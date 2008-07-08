@@ -1,0 +1,13 @@
+Source: pluto-avwizard-sounds
+Section: lmce
+Priority: optional
+Maintainer: Daniel Kristjansson <danielk@cuymedia.net>
+Build-Depends: debhelper (>= 5)
+Standards-Version: 3.7.2
+
+Package: pluto-avwizard-sounds
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Sounds used by a AVWizard
+ Sounds used by a AVWizard, including samples.
+

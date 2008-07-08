@@ -1,0 +1,12 @@
+pluto-avwizard-sounds (1.1-1) linuxmce; urgency=low
+
+  * Repackaged.
+
+ -- Daniel Kristjansson <danielk@cuymedia.net>  Sun, 06 Jul 2008 10:27:15 -0400
+
+pluto-avwizard-sounds (1.0-1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Radu Cristescu <radu@localhost.localdomain>  Thu, 11 May 2006 16:20:44 +0300
+
