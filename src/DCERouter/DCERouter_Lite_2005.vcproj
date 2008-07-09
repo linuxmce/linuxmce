@@ -260,6 +260,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Room_Data.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Scene_Data.h"
 				>
 			</File>

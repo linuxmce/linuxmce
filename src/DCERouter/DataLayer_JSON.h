@@ -5,6 +5,7 @@
 #include "DeviceTemplate_Data.h"
 #include "DeviceCategory_Data.h"
 #include "Scene_Data.h"
+#include "Room_Data.h"
 #include <map>
 //----------------------------------------------------------------------------------------------
 class DataLayer_JSON : public IDataLayer
@@ -15,7 +16,8 @@ class DataLayer_JSON : public IDataLayer
 	std::map<int, DeviceTemplate_Data> m_mapDeviceTemplate_Data;
 	std::map<int, DeviceCategory_Data> m_mapDeviceCategory_Data;
 	std::map<int, Scene_Data> m_mapScene_Data;
-
+	std::map<int, Room_Data> m_mapRoom_Data;
+	
 	struct json_object *m_root_json_obj_Devices;
 	struct json_object *m_root_json_obj_NonDevices;
 
@@ -64,6 +66,7 @@ private:
 	void ParseDeviceDataList(std::map<int, string>& mapDeviceData, struct json_object *json_obj);
 	void ParseDeviceParameters(std::map<string, string>& mapDeviceParams, struct json_object *json_obj);
 	void ParseScenes(struct json_object *json_obj);
+	void ParseRooms(struct json_object *json_obj);
 	void ParseCommands(map<int, Command_Data>& mapCommands, struct json_object *json_obj);
 	void ParseDeviceTemplates(struct json_object *json_obj);
 	void ParseDeviceCategories(struct json_object *json_obj);

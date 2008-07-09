@@ -127,7 +127,8 @@ void DataLayer_JSON::SaveDevicesFile()
 			StringUtils::ltos(pDeviceData_Router->m_dwPK_Device) + "|" + 
 			StringUtils::ltos(pDeviceData_Router->m_dwPK_DeviceTemplate) + "|" + 
 			pDeviceData_Router->m_sIPAddress + "|" + 
-			pDeviceData_Router->m_sDescription + "\n"; 
+			pDeviceData_Router->m_sDescription + "|" + 
+			m_mapRoom_Data[pDeviceData_Router->m_dwPK_Room].Description() + "\n"; 
 	}
 
 	//save devices list
@@ -182,6 +183,8 @@ bool DataLayer_JSON::LoadDynamicConfiguration()
 
 			if(sValue == "scenes")
 				ParseScenes(iter.val);
+			if(sValue == "Room")
+				ParseRooms(iter.val);
 		}
 
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "DataLayer: Got %d scenes", m_mapScene_Data.size());
@@ -578,6 +581,45 @@ void DataLayer_JSON::ParseScenes(struct json_object *json_obj)
 		}
 
 		m_mapScene_Data[nSceneID] = scene_data;
+	}
+}
+//----------------------------------------------------------------------------------------------
+void DataLayer_JSON::ParseRooms(struct json_object *json_obj)
+{
+	struct json_object *obj_rooms = json_obj;
+	struct json_object_iter iter_rooms;
+	json_object_object_foreachC(obj_rooms, iter_rooms) 
+	{
+		string sRoomID = iter_rooms.key;
+		StringUtils::Replace(&sRoomID, "PK_Room_", "");
+
+		int nRoomID = atoi(sRoomID.c_str());
+
+		Room_Data room_data(nRoomID);
+
+		struct json_object_iter iter_roomparams;
+		json_object_object_foreachC(iter_rooms.val, iter_roomparams)
+		{
+			string sKey = iter_roomparams.key;
+
+			if(iter_roomparams.val->o_type == json_type_string)
+			{
+				string sValue = json_object_get_string(iter_roomparams.val);
+
+				if(sKey == "Description")
+				{
+					room_data.Description(sValue);
+				}
+				else if(sKey == "room_type")
+				{
+					room_data.RoomType(sValue);
+				}
+				
+				//parse here FK_Section or FK_RoomType if needed
+			}
+		}
+
+		m_mapRoom_Data[nRoomID] = room_data;
 	}
 }
 //----------------------------------------------------------------------------------------------
