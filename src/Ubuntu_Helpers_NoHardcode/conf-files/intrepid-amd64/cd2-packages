@@ -200,7 +200,6 @@ libdigest-sha1-perl
 libdirectfb-1.0-0
 libdiscover1
 libdmx1
-libdns32
 libdrm2
 libdv4
 libdvbpsi4
@@ -311,7 +310,7 @@ libio-string-perl
 libio-stringy-perl
 libipc-sharelite-perl
 libipc-signal-perl
-libisc32
+libisc41
 libisccc40
 libisccfg40
 libiso9660-5
@@ -747,9 +746,9 @@ xserver-xorg-video-i128
 xserver-xorg-video-i740
 xserver-xorg-video-i810
 xserver-xorg-video-imstt
+xserver-xorg-video-intel
 xserver-xorg-video-mga
 xserver-xorg-video-neomagic
-xserver-xorg-video-newport
 xserver-xorg-video-nsc
 xserver-xorg-video-nv
 xserver-xorg-video-rendition

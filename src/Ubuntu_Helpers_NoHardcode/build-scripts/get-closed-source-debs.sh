@@ -36,7 +36,7 @@ function Unpack_Debs() {
 }
 
 
-if [[ "$svn_private_url" != "" ]] && [[ "$svn_private_user" != "" ]] && [[ "$svn_private_pass" != "" ]] ;then
+if [ x"$svn_private_url" = x"" -o x"$svn_private_user" = x"" -o x"$svn_private_pass" = x"" ] ; then
 	DisplayMessage "Nothing to download, will use local debs."
 else
 	Download_Debs

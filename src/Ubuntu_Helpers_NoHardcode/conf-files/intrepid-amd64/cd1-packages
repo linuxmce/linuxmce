@@ -2,13 +2,11 @@ alsa-utils
 asterisk-sounds-extra
 binutils
 coreutils
-cpp-3.3
-cpp-4.1
+cpp-4.3
 cvs
 dpkg
 firefox
-g++-3.3
-g++-4.1
+g++-4.3
 ia32-libs
 kdelibs-data
 libalgorithm-c3-perl
@@ -19,7 +17,6 @@ libc6
 libc6-dev
 libcaca0
 libcarp-clan-perl
-libcgi-perl
 libclass-c3-perl
 libclass-data-accessor-perl
 libclass-factory-util-perl

@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-. /etc/lmce-build/builder.conf
+. /usr/local/lmce-build/common/env.sh
 . /usr/local/lmce-build/common/logging.sh
 . /usr/local/lmce-build/common/utils.sh
 
@@ -15,7 +15,7 @@ function Changed_Since_Last_Build {
 	local revision_new=$(svn info $fs_path | grep '^Revision: ' | cut -d' ' -f2)
 	local revision_old=$(cat "$cache_file" | grep "^${url_id}" | cut -d'|' -f2)
 	
-	if [[ "$revision_new" == "$revision_old" ]] ;then
+	if [ "$revision_new" = "$revision_old" ] ; then
 		return $(/bin/false)
 	fi
 
@@ -29,42 +29,58 @@ function Changed_Since_Last_Build {
 function Build_Replacements_Common { 
 	mkdir -p "$replacements_dir"
 
+	build_zaptel="yes"
+        build_mce_installer="yes"
+        build_alsa_modules="yes"
+	case "$(lsb_release -c -s)" in
+		"gutsy")
+		;;
+		"hardy")
+		;;
+		"intrepid")
+		build_zaptel="no"
+                build_mce_installer="no"
+	        build_alsa_modules="no"
+		;;
+	esac
+
+
 	#Package: libsdl
-	dir_="${svn_dir}/trunk/ubuntu/libsdl1.2-1.2.12"
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu/libsdl1.2-1.2.12"
 	if Changed_Since_Last_Build "$dir_" ;then
 		DisplayMessage "Building libsdl1.2debian-pluto"
 		pushd "$dir_"
-		dpkg-buildpackage -rfakeroot -us -uc -b
+		dpkg-buildpackage -rfakeroot -us -uc -b -tc
 		cp -r ../libsdl1.2debian-pluto*.deb "${replacements_dir}"
 		popd
 	fi
 
 	#Package: spcp8x5
-	dir_="${svn_dir}/trunk/ubuntu/spcp8x5"
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu/spcp8x5"
 	if Changed_Since_Last_Build "$dir_" ;then
 		DisplayMessage "Building spcp8x5"
 		pushd "$dir_"
-		dpkg-buildpackage -rfakeroot -us -uc -b
+		dpkg-buildpackage -rfakeroot -us -uc -b -tc
 		cp -r ../spcp8x5*.deb ${replacements_dir}
 		popd
 	fi
 
 	#Package: libxine
-	dir_="${svn_dir}/trunk/ubuntu/xine-lib-1.1.10.1"
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu/xine-lib-1.1.10.1"
 	if Changed_Since_Last_Build "$dir_" ;then
 		DisplayMessage "Building xine-lib"
 		pushd "$dir_"
-		dpkg-buildpackage -rfakeroot -us -uc -b
+		dpkg-buildpackage -rfakeroot -us -uc -b -tc
 		cp -r ../libxine*.deb ${replacements_dir}
 		popd
 	fi
 
 	#Package: mythtv
-	dir_="${svn_dir}/trunk/ubuntu/mythtv-0.20.2+fixes14472"
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu/mythtv-0.20.2+fixes14472"
 	if Changed_Since_Last_Build "$dir_" ;then
 		DisplayMessage "Building mythtv"
 		pushd "$dir_"
-		dpkg-buildpackage -rfakeroot -us -uc -b
+		dpkg-buildpackage -rfakeroot -us -uc -b -tc
 		cp -r ../libmyth*.deb ${replacements_dir}
 		cp -r ../mythtv*.deb ${replacements_dir}
 		cp -r ../ubuntu-mythtv*.deb ${replacements_dir}
@@ -72,164 +88,167 @@ function Build_Replacements_Common {
 	fi
 
 	#Package: tee-pluto
-	dir_="${svn_dir}/trunk/misc_utils/tee-pluto"
+	dir_="${svn_dir}/${svn_branch_name}/misc_utils/tee-pluto"
 	if Changed_Since_Last_Build "$dir_" ;then
 		DisplayMessage "Building tee-pluto"
 		pushd "$dir_"
-		dpkg-buildpackage -rfakeroot -us -uc -b
+		dpkg-buildpackage -rfakeroot -us -uc -b -tc
 		cp ../tee-pluto_*.deb ${replacements_dir}
 		popd
 	fi
 
 
 	#Package: pluto-mplayer
-	dir_="${svn_dir}/trunk/ubuntu/mplayer-svn26234"
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu/mplayer-svn26234"
 	if Changed_Since_Last_Build "$dir_" ;then
 		DisplayMessage "Building pluto-mplayer-svn26234"
 		pushd "$dir_"
-		dpkg-buildpackage -rfakeroot -us -uc -b
+		dpkg-buildpackage -rfakeroot -us -uc -b -tc
 		cp -r ../pluto-mplayer_*.deb ${replacements_dir}
 		popd
 	fi
 	
 	#Package: pluto-ffmpeg
-	dir_="${svn_dir}/trunk/ubuntu/ffmpeg-svn12476"
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu/ffmpeg-svn12476"
 	if Changed_Since_Last_Build "$dir_" ;then
 		DisplayMessage "Building pluto-ffmpeg"
 		pushd "$dir_"
-		dpkg-buildpackage -rfakeroot -us -uc -b
+		dpkg-buildpackage -rfakeroot -us -uc -b -tc
 		cp -r ../pluto-ffmpeg_*.deb ${replacements_dir}
 		popd
 	fi
 	
 	#Package: fuppes
-	dir_="${svn_dir}/trunk/ubuntu/fuppes-0+svn578"
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu/fuppes-0+svn578"
 	if Changed_Since_Last_Build "$dir_" ;then
 		DisplayMessage "Building fuppes-0+svn578"
 		pushd "$dir_"
-		dpkg-buildpackage -rfakeroot -us -uc -b
+		dpkg-buildpackage -rfakeroot -us -uc -b -tc
 		cp -r ../fuppes_*.deb ${replacements_dir}
 		popd
 	fi
 	
 	#Package: djmount
-	dir_="${svn_dir}/trunk/ubuntu/djmount-0.71"
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu/djmount-0.71"
 	if Changed_Since_Last_Build "$dir_" ;then
 		DisplayMessage "Building djmount-0.71"
 		pushd "$dir_"
-		dpkg-buildpackage -rfakeroot -us -uc -b
+		dpkg-buildpackage -rfakeroot -us -uc -b -tc
 		cp -r ../djmount_*.deb ${replacements_dir}
 		popd
 	fi
 
 	#Package: freepbx
-	dir_="${svn_dir}/trunk/ubuntu/asterisk/freepbx"
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu/asterisk/freepbx"
 	if Changed_Since_Last_Build "$dir_" ;then
 		DisplayMessage "Building freepbx"
 		pushd "$dir_"
-		dpkg-buildpackage -rfakeroot -us -uc -b
+		dpkg-buildpackage -rfakeroot -us -uc -b -tc
 		cp -r ../freepbx_*.deb ${replacements_dir}
 		popd
 	fi
 
         #Package: chan-sccp
-        dir_="${snv_dir}/trunk/ubuntu/asterisk/chan_sccp"
+        dir_="${svn_dir}/${svn_branch_name}/ubuntu/asterisk/chan_sccp"
         if ReplacementNeedsBuild "$dir_"; then
 		DisplayMessage "Build chan-sccp"
                 pushd "$dir_"
-                dpkg-buildpackage -rfakeroot -us -uc -b
-                cp -r ../chan-sccp_*.deb ${temp_dir}
+                dpkg-buildpackage -rfakeroot -us -uc -b -tc
+                cp -r ../chan-sccp_*.deb ${replacements_dir}
                 popd
         fi
 
 	#Package: pluto-asterisk
-	dir_="${svn_dir}/trunk/ubuntu/asterisk"
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu/asterisk"
 	if Changed_Since_Last_Build "$dir_" ;then
 		DisplayMessage "Building pluto-asterisk"
 		pushd "$dir_"
-		./make_package_ubuntu.sh `uname -r`
+		./make_package_ubuntu.sh $KVER
 		cp -r asterisk-pluto_*.deb ${replacements_dir}
 		popd
 	fi
 
 	#Package: lshwd
-	dir_="${svn_dir}/trunk/ubuntu/lshwd-2.0-rc4"
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu/lshwd-2.0-rc4"
 	if Changed_Since_Last_Build "$dir_" ;then
 		DisplayMessage "Building lshwd-2.0-rc4"
 		pushd "$dir_"
-		dpkg-buildpackage -rfakeroot -us -uc -b
+		dpkg-buildpackage -rfakeroot -us -uc -b -tc
 		cp ../lshwd_2.0*.deb ${replacements_dir}
 		popd
 	fi
 
-	
-	#Package: zaptel-modules
-	DisplayMessage "Building zaptel-modules"
-	m-a -ft -l `uname -r` a-b zaptel
-	cp /usr/src/zaptel-modules*.deb "${replacements_dir}"
-
+        if [ x"$build_zaptel" = x"yes" ] ; then
+		#Package: zaptel-modules
+		DisplayMessage "Building zaptel-modules"
+		m-a --non-inter -ft -l $KVER a-b zaptel
+		cp /usr/src/zaptel-modules*.deb "${replacements_dir}"
+	fi
 
 	#Package: lirc-pluto
-	dir_="${svn_dir}"/trunk/ubuntu/lirc-pluto-0.1
+	dir_=${svn_dir}/${svn_branch_name}/ubuntu/lirc-pluto-0.1
 	if Changed_Since_Last_Build "$dir_" ;then
 		DisplayMessage "Building lirc-pluto"
 		pushd "$dir_"
-		dpkg-buildpackage -rfakeroot -us -uc -b
+		dpkg-buildpackage -rfakeroot -us -uc -b -tc
 		cp ../lirc-pluto_*.deb "${replacements_dir}"
 		popd
 	fi
 
 	#Package: lirc
-	dir_="${svn_dir}"/trunk/ubuntu/lirc-0.8.2+lmce
+	dir_=${svn_dir}/${svn_branch_name}/ubuntu/lirc-0.8.2+lmce
 	if Changed_Since_Last_Build "$dir_" ;then
 		pushd "$dir_"
-		dpkg-buildpackage -rfakeroot -us -uc -b
+		dpkg-buildpackage -rfakeroot -us -uc -b -tc
 		cp ../lirc{,-x}_*.deb ../liblircclient{0,-dev}_*.deb "${replacements_dir}"
 		popd
 	fi
 
 	
 	#Package: mce-launcher
-	dir_="${svn_dir}"/trunk/src/mce-launcher
+	dir_=${svn_dir}/${svn_branch_name}/src/mce-launcher
 	if Changed_Since_Last_Build "$dir_" ;then
 		DisplayMessage "Building mce-launcher"
 		pushd "$dir_"
-		dpkg-buildpackage -rfakeroot -us -uc -b
+		dpkg-buildpackage -rfakeroot -us -uc -b -tc
 		cp ../mce-launcher_*.deb "${replacements_dir}"
 		popd
 	fi
 
 	#Package: mce-installer
-	dir_="${svn_dir}"/trunk/src/mce-installer
-	if Changed_Since_Last_Build "$dir_" ;then
-		DisplayMessage "Building mce-installer"
-		pushd "$dir_"
-		dpkg-buildpackage -rfakeroot -us -uc -b
-		cp ../mce-installer_*.deb "${replacements_dir}"
-		popd
+        if [ x"$build_mce_installer" = x"yes" ] ; then
+		dir_=${svn_dir}/${svn_branch_name}/src/mce-installer
+		if Changed_Since_Last_Build "$dir_" ;then
+			DisplayMessage "Building mce-installer"
+			pushd "$dir_"
+			dpkg-buildpackage -rfakeroot -us -uc -b -tc
+			cp ../mce-installer_*.deb "${replacements_dir}"
+			popd
+		fi
 	fi
 
 	#Package: mtx-pluto
-	dir_="${svn_dir}"/trunk/ubuntu/mtx-1.3.11
+	dir_=${svn_dir}/${svn_branch_name}/ubuntu/mtx-1.3.11
 	if Changed_Since_Last_Build "$dir_" ;then
 		DisplayMessage "Building mtx-pluto"
 		pushd "$dir_"
-		dpkg-buildpackage -rfakeroot -us -uc -b
+		dpkg-buildpackage -rfakeroot -us -uc -b -tc
 		cp ../mtx-pluto_*.deb "${replacements_dir}"
 		popd
 	fi
 
 	#Package: parted
-	dir_="${svn_dir}"/trunk/ubuntu/parted-1.8.8
+	dir_=${svn_dir}/${svn_branch_name}/ubuntu/parted-1.8.8
 	if Changed_Since_Last_Build "$dir_"; then
 		DisplayMessage "Building parted"
 		pushd "$dir_"
-		dpkg-buildpackage -rfakeroot -us -uc -b
+		dpkg-buildpackage -rfakeroot -us -uc -b -tc
 		cp ../*parted*.deb "${replacements_dir}"
 	fi
 
+	# TODO Fix this package so it builds against target kernel not running kernel
 	#Package: linux-image-diskless
-	dir_="${svn_dir}"/trunk/ubuntu/linux-image-dummy
+	dir_=${svn_dir}/${svn_branch_name}/ubuntu/linux-image-dummy
 	if Changed_Since_Last_Build "$dir_" ;then
 		DisplayMessage "Building linux-image-diskless"
 		pushd "$dir_"
@@ -237,15 +256,32 @@ function Build_Replacements_Common {
 		cp linux-image-diskless_*.deb "${replacements_dir}"		
 		popd
 	fi
+
+	if [ x"$build_alsa_modules" = x"yes" ] ; then
+		#Package: alsa-modules
+		DisplayMessage "Building alsa-modules"
+		m-a --non-inter -ft -l $KVER a-b alsa
+		cp /usr/src/alsa-modules-*.deb "${replacements_dir}"
+	fi
+
+	#Package: pluto-avwizard-sounds
+	dir_=${svn_dir}/${svn_branch_name}/src/pluto-avwizard-sounds
+	if Changed_Since_Last_Build "$dir_" ;then
+		pushd $dir_
+			DisplayMessage "Building av-wizard-sounds"
+			dpkg-buildpackage -rfakeroot -us -uc -b -tc
+			cp ../pluto-avwizard-sounds_*.deb "${replacements_dir}"
+		popd
+	fi
 }
 
 function Build_Replacements_Hardy {
 	#Package: chan-sccp
-	dir_="${svn_dir}/trunk/ubuntu/asterisk/chan_sccp"
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu/asterisk/chan_sccp"
 	if Changed_Since_Last_Build "$dir_" ;then
 		DisplayMessage "Building chan-sccp"
 		pushd "$dir_"
-		dpkg-buildpackage -rfakeroot -us -uc -b
+		dpkg-buildpackage -rfakeroot -us -uc -b -tc
 		cp ../chan-sccp_*.deb ${replacements_dir}
 		popd
 	fi
@@ -256,11 +292,11 @@ function Build_Replacements_Gutsy {
 
 	# DISABLED IN HARDY : not compiling anymore
 	# Package: liblinphone
-	dir_="${svn_dir}/trunk/ubuntu/linphone-1.3.5"
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu/linphone-1.3.5"
 	if Changed_Since_Last_Build "$dir_" ;then
 		DisplayMessage "Building linphone-1.3.5"
 		pushd "$dir_"
-		dpkg-buildpackage -rfakeroot -us -uc -b
+		dpkg-buildpackage -rfakeroot -us -uc -b -tc
 		cp ../liblinphone1-lmce_*.deb ${replacements_dir}
 		cp ../libortp4-lmce_*.deb ${replacements_dir}
 		cp ../linphone*_*.deb ${replacements_dir}
@@ -271,17 +307,17 @@ function Build_Replacements_Gutsy {
 	#Package: lirc-modules
 	pushd .
 		DisplayMessage "Building lirc-modules"
-                cd "${svn_dir}"/trunk/src/Ubuntu_Helpers
+                cd ${svn_dir}/${svn_branch_name}/src/Ubuntu_Helpers
                 rm -f /etc/lirc/lirc-modules-source.conf
                 dpkg-reconfigure -fnoninteractive lirc-modules-source
 
                 mkdir -p /usr/src/modules/lirc/drivers/media/video/bt8xx/
-                cp -a /usr/src/linux-source-`uname -r | cut -d '-' -f1`/drivers/media/video/bt8xx/* /lib/modules/`uname -r`/build/drivers/media/video
-                cp -a /usr/src/linux-source-`uname -r | cut -d '-' -f1`/drivers/media/video/* /lib/modules/`uname -r`/build/drivers/media/video
+                cp -a $KDIR/drivers/media/video/bt8xx/* /lib/modules/$KVER/build/drivers/media/video
+                cp -a $KDIR/drivers/media/video/* /lib/modules/$KVER/build/drivers/media/video
 
-                cd /usr/src/linux-source-`uname -r | cut -d '-' -f1`/drivers/media/video
+                cd $KDIR/drivers/media/video
                 cp -a btcx-risc.h /usr/src/modules/lirc/drivers/media/video
-                m-a -ft a-b lirc-modules
+                m-a --non-inter -ft -l $KVER a-b lirc-modules
                 cp /usr/src/lirc-modules*.deb "${replacements_dir}"
 	popd
 
@@ -289,13 +325,13 @@ function Build_Replacements_Gutsy {
 	#Package: ivtv-modules
 	pushd .
 		DisplayMessage "Building ivtv-modules"
-		m-a -ft a-b ivtv
+		m-a --non-inter -ft -l $KVER a-b ivtv
 		cp /usr/src/ivtv-modules*.deb "${replacements_dir}"
 	popd
 
 	# DISABLED IN HARDY : included in kernel package
 	#Package: ivtv-firmware
-	pushd "${svn_dir}"/trunk/ubuntu/
+	pushd ${svn_dir}/${svn_branch_name}/ubuntu/
 		DisplayMessage "Building ivtv-firmware"
 		Src="deb http://dl.ivtvdriver.org/ubuntu feisty firmware"
 		if [ ! -e /etc/apt/sources.list.pbackup ] ;then

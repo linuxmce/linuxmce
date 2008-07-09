@@ -16,19 +16,19 @@ function import_databases () {
 
 	## Import pluto_main, pluto_media, pluto_security, pluto_telecom
 	DisplayMessage "Getting a sqldump of main_sqlcvs"
-	mysqldump -u "$sqlcvs_user" -h "$sqlcvs_host" main_sqlcvs    > "$dbdump_main_sqlcvs"
+	mysqldump --compress -u "$sqlcvs_user" -h "$sqlcvs_host" main_sqlcvs    > "$dbdump_main_sqlcvs"
 	DisplayMessage "Getting a sqldump of myth_sqlcvs"
-	mysqldump -u "$sqlcvs_user" -h "$sqlcvs_host" myth_sqlcvs    > "$dbdump_myth_sqlcvs"
+	mysqldump --compress -u "$sqlcvs_user" -h "$sqlcvs_host" myth_sqlcvs    > "$dbdump_myth_sqlcvs"
 	DisplayMessage "Getting a sqldump of pluto_media"
-	mysqldump -u "$sqlcvs_user" -h "$sqlcvs_host" pluto_media    > "$dbdump_pluto_media"
+	mysqldump --compress -u "$sqlcvs_user" -h "$sqlcvs_host" pluto_media    > "$dbdump_pluto_media"
 	DisplayMessage "Getting a sqldump of pluto_security"
-	mysqldump -u "$sqlcvs_user" -h "$sqlcvs_host" pluto_security > "$dbdump_pluto_security"
+	mysqldump --compress -u "$sqlcvs_user" -h "$sqlcvs_host" pluto_security > "$dbdump_pluto_security"
 	DisplayMessage "Getting a sqldump of pluto_telecom"
-	mysqldump -u "$sqlcvs_user" -h "$sqlcvs_host" pluto_telecom  > "$dbdump_pluto_telecom"
+	mysqldump --compress -u "$sqlcvs_user" -h "$sqlcvs_host" pluto_telecom  > "$dbdump_pluto_telecom"
 
 	# Run search and replace over the db dumps
 	DisplayMessage "Running Search'n'Replace on the sqldumps (MakeRelase_PrepFiles)"
-	export LD_LIBRARY_PATH="$mkr_dir:${svn_dir}/trunk/src/lib"
+	export LD_LIBRARY_PATH="$mkr_dir:${svn_dir}/${svn_branch_name}/src/lib"
 	MakeRelease_PrepFiles="${mkr_dir}/MakeRelease_PrepFiles"
 	$MakeRelease_PrepFiles -p $(dirname $dbdump_main_sqlcvs) -e "$(basename $dbdump_main_sqlcvs),$(basename $dbdump_myth_sqlcvs),$(basename $dbdump_pluto_media),$(basename $dbdump_pluto_security),$(basename $dbdump_pluto_telecom)" -c /etc/lmce-build/${flavor}.conf
 

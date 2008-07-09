@@ -7,8 +7,8 @@ set -e
 set -x
 
 function build_main_debs_sim() {
-	export PATH=$PATH:${svn_dir}/trunk/src/bin
-	export LD_LIBRARY_PATH="$mkr_dir:${svn_dir}/trunk/src/lib"
+	export PATH=$PATH:${svn_dir}/${svn_branch_name}/src/bin
+	export LD_LIBRARY_PATH="$mkr_dir:${svn_dir}/${svn_branch_name}/src/lib"
 
 	#FIXME Hackozaurus to build SimplePhone
 	export PKG_CONFIG_PATH=/opt/linphone-1.3.5/lib/pkgconfig
@@ -31,7 +31,7 @@ function build_main_debs_sim() {
 
 	# Perform Search&Replace on the sources
 	DisplayMessage "Performing search'n'replace on the sources"
-	"${mkr_dir}/MakeRelease_PrepFiles" -p "${svn_dir}/trunk" -e "*.cpp,*.h,Makefile*,*.php,*.sh,*.pl,*.awk" -c "/etc/lmce-build/${flavor}.conf" || Error "MakeRelease_PrepFiles failed"
+	"${mkr_dir}/MakeRelease_PrepFiles" -p "${svn_dir}/${svn_branch_name}" -e "*.cpp,*.h,Makefile*,*.php,*.sh,*.pl,*.awk" -c "/etc/lmce-build/${flavor}.conf" || Error "MakeRelease_PrepFiles failed"
 
 	# Clear the debs output directory
 	DisplayMessage "Cleaning MakeRelease debs output directory"
@@ -40,22 +40,22 @@ function build_main_debs_sim() {
 
 	# Prepare some params values for MakeRelease
 	DisplayMessage "Compiling and building packages"
-	SVNrevision=$(svn info "${svn_dir}"/trunk/src |grep ^Revision | cut -d" " -f2)
+	SVNrevision=$(svn info "$svn_dir/$svn_branch_name/src" |grep ^Revision | cut -d" " -f2)
 	ExcludePkgList="462,607,432,431,427,426,430,429,589,590,515,516,266,540"
 
 	# Compile the packages
-	"${mkr_dir}/MakeRelease" -a -R "$SVNrevision" -h 'localhost' -u 'root' -O "$out_dir" -D 'pluto_main_build' -o 15 -r 21 -m 1 -K "$ExcludePkgList" -s "${svn_dir}/trunk" -n / -d -c || Error "MakeRelease failed: compiling public"
+	"${mkr_dir}/MakeRelease" -a -R "$SVNrevision" -h 'localhost' -u 'root' -O "$out_dir" -D 'pluto_main_build' -o 15 -r 21 -m 1 -K "$ExcludePkgList" -s "${svn_dir}/${svn_branch_name}" -n / -d -c || Error "MakeRelease failed: compiling public"
 
 	# Compile the private packages
 	if [[ "$svn_private_url" != "" ]] && [[ "$svn_private_user" != "" ]] && [[ "$svn_private_pass" != "" ]] ;then
-		"${mkr_dir}/MakeRelease" -a -R "$SVNrevision" -h 'localhost' -u 'root' -O "$out_dir" -D 'pluto_main_build' -o 15 -r 21 -m 1108 -K "$ExcludePkgList" -s "${svn_dir}/trunk" -n / -d -c || Error "MakeRelease failed: compiling private"
+		"${mkr_dir}/MakeRelease" -a -R "$SVNrevision" -h 'localhost' -u 'root' -O "$out_dir" -D 'pluto_main_build' -o 15 -r 21 -m 1108 -K "$ExcludePkgList" -s "${svn_dir}/${svn_branch_name}" -n / -d -c || Error "MakeRelease failed: compiling private"
 	fi
 
 	# Simulate the package creation
-	"${mkr_dir}/MakeRelease" -a -R "$SVNrevision" -h 'localhost' -u 'root' -O "$out_dir" -D 'pluto_main_build' -o 15 -r 21 -m 1 -K "$ExcludePkgList" -s "${svn_dir}/trunk" -n / -d -b -S || Error "MakeRelease failed: packaging public"
+	"${mkr_dir}/MakeRelease" -a -R "$SVNrevision" -h 'localhost' -u 'root' -O "$out_dir" -D 'pluto_main_build' -o 15 -r 21 -m 1 -K "$ExcludePkgList" -s "${svn_dir}/${svn_branch_name}" -n / -d -b -S || Error "MakeRelease failed: packaging public"
 
 	if [[ "$svn_private_url" != "" ]] && [[ "$svn_private_user" != "" ]] && [[ "$svn_private_pass" != "" ]] ;then
-		"${mkr_dir}/MakeRelease" -a -R "$SVNrevision" -h 'localhost' -u 'root' -O "$out_dir" -D 'pluto_main_build' -o 15 -r 21 -m 1108 -K "$ExcludePkgList" -s "${svn_dir}/trunk" -n / -d -b -S || Error "MakeRelease failed: packaging private"
+		"${mkr_dir}/MakeRelease" -a -R "$SVNrevision" -h 'localhost' -u 'root' -O "$out_dir" -D 'pluto_main_build' -o 15 -r 21 -m 1108 -K "$ExcludePkgList" -s "${svn_dir}/${svn_branch_name}" -n / -d -b -S || Error "MakeRelease failed: packaging private"
 	fi
 }
 

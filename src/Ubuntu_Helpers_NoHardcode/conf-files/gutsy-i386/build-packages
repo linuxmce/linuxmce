@@ -11,8 +11,8 @@ dmsetup
 docbook-utils
 fakeroot
 fuse-utils
-ghostscript
 gnome-applets
+gs-gpl
 gtk-doc-tools
 ivtv-source
 kdelibs4-dev
@@ -70,11 +70,11 @@ libqt3-compat-headers
 libqt3-headers
 libqt3-mt-dev
 libreadline5-dev
-libsdl1.2-dev
 libsdl-gfx1.2-dev
 libsdl-image1.2-dev
 libsdl-sge-dev
 libsdl-ttf2.0-dev
+libsdl1.2-dev
 libsmbclient-dev
 libsqlite3-dev
 libstdc++5
@@ -98,6 +98,8 @@ libxmu-headers
 libxrender-dev
 libxtst-dev
 linux-headers-2.6.22-14-generic
+linux-image-2.6.22-14-generic
+linux-restricted-modules-2.6.22-14-generic
 linux-source-2.6.22
 lirc-modules-source
 mkisofs
@@ -126,10 +128,10 @@ texinfo
 transfig
 uuid-dev
 w3m
+x-dev
 x11proto-core-dev
 x11proto-record-dev
 x11proto-xext-dev
 x11proto-xf86vidmode-dev
-x-dev
 xorg-dev
 zaptel-source
