@@ -1,9 +1,10 @@
 #!/bin/ash
 
 CONF_FILE="/etc/pluto.conf"
+/usr/bin/dos2unix $CONF_FILE $CONF_FILE
 #Remove Commented lines and get options
-NumberOfCopies=$((`grep -v "^#" $CONF_FILE | awk -F '=' '/NumberOfCopies/ {print $2}'`))
-RotationInterval=$((`grep -v "^#" $CONF_FILE | awk -F '=' '/RotationInterval/ {print $2}'`))
+NumberOfCopies=$((`grep -v "^#" $CONF_FILE | tr -d "\015" | awk -F '=' '/NumberOfCopies/ {print $2}'`))
+RotationInterval=$((`grep -v "^#" $CONF_FILE | tr -d "\015" | awk -F '=' '/RotationInterval/ {print $2}'`))
 
 #NumberOfCopies=4
 #RotationInterval=$((6 * 60 * 60)) #seconds
