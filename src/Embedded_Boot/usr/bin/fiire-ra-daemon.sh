@@ -45,11 +45,17 @@ if [[ ! -f "$CONF_FILE" ]]; then
 	log "Closing down. Fiire remote access is not configured."
 fi
 
-if [[ ! -f "$CONF_FILE" ]] ;then
+if [[ ! -r "$CONF_FILE" ]] ;then
 	log "Failed to read fiire-ra configuration file."
 	exit 1
 fi
+
 . "$CONF_FILE"
+
+if [[ "$RA_DISABLED" = "1" ]];then
+	log "Remote Assistance is disabled. Closing RA..."
+	exit 1
+fi
 
 PASSWORD_MD5="`echo -n "$PASSWORD" | md5sum | cut -d' ' -f1`"
 
