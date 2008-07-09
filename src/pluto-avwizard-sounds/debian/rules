@@ -9,13 +9,17 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
+get-orig-source: get-orig-source-stamp
+get-orig-source-stamp:
+	svn export http://svn.linuxmce.org/pluto/media/pluto-avwizard-sounds_1.1.tar.gz
+	mv pluto-avwizard-sounds_1.1.tar.gz pluto-avwizard-sounds.tar.gz
+	touch $@
+
 configure: configure-stamp
-configure-stamp:
+configure-stamp: get-orig-source
 	dh_testdir
 	# Add here commands to configure the package.
-
-	touch configure-stamp
-
+	touch $@
 
 build: build-stamp
 	echo "pluto-avwizard-sounds_1.1-1_all.deb lmce optional" > debian/files
