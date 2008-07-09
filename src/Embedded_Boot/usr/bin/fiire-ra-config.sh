@@ -2,6 +2,7 @@
 
 USERNAME="$1"
 PASSWORD="$2"
+RA_DISABLED="$3"
 
 CONF_FILE="/etc/fiire-ra/fiire-ra.conf"
 SSH_KEY_FILE="/etc/fiire-ra/keys/fiire-ra.key"
@@ -45,6 +46,7 @@ mv "$SSH_KEY_FILE.tmp" "$SSH_KEY_FILE"
 mv "$SSH_KEY_FILE.tmp.pub" "$SSH_KEY_FILE.pub"
 
 echo "#!/bin/bash"                  > "$CONF_FILE"
+echo "RA_DISABLED=$RA_DISABLED" >> "$CONF_FILE"
 echo "USERNAME=$USERNAME"  >> "$CONF_FILE"
 echo "PASSWORD=$PASSWORD"  >> "$CONF_FILE"
 echo "PORT=$PORT"          >> "$CONF_FILE"
