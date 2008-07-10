@@ -141,61 +141,117 @@ std::map<int, DeviceData_Router *>& DataLayer_JSON::Devices()
 	return m_mapDeviceData_Router;
 }
 //----------------------------------------------------------------------------------------------
-bool DataLayer_JSON::LoadDevicesConfiguration()
+bool DataLayer_JSON::LoadDevicesConfiguration(int iUseBackup)
 {
-	char *pData = GetUncompressedDataFromFile(JSON_DEVICES_CONFIG_FILE);
+	string sFilename = JSON_DEVICES_CONFIG_FILE;
+	if( iUseBackup )
+		sFilename += "." + StringUtils::itos(iUseBackup);
+
+	char *pData = GetUncompressedDataFromFile(sFilename);
+
+	bool bGotDevices=false;
 
 	if(NULL != pData)
 	{
-		m_root_json_obj_Devices = json_tokener_parse(pData);
-		PLUTO_SAFE_DELETE_ARRAY(pData);
-
-		struct json_object_iter iter;
-		json_object_object_foreachC(m_root_json_obj_Devices, iter) 
+		try
 		{
-			string sValue = iter.key;
+			m_root_json_obj_Devices = json_tokener_parse(pData);
+			PLUTO_SAFE_DELETE_ARRAY(pData);
 
-			if(sValue == "Device_ids")
-				ParseDevicesList(iter.val);
-			else if(sValue == "Device")
-				ParseDevices(iter.val);
+			struct json_object_iter iter;
+			json_object_object_foreachC(m_root_json_obj_Devices, iter) 
+			{
+				string sValue = iter.key;
+
+				if(sValue == "Device_ids")
+					ParseDevicesList(iter.val);
+				else if(sValue == "Device")
+				{
+					bGotDevices=true;
+					ParseDevices(iter.val);
+				}
+			}
+		}
+		catch(...)
+		{
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "DataLayer::LoadDevicesConfiguration exception on file %s", sFilename.c_str());
+			bGotDevices=false;  // So we'll retry
 		}
 
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "DataLayer: Got %d devices", m_mapDeviceData_Router.size());
-		return true;
+		if( bGotDevices )
+			return true;
+	}
+	else
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "DataLayer: LoadDevicesConfiguration %s doesn't exist", sFilename.c_str());
+
+	if( bGotDevices == false )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "DataLayer: LoadDevicesConfiguration failed to load %s retry %d", sFilename.c_str(), iUseBackup);
+		if( iUseBackup<5 )
+			return LoadDevicesConfiguration(iUseBackup+1);
 	}
 
 	return false;
 }
 //----------------------------------------------------------------------------------------------
-bool DataLayer_JSON::LoadDynamicConfiguration()
+bool DataLayer_JSON::LoadDynamicConfiguration(int iUseBackup)
 {
-	char *pData = GetUncompressedDataFromFile(JSON_DYNAMIC_CONFIG_FILE);
+	string sFilename = JSON_DYNAMIC_CONFIG_FILE;
+	if( iUseBackup )
+		sFilename += "." + StringUtils::itos(iUseBackup);
 
+	char *pData = GetUncompressedDataFromFile(sFilename);
+
+	bool bGotScenes=false,bGotRooms=false;
 	if(NULL != pData)
 	{
-		m_root_json_obj_NonDevices = json_tokener_parse(pData);
-		PLUTO_SAFE_DELETE_ARRAY(pData);
-
-		struct json_object_iter iter;
-		json_object_object_foreachC(m_root_json_obj_NonDevices, iter) 
+		try
 		{
-			string sValue = iter.key;
+			m_root_json_obj_NonDevices = json_tokener_parse(pData);
+			PLUTO_SAFE_DELETE_ARRAY(pData);
 
-			if(sValue == "scenes")
-				ParseScenes(iter.val);
-			if(sValue == "Room")
-				ParseRooms(iter.val);
+			struct json_object_iter iter;
+			json_object_object_foreachC(m_root_json_obj_NonDevices, iter) 
+			{
+				string sValue = iter.key;
+
+				if(sValue == "scenes")
+				{
+					bGotScenes = true;
+					ParseScenes(iter.val);
+				}
+				if(sValue == "Room")
+				{
+					bGotRooms = true;
+					ParseRooms(iter.val);
+				}
+			}
+		}
+		catch(...)
+		{
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "DataLayer::LoadDynamicConfiguration exception on file %s", sFilename.c_str());
+			bGotScenes=bGotRooms=false;  // So we'll retry
 		}
 
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "DataLayer: Got %d scenes", m_mapScene_Data.size());
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "DataLayer: Got %d scenes from %s", m_mapScene_Data.size(), sFilename.c_str());
 		for( std::map<int, Scene_Data>::iterator it = m_mapScene_Data.begin(); it != m_mapScene_Data.end(); ++it )
 		{
 			Scene_Data *pScene_Data = &(it->second);
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "DataLayer: Scene %d=%s", it->first, pScene_Data->Description().c_str());
 		}
 
-		return true;
+		if( bGotScenes && bGotRooms )
+			return true;
+	}
+	else
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "DataLayer: LoadDynamicConfiguration %s doesn't exist", sFilename.c_str());
+
+	if( bGotScenes == false || bGotRooms==false )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "DataLayer: LoadDynamicConfiguration failed to load %s retry %d", sFilename.c_str(), iUseBackup);
+		if( iUseBackup<5 )
+			return LoadDynamicConfiguration(iUseBackup+1);
 	}
 
 	return false;

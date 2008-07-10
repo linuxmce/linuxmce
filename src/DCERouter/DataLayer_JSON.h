@@ -59,8 +59,8 @@ public:
 
 private:
 
-	bool LoadDynamicConfiguration();
-	bool LoadDevicesConfiguration();
+	bool LoadDynamicConfiguration(int iUseBackup=0);
+	bool LoadDevicesConfiguration(int iUseBackup=0);
 	bool LoadStaticConfiguration();
 	void UpdateDevicesTree();
 
