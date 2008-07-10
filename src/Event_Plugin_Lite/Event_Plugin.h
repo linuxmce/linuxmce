@@ -35,7 +35,23 @@ class EventInstance;
 
 //<-dceag-decl-b->!
 namespace DCE
-{	
+{
+	class CannedEvent
+	{
+	public:
+		int m_FK_Event;
+		string m_sDescription;
+		bool m_bIsNot,m_bIsAnd;
+
+		CannedEvent(int FK_Event, string sDescription, bool bIsNot, bool bIsAnd)
+		{
+			m_FK_Event=FK_Event;
+			m_sDescription=sDescription;
+			m_bIsNot=bIsNot;
+			m_bIsAnd=bIsAnd;
+		}
+	};
+
 	class Event_Plugin : public Event_Plugin_Command, public AlarmEvent
 	{
 //<-dceag-decl-e->
@@ -54,6 +70,9 @@ namespace DCE
 		double m_fLongitude,m_fLatitude;
 		bool m_bIsDaytime;
 		time_t m_tNextSunriseSunset;
+		map<int,CannedEvent *> m_mapCannedEvents;
+		map<int,int> m_mapCriteriaParmList_ParameterType;  // Map of criteriaparmlist to parameter type
+		class General_Info_Plugin *m_pGeneral_Info_Plugin;
 
 		// Private methods
 public:
@@ -72,10 +91,10 @@ public:
 
 		void ParseTimers(struct json_object *json_obj);
 		void ParseEvents(struct json_object *json_obj);
+		void ParseCannedEvents(struct json_object *json_obj);
+		void ParseCriteriaParmList(struct json_object *json_obj);
 		void ParseCommands(map<int, Command_Data>& mapCommands, struct json_object *json_obj);
 		void ParseCommandParameters(std::map<int, string>& mapParams, struct json_object *json_obj);
-		void ExecuteCommandData(map<int, Command_Data> *mapCommands);
-		void ExecuteCommandData(Command_Data *pCommand_Data);
 
 		virtual void PrepareToDelete();
 		bool ProcessEvent(class Socket *pSocket,class Message *pMessage,class DeviceData_Base *pDeviceFrom,class DeviceData_Base *pDeviceTo);
@@ -88,6 +107,9 @@ public:
 		void FireSunriseSunsetEvent();
 
 		bool IsDaytime() { return m_bIsDaytime; }
+
+		CannedEvent *m_mapCannedEvents_Find(int PK_CannedEvent) { map<int,CannedEvent *>::iterator it = m_mapCannedEvents.find(PK_CannedEvent); return it==m_mapCannedEvents.end() ? NULL : (*it).second; }
+		int m_mapCriteriaParmList_ParameterType_Find(int PK_CriteriaParmList) { map<int,int>::iterator it = m_mapCriteriaParmList_ParameterType.find(PK_CriteriaParmList); return it==m_mapCriteriaParmList_ParameterType.end() ? NULL : (*it).second; }
 
 //<-dceag-h-b->
 	/*

@@ -56,7 +56,6 @@ namespace DCE
 
 		// Private methods
 		void ParseCommandParameters(std::map<int, string>& mapParams, string &sText,string::size_type &pos);
-		void ExecuteCommandGroup(Scene_Data *pScene_Data,int PK_Device_From);
 		void SetNextAlarm();
 		void RegisterAllInterceptor();
 		void UnRegisterAllInterceptor();
@@ -88,6 +87,8 @@ public:
 		void AlarmCallback(int id, void* param);
 
 		DeviceData_Router *ProcessChildDevice(int nPK_Device, string sLine, bool &bNewDevice);
+
+		void ExecuteCommandData(map<int, Command_Data> *mapCommands,int PK_Device_From);
 
 //<-dceag-h-b->
 	/*

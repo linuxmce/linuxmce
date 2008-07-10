@@ -20,7 +20,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="../DCE;&quot;../../libs/Libraries/pthreads-win32/include&quot;;/mysql/include;..;../../libs/CrossPlatform/LibXML2/include;&quot;../../libs/CrossPlatform/json-c&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;DEBUG;DCEROUTER;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;DEBUG;DCEROUTER;EMBEDDED_LMCE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"

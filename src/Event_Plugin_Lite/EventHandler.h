@@ -33,6 +33,7 @@ public:
 	bool m_bDisabled;
 	map<int, Command_Data> m_mapCommands;
 	string m_sDescription;
+	class Event_Plugin *m_pEvent_Plugin;
 
 	EventHandler(unsigned long PK_EventHander,Event_Plugin *pEvent_Plugin,struct json_object *json_obj);
 	void ParseCriteria(struct json_object *json_obj);

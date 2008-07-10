@@ -41,6 +41,8 @@ using namespace DCE;
 #include "TimedEvent.h"
 #include "sunrise.h"
 
+#include "../General_Info_Plugin_Lite/General_Info_Plugin.h"
+
 #define ALARM_TIMED_EVENT	1
 #define ALARM_SUNRISE_SUNSET	2
 
@@ -82,15 +84,31 @@ bool Event_Plugin::GetConfig()
 	*/
 
 	DataLayer_JSON *pDataLayer_JSON = (DataLayer_JSON *) m_pRouter->DataLayer();
-	struct json_object_iter iter;
-	json_object_object_foreachC(pDataLayer_JSON->m_root_json_obj_NonDevices_get(), iter) 
-	{
-		string sValue = iter.key;
 
-		if(sValue == "Timer")
-			ParseTimers(iter.val);
-		else if(sValue == "Event")
-			ParseEvents(iter.val);
+	{
+		struct json_object_iter iter;
+		json_object_object_foreachC(pDataLayer_JSON->m_root_json_obj_PM_get(), iter) 
+		{
+			string sValue = iter.key;
+
+			if(sValue == "CannedEvents")
+				ParseCannedEvents(iter.val);
+			else if(sValue == "CriteriaParmList")
+				ParseCriteriaParmList(iter.val);
+		}
+	}
+
+	{
+		struct json_object_iter iter;
+		json_object_object_foreachC(pDataLayer_JSON->m_root_json_obj_NonDevices_get(), iter) 
+		{
+			string sValue = iter.key;
+
+			if(sValue == "Timer")
+				ParseTimers(iter.val);
+			else if(sValue == "Event")
+				ParseEvents(iter.val);
+		}
 	}
 
 	m_pAlarmManager = new AlarmManager();
@@ -139,6 +157,68 @@ void Event_Plugin::ParseTimers(struct json_object *json_obj)
 		}
 		else
 			m_mapTimedEvent[pTimedEvent->m_ID] = pTimedEvent;
+	}
+}
+
+void Event_Plugin::ParseCannedEvents(struct json_object *json_obj)
+{
+	struct json_object *obj_events = json_obj;
+	struct json_object_iter iter_events;
+	json_object_object_foreachC(obj_events, iter_events) 
+	{
+		string sCannedEventID = iter_events.key;
+
+		StringUtils::Replace(&sCannedEventID, "PK_CannedEvents_", "");
+		int PK_CannedEvents = atoi(sCannedEventID.c_str());
+
+		string sDescription;
+		int FK_Event=0;
+		bool bIsNot=false,bIsAnd=false;
+		struct json_object_iter iter_eventParms;
+		json_object_object_foreachC(iter_events.val, iter_eventParms)
+		{
+			if( iter_eventParms.val->o_type!=json_type_int && iter_eventParms.val->o_type!=json_type_string )
+				continue;
+
+			string sKey = iter_eventParms.key;
+			if( sKey=="Description" )
+				sDescription = json_object_get_string(iter_eventParms.val);
+			else if( sKey=="FK_Event" )
+				FK_Event = json_object_get_int(iter_eventParms.val);
+			else if( sKey=="bIsAnd" )
+				bIsAnd = json_object_get_int(iter_eventParms.val)==1;
+			else if( sKey=="bIsNot" )
+				bIsNot = json_object_get_int(iter_eventParms.val)==1;
+		}
+
+		m_mapCannedEvents[PK_CannedEvents] = new CannedEvent(FK_Event,sDescription,bIsNot,bIsAnd);
+	}
+}
+
+void Event_Plugin::ParseCriteriaParmList(struct json_object *json_obj)
+{
+	struct json_object *obj_parmlist = json_obj;
+	struct json_object_iter iter_parmlist;
+	json_object_object_foreachC(obj_parmlist, iter_parmlist) 
+	{
+		string sCriteriaParmListID = iter_parmlist.key;
+
+		StringUtils::Replace(&sCriteriaParmListID, "PK_CriteriaParmList_", "");
+		int PK_CriteriaParmList = atoi(sCriteriaParmListID.c_str());
+
+		int FK_ParameterType=0;
+		struct json_object_iter iter_parmlistParms;
+		json_object_object_foreachC(iter_parmlist.val, iter_parmlistParms)
+		{
+			if( iter_parmlistParms.val->o_type!=json_type_int && iter_parmlistParms.val->o_type!=json_type_string )
+				continue;
+
+			string sKey = iter_parmlistParms.key;
+			if( sKey=="FK_ParameterType" )
+				FK_ParameterType = json_object_get_int(iter_parmlistParms.val);
+		}
+
+		m_mapCriteriaParmList_ParameterType[PK_CriteriaParmList] = FK_ParameterType;
 	}
 }
 
@@ -192,7 +272,7 @@ void Event_Plugin::ParseCommands(map<int, Command_Data>& mapCommands, struct jso
 			{
 				string sKey = iter_command.key;
 
-				if(iter_command.val->o_type == json_type_int)
+				if(iter_command.val->o_type == json_type_int || iter_command.val->o_type == json_type_string)
 				{
 					int nValue = json_object_get_int(iter_command.val);
 
@@ -230,7 +310,7 @@ void Event_Plugin::ParseCommandParameters(std::map<int, string>& mapParams, stru
 		StringUtils::Replace(&sFK_CommandParameter, "FK_CommandParameter_", "");
 		int nFK_CommandParameter = atoi(sFK_CommandParameter.c_str());
 		
-		if(iter_params.val->o_type == json_type_string)
+		if(iter_params.val->o_type == json_type_int || iter_params.val->o_type == json_type_string)
 		{
 			string sValue = json_object_get_string(iter_params.val);
 			mapParams[nFK_CommandParameter] = sValue;
@@ -297,6 +377,9 @@ Event_Plugin::~Event_Plugin()
 	for(map<int,Criteria *>::iterator itc = m_mapCriteria.begin(), endc = m_mapCriteria.end(); itc != endc; ++itc)
 		delete itc->second;
 	m_mapCriteria.clear();
+
+	for(map<int,CannedEvent *>::iterator it=m_mapCannedEvents.begin();it!=m_mapCannedEvents.end();++it)
+		delete it->second;
 }
 
 void Event_Plugin::PrepareToDelete()
@@ -312,7 +395,15 @@ void Event_Plugin::PrepareToDelete()
 bool Event_Plugin::Register()
 //<-dceag-reg-e->
 {
-    RegisterMsgInterceptor((MessageInterceptorFn)(&Event_Plugin::ProcessEvent) ,0,0,0,0,MESSAGETYPE_EVENT,0);
+	m_pGeneral_Info_Plugin=( General_Info_Plugin * ) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_General_Info_Plugin_CONST);
+
+	if( !m_pGeneral_Info_Plugin )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Cannot find sister plugins to Event_Plugin plugin");
+		return false;
+	}
+
+	RegisterMsgInterceptor((MessageInterceptorFn)(&Event_Plugin::ProcessEvent) ,0,0,0,0,MESSAGETYPE_EVENT,0);
 	return Connect(PK_DeviceTemplate_get()); 
 }
 
@@ -405,7 +496,7 @@ bool Event_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessage,cl
 
 void Event_Plugin::ExecuteEvent(EventInstance *pEventInstance)
 {
-	ExecuteCommandData(&(pEventInstance->m_ptrEventHandler->m_mapCommands));
+	m_pGeneral_Info_Plugin->ExecuteCommandData(&(pEventInstance->m_ptrEventHandler->m_mapCommands),m_dwPK_Device);
 	delete pEventInstance;  // We will probably need to keep this for a while for some events like security problems
 }
 
@@ -451,7 +542,7 @@ void Event_Plugin::AlarmCallback(int id, void* param)
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Timer: %s firing",
 			pTimedEvent->m_sDescription.c_str());
 
-		ExecuteCommandData(&(pTimedEvent->m_mapCommands));
+		m_pGeneral_Info_Plugin->ExecuteCommandData(&(pTimedEvent->m_mapCommands),m_dwPK_Device);
 		pTimedEvent->CalcNextTime();
 		SetNextTimedEventCallback();
 	}
@@ -584,32 +675,4 @@ void Event_Plugin::FireSunriseSunsetEvent()
 
 	m_pAlarmManager->AddAbsoluteAlarm( m_tNextSunriseSunset, this, ALARM_SUNRISE_SUNSET, NULL );
 
-}
-
-void Event_Plugin::ExecuteCommandData(map<int, Command_Data> *mapCommands)
-{
-	for(map<int, Command_Data>::iterator it=mapCommands->begin();it!=mapCommands->end();++it)
-		ExecuteCommandData( &(it->second) );
-}
-
-void Event_Plugin::ExecuteCommandData(Command_Data *pCommand_Data)
-{
-	Message *pMessage = new Message();
-	pMessage->m_dwPK_Device_From = m_dwPK_Device;
-	pMessage->m_dwMessage_Type = MESSAGETYPE_COMMAND;
-	pMessage->m_dwID = pCommand_Data->PK_Command();
-	pMessage->m_dwPK_Device_To = pCommand_Data->Device_To();
-	pMessage->m_mapParameters[COMMANDPARAMETER_Is_Temporary_CONST] = (pCommand_Data->IsTemporary()==0 ? "1" : "0");
-	pMessage->m_mapParameters[COMMANDPARAMETER_Already_processed_CONST] = "1";
-
-	for(std::map<int, string>::iterator it_param = pCommand_Data->Params().begin(); 
-		it_param != pCommand_Data->Params().end(); ++it_param)
-	{
-		pMessage->m_mapParameters[it_param->first] = it_param->second;
-	}
-
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Event_Plugin::ExecuteCommandGroup Processing message from %d to %d id %d", 
-		pMessage->m_dwPK_Device_From, pMessage->m_dwPK_Device_To, pMessage->m_dwID);
-
-	QueueMessageToRouter(pMessage);
 }

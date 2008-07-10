@@ -20,6 +20,7 @@ class DataLayer_JSON : public IDataLayer
 	
 	struct json_object *m_root_json_obj_Devices;
 	struct json_object *m_root_json_obj_NonDevices;
+	struct json_object *m_root_json_obj_PM;
 
 	pluto_pthread_mutex_t m_DataMutex;
 	pthread_mutexattr_t m_MutexAttr;
@@ -37,6 +38,8 @@ public:
 	//get devices
 	std::map<int, DeviceData_Router *>& Devices();
 	struct json_object *m_root_json_obj_NonDevices_get() { return m_root_json_obj_NonDevices; }
+	struct json_object *m_root_json_obj_Devices_get() { return m_root_json_obj_Devices; }
+	struct json_object *m_root_json_obj_PM_get() { return m_root_json_obj_PM; }
 
 	//queries for scenes and device templates
 	Scene_Data* Scene(int nSceneID);

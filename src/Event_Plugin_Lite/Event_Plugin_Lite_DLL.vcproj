@@ -143,6 +143,12 @@
 				RelativePath=".\EventHandler.cpp">
 			</File>
 			<File
+				RelativePath="..\General_Info_Plugin_Lite\General_Info_Plugin.cpp">
+			</File>
+			<File
+				RelativePath="..\Gen_Devices\General_Info_PluginBase.cpp">
+			</File>
+			<File
 				RelativePath="Main.cpp">
 			</File>
 			<File

@@ -36,7 +36,7 @@ TimedEvent::TimedEvent(int ID,struct json_object *json_obj,Event_Plugin *pEvent_
 	{
 		string sKey = iter_sceneparams.key;
 
-		if(iter_sceneparams.val->o_type == json_type_string)
+		if(iter_sceneparams.val->o_type == json_type_int || iter_sceneparams.val->o_type == json_type_string)
 		{
 			string sValue = json_object_get_string(iter_sceneparams.val);
 
@@ -80,13 +80,13 @@ void TimedEvent::ParseCriteria(struct json_object *json_obj)
 			{
 				string sKey_2 = iter_criteriaparams_2.key;
 
-				if(sKey_2=="PK_CriteriaParmList" && iter_criteriaparams_2.val->o_type == json_type_string )
-					PK_CriteriaParmList = atoi( json_object_get_string(iter_criteriaparams_2.val) );
-				else if( sKey_2=="Operator" && iter_criteriaparams_2.val->o_type == json_type_string )
-					Operator = atoi( json_object_get_string(iter_criteriaparams_2.val) );
-				else if( sKey_2=="Parm" && iter_criteriaparams_2.val->o_type == json_type_string )
+				if(sKey_2=="PK_CriteriaParmList" && (iter_criteriaparams_2.val->o_type == json_type_int || iter_criteriaparams_2.val->o_type == json_type_string) )
+					PK_CriteriaParmList = json_object_get_int(iter_criteriaparams_2.val);
+				else if( sKey_2=="Operator" && (iter_criteriaparams_2.val->o_type == json_type_int || iter_criteriaparams_2.val->o_type == json_type_string) )
+					Operator = json_object_get_int(iter_criteriaparams_2.val);
+				else if( sKey_2=="Parm" && (iter_criteriaparams_2.val->o_type == json_type_int || iter_criteriaparams_2.val->o_type == json_type_string) )
 					sParm = json_object_get_string(iter_criteriaparams_2.val);
-				else if( sKey_2=="Value" && iter_criteriaparams_2.val->o_type == json_type_string )
+				else if( sKey_2=="Value" && (iter_criteriaparams_2.val->o_type == json_type_int || iter_criteriaparams_2.val->o_type == json_type_string) )
 					sValue = json_object_get_string(iter_criteriaparams_2.val);
 			}
 

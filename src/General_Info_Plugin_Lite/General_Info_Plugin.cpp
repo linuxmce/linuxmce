@@ -1250,7 +1250,7 @@ void General_Info_Plugin::CMD_Execute_Command_Group(string sText,int iPK_Command
 		if(NULL != pScene_Data)
 		{
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::CMD_Execute_Command_Group executing %d with %d commands", iPK_CommandGroup, (int) pScene_Data->Commands().size() );
-			ExecuteCommandGroup(pScene_Data,pMessage->m_dwPK_Device_From);
+			ExecuteCommandData(&(pScene_Data->Commands()),pMessage->m_dwPK_Device_From);
 		}
 		else
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "General_Info_Plugin::CMD_Execute_Command_Group Unexisting scene: %d", iPK_CommandGroup);
@@ -1274,11 +1274,16 @@ aCommand_data.CancelIfOther(1);
 aCommand_data.IsTemporary(1);
 			if( sText[pos-1]!='\n' )
 				ParseCommandParameters(aCommand_data.Params(), sText, pos);
-			scene_Data.Commands()[iIndex++] = aCommand_data;
+			if( aCommand_data.Device_To()==0 || aCommand_data.PK_Command()==0 )
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "General_Info_Plugin::CMD_Execute_Command_Group scene: %d has empty data", iPK_CommandGroup);
+			else
+				scene_Data.Commands()[iIndex++] = aCommand_data;
+			while( (sText[pos]=='\n' || sText[pos]=='\r') && pos<sText.size() )
+				++pos;
 		}
 
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::CMD_Execute_Command_Group executing temp %d commands", (int) scene_Data.Commands().size() );
-		ExecuteCommandGroup(&scene_Data,pMessage->m_dwPK_Device_From);
+		ExecuteCommandData(&(scene_Data.Commands()),pMessage->m_dwPK_Device_From);
 	}
 }
 
@@ -1311,17 +1316,14 @@ void General_Info_Plugin::ParseCommandParameters(std::map<int, string>& mapParam
 
 		mapParams[PK_CommandParameter]=sValue;
 		if( sText[pos-1]=='\n' || pos>=sText.size() )
-		{
-			pos++;
 			return;
-		}
 	}
 }
 
-void General_Info_Plugin::ExecuteCommandGroup(Scene_Data *pScene_Data,int PK_Device_From)
+void General_Info_Plugin::ExecuteCommandData(map<int, Command_Data> *mapCommands,int PK_Device_From)
 {
 	PLUTO_SAFETY_LOCK(dm, m_pRouter->DataLayer()->Mutex());
-	for(std::map<int, Command_Data>::iterator it = pScene_Data->Commands().begin(); it != pScene_Data->Commands().end(); ++it)
+	for(std::map<int, Command_Data>::iterator it = mapCommands->begin(); it != mapCommands->end(); ++it)
 	{
 		Command_Data *pCommand_Data = &(it->second);
 
@@ -1499,21 +1501,21 @@ void General_Info_Plugin::CMD_Restore_To_NonTemp_State(int iPK_Device,string &sC
 		QueueMessageToRouter( new Message( m_dwPK_Device,pDevice->m_dwPK_Device,PRIORITY_NORMAL,MESSAGETYPE_COMMAND,COMMAND_Generic_On_CONST,0 ) );
 	else
 	{
-		DeviceData_Base *pDevice_Plugin = NULL;
+		Command_Impl *pCommand_Impl = NULL;
 		if( pDevice->WithinCategory(DEVICECATEGORY_Climate_Device_CONST) )
-			pDevice_Plugin = m_pData->FindFirstRelatedDeviceOfCategory( DEVICECATEGORY_Climate_Plugins_CONST );
+			pCommand_Impl = m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Climate_Plugin_CONST);
 		else if( pDevice->WithinCategory(DEVICECATEGORY_Security_Device_CONST) )
-			pDevice_Plugin = m_pData->FindFirstRelatedDeviceOfCategory( DEVICECATEGORY_Security_Plugins_CONST );
+			pCommand_Impl = m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Security_Plugin_CONST);
 		else if( pDevice->WithinCategory(DEVICECATEGORY_Lighting_Device_CONST) )
-			pDevice_Plugin = m_pData->FindFirstRelatedDeviceOfCategory( DEVICECATEGORY_Lighting_Plugins_CONST );
+			pCommand_Impl = m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Lighting_Plugin_CONST);
 
-		if( pDevice_Plugin==NULL )
+		if( pCommand_Impl==NULL )
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::CMD_Restore_To_NonTemp_State Device %d has no plugin", iPK_Device);
 		else
 		{
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::CMD_Restore_To_NonTemp_State Device %d forwarding to %d", iPK_Device, pDevice_Plugin->m_dwPK_Device);
-			QueueMessageToRouter( new Message( m_dwPK_Device,pDevice_Plugin->m_dwPK_Device,PRIORITY_NORMAL,MESSAGETYPE_COMMAND,COMMAND_Restore_To_NonTemp_State_CONST, 1,
-				COMMANDPARAMETER_PK_Device_CONST, StringUtils::itos(pDevice_Plugin->m_dwPK_Device)) );
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::CMD_Restore_To_NonTemp_State Device %d forwarding to %d", iPK_Device, pCommand_Impl->m_dwPK_Device);
+			QueueMessageToRouter( new Message( m_dwPK_Device,pCommand_Impl->m_dwPK_Device,PRIORITY_NORMAL,MESSAGETYPE_COMMAND,COMMAND_Restore_To_NonTemp_State_CONST, 1,
+				COMMANDPARAMETER_PK_Device_CONST, StringUtils::itos(pCommand_Impl->m_dwPK_Device).c_str()) );
 		}
 	}
 }

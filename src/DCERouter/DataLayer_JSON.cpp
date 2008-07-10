@@ -32,7 +32,7 @@ extern "C"
 //----------------------------------------------------------------------------------------------
 #define ADD_STRING_CHILD(parent, key, value) json_object_object_add(parent, key, json_object_new_string(const_cast<char *>(value.c_str())));
 //----------------------------------------------------------------------------------------------
-DataLayer_JSON::DataLayer_JSON(void) : m_root_json_obj_Devices(NULL), m_root_json_obj_NonDevices(NULL), m_DataMutex("data")
+DataLayer_JSON::DataLayer_JSON(void) : m_root_json_obj_Devices(NULL), m_root_json_obj_NonDevices(NULL), m_root_json_obj_PM(NULL), m_DataMutex("data")
 {
 	m_dwPK_Device_Largest = 0;
 
@@ -45,6 +45,7 @@ DataLayer_JSON::~DataLayer_JSON(void)
 {
 	json_object_put(m_root_json_obj_Devices); 
 	json_object_put(m_root_json_obj_NonDevices); 
+	json_object_put(m_root_json_obj_PM); 
 
 	pthread_mutexattr_destroy(&m_MutexAttr);
 }
@@ -202,16 +203,14 @@ bool DataLayer_JSON::LoadDynamicConfiguration()
 //----------------------------------------------------------------------------------------------
 bool DataLayer_JSON::LoadStaticConfiguration()
 {
-	struct json_object *json_obj = NULL;
-
 	char *pData = GetUncompressedDataFromFile(JSON_STATIC_CONFIG_FILE);
 
 	if(NULL != pData)
 	{
-		json_obj = json_tokener_parse(pData);
+		m_root_json_obj_PM = json_tokener_parse(pData);
 
 		struct json_object_iter iter;
-		json_object_object_foreachC(json_obj, iter) 
+		json_object_object_foreachC(m_root_json_obj_PM, iter) 
 		{
 			string sValue = iter.key;
 
@@ -220,8 +219,6 @@ bool DataLayer_JSON::LoadStaticConfiguration()
 			else if(sValue == "DeviceCategory")
 				ParseDeviceCategories(iter.val);
 		}
-
-		json_object_put(json_obj); 
 
 		PLUTO_SAFE_DELETE_ARRAY(pData);
 
@@ -318,12 +315,12 @@ void DataLayer_JSON::ParseDevices(struct json_object *json_obj)
 					sDescription = json_object_get_string(iter_device.val);
 					LoggerWrapper::GetInstance()->Write(LV_STATUS, "\tDescription: %s", sDescription.c_str());
 				}
-				else if(sValue == "FK_DeviceTemplate" && iter_device.val->o_type == json_type_string)
-					PK_DeviceTemplate = atoi(json_object_get_string(iter_device.val));
-				else if(sValue == "FK_Room" && iter_device.val->o_type == json_type_string)
-					PK_Room = atoi(json_object_get_string(iter_device.val));
-				else if(sValue == "FK_Device_ControlledVia" && iter_device.val->o_type == json_type_string)
-					PK_Device_ControlledVia = atoi(json_object_get_string(iter_device.val));
+				else if(sValue == "FK_DeviceTemplate" && (iter_device.val->o_type == json_type_int || iter_device.val->o_type == json_type_string) )
+					PK_DeviceTemplate = json_object_get_int(iter_device.val);
+				else if(sValue == "FK_Room" && (iter_device.val->o_type == json_type_int || iter_device.val->o_type == json_type_string))
+					PK_Room = json_object_get_int(iter_device.val);
+				else if(sValue == "FK_Device_ControlledVia" && (iter_device.val->o_type == json_type_int || iter_device.val->o_type == json_type_string))
+					PK_Device_ControlledVia = json_object_get_int(iter_device.val);
 				else if(sValue == "params")
 					ParseDeviceParameters(mapDeviceParams, iter_device.val);
 				else if(sValue == "DeviceData" && iter_device.val->o_type == json_type_object)
@@ -361,7 +358,7 @@ void DataLayer_JSON::ParseDeviceDataList(std::map<int, string>& mapDeviceData, s
 		string sValue = iter_devicedata.key;
 		int PK_DeviceData = atoi(StringUtils::Replace(&sValue, "FK_DeviceData_", "").c_str());
 
-		if(iter_devicedata.val->o_type == json_type_string)
+		if(iter_devicedata.val->o_type == json_type_int || iter_devicedata.val->o_type == json_type_string)
 		{
 			string sValue = json_object_get_string(iter_devicedata.val);
 			mapDeviceData[PK_DeviceData] = sValue;
@@ -377,7 +374,7 @@ void DataLayer_JSON::ParseDeviceParameters(std::map<string, string>& mapDevicePa
 	{
 		string sKey = iter_devicedata.key;
 
-		if(iter_devicedata.val->o_type == json_type_string)
+		if(iter_devicedata.val->o_type == json_type_int || iter_devicedata.val->o_type == json_type_string)
 			mapDeviceParams[sKey] = json_object_get_string(iter_devicedata.val);
 	}	
 }
@@ -443,7 +440,7 @@ void DataLayer_JSON::ParseDeviceTemplates(struct json_object *json_obj)
 		{
 			string sKey = iter_deviceparams.key;
 
-			if(iter_deviceparams.val->o_type == json_type_string)
+			if(iter_deviceparams.val->o_type == json_type_int || iter_deviceparams.val->o_type == json_type_string)
 			{
 				string sValue = json_object_get_string(iter_deviceparams.val);
 
@@ -482,7 +479,7 @@ void DataLayer_JSON::ParseDeviceCategories(struct json_object *json_obj)
 		{
 			string sKey = iter_deviceparams.key;
 
-			if(iter_deviceparams.val->o_type == json_type_string)
+			if(iter_deviceparams.val->o_type == json_type_int || iter_deviceparams.val->o_type == json_type_string)
 			{
 				string sValue = json_object_get_string(iter_deviceparams.val);
 
@@ -561,7 +558,7 @@ void DataLayer_JSON::ParseScenes(struct json_object *json_obj)
 		{
 			string sKey = iter_sceneparams.key;
 
-			if(iter_sceneparams.val->o_type == json_type_string)
+			if(iter_sceneparams.val->o_type == json_type_int || iter_sceneparams.val->o_type == json_type_string)
 			{
 				string sValue = json_object_get_string(iter_sceneparams.val);
 
@@ -642,9 +639,9 @@ void DataLayer_JSON::ParseCommands(map<int, Command_Data>& mapCommands, struct j
 			{
 				string sKey = iter_command.key;
 
-				if(iter_command.val->o_type == json_type_int)
+				if(iter_command.val->o_type == json_type_int || iter_command.val->o_type == json_type_string )
 				{
-					int nValue = json_object_get_int(iter_command.val);
+					int nValue = iter_command.val->o_type == json_type_string ? atoi(json_object_get_string(iter_command.val)) : json_object_get_int(iter_command.val);
 
 					if(sKey == "Device_From")
 						aCommand_data.Device_From(nValue);
@@ -680,7 +677,7 @@ void DataLayer_JSON::ParseCommandParameters(std::map<int, string>& mapParams, st
 		StringUtils::Replace(&sFK_CommandParameter, "FK_CommandParameter_", "");
 		int nFK_CommandParameter = atoi(sFK_CommandParameter.c_str());
 		
-		if(iter_params.val->o_type == json_type_string)
+		if(iter_params.val->o_type == json_type_int || iter_params.val->o_type == json_type_string)
 		{
 			string sValue = json_object_get_string(iter_params.val);
 			mapParams[nFK_CommandParameter] = sValue;
