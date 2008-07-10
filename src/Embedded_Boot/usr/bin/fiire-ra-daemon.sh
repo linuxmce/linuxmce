@@ -3,7 +3,6 @@ CONF_FILE="/etc/fiire-ra/fiire-ra.conf"
 PID_FILE="/var/run/fiire-ra.pid"
 SSH_KEY_FILE="/etc/fiire-ra/keys/fiire-ra.key"
 
-
 PipePath="/var/run/fiire-ra-pipes"
 PipeSend="$PipePath/send"
 PipeRecv="$PipePath/recv"

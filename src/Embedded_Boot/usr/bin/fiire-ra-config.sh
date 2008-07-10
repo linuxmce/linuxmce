@@ -9,6 +9,7 @@ SSH_KEY_FILE="/etc/fiire-ra/keys/fiire-ra.key"
 
 PASSWORD_MD5="`echo -n "$PASSWORD" | md5sum | cut -d' ' -f1`"
 
+
 log() {
 	logger -s -t 'fiire-ra' $*
 }
