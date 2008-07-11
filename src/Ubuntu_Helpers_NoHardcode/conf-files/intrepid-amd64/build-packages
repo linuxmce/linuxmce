@@ -175,5 +175,6 @@ x11proto-core-dev
 x11proto-record-dev
 x11proto-xext-dev
 x11proto-xf86vidmode-dev
+xcompmgr
 xorg-dev
 zaptel-source
