@@ -19,7 +19,7 @@ sleep 2
 
 # Backup configuration
 log "Creating a backup of the config files."
-tar zcf /tmp/backup.tar.gz /etc/pluto /etc/config
+tar zcf /tmp/backup.tar.gz /etc/pluto /etc/config /etc/fiire-ra
 
 # Flash new image
 log "Started flashing new image."
