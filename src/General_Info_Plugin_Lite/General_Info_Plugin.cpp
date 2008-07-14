@@ -1228,6 +1228,9 @@ void General_Info_Plugin::CMD_Update_Device(int iPK_Device,string sMac_address,i
 	}
 
 	m_pRouter->DataLayer()->Save();
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::CMD_Update_Device saved data for device %d %s in room %d",
+		pDeviceData_Router->m_dwPK_Device, pDeviceData_Router->m_sDescription.c_str(), pDeviceData_Router->m_dwPK_Room);
+
 }
 
 //<-dceag-c370-b->

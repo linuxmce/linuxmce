@@ -369,7 +369,7 @@ void DataLayer_JSON::ParseDevices(struct json_object *json_obj)
 				if(sValue == "Description" && iter_device.val->o_type == json_type_string)
 				{
 					sDescription = json_object_get_string(iter_device.val);
-					LoggerWrapper::GetInstance()->Write(LV_STATUS, "\tDescription: %s", sDescription.c_str());
+					LoggerWrapper::GetInstance()->Write(LV_STATUS, "\tDevice %d Description: %s", nDeviceID, sDescription.c_str());
 				}
 				else if(sValue == "FK_DeviceTemplate" && (iter_device.val->o_type == json_type_int || iter_device.val->o_type == json_type_string) )
 					PK_DeviceTemplate = json_object_get_int(iter_device.val);
@@ -380,7 +380,7 @@ void DataLayer_JSON::ParseDevices(struct json_object *json_obj)
 				else if(sValue == "params")
 					ParseDeviceParameters(mapDeviceParams, iter_device.val);
 				else if(sValue == "DeviceData" && iter_device.val->o_type == json_type_object)
-					ParseDeviceDataList(mapDeviceData, iter_device.val);
+					ParseDeviceDataList(nDeviceID,mapDeviceData, iter_device.val);
 			}
 
 			pDevice = new DeviceData_Router(nDeviceID, PK_DeviceTemplate, PK_Installation, PK_Device_ControlledVia);
@@ -406,7 +406,7 @@ void DataLayer_JSON::ParseDevices(struct json_object *json_obj)
 	}
 }
 //----------------------------------------------------------------------------------------------
-void DataLayer_JSON::ParseDeviceDataList(std::map<int, string>& mapDeviceData, struct json_object *json_obj)
+void DataLayer_JSON::ParseDeviceDataList(int PK_Device,std::map<int, string>& mapDeviceData, struct json_object *json_obj)
 {
 	struct json_object_iter iter_devicedata;
 	json_object_object_foreachC(json_obj, iter_devicedata)
@@ -418,7 +418,7 @@ void DataLayer_JSON::ParseDeviceDataList(std::map<int, string>& mapDeviceData, s
 		{
 			string sValue = json_object_get_string(iter_devicedata.val);
 			mapDeviceData[PK_DeviceData] = sValue;
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "\tDevice data %d = %s", PK_DeviceData, sValue.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "\tDevice %d data %d = %s", PK_Device, PK_DeviceData, sValue.c_str());
 		}
 	}
 }
@@ -671,6 +671,8 @@ void DataLayer_JSON::ParseRooms(struct json_object *json_obj)
 				//parse here FK_Section or FK_RoomType if needed
 			}
 		}
+
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "DataLayer_JSON::ParseRooms %d=%s", nRoomID, room_data.Description().c_str());
 
 		m_mapRoom_Data[nRoomID] = room_data;
 	}

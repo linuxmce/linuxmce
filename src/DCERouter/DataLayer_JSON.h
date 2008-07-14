@@ -66,7 +66,7 @@ private:
 
 	void ParseDevicesList(struct json_object *json_obj);
 	void ParseDevices(struct json_object *json_obj);
-	void ParseDeviceDataList(std::map<int, string>& mapDeviceData, struct json_object *json_obj);
+	void ParseDeviceDataList(int PK_Device,std::map<int, string>& mapDeviceData, struct json_object *json_obj);
 	void ParseDeviceParameters(std::map<string, string>& mapDeviceParams, struct json_object *json_obj);
 	void ParseScenes(struct json_object *json_obj);
 	void ParseRooms(struct json_object *json_obj);
