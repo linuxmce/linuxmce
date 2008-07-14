@@ -1,6 +1,6 @@
 #!/bin/sh /etc/rc.common
 
-START=50
+START=51
 
 start() {
 	/usr/bin/fiire-ra-daemon.sh	
