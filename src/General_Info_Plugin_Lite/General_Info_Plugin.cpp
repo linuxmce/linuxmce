@@ -1211,13 +1211,17 @@ void General_Info_Plugin::CMD_Update_Device(int iPK_Device,string sMac_address,i
 
 	vector<string> vectStrings;
 	StringUtils::Tokenize(sData_String, "|", vectStrings);
-
 	for(vector<string>::iterator it = vectStrings.begin(), end = vectStrings.end(); it != end; ++it)
 	{
 		string sKey = *it;
 		int nKey = atoi(sKey.c_str());
 
-		if(++it != end)
+		if( ++it == end )
+		{
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "General_Info_Plugin::CMD_Update_Device parms %s are malformed", sData_String.c_str());
+			break;
+		}
+		else
 		{
 			string sValue = *it;
 			pDeviceData_Router->ReplaceParameter(nKey, sValue);
