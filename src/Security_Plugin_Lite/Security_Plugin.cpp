@@ -107,6 +107,7 @@ bool Security_Plugin::GetConfig()
 {
 	if( !Security_Plugin_Command::GetConfig() )
 		return false;
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Security_Plugin::GetConfig start");
 //<-dceag-getconfig-e->
 /*
 
@@ -187,6 +188,7 @@ bool Security_Plugin::GetConfig()
 	}
 
 	GetHouseModes();
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Security_Plugin::GetConfig stop");
 	return true;
 }
 
@@ -219,9 +221,11 @@ void Security_Plugin::PrepareToDelete()
 bool Security_Plugin::Register()
 //<-dceag-reg-e->
 {
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Security_Plugin::Register start");
     RegisterMsgInterceptor((MessageInterceptorFn)(&Security_Plugin::SensorTrippedEvent) ,0,0,0,0,MESSAGETYPE_EVENT,EVENT_Sensor_Tripped_CONST);
 	RegisterMsgInterceptor((MessageInterceptorFn)(&Security_Plugin::PanelChangeState) ,0,0,0,0,
 		MESSAGETYPE_EVENT,67);
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Security_Plugin::Register stop");
 
 	return Connect(PK_DeviceTemplate_get()); 
 }

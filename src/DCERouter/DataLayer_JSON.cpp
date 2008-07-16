@@ -70,6 +70,7 @@ bool DataLayer_JSON::Load()
 //----------------------------------------------------------------------------------------------
 void DataLayer_JSON::PluginsLoaded()
 {
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "DataLayer_JSON::PluginsLoaded");
 	if( m_root_json_obj_Devices )
 	{
 		json_object_put(m_root_json_obj_Devices); 
