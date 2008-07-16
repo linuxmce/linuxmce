@@ -177,6 +177,7 @@ bool Security_Plugin::GetConfig()
 	m_pAlarmManager = new AlarmManager();
     m_pAlarmManager->Start(2);      //4 = number of worker threads
 
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Security_Plugin::GetConfig get path");
 	FileUtils::MakeDir(DATA_Get_Path()); // Just be sure it's here
 
 	// Get the zones
@@ -186,6 +187,7 @@ bool Security_Plugin::GetConfig()
 		if( pDeviceGroup->m_Type==1 )
 			m_mapDeviceGroup[pDeviceGroup->m_dwPK_DeviceGroup]=pDeviceGroup;
 	}
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Security_Plugin::GetConfig get house modes");
 
 	GetHouseModes();
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Security_Plugin::GetConfig stop");
