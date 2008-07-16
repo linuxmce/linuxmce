@@ -26,6 +26,7 @@ public:
 	//load/save data
 	virtual bool Load() = 0;
 	virtual bool Save() = 0;
+	virtual void PluginsLoaded() = 0; // Free up any temporary data the plugins may have needed to load
 
 	//the mutex
 	virtual pluto_pthread_mutex_t& Mutex() = 0;

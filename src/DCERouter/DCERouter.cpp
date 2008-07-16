@@ -442,6 +442,12 @@ Router::~Router()
     delete m_pDatabase_pluto_main;
 #endif
 
+#ifdef EMBEDDED_LMCE
+	dm.Release();  // lock created in DATA_LAYER_LEGACY_CODE
+#endif
+
+	delete m_pDataLayer;
+
 	pthread_mutex_destroy(&m_CoreMutex.mutex);
 	pthread_mutex_destroy(&m_InterceptorMutex.mutex);
 	pthread_mutex_destroy(&m_MessageQueueMutex.mutex);
@@ -1461,6 +1467,14 @@ bool Router::ReceivedString(Socket *pSocket, string Line, int nTimeout/* = -1*/)
             }
             else
             {
+				if( pDevice->m_pMySerializedData==NULL )
+				{
+					pDevice->DeviceData_Impl::SerializeWrite();   // Have each device pre-serialize all it's data
+					pDevice->m_pMySerializedData=pDevice->m_pcDataBlock;  // When we serialize this device's children or parents, this would get overwritten if we didn't make a copy
+					pDevice->m_iConfigSize = (unsigned long) (pDevice->m_pcCurrentPosition-pDevice->m_pcDataBlock);
+					pDevice->m_pcDataBlock=NULL; // So the framework doesn't delete this when we serialize another object in the chain
+				}
+
                 pServerSocket->SendString(string("CONFIG ")+StringUtils::itos((int)pDevice->m_iConfigSize));
                 pServerSocket->SendData(pDevice->m_iConfigSize, pDevice->m_pMySerializedData);
             }
@@ -1870,6 +1884,8 @@ string Message::ToXML()
     RegisterAllPlugins();
     m_bIsLoading=false;
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "Plug-ins loaded");
+	
+	DataLayer()->PluginsLoaded();  // The data layer may have been holding some temporary stuff for the plugins
 
     //TODO keep track of the 'status'..and set it here
 //  if(m_pCorpClient)
@@ -3062,10 +3078,6 @@ void Router::Configure()
     {
         DeviceData_Router *pDevice = (*itDevice).second;
 
-        pDevice->DeviceData_Impl::SerializeWrite();   // Have each device pre-serialize all it's data
-        pDevice->m_pMySerializedData=pDevice->m_pcDataBlock;  // When we serialize this device's children or parents, this would get overwritten if we didn't make a copy
-        pDevice->m_iConfigSize = (unsigned long) (pDevice->m_pcCurrentPosition-pDevice->m_pcDataBlock);
-        pDevice->m_pcDataBlock=NULL; // So the framework doesn't delete this when we serialize another object in the chain
         if( !pDevice->m_pDevice_ControlledVia )
             ParseDevice(DEVICEID_DCEROUTER, DEVICEID_DCEROUTER,pDevice);
     }

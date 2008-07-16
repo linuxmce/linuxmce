@@ -43,9 +43,12 @@ DataLayer_JSON::DataLayer_JSON(void) : m_root_json_obj_Devices(NULL), m_root_jso
 //----------------------------------------------------------------------------------------------
 DataLayer_JSON::~DataLayer_JSON(void)
 {
-	json_object_put(m_root_json_obj_Devices); 
-	json_object_put(m_root_json_obj_NonDevices); 
-	json_object_put(m_root_json_obj_PM); 
+	if( m_root_json_obj_Devices )
+		json_object_put(m_root_json_obj_Devices); 
+	if( m_root_json_obj_NonDevices )
+		json_object_put(m_root_json_obj_NonDevices); 
+	if( m_root_json_obj_PM )
+		json_object_put(m_root_json_obj_PM); 
 
 	pthread_mutexattr_destroy(&m_MutexAttr);
 }
@@ -62,6 +65,26 @@ bool DataLayer_JSON::Load()
 	}
 
 	return false;
+}
+
+//----------------------------------------------------------------------------------------------
+void DataLayer_JSON::PluginsLoaded()
+{
+	if( m_root_json_obj_Devices )
+	{
+		json_object_put(m_root_json_obj_Devices); 
+		m_root_json_obj_Devices=NULL;
+	}
+	if( m_root_json_obj_NonDevices )
+	{
+		json_object_put(m_root_json_obj_NonDevices);
+		m_root_json_obj_NonDevices=NULL;
+	}
+	if( m_root_json_obj_PM )
+	{
+		json_object_put(m_root_json_obj_PM);
+		m_root_json_obj_PM=NULL;
+	}
 }
 //----------------------------------------------------------------------------------------------
 bool DataLayer_JSON::Save()

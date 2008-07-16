@@ -32,6 +32,7 @@ public:
 	//load/save data
 	bool Load();
 	bool Save();
+	virtual void PluginsLoaded(); // Free up the json objects stored in memory so the plugin could load
 
 	pluto_pthread_mutex_t& Mutex() { return m_DataMutex; }
 
@@ -56,6 +57,7 @@ public:
 	DeviceData_Router *CreateDevice(int iPK_DeviceTemplate, string sDescription, string sIP_Address, string sMac_address, int iPK_Device_ControlledVia);
 	void SetDeviceData(int nPK_Device, int nFK_DeviceData, string sValue);
 	void SetDeviceData(DeviceData_Router *pDeviceData_Router, int nFK_DeviceData, string sValue);
+
 
 private:
 
