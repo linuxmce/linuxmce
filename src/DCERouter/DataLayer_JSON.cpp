@@ -70,7 +70,6 @@ bool DataLayer_JSON::Load()
 //----------------------------------------------------------------------------------------------
 void DataLayer_JSON::PluginsLoaded()
 {
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "DataLayer_JSON::PluginsLoaded");
 	if( m_root_json_obj_Devices )
 	{
 		json_object_put(m_root_json_obj_Devices); 
@@ -117,6 +116,8 @@ bool DataLayer_JSON::Save()
 	delete [] pCompressedData;
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "DataLayer_JSON::Save done");
+
+	PluginsLoaded(); // This will delete the newly created objects so we're not holding up the memory
 
 	return true;
 }
@@ -858,7 +859,10 @@ void DataLayer_JSON::SetDeviceData(DeviceData_Router *pDeviceData_Router, int nF
 void DataLayer_JSON::SaveDevicesList()
 {
 	//delete the old node
-	json_object_object_del(m_root_json_obj_Devices, "Device_ids");
+	if( m_root_json_obj_Devices )
+		json_object_object_del(m_root_json_obj_Devices, "Device_ids");
+	else
+		m_root_json_obj_Devices = json_object_new_object();
 
 	//create a new one
 	struct json_object *devices_list_obj = json_object_new_array();
@@ -878,7 +882,10 @@ void DataLayer_JSON::SaveDevicesList()
 void DataLayer_JSON::SaveDevices()
 {
 	//delete the old node
-	json_object_object_del(m_root_json_obj_Devices, "Devices");
+	if( m_root_json_obj_Devices )
+		json_object_object_del(m_root_json_obj_Devices, "Devices");
+	else
+		m_root_json_obj_Devices = json_object_new_object();
 
 	//create a new one
 	struct json_object *devices_obj = json_object_new_object();
