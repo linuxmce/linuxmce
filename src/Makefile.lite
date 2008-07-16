@@ -8,7 +8,7 @@ export SNR_CPPFLAGS SNR_LDFLAGS
 BINS=DCERouter MessageSend pluto-lzo interfeed ANSI-to-HTML Sleep NetworkTest RemoteAssistance
 DEVS=ZWave
 LIBS=Serial SerializeClass PlutoUtils DCE
-Plugins=General_Info_Plugin_Lite Lighting_Plugin_Lite Climate_Plugin_Lite
+Plugins=General_Info_Plugin_Lite Lighting_Plugin_Lite Climate_Plugin_Lite Event_Plugin_Lite Security_Plugin_Lite
 
 all: libs bins
 ifeq ($(ARCH),mipsel)
