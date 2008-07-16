@@ -9,7 +9,7 @@ CXX = g++
 CXXFLAGS = -Wall -fPIC -Os
 CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE $(SNR_CPPFLAGS) -I/usr/include/json
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
-BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
+BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread -ljson
 
 MYNAME = Event_Plugin_Lite
 VERSION = 2.0.0
