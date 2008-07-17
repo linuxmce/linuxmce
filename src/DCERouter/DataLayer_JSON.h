@@ -6,6 +6,7 @@
 #include "DeviceCategory_Data.h"
 #include "Scene_Data.h"
 #include "Room_Data.h"
+#include "AlarmManager.h"
 #include <map>
 
 #define DELAYED_SAVE	1

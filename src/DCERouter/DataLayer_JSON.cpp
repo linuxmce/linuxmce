@@ -99,8 +99,9 @@ bool DataLayer_JSON::Save()
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "DataLayer_JSON::Save starting");
 	PLUTO_SAFETY_LOCK(dm, m_DataMutex);
 	m_bNeedToSave=true;
-	cancel alarm
-	addalarm
+	m_pAlarmManager->CancelAlarmByType(DELAYED_SAVE);
+	m_pAlarmManager->AddRelativeAlarm(2,this,DELAYED_SAVE,NULL);
+	return true;
 }
 
 void DataLayer_JSON::AlarmCallback(int id, void* param)
@@ -112,6 +113,7 @@ void DataLayer_JSON::AlarmCallback(int id, void* param)
 //----------------------------------------------------------------------------------------------
 bool DataLayer_JSON::DoSave()
 {
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "DataLayer_JSON::DoSave starting");
 	PLUTO_SAFETY_LOCK(dm, m_DataMutex);
 	UpdateDevicesTree();
 
