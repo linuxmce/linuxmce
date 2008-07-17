@@ -7,9 +7,12 @@
 #include "Scene_Data.h"
 #include "Room_Data.h"
 #include <map>
+
+#define DELAYED_SAVE	1
 //----------------------------------------------------------------------------------------------
-class DataLayer_JSON : public IDataLayer
+class DataLayer_JSON : public IDataLayer, public AlarmEvent
 {
+	AlarmManager* m_pAlarmManager;
 	int m_dwPK_Device_Largest;
 
 	std::map<int, DeviceData_Router *> m_mapDeviceData_Router;
@@ -24,6 +27,7 @@ class DataLayer_JSON : public IDataLayer
 
 	pluto_pthread_mutex_t m_DataMutex;
 	pthread_mutexattr_t m_MutexAttr;
+	bool m_bNeedToSave;  // Set to true when we have something we need to save.  Do the saving offline in a separate thread for efficiency
 
 public:
 	DataLayer_JSON(void);
@@ -32,6 +36,7 @@ public:
 	//load/save data
 	bool Load();
 	bool Save();
+	bool DoSave();
 	virtual void PluginsLoaded(); // Free up the json objects stored in memory so the plugin could load
 
 	pluto_pthread_mutex_t& Mutex() { return m_DataMutex; }
@@ -85,6 +90,8 @@ private:
 
 	//utils
 	char *GetUncompressedDataFromFile(string sFileName);
+
+	void AlarmCallback(int id, void* param);
 };
 //----------------------------------------------------------------------------------------------
 #endif //__DATA_LAYER_JSON_H__

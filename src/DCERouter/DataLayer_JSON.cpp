@@ -35,14 +35,21 @@ extern "C"
 DataLayer_JSON::DataLayer_JSON(void) : m_root_json_obj_Devices(NULL), m_root_json_obj_NonDevices(NULL), m_root_json_obj_PM(NULL), m_DataMutex("data")
 {
 	m_dwPK_Device_Largest = 0;
+	m_bNeedToSave=false;
 
 	pthread_mutexattr_init(&m_MutexAttr);
 	pthread_mutexattr_settype(&m_MutexAttr, PTHREAD_MUTEX_RECURSIVE_NP);
 	m_DataMutex.Init(&m_MutexAttr);
+
+	m_pAlarmManager = new AlarmManager();
+    m_pAlarmManager->Start(1);      //1 = number of worker threads
 }
 //----------------------------------------------------------------------------------------------
 DataLayer_JSON::~DataLayer_JSON(void)
 {
+	if( m_bNeedToSave )
+		DoSave();
+
 	if( m_root_json_obj_Devices )
 		json_object_put(m_root_json_obj_Devices); 
 	if( m_root_json_obj_NonDevices )
@@ -91,7 +98,21 @@ bool DataLayer_JSON::Save()
 {
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "DataLayer_JSON::Save starting");
 	PLUTO_SAFETY_LOCK(dm, m_DataMutex);
+	m_bNeedToSave=true;
+	cancel alarm
+	addalarm
+}
 
+void DataLayer_JSON::AlarmCallback(int id, void* param)
+{
+	if( id==DELAYED_SAVE )
+		DoSave();
+}
+
+//----------------------------------------------------------------------------------------------
+bool DataLayer_JSON::DoSave()
+{
+	PLUTO_SAFETY_LOCK(dm, m_DataMutex);
 	UpdateDevicesTree();
 
 	SaveDevicesFile();
@@ -119,6 +140,7 @@ bool DataLayer_JSON::Save()
 
 	PluginsLoaded(); // This will delete the newly created objects so we're not holding up the memory
 
+	m_bNeedToSave=false;
 	return true;
 }
 //----------------------------------------------------------------------------------------------
@@ -890,6 +912,7 @@ void DataLayer_JSON::SaveDevices()
 	//create a new one
 	struct json_object *devices_obj = json_object_new_object();
 
+	int iUnassignedDevices=0; // Count of devices with no room
 	for(std::map<int, DeviceData_Router *>::iterator it = m_mapDeviceData_Router.begin(),
 		end = m_mapDeviceData_Router.end(); it != end; ++it)
 	{
@@ -900,6 +923,9 @@ void DataLayer_JSON::SaveDevices()
 			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Device %d is deleted. Skipping... ", pDeviceData_Router->m_dwPK_Device);
 			continue;
 		}
+
+		if( pDeviceData_Router->m_dwPK_Room==0 )
+			iUnassignedDevices++;
 
         struct json_object *device_obj = json_object_new_object();
 
@@ -944,6 +970,8 @@ void DataLayer_JSON::SaveDevices()
 		string sNodeName = "PK_Device_" + StringUtils::ltos(pDeviceData_Router->m_dwPK_Device);
 		json_object_object_add(devices_obj, const_cast<char *>(sNodeName.c_str()), device_obj);
 	}
+
+	ADD_STRING_CHILD(m_root_json_obj_Devices, "UnassignedDevices", StringUtils::itos(iUnassignedDevices));
 
 	//add it to root node
 	json_object_object_add(m_root_json_obj_Devices, "Device", devices_obj);
