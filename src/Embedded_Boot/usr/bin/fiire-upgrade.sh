@@ -29,7 +29,7 @@ tar zcf /tmp/backup.tar.gz /etc/pluto /etc/config /etc/fiire-ra
 # Flash new image
 log "Started flashing new image."
 echo " `date` ==fu== Started flashing new image." >> $upgrade_log
-echo " `date` ==fu== Free space available = `free | tr -s ' ' | tail -1 | cut -d" " -f 4` " >> $upgrade_log
+echo " `date` ==fu== Free space available = `cat /proc/meminfo | grep "MemFree" | tr -s ' ' | cut -d " " -f 2` " >> $upgrade_log
 
 cd /tmp
 mtd write /tmp/firmware.img linux
