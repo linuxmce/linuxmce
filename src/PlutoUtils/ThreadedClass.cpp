@@ -118,6 +118,5 @@ void ThreadedClass::InternalRun()
 
 void ThreadedClass::BroadcastCond()
 { 
-	LoggerWrapper::GetInstance()->Write(LV_SOCKET,"ThreadedClass::BroadcastCond");
 	pthread_cond_broadcast( &m_ThreadCondition );
 }

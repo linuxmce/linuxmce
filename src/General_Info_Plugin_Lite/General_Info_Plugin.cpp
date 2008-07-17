@@ -1075,7 +1075,7 @@ bool General_Info_Plugin::DeviceDetected( class Socket *pSocket, class Message *
 {
 	string sDeviceData = pMessage->m_mapParameters[EVENTPARAMETER_DeviceData_CONST];
 	string sIPAddress = pMessage->m_mapParameters[EVENTPARAMETER_IP_Address_CONST];
-	string sMacAddress = pMessage->m_mapParameters[EVENTPARAMETER_Mac_Address_CONST];
+	string sMacAddress = StringUtils::ToUpper(pMessage->m_mapParameters[EVENTPARAMETER_Mac_Address_CONST]);
 	int nPK_DeviceTemplate = atoi(pMessage->m_mapParameters[EVENTPARAMETER_PK_DeviceTemplate_CONST].c_str());
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device detected: template id %d, ip %s, mac %s, device data %s",
@@ -1090,7 +1090,7 @@ bool General_Info_Plugin::DeviceDetected( class Socket *pSocket, class Message *
 	{
 		DeviceData_Router *pDeviceData_Router = *it;
 
-		if(pDeviceData_Router->m_sMacAddress == sMacAddress)
+		if( pDeviceData_Router->m_sMacAddress == sMacAddress)
 		{
 			bDeviceExists = true;
 
