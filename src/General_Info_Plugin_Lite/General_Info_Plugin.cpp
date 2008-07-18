@@ -921,9 +921,9 @@ void General_Info_Plugin::ReportingChildDevices_Offline( void *pVoid )
 
 	delete pChildDeviceProcessing;
 
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::ReportingChildDevices %d new and %d removed devices", iNewDevices, iRemovedDevices);
 	if( iNewDevices || iRemovedDevices )
 	{
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::ReportingChildDevices reloading because of %d new and %d removed devices", iNewDevices, iRemovedDevices);
 		Message *pMessage = new Message( m_dwPK_Device, DEVICEID_DCEROUTER, PRIORITY_NORMAL, MESSAGETYPE_SYSCOMMAND, SYSCOMMAND_RELOAD, 0 );
 		QueueMessageToRouter( pMessage );
 	}
