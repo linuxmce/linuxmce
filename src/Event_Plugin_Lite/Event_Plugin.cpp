@@ -110,9 +110,11 @@ bool Event_Plugin::GetConfig()
 				ParseEvents(iter.val);
 		}
 	}
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p2");
 
 	m_pAlarmManager = new AlarmManager();
     m_pAlarmManager->Start(2);      //4 = number of worker threads
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p3");
 /*
 	PLUTO_SAFETY_LOCK(em,m_EventMutex);
 	m_fLongitude = DATA_Get_Longitude();
@@ -503,11 +505,13 @@ void Event_Plugin::ExecuteEvent(EventInstance *pEventInstance)
 void Event_Plugin::SetNextTimedEventCallback()
 {
 	PLUTO_SAFETY_LOCK(em,m_EventMutex);
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p4");
 	if( m_mapTimedEvent.size()==0 )
 	{
 		m_pTimedEvent_Next=NULL;
 		return;
 	}
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p5");
 
 	m_pTimedEvent_Next=NULL;
 	for(MapTimedEvent::iterator it=m_mapTimedEvent.begin();it!=m_mapTimedEvent.end();++it)
@@ -522,6 +526,7 @@ void Event_Plugin::SetNextTimedEventCallback()
 		if( pTimedEvent->m_tTime < m_pTimedEvent_Next->m_tTime )
 			m_pTimedEvent_Next = pTimedEvent;
 	}
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p6");
 
 	if( m_pTimedEvent_Next )
 	{
@@ -530,6 +535,7 @@ void Event_Plugin::SetNextTimedEventCallback()
 			m_pTimedEvent_Next->m_sDescription.c_str(),
 			m_pTimedEvent_Next->m_tTime - time(NULL));
 	}
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p7");
 }
 
 void Event_Plugin::AlarmCallback(int id, void* param)
