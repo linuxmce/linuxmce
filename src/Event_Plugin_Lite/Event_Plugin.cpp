@@ -153,6 +153,8 @@ void Event_Plugin::ParseTimers(struct json_object *json_obj)
 #ifdef DEBUG
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Adding timed event %d",nTimerID);
 #endif
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"p17");
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"p18 %d", (int) pTimedEvent->m_mapCommands.size() );
 		if( pTimedEvent->m_mapCommands.empty() )
 		{
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Timed event %d has no commands",nTimerID);
