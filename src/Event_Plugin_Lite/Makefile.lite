@@ -30,7 +30,7 @@ XTRALDLIBS =
 
 Gen_Dev_Files += 
 sources += Criteria.cpp  CriteriaParmNesting.cpp \
-	Criteria_EvaluateExpression.cpp TimedEvent.cpp sunrise.cpp
+	Criteria_EvaluateExpression.cpp TimedEvent.cpp sunrise.cpp EventHandler.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)

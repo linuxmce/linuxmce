@@ -30,25 +30,21 @@
 
 EventHandler::EventHandler(unsigned long PK_EventHander,Event_Plugin *pEvent_Plugin,struct json_object *json_obj)
 {
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p22");
 	m_pEvent_Plugin=pEvent_Plugin;
 	m_tLastFired=0;
 	m_PK_EventHander = PK_EventHander;
 	m_bDisabled=false;
 	m_OncePerSeconds=0;
 	m_PK_CannedEvents = m_PK_Event = 0;
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p23");
 
 	struct json_object_iter iter_sceneparams;
 	json_object_object_foreachC(json_obj, iter_sceneparams)
 	{
 		string sKey = iter_sceneparams.key;
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p24 %s", sKey.c_str());
 
 		if(iter_sceneparams.val->o_type == json_type_int || iter_sceneparams.val->o_type == json_type_string)
 		{
 			string sValue = json_object_get_string(iter_sceneparams.val);
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p25 %s", sValue.c_str());
 
 			if(sKey == "Description")
 			{
@@ -69,16 +65,13 @@ LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p25 %s", sValue.c_str());
 		}
 		else if(sKey == "commands" && iter_sceneparams.val->o_type == json_type_object)
 		{
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p26");
 			m_pEvent_Plugin->ParseCommands(m_mapCommands, iter_sceneparams.val);
 		}
 		else if(sKey == "Criteria" && iter_sceneparams.val->o_type == json_type_object)
 		{
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p27");
 			ParseCriteria(iter_sceneparams.val);
 		}
 	}
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p28");
 
 	CannedEvent *pCannedEvent = m_pEvent_Plugin->m_mapCannedEvents_Find(m_PK_CannedEvents);
 	if( pCannedEvent!=NULL )
@@ -89,21 +82,17 @@ LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p28");
 		m_pCriteria->m_pCriteriaParmNesting->m_bAnd = pCannedEvent->m_bIsAnd;
 		m_pCriteria->m_pCriteriaParmNesting->m_bNot = pCannedEvent->m_bIsNot;
 	}
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p29");
 }
 
 void EventHandler::ParseCriteria(struct json_object *json_obj)
 {
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p30");
 	CriteriaParmNesting *pCriteriaParmNesting = new CriteriaParmNesting(false,true);
 	m_pCriteria = new Criteria(1,pCriteriaParmNesting);
 
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p31");
 	struct json_object_iter iter_criteriaparams;
 	json_object_object_foreachC(json_obj, iter_criteriaparams)
 	{
 		string sKey = iter_criteriaparams.key;
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p32 %s", sKey.c_str());
 
 		if(StringUtils::StartsWith(sKey,"param_") && iter_criteriaparams.val->o_type == json_type_object)
 		{
@@ -115,7 +104,6 @@ LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p32 %s", sKey.c_str());
 			json_object_object_foreachC(iter_criteriaparams.val, iter_criteriaparams_2)
 			{
 				string sKey_2 = iter_criteriaparams_2.key;
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p33 %s", sKey_2.c_str());
 
 				if(sKey_2=="PK_CriteriaParmList" && (iter_criteriaparams_2.val->o_type == json_type_int || iter_criteriaparams_2.val->o_type == json_type_string) )
 					PK_CriteriaParmList =json_object_get_int(iter_criteriaparams_2.val);
@@ -128,16 +116,13 @@ LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p33 %s", sKey_2.c_str());
 				else if( sKey_2=="Value" && (iter_criteriaparams_2.val->o_type == json_type_int || iter_criteriaparams_2.val->o_type == json_type_string) )
 					sValue = json_object_get_string(iter_criteriaparams_2.val);
 			}
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p35");
 
 			CriteriaParm *pCriteriaParm = new CriteriaParm(
 					1 /*pRow_CriteriaParm->PK_CriteriaParm_get() */,PK_CriteriaParmList,
 					PK_ParameterType==0 ? m_pEvent_Plugin->m_mapCriteriaParmList_ParameterType_Find(PK_CriteriaParmList) : PK_ParameterType,Operator,
 					sValue,sParm);
 
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p36");
 			pCriteriaParmNesting->m_vectCriteriaParm.push_back( pCriteriaParm );
 		}
 	}
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p37");
 }

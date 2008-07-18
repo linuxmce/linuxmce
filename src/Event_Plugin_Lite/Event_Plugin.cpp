@@ -103,7 +103,6 @@ bool Event_Plugin::GetConfig()
 		json_object_object_foreachC(pDataLayer_JSON->m_root_json_obj_NonDevices_get(), iter) 
 		{
 			string sValue = iter.key;
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p10 %s", sValue.c_str());
 
 			if(sValue == "Timer")
 				ParseTimers(iter.val);
@@ -111,11 +110,9 @@ LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p10 %s", sValue.c_str());
 				ParseEvents(iter.val);
 		}
 	}
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p2");
 
 	m_pAlarmManager = new AlarmManager();
     m_pAlarmManager->Start(2);      //4 = number of worker threads
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p3");
 /*
 	PLUTO_SAFETY_LOCK(em,m_EventMutex);
 	m_fLongitude = DATA_Get_Longitude();
@@ -153,19 +150,13 @@ void Event_Plugin::ParseTimers(struct json_object *json_obj)
 #ifdef DEBUG
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Adding timed event %d",nTimerID);
 #endif
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"p17");
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"p18 %d", (int) pTimedEvent->m_mapCommands.size() );
 		if( pTimedEvent->m_mapCommands.empty() )
 		{
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Timed event %d has no commands",nTimerID);
 			delete pTimedEvent;
 		}
 		else
-		{
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p8");
 			m_mapTimedEvent[pTimedEvent->m_ID] = pTimedEvent;
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p9");
-		}
 	}
 }
 
@@ -233,13 +224,11 @@ void Event_Plugin::ParseCriteriaParmList(struct json_object *json_obj)
 
 void Event_Plugin::ParseEvents(struct json_object *json_obj)
 {
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p11");
 	struct json_object *obj_events = json_obj;
 	struct json_object_iter iter_events;
 	json_object_object_foreachC(obj_events, iter_events) 
 	{
 		string sEventID = iter_events.key;
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p12 %s", sEventID.c_str());
 
 		StringUtils::Replace(&sEventID, "PK_Event_", "");
 		int nEventID = atoi(sEventID.c_str());
@@ -253,15 +242,12 @@ LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p12 %s", sEventID.c_str());
 		}
 		else
 		{
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p13");
 			ListEventHandler *pListEventHandler = m_mapListEventHandler_Find(pEventHandler->m_PK_Event);
 			if( !pListEventHandler )
 			{
 				pListEventHandler = new ListEventHandler();
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p15");
   				m_mapListEventHandler[pEventHandler->m_PK_Event] = pListEventHandler;
 			}
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p14");
 			pListEventHandler->push_back(pEventHandler);
 		}
 	}
@@ -517,13 +503,11 @@ void Event_Plugin::ExecuteEvent(EventInstance *pEventInstance)
 void Event_Plugin::SetNextTimedEventCallback()
 {
 	PLUTO_SAFETY_LOCK(em,m_EventMutex);
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p4");
 	if( m_mapTimedEvent.size()==0 )
 	{
 		m_pTimedEvent_Next=NULL;
 		return;
 	}
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p5");
 
 	m_pTimedEvent_Next=NULL;
 	for(MapTimedEvent::iterator it=m_mapTimedEvent.begin();it!=m_mapTimedEvent.end();++it)
@@ -538,7 +522,6 @@ LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p5");
 		if( pTimedEvent->m_tTime < m_pTimedEvent_Next->m_tTime )
 			m_pTimedEvent_Next = pTimedEvent;
 	}
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p6");
 
 	if( m_pTimedEvent_Next )
 	{
@@ -547,7 +530,6 @@ LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p6");
 			m_pTimedEvent_Next->m_sDescription.c_str(),
 			m_pTimedEvent_Next->m_tTime - time(NULL));
 	}
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p7");
 }
 
 void Event_Plugin::AlarmCallback(int id, void* param)
