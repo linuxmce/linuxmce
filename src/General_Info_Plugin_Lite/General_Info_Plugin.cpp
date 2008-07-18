@@ -988,7 +988,13 @@ DeviceData_Router *General_Info_Plugin::ProcessChildDevice(int nPK_Device, strin
 		if(!sDescription.empty())
 			pDeviceData_Router->m_sDescription = sDescription;
 		else
-			pDeviceData_Router->m_sDescription = sInternalID;
+		{
+			DeviceTemplate_Data *pDeviceTemplate_Data = m_pRouter->DataLayer()->DeviceTemplate(pDeviceData_Router->m_dwPK_DeviceTemplate);
+			if(pDeviceTemplate_Data)
+				pDeviceData_Router->m_sDescription = pDeviceTemplate_Data->Description();
+			else
+				pDeviceData_Router->m_sDescription = sInternalID;
+		}
 	}
 	else if(bNewDevice)
 	{
@@ -1152,6 +1158,9 @@ bool General_Info_Plugin::DeviceDetected( class Socket *pSocket, class Message *
 
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Device created: %d", nPK_Device);
 		m_pRouter->DataLayer()->Save();
+
+		Message *pMessage = new Message( m_dwPK_Device, DEVICEID_DCEROUTER, PRIORITY_NORMAL, MESSAGETYPE_SYSCOMMAND, SYSCOMMAND_RELOAD, 0 );
+		QueueMessageToRouter( pMessage );
 	}
 
 	return false;
