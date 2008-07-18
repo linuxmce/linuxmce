@@ -26,17 +26,26 @@ InitPipes()
 }
 
 PortForwarding() {
-	while :; do
-		ssh -T -y -i "$SSH_KEY_FILE" -R "$PORT:localhost:80" "$SSHConnectionData" <"$PipeSend" >"$PipeRecv" &
-		SSHPID=$!
-		exec 8>"$PipeSend" 9<"$PipeRecv"
+	ssh -T -y -i "$SSH_KEY_FILE" -R "$PORT:localhost:80" -L "8081:localhost:80" "$SSHConnectionData" <"$PipeSend" >"$PipeRecv" &
+	SSHPID=$!
+	exec 8>"$PipeSend" 9<"$PipeRecv"
 
-		echo "$USERNAME $PASSWORD_MD5" >&8
+	echo "$USERNAME $PASSWORD_MD5" >&8
 
-		wait "$SSHPID"
-		exec 8>&- 9<&-
-		log "Connection to fiire server failed, will retry in 60 seconds."
-		sleep 60
+	wait "$SSHPID"
+	exec 8>&- 9<&-
+}
+
+TunelChecking () {
+	while : ;do
+		sleep 30;
+		curl "http://localhost:8081/index.php"
+		exit_code=$?
+
+		if [[ "$exit_code" != "0" ]] ;then
+			log "Tunnel is down, will try to restart it now"
+			/etc/init.d/fiire-ra restart
+		fi
 	done
 }
 
@@ -83,4 +92,5 @@ exec 0</dev/null
 exec 1>/dev/null
 exec 2>/dev/null
 PortForwarding &
+TunelChecking &
 echo $! > "$PID_FILE"
