@@ -103,6 +103,7 @@ bool Event_Plugin::GetConfig()
 		json_object_object_foreachC(pDataLayer_JSON->m_root_json_obj_NonDevices_get(), iter) 
 		{
 			string sValue = iter.key;
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p10 %s", sValue.c_str());
 
 			if(sValue == "Timer")
 				ParseTimers(iter.val);
@@ -158,7 +159,11 @@ void Event_Plugin::ParseTimers(struct json_object *json_obj)
 			delete pTimedEvent;
 		}
 		else
+		{
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p8");
 			m_mapTimedEvent[pTimedEvent->m_ID] = pTimedEvent;
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p9");
+		}
 	}
 }
 
@@ -226,11 +231,13 @@ void Event_Plugin::ParseCriteriaParmList(struct json_object *json_obj)
 
 void Event_Plugin::ParseEvents(struct json_object *json_obj)
 {
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p11");
 	struct json_object *obj_events = json_obj;
 	struct json_object_iter iter_events;
 	json_object_object_foreachC(obj_events, iter_events) 
 	{
 		string sEventID = iter_events.key;
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p12 %s", sEventID.c_str());
 
 		StringUtils::Replace(&sEventID, "PK_Event_", "");
 		int nEventID = atoi(sEventID.c_str());
@@ -244,12 +251,15 @@ void Event_Plugin::ParseEvents(struct json_object *json_obj)
 		}
 		else
 		{
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p13");
 			ListEventHandler *pListEventHandler = m_mapListEventHandler_Find(pEventHandler->m_PK_Event);
 			if( !pListEventHandler )
 			{
 				pListEventHandler = new ListEventHandler();
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p15");
   				m_mapListEventHandler[pEventHandler->m_PK_Event] = pListEventHandler;
 			}
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"p14");
 			pListEventHandler->push_back(pEventHandler);
 		}
 	}
