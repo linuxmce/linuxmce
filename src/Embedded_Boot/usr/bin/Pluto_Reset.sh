@@ -7,10 +7,23 @@ touch /tmp/.reset-pluto
 
 mkdir -p /etc/pluto/save/
 cp /etc/pluto/* /etc/pluto/save/
+cp /etc/httpd.conf /etc/pluto/save/
+mv /etc/TZ /etc/TZ-full
 cp /etc/pluto/orig/* /etc/pluto/
+sed -i '1,9!d' /etc/httpd.conf
 
 uci set network.wan.proto=dhcp
 uci set network.wan.ifname=eth0.1
+
+Cfg=$(uci show wireless|grep device=wl0|cut -d. -f2)
+uci set wireless.wl0.disabled=1
+uci set wireless.wl0.channel=5
+uci set wireless.$Cfg.network="lan"
+uci set wireless.$Cfg.mode="ap"
+uci set wireless.$Cfg.hidden=1
+uci set wireless.$Cfg.ssid="HomeControl"
+uci set wireless.$Cfg.encryption="none"
+
 
 Model=$(cat /proc/diag/model)
 case "$Model" in
