@@ -76,10 +76,23 @@ public class Scenarios
 
                 int nPipeIndex = sLine.indexOf("|");
                 String sID = sLine.substring(0, nPipeIndex);
-                String sName = sLine.substring(nPipeIndex + 1, sLine.length());
                 int nID = Integer.parseInt(sID);
+                
+                String sRoom = "Unknown room";  
+                String sName = "";
 
-                CommandGroup currentCommandGroup = new CommandGroup(nID, 1, 1, sName, "");
+                int nPipeIndexName = sLine.indexOf("|", nPipeIndex + 1);
+                if(nPipeIndexName != -1)
+                {
+                    sName = sLine.substring(nPipeIndex + 1, nPipeIndexName);
+                    sRoom = sLine.substring(nPipeIndexName + 1, sLine.length());
+                }
+                else
+                {
+                    sName = sLine.substring(nPipeIndex + 1, sLine.length());
+                }                  
+
+                CommandGroup currentCommandGroup = new CommandGroup(nID, 1, 1, sName, sRoom);
                 m_mapCommandGroups.put(nID, currentCommandGroup);                
                 
                 System.out.println("Added scenario: " + nID + " - " + sName);

@@ -33,7 +33,7 @@ public class PlutoProxy
 	private final static int DEVICETEMPLATE_General_Info_Plugin_CONST = 27;
 	
 	//virtual devices
-	private final static int VIRTUALDEVICE_DCEROUTER_CONST = -1000;
+	//private final static int VIRTUALDEVICE_DCEROUTER_CONST = -1000;
 	
 	//commands
 	private final static int COMMAND_Request_XML_Data_CONST = 869;
@@ -138,15 +138,32 @@ public class PlutoProxy
 		
 		if(m_comm.IsConnected())
 		{
+			/*
 			Message message = new Message(
-				  m_nOrbiterDeviceID,  //from 
-				  VIRTUALDEVICE_DCEROUTER_CONST, //to
+					m_nPVRDeviceID,  //from 
+				  2, //to
 				  Message.MessagePriority.PRIORITY_NORMAL, 
 				  Message.MessageType.MESSAGETYPE_EXEC_COMMAND_GROUP, 
 				  nCommandGroupID //message id
 			);
+			message.TargetType(Message.MessageTargetType.TT_Device, "");
 			message.Write();
 			m_comm.EventHandler().SendMessage(message);
+			*/
+			
+			if(m_comm.IsConnected())
+			{
+				Message message = new Message(
+					  m_nPVRDeviceID,  //from 
+					  2, 
+					  Message.MessagePriority.PRIORITY_NORMAL, 
+					  Message.MessageType.MESSAGETYPE_EXEC_COMMAND_GROUP, 
+					  nCommandGroupID //message id
+				);
+				message.TargetType(Message.MessageTargetType.TT_Device, "");
+				message.Write();
+				m_comm.EventHandler().SendMessage(message);
+			}
 		}
 	}
 	
