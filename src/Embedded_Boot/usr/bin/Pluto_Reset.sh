@@ -20,7 +20,7 @@ uci set wireless.wl0.disabled=1
 uci set wireless.wl0.channel=5
 uci set wireless.$Cfg.network="lan"
 uci set wireless.$Cfg.mode="ap"
-uci set wireless.$Cfg.hidden=1
+uci set wireless.$Cfg.hidden=0
 uci set wireless.$Cfg.ssid="HomeControl"
 uci set wireless.$Cfg.encryption="none"
 
