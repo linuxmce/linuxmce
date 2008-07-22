@@ -914,7 +914,9 @@ void DataLayer_JSON::SaveDevices()
 	//create a new one
 	struct json_object *devices_obj = json_object_new_object();
 
+	int PK_Device_ZWave=0;
 	int iUnassignedDevices=0; // Count of devices with no room
+	int iAutomationDevices=0; // Count of devices that are a child of the automation system
 	for(std::map<int, DeviceData_Router *>::iterator it = m_mapDeviceData_Router.begin(),
 		end = m_mapDeviceData_Router.end(); it != end; ++it)
 	{
@@ -926,8 +928,16 @@ void DataLayer_JSON::SaveDevices()
 			continue;
 		}
 
+		/*
+			Nasty temporary hack.  Vali needs the total number of ZWave devices.  Make this general */
+
+		if( pDeviceData_Router->m_dwPK_DeviceTemplate==1754 )
+			PK_Device_ZWave=pDeviceData_Router->m_dwPK_Device;
+		if( PK_Device_ZWave && pDeviceData_Router->m_dwPK_Device_ControlledVia==PK_Device_ZWave && pDeviceData_Router->m_dwPK_DeviceTemplate!=1945 )
+			iAutomationDevices++;
+
 		if( pDeviceData_Router->m_dwPK_Room==0 )
-			iUnassignedDevices++;
+			iUnassignedDevices++; 
 
         struct json_object *device_obj = json_object_new_object();
 
@@ -974,6 +984,7 @@ void DataLayer_JSON::SaveDevices()
 	}
 
 	ADD_STRING_CHILD(m_root_json_obj_Devices, "UnassignedDevices", StringUtils::itos(iUnassignedDevices));
+	ADD_STRING_CHILD(m_root_json_obj_Devices, "AutomationDevices", StringUtils::itos(iAutomationDevices));
 
 	//add it to root node
 	json_object_object_add(m_root_json_obj_Devices, "Device", devices_obj);
