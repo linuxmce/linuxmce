@@ -5251,14 +5251,14 @@
 		"PK_DeviceTemplate_1868": {
 			"Description":"XML Data Handler Plugin",
 			"FK_DeviceCategory":"169",
-			"ImplementsDCE":"0",
+			"ImplementsDCE":"1",
 			"IsEmbedded":"1",
 			"CommandLine":""
 		},
 		"PK_DeviceTemplate_1869": {
 			"Description":"Basic XML Data Source Plugin",
 			"FK_DeviceCategory":"170",
-			"ImplementsDCE":"0",
+			"ImplementsDCE":"1",
 			"IsEmbedded":"1",
 			"CommandLine":""
 		},				
