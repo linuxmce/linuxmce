@@ -2174,7 +2174,7 @@
 		}
 	}
 	,
-	"DeviceCategory_ids":[1,83,7,61,68,67,70,73,140,99,84,81,82,80,117],
+	"DeviceCategory_ids":[1,83,7,61,68,67,70,73,140,99,84,81,82,80,117,169,170],
 	"DeviceCategory":{
 		"PK_DeviceCategory_1": {
 			"FK_DeviceCategory_Parent":"",
@@ -2235,7 +2235,15 @@
 		"PK_DeviceCategory_117": {
 			"FK_DeviceCategory_Parent":"57",
 			"Description":"Remote Controls"
-		}
+		},
+		"PK_DeviceCategory_169": {
+			"FK_DeviceCategory_Parent":"9",
+			"Description":"XML Data Handler Plugins"
+		},
+		"PK_DeviceCategory_170": {
+			"FK_DeviceCategory_Parent":"9",
+			"Description":"XML Data Source Plugins"
+		}		
 	}
 	,
 	"DeviceCommandGroup_ids":[12,17,21,24,28,29,31,36,62,72,76,80,85,94],
@@ -5070,7 +5078,7 @@
 		}
 	}
 	,
-	"DeviceTemplate_ids":[1,4,7,27,31,32,33,37,38,47,50,52,54,56,68,1599,1600,1633,1744,1745,1754,1773,1813,1820,1922,1945],
+	"DeviceTemplate_ids":[1,4,7,27,31,32,33,37,38,47,50,52,54,56,68,1599,1600,1633,1744,1745,1754,1773,1813,1820,1868,1869,1922,1945],
 	"DeviceTemplate":{
 		"PK_DeviceTemplate_1": {
 			"Description":"DCERouter",
