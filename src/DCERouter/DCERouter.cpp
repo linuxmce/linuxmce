@@ -540,7 +540,9 @@ void Router::RegisterAllPlugins()
 			iPK_DeviceTemplate != DEVICETEMPLATE_Lighting_Plugin_CONST &&
 			iPK_DeviceTemplate != DEVICETEMPLATE_Climate_Plugin_CONST &&
 			iPK_DeviceTemplate != DEVICETEMPLATE_Security_Plugin_CONST &&
-			iPK_DeviceTemplate != DEVICETEMPLATE_Event_Plugin_CONST
+			iPK_DeviceTemplate != DEVICETEMPLATE_Event_Plugin_CONST &&
+			iPK_DeviceTemplate != DEVICETEMPLATE_Basic_XML_Data_Source_Plugin_CONST &&
+			iPK_DeviceTemplate != DEVICETEMPLATE_XML_Data_Handler_Plugin_CONST
 		)
 			continue;
 

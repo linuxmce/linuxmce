@@ -673,7 +673,7 @@ void DataLayer_JSON::ParseScenes(struct json_object *json_obj)
 				}
 				else if(sKey == "FK_Room")
 				{
-					//TODO : use it
+					scene_data.RoomID(atoi(sValue.c_str()));
 				}
 			}
 			else if(sKey == "commands" && iter_sceneparams.val->o_type == json_type_object)
@@ -803,6 +803,11 @@ Scene_Data* DataLayer_JSON::Scene(int nSceneID)
 	}
 
 	return NULL;
+}
+//----------------------------------------------------------------------------------------------
+const std::map<int, Scene_Data>& DataLayer_JSON::Scenes()
+{
+	return m_mapScene_Data;
 }
 //----------------------------------------------------------------------------------------------
 DeviceTemplate_Data* DataLayer_JSON::DeviceTemplate(int nPK_DeviceTemplate)

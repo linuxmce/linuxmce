@@ -52,6 +52,9 @@ public:
 	Scene_Data* Scene(int nSceneID);
 	DeviceTemplate_Data* DeviceTemplate(int nPK_DeviceTemplate);
 
+	//get scenes
+	const std::map<int, Scene_Data>& Scenes();
+
 	//queries for devices
 	int LargestDeviceNumber();
 	DeviceData_Router *ChildMatchingDeviceData(int nPK_Device_Parent, int nFK_DeviceData, string sValue);

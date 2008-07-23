@@ -34,6 +34,9 @@ public:
 	//get devices
 	virtual std::map<int, DeviceData_Router *>& Devices() = 0;
 
+	//get scenes
+	virtual const std::map<int, Scene_Data>& Scenes() = 0;
+
 	//queries for scenes and device templates
 	virtual Scene_Data* Scene(int nSceneID) = 0;
 	virtual DeviceTemplate_Data* DeviceTemplate(int nPK_DeviceTemplate) = 0;
