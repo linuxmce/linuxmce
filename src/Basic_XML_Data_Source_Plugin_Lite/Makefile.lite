@@ -19,8 +19,12 @@ Gen_Dev_Files = $(GENDEV)/Basic_XML_Data_Source_PluginBase.cpp
 sources = Main.cpp Basic_XML_Data_Source_Plugin.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
+ifeq ($(ARCH),mipsel)
+        CXX=mipsel-linux-g++
+endif
+
 CXXFLAGS +=
-CPPFLAGS += -I/usr/include/libxml2/
+CPPFLAGS += -I/usr/include/libxml2/ -DEMBEDDED_LMCE -DDEBUG
 LDFLAGS += -lxml2
 XTRALDLIBS =
 
