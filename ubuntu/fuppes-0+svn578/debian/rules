@@ -13,9 +13,11 @@ else
 	CFLAGS += -O2
 endif
 
-config.status: configure
+include /usr/share/dpatch/dpatch.make
+
+configure: configure-stamp
+configure-stamp: patch-stamp
 	dh_testdir
-	# Add here commands to configure the package.
 ifneq "$(wildcard /usr/share/misc/config.sub)" ""
 	cp -f /usr/share/misc/config.sub config.sub
 endif
@@ -23,11 +25,10 @@ ifneq "$(wildcard /usr/share/misc/config.guess)" ""
 	cp -f /usr/share/misc/config.guess config.guess
 endif
 	./configure --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info
+	touch $@
 
-
-build: build-stamp
-
-build-stamp:  config.status
+build: configure-stamp build-stamp
+build-stamp:
 	dh_testdir
 
 	# Add here commands to compile the package.
@@ -36,7 +37,7 @@ build-stamp:  config.status
 
 	touch $@
 
-clean:
+clean: unpatch
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp 
