@@ -768,6 +768,7 @@ xserver-xorg-video-vga
 xserver-xorg-video-via
 xserver-xorg-video-vmware
 xserver-xorg-video-voodoo
+xserver-xorg-video-intel
 xterm
 xtrans-dev
 xulrunner-1.9

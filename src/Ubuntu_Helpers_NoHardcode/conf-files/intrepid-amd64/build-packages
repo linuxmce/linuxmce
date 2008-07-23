@@ -66,7 +66,10 @@ libdvb-dev
 libdvdnav-dev
 libdvdread-dev
 libesd0-dev
+libfaac-dev
+libfaac0
 libfaad-dev
+libfftw3-dev
 libflac-dev
 libfuse-dev
 libgl1-mesa-dev
@@ -125,6 +128,8 @@ libusb-dev
 libvte-dev
 libwavpack-dev
 libx11-dev
+libx264-59
+libx264-dev
 libxcb-shape0-dev
 libxcb-shm0-dev
 libxcb-xv0-dev
@@ -135,6 +140,8 @@ libxrender-dev
 libxt-dev
 libxtst-dev
 libxv-dev
+libxvidcore4
+libxvidcore4-dev
 libxvmc-dev
 libxxf86vm-dev
 linux-headers-2.6.26-2-generic
