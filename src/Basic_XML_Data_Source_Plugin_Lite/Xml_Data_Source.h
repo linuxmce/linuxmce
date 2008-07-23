@@ -37,7 +37,7 @@ namespace DCE
 	// DeviceList Lists all the devices in the system, including all rooms, device templates and device categories with devices
 	class DeviceList : public XML_Data_Source_Base
 	{
-		Database_pluto_main *m_pDatabase_pluto_main;
+		//Database_pluto_main *m_pDatabase_pluto_main;
 		XML_Data_InstantiationInfo_Basic *m_pXML_Data_InstantiationInfo_Basic;
 	public:
 		DeviceList(XML_Data_InstantiationInfo_Basic *pXML_Data_InstantiationInfo_Basic) { m_pXML_Data_InstantiationInfo_Basic=pXML_Data_InstantiationInfo_Basic; /*m_pDatabase_pluto_main=m_pXML_Data_InstantiationInfo_Basic->m_pDatabase_pluto_main;*/ }
@@ -50,7 +50,7 @@ namespace DCE
 	// CommandGroupList Lists all the command groups in the system by room, including all rooms, and arrays (ie command group categories)
 	class CommandGroupList : public XML_Data_Source_Base
 	{
-		Database_pluto_main *m_pDatabase_pluto_main;
+		//Database_pluto_main *m_pDatabase_pluto_main;
 		XML_Data_InstantiationInfo_Basic *m_pXML_Data_InstantiationInfo_Basic;
 	public:
 		CommandGroupList(XML_Data_InstantiationInfo_Basic *pXML_Data_InstantiationInfo_Basic) { m_pXML_Data_InstantiationInfo_Basic=pXML_Data_InstantiationInfo_Basic; /*m_pDatabase_pluto_main=m_pXML_Data_InstantiationInfo_Basic->m_pDatabase_pluto_main;*/ }
