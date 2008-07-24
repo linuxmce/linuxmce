@@ -8,9 +8,18 @@ touch /tmp/.reset-pluto
 mkdir -p /etc/pluto/save/
 cp /etc/pluto/* /etc/pluto/save/
 cp /etc/httpd.conf /etc/pluto/save/
-mv /etc/TZ /etc/TZ-full
+mv /etc/TZ /etc/TZ-full /etc/pluto/save/
 cp /etc/pluto/orig/* /etc/pluto/
-sed -i '1,9!d' /etc/httpd.conf
+cp /etc/pluto.conf /etc/pluto/save/
+
+rm -rf /etc/fiire-ra
+rm -f /etc/pluto/ra_password /etc/pluto/ra_ports
+rm -f /etc/pluto/pluto.json.lzo.1  /etc/pluto/pluto.json.lzo.2
+
+
+sed -ir '/^\/(cgi-bin|cisco)\/*/d' /etc/httpd.conf
+passwd -d root
+sed -i 's/^root:/root:!/' /etc/passwd
 
 uci set network.wan.proto=dhcp
 uci set network.wan.ifname=eth0.1
