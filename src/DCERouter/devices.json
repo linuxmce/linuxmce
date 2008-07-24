@@ -123,6 +123,38 @@
             } 
         },              
         "PK_Device_8": {
+            "Description": "XML Data Handler Plugin",
+            "FK_DeviceTemplate": "1868",
+            "FK_Room": "1",
+            "FK_Device_ControlledVia": "2",
+            "DeviceData": {
+            },
+            "params": {
+                "IPaddress": "127.0.0.1",
+                "MACaddress": "",
+                "IgnoreOnOff": "0",
+                "State": "",
+                "Status": "",
+                "Disabled": "0" 
+            } 
+        },              
+        "PK_Device_9": {
+            "Description": "Basic XML Data Source Plugin",
+            "FK_DeviceTemplate": "1869",
+            "FK_Room": "1",
+            "FK_Device_ControlledVia": "2",
+            "DeviceData": {
+            },
+            "params": {
+                "IPaddress": "127.0.0.1",
+                "MACaddress": "",
+                "IgnoreOnOff": "0",
+                "State": "",
+                "Status": "",
+                "Disabled": "0" 
+            } 
+        },              
+        "PK_Device_10": {
             "Description": "ZWave",
             "FK_DeviceTemplate": "1754",
             "FK_Room": "1",
