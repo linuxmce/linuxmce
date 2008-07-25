@@ -24,7 +24,9 @@ sleep 2
 # Backup configuration
 log "Creating a backup of the config files."
 echo " `date` ==fu== Creating a backup of the config files: /etc/pluto /etc/config /etc/fiire-ra" >> $upgrade_log
-tar zcf /tmp/backup.tar.gz /etc/pluto /etc/config /etc/fiire-ra
+nvram set backup="`tar zc /etc/config /etc/pluto/installation_number | uuencode -`"
+nvram commit
+#tar zcf /tmp/backup.tar.gz /etc/pluto /etc/config /etc/fiire-ra
 
 # Flash new image
 log "Started flashing new image."
@@ -44,7 +46,7 @@ rm -f /tmp/firmware.img
 log "Restoring configuration files."
 echo " `date` ==fu== Restoring configuration files." >> $upgrade_log
 cd /
-tar zxvf /tmp/backup.tar.gz
+#tar zxvf /tmp/backup.tar.gz
 
 # Rebooting
 echo " `date` ==fu== REBOOTING the system..." >> $upgrade_log
