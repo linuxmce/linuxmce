@@ -120,9 +120,10 @@ fi
 
 Cfg=$(uci show dhcp|grep interface=lan|cut -d. -f2)
 CfgMasq=$(uci show dhcp|grep =dnsmasq|cut -d. -f2|cut -d= -f1)
-uci set dhcp.$Cfg.force=1
-uci set dhcp.$Cfg.ignore=0
+
 uci commit
+sync
+
 case "$IPtype" in
 	local)
 		echo "$(date -R) WAN IP is local. Configuring as switch" >>/tmp/log.NetLED
