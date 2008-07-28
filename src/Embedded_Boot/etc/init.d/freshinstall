@@ -9,7 +9,7 @@ boot()
     #do not change network settings
 
     if [[ -f /tmp/bk2nvram.tar.gz ]]; then
-        rm -f /tmp/bk2nvram.tar.gz
+        rm -f /tmp/bk2nvram.tar.gz /etc/pluto/fresh_install
         echo  "$(date -R) Firmware upgrade. Exiting..." >>/tmp/log.freshinstall
         return 0;
 
