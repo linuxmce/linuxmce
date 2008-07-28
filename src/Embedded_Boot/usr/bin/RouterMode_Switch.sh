@@ -32,7 +32,7 @@ uci commit
 sync
 
 #del other if
-ifconfig eth0.1 down
+ifconfig eth0.1 down 2>/dev/null
 
 /etc/init.d/network restart
 /etc/init.d/firewall restart

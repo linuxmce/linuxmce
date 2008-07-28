@@ -41,7 +41,7 @@ uci commit
 sync
 
 #del other if
-ifconfig br-lan:0 down
+ifconfig br-lan:0 down 2>/dev/null
 
 #restart services
 /etc/init.d/network restart
