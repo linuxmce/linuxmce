@@ -43,7 +43,7 @@ boot()
 #conf wan
 	uci set network.wan.proto=dhcp
 	uci set network.wan.ifname=eth0.1
-    ifconfig br-lan:0 down
+    ifconfig br-lan:0 down 2>/dev/null
 
 	uci commit
     sync
