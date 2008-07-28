@@ -46,6 +46,6 @@ case "$Model" in
 		;;
 esac
 uci commit
-
 sync
+
 reboot
