@@ -183,13 +183,12 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 				{
 					/* HACK -- it seems the app isn't always converting this to celsius! */
 					if( iLevel>40 )
-					{
 						iLevel = (iLevel - 32) * 5 / 9;
-						pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST] = StringUtils::itos(iLevel);
-					}
 
-					pDevice->m_sState_set("ON/" + StringUtils::itos(iLevel) + GetTemperature(pDevice),bIsTemporary);
+					pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST] = StringUtils::itos(iLevel);
 					pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST] = StringUtils::itos(iLevel);
+					sSetPoint = StringUtils::itos(iLevel);
+					SetStateValue(pDevice, "ON", sMode, sFan, sSetPoint, sTemp, bIsTemporary);
 				}
 			}
 		}
