@@ -5,6 +5,10 @@ START=96
 boot()
 {
 	echo 0 >/proc/diag/led/power
+	echo "$(date -R) Starting Watch_WAN" >>/tmp/log.check_internet
 	/usr/bin/Watch_WAN.sh >/dev/null 2>&1 </dev/null &
+	echo "$(date -R) Starting NetLED" >>/tmp/log.check_internet
 	/usr/bin/NetLED.sh >/dev/null 2>&1 </dev/null &
+	echo "$(date -R) Starting Watch_dnsmasq" >>/tmp/log.check_internet
+	/usr/bin/Watch_dnsmasq.sh 2>&1 </dev/null &
 }
