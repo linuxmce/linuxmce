@@ -1,6 +1,6 @@
 #!/bin/sh /etc/rc.common
 
-START=3
+START=03
 
 start() {
 	nvram get backup | uudecode > /tmp/bk2nvram.tar.gz
