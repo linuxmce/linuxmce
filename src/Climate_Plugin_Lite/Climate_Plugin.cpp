@@ -164,9 +164,9 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 	// The State is in the format ON|OFF/SET TEMP (CURRENT TEMP)
 	if( pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND )
 	{
-		if( pMessage->m_dwID==COMMAND_Set_Level_CONST )
+		if( pMessage->m_dwID==COMMAND_Set_Level_CONST || pMessage->m_dwID==COMMAND_Set_Temperature_CONST )
 		{
-			string sLevel = pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST];
+			string sLevel = pMessage->m_dwID==COMMAND_Set_Level_CONST ? pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST] : pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST];
 			if( sLevel.size()==0 )
 				pMessage->m_dwID=COMMAND_Generic_Off_CONST;
 			else
@@ -181,6 +181,13 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 					pMessage->m_dwID=COMMAND_Generic_Off_CONST;
 				else
 				{
+					/* HACK -- it seems the app isn't always converting this to celsius! */
+					if( iLevel>40 )
+					{
+						iLevel = (iLevel - 32) * 5 / 9;
+						pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST] = StringUtils::itos(iLevel);
+					}
+
 					pDevice->m_sState_set("ON/" + StringUtils::itos(iLevel) + GetTemperature(pDevice),bIsTemporary);
 					pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST] = StringUtils::itos(iLevel);
 				}
@@ -196,13 +203,22 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Climate_Plugin: COMMAND_Set_HeatCool_CONST !");
 			string sState = pMessage->m_mapParameters[COMMANDPARAMETER_OnOff_CONST];
 			if( sState=="H" )
+			{
+				sOn = "ON";
 				SetStateValue(pDevice, sOn, "HEAT", sFan, sSetPoint, sTemp, bIsTemporary);
+			}
 			else if( sState=="C" )
+			{
+				sOn = "ON";
 				SetStateValue(pDevice, sOn, "COOL", sFan, sSetPoint, sTemp, bIsTemporary);
+			}
 			else if( sState=="F" )
 				SetStateValue(pDevice, sOn, "FAN_ONLY", sFan, sSetPoint, sTemp, bIsTemporary);
 			else
+			{
+				sOn = "ON";
 				SetStateValue(pDevice, sOn, "AUTO", sFan, sSetPoint, sTemp, bIsTemporary);
+			}
 		}
 		else if( pMessage->m_dwID == COMMAND_Set_Fan_CONST )
 		{
