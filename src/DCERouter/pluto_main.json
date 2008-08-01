@@ -1,51 +1,9 @@
 {
-	"CannedEvents_ids":[2,3,4,5,6,9,15,16,17,18,19,20,21,22,23,26,27,28,29,30,31,32],
+	"CannedEvents_ids":[6,17,18,19,30,31,32],
 	"CannedEvents":{
-		"PK_CannedEvents_2": {
-			"Description":"Watching Media in a room",
-			"FK_Event":"19",
-			"bIsAnd":"1",
-			"bIsNot":"0"
-		},
-		"PK_CannedEvents_3": {
-			"Description":"Listening to Media in a room",
-			"FK_Event":"21",
-			"bIsAnd":"1",
-			"bIsNot":"0"
-		},
-		"PK_CannedEvents_4": {
-			"Description":"Stop Watching Media in a room",
-			"FK_Event":"20",
-			"bIsAnd":"1",
-			"bIsNot":"0"
-		},
-		"PK_CannedEvents_5": {
-			"Description":"Stop Listening to Media in a room",
-			"FK_Event":"22",
-			"bIsAnd":"1",
-			"bIsNot":"0"
-		},
 		"PK_CannedEvents_6": {
 			"Description":"A sensor (door\/window\/motion\/etc.) is tripped",
 			"FK_Event":"9",
-			"bIsAnd":"1",
-			"bIsNot":"0"
-		},
-		"PK_CannedEvents_9": {
-			"Description":"There is an incoming call",
-			"FK_Event":"36",
-			"bIsAnd":"1",
-			"bIsNot":"0"
-		},
-		"PK_CannedEvents_15": {
-			"Description":"The number of voice messages changes",
-			"FK_Event":"37",
-			"bIsAnd":"1",
-			"bIsNot":"0"
-		},
-		"PK_CannedEvents_16": {
-			"Description":"Security breach",
-			"FK_Event":"16",
 			"bIsAnd":"1",
 			"bIsNot":"0"
 		},
@@ -64,54 +22,6 @@
 		"PK_CannedEvents_19": {
 			"Description":"Someone rings the doorbell",
 			"FK_Event":"40",
-			"bIsAnd":"1",
-			"bIsNot":"0"
-		},
-		"PK_CannedEvents_20": {
-			"Description":"Monitor mode is triggered",
-			"FK_Event":"41",
-			"bIsAnd":"1",
-			"bIsNot":"0"
-		},
-		"PK_CannedEvents_21": {
-			"Description":"Movement is detected",
-			"FK_Event":"42",
-			"bIsAnd":"1",
-			"bIsNot":"0"
-		},
-		"PK_CannedEvents_22": {
-			"Description":"Alarm is reset",
-			"FK_Event":"18",
-			"bIsAnd":"1",
-			"bIsNot":"0"
-		},
-		"PK_CannedEvents_23": {
-			"Description":"House Mode Changes",
-			"FK_Event":"43",
-			"bIsAnd":"1",
-			"bIsNot":"0"
-		},
-		"PK_CannedEvents_26": {
-			"Description":"ID Tag Detected",
-			"FK_Event":"44",
-			"bIsAnd":"1",
-			"bIsNot":"0"
-		},
-		"PK_CannedEvents_27": {
-			"Description":"ID Tag Lost",
-			"FK_Event":"45",
-			"bIsAnd":"1",
-			"bIsNot":"0"
-		},
-		"PK_CannedEvents_28": {
-			"Description":"Playing specific media or type of media",
-			"FK_Event":"58",
-			"bIsAnd":"1",
-			"bIsNot":"0"
-		},
-		"PK_CannedEvents_29": {
-			"Description":"Stop specific media or type of media",
-			"FK_Event":"12",
 			"bIsAnd":"1",
 			"bIsNot":"0"
 		},
@@ -258,17 +168,6 @@
 			"ExtraInfo":"",
 			"Required":"0"
 		},
-		"PK_CannedEvents_CriteriaParmList_20": {
-			"FK_CannedEvents":"6",
-			"FK_CriteriaParmList":"11",
-			"Description":"What time of day?",
-			"Comments":"",
-			"Operator":"1",
-			"Parm":"",
-			"DefaultValue":"",
-			"ExtraInfo":"",
-			"Required":"0"
-		},
 		"PK_CannedEvents_CriteriaParmList_23": {
 			"FK_CannedEvents":"9",
 			"FK_CriteriaParmList":"11",
@@ -304,28 +203,6 @@
 		},
 		"PK_CannedEvents_CriteriaParmList_31": {
 			"FK_CannedEvents":"16",
-			"FK_CriteriaParmList":"8",
-			"Description":"What device?",
-			"Comments":"",
-			"Operator":"1",
-			"Parm":"",
-			"DefaultValue":"",
-			"ExtraInfo":"",
-			"Required":"0"
-		},
-		"PK_CannedEvents_CriteriaParmList_32": {
-			"FK_CannedEvents":"17",
-			"FK_CriteriaParmList":"8",
-			"Description":"What device?",
-			"Comments":"",
-			"Operator":"1",
-			"Parm":"",
-			"DefaultValue":"",
-			"ExtraInfo":"",
-			"Required":"0"
-		},
-		"PK_CannedEvents_CriteriaParmList_33": {
-			"FK_CannedEvents":"18",
 			"FK_CriteriaParmList":"8",
 			"Description":"What device?",
 			"Comments":"",

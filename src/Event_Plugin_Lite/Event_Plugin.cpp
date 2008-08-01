@@ -108,29 +108,21 @@ bool Event_Plugin::GetConfig()
 				ParseTimers(iter.val);
 			else if(sValue == "Event")
 				ParseEvents(iter.val);
+			else if(sValue == "longitude")
+				m_fLongitude = json_object_get_double(iter.val);
+			else if(sValue == "latitude")
+				m_fLatitude = json_object_get_double(iter.val);
 		}
 	}
 
 	m_pAlarmManager = new AlarmManager();
     m_pAlarmManager->Start(2);      //4 = number of worker threads
-/*
-	PLUTO_SAFETY_LOCK(em,m_EventMutex);
-	m_fLongitude = DATA_Get_Longitude();
-	m_fLatitude = DATA_Get_Latitude();
 
-	if( m_fLongitude==0 && m_fLatitude==0 && m_pRouter->m_pRow_Installation_get() )
-	{
-		Row_City *pRow_City = m_pRouter->m_pRow_Installation_get()->FK_City_getrow();
-		if( pRow_City )
-		{
-			m_fLongitude = pRow_City->Longitude_get();
-			m_fLatitude = pRow_City->Latitude_get();
-		}
-	}
+	PLUTO_SAFETY_LOCK(em,m_EventMutex);
 
 	if( m_fLongitude!=0 || m_fLatitude!=0 )
 		SetFirstSunriseSunset();
-*/	
+
 	SetNextTimedEventCallback();
 	return true;
 }
