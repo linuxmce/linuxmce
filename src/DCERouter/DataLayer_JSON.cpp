@@ -57,6 +57,8 @@ DataLayer_JSON::~DataLayer_JSON(void)
 	if( m_root_json_obj_PM )
 		json_object_put(m_root_json_obj_PM); 
 
+	delete m_pAlarmManager;
+
 	pthread_mutexattr_destroy(&m_MutexAttr);
 }
 //----------------------------------------------------------------------------------------------
