@@ -120,6 +120,8 @@ public:
 	virtual ~pluto_pthread_mutex_t() { if( m_bInitialized ) pthread_mutex_destroy(&mutex); }
 	int Init(pthread_mutexattr_t *type,pthread_cond_t *pthread_cond_t=NULL)
 	{
+		if( m_bInitialized )
+			return 0;
 		int iResult=pthread_mutex_init(&mutex, type);
 		m_bInitialized=true;
 		m_pthread_cond_t=pthread_cond_t;

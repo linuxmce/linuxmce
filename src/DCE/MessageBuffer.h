@@ -44,6 +44,7 @@ namespace DCE
 		bool m_bThreadRunning;
 
 		MessageBuffer(class Command_Impl *pCommand_Impl);
+		~MessageBuffer();
 		bool BufferMessage(Message *pMessage);
 		void Run();
 		bool MessagesConflict(Message *pMessage1,Message *pMessage2);

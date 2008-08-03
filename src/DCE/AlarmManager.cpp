@@ -174,6 +174,8 @@ void AlarmManager::Run()
  */
 int AlarmManager::AddAbsoluteAlarm(time_t when, AlarmEvent* callback, int type, void* param)
 {
+	if( m_Run == false )
+		return -1;
 #ifdef DEBUG
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AlarmManager::AddAbsoluteAlarm time %d type %d", (int) when, type);
 #endif
@@ -210,6 +212,8 @@ int AlarmManager::AddAbsoluteAlarm(time_t when, AlarmEvent* callback, int type, 
  */
 int AlarmManager::AddRelativeAlarm(long delay, AlarmEvent* callback, int type, void* param)
 {
+	if( m_Run == false )
+		return -1;
 #ifdef DEBUG
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AlarmManager::AddRelativeAlarm current time %d delay %d type %d", (int) time(NULL), (int) delay, type);
 #endif

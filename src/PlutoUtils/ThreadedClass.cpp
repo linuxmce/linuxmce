@@ -25,7 +25,7 @@
 using namespace nsThreadedClass;
 using namespace DCE;
 
-ThreadedClass::ThreadedClass() : m_ThreadMutex("ThreadedClass", true)
+ThreadedClass::ThreadedClass() : m_ThreadMutex("ThreadedClass")
 {
 	m_bQuit=m_bThreadRunning=false;
 	m_pthread=0;
@@ -40,6 +40,7 @@ ThreadedClass::~ThreadedClass()
 {
 	StopThread();
 	pthread_mutex_destroy(&m_ThreadMutex.mutex);
+	pthread_cond_destroy(&m_ThreadCondition);
     pthread_mutexattr_destroy(&m_ThreadAttribute);
 }
 

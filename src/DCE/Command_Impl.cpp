@@ -185,6 +185,7 @@ Command_Impl::~Command_Impl()
 	LoggerWrapper::GetInstance()->Write( LV_STATUS, "~Command_Impl finished" );
 
 	pthread_mutex_destroy(&m_listMessageQueueMutex.mutex);
+	pthread_cond_destroy(&m_listMessageQueueCond);
 }
 
 void Command_Impl::PrepareToDelete()
@@ -256,10 +257,12 @@ void Command_Impl::CreateChildren()
 		Event_Impl *pEvent = m_pEvent->CreateEvent( pDeviceData_Impl_Child->m_dwPK_DeviceTemplate, m_pPrimaryDeviceCommand->m_pEvent->m_pClientSocket, pDeviceData_Impl_Child->m_dwPK_Device );
 		if ( !pEvent )
 		{
-			pEvent = new Event_Impl( m_pPrimaryDeviceCommand->m_pEvent->m_pClientSocket, pDeviceData_Impl_Child->m_dwPK_Device );
+// I think this is a mistake??  We never do anything with this?			pEvent = new Event_Impl( m_pPrimaryDeviceCommand->m_pEvent->m_pClientSocket, pDeviceData_Impl_Child->m_dwPK_Device );
 			LoggerWrapper::GetInstance()->Write( LV_WARNING, "Note: Device manager has attached a device of type %d that this has no custom event handler for.  It will not fire events.",
 					pDeviceData_Impl_Child->m_dwPK_DeviceTemplate);
+			continue;
 		}
+
 		Command_Impl *pCommand = m_pPrimaryDeviceCommand->CreateCommand( pDeviceData_Impl_Child->m_dwPK_DeviceTemplate, m_pPrimaryDeviceCommand, pDeviceData_Impl_Child, pEvent );
 		if ( !pCommand )
 		{
