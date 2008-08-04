@@ -22,11 +22,7 @@ echo " `date` ==fu== Closing down services: httpd & Pluto." >> $upgrade_log
 sleep 2
 
 # Backup configuration
-log "Creating a backup of the config files."
-echo " `date` ==fu== Creating a backup of the config files:  /etc/config /etc/pluto/installation_number  /etc/firewall.config " >> $upgrade_log
-nvram set backup="`tar zc /etc/config /etc/pluto/installation_number /etc/firewall.config | uuencode -`"
-nvram commit
-#tar zcf /tmp/backup.tar.gz /etc/pluto /etc/config /etc/fiire-ra
+/usr/bin/backup-store.sh
 
 # Flash new image
 log "Started flashing new image."
