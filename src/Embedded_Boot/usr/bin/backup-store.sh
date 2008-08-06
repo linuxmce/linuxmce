@@ -3,7 +3,7 @@
 
 BACKUP_STORAGE_URL="http://backup.fiire.com/put.php"
 
-CRITICAL_CONF="/etc/config /etc/pluto/installation_number /etc/firewall.config"
+CRITICAL_CONF="/etc/config /etc/pluto/installation_number /etc/firewall.config /etc/httpd.conf"
 NONCRITICAL_CONF="/etc/pluto/"
 
 log() {
@@ -12,6 +12,14 @@ log() {
 
 BackupID=`date +%s`
 InstallationID=`cat /etc/pluto/installation_number`
+
+if [[ -f /etc/pluto/fresh_install ]]; then
+    Fresh_Install=1
+    log "Fresh Install 1"
+else
+    log "Fresh Install 0"
+    Fresh_Install=0
+fi
 
 # Backup non-critical configs on fiire.com
 log "Creating a backup of the non-critical config files."
@@ -22,6 +30,7 @@ tar zcf "/tmp/$BackupID.tgz" $NONCRITICAL_CONF
 curl -k -F "InstallationID=$InstallationID" -F "BackupID=$BackupID" -F "Backup=@/tmp/$BackupID.tgz" "$BACKUP_STORAGE_URL"
 rm -f "/tmp/$BackupID.tgz"
 nvram set backupid="$BackupID"
+nvram set fresh_install="$Fresh_Install"
 
 # Backup critical configs in nvram
 log "Creating a backup of the critical config files."
