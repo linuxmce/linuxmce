@@ -11,7 +11,7 @@ start() {
 		nvram get backup | uudecode > /tmp/bk2nvram.tar.gz
 		cd /
 		tar zxvf /tmp/bk2nvram.tar.gz
-		rm -f /tmp/bk2nvram.tar.gz
+		#rm -f /tmp/bk2nvram.tar.gz
 
 		# Start networking
 		/etc/init.d/network start
