@@ -4,6 +4,8 @@ if [[ -f /tmp/.reset-pluto ]]; then
 	exit
 fi
 touch /tmp/.reset-pluto
+echo 0 > /proc/diag/led/power
+touch /etc/pluto/fresh_install
 
 mkdir -p /etc/pluto/save/
 cp /etc/pluto/* /etc/pluto/save/
@@ -33,6 +35,8 @@ uci set wireless.$Cfg.hidden=0
 uci set wireless.$Cfg.ssid="HomeControl"
 uci set wireless.$Cfg.encryption="none"
 
+#enable firewall 
+sed -ir '/^ *accept:.*/d' /etc/firewall.config
 
 Model=$(cat /proc/diag/model)
 case "$Model" in

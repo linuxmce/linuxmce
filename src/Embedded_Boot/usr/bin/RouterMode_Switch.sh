@@ -33,6 +33,9 @@ sync
 
 #del other if
 ifconfig eth0.1 down 2>/dev/null
+#disable firewall
+sed -ir '/^ *accept:.*/d' /etc/firewall.config
+echo "accept:" >> /etc/firewall.config
 
 /etc/init.d/network restart
 /etc/init.d/firewall restart

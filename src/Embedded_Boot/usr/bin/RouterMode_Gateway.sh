@@ -43,6 +43,9 @@ sync
 #del other if
 ifconfig br-lan:0 down 2>/dev/null
 
+#enable firewall 
+sed -ir '/^ *accept:.*/d' /etc/firewall.config
+
 #restart services
 /etc/init.d/network restart
 /etc/init.d/firewall restart
