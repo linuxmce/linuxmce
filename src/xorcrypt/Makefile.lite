@@ -1,3 +1,10 @@
+ifeq ($(ARCH),mipsel)
+    CXX = mipsel-linux-g++
+    CXXFLAGS = -Wall -fPIC -Os
+else
+    CXX = g++
+fi
+
 all: xorcrypt
 
 xorcrypt:
