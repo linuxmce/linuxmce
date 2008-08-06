@@ -10,8 +10,14 @@ boot()
 
     if [[ -f /tmp/bk2nvram.tar.gz ]]; then
         rm -f /tmp/bk2nvram.tar.gz 
-        rm -f /etc/pluto/fresh_install
+        Fresh_Install=`nvram get fresh_install`
+        if [[ "$Fresh_Install" == "0" ]]; then
+            rm -f /etc/pluto/fresh_install
+            echo  "$(date -R) Firmware upgrade. Manual Network Settings" >>/tmp/log.freshinstall
+        fi
         echo  "$(date -R) Firmware upgrade. Exiting..." >>/tmp/log.freshinstall
+        nvram set fresh_install=""
+        nvram commit
         return 0;
 
     elif [[ -f /etc/pluto/fresh_install ]]; then
