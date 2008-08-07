@@ -4,12 +4,15 @@
 BACKUP_STORAGE_URL="http://backup.fiire.com/put.php"
 
 CRITICAL_CONF="/etc/config /etc/pluto/installation_number /etc/firewall.config /etc/httpd.conf /etc/passwd"
-NONCRITICAL_CONF="/etc/pluto/ /etc/TZ /etc/TZ-full"
+NONCRITICAL_CONF="/etc/pluto/"
+log_file="/tmp/log.upgrade"
 
 log() {
-	logger -s -t 'backup-store' $*
+	#logger -s -t 'backup-store' $*
+    echo "`date` - $*" >> $log_file
 }
 
+log "===Start backup-store script==="
 BackupID=`date +%s`
 InstallationID=`cat /etc/pluto/installation_number`
 
@@ -38,3 +41,5 @@ cd /
 nvram set backup="`tar zc $CRITICAL_CONF | uuencode -`"
 
 nvram commit
+
+log "===End backup-store script==="
