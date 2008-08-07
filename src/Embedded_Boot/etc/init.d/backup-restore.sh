@@ -11,7 +11,7 @@ start() {
 		echo "`date` - Restore critical config files" >> $log_file
 		nvram get backup | uudecode > /tmp/bk2nvram.tar.gz
 		cd /
-		tar zxvf /tmp/bk2nvram.tar.gz 2>&1 1>>$log_file
+		tar zxvf /tmp/bk2nvram.tar.gz 1>>$log_file 2>&1
 		#rm -f /tmp/bk2nvram.tar.gz
         echo "`date` - Clear nvram backup variable" >> $log_file
 		nvram set backup=""
