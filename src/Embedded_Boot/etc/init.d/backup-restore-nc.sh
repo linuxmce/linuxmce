@@ -25,6 +25,8 @@ start() {
 		#nvram set backup=""
 		nvram set backupid=""
 		nvram commit
+        echo "`date` - Restarting ntpclient..." >> $log_file
+        /etc/init.d/ntpclient restart
 	fi
 }
 
