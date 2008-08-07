@@ -3,7 +3,7 @@ ifeq ($(ARCH),mipsel)
     CXXFLAGS = -Wall -fPIC -Os
 else
     CXX = g++
-fi
+endif
 
 all: xorcrypt
 
