@@ -3,7 +3,7 @@
 
 BACKUP_STORAGE_URL="http://backup.fiire.com/put.php"
 
-CRITICAL_CONF="/etc/config /etc/pluto/installation_number /etc/firewall.config /etc/httpd.conf"
+CRITICAL_CONF="/etc/config /etc/pluto/installation_number /etc/firewall.config /etc/httpd.conf /etc/passwd"
 NONCRITICAL_CONF="/etc/pluto/"
 
 log() {
