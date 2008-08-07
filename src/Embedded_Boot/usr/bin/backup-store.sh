@@ -4,7 +4,7 @@
 BACKUP_STORAGE_URL="http://backup.fiire.com/put.php"
 
 CRITICAL_CONF="/etc/config /etc/pluto/installation_number /etc/firewall.config /etc/httpd.conf /etc/passwd"
-NONCRITICAL_CONF="/etc/pluto/"
+NONCRITICAL_CONF="/etc/pluto /etc/fiire-ra /etc/TZ /etc/TZ-full"
 log_file="/tmp/log.upgrade"
 
 log() {
