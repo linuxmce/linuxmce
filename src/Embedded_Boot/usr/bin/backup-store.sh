@@ -27,7 +27,9 @@ fi
 # Backup non-critical configs on fiire.com
 log "Creating a backup of the non-critical config files."
 cd /
+mv /etc/pluto/version /tmp/pluto.version
 tar zcf "/tmp/$BackupID.tgz" $NONCRITICAL_CONF
+mv /tmp/pluto.version /etc/pluto/version
 
 # Send non critical backup to Backup server
 curl -k -F "InstallationID=$InstallationID" -F "BackupID=$BackupID" -F "Backup=@/tmp/$BackupID.tgz" "$BACKUP_STORAGE_URL"
