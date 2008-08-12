@@ -1,6 +1,11 @@
 #!/bin/sh
 
+if [[ "$1" == "--no-backup" ]] ;then
+	no_backup=1
+fi
+
 upgrade_log="/tmp/log.upgrade"
+
 log() {
 	logger -s -t 'fiire-upgrade' $*
 }
@@ -22,7 +27,9 @@ echo " `date` ==fu== Closing down services: httpd & Pluto." >> $upgrade_log
 sleep 2
 
 # Backup configuration
-/usr/bin/backup-store.sh
+if [[ "$no_backup" != "1" ]] ;then
+	/usr/bin/backup-store.sh
+fi
 
 # Flash new image
 log "Started flashing new image."
