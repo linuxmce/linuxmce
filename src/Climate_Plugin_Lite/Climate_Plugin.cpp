@@ -394,4 +394,5 @@ void Climate_Plugin::SetStateValue(DeviceData_Router *pDevice,
 	   string sOn, string sMode, string sFan, string sSetPoint, string sTemp,bool bIsTemporary)
 {
 	pDevice->m_sState_set(sOn + "/" + sMode + "/" + sFan + "/" + sSetPoint + " (" + sTemp + ")",bIsTemporary);
+	m_pRouter->DataLayer()->Save();
 }

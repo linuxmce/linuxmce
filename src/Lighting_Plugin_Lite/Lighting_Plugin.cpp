@@ -319,6 +319,9 @@ int Lighting_Plugin::GetLightingLevel(DeviceData_Router *pDevice,int iLevel_Defa
 
 void Lighting_Plugin::SetLightState(int PK_Device,bool bIsOn,int Level, bool bRestore,bool bIsTemporary)
 {
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Lighting_Plugin::SetLightState PK_Device %d On %d Level %d Restore %d Temporary %d",
+		PK_Device, (int) bIsOn, Level, (int) bRestore, (int) bIsTemporary);
+
 	DeviceData_Router *pDevice =  m_pRouter->m_mapDeviceData_Router_Find(PK_Device);
 	if( !pDevice )
 		return; // Shouldn't happen
@@ -326,6 +329,7 @@ void Lighting_Plugin::SetLightState(int PK_Device,bool bIsOn,int Level, bool bRe
 		Level = GetLightingLevel( pDevice );
 
 	pDevice->m_sState_set( (bIsOn ? "ON" : "OFF") + string("/") + StringUtils::itos(Level),bIsTemporary);
+	m_pRouter->DataLayer()->Save();
 
 	if( bRestore )
 	{

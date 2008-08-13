@@ -309,6 +309,7 @@ bool Security_Plugin::SetHouseMode(DeviceData_Router *pDevice,int iPK_Users,int 
 	if( Bypass=="PERMBYPASS" )
 	{
 		pDevice->m_sState_set(Mode + "," + Bypass);
+		m_pRouter->DataLayer()->Save();
 		return true; // We're bypassing this one
 	}
 
@@ -328,6 +329,7 @@ bool Security_Plugin::SetHouseMode(DeviceData_Router *pDevice,int iPK_Users,int 
 		Bypass = "";
 
 	pDevice->m_sState_set(Mode + "," + Bypass + "," + sPK_ModeChange);
+	m_pRouter->DataLayer()->Save();
 
 	return true;
 }

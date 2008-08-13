@@ -289,9 +289,6 @@ void General_Info_Plugin::CMD_Get_Device_State(int iPK_Device,string *sValue_To_
 			DeviceData_Router *pDeviceData_Router = it_device->second;
 			int iPK_DeviceCategory = pDeviceData_Router->m_dwPK_DeviceCategory;
 
-			if(iPK_DeviceCategory != DEVICECATEGORY_Lighting_Device_CONST && iPK_DeviceCategory != DEVICECATEGORY_Climate_Device_CONST)
-				continue;
-
 			*sValue_To_Assign += StringUtils::ltos(pDeviceData_Router->m_dwPK_Device) + "|" + 
 				pDeviceData_Router->m_sState_get() + "\n";
 		}
@@ -306,7 +303,33 @@ void General_Info_Plugin::CMD_Get_Device_State(int iPK_Device,string *sValue_To_
 void General_Info_Plugin::CMD_Get_Device_Status(string &sCMD_Result,Message *pMessage)
 //<-dceag-c248-e->
 {
-	cout << "Need to implement command #248 - Get Device Status" << endl;
+	if(iPK_Device)
+	{
+		DeviceData_Router *pDeviceData_Router = m_pRouter->DataLayer()->Device(iPK_Device);
+		if( !pDeviceData_Router )
+		{
+			sCMD_Result = "BAD DEVICE";
+			*sValue_To_Assign = "";
+		}
+		else
+		{
+			sCMD_Result = "OK";
+			*sValue_To_Assign = pDeviceData_Router->m_sStatus_get();
+		}
+	}
+	else
+	{	
+		//get status for all devices
+		for(map<int, DeviceData_Router *>::iterator it_device = m_pRouter->DataLayer()->Devices().begin(); 
+			it_device != m_pRouter->DataLayer()->Devices().end(); ++it_device)
+		{
+			DeviceData_Router *pDeviceData_Router = it_device->second;
+			int iPK_DeviceCategory = pDeviceData_Router->m_dwPK_DeviceCategory;
+
+			*sValue_To_Assign += StringUtils::ltos(pDeviceData_Router->m_dwPK_Device) + "|" + 
+				pDeviceData_Router->m_sStatus_get() + "\n";
+		}
+	}
 }
 
 //<-dceag-c272-b->
