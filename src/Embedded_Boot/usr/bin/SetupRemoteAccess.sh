@@ -8,8 +8,18 @@ cronEntry_Special="*/10 * * * * ash -c '$cronCmd_Special >/dev/null 2>&1' #RA_sp
 UpdateInterval=86400 #seconds
 RaPass=$(cat /etc/pluto/ra_password 2>/dev/null)
 
+log_file="/tmp/log.setupRA"
+
+log() {
+	#logger -s -t 'SetupRA' $*
+    echo "`date` - $*" >> $log_file
+}
+
+log "===Start SetupRemoteAccess script==="
+
 GetPorts()
 {
+    log "=GetPorts="
 	Result=$(cat /etc/pluto/ra_ports 2>/dev/null)
 	case "$Result" in
 		*';'*) : ;;
@@ -59,6 +69,7 @@ RAKey="/etc/pluto/ra_key"
 
 AddCronEntry()
 {
+    log "=AddCronEntry="
 	local CronReload
 	
 	# if this script is not in a cron job
@@ -66,18 +77,18 @@ AddCronEntry()
 		# add it to crontab
 		echo "$cronEntry" >>/etc/crontabs/root
 		CronReload=1
-		echo "Added crontab entry"
+		log "Added crontab entry"
 	else
-		echo "Crontab entry already present. Not adding."
+		log "Crontab entry already present. Not adding."
 	fi
 
 	if ! grep -qF "#RA_special" /etc/crontabs/root; then
 		# add it to crontab
 		echo "$cronEntry_Special" >>/etc/crontabs/root
 		CronReload=1
-		echo "Added crontab entry (special)"
+		log "Added crontab entry (special)"
 	else
-		echo "Crontab entry (special) already present. Not adding."
+		log "Crontab entry (special) already present. Not adding."
 	fi
 	
 	if [[ -n "$CronReload" ]]; then
@@ -87,23 +98,24 @@ AddCronEntry()
 
 DelCronEntry()
 {
+    log "=DelCronEntry="
 	local CronReload
 
 	# remove script from crontab
 	if grep -qF "#RA_std" /etc/crontabs/root; then
 		sed -ir '/#RA_std/d' /etc/crontabs/root
 		CronReload="1"
-		echo "Crontab entry found. Removed."
+		log "Crontab entry found. Removed."
 	else
-		echo "Crontab entry not found. Not removing."
+		log "Crontab entry not found. Not removing."
 	fi
 	
 	if grep -qF "#RA_special" /etc/crontabs/root; then
 		sed -ir '/#RA_special/d' /etc/crontabs/root
 		CronReload="1"
-		echo "Crontab entry (special) found. Removed."
+		log "Crontab entry (special) found. Removed."
 	else
-		echo "Crontab entry (special) not found. Not removing."
+		log "Crontab entry (special) not found. Not removing."
 	fi
 
 	if [[ -n "$CronReload" ]]; then
@@ -113,6 +125,7 @@ DelCronEntry()
 
 CreateTunnel()
 {
+    log "=CreateTunnel"
 	Suffix="$1"
 	LocalPort="$2"
 	RemotePort="$3"
@@ -150,17 +163,18 @@ CreateTunnel()
 			[[ -n "$Tunnel" ]] && RemoveTunnel "$Suffix"
 			/usr/bin/RemoteAccess_Tunnel.sh "$RemotePort" "$LocalPort" "$RAKey" "$Host" "$RAhost" "$RAport" &
 			echo $! >/tmp/tunnel.$Suffix
-			echo "$Suffix tunnel enabled."
+			log "$Suffix tunnel enabled."
 		else
-			echo "$Suffix tunnel not down. False alarm"
+			log "$Suffix tunnel not down. False alarm"
 		fi
 	else
-		echo "$Suffix tunnel already present. Not enabling."
+		log "$Suffix tunnel already present. Not enabling."
 	fi
 }
 
 RemoveTunnel()
 {
+    log "=RemoveTunnel="
 	Suffix="$1"
 	Tunnel=$(cat /tmp/tunnel.$Suffix 2>/dev/null)
 	if [[ -n "$Tunnel" ]] && [[ ! -d /proc/"$Tunnel" ]]; then
@@ -179,14 +193,15 @@ RemoveTunnel()
 			fi
 		done
 		kill $Tunnel
-		echo "$Suffix tunnel found. Closed."
+		log "$Suffix tunnel found. Closed."
 	else
-		echo "$Suffix tunnel not found. Not closing."
+		log "$Suffix tunnel not found. Not closing."
 	fi
 }
 
 CreateTunnels()
 {
+    log "=CreateTunnels="
 	/usr/bin/RA_ChangePassword.sh
 
 	local Var PortName PortTunnel PortNameDest PortDest
@@ -205,6 +220,7 @@ CreateTunnels()
 
 CreateTunnels_Special()
 {
+    log "=CreateTunnels_Special="
 	local Var PortName PortTunnel PortNameDest PortDest
 
 	for Var in $VarsPortNoMon; do
@@ -219,6 +235,7 @@ CreateTunnels_Special()
 
 RemoveTunnels()
 {
+    log "=RemoveTunnels="
 	local Var PortName PortNameDest
 
 	for Var in $VarsPortStd; do
@@ -234,6 +251,7 @@ RemoveTunnels()
 
 RemoveTunnels_Special()
 {
+    log "=RemoveTunnels_Special="
 	local Var PortName PortNameDest
 
 	for Var in $VarsPortNoMon; do
@@ -245,12 +263,14 @@ RemoveTunnels_Special()
 
 DeleteHostKey()
 {
+    log "=DeleteHostKey="
 	sed -ri '/cisco\.fiire\.com/d' /root/.ssh/known_hosts
 }
 
 Me="$(basename "$0")"
 
 if [[ "$Me" == "$(basename "$cronCmd")" ]]; then
+    log "===$Me==="
 	DeleteHostKey
 	if [[ -n "$RaPass" ]]; then
 		/usr/bin/RA_KeepPortsAlive.sh
@@ -258,12 +278,15 @@ if [[ "$Me" == "$(basename "$cronCmd")" ]]; then
 		[[ "$1" == "restart" ]] && RemoveTunnels
 		CreateTunnels
 	elif [[ -f /etc/pluto/ra_password ]]; then
-		echo "Remote assistance is enabled in pluto.conf, yet remote password is empty. Avoiding closing the tunnels."
+		log "Remote assistance is enabled in pluto.conf, yet remote password is empty. Avoiding closing the tunnels."
 	else
 		DelCronEntry
 		RemoveTunnels
 	fi
 elif [[ "$Me" == "$(basename "$cronCmd_Special")" ]]; then
+    log "===$Me==="
 	RemoveTunnels_Special
 	CreateTunnels_Special
 fi
+
+log "===End SetupRemoteAccess script==="
