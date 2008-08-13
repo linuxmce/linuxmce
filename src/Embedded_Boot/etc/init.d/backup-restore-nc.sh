@@ -27,8 +27,10 @@ start() {
 		nvram commit
         echo "`date` - Restarting ntpclient..." >> $log_file
         /etc/init.d/ntpclient restart
-        echo "`date` - Reload Cron..." >> $log_file
-        /etc/init.d/cron reload    
+        #echo "`date` - Reload Cron..." >> $log_file
+        #/etc/init.d/cron reload    
+        echo "`date` - Start RemoteAssistance..." >> $log_file
+        /usr/bin/SetupRemoteAccess.sh >/dev/null 2>&1 </dev/null &
     fi
 }
 
