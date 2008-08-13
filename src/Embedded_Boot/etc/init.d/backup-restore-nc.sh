@@ -27,7 +27,9 @@ start() {
 		nvram commit
         echo "`date` - Restarting ntpclient..." >> $log_file
         /etc/init.d/ntpclient restart
-	fi
+        echo "`date` - Reload Cron..." >> $log_file
+        /etc/init.d/cron reload    
+    fi
 }
 
 stop() {
