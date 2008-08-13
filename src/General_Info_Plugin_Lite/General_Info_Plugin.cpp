@@ -303,6 +303,7 @@ void General_Info_Plugin::CMD_Get_Device_State(int iPK_Device,string *sValue_To_
 void General_Info_Plugin::CMD_Get_Device_Status(string &sCMD_Result,Message *pMessage)
 //<-dceag-c248-e->
 {
+	/*
 	if(iPK_Device)
 	{
 		DeviceData_Router *pDeviceData_Router = m_pRouter->DataLayer()->Device(iPK_Device);
@@ -330,6 +331,7 @@ void General_Info_Plugin::CMD_Get_Device_Status(string &sCMD_Result,Message *pMe
 				pDeviceData_Router->m_sStatus_get() + "\n";
 		}
 	}
+	*/
 }
 
 //<-dceag-c272-b->
