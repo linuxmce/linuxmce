@@ -5346,7 +5346,7 @@ void ScreenHandler::HandleAssistedMakeCall(int iPK_Users,string sPhoneExtension,
 				iPK_Users, sPhoneExtension, StringUtils::itos(iPK_Device_From), iPK_Device_To);
 			m_pOrbiter->SendCommand(cmd_Make_Call, &sResponse);
 
-			if(sResponse != "OK")
+			if(sResponse.size()<2 || sResponse.substr(0,2)!="OK")
 			{
 				sMessage = "Failed to make call!";
 			}
@@ -5378,7 +5378,7 @@ void ScreenHandler::HandleAssistedMakeCall(int iPK_Users,string sPhoneExtension,
 				iPK_Users, sPhoneExtension, sPhoneCallID, iPK_Device_From);
 			m_pOrbiter->SendCommand(cmd_PL_Join_Call, &sResponse);
 
-			if(sResponse != "OK")
+			if(sResponse.size()<2 || sResponse.substr(0,2)!="OK")
 			{
 				sMessage = "Failed to join!";
 			}
@@ -5410,7 +5410,7 @@ void ScreenHandler::HandleAssistedMakeCall(int iPK_Users,string sPhoneExtension,
 				iPK_Device_To, iPK_Users, sPhoneExtension, sSourceChannel, "");
 			m_pOrbiter->SendCommand(cmd_PL_Transfer, &sResponse);
 
-			if(sResponse != "OK")
+			if(sResponse.size()<2 || sResponse.substr(0,2)!="OK")
 			{
 				sMessage = "Failed to transfer!";
 			}
@@ -5446,7 +5446,7 @@ void ScreenHandler::HandleAssistedMakeCall(int iPK_Users,string sPhoneExtension,
 				iPK_Device_To, iPK_Users, sPhoneExtension, sSecondPhoneCall, sMyChannel, &sTaskID);
 			m_pOrbiter->SendCommand(cmd_Assisted_Transfer, &sResponse);
 
-			if(sResponse != "OK")
+			if(sResponse.size()<2 || sResponse.substr(0,2)!="OK")
 			{
 				sMessage = "Failed to transfer!";
 			}
@@ -5468,7 +5468,7 @@ void ScreenHandler::HandleAssistedMakeCall(int iPK_Users,string sPhoneExtension,
 			break;
 	}
 
-	if(sResponse != "OK")
+	if(sResponse.size()<2 || sResponse.substr(0,2)!="OK")
 	{
 		SCREEN_PopupMessage(
 			SCREEN_PopupMessage_CONST,  //screen id

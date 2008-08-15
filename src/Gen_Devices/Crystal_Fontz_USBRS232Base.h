@@ -142,7 +142,7 @@ public:
 					string sResponse;
 					Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName);
 					event_Impl.m_pClientSocket->SendString( "RELOAD" );
-					if( !event_Impl.m_pClientSocket->ReceiveString( sResponse ) || sResponse!="OK" )
+					if( !event_Impl.m_pClientSocket->ReceiveString( sResponse ) || sResponse.size()<2 || sResponse.substr(0,2)!="OK" )
 					{
 						CannotReloadRouter();
 						LoggerWrapper::GetInstance()->Write(LV_WARNING,"Reload request denied: %s",sResponse.c_str());

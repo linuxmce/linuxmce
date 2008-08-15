@@ -796,7 +796,7 @@ void PowerfileRip_Task::RipDVD(Row_Disc *pRow_Disc,listMediaAttribute &listMedia
 	m_pDDF = pPowerfile_Job->m_pPowerfile_C200->GetDDF(m_iDrive_Number);
 	m_pDDF->CMD_Rip_Disk(m_iPK_Users, m_sFormat, sPath, "", pRow_Disc->PK_Disc_get(), m_iDrive_Number, sCMD_Result, NULL);
 
-	if (sCMD_Result == "OK")
+	if (sCMD_Result.size()>=2 && sCMD_Result.substr(0,2) == "OK")
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Disc is ripping");
 		while (! m_bStop)
@@ -886,7 +886,7 @@ void PowerfileRip_Task::RipCD(Row_Disc *pRow_Disc,listMediaAttribute &listMediaA
 	m_pDDF = pPowerfile_Job->m_pPowerfile_C200->GetDDF(m_iDrive_Number);
 	m_pDDF->CMD_Rip_Disk(m_iPK_Users, m_sFormat, sPath, sTracks, pRow_Disc->PK_Disc_get(), m_iDrive_Number, sCMD_Result, NULL);
 
-	if( sCMD_Result=="OK" )
+	if( sCMD_Result.size()>=2 && sCMD_Result.substr(0,2) == "OK" )
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Disc is ripping");
 		while (! m_bStop)
@@ -958,7 +958,7 @@ void Powerfile_Task::ThreadStarted()
 	{
 		string sCmdResult = "FAILED";
 		pPowerfile_Job->m_pPowerfile_C200->CMD_Load_from_Slot_into_Drive(m_iSlot, m_iDrive_Number, sCmdResult, NULL);
-		if (sCmdResult != "OK")
+		if (sCmdResult.size()<2 || sCmdResult.substr(0,2)!="OK")
 		{
 			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Failed to load disc into drive. Task postponed");
 			m_eTaskStatus = TASK_NOT_STARTED;

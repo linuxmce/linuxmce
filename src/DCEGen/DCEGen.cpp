@@ -264,10 +264,10 @@ void DCEGen::GenerateDevice(int PK_DeviceTemplate,bool bTemplates)
 	// our direct category, but the parent's category as well
 	AddChildrenByCategory(p_Row_DeviceTemplate->FK_DeviceCategory_getrow(),&mapRow_MasterDevice_Children);
 
-	if( p_Row_DeviceTemplate->CommandLine_get().size() )
-		m_sTemplateOutput = "../" + p_Row_DeviceTemplate->CommandLine_get() + "/";  // They're going to be output within out directory
-	else
+	if( m_sTemplateOutput.empty() )
+	{
 		m_sTemplateOutput = "../" + FileUtils::ValidCPPName(p_Row_DeviceTemplate->Description_get()) + "/";  // They're going to be output within out directory
+	}
 
 	// We put our master device in this map already, and the embedded children too
 	map<int,Row_DeviceTemplate *>::iterator it;
@@ -293,11 +293,7 @@ void DCEGen::AddChildrenByCategory(class Row_DeviceCategory *p_Row_DeviceCategor
 
 void DCEGen::CreateDeviceFile(class Row_DeviceTemplate *p_Row_DeviceTemplate,map<int,class Row_DeviceTemplate *> *p_mapRow_MasterDevice_Children,bool bTemplates)
 {
-	string Name;
-	if( p_Row_DeviceTemplate->CommandLine_get().size() )
-		Name = p_Row_DeviceTemplate->CommandLine_get();
-	else
-		Name = FileUtils::ValidCPPName(p_Row_DeviceTemplate->Description_get());
+	string Name = FileUtils::ValidCPPName(p_Row_DeviceTemplate->Description_get());
 
 	bool bIsPlugin = 1 == p_Row_DeviceTemplate->IsPlugIn_get();
 	DeviceInfo deviceInfo(p_Row_DeviceTemplate);
@@ -568,7 +564,7 @@ void DCEGen::CreateDeviceFile(class Row_DeviceTemplate *p_Row_DeviceTemplate,map
 	fstr_DeviceCommand << "\t\t\t\t\tstring sResponse;" << endl;
 	fstr_DeviceCommand << "\t\t\t\t\tEvent_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName);" << endl;
 	fstr_DeviceCommand << "\t\t\t\t\tevent_Impl.m_pClientSocket->SendString( \"RELOAD\" );" << endl;
-	fstr_DeviceCommand << "\t\t\t\t\tif( !event_Impl.m_pClientSocket->ReceiveString( sResponse ) || sResponse!=\"OK\" )" << endl;
+	fstr_DeviceCommand << "\t\t\t\t\tif( !event_Impl.m_pClientSocket->ReceiveString( sResponse ) || sResponse.size()<2 || sResponse.substr(0,2)!=\"OK\" )" << endl;
 	fstr_DeviceCommand << "\t\t\t\t\t{" << endl;
 	fstr_DeviceCommand << "\t\t\t\t\t\tCannotReloadRouter();" << endl;
 	fstr_DeviceCommand << "\t\t\t\t\t\tLoggerWrapper::GetInstance()->Write(LV_WARNING,\"Reload request denied: %s\",sResponse.c_str());" << endl;
@@ -913,11 +909,7 @@ void DCEGen::CreateDeviceFile(class Row_DeviceTemplate *p_Row_DeviceTemplate,map
 	for(itMDL=p_mapRow_MasterDevice_Children->begin();itMDL!=p_mapRow_MasterDevice_Children->end();++itMDL)
 	{
 		Row_DeviceTemplate *p_Row_DeviceTemplate = (*itMDL).second;
-		string sName;
-		if( p_Row_DeviceTemplate->CommandLine_get().size() )
-			sName = p_Row_DeviceTemplate->CommandLine_get();
-		else
-			sName = FileUtils::ValidCPPName(p_Row_DeviceTemplate->Description_get());
+		string sName = FileUtils::ValidCPPName(p_Row_DeviceTemplate->Description_get());
 
 		fstr_DeviceCommand << "#include \"" + sName + "Base.h\"" << endl;
 		fstr_DeviceCommand << "extern " + sName + "_Command *Create_" + sName + "(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);" << endl;
@@ -939,11 +931,7 @@ void DCEGen::CreateDeviceFile(class Row_DeviceTemplate *p_Row_DeviceTemplate,map
 		for(itMDL=p_mapRow_MasterDevice_Children->begin();itMDL!=p_mapRow_MasterDevice_Children->end();++itMDL)
 		{
 			Row_DeviceTemplate *p_Row_DeviceTemplate = (*itMDL).second;
-			string sName;
-			if( p_Row_DeviceTemplate->CommandLine_get().size() )
-				sName = p_Row_DeviceTemplate->CommandLine_get();
-			else
-				sName = FileUtils::ValidCPPName(p_Row_DeviceTemplate->Description_get());
+			string sName = FileUtils::ValidCPPName(p_Row_DeviceTemplate->Description_get());
 
 			fstr_DeviceCommand << "\t\tcase " << StringUtils::itos(p_Row_DeviceTemplate->PK_DeviceTemplate_get()) << ":" << endl;
 			fstr_DeviceCommand << "\t\t\treturn new " << sName << "_Data();" << endl;
@@ -963,11 +951,7 @@ void DCEGen::CreateDeviceFile(class Row_DeviceTemplate *p_Row_DeviceTemplate,map
 		for(itMDL=p_mapRow_MasterDevice_Children->begin();itMDL!=p_mapRow_MasterDevice_Children->end();++itMDL)
 		{
 			Row_DeviceTemplate *p_Row_DeviceTemplate = (*itMDL).second;
-			string sName;
-			if( p_Row_DeviceTemplate->CommandLine_get().size() )
-				sName = p_Row_DeviceTemplate->CommandLine_get();
-			else
-				sName = FileUtils::ValidCPPName(p_Row_DeviceTemplate->Description_get());
+			string sName = FileUtils::ValidCPPName(p_Row_DeviceTemplate->Description_get());
 
 			fstr_DeviceCommand << "\t\tcase " + StringUtils::itos(p_Row_DeviceTemplate->PK_DeviceTemplate_get()) + ":"<< endl;
 			fstr_DeviceCommand << "\t\t\treturn (Event_Impl *) new " + sName + "_Event(pOCClientSocket, dwDevice);"<< endl;
@@ -990,11 +974,7 @@ void DCEGen::CreateDeviceFile(class Row_DeviceTemplate *p_Row_DeviceTemplate,map
 			Row_DeviceTemplate *p_Row_DeviceTemplate = (*itMDL).second;
 			if( p_Row_DeviceTemplate->PK_DeviceTemplate_get()!=m_dwPK_DeviceTemplate )  // Don't do this for ourselves since we can't have a child of the same type
 			{
-				string sName;
-				if( p_Row_DeviceTemplate->CommandLine_get().size() )
-					sName = p_Row_DeviceTemplate->CommandLine_get();
-				else
-					sName = FileUtils::ValidCPPName(p_Row_DeviceTemplate->Description_get());
+				string sName = FileUtils::ValidCPPName(p_Row_DeviceTemplate->Description_get());
 				fstr_DeviceCommand << "\t\tcase " << StringUtils::itos(p_Row_DeviceTemplate->PK_DeviceTemplate_get()) << ":" << endl;
 				fstr_DeviceCommand << "\t\t\treturn (Command_Impl *) Create_" << sName << "(pPrimaryDeviceCommand, pData, pEvent, m_pRouter);" << endl;
 			}

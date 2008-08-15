@@ -4114,7 +4114,7 @@ void Orbiter::ExecuteCommandsInList( DesignObjCommandList *pDesignObjCommandList
 				pMessage->m_eExpectedResponse = ER_DeliveryConfirmation;  // i.e. just an "OK"
 				string sResponse; // We'll use this only if a response wasn't passed in
 				bool bResult = m_pcRequestSocket->SendMessage( pMessage, sResponse );
-				if( !bResult || sResponse != "OK" )
+				if( !bResult || sResponse.size()<2 || sResponse.substr(0,2)!="OK" )
 					LoggerWrapper::GetInstance()->Write( LV_CRITICAL,  "Send Message failed with result %d Response %s",(int) bResult,sResponse.c_str());
 			}
 			else if( pMessage->m_dwID==COMMAND_Bind_to_Media_Remote_CONST )
@@ -8638,7 +8638,7 @@ int Orbiter::HandleNotOKStatus(string sStatus,string sRegenStatus,int iRegenPerc
 			string sResponse;
 			Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName);
 			event_Impl.m_pClientSocket->SendString( "RELOAD" );
-			if( !event_Impl.m_pClientSocket->ReceiveString( sResponse ) || sResponse!="OK" )
+			if( !event_Impl.m_pClientSocket->ReceiveString( sResponse ) || sResponse.size()<2 || sResponse.substr(0,2)!="OK" )
 			{
 				CannotReloadRouter();
 				LoggerWrapper::GetInstance()->Write(LV_WARNING,"Reload request denied: %s",sResponse.c_str());
@@ -8946,7 +8946,7 @@ bool Orbiter::RegenOrbiter()
 	DCE::CMD_Regen_Orbiter_DT CMD_Regen_Orbiter_DT( m_dwPK_Device, DEVICETEMPLATE_Orbiter_Plugin_CONST, BL_SameHouse,
 		m_dwPK_Device,"","");
 	CMD_Regen_Orbiter_DT.m_pMessage->m_eExpectedResponse = ER_DeliveryConfirmation;
-	if( !event_Impl.SendMessage(CMD_Regen_Orbiter_DT.m_pMessage,sResponse) || sResponse!="OK" )
+	if( !event_Impl.SendMessage(CMD_Regen_Orbiter_DT.m_pMessage,sResponse) || sResponse.size()<2 || sResponse.substr(0,2)!="OK" )
 	{
 		m_pOrbiterRenderer->PromptUser("Sorry.  I was unable to send this message to the Core.  Please try again or use the Pluto Admin site.");
 		return true;
@@ -10090,7 +10090,7 @@ void Orbiter::SendOffToSS( void *data )
 {
 	string sResponse;
 	DCE::CMD_Off CMD_Off(m_dwPK_Device,m_pDevice_ScreenSaver->m_dwPK_Device,0);
-	if( !SendCommand(CMD_Off,&sResponse) || sResponse!="OK" )
+	if( !SendCommand(CMD_Off,&sResponse) || sResponse.size()<2 || sResponse.substr(0,2)!="OK" )
 	{
 #ifdef DEBUG
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Orbiter::SendOffToSS screen saver not available.  try again in 1 second");
@@ -10106,7 +10106,7 @@ void Orbiter::SendOnToSS( void *data )
 {
 	string sResponse;
 	DCE::CMD_On CMD_On(m_dwPK_Device,m_pDevice_ScreenSaver->m_dwPK_Device,0,"");
-    if( SendCommand(CMD_On,&sResponse) && sResponse=="OK" )
+    if( SendCommand(CMD_On,&sResponse) && sResponse.size()<2 || sResponse.substr(0,2)!="OK" )
 	{
 	    string sName = m_pDevice_ScreenSaver->m_mapParameters_Find(DEVICEDATA_Name_CONST);
 		CMD_Activate_Window(sName);

@@ -932,7 +932,7 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"InternalSendCommand confirmation 
 			LoggerWrapper::GetInstance()->Write(LV_WARNING,"InternalSendCommand cannot send message type %d id %d to %d with confirmation.  Going to quit", Type,ID,PK_Device_To);
 			OnReload();
 		}
-		return bResult && *p_sResponse == "OK";
+		return bResult && p_sResponse->size()>=2 && p_sResponse->substr(0,2) == "OK";
 	}
 #ifdef DEBUG
 LoggerWrapper::GetInstance()->Write(LV_STATUS,"InternalSendCommand id %d out parm conf %d resp %p",
@@ -982,7 +982,7 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"InternalSendCommand out done id %
 	if( p_sResponse )
 		*p_sResponse = sResponse;
 
-	bool bResult = sResponse=="OK";
+	bool bResult = (sResponse.size()>=2 && sResponse.substr(0,2)=="OK");
 #ifdef DEBUG
 LoggerWrapper::GetInstance()->Write(LV_STATUS,"InternalSendCommand out id %d parm exiting conf %d resp %p",
 									ID,iConfirmation,pPreformedCommand.m_pcResponse);
