@@ -120,8 +120,7 @@ bool Event_Plugin::GetConfig()
 
 	PLUTO_SAFETY_LOCK(em,m_EventMutex);
 
-	if( m_fLongitude!=0 || m_fLatitude!=0 )
-		SetFirstSunriseSunset();
+	SetFirstSunriseSunset();
 
 	SetNextTimedEventCallback();
 	return true;
@@ -140,11 +139,11 @@ void Event_Plugin::ParseTimers(struct json_object *json_obj)
 		
 		TimedEvent *pTimedEvent = new TimedEvent(nTimerID,iter_timers.val,this);
 #ifdef DEBUG
-		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Adding timed event %d",nTimerID);
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Event_Plugin::ParseTimers Adding timed event %d",nTimerID);
 #endif
 		if( pTimedEvent->m_mapCommands.empty() )
 		{
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Timed event %d has no commands",nTimerID);
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Event_Plugin::ParseTimers Timed event %d has no commands",nTimerID);
 			delete pTimedEvent;
 		}
 		else
@@ -229,7 +228,7 @@ void Event_Plugin::ParseEvents(struct json_object *json_obj)
 
 		if( pEventHandler->m_mapCommands.empty() )
 		{
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Event %d has no commands",nEventID );
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Event_Plugin::ParseEvents Event %d has no commands",nEventID );
 			delete pEventHandler;
 		}
 		else
@@ -391,7 +390,7 @@ bool Event_Plugin::Register()
 
 	if( !m_pGeneral_Info_Plugin )
 	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Cannot find sister plugins to Event_Plugin plugin");
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Event_Plugin::Register Cannot find sister plugins to Event_Plugin plugin");
 		return false;
 	}
 
@@ -431,7 +430,7 @@ bool Event_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessage,cl
 	ListEventHandler *pListEventHandler = m_mapListEventHandler_Find(pMessage->m_dwID);
 	if( pListEventHandler==NULL ) // No handlers for this type of event
 	{
-		LoggerWrapper::GetInstance()->Write(LV_EVENT,"Event #%d has no handlers",pMessage->m_dwID);
+		LoggerWrapper::GetInstance()->Write(LV_EVENT,"Event_Plugin::ProcessEvent Event #%d has no handlers",pMessage->m_dwID);
 		return false;
 	}
 
@@ -452,7 +451,7 @@ bool Event_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessage,cl
 
 		if( pEventHandler->m_OncePerSeconds && pEventHandler->m_tLastFired && time(NULL)-pEventHandler->m_tLastFired<pEventHandler->m_OncePerSeconds )
 		{
-			LoggerWrapper::GetInstance()->Write(LV_EVENTHANDLER,"Skipping Event Handler: %d last fired %d (time is %d)",pEventHandler->m_PK_EventHander,(int) pEventHandler->m_tLastFired,(int) time(NULL));
+			LoggerWrapper::GetInstance()->Write(LV_EVENTHANDLER,"Event_Plugin::ProcessEvent Skipping Event Handler: %d last fired %d (time is %d)",pEventHandler->m_PK_EventHander,(int) pEventHandler->m_tLastFired,(int) time(NULL));
 			bResult=false;
 		}
 		else if( pEventHandler->m_pCriteria!=NULL )
@@ -464,12 +463,12 @@ bool Event_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessage,cl
 			}
 			catch(exception e)
 			{
-				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Problem with criteria for Event ID: %d - result: %s",pEventHandler->m_PK_EventHander,"??");
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Event_Plugin::ProcessEvent Problem with criteria for Event ID: %d - result: %s",pEventHandler->m_PK_EventHander,"??");
 				bResult=false;
 			}
 		}
 
-		LoggerWrapper::GetInstance()->Write(LV_EVENTHANDLER,"Evaluated Event Handler: %d to: %d once per: %d last fired %d (time is %d)",
+		LoggerWrapper::GetInstance()->Write(LV_EVENTHANDLER,"Event_Plugin::ProcessEvent Evaluated Event Handler: %d to: %d once per: %d last fired %d (time is %d)",
 			pEventHandler->m_PK_EventHander,(int) bResult,
 			pEventHandler->m_OncePerSeconds,(int) pEventHandler->m_tLastFired,(int) time(NULL));
 		if( bResult ) 
@@ -518,7 +517,7 @@ void Event_Plugin::SetNextTimedEventCallback()
 	if( m_pTimedEvent_Next )
 	{
 		m_pAlarmManager->AddAbsoluteAlarm( m_pTimedEvent_Next->m_tTime, this, ALARM_TIMED_EVENT, (void *) m_pTimedEvent_Next );
-		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Timer: next event is %s in %d seconds",
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Event_Plugin::SetNextTimedEventCallback Timer: next event is %s in %d seconds",
 			m_pTimedEvent_Next->m_sDescription.c_str(),
 			m_pTimedEvent_Next->m_tTime - time(NULL));
 	}
@@ -531,7 +530,7 @@ void Event_Plugin::AlarmCallback(int id, void* param)
 	{
 		TimedEvent *pTimedEvent = (TimedEvent *) param;
 
-		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Timer: %s firing",
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Event_Plugin::AlarmCallback Timer: %s firing",
 			pTimedEvent->m_sDescription.c_str());
 
 		m_pGeneral_Info_Plugin->ExecuteCommandData(&(pTimedEvent->m_mapCommands),m_dwPK_Device);
@@ -581,7 +580,7 @@ void Event_Plugin::SetFirstSunriseSunset()
 	m_bIsDaytime=true;
 	m_tNextSunriseSunset=0;
 	if( m_fLongitude==0 && m_fLatitude==0 )
-		LoggerWrapper::GetInstance()->Write(LV_WARNING,"No sunrise/sunset since no city or longitude/latitude set");
+		LoggerWrapper::GetInstance()->Write(LV_WARNING,"Event_Plugin::SetFirstSunriseSunset No sunrise/sunset since no city or longitude/latitude set");
 	else
 	{
 		time_t tNow=time(NULL);
@@ -593,10 +592,10 @@ void Event_Plugin::SetFirstSunriseSunset()
 		tm tmm;
 		localtime_r(&tSunrise,&tmm);
 
-		LoggerWrapper::GetInstance()->Write(LV_STATUS,"tSunrise: %s",asctime(localtime(&tSunrise)));
-		LoggerWrapper::GetInstance()->Write(LV_STATUS,"tSunset: %s",asctime(localtime(&tSunset)));
-		LoggerWrapper::GetInstance()->Write(LV_STATUS,"tSunriseTomorrow: %s",asctime(localtime(&tSunriseTomorrow)));
-		LoggerWrapper::GetInstance()->Write(LV_STATUS,"tSunsetTomorrow: %s",asctime(localtime(&tSunsetTomorrow)));
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Event_Plugin::SetFirstSunriseSunset tSunrise: %s",asctime(localtime(&tSunrise)));
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Event_Plugin::SetFirstSunriseSunset tSunset: %s",asctime(localtime(&tSunset)));
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Event_Plugin::SetFirstSunriseSunset tSunriseTomorrow: %s",asctime(localtime(&tSunriseTomorrow)));
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Event_Plugin::SetFirstSunriseSunset tSunsetTomorrow: %s",asctime(localtime(&tSunsetTomorrow)));
 
 		if( tSunset>tSunrise )  // I think this is always the case unless in the Arctic somewhere sunset is at 1am and sunrise at 2am????
 		{
@@ -638,7 +637,7 @@ void Event_Plugin::SetFirstSunriseSunset()
 		Seconds -= Hours * 3600;
 		int Minutes = Seconds / 60;
 		Seconds -= Minutes * 60;
-		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Currently %s next event in %d:%d:%d",
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Event_Plugin::SetFirstSunriseSunset Currently %s next event in %d:%d:%d",
 			(m_bIsDaytime ? "daytime" : "night"), Hours, Minutes, Seconds);
 
 		m_pAlarmManager->AddAbsoluteAlarm( m_tNextSunriseSunset, this, ALARM_SUNRISE_SUNSET, NULL );
