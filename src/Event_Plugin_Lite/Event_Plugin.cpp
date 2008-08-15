@@ -592,7 +592,7 @@ void Event_Plugin::SetFirstSunriseSunset()
 		tm tmm;
 		localtime_r(&tSunrise,&tmm);
 
-		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Event_Plugin::SetFirstSunriseSunset tSunrise: %s",asctime(localtime(&tSunrise)));
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Event_Plugin::SetFirstSunriseSunset long %lf lat %lf tSunrise: %s",m_fLongitude, m_fLatitude, asctime(localtime(&tSunrise)));
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Event_Plugin::SetFirstSunriseSunset tSunset: %s",asctime(localtime(&tSunset)));
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Event_Plugin::SetFirstSunriseSunset tSunriseTomorrow: %s",asctime(localtime(&tSunriseTomorrow)));
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Event_Plugin::SetFirstSunriseSunset tSunsetTomorrow: %s",asctime(localtime(&tSunsetTomorrow)));
