@@ -90,7 +90,7 @@ void UpdateAlbumsForPhotos()
 	MediaAttributes_LowLevel mediaAttributes_LowLevel(g_pDatabase_pluto_media);
 
 	string sSqlAlbums = "SELECT DISTINCT Path FROM File where EK_MediaType=" TOSTRING(MEDIATYPE_pluto_Pictures_CONST) " AND Missing=0 and IsDirectory=0";
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Albums %s", sSqlAlbums.c_str());
+
 	PlutoSqlResult result;
 	DB_ROW row;
 	if((result.r = g_pDatabase_pluto_media->db_wrapper_query_result(sSqlAlbums)))
@@ -99,14 +99,13 @@ LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Albums %s", sSqlAlbums.c_str()
 		{
 			Row_Attribute *pRow_Attribute = mediaAttributes_LowLevel.GetAttributeFromDescription(MEDIATYPE_pluto_Pictures_CONST,
 				ATTRIBUTETYPE_Album_CONST, FileUtils::FilenameWithoutPath(row[0]));
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Albums getting %p/%s", pRow_Attribute, row[0]);
 
 			if( pRow_Attribute )
 			{
-				string sSQL = "UPDATE INTO File_Attribute(FK_File,FK_Attribute) SELECT PK_File," + StringUtils::itos(pRow_Attribute->PK_Attribute_get()) + 
+				string sSQL = "REPLACE INTO File_Attribute(FK_File,FK_Attribute) SELECT PK_File," + StringUtils::itos(pRow_Attribute->PK_Attribute_get()) + 
 					" FROM File where Path='" + row[0] + "' AND EK_MediaType=" TOSTRING(MEDIATYPE_pluto_Pictures_CONST) " AND Missing=0 and IsDirectory=0";
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Updating album %s", sSQL.c_str());
-				g_pDatabase_pluto_media->threaded_db_wrapper_query(sSQL);
+				int iResult = g_pDatabase_pluto_media->threaded_db_wrapper_query(sSQL);
+				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Updated PhotoAlbum %d records: %s", iResult, sSQL.c_str());
 			}
 		}
 	}
@@ -459,6 +458,7 @@ int main(int argc, char *argv[])
 			string sFolder = *it;
 
 			UpdateMedia UpdateMedia(sDBHost,sDBUser,sDBPassword,iDBPort,sFolder,bSyncFilesOnly);
+
 			if(!sFolder.empty())
 				UpdateMedia.DoIt();
 
