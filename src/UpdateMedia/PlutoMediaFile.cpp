@@ -830,7 +830,7 @@ int PlutoMediaFile::AddFileToDatabase(int PK_MediaType)
 		pRow_Picture_File->Table_Picture_File_get()->Commit();
 
 		string sCmd = "convert \"" + pRow_File->Path_get() + "/" + pRow_File->Filename_get() + "\" -scale 256x256 -antialias \"jpeg:/home/mediapics/" + StringUtils::itos(pRow_Picture->PK_Picture_get()) + ".jpg";
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Creating thumbnail for photo %s",sCmd.c_str());
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Creating thumbnail for photo %d/%s",pRow_File->PK_File_get(),sCmd.c_str());
 		system(sCmd.c_str());
 	}
 

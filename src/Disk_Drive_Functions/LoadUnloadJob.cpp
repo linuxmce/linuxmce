@@ -54,13 +54,13 @@ LoadUnloadJob::~LoadUnloadJob()
 		m_pDrive->UnlockDrive();
 }
 
-bool LoadUnloadJob::ReadyToRun()
+Job::enumReadyToRun LoadUnloadJob::ReadyToRun()
 {
 	// If we're going to load/unload from a drive, be sure we can lock it
 	if( m_pDrive && !m_pDrive->LockDrive(Disk_Drive_Functions::locked_move,(void *)this) )
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"LoadUnloadJob::ReadyToRun cannot lock drive");
-		return false; // We're not ready yet.  Somebody else is using the drive
+		return readyToRun_No; // We're not ready yet.  Somebody else is using the drive
 	}
 
 	if( m_eLoadUnloadJobType==eMoveFromSlotToDrive || m_eLoadUnloadJobType==eMoveFromDriveToSlot ) // If we don't have a m_pSlot/drive, something is wrong, we have nothing and can't proceed
@@ -69,19 +69,19 @@ bool LoadUnloadJob::ReadyToRun()
 		{
 			m_eJobStatus_set(job_Error);
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"LoadUnloadJob::ReadyToRun no slot/drive for move operation");
-			return false;
+			return readyToRun_No;
 		}
 		if( m_pDrive->LockDrive(Drive::locked_move,this)==false )
 		{
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"LoadUnloadJob::ReadyToRun 1 drive is already locked");
-			return false;
+			return readyToRun_No;
 		}
 
 		if( m_eLoadUnloadJobType==eMoveFromSlotToDrive )
 			AddTask(new MoveDiscTask(this,"SlotToDrive",MoveDiscTask::mdt_SlotToDrive,m_pJukeBox,m_pDrive,m_pSlot));
 		else
 			AddTask(new MoveDiscTask(this,"DriveToSlot",MoveDiscTask::mdt_DriveToSlot,m_pJukeBox,m_pDrive,m_pSlot));
-		return true;
+		return readyToRun_Yes;
 	}
 
 	if( m_eLoadUnloadJobType==eEjectOneDisc )
@@ -91,7 +91,7 @@ bool LoadUnloadJob::ReadyToRun()
 			if( m_pDrive->LockDrive(Drive::locked_move,this)==false )
 			{
 				LoggerWrapper::GetInstance()->Write(LV_STATUS,"LoadUnloadJob::ReadyToRun 2 drive is already locked");
-				return false;
+				return readyToRun_No;
 			}
 
 			PLUTO_SAFETY_LOCK(dm,m_pJukeBox->m_DriveMutex_get());
@@ -100,30 +100,30 @@ bool LoadUnloadJob::ReadyToRun()
 			{
 				m_eJobStatus_set(job_Error);
 				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"LoadUnloadJob::ReadyToRun 7 no slot for load operation");
-				return false;
+				return readyToRun_No;
 			}
 			pSlot->m_eStatus = Slot::slot_intransit;
 
 			AddTask(new MoveDiscTask(this,"DriveToSlot",MoveDiscTask::mdt_DriveToSlot,m_pJukeBox,m_pDrive,pSlot));
 			AddTask(new MoveDiscTask(this,"SlotToEject",MoveDiscTask::mdt_SlotToEject,m_pJukeBox,NULL,pSlot));
-			return true;
+			return readyToRun_Yes;
 		}
 		else if( !m_pSlot )
 		{
 			m_eJobStatus_set(job_Error);
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"LoadUnloadJob::ReadyToRun no slot for eject operation");
-			return false;
+			return readyToRun_No;
 		}
 		else
 		{
 			AddTask(new MoveDiscTask(this,"SlotToEject",MoveDiscTask::mdt_SlotToEject,m_pJukeBox,NULL,m_pSlot));
-			return true;
+			return readyToRun_Yes;
 		}
 	}
 	else if( m_eLoadUnloadJobType==eEjectMultipleDiscs )
 	{
 		AddTask(new MoveDiscTask(this,"SlotToEject",MoveDiscTask::mdt_SlotToEject,m_pJukeBox,NULL,NULL));  // NULL Slot means all slots
-		return true;
+		return readyToRun_Yes;
 	}
 	else if( m_eLoadUnloadJobType==eLoadOneDisc )
 	{
@@ -135,22 +135,22 @@ bool LoadUnloadJob::ReadyToRun()
 			{
 				m_eJobStatus_set(job_Error);
 				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"LoadUnloadJob::ReadyToRun no slot for load operation");
-				return false;
+				return readyToRun_No;
 			}
 			m_pSlot->m_eStatus = Slot::slot_intransit;
 		}
 		AddTask(new MoveDiscTask(this,"Load",MoveDiscTask::mdt_Load,m_pJukeBox,NULL,m_pSlot));
-		return true;
+		return readyToRun_Yes;
 	}
 	else if( m_eLoadUnloadJobType==eLoadMultipleDiscs )
 	{
 		AddTask(new MoveDiscTask(this,"Load",MoveDiscTask::mdt_Load,m_pJukeBox,NULL,NULL)); // NULL slot means multiple
-		return true;
+		return readyToRun_Yes;
 	}
 
 	m_eJobStatus_set(job_Error);
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"LoadUnloadJob::ReadyToRun unknown operation");
-	return false;
+	return readyToRun_No;
 }
 
 bool LoadUnloadJob::ReportPendingTasks(PendingTaskList *pPendingTaskList)

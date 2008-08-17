@@ -151,7 +151,7 @@ RipJob::~RipJob()
 	}
 }
 
-bool RipJob::ReadyToRun()
+Job::enumReadyToRun RipJob::ReadyToRun()
 {
 	if( m_pDisk_Drive_Functions )  // We're ready to go if we have a drive to do the ripping
 	{
@@ -160,23 +160,23 @@ bool RipJob::ReadyToRun()
 		{
 		    LoggerWrapper::GetInstance()->Write(LV_STATUS, "RipJob::RipJob::ReadyToRun fixup failed, aborting this job");
 		    m_eJobStatus_set(job_Error);
-		    return false;
+		    return readyToRun_No;
 		}
 
 		AddRippingTasks();
-		return true;
+		return readyToRun_Yes;
 	}
 
 	if( !m_pSlot ) // If we don't have a jukebox, something is wrong, we have nothing and can't proceed
 	{
 		m_eJobStatus_set(job_Error);
-		return false;
+		return readyToRun_No;
 	}
 
 	// Try to get an available drive from the jukebox to do the ripping
 	Drive *pDrive = m_pSlot->m_pJukeBox->LockAvailableDrive(Disk_Drive_Functions::locked_rip_job,this,NULL,true);
 	if( pDrive==NULL )  // We don't have a drive
-		return false;
+		return readyToRun_No;
 
 	m_pDisk_Drive_Functions=pDrive;
 	AddTask(new MoveDiscTask(this,"SlotToDrive",MoveDiscTask::mdt_SlotToDrive,m_pSlot->m_pJukeBox,pDrive,m_pSlot));
@@ -184,7 +184,7 @@ bool RipJob::ReadyToRun()
 	AddTask(new FixupRippingInfoTask(this,"FixupRippingInfo"));
 	AddTask(new AddRippingTasksTask(this,pDrive,"AddRippingTasks"));
 	AddTask(new MoveDiscTask(this,"DriveToSlot",MoveDiscTask::mdt_DriveToSlot,m_pSlot->m_pJukeBox,pDrive,m_pSlot));
-	return true;
+	return readyToRun_Yes;
 }
 
 void RipJob::JobDone()
