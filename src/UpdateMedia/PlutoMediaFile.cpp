@@ -820,10 +820,17 @@ int PlutoMediaFile::AddFileToDatabase(int PK_MediaType)
 
 	if( PK_MediaType==MEDIATYPE_pluto_Pictures_CONST && !m_bIsDir)
 	{
-		string Output = m_sDirectory + "/" + m_sFile;
-		StringUtils::Replace(&Output,"\"","\\\"");
-		string sCmd = "convert \"" + Output + "\" -scale 256x256 -antialias \"jpeg:" + Output + ".tnj\"";
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Creating thumbnail %s",sCmd.c_str());
+		Row_Picture *pRow_Picture = m_pDatabase_pluto_media->Picture_get()->AddRow();
+		pRow_Picture->Extension_set("jpg");
+		pRow_Picture->Table_Picture_get()->Commit();
+
+		Row_Picture_File *pRow_Picture_File = m_pDatabase_pluto_media->Picture_File_get()->AddRow();
+		pRow_Picture_File->FK_File_set(pRow_File->PK_File_get());
+		pRow_Picture_File->FK_Picture_set(pRow_Picture->PK_Picture_get());
+		pRow_Picture_File->Table_Picture_File_get()->Commit();
+
+		string sCmd = "convert \"" + pRow_File->Path_get() + "/" + pRow_File->Filename_get() + "\" -scale 256x256 -antialias \"jpeg:/home/mediapics/" + StringUtils::itos(pRow_Picture->PK_Picture_get()) + ".jpg";
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Creating thumbnail for photo %s",sCmd.c_str());
 		system(sCmd.c_str());
 	}
 
