@@ -87,7 +87,7 @@ namespace DCE
 
 		@Returns true if the socket is to be deleted after this and false if not.
 		*/
-		bool ServeClient();
+		virtual bool ServeClient();
 
 		static void *BeginWapClientThread(void*);
 

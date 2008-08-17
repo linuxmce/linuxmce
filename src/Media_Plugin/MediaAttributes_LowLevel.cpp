@@ -496,7 +496,7 @@ void operator+= (deque<MediaFile *> &dTarget, deque<MediaFile *> &dAdditional)
         dTarget.push_back(dAdditional[s]);
 }
 
-Row_Attribute *MediaAttributes_LowLevel::GetAttributeFromDescription(int PK_MediaType,int PK_AttributeType,string sName,int PK_Attribute_Related)
+Row_Attribute *MediaAttributes_LowLevel::GetAttributeFromDescription(int PK_MediaType,int PK_AttributeType,string sName,int PK_Attribute_Related,bool *p_bNew)
 {
 	if( StringUtils::OnlyWhiteSpace(sName) )
 	{
@@ -568,6 +568,8 @@ PK_MediaType, PK_AttributeType, sName.c_str(), PK_Attribute_Related, (int) vectR
 		pRow_Attribute->FK_AttributeType_set(PK_AttributeType);
 		pRow_Attribute->Name_set(sName);
 		pRow_Attribute->Table_Attribute_get()->Commit();
+		if( p_bNew )
+			*p_bNew = true;
 		return pRow_Attribute;
 	}
 }
@@ -1506,6 +1508,7 @@ int MediaAttributes_LowLevel::AddRippedDiscToDatabase(int PK_Disc,int PK_MediaTy
 		FileUtils::DelFile(sDestination + "/" + sLockFile);
 	}
 	DatabaseUtils::SyncMediaAttributes(m_pDatabase_pluto_media);
+	DatabaseUtils::UpdateAttributeCount(m_pDatabase_pluto_media);
 	return PK_File;
 }
 

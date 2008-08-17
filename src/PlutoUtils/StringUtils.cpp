@@ -556,9 +556,9 @@ string StringUtils::URLEncode( string sInput )
         {
             case '\"': case '<': case '>': case '%': case '\\':
             case  '^': case '[': case ']': case '`': case '+':
-            case  '$': case ',': case '@': case ';': case '/':
+            case  '$': case ',': case '@': case ';': //case '/':
             case  '!': case '#': case '?': case '=': case '&':
-            case  ':':
+//            case  ':':
                 *outBuffer++ = '%';
                 *outBuffer++ = hexValues[(*inBuffer >> 4) & 0x0F];
                 *outBuffer++ = hexValues[*inBuffer & 0x0F];

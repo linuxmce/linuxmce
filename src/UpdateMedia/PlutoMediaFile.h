@@ -64,7 +64,7 @@ private:
 	Database_pluto_media *m_pDatabase_pluto_media;
 	
 	static MediaSyncMode m_DefaultMediaSyncMode;
-	static bool m_bNewFilesAdded;
+	static bool m_bNewFilesAdded,m_bAttributesUpdated;
 	static string m_sDVDKeysCache;
 
 	auto_ptr<GenericFileHandler> m_spFileHandler;
@@ -123,6 +123,8 @@ public:
 	//new file added status
 	static bool NewFilesAdded() { return m_bNewFilesAdded; }
 	static void ResetNewFilesAddedStatus() { m_bNewFilesAdded = false; }
+	static bool AttributesUpdated() { return m_bAttributesUpdated; }
+	static void ResetAttributesUpdated() { m_bAttributesUpdated = false; }
 
 	static void DVDKeysCacheSetup(string sValue) { if(!sValue.empty()) m_sDVDKeysCache = sValue; }
 

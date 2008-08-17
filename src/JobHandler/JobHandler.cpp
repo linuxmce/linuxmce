@@ -30,27 +30,34 @@ using namespace DCE;
 JobHandler::JobHandler()
 {
 	m_bMultiThreadedJobs=true;  // Derived versions can override this if there should be only 1 job at a time
-	m_bProcessingSuspended=m_bSuspendProcessing=false;
+	m_bRunByPriority=m_bProcessingSuspended=m_bSuspendProcessing=false;
 }
 
 JobHandler::~JobHandler()
 {
-	WaitForJobsToFinish();
+	m_bQuit=true;
 	StopThread();
+	WaitForJobsToFinish();
 }
 
 bool JobHandler::AbortAllJobs()
 {
 	PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
 	bool bAbortedOk=true;
-	for(list<Job *>::iterator it=m_listJob.begin();it!=m_listJob.end();++it)
+	list<Job *>::iterator it;
+	while( (it=m_listJob.begin())!=m_listJob.end() )  // The list may get altered when we're not holding the mutex
 	{
+		jm.Release();  // Don't hold the mutex while aborting
 		Job *pJob = *it;
 		if( !pJob->Abort() )
 		{
 			LoggerWrapper::GetInstance()->Write(LV_WARNING,"JobHandler::AbortAllJobs cannot abort %s", pJob->m_sName.c_str());
 			bAbortedOk=false;
 		}
+		jm.Relock();
+		m_listJob.erase(it);
+		if( pJob->m_bAutoDelete_get() )
+			m_listJob_Delete.push_back(make_pair<time_t,Job *> (time(NULL),pJob));
 	}
 
 	PurgeCompletedJobs();
@@ -61,7 +68,8 @@ bool JobHandler::AbortAllJobs()
 bool JobHandler::WaitForJobsToFinish(bool bAbort,int iSeconds)
 {
 #ifdef DEBUG
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::WaitForJobsToFinish");
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::WaitForJobsToFinish m_listJob %d m_listJob_Blocking %d m_listJob_Delete %d abort %d seconds %i",
+		(int) m_listJob.size(), (int) m_listJob_Blocking.size(), (int) m_listJob_Delete.size(), (int) bAbort, iSeconds);
 #endif
 	if( bAbort )
 		AbortAllJobs();
@@ -69,19 +77,21 @@ bool JobHandler::WaitForJobsToFinish(bool bAbort,int iSeconds)
 	time_t tTimeout = time(NULL) + iSeconds;
 	while(true)
 	{
-		PurgeCompletedJobs();
+		PurgeCompletedJobs(true);
 
 		if( HasJobs()==false )
 		{
 #ifdef DEBUG
-			LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::WaitForJobsToFinish COMPLETED OK");
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::WaitForJobsToFinish COMPLETED OK m_listJob %d m_listJob_Blocking %d m_listJob_Delete %d",
+				(int) m_listJob.size(), (int) m_listJob_Blocking.size(), (int) m_listJob_Delete.size());
 #endif
 			return true;
 		}
 
 		if( tTimeout<=time(NULL) )
 		{
-			LoggerWrapper::GetInstance()->Write(LV_WARNING,"JobHandler::WaitForJobsToFinish failed to complete");
+			LoggerWrapper::GetInstance()->Write(LV_WARNING,"JobHandler::WaitForJobsToFinish failed to complete m_listJob %d m_listJob_Blocking %d m_listJob_Delete %d",
+				(int) m_listJob.size(), (int) m_listJob_Blocking.size(), (int) m_listJob_Delete.size());
 			return false;  // Jobs failed to end in designated amount of time
 		}
 
@@ -89,37 +99,53 @@ bool JobHandler::WaitForJobsToFinish(bool bAbort,int iSeconds)
 	}
 }
 
-void JobHandler::PurgeCompletedJobs()
+void JobHandler::PurgeCompletedJobs(bool bForceDelete)
 {
 	PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
 #ifdef DEBUG
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::PurgeCompletedJobs purge job %d",
-		m_listJob.size());
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::PurgeCompletedJobs purge job %d blocking %d delete %d",
+		(int) m_listJob.size(), (int) m_listJob_Blocking.size(), (int) m_listJob_Delete.size());
 #endif
+
+	time_t tNow = time(NULL);
+	for( list< pair<time_t,Job *> >::iterator it=m_listJob_Delete.begin();it!=m_listJob_Delete.end();)
+	{
+		if( bForceDelete || tNow - (*it).first > 30 )  // Wait at least 30 seconds before deleting the pointer
+		{
+			Job *pJob = (*it).second;
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::PurgeCompletedJobs deleting job %s", pJob->ToString().c_str());
+			delete pJob;
+			m_listJob_Delete.erase(it++);
+		}
+		else
+			++it;
+	}
 
 	for(list<Job *>::iterator it=m_listJob.begin();it!=m_listJob.end();)
 	{
 		Job *pJob = *it;
+
 		if( pJob->m_eJobStatus_get()==Job::job_Done || pJob->m_eJobStatus_get()==Job::job_Aborted || pJob->m_eJobStatus_get()==Job::job_Error )
 		{
 			if( pJob->m_eJobStatus_get()==Job::job_Error )
-				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"JobHandler::PurgeCompletedJobs purge job %d %s status %d",
-					pJob->m_iID_get(),pJob->m_sName_get().c_str(),(int) pJob->m_eJobStatus_get());
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"JobHandler::PurgeCompletedJobs purge job %s %s status %d",
+					pJob->ToString().c_str(),pJob->m_sName_get().c_str(),(int) pJob->m_eJobStatus_get());
 #ifdef DEBUG
-			LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::PurgeCompletedJobs purge job %d %s status %d",
-				pJob->m_iID_get(),pJob->m_sName_get().c_str(),(int) pJob->m_eJobStatus_get());
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::PurgeCompletedJobs purge job %s %s status %d",
+				pJob->ToString().c_str(),pJob->m_sName_get().c_str(),(int) pJob->m_eJobStatus_get());
 #endif
+			RemoveBlockedJob(pJob);
+
 			pJob->StopThread(5);  // Job should immediately, but give it 5 seconds to be sure
 			m_listJob.erase(it++);
 			if( pJob->m_bAutoDelete_get() )
-				delete pJob;
+				m_listJob_Delete.push_back(make_pair<time_t,Job *> (tNow,pJob));
 		}
 		else
 		{
-#ifdef DEBUG
-			LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::PurgeCompletedJobs keep job %d %s status %d",
-				pJob->m_iID_get(),pJob->m_sName_get().c_str(),(int) pJob->m_eJobStatus_get());
-#endif
+			if( pJob->m_eJobStatus_get()!=Job::job_InProgress && pJob->m_eJobStatus_get()!=Job::job_WaitingForCallback )
+				RemoveBlockedJob(pJob);
+
 			++it;
 		}
 	}
@@ -131,11 +157,34 @@ bool JobHandler::HasJobs()
 	return m_listJob.empty()==false; 
 }
 
-void JobHandler::AddJob(Job *pJob,bool bFirst)
+bool JobHandler::RemoveJobFromList(Job *pJob)
 {
 	PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
+	for(list<Job *>::iterator it=m_listJob.begin();it!=m_listJob.end();++it)
+	{
+		if( pJob==*it )
+		{
+			m_listJob.erase(it);
+			if( pJob->m_bAutoDelete_get() )
+				m_listJob_Delete.push_back(make_pair<time_t,Job *> (time(NULL),pJob));
+			return true;
+		}
+	}
+	return false;
+}
+
+void JobHandler::AddJob(Job *pJob,bool bFirst)
+{
+	if( m_bQuit )
+	{
+		if( pJob->m_bAutoDelete_get() )
+			delete pJob;
+		return;
+	}
+
+	PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
 #ifdef DEBUG
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::AddJob job %d %s",pJob->m_iID_get(),pJob->m_sName_get().c_str());
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::AddJob job %s <%p> %s type %s first %d",pJob->ToString().c_str(),pJob,pJob->m_sName_get().c_str(),pJob->GetType().c_str(),(int) bFirst);
 #endif
 	BroadcastCond();
 	if( bFirst )
@@ -144,11 +193,23 @@ void JobHandler::AddJob(Job *pJob,bool bFirst)
 		m_listJob.push_back(pJob);
 }
 
+void JobHandler::BlockAllJobs(Job *pJob)
+{
+	PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
+#ifdef DEBUG
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::BlockAllJobs job %s <%p> %s type %s",pJob->ToString().c_str(),pJob,pJob->m_sName_get().c_str(),pJob->GetType().c_str());
+#endif
+	for(list<Job *>::iterator it=m_listJob_Blocking.begin();it!=m_listJob_Blocking.end();++it)
+		if( *it==pJob )
+			return;  // Already in the list
+	m_listJob_Blocking.push_back(pJob);
+}
+
 bool JobHandler::MoveJobToEndOfQueue(Job *pJob)
 {
 	PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
 #ifdef DEBUG
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::MoveJobToEndOfQueue job %d %s",pJob->m_iID_get(),pJob->m_sName_get().c_str());
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::MoveJobToEndOfQueue job %s %s",pJob->ToString().c_str(),pJob->m_sName_get().c_str());
 #endif
 	for(list<class Job *>::iterator it=m_listJob.begin();it!=m_listJob.end();++it)
 	{
@@ -182,6 +243,23 @@ bool JobHandler::ContainsJob(string sName)
 	return false;
 }
 
+bool JobHandler::ContainsJobType(string sType)
+{
+	PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
+	for(list<class Job *>::iterator it=m_listJob.begin();it!=m_listJob.end();++it)
+		if( (*it)->GetType()==sType )
+			return true;
+	return false;
+}
+
+static bool JobHandlerComparer(Job *x, Job *y)
+{
+	if( x->m_cPriority_get()==y->m_cPriority_get() )
+		return x->m_iID_get()<y->m_iID_get();
+	else
+		return x->m_cPriority_get()<y->m_cPriority_get();
+}
+
 void JobHandler::Run()
 {
 	while(!m_bQuit)
@@ -202,19 +280,41 @@ void JobHandler::Run()
 		}
 		PurgeCompletedJobs();
 
-		LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::Run jobs %d", m_listJob.size());
-		
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::Run jobs %d blocking jobs %d", (int) m_listJob.size(), (int) m_listJob_Blocking.size());
+		Job *pJob_Blocking = NULL;
+		for(list<class Job *>::iterator it=m_listJob_Blocking.begin();it!=m_listJob_Blocking.end();)
+		{
+			Job *pJob = *it;
+			if( pJob->m_eJobStatus_get()==Job::job_WaitingToStart || pJob->m_eJobStatus_get()==Job::job_WaitingForCallback || pJob->m_eJobStatus_get()==Job::job_InProgress )
+			{
+				pJob_Blocking=pJob;
+				break;
+			}
+			m_listJob_Blocking.erase(it++);
+		}
+
+		if( m_bRunByPriority )
+			m_listJob.sort(JobHandlerComparer);
+
 		for(list<class Job *>::iterator it=m_listJob.begin();it!=m_listJob.end();++it)
 		{
 			Job *pJob = *it;
-			if( pJob->m_eJobStatus_get()!=Job::job_WaitingToStart )
+			if( pJob->m_eJobStatus_get()!=Job::job_WaitingToStart && pJob->m_eJobStatus_get()!=Job::job_WaitingForCallback )
 				continue;
 
-			if( pJob->ReadyToRun() )
+			if( pJob_Blocking && pJob_Blocking!=pJob )
+				continue;
+
+			Job::enumReadyToRun _enumReadyToRun;
+			if( (pJob->m_tNextRunAttempt_get()==0 || pJob->m_tNextRunAttempt_get()<=time(NULL)) && (_enumReadyToRun=pJob->ReadyToRun())!=Job::readyToRun_No )
 			{
+				if( pJob->m_tsFirstRun.tv_sec==1 )
+					pJob->m_tsFirstRun_set();
+
+				GoingToRunJob(pJob);  // Let specialized job handlers do something here
 #ifdef DEBUG
-				LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::Run ready to run job %d %s status %d <%p>",
-					pJob->m_iID_get(),pJob->m_sName_get().c_str(),(int) pJob->m_eJobStatus_get(), pJob);
+				LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::Run ready to run job %s %s status %d <%p>",
+					pJob->ToString().c_str(),pJob->m_sName_get().c_str(),(int) pJob->m_eJobStatus_get(), pJob);
 #endif
 				if( m_bMultiThreadedJobs==false )
 				{
@@ -222,9 +322,7 @@ void JobHandler::Run()
 					break;
 				}
 				else
-				{
 					pJob->StartThread();
-				}
 			}
 
 			// This Job wants to be called no later than a certain time.  See what is the next job (ie nearest next runattempt)
@@ -238,8 +336,13 @@ void JobHandler::Run()
 		// We've got a job to run as single threaded
 		if( pJob_SingleThreaded )
 		{
+			int iJobID = pJob_SingleThreaded->m_iID_get();
 			jm.Release();
 			pJob_SingleThreaded->Run();
+#ifdef DEBUG
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::Run finished single job %d  <%p>",
+				iJobID, pJob_SingleThreaded);
+#endif
 			pJob_SingleThreaded = NULL;
 			jm.Relock();
 			continue;  // Start the loop again at the beginning since it may have changed while the mutex was unlocked
@@ -248,21 +351,25 @@ void JobHandler::Run()
 		if( m_bQuit )
 			return;
 
-#ifdef DEBUG
-		LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::Run ready to sleep %d jobs %p",
-			(int) m_listJob.size(), pJob_Next_Timed );
-#endif
-
 		// See if there's a time limit by which we should check the jobs again
 		if( pJob_Next_Timed )
 		{
 			time_t Seconds = pJob_Next_Timed->m_tNextRunAttempt_get() - time(NULL);
 			if( Seconds<0 )
 				Seconds=0;
+#ifdef DEBUG
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::Run ready to sleep %d jobs %p Seconds %d",
+				(int) m_listJob.size(), pJob_Next_Timed, (int) Seconds );
+#endif
 			jm.TimedCondWait( (int) Seconds, 0 );  // Yes, wait only up until this job wants to be called again
 		}
 		else
+		{
+#ifdef DEBUG
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::Run ready to sleep %d", (int) m_listJob.size() );
+#endif
 			jm.CondWait();  // Nope, wait until something happens
+		}
 	}
 }
 
@@ -331,6 +438,7 @@ void JobHandler::ResumeProcessing()
 
 int JobHandler::NumberJobsWithStatus(Job::JobStatus eJobStatus)
 {
+	PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
 	int iCount=0;
 	for(list<Job *>::iterator it=m_listJob.begin();it!=m_listJob.end();++it)
 	{
@@ -341,4 +449,17 @@ int JobHandler::NumberJobsWithStatus(Job::JobStatus eJobStatus)
 	return iCount;
 }
 
-
+void JobHandler::RemoveBlockedJob(Job *pJob)
+{
+	// Be sure this job isn't in our blocking list
+	for(list<class Job *>::iterator itBlock=m_listJob_Blocking.begin();itBlock!=m_listJob_Blocking.end();)
+	{
+		if( pJob == *itBlock )
+		{
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"JobHandler::RemoveBlockedJob removing job %s", pJob->ToString().c_str());
+			m_listJob_Blocking.erase(itBlock++);
+		}
+		else
+			itBlock++;
+	}
+}

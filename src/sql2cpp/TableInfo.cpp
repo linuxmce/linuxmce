@@ -39,7 +39,8 @@ bool TableInfo::loadFromDB( string sTable )
 
 #ifdef WIN32
 		for ( int i=0; i < iFieldsCount; i++ )
-			m_Fields.push_back(new FieldInfo((MYSQL_FIELD *)((char *)pMysqlFields + i * sizeof(MYSQL_FIELD) / 2)));
+			m_Fields.push_back(new FieldInfo(pMysqlFields + i));
+//			m_Fields.push_back(new FieldInfo((MYSQL_FIELD *)((char *)pMysqlFields + i * sizeof(MYSQL_FIELD) / 2)));
 #else
 		for ( int i=0; i < iFieldsCount; i++ )
 			m_Fields.push_back(new FieldInfo(pMysqlFields + i));

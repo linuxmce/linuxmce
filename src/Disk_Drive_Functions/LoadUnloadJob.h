@@ -65,7 +65,7 @@ namespace nsJobHandler
 			Command_Impl *pCommand_Impl);
 		virtual ~LoadUnloadJob();
 
-		virtual bool ReadyToRun();
+		virtual enumReadyToRun ReadyToRun();
 		void AddTasks();
 
 		virtual bool ReportPendingTasks(PendingTaskList *pPendingTaskList);

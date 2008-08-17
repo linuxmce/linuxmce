@@ -1811,7 +1811,9 @@
 #define DEVICETEMPLATE_Shoutcast_Radio_Plugin_CONST 1929
 #define DEVICETEMPLATE_Hillcrest_Plugin_CONST 1930
 #define DEVICETEMPLATE_ZWave_Controller_CONST 1945
-
+#define DEVICETEMPLATE_Data_Provider_Catalog_Plugin_CONST 1948
+#define DEVICETEMPLATE_Shared_JSON_Data_Provider_Plug_CONST 1949
+#define DEVICETEMPLATE_Media_Data_Provider_CONST 1950
 
 #define DEVICETEMPLATE_TABLE "DeviceTemplate"
 #define DEVICETEMPLATE_PK_DEVICETEMPLATE_FIELD "PK_DeviceTemplate"

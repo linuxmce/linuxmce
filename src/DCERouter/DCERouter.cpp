@@ -1887,7 +1887,9 @@ string Message::ToXML()
     m_bIsLoading=false;
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "Plug-ins loaded");
 	
+#ifdef EMBEDDED_LMCE
 	DataLayer()->PluginsLoaded();  // The data layer may have been holding some temporary stuff for the plugins
+#endif
 
     //TODO keep track of the 'status'..and set it here
 //  if(m_pCorpClient)
@@ -2315,6 +2317,11 @@ void Router::HandleCommandPipes(Socket *pSocket,SafetyMessage *pSafetyMessage)
 
 void Router::RealSendMessage(Socket *pSocket,SafetyMessage *pSafetyMessage)
 {
+	if( m_bIsLoading )
+	{
+		while( m_bIsLoading && !m_bQuit )
+			Sleep(50);
+	}
     if ( (*(*pSafetyMessage))->m_dwPK_Device_To==DEVICEID_LIST )
     {
         // Loop back and call ourselves for each message
@@ -3199,7 +3206,7 @@ string Router::GetDevicesByDeviceTemplate(DeviceData_Router *pDeviceData_From,in
 // tempoarary hack.  need to optimize & handle broadcats
 string Router::GetDevicesByCategory(DeviceData_Router *pDeviceData_From,int PK_DeviceCategory,eBroadcastLevel BroadcastLevel)
 {
-	if( BroadcastLevel!=BL_AllHouses && !pDeviceData_From )
+	if( BroadcastLevel!=BL_AllHouses && BroadcastLevel!=BL_SameHouse && !pDeviceData_From )
 		return ""; // If we're going to filter, we need an incoming device
 
 #ifdef EMBEDDED_LMCE
@@ -3218,10 +3225,10 @@ LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"m_mapDeviceData_Router has a NU
 continue;
 }
         if( !pDevice->WithinCategory(PK_DeviceCategory) ||
-				(BroadcastLevel==BL_DirectSiblings && pDeviceData_From->m_pDevice_ControlledVia!=pDevice->m_pDevice_ControlledVia) ||
-				(BroadcastLevel==BL_SameComputer && (pDeviceData_From->m_pDevice_Core!=pDevice->m_pDevice_Core || pDeviceData_From->m_pDevice_MD!=pDevice->m_pDevice_MD) ) ||
-				(BroadcastLevel==BL_SameRoom && pDeviceData_From->m_dwPK_Room!=pDevice->m_dwPK_Room) ||
-				(BroadcastLevel==BL_SameHouse && pDeviceData_From->m_dwPK_Installation!=pDevice->m_dwPK_Installation) )
+				(BroadcastLevel==BL_DirectSiblings && pDeviceData_From && pDeviceData_From->m_pDevice_ControlledVia!=pDevice->m_pDevice_ControlledVia) ||
+				(BroadcastLevel==BL_SameComputer && pDeviceData_From && (pDeviceData_From->m_pDevice_Core!=pDevice->m_pDevice_Core || pDeviceData_From->m_pDevice_MD!=pDevice->m_pDevice_MD) ) ||
+				(BroadcastLevel==BL_SameRoom && pDeviceData_From && pDeviceData_From->m_dwPK_Room!=pDevice->m_dwPK_Room) ||
+				(BroadcastLevel==BL_SameHouse && pDeviceData_From && pDeviceData_From->m_dwPK_Installation!=pDevice->m_dwPK_Installation) )
             continue;
 
         if( Result.length() )

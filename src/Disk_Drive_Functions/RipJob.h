@@ -71,7 +71,7 @@ namespace nsJobHandler
 			Command_Impl *pCommand_Impl);
 		virtual ~RipJob();
 
-		virtual bool ReadyToRun();
+		virtual enumReadyToRun ReadyToRun();
 		void AddRippingTasks(Drive *pDrive=NULL, TasklistPosition position=position_TasklistEnd);
 		virtual void JobDone();
 

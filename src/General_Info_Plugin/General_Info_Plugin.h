@@ -316,6 +316,19 @@ public:
 	virtual void CMD_Get_Room_Description(int iPK_Device,string *sText,int *iPK_Room,string &sCMD_Result,Message *pMessage);
 
 
+	/** @brief COMMAND: #370 - Execute Command Group */
+	/** Execute a command group */
+		/** @param #9 Text */
+			/** Instead of the command group, it can be put here in the format: PK_Device,PK_DeviceGroup,PK_Command,Delay,CancelIfOther,IsTemporary,"PK_CommandParameter","Description"....\n
+
+where the items in " have escaped " so they can embed , and \n characters */
+		/** @param #28 PK_CommandGroup */
+			/** The command group to execute */
+
+	virtual void CMD_Execute_Command_Group(string sText,int iPK_CommandGroup) { string sCMD_Result; CMD_Execute_Command_Group(sText.c_str(),iPK_CommandGroup,sCMD_Result,NULL);};
+	virtual void CMD_Execute_Command_Group(string sText,int iPK_CommandGroup,string &sCMD_Result,Message *pMessage);
+
+
 	/** @brief COMMAND: #371 - Is Daytime */
 	/** Returns true or false to indicate if it is daytime (ie between sunrise and sunset) */
 		/** @param #119 True/False */
@@ -555,7 +568,7 @@ Delimiter: '\n' */
 		/** @param #2 PK_Device */
 			/** The parent device */
 		/** @param #5 Value To Assign */
-			/** A pipe delimited list like this: DeviceID1|CommandLine1\nDeviceID2|CommandLine2 etc */
+			/** A pipe delimited list like this: DeviceID1|TemplateName1|CommandLine1\nDeviceID2|DeviceTemplateName2|CommandLine2 etc */
 
 	virtual void CMD_Get_Devices_To_Start(int iPK_Device,string *sValue_To_Assign) { string sCMD_Result; CMD_Get_Devices_To_Start(iPK_Device,sValue_To_Assign,sCMD_Result,NULL);};
 	virtual void CMD_Get_Devices_To_Start(int iPK_Device,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage);
@@ -578,7 +591,6 @@ Delimiter: '\n' */
 
 	virtual void CMD_Update_Device(int iPK_Device,string sMac_address,int iPK_Room,string sIP_Address,string sData_String,string sDescription) { string sCMD_Result; CMD_Update_Device(iPK_Device,sMac_address.c_str(),iPK_Room,sIP_Address.c_str(),sData_String.c_str(),sDescription.c_str(),sCMD_Result,NULL);};
 	virtual void CMD_Update_Device(int iPK_Device,string sMac_address,int iPK_Room,string sIP_Address,string sData_String,string sDescription,string &sCMD_Result,Message *pMessage);
-
 
 //<-dceag-h-e->
 	private:

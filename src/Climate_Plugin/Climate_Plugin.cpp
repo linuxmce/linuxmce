@@ -224,6 +224,8 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 	if( !pDevice || !pMessage || !pDevice->WithinCategory(DEVICECATEGORY_Climate_Device_CONST) )
 		return;
 
+	bool bIsTemporary = pMessage->m_mapParameters_Find(COMMANDPARAMETER_Is_Temporary_CONST)=="1";
+
 	string sOn;
 	string sMode;
 	string sFan;
@@ -234,9 +236,9 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 	// The State is in the format ON|OFF/SET TEMP (CURRENT TEMP)
 	if( pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND )
 	{
-		if( pMessage->m_dwID==COMMAND_Set_Level_CONST )
+		if( pMessage->m_dwID==COMMAND_Set_Level_CONST || pMessage->m_dwID==COMMAND_Set_Temperature_CONST )
 		{
-			string sLevel = pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST];
+			string sLevel = pMessage->m_dwID==COMMAND_Set_Level_CONST ? pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST] : pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST];
 			if( sLevel.size()==0 )
 				pMessage->m_dwID=COMMAND_Generic_Off_CONST;
 			else
@@ -251,7 +253,7 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 					pMessage->m_dwID=COMMAND_Generic_Off_CONST;
 				else
 				{
-					pDevice->m_sState_set("ON/" + StringUtils::itos(iLevel) + GetTemperature(pDevice));
+					pDevice->m_sState_set("ON/" + StringUtils::itos(iLevel) + GetTemperature(pDevice),bIsTemporary);
 					pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST] = StringUtils::itos(iLevel);
 				}
 			}
@@ -440,5 +442,5 @@ void Climate_Plugin::GetStateVar(DeviceData_Router *pDevice,
 void Climate_Plugin::SetStateValue(DeviceData_Router *pDevice,
 	   string sOn, string sMode, string sFan, string sSetPoint, string sTemp)
 {
-	pDevice->m_sState_set(sOn + "/" + sMode + "/" + sFan + "/" + sSetPoint + " (" + sTemp + ")");
+	pDevice->m_sState_set(sOn + "/" + sMode + "/" + sFan + "/" + sSetPoint + " (" + sTemp + ")",bIsTemporary);
 }

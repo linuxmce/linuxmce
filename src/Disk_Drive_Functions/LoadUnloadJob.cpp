@@ -67,7 +67,7 @@ bool LoadUnloadJob::ReadyToRun()
 	{
 		if( !m_pSlot || !m_pDrive )
 		{
-			m_eJobStatus = job_Error;
+			m_eJobStatus_set(job_Error);
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"LoadUnloadJob::ReadyToRun no slot/drive for move operation");
 			return false;
 		}
@@ -98,7 +98,7 @@ bool LoadUnloadJob::ReadyToRun()
 			Slot *pSlot = m_pJukeBox->m_mapSlot_Empty();  // Get an empty slot to move it to
 			if( !pSlot )
 			{
-				m_eJobStatus = job_Error;
+				m_eJobStatus_set(job_Error);
 				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"LoadUnloadJob::ReadyToRun 7 no slot for load operation");
 				return false;
 			}
@@ -110,7 +110,7 @@ bool LoadUnloadJob::ReadyToRun()
 		}
 		else if( !m_pSlot )
 		{
-			m_eJobStatus = job_Error;
+			m_eJobStatus_set(job_Error);
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"LoadUnloadJob::ReadyToRun no slot for eject operation");
 			return false;
 		}
@@ -133,7 +133,7 @@ bool LoadUnloadJob::ReadyToRun()
 			m_pSlot = m_pJukeBox->m_mapSlot_Empty();
 			if( !m_pSlot )
 			{
-				m_eJobStatus = job_Error;
+				m_eJobStatus_set(job_Error);
 				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"LoadUnloadJob::ReadyToRun no slot for load operation");
 				return false;
 			}
@@ -148,7 +148,7 @@ bool LoadUnloadJob::ReadyToRun()
 		return true;
 	}
 
-	m_eJobStatus = job_Error;
+	m_eJobStatus_set(job_Error);
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"LoadUnloadJob::ReadyToRun unknown operation");
 	return false;
 }
@@ -156,7 +156,7 @@ bool LoadUnloadJob::ReadyToRun()
 bool LoadUnloadJob::ReportPendingTasks(PendingTaskList *pPendingTaskList)
 {
 	PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
-	if( m_eJobStatus==job_WaitingToStart || m_eJobStatus==job_InProgress )
+	if( m_eJobStatus_get() == job_WaitingToStart || m_eJobStatus_get() == job_InProgress )
 	{
 		if( pPendingTaskList )
 		{

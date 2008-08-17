@@ -97,8 +97,8 @@ static const string sURL_Base = "http://10.0.0.175/plutohome-com/getRegisteredDe
 #include "DCEConfig.h"
 DCEConfig dceConfig; // Needed by CreateDevice
 
-#define UPDATE_ENT_AREA				1
-#define PROCESS_CHILD_DEVICES		2
+#define UPDATE_ENT_AREA						1
+#define PROCESS_CHILD_DEVICES				2
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -2459,7 +2459,7 @@ void General_Info_Plugin::CMD_Check_for_updates(string &sCMD_Result,Message *pMe
 				sSuccessCommand,false,false,false,true);
 			string sResponse;
 			CMD_Spawn_Application.m_pMessage->m_eRetry=MR_Retry;
-			if( !SendCommand(CMD_Spawn_Application,&sResponse) || sResponse!="OK" )
+			if( !SendCommand(CMD_Spawn_Application,&sResponse) || sResponse.size()<2 || sResponse.substr(0,2)!="OK" )
 			{
 				LoggerWrapper::GetInstance()->Write(LV_WARNING,"General_Info_Plugin::CMD_Check_for_updates m_mapMediaDirectors_PendingConfig Failed to send spawn application to %d",pDevice->m_dwPK_Device);
 			}
@@ -4121,7 +4121,7 @@ void General_Info_Plugin::CMD_Get_Home_Symlink(string sPath,string *sSymlink,str
 		/** @param #2 PK_Device */
 			/** The parent device */
 		/** @param #5 Value To Assign */
-			/** A pipe delimited list like this: DeviceID1|CommandLine1\nDeviceID2|CommandLine2 etc */
+			/** A pipe delimited list like this: DeviceID1|TemplateName1|CommandLine1\nDeviceID2|DeviceTemplateName2|CommandLine2 etc */
 
 void General_Info_Plugin::CMD_Get_Devices_To_Start(int iPK_Device,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
 //<-dceag-c956-e->
@@ -4145,5 +4145,21 @@ void General_Info_Plugin::CMD_Get_Devices_To_Start(int iPK_Device,string *sValue
 
 void General_Info_Plugin::CMD_Update_Device(int iPK_Device,string sMac_address,int iPK_Room,string sIP_Address,string sData_String,string sDescription,string &sCMD_Result,Message *pMessage)
 //<-dceag-c957-e->
+{
+}
+
+//<-dceag-c370-b->
+
+	/** @brief COMMAND: #370 - Execute Command Group */
+	/** Execute a command group */
+		/** @param #9 Text */
+			/** Instead of the command group, it can be put here in the format: PK_Device,PK_DeviceGroup,PK_Command,Delay,CancelIfOther,IsTemporary,"PK_CommandParameter","Description"....\n
+
+where the items in " have escaped " so they can embed , and \n characters */
+		/** @param #28 PK_CommandGroup */
+			/** The command group to execute */
+
+void General_Info_Plugin::CMD_Execute_Command_Group(string sText,int iPK_CommandGroup,string &sCMD_Result,Message *pMessage)
+//<-dceag-c370-e->
 {
 }

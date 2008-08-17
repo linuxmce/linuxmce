@@ -591,6 +591,26 @@ int DatabaseUtils::SyncMediaAttributes(DBHelper *pDBHelper)
 	return nAffectedRecords;
 }
 
+int DatabaseUtils::UpdateAttributeCount(DBHelper *pDBHelper)
+{
+	pDBHelper->threaded_db_wrapper_query("DELETE FROM Attribute_MediaType");
+
+    int nAffectedRecords = pDBHelper->threaded_db_wrapper_query(
+		"insert into Attribute_MediaType(FK_Attribute,EK_MediaType,NumFiles) "
+		"select PK_Attribute,File.EK_MediaType,count(PK_File) FROM Attribute "
+		"JOIN File_Attribute ON FK_Attribute=PK_Attribute "
+		"JOIN File ON FK_File=PK_File "
+		"WHERE Missing=0 AND IsDirectory=0 "
+		"GROUP BY PK_Attribute,File.EK_MediaType"
+	);
+
+	if(nAffectedRecords == -1)
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "DatabaseUtils::UpdateAttributeCount Attributes sync failed!"); 
+	else
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "DatabaseUtils::UpdateAttributeCount Records affected %d", nAffectedRecords); 
+	return nAffectedRecords;
+}
+
 void DatabaseUtils::LockTable(DBHelper *pDBHelper,string sTable)
 {
 	string sSQL = "LOCK TABLES `" + sTable + "` WRITE";

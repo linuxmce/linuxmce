@@ -42,25 +42,32 @@ Job::Job(JobHandler *pJobHandler,string sName,int PK_Orbiter,Command_Impl *pComm
 	m_iPK_Orbiter=PK_Orbiter;
 	m_pCommand_Impl=pCommand_Impl;
 	m_bAutoDelete=true;
+	gettimeofday( &m_tsCreated, NULL );
+	m_tsFirstRun.tv_sec=m_tsFirstRun.tv_nsec=0;
+	m_cPriority=50;
 
 #ifdef DEBUG
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Job::Job starting job %d <%p>",
-		m_iID,this);
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Job::Job created job %d <%p> name %s",
+		m_iID,this,m_sName.c_str());
 #endif
 }
 
 Job::~Job()
 {
+#ifdef DEBUG
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Job::~Job finished job %d <%p> name %s",
+		m_iID,this,m_sName.c_str());
+#endif
 	for(list<Task *>::iterator it=m_listTask.begin();it!=m_listTask.end();++it)
 		delete *it;
 }
 
 // cancel all tasks in this job
-bool Job::Abort()
+bool Job::Abort(bool bRequeue)
 {
 	m_bQuit=true;
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Job::Abort %s status %d", m_sName.c_str(), (int) m_eJobStatus);
-	if( m_eJobStatus==job_Aborted || m_eJobStatus==job_Done )
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Job::Abort %s status %d", ToString().c_str(), (int) m_eJobStatus);
+	if( m_eJobStatus_get() == job_Aborted || m_eJobStatus_get() == job_Done )
 		return true;
 	bool bAbortedOk=true;
 	PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
@@ -74,8 +81,20 @@ bool Job::Abort()
 			bAbortedOk=false;
 		}
 	}
-	if( m_eJobStatus==job_WaitingToStart || m_eJobStatus==job_InProgress )
-		m_eJobStatus=job_Aborted;
+	if( m_eJobStatus_get() == job_WaitingToStart || m_eJobStatus_get() == job_WaitingForCallback || m_eJobStatus_get() == job_InProgress )
+	{
+		if( bRequeue )
+		{
+			m_eJobStatus_set(job_WaitingToStart);
+			for(list<class Task *>::iterator it=m_listTask.begin();it!=m_listTask.end();++it)
+			{
+				Task *pTask = *it;
+				pTask->m_eTaskStatus_set(TASK_NOT_STARTED);
+			}
+		}
+		else
+			m_eJobStatus_set(job_Aborted);
+	}
 	return bAbortedOk;
 }
 
@@ -156,7 +175,7 @@ int Job::PendingTasks()
 
 bool Job::StartThread()
 {
-	m_eJobStatus=job_InProgress;
+	m_eJobStatus_set(job_InProgress);
 	return ThreadedClass::StartThread();
 }
 
@@ -176,7 +195,7 @@ bool Job::StopThread(int iTimeout)
 // run each task
 void Job::Run()
 {
-	m_eJobStatus=job_InProgress;
+	m_eJobStatus_set(job_InProgress);
 	PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
 	Task * pTask;
 	bool bAborted=false;
@@ -206,7 +225,7 @@ void Job::Run()
 		jm.Relock();
 	}
 	RefreshOrbiter();
-	m_eJobStatus=bAborted ? job_Aborted : job_Done;
+	m_eJobStatus_set(bAborted ? job_Aborted : job_Done);
 	JobDone();
 	m_pJobHandler->BroadcastCond();
 }
@@ -223,6 +242,41 @@ void Job::Reset(bool bDelete)
 	m_listTask.clear();
 }
 
+#ifdef DEBUG
+void Job::m_eJobStatus_set(enum JobStatus jobStatus,bool bLog)
+{
+	m_eJobStatus=jobStatus;
+	if( bLog==false )
+		return;
+
+	timespec ts;
+	gettimeofday(&ts,NULL);
+	timespec tsDiff = ts - m_tsCreated;
+
+	switch(m_eJobStatus)
+	{
+	case job_WaitingToStart:
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Job::m_eJobStatus job %s <%p> m_eJobStatus job_WaitingToStart after %d.%d seconds",ToString().c_str(),this,tsDiff.tv_sec,tsDiff.tv_nsec);
+		return;
+	case job_InProgress:
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Job::m_eJobStatus job %s <%p> m_eJobStatus job_InProgress after %d.%d seconds",ToString().c_str(),this,tsDiff.tv_sec,tsDiff.tv_nsec);
+		return;
+	case job_Error:
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Job::m_eJobStatus job %s <%p> m_eJobStatus job_Error after %d.%d seconds",ToString().c_str(),this,tsDiff.tv_sec,tsDiff.tv_nsec);
+		return;
+	case job_Aborted:
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Job::m_eJobStatus job %s <%p> m_eJobStatus job_Aborted after %d.%d seconds",ToString().c_str(),this,tsDiff.tv_sec,tsDiff.tv_nsec);
+		return;
+	case job_Done:
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Job::m_eJobStatus job %s <%p> m_eJobStatus job_Done after %d.%d seconds",ToString().c_str(),this,tsDiff.tv_sec,tsDiff.tv_nsec);
+		return;
+	case job_WaitingForCallback:
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Job::m_eJobStatus job %s <%p> m_eJobStatus job_WaitingForCallback after %d.%d seconds",ToString().c_str(),this,tsDiff.tv_sec,tsDiff.tv_nsec);
+		return;
+	}
+}
+#endif
+
 Task *Job::FindTask(int taskID)
 {
 	for(list<Task *>::iterator it=m_listTask.begin();it!=m_listTask.end();++it)
@@ -237,7 +291,7 @@ Task *Job::FindTask(int taskID)
 bool Job::ReportPendingTasks(PendingTaskList *pPendingTaskList)
 {
 	PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
-	if( m_eJobStatus==job_WaitingToStart || m_eJobStatus==job_InProgress )
+	if( m_eJobStatus_get() == job_WaitingToStart || m_eJobStatus_get() == job_InProgress || m_eJobStatus_get()==job_WaitingForCallback )
 	{
 		if( pPendingTaskList )
 		{

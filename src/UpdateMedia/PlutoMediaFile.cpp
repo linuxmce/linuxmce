@@ -81,6 +81,7 @@ char *MediaSyncModeStr[] =
 //-----------------------------------------------------------------------------------------------------
 MediaSyncMode PlutoMediaFile::m_DefaultMediaSyncMode = modeNone;
 bool PlutoMediaFile::m_bNewFilesAdded = false;
+bool PlutoMediaFile::m_bAttributesUpdated = false;
 string PlutoMediaFile::m_sDVDKeysCache = "/home/.dvdcss";
 //-----------------------------------------------------------------------------------------------------
 PlutoMediaFile::PlutoMediaFile(Database_pluto_media *pDatabase_pluto_media, int PK_Installation, 
@@ -443,8 +444,10 @@ void PlutoMediaFile::SaveShortAttributesInDb(bool bAddAllToDb)
 						continue; // See notes above
 
 					MediaAttributes_LowLevel mediaAttributes_LowLevel(m_pDatabase_pluto_media);
+
+					bool bNew=false;
 					Row_Attribute *pRow_Attribute = mediaAttributes_LowLevel.GetAttributeFromDescription(m_nPK_MediaType,
-						pPlutoMediaAttribute->m_nType, pPlutoMediaAttribute->m_sName, PK_Attribute_CDDB ? PK_Attribute_CDDB : PK_Attribute_Performer);
+						pPlutoMediaAttribute->m_nType, pPlutoMediaAttribute->m_sName, PK_Attribute_CDDB ? PK_Attribute_CDDB : PK_Attribute_Performer, &bNew);
 
 					if( pRow_Attribute==NULL )
 					{
@@ -452,6 +455,9 @@ void PlutoMediaFile::SaveShortAttributesInDb(bool bAddAllToDb)
 							pPlutoMediaAttribute->m_nType, pPlutoMediaAttribute->m_sName.c_str());
 						continue;
 					}
+
+					if( bNew )
+						m_bAttributesUpdated = true;
 
 					pPlutoMediaAttribute->m_nPK_Attribute = pRow_Attribute->PK_Attribute_get();
 					if( pPlutoMediaAttribute->m_nType==ATTRIBUTETYPE_Performer_CONST )

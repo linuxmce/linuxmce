@@ -48,8 +48,7 @@ IdentifyJob::~IdentifyJob()
 		m_pDisk_Drive_Functions->UnlockDrive();
 	}
 }
-
-bool IdentifyJob::ReadyToRun()
+enumReadyToRun IdentifyJob::ReadyToRun()
 {
 	if( m_pDisk_Drive_Functions )  // We're ready to go if we have a drive to do the ripping
 	{
@@ -62,7 +61,7 @@ bool IdentifyJob::ReadyToRun()
 		if( !m_pDisk_Drive_Functions->m_pDevice_MediaIdentifier_get() )
 		{
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "IdentifyJob::ReadyToRun no media identifier");
-			m_eJobStatus = job_Error;
+			m_eJobStatus_set(job_Error);
 			return false;
 		}
 
@@ -72,7 +71,7 @@ bool IdentifyJob::ReadyToRun()
 
 	if( !m_pSlot ) // If we don't have a m_pSlot, something is wrong, we have nothing and can't proceed
 	{
-		m_eJobStatus = job_Error;
+		m_eJobStatus_set(job_Error);
 		return false;
 	}
 
@@ -87,7 +86,7 @@ bool IdentifyJob::ReadyToRun()
 	if( !m_pDisk_Drive_Functions->m_pDevice_MediaIdentifier_get() )
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "IdentifyJob::ReadyToRun no media identifier");
-		m_eJobStatus = job_Error;
+		m_eJobStatus_set(job_Error);
 		return false;
 	}
 
@@ -105,7 +104,7 @@ void IdentifyJob::AddIdentifyTasks()
 bool IdentifyJob::ReportPendingTasks(PendingTaskList *pPendingTaskList)
 {
 	PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
-	if( m_eJobStatus==job_WaitingToStart || m_eJobStatus==job_InProgress )
+	if( m_eJobStatus_get() == job_WaitingToStart || m_eJobStatus_get() == job_InProgress )
 	{
 		if( pPendingTaskList )
 		{
