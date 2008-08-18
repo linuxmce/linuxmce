@@ -1,4 +1,5 @@
-SNR_CPPFLAGS ?= <-mkr_t_compile_defines->
+SNR_CPPFLAGS ?=
+# <-mkr_t_compile_defines->
 
 ROOT = ..
 VIP = ../VIPShared
