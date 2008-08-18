@@ -25,7 +25,7 @@ endif
 
 CXXFLAGS +=
 CPPFLAGS += -I/usr/include/libxml2/ -DEMBEDDED_LMCE -DDEBUG 
-LDFLAGS += -lxml2
+LDFLAGS += #-lxml2
 XTRALDLIBS =
 
 Gen_Dev_Files +=
