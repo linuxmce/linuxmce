@@ -434,11 +434,55 @@
 		}
 	}
 	,
-	"Command_ids":[19,68,71,84,184,192,193,200,201,202,203,239,246,247,248,257,263,272,274,278,279,280,322,323,350,351,355,356,365,370,371,373,384,387,395,396,684,685,718,719,752,756,757,760,765,776,788,789,791,800,802,803,808,813,820,827,833,835,840,841,842,843,844,882,915,934,956,957,966,967,968,969],
+	"Command_ids":[19,28,32,37,38,39,40,41,42,63,64,65,68,71,84,92,95,126,139,184,191,192,193,200,201,202,203,239,246,247,248,249,257,259,263,272,274,278,279,280,322,323,350,351,355,356,365,370,371,373,384,387,395,396,412,548,684,685,718,719,752,756,757,760,765,776,788,789,791,800,802,803,808,813,820,827,833,835,840,841,842,843,844,869,882,915,916,917,920,934,956,957,966,967,968,969,970,971],
 	"Command":{
 		"PK_Command_19": {
 			"Description":"Set House Mode",
 			"FK_CommandCategory":"28"
+		},
+		"PK_Command_28": {
+			"Description":"Simulate Keypress",
+			"FK_CommandCategory":"1"
+		},
+		"PK_Command_32": {
+			"Description":"Update Object Image",
+			"FK_CommandCategory":"1"
+		},
+		"PK_Command_37": {
+			"Description":"Play Media",
+			"FK_CommandCategory":"9"
+		},
+		"PK_Command_38": {
+			"Description":"Stop Media",
+			"FK_CommandCategory":"9"
+		},
+		"PK_Command_39": {
+			"Description":"Pause Media",
+			"FK_CommandCategory":"9"
+		},
+		"PK_Command_40": {
+			"Description":"Restart Media",
+			"FK_CommandCategory":"9"
+		},
+		"PK_Command_41": {
+			"Description":"Change Playback Speed",
+			"FK_CommandCategory":"9"
+		},
+		"PK_Command_42": {
+			"Description":"Jump to Position in Stream",
+			"FK_CommandCategory":"9"
+		},
+		"PK_Command_63": {
+			"Description":"Skip Fwd - Channel\/Track Greater",
+			"FK_CommandCategory":"33"
+		},
+		"PK_Command_64": {
+			"Description":"Skip Back - Channel\/Track Lower",
+			"FK_CommandCategory":"33"
+		},
+		"PK_Command_65": {
+			"Description":"Jump Position In Playlist",
+			"FK_CommandCategory":"9"
 		},
 		"PK_Command_68": {
 			"Description":"Get Device Data",
@@ -452,9 +496,29 @@
 			"Description":"Get Video Frame",
 			"FK_CommandCategory":"9"
 		},
+		"PK_Command_92": {
+			"Description":"Pause",
+			"FK_CommandCategory":"33"
+		},
+		"PK_Command_95": {
+			"Description":"Stop",
+			"FK_CommandCategory":"33"
+		},
+		"PK_Command_126": {
+			"Description":"Guide",
+			"FK_CommandCategory":"13"
+		},
+		"PK_Command_139": {
+			"Description":"Play",
+			"FK_CommandCategory":"33"
+		},
 		"PK_Command_184": {
 			"Description":"Set Level",
 			"FK_CommandCategory":"8"
+		},
+		"PK_Command_191": {
+			"Description":"Send Code",
+			"FK_CommandCategory":"37"
 		},
 		"PK_Command_192": {
 			"Description":"On",
@@ -496,9 +560,17 @@
 			"Description":"Get Device Status",
 			"FK_CommandCategory":"7"
 		},
+		"PK_Command_249": {
+			"Description":"Start Streaming",
+			"FK_CommandCategory":"9"
+		},
 		"PK_Command_257": {
 			"Description":"Delay",
 			"FK_CommandCategory":"55"
+		},
+		"PK_Command_259": {
+			"Description":"Report Playback Position",
+			"FK_CommandCategory":"9"
 		},
 		"PK_Command_263": {
 			"Description":"Toggle Event Handler",
@@ -579,6 +651,14 @@
 		"PK_Command_396": {
 			"Description":"Check for updates done",
 			"FK_CommandCategory":"55"
+		},
+		"PK_Command_412": {
+			"Description":"Set Media Position",
+			"FK_CommandCategory":"9"
+		},
+		"PK_Command_548": {
+			"Description":"Menu",
+			"FK_CommandCategory":"43"
 		},
 		"PK_Command_684": {
 			"Description":"Zoom In",
@@ -688,6 +768,10 @@
 			"Description":"RemoteAssistance_GetStatus",
 			"FK_CommandCategory":"7"
 		},
+		"PK_Command_869": {
+			"Description":"Request XML Data",
+			"FK_CommandCategory":"11"
+		},
 		"PK_Command_882": {
 			"Description":"Abort Task",
 			"FK_CommandCategory":"7"
@@ -695,6 +779,18 @@
 		"PK_Command_915": {
 			"Description":"Enable Device",
 			"FK_CommandCategory":"55"
+		},
+		"PK_Command_916": {
+			"Description":"Set Aspect Ratio",
+			"FK_CommandCategory":"9"
+		},
+		"PK_Command_917": {
+			"Description":"Set Zoom",
+			"FK_CommandCategory":"9"
+		},
+		"PK_Command_920": {
+			"Description":"Set Media ID",
+			"FK_CommandCategory":"9"
 		},
 		"PK_Command_934": {
 			"Description":"Get Home Symlink",
@@ -723,14 +819,30 @@
 		"PK_Command_969": {
 			"Description":"Restore To NonTemp State",
 			"FK_CommandCategory":"7"
+		},
+		"PK_Command_970": {
+			"Description":"Register Data Provider",
+			"FK_CommandCategory":"7"
+		},
+		"PK_Command_971": {
+			"Description":"Request Data Provider",
+			"FK_CommandCategory":"7"
 		}
 	}
 	,
-	"CommandCategory_ids":[28,7,9,8,10,34,55,36,43,44,5,26],
+	"CommandCategory_ids":[28,1,33,7,9,13,8,37,10,34,55,36,43,44,5,26,11],
 	"CommandCategory":{
 		"PK_CommandCategory_28": {
 			"FK_CommandCategory_Parent":"",
 			"Description":"Security"
+		},
+		"PK_CommandCategory_1": {
+			"FK_CommandCategory_Parent":"",
+			"Description":"Orbiter"
+		},
+		"PK_CommandCategory_33": {
+			"FK_CommandCategory_Parent":"12",
+			"Description":"Simple Control"
 		},
 		"PK_CommandCategory_7": {
 			"FK_CommandCategory_Parent":"",
@@ -740,9 +852,17 @@
 			"FK_CommandCategory_Parent":"2",
 			"Description":"DCE Players"
 		},
+		"PK_CommandCategory_13": {
+			"FK_CommandCategory_Parent":"12",
+			"Description":"TV"
+		},
 		"PK_CommandCategory_8": {
 			"FK_CommandCategory_Parent":"2",
 			"Description":"Handler"
+		},
+		"PK_CommandCategory_37": {
+			"FK_CommandCategory_Parent":"",
+			"Description":"Infrared"
 		},
 		"PK_CommandCategory_10": {
 			"FK_CommandCategory_Parent":"",
@@ -775,10 +895,14 @@
 		"PK_CommandCategory_26": {
 			"FK_CommandCategory_Parent":"",
 			"Description":"Lighting"
+		},
+		"PK_CommandCategory_11": {
+			"FK_CommandCategory_Parent":"",
+			"Description":"Datagrid"
 		}
 	}
 	,
-	"CommandParameter_ids":[99,100,101,2,52,53,13,19,23,41,60,61,20,76,97,98,91,92,102,107,21,50,57,5,8,47,9,28,119,40,230,150,156,198,44,201,58,109,154,202,10,205,103,51,208,219,222,223,229,239,240,163,17,244,48,249,250,248,275,220,225,39,182,259],
+	"CommandParameter_ids":[99,100,101,26,3,14,29,42,59,43,2,52,53,13,19,23,41,60,61,20,203,76,97,98,91,92,105,102,107,21,50,57,5,8,47,28,9,119,40,230,150,156,198,44,201,58,109,10,154,202,205,103,51,208,219,222,223,229,239,240,163,17,244,48,249,250,15,248,260,261,275,220,225,39,182,259,280,279,281],
 	"CommandParameter":{
 		"PK_CommandParameter_99": {
 			"Description":"Password",
@@ -791,6 +915,34 @@
 		"PK_CommandParameter_101": {
 			"Description":"Handling Instructions",
 			"FK_ParameterType":"1"
+		},
+		"PK_CommandParameter_26": {
+			"Description":"PK_Button",
+			"FK_ParameterType":"1"
+		},
+		"PK_CommandParameter_3": {
+			"Description":"PK_DesignObj",
+			"FK_ParameterType":"1"
+		},
+		"PK_CommandParameter_14": {
+			"Description":"Type",
+			"FK_ParameterType":"1"
+		},
+		"PK_CommandParameter_29": {
+			"Description":"PK_MediaType",
+			"FK_ParameterType":"2"
+		},
+		"PK_CommandParameter_42": {
+			"Description":"MediaPosition",
+			"FK_ParameterType":"1"
+		},
+		"PK_CommandParameter_59": {
+			"Description":"MediaURL",
+			"FK_ParameterType":"4"
+		},
+		"PK_CommandParameter_43": {
+			"Description":"MediaPlaybackSpeed",
+			"FK_ParameterType":"2"
 		},
 		"PK_CommandParameter_2": {
 			"Description":"PK_Device",
@@ -832,6 +984,10 @@
 			"Description":"Format",
 			"FK_ParameterType":"1"
 		},
+		"PK_CommandParameter_203": {
+			"Description":"Eject",
+			"FK_ParameterType":"3"
+		},
 		"PK_CommandParameter_76": {
 			"Description":"Level",
 			"FK_ParameterType":"1"
@@ -851,6 +1007,10 @@
 		"PK_CommandParameter_92": {
 			"Description":"Checksum Only",
 			"FK_ParameterType":"3"
+		},
+		"PK_CommandParameter_105": {
+			"Description":"StreamingTargets",
+			"FK_ParameterType":"1"
 		},
 		"PK_CommandParameter_102": {
 			"Description":"Time",
@@ -884,13 +1044,13 @@
 			"Description":"Mac address",
 			"FK_ParameterType":"1"
 		},
-		"PK_CommandParameter_9": {
-			"Description":"Text",
-			"FK_ParameterType":"1"
-		},
 		"PK_CommandParameter_28": {
 			"Description":"PK_CommandGroup",
 			"FK_ParameterType":"2"
+		},
+		"PK_CommandParameter_9": {
+			"Description":"Text",
+			"FK_ParameterType":"1"
 		},
 		"PK_CommandParameter_119": {
 			"Description":"True\/False",
@@ -932,16 +1092,16 @@
 			"Description":"Data String",
 			"FK_ParameterType":"1"
 		},
+		"PK_CommandParameter_10": {
+			"Description":"ID",
+			"FK_ParameterType":"1"
+		},
 		"PK_CommandParameter_154": {
 			"Description":"PK_Command",
 			"FK_ParameterType":"2"
 		},
 		"PK_CommandParameter_202": {
 			"Description":"Parameters",
-			"FK_ParameterType":"1"
-		},
-		"PK_CommandParameter_10": {
-			"Description":"ID",
 			"FK_ParameterType":"1"
 		},
 		"PK_CommandParameter_205": {
@@ -1008,9 +1168,21 @@
 			"Description":"Nodes List",
 			"FK_ParameterType":"1"
 		},
+		"PK_CommandParameter_15": {
+			"Description":"DataGrid ID",
+			"FK_ParameterType":"1"
+		},
 		"PK_CommandParameter_248": {
 			"Description":"Parameter ID",
 			"FK_ParameterType":"2"
+		},
+		"PK_CommandParameter_260": {
+			"Description":"Aspect Ratio",
+			"FK_ParameterType":"1"
+		},
+		"PK_CommandParameter_261": {
+			"Description":"Zoom Level",
+			"FK_ParameterType":"1"
 		},
 		"PK_CommandParameter_275": {
 			"Description":"Symlink",
@@ -1035,6 +1207,18 @@
 		"PK_CommandParameter_259": {
 			"Description":"Multiple",
 			"FK_ParameterType":"3"
+		},
+		"PK_CommandParameter_280": {
+			"Description":"Format Output",
+			"FK_ParameterType":"1"
+		},
+		"PK_CommandParameter_279": {
+			"Description":"Format Input",
+			"FK_ParameterType":"1"
+		},
+		"PK_CommandParameter_281": {
+			"Description":"Cache",
+			"FK_ParameterType":"1"
 		}
 	}
 	,
@@ -1067,6 +1251,150 @@
 			"FK_Command":"19",
 			"FK_CommandParameter":"101",
 			"Description":"How to handle any sensors that we are trying to arm, but are blocked.  Valid choices are: R-Report, change to a screen on the orbiter reporting this and let the user decide, W-Wait, arm anyway, but wait for the sensors to clear and then arm them, B-Bypass",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_28_26": {
+			"FK_Command":"28",
+			"FK_CommandParameter":"26",
+			"Description":"What key to simulate being pressed.  If 2 numbers are specified, separated by a comma, the second will be used if the Shift key is specified.",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_28_41": {
+			"FK_Command":"28",
+			"FK_CommandParameter":"41",
+			"Description":"ID of stream to apply",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_28_50": {
+			"FK_Command":"28",
+			"FK_CommandParameter":"50",
+			"Description":"The application to send the keypress to. If not specified, it goes to the DCE device.",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_32_3": {
+			"FK_Command":"32",
+			"FK_CommandParameter":"3",
+			"Description":"The object in which to put the bitmap",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_32_14": {
+			"FK_Command":"32",
+			"FK_CommandParameter":"14",
+			"Description":"1=bmp, 2=jpg, 3=png",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_32_19": {
+			"FK_Command":"32",
+			"FK_CommandParameter":"19",
+			"Description":"The contents of the bitmap, like reading from the file into a memory buffer",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_32_23": {
+			"FK_Command":"32",
+			"FK_CommandParameter":"23",
+			"Description":"If 1, the image will be stretched to fit the object",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_37_42": {
+			"FK_Command":"37",
+			"FK_CommandParameter":"42",
+			"Description":"The position at which we need to start playing.",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_37_59": {
+			"FK_Command":"37",
+			"FK_CommandParameter":"59",
+			"Description":"The file to play, or other media id.  The format is specific on the media type and the media player.",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_37_29": {
+			"FK_Command":"37",
+			"FK_CommandParameter":"29",
+			"Description":"The type of media",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_37_41": {
+			"FK_Command":"37",
+			"FK_CommandParameter":"41",
+			"Description":"The media that we need to play.",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_38_41": {
+			"FK_Command":"38",
+			"FK_CommandParameter":"41",
+			"Description":"The media needing to be stopped.",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_38_42": {
+			"FK_Command":"38",
+			"FK_CommandParameter":"42",
+			"Description":"The position at which this stream was last played.",
+			"IsOut":"1"
+		},
+		"Command_CommandParameter_39_41": {
+			"FK_Command":"39",
+			"FK_CommandParameter":"41",
+			"Description":"The media stream for which we need to pause playback.",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_40_41": {
+			"FK_Command":"40",
+			"FK_CommandParameter":"41",
+			"Description":"The media stream that we need to restart playback for.",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_41_41": {
+			"FK_Command":"41",
+			"FK_CommandParameter":"41",
+			"Description":"The media needing the playback speed change.",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_41_43": {
+			"FK_Command":"41",
+			"FK_CommandParameter":"43",
+			"Description":"The requested media playback speed * 1000.  -1000 = rev, 4000 = 4x fwd, -500 = rev 1\/2.  Less than 10 = relative.  +2 = double, -1 = reverse.   See Media_Plugin::ReceivedMessage",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_41_220": {
+			"FK_Command":"41",
+			"FK_CommandParameter":"220",
+			"Description":"If true, report this speed to the user on the OSD",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_42_5": {
+			"FK_Command":"42",
+			"FK_CommandParameter":"5",
+			"Description":"The number of seconds.  A number is considered an absolute.  \"+2\" means forward 2, \"-1\" means back 1.  A simpler command than Set Media Position",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_42_41": {
+			"FK_Command":"42",
+			"FK_CommandParameter":"41",
+			"Description":"The stream",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_63_41": {
+			"FK_Command":"63",
+			"FK_CommandParameter":"41",
+			"Description":"ID of stream to apply",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_64_41": {
+			"FK_Command":"64",
+			"FK_CommandParameter":"41",
+			"Description":"ID of stream to apply",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_65_5": {
+			"FK_Command":"65",
+			"FK_CommandParameter":"5",
+			"Description":"The track to go to.  A number is considered an absolute.  \"+2\" means forward 2, \"-1\" means back 1.",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_65_41": {
+			"FK_Command":"65",
+			"FK_CommandParameter":"41",
+			"Description":"ID of stream to apply",
 			"IsOut":"0"
 		},
 		"Command_CommandParameter_68_2": {
@@ -1105,6 +1433,12 @@
 			"Description":"The file's contents",
 			"IsOut":"1"
 		},
+		"Command_CommandParameter_84_61": {
+			"FK_Command":"84",
+			"FK_CommandParameter":"61",
+			"Description":"Frame height",
+			"IsOut":"0"
+		},
 		"Command_CommandParameter_84_19": {
 			"FK_Command":"84",
 			"FK_CommandParameter":"19",
@@ -1135,10 +1469,28 @@
 			"Description":"Frame width",
 			"IsOut":"0"
 		},
-		"Command_CommandParameter_84_61": {
-			"FK_Command":"84",
-			"FK_CommandParameter":"61",
-			"Description":"Frame height",
+		"Command_CommandParameter_92_41": {
+			"FK_Command":"92",
+			"FK_CommandParameter":"41",
+			"Description":"ID of stream to apply",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_95_41": {
+			"FK_Command":"95",
+			"FK_CommandParameter":"41",
+			"Description":"ID of stream to apply",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_95_203": {
+			"FK_Command":"95",
+			"FK_CommandParameter":"203",
+			"Description":"If true, the drive will be ejected if there is no media currently playing, so a remote's stop button acts as stop\/eject.",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_139_41": {
+			"FK_Command":"139",
+			"FK_CommandParameter":"41",
+			"Description":"ID of stream to apply",
 			"IsOut":"0"
 		},
 		"Command_CommandParameter_184_76": {
@@ -1147,16 +1499,22 @@
 			"Description":"The level to set, as a value between 0 (off) and 100 (full).  It can be preceeded with a - or + indicating a relative value.  +20 means up 20%.",
 			"IsOut":"0"
 		},
-		"Command_CommandParameter_192_98": {
-			"FK_Command":"192",
-			"FK_CommandParameter":"98",
-			"Description":"Normally when a device is turned on the corresponding \"pipes\" are enabled by default. if this parameter is blank.  If this parameter is 0, no pipes will be enabled.  This can also be a comma seperated list of devices, meaning only the pipes to those devic",
+		"Command_CommandParameter_191_9": {
+			"FK_Command":"191",
+			"FK_CommandParameter":"9",
+			"Description":"The I\/R code -- usually in Pronto format",
 			"IsOut":"0"
 		},
 		"Command_CommandParameter_192_97": {
 			"FK_Command":"192",
 			"FK_CommandParameter":"97",
 			"Description":"Normally when a device is turned on all the inputs and outputs are selected automatically.  If this parameter is specified, only the settings along this pipe will be set.",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_192_98": {
+			"FK_Command":"192",
+			"FK_CommandParameter":"98",
+			"Description":"Normally when a device is turned on the corresponding \"pipes\" are enabled by default. if this parameter is blank.  If this parameter is 0, no pipes will be enabled.  This can also be a comma seperated list of devices, meaning only the pipes to those devic",
 			"IsOut":"0"
 		},
 		"Command_CommandParameter_193_97": {
@@ -1213,6 +1571,12 @@
 			"Description":"If this is true, this command will return only the checksum of the file, Data will be null.",
 			"IsOut":"1"
 		},
+		"Command_CommandParameter_246_2": {
+			"FK_Command":"246",
+			"FK_CommandParameter":"2",
+			"Description":"The device to set",
+			"IsOut":"0"
+		},
 		"Command_CommandParameter_246_5": {
 			"FK_Command":"246",
 			"FK_CommandParameter":"5",
@@ -1223,12 +1587,6 @@
 			"FK_Command":"246",
 			"FK_CommandParameter":"52",
 			"Description":"The device data",
-			"IsOut":"0"
-		},
-		"Command_CommandParameter_246_2": {
-			"FK_Command":"246",
-			"FK_CommandParameter":"2",
-			"Description":"The device to set",
 			"IsOut":"0"
 		},
 		"Command_CommandParameter_247_2": {
@@ -1243,11 +1601,59 @@
 			"Description":"The state data for the device.",
 			"IsOut":"1"
 		},
+		"Command_CommandParameter_249_59": {
+			"FK_Command":"249",
+			"FK_CommandParameter":"59",
+			"Description":"The url to use to play this stream.",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_249_105": {
+			"FK_Command":"249",
+			"FK_CommandParameter":"105",
+			"Description":"Target destinations for streaming. Semantics dependent on the target device.",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_249_29": {
+			"FK_Command":"249",
+			"FK_CommandParameter":"29",
+			"Description":"The type of media",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_249_41": {
+			"FK_Command":"249",
+			"FK_CommandParameter":"41",
+			"Description":"Identifier for this streaming session.",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_249_42": {
+			"FK_Command":"249",
+			"FK_CommandParameter":"42",
+			"Description":"Where to start playing from",
+			"IsOut":"0"
+		},
 		"Command_CommandParameter_257_102": {
 			"FK_Command":"257",
 			"FK_CommandParameter":"102",
 			"Description":"The delay time in minutes",
 			"IsOut":"0"
+		},
+		"Command_CommandParameter_259_9": {
+			"FK_Command":"259",
+			"FK_CommandParameter":"9",
+			"Description":"A human readable representation of the current position",
+			"IsOut":"1"
+		},
+		"Command_CommandParameter_259_41": {
+			"FK_Command":"259",
+			"FK_CommandParameter":"41",
+			"Description":"The stream ID on which to report the position.",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_259_42": {
+			"FK_Command":"259",
+			"FK_CommandParameter":"42",
+			"Description":"A media player readable representation of the current position including all options",
+			"IsOut":"1"
 		},
 		"Command_CommandParameter_263_107": {
 			"FK_Command":"263",
@@ -1381,6 +1787,30 @@
 			"Description":"This is true if the script used to check for updates fails.",
 			"IsOut":"0"
 		},
+		"Command_CommandParameter_412_41": {
+			"FK_Command":"412",
+			"FK_CommandParameter":"41",
+			"Description":"The stream to set",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_412_42": {
+			"FK_Command":"412",
+			"FK_CommandParameter":"42",
+			"Description":"The media position.  When MediaPlugin gets this, it will be a bookmark ID, when a media player gets it, the string",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_548_9": {
+			"FK_Command":"548",
+			"FK_CommandParameter":"9",
+			"Description":"A string indicating which menu should appear.  The parameter is only used for smart media devices",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_548_41": {
+			"FK_Command":"548",
+			"FK_CommandParameter":"41",
+			"Description":"ID of stream to apply",
+			"IsOut":"0"
+		},
 		"Command_CommandParameter_718_2": {
 			"FK_Command":"718",
 			"FK_CommandParameter":"2",
@@ -1477,6 +1907,12 @@
 			"Description":"Parameters for the command in the format:\r\nPK_CommandParameter|Value|...",
 			"IsOut":"0"
 		},
+		"Command_CommandParameter_765_205": {
+			"FK_Command":"765",
+			"FK_CommandParameter":"205",
+			"Description":"If true, the device list are the source devices and the PK_Device is the relation",
+			"IsOut":"0"
+		},
 		"Command_CommandParameter_765_2": {
 			"FK_Command":"765",
 			"FK_CommandParameter":"2",
@@ -1487,12 +1923,6 @@
 			"FK_Command":"765",
 			"FK_CommandParameter":"103",
 			"Description":"The devices it relates to",
-			"IsOut":"0"
-		},
-		"Command_CommandParameter_765_205": {
-			"FK_Command":"765",
-			"FK_CommandParameter":"205",
-			"Description":"If true, the device list are the source devices and the PK_Device is the relation",
 			"IsOut":"0"
 		},
 		"Command_CommandParameter_776_51": {
@@ -1621,17 +2051,17 @@
 			"Description":"If specified, only command groups with this Description will be terminated",
 			"IsOut":"0"
 		},
-		"Command_CommandParameter_833_5": {
-			"FK_Command":"833",
-			"FK_CommandParameter":"5",
-			"Description":"The user's name",
-			"IsOut":"1"
-		},
 		"Command_CommandParameter_833_17": {
 			"FK_Command":"833",
 			"FK_CommandParameter":"17",
 			"Description":"The user id",
 			"IsOut":"0"
+		},
+		"Command_CommandParameter_833_5": {
+			"FK_Command":"833",
+			"FK_CommandParameter":"5",
+			"Description":"The user's name",
+			"IsOut":"1"
 		},
 		"Command_CommandParameter_835_244": {
 			"FK_Command":"835",
@@ -1639,16 +2069,22 @@
 			"Description":"Contains the following info:\r\n\r\ndevice id, device ip, share name, user name, password, free space.\r\n\r\nDelimiter: '\\n'",
 			"IsOut":"1"
 		},
+		"Command_CommandParameter_840_239": {
+			"FK_Command":"840",
+			"FK_CommandParameter":"239",
+			"Description":"Z-Wave node ID of the device.",
+			"IsOut":"0"
+		},
 		"Command_CommandParameter_840_48": {
 			"FK_Command":"840",
 			"FK_CommandParameter":"48",
 			"Description":"WakeUp timeout value (1-255 min)",
 			"IsOut":"0"
 		},
-		"Command_CommandParameter_840_239": {
-			"FK_Command":"840",
-			"FK_CommandParameter":"239",
-			"Description":"Z-Wave node ID of the device.",
+		"Command_CommandParameter_841_48": {
+			"FK_Command":"841",
+			"FK_CommandParameter":"48",
+			"Description":"The value of parameter.",
 			"IsOut":"0"
 		},
 		"Command_CommandParameter_841_239": {
@@ -1661,12 +2097,6 @@
 			"FK_Command":"841",
 			"FK_CommandParameter":"248",
 			"Description":"The configuration parameter ID.",
-			"IsOut":"0"
-		},
-		"Command_CommandParameter_841_48": {
-			"FK_Command":"841",
-			"FK_CommandParameter":"48",
-			"Description":"The value of parameter.",
 			"IsOut":"0"
 		},
 		"Command_CommandParameter_842_239": {
@@ -1699,6 +2129,24 @@
 			"Description":"The state of Remote Assistance",
 			"IsOut":"1"
 		},
+		"Command_CommandParameter_869_15": {
+			"FK_Command":"869",
+			"FK_CommandParameter":"15",
+			"Description":"The name of the datagrid to generate.  This corresponds to the id the data generator registered with",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_869_109": {
+			"FK_Command":"869",
+			"FK_CommandParameter":"109",
+			"Description":"The resulting data in XML Format",
+			"IsOut":"1"
+		},
+		"Command_CommandParameter_869_202": {
+			"FK_Command":"869",
+			"FK_CommandParameter":"202",
+			"Description":"Incoming parameters in xml format.",
+			"IsOut":"0"
+		},
 		"Command_CommandParameter_882_248": {
 			"FK_Command":"882",
 			"FK_CommandParameter":"248",
@@ -1715,6 +2163,42 @@
 			"FK_Command":"915",
 			"FK_CommandParameter":"198",
 			"Description":"The Orbiter that did it, if any",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_916_41": {
+			"FK_Command":"916",
+			"FK_CommandParameter":"41",
+			"Description":"ID of stream to apply",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_916_260": {
+			"FK_Command":"916",
+			"FK_CommandParameter":"260",
+			"Description":"aspect ratio to set: auto, 1:1, 4:3, 16:9, 2.11:1",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_917_41": {
+			"FK_Command":"917",
+			"FK_CommandParameter":"41",
+			"Description":"ID of stream to apply",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_917_261": {
+			"FK_Command":"917",
+			"FK_CommandParameter":"261",
+			"Description":"Zoom level to set",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_920_10": {
+			"FK_Command":"920",
+			"FK_CommandParameter":"10",
+			"Description":"Media ID (special format)",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_920_41": {
+			"FK_Command":"920",
+			"FK_CommandParameter":"41",
+			"Description":"ID of stream to set media information for",
 			"IsOut":"0"
 		},
 		"Command_CommandParameter_934_219": {
@@ -1831,18 +2315,6 @@
 			"Description":"If true, allow addition of multiple nodes until timeout occurs or add node is called with node stop.",
 			"IsOut":"0"
 		},
-		"Command_CommandParameter_968_182": {
-			"FK_Command":"968",
-			"FK_CommandParameter":"182",
-			"Description":"Number of seconds to timeout.  If not specified default is 60 seconds.  0=no timeout; a subsequent node stop must be called.",
-			"IsOut":"0"
-		},
-		"Command_CommandParameter_968_259": {
-			"FK_Command":"968",
-			"FK_CommandParameter":"259",
-			"Description":"If true, allow deletion of multiple nodes until timeout occurs or add node is called with node stop.",
-			"IsOut":"0"
-		},
 		"Command_CommandParameter_968_39": {
 			"FK_Command":"968",
 			"FK_CommandParameter":"39",
@@ -1855,10 +2327,94 @@
 			"Description":"empty or 1 = Node Any, 2=node controller, 3=node slave, 5=node stop",
 			"IsOut":"0"
 		},
+		"Command_CommandParameter_968_182": {
+			"FK_Command":"968",
+			"FK_CommandParameter":"182",
+			"Description":"Number of seconds to timeout.  If not specified default is 60 seconds.  0=no timeout; a subsequent node stop must be called.",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_968_259": {
+			"FK_Command":"968",
+			"FK_CommandParameter":"259",
+			"Description":"If true, allow deletion of multiple nodes until timeout occurs or add node is called with node stop.",
+			"IsOut":"0"
+		},
 		"Command_CommandParameter_969_2": {
 			"FK_Command":"969",
 			"FK_CommandParameter":"2",
 			"Description":"The device to restore",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_970_2": {
+			"FK_Command":"970",
+			"FK_CommandParameter":"2",
+			"Description":"The device that handles the type of data",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_970_10": {
+			"FK_Command":"970",
+			"FK_CommandParameter":"10",
+			"Description":"The ID of the data source.  If the last character is a * (wildcard) then it will provide all data sources that start with this ID",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_970_279": {
+			"FK_Command":"970",
+			"FK_CommandParameter":"279",
+			"Description":"The format for input parameters.  * means match any request.",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_970_280": {
+			"FK_Command":"970",
+			"FK_CommandParameter":"280",
+			"Description":"The format for output data.  * means match any request.",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_971_281": {
+			"FK_Command":"971",
+			"FK_CommandParameter":"281",
+			"Description":"Empty = Use Default. Y=Keep a copy of the output in cache, N=Do not keep this result in cache",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_971_10": {
+			"FK_Command":"971",
+			"FK_CommandParameter":"10",
+			"Description":"The ID of the data being requested",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_971_48": {
+			"FK_Command":"971",
+			"FK_CommandParameter":"48",
+			"Description":"An number representing this particular request.  If Multiple is true, the command can be resent with the same Value to get the same output",
+			"IsOut":"1"
+		},
+		"Command_CommandParameter_971_109": {
+			"FK_Command":"971",
+			"FK_CommandParameter":"109",
+			"Description":"The resulting Data",
+			"IsOut":"1"
+		},
+		"Command_CommandParameter_971_202": {
+			"FK_Command":"971",
+			"FK_CommandParameter":"202",
+			"Description":"The parameters for the query",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_971_259": {
+			"FK_Command":"971",
+			"FK_CommandParameter":"259",
+			"Description":"if true, we may make multiple requests and pass back in the same output Value",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_971_279": {
+			"FK_Command":"971",
+			"FK_CommandParameter":"279",
+			"Description":"The format for the parameters",
+			"IsOut":"0"
+		},
+		"Command_CommandParameter_971_280": {
+			"FK_Command":"971",
+			"FK_CommandParameter":"280",
+			"Description":"The desired format to retrieve the data",
 			"IsOut":"0"
 		}
 	}
@@ -2051,7 +2607,7 @@
 		}
 	}
 	,
-	"DeviceCategory_ids":[1,83,7,61,68,67,70,73,140,99,84,81,82,80,117,169,170],
+	"DeviceCategory_ids":[1,83,7,61,68,67,70,73,140,99,84,81,82,169,170,80,64,117,174,175,158],
 	"DeviceCategory":{
 		"PK_DeviceCategory_1": {
 			"FK_DeviceCategory_Parent":"",
@@ -2105,25 +2661,41 @@
 			"FK_DeviceCategory_Parent":"71",
 			"Description":"Climate Interface"
 		},
+		"PK_DeviceCategory_169": {
+			"FK_DeviceCategory_Parent":"9",
+			"Description":"XML Data Handler Plug-ins"
+		},
+		"PK_DeviceCategory_170": {
+			"FK_DeviceCategory_Parent":"9",
+			"Description":"XML Data Source Plug-ins"
+		},
 		"PK_DeviceCategory_80": {
 			"FK_DeviceCategory_Parent":"71",
 			"Description":"Security Interface"
+		},
+		"PK_DeviceCategory_64": {
+			"FK_DeviceCategory_Parent":"62",
+			"Description":"Virtual Media Director"
 		},
 		"PK_DeviceCategory_117": {
 			"FK_DeviceCategory_Parent":"57",
 			"Description":"Remote Controls"
 		},
-		"PK_DeviceCategory_169": {
-			"FK_DeviceCategory_Parent":"9",
-			"Description":"XML Data Handler Plugins"
+		"PK_DeviceCategory_174": {
+			"FK_DeviceCategory_Parent":"12",
+			"Description":"Data Provider Catalog Plugins"
 		},
-		"PK_DeviceCategory_170": {
-			"FK_DeviceCategory_Parent":"9",
-			"Description":"XML Data Source Plugins"
-		}		
+		"PK_DeviceCategory_175": {
+			"FK_DeviceCategory_Parent":"12",
+			"Description":"Data Providers"
+		},
+		"PK_DeviceCategory_158": {
+			"FK_DeviceCategory_Parent":"157",
+			"Description":"Network Storage"
+		}
 	}
 	,
-	"DeviceCommandGroup_ids":[12,17,21,24,28,29,31,36,62,72,76,80,85,94],
+	"DeviceCommandGroup_ids":[12,17,21,24,28,29,31,36,62,72,76,80,85,88,94,95,96],
 	"DeviceCommandGroup":{
 		"PK_DeviceCommandGroup_12": {
 			"FK_DeviceCategory":"61",
@@ -2177,9 +2749,21 @@
 			"FK_DeviceCategory":"81",
 			"Description":"ZWave"
 		},
+		"PK_DeviceCommandGroup_88": {
+			"FK_DeviceCategory":"169",
+			"Description":"XML DataGrid Logic"
+		},
 		"PK_DeviceCommandGroup_94": {
 			"FK_DeviceCategory":"68",
 			"Description":"Climate Plugin Command Group"
+		},
+		"PK_DeviceCommandGroup_95": {
+			"FK_DeviceCategory":"174",
+			"Description":"Data Provider Catalog"
+		},
+		"PK_DeviceCommandGroup_96": {
+			"FK_DeviceCategory":"175",
+			"Description":"Data Providers"
 		}
 	}
 	,
@@ -4649,6 +5233,11 @@
 			"FK_Command":"193",
 			"Description":"Turn off the device"
 		},
+		"DeviceCommandGroup_Command_85_191": {
+			"FK_DeviceCommandGroup":"85",
+			"FK_Command":"191",
+			"Description":"Send a command to a node.  The text is a series of hex values separated by spaces, starting with data length, data and txOptions."
+		},
 		"DeviceCommandGroup_Command_85_820": {
 			"FK_DeviceCommandGroup":"85",
 			"FK_Command":"820",
@@ -4828,6 +5417,21 @@
 			"FK_DeviceCommandGroup":"94",
 			"FK_Command":"969",
 			"Description":"Restore a climate device to the state in State_NonTemporary"
+		},
+		"DeviceCommandGroup_Command_95_970": {
+			"FK_DeviceCommandGroup":"95",
+			"FK_Command":"970",
+			"Description":"Register a data provider in the catalog"
+		},
+		"DeviceCommandGroup_Command_95_971": {
+			"FK_DeviceCommandGroup":"95",
+			"FK_Command":"971",
+			"Description":"Request data from a provider registered in the catalog"
+		},
+		"DeviceCommandGroup_Command_96_971": {
+			"FK_DeviceCommandGroup":"96",
+			"FK_Command":"971",
+			"Description":"Request data from this provider"
 		}
 	}
 	,
@@ -4955,7 +5559,7 @@
 		}
 	}
 	,
-	"DeviceTemplate_ids":[1,4,7,27,31,32,33,37,38,47,50,52,54,56,68,1599,1600,1633,1744,1745,1754,1773,1813,1820,1868,1869,1922,1945],
+	"DeviceTemplate_ids":[1,4,7,27,31,32,33,37,38,47,50,52,54,56,68,1599,1600,1633,1744,1745,1754,1773,1813,1820,1868,1869,1922,1923,1945,1948,1949,1950,1951],
 	"DeviceTemplate":{
 		"PK_DeviceTemplate_1": {
 			"Description":"DCERouter",
@@ -5126,19 +5730,19 @@
 			"CommandLine":""
 		},
 		"PK_DeviceTemplate_1868": {
-			"Description":"XML Data Handler Plugin",
+			"Description":"XML Data Handler Plug-in",
 			"FK_DeviceCategory":"169",
 			"ImplementsDCE":"1",
-			"IsEmbedded":"1",
+			"IsEmbedded":"0",
 			"CommandLine":""
 		},
 		"PK_DeviceTemplate_1869": {
-			"Description":"Basic XML Data Source Plugin",
+			"Description":"Basic XML Data Source Plug-in",
 			"FK_DeviceCategory":"170",
 			"ImplementsDCE":"1",
-			"IsEmbedded":"1",
+			"IsEmbedded":"0",
 			"CommandLine":""
-		},				
+		},
 		"PK_DeviceTemplate_1922": {
 			"Description":"ZWave Embedded Security Interf",
 			"FK_DeviceCategory":"80",
@@ -5146,9 +5750,44 @@
 			"IsEmbedded":"1",
 			"CommandLine":""
 		},
+		"PK_DeviceTemplate_1923": {
+			"Description":"Hillcrest STB",
+			"FK_DeviceCategory":"64",
+			"ImplementsDCE":"1",
+			"IsEmbedded":"0",
+			"CommandLine":""
+		},
 		"PK_DeviceTemplate_1945": {
 			"Description":"ZWave Controller",
 			"FK_DeviceCategory":"117",
+			"ImplementsDCE":"0",
+			"IsEmbedded":"0",
+			"CommandLine":""
+		},
+		"PK_DeviceTemplate_1948": {
+			"Description":"Data Provider Catalog Plug-in",
+			"FK_DeviceCategory":"174",
+			"ImplementsDCE":"1",
+			"IsEmbedded":"0",
+			"CommandLine":""
+		},
+		"PK_DeviceTemplate_1949": {
+			"Description":"Shared JSON Data Provider Plug",
+			"FK_DeviceCategory":"175",
+			"ImplementsDCE":"1",
+			"IsEmbedded":"0",
+			"CommandLine":""
+		},
+		"PK_DeviceTemplate_1950": {
+			"Description":"Media Data Provider",
+			"FK_DeviceCategory":"175",
+			"ImplementsDCE":"1",
+			"IsEmbedded":"0",
+			"CommandLine":""
+		},
+		"PK_DeviceTemplate_1951": {
+			"Description":"DNS-323",
+			"FK_DeviceCategory":"158",
 			"ImplementsDCE":"0",
 			"IsEmbedded":"0",
 			"CommandLine":""
@@ -5231,6 +5870,34 @@
 		"DeviceTemplate_DeviceCommandGroup_1754_85": {
 			"FK_DeviceTemplate":"1754",
 			"FK_DeviceCommandGroup":"85"
+		},
+		"DeviceTemplate_DeviceCommandGroup_1868_88": {
+			"FK_DeviceTemplate":"1868",
+			"FK_DeviceCommandGroup":"88"
+		},
+		"DeviceTemplate_DeviceCommandGroup_1869_21": {
+			"FK_DeviceTemplate":"1869",
+			"FK_DeviceCommandGroup":"21"
+		},
+		"DeviceTemplate_DeviceCommandGroup_1923_4": {
+			"FK_DeviceTemplate":"1923",
+			"FK_DeviceCommandGroup":"4"
+		},
+		"DeviceTemplate_DeviceCommandGroup_1923_5": {
+			"FK_DeviceTemplate":"1923",
+			"FK_DeviceCommandGroup":"5"
+		},
+		"DeviceTemplate_DeviceCommandGroup_1948_95": {
+			"FK_DeviceTemplate":"1948",
+			"FK_DeviceCommandGroup":"95"
+		},
+		"DeviceTemplate_DeviceCommandGroup_1949_96": {
+			"FK_DeviceTemplate":"1949",
+			"FK_DeviceCommandGroup":"96"
+		},
+		"DeviceTemplate_DeviceCommandGroup_1950_96": {
+			"FK_DeviceTemplate":"1950",
+			"FK_DeviceCommandGroup":"96"
 		}
 	}
 	,
@@ -5847,6 +6514,24 @@
 			"SetByDevice":"0",
 			"Description":"The type of alert - normally none since this is a generic sensor"
 		},
+		"DeviceTemplate_DeviceData_1869_12": {
+			"FK_DeviceTemplate":"1869",
+			"FK_DeviceData":"12",
+			"IK_DeviceData":"",
+			"Required":"0",
+			"AllowedToModify":"1",
+			"SetByDevice":"0",
+			"Description":"channel"
+		},
+		"DeviceTemplate_DeviceData_1923_37": {
+			"FK_DeviceTemplate":"1923",
+			"FK_DeviceData":"37",
+			"IK_DeviceData":"",
+			"Required":"0",
+			"AllowedToModify":"1",
+			"SetByDevice":"0",
+			"Description":"the com port used for the serial communications"
+		},
 		"DeviceTemplate_DeviceData_7_28": {
 			"FK_DeviceTemplate":"7",
 			"FK_DeviceData":"28",
@@ -5894,7 +6579,7 @@
 		}
 	}
 	,
-	"DeviceTemplate_DeviceTemplate_ControlledVia_ids":[2,3,6,33,41,52,86,106,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	"DeviceTemplate_DeviceTemplate_ControlledVia_ids":[2,3,6,33,41,52,86,90,91,106,116,117,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
 	"DeviceTemplate_DeviceTemplate_ControlledVia":{
 		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_2": {
 			"FK_DeviceTemplate":"27",
@@ -5945,12 +6630,40 @@
 			"RerouteMessagesToParent":"1",
 			"AutoCreateChildren":"1"
 		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_90": {
+			"FK_DeviceTemplate":"1868",
+			"FK_DeviceTemplate_ControlledVia":"1",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_91": {
+			"FK_DeviceTemplate":"1869",
+			"FK_DeviceTemplate_ControlledVia":"1",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
 		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_106": {
 			"FK_DeviceTemplate":"1922",
 			"FK_DeviceTemplate_ControlledVia":"1754",
 			"Description":"",
 			"RerouteMessagesToParent":"1",
 			"AutoCreateChildren":"1"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_116": {
+			"FK_DeviceTemplate":"1949",
+			"FK_DeviceTemplate_ControlledVia":"1",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_117": {
+			"FK_DeviceTemplate":"1948",
+			"FK_DeviceTemplate_ControlledVia":"1",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
 		},
 		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
 			"FK_DeviceTemplate":"1",
@@ -5976,6 +6689,13 @@
 		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
 			"FK_DeviceTemplate":"56",
 			"FK_DeviceTemplate_ControlledVia":"40",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"56",
+			"FK_DeviceTemplate_ControlledVia":"48",
 			"Description":"",
 			"RerouteMessagesToParent":"0",
 			"AutoCreateChildren":"0"
@@ -6087,6 +6807,13 @@
 		},
 		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
 			"FK_DeviceTemplate":"4",
+			"FK_DeviceTemplate_ControlledVia":"48",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"4",
 			"FK_DeviceTemplate_ControlledVia":"49",
 			"Description":"",
 			"RerouteMessagesToParent":"0",
@@ -6185,13 +6912,6 @@
 		},
 		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
 			"FK_DeviceTemplate":"38",
-			"FK_DeviceTemplate_ControlledVia":"48",
-			"Description":"",
-			"RerouteMessagesToParent":"0",
-			"AutoCreateChildren":"0"
-		},
-		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
-			"FK_DeviceTemplate":"38",
 			"FK_DeviceTemplate_ControlledVia":"1754",
 			"Description":"",
 			"RerouteMessagesToParent":"0",
@@ -6207,6 +6927,13 @@
 		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
 			"FK_DeviceTemplate":"38",
 			"FK_DeviceTemplate_ControlledVia":"40",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"38",
+			"FK_DeviceTemplate_ControlledVia":"48",
 			"Description":"",
 			"RerouteMessagesToParent":"0",
 			"AutoCreateChildren":"0"
@@ -6311,13 +7038,6 @@
 		},
 		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
 			"FK_DeviceTemplate":"37",
-			"FK_DeviceTemplate_ControlledVia":"48",
-			"Description":"",
-			"RerouteMessagesToParent":"0",
-			"AutoCreateChildren":"0"
-		},
-		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
-			"FK_DeviceTemplate":"37",
 			"FK_DeviceTemplate_ControlledVia":"1754",
 			"Description":"",
 			"RerouteMessagesToParent":"0",
@@ -6333,6 +7053,13 @@
 		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
 			"FK_DeviceTemplate":"37",
 			"FK_DeviceTemplate_ControlledVia":"40",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"37",
+			"FK_DeviceTemplate_ControlledVia":"48",
 			"Description":"",
 			"RerouteMessagesToParent":"0",
 			"AutoCreateChildren":"0"
@@ -6438,6 +7165,13 @@
 		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
 			"FK_DeviceTemplate":"1599",
 			"FK_DeviceTemplate_ControlledVia":"40",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"1599",
+			"FK_DeviceTemplate_ControlledVia":"48",
 			"Description":"",
 			"RerouteMessagesToParent":"0",
 			"AutoCreateChildren":"0"
@@ -6654,6 +7388,13 @@
 		},
 		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
 			"FK_DeviceTemplate":"1600",
+			"FK_DeviceTemplate_ControlledVia":"48",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"1600",
 			"FK_DeviceTemplate_ControlledVia":"49",
 			"Description":"",
 			"RerouteMessagesToParent":"0",
@@ -6809,6 +7550,13 @@
 		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
 			"FK_DeviceTemplate":"54",
 			"FK_DeviceTemplate_ControlledVia":"40",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"54",
+			"FK_DeviceTemplate_ControlledVia":"48",
 			"Description":"",
 			"RerouteMessagesToParent":"0",
 			"AutoCreateChildren":"0"
@@ -6976,6 +7724,13 @@
 		},
 		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
 			"FK_DeviceTemplate":"1773",
+			"FK_DeviceTemplate_ControlledVia":"48",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"1773",
 			"FK_DeviceTemplate_ControlledVia":"49",
 			"Description":"",
 			"RerouteMessagesToParent":"0",
@@ -7109,6 +7864,13 @@
 		},
 		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
 			"FK_DeviceTemplate":"1813",
+			"FK_DeviceTemplate_ControlledVia":"48",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"1813",
 			"FK_DeviceTemplate_ControlledVia":"49",
 			"Description":"",
 			"RerouteMessagesToParent":"0",
@@ -7186,6 +7948,139 @@
 		},
 		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
 			"FK_DeviceTemplate":"1813",
+			"FK_DeviceTemplate_ControlledVia":"1932",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"1869",
+			"FK_DeviceTemplate_ControlledVia":"14",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"1869",
+			"FK_DeviceTemplate_ControlledVia":"25",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"1869",
+			"FK_DeviceTemplate_ControlledVia":"1754",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"1869",
+			"FK_DeviceTemplate_ControlledVia":"1920",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"1869",
+			"FK_DeviceTemplate_ControlledVia":"1743",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"1869",
+			"FK_DeviceTemplate_ControlledVia":"40",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"1869",
+			"FK_DeviceTemplate_ControlledVia":"48",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"1869",
+			"FK_DeviceTemplate_ControlledVia":"49",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"1869",
+			"FK_DeviceTemplate_ControlledVia":"1629",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"1869",
+			"FK_DeviceTemplate_ControlledVia":"1630",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"1869",
+			"FK_DeviceTemplate_ControlledVia":"1632",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"1869",
+			"FK_DeviceTemplate_ControlledVia":"1742",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"1869",
+			"FK_DeviceTemplate_ControlledVia":"1746",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"1869",
+			"FK_DeviceTemplate_ControlledVia":"1747",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"1869",
+			"FK_DeviceTemplate_ControlledVia":"1760",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"1869",
+			"FK_DeviceTemplate_ControlledVia":"1785",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"1869",
+			"FK_DeviceTemplate_ControlledVia":"1815",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"1869",
+			"FK_DeviceTemplate_ControlledVia":"1845",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"1869",
 			"FK_DeviceTemplate_ControlledVia":"1932",
 			"Description":"",
 			"RerouteMessagesToParent":"0",
@@ -7249,13 +8144,6 @@
 		},
 		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
 			"FK_DeviceTemplate":"68",
-			"FK_DeviceTemplate_ControlledVia":"48",
-			"Description":"",
-			"RerouteMessagesToParent":"0",
-			"AutoCreateChildren":"0"
-		},
-		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
-			"FK_DeviceTemplate":"68",
 			"FK_DeviceTemplate_ControlledVia":"1754",
 			"Description":"",
 			"RerouteMessagesToParent":"0",
@@ -7271,6 +8159,13 @@
 		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
 			"FK_DeviceTemplate":"68",
 			"FK_DeviceTemplate_ControlledVia":"40",
+			"Description":"",
+			"RerouteMessagesToParent":"0",
+			"AutoCreateChildren":"0"
+		},
+		"PK_DeviceTemplate_DeviceTemplate_ControlledVia_-1": {
+			"FK_DeviceTemplate":"68",
+			"FK_DeviceTemplate_ControlledVia":"48",
 			"Description":"",
 			"RerouteMessagesToParent":"0",
 			"AutoCreateChildren":"0"
@@ -7500,10 +8395,22 @@
 			"FK_Event":"55",
 			"Description":"Fired whenever the device has finished downloading its configuration in response to a 'Download Configuration' command",
 			"Code":""
+		},
+		"DeviceTemplate_Event_1923_12": {
+			"FK_DeviceTemplate":"1923",
+			"FK_Event":"12",
+			"Description":"",
+			"Code":""
+		},
+		"DeviceTemplate_Event_1923_58": {
+			"FK_DeviceTemplate":"1923",
+			"FK_Event":"58",
+			"Description":"",
+			"Code":""
 		}
 	}
 	,
-	"Event_ids":[16,17,18,25,26,27,28,29,38,39,40,41,43,51,52,54,55,48,9,78,79],
+	"Event_ids":[16,17,18,25,26,27,28,29,38,39,40,41,43,51,52,54,55,48,9,78,79,12,58],
 	"Event":{
 		"PK_Event_16": {
 			"FK_EventCategory":"9",
@@ -7588,6 +8495,14 @@
 		"PK_Event_79": {
 			"FK_EventCategory":"10",
 			"Description":"Fan Mode Changed"
+		},
+		"PK_Event_12": {
+			"FK_EventCategory":"2",
+			"Description":"Playback Completed"
+		},
+		"PK_Event_58": {
+			"FK_EventCategory":"2",
+			"Description":"Playback Started"
 		}
 	}
 	,
@@ -7611,7 +8526,7 @@
 		}
 	}
 	,
-	"EventParameter_ids":[26,30,13,14,38,39,12,10,25],
+	"EventParameter_ids":[26,30,13,14,38,39,12,10,25,4,9,37,16,47,48],
 	"EventParameter":{
 		"PK_EventParameter_26": {
 			"Description":"PK_Device",
@@ -7666,6 +8581,42 @@
 			"Define":"",
 			"Comments":"",
 			"FK_ParameterType":"3"
+		},
+		"PK_EventParameter_4": {
+			"Description":"MRL",
+			"Define":"",
+			"Comments":"",
+			"FK_ParameterType":"1"
+		},
+		"PK_EventParameter_9": {
+			"Description":"Stream ID",
+			"Define":"",
+			"Comments":"",
+			"FK_ParameterType":"2"
+		},
+		"PK_EventParameter_37": {
+			"Description":"With Errors",
+			"Define":"",
+			"Comments":"Errors occurred",
+			"FK_ParameterType":"3"
+		},
+		"PK_EventParameter_16": {
+			"Description":"SectionDescription",
+			"Define":"",
+			"Comments":"Current Section description.",
+			"FK_ParameterType":"1"
+		},
+		"PK_EventParameter_47": {
+			"Description":"Audio",
+			"Define":"",
+			"Comments":"The type of audio",
+			"FK_ParameterType":"1"
+		},
+		"PK_EventParameter_48": {
+			"Description":"Video",
+			"Define":"",
+			"Comments":"The type of video being played",
+			"FK_ParameterType":"1"
 		}
 	}
 	,
@@ -7769,6 +8720,46 @@
 			"FK_Event":"79",
 			"FK_EventParameter":"30",
 			"Description":"Fan mode value\r\n0,1 - AUTO \/ LOW\r\n2,3 - HIGH\r\n"
+		},
+		"Event_EventParameter_12_4": {
+			"FK_Event":"12",
+			"FK_EventParameter":"4",
+			"Description":"The filename or MRL that finished playing"
+		},
+		"Event_EventParameter_12_9": {
+			"FK_Event":"12",
+			"FK_EventParameter":"9",
+			"Description":"The Stream which has completed the playback."
+		},
+		"Event_EventParameter_12_37": {
+			"FK_Event":"12",
+			"FK_EventParameter":"37",
+			"Description":"There were problems playing the stream."
+		},
+		"Event_EventParameter_58_4": {
+			"FK_Event":"58",
+			"FK_EventParameter":"4",
+			"Description":"The file or MRL being played"
+		},
+		"Event_EventParameter_58_9": {
+			"FK_Event":"58",
+			"FK_EventParameter":"9",
+			"Description":"The ID of the stream"
+		},
+		"Event_EventParameter_58_16": {
+			"FK_Event":"58",
+			"FK_EventParameter":"16",
+			"Description":"A \\n delimited list of all the tracks or chapters.  Each is a description followed by \\t chapter\\ttitle.  The last \\ttitle does not apply to cd's"
+		},
+		"Event_EventParameter_58_47": {
+			"FK_Event":"58",
+			"FK_EventParameter":"47",
+			"Description":"pcm, ac3-dd, ac3-dts, ac3,other,none"
+		},
+		"Event_EventParameter_58_48": {
+			"FK_Event":"58",
+			"FK_EventParameter":"48",
+			"Description":"4:3,16:9,other,none"
 		}
 	}
 	,
@@ -8055,7 +9046,7 @@
 		},
 		"PK_FloorplanObjectType_36": {
 			"FK_FloorplanType":"7",
-			"Description":"Non-<-mkr_t_name_lower-> Phone",
+			"Description":"Non-linuxmce Phone",
 			"Direction":"OUT",
 			"FK_DesignObj_Control":"2248",
 			"Filename":"",
@@ -8194,7 +9185,7 @@
 		}
 	}
 	,
-	"Manufacturer_ids":[1,190,5,551],
+	"Manufacturer_ids":[1,190,5,551,324],
 	"Manufacturer":{
 		"PK_Manufacturer_1": {
 			"Description":"Pluto",
@@ -8210,6 +9201,10 @@
 		},
 		"PK_Manufacturer_551": {
 			"Description":"iButtonLink",
+			"IRFrequency":""
+		},
+		"PK_Manufacturer_324": {
+			"Description":"D-Link",
 			"IRFrequency":""
 		}
 	}
