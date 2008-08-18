@@ -10,7 +10,7 @@ BINS=DCERouter MessageSend pluto-lzo interfeed ANSI-to-HTML Sleep NetworkTest Re
 DEVS=ZWave
 LIBS=Serial SerializeClass PlutoUtils DCE
 Plugins=General_Info_Plugin_Lite Lighting_Plugin_Lite Climate_Plugin_Lite Event_Plugin_Lite Security_Plugin_Lite
-Shared_JSON_Data_Provider_Plug Data_Provider_Catalog_Plugin
+Plugins +=Shared_JSON_Data_Provider_Plug Data_Provider_Catalog_Plugin
 # XML_Data_Handler_Plugin_Lite Basic_XML_Data_Source_Plugin_Lite
 
 all: libs bins
