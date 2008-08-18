@@ -34,9 +34,11 @@ or FITNESS FOR A PARTICULAR PURPOSE. See the Pluto Public License for more detai
 #include <map>
 #include <list>
 
+#ifndef NOXATTR
 #ifndef WIN32
 #include <dirent.h>
 #include <attr/attributes.h>
+#endif
 #endif
 
 #include "pluto_main/Table_MediaType.h"
