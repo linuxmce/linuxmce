@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="Basic_XML_Data_Source_Plugin"
+	Name="Data_Provider_Catalog_Plugin"
 	ProjectGUID="{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}"
 	Keyword="Win32Proj">
 	<Platforms>
@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..;../DCE/;../../libs/Libraries/pthreads-win32/include;/mysql/include;../../libs/CrossPlatform/LibXML2/include"
+				AdditionalIncludeDirectories="..;../DCE/;../../libs/Libraries/pthreads-win32/include;/mysql/include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;EMBEDDED_LMCE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -32,13 +32,13 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="pthreadVC.lib wsock32.lib DCE.lib pluto_main.lib libmysql.lib libxml2.lib"
-				OutputFile="../Debug/Basic_XML_Data_Source_Plugin.dll"
+				AdditionalDependencies="pthreadVC.lib wsock32.lib DCE.lib"
+				OutputFile="../Debug/Data_Provider_Catalog_Plugin_Lite.dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;../../libs/Libraries/pthreads-win32/lib&quot;;../lib;../../libs/CrossPlatform/LibXML2/lib;/mysql/lib/debug"
-				ModuleDefinitionFile="Basic_XML_Data_Source_Plugin.def"
+				AdditionalLibraryDirectories="../../libs/Libraries/pthreads-win32/lib;../lib"
+				ModuleDefinitionFile="Data_Provider_Catalog_Plugin.def"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/Basic_XML_Data_Source_Plugin.pdb"
+				ProgramDatabaseFile="$(OutDir)/Data_Provider_Catalog_Plugin.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
@@ -73,7 +73,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				OmitFramePointers="TRUE"
-				AdditionalIncludeDirectories="..;../DCE/;&quot;../../libs/Libraries/pthreads-win32/include&quot;;/mysql/include;../../libs/CrossPlatform/LibXML2/include"
+				AdditionalIncludeDirectories="..;../DCE/;../../libs/Libraries/pthreads-win32/include;/mysql/include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
@@ -86,11 +86,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="pthreadVC.lib wsock32.lib DCE-r.lib pluto_main-r.lib libmysql.lib libxml2.lib"
-				OutputFile="../bin/Basic_XML_Data_Source_Plugin.dll"
+				AdditionalDependencies="pthreadVC.lib wsock32.lib DCE-r.lib"
+				OutputFile="../bin/Data_Provider_Catalog_Plugin.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;../../libs/Libraries/pthreads-win32/lib&quot;;../lib;../../libs/CrossPlatform/LibXML2/lib;/mysql/lib/debug"
-				ModuleDefinitionFile="Basic_XML_Data_Source_Plugin.def"
+				AdditionalLibraryDirectories="../../libs/Libraries/pthreads-win32/lib;../lib"
+				ModuleDefinitionFile="Data_Provider_Catalog_Plugin.def"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -125,38 +125,26 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm">
 			<File
-				RelativePath="Basic_XML_Data_Source_Plugin.cpp">
+				RelativePath="Data_Provider_Catalog_Plugin.cpp">
 			</File>
 			<File
-				RelativePath="Basic_XML_Data_Source_Plugin.def">
+				RelativePath="Data_Provider_Catalog_Plugin.def">
 			</File>
 			<File
-				RelativePath="..\Gen_Devices\Basic_XML_Data_Source_PluginBase.cpp">
+				RelativePath="..\Gen_Devices\Data_Provider_Catalog_PluginBase.cpp">
+			</File>
+			<File
+				RelativePath=".\DP_Catalog.cpp">
 			</File>
 			<File
 				RelativePath="Main.cpp">
-			</File>
-			<File
-				RelativePath="..\XML_Data_Handler_Plugin\XML_Data_CallBack.cpp">
-			</File>
-			<File
-				RelativePath="..\XML_Data_Handler_Plugin\XML_Data_Factory.cpp">
-			</File>
-			<File
-				RelativePath="..\XML_Data_Handler_Plugin\XML_Data_Handler_Plugin.cpp">
-			</File>
-			<File
-				RelativePath="..\Gen_Devices\XML_Data_Handler_PluginBase.cpp">
-			</File>
-			<File
-				RelativePath=".\XML_Data_Source.cpp">
 			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc">
 			<File
-				RelativePath="Basic_XML_Data_Source_Plugin.h">
+				RelativePath="Data_Provider_Catalog_Plugin.h">
 			</File>
 			<File
 				RelativePath="..\DCE\DCEDeviceData_Impl.h">

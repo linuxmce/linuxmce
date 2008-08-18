@@ -542,7 +542,9 @@ void Router::RegisterAllPlugins()
 			iPK_DeviceTemplate != DEVICETEMPLATE_Security_Plugin_CONST &&
 			iPK_DeviceTemplate != DEVICETEMPLATE_Event_Plugin_CONST &&
 			iPK_DeviceTemplate != DEVICETEMPLATE_Basic_XML_Data_Source_Plugin_CONST &&
-			iPK_DeviceTemplate != DEVICETEMPLATE_XML_Data_Handler_Plugin_CONST
+			iPK_DeviceTemplate != DEVICETEMPLATE_XML_Data_Handler_Plugin_CONST && 
+			iPK_DeviceTemplate != DEVICETEMPLATE_Data_Provider_Catalog_Plugin_CONST && 
+			iPK_DeviceTemplate != DEVICETEMPLATE_Shared_JSON_Data_Provider_Plug_CONST
 		)
 			continue;
 
@@ -2648,14 +2650,14 @@ void Router::ParseDevice(int MasterDeviceID, int ParentDeviceID, class DeviceDat
 
 		if( pDevice->m_bImplementsDCE && !pDevice->m_bIsEmbedded )
 		{
-			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Created DCE device %d %s (mdl: %d) routed to: %d (%s) disabled %d",pDevice->m_dwPK_Device,
-				pDevice->m_sDescription.c_str(),pDevice->m_dwPK_DeviceTemplate,pDevice->m_dwPK_Device,sTop.c_str(),(int) pDevice->m_bDisabled);
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Created DCE device %d %s (mdl: %d) cv: %d routed to: %d (%s) disabled %d",pDevice->m_dwPK_Device,
+				pDevice->m_sDescription.c_str(),pDevice->m_dwPK_DeviceTemplate,pDevice->m_dwPK_Device_ControlledVia, pDevice->m_dwPK_Device,sTop.c_str(),(int) pDevice->m_bDisabled);
 			m_Routing_DeviceToController[pDevice->m_dwPK_Device] = pDevice->m_dwPK_Device;
 		}
 		else
 		{
-			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Created device %d %s (mdl: %d) routed to: %d (%s) disabled %d",pDevice->m_dwPK_Device,
-				pDevice->m_sDescription.c_str(),pDevice->m_dwPK_DeviceTemplate,MasterDeviceID,sTop.c_str(),(int) pDevice->m_bDisabled);
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Created device %d %s (mdl: %d) cv: %d routed to: %d (%s) disabled %d",pDevice->m_dwPK_Device,
+				pDevice->m_sDescription.c_str(),pDevice->m_dwPK_DeviceTemplate,pDevice->m_dwPK_Device_ControlledVia,MasterDeviceID,sTop.c_str(),(int) pDevice->m_bDisabled);
 			m_Routing_DeviceToController[pDevice->m_dwPK_Device] = MasterDeviceID;
 		}
     }
