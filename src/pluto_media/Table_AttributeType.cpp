@@ -33,8 +33,11 @@ using namespace std;
 #include "Table_AttributeType.h"
 
 #include "Table_Attribute.h"
+#include "Table_Disc_Attribute.h"
+#include "Table_File_Attribute.h"
 #include "Table_LongAttribute.h"
 #include "Table_MediaType_AttributeType.h"
+#include "Table_Picture_Attribute.h"
 
 
 void Database_pluto_media::CreateTable_AttributeType()
@@ -1004,6 +1007,20 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Attribute *pTable = table->database->Attribute_get();
 pTable->GetRows("`FK_AttributeType`=" + StringUtils::itos(m_PK_AttributeType),rows);
 }
+void Row_AttributeType::Disc_Attribute_FK_AttributeType_getrows(vector <class Row_Disc_Attribute*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Disc_Attribute *pTable = table->database->Disc_Attribute_get();
+pTable->GetRows("`FK_AttributeType`=" + StringUtils::itos(m_PK_AttributeType),rows);
+}
+void Row_AttributeType::File_Attribute_FK_AttributeType_getrows(vector <class Row_File_Attribute*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_File_Attribute *pTable = table->database->File_Attribute_get();
+pTable->GetRows("`FK_AttributeType`=" + StringUtils::itos(m_PK_AttributeType),rows);
+}
 void Row_AttributeType::LongAttribute_FK_AttributeType_getrows(vector <class Row_LongAttribute*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1016,6 +1033,13 @@ void Row_AttributeType::MediaType_AttributeType_FK_AttributeType_getrows(vector 
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_MediaType_AttributeType *pTable = table->database->MediaType_AttributeType_get();
+pTable->GetRows("`FK_AttributeType`=" + StringUtils::itos(m_PK_AttributeType),rows);
+}
+void Row_AttributeType::Picture_Attribute_FK_AttributeType_getrows(vector <class Row_Picture_Attribute*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Picture_Attribute *pTable = table->database->Picture_Attribute_get();
 pTable->GetRows("`FK_AttributeType`=" + StringUtils::itos(m_PK_AttributeType),rows);
 }
 

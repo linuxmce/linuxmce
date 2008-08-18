@@ -33,6 +33,7 @@ using namespace std;
 #include "Table_Attribute.h"
 #include "Table_AttributeType.h"
 
+#include "Table_Attribute_MediaType.h"
 #include "Table_Attribute_Settings.h"
 #include "Table_CoverArtScan.h"
 #include "Table_Disc_Attribute.h"
@@ -960,6 +961,13 @@ return pTable->GetRow(m_FK_AttributeType);
 }
 
 
+void Row_Attribute::Attribute_MediaType_FK_Attribute_getrows(vector <class Row_Attribute_MediaType*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Attribute_MediaType *pTable = table->database->Attribute_MediaType_get();
+pTable->GetRows("`FK_Attribute`=" + StringUtils::itos(m_PK_Attribute),rows);
+}
 void Row_Attribute::Attribute_Settings_FK_Attribute_getrows(vector <class Row_Attribute_Settings*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);

@@ -100,6 +100,7 @@ class DECLSPECIFIER Row_Disc_Attribute : public TableRow, public SerializeClass
 long int m_FK_Attribute;
 long int m_Track;
 long int m_Section;
+long int m_FK_AttributeType;
 long int m_psc_id;
 long int m_psc_batch;
 long int m_psc_user;
@@ -107,13 +108,14 @@ short int m_psc_frozen;
 string m_psc_mod;
 long int m_psc_restrict;
 
-		bool is_null[10];
+		bool is_null[11];
 	
 	public:
 		long int FK_Disc_get();
 long int FK_Attribute_get();
 long int Track_get();
 long int Section_get();
+long int FK_AttributeType_get();
 long int psc_id_get();
 long int psc_batch_get();
 long int psc_user_get();
@@ -126,6 +128,7 @@ long int psc_restrict_get();
 void FK_Attribute_set(long int val);
 void Track_set(long int val);
 void Section_set(long int val);
+void FK_AttributeType_set(long int val);
 void psc_id_set(long int val);
 void psc_batch_set(long int val);
 void psc_user_set(long int val);
@@ -134,14 +137,16 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool psc_id_isNull();
+		bool FK_AttributeType_isNull();
+bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
 bool psc_restrict_isNull();
 
 			
-		void psc_id_setNull(bool val);
+		void FK_AttributeType_setNull(bool val);
+void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
@@ -160,6 +165,7 @@ void psc_restrict_setNull(bool val);
 		// Return the rows for foreign keys 
 		class Row_Disc* FK_Disc_getrow();
 class Row_Attribute* FK_Attribute_getrow();
+class Row_AttributeType* FK_AttributeType_getrow();
 
 
 		// Return the rows in other tables with foreign keys pointing here
@@ -167,7 +173,7 @@ class Row_Attribute* FK_Attribute_getrow();
 
 		// Setup binary serialization
 		void SetupSerialization(int iSC_Version) {
-			StartSerializeList() + m_FK_Disc+ m_FK_Attribute+ m_Track+ m_Section+ m_psc_id+ m_psc_batch+ m_psc_user+ m_psc_frozen+ m_psc_mod+ m_psc_restrict;
+			StartSerializeList() + m_FK_Disc+ m_FK_Attribute+ m_Track+ m_Section+ m_FK_AttributeType+ m_psc_id+ m_psc_batch+ m_psc_user+ m_psc_frozen+ m_psc_mod+ m_psc_restrict;
 		}
 	private:
 		void SetDefaultValues();
@@ -176,6 +182,7 @@ class Row_Attribute* FK_Attribute_getrow();
 string FK_Attribute_asSQL();
 string Track_asSQL();
 string Section_asSQL();
+string FK_AttributeType_asSQL();
 string psc_id_asSQL();
 string psc_batch_asSQL();
 string psc_user_asSQL();

@@ -22,6 +22,7 @@ Database_pluto_media::Database_pluto_media(Logger *pLogger)
 	LoggerWrapper::SetInstance(pLogger);
 tblAttribute=NULL;
 tblAttributeType=NULL;
+tblAttribute_MediaType=NULL;
 tblAttribute_Settings=NULL;
 tblBookmark=NULL;
 tblCoverArtScan=NULL;
@@ -78,6 +79,9 @@ if( tblAttribute!=NULL )
 		bResult=false;
 if( tblAttributeType!=NULL )
 	if( !Commit_AttributeType(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
+		bResult=false;
+if( tblAttribute_MediaType!=NULL )
+	if( !Commit_Attribute_MediaType(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
 		bResult=false;
 if( tblAttribute_Settings!=NULL )
 	if( !Commit_Attribute_Settings(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
@@ -210,6 +214,7 @@ void Database_pluto_media::DeleteAllTables()
 {
 DeleteTable_Attribute();
 DeleteTable_AttributeType();
+DeleteTable_Attribute_MediaType();
 DeleteTable_Attribute_Settings();
 DeleteTable_Bookmark();
 DeleteTable_CoverArtScan();

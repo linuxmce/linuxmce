@@ -16,6 +16,7 @@ CPPFLAGS += -DUSE_MYSQL_WRAPPER
 sources = ../db_wrapper/db_wrapper.cpp ../db_wrapper/ClientSocket.cpp ../db_wrapper/Socket.cpp Database_pluto_media.cpp TableRow.cpp \
 Table_Attribute.cpp \
 Table_AttributeType.cpp \
+Table_Attribute_MediaType.cpp \
 Table_Attribute_Settings.cpp \
 Table_Bookmark.cpp \
 Table_CoverArtScan.cpp \
