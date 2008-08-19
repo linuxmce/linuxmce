@@ -40,7 +40,6 @@ or FITNESS FOR A PARTICULAR PURPOSE. See the Pluto Public License for more detai
 #include <attr/attributes.h>
 #endif
 #endif
-#include "attributes.h"
 
 #include "pluto_main/Define_MediaType.h"
 #include "pluto_main/Define_DeviceTemplate_MediaType.h"

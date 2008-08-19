@@ -1668,6 +1668,7 @@ map<string,int> PlutoMediaIdentifier::m_mapExtensions;
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Activating Pluto Media Identifier...");
 	
+	/* Hardcode this list because we want to eliminate the dependency on pluto_main in UpdateMedia so it can run on a NAS device */
 	m_mapExtensions["wav"]=MEDIATYPE_pluto_StoredAudio_CONST;
 	m_mapExtensions["mp3"]=MEDIATYPE_pluto_StoredAudio_CONST;
 	m_mapExtensions["flac"]=MEDIATYPE_pluto_StoredAudio_CONST;
