@@ -15,6 +15,7 @@ extern "C"
 
 #include "PlutoUtils/LZO.h"
 #include "PlutoUtils/PlutoDefs.h"
+#include "pluto_main/Define_DeviceData.h"
 //----------------------------------------------------------------------------------------------
 #if !defined(WIN32) && defined(EMBEDDED_LMCE)
 	#define JSON_DYNAMIC_CONFIG_FILE "/etc/pluto/pluto.json.lzo"
@@ -943,7 +944,7 @@ void DataLayer_JSON::SaveDevices()
 		if( PK_Device_ZWave && pDeviceData_Router->m_dwPK_Device_ControlledVia==PK_Device_ZWave && pDeviceData_Router->m_dwPK_DeviceTemplate!=1945 )
 			iAutomationDevices++;
 
-		if( pDeviceData_Router->m_dwPK_Room==0 )
+		if( pDeviceData_Router->m_dwPK_Room==0 && pDeviceData_Router->m_mapParameters_Find(DEVICEDATA_Room_Not_Required_CONST)!="1" )
 			iUnassignedDevices++; 
 
         struct json_object *device_obj = json_object_new_object();
