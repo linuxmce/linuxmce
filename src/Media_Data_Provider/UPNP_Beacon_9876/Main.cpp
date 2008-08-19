@@ -35,6 +35,8 @@ int _tmain(int argc, _TCHAR* argv[])
 int main(int argc, char *argv[])
 {
 #endif
+	while(1)
+	{
 	struct sockaddr_in addr;
 	int fd, nbytes;
 	socklen_t addrlen;
@@ -46,6 +48,7 @@ int main(int argc, char *argv[])
 	/* create what looks like an ordinary UDP socket */
 	if ((fd=(int) socket(AF_INET,SOCK_DGRAM,0)) < 0) {
 		perror("socket");
+		Sleep(1000);
 		exit(1);
 	}
 
@@ -54,6 +57,7 @@ int main(int argc, char *argv[])
 	/* allow multiple sockets to use the same PORT number */
 	if (setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,(SOCKOPTTYPE) &yes,sizeof(yes)) < 0) {
 		perror("Reusing ADDR failed");
+		Sleep(1000);
 		exit(1);
 	}
 	/*** END OF MODIFICATION TO ORIGINAL */
@@ -67,6 +71,7 @@ int main(int argc, char *argv[])
 	/* bind to receive address */
 	if (bind(fd,(struct sockaddr *) &addr,sizeof(addr)) < 0) {
 		perror("bind");
+		Sleep(1000);
 		exit(1);
 	}
 
@@ -75,6 +80,7 @@ int main(int argc, char *argv[])
 	mreq.imr_interface.s_addr=htonl(INADDR_ANY);
 	if (setsockopt(fd,IPPROTO_IP,IP_ADD_MEMBERSHIP,(SOCKOPTTYPE) &mreq,sizeof(mreq)) < 0) {
 		perror("setsockopt");
+		Sleep(1000);
 		exit(1);
 	}
 
@@ -110,13 +116,15 @@ int main(int argc, char *argv[])
 		if ((nbytes=recvfrom(fd,msgbuf,MSGBUFSIZE,0,
 			(struct sockaddr *) &addr,&addrlen)) < 0) {
 				perror("recvfrom");
-				exit(1);
+				Sleep(1000);
+				break;
 			}
 
 			int i = sendto(fd,(const char *) cBuffer, (int) strlen(cBuffer),0,(struct sockaddr *) &addr, sizeof(addr));
 			printf("Sent (%d)\n",i);
 			//printf("Sent (%d) to %d.%d.%d.%d\n", 
 			//	i, (int) addr.sin_addr.S_un.S_un_b.s_b1,(int) addr.sin_addr.S_un.S_un_b.s_b2,(int) addr.sin_addr.S_un.S_un_b.s_b3,(int) addr.sin_addr.S_un.S_un_b.s_b4);
+	}
 	}
 
 
