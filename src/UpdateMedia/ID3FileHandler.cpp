@@ -3,7 +3,7 @@
 #include "PlutoMediaAttributes.h"
 #include "FileUtils/file_utils.h"
 #include "DCE/Logger.h"
-#include "pluto_main/Table_MediaType.h"
+#include "pluto_main/Define_MediaType.h"
 using namespace DCE;
 //-----------------------------------------------------------------------------------------------------
 namespace UpdateMediaVars

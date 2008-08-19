@@ -945,7 +945,7 @@ void Disk_Drive_Functions::GetTracksForDisc(Row_Disc *pRow_Disc,map<int,string> 
 		mapTracks[Track] = "";
 	}
 
-	string sSQL = "JOIN Attribute ON FK_Attribute=PK_Attribute WHERE FK_Disc=" + StringUtils::itos(pRow_Disc->PK_Disc_get()) + " AND FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Title_CONST);
+	string sSQL = "JOIN Attribute ON FK_Attribute=PK_Attribute WHERE FK_Disc=" + StringUtils::itos(pRow_Disc->PK_Disc_get()) + " AND Attribute.FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Title_CONST);
 	vector<Row_Disc_Attribute *> vectRow_Disc_Attribute;
 	m_pDatabase_pluto_media->Disc_Attribute_get()->GetRows(sSQL,&vectRow_Disc_Attribute);
 	for(vector<Row_Disc_Attribute *>::iterator it=vectRow_Disc_Attribute.begin();it!=vectRow_Disc_Attribute.end();++it)

@@ -2800,13 +2800,13 @@ void Orbiter_Plugin::CMD_Get_Screen_Saver_Files(int iPK_Device,string *sFilename
 	string sSQL = "SELECT DISTINCT PK_File,Path,Filename "
 		"FROM File "
 		"JOIN File_Attribute ON FK_File=PK_File "
-		"JOIN Attribute ON FK_Attribute=PK_Attribute AND FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Screen_Saver_For_MD_CONST) " "
+		"JOIN Attribute ON FK_Attribute=PK_Attribute AND Attribute.FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Screen_Saver_For_MD_CONST) " "
 		"WHERE (Name='' OR Name='*' OR Name='" + StringUtils::itos(iPK_Device) + "') AND Missing=0 AND Filename like '%jpg' "
 		" AND PK_File NOT IN "
 		"( "
 		"SELECT FK_File FROM File_Attribute "
 		"INNER JOIN Attribute ON FK_Attribute = PK_Attribute "
-		"WHERE FK_AttributeType = " TOSTRING(ATTRIBUTETYPE_Screen_saver_disabled_CONST)
+		"WHERE Attribute.FK_AttributeType = " TOSTRING(ATTRIBUTETYPE_Screen_saver_disabled_CONST)
 		")";
 
 	PlutoSqlResult result_set1,result_set2;
@@ -2835,7 +2835,7 @@ void Orbiter_Plugin::CMD_Get_Screen_Saver_Files(int iPK_Device,string *sFilename
 		sSQL = "SELECT DISTINCT PK_File,Path,Filename "
 			"FROM File "
 			"JOIN File_Attribute ON FK_File=PK_File "
-			"JOIN Attribute ON FK_Attribute=PK_Attribute AND FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Keyword_CONST) " "
+			"JOIN Attribute ON FK_Attribute=PK_Attribute AND Attribute.FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Keyword_CONST) " "
 			"WHERE Name IN (" + sKeywords + ") AND Filename like '%jpg' AND "
 			"PK_File IN (" + sPK_File + ");";
 

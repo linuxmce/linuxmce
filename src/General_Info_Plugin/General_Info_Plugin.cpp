@@ -2148,7 +2148,7 @@ class DataGridTable *General_Info_Plugin::Discs( string GridID, string Parms, vo
 			Row_DiscLocation *pRow_DiscLocation = vectRow_DiscLocation[0];
 			pRow_DiscLocation->Reload();
 			string sSQL = "JOIN Attribute ON FK_Attribute=PK_Attribute WHERE FK_Disc=" + StringUtils::itos(pRow_DiscLocation->FK_Disc_get())
-				+ " AND FK_AttributeType IN (" TOSTRING(ATTRIBUTETYPE_Album_CONST) "," TOSTRING(ATTRIBUTETYPE_Title_CONST) ")";
+				+ " AND Attribute.FK_AttributeType IN (" TOSTRING(ATTRIBUTETYPE_Album_CONST) "," TOSTRING(ATTRIBUTETYPE_Title_CONST) ")";
 
 			if( pRow_DiscLocation->EK_Device_Ripping_isNull()==false )
 			{
@@ -2336,7 +2336,7 @@ class DataGridTable *General_Info_Plugin::JukeboxDrives( string GridID, string P
 					pCell->m_mapAttributes["PK_File"]=StringUtils::itos(pRow_Disc->FK_File_get());
 
 				string sSQL = "JOIN Attribute ON FK_Attribute=PK_Attribute WHERE FK_Disc=" + StringUtils::itos(pRow_Disc->PK_Disc_get())
-					+ " AND FK_AttributeType IN (" TOSTRING(ATTRIBUTETYPE_Album_CONST) "," TOSTRING(ATTRIBUTETYPE_Title_CONST) ")";
+					+ " AND Attribute.FK_AttributeType IN (" TOSTRING(ATTRIBUTETYPE_Album_CONST) "," TOSTRING(ATTRIBUTETYPE_Title_CONST) ")";
 
 				vector<Row_Disc_Attribute *> vectRow_Disc_Attribute;
 				m_pDatabase_pluto_media->Disc_Attribute_get()->GetRows(sSQL,&vectRow_Disc_Attribute);
@@ -2398,7 +2398,7 @@ class DataGridTable *General_Info_Plugin::JukeboxSlots( string GridID, string Pa
 				pCell->m_mapAttributes["PK_File"]=StringUtils::itos(pRow_Disc->FK_File_get());
 
 			string sSQL = "JOIN Attribute ON FK_Attribute=PK_Attribute WHERE FK_Disc=" + StringUtils::itos(pRow_Disc->PK_Disc_get())
-				+ " AND FK_AttributeType IN (" TOSTRING(ATTRIBUTETYPE_Album_CONST) "," TOSTRING(ATTRIBUTETYPE_Title_CONST) ")";
+				+ " AND Attribute.FK_AttributeType IN (" TOSTRING(ATTRIBUTETYPE_Album_CONST) "," TOSTRING(ATTRIBUTETYPE_Title_CONST) ")";
 
 			vector<Row_Disc_Attribute *> vectRow_Disc_Attribute;
 			m_pDatabase_pluto_media->Disc_Attribute_get()->GetRows(sSQL,&vectRow_Disc_Attribute);

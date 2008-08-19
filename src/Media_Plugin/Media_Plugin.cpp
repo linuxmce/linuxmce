@@ -462,7 +462,7 @@ continue;
 
 #ifdef SIM_JUKEBOX
 	{
-		string sSQL = "SELECT FK_File,Name FROM File_Attribute JOIN Attribute ON FK_Attribute=PK_Attribute WHERE FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Purchase_Info_CONST);
+		string sSQL = "SELECT FK_File,Name FROM File_Attribute JOIN Attribute ON FK_Attribute=PK_Attribute WHERE Attribute.FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Purchase_Info_CONST);
 		PlutoSqlResult result;
 		DB_ROW row;
 		if( (result.r = m_pDatabase_pluto_media->db_wrapper_query_result(sSQL))  )

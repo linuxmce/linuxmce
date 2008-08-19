@@ -25,7 +25,6 @@
 using namespace std;
 //-----------------------------------------------------------------------------------------------------
 class Database_pluto_media;
-class Database_pluto_main;
 class PlutoMediaAttributes;
 class Row_File;
 //-----------------------------------------------------------------------------------------------------
@@ -150,7 +149,7 @@ private:
 
     virtual ~PlutoMediaIdentifier() = 0; //don't allow instances
 public:
-    static void Activate(Database_pluto_main *pDatabase_pluto_main);
+    static void Activate();
     static int Identify(string sFilename);
 	static string GetExtensions(); //tab delimited
 };

@@ -30,9 +30,8 @@
 #include <map>
 #include <list>
 
-#include "pluto_main/Table_MediaType.h"
-#include "pluto_main/Table_DeviceTemplate_MediaType.h"
-#include "pluto_main/Table_Installation.h"
+#include "pluto_main/Define_MediaType.h"
+#include "pluto_main/Define_DeviceTemplate_MediaType.h"
 
 #include "pluto_media/Table_File.h"
 #include "pluto_media/Table_Picture_File.h"
@@ -365,7 +364,7 @@ void PlutoMediaFile::SaveShortAttributesInDb(bool bAddAllToDb)
 	if(!bAddAllToDb)
 	{
 		string SQL = 
-			"SELECT PK_Attribute,FK_AttributeType, Name, Track, Section "
+			"SELECT PK_Attribute,Attribute.FK_AttributeType, Name, Track, Section "
 			"FROM Attribute JOIN File_Attribute ON PK_Attribute = FK_Attribute "
 			"WHERE FK_File = " + StringUtils::ltos(PK_File);
 
@@ -1185,7 +1184,7 @@ void PlutoMediaFile::LoadShortAttributes()
 	PlutoSqlResult result;
 	DB_ROW row;
 	string SQL = 
-		"SELECT PK_Attribute,FK_AttributeType, Name, Track, Section "
+		"SELECT PK_Attribute,Attribute.FK_AttributeType, Name, Track, Section "
 		"FROM Attribute JOIN File_Attribute ON PK_Attribute = FK_Attribute "
 		"WHERE FK_File = " + StringUtils::ltos(m_pPlutoMediaAttributes->m_nFileID);
 
@@ -1662,34 +1661,40 @@ void PlutoMediaFile::GenerateMd5SumsCoverartsFromDb(list<string>& listMd5Sums)
 //-----------------------------------------------------------------------------------------------------
 map<string,int> PlutoMediaIdentifier::m_mapExtensions;
 //-----------------------------------------------------------------------------------------------------
-/*static*/ void PlutoMediaIdentifier::Activate(Database_pluto_main *pDatabase_pluto_main)
+/*static*/ void PlutoMediaIdentifier::Activate()
 {
 	if(m_mapExtensions.size()) //activate once
 		return;
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Activating Pluto Media Identifier...");
 	
-    vector<Row_MediaType *> vectRow_MediaType;
-    pDatabase_pluto_main->MediaType_get()->GetRows("1=1",&vectRow_MediaType);
-    for(size_t s=0;s<vectRow_MediaType.size();++s)
-    {
-        Row_MediaType *pRow_MediaType = vectRow_MediaType[s];
-        string::size_type pos=0;
-        string sExtensions = pRow_MediaType->Extensions_get();
-        while(pos < sExtensions.size() )
-			m_mapExtensions[StringUtils::ToLower(StringUtils::Tokenize(sExtensions,",",pos))] = pRow_MediaType->PK_MediaType_get();
-    }
-
-    vector<Row_DeviceTemplate_MediaType *> vectRow_DeviceTemplate_MediaType;
-    pDatabase_pluto_main->DeviceTemplate_MediaType_get()->GetRows("1=1",&vectRow_DeviceTemplate_MediaType);
-    for(size_t s=0;s<vectRow_DeviceTemplate_MediaType.size();++s)
-    {
-        Row_DeviceTemplate_MediaType *pRow_DeviceTemplate_MediaType = vectRow_DeviceTemplate_MediaType[s];
-        string::size_type pos=0;
-        string sExtensions = pRow_DeviceTemplate_MediaType->Extensions_get();
-        while(pos < sExtensions.size() )
-            m_mapExtensions[StringUtils::ToLower(StringUtils::Tokenize(sExtensions,",",pos))] = pRow_DeviceTemplate_MediaType->FK_MediaType_get();
-    }
+	m_mapExtensions["wav"]=MEDIATYPE_pluto_StoredAudio_CONST;
+	m_mapExtensions["mp3"]=MEDIATYPE_pluto_StoredAudio_CONST;
+	m_mapExtensions["flac"]=MEDIATYPE_pluto_StoredAudio_CONST;
+	m_mapExtensions["ogg"]=MEDIATYPE_pluto_StoredAudio_CONST;
+	m_mapExtensions["wma"]=MEDIATYPE_pluto_StoredAudio_CONST;
+	m_mapExtensions["mov"]=MEDIATYPE_pluto_StoredVideo_CONST;
+	m_mapExtensions["avi"]=MEDIATYPE_pluto_StoredVideo_CONST;
+	m_mapExtensions["mpeg"]=MEDIATYPE_pluto_StoredVideo_CONST;
+	m_mapExtensions["mpg"]=MEDIATYPE_pluto_StoredVideo_CONST;
+	m_mapExtensions["wmv"]=MEDIATYPE_pluto_StoredVideo_CONST;
+	m_mapExtensions["ts"]=MEDIATYPE_pluto_StoredVideo_CONST;
+	m_mapExtensions["tp"]=MEDIATYPE_pluto_StoredVideo_CONST;
+	m_mapExtensions["dvd"]=MEDIATYPE_pluto_StoredVideo_CONST;
+	m_mapExtensions["vdr"]=MEDIATYPE_pluto_StoredVideo_CONST;
+	m_mapExtensions["ogm"]=MEDIATYPE_pluto_StoredVideo_CONST;
+	m_mapExtensions["evo"]=MEDIATYPE_pluto_StoredVideo_CONST;
+	m_mapExtensions["m2ts"]=MEDIATYPE_pluto_StoredVideo_CONST;
+	m_mapExtensions["iso"]=MEDIATYPE_pluto_StoredVideo_CONST;
+	m_mapExtensions["mp4"]=MEDIATYPE_pluto_StoredVideo_CONST;
+	m_mapExtensions["mkv"]=MEDIATYPE_pluto_StoredVideo_CONST;
+	m_mapExtensions["divx"]=MEDIATYPE_pluto_StoredVideo_CONST;
+	m_mapExtensions["jpg"]=MEDIATYPE_pluto_Pictures_CONST;
+	m_mapExtensions["bmp"]=MEDIATYPE_pluto_Pictures_CONST;
+	m_mapExtensions["png"]=MEDIATYPE_pluto_Pictures_CONST;
+	m_mapExtensions["gif"]=MEDIATYPE_pluto_Pictures_CONST;
+	m_mapExtensions["tif"]=MEDIATYPE_pluto_Pictures_CONST;
+	m_mapExtensions["zip"]=MEDIATYPE_lmce_Game_CONST;
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Pluto Media Identifier activated. Extensions %d", m_mapExtensions.size());
 }

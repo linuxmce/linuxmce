@@ -577,12 +577,22 @@ int DatabaseUtils::SyncMediaAttributes(DBHelper *pDBHelper)
 		"JOIN File_Attribute ON File_Attribute.FK_Attribute=PK_Attribute "
 		"JOIN Picture_File ON Picture_File.FK_File=File_Attribute.FK_File "
 		"LEFT JOIN Picture_Attribute ON Picture_Attribute.FK_Attribute=PK_Attribute "
-		"WHERE Picture_Attribute.FK_Picture is NULL AND FK_AttributeType IN (" 
+		"WHERE Picture_Attribute.FK_Picture is NULL AND Attribute.FK_AttributeType IN (" 
 		TOSTRING(ATTRIBUTETYPE_Performer_CONST) ", "
 		TOSTRING(ATTRIBUTETYPE_Album_CONST) ", " 
 		TOSTRING(ATTRIBUTETYPE_Title_CONST) ") "
 		"GROUP BY PK_Attribute"
 	);
+
+	// Now update the AttributeTypes.  This is redundant data but since mysql doesn't support nested queries it's necessary.  For example you can't make the following query returning files without album attritures
+	/* SELECT * FROM File
+		LEFT JOIN File_Attribute ON FK_File=PK_File
+		LEFT JOIN Attribute ON FK_Attribute=PK_Attribute
+		WHERE EK_MediaType=4 
+	*/	
+	pDBHelper->threaded_db_wrapper_query("UPDATE File_Attribute JOIN Attribute ON FK_Attribute=PK_Attribute SET File_Attribute.FK_AttributeType=Attribute.FK_AttributeType");
+	pDBHelper->threaded_db_wrapper_query("UPDATE Disc_Attribute JOIN Attribute ON FK_Attribute=PK_Attribute SET Disc_Attribute.FK_AttributeType=Attribute.FK_AttributeType");
+	pDBHelper->threaded_db_wrapper_query("UPDATE Picture_Attribute JOIN Attribute ON FK_Attribute=PK_Attribute SET Picture_Attribute.FK_AttributeType=Attribute.FK_AttributeType");
 
 	if(nAffectedRecords == -1)
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "DatabaseUtils::SyncMediaAttributes Attributes sync failed!"); 

@@ -69,7 +69,7 @@ void FileListGrid::ToData(string GridID,int &Size, char* &Data, int *ColStart, i
 					"JOIN Picture_Attribute ON Picture_Attribute.FK_Attribute = File_Attribute.FK_Attribute "
 					"JOIN Picture ON Picture_Attribute.FK_Picture = PK_Picture "
 					"JOIN Attribute ON Picture_Attribute.FK_Attribute = PK_Attribute "
-					"JOIN AttributeType ON FK_AttributeType = PK_AttributeType "
+					"JOIN AttributeType ON Attribute.FK_AttributeType = PK_AttributeType "
 				"WHERE Path = \"" + FileUtils::BasePath(flInfo->m_sPath) + "\" "
 				"GROUP BY Filename "
 				"ORDER BY PicPriority DESC "

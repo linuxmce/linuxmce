@@ -31,6 +31,8 @@ using namespace DCE;
 #include "../Data_Provider_Catalog_Plugin/Data_Provider_Factory.h"
 #include "HTTP_Request_Handler.h"
 
+#include "pluto_media/Define_AttributeType.h"
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 Media_Data_Provider::Media_Data_Provider(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
@@ -86,10 +88,10 @@ void Media_Data_Provider::PostConnect()
 	"select count(PK_Attribute) from Attribute where FK_AttributeType=%1\t"
 	"itemId\n"
 "getContainerInfoByPrefixCount\t"
-	"select count(FK_Attribute) FROM Attribute_MediaType JOIN Attribute ON FK_Attribute=PK_Attribute WHERE FK_AttributeType=3 AND EK_MediaType=%mt\t"
+	"select count(FK_Attribute) FROM Attribute_MediaType JOIN Attribute ON FK_Attribute=PK_Attribute WHERE Attribute.FK_AttributeType=%at AND EK_MediaType=%mt\t"
 	"HCPrefix\n"
 "getContainerInfoByPrefixChunk\t"
-	"select FK_Attribute,Name FROM Attribute_MediaType JOIN Attribute ON FK_Attribute=PK_Attribute WHERE FK_AttributeType=3 AND EK_MediaType=%mt ORDER BY Name LIMIT %2 OFFSET %3;\t"
+	"select FK_Attribute,Name FROM Attribute_MediaType JOIN Attribute ON FK_Attribute=PK_Attribute WHERE Attribute.FK_AttributeType=%at AND EK_MediaType=%mt ORDER BY Name LIMIT %2 OFFSET %3;\t"
 	"HCPrefix,Limit,Offset\n"
 "getImageForAlbum\t"
 	"select FK_Attribute,concat('/home/mediapics/',FK_Picture,'_tn.jpg'),'NULL',FK_Attribute FROM Picture_Attribute WHERE FK_Attribute=%1 LIMIT 1\t"
@@ -129,32 +131,77 @@ void Media_Data_Provider::PostConnect()
 		"ORDER BY Filename LIMIT %2 OFFSET %3\t"
 		"PK_Attribute,Limit,Offset\n" 
 		// URL,rotation,objectID
+
+"getAlbumCoverURI\t"
+	"SELECT concat('file:///home/mediapics/',FK_Picture,'.jpg') FROM Picture_Attribute WHERE FK_Attribute=%1\t"
+	"PK_Attribute\n"
+
+"getNumSongUrisOfArtist\t"
+	"select count(FK_File) FROM File_Attribute WHERE FK_Attribute=%1\t"
+	"PK_Attribute\n"
+
 "getVideoUrisOfAlbum\t"
 		"SELECT PK_File,concat('file://', Path, '/', Filename),0,FK_File FROM File "
 		"JOIN File_Attribute ON FK_File=PK_File WHERE FK_Attribute=%1 AND Missing=0 AND IsDirectory=0 "
 		"ORDER BY Filename LIMIT %2 OFFSET %3\t"
 	"PK_Attribute,Limit,Offset\n" 
 	// SELECT object.objId, %resURI(res_t) from aggr_object object INNER JOIN aggr_items ON aggr_items.ref = object.objId INNER JOIN aggr_res res_t ON res_t.objId=object.objId WHERE aggr_items.objId = '%1' and res_t.type='content' order by object.sortTitle LIMIT %2 OFFSET %3;
+
 "getSongUrisOfAlbum\t"
-	"\t"
-	"PK_File,Limit,Offset\n"
+	"SELECT PK_File,concat('file://',Path,'/',Filename) FROM File_Attribute As Album "
+		"JOIN File ON FK_File=PK_File "
+		"WHERE Album.FK_Attribute=%1\t"
+	"PK_Attribute,Limit,Offset\n"
+	// SELECT object.objId, %resURI(res_t) from aggr_object object INNER JOIN aggr_items ON aggr_items.ref = object.objId INNER JOIN aggr_res res_t ON res_t.objId=object.objId WHERE aggr_items.objId = '%1' and res_t.type='content' order by (case when object.originalTrackNumber=-1 then 9999 else object.originalTrackNumber end), object.sortTitle LIMIT %2 OFFSET %3;
+
+"getSongUrisOfArtist\t"
+	"SELECT PK_File,concat('file://',Path,'/',Filename) FROM File_Attribute As Artist "
+		"JOIN File ON FK_File=PK_File "
+		"WHERE Artist.FK_Attribute=%1\t"
+	"PK_Attribute,Limit,Offset\n"
+
+"getAlbumOfSong\t"
+	"select FK_Attribute FROM File_Attribute WHERE FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Album_CONST) " AND FK_File=%1\t"
+	"PK_File\n"
+
+"getSongInfo\t"
+		"select IFNULL(Song_A.Name,Filename),Performer_A.Name,Album_A.Name,Genre_A.Name,concat('file:///home/mediapics/',FK_Picture,'.jpg') FROM File "
+		"LEFT JOIN File_Attribute AS Song ON Song.FK_File=PK_File AND Song.FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Title_CONST) " "
+		"LEFT JOIN Attribute AS Song_A ON Song.FK_Attribute=Song_A.PK_Attribute "
+		"LEFT JOIN File_Attribute AS Performer ON Performer.FK_File=PK_File AND Performer.FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Performer_CONST) " "
+		"LEFT JOIN Attribute AS Performer_A ON Performer.FK_Attribute=Performer_A.PK_Attribute "
+		"LEFT JOIN File_Attribute AS Album ON Album.FK_File=PK_File AND Album.FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Album_CONST) " "
+		"LEFT JOIN Attribute AS Album_A ON Album.FK_Attribute=Album_A.PK_Attribute "
+		"LEFT JOIN File_Attribute AS Genre ON Genre.FK_File=PK_File AND Genre.FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Genre_CONST) " "
+		"LEFT JOIN Attribute AS Genre_A ON Genre.FK_Attribute=Genre_A.PK_Attribute "
+		"LEFT JOIN Picture_File ON Picture_File.FK_File=PK_File "
+		"WHERE PK_File=%1\t"
+	"PK_File\n"
+	// Song name, artist name, album name, genre, pic URL
+
 "batchGetStartLettersAndNumberofItemsForPrefix\t"
-		"select distinct left(Name,1),10 AS N FROM Attribute_MediaType JOIN Attribute ON FK_Attribute=PK_Attribute "
-		"WHERE FK_AttributeType=%at AND EK_MediaType=%mt ORDER BY N\t"
+	"select UPPER(LEFT(Name,2)) AS s,sum(NumFiles) FROM Attribute_MediaType "
+		"JOIN Attribute ON FK_Attribute=PK_Attribute "
+		"WHERE EK_MediaType=%mt AND Attribute.FK_AttributeType=%at "
+		"GROUP BY s "
+		"ORDER BY s\t"
 	"HCPrefix\n" 
 	// select substr, count from aggr_substrs where prefix = '%1' order by substr;
+
 "getUriForArtistsBySortTitleBetween\t"
 		"select concat('/home/mediapics/', FK_Picture, '.jpg') FROM Attribute_MediaType "
 		"JOIN Attribute ON Attribute_MediaType.FK_Attribute=PK_Attribute JOIN Picture_Attribute ON Picture_Attribute.FK_Attribute=PK_Attribute "
-		"WHERE FK_AttributeType=2 AND EK_MediaType=4 AND Name >= %1 and Name <= %2 "
+		"WHERE Attribute.FK_AttributeType=2 AND EK_MediaType=4 AND Name >= %1 and Name <= %2 "
 		"Order BY Name limit %3 offset %4\t"
 	"From,To,Limit,Offset\n" 
 	// select %resURI(res_t) from aggr_object object_t, aggr_res res_t WHERE object_t.prefix = 1 and res_t.objId=object_t.objId and res_t.usage='thumbnail' and object_t.sortTitle >= '%1' and object_t.sortTitle <= '%2' order by object_t.sortTitle limit %3 offset %4;
+
 "batchGetIdTitleUriForArtistsBySortTitleBetween\t"
 	"select PK_Attribute,Name,concat('/home/mediapics/', FK_Picture, '.jpg') FROM Attribute_MediaType "
 	"JOIN Attribute ON Attribute_MediaType.FK_Attribute=PK_Attribute "
 	"JOIN Picture_Attribute ON Picture_Attribute.FK_Attribute=PK_Attribute "
-	"WHERE FK_AttributeType=2 AND EK_MediaType=4 AND Name >= %1 and Name <= %2 "
+	"WHERE Attribute.FK_AttributeType=2 AND EK_MediaType=4 AND Name >= %1 and Name <= %2 "
+	"ORDER BY Name "
 	"LIMIT %3 OFFSET %4\t"
 	"From,To,Limit,Offset\n" 
 	// select object_t.objId, object_t.title, %resURI(res_t) from aggr_object object_t, aggr_res res_t WHERE object_t.prefix = 1 and res_t.objId=object_t.objId and res_t.usage='albumCover' and object_t.sortTitle >= '%1' and object_t.sortTitle <= '%2' order by object_t.sortTitle limit %3 offset %4;
@@ -162,40 +209,70 @@ void Media_Data_Provider::PostConnect()
 "getNumberOfArtistsBySortTitleBetween\t"
 	"select count(PK_Attribute) FROM Attribute_MediaType "
 	"JOIN Attribute ON Attribute_MediaType.FK_Attribute=PK_Attribute "
-	"WHERE FK_AttributeType=2 AND EK_MediaType=4 AND Name >= %1 and Name <= %2\t"
+	"WHERE Attribute.FK_AttributeType=2 AND EK_MediaType=4 AND Name >= %1 and Name <= %2\t"
 	"From,To\n" 
 	// select count(*) from aggr_object object_t WHERE object_t.prefix = 1 and object_t.sortTitle >= '%1' and object_t.sortTitle <= '%2';
 
 	
 //fix
 "getNameSongCountForArtist\t"
-	"select 'songone',3\t"
+	"select Name,count(FK_File) FROM File_Attribute JOIN Attribute ON FK_Attribute=PK_Attribute WHERE FK_Attribute=%1 GROUP BY PK_Attribute\t"
 	"PK_Attribute\n"
 	//SELECT o.title, count(*) from aggr_object o, aggr_items i WHERE o.objId='%1' AND o.objId=i.objId AND i.targetPrefix=2 GROUP BY o.objId;
 
 //fix
 "getIdTitleUriHostForAlbumsOfArtist\t"
-	"select 123, 'foo', '/home/mediapics/611.jpg', '888'\t"
+		"SELECT DISTINCT Album.FK_Attribute,Attribute.Name,concat('/home/mediapics/', FK_Picture, '.jpg') FROM File_Attribute As Performer "
+		"LEFT JOIN File_Attribute As Album ON Performer.FK_File=Album.FK_File "
+		"LEFT JOIN Attribute ON Album.FK_Attribute=PK_Attribute "
+		"LEFT JOIN Picture_Attribute ON PK_Attribute=Picture_Attribute.FK_Attribute "
+		"WHERE Performer.FK_Attribute=%1 AND Attribute.FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Album_CONST) " "
+		"LIMIT %2 OFFSET %3\t"
 	"PK_Attribute,Limit,Offset\n"
 	// select o.objId, o.title, %resURI(r), o.hostKey from aggr_object o, aggr_items i, aggr_items ia, aggr_res r WHERE i.objId='%1' and i.targetPrefix=0 and o.objId=i.ref AND o.objId=ia.ref AND r.objId=o.objId and r.usage = 'albumCover' GROUP BY o.objId ORDER BY o.sortTitle limit %2 offset %3
 
 
 //fix
 "getArtistCountForAlbumsOfArtist\t"
-	"select 5\t"
+		"SELECT count(Songs.FK_File) "
+		"FROM File_Attribute As Performer " // the performers
+		"LEFT JOIN File_Attribute As Albums ON Performer.FK_File=Albums.FK_File AND Albums.FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Album_CONST) " " // all the albums for the performer
+		"LEFT JOIN File_Attribute As Songs ON Albums.FK_Attribute=Songs.FK_Attribute " // All the songs on those albums
+		"WHERE Performer.FK_Attribute=%1 "
+		"GROUP BY  Albums.FK_Attribute "
+		"ORDER BY  Albums.FK_Attribute\t"
 	"PK_Attribute\n"
 	// SELECT count(*) FROM (SELECT o.objId objId, o.sortTitle sortTitle FROM aggr_object o, aggr_items i WHERE i.objId='%1' and i.targetPrefix=0 and o.objId=i.ref) s, aggr_relations r WHERE r.objId in (s.objId) GROUP BY s.objId ORDER BY sortTitle;
+	/* select *
+FROM File_Attribute As Performer # the performers
+LEFT JOIN File_Attribute As Albums ON Performer.FK_File=Albums.FK_File AND Albums.FK_AttributeType=3 # all the albums for the performer
+LEFT JOIN File_Attribute As Songs ON Albums.FK_Attribute=Songs.FK_Attribute # All the songs on those albums
+WHERE Performer.FK_Attribute=8053
+ORDER BY  Albums.FK_Attribute
+
+GROUP BY  Albums.FK_Attribute
+*/
 
 //fix
 "getNumberOfSongsInAlbumOrByArtist\t"
-	"select 3\t"
-	"\n"
+	"SELECT count(FK_File) FROM File_Attribute WHERE FK_Attribute=%1\t"
+	"PK_Attribute\n"
 	// select count(distinct(ref)) from aggr_items WHERE objId='%1' and targetPrefix=2;
 
 //fix
 "batchGetSongsArtistsOfAlbumBySortField\t"
-	"select 8674, 'my title', 'my ref', 'oa title', 'oatrack' FROM File limit 3\t"
+		"SELECT PK_File,IFNULL(SongTitle_A.Name,Filename),Performer_A.Name,Track_A.Name "
+		"FROM File_Attribute As Album "
+		"JOIN File ON Album.FK_File=PK_File "
+		"LEFT JOIN File_Attribute As SongTitle ON PK_File=SongTitle.FK_File AND SongTitle.FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Title_CONST) " "
+		"LEFT JOIN Attribute AS SongTitle_A ON SongTitle.FK_Attribute=SongTitle_A.PK_Attribute "
+		"LEFT JOIN File_Attribute As Performer ON PK_File=Performer.FK_File AND Performer.FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Performer_CONST) " "
+		"LEFT JOIN Attribute AS Performer_A ON Performer.FK_Attribute=Performer_A.PK_Attribute "
+		"LEFT JOIN File_Attribute As Track ON PK_File=Track.FK_File AND Track.FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Track_CONST) " "
+		"LEFT JOIN Attribute AS Track_A ON Track.FK_Attribute=Track_A.PK_Attribute "
+		"WHERE Album.FK_Attribute=%1 ORDER BY Track_A.Name LIMIT %2 OFFSET %3\t"
 	"\n"
+	// PK_File, Song Title, PK_Attribute_Artist, Artist Name, Track
 	// select o.objId, o.title, r.ref, o_a.title, o.originalTrackNumber from aggr_object o, aggr_items i INNER JOIN aggr_relations r ON r.objId=o.objId INNER JOIN aggr_object o_a ON r.ref=o_a.objId  AND r.targetPrefix=1 WHERE i.objId='%1' and i.ref=o.objId order by (case when o.originalTrackNumber=-1 then 9999 else o.originalTrackNumber end), o.sortTitle limit %2 offset %3;
 
 "getNumberofItemsForPrefix\t"

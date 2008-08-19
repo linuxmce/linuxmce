@@ -1781,7 +1781,7 @@ vector<class ArrayValue *> *DesignObj_Generator::GetArrayValues(Row_DesignObjVar
 					"JOIN File_Attribute ON FK_Attribute=PK_Attribute "
 					"JOIN File ON FK_File=PK_File "
 					"WHERE EK_MediaType=" + StringUtils::itos(m_pOrbiterGenerator->m_dwMediaType) +
-					" AND FK_AttributeType="  TOSTRING(ATTRIBUTETYPE_Genre_CONST) " AND Missing=0";
+					" AND Attribute.FK_AttributeType="  TOSTRING(ATTRIBUTETYPE_Genre_CONST) " AND Missing=0";
 
 				vector<Row_Attribute *> vectRow_Attribute;
 				m_pOrbiterGenerator->m_spDatabase_pluto_media->Attribute_get()->GetRows(sSQL,&vectRow_Attribute);

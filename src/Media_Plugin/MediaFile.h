@@ -227,7 +227,7 @@ public:
 			pMediaAttributes_LowLevel->m_pDatabase_pluto_media->Attribute_get()->GetRows(
 				"JOIN File_Attribute ON FK_Attribute = PK_Attribute "
 				"WHERE FK_File = " + StringUtils::ltos(m_dwPK_File) + " AND "
-				"FK_AttributeType = " + StringUtils::ltos(nAttributeType),
+				"Attribute.FK_AttributeType = " + StringUtils::ltos(nAttributeType),
 				&vectRow_Attribute
 			);
 

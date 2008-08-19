@@ -83,34 +83,40 @@ bool Generic_Mysql_Provider::Populate(int PK_Device,string sID,string sParameter
 			if( row[i] )
 			{
 				string s = row[i];
-				StringUtils::Replace(&s,"\"","");
-				StringUtils::Replace(&s,"'","");
-				StringUtils::Replace(&s,"[","");
-				StringUtils::Replace(&s,"]","");
-				StringUtils::Replace(&s,"(","");
-				StringUtils::Replace(&s,")","");
-				StringUtils::Replace(&s,"%","");
-				StringUtils::Replace(&s,"<","");
-				StringUtils::Replace(&s,">","");
-				StringUtils::Replace(&s,"^","");
-				StringUtils::Replace(&s,"$","");
-				StringUtils::Replace(&s,"@","");
-				StringUtils::Replace(&s,";","");
-				StringUtils::Replace(&s,"?","");
-				StringUtils::Replace(&s,"!","");
-				StringUtils::Replace(&s,"#","");
-				StringUtils::Replace(&s,"=","");
-				StringUtils::Replace(&s,"&","");
-				StringUtils::Replace(&s,"+","");
-				StringUtils::Replace(&s,"\\","");
-				StringUtils::Replace(&s,"`","");
-				StringUtils::Replace(&s,",","");
-				StringUtils::Replace(&s,"ë","");
-				StringUtils::Replace(&s,"ï","");
+				if( s.size()>7 && s.substr(0,7)=="file://" )
+				{
+					StringUtils::Replace(&s," ","%20");
+				}
+				else
+				{
+					StringUtils::Replace(&s,"\"","");
+					StringUtils::Replace(&s,"'","");
+					StringUtils::Replace(&s,"[","");
+					StringUtils::Replace(&s,"]","");
+					StringUtils::Replace(&s,"(","");
+					StringUtils::Replace(&s,")","");
+					StringUtils::Replace(&s,"%","");
+					StringUtils::Replace(&s,"<","");
+					StringUtils::Replace(&s,">","");
+					StringUtils::Replace(&s,"^","");
+					StringUtils::Replace(&s,"$","");
+					StringUtils::Replace(&s,"@","");
+					StringUtils::Replace(&s,";","");
+					StringUtils::Replace(&s,"?","");
+					StringUtils::Replace(&s,"!","");
+					StringUtils::Replace(&s,"#","");
+					StringUtils::Replace(&s,"=","");
+					StringUtils::Replace(&s,"&","");
+					StringUtils::Replace(&s,"+","");
+					StringUtils::Replace(&s,"\\","");
+					StringUtils::Replace(&s,"`","");
+					StringUtils::Replace(&s,",","");
+					StringUtils::Replace(&s,"ë","");
+					StringUtils::Replace(&s,"ï","");
 
-if( s!=row[i] )
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Generic_Mysql_Provider::Populate ESCAPED %s", row[i]);
-
+	if( s!=row[i] )
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Generic_Mysql_Provider::Populate ESCAPED %s", row[i]);
+				}
 
 				if( s.find("http://")!=string::npos )
 					*it += StringUtils::URLEncode(s);
