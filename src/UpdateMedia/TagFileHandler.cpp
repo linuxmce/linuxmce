@@ -1,3 +1,8 @@
+
+#include <tag.h>
+using namespace TagLib;
+
+
 #include "TagFileHandler.h"
 #include "PlutoMediaAttributes.h"
 #include "FileUtils/file_utils.h"
