@@ -1,0 +1,46 @@
+ROOT=..
+
+CXX=g++
+CC=$(CXX)
+#CPPFLAGS=-W -Wall -pipe -ggdb3 -DUPDATE_MEDIA
+CPPFLAGS=-fPIC -Wall -pipe -Os -W -DUPDATE_MEDIA -DNOXATTR
+CXXFLAGS=-I. -I.. -I$(ROOT) -I$(ROOT)/DCE -I/mnt/HD_a2/additional_packages/add/taglib-1.4/taglib -I/mnt/HD_a2/ffp/include/id3/
+CXXFLAGS += -I/mnt/HD_a2/additional_packages/add/taglib-1.4/taglib/toolkit -I/mnt/HD_a2/additional_packages/add/taglib-1.4/taglib/.libs/
+LDFLAGS=-L$(ROOT)/lib -L/usr/local/lib -L/mnt/HD_a2/ffp/lib -L/mnt/HD_a2/ffp/lib/mysql -L/mnt/HD_a2/additional_packages/add/taglib-1.4/taglib/.libs/
+LDLIBS= -lpluto_media -lDCECommon -lSerializeClass -lPlutoUtils -lpthread -lid3 -ltag -liconv
+
+#/mnt/HD_a2/ffp/lib/libiconv.so
+
+#<-mkr_B_use_mysql_wrapper_b->
+CPPFLAGS += -I/usr/include/mysql
+LDFLAGS += -lmysqlclient_r
+#<-mkr_B_use_mysql_wrapper_e->
+
+#<-mkr_b_use_mysql_wrapper_b->
+#CPPFLAGS += -DUSE_MYSQL_WRAPPER
+#<-mkr_b_use_mysql_wrapper_e->
+
+sources = Main.cpp \
+UpdateMedia.cpp \
+PlutoMediaFile.cpp \
+MediaIdentifier.cpp \
+PlutoMediaAttributes.cpp \
+MediaState.cpp \
+FileStatusObserver.cpp \
+GenericFileHandler.cpp \
+ID3FileHandler.cpp \
+VDRInfoFileHandler.cpp \
+FileHandlerFactory.cpp \
+TagFileHandler.cpp \
+FileUtils/file_utils.cpp \
+id3info/id3info.cpp \
+$(ROOT)/Media_Plugin/MediaAttributes_LowLevel.cpp \
+$(ROOT)/inotify/FileNotifier.cpp \
+$(ROOT)/inotify/inotify_class.cpp 
+
+all: $(sources:.cpp=.o)
+	$(CXX) -o UpdateMedia $+ $(LDFLAGS) $(LDLIBS)
+	cp UpdateMedia $(ROOT)/bin/
+
+clean:
+	rm -f UpdateMedia $(sources:.cpp=.o) 
