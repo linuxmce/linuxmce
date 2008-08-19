@@ -226,7 +226,7 @@
             "FK_Room": "",
             "FK_Device_ControlledVia": "1",
             "DeviceData": {
-				"FK_DeviceData_284": "1"
+				"FK_DeviceData_284": "1",
                 "FK_DeviceData_11": "3",
                 "FK_DeviceData_26": "100",
                 "FK_DeviceData_37": "\/dev\/usb\/tts\/0" 
