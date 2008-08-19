@@ -132,8 +132,12 @@ Create this on the stack to have all allocated memory clean up on exit
 		PendingTaskList() {}
 		~PendingTaskList()
 		{
-			for(list<PendingTask *>::iterator it=m_listPendingTask.begin();it!=m_listPendingTask.end();++it)
+			for(list<PendingTask *>::iterator it=m_listPendingTask.begin(); 
+			it!=m_listPendingTask.end();
+			++it)
+				{
 				delete *it;
+			}
 		}
 
 		string ToString()
