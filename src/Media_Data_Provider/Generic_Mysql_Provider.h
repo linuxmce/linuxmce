@@ -19,6 +19,7 @@
 #define Generic_Mysql_Provider_h
 
 #include <map>
+#include <string>
 
 using namespace std;
 

@@ -25,7 +25,7 @@ LDFLAGS +=
 XTRALDLIBS =
 
 Gen_Dev_Files +=
-sources +=
+sources += Generic_Mysql_Provider.cpp HTTP_Request_Handler.cpp ../Data_Provider_Catalog_Plugin/Data_Provider_Factory.cpp ../Data_Provider_Catalog_Plugin/Data_Provider_CallBack.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)

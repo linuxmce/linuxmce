@@ -19,6 +19,7 @@
 #define Data_Provider_CallBack_h
 
 #include <map>
+#include <string>
 using namespace std;
 
 /*
