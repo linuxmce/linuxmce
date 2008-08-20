@@ -255,9 +255,13 @@ public:
 
 	/** @brief COMMAND: #248 - Get Device Status */
 	/** Gets the status for a device */
+		/** @param #2 PK_Device */
+			/** The device id which you need information for. */
+		/** @param #5 Value To Assign */
+			/** the data */
 
-	virtual void CMD_Get_Device_Status() { string sCMD_Result; CMD_Get_Device_Status(sCMD_Result,NULL);};
-	virtual void CMD_Get_Device_Status(string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Get_Device_Status(int iPK_Device,string *sValue_To_Assign) { string sCMD_Result; CMD_Get_Device_Status(iPK_Device,sValue_To_Assign,sCMD_Result,NULL);};
+	virtual void CMD_Get_Device_Status(int iPK_Device,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #272 - Restart DCERouter */
@@ -591,6 +595,15 @@ Delimiter: '\n' */
 
 	virtual void CMD_Update_Device(int iPK_Device,string sMac_address,int iPK_Room,string sIP_Address,string sData_String,string sDescription) { string sCMD_Result; CMD_Update_Device(iPK_Device,sMac_address.c_str(),iPK_Room,sIP_Address.c_str(),sData_String.c_str(),sDescription.c_str(),sCMD_Result,NULL);};
 	virtual void CMD_Update_Device(int iPK_Device,string sMac_address,int iPK_Room,string sIP_Address,string sData_String,string sDescription,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #969 - Restore To NonTemp State */
+	/** Restore a device to the state in State_NonTemporary, so that a temporary change can be reverted */
+		/** @param #2 PK_Device */
+			/** The device to restore */
+
+	virtual void CMD_Restore_To_NonTemp_State(int iPK_Device) { string sCMD_Result; CMD_Restore_To_NonTemp_State(iPK_Device,sCMD_Result,NULL);};
+	virtual void CMD_Restore_To_NonTemp_State(int iPK_Device,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
 	private:
