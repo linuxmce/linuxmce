@@ -1248,3 +1248,28 @@ void Security_Plugin::GetFloorplanDeviceInfo(DeviceData_Router *pDeviceData_Rout
 	else
 		iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_SECURITY_DOOR_CLOSED_CONST;
 }
+//<-dceag-c969-b->
+
+	/** @brief COMMAND: #969 - Restore To NonTemp State */
+	/** Restore a security device to the state in State_NonTemporary */
+		/** @param #2 PK_Device */
+			/** The device to restore */
+
+void Security_Plugin::CMD_Restore_To_NonTemp_State(int iPK_Device,string &sCMD_Result,Message *pMessage)
+//<-dceag-c969-e->
+{
+}
+
+//<-dceag-c972-b->
+
+	/** @brief COMMAND: #972 - Set Sensor State */
+	/** Sets the state of a sensor */
+		/** @param #2 PK_Device */
+			/** The sensor */
+		/** @param #5 Value To Assign */
+			/** Can be: ARMED or UNARMED */
+
+void Security_Plugin::CMD_Set_Sensor_State(int iPK_Device,string sValue_To_Assign,string &sCMD_Result,Message *pMessage)
+//<-dceag-c972-e->
+{
+}

@@ -223,6 +223,25 @@ public:
 	virtual void CMD_Verify_PIN(int iPK_Users,string sPassword,bool *bIsSuccessful,string &sCMD_Result,Message *pMessage);
 
 
+	/** @brief COMMAND: #969 - Restore To NonTemp State */
+	/** Restore a security device to the state in State_NonTemporary */
+		/** @param #2 PK_Device */
+			/** The device to restore */
+
+	virtual void CMD_Restore_To_NonTemp_State(int iPK_Device) { string sCMD_Result; CMD_Restore_To_NonTemp_State(iPK_Device,sCMD_Result,NULL);};
+	virtual void CMD_Restore_To_NonTemp_State(int iPK_Device,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #972 - Set Sensor State */
+	/** Sets the state of a sensor */
+		/** @param #2 PK_Device */
+			/** The sensor */
+		/** @param #5 Value To Assign */
+			/** Can be: ARMED or UNARMED */
+
+	virtual void CMD_Set_Sensor_State(int iPK_Device,string sValue_To_Assign) { string sCMD_Result; CMD_Set_Sensor_State(iPK_Device,sValue_To_Assign.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Set_Sensor_State(int iPK_Device,string sValue_To_Assign,string &sCMD_Result,Message *pMessage);
+
 //<-dceag-h-e->
 	// make these inline so Orbiter Plugin can call them without adding the security plugin.cpp file
 	// TODO: All the plugins should call the other plugins using the shared objects/dll's rather than static linking
