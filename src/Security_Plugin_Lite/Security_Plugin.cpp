@@ -315,7 +315,7 @@ void Security_Plugin::UpdateAlertLog(SecurityAlert *pSecurityAlert)
 		"&SensorDisarmed=" + (pSecurityAlert->m_bSensorDisarmed ? "1" : "0");
 // http://cisco.fiire.com/AlertLog.php?EK_Installation=1&DateTime=1219198786&Counter=0&EK_Device=17&SensorDisarmed=0
 
-#ifdef WIN32
+//#ifdef WIN32
 	size_t size;
 	char *pPtr = FileUtils::ReadURL(sURL,size,true);
 	if( pPtr==NULL || size==0 || strstr(pPtr,"Added_OK")==NULL )
@@ -325,11 +325,13 @@ void Security_Plugin::UpdateAlertLog(SecurityAlert *pSecurityAlert)
 	}
 	else
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Security_Plugin::UpdateAlertLog success: %s %d", pPtr, size);
+	/*
 #else
 	
 	char * buffer = NULL;
 	int iResult = http_fetch(sUrl.c_str(), &buffer);
 #endif
+	*/
 }
 
 void Security_Plugin::AlarmCallback(int id, void* param)
