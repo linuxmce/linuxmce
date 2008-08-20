@@ -45,6 +45,7 @@ using namespace DCE;
 
 #define ALARM_TIMED_EVENT	1
 #define ALARM_SUNRISE_SUNSET	2
+#define HANDLE_ALERT_NOTIFICATION			3
 
 
 //<-dceag-const-b->
@@ -70,6 +71,7 @@ bool Event_Plugin::GetConfig()
 		return false;
 //<-dceag-getconfig-e->
 
+	m_fLongitude=m_fLatitude=0;
 /*
 	vector<Row_Criteria *> vectRow_Criteria;
 	if(pRow_Installation)
@@ -112,6 +114,9 @@ bool Event_Plugin::GetConfig()
 				m_fLongitude = json_object_get_double(iter.val);
 			else if(sValue == "latitude")
 				m_fLatitude = json_object_get_double(iter.val);
+			else if(sValue == "User")
+				ParseUsers(iter.val);
+
 		}
 	}
 
@@ -148,6 +153,44 @@ void Event_Plugin::ParseTimers(struct json_object *json_obj)
 		}
 		else
 			m_mapTimedEvent[pTimedEvent->m_ID] = pTimedEvent;
+	}
+}
+
+void Event_Plugin::ParseUsers(struct json_object *json_obj)
+{
+	struct json_object *obj_users = json_obj;
+	struct json_object_iter iter_users;
+	json_object_object_foreachC(obj_users, iter_users) 
+	{
+		string sUserID = iter_users.key;
+
+		StringUtils::Replace(&sUserID, "PK_User_", "");
+		int iUserID = atoi(sUserID.c_str());
+		
+		UserNotification *pUserNotification = new UserNotification(iUserID);
+		m_mapUserNotification[iUserID] = pUserNotification;
+		struct json_object_iter iter_userParms;
+		json_object_object_foreachC(iter_users.val, iter_userParms)
+		{
+			if( iter_userParms.val->o_type!=json_type_int && iter_userParms.val->o_type!=json_type_string )
+				continue;
+
+			string sKey = iter_userParms.key;
+			if( sKey=="Name" )
+				pUserNotification->m_sName = json_object_get_string(iter_userParms.val);
+			else if( sKey=="notify_sms" )
+				pUserNotification->m_bNotifySms = json_object_get_string(iter_userParms.val)=="true";
+			else if( sKey=="phone" )
+				pUserNotification->m_sPhone = json_object_get_string(iter_userParms.val);
+			else if( sKey=="notify_email" )
+				pUserNotification->m_bNotifyEmail = json_object_get_string(iter_userParms.val)=="true";
+			else if( sKey=="email_address" )
+				pUserNotification->m_sEmail = json_object_get_string(iter_userParms.val);
+			else if( sKey=="notify_voice" )
+				pUserNotification->m_bNotifyVoice = json_object_get_string(iter_userParms.val)=="true";
+			else if( sKey=="voicephone" )
+				pUserNotification->m_sVoicePhone = json_object_get_string(iter_userParms.val);
+		}
 	}
 }
 
@@ -478,6 +521,7 @@ bool Event_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessage,cl
 			pEventInstance->m_PKID_Device_OriginatedThisEvent = pMessage->m_dwPK_Device_From;
 			pEventHandler->m_tLastFired = time(NULL);
 			ExecuteEvent(pEventInstance);
+			m_pAlarmManager->AddRelativeAlarm( 0, this, HANDLE_ALERT_NOTIFICATION, pEventInstance );
 		}
 	}
 
@@ -539,6 +583,12 @@ void Event_Plugin::AlarmCallback(int id, void* param)
 	}
 	else if( id==ALARM_SUNRISE_SUNSET )
 		FireSunriseSunsetEvent();
+	else if( id==HANDLE_ALERT_NOTIFICATION )
+		HandleAlertNotification((EventInstance *) param);
+}
+
+void Event_Plugin::HandleAlertNotification(EventInstance *pEventInstance)
+{
 }
 
 

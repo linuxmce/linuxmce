@@ -287,8 +287,6 @@ void General_Info_Plugin::CMD_Get_Device_State(int iPK_Device,string *sValue_To_
 			it_device != m_pRouter->DataLayer()->Devices().end(); ++it_device)
 		{
 			DeviceData_Router *pDeviceData_Router = it_device->second;
-			int iPK_DeviceCategory = pDeviceData_Router->m_dwPK_DeviceCategory;
-
 			*sValue_To_Assign += StringUtils::ltos(pDeviceData_Router->m_dwPK_Device) + "|" + 
 				pDeviceData_Router->m_sState_get() + "\n";
 		}
@@ -299,11 +297,14 @@ void General_Info_Plugin::CMD_Get_Device_State(int iPK_Device,string *sValue_To_
 
 	/** @brief COMMAND: #248 - Get Device Status */
 	/** Gets the status for a device */
+		/** @param #2 PK_Device */
+			/** The device id which you need information for. */
+		/** @param #5 Value To Assign */
+			/** the data */
 
-void General_Info_Plugin::CMD_Get_Device_Status(string &sCMD_Result,Message *pMessage)
+void General_Info_Plugin::CMD_Get_Device_Status(int iPK_Device,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
 //<-dceag-c248-e->
 {
-	/*
 	if(iPK_Device)
 	{
 		DeviceData_Router *pDeviceData_Router = m_pRouter->DataLayer()->Device(iPK_Device);
@@ -325,13 +326,10 @@ void General_Info_Plugin::CMD_Get_Device_Status(string &sCMD_Result,Message *pMe
 			it_device != m_pRouter->DataLayer()->Devices().end(); ++it_device)
 		{
 			DeviceData_Router *pDeviceData_Router = it_device->second;
-			int iPK_DeviceCategory = pDeviceData_Router->m_dwPK_DeviceCategory;
-
 			*sValue_To_Assign += StringUtils::ltos(pDeviceData_Router->m_dwPK_Device) + "|" + 
 				pDeviceData_Router->m_sStatus_get() + "\n";
 		}
 	}
-	*/
 }
 
 //<-dceag-c272-b->

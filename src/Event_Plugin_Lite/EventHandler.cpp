@@ -62,6 +62,10 @@ EventHandler::EventHandler(unsigned long PK_EventHander,Event_Plugin *pEvent_Plu
 			{
 				m_bDisabled = (sValue=="0");
 			}
+			else if(sKey == "Users")
+			{
+				m_sUsers = sValue;
+			}
 		}
 		else if(sKey == "commands" && iter_sceneparams.val->o_type == json_type_object)
 		{

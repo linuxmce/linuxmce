@@ -52,6 +52,20 @@ namespace DCE
 		}
 	};
 
+	class UserNotification
+	{
+	public:
+		int m_PK_Users;
+		string m_sName,m_sPhone,m_sEmail,m_sVoicePhone;
+		bool m_bNotifySms,m_bNotifyEmail,m_bNotifyVoice;
+
+		UserNotification(int PK_Users) 
+		{ 
+			m_PK_Users=PK_Users; 
+			m_bNotifySms=m_bNotifyEmail=m_bNotifyVoice=false;
+		}
+	};
+
 	class Event_Plugin : public Event_Plugin_Command, public AlarmEvent
 	{
 //<-dceag-decl-e->
@@ -73,6 +87,7 @@ namespace DCE
 		map<int,CannedEvent *> m_mapCannedEvents;
 		map<int,int> m_mapCriteriaParmList_ParameterType;  // Map of criteriaparmlist to parameter type
 		class General_Info_Plugin *m_pGeneral_Info_Plugin;
+		map<int,UserNotification *> m_mapUserNotification;
 
 		// Private methods
 public:
@@ -91,6 +106,7 @@ public:
 
 		void ParseTimers(struct json_object *json_obj);
 		void ParseEvents(struct json_object *json_obj);
+		void ParseUsers(struct json_object *json_obj);
 		void ParseCannedEvents(struct json_object *json_obj);
 		void ParseCriteriaParmList(struct json_object *json_obj);
 		void ParseCommands(map<int, Command_Data>& mapCommands, struct json_object *json_obj);
@@ -105,6 +121,7 @@ public:
 
 		void SetFirstSunriseSunset();
 		void FireSunriseSunsetEvent();
+		void HandleAlertNotification(EventInstance *pEventInstance);
 
 		bool IsDaytime() { return m_bIsDaytime; }
 

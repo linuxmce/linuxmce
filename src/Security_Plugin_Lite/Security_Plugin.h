@@ -34,9 +34,6 @@
 
 #include "DeviceData_Router.h"
 #include "AlarmManager.h"
-class Row_Alert;
-class Row_Alert_Device;
-class Row_AlertType;
 
 /*
 	All sensors' states are in this form: Mode,Bypass,Delay
@@ -62,34 +59,35 @@ class Row_AlertType;
 //<-dceag-decl-b->!
 namespace DCE
 {
+	class SecurityAlert
+	{
+	public:
+		bool m_bSensorDisarmed;
+		time_t m_tTime;
+		DeviceData_Router *m_pDevice;
+		int m_iAlertID;
+
+		SecurityAlert(int iAlertID,DeviceData_Router *pDevice)
+		{
+			m_bSensorDisarmed=false;
+			m_iAlertID=iAlertID;
+			m_pDevice=pDevice;
+			m_tTime=time(NULL);
+		}
+	};
+
 	class Security_Plugin : public Security_Plugin_Command, public AlarmEvent
 	{
 //<-dceag-decl-e->
 
-    friend class Notification;
 	// Private member variables 
     pluto_pthread_mutex_t m_SecurityMutex;
 	pthread_mutexattr_t m_MutexAttr; /** < make it recursive */
-	DeviceData_Router *m_pDeviceData_Router_this;
 	class AlarmManager *m_pAlarmManager;
-//	vector<Row_Alert *> m_vectPendingAlerts;
-//	map<int,Row_ModeChange *> m_mapRow_ModeChange_Last;  // Map based on the zone (DeviceGroup) or 0 for all zones
-  //  Row_ModeChange *m_mapRow_ModeChange_Last_Find(int PK_DeviceGroup) { map<int,class Row_ModeChange *>::iterator it = m_mapRow_ModeChange_Last.find(PK_DeviceGroup); return it==m_mapRow_ModeChange_Last.end() ? NULL : (*it).second; }
-	int m_PK_Device_TextToSpeach;
-	map<pthread_t,class Notification *> m_mapNotification; // Any pending notifications
-	bool m_bMonitorMode; // True if the user is monitoring events
-	bool m_bBabySitterMode;  // True if babySitter mode
-	map<int,class DeviceGroup *> m_mapDeviceGroup; // The device groups that are valid security zones
-	map<int,int> m_mapPK_HouseMode;  // Map the house mode to the devicegroup
-	
-	// The announcements we'll need to make are stored here.  They come from the Text_LS table
-	string m_sCountdownBeforeAlarm,m_sCountdownBeforeArmed,m_sShortCountdownBeforeAlarm,m_sShortCountdownBeforeArmed;
-
-	// If there is a pending exit delay that we are counting down for, the time at which the delay expires
-	// will be stored here
-	time_t m_tExitTime;
-	bool m_bExitDelay_New; // Set to true when a new exit delay is started so we know to make a full announcement.
-	map<int,bool> m_mapAlarm_New; // For a PK_Alert Set to true when a new exit delay is started so we know to make a full announcement.
+	int m_iAlertID;
+	map<int,SecurityAlert *> m_mapSecurityAlert;
+	string m_sRA_User,m_sRA_Password;
+	map<int, list<int> > m_mapSensorsToCameras;
 
 	// Private methods
 public:
@@ -108,41 +106,24 @@ public:
 
 	void PrepareToDelete();
 
-	/** Datagrids */
-	bool SetHouseMode(DeviceData_Router *pDevice,int iPK_Users,int PK_HouseMode,string sHandlingInstructions);
-	void HandleSetModeFailure(Message *pMessage);
 	bool SensorIsTripped(int PK_HouseMode,DeviceData_Router *pDevice);
 	string GetModeString(int PK_HouseMode);
 	int GetModeID(string Mode);
 	// Returns the PK_AlertType for this mode/house.  Or ALERTTYPE_DONOTHING, ALERTTYPE_ANNOUNCMENT, ALERTTYPE_PHOTO
 	int GetAlertType(int PK_HouseMode,DeviceData_Router *pDevice,bool *bNotify=NULL);
 	void SecurityBreach(DeviceData_Router *pDevice);
-	void FireAlarm(DeviceData_Router *pDevice);
-	string AlertsSinceLastChange(int PK_DeviceGroup,bool &bSecurityOrFire);
-	void SaveHouseModes();  // Save m_mapPK_HouseMode to the database
-	void GetHouseModes(); // Get m_mapPK_HouseMode from the database
 
 	/** Interceptors */
     bool SensorTrippedEvent(class Socket *pSocket,class Message *pMessage,class DeviceData_Base *pDeviceFrom,class DeviceData_Base *pDeviceTo);
 	bool SensorTrippedEventHandler(class DeviceData_Router *pDevice,bool bIsTripped);
-	bool OrbiterRegistered(class Socket *pSocket,class Message *pMessage,class DeviceData_Base *pDeviceFrom,class DeviceData_Base *pDeviceTo);
 	bool PanelChangeState(class Socket *pSocket,class Message *pMessage,class DeviceData_Base *pDeviceFrom,class DeviceData_Base *pDeviceTo);
 
 	// Alarm callback
 	virtual void AlarmCallback(int id, void* param);
-	void ProcessCountdown(int id,Row_Alert *pRow_Alert);
-	void ProcessAlert(Row_Alert *pRow_Alert);
-	void SayToDevices(string sText,DeviceData_Router *pDeviceData_Router);
-
-	// Follow-me
-	virtual void FollowMe_EnteredRoom(int iPK_Event, int iPK_Orbiter, int iPK_Device, int iPK_Users, int iPK_RoomOrEntArea, int iPK_RoomOrEntArea_Left) {}
-	virtual void FollowMe_LeftRoom(int iPK_Event, int iPK_Orbiter, int iPK_Device, int iPK_Users, int iPK_RoomOrEntArea, int iPK_RoomOrEntArea_Left) {}
-
-	// Actions
-	void AnnounceAlert(DeviceData_Router *pDevice);
-	void SnapPhoto(Row_Alert_Device *pRow_Alert_Device,DeviceData_Router *pDevice);
-	Row_Alert *LogAlert(Row_AlertType *pRow_AlertType,DeviceData_Router *pDevice,bool bAnnouncementOnly,bool bNotify);  // Returns NULL if the alert was pooled with another
-
+	void ProcessSensorTripped(SecurityAlert *pSecurityAlert);
+	void UpdateAlertLog(SecurityAlert *pSecurityAlert);
+	void ProcessCameras(SecurityAlert *pSecurityAlert);
+	void ProcessCamera(SecurityAlert *pSecurityAlert,DeviceData_Router *pDevice_Camera);
 
 //<-dceag-h-b->
 	/*
@@ -203,6 +184,25 @@ public:
 	virtual void CMD_Verify_PIN(int iPK_Users,string sPassword,bool *bIsSuccessful) { string sCMD_Result; CMD_Verify_PIN(iPK_Users,sPassword.c_str(),bIsSuccessful,sCMD_Result,NULL);};
 	virtual void CMD_Verify_PIN(int iPK_Users,string sPassword,bool *bIsSuccessful,string &sCMD_Result,Message *pMessage);
 
+
+	/** @brief COMMAND: #969 - Restore To NonTemp State */
+	/** Restore a security device to the state in State_NonTemporary */
+		/** @param #2 PK_Device */
+			/** The device to restore */
+
+	virtual void CMD_Restore_To_NonTemp_State(int iPK_Device) { string sCMD_Result; CMD_Restore_To_NonTemp_State(iPK_Device,sCMD_Result,NULL);};
+	virtual void CMD_Restore_To_NonTemp_State(int iPK_Device,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #972 - Set Sensor State */
+	/** Sets the state of a sensor */
+		/** @param #2 PK_Device */
+			/** The sensor */
+		/** @param #5 Value To Assign */
+			/** Can be: ARMED or UNARMED */
+
+	virtual void CMD_Set_Sensor_State(int iPK_Device,string sValue_To_Assign) { string sCMD_Result; CMD_Set_Sensor_State(iPK_Device,sValue_To_Assign.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Set_Sensor_State(int iPK_Device,string sValue_To_Assign,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
 	// make these inline so Orbiter Plugin can call them without adding the security plugin.cpp file
