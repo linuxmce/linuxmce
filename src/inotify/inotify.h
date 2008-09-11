@@ -22,7 +22,10 @@
 #ifndef _LINUX_INOTIFY_H
 #define _LINUX_INOTIFY_H
 
-#include <linux/types.h>
+#include <cstdlib>
+#include <sys/types.h>
+#define __u32 u_int32_t
+#define __s32 int32_t
 
 /*
  * struct inotify_event - structure read from the inotify device for each event

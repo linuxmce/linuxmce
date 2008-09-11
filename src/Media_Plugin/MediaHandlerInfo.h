@@ -58,6 +58,7 @@ namespace DCE
 #define MEDIASTREAM_TYPE_VIDEOLAN		103
 #define MEDIASTREAM_TYPE_VDR			104
 #define MEDIASTREAM_TYPE_MOXI			105
+#define MEDIASTREAM_TYPE_GAME			300
 
 	/** @brief
 	*

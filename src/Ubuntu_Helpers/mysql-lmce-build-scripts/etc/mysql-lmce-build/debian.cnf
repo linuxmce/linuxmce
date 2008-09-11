@@ -1,0 +1,11 @@
+# Automatically generated for Debian scripts. DO NOT TOUCH!
+[client]
+host     = localhost
+user     = debian-sys-maint
+password = MYkxdglltKCfSIzu
+socket   = /var/run/mysqld-lmce-build/mysqld.sock
+[mysql_upgrade]
+user     = debian-sys-maint
+password = MYkxdglltKCfSIzu
+socket   = /var/run/mysqld-lmce-build/mysqld.sock
+basedir  = /usr

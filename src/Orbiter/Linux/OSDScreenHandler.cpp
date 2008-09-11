@@ -279,7 +279,7 @@ bool OSDScreenHandler::VideoWizard_ObjectSelected(CallBackData *pData)
 				CMD_Regen_Orbiter cmd_Regen_Orbiter(m_pOrbiter->m_dwPK_Device, m_pOrbiter->m_dwPK_Device_OrbiterPlugIn, m_pOrbiter->m_dwPK_Device, "", "Y");
 				m_pOrbiter->SendCommand(cmd_Regen_Orbiter, &sResponse);
 
-				if(sResponse.size()<2 || sResponse.substr(0,2)!="OK")
+				if(sResponse != "OK")
 				{
 					//the router will send a go to screen to orbiter to tell the user
 					//that it cannot reload

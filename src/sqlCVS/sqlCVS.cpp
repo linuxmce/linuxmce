@@ -44,7 +44,7 @@
 #include "DCE/Logger.h"
 #include "RA/RAServer.h"
 
-#define  VERSION "<=version=>"
+#include "../include/version.h"
 
 using namespace std;
 using namespace sqlCVS;

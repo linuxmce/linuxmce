@@ -37,6 +37,8 @@
 #define USELESS_TIMEOUT  2
 
 #include <cmath>
+
+#include <algorithm>
 using namespace std;
 
 namespace DCE {

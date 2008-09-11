@@ -317,7 +317,8 @@ void Crystal_Fontz_USBRS232::DoUpdateDisplay(vector<string> *vectString)
 		command_packet.data[0]=0;
 		command_packet.data[1]=s;
 		if( str.size() )
-			memcpy(&command_packet.data[2],str.c_str(),min(m_iNumVisibleColumns,str.size()));
+			memcpy(&command_packet.data[2],str.c_str(),
+			       min(m_iNumVisibleColumns,(int)str.size()));
 		if( str.size()<m_iNumVisibleColumns )
 			memcpy((void *) &command_packet.data[2+str.size()],"                                                                                                    ",m_iNumVisibleColumns-str.size());
 		if( !send_packet(&command_packet,response_packet) )

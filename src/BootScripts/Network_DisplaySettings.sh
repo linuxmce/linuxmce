@@ -43,23 +43,18 @@ function displayNetworkSettings {
 
 }
 
-## TODO: Clean up parameter parsing: no processing, just set internal flags here
+
 for ((i = 1; i <= "$#"; i++)); do
 	case "${!i}" in
-		--out-file)
-			((i++))
-			exec >"${!i}"
-		;;
 		--orbiter) Orbiter=y ;;
 		--all)
 			displayNetworkSettings
 			exit 0
-		;;
+			;;
 		*) echo "Unknown option '${!i}'" ;;
 	esac
 done
 
-## TODO: make this into a function, additional to displayNetworkSettings, to use depending on script parameters
 . /usr/pluto/bin/Network_Parameters.sh
 
 case "$DCERouter" in

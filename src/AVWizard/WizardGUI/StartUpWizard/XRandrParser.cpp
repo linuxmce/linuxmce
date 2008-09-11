@@ -18,6 +18,7 @@
  */
 #include "XRandrParser.h"
 
+#include <cstring>
 #include <stdlib.h>
 #include <fstream>
 #include <stdio.h>

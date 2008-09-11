@@ -2025,7 +2025,7 @@
 #define DESIGNOBJ_mnuSystemHalt_CONST 5272
 #define DESIGNOBJ_butCancelHalt_CONST 5273
 #define DESIGNOBJ_butRebootInstead_CONST 5274
-#define DESIGNOBJ_mnuPlayDisc_CONST 5275
+#define DESIGNOBJ_mnuManageDrives_CONST 5275
 #define DESIGNOBJ_dgDiscs_CONST 5276
 #define DESIGNOBJ_dgJukeBoxes_CONST 5277
 #define DESIGNOBJ_dgCompactFlashes_CONST 5278
@@ -2289,10 +2289,6 @@
 #define DESIGNOBJ_grpLightControlsOnOff_CONST 5586
 #define DESIGNOBJ_butLightsOn_CONST 5587
 #define DESIGNOBJ_butFBSF_Download_CONST 5588
-#define DESIGNOBJ_butViewList_CONST 5590
-#define DESIGNOBJ_butViewIcons_CONST 5591
-#define DESIGNOBJ_butSortBySong_CONST 5592
-#define DESIGNOBJ_objAudioServerFileBrows_CONST 5593
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"

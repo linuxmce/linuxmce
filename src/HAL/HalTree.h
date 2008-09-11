@@ -30,6 +30,7 @@
 #ifndef HalTree_h
 #define HalTree_h
 
+#include <cstdlib>
 #include <vector>
 #include <map>
 #include <string>

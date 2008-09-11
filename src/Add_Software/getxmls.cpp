@@ -20,6 +20,7 @@ See the GNU General Public License for more details.
 #include <fcntl.h>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include "../PlutoUtils/uuencode.h"
 #include "../DCE/Logger.h"

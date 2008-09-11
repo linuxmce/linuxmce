@@ -55,12 +55,6 @@ MessageBuffer::MessageBuffer(class Command_Impl *pCommand_Impl)
 	m_pMessage_In_Process=NULL;
 }
 
-MessageBuffer::~MessageBuffer()
-{
-	pthread_mutex_destroy(&m_MessageBufferMutex.mutex);
-	pthread_cond_destroy( &m_MessageBufferCond );
-}
-
 bool MessageBuffer::BufferMessage(Message *pMessage)
 {
 	if( pMessage->m_eExpectedResponse!=ER_None )

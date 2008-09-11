@@ -55,7 +55,7 @@ function editMasterDevice($output,$dbADO) {
 		$rs->Close();
 
 		$out='
-		<script>
+		<script type="text/javascript">
 			function windowOpen(locationA,attributes) {
 				window.open(locationA,\'\',attributes);
 			}

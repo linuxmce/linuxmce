@@ -31,6 +31,7 @@
 #define SERIALD_H
 
 #include <vector>
+#include <string>
 
 namespace DCE
 {

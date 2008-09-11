@@ -15,7 +15,6 @@ extern "C"
 
 #include "PlutoUtils/LZO.h"
 #include "PlutoUtils/PlutoDefs.h"
-#include "pluto_main/Define_DeviceData.h"
 //----------------------------------------------------------------------------------------------
 #if !defined(WIN32) && defined(EMBEDDED_LMCE)
 	#define JSON_DYNAMIC_CONFIG_FILE "/etc/pluto/pluto.json.lzo"
@@ -33,32 +32,18 @@ extern "C"
 //----------------------------------------------------------------------------------------------
 #define ADD_STRING_CHILD(parent, key, value) json_object_object_add(parent, key, json_object_new_string(const_cast<char *>(value.c_str())));
 //----------------------------------------------------------------------------------------------
-DataLayer_JSON::DataLayer_JSON(void) : m_root_json_obj_Devices(NULL), m_root_json_obj_NonDevices(NULL), m_root_json_obj_PM(NULL), m_DataMutex("data")
+DataLayer_JSON::DataLayer_JSON(void) : m_root_json_obj(NULL), m_DataMutex("data")
 {
 	m_dwPK_Device_Largest = 0;
-	m_bNeedToSave=false;
 
 	pthread_mutexattr_init(&m_MutexAttr);
 	pthread_mutexattr_settype(&m_MutexAttr, PTHREAD_MUTEX_RECURSIVE_NP);
 	m_DataMutex.Init(&m_MutexAttr);
-
-	m_pAlarmManager = new AlarmManager();
-    m_pAlarmManager->Start(1);      //1 = number of worker threads
 }
 //----------------------------------------------------------------------------------------------
 DataLayer_JSON::~DataLayer_JSON(void)
 {
-	if( m_bNeedToSave )
-		DoSave();
-
-	if( m_root_json_obj_Devices )
-		json_object_put(m_root_json_obj_Devices); 
-	if( m_root_json_obj_NonDevices )
-		json_object_put(m_root_json_obj_NonDevices); 
-	if( m_root_json_obj_PM )
-		json_object_put(m_root_json_obj_PM); 
-
-	delete m_pAlarmManager;
+	json_object_put(m_root_json_obj); 
 
 	pthread_mutexattr_destroy(&m_MutexAttr);
 }
@@ -76,48 +61,11 @@ bool DataLayer_JSON::Load()
 
 	return false;
 }
-
-//----------------------------------------------------------------------------------------------
-void DataLayer_JSON::PluginsLoaded()
-{
-	if( m_root_json_obj_Devices )
-	{
-		json_object_put(m_root_json_obj_Devices); 
-		m_root_json_obj_Devices=NULL;
-	}
-	if( m_root_json_obj_NonDevices )
-	{
-		json_object_put(m_root_json_obj_NonDevices);
-		m_root_json_obj_NonDevices=NULL;
-	}
-	if( m_root_json_obj_PM )
-	{
-		json_object_put(m_root_json_obj_PM);
-		m_root_json_obj_PM=NULL;
-	}
-}
 //----------------------------------------------------------------------------------------------
 bool DataLayer_JSON::Save()
 {
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "DataLayer_JSON::Save starting");
 	PLUTO_SAFETY_LOCK(dm, m_DataMutex);
-	m_bNeedToSave=true;
-	m_pAlarmManager->CancelAlarmByType(DELAYED_SAVE);
-	m_pAlarmManager->AddRelativeAlarm(2,this,DELAYED_SAVE,NULL);
-	return true;
-}
 
-void DataLayer_JSON::AlarmCallback(int id, void* param)
-{
-	if( id==DELAYED_SAVE )
-		DoSave();
-}
-
-//----------------------------------------------------------------------------------------------
-bool DataLayer_JSON::DoSave()
-{
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "DataLayer_JSON::DoSave starting");
-	PLUTO_SAFETY_LOCK(dm, m_DataMutex);
 	UpdateDevicesTree();
 
 	SaveDevicesFile();
@@ -126,7 +74,7 @@ bool DataLayer_JSON::DoSave()
 
 	//NOTE: json-c saves the json data into an unformatted string
 	//use http://www.jsonlint.com/ to format the json file
-	string sData(json_object_to_json_string(m_root_json_obj_Devices));
+	string sData(json_object_to_json_string(m_root_json_obj));
 
 #ifdef WIN32
 	//Also save the uncompressed version -- for debugging
@@ -141,11 +89,6 @@ bool DataLayer_JSON::DoSave()
 	FileUtils::WriteBufferIntoFile(JSON_DEVICES_CONFIG_FILE, pCompressedData, iSize);
 	delete [] pCompressedData;
 
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "DataLayer_JSON::Save done");
-
-	PluginsLoaded(); // This will delete the newly created objects so we're not holding up the memory
-
-	m_bNeedToSave=false;
 	return true;
 }
 //----------------------------------------------------------------------------------------------
@@ -180,8 +123,7 @@ void DataLayer_JSON::SaveDevicesFile()
 			StringUtils::ltos(pDeviceData_Router->m_dwPK_Device) + "|" + 
 			StringUtils::ltos(pDeviceData_Router->m_dwPK_DeviceTemplate) + "|" + 
 			pDeviceData_Router->m_sIPAddress + "|" + 
-			pDeviceData_Router->m_sDescription + "|" + 
-			m_mapRoom_Data[pDeviceData_Router->m_dwPK_Room].Description() + "\n"; 
+			pDeviceData_Router->m_sDescription + "\n"; 
 	}
 
 	//save devices list
@@ -193,117 +135,53 @@ std::map<int, DeviceData_Router *>& DataLayer_JSON::Devices()
 	return m_mapDeviceData_Router;
 }
 //----------------------------------------------------------------------------------------------
-bool DataLayer_JSON::LoadDevicesConfiguration(int iUseBackup)
+bool DataLayer_JSON::LoadDevicesConfiguration()
 {
-	string sFilename = JSON_DEVICES_CONFIG_FILE;
-	if( iUseBackup )
-		sFilename += "." + StringUtils::itos(iUseBackup);
-
-	char *pData = GetUncompressedDataFromFile(sFilename);
-
-	bool bGotDevices=false;
+	char *pData = GetUncompressedDataFromFile(JSON_DEVICES_CONFIG_FILE);
 
 	if(NULL != pData)
 	{
-		try
-		{
-			m_root_json_obj_Devices = json_tokener_parse(pData);
-			PLUTO_SAFE_DELETE_ARRAY(pData);
+		m_root_json_obj = json_tokener_parse(pData);
+		PLUTO_SAFE_DELETE_ARRAY(pData);
 
-			struct json_object_iter iter;
-			json_object_object_foreachC(m_root_json_obj_Devices, iter) 
-			{
-				string sValue = iter.key;
-
-				if(sValue == "Device_ids")
-					ParseDevicesList(iter.val);
-				else if(sValue == "Device")
-				{
-					bGotDevices=true;
-					ParseDevices(iter.val);
-				}
-			}
-		}
-		catch(...)
+		struct json_object_iter iter;
+		json_object_object_foreachC(m_root_json_obj, iter) 
 		{
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "DataLayer::LoadDevicesConfiguration exception on file %s", sFilename.c_str());
-			bGotDevices=false;  // So we'll retry
+			string sValue = iter.key;
+
+			if(sValue == "Device_ids")
+				ParseDevicesList(iter.val);
+			else if(sValue == "Device")
+				ParseDevices(iter.val);
 		}
 
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "DataLayer: Got %d devices", m_mapDeviceData_Router.size());
-		if( bGotDevices )
-			return true;
-	}
-	else
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "DataLayer: LoadDevicesConfiguration %s doesn't exist", sFilename.c_str());
-
-	if( bGotDevices == false )
-	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "DataLayer: LoadDevicesConfiguration failed to load %s retry %d", sFilename.c_str(), iUseBackup);
-		if( iUseBackup<5 )
-			return LoadDevicesConfiguration(iUseBackup+1);
+		return true;
 	}
 
 	return false;
 }
 //----------------------------------------------------------------------------------------------
-bool DataLayer_JSON::LoadDynamicConfiguration(int iUseBackup)
+bool DataLayer_JSON::LoadDynamicConfiguration()
 {
-	string sFilename = JSON_DYNAMIC_CONFIG_FILE;
-	if( iUseBackup )
-		sFilename += "." + StringUtils::itos(iUseBackup);
+	char *pData = GetUncompressedDataFromFile(JSON_DYNAMIC_CONFIG_FILE);
 
-	char *pData = GetUncompressedDataFromFile(sFilename);
-
-	bool bGotScenes=false,bGotRooms=false;
 	if(NULL != pData)
 	{
-		try
-		{
-			m_root_json_obj_NonDevices = json_tokener_parse(pData);
-			PLUTO_SAFE_DELETE_ARRAY(pData);
+		m_root_json_obj = json_tokener_parse(pData);
+		PLUTO_SAFE_DELETE_ARRAY(pData);
 
-			struct json_object_iter iter;
-			json_object_object_foreachC(m_root_json_obj_NonDevices, iter) 
-			{
-				string sValue = iter.key;
-
-				if(sValue == "scenes")
-				{
-					bGotScenes = true;
-					ParseScenes(iter.val);
-				}
-				if(sValue == "Room")
-				{
-					bGotRooms = true;
-					ParseRooms(iter.val);
-				}
-			}
-		}
-		catch(...)
+		struct json_object_iter iter;
+		json_object_object_foreachC(m_root_json_obj, iter) 
 		{
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "DataLayer::LoadDynamicConfiguration exception on file %s", sFilename.c_str());
-			bGotScenes=bGotRooms=false;  // So we'll retry
+			string sValue = iter.key;
+
+			if(sValue == "scenes")
+				ParseScenes(iter.val);
 		}
 
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "DataLayer: Got %d scenes from %s", m_mapScene_Data.size(), sFilename.c_str());
-		for( std::map<int, Scene_Data>::iterator it = m_mapScene_Data.begin(); it != m_mapScene_Data.end(); ++it )
-		{
-			Scene_Data *pScene_Data = &(it->second);
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "DataLayer: Scene %d=%s", it->first, pScene_Data->Description().c_str());
-		}
-
-		if( bGotScenes && bGotRooms )
-			return true;
-	}
-	else
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "DataLayer: LoadDynamicConfiguration %s doesn't exist", sFilename.c_str());
-
-	if( bGotScenes == false || bGotRooms==false )
-	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "DataLayer: LoadDynamicConfiguration failed to load %s retry %d", sFilename.c_str(), iUseBackup);
-		if( iUseBackup<5 )
-			return LoadDynamicConfiguration(iUseBackup+1);
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "DataLayer: Got %d scenes", m_mapScene_Data.size());
+		return true;
 	}
 
 	return false;
@@ -311,14 +189,16 @@ bool DataLayer_JSON::LoadDynamicConfiguration(int iUseBackup)
 //----------------------------------------------------------------------------------------------
 bool DataLayer_JSON::LoadStaticConfiguration()
 {
+	struct json_object *json_obj = NULL;
+
 	char *pData = GetUncompressedDataFromFile(JSON_STATIC_CONFIG_FILE);
 
 	if(NULL != pData)
 	{
-		m_root_json_obj_PM = json_tokener_parse(pData);
+		json_obj = json_tokener_parse(pData);
 
 		struct json_object_iter iter;
-		json_object_object_foreachC(m_root_json_obj_PM, iter) 
+		json_object_object_foreachC(json_obj, iter) 
 		{
 			string sValue = iter.key;
 
@@ -327,6 +207,8 @@ bool DataLayer_JSON::LoadStaticConfiguration()
 			else if(sValue == "DeviceCategory")
 				ParseDeviceCategories(iter.val);
 		}
+
+		json_object_put(json_obj); 
 
 		PLUTO_SAFE_DELETE_ARRAY(pData);
 
@@ -401,6 +283,8 @@ void DataLayer_JSON::ParseDevices(struct json_object *json_obj)
 		StringUtils::Replace(&sDeviceID, "PK_Device_", "");
 		int nDeviceID = atoi(sDeviceID.c_str());
 
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Parsing device %d:", nDeviceID);
+
 		if(m_mapDeviceData_Router.find(nDeviceID) != m_mapDeviceData_Router.end())
 		{
 			DeviceData_Router *pDevice = NULL;
@@ -411,7 +295,7 @@ void DataLayer_JSON::ParseDevices(struct json_object *json_obj)
 			string sDescription;
 			map<int, string> mapDeviceData;
 			map<string, string> mapDeviceParams;
-	
+
 			struct json_object *obj_device = iter_devices.val;
 			struct json_object_iter iter_device;
 			json_object_object_foreachC(obj_device, iter_device) 
@@ -421,18 +305,18 @@ void DataLayer_JSON::ParseDevices(struct json_object *json_obj)
 				if(sValue == "Description" && iter_device.val->o_type == json_type_string)
 				{
 					sDescription = json_object_get_string(iter_device.val);
-					LoggerWrapper::GetInstance()->Write(LV_STATUS, "\tDevice %d Description: %s", nDeviceID, sDescription.c_str());
+					LoggerWrapper::GetInstance()->Write(LV_STATUS, "\tDescription: %s", sDescription.c_str());
 				}
-				else if(sValue == "FK_DeviceTemplate" && (iter_device.val->o_type == json_type_int || iter_device.val->o_type == json_type_string) )
-					PK_DeviceTemplate = json_object_get_int(iter_device.val);
-				else if(sValue == "FK_Room" && (iter_device.val->o_type == json_type_int || iter_device.val->o_type == json_type_string))
-					PK_Room = json_object_get_int(iter_device.val);
-				else if(sValue == "FK_Device_ControlledVia" && (iter_device.val->o_type == json_type_int || iter_device.val->o_type == json_type_string))
-					PK_Device_ControlledVia = json_object_get_int(iter_device.val);
+				else if(sValue == "FK_DeviceTemplate" && iter_device.val->o_type == json_type_string)
+					PK_DeviceTemplate = atoi(json_object_get_string(iter_device.val));
+				else if(sValue == "FK_Room" && iter_device.val->o_type == json_type_string)
+					PK_Room = atoi(json_object_get_string(iter_device.val));
+				else if(sValue == "FK_Device_ControlledVia" && iter_device.val->o_type == json_type_string)
+					PK_Device_ControlledVia = atoi(json_object_get_string(iter_device.val));
 				else if(sValue == "params")
 					ParseDeviceParameters(mapDeviceParams, iter_device.val);
 				else if(sValue == "DeviceData" && iter_device.val->o_type == json_type_object)
-					ParseDeviceDataList(nDeviceID,mapDeviceData, iter_device.val);
+					ParseDeviceDataList(mapDeviceData, iter_device.val);
 			}
 
 			pDevice = new DeviceData_Router(nDeviceID, PK_DeviceTemplate, PK_Installation, PK_Device_ControlledVia);
@@ -445,10 +329,6 @@ void DataLayer_JSON::ParseDevices(struct json_object *json_obj)
 				m_dwPK_Device_Largest = nDeviceID;
 
 			AssignParametersToDevice(pDevice, mapDeviceParams);
-
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Parsing device %d: template %d controlled via %d room %d state %s status %s IPaddress %s mac %s disabled %d",
-				nDeviceID, PK_DeviceTemplate, PK_Device_ControlledVia, pDevice->m_dwPK_Room, pDevice->m_sState_get().c_str(), pDevice->m_sStatus_get().c_str(),
-				pDevice->m_sIPAddress.c_str(), pDevice->m_sMacAddress.c_str(), (int) pDevice->m_bDisabled);
 		}
  		else
 		{
@@ -458,7 +338,7 @@ void DataLayer_JSON::ParseDevices(struct json_object *json_obj)
 	}
 }
 //----------------------------------------------------------------------------------------------
-void DataLayer_JSON::ParseDeviceDataList(int PK_Device,std::map<int, string>& mapDeviceData, struct json_object *json_obj)
+void DataLayer_JSON::ParseDeviceDataList(std::map<int, string>& mapDeviceData, struct json_object *json_obj)
 {
 	struct json_object_iter iter_devicedata;
 	json_object_object_foreachC(json_obj, iter_devicedata)
@@ -466,11 +346,11 @@ void DataLayer_JSON::ParseDeviceDataList(int PK_Device,std::map<int, string>& ma
 		string sValue = iter_devicedata.key;
 		int PK_DeviceData = atoi(StringUtils::Replace(&sValue, "FK_DeviceData_", "").c_str());
 
-		if(iter_devicedata.val->o_type == json_type_int || iter_devicedata.val->o_type == json_type_string)
+		if(iter_devicedata.val->o_type == json_type_string)
 		{
 			string sValue = json_object_get_string(iter_devicedata.val);
 			mapDeviceData[PK_DeviceData] = sValue;
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "\tDevice %d data %d = %s", PK_Device, PK_DeviceData, sValue.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "\tDevice data %d = %s", PK_DeviceData, sValue.c_str());
 		}
 	}
 }
@@ -482,7 +362,7 @@ void DataLayer_JSON::ParseDeviceParameters(std::map<string, string>& mapDevicePa
 	{
 		string sKey = iter_devicedata.key;
 
-		if(iter_devicedata.val->o_type == json_type_int || iter_devicedata.val->o_type == json_type_string)
+		if(iter_devicedata.val->o_type == json_type_string)
 			mapDeviceParams[sKey] = json_object_get_string(iter_devicedata.val);
 	}	
 }
@@ -501,8 +381,6 @@ void DataLayer_JSON::AssignParametersToDevice(DeviceData_Router *pDevice, const 
 			pDevice->m_bIgnoreOnOff = it->second == "1";
 		else if(it->first == "State")
 			pDevice->m_sState_set(it->second);
-		else if(it->first == "State_NonTemporary")
-			pDevice->m_sState_NonTemporary_set(it->second);
 		else if(it->first == "Status")
 			pDevice->m_sStatus_set(it->second);
 		else if(it->first == "Disabled")
@@ -548,7 +426,7 @@ void DataLayer_JSON::ParseDeviceTemplates(struct json_object *json_obj)
 		{
 			string sKey = iter_deviceparams.key;
 
-			if(iter_deviceparams.val->o_type == json_type_int || iter_deviceparams.val->o_type == json_type_string)
+			if(iter_deviceparams.val->o_type == json_type_string)
 			{
 				string sValue = json_object_get_string(iter_deviceparams.val);
 
@@ -587,7 +465,7 @@ void DataLayer_JSON::ParseDeviceCategories(struct json_object *json_obj)
 		{
 			string sKey = iter_deviceparams.key;
 
-			if(iter_deviceparams.val->o_type == json_type_int || iter_deviceparams.val->o_type == json_type_string)
+			if(iter_deviceparams.val->o_type == json_type_string)
 			{
 				string sValue = json_object_get_string(iter_deviceparams.val);
 
@@ -604,8 +482,6 @@ void DataLayer_JSON::ParseDeviceCategories(struct json_object *json_obj)
 //----------------------------------------------------------------------------------------------
 char *DataLayer_JSON::GetUncompressedDataFromFile(string sFileName)
 {
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "DataLayer_JSON::GetUncompressedDataFromFile starting %s", sFileName.c_str());
-
 #ifndef WIN32 //force lzo creating everytime for debugging
 	if(!FileUtils::FileExists(sFileName))
 #endif
@@ -640,11 +516,6 @@ char *DataLayer_JSON::GetUncompressedDataFromFile(string sFileName)
 
 	PLUTO_SAFE_DELETE_ARRAY(pCompressedData);
 
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "DataLayer_JSON::GetUncompressedDataFromFile done %s", sFileName.c_str());
-#ifdef WIN32
-	FileUtils::WriteBufferIntoFile("/temp/" + sFileName + ".txt", pUncompressedData,size);
-#endif
-
 	return pUncompressedData;
 }
 //----------------------------------------------------------------------------------------------
@@ -666,7 +537,7 @@ void DataLayer_JSON::ParseScenes(struct json_object *json_obj)
 		{
 			string sKey = iter_sceneparams.key;
 
-			if(iter_sceneparams.val->o_type == json_type_int || iter_sceneparams.val->o_type == json_type_string)
+			if(iter_sceneparams.val->o_type == json_type_string)
 			{
 				string sValue = json_object_get_string(iter_sceneparams.val);
 
@@ -676,7 +547,7 @@ void DataLayer_JSON::ParseScenes(struct json_object *json_obj)
 				}
 				else if(sKey == "FK_Room")
 				{
-					scene_data.RoomID(atoi(sValue.c_str()));
+					//TODO : use it
 				}
 			}
 			else if(sKey == "commands" && iter_sceneparams.val->o_type == json_type_object)
@@ -686,47 +557,6 @@ void DataLayer_JSON::ParseScenes(struct json_object *json_obj)
 		}
 
 		m_mapScene_Data[nSceneID] = scene_data;
-	}
-}
-//----------------------------------------------------------------------------------------------
-void DataLayer_JSON::ParseRooms(struct json_object *json_obj)
-{
-	struct json_object *obj_rooms = json_obj;
-	struct json_object_iter iter_rooms;
-	json_object_object_foreachC(obj_rooms, iter_rooms) 
-	{
-		string sRoomID = iter_rooms.key;
-		StringUtils::Replace(&sRoomID, "PK_Room_", "");
-
-		int nRoomID = atoi(sRoomID.c_str());
-
-		Room_Data room_data(nRoomID);
-
-		struct json_object_iter iter_roomparams;
-		json_object_object_foreachC(iter_rooms.val, iter_roomparams)
-		{
-			string sKey = iter_roomparams.key;
-
-			if(iter_roomparams.val->o_type == json_type_string)
-			{
-				string sValue = json_object_get_string(iter_roomparams.val);
-
-				if(sKey == "Description")
-				{
-					room_data.Description(sValue);
-				}
-				else if(sKey == "room_type")
-				{
-					room_data.RoomType(sValue);
-				}
-				
-				//parse here FK_Section or FK_RoomType if needed
-			}
-		}
-
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "DataLayer_JSON::ParseRooms %d=%s", nRoomID, room_data.Description().c_str());
-
-		m_mapRoom_Data[nRoomID] = room_data;
 	}
 }
 //----------------------------------------------------------------------------------------------
@@ -749,9 +579,9 @@ void DataLayer_JSON::ParseCommands(map<int, Command_Data>& mapCommands, struct j
 			{
 				string sKey = iter_command.key;
 
-				if(iter_command.val->o_type == json_type_int || iter_command.val->o_type == json_type_string )
+				if(iter_command.val->o_type == json_type_int)
 				{
-					int nValue = iter_command.val->o_type == json_type_string ? atoi(json_object_get_string(iter_command.val)) : json_object_get_int(iter_command.val);
+					int nValue = json_object_get_int(iter_command.val);
 
 					if(sKey == "Device_From")
 						aCommand_data.Device_From(nValue);
@@ -759,12 +589,6 @@ void DataLayer_JSON::ParseCommands(map<int, Command_Data>& mapCommands, struct j
 						aCommand_data.Device_To(nValue);
 					else if(sKey == "FK_Command")
 						aCommand_data.PK_Command(nValue);
-					else if(sKey == "IsTemporary")
-						aCommand_data.IsTemporary(nValue);
-					else if(sKey == "CancelIfOther")
-						aCommand_data.CancelIfOther(nValue);
-					else if(sKey == "Delay")
-						aCommand_data.Delay(nValue);
 				}
 				else if(sKey == "params" && iter_command.val->o_type == json_type_object)
 				{
@@ -787,7 +611,7 @@ void DataLayer_JSON::ParseCommandParameters(std::map<int, string>& mapParams, st
 		StringUtils::Replace(&sFK_CommandParameter, "FK_CommandParameter_", "");
 		int nFK_CommandParameter = atoi(sFK_CommandParameter.c_str());
 		
-		if(iter_params.val->o_type == json_type_int || iter_params.val->o_type == json_type_string)
+		if(iter_params.val->o_type == json_type_string)
 		{
 			string sValue = json_object_get_string(iter_params.val);
 			mapParams[nFK_CommandParameter] = sValue;
@@ -806,11 +630,6 @@ Scene_Data* DataLayer_JSON::Scene(int nSceneID)
 	}
 
 	return NULL;
-}
-//----------------------------------------------------------------------------------------------
-const std::map<int, Scene_Data>& DataLayer_JSON::Scenes()
-{
-	return m_mapScene_Data;
 }
 //----------------------------------------------------------------------------------------------
 DeviceTemplate_Data* DataLayer_JSON::DeviceTemplate(int nPK_DeviceTemplate)
@@ -891,10 +710,7 @@ void DataLayer_JSON::SetDeviceData(DeviceData_Router *pDeviceData_Router, int nF
 void DataLayer_JSON::SaveDevicesList()
 {
 	//delete the old node
-	if( m_root_json_obj_Devices )
-		json_object_object_del(m_root_json_obj_Devices, "Device_ids");
-	else
-		m_root_json_obj_Devices = json_object_new_object();
+	json_object_object_del(m_root_json_obj, "Device_ids");
 
 	//create a new one
 	struct json_object *devices_list_obj = json_object_new_array();
@@ -908,23 +724,17 @@ void DataLayer_JSON::SaveDevicesList()
 	}
 
 	//add it to root node
-	json_object_object_add(m_root_json_obj_Devices, "Device_ids", devices_list_obj);
+	json_object_object_add(m_root_json_obj, "Device_ids", devices_list_obj);
 }
 //----------------------------------------------------------------------------------------------
 void DataLayer_JSON::SaveDevices()
 {
 	//delete the old node
-	if( m_root_json_obj_Devices )
-		json_object_object_del(m_root_json_obj_Devices, "Devices");
-	else
-		m_root_json_obj_Devices = json_object_new_object();
+	json_object_object_del(m_root_json_obj, "Devices");
 
 	//create a new one
 	struct json_object *devices_obj = json_object_new_object();
 
-	int PK_Device_ZWave=0;
-	int iUnassignedDevices=0; // Count of devices with no room
-	int iAutomationDevices=0; // Count of devices that are a child of the automation system
 	for(std::map<int, DeviceData_Router *>::iterator it = m_mapDeviceData_Router.begin(),
 		end = m_mapDeviceData_Router.end(); it != end; ++it)
 	{
@@ -935,17 +745,6 @@ void DataLayer_JSON::SaveDevices()
 			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Device %d is deleted. Skipping... ", pDeviceData_Router->m_dwPK_Device);
 			continue;
 		}
-
-		/*
-			Nasty temporary hack.  Vali needs the total number of ZWave devices.  Make this general */
-
-		if( pDeviceData_Router->m_dwPK_DeviceTemplate==1754 )
-			PK_Device_ZWave=pDeviceData_Router->m_dwPK_Device;
-		if( PK_Device_ZWave && pDeviceData_Router->m_dwPK_Device_ControlledVia==PK_Device_ZWave && pDeviceData_Router->m_dwPK_DeviceTemplate!=1945 )
-			iAutomationDevices++;
-
-		if( pDeviceData_Router->m_dwPK_Room==0 && pDeviceData_Router->m_mapParameters_Find(DEVICEDATA_Room_Not_Required_CONST)!="1" )
-			iUnassignedDevices++; 
 
         struct json_object *device_obj = json_object_new_object();
 
@@ -977,7 +776,6 @@ void DataLayer_JSON::SaveDevices()
 		ADD_STRING_CHILD(params_obj, "MACaddress", pDeviceData_Router->m_sMacAddress);
 		ADD_STRING_CHILD(params_obj, "IgnoreOnOff", StringUtils::ltos((long)pDeviceData_Router->m_bIgnoreOnOff));
 		ADD_STRING_CHILD(params_obj, "State", pDeviceData_Router->m_sState_get());
-		ADD_STRING_CHILD(params_obj, "State_NonTemporary", pDeviceData_Router->m_sState_NonTemporary_get());
 		ADD_STRING_CHILD(params_obj, "Status", pDeviceData_Router->m_sStatus_get());
 		ADD_STRING_CHILD(params_obj, "Disabled", StringUtils::ltos((long)pDeviceData_Router->m_bDisabled));
 
@@ -991,11 +789,8 @@ void DataLayer_JSON::SaveDevices()
 		json_object_object_add(devices_obj, const_cast<char *>(sNodeName.c_str()), device_obj);
 	}
 
-	ADD_STRING_CHILD(m_root_json_obj_Devices, "UnassignedDevices", StringUtils::itos(iUnassignedDevices));
-	ADD_STRING_CHILD(m_root_json_obj_Devices, "AutomationDevices", StringUtils::itos(iAutomationDevices));
-
 	//add it to root node
-	json_object_object_add(m_root_json_obj_Devices, "Device", devices_obj);
+	json_object_object_add(m_root_json_obj, "Device", devices_obj);
 }
 //----------------------------------------------------------------------------------------------
 DeviceData_Router *DataLayer_JSON::CreateDevice(int iPK_DeviceTemplate, string sDescription, 

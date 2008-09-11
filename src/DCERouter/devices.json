@@ -6,23 +6,15 @@
         4,
         5,
         6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12,
-        13
+        7
     ],
-    "UnassignedDevices": "0", "AutomationDevices": "0",
     "Device": {
         "PK_Device_1": {
             "Description": "Computer",
             "FK_DeviceTemplate": "7",
-            "FK_Room": "",
+            "FK_Room": "1",
             "FK_Device_ControlledVia": "0",
             "DeviceData": {
-				"FK_DeviceData_284": "1"
             },
             "params": {
                 "IPaddress": "127.0.0.1",
@@ -36,10 +28,9 @@
         "PK_Device_2": {
             "Description": "DCERouter",
             "FK_DeviceTemplate": "1",
-            "FK_Room": "",
+            "FK_Room": "1",
             "FK_Device_ControlledVia": "1",
             "DeviceData": {
-				"FK_DeviceData_284": "1"
             },
             "params": {
                 "IPaddress": "127.0.0.1",
@@ -53,10 +44,9 @@
         "PK_Device_3": {
             "Description": "General Info Plugin Lite",
             "FK_DeviceTemplate": "27",
-            "FK_Room": "",
+            "FK_Room": "1",
             "FK_Device_ControlledVia": "2",
             "DeviceData": {
-				"FK_DeviceData_284": "1"
             },
             "params": {
                 "IPaddress": "127.0.0.1",
@@ -70,10 +60,9 @@
         "PK_Device_4": {
             "Description": "Lighting Plugin Lite",
             "FK_DeviceTemplate": "32",
-            "FK_Room": "",
+            "FK_Room": "1",
             "FK_Device_ControlledVia": "2",
             "DeviceData": {
-				"FK_DeviceData_284": "1"
             },
             "params": {
                 "IPaddress": "127.0.0.1",
@@ -87,10 +76,9 @@
         "PK_Device_5": {
             "Description": "Climate Plugin Lite",
             "FK_DeviceTemplate": "31",
-            "FK_Room": "",
+            "FK_Room": "1",
             "FK_Device_ControlledVia": "2",
             "DeviceData": {
-				"FK_DeviceData_284": "1"
             },
             "params": {
                 "IPaddress": "127.0.0.1",
@@ -102,134 +90,30 @@
             } 
         },              
         "PK_Device_6": {
-            "Description": "Security Plugin Lite",
-            "FK_DeviceTemplate": "33",
-            "FK_Room": "",
-            "FK_Device_ControlledVia": "2",
-            "DeviceData": {
-				"FK_DeviceData_284": "1"
-            },
-            "params": {
-                "IPaddress": "127.0.0.1",
-                "MACaddress": "",
-                "IgnoreOnOff": "0",
-                "State": "",
-                "Status": "",
-                "Disabled": "0" 
-            } 
-        },              
-        "PK_Device_7": {
-            "Description": "Event Plugin Lite",
-            "FK_DeviceTemplate": "52",
-            "FK_Room": "",
-            "FK_Device_ControlledVia": "2",
-            "DeviceData": {
-				"FK_DeviceData_284": "1"
-            },
-            "params": {
-                "IPaddress": "127.0.0.1",
-                "MACaddress": "",
-                "IgnoreOnOff": "0",
-                "State": "",
-                "Status": "",
-                "Disabled": "0" 
-            } 
-        },              
-        "PK_Device_8": {
-            "Description": "XML Data Handler Plugin",
-            "FK_DeviceTemplate": "1868",
-            "FK_Room": "",
-            "FK_Device_ControlledVia": "2",
-            "DeviceData": {
-				"FK_DeviceData_284": "1"
-            },
-            "params": {
-                "IPaddress": "127.0.0.1",
-                "MACaddress": "",
-                "IgnoreOnOff": "0",
-                "State": "",
-                "Status": "",
-                "Disabled": "0" 
-            } 
-        },              
-        "PK_Device_9": {
-            "Description": "Basic XML Data Source Plugin",
-            "FK_DeviceTemplate": "1869",
-            "FK_Room": "",
-            "FK_Device_ControlledVia": "2",
-            "DeviceData": {
-				"FK_DeviceData_284": "1"
-            },
-            "params": {
-                "IPaddress": "127.0.0.1",
-                "MACaddress": "",
-                "IgnoreOnOff": "0",
-                "State": "",
-                "Status": "",
-                "Disabled": "0" 
-            } 
-        },              
-        "PK_Device_10": {
-            "Description": "Data Provider Catalog Plug-in",
-            "FK_DeviceTemplate": "1948",
-            "FK_Room": "",
-            "FK_Device_ControlledVia": "2",
-            "DeviceData": {
-				"FK_DeviceData_284": "1"
-            },
-            "params": {
-                "IPaddress": "127.0.0.1",
-                "MACaddress": "",
-                "IgnoreOnOff": "0",
-                "State": "",
-                "Status": "",
-                "Disabled": "0" 
-            } 
-        },              
-        "PK_Device_11": {
-            "Description": "Shared JSON Data Provider Plug",
-            "FK_DeviceTemplate": "1949",
-            "FK_Room": "",
-            "FK_Device_ControlledVia": "2",
-            "DeviceData": {
-				"FK_DeviceData_284": "1"
-            },
-            "params": {
-                "IPaddress": "127.0.0.1",
-                "MACaddress": "",
-                "IgnoreOnOff": "0",
-                "State": "",
-                "Status": "",
-                "Disabled": "0" 
-            } 
-        },              
-        "PK_Device_12": {
-            "Description": "Media Data Provider",
-            "FK_DeviceTemplate": "1950",
-            "FK_Room": "",
-            "FK_Device_ControlledVia": "1",
-            "DeviceData": {
-				"FK_DeviceData_284": "1"
-            },
-            "params": {
-                "IPaddress": "127.0.0.1",
-                "MACaddress": "",
-                "IgnoreOnOff": "0",
-                "State": "",
-                "Status": "",
-                "Disabled": "0" 
-            } 
-        },              
-        "PK_Device_13": {
             "Description": "ZWave",
             "FK_DeviceTemplate": "1754",
-            "FK_Room": "",
+            "FK_Room": "1",
             "FK_Device_ControlledVia": "1",
             "DeviceData": {
-				"FK_DeviceData_284": "1",
                 "FK_DeviceData_11": "3",
                 "FK_DeviceData_26": "100",
                 "FK_DeviceData_37": "\/dev\/usb\/tts\/0" 
+            },
+            "params": {
+                "IPaddress": "127.0.0.1",
+                "MACaddress": "",
+                "IgnoreOnOff": "0",
+                "State": "",
+                "Status": "",
+                "Disabled": "0" 
+            } 
+        },
+        "PK_Device_7": {
+            "Description": "Tivo",
+            "FK_DeviceTemplate": "1872",
+            "FK_Room": "1",
+            "FK_Device_ControlledVia": "1",
+            "DeviceData": {
             },
             "params": {
                 "IPaddress": "127.0.0.1",

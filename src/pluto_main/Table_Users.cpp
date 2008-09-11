@@ -37,6 +37,7 @@ using namespace std;
 
 #include "Table_DeviceTemplate.h"
 #include "Table_Device_Users.h"
+#include "Table_Document_Comment.h"
 #include "Table_Installation_Users.h"
 #include "Table_Orbiter_Users_PasswordReq.h"
 #include "Table_Package_Users.h"
@@ -186,8 +187,7 @@ is_null[24] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[25] = false;
-m_psc_mod = "0000-00-00 00:00:00";
-is_null[26] = false;
+is_null[26] = true;
 is_null[27] = true;
 m_psc_restrict = 0;
 
@@ -417,6 +417,9 @@ return is_null[24];}
 bool Row_Users::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[25];}
+bool Row_Users::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[26];}
 bool Row_Users::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[27];}
@@ -484,6 +487,10 @@ is_modified=true;
 }
 void Row_Users::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[25]=val;
+is_modified=true;
+}
+void Row_Users::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[26]=val;
 is_modified=true;
 }
 void Row_Users::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1882,6 +1889,13 @@ void Row_Users::Device_Users_FK_Users_getrows(vector <class Row_Device_Users*> *
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Device_Users *pTable = table->database->Device_Users_get();
+pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
+}
+void Row_Users::Document_Comment_FK_Users_getrows(vector <class Row_Document_Comment*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Document_Comment *pTable = table->database->Document_Comment_get();
 pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
 }
 void Row_Users::Installation_Users_FK_Users_getrows(vector <class Row_Installation_Users*> *rows)

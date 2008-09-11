@@ -83,7 +83,7 @@ private:
 	class Private;
 	Private * d;
 #endif
-	bool m_bPortDied;  // Set this to true of the port was opened, and later becomes unreadable
+
 };
 
 #endif

@@ -37,5 +37,5 @@ shellrc_DATA = lmce_launch_managerui.rc
 
 AM_CXXFLAGS = -fexceptions
 
-all-local:
+all-local: $(bin_PROGRAMS)
 	cp $(bin_PROGRAMS) $(top_srcdir)/../bin/

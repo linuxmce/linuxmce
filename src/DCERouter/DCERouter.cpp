@@ -98,7 +98,7 @@ using namespace std;
 using namespace DCE;
 extern DCEConfig g_DCEConfig;
 
-#define  VERSION "<=version=>"
+#include "../include/version.h"
 
 #define	 SERIALIZE_MESSAGE_FILE		"/var/PersistentDceMessages"
 
@@ -442,12 +442,6 @@ Router::~Router()
     delete m_pDatabase_pluto_main;
 #endif
 
-#ifdef EMBEDDED_LMCE
-	dm.Release();  // lock created in DATA_LAYER_LEGACY_CODE
-#endif
-
-	delete m_pDataLayer;
-
 	pthread_mutex_destroy(&m_CoreMutex.mutex);
 	pthread_mutex_destroy(&m_InterceptorMutex.mutex);
 	pthread_mutex_destroy(&m_MessageQueueMutex.mutex);
@@ -538,13 +532,7 @@ void Router::RegisterAllPlugins()
 		if(
 			iPK_DeviceTemplate != DEVICETEMPLATE_General_Info_Plugin_CONST &&
 			iPK_DeviceTemplate != DEVICETEMPLATE_Lighting_Plugin_CONST &&
-			iPK_DeviceTemplate != DEVICETEMPLATE_Climate_Plugin_CONST &&
-			iPK_DeviceTemplate != DEVICETEMPLATE_Security_Plugin_CONST &&
-			iPK_DeviceTemplate != DEVICETEMPLATE_Event_Plugin_CONST &&
-			iPK_DeviceTemplate != DEVICETEMPLATE_Basic_XML_Data_Source_Plugin_CONST &&
-			iPK_DeviceTemplate != DEVICETEMPLATE_XML_Data_Handler_Plugin_CONST && 
-			iPK_DeviceTemplate != DEVICETEMPLATE_Data_Provider_Catalog_Plugin_CONST && 
-			iPK_DeviceTemplate != DEVICETEMPLATE_Shared_JSON_Data_Provider_Plug_CONST
+			iPK_DeviceTemplate != DEVICETEMPLATE_Climate_Plugin_CONST
 		)
 			continue;
 
@@ -1471,14 +1459,6 @@ bool Router::ReceivedString(Socket *pSocket, string Line, int nTimeout/* = -1*/)
             }
             else
             {
-				if( pDevice->m_pMySerializedData==NULL )
-				{
-					pDevice->DeviceData_Impl::SerializeWrite();   // Have each device pre-serialize all it's data
-					pDevice->m_pMySerializedData=pDevice->m_pcDataBlock;  // When we serialize this device's children or parents, this would get overwritten if we didn't make a copy
-					pDevice->m_iConfigSize = (unsigned long) (pDevice->m_pcCurrentPosition-pDevice->m_pcDataBlock);
-					pDevice->m_pcDataBlock=NULL; // So the framework doesn't delete this when we serialize another object in the chain
-				}
-
                 pServerSocket->SendString(string("CONFIG ")+StringUtils::itos((int)pDevice->m_iConfigSize));
                 pServerSocket->SendData(pDevice->m_iConfigSize, pDevice->m_pMySerializedData);
             }
@@ -1888,10 +1868,6 @@ string Message::ToXML()
     RegisterAllPlugins();
     m_bIsLoading=false;
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "Plug-ins loaded");
-	
-#ifdef EMBEDDED_LMCE
-	DataLayer()->PluginsLoaded();  // The data layer may have been holding some temporary stuff for the plugins
-#endif
 
     //TODO keep track of the 'status'..and set it here
 //  if(m_pCorpClient)
@@ -2319,11 +2295,6 @@ void Router::HandleCommandPipes(Socket *pSocket,SafetyMessage *pSafetyMessage)
 
 void Router::RealSendMessage(Socket *pSocket,SafetyMessage *pSafetyMessage)
 {
-	if( m_bIsLoading )
-	{
-		while( m_bIsLoading && !m_bQuit )
-			Sleep(50);
-	}
     if ( (*(*pSafetyMessage))->m_dwPK_Device_To==DEVICEID_LIST )
     {
         // Loop back and call ourselves for each message
@@ -2650,14 +2621,14 @@ void Router::ParseDevice(int MasterDeviceID, int ParentDeviceID, class DeviceDat
 
 		if( pDevice->m_bImplementsDCE && !pDevice->m_bIsEmbedded )
 		{
-			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Created DCE device %d %s (mdl: %d) cv: %d routed to: %d (%s) disabled %d",pDevice->m_dwPK_Device,
-				pDevice->m_sDescription.c_str(),pDevice->m_dwPK_DeviceTemplate,pDevice->m_dwPK_Device_ControlledVia, pDevice->m_dwPK_Device,sTop.c_str(),(int) pDevice->m_bDisabled);
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Created DCE device %d %s (mdl: %d) routed to: %d (%s) disabled %d",pDevice->m_dwPK_Device,
+				pDevice->m_sDescription.c_str(),pDevice->m_dwPK_DeviceTemplate,pDevice->m_dwPK_Device,sTop.c_str(),(int) pDevice->m_bDisabled);
 			m_Routing_DeviceToController[pDevice->m_dwPK_Device] = pDevice->m_dwPK_Device;
 		}
 		else
 		{
-			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Created device %d %s (mdl: %d) cv: %d routed to: %d (%s) disabled %d",pDevice->m_dwPK_Device,
-				pDevice->m_sDescription.c_str(),pDevice->m_dwPK_DeviceTemplate,pDevice->m_dwPK_Device_ControlledVia,MasterDeviceID,sTop.c_str(),(int) pDevice->m_bDisabled);
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Created device %d %s (mdl: %d) routed to: %d (%s) disabled %d",pDevice->m_dwPK_Device,
+				pDevice->m_sDescription.c_str(),pDevice->m_dwPK_DeviceTemplate,MasterDeviceID,sTop.c_str(),(int) pDevice->m_bDisabled);
 			m_Routing_DeviceToController[pDevice->m_dwPK_Device] = MasterDeviceID;
 		}
     }
@@ -3089,6 +3060,10 @@ void Router::Configure()
     {
         DeviceData_Router *pDevice = (*itDevice).second;
 
+        pDevice->DeviceData_Impl::SerializeWrite();   // Have each device pre-serialize all it's data
+        pDevice->m_pMySerializedData=pDevice->m_pcDataBlock;  // When we serialize this device's children or parents, this would get overwritten if we didn't make a copy
+        pDevice->m_iConfigSize = (unsigned long) (pDevice->m_pcCurrentPosition-pDevice->m_pcDataBlock);
+        pDevice->m_pcDataBlock=NULL; // So the framework doesn't delete this when we serialize another object in the chain
         if( !pDevice->m_pDevice_ControlledVia )
             ParseDevice(DEVICEID_DCEROUTER, DEVICEID_DCEROUTER,pDevice);
     }
@@ -3208,7 +3183,7 @@ string Router::GetDevicesByDeviceTemplate(DeviceData_Router *pDeviceData_From,in
 // tempoarary hack.  need to optimize & handle broadcats
 string Router::GetDevicesByCategory(DeviceData_Router *pDeviceData_From,int PK_DeviceCategory,eBroadcastLevel BroadcastLevel)
 {
-	if( BroadcastLevel!=BL_AllHouses && BroadcastLevel!=BL_SameHouse && !pDeviceData_From )
+	if( BroadcastLevel!=BL_AllHouses && !pDeviceData_From )
 		return ""; // If we're going to filter, we need an incoming device
 
 #ifdef EMBEDDED_LMCE
@@ -3227,10 +3202,10 @@ LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"m_mapDeviceData_Router has a NU
 continue;
 }
         if( !pDevice->WithinCategory(PK_DeviceCategory) ||
-				(BroadcastLevel==BL_DirectSiblings && pDeviceData_From && pDeviceData_From->m_pDevice_ControlledVia!=pDevice->m_pDevice_ControlledVia) ||
-				(BroadcastLevel==BL_SameComputer && pDeviceData_From && (pDeviceData_From->m_pDevice_Core!=pDevice->m_pDevice_Core || pDeviceData_From->m_pDevice_MD!=pDevice->m_pDevice_MD) ) ||
-				(BroadcastLevel==BL_SameRoom && pDeviceData_From && pDeviceData_From->m_dwPK_Room!=pDevice->m_dwPK_Room) ||
-				(BroadcastLevel==BL_SameHouse && pDeviceData_From && pDeviceData_From->m_dwPK_Installation!=pDevice->m_dwPK_Installation) )
+				(BroadcastLevel==BL_DirectSiblings && pDeviceData_From->m_pDevice_ControlledVia!=pDevice->m_pDevice_ControlledVia) ||
+				(BroadcastLevel==BL_SameComputer && (pDeviceData_From->m_pDevice_Core!=pDevice->m_pDevice_Core || pDeviceData_From->m_pDevice_MD!=pDevice->m_pDevice_MD) ) ||
+				(BroadcastLevel==BL_SameRoom && pDeviceData_From->m_dwPK_Room!=pDevice->m_dwPK_Room) ||
+				(BroadcastLevel==BL_SameHouse && pDeviceData_From->m_dwPK_Installation!=pDevice->m_dwPK_Installation) )
             continue;
 
         if( Result.length() )

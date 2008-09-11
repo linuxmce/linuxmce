@@ -1,14 +1,14 @@
-CXX=g++
+# -*- Makefile -*-
+
 CC=$(CXX)
 CXXFLAGS=-W -Wall -pipe -ggdb3
 CPPFLAGS=-I. -I.. -I/usr/include/SDL -I/usr/X11R6/include -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -DKDE_LMCE -DDEBUG -DVIA_DIAG_TEST_UNIT
 LDFLAGS=-lXtst -lGL -lGLU -lXrender -lXext -lSDL -lSDL_ttf -lSDL_image -lddmpeg -lglut 
 
 sources = VIAdiag_texture.cpp ../ViaOverlay.cpp
-			
+
 all: $(sources:.cpp=.o)
 	$(CXX) -o VIAdiag_texture $+ $(LDFLAGS)
 	cp VIAdiag_texture ../../../../bin/
 clean:
 	rm -f VIAdiag_texture $(sources:.cpp=.o) 
-	

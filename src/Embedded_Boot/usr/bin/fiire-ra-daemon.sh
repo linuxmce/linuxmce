@@ -3,6 +3,7 @@ CONF_FILE="/etc/fiire-ra/fiire-ra.conf"
 PID_FILE="/var/run/fiire-ra.pid"
 SSH_KEY_FILE="/etc/fiire-ra/keys/fiire-ra.key"
 
+
 PipePath="/var/run/fiire-ra-pipes"
 PipeSend="$PipePath/send"
 PipeRecv="$PipePath/recv"
@@ -26,26 +27,17 @@ InitPipes()
 }
 
 PortForwarding() {
-	ssh -T -y -i "$SSH_KEY_FILE" -R "$PORT:localhost:80" -L "8081:localhost:80" "$SSHConnectionData" <"$PipeSend" >"$PipeRecv" &
-	SSHPID=$!
-	exec 8>"$PipeSend" 9<"$PipeRecv"
+	while :; do
+		ssh -T -y -i "$SSH_KEY_FILE" -R "$PORT:localhost:80" "$SSHConnectionData" <"$PipeSend" >"$PipeRecv" &
+		SSHPID=$!
+		exec 8>"$PipeSend" 9<"$PipeRecv"
 
-	echo "$USERNAME $PASSWORD_MD5" >&8
+		echo "$USERNAME $PASSWORD_MD5" >&8
 
-	wait "$SSHPID"
-	exec 8>&- 9<&-
-}
-
-TunelChecking () {
-	while : ;do
-		sleep 30;
-		curl "http://localhost:8081/index.php"
-		exit_code=$?
-
-		if [[ "$exit_code" != "0" ]] ;then
-			log "Tunnel is down, will try to restart it now"
-			/etc/init.d/fiire-ra restart
-		fi
+		wait "$SSHPID"
+		exec 8>&- 9<&-
+		log "Connection to fiire server lost, will retry in 60 seconds."
+		sleep 60
 	done
 }
 
@@ -53,17 +45,11 @@ if [[ ! -f "$CONF_FILE" ]]; then
 	log "Closing down. Fiire remote access is not configured."
 fi
 
-if [[ ! -r "$CONF_FILE" ]] ;then
+if [[ ! -f "$CONF_FILE" ]] ;then
 	log "Failed to read fiire-ra configuration file."
 	exit 1
 fi
-
 . "$CONF_FILE"
-
-if [[ "$RA_DISABLED" = "1" ]];then
-	log "Remote Assistance is disabled. Closing RA..."
-	exit 1
-fi
 
 PASSWORD_MD5="`echo -n "$PASSWORD" | md5sum | cut -d' ' -f1`"
 
@@ -92,5 +78,4 @@ exec 0</dev/null
 exec 1>/dev/null
 exec 2>/dev/null
 PortForwarding &
-TunelChecking &
 echo $! > "$PID_FILE"

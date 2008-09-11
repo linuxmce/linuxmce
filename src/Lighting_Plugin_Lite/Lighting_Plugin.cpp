@@ -260,8 +260,6 @@ void Lighting_Plugin::PreprocessLightingMessage(DeviceData_Router *pDevice,Messa
 	if( !pDevice || !pMessage || pMessage->m_mapParameters.find(COMMANDPARAMETER_Advanced_options_CONST)!=pMessage->m_mapParameters.end() )
 		return;
 
-	bool bIsTemporary = pMessage->m_mapParameters[COMMANDPARAMETER_Is_Temporary_CONST]=="1";
-
 	if( pMessage->m_dwID==COMMAND_Set_Level_CONST )
 	{
 		string sLevel = pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST];
@@ -295,16 +293,16 @@ void Lighting_Plugin::PreprocessLightingMessage(DeviceData_Router *pDevice,Messa
 						pDevice->m_dwPK_Device);
 				}
 
-				SetLightState( pDevice->m_dwPK_Device, true, iLevel, true, bIsTemporary );
+				SetLightState( pDevice->m_dwPK_Device, true, iLevel );
 				pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST] = StringUtils::itos(iLevel);
 			}
 		}
 	}
 
 	if( pMessage->m_dwID==COMMAND_Generic_On_CONST )
-		SetLightState( pDevice->m_dwPK_Device, true, 100, true, bIsTemporary);
+		SetLightState( pDevice->m_dwPK_Device, true );
 	else if( pMessage->m_dwID==COMMAND_Generic_Off_CONST )
-		SetLightState( pDevice->m_dwPK_Device, false, 0, true, bIsTemporary);
+		SetLightState( pDevice->m_dwPK_Device, false );
 }
 
 int Lighting_Plugin::GetLightingLevel(DeviceData_Router *pDevice,int iLevel_Default)
@@ -317,19 +315,15 @@ int Lighting_Plugin::GetLightingLevel(DeviceData_Router *pDevice,int iLevel_Defa
 		return iLevel_Default;
 }
 
-void Lighting_Plugin::SetLightState(int PK_Device,bool bIsOn,int Level, bool bRestore,bool bIsTemporary)
+void Lighting_Plugin::SetLightState(int PK_Device,bool bIsOn,int Level, bool bRestore)
 {
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Lighting_Plugin::SetLightState PK_Device %d On %d Level %d Restore %d Temporary %d",
-		PK_Device, (int) bIsOn, Level, (int) bRestore, (int) bIsTemporary);
-
 	DeviceData_Router *pDevice =  m_pRouter->m_mapDeviceData_Router_Find(PK_Device);
 	if( !pDevice )
 		return; // Shouldn't happen
 	if( Level==-1 )
 		Level = GetLightingLevel( pDevice );
 
-	pDevice->m_sState_set( (bIsOn ? "ON" : "OFF") + string("/") + StringUtils::itos(Level),bIsTemporary);
-	m_pRouter->DataLayer()->Save();
+	pDevice->m_sState_set( (bIsOn ? "ON" : "OFF") + string("/") + StringUtils::itos(Level));
 
 	if( bRestore )
 	{
@@ -415,43 +409,3 @@ void Lighting_Plugin::AlarmCallback(int id, void* param)
 	lm.Release();
 	SetLightingAlarm();
 }
-
-//<-dceag-c969-b->
-
-	/** @brief COMMAND: #969 - Restore To NonTemp State */
-	/** Restore a lighting device to the state in State_NonTemporary */
-		/** @param #2 PK_Device */
-			/** The device to restore */
-
-void Lighting_Plugin::CMD_Restore_To_NonTemp_State(int iPK_Device,string &sCMD_Result,Message *pMessage)
-//<-dceag-c969-e->
-{
-	DeviceData_Router *pDevice = m_pRouter->m_mapDeviceData_Router_Find(iPK_Device);
-	if( pDevice==NULL )
-	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Lighting_Plugin::CMD_Restore_To_NonTemp_State Device %d is invalid", iPK_Device);
-		return;
-	}
-
-	string sState = pDevice->m_sState_NonTemporary_get();
-
-	int iLevel = -1;
-	string::size_type pos = sState.find("/");
-	if( pos!=string::npos )
-		iLevel = atoi(sState.substr(pos+1).c_str());
-
-	if( sState.size()>=2 && sState.substr(0,2)=="ON" )
-		QueueMessageToRouter( new Message( m_dwPK_Device,pDevice->m_dwPK_Device,PRIORITY_NORMAL,MESSAGETYPE_COMMAND,COMMAND_Generic_On_CONST,0 ) );
-	else if( sState.size()>=3 && sState.substr(0,3)=="OFF" )
-		QueueMessageToRouter( new Message( m_dwPK_Device,pDevice->m_dwPK_Device,PRIORITY_NORMAL,MESSAGETYPE_COMMAND,COMMAND_Generic_Off_CONST,0 ) );
-	else
-	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Lighting_Plugin::CMD_Restore_To_NonTemp_State Device %d has unknown state %s", iPK_Device, sState.c_str());
-		return;
-	}
-
-	if( iLevel!=-1 )
-		QueueMessageToRouter( new Message( m_dwPK_Device,pDevice->m_dwPK_Device,PRIORITY_NORMAL,MESSAGETYPE_COMMAND,COMMAND_Set_Level_CONST,1,
-			COMMANDPARAMETER_Value_To_Assign_CONST, StringUtils::itos(iLevel)) );
-}
-

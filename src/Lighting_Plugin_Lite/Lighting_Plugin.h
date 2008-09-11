@@ -72,7 +72,7 @@ public:
 	int GetLightingLevel(DeviceData_Router *pDevice,int iLevel_Default=0);
 	
 	// Set the state of a light.  -1 = don't change the level, just the on/off
-	void SetLightState(int PK_Device,bool bIsOn,int Level=-1, bool bRestore=true,bool bIsTemporary=false);
+	void SetLightState(int PK_Device,bool bIsOn,int Level=-1, bool bRestore=true);
 	
 	void SetLightingAlarm(); // Find the next event in m_mapLightsToRestore and set the alarm callback
 	void AlarmCallback(int id, void* param);  // Implementation for AlarmEvent
@@ -101,14 +101,6 @@ public:
 	virtual void CMD_Set_Level(string sLevel) { string sCMD_Result; CMD_Set_Level(sLevel.c_str(),sCMD_Result,NULL);};
 	virtual void CMD_Set_Level(string sLevel,string &sCMD_Result,Message *pMessage);
 
-
-	/** @brief COMMAND: #969 - Restore To NonTemp State */
-	/** Restore a lighting device to the state in State_NonTemporary */
-		/** @param #2 PK_Device */
-			/** The device to restore */
-
-	virtual void CMD_Restore_To_NonTemp_State(int iPK_Device) { string sCMD_Result; CMD_Restore_To_NonTemp_State(iPK_Device,sCMD_Result,NULL);};
-	virtual void CMD_Restore_To_NonTemp_State(int iPK_Device,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
 };

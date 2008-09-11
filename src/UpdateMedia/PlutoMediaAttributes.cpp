@@ -18,6 +18,9 @@
  */
 #include "PlutoMediaAttributes.h"
 
+#include <algorithm>
+using namespace std;
+
 #include "Logger.h"
 using namespace DCE;
 

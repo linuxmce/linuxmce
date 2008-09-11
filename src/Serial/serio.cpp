@@ -26,9 +26,6 @@
  Copyright Activision 1998
 -------------------------------------------------------------------------*/
 #include "PlutoUtils/CommonIncludes.h"
-#include "DCE/Logger.h"
-#include "Generic_Serial_Device/IOUtils.h"
-using namespace DCE;
 
 #include <assert.h>
 #include <stdlib.h>
@@ -305,13 +302,7 @@ serio_res_t serio_poll(serio_t *serio)
 		/* check to see if there is any space in the queue to read into */
 		if (len > 0) {
 			DPRINT(("%d serio_poll: rx: ReadFile(%d bytes)\n", clock(), len));
-int bresult = ReadFile(serio->port, serio->rx.buf+serio->rx.tail, len, &cbTransfer, &serio->rx.overlap);
-if( cbTransfer!=0 )
-{
-LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "sio bresult %d rx.buf %p rx.tail %d len %d cbTransfer %d buf %s",
-(int) bresult, serio->rx.buf, serio->rx.tail, len, cbTransfer,IOUtils::FormatHexAsciiBuffer((const char *) serio->rx.buf+serio->rx.tail, static_cast<unsigned int>(cbTransfer),"35").c_str());
-}
-			if (bresult) {
+			if (ReadFile(serio->port, serio->rx.buf+serio->rx.tail, len, &cbTransfer, &serio->rx.overlap)) {
 				int old_tail = serio->rx.tail;
 				serio->rx.tail += cbTransfer;
 				serio->rx.tail = serio_WRAP(serio->rx.tail);

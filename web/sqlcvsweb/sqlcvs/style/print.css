@@ -1,0 +1,97 @@
+h2 { 
+	color:#ffffff;
+	font-size:16pt;
+	font-family:Verdana,Arial,Helvetica; 
+	letter-spacing:0.1mm;
+	word-spacing:0.8mm; 
+}
+
+a { 
+	color:#24387f;
+}
+a:link { color:#24387f; font-family:Verdana,Arial,Helvetica; font-size:10pt; line-height:11pt; text-decoration:none;  }
+a:visited { color:#24387f; font-family:Verdana,Arial,Helvetica; font-size:10pt;  line-height:11pt; text-decoration:none;}
+a:hover {color:#24387f;  font-family:Verdana,Arial,Helvetica; font-size:10pt;  line-height:11pt; text-decoration:underline; }
+td { background:#DFDFDF; }
+tr { background:#a7afcc; }
+table { background:#DFDFDF; }
+body  { 
+	color:Black; 
+	font-size:10pt; 
+	background:#ffffff;
+	font-family:Arial,Verdana,Helvetica; 
+	line-height:14pt;
+        margin: 0; 
+	padding: 1em;
+	min-width: 41em;
+}
+div#head {
+	background:#24387f;
+	border: 2px solid #24387f;
+	margin: 0;
+	height: 62px;
+}
+div#apptitle {
+	background:#24387f;
+	color:#ffffff;
+	font-size:16pt;
+	font-style:bold;
+	font-family:Verdana,Arial,Helvetica; 
+	letter-spacing:0.1mm;
+	word-spacing:0.8mm; 
+	margin: 1em;
+	float: left;
+}
+div#logo {
+	bgcolor:#24387f;
+	float: left;
+}
+div#username {
+	background:#24387f;
+	color:#ffffff;
+	font-size:16pt;
+	font-family:Verdana,Arial,Helvetica; 
+	letter-spacing:0.1mm;
+	word-spacing:0.8mm; 
+	float: right;
+	margin: 1em;
+}
+div#menu {
+	background:#dfdfdf;
+	border: 2px solid black;
+	float: left;
+	padding: 5px;
+	margin: 5px;
+	display: none;
+}
+div#title {
+	color:black;
+	font-size:16pt;
+	font-family:Verdana,Arial,Helvetica; 
+	letter-spacing:0.1mm;
+	word-spacing:0.8mm; 
+	margin-top: 0.3em;
+	margin-bottom: 0.2em;
+}
+div#content {
+	margin-left: 8.5em;
+}
+div#loginprompt {
+	background:#dfdfdf;
+	border: 2px solid black;
+	width: 20em;
+	margin-top: 5em;
+	margin-left: 5em;
+	margin-bottom: 5em;
+	padding: 1em;
+}
+div#copyright {
+	margin: 5px;
+	margin-left: 8.5em;
+	clear: left;
+}
+
+div#domainsysinfo { float: left; }
+div#domainvbd { clear: right; width: 10em; }
+div#domainvif { clear: right; width: 10em;}
+div#domaincost { clear: right; width: 10em; }

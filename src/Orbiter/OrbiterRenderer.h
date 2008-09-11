@@ -19,6 +19,7 @@
 #ifndef __ORBITER_RENDERER_H__
 #define __ORBITER_RENDERER_H__
 
+#include <memory>
 #include <string>
 //-----------------------------------------------------------------------------------------------------
 #include "DesignObj_Orbiter.h"

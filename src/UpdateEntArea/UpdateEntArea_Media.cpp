@@ -165,13 +165,49 @@ void UpdateEntArea::AddDefaultMediaScenarios(Row_EntertainArea *pRow_EntertainAr
 		pCommandGroup->AddCommand(DEVICETEMPLATE_This_Orbiter_CONST,COMMAND_Show_File_List_CONST,1,1,COMMANDPARAMETER_PK_MediaType_CONST,StringUtils::itos(MEDIATYPE_misc_DocViewer_CONST).c_str());
 
 	{
+		// If a game player is attached to an EA, add a games button.
+		string sSQL="SELECT PK_Device,FK_MediaType,MediaType.Description as MediaType "
+			"FROM Device_EntertainArea "
+			"JOIN Device ON FK_Device=PK_Device "
+			"JOIN DeviceTemplate_MediaType ON Device.FK_DeviceTemplate=DeviceTemplate_MediaType.FK_DeviceTemplate "
+			"JOIN MediaType ON FK_MediaType=PK_MediaType "
+			"WHERE FK_EntertainArea=" + StringUtils::itos(pRow_EntertainArea->PK_EntertainArea_get()) + " AND FK_MediaType = 29";
+
+		iOrder=1;
+		PlutoSqlResult result_set;
+		DB_ROW row;
+		if( (result_set.r=m_pDatabase_pluto_main->db_wrapper_query_result(sSQL)) )
+		{
+			while ((row=db_wrapper_fetch_row(result_set.r)))
+			{
+				Row_Device *pRow_Device = m_pDatabase_pluto_main->Device_get()->GetRow(atoi(row[0]));
+				if( !pRow_Device->FK_Device_RouteTo_isNull() )
+					pRow_Device = pRow_Device->FK_Device_RouteTo_getrow();
+ 
+				if ( !pRow_Device )
+				{
+					LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Error game player device %s can not be located.",row[0]);
+					continue;				
+				}
+				// Keep this block marked for future use in case we need multiple game buttons? 
+			}
+			// Fix, only create one Games media type for now. 			
+
+			// we're good, and have a usable player device, let's add the games.
+			pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Media_Wiz_FileDisc_CONST,"Games",ICON_Video_CONST,0,MEDIATYPE_lmce_Game_CONST,NULL,15);
+			if( pCommandGroup )
+				pCommandGroup->AddCommand(DEVICETEMPLATE_This_Orbiter_CONST,COMMAND_Show_File_List_CONST,1,1,COMMANDPARAMETER_PK_MediaType_CONST,StringUtils::itos(MEDIATYPE_lmce_Game_CONST).c_str());			
+		}
+	}
+
+	{
 		// Find all non-pluto media
 		string sSQL="SELECT PK_Device,FK_MediaType,MediaType.Description as MediaType "
 			"FROM Device_EntertainArea "
 			"JOIN Device ON FK_Device=PK_Device "
 			"JOIN DeviceTemplate_MediaType ON Device.FK_DeviceTemplate=DeviceTemplate_MediaType.FK_DeviceTemplate "
 			"JOIN MediaType ON FK_MediaType=PK_MediaType "
-			"WHERE FK_EntertainArea=" + StringUtils::itos(pRow_EntertainArea->PK_EntertainArea_get()) + " AND FK_MediaType NOT IN (1,2,3,4,5,6,7,20,21,22,23,24,27,28) ORDER BY PK_Device";
+			"WHERE FK_EntertainArea=" + StringUtils::itos(pRow_EntertainArea->PK_EntertainArea_get()) + " AND FK_MediaType NOT IN (1,2,3,4,5,6,7,20,21,22,23,24,27,28,29) ORDER BY PK_Device";
 
 		iOrder=1;
 		PlutoSqlResult result_set;

@@ -26,16 +26,12 @@ public:
 	//load/save data
 	virtual bool Load() = 0;
 	virtual bool Save() = 0;
-	virtual void PluginsLoaded() = 0; // Free up any temporary data the plugins may have needed to load
 
 	//the mutex
 	virtual pluto_pthread_mutex_t& Mutex() = 0;
 
 	//get devices
 	virtual std::map<int, DeviceData_Router *>& Devices() = 0;
-
-	//get scenes
-	virtual const std::map<int, Scene_Data>& Scenes() = 0;
 
 	//queries for scenes and device templates
 	virtual Scene_Data* Scene(int nSceneID) = 0;

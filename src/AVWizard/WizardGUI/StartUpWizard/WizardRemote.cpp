@@ -19,6 +19,7 @@
 #include "WizardRemote.h"
 
 #include "signal.h"
+#include <cstdlib>
 #include <iostream>
 using namespace std;
 

@@ -50,9 +50,7 @@
 #include "Simulator.h"
 #include "Orbiter.h"
 
-#define  VERSION "<=version=>"
-const char *g_szCompile_Date="<=compile_date=>";
-/*SVN_REVISION*/
+#include "../include/version.cpp"
 
 extern HWND	g_hWndList; //maindialog logger list
 

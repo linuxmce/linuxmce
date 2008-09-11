@@ -1078,6 +1078,7 @@
 #define TEXT_Force_Reload_CONST 2021
 #define TEXT_Cannot_Reload_CONST 2022
 #define TEXT_Download_CONST 2023
+#define TEXT_RECs_CONST 2024
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"

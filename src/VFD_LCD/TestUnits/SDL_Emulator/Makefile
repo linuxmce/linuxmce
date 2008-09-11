@@ -1,6 +1,5 @@
 ROOT=../../..
 
-CXX=g++
 CC=$(CXX)
 CXXFLAGS=-W -Wall -pipe -ggdb3
 CPPFLAGS=-I. -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/SDL -I/usr/include/libxml2/ -I/usr/include/mysql
@@ -18,10 +17,9 @@ sources = \
 	  SDLFrontEnd.cpp \
 	  ../../InputProviders/SocketStatusInputProvider.cpp \
 	  main.cpp
-			
+
 all: $(sources:.cpp=.o)
 	$(CXX) -o SDL_Emulator $+ $(LDFLAGS)
 	cp SDL_Emulator ../../../bin/
 clean:
 	rm -f SDL_Emulator $(sources:.cpp=.o) 
-	

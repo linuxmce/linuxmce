@@ -2,6 +2,9 @@
 #include "inotify/FileNotifier.h"
 #include "PlutoUtils/ProcessUtils.h"
 #include "FileUtils/file_utils.h"
+#include <algorithm>
+using namespace std;
+
 //------------------------------------------------------------------------------------------
 #define CHECK_OBSERVED_FILES_STATUS 1
 #define OBSERVER_SCANNING_INTERVAL  3 //seconds

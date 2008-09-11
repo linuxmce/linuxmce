@@ -322,7 +322,7 @@ string RegenMonitor::AllScenariosFloorplans()
 
 string RegenMonitor::GetModInfo_Genres()
 {
-	string sSQL = "SELECT max(PK_Attribute) FROM Attribute WHERE Attribute.FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Genre_CONST);
+	string sSQL = "SELECT max(PK_Attribute) FROM Attribute WHERE FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Genre_CONST);
 
 	string sResult;
 	PlutoSqlResult result_set_array;

@@ -70,7 +70,7 @@ namespace nsThreadedClass
 
 		virtual void InternalRun();
 		bool ThreadRunning() { return m_bThreadRunning; }
-		void BroadcastCond();
+		void BroadcastCond() { pthread_cond_broadcast( &m_ThreadCondition ); }
 		virtual void Run()=0;
 
 		pluto_pthread_mutex_t *m_ThreadMutex_get() { return &m_ThreadMutex; }

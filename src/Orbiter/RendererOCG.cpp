@@ -20,6 +20,7 @@
 #include "PlutoUtils/PlutoDefs.h"
 #include "PlutoUtils/minilzo.h"
 #include "PlutoUtils/FileUtils.h"
+#include <cstring>
 
 //----------------------------------------------------------------------------------------------------------------
 #define HEAP_ALLOC(var,size) \

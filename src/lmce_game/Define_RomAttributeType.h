@@ -1,0 +1,21 @@
+#ifndef __Define_RomAttributeType_H__
+#define __Define_RomAttributeType_H__
+
+#define ROMATTRIBUTETYPE_title_CONST 1
+#define ROMATTRIBUTETYPE_year_CONST 2
+#define ROMATTRIBUTETYPE_manufacturer_CONST 3
+#define ROMATTRIBUTETYPE_genre_CONST 4
+
+#define ROMATTRIBUTETYPE_TABLE "RomAttributeType"
+#define ROMATTRIBUTETYPE_PK_ROMATTRIBUTETYPE_FIELD "PK_RomAttributeType"
+#define ROMATTRIBUTETYPE_PK_ROMATTRIBUTETYPE_TABLE_FIELD "RomAttributeType.PK_RomAttributeType"
+#define ROMATTRIBUTETYPE_DEFINE_FIELD "Define"
+#define ROMATTRIBUTETYPE_DEFINE_TABLE_FIELD "RomAttributeType.Define"
+#define ROMATTRIBUTETYPE_DESCRIPTION_FIELD "Description"
+#define ROMATTRIBUTETYPE_DESCRIPTION_TABLE_FIELD "RomAttributeType.Description"
+#define ROMATTRIBUTETYPE_PICPRIORITY_FIELD "PicPriority"
+#define ROMATTRIBUTETYPE_PICPRIORITY_TABLE_FIELD "RomAttributeType.PicPriority"
+
+
+#endif
+

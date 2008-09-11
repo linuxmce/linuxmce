@@ -334,8 +334,8 @@ bool VR_IdentifyPhone::ProcessRequest( )
 			// We found the record
 			m_iPlutoId = m_iIdentifiedPlutoId;
 			// Add it to the MacAddress table
-//			sprintf( sql, "INSERT INTO MacAddress( PKID_MacAddress, FKID_PlutoId, FKID_C_PhoneStatus ) "
-//				"VALUES( %I64d, %d, %d )", m_iMacAddress, ( int ) m_iPlutoId, ( int ) C_PHONESTATUS_NEW_PHONE_CONST );
+//			sprintf( sql, "INSERT INTO MacAddress ( PKID_MacAddress, FKID_PlutoId, FKID_C_PhoneStatus ) "
+//				"VALUES ( %I64d, %d, %d )", m_iMacAddress, ( int ) m_iPlutoId, ( int ) C_PHONESTATUS_NEW_PHONE_CONST );
 
 
 			// See if there is a model specified, and the the nobinary flag is not set, and there is a binary version
@@ -343,8 +343,8 @@ bool VR_IdentifyPhone::ProcessRequest( )
 				FileName = PlutoIdRow[4];
 
 			s.str( "" );
-			s << "INSERT INTO MacAddress( PKID_MacAddress, FKID_PlutoId, FKID_C_PhoneStatus, NoBinary, FKID_PhoneModel ) " <<
-				"VALUES( " << m_iMacAddress << ", " << m_iPlutoId << ", " << C_PHONESTATUS_NEW_PHONE_CONST << 
+			s << "INSERT INTO MacAddress ( PKID_MacAddress, FKID_PlutoId, FKID_C_PhoneStatus, NoBinary, FKID_PhoneModel ) " <<
+				"VALUES ( " << m_iMacAddress << ", " << m_iPlutoId << ", " << C_PHONESTATUS_NEW_PHONE_CONST << 
 				", " << ( PlutoIdRow[3] ? PlutoIdRow[3] : "0" ) << // No Binary
 				", " << ( PlutoIdRow[2] ? PlutoIdRow[2] : "NULL" ) << // Phone Model
 				" )";
@@ -523,7 +523,7 @@ void VR_IdentifyPhone::LogVisit( )
 #ifdef VIPSERVER
 	char sql[100];
 	cout << "Visit Logged\n";
-	sprintf( sql, "INSERT INTO Visit( FKID_PlutoId_User, FKID_PlutoId_Establishment ) VALUES( %d, %d )", m_iPlutoId, m_iEstablishmentID );
+	sprintf( sql, "INSERT INTO Visit ( FKID_PlutoId_User, FKID_PlutoId_Establishment ) VALUES ( %d, %d )", m_iPlutoId, m_iEstablishmentID );
 	g_pPlutoConfig->threaded_mysql_query( sql );
 #endif
 }

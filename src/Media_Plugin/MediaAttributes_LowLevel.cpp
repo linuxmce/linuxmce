@@ -496,7 +496,7 @@ void operator+= (deque<MediaFile *> &dTarget, deque<MediaFile *> &dAdditional)
         dTarget.push_back(dAdditional[s]);
 }
 
-Row_Attribute *MediaAttributes_LowLevel::GetAttributeFromDescription(int PK_MediaType,int PK_AttributeType,string sName,int PK_Attribute_Related,bool *p_bNew)
+Row_Attribute *MediaAttributes_LowLevel::GetAttributeFromDescription(int PK_MediaType,int PK_AttributeType,string sName,int PK_Attribute_Related)
 {
 	if( StringUtils::OnlyWhiteSpace(sName) )
 	{
@@ -520,7 +520,7 @@ Row_Attribute *MediaAttributes_LowLevel::GetAttributeFromDescription(int PK_Medi
 			"LEFT JOIN Disc_Attribute AS DA2 ON DA.FK_Disc=DA2.FK_Disc AND DA2.FK_Attribute = " + StringUtils::itos(PK_Attribute_Related) + " "
 			"LEFT JOIN Download_Attribute AS LA ON LA.FK_Attribute=PK_Attribute "
 			"LEFT JOIN Download_Attribute AS LA2 ON LA.FK_Download=LA2.FK_Download AND LA2.FK_Attribute = " + StringUtils::itos(PK_Attribute_Related) + " "
-			"WHERE Attribute.FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Album_CONST) " AND Name='" + StringUtils::SQLEscape(sName) + "' "
+			"WHERE FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Album_CONST) " AND Name='" + StringUtils::SQLEscape(sName) + "' "
 			"AND (FA2.FK_Attribute IS NOT NULL OR DA2.FK_Attribute IS NOT NULL OR LA2.FK_Attribute IS NOT NULL)";
 		m_pDatabase_pluto_media->Attribute_get()->GetRows(sWhere,&vectRow_Attribute);
 
@@ -568,8 +568,6 @@ PK_MediaType, PK_AttributeType, sName.c_str(), PK_Attribute_Related, (int) vectR
 		pRow_Attribute->FK_AttributeType_set(PK_AttributeType);
 		pRow_Attribute->Name_set(sName);
 		pRow_Attribute->Table_Attribute_get()->Commit();
-		if( p_bNew )
-			*p_bNew = true;
 		return pRow_Attribute;
 	}
 }
@@ -1300,7 +1298,7 @@ int MediaAttributes_LowLevel::AddRippedDiscToDatabase(int PK_Disc,int PK_MediaTy
 		vector<Row_Disc_Attribute *> vectRow_Disc_Attribute;
 		m_pDatabase_pluto_media->Disc_Attribute_get()->GetRows(
 			"JOIN Attribute ON FK_Attribute=PK_Attribute WHERE FK_Disc=" + StringUtils::itos(PK_Disc) + 
-			" AND Attribute.FK_AttributeType=" + StringUtils::itos(ATTRIBUTETYPE_Disc_ID_CONST),&vectRow_Disc_Attribute);
+			" AND FK_AttributeType=" + StringUtils::itos(ATTRIBUTETYPE_Disc_ID_CONST),&vectRow_Disc_Attribute);
 		Row_Disc_Attribute *pRow_Disc_Attribute_DiscID=NULL;
 		if( vectRow_Disc_Attribute.size()>0 )
 			pRow_Disc_Attribute_DiscID = vectRow_Disc_Attribute[0];
@@ -1397,7 +1395,7 @@ int MediaAttributes_LowLevel::AddRippedDiscToDatabase(int PK_Disc,int PK_MediaTy
                           LoggerWrapper::GetInstance()->Write(LV_STATUS,"MediaAttributes_LowLevel::AddRippedDiscToDatabase setting track number for %s to %i",s.c_str(), iTrack);
 #endif
                           vector<Row_File_Attribute *> vFileAttrs;
-                          m_pDatabase_pluto_media->File_Attribute_get()->GetRows("JOIN Attribute ON FK_Attribute=PK_Attribute WHERE Attribute.FK_AttributeType=" + StringUtils::itos(ATTRIBUTETYPE_Track_CONST) + " AND FK_File=" + StringUtils::itos(pRow_File->PK_File_get()),&vFileAttrs);
+                          m_pDatabase_pluto_media->File_Attribute_get()->GetRows("JOIN Attribute ON FK_Attribute=PK_Attribute WHERE FK_AttributeType=" + StringUtils::itos(ATTRIBUTETYPE_Track_CONST) + " AND FK_File=" + StringUtils::itos(pRow_File->PK_File_get()),&vFileAttrs);
                           if (vFileAttrs.size()==0)
                           {
 #ifdef DEBUG
@@ -1508,7 +1506,6 @@ int MediaAttributes_LowLevel::AddRippedDiscToDatabase(int PK_Disc,int PK_MediaTy
 		FileUtils::DelFile(sDestination + "/" + sLockFile);
 	}
 	DatabaseUtils::SyncMediaAttributes(m_pDatabase_pluto_media);
-	DatabaseUtils::UpdateAttributeCount(m_pDatabase_pluto_media);
 	return PK_File;
 }
 
@@ -1628,12 +1625,12 @@ string MediaAttributes_LowLevel::GetDefaultDescriptionForMediaFile(MediaFile *pM
 	string sSQL;
 	
 	if( pMediaFile->m_dwPK_Disk )
-		sSQL = "SELECT Attribute.FK_AttributeType,Attribute.Name FROM Disc_Attribute JOIN Attribute ON FK_Attribute=PK_Attribute WHERE FK_Disc = "
-			+ StringUtils::itos(pMediaFile->m_dwPK_Disk) + " AND Track=0 AND Section=0 AND Attribute.FK_AttributeType IN ("
+		sSQL = "SELECT FK_AttributeType,Attribute.Name FROM Disc_Attribute JOIN Attribute ON FK_Attribute=PK_Attribute WHERE FK_Disc = "
+			+ StringUtils::itos(pMediaFile->m_dwPK_Disk) + " AND Track=0 AND Section=0 AND FK_AttributeType IN ("
 			TOSTRING(ATTRIBUTETYPE_Title_CONST) "," TOSTRING(ATTRIBUTETYPE_Performer_CONST) "," TOSTRING(ATTRIBUTETYPE_Album_CONST) ")";
 	else
-		sSQL = "SELECT Attribute.FK_AttributeType,Attribute.Name FROM File_Attribute JOIN Attribute ON FK_Attribute=PK_Attribute WHERE FK_File = "
-			+ StringUtils::itos(pMediaFile->m_dwPK_File) + " AND Track=0 AND Section=0 AND Attribute.FK_AttributeType IN ("
+		sSQL = "SELECT FK_AttributeType,Attribute.Name FROM File_Attribute JOIN Attribute ON FK_Attribute=PK_Attribute WHERE FK_File = "
+			+ StringUtils::itos(pMediaFile->m_dwPK_File) + " AND Track=0 AND Section=0 AND FK_AttributeType IN ("
 			TOSTRING(ATTRIBUTETYPE_Title_CONST) "," TOSTRING(ATTRIBUTETYPE_Performer_CONST) "," TOSTRING(ATTRIBUTETYPE_Album_CONST) ")";
 		
     PlutoSqlResult result;
@@ -1665,7 +1662,7 @@ string MediaAttributes_LowLevel::GetDefaultDescriptionForMediaFile(MediaFile *pM
 
 int MediaAttributes_LowLevel::GetAttributeFromFile(int PK_File,int PK_AttributeType,string &sAttribute)
 {
-	string sSQL = "JOIN File_Attribute ON FK_Attribute=PK_Attribute WHERE Attribute.FK_AttributeType=" + StringUtils::itos(PK_AttributeType) + " and FK_File=" + StringUtils::itos(PK_File) + " limit 1";
+	string sSQL = "JOIN File_Attribute ON FK_Attribute=PK_Attribute WHERE FK_AttributeType=" + StringUtils::itos(PK_AttributeType) + " and FK_File=" + StringUtils::itos(PK_File) + " limit 1";
 	vector<Row_Attribute *> vectRow_Attribute;
 	m_pDatabase_pluto_media->Attribute_get()->GetRows(sSQL,&vectRow_Attribute);
 	if( vectRow_Attribute.empty() )
@@ -1677,7 +1674,7 @@ int MediaAttributes_LowLevel::GetAttributeFromFile(int PK_File,int PK_AttributeT
 
 int MediaAttributes_LowLevel::GetAttributeFromDisc(int PK_Disc,int PK_AttributeType,string &sAttribute)
 {
-	string sSQL = "JOIN Disc_Attribute ON FK_Attribute=PK_Attribute WHERE Attribute.FK_AttributeType=" + StringUtils::itos(PK_AttributeType) + " and FK_Disc=" + StringUtils::itos(PK_Disc) + " ORDER BY Track limit 1";  // Order by Track so we get the '0' tracks first
+	string sSQL = "JOIN Disc_Attribute ON FK_Attribute=PK_Attribute WHERE FK_AttributeType=" + StringUtils::itos(PK_AttributeType) + " and FK_Disc=" + StringUtils::itos(PK_Disc) + " ORDER BY Track limit 1";  // Order by Track so we get the '0' tracks first
 	vector<Row_Attribute *> vectRow_Attribute;
 	m_pDatabase_pluto_media->Attribute_get()->GetRows(sSQL,&vectRow_Attribute);
 	if( vectRow_Attribute.empty() )

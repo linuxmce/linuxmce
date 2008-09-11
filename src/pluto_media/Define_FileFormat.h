@@ -10,6 +10,7 @@
 #define FILEFORMAT_MP3_CONST 7
 #define FILEFORMAT_CD_Quality_CONST 8
 #define FILEFORMAT_Highdef_audio_CONST 9
+#define FILEFORMAT_Arcade_ROM_CONST 10
 
 #define FILEFORMAT_TABLE "FileFormat"
 #define FILEFORMAT_PK_FILEFORMAT_FIELD "PK_FileFormat"

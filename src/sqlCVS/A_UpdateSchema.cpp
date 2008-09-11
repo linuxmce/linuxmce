@@ -71,7 +71,7 @@ void A_UpdateSchema::ProcessAction(class RA_Request *pRequest,class RA_Processor
 
 	ostringstream sSql;
 	sSql << "INSERT INTO `psc_" << m_sRepository << "_schema` (`PK_psc_" << m_sRepository << "_schema`,`Value`) "
-		<< "VALUES(" << m_iSchemaVersion << ",'" << StringUtils::SQLEscape(m_sUpdateString) << "');";
+		<< "VALUES (" << m_iSchemaVersion << ",'" << StringUtils::SQLEscape(m_sUpdateString) << "');";
 	if( pRepository->m_pDatabase->threaded_mysql_query( sSql.str() )<0 )
 	{
 		cout << "SQL failed: " << sSql << endl;

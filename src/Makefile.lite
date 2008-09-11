@@ -1,17 +1,14 @@
-#export SNR_CPPFLAGS="-DDEBUG"
-#export SNR_LDFLAGS=""
+SNR_CPPFLAGS=
+SNR_LDFLAGS=
 
-#export SNR_CPPFLAGS
-#export SNR_LDFLAGS
+export SNR_CPPFLAGS SNR_LDFLAGS
 
 #export PATH="$PATH:/home/radu/SVN/openwrt/trunk/staging_dir/toolchain-mipsel_gcc3.4.6/bin"
 
-BINS=DCERouter MessageSend pluto-lzo interfeed ANSI-to-HTML Sleep NetworkTest RemoteAssistance xorcrypt
+BINS=DCERouter MessageSend pluto-lzo interfeed ANSI-to-HTML Sleep NetworkTest
 DEVS=ZWave
 LIBS=Serial SerializeClass PlutoUtils DCE
-Plugins=General_Info_Plugin_Lite Lighting_Plugin_Lite Climate_Plugin_Lite Event_Plugin_Lite Security_Plugin_Lite
-Plugins +=Shared_JSON_Data_Provider_Plug Data_Provider_Catalog_Plugin
-# XML_Data_Handler_Plugin_Lite Basic_XML_Data_Source_Plugin_Lite
+Plugins=General_Info_Plugin_Lite Lighting_Plugin_Lite Climate_Plugin_Lite
 
 all: libs bins
 ifeq ($(ARCH),mipsel)

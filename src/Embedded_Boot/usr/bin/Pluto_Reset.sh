@@ -4,39 +4,13 @@ if [[ -f /tmp/.reset-pluto ]]; then
 	exit
 fi
 touch /tmp/.reset-pluto
-echo 0 > /proc/diag/led/power
-touch /etc/pluto/fresh_install
 
 mkdir -p /etc/pluto/save/
 cp /etc/pluto/* /etc/pluto/save/
-cp /etc/httpd.conf /etc/pluto/save/
-mv /etc/TZ /etc/TZ-full /etc/pluto/save/
 cp /etc/pluto/orig/* /etc/pluto/
-cp /etc/pluto.conf /etc/pluto/save/
-
-rm -rf /etc/fiire-ra
-rm -f /etc/pluto/ra_password /etc/pluto/ra_ports
-rm -f /etc/pluto/pluto.json.lzo.1  /etc/pluto/pluto.json.lzo.2
-
-
-sed -ir '/^\/(cgi-bin|cisco)\/*/d' /etc/httpd.conf
-passwd -d root
-sed -i 's/^root:/root:!/' /etc/passwd
 
 uci set network.wan.proto=dhcp
 uci set network.wan.ifname=eth0.1
-
-Cfg=$(uci show wireless|grep device=wl0|cut -d. -f2)
-uci set wireless.wl0.disabled=1
-uci set wireless.wl0.channel=5
-uci set wireless.$Cfg.network="lan"
-uci set wireless.$Cfg.mode="ap"
-uci set wireless.$Cfg.hidden=0
-uci set wireless.$Cfg.ssid="HomeControl"
-uci set wireless.$Cfg.encryption="none"
-
-#enable firewall 
-sed -ir '/^ *accept:.*/d' /etc/firewall.config
 
 Model=$(cat /proc/diag/model)
 case "$Model" in
@@ -50,6 +24,6 @@ case "$Model" in
 		;;
 esac
 uci commit
-sync
 
+sync
 reboot

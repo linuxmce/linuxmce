@@ -30,8 +30,11 @@ RunSQL()
 	if [[ -n "$MySqlPassword" ]]; then
 		Pass="-p$MySqlPassword"
 	fi
+	if [[ -n "$MySqlPort" ]]; then
+		Port="-P $MySqlPort"
+	fi
 	if [[ -n "$Q" ]]; then
-		echo "$Q;" | mysql -A -N "$SQL_DB" -h "$MySqlHost" -u "$MySqlUser" $Pass | SQL_Translate
+		echo "$Q;" | mysql -A -N "$SQL_DB" -h "$MySqlHost" -u "$MySqlUser" $Pass $Port | SQL_Translate
 	fi
 }
 

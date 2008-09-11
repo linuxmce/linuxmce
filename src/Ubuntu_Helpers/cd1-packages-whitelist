@@ -1,3 +1,4 @@
+
 alsa-utils
 binutils
 coreutils
@@ -64,4 +65,4 @@ xfonts-base
 xfwm4
 xine-ui
 xserver-xorg-core
-enity
+zenity

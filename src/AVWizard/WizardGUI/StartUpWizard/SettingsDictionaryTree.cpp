@@ -17,7 +17,7 @@
 
  */
 #include "SettingsDictionaryTree.h"
-
+#include <cstring>
 
 #define WIZARD_SETTINGS_XML_ENCODING "UTF8" 
 

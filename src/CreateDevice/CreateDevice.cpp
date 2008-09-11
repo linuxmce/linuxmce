@@ -51,7 +51,7 @@
 #include "pluto_main/Define_CommandParameter.h"
 #include "DCEConfig.h"
 
-#define  VERSION "<=version=>"
+#include "../include/version.h"
 
 extern DCEConfig dceConfig;
 

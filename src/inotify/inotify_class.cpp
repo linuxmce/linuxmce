@@ -18,6 +18,9 @@
 #include <sys/ioctl.h>
 #endif
 
+#include <cstdlib>
+#include <cstring>
+
 #include "inotify_class.h"
 
 #ifndef WIN32

@@ -66,7 +66,7 @@
 #include "pluto_main/Table_Users.h"
 #include "DCE/Message.h"
 
-#define  VERSION "<=version=>"
+#include "../include/version.h"
 
 using namespace std;
 using namespace DCE;

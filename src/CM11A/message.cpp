@@ -25,6 +25,7 @@
 //
 //
 #include "message.h"
+#include <cstdlib>
 
 namespace CM11ADEV {
 

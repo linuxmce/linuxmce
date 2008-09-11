@@ -34,6 +34,7 @@ or FITNESS FOR A PARTICULAR PURPOSE. See the Pluto Public License for more detai
 #ifndef OpenGL3DEngine_H_
 #define OpenGL3DEngine_H_
 
+#include <memory>
 #include <map>
 
 #include "ExtensionManager.h"

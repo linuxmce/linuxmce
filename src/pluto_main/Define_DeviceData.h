@@ -234,7 +234,6 @@
 #define DEVICEDATA_Automatically_Go_to_Remote_CONST 281
 #define DEVICEDATA_Queue_Instead_of_Instant_Play_CONST 282
 #define DEVICEDATA_Polling_Settings_CONST 283
-#define DEVICEDATA_Room_Not_Required_CONST 284
 
 #define DEVICEDATA_TABLE "DeviceData"
 #define DEVICEDATA_PK_DEVICEDATA_FIELD "PK_DeviceData"

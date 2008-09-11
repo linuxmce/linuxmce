@@ -101,6 +101,9 @@ function usersRooms($output,$dbADO) {
 				}
 			}
 		}
+		//Orbiters need regenerated to activate changes
+		setOrbitersNeedConfigure($installationID,$dbADO);
+
 		header("Location: index.php?section=usersRooms&msg=$TEXT_USER_ROOM_UPDATED_CONST");
 
 	}

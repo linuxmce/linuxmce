@@ -1,6 +1,5 @@
 ROOT=..
 
-CXX=g++
 CC=$(CXX)
 CPPFLAGS=-W -Wall -pipe -ggdb3 -DENABLE_TEST_UNIT
 CXXFLAGS=-I. -I.. -I$(ROOT)

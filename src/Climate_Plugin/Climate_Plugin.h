@@ -73,7 +73,7 @@ public:
 	
 	int GetClimateLevel(DeviceData_Router *pDevice,int iLevel_Default);
 	string GetTemperature(DeviceData_Router *pDevice);
-	void SetStateValue(DeviceData_Router *pDevice, string sOn, string sMode, string sFan, string sSetPoint, string sTemp, bool bIsTemporary);
+	void SetStateValue(DeviceData_Router *pDevice, string sOn, string sMode, string sFan, string sSetPoint, string sTemp);
 	void GetStateVar(DeviceData_Router *pDevice, string& sOn, string& sMode, string& sFan, string& sSetPoint, string& sTemp);
 
 //<-dceag-h-b->

@@ -49,31 +49,31 @@ IdentifyJob::~IdentifyJob()
 	}
 }
 
-Job::enumReadyToRun IdentifyJob::ReadyToRun()
+bool IdentifyJob::ReadyToRun()
 {
 	if( m_pDisk_Drive_Functions )  // We're ready to go if we have a drive to do the ripping
 	{
 		if( !m_pDisk_Drive_Functions->LockDrive(Disk_Drive_Functions::locked_identify_job,this) )
 		{
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"IdentifyJob::ReadyToRun cannot lock drive");
-			return readyToRun_No; // We're not ready yet.  Somebody else is using the drive
+			return false; // We're not ready yet.  Somebody else is using the drive
 		}
 
 		if( !m_pDisk_Drive_Functions->m_pDevice_MediaIdentifier_get() )
 		{
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "IdentifyJob::ReadyToRun no media identifier");
-			m_eJobStatus_set(job_Error);
-			return readyToRun_No;
+			m_eJobStatus = job_Error;
+			return false;
 		}
 
 		AddIdentifyTasks();
-		return readyToRun_Yes;
+		return true;
 	}
 
 	if( !m_pSlot ) // If we don't have a m_pSlot, something is wrong, we have nothing and can't proceed
 	{
-		m_eJobStatus_set(job_Error);
-		return readyToRun_No;
+		m_eJobStatus = job_Error;
+		return false;
 	}
 
 	// Try to get an available drive from the jukebox to do the ripping
@@ -81,20 +81,20 @@ Job::enumReadyToRun IdentifyJob::ReadyToRun()
 	if( m_pDisk_Drive_Functions==NULL )  // We don't have a drive
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"IdentifyJob::ReadyToRun no drive for slot %d",m_pSlot->m_SlotNumber);
-		return readyToRun_No;
+		return false;
 	}
 
 	if( !m_pDisk_Drive_Functions->m_pDevice_MediaIdentifier_get() )
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "IdentifyJob::ReadyToRun no media identifier");
-		m_eJobStatus_set(job_Error);
-		return readyToRun_No;
+		m_eJobStatus = job_Error;
+		return false;
 	}
 
 	AddTask(new MoveDiscTask(this,"SlotToDrive",MoveDiscTask::mdt_SlotToDrive,m_pSlot->m_pJukeBox,(Drive *) m_pDisk_Drive_Functions,m_pSlot));
 	AddIdentifyTasks();
 	AddTask(new MoveDiscTask(this,"DriveToSlot",MoveDiscTask::mdt_DriveToSlot,m_pSlot->m_pJukeBox,(Drive *) m_pDisk_Drive_Functions,m_pSlot));
-	return readyToRun_Yes;
+	return true;
 }
 
 void IdentifyJob::AddIdentifyTasks()
@@ -105,7 +105,7 @@ void IdentifyJob::AddIdentifyTasks()
 bool IdentifyJob::ReportPendingTasks(PendingTaskList *pPendingTaskList)
 {
 	PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
-	if( m_eJobStatus_get() == job_WaitingToStart || m_eJobStatus_get() == job_InProgress )
+	if( m_eJobStatus==job_WaitingToStart || m_eJobStatus==job_InProgress )
 	{
 		if( pPendingTaskList )
 		{

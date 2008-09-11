@@ -1,6 +1,5 @@
 ROOT=..
 
-CXX=g++
 CC=$(CXX)
 CPPFLAGS=-W -Wall -pipe -ggdb3
 CXXFLAGS=-I. -I.. -I$(ROOT) -I$(ROOT)/DCE

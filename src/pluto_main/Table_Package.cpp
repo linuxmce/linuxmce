@@ -47,7 +47,6 @@ using namespace std;
 #include "Table_Package_Package.h"
 #include "Table_Package_Source.h"
 #include "Table_Package_Users.h"
-#include "Table_Package_Version.h"
 #include "Table_PageSetup.h"
 #include "Table_PaidLicense.h"
 #include "Table_QuickStartTemplate.h"
@@ -180,8 +179,7 @@ is_null[15] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[16] = false;
-m_psc_mod = "0000-00-00 00:00:00";
-is_null[17] = false;
+is_null[17] = true;
 is_null[18] = true;
 m_psc_restrict = 0;
 
@@ -351,6 +349,9 @@ return is_null[15];}
 bool Row_Package::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[16];}
+bool Row_Package::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[17];}
 bool Row_Package::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[18];}
@@ -410,6 +411,10 @@ is_modified=true;
 }
 void Row_Package::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[16]=val;
+is_modified=true;
+}
+void Row_Package::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[17]=val;
 is_modified=true;
 }
 void Row_Package::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1560,13 +1565,6 @@ void Row_Package::Package_Users_FK_Package_getrows(vector <class Row_Package_Use
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Package_Users *pTable = table->database->Package_Users_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::Package_Version_FK_Package_getrows(vector <class Row_Package_Version*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Version *pTable = table->database->Package_Version_get();
 pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
 }
 void Row_Package::PageSetup_FK_Package_getrows(vector <class Row_PageSetup*> *rows)

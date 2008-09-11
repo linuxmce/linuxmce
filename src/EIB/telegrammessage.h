@@ -33,6 +33,7 @@ Header for TelegramMessage class.
 
 #include "message.h"
 
+#include <cstring>
 #include <string>
 
 #define MAX_STRING_DATA_LEN		23

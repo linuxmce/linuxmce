@@ -224,8 +224,6 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 	if( !pDevice || !pMessage || !pDevice->WithinCategory(DEVICECATEGORY_Climate_Device_CONST) )
 		return;
 
-	bool bIsTemporary = pMessage->m_mapParameters[COMMANDPARAMETER_Is_Temporary_CONST]=="1";
-
 	string sOn;
 	string sMode;
 	string sFan;
@@ -236,9 +234,9 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 	// The State is in the format ON|OFF/SET TEMP (CURRENT TEMP)
 	if( pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND )
 	{
-		if( pMessage->m_dwID==COMMAND_Set_Level_CONST || pMessage->m_dwID==COMMAND_Set_Temperature_CONST )
+		if( pMessage->m_dwID==COMMAND_Set_Level_CONST )
 		{
-			string sLevel = pMessage->m_dwID==COMMAND_Set_Level_CONST ? pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST] : pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST];
+			string sLevel = pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST];
 			if( sLevel.size()==0 )
 				pMessage->m_dwID=COMMAND_Generic_Off_CONST;
 			else
@@ -253,28 +251,28 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 					pMessage->m_dwID=COMMAND_Generic_Off_CONST;
 				else
 				{
-					pDevice->m_sState_set("ON/" + StringUtils::itos(iLevel) + GetTemperature(pDevice),bIsTemporary);
+					pDevice->m_sState_set("ON/" + StringUtils::itos(iLevel) + GetTemperature(pDevice));
 					pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST] = StringUtils::itos(iLevel);
 				}
 			}
 		}
 
 		if( pMessage->m_dwID==COMMAND_Generic_On_CONST )
-			SetStateValue(pDevice, "ON", sMode, sFan, sSetPoint, sTemp, bIsTemporary);
+			SetStateValue(pDevice, "ON", sMode, sFan, sSetPoint, sTemp);
 		else if( pMessage->m_dwID==COMMAND_Generic_Off_CONST )
-			SetStateValue(pDevice, "OFF", sMode, sFan, sSetPoint, sTemp, bIsTemporary);
+			SetStateValue(pDevice, "OFF", sMode, sFan, sSetPoint, sTemp);
 		else if( pMessage->m_dwID==COMMAND_Set_HeatCool_CONST )
 		{
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Climate_Plugin: COMMAND_Set_HeatCool_CONST !");
 			string sState = pMessage->m_mapParameters[COMMANDPARAMETER_OnOff_CONST];
 			if( sState=="H" )
-				SetStateValue(pDevice, sOn, "HEAT", sFan, sSetPoint, sTemp, bIsTemporary);
+				SetStateValue(pDevice, sOn, "HEAT", sFan, sSetPoint, sTemp);
 			else if( sState=="C" )
-				SetStateValue(pDevice, sOn, "COOL", sFan, sSetPoint, sTemp, bIsTemporary);
+				SetStateValue(pDevice, sOn, "COOL", sFan, sSetPoint, sTemp);
 			else if( sState=="F" )
-				SetStateValue(pDevice, sOn, "FAN_ONLY", sFan, sSetPoint, sTemp, bIsTemporary);
+				SetStateValue(pDevice, sOn, "FAN_ONLY", sFan, sSetPoint, sTemp);
 			else
-				SetStateValue(pDevice, sOn, "AUTO", sFan, sSetPoint, sTemp, bIsTemporary);
+				SetStateValue(pDevice, sOn, "AUTO", sFan, sSetPoint, sTemp);
 		}
 		else if( pMessage->m_dwID == COMMAND_Set_Fan_CONST )
 		{
@@ -282,11 +280,11 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 			string sState = pMessage->m_mapParameters[COMMANDPARAMETER_OnOff_CONST];
 			if( 1 == atoi(sState.c_str()) )
 			{
-				SetStateValue(pDevice, sOn, "FAN_ONLY", "HIGH", sSetPoint, sTemp, bIsTemporary);
+				SetStateValue(pDevice, sOn, "FAN_ONLY", "HIGH", sSetPoint, sTemp);
 			}
 			else
 			{
-				SetStateValue(pDevice, sOn, "AUTO", "AUTO", sSetPoint, sTemp, bIsTemporary);
+				SetStateValue(pDevice, sOn, "AUTO", "AUTO", sSetPoint, sTemp);
 			}
 		}
 	}
@@ -297,14 +295,14 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Climate_Plugin: EVENT_Temperature_Changed_CONST !");
 			// Replace the current temp
 			string sLevel = pMessage->m_mapParameters[EVENTPARAMETER_Value_CONST];
-			SetStateValue(pDevice, sOn, sMode, sFan, sSetPoint, sLevel, bIsTemporary);
+			SetStateValue(pDevice, sOn, sMode, sFan, sSetPoint, sLevel);
 		}
 		else if( pMessage->m_dwID == EVENT_Thermostat_Set_Point_Chan_CONST )
 		{
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Climate_Plugin: EVENT_Thermostat_Set_Point_Chan_CONST !");
 			// Replace the current temp
 			string sLevel = pMessage->m_mapParameters[EVENTPARAMETER_Value_CONST];
-			SetStateValue(pDevice, sOn, sMode, sFan, sLevel, sTemp, bIsTemporary);
+			SetStateValue(pDevice, sOn, sMode, sFan, sLevel, sTemp);
 		}
 		else if( pMessage->m_dwID == EVENT_Fan_Mode_Changed_CONST )
 		{
@@ -317,12 +315,12 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 				default:
 				case 0:
 				case 1:
-					SetStateValue(pDevice, sOn, sMode, "AUTO", sSetPoint, sTemp, bIsTemporary);
+					SetStateValue(pDevice, sOn, sMode, "AUTO", sSetPoint, sTemp);
 					break;
 					
 				case 2:
 				case 3:
-					SetStateValue(pDevice, sOn, sMode, "HIGH", sSetPoint, sTemp, bIsTemporary);
+					SetStateValue(pDevice, sOn, sMode, "HIGH", sSetPoint, sTemp);
 					break;
 			}
 		}
@@ -337,19 +335,19 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 			{
 				default:
 				case 10:
-					SetStateValue(pDevice, sOn, "AUTO", sFan, sSetPoint, sTemp, bIsTemporary);
+					SetStateValue(pDevice, sOn, "AUTO", sFan, sSetPoint, sTemp);
 					break;
 			
 				case 1:
-					SetStateValue(pDevice, sOn, "HEAT", sFan, sSetPoint, sTemp, bIsTemporary);
+					SetStateValue(pDevice, sOn, "HEAT", sFan, sSetPoint, sTemp);
 					break;
 			
 				case 2:
-					SetStateValue(pDevice, sOn, "COOL", sFan, sSetPoint, sTemp, bIsTemporary);
+					SetStateValue(pDevice, sOn, "COOL", sFan, sSetPoint, sTemp);
 					break;
 			
 				case 6:
-					SetStateValue(pDevice, sOn, "FAN_ONLY", sFan, sSetPoint, sTemp, bIsTemporary);
+					SetStateValue(pDevice, sOn, "FAN_ONLY", sFan, sSetPoint, sTemp);
 					break;
 			}
 		}
@@ -440,7 +438,7 @@ void Climate_Plugin::GetStateVar(DeviceData_Router *pDevice,
 }
 
 void Climate_Plugin::SetStateValue(DeviceData_Router *pDevice,
-	   string sOn, string sMode, string sFan, string sSetPoint, string sTemp,bool bIsTemporary)
+	   string sOn, string sMode, string sFan, string sSetPoint, string sTemp)
 {
-	pDevice->m_sState_set(sOn + "/" + sMode + "/" + sFan + "/" + sSetPoint + " (" + sTemp + ")",bIsTemporary);
+	pDevice->m_sState_set(sOn + "/" + sMode + "/" + sFan + "/" + sSetPoint + " (" + sTemp + ")");
 }

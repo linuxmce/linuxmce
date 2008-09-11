@@ -22,7 +22,7 @@ Pin: origin
 Pin-Priority: 9999
 
 Package: *
-Pin: release v='$(lsb_release -s -r)',o=Ubuntu,a='$(lsb_release -c -s)',l=Ubuntu
+Pin: release v='$(lsb_release -s -r)',o=Ubuntu,a='$(sb_release -c -s)',l=Ubuntu
 Pin-Priority: 9998
 ' > /etc/apt/preferences
 

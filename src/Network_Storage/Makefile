@@ -1,4 +1,4 @@
-CC=gcc
+
 CPPFLAGS=-W -Wall -pipe #-g -ggdb3
 CFLAGS=
 LDFLAGS=

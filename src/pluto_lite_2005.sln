@@ -18,10 +18,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Serial_lite_2005", "Serial\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZWave_lite_2005", "ZWave\ZWave_lite_2005.vcproj", "{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XML_Data_Handler_Plugin_Lite", "XML_Data_Handler_Plugin_Lite\XML_Data_Handler_Plugin_DLL_Lite.vcproj", "{BFB764EC-A94C-414F-4445-7EECDFEE8BBA}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Basic_XML_Data_Source_Plugin_DLL_Lite", "Basic_XML_Data_Source_Plugin_Lite\Basic_XML_Data_Source_Plugin_DLL_Lite.vcproj", "{BFB764EC-A94C-414F-AE25-7EECDF338BBA}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -60,14 +56,6 @@ Global
 		{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}.Debug|Win32.Build.0 = Debug|Win32
 		{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}.Release|Win32.ActiveCfg = Release|Win32
 		{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}.Release|Win32.Build.0 = Release|Win32
-		{BFB764EC-A94C-414F-4445-7EECDFEE8BBA}.Debug|Win32.ActiveCfg = Debug|Win32
-		{BFB764EC-A94C-414F-4445-7EECDFEE8BBA}.Debug|Win32.Build.0 = Debug|Win32
-		{BFB764EC-A94C-414F-4445-7EECDFEE8BBA}.Release|Win32.ActiveCfg = Release|Win32
-		{BFB764EC-A94C-414F-4445-7EECDFEE8BBA}.Release|Win32.Build.0 = Release|Win32
-		{BFB764EC-A94C-414F-AE25-7EECDF338BBA}.Debug|Win32.ActiveCfg = Debug|Win32
-		{BFB764EC-A94C-414F-AE25-7EECDF338BBA}.Debug|Win32.Build.0 = Debug|Win32
-		{BFB764EC-A94C-414F-AE25-7EECDF338BBA}.Release|Win32.ActiveCfg = Release|Win32
-		{BFB764EC-A94C-414F-AE25-7EECDF338BBA}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

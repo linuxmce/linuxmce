@@ -25,7 +25,7 @@
 using namespace nsThreadedClass;
 using namespace DCE;
 
-ThreadedClass::ThreadedClass() : m_ThreadMutex("ThreadedClass")
+ThreadedClass::ThreadedClass() : m_ThreadMutex("ThreadedClass", true)
 {
 	m_bQuit=m_bThreadRunning=false;
 	m_pthread=0;
@@ -40,7 +40,6 @@ ThreadedClass::~ThreadedClass()
 {
 	StopThread();
 	pthread_mutex_destroy(&m_ThreadMutex.mutex);
-	pthread_cond_destroy(&m_ThreadCondition);
     pthread_mutexattr_destroy(&m_ThreadAttribute);
 }
 
@@ -115,9 +114,4 @@ void ThreadedClass::InternalRun()
 	}
 	LoggerWrapper::GetInstance()->Write(LV_SOCKET,"ThreadedClass::InternalRun ended");
 	m_bThreadRunning=false;
-}
-
-void ThreadedClass::BroadcastCond()
-{ 
-	pthread_cond_broadcast( &m_ThreadCondition );
 }

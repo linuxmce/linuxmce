@@ -240,10 +240,8 @@ Socket::~Socket()
 		m_pcInSockBuffer = NULL;
 	}
 
-
-	pthread_mutex_destroy( &m_SocketMutex.mutex );
 	pthread_mutexattr_destroy( &m_SocketMutexAttr );
-	pthread_cond_destroy( &m_PingLoopCond );
+	pthread_mutex_destroy( &m_SocketMutex.mutex );
 }
 
 bool Socket::SendMessage( Message *pMessage, bool bDeleteMessage )

@@ -1,4 +1,4 @@
-CXX = g++
+
 CXXFLAGS = -Wall -fPIC -ggdb3
 CPPFLAGS = -DDEBUG
 LDFLAGS = 

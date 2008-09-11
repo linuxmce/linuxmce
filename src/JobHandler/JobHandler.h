@@ -77,8 +77,6 @@ namespace nsJobHandler
 	{
 	private:
 		ListJob m_listJob;
-		ListJob m_listJob_Blocking;
-		list< pair<time_t,Job *> > m_listJob_Delete;  // Don't delete the jobs immediately.  Do it after a few seconds because some functions, like Abort, may terminate the job and the pointer to it hasn't been released
 		bool m_bProcessingSuspended, m_bSuspendProcessing;
 
 	protected:
@@ -87,32 +85,24 @@ namespace nsJobHandler
 		at a time in the same thread as the JobHandler's main Run() thread
 		*/
 		bool m_bMultiThreadedJobs;
-		
-		/* This m_bRunByPriority is true, we will sort the jobs by priority before
-		starting them so we start them in that order */
-		bool m_bRunByPriority;
 
 	public:
 		JobHandler();
 		virtual ~JobHandler();
 
 		bool AbortAllJobs();
-		void PurgeCompletedJobs(bool bForceDelete=false);
+		void PurgeCompletedJobs();
 		bool WaitForJobsToFinish(bool bAbort=true,int iSeconds=5);  //!< By default abort and wait 5 seconds for jobs to finish
 
-		virtual void AddJob(Job *pJob,bool bFirst=false);
-		bool RemoveJobFromList(Job *pJob); // Call this when deleting jobs marked as don't auto delete so we know they're gone
+		void AddJob(Job *pJob,bool bFirst=false);
 		bool MoveJobToEndOfQueue(Job *pJob);
 		string ToString();
 		bool ContainsJob(string sName);
-		bool ContainsJobType(string sType);
 		void StateChanged();
 
 		bool HasJobs();
 
 		virtual void Run();
-
-		virtual void GoingToRunJob(Job *pJob) {}  // An FYI that specialized job handlers can override
 
 		/** Be sure to grab a mutex before using this.
         like this: PLUTO_SAFETY_LOCK(jm,*m_pJobHandler->m_ThreadMutex_get());
@@ -131,10 +121,6 @@ namespace nsJobHandler
         like this: PLUTO_SAFETY_LOCK(jm,*m_pJobHandler->m_ThreadMutex_get());
         */
 		const ListJob *m_listJob_get() { return &m_listJob; }
-
-		// Don't run any jobs as long as this job is marked as job_InProgress or job_WaitingForCallback
-		void BlockAllJobs(Job *pJob);
-		void RemoveBlockedJob(Job *pJob); // Remove this job from the list
 
 		bool ReportPendingTasks(PendingTaskList *pPendingTaskList,string sType="");
 

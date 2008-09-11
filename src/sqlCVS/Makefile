@@ -14,14 +14,10 @@ sqlCVS = $(sources) sqlCVS.cpp
 new_thing = $(sources) TableInfo_SCVS.cpp
 
 all: sqlCVS
-#all: newthing
 
 sqlCVS: $(sqlCVS:.cpp=.o)
 	$(CXX) -o $@ $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	cp $@ $(ROOT)/bin
-
-newthing: $(new_thing:.cpp=.o)
-	@echo "*** Something to do here ***"
 
 clean: clean-recursive
 	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) sqlCVS >/dev/null

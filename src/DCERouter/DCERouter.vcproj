@@ -19,14 +19,14 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../DCE;&quot;../../libs/Libraries/pthreads-win32/include&quot;;/mysql/include;..;../../libs/CrossPlatform/LibXML2/include;&quot;../../libs/CrossPlatform/json-c&quot;;C:\pluto\dlib-17.7\"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;DEBUG;DCEROUTER;EMBEDDED_LMCE"
+				AdditionalIncludeDirectories="../DCE;&quot;../../libs/Libraries/pthreads-win32/include&quot;;/mysql/include;..;../../libs/CrossPlatform/LibXML2/include;&quot;../../libs/CrossPlatform/json-c&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;DEBUG;DCEROUTER;"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				WarnAsError="FALSE"
+				WarnAsError="TRUE"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="4"/>
 			<Tool
@@ -145,9 +145,6 @@
 			</File>
 			<File
 				RelativePath="..\Dce\MessageXML.cpp">
-			</File>
-			<File
-				RelativePath="..\..\dlib-17.7\dlib\all\source.cpp">
 			</File>
 		</Filter>
 		<Filter

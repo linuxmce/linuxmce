@@ -1,0 +1,26 @@
+SNR_CPPFLAGS ?= <-mkr_t_compile_defines->
+
+ROOT = ..
+VIP = ../VIPShared
+GDEV = ./Gen_Devices
+CXXFLAGS = -fPIC -Wall -g -ggdb3 -D_GNU_SOURCE
+CPPFLAGS = -I./ -I../../ -I../ -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE $(SNR_CPPFLAGS)
+
+
+sources = SerializeClass.cpp
+
+all: libSerializeClass.so all-recursive
+
+libSerializeClass.so: $(sources:.cpp=.o)
+	$(CXX) -shared $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call cpath,$+)
+	cp $@ ../lib
+
+libSerializeClass.a: $(sources:.cpp=.o)
+	$(AR) rc $@ $(call cpath,$+)
+	cp $@ ../lib
+
+clean:
+	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) libSerializeClass.so libSerializeClass.a >/dev/null
+
+include $(ROOT)/PlutoUtils/make.rules
+-include $(sources:.cpp=.d)

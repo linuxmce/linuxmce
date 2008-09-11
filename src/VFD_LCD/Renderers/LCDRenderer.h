@@ -6,6 +6,8 @@
 //--------------------------------------------------------------------------------------------------------
 #include "../LCDLogic/IRenderer.h"
 #include "../LCDLogic/IInputProvider.h"
+#include <memory>
+using namespace std;
 //--------------------------------------------------------------------------------------------------------
 class LCDRenderer : public IRenderer, public IInputProvider
 {

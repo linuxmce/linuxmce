@@ -7,17 +7,9 @@ if [[ -f /proc/tty/driver/serial ]]; then
 	done
 fi
 
-if [[ -d /sys/bus/usb-serial/devices ]]; then
-	pushd /sys/bus/usb-serial/devices &>/dev/null
-	Ports=
-	for dev in *; do
-		##id=$(readlink "$dev" | sed 's,^.*/\(usb.*\)/tty.*$,\1,g')
-		id=$(readlink -f "$dev" | sed 's,^.*\(pci.*\)/usb[0-9]*/[0-9./-]*/[0-9]*-\([0-9.]*\):[0-9.]*/ttyUSB[0-9]*$,\1+\2,g')
-		Ports="$Ports $id"
-	done
-	echo "${Ports# }" | tr ' ' '\n'
-	popd &>/dev/null
-fi
+Ports=
+Ports=`find /sys/devices -name '*tty*' | grep '/tty:' | grep usb | sed 's,^.*\(pci.*\)/usb[0-9]*/[0-9./-]*/[0-9]*-\([0-9.]*\):[0-9.]*/tty.*$,\1+\2,g'`
+echo "${Ports# }" | tr ' ' '\n'
 
 shopt -s nullglob
 for Port in /dev/ttyS_*; do

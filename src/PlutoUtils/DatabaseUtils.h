@@ -105,7 +105,6 @@ namespace DatabaseUtils
 	long GetRoomForDevice(DBHelper *pDBHelper, int nPK_Device);
 	long GetRoomByName(DBHelper *pDBHelper, string sDescription, int PK_RoomType);
 	int SyncMediaAttributes(DBHelper *pDBHelper); // When media files have pics, but not the attributes, add attributes to the pics.  Returns the affected rows or <0 for error
-	int UpdateAttributeCount(DBHelper *pDBHelper); // When attributes have changed, update the total count
 	bool DeviceIsWithinCategory(DBHelper *pDBHelper,int PK_Device,int PK_DeviceCategory);
 	void LockTable(DBHelper *pDBHelper,string sTable);
 	void UnLockTables(DBHelper *pDBHelper);

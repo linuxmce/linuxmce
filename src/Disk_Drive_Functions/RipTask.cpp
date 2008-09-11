@@ -145,7 +145,7 @@ int RipTask::Run()
 						false, false, false, false);
 
 	string sResponse;
-    if (! m_pRipJob->m_pDisk_Drive_Functions->m_pCommand_Impl->SendCommand(spawnApplication,&sResponse) || sResponse.size()<2 || sResponse.substr(0,2) != "OK")
+    if (! m_pRipJob->m_pDisk_Drive_Functions->m_pCommand_Impl->SendCommand(spawnApplication,&sResponse) || sResponse != "OK")
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Trying to rip - App server returned %s",sResponse.c_str());
 		m_eTaskStatus_set(TASK_FAILED_ABORT);

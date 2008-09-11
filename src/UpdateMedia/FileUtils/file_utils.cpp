@@ -23,7 +23,7 @@
 #include <sys/types.h>
 #include <iostream>
 #include <string.h>
-
+#include <cstdlib>
 #include <errno.h>
 
 using namespace std;

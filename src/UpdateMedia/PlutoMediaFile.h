@@ -19,12 +19,14 @@
 #ifndef __PLUTO_MEDIA_FILE_H__
 #define __PLUTO_MEDIA_FILE_H__
 
+#include <memory>
 #include <string>
 #include <map>
 #include <list>
 using namespace std;
 //-----------------------------------------------------------------------------------------------------
 class Database_pluto_media;
+class Database_pluto_main;
 class PlutoMediaAttributes;
 class Row_File;
 //-----------------------------------------------------------------------------------------------------
@@ -63,7 +65,7 @@ private:
 	Database_pluto_media *m_pDatabase_pluto_media;
 	
 	static MediaSyncMode m_DefaultMediaSyncMode;
-	static bool m_bNewFilesAdded,m_bAttributesUpdated;
+	static bool m_bNewFilesAdded;
 	static string m_sDVDKeysCache;
 
 	auto_ptr<GenericFileHandler> m_spFileHandler;
@@ -122,8 +124,6 @@ public:
 	//new file added status
 	static bool NewFilesAdded() { return m_bNewFilesAdded; }
 	static void ResetNewFilesAddedStatus() { m_bNewFilesAdded = false; }
-	static bool AttributesUpdated() { return m_bAttributesUpdated; }
-	static void ResetAttributesUpdated() { m_bAttributesUpdated = false; }
 
 	static void DVDKeysCacheSetup(string sValue) { if(!sValue.empty()) m_sDVDKeysCache = sValue; }
 
@@ -149,7 +149,7 @@ private:
 
     virtual ~PlutoMediaIdentifier() = 0; //don't allow instances
 public:
-    static void Activate();
+    static void Activate(Database_pluto_main *pDatabase_pluto_main);
     static int Identify(string sFilename);
 	static string GetExtensions(); //tab delimited
 };

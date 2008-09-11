@@ -40,11 +40,7 @@ function assureXorgSane()
 AlphaBlending=$(AlphaBlendingEnabled)
 
 #XClient=/usr/pluto/bin/Start_IceWM.sh
-if [[ -e /usr/bin/xfwm4 ]] ;then 
-	XClient=/usr/bin/xfwm4
-else 
-	XClient=/usr/bin/kwin
-fi
+XClient=/usr/bin/xfwm4
 XClientParm=()
 XOrgConf="/etc/X11/xorg.conf"
 
@@ -53,7 +49,7 @@ Background=y
 XDisplay=":$Display"
 
 Xcompmgr=/bin/true
-if [[ "$AlphaBlending" != 1 && "$XClient" != "/usr/bin/kwin" ]]; then
+if [[ "$AlphaBlending" != 1 ]]; then
 	XClientParm=(--compositor=off)
 fi
 

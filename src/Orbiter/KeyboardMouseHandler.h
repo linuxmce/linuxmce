@@ -22,6 +22,7 @@
 #include <list>
 #include <string>
 #include <map>
+#include <memory>
 using namespace std;
 
 #include "DesignObj_Orbiter.h"

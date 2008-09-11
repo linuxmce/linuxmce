@@ -16,6 +16,9 @@
 #include "TiraAPI.h"
 #include "TransAction.h"
 
+#include <cstdio>
+#include <cstring>
+
 // Returns  0 -- success
 //          1 -- invalid parameter
 //          2 -- not enough space to store CCF string

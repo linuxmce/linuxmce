@@ -39,7 +39,6 @@ namespace DCE
 	class Message;
 	class DeviceData_Impl;
 	class Event_Impl;
-	class MessageInterceptorCallBack;
 
 
 /**
@@ -132,12 +131,8 @@ Create this on the stack to have all allocated memory clean up on exit
 		PendingTaskList() {}
 		~PendingTaskList()
 		{
-			for(list<PendingTask *>::iterator it=m_listPendingTask.begin(); 
-			it!=m_listPendingTask.end();
-			++it)
-				{
+			for(list<PendingTask *>::iterator it=m_listPendingTask.begin();it!=m_listPendingTask.end();++it)
 				delete *it;
-			}
 		}
 
 		string ToString()
@@ -468,7 +463,7 @@ Create this on the stack to have all allocated memory clean up on exit
 		 * since it can introduce delays if your device isn't responding right away.  For Plugins this
 		 * parameter is ignored and presumed to always be true
 		 */
-		int RegisterMsgInterceptor(MessageInterceptorFn pMessageInterceptorFn,int PK_Device_From,int PK_Device_To,int PK_DeviceTemplate,int PK_DeviceCategory,int MessageType,int MessageID,bool bAllowRerouting=true,MessageInterceptorCallBack **p_pMessageInterceptorCallBack=NULL);
+		int RegisterMsgInterceptor(MessageInterceptorFn pMessageInterceptorFn,int PK_Device_From,int PK_Device_To,int PK_DeviceTemplate,int PK_DeviceCategory,int MessageType,int MessageID,bool bAllowRerouting=true);
 
 		/**
 		 * @brief If a plug-in dies, the router also dies, and all interceptors are cleared.  However if this

@@ -598,7 +598,7 @@ void Media_Plugin::PopulateFileBrowserInfoForPlayList(MediaListGrid *pMediaListG
 
 void Media_Plugin::PopulateFileBrowserInfoForDisc(MediaListGrid *pMediaListGrid,int PK_AttributeType_Sort,string &sPK_Disk,map<int,int> &mapDisk_To_Pic)
 {
-	string sSQL_Sort = "SELECT PK_Disc,Name,FK_FileFormat,Track,DateLastViewed FROM Disc JOIN Disc_Attribute ON FK_Disc=PK_Disc JOIN Attribute ON FK_Attribute=PK_Attribute AND Attribute.FK_AttributeType=" + StringUtils::itos(PK_AttributeType_Sort) + " WHERE PK_Disc in (" + sPK_Disk + ")";
+	string sSQL_Sort = "SELECT PK_Disc,Name,FK_FileFormat,Track,DateLastViewed FROM Disc JOIN Disc_Attribute ON FK_Disc=PK_Disc JOIN Attribute ON FK_Attribute=PK_Attribute AND FK_AttributeType=" + StringUtils::itos(PK_AttributeType_Sort) + " WHERE PK_Disc in (" + sPK_Disk + ")";
 
     PlutoSqlResult result;
     DB_ROW row;
@@ -651,13 +651,13 @@ void Media_Plugin::PopulateFileBrowserInfoForFile(MediaListGrid *pMediaListGrid,
 		bShowingSongs=true;
 		// TODO ___ FIND A BETTER WAY TO DO THIS QUERY.  It's returning a record for the file for each attribute, causing it to skip repeatedly, and it's very inefficient, and requires the double sorting order clauses!
 		// When showing songs for music we want performer, album and track
-		sSQL_Sort = "SELECT PK_File,'',Name,0,FK_FileFormat,Filename,DateLastViewed,Attribute.FK_AttributeType FROM File LEFT JOIN File_Attribute ON FK_File=PK_File "
-			"LEFT JOIN Attribute ON FK_Attribute=PK_Attribute AND Attribute.FK_AttributeType IN (" TOSTRING(ATTRIBUTETYPE_Title_CONST) "," TOSTRING(ATTRIBUTETYPE_Performer_CONST) "," TOSTRING(ATTRIBUTETYPE_Album_CONST) "," TOSTRING(ATTRIBUTETYPE_Track_CONST) ") "
-			"WHERE IsDirectory=0 AND PK_File in (" + sPK_File + ") AND Attribute.FK_AttributeType IN (" TOSTRING(ATTRIBUTETYPE_Title_CONST) "," TOSTRING(ATTRIBUTETYPE_Performer_CONST) "," TOSTRING(ATTRIBUTETYPE_Album_CONST) "," TOSTRING(ATTRIBUTETYPE_Track_CONST) ") ORDER BY PK_File,FK_AttributeType DESC";
+		sSQL_Sort = "SELECT PK_File,'',Name,0,FK_FileFormat,Filename,DateLastViewed,FK_AttributeType FROM File LEFT JOIN File_Attribute ON FK_File=PK_File "
+			"LEFT JOIN Attribute ON FK_Attribute=PK_Attribute AND FK_AttributeType IN (" TOSTRING(ATTRIBUTETYPE_Title_CONST) "," TOSTRING(ATTRIBUTETYPE_Performer_CONST) "," TOSTRING(ATTRIBUTETYPE_Album_CONST) "," TOSTRING(ATTRIBUTETYPE_Track_CONST) ") "
+			"WHERE IsDirectory=0 AND PK_File in (" + sPK_File + ") AND FK_AttributeType IN (" TOSTRING(ATTRIBUTETYPE_Title_CONST) "," TOSTRING(ATTRIBUTETYPE_Performer_CONST) "," TOSTRING(ATTRIBUTETYPE_Album_CONST) "," TOSTRING(ATTRIBUTETYPE_Track_CONST) ") ORDER BY PK_File,FK_AttributeType DESC";
 	}
 	else
 		// TODO ___ FIND A BETTER WAY TO DO THIS QUERY.  It's returning a record for the file for each attribute, causing it to skip repeatedly, and it's very inefficient, and requires the double sorting order clauses!
-		sSQL_Sort = "SELECT PK_File,'',Name,0,FK_FileFormat,Filename,DateLastViewed FROM File LEFT JOIN File_Attribute ON FK_File=PK_File LEFT JOIN Attribute ON FK_Attribute=PK_Attribute AND Attribute.FK_AttributeType=" + StringUtils::itos(PK_AttributeType_Sort) + " WHERE IsDirectory=0 AND PK_File in (" + sPK_File + ") AND (FK_AttributeType IS NULL OR FK_AttributeType=" + StringUtils::itos(PK_AttributeType_Sort) + ") ORDER BY PK_File,PK_Attribute DESC";
+		sSQL_Sort = "SELECT PK_File,'',Name,0,FK_FileFormat,Filename,DateLastViewed FROM File LEFT JOIN File_Attribute ON FK_File=PK_File LEFT JOIN Attribute ON FK_Attribute=PK_Attribute AND FK_AttributeType=" + StringUtils::itos(PK_AttributeType_Sort) + " WHERE IsDirectory=0 AND PK_File in (" + sPK_File + ") AND (FK_AttributeType IS NULL OR FK_AttributeType=" + StringUtils::itos(PK_AttributeType_Sort) + ") ORDER BY PK_File,PK_Attribute DESC";
 
     PlutoSqlResult result;
     DB_ROW row;
@@ -716,7 +716,7 @@ void Media_Plugin::PopulateFileBrowserInfoForAttribute(MediaListGrid *pMediaList
 
 	string sSQL_Sort = "SELECT PK_Attribute,Name,min(FK_Picture) AS FK_Picture,FK_File FROM " + sTable + " JOIN " + 
 		sTable + "_Attribute ON FK_" + sTable + "=PK_" + sTable + " JOIN Attribute ON " + 
-		sTable + "_Attribute.FK_Attribute=PK_Attribute AND Attribute.FK_AttributeType=" + StringUtils::itos(PK_AttributeType_Sort) + 
+		sTable + "_Attribute.FK_Attribute=PK_Attribute AND FK_AttributeType=" + StringUtils::itos(PK_AttributeType_Sort) + 
 		" LEFT JOIN Picture_Attribute ON Picture_Attribute.FK_Attribute=PK_Attribute WHERE " + 
 		(sTable=="File" ? "IsDirectory=0 AND " : "") +
 		"PK_" + sTable + " in (" + sPK_File_Or_Disc + ") GROUP BY PK_Attribute,Name";
@@ -729,7 +729,7 @@ void Media_Plugin::PopulateFileBrowserInfoForAttribute(MediaListGrid *pMediaList
 		if( result.r->row_count==0 && PK_AttributeType_Sort==ATTRIBUTETYPE_Album_CONST )
 		{
 			result.ClearResults();
-			sSQL_Sort = "SELECT PK_Attribute,Name,min(FK_Picture) AS FK_Picture FROM " + sTable + " JOIN " + sTable + "_Attribute ON FK_" + sTable + "=PK_" + sTable + " JOIN Attribute ON " + sTable + "_Attribute.FK_Attribute=PK_Attribute AND Attribute.FK_AttributeType IN (" TOSTRING(ATTRIBUTETYPE_Track_CONST) "," TOSTRING(ATTRIBUTETYPE_Title_CONST) ") LEFT JOIN Picture_Attribute ON Picture_Attribute.FK_Attribute=PK_Attribute WHERE IsDirectory=0 AND PK_" + sTable + " in (" + sPK_File_Or_Disc + ") GROUP BY PK_Attribute,Name";
+			sSQL_Sort = "SELECT PK_Attribute,Name,min(FK_Picture) AS FK_Picture FROM " + sTable + " JOIN " + sTable + "_Attribute ON FK_" + sTable + "=PK_" + sTable + " JOIN Attribute ON " + sTable + "_Attribute.FK_Attribute=PK_Attribute AND FK_AttributeType IN (" TOSTRING(ATTRIBUTETYPE_Track_CONST) "," TOSTRING(ATTRIBUTETYPE_Title_CONST) ") LEFT JOIN Picture_Attribute ON Picture_Attribute.FK_Attribute=PK_Attribute WHERE IsDirectory=0 AND PK_" + sTable + " in (" + sPK_File_Or_Disc + ") GROUP BY PK_Attribute,Name";
 			if( (result.r=m_pDatabase_pluto_media->db_wrapper_query_result( sSQL_Sort ))==NULL )
 				return;
 		}
@@ -751,7 +751,7 @@ void Media_Plugin::PopulateFileBrowserInfoForAttribute(MediaListGrid *pMediaList
 		// We're going to run the query twice for albums.  First we'll get the performers for the file so that when we show albums we can show performers also
 		string sSQL_Performer = "SELECT FK_File,PK_Attribute,Name FROM " + sTable + " JOIN " + 
 			sTable + "_Attribute ON FK_" + sTable + "=PK_" + sTable + " JOIN Attribute ON " + 
-			sTable + "_Attribute.FK_Attribute=PK_Attribute AND Attribute.FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Performer_CONST) 
+			sTable + "_Attribute.FK_Attribute=PK_Attribute AND FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Performer_CONST) 
 			" WHERE " + 
 			(sTable=="File" ? "IsDirectory=0 AND " : "") +
 			"PK_" + sTable + " in (" + sPK_File_Or_Disc + ")";
@@ -795,7 +795,7 @@ void Media_Plugin::PopulateFileBrowserInfoForBookmark(MediaListGrid *pMediaListG
 			"LEFT JOIN File ON Bookmark.FK_File=PK_File "
 			"LEFT JOIN File_Attribute ON PK_File=File_Attribute.FK_File "
 			"LEFT JOIN Attribute ON File_Attribute.FK_Attribute=PK_Attribute "
-			"WHERE (Attribute.FK_AttributeType IS NULL OR FK_AttributeType =" TOSTRING(ATTRIBUTETYPE_Title_CONST) ") AND IsAutoResume=0 "
+			"WHERE (FK_AttributeType IS NULL OR FK_AttributeType =" TOSTRING(ATTRIBUTETYPE_Title_CONST) ") AND IsAutoResume=0 "
 			"AND Bookmark.FK_File IN (" + sPK_File + ") "
 			"ORDER BY PK_Bookmark";
 
@@ -914,7 +914,7 @@ void Media_Plugin::PopulateWithDatabaseInfoOnPath(map<string,DatabaseInfoOnPath 
 				"JOIN Picture_Attribute ON Picture_Attribute.FK_Attribute = File_Attribute.FK_Attribute "
 				"JOIN Picture ON Picture_Attribute.FK_Picture = PK_Picture "
 				"JOIN Attribute ON Picture_Attribute.FK_Attribute = PK_Attribute "
-				"JOIN AttributeType ON Attribute.FK_AttributeType = PK_AttributeType "
+				"JOIN AttributeType ON FK_AttributeType = PK_AttributeType "
 			"WHERE Path = \"" + sSearchPath + "\" "
 			"GROUP BY Filename "
 			"ORDER BY PicPriority DESC "
@@ -1200,14 +1200,14 @@ class DataGridTable *Media_Plugin::CDTracks( string GridID, string Parms, void *
 		{
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Media_Plugin::CDTracks - media file has disc id %d", pMediaFile->m_dwPK_Disk);
 
-			sSQL = "select Track,Name FROM Attribute JOIN Disc_Attribute ON FK_Attribute=PK_Attribute WHERE Attribute.FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Title_CONST) 
+			sSQL = "select Track,Name FROM Attribute JOIN Disc_Attribute ON FK_Attribute=PK_Attribute WHERE FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Title_CONST) 
 				" AND FK_Disc=" + StringUtils::itos(pMediaFile->m_dwPK_Disk);
 		}
 		else
 		{
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Media_Plugin::CDTracks - media stream has disc id %d", pEntertainArea->m_pMediaStream->m_dwPK_Disc);
 
-			sSQL = "select Track,Name FROM Attribute JOIN Disc_Attribute ON FK_Attribute=PK_Attribute WHERE Attribute.FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Title_CONST) 
+			sSQL = "select Track,Name FROM Attribute JOIN Disc_Attribute ON FK_Attribute=PK_Attribute WHERE FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Title_CONST) 
 				" AND FK_Disc=" + StringUtils::itos(pEntertainArea->m_pMediaStream->m_dwPK_Disc);
 		}
 	}
@@ -1215,7 +1215,7 @@ class DataGridTable *Media_Plugin::CDTracks( string GridID, string Parms, void *
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Media_Plugin::CDTracks - using disc id from parms %s", Parms.c_str());
 
-		sSQL = "select Track,Name FROM Attribute JOIN Disc_Attribute ON FK_Attribute=PK_Attribute WHERE Attribute.FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Title_CONST) " AND FK_Disc=" + Parms;
+		sSQL = "select Track,Name FROM Attribute JOIN Disc_Attribute ON FK_Attribute=PK_Attribute WHERE FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Title_CONST) " AND FK_Disc=" + Parms;
 	}
 
 	PlutoSqlResult result;

@@ -70,19 +70,28 @@ function sqlcvs_update($output,$dbADO) {
 		</tr>		
 		<tr>
 			<td colspan="3"><B>'.$TEXT_USERNAME_CONST.':</B></td>
-			<td><input type="text" name="username" value="'.@$_REQUEST['username'].'"></td>
+			<td><input type="text" name="username" value="'.((isset($_REQUEST['username']))?@$_REQUEST['username']:'anonymous').'"></td>
 		</tr>
 		<tr>
 			<td colspan="3"><B>'.$TEXT_PASSWORD_CONST.':</B></td>
-			<td><input type="text" name="password" value="'.@$_REQUEST['password'].'"></td>
+			<td><input type="text" name="password" value="'.((isset($_REQUEST['password']))?@$_REQUEST['password']:'nopass').'"></td>
 		</tr>
 		<tr>
 			<td colspan="3"><B>'.$TEXT_DATABASE_CONST.':</B></td>
 			<td>'.pulldownFromArray($databasesArray,'database',$database,'onchange="document.sqlcvs_update.action.value=\'form\';document.sqlcvs_update.submit();"','key','').'</td>
 		</tr>
 		<tr>
-			<td colspan="3">&nbsp;</td>
+			<td colspan="4">&nbsp;</td>
+		</tr>
+		<tr>
+			<td colspan="4">'.$TEXT_SQLCVS_UPDATE_HINT.'</td>
+		</tr>
+		<tr>
+			<td colspan="4">&nbsp;</td>
+		</tr>
+		<tr>
 			<td><input type="submit" class="button" name="update" value="'.$TEXT_NEXT_CONST.'"></td>
+			<td colspan="3">&nbsp;</td>
 		</tr>		
 		';
 	
@@ -94,7 +103,7 @@ function sqlcvs_update($output,$dbADO) {
 			if($cleanTable!='local'){
 				$out.='
 				<tr bgcolor="#F0F3F8">
-					<td>&nbsp;</td>
+					<td width="50">&nbsp;</td>
 					<td width="20">
 						<input type="checkbox" name="table_'.$cleanTable.'" value="1">			
 					</td>
@@ -108,7 +117,7 @@ function sqlcvs_update($output,$dbADO) {
 				foreach ($fieldsArray AS $key=>$value){
 					$out.='
 				<tr>
-					<td>&nbsp;</td>
+					<td width="50">&nbsp;</td>
 					<td width="20">&nbsp;</td>
 					<td width="20"><input type="checkbox" name="'.$cleanTable.'_'.$value.'" value="1" onClick="groupCheck(\''.$cleanTable.'\',\''.$value.'\')"></td>
 					<td>'.$value.'</td>
@@ -119,8 +128,8 @@ function sqlcvs_update($output,$dbADO) {
 	}	
 	$out.='	
 		<tr>
-			<td colspan="3">&nbsp;</td>
 			<td><input type="submit" class="button" name="update" value="'.$TEXT_NEXT_CONST.'"></td>
+			<td colspan="3">&nbsp;</td>
 		</tr>		
 	</table>
 	</form>

@@ -1,67 +1,40 @@
 #!/bin/sh /etc/rc.common
 
-START=41
+START=50
 
 boot()
 {
-    #if not new install 
-    #or if firmware upgrade
-    #do not change network settings
+	if [[ ! -f /etc/pluto/fresh_install ]]; then
+		return 0
+	fi
 
-    if [[ -f /tmp/bk2nvram.tar.gz ]]; then
-        rm -f /tmp/bk2nvram.tar.gz 
-        Fresh_Install=`nvram get fresh_install`
-        if [[ "$Fresh_Install" == "0" ]]; then
-            rm -f /etc/pluto/fresh_install
-            echo  "$(date -R) Firmware upgrade. Manual Network Settings" >>/tmp/log.freshinstall
-        fi
-        echo  "$(date -R) Firmware upgrade. Exiting..." >>/tmp/log.freshinstall
-        nvram set fresh_install=""
-        nvram commit
-        return 0;
+	Cfg=$(uci show dhcp|grep interface=lan|cut -d. -f2)
+	CfgMasq=$(uci show dhcp|grep =dnsmasq|cut -d. -f2|cut -d= -f1)
 
-    elif [[ -f /etc/pluto/fresh_install ]]; then
+	uci set network.lan.proto=static
+	uci set network.lan.ipaddr=192.168.81.1
+	uci set network.lan.netmask=255.255.255.0
 
-        echo  "$(date -R) Fresh Install. Proceeding..." >>/tmp/log.freshinstall
+	uci set dhcp.$Cfg.ignore=0
+	uci set dhcp.$Cfg.dynamicdhcp=1
+	uci set dhcp.$CfgMasq.authoritative=1
 
-    	Cfg=$(uci show dhcp|grep interface=lan|cut -d. -f2)
-    	CfgMasq=$(uci show dhcp|grep =dnsmasq|cut -d. -f2|cut -d= -f1)
-#conf int lan
-    	uci set network.lan.proto=static
-    	uci set network.lan.ipaddr=192.168.81.1
-    	uci set network.lan.netmask=255.255.255.0
-#enable dhcpd
-		uci set dhcp.$Cfg.ignore=0
-		uci set dhcp.$Cfg.dynamicdhcp=1
-		uci set dhcp.$Cfg.force=1
-		uci set dhcp.$CfgMasq.authoritative=1
-#conf vlan's
-    	Model=$(cat /proc/diag/model)
-    	case "$Model" in
-    		"ASUS WL-500g Premium")
-    			uci set network.eth0.vlan0="1 2 3 4 5*"
-    			uci set network.eth0.vlan1="0 5"
-    			;;
-    		"ASUS WL-500g Premium V2")
-    			uci set network.eth0.vlan0="0 1 2 3 5*"
-    			uci set network.eth0.vlan1="4 5"
-    			;;
-    	esac
-#conf wan
+	Model=$(cat /proc/diag/model)
+	case "$Model" in
+		"ASUS WL-500g Premium")
+			uci set network.eth0.vlan0="1 2 3 4 5*"
+			uci set network.eth0.vlan1="0 5"
+			;;
+		"ASUS WL-500g Premium V2")
+			uci set network.eth0.vlan0="0 1 2 3 5*"
+			uci set network.eth0.vlan1="4 5"
+			;;
+	esac
+
 	uci set network.wan.proto=dhcp
 	uci set network.wan.ifname=eth0.1
-    ifconfig br-lan:0 down 2>/dev/null
 
 	uci commit
-    sync
 
-    	echo "$(date -R) Restarting network" >>/tmp/log.freshinstall
-    	/etc/init.d/network restart;    
-
-    else        
-        echo  "$(date -R) Nothing to do. Exiting..." >>/tmp/log.freshinstall
-        return 0
-
-    fi
-
+	/etc/init.d/network restart
 }

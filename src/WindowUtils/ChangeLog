@@ -1,0 +1,10 @@
+2008-02-23 18:45 (tschak)
+	Well, it compiles. 
+
+2008-02-26 01:17 (tschak)
+	Well, it works.
+
+2008-02-28 00:10 (tschak)
+	Added SendKeyToWindow, which takes an X Display, an X Window, and an X
+	Key Sym to send to the screen. The Key is then sent immediately to the
+	target. 

@@ -21,6 +21,7 @@
 #define FILEUTILS
 
 #ifndef SYMBIAN
+	#include <cstdlib>
 	#include <string>
 	#include <vector>
 	#include <map>

@@ -207,6 +207,10 @@ class Table_Directory* tblDirectory;
 bool Commit_Directory(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
 class Table_Distro* tblDistro;
 bool Commit_Distro(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
+class Table_Document* tblDocument;
+bool Commit_Document(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
+class Table_Document_Comment* tblDocument_Comment;
+bool Commit_Document_Comment(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
 class Table_Effect* tblEffect;
 bool Commit_Effect(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
 class Table_EffectType* tblEffectType;
@@ -309,8 +313,6 @@ class Table_Package_Source_Compat* tblPackage_Source_Compat;
 bool Commit_Package_Source_Compat(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
 class Table_Package_Users* tblPackage_Users;
 bool Commit_Package_Users(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
-class Table_Package_Version* tblPackage_Version;
-bool Commit_Package_Version(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
 class Table_PageSetup* tblPageSetup;
 bool Commit_PageSetup(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
 class Table_PaidLicense* tblPaidLicense;
@@ -443,6 +445,18 @@ class Table_psc_designer_schema* tblpsc_designer_schema;
 bool Commit_psc_designer_schema(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
 class Table_psc_designer_tables* tblpsc_designer_tables;
 bool Commit_psc_designer_tables(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
+class Table_psc_document_batdet* tblpsc_document_batdet;
+bool Commit_psc_document_batdet(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
+class Table_psc_document_bathdr* tblpsc_document_bathdr;
+bool Commit_psc_document_bathdr(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
+class Table_psc_document_batuser* tblpsc_document_batuser;
+bool Commit_psc_document_batuser(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
+class Table_psc_document_repset* tblpsc_document_repset;
+bool Commit_psc_document_repset(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
+class Table_psc_document_schema* tblpsc_document_schema;
+bool Commit_psc_document_schema(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
+class Table_psc_document_tables* tblpsc_document_tables;
+bool Commit_psc_document_tables(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
 class Table_psc_ir_batdet* tblpsc_ir_batdet;
 bool Commit_psc_ir_batdet(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
 class Table_psc_ir_bathdr* tblpsc_ir_bathdr;
@@ -571,6 +585,8 @@ class Table_Device_Users* Device_Users_get() { if( !tblDevice_Users ) CreateTabl
 class Table_Direction* Direction_get() { if( !tblDirection ) CreateTable_Direction(); return tblDirection; }
 class Table_Directory* Directory_get() { if( !tblDirectory ) CreateTable_Directory(); return tblDirectory; }
 class Table_Distro* Distro_get() { if( !tblDistro ) CreateTable_Distro(); return tblDistro; }
+class Table_Document* Document_get() { if( !tblDocument ) CreateTable_Document(); return tblDocument; }
+class Table_Document_Comment* Document_Comment_get() { if( !tblDocument_Comment ) CreateTable_Document_Comment(); return tblDocument_Comment; }
 class Table_Effect* Effect_get() { if( !tblEffect ) CreateTable_Effect(); return tblEffect; }
 class Table_EffectType* EffectType_get() { if( !tblEffectType ) CreateTable_EffectType(); return tblEffectType; }
 class Table_EffectType_Effect_Skin* EffectType_Effect_Skin_get() { if( !tblEffectType_Effect_Skin ) CreateTable_EffectType_Effect_Skin(); return tblEffectType_Effect_Skin; }
@@ -622,7 +638,6 @@ class Table_Package_Package* Package_Package_get() { if( !tblPackage_Package ) C
 class Table_Package_Source* Package_Source_get() { if( !tblPackage_Source ) CreateTable_Package_Source(); return tblPackage_Source; }
 class Table_Package_Source_Compat* Package_Source_Compat_get() { if( !tblPackage_Source_Compat ) CreateTable_Package_Source_Compat(); return tblPackage_Source_Compat; }
 class Table_Package_Users* Package_Users_get() { if( !tblPackage_Users ) CreateTable_Package_Users(); return tblPackage_Users; }
-class Table_Package_Version* Package_Version_get() { if( !tblPackage_Version ) CreateTable_Package_Version(); return tblPackage_Version; }
 class Table_PageSetup* PageSetup_get() { if( !tblPageSetup ) CreateTable_PageSetup(); return tblPageSetup; }
 class Table_PaidLicense* PaidLicense_get() { if( !tblPaidLicense ) CreateTable_PaidLicense(); return tblPaidLicense; }
 class Table_ParameterType* ParameterType_get() { if( !tblParameterType ) CreateTable_ParameterType(); return tblParameterType; }
@@ -689,6 +704,12 @@ class Table_psc_designer_batuser* psc_designer_batuser_get() { if( !tblpsc_desig
 class Table_psc_designer_repset* psc_designer_repset_get() { if( !tblpsc_designer_repset ) CreateTable_psc_designer_repset(); return tblpsc_designer_repset; }
 class Table_psc_designer_schema* psc_designer_schema_get() { if( !tblpsc_designer_schema ) CreateTable_psc_designer_schema(); return tblpsc_designer_schema; }
 class Table_psc_designer_tables* psc_designer_tables_get() { if( !tblpsc_designer_tables ) CreateTable_psc_designer_tables(); return tblpsc_designer_tables; }
+class Table_psc_document_batdet* psc_document_batdet_get() { if( !tblpsc_document_batdet ) CreateTable_psc_document_batdet(); return tblpsc_document_batdet; }
+class Table_psc_document_bathdr* psc_document_bathdr_get() { if( !tblpsc_document_bathdr ) CreateTable_psc_document_bathdr(); return tblpsc_document_bathdr; }
+class Table_psc_document_batuser* psc_document_batuser_get() { if( !tblpsc_document_batuser ) CreateTable_psc_document_batuser(); return tblpsc_document_batuser; }
+class Table_psc_document_repset* psc_document_repset_get() { if( !tblpsc_document_repset ) CreateTable_psc_document_repset(); return tblpsc_document_repset; }
+class Table_psc_document_schema* psc_document_schema_get() { if( !tblpsc_document_schema ) CreateTable_psc_document_schema(); return tblpsc_document_schema; }
+class Table_psc_document_tables* psc_document_tables_get() { if( !tblpsc_document_tables ) CreateTable_psc_document_tables(); return tblpsc_document_tables; }
 class Table_psc_ir_batdet* psc_ir_batdet_get() { if( !tblpsc_ir_batdet ) CreateTable_psc_ir_batdet(); return tblpsc_ir_batdet; }
 class Table_psc_ir_bathdr* psc_ir_bathdr_get() { if( !tblpsc_ir_bathdr ) CreateTable_psc_ir_bathdr(); return tblpsc_ir_bathdr; }
 class Table_psc_ir_batuser* psc_ir_batuser_get() { if( !tblpsc_ir_batuser ) CreateTable_psc_ir_batuser(); return tblpsc_ir_batuser; }
@@ -804,6 +825,8 @@ void CreateTable_Device_Users();
 void CreateTable_Direction();
 void CreateTable_Directory();
 void CreateTable_Distro();
+void CreateTable_Document();
+void CreateTable_Document_Comment();
 void CreateTable_Effect();
 void CreateTable_EffectType();
 void CreateTable_EffectType_Effect_Skin();
@@ -855,7 +878,6 @@ void CreateTable_Package_Package();
 void CreateTable_Package_Source();
 void CreateTable_Package_Source_Compat();
 void CreateTable_Package_Users();
-void CreateTable_Package_Version();
 void CreateTable_PageSetup();
 void CreateTable_PaidLicense();
 void CreateTable_ParameterType();
@@ -922,6 +944,12 @@ void CreateTable_psc_designer_batuser();
 void CreateTable_psc_designer_repset();
 void CreateTable_psc_designer_schema();
 void CreateTable_psc_designer_tables();
+void CreateTable_psc_document_batdet();
+void CreateTable_psc_document_bathdr();
+void CreateTable_psc_document_batuser();
+void CreateTable_psc_document_repset();
+void CreateTable_psc_document_schema();
+void CreateTable_psc_document_tables();
 void CreateTable_psc_ir_batdet();
 void CreateTable_psc_ir_bathdr();
 void CreateTable_psc_ir_batuser();
@@ -1031,6 +1059,8 @@ void DeleteTable_Device_Users();
 void DeleteTable_Direction();
 void DeleteTable_Directory();
 void DeleteTable_Distro();
+void DeleteTable_Document();
+void DeleteTable_Document_Comment();
 void DeleteTable_Effect();
 void DeleteTable_EffectType();
 void DeleteTable_EffectType_Effect_Skin();
@@ -1082,7 +1112,6 @@ void DeleteTable_Package_Package();
 void DeleteTable_Package_Source();
 void DeleteTable_Package_Source_Compat();
 void DeleteTable_Package_Users();
-void DeleteTable_Package_Version();
 void DeleteTable_PageSetup();
 void DeleteTable_PaidLicense();
 void DeleteTable_ParameterType();
@@ -1149,6 +1178,12 @@ void DeleteTable_psc_designer_batuser();
 void DeleteTable_psc_designer_repset();
 void DeleteTable_psc_designer_schema();
 void DeleteTable_psc_designer_tables();
+void DeleteTable_psc_document_batdet();
+void DeleteTable_psc_document_bathdr();
+void DeleteTable_psc_document_batuser();
+void DeleteTable_psc_document_repset();
+void DeleteTable_psc_document_schema();
+void DeleteTable_psc_document_tables();
 void DeleteTable_psc_ir_batdet();
 void DeleteTable_psc_ir_bathdr();
 void DeleteTable_psc_ir_batuser();

@@ -1,4 +1,4 @@
-CC=gcc
+
 CFLAGS=-W -Wall -g -ggdb3
 
 all: ansi2html

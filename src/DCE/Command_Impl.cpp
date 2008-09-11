@@ -185,7 +185,6 @@ Command_Impl::~Command_Impl()
 	LoggerWrapper::GetInstance()->Write( LV_STATUS, "~Command_Impl finished" );
 
 	pthread_mutex_destroy(&m_listMessageQueueMutex.mutex);
-	pthread_cond_destroy(&m_listMessageQueueCond);
 }
 
 void Command_Impl::PrepareToDelete()
@@ -257,12 +256,10 @@ void Command_Impl::CreateChildren()
 		Event_Impl *pEvent = m_pEvent->CreateEvent( pDeviceData_Impl_Child->m_dwPK_DeviceTemplate, m_pPrimaryDeviceCommand->m_pEvent->m_pClientSocket, pDeviceData_Impl_Child->m_dwPK_Device );
 		if ( !pEvent )
 		{
-// I think this is a mistake??  We never do anything with this?			pEvent = new Event_Impl( m_pPrimaryDeviceCommand->m_pEvent->m_pClientSocket, pDeviceData_Impl_Child->m_dwPK_Device );
+			pEvent = new Event_Impl( m_pPrimaryDeviceCommand->m_pEvent->m_pClientSocket, pDeviceData_Impl_Child->m_dwPK_Device );
 			LoggerWrapper::GetInstance()->Write( LV_WARNING, "Note: Device manager has attached a device of type %d that this has no custom event handler for.  It will not fire events.",
 					pDeviceData_Impl_Child->m_dwPK_DeviceTemplate);
-			continue;
 		}
-
 		Command_Impl *pCommand = m_pPrimaryDeviceCommand->CreateCommand( pDeviceData_Impl_Child->m_dwPK_DeviceTemplate, m_pPrimaryDeviceCommand, pDeviceData_Impl_Child, pEvent );
 		if ( !pCommand )
 		{
@@ -932,7 +929,7 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"InternalSendCommand confirmation 
 			LoggerWrapper::GetInstance()->Write(LV_WARNING,"InternalSendCommand cannot send message type %d id %d to %d with confirmation.  Going to quit", Type,ID,PK_Device_To);
 			OnReload();
 		}
-		return bResult && p_sResponse->size()>=2 && p_sResponse->substr(0,2) == "OK";
+		return bResult && *p_sResponse == "OK";
 	}
 #ifdef DEBUG
 LoggerWrapper::GetInstance()->Write(LV_STATUS,"InternalSendCommand id %d out parm conf %d resp %p",
@@ -982,7 +979,7 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"InternalSendCommand out done id %
 	if( p_sResponse )
 		*p_sResponse = sResponse;
 
-	bool bResult = (sResponse.size()>=2 && sResponse.substr(0,2)=="OK");
+	bool bResult = sResponse=="OK";
 #ifdef DEBUG
 LoggerWrapper::GetInstance()->Write(LV_STATUS,"InternalSendCommand out id %d parm exiting conf %d resp %p",
 									ID,iConfirmation,pPreformedCommand.m_pcResponse);
@@ -1011,17 +1008,13 @@ void Command_Impl::StopWatchDog()
     }
 }
 
-int Command_Impl::RegisterMsgInterceptor(MessageInterceptorFn pMessageInterceptorFn,int PK_Device_From,int PK_Device_To,int PK_DeviceTemplate,int PK_DeviceCategory,int MessageType,int MessageID,bool bAllowRerouting, MessageInterceptorCallBack **p_pMessageInterceptorCallBack)
+int Command_Impl::RegisterMsgInterceptor(MessageInterceptorFn pMessageInterceptorFn,int PK_Device_From,int PK_Device_To,int PK_DeviceTemplate,int PK_DeviceCategory,int MessageType,int MessageID,bool bAllowRerouting)
 {
 #ifdef LINK_TO_ROUTER
 	if( m_pRouter )
 	{
-		MessageInterceptorCallBack *pMessageInterceptorCallBack = new MessageInterceptorCallBack(this, pMessageInterceptorFn);
-		if( p_pMessageInterceptorCallBack )
-			p_pMessageInterceptorCallBack = &pMessageInterceptorCallBack;
-
 		m_pRouter->RegisterMsgInterceptor(
-			pMessageInterceptorCallBack, PK_Device_From, PK_Device_To, PK_DeviceTemplate, PK_DeviceCategory, MessageType, MessageID );
+			new MessageInterceptorCallBack(this, pMessageInterceptorFn), PK_Device_From, PK_Device_To, PK_DeviceTemplate, PK_DeviceCategory, MessageType, MessageID );
 		return 0;
 	}
 	else

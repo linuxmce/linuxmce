@@ -42,6 +42,8 @@
 
 #include "RubyIOManager.h"
 
+#include <algorithm>
+
 using namespace EMBRUBY;
 using namespace std;
 

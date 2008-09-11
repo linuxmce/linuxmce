@@ -45,6 +45,8 @@
 #define ATTRIBUTETYPE_Creation_Date_CONST 44
 #define ATTRIBUTETYPE_THX_Disk_ID_CONST 45
 #define ATTRIBUTETYPE_Screen_saver_disabled_CONST 46
+#define ATTRIBUTETYPE_Manufacturer_CONST 47
+#define ATTRIBUTETYPE_Year_CONST 48
 
 #define ATTRIBUTETYPE_TABLE "AttributeType"
 #define ATTRIBUTETYPE_PK_ATTRIBUTETYPE_FIELD "PK_AttributeType"

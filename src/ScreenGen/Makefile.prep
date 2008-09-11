@@ -1,0 +1,33 @@
+ROOT = ..
+CXXFLAGS = -pipe -Wall -ggdb3
+CPPFLAGS = -I/usr/local/include -I$(ROOT)/DCE -I.. -I. 
+LDFLAGS = -L$(ROOT)/lib
+LDLIBS = -ldl -lpthread -lpluto_main -lDCECommon -lSerializeClass -lPlutoUtils
+
+#<-mkr_B_use_mysql_wrapper_b->
+CPPFLAGS += -I/usr/include/mysql
+LDFLAGS += -lmysqlclient_r
+#<-mkr_B_use_mysql_wrapper_e->
+
+#<-mkr_b_use_mysql_wrapper_b->
+CPPFLAGS += -DUSE_MYSQL_WRAPPER
+#<-mkr_b_use_mysql_wrapper_e->
+
+APPNAME = ScreenGen
+VERSION = 2.0.0
+
+sources = ../db_wrapper/db_wrapper.cpp ../db_wrapper/ClientSocket.cpp ../db_wrapper/Socket.cpp \
+ScreenGen.cpp
+
+all: $(sources:.cpp=.o)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o ScreenGen $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	cp ScreenGen ../bin
+
+clean: clean-recursive
+	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) ScreenGen >/dev/null
+
+package:
+	./make_package.sh $(APPNAME) $(VERSION)
+
+include $(ROOT)/PlutoUtils/make.rules
+-include $(sources:.cpp=.d)

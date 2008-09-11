@@ -39,4 +39,7 @@ $TEXT_CODES_GROUP_ADDED_CONST='Codes group added.';
 $TEXT_ERROR_NO_GROUP_CONST='There are no groups/codesets for this manufacturer and device category. Please add a group before adding codes.';
 $TEXT_MISSING_COMM_METHOD_CONST='Missing comm method';
 $TEXT_ADD_COMM_METHOD_CONST='Add comm method';
+$TEXT_RepeatIR_CONST='IR Repeats: ';
+$TEXT_RepeatGeneral_CONST='General IR codes';
+$TEXT_RepeatVolume_CONST='Volume IR codes';
 ?>

@@ -1,15 +1,12 @@
-
-#include <tag.h>
-using namespace TagLib;
-
-
 #include "TagFileHandler.h"
 #include "PlutoMediaAttributes.h"
 #include "FileUtils/file_utils.h"
 #include "DCE/Logger.h"
-#include "pluto_main/Define_MediaType.h"
+#include "pluto_main/Table_MediaType.h"
 #include "pluto_media/Define_AttributeType.h"
 using namespace DCE;
+
+#include <cstdlib>
 
 #include <tag.h>
 #include <fileref.h>

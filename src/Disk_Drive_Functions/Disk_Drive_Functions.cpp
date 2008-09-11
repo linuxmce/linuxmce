@@ -44,6 +44,8 @@ or FITNESS FOR A PARTICULAR PURPOSE. See the Pluto Public License for more detai
 #include <sys/mount.h>
 #endif
 
+#include <limits.h>
+
 #include <sstream>
 using namespace std;
 
@@ -740,8 +742,6 @@ bool Disk_Drive_Functions::FixupRippingInfo(Disk_Drive_Functions *pDisk_Drive_Fu
 	}
 	else if( PK_MediaType==MEDIATYPE_pluto_DVD_CONST )
 		StringUtils::Replace(&sDirectory,"___audio___or___video___","videos");
-	else if( PK_MediaType==MEDIATYPE_pluto_HDDVD_CONST || PK_MediaType==MEDIATYPE_pluto_BD_CONST )
-	    StringUtils::Replace(&sDirectory,"___audio___or___video___","videos");
 
 	bool bUsingUnknownDiscName=false;
 	// Validate the name and be sure it's unique
@@ -756,16 +756,8 @@ bool Disk_Drive_Functions::FixupRippingInfo(Disk_Drive_Functions *pDisk_Drive_Fu
 		}
 		if( sFilename.size()==0 )
 		{
-		    // default
-		    sFilename = "Unknown CD";
-		    bUsingUnknownDiscName=true;
-
-		    if (PK_MediaType==MEDIATYPE_pluto_DVD_CONST)
-			sFilename = "Unknown DVD";
-		    else if (PK_MediaType==MEDIATYPE_pluto_HDDVD_CONST)
-			sFilename = "Unknown HD-DVD";
-		    else if (PK_MediaType==MEDIATYPE_pluto_BD_CONST)
-			sFilename = "Unknown Blu-ray Disc";
+			sFilename = PK_MediaType==MEDIATYPE_pluto_DVD_CONST ? "Unknown DVD" : "Unknown CD";
+			bUsingUnknownDiscName=true;
 		}
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Disk_Drive_Functions::FixupRippingInfo fixed directory %s / %s / %s", sDirectory.c_str(), sFilename.c_str(), sDirectory2.c_str());
 	}
@@ -945,7 +937,7 @@ void Disk_Drive_Functions::GetTracksForDisc(Row_Disc *pRow_Disc,map<int,string> 
 		mapTracks[Track] = "";
 	}
 
-	string sSQL = "JOIN Attribute ON FK_Attribute=PK_Attribute WHERE FK_Disc=" + StringUtils::itos(pRow_Disc->PK_Disc_get()) + " AND Attribute.FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Title_CONST);
+	string sSQL = "JOIN Attribute ON FK_Attribute=PK_Attribute WHERE FK_Disc=" + StringUtils::itos(pRow_Disc->PK_Disc_get()) + " AND FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Title_CONST);
 	vector<Row_Disc_Attribute *> vectRow_Disc_Attribute;
 	m_pDatabase_pluto_media->Disc_Attribute_get()->GetRows(sSQL,&vectRow_Disc_Attribute);
 	for(vector<Row_Disc_Attribute *>::iterator it=vectRow_Disc_Attribute.begin();it!=vectRow_Disc_Attribute.end();++it)

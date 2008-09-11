@@ -11,8 +11,6 @@
 #define DISC_ATTRIBUTE_TRACK_TABLE_FIELD "Disc_Attribute.Track"
 #define DISC_ATTRIBUTE_SECTION_FIELD "Section"
 #define DISC_ATTRIBUTE_SECTION_TABLE_FIELD "Disc_Attribute.Section"
-#define DISC_ATTRIBUTE_FK_ATTRIBUTETYPE_FIELD "FK_AttributeType"
-#define DISC_ATTRIBUTE_FK_ATTRIBUTETYPE_TABLE_FIELD "Disc_Attribute.FK_AttributeType"
 #define DISC_ATTRIBUTE_PSC_ID_FIELD "psc_id"
 #define DISC_ATTRIBUTE_PSC_ID_TABLE_FIELD "Disc_Attribute.psc_id"
 #define DISC_ATTRIBUTE_PSC_BATCH_FIELD "psc_batch"

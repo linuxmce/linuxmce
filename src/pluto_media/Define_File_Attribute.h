@@ -11,8 +11,6 @@
 #define FILE_ATTRIBUTE_TRACK_TABLE_FIELD "File_Attribute.Track"
 #define FILE_ATTRIBUTE_SECTION_FIELD "Section"
 #define FILE_ATTRIBUTE_SECTION_TABLE_FIELD "File_Attribute.Section"
-#define FILE_ATTRIBUTE_FK_ATTRIBUTETYPE_FIELD "FK_AttributeType"
-#define FILE_ATTRIBUTE_FK_ATTRIBUTETYPE_TABLE_FIELD "File_Attribute.FK_AttributeType"
 #define FILE_ATTRIBUTE_PSC_ID_FIELD "psc_id"
 #define FILE_ATTRIBUTE_PSC_ID_TABLE_FIELD "File_Attribute.psc_id"
 #define FILE_ATTRIBUTE_PSC_BATCH_FIELD "psc_batch"

@@ -7,10 +7,6 @@ case "$1" in
 esac
 
 rm -f /var/run/pluto.stop
-if ! grep -q '#Rotate_Logs$' /etc/crontabs/root 2>/dev/null; then
-	echo "*/1 * * * * /usr/bin/Rotate_Logs.sh #Rotate_Logs" >>/etc/crontabs/root
-	/etc/init.d/cron restart
-fi
 
 /usr/bin/Start_DCERouter.sh &
 

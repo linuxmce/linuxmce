@@ -240,8 +240,7 @@ public:
 	 */
 	SerializeClass(bool bManuallySetupSerialization=false)
 	{
-		m_pcDataBlock = NULL;
-		m_pcCurrentPosition = NULL;
+		m_pcDataBlock = m_pcCurrentPosition = NULL;
 		m_iSC_Version = 1;
 		m_bManuallySetupSerialization = bManuallySetupSerialization;
 	}

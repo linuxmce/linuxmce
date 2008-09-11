@@ -462,7 +462,7 @@ continue;
 
 #ifdef SIM_JUKEBOX
 	{
-		string sSQL = "SELECT FK_File,Name FROM File_Attribute JOIN Attribute ON FK_Attribute=PK_Attribute WHERE Attribute.FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Purchase_Info_CONST);
+		string sSQL = "SELECT FK_File,Name FROM File_Attribute JOIN Attribute ON FK_Attribute=PK_Attribute WHERE FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Purchase_Info_CONST);
 		PlutoSqlResult result;
 		DB_ROW row;
 		if( (result.r = m_pDatabase_pluto_media->db_wrapper_query_result(sSQL))  )
@@ -4166,7 +4166,7 @@ void Media_Plugin::CMD_Rip_Disk(int iPK_Device,string sFilename,int iPK_Users,st
 	string sResponse;
 	DCE::CMD_Rip_Disk cmdRipDisk(pMessage->m_dwPK_Device_From, pDevice_Disk->m_dwPK_Device, pDevice_Disk->m_dwPK_Device, sFilename, iPK_Users, 
 		sFormat, sTracks, pRow_Disc ? pRow_Disc->PK_Disc_get() : 0, iSlot_Number, iDriveID, sDirectory);  // Send it from the Orbiter so disk drive knows who requested it
-	if( !SendCommand(cmdRipDisk,&sResponse) || sResponse.size()<2 || sResponse.substr(0,2)!="OK" )
+	if( !SendCommand(cmdRipDisk,&sResponse) || sResponse!="OK" )
 	{
 		SCREEN_DialogRippingError SCREEN_DialogRippingError(m_dwPK_Device, pMessage->m_dwPK_Device_From,
 			"Cannot copy disk " + sResponse, "40");

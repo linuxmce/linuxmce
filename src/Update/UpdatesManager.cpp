@@ -16,7 +16,8 @@
 
 #include <sys/types.h>
 #include <dirent.h>
-
+#include <algorithm>
+using namespace std;
 
 UpdatesManager::UpdatesManager(const char * xmlPath, const char * updPath, int iInput, int iOutput)
 	: updatesPath(updPath),

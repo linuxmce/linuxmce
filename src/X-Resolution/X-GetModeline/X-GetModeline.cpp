@@ -1,5 +1,7 @@
 #include "../libresolution/libresolution.h"
 
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <string>
 using namespace std;

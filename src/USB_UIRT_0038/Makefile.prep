@@ -1,0 +1,78 @@
+#<-dceag-mh-b->
+GENDEV=../Gen_Devices
+
+SNR_CPPFLAGS ?= <-mkr_t_compile_defines->
+
+ROOT = ..
+
+CXXFLAGS = -Wall -fPIC -ggdb3
+CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
+LDFLAGS = -L$(ROOT)/lib
+BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lmysqlclient_r -lpthread
+
+ifneq (,$(findstring -DARCH64, $(CPPFLAGS)))
+        UUIRTDRV_SO = uuirtdrv-amd64.so
+else
+        UUIRTDRV_SO = uuirtdrv-i386.so
+endif
+
+MYNAME = USB_UIRT_0038
+VERSION = 2.0.0
+MYDEVTEMPLATEID = 1783mplateID
+
+Gen_Dev_Files = $(GENDEV)/USB_UIRT_0038Base.cpp
+sources = Main.cpp USB_UIRT_0038.cpp $(Gen_Dev_Files)
+#<-dceag-mh-e->
+
+CXXFLAGS +=
+CPPFLAGS +=
+LDFLAGS +=
+XTRALDLIBS = -lMessageTranslation -lIRBase -ldl
+
+Gen_Dev_Files +=
+sources += ../LIRC_DCE/IRReceiverBase.cpp 
+
+#<-dceag-mf-b->
+LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
+
+whattodo:
+	@echo "type 'make bin', 'make so' or 'make all'"
+
+all: bin so
+
+bin: ../bin/USB_UIRT_0038
+
+uuirtdrv.so: ../../proprietary_binaries/USB_UIRT_0038/$(UUIRTDRV_SO)
+	cp ../../proprietary_binaries/USB_UIRT_0038/$(UUIRTDRV_SO) $@
+
+../lib/uuirtdrv.so: uuirtdrv.so
+	cp uuirtdrv.so $@
+
+so: ../bin/USB_UIRT_0038.so
+
+USB_UIRT_0038.so: $(sources:.cpp=.o) uuirtdrv.so
+	$(CXX) -shared -o $(MYNAME).so $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	./post_make.sh $@
+
+../bin/USB_UIRT_0038.so: USB_UIRT_0038.so ../lib/uuirtdrv.so
+	cp USB_UIRT_0038.so $@
+
+USB_UIRT_0038: $(sources:.cpp=.o) uuirtdrv.so
+	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	./post_make.sh $@
+
+../bin/USB_UIRT_0038: USB_UIRT_0038 ../lib/uuirtdrv.so
+	cp USB_UIRT_0038 $@
+
+clean: clean-recursive
+	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) USB_UIRT_0038 ../bin/USB_UIRT_0038 USB_UIRT_0038.so ../bin/USB_UIRT_0038.so uuirtdrv.so ../lib/uuirtdrv.so >/dev/null
+
+package:
+	./make_package.sh $(MYNAME) $(VERSION) $(MYDEVTEMPLATEID)
+
+include $(ROOT)/PlutoUtils/make.rules
+ifeq (,$(findstring clean, $(MAKECMDGOALS)))
+-include $(sources:.cpp=.d)
+endif
+#<-dceag-mf-e->
+

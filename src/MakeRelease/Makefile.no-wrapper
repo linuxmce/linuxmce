@@ -1,0 +1,26 @@
+ROOT = ..
+CXXFLAGS = -pipe -Wall -ggdb3
+CPPFLAGS = -I/usr/local/include -I$(ROOT)/DCE -I.. -I. -I/usr/include/mysql
+LDFLAGS = -L$(ROOT)/lib
+LDLIBS = -ldl -lmysqlclient -lpthread -lpluto_main -lDCECommon -lSerializeClass -lPlutoUtils
+
+CPPFLAGS += -I/usr/include/mysql
+LDFLAGS += -lmysqlclient_r
+
+APPNAME = MakeRelease
+VERSION = 2.0.0
+
+sources = MakeRelease.cpp
+
+all: $(sources:.cpp=.o)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o MakeRelease $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	cp MakeRelease ../bin
+
+clean: clean-recursive
+	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) MakeRelease >/dev/null
+
+package:
+	./make_package.sh $(APPNAME) $(VERSION)
+
+include $(ROOT)/PlutoUtils/make.rules
+-include $(sources:.cpp=.d)

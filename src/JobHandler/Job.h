@@ -74,16 +74,9 @@ namespace nsJobHandler
 		    position_TasklistEnd
 		};
 
-		enum enumReadyToRun
-		{
-			readyToRun_No,
-			readyToRun_Yes
-		};
-
 	private:
 		static int m_NextJobID;
 		int m_NextTaskID;
-		JobStatus m_eJobStatus;
 
 	protected:
 		friend class Task;
@@ -92,17 +85,15 @@ namespace nsJobHandler
 		string m_sName;
 		int m_iID;
 		int m_iMaxTasks;
+		JobStatus m_eJobStatus;
 		class JobHandler *m_pJobHandler;
 		ListTask m_listTask;
 		bool m_bAutoDelete;
-		unsigned char m_cPriority; // Priorities with lower numbers get run first if JobHandler::m_bRunByPriority is true
 
-        /** Set this to non-zero if you want to your ReadyToRun() to be called no earlier than this time.
+        /** Set this to non-zero if you want to your ReadyToRun() to be called no later than this time.
         Zero means don't call until something changes.
         */
 		time_t m_tNextRunAttempt;
-		timespec m_tsCreated, // The time this was added to the queue
-			m_tsFirstRun; // The time this was first run
 
           /** If passed into the constructor, send this Orbiter a 'refresh' when something changes with this job.
           */
@@ -116,37 +107,25 @@ namespace nsJobHandler
 		// Override these for better reporting of the Job's progress
 		virtual int PercentComplete() { return 0; }
 		virtual int SecondsRemaining() { return 0; }
-		virtual string ToString() { return "#" + StringUtils::itos(m_iID) + " P:" + StringUtils::itos((int) m_cPriority) + " " + GetType() + ":" + m_sName; }
+		virtual string ToString() { return m_sName; }
 
 		int m_iID_get() { return m_iID; }
 		time_t m_tNextRunAttempt_get() { return m_tNextRunAttempt; }
-		void m_tNextRunAttempt_set(time_t tNextRunAttempt) { m_tNextRunAttempt=tNextRunAttempt; }
-		timespec m_tsCreated_get() { return m_tsCreated; }
-		timespec m_tsFirstRun_get() { return m_tsFirstRun; }
-		void m_tsFirstRun_set()	{ gettimeofday( &m_tsFirstRun, NULL ); }
 
 		bool m_bAutoDelete_get() { return m_bAutoDelete; }
 		void m_bAutoDelete_set( bool bAutoDelete ) { m_bAutoDelete=bAutoDelete; }
 
 		int PendingTasks();
-		virtual bool Abort(bool bRequeue=false);  // If bRequeue is true, then put it back in the queue so it can restart later
+		bool Abort();
 
 		void SetMaxTasks(int MaxTasks) { m_iMaxTasks=MaxTasks; }
 		virtual bool StartThread();
 		virtual bool StopThread(int iTimeout);
-		virtual enumReadyToRun ReadyToRun() { return readyToRun_Yes; }
+		virtual bool ReadyToRun() { return true; }
 
 		virtual void JobDone() {} // Override to do something when the job is finished
 
 		enum JobStatus m_eJobStatus_get() { return m_eJobStatus; }
-#ifdef DEBUG
-		void m_eJobStatus_set(enum JobStatus jobStatus,bool bLog=true);  // Set it to false when called from within a constructor so it doesn't error
-#else
-		void m_eJobStatus_set(enum JobStatus jobStatus) { m_eJobStatus=jobStatus; }
-#endif
-
-		unsigned char m_cPriority_get() { return m_cPriority; }
-		void m_cPriority_set( unsigned char cPriority ) { m_cPriority=cPriority; }
 
 		virtual bool CanHandleAnotherTask() { return m_iMaxTasks==0 || PendingTasks()<m_iMaxTasks; }
 

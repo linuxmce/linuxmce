@@ -316,17 +316,25 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 			$toDelete=$_REQUEST['picID'];
 			$path=stripslashes(@$_REQUEST['path']);
 			
-			$deletePic='DELETE FROM Picture WHERE PK_Picture=?';
-			$mediadbADO->Execute($deletePic,$toDelete);
-			
-			$deletePicAttribute='DELETE FROM Picture_Attribute WHERE FK_Picture=?';
-			$mediadbADO->Execute($deletePicAttribute,$toDelete);
-			
+			//remove reference to the picture
 			$deletePicFile='DELETE FROM Picture_File WHERE FK_Picture=?';
 			$mediadbADO->Execute($deletePicFile,$toDelete);
 			
-			@unlink($GLOBALS['mediaPicsPath'].$toDelete.'.jpg');
-			@unlink($GLOBALS['mediaPicsPath'].$toDelete.'_tn.jpg');
+			//Is anything else referencing this picture?
+			$pictureReference =         'SELECT * FROM Picture_Attribute WHERE FK_Picture = '.$toDelete;
+			$pictureReference .= ' UNION SELECT * FROM Picture_Disc WHERE FK_Picture = '.$toDelete;
+			$pictureReference .= ' UNION SELECT * FROM Picture_Download WHERE FK_Picture = '.$toDelete;
+			$pictureReference .= ' UNION SELECT * FROM Picture_File WHERE FK_Picture = '.$toDelete;
+			$numPictureReferences = $mediadbADO->Execute($pictureReference);
+
+			//Delete picture from database and file system only if nothing else is referencing it!
+			if($numPictureReferences->RecordCount()==0) {
+				$deletePic='DELETE FROM Picture WHERE PK_Picture=?';
+				$mediadbADO->Execute($deletePic,$toDelete);
+				@unlink($GLOBALS['mediaPicsPath'].$toDelete.'.jpg');
+				@unlink($GLOBALS['mediaPicsPath'].$toDelete.'_tn.jpg');
+				
+			}
 
 			$cmd='sudo -u root /usr/pluto/bin/UpdateMedia -w -d "'.bash_escape($path).'"';
 			exec_batch_command($cmd);
@@ -416,6 +424,9 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 			
 			$delID3='sudo -u root rm -f "'.bash_escape($oldFilePath).'.id3"';
 			exec_batch_command($delID3);
+
+			$delCssKey='sudo -u root rm -f "'.bash_escape($oldFilePath).'.keys.tar.gz"';
+			exec_batch_command($delCssKey);
 			
 			$mediadbADO->Execute('DELETE FROM File_Attribute WHERE FK_File=?',$fileID);
 			$mediadbADO->Execute('DELETE FROM Picture_File WHERE FK_File=?',$fileID);
@@ -572,6 +583,9 @@ function web_rename($source, $destination){
 	$rename_id3='sudo -u root /usr/pluto/bin/Web_Rename.sh "'.bash_escape($source).'.id3" "'.bash_escape($destination).'.id3"';
 	exec_batch_command($rename_id3);
 	
+	$rename_CssKey='sudo -u root /usr/pluto/bin/Web_Rename.sh "'.bash_escape($source).'.keys.tar.gz" "'.bash_escape($destination).'.keys.tar.gz"';
+	exec_batch_command($rename_CssKey);
+
 	$cmd='sudo -u root /usr/pluto/bin/Web_Rename.sh "'.bash_escape($source).'" "'.bash_escape($destination).'"';
 	return exec_batch_command($cmd);
 }

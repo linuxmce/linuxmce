@@ -22,6 +22,9 @@
 
 #include "DCE/Logger.h"
 
+#include <algorithm>
+using namespace DCE;
+
 Frame::Frame(string Name, Container* pMesh) 
 	: Visible_(true),
 	pTransform(),

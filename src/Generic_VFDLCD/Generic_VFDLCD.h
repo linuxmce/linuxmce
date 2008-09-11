@@ -17,6 +17,9 @@
 #ifndef Generic_VFDLCD_h
 #define Generic_VFDLCD_h
 
+#include <memory>
+using namespace std;
+
 //	DCE Implemenation for #1896 Generic VFD-LCD
 
 #include "Gen_Devices/Generic_VFDLCDBase.h"

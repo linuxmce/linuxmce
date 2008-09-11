@@ -68,9 +68,18 @@ while [[ "$Loop" == yes ]]; do
 done
 
 FireFoxProfile=~/".mozilla/firefox/$Path/"
-cp /home/user_$User/bookmarks.html "$FireFoxProfile/bookmarks.html"
 
 echo "$(date -R) user $User URL $URL" >>"$LogFile"
+
+if [[ $User != 0 ]]; then
+	if [[ ! -f "/home/user_$User/bookmarks.html" ]]; then
+		echo "User $User doesn't have bookmarks yet"
+		cp /home/public/bookmarks.html "/home/user_$User/bookmarks.html"
+		cp /home/public/bookmarks.html "$FireFoxProfile"
+	else
+		cp "/home/user_$User/bookmarks.html" "$FireFoxProfile"
+	fi
+fi
 
 echo "starting firefox" >>"$LogFile"
 firefox "$URL"

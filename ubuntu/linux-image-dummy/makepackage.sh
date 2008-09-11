@@ -1,10 +1,6 @@
 #!/bin/bash
 
-Moon_KernelVersion="$1"
-if [ x"$Moon_KernelVersion" = x"" ] ; then
-	Moon_KernelVersion=$(uname -r)
-fi
-
+Moon_KernelVersion=$(uname -r)
 Moon_KernelArch=$(apt-config dump | grep 'APT::Architecture' | sed 's/APT::Architecture "\(.*\)".*/\1/g')
 Moon_RootLocation='package/'
 
@@ -35,9 +31,9 @@ sed -i 's/^.*BOOT=.*/BOOT=nfs/g' /etc/initramfs-tools-diskless/initramfs.conf
 # NOTE: reference: UbuntuDiskless/Diskless_BuildDefaultImage.sh
 AddModules sky2 atl1
 
-mkinitramfs -d /etc/initramfs-tools-diskless/ -o ${Moon_RootLocation}/boot/initrd.img-${Moon_KernelVersion} ${Moon_KernelVersion}
+mkinitramfs -d /etc/initramfs-tools-diskless/ -o ${Moon_RootLocation}/boot/initrd.img-${Moon_KernelVersion}
 
-# Copy from /lib/modules only whare belongs to linux-image-$Moon_KernelVersion
+# Copy from /lib/modules only whare belongs to linux-image-`uname -r`
 dpkg -L linux-image-${Moon_KernelVersion}  | grep '^/lib/modules/'  | sed 's|^/lib/modules/||g' | while read line ;do
 	if [[ -f "/lib/modules/$line" ]] ;then
 		cp "/lib/modules/$line" "${Moon_RootLocation}/lib/modules/$line"

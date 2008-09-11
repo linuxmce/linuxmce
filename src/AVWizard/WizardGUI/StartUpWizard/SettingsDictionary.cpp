@@ -18,6 +18,7 @@
  */
 #include "SettingsDictionary.h"
 
+#include <cstring>
 #include <iostream>
 
 SettingsDictionary::SettingsDictionary(void)

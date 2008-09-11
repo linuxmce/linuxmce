@@ -1,25 +1,40 @@
 #!/bin/sh
 
-log() {
-	logger -s -t 'fiire-report' $*
-}
+# Bridged mode
+if [[ "`uci get network.eth0.vlan1`" == '' ]] ;then
+	# With Static IP
+	if [[ "`uci get network.lan.proto`" == 'static' ]] ;then
+		Report_IP=`uci get network.lan.ipaddr`
 
-LanIP=`uci get network.lan.ipaddr`
-if [[ "`uci get network.wan.proto`" == 'dhcp' ]] ;then
-	WanIface=`uci get network.wan.ifname`
-	WanIP=`ifconfig $WanIface | grep 'inet addr:' | sed 's/.*inet addr:\([0-9.]*\).*/\1/g'`
+	# With Dynamic IP
+	else
+		wait=0
+		while [[ "$Report_IP" == "" ]] && [[ "$wait" != "15" ]] ;do
+			Report_IP=`ifconfig br-lan | grep 'inet addr:' | sed 's/.*inet addr:\([0-9.]*\).*/\1/g'`
+			sleep 1
+			wait=$(( wait + 1 ))
+		done
+	fi
+
+# Routing mode
 else
-	WanIP=`uci get network.wan.ipaddr`
+ 	# With Static IP
+	if [[ "`uci get network.wan.proto`" == 'static' ]] ;then
+		Report_IP=`uci get network.wan.ipaddr`
+	
+	# With Dynamic IP
+	else
+		wait=0
+		while [[ "$Report_IP" == "" ]] && [[ "$wait" != "15" ]] ;do
+			Report_IP=`ifconfig eth0.1 | grep 'inet addr:' | sed 's/.*inet addr:\([0-9.]*\).*/\1/g'`
+			sleep 1
+			wait=$(( wait + 1 ))
+		done
+	fi
 fi
-MAC=`ifconfig eth0 | grep 'HWaddr' | sed 's/.*HWaddr \([0-9A-F:]*\).*/\1/g'`
 
-log "Reporting lan:$LanIP wan:$WanIP mac:$MAC"
-wget -qO/dev/null "http://cisco.fiire.com/ReportAP.php?IP=${WanIP}&MAC=${MAC}"
+Report_MAC=`ifconfig eth0 | grep 'HWaddr' | sed 's/.*HWaddr \([0-9A-F:]*\).*/\1/g'`
 
-# Update /etc/hosts
-grep -v local.fiire.com /etc/hosts > /etc/hosts.temp
-echo "$LanIP local.fiire.com" >> /etc/hosts.temp
-mv /etc/hosts.temp /etc/hosts
 
-echo "$(date -R) Reported AP $LanIP, $WanIP, $MAC" >>/tmp/log.Report_AP
-/etc/init.d/dnsmasq restart
+echo "Reporting $Report_IP - $Report_MAC"
+wget -qO/dev/null "http://plutohome.com/ReportAP.php?IP=${Report_IP}&MAC=${Report_MAC}"

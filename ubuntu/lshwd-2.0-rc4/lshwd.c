@@ -396,8 +396,6 @@ begin_procfs_pci_scan:
 					snprintf(module, sizeof(module) - 1, "nv");
 				else if (dev.vendorid == 0x1002) //ATI
 					snprintf(module, sizeof(module) - 1, "radeon");
-				else if (dev.vendorid == 0x8086) //Intel
-					snprintf(module, sizeof(module) - 1, "intel");
 				DEBUG("%s\n%s\n%s\n%s\n", x->xserver, x->xmodule, x->xdesc, x->xopts);
 			}
 
@@ -580,8 +578,6 @@ begin_sysfs_pci_scan:
 				snprintf(module, sizeof(module) - 1, "nv");
 			else if (dev.vendorid == 0x1002) //ATI
 				snprintf(module, sizeof(module) - 1, "radeon");
-			else if (dev.vendorid == 0x8086) //Intel
-				snprintf(module, sizeof(module) - 1, "intel");
 			DEBUG("%s\n%s\n%s\n%s\n", x->xserver, x->xmodule, x->xdesc, x->xopts);
 		}
 		if (!is_device_listed(&dev)) add_device(&dev);

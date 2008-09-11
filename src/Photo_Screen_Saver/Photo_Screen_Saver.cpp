@@ -4,7 +4,7 @@
  Copyright (C) 2004 Pluto, Inc., a Florida Corporation
 
  www.plutohome.com
- 
+
 
  Phone: +1 (877) 758-8648
 
@@ -39,11 +39,11 @@ using namespace DCE;
 #define SECONDS_PER_HOUR	(SECONDS_PER_MINUTE * 60)
 
 #ifdef VIA_OVERLAY
-	extern "C" 
+	extern "C"
 	{
 		#include "Orbiter/OpenGL/VIA/via_types.h"
 		#include "Orbiter/OpenGL/VIA/viavid.h"
-	}; 
+	};
 
 	static VMI_INFO_PARAM VMI_Info;
 #endif
@@ -81,7 +81,7 @@ bool Photo_Screen_Saver::GetConfig()
 	if( !Photo_Screen_Saver_Command::GetConfig() )
 		return false;
 //<-dceag-getconfig-e->
-	
+
 	m_bIsOn=false;
 	CMD_Reload();
 
@@ -127,11 +127,11 @@ void Photo_Screen_Saver::AlarmCallback(int id, void* param)
 bool Photo_Screen_Saver::Register()
 //<-dceag-reg-e->
 {
-	return Connect(PK_DeviceTemplate_get()); 
+	return Connect(PK_DeviceTemplate_get());
 }
 
 /*  Since several parents can share the same child class, and each has it's own implementation, the base class in Gen_Devices
-	cannot include the actual implementation.  Instead there's an extern function declared, and the actual new exists here.  You 
+	cannot include the actual implementation.  Instead there's an extern function declared, and the actual new exists here.  You
 	can safely remove this block (put a ! after the dceag-createinst-b block) if this device is not embedded within other devices. */
 //<-dceag-createinst-b->
 Photo_Screen_Saver_Command *Create_Photo_Screen_Saver(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
@@ -143,9 +143,9 @@ Photo_Screen_Saver_Command *Create_Photo_Screen_Saver(Command_Impl *pPrimaryDevi
 /*
 	When you receive commands that are destined to one of your children,
 	then if that child implements DCE then there will already be a separate class
-	created for the child that will get the message.  If the child does not, then you will 
-	get all	commands for your children in ReceivedCommandForChild, where 
-	pDeviceData_Base is the child device.  If you handle the message, you 
+	created for the child that will get the message.  If the child does not, then you will
+	get all	commands for your children in ReceivedCommandForChild, where
+	pDeviceData_Base is the child device.  If you handle the message, you
 	should change the sCMD_Result to OK
 */
 //<-dceag-cmdch-b->
@@ -157,7 +157,7 @@ void Photo_Screen_Saver::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Im
 
 /*
 	When you received a valid command, but it wasn't for one of your children,
-	then ReceivedUnknownCommand gets called.  If you handle the message, you 
+	then ReceivedUnknownCommand gets called.  If you handle the message, you
 	should change the sCMD_Result to OK
 */
 //<-dceag-cmduk-b->
@@ -268,7 +268,7 @@ void Photo_Screen_Saver::CMD_On(int iPK_Pipe,string sPK_Device_Pipes,string &sCM
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Failed to enable THREEDOVERLAY overlay for PSS");
 	else
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Enabled THREEDOVERLAY overlay for PSS!");
-#endif 	
+#endif 
 
 	if(0 == ThreadID)
 	{
@@ -313,7 +313,7 @@ void Photo_Screen_Saver::CMD_Off(int iPK_Pipe,string &sCMD_Result,Message *pMess
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Failed to disable THREEDOVERLAY overlay for PSS");
 	else
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Disabled THREEDOVERLAY overlay for PSS!");
-#endif 	
+#endif 
 
 	if(m_bIsOn)
 	{
@@ -343,13 +343,13 @@ void* ThreadAnimation(void* ThreadInfo)
 {
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Start Gallery thread");
 	GallerySetup* Info = (GallerySetup*) ThreadInfo;
-	Gallery::Instance().Setup(Info->GetWidth(), Info->GetHeight(), 
+	Gallery::Instance().Setup(Info->GetWidth(), Info->GetHeight(),
 		Info->GetFaddingTime(),
 		Info->GetZoomTime(),
 		Info->GetSearchImagesPath(),
 		Info->GetUseAnimation(),
 		Info->GetMaxSize());
-	Gallery::Instance().MainLoop(Info->m_pPhoto_Screen_Saver); 
+	Gallery::Instance().MainLoop(Info->m_pPhoto_Screen_Saver);
 	Gallery::Instance().CleanUp();
 
 	*(Info->ThreadID) = 0;

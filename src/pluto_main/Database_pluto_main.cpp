@@ -111,6 +111,8 @@ tblDevice_Users=NULL;
 tblDirection=NULL;
 tblDirectory=NULL;
 tblDistro=NULL;
+tblDocument=NULL;
+tblDocument_Comment=NULL;
 tblEffect=NULL;
 tblEffectType=NULL;
 tblEffectType_Effect_Skin=NULL;
@@ -162,7 +164,6 @@ tblPackage_Package=NULL;
 tblPackage_Source=NULL;
 tblPackage_Source_Compat=NULL;
 tblPackage_Users=NULL;
-tblPackage_Version=NULL;
 tblPageSetup=NULL;
 tblPaidLicense=NULL;
 tblParameterType=NULL;
@@ -229,6 +230,12 @@ tblpsc_designer_batuser=NULL;
 tblpsc_designer_repset=NULL;
 tblpsc_designer_schema=NULL;
 tblpsc_designer_tables=NULL;
+tblpsc_document_batdet=NULL;
+tblpsc_document_bathdr=NULL;
+tblpsc_document_batuser=NULL;
+tblpsc_document_repset=NULL;
+tblpsc_document_schema=NULL;
+tblpsc_document_tables=NULL;
 tblpsc_ir_batdet=NULL;
 tblpsc_ir_bathdr=NULL;
 tblpsc_ir_batuser=NULL;
@@ -530,6 +537,12 @@ if( tblDirectory!=NULL )
 if( tblDistro!=NULL )
 	if( !Commit_Distro(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
 		bResult=false;
+if( tblDocument!=NULL )
+	if( !Commit_Document(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
+		bResult=false;
+if( tblDocument_Comment!=NULL )
+	if( !Commit_Document_Comment(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
+		bResult=false;
 if( tblEffect!=NULL )
 	if( !Commit_Effect(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
 		bResult=false;
@@ -682,9 +695,6 @@ if( tblPackage_Source_Compat!=NULL )
 		bResult=false;
 if( tblPackage_Users!=NULL )
 	if( !Commit_Package_Users(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
-		bResult=false;
-if( tblPackage_Version!=NULL )
-	if( !Commit_Package_Version(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
 		bResult=false;
 if( tblPageSetup!=NULL )
 	if( !Commit_PageSetup(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
@@ -884,6 +894,24 @@ if( tblpsc_designer_schema!=NULL )
 if( tblpsc_designer_tables!=NULL )
 	if( !Commit_psc_designer_tables(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
 		bResult=false;
+if( tblpsc_document_batdet!=NULL )
+	if( !Commit_psc_document_batdet(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
+		bResult=false;
+if( tblpsc_document_bathdr!=NULL )
+	if( !Commit_psc_document_bathdr(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
+		bResult=false;
+if( tblpsc_document_batuser!=NULL )
+	if( !Commit_psc_document_batuser(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
+		bResult=false;
+if( tblpsc_document_repset!=NULL )
+	if( !Commit_psc_document_repset(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
+		bResult=false;
+if( tblpsc_document_schema!=NULL )
+	if( !Commit_psc_document_schema(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
+		bResult=false;
+if( tblpsc_document_tables!=NULL )
+	if( !Commit_psc_document_tables(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
+		bResult=false;
 if( tblpsc_ir_batdet!=NULL )
 	if( !Commit_psc_ir_batdet(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
 		bResult=false;
@@ -1035,6 +1063,8 @@ DeleteTable_Device_Users();
 DeleteTable_Direction();
 DeleteTable_Directory();
 DeleteTable_Distro();
+DeleteTable_Document();
+DeleteTable_Document_Comment();
 DeleteTable_Effect();
 DeleteTable_EffectType();
 DeleteTable_EffectType_Effect_Skin();
@@ -1086,7 +1116,6 @@ DeleteTable_Package_Package();
 DeleteTable_Package_Source();
 DeleteTable_Package_Source_Compat();
 DeleteTable_Package_Users();
-DeleteTable_Package_Version();
 DeleteTable_PageSetup();
 DeleteTable_PaidLicense();
 DeleteTable_ParameterType();
@@ -1153,6 +1182,12 @@ DeleteTable_psc_designer_batuser();
 DeleteTable_psc_designer_repset();
 DeleteTable_psc_designer_schema();
 DeleteTable_psc_designer_tables();
+DeleteTable_psc_document_batdet();
+DeleteTable_psc_document_bathdr();
+DeleteTable_psc_document_batuser();
+DeleteTable_psc_document_repset();
+DeleteTable_psc_document_schema();
+DeleteTable_psc_document_tables();
 DeleteTable_psc_ir_batdet();
 DeleteTable_psc_ir_bathdr();
 DeleteTable_psc_ir_batuser();

@@ -54,7 +54,7 @@ int sqlCVSprocessor::UnauthorizedBatch(int psc_user_needs_to_authorize)
 		m_psc_bathdr_unauth = min(m_psc_bathdr_unauth,atoi(row[0])-1);
 
 	sSQL.str("");
-	sSQL << "INSERT INTO `psc_" << m_pRepository->Name_get( ) << "_bathdr` (PK_psc_" << m_pRepository->Name_get() << "_bathdr, IPAddress, date, comments ) VALUES( "
+	sSQL << "INSERT INTO `psc_" << m_pRepository->Name_get( ) << "_bathdr` (PK_psc_" << m_pRepository->Name_get() << "_bathdr, IPAddress, date, comments ) VALUES ( "
 		<< m_psc_bathdr_unauth << ",'" << (m_pSocket ? m_pSocket->m_sIPAddress : "") << "', NOW(), '" << StringUtils::SQLEscape(m_sComments) << "' )";
 	if( m_pRepository->m_pDatabase->threaded_mysql_query( sSQL.str( ) )<0 )
 	{

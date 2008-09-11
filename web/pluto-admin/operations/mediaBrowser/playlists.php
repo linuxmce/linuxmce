@@ -3,7 +3,8 @@ function playlists($output,$mediadbADO) {
 	// include language file
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/playlists.lang.php');
-	
+	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/exportPlaylist.lang.php');
+
 	/* @var $mediadbADO ADOConnection */
 	/* @var $rs ADORecordSet */
 	$out='';
@@ -13,6 +14,11 @@ function playlists($output,$mediadbADO) {
 	if($action=='form'){
 		
 		$out.='
+		<script>
+			function windowOpen(locationA,attributes) {
+				window.open(locationA,\'\',attributes);
+			}
+		</script>
 			<div align="center" class="err">'.@$_REQUEST['error'].'</div>
 			<div align="center" class="confirm"><B>'.@$_REQUEST['msg'].'</B></div>
 			
@@ -40,12 +46,12 @@ function playlists($output,$mediadbADO) {
 		while($rowPlaylist=$resPlaylist->FetchRow()){
 			$pos++;
 			$pic=(!is_null($rowPlaylist['FK_Picture']))?'<a href="mediapics/'.$rowPlaylist['FK_Picture'].'.jpg" target="_blank"><img src="mediapics/'.$rowPlaylist['FK_Picture'].'_tn.jpg" border="0"></a>':'';
-			$out.='
+			$out.='				
 				<tr bgcolor="'.(($pos%2==0)?'#EEEEEE':'#EBEFF9').'">
 					<td align="center">'.$pos.'</td>
 					<td align="center">'.$pic.'</td>
 					<td align="center">'.$rowPlaylist['Name'].'</td>
-					<td align="center"><a href="index.php?section=editPlaylist&plID='.$rowPlaylist['PK_Playlist'].'">'.$TEXT_EDIT_CONST.'</a> <a href="#" onClick="if(confirm(\''.$TEXT_CONFIRM_DELETE_PLAYLIST_CONST.'\'))self.location=\'index.php?section=playlists&action=delete&plID='.$rowPlaylist['PK_Playlist'].'\'">'.$TEXT_DELETE_CONST.'</a></td>
+					<td align="center"><a href="index.php?section=editPlaylist&plID='.$rowPlaylist['PK_Playlist'].'">'.$TEXT_EDIT_CONST.'</a> <a href="#" onClick="if(confirm(\''.$TEXT_CONFIRM_DELETE_PLAYLIST_CONST.'\'))self.location=\'index.php?section=playlists&action=delete&plID='.$rowPlaylist['PK_Playlist'].'\'">'.$TEXT_DELETE_CONST.'</a><BR><a href="#" onClick="windowOpen(\'index.php?section=exportPlaylist&playlistID='.$rowPlaylist['PK_Playlist'].'\',\'width=400,height=450,toolbars=false,scrollbars=0,resizable=1\');">'.$TEXT_EXPORT_PLAYLIST_CONST.'</a></td>
 				</tr>
 			';
 		}

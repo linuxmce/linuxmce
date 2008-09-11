@@ -25,43 +25,16 @@
 #include "AlarmManager.h"
 #include "DCE/DeviceData_Router.h"
 
-class Scene_Data;
-class Command_Data;
 
 //<-dceag-decl-b->!
 namespace DCE
 {
-	// When execute scenario is called and is supposed to delay sending a command it 
-	// creates an instance of this and adds it to a map
-	class Command_Data_CallBack
-	{
-	public:
-		Command_Data *m_pCommand_Data;
-		time_t m_tTime;
-		int m_PK_Device_From;
-
-		Command_Data_CallBack(Command_Data *pCommand_Data, time_t tTime, int PK_Device_From);
-
-		~Command_Data_CallBack();
-	};
-
-	typedef list< Command_Data_CallBack * > List_Command_Data_CallBack;
-
 	class General_Info_Plugin : public General_Info_Plugin_Command, public AlarmEvent
 	{
 //<-dceag-decl-e->
 		// Private member variables
-		class MessageInterceptorCallBack *m_pCallBack_ForExecuteScenarios;
-		map<int,List_Command_Data_CallBack *> m_mapList_Command_Data_CallBack;
 
 		// Private methods
-		void ParseCommandParameters(std::map<int, string>& mapParams, string &sText,string::size_type &pos);
-		void SetNextAlarm();
-		void RegisterAllInterceptor();
-		void UnRegisterAllInterceptor();
-		void ProcessDelayedExecuteScenarios();
-		void ExecuteCommandData(Command_Data *pCommand_Data,int PK_Device_From);
-
 public:
 		// Public member variables
 
@@ -76,7 +49,12 @@ public:
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
 
-		bool InterceptAllCommands( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
+//<-dceag-const2-b->
+		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
+		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
+		General_Info_Plugin(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
+//<-dceag-const2-e->
+
 		bool ReportingChildDevices( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
 		void ReportingChildDevices_Offline( void *pVoid );
 
@@ -86,9 +64,7 @@ public:
 		class AlarmManager *m_pAlarmManager;
 		void AlarmCallback(int id, void* param);
 
-		DeviceData_Router *ProcessChildDevice(int nPK_Device, string sLine, bool &bNewDevice);
-
-		void ExecuteCommandData(map<int, Command_Data> *mapCommands,int PK_Device_From);
+		DeviceData_Router *ProcessChildDevice(int nPK_Device, string sLine);
 
 //<-dceag-h-b->
 	/*
@@ -172,13 +148,9 @@ public:
 
 	/** @brief COMMAND: #248 - Get Device Status */
 	/** Gets the status for a device */
-		/** @param #2 PK_Device */
-			/** The device id which you need information for. */
-		/** @param #5 Value To Assign */
-			/** the data */
 
-	virtual void CMD_Get_Device_Status(int iPK_Device,string *sValue_To_Assign) { string sCMD_Result; CMD_Get_Device_Status(iPK_Device,sValue_To_Assign,sCMD_Result,NULL);};
-	virtual void CMD_Get_Device_Status(int iPK_Device,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Get_Device_Status() { string sCMD_Result; CMD_Get_Device_Status(sCMD_Result,NULL);};
+	virtual void CMD_Get_Device_Status(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #272 - Restart DCERouter */
@@ -235,19 +207,6 @@ public:
 
 	virtual void CMD_Get_Room_Description(int iPK_Device,string *sText,int *iPK_Room) { string sCMD_Result; CMD_Get_Room_Description(iPK_Device,sText,iPK_Room,sCMD_Result,NULL);};
 	virtual void CMD_Get_Room_Description(int iPK_Device,string *sText,int *iPK_Room,string &sCMD_Result,Message *pMessage);
-
-
-	/** @brief COMMAND: #370 - Execute Command Group */
-	/** Execute a command group */
-		/** @param #9 Text */
-			/** Instead of the command group, it can be put here in the format: PK_Device,PK_DeviceGroup,PK_Command,Delay,CancelIfOther,IsTemporary,"PK_CommandParameter","Description"....\n
-
-where the items in " have escaped " so they can embed , and \n characters */
-		/** @param #28 PK_CommandGroup */
-			/** The command group to execute */
-
-	virtual void CMD_Execute_Command_Group(string sText,int iPK_CommandGroup) { string sCMD_Result; CMD_Execute_Command_Group(sText.c_str(),iPK_CommandGroup,sCMD_Result,NULL);};
-	virtual void CMD_Execute_Command_Group(string sText,int iPK_CommandGroup,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #371 - Is Daytime */
@@ -489,7 +448,7 @@ Delimiter: '\n' */
 		/** @param #2 PK_Device */
 			/** The parent device */
 		/** @param #5 Value To Assign */
-			/** A pipe delimited list like this: DeviceID1|TemplateName1|CommandLine1\nDeviceID2|DeviceTemplateName2|CommandLine2 etc */
+			/** A pipe delimited list like this: DeviceID1|CommandLine1\nDeviceID2|CommandLine2 etc */
 
 	virtual void CMD_Get_Devices_To_Start(int iPK_Device,string *sValue_To_Assign) { string sCMD_Result; CMD_Get_Devices_To_Start(iPK_Device,sValue_To_Assign,sCMD_Result,NULL);};
 	virtual void CMD_Get_Devices_To_Start(int iPK_Device,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage);
@@ -514,14 +473,6 @@ Delimiter: '\n' */
 	virtual void CMD_Update_Device(int iPK_Device,string sMac_address,int iPK_Room,string sIP_Address,string sData_String,string sDescription,string &sCMD_Result,Message *pMessage);
 
 
-	/** @brief COMMAND: #969 - Restore To NonTemp State */
-	/** Restore a device to the state in State_NonTemporary, so that a temporary change can be reverted */
-		/** @param #2 PK_Device */
-			/** The device to restore */
-
-	virtual void CMD_Restore_To_NonTemp_State(int iPK_Device) { string sCMD_Result; CMD_Restore_To_NonTemp_State(iPK_Device,sCMD_Result,NULL);};
-	virtual void CMD_Restore_To_NonTemp_State(int iPK_Device,string &sCMD_Result,Message *pMessage);
-
 //<-dceag-h-e->
 	};
 
@@ -529,5 +480,3 @@ Delimiter: '\n' */
 }
 #endif
 //<-dceag-end-e->
-//<-dceag-const2-b->!
-

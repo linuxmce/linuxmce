@@ -35,6 +35,7 @@ or FITNESS FOR A PARTICULAR PURPOSE. See the Pluto Public License for more detai
 #ifndef __DATAGRID_ANIMATION_MANAGER_H__
 #define __DATAGRID_ANIMATION_MANAGER_H__
 
+#include <string>
 #include <vector>
 using namespace std;
 

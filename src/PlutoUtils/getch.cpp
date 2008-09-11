@@ -19,6 +19,7 @@
 #else
 #include <termios.h>
 #include <sys/ioctl.h>
+#include <sys/select.h>
 #include <unistd.h>
 
 #define EOF -1

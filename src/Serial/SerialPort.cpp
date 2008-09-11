@@ -17,10 +17,8 @@
 
  */
 #include "SerialPort.h"
-#include "DCE/Logger.h"
-#include "Generic_Serial_Device/IOUtils.h"
-#include <time.h>
-using namespace DCE;
+#include <cstdlib>
+#include <cstring>
 
 #ifdef WIN32
 
@@ -36,8 +34,6 @@ CSerialPort::CSerialPort(string Port, unsigned BPS, eParityBitStop ParityBitStop
 	filer=fopen("/serialread.txt","wb");
 	filew=fopen("/serialwrite.txt","wb");
 #endif
-
-	m_bPortDied=false;
 
     m_Serio.port=NULL;
 	if (serio_open(&m_Serio, BPS, Port.c_str(), NOPARITY, 8, ONESTOPBIT)!=comm_STATUS_OK)
@@ -76,11 +72,7 @@ size_t CSerialPort::Read(char *Buf, size_t MaxLen, int Timeout)
 	size_t ReturnValue = 0;
 	while( tv_now<tv_timeout )
 	{
-		ReturnValue=0;
-		serio_res_t res = serio_read(&m_Serio, &Buf[ReadSoFar], MaxLen, &ReturnValue);
-if( ReturnValue>0 )
-LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "CSerialPort::Read res %d ReadSoFar %d MaxLen %d ReturnValue %d Buf[ReadSoFar] %s",
-	(int) res, (int) ReadSoFar, (int) MaxLen, (int) ReturnValue, IOUtils::FormatHexAsciiBuffer((const char *) &Buf[ReadSoFar], static_cast<unsigned int>(ReturnValue),"34").c_str());
+		serio_read(&m_Serio, &Buf[ReadSoFar], MaxLen, &ReturnValue);
 
 
 #ifdef DEBUG_USING_FILES
@@ -240,35 +232,15 @@ void *CSerialPort::Private::receiveFunction(void * serialPrivate)
 		
 		FD_ZERO(&rfds);
 		FD_SET(parent->m_fdSerial, &rfds);
-
-		static int iConsecutiveFailures = 0;
 		
 		ret = select(parent->m_fdSerial+1, &rfds, NULL, NULL, &tv);
 		if (ret <= 0 || !FD_ISSET(parent->m_fdSerial, &rfds))
 		{
-			iConsecutiveFailures = 0;
 			retval = -1;
 		}
 		else
 		{
 			retval = read(parent->m_fdSerial, mybuf, len);
-			// I'm not sure how to tell when the port is really dead.  retVal==0 normally seems to indicate it is dead
-			// But sometimes it happens on it's own.  I'll assume it's dead if it happens 100 times in a row over a 1 second period
-			if( retval==0 )
-			{
-				iConsecutiveFailures++;
-				Sleep(10);
-				if( iConsecutiveFailures>100 )
-				{
-					LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "CSerialPort::Private::receiveFunction PORT DIED");
-					parent->m_bPortDied=true;
-					priv->running = false;
-					pthread_exit(NULL);
-					return NULL;
-				}
-			}
-			else
-				iConsecutiveFailures = 0;
 		}
 		pthread_mutex_unlock( &priv->mutex_serial );
 		
@@ -293,8 +265,6 @@ void *CSerialPort::Private::receiveFunction(void * serialPrivate)
 
 CSerialPort::CSerialPort(string Port, unsigned BPS, eParityBitStop ParityBitStop, bool FlowControl)
 {
-	m_bPortDied=false;
-
 	d = new Private(this);
 	if( d == NULL )
 	{
@@ -441,12 +411,6 @@ void CSerialPort::Write(char *Buf, size_t Len)
 
 size_t CSerialPort::Read(char *Buf, size_t MaxLen, int Timeout)
 {
-	if( m_bPortDied )
-	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "CSerialPort::Read.  port has gone away");
-		throw string("port gone");
-	}
-
 	struct timeval now;
 	struct timeval last;
 	size_t bytes = 0;

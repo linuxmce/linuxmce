@@ -61,7 +61,7 @@ int IdentifyTask::Run()
 			m_pDisk_Drive_Functions->m_dwPK_Device_get(),StringUtils::itos(m_pDisk_Drive_Functions->m_discid),
 			m_pDisk_Drive_Functions->m_sDrive,
 			m_pCommand_Impl->m_dwPK_Device);
-		if( m_pCommand_Impl->SendCommand(CMD_Identify_Media,&sResponse) && sResponse.size()>=2 && sResponse.substr(0,2)=="OK" )
+		if( m_pCommand_Impl->SendCommand(CMD_Identify_Media,&sResponse) && sResponse=="OK" )
 		{
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "IdentifyTask::Run waiting for identification");
 			m_eTaskStatus_set(TASK_IN_PROGRESS);

@@ -19,6 +19,8 @@
  ***************************************************************************/
 #include "masterproxypeerthread.h"
 
+#include <cstdlib>
+
 #include <iostream>
 
 #include "constants.h"

@@ -105,6 +105,9 @@ function usersOrbiters($output,$dbADO) {
 				}
 			}
 		}
+		//Orbiters need regenerated to activate changes
+		setOrbitersNeedConfigure($installationID,$dbADO);
+
 		header("Location: index.php?section=usersOrbiters&msg=$TEXT_USER_ORBITER_UPDATED_CONST");
 	}
 

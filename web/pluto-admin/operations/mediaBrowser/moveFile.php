@@ -69,9 +69,16 @@ function moveFile($output,$mediadbADO) {
 
 		if(isset($_POST['newPath']) && $_POST['newPath']!=''){
 			$newFilePath=urldecode($_POST['newPath']);
+
+			$filePath = bash_escape($filePath);
+			$newFilePath = bash_escape($newFilePath);
+
 			$mvID3='sudo -u root mv \''.$filePath.'.id3\' \''.$newFilePath.'.id3\'';
 			exec_batch_command($mvID3);
 	
+			$mvCssKey='sudo -u root mv \''.$filePath.'.keys.tar.gz\' \''.$newFilePath.'.keys.tar.gz\'';
+			exec_batch_command($mvCssKey);
+
 			$cmd='sudo -u root mv \''.$filePath.'\' \''.$newFilePath.'\'';
 			$moved_cmd=exec($cmd,$ret,$moved);	
 			

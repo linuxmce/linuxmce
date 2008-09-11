@@ -1,0 +1,16 @@
+----------------------------
+LinuxMCE WindowUtils library
+----------------------------
+
+Author: 
+	Thom Cherryhomes <thom.cherryhomes@localeconcept.com>
+
+Synopsis:
+	A simple window introspection library to be used in DCE devices that interact with windows,
+	such as media plugins and players. I currently use this in MAME Player to pass keystrokes
+	to the MAME window.
+
+License:
+	GNU Public License (GPL) Version 3.0 - Please visit http://www.gnu.org/ for details.
+
+

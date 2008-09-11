@@ -53,7 +53,7 @@ namespace nsJobHandler
 			Command_Impl *pCommand_Impl);
 		virtual ~IdentifyJob();
 
-		virtual enumReadyToRun ReadyToRun();
+		virtual bool ReadyToRun();
 		void AddIdentifyTasks();
 
 		virtual bool ReportPendingTasks(PendingTaskList *pPendingTaskList);

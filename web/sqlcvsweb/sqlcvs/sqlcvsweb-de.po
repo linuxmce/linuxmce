@@ -1,0 +1,93 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2007-11-20 13:06+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: index.php:24
+msgid "sqlCVSweb"
+msgstr ""
+
+#: index.php:25
+msgid "Management GUI"
+msgstr ""
+
+#: index.php:44
+msgid "User"
+msgstr ""
+
+#: content/batch/detail.inc:1
+msgid "Batch details"
+msgstr ""
+
+#: content/batch/detail.inc:2
+msgid "Repository"
+msgstr ""
+
+#: content/batch/detail.inc:2 content/batch/view.inc:27
+msgid "Batch ID"
+msgstr ""
+
+#: content/batch/view.inc:1 content/menuleft.inc:4
+msgid "View batches"
+msgstr "Batches anzeigen"
+
+#: content/batch/view.inc:22
+msgid "Results"
+msgstr "Ergebnisse"
+
+#: content/batch/view.inc:27
+msgid "IP Address"
+msgstr "IP Adresse"
+
+#: content/batch/view.inc:27
+msgid "Date"
+msgstr "Datum"
+
+#: content/batch/view.inc:27
+msgid "Comments"
+msgstr "Kommentare"
+
+#: content/menuleft.inc:2
+msgid "Batches"
+msgstr ""
+
+#: content/menuleft.inc:6
+msgid "User Management"
+msgstr "Benutzermanagement"
+
+#: content/menuleft.inc:8
+msgid "View users"
+msgstr "Benutzer anzeigen"
+
+#: content/menuleft.inc:10
+msgid "LMCE"
+msgstr ""
+
+#: content/menuleft.inc:10
+msgid "Links"
+msgstr ""
+
+#: content/menuleft.inc:12
+msgid "Wiki"
+msgstr ""
+
+#: content/menuleft.inc:14
+msgid "Forum"
+msgstr ""
+
+#: content/menuleft.inc:16
+msgid "Mailing Lists"
+msgstr ""

@@ -192,6 +192,7 @@
 				
 			}else{
 				$publicADO->Execute('DELETE FROM DeviceTemplate_DSPMode WHERE FK_DeviceTemplate=?',array($dtID));
+				$publicADO->Execute('UPDATE DeviceTemplate_AV SET ToggleDSP=? WHERE FK_DeviceTemplate=?',array(0,$dtID));
 			}
 
 			$nextStep=($dsp==3)?'6b':7;

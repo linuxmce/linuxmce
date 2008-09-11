@@ -1,0 +1,3 @@
+2008-03-18	Thomas Cherryhomes <thom.cherryhomes@localeconcept.com>
+
+* Fixed sql2cpp class to avoid table clashes with pluto_media!  

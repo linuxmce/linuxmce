@@ -25,6 +25,9 @@ See the GNU General Public License for more details.
 #include "ServerSocket.h"
 #include "SocketListener.h"
 
+#include <algorithm>
+using namespace std;
+
 using namespace DCE;
 
 void *BeginListenerThread( void *pSockListener )

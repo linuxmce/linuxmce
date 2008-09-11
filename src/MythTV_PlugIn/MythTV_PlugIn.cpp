@@ -2153,7 +2153,7 @@ void MythTV_PlugIn::StartScanJob(ScanJob *pScanJob)
 		DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
 			SCRIPT_DIR + pScanJob->m_sScanJob,"scanchannels",sArguments,sScanFailed,"",false,false,false,true);
 		string sResponse;
-		if( !SendCommand(CMD_Spawn_Application,&sResponse) || sResponse.size()<2 || sResponse.substr(0,2)!="OK" )
+		if( !SendCommand(CMD_Spawn_Application,&sResponse) || sResponse!="OK" )
 		{
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MythTV_PlugIn::StartScanJob -- app server didn't respond");
 			m_pAlarmManager->AddRelativeAlarm(30,this,START_SCAN_JOB,(void *) pScanJob);  /* check again in 30 seconds */

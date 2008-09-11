@@ -18,6 +18,7 @@
  */
 #include "WizardCommandLineParser.h"
 
+#include <cstring>
 #include <iostream>
 
 #ifdef WIN32

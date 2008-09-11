@@ -167,7 +167,9 @@ function restrictAccess($output,$dbADO) {
 				}
 			}
 		}
-		
+		//Orbiters need regenerated to activate changes
+		setOrbitersNeedConfigure($installationID,$dbADO);
+
 		header("Location: index.php?section=restrictAccess&msg=$TEXT_RESTRICTIONS_UPDATED_CONST");
 
 	}

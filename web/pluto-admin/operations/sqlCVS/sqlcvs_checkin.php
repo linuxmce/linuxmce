@@ -58,7 +58,7 @@ function sqlcvs_checkin($output,$dbADO) {
 		<input type="hidden" name="section" value="sqlcvs_checkin">
 		<input type="hidden" name="action" value="add">	
 		
-	<table width="400" cellpadding="3" cellspacing="0">
+	<table width="500" cellpadding="3" cellspacing="0" border="0">
 		<tr>
 			<td colspan="3"><B>'.$TEXT_SQLCVS_HOST_CONST.':</B></td>
 			<td><input type="text" name="host" value="'.((isset($_REQUEST['host']))?$_REQUEST['host']:'sqlcvs.linuxmce.org').'"></td>
@@ -69,20 +69,25 @@ function sqlcvs_checkin($output,$dbADO) {
 		</tr>		
 		<tr>
 			<td colspan="3"><B>'.$TEXT_USERNAME_CONST.':</B></td>
-			<td><input type="text" name="username" value="'.@$_REQUEST['username'].'"></td>
+			<td><input type="text" name="username" value="'.((isset($_REQUEST['username']))?@$_REQUEST['username']:'anonymous').'"></td>
 		</tr>
 		<tr>
 			<td colspan="3"><B>'.$TEXT_PASSWORD_CONST.':</B></td>
-			<td><input type="text" name="password" value="'.@$_REQUEST['password'].'"></td>
+			<td><input type="text" name="password" value="'.((isset($_REQUEST['password']))?@$_REQUEST['password']:'nopass').'"></td>
 		</tr>
 		<tr>
 			<td colspan="3"><B>'.$TEXT_DATABASE_CONST.':</B></td>
 			<td>'.pulldownFromArray($databasesArray,'database',$database,'onchange="document.sqlcvs_checkin.action.value=\'form\';document.sqlcvs_checkin.submit();"','key','').'</td>
 		</tr>		
 		<tr>
-			<td colspan="3">&nbsp;</td>
-			<td><input type="submit" class="button" name="submitBtn" value="'.$TEXT_NEXT_CONST.'"></td>
-		</tr>		
+			<td colspan=4>&nbsp</td>
+		</tr>	
+		<tr>
+			<td colspan=4>'.$TEXT_SQLCVS_CHECKIN_HINT.'</td>
+		</tr>	
+		<tr>
+			<td colspan=4>&nbsp</td>
+		</tr>	
 		';
 	
 
@@ -93,7 +98,7 @@ function sqlcvs_checkin($output,$dbADO) {
 			if($cleanTable!='local'){
 				$out.='
 				<tr bgcolor="#F0F3F8">
-					<td>&nbsp;</td>
+					<td width="50">&nbsp;</td>
 					<td width="20"><input type="checkbox" name="table_'.$cleanTable.'" value="1" onclick="selAllCheckboxes(\''.$cleanTable.'\');"></td>
 					<td colspan="2"><B>'.$cleanTable.'</B></td>
 				</tr>
@@ -105,7 +110,7 @@ function sqlcvs_checkin($output,$dbADO) {
 				foreach ($fieldsArray AS $key=>$value){
 					$out.='
 				<tr>
-					<td>&nbsp;</td>
+					<td width="50">&nbsp;</td>
 					<td width="20">&nbsp;</td>
 					<td width="20"><input type="checkbox" name="'.$cleanTable.'_'.$value.'" value="1" onClick="groupCheck(\''.$cleanTable.'\',\''.$value.'\')"></td>
 					<td>'.$value.'</td>
@@ -116,8 +121,17 @@ function sqlcvs_checkin($output,$dbADO) {
 	}	
 	$out.='	
 		<tr>
-			<td colspan="3">&nbsp;</td>
+			<td colspan="4">&nbsp</td>
+		</tr>
+		<tr>
+			<td colspan="4" align="Left">'.$TEXT_SQLCVS_COMMENT.'</td>
+		</tr>
+		<tr>
+			<td align="center" colspan="4"><input type="text" name="sqlCVSComment" size="100%"></td>
+		</tr>
+		<tr>
 			<td><input type="submit" class="button" name="submitBtn" value="'.$TEXT_NEXT_CONST.'"></td>
+			<td colspan="3">&nbsp</td>
 		</tr>		
 	</table>
 	</form>
@@ -136,6 +150,7 @@ function sqlcvs_checkin($output,$dbADO) {
 		$password=stripslashes($_POST['password']);
 		$rParmArray=array();
 		$tParmArray=array();
+		$sqlCVSComment = ($_POST['sqlCVSComment']!="")?' -c "'.bash_escape(stripslashes($_POST['sqlCVSComment'])).'"':"";
 
 		if($host=='' || $port==''){
 			header("Location: index.php?section=sqlcvs_checkin&error=$TEXT_ERROR_HOST_OR_PORT_NOT_SPECIFIED_CONST");
@@ -170,8 +185,9 @@ function sqlcvs_checkin($output,$dbADO) {
 			$parmList.=join(',',$tParmArray[$rep]);
 		}
 		
-		$cmd='/usr/pluto/bin/sqlCVS -H '.$host.' -R '.$port.' -h localhost -a -n '.$parmList.' -d "'.$username.'" -U "'.$username.'~'.$password.'" -D '.$database.' -e checkin';
-
+		$cmd='/usr/pluto/bin/sqlCVS -H '.$host.' -R '.$port.' -h localhost -a -n '.$parmList.' -d "'.$username.'" -U "'.$username.'~'.$password.'" -D '.$database.$sqlCVSComment.' -e checkin';
+		writeFile($GLOBALS['WebExecLogFile'],date('d-m-Y H:i:s')."\t".$cmd."\n",'a+');
+		
 		$out='
 		<script>
 			function windowOpen(locationA,attributes) {

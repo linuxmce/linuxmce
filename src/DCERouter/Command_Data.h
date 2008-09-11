@@ -10,9 +10,6 @@ private:
 	int m_nDevice_From;
 	int m_nDevice_To;
 	int m_nPK_Command;
-	int m_nDelay;
-	int m_nCancelIfOther;
-	int m_nIsTemporary;
 	std::map<int, string> m_mapParams;
 
 public:
@@ -22,9 +19,6 @@ public:
 		m_nDevice_From = 0;
 		m_nDevice_To = 0;
 		m_nPK_Command = 0;
-		m_nDelay = 0;
-		m_nCancelIfOther = 0;
-		m_nIsTemporary = 0;
 	}
 
 	void Device_From(int nDeviceID)
@@ -55,36 +49,6 @@ public:
 	int PK_Command()
 	{
 		return m_nPK_Command;
-	}
-
-	void Delay(int nDelay)
-	{
-		m_nDelay = nDelay;
-	}
-
-	int Delay()
-	{
-		return m_nDelay;
-	}
-
-	void CancelIfOther(int nCancelIfOther)
-	{
-		m_nCancelIfOther = nCancelIfOther;
-	}
-
-	int CancelIfOther()
-	{
-		return (int) m_nCancelIfOther;
-	}
-
-	void IsTemporary(int nIsTemporary)
-	{
-		m_nIsTemporary = nIsTemporary;
-	}
-
-	int IsTemporary()
-	{
-		return m_nIsTemporary;
 	}
 
 	std::map<int, string>& Params()

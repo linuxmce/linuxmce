@@ -29,8 +29,6 @@ class Table_Attribute* tblAttribute;
 bool Commit_Attribute(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
 class Table_AttributeType* tblAttributeType;
 bool Commit_AttributeType(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
-class Table_Attribute_MediaType* tblAttribute_MediaType;
-bool Commit_Attribute_MediaType(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
 class Table_Attribute_Settings* tblAttribute_Settings;
 bool Commit_Attribute_Settings(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
 class Table_Bookmark* tblBookmark;
@@ -116,7 +114,6 @@ bool Commit_psc_media_tables(bool bDeleteFailedModifiedRow,bool bDeleteFailedIns
 public:
 class Table_Attribute* Attribute_get() { if( !tblAttribute ) CreateTable_Attribute(); return tblAttribute; }
 class Table_AttributeType* AttributeType_get() { if( !tblAttributeType ) CreateTable_AttributeType(); return tblAttributeType; }
-class Table_Attribute_MediaType* Attribute_MediaType_get() { if( !tblAttribute_MediaType ) CreateTable_Attribute_MediaType(); return tblAttribute_MediaType; }
 class Table_Attribute_Settings* Attribute_Settings_get() { if( !tblAttribute_Settings ) CreateTable_Attribute_Settings(); return tblAttribute_Settings; }
 class Table_Bookmark* Bookmark_get() { if( !tblBookmark ) CreateTable_Bookmark(); return tblBookmark; }
 class Table_CoverArtScan* CoverArtScan_get() { if( !tblCoverArtScan ) CreateTable_CoverArtScan(); return tblCoverArtScan; }
@@ -166,7 +163,6 @@ bool Commit(bool bDeleteFailedModifiedRow=false,bool bDeleteFailedInsertRow=fals
 private:
 void CreateTable_Attribute();
 void CreateTable_AttributeType();
-void CreateTable_Attribute_MediaType();
 void CreateTable_Attribute_Settings();
 void CreateTable_Bookmark();
 void CreateTable_CoverArtScan();
@@ -210,7 +206,6 @@ void CreateTable_psc_media_schema();
 void CreateTable_psc_media_tables();
 void DeleteTable_Attribute();
 void DeleteTable_AttributeType();
-void DeleteTable_Attribute_MediaType();
 void DeleteTable_Attribute_Settings();
 void DeleteTable_Bookmark();
 void DeleteTable_CoverArtScan();

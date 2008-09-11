@@ -556,9 +556,9 @@ string StringUtils::URLEncode( string sInput )
         {
             case '\"': case '<': case '>': case '%': case '\\':
             case  '^': case '[': case ']': case '`': case '+':
-            case  '$': case ',': case '@': case ';': //case '/':
+            case  '$': case ',': case '@': case ';': case '/':
             case  '!': case '#': case '?': case '=': case '&':
-//            case  ':':
+            case  ':':
                 *outBuffer++ = '%';
                 *outBuffer++ = hexValues[(*inBuffer >> 4) & 0x0F];
                 *outBuffer++ = hexValues[*inBuffer & 0x0F];
@@ -610,7 +610,7 @@ string StringUtils::URLDecode( string sInput )
                     *outBuffer = *inBuffer - '0';
                 else if ('A' <= *inBuffer && *inBuffer <= 'F')
                     *outBuffer = *inBuffer - ('A' - 10);
-                else if ('a' <= *inBuffer && *inBuffer <= 'f')
+                else if ('A' <= *inBuffer && *inBuffer <= 'F')
                     *outBuffer = *inBuffer - ('a' - 10);
                 *outBuffer <<= 4;
 
@@ -619,7 +619,7 @@ string StringUtils::URLDecode( string sInput )
                     *outBuffer |= (*inBuffer - '0');
                 else if ('A' <= *inBuffer && *inBuffer <= 'F')
                     *outBuffer |= (*inBuffer - ('A' - 10));
-                else if ('a' <= *inBuffer && *inBuffer <= 'f')
+                else if ('A' <= *inBuffer && *inBuffer <= 'F')
                     *outBuffer |= (*inBuffer - ('a' - 10));
             }
 #ifndef WINCE

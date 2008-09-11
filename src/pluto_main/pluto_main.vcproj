@@ -391,6 +391,12 @@
 				RelativePath=".\Table_Distro.cpp">
 			</File>
 			<File
+				RelativePath=".\Table_Document.cpp">
+			</File>
+			<File
+				RelativePath=".\Table_Document_Comment.cpp">
+			</File>
+			<File
 				RelativePath=".\Table_Effect.cpp">
 			</File>
 			<File
@@ -542,9 +548,6 @@
 			</File>
 			<File
 				RelativePath=".\Table_Package_Users.cpp">
-			</File>
-			<File
-				RelativePath=".\Table_Package_Version.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_PageSetup.cpp">
@@ -743,6 +746,24 @@
 			</File>
 			<File
 				RelativePath=".\Table_psc_designer_tables.cpp">
+			</File>
+			<File
+				RelativePath=".\Table_psc_document_batdet.cpp">
+			</File>
+			<File
+				RelativePath=".\Table_psc_document_bathdr.cpp">
+			</File>
+			<File
+				RelativePath=".\Table_psc_document_batuser.cpp">
+			</File>
+			<File
+				RelativePath=".\Table_psc_document_repset.cpp">
+			</File>
+			<File
+				RelativePath=".\Table_psc_document_schema.cpp">
+			</File>
+			<File
+				RelativePath=".\Table_psc_document_tables.cpp">
 			</File>
 			<File
 				RelativePath=".\Table_psc_ir_batdet.cpp">

@@ -28,21 +28,6 @@ using namespace DCE;
 //<-dceag-d-e->
 
 #include "DCE/DCERouter.h"
-#include "DCERouter/Command_Data.h"
-#include "DCERouter/Scene_Data.h"
-
-Command_Data_CallBack::Command_Data_CallBack(Command_Data *pCommand_Data, time_t tTime, int PK_Device_From)
-{
-	m_pCommand_Data = new Command_Data();
-	*m_pCommand_Data = *pCommand_Data;
-	m_tTime = tTime;
-	m_PK_Device_From = PK_Device_From;
-}
-
-Command_Data_CallBack::~Command_Data_CallBack()
-{
-	delete m_pCommand_Data;
-}
 
 struct ChildDeviceProcessing
 {
@@ -57,7 +42,6 @@ struct ChildDeviceProcessing
 };
 
 #define PROCESS_CHILD_DEVICES 1
-#define PROCESS_DELAYED_EXECUTE_SCENARIOS	3
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -66,10 +50,15 @@ General_Info_Plugin::General_Info_Plugin(int DeviceID, string ServerAddress,bool
 //<-dceag-const-e->
 {
 	m_pAlarmManager=NULL;
-	m_pCallBack_ForExecuteScenarios=NULL;
 }
 
-//<-dceag-const2-b->!
+//<-dceag-const2-b->
+// The constructor when the class is created as an embedded instance within another stand-alone device
+General_Info_Plugin::General_Info_Plugin(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
+	: General_Info_Plugin_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
+//<-dceag-const2-e->
+{
+}
 
 //<-dceag-dest-b->
 General_Info_Plugin::~General_Info_Plugin()
@@ -104,7 +93,15 @@ bool General_Info_Plugin::Register()
 	return Connect(PK_DeviceTemplate_get()); 
 }
 
-//<-dceag-createinst-b->!
+/*  Since several parents can share the same child class, and each has it's own implementation, the base class in Gen_Devices
+	cannot include the actual implementation.  Instead there's an extern function declared, and the actual new exists here.  You 
+	can safely remove this block (put a ! after the dceag-createinst-b block) if this device is not embedded within other devices. */
+//<-dceag-createinst-b->
+General_Info_Plugin_Command *Create_General_Info_Plugin(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
+{
+	return new General_Info_Plugin(pPrimaryDeviceCommand, pData, pEvent, pRouter);
+}
+//<-dceag-createinst-e->
 
 /*
 	When you receive commands that are destined to one of your children,
@@ -239,19 +236,10 @@ void General_Info_Plugin::CMD_Request_File_And_Checksum(string sFilename,char **
 void General_Info_Plugin::CMD_Set_Device_Data(int iPK_Device,string sValue_To_Assign,int iPK_DeviceData,string &sCMD_Result,Message *pMessage)
 //<-dceag-c246-e->
 {
-	DeviceData_Router *pDeviceData_Router = m_pRouter->DataLayer()->Device(iPK_Device);
-
-	if(NULL == pDeviceData_Router)
-	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Unable to update device %d, it doesn't exist", iPK_Device);
-		sCMD_Result = "ERROR: Device doesn't exist";
-		return;
-	}
-
-	pDeviceData_Router->ReplaceParameter(iPK_DeviceData, sValue_To_Assign);
-
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Updating device data %d with value %s", iPK_DeviceData, sValue_To_Assign.c_str());
-	m_pRouter->DataLayer()->Save();
+	cout << "Need to implement command #246 - Set Device Data" << endl;
+	cout << "Parm #2 - PK_Device=" << iPK_Device << endl;
+	cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
+	cout << "Parm #52 - PK_DeviceData=" << iPK_DeviceData << endl;
 }
 
 //<-dceag-c247-b->
@@ -287,6 +275,11 @@ void General_Info_Plugin::CMD_Get_Device_State(int iPK_Device,string *sValue_To_
 			it_device != m_pRouter->DataLayer()->Devices().end(); ++it_device)
 		{
 			DeviceData_Router *pDeviceData_Router = it_device->second;
+			int iPK_DeviceCategory = pDeviceData_Router->m_dwPK_DeviceCategory;
+
+			if(iPK_DeviceCategory != DEVICECATEGORY_Lighting_Device_CONST && iPK_DeviceCategory != DEVICECATEGORY_Climate_Device_CONST)
+				continue;
+
 			*sValue_To_Assign += StringUtils::ltos(pDeviceData_Router->m_dwPK_Device) + "|" + 
 				pDeviceData_Router->m_sState_get() + "\n";
 		}
@@ -297,39 +290,11 @@ void General_Info_Plugin::CMD_Get_Device_State(int iPK_Device,string *sValue_To_
 
 	/** @brief COMMAND: #248 - Get Device Status */
 	/** Gets the status for a device */
-		/** @param #2 PK_Device */
-			/** The device id which you need information for. */
-		/** @param #5 Value To Assign */
-			/** the data */
 
-void General_Info_Plugin::CMD_Get_Device_Status(int iPK_Device,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
+void General_Info_Plugin::CMD_Get_Device_Status(string &sCMD_Result,Message *pMessage)
 //<-dceag-c248-e->
 {
-	if(iPK_Device)
-	{
-		DeviceData_Router *pDeviceData_Router = m_pRouter->DataLayer()->Device(iPK_Device);
-		if( !pDeviceData_Router )
-		{
-			sCMD_Result = "BAD DEVICE";
-			*sValue_To_Assign = "";
-		}
-		else
-		{
-			sCMD_Result = "OK";
-			*sValue_To_Assign = pDeviceData_Router->m_sStatus_get();
-		}
-	}
-	else
-	{	
-		//get status for all devices
-		for(map<int, DeviceData_Router *>::iterator it_device = m_pRouter->DataLayer()->Devices().begin(); 
-			it_device != m_pRouter->DataLayer()->Devices().end(); ++it_device)
-		{
-			DeviceData_Router *pDeviceData_Router = it_device->second;
-			*sValue_To_Assign += StringUtils::ltos(pDeviceData_Router->m_dwPK_Device) + "|" + 
-				pDeviceData_Router->m_sStatus_get() + "\n";
-		}
-	}
+	cout << "Need to implement command #248 - Get Device Status" << endl;
 }
 
 //<-dceag-c272-b->
@@ -575,10 +540,6 @@ void General_Info_Plugin::CMD_Create_Device(int iPK_DeviceTemplate,string sMac_a
 void General_Info_Plugin::CMD_Delete_Device(int iPK_Device,string &sCMD_Result,Message *pMessage)
 //<-dceag-c719-e->
 {
-#ifdef DEBUG
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::CMD_Delete_Device device %d", iPK_Device);
-#endif
-
 	vector<DeviceData_Router *> vectDevice_Children;
 	m_pRouter->DataLayer()->ChildrenDevices(iPK_Device, vectDevice_Children);
 	for(vector<DeviceData_Router *>::iterator it_child = vectDevice_Children.begin(); it_child != vectDevice_Children.end(); ++it_child)
@@ -876,8 +837,6 @@ void General_Info_Plugin::AlarmCallback(int id, void* param)
 {
 	if( id==PROCESS_CHILD_DEVICES )
 		ReportingChildDevices_Offline(param);
-	else if( id==PROCESS_DELAYED_EXECUTE_SCENARIOS )
-		ProcessDelayedExecuteScenarios();
 }
 //----------------------------------------------------------------------------------------------
 void General_Info_Plugin::ReportingChildDevices_Offline( void *pVoid )
@@ -888,19 +847,14 @@ void General_Info_Plugin::ReportingChildDevices_Offline( void *pVoid )
 	vector<string> vectLines;
 	StringUtils::Tokenize(pChildDeviceProcessing->m_sChildren,"\n",vectLines);
 
-	int iNewDevices=0,iRemovedDevices=0;
-
 	for(vector<string>::iterator it = vectLines.begin(); it != vectLines.end(); ++it)
 	{
 		string sLine = *it;
-		bool bNewDevice;
+
 		// This will add the child device if it doesn't exist
-		DeviceData_Router *pDevice_Child = ProcessChildDevice(pChildDeviceProcessing->m_nPK_Device, sLine, bNewDevice);
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::ReportingChildDevices_Offline line %s child %d new %d", sLine.c_str(), pDevice_Child ? pDevice_Child->m_dwPK_Device : -1, (int) bNewDevice);
+		DeviceData_Router *pDevice_Child = ProcessChildDevice(pChildDeviceProcessing->m_nPK_Device, sLine);
 		if(NULL != pDevice_Child)
 			mapCurrentChildren[pDevice_Child->m_dwPK_Device] = true;
-		if( bNewDevice )
-			iNewDevices++;
 	}
 
 	// See if any child devices have since disappeared
@@ -925,7 +879,6 @@ void General_Info_Plugin::ReportingChildDevices_Offline( void *pVoid )
 					LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::ReportingChildDevices removing dead embedded device %d %s",
 						pDevice_Child->m_dwPK_Device, pDevice_Child->m_sDescription.c_str());
 					CMD_Delete_Device(pDevice_Child->m_dwPK_Device);
-					iRemovedDevices++;
 				}
 				continue; // Don't delete the embedded device
 			}
@@ -936,36 +889,27 @@ void General_Info_Plugin::ReportingChildDevices_Offline( void *pVoid )
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"General_Info_Plugin::ReportingChildDevices removing dead device %d %s",
 				pDeviceData_Router->m_dwPK_Device, pDeviceData_Router->m_sDescription.c_str());
 			CMD_Delete_Device(pDeviceData_Router->m_dwPK_Device);
-			iRemovedDevices++;
 		}
 	}
 
 	m_pRouter->DataLayer()->Save();
 
 	delete pChildDeviceProcessing;
-
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::ReportingChildDevices %d new and %d removed devices", iNewDevices, iRemovedDevices);
-	if( iNewDevices || iRemovedDevices )
-	{
-		Message *pMessage = new Message( m_dwPK_Device, DEVICEID_DCEROUTER, PRIORITY_NORMAL, MESSAGETYPE_SYSCOMMAND, SYSCOMMAND_RELOAD, 0 );
-		QueueMessageToRouter( pMessage );
-	}
 }
 //----------------------------------------------------------------------------------------------
 // It will be like this:
 // [internal id] \t [description] \t [room name] \t [device template] \t [floorplan id] \t [PK_DeviceData] \t [Value] ... \n
 
-DeviceData_Router *General_Info_Plugin::ProcessChildDevice(int nPK_Device, string sLine, bool &bNewDevice)
+DeviceData_Router *General_Info_Plugin::ProcessChildDevice(int nPK_Device, string sLine)
 {
-	bNewDevice = false;
-
 	string::size_type pos=0;
 	string sInternalID = StringUtils::Tokenize(sLine,"\t",pos);
 	string sDescription = StringUtils::Tokenize(sLine,"\t",pos);
 	string sRoomName = StringUtils::Tokenize(sLine,"\t",pos);
 	int PK_DeviceTemplate = atoi(StringUtils::Tokenize(sLine,"\t",pos).c_str());
 	string sPK_FloorplanObjectType = StringUtils::Tokenize(sLine,"\t",pos);
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::ProcessChildDevice: pos=%d, %s", pos, sLine.c_str());
+
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "ProcessChildDevice: pos=%d, %s", pos, sLine.c_str());
 
 	DeviceTemplate_Data *pDeviceTemplate_Data = m_pRouter->DataLayer()->DeviceTemplate(PK_DeviceTemplate);
 	if(NULL == pDeviceTemplate_Data)
@@ -974,6 +918,8 @@ DeviceData_Router *General_Info_Plugin::ProcessChildDevice(int nPK_Device, strin
 		return NULL;
 	}
 
+	bool bCreatedNew = false;
+
 	// Find the child device with this internal id
 	DeviceData_Router *pDeviceData_Router = m_pRouter->DataLayer()->ChildMatchingDeviceData(nPK_Device, DEVICEDATA_PortChannel_Number_CONST, StringUtils::SQLEscape(sInternalID));
 	if(NULL != pDeviceData_Router)
@@ -981,22 +927,16 @@ DeviceData_Router *General_Info_Plugin::ProcessChildDevice(int nPK_Device, strin
 		if(pDeviceData_Router->m_dwPK_DeviceTemplate == PK_DeviceTemplate)
 			return pDeviceData_Router;
 		else
-		{
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::ProcessChildDevice (Reporting) line %s device %d deleting temp %d!=%d", 
-				sLine.c_str(), pDeviceData_Router->m_dwPK_Device, pDeviceData_Router->m_dwPK_DeviceTemplate, PK_DeviceTemplate);
 			CMD_Delete_Device(pDeviceData_Router->m_dwPK_Device);
-		}
 	}
 	
 	// Create it since it doesn't exist
 	int iPK_Device = 0;
-	bNewDevice = true;
+	bCreatedNew = true;
 
 	CMD_Create_Device(PK_DeviceTemplate,"",0,"",
 		StringUtils::itos(DEVICEDATA_PortChannel_Number_CONST) + "|" + sInternalID,
 		0, nPK_Device,"",0,0, &iPK_Device);
-
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::ProcessChildDevice created %d from %s", nPK_Device, sLine.c_str());
 
 	pDeviceData_Router = m_pRouter->DataLayer()->Device(iPK_Device);
 	if(NULL == pDeviceData_Router)
@@ -1011,15 +951,9 @@ DeviceData_Router *General_Info_Plugin::ProcessChildDevice(int nPK_Device, strin
 		if(!sDescription.empty())
 			pDeviceData_Router->m_sDescription = sDescription;
 		else
-		{
-			DeviceTemplate_Data *pDeviceTemplate_Data = m_pRouter->DataLayer()->DeviceTemplate(pDeviceData_Router->m_dwPK_DeviceTemplate);
-			if(pDeviceTemplate_Data)
-				pDeviceData_Router->m_sDescription = pDeviceTemplate_Data->Description();
-			else
-				pDeviceData_Router->m_sDescription = sInternalID;
-		}
+			pDeviceData_Router->m_sDescription = sInternalID;
 	}
-	else if(bNewDevice)
+	else if(bCreatedNew)
 	{
 		string sOldDescription = pDeviceData_Router->m_sDescription;
 
@@ -1075,7 +1009,7 @@ DeviceData_Router *General_Info_Plugin::ProcessChildDevice(int nPK_Device, strin
 		/** @param #2 PK_Device */
 			/** The parent device */
 		/** @param #5 Value To Assign */
-			/** A pipe delimited list like this: DeviceID1|TemplateName1|CommandLine1\nDeviceID2|DeviceTemplateName2|CommandLine2 etc */
+			/** A pipe delimited list like this: DeviceID1|CommandLine1\nDeviceID2|CommandLine2 etc */
 
 void General_Info_Plugin::CMD_Get_Devices_To_Start(int iPK_Device,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
 //<-dceag-c956-e->
@@ -1104,7 +1038,7 @@ bool General_Info_Plugin::DeviceDetected( class Socket *pSocket, class Message *
 {
 	string sDeviceData = pMessage->m_mapParameters[EVENTPARAMETER_DeviceData_CONST];
 	string sIPAddress = pMessage->m_mapParameters[EVENTPARAMETER_IP_Address_CONST];
-	string sMacAddress = StringUtils::ToUpper(pMessage->m_mapParameters[EVENTPARAMETER_Mac_Address_CONST]);
+	string sMacAddress = pMessage->m_mapParameters[EVENTPARAMETER_Mac_Address_CONST];
 	int nPK_DeviceTemplate = atoi(pMessage->m_mapParameters[EVENTPARAMETER_PK_DeviceTemplate_CONST].c_str());
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device detected: template id %d, ip %s, mac %s, device data %s",
@@ -1119,7 +1053,7 @@ bool General_Info_Plugin::DeviceDetected( class Socket *pSocket, class Message *
 	{
 		DeviceData_Router *pDeviceData_Router = *it;
 
-		if( pDeviceData_Router->m_sMacAddress == sMacAddress)
+		if(pDeviceData_Router->m_sMacAddress == sMacAddress)
 		{
 			bDeviceExists = true;
 
@@ -1181,9 +1115,6 @@ bool General_Info_Plugin::DeviceDetected( class Socket *pSocket, class Message *
 
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Device created: %d", nPK_Device);
 		m_pRouter->DataLayer()->Save();
-
-		Message *pMessage = new Message( m_dwPK_Device, DEVICEID_DCEROUTER, PRIORITY_NORMAL, MESSAGETYPE_SYSCOMMAND, SYSCOMMAND_RELOAD, 0 );
-		QueueMessageToRouter( pMessage );
 	}
 
 	return false;
@@ -1229,7 +1160,7 @@ void General_Info_Plugin::CMD_Update_Device(int iPK_Device,string sMac_address,i
 
 	if(NULL == pDeviceData_Router)
 	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Unable to update device %d, it doesn't exist", iPK_Device);
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Unable to update device %d, it doesn't exist");
 		sCMD_Result = "ERROR: Device doesn't exist";
 		return;
 	}
@@ -1243,17 +1174,13 @@ void General_Info_Plugin::CMD_Update_Device(int iPK_Device,string sMac_address,i
 
 	vector<string> vectStrings;
 	StringUtils::Tokenize(sData_String, "|", vectStrings);
+
 	for(vector<string>::iterator it = vectStrings.begin(), end = vectStrings.end(); it != end; ++it)
 	{
 		string sKey = *it;
 		int nKey = atoi(sKey.c_str());
 
-		if( ++it == end )
-		{
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "General_Info_Plugin::CMD_Update_Device parms %s are malformed", sData_String.c_str());
-			break;
-		}
-		else
+		if(++it != end)
 		{
 			string sValue = *it;
 			pDeviceData_Router->ReplaceParameter(nKey, sValue);
@@ -1264,297 +1191,4 @@ void General_Info_Plugin::CMD_Update_Device(int iPK_Device,string sMac_address,i
 	}
 
 	m_pRouter->DataLayer()->Save();
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::CMD_Update_Device saved data for device %d %s in room %d",
-		pDeviceData_Router->m_dwPK_Device, pDeviceData_Router->m_sDescription.c_str(), pDeviceData_Router->m_dwPK_Room);
-
-}
-
-//<-dceag-c370-b->
-
-	/** @brief COMMAND: #370 - Execute Command Group */
-	/** Execute a command group */
-		/** @param #9 Text */
-			/** Instead of the command group, it can be put here in the format: PK_Device,PK_DeviceGroup,PK_Command,Delay,CancelIfOther,IsTemporary,"PK_CommandParameter","Description"....\n
-
-where the items in " have escaped " so they can embed , and \n characters */
-		/** @param #28 PK_CommandGroup */
-			/** The command group to execute */
-
-void General_Info_Plugin::CMD_Execute_Command_Group(string sText,int iPK_CommandGroup,string &sCMD_Result,Message *pMessage)
-//<-dceag-c370-e->
-{
-	if(iPK_CommandGroup && NULL != m_pRouter->DataLayer())
-	{
-		Scene_Data *pScene_Data =  m_pRouter->DataLayer()->Scene(iPK_CommandGroup);
-		if(NULL != pScene_Data)
-		{
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::CMD_Execute_Command_Group executing %d with %d commands", iPK_CommandGroup, (int) pScene_Data->Commands().size() );
-			ExecuteCommandData(&(pScene_Data->Commands()),pMessage->m_dwPK_Device_From);
-		}
-		else
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "General_Info_Plugin::CMD_Execute_Command_Group Unexisting scene: %d", iPK_CommandGroup);
-	}
-	else if( sText.empty()==false )
-	{
-		Scene_Data scene_Data;
-
-		int iIndex=0;
-		string::size_type pos=0;
-		while(pos<sText.size())
-		{
-			Command_Data aCommand_data;
-			aCommand_data.Device_To(atoi(StringUtils::Tokenize( sText, ",", pos ).c_str()));
-			int PK_DeviceGroup = atoi(StringUtils::Tokenize( sText, ",", pos ).c_str());
-			aCommand_data.PK_Command(atoi(StringUtils::Tokenize( sText, ",", pos ).c_str()));
-			aCommand_data.Delay(atoi(StringUtils::Tokenize( sText, ",", pos ).c_str()));
-			aCommand_data.CancelIfOther(atoi(StringUtils::Tokenize( sText, ",", pos ).c_str()));
-			aCommand_data.IsTemporary(atoi(StringUtils::Tokenize( sText, ",\n", pos ).c_str()));  // This may be the end too
-aCommand_data.CancelIfOther(1);
-aCommand_data.IsTemporary(1);
-			if( sText[pos-1]!='\n' )
-				ParseCommandParameters(aCommand_data.Params(), sText, pos);
-			if( aCommand_data.Device_To()==0 || aCommand_data.PK_Command()==0 )
-				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "General_Info_Plugin::CMD_Execute_Command_Group scene: %d has empty data", iPK_CommandGroup);
-			else
-				scene_Data.Commands()[iIndex++] = aCommand_data;
-			while( (sText[pos]=='\n' || sText[pos]=='\r') && pos<sText.size() )
-				++pos;
-		}
-
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::CMD_Execute_Command_Group executing temp %d commands", (int) scene_Data.Commands().size() );
-		ExecuteCommandData(&(scene_Data.Commands()),pMessage->m_dwPK_Device_From);
-	}
-}
-
-
-void General_Info_Plugin::ParseCommandParameters(std::map<int, string>& mapParams, string &sText,string::size_type &pos)
-{
-	while(true)
-	{
-		int PK_CommandParameter = atoi(StringUtils::Tokenize( sText, ",", pos ).c_str());
-		string sValue;
-		if( sText[pos]=='"' )
-		{
-			size_t size = sText.size();
-			string::size_type pos_start = ++pos;
-			while( pos++<size )
-			{
-				if( sText[pos]=='"' && sText[pos-1]!='\\' )
-				{
-					sValue = sText.substr(pos_start, pos-pos_start);
-					StringUtils::Replace(&sValue,"\\\"", "\""); // Replace any escaped "
-					pos++;
-					if( pos<sText.size() && (sText[pos]==',' || sText[pos]=='\n') )
-						pos++; // Skip the comma or \n
-					break;
-				}
-			}
-		}
-		else
-			sValue = StringUtils::Tokenize( sText, "\n,", pos );
-
-		mapParams[PK_CommandParameter]=sValue;
-		if( sText[pos-1]=='\n' || pos>=sText.size() )
-			return;
-	}
-}
-
-void General_Info_Plugin::ExecuteCommandData(map<int, Command_Data> *mapCommands,int PK_Device_From)
-{
-	PLUTO_SAFETY_LOCK(dm, m_pRouter->DataLayer()->Mutex());
-	for(std::map<int, Command_Data>::iterator it = mapCommands->begin(); it != mapCommands->end(); ++it)
-	{
-		Command_Data *pCommand_Data = &(it->second);
-
-		if( pCommand_Data->Delay() )
-		{
-			Command_Data_CallBack *pCommand_Data_CallBack = new Command_Data_CallBack(pCommand_Data,time(NULL) + pCommand_Data->Delay(),PK_Device_From);
-			List_Command_Data_CallBack *pList_Command_Data_CallBack = m_mapList_Command_Data_CallBack[ pCommand_Data->Device_To() ];
-			if( !pList_Command_Data_CallBack )
-			{
-				pList_Command_Data_CallBack = new List_Command_Data_CallBack();
-				m_mapList_Command_Data_CallBack[ pCommand_Data->Device_To() ] = pList_Command_Data_CallBack;
-			}
-			pList_Command_Data_CallBack->push_back( pCommand_Data_CallBack );
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::ExecuteCommandGroup delay %p/%p", pCommand_Data_CallBack, pCommand_Data_CallBack->m_pCommand_Data);
-		}
-		else
-			ExecuteCommandData(pCommand_Data,PK_Device_From);
-	}
-	SetNextAlarm();
-}
-
-void General_Info_Plugin::SetNextAlarm()
-{
-	time_t tLowest=0;
-	bool bCancellable=false;
-	PLUTO_SAFETY_LOCK(dm, m_pRouter->DataLayer()->Mutex());
-	for(map<int,List_Command_Data_CallBack *>::iterator it=m_mapList_Command_Data_CallBack.begin();
-		it!=m_mapList_Command_Data_CallBack.end();)
-	{
-		List_Command_Data_CallBack *pList_Command_Data_CallBack = it->second;
-		if( pList_Command_Data_CallBack->empty() )
-			m_mapList_Command_Data_CallBack.erase(it++);
-		else
-		{
-			for(List_Command_Data_CallBack::iterator itL=pList_Command_Data_CallBack->begin();itL!=pList_Command_Data_CallBack->end();++itL)
-			{
-				Command_Data_CallBack *pCommand_Data_CallBack = *itL;
-				if( pCommand_Data_CallBack->m_pCommand_Data->CancelIfOther() )
-					bCancellable=true;
-				if( tLowest==0 || tLowest>pCommand_Data_CallBack->m_tTime )
-					tLowest = pCommand_Data_CallBack->m_tTime;
-			}
-			++it;
-		}
-	}
-
-	m_pAlarmManager->CancelAlarmByType(PROCESS_DELAYED_EXECUTE_SCENARIOS);
-	if( tLowest!=0 )
-		m_pAlarmManager->AddAbsoluteAlarm(tLowest, this, PROCESS_DELAYED_EXECUTE_SCENARIOS, NULL);
-
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::SetNextAlarm %d (%d) seconds cancellable %d callback %p", time(NULL)-tLowest, tLowest, (int) bCancellable, m_pCallBack_ForExecuteScenarios);
-
-	if( bCancellable && m_pCallBack_ForExecuteScenarios==NULL)
-		RegisterAllInterceptor();
-	else if( bCancellable==false && m_pCallBack_ForExecuteScenarios!=NULL )
-		UnRegisterAllInterceptor();
-}
-
-void General_Info_Plugin::RegisterAllInterceptor()
-{
-	PLUTO_SAFETY_LOCK(dm, m_pRouter->DataLayer()->Mutex());
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::RegisterAllInterceptor %p", m_pCallBack_ForExecuteScenarios);
-	if( !m_pCallBack_ForExecuteScenarios )
-		RegisterMsgInterceptor( ( MessageInterceptorFn )( &General_Info_Plugin::InterceptAllCommands ), 0, 0, 0, 0, MESSAGETYPE_COMMAND, 0, true, &m_pCallBack_ForExecuteScenarios );
-}
-
-void General_Info_Plugin::UnRegisterAllInterceptor()
-{
-	PLUTO_SAFETY_LOCK(dm, m_pRouter->DataLayer()->Mutex());
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::UnRegisterAllInterceptor %p", m_pCallBack_ForExecuteScenarios);
-	if( m_pCallBack_ForExecuteScenarios )
-		m_pRouter->UnRegisterMsgInterceptor(m_pCallBack_ForExecuteScenarios);
-	m_pCallBack_ForExecuteScenarios=NULL;
-}
-
-bool General_Info_Plugin::InterceptAllCommands( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo )
-{
-	if( pMessage->m_mapParameters.find(COMMANDPARAMETER_Already_processed_CONST)!=pMessage->m_mapParameters.end() )
-		return false; // This originated from us anyway
-
-	PLUTO_SAFETY_LOCK(dm, m_pRouter->DataLayer()->Mutex());
-	map<int,List_Command_Data_CallBack *>::iterator it=m_mapList_Command_Data_CallBack.find( pMessage->m_dwPK_Device_To );
-	if( it!=m_mapList_Command_Data_CallBack.end() )
-	{
-		List_Command_Data_CallBack *pList_Command_Data_CallBack = it->second;
-		for(List_Command_Data_CallBack::iterator itL=pList_Command_Data_CallBack->begin();itL!=pList_Command_Data_CallBack->end();)
-		{
-			Command_Data_CallBack *pCommand_Data_CallBack = *itL;
-			if( pCommand_Data_CallBack->m_pCommand_Data->CancelIfOther() )
-			{
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::InterceptAllCommands canceling %p/%p", pCommand_Data_CallBack,pCommand_Data_CallBack->m_pCommand_Data );
-				pList_Command_Data_CallBack->erase(itL++);
-				delete pCommand_Data_CallBack;
-			}
-			else
-				++itL;
-		}
-	}
-	return false;
-}
-
-void General_Info_Plugin::ProcessDelayedExecuteScenarios()
-{
-	time_t tNow = time(NULL);
-	PLUTO_SAFETY_LOCK(dm, m_pRouter->DataLayer()->Mutex());
-	for(map<int,List_Command_Data_CallBack *>::iterator it=m_mapList_Command_Data_CallBack.begin();
-		it!=m_mapList_Command_Data_CallBack.end();++it)
-	{
-		List_Command_Data_CallBack *pList_Command_Data_CallBack = it->second;
-		for(List_Command_Data_CallBack::iterator itL=pList_Command_Data_CallBack->begin();itL!=pList_Command_Data_CallBack->end();)
-		{
-			Command_Data_CallBack *pCommand_Data_CallBack = *itL;
-			if( pCommand_Data_CallBack->m_tTime<=tNow )
-			{
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::ProcessDelayedExecuteScenarios executing %p/%p", pCommand_Data_CallBack,pCommand_Data_CallBack->m_pCommand_Data );
-
-				ExecuteCommandData(pCommand_Data_CallBack->m_pCommand_Data,pCommand_Data_CallBack->m_PK_Device_From);
-				pList_Command_Data_CallBack->erase(itL++);
-				delete pCommand_Data_CallBack;
-			}
-			else
-				++itL;
-		}
-	}
-
-	SetNextAlarm();
-}
-
-void General_Info_Plugin::ExecuteCommandData(Command_Data *pCommand_Data,int PK_Device_From)
-{
-	Message *pMessage = new Message();
-	pMessage->m_dwPK_Device_From = PK_Device_From ? PK_Device_From : m_dwPK_Device;
-	pMessage->m_dwMessage_Type = MESSAGETYPE_COMMAND;
-	pMessage->m_dwID = pCommand_Data->PK_Command();
-	pMessage->m_dwPK_Device_To = pCommand_Data->Device_To();
-	pMessage->m_mapParameters[COMMANDPARAMETER_Is_Temporary_CONST] = (pCommand_Data->IsTemporary()==0 ? "1" : "0");
-	pMessage->m_mapParameters[COMMANDPARAMETER_Already_processed_CONST] = "1";
-
-	if(pMessage->m_dwPK_Device_To == DEVICETEMPLATE_This_Orbiter_CONST && PK_Device_From )
-		pMessage->m_dwPK_Device_To = PK_Device_From;
-
-	for(std::map<int, string>::iterator it_param = pCommand_Data->Params().begin(); 
-		it_param != pCommand_Data->Params().end(); ++it_param)
-	{
-		pMessage->m_mapParameters[it_param->first] = it_param->second;
-	}
-
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::ExecuteCommandGroup Processing message from %d to %d id %d", 
-		pMessage->m_dwPK_Device_From, pMessage->m_dwPK_Device_To, pMessage->m_dwID);
-
-	QueueMessageToRouter(pMessage);
-}
-
-//<-dceag-c969-b->
-
-	/** @brief COMMAND: #969 - Restore To NonTemp State */
-	/** Restore a device to the state in State_NonTemporary, so that a temporary change can be reverted */
-		/** @param #2 PK_Device */
-			/** The device to restore */
-
-void General_Info_Plugin::CMD_Restore_To_NonTemp_State(int iPK_Device,string &sCMD_Result,Message *pMessage)
-//<-dceag-c969-e->
-{
-	DeviceData_Router *pDevice = m_pRouter->m_mapDeviceData_Router_Find(iPK_Device);
-	if( pDevice==NULL )
-	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "General_Info_Plugin::CMD_Restore_To_NonTemp_State Device %d is invalid", iPK_Device);
-		return;
-	}
-
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::CMD_Restore_To_NonTemp_State Device %d was %s", iPK_Device, pDevice->m_sState_NonTemporary_get().c_str());
-	if( pDevice->m_sState_NonTemporary_get()=="OFF" )
-		QueueMessageToRouter( new Message( m_dwPK_Device,pDevice->m_dwPK_Device,PRIORITY_NORMAL,MESSAGETYPE_COMMAND,COMMAND_Generic_Off_CONST,0 ) );
-	else if( pDevice->m_sState_NonTemporary_get()=="ON" )
-		QueueMessageToRouter( new Message( m_dwPK_Device,pDevice->m_dwPK_Device,PRIORITY_NORMAL,MESSAGETYPE_COMMAND,COMMAND_Generic_On_CONST,0 ) );
-	else
-	{
-		Command_Impl *pCommand_Impl = NULL;
-		if( pDevice->WithinCategory(DEVICECATEGORY_Climate_Device_CONST) )
-			pCommand_Impl = m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Climate_Plugin_CONST);
-		else if( pDevice->WithinCategory(DEVICECATEGORY_Security_Device_CONST) )
-			pCommand_Impl = m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Security_Plugin_CONST);
-		else if( pDevice->WithinCategory(DEVICECATEGORY_Lighting_Device_CONST) )
-			pCommand_Impl = m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Lighting_Plugin_CONST);
-
-		if( pCommand_Impl==NULL )
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::CMD_Restore_To_NonTemp_State Device %d has no plugin", iPK_Device);
-		else
-		{
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "General_Info_Plugin::CMD_Restore_To_NonTemp_State Device %d forwarding to %d", iPK_Device, pCommand_Impl->m_dwPK_Device);
-			QueueMessageToRouter( new Message( m_dwPK_Device,pCommand_Impl->m_dwPK_Device,PRIORITY_NORMAL,MESSAGETYPE_COMMAND,COMMAND_Restore_To_NonTemp_State_CONST, 1,
-				COMMANDPARAMETER_PK_Device_CONST, StringUtils::itos(pCommand_Impl->m_dwPK_Device).c_str()) );
-		}
-	}
 }

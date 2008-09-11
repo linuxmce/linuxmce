@@ -1,5 +1,6 @@
 #ifdef USE_MYSQL_WRAPPER
 
+#include <cstdlib>
 #include <stdio.h>
 #include <string>
 #include <signal.h>

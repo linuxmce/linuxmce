@@ -183,7 +183,7 @@ public:
 					string sResponse;
 					Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName);
 					event_Impl.m_pClientSocket->SendString( "RELOAD" );
-					if( !event_Impl.m_pClientSocket->ReceiveString( sResponse ) || sResponse.size()<2 || sResponse.substr(0,2)!="OK" )
+					if( !event_Impl.m_pClientSocket->ReceiveString( sResponse ) || sResponse!="OK" )
 					{
 						CannotReloadRouter();
 						LoggerWrapper::GetInstance()->Write(LV_WARNING,"Reload request denied: %s",sResponse.c_str());
@@ -256,7 +256,6 @@ public:
 	void EVENT_Reporting_Child_Devices(string sError_Message,string sText) { GetEvents()->Reporting_Child_Devices(sError_Message.c_str(),sText.c_str()); }
 	void EVENT_Download_Config_Done(string sError_Message) { GetEvents()->Download_Config_Done(sError_Message.c_str()); }
 	//Commands - Override these to handle commands from the server
-	virtual void CMD_Send_Code(string sText,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Report_Child_Devices(string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Download_Configuration(string sText,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Send_Command_To_Child(string sID,int iPK_Command,string sParameters,string &sCMD_Result,class Message *pMessage) {};
@@ -301,32 +300,6 @@ public:
 					return rmr_Buffered;
 				switch(pMessage->m_dwID)
 				{
-				case COMMAND_Send_Code_CONST:
-					{
-						string sCMD_Result="OK";
-						string sText=pMessage->m_mapParameters[COMMANDPARAMETER_Text_CONST];
-						CMD_Send_Code(sText.c_str(),sCMD_Result,pMessage);
-						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
-						{
-							pMessage->m_bRespondedToMessage=true;
-							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
-							pMessageOut->m_mapParameters[0]=sCMD_Result;
-							SendMessage(pMessageOut);
-						}
-						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
-						{
-							pMessage->m_bRespondedToMessage=true;
-							SendString(sCMD_Result);
-						}
-						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
-						{
-							int iRepeat=atoi(itRepeat->second.c_str());
-							for(int i=2;i<=iRepeat;++i)
-								CMD_Send_Code(sText.c_str(),sCMD_Result,pMessage);
-						}
-					};
-					iHandled++;
-					continue;
 				case COMMAND_Report_Child_Devices_CONST:
 					{
 						string sCMD_Result="OK";

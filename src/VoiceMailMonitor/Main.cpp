@@ -16,7 +16,7 @@
  or FITNESS FOR A PARTICULAR PURPOSE. See the Pluto Public License for more details.
 
  */
-#define VERSION "<=version=>"
+#include "../include/version.h"
 
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"

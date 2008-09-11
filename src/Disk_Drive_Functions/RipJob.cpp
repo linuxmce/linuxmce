@@ -115,13 +115,13 @@ RipJob::~RipJob()
 		m_pDatabase_pluto_media->threaded_db_wrapper_query(sSQL);
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "RipJob::~RipJob %d m_eJobStatus %d drive %d slot %d %s / %s m_pRow_DiscLocation %d/%d query: %s", 
-		m_iID, (int) m_eJobStatus_get(), m_pDisk_Drive_Functions ? m_pDisk_Drive_Functions->m_dwPK_Device_get() : 0,
+		m_iID, (int) m_eJobStatus, m_pDisk_Drive_Functions ? m_pDisk_Drive_Functions->m_dwPK_Device_get() : 0,
 		m_pSlot ? m_pSlot->m_SlotNumber : 0, m_sDirectory.c_str(), m_sFileName.c_str(),
 		m_pRow_DiscLocation ? m_pRow_DiscLocation->EK_Device_get() : 0, m_pRow_DiscLocation ? m_pRow_DiscLocation->Slot_get() : 0, sSQL.c_str());
 
 	string sMessage;
-	if( m_eJobStatus_get()!=job_Done )
-		sMessage = "Ripping failed, code " + StringUtils::itos( (int) m_eJobStatus_get() );
+	if( m_eJobStatus!=job_Done )
+		sMessage = "Ripping failed, code " + StringUtils::itos( (int) m_eJobStatus );
 	else if(m_nTracksFailedToRip == m_listTask.size())
 		sMessage = "Ripping failed";
 	else if (m_bHasErrors)
@@ -151,7 +151,7 @@ RipJob::~RipJob()
 	}
 }
 
-Job::enumReadyToRun RipJob::ReadyToRun()
+bool RipJob::ReadyToRun()
 {
 	if( m_pDisk_Drive_Functions )  // We're ready to go if we have a drive to do the ripping
 	{
@@ -159,24 +159,24 @@ Job::enumReadyToRun RipJob::ReadyToRun()
 		if (!m_pDisk_Drive_Functions->FixupRippingInfo(m_pDisk_Drive_Functions,m_iPK_MediaType,m_sFileName,m_sTracks,m_iEK_Disc,m_sDirectory))
 		{
 		    LoggerWrapper::GetInstance()->Write(LV_STATUS, "RipJob::RipJob::ReadyToRun fixup failed, aborting this job");
-		    m_eJobStatus_set(job_Error);
-		    return readyToRun_No;
+		    m_eJobStatus = job_Error;
+		    return false;
 		}
 
 		AddRippingTasks();
-		return readyToRun_Yes;
+		return true;
 	}
 
 	if( !m_pSlot ) // If we don't have a jukebox, something is wrong, we have nothing and can't proceed
 	{
-		m_eJobStatus_set(job_Error);
-		return readyToRun_No;
+		m_eJobStatus = job_Error;
+		return false;
 	}
 
 	// Try to get an available drive from the jukebox to do the ripping
 	Drive *pDrive = m_pSlot->m_pJukeBox->LockAvailableDrive(Disk_Drive_Functions::locked_rip_job,this,NULL,true);
 	if( pDrive==NULL )  // We don't have a drive
-		return readyToRun_No;
+		return false;
 
 	m_pDisk_Drive_Functions=pDrive;
 	AddTask(new MoveDiscTask(this,"SlotToDrive",MoveDiscTask::mdt_SlotToDrive,m_pSlot->m_pJukeBox,pDrive,m_pSlot));
@@ -184,7 +184,7 @@ Job::enumReadyToRun RipJob::ReadyToRun()
 	AddTask(new FixupRippingInfoTask(this,"FixupRippingInfo"));
 	AddTask(new AddRippingTasksTask(this,pDrive,"AddRippingTasks"));
 	AddTask(new MoveDiscTask(this,"DriveToSlot",MoveDiscTask::mdt_DriveToSlot,m_pSlot->m_pJukeBox,pDrive,m_pSlot));
-	return readyToRun_Yes;
+	return true;
 }
 
 void RipJob::JobDone()
@@ -218,7 +218,7 @@ void RipJob::AddRippingTasks(Drive *pDrive, TasklistPosition position)
 bool RipJob::ReportPendingTasks(PendingTaskList *pPendingTaskList)
 {
 	PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
-	if( m_eJobStatus_get() == job_WaitingToStart || m_eJobStatus_get() == job_InProgress )
+	if( m_eJobStatus==job_WaitingToStart || m_eJobStatus==job_InProgress )
 	{
 		if( pPendingTaskList )
 		{

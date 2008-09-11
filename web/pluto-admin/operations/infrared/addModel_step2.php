@@ -28,13 +28,13 @@
 		
 		<table class="normaltext" align="center">
 			<tr>
-				<td>'.$TEXT_Q2_POWER_DELAY_TEXT_CONST.' <input type="text" name="IR_PowerDelay" value="'.(((int)@$_REQUEST['isDef']==1)?'7':@$dtArray['IR_PowerDelay'][0]/1000).'" size="2"></td>
+				<td>'.$TEXT_Q2_POWER_DELAY_TEXT_CONST.' <input type="text" name="IR_PowerDelay" value="'.(((int)@$_REQUEST['isDef']==1)?'7000':@$dtArray['IR_PowerDelay'][0]).'" size="3"></td>
 			</tr>
 			<tr>
-				<td>'.$TEXT_Q2_MODE_DELAY_DELAY_TEXT_CONST.' <input type="text" name="IR_ModeDelay" size="2" value="'.(((int)@$_REQUEST['isDef']==1)?'2':@$dtArray['IR_ModeDelay'][0]/1000).'"></td>
+				<td>'.$TEXT_Q2_MODE_DELAY_DELAY_TEXT_CONST.' <input type="text" name="IR_ModeDelay" size="3" value="'.(((int)@$_REQUEST['isDef']==1)?'2000':@$dtArray['IR_ModeDelay'][0]).'"></td>
 			</tr>		
 			<tr>
-				<td>'.$TEXT_Q2_DIGIT_DELAY_DELAY_TEXT_CONST.' <input type="text" name="DigitDelay" value="'.(((int)@$_REQUEST['isDef']==1)?'0.250':round(@$dtArray['DigitDelay'][0]/1000,3)).'" size="2"></td>
+				<td>'.$TEXT_Q2_DIGIT_DELAY_DELAY_TEXT_CONST.' <input type="text" name="DigitDelay" value="'.(((int)@$_REQUEST['isDef']==1)?'250':@$dtArray['DigitDelay'][0]).'" size="3"></td>
 			</tr>		
 			<tr>
 				<td align="center"><input type="submit" class="button" name="add" value="'.$submitLabel.'"> </td>
@@ -60,7 +60,7 @@
 				return false;
 			}
 			
-			if(powerDelay>20 || modeDelay>20 || digitDelay>20){
+			if(powerDelay>20000 || modeDelay>20000 || digitDelay>20000){
 				if(confirm("One or more delays are greater than 20s. Are you sure it is correct?")){
 					return true;
 				}else{
@@ -75,9 +75,9 @@
 	}else{
 		// process
 		if($dtID!=0){
-			$IR_PowerDelay=1000*$_POST['IR_PowerDelay'];
-			$IR_ModeDelay=1000*$_POST['IR_ModeDelay'];
-			$DigitDelay=1000*$_POST['DigitDelay'];
+			$IR_PowerDelay=$_POST['IR_PowerDelay'];
+			$IR_ModeDelay= $_POST['IR_ModeDelay'];
+			$DigitDelay =  $_POST['DigitDelay'];
 			
 			$publicADO->Execute('UPDATE DeviceTemplate_AV SET IR_PowerDelay=?, IR_ModeDelay=?, DigitDelay=? WHERE FK_DeviceTemplate=?',array($IR_PowerDelay,$IR_ModeDelay,$DigitDelay,$dtID));
 			if($return==0){

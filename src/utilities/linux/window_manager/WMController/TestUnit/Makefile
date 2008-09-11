@@ -1,4 +1,4 @@
-CXX=g++
+
 CC=$(CXX)
 CPPFLAGS=-W -Wall -pipe -ggdb3
 CXXFLAGS=-I. -I../../../../.. -I/usr/X11R6/include -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I../../../../DCE -DDEBUG -DTEST_UNIT

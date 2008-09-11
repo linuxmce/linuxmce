@@ -65,7 +65,7 @@ function sqlcvs_diff($output,$dbADO) {
 		<input type="hidden" name="section" value="sqlcvs_diff">
 		<input type="hidden" name="action" value="choose">	
 		
-	<table width="500" cellpadding="3" cellspacing="0">
+	<table width="500" cellpadding="3" cellspacing="0" border="0">
 		<tr>
 			<td colspan="3"><B>'.$TEXT_SQLCVS_HOST_CONST.':</B></td>
 			<td><input type="text" name="host" value="'.((isset($_REQUEST['host']))?$_REQUEST['host']:'sqlcvs.linuxmce.org').'"></td>
@@ -90,9 +90,18 @@ function sqlcvs_diff($output,$dbADO) {
 			<td colspan="4">* '.$TEXT_COMMIT_INFO_CONST.'	</td>
 		</tr>		
 		<tr>
-			<td colspan="3">&nbsp;</td>
+			<td colspan="4">&nbsp;</td>
+		</tr>
+		<tr>
+			<td colspan="4">'.$TEXT_SQLCVS_DIFF_HINT.'</td>
+		</tr>
+		<tr>
+			<td colspan="4">&nbsp;</td>
+		</tr>
+		<tr>
 			<td><input type="submit" class="button" name="submitBtn" value="'.$TEXT_NEXT_CONST.'"></td>
-		</tr>		
+			<td colspan="3">&nbsp;</td>
+		</tr>			
 		';
 	
 
@@ -103,7 +112,7 @@ function sqlcvs_diff($output,$dbADO) {
 			if($cleanTable!='local'){
 				$out.='
 				<tr bgcolor="#F0F3F8">
-					<td>&nbsp;</td>
+					<td width="50">&nbsp;</td>
 					<td width="20"><input type="checkbox" name="table_'.$cleanTable.'" value="1"></td>
 					<td colspan="2"><B>'.$cleanTable.'</B></td>
 				</tr>
@@ -115,7 +124,7 @@ function sqlcvs_diff($output,$dbADO) {
 				foreach ($fieldsArray AS $key=>$value){
 					$out.='
 				<tr>
-					<td>&nbsp;</td>
+					<td width="50">&nbsp;</td>
 					<td width="20">&nbsp;</td>
 					<td width="20"><input type="checkbox" name="'.$cleanTable.'_'.$value.'" value="1" onClick="groupCheck(\''.$cleanTable.'\',\''.$value.'\')"></td>
 					<td>'.$value.'</td>
@@ -126,8 +135,8 @@ function sqlcvs_diff($output,$dbADO) {
 	}	
 	$out.='	
 		<tr>
-			<td colspan="3">&nbsp;</td>
 			<td><input type="submit" class="button" name="submitBtn" value="'.$TEXT_NEXT_CONST.'"></td>
+			<td colspan="3">&nbsp;</td>
 		</tr>		
 	</table>
 	</form>
@@ -194,7 +203,7 @@ function sqlcvs_diff($output,$dbADO) {
 		<input type="hidden" name="section" value="sqlcvs_diff">
 		<input type="hidden" name="action" value="finish">	
 		
-		<table>
+		<table width="500" border="0">
 		<tr>
 			<td><B>'.$TEXT_SQLCVS_HOST_CONST.':</B></td>
 			<td><input type="text" name="host" value="'.$host.'"></td>
@@ -212,18 +221,18 @@ function sqlcvs_diff($output,$dbADO) {
 			<td><input type="text" name="password" value="'.$password.'"></td>
 		</tr>
 		<tr>
-			<td colspan="3"><B>'.$TEXT_DATABASE_CONST.':</B></td>
+			<td><B>'.$TEXT_DATABASE_CONST.':</B></td>
 			<td>'.pulldownFromArray($databasesArray,'database',$database,'onchange="document.sqlcvs_diff.action.value=\'form\';document.sqlcvs_diff.submit();"','key','').'</td>
 		</tr>		
 		<tr>
 			<td colspan="4">'.$TEXT_COMMIT_INFO_CONST.'	</td>
 		</tr>		
 		<tr>
-			<td>&nbsp;</td>
-			<td><input type="submit" class="button" name="submitBtn" value="'.$TEXT_NEXT_CONST.'"></td>
+			<td colspan="4">&nbsp;</td>
+			
 		</tr>
 		</table>
-		<table width="700" cellpadding="3" cellspacing="0" border="0">';
+		<table width="700" cellpadding="3" cellspacing="0" border="0">';	
 		$repository='';
 		$table='';
 		if($retVal==0){
@@ -262,7 +271,7 @@ function sqlcvs_diff($output,$dbADO) {
 				$out.='
 					<tr>
 						<td><input type="checkbox" name="line_'.$lineNo.'" value="1" checked></td>';
-				if(str_replace('CHANGE:','',$items[3])!='DEL'){
+				if(str_replace('CHANGE:','',$items[3])!=' DEL'){
 					$out.='
 						<td><a href="javascript:windowOpen(\'showRecord.php?table='.$lineTable.'&where='.addslashes(str_replace('WHERE:','',$items[4])).'\',\'width=800,height=400,scrollbars=1,resizable=1\');">'.str_replace('CHANGE:','',$items[3]).'</a></td>
 						<td>'.substr($lineValues[$cols[0]][0],0,20).'</td>
@@ -289,7 +298,16 @@ function sqlcvs_diff($output,$dbADO) {
 						<td colspan="5" bgcolor="#F0F3F8"><a href="javascript:selAllCheckboxes(\''.$lineNo.'\',true);">[ Check all ]</a> <a href="javascript:selAllCheckboxes(\''.$lineNo.'\',false);">[ Uncheck all ]</a></td>
 					</tr>			
 					<tr>
-						<td colspan="5" align="center"><input type="submit" class="button" name="revert" value="'.$TEXT_REVERT_CONST.'"> <input type="submit" class="button" name="checkin" value="'.$TEXT_CHECKIN_CONST.'"></td>
+						<td colspan="5">&nbsp</td>
+					</tr>
+					<tr>
+						<td colspan="5" align="left">'.$TEXT_SQLCVS_COMMENT.'</td>
+					</tr>
+					<tr>
+						<td align="center" colspan="5"><input type="text" name="sqlCVSComment" size="100%"></td>
+					</tr>
+					<tr>
+						<td colspan="5" align="left"><input type="submit" class="button" name="revert" value="'.$TEXT_REVERT_CONST.'"> <input type="submit" class="button" name="checkin" value="'.$TEXT_CHECKIN_CONST.'"></td>
 					</tr>';
 			}else{
 				$out.='
@@ -326,7 +344,10 @@ function sqlcvs_diff($output,$dbADO) {
 		$parmList=$_POST['parms'];
 		$port=(int)$_POST['port'];
 		$rand_tmp_file=$_POST['rand_tmp_file'];
-		
+		$sqlcvsAction=(isset($_POST['revert']))?'revert':'checkin';
+		$sqlCVSComment = ($_POST['sqlCVSComment']!="" && $sqlcvsAction=="checkin")?' -c "'.bash_escape(stripslashes($_POST['sqlCVSComment'])).'"':"";
+
+
 		if($host=='' || $port==''){
 			header("Location: index.php?section=sqlcvs_diff&error=$TEXT_ERROR_HOST_OR_PORT_NOT_SPECIFIED_CONST");
 			exit();			
@@ -334,20 +355,20 @@ function sqlcvs_diff($output,$dbADO) {
 		
 		$fileLines=$_POST['fileLines'];
 		$fileArray=file('/tmp/'.$rand_tmp_file);
-		$maskArray=array();
+
+		//Build a proper mask file to allow sqlCVS to checkin/revert only what is selected
+		$maskFile = fopen('/tmp/'.$rand_tmp_file.'.mask','w');
 		for($i=0;$i<$fileLines;$i++){
 			if(isset($_POST['line_'.$i]) && (int)$_POST['line_'.$i]==1){
-				$maskArray[]=$fileArray[$i];
+				fwrite($maskFile,$fileArray[$i]);
 			}
 		}
-		exec_batch_command('sudo -u root chmod 777 /tmp/tmp_sqlcvs_file');
+		fclose($maskFile);
 		
-		$sqlcvsAction=(isset($_POST['revert']))?'revert':'checkin';
-		
-		$cmd='sudo -u root /usr/pluto/bin/sqlCVS -R '.$port.' -H '.$host.' -h localhost -a -n '.$parmList.' -d "'.$username.'" -U "'.$username.'~'.$password.'" -D '.$database.' -e -m /tmp/'.$rand_tmp_file.' '.$sqlcvsAction;
-		writeFile($GLOBALS['WebExecLogFile'],date('d-m-Y H:i:s')."\t".$cmd."\n",'a+');
-		//unlink($rand_tmp_file);
+		//build sqlCVS command string
 
+		$cmd='sudo -u root /usr/pluto/bin/sqlCVS -R '.$port.' -H '.$host.' -h localhost -a -n '.$parmList.' -d "'.$username.'" -U "'.$username.'~'.$password.'" -D '.$database.$sqlCVSComment.' -e -m /tmp/'.$rand_tmp_file.'.mask '.$sqlcvsAction;
+		writeFile($GLOBALS['WebExecLogFile'],date('d-m-Y H:i:s')."\t".$cmd."\n",'a+');
 		
 		$out='
 		<script>

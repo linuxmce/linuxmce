@@ -10,15 +10,13 @@ private:
 
 	int m_nSceneID;
 	string m_sDescription;
-	int m_nRoomID;
 	std::map<int, Command_Data> m_mapCommands;
 
 public:
 
-	Scene_Data(int nSceneID = 0, int nRoomID = 0)
+	Scene_Data(int nSceneID = 0)
 	{
 		m_nSceneID = nSceneID;
-		m_nRoomID = nRoomID;
 	}
 
 	void Description(string sValue)
@@ -26,24 +24,9 @@ public:
 		m_sDescription = sValue;
 	}
 
-	string Description() const
+	string Description()
 	{
 		return m_sDescription;
-	}
-
-	int SceneID() const 
-	{
-		return m_nSceneID;
-	}
-
-	int RoomID() const
-	{
-		return m_nRoomID;
-	}
-
-	void RoomID(int nRoomID)
-	{
-		m_nRoomID = nRoomID;
 	}
 
 	std::map<int, Command_Data>& Commands()

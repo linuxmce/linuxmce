@@ -1,2 +1,0 @@
-obj-m := spcp8x5.o
-module-objs := spcp8x5.o  

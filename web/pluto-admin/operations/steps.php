@@ -25,7 +25,7 @@ function steps($output,$dbADO) {
 
 $start_time=getmicrotime();		
 	$scriptInHead ='
-		<script>
+		<script type="text/javascript">
 		function setMenuItem(mainUrl,selfPage,sender,anchor)
 		{
 			if(mainUrl!=\'\'){
@@ -44,18 +44,16 @@ $start_time=getmicrotime();
 	
 		function highlightMenuItem(){
 			try{
-				document.getElementById('.(int)@$_REQUEST['pageSetup'].').style.background="#CCCCCC";
+				document.getElementById('.(int)@$_REQUEST['pageSetup'].').style.background="#ccc";
 				document.getElementById("next_'.(int)@$_REQUEST['pageSetup'].'").style.display="";
-			}catch(e){
-				//do nothing
-			}
+			}catch(e){}
 		}
 		</script>
 	';
 	
 
 	
-	$out='<table border="0" cellpading="2" cellspacing="0" width="100%">
+	$out='<table style="border: 0; width: 100%" cellpading="2" cellspacing="0">
 			<tr>
 				<td colspan="3" align="center" height="133" class="left_frame_logo">
 					<a href="index.php?section=wizard"><img src="include/images/spacer.gif" border="0" width="220" height="90"></a>
@@ -98,7 +96,7 @@ $start_time=getmicrotime();
 	//$out.='<br><p class="normaltext">Page generated in '.round(($end_time-$start_time),3).' s.';
 	
 	$output->setScriptInHead($scriptInHead);
-	$output->setScriptInBody(' onLoad="highlightMenuItem();"');
+	$output->setScriptInBody(' onload="highlightMenuItem();"');
 	$output->setBody($out);
 	$output->setTitle(APPLICATION_NAME);			
 	$output->output();  

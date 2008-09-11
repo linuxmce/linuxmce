@@ -1,9 +1,0 @@
-<-dceag-p-b->
-Package = DCE_Destination_Package
-Dir = 
-desc = DCE Implemenation for #1950 Media Data Provider
-Maintainer = aaronName
-Email = 
-Depend = DCE_Dependencies
-<-dceag-p-e->
-

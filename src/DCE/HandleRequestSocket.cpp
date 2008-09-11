@@ -99,7 +99,7 @@ bool HandleRequestSocket::OnConnect( int PK_DeviceTemplate,string sExtraInfo )
 	}
 	if ( sResponse == "CLOSED" ) return false;
 
-	if ( sResponse.size()<2 || sResponse.substr(0,2) != "OK" )
+	if ( sResponse != "OK" )
 	{
 		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Connection for requesthandler %p (device: %d) reported %s. %s", this, m_dwPK_Device, sResponse.c_str(), m_sName.c_str() );
 		return false;

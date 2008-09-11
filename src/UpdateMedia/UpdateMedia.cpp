@@ -34,15 +34,13 @@ or FITNESS FOR A PARTICULAR PURPOSE. See the Pluto Public License for more detai
 #include <map>
 #include <list>
 
-#ifndef NOXATTR
 #ifndef WIN32
 #include <dirent.h>
 #include <attr/attributes.h>
 #endif
-#endif
 
-#include "pluto_main/Define_MediaType.h"
-#include "pluto_main/Define_DeviceTemplate_MediaType.h"
+#include "pluto_main/Table_MediaType.h"
+#include "pluto_main/Table_DeviceTemplate_MediaType.h"
 
 #include "pluto_media/Table_File.h"
 #include "pluto_media/Table_Picture_File.h"
@@ -51,8 +49,8 @@ or FITNESS FOR A PARTICULAR PURPOSE. See the Pluto Public License for more detai
 #include "pluto_media/Table_File_Attribute.h"
 
 #include "PlutoMediaFile.h"
-#include "pluto_main/Define_Installation.h"
-#include "pluto_main/Define_Device_DeviceData.h"
+#include "pluto_main/Table_Installation.h"
+#include "pluto_main/Table_Device_DeviceData.h"
 #include "pluto_main/Define_DeviceData.h"
 
 #ifdef WIN32
@@ -71,7 +69,7 @@ or FITNESS FOR A PARTICULAR PURPOSE. See the Pluto Public License for more detai
 
 #include "FileStatusObserver.h"
 
-#define  VERSION "<=version=>"
+#include "../include/version.h"
 //#define  USE_DEVEL_DATABASES 
 
 using namespace std;
@@ -126,8 +124,15 @@ UpdateMedia::UpdateMedia(string host, string user, string pass, int port,string 
 		return;
 	}
 
+	m_pDatabase_pluto_main = new Database_pluto_main(LoggerWrapper::GetInstance());
+	if( !m_pDatabase_pluto_main->Connect( host, user, pass, sPlutoMainDbName, port ) )
+	{
+		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Cannot connect to database!" );
+		return;
+	}
+
 	m_bAsDaemon = false;
-	PlutoMediaIdentifier::Activate();
+	PlutoMediaIdentifier::Activate(m_pDatabase_pluto_main);
 	LoadExtensions();
 
 	m_sDirectory = FileUtils::ExcludeTrailingSlash(sDirectory);
@@ -139,7 +144,7 @@ UpdateMedia::UpdateMedia(string host, string user, string pass, int port,string 
 }
 
 UpdateMedia::UpdateMedia(Database_pluto_media *pDatabase_pluto_media, 
-						 string sDirectory) 
+						 Database_pluto_main *pDatabase_pluto_main, string sDirectory) 
 {
 #ifndef WIN32
 	signal(SIGTRAP, &sigtrap_hook);
@@ -148,6 +153,7 @@ UpdateMedia::UpdateMedia(Database_pluto_media *pDatabase_pluto_media,
 	ReadConfigFile();
 
 	//reusing connections
+	m_pDatabase_pluto_main = pDatabase_pluto_main;
 	m_pDatabase_pluto_media = pDatabase_pluto_media;
 
 	SetupInstallation();
@@ -161,6 +167,7 @@ UpdateMedia::~UpdateMedia()
 	if(!m_bAsDaemon)
 	{
 		delete m_pDatabase_pluto_media;
+		delete m_pDatabase_pluto_main;
 	}
 }
 
@@ -204,9 +211,11 @@ void UpdateMedia::ReadConfigFile()
 
 void UpdateMedia::SetupInstallation()
 {
-	DCEConfig dce_config;
-	m_nPK_Installation = atoi(dce_config.m_mapParameters_Find("PK_Installation").c_str());
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "UpdateMedia::SetupInstallation %d", m_nPK_Installation) ;
+	m_nPK_Installation = 0;
+	vector<Row_Installation *> vectRow_Installation;
+	m_pDatabase_pluto_main->Installation_get()->GetRows("1=1", &vectRow_Installation);
+	if(vectRow_Installation.size() > 0)
+		m_nPK_Installation = vectRow_Installation[0]->PK_Installation_get();
 }
 
 void UpdateMedia::LoadExtensions()

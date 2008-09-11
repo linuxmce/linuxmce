@@ -3,6 +3,9 @@
 
 #include <string>
 #include <iostream>
+#include <cstring>
+#include <stdint.h>
+#include <sys/types.h>
 
 using namespace std;
 

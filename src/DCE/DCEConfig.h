@@ -39,6 +39,7 @@ class DCEConfig : public RA_Config
 private:
 
 	map<string,bool> m_mapModifiedParameters;
+public: // HACK needed by lmce_launch_managerwidget.cpp -- dtk 2007-11-06 HACK
 	map<string,string> m_mapParameters;
 
 public:

@@ -124,9 +124,6 @@
 				RelativePath=".\Table_AttributeType.cpp">
 			</File>
 			<File
-				RelativePath=".\Table_Attribute_MediaType.cpp">
-			</File>
-			<File
 				RelativePath=".\Table_Attribute_Settings.cpp">
 			</File>
 			<File

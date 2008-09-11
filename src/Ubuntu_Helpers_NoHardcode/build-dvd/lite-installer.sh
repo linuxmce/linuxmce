@@ -257,17 +257,13 @@ FormatPartitions()
 		else
 			if [[ -d ./usr/pluto/diskless ]]; then
 				pushd ./usr/pluto/diskless &>/dev/null
-					md_no=0
-                    while read MD; do
-                        ((md_no++))
+					while read MD; do
 						NukeFS "./$MD",etc "./$MD/etc",pluto.conf
 					done < <(find . -mindepth 1 -maxdepth 1 -type d)
 				popd &>/dev/null
 	
 				mkdir .upgrade-diskless
-                if [[ $md_no -gt 0 ]]; then
-    				mv ./usr/pluto/diskless/* .upgrade-diskless/
-                fi
+				mv ./usr/pluto/diskless/* .upgrade-diskless/
 			fi
 	
 			NukeFS .,home,var,etc,usr,.upgrade-diskless ./var,lib ./var/lib,mysql ./etc,pluto.conf,ssh,passwd,shadow,group,mysql ./usr,pluto ./usr/pluto,orbiter ./usr/pluto/orbiter,rooms,scenarios,users

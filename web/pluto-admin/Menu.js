@@ -48,7 +48,7 @@ reloadPage(true);
 // Initialize
 /******************************************/
 //Menu Array
-Menu =new Array(); //Menu[x][0]=INDEX - Menu[x][1]=PARENT - Menu[x][2]=Text - Menu[x][3]=Image - Menu[x][4]=Roll Image - Menu[x][5]=URL 
+Menu = []; //Menu[x][0]=INDEX - Menu[x][1]=PARENT - Menu[x][2]=Text - Menu[x][3]=Image - Menu[x][4]=Roll Image - Menu[x][5]=URL 
 var i=0;
 var ii=0; //used in validation of Menu Array
 var MaxMenuIndex=0;
@@ -72,7 +72,7 @@ var MyURL="";
 var TopParent=TOP;
 var LeftParent=LEFT;
 var ORGWIDTH=WIDTH;
-Parent_Child_Count=new Array(); //Counts the children of each Main Menu
+Parent_Child_Count=[]; //Counts the children of each Main Menu
 var Main_Parent_Count=0; //Counts the number of the Main menu 
 
 //Validation Variable
@@ -118,7 +118,7 @@ function AddMenu(ID, Parent_ID, Text, Image, RollImage, URL)
   if(Text.length==0 && Image.length==0) {alert("The Menu #"+(ii+1)+" should have either an image or a text assigned"); Error=true;}
   ii++;
    
-  Menu[i] = new Array();    
+  Menu[i] = [];    
   if(!Error)
   {
      for (var j=0; j < 6 ;j++)
@@ -148,10 +148,10 @@ function Build()
     //Initilize Position Variables
     for (var j=0;j<MaxMenuIndex;j++)
     { 
-      TOPLEFT[j]=new Array();
+      TOPLEFT[j]=[];
       Parent_Child_Count[j]=0;
-      MOUSEOVEROUT[j]=new Array(); 
-      Parent_Children_ID[j]=new Array();  
+      MOUSEOVEROUT[j]=[]; 
+      Parent_Children_ID[j]=[];  
       TOPLEFT[j][0]=0;
       TOPLEFT[j][1]=0;
     }   

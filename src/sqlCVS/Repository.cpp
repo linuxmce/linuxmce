@@ -183,7 +183,7 @@ void Repository::Setup( )
 		if( !( result_set.r=m_pDatabase->mysql_query_result( sql.str( ) ) ) || !( row = mysql_fetch_row( result_set.r ) ) )
 		{
 			sql.str( "" );
-			sql << "INSERT INTO `" << Tablename << "` ( Tablename ) VALUES( '" << pTable->Name_get( ) << "' )";
+			sql << "INSERT INTO `" << Tablename << "` ( Tablename ) VALUES ( '" << pTable->Name_get( ) << "' )";
 			if( m_pDatabase->threaded_mysql_query( sql.str( ) )<0 )
 			{
 				cerr << "SQL failed: " << sql.str( ) << endl;
@@ -242,7 +242,7 @@ string Repository::GetSetting(string Setting,string Default)
 	if( Default.length() )
 	{
 		sql.str("");
-		sql	<< "INSERT INTO `" << Tablename << "` (Setting,Value) VALUES('" + StringUtils::SQLEscape(Setting) + "','"  + StringUtils::SQLEscape(Default) + "')";
+		sql	<< "INSERT INTO `" << Tablename << "` (Setting,Value) VALUES ('" + StringUtils::SQLEscape(Setting) + "','"  + StringUtils::SQLEscape(Default) + "')";
 		if( m_pDatabase->threaded_mysql_query( sql.str( ) )<0 )
 		{
 			cerr << "SQL Failed: " << sql.str( ) << endl;
@@ -661,7 +661,7 @@ bool Repository::CheckIn( )
 		// roll back the transaction and try to re-commit.  Need a fail-safe reply
 		st2.Commit();
 		ostringstream sql;
-		sql << "INSERT INTO `" << m_pTable_BatchHeader->Name_get() << "` (PK_" << m_pTable_BatchHeader->Name_get() << ",date) VALUES(" 
+		sql << "INSERT INTO `" << m_pTable_BatchHeader->Name_get() << "` (PK_" << m_pTable_BatchHeader->Name_get() << ",date) VALUES (" 
 			<< r_CommitChanges.m_psc_batch << ",NOW())";
 		if( m_pDatabase->threaded_mysql_query( sql.str( ) )<0 )
 		{
@@ -750,7 +750,7 @@ int Repository::CreateBatch( sqlCVSprocessor *psqlCVSprocessor, map<int,Validate
 	else
 	{
 		std::ostringstream sSQL;
-		sSQL << "INSERT INTO `" << m_pTable_BatchHeader->Name_get( ) << "` ( IPAddress,date,comments ) VALUES( '" << 
+		sSQL << "INSERT INTO `" << m_pTable_BatchHeader->Name_get( ) << "` ( IPAddress,date,comments ) VALUES ( '" << 
 			(psqlCVSprocessor->m_pSocket ? psqlCVSprocessor->m_pSocket->m_sIPAddress : "")<< "',NOW(),'" << StringUtils::SQLEscape(psqlCVSprocessor->m_sComments) << "' )";
 		int BatchID = m_pDatabase->threaded_mysql_query_withID( sSQL.str( ) );
 		if( !BatchID )
@@ -763,7 +763,7 @@ int Repository::CreateBatch( sqlCVSprocessor *psqlCVSprocessor, map<int,Validate
 				ValidatedUser *pValidatedUser = (*it).second;
 				std::ostringstream sSQL;
 				sSQL << "INSERT INTO `" << m_pTable_BatchUser->Name_get( ) << "` ( FK_" 
-					<< m_pTable_BatchHeader->Name_get( ) << ",psc_user,is_sup,no_pass ) VALUES( " << BatchID << "," << (*it).first << "," << 
+					<< m_pTable_BatchHeader->Name_get( ) << ",psc_user,is_sup,no_pass ) VALUES ( " << BatchID << "," << (*it).first << "," << 
 					(pValidatedUser->m_bIsSupervisor ? "1" : "0") << "," << (pValidatedUser->m_bWithoutPassword ? "1" : "0") << " )";
 				int BatchID = m_pDatabase->threaded_mysql_query_withID( sSQL.str( ) );
 
@@ -1151,7 +1151,7 @@ int k=2;
 			sSQL << "UPDATE `" << sTableName << "` SET ";
 		else
 		{
-			sSQL << "INSERT INTO `" << sTableName << "`(";
+			sSQL << "INSERT INTO `" << sTableName << "` (";
 			bool bFirst=true;
 			for(list<string>::iterator it=listFields.begin();it!=listFields.end();++it)
 			{
@@ -1161,7 +1161,7 @@ int k=2;
 					sSQL << ",";
 				sSQL << "`" << *it << "`";
 			}
-			sSQL << ") VALUES( ";
+			sSQL << ") VALUES ( ";
 		}
 		bool bFirst=true;
 		for(list<string>::iterator it=listFields.begin();it!=listFields.end();++it)
@@ -1390,7 +1390,7 @@ void Repository::ResetSystemTables()
 	for(map<int,string>::iterator it=mapSchema.begin();it!=mapSchema.end();++it)
 	{
 		sql.str("");
-		sql	<< "INSERT INTO `" << Tablename << "` (PK_" << Tablename << ",`Value`) VALUES("
+		sql	<< "INSERT INTO `" << Tablename << "` (PK_" << Tablename << ",`Value`) VALUES ("
 			<< (*it).first << ",'" << StringUtils::SQLEscape((*it).second) << "');";
 		if( m_pDatabase->threaded_mysql_query( sql.str( ) )<0 )
 		{
@@ -1405,7 +1405,7 @@ void Repository::ResetSystemTables()
 		Table *pTable = m_mapTable_Find(*it);
 		string Tablename = "psc_" + m_sName + "_tables"; /**< Our _tables table */
 		ostringstream sql;
-		sql << "INSERT INTO `" << Tablename << "` ( Tablename,filter,frozen ) VALUES( '" << *it << "','" << (pTable ? pTable->m_sFilter : "") 
+		sql << "INSERT INTO `" << Tablename << "` ( Tablename,filter,frozen ) VALUES ( '" << *it << "','" << (pTable ? pTable->m_sFilter : "") 
 			<< "'," << (pTable && pTable->m_bFrozen ? "1" : "0") << ")";
 		if( m_pDatabase->threaded_mysql_query( sql.str( ) )<0 )
 		{

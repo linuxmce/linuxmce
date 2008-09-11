@@ -32,7 +32,7 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 
-#define  VERSION "<=version=>"
+#include "../include/version.h"
 
 using namespace std;
 using namespace DCE;

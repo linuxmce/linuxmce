@@ -107,10 +107,10 @@ static void LS_InitVTable()
 	LS_LinphoneCoreVTable.inv_recv = call_received;
 	LS_LinphoneCoreVTable.bye_recv = bye_received;
 	LS_LinphoneCoreVTable.auth_info_requested = auth_requested;
-	LS_LinphoneCoreVTable.display_status = display_something;
-	LS_LinphoneCoreVTable.display_message = display_something;
-	LS_LinphoneCoreVTable.display_warning = display_warning;
-	LS_LinphoneCoreVTable.display_url = display_url;
+	LS_LinphoneCoreVTable.display_status = (DisplayStatusCb) display_something;
+	LS_LinphoneCoreVTable.display_message = (DisplayMessageCb) display_something;
+	LS_LinphoneCoreVTable.display_warning = (DisplayMessageCb) display_warning;
+	LS_LinphoneCoreVTable.display_url = (DisplayUrlCb) display_url;
 	LS_LinphoneCoreVTable.display_question = (DisplayQuestionCb) stub;
 }
 /** Initialize LinphoneProxyConfig variable */

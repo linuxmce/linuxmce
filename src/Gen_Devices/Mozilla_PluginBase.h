@@ -72,7 +72,7 @@ public:
 				{
 					string sResponse;
 					m_pEvent->m_pClientSocket->SendString( "RELOAD" );
-					if( m_pEvent->m_pClientSocket->ReceiveString( sResponse ) && sResponse.size()<2 || sResponse.substr(0,2)!="OK" )
+					if( m_pEvent->m_pClientSocket->ReceiveString( sResponse ) && sResponse!="OK" )
 					{
 						CannotReloadRouter();
 						LoggerWrapper::GetInstance()->Write(LV_WARNING,"Reload request denied: %s",sResponse.c_str());

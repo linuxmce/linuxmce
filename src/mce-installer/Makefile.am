@@ -22,3 +22,9 @@ dist-hook:
 		fi \
 	done
 
+
+clean:
+	rm -f src/sample.mpg mce-installer.sh
+
+distclean: clean
+	rm -f Makefile

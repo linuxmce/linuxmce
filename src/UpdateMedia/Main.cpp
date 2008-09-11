@@ -35,6 +35,7 @@
 #include <vector>
 #include <map>
 #include <list>
+#include <algorithm>
 
 #ifdef WIN32
 #include <direct.h>
@@ -51,17 +52,13 @@
 #include "PlutoMediaFile.h"
 #include "PlutoMediaFile.h"
 #include "pluto_media/Define_AttributeType.h"
-#include "pluto_media/Table_Attribute.h"
 
 #include "DCE/Message.h"
 #include "DCE/DeviceData_Impl.h"
 #include "pluto_main/Define_Command.h"
 #include "pluto_main/Define_DeviceTemplate.h"
-#include "pluto_main/Define_MediaType.h"
 
-#include "Media_Plugin/MediaAttributes_LowLevel.h"
-
-#define  VERSION "<=version=>"
+#include "../include/version.h"
 
 using namespace std;
 using namespace DCE;
@@ -76,6 +73,7 @@ namespace UpdateMediaVars
 	vector<string> vectModifiedFolders;
 
     Database_pluto_media *g_pDatabase_pluto_media = NULL;
+    Database_pluto_main *g_pDatabase_pluto_main = NULL;
 
     pluto_pthread_mutex_t g_ConnectionMutex("connections");
 	pluto_pthread_mutex_t g_FoldersListMutex("folders list");
@@ -83,60 +81,6 @@ namespace UpdateMediaVars
 }
 
 using namespace UpdateMediaVars;
-
-void UpdateAlbumsForPhotos()
-{
-	MediaAttributes_LowLevel mediaAttributes_LowLevel(g_pDatabase_pluto_media);
-
-	string sSqlAlbums = "SELECT DISTINCT Path FROM File where EK_MediaType=" TOSTRING(MEDIATYPE_pluto_Pictures_CONST) " AND Missing=0 and IsDirectory=0";
-
-	PlutoSqlResult result;
-	DB_ROW row;
-	if((result.r = g_pDatabase_pluto_media->db_wrapper_query_result(sSqlAlbums)))
-	{
-		while((row = db_wrapper_fetch_row(result.r)))
-		{
-			Row_Attribute *pRow_Attribute = mediaAttributes_LowLevel.GetAttributeFromDescription(MEDIATYPE_pluto_Pictures_CONST,
-				ATTRIBUTETYPE_Album_CONST, FileUtils::FilenameWithoutPath(row[0]));
-
-			if( pRow_Attribute )
-			{
-				string sSQL = "REPLACE INTO File_Attribute(FK_File,FK_Attribute) SELECT PK_File," + StringUtils::itos(pRow_Attribute->PK_Attribute_get()) + 
-					" FROM File where Path='" + row[0] + "' AND EK_MediaType=" TOSTRING(MEDIATYPE_pluto_Pictures_CONST) " AND Missing=0 and IsDirectory=0";
-				int iResult = g_pDatabase_pluto_media->threaded_db_wrapper_query(sSQL);
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Updated PhotoAlbum %d records: %s", iResult, sSQL.c_str());
-			}
-		}
-	}
-}
-
-void AddUnknownAlbum()
-{
-	MediaAttributes_LowLevel mediaAttributes_LowLevel(g_pDatabase_pluto_media);
-
-	Row_Attribute *pRow_Attribute = mediaAttributes_LowLevel.GetAttributeFromDescription(MEDIATYPE_pluto_StoredAudio_CONST,
-		ATTRIBUTETYPE_Album_CONST, "Unknown Album");  // Add the unknown attribute for songs without an album
-
-	int iResult1=0, iResult2=0;
-
-	if( pRow_Attribute )
-		iResult1=g_pDatabase_pluto_media->threaded_db_wrapper_query(
-			"REPLACE INTO File_Attribute(FK_File,FK_Attribute) "
-				"SELECT PK_File," + StringUtils::itos(pRow_Attribute->PK_Attribute_get()) + " FROM File "
-				"LEFT JOIN File_Attribute ON FK_File=PK_File AND FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Album_CONST) " "
-				"WHERE EK_MediaType=" TOSTRING(MEDIATYPE_pluto_StoredAudio_CONST) " AND FK_AttributeType IS NULL" );
-
-	pRow_Attribute = mediaAttributes_LowLevel.GetAttributeFromDescription(MEDIATYPE_pluto_StoredAudio_CONST,
-		ATTRIBUTETYPE_Performer_CONST, "Unknown Performer");  // Add the unknown attribute for songs without a performer
-
-	if( pRow_Attribute )
-		iResult2=g_pDatabase_pluto_media->threaded_db_wrapper_query(
-			"REPLACE INTO File_Attribute(FK_File,FK_Attribute) "
-				"SELECT PK_File," + StringUtils::itos(pRow_Attribute->PK_Attribute_get()) + " FROM File "
-				"LEFT JOIN File_Attribute ON FK_File=PK_File AND FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Performer_CONST) " "
-				"WHERE EK_MediaType=" TOSTRING(MEDIATYPE_pluto_StoredAudio_CONST) " AND FK_AttributeType IS NULL" );
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AddUnknownAlbum %d/%d records", iResult1, iResult2);
-}
 
 void RemoveDuplicatedAttributes()
 {
@@ -214,13 +158,10 @@ void RemoveDuplicatedAttributes()
 
 void *UpdateMediaThread(void *)
 {
-	UpdateAlbumsForPhotos();
-	DatabaseUtils::SyncMediaAttributes(g_pDatabase_pluto_media);
-	DatabaseUtils::UpdateAttributeCount(g_pDatabase_pluto_media);
+	DatabaseUtils::SyncMediaAttributes(g_pDatabase_pluto_main);
 	RemoveDuplicatedAttributes();
-	AddUnknownAlbum();
 
-	PlutoMediaIdentifier::Activate();
+	PlutoMediaIdentifier::Activate(g_pDatabase_pluto_main);
 
 	vector<string> vsUPnPDevices;
 	
@@ -270,9 +211,8 @@ void *UpdateMediaThread(void *)
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Synchronizing '%s'...", sItem.c_str());	
 
 			PlutoMediaFile::ResetNewFilesAddedStatus();
-			PlutoMediaFile::ResetAttributesUpdated();
 				
-			UpdateMedia engine(g_pDatabase_pluto_media, sItem);
+			UpdateMedia engine(g_pDatabase_pluto_media, g_pDatabase_pluto_main, sItem);
 			engine.LoadExtensions();
 			engine.DoIt();
 
@@ -282,16 +222,13 @@ void *UpdateMediaThread(void *)
 			if( bUpdateThumbnails )
 				engine.UpdateThumbnails();
 
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Synchronized '%s'. new files %d attributes updated %d",
-				sItem.c_str(), (int) PlutoMediaFile::NewFilesAdded(), PlutoMediaFile::AttributesUpdated() );
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Synchronized '%s'.", sItem.c_str());
 
-			if(PlutoMediaFile::NewFilesAdded() || PlutoMediaFile::AttributesUpdated() )
+			if(PlutoMediaFile::NewFilesAdded())
 			{
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "New files were added to db for '%s'.", sItem.c_str());
 
-				UpdateAlbumsForPhotos();
-				DatabaseUtils::SyncMediaAttributes(g_pDatabase_pluto_media);
-				DatabaseUtils::UpdateAttributeCount(g_pDatabase_pluto_media);
+				DatabaseUtils::SyncMediaAttributes(g_pDatabase_pluto_main);
 
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sending \"Check for new files\" command to Media_Plugin...");
 				Event_Impl *pEvent = new Event_Impl(DEVICEID_MESSAGESEND, 0, "dcerouter");
@@ -303,7 +240,6 @@ void *UpdateMediaThread(void *)
 				pEvent = NULL;
 
 				RemoveDuplicatedAttributes();
-				AddUnknownAlbum();
 
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Command \"Check for new files\" sent!");
 			}
@@ -487,7 +423,6 @@ int main(int argc, char *argv[])
 			string sFolder = *it;
 
 			UpdateMedia UpdateMedia(sDBHost,sDBUser,sDBPassword,iDBPort,sFolder,bSyncFilesOnly);
-
 			if(!sFolder.empty())
 				UpdateMedia.DoIt();
 
@@ -513,12 +448,6 @@ int main(int argc, char *argv[])
 				UpdateMedia.UpdateThumbnails();
 */
 		}
-
-		UpdateAlbumsForPhotos();
-		DatabaseUtils::SyncMediaAttributes(g_pDatabase_pluto_media);
-		DatabaseUtils::UpdateAttributeCount(g_pDatabase_pluto_media);
-		RemoveDuplicatedAttributes();
-		AddUnknownAlbum();
 	}
 	else
 	{
@@ -544,6 +473,13 @@ int main(int argc, char *argv[])
             return 1;
         }
 
+        g_pDatabase_pluto_main = new Database_pluto_main(LoggerWrapper::GetInstance());
+        if( !g_pDatabase_pluto_main->Connect(sDBHost,sDBUser,sDBPassword, sPlutoMainDbName,iDBPort) )
+        {
+            LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Cannot connect to database!" );
+            return 2;
+        }
+
 		FileNotifier fileNotifier(g_pDatabase_pluto_media);
 		fileNotifier.RegisterCallbacks(OnModify, OnModify); //we'll use the same callback for OnCreate and OnDelete events
 
@@ -566,6 +502,8 @@ int main(int argc, char *argv[])
 
 		delete g_pDatabase_pluto_media;
 		g_pDatabase_pluto_media = NULL;
+		delete g_pDatabase_pluto_main;
+		g_pDatabase_pluto_main = NULL;
 	}
 
 	FileStatusObserver::Instance().Finalize();

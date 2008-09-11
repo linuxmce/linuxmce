@@ -16,7 +16,6 @@ Cleanup()
 	fi
 	echo 1 >/proc/diag/led/power
 	rm -f /tmp/netled.pid
-	echo "$(date -R) NetLED terminated" >>/tmp/log.NetLED
 }
 
 LED_NoNet()
@@ -32,7 +31,6 @@ LED_NoNet()
 		Now=$(date +%s)
 		Difference=$(expr $Now - $Start)
 		if [[ -f /etc/pluto/fresh_install ]] && [[ "$Once" == false ]] && [[ "$Difference" -ge 60 ]]; then
-			echo "$(date -R) No Internet for 60 seconds. Switching to gateway mode" >>/tmp/log.NetLED
 			/usr/bin/RouterMode_Gateway.sh
 			Once=true
 		fi
@@ -56,8 +54,6 @@ Srv_plutohome=plutohome.com
 
 PID_NoNet=
 
-echo "$(date -R) NetLED active" >>/tmp/log.NetLED
-
 while :; do
 	Reach=0
 	for key in $Keys; do
@@ -71,7 +67,6 @@ while :; do
 	done
 
 	if [[ "$Reach" -eq 0 ]]; then
-		echo "$(date -R) No hosts reachable. No Internet." >>/tmp/log.NetLED
 		NoInternet
 		sleep 5
 		continue
@@ -81,23 +76,18 @@ while :; do
 	for key in $Keys; do
 		eval "IP=\$(echo \$IP_$key)"
 		if [[ "$IP" == "$LastIP" ]]; then
-			echo "$(date -R) Hosts return same IP address. No Internet." >>/tmp/log.NetLED
 			NoInternet
 			sleep 5
 			continue 2
 		fi
 		LastIP="$IP"
 	done
-	echo "$(date -R) Internet connection active. Exiting loop." >>/tmp/log.NetLED
 	break
 done
 
-/usr/bin/Report_AP.sh &
 if [[ ! -f /etc/pluto/fresh_install ]]; then
-	echo "$(date -R) Automatic configuration disabled. Exiting." >>/tmp/log.NetLED
 	exit
 fi
-echo "$(date -R) Automatic configuration enabled. Proceeding" >>/tmp/log.NetLED
 
 IPtype=routable
 
@@ -120,17 +110,14 @@ fi
 
 Cfg=$(uci show dhcp|grep interface=lan|cut -d. -f2)
 CfgMasq=$(uci show dhcp|grep =dnsmasq|cut -d. -f2|cut -d= -f1)
-
+uci set dhcp.$Cfg.force=1
+uci set dhcp.$Cfg.ignore=0
 uci commit
-sync
-
 case "$IPtype" in
 	local)
-		echo "$(date -R) WAN IP is local. Configuring as switch" >>/tmp/log.NetLED
 		/usr/bin/RouterMode_Switch.sh "$Cfg" "$CfgMasq"
 		;;
 	routable)
-		echo "$(date -R) WAN IP is routable. Configuring as gateway" >>/tmp/log.NetLED
 		/usr/bin/RouterMode_Gateway.sh "$Cfg" "$CfgMasq"
 		;;
 esac
