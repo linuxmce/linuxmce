@@ -876,6 +876,17 @@
 #define COMMAND_Add_Node_CONST 967
 #define COMMAND_Remove_Node_CONST 968
 #define COMMAND_Restore_To_NonTemp_State_CONST 969
+#define COMMAND_Register_Data_Provider_CONST 970
+#define COMMAND_Request_Data_Provider_CONST 971
+#define COMMAND_Set_Sensor_State_CONST 972
+#define COMMAND_Archive_Video_Frame_CONST 973
+#define COMMAND_sRGB_Color_Mode_CONST 974
+#define COMMAND_Theatre_Color_Mode_CONST 975
+#define COMMAND_Living_Room_Color_Mode_CONST 976
+#define COMMAND_Natural_Color_Mode_CONST 977
+#define COMMAND_Dynamic_Color_Mode_CONST 978
+#define COMMAND_Theatre_Black_1_Color_Mode_CONST 979
+#define COMMAND_Theatre_Black_2_Color_Mode_CONST 980
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"

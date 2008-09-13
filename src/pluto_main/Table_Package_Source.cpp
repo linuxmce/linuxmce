@@ -35,6 +35,8 @@ using namespace std;
 #include "Table_RepositorySource.h"
 
 #include "Table_Package_Source_Compat.h"
+#include "Table_Package_Source_Compat_pschist.h"
+#include "Table_Package_Source_Compat_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Package_Source()
@@ -1314,6 +1316,20 @@ void Row_Package_Source::Package_Source_Compat_FK_Package_Source_getrows(vector 
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Package_Source_Compat *pTable = table->database->Package_Source_Compat_get();
+pTable->GetRows("`FK_Package_Source`=" + StringUtils::itos(m_PK_Package_Source),rows);
+}
+void Row_Package_Source::Package_Source_Compat_pschist_FK_Package_Source_getrows(vector <class Row_Package_Source_Compat_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_Source_Compat_pschist *pTable = table->database->Package_Source_Compat_pschist_get();
+pTable->GetRows("`FK_Package_Source`=" + StringUtils::itos(m_PK_Package_Source),rows);
+}
+void Row_Package_Source::Package_Source_Compat_pschmask_FK_Package_Source_getrows(vector <class Row_Package_Source_Compat_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_Source_Compat_pschmask *pTable = table->database->Package_Source_Compat_pschmask_get();
 pTable->GetRows("`FK_Package_Source`=" + StringUtils::itos(m_PK_Package_Source),rows);
 }
 

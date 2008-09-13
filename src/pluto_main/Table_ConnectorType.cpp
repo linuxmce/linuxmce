@@ -33,7 +33,11 @@ using namespace std;
 #include "Table_ConnectorType.h"
 
 #include "Table_DeviceTemplate_Input.h"
+#include "Table_DeviceTemplate_Input_pschist.h"
+#include "Table_DeviceTemplate_Input_pschmask.h"
 #include "Table_DeviceTemplate_Output.h"
+#include "Table_DeviceTemplate_Output_pschist.h"
+#include "Table_DeviceTemplate_Output_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_ConnectorType()
@@ -953,11 +957,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceTemplate_Input *pTable = table->database->DeviceTemplate_Input_get();
 pTable->GetRows("`FK_ConnectorType`=" + StringUtils::itos(m_PK_ConnectorType),rows);
 }
+void Row_ConnectorType::DeviceTemplate_Input_pschist_FK_ConnectorType_getrows(vector <class Row_DeviceTemplate_Input_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_Input_pschist *pTable = table->database->DeviceTemplate_Input_pschist_get();
+pTable->GetRows("`FK_ConnectorType`=" + StringUtils::itos(m_PK_ConnectorType),rows);
+}
+void Row_ConnectorType::DeviceTemplate_Input_pschmask_FK_ConnectorType_getrows(vector <class Row_DeviceTemplate_Input_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_Input_pschmask *pTable = table->database->DeviceTemplate_Input_pschmask_get();
+pTable->GetRows("`FK_ConnectorType`=" + StringUtils::itos(m_PK_ConnectorType),rows);
+}
 void Row_ConnectorType::DeviceTemplate_Output_FK_ConnectorType_getrows(vector <class Row_DeviceTemplate_Output*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_DeviceTemplate_Output *pTable = table->database->DeviceTemplate_Output_get();
+pTable->GetRows("`FK_ConnectorType`=" + StringUtils::itos(m_PK_ConnectorType),rows);
+}
+void Row_ConnectorType::DeviceTemplate_Output_pschist_FK_ConnectorType_getrows(vector <class Row_DeviceTemplate_Output_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_Output_pschist *pTable = table->database->DeviceTemplate_Output_pschist_get();
+pTable->GetRows("`FK_ConnectorType`=" + StringUtils::itos(m_PK_ConnectorType),rows);
+}
+void Row_ConnectorType::DeviceTemplate_Output_pschmask_FK_ConnectorType_getrows(vector <class Row_DeviceTemplate_Output_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_Output_pschmask *pTable = table->database->DeviceTemplate_Output_pschmask_get();
 pTable->GetRows("`FK_ConnectorType`=" + StringUtils::itos(m_PK_ConnectorType),rows);
 }
 

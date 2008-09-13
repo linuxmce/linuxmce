@@ -172,8 +172,14 @@ class Row_Installation* FK_Installation_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void CommandGroup_Command_FK_DeviceGroup_getrows(vector <class Row_CommandGroup_Command*> *rows);
+void CommandGroup_Command_pschist_FK_DeviceGroup_getrows(vector <class Row_CommandGroup_Command_pschist*> *rows);
+void CommandGroup_Command_pschmask_FK_DeviceGroup_getrows(vector <class Row_CommandGroup_Command_pschmask*> *rows);
 void DeviceGroup_FK_DeviceGroup_Parent_getrows(vector <class Row_DeviceGroup*> *rows);
+void DeviceGroup_pschist_FK_DeviceGroup_Parent_getrows(vector <class Row_DeviceGroup_pschist*> *rows);
+void DeviceGroup_pschmask_FK_DeviceGroup_Parent_getrows(vector <class Row_DeviceGroup_pschmask*> *rows);
 void Device_DeviceGroup_FK_DeviceGroup_getrows(vector <class Row_Device_DeviceGroup*> *rows);
+void Device_DeviceGroup_pschist_FK_DeviceGroup_getrows(vector <class Row_Device_DeviceGroup_pschist*> *rows);
+void Device_DeviceGroup_pschmask_FK_DeviceGroup_getrows(vector <class Row_Device_DeviceGroup_pschmask*> *rows);
 
 
 		// Setup binary serialization

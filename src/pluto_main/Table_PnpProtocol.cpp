@@ -33,6 +33,8 @@ using namespace std;
 #include "Table_PnpProtocol.h"
 
 #include "Table_DHCPDevice.h"
+#include "Table_DHCPDevice_pschist.h"
+#include "Table_DHCPDevice_pschmask.h"
 #include "Table_PnpQueue.h"
 
 
@@ -963,6 +965,20 @@ void Row_PnpProtocol::DHCPDevice_FK_PnpProtocol_getrows(vector <class Row_DHCPDe
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_DHCPDevice *pTable = table->database->DHCPDevice_get();
+pTable->GetRows("`FK_PnpProtocol`=" + StringUtils::itos(m_PK_PnpProtocol),rows);
+}
+void Row_PnpProtocol::DHCPDevice_pschist_FK_PnpProtocol_getrows(vector <class Row_DHCPDevice_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DHCPDevice_pschist *pTable = table->database->DHCPDevice_pschist_get();
+pTable->GetRows("`FK_PnpProtocol`=" + StringUtils::itos(m_PK_PnpProtocol),rows);
+}
+void Row_PnpProtocol::DHCPDevice_pschmask_FK_PnpProtocol_getrows(vector <class Row_DHCPDevice_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DHCPDevice_pschmask *pTable = table->database->DHCPDevice_pschmask_get();
 pTable->GetRows("`FK_PnpProtocol`=" + StringUtils::itos(m_PK_PnpProtocol),rows);
 }
 void Row_PnpProtocol::PnpQueue_FK_PnpProtocol_getrows(vector <class Row_PnpQueue*> *rows)

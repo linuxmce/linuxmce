@@ -167,6 +167,8 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Event_EventParameter_FK_EventParameter_getrows(vector <class Row_Event_EventParameter*> *rows);
+void Event_EventParameter_pschist_FK_EventParameter_getrows(vector <class Row_Event_EventParameter_pschist*> *rows);
+void Event_EventParameter_pschmask_FK_EventParameter_getrows(vector <class Row_Event_EventParameter_pschmask*> *rows);
 
 
 		// Setup binary serialization

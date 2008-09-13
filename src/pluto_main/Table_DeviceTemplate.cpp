@@ -44,30 +44,78 @@ using namespace std;
 #include "Table_PnpLevel.h"
 
 #include "Table_CommandGroup_D_Command.h"
+#include "Table_CommandGroup_D_Command_pschist.h"
+#include "Table_CommandGroup_D_Command_pschmask.h"
 #include "Table_ConfigType.h"
+#include "Table_ConfigType_pschist.h"
+#include "Table_ConfigType_pschmask.h"
 #include "Table_DHCPDevice.h"
+#include "Table_DHCPDevice_pschist.h"
+#include "Table_DHCPDevice_pschmask.h"
 #include "Table_Device.h"
 #include "Table_DeviceTemplate_AV.h"
+#include "Table_DeviceTemplate_AV_pschist.h"
+#include "Table_DeviceTemplate_AV_pschmask.h"
 #include "Table_DeviceTemplate_DSPMode.h"
+#include "Table_DeviceTemplate_DSPMode_pschist.h"
+#include "Table_DeviceTemplate_DSPMode_pschmask.h"
 #include "Table_DeviceTemplate_DesignObj.h"
+#include "Table_DeviceTemplate_DesignObj_pschist.h"
+#include "Table_DeviceTemplate_DesignObj_pschmask.h"
 #include "Table_DeviceTemplate_DeviceCategory_ControlledVia.h"
+#include "Table_DeviceTemplate_DeviceCategory_ControlledVia_pschist.h"
+#include "Table_DeviceTemplate_DeviceCategory_ControlledVia_pschmask.h"
 #include "Table_DeviceTemplate_DeviceCommandGroup.h"
+#include "Table_DeviceTemplate_DeviceCommandGroup_pschist.h"
+#include "Table_DeviceTemplate_DeviceCommandGroup_pschmask.h"
 #include "Table_DeviceTemplate_DeviceData.h"
+#include "Table_DeviceTemplate_DeviceData_pschist.h"
+#include "Table_DeviceTemplate_DeviceData_pschmask.h"
 #include "Table_DeviceTemplate_DeviceTemplate_ControlledVia.h"
 #include "Table_DeviceTemplate_DeviceTemplate_ControlledVia.h"
+#include "Table_DeviceTemplate_DeviceTemplate_ControlledVia_pschist.h"
+#include "Table_DeviceTemplate_DeviceTemplate_ControlledVia_pschist.h"
+#include "Table_DeviceTemplate_DeviceTemplate_ControlledVia_pschmask.h"
+#include "Table_DeviceTemplate_DeviceTemplate_ControlledVia_pschmask.h"
 #include "Table_DeviceTemplate_DeviceTemplate_Related.h"
 #include "Table_DeviceTemplate_DeviceTemplate_Related.h"
+#include "Table_DeviceTemplate_DeviceTemplate_Related_pschist.h"
+#include "Table_DeviceTemplate_DeviceTemplate_Related_pschist.h"
+#include "Table_DeviceTemplate_DeviceTemplate_Related_pschmask.h"
+#include "Table_DeviceTemplate_DeviceTemplate_Related_pschmask.h"
 #include "Table_DeviceTemplate_Event.h"
+#include "Table_DeviceTemplate_Event_pschist.h"
+#include "Table_DeviceTemplate_Event_pschmask.h"
 #include "Table_DeviceTemplate_InfraredGroup.h"
+#include "Table_DeviceTemplate_InfraredGroup_pschist.h"
+#include "Table_DeviceTemplate_InfraredGroup_pschmask.h"
 #include "Table_DeviceTemplate_Input.h"
+#include "Table_DeviceTemplate_Input_pschist.h"
+#include "Table_DeviceTemplate_Input_pschmask.h"
 #include "Table_DeviceTemplate_MediaType.h"
+#include "Table_DeviceTemplate_MediaType_pschist.h"
+#include "Table_DeviceTemplate_MediaType_pschmask.h"
 #include "Table_DeviceTemplate_Output.h"
+#include "Table_DeviceTemplate_Output_pschist.h"
+#include "Table_DeviceTemplate_Output_pschmask.h"
 #include "Table_DeviceTemplate_PageSetup.h"
+#include "Table_DeviceTemplate_PageSetup_pschist.h"
+#include "Table_DeviceTemplate_PageSetup_pschmask.h"
+#include "Table_Device_pschist.h"
+#include "Table_Device_pschmask.h"
 #include "Table_InfraredGroup_Command.h"
+#include "Table_InfraredGroup_Command_pschist.h"
+#include "Table_InfraredGroup_Command_pschmask.h"
 #include "Table_InstallWizard.h"
+#include "Table_InstallWizard_pschist.h"
+#include "Table_InstallWizard_pschmask.h"
 #include "Table_PnpQueue.h"
 #include "Table_Screen_DesignObj.h"
+#include "Table_Screen_DesignObj_pschist.h"
+#include "Table_Screen_DesignObj_pschmask.h"
 #include "Table_StartupScript.h"
+#include "Table_StartupScript_pschist.h"
+#include "Table_StartupScript_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_DeviceTemplate()
@@ -2322,6 +2370,20 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_CommandGroup_D_Command *pTable = table->database->CommandGroup_D_Command_get();
 pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
 }
+void Row_DeviceTemplate::CommandGroup_D_Command_pschist_FK_DeviceTemplate_getrows(vector <class Row_CommandGroup_D_Command_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_CommandGroup_D_Command_pschist *pTable = table->database->CommandGroup_D_Command_pschist_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::CommandGroup_D_Command_pschmask_FK_DeviceTemplate_getrows(vector <class Row_CommandGroup_D_Command_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_CommandGroup_D_Command_pschmask *pTable = table->database->CommandGroup_D_Command_pschmask_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
 void Row_DeviceTemplate::ConfigType_FK_DeviceTemplate_getrows(vector <class Row_ConfigType*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -2329,11 +2391,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_ConfigType *pTable = table->database->ConfigType_get();
 pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
 }
+void Row_DeviceTemplate::ConfigType_pschist_FK_DeviceTemplate_getrows(vector <class Row_ConfigType_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_ConfigType_pschist *pTable = table->database->ConfigType_pschist_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::ConfigType_pschmask_FK_DeviceTemplate_getrows(vector <class Row_ConfigType_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_ConfigType_pschmask *pTable = table->database->ConfigType_pschmask_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
 void Row_DeviceTemplate::DHCPDevice_FK_DeviceTemplate_getrows(vector <class Row_DHCPDevice*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_DHCPDevice *pTable = table->database->DHCPDevice_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DHCPDevice_pschist_FK_DeviceTemplate_getrows(vector <class Row_DHCPDevice_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DHCPDevice_pschist *pTable = table->database->DHCPDevice_pschist_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DHCPDevice_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DHCPDevice_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DHCPDevice_pschmask *pTable = table->database->DHCPDevice_pschmask_get();
 pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
 }
 void Row_DeviceTemplate::Device_FK_DeviceTemplate_getrows(vector <class Row_Device*> *rows)
@@ -2350,11 +2440,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceTemplate_AV *pTable = table->database->DeviceTemplate_AV_get();
 pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
 }
+void Row_DeviceTemplate::DeviceTemplate_AV_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_AV_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_AV_pschist *pTable = table->database->DeviceTemplate_AV_pschist_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DeviceTemplate_AV_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_AV_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_AV_pschmask *pTable = table->database->DeviceTemplate_AV_pschmask_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
 void Row_DeviceTemplate::DeviceTemplate_DSPMode_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DSPMode*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_DeviceTemplate_DSPMode *pTable = table->database->DeviceTemplate_DSPMode_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DeviceTemplate_DSPMode_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DSPMode_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_DSPMode_pschist *pTable = table->database->DeviceTemplate_DSPMode_pschist_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DeviceTemplate_DSPMode_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DSPMode_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_DSPMode_pschmask *pTable = table->database->DeviceTemplate_DSPMode_pschmask_get();
 pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
 }
 void Row_DeviceTemplate::DeviceTemplate_DesignObj_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DesignObj*> *rows)
@@ -2364,11 +2482,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceTemplate_DesignObj *pTable = table->database->DeviceTemplate_DesignObj_get();
 pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
 }
+void Row_DeviceTemplate::DeviceTemplate_DesignObj_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DesignObj_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_DesignObj_pschist *pTable = table->database->DeviceTemplate_DesignObj_pschist_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DeviceTemplate_DesignObj_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DesignObj_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_DesignObj_pschmask *pTable = table->database->DeviceTemplate_DesignObj_pschmask_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
 void Row_DeviceTemplate::DeviceTemplate_DeviceCategory_ControlledVia_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceCategory_ControlledVia*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_DeviceTemplate_DeviceCategory_ControlledVia *pTable = table->database->DeviceTemplate_DeviceCategory_ControlledVia_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DeviceTemplate_DeviceCategory_ControlledVia_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceCategory_ControlledVia_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_DeviceCategory_ControlledVia_pschist *pTable = table->database->DeviceTemplate_DeviceCategory_ControlledVia_pschist_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DeviceTemplate_DeviceCategory_ControlledVia_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceCategory_ControlledVia_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_DeviceCategory_ControlledVia_pschmask *pTable = table->database->DeviceTemplate_DeviceCategory_ControlledVia_pschmask_get();
 pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
 }
 void Row_DeviceTemplate::DeviceTemplate_DeviceCommandGroup_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceCommandGroup*> *rows)
@@ -2378,11 +2524,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceTemplate_DeviceCommandGroup *pTable = table->database->DeviceTemplate_DeviceCommandGroup_get();
 pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
 }
+void Row_DeviceTemplate::DeviceTemplate_DeviceCommandGroup_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceCommandGroup_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_DeviceCommandGroup_pschist *pTable = table->database->DeviceTemplate_DeviceCommandGroup_pschist_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DeviceTemplate_DeviceCommandGroup_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceCommandGroup_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_DeviceCommandGroup_pschmask *pTable = table->database->DeviceTemplate_DeviceCommandGroup_pschmask_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
 void Row_DeviceTemplate::DeviceTemplate_DeviceData_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceData*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_DeviceTemplate_DeviceData *pTable = table->database->DeviceTemplate_DeviceData_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DeviceTemplate_DeviceData_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceData_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_DeviceData_pschist *pTable = table->database->DeviceTemplate_DeviceData_pschist_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DeviceTemplate_DeviceData_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceData_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_DeviceData_pschmask *pTable = table->database->DeviceTemplate_DeviceData_pschmask_get();
 pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
 }
 void Row_DeviceTemplate::DeviceTemplate_DeviceTemplate_ControlledVia_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia*> *rows)
@@ -2399,6 +2573,34 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceTemplate_DeviceTemplate_ControlledVia *pTable = table->database->DeviceTemplate_DeviceTemplate_ControlledVia_get();
 pTable->GetRows("`FK_DeviceTemplate_ControlledVia`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
 }
+void Row_DeviceTemplate::DeviceTemplate_DeviceTemplate_ControlledVia_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_DeviceTemplate_ControlledVia_pschist *pTable = table->database->DeviceTemplate_DeviceTemplate_ControlledVia_pschist_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DeviceTemplate_DeviceTemplate_ControlledVia_pschist_FK_DeviceTemplate_ControlledVia_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_DeviceTemplate_ControlledVia_pschist *pTable = table->database->DeviceTemplate_DeviceTemplate_ControlledVia_pschist_get();
+pTable->GetRows("`FK_DeviceTemplate_ControlledVia`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DeviceTemplate_DeviceTemplate_ControlledVia_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_DeviceTemplate_ControlledVia_pschmask *pTable = table->database->DeviceTemplate_DeviceTemplate_ControlledVia_pschmask_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DeviceTemplate_DeviceTemplate_ControlledVia_pschmask_FK_DeviceTemplate_ControlledVia_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_DeviceTemplate_ControlledVia_pschmask *pTable = table->database->DeviceTemplate_DeviceTemplate_ControlledVia_pschmask_get();
+pTable->GetRows("`FK_DeviceTemplate_ControlledVia`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
 void Row_DeviceTemplate::DeviceTemplate_DeviceTemplate_Related_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_Related*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -2413,11 +2615,53 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceTemplate_DeviceTemplate_Related *pTable = table->database->DeviceTemplate_DeviceTemplate_Related_get();
 pTable->GetRows("`FK_DeviceTemplate_Related`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
 }
+void Row_DeviceTemplate::DeviceTemplate_DeviceTemplate_Related_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_Related_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_DeviceTemplate_Related_pschist *pTable = table->database->DeviceTemplate_DeviceTemplate_Related_pschist_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DeviceTemplate_DeviceTemplate_Related_pschist_FK_DeviceTemplate_Related_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_Related_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_DeviceTemplate_Related_pschist *pTable = table->database->DeviceTemplate_DeviceTemplate_Related_pschist_get();
+pTable->GetRows("`FK_DeviceTemplate_Related`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DeviceTemplate_DeviceTemplate_Related_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_Related_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_DeviceTemplate_Related_pschmask *pTable = table->database->DeviceTemplate_DeviceTemplate_Related_pschmask_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DeviceTemplate_DeviceTemplate_Related_pschmask_FK_DeviceTemplate_Related_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_Related_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_DeviceTemplate_Related_pschmask *pTable = table->database->DeviceTemplate_DeviceTemplate_Related_pschmask_get();
+pTable->GetRows("`FK_DeviceTemplate_Related`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
 void Row_DeviceTemplate::DeviceTemplate_Event_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_Event*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_DeviceTemplate_Event *pTable = table->database->DeviceTemplate_Event_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DeviceTemplate_Event_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_Event_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_Event_pschist *pTable = table->database->DeviceTemplate_Event_pschist_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DeviceTemplate_Event_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_Event_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_Event_pschmask *pTable = table->database->DeviceTemplate_Event_pschmask_get();
 pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
 }
 void Row_DeviceTemplate::DeviceTemplate_InfraredGroup_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_InfraredGroup*> *rows)
@@ -2427,11 +2671,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceTemplate_InfraredGroup *pTable = table->database->DeviceTemplate_InfraredGroup_get();
 pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
 }
+void Row_DeviceTemplate::DeviceTemplate_InfraredGroup_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_InfraredGroup_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_InfraredGroup_pschist *pTable = table->database->DeviceTemplate_InfraredGroup_pschist_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DeviceTemplate_InfraredGroup_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_InfraredGroup_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_InfraredGroup_pschmask *pTable = table->database->DeviceTemplate_InfraredGroup_pschmask_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
 void Row_DeviceTemplate::DeviceTemplate_Input_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_Input*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_DeviceTemplate_Input *pTable = table->database->DeviceTemplate_Input_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DeviceTemplate_Input_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_Input_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_Input_pschist *pTable = table->database->DeviceTemplate_Input_pschist_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DeviceTemplate_Input_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_Input_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_Input_pschmask *pTable = table->database->DeviceTemplate_Input_pschmask_get();
 pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
 }
 void Row_DeviceTemplate::DeviceTemplate_MediaType_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_MediaType*> *rows)
@@ -2441,11 +2713,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceTemplate_MediaType *pTable = table->database->DeviceTemplate_MediaType_get();
 pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
 }
+void Row_DeviceTemplate::DeviceTemplate_MediaType_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_MediaType_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_MediaType_pschist *pTable = table->database->DeviceTemplate_MediaType_pschist_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DeviceTemplate_MediaType_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_MediaType_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_MediaType_pschmask *pTable = table->database->DeviceTemplate_MediaType_pschmask_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
 void Row_DeviceTemplate::DeviceTemplate_Output_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_Output*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_DeviceTemplate_Output *pTable = table->database->DeviceTemplate_Output_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DeviceTemplate_Output_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_Output_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_Output_pschist *pTable = table->database->DeviceTemplate_Output_pschist_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DeviceTemplate_Output_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_Output_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_Output_pschmask *pTable = table->database->DeviceTemplate_Output_pschmask_get();
 pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
 }
 void Row_DeviceTemplate::DeviceTemplate_PageSetup_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_PageSetup*> *rows)
@@ -2455,6 +2755,34 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceTemplate_PageSetup *pTable = table->database->DeviceTemplate_PageSetup_get();
 pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
 }
+void Row_DeviceTemplate::DeviceTemplate_PageSetup_pschist_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_PageSetup_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_PageSetup_pschist *pTable = table->database->DeviceTemplate_PageSetup_pschist_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::DeviceTemplate_PageSetup_pschmask_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_PageSetup_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_PageSetup_pschmask *pTable = table->database->DeviceTemplate_PageSetup_pschmask_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::Device_pschist_FK_DeviceTemplate_getrows(vector <class Row_Device_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Device_pschist *pTable = table->database->Device_pschist_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::Device_pschmask_FK_DeviceTemplate_getrows(vector <class Row_Device_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Device_pschmask *pTable = table->database->Device_pschmask_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
 void Row_DeviceTemplate::InfraredGroup_Command_FK_DeviceTemplate_getrows(vector <class Row_InfraredGroup_Command*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -2462,11 +2790,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_InfraredGroup_Command *pTable = table->database->InfraredGroup_Command_get();
 pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
 }
+void Row_DeviceTemplate::InfraredGroup_Command_pschist_FK_DeviceTemplate_getrows(vector <class Row_InfraredGroup_Command_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_InfraredGroup_Command_pschist *pTable = table->database->InfraredGroup_Command_pschist_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::InfraredGroup_Command_pschmask_FK_DeviceTemplate_getrows(vector <class Row_InfraredGroup_Command_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_InfraredGroup_Command_pschmask *pTable = table->database->InfraredGroup_Command_pschmask_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
 void Row_DeviceTemplate::InstallWizard_FK_DeviceTemplate_getrows(vector <class Row_InstallWizard*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_InstallWizard *pTable = table->database->InstallWizard_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::InstallWizard_pschist_FK_DeviceTemplate_getrows(vector <class Row_InstallWizard_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_InstallWizard_pschist *pTable = table->database->InstallWizard_pschist_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::InstallWizard_pschmask_FK_DeviceTemplate_getrows(vector <class Row_InstallWizard_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_InstallWizard_pschmask *pTable = table->database->InstallWizard_pschmask_get();
 pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
 }
 void Row_DeviceTemplate::PnpQueue_FK_DeviceTemplate_getrows(vector <class Row_PnpQueue*> *rows)
@@ -2483,11 +2839,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Screen_DesignObj *pTable = table->database->Screen_DesignObj_get();
 pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
 }
+void Row_DeviceTemplate::Screen_DesignObj_pschist_FK_DeviceTemplate_getrows(vector <class Row_Screen_DesignObj_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Screen_DesignObj_pschist *pTable = table->database->Screen_DesignObj_pschist_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::Screen_DesignObj_pschmask_FK_DeviceTemplate_getrows(vector <class Row_Screen_DesignObj_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Screen_DesignObj_pschmask *pTable = table->database->Screen_DesignObj_pschmask_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
 void Row_DeviceTemplate::StartupScript_FK_DeviceTemplate_getrows(vector <class Row_StartupScript*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_StartupScript *pTable = table->database->StartupScript_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::StartupScript_pschist_FK_DeviceTemplate_getrows(vector <class Row_StartupScript_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_StartupScript_pschist *pTable = table->database->StartupScript_pschist_get();
+pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::StartupScript_pschmask_FK_DeviceTemplate_getrows(vector <class Row_StartupScript_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_StartupScript_pschmask *pTable = table->database->StartupScript_pschmask_get();
 pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
 }
 

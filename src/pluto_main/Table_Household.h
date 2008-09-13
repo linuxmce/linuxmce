@@ -152,6 +152,8 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Household_Installation_FK_Household_getrows(vector <class Row_Household_Installation*> *rows);
+void Household_Installation_pschist_FK_Household_getrows(vector <class Row_Household_Installation_pschist*> *rows);
+void Household_Installation_pschmask_FK_Household_getrows(vector <class Row_Household_Installation_pschmask*> *rows);
 
 
 		// Setup binary serialization

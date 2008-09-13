@@ -170,7 +170,13 @@ class Row_CommMethod* FK_CommMethod_getrow();
 		// Return the rows in other tables with foreign keys pointing here
 		void DeviceTemplate_FK_InfraredGroup_getrows(vector <class Row_DeviceTemplate*> *rows);
 void DeviceTemplate_InfraredGroup_FK_InfraredGroup_getrows(vector <class Row_DeviceTemplate_InfraredGroup*> *rows);
+void DeviceTemplate_InfraredGroup_pschist_FK_InfraredGroup_getrows(vector <class Row_DeviceTemplate_InfraredGroup_pschist*> *rows);
+void DeviceTemplate_InfraredGroup_pschmask_FK_InfraredGroup_getrows(vector <class Row_DeviceTemplate_InfraredGroup_pschmask*> *rows);
+void DeviceTemplate_pschist_FK_InfraredGroup_getrows(vector <class Row_DeviceTemplate_pschist*> *rows);
+void DeviceTemplate_pschmask_FK_InfraredGroup_getrows(vector <class Row_DeviceTemplate_pschmask*> *rows);
 void InfraredGroup_Command_FK_InfraredGroup_getrows(vector <class Row_InfraredGroup_Command*> *rows);
+void InfraredGroup_Command_pschist_FK_InfraredGroup_getrows(vector <class Row_InfraredGroup_Command_pschist*> *rows);
+void InfraredGroup_Command_pschmask_FK_InfraredGroup_getrows(vector <class Row_InfraredGroup_Command_pschmask*> *rows);
 
 
 		// Setup binary serialization

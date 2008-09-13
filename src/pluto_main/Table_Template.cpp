@@ -33,7 +33,11 @@ using namespace std;
 #include "Table_Template.h"
 
 #include "Table_CommandGroup.h"
+#include "Table_CommandGroup_pschist.h"
+#include "Table_CommandGroup_pschmask.h"
 #include "Table_EventHandler.h"
+#include "Table_EventHandler_pschist.h"
+#include "Table_EventHandler_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Template()
@@ -959,11 +963,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_CommandGroup *pTable = table->database->CommandGroup_get();
 pTable->GetRows("`FK_Template`=" + StringUtils::itos(m_PK_Template),rows);
 }
+void Row_Template::CommandGroup_pschist_FK_Template_getrows(vector <class Row_CommandGroup_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_CommandGroup_pschist *pTable = table->database->CommandGroup_pschist_get();
+pTable->GetRows("`FK_Template`=" + StringUtils::itos(m_PK_Template),rows);
+}
+void Row_Template::CommandGroup_pschmask_FK_Template_getrows(vector <class Row_CommandGroup_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_CommandGroup_pschmask *pTable = table->database->CommandGroup_pschmask_get();
+pTable->GetRows("`FK_Template`=" + StringUtils::itos(m_PK_Template),rows);
+}
 void Row_Template::EventHandler_FK_Template_getrows(vector <class Row_EventHandler*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_EventHandler *pTable = table->database->EventHandler_get();
+pTable->GetRows("`FK_Template`=" + StringUtils::itos(m_PK_Template),rows);
+}
+void Row_Template::EventHandler_pschist_FK_Template_getrows(vector <class Row_EventHandler_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_EventHandler_pschist *pTable = table->database->EventHandler_pschist_get();
+pTable->GetRows("`FK_Template`=" + StringUtils::itos(m_PK_Template),rows);
+}
+void Row_Template::EventHandler_pschmask_FK_Template_getrows(vector <class Row_EventHandler_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_EventHandler_pschmask *pTable = table->database->EventHandler_pschmask_get();
 pTable->GetRows("`FK_Template`=" + StringUtils::itos(m_PK_Template),rows);
 }
 

@@ -180,6 +180,8 @@ class Row_MediaType* FK_MediaType_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void DeviceTemplate_MediaType_DesignObj_FK_DeviceTemplate_MediaType_getrows(vector <class Row_DeviceTemplate_MediaType_DesignObj*> *rows);
+void DeviceTemplate_MediaType_DesignObj_pschist_FK_DeviceTemplate_MediaType_getrows(vector <class Row_DeviceTemplate_MediaType_DesignObj_pschist*> *rows);
+void DeviceTemplate_MediaType_DesignObj_pschmask_FK_DeviceTemplate_MediaType_getrows(vector <class Row_DeviceTemplate_MediaType_DesignObj_pschmask*> *rows);
 
 
 		// Setup binary serialization

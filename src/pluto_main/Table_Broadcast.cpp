@@ -33,6 +33,8 @@ using namespace std;
 #include "Table_Broadcast.h"
 
 #include "Table_MediaType_Broadcast.h"
+#include "Table_MediaType_Broadcast_pschist.h"
+#include "Table_MediaType_Broadcast_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Broadcast()
@@ -956,6 +958,20 @@ void Row_Broadcast::MediaType_Broadcast_FK_Broadcast_getrows(vector <class Row_M
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_MediaType_Broadcast *pTable = table->database->MediaType_Broadcast_get();
+pTable->GetRows("`FK_Broadcast`=" + StringUtils::itos(m_PK_Broadcast),rows);
+}
+void Row_Broadcast::MediaType_Broadcast_pschist_FK_Broadcast_getrows(vector <class Row_MediaType_Broadcast_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_MediaType_Broadcast_pschist *pTable = table->database->MediaType_Broadcast_pschist_get();
+pTable->GetRows("`FK_Broadcast`=" + StringUtils::itos(m_PK_Broadcast),rows);
+}
+void Row_Broadcast::MediaType_Broadcast_pschmask_FK_Broadcast_getrows(vector <class Row_MediaType_Broadcast_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_MediaType_Broadcast_pschmask *pTable = table->database->MediaType_Broadcast_pschmask_get();
 pTable->GetRows("`FK_Broadcast`=" + StringUtils::itos(m_PK_Broadcast),rows);
 }
 

@@ -211,6 +211,8 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Device_StartupScript_FK_StartupScript_getrows(vector <class Row_Device_StartupScript*> *rows);
+void Device_StartupScript_pschist_FK_StartupScript_getrows(vector <class Row_Device_StartupScript_pschist*> *rows);
+void Device_StartupScript_pschmask_FK_StartupScript_getrows(vector <class Row_Device_StartupScript_pschmask*> *rows);
 
 
 		// Setup binary serialization

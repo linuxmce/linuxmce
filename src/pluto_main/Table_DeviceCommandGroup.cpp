@@ -34,9 +34,17 @@ using namespace std;
 #include "Table_DeviceCategory.h"
 
 #include "Table_DeviceCommandGroup_Command.h"
+#include "Table_DeviceCommandGroup_Command_pschist.h"
+#include "Table_DeviceCommandGroup_Command_pschmask.h"
 #include "Table_DeviceCommandGroup_DeviceCommandGroup_Parent.h"
 #include "Table_DeviceCommandGroup_DeviceCommandGroup_Parent.h"
+#include "Table_DeviceCommandGroup_DeviceCommandGroup_Parent_pschist.h"
+#include "Table_DeviceCommandGroup_DeviceCommandGroup_Parent_pschist.h"
+#include "Table_DeviceCommandGroup_DeviceCommandGroup_Parent_pschmask.h"
+#include "Table_DeviceCommandGroup_DeviceCommandGroup_Parent_pschmask.h"
 #include "Table_DeviceTemplate_DeviceCommandGroup.h"
+#include "Table_DeviceTemplate_DeviceCommandGroup_pschist.h"
+#include "Table_DeviceTemplate_DeviceCommandGroup_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_DeviceCommandGroup()
@@ -969,6 +977,20 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceCommandGroup_Command *pTable = table->database->DeviceCommandGroup_Command_get();
 pTable->GetRows("`FK_DeviceCommandGroup`=" + StringUtils::itos(m_PK_DeviceCommandGroup),rows);
 }
+void Row_DeviceCommandGroup::DeviceCommandGroup_Command_pschist_FK_DeviceCommandGroup_getrows(vector <class Row_DeviceCommandGroup_Command_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceCommandGroup_Command_pschist *pTable = table->database->DeviceCommandGroup_Command_pschist_get();
+pTable->GetRows("`FK_DeviceCommandGroup`=" + StringUtils::itos(m_PK_DeviceCommandGroup),rows);
+}
+void Row_DeviceCommandGroup::DeviceCommandGroup_Command_pschmask_FK_DeviceCommandGroup_getrows(vector <class Row_DeviceCommandGroup_Command_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceCommandGroup_Command_pschmask *pTable = table->database->DeviceCommandGroup_Command_pschmask_get();
+pTable->GetRows("`FK_DeviceCommandGroup`=" + StringUtils::itos(m_PK_DeviceCommandGroup),rows);
+}
 void Row_DeviceCommandGroup::DeviceCommandGroup_DeviceCommandGroup_Parent_FK_DeviceCommandGroup_getrows(vector <class Row_DeviceCommandGroup_DeviceCommandGroup_Parent*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -983,11 +1005,53 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceCommandGroup_DeviceCommandGroup_Parent *pTable = table->database->DeviceCommandGroup_DeviceCommandGroup_Parent_get();
 pTable->GetRows("`FK_DeviceCommandGroup_Parent`=" + StringUtils::itos(m_PK_DeviceCommandGroup),rows);
 }
+void Row_DeviceCommandGroup::DeviceCommandGroup_DeviceCommandGroup_Parent_pschist_FK_DeviceCommandGroup_getrows(vector <class Row_DeviceCommandGroup_DeviceCommandGroup_Parent_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceCommandGroup_DeviceCommandGroup_Parent_pschist *pTable = table->database->DeviceCommandGroup_DeviceCommandGroup_Parent_pschist_get();
+pTable->GetRows("`FK_DeviceCommandGroup`=" + StringUtils::itos(m_PK_DeviceCommandGroup),rows);
+}
+void Row_DeviceCommandGroup::DeviceCommandGroup_DeviceCommandGroup_Parent_pschist_FK_DeviceCommandGroup_Parent_getrows(vector <class Row_DeviceCommandGroup_DeviceCommandGroup_Parent_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceCommandGroup_DeviceCommandGroup_Parent_pschist *pTable = table->database->DeviceCommandGroup_DeviceCommandGroup_Parent_pschist_get();
+pTable->GetRows("`FK_DeviceCommandGroup_Parent`=" + StringUtils::itos(m_PK_DeviceCommandGroup),rows);
+}
+void Row_DeviceCommandGroup::DeviceCommandGroup_DeviceCommandGroup_Parent_pschmask_FK_DeviceCommandGroup_getrows(vector <class Row_DeviceCommandGroup_DeviceCommandGroup_Parent_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceCommandGroup_DeviceCommandGroup_Parent_pschmask *pTable = table->database->DeviceCommandGroup_DeviceCommandGroup_Parent_pschmask_get();
+pTable->GetRows("`FK_DeviceCommandGroup`=" + StringUtils::itos(m_PK_DeviceCommandGroup),rows);
+}
+void Row_DeviceCommandGroup::DeviceCommandGroup_DeviceCommandGroup_Parent_pschmask_FK_DeviceCommandGroup_Parent_getrows(vector <class Row_DeviceCommandGroup_DeviceCommandGroup_Parent_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceCommandGroup_DeviceCommandGroup_Parent_pschmask *pTable = table->database->DeviceCommandGroup_DeviceCommandGroup_Parent_pschmask_get();
+pTable->GetRows("`FK_DeviceCommandGroup_Parent`=" + StringUtils::itos(m_PK_DeviceCommandGroup),rows);
+}
 void Row_DeviceCommandGroup::DeviceTemplate_DeviceCommandGroup_FK_DeviceCommandGroup_getrows(vector <class Row_DeviceTemplate_DeviceCommandGroup*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_DeviceTemplate_DeviceCommandGroup *pTable = table->database->DeviceTemplate_DeviceCommandGroup_get();
+pTable->GetRows("`FK_DeviceCommandGroup`=" + StringUtils::itos(m_PK_DeviceCommandGroup),rows);
+}
+void Row_DeviceCommandGroup::DeviceTemplate_DeviceCommandGroup_pschist_FK_DeviceCommandGroup_getrows(vector <class Row_DeviceTemplate_DeviceCommandGroup_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_DeviceCommandGroup_pschist *pTable = table->database->DeviceTemplate_DeviceCommandGroup_pschist_get();
+pTable->GetRows("`FK_DeviceCommandGroup`=" + StringUtils::itos(m_PK_DeviceCommandGroup),rows);
+}
+void Row_DeviceCommandGroup::DeviceTemplate_DeviceCommandGroup_pschmask_FK_DeviceCommandGroup_getrows(vector <class Row_DeviceTemplate_DeviceCommandGroup_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_DeviceCommandGroup_pschmask *pTable = table->database->DeviceTemplate_DeviceCommandGroup_pschmask_get();
 pTable->GetRows("`FK_DeviceCommandGroup`=" + StringUtils::itos(m_PK_DeviceCommandGroup),rows);
 }
 

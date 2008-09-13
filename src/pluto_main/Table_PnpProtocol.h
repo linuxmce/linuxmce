@@ -162,6 +162,8 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void DHCPDevice_FK_PnpProtocol_getrows(vector <class Row_DHCPDevice*> *rows);
+void DHCPDevice_pschist_FK_PnpProtocol_getrows(vector <class Row_DHCPDevice_pschist*> *rows);
+void DHCPDevice_pschmask_FK_PnpProtocol_getrows(vector <class Row_DHCPDevice_pschmask*> *rows);
 void PnpQueue_FK_PnpProtocol_getrows(vector <class Row_PnpQueue*> *rows);
 
 

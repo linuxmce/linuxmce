@@ -160,10 +160,20 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Command_Pipe_FK_Pipe_getrows(vector <class Row_Command_Pipe*> *rows);
+void Command_Pipe_pschist_FK_Pipe_getrows(vector <class Row_Command_Pipe_pschist*> *rows);
+void Command_Pipe_pschmask_FK_Pipe_getrows(vector <class Row_Command_Pipe_pschmask*> *rows);
 void DeviceTemplate_DeviceCategory_ControlledVia_Pipe_FK_Pipe_getrows(vector <class Row_DeviceTemplate_DeviceCategory_ControlledVia_Pipe*> *rows);
+void DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschist_FK_Pipe_getrows(vector <class Row_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschist*> *rows);
+void DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschmask_FK_Pipe_getrows(vector <class Row_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschmask*> *rows);
 void DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_FK_Pipe_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe*> *rows);
+void DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschist_FK_Pipe_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschist*> *rows);
+void DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschmask_FK_Pipe_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschmask*> *rows);
 void Device_Device_Pipe_FK_Pipe_getrows(vector <class Row_Device_Device_Pipe*> *rows);
+void Device_Device_Pipe_pschist_FK_Pipe_getrows(vector <class Row_Device_Device_Pipe_pschist*> *rows);
+void Device_Device_Pipe_pschmask_FK_Pipe_getrows(vector <class Row_Device_Device_Pipe_pschmask*> *rows);
 void MediaType_FK_Pipe_getrows(vector <class Row_MediaType*> *rows);
+void MediaType_pschist_FK_Pipe_getrows(vector <class Row_MediaType_pschist*> *rows);
+void MediaType_pschmask_FK_Pipe_getrows(vector <class Row_MediaType_pschmask*> *rows);
 
 
 		// Setup binary serialization

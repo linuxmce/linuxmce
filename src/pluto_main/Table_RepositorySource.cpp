@@ -36,7 +36,11 @@ using namespace std;
 #include "Table_RepositoryType.h"
 
 #include "Table_Package_Source.h"
+#include "Table_Package_Source_pschist.h"
+#include "Table_Package_Source_pschmask.h"
 #include "Table_RepositorySource_URL.h"
+#include "Table_RepositorySource_URL_pschist.h"
+#include "Table_RepositorySource_URL_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_RepositorySource()
@@ -1176,11 +1180,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Package_Source *pTable = table->database->Package_Source_get();
 pTable->GetRows("`FK_RepositorySource`=" + StringUtils::itos(m_PK_RepositorySource),rows);
 }
+void Row_RepositorySource::Package_Source_pschist_FK_RepositorySource_getrows(vector <class Row_Package_Source_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_Source_pschist *pTable = table->database->Package_Source_pschist_get();
+pTable->GetRows("`FK_RepositorySource`=" + StringUtils::itos(m_PK_RepositorySource),rows);
+}
+void Row_RepositorySource::Package_Source_pschmask_FK_RepositorySource_getrows(vector <class Row_Package_Source_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_Source_pschmask *pTable = table->database->Package_Source_pschmask_get();
+pTable->GetRows("`FK_RepositorySource`=" + StringUtils::itos(m_PK_RepositorySource),rows);
+}
 void Row_RepositorySource::RepositorySource_URL_FK_RepositorySource_getrows(vector <class Row_RepositorySource_URL*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_RepositorySource_URL *pTable = table->database->RepositorySource_URL_get();
+pTable->GetRows("`FK_RepositorySource`=" + StringUtils::itos(m_PK_RepositorySource),rows);
+}
+void Row_RepositorySource::RepositorySource_URL_pschist_FK_RepositorySource_getrows(vector <class Row_RepositorySource_URL_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_RepositorySource_URL_pschist *pTable = table->database->RepositorySource_URL_pschist_get();
+pTable->GetRows("`FK_RepositorySource`=" + StringUtils::itos(m_PK_RepositorySource),rows);
+}
+void Row_RepositorySource::RepositorySource_URL_pschmask_FK_RepositorySource_getrows(vector <class Row_RepositorySource_URL_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_RepositorySource_URL_pschmask *pTable = table->database->RepositorySource_URL_pschmask_get();
 pTable->GetRows("`FK_RepositorySource`=" + StringUtils::itos(m_PK_RepositorySource),rows);
 }
 

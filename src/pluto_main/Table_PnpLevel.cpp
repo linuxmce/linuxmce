@@ -33,6 +33,8 @@ using namespace std;
 #include "Table_PnpLevel.h"
 
 #include "Table_DeviceTemplate.h"
+#include "Table_DeviceTemplate_pschist.h"
+#include "Table_DeviceTemplate_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_PnpLevel()
@@ -962,6 +964,20 @@ void Row_PnpLevel::DeviceTemplate_FK_PnpLevel_getrows(vector <class Row_DeviceTe
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_DeviceTemplate *pTable = table->database->DeviceTemplate_get();
+pTable->GetRows("`FK_PnpLevel`=" + StringUtils::itos(m_PK_PnpLevel),rows);
+}
+void Row_PnpLevel::DeviceTemplate_pschist_FK_PnpLevel_getrows(vector <class Row_DeviceTemplate_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_pschist *pTable = table->database->DeviceTemplate_pschist_get();
+pTable->GetRows("`FK_PnpLevel`=" + StringUtils::itos(m_PK_PnpLevel),rows);
+}
+void Row_PnpLevel::DeviceTemplate_pschmask_FK_PnpLevel_getrows(vector <class Row_DeviceTemplate_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_pschmask *pTable = table->database->DeviceTemplate_pschmask_get();
 pTable->GetRows("`FK_PnpLevel`=" + StringUtils::itos(m_PK_PnpLevel),rows);
 }
 

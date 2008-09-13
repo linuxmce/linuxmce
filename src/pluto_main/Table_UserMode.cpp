@@ -33,6 +33,8 @@ using namespace std;
 #include "Table_UserMode.h"
 
 #include "Table_Users.h"
+#include "Table_Users_pschist.h"
+#include "Table_Users_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_UserMode()
@@ -950,6 +952,20 @@ void Row_UserMode::Users_FK_UserMode_getrows(vector <class Row_Users*> *rows)
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Users *pTable = table->database->Users_get();
+pTable->GetRows("`FK_UserMode`=" + StringUtils::itos(m_PK_UserMode),rows);
+}
+void Row_UserMode::Users_pschist_FK_UserMode_getrows(vector <class Row_Users_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Users_pschist *pTable = table->database->Users_pschist_get();
+pTable->GetRows("`FK_UserMode`=" + StringUtils::itos(m_PK_UserMode),rows);
+}
+void Row_UserMode::Users_pschmask_FK_UserMode_getrows(vector <class Row_Users_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Users_pschmask *pTable = table->database->Users_pschmask_get();
 pTable->GetRows("`FK_UserMode`=" + StringUtils::itos(m_PK_UserMode),rows);
 }
 

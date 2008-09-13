@@ -34,7 +34,11 @@ using namespace std;
 #include "Table_Event.h"
 
 #include "Table_CannedEvents_CriteriaParmList.h"
+#include "Table_CannedEvents_CriteriaParmList_pschist.h"
+#include "Table_CannedEvents_CriteriaParmList_pschmask.h"
 #include "Table_EventHandler.h"
+#include "Table_EventHandler_pschist.h"
+#include "Table_EventHandler_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_CannedEvents()
@@ -1046,11 +1050,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_CannedEvents_CriteriaParmList *pTable = table->database->CannedEvents_CriteriaParmList_get();
 pTable->GetRows("`FK_CannedEvents`=" + StringUtils::itos(m_PK_CannedEvents),rows);
 }
+void Row_CannedEvents::CannedEvents_CriteriaParmList_pschist_FK_CannedEvents_getrows(vector <class Row_CannedEvents_CriteriaParmList_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_CannedEvents_CriteriaParmList_pschist *pTable = table->database->CannedEvents_CriteriaParmList_pschist_get();
+pTable->GetRows("`FK_CannedEvents`=" + StringUtils::itos(m_PK_CannedEvents),rows);
+}
+void Row_CannedEvents::CannedEvents_CriteriaParmList_pschmask_FK_CannedEvents_getrows(vector <class Row_CannedEvents_CriteriaParmList_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_CannedEvents_CriteriaParmList_pschmask *pTable = table->database->CannedEvents_CriteriaParmList_pschmask_get();
+pTable->GetRows("`FK_CannedEvents`=" + StringUtils::itos(m_PK_CannedEvents),rows);
+}
 void Row_CannedEvents::EventHandler_FK_CannedEvents_getrows(vector <class Row_EventHandler*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_EventHandler *pTable = table->database->EventHandler_get();
+pTable->GetRows("`FK_CannedEvents`=" + StringUtils::itos(m_PK_CannedEvents),rows);
+}
+void Row_CannedEvents::EventHandler_pschist_FK_CannedEvents_getrows(vector <class Row_EventHandler_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_EventHandler_pschist *pTable = table->database->EventHandler_pschist_get();
+pTable->GetRows("`FK_CannedEvents`=" + StringUtils::itos(m_PK_CannedEvents),rows);
+}
+void Row_CannedEvents::EventHandler_pschmask_FK_CannedEvents_getrows(vector <class Row_EventHandler_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_EventHandler_pschmask *pTable = table->database->EventHandler_pschmask_get();
 pTable->GetRows("`FK_CannedEvents`=" + StringUtils::itos(m_PK_CannedEvents),rows);
 }
 

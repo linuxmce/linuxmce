@@ -189,6 +189,8 @@ class Row_CriteriaParmList* FK_CriteriaParmList_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void CriteriaParm_FK_CannedEvents_CriteriaParmList_getrows(vector <class Row_CriteriaParm*> *rows);
+void CriteriaParm_pschist_FK_CannedEvents_CriteriaParmList_getrows(vector <class Row_CriteriaParm_pschist*> *rows);
+void CriteriaParm_pschmask_FK_CannedEvents_CriteriaParmList_getrows(vector <class Row_CriteriaParm_pschmask*> *rows);
 
 
 		// Setup binary serialization

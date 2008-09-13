@@ -35,6 +35,10 @@ using namespace std;
 
 #include "Table_Command.h"
 #include "Table_CommandCategory.h"
+#include "Table_CommandCategory_pschist.h"
+#include "Table_CommandCategory_pschmask.h"
+#include "Table_Command_pschist.h"
+#include "Table_Command_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_CommandCategory()
@@ -979,6 +983,34 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_CommandCategory *pTable = table->database->CommandCategory_get();
 pTable->GetRows("`FK_CommandCategory_Parent`=" + StringUtils::itos(m_PK_CommandCategory),rows);
+}
+void Row_CommandCategory::CommandCategory_pschist_FK_CommandCategory_Parent_getrows(vector <class Row_CommandCategory_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_CommandCategory_pschist *pTable = table->database->CommandCategory_pschist_get();
+pTable->GetRows("`FK_CommandCategory_Parent`=" + StringUtils::itos(m_PK_CommandCategory),rows);
+}
+void Row_CommandCategory::CommandCategory_pschmask_FK_CommandCategory_Parent_getrows(vector <class Row_CommandCategory_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_CommandCategory_pschmask *pTable = table->database->CommandCategory_pschmask_get();
+pTable->GetRows("`FK_CommandCategory_Parent`=" + StringUtils::itos(m_PK_CommandCategory),rows);
+}
+void Row_CommandCategory::Command_pschist_FK_CommandCategory_getrows(vector <class Row_Command_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Command_pschist *pTable = table->database->Command_pschist_get();
+pTable->GetRows("`FK_CommandCategory`=" + StringUtils::itos(m_PK_CommandCategory),rows);
+}
+void Row_CommandCategory::Command_pschmask_FK_CommandCategory_getrows(vector <class Row_Command_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Command_pschmask *pTable = table->database->Command_pschmask_get();
+pTable->GetRows("`FK_CommandCategory`=" + StringUtils::itos(m_PK_CommandCategory),rows);
 }
 
 

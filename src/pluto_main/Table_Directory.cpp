@@ -33,6 +33,8 @@ using namespace std;
 #include "Table_Directory.h"
 
 #include "Table_Package_Directory.h"
+#include "Table_Package_Directory_pschist.h"
+#include "Table_Package_Directory_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Directory()
@@ -956,6 +958,20 @@ void Row_Directory::Package_Directory_FK_Directory_getrows(vector <class Row_Pac
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Package_Directory *pTable = table->database->Package_Directory_get();
+pTable->GetRows("`FK_Directory`=" + StringUtils::itos(m_PK_Directory),rows);
+}
+void Row_Directory::Package_Directory_pschist_FK_Directory_getrows(vector <class Row_Package_Directory_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_Directory_pschist *pTable = table->database->Package_Directory_pschist_get();
+pTable->GetRows("`FK_Directory`=" + StringUtils::itos(m_PK_Directory),rows);
+}
+void Row_Directory::Package_Directory_pschmask_FK_Directory_getrows(vector <class Row_Package_Directory_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_Directory_pschmask *pTable = table->database->Package_Directory_pschmask_get();
 pTable->GetRows("`FK_Directory`=" + StringUtils::itos(m_PK_Directory),rows);
 }
 

@@ -190,6 +190,8 @@ class Row_DeviceCategory* FK_DeviceCategory_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void CommandGroup_D_Command_CommandParameter_FK_CommandGroup_D_Command_getrows(vector <class Row_CommandGroup_D_Command_CommandParameter*> *rows);
+void CommandGroup_D_Command_CommandParameter_pschist_FK_CommandGroup_D_Command_getrows(vector <class Row_CommandGroup_D_Command_CommandParameter_pschist*> *rows);
+void CommandGroup_D_Command_CommandParameter_pschmask_FK_CommandGroup_D_Command_getrows(vector <class Row_CommandGroup_D_Command_CommandParameter_pschmask*> *rows);
 
 
 		// Setup binary serialization

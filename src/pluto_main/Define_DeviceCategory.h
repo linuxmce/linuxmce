@@ -118,6 +118,9 @@
 #define DEVICECATEGORY_Flash_Memory_CONST 171
 #define DEVICECATEGORY_LCD_CONST 172
 #define DEVICECATEGORY_Raid_Controllers_CONST 173
+#define DEVICECATEGORY_Data_Provider_Catalog_Plugins_CONST 174
+#define DEVICECATEGORY_Data_Providers_CONST 175
+#define DEVICECATEGORY_NonMedia_Director_PCs_CONST 176
 
 #define DEVICECATEGORY_TABLE "DeviceCategory"
 #define DEVICECATEGORY_PK_DEVICECATEGORY_FIELD "PK_DeviceCategory"

@@ -168,8 +168,16 @@ void psc_restrict_setNull(bool val);
 		// Return the rows in other tables with foreign keys pointing here
 		void DesignObjVariation_Text_FK_Text_getrows(vector <class Row_DesignObjVariation_Text*> *rows);
 void DesignObjVariation_Text_FK_Text_OverrideFromHeader_getrows(vector <class Row_DesignObjVariation_Text*> *rows);
+void DesignObjVariation_Text_pschist_FK_Text_getrows(vector <class Row_DesignObjVariation_Text_pschist*> *rows);
+void DesignObjVariation_Text_pschist_FK_Text_OverrideFromHeader_getrows(vector <class Row_DesignObjVariation_Text_pschist*> *rows);
+void DesignObjVariation_Text_pschmask_FK_Text_getrows(vector <class Row_DesignObjVariation_Text_pschmask*> *rows);
+void DesignObjVariation_Text_pschmask_FK_Text_OverrideFromHeader_getrows(vector <class Row_DesignObjVariation_Text_pschmask*> *rows);
 void Text_LS_FK_Text_getrows(vector <class Row_Text_LS*> *rows);
 void Text_LS_AltVersions_FK_Text_getrows(vector <class Row_Text_LS_AltVersions*> *rows);
+void Text_LS_AltVersions_pschist_FK_Text_getrows(vector <class Row_Text_LS_AltVersions_pschist*> *rows);
+void Text_LS_AltVersions_pschmask_FK_Text_getrows(vector <class Row_Text_LS_AltVersions_pschmask*> *rows);
+void Text_LS_pschist_FK_Text_getrows(vector <class Row_Text_LS_pschist*> *rows);
+void Text_LS_pschmask_FK_Text_getrows(vector <class Row_Text_LS_pschmask*> *rows);
 
 
 		// Setup binary serialization

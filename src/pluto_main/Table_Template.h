@@ -160,7 +160,11 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void CommandGroup_FK_Template_getrows(vector <class Row_CommandGroup*> *rows);
+void CommandGroup_pschist_FK_Template_getrows(vector <class Row_CommandGroup_pschist*> *rows);
+void CommandGroup_pschmask_FK_Template_getrows(vector <class Row_CommandGroup_pschmask*> *rows);
 void EventHandler_FK_Template_getrows(vector <class Row_EventHandler*> *rows);
+void EventHandler_pschist_FK_Template_getrows(vector <class Row_EventHandler_pschist*> *rows);
+void EventHandler_pschmask_FK_Template_getrows(vector <class Row_EventHandler_pschmask*> *rows);
 
 
 		// Setup binary serialization

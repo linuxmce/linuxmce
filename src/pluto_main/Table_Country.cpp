@@ -34,9 +34,13 @@ using namespace std;
 
 #include "Table_City.h"
 #include "Table_Installation.h"
+#include "Table_Installation_pschist.h"
+#include "Table_Installation_pschmask.h"
 #include "Table_PostalCode.h"
 #include "Table_Region.h"
 #include "Table_RepositorySource_URL.h"
+#include "Table_RepositorySource_URL_pschist.h"
+#include "Table_RepositorySource_URL_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Country()
@@ -756,6 +760,20 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Installation *pTable = table->database->Installation_get();
 pTable->GetRows("`FK_Country`=" + StringUtils::itos(m_PK_Country),rows);
 }
+void Row_Country::Installation_pschist_FK_Country_getrows(vector <class Row_Installation_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Installation_pschist *pTable = table->database->Installation_pschist_get();
+pTable->GetRows("`FK_Country`=" + StringUtils::itos(m_PK_Country),rows);
+}
+void Row_Country::Installation_pschmask_FK_Country_getrows(vector <class Row_Installation_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Installation_pschmask *pTable = table->database->Installation_pschmask_get();
+pTable->GetRows("`FK_Country`=" + StringUtils::itos(m_PK_Country),rows);
+}
 void Row_Country::PostalCode_FK_Country_getrows(vector <class Row_PostalCode*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -775,6 +793,20 @@ void Row_Country::RepositorySource_URL_FK_Country_getrows(vector <class Row_Repo
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_RepositorySource_URL *pTable = table->database->RepositorySource_URL_get();
+pTable->GetRows("`FK_Country`=" + StringUtils::itos(m_PK_Country),rows);
+}
+void Row_Country::RepositorySource_URL_pschist_FK_Country_getrows(vector <class Row_RepositorySource_URL_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_RepositorySource_URL_pschist *pTable = table->database->RepositorySource_URL_pschist_get();
+pTable->GetRows("`FK_Country`=" + StringUtils::itos(m_PK_Country),rows);
+}
+void Row_Country::RepositorySource_URL_pschmask_FK_Country_getrows(vector <class Row_RepositorySource_URL_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_RepositorySource_URL_pschmask *pTable = table->database->RepositorySource_URL_pschmask_get();
 pTable->GetRows("`FK_Country`=" + StringUtils::itos(m_PK_Country),rows);
 }
 

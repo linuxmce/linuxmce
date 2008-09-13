@@ -37,7 +37,13 @@ using namespace std;
 
 #include "Table_DeviceTemplate.h"
 #include "Table_DeviceTemplate_InfraredGroup.h"
+#include "Table_DeviceTemplate_InfraredGroup_pschist.h"
+#include "Table_DeviceTemplate_InfraredGroup_pschmask.h"
+#include "Table_DeviceTemplate_pschist.h"
+#include "Table_DeviceTemplate_pschmask.h"
 #include "Table_InfraredGroup_Command.h"
+#include "Table_InfraredGroup_Command_pschist.h"
+#include "Table_InfraredGroup_Command_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_InfraredGroup()
@@ -1076,11 +1082,53 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceTemplate_InfraredGroup *pTable = table->database->DeviceTemplate_InfraredGroup_get();
 pTable->GetRows("`FK_InfraredGroup`=" + StringUtils::itos(m_PK_InfraredGroup),rows);
 }
+void Row_InfraredGroup::DeviceTemplate_InfraredGroup_pschist_FK_InfraredGroup_getrows(vector <class Row_DeviceTemplate_InfraredGroup_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_InfraredGroup_pschist *pTable = table->database->DeviceTemplate_InfraredGroup_pschist_get();
+pTable->GetRows("`FK_InfraredGroup`=" + StringUtils::itos(m_PK_InfraredGroup),rows);
+}
+void Row_InfraredGroup::DeviceTemplate_InfraredGroup_pschmask_FK_InfraredGroup_getrows(vector <class Row_DeviceTemplate_InfraredGroup_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_InfraredGroup_pschmask *pTable = table->database->DeviceTemplate_InfraredGroup_pschmask_get();
+pTable->GetRows("`FK_InfraredGroup`=" + StringUtils::itos(m_PK_InfraredGroup),rows);
+}
+void Row_InfraredGroup::DeviceTemplate_pschist_FK_InfraredGroup_getrows(vector <class Row_DeviceTemplate_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_pschist *pTable = table->database->DeviceTemplate_pschist_get();
+pTable->GetRows("`FK_InfraredGroup`=" + StringUtils::itos(m_PK_InfraredGroup),rows);
+}
+void Row_InfraredGroup::DeviceTemplate_pschmask_FK_InfraredGroup_getrows(vector <class Row_DeviceTemplate_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_pschmask *pTable = table->database->DeviceTemplate_pschmask_get();
+pTable->GetRows("`FK_InfraredGroup`=" + StringUtils::itos(m_PK_InfraredGroup),rows);
+}
 void Row_InfraredGroup::InfraredGroup_Command_FK_InfraredGroup_getrows(vector <class Row_InfraredGroup_Command*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_InfraredGroup_Command *pTable = table->database->InfraredGroup_Command_get();
+pTable->GetRows("`FK_InfraredGroup`=" + StringUtils::itos(m_PK_InfraredGroup),rows);
+}
+void Row_InfraredGroup::InfraredGroup_Command_pschist_FK_InfraredGroup_getrows(vector <class Row_InfraredGroup_Command_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_InfraredGroup_Command_pschist *pTable = table->database->InfraredGroup_Command_pschist_get();
+pTable->GetRows("`FK_InfraredGroup`=" + StringUtils::itos(m_PK_InfraredGroup),rows);
+}
+void Row_InfraredGroup::InfraredGroup_Command_pschmask_FK_InfraredGroup_getrows(vector <class Row_InfraredGroup_Command_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_InfraredGroup_Command_pschmask *pTable = table->database->InfraredGroup_Command_pschmask_get();
 pTable->GetRows("`FK_InfraredGroup`=" + StringUtils::itos(m_PK_InfraredGroup),rows);
 }
 

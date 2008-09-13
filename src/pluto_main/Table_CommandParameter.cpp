@@ -34,9 +34,17 @@ using namespace std;
 #include "Table_ParameterType.h"
 
 #include "Table_CommandGroup_Command_CommandParameter.h"
+#include "Table_CommandGroup_Command_CommandParameter_pschist.h"
+#include "Table_CommandGroup_Command_CommandParameter_pschmask.h"
 #include "Table_CommandGroup_D_Command_CommandParameter.h"
+#include "Table_CommandGroup_D_Command_CommandParameter_pschist.h"
+#include "Table_CommandGroup_D_Command_CommandParameter_pschmask.h"
 #include "Table_Command_CommandParameter.h"
+#include "Table_Command_CommandParameter_pschist.h"
+#include "Table_Command_CommandParameter_pschmask.h"
 #include "Table_Screen_CommandParameter.h"
+#include "Table_Screen_CommandParameter_pschist.h"
+#include "Table_Screen_CommandParameter_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_CommandParameter()
@@ -1056,11 +1064,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_CommandGroup_Command_CommandParameter *pTable = table->database->CommandGroup_Command_CommandParameter_get();
 pTable->GetRows("`FK_CommandParameter`=" + StringUtils::itos(m_PK_CommandParameter),rows);
 }
+void Row_CommandParameter::CommandGroup_Command_CommandParameter_pschist_FK_CommandParameter_getrows(vector <class Row_CommandGroup_Command_CommandParameter_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_CommandGroup_Command_CommandParameter_pschist *pTable = table->database->CommandGroup_Command_CommandParameter_pschist_get();
+pTable->GetRows("`FK_CommandParameter`=" + StringUtils::itos(m_PK_CommandParameter),rows);
+}
+void Row_CommandParameter::CommandGroup_Command_CommandParameter_pschmask_FK_CommandParameter_getrows(vector <class Row_CommandGroup_Command_CommandParameter_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_CommandGroup_Command_CommandParameter_pschmask *pTable = table->database->CommandGroup_Command_CommandParameter_pschmask_get();
+pTable->GetRows("`FK_CommandParameter`=" + StringUtils::itos(m_PK_CommandParameter),rows);
+}
 void Row_CommandParameter::CommandGroup_D_Command_CommandParameter_FK_CommandParameter_getrows(vector <class Row_CommandGroup_D_Command_CommandParameter*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_CommandGroup_D_Command_CommandParameter *pTable = table->database->CommandGroup_D_Command_CommandParameter_get();
+pTable->GetRows("`FK_CommandParameter`=" + StringUtils::itos(m_PK_CommandParameter),rows);
+}
+void Row_CommandParameter::CommandGroup_D_Command_CommandParameter_pschist_FK_CommandParameter_getrows(vector <class Row_CommandGroup_D_Command_CommandParameter_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_CommandGroup_D_Command_CommandParameter_pschist *pTable = table->database->CommandGroup_D_Command_CommandParameter_pschist_get();
+pTable->GetRows("`FK_CommandParameter`=" + StringUtils::itos(m_PK_CommandParameter),rows);
+}
+void Row_CommandParameter::CommandGroup_D_Command_CommandParameter_pschmask_FK_CommandParameter_getrows(vector <class Row_CommandGroup_D_Command_CommandParameter_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_CommandGroup_D_Command_CommandParameter_pschmask *pTable = table->database->CommandGroup_D_Command_CommandParameter_pschmask_get();
 pTable->GetRows("`FK_CommandParameter`=" + StringUtils::itos(m_PK_CommandParameter),rows);
 }
 void Row_CommandParameter::Command_CommandParameter_FK_CommandParameter_getrows(vector <class Row_Command_CommandParameter*> *rows)
@@ -1070,11 +1106,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Command_CommandParameter *pTable = table->database->Command_CommandParameter_get();
 pTable->GetRows("`FK_CommandParameter`=" + StringUtils::itos(m_PK_CommandParameter),rows);
 }
+void Row_CommandParameter::Command_CommandParameter_pschist_FK_CommandParameter_getrows(vector <class Row_Command_CommandParameter_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Command_CommandParameter_pschist *pTable = table->database->Command_CommandParameter_pschist_get();
+pTable->GetRows("`FK_CommandParameter`=" + StringUtils::itos(m_PK_CommandParameter),rows);
+}
+void Row_CommandParameter::Command_CommandParameter_pschmask_FK_CommandParameter_getrows(vector <class Row_Command_CommandParameter_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Command_CommandParameter_pschmask *pTable = table->database->Command_CommandParameter_pschmask_get();
+pTable->GetRows("`FK_CommandParameter`=" + StringUtils::itos(m_PK_CommandParameter),rows);
+}
 void Row_CommandParameter::Screen_CommandParameter_FK_CommandParameter_getrows(vector <class Row_Screen_CommandParameter*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Screen_CommandParameter *pTable = table->database->Screen_CommandParameter_get();
+pTable->GetRows("`FK_CommandParameter`=" + StringUtils::itos(m_PK_CommandParameter),rows);
+}
+void Row_CommandParameter::Screen_CommandParameter_pschist_FK_CommandParameter_getrows(vector <class Row_Screen_CommandParameter_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Screen_CommandParameter_pschist *pTable = table->database->Screen_CommandParameter_pschist_get();
+pTable->GetRows("`FK_CommandParameter`=" + StringUtils::itos(m_PK_CommandParameter),rows);
+}
+void Row_CommandParameter::Screen_CommandParameter_pschmask_FK_CommandParameter_getrows(vector <class Row_Screen_CommandParameter_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Screen_CommandParameter_pschmask *pTable = table->database->Screen_CommandParameter_pschmask_get();
 pTable->GetRows("`FK_CommandParameter`=" + StringUtils::itos(m_PK_CommandParameter),rows);
 }
 
