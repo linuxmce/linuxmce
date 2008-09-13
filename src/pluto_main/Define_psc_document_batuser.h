@@ -1,0 +1,19 @@
+#ifndef __Define_psc_document_batuser_H__
+#define __Define_psc_document_batuser_H__
+
+
+#define PSC_DOCUMENT_BATUSER_TABLE "psc_document_batuser"
+#define PSC_DOCUMENT_BATUSER_PK_PSC_DOCUMENT_BATUSER_FIELD "PK_psc_document_batuser"
+#define PSC_DOCUMENT_BATUSER_PK_PSC_DOCUMENT_BATUSER_TABLE_FIELD "psc_document_batuser.PK_psc_document_batuser"
+#define PSC_DOCUMENT_BATUSER_FK_PSC_DOCUMENT_BATHDR_FIELD "FK_psc_document_bathdr"
+#define PSC_DOCUMENT_BATUSER_FK_PSC_DOCUMENT_BATHDR_TABLE_FIELD "psc_document_batuser.FK_psc_document_bathdr"
+#define PSC_DOCUMENT_BATUSER_PSC_USER_FIELD "psc_user"
+#define PSC_DOCUMENT_BATUSER_PSC_USER_TABLE_FIELD "psc_document_batuser.psc_user"
+#define PSC_DOCUMENT_BATUSER_IS_SUP_FIELD "is_sup"
+#define PSC_DOCUMENT_BATUSER_IS_SUP_TABLE_FIELD "psc_document_batuser.is_sup"
+#define PSC_DOCUMENT_BATUSER_NO_PASS_FIELD "no_pass"
+#define PSC_DOCUMENT_BATUSER_NO_PASS_TABLE_FIELD "psc_document_batuser.no_pass"
+
+
+#endif
+

@@ -1,0 +1,13 @@
+#ifndef __Define_psc_document_schema_H__
+#define __Define_psc_document_schema_H__
+
+
+#define PSC_DOCUMENT_SCHEMA_TABLE "psc_document_schema"
+#define PSC_DOCUMENT_SCHEMA_PK_PSC_DOCUMENT_SCHEMA_FIELD "PK_psc_document_schema"
+#define PSC_DOCUMENT_SCHEMA_PK_PSC_DOCUMENT_SCHEMA_TABLE_FIELD "psc_document_schema.PK_psc_document_schema"
+#define PSC_DOCUMENT_SCHEMA_VALUE_FIELD "Value"
+#define PSC_DOCUMENT_SCHEMA_VALUE_TABLE_FIELD "psc_document_schema.Value"
+
+
+#endif
+

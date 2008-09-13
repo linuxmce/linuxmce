@@ -1,0 +1,27 @@
+#ifndef __Define_psc_document_batdet_H__
+#define __Define_psc_document_batdet_H__
+
+
+#define PSC_DOCUMENT_BATDET_TABLE "psc_document_batdet"
+#define PSC_DOCUMENT_BATDET_PK_PSC_DOCUMENT_BATDET_FIELD "PK_psc_document_batdet"
+#define PSC_DOCUMENT_BATDET_PK_PSC_DOCUMENT_BATDET_TABLE_FIELD "psc_document_batdet.PK_psc_document_batdet"
+#define PSC_DOCUMENT_BATDET_FK_PSC_DOCUMENT_BATHDR_FIELD "FK_psc_document_bathdr"
+#define PSC_DOCUMENT_BATDET_FK_PSC_DOCUMENT_BATHDR_TABLE_FIELD "psc_document_batdet.FK_psc_document_bathdr"
+#define PSC_DOCUMENT_BATDET_TABLENAME_FIELD "Tablename"
+#define PSC_DOCUMENT_BATDET_TABLENAME_TABLE_FIELD "psc_document_batdet.Tablename"
+#define PSC_DOCUMENT_BATDET_NEW_FIELD "New"
+#define PSC_DOCUMENT_BATDET_NEW_TABLE_FIELD "psc_document_batdet.New"
+#define PSC_DOCUMENT_BATDET_DELETED_FIELD "Deleted"
+#define PSC_DOCUMENT_BATDET_DELETED_TABLE_FIELD "psc_document_batdet.Deleted"
+#define PSC_DOCUMENT_BATDET_MODIFIED_FIELD "Modified"
+#define PSC_DOCUMENT_BATDET_MODIFIED_TABLE_FIELD "psc_document_batdet.Modified"
+#define PSC_DOCUMENT_BATDET_FK_PSC_DOCUMENT_BATHDR_ORIG_FIELD "FK_psc_document_bathdr_orig"
+#define PSC_DOCUMENT_BATDET_FK_PSC_DOCUMENT_BATHDR_ORIG_TABLE_FIELD "psc_document_batdet.FK_psc_document_bathdr_orig"
+#define PSC_DOCUMENT_BATDET_FK_PSC_DOCUMENT_BATHDR_AUTH_FIELD "FK_psc_document_bathdr_auth"
+#define PSC_DOCUMENT_BATDET_FK_PSC_DOCUMENT_BATHDR_AUTH_TABLE_FIELD "psc_document_batdet.FK_psc_document_bathdr_auth"
+#define PSC_DOCUMENT_BATDET_FK_PSC_DOCUMENT_BATHDR_UNAUTH_FIELD "FK_psc_document_bathdr_unauth"
+#define PSC_DOCUMENT_BATDET_FK_PSC_DOCUMENT_BATHDR_UNAUTH_TABLE_FIELD "psc_document_batdet.FK_psc_document_bathdr_unauth"
+
+
+#endif
+
