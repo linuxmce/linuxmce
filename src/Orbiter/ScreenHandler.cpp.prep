@@ -860,11 +860,11 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"ScreenHandler::MediaBrowser_Objec
 			mediaFileBrowserOptions.m_PK_AttributeType_Sort = ATTRIBUTETYPE_Genre_CONST;
 			bChangedSortFilter = true;
 		}
-		else if(pObjectInfoData->m_PK_DesignObj_SelectedObject == DESIGNOBJ_butSortBySong_CONST)
-		{
-			mediaFileBrowserOptions.m_PK_AttributeType_Sort = ATTRIBUTETYPE_Title_CONST;
-			bChangedSortFilter = true;
-		}
+		//else if(pObjectInfoData->m_PK_DesignObj_SelectedObject == DESIGNOBJ_butSortBySong_CONST)
+		//{
+		//	mediaFileBrowserOptions.m_PK_AttributeType_Sort = ATTRIBUTETYPE_Title_CONST;
+		//	bChangedSortFilter = true;
+		//}
 		else if(pObjectInfoData->m_PK_DesignObj_SelectedObject == DESIGNOBJ_butViewList_CONST)
 		{
 			mediaFileBrowserOptions.m_mapGridStyle[mediaFileBrowserOptions.m_PK_AttributeType_Sort] = omgs_BrowserStyle_List;
