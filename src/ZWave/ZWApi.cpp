@@ -250,6 +250,12 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							newNode->plutoDeviceTemplateConst = DEVICETEMPLATE_Generic_Sensor_CONST;
 							deviceList += tempbuf2;
 							break;
+						case GENERIC_TYPE_WINDOW_COVERING:
+							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"GENERIC TYPE: Window Covering");
+							sprintf(tempbuf2, "%d\t\t\t%d\t\n", tmp_nodeid, DEVICETEMPLATE_Drapes_Switch_CONST);
+							newNode->plutoDeviceTemplateConst = DEVICETEMPLATE_Drapes_Switch_CONST;
+							deviceList += tempbuf2;
+							break;
 						;;
 						default:
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"GENERIC TYPE: %x",frame[6]);
