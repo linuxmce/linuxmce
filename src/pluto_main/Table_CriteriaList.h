@@ -159,6 +159,10 @@ void psc_restrict_setNull(bool val);
 		// Return the rows in other tables with foreign keys pointing here
 		void Criteria_FK_CriteriaList_getrows(vector <class Row_Criteria*> *rows);
 void CriteriaList_CriteriaParmList_FK_CriteriaList_getrows(vector <class Row_CriteriaList_CriteriaParmList*> *rows);
+void CriteriaList_CriteriaParmList_pschist_FK_CriteriaList_getrows(vector <class Row_CriteriaList_CriteriaParmList_pschist*> *rows);
+void CriteriaList_CriteriaParmList_pschmask_FK_CriteriaList_getrows(vector <class Row_CriteriaList_CriteriaParmList_pschmask*> *rows);
+void Criteria_pschist_FK_CriteriaList_getrows(vector <class Row_Criteria_pschist*> *rows);
+void Criteria_pschmask_FK_CriteriaList_getrows(vector <class Row_Criteria_pschmask*> *rows);
 
 
 		// Setup binary serialization

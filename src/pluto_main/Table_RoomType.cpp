@@ -33,6 +33,8 @@ using namespace std;
 #include "Table_RoomType.h"
 
 #include "Table_Room.h"
+#include "Table_Room_pschist.h"
+#include "Table_Room_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_RoomType()
@@ -950,6 +952,20 @@ void Row_RoomType::Room_FK_RoomType_getrows(vector <class Row_Room*> *rows)
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Room *pTable = table->database->Room_get();
+pTable->GetRows("`FK_RoomType`=" + StringUtils::itos(m_PK_RoomType),rows);
+}
+void Row_RoomType::Room_pschist_FK_RoomType_getrows(vector <class Row_Room_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Room_pschist *pTable = table->database->Room_pschist_get();
+pTable->GetRows("`FK_RoomType`=" + StringUtils::itos(m_PK_RoomType),rows);
+}
+void Row_RoomType::Room_pschmask_FK_RoomType_getrows(vector <class Row_Room_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Room_pschmask *pTable = table->database->Room_pschmask_get();
 pTable->GetRows("`FK_RoomType`=" + StringUtils::itos(m_PK_RoomType),rows);
 }
 

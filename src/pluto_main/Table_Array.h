@@ -167,7 +167,11 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Array_FK_Array_Parent_getrows(vector <class Row_Array*> *rows);
+void Array_pschist_FK_Array_Parent_getrows(vector <class Row_Array_pschist*> *rows);
+void Array_pschmask_FK_Array_Parent_getrows(vector <class Row_Array_pschmask*> *rows);
 void CommandGroup_FK_Array_getrows(vector <class Row_CommandGroup*> *rows);
+void CommandGroup_pschist_FK_Array_getrows(vector <class Row_CommandGroup_pschist*> *rows);
+void CommandGroup_pschmask_FK_Array_getrows(vector <class Row_CommandGroup_pschmask*> *rows);
 
 
 		// Setup binary serialization

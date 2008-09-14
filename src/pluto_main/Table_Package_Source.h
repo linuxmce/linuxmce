@@ -195,6 +195,8 @@ class Row_RepositorySource* FK_RepositorySource_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Package_Source_Compat_FK_Package_Source_getrows(vector <class Row_Package_Source_Compat*> *rows);
+void Package_Source_Compat_pschist_FK_Package_Source_getrows(vector <class Row_Package_Source_Compat_pschist*> *rows);
+void Package_Source_Compat_pschmask_FK_Package_Source_getrows(vector <class Row_Package_Source_Compat_pschmask*> *rows);
 
 
 		// Setup binary serialization

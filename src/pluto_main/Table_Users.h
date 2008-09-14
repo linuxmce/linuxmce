@@ -242,12 +242,26 @@ class Row_UserMode* FK_UserMode_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void DeviceTemplate_FK_Users_Maintainer_getrows(vector <class Row_DeviceTemplate*> *rows);
+void DeviceTemplate_pschist_FK_Users_Maintainer_getrows(vector <class Row_DeviceTemplate_pschist*> *rows);
+void DeviceTemplate_pschmask_FK_Users_Maintainer_getrows(vector <class Row_DeviceTemplate_pschmask*> *rows);
 void Device_Users_FK_Users_getrows(vector <class Row_Device_Users*> *rows);
+void Device_Users_pschist_FK_Users_getrows(vector <class Row_Device_Users_pschist*> *rows);
+void Device_Users_pschmask_FK_Users_getrows(vector <class Row_Device_Users_pschmask*> *rows);
 void Document_Comment_FK_Users_getrows(vector <class Row_Document_Comment*> *rows);
+void Document_Comment_pschist_FK_Users_getrows(vector <class Row_Document_Comment_pschist*> *rows);
+void Document_Comment_pschmask_FK_Users_getrows(vector <class Row_Document_Comment_pschmask*> *rows);
 void Installation_Users_FK_Users_getrows(vector <class Row_Installation_Users*> *rows);
+void Installation_Users_pschist_FK_Users_getrows(vector <class Row_Installation_Users_pschist*> *rows);
+void Installation_Users_pschmask_FK_Users_getrows(vector <class Row_Installation_Users_pschmask*> *rows);
 void Orbiter_Users_PasswordReq_FK_Users_getrows(vector <class Row_Orbiter_Users_PasswordReq*> *rows);
+void Orbiter_Users_PasswordReq_pschist_FK_Users_getrows(vector <class Row_Orbiter_Users_PasswordReq_pschist*> *rows);
+void Orbiter_Users_PasswordReq_pschmask_FK_Users_getrows(vector <class Row_Orbiter_Users_PasswordReq_pschmask*> *rows);
 void Package_Users_FK_Users_getrows(vector <class Row_Package_Users*> *rows);
+void Package_Users_pschist_FK_Users_getrows(vector <class Row_Package_Users_pschist*> *rows);
+void Package_Users_pschmask_FK_Users_getrows(vector <class Row_Package_Users_pschmask*> *rows);
 void Room_Users_FK_Users_getrows(vector <class Row_Room_Users*> *rows);
+void Room_Users_pschist_FK_Users_getrows(vector <class Row_Room_Users_pschist*> *rows);
+void Room_Users_pschmask_FK_Users_getrows(vector <class Row_Room_Users_pschmask*> *rows);
 
 
 		// Setup binary serialization

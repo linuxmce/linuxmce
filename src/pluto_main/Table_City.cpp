@@ -36,6 +36,8 @@ using namespace std;
 #include "Table_TimeZone.h"
 
 #include "Table_Installation.h"
+#include "Table_Installation_pschist.h"
+#include "Table_Installation_pschmask.h"
 #include "Table_PostalCode.h"
 
 
@@ -1030,6 +1032,20 @@ void Row_City::Installation_FK_City_getrows(vector <class Row_Installation*> *ro
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Installation *pTable = table->database->Installation_get();
+pTable->GetRows("`FK_City`=" + StringUtils::itos(m_PK_City),rows);
+}
+void Row_City::Installation_pschist_FK_City_getrows(vector <class Row_Installation_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Installation_pschist *pTable = table->database->Installation_pschist_get();
+pTable->GetRows("`FK_City`=" + StringUtils::itos(m_PK_City),rows);
+}
+void Row_City::Installation_pschmask_FK_City_getrows(vector <class Row_Installation_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Installation_pschmask *pTable = table->database->Installation_pschmask_get();
 pTable->GetRows("`FK_City`=" + StringUtils::itos(m_PK_City),rows);
 }
 void Row_City::PostalCode_FK_City_getrows(vector <class Row_PostalCode*> *rows)

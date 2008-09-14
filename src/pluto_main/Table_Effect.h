@@ -160,6 +160,8 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void EffectType_Effect_Skin_FK_Effect_getrows(vector <class Row_EffectType_Effect_Skin*> *rows);
+void EffectType_Effect_Skin_pschist_FK_Effect_getrows(vector <class Row_EffectType_Effect_Skin_pschist*> *rows);
+void EffectType_Effect_Skin_pschmask_FK_Effect_getrows(vector <class Row_EffectType_Effect_Skin_pschmask*> *rows);
 
 
 		// Setup binary serialization

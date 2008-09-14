@@ -33,6 +33,8 @@ using namespace std;
 #include "Table_Licensing.h"
 
 #include "Table_DeviceTemplate.h"
+#include "Table_DeviceTemplate_pschist.h"
+#include "Table_DeviceTemplate_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Licensing()
@@ -1038,6 +1040,20 @@ void Row_Licensing::DeviceTemplate_FK_Licensing_getrows(vector <class Row_Device
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_DeviceTemplate *pTable = table->database->DeviceTemplate_get();
+pTable->GetRows("`FK_Licensing`=" + StringUtils::itos(m_PK_Licensing),rows);
+}
+void Row_Licensing::DeviceTemplate_pschist_FK_Licensing_getrows(vector <class Row_DeviceTemplate_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_pschist *pTable = table->database->DeviceTemplate_pschist_get();
+pTable->GetRows("`FK_Licensing`=" + StringUtils::itos(m_PK_Licensing),rows);
+}
+void Row_Licensing::DeviceTemplate_pschmask_FK_Licensing_getrows(vector <class Row_DeviceTemplate_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_pschmask *pTable = table->database->DeviceTemplate_pschmask_get();
 pTable->GetRows("`FK_Licensing`=" + StringUtils::itos(m_PK_Licensing),rows);
 }
 

@@ -206,6 +206,8 @@ class Row_DesignObj* FK_DesignObj_OSD_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Device_QuickStart_FK_QuickStartTemplate_getrows(vector <class Row_Device_QuickStart*> *rows);
+void Device_QuickStart_pschist_FK_QuickStartTemplate_getrows(vector <class Row_Device_QuickStart_pschist*> *rows);
+void Device_QuickStart_pschmask_FK_QuickStartTemplate_getrows(vector <class Row_Device_QuickStart_pschmask*> *rows);
 
 
 		// Setup binary serialization

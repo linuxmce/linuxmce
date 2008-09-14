@@ -34,6 +34,10 @@ using namespace std;
 
 #include "Table_DesignObj.h"
 #include "Table_DesignObjType_DesignObjParameter.h"
+#include "Table_DesignObjType_DesignObjParameter_pschist.h"
+#include "Table_DesignObjType_DesignObjParameter_pschmask.h"
+#include "Table_DesignObj_pschist.h"
+#include "Table_DesignObj_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_DesignObjType()
@@ -1044,6 +1048,34 @@ void Row_DesignObjType::DesignObjType_DesignObjParameter_FK_DesignObjType_getrow
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_DesignObjType_DesignObjParameter *pTable = table->database->DesignObjType_DesignObjParameter_get();
+pTable->GetRows("`FK_DesignObjType`=" + StringUtils::itos(m_PK_DesignObjType),rows);
+}
+void Row_DesignObjType::DesignObjType_DesignObjParameter_pschist_FK_DesignObjType_getrows(vector <class Row_DesignObjType_DesignObjParameter_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DesignObjType_DesignObjParameter_pschist *pTable = table->database->DesignObjType_DesignObjParameter_pschist_get();
+pTable->GetRows("`FK_DesignObjType`=" + StringUtils::itos(m_PK_DesignObjType),rows);
+}
+void Row_DesignObjType::DesignObjType_DesignObjParameter_pschmask_FK_DesignObjType_getrows(vector <class Row_DesignObjType_DesignObjParameter_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DesignObjType_DesignObjParameter_pschmask *pTable = table->database->DesignObjType_DesignObjParameter_pschmask_get();
+pTable->GetRows("`FK_DesignObjType`=" + StringUtils::itos(m_PK_DesignObjType),rows);
+}
+void Row_DesignObjType::DesignObj_pschist_FK_DesignObjType_getrows(vector <class Row_DesignObj_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DesignObj_pschist *pTable = table->database->DesignObj_pschist_get();
+pTable->GetRows("`FK_DesignObjType`=" + StringUtils::itos(m_PK_DesignObjType),rows);
+}
+void Row_DesignObjType::DesignObj_pschmask_FK_DesignObjType_getrows(vector <class Row_DesignObj_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DesignObj_pschmask *pTable = table->database->DesignObj_pschmask_get();
 pTable->GetRows("`FK_DesignObjType`=" + StringUtils::itos(m_PK_DesignObjType),rows);
 }
 

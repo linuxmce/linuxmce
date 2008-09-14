@@ -165,7 +165,11 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void CannedEvents_CriteriaParmList_FK_CannedEvents_getrows(vector <class Row_CannedEvents_CriteriaParmList*> *rows);
+void CannedEvents_CriteriaParmList_pschist_FK_CannedEvents_getrows(vector <class Row_CannedEvents_CriteriaParmList_pschist*> *rows);
+void CannedEvents_CriteriaParmList_pschmask_FK_CannedEvents_getrows(vector <class Row_CannedEvents_CriteriaParmList_pschmask*> *rows);
 void EventHandler_FK_CannedEvents_getrows(vector <class Row_EventHandler*> *rows);
+void EventHandler_pschist_FK_CannedEvents_getrows(vector <class Row_EventHandler_pschist*> *rows);
+void EventHandler_pschmask_FK_CannedEvents_getrows(vector <class Row_EventHandler_pschmask*> *rows);
 
 
 		// Setup binary serialization

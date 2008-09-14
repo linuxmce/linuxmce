@@ -37,6 +37,8 @@ using namespace std;
 #include "Table_DeviceCategory.h"
 
 #include "Table_CommandGroup_D_Command_CommandParameter.h"
+#include "Table_CommandGroup_D_Command_CommandParameter_pschist.h"
+#include "Table_CommandGroup_D_Command_CommandParameter_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_CommandGroup_D_Command()
@@ -1273,6 +1275,20 @@ void Row_CommandGroup_D_Command::CommandGroup_D_Command_CommandParameter_FK_Comm
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_CommandGroup_D_Command_CommandParameter *pTable = table->database->CommandGroup_D_Command_CommandParameter_get();
+pTable->GetRows("`FK_CommandGroup_D_Command`=" + StringUtils::itos(m_PK_CommandGroup_D_Command),rows);
+}
+void Row_CommandGroup_D_Command::CommandGroup_D_Command_CommandParameter_pschist_FK_CommandGroup_D_Command_getrows(vector <class Row_CommandGroup_D_Command_CommandParameter_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_CommandGroup_D_Command_CommandParameter_pschist *pTable = table->database->CommandGroup_D_Command_CommandParameter_pschist_get();
+pTable->GetRows("`FK_CommandGroup_D_Command`=" + StringUtils::itos(m_PK_CommandGroup_D_Command),rows);
+}
+void Row_CommandGroup_D_Command::CommandGroup_D_Command_CommandParameter_pschmask_FK_CommandGroup_D_Command_getrows(vector <class Row_CommandGroup_D_Command_CommandParameter_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_CommandGroup_D_Command_CommandParameter_pschmask *pTable = table->database->CommandGroup_D_Command_CommandParameter_pschmask_get();
 pTable->GetRows("`FK_CommandGroup_D_Command`=" + StringUtils::itos(m_PK_CommandGroup_D_Command),rows);
 }
 

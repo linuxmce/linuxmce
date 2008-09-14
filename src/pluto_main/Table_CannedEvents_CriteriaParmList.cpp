@@ -35,6 +35,8 @@ using namespace std;
 #include "Table_CriteriaParmList.h"
 
 #include "Table_CriteriaParm.h"
+#include "Table_CriteriaParm_pschist.h"
+#include "Table_CriteriaParm_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_CannedEvents_CriteriaParmList()
@@ -1294,6 +1296,20 @@ void Row_CannedEvents_CriteriaParmList::CriteriaParm_FK_CannedEvents_CriteriaPar
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_CriteriaParm *pTable = table->database->CriteriaParm_get();
+pTable->GetRows("`FK_CannedEvents_CriteriaParmList`=" + StringUtils::itos(m_PK_CannedEvents_CriteriaParmList),rows);
+}
+void Row_CannedEvents_CriteriaParmList::CriteriaParm_pschist_FK_CannedEvents_CriteriaParmList_getrows(vector <class Row_CriteriaParm_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_CriteriaParm_pschist *pTable = table->database->CriteriaParm_pschist_get();
+pTable->GetRows("`FK_CannedEvents_CriteriaParmList`=" + StringUtils::itos(m_PK_CannedEvents_CriteriaParmList),rows);
+}
+void Row_CannedEvents_CriteriaParmList::CriteriaParm_pschmask_FK_CannedEvents_CriteriaParmList_getrows(vector <class Row_CriteriaParm_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_CriteriaParm_pschmask *pTable = table->database->CriteriaParm_pschmask_get();
 pTable->GetRows("`FK_CannedEvents_CriteriaParmList`=" + StringUtils::itos(m_PK_CannedEvents_CriteriaParmList),rows);
 }
 

@@ -34,11 +34,23 @@ using namespace std;
 #include "Table_EventCategory.h"
 
 #include "Table_CannedEvents.h"
+#include "Table_CannedEvents_pschist.h"
+#include "Table_CannedEvents_pschmask.h"
 #include "Table_DeviceCategory_Event.h"
+#include "Table_DeviceCategory_Event_pschist.h"
+#include "Table_DeviceCategory_Event_pschmask.h"
 #include "Table_DeviceTemplate_Event.h"
+#include "Table_DeviceTemplate_Event_pschist.h"
+#include "Table_DeviceTemplate_Event_pschmask.h"
 #include "Table_Device_HouseMode.h"
+#include "Table_Device_HouseMode_pschist.h"
+#include "Table_Device_HouseMode_pschmask.h"
 #include "Table_EventHandler.h"
+#include "Table_EventHandler_pschist.h"
+#include "Table_EventHandler_pschmask.h"
 #include "Table_Event_EventParameter.h"
+#include "Table_Event_EventParameter_pschist.h"
+#include "Table_Event_EventParameter_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Event()
@@ -1063,11 +1075,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_CannedEvents *pTable = table->database->CannedEvents_get();
 pTable->GetRows("`FK_Event`=" + StringUtils::itos(m_PK_Event),rows);
 }
+void Row_Event::CannedEvents_pschist_FK_Event_getrows(vector <class Row_CannedEvents_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_CannedEvents_pschist *pTable = table->database->CannedEvents_pschist_get();
+pTable->GetRows("`FK_Event`=" + StringUtils::itos(m_PK_Event),rows);
+}
+void Row_Event::CannedEvents_pschmask_FK_Event_getrows(vector <class Row_CannedEvents_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_CannedEvents_pschmask *pTable = table->database->CannedEvents_pschmask_get();
+pTable->GetRows("`FK_Event`=" + StringUtils::itos(m_PK_Event),rows);
+}
 void Row_Event::DeviceCategory_Event_FK_Event_getrows(vector <class Row_DeviceCategory_Event*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_DeviceCategory_Event *pTable = table->database->DeviceCategory_Event_get();
+pTable->GetRows("`FK_Event`=" + StringUtils::itos(m_PK_Event),rows);
+}
+void Row_Event::DeviceCategory_Event_pschist_FK_Event_getrows(vector <class Row_DeviceCategory_Event_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceCategory_Event_pschist *pTable = table->database->DeviceCategory_Event_pschist_get();
+pTable->GetRows("`FK_Event`=" + StringUtils::itos(m_PK_Event),rows);
+}
+void Row_Event::DeviceCategory_Event_pschmask_FK_Event_getrows(vector <class Row_DeviceCategory_Event_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceCategory_Event_pschmask *pTable = table->database->DeviceCategory_Event_pschmask_get();
 pTable->GetRows("`FK_Event`=" + StringUtils::itos(m_PK_Event),rows);
 }
 void Row_Event::DeviceTemplate_Event_FK_Event_getrows(vector <class Row_DeviceTemplate_Event*> *rows)
@@ -1077,11 +1117,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceTemplate_Event *pTable = table->database->DeviceTemplate_Event_get();
 pTable->GetRows("`FK_Event`=" + StringUtils::itos(m_PK_Event),rows);
 }
+void Row_Event::DeviceTemplate_Event_pschist_FK_Event_getrows(vector <class Row_DeviceTemplate_Event_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_Event_pschist *pTable = table->database->DeviceTemplate_Event_pschist_get();
+pTable->GetRows("`FK_Event`=" + StringUtils::itos(m_PK_Event),rows);
+}
+void Row_Event::DeviceTemplate_Event_pschmask_FK_Event_getrows(vector <class Row_DeviceTemplate_Event_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_Event_pschmask *pTable = table->database->DeviceTemplate_Event_pschmask_get();
+pTable->GetRows("`FK_Event`=" + StringUtils::itos(m_PK_Event),rows);
+}
 void Row_Event::Device_HouseMode_FK_Event_getrows(vector <class Row_Device_HouseMode*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Device_HouseMode *pTable = table->database->Device_HouseMode_get();
+pTable->GetRows("`FK_Event`=" + StringUtils::itos(m_PK_Event),rows);
+}
+void Row_Event::Device_HouseMode_pschist_FK_Event_getrows(vector <class Row_Device_HouseMode_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Device_HouseMode_pschist *pTable = table->database->Device_HouseMode_pschist_get();
+pTable->GetRows("`FK_Event`=" + StringUtils::itos(m_PK_Event),rows);
+}
+void Row_Event::Device_HouseMode_pschmask_FK_Event_getrows(vector <class Row_Device_HouseMode_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Device_HouseMode_pschmask *pTable = table->database->Device_HouseMode_pschmask_get();
 pTable->GetRows("`FK_Event`=" + StringUtils::itos(m_PK_Event),rows);
 }
 void Row_Event::EventHandler_FK_Event_getrows(vector <class Row_EventHandler*> *rows)
@@ -1091,11 +1159,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_EventHandler *pTable = table->database->EventHandler_get();
 pTable->GetRows("`FK_Event`=" + StringUtils::itos(m_PK_Event),rows);
 }
+void Row_Event::EventHandler_pschist_FK_Event_getrows(vector <class Row_EventHandler_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_EventHandler_pschist *pTable = table->database->EventHandler_pschist_get();
+pTable->GetRows("`FK_Event`=" + StringUtils::itos(m_PK_Event),rows);
+}
+void Row_Event::EventHandler_pschmask_FK_Event_getrows(vector <class Row_EventHandler_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_EventHandler_pschmask *pTable = table->database->EventHandler_pschmask_get();
+pTable->GetRows("`FK_Event`=" + StringUtils::itos(m_PK_Event),rows);
+}
 void Row_Event::Event_EventParameter_FK_Event_getrows(vector <class Row_Event_EventParameter*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Event_EventParameter *pTable = table->database->Event_EventParameter_get();
+pTable->GetRows("`FK_Event`=" + StringUtils::itos(m_PK_Event),rows);
+}
+void Row_Event::Event_EventParameter_pschist_FK_Event_getrows(vector <class Row_Event_EventParameter_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Event_EventParameter_pschist *pTable = table->database->Event_EventParameter_pschist_get();
+pTable->GetRows("`FK_Event`=" + StringUtils::itos(m_PK_Event),rows);
+}
+void Row_Event::Event_EventParameter_pschmask_FK_Event_getrows(vector <class Row_Event_EventParameter_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Event_EventParameter_pschmask *pTable = table->database->Event_EventParameter_pschmask_get();
 pTable->GetRows("`FK_Event`=" + StringUtils::itos(m_PK_Event),rows);
 }
 

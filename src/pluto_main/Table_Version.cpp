@@ -33,7 +33,14 @@ using namespace std;
 #include "Table_Version.h"
 
 #include "Table_Installation.h"
+#include "Table_Installation_pschist.h"
+#include "Table_Installation_pschmask.h"
+#include "Table_Package_Version.h"
+#include "Table_Package_Version_pschist.h"
+#include "Table_Package_Version_pschmask.h"
 #include "Table_Schema.h"
+#include "Table_Schema_pschist.h"
+#include "Table_Schema_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Version()
@@ -1303,11 +1310,60 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Installation *pTable = table->database->Installation_get();
 pTable->GetRows("`FK_Version`=" + StringUtils::itos(m_PK_Version),rows);
 }
+void Row_Version::Installation_pschist_FK_Version_getrows(vector <class Row_Installation_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Installation_pschist *pTable = table->database->Installation_pschist_get();
+pTable->GetRows("`FK_Version`=" + StringUtils::itos(m_PK_Version),rows);
+}
+void Row_Version::Installation_pschmask_FK_Version_getrows(vector <class Row_Installation_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Installation_pschmask *pTable = table->database->Installation_pschmask_get();
+pTable->GetRows("`FK_Version`=" + StringUtils::itos(m_PK_Version),rows);
+}
+void Row_Version::Package_Version_FK_Version_getrows(vector <class Row_Package_Version*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_Version *pTable = table->database->Package_Version_get();
+pTable->GetRows("`FK_Version`=" + StringUtils::itos(m_PK_Version),rows);
+}
+void Row_Version::Package_Version_pschist_FK_Version_getrows(vector <class Row_Package_Version_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_Version_pschist *pTable = table->database->Package_Version_pschist_get();
+pTable->GetRows("`FK_Version`=" + StringUtils::itos(m_PK_Version),rows);
+}
+void Row_Version::Package_Version_pschmask_FK_Version_getrows(vector <class Row_Package_Version_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_Version_pschmask *pTable = table->database->Package_Version_pschmask_get();
+pTable->GetRows("`FK_Version`=" + StringUtils::itos(m_PK_Version),rows);
+}
 void Row_Version::Schema_FK_Version_getrows(vector <class Row_Schema*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Schema *pTable = table->database->Schema_get();
+pTable->GetRows("`FK_Version`=" + StringUtils::itos(m_PK_Version),rows);
+}
+void Row_Version::Schema_pschist_FK_Version_getrows(vector <class Row_Schema_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Schema_pschist *pTable = table->database->Schema_pschist_get();
+pTable->GetRows("`FK_Version`=" + StringUtils::itos(m_PK_Version),rows);
+}
+void Row_Version::Schema_pschmask_FK_Version_getrows(vector <class Row_Schema_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Schema_pschmask *pTable = table->database->Schema_pschmask_get();
 pTable->GetRows("`FK_Version`=" + StringUtils::itos(m_PK_Version),rows);
 }
 

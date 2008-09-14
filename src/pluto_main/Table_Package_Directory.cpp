@@ -37,6 +37,8 @@ using namespace std;
 #include "Table_Distro.h"
 
 #include "Table_Package_Directory_File.h"
+#include "Table_Package_Directory_File_pschist.h"
+#include "Table_Package_Directory_File_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Package_Directory()
@@ -1267,6 +1269,20 @@ void Row_Package_Directory::Package_Directory_File_FK_Package_Directory_getrows(
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Package_Directory_File *pTable = table->database->Package_Directory_File_get();
+pTable->GetRows("`FK_Package_Directory`=" + StringUtils::itos(m_PK_Package_Directory),rows);
+}
+void Row_Package_Directory::Package_Directory_File_pschist_FK_Package_Directory_getrows(vector <class Row_Package_Directory_File_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_Directory_File_pschist *pTable = table->database->Package_Directory_File_pschist_get();
+pTable->GetRows("`FK_Package_Directory`=" + StringUtils::itos(m_PK_Package_Directory),rows);
+}
+void Row_Package_Directory::Package_Directory_File_pschmask_FK_Package_Directory_getrows(vector <class Row_Package_Directory_File_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_Directory_File_pschmask *pTable = table->database->Package_Directory_File_pschmask_get();
 pTable->GetRows("`FK_Package_Directory`=" + StringUtils::itos(m_PK_Package_Directory),rows);
 }
 

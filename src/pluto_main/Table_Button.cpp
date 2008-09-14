@@ -34,6 +34,10 @@ using namespace std;
 
 #include "Table_DesignObjVariation.h"
 #include "Table_DesignObjVariation_Zone.h"
+#include "Table_DesignObjVariation_Zone_pschist.h"
+#include "Table_DesignObjVariation_Zone_pschmask.h"
+#include "Table_DesignObjVariation_pschist.h"
+#include "Table_DesignObjVariation_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Button()
@@ -958,6 +962,34 @@ void Row_Button::DesignObjVariation_Zone_FK_Button_getrows(vector <class Row_Des
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_DesignObjVariation_Zone *pTable = table->database->DesignObjVariation_Zone_get();
+pTable->GetRows("`FK_Button`=" + StringUtils::itos(m_PK_Button),rows);
+}
+void Row_Button::DesignObjVariation_Zone_pschist_FK_Button_getrows(vector <class Row_DesignObjVariation_Zone_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DesignObjVariation_Zone_pschist *pTable = table->database->DesignObjVariation_Zone_pschist_get();
+pTable->GetRows("`FK_Button`=" + StringUtils::itos(m_PK_Button),rows);
+}
+void Row_Button::DesignObjVariation_Zone_pschmask_FK_Button_getrows(vector <class Row_DesignObjVariation_Zone_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DesignObjVariation_Zone_pschmask *pTable = table->database->DesignObjVariation_Zone_pschmask_get();
+pTable->GetRows("`FK_Button`=" + StringUtils::itos(m_PK_Button),rows);
+}
+void Row_Button::DesignObjVariation_pschist_FK_Button_getrows(vector <class Row_DesignObjVariation_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DesignObjVariation_pschist *pTable = table->database->DesignObjVariation_pschist_get();
+pTable->GetRows("`FK_Button`=" + StringUtils::itos(m_PK_Button),rows);
+}
+void Row_Button::DesignObjVariation_pschmask_FK_Button_getrows(vector <class Row_DesignObjVariation_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DesignObjVariation_pschmask *pTable = table->database->DesignObjVariation_pschmask_get();
 pTable->GetRows("`FK_Button`=" + StringUtils::itos(m_PK_Button),rows);
 }
 

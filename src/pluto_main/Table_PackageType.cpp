@@ -33,6 +33,8 @@ using namespace std;
 #include "Table_PackageType.h"
 
 #include "Table_Package.h"
+#include "Table_Package_pschist.h"
+#include "Table_Package_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_PackageType()
@@ -956,6 +958,20 @@ void Row_PackageType::Package_FK_PackageType_getrows(vector <class Row_Package*>
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Package *pTable = table->database->Package_get();
+pTable->GetRows("`FK_PackageType`=" + StringUtils::itos(m_PK_PackageType),rows);
+}
+void Row_PackageType::Package_pschist_FK_PackageType_getrows(vector <class Row_Package_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_pschist *pTable = table->database->Package_pschist_get();
+pTable->GetRows("`FK_PackageType`=" + StringUtils::itos(m_PK_PackageType),rows);
+}
+void Row_PackageType::Package_pschmask_FK_PackageType_getrows(vector <class Row_Package_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_pschmask *pTable = table->database->Package_pschmask_get();
 pTable->GetRows("`FK_PackageType`=" + StringUtils::itos(m_PK_PackageType),rows);
 }
 

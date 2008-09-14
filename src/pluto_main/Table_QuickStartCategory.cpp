@@ -34,7 +34,11 @@ using namespace std;
 #include "Table_QuickStartCategory.h"
 
 #include "Table_QuickStartCategory.h"
+#include "Table_QuickStartCategory_pschist.h"
+#include "Table_QuickStartCategory_pschmask.h"
 #include "Table_QuickStartTemplate.h"
+#include "Table_QuickStartTemplate_pschist.h"
+#include "Table_QuickStartTemplate_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_QuickStartCategory()
@@ -973,11 +977,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_QuickStartCategory *pTable = table->database->QuickStartCategory_get();
 pTable->GetRows("`FK_QuickStartCategory_Parent`=" + StringUtils::itos(m_PK_QuickStartCategory),rows);
 }
+void Row_QuickStartCategory::QuickStartCategory_pschist_FK_QuickStartCategory_Parent_getrows(vector <class Row_QuickStartCategory_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_QuickStartCategory_pschist *pTable = table->database->QuickStartCategory_pschist_get();
+pTable->GetRows("`FK_QuickStartCategory_Parent`=" + StringUtils::itos(m_PK_QuickStartCategory),rows);
+}
+void Row_QuickStartCategory::QuickStartCategory_pschmask_FK_QuickStartCategory_Parent_getrows(vector <class Row_QuickStartCategory_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_QuickStartCategory_pschmask *pTable = table->database->QuickStartCategory_pschmask_get();
+pTable->GetRows("`FK_QuickStartCategory_Parent`=" + StringUtils::itos(m_PK_QuickStartCategory),rows);
+}
 void Row_QuickStartCategory::QuickStartTemplate_FK_QuickStartCategory_getrows(vector <class Row_QuickStartTemplate*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_QuickStartTemplate *pTable = table->database->QuickStartTemplate_get();
+pTable->GetRows("`FK_QuickStartCategory`=" + StringUtils::itos(m_PK_QuickStartCategory),rows);
+}
+void Row_QuickStartCategory::QuickStartTemplate_pschist_FK_QuickStartCategory_getrows(vector <class Row_QuickStartTemplate_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_QuickStartTemplate_pschist *pTable = table->database->QuickStartTemplate_pschist_get();
+pTable->GetRows("`FK_QuickStartCategory`=" + StringUtils::itos(m_PK_QuickStartCategory),rows);
+}
+void Row_QuickStartCategory::QuickStartTemplate_pschmask_FK_QuickStartCategory_getrows(vector <class Row_QuickStartTemplate_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_QuickStartTemplate_pschmask *pTable = table->database->QuickStartTemplate_pschmask_get();
 pTable->GetRows("`FK_QuickStartCategory`=" + StringUtils::itos(m_PK_QuickStartCategory),rows);
 }
 

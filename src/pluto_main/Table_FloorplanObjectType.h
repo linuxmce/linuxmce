@@ -182,8 +182,14 @@ class Row_DesignObj* FK_DesignObj_Control_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void EntertainArea_FK_FloorplanObjectType_getrows(vector <class Row_EntertainArea*> *rows);
+void EntertainArea_pschist_FK_FloorplanObjectType_getrows(vector <class Row_EntertainArea_pschist*> *rows);
+void EntertainArea_pschmask_FK_FloorplanObjectType_getrows(vector <class Row_EntertainArea_pschmask*> *rows);
 void FloorplanObjectType_Color_FK_FloorplanObjectType_getrows(vector <class Row_FloorplanObjectType_Color*> *rows);
+void FloorplanObjectType_Color_pschist_FK_FloorplanObjectType_getrows(vector <class Row_FloorplanObjectType_Color_pschist*> *rows);
+void FloorplanObjectType_Color_pschmask_FK_FloorplanObjectType_getrows(vector <class Row_FloorplanObjectType_Color_pschmask*> *rows);
 void Room_FK_FloorplanObjectType_getrows(vector <class Row_Room*> *rows);
+void Room_pschist_FK_FloorplanObjectType_getrows(vector <class Row_Room_pschist*> *rows);
+void Room_pschmask_FK_FloorplanObjectType_getrows(vector <class Row_Room_pschmask*> *rows);
 
 
 		// Setup binary serialization

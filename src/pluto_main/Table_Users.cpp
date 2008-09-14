@@ -36,12 +36,26 @@ using namespace std;
 #include "Table_UserMode.h"
 
 #include "Table_DeviceTemplate.h"
+#include "Table_DeviceTemplate_pschist.h"
+#include "Table_DeviceTemplate_pschmask.h"
 #include "Table_Device_Users.h"
+#include "Table_Device_Users_pschist.h"
+#include "Table_Device_Users_pschmask.h"
 #include "Table_Document_Comment.h"
+#include "Table_Document_Comment_pschist.h"
+#include "Table_Document_Comment_pschmask.h"
 #include "Table_Installation_Users.h"
+#include "Table_Installation_Users_pschist.h"
+#include "Table_Installation_Users_pschmask.h"
 #include "Table_Orbiter_Users_PasswordReq.h"
+#include "Table_Orbiter_Users_PasswordReq_pschist.h"
+#include "Table_Orbiter_Users_PasswordReq_pschmask.h"
 #include "Table_Package_Users.h"
+#include "Table_Package_Users_pschist.h"
+#include "Table_Package_Users_pschmask.h"
 #include "Table_Room_Users.h"
+#include "Table_Room_Users_pschist.h"
+#include "Table_Room_Users_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Users()
@@ -1884,11 +1898,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceTemplate *pTable = table->database->DeviceTemplate_get();
 pTable->GetRows("`FK_Users_Maintainer`=" + StringUtils::itos(m_PK_Users),rows);
 }
+void Row_Users::DeviceTemplate_pschist_FK_Users_Maintainer_getrows(vector <class Row_DeviceTemplate_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_pschist *pTable = table->database->DeviceTemplate_pschist_get();
+pTable->GetRows("`FK_Users_Maintainer`=" + StringUtils::itos(m_PK_Users),rows);
+}
+void Row_Users::DeviceTemplate_pschmask_FK_Users_Maintainer_getrows(vector <class Row_DeviceTemplate_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_pschmask *pTable = table->database->DeviceTemplate_pschmask_get();
+pTable->GetRows("`FK_Users_Maintainer`=" + StringUtils::itos(m_PK_Users),rows);
+}
 void Row_Users::Device_Users_FK_Users_getrows(vector <class Row_Device_Users*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Device_Users *pTable = table->database->Device_Users_get();
+pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
+}
+void Row_Users::Device_Users_pschist_FK_Users_getrows(vector <class Row_Device_Users_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Device_Users_pschist *pTable = table->database->Device_Users_pschist_get();
+pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
+}
+void Row_Users::Device_Users_pschmask_FK_Users_getrows(vector <class Row_Device_Users_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Device_Users_pschmask *pTable = table->database->Device_Users_pschmask_get();
 pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
 }
 void Row_Users::Document_Comment_FK_Users_getrows(vector <class Row_Document_Comment*> *rows)
@@ -1898,11 +1940,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Document_Comment *pTable = table->database->Document_Comment_get();
 pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
 }
+void Row_Users::Document_Comment_pschist_FK_Users_getrows(vector <class Row_Document_Comment_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Document_Comment_pschist *pTable = table->database->Document_Comment_pschist_get();
+pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
+}
+void Row_Users::Document_Comment_pschmask_FK_Users_getrows(vector <class Row_Document_Comment_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Document_Comment_pschmask *pTable = table->database->Document_Comment_pschmask_get();
+pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
+}
 void Row_Users::Installation_Users_FK_Users_getrows(vector <class Row_Installation_Users*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Installation_Users *pTable = table->database->Installation_Users_get();
+pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
+}
+void Row_Users::Installation_Users_pschist_FK_Users_getrows(vector <class Row_Installation_Users_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Installation_Users_pschist *pTable = table->database->Installation_Users_pschist_get();
+pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
+}
+void Row_Users::Installation_Users_pschmask_FK_Users_getrows(vector <class Row_Installation_Users_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Installation_Users_pschmask *pTable = table->database->Installation_Users_pschmask_get();
 pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
 }
 void Row_Users::Orbiter_Users_PasswordReq_FK_Users_getrows(vector <class Row_Orbiter_Users_PasswordReq*> *rows)
@@ -1912,6 +1982,20 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Orbiter_Users_PasswordReq *pTable = table->database->Orbiter_Users_PasswordReq_get();
 pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
 }
+void Row_Users::Orbiter_Users_PasswordReq_pschist_FK_Users_getrows(vector <class Row_Orbiter_Users_PasswordReq_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Orbiter_Users_PasswordReq_pschist *pTable = table->database->Orbiter_Users_PasswordReq_pschist_get();
+pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
+}
+void Row_Users::Orbiter_Users_PasswordReq_pschmask_FK_Users_getrows(vector <class Row_Orbiter_Users_PasswordReq_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Orbiter_Users_PasswordReq_pschmask *pTable = table->database->Orbiter_Users_PasswordReq_pschmask_get();
+pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
+}
 void Row_Users::Package_Users_FK_Users_getrows(vector <class Row_Package_Users*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1919,11 +2003,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Package_Users *pTable = table->database->Package_Users_get();
 pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
 }
+void Row_Users::Package_Users_pschist_FK_Users_getrows(vector <class Row_Package_Users_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_Users_pschist *pTable = table->database->Package_Users_pschist_get();
+pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
+}
+void Row_Users::Package_Users_pschmask_FK_Users_getrows(vector <class Row_Package_Users_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_Users_pschmask *pTable = table->database->Package_Users_pschmask_get();
+pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
+}
 void Row_Users::Room_Users_FK_Users_getrows(vector <class Row_Room_Users*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Room_Users *pTable = table->database->Room_Users_get();
+pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
+}
+void Row_Users::Room_Users_pschist_FK_Users_getrows(vector <class Row_Room_Users_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Room_Users_pschist *pTable = table->database->Room_Users_pschist_get();
+pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
+}
+void Row_Users::Room_Users_pschmask_FK_Users_getrows(vector <class Row_Room_Users_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Room_Users_pschmask *pTable = table->database->Room_Users_pschmask_get();
 pTable->GetRows("`FK_Users`=" + StringUtils::itos(m_PK_Users),rows);
 }
 

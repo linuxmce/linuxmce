@@ -162,8 +162,14 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void CannedEvents_CriteriaParmList_FK_CriteriaParmList_getrows(vector <class Row_CannedEvents_CriteriaParmList*> *rows);
+void CannedEvents_CriteriaParmList_pschist_FK_CriteriaParmList_getrows(vector <class Row_CannedEvents_CriteriaParmList_pschist*> *rows);
+void CannedEvents_CriteriaParmList_pschmask_FK_CriteriaParmList_getrows(vector <class Row_CannedEvents_CriteriaParmList_pschmask*> *rows);
 void CriteriaList_CriteriaParmList_FK_CriteriaParmList_getrows(vector <class Row_CriteriaList_CriteriaParmList*> *rows);
+void CriteriaList_CriteriaParmList_pschist_FK_CriteriaParmList_getrows(vector <class Row_CriteriaList_CriteriaParmList_pschist*> *rows);
+void CriteriaList_CriteriaParmList_pschmask_FK_CriteriaParmList_getrows(vector <class Row_CriteriaList_CriteriaParmList_pschmask*> *rows);
 void CriteriaParm_FK_CriteriaParmList_getrows(vector <class Row_CriteriaParm*> *rows);
+void CriteriaParm_pschist_FK_CriteriaParmList_getrows(vector <class Row_CriteriaParm_pschist*> *rows);
+void CriteriaParm_pschmask_FK_CriteriaParmList_getrows(vector <class Row_CriteriaParm_pschmask*> *rows);
 
 
 		// Setup binary serialization

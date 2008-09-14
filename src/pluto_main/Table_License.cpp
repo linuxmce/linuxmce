@@ -33,7 +33,11 @@ using namespace std;
 #include "Table_License.h"
 
 #include "Table_Package.h"
+#include "Table_Package_pschist.h"
+#include "Table_Package_pschmask.h"
 #include "Table_PaidLicense.h"
+#include "Table_PaidLicense_pschist.h"
+#include "Table_PaidLicense_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_License()
@@ -1103,11 +1107,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Package *pTable = table->database->Package_get();
 pTable->GetRows("`FK_License`=" + StringUtils::itos(m_PK_License),rows);
 }
+void Row_License::Package_pschist_FK_License_getrows(vector <class Row_Package_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_pschist *pTable = table->database->Package_pschist_get();
+pTable->GetRows("`FK_License`=" + StringUtils::itos(m_PK_License),rows);
+}
+void Row_License::Package_pschmask_FK_License_getrows(vector <class Row_Package_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_pschmask *pTable = table->database->Package_pschmask_get();
+pTable->GetRows("`FK_License`=" + StringUtils::itos(m_PK_License),rows);
+}
 void Row_License::PaidLicense_FK_License_getrows(vector <class Row_PaidLicense*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_PaidLicense *pTable = table->database->PaidLicense_get();
+pTable->GetRows("`FK_License`=" + StringUtils::itos(m_PK_License),rows);
+}
+void Row_License::PaidLicense_pschist_FK_License_getrows(vector <class Row_PaidLicense_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_PaidLicense_pschist *pTable = table->database->PaidLicense_pschist_get();
+pTable->GetRows("`FK_License`=" + StringUtils::itos(m_PK_License),rows);
+}
+void Row_License::PaidLicense_pschmask_FK_License_getrows(vector <class Row_PaidLicense_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_PaidLicense_pschmask *pTable = table->database->PaidLicense_pschmask_get();
 pTable->GetRows("`FK_License`=" + StringUtils::itos(m_PK_License),rows);
 }
 

@@ -164,6 +164,8 @@ class Row_DesignObj* FK_DesignObj_Child_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void DesignObjVariation_DesignObj_Skin_Language_FK_DesignObjVariation_DesignObj_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language*> *rows);
+void DesignObjVariation_DesignObj_Skin_Language_pschist_FK_DesignObjVariation_DesignObj_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language_pschist*> *rows);
+void DesignObjVariation_DesignObj_Skin_Language_pschmask_FK_DesignObjVariation_DesignObj_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language_pschmask*> *rows);
 
 
 		// Setup binary serialization

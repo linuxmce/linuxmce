@@ -165,6 +165,8 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void ConfigType_Token_FK_ConfigType_File_getrows(vector <class Row_ConfigType_Token*> *rows);
+void ConfigType_Token_pschist_FK_ConfigType_File_getrows(vector <class Row_ConfigType_Token_pschist*> *rows);
+void ConfigType_Token_pschmask_FK_ConfigType_File_getrows(vector <class Row_ConfigType_Token_pschmask*> *rows);
 
 
 		// Setup binary serialization

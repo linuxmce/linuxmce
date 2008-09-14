@@ -35,7 +35,11 @@ using namespace std;
 #include "Table_DeviceCategory.h"
 
 #include "Table_ConfigType_File.h"
+#include "Table_ConfigType_File_pschist.h"
+#include "Table_ConfigType_File_pschmask.h"
 #include "Table_ConfigType_Setting.h"
+#include "Table_ConfigType_Setting_pschist.h"
+#include "Table_ConfigType_Setting_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_ConfigType()
@@ -1069,11 +1073,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_ConfigType_File *pTable = table->database->ConfigType_File_get();
 pTable->GetRows("`FK_ConfigType`=" + StringUtils::itos(m_PK_ConfigType),rows);
 }
+void Row_ConfigType::ConfigType_File_pschist_FK_ConfigType_getrows(vector <class Row_ConfigType_File_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_ConfigType_File_pschist *pTable = table->database->ConfigType_File_pschist_get();
+pTable->GetRows("`FK_ConfigType`=" + StringUtils::itos(m_PK_ConfigType),rows);
+}
+void Row_ConfigType::ConfigType_File_pschmask_FK_ConfigType_getrows(vector <class Row_ConfigType_File_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_ConfigType_File_pschmask *pTable = table->database->ConfigType_File_pschmask_get();
+pTable->GetRows("`FK_ConfigType`=" + StringUtils::itos(m_PK_ConfigType),rows);
+}
 void Row_ConfigType::ConfigType_Setting_FK_ConfigType_getrows(vector <class Row_ConfigType_Setting*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_ConfigType_Setting *pTable = table->database->ConfigType_Setting_get();
+pTable->GetRows("`FK_ConfigType`=" + StringUtils::itos(m_PK_ConfigType),rows);
+}
+void Row_ConfigType::ConfigType_Setting_pschist_FK_ConfigType_getrows(vector <class Row_ConfigType_Setting_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_ConfigType_Setting_pschist *pTable = table->database->ConfigType_Setting_pschist_get();
+pTable->GetRows("`FK_ConfigType`=" + StringUtils::itos(m_PK_ConfigType),rows);
+}
+void Row_ConfigType::ConfigType_Setting_pschmask_FK_ConfigType_getrows(vector <class Row_ConfigType_Setting_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_ConfigType_Setting_pschmask *pTable = table->database->ConfigType_Setting_pschmask_get();
 pTable->GetRows("`FK_ConfigType`=" + StringUtils::itos(m_PK_ConfigType),rows);
 }
 

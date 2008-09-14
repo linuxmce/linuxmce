@@ -36,11 +36,23 @@ using namespace std;
 #include "Table_Style.h"
 
 #include "Table_DesignObjVariation_Text_Skin_Language.h"
+#include "Table_DesignObjVariation_Text_Skin_Language_pschist.h"
+#include "Table_DesignObjVariation_Text_Skin_Language_pschmask.h"
 #include "Table_Skin.h"
+#include "Table_Skin_pschist.h"
+#include "Table_Skin_pschmask.h"
 #include "Table_Style.h"
 #include "Table_Style.h"
 #include "Table_Style.h"
 #include "Table_StyleVariation.h"
+#include "Table_StyleVariation_pschist.h"
+#include "Table_StyleVariation_pschmask.h"
+#include "Table_Style_pschist.h"
+#include "Table_Style_pschist.h"
+#include "Table_Style_pschist.h"
+#include "Table_Style_pschmask.h"
+#include "Table_Style_pschmask.h"
+#include "Table_Style_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Style()
@@ -1136,11 +1148,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DesignObjVariation_Text_Skin_Language *pTable = table->database->DesignObjVariation_Text_Skin_Language_get();
 pTable->GetRows("`FK_Style`=" + StringUtils::itos(m_PK_Style),rows);
 }
+void Row_Style::DesignObjVariation_Text_Skin_Language_pschist_FK_Style_getrows(vector <class Row_DesignObjVariation_Text_Skin_Language_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DesignObjVariation_Text_Skin_Language_pschist *pTable = table->database->DesignObjVariation_Text_Skin_Language_pschist_get();
+pTable->GetRows("`FK_Style`=" + StringUtils::itos(m_PK_Style),rows);
+}
+void Row_Style::DesignObjVariation_Text_Skin_Language_pschmask_FK_Style_getrows(vector <class Row_DesignObjVariation_Text_Skin_Language_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DesignObjVariation_Text_Skin_Language_pschmask *pTable = table->database->DesignObjVariation_Text_Skin_Language_pschmask_get();
+pTable->GetRows("`FK_Style`=" + StringUtils::itos(m_PK_Style),rows);
+}
 void Row_Style::Skin_FK_Style_getrows(vector <class Row_Skin*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Skin *pTable = table->database->Skin_get();
+pTable->GetRows("`FK_Style`=" + StringUtils::itos(m_PK_Style),rows);
+}
+void Row_Style::Skin_pschist_FK_Style_getrows(vector <class Row_Skin_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Skin_pschist *pTable = table->database->Skin_pschist_get();
+pTable->GetRows("`FK_Style`=" + StringUtils::itos(m_PK_Style),rows);
+}
+void Row_Style::Skin_pschmask_FK_Style_getrows(vector <class Row_Skin_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Skin_pschmask *pTable = table->database->Skin_pschmask_get();
 pTable->GetRows("`FK_Style`=" + StringUtils::itos(m_PK_Style),rows);
 }
 void Row_Style::Style_FK_Style_Selected_getrows(vector <class Row_Style*> *rows)
@@ -1170,6 +1210,62 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_StyleVariation *pTable = table->database->StyleVariation_get();
 pTable->GetRows("`FK_Style`=" + StringUtils::itos(m_PK_Style),rows);
+}
+void Row_Style::StyleVariation_pschist_FK_Style_getrows(vector <class Row_StyleVariation_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_StyleVariation_pschist *pTable = table->database->StyleVariation_pschist_get();
+pTable->GetRows("`FK_Style`=" + StringUtils::itos(m_PK_Style),rows);
+}
+void Row_Style::StyleVariation_pschmask_FK_Style_getrows(vector <class Row_StyleVariation_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_StyleVariation_pschmask *pTable = table->database->StyleVariation_pschmask_get();
+pTable->GetRows("`FK_Style`=" + StringUtils::itos(m_PK_Style),rows);
+}
+void Row_Style::Style_pschist_FK_Style_Selected_getrows(vector <class Row_Style_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Style_pschist *pTable = table->database->Style_pschist_get();
+pTable->GetRows("`FK_Style_Selected`=" + StringUtils::itos(m_PK_Style),rows);
+}
+void Row_Style::Style_pschist_FK_Style_Highlighted_getrows(vector <class Row_Style_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Style_pschist *pTable = table->database->Style_pschist_get();
+pTable->GetRows("`FK_Style_Highlighted`=" + StringUtils::itos(m_PK_Style),rows);
+}
+void Row_Style::Style_pschist_FK_Style_Alt_getrows(vector <class Row_Style_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Style_pschist *pTable = table->database->Style_pschist_get();
+pTable->GetRows("`FK_Style_Alt`=" + StringUtils::itos(m_PK_Style),rows);
+}
+void Row_Style::Style_pschmask_FK_Style_Selected_getrows(vector <class Row_Style_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Style_pschmask *pTable = table->database->Style_pschmask_get();
+pTable->GetRows("`FK_Style_Selected`=" + StringUtils::itos(m_PK_Style),rows);
+}
+void Row_Style::Style_pschmask_FK_Style_Highlighted_getrows(vector <class Row_Style_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Style_pschmask *pTable = table->database->Style_pschmask_get();
+pTable->GetRows("`FK_Style_Highlighted`=" + StringUtils::itos(m_PK_Style),rows);
+}
+void Row_Style::Style_pschmask_FK_Style_Alt_getrows(vector <class Row_Style_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Style_pschmask *pTable = table->database->Style_pschmask_get();
+pTable->GetRows("`FK_Style_Alt`=" + StringUtils::itos(m_PK_Style),rows);
 }
 
 

@@ -34,11 +34,23 @@ using namespace std;
 #include "Table_UI.h"
 
 #include "Table_DesignObjVariation.h"
+#include "Table_DesignObjVariation_pschist.h"
+#include "Table_DesignObjVariation_pschmask.h"
 #include "Table_Screen_DesignObj.h"
+#include "Table_Screen_DesignObj_pschist.h"
+#include "Table_Screen_DesignObj_pschmask.h"
 #include "Table_Size.h"
+#include "Table_Size_pschist.h"
+#include "Table_Size_pschmask.h"
 #include "Table_Skin.h"
+#include "Table_Skin_pschist.h"
+#include "Table_Skin_pschmask.h"
 #include "Table_StyleVariation.h"
+#include "Table_StyleVariation_pschist.h"
+#include "Table_StyleVariation_pschmask.h"
 #include "Table_UI.h"
+#include "Table_UI_pschist.h"
+#include "Table_UI_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_UI()
@@ -1127,11 +1139,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DesignObjVariation *pTable = table->database->DesignObjVariation_get();
 pTable->GetRows("`FK_UI`=" + StringUtils::itos(m_PK_UI),rows);
 }
+void Row_UI::DesignObjVariation_pschist_FK_UI_getrows(vector <class Row_DesignObjVariation_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DesignObjVariation_pschist *pTable = table->database->DesignObjVariation_pschist_get();
+pTable->GetRows("`FK_UI`=" + StringUtils::itos(m_PK_UI),rows);
+}
+void Row_UI::DesignObjVariation_pschmask_FK_UI_getrows(vector <class Row_DesignObjVariation_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DesignObjVariation_pschmask *pTable = table->database->DesignObjVariation_pschmask_get();
+pTable->GetRows("`FK_UI`=" + StringUtils::itos(m_PK_UI),rows);
+}
 void Row_UI::Screen_DesignObj_FK_UI_getrows(vector <class Row_Screen_DesignObj*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Screen_DesignObj *pTable = table->database->Screen_DesignObj_get();
+pTable->GetRows("`FK_UI`=" + StringUtils::itos(m_PK_UI),rows);
+}
+void Row_UI::Screen_DesignObj_pschist_FK_UI_getrows(vector <class Row_Screen_DesignObj_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Screen_DesignObj_pschist *pTable = table->database->Screen_DesignObj_pschist_get();
+pTable->GetRows("`FK_UI`=" + StringUtils::itos(m_PK_UI),rows);
+}
+void Row_UI::Screen_DesignObj_pschmask_FK_UI_getrows(vector <class Row_Screen_DesignObj_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Screen_DesignObj_pschmask *pTable = table->database->Screen_DesignObj_pschmask_get();
 pTable->GetRows("`FK_UI`=" + StringUtils::itos(m_PK_UI),rows);
 }
 void Row_UI::Size_FK_UI_getrows(vector <class Row_Size*> *rows)
@@ -1141,11 +1181,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Size *pTable = table->database->Size_get();
 pTable->GetRows("`FK_UI`=" + StringUtils::itos(m_PK_UI),rows);
 }
+void Row_UI::Size_pschist_FK_UI_getrows(vector <class Row_Size_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Size_pschist *pTable = table->database->Size_pschist_get();
+pTable->GetRows("`FK_UI`=" + StringUtils::itos(m_PK_UI),rows);
+}
+void Row_UI::Size_pschmask_FK_UI_getrows(vector <class Row_Size_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Size_pschmask *pTable = table->database->Size_pschmask_get();
+pTable->GetRows("`FK_UI`=" + StringUtils::itos(m_PK_UI),rows);
+}
 void Row_UI::Skin_FK_UI_getrows(vector <class Row_Skin*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Skin *pTable = table->database->Skin_get();
+pTable->GetRows("`FK_UI`=" + StringUtils::itos(m_PK_UI),rows);
+}
+void Row_UI::Skin_pschist_FK_UI_getrows(vector <class Row_Skin_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Skin_pschist *pTable = table->database->Skin_pschist_get();
+pTable->GetRows("`FK_UI`=" + StringUtils::itos(m_PK_UI),rows);
+}
+void Row_UI::Skin_pschmask_FK_UI_getrows(vector <class Row_Skin_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Skin_pschmask *pTable = table->database->Skin_pschmask_get();
 pTable->GetRows("`FK_UI`=" + StringUtils::itos(m_PK_UI),rows);
 }
 void Row_UI::StyleVariation_FK_UI_getrows(vector <class Row_StyleVariation*> *rows)
@@ -1155,11 +1223,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_StyleVariation *pTable = table->database->StyleVariation_get();
 pTable->GetRows("`FK_UI`=" + StringUtils::itos(m_PK_UI),rows);
 }
+void Row_UI::StyleVariation_pschist_FK_UI_getrows(vector <class Row_StyleVariation_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_StyleVariation_pschist *pTable = table->database->StyleVariation_pschist_get();
+pTable->GetRows("`FK_UI`=" + StringUtils::itos(m_PK_UI),rows);
+}
+void Row_UI::StyleVariation_pschmask_FK_UI_getrows(vector <class Row_StyleVariation_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_StyleVariation_pschmask *pTable = table->database->StyleVariation_pschmask_get();
+pTable->GetRows("`FK_UI`=" + StringUtils::itos(m_PK_UI),rows);
+}
 void Row_UI::UI_FK_UI_Alt_getrows(vector <class Row_UI*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_UI *pTable = table->database->UI_get();
+pTable->GetRows("`FK_UI_Alt`=" + StringUtils::itos(m_PK_UI),rows);
+}
+void Row_UI::UI_pschist_FK_UI_Alt_getrows(vector <class Row_UI_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_UI_pschist *pTable = table->database->UI_pschist_get();
+pTable->GetRows("`FK_UI_Alt`=" + StringUtils::itos(m_PK_UI),rows);
+}
+void Row_UI::UI_pschmask_FK_UI_Alt_getrows(vector <class Row_UI_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_UI_pschmask *pTable = table->database->UI_pschmask_get();
 pTable->GetRows("`FK_UI_Alt`=" + StringUtils::itos(m_PK_UI),rows);
 }
 

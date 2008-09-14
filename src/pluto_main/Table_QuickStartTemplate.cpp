@@ -37,6 +37,8 @@ using namespace std;
 #include "Table_DesignObj.h"
 
 #include "Table_Device_QuickStart.h"
+#include "Table_Device_QuickStart_pschist.h"
+#include "Table_Device_QuickStart_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_QuickStartTemplate()
@@ -1394,6 +1396,20 @@ void Row_QuickStartTemplate::Device_QuickStart_FK_QuickStartTemplate_getrows(vec
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Device_QuickStart *pTable = table->database->Device_QuickStart_get();
+pTable->GetRows("`FK_QuickStartTemplate`=" + StringUtils::itos(m_PK_QuickStartTemplate),rows);
+}
+void Row_QuickStartTemplate::Device_QuickStart_pschist_FK_QuickStartTemplate_getrows(vector <class Row_Device_QuickStart_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Device_QuickStart_pschist *pTable = table->database->Device_QuickStart_pschist_get();
+pTable->GetRows("`FK_QuickStartTemplate`=" + StringUtils::itos(m_PK_QuickStartTemplate),rows);
+}
+void Row_QuickStartTemplate::Device_QuickStart_pschmask_FK_QuickStartTemplate_getrows(vector <class Row_Device_QuickStart_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Device_QuickStart_pschmask *pTable = table->database->Device_QuickStart_pschmask_get();
 pTable->GetRows("`FK_QuickStartTemplate`=" + StringUtils::itos(m_PK_QuickStartTemplate),rows);
 }
 

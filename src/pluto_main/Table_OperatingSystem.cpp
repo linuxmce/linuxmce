@@ -33,13 +33,29 @@ using namespace std;
 #include "Table_OperatingSystem.h"
 
 #include "Table_DeviceTemplate.h"
+#include "Table_DeviceTemplate_pschist.h"
+#include "Table_DeviceTemplate_pschmask.h"
 #include "Table_Distro.h"
+#include "Table_Distro_pschist.h"
+#include "Table_Distro_pschmask.h"
 #include "Table_InstallWizard_Distro.h"
+#include "Table_InstallWizard_Distro_pschist.h"
+#include "Table_InstallWizard_Distro_pschmask.h"
 #include "Table_Package_Compat.h"
+#include "Table_Package_Compat_pschist.h"
+#include "Table_Package_Compat_pschmask.h"
 #include "Table_Package_Directory.h"
 #include "Table_Package_Directory_File.h"
+#include "Table_Package_Directory_File_pschist.h"
+#include "Table_Package_Directory_File_pschmask.h"
+#include "Table_Package_Directory_pschist.h"
+#include "Table_Package_Directory_pschmask.h"
 #include "Table_Package_Source_Compat.h"
+#include "Table_Package_Source_Compat_pschist.h"
+#include "Table_Package_Source_Compat_pschmask.h"
 #include "Table_RepositorySource.h"
+#include "Table_RepositorySource_pschist.h"
+#include "Table_RepositorySource_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_OperatingSystem()
@@ -965,11 +981,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceTemplate *pTable = table->database->DeviceTemplate_get();
 pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
 }
+void Row_OperatingSystem::DeviceTemplate_pschist_FK_OperatingSystem_getrows(vector <class Row_DeviceTemplate_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_pschist *pTable = table->database->DeviceTemplate_pschist_get();
+pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
+}
+void Row_OperatingSystem::DeviceTemplate_pschmask_FK_OperatingSystem_getrows(vector <class Row_DeviceTemplate_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_pschmask *pTable = table->database->DeviceTemplate_pschmask_get();
+pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
+}
 void Row_OperatingSystem::Distro_FK_OperatingSystem_getrows(vector <class Row_Distro*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Distro *pTable = table->database->Distro_get();
+pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
+}
+void Row_OperatingSystem::Distro_pschist_FK_OperatingSystem_getrows(vector <class Row_Distro_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Distro_pschist *pTable = table->database->Distro_pschist_get();
+pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
+}
+void Row_OperatingSystem::Distro_pschmask_FK_OperatingSystem_getrows(vector <class Row_Distro_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Distro_pschmask *pTable = table->database->Distro_pschmask_get();
 pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
 }
 void Row_OperatingSystem::InstallWizard_Distro_FK_OperatingSystem_getrows(vector <class Row_InstallWizard_Distro*> *rows)
@@ -979,11 +1023,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_InstallWizard_Distro *pTable = table->database->InstallWizard_Distro_get();
 pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
 }
+void Row_OperatingSystem::InstallWizard_Distro_pschist_FK_OperatingSystem_getrows(vector <class Row_InstallWizard_Distro_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_InstallWizard_Distro_pschist *pTable = table->database->InstallWizard_Distro_pschist_get();
+pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
+}
+void Row_OperatingSystem::InstallWizard_Distro_pschmask_FK_OperatingSystem_getrows(vector <class Row_InstallWizard_Distro_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_InstallWizard_Distro_pschmask *pTable = table->database->InstallWizard_Distro_pschmask_get();
+pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
+}
 void Row_OperatingSystem::Package_Compat_FK_OperatingSystem_getrows(vector <class Row_Package_Compat*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Package_Compat *pTable = table->database->Package_Compat_get();
+pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
+}
+void Row_OperatingSystem::Package_Compat_pschist_FK_OperatingSystem_getrows(vector <class Row_Package_Compat_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_Compat_pschist *pTable = table->database->Package_Compat_pschist_get();
+pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
+}
+void Row_OperatingSystem::Package_Compat_pschmask_FK_OperatingSystem_getrows(vector <class Row_Package_Compat_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_Compat_pschmask *pTable = table->database->Package_Compat_pschmask_get();
 pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
 }
 void Row_OperatingSystem::Package_Directory_FK_OperatingSystem_getrows(vector <class Row_Package_Directory*> *rows)
@@ -1000,6 +1072,34 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Package_Directory_File *pTable = table->database->Package_Directory_File_get();
 pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
 }
+void Row_OperatingSystem::Package_Directory_File_pschist_FK_OperatingSystem_getrows(vector <class Row_Package_Directory_File_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_Directory_File_pschist *pTable = table->database->Package_Directory_File_pschist_get();
+pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
+}
+void Row_OperatingSystem::Package_Directory_File_pschmask_FK_OperatingSystem_getrows(vector <class Row_Package_Directory_File_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_Directory_File_pschmask *pTable = table->database->Package_Directory_File_pschmask_get();
+pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
+}
+void Row_OperatingSystem::Package_Directory_pschist_FK_OperatingSystem_getrows(vector <class Row_Package_Directory_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_Directory_pschist *pTable = table->database->Package_Directory_pschist_get();
+pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
+}
+void Row_OperatingSystem::Package_Directory_pschmask_FK_OperatingSystem_getrows(vector <class Row_Package_Directory_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_Directory_pschmask *pTable = table->database->Package_Directory_pschmask_get();
+pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
+}
 void Row_OperatingSystem::Package_Source_Compat_FK_OperatingSystem_getrows(vector <class Row_Package_Source_Compat*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1007,11 +1107,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Package_Source_Compat *pTable = table->database->Package_Source_Compat_get();
 pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
 }
+void Row_OperatingSystem::Package_Source_Compat_pschist_FK_OperatingSystem_getrows(vector <class Row_Package_Source_Compat_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_Source_Compat_pschist *pTable = table->database->Package_Source_Compat_pschist_get();
+pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
+}
+void Row_OperatingSystem::Package_Source_Compat_pschmask_FK_OperatingSystem_getrows(vector <class Row_Package_Source_Compat_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Package_Source_Compat_pschmask *pTable = table->database->Package_Source_Compat_pschmask_get();
+pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
+}
 void Row_OperatingSystem::RepositorySource_FK_OperatingSystem_getrows(vector <class Row_RepositorySource*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_RepositorySource *pTable = table->database->RepositorySource_get();
+pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
+}
+void Row_OperatingSystem::RepositorySource_pschist_FK_OperatingSystem_getrows(vector <class Row_RepositorySource_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_RepositorySource_pschist *pTable = table->database->RepositorySource_pschist_get();
+pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
+}
+void Row_OperatingSystem::RepositorySource_pschmask_FK_OperatingSystem_getrows(vector <class Row_RepositorySource_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_RepositorySource_pschmask *pTable = table->database->RepositorySource_pschmask_get();
 pTable->GetRows("`FK_OperatingSystem`=" + StringUtils::itos(m_PK_OperatingSystem),rows);
 }
 

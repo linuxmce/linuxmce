@@ -35,8 +35,14 @@ using namespace std;
 #include "Table_DesignObj.h"
 
 #include "Table_EntertainArea.h"
+#include "Table_EntertainArea_pschist.h"
+#include "Table_EntertainArea_pschmask.h"
 #include "Table_FloorplanObjectType_Color.h"
+#include "Table_FloorplanObjectType_Color_pschist.h"
+#include "Table_FloorplanObjectType_Color_pschmask.h"
 #include "Table_Room.h"
+#include "Table_Room_pschist.h"
+#include "Table_Room_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_FloorplanObjectType()
@@ -1243,6 +1249,20 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_EntertainArea *pTable = table->database->EntertainArea_get();
 pTable->GetRows("`FK_FloorplanObjectType`=" + StringUtils::itos(m_PK_FloorplanObjectType),rows);
 }
+void Row_FloorplanObjectType::EntertainArea_pschist_FK_FloorplanObjectType_getrows(vector <class Row_EntertainArea_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_EntertainArea_pschist *pTable = table->database->EntertainArea_pschist_get();
+pTable->GetRows("`FK_FloorplanObjectType`=" + StringUtils::itos(m_PK_FloorplanObjectType),rows);
+}
+void Row_FloorplanObjectType::EntertainArea_pschmask_FK_FloorplanObjectType_getrows(vector <class Row_EntertainArea_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_EntertainArea_pschmask *pTable = table->database->EntertainArea_pschmask_get();
+pTable->GetRows("`FK_FloorplanObjectType`=" + StringUtils::itos(m_PK_FloorplanObjectType),rows);
+}
 void Row_FloorplanObjectType::FloorplanObjectType_Color_FK_FloorplanObjectType_getrows(vector <class Row_FloorplanObjectType_Color*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1250,11 +1270,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_FloorplanObjectType_Color *pTable = table->database->FloorplanObjectType_Color_get();
 pTable->GetRows("`FK_FloorplanObjectType`=" + StringUtils::itos(m_PK_FloorplanObjectType),rows);
 }
+void Row_FloorplanObjectType::FloorplanObjectType_Color_pschist_FK_FloorplanObjectType_getrows(vector <class Row_FloorplanObjectType_Color_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_FloorplanObjectType_Color_pschist *pTable = table->database->FloorplanObjectType_Color_pschist_get();
+pTable->GetRows("`FK_FloorplanObjectType`=" + StringUtils::itos(m_PK_FloorplanObjectType),rows);
+}
+void Row_FloorplanObjectType::FloorplanObjectType_Color_pschmask_FK_FloorplanObjectType_getrows(vector <class Row_FloorplanObjectType_Color_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_FloorplanObjectType_Color_pschmask *pTable = table->database->FloorplanObjectType_Color_pschmask_get();
+pTable->GetRows("`FK_FloorplanObjectType`=" + StringUtils::itos(m_PK_FloorplanObjectType),rows);
+}
 void Row_FloorplanObjectType::Room_FK_FloorplanObjectType_getrows(vector <class Row_Room*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Room *pTable = table->database->Room_get();
+pTable->GetRows("`FK_FloorplanObjectType`=" + StringUtils::itos(m_PK_FloorplanObjectType),rows);
+}
+void Row_FloorplanObjectType::Room_pschist_FK_FloorplanObjectType_getrows(vector <class Row_Room_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Room_pschist *pTable = table->database->Room_pschist_get();
+pTable->GetRows("`FK_FloorplanObjectType`=" + StringUtils::itos(m_PK_FloorplanObjectType),rows);
+}
+void Row_FloorplanObjectType::Room_pschmask_FK_FloorplanObjectType_getrows(vector <class Row_Room_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Room_pschmask *pTable = table->database->Room_pschmask_get();
 pTable->GetRows("`FK_FloorplanObjectType`=" + StringUtils::itos(m_PK_FloorplanObjectType),rows);
 }
 

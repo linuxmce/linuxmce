@@ -35,8 +35,14 @@ using namespace std;
 #include "Table_Pipe.h"
 
 #include "Table_DeviceTemplate_MediaType.h"
+#include "Table_DeviceTemplate_MediaType_pschist.h"
+#include "Table_DeviceTemplate_MediaType_pschmask.h"
 #include "Table_MediaType_Broadcast.h"
+#include "Table_MediaType_Broadcast_pschist.h"
+#include "Table_MediaType_Broadcast_pschmask.h"
 #include "Table_MediaType_DesignObj.h"
+#include "Table_MediaType_DesignObj_pschist.h"
+#include "Table_MediaType_DesignObj_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_MediaType()
@@ -1355,6 +1361,20 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceTemplate_MediaType *pTable = table->database->DeviceTemplate_MediaType_get();
 pTable->GetRows("`FK_MediaType`=" + StringUtils::itos(m_PK_MediaType),rows);
 }
+void Row_MediaType::DeviceTemplate_MediaType_pschist_FK_MediaType_getrows(vector <class Row_DeviceTemplate_MediaType_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_MediaType_pschist *pTable = table->database->DeviceTemplate_MediaType_pschist_get();
+pTable->GetRows("`FK_MediaType`=" + StringUtils::itos(m_PK_MediaType),rows);
+}
+void Row_MediaType::DeviceTemplate_MediaType_pschmask_FK_MediaType_getrows(vector <class Row_DeviceTemplate_MediaType_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_DeviceTemplate_MediaType_pschmask *pTable = table->database->DeviceTemplate_MediaType_pschmask_get();
+pTable->GetRows("`FK_MediaType`=" + StringUtils::itos(m_PK_MediaType),rows);
+}
 void Row_MediaType::MediaType_Broadcast_FK_MediaType_getrows(vector <class Row_MediaType_Broadcast*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1362,11 +1382,39 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_MediaType_Broadcast *pTable = table->database->MediaType_Broadcast_get();
 pTable->GetRows("`FK_MediaType`=" + StringUtils::itos(m_PK_MediaType),rows);
 }
+void Row_MediaType::MediaType_Broadcast_pschist_FK_MediaType_getrows(vector <class Row_MediaType_Broadcast_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_MediaType_Broadcast_pschist *pTable = table->database->MediaType_Broadcast_pschist_get();
+pTable->GetRows("`FK_MediaType`=" + StringUtils::itos(m_PK_MediaType),rows);
+}
+void Row_MediaType::MediaType_Broadcast_pschmask_FK_MediaType_getrows(vector <class Row_MediaType_Broadcast_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_MediaType_Broadcast_pschmask *pTable = table->database->MediaType_Broadcast_pschmask_get();
+pTable->GetRows("`FK_MediaType`=" + StringUtils::itos(m_PK_MediaType),rows);
+}
 void Row_MediaType::MediaType_DesignObj_FK_MediaType_getrows(vector <class Row_MediaType_DesignObj*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_MediaType_DesignObj *pTable = table->database->MediaType_DesignObj_get();
+pTable->GetRows("`FK_MediaType`=" + StringUtils::itos(m_PK_MediaType),rows);
+}
+void Row_MediaType::MediaType_DesignObj_pschist_FK_MediaType_getrows(vector <class Row_MediaType_DesignObj_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_MediaType_DesignObj_pschist *pTable = table->database->MediaType_DesignObj_pschist_get();
+pTable->GetRows("`FK_MediaType`=" + StringUtils::itos(m_PK_MediaType),rows);
+}
+void Row_MediaType::MediaType_DesignObj_pschmask_FK_MediaType_getrows(vector <class Row_MediaType_DesignObj_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_MediaType_DesignObj_pschmask *pTable = table->database->MediaType_DesignObj_pschmask_get();
 pTable->GetRows("`FK_MediaType`=" + StringUtils::itos(m_PK_MediaType),rows);
 }
 

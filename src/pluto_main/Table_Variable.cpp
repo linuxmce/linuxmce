@@ -33,6 +33,8 @@ using namespace std;
 #include "Table_Variable.h"
 
 #include "Table_Orbiter_Variable.h"
+#include "Table_Orbiter_Variable_pschist.h"
+#include "Table_Orbiter_Variable_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Variable()
@@ -1000,6 +1002,20 @@ void Row_Variable::Orbiter_Variable_FK_Variable_getrows(vector <class Row_Orbite
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Orbiter_Variable *pTable = table->database->Orbiter_Variable_get();
+pTable->GetRows("`FK_Variable`=" + StringUtils::itos(m_PK_Variable),rows);
+}
+void Row_Variable::Orbiter_Variable_pschist_FK_Variable_getrows(vector <class Row_Orbiter_Variable_pschist*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Orbiter_Variable_pschist *pTable = table->database->Orbiter_Variable_pschist_get();
+pTable->GetRows("`FK_Variable`=" + StringUtils::itos(m_PK_Variable),rows);
+}
+void Row_Variable::Orbiter_Variable_pschmask_FK_Variable_getrows(vector <class Row_Orbiter_Variable_pschmask*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Orbiter_Variable_pschmask *pTable = table->database->Orbiter_Variable_pschmask_get();
 pTable->GetRows("`FK_Variable`=" + StringUtils::itos(m_PK_Variable),rows);
 }
 
