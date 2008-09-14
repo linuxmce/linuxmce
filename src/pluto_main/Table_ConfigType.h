@@ -170,11 +170,7 @@ class Row_DeviceCategory* FK_DeviceCategory_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void ConfigType_File_FK_ConfigType_getrows(vector <class Row_ConfigType_File*> *rows);
-void ConfigType_File_pschist_FK_ConfigType_getrows(vector <class Row_ConfigType_File_pschist*> *rows);
-void ConfigType_File_pschmask_FK_ConfigType_getrows(vector <class Row_ConfigType_File_pschmask*> *rows);
 void ConfigType_Setting_FK_ConfigType_getrows(vector <class Row_ConfigType_Setting*> *rows);
-void ConfigType_Setting_pschist_FK_ConfigType_getrows(vector <class Row_ConfigType_Setting_pschist*> *rows);
-void ConfigType_Setting_pschmask_FK_ConfigType_getrows(vector <class Row_ConfigType_Setting_pschmask*> *rows);
 
 
 		// Setup binary serialization

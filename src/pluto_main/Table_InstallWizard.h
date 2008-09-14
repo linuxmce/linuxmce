@@ -169,8 +169,6 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void InstallWizard_Distro_FK_InstallWizard_getrows(vector <class Row_InstallWizard_Distro*> *rows);
-void InstallWizard_Distro_pschist_FK_InstallWizard_getrows(vector <class Row_InstallWizard_Distro_pschist*> *rows);
-void InstallWizard_Distro_pschmask_FK_InstallWizard_getrows(vector <class Row_InstallWizard_Distro_pschmask*> *rows);
 
 
 		// Setup binary serialization

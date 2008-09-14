@@ -163,8 +163,6 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Orbiter_Variable_FK_Variable_getrows(vector <class Row_Orbiter_Variable*> *rows);
-void Orbiter_Variable_pschist_FK_Variable_getrows(vector <class Row_Orbiter_Variable_pschist*> *rows);
-void Orbiter_Variable_pschmask_FK_Variable_getrows(vector <class Row_Orbiter_Variable_pschmask*> *rows);
 
 
 		// Setup binary serialization

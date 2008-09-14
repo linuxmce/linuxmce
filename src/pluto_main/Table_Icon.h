@@ -181,14 +181,8 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void CommandGroup_FK_Icon_getrows(vector <class Row_CommandGroup*> *rows);
-void CommandGroup_pschist_FK_Icon_getrows(vector <class Row_CommandGroup_pschist*> *rows);
-void CommandGroup_pschmask_FK_Icon_getrows(vector <class Row_CommandGroup_pschmask*> *rows);
 void Floorplan_FK_Icon_getrows(vector <class Row_Floorplan*> *rows);
-void Floorplan_pschist_FK_Icon_getrows(vector <class Row_Floorplan_pschist*> *rows);
-void Floorplan_pschmask_FK_Icon_getrows(vector <class Row_Floorplan_pschmask*> *rows);
 void Room_FK_Icon_getrows(vector <class Row_Room*> *rows);
-void Room_pschist_FK_Icon_getrows(vector <class Row_Room_pschist*> *rows);
-void Room_pschmask_FK_Icon_getrows(vector <class Row_Room_pschmask*> *rows);
 
 
 		// Setup binary serialization

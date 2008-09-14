@@ -33,8 +33,6 @@ using namespace std;
 #include "Table_Household.h"
 
 #include "Table_Household_Installation.h"
-#include "Table_Household_Installation_pschist.h"
-#include "Table_Household_Installation_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Household()
@@ -864,20 +862,6 @@ void Row_Household::Household_Installation_FK_Household_getrows(vector <class Ro
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Household_Installation *pTable = table->database->Household_Installation_get();
-pTable->GetRows("`FK_Household`=" + StringUtils::itos(m_PK_Household),rows);
-}
-void Row_Household::Household_Installation_pschist_FK_Household_getrows(vector <class Row_Household_Installation_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Household_Installation_pschist *pTable = table->database->Household_Installation_pschist_get();
-pTable->GetRows("`FK_Household`=" + StringUtils::itos(m_PK_Household),rows);
-}
-void Row_Household::Household_Installation_pschmask_FK_Household_getrows(vector <class Row_Household_Installation_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Household_Installation_pschmask *pTable = table->database->Household_Installation_pschmask_get();
 pTable->GetRows("`FK_Household`=" + StringUtils::itos(m_PK_Household),rows);
 }
 

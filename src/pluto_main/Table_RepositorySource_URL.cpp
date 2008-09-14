@@ -35,8 +35,6 @@ using namespace std;
 #include "Table_Country.h"
 
 #include "Table_Installation_RepositorySource_URL.h"
-#include "Table_Installation_RepositorySource_URL_pschist.h"
-#include "Table_Installation_RepositorySource_URL_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_RepositorySource_URL()
@@ -1161,20 +1159,6 @@ void Row_RepositorySource_URL::Installation_RepositorySource_URL_FK_RepositorySo
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Installation_RepositorySource_URL *pTable = table->database->Installation_RepositorySource_URL_get();
-pTable->GetRows("`FK_RepositorySource_URL`=" + StringUtils::itos(m_PK_RepositorySource_URL),rows);
-}
-void Row_RepositorySource_URL::Installation_RepositorySource_URL_pschist_FK_RepositorySource_URL_getrows(vector <class Row_Installation_RepositorySource_URL_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Installation_RepositorySource_URL_pschist *pTable = table->database->Installation_RepositorySource_URL_pschist_get();
-pTable->GetRows("`FK_RepositorySource_URL`=" + StringUtils::itos(m_PK_RepositorySource_URL),rows);
-}
-void Row_RepositorySource_URL::Installation_RepositorySource_URL_pschmask_FK_RepositorySource_URL_getrows(vector <class Row_Installation_RepositorySource_URL_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Installation_RepositorySource_URL_pschmask *pTable = table->database->Installation_RepositorySource_URL_pschmask_get();
 pTable->GetRows("`FK_RepositorySource_URL`=" + StringUtils::itos(m_PK_RepositorySource_URL),rows);
 }
 

@@ -34,14 +34,8 @@ using namespace std;
 #include "Table_ParameterType.h"
 
 #include "Table_CannedEvents_CriteriaParmList.h"
-#include "Table_CannedEvents_CriteriaParmList_pschist.h"
-#include "Table_CannedEvents_CriteriaParmList_pschmask.h"
 #include "Table_CriteriaList_CriteriaParmList.h"
-#include "Table_CriteriaList_CriteriaParmList_pschist.h"
-#include "Table_CriteriaList_CriteriaParmList_pschmask.h"
 #include "Table_CriteriaParm.h"
-#include "Table_CriteriaParm_pschist.h"
-#include "Table_CriteriaParm_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_CriteriaParmList()
@@ -1011,20 +1005,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_CannedEvents_CriteriaParmList *pTable = table->database->CannedEvents_CriteriaParmList_get();
 pTable->GetRows("`FK_CriteriaParmList`=" + StringUtils::itos(m_PK_CriteriaParmList),rows);
 }
-void Row_CriteriaParmList::CannedEvents_CriteriaParmList_pschist_FK_CriteriaParmList_getrows(vector <class Row_CannedEvents_CriteriaParmList_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CannedEvents_CriteriaParmList_pschist *pTable = table->database->CannedEvents_CriteriaParmList_pschist_get();
-pTable->GetRows("`FK_CriteriaParmList`=" + StringUtils::itos(m_PK_CriteriaParmList),rows);
-}
-void Row_CriteriaParmList::CannedEvents_CriteriaParmList_pschmask_FK_CriteriaParmList_getrows(vector <class Row_CannedEvents_CriteriaParmList_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CannedEvents_CriteriaParmList_pschmask *pTable = table->database->CannedEvents_CriteriaParmList_pschmask_get();
-pTable->GetRows("`FK_CriteriaParmList`=" + StringUtils::itos(m_PK_CriteriaParmList),rows);
-}
 void Row_CriteriaParmList::CriteriaList_CriteriaParmList_FK_CriteriaParmList_getrows(vector <class Row_CriteriaList_CriteriaParmList*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1032,39 +1012,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_CriteriaList_CriteriaParmList *pTable = table->database->CriteriaList_CriteriaParmList_get();
 pTable->GetRows("`FK_CriteriaParmList`=" + StringUtils::itos(m_PK_CriteriaParmList),rows);
 }
-void Row_CriteriaParmList::CriteriaList_CriteriaParmList_pschist_FK_CriteriaParmList_getrows(vector <class Row_CriteriaList_CriteriaParmList_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CriteriaList_CriteriaParmList_pschist *pTable = table->database->CriteriaList_CriteriaParmList_pschist_get();
-pTable->GetRows("`FK_CriteriaParmList`=" + StringUtils::itos(m_PK_CriteriaParmList),rows);
-}
-void Row_CriteriaParmList::CriteriaList_CriteriaParmList_pschmask_FK_CriteriaParmList_getrows(vector <class Row_CriteriaList_CriteriaParmList_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CriteriaList_CriteriaParmList_pschmask *pTable = table->database->CriteriaList_CriteriaParmList_pschmask_get();
-pTable->GetRows("`FK_CriteriaParmList`=" + StringUtils::itos(m_PK_CriteriaParmList),rows);
-}
 void Row_CriteriaParmList::CriteriaParm_FK_CriteriaParmList_getrows(vector <class Row_CriteriaParm*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_CriteriaParm *pTable = table->database->CriteriaParm_get();
-pTable->GetRows("`FK_CriteriaParmList`=" + StringUtils::itos(m_PK_CriteriaParmList),rows);
-}
-void Row_CriteriaParmList::CriteriaParm_pschist_FK_CriteriaParmList_getrows(vector <class Row_CriteriaParm_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CriteriaParm_pschist *pTable = table->database->CriteriaParm_pschist_get();
-pTable->GetRows("`FK_CriteriaParmList`=" + StringUtils::itos(m_PK_CriteriaParmList),rows);
-}
-void Row_CriteriaParmList::CriteriaParm_pschmask_FK_CriteriaParmList_getrows(vector <class Row_CriteriaParm_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CriteriaParm_pschmask *pTable = table->database->CriteriaParm_pschmask_get();
 pTable->GetRows("`FK_CriteriaParmList`=" + StringUtils::itos(m_PK_CriteriaParmList),rows);
 }
 

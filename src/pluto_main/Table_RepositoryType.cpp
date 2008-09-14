@@ -34,13 +34,7 @@ using namespace std;
 
 #include "Table_Installation.h"
 #include "Table_Installation.h"
-#include "Table_Installation_pschist.h"
-#include "Table_Installation_pschist.h"
-#include "Table_Installation_pschmask.h"
-#include "Table_Installation_pschmask.h"
 #include "Table_RepositorySource.h"
-#include "Table_RepositorySource_pschist.h"
-#include "Table_RepositorySource_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_RepositoryType()
@@ -1123,53 +1117,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Installation *pTable = table->database->Installation_get();
 pTable->GetRows("`FK_RepositoryType_Binaries`=" + StringUtils::itos(m_PK_RepositoryType),rows);
 }
-void Row_RepositoryType::Installation_pschist_FK_RepositoryType_Source_getrows(vector <class Row_Installation_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Installation_pschist *pTable = table->database->Installation_pschist_get();
-pTable->GetRows("`FK_RepositoryType_Source`=" + StringUtils::itos(m_PK_RepositoryType),rows);
-}
-void Row_RepositoryType::Installation_pschist_FK_RepositoryType_Binaries_getrows(vector <class Row_Installation_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Installation_pschist *pTable = table->database->Installation_pschist_get();
-pTable->GetRows("`FK_RepositoryType_Binaries`=" + StringUtils::itos(m_PK_RepositoryType),rows);
-}
-void Row_RepositoryType::Installation_pschmask_FK_RepositoryType_Source_getrows(vector <class Row_Installation_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Installation_pschmask *pTable = table->database->Installation_pschmask_get();
-pTable->GetRows("`FK_RepositoryType_Source`=" + StringUtils::itos(m_PK_RepositoryType),rows);
-}
-void Row_RepositoryType::Installation_pschmask_FK_RepositoryType_Binaries_getrows(vector <class Row_Installation_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Installation_pschmask *pTable = table->database->Installation_pschmask_get();
-pTable->GetRows("`FK_RepositoryType_Binaries`=" + StringUtils::itos(m_PK_RepositoryType),rows);
-}
 void Row_RepositoryType::RepositorySource_FK_RepositoryType_getrows(vector <class Row_RepositorySource*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_RepositorySource *pTable = table->database->RepositorySource_get();
-pTable->GetRows("`FK_RepositoryType`=" + StringUtils::itos(m_PK_RepositoryType),rows);
-}
-void Row_RepositoryType::RepositorySource_pschist_FK_RepositoryType_getrows(vector <class Row_RepositorySource_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_RepositorySource_pschist *pTable = table->database->RepositorySource_pschist_get();
-pTable->GetRows("`FK_RepositoryType`=" + StringUtils::itos(m_PK_RepositoryType),rows);
-}
-void Row_RepositoryType::RepositorySource_pschmask_FK_RepositoryType_getrows(vector <class Row_RepositorySource_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_RepositorySource_pschmask *pTable = table->database->RepositorySource_pschmask_get();
 pTable->GetRows("`FK_RepositoryType`=" + StringUtils::itos(m_PK_RepositoryType),rows);
 }
 

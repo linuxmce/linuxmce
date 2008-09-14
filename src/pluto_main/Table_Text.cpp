@@ -35,16 +35,8 @@ using namespace std;
 
 #include "Table_DesignObjVariation_Text.h"
 #include "Table_DesignObjVariation_Text.h"
-#include "Table_DesignObjVariation_Text_pschist.h"
-#include "Table_DesignObjVariation_Text_pschist.h"
-#include "Table_DesignObjVariation_Text_pschmask.h"
-#include "Table_DesignObjVariation_Text_pschmask.h"
 #include "Table_Text_LS.h"
 #include "Table_Text_LS_AltVersions.h"
-#include "Table_Text_LS_AltVersions_pschist.h"
-#include "Table_Text_LS_AltVersions_pschmask.h"
-#include "Table_Text_LS_pschist.h"
-#include "Table_Text_LS_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Text()
@@ -1071,34 +1063,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DesignObjVariation_Text *pTable = table->database->DesignObjVariation_Text_get();
 pTable->GetRows("`FK_Text_OverrideFromHeader`=" + StringUtils::itos(m_PK_Text),rows);
 }
-void Row_Text::DesignObjVariation_Text_pschist_FK_Text_getrows(vector <class Row_DesignObjVariation_Text_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_Text_pschist *pTable = table->database->DesignObjVariation_Text_pschist_get();
-pTable->GetRows("`FK_Text`=" + StringUtils::itos(m_PK_Text),rows);
-}
-void Row_Text::DesignObjVariation_Text_pschist_FK_Text_OverrideFromHeader_getrows(vector <class Row_DesignObjVariation_Text_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_Text_pschist *pTable = table->database->DesignObjVariation_Text_pschist_get();
-pTable->GetRows("`FK_Text_OverrideFromHeader`=" + StringUtils::itos(m_PK_Text),rows);
-}
-void Row_Text::DesignObjVariation_Text_pschmask_FK_Text_getrows(vector <class Row_DesignObjVariation_Text_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_Text_pschmask *pTable = table->database->DesignObjVariation_Text_pschmask_get();
-pTable->GetRows("`FK_Text`=" + StringUtils::itos(m_PK_Text),rows);
-}
-void Row_Text::DesignObjVariation_Text_pschmask_FK_Text_OverrideFromHeader_getrows(vector <class Row_DesignObjVariation_Text_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_Text_pschmask *pTable = table->database->DesignObjVariation_Text_pschmask_get();
-pTable->GetRows("`FK_Text_OverrideFromHeader`=" + StringUtils::itos(m_PK_Text),rows);
-}
 void Row_Text::Text_LS_FK_Text_getrows(vector <class Row_Text_LS*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1111,34 +1075,6 @@ void Row_Text::Text_LS_AltVersions_FK_Text_getrows(vector <class Row_Text_LS_Alt
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Text_LS_AltVersions *pTable = table->database->Text_LS_AltVersions_get();
-pTable->GetRows("`FK_Text`=" + StringUtils::itos(m_PK_Text),rows);
-}
-void Row_Text::Text_LS_AltVersions_pschist_FK_Text_getrows(vector <class Row_Text_LS_AltVersions_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Text_LS_AltVersions_pschist *pTable = table->database->Text_LS_AltVersions_pschist_get();
-pTable->GetRows("`FK_Text`=" + StringUtils::itos(m_PK_Text),rows);
-}
-void Row_Text::Text_LS_AltVersions_pschmask_FK_Text_getrows(vector <class Row_Text_LS_AltVersions_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Text_LS_AltVersions_pschmask *pTable = table->database->Text_LS_AltVersions_pschmask_get();
-pTable->GetRows("`FK_Text`=" + StringUtils::itos(m_PK_Text),rows);
-}
-void Row_Text::Text_LS_pschist_FK_Text_getrows(vector <class Row_Text_LS_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Text_LS_pschist *pTable = table->database->Text_LS_pschist_get();
-pTable->GetRows("`FK_Text`=" + StringUtils::itos(m_PK_Text),rows);
-}
-void Row_Text::Text_LS_pschmask_FK_Text_getrows(vector <class Row_Text_LS_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Text_LS_pschmask *pTable = table->database->Text_LS_pschmask_get();
 pTable->GetRows("`FK_Text`=" + StringUtils::itos(m_PK_Text),rows);
 }
 

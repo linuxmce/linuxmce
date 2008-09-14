@@ -163,20 +163,10 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void CommandParameter_FK_ParameterType_getrows(vector <class Row_CommandParameter*> *rows);
-void CommandParameter_pschist_FK_ParameterType_getrows(vector <class Row_CommandParameter_pschist*> *rows);
-void CommandParameter_pschmask_FK_ParameterType_getrows(vector <class Row_CommandParameter_pschmask*> *rows);
 void CriteriaParmList_FK_ParameterType_getrows(vector <class Row_CriteriaParmList*> *rows);
-void CriteriaParmList_pschist_FK_ParameterType_getrows(vector <class Row_CriteriaParmList_pschist*> *rows);
-void CriteriaParmList_pschmask_FK_ParameterType_getrows(vector <class Row_CriteriaParmList_pschmask*> *rows);
 void DesignObjParameter_FK_ParameterType_getrows(vector <class Row_DesignObjParameter*> *rows);
-void DesignObjParameter_pschist_FK_ParameterType_getrows(vector <class Row_DesignObjParameter_pschist*> *rows);
-void DesignObjParameter_pschmask_FK_ParameterType_getrows(vector <class Row_DesignObjParameter_pschmask*> *rows);
 void DeviceData_FK_ParameterType_getrows(vector <class Row_DeviceData*> *rows);
-void DeviceData_pschist_FK_ParameterType_getrows(vector <class Row_DeviceData_pschist*> *rows);
-void DeviceData_pschmask_FK_ParameterType_getrows(vector <class Row_DeviceData_pschmask*> *rows);
 void EventParameter_FK_ParameterType_getrows(vector <class Row_EventParameter*> *rows);
-void EventParameter_pschist_FK_ParameterType_getrows(vector <class Row_EventParameter_pschist*> *rows);
-void EventParameter_pschmask_FK_ParameterType_getrows(vector <class Row_EventParameter_pschmask*> *rows);
 
 
 		// Setup binary serialization

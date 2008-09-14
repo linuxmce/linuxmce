@@ -158,11 +158,7 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void DeviceTemplate_Input_FK_ConnectorType_getrows(vector <class Row_DeviceTemplate_Input*> *rows);
-void DeviceTemplate_Input_pschist_FK_ConnectorType_getrows(vector <class Row_DeviceTemplate_Input_pschist*> *rows);
-void DeviceTemplate_Input_pschmask_FK_ConnectorType_getrows(vector <class Row_DeviceTemplate_Input_pschmask*> *rows);
 void DeviceTemplate_Output_FK_ConnectorType_getrows(vector <class Row_DeviceTemplate_Output*> *rows);
-void DeviceTemplate_Output_pschist_FK_ConnectorType_getrows(vector <class Row_DeviceTemplate_Output_pschist*> *rows);
-void DeviceTemplate_Output_pschmask_FK_ConnectorType_getrows(vector <class Row_DeviceTemplate_Output_pschmask*> *rows);
 
 
 		// Setup binary serialization

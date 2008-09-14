@@ -34,8 +34,6 @@ using namespace std;
 #include "Table_DeviceTemplate.h"
 
 #include "Table_InstallWizard_Distro.h"
-#include "Table_InstallWizard_Distro_pschist.h"
-#include "Table_InstallWizard_Distro_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_InstallWizard()
@@ -1058,20 +1056,6 @@ void Row_InstallWizard::InstallWizard_Distro_FK_InstallWizard_getrows(vector <cl
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_InstallWizard_Distro *pTable = table->database->InstallWizard_Distro_get();
-pTable->GetRows("`FK_InstallWizard`=" + StringUtils::itos(m_PK_InstallWizard),rows);
-}
-void Row_InstallWizard::InstallWizard_Distro_pschist_FK_InstallWizard_getrows(vector <class Row_InstallWizard_Distro_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_InstallWizard_Distro_pschist *pTable = table->database->InstallWizard_Distro_pschist_get();
-pTable->GetRows("`FK_InstallWizard`=" + StringUtils::itos(m_PK_InstallWizard),rows);
-}
-void Row_InstallWizard::InstallWizard_Distro_pschmask_FK_InstallWizard_getrows(vector <class Row_InstallWizard_Distro_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_InstallWizard_Distro_pschmask *pTable = table->database->InstallWizard_Distro_pschmask_get();
 pTable->GetRows("`FK_InstallWizard`=" + StringUtils::itos(m_PK_InstallWizard),rows);
 }
 

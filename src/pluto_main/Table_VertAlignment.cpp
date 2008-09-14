@@ -33,11 +33,7 @@ using namespace std;
 #include "Table_VertAlignment.h"
 
 #include "Table_DesignObjVariation_Text_Skin_Language.h"
-#include "Table_DesignObjVariation_Text_Skin_Language_pschist.h"
-#include "Table_DesignObjVariation_Text_Skin_Language_pschmask.h"
 #include "Table_StyleVariation.h"
-#include "Table_StyleVariation_pschist.h"
-#include "Table_StyleVariation_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_VertAlignment()
@@ -957,39 +953,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DesignObjVariation_Text_Skin_Language *pTable = table->database->DesignObjVariation_Text_Skin_Language_get();
 pTable->GetRows("`FK_VertAlignment`=" + StringUtils::itos(m_PK_VertAlignment),rows);
 }
-void Row_VertAlignment::DesignObjVariation_Text_Skin_Language_pschist_FK_VertAlignment_getrows(vector <class Row_DesignObjVariation_Text_Skin_Language_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_Text_Skin_Language_pschist *pTable = table->database->DesignObjVariation_Text_Skin_Language_pschist_get();
-pTable->GetRows("`FK_VertAlignment`=" + StringUtils::itos(m_PK_VertAlignment),rows);
-}
-void Row_VertAlignment::DesignObjVariation_Text_Skin_Language_pschmask_FK_VertAlignment_getrows(vector <class Row_DesignObjVariation_Text_Skin_Language_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_Text_Skin_Language_pschmask *pTable = table->database->DesignObjVariation_Text_Skin_Language_pschmask_get();
-pTable->GetRows("`FK_VertAlignment`=" + StringUtils::itos(m_PK_VertAlignment),rows);
-}
 void Row_VertAlignment::StyleVariation_FK_VertAlignment_getrows(vector <class Row_StyleVariation*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_StyleVariation *pTable = table->database->StyleVariation_get();
-pTable->GetRows("`FK_VertAlignment`=" + StringUtils::itos(m_PK_VertAlignment),rows);
-}
-void Row_VertAlignment::StyleVariation_pschist_FK_VertAlignment_getrows(vector <class Row_StyleVariation_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_StyleVariation_pschist *pTable = table->database->StyleVariation_pschist_get();
-pTable->GetRows("`FK_VertAlignment`=" + StringUtils::itos(m_PK_VertAlignment),rows);
-}
-void Row_VertAlignment::StyleVariation_pschmask_FK_VertAlignment_getrows(vector <class Row_StyleVariation_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_StyleVariation_pschmask *pTable = table->database->StyleVariation_pschmask_get();
 pTable->GetRows("`FK_VertAlignment`=" + StringUtils::itos(m_PK_VertAlignment),rows);
 }
 

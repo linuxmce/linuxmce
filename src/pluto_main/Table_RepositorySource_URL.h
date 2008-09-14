@@ -178,8 +178,6 @@ class Row_Country* FK_Country_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Installation_RepositorySource_URL_FK_RepositorySource_URL_getrows(vector <class Row_Installation_RepositorySource_URL*> *rows);
-void Installation_RepositorySource_URL_pschist_FK_RepositorySource_URL_getrows(vector <class Row_Installation_RepositorySource_URL_pschist*> *rows);
-void Installation_RepositorySource_URL_pschmask_FK_RepositorySource_URL_getrows(vector <class Row_Installation_RepositorySource_URL_pschmask*> *rows);
 
 
 		// Setup binary serialization

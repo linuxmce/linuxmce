@@ -33,8 +33,6 @@ using namespace std;
 #include "Table_FloorplanType.h"
 
 #include "Table_FloorplanObjectType.h"
-#include "Table_FloorplanObjectType_pschist.h"
-#include "Table_FloorplanObjectType_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_FloorplanType()
@@ -952,20 +950,6 @@ void Row_FloorplanType::FloorplanObjectType_FK_FloorplanType_getrows(vector <cla
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_FloorplanObjectType *pTable = table->database->FloorplanObjectType_get();
-pTable->GetRows("`FK_FloorplanType`=" + StringUtils::itos(m_PK_FloorplanType),rows);
-}
-void Row_FloorplanType::FloorplanObjectType_pschist_FK_FloorplanType_getrows(vector <class Row_FloorplanObjectType_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_FloorplanObjectType_pschist *pTable = table->database->FloorplanObjectType_pschist_get();
-pTable->GetRows("`FK_FloorplanType`=" + StringUtils::itos(m_PK_FloorplanType),rows);
-}
-void Row_FloorplanType::FloorplanObjectType_pschmask_FK_FloorplanType_getrows(vector <class Row_FloorplanObjectType_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_FloorplanObjectType_pschmask *pTable = table->database->FloorplanObjectType_pschmask_get();
 pTable->GetRows("`FK_FloorplanType`=" + StringUtils::itos(m_PK_FloorplanType),rows);
 }
 

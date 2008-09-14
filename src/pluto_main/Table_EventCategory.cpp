@@ -35,10 +35,6 @@ using namespace std;
 
 #include "Table_Event.h"
 #include "Table_EventCategory.h"
-#include "Table_EventCategory_pschist.h"
-#include "Table_EventCategory_pschmask.h"
-#include "Table_Event_pschist.h"
-#include "Table_Event_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_EventCategory()
@@ -983,34 +979,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_EventCategory *pTable = table->database->EventCategory_get();
 pTable->GetRows("`FK_EventCategory_Parent`=" + StringUtils::itos(m_PK_EventCategory),rows);
-}
-void Row_EventCategory::EventCategory_pschist_FK_EventCategory_Parent_getrows(vector <class Row_EventCategory_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_EventCategory_pschist *pTable = table->database->EventCategory_pschist_get();
-pTable->GetRows("`FK_EventCategory_Parent`=" + StringUtils::itos(m_PK_EventCategory),rows);
-}
-void Row_EventCategory::EventCategory_pschmask_FK_EventCategory_Parent_getrows(vector <class Row_EventCategory_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_EventCategory_pschmask *pTable = table->database->EventCategory_pschmask_get();
-pTable->GetRows("`FK_EventCategory_Parent`=" + StringUtils::itos(m_PK_EventCategory),rows);
-}
-void Row_EventCategory::Event_pschist_FK_EventCategory_getrows(vector <class Row_Event_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Event_pschist *pTable = table->database->Event_pschist_get();
-pTable->GetRows("`FK_EventCategory`=" + StringUtils::itos(m_PK_EventCategory),rows);
-}
-void Row_EventCategory::Event_pschmask_FK_EventCategory_getrows(vector <class Row_Event_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Event_pschmask *pTable = table->database->Event_pschmask_get();
-pTable->GetRows("`FK_EventCategory`=" + StringUtils::itos(m_PK_EventCategory),rows);
 }
 
 

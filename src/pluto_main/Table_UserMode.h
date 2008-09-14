@@ -158,8 +158,6 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Users_FK_UserMode_getrows(vector <class Row_Users*> *rows);
-void Users_pschist_FK_UserMode_getrows(vector <class Row_Users_pschist*> *rows);
-void Users_pschmask_FK_UserMode_getrows(vector <class Row_Users_pschmask*> *rows);
 
 
 		// Setup binary serialization

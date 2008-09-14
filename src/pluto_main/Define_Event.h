@@ -82,6 +82,7 @@
 #define EVENT_State_Changed_CONST 81
 #define EVENT_Media_Removed_CONST 82
 #define EVENT_Armed_Sensor_Tripped_CONST 83
+#define EVENT_Instant_Message_Recieved_CONST 84
 
 #define EVENT_TABLE "Event"
 #define EVENT_PK_EVENT_FIELD "PK_Event"

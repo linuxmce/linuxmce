@@ -160,8 +160,6 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Package_FK_PackageType_getrows(vector <class Row_Package*> *rows);
-void Package_pschist_FK_PackageType_getrows(vector <class Row_Package_pschist*> *rows);
-void Package_pschmask_FK_PackageType_getrows(vector <class Row_Package_pschmask*> *rows);
 
 
 		// Setup binary serialization

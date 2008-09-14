@@ -193,14 +193,7 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Installation_FK_Version_getrows(vector <class Row_Installation*> *rows);
-void Installation_pschist_FK_Version_getrows(vector <class Row_Installation_pschist*> *rows);
-void Installation_pschmask_FK_Version_getrows(vector <class Row_Installation_pschmask*> *rows);
-void Package_Version_FK_Version_getrows(vector <class Row_Package_Version*> *rows);
-void Package_Version_pschist_FK_Version_getrows(vector <class Row_Package_Version_pschist*> *rows);
-void Package_Version_pschmask_FK_Version_getrows(vector <class Row_Package_Version_pschmask*> *rows);
 void Schema_FK_Version_getrows(vector <class Row_Schema*> *rows);
-void Schema_pschist_FK_Version_getrows(vector <class Row_Schema_pschist*> *rows);
-void Schema_pschmask_FK_Version_getrows(vector <class Row_Schema_pschmask*> *rows);
 
 
 		// Setup binary serialization

@@ -35,14 +35,8 @@ using namespace std;
 #include "Table_Package.h"
 
 #include "Table_DeviceTemplate_PageSetup.h"
-#include "Table_DeviceTemplate_PageSetup_pschist.h"
-#include "Table_DeviceTemplate_PageSetup_pschmask.h"
 #include "Table_PageSetup.h"
-#include "Table_PageSetup_pschist.h"
-#include "Table_PageSetup_pschmask.h"
 #include "Table_SetupStep.h"
-#include "Table_SetupStep_pschist.h"
-#include "Table_SetupStep_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_PageSetup()
@@ -1212,20 +1206,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceTemplate_PageSetup *pTable = table->database->DeviceTemplate_PageSetup_get();
 pTable->GetRows("`FK_PageSetup`=" + StringUtils::itos(m_PK_PageSetup),rows);
 }
-void Row_PageSetup::DeviceTemplate_PageSetup_pschist_FK_PageSetup_getrows(vector <class Row_DeviceTemplate_PageSetup_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_PageSetup_pschist *pTable = table->database->DeviceTemplate_PageSetup_pschist_get();
-pTable->GetRows("`FK_PageSetup`=" + StringUtils::itos(m_PK_PageSetup),rows);
-}
-void Row_PageSetup::DeviceTemplate_PageSetup_pschmask_FK_PageSetup_getrows(vector <class Row_DeviceTemplate_PageSetup_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_PageSetup_pschmask *pTable = table->database->DeviceTemplate_PageSetup_pschmask_get();
-pTable->GetRows("`FK_PageSetup`=" + StringUtils::itos(m_PK_PageSetup),rows);
-}
 void Row_PageSetup::PageSetup_FK_PageSetup_Parent_getrows(vector <class Row_PageSetup*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1233,39 +1213,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_PageSetup *pTable = table->database->PageSetup_get();
 pTable->GetRows("`FK_PageSetup_Parent`=" + StringUtils::itos(m_PK_PageSetup),rows);
 }
-void Row_PageSetup::PageSetup_pschist_FK_PageSetup_Parent_getrows(vector <class Row_PageSetup_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_PageSetup_pschist *pTable = table->database->PageSetup_pschist_get();
-pTable->GetRows("`FK_PageSetup_Parent`=" + StringUtils::itos(m_PK_PageSetup),rows);
-}
-void Row_PageSetup::PageSetup_pschmask_FK_PageSetup_Parent_getrows(vector <class Row_PageSetup_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_PageSetup_pschmask *pTable = table->database->PageSetup_pschmask_get();
-pTable->GetRows("`FK_PageSetup_Parent`=" + StringUtils::itos(m_PK_PageSetup),rows);
-}
 void Row_PageSetup::SetupStep_FK_PageSetup_getrows(vector <class Row_SetupStep*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_SetupStep *pTable = table->database->SetupStep_get();
-pTable->GetRows("`FK_PageSetup`=" + StringUtils::itos(m_PK_PageSetup),rows);
-}
-void Row_PageSetup::SetupStep_pschist_FK_PageSetup_getrows(vector <class Row_SetupStep_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_SetupStep_pschist *pTable = table->database->SetupStep_pschist_get();
-pTable->GetRows("`FK_PageSetup`=" + StringUtils::itos(m_PK_PageSetup),rows);
-}
-void Row_PageSetup::SetupStep_pschmask_FK_PageSetup_getrows(vector <class Row_SetupStep_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_SetupStep_pschmask *pTable = table->database->SetupStep_pschmask_get();
 pTable->GetRows("`FK_PageSetup`=" + StringUtils::itos(m_PK_PageSetup),rows);
 }
 

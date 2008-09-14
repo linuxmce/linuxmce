@@ -887,6 +887,7 @@
 #define COMMAND_Dynamic_Color_Mode_CONST 978
 #define COMMAND_Theatre_Black_1_Color_Mode_CONST 979
 #define COMMAND_Theatre_Black_2_Color_Mode_CONST 980
+#define COMMAND_Send_IM_CONST 981
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"

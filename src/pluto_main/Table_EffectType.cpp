@@ -33,11 +33,7 @@ using namespace std;
 #include "Table_EffectType.h"
 
 #include "Table_DesignObjVariation.h"
-#include "Table_DesignObjVariation_pschist.h"
-#include "Table_DesignObjVariation_pschmask.h"
 #include "Table_EffectType_Effect_Skin.h"
-#include "Table_EffectType_Effect_Skin_pschist.h"
-#include "Table_EffectType_Effect_Skin_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_EffectType()
@@ -963,39 +959,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DesignObjVariation *pTable = table->database->DesignObjVariation_get();
 pTable->GetRows("`FK_EffectType_Highlighted`=" + StringUtils::itos(m_PK_EffectType),rows);
 }
-void Row_EffectType::DesignObjVariation_pschist_FK_EffectType_Highlighted_getrows(vector <class Row_DesignObjVariation_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_pschist *pTable = table->database->DesignObjVariation_pschist_get();
-pTable->GetRows("`FK_EffectType_Highlighted`=" + StringUtils::itos(m_PK_EffectType),rows);
-}
-void Row_EffectType::DesignObjVariation_pschmask_FK_EffectType_Highlighted_getrows(vector <class Row_DesignObjVariation_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_pschmask *pTable = table->database->DesignObjVariation_pschmask_get();
-pTable->GetRows("`FK_EffectType_Highlighted`=" + StringUtils::itos(m_PK_EffectType),rows);
-}
 void Row_EffectType::EffectType_Effect_Skin_FK_EffectType_getrows(vector <class Row_EffectType_Effect_Skin*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_EffectType_Effect_Skin *pTable = table->database->EffectType_Effect_Skin_get();
-pTable->GetRows("`FK_EffectType`=" + StringUtils::itos(m_PK_EffectType),rows);
-}
-void Row_EffectType::EffectType_Effect_Skin_pschist_FK_EffectType_getrows(vector <class Row_EffectType_Effect_Skin_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_EffectType_Effect_Skin_pschist *pTable = table->database->EffectType_Effect_Skin_pschist_get();
-pTable->GetRows("`FK_EffectType`=" + StringUtils::itos(m_PK_EffectType),rows);
-}
-void Row_EffectType::EffectType_Effect_Skin_pschmask_FK_EffectType_getrows(vector <class Row_EffectType_Effect_Skin_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_EffectType_Effect_Skin_pschmask *pTable = table->database->EffectType_Effect_Skin_pschmask_get();
 pTable->GetRows("`FK_EffectType`=" + StringUtils::itos(m_PK_EffectType),rows);
 }
 

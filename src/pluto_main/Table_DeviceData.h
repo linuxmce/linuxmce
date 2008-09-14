@@ -162,17 +162,9 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void DHCPDevice_DeviceData_FK_DeviceData_getrows(vector <class Row_DHCPDevice_DeviceData*> *rows);
-void DHCPDevice_DeviceData_pschist_FK_DeviceData_getrows(vector <class Row_DHCPDevice_DeviceData_pschist*> *rows);
-void DHCPDevice_DeviceData_pschmask_FK_DeviceData_getrows(vector <class Row_DHCPDevice_DeviceData_pschmask*> *rows);
 void DeviceCategory_DeviceData_FK_DeviceData_getrows(vector <class Row_DeviceCategory_DeviceData*> *rows);
-void DeviceCategory_DeviceData_pschist_FK_DeviceData_getrows(vector <class Row_DeviceCategory_DeviceData_pschist*> *rows);
-void DeviceCategory_DeviceData_pschmask_FK_DeviceData_getrows(vector <class Row_DeviceCategory_DeviceData_pschmask*> *rows);
 void DeviceTemplate_DeviceData_FK_DeviceData_getrows(vector <class Row_DeviceTemplate_DeviceData*> *rows);
-void DeviceTemplate_DeviceData_pschist_FK_DeviceData_getrows(vector <class Row_DeviceTemplate_DeviceData_pschist*> *rows);
-void DeviceTemplate_DeviceData_pschmask_FK_DeviceData_getrows(vector <class Row_DeviceTemplate_DeviceData_pschmask*> *rows);
 void Device_DeviceData_FK_DeviceData_getrows(vector <class Row_Device_DeviceData*> *rows);
-void Device_DeviceData_pschist_FK_DeviceData_getrows(vector <class Row_Device_DeviceData_pschist*> *rows);
-void Device_DeviceData_pschmask_FK_DeviceData_getrows(vector <class Row_Device_DeviceData_pschmask*> *rows);
 
 
 		// Setup binary serialization

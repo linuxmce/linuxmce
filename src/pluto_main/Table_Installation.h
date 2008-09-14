@@ -239,44 +239,18 @@ class Row_RepositoryType* FK_RepositoryType_Binaries_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void CommandGroup_FK_Installation_getrows(vector <class Row_CommandGroup*> *rows);
-void CommandGroup_pschist_FK_Installation_getrows(vector <class Row_CommandGroup_pschist*> *rows);
-void CommandGroup_pschmask_FK_Installation_getrows(vector <class Row_CommandGroup_pschmask*> *rows);
 void Criteria_FK_Installation_getrows(vector <class Row_Criteria*> *rows);
-void Criteria_pschist_FK_Installation_getrows(vector <class Row_Criteria_pschist*> *rows);
-void Criteria_pschmask_FK_Installation_getrows(vector <class Row_Criteria_pschmask*> *rows);
 void Device_FK_Installation_getrows(vector <class Row_Device*> *rows);
 void DeviceGroup_FK_Installation_getrows(vector <class Row_DeviceGroup*> *rows);
-void DeviceGroup_pschist_FK_Installation_getrows(vector <class Row_DeviceGroup_pschist*> *rows);
-void DeviceGroup_pschmask_FK_Installation_getrows(vector <class Row_DeviceGroup_pschmask*> *rows);
-void Device_pschist_FK_Installation_getrows(vector <class Row_Device_pschist*> *rows);
-void Device_pschmask_FK_Installation_getrows(vector <class Row_Device_pschmask*> *rows);
 void EventHandler_FK_Installation_getrows(vector <class Row_EventHandler*> *rows);
-void EventHandler_pschist_FK_Installation_getrows(vector <class Row_EventHandler_pschist*> *rows);
-void EventHandler_pschmask_FK_Installation_getrows(vector <class Row_EventHandler_pschmask*> *rows);
 void Floorplan_FK_Installation_getrows(vector <class Row_Floorplan*> *rows);
-void Floorplan_pschist_FK_Installation_getrows(vector <class Row_Floorplan_pschist*> *rows);
-void Floorplan_pschmask_FK_Installation_getrows(vector <class Row_Floorplan_pschmask*> *rows);
 void Household_Installation_FK_Installation_getrows(vector <class Row_Household_Installation*> *rows);
-void Household_Installation_pschist_FK_Installation_getrows(vector <class Row_Household_Installation_pschist*> *rows);
-void Household_Installation_pschmask_FK_Installation_getrows(vector <class Row_Household_Installation_pschmask*> *rows);
 void InfraredGroup_Command_Preferred_FK_Installation_getrows(vector <class Row_InfraredGroup_Command_Preferred*> *rows);
-void InfraredGroup_Command_Preferred_pschist_FK_Installation_getrows(vector <class Row_InfraredGroup_Command_Preferred_pschist*> *rows);
-void InfraredGroup_Command_Preferred_pschmask_FK_Installation_getrows(vector <class Row_InfraredGroup_Command_Preferred_pschmask*> *rows);
 void Installation_RepositorySource_URL_FK_Installation_getrows(vector <class Row_Installation_RepositorySource_URL*> *rows);
-void Installation_RepositorySource_URL_pschist_FK_Installation_getrows(vector <class Row_Installation_RepositorySource_URL_pschist*> *rows);
-void Installation_RepositorySource_URL_pschmask_FK_Installation_getrows(vector <class Row_Installation_RepositorySource_URL_pschmask*> *rows);
 void Installation_Users_FK_Installation_getrows(vector <class Row_Installation_Users*> *rows);
-void Installation_Users_pschist_FK_Installation_getrows(vector <class Row_Installation_Users_pschist*> *rows);
-void Installation_Users_pschmask_FK_Installation_getrows(vector <class Row_Installation_Users_pschmask*> *rows);
 void Room_FK_Installation_getrows(vector <class Row_Room*> *rows);
-void Room_pschist_FK_Installation_getrows(vector <class Row_Room_pschist*> *rows);
-void Room_pschmask_FK_Installation_getrows(vector <class Row_Room_pschmask*> *rows);
 void SetupStep_FK_Installation_getrows(vector <class Row_SetupStep*> *rows);
-void SetupStep_pschist_FK_Installation_getrows(vector <class Row_SetupStep_pschist*> *rows);
-void SetupStep_pschmask_FK_Installation_getrows(vector <class Row_SetupStep_pschmask*> *rows);
 void Users_FK_Installation_Main_getrows(vector <class Row_Users*> *rows);
-void Users_pschist_FK_Installation_Main_getrows(vector <class Row_Users_pschist*> *rows);
-void Users_pschmask_FK_Installation_Main_getrows(vector <class Row_Users_pschmask*> *rows);
 
 
 		// Setup binary serialization

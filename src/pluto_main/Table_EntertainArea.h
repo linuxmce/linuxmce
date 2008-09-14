@@ -176,11 +176,7 @@ class Row_FloorplanObjectType* FK_FloorplanObjectType_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void CommandGroup_EntertainArea_FK_EntertainArea_getrows(vector <class Row_CommandGroup_EntertainArea*> *rows);
-void CommandGroup_EntertainArea_pschist_FK_EntertainArea_getrows(vector <class Row_CommandGroup_EntertainArea_pschist*> *rows);
-void CommandGroup_EntertainArea_pschmask_FK_EntertainArea_getrows(vector <class Row_CommandGroup_EntertainArea_pschmask*> *rows);
 void Device_EntertainArea_FK_EntertainArea_getrows(vector <class Row_Device_EntertainArea*> *rows);
-void Device_EntertainArea_pschist_FK_EntertainArea_getrows(vector <class Row_Device_EntertainArea_pschist*> *rows);
-void Device_EntertainArea_pschmask_FK_EntertainArea_getrows(vector <class Row_Device_EntertainArea_pschmask*> *rows);
 
 
 		// Setup binary serialization

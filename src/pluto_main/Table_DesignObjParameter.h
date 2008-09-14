@@ -167,11 +167,7 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void DesignObjType_DesignObjParameter_FK_DesignObjParameter_getrows(vector <class Row_DesignObjType_DesignObjParameter*> *rows);
-void DesignObjType_DesignObjParameter_pschist_FK_DesignObjParameter_getrows(vector <class Row_DesignObjType_DesignObjParameter_pschist*> *rows);
-void DesignObjType_DesignObjParameter_pschmask_FK_DesignObjParameter_getrows(vector <class Row_DesignObjType_DesignObjParameter_pschmask*> *rows);
 void DesignObjVariation_DesignObjParameter_FK_DesignObjParameter_getrows(vector <class Row_DesignObjVariation_DesignObjParameter*> *rows);
-void DesignObjVariation_DesignObjParameter_pschist_FK_DesignObjParameter_getrows(vector <class Row_DesignObjVariation_DesignObjParameter_pschist*> *rows);
-void DesignObjVariation_DesignObjParameter_pschmask_FK_DesignObjParameter_getrows(vector <class Row_DesignObjVariation_DesignObjParameter_pschmask*> *rows);
 
 
 		// Setup binary serialization

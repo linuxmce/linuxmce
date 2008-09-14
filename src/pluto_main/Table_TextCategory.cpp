@@ -35,10 +35,6 @@ using namespace std;
 
 #include "Table_Text.h"
 #include "Table_TextCategory.h"
-#include "Table_TextCategory_pschist.h"
-#include "Table_TextCategory_pschmask.h"
-#include "Table_Text_pschist.h"
-#include "Table_Text_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_TextCategory()
@@ -983,34 +979,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_TextCategory *pTable = table->database->TextCategory_get();
 pTable->GetRows("`FK_TextCategory_Parent`=" + StringUtils::itos(m_PK_TextCategory),rows);
-}
-void Row_TextCategory::TextCategory_pschist_FK_TextCategory_Parent_getrows(vector <class Row_TextCategory_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_TextCategory_pschist *pTable = table->database->TextCategory_pschist_get();
-pTable->GetRows("`FK_TextCategory_Parent`=" + StringUtils::itos(m_PK_TextCategory),rows);
-}
-void Row_TextCategory::TextCategory_pschmask_FK_TextCategory_Parent_getrows(vector <class Row_TextCategory_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_TextCategory_pschmask *pTable = table->database->TextCategory_pschmask_get();
-pTable->GetRows("`FK_TextCategory_Parent`=" + StringUtils::itos(m_PK_TextCategory),rows);
-}
-void Row_TextCategory::Text_pschist_FK_TextCategory_getrows(vector <class Row_Text_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Text_pschist *pTable = table->database->Text_pschist_get();
-pTable->GetRows("`FK_TextCategory`=" + StringUtils::itos(m_PK_TextCategory),rows);
-}
-void Row_TextCategory::Text_pschmask_FK_TextCategory_getrows(vector <class Row_Text_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Text_pschmask *pTable = table->database->Text_pschmask_get();
-pTable->GetRows("`FK_TextCategory`=" + StringUtils::itos(m_PK_TextCategory),rows);
 }
 
 

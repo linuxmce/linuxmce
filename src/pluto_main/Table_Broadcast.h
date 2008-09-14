@@ -160,8 +160,6 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void MediaType_Broadcast_FK_Broadcast_getrows(vector <class Row_MediaType_Broadcast*> *rows);
-void MediaType_Broadcast_pschist_FK_Broadcast_getrows(vector <class Row_MediaType_Broadcast_pschist*> *rows);
-void MediaType_Broadcast_pschmask_FK_Broadcast_getrows(vector <class Row_MediaType_Broadcast_pschmask*> *rows);
 
 
 		// Setup binary serialization

@@ -34,10 +34,6 @@ using namespace std;
 
 #include "Table_Criteria.h"
 #include "Table_CriteriaList_CriteriaParmList.h"
-#include "Table_CriteriaList_CriteriaParmList_pschist.h"
-#include "Table_CriteriaList_CriteriaParmList_pschmask.h"
-#include "Table_Criteria_pschist.h"
-#include "Table_Criteria_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_CriteriaList()
@@ -962,34 +958,6 @@ void Row_CriteriaList::CriteriaList_CriteriaParmList_FK_CriteriaList_getrows(vec
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_CriteriaList_CriteriaParmList *pTable = table->database->CriteriaList_CriteriaParmList_get();
-pTable->GetRows("`FK_CriteriaList`=" + StringUtils::itos(m_PK_CriteriaList),rows);
-}
-void Row_CriteriaList::CriteriaList_CriteriaParmList_pschist_FK_CriteriaList_getrows(vector <class Row_CriteriaList_CriteriaParmList_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CriteriaList_CriteriaParmList_pschist *pTable = table->database->CriteriaList_CriteriaParmList_pschist_get();
-pTable->GetRows("`FK_CriteriaList`=" + StringUtils::itos(m_PK_CriteriaList),rows);
-}
-void Row_CriteriaList::CriteriaList_CriteriaParmList_pschmask_FK_CriteriaList_getrows(vector <class Row_CriteriaList_CriteriaParmList_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CriteriaList_CriteriaParmList_pschmask *pTable = table->database->CriteriaList_CriteriaParmList_pschmask_get();
-pTable->GetRows("`FK_CriteriaList`=" + StringUtils::itos(m_PK_CriteriaList),rows);
-}
-void Row_CriteriaList::Criteria_pschist_FK_CriteriaList_getrows(vector <class Row_Criteria_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Criteria_pschist *pTable = table->database->Criteria_pschist_get();
-pTable->GetRows("`FK_CriteriaList`=" + StringUtils::itos(m_PK_CriteriaList),rows);
-}
-void Row_CriteriaList::Criteria_pschmask_FK_CriteriaList_getrows(vector <class Row_Criteria_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Criteria_pschmask *pTable = table->database->Criteria_pschmask_get();
 pTable->GetRows("`FK_CriteriaList`=" + StringUtils::itos(m_PK_CriteriaList),rows);
 }
 

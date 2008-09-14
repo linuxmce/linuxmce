@@ -35,8 +35,6 @@ using namespace std;
 #include "Table_DesignObj.h"
 
 #include "Table_DesignObjVariation_DesignObj_Skin_Language.h"
-#include "Table_DesignObjVariation_DesignObj_Skin_Language_pschist.h"
-#include "Table_DesignObjVariation_DesignObj_Skin_Language_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_DesignObjVariation_DesignObj()
@@ -980,20 +978,6 @@ void Row_DesignObjVariation_DesignObj::DesignObjVariation_DesignObj_Skin_Languag
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_DesignObjVariation_DesignObj_Skin_Language *pTable = table->database->DesignObjVariation_DesignObj_Skin_Language_get();
-pTable->GetRows("`FK_DesignObjVariation_DesignObj`=" + StringUtils::itos(m_PK_DesignObjVariation_DesignObj),rows);
-}
-void Row_DesignObjVariation_DesignObj::DesignObjVariation_DesignObj_Skin_Language_pschist_FK_DesignObjVariation_DesignObj_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_DesignObj_Skin_Language_pschist *pTable = table->database->DesignObjVariation_DesignObj_Skin_Language_pschist_get();
-pTable->GetRows("`FK_DesignObjVariation_DesignObj`=" + StringUtils::itos(m_PK_DesignObjVariation_DesignObj),rows);
-}
-void Row_DesignObjVariation_DesignObj::DesignObjVariation_DesignObj_Skin_Language_pschmask_FK_DesignObjVariation_DesignObj_getrows(vector <class Row_DesignObjVariation_DesignObj_Skin_Language_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_DesignObj_Skin_Language_pschmask *pTable = table->database->DesignObjVariation_DesignObj_Skin_Language_pschmask_get();
 pTable->GetRows("`FK_DesignObjVariation_DesignObj`=" + StringUtils::itos(m_PK_DesignObjVariation_DesignObj),rows);
 }
 

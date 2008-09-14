@@ -212,8 +212,6 @@ class Row_Manufacturer* FK_Manufacturer_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void DHCPDevice_DeviceData_FK_DHCPDevice_getrows(vector <class Row_DHCPDevice_DeviceData*> *rows);
-void DHCPDevice_DeviceData_pschist_FK_DHCPDevice_getrows(vector <class Row_DHCPDevice_DeviceData_pschist*> *rows);
-void DHCPDevice_DeviceData_pschmask_FK_DHCPDevice_getrows(vector <class Row_DHCPDevice_DeviceData_pschmask*> *rows);
 
 
 		// Setup binary serialization

@@ -34,16 +34,8 @@ using namespace std;
 
 #include "Table_DesignObj.h"
 #include "Table_DesignObjVariation.h"
-#include "Table_DesignObjVariation_pschist.h"
-#include "Table_DesignObjVariation_pschmask.h"
-#include "Table_DesignObj_pschist.h"
-#include "Table_DesignObj_pschmask.h"
 #include "Table_DeviceTemplate.h"
-#include "Table_DeviceTemplate_pschist.h"
-#include "Table_DeviceTemplate_pschmask.h"
 #include "Table_Skin.h"
-#include "Table_Skin_pschist.h"
-#include "Table_Skin_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_StabilityStatus()
@@ -970,34 +962,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DesignObjVariation *pTable = table->database->DesignObjVariation_get();
 pTable->GetRows("`FK_StabilityStatus`=" + StringUtils::itos(m_PK_StabilityStatus),rows);
 }
-void Row_StabilityStatus::DesignObjVariation_pschist_FK_StabilityStatus_getrows(vector <class Row_DesignObjVariation_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_pschist *pTable = table->database->DesignObjVariation_pschist_get();
-pTable->GetRows("`FK_StabilityStatus`=" + StringUtils::itos(m_PK_StabilityStatus),rows);
-}
-void Row_StabilityStatus::DesignObjVariation_pschmask_FK_StabilityStatus_getrows(vector <class Row_DesignObjVariation_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjVariation_pschmask *pTable = table->database->DesignObjVariation_pschmask_get();
-pTable->GetRows("`FK_StabilityStatus`=" + StringUtils::itos(m_PK_StabilityStatus),rows);
-}
-void Row_StabilityStatus::DesignObj_pschist_FK_StabilityStatus_getrows(vector <class Row_DesignObj_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObj_pschist *pTable = table->database->DesignObj_pschist_get();
-pTable->GetRows("`FK_StabilityStatus`=" + StringUtils::itos(m_PK_StabilityStatus),rows);
-}
-void Row_StabilityStatus::DesignObj_pschmask_FK_StabilityStatus_getrows(vector <class Row_DesignObj_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObj_pschmask *pTable = table->database->DesignObj_pschmask_get();
-pTable->GetRows("`FK_StabilityStatus`=" + StringUtils::itos(m_PK_StabilityStatus),rows);
-}
 void Row_StabilityStatus::DeviceTemplate_FK_StabilityStatus_getrows(vector <class Row_DeviceTemplate*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1005,39 +969,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceTemplate *pTable = table->database->DeviceTemplate_get();
 pTable->GetRows("`FK_StabilityStatus`=" + StringUtils::itos(m_PK_StabilityStatus),rows);
 }
-void Row_StabilityStatus::DeviceTemplate_pschist_FK_StabilityStatus_getrows(vector <class Row_DeviceTemplate_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_pschist *pTable = table->database->DeviceTemplate_pschist_get();
-pTable->GetRows("`FK_StabilityStatus`=" + StringUtils::itos(m_PK_StabilityStatus),rows);
-}
-void Row_StabilityStatus::DeviceTemplate_pschmask_FK_StabilityStatus_getrows(vector <class Row_DeviceTemplate_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_pschmask *pTable = table->database->DeviceTemplate_pschmask_get();
-pTable->GetRows("`FK_StabilityStatus`=" + StringUtils::itos(m_PK_StabilityStatus),rows);
-}
 void Row_StabilityStatus::Skin_FK_StabilityStatus_getrows(vector <class Row_Skin*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Skin *pTable = table->database->Skin_get();
-pTable->GetRows("`FK_StabilityStatus`=" + StringUtils::itos(m_PK_StabilityStatus),rows);
-}
-void Row_StabilityStatus::Skin_pschist_FK_StabilityStatus_getrows(vector <class Row_Skin_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Skin_pschist *pTable = table->database->Skin_pschist_get();
-pTable->GetRows("`FK_StabilityStatus`=" + StringUtils::itos(m_PK_StabilityStatus),rows);
-}
-void Row_StabilityStatus::Skin_pschmask_FK_StabilityStatus_getrows(vector <class Row_Skin_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Skin_pschmask *pTable = table->database->Skin_pschmask_get();
 pTable->GetRows("`FK_StabilityStatus`=" + StringUtils::itos(m_PK_StabilityStatus),rows);
 }
 

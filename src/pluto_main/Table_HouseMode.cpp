@@ -33,8 +33,6 @@ using namespace std;
 #include "Table_HouseMode.h"
 
 #include "Table_Device_HouseMode.h"
-#include "Table_Device_HouseMode_pschist.h"
-#include "Table_Device_HouseMode_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_HouseMode()
@@ -952,20 +950,6 @@ void Row_HouseMode::Device_HouseMode_FK_HouseMode_getrows(vector <class Row_Devi
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Device_HouseMode *pTable = table->database->Device_HouseMode_get();
-pTable->GetRows("`FK_HouseMode`=" + StringUtils::itos(m_PK_HouseMode),rows);
-}
-void Row_HouseMode::Device_HouseMode_pschist_FK_HouseMode_getrows(vector <class Row_Device_HouseMode_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Device_HouseMode_pschist *pTable = table->database->Device_HouseMode_pschist_get();
-pTable->GetRows("`FK_HouseMode`=" + StringUtils::itos(m_PK_HouseMode),rows);
-}
-void Row_HouseMode::Device_HouseMode_pschmask_FK_HouseMode_getrows(vector <class Row_Device_HouseMode_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Device_HouseMode_pschmask *pTable = table->database->Device_HouseMode_pschmask_get();
 pTable->GetRows("`FK_HouseMode`=" + StringUtils::itos(m_PK_HouseMode),rows);
 }
 

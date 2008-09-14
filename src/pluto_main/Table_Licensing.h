@@ -166,8 +166,6 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void DeviceTemplate_FK_Licensing_getrows(vector <class Row_DeviceTemplate*> *rows);
-void DeviceTemplate_pschist_FK_Licensing_getrows(vector <class Row_DeviceTemplate_pschist*> *rows);
-void DeviceTemplate_pschmask_FK_Licensing_getrows(vector <class Row_DeviceTemplate_pschmask*> *rows);
 
 
 		// Setup binary serialization

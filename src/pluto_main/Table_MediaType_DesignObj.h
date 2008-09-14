@@ -215,8 +215,6 @@ class Row_Skin* FK_Skin_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void RemoteControl_FK_MediaType_DesignObj_getrows(vector <class Row_RemoteControl*> *rows);
-void RemoteControl_pschist_FK_MediaType_DesignObj_getrows(vector <class Row_RemoteControl_pschist*> *rows);
-void RemoteControl_pschmask_FK_MediaType_DesignObj_getrows(vector <class Row_RemoteControl_pschmask*> *rows);
 
 
 		// Setup binary serialization

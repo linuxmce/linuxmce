@@ -158,8 +158,6 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void FloorplanObjectType_FK_FloorplanType_getrows(vector <class Row_FloorplanObjectType*> *rows);
-void FloorplanObjectType_pschist_FK_FloorplanType_getrows(vector <class Row_FloorplanObjectType_pschist*> *rows);
-void FloorplanObjectType_pschmask_FK_FloorplanType_getrows(vector <class Row_FloorplanObjectType_pschmask*> *rows);
 
 
 		// Setup binary serialization

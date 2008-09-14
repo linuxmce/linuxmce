@@ -35,10 +35,6 @@ using namespace std;
 
 #include "Table_DesignObj.h"
 #include "Table_DesignObjCategory.h"
-#include "Table_DesignObjCategory_pschist.h"
-#include "Table_DesignObjCategory_pschmask.h"
-#include "Table_DesignObj_pschist.h"
-#include "Table_DesignObj_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_DesignObjCategory()
@@ -983,34 +979,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_DesignObjCategory *pTable = table->database->DesignObjCategory_get();
 pTable->GetRows("`FK_DesignObjCategory_Parent`=" + StringUtils::itos(m_PK_DesignObjCategory),rows);
-}
-void Row_DesignObjCategory::DesignObjCategory_pschist_FK_DesignObjCategory_Parent_getrows(vector <class Row_DesignObjCategory_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjCategory_pschist *pTable = table->database->DesignObjCategory_pschist_get();
-pTable->GetRows("`FK_DesignObjCategory_Parent`=" + StringUtils::itos(m_PK_DesignObjCategory),rows);
-}
-void Row_DesignObjCategory::DesignObjCategory_pschmask_FK_DesignObjCategory_Parent_getrows(vector <class Row_DesignObjCategory_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObjCategory_pschmask *pTable = table->database->DesignObjCategory_pschmask_get();
-pTable->GetRows("`FK_DesignObjCategory_Parent`=" + StringUtils::itos(m_PK_DesignObjCategory),rows);
-}
-void Row_DesignObjCategory::DesignObj_pschist_FK_DesignObjCategory_getrows(vector <class Row_DesignObj_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObj_pschist *pTable = table->database->DesignObj_pschist_get();
-pTable->GetRows("`FK_DesignObjCategory`=" + StringUtils::itos(m_PK_DesignObjCategory),rows);
-}
-void Row_DesignObjCategory::DesignObj_pschmask_FK_DesignObjCategory_getrows(vector <class Row_DesignObj_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DesignObj_pschmask *pTable = table->database->DesignObj_pschmask_get();
-pTable->GetRows("`FK_DesignObjCategory`=" + StringUtils::itos(m_PK_DesignObjCategory),rows);
 }
 
 

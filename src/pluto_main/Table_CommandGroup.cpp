@@ -39,20 +39,10 @@ using namespace std;
 #include "Table_Icon.h"
 
 #include "Table_CommandGroup_Command.h"
-#include "Table_CommandGroup_Command_pschist.h"
-#include "Table_CommandGroup_Command_pschmask.h"
 #include "Table_CommandGroup_EntertainArea.h"
-#include "Table_CommandGroup_EntertainArea_pschist.h"
-#include "Table_CommandGroup_EntertainArea_pschmask.h"
 #include "Table_CommandGroup_Room.h"
-#include "Table_CommandGroup_Room_pschist.h"
-#include "Table_CommandGroup_Room_pschmask.h"
 #include "Table_Device_CommandGroup.h"
-#include "Table_Device_CommandGroup_pschist.h"
-#include "Table_Device_CommandGroup_pschmask.h"
 #include "Table_EventHandler.h"
-#include "Table_EventHandler_pschist.h"
-#include "Table_EventHandler_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_CommandGroup()
@@ -1693,39 +1683,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_CommandGroup_Command *pTable = table->database->CommandGroup_Command_get();
 pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
 }
-void Row_CommandGroup::CommandGroup_Command_pschist_FK_CommandGroup_getrows(vector <class Row_CommandGroup_Command_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandGroup_Command_pschist *pTable = table->database->CommandGroup_Command_pschist_get();
-pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
-}
-void Row_CommandGroup::CommandGroup_Command_pschmask_FK_CommandGroup_getrows(vector <class Row_CommandGroup_Command_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandGroup_Command_pschmask *pTable = table->database->CommandGroup_Command_pschmask_get();
-pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
-}
 void Row_CommandGroup::CommandGroup_EntertainArea_FK_CommandGroup_getrows(vector <class Row_CommandGroup_EntertainArea*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_CommandGroup_EntertainArea *pTable = table->database->CommandGroup_EntertainArea_get();
-pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
-}
-void Row_CommandGroup::CommandGroup_EntertainArea_pschist_FK_CommandGroup_getrows(vector <class Row_CommandGroup_EntertainArea_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandGroup_EntertainArea_pschist *pTable = table->database->CommandGroup_EntertainArea_pschist_get();
-pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
-}
-void Row_CommandGroup::CommandGroup_EntertainArea_pschmask_FK_CommandGroup_getrows(vector <class Row_CommandGroup_EntertainArea_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandGroup_EntertainArea_pschmask *pTable = table->database->CommandGroup_EntertainArea_pschmask_get();
 pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
 }
 void Row_CommandGroup::CommandGroup_Room_FK_CommandGroup_getrows(vector <class Row_CommandGroup_Room*> *rows)
@@ -1735,20 +1697,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_CommandGroup_Room *pTable = table->database->CommandGroup_Room_get();
 pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
 }
-void Row_CommandGroup::CommandGroup_Room_pschist_FK_CommandGroup_getrows(vector <class Row_CommandGroup_Room_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandGroup_Room_pschist *pTable = table->database->CommandGroup_Room_pschist_get();
-pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
-}
-void Row_CommandGroup::CommandGroup_Room_pschmask_FK_CommandGroup_getrows(vector <class Row_CommandGroup_Room_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandGroup_Room_pschmask *pTable = table->database->CommandGroup_Room_pschmask_get();
-pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
-}
 void Row_CommandGroup::Device_CommandGroup_FK_CommandGroup_getrows(vector <class Row_Device_CommandGroup*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -1756,39 +1704,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_Device_CommandGroup *pTable = table->database->Device_CommandGroup_get();
 pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
 }
-void Row_CommandGroup::Device_CommandGroup_pschist_FK_CommandGroup_getrows(vector <class Row_Device_CommandGroup_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Device_CommandGroup_pschist *pTable = table->database->Device_CommandGroup_pschist_get();
-pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
-}
-void Row_CommandGroup::Device_CommandGroup_pschmask_FK_CommandGroup_getrows(vector <class Row_Device_CommandGroup_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Device_CommandGroup_pschmask *pTable = table->database->Device_CommandGroup_pschmask_get();
-pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
-}
 void Row_CommandGroup::EventHandler_FK_CommandGroup_getrows(vector <class Row_EventHandler*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_EventHandler *pTable = table->database->EventHandler_get();
-pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
-}
-void Row_CommandGroup::EventHandler_pschist_FK_CommandGroup_getrows(vector <class Row_EventHandler_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_EventHandler_pschist *pTable = table->database->EventHandler_pschist_get();
-pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
-}
-void Row_CommandGroup::EventHandler_pschmask_FK_CommandGroup_getrows(vector <class Row_EventHandler_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_EventHandler_pschmask *pTable = table->database->EventHandler_pschmask_get();
 pTable->GetRows("`FK_CommandGroup`=" + StringUtils::itos(m_PK_CommandGroup),rows);
 }
 

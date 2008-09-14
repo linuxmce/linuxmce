@@ -228,20 +228,10 @@ class Row_Icon* FK_Icon_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void CommandGroup_Command_FK_CommandGroup_getrows(vector <class Row_CommandGroup_Command*> *rows);
-void CommandGroup_Command_pschist_FK_CommandGroup_getrows(vector <class Row_CommandGroup_Command_pschist*> *rows);
-void CommandGroup_Command_pschmask_FK_CommandGroup_getrows(vector <class Row_CommandGroup_Command_pschmask*> *rows);
 void CommandGroup_EntertainArea_FK_CommandGroup_getrows(vector <class Row_CommandGroup_EntertainArea*> *rows);
-void CommandGroup_EntertainArea_pschist_FK_CommandGroup_getrows(vector <class Row_CommandGroup_EntertainArea_pschist*> *rows);
-void CommandGroup_EntertainArea_pschmask_FK_CommandGroup_getrows(vector <class Row_CommandGroup_EntertainArea_pschmask*> *rows);
 void CommandGroup_Room_FK_CommandGroup_getrows(vector <class Row_CommandGroup_Room*> *rows);
-void CommandGroup_Room_pschist_FK_CommandGroup_getrows(vector <class Row_CommandGroup_Room_pschist*> *rows);
-void CommandGroup_Room_pschmask_FK_CommandGroup_getrows(vector <class Row_CommandGroup_Room_pschmask*> *rows);
 void Device_CommandGroup_FK_CommandGroup_getrows(vector <class Row_Device_CommandGroup*> *rows);
-void Device_CommandGroup_pschist_FK_CommandGroup_getrows(vector <class Row_Device_CommandGroup_pschist*> *rows);
-void Device_CommandGroup_pschmask_FK_CommandGroup_getrows(vector <class Row_Device_CommandGroup_pschmask*> *rows);
 void EventHandler_FK_CommandGroup_getrows(vector <class Row_EventHandler*> *rows);
-void EventHandler_pschist_FK_CommandGroup_getrows(vector <class Row_EventHandler_pschist*> *rows);
-void EventHandler_pschmask_FK_CommandGroup_getrows(vector <class Row_EventHandler_pschmask*> *rows);
 
 
 		// Setup binary serialization

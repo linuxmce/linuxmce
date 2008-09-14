@@ -35,8 +35,6 @@ using namespace std;
 #include "Table_Country.h"
 
 #include "Table_Installation.h"
-#include "Table_Installation_pschist.h"
-#include "Table_Installation_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_PostalCode()
@@ -961,20 +959,6 @@ void Row_PostalCode::Installation_FK_PostalCode_getrows(vector <class Row_Instal
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Installation *pTable = table->database->Installation_get();
-pTable->GetRows("`FK_PostalCode`=" + StringUtils::itos(m_PK_PostalCode),rows);
-}
-void Row_PostalCode::Installation_pschist_FK_PostalCode_getrows(vector <class Row_Installation_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Installation_pschist *pTable = table->database->Installation_pschist_get();
-pTable->GetRows("`FK_PostalCode`=" + StringUtils::itos(m_PK_PostalCode),rows);
-}
-void Row_PostalCode::Installation_pschmask_FK_PostalCode_getrows(vector <class Row_Installation_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Installation_pschmask *pTable = table->database->Installation_pschmask_get();
 pTable->GetRows("`FK_PostalCode`=" + StringUtils::itos(m_PK_PostalCode),rows);
 }
 

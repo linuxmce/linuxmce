@@ -40,8 +40,6 @@ using namespace std;
 #include "Table_Skin.h"
 
 #include "Table_RemoteControl.h"
-#include "Table_RemoteControl_pschist.h"
-#include "Table_RemoteControl_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_DeviceTemplate_MediaType_DesignObj()
@@ -1506,20 +1504,6 @@ void Row_DeviceTemplate_MediaType_DesignObj::RemoteControl_FK_DeviceTemplate_Med
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_RemoteControl *pTable = table->database->RemoteControl_get();
-pTable->GetRows("`FK_DeviceTemplate_MediaType_DesignObj`=" + StringUtils::itos(m_PK_DeviceTemplate_MediaType_DesignObj),rows);
-}
-void Row_DeviceTemplate_MediaType_DesignObj::RemoteControl_pschist_FK_DeviceTemplate_MediaType_DesignObj_getrows(vector <class Row_RemoteControl_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_RemoteControl_pschist *pTable = table->database->RemoteControl_pschist_get();
-pTable->GetRows("`FK_DeviceTemplate_MediaType_DesignObj`=" + StringUtils::itos(m_PK_DeviceTemplate_MediaType_DesignObj),rows);
-}
-void Row_DeviceTemplate_MediaType_DesignObj::RemoteControl_pschmask_FK_DeviceTemplate_MediaType_DesignObj_getrows(vector <class Row_RemoteControl_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_RemoteControl_pschmask *pTable = table->database->RemoteControl_pschmask_get();
 pTable->GetRows("`FK_DeviceTemplate_MediaType_DesignObj`=" + StringUtils::itos(m_PK_DeviceTemplate_MediaType_DesignObj),rows);
 }
 

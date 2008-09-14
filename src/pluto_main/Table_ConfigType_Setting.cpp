@@ -34,8 +34,6 @@ using namespace std;
 #include "Table_ConfigType.h"
 
 #include "Table_ConfigType_Token.h"
-#include "Table_ConfigType_Token_pschist.h"
-#include "Table_ConfigType_Token_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_ConfigType_Setting()
@@ -959,20 +957,6 @@ void Row_ConfigType_Setting::ConfigType_Token_FK_ConfigType_Setting_getrows(vect
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_ConfigType_Token *pTable = table->database->ConfigType_Token_get();
-pTable->GetRows("`FK_ConfigType_Setting`=" + StringUtils::itos(m_PK_ConfigType_Setting),rows);
-}
-void Row_ConfigType_Setting::ConfigType_Token_pschist_FK_ConfigType_Setting_getrows(vector <class Row_ConfigType_Token_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_ConfigType_Token_pschist *pTable = table->database->ConfigType_Token_pschist_get();
-pTable->GetRows("`FK_ConfigType_Setting`=" + StringUtils::itos(m_PK_ConfigType_Setting),rows);
-}
-void Row_ConfigType_Setting::ConfigType_Token_pschmask_FK_ConfigType_Setting_getrows(vector <class Row_ConfigType_Token_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_ConfigType_Token_pschmask *pTable = table->database->ConfigType_Token_pschmask_get();
 pTable->GetRows("`FK_ConfigType_Setting`=" + StringUtils::itos(m_PK_ConfigType_Setting),rows);
 }
 

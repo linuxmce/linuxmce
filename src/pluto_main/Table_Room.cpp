@@ -37,17 +37,9 @@ using namespace std;
 #include "Table_FloorplanObjectType.h"
 
 #include "Table_CommandGroup_Room.h"
-#include "Table_CommandGroup_Room_pschist.h"
-#include "Table_CommandGroup_Room_pschmask.h"
 #include "Table_Device.h"
-#include "Table_Device_pschist.h"
-#include "Table_Device_pschmask.h"
 #include "Table_EntertainArea.h"
-#include "Table_EntertainArea_pschist.h"
-#include "Table_EntertainArea_pschmask.h"
 #include "Table_Room_Users.h"
-#include "Table_Room_Users_pschist.h"
-#include "Table_Room_Users_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_Room()
@@ -1287,39 +1279,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_CommandGroup_Room *pTable = table->database->CommandGroup_Room_get();
 pTable->GetRows("`FK_Room`=" + StringUtils::itos(m_PK_Room),rows);
 }
-void Row_Room::CommandGroup_Room_pschist_FK_Room_getrows(vector <class Row_CommandGroup_Room_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandGroup_Room_pschist *pTable = table->database->CommandGroup_Room_pschist_get();
-pTable->GetRows("`FK_Room`=" + StringUtils::itos(m_PK_Room),rows);
-}
-void Row_Room::CommandGroup_Room_pschmask_FK_Room_getrows(vector <class Row_CommandGroup_Room_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CommandGroup_Room_pschmask *pTable = table->database->CommandGroup_Room_pschmask_get();
-pTable->GetRows("`FK_Room`=" + StringUtils::itos(m_PK_Room),rows);
-}
 void Row_Room::Device_FK_Room_getrows(vector <class Row_Device*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Device *pTable = table->database->Device_get();
-pTable->GetRows("`FK_Room`=" + StringUtils::itos(m_PK_Room),rows);
-}
-void Row_Room::Device_pschist_FK_Room_getrows(vector <class Row_Device_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Device_pschist *pTable = table->database->Device_pschist_get();
-pTable->GetRows("`FK_Room`=" + StringUtils::itos(m_PK_Room),rows);
-}
-void Row_Room::Device_pschmask_FK_Room_getrows(vector <class Row_Device_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Device_pschmask *pTable = table->database->Device_pschmask_get();
 pTable->GetRows("`FK_Room`=" + StringUtils::itos(m_PK_Room),rows);
 }
 void Row_Room::EntertainArea_FK_Room_getrows(vector <class Row_EntertainArea*> *rows)
@@ -1329,39 +1293,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_EntertainArea *pTable = table->database->EntertainArea_get();
 pTable->GetRows("`FK_Room`=" + StringUtils::itos(m_PK_Room),rows);
 }
-void Row_Room::EntertainArea_pschist_FK_Room_getrows(vector <class Row_EntertainArea_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_EntertainArea_pschist *pTable = table->database->EntertainArea_pschist_get();
-pTable->GetRows("`FK_Room`=" + StringUtils::itos(m_PK_Room),rows);
-}
-void Row_Room::EntertainArea_pschmask_FK_Room_getrows(vector <class Row_EntertainArea_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_EntertainArea_pschmask *pTable = table->database->EntertainArea_pschmask_get();
-pTable->GetRows("`FK_Room`=" + StringUtils::itos(m_PK_Room),rows);
-}
 void Row_Room::Room_Users_FK_Room_getrows(vector <class Row_Room_Users*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Room_Users *pTable = table->database->Room_Users_get();
-pTable->GetRows("`FK_Room`=" + StringUtils::itos(m_PK_Room),rows);
-}
-void Row_Room::Room_Users_pschist_FK_Room_getrows(vector <class Row_Room_Users_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Room_Users_pschist *pTable = table->database->Room_Users_pschist_get();
-pTable->GetRows("`FK_Room`=" + StringUtils::itos(m_PK_Room),rows);
-}
-void Row_Room::Room_Users_pschmask_FK_Room_getrows(vector <class Row_Room_Users_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Room_Users_pschmask *pTable = table->database->Room_Users_pschmask_get();
 pTable->GetRows("`FK_Room`=" + StringUtils::itos(m_PK_Room),rows);
 }
 

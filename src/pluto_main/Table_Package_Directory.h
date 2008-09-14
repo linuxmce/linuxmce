@@ -188,8 +188,6 @@ class Row_Distro* FK_Distro_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Package_Directory_File_FK_Package_Directory_getrows(vector <class Row_Package_Directory_File*> *rows);
-void Package_Directory_File_pschist_FK_Package_Directory_getrows(vector <class Row_Package_Directory_File_pschist*> *rows);
-void Package_Directory_File_pschmask_FK_Package_Directory_getrows(vector <class Row_Package_Directory_File_pschmask*> *rows);
 
 
 		// Setup binary serialization

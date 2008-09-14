@@ -33,11 +33,7 @@ using namespace std;
 #include "Table_CommMethod.h"
 
 #include "Table_DeviceTemplate.h"
-#include "Table_DeviceTemplate_pschist.h"
-#include "Table_DeviceTemplate_pschmask.h"
 #include "Table_InfraredGroup.h"
-#include "Table_InfraredGroup_pschist.h"
-#include "Table_InfraredGroup_pschmask.h"
 #include "Table_PnpQueue.h"
 
 
@@ -970,39 +966,11 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 class Table_DeviceTemplate *pTable = table->database->DeviceTemplate_get();
 pTable->GetRows("`FK_CommMethod`=" + StringUtils::itos(m_PK_CommMethod),rows);
 }
-void Row_CommMethod::DeviceTemplate_pschist_FK_CommMethod_getrows(vector <class Row_DeviceTemplate_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_pschist *pTable = table->database->DeviceTemplate_pschist_get();
-pTable->GetRows("`FK_CommMethod`=" + StringUtils::itos(m_PK_CommMethod),rows);
-}
-void Row_CommMethod::DeviceTemplate_pschmask_FK_CommMethod_getrows(vector <class Row_DeviceTemplate_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_pschmask *pTable = table->database->DeviceTemplate_pschmask_get();
-pTable->GetRows("`FK_CommMethod`=" + StringUtils::itos(m_PK_CommMethod),rows);
-}
 void Row_CommMethod::InfraredGroup_FK_CommMethod_getrows(vector <class Row_InfraredGroup*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_InfraredGroup *pTable = table->database->InfraredGroup_get();
-pTable->GetRows("`FK_CommMethod`=" + StringUtils::itos(m_PK_CommMethod),rows);
-}
-void Row_CommMethod::InfraredGroup_pschist_FK_CommMethod_getrows(vector <class Row_InfraredGroup_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_InfraredGroup_pschist *pTable = table->database->InfraredGroup_pschist_get();
-pTable->GetRows("`FK_CommMethod`=" + StringUtils::itos(m_PK_CommMethod),rows);
-}
-void Row_CommMethod::InfraredGroup_pschmask_FK_CommMethod_getrows(vector <class Row_InfraredGroup_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_InfraredGroup_pschmask *pTable = table->database->InfraredGroup_pschmask_get();
 pTable->GetRows("`FK_CommMethod`=" + StringUtils::itos(m_PK_CommMethod),rows);
 }
 void Row_CommMethod::PnpQueue_FK_CommMethod_getrows(vector <class Row_PnpQueue*> *rows)

@@ -158,8 +158,6 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Device_HouseMode_FK_HouseMode_getrows(vector <class Row_Device_HouseMode*> *rows);
-void Device_HouseMode_pschist_FK_HouseMode_getrows(vector <class Row_Device_HouseMode_pschist*> *rows);
-void Device_HouseMode_pschmask_FK_HouseMode_getrows(vector <class Row_Device_HouseMode_pschmask*> *rows);
 
 
 		// Setup binary serialization

@@ -36,12 +36,6 @@ using namespace std;
 #include "Table_Criteria.h"
 #include "Table_CriteriaParm.h"
 #include "Table_CriteriaParmNesting.h"
-#include "Table_CriteriaParmNesting_pschist.h"
-#include "Table_CriteriaParmNesting_pschmask.h"
-#include "Table_CriteriaParm_pschist.h"
-#include "Table_CriteriaParm_pschmask.h"
-#include "Table_Criteria_pschist.h"
-#include "Table_Criteria_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_CriteriaParmNesting()
@@ -1029,48 +1023,6 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_CriteriaParmNesting *pTable = table->database->CriteriaParmNesting_get();
 pTable->GetRows("`FK_CriteriaParmNesting_Parent`=" + StringUtils::itos(m_PK_CriteriaParmNesting),rows);
-}
-void Row_CriteriaParmNesting::CriteriaParmNesting_pschist_FK_CriteriaParmNesting_Parent_getrows(vector <class Row_CriteriaParmNesting_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CriteriaParmNesting_pschist *pTable = table->database->CriteriaParmNesting_pschist_get();
-pTable->GetRows("`FK_CriteriaParmNesting_Parent`=" + StringUtils::itos(m_PK_CriteriaParmNesting),rows);
-}
-void Row_CriteriaParmNesting::CriteriaParmNesting_pschmask_FK_CriteriaParmNesting_Parent_getrows(vector <class Row_CriteriaParmNesting_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CriteriaParmNesting_pschmask *pTable = table->database->CriteriaParmNesting_pschmask_get();
-pTable->GetRows("`FK_CriteriaParmNesting_Parent`=" + StringUtils::itos(m_PK_CriteriaParmNesting),rows);
-}
-void Row_CriteriaParmNesting::CriteriaParm_pschist_FK_CriteriaParmNesting_getrows(vector <class Row_CriteriaParm_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CriteriaParm_pschist *pTable = table->database->CriteriaParm_pschist_get();
-pTable->GetRows("`FK_CriteriaParmNesting`=" + StringUtils::itos(m_PK_CriteriaParmNesting),rows);
-}
-void Row_CriteriaParmNesting::CriteriaParm_pschmask_FK_CriteriaParmNesting_getrows(vector <class Row_CriteriaParm_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_CriteriaParm_pschmask *pTable = table->database->CriteriaParm_pschmask_get();
-pTable->GetRows("`FK_CriteriaParmNesting`=" + StringUtils::itos(m_PK_CriteriaParmNesting),rows);
-}
-void Row_CriteriaParmNesting::Criteria_pschist_FK_CriteriaParmNesting_getrows(vector <class Row_Criteria_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Criteria_pschist *pTable = table->database->Criteria_pschist_get();
-pTable->GetRows("`FK_CriteriaParmNesting`=" + StringUtils::itos(m_PK_CriteriaParmNesting),rows);
-}
-void Row_CriteriaParmNesting::Criteria_pschmask_FK_CriteriaParmNesting_getrows(vector <class Row_Criteria_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Criteria_pschmask *pTable = table->database->Criteria_pschmask_get();
-pTable->GetRows("`FK_CriteriaParmNesting`=" + StringUtils::itos(m_PK_CriteriaParmNesting),rows);
 }
 
 

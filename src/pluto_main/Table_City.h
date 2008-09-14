@@ -168,8 +168,6 @@ class Row_TimeZone* FK_TimeZone_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Installation_FK_City_getrows(vector <class Row_Installation*> *rows);
-void Installation_pschist_FK_City_getrows(vector <class Row_Installation_pschist*> *rows);
-void Installation_pschmask_FK_City_getrows(vector <class Row_Installation_pschmask*> *rows);
 void PostalCode_FK_City_getrows(vector <class Row_PostalCode*> *rows);
 
 

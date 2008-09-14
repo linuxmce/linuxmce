@@ -35,8 +35,6 @@ using namespace std;
 #include "Table_DeviceCategory.h"
 
 #include "Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe.h"
-#include "Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschist.h"
-#include "Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_DeviceTemplate_DeviceCategory_ControlledVia()
@@ -1102,20 +1100,6 @@ void Row_DeviceTemplate_DeviceCategory_ControlledVia::DeviceTemplate_DeviceCateg
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe *pTable = table->database->DeviceTemplate_DeviceCategory_ControlledVia_Pipe_get();
-pTable->GetRows("`FK_DeviceTemplate_DeviceCategory_ControlledVia`=" + StringUtils::itos(m_PK_DeviceTemplate_DeviceCategory_ControlledVia),rows);
-}
-void Row_DeviceTemplate_DeviceCategory_ControlledVia::DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschist_FK_DeviceTemplate_DeviceCategory_ControlledVia_getrows(vector <class Row_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschist *pTable = table->database->DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschist_get();
-pTable->GetRows("`FK_DeviceTemplate_DeviceCategory_ControlledVia`=" + StringUtils::itos(m_PK_DeviceTemplate_DeviceCategory_ControlledVia),rows);
-}
-void Row_DeviceTemplate_DeviceCategory_ControlledVia::DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschmask_FK_DeviceTemplate_DeviceCategory_ControlledVia_getrows(vector <class Row_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschmask *pTable = table->database->DeviceTemplate_DeviceCategory_ControlledVia_Pipe_pschmask_get();
 pTable->GetRows("`FK_DeviceTemplate_DeviceCategory_ControlledVia`=" + StringUtils::itos(m_PK_DeviceTemplate_DeviceCategory_ControlledVia),rows);
 }
 

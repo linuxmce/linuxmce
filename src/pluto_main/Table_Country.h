@@ -137,13 +137,9 @@ void country_code_set(string val);
 		// Return the rows in other tables with foreign keys pointing here
 		void City_FK_Country_getrows(vector <class Row_City*> *rows);
 void Installation_FK_Country_getrows(vector <class Row_Installation*> *rows);
-void Installation_pschist_FK_Country_getrows(vector <class Row_Installation_pschist*> *rows);
-void Installation_pschmask_FK_Country_getrows(vector <class Row_Installation_pschmask*> *rows);
 void PostalCode_FK_Country_getrows(vector <class Row_PostalCode*> *rows);
 void Region_FK_Country_getrows(vector <class Row_Region*> *rows);
 void RepositorySource_URL_FK_Country_getrows(vector <class Row_RepositorySource_URL*> *rows);
-void RepositorySource_URL_pschist_FK_Country_getrows(vector <class Row_RepositorySource_URL_pschist*> *rows);
-void RepositorySource_URL_pschmask_FK_Country_getrows(vector <class Row_RepositorySource_URL_pschmask*> *rows);
 
 
 		// Setup binary serialization

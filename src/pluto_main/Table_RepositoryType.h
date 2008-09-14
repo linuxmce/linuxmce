@@ -176,13 +176,7 @@ void psc_restrict_setNull(bool val);
 		// Return the rows in other tables with foreign keys pointing here
 		void Installation_FK_RepositoryType_Source_getrows(vector <class Row_Installation*> *rows);
 void Installation_FK_RepositoryType_Binaries_getrows(vector <class Row_Installation*> *rows);
-void Installation_pschist_FK_RepositoryType_Source_getrows(vector <class Row_Installation_pschist*> *rows);
-void Installation_pschist_FK_RepositoryType_Binaries_getrows(vector <class Row_Installation_pschist*> *rows);
-void Installation_pschmask_FK_RepositoryType_Source_getrows(vector <class Row_Installation_pschmask*> *rows);
-void Installation_pschmask_FK_RepositoryType_Binaries_getrows(vector <class Row_Installation_pschmask*> *rows);
 void RepositorySource_FK_RepositoryType_getrows(vector <class Row_RepositorySource*> *rows);
-void RepositorySource_pschist_FK_RepositoryType_getrows(vector <class Row_RepositorySource_pschist*> *rows);
-void RepositorySource_pschmask_FK_RepositoryType_getrows(vector <class Row_RepositorySource_pschmask*> *rows);
 
 
 		// Setup binary serialization

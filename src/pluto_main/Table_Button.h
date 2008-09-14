@@ -159,10 +159,6 @@ void psc_restrict_setNull(bool val);
 		// Return the rows in other tables with foreign keys pointing here
 		void DesignObjVariation_FK_Button_getrows(vector <class Row_DesignObjVariation*> *rows);
 void DesignObjVariation_Zone_FK_Button_getrows(vector <class Row_DesignObjVariation_Zone*> *rows);
-void DesignObjVariation_Zone_pschist_FK_Button_getrows(vector <class Row_DesignObjVariation_Zone_pschist*> *rows);
-void DesignObjVariation_Zone_pschmask_FK_Button_getrows(vector <class Row_DesignObjVariation_Zone_pschmask*> *rows);
-void DesignObjVariation_pschist_FK_Button_getrows(vector <class Row_DesignObjVariation_pschist*> *rows);
-void DesignObjVariation_pschmask_FK_Button_getrows(vector <class Row_DesignObjVariation_pschmask*> *rows);
 
 
 		// Setup binary serialization

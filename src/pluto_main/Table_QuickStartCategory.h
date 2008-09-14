@@ -163,11 +163,7 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void QuickStartCategory_FK_QuickStartCategory_Parent_getrows(vector <class Row_QuickStartCategory*> *rows);
-void QuickStartCategory_pschist_FK_QuickStartCategory_Parent_getrows(vector <class Row_QuickStartCategory_pschist*> *rows);
-void QuickStartCategory_pschmask_FK_QuickStartCategory_Parent_getrows(vector <class Row_QuickStartCategory_pschmask*> *rows);
 void QuickStartTemplate_FK_QuickStartCategory_getrows(vector <class Row_QuickStartTemplate*> *rows);
-void QuickStartTemplate_pschist_FK_QuickStartCategory_getrows(vector <class Row_QuickStartTemplate_pschist*> *rows);
-void QuickStartTemplate_pschmask_FK_QuickStartCategory_getrows(vector <class Row_QuickStartTemplate_pschmask*> *rows);
 
 
 		// Setup binary serialization

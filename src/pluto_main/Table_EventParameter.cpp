@@ -34,8 +34,6 @@ using namespace std;
 #include "Table_ParameterType.h"
 
 #include "Table_Event_EventParameter.h"
-#include "Table_Event_EventParameter_pschist.h"
-#include "Table_Event_EventParameter_pschmask.h"
 
 
 void Database_pluto_main::CreateTable_EventParameter()
@@ -1053,20 +1051,6 @@ void Row_EventParameter::Event_EventParameter_FK_EventParameter_getrows(vector <
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Event_EventParameter *pTable = table->database->Event_EventParameter_get();
-pTable->GetRows("`FK_EventParameter`=" + StringUtils::itos(m_PK_EventParameter),rows);
-}
-void Row_EventParameter::Event_EventParameter_pschist_FK_EventParameter_getrows(vector <class Row_Event_EventParameter_pschist*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Event_EventParameter_pschist *pTable = table->database->Event_EventParameter_pschist_get();
-pTable->GetRows("`FK_EventParameter`=" + StringUtils::itos(m_PK_EventParameter),rows);
-}
-void Row_EventParameter::Event_EventParameter_pschmask_FK_EventParameter_getrows(vector <class Row_Event_EventParameter_pschmask*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Event_EventParameter_pschmask *pTable = table->database->Event_EventParameter_pschmask_get();
 pTable->GetRows("`FK_EventParameter`=" + StringUtils::itos(m_PK_EventParameter),rows);
 }
 

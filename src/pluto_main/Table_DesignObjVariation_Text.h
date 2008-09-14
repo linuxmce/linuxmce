@@ -166,8 +166,6 @@ class Row_Text* FK_Text_OverrideFromHeader_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void DesignObjVariation_Text_Skin_Language_FK_DesignObjVariation_Text_getrows(vector <class Row_DesignObjVariation_Text_Skin_Language*> *rows);
-void DesignObjVariation_Text_Skin_Language_pschist_FK_DesignObjVariation_Text_getrows(vector <class Row_DesignObjVariation_Text_Skin_Language_pschist*> *rows);
-void DesignObjVariation_Text_Skin_Language_pschmask_FK_DesignObjVariation_Text_getrows(vector <class Row_DesignObjVariation_Text_Skin_Language_pschmask*> *rows);
 
 
 		// Setup binary serialization

@@ -171,8 +171,6 @@ class Row_DeviceTemplate* FK_DeviceTemplate_ControlledVia_getrow();
 
 		// Return the rows in other tables with foreign keys pointing here
 		void DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_FK_DeviceTemplate_DeviceTemplate_ControlledVia_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe*> *rows);
-void DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschist_FK_DeviceTemplate_DeviceTemplate_ControlledVia_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschist*> *rows);
-void DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschmask_FK_DeviceTemplate_DeviceTemplate_ControlledVia_getrows(vector <class Row_DeviceTemplate_DeviceTemplate_ControlledVia_Pipe_pschmask*> *rows);
 
 
 		// Setup binary serialization
