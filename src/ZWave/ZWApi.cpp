@@ -503,19 +503,19 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got switch multilevel report from node %i, level: %i",frame[3],frame[7]);
 							DCE::ZWave *tmp_zwave = static_cast<DCE::ZWave*>(myZWave);
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Send light changed event");
-							tmp_zwave->SendLightChangedEvents (frame[3],(unsigned char)frame[7]);
+							tmp_zwave->SendLightChangedEvents ((unsigned char)frame[3],(unsigned char)frame[7]);
 						}
 						break;
 					case COMMAND_CLASS_SWITCH_ALL:
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_SWITCH_ALL - ");
 						if (frame[6] == SWITCH_ALL_ON) {
-							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got switch all ON from node %i",frame[3]);
+							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got switch all ON from node %i",(unsigned char)frame[3]);
 							DCE::ZWave *tmp_zwave = static_cast<DCE::ZWave*>(myZWave);
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Send light changed event");
 							tmp_zwave->SendLightChangedEvents (0,99);
 						}
 						if (frame[6] == SWITCH_ALL_OFF) {
-							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got switch all OFF from node %i",frame[3]);
+							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got switch all OFF from node %i",(unsigned char)frame[3]);
 							DCE::ZWave *tmp_zwave = static_cast<DCE::ZWave*>(myZWave);
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Send light changed event");
 							tmp_zwave->SendLightChangedEvents (0,0);
@@ -524,11 +524,11 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					case COMMAND_CLASS_ALARM:
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_ALARM - ");
 						if (frame[6] == ALARM_REPORT) {
-							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got ALARM from node %i, type: %i, level: %i",frame[3],frame[7],frame[8]);
+							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got ALARM from node %i, type: %i, level: %i",(unsigned char)frame[3],(unsigned char)frame[7],(unsigned char)frame[8]);
 							DCE::ZWave *tmp_zwave = static_cast<DCE::ZWave*>(myZWave);
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Send sensor tripped changed event");
-							tmp_zwave->SendSensorTrippedEvents (frame[3],true);
-							tmp_zwave->SendSensorTrippedEvents (frame[3],false);
+							tmp_zwave->SendSensorTrippedEvents ((unsigned char)frame[3],true);
+							tmp_zwave->SendSensorTrippedEvents ((unsigned char)frame[3],false);
 						}
 						break;
 					case COMMAND_CLASS_BASIC:
@@ -538,7 +538,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							// char tmp[32];
 							// sprintf(&tmp,"%d",frame[7]);
 							//
-							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got basic report from node %i, value: %i",frame[3],(unsigned char)frame[7]);
+							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got basic report from node %i, value: %i",(unsigned char)frame[3],(unsigned char)frame[7]);
 							ZWNodeMapIt = ZWNodeMap.find((unsigned int)frame[3]);
 							if (ZWNodeMapIt != ZWNodeMap.end()) {
 								if ((*ZWNodeMapIt).second->stateBasic != (unsigned char)frame[7]) {
@@ -551,11 +551,11 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							}
 
 						} else if ((unsigned char)frame[6] == BASIC_SET) {
-							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got COMMAND_CLASS_BASIC:BASIC_SET, level %i",(unsigned char)frame[7]);
+							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got BASIC_SET from node %i, value %i",(unsigned char)frame[3],(unsigned char)frame[7]);
 							ZWNodeMapIt = ZWNodeMap.find((unsigned int)frame[3]);
 							if (ZWNodeMapIt != ZWNodeMap.end()) {
-								if ((*ZWNodeMapIt).second->typeGeneric == GENERIC_TYPE_SWITCH_REMOTE) {
-									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"This is a remote switch, we will traverse the association list and request reports");
+								if (((*ZWNodeMapIt).second->typeGeneric == GENERIC_TYPE_SWITCH_REMOTE) && ((*ZWNodeMapIt).second->typeBasic == BASIC_TYPE_ROUTING_SLAVE)) {
+									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"This is a powered remote switch, we will traverse the association list and request reports");
 									const char *tmp_str = (*ZWNodeMapIt).second->associationList[1].c_str();
 									char *pch = strtok((char*)tmp_str,",");
 									while (pch != NULL) {
@@ -564,6 +564,15 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 									}
 										
 									
+								} else if ((*ZWNodeMapIt).second->typeGeneric == GENERIC_TYPE_SENSOR_BINARY) {
+									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"This is a binary sensor, so we send sensor tripped events");
+									DCE::ZWave *tmp2_zwave = static_cast<DCE::ZWave*>(myZWave);
+									if ((unsigned char)frame[7] == 0xff) {
+										tmp2_zwave->SendSensorTrippedEvents ((unsigned char)frame[3],true);
+									} else {
+										tmp2_zwave->SendSensorTrippedEvents ((unsigned char)frame[3],false);
+									}
+
 								}
 							}
 							
