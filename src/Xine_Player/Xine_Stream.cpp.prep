@@ -597,7 +597,7 @@ bool Xine_Stream::OpenMedia(string fileName, string &sMediaInfo, string sMediaPo
 		}
 	}
 
-	bool is_url = (fileName.find(":/")>=0);
+	bool is_url = ( fileName.find(":/") != string::npos);
 	string tmp = (is_url) ? "" : "file://";
 	if (sURLsuffix!="")
 	{
