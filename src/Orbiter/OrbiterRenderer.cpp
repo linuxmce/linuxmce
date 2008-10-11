@@ -1236,6 +1236,12 @@ void OrbiterRenderer::ObjectOnScreen( VectDesignObj_Orbiter *pVectDesignObj_Orbi
 		pObj->m_bHidden = false;
 #endif
 
+//also NOT hidden on Maemo orbiter
+#if defined(MAEMO_NOKIA770)
+	if(pObj->m_iBaseObjectID == DESIGNOBJ_objExitController2_CONST)
+		pObj->m_bHidden = false;
+#endif
+
 	// Move InitializeGrid down so it gets called after the LoadActions,  which may set variables that it will use
 
 	//  Move this down because there's a hide object in the onload
