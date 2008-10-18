@@ -1,5 +1,8 @@
-
 <?php
+/*
+	Copyright 2008 - Peer Oliver Schmidt
+	GPLv2 Licensed
+*/
 	error_reporting(E_ALL);
 	include("lib.inc.php");
 	connectdb();

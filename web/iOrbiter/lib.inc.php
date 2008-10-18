@@ -1,5 +1,8 @@
 <?php
-
+/*
+	Copyright 2008 - Peer Oliver Schmidt
+	GPLv2 Licensed
+*/
 	function DoParameter29($mediaLink, $parameterValue, $commandGroup) {
 		// DoParameter29 is called, when ever a file listing needs to
 		// be presented.
