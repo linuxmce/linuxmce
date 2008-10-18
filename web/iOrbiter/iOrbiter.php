@@ -1,0 +1,105 @@
+ <?php
+ 	include_once("lib.inc.php");
+	error_reporting(E_ALL);
+	connectDB();
+	$currentUser = 1;
+	$currentScreen = 1;
+	$currentRoom = 3; 
+	global $currentUser, $currentScreen, $currentRoom, $currentEntertainArea, $link, $mediaLink;
+	if (isset($_GET["room"])) {
+		$currentRoom = $_GET["room"];
+		$currentRoom = intval($currentRoom);
+	}
+	if (isset($_GET["screen"])) {
+		$currentScreen = $_GET["screen"];
+		$currentScreen = intval($currentScreen);
+	}
+	if (isset($_GET["user"])) {
+		$currentUser = $_GET["user"];
+	}
+	$currentEntertainArea = getMyValue($link,"SELECT PK_EntertainArea FROM EntertainArea WHERE FK_Room = $currentRoom");
+	$heading = getMyValue($link,"SELECT Description FROM Room WHERE PK_Room = $currentRoom") . " - " . getMyValue($link,"SELECT UserName FROM Users WHERE PK_Users = $currentUser");
+	
+?>
+ <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>LinuxMCE</title>
+<meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+<style type="text/css" media="screen">@import "iui/iui.css";</style>
+<script type="application/x-javascript" src="iui/iui.js"></script>
+</head>
+<body onclick="console.log('Hello', event.target);">
+	<div class="toolbar">
+		<h1 id="pageTitle"></h1>
+		<a id="backButton" class="button" href="#"></a>
+		<a class="button" href="#Locations"><?php print $heading; ?></a>
+	</div>
+	<ul id="home" title="Home" selected="true">
+		<li><a href="#Lighting-Scenarios">Lighting Scenarios</a></li>
+		<li><a href="#Media-Scenarios">Media Scenarios</a></li>
+		<li><a href="#Climate-Scenarios">Climate Scenarios</a></li>
+		<li><a href="#Communication-Scenarios">Communication Scenarios</a></li>
+		<li><a href="#Security-Scenarios">Security Scenarios</a></li>
+		<li><a href="#Power">Power</a></li>
+		<li><a href="#linuxmce-links">LinuxMCE Links</a></li>
+	</ul>
+	<ul id="linuxmce-links" title="Links">
+		<li><a href="http://dcerouter/" target="_self">Web Admin</a></li>
+		<li><a href="http://www.linuxmce.org/" target="_self">Website</a></li>
+		<li><a href="http://forum.linuxmce.org/" target="_self">Forum</a></li>
+		<li><a href="http://wiki.linuxmce.org/" target="_self">Wiki</a></li>
+	</ul>
+<?php
+	// Lighting
+	doDesignObjVariations(1345,$link);
+	// Media
+	doDesignObjVariations(1346,$link);
+	// Climate
+	doDesignObjVariations(1347,$link);
+	// Telecom
+	doDesignObjVariations(1349,$link);
+	// Security
+	doDesignObjVariations(1348,$link);
+	// Rooms
+	doDesignObjVariations(2918,$link);
+	// Users
+	doDesignObjVariations(1903,$link);
+
+
+	If (isset($_GET["CommandGroup"])) {
+		$commandGroup = $_GET["CommandGroup"];
+		doCommandGroup($link,$commandGroup);
+	} 
+	If (isset($_GET["CommandGroup_D"])) {
+		$commandGroup = $_GET["CommandGroup_D"];
+		doCommandGroup_D($link,$commandGroup);
+	} 
+	
+		
+
+	// We get the main Screens object
+	$query = "SELECT FK_DesignObj FROM Screen_DesignObj Where FK_Screen = $currentScreen AND $UI AND $SKIN";
+//	print "<p>Getting screen $currentScreen.</p>\n";
+	$mainDesignObj = getMyValue($link,$query);
+//	print "<pre>mainDesignObj $mainDesignObj</pre>\n";
+	// And we get the standard variation of the main menu first.
+	
+//	orbiterDoVariation($link, $mainDesignObj, $currentRoom, $currentEntertainArea,$UI = NULL); // First we use the standard variation.
+//	orbiterDoVariation($link, $mainDesignObj, $currentRoom, $currentEntertainArea,$UI = 1); // After that we add everything from the Normal 4:3 Variation
+	
+//  print "<p>End Of Table</p>\n";
+//  print "</body></html>\n";
+	
+
+	mysql_close($mediaLink);
+	mysql_close($link);
+		
+?>
+
+
+
+</body>
+</html>
