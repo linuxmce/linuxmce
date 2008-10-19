@@ -26,6 +26,31 @@
 		}
 	}
 
+	function getPicture($mediaLink, $PK_File) {
+		// Get a link to the picture associated with the supplied
+		// file.	
+		$fileName = "";
+		$summary = "";
+		$query = "SELECT FK_Picture From Picture_File Where FK_File = $PK_File";
+		$fileName = getMyValue($mediaLink,$query);
+		// Next get the summary of the supplied file
+		$query = "SELECT Text From LongAttribute WHERE FK_AttributeType = 37 AND FK_File = $PK_File";
+		$summary = getMyValue($mediaLink,$query);
+		if ($fileName != "") {
+			if (strlen($summary)>350) {
+				$summary = substr($summary,0,350) . "...";
+			}
+			print "<li style='height: 320px;'>";
+			print "<img style='float:left;' src='/pluto-admin/mediapics/" . $fileName . "_tn.jpg' height='320px'>";			
+			print "<div style='height: 320px;'>$summary</div>";
+//			print "<li>$summary</li>";
+			print "</li>\n";
+		} else if ($summary != "") {
+			print "<li>$summary";
+			print "</li>\n";
+		}
+	}
+
 	function orbiterDoVariation($link, $mainDesignObj, $currentRoom, $currentEntertainArea, $PK_UI = NULL) {
 		// Get the description for the current variation, and the variation designobj containing all other
 		// objects of the page.
@@ -94,7 +119,7 @@
 				// If we are working on a specific UI, we need to include the Standard variation as well
 				if ($UI != "FK_UI IS NULL") {
 					$query = "SELECT PK_DesignObjVariation FROM DesignObjVariation WHERE FK_DesignObj = $designObject AND FK_UI IS NULL";
-					$designObjVariation = getMyValues($link,$query);
+					$designObjVariation = getMyValue($link,$query);
 					doDesignObjVariations($designObjVariation,$link);
 				}
 			} else {
@@ -129,11 +154,13 @@
 
 	}
 
-	function listMyArray($link, $query, $label, $groupByField=-1, $addAnEntry=-1, $refURL = '') {
+	function listMyArray($link, $query, $label, $groupByField=-1, $addAnEntry=-1, $refURL = '',$withUL = True) {
 		$array = getMyArray($link, $query);
 		$oldGroup = "";
 
-		print "<ul>\n";
+		if ($withUL) {
+			print "<ul>\n";
+		}
 		if ($addAnEntry <> -1) {
 	//		foreach($addAnEntry as $member) { print "Member: $member\n"; } 
 			print "<li class='group'>Commands</li>\n";
@@ -158,7 +185,9 @@
 			}
 			print "<li id='$label"."_$member[0]" . "'><a href='$ref'>$member[1]</a></li>\n";
 		}
-		print "</ul>\n";
+		if ($withUL) {
+			print "</ul>\n";
+		}
 	}
 	
 	function doGenres($pk_mediatype = 5) {
@@ -271,7 +300,7 @@
 		listMyArray($mediaLink,$query,"File",3);
 	}
 
-	function buildAttributeList($mediaLink, $pk_file) {
+	function buildAttributeList($mediaLink, $pk_file, $withUL = True) {
 		// Get all attributes belonging to a specific media file.
 		$query = "SELECT PK_Attribute, Attribute.Name, AttributeType.Description FROM Attribute ";
 		$query .= "JOIN File_Attribute ON FK_Attribute = PK_Attribute ";
@@ -280,7 +309,7 @@
 		$query .= "Order By (Description != \"Title\"),(Description != \"Performer\"), Description";
 	//	print "Query: $query";
 		
-		listMyArray($mediaLink,$query,"Details",2,array($pk_file,"Play","play"),"findmore.php?");
+		listMyArray($mediaLink,$query,"Details",2,array($pk_file,"Play","play"),"findmore.php?",$withUL = $withUL);
 	}
 	
 	function getMyValue($link,$query) {

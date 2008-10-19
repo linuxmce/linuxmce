@@ -28,6 +28,9 @@
 
 	$currentEntertainArea = getMyValue($link,"SELECT PK_EntertainArea FROM EntertainArea WHERE FK_Room = $currentRoom");
 	$heading = getMyValue($link,"SELECT Description FROM Room WHERE PK_Room = $currentRoom") . " - " . getMyValue($link,"SELECT UserName FROM Users WHERE PK_Users = $currentUser");
-	
-	buildAttributeList($mediaLink,$PK_File);
+
+	print "<ul>";
+	getPicture($mediaLink,$PK_File);	
+	buildAttributeList($mediaLink,$PK_File,$withUL = False);
+	print "</ul>";
 ?>
