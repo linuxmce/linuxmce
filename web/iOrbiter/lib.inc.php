@@ -37,14 +37,11 @@
 		$query = "SELECT Text From LongAttribute WHERE FK_AttributeType = 37 AND FK_File = $PK_File";
 		$summary = getMyValue($mediaLink,$query);
 		if ($fileName != "") {
-			if (strlen($summary)>350) {
-				$summary = substr($summary,0,350) . "...";
-			}
-			print "<li style='height: 320px;'>";
+			print "<li>"; // style='height: 320px;'>";
 			print "<img style='float:left;' src='/pluto-admin/mediapics/" . $fileName . "_tn.jpg' height='320px'>";			
-			print "<div style='height: 320px;'>$summary</div>";
-//			print "<li>$summary</li>";
+			print "<div>$summary</div>";
 			print "</li>\n";
+			print "<li style='clear:left;'></li>\n";
 		} else if ($summary != "") {
 			print "<li>$summary";
 			print "</li>\n";
