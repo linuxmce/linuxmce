@@ -35,13 +35,14 @@
 <title>LinuxMCE</title>
 <meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 <style type="text/css" media="screen">@import "iui/iui.css";</style>
+<style type="text/css" media="screen">@import "iOrbiter.css";</style>
 <script type="application/x-javascript" src="iui/iui.js"></script>
 </head>
 <body onclick="console.log('Hello', event.target);">
 	<div class="toolbar">
 		<h1 id="pageTitle"></h1>
 		<a id="backButton" class="button" href="#"></a>
-		<a class="button" href="#Locations"><?php print $room; ?></a>
+		<a class="button2" href="#Locations"><?php print $room; ?></a>
 		<a class="button" href="#All-Users"><?php print $user; ?></a>
 	</div>
 	<ul id="home" title="Home" selected="true">
