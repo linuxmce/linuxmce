@@ -39,7 +39,7 @@
 		if ($fileName != "") {
 			print "<li>"; // style='height: 320px;'>";
 			print "<img style='float:left;' src='/pluto-admin/mediapics/" . $fileName . "_tn.jpg' height='320px'>";			
-			print "<div>$summary</div>";
+			print "<p>$summary</p>";
 			print "</li>\n";
 			print "<li style='clear:left;'></li>\n";
 		} else if ($summary != "") {
@@ -71,8 +71,11 @@
 
 	function doDesignObjVariations($designObjVariation,$link) {
 		global $currentRoom, $currentScreen, $currentEntertainArea;
+		$url = "design.php?CommandGroup";
+		$target = "";  // Set to self to start over. -> For example after room and user selection.
 		// How do I get to the CommandGroup_Room containing the list of lights?
-		$query = "SELECT Value FROM DesignObjVariation_DesignObjParameter D Where FK_DesignObjVariation = $designObjVariation AND FK_DesignObjParameter = 11";
+		$query = "SELECT Value FROM DesignObjVariation_DesignObjParameter ";
+		$query .= "Where FK_DesignObjVariation = $designObjVariation AND FK_DesignObjParameter = 11";
 		$PK_Array = getMyValue($link,$query);
 		// $PK_Array = 1;
 		$query = "SELECT Description FROM Array Where PK_Array = $PK_Array";
@@ -81,20 +84,32 @@
 		print "<ul id='$buttonDescription'>\n";
 		// $buttonDescription = "Lighting Scenario";
 		If (in_array($PK_Array,array(1,2,3,4))) {
-			$query = "SELECT PK_CommandGroup, Description FROM CommandGroup C JOIN CommandGroup_Room ON CommandGroup_Room.FK_CommandGroup = PK_CommandGroup WHERE FK_Array = $PK_Array AND FK_Room = $currentRoom";
+			$query = "SELECT PK_CommandGroup, Description FROM CommandGroup ";
+			$query .= " JOIN CommandGroup_Room ON CommandGroup_Room.FK_CommandGroup = PK_CommandGroup ";
+			$query .= " WHERE FK_Array = $PK_Array AND FK_Room = $currentRoom";
 		} elseif ($PK_Array == 5) {
 			// Media Scenarios are not room based, but EntertainmentArea based
-			$query = "SELECT PK_CommandGroup, Description FROM CommandGroup C JOIN CommandGroup_EntertainArea ON CommandGroup_EntertainArea.FK_CommandGroup = PK_CommandGroup WHERE FK_Array = $PK_Array AND CommandGroup_EntertainArea.FK_EntertainArea = $currentEntertainArea";
+			$query = "SELECT PK_CommandGroup, Description FROM CommandGroup ";
+			$query .= "JOIN CommandGroup_EntertainArea ON CommandGroup_EntertainArea.FK_CommandGroup = PK_CommandGroup ";
+			$query .= "WHERE FK_Array = $PK_Array AND CommandGroup_EntertainArea.FK_EntertainArea = $currentEntertainArea";
 		} elseif ($PK_Array == 13) {
-			$query = "SELECT PK_Users, UserName FROM Users Where HideFromOrbiter = 0";
+			// List of users that are not hidden from the Orbiter
+			$target = " target='_self'";
+			$url = "iOrbiter.php?currentUser";
+			$query = "SELECT PK_Users, UserName FROM Users ";
+			$query .= "Where HideFromOrbiter = 0";
 		} elseif ($PK_Array == 14) {
-			$query = "SELECT PK_Room, Description FROM Room Where HideFromOrbiter = 0";
+			// List of rooms that are not hidden from the Orbiter
+			$target = " target='_self'";
+			$url = "iOrbiter.php?currentRoom";
+			$query = "SELECT PK_Room, Description FROM Room ";
+			$query .= "Where HideFromOrbiter = 0";
 		} else {
 			die("<p>Unknown PK_Array $PK_Array</p>\n");
 		}
 		$buttonArray = getMyArray($link,$query);
 		foreach($buttonArray as $buttonDetail) {
-			print "<li><a href='design.php?CommandGroup=$buttonDetail[0]'>$buttonDetail[1]</a></li>\n";
+			print "<li><a href='$url=$buttonDetail[0]' $target>$buttonDetail[1]</a></li>\n";
 		}
 		print "</ul>";
 	}
@@ -152,6 +167,15 @@
 	}
 
 	function listMyArray($link, $query, $label, $groupByField=-1, $addAnEntry=-1, $refURL = '',$withUL = True) {
+		// listMyArrays displays the contents of a supplied array in a way, the UI can be interpreted.
+		// $link is the mysql link
+		// $query contains the query to be executed
+		// $label contains the prefix for ID to be used
+		// $groupByField can be set to a field which to group by all the links
+		// $addAnEntry can contain an array, allowing additional entries be stored into the linked list
+		// $refURL contains the URL to be executed with the IDs of the MySQL array
+		// $withUL can be set to false to disable the printing of the UL tag, for example because other
+		//	stuff had already set the UL tag.
 		$array = getMyArray($link, $query);
 		$oldGroup = "";
 
@@ -159,7 +183,6 @@
 			print "<ul>\n";
 		}
 		if ($addAnEntry <> -1) {
-	//		foreach($addAnEntry as $member) { print "Member: $member\n"; } 
 			print "<li class='group'>Commands</li>\n";
 			if (is_array($addAnEntry[0])) {
 				foreach ($addAnEntry as $addAnEntrySingle) {
@@ -187,7 +210,7 @@
 		}
 	}
 	
-	function doGenres($pk_mediatype = 5) {
+	function doGenres($mediaLink, $pk_mediatype = 5) {
 		// Display a UL of genres for the supplied mediatype
 		$query = "Select Distinct Attribute.Name, Attribute.Name From File_Attribute Join File On File.PK_File = File_Attribute.FK_File";
 		$query .= " Join Attribute On File_Attribute.FK_Attribute = Attribute.PK_Attribute";
