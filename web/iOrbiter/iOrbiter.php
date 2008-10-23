@@ -44,7 +44,8 @@
 <body onclick="console.log('Hello', event.target);">
 	<div class="toolbar">
 		<h1 id="pageTitle"></h1>
-		<a id="backButton" class="button" href="#"></a>
+		<a id="backButton" class="button"></a>
+		<a id="homeButton" class="button" href='iOrbiter.php' target='_self'>Home</a>
 		<a class="button2" href="#Locations"><?php print $room; ?></a>
 		<a class="button" href="#All-Users"><?php print $user; ?></a>
 	</div>

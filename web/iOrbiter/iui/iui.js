@@ -260,6 +260,8 @@ function updatePage(page, fromPage)
         showForm(page);
         
     var backButton = $("backButton");
+    var homeButton = $("homeButton");
+
     if (backButton)
     {
         var prevPage = $(pageHistory[pageHistory.length-2]);
@@ -270,6 +272,17 @@ function updatePage(page, fromPage)
         }
         else
             backButton.style.display = "none";
+    }    
+    if (homeButton)
+    {
+        var prevPage = $(pageHistory[pageHistory.length-2]);
+        if (prevPage && !page.getAttribute("hideBackButton"))
+        {
+            homeButton.style.display = "inline";
+/*            homeButton.innerHTML = "Home" */
+        }
+        else
+            homeButton.style.display = "none";
     }    
 }
 
