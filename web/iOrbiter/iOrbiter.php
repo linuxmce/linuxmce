@@ -23,23 +23,16 @@
 		$currentUser = $_GET["currentUser"];
 	}
 	$currentEntertainArea = getMyValue($link,"SELECT PK_EntertainArea FROM EntertainArea WHERE FK_Room = $currentRoom");
-<<<<<<< .mine
 	if (intval($currentEntertainArea)==0) {
 		$media = False;
 	} 
 	$room = getMyValue($link,"SELECT Description FROM Room WHERE PK_Room = $currentRoom");
 	$user = getMyValue($link,"SELECT UserName FROM Users WHERE PK_Users = $currentUser");
 	$heading =  $room . " - " . $user;
-=======
-	$room = getMyValue($link,"SELECT Description FROM Room WHERE PK_Room = $currentRoom");
-	$user = getMyValue($link,"SELECT UserName FROM Users WHERE PK_Users = $currentUser");
-	$heading =  $room . " - " . $user;
->>>>>>> .r21467
 	
 ?>
  <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title>LinuxMCE</title>
