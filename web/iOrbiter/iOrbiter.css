@@ -1,4 +1,10 @@
+/*
+	Additional CSS for the iOrbiter.
+	Copyright Peer Oliver Schmidt 2008
+	Licence GPL v2
+	based on the regular button class in iUI
 
+ */
 .button2 {
     position: absolute;
     overflow: hidden;
@@ -20,4 +26,14 @@
     white-space: nowrap;
     background: none;
     -webkit-border-image: url(iui/toolButton.png) 0 5 0 5;
+}
+
+#homeButton {
+    display: none;
+    left: 60px;
+    right: auto;
+    padding: 0;
+    max-width: 55px;
+    border-width: 0 8px 0 14px;
+    -webkit-border-image: url(iui/backButton.png) 0 8 0 14;
 }
