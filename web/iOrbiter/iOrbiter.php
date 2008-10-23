@@ -9,6 +9,7 @@
 	$currentUser = 1;
 	$currentScreen = 1;
 	$currentRoom = 3; 
+	$media = True;
 	global $currentUser, $currentScreen, $currentRoom, $currentEntertainArea, $link, $mediaLink;
 	if (isset($_GET["currentRoom"])) {
 		$currentRoom = $_GET["currentRoom"];
@@ -22,9 +23,18 @@
 		$currentUser = $_GET["currentUser"];
 	}
 	$currentEntertainArea = getMyValue($link,"SELECT PK_EntertainArea FROM EntertainArea WHERE FK_Room = $currentRoom");
+<<<<<<< .mine
+	if (intval($currentEntertainArea)==0) {
+		$media = False;
+	} 
 	$room = getMyValue($link,"SELECT Description FROM Room WHERE PK_Room = $currentRoom");
 	$user = getMyValue($link,"SELECT UserName FROM Users WHERE PK_Users = $currentUser");
 	$heading =  $room . " - " . $user;
+=======
+	$room = getMyValue($link,"SELECT Description FROM Room WHERE PK_Room = $currentRoom");
+	$user = getMyValue($link,"SELECT UserName FROM Users WHERE PK_Users = $currentUser");
+	$heading =  $room . " - " . $user;
+>>>>>>> .r21467
 	
 ?>
  <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
@@ -64,7 +74,15 @@
 	// Lighting
 	doDesignObjVariations(1345,$link);
 	// Media
-	doDesignObjVariations(1346,$link);
+	// Only show the media sub menu, if we are in an Entertainment Area.
+	if ($media) {
+		doDesignObjVariations(1346,$link);	
+	} else {
+		print "<ul id='Media-Scenarios'>\n";
+		print "<li>No media devices in this room</li>\n";
+		print "</ul>\n";
+	}
+
 	// Climate
 	doDesignObjVariations(1347,$link);
 	// Telecom
