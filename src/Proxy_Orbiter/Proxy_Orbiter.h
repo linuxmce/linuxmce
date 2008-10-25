@@ -110,6 +110,10 @@ namespace DCE
 		
 		bool PushRefreshEvent(bool bForce, bool bIgnoreMinimumInterval = false);
 		void *PushRefreshEventTask(void *p);
+
+		string PhonePost(string sURL, const vector<string>& vectHeaders, const map<string, string>& mapParams,
+				string User = "", string Password = "", int nPort = 80);
+
 	};
 }
 //-----------------------------------------------------------------------------------------------------
