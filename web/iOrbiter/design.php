@@ -20,7 +20,7 @@
 
 	// We get the main Screens object
 	$query = "SELECT FK_DesignObj FROM Screen_DesignObj Where FK_Screen = $currentScreen AND $UI AND $SKIN";
-	print "<h2>Getting screen $currentScreen.</h2>\n";
+	print "<h2>Gxetting screen $currentScreen.</h2>\n";
 	$mainDesignObj = getMyValue($link,$query);
 	print "<pre>mainDesignObj $mainDesignObj</pre>\n";
 	// And we get the standard variation of the main menu first.

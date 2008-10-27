@@ -3,6 +3,11 @@
 	Copyright 2008 - Peer Oliver Schmidt
 	GPLv2 Licensed
 */
+
+//	error_reporting(E_ALL);
+	
+//	connectToDCERouter();
+
 	function DoParameter29($mediaLink, $parameterValue, $commandGroup) {
 		// DoParameter29 is called, when ever a file listing needs to
 		// be presented.
@@ -388,44 +393,69 @@
 		return $returnValue;
 	}
 
+  function connectToDCERouter($deviceFromID=2, $DCERouter='dcerouter', $port=3450) {
+  	// Create a connection to the DCERouter and announce the from device.
+    if (!is_numeric($port)) {
+      return false;
+    }	
+	print "Trying to create socket DCEROUTER: $DCERouter PORT: $port FROMDEVICE: $deviceFromID\n";
+    $socket = fsockopen($DCERouter,$port);
+    if (!$socket) {
+      die("Can't open socket to DCERouter at $DCEROUTER : $port\n");
+	}
+	print "Socket created\n";
+    $result = fwrite($socket,"EVENT $deviceFromID\n");
+    return $socket;
+  }
+
+
 	function doCommandGroup($link,$commandGroup) {
-		global $currentScreen, $mediaLink;
+		global $current, $mediaLink;
+		$deviceFromID = 2;
+		$messageType = 1;   // 1 = COMMAND, 2 = EVENT
+		
 		$commandGroupDescription = getMyValue($link,"SELECT Description FROM CommandGroup WHERE PK_CommandGroup = $commandGroup");
 		// print "<h1>CommandGroup $commandGroup - $commandGroupDescription</h1>\n";
-		$query = "SELECT PK_CommandGroup" . "_Command,FK_Command, FK_Device FROM CommandGroup" . "_Command Where FK_CommandGroup = $commandGroup Order By OrderNum";
+		$query = "SELECT PK_CommandGroup_Command,FK_Command, FK_Device FROM CommandGroup_Command Where FK_CommandGroup = $commandGroup Order By OrderNum";
 		// print "<p>query: $query</p>\n";
+		print "<ul>$commandGroupDescription</ul>\n";
 		$commands = getMyArray($link,$query);
-
+		$socket = connectToDCERouter($deviceFromID);
+		
 		foreach($commands as $commandDetail) {
+			$messageToSend = "";
 			$destinationDeviceDescription = "";
-			$destinationDevice = $commandDetail[2];
-			if( $destinationDevice >= 0) {
-				$destinationDeviceDescription = getMyValue($link,"SELECT Description From Device Where PK_Device = $destinationDevice");
-			} elseif ($destinationDevice = -300) {
+			$deviceToID = $commandDetail[2];
+			if( $deviceToID >= 0) {
+				$destinationDeviceDescription = getMyValue($link,"SELECT Description From Device Where PK_Device = $deviceToID");
+			} elseif ($deviceToID = -300) {
 				$destinationDeviceDescription = "Current Orbiter";
-			}	
-			$command = $commandDetail[1];
+			}
+			$messageID = $commandDetail[1];
 			
-			$commandDescription = getMyValue($link,"SELECT Description FROM Command Where PK_Command = $command");
-	//		print "<h2>Destination: $destinationDevice - $destinationDeviceDescription</h2>\n";
-	//		print "<h3>Command: $command - $commandDescription</h3>\n";
+			$commandDescription = getMyValue($link,"SELECT Description FROM Command Where PK_Command = $messageID");
+			print "<h2>Destination: $deviceToID - $destinationDeviceDescription</h2>\n";
+			print "<h3>Command: $messageID - $commandDescription</h3>\n";
 
 			$commandGroupCommand = $commandDetail[0];
-			$parameters = getMyArray($link,"SELECT FK_CommandParameter, IK_CommandParameter FROM CommandGroup_Command_CommandParameter C Where FK_CommandGroup"."_Command = $commandGroupCommand");
+			$parameters = getMyArray($link,"SELECT FK_CommandParameter, IK_CommandParameter FROM CommandGroup_Command_CommandParameter C Where FK_CommandGroup_Command = $commandGroupCommand");
+			$messageToSend = "$deviceFromID $deviceToID $messageType $messageID";
 			foreach($parameters as $parameter) {
 				
 				$parameterType = $parameter[0];
 				$parameterValue = $parameter[1];
 				$parameterDescription = getMyValue($link,"SELECT Description FROM CommandParameter C WHERE PK_CommandParameter = $parameterType");
 
-				if ($command == 741) {
+				$messageToSend = $messageToSend . " $parameterType \"$parameterValue\"";
+
+				if ($messageID == 741) {
 					// Goto Screen
 					if ($parameterType == 159) {
 						// PK_Screen
 						$currentScreen = $parameterValue;
 					}
 				}
-				if ($command == 401) {
+				if ($messageID == 401) {
 					if ($parameterType == 29) {
 						DoParameter29($mediaLink, $parameterValue, $commandGroup);
 					}
@@ -433,7 +463,10 @@
 	//			print "<p>Parameter: $parameterType - $parameterDescription - $parameterValue</p>\n";
 
 			}
+			messageSend($socket, $messageToSend);
+						
 		}
+		fclose($socket);
 	}
 
 	function doCommandGroup_D($link,$commandGroup) {
@@ -486,16 +519,27 @@
 		}
 	}
 
+function messageSend($socket,$request) {
+	// This function uses the ASCII DCE protocol to send a message to the DCERouter.
+	print "<h1>Message to send: $request</h1>\n";
+	$messageLength = strlen($request);	
+	$result = fwrite($socket,"MESSAGET ");
+	$result = fwrite($socket,"$messageLength\n");
+	$result = fwrite($socket,$request . "\n");
+	
+} 
+
+
 function connectdb() {
 	global $link, $mediaLink, $currentRoom, $currentUser, $currentScreen, $currentEntertainArea, $UI, $SKIN;
 
 	$user = "root";
 	$password = "";
-	$link = mysql_connect("localhost",$user,$password);
+	$link = mysql_connect("127.0.0.1",$user,$password);
 	
 	mysql_select_db("pluto_main",$link);
 
-	$mediaLink = mysql_connect("localhost",$user,$password,true);
+	$mediaLink = mysql_connect("127.0.0.1",$user,$password,true);
 	
 	mysql_select_db("pluto_media",$mediaLink);
 
@@ -508,60 +552,4 @@ function connectdb() {
 	// Check if we got called with some command to be executed
 }
 
-function messageSend($deviceToId = 10, $deviceGroupToId = 0, $messageId = 43, $messagePriority = 1, $messageType = 1,
-		$deviceCategoryTo = 0, $deviceTemplateTo = 0, $includeChildren = 0, $messageBroadcastLevel = 0,
-		$messageRetry = 0, $relativeToSender = 0, $expectedResponse = 0, $deviceListTo = "") {
-
-	// Reimplementation of the command line messagesend. This allows the orbiter to send messages to the DCERouter to
-	// initiate activities.
-
-/*	deviceToId = 10 # Media plugin
-	deviceGroupToId = 0 # no specific device group.
-	messageId = 43 # MH_Play_File (see Advanced / DCE / Commands for more)
-	messagePriority = 1 # PRIORITY_LOW=0, PRIORITY_NORMAL=1, PRIORITY_HIGH=2, PRIORITY_URGENT=3
-	messageType = 1      # MESSAGETYPE_COMMAND=1, MESSAGETYPE_EVENT=2, MESSAGETYPE_DATAPARM_CHANGE=3, MESSAGETYPE_REPLY=4, MESSAGETYPE_DATAPARM_REQUEST=5, MESSAGETYPE_LOG=6, MESSAGETYPE_SYSCOMMAND=7, MESSAGETYPE_REGISTER_INTERCEPTOR=8, MESSAGETYPE_MESSAGE_INTERCEPTED=9, MESSAGETYPE_EXEC_COMMAND_GROUP=10, MESSAGETYPE_START_PING=11, MESSAGETYPE_STOP_PING=12, MESSAGETYPE_PURGE_INTERCEPTORS=13, MESSAGETYPE_PENDING_TASKS=14
-	deviceCategoryTo = 0 # no specific category
-	deviceTemplateTo = 0 # no specific template
-	includeChildren = 0 # we don't care about children
-	messageBroadcastLevel = 0 # BL_None=0, BL_DirectSiblings=1, BL_SameComputer=2, BL_SameRoom=3, BL_SameHouse=4, BL_AllHouses=5
-	messageRetry = 0 # MR_None=0, MR_Retry=1, MR_Persist=2
-	relativeToSender = 0 # not relative to sender
-	expectedResponse = 0 # delivery confirmation
-	deviceListTo = "" # no specific list of devices to send stuff to.
-*/	
-	
-	
-//	$blobheader = pack("9LBLLBL0s",magicNumber, deviceFromId, deviceToId, deviceGroupToId, messageId, messagePriority, messageType, deviceCategoryTo, deviceTemplateTo, includeChildren, messageBroadcastLevel, messageRetry, relativeToSender, expectedResponse, deviceListTo)
-	$blobheader = pack("9LBLLBL0s",magicNumber, deviceFromId, deviceToId, deviceGroupToId, messageId, messagePriority, messageType, deviceCategoryTo, deviceTemplateTo, includeChildren, messageBroadcastLevel, messageRetry, relativeToSender, expectedResponse, deviceListTo);
-	
-	
-//	# SendHeader(blob,dcerouter)    
-	
-	$parameter1ID = 13; // filename
-	$parameter1Content = "/home/public/data/samples/security/security.mpg";
-	
-	$parameter2ID = 45; // Entertainment Area
-	$parameter2Content = "2";
-	
-	$blobbody = pack("LL" . strlen($parameter1Content) . "sL1sL",2,$parameter1ID,$parameter1Content,$parameter2ID,$parameter2Content,0);
-	
-	#SendBody(blob,dcerouter)
-	
-	$blobfooter = pack("L",6789);
-	#SendFooter(blob,dcerouter)
-	$blobsize = strlen($blobheader)+strlen($blobbody)+strlen($blobfooter);
-	print "blobsize mit drei mal calcsize";
-	print $blobsize;
-	
-	$bigblob = $blobheader . $blobbody . $blobfooter;
-	print "blobsize mit bigblob";
-	print strlen($bigblob);
-	
-	$bigblob = "78 10 1 43 13 \"/home/public/data/samples/security/security.mpg\"  45 2";
-	$delimiter = " ";
-//	$bigblob = $delimiter.join(sys.argv[1:]);
-//	SendBigBlob($bigblob,$dcerouter);
-	print "big blob:";
-	print $bigblob;
-}
 ?>
