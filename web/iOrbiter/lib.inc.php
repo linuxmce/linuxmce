@@ -418,7 +418,7 @@
 		// print "<h1>CommandGroup $commandGroup - $commandGroupDescription</h1>\n";
 		$query = "SELECT PK_CommandGroup_Command,FK_Command, FK_Device FROM CommandGroup_Command Where FK_CommandGroup = $commandGroup Order By OrderNum";
 		// print "<p>query: $query</p>\n";
-		print "<ul>$commandGroupDescription</ul>\n";
+//		print "<ul>$commandGroupDescription</ul>\n";
 		$commands = getMyArray($link,$query);
 		$socket = connectToDCERouter($deviceFromID);
 		
@@ -434,8 +434,8 @@
 			$messageID = $commandDetail[1];
 			
 			$commandDescription = getMyValue($link,"SELECT Description FROM Command Where PK_Command = $messageID");
-			print "<h2>Destination: $deviceToID - $destinationDeviceDescription</h2>\n";
-			print "<h3>Command: $messageID - $commandDescription</h3>\n";
+//			print "<h2>Destination: $deviceToID - $destinationDeviceDescription</h2>\n";
+//			print "<h3>Command: $messageID - $commandDescription</h3>\n";
 
 			$commandGroupCommand = $commandDetail[0];
 			$parameters = getMyArray($link,"SELECT FK_CommandParameter, IK_CommandParameter FROM CommandGroup_Command_CommandParameter C Where FK_CommandGroup_Command = $commandGroupCommand");
@@ -521,7 +521,7 @@
 
 function messageSend($socket,$request) {
 	// This function uses the ASCII DCE protocol to send a message to the DCERouter.
-	print "<h1>Message to send: $request</h1>\n";
+//	print "<h1>Message to send: $request</h1>\n";
 	$messageLength = strlen($request);	
 	$result = fwrite($socket,"MESSAGET ");
 	$result = fwrite($socket,"$messageLength\n");
