@@ -52,9 +52,13 @@
 	<div class="toolbar">
 		<h1 id="pageXXTitle" ></h1>
 		<a id="backButton" class="button"></a>
-		<a id="homeButton" class="button" href='iOrbiter.php?currentRoom=$currentRoom&currentUser=$currentUser' target='_self'>Home</a>
-		<a class="button2" href="#Locations"><?php print $room; ?></a>
-		<a class="button" href="#All-Users"><?php print $user; ?></a>
+		
+<?php
+		print "<a id='homeButton' class='button' href='iOrbiter.php?currentRoom=$currentRoom&currentUser=$currentUser' target='_self'>Home</a>\n";
+		print "<a class='button2' href='#Locations'>$room</a>\n";
+		print "<a class='button' href='#All-Users'>$user</a>\n";
+?>
+
 	</div>
 	<ul id="home" title="Home" selected="true">
 		<li><a href="#Lighting-Scenarios">Lighting Scenarios</a></li>
