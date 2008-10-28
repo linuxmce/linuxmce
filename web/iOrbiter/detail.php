@@ -3,6 +3,10 @@
 	Copyright 2008 - Peer Oliver Schmidt
 	GPLv2 Licensed
 */
+	/*
+	 * This file is used to display the detail page for the supplied media file
+	 * identified by PK_File
+	 */
  	include_once("lib.inc.php");
 	error_reporting(E_ALL);
 	connectDB();
@@ -29,7 +33,7 @@
 	$currentEntertainArea = getMyValue($link,"SELECT PK_EntertainArea FROM EntertainArea WHERE FK_Room = $currentRoom");
 	$heading = getMyValue($link,"SELECT Description FROM Room WHERE PK_Room = $currentRoom") . " - " . getMyValue($link,"SELECT UserName FROM Users WHERE PK_Users = $currentUser");
 
-	print "<ul>";
+	print "<ul title='Media Details'>";
 	getPicture($mediaLink,$PK_File);	
 	buildAttributeList($mediaLink,$PK_File,$withUL = False);
 	print "</ul>";

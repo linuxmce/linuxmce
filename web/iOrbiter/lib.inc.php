@@ -181,6 +181,7 @@
 		// $refURL contains the URL to be executed with the IDs of the MySQL array
 		// $withUL can be set to false to disable the printing of the UL tag, for example because other
 		//	stuff had already set the UL tag.
+		global $currentRoom, $currentUser;
 		$array = getMyArray($link, $query);
 		$oldGroup = "";
 
@@ -191,7 +192,7 @@
 			print "<li class='group'>Commands</li>\n";
 			if (is_array($addAnEntry[0])) {
 				foreach ($addAnEntry as $addAnEntrySingle) {
-					print "<li id='$label"." $addAnEntrySingle[0]" . "'><a href='$addAnEntrySingle[2]'>$addAnEntrySingle[1]</a></li>\n";
+					print "<li id='$label"." $addAnEntrySingle[0]" . "'><a href='$addAnEntrySingle[2]&currentUser$currentUser&currentRoom=$currentRoom'>$addAnEntrySingle[1]</a></li>\n";
 				}
 			}
 			print "<li id='$label"." $addAnEntry[0]" . "'><a href='$addAnEntry[2]'>$addAnEntry[1]</a></li>\n";

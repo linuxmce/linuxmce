@@ -3,6 +3,13 @@
 	Copyright 2008 - Peer Oliver Schmidt
 	GPLv2 Licensed
 */
+/*
+	iOrbiter provides web based access to the LinuxMCE installation.
+	It does do so not based on transferring big graphics, but mostly text items.
+	
+	Most of the scenarios of the regular UI1 orbiter are used in this
+	Orbiter as well.
+ */
  	include_once("lib.inc.php");
 	error_reporting(E_ALL);
 	connectDB();
@@ -43,9 +50,9 @@
 </head>
 <body onclick="console.log('Hello', event.target);">
 	<div class="toolbar">
-		<h1 id="pageTitle"></h1>
+		<h1 id="pageXXTitle" ></h1>
 		<a id="backButton" class="button"></a>
-		<a id="homeButton" class="button" href='iOrbiter.php' target='_self'>Home</a>
+		<a id="homeButton" class="button" href='iOrbiter.php?currentRoom=$currentRoom&currentUser=$currentUser' target='_self'>Home</a>
 		<a class="button2" href="#Locations"><?php print $room; ?></a>
 		<a class="button" href="#All-Users"><?php print $user; ?></a>
 	</div>
