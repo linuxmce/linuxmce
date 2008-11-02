@@ -63,6 +63,7 @@ description = $Device_EXT
 context = from-internal
 incominglimit = 2
 transfer = off
+vmnum=*97
 secondary_dialtone_digits = 9
 secondary_dialtone_tone = 0x22
 cid_name = pl_$Device_ID
