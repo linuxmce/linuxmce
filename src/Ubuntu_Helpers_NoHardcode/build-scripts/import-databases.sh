@@ -28,7 +28,7 @@ function get_dbdump
 
 	DisplayMessage "Getting a sqldump of ${dbdump_name}"
 
-	[ ! -e "${dbdump_file}.prep" ] && #ZaercTempHack
+#	[ ! -e "${dbdump_file}.prep" ] && #ZaercTempHack
 	mysqldump --compress --skip-extended-insert $SqlCvsCred "${dbdump_name}" > "${dbdump_file}.prep"
 
 	cp -f "${dbdump_file}.prep" "${dbdump_file}"
@@ -102,7 +102,7 @@ function import_databases () {
 	import_dbdump lmce_game "$dbdump_lmce_game"
 
 #	rm -f "$dbdump_main_sqlcvs" "$dbdump_myth_sqlcvs" "$dbdump_pluto_media" "$dbdump_pluto_security" "$dbdump_pluto_telecom"
-	rm -rf "${dbdump_dir}"
+#	rm -rf "${dbdump_dir}"
 
 }
 
