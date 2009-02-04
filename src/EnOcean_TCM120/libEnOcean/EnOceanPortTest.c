@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
 	mydata = tcm120_rd_idbase();
 
 
-	enocean_error_structure error = enocean_init("/dev/ttyUSB0");
+	enocean_error_structure error = enocean_init("/dev/ttyUSB1");
 	if (error.code != E_OK) {
 		printf("%s\n",error.message);
 		return EXIT_FAILURE;

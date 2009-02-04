@@ -1,10 +1,5 @@
 /*
-     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
-
-     www.plutohome.com
-
-     Phone: +1 (877) 758-8648
- 
+     Copyright (C) 2009 Harald Klein <hari@vt100.at>
 
      This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
      This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
@@ -26,6 +21,16 @@ using namespace DCE;
 
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
+
+extern "C" {
+	#include "libEnOcean/cssl.h"
+	#include "libEnOcean/EnOceanProtocol.h"
+	#include "libEnOcean/EnOceanPort.h"
+	#include "libEnOcean/TCM120.h"
+}
+
+void serialCallBack(enocean_data_structure in);
+ 
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -59,6 +64,15 @@ bool EnOcean_TCM120::GetConfig()
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
+	
+	string port = TranslateSerialUSB(DATA_Get_COM_Port_on_PC());
+	enocean_error_structure error = enocean_init((const char *)port.c_str());
+	if (error.code != E_OK) {
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"%s\n",error.message);
+		return false;
+	}
+	enocean_set_callback_function(serialCallBack);
+
 	return true;
 }
 
@@ -258,3 +272,13 @@ void EnOcean_TCM120::CMD_StatusReport(string sArguments,string &sCMD_Result,Mess
 }
 
 
+// internal methods
+
+void serialCallBack(enocean_data_structure in) {
+
+	char* humanstring;
+        humanstring = enocean_hexToHuman(in);
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"%s\n",humanstring);
+        free(humanstring);
+
+}

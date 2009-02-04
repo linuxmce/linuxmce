@@ -6,17 +6,19 @@ SNR_LDFLAGS ?=
 
 ROOT = ..
 CXX = g++
+GCC = gcc
 CXXFLAGS = -Wall -fPIC -ggdb3
 CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
 BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
 MYNAME = EnOcean_TCM120
-VERSION = 2.0.0
-MYDEVTEMPLATEID = 1948mplateID
+VERSION = 0.0.1
+MYDEVTEMPLATEID = 1948
 
 Gen_Dev_Files = $(GENDEV)/EnOcean_TCM120Base.cpp
 sources = Main.cpp EnOcean_TCM120.cpp $(Gen_Dev_Files)
+libenocean_sources = libEnOcean/TCM120.c libEnOcean/EnOceanPort.c libEnOcean/cssl.c
 #<-dceag-mh-e->
 
 CXXFLAGS +=
@@ -25,7 +27,7 @@ LDFLAGS +=
 XTRALDLIBS = -lmysqlclient_r
 
 Gen_Dev_Files +=
-sources +=
+sources += 
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
@@ -35,7 +37,11 @@ whattodo:
 
 all: bin so
 
-bin: EnOcean_TCM120
+enoceanlib:
+	$(GCC) -c -fPIC -D_GNU_SOURCE -o cssl.o libEnOcean/cssl.c
+	$(GCC) -c -fPIC -o EnOceanPort.o libEnOcean/EnOceanPort.c
+
+bin: enoceanlib EnOcean_TCM120
 
 so: EnOcean_TCM120.so
 
@@ -46,12 +52,12 @@ EnOcean_TCM120.so: $(sources:.cpp=.o)
 	./post_make.sh $@
 		
 EnOcean_TCM120: $(sources:.cpp=.o)
-	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	$(CXX) -o $(MYNAME) $(call cpath,$+) cssl.o EnOceanPort.o $(LDFLAGS) $(LDLIBS)
 	cp $@ ../bin
 	./post_make.sh $@
 
 clean: clean-recursive
-	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) EnOcean_TCM120.bin EnOcean_TCM120.so >/dev/null
+	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) EnOcean_TCM120.bin EnOcean_TCM120.so cssl.o EnOceanPort.o >/dev/null
 
 package:
 	chmod +x make_package.sh

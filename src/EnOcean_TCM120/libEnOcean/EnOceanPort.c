@@ -213,6 +213,10 @@ char* enocean_hexToHuman(enocean_data_structure frame)
 	char *temphexstring;
 	sprintf(tempstring,HR_TYPE);
 	tempstring += sizeof(HR_TYPE)-1;
+
+	enocean_data_structure_6DT* frame_6DT;
+	enocean_data_structure_MDA* frame_MDA;
+
 	// Now it depends on ORG what to do
 	switch (frame.ORG) {
 	  case C_ORG_RPS: // RBS received
@@ -252,7 +256,7 @@ char* enocean_hexToHuman(enocean_data_structure frame)
 	    break;
 	  case C_ORG_6DT:
 		    sprintf(tempstring,HR_6DT);
-		    enocean_data_structure_6DT* frame_6DT = enocean_convert_to_6DT(&frame);
+		    frame_6DT = enocean_convert_to_6DT(&frame);
 		    tempstring += sizeof(HR_6DT)-1;
 			sprintf(tempstring,HR_SENDER);
 			tempstring += sizeof(HR_SENDER)-1;
@@ -269,7 +273,7 @@ char* enocean_hexToHuman(enocean_data_structure frame)
 		    break;
 	  case C_ORG_MDA:
 		    sprintf(tempstring,HR_MDA);
-		    enocean_data_structure_MDA* frame_MDA = enocean_convert_to_MDA(&frame);
+		    frame_MDA = enocean_convert_to_MDA(&frame);
 		    tempstring += sizeof(HR_MDA)-1;
 			sprintf(tempstring,HR_SENDER);
 			tempstring += sizeof(HR_SENDER)-1;
