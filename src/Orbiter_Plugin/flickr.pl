@@ -7,8 +7,8 @@
 
 use Flickr::API;
 use XML::Simple;
-use XML::SAX;
-use XML::Libxml;
+#use XML::SAX;
+#use XML::Libxml;
 use Image::Magick;
 use Data::Dumper;
 use DBI;
