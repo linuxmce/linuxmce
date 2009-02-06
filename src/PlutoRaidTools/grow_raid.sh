@@ -91,14 +91,15 @@ echo "Unmounting device $RaidDevice to prepare for filesystem operations..."
 umount $RaidDevice
 
 echo "Growing Raid to use extra disk(s)..."
-mdam --grow $RaidDevice --raid-disks=$TotalNewRaidDrives
+#mdadm --grow $RaidDevice --raid-disks=$TotalNewRaidDrives
 
 #Resize the filesystem to use the new drive space
 #Different commands must be used for different filesystem types.
 #Support for other filesystems may be added by expanding the if statement below.
 echo "Resizing the filesystem to use the new space..."
 if [[ $fsType == "ext3" || $fsType == "ext2" ]] ;then
-	resize2fs $RaidDevice
+	#resize2fs $RaidDevice
+	echo ""
 fi
 
 echo "Mounting device $RaidDevice."
