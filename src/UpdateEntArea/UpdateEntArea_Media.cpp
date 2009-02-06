@@ -144,7 +144,7 @@ void UpdateEntArea::AddDefaultMediaScenarios(Row_EntertainArea *pRow_EntertainAr
 		pCommandGroup->AddCommand(DEVICETEMPLATE_This_Orbiter_CONST,COMMAND_Show_File_List_CONST,1,1,COMMANDPARAMETER_PK_MediaType_CONST,StringUtils::itos(MEDIATYPE_misc_Playlist_CONST).c_str());
 
         {
-		// Add a Games button if a Game Player exists.
+		// Add a Games button if a Game Player exists..
 		// TODO: Make this a category when the next emulator is supported.
 		string sSQL = "SELECT PK_Device FROM Device_EntertainArea "
 			"JOIN Device ON FK_Device=PK_Device "
@@ -192,7 +192,7 @@ void UpdateEntArea::AddDefaultMediaScenarios(Row_EntertainArea *pRow_EntertainAr
 			"JOIN Device ON FK_Device=PK_Device "
 			"JOIN DeviceTemplate_MediaType ON Device.FK_DeviceTemplate=DeviceTemplate_MediaType.FK_DeviceTemplate "
 			"JOIN MediaType ON FK_MediaType=PK_MediaType "
-			"WHERE FK_EntertainArea=" + StringUtils::itos(pRow_EntertainArea->PK_EntertainArea_get()) + " AND FK_MediaType NOT IN (1,2,3,4,5,6,7,20,21,22,23,24,27,28) ORDER BY PK_Device";
+			"WHERE FK_EntertainArea=" + StringUtils::itos(pRow_EntertainArea->PK_EntertainArea_get()) + " AND FK_MediaType NOT IN (1,2,3,4,5,6,7,20,21,22,23,24,27,28,29) ORDER BY PK_Device";
 
 		iOrder=1;
 		PlutoSqlResult result_set;
