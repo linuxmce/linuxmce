@@ -35,4 +35,11 @@ $TEXT_USE_AUTOMATICALLY_CONST='Use automatically';
 $TEXT_USE_PLUTO_DIRECTORY_STRUCTURE_CONST='Use pluto\'s directory structure';
 $TEXT_RAID_DRIVES_INFO_CONST='Add the drives and partitions you would like to be part of the RAID, and then select "Create RAID Array"';
 $TEXT_RAID_FORMAT_STATUS_CONST='Format status';
+$TEXT_GROW_HEADER_CONST='<B>Grow RAID Array</B>';
+$TEXT_GROW_INSTRUCTIONS_CONST='You can grow your raid array to occupy the space on your spare dirves. In order to grow your RAID array to a larger one,<BR>you must first use the "Add Drive" dropdown above, and add at least one spare drive if you don\'t already have one.<BR>There is a dropdown below which will allow you to grow your RAID array if you have the spare drives present.';
+$TEXT_GROW_WARNINGS_CONST='<B>Please note that growing a RAID array while online is experimental so please ensure that you have backups!</B>';
+$TEXT_GROW_BY_PREFIX_CONST='Grow by ';
+$TEXT_GROW_BY_SUFFIX_CONST=' drives';
+$TEXT_GROW_CONST='Grow';
+$TEXT_GROW_SUCCESS_MSG_CONST='Success!<BR>Your RAID array will now rebuild itsself to use the available extra space.<BR>Please note that this may take more than 24 hours. It is normal for your RAID array to be listed as Damaged or Rebuilding during this time.<BR>Please do not reboot until rebuilding is finished.';
 ?>

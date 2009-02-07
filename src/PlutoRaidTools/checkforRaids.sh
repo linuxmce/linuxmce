@@ -168,6 +168,6 @@ for el in $raid_table ;do
 	done
 
 	## Triger a refresh of status
-	/usr/pluto/bin/monitoring_RAID.sh 'REFRESH WEB' /dev/md1
+	/usr/pluto/bin/monitoring_RAID.sh 'REFRESH WEB' $el
 done
 

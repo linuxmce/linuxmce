@@ -24,7 +24,7 @@ function raidDrives($output,$dbADO) {
 		document.raidDrives.submit();
 	}	
 	</script>		
-	<div class="err" align="center">'.(isset($_GET['error'])?strip_tags($_GET['error']):'').'</div>
+	<div class="err" align="center"><B>'.(isset($_GET['error'])?strip_tags($_GET['error']):'').'</B></div>
 	<div class="confirm" align="center"><B>'.@$_GET['msg'].'</B></div>
 	<form action="index.php" method="POST" name="raidDrives">
 	<input type="hidden" name="section" value="raidDrives">
@@ -78,7 +78,7 @@ function raidDrives($output,$dbADO) {
 		</tr>
 		</table>';
 	}else{
-		
+		$blockDevice = $data['BlockDevice'][0];
 		$out.='
 		<table>
 		<tr>
@@ -143,10 +143,18 @@ function raidDrives($output,$dbADO) {
 		$raidDrives=array();
 		$noDrives=count(@$drivesData['PK_Device']);
 		$usedDrives=array();
+		$spareDrives=0;  //count the number of spare drives
+		$spareDrivesList=array();
 		for ($i=0;$i<$noDrives;$i++){
 			$raidDrives[]=$drivesData['PK_Device'][$i];
 			$usedDrives[]=$drivesData['Description'][$i];
-			
+
+			if ($drivesData['Type']==1){
+				$spareDrives++;
+				$spareDrivesList[]=$spareDrives;
+			}
+
+
 			$confirmation=$TEXT_CONFIRM_DELETE_DRIVE_CONST;
 			$noDelete=0;
 			if($RAIDStatus>0 && $drivesData['Type'][$i]!=1){
@@ -183,7 +191,7 @@ function raidDrives($output,$dbADO) {
 				<td align="center">'.$drivesData['PK_Device'][$i].'</td>
 				<td align="center">'.$drivesData['Description'][$i].'</td>
 				<td align="center">'.$drivesData['Capacity'][$i].'</td>
-				<td align="center">'.(($drivesData['Type'][$i]==1)?'spare':'active').' disk</td>
+				<td align="center">'.(($drivesData['Type'][$i]==1)?'spare':'active').' drive</td>
 				<td align="center">'.$drivesData['Status'][$i].'</td>
 				<td align="center">
 				<input type="button" class="button_fixed" name="edit_'.$drivesData['PK_Device'][$i].'" value="'.$TEXT_ADVANCED_CONST.'"  onClick="self.location=\'index.php?section=editDeviceParams&deviceID='.$drivesData['PK_Device'][$i].'\';"><br>
@@ -202,11 +210,40 @@ function raidDrives($output,$dbADO) {
 			</tr>';
 			
 		}
+		
+		$out.='
+		<tr>
+			<td colspan="6">
+				&nbsp;
+			</td>
+		</tr>
+		<tr>
+			<td colspan="6">
+				&nbsp;
+			</td>
+		</tr>
+		<tr class="tablehead">
+			<td  colspan="6" align="center">'.$TEXT_GROW_HEADER_CONST.'</td>
+		</tr>
+		<tr class="alternate_back">
+			<td colspan="6">
+			'.$TEXT_GROW_INSTRUCTIONS_CONST.'
+			<BR>
+			'.$TEXT_GROW_WARNINGS_CONST.'
+			</td>
+		</tr>
+		<tr>
+			<td align="center" colspan="5">
+			<b>'.$TEXT_GROW_BY_PREFIX_CONST.'</b>'.pulldownFromArray($spareDrivesList,'numSparesToGrow',$spareDrives,'','value').$TEXT_GROW_BY_SUFFIX_CONST.'&nbsp;&nbsp;<input type="submit" class="button" name="grow" value='.$TEXT_GROW_CONST.'>
+			<td>
+		</tr>
+		';
 		$out.='
 		</table>
 		
 		<input type="hidden" name="raidDrives" value="'.join(',',$raidDrives).'">
 		<input type="hidden" name="parentIP" value="'.$data['ParentIP'][0].'">
+		<input type="hidden" name="blockDevice" value="'.$blockDevice.'">
 		';
 	}
 	$out.='
@@ -220,7 +257,8 @@ function raidDrives($output,$dbADO) {
 			exit(0);
 		}
 		$parentIP=$_REQUEST['parentIP'];
-		
+		$blockDevice=$_REQUEST['blockDevice'];
+		$numSparesToGrow = $_REQUEST['numSparesToGrow'];
 		if(isset($_POST['add']) && @$_POST['drive']!='0'){
 			$spare=(int)@$_POST['spare'];
 			$newDrive=createDevice($GLOBALS['RaidHardDrive'],$installationID,$deviceID,NULL,$dbADO);
@@ -286,7 +324,16 @@ function raidDrives($output,$dbADO) {
 			header("Location: index.php?section=raidDrives&deviceID=$deviceID&msg=".urlencode($TEXT_RAID_ARRAY_CREATED_CONST));
 			exit();				
 		}
-		
+		if(isset($_POST['grow'])){
+			$cmd = 'sudo -u root /usr/pluto/bin/grow_raid.sh '.$blockDevice.' '.$numSparesToGrow;
+			$res=exec_batch_command($cmd);	
+			if($res){		
+				header("Location: index.php?section=raidDrives&deviceID=$deviceID&error=".urlencode(@$res));
+				exit();	
+			}
+			header("Location: index.php?section=raidDrives&deviceID=$deviceID&msg=".urlencode($TEXT_GROW_SUCCESS_MSG_CONST));
+			exit();
+		}
 		header("Location: index.php?section=raidDrives&deviceID=$deviceID&msg=".urlencode(@$msg));
 		exit();
 	}
