@@ -27,6 +27,10 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
+#include "DCERouter.h"
+#include "pluto_main/Define_Event.h"
+#include "pluto_main/Define_EventParameter.h"
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 DataLogger_Plugin::DataLogger_Plugin(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
@@ -47,6 +51,7 @@ DataLogger_Plugin::DataLogger_Plugin(Command_Impl *pPrimaryDeviceCommand, Device
 DataLogger_Plugin::~DataLogger_Plugin()
 //<-dceag-dest-e->
 {
+	delete m_pDatabase_lmce_datalog;
 	
 }
 
@@ -66,13 +71,6 @@ bool DataLogger_Plugin::GetConfig()
 		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Cannot connect to database 'lmce_datalog'!" );
 		return false;
 	} 
-
-	Row_Datapoints *pRow_Datapoints = m_pDatabase_lmce_datalog->Datapoints_get()->AddRow();
-	pRow_Datapoints->Datapoint_set(0.5);
-	pRow_Datapoints->FK_Unit_set(1);
-	m_pDatabase_lmce_datalog->Datapoints_get()->Commit();
-	pRow_Datapoints->Delete();
-
 	return true;
 }
 
@@ -128,6 +126,47 @@ void DataLogger_Plugin::ReceivedUnknownCommand(string &sCMD_Result,Message *pMes
 //<-dceag-sample-e->
 
 bool DataLogger_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessage,class DeviceData_Base *pDeviceFrom,class DeviceData_Base *pDeviceTo) {
+
+	
+	bool handled = true;
+	int unit = 0;
+	float fValue = 0;
+	string sValue = "";
+
+
+	switch( pMessage->m_dwID ) {
+
+		case EVENT_CO2_Level_Changed_CONST:
+			unit = 1;
+			sValue = pMessage->m_mapParameters[EVENTPARAMETER_Value_CONST];
+			fValue = atoi(sValue.c_str());
+			;;
+			break;
+		case EVENT_Temperature_Changed_CONST:
+			unit = 2;
+			;;
+			break;
+		case EVENT_Humidity_Changed_CONST:
+			unit = 3;
+			;;
+			break;
+		case EVENT_Brightness_Changed_CONST:
+			unit = 4;
+			;;
+			break;
+		default:
+			handled=false;
+			;;
+	}
+
+	if (handled) {
+		// TODO: save to db:  pMessage->m_dwPK_Device_From
+		Row_Datapoints *pRow_Datapoints = m_pDatabase_lmce_datalog->Datapoints_get()->AddRow();
+		pRow_Datapoints->Datapoint_set(fValue);
+		pRow_Datapoints->FK_Unit_set(unit);
+		m_pDatabase_lmce_datalog->Datapoints_get()->Commit();
+		// pRow_Datapoints->Delete();
+	}
 
 	return true;
 
