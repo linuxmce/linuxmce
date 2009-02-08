@@ -30,8 +30,9 @@ extern "C" {
 }
 
 void serialCallBack(enocean_data_structure in);
- 
 
+void *myself;
+ 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 EnOcean_TCM120::EnOcean_TCM120(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
@@ -64,6 +65,8 @@ bool EnOcean_TCM120::GetConfig()
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
+
+	myself = (void *)this;
 	
 	string port = TranslateSerialUSB(DATA_Get_COM_Port_on_PC());
 	enocean_error_structure error = enocean_init((const char *)port.c_str());
@@ -140,87 +143,7 @@ void EnOcean_TCM120::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessag
 	sCMD_Result = "UNKNOWN COMMAND";
 }
 
-//<-dceag-sample-b->
-/*		**** SAMPLE ILLUSTRATING HOW TO USE THE BASE CLASSES ****
-
-**** IF YOU DON'T WANT DCEGENERATOR TO KEEP PUTTING THIS AUTO-GENERATED SECTION ****
-**** ADD AN ! AFTER THE BEGINNING OF THE AUTO-GENERATE TAG, LIKE //<=dceag-sample-b->! ****
-Without the !, everything between <=dceag-sometag-b-> and <=dceag-sometag-e->
-will be replaced by DCEGenerator each time it is run with the normal merge selection.
-The above blocks are actually <- not <=.  We don't want a substitution here
-
-void EnOcean_TCM120::SomeFunction()
-{
-	// If this is going to be loaded into the router as a plug-in, you can implement: 	virtual bool Register();
-	// to do all your registration, such as creating message interceptors
-
-	// If you use an IDE with auto-complete, after you type DCE:: it should give you a list of all
-	// commands and requests, including the parameters.  See "AllCommandsRequests.h"
-
-	// Examples:
-	
-	// Send a specific the "CMD_Simulate_Mouse_Click" command, which takes an X and Y parameter.  We'll use 55,77 for X and Y.
-	DCE::CMD_Simulate_Mouse_Click CMD_Simulate_Mouse_Click(m_dwPK_Device,OrbiterID,55,77);
-	SendCommand(CMD_Simulate_Mouse_Click);
-
-	// Send the message to orbiters 32898 and 27283 (ie a device list, hence the _DL)
-	// And we want a response, which will be "OK" if the command was successfull
-	string sResponse;
-	DCE::CMD_Simulate_Mouse_Click_DL CMD_Simulate_Mouse_Click_DL(m_dwPK_Device,"32898,27283",55,77)
-	SendCommand(CMD_Simulate_Mouse_Click_DL,&sResponse);
-
-	// Send the message to all orbiters within the house, which is all devices with the category DEVICECATEGORY_Orbiter_CONST (see pluto_main/Define_DeviceCategory.h)
-	// Note the _Cat for category
-	DCE::CMD_Simulate_Mouse_Click_Cat CMD_Simulate_Mouse_Click_Cat(m_dwPK_Device,DEVICECATEGORY_Orbiter_CONST,true,BL_SameHouse,55,77)
-    SendCommand(CMD_Simulate_Mouse_Click_Cat);
-
-	// Send the message to all "DeviceTemplate_Orbiter_CONST" devices within the room (see pluto_main/Define_DeviceTemplate.h)
-	// Note the _DT.
-	DCE::CMD_Simulate_Mouse_Click_DT CMD_Simulate_Mouse_Click_DT(m_dwPK_Device,DeviceTemplate_Orbiter_CONST,true,BL_SameRoom,55,77);
-	SendCommand(CMD_Simulate_Mouse_Click_DT);
-
-	// This command has a normal string parameter, but also an int as an out parameter
-	int iValue;
-	DCE::CMD_Get_Signal_Strength CMD_Get_Signal_Strength(m_dwDeviceID, DestDevice, sMac_address,&iValue);
-	// This send command will wait for the destination device to respond since there is
-	// an out parameter
-	SendCommand(CMD_Get_Signal_Strength);  
-
-	// This time we don't care about the out parameter.  We just want the command to 
-	// get through, and don't want to wait for the round trip.  The out parameter, iValue,
-	// will not get set
-	SendCommandNoResponse(CMD_Get_Signal_Strength);  
-
-	// This command has an out parameter of a data block.  Any parameter that is a binary
-	// data block is a pair of int and char *
-	// We'll also want to see the response, so we'll pass a string for that too
-
-	int iFileSize;
-	char *pFileContents
-	string sResponse;
-	DCE::CMD_Request_File CMD_Request_File(m_dwDeviceID, DestDevice, "filename",&pFileContents,&iFileSize,&sResponse);
-	SendCommand(CMD_Request_File);
-
-	// If the device processed the command (in this case retrieved the file),
-	// sResponse will be "OK", and iFileSize will be the size of the file
-	// and pFileContents will be the file contents.  **NOTE**  We are responsible
-	// free deleting pFileContents.
-
-
-	// To access our data and events below, you can type this-> if your IDE supports auto complete to see all the data and events you can access
-
-	// Get our IP address from our data
-	string sIP = DATA_Get_IP_Address();
-
-	// Set our data "Filename" to "myfile"
-	DATA_Set_Filename("myfile");
-
-	// Fire the "Finished with file" event, which takes no parameters
-	EVENT_Finished_with_file();
-	// Fire the "Touch or click" which takes an X and Y parameter
-	EVENT_Touch_or_click(10,150);
-}
-*/
+//<-dceag-sample-b->!
 //<-dceag-sample-e->
 
 /*
@@ -294,7 +217,11 @@ void EnOcean_TCM120::CMD_StatusReport(string sArguments,string &sCMD_Result,Mess
 // internal methods
 
 void serialCallBack(enocean_data_structure in) {
+	DeviceData_Impl *pTargetChildDevice = NULL;
 
+	long id = (in.ID_BYTE3 << 24) + (in.ID_BYTE2 << 16) + (in.ID_BYTE1 << 8) + in.ID_BYTE0;
+	pTargetChildDevice = (static_cast<EnOcean_TCM120::EnOcean_TCM120*>(myself))->InternalIDToDevice(id);
+//	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Node %i Internal: %p",id,pTargetChildDevice);
 
 	switch(in.ORG) {
 		case C_ORG_INF_INIT:
@@ -309,7 +236,7 @@ void serialCallBack(enocean_data_structure in) {
 		case C_ORG_RPS:
 			if (in.STATUS & S_RPS_NU) {
 				// NU == 1, N-Message
-				LoggerWrapper::GetInstance()->Write(LV_WARNING,"Received RPS N-Message Rocker ID: %i UD: %i Pressed: %i Second Rocker ID: %i SUD: %i Second Action: %i",
+				LoggerWrapper::GetInstance()->Write(LV_WARNING,"Received RPS N-Message Node 0x%08x Rocker ID: %i UD: %i Pressed: %i Second Rocker ID: %i SUD: %i Second Action: %i", id,
 					(in.DATA_BYTE3 & DB3_RPS_NU_RID) >> DB3_RPS_NU_RID_SHIFT, 
 					(in.DATA_BYTE3 & DB3_RPS_NU_UD) >> DB3_RPS_NU_UD_SHIFT, 
 					(in.DATA_BYTE3 & DB3_RPS_NU_PR)>>DB3_RPS_NU_PR_SHIFT,
@@ -317,9 +244,18 @@ void serialCallBack(enocean_data_structure in) {
 					(in.DATA_BYTE3 & DB3_RPS_NU_SUD)>>DB3_RPS_NU_SUD_SHIFT,
 					(in.DATA_BYTE3 & DB3_RPS_NU_SA)>>DB3_RPS_NU_SA_SHIFT);
 				
+
+				(static_cast<EnOcean_TCM120::EnOcean_TCM120*>(myself))->m_pEvent->SendMessage( new Message(pTargetChildDevice->m_dwPK_Device,
+					DEVICEID_EVENTMANAGER,
+					PRIORITY_NORMAL,
+					MESSAGETYPE_EVENT,
+					((in.DATA_BYTE3 & DB3_RPS_NU_UD) >> DB3_RPS_NU_UD_SHIFT) ? EVENT_On_CONST : EVENT_Off_CONST,
+					0));
+
+				
 			} else {
 				// NU == 0, U-Message
-				LoggerWrapper::GetInstance()->Write(LV_WARNING,"Received RPS U-Message Buttons: %i Pressed: %i",(in.DATA_BYTE3 & DB3_RPS_BUTTONS) >> DB3_RPS_BUTTONS_SHIFT, (in.DATA_BYTE3 & DB3_RPS_PR)>>DB3_RPS_PR_SHIFT);
+				LoggerWrapper::GetInstance()->Write(LV_WARNING,"Received RPS U-Message Node 0x%08x Buttons: %i Pressed: %i",id,(in.DATA_BYTE3 & DB3_RPS_BUTTONS) >> DB3_RPS_BUTTONS_SHIFT, (in.DATA_BYTE3 & DB3_RPS_PR)>>DB3_RPS_PR_SHIFT);
 			}
 			break;
 			;;
@@ -335,4 +271,38 @@ void serialCallBack(enocean_data_structure in) {
 
 
 
+}
+DeviceData_Impl *EnOcean_TCM120::InternalIDToDevice(long lInternalID) {
+        DeviceData_Impl *pChildDevice = NULL;
+
+        for( VectDeviceData_Impl::const_iterator it = m_pData->m_vectDeviceData_Impl_Children.begin();
+                        it != m_pData->m_vectDeviceData_Impl_Children.end(); ++it )
+        {
+                pChildDevice = (*it);
+                if( pChildDevice != NULL )
+                {
+			int tmp_node_id = atoi(pChildDevice->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST).c_str());
+			// check if child exists
+			if ( tmp_node_id == lInternalID) {
+				return pChildDevice;
+			}
+
+			// iterate over embedded interfaces
+			DeviceData_Impl *pChildDevice1 = NULL;
+			for( VectDeviceData_Impl::const_iterator it1 = pChildDevice->m_vectDeviceData_Impl_Children.begin();
+				it1 != pChildDevice->m_vectDeviceData_Impl_Children.end(); ++it1 )
+			{
+				pChildDevice1 = (*it1);
+				if( pChildDevice1 != NULL )
+				{
+					int tmp_node_id = atoi(pChildDevice1->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST).c_str());
+					if ( tmp_node_id == lInternalID) {
+						return pChildDevice1;
+					}
+				}
+			}
+
+		}
+	}
+	return NULL;
 }
