@@ -63,6 +63,7 @@ public:
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
 		virtual void SendSensorTrippedEvents(unsigned short node_id, bool value);
+		virtual void SendCO2LevelChangedEvent(unsigned short node_id, int value);
 		virtual void SendLightChangedEvents(unsigned short node_id, int value);
 		virtual void SendOrbiterPopup(const char *message); 
         	virtual int AddDevice(int parent, string sInternalID, int PK_DeviceTemplate);

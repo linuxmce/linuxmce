@@ -439,39 +439,44 @@ void ZWave::CMD_Remove_Node(string sOptions,int iValue,string sTimeout,bool bMul
 
 void ZWave::SendSensorTrippedEvents(unsigned short node_id, bool value)
 {
-        DeviceData_Impl *pChildDevice = NULL;
-        for( VectDeviceData_Impl::const_iterator it = m_pData->m_vectDeviceData_Impl_Children.begin();
-                        it != m_pData->m_vectDeviceData_Impl_Children.end(); ++it )
-        {
-                pChildDevice = (*it);
-                if( pChildDevice != NULL )
-                {
-			DeviceData_Impl *pChildDevice1 = NULL;
-			for( VectDeviceData_Impl::const_iterator it1 = pChildDevice->m_vectDeviceData_Impl_Children.begin();
-				it1 != pChildDevice->m_vectDeviceData_Impl_Children.end(); ++it1 )
-			{
-				pChildDevice1 = (*it1);
-				if( pChildDevice1 != NULL )
-				{
-					int tmp_node_id = atoi(pChildDevice1->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST).c_str());
-					if (tmp_node_id == node_id) {
-						LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending sensor tripped event from node %d",tmp_node_id);
-						m_pEvent->SendMessage( new Message(pChildDevice1->m_dwPK_Device,
-							DEVICEID_EVENTMANAGER,
-							PRIORITY_NORMAL,
-							MESSAGETYPE_EVENT,
-							EVENT_Sensor_Tripped_CONST,
-							1,
-							EVENTPARAMETER_Tripped_CONST,
-							value ? "1" : "0")
-						);
-					}
-				}
-			}
-		}
+	char tmp_node_id[16];
+	sprintf(tmp_node_id,"%i",node_id);
+        DeviceData_Impl *pChildDevice = InternalIDToDevice(tmp_node_id);
+	if (pChildDevice != NULL) {		
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending sensor tripped event from node %d",node_id);
+		m_pEvent->SendMessage( new Message(pChildDevice->m_dwPK_Device,
+			DEVICEID_EVENTMANAGER,
+			PRIORITY_NORMAL,
+			MESSAGETYPE_EVENT,
+			EVENT_Sensor_Tripped_CONST,
+			1,
+			EVENTPARAMETER_Tripped_CONST,
+			value ? "1" : "0")
+		);
 	}
 }
 
+void ZWave::SendCO2LevelChangedEvent(unsigned short node_id, int value)
+{
+	char tmp_node_id[16];
+	char tmp_value[16];
+	sprintf(tmp_node_id,"%i",node_id);
+	sprintf(tmp_value,"%i",value);
+        DeviceData_Impl *pChildDevice = InternalIDToDevice(tmp_node_id);
+	if (pChildDevice != NULL) {		
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending co2 level changed event from node %s",tmp_node_id);
+		m_pEvent->SendMessage( new Message(pChildDevice->m_dwPK_Device,
+			DEVICEID_EVENTMANAGER,
+			PRIORITY_NORMAL,
+			MESSAGETYPE_EVENT,
+			EVENT_CO2_Level_Changed_CONST,
+			1,
+			EVENTPARAMETER_Value_CONST,
+			tmp_value)
+		);
+	}
+
+}
 
 void ZWave::SendLightChangedEvents(unsigned short node_id, int value)
 {
@@ -671,6 +676,8 @@ void ZWave::SetManufacturerSpecificString(string sManufacturerSpecific) {
 
 DeviceData_Impl *ZWave::InternalIDToDevice(string sInternalID) {
         DeviceData_Impl *pChildDevice = NULL;
+
+	if (sInternalID == "") return NULL;
 
         for( VectDeviceData_Impl::const_iterator it = m_pData->m_vectDeviceData_Impl_Children.begin();
                         it != m_pData->m_vectDeviceData_Impl_Children.end(); ++it )

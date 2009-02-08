@@ -621,6 +621,8 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 								break;
 								case SENSOR_MULTILEVEL_REPORT_CO2_LEVEL:
 									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"CO2 level measurement received: %d ppm",value);
+									DCEcallback->SendCO2LevelChangedEvent ((unsigned char)frame[3],value);
+
 								;;
 								break;
 								case SENSOR_MULTILEVEL_REPORT_RELATIVE_HUMIDITY:
