@@ -195,7 +195,11 @@ function raidDrives($output,$dbADO) {
 				<td align="center">'.$drivesData['Status'][$i].'</td>
 				<td align="center">
 				<input type="button" class="button_fixed" name="edit_'.$drivesData['PK_Device'][$i].'" value="'.$TEXT_ADVANCED_CONST.'"  onClick="self.location=\'index.php?section=editDeviceParams&deviceID='.$drivesData['PK_Device'][$i].'\';"><br>
-				<input type="submit" class="button_fixed" name="delete_'.$drivesData['PK_Device'][$i].'" value="'.$TEXT_DELETE_CONST.'"  onClick="'.$deleteFunction.'">
+				<input type="submit" class="button_fixed" name="delete_'.$drivesData['PK_Device'][$i].'" value="'.$TEXT_DELETE_CONST.'"  onClick="'.$deleteFunction.'"><BR>';
+			if($drivesData['Status'][$i]=="REMOVED") {
+				$out.='<input type="submit" class="button_fixed" name="add_'.$drivesData['PK_Device'][$i].'" value ="Activate">';	
+			}
+			$out.='			
 				</td>
 			</tr>';
 		}
@@ -259,6 +263,8 @@ function raidDrives($output,$dbADO) {
 		$parentIP=$_REQUEST['parentIP'];
 		$blockDevice=$_REQUEST['blockDevice'];
 		$numSparesToGrow = $_REQUEST['numSparesToGrow'];
+
+		
 		if(isset($_POST['add']) && @$_POST['drive']!='0'){
 			$spare=(int)@$_POST['spare'];
 			$newDrive=createDevice($GLOBALS['RaidHardDrive'],$installationID,$deviceID,NULL,$dbADO);
@@ -288,6 +294,15 @@ function raidDrives($output,$dbADO) {
 				
 				header("Location: index.php?section=raidDrives&deviceID=$deviceID&msg=".urlencode($TEXT_DRIVE_DELETED_CONST));
 				exit();				
+			}
+			if(isset($_POST['add_'.$drive])){
+				//get path for drive determined by id
+				$res =getFieldsAsArray('Device_DeviceData','IK_DeviceData',$dbADO,'WHERE FK_Device='.$drive);
+				
+				$cmd='sudo -u root /usr/pluto/bin/add_drive.sh '.$blockDevice.' '.$res['IK_DeviceData'][0];
+				$msg= exec_batch_command($cmd);
+				header("Location: index.php?section=raidDrives&deviceID=$deviceID&msg=".urlencode(@$msg));
+		exit();
 			}
 		}
 		
