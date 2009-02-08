@@ -68,7 +68,7 @@ bool EnOcean_TCM120::GetConfig()
 	string port = TranslateSerialUSB(DATA_Get_COM_Port_on_PC());
 	enocean_error_structure error = enocean_init((const char *)port.c_str());
 	if (error.code != E_OK) {
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"%s\n",error.message);
+		LoggerWrapper::GetInstance()->Write(LV_WARNING,"%s\n",error.message);
 		return false;
 	}
 	enocean_set_callback_function(serialCallBack);
@@ -81,6 +81,14 @@ bool EnOcean_TCM120::GetConfig()
 	humanstring = enocean_hexToHuman(frame);
 	printf("frame is: %s",humanstring);
 	free(humanstring); */
+
+	enocean_send(&frame);
+
+	// give the TCM120 time to handle the command
+	sleep (1);
+
+	frame = enocean_clean_data_structure();
+	frame = tcm120_rd_idbase();
 
 	enocean_send(&frame);
 
@@ -290,17 +298,41 @@ void serialCallBack(enocean_data_structure in) {
 
 	switch(in.ORG) {
 		case C_ORG_INF_INIT:
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Received INF_INIT %c%c%c%c%c%c%c%c",in.DATA_BYTE3,in.DATA_BYTE2,in.DATA_BYTE1,in.DATA_BYTE0,in.ID_BYTE3,in.ID_BYTE2,in.ID_BYTE1,in.ID_BYTE0);
+			if (in.DATA_BYTE3 != 0x20) LoggerWrapper::GetInstance()->Write(LV_WARNING,"Received INF_INIT %c%c%c%c%c%c%c%c\n",in.DATA_BYTE3,in.DATA_BYTE2,in.DATA_BYTE1,in.DATA_BYTE0,in.ID_BYTE3,in.ID_BYTE2,in.ID_BYTE1,in.ID_BYTE0);
+			break;
+			;;
+		case C_ORG_INF_IDBASE:
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Received INF_IDBASE 0x%02x%02x%02x%02x",in.ID_BYTE3,in.ID_BYTE2,in.ID_BYTE1,in.ID_BYTE0);
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TCM120 Module initialized");
+			break;
+			;;
+		case C_ORG_RPS:
+			if (in.STATUS & S_RPS_NU) {
+				// NU == 1, N-Message
+				LoggerWrapper::GetInstance()->Write(LV_WARNING,"Received RPS N-Message Rocker ID: %i UD: %i Pressed: %i Second Rocker ID: %i SUD: %i Second Action: %i",
+					(in.DATA_BYTE3 & DB3_RPS_NU_RID) >> DB3_RPS_NU_RID_SHIFT, 
+					(in.DATA_BYTE3 & DB3_RPS_NU_UD) >> DB3_RPS_NU_UD_SHIFT, 
+					(in.DATA_BYTE3 & DB3_RPS_NU_PR)>>DB3_RPS_NU_PR_SHIFT,
+					(in.DATA_BYTE3 & DB3_RPS_NU_SRID)>>DB3_RPS_NU_SRID_SHIFT, 
+					(in.DATA_BYTE3 & DB3_RPS_NU_SUD)>>DB3_RPS_NU_SUD_SHIFT,
+					(in.DATA_BYTE3 & DB3_RPS_NU_SA)>>DB3_RPS_NU_SA_SHIFT);
+				
+			} else {
+				// NU == 0, U-Message
+				LoggerWrapper::GetInstance()->Write(LV_WARNING,"Received RPS U-Message Buttons: %i Pressed: %i",(in.DATA_BYTE3 & DB3_RPS_BUTTONS) >> DB3_RPS_BUTTONS_SHIFT, (in.DATA_BYTE3 & DB3_RPS_PR)>>DB3_RPS_PR_SHIFT);
+			}
 			break;
 			;;
 		default:
 			char* humanstring;
 			humanstring = enocean_hexToHuman(in);
-			LoggerWrapper::GetInstance()->Write(LV_WARNING,"%s\n",humanstring);
+			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Received unhandled frame: %s",humanstring);
+			printf("DATA: %s\n",humanstring);
 			free(humanstring);
 			break;
 			;;
 	}
+
 
 
 }
