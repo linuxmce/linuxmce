@@ -9,7 +9,7 @@ CXX = g++
 CXXFLAGS = -Wall -fPIC -ggdb3
 CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
-BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
+BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread -llmce_datalog
 
 MYNAME = DataLogger_Plugin
 VERSION = 2.0.0
