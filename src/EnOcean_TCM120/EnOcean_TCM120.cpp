@@ -246,11 +246,12 @@ void serialCallBack(enocean_data_structure in) {
 				
 
 				(static_cast<EnOcean_TCM120::EnOcean_TCM120*>(myself))->m_pEvent->SendMessage( new Message(pTargetChildDevice->m_dwPK_Device,
-					DEVICEID_EVENTMANAGER,
-					PRIORITY_NORMAL,
-					MESSAGETYPE_EVENT,
-					((in.DATA_BYTE3 & DB3_RPS_NU_UD) >> DB3_RPS_NU_UD_SHIFT) ? EVENT_On_CONST : EVENT_Off_CONST,
-					0));
+					DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,
+					EVENT_Device_OnOff_CONST,
+					1,
+					EVENTPARAMETER_OnOff_CONST,
+					((in.DATA_BYTE3 & DB3_RPS_NU_UD) >> DB3_RPS_NU_UD_SHIFT) ? "1" : "0")
+				);
 
 				
 			} else {
