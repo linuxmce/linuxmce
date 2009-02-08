@@ -442,6 +442,14 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 						}
 						break;
 					;;
+					case COMMAND_CLASS_MULTI_INSTANCE:
+						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_MULTI_INSTANCE");
+						if (frame[6] == MULTI_INSTANCE_REPORT) {
+							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got MULTI_INSTANCE_REPORT from node %i: Command Class 0x%x, instance count: %i",(unsigned char)frame[3],(unsigned char)frame[7],(unsigned char)frame[8]);
+
+						}
+						break;
+					;;	
 					case COMMAND_CLASS_VERSION:
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_VERSION");
 						if (frame[6] == VERSION_REPORT) {
@@ -1984,6 +1992,11 @@ void ZWApi::ZWApi::zwStatusReport() {
 //		zwReadMemory(64*i);
 //	}
 //	zwRequestBasicReport(NODE_BROADCAST);
+//
+	zwMultiInstanceGet(13, COMMAND_CLASS_SENSOR_MULTILEVEL);
+	zwRequestMultilevelSensorReportInstance(13,1);
+	zwRequestMultilevelSensorReportInstance(13,2);
+	zwRequestMultilevelSensorReportInstance(13,3);
 }
 
 void ZWApi::ZWApi::zwPollDevices(bool onoff) {
@@ -2027,7 +2040,7 @@ void ZWApi::ZWApi::zwMultiInstanceGet(int node_id, int command_class){
 
         mybuf[0] = FUNC_ID_ZW_SEND_DATA;
         mybuf[1] = node_id;
-        mybuf[2] = 2; // length of command
+        mybuf[2] = 3; // length of command
         mybuf[3] = COMMAND_CLASS_MULTI_INSTANCE;
         mybuf[4] = MULTI_INSTANCE_GET;
         mybuf[5] = command_class;
@@ -2037,6 +2050,18 @@ void ZWApi::ZWApi::zwMultiInstanceGet(int node_id, int command_class){
 
 }
 void ZWApi::ZWApi::zwRequestMultilevelSensorReportInstance(int node_id,int instance){
+        char mybuf[1024];
+
+        mybuf[0] = FUNC_ID_ZW_SEND_DATA;
+        mybuf[1] = node_id;
+        mybuf[2] = 5; // length of command
+	mybuf[3] = COMMAND_CLASS_MULTI_INSTANCE;
+	mybuf[4] = MULTI_INSTANCE_CMD_ENCAP;
+	mybuf[5] = instance;
+        mybuf[6] = COMMAND_CLASS_SENSOR_MULTILEVEL;
+        mybuf[7] = SENSOR_MULTILEVEL_GET;
+        mybuf[8] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+        sendFunction( mybuf , 9, REQUEST, 1);
 
 }
 

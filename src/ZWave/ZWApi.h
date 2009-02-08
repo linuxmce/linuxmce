@@ -309,6 +309,7 @@ namespace ZWApi {
 	int typeGeneric;
 	int typeSpecific;
 	bool sleepingDevice;
+	bool multiInstance;
 	int plutoDeviceTemplateConst;
 	// holds the device state (used by setback schedule thermostat)
 	int stateBasic;
