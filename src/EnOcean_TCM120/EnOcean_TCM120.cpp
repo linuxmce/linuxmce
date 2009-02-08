@@ -73,6 +73,17 @@ bool EnOcean_TCM120::GetConfig()
 	}
 	enocean_set_callback_function(serialCallBack);
 
+	enocean_data_structure frame;
+	frame = enocean_clean_data_structure();
+	frame = tcm120_reset();
+
+	/* char* humanstring;
+	humanstring = enocean_hexToHuman(frame);
+	printf("frame is: %s",humanstring);
+	free(humanstring); */
+
+	enocean_send(&frame);
+
 	return true;
 }
 
@@ -276,9 +287,20 @@ void EnOcean_TCM120::CMD_StatusReport(string sArguments,string &sCMD_Result,Mess
 
 void serialCallBack(enocean_data_structure in) {
 
-	char* humanstring;
-        humanstring = enocean_hexToHuman(in);
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"%s\n",humanstring);
-        free(humanstring);
+
+	switch(in.ORG) {
+		case C_ORG_INF_INIT:
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Received INF_INIT %c%c%c%c%c%c%c%c",in.DATA_BYTE3,in.DATA_BYTE2,in.DATA_BYTE1,in.DATA_BYTE0,in.ID_BYTE3,in.ID_BYTE2,in.ID_BYTE1,in.ID_BYTE0);
+			break;
+			;;
+		default:
+			char* humanstring;
+			humanstring = enocean_hexToHuman(in);
+			LoggerWrapper::GetInstance()->Write(LV_WARNING,"%s\n",humanstring);
+			free(humanstring);
+			break;
+			;;
+	}
+
 
 }

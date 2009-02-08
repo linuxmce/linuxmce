@@ -40,6 +40,7 @@ all: bin so
 enoceanlib:
 	$(GCC) -c -fPIC -D_GNU_SOURCE -o cssl.o libEnOcean/cssl.c
 	$(GCC) -c -fPIC -o EnOceanPort.o libEnOcean/EnOceanPort.c
+	$(GCC) -c -fPIC -o TCM120.o libEnOcean/TCM120.c
 
 bin: enoceanlib EnOcean_TCM120
 
@@ -52,12 +53,12 @@ EnOcean_TCM120.so: $(sources:.cpp=.o)
 	./post_make.sh $@
 		
 EnOcean_TCM120: $(sources:.cpp=.o)
-	$(CXX) -o $(MYNAME) $(call cpath,$+) cssl.o EnOceanPort.o $(LDFLAGS) $(LDLIBS)
+	$(CXX) -o $(MYNAME) $(call cpath,$+) cssl.o EnOceanPort.o TCM120.o $(LDFLAGS) $(LDLIBS)
 	cp $@ ../bin
 	./post_make.sh $@
 
 clean: clean-recursive
-	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) EnOcean_TCM120.bin EnOcean_TCM120.so cssl.o EnOceanPort.o >/dev/null
+	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) EnOcean_TCM120.bin EnOcean_TCM120.so cssl.o EnOceanPort.o TCM120.o  >/dev/null
 
 package:
 	chmod +x make_package.sh
