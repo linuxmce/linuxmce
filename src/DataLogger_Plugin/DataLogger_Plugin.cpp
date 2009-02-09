@@ -160,10 +160,20 @@ bool DataLogger_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessa
 	}
 
 	if (handled) {
-		// TODO: save to db:  pMessage->m_dwPK_Device_From
+		time_t timestamp;
+		struct tm *timestruct;
+		timestamp = time(NULL);
+		timestruct = localtime(&timestamp); 
+
+		char tmp_timestamp[512];
+		strftime(tmp_timestamp,512,"%Y-%m-%d %H:%M:%S",timestruct);
+
 		Row_Datapoints *pRow_Datapoints = m_pDatabase_lmce_datalog->Datapoints_get()->AddRow();
 		pRow_Datapoints->Datapoint_set(fValue);
 		pRow_Datapoints->FK_Unit_set(unit);
+		pRow_Datapoints->EK_Device_set(pMessage->m_dwPK_Device_From);
+		pRow_Datapoints->timestamp_set(tmp_timestamp);
+		// LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "DATALOGGER FROM %i",pMessage->m_dwPK_Device_From );
 		m_pDatabase_lmce_datalog->Datapoints_get()->Commit();
 		// pRow_Datapoints->Delete();
 	}
