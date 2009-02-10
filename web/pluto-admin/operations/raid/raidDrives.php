@@ -197,7 +197,7 @@ function raidDrives($output,$dbADO) {
 				<input type="button" class="button_fixed" name="edit_'.$drivesData['PK_Device'][$i].'" value="'.$TEXT_ADVANCED_CONST.'"  onClick="self.location=\'index.php?section=editDeviceParams&deviceID='.$drivesData['PK_Device'][$i].'\';"><br>
 				<input type="submit" class="button_fixed" name="delete_'.$drivesData['PK_Device'][$i].'" value="'.$TEXT_DELETE_CONST.'"  onClick="'.$deleteFunction.'"><BR>';
 			if($drivesData['Status'][$i]=="REMOVED") {
-				$out.='<input type="submit" class="button_fixed" name="add_'.$drivesData['PK_Device'][$i].'" value ="Activate">';	
+				$out.='<input type="submit" class="button_fixed" name="add_'.$drivesData['PK_Device'][$i].'" value ="'.$TEXT_ACTIVATE_DRIVE_CONST.'">';	
 			}
 			$out.='			
 				</td>
