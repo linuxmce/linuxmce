@@ -9,7 +9,7 @@ CXX = g++
 CXXFLAGS = -Wall -fPIC -ggdb3
 CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
-BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
+BASELDLIBS = -llmce_game -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
 MYNAME = Game_PlugIn
 VERSION = 2.0.0
