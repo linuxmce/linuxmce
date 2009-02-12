@@ -7,7 +7,7 @@ Standards-Version: 3.7.3
 
 Package: fuppes
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, liblame0, libmpcdec3, libfaad2-0, libflac8, libtwolame0, libmad0, libmp4v2-0, libvorbisfile3
+Depends: ${shlibs:Depends}, ${misc:Depends}, libmp3lame0, libmpcdec3, libfaad2-0, libflac8, libtwolame0, libmad0, libmp4v2-0, libvorbisfile3
 Description: Free UPnP Entertainment Service
  FUPPES is a free multiplatform UPnP (TM) A/V Media Server.
  .
