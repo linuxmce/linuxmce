@@ -17,7 +17,7 @@
 using namespace std;
 using namespace DCE;
 
-#define MYTH_PROTOCOL	31
+#define MYTH_PROTOCOL	40	
 #include "Gen_Devices/AllCommandsRequests.h"
 
 MythBackEnd_Socket::MythBackEnd_Socket(MythTV_PlugIn *pMythTV_PlugIn,string sIPAddress)
