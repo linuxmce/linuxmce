@@ -101,6 +101,11 @@ function Build_Replacements_Common
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/libparted*.deb ${replacements_dir}
 
 
+	#Package: fuppes
+	Build_Replacement_Package fuppes ubuntu/fuppes-0+svn578
+	cp ${svn_dir}/${svn_branch_name}/ubuntu/fuppes*.deb ${replacements_dir}
+
+
 	# TODO Fix this package so it builds against target kernel not running kernel
 	#Package: linux-image-diskless
 	dir_=${svn_dir}/${svn_branch_name}/ubuntu/linux-image-dummy
