@@ -8839,14 +8839,27 @@ int Orbiter::SetupNewOrbiter()
 	// HOW to do this??  TODO
 #endif
 
+#ifdef PADORBITER
+	int PK_Size=1;
+	Width=800;
+	Height=600;
+#else
 	int PK_Size=0;
 	PK_Size=m_pOrbiterRenderer->PromptFor("Size");
 	if( PROMPT_CANCEL == PK_Size)
 		return 0;
+#endif
 
+#ifdef PADORBITER
+	int PK_Device=0;
+	DCE::CMD_New_Orbiter_DT CMD_New_Orbiter_DT(m_dwPK_Device, DEVICETEMPLATE_Orbiter_Plugin_CONST, BL_SameHouse, sType,
+		PK_Users,DEVICETEMPLATE_Orbiter_CONST,m_sMacAddress,PK_Room,Width,Height,PK_Skin,PK_Language,PK_Size,&PK_Device);
+#else
 	int PK_Device=0;
 	DCE::CMD_New_Orbiter_DT CMD_New_Orbiter_DT(m_dwPK_Device, DEVICETEMPLATE_Orbiter_Plugin_CONST, BL_SameHouse, sType,
 		PK_Users,m_dwPK_DeviceTemplate,m_sMacAddress,PK_Room,Width,Height,PK_Skin,PK_Language,PK_Size,&PK_Device);
+
+#endif
 
 	CMD_New_Orbiter_DT.m_pMessage->m_eExpectedResponse = ER_ReplyMessage;
 	Message *pResponse = event_Impl.SendReceiveMessage( CMD_New_Orbiter_DT.m_pMessage );
