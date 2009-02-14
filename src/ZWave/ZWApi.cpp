@@ -608,6 +608,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 									} else {
 										DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Luminance measurement received: %d Lux",value);
 									} 
+									DCEcallback->SendBrightnessChangedEvent ((unsigned char)frame[3],value);
 								;;
 								break;
 								case SENSOR_MULTILEVEL_REPORT_POWER:
@@ -627,6 +628,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 								break;
 								case SENSOR_MULTILEVEL_REPORT_RELATIVE_HUMIDITY:
 									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Relative humidity measurement received: %d percent",value);
+									DCEcallback->SendHumidityChangedEvent ((unsigned char)frame[3],value);
 
 								;;
 								break;
@@ -636,6 +638,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 									} else {
 										DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Temperature level measurement received: %d F",value);
 									}
+									DCEcallback->SendTemperatureChangedEvent ((unsigned char)frame[3],value);
 								;;
 								break;
 								default:

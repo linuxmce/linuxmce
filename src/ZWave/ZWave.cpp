@@ -478,6 +478,64 @@ void ZWave::SendCO2LevelChangedEvent(unsigned short node_id, int value)
 
 }
 
+void ZWave::SendTemperatureChangedEvent(unsigned short node_id, float value)
+{
+	char tempstr[512];
+	sprintf(tempstr, "%.1f", value);
+	char tmp_node_id[16];
+	sprintf(tmp_node_id,"%i",node_id);
+        DeviceData_Impl *pChildDevice = InternalIDToDevice(tmp_node_id);
+	if (pChildDevice != NULL) {		
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending co2 level changed event from node %s",tmp_node_id);
+		m_pEvent->SendMessage( new Message(pChildDevice->m_dwPK_Device,
+			DEVICEID_EVENTMANAGER,
+			PRIORITY_NORMAL,
+			MESSAGETYPE_EVENT,
+			EVENT_Temperature_Changed_CONST, 1, 
+			EVENTPARAMETER_Value_CONST, tempstr)
+		);
+	}
+
+}
+void ZWave::SendHumidityChangedEvent(unsigned short node_id, int value)
+{
+	char tempstr[512];
+	sprintf(tempstr, "%i", value);
+	char tmp_node_id[16];
+	sprintf(tmp_node_id,"%i",node_id);
+        DeviceData_Impl *pChildDevice = InternalIDToDevice(tmp_node_id);
+	if (pChildDevice != NULL) {		
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending humidity level changed event from node %s",tmp_node_id);
+		m_pEvent->SendMessage( new Message(pChildDevice->m_dwPK_Device,
+			DEVICEID_EVENTMANAGER,
+			PRIORITY_NORMAL,
+			MESSAGETYPE_EVENT,
+			EVENT_Humidity_Changed_CONST, 1, 
+			EVENTPARAMETER_Value_CONST, tempstr)
+		);
+	}
+
+}
+void ZWave::SendBrightnessChangedEvent(unsigned short node_id, int value)
+{
+	char tempstr[512];
+	sprintf(tempstr, "%i", value);
+	char tmp_node_id[16];
+	sprintf(tmp_node_id,"%i",node_id);
+        DeviceData_Impl *pChildDevice = InternalIDToDevice(tmp_node_id);
+	if (pChildDevice != NULL) {		
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending brightness level changed event from node %s",tmp_node_id);
+		m_pEvent->SendMessage( new Message(pChildDevice->m_dwPK_Device,
+			DEVICEID_EVENTMANAGER,
+			PRIORITY_NORMAL,
+			MESSAGETYPE_EVENT,
+			EVENT_Brightness_Changed_CONST, 1, 
+			EVENTPARAMETER_Value_CONST, tempstr)
+		);
+	}
+
+}
+
 void ZWave::SendLightChangedEvents(unsigned short node_id, int value)
 {
 	char svalue[32];
