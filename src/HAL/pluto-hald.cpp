@@ -179,7 +179,7 @@ void PlutoHalD::myDeviceAdded(LibHalContext * ctx, const char * udi)
 		return;
 	}
 	
-	gchar *bus = libhal_device_get_property_string (ctx, udi, "info.bus", NULL);
+	gchar *bus = libhal_device_get_property_string (ctx, udi, "info.subsystem", NULL);
 	gchar *category = libhal_device_get_property_string (ctx, udi, "info.category", NULL);
 	if( bus != NULL &&
 		strcmp(bus, "usb_device") == 0 &&
@@ -205,7 +205,7 @@ void PlutoHalD::myDeviceAdded(LibHalContext * ctx, const char * udi)
 		{
 			string parent;
 				
-			getParentId(ctx, udi, "info.bus", "usb_device", parent);
+			getParentId(ctx, udi, "info.subsystem", "usb_device", parent);
 			if( !parent.empty() )
 			{
 				string mainParent;
@@ -263,7 +263,7 @@ void PlutoHalD::myDeviceAdded(LibHalContext * ctx, const char * udi)
 						// 100 ms should be enough
 						usleep(100000);
 				
-						getChildId(ctx, mainParent.c_str(), "info.bus", "usb", serial_parent);
+						getChildId(ctx, mainParent.c_str(), "info.subsystem", "usb", serial_parent);
 					
 						if( !serial_parent.empty() )
 							break;
@@ -657,7 +657,7 @@ void PlutoHalD::initialize(LibHalContext * ctx)
 		
 		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "init udi = %s\n", udi);
 		
-		bus = libhal_device_get_property_string (ctx, udi, "info.bus", NULL);
+		bus = libhal_device_get_property_string (ctx, udi, "info.subsystem", NULL);
 		category = libhal_device_get_property_string (ctx, udi, "info.category", NULL);
 		if( bus != NULL && 0 == strcmp(bus, "usb_device") && strlen(bus) == strlen("usb_device") )
 		{
@@ -679,7 +679,7 @@ void PlutoHalD::initialize(LibHalContext * ctx)
 			{
 				string parent;
 				
-				getParentId(ctx, udi, "info.bus", "usb_device", parent);
+				getParentId(ctx, udi, "info.subsystem", "usb_device", parent);
 				if( !parent.empty() )
 				{
 					string mainParent;
@@ -737,7 +737,7 @@ void PlutoHalD::initialize(LibHalContext * ctx)
 							// 100 ms should be enough
 							usleep(100000);
 				
-							getChildId(ctx, mainParent.c_str(), "info.bus", "usb", serial_parent);
+							getChildId(ctx, mainParent.c_str(), "info.subsystem", "usb", serial_parent);
 					
 							if( !serial_parent.empty() )
 								break;
@@ -1066,7 +1066,7 @@ void PlutoHalD::getProductVendorId(	LibHalContext * ctx, const char * udi,
 									int * busType , string & sysfsPath )
 {
 	moreInfo = "";
-	gchar *bus = libhal_device_get_property_string (ctx, udi, "info.bus", NULL);
+	gchar *bus = libhal_device_get_property_string (ctx, udi, "info.subsystem", NULL);
 	if( bus != NULL )
 	{
 		string prodIdKey = bus;
