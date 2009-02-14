@@ -1569,6 +1569,7 @@ bool Media_Plugin::StartMedia(MediaStream *pMediaStream)
 	if( pMediaStream->m_pMediaHandlerInfo->m_pMediaHandlerBase->StartMedia(pMediaStream,sError) )
 	{
 		int StreamID = pMediaStream->m_iStreamID_get( );
+		pMediaStream->m_sStartPosition = "";
 
 		if(NULL != m_pAlarmManager)
 			m_pAlarmManager->AddRelativeAlarm(1,this,UPDATE_VIEW_DATE,(void *) StreamID);  // Do this off-line so we don't block the mutex doing a database update
