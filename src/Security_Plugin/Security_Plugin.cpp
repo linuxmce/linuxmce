@@ -695,12 +695,19 @@ bool Security_Plugin::SensorTrippedEventHandler(DeviceData_Router *pDevice,bool 
 	pDevice->m_sStatus_set(bIsTripped ? "TRIPPED" : "NORMAL");
 
 	string State = pDevice->m_sState_get();
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "XXX: Device: %d, State: %s", pDevice->m_dwPK_Device, State.c_str());
 	string::size_type pos=0;
 	string Mode = StringUtils::Tokenize(State,",",pos);
 	string Bypass = StringUtils::Tokenize(State,",",pos);
 	string sPK_ModeChange = StringUtils::Tokenize(State,",",pos);
 
 	int PK_HouseMode = GetModeID(Mode);
+
+	string sConfiguration = m_pDatabase_pluto_main->Device_DeviceData_get()->GetRow(m_dwPK_Device,DEVICEDATA_Configuration_CONST)->IK_DeviceData_get();
+	pos = 0;
+	StringUtils::Tokenize(sConfiguration, ",", pos);
+	string HouseMode = StringUtils::Tokenize(sConfiguration, ",", pos);
+	PK_HouseMode = atoi(HouseMode.c_str());
 
 	if( Bypass=="WAIT" || bIsTripped==false )
 	{
@@ -733,6 +740,7 @@ bool Security_Plugin::SensorTrippedEventHandler(DeviceData_Router *pDevice,bool 
 
 	bool bNotify=false,bAnnouncementOnly=false;
 	int PK_AlertType = GetAlertType(PK_HouseMode,pDevice,&bNotify);
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "XXX: PK_AlertType: %d, PK_HouseMode: %d", PK_AlertType, PK_HouseMode);
 	if( PK_AlertType<=0 )
 	{
 		bAnnouncementOnly=true; // This is something information only, like an announcement, or only has a notification and do nothing
@@ -1176,6 +1184,7 @@ void Security_Plugin::SaveHouseModes()
 	for(map<int,int>::iterator it=m_mapPK_HouseMode.begin();it!=m_mapPK_HouseMode.end();++it)
 		sData += StringUtils::itos(it->first) + "," + StringUtils::itos(it->second) + ",";
 
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "XXX: SetHouseMode sData: %s", sData.c_str());
 	pRow_Device_DeviceData->IK_DeviceData_set(sData);
 	pRow_Device_DeviceData->Table_Device_DeviceData_get()->Commit();
 }
