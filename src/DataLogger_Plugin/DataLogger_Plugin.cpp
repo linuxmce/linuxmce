@@ -131,6 +131,7 @@ bool DataLogger_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessa
 	bool handled = true;
 	int unit = 0;
 	float fValue = 0;
+	int iValue = 0;
 	string sValue = "";
 
 
@@ -144,14 +145,22 @@ bool DataLogger_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessa
 			break;
 		case EVENT_Temperature_Changed_CONST:
 			unit = 2;
+			sValue = pMessage->m_mapParameters[EVENTPARAMETER_Value_CONST];
+			sscanf(sValue.c_str(),"%f",&fValue);
 			;;
 			break;
 		case EVENT_Humidity_Changed_CONST:
 			unit = 3;
+			sValue = pMessage->m_mapParameters[EVENTPARAMETER_Value_CONST];
+			sscanf(sValue.c_str(),"%i",&iValue);
+			fValue = iValue;
 			;;
 			break;
 		case EVENT_Brightness_Changed_CONST:
 			unit = 4;
+			sValue = pMessage->m_mapParameters[EVENTPARAMETER_Value_CONST];
+			sscanf(sValue.c_str(),"%i",&iValue);
+			fValue = iValue;
 			;;
 			break;
 		default:
