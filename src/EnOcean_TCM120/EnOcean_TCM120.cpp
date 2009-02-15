@@ -283,7 +283,55 @@ void serialCallBack(enocean_data_structure in) {
 			break;
 			;;
 		case C_ORG_4BS:
+			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Received 4BS Message Node 0x%08x",id);
+			if ((in.DATA_BYTE0 & 8) == 8) {
+				// teach in telegram
+				if ((in.DATA_BYTE0 & 128) == 128) {
+					// new type
+					int profile = in.DATA_BYTE3 >> 2;
+					int type = ((in.DATA_BYTE3 & 3) << 5) + (in.DATA_BYTE2 >> 3);
+					int manufacturer = ((in.DATA_BYTE2 & 7) << 8) + in.DATA_BYTE1;
+					switch (profile) {
+						case 2:	// Temp sensor
+							break;
+							;;
+						case 4:	// Temp & Hum sensor
+							break;
+							;;
+						case 5:	// pressure
+							break;
+							;;
+						case 6:	// Light sensor
+							break;
+							;;
+						case 7:	// Occupancy
+							break;
+							;;
+						case 8:	// Light, Temp, Occup
+							break;
+							;;
+						case 9:	// gas sensor
+							break;
+							;;
+						case 16:	// room operating panel
+							break;
+							;;
+						case 48:	// digital input
+							break;
+							;;
+						case 56:	// central command
+							break;
+							;;
+						default:
+							;;
+					}
+				}
 
+			} else {
+				// regular telegram
+
+
+			}
 			break;
 			;;
 		default:
