@@ -245,19 +245,45 @@ void serialCallBack(enocean_data_structure in) {
 					(in.DATA_BYTE3 & DB3_RPS_NU_SA)>>DB3_RPS_NU_SA_SHIFT);
 				
 
-				(static_cast<EnOcean_TCM120::EnOcean_TCM120*>(myself))->m_pEvent->SendMessage( new Message(pTargetChildDevice->m_dwPK_Device,
-					DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,
-					EVENT_Device_OnOff_CONST,
-					1,
-					EVENTPARAMETER_OnOff_CONST,
-					((in.DATA_BYTE3 & DB3_RPS_NU_UD) >> DB3_RPS_NU_UD_SHIFT) ? "1" : "0")
-				);
+				if (pTargetChildDevice != NULL) {
+					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Sending On/Off event from Node 0x%08x",id);
+					(static_cast<EnOcean_TCM120::EnOcean_TCM120*>(myself))->m_pEvent->SendMessage( new Message(pTargetChildDevice->m_dwPK_Device,
+						DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,
+						EVENT_Device_OnOff_CONST,
+						1,
+						EVENTPARAMETER_OnOff_CONST,
+						((in.DATA_BYTE3 & DB3_RPS_NU_UD) >> DB3_RPS_NU_UD_SHIFT) ? "1" : "0")
+					);
+				}
 
 				
 			} else {
 				// NU == 0, U-Message
 				LoggerWrapper::GetInstance()->Write(LV_WARNING,"Received RPS U-Message Node 0x%08x Buttons: %i Pressed: %i",id,(in.DATA_BYTE3 & DB3_RPS_BUTTONS) >> DB3_RPS_BUTTONS_SHIFT, (in.DATA_BYTE3 & DB3_RPS_PR)>>DB3_RPS_PR_SHIFT);
 			}
+			break;
+			;;
+		case C_ORG_1BS:
+			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Received 1BS Message Node 0x%08x Value 0x%x",id,in.DATA_BYTE3);
+			if (pTargetChildDevice != NULL) {
+				if (((in.STATUS >> 4) & 7) == 0) { // magnet contact profile, send sensor tripped events
+					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Sending sensor tripped event from Node 0x%08x",id);
+					(static_cast<EnOcean_TCM120::EnOcean_TCM120*>(myself))->m_pEvent->SendMessage( new Message(pTargetChildDevice->m_dwPK_Device,
+						DEVICEID_EVENTMANAGER,
+						PRIORITY_NORMAL,
+						MESSAGETYPE_EVENT,
+						EVENT_Sensor_Tripped_CONST,
+						1,
+						EVENTPARAMETER_Tripped_CONST,
+						(in.DATA_BYTE3 & 1) ? "0" : "1")
+					);
+				}
+			}
+
+			break;
+			;;
+		case C_ORG_4BS:
+
 			break;
 			;;
 		default:
