@@ -14,6 +14,15 @@ sub getIP {
         return $IP;
 }
 
+sub getTimeZone {
+        my $dbh = DBI->connect(&read_pluto_cred()) or die "Can't connect to database: $DBI::errstr\n";
+        my $sth = $dbh->prepare("SELECT ZoneName FROM TimeZone Where PK_Timezone = (select FK_Timezone from City Where PK_City = (Select FK_City From Installation))");
+        $sth->execute || die "Sql Error";
+        my $row = $sth->fetchrow_hashref;
+        my $TimeZone = $row->{ZoneName};
+        return $TimeZone;
+}  
+
 #declare vars (it's safer this way)
 my $Device_ID;
 my $Device_IP;
@@ -55,6 +64,7 @@ my $str_SEPDefault = "";
 my $str_DEV = "";
 my $str_LINE = "";
 my $str_FILE = "";
+my $str_TimeZone = getTimeZone();
 
 $str_XMLDefault .= "<?xml version=\"1.0\"?>\n";
 $str_XMLDefault .= "<Default>\n";
@@ -83,7 +93,7 @@ $str_SEPDefault .= "<name>Default</name>\r\n";
 $str_SEPDefault .= "<dateTimeSetting>\r\n";
 $str_SEPDefault .= "<name>CMLocal</name>\r\n";
 $str_SEPDefault .= "<dateTemplate>D.M.Y</dateTemplate>\r\n";
-$str_SEPDefault .= "<timeZone></timeZone>\r\n";
+$str_SEPDefault .= "<timeZone>$str_TimeZone</timeZone>\r\n";
 $str_SEPDefault .= "</dateTimeSetting>\r\n";
 $str_SEPDefault .= "<callManagerGroup>\r\n";
 $str_SEPDefault .= "<members>\r\n";
