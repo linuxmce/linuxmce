@@ -4,16 +4,19 @@ CPPFLAGS =  -I.. -I../.. -I../DCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DM
 CXX = g++
 LDFLAGS = -L$(ROOT)/lib
 
+sources = Database_lmce_datalog.cpp TableRow.cpp \
+Table_Datapoints.cpp \
+Table_Unit.cpp
+
 #<-mkr_B_use_mysql_wrapper_b->
 CPPFLAGS += -I/usr/include/mysql
 LDFLAGS += -lmysqlclient_r
 #<-mkr_B_use_mysql_wrapper_e->
 
-#
-
-sources = ../db_wrapper/db_wrapper.cpp ../db_wrapper/ClientSocket.cpp ../db_wrapper/Socket.cpp Database_lmce_datalog.cpp TableRow.cpp \
-Table_Datapoints.cpp \
-Table_Unit.cpp
+#<-mkr_b_use_mysql_wrapper_b->
+CPPFLAGS += -DUSE_MYSQL_WRAPPER
+sources += ../db_wrapper/db_wrapper.cpp ../db_wrapper/ClientSocket.cpp ../db_wrapper/Socket.cpp
+#<-mkr_b_use_mysql_wrapper_e->
 
 all: liblmce_datalog.so all-recursive
 
