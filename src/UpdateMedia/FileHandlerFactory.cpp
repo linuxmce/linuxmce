@@ -3,6 +3,7 @@
 #include "VDRInfoFileHandler.h"
 #include "ID3FileHandler.h"
 #include "TagFileHandler.h"
+#include "RomFileHandler.h"
 #include "PlutoUtils/FileUtils.h"
 #include "FileUtils/file_utils.h"
 //-----------------------------------------------------------------------------------------------------
@@ -20,6 +21,10 @@ FileHandlerFactory::~FileHandlerFactory(void)
 
 	switch(GetFileHandlerType(sDirectory, sFile))
 	{
+		case fhtRom:
+			pFileHandler = new RomFileHandler(sDirectory, sFile);
+			break;
+
 		case fhtVdr:
 			pFileHandler = new VDRInfoFileHandler(sDirectory, sFile);
 			break;
@@ -48,11 +53,19 @@ FileHandlerFactory::~FileHandlerFactory(void)
 		type = fhtVdr;
 	else if(IsValidTagFile(sDirectory, sFile))
 		type = fhtTag;
+	else if(IsValidRomFile(sDirectory, sFile))
+		type = fhtRom;
 	else 
 		type = fhtId3;
 
 	return type;
 }	
+//-----------------------------------------------------------------------------------------------------
+/*static*/ bool FileHandlerFactory::IsValidRomFile(string sDirectory, string sFile)
+{
+	string sExtension = FileUtils::FindExtension(sFile);
+	return sExtension == "zip";
+}
 //-----------------------------------------------------------------------------------------------------
 /*static*/ bool FileHandlerFactory::IsValidVDRFile(string sDirectory, string sFile)
 {
