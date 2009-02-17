@@ -456,7 +456,7 @@ void Game_PlugIn::CheckForNewROMs()
 {
  
 //	// Scan for new roms, and tag things appropriately. This is run by the AlarmManager that we instantiate.
- 
+/* 
 	string sSQL = "SELECT max(PK_File) FROM File";
 	PlutoSqlResult result;
    	DB_ROW row;
@@ -517,10 +517,10 @@ void Game_PlugIn::CheckForNewROMs()
  
 	m_pMedia_Plugin->m_pDatabase_pluto_media->File_get()->Commit();
 	m_pAlarmManager->CancelAlarmByType(CHECK_FOR_NEW_ROMS);  // Don't get multiple entries in here
-	m_pAlarmManager->AddRelativeAlarm(180,this,CHECK_FOR_NEW_ROMS,NULL);  /* check again in a few mins */
+	m_pAlarmManager->AddRelativeAlarm(180,this,CHECK_FOR_NEW_ROMS,NULL);  // check again in a few mins 
  
 	m_dwPK_File_LastCheckedForNewRecordings = PK_File_Max;
- 
+*/ 
 }
 
 /* Grabbed almost verbatim from Xine Player */

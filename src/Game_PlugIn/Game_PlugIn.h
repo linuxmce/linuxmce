@@ -33,9 +33,8 @@
 #include "../Media_Plugin/MediaHandlerBase.h"
 
 #include "GameMediaStream.h"
-#include "GAMEROM.h"
 #include "AlarmManager.h"
-
+#include "GAMEROM.h"
 
 
 //<-dceag-decl-b->

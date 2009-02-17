@@ -37,13 +37,13 @@ string GAMEROM::getTitleForROM(string sROMName)
 	if (!m_pMyDatabase->Rom_get()->GetRows(s_WhereQuery,&v_Rom)) 
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not get Rom matching ROMName: %s",sRomName.c_str());
-		return "No Matching Rom for ROM: "+sRomName;
+		return "NOMATCH";
 	} 
 
 	if (v_Rom.size() == 0)
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not get Rom matching ROMName: %s",sRomName.c_str());
-		return "No Matching Rom for ROM: "+sRomName;
+		return "NOMATCH";
 	}
 
 	pRow_Rom = m_pMyDatabase->Rom_get()->GetRow(v_Rom[0]->PK_Rom_get());
@@ -61,7 +61,7 @@ string GAMEROM::getTitleForROM(string sROMName)
 
 	// Nothing was found, return a message.
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not Find Title RomAttribute for ROMName: %s",sRomName.c_str());
-	return "No Matching Title for ROM: "+sRomName;
+	return "NOMATCH";
 
 }
 
@@ -77,13 +77,13 @@ string GAMEROM::getYearForROM(string sROMName)
 	if (!m_pMyDatabase->Rom_get()->GetRows(s_WhereQuery,&v_Rom)) 
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not get Rom matching ROMName: %s",sRomName.c_str());
-		return "No Matching Rom for ROM: "+sRomName;
+		return "NOMATCH";
 	} 
 
 	if (v_Rom.size() == 0)
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not get Rom matching ROMName: %s",sRomName.c_str());
-		return "No Matching Rom for ROM: "+sRomName;
+		return "NOMATCH";
 	}
 	
 	pRow_Rom = m_pMyDatabase->Rom_get()->GetRow(v_Rom[0]->PK_Rom_get());
@@ -101,7 +101,7 @@ string GAMEROM::getYearForROM(string sROMName)
 
 	// Nothing was found, return a message.
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not Find Year RomAttribute for ROMName: %s",sRomName.c_str());
-	return "No Matching Year for ROM: "+sRomName;
+	return "NOMATCH";
 
 }
 
@@ -117,13 +117,13 @@ string GAMEROM::getManufacturerForROM(string sROMName)
 	if (!m_pMyDatabase->Rom_get()->GetRows(s_WhereQuery,&v_Rom)) 
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not get Rom matching ROMName: %s",sRomName.c_str());
-		return "No Matching Rom for ROM: "+sRomName;
+		return "NOMATCH";
 	} 
 
 	if (v_Rom.size() == 0)
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not get Rom matching ROMName: %s",sRomName.c_str());
-		return "No Matching Rom for ROM: "+sRomName;
+		return "NOMATCH";
 	}
 	
 	pRow_Rom = m_pMyDatabase->Rom_get()->GetRow(v_Rom[0]->PK_Rom_get());
@@ -141,7 +141,7 @@ string GAMEROM::getManufacturerForROM(string sROMName)
 
 	// Nothing was found, return a message.
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not Find Manufacturer RomAttribute for ROMName: %s",sRomName.c_str());
-	return "No Matching Manufacturer for ROM: "+sRomName;
+	return "NOMATCH";
 }
 
 string GAMEROM::getGenreForROM(string sROMName)
@@ -156,13 +156,13 @@ string GAMEROM::getGenreForROM(string sROMName)
 	if (!m_pMyDatabase->Rom_get()->GetRows(s_WhereQuery,&v_Rom)) 
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not get Rom matching ROMName: %s",sRomName.c_str());
-		return "No Matching Rom for ROM: "+sRomName;
+		return "NOMATCH";
 	} 
 
 	if (v_Rom.size() == 0)
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not get Rom matching ROMName: %s",sRomName.c_str());
-		return "No Matching Rom for ROM: "+sRomName;
+		return "NOMATCH";
 	}
 	
 	pRow_Rom = m_pMyDatabase->Rom_get()->GetRow(v_Rom[0]->PK_Rom_get());
@@ -180,5 +180,5 @@ string GAMEROM::getGenreForROM(string sROMName)
 
 	// Nothing was found, return a message.
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not Find Genre RomAttribute for ROMName: %s",sRomName.c_str());
-	return "No Matching Genre for ROM: "+sRomName;
+	return "NOMATCH";
 }

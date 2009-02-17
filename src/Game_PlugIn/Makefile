@@ -9,7 +9,7 @@ CXX = g++
 CXXFLAGS = -Wall -fPIC -ggdb3
 CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
-BASELDLIBS = -llmce_game -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
+BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
 MYNAME = Game_PlugIn
 VERSION = 2.0.0
@@ -22,7 +22,7 @@ sources = Main.cpp Game_PlugIn.cpp $(Gen_Dev_Files)
 CXXFLAGS +=
 CPPFLAGS +=
 LDFLAGS +=
-XTRALDLIBS =
+XTRALDLIBS = -llmce_game
 
 Gen_Dev_Files +=
 sources += GAMEROM.cpp \
