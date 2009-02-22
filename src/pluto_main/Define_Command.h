@@ -875,6 +875,12 @@
 #define COMMAND_Set_Polling_State_CONST 966
 #define COMMAND_Add_Node_CONST 967
 #define COMMAND_Remove_Node_CONST 968
+#define COMMAND_Natural_CONST 969
+#define COMMAND_Theatre_Black_1_CONST 970
+#define COMMAND_Theatre_Black_2_CONST 971
+#define COMMAND_sRGB_CONST 972
+#define COMMAND_Video_Mute_On_CONST 973
+#define COMMAND_Video_Mute_Off_CONST 974
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"
