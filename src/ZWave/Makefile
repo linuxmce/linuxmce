@@ -1,8 +1,7 @@
 #<-dceag-mh-b->
 GENDEV=../Gen_Devices
 
-SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES -I/opt/libxine1-pluto/include -I/opt/linphone-1.3.5/include
-SNR_LDFLAGS ?= -L/opt/libxine1-pluto/lib -L/opt/linphone-1.3.5/lib
+SNR_CPPFLAGS ?= <-mkr_t_compile_defines->
 
 ROOT = ..
 CXX = g++
@@ -13,7 +12,7 @@ BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
 MYNAME = ZWave
 VERSION = 2.0.0
-MYDEVTEMPLATEID = 1754mplateID
+MYDEVTEMPLATEID = 1754
 
 Gen_Dev_Files = $(GENDEV)/ZWaveBase.cpp
 sources = Main.cpp ZWave.cpp $(Gen_Dev_Files)
@@ -33,7 +32,7 @@ LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
 whattodo:
 	@echo "type 'make bin', 'make so' or 'make all'"
 
-all: bin so
+all: bin
 
 bin: ZWave
 
