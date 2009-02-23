@@ -185,6 +185,8 @@ bool DataLogger_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessa
 		// LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "DATALOGGER FROM %i",pMessage->m_dwPK_Device_From );
 		m_pDatabase_lmce_datalog->Datapoints_get()->Commit();
 		// pRow_Datapoints->Delete();
+		//
+		// TODO: FIXME: I'm sure i need to free something here
 	}
 
 	return true;
