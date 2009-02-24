@@ -92,7 +92,7 @@ function mainMediaFilesSync($output,$mediadbADO,$dbADO) {
 			<!--
 			EDIT BY PAUL MUMBY:
 			ADDED RECURSIVE BUTTON BELOW
-			--!>		
+			-->		
 			<form action="index.php" method="POST" name="mainMediaFilesSync">
 			<input type="hidden" name="section" value="mainMediaFilesSync">
 			<input type="hidden" name="action" value="update">

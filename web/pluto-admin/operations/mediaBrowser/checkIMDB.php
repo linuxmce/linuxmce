@@ -130,7 +130,7 @@ function IMDBSearchBox($fileData,$searchIndex,$mediadbADO){
 			<td align="center"><B>'.$TEXT_FILENAME_CONST.'</B></td>
 			<td align="center"><B>'.$TEXT_IMDB_KEYWORD_CONST.'</B></td>
 <!--			<td colspan="4" align="center"><B>'.$TEXT_FILTERS_CONST.'</B></td>
-	--!>	</tr>
+	-->	</tr>
 	
 		<tr>
 			<td align="left">'.$fileData['Path'][0].'/'.$fileData['Filename'][0].'</td>
@@ -139,7 +139,7 @@ function IMDBSearchBox($fileData,$searchIndex,$mediadbADO){
 			<td align="left"><input type="text" name="Keyword2Search_'.$id.'" value="'.@$filter2.'"></td>
 			<td align="left">'.pulldownFromArray($filterOptions,'Keyword3Type_'.$id,$filterSelected3).'</td>
 			<td align="left"><input type="text" name="Keyword3Search_'.$id.'" value="'.@$filter3.'"></td>
-	--!>	</tr>
+	-->	</tr>
 		<tr>
 			<td align="center" colspan="6"><input type="submit" class="button" name="doSearch" value="'.$TEXT_GET_IMDB_ATTRIBUTES_CONST.'"> <input type="button" class="button" name="syncAttributes" value="Back to file" onClick="self.location=\'index.php?section=editMediaFile&fileID='.$fileData['PK_File'][0].'\'"></td>
 		</tr>		
