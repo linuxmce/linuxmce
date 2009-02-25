@@ -131,6 +131,8 @@ $BASEDIR/UpdateMediaDaemonControl.sh -enable
 
 $BASEDIR/Start_DCERouter.sh
 
+$BASEDIR/checkforRaids.sh
+$BASEDIR/UpdateAvailableSerialPorts.sh
 
 QUERY="SELECT PK_Device FROM Device JOIN DeviceTemplate ON Device.FK_DeviceTemplate=DeviceTemplate.PK_DeviceTemplate WHERE PK_DeviceTemplate=${DeviceTemplate_Core}"
 RESULT=$(RunSQL "$QUERY")
