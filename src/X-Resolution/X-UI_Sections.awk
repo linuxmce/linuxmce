@@ -63,6 +63,11 @@ function outputExtensions()
 #<-mkr_b_via_e->
 	print "\tOption \"RENDER\" \"true\"";
 	print "EndSection";
+
+	print "Section \"ServerFlags\"";
+	print "\tOption \"AutoAddDevices\" \"False\"";
+	print "EndSection";
+
 }
 
 # update Screen and Device sections
