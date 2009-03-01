@@ -999,6 +999,13 @@ switch ($section) {
 	    $output->setHelpSrc('/wiki/index.php/Execute_Scenarios');
 	    executeScenarios($output,$dbADO);
 	break;
+        case 'viewDatalog';
+                $output = new Template($dbADO);
+                $output->setTemplateFileType('large');
+            include_once('operations/datalog/viewDatalog.php');
+            $output->setHelpSrc('/wiki/index.php/DataLogger');
+            viewDatalog($output,$dbADO);
+        break;
 	case 'pickScenario';
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('small');
