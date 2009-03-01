@@ -63,7 +63,7 @@ DefaultSambaPassword=609FCABC7B0F9AEAAAD3B435B51404EE:DDFF3B733E17BE6500375694FE
 DefaultLinuxPassword=
 
 global_static_dirs="public temp_pvr mydvd cameras tv_listing"
-user_dirs="audio pictures documents videos"
+user_dirs="audio pictures documents videos games/MAME"
 user_static_dirs="data"
 
 UserList=

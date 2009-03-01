@@ -15,7 +15,7 @@ for ((i = 0; i < ${#Params[@]}; i++)); do
 done
 
 ## A list containing the plugo directories
-Directories="pictures,audio,documents,videos"
+Directories="pictures,audio,documents,videos,games/MAME"
 countDirs=$(echo $Directories | sed 's/,/\n/g' | wc -l)
 
 ## A list containin the pluto users that need to use those directories

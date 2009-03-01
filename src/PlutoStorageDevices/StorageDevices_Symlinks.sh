@@ -51,7 +51,7 @@ set +o noglob
 	
 	## Sanitize Device_Directories/Users
 	if [[ $Device_Directories == "" ]]; then
-		Device_Directories="pictures,audio,documents,videos"
+		Device_Directories="pictures,audio,documents,videos,games/MAME"
 	fi
 
 	if [[ $Device_Users == "" ]]; then
