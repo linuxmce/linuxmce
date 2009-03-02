@@ -120,6 +120,18 @@ public:
 			return m_mapParameters[DEVICEDATA_Type_CONST];
 	}
 
+	string Get_Default_Repeat()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Default_Repeat_CONST);
+		else
+			return m_mapParameters[DEVICEDATA_Default_Repeat_CONST];
+	}
+
+	void Set_Default_Repeat(string Value)
+	{
+		SetParm(DEVICEDATA_Default_Repeat_CONST,Value.c_str());
+	}
 };
 
 
@@ -225,13 +237,15 @@ public:
 	Command_Impl *CreateCommand(int PK_DeviceTemplate, Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent);
 	//Data accessors
 	string DATA_Get_Type() { return GetData()->Get_Type(); }
+	string DATA_Get_Default_Repeat() { return GetData()->Get_Default_Repeat(); }
+	void DATA_Set_Default_Repeat(string Value,bool bUpdateDatabase=false) { GetData()->Set_Default_Repeat(Value); if( bUpdateDatabase ) SetDeviceDataInDB(m_dwPK_Device,278,Value); }
 	//Event accessors
 	void EVENT_Watching_Media(int iPK_Room) { GetEvents()->Watching_Media(iPK_Room); }
 	void EVENT_Stopped_Watching_Media(int iPK_Room) { GetEvents()->Stopped_Watching_Media(iPK_Room); }
 	void EVENT_Listening_to_Media(int iPK_Room) { GetEvents()->Listening_to_Media(iPK_Room); }
 	void EVENT_Stopped_Listening_To_Medi(int iPK_Room) { GetEvents()->Stopped_Listening_To_Medi(iPK_Room); }
 	//Commands - Override these to handle commands from the server
-	virtual void CMD_MH_Play_Media(int iPK_Device,string sFilename,int iPK_MediaType,int iPK_DeviceTemplate,string sPK_EntertainArea,bool bResume,int iRepeat,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_MH_Play_Media(int iPK_Device,string sFilename,int iPK_MediaType,int iPK_DeviceTemplate,string sPK_EntertainArea,bool bResume,int iRepeat,bool bQueue,bool bBypass_Event,bool bDont_Setup_AV,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_MH_Stop_Media(int iPK_Device,int iPK_MediaType,int iPK_DeviceTemplate,string sPK_EntertainArea,bool bBypass_Event,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Bind_to_Media_Remote(int iPK_Device,string sPK_DesignObj,string sOnOff,string sOptions,string sPK_EntertainArea,int iPK_Text_Synopsis,int iPK_Screen,string &sCMD_Result,class Message *pMessage) {};
@@ -253,7 +267,7 @@ public:
 	virtual void CMD_Rename_Bookmark(string sValue_To_Assign,int iPK_Users,int iEK_Bookmark,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Set_Media_Position(int iStreamID,string sMediaPosition,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Set_Auto_Resume_Options(string sValue_To_Assign,int iPK_Users,int iPK_MediaType,string &sCMD_Result,class Message *pMessage) {};
-	virtual void CMD_Shuffle(string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Shuffle(string sPK_EntertainArea,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Media_Identified(int iPK_Device,string sValue_To_Assign,string sID,char *pData,int iData_Size,string sFormat,int iPK_MediaType,string sMediaURL,string sURL,int *iEK_Disc,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Remove_playlist(int iEK_Playlist,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Get_Attributes_For_Media(string sFilename,string sPK_EntertainArea,string *sValue_To_Assign,string &sCMD_Result,class Message *pMessage) {};
@@ -270,6 +284,7 @@ public:
 	virtual void CMD_Update_Ripping_Status(string sText,string sFilename,string sTime,string sStatus,int iPercent,string sTask,string sJob,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Abort_Task(int iParameter_ID,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Get_Ripping_Status(string *sStatus,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Specify_Repeat_Options(string sPK_EntertainArea,int iRepeat,string &sCMD_Result,class Message *pMessage) {};
 
 	//This distributes a received message to your handler.
 	virtual ReceivedMessageResult ReceivedMessage(class Message *pMessageOriginal)
@@ -312,7 +327,10 @@ public:
 						string sPK_EntertainArea=pMessage->m_mapParameters[COMMANDPARAMETER_PK_EntertainArea_CONST];
 						bool bResume=(pMessage->m_mapParameters[COMMANDPARAMETER_Resume_CONST]=="1" ? true : false);
 						int iRepeat=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Repeat_CONST].c_str());
-						CMD_MH_Play_Media(iPK_Device,sFilename.c_str(),iPK_MediaType,iPK_DeviceTemplate,sPK_EntertainArea.c_str(),bResume,iRepeat,sCMD_Result,pMessage);
+						bool bQueue=(pMessage->m_mapParameters[COMMANDPARAMETER_Queue_CONST]=="1" ? true : false);
+						bool bBypass_Event=(pMessage->m_mapParameters[COMMANDPARAMETER_Bypass_Event_CONST]=="1" ? true : false);
+						bool bDont_Setup_AV=(pMessage->m_mapParameters[COMMANDPARAMETER_Dont_Setup_AV_CONST]=="1" ? true : false);
+						CMD_MH_Play_Media(iPK_Device,sFilename.c_str(),iPK_MediaType,iPK_DeviceTemplate,sPK_EntertainArea.c_str(),bResume,iRepeat,bQueue,bBypass_Event,bDont_Setup_AV,sCMD_Result,pMessage);
 						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
 						{
 							pMessage->m_bRespondedToMessage=true;
@@ -329,7 +347,7 @@ public:
 						{
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
-								CMD_MH_Play_Media(iPK_Device,sFilename.c_str(),iPK_MediaType,iPK_DeviceTemplate,sPK_EntertainArea.c_str(),bResume,iRepeat,sCMD_Result,pMessage);
+								CMD_MH_Play_Media(iPK_Device,sFilename.c_str(),iPK_MediaType,iPK_DeviceTemplate,sPK_EntertainArea.c_str(),bResume,iRepeat,bQueue,bBypass_Event,bDont_Setup_AV,sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;
@@ -933,7 +951,8 @@ public:
 				case COMMAND_Shuffle_CONST:
 					{
 						string sCMD_Result="OK";
-						CMD_Shuffle(sCMD_Result,pMessage);
+						string sPK_EntertainArea=pMessage->m_mapParameters[COMMANDPARAMETER_PK_EntertainArea_CONST];
+						CMD_Shuffle(sPK_EntertainArea.c_str(),sCMD_Result,pMessage);
 						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
 						{
 							pMessage->m_bRespondedToMessage=true;
@@ -950,7 +969,7 @@ public:
 						{
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
-								CMD_Shuffle(sCMD_Result,pMessage);
+								CMD_Shuffle(sPK_EntertainArea.c_str(),sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;
@@ -1406,6 +1425,33 @@ public:
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
 								CMD_Get_Ripping_Status(&sStatus,sCMD_Result,pMessage);
+						}
+					};
+					iHandled++;
+					continue;
+				case COMMAND_Specify_Repeat_Options_CONST:
+					{
+						string sCMD_Result="OK";
+						string sPK_EntertainArea=pMessage->m_mapParameters[COMMANDPARAMETER_PK_EntertainArea_CONST];
+						int iRepeat=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Repeat_CONST].c_str());
+						CMD_Specify_Repeat_Options(sPK_EntertainArea.c_str(),iRepeat,sCMD_Result,pMessage);
+						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
+							pMessageOut->m_mapParameters[0]=sCMD_Result;
+							SendMessage(pMessageOut);
+						}
+						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							SendString(sCMD_Result);
+						}
+						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
+						{
+							int iRepeat=atoi(itRepeat->second.c_str());
+							for(int i=2;i<=iRepeat;++i)
+								CMD_Specify_Repeat_Options(sPK_EntertainArea.c_str(),iRepeat,sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;
