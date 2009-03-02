@@ -26,6 +26,10 @@ for User in $R; do
 	if [[ -d "$Dir" ]]; then
 		/usr/pluto/bin/UpdateMedia -d "$Dir" || :
 	fi
+	Dir="/home/user_$User/data/games/MAME"
+	if [[ -d "$Dir" ]]; then
+		/usr/pluto/bin/UpdateMedia -d "$Dir" || :
+	fi
 done
 
 ## Add the init script to runlevel 0 and 6

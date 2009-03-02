@@ -237,6 +237,8 @@ int PlutoMediaFile::HandleFileNotInDatabase(int PK_MediaType)
 				PK_MediaType = MEDIATYPE_pluto_Pictures_CONST;
 			else if(sFullPath.find(sBasePath + "documents") == 0)
 				PK_MediaType = MEDIATYPE_misc_DocViewer_CONST;
+			else if(sFullPath.find(sBasePath + "games/MAME") == 0)
+				PK_MediaType = MEDIATYPE_lmce_Game_CONST;
 			else
 				PK_MediaType = MEDIATYPE_misc_DocViewer_CONST;
 		}
