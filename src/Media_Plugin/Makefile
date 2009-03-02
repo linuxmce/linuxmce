@@ -1,7 +1,7 @@
 #<-dceag-mh-b->!
 GENDEV=../Gen_Devices
 
-SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES -I/opt/libxine1-pluto/include -I/opt/libsdl1.2-1.2.7+1.2.8cvs20041007/include -I/opt/libsdl1.2-1.2.7+1.2.8cvs20041007/include/SD
+SNR_CPPFLAGS ?= <-mkr_t_compile_defines->
 
 ROOT = ..
 CXX = g++

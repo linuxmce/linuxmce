@@ -72,7 +72,7 @@ MediaStream::MediaStream( class MediaHandlerInfo *pMediaHandlerInfo, int iPK_Med
 	m_iPK_MediaProvider=iPK_MediaProvider;
 	m_bPlugInWillSetDescription=false;
 	m_bIdentifiedDisc=false;
-	m_bContainsTitlesOrSections=false;
+	m_bContainsTitlesOrSections=true;
 
     m_iPK_Users=PK_Users;
     m_eSourceType=sourceType;
@@ -327,6 +327,7 @@ void MediaStream::GetRenderDevices(map<int, MediaDevice *> *pmapMediaDevices)
 
 void MediaStream::UpdateDescriptions(bool bAllFiles,MediaFile *pMediaFile_In)
 {
+
 	if( m_bPlugInWillSetDescription )
 		return;
 
@@ -353,7 +354,7 @@ void MediaStream::UpdateDescriptions(bool bAllFiles,MediaFile *pMediaFile_In)
 		else if( !pMediaFile )
 			pMediaFile = GetCurrentMediaFile();
 
-		Row_Attribute *pRow_Attribute_Album=NULL,*pRow_Attribute_Performer=NULL,*pRow_Attribute_Title=NULL;
+		Row_Attribute *pRow_Attribute_Album=NULL,*pRow_Attribute_Performer=NULL,*pRow_Attribute_Title=NULL,*pRow_Attribute_Episode=NULL;
 
 		// First try to find attributes for the particular song, otherwise look in the collection
 		if( pMediaFile )
@@ -376,6 +377,14 @@ void MediaStream::UpdateDescriptions(bool bAllFiles,MediaFile *pMediaFile_In)
 				if( listPK_Attribute && listPK_Attribute->size() )
 					pRow_Attribute_Title = pMedia_Plugin->m_pDatabase_pluto_media->Attribute_get()->GetRow(*(listPK_Attribute->begin()));
 			}
+
+			if( !pRow_Attribute_Episode )
+			{
+				list_int *listPK_Attribute = pMediaFile->m_mapPK_Attribute_Find(ATTRIBUTETYPE_Episode_CONST);
+				if( listPK_Attribute && listPK_Attribute->size() )
+					pRow_Attribute_Episode = pMedia_Plugin->m_pDatabase_pluto_media->Attribute_get()->GetRow(*(listPK_Attribute->begin()));
+			}
+
 		}
 
 		if( !pRow_Attribute_Performer )
@@ -396,7 +405,13 @@ void MediaStream::UpdateDescriptions(bool bAllFiles,MediaFile *pMediaFile_In)
 			if( listPK_Attribute && listPK_Attribute->size() )
 				pRow_Attribute_Title = pMedia_Plugin->m_pDatabase_pluto_media->Attribute_get()->GetRow(*(listPK_Attribute->begin()));
 		}
-
+		if( !pRow_Attribute_Episode )
+		{
+			list_int *listPK_Attribute = m_mapPK_Attribute_Find(ATTRIBUTETYPE_Episode_CONST);
+			if( listPK_Attribute && listPK_Attribute->size() )
+				pRow_Attribute_Title = pMedia_Plugin->m_pDatabase_pluto_media->Attribute_get()->GetRow(*(listPK_Attribute->begin()));
+		}
+		
 		if( (pRow_Attribute_Performer || pRow_Attribute_Album) && m_iPK_MediaType!=MEDIATYPE_pluto_StoredVideo_CONST )
 		{
 			if( pRow_Attribute_Performer )
@@ -421,7 +436,9 @@ void MediaStream::UpdateDescriptions(bool bAllFiles,MediaFile *pMediaFile_In)
 		else if( pMediaFile && pMediaFile->m_sFilename.size()>6 && pMediaFile->m_sFilename.substr(0,6)=="cdda:/" )
 			m_sMediaDescription = pMediaFile->m_sFilename.substr(6);
 		else if( pMediaFile )
+		{
 			m_sMediaDescription = pMediaFile->m_sFilename;
+		}
 
 		if( pMediaFile && pMediaFile->m_sDescription.size()==0 )
 			pMediaFile->m_sDescription = pMediaFile->m_sFilename;
@@ -433,6 +450,20 @@ void MediaStream::UpdateDescriptions(bool bAllFiles,MediaFile *pMediaFile_In)
 			else
 				m_sMediaDescription = pMediaFile->m_sFilename;
 		}
+
+		// Let's see if putting it down here makes a dent. 
+		if( (pRow_Attribute_Title) && m_iPK_MediaType==MEDIATYPE_pluto_StoredVideo_CONST )
+		{
+			m_sMediaDescription = pRow_Attribute_Title->Name_get();
+
+			if (pRow_Attribute_Episode) {
+				m_sSectionDescription = pRow_Attribute_Episode->Name_get();			
+			} else {
+				m_sSectionDescription = m_sMediaDescription;
+			}
+
+		}
+
 	}
 	else if( m_iPK_MediaType==MEDIATYPE_pluto_DVD_CONST )
 	{

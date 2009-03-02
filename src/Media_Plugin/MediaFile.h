@@ -44,6 +44,7 @@ public:
 		m_iTrack = atoi(GetAttributeValue(pMediaAttributes_LowLevel,ATTRIBUTETYPE_Track_CONST).c_str());
 		m_sTitle = GetAttributeValue(pMediaAttributes_LowLevel, ATTRIBUTETYPE_Title_CONST);
 		m_sAlbum = GetAttributeValue(pMediaAttributes_LowLevel, ATTRIBUTETYPE_Album_CONST);
+		m_sEpisode = GetAttributeValue(pMediaAttributes_LowLevel, ATTRIBUTETYPE_Episode_CONST);
 	}
 
 	MediaFile(int PK_Disk,int PK_Device_Disk_Drive,int Slot)	{
@@ -95,6 +96,7 @@ public:
 		m_iTrack = atoi(GetAttributeValue(pMediaAttributes_LowLevel,ATTRIBUTETYPE_Track_CONST).c_str());
 		m_sTitle = GetAttributeValue(pMediaAttributes_LowLevel, ATTRIBUTETYPE_Title_CONST);
 		m_sAlbum = GetAttributeValue(pMediaAttributes_LowLevel, ATTRIBUTETYPE_Album_CONST);
+		m_sEpisode = GetAttributeValue(pMediaAttributes_LowLevel, ATTRIBUTETYPE_Episode_CONST);
 	}
 
 	MediaFile(MediaFile *pMediaFile_Copy) {
@@ -117,6 +119,7 @@ public:
 		m_bWaitingForJukebox=pMediaFile_Copy->m_bWaitingForJukebox;
 		m_sTitle=pMediaFile_Copy->m_sTitle;
 		m_sAlbum=pMediaFile_Copy->m_sAlbum;
+		m_sEpisode=pMediaFile_Copy->m_sEpisode;
 	}
 
 
@@ -171,7 +174,7 @@ public:
 		m_dwPK_CommandGroup_Start,m_dwPK_CommandGroup_Stop; // If specified in Playlist_Entry, these will be executed when the file starts and stops
 	time_t m_tTimeout;
 	int m_iTrack; // If this is a cd, the track to play
-	string m_sPath,m_sFilename,m_sDescription,m_sExtension,m_sTitle,m_sAlbum;
+	string m_sPath,m_sFilename,m_sDescription,m_sExtension,m_sTitle,m_sAlbum,m_sEpisode;
 	string m_sStartPosition; /** Where to start the media the first time.  As soon as the media has begun MediaPlugin will reset this */
 
 	string FullyQualifiedFile() {

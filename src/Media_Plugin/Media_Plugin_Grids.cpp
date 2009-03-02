@@ -976,6 +976,7 @@ class DataGridTable *Media_Plugin::CurrentMediaSections( string GridID, string P
 			pDataGrid->SetData(0, currentPos++,new DataGridCell((*it)->Description_get(),(*it)->Position_get()));
 	}
 
+	// This branch executed for DVDs and other disc media with titles and sections.
 	if( pMediaStream->m_bContainsTitlesOrSections )
 	{
 		for(size_t sTitle=0;sTitle<pMediaStream->m_dequeMediaTitle.size();++sTitle)
@@ -1000,6 +1001,7 @@ class DataGridTable *Media_Plugin::CurrentMediaSections( string GridID, string P
 	}
 	else
 	{
+		// This branch for file based media.
 		int iSection=0;
 		for ( itFiles = pMediaStream->m_dequeMediaFile.begin(); itFiles != pMediaStream->m_dequeMediaFile.end(); itFiles++ )
 		{

@@ -2817,8 +2817,14 @@ int Media_Plugin::DetermineUserOnOrbiter(int iPK_Device_Orbiter)
 			/** If true, when this media finishes, resume whatever was playing previously.  Useful for making announcements and similar. */
 		/** @param #117 Repeat */
 			/** 0=default for media type, 1=loop, -1=do not loop */
+		/** @param #253 Queue */
+			/** If true, the file won't be played unless the queue is empty.  It will be appended to the queue only */
+		/** @param #254 Bypass Event */
+			/** If true, the 'listening to media' event won't be fire. */
+		/** @param #276 Dont Setup AV */
+			/** If true, the on/input selects won't be sent to the a/v gear */
 
-void Media_Plugin::CMD_MH_Play_Media(int iPK_Device,string sFilename,int iPK_MediaType,int iPK_DeviceTemplate,string sPK_EntertainArea,bool bResume,int iRepeat,string &sCMD_Result,Message *pMessage)
+void Media_Plugin::CMD_MH_Play_Media(int iPK_Device,string sFilename,int iPK_MediaType,int iPK_DeviceTemplate,string sPK_EntertainArea,bool bResume,int iRepeat,bool bQueue,bool bBypass_Event,bool bDont_Setup_AV,string &sCMD_Result,Message *pMessage)
 //<-dceag-c43-e->
 {
     PLUTO_SAFETY_LOCK(mm,m_MediaMutex);
@@ -5676,15 +5682,16 @@ int Media_Plugin::CheckForAutoResume(MediaStream *pMediaStream)
 
 	/** @brief COMMAND: #623 - Shuffle */
 	/** Randomizes the order of the current playlist. */
+		/** @param #45 PK_EntertainArea */
+			/** The Entertainment Area to send the shuffle command to. If not specified, This is assumed to come from an orbiter, and will be automatically determined. */
 
-void Media_Plugin::CMD_Shuffle(string &sCMD_Result,Message *pMessage)
+void Media_Plugin::CMD_Shuffle(string sPK_EntertainArea,string &sCMD_Result,Message *pMessage)
 //<-dceag-c623-e->
 {
     PLUTO_SAFETY_LOCK( mm, m_MediaMutex );
 
 	vector<EntertainArea *> vectEntertainArea;
-	// Only an Orbiter will tell us to shuffle
-    DetermineEntArea( pMessage->m_dwPK_Device_From, 0, "", vectEntertainArea );
+    DetermineEntArea( pMessage->m_dwPK_Device_From, 0, (sPK_EntertainArea.empty() ? sPK_EntertainArea : ""), vectEntertainArea );
 	for(size_t s=0;s<vectEntertainArea.size();++s)
 	{
 		EntertainArea *pEntertainArea = vectEntertainArea[s];
@@ -7152,4 +7159,17 @@ void Media_Plugin::CMD_Get_Ripping_Status(string *sStatus,string &sCMD_Result,Me
 		 if(sMessage == "disk ejected")
 			 *sStatus = "";
 	}
+}
+//<-dceag-c955-b->
+
+	/** @brief COMMAND: #955 - Specify Repeat Options */
+	/** Change the repeat option for an entertainment area */
+		/** @param #45 PK_EntertainArea */
+			/** The entertainment area */
+		/** @param #117 Repeat */
+			/** 0=none, 1=repeat queue, 2=repeat track */
+
+void Media_Plugin::CMD_Specify_Repeat_Options(string sPK_EntertainArea,int iRepeat,string &sCMD_Result,Message *pMessage)
+//<-dceag-c955-e->
+{
 }
