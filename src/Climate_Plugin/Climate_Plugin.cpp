@@ -167,10 +167,26 @@ class DataGridTable *Climate_Plugin::ClimateScenariosGrid(string GridID,string P
 //<-dceag-createinst-b->!
 void Climate_Plugin::GetFloorplanDeviceInfo(DeviceData_Router *pDeviceData_Router,EntertainArea *pEntertainArea,int iFloorplanObjectType,int &iPK_FloorplanObjectType_Color,int &Color,string &sDescription,string &OSD,int &PK_DesignObj_Toolbar)
 {
+	string sOn;	string sMode; string sFan; string sSetPoint; string sTemp;
+	GetStateVar(pDeviceData_Router, sOn, sMode, sFan, sSetPoint, sTemp);
+
+	if( sOn.c_str()=="OFF" ) {
+		iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_OFF_CONST;
+	} else {
+		iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_COOLING_CONST;
+	};	
+	
 	switch(iFloorplanObjectType)
 	{
 	case FLOORPLANOBJECTTYPE_CLIMATE_THERMOSTAT_CONST:
 		PK_DesignObj_Toolbar=DESIGNOBJ_grpThermostatControls_CONST;
+		if ( sMode=="HEAT" ) {
+			iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_HEATING_CONST;
+		} else if ( sMode=="COOL" )	{
+			iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_COOLING_CONST;
+		} else if ( sMode=="AUTO" ) {		
+			iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_FAN_CONST;
+		};
 		break;
 	case FLOORPLANOBJECTTYPE_CLIMATE_THERMOMETER_CONST:
 		PK_DesignObj_Toolbar=0;
@@ -183,15 +199,50 @@ void Climate_Plugin::GetFloorplanDeviceInfo(DeviceData_Router *pDeviceData_Route
 		break;
 	case FLOORPLANOBJECTTYPE_CLIMATE_POOL_CONST:
 		PK_DesignObj_Toolbar=DESIGNOBJ_grpPoolControls_CONST;
+		if( sMode=="HEAT" ) {
+			iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_HEATING_CONST;
+		} else if ( sMode=="COOL" ) {
+			iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_COOLING_CONST;
+		} else if ( sMode=="AUTO" ) {
+			iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_FAN_CONST;
+		};
 		break;
 	case FLOORPLANOBJECTTYPE_CLIMATE_SPRINKLER_CONST:
 		PK_DesignObj_Toolbar=DESIGNOBJ_grpSprinklerControls_CONST;
+		if( sOn=="ON" )
+			iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_HEATING_CONST;
+		else if ( sOn=="OFF" )
+			iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_FAN_CONST;
 		break;
+	default:
+		PK_DesignObj_Toolbar=0;
+		break;
+	};       
+	
+	string sExtra_Parameters = pDeviceData_Router->m_mapParameters_Find(DEVICEDATA_Extra_Parameters_CONST);
+
+	if (sExtra_Parameters.length() > 0) {
+		string Test = "Extra parameters present!";
+//		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Climate_Plugin::GetFloorplanDeviceInfo |Got current state info %s %s %s %s %s",sOn.c_str(),sMode.c_str(), sFan.c_str(),sSetPoint.c_str(),sTemp.c_str());
+
+		string sTemp_OSD_String = sExtra_Parameters.c_str();
+		unsigned int pos;
+		if ((pos=sTemp_OSD_String.find("$1",0)) != string::npos) 	sTemp_OSD_String.replace( pos, 2, sOn);
+		if ((pos=sTemp_OSD_String.find("$2",0)) != string::npos) 	sTemp_OSD_String.replace( pos, 2, sMode);
+		if ((pos=sTemp_OSD_String.find("$3",0)) != string::npos) 	sTemp_OSD_String.replace( pos, 2, sFan);
+		if ((pos=sTemp_OSD_String.find("$4",0)) != string::npos) 	sTemp_OSD_String.replace( pos, 2, sSetPoint);
+		if ((pos=sTemp_OSD_String.find("$5",0)) != string::npos) 	sTemp_OSD_String.replace( pos, 2, sTemp);
+		OSD=sTemp_OSD_String.c_str();
+//		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Climate_Plugin::GetFloorplanDeviceInfo |Extra parameters found: %s | NEW OSD is %s",sExtra_Parameters.c_str(),sTemp_OSD_String.c_str());
+		
+	} else {
+		OSD=pDeviceData_Router->m_sState_get();
+//		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Climate_Plugin::GetFloorplanDeviceInfo |Extra parameters not found!");
 	};
-	if( (OSD=pDeviceData_Router->m_sState_get())=="OFF" )
-		iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_OFF_CONST;
-	else
-		iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_COOLING_CONST;
+	
+
+//	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Climate_Plugin::GetFloorplanDeviceInfo |  Device ID:%d Install_ID:%d Template:%d Category:%d Room:%d",pDeviceData_Router->m_dwPK_Device,pDeviceData_Router->m_dwPK_Installation,pDeviceData_Router->m_dwPK_DeviceTemplate,pDeviceData_Router->m_dwPK_DeviceCategory,pDeviceData_Router->m_dwPK_Room);
+
 }
 
 bool Climate_Plugin::ClimateCommand( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo )
@@ -230,8 +281,8 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 	string sSetPoint;
 	string sTemp;
 	GetStateVar(pDevice, sOn, sMode, sFan, sSetPoint, sTemp);
-	
-	// The State is in the format ON|OFF/SET TEMP (CURRENT TEMP)
+
+	// The State is in the format ON|OFF/HEAT|COOL|FAN_ONLY|AUTO/HIGH|AUTO/SET TEMP (CURRENT TEMP)
 	if( pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND )
 	{
 		if( pMessage->m_dwID==COMMAND_Set_Level_CONST )
@@ -251,7 +302,9 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 					pMessage->m_dwID=COMMAND_Generic_Off_CONST;
 				else
 				{
-					pDevice->m_sState_set("ON/" + StringUtils::itos(iLevel) + GetTemperature(pDevice));
+//					pDevice->m_sState_set("ON/" + StringUtils::itos(iLevel) + GetTemperature(pDevice)); /Replaced with clause below
+					SetStateValue(pDevice, "ON", sMode, sFan, StringUtils::itos(iLevel), sTemp);
+
 					pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST] = StringUtils::itos(iLevel);
 				}
 			}
