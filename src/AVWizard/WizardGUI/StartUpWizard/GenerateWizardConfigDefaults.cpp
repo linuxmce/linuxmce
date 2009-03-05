@@ -767,7 +767,7 @@ void GenerateWizardConfigDefaults::GeneratePage_AudioVolume(
 	//Create text area
 	std::string StringList[4];
 	StringList[0] = "I am playing some music, press enter when you confirm that you can hear it";
-	StringList[1] = "and the volume is adjusted at a confortable level.";
+	StringList[1] = "and the volume is adjusted at a comfortable level.";
 
 	StringList[2] = "** NO AUDIO **";
 	StringList[3] = "Bonus CD with sample audio tracks was not installed";
