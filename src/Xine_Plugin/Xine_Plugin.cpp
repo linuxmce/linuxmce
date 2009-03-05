@@ -290,6 +290,70 @@ bool Xine_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
 	mediaURL = StringUtils::Replace(mediaURL, "\\", "/"); // replacing all the \ in a windows path with /
 #endif
 
+	// hack: redirect MythTV recordings to MythTV_Player
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Doing MythTV redirection check...");
+	bool bRedirectToMythTV = (mediaURL.find("tv_shows") != string::npos);
+
+	if (bRedirectToMythTV)
+	  LoggerWrapper::GetInstance()->Write(LV_WARNING,"Redirecting to MythTV.");
+
+	if( !bRedirectToMythTV && pXineMediaStream->StreamingRequired() )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "sending CMD_Play_Media from %d to %d with deq pos %d", 
+			m_dwPK_Device, pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
+			pMediaStream->m_iDequeMediaFile_Pos);
+		DCE::CMD_Start_Streaming cmd(m_dwPK_Device,
+								pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
+								pXineMediaStream->m_iPK_MediaType,
+								pXineMediaStream->m_iStreamID_get( ),
+								pMediaFile && pMediaFile->m_sStartPosition.size() ? pMediaFile->m_sStartPosition : pXineMediaStream->m_sStartPosition,
+								mediaURL,
+								pXineMediaStream->GetTargets(DEVICETEMPLATE_Xine_Player_CONST));
+		// No handling of errors (it will in some cases deadlock the router.)
+		SendCommand(cmd);
+	}
+	else
+	{
+		MediaDevice *pMediaDevice_MythTV = NULL;
+		
+		if (bRedirectToMythTV)
+		{
+			pMediaDevice_MythTV = m_pMedia_Plugin->m_mapMediaDevice_Find(m_pRouter->FindClosestRelative(DEVICETEMPLATE_MythTV_Player_CONST, pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device));
+			if (!pMediaDevice_MythTV)
+			{
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "Failed to find MythTV for redirect, cancelling redirect :("); 
+				bRedirectToMythTV = false;	
+			}
+			else
+			{
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "Found MythTV for redirect, device #%i", pMediaDevice_MythTV->m_pDeviceData_Router->m_dwPK_Device); 
+				pMediaStream->m_pMediaDevice_Source = pMediaDevice_MythTV;
+			}
+		}
+		
+		// changing window name
+		if (bRedirectToMythTV)
+		{
+			pMediaStream->m_sAppName = "mythfrontend.real.Mythfrontend.real";
+			pMediaStream->m_bContainsTitlesOrSections = false;
+			
+		}
+		
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "sending CMD_Play_Media from %d to %d with deq pos %d", 
+			m_dwPK_Device, pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
+			pMediaStream->m_iDequeMediaFile_Pos);
+		DCE::CMD_Play_Media cmd(m_dwPK_Device,
+								pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
+								pXineMediaStream->m_iPK_MediaType,
+								pXineMediaStream->m_iStreamID_get( ),
+								pMediaFile && pMediaFile->m_sStartPosition.size() ? pMediaFile->m_sStartPosition : pXineMediaStream->m_sStartPosition,
+								mediaURL);
+
+		// No handling of errors (it will in some cases deadlock the router.)
+		SendCommand(cmd);	
+	}
+
+
 	// hack: redirect MOV, EVO, M2TS files to MPlayer_Player
 	// TODO rework Media Dispatcher to make it more clear - later
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Doing MPlayer redirection check...");

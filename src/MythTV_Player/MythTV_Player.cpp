@@ -99,6 +99,7 @@ MythTV_Player::MythTV_Player(int DeviceID, string ServerAddress,bool bConnectEve
     m_CurTime=0;
     m_EndTime=0;
 	m_iStreamID=0;
+    m_sMediaURL="";
 }
 
 //<-dceag-getconfig-b->
@@ -226,13 +227,41 @@ void MythTV_Player::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage
 
 void MythTV_Player::updateMode(string toMode)
 {
-	if (toMode!=m_CurrentMode)
-	{				
-		m_CurrentMode = toMode;
-		LoggerWrapper::GetInstance()->Write(LV_WARNING,"Changing mode: %s",toMode.c_str());
-		DCE::CMD_Set_Active_Menu CMD_Set_Active_Menu_(m_dwPK_Device,m_pDevice_MythTV_Plugin->m_dwPK_Device, toMode);
-		SendCommand(CMD_Set_Active_Menu_);
+	if (m_sMediaURL.empty()) 
+	{
+	  if (toMode!=m_CurrentMode)
+	  {				
+		  m_CurrentMode = toMode;
+		  LoggerWrapper::GetInstance()->Write(LV_WARNING,"Changing mode: %s",toMode.c_str());
+		  DCE::CMD_Set_Active_Menu CMD_Set_Active_Menu_(m_dwPK_Device,m_pDevice_MythTV_Plugin->m_dwPK_Device, toMode);
+		  SendCommand(CMD_Set_Active_Menu_);
+	  }
 	}
+}
+
+/** 
+ * Given a MediaURL which is typically of the form:
+ * /home/public/data/videos/tv_shows_1/cccc_yyyymmddhhmmss.mpg
+ * do some simple text formatting on it to provide something that
+ * can be passed back to a "play program" control port command
+ * so that stuff can be played.
+*/
+string MythTV_Player::parseMediaURL(string sMediaURL) 
+{
+
+  string sMediaFilename = FileUtils::FilenameWithoutPath(sMediaURL);
+
+  string sChannelID, sYear, sMonth, sDay, sHour, sMinute, sSeconds;
+  sChannelID 	= sMediaFilename.substr( 0,4 );
+  sYear 	= sMediaFilename.substr( 5,4 );
+  sMonth	= sMediaFilename.substr( 9,2 );
+  sDay		= sMediaFilename.substr(11,2 );
+  sHour		= sMediaFilename.substr(13,2 );
+  sMinute	= sMediaFilename.substr(15,2 );
+  sSeconds	= sMediaFilename.substr(17,2 );
+
+  return sChannelID + " " + sYear + "-" + sMonth + "-" +sDay + "T" + sHour + ":" + sMinute + ":" + sSeconds;
+  
 }
 
 void MythTV_Player::pollMythStatus()
@@ -269,8 +298,40 @@ void MythTV_Player::pollMythStatus()
 		    mm.Release();
 		    Sleep(100);
 		    mm.Relock();
+		    if (!m_sMediaURL.empty()) // A MediaURL was passed into MediaHandler.
+		    {
+		      string sCommand = "play program " + parseMediaURL(m_sMediaURL);
+		      sResult = sendMythCommand(sCommand.c_str());
+		      if( sResult!="OK" ) 
+		      {
+			// FIXME: Come back here and implement some error handling.
+		      }
+		      else
+			bCommunication=true; // Connected.
+			mm.Release();
+			Sleep(3000);
+			mm.Relock();
+			string sResult = sendMythCommand("query location");
+			if ( sResult.find("Playback")!=string::npos && sResult.find("ERROR")==string::npos )
+			{
+			  bPlaybackStarted=true;
+			  LoggerWrapper::GetInstance()->Write(LV_STATUS, "MythTV_Player::pollMythStatus started playing from URL: %s",
+			  sResult.c_str());
+			  break;
+			} 
+			else 
+			{
+			  LoggerWrapper::GetInstance()->Write(LV_WARNING, "MythTV_Player::pollMythStatus no playback yet, reported : %s", sResult.c_str());
+			  mm.Release();
+			  Sleep(3000); // Give it a longer time
+			  mm.Relock();
+			  continue;			
+			}
+		    }
+		    else // TV Was launched without MediaURL, just start LiveTV.
+		    {
 		    sResult = sendMythCommand("jump livetv");
-			if( sResult!="OK" )
+		    if( sResult!="OK" )
 			{
 			    LoggerWrapper::GetInstance()->Write(LV_WARNING, "MythTV_Player::pollMythStatus no jump livetv %s", sResult.c_str());
 				continue;
@@ -295,6 +356,7 @@ void MythTV_Player::pollMythStatus()
 				Sleep(3000); // Give it a longer time
 				mm.Relock();
 				continue;
+			}
 			}
 		} while(time(NULL) < timeout);
 
@@ -375,7 +437,7 @@ void MythTV_Player::pollMythStatus()
 			if (SetMode == "Playback")
 			{
 				m_mythStatus_set(MYTHSTATUS_PLAYBACK);
-				if (vectResults[1]=="LiveTV")
+				if (vectResults[1]=="TV")
 				{
 					m_CurTime = StringUtils::TimeAsSeconds(vectResults[2]);
 					m_EndTime = StringUtils::TimeAsSeconds(vectResults[4]);
@@ -928,22 +990,38 @@ void MythTV_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMedia
 #ifndef WIN32
 	PLUTO_SAFETY_LOCK(mm,m_MythMutex);
 	
-	if ( m_mythStatus_get() == MYTHSTATUS_DISCONNECTED )
+	// If a mythTV stream is already present, then we need to just tell the system to play the next bit of media.
+	if (!sMediaURL.empty() && ( m_mythStatus_get() != MYTHSTATUS_DISCONNECTED ))
 	{
-		m_mythStatus_set(MYTHSTATUS_STARTUP);
+	  if (m_sMediaURL != sMediaURL) 
+	  { 
+	    m_sMediaURL = sMediaURL;
+	    string sCommand = "play program " + parseMediaURL(m_sMediaURL);
+	    sendMythCommand(sCommand.c_str());
+	  }
 	}
-	else
+	else // A MythTV Stream was not already present. 
 	{
-		if (m_mythStatus_get() == MYTHSTATUS_LIVETV || m_mythStatus_get() == MYTHSTATUS_PLAYBACK)
-			sendMythCommand("play speed normal");
-		else
-			sendMythCommand("key P");
-	}
-	selectWindow();
 
-	// Set the initial channel to tune to after startup
-	m_sInitialChannel = sMediaPosition;
-	m_iStreamID=iStreamID;
+	  if ( m_mythStatus_get() == MYTHSTATUS_DISCONNECTED )
+	  {
+		  m_sMediaURL = sMediaURL;
+		  m_mythStatus_set(MYTHSTATUS_STARTUP);
+	  }
+	  else
+	  {
+		  if (m_mythStatus_get() == MYTHSTATUS_LIVETV || m_mythStatus_get() == MYTHSTATUS_PLAYBACK)
+			  sendMythCommand("play speed normal");
+		  else
+			  sendMythCommand("key P");
+	  }
+  
+	  selectWindow();
+  
+	  // Set the initial channel to tune to after startup
+	  m_sInitialChannel = sMediaPosition;
+	  m_iStreamID=iStreamID;
+	}
 #endif
 }
 
