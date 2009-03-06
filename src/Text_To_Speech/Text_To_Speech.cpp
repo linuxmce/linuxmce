@@ -143,14 +143,30 @@ char *Text_To_Speech::CreateWAV(string sText,int &Size)
 			/** What to say */
 		/** @param #103 List PK Device */
 			/** A comma delimited list of the devices to send it to */
+		/** @param #254 Bypass Event */
+			/** Will be passed in MH Play Media command */
+		/** @param #276 Dont Setup AV */
+			/** Dont Setup AV */
+		/** @param #278 Voice */
+			/** Installed voice to use (blank for default voice) */
 
-void Text_To_Speech::CMD_Send_Audio_To_Device(string sText,string sList_PK_Device,string &sCMD_Result,Message *pMessage)
+void Text_To_Speech::CMD_Send_Audio_To_Device(string sText,string sList_PK_Device,bool bBypass_Event,bool bDont_Setup_AV,string sVoice,string &sCMD_Result,Message *pMessage)
 //<-dceag-c253-e->
 {
 	PLUTO_SAFETY_LOCK(tm,m_TTSMutex);
 
 	string sFile = "/home/public/data/tts/" + StringUtils::itos(m_dwID++) + ".wav";
-	string sCmd = "flite -t \"" + sText + ".\" -o " + sFile;
+	string sTextFile = "/home/public/data/tts/" + StringUtils::itos(m_dwID++) + ".txt";
+	
+	//text2wave will not take a text string directly, so lets put the text into a temporary file
+	ofstream out(sTextFile);
+	if(!out){
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Could not create temporary text file");	
+	}
+	out << sText;
+	out.close();
+
+	string sCmd = "text2wave " + sTextFile + " -o " + sFile;
 	system(sCmd.c_str());
 	if( FileUtils::FileExists(sFile) )
 	{
@@ -188,8 +204,10 @@ void Text_To_Speech::CMD_Send_Audio_To_Device(string sText,string sList_PK_Devic
 			/** The text to say */
 		/** @param #19 Data */
 			/** This is the wave file */
+		/** @param #278 Voice */
+			/** Installed voice to use (blank for default voice) */
 
-void Text_To_Speech::CMD_Text_To_Wave(string sText,char **pData,int *iData_Size,string &sCMD_Result,Message *pMessage)
+void Text_To_Speech::CMD_Text_To_Wave(string sText,string sVoice,char **pData,int *iData_Size,string &sCMD_Result,Message *pMessage)
 //<-dceag-c256-e->
 {
 	*pData = CreateWAV(sText,*iData_Size);

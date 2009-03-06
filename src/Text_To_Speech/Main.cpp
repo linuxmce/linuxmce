@@ -185,8 +185,8 @@ int main(int argc, char* argv[])
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",PK_Device,sRouter_IP.c_str());
 
-	bool bAppError = false;
-	bool bReload = false;
+	bool bAppError=false;
+	bool bReload=false;
 	try
 	{
 		Text_To_Speech *pText_To_Speech = new Text_To_Speech(PK_Device, sRouter_IP,true,bLocalMode);
@@ -200,14 +200,24 @@ int main(int argc, char* argv[])
 			if( bLocalMode )
 				pText_To_Speech->RunLocalMode();
 			else
-				pthread_join(pText_To_Speech->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
+			{
+				if(pText_To_Speech->m_RequestHandlerThread)
+					pthread_join(pText_To_Speech->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
+			}
 			g_pDeadlockHandler=NULL;
 			g_pSocketCrashHandler=NULL;
 		} 
 		else 
 		{
 			bAppError = true;
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
+			if( pText_To_Speech->m_pEvent && pText_To_Speech->m_pEvent->m_pClientSocket && pText_To_Speech->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
+			{
+				bAppError = false;
+				bReload = false;
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "No Router.  Will abort");
+			}
+			else
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
 		}
 
 		if( pText_To_Speech->m_bReload )

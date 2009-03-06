@@ -1,18 +1,3 @@
-/*
-     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
-
-     www.plutohome.com
-
-     Phone: +1 (877) 758-8648
- 
-
-     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
-     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
-     of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
-     See the GNU General Public License for more details.
-
-*/
 #ifndef Text_To_SpeechBase_h
 #define Text_To_SpeechBase_h
 #include "DeviceData_Impl.h"
@@ -210,8 +195,8 @@ public:
 	string DATA_Get_BranchNo() { return GetData()->Get_BranchNo(); }
 	//Event accessors
 	//Commands - Override these to handle commands from the server
-	virtual void CMD_Send_Audio_To_Device(string sText,string sList_PK_Device,string &sCMD_Result,class Message *pMessage) {};
-	virtual void CMD_Text_To_Wave(string sText,char **pData,int *iData_Size,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Send_Audio_To_Device(string sText,string sList_PK_Device,bool bBypass_Event,bool bDont_Setup_AV,string sVoice,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Text_To_Wave(string sText,string sVoice,char **pData,int *iData_Size,string &sCMD_Result,class Message *pMessage) {};
 
 	//This distributes a received message to your handler.
 	virtual ReceivedMessageResult ReceivedMessage(class Message *pMessageOriginal)
@@ -249,7 +234,10 @@ public:
 						string sCMD_Result="OK";
 						string sText=pMessage->m_mapParameters[COMMANDPARAMETER_Text_CONST];
 						string sList_PK_Device=pMessage->m_mapParameters[COMMANDPARAMETER_List_PK_Device_CONST];
-						CMD_Send_Audio_To_Device(sText.c_str(),sList_PK_Device.c_str(),sCMD_Result,pMessage);
+						bool bBypass_Event=(pMessage->m_mapParameters[COMMANDPARAMETER_Bypass_Event_CONST]=="1" ? true : false);
+						bool bDont_Setup_AV=(pMessage->m_mapParameters[COMMANDPARAMETER_Dont_Setup_AV_CONST]=="1" ? true : false);
+						string sVoice=pMessage->m_mapParameters[COMMANDPARAMETER_Voice_CONST];
+						CMD_Send_Audio_To_Device(sText.c_str(),sList_PK_Device.c_str(),bBypass_Event,bDont_Setup_AV,sVoice.c_str(),sCMD_Result,pMessage);
 						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
 						{
 							pMessage->m_bRespondedToMessage=true;
@@ -266,7 +254,7 @@ public:
 						{
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
-								CMD_Send_Audio_To_Device(sText.c_str(),sList_PK_Device.c_str(),sCMD_Result,pMessage);
+								CMD_Send_Audio_To_Device(sText.c_str(),sList_PK_Device.c_str(),bBypass_Event,bDont_Setup_AV,sVoice.c_str(),sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;
@@ -275,9 +263,10 @@ public:
 					{
 						string sCMD_Result="OK";
 						string sText=pMessage->m_mapParameters[COMMANDPARAMETER_Text_CONST];
+						string sVoice=pMessage->m_mapParameters[COMMANDPARAMETER_Voice_CONST];
 						char *pData=pMessage->m_mapData_Parameters[COMMANDPARAMETER_Data_CONST];
 						int iData_Size=pMessage->m_mapData_Lengths[COMMANDPARAMETER_Data_CONST];
-						CMD_Text_To_Wave(sText.c_str(),&pData,&iData_Size,sCMD_Result,pMessage);
+						CMD_Text_To_Wave(sText.c_str(),sVoice.c_str(),&pData,&iData_Size,sCMD_Result,pMessage);
 						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
 						{
 							pMessage->m_bRespondedToMessage=true;
@@ -295,7 +284,7 @@ public:
 						{
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
-								CMD_Text_To_Wave(sText.c_str(),&pData,&iData_Size,sCMD_Result,pMessage);
+								CMD_Text_To_Wave(sText.c_str(),sVoice.c_str(),&pData,&iData_Size,sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;
