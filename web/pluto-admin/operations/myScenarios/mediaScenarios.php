@@ -202,20 +202,32 @@ function mediaScenarios($output,$dbADO) {
 						$paramsArray[$rowParams['FK_CommandParameter']]=$rowParams['IK_CommandParameter'];
 					}
 				
-					$getMediaType='SELECT * FROM MediaType WHERE PK_MediaType=?';
-					$resMediaType=$dbADO->Execute($getMediaType,$paramsArray[$GLOBALS['commandParamPK_MediaType']]);
-					$rowMediaType=$resMediaType->FetchRow();
-					$mediaType=$rowMediaType['Description'];
+					If ($paramsArray[$GLOBALS['commandParamPK_MediaType']] != "") {
+						$getMediaType='SELECT * FROM MediaType WHERE PK_MediaType=?';
+						$resMediaType=$dbADO->Execute($getMediaType,$paramsArray[$GLOBALS['commandParamPK_MediaType']]);
+						$rowMediaType=$resMediaType->FetchRow();
+						$mediaType=$rowMediaType['Description'];
+					} else {
+						$mediaType="unspecified";
+					}
 					
-					$getDevice='SELECT * FROM Device WHERE PK_Device=?';
-					$resDevice=$dbADO->Execute($getDevice,$paramsArray[$GLOBALS['commandParamPK_Device']]);
-					$rowDevice=$resDevice->FetchRow();
-					$deviceName=$rowDevice['Description'];
-	
-					$getDeviceTemplate='SELECT * FROM DeviceTemplate WHERE PK_DeviceTemplate=?';
-					$resDeviceTemplate=$dbADO->Execute($getDeviceTemplate,$paramsArray[$GLOBALS['commandParamPK_DeviceTemplate']]);
-					$rowDeviceTemplate=$resDeviceTemplate->FetchRow();
-					$deviceTemplateName=$rowDevice['Description'];
+					if ($paramsArray[$GLOBALS['commandParamPK_Device']] != "") {
+						$getDevice='SELECT * FROM Device WHERE PK_Device=?';
+						$resDevice=$dbADO->Execute($getDevice,$paramsArray[$GLOBALS['commandParamPK_Device']]);
+						$rowDevice=$resDevice->FetchRow();
+						$deviceName=$rowDevice['Description'];
+					} else {
+						$deviceName="unspecified";
+					}	
+					
+					if ($paramsArray[$GLOBALS['commandParamPK_DeviceTemplate']] != "") {
+						$getDeviceTemplate='SELECT * FROM DeviceTemplate WHERE PK_DeviceTemplate=?';
+						$resDeviceTemplate=$dbADO->Execute($getDeviceTemplate,$paramsArray[$GLOBALS['commandParamPK_DeviceTemplate']]);
+						$rowDeviceTemplate=$resDeviceTemplate->FetchRow();
+						$deviceTemplateName=$rowDevice['Description'];
+					} else {
+						$deviceTemplateName="unspecified";
+					}
 				}
 								
 				$out.='
