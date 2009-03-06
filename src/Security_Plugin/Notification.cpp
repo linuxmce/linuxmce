@@ -302,9 +302,10 @@ string Notification::GenerateWavFile(long nAlertType, long nDeviceID)
     
     char *pData = NULL;
     int iSize = 0;
+    string sVoice = ""; //TODO: once better voices are supported, assign a decent one!
 
     CMD_Text_To_Wave CMD_Text_To_Wave_(m_pSecurity_Plugin->m_dwPK_Device, m_pSecurity_Plugin->m_PK_Device_TextToSpeach, 
-        sText, &pData, &iSize);
+        sText, sVoice, &pData, &iSize);
     string sResponse;
     bool bResponse = m_pSecurity_Plugin->SendCommand(CMD_Text_To_Wave_, &sResponse);
 
