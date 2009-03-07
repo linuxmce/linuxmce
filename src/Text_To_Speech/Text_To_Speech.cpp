@@ -16,6 +16,7 @@
  or FITNESS FOR A PARTICULAR PURPOSE. See the Pluto Public License for more details.
 
  */
+#include <fstream>
 //<-dceag-d-b->
 #include "Text_To_Speech.h"
 #include "DCE/Logger.h"
@@ -159,14 +160,14 @@ void Text_To_Speech::CMD_Send_Audio_To_Device(string sText,string sList_PK_Devic
 	string sTextFile = "/home/public/data/tts/" + StringUtils::itos(m_dwID++) + ".txt";
 	
 	//text2wave will not take a text string directly, so lets put the text into a temporary file
-	ofstream out(sTextFile);
+	ofstream out(sTextFile.c_str());
 	if(!out){
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Could not create temporary text file");	
 	}
 	out << sText;
 	out.close();
 
-	string sCmd = "text2wave " + sTextFile + " -o " + sFile;
+	string sCmd = "text2wave " + sTextFile + " -o " + sFile; //TODO: change voice with eval() parameter
 	system(sCmd.c_str());
 	if( FileUtils::FileExists(sFile) )
 	{
@@ -181,6 +182,7 @@ void Text_To_Speech::CMD_Send_Audio_To_Device(string sText,string sList_PK_Devic
 			}
 		}
 		m_mapOutstandingFiles[time(NULL)]=sFile;
+		m_mapOutstandingFiles[time(null)]=sTextFile;
 	}
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Processed file: %s outstanding: %d",sCmd.c_str(),(int) m_mapOutstandingFiles.size());
