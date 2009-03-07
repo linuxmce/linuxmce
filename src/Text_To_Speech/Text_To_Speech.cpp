@@ -132,6 +132,8 @@ char *Text_To_Speech::CreateWAV(string sText,string sVoice,int &Size)
 	//Use custom voice
 	if(sVoice!="") {
 		sCmd += " -eval \"("+sVoice+")\"";
+	} else {
+		sCmd += " -eval \"("+DATA_Get_default_voice()+")\"";
 	}
 	system(sCmd.c_str());
 #endif
@@ -191,6 +193,8 @@ void Text_To_Speech::CMD_Send_Audio_To_Device(string sText,string sList_PK_Devic
 	//Use custom voice
 	if(sVoice!="") {
 		sCmd += " -eval \"("+sVoice+")\"";
+	} else {
+		sCmd += " -eval \"("+DATA_Get_default_voice()+")\"";
 	}
 	system(sCmd.c_str());
 	if( FileUtils::FileExists(sFile) )
