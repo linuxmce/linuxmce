@@ -88,6 +88,14 @@ public:
 			return m_mapParameters[DEVICEDATA_BranchNo_CONST];
 	}
 
+	string Get_default_voice()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_default_voice_CONST);
+		else
+			return m_mapParameters[DEVICEDATA_default_voice_CONST];
+	}
+
 };
 
 
@@ -193,6 +201,7 @@ public:
 	Command_Impl *CreateCommand(int PK_DeviceTemplate, Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent);
 	//Data accessors
 	string DATA_Get_BranchNo() { return GetData()->Get_BranchNo(); }
+	string DATA_Get_default_voice() { return GetData()->Get_default_voice(); }
 	//Event accessors
 	//Commands - Override these to handle commands from the server
 	virtual void CMD_Send_Audio_To_Device(string sText,string sList_PK_Device,bool bBypass_Event,bool bDont_Setup_AV,string sVoice,string &sCMD_Result,class Message *pMessage) {};

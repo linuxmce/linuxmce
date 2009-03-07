@@ -66,6 +66,7 @@ private:
 	/*
 			*****DATA***** accessors inherited from base class
 	string DATA_Get_BranchNo();
+	string DATA_Get_default_voice();
 
 			*****EVENT***** accessors inherited from base class
 
