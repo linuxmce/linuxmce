@@ -55,7 +55,7 @@ public:
 		map<time_t,string> m_mapOutstandingFiles; // So we can delete files more than 5 minutes old
 
 private:
-        char *CreateWAV(string sText,int &Size);
+        char *CreateWAV(string sText,string sVoice,int &Size);
 
 //<-dceag-h-b->
 	/*

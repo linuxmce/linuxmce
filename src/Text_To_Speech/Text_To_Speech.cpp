@@ -110,27 +110,46 @@ void Text_To_Speech::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessag
 
 //<-dceag-sample-b->!
 
-char *Text_To_Speech::CreateWAV(string sText,int &Size)
+char *Text_To_Speech::CreateWAV(string sText,string sVoice,int &Size)
 {
-    string cmd;
+   	string sCmd;
+	string sTextFile = "sample.txt";
+	string sFile = "sample.wav";
 #ifdef WIN32
-	cmd = "iisc /ttw \"" + sText + "\" sample.wav";
-	system(cmd.c_str());
+	sCmd = "iisc /ttw \"" + sText + "\" " + sFile;
+	system(sCmd.c_str());
 #else
-	cmd = "flite -t \"" + sText + "\" sample.wav";
-	system(cmd.c_str());
+	
+	ofstream out(sTextFile.c_str());
+	if(!out){
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Could not create temporary text file for sample generation.");	
+	}
+	out << sText;
+	out.close();
+
+	sCmd = "text2wave " + sTextFile + " -o " + sFile;
+
+	//Use custom voice
+	if(sVoice!="") {
+		sCmd += " -eval \"("+sVoice+")\"";
+	}
+	system(sCmd.c_str());
 #endif
 
     size_t iSize;
-    char *pData = FileUtils::ReadFileIntoBuffer("sample.wav", iSize);
+    char *pData = FileUtils::ReadFileIntoBuffer(sFile, iSize);
     Size = iSize;
 
 #ifdef WIN32
-	cmd = "del sample.wav";
-	system(cmd.c_str());
+	sCmd = "del " + sFile;
+	system(sCmd.c_str());
+	sCmd = "del " + sTextFile;
+	system(sCmd.c_str());
 #else
-	cmd = "rm sample.wav";
-	system(cmd.c_str());
+	sCmd = "rm " + sFile;
+	system(sCmd.c_str());
+	sCmd = "rm " + sTextFile;
+	system(sCmd.c_str());
 #endif
 
 	return pData;
@@ -167,7 +186,12 @@ void Text_To_Speech::CMD_Send_Audio_To_Device(string sText,string sList_PK_Devic
 	out << sText;
 	out.close();
 
-	string sCmd = "text2wave " + sTextFile + " -o " + sFile; //TODO: change voice with eval() parameter
+	string sCmd = "text2wave " + sTextFile + " -o " + sFile;
+
+	//Use custom voice
+	if(sVoice!="") {
+		sCmd += " -eval \"("+sVoice+")\"";
+	}
 	system(sCmd.c_str());
 	if( FileUtils::FileExists(sFile) )
 	{
@@ -182,7 +206,7 @@ void Text_To_Speech::CMD_Send_Audio_To_Device(string sText,string sList_PK_Devic
 			}
 		}
 		m_mapOutstandingFiles[time(NULL)]=sFile;
-		m_mapOutstandingFiles[time(null)]=sTextFile;
+		m_mapOutstandingFiles[time(NULL)]=sTextFile;
 	}
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Processed file: %s outstanding: %d",sCmd.c_str(),(int) m_mapOutstandingFiles.size());
@@ -212,7 +236,7 @@ void Text_To_Speech::CMD_Send_Audio_To_Device(string sText,string sList_PK_Devic
 void Text_To_Speech::CMD_Text_To_Wave(string sText,string sVoice,char **pData,int *iData_Size,string &sCMD_Result,Message *pMessage)
 //<-dceag-c256-e->
 {
-	*pData = CreateWAV(sText,*iData_Size);
+	*pData = CreateWAV(sText,sVoice,*iData_Size);
 }
 
 //<-dceag-createinst-b->!
