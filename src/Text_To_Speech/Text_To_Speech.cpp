@@ -177,8 +177,9 @@ void Text_To_Speech::CMD_Send_Audio_To_Device(string sText,string sList_PK_Devic
 {
 	PLUTO_SAFETY_LOCK(tm,m_TTSMutex);
 
-	string sFile = "/home/public/data/tts/" + StringUtils::itos(m_dwID++) + ".wav";
-	string sTextFile = "/home/public/data/tts/" + StringUtils::itos(m_dwID++) + ".txt";
+	int iTempID = m_dwID++;
+	string sFile = "/home/public/data/tts/" + StringUtils::itos(iTempID) + ".wav";
+	string sTextFile = "/home/public/data/tts/" + StringUtils::itos(iTempID) + ".txt";
 	
 	//text2wave will not take a text string directly, so lets put the text into a temporary file
 	ofstream out(sTextFile.c_str());
@@ -205,7 +206,7 @@ void Text_To_Speech::CMD_Send_Audio_To_Device(string sText,string sList_PK_Devic
 			int PK_Device = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
 			if( PK_Device )
 			{
-				DCE::CMD_MH_Play_Media CMD_MH_Play_Media(m_dwPK_Device,m_dwPK_Device_MediaPlugin,PK_Device,sFile,0,0,"",true,0,0 /* bQueue */,0 /* bBypass_Event */, 0 /* bDont_Setup_AV */);
+				DCE::CMD_MH_Play_Media CMD_MH_Play_Media(m_dwPK_Device,m_dwPK_Device_MediaPlugin,PK_Device,sFile,0/*iPK_MediaType*/,0/*iPK_DeviceTemplate*/,""/*sPK_EntertainArea*/,true/*bResume*/,0/*iRepeat*/,0 /* bQueue */,bBypass_Event /* bBypass_Event */, bDont_Setup_AV /* bDont_Setup_AV */);
 				SendCommand(CMD_MH_Play_Media);
 			}
 		}
