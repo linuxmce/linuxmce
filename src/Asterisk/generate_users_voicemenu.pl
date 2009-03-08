@@ -50,7 +50,7 @@ $list .= "/var/lib/asterisk/sounds/pluto/pluto-default-voicemenu4.gsm ";
 
 sub generate_voice()
 {
-	&generate_voice_fextival(@_);
+	&generate_voice_festival(@_);
 }
 
 sub generate_voice_att()
