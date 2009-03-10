@@ -218,7 +218,6 @@ function sqlcvs_diff($output,$dbADO) {
 		
 		<table width="500" border="0">
 		<tr>
-			TESTINGTESTINGTESTING
 			<td><B>'.$TEXT_SQLCVS_HOST_CONST.':</B></td>
 			<td><input type="text" name="host" value="'.$host.'"></td>
 		</tr>
