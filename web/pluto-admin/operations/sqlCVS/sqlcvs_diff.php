@@ -198,6 +198,19 @@ function sqlcvs_diff($output,$dbADO) {
 				eval("sqlcvs_diff.line_"+i+".checked="+val);
 		   }
 		}
+		function checkCredentials()
+		{
+			if(document.sqlcvs_diff.username.value==\'anonymous\')
+			{
+				if(document.sqlcvs_diff.containsDesignerRepo.value==\'true\'){
+					alert(\''.$TEXT_SQLCVS_ALERT_DESIGNER_REPO.'\');
+					return false;
+				} else {
+					return confirm(\''.$TEXT_SQLCVS_CONFIRM_ANONYMOUS.'\');
+				}
+			}
+			return true;
+		}
 		</script>
 	<form action="index.php" method="POST" name="sqlcvs_diff">
 		<input type="hidden" name="section" value="sqlcvs_diff">
@@ -205,6 +218,7 @@ function sqlcvs_diff($output,$dbADO) {
 		
 		<table width="500" border="0">
 		<tr>
+			TESTINGTESTINGTESTING
 			<td><B>'.$TEXT_SQLCVS_HOST_CONST.':</B></td>
 			<td><input type="text" name="host" value="'.$host.'"></td>
 		</tr>
@@ -238,6 +252,7 @@ function sqlcvs_diff($output,$dbADO) {
 		if($retVal==0){
 			$resultArray=file('/tmp/'.$rand_tmp_file);
 			$lineNo=0;
+			$containsDesignerRepo=false;
 			foreach ($resultArray AS $line){
 				$items=explode("\t",$line);
 				$lineRep=str_replace('REP:','',$items[0]);
@@ -247,6 +262,9 @@ function sqlcvs_diff($output,$dbADO) {
 					<tr bgcolor="#F0F3F8">
 						<td colspan="5"><B>'.$TEXT_REPOSITORY_CONST.': '.$lineRep.'</B></td>
 					</tr>';
+					if($lineRep=="designer"){
+						$containsDesignerRepo=true;
+					}
 				}
 				$lineTable=str_replace('TABLE:','',$items[1]);
 				if($lineTable!=$table){
@@ -290,6 +308,13 @@ function sqlcvs_diff($output,$dbADO) {
 			$out.='
 				<input type="hidden" name="parms" value="'.$parmList.'">
 				<input type="hidden" name="fileLines" value="'.$lineNo.'">';
+			if($containsDesignerRepo){
+				$out.='
+				<input type="hidden" name="containsDesignerRepo" value="true">';
+			}else{
+				$out.='
+				<input type="hidden" name="containsDesignerRepo" value="false">';
+			}
 		}
 		if($retVal==0){
 			if(@count($resultArray)>0){
@@ -307,7 +332,7 @@ function sqlcvs_diff($output,$dbADO) {
 						<td align="center" colspan="5"><input type="text" name="sqlCVSComment" size="100%"></td>
 					</tr>
 					<tr>
-						<td colspan="5" align="left"><input type="submit" class="button" name="revert" value="'.$TEXT_REVERT_CONST.'"> <input type="submit" class="button" name="checkin" value="'.$TEXT_CHECKIN_CONST.'"></td>
+						<td colspan="5" align="left"><input type="submit" class="button" name="revert" value="'.$TEXT_REVERT_CONST.'"> <input type="submit" class="button" name="checkin" value="'.$TEXT_CHECKIN_CONST.'" onClick="javascript:return checkCredentials();"></td>
 					</tr>';
 			}else{
 				$out.='
