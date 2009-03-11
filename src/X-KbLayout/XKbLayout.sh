@@ -2,11 +2,11 @@
 
 . /usr/pluto/bin/SQL_Ops.sh
 
-#<-mkr_b_via_b->
-exit
-#<-mkr_b_via_e->
+#
 
-function getCurrentLayout {
+
+
+function getCurrentLayoutPreIntrepid {
 	currentLayout=$(cat $XConfFile 2>/dev/null  | grep "^.*Option.*\"XkbLayout\"" | cut -f5 | sed 's/"//g')
 	currentVariant=$(cat $XConfFile 2>/dev/null | grep "^.*Option.*\"XkbVariant\"" | cut -f5 | sed 's/"//g')
 
@@ -20,7 +20,22 @@ function getCurrentLayout {
 	echo $currentLayout $currentVariant
 }
 
-function setCurrentLayout {
+function getCurrentLayout {
+	. $XConfFile
+	currentLayout="$XKBLAYOUT"
+	currentVariant="$XKBVARIANT"
+
+	if [[ "$currentLayout" == "" ]]; then
+		currentLayout="us"
+	fi
+	if [[ "$currentVariant" == "" ]] ;then
+		currentVariant="basic"
+	fi
+
+	echo $currentLayout $currentVariant
+}
+
+function setCurrentLayoutPreIntrepid {
 	local layout=$1
 	local variant=$2
 	
@@ -52,6 +67,38 @@ function setCurrentLayout {
 	mv $XConfFile.$$ $XConfFile
 }
 
+function setCurrentLayout {
+	local layout=$1
+	local variant=$2
+	
+	if [[ ! -f $XConfFile ]] ;then
+		echo "Warning: file $XConfFile does not exist"
+		return 1
+	fi
+
+	# Test is the Layout option is inable in X Config File
+	grep -q "XKBLAYOUT" $XConfFile
+	if [[ $? -eq 0 ]]; then
+		# Just replace the current layout
+		sed "s|^XKBLAYOUT.*|XKBLAYOUT=\"$layout\"|g" $XConfFile > $XConfFile.$$
+	else
+		# Create the layout option
+		echo "XKBLAYOUT=\"$layout\"">>$XConfFile.$$
+	fi
+	mv $XConfFile.$$ $XConfFile
+	
+	# Test if the Variant option is enabled in X Config File
+	grep -q "XKBVARIANT" $XConfFile
+	if [[ $? -eq -0 ]]; then
+		# Just replace the current variant
+		sed "s|^XKBVARIANT.*|XKBVARIANT=\"$variant\"|g" $XConfFile > $XConfFile.$$
+	else
+		# Create the layout option
+		echo "XKBVARIANT=\"$variant\"">>$XConfFile.$$
+	fi
+	mv $XConfFile.$$ $XConfFile
+}
+
 Action=$1
 IP=$2
 KbLayout=$3
@@ -71,7 +118,7 @@ else
 	XConfPath=""
 fi
 
-XConfFile="$XConfPath/etc/X11/xorg.conf"
+XConfFile="$XConfPath/etc/default/console-setup"
 
 case "$Action" in
 	get)
