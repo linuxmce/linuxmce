@@ -49,6 +49,24 @@ function sqlcvs_checkin($output,$dbADO) {
 				eval("sqlcvs_checkin.table_"+group+".checked=true");
 			}
 		}
+		function checkCredentials()
+		{
+			if(document.sqlcvs_checkin.sqlCVSComment.value==\'\')
+			{
+				alert(\''.$TEST_SQLCVS_ALERT_COMMENT.'\');
+				return false;
+			}
+			if(document.sqlcvs_checkin.username.value==\'anonymous\')
+			{
+				if(document.sqlcvs_checkin.table_designer.checked==true){
+					alert(\''.$TEXT_SQLCVS_ALERT_DESIGNER_REPO.'\');
+					return false;
+				} else {
+					return confirm(\''.$TEXT_SQLCVS_CONFIRM_ANONYMOUS.'\');
+				}
+			}
+			return true;
+		}
 		</script>
 				
 		<div class="err" align="center">'.stripslashes(@$_REQUEST['error']).'</div>
@@ -130,7 +148,7 @@ function sqlcvs_checkin($output,$dbADO) {
 			<td align="center" colspan="4"><input type="text" name="sqlCVSComment" size="100%"></td>
 		</tr>
 		<tr>
-			<td><input type="submit" class="button" name="submitBtn" value="'.$TEXT_NEXT_CONST.'"></td>
+			<td><input type="submit" class="button" name="submitBtn" value="'.$TEXT_NEXT_CONST.'" onClick="javascript:return checkCredentials();"></td>
 			<td colspan="3">&nbsp</td>
 		</tr>		
 	</table>

@@ -200,6 +200,11 @@ function sqlcvs_diff($output,$dbADO) {
 		}
 		function checkCredentials()
 		{
+			if(document.sqlcvs_diff.sqlCVSComment.value==\'\')
+			{
+				alert(\''.$TEST_SQLCVS_ALERT_COMMENT.'\');
+				return false;
+			}
 			if(document.sqlcvs_diff.username.value==\'anonymous\')
 			{
 				if(document.sqlcvs_diff.containsDesignerRepo.value==\'true\'){
