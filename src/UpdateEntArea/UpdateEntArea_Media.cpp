@@ -161,11 +161,8 @@ void UpdateEntArea::AddDefaultMediaScenarios(Row_EntertainArea *pRow_EntertainAr
 	}
 
 	{
-		// Only add this button if there's a disk drive
-		string sSQL = "SELECT PK_Device FROM Device_EntertainArea "
-			"JOIN Device ON FK_Device=PK_Device "
-			"JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate "
-			"WHERE FK_DeviceCategory=" + StringUtils::itos(DEVICECATEGORY_Disc_Drives_CONST) + " AND FK_EntertainArea=" + StringUtils::itos(pRow_EntertainArea->PK_EntertainArea_get());
+		//Manage Drives Scenario: only add this button if there's at least one disk drive somewhere in the house...
+		string sSQL = "SELECT PK_Device from Device JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE FK_DeviceCategory=" + StringUtils::itos(DEVICECATEGORY_Disc_Drives_CONST);
 		PlutoSqlResult result_set;
 		if( (result_set.r=m_pDatabase_pluto_main->db_wrapper_query_result(sSQL)) && result_set.r->row_count>0 )
 		{
