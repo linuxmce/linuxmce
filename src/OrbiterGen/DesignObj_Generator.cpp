@@ -1975,9 +1975,16 @@ vector<class ArrayValue *> *DesignObj_Generator::GetArrayValues(Row_DesignObjVar
 							continue;
 						if( PK_Array==ARRAY_Phone_Users_CONST && drIU->FK_Users_getrow()->Extension_isNull() )
 							continue;
-						string sName = pRow_Users->UserName_get();
-						if( drIU->FK_Users_getrow()->Nickname_get().size() )
+						//User selection names.
+						//Use Nickname when available. 
+						string sName = "";						
+						if( drIU->FK_Users_getrow()->Nickname_get().size() ||  drIU->FK_Users_getrow()->Nickname_isNull()) {
+							//There is a Nickname, use it!
 							sName = pRow_Users->Nickname_get();
+						} else {
+							//There is no Nickname, so use the UserName		
+							sName = pRow_Users->UserName_get();
+						}
 
 						alArray->push_back(new ArrayValue(StringUtils::itos(pRow_Users->PK_Users_get()),sName,NULL,0,0,
 							0,0,pRow_DesignObjVariation_DesignObj_Skin_Language->CanBeHidden_get()==1,pRow_DesignObjVariation_DesignObj_Skin_Language->HideByDefault_get()==1,false));
@@ -2259,9 +2266,16 @@ int k=2;
             {
 				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"User %d in text %s is invalid",PK_User,Text.c_str());
 				sValue = "";
-            }
-			else
-	            sValue = drUser->Nickname_isNull() ? drUser->UserName_get() : drUser->Nickname_get();
+            } else {
+		   //not sure where this is used exactly?
+	           if(drUser->Nickname_get().size() || drUser->Nickname_isNull()) {
+			//There is a Nickname, use it!
+			sValue = drUser->Nickname_get();
+		   } else {
+			//There is no Nickname, so use the UserName
+			sValue = drUser->UserName_get();
+		   }
+	    }
         }
         else if( sVariable[0]=='T' && sVariable.length()>1 )  // <%=T592%> means text object 592
         {
