@@ -202,7 +202,7 @@ function sqlcvs_diff($output,$dbADO) {
 		{
 			if(document.sqlcvs_diff.sqlCVSComment.value==\'\')
 			{
-				alert(\''.$TEST_SQLCVS_ALERT_COMMENT.'\');
+				alert(\''.$TEXT_SQLCVS_ALERT_COMMENT.'\');
 				return false;
 			}
 			if(document.sqlcvs_diff.username.value==\'anonymous\')

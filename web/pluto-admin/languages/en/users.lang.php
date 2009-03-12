@@ -1,6 +1,6 @@
 <?
 $TEXT_USERS_CONST='Users';
-$TEXT_USERS_NOTE_CONST='Add all the users, or family members, who will be using Pluto.';
+$TEXT_USERS_NOTE_CONST='Add all the users, or family members, who will be using LinuxMCE.';
 $TEXT_USER_CHANGE_PASSWORD_CONST='Change Password';
 $TEXT_USER_CHANGE_PIN_CONST='Change PIN';
 $TEXT_UPLOAD_PICTURE_CONST='Upload picture';

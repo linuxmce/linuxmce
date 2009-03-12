@@ -23,5 +23,5 @@ $TEXT_SQLCVS_UPDATE_HINT='Use this page to pull in the latest changes from the m
 $TEXT_SQLCVS_DIFF_HINT='Use this page to checkin or revert any changes to your local database. If you are looking to pull in the latest changes from the master server, please use the sqlCVS Update page.';
 $TEXT_SQLCVS_ALERT_DESIGNER_REPO='Sorry, you cannot check in changes to the Designer repo without credentials. Please enter your credentials and try again.';
 $TEXT_SQLCVS_CONFIRM_ANONYMOUS='Are you sure you want to check in changes as an anonymous user?';
-$TEST_SQLCVS_ALERT_COMMENT='Sorry, you cannot check in changes without a comment describing what the checkin is for. Please add a comment and try again.';
+$TEXT_SQLCVS_ALERT_COMMENT='Sorry, you cannot check in changes without a comment describing what the checkin is for. Please add a comment and try again.';
 ?>

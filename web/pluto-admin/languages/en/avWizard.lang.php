@@ -1,7 +1,7 @@
 <?
 $TEXT_AV_EQUIPMENT_CONST='A/V Equipment';
 $TEXT_CONNECTION_WIZARD_CONST='Connection Wizard';
-$TEXT_SHARE_CODES_CONST='Share my I/R codes with other Pluto users.';
+$TEXT_SHARE_CODES_CONST='Share my I/R codes with other LinuxMCE users.';
 $TEXT_ALL_ENTERTAIN_AREAS_CONST='All entertain areas';
 $TEXT_CHOOSE_ENTERTAIN_AREA_CONST='Choose entertain area';
 $TEXT_UNASSIGNED_CONST='Unassigned';

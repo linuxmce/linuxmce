@@ -1,6 +1,6 @@
 <?
 $TEXT_CHOOSE_PREFERRED_REMOTES_CONST='Choose preferred remotes';
-$TEXT_PREFERRED_REMOTES_INFO_CONST='Use this screen to specify what remote controls you want to use for media scenarios.  If you do not specify any preferences, Pluto will pick the most logical choice automatically.  If you do specify preferences, Pluto will use your choice instead.';
+$TEXT_PREFERRED_REMOTES_INFO_CONST='Use this screen to specify what remote controls you want to use for media scenarios.  If you do not specify any preferences, LinuxMCE will pick the most logical choice automatically.  If you do specify preferences, LinuxMCE will use your choice instead.';
 $TEXT_REMOVE_REMOTE_CONFIRMATION_CONST='Are you sure you want to remove this remote?';
 $TEXT_EXISTING_REMOTES_CONST='Existing remotes';
 $TEXT_FOR_THIS_TYPE_OF_MEDIA_CONST='For this type of media';

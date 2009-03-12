@@ -53,7 +53,7 @@ function sqlcvs_checkin($output,$dbADO) {
 		{
 			if(document.sqlcvs_checkin.sqlCVSComment.value==\'\')
 			{
-				alert(\''.$TEST_SQLCVS_ALERT_COMMENT.'\');
+				alert(\''.$TEXT_SQLCVS_ALERT_COMMENT.'\');
 				return false;
 			}
 			if(document.sqlcvs_checkin.username.value==\'anonymous\')

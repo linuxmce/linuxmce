@@ -1,6 +1,6 @@
 <?
 $TEXT_MEDIA_SCENARIOS_CONST='Media scenarios';
-$TEXT_MEDIA_SCENARIOS_NOTE_CONST='Each Media Scenario will be a button on the Orbiter.  To use Media from a Pluto Media Director, just check the box for the type of media you want.  To use Media from another source, like a VCR, DVD player, etc., use the "Add Media Scenario" section.';
+$TEXT_MEDIA_SCENARIOS_NOTE_CONST='Each Media Scenario will be a button on the Orbiter.  To use Media from a Media Director, just check the box for the type of media you want.  To use Media from another source, like a VCR, DVD player, etc., use the "Add Media Scenario" section.';
 $TEXT_ADD_MEDIA_SCENARIO_CONST='Add Media Scenario';
 $TEXT_NO_ENTERTAIN_AREA_CONST='No entertain areas available. They will be created automatically when you next restart your Core, and you can add media scenarios then. If you want to manually configure your entertainment areas please do so on the "Rooms" page. Refer to the help on that page for details.';
 $TEXT_GOTO_ROOMS_CONST='Go to rooms page';
