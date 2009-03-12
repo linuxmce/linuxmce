@@ -118,7 +118,19 @@ void UpdateEntArea::AddDefaultTelecomScenarios(Row_Room *pRow_Room)
 	for(size_t s=0;s<vectRow_Users.size();++s)
 	{
 		Row_Users *pRow_Users = vectRow_Users[s];
-		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,pRow_Users->UserName_get(),0,1,pRow_Users->PK_Users_get());
+
+		//Voicemail Button.
+		//Use Nickname when available. 
+		string sName = "";						
+		if( pRow_Users->Nickname_get().size() ||  pRow_Users->Nickname_isNull()) {
+			//There is a Nickname, use it!
+			sName = pRow_Users->Nickname_get();
+		} else {
+			//There is no Nickname, so use the UserName		
+			sName = pRow_Users->UserName_get();
+		}
+
+		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,sName,0,1,pRow_Users->PK_Users_get());
 		if( pCommandGroup )
 		{
 			pCommandGroup->m_pRow_CommandGroup->FK_DesignObj_set(DESIGNOBJ_butUserStatus_CONST);
