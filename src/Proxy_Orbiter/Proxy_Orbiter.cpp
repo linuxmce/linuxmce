@@ -86,7 +86,7 @@ Proxy_Orbiter::Proxy_Orbiter(int DeviceID, int PK_DeviceTemplate, string ServerA
         m_iListenPort = CISCO_LISTEN_PORT_START;
 
     m_sInternalServerAddress = m_pData->GetTopMostDevice()->GetIPAddress();
-    m_sBaseUrl = "http://" + m_sInternalServerAddress + "/pluto-admin/";
+    m_sBaseUrl = "http://" + m_sInternalServerAddress + "/lmce-admin/";
 
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Server's internal ip address: %s", m_sInternalServerAddress.c_str()); 
 

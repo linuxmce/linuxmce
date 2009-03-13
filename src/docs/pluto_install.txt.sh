@@ -98,7 +98,7 @@ svn co http://10.0.0.170/pluto/trunk/web/
 su
 apt-get install mysql-client mysql-server apache2 libapache2-mod-php4 php4-mysql
 cd /var/www
-ln -sv $PLUTO_SRC_BASE/web/pluto-admin/
+ln -sv $PLUTO_SRC_BASE/web/lmce-admin/
 scp -pr $ACCOUNT_HYBRID_MACHINE:/var/www/globalconfig .
 # ! edit /etc/php4/apache2/php.ini
 # ! uncomment line: ;extension=mysql.so
@@ -131,7 +131,7 @@ tar -jxvf newso.tar.bz2
 
 # getting the correct id
 #
-# open in browser http://localhost/pluto-admin/
+# open in browser http://localhost/lmce-admin/
 # login
 # click on the left frame, at the bottom: 'Show devices tree'
 # click on the left frame: CORE -> The core/hybrid -> OnScreen Orbiter

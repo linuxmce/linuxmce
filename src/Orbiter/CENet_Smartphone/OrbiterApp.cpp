@@ -1751,9 +1751,9 @@ void OrbiterApp::CheckBookmarks( void )
 	if (  szURL ) {
 		if ( _fgetts( szURL, MAX_URL_LENGTH-2, hFile ) ) {
 			if ( szURL[_tcslen(szURL)-1]==_T('\n') ) szURL[_tcslen(szURL)-1] = 0;
-			//Pluto - http://34.34.23.34/pluto-admin/check.wml?
+			//Pluto - http://34.34.23.34/lmce-admin/check.wml?
 			CSmartphone2003Favorites::AddLinkToFavorites( _T(DEFAULT_LINK_NAME), szURL, FALSE );
-			//Pluto Alerts - http://34.34.23.34/pluto-admin/check.wml?security=0		
+			//Pluto Alerts - http://34.34.23.34/lmce-admin/check.wml?security=0		
 			_tcscat(szURL, _T(ALERTS_LINK_SUBSTR));		
 			CSmartphone2003Favorites::AddLinkToFavorites( _T(ALERTS_LINK_NAME), szURL, FALSE );
 		}

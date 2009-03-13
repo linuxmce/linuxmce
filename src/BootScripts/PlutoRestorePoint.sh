@@ -49,7 +49,7 @@ if [[ "$1" == "--backup" ]]; then
 	mkdir -p $FULLPATH/asterisk
 	/usr/bin/mysqldump -e --quote-names --allow-keywords --add-drop-table --skip-extended-insert $MYSQL_DB_CRED asterisk > $FULLPATH/asterisk/asterisk.sql
 	
-	# backup pluto-admin
+	# backup lmce-admin
 	mkdir -p $FULLPATH/usr/pluto/orbiter
 	cp -Lr /usr/pluto/orbiter/floorplans $FULLPATH/usr/pluto/orbiter
 	cp -Lr /usr/pluto/orbiter/users $FULLPATH/usr/pluto/orbiter

@@ -31,7 +31,7 @@ FeedbackMD "Assigned permanent IP '$MD_IP' to device '$MD_Device'"
 
 WaitLock "NewPnPMD" "NewPnPMD$MD_Device"
 Logging "$TYPE" "$SEVERITY_NORMAL" "Running diskless MD setup command suite (device '$MD_Device')"
-# Note: keep this in sync with /var/www/pluto-admin/operations/logs/executeLog.php, case 1
+# Note: keep this in sync with /var/www/lmce-admin/operations/logs/executeLog.php, case 1
 FeedbackMD "Running Diskless_Setup.sh"
 if ! /usr/pluto/bin/Diskless_Setup.sh; then
 	bright="[1m"

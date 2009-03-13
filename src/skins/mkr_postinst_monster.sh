@@ -14,7 +14,7 @@ ConfSet UseSkinSettings_7 1
 ConfSet UseSkinSettings_10 3
 ConfSet UseSkinSettings_11 6
 
-mv /var/www/pluto-admin/include/images/{monster_logo,logo_pluto}.jpg || /bin/true
+mv /var/www/lmce-admin/include/images/{monster_logo,logo_pluto}.jpg || /bin/true
 cp /usr/pluto/orbiter/skins/Monster/bootsplash/*.cfg /etc/bootsplash/themes/pluto/config || /bin/true
 cp /usr/pluto/orbiter/skins/Monster/bootsplash/*.jpg /etc/bootsplash/themes/pluto/images || /bin/true
 /var/lib/dpkg/info/bootsplash.postinst configure

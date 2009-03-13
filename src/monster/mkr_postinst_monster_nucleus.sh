@@ -45,7 +45,7 @@ echo "## Please wait, installing cisco firmware"
 #rm -rf /tmp/cisco
 
 # monster web skin
-sed -i "s/_SESSION\\['skin'\\]=.;/_SESSION\\['skin'\\]=1;/" /var/www/pluto-admin/include/config/config.inc.php
+sed -i "s/_SESSION\\['skin'\\]=.;/_SESSION\\['skin'\\]=1;/" /var/www/lmce-admin/include/config/config.inc.php
 
 # Append the vendor label in pluto.conf
 Vendor="Monster"

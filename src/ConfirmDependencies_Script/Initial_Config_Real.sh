@@ -14,7 +14,7 @@ PHURL="http://www.plutohome.com/"
 ACTIV="http://activate.plutohome.com"
 
 activation_url="$ACTIV/activation.php"
-activation_url_alt="$ACTIV/pluto-admin/activation.php"
+activation_url_alt="$ACTIV/lmce-admin/activation.php"
 
 DIR="/usr/pluto/install"
 CDD="ConfirmDependencies_Debian.sh"

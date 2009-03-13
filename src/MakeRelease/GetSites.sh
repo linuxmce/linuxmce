@@ -17,8 +17,8 @@ for i in plutovip-com.tar.gz pluto-support.tar.gz trunk_doc.tar.gz plutohome-com
 	echo "Extracting $i"
 	tar -xzvf "$i"
 done
-cp /var/www/pluto-admin_include_config_config.inc.php /var/www/pluto-admin/include/config/config.inc.php
-cp /var/www/pluto-admin_globalconfig.inc.php /var/www/pluto-admin/globalconfig.inc.php
+cp /var/www/lmce-admin_include_config_config.inc.php /var/www/lmce-admin/include/config/config.inc.php
+cp /var/www/lmce-admin_globalconfig.inc.php /var/www/lmce-admin/globalconfig.inc.php
 rm -f /var/www/plutohome-com/plutoadmin
 ln -s /var/www/pluto-admin/ /var/www/plutohome-com/plutoadmin
 

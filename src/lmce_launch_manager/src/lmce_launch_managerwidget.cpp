@@ -744,7 +744,7 @@ void lmce_launch_managerWidget::btnOpenAdminSite_clicked()
 			writeLog("Firefox not found, falling back to default system browser: " + browserApp, false, LV_WARNING);
 	
 	QProcess process(browserApp);
-	process.addArgument("http://"+leCoreIP->text()+"/pluto-admin/");
+	process.addArgument("http://"+leCoreIP->text()+"/lmce-admin/");
 	process.start();
 }
 
