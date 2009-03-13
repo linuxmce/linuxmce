@@ -1,7 +1,7 @@
 Source: djmount
 Section: unknown
 Priority: extra
-Maintainer: Razvan Gavril <razvan.gavril@gmail.com>
+Maintainer: LinuxMCE Developers <developers@linuxmce.org>
 Build-Depends: debhelper (>= 5), autotools-dev, libfuse-dev, fuse-utils
 Standards-Version: 3.7.2
 

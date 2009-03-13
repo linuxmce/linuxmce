@@ -1,7 +1,7 @@
 Source: freepbx
 Section: unknown
 Priority: optional
-Maintainer: Radu Cristescu <radu.c@plutohome.com>
+Maintainer: LinuxMCE Developers <developers@linuxmce.org>
 Build-Depends: debhelper (>= 4.0.0)
 Standards-Version: 3.6.1
 

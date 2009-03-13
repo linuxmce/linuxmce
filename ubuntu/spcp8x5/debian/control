@@ -1,7 +1,7 @@
 Source: spcp8x5
 Section: unknown
 Priority: extra
-Maintainer: Radu Cristescu <radu.c@plutohome.com>
+Maintainer: LinuxMCE Developers <developers@linuxmce.org>
 Build-Depends: debhelper (>= 5)
 Standards-Version: 3.7.2
 

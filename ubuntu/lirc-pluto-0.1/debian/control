@@ -1,7 +1,7 @@
 Source: lirc-pluto
 Section: unknown
 Priority: optional
-Maintainer: root <root@unknown>
+Maintainer: LinuxMCE Developers <developers@linuxmce.org>
 Build-Depends: debhelper (>= 5)
 Standards-Version: 3.7.2
 
