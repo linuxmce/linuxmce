@@ -10,7 +10,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link rel='stylesheet' type='text/css' href='include/styles/main.css'>
 		
-<title><-mkr_t_name_mixed-> :: Orbiters</title>	
+<title>LinuxMCE :: Orbiters</title>	
 </HEAD>
 
 <BODY >

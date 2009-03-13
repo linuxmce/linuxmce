@@ -2396,7 +2396,7 @@ function createDevice($FK_DeviceTemplate,$FK_Installation,$controlledBy,$roomID,
 		write_weblog($out);
 		
 		if(strpos($out,'0:OK')===false){
-			error_redirect('ERROR: Error creating device.  Be sure <-mkr_t_name_mixed-> is running.','');
+			error_redirect('ERROR: Error creating device.  Be sure LinuxMCE is running.','');
 		}
 		
 		$insertID=(int)trim(substr($out,7));

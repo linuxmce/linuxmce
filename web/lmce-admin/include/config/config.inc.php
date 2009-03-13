@@ -49,7 +49,7 @@
 	
 	
 	define("VERSION","0.1");
-	define("APPLICATION_NAME","<-mkr_t_name_mixed->");
+	define("APPLICATION_NAME","LinuxMCE");
 	
 	define("APPROOT",$_SERVER['DOCUMENT_ROOT']."".$directory."/");
 	define("APPURL",$domain.$directory);

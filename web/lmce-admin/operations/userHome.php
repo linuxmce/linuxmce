@@ -23,7 +23,7 @@ function userHome($output,$dbADO) {
 	$out.=$content;
 
 	$output->setMenuTitle($TEXT_WELCOME_MESSAGE_CONST);
-	$output->setHelpSrc('/wiki/index.php/<-mkr_t_name_mixed->_Admin_Website');
+	$output->setHelpSrc('/wiki/index.php/LinuxMCE_Admin_Website');
 	$output->setBody($out);
 	$output->setScriptInHead($scriptInHead);
 	$output->setTitle(APPLICATION_NAME.' :: '.$TEXT_USER_HOME_CONST);

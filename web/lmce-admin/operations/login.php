@@ -57,10 +57,10 @@ function login($output,$dbADO) {
 	    &nbsp;&nbsp;
 	    </tr>
 	    <tr>
-	      <td colspan="2" align="center"><a href="'.$wikiHost.'/index.php/<-mkr_t_name_mixed->_Admin_Website" target="_top">'.$TEXT_HELP_WITH_ADMIN_SITE_CONST.'</a></td>
+	      <td colspan="2" align="center"><a href="'.$wikiHost.'/index.php/LinuxMCE_Admin_Website" target="_top">'.$TEXT_HELP_WITH_ADMIN_SITE_CONST.'</a></td>
 	    </tr>
 	    <tr>
-	      <td colspan="2" align="center">Learn about <-mkr_t_name_mixed-> at <a href="http://www.<-mkr_t_main_url->" target="_top">www.<-mkr_t_main_url-></a><br><br>'.$TEXT_DOWNLOAD_CONST.' <a href="index.php?section=orbitersWin">'.$TEXT_ORBITER_WIN_INSTALLER_CONST.'</a></td>
+	      <td colspan="2" align="center">Learn about LinuxMCE at <a href="http://www.linuxmce.org" target="_top">www.linuxmce.org</a><br><br>'.$TEXT_DOWNLOAD_CONST.' <a href="index.php?section=orbitersWin">'.$TEXT_ORBITER_WIN_INSTALLER_CONST.'</a></td>
 	    </tr>
 	    <tr>
 	      <td colspan="2" align="center">'.$TEXT_VERSION_CONST.': <=version=></td>
