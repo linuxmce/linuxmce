@@ -41,6 +41,7 @@ LMCE_Launch_Manager::LMCE_Launch_Manager(Command_Impl *pPrimaryDeviceCommand, De
 	: LMCE_Launch_Manager_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
 //<-dceag-const2-e->
 {
+	MainMenu();
 }
 
 //<-dceag-dest-b->
@@ -195,5 +196,22 @@ void LMCE_Launch_Manager::SomeFunction()
 	COMMANDS TO IMPLEMENT
 
 */
+string LMCE_Launch_Manager::MainMenu() {
+	cout << "***********************" << endl
+	<< "LinxuMCE Launch Manager" << endl
+	<< "***********************" << endl
+	<< "Core status: " <<endl
+	<< "Media Station Status: " << endl
+	<< "Remote Assistance: " << endl
+	<< "***********************" << endl << endl
+	<< "1) Regen this orbiter" << endl
+	<< "2) Regen All Orbiters" << endl
+	<< "3) Reload Router" << endl
+	<< "4) Toggle Remote Assistance" << endl;
 
+	string s;
+	cin >> s;
 
+	return "";
+
+}
