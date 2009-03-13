@@ -196,7 +196,7 @@ if ! BlacklistConfFiles "$PHP_CONFIG_FILE" ;then
 	#adjust PHP session max lifetime
 	sed -i 's/^session.gc_maxlifetime = 1440$/session.gc_maxlifetime = 144000/' $PHP_CONFIG_FILE
 	#adjust PHP max execution time
-	sed -i 's/max_execution_time =*/max_execution_time = 120 ;/g' $PHP_CONFIG_FILE
+	sed -i 's/max_execution_time =.*/max_execution_time = 120 ;/g' $PHP_CONFIG_FILE
 	#adjust PHP maximum upload filesize
-	sed -i 's/upload_max_filesize =*/upload_max_filesize = 16M ;/g' $PHP_CONFIG_FILE
+	sed -i 's/upload_max_filesize =.*/upload_max_filesize = 16M ;/g' $PHP_CONFIG_FILE
 fi
