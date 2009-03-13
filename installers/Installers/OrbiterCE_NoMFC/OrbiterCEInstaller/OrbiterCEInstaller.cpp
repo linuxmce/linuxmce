@@ -240,7 +240,7 @@ bool IsCoreAddress(TCHAR *wcServername, bool bLog = false)
 	wchar_t FullUrlW[MAX_STRING_LEN];
 	wcscpy(FullUrlW, TEXT("http://"));
 	wcscat(FullUrlW, wcServername);
-	wcscat(FullUrlW, TEXT("/pluto-admin/fdownload.php?filepath=bin/OrbiterCE.exe")); //for testing
+	wcscat(FullUrlW, TEXT("/lmce-admin/fdownload.php?filepath=bin/OrbiterCE.exe")); //for testing
 	
 	bool bResult = false;
 	HINTERNET hInternet = InternetOpen(TEXT("Pluto OrbiterCE Installer"), INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
@@ -315,16 +315,16 @@ void OnInstall()
 			return;
 
 		if(bResult)
-			bResult = DownloadFileHelper(wcPath, wcServername, TEXT("/pluto-admin/fdownload.php?filepath=orbiter/binaries/AYGSHELL.DLL"), TEXT("AYGSHELL.DLL"));
+			bResult = DownloadFileHelper(wcPath, wcServername, TEXT("/lmce-admin/fdownload.php?filepath=orbiter/binaries/AYGSHELL.DLL"), TEXT("AYGSHELL.DLL"));
 
 		if(bResult)
-			bResult = DownloadFileHelper(wcPath, wcServername, TEXT("/pluto-admin/fdownload.php?filepath=orbiter/binaries/PthreadsCE.dll"), TEXT("PthreadsCE.dll"));
+			bResult = DownloadFileHelper(wcPath, wcServername, TEXT("/lmce-admin/fdownload.php?filepath=orbiter/binaries/PthreadsCE.dll"), TEXT("PthreadsCE.dll"));
 
 		if(bResult)
-			bResult = DownloadFileHelper(wcPath, wcServername, TEXT("/pluto-admin/fdownload.php?filepath=bin/OrbiterCE.exe"), TEXT("OrbiterCE.exe"));
+			bResult = DownloadFileHelper(wcPath, wcServername, TEXT("/lmce-admin/fdownload.php?filepath=bin/OrbiterCE.exe"), TEXT("OrbiterCE.exe"));
 
 		if(bResult)
-			bResult = DownloadFileHelper(wcPath, wcServername, TEXT("/pluto-admin/fdownload.php?filepath=orbiter/binaries/logo.gif"), TEXT("logo.gif"));
+			bResult = DownloadFileHelper(wcPath, wcServername, TEXT("/lmce-admin/fdownload.php?filepath=orbiter/binaries/logo.gif"), TEXT("logo.gif"));
 
 		if(bResult)
 		{

@@ -4,7 +4,7 @@ diff -r -u AMP.orig/amp_conf/var/www/html/recordings/index.php AMP/amp_conf/var/
 @@ -1,4 +1,31 @@
  <?php
 +// *********** autologin for pluto admin ******************
-+session_name('Pluto-admin');
++session_name('LMCE-admin');
 +session_start();
 +
 +if(isset($_SESSION['Extension'])){
