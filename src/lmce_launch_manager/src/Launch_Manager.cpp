@@ -38,7 +38,7 @@ Launch_Manager::Launch_Manager(int DeviceID, string ServerAddress,bool bConnectE
 	: Launch_Manager_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
-	lmWidget = NULL;
+
 }
 
 //<-dceag-const2-b->
@@ -47,14 +47,14 @@ Launch_Manager::Launch_Manager(Command_Impl *pPrimaryDeviceCommand, DeviceData_I
 	: Launch_Manager_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
 //<-dceag-const2-e->
 {
-	lmWidget = NULL;
+
 }
 
 //<-dceag-dest-b->
 Launch_Manager::~Launch_Manager()
 //<-dceag-dest-e->
 {
-	lmWidget = NULL;
+
 }
 
 //<-dceag-getconfig-b->
@@ -204,13 +204,4 @@ void Launch_Manager::SomeFunction()
 */
 
 
-void Launch_Manager::CreateNewChildren()
-{
-	const int eventSpawnNewChildren = QEvent::User + 100;
-	
-	if (lmWidget)
-	{	
-		QEvent *pEvent = new QEvent( (QEvent::Type) eventSpawnNewChildren);
-		QApplication::postEvent(lmWidget, pEvent);
-	}
-}
+
