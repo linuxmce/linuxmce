@@ -32,14 +32,14 @@ function get_video_frame($cameraid,$installationID,$dbADO){
 	$securityDevicePlugin=getFieldsAsArray('Device','PK_Device',$dbADO,'WHERE FK_DeviceTemplate='.$GLOBALS['SecurityPlugin'].' AND FK_Installation='.$installationID);
 	$securityPluginDD=getFieldsAsArray('Device_DeviceData','IK_DeviceData',$dbADO,'WHERE FK_Device='.(int)@$securityDevicePlugin['PK_Device'][0].' AND FK_DeviceData='.$GLOBALS['Path']);
 
-	$cmd='/usr/pluto/bin/MessageSend localhost -targetType device -o -p "/var/www/pluto-admin/security_images" 0 '.$cameraid.' 1 84 19 0 20 "jpg" 23 0 31 0 60 100 61 100';
+	$cmd='/usr/pluto/bin/MessageSend localhost -targetType device -o -p "/var/www/lmce-admin/security_images" 0 '.$cameraid.' 1 84 19 0 20 "jpg" 23 0 31 0 60 100 61 100';
 	$ret=exec_batch_command($cmd,1);
 	$retArray=explode("\n",$ret);
 
 	$msg=$TEXT_ERROR_CAMERA_SCREENSHOT_NOT_AVAILABLE_CONST;
 	foreach ($retArray as $line) {
 		if(ereg(':OK',$line)){
-			exec('mv /var/www/pluto-admin/security_images/19.out /var/www/pluto-admin/security_images/'.$cameraid.'.jpg',$retArray,$retCode);
+			exec('mv /var/www/pluto-admin/security_images/19.out /var/www/lmce-admin/security_images/'.$cameraid.'.jpg',$retArray,$retCode);
 			$msg='<img src="security_images/'.$cameraid.'.jpg" alt="'.$TEXT_LOADING_CONST.'"/>';
 		}
 	}

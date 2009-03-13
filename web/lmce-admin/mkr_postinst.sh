@@ -12,40 +12,40 @@ fi
 mkdir -p /home/pluto/floorplans
 chmod -R 777 /home/pluto/floorplans
 chown -R www-data.www-data /home/pluto/floorplans
-rm -f /var/www/pluto-admin/floorplans 2>/dev/null
+rm -f /var/www/lmce-admin/floorplans 2>/dev/null
 [[ -e /usr/pluto/orbiter/floorplans ]] || ln -sn /home/pluto/floorplans /usr/pluto/orbiter/floorplans
-[[ -e /var/www/pluto-admin/floorplans ]] || ln -sn /usr/pluto/orbiter/floorplans/ /var/www/pluto-admin/
+[[ -e /var/www/lmce-admin/floorplans ]] || ln -sn /usr/pluto/orbiter/floorplans/ /var/www/lmce-admin/
 
 mkdir -p /usr/pluto/orbiter/users
 chmod -R 777 /usr/pluto/orbiter/users
 chown -R www-data.www-data /usr/pluto/orbiter/users
-rm -f /var/www/pluto-admin/users
-ln -s /usr/pluto/orbiter/users/ /var/www/pluto-admin/
+rm -f /var/www/lmce-admin/users
+ln -s /usr/pluto/orbiter/users/ /var/www/lmce-admin/
 
 mkdir -p /home/mediapics
 chmod -R 777 /home/mediapics
-rm -f /var/www/pluto-admin/mediapics
-ln -s /home/mediapics /var/www/pluto-admin/mediapics
+rm -f /var/www/lmce-admin/mediapics
+ln -s /home/mediapics /var/www/lmce-admin/mediapics
 
 mkdir -p /usr/pluto/orbiter/rooms
 chmod -R 777 /usr/pluto/orbiter/rooms
-rm -f /var/www/pluto-admin/rooms
-ln -s /usr/pluto/orbiter/rooms /var/www/pluto-admin/rooms
+rm -f /var/www/lmce-admin/rooms
+ln -s /usr/pluto/orbiter/rooms /var/www/lmce-admin/rooms
 
 mkdir -p /usr/pluto/orbiter/scenarios
 chmod -R 777 /usr/pluto/orbiter/scenarios
-rm -f /var/www/pluto-admin/scenarios
-ln -s /usr/pluto/orbiter/scenarios /var/www/pluto-admin/scenarios
+rm -f /var/www/lmce-admin/scenarios
+ln -s /usr/pluto/orbiter/scenarios /var/www/lmce-admin/scenarios
 
 mkdir -p /usr/pluto/orbiter/orbiter_bg
 chmod -R 777 /usr/pluto/orbiter/orbiter_bg
-rm -f /var/www/pluto-admin/orbiter_bg
-ln -s /usr/pluto/orbiter/orbiter_bg /var/www/pluto-admin/orbiter_bg
+rm -f /var/www/lmce-admin/orbiter_bg
+ln -s /usr/pluto/orbiter/orbiter_bg /var/www/lmce-admin/orbiter_bg
 
-mkdir -p /var/www/pluto-admin/security_images
-chmod -R 777 /var/www/pluto-admin/security_images
+mkdir -p /var/www/lmce-admin/security_images
+chmod -R 777 /var/www/lmce-admin/security_images
 
-chmod 777 /var/www/pluto-admin/cached
+chmod 777 /var/www/lmce-admin/cached
 touch /etc/pluto-callerid.conf
 chmod 777 /etc/pluto-callerid.conf
 
@@ -55,9 +55,9 @@ chown www-data.www-data /var/log/pluto/webExecLog.log
 
 mkdir -p /home/coverartscan
 chown www-data.www-data /home/coverartscan
-ln -snf /home/coverartscan /var/www/pluto-admin/coverartscan || :
+ln -snf /home/coverartscan /var/www/lmce-admin/coverartscan || :
 
-mv /var/www/pluto-admin/grabcoverart.sh /usr/pluto/bin || /bin/true
+mv /var/www/lmce-admin/grabcoverart.sh /usr/pluto/bin || /bin/true
 
 # enable rewrite module
 a2enmod rewrite || /bin/true
@@ -94,7 +94,7 @@ NameVirtualHost *
 		allow from all
 		# This directive allows us to have apache2's default start page
                 # in /apache2-default/, but still have / go to the right place
-		RedirectMatch ^/$ /pluto-admin/
+		RedirectMatch ^/$ /lmce-admin/
 	</Directory>
 
 	ScriptAlias /cgi-bin/ /usr/lib/cgi-bin/

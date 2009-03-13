@@ -31,11 +31,11 @@ case "$1" in
   		maxfiles=$(RunSQL "SELECT PK_File AS Filename FROM File LEFT JOIN Picture_File ON Picture_File.FK_File=PK_File LEFT JOIN CoverArtScan ON CoverArtScan.FK_File=PK_File WHERE EK_MediaType IN (3,4,5,27,28) AND (Scanned IS NULL OR Scanned=0) AND Missing = 0 AND IsDirectory=0 GROUP BY PK_File HAVING count(FK_Picture)=0 ;" | wc -w)
 	
 		while [ $startid -lt $maxfiles ]; do
-			lynx -dump -width=300 "http://$webhost/pluto-admin/genwget.php?from=$startid&range=$range" > $wgetlist
+			lynx -dump -width=300 "http://$webhost/lmce-admin/genwget.php?from=$startid&range=$range" > $wgetlist
 			
 			cat $wgetlist | 
 			while read line ;do
-				wget "http://$webhost/pluto-admin/$line" --header="User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.0.4) Gecko/20060508 Firefox/1.5.0.4" -O -
+				wget "http://$webhost/lmce-admin/$line" --header="User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.0.4) Gecko/20060508 Firefox/1.5.0.4" -O -
 				sleep 2
 			done
 			

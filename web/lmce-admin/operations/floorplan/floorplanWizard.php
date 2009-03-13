@@ -10,7 +10,7 @@ function floorplanWizard($output,$dbADO) {
 	$page=(isset($_REQUEST['page']))?$_REQUEST['page']:1;
 	$type=(isset($_REQUEST['type']))?$_REQUEST['type']:1;
 	$action = isset($_REQUEST['action'])?cleanString($_REQUEST['action']):'form';
-	$path=$_SERVER['DOCUMENT_ROOT'].'/pluto-admin/floorplans/inst'.$installationID;
+	$path=$_SERVER['DOCUMENT_ROOT'].'/lmce-admin/floorplans/inst'.$installationID;
 	$floorPlanImage='include/images/image_not_found.gif';
 	$maxWidth=400;
 	$maxHeight=400;

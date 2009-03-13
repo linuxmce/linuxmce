@@ -103,7 +103,7 @@ function proxySocket($output,$dbADO){
 		}
 		$XML=getXML($deviceID,$dbADO,$socket);
 		web_socket_close($socket);
-		$refreshURL="http://".$_SERVER['SERVER_ADDR']."/pluto-admin/index.php?section=proxySocket&address=$address&port=$port&command=XML&deviceID=$deviceID";
+		$refreshURL="http://".$_SERVER['SERVER_ADDR']."/lmce-admin/index.php?section=proxySocket&address=$address&port=$port&command=XML&deviceID=$deviceID";
 		
 		//Header("Refresh: 5; url=$refreshURL");
 		Header("Content-type: text/xml"); 
@@ -257,15 +257,15 @@ function xml_die($deviceID,$address,$port,$command,$message,$userFriendlyMessage
 	<Prompt>'.substr($xmlMessage,0,31).'</Prompt>
 	<LocationX>0</LocationX>
 	<LocationY>0</LocationY>
-	<URL>http://'.$GLOBALS['coreIP'].'/pluto-admin/security_images/generic_xml_error.png</URL>
+	<URL>http://'.$GLOBALS['coreIP'].'/lmce-admin/security_images/generic_xml_error.png</URL>
 	<MenuItem>
 		<Name>Button</Name>
-			<URL>http://'.$GLOBALS['coreIP'].'/pluto-admin/security_images/generic_xml_error.png</URL>
+			<URL>http://'.$GLOBALS['coreIP'].'/lmce-admin/security_images/generic_xml_error.png</URL>
 		<TouchArea X1="0" Y1="0" X2="0" Y2="0"/>
 	</MenuItem>	
 </CiscoIPPhoneGraphicFileMenu>';
 
-	$refreshURL="http://".$_SERVER['SERVER_ADDR']."/pluto-admin/index.php?section=proxySocket&address=$address&port=$port&command=$command&deviceID=$deviceID";
+	$refreshURL="http://".$_SERVER['SERVER_ADDR']."/lmce-admin/index.php?section=proxySocket&address=$address&port=$port&command=$command&deviceID=$deviceID";
 	Header("Refresh: 5; url=$refreshURL");
 	//writeFile(getcwd().'/security_images/urls.txt',$refreshURL."\n\n",'a+');
 	Header("Content-type: text/xml"); 

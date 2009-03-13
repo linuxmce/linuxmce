@@ -290,7 +290,7 @@ function displayScreens($dbADO)
 					$count++;
 					$msg.=$count.'. <a href="check.wml?opt=1&amp;cgid='.$scenarioID['PK_CommandGroup'].extraLinks().'">'.$scenarioID['Description'].'</a><br/>';
 				}
-			}
+			}http://www.instant-web-site-tools.com/html-redirect.html
 			break;
 		case 2:
 			if(isset($_REQUEST['mode'])){
@@ -331,12 +331,12 @@ function displayScreens($dbADO)
 				$securityDevicePlugin=getFieldsAsArray('Device','PK_Device',$dbADO,'WHERE FK_DeviceTemplate='.$GLOBALS['SecurityPlugin'].' AND FK_Installation='.$installationID);
 				$securityPluginDD=getFieldsAsArray('Device_DeviceData','IK_DeviceData',$dbADO,'WHERE FK_Device='.(int)@$securityDevicePlugin['PK_Device'][0].' AND FK_DeviceData='.$GLOBALS['Path']);
 				
-				$cmd='/usr/pluto/bin/MessageSend localhost -targetType device -o -p "/var/www/pluto-admin/security_images" 0 '.$_REQUEST['cameraid'].' 1 84 19 0 20 "jpg" 23 0 31 0 60 100 61 100';
+				$cmd='/usr/pluto/bin/MessageSend localhost -targetType device -o -p "/var/www/lmce-admin/security_images" 0 '.$_REQUEST['cameraid'].' 1 84 19 0 20 "jpg" 23 0 31 0 60 100 61 100';
 				exec($cmd,$retArray);
 				$msg='Camera screenshot not available.';
 				foreach ($retArray as $line) {
 					if(!ereg(':OK',$line)){
-						exec('mv /var/www/pluto-admin/security_images/19.out /var/www/pluto-admin/security_images/'.$cameraid.'.jpg',$retArray,$retCode);
+						exec('mv /var/www/pluto-admin/security_images/19.out /var/www/lmce-admin/security_images/'.$cameraid.'.jpg',$retArray,$retCode);
 						$msg='<img src="security_images/'.$cameraid.'.jpg" alt="Loading ..."/>';
 					}
 				}

@@ -731,7 +731,7 @@ $manualyConfigureArray=array(
 				
 				// set simlink for security plugin path	
 				if($elem==$GLOBALS['Path'] && $DeviceTemplate==$GLOBALS['SecurityPlugin']){
-					exec('sudo -u root /usr/pluto/bin/SetWebLinks.sh \''.$value.'\' \'/var/www/pluto-admin/security_images\'',$retArray);
+					exec('sudo -u root /usr/pluto/bin/SetWebLinks.sh \''.$value.'\' \'/var/www/lmce-admin/security_images\'',$retArray);
 					$error=@join('',$retArray);
 				}
 			}

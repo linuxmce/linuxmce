@@ -5,22 +5,22 @@
   	$_SESSION['skin']=0;
   	
   	error_reporting(E_ALL ^ E_NOTICE);
-  	$GLOBALS['globalConfigPath']='/var/www/pluto-admin/include/config/';
-  	$GLOBALS['floorplansPath']='/var/www/pluto-admin/floorplans';
-  	$GLOBALS['usersPicsPath']='/var/www/pluto-admin/users/';
-  	$GLOBALS['roomsPicsPath']='/var/www/pluto-admin/rooms/';
-  	$GLOBALS['scenariosPicsPath']='/var/www/pluto-admin/scenarios/';
+  	$GLOBALS['globalConfigPath']='/var/www/lmce-admin/include/config/';
+  	$GLOBALS['floorplansPath']='/var/www/lmce-admin/floorplans';
+  	$GLOBALS['usersPicsPath']='/var/www/lmce-admin/users/';
+  	$GLOBALS['roomsPicsPath']='/var/www/lmce-admin/rooms/';
+  	$GLOBALS['scenariosPicsPath']='/var/www/lmce-admin/scenarios/';
   	$GLOBALS['pluto.conf']='/etc/pluto.conf';
   	$GLOBALS['wap.conf']='/etc/wap.conf';
   	$GLOBALS['pluto_callerid.conf']='/etc/pluto-callerid.conf';
-  	$GLOBALS['ErrorLog']='/var/log/pluto/pluto-admin.log';
+  	$GLOBALS['ErrorLog']='/var/log/pluto/lmce-admin.log';
   	$GLOBALS['databasesArray']=array('pluto_main_devel'=>'pluto_main','pluto_myth_devel'=>'pluto_myth');
 
   	// display loading time at the bottom of the page
   	$GLOBALS['display_loading_time']=0;
 
   	// set it to path with write permission to enable loading time logging orr leave blank to disable
-  	$GLOBALS['save_loading_time']='/var/www/pluto-admin/cached/';
+  	$GLOBALS['save_loading_time']='/var/www/lmce-admin/cached/';
 
   	// log file for external calls
   	$GLOBALS['WebExecLogFile']='/var/log/pluto/webExecLog.log';
@@ -40,12 +40,12 @@
   	
 	$GLOBALS['sendErrorsTo']='support@plutohome.com';
 	
-	$directory="/pluto-admin/";
+	$directory="/lmce-admin/";
 	$domain="http://localhost";
 	
 	// path where the media pics and orbiter backgrounds are uploaded
-	$GLOBALS['mediaPicsPath']=$_SERVER['DOCUMENT_ROOT'].'/pluto-admin/mediapics/';
-	$GLOBALS['orbiterBackgroundPath']=$_SERVER['DOCUMENT_ROOT'].'/pluto-admin/orbiter_bg/';
+	$GLOBALS['mediaPicsPath']=$_SERVER['DOCUMENT_ROOT'].'/lmce-admin/mediapics/';
+	$GLOBALS['orbiterBackgroundPath']=$_SERVER['DOCUMENT_ROOT'].'/lmce-admin/orbiter_bg/';
 	
 	
 	define("VERSION","0.1");

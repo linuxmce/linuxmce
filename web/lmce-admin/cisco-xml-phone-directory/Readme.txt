@@ -17,9 +17,9 @@ Nice and simple.
 
 == Installing this Patch ==
 
-* Unpack the files to the pluto-admin directory. (/var/www/pluto-admin/)
+* Unpack the files to the lmce-admin directory. (/var/www/pluto-admin/)
 * edit the file /tftpboot/SEPDefault7970.cnf.xml (it just needs to be the default xml for your cisco phone, adjust as needed.)
-** Find the <directoryURL></directoryURL> tags, and place '''http://192.168.80.1/pluto-admin/directory.php''' between them.
+** Find the <directoryURL></directoryURL> tags, and place '''http://192.168.80.1/lmce-admin/directory.php''' between them.
 * Reboot the phone by pressing the settings button, and pressing the following button sequence '''**#**'''
 
 Once the phone boots, try the directory by pressing the Directory button!

@@ -3,7 +3,7 @@ require('include/config/config.inc.php');
 require('include/utils.inc.php');
 $start_time=getmicrotime();
 
-$path='/home/users/vali/work/web/pluto-admin/languages/en/';
+$path='/home/users/jondecker76/work/web/lmce-admin/languages/en/';
 $cmd="grep -H '^\\$' $path*.php";
 
 

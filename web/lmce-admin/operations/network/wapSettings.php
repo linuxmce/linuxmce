@@ -38,7 +38,7 @@ function wapSettings($output,$dbADO) {
 	if ($action=='form') {
 		if(!isset($wapURL) || $wapURL==''){
 			$coreFields=getFieldsAsArray('Device','IPAddress',$dbADO,'INNER JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE FK_Installation='.$installationID.' AND FK_DeviceCategory='.$GLOBALS['CategoryCore']);
-			$wapURL='http://'.$coreFields['IPAddress'][0].'/pluto-admin/check.wml';
+			$wapURL='http://'.$coreFields['IPAddress'][0].'/lmce-admin/check.wml';
 		}
 
 		$out.=setLeftMenu($dbADO).'
@@ -55,7 +55,7 @@ function wapSettings($output,$dbADO) {
 $code='
 <?php
 Header( "Content-type: text/vnd.wap.wml");
-$Message=queryServer($_SERVER[\'QUERY_STRING\'],\'http://<your_core_ip_address>/pluto-admin/check.wml\');
+$Message=queryServer($_SERVER[\'QUERY_STRING\'],\'http://<your_core_ip_address>/lmce-admin/check.wml\');
 
 print $Message;
 
