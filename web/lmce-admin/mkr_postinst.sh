@@ -15,39 +15,47 @@ chown -R www-data.www-data /home/pluto/floorplans
 rm -f /var/www/lmce-admin/floorplans 2>/dev/null
 [[ -e /usr/pluto/orbiter/floorplans ]] || ln -sn /home/pluto/floorplans /usr/pluto/orbiter/floorplans
 [[ -e /var/www/lmce-admin/floorplans ]] || ln -sn /usr/pluto/orbiter/floorplans/ /var/www/lmce-admin/
+rm -f /var/www/pluto-admin/floorplans # get rid of old pluto-admin link
 
 mkdir -p /usr/pluto/orbiter/users
 chmod -R 777 /usr/pluto/orbiter/users
 chown -R www-data.www-data /usr/pluto/orbiter/users
 rm -f /var/www/lmce-admin/users
+rm -f /var/www/pluto-admin/users #get rid of old pluto-admin link
 ln -s /usr/pluto/orbiter/users/ /var/www/lmce-admin/
 
 mkdir -p /home/mediapics
 chmod -R 777 /home/mediapics
 rm -f /var/www/lmce-admin/mediapics
+rm -f /var/www/pluto-admin/mediapics #get rid of old pluto-admin link
 ln -s /home/mediapics /var/www/lmce-admin/mediapics
 
 mkdir -p /usr/pluto/orbiter/rooms
 chmod -R 777 /usr/pluto/orbiter/rooms
 rm -f /var/www/lmce-admin/rooms
+rm -f /var/www/pluto-admin/rooms #get rid of old pluto-admin link
 ln -s /usr/pluto/orbiter/rooms /var/www/lmce-admin/rooms
 
 mkdir -p /usr/pluto/orbiter/scenarios
 chmod -R 777 /usr/pluto/orbiter/scenarios
 rm -f /var/www/lmce-admin/scenarios
+rm -f /var/www/pluto-admin/scenarios #get rid of old pluto-admin link
 ln -s /usr/pluto/orbiter/scenarios /var/www/lmce-admin/scenarios
 
 mkdir -p /usr/pluto/orbiter/orbiter_bg
 chmod -R 777 /usr/pluto/orbiter/orbiter_bg
 rm -f /var/www/lmce-admin/orbiter_bg
+rm -f /var/www/pluto-admin/orbiter_bg #get rid of of old pluto-admin link
 ln -s /usr/pluto/orbiter/orbiter_bg /var/www/lmce-admin/orbiter_bg
 
 mkdir -p /var/www/lmce-admin/security_images
 chmod -R 777 /var/www/lmce-admin/security_images
+rm -f /var/www/pluto-admin/security_images #get rid of old pluto-admin directory
 
 chmod 777 /var/www/lmce-admin/cached
 touch /etc/pluto-callerid.conf
 chmod 777 /etc/pluto-callerid.conf
+rm -f /var/www/pluto-admin/cached # get rid of old pluto-admin directory
 
 mkdir -p /var/log/pluto
 touch /var/log/pluto/webExecLog.log
@@ -56,6 +64,7 @@ chown www-data.www-data /var/log/pluto/webExecLog.log
 mkdir -p /home/coverartscan
 chown www-data.www-data /home/coverartscan
 ln -snf /home/coverartscan /var/www/lmce-admin/coverartscan || :
+rm -f /var/www/pluto-admin/coverartscan
 
 mv /var/www/lmce-admin/grabcoverart.sh /usr/pluto/bin || /bin/true
 
@@ -177,5 +186,17 @@ chown www-data.root /etc/wap.conf
 chmod 664 /etc/wap.conf
 
 if ! BlacklistConfFiles "$PHP_CONFIG_FILE" ;then
-	sed -i 's/memory_limit =.*/memory_limit = 16M ;/g' $PHP_CONFIG_FILE
+	#Make php.ini backup
+	if [ ! -e "$PHP_CONFIG_FILE.pbackup" ] ;then
+		cp "$PHP_CONFIG_FILE" "$PHP_CONFIG_FILE.pbackup" || :
+	fi
+				
+	#adjust PHP memory limit
+	sed -i 's/memory_limit =.*/memory_limit = 512M ;/g' $PHP_CONFIG_FILE
+	#adjust PHP session max lifetime
+	sed -i 's/^session.gc_maxlifetime = 1440$/session.gc_maxlifetime = 144000/' $PHP_CONFIG_FILE
+	#adjust PHP max execution time
+	sed -i 's/max_execution_time =*/max_execution_time = 120 ;/g' $PHP_CONFIG_FILE
+	#adjust PHP maximum upload filesize
+	sed -i 's/upload_max_filesize =*/upload_max_filesize = 16M ;/g' $PHP_CONFIG_FILE
 fi
