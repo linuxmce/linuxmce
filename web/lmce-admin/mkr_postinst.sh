@@ -50,12 +50,12 @@ ln -s /usr/pluto/orbiter/orbiter_bg /var/www/lmce-admin/orbiter_bg
 
 mkdir -p /var/www/lmce-admin/security_images
 chmod -R 777 /var/www/lmce-admin/security_images
-rm -f /var/www/pluto-admin/security_images #get rid of old pluto-admin directory
+rm -rf /var/www/pluto-admin/security_images #get rid of old pluto-admin directory
 
 chmod 777 /var/www/lmce-admin/cached
 touch /etc/pluto-callerid.conf
 chmod 777 /etc/pluto-callerid.conf
-rm -f /var/www/pluto-admin/cached # get rid of old pluto-admin directory
+rm -rf /var/www/pluto-admin/cached # get rid of old pluto-admin directory
 
 mkdir -p /var/log/pluto
 touch /var/log/pluto/webExecLog.log
