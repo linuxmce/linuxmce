@@ -41,7 +41,6 @@ LMCE_Launch_Manager::LMCE_Launch_Manager(Command_Impl *pPrimaryDeviceCommand, De
 	: LMCE_Launch_Manager_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
 //<-dceag-const2-e->
 {
-
 }
 
 //<-dceag-dest-b->
@@ -196,56 +195,5 @@ void LMCE_Launch_Manager::SomeFunction()
 	COMMANDS TO IMPLEMENT
 
 */
-string LMCE_Launch_Manager::MainMenu() {
-	cout << "*********************************" << endl
-	<< "LinxuMCE Launch Manager" << endl
-	<< "*********************************" << endl
-	<< "Core status: " <<endl
-	<< "Media Station Status: " << endl
-	<< "Remote Assistance: " << endl
-	<< "IP Address: " << endl
-	<< "*********************************" << endl << endl
-	<< "1) Regen this orbiter" << endl
-	<< "2) Regen All Orbiters" << endl
-	<< "3) Reload Router" << endl
-	<< "4) Toggle Remote Assistance" << endl;
 
-	string s;
-	cin >> s;
 
-	switch (s) {
-	case "1":
-		//Regen this orbiter
-		return "regen";
-		break;
-	case "2":
-		//Regen All Orbiters
-		return "regen_all";
-		break;
-	case "3":
-		//Reload Router
-		return "reload";
-		break;
-	case "4":
-		//Toggle Remote Assistance
-		return "toggle_RA";
-		break;
-	case "x":
-		//exit
-		return "exit";
-		break;
-	default:
-		//Unrecognized choice!	
-	return "";
-
-	}
-
-}
-
-void LMCE_Launch_Manager::Run(){
-	while(MainMenu()!="exit"){
-		//process menu selections
-	}
-	//Exit command has been chosen. Lets shut down....
-
-}

@@ -32,7 +32,6 @@ namespace DCE
 
 		// Private methods
 public:
-		string MainMenu();
 		// Public member variables
 
 //<-dceag-const-b->
