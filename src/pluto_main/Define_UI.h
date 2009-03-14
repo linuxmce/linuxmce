@@ -5,6 +5,7 @@
 #define UI_PDA_4_3_vertical_style_CONST 2
 #define UI_Symbian_Series_60_Phone_CONST 3
 #define UI_V2_Normal_Horizontal_16_9_CONST 4
+#define UI_Normal_Horizontal_16_9_CONST 5
 
 #define UI_TABLE "UI"
 #define UI_PK_UI_FIELD "PK_UI"
