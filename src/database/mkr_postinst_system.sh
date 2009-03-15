@@ -1,7 +1,10 @@
 echo 
 . /usr/pluto/bin/Config_Ops.sh || :
 /usr/pluto/bin/Debug_LogKernelModules.sh "$0" || :
-if [ install = "$1" ]; then
+PROCESS="upgrade"
+# Check if we have an existing install, by verifying the DeviceTemplate table exists
+mysql $MYSQL_DB_CRED $MySqlDBName -e "Select * From DeviceTemplate Limit 0,1"||PROCESS="install"
+if [ $PROCESS = "install" ]; then
 	echo 
 	echo Setting up system database.
 	echo ****This may take a long time****
@@ -33,8 +36,12 @@ if [ install = "$1" ]; then
 	Q="FLUSH PRIVILEGES;"
 	mysql $MYSQL_DB_CRED -e "$Q"
 fi
-if [ upgrade = "$1" ]; then
-	/usr/pluto/bin/sqlCVS $PLUTO_DB_CRED -n -D $MySqlDBName -r constants,dce,designer,document,ir,website update || exit $?
+if [ $PROCESS = "upgrade" ]; then
+	echo
+	echo Updating system database using sqlCVS
+	echo Please be patient...
+	## FIXME - schema.linuxmce.org is hard coded
+	/usr/pluto/bin/sqlCVS -R 3999 -H schema.linuxmce.org $PLUTO_DB_CRED -n -d anonymous -U anonymous~nopass -D $MySqlDBName -r constants,dce,designer,document,ir,website -A -e update || exit $?
 fi
 # update quick start icons
 /bin/bash /usr/pluto/bin/UpdateQuickStartIcons.sh || /bin/true
