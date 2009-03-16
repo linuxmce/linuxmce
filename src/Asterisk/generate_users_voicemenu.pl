@@ -28,7 +28,7 @@ $list = "";
 $list .= "/var/lib/asterisk/sounds/pluto/pluto-default-voicemenu1.gsm ";
 $list .= "/var/lib/asterisk/sounds/pluto/pluto-default-voicemenu2.gsm ";
 
-$DB_SQL = "select if(Nickname="",UserName,Nickname) AS Name, Extension from Users where `Extension` like '30%' and HasMailbox = 1";
+$DB_SQL = "select if(Nickname=\"\",UserName,Nickname) AS Name, Extension from Users where `Extension` like '30%' and HasMailbox = 1";
 $DB_STATEMENT = $DB_PL_HANDLE->prepare($DB_SQL) or die "Couldn't prepare query '$DB_SQL': $DBI::errstr\n";
 $DB_STATEMENT->execute() or die "Couldn't execute query '$DB_SQL': $DBI::errstr\n";
 while(my $DB_ROW = $DB_STATEMENT->fetchrow_hashref())
@@ -99,7 +99,7 @@ sub generate_voice_festival()
 	$DB_SQL = "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_DeviceData=283 LIMIT 1";
 	$DB_STATEMENT = $DB_PL_HANDLE->prepare($DB_SQL) or die "Couldn't prepare query '$DB_SQL': $DBI::errstr\n";
 	$DB_STATEMENT->execute() or die "Couldn't execute query '$DB_SQL': $DBI::errstr\n";
-	my $DB_ROW = $DB_STATEMENT->fetchrow_hashref()
+	my $DB_ROW = $DB_STATEMENT->fetchrow_hashref();
 	my $defaultVoice=$DB_ROW->{'IK_DeviceData'};
 	$DB_STATEMENT->finish();
 
@@ -108,7 +108,9 @@ sub generate_voice_festival()
 	print TF "$TEXT\n";
 	close TF;
 	#Create the wave file
-	open F,"|text2wave /tmp/festival.txt -o /tmp/festival.wav -eval\"(".$defaultVoice.")\"";
+	my $cmd = "text2wave /tmp/festival.txt -o /tmp/festival.wav -eval\(\"$defaultVoice\"\)";
+	print "Hello $cmd";
+	open F,"|$cmd";
 	close F;
 	#resample and create permanent file
 	`/usr/bin/sox /tmp/festival.wav -r 8000 -c 1 $FILE resample -ql`;
