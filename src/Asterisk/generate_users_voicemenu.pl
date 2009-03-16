@@ -9,24 +9,26 @@ my $DB_PL_HANDLE;
 my $DB_STATEMENT;
 my $DB_SQL;
 
-#'Thank you for calling. To call everybody in the house press 0, to call George press 1, to call Mary press 2, to leave a message press #.';
-
-my $list = "";
-#&generate_voice("Thank you for calling.","/tmp/pluto-default-voicemenu1.gsm");
-#$list .= "/tmp/pluto-default-voicemenu1.gsm ";
-#&generate_voice("To call everybody in the house press 0.","/tmp/pluto-default-voicemenu2.gsm");
-#$list .= "/tmp/pluto-default-voicemenu2.gsm ";
-#&generate_voice("If you know the extension dial it now.","/tmp/pluto-default-voicemenu3.gsm");
-#$list .= "/tmp/pluto-default-voicemenu3.gsm ";
-#&generate_voice("To leave a message press #.","/tmp/pluto-default-voicemenu4.gsm");
-#$list .= "/tmp/pluto-default-voicemenu4.gsm ";
-#`/usr/bin/sox $list /tmp/pluto-default-voicemenu.gsm`;
-
 $DB_PL_HANDLE = DBI->connect(&read_pluto_cred()) or die "Can't connect to database: $DBI::errstr\n";
 
-$list = "";
-$list .= "/var/lib/asterisk/sounds/pluto/pluto-default-voicemenu1.gsm ";
-$list .= "/var/lib/asterisk/sounds/pluto/pluto-default-voicemenu2.gsm ";
+#Lets generate the IVR menu voice. See below example:
+#'Thank you for calling. To call everybody in the house, press 0. To call George, press 1. To call Mary, press 2. To leave a message, press #.';
+print "Generating speech for IVR Main Menu.\n";
+my $list = "";
+&generate_voice("Thank you for calling.","/tmp/pluto-default-voicemenu1.gsm");
+$list .= "/tmp/pluto-default-voicemenu1.gsm ";
+&generate_voice("If you know the extension of the person you wish to call, you may enter it at any time.","/tmp/pluto-default-voicemenu2.gsm");
+$list .= "/tmp/pluto-default-voicemenu2.gsm ";
+&generate_voice("To call everybody in the house, dial 0.","/tmp/pluto-default-voicemenu3.gsm");
+$list .= "/tmp/pluto-default-voicemenu3.gsm ";
+&generate_voice("To leave a message, please press the pound sign.","/tmp/pluto-default-voicemenu4.gsm");
+#$list .= "/tmp/pluto-default-voicemenu4.gsm "; #we will add this to the list last, after all user options are generated.
+#`/usr/bin/sox $list /tmp/pluto-default-voicemenu.gsm`;
+
+
+#$list = "";
+#$list .= "/var/lib/asterisk/sounds/pluto/pluto-default-voicemenu1.gsm ";
+#$list .= "/var/lib/asterisk/sounds/pluto/pluto-default-voicemenu2.gsm ";
 
 $DB_SQL = "select if(Nickname=\"\",UserName,Nickname) AS Name, Extension from Users where `Extension` like '30%' and HasMailbox = 1";
 $DB_STATEMENT = $DB_PL_HANDLE->prepare($DB_SQL) or die "Couldn't prepare query '$DB_SQL': $DBI::errstr\n";
@@ -35,20 +37,25 @@ while(my $DB_ROW = $DB_STATEMENT->fetchrow_hashref())
 {
     my $i=$1 if($DB_ROW->{'Extension'} =~ /(\d)$/);
 	my $j=$DB_ROW->{'Extension'};
-    print "Generating text for ".$DB_ROW->{'Name'}." extension: $j\n";
-    &generate_voice("To call ".$DB_ROW->{'Name'}." dial ".$i.".","/tmp/pluto-default-voicemenu3-$i.gsm");
+    print "Generating speech for ".$DB_ROW->{'Name'}." extension: $j\n";
+    &generate_voice("To call ".$DB_ROW->{'Name'}.", dial ".$i.".","/tmp/pluto-default-voicemenu3-$i.gsm");
     $list .= "/tmp/pluto-default-voicemenu3-$i.gsm ";
 	`/bin/mkdir -p /var/spool/asterisk/voicemail/default/$j/INBOX/Old`;
     &generate_voice($DB_ROW->{'Name'},"/var/spool/asterisk/voicemail/default/$j/greet.gsm");
 }
 $DB_STATEMENT->finish();
 
-$list .= "/var/lib/asterisk/sounds/pluto/pluto-default-voicemenu4.gsm ";
+$list .= "/tmp/pluto-default-voicemenu4.gsm";
 `/usr/bin/sox $list /var/lib/asterisk/sounds/pluto/pluto-default-voicemenu.gsm`;
 
 `/bin/chown -R asterisk:www-data /var/spool/asterisk/voicemail/*`;
 `/bin/chmod 770 -R /var/spool/asterisk/voicemail/*`;
 
+#clean up
+unlink "/tmp/pluto-default-voicemenu1.gsm";
+unlink "/tmp/pluto-default-voicemenu2.gsm";
+unlink "/tmp/pluto-default-voicemenu3.gsm";
+unlink "/tmp/pluto-default-voicemenu4.gsm";
 sub generate_voice()
 {
 	&generate_voice_festival(@_);
@@ -95,7 +102,8 @@ sub generate_voice_festival()
 {
 	my $TEXT = shift;
 	my $FILE = shift;
-	my $DB_PL_HANDLE2;
+	my $DB_PL_HANDLE2;$DB_PL_HANDLE = DBI->connect(&read_pluto_cred()) or die "Can't connect to database: $DBI::errstr\n";
+
 	my $DB_STATEMENT2;
 	my $DB_SQL2;
 
