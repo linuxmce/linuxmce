@@ -1,0 +1,16 @@
+Begin3
+Title:          lmce_launch_manager -- Some description
+Version:        0.1
+Entered-date:   
+Description:    
+Keywords:       KDE Qt
+Author:         Paul Webber <webpaul01@gmail.com>
+Maintained-by:  Paul Webber <webpaul01@gmail.com>
+Home-page:      
+Alternate-site: 
+Primary-site:   ftp://ftp.kde.org/pub/kde/unstable/apps/utils
+                xxxxxx  lmce_launch_manager-0.1.tar.gz
+                xxx     lmce_launch_manager-0.1.lsm
+Platform:       Linux. Needs KDE
+Copying-policy: Custom
+End

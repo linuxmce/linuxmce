@@ -22,7 +22,7 @@
 #include "Gen_Devices/Launch_ManagerBase.h"
 //<-dceag-d-e->
 
-
+class lmce_launch_managerWidget;
 
 //<-dceag-decl-b->
 namespace DCE
@@ -33,9 +33,9 @@ namespace DCE
 		// Private member variables
 
 		// Private methods
-
+public:
 		// Public member variables
-
+	lmce_launch_managerWidget *lmWidget;
 
 //<-dceag-const-b->
 public:
@@ -47,7 +47,7 @@ public:
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
-
+		virtual void CreateNewChildren();
 
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router

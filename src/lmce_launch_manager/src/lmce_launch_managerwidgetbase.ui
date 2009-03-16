@@ -1,0 +1,1499 @@
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
+<class>lmce_launch_managerWidgetBase</class>
+<widget class="QWidget">
+    <property name="name">
+        <cstring>lmce_launch_managerwidgetbase</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>614</width>
+            <height>400</height>
+        </rect>
+    </property>
+    <property name="minimumSize">
+        <size>
+            <width>600</width>
+            <height>400</height>
+        </size>
+    </property>
+    <property name="font">
+        <font>
+            <family>Sans Serif</family>
+            <pointsize>9</pointsize>
+        </font>
+    </property>
+    <property name="caption">
+        <string>LMCE Launch Manager</string>
+    </property>
+    <widget class="QListView">
+        <column>
+            <property name="text">
+                <string>Date</string>
+            </property>
+            <property name="clickable">
+                <bool>true</bool>
+            </property>
+            <property name="resizable">
+                <bool>false</bool>
+            </property>
+        </column>
+        <column>
+            <property name="text">
+                <string>Message</string>
+            </property>
+            <property name="clickable">
+                <bool>true</bool>
+            </property>
+            <property name="resizable">
+                <bool>true</bool>
+            </property>
+        </column>
+        <property name="name">
+            <cstring>lbMessages</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>10</x>
+                <y>300</y>
+                <width>590</width>
+                <height>90</height>
+            </rect>
+        </property>
+        <property name="allColumnsShowFocus">
+            <bool>true</bool>
+        </property>
+        <property name="resizeMode">
+            <enum>LastColumn</enum>
+        </property>
+    </widget>
+    <widget class="QTabWidget">
+        <property name="name">
+            <cstring>twAllTabs</cstring>
+        </property>
+        <property name="enabled">
+            <bool>true</bool>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>11</x>
+                <y>4</y>
+                <width>590</width>
+                <height>290</height>
+            </rect>
+        </property>
+        <property name="font">
+            <font>
+            </font>
+        </property>
+        <widget class="QWidget">
+            <property name="name">
+                <cstring>tab</cstring>
+            </property>
+            <attribute name="title">
+                <string>Start</string>
+            </attribute>
+            <widget class="QGroupBox">
+                <property name="name">
+                    <cstring>groupBox2</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>3</y>
+                        <width>200</width>
+                        <height>160</height>
+                    </rect>
+                </property>
+                <property name="title">
+                    <string>LMCE control</string>
+                </property>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>btnSwitchCoreAndMedia</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>20</y>
+                            <width>180</width>
+                            <height>23</height>
+                        </rect>
+                    </property>
+                    <property name="paletteForegroundColor">
+                        <color>
+                            <red>0</red>
+                            <green>170</green>
+                            <blue>0</blue>
+                        </color>
+                    </property>
+                    <property name="font">
+                        <font>
+                            <bold>1</bold>
+                        </font>
+                    </property>
+                    <property name="text">
+                        <string>&amp;Start Linux MCE</string>
+                    </property>
+                    <property name="accel">
+                        <string>Alt+S</string>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>btnActivateOrbiter</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>60</y>
+                            <width>180</width>
+                            <height>24</height>
+                        </rect>
+                    </property>
+                    <property name="paletteForegroundColor">
+                        <color>
+                            <red>0</red>
+                            <green>177</green>
+                            <blue>0</blue>
+                        </color>
+                    </property>
+                    <property name="font">
+                        <font>
+                            <bold>1</bold>
+                        </font>
+                    </property>
+                    <property name="text">
+                        <string>&amp;Activate Orbiter</string>
+                    </property>
+                    <property name="accel">
+                        <string>Alt+A</string>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>btnSwitchCore</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>90</y>
+                            <width>180</width>
+                            <height>20</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>Start &amp;Core only</string>
+                    </property>
+                    <property name="accel">
+                        <string>Alt+C</string>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>btnSwitchMedia</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>115</y>
+                            <width>180</width>
+                            <height>20</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>Start &amp;Media Station</string>
+                    </property>
+                    <property name="accel">
+                        <string>Alt+M</string>
+                    </property>
+                </widget>
+            </widget>
+            <widget class="QGroupBox">
+                <property name="name">
+                    <cstring>groupBox3</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>220</x>
+                        <y>2</y>
+                        <width>200</width>
+                        <height>160</height>
+                    </rect>
+                </property>
+                <property name="title">
+                    <string>Common tasks</string>
+                </property>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>btnOpenAdminSite</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>20</y>
+                            <width>180</width>
+                            <height>20</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>&amp;Open admin website</string>
+                    </property>
+                    <property name="accel">
+                        <string>Alt+O</string>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>btnRegenThisOrbiter</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>43</y>
+                            <width>180</width>
+                            <height>20</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>R&amp;egen this Orbiter</string>
+                    </property>
+                    <property name="accel">
+                        <string>Alt+E</string>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>btnRegenAllOrbiters</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>66</y>
+                            <width>180</width>
+                            <height>20</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>Re&amp;gen all Orbiters</string>
+                    </property>
+                    <property name="accel">
+                        <string>Alt+G</string>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>btnReloadRouter</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>89</y>
+                            <width>180</width>
+                            <height>20</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>Re&amp;load router</string>
+                    </property>
+                    <property name="accel">
+                        <string>Alt+L</string>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>btn_ViewIP</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>135</y>
+                            <width>180</width>
+                            <height>20</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>View IP Address</string>
+                    </property>
+                    <property name="accel">
+                        <string></string>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>btn_SwitchRA</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>112</y>
+                            <width>180</width>
+                            <height>20</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>Enable Remote Assistance</string>
+                    </property>
+                    <property name="accel">
+                        <string></string>
+                    </property>
+                </widget>
+            </widget>
+            <widget class="QGroupBox">
+                <property name="name">
+                    <cstring>groupBox4</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>430</x>
+                        <y>2</y>
+                        <width>150</width>
+                        <height>160</height>
+                    </rect>
+                </property>
+                <property name="title">
+                    <string>Autostart settings</string>
+                </property>
+                <widget class="QCheckBox">
+                    <property name="name">
+                        <cstring>cbAutostartMedia</cstring>
+                    </property>
+                    <property name="enabled">
+                        <bool>true</bool>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>85</y>
+                            <width>110</width>
+                            <height>40</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>Autostart 
+Me&amp;dia Station</string>
+                    </property>
+                    <property name="accel">
+                        <string>Alt+D</string>
+                    </property>
+                </widget>
+                <widget class="QLabel">
+                    <property name="name">
+                        <cstring>textLabel1_3</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>20</x>
+                            <y>20</y>
+                            <width>120</width>
+                            <height>20</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>When LM starts:</string>
+                    </property>
+                </widget>
+                <widget class="QCheckBox">
+                    <property name="name">
+                        <cstring>cbAutostartCore</cstring>
+                    </property>
+                    <property name="enabled">
+                        <bool>true</bool>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>43</y>
+                            <width>110</width>
+                            <height>40</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>A&amp;utostart 
+Core</string>
+                    </property>
+                    <property name="accel">
+                        <string>Alt+U</string>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>saveBootupSettings</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>16</x>
+                            <y>130</y>
+                            <width>120</width>
+                            <height>24</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>sa&amp;ve settings</string>
+                    </property>
+                    <property name="accel">
+                        <string>Alt+V</string>
+                    </property>
+                </widget>
+            </widget>
+            <widget class="QProgressBar">
+                <property name="name">
+                    <cstring>pbProgress</cstring>
+                </property>
+                <property name="enabled">
+                    <bool>true</bool>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>170</y>
+                        <width>570</width>
+                        <height>23</height>
+                    </rect>
+                </property>
+                <property name="progress">
+                    <number>0</number>
+                </property>
+                <property name="percentageVisible">
+                    <bool>true</bool>
+                </property>
+            </widget>
+            <widget class="QLabel">
+                <property name="name">
+                    <cstring>tlCoreStatus</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>120</x>
+                        <y>196</y>
+                        <width>160</width>
+                        <height>20</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>not running</string>
+                </property>
+            </widget>
+            <widget class="QLabel">
+                <property name="name">
+                    <cstring>textLabel2</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>217</y>
+                        <width>160</width>
+                        <height>20</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>Media Station status:</string>
+                </property>
+            </widget>
+            <widget class="QLabel">
+                <property name="name">
+                    <cstring>textLabel1</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>196</y>
+                        <width>100</width>
+                        <height>20</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>Core status:</string>
+                </property>
+            </widget>
+            <widget class="QLabel">
+                <property name="name">
+                    <cstring>textLabel1_4</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>238</y>
+                        <width>150</width>
+                        <height>20</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>Remote Assisstance:</string>
+                </property>
+            </widget>
+            <widget class="QLabel">
+                <property name="name">
+                    <cstring>tlMediaStatus</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>170</x>
+                        <y>218</y>
+                        <width>110</width>
+                        <height>20</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>not running</string>
+                </property>
+            </widget>
+            <widget class="QLabel">
+                <property name="name">
+                    <cstring>tlRAStatus</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>170</x>
+                        <y>238</y>
+                        <width>410</width>
+                        <height>20</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>disabled</string>
+                </property>
+            </widget>
+            <widget class="QLabel">
+                <property name="name">
+                    <cstring>tlStatusMessages</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>300</x>
+                        <y>200</y>
+                        <width>280</width>
+                        <height>35</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>Some Messages</string>
+                </property>
+                <property name="alignment">
+                    <set>AlignTop|AlignRight</set>
+                </property>
+            </widget>
+        </widget>
+        <widget class="QWidget">
+            <property name="name">
+                <cstring>tab</cstring>
+            </property>
+            <attribute name="title">
+                <string>Connections</string>
+            </attribute>
+            <widget class="QGroupBox">
+                <property name="name">
+                    <cstring>groupBox1</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>40</y>
+                        <width>200</width>
+                        <height>150</height>
+                    </rect>
+                </property>
+                <property name="title">
+                    <string>MySQL settings</string>
+                </property>
+                <widget class="QLabel">
+                    <property name="name">
+                        <cstring>textLabel7</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>20</y>
+                            <width>52</width>
+                            <height>20</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>IP:</string>
+                    </property>
+                </widget>
+                <widget class="QLabel">
+                    <property name="name">
+                        <cstring>textLabel8</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>50</y>
+                            <width>52</width>
+                            <height>20</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>User:</string>
+                    </property>
+                </widget>
+                <widget class="QLabel">
+                    <property name="name">
+                        <cstring>textLabel9</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>80</y>
+                            <width>52</width>
+                            <height>20</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>Password:</string>
+                    </property>
+                </widget>
+                <widget class="QLineEdit">
+                    <property name="name">
+                        <cstring>leDBIP</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>70</x>
+                            <y>20</y>
+                            <width>90</width>
+                            <height>21</height>
+                        </rect>
+                    </property>
+                </widget>
+                <widget class="QLineEdit">
+                    <property name="name">
+                        <cstring>leDBUser</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>70</x>
+                            <y>50</y>
+                            <width>90</width>
+                            <height>21</height>
+                        </rect>
+                    </property>
+                </widget>
+                <widget class="QLineEdit">
+                    <property name="name">
+                        <cstring>leDBPass</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>70</x>
+                            <y>80</y>
+                            <width>90</width>
+                            <height>21</height>
+                        </rect>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>btnTestMySQLConnection</cstring>
+                    </property>
+                    <property name="enabled">
+                        <bool>true</bool>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>50</x>
+                            <y>120</y>
+                            <width>91</width>
+                            <height>23</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>&amp;Test</string>
+                    </property>
+                    <property name="accel">
+                        <string>Alt+T</string>
+                    </property>
+                </widget>
+            </widget>
+            <widget class="QLineEdit">
+                <property name="name">
+                    <cstring>leCoreIP</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>120</x>
+                        <y>10</y>
+                        <width>90</width>
+                        <height>21</height>
+                    </rect>
+                </property>
+            </widget>
+            <widget class="QLabel">
+                <property name="name">
+                    <cstring>textLabel6</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>20</x>
+                        <y>10</y>
+                        <width>80</width>
+                        <height>20</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>Core's IP:</string>
+                </property>
+            </widget>
+            <widget class="QPushButton">
+                <property name="name">
+                    <cstring>btnSaveConnectionsSettings</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>210</y>
+                        <width>200</width>
+                        <height>23</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>&amp;save settings</string>
+                </property>
+                <property name="accel">
+                    <string>Alt+S</string>
+                </property>
+            </widget>
+        </widget>
+        <widget class="QWidget">
+            <property name="name">
+                <cstring>TabPage</cstring>
+            </property>
+            <attribute name="title">
+                <string>Video</string>
+            </attribute>
+            <widget class="QGroupBox">
+                <property name="name">
+                    <cstring>groupBox6</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>0</y>
+                        <width>570</width>
+                        <height>250</height>
+                    </rect>
+                </property>
+                <property name="title">
+                    <string>Linux MCE settings</string>
+                </property>
+                <widget class="QLabel">
+                    <property name="name">
+                        <cstring>textLabel11</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>50</y>
+                            <width>100</width>
+                            <height>20</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>Resolution:</string>
+                    </property>
+                </widget>
+                <widget class="QLineEdit">
+                    <property name="name">
+                        <cstring>leVideoResolution</cstring>
+                    </property>
+                    <property name="enabled">
+                        <bool>true</bool>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>130</x>
+                            <y>50</y>
+                            <width>106</width>
+                            <height>21</height>
+                        </rect>
+                    </property>
+                    <property name="readOnly">
+                        <bool>true</bool>
+                    </property>
+                </widget>
+                <widget class="QLineEdit">
+                    <property name="name">
+                        <cstring>leVideoDriver</cstring>
+                    </property>
+                    <property name="enabled">
+                        <bool>true</bool>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>130</x>
+                            <y>20</y>
+                            <width>106</width>
+                            <height>21</height>
+                        </rect>
+                    </property>
+                    <property name="readOnly">
+                        <bool>true</bool>
+                    </property>
+                </widget>
+                <widget class="QLabel">
+                    <property name="name">
+                        <cstring>textLabel10</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>20</y>
+                            <width>100</width>
+                            <height>20</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>Video driver:</string>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>btn_StartUIDiag</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>370</x>
+                            <y>20</y>
+                            <width>180</width>
+                            <height>24</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>&amp;Start UI diagnostics tool</string>
+                    </property>
+                    <property name="accel">
+                        <string>Alt+S</string>
+                    </property>
+                </widget>
+                <widget class="QFrame">
+                    <property name="name">
+                        <cstring>frame3_2_2</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>190</y>
+                            <width>540</width>
+                            <height>16</height>
+                        </rect>
+                    </property>
+                    <property name="frameShape">
+                        <enum>HLine</enum>
+                    </property>
+                    <property name="frameShadow">
+                        <enum>Raised</enum>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>btnChange_Resolution</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>190</x>
+                            <y>210</y>
+                            <width>190</width>
+                            <height>24</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>Change Resolution</string>
+                    </property>
+                </widget>
+            </widget>
+        </widget>
+        <widget class="QWidget">
+            <property name="name">
+                <cstring>TabPage</cstring>
+            </property>
+            <attribute name="title">
+                <string>Audio</string>
+            </attribute>
+            <widget class="QLineEdit">
+                <property name="name">
+                    <cstring>leAudioDriver</cstring>
+                </property>
+                <property name="enabled">
+                    <bool>false</bool>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>150</x>
+                        <y>10</y>
+                        <width>106</width>
+                        <height>21</height>
+                    </rect>
+                </property>
+            </widget>
+            <widget class="QComboBox">
+                <item>
+                    <property name="text">
+                        <string>manual settings</string>
+                    </property>
+                </item>
+                <item>
+                    <property name="text">
+                        <string>SPDIF Coax</string>
+                    </property>
+                </item>
+                <item>
+                    <property name="text">
+                        <string>SPDIF TosLink</string>
+                    </property>
+                </item>
+                <item>
+                    <property name="text">
+                        <string>Stereo</string>
+                    </property>
+                </item>
+                <item>
+                    <property name="text">
+                        <string>Multichannel Analog</string>
+                    </property>
+                </item>
+                <property name="name">
+                    <cstring>cmbAudioConnector</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>150</x>
+                        <y>40</y>
+                        <width>140</width>
+                        <height>21</height>
+                    </rect>
+                </property>
+            </widget>
+            <widget class="QLabel">
+                <property name="name">
+                    <cstring>textLabel13</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>10</y>
+                        <width>110</width>
+                        <height>20</height>
+                    </rect>
+                </property>
+                <property name="sizePolicy">
+                    <sizepolicy>
+                        <hsizetype>5</hsizetype>
+                        <vsizetype>5</vsizetype>
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                    </sizepolicy>
+                </property>
+                <property name="text">
+                    <string>Audio driver:</string>
+                </property>
+            </widget>
+            <widget class="QLabel">
+                <property name="name">
+                    <cstring>textLabel14</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>40</y>
+                        <width>120</width>
+                        <height>20</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>Audio connector:</string>
+                </property>
+            </widget>
+            <widget class="QCheckBox">
+                <property name="name">
+                    <cstring>cbAC3Pass</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>80</y>
+                        <width>300</width>
+                        <height>20</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>&amp;AC-3 pass through for Dolby Digital and DTS</string>
+                </property>
+                <property name="accel">
+                    <string>Alt+A</string>
+                </property>
+            </widget>
+            <widget class="QPushButton">
+                <property name="name">
+                    <cstring>btnApplyAudioSettings</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>30</x>
+                        <y>120</y>
+                        <width>210</width>
+                        <height>23</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>&amp;change audio settings</string>
+                </property>
+                <property name="accel">
+                    <string>Alt+C</string>
+                </property>
+            </widget>
+        </widget>
+        <widget class="QWidget">
+            <property name="name">
+                <cstring>TabPage</cstring>
+            </property>
+            <attribute name="title">
+                <string>Log Options</string>
+            </attribute>
+            <widget class="QListView">
+                <column>
+                    <property name="text">
+                        <string>Level</string>
+                    </property>
+                    <property name="clickable">
+                        <bool>true</bool>
+                    </property>
+                    <property name="resizable">
+                        <bool>true</bool>
+                    </property>
+                </column>
+                <property name="name">
+                    <cstring>lvLogLevels</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>10</y>
+                        <width>410</width>
+                        <height>220</height>
+                    </rect>
+                </property>
+            </widget>
+            <widget class="QPushButton">
+                <property name="name">
+                    <cstring>btnApplyLogOptions</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>430</x>
+                        <y>200</y>
+                        <width>130</width>
+                        <height>23</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>&amp;apply log options</string>
+                </property>
+                <property name="accel">
+                    <string>Alt+A</string>
+                </property>
+            </widget>
+        </widget>
+        <widget class="QWidget">
+            <property name="name">
+                <cstring>TabPage</cstring>
+            </property>
+            <attribute name="title">
+                <string>View Log</string>
+            </attribute>
+            <widget class="QPushButton">
+                <property name="name">
+                    <cstring>btnViewLog</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>12</x>
+                        <y>216</y>
+                        <width>80</width>
+                        <height>24</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>&amp;view log</string>
+                </property>
+                <property name="accel">
+                    <string>Alt+V</string>
+                </property>
+            </widget>
+            <widget class="QPushButton">
+                <property name="name">
+                    <cstring>btnTailLog</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>98</x>
+                        <y>216</y>
+                        <width>73</width>
+                        <height>24</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>&amp;tail log</string>
+                </property>
+                <property name="accel">
+                    <string>Alt+T</string>
+                </property>
+            </widget>
+            <widget class="QPushButton">
+                <property name="name">
+                    <cstring>btnRotateAllLogs</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>450</x>
+                        <y>216</y>
+                        <width>118</width>
+                        <height>24</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>&amp;rotate all logs</string>
+                </property>
+                <property name="accel">
+                    <string>Alt+R</string>
+                </property>
+            </widget>
+            <widget class="QListView">
+                <column>
+                    <property name="text">
+                        <string>File</string>
+                    </property>
+                    <property name="clickable">
+                        <bool>true</bool>
+                    </property>
+                    <property name="resizable">
+                        <bool>true</bool>
+                    </property>
+                </column>
+                <column>
+                    <property name="text">
+                        <string>Size</string>
+                    </property>
+                    <property name="clickable">
+                        <bool>true</bool>
+                    </property>
+                    <property name="resizable">
+                        <bool>true</bool>
+                    </property>
+                </column>
+                <column>
+                    <property name="text">
+                        <string>Full Path</string>
+                    </property>
+                    <property name="clickable">
+                        <bool>true</bool>
+                    </property>
+                    <property name="resizable">
+                        <bool>true</bool>
+                    </property>
+                </column>
+                <property name="name">
+                    <cstring>lvLogs</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>10</y>
+                        <width>560</width>
+                        <height>200</height>
+                    </rect>
+                </property>
+                <property name="allColumnsShowFocus">
+                    <bool>true</bool>
+                </property>
+            </widget>
+        </widget>
+        <widget class="QWidget">
+            <property name="name">
+                <cstring>TabPage</cstring>
+            </property>
+            <attribute name="title">
+                <string>Configuration Files</string>
+            </attribute>
+            <widget class="QListView">
+                <column>
+                    <property name="text">
+                        <string>Comment</string>
+                    </property>
+                    <property name="clickable">
+                        <bool>true</bool>
+                    </property>
+                    <property name="resizable">
+                        <bool>true</bool>
+                    </property>
+                </column>
+                <column>
+                    <property name="text">
+                        <string>File</string>
+                    </property>
+                    <property name="clickable">
+                        <bool>true</bool>
+                    </property>
+                    <property name="resizable">
+                        <bool>true</bool>
+                    </property>
+                </column>
+                <property name="name">
+                    <cstring>lvConfigs</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>10</y>
+                        <width>560</width>
+                        <height>190</height>
+                    </rect>
+                </property>
+                <property name="allColumnsShowFocus">
+                    <bool>true</bool>
+                </property>
+            </widget>
+            <widget class="QPushButton">
+                <property name="name">
+                    <cstring>btnEditConfigurationFile</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>200</x>
+                        <y>210</y>
+                        <width>170</width>
+                        <height>23</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>&amp;edit configuration file</string>
+                </property>
+                <property name="accel">
+                    <string>Alt+E</string>
+                </property>
+            </widget>
+        </widget>
+    </widget>
+</widget>
+<connections>
+    <connection>
+        <sender>btnViewLog</sender>
+        <signal>clicked()</signal>
+        <receiver>lmce_launch_managerwidgetbase</receiver>
+        <slot>btnViewLog_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>btnTailLog</sender>
+        <signal>clicked()</signal>
+        <receiver>lmce_launch_managerwidgetbase</receiver>
+        <slot>btnTailLog_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>btnEditConfigurationFile</sender>
+        <signal>clicked()</signal>
+        <receiver>lmce_launch_managerwidgetbase</receiver>
+        <slot>btnEditConfigurationFile_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>btnApplyLogOptions</sender>
+        <signal>clicked()</signal>
+        <receiver>lmce_launch_managerwidgetbase</receiver>
+        <slot>btnApplyLogOptions_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>btnSaveConnectionsSettings</sender>
+        <signal>clicked()</signal>
+        <receiver>lmce_launch_managerwidgetbase</receiver>
+        <slot>btnSaveConnectionsSettings_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>btnRotateAllLogs</sender>
+        <signal>clicked()</signal>
+        <receiver>lmce_launch_managerwidgetbase</receiver>
+        <slot>btnRotateAllLogs_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>lvLogs</sender>
+        <signal>currentChanged(QListViewItem*)</signal>
+        <receiver>lmce_launch_managerwidgetbase</receiver>
+        <slot>lvLogs_currentChanged(QListViewItem*)</slot>
+    </connection>
+    <connection>
+        <sender>btnOpenAdminSite</sender>
+        <signal>clicked()</signal>
+        <receiver>lmce_launch_managerwidgetbase</receiver>
+        <slot>btnOpenAdminSite_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>btnTestMySQLConnection</sender>
+        <signal>clicked()</signal>
+        <receiver>lmce_launch_managerwidgetbase</receiver>
+        <slot>btnTestMySQLConnection_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>btnSwitchCore</sender>
+        <signal>clicked()</signal>
+        <receiver>lmce_launch_managerwidgetbase</receiver>
+        <slot>btnSwitchCore_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>btnSwitchCoreAndMedia</sender>
+        <signal>clicked()</signal>
+        <receiver>lmce_launch_managerwidgetbase</receiver>
+        <slot>btnSwitchCoreAndMedia_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>btnSwitchMedia</sender>
+        <signal>clicked()</signal>
+        <receiver>lmce_launch_managerwidgetbase</receiver>
+        <slot>btnSwitchMedia_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>btnRegenThisOrbiter</sender>
+        <signal>clicked()</signal>
+        <receiver>lmce_launch_managerwidgetbase</receiver>
+        <slot>btnRegenThisOrbiter_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>btnReloadRouter</sender>
+        <signal>clicked()</signal>
+        <receiver>lmce_launch_managerwidgetbase</receiver>
+        <slot>btnReloadRouter_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>btnRegenAllOrbiters</sender>
+        <signal>clicked()</signal>
+        <receiver>lmce_launch_managerwidgetbase</receiver>
+        <slot>btnRegenAllOrbiters_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>btnApplyAudioSettings</sender>
+        <signal>clicked()</signal>
+        <receiver>lmce_launch_managerwidgetbase</receiver>
+        <slot>btnApplyAudioSettings_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>btnActivateOrbiter</sender>
+        <signal>clicked()</signal>
+        <receiver>lmce_launch_managerwidgetbase</receiver>
+        <slot>btnActivateOrbiter_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>saveBootupSettings</sender>
+        <signal>clicked()</signal>
+        <receiver>lmce_launch_managerwidgetbase</receiver>
+        <slot>saveBootupSettings_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>btn_StartUIDiag</sender>
+        <signal>clicked()</signal>
+        <receiver>lmce_launch_managerwidgetbase</receiver>
+        <slot>btn_StartUIDiag_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>twAllTabs</sender>
+        <signal>currentChanged(QWidget*)</signal>
+        <receiver>lmce_launch_managerwidgetbase</receiver>
+        <slot>twAllTabs_currentChanged(QWidget*)</slot>
+    </connection>
+    <connection>
+        <sender>btn_ViewIP</sender>
+        <signal>clicked()</signal>
+        <receiver>lmce_launch_managerwidgetbase</receiver>
+        <slot>btn_ViewIP_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>btn_SwitchRA</sender>
+        <signal>clicked()</signal>
+        <receiver>lmce_launch_managerwidgetbase</receiver>
+        <slot>btn_SwitchRA_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>btnChange_Resolution</sender>
+        <signal>clicked()</signal>
+        <receiver>lmce_launch_managerwidgetbase</receiver>
+        <slot>btnChange_Resolution_clicked()</slot>
+    </connection>
+</connections>
+<tabstops>
+    <tabstop>twAllTabs</tabstop>
+    <tabstop>btnSwitchCoreAndMedia</tabstop>
+    <tabstop>btnActivateOrbiter</tabstop>
+    <tabstop>btnSwitchCore</tabstop>
+    <tabstop>btnSwitchMedia</tabstop>
+    <tabstop>btnOpenAdminSite</tabstop>
+    <tabstop>btnRegenThisOrbiter</tabstop>
+    <tabstop>btnRegenAllOrbiters</tabstop>
+    <tabstop>btnReloadRouter</tabstop>
+    <tabstop>btn_SwitchRA</tabstop>
+    <tabstop>btn_ViewIP</tabstop>
+    <tabstop>cbAutostartCore</tabstop>
+    <tabstop>cbAutostartMedia</tabstop>
+    <tabstop>saveBootupSettings</tabstop>
+    <tabstop>leCoreIP</tabstop>
+    <tabstop>leDBIP</tabstop>
+    <tabstop>leDBUser</tabstop>
+    <tabstop>leDBPass</tabstop>
+    <tabstop>btnTestMySQLConnection</tabstop>
+    <tabstop>btnSaveConnectionsSettings</tabstop>
+    <tabstop>leVideoDriver</tabstop>
+    <tabstop>leVideoResolution</tabstop>
+    <tabstop>btn_StartUIDiag</tabstop>
+    <tabstop>leAudioDriver</tabstop>
+    <tabstop>cmbAudioConnector</tabstop>
+    <tabstop>cbAC3Pass</tabstop>
+    <tabstop>btnApplyAudioSettings</tabstop>
+    <tabstop>lvLogLevels</tabstop>
+    <tabstop>btnApplyLogOptions</tabstop>
+    <tabstop>lvLogs</tabstop>
+    <tabstop>btnViewLog</tabstop>
+    <tabstop>btnTailLog</tabstop>
+    <tabstop>btnRotateAllLogs</tabstop>
+    <tabstop>lvConfigs</tabstop>
+    <tabstop>btnEditConfigurationFile</tabstop>
+    <tabstop>lbMessages</tabstop>
+</tabstops>
+<includes>
+    <include location="local" impldecl="in implementation">lmce_launch_managerwidgetbase.ui.h</include>
+</includes>
+<slots>
+    <slot>btnViewLog_clicked()</slot>
+    <slot>btnTailLog_clicked()</slot>
+    <slot>btnEditConfigurationFile_clicked()</slot>
+    <slot>pushButton12_clicked()</slot>
+    <slot>btnApplyLogOptions_clicked()</slot>
+    <slot>btnSaveConnectionsSettings_clicked()</slot>
+    <slot>btnRotateAllLogs_clicked()</slot>
+    <slot>lvLogs_currentChanged( QListViewItem * )</slot>
+    <slot>btnOpenAdminSite_clicked()</slot>
+    <slot>pushButton9_clicked()</slot>
+    <slot>btnTestMySQLConnection_clicked()</slot>
+    <slot>btnSwitchCore_clicked()</slot>
+    <slot>btnSwitchCoreAndMedia_clicked()</slot>
+    <slot>btnSwitchMedia_clicked()</slot>
+    <slot>btnRegenThisOrbiter_clicked()</slot>
+    <slot>btnReloadRouter_clicked()</slot>
+    <slot>btnRegenAllOrbiters_clicked()</slot>
+    <slot>btnApplyVideoSettings_clicked()</slot>
+    <slot>btnApplyAudioSettings_clicked()</slot>
+    <slot>pbActivateOrbiter_clicked()</slot>
+    <slot>btnActivateOrbiter_clicked()</slot>
+    <slot>saveBootupSettings_clicked()</slot>
+    <slot>btn_StartUIDiag_clicked()</slot>
+    <slot>btn_StartDisplayConfig_clicked()</slot>
+    <slot>btnForceXorgSettings_clicked()</slot>
+    <slot>cbXorgSettings_activated( int )</slot>
+    <slot>cbXorgRefreshRate_activated( int )</slot>
+    <slot>twAllTabs_currentChanged( QWidget * )</slot>
+    <slot>btn_SwtchRA_clicked()</slot>
+    <slot>btn_ViewIP_clicked()</slot>
+    <slot>btn_SwitchRA_clicked()</slot>
+    <slot>btnForceVideoDefaults_clicked()</slot>
+    <slot>btnChange_Resolution_clicked()</slot>
+</slots>
+<functions>
+    <function>init()</function>
+</functions>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>
