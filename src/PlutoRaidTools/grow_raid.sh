@@ -89,9 +89,24 @@ echo "     ************************"
 
 echo "Growing Raid to use extra disk(s)..."
 mdadm --grow $RaidDevice --raid-disks=$TotalNewRaidDrives
+sleep 10
 
-#Note: Resizing the filesystem to use the new drive space
-#is handled in monitoring_RAID.sh by the RebuildFinished event.
+#loop around reporting the status until finished reshaping/rebuilding
+#cat /proc/mdstat shows a % finished while this is happening
+while res=$(cat /proc/mdstat | grep '%');do
+	echo $res
+	sleep 60
+done
+
+#The reshaping and rebuilding of the array is complete.
+#resize the partition to match the capacity of the array
+fsType=$(df -T $Param_Raid | tail -n 1 | sed 's/[ \t][ \t]*/ /g' | cut -d' ' -f2)
+if [[ $fsType == "ext3" || $fsType == "ext2" ]] ;then
+	echo "Resize Partition: Supported filesystem type $fsType found. Resizing partition as needed" >> /var/log/pluto/RAID_monitoring.log
+	resize2fs $Param_Raid	
+else
+	echo "Resize Partition: Filesystem type $fsType is not supported at this time. Aborting partition resize." >> /var/log/pluto/RAID_monitoring.log	
+fi
 
 echo "Raid grown successfully to $TotalNewRaidDrives drives."
 echo "Note that system performance may be degraded for the next 24 hours and even longer as the array rebuilds itsself."

@@ -195,14 +195,7 @@ case "$Param_Event" in
 			raidSize=$(mdadm --query $Param_Raid | head -1 |cut -d' ' -f2)
 			Raid_SetSize "$DeviceID" "$raidSize"
 
-			#resize the partition to match the capacity of the array
-			fsType=$(df -T $Param_Raid | tail -n 1 | sed 's/[ \t][ \t]*/ /g' | cut -d' ' -f2)
-			if [[ $fsType == "ext3" || $fsType == "ext2" ]] ;then
-				echo "Resize Partition: Supported filesystem type $fsType found. Resizing partition as needed" >> /var/log/pluto/RAID_monitoring.log
-				resize2fs $Param_Raid	
-			else
-				echo "Resize Partition: Filesystem type $fsType is not supported at this time. Aborting partition resize." >> /var/log/pluto/RAID_monitoring.log	
-			fi
+			
 		fi
 	;;
 
