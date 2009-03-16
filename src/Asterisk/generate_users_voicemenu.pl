@@ -35,6 +35,7 @@ while(my $DB_ROW = $DB_STATEMENT->fetchrow_hashref())
 {
     my $i=$1 if($DB_ROW->{'Extension'} =~ /(\d)$/);
 	my $j=$DB_ROW->{'Extension'};
+    print "Generating text for ".$DB_ROW->{'Name'}." extension: $j\n";
     &generate_voice("To call ".$DB_ROW->{'Name'}." dial ".$i.".","/tmp/pluto-default-voicemenu3-$i.gsm");
     $list .= "/tmp/pluto-default-voicemenu3-$i.gsm ";
 	`/bin/mkdir -p /var/spool/asterisk/voicemail/default/$j/INBOX/Old`;
@@ -94,24 +95,24 @@ sub generate_voice_festival()
 {
 	my $TEXT = shift;
 	my $FILE = shift;
+	my $DB_PL_HANDLE2;
+	my $DB_STATEMENT2;
+	my $DB_SQL2;
 
 	#TODO: make proper mysql query to get default voice for voice generation! This is a bit of an ugly hack, but should work!
-	$DB_SQL = "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_DeviceData=283 LIMIT 1";
-	$DB_STATEMENT = $DB_PL_HANDLE->prepare($DB_SQL) or die "Couldn't prepare query '$DB_SQL': $DBI::errstr\n";
-	$DB_STATEMENT->execute() or die "Couldn't execute query '$DB_SQL': $DBI::errstr\n";
-	my $DB_ROW = $DB_STATEMENT->fetchrow_hashref();
-	my $defaultVoice=$DB_ROW->{'IK_DeviceData'};
-	$DB_STATEMENT->finish();
+	$DB_SQL2 = "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_DeviceData=283 LIMIT 1";
+	$DB_STATEMENT2 = $DB_PL_HANDLE->prepare($DB_SQL2) or die "Couldn't prepare query '$DB_SQL2': $DBI::errstr\n";
+	$DB_STATEMENT2->execute() or die "Couldn't execute query '$DB_SQL2': $DBI::errstr\n";
+	my $DB_ROW2 = $DB_STATEMENT2->fetchrow_hashref();
+	my $defaultVoice=$DB_ROW2->{'IK_DeviceData'};
+	$DB_STATEMENT2->finish();
 
 	#create a text file for festival to use
 	open TF,">/tmp/festival.txt";
 	print TF "$TEXT\n";
 	close TF;
 	#Create the wave file
-	my $cmd = "text2wave /tmp/festival.txt -o /tmp/festival.wav -eval\(\"$defaultVoice\"\)";
-	print "Hello $cmd";
-	open F,"|$cmd";
-	close F;
+	system('text2wave /tmp/festival.txt -o /tmp/festival.wav -eval "(' . $defaultVoice . ')"');
 	#resample and create permanent file
 	`/usr/bin/sox /tmp/festival.wav -r 8000 -c 1 $FILE resample -ql`;
 	#clean up the temporary files
