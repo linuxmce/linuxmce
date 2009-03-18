@@ -19,6 +19,10 @@ open(CONF,$pluto_conf) or die "Could not open pluto configfile \"$pluto_conf\"\n
 while(<CONF>)
 {
 	chomp;
+	# In case we have a blank line in the configuration file, we don't want
+	# to choke
+	$option = "";
+	$value = "";
 	my ($option, $eq, $value) = split(/ /,$_);
 
 	if ($option eq "DCERouter")
