@@ -109,30 +109,50 @@ function sortScenarios($output,$dbADO) {
 			$areaID=@$_REQUEST[''.$sortBy.'ID'];
 			$operation=$_REQUEST['operation'];
 			$sort=$_REQUEST['sort'];
-			if($operation=='up'){
-				if($sort>0){
-					$res=$dbADO->Execute('SELECT FK_CommandGroup,Sort FROM CommandGroup_'.$sortBy.' WHERE FK_'.$sortBy.'=? AND Sort<? ORDER BY Sort DESC LIMIT 0,1',array($areaID,$sort));
-					if($res->RecordCount()>0){
-						$row=$res->FetchRow();
-						
-						$updateCG_R='UPDATE CommandGroup_'.$sortBy.' SET Sort=? WHERE FK_CommandGroup=? AND FK_'.$sortBy.'=?';
-						$dbADO->Execute($updateCG_R,array($sort,$row['FK_CommandGroup'],$areaID));
-						$dbADO->Execute($updateCG_R,array($row['Sort'],$fromCgID,$areaID));
-						$msg=$TEXT_POSITIONS_UPDATED_CONST;
+			if($sort>0){
+
+				//Here, we re-number the sort order to make sure there is no chance of a collision
+				$sortMeBaby = $dbADO->Execute(
+					'SELECT FK_CommandGroup,Sort FROM CommandGroup_'.$sortBy.
+					' WHERE FK_'.$sortBy.'=? ORDER BY Sort ASC',
+					array($areaID));
+
+				$updateCG_R='UPDATE CommandGroup_'.$sortBy.' SET Sort=? WHERE FK_CommandGroup=? AND FK_'.$sortBy.'=?';
+
+				$sortIndex = 1;
+				while ($row = $sortMeBaby->FetchRow()){
+					$dbADO->Execute($updateCG_R, array($sortIndex, $row['FK_CommandGroup'], $areaID));
+					$sortIndex = $sortIndex + 5;
+				}
+
+				//Re-numbering complete, move on to the operation requested
+				if($operation=='up'){
+					$res=$dbADO->Execute(
+					'SELECT FK_CommandGroup,Sort FROM CommandGroup_'.$sortBy.
+					' WHERE FK_'.$sortBy.'=? AND Sort<=? ORDER BY Sort DESC LIMIT 0,2',
+					array($areaID,$sort));
+				} else { //operation is down
+					$res=$dbADO->Execute(
+					'SELECT FK_CommandGroup,Sort FROM CommandGroup_'.$sortBy.
+					' WHERE FK_'.$sortBy.'=? AND Sort>=? ORDER BY Sort ASC LIMIT 0,2',
+					array($areaID,$sort));
+				}
+				$rowFrom = $res->FetchRow();
+				$rowTo = $res->FetchRow();
+				$numFrom = (int)$rowFrom['Sort'];
+				$numTo = (int)$rowTo['Sort'];
+				if ($numFrom == $numTo) { //Should never happen - ordering takes place above
+					if ($operation == 'up') {
+						$numTo = $numTo - 1;
+					} else { //operation is down
+						$numTo = $numTo + 1;
 					}
 				}
-			}else{
-				if($sort>0){
-					$res=$dbADO->Execute('SELECT FK_CommandGroup,Sort FROM CommandGroup_'.$sortBy.' WHERE FK_'.$sortBy.'=? AND Sort>? ORDER BY Sort Asc LIMIT 0,1',array($areaID,$sort));
-					if($res->RecordCount()>0){
-						$row=$res->FetchRow();
-						
-						$updateCG_R='UPDATE CommandGroup_'.$sortBy.' SET Sort=? WHERE FK_CommandGroup=? AND FK_'.$sortBy.'=?';
-						$dbADO->Execute($updateCG_R,array($sort,$row['FK_CommandGroup'],$areaID));
-						$dbADO->Execute($updateCG_R,array($row['Sort'],$fromCgID,$areaID));
-						$msg=$TEXT_POSITIONS_UPDATED_CONST;
-					}
-				}
+
+				//Simply swap the sort values for the two command groups that need to be reordered
+				$dbADO->Execute($updateCG_R, array($numTo, $rowFrom['FK_CommandGroup'], $areaID));
+				$dbADO->Execute($updateCG_R, array($numFrom, $rowTo['FK_CommandGroup'], $areaID)); 
+				$msg=$TEXT_POSITIONS_UPDATED_CONST;
 			}
 		}else{
 			$msg=$TEXT_POSITIONS_NOT_UPDATED_CONST;
