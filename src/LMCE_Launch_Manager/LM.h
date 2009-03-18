@@ -15,7 +15,9 @@ class LM
 private:	
 	// Private member variables
 	DCE::LMCE_Launch_Manager * m_pLMCE_Launch_Manager;
-	int m_iDevicesLevel;
+	vector<string> m_vCoreDevices;
+	vector<string> m_vMediaDevices;
+
 	bool m_bRemoteAssistanceRunning;
 
 	bool m_bCoreRunning;
@@ -26,7 +28,7 @@ private:
 
 	bool m_bRegenInProgress;
 	bool m_bRegenTrackingCurrentOrbiterOnly;
-	
+	int m_iDevicesLevel;
 	string m_sAutostartCore;
 	string m_sAutostartMedia;
 
@@ -42,7 +44,7 @@ private:
 	string m_sVideoDriver;
 
 	//MySQL Related 	
-	MYSQL *pm_mysqlPlutoDatabase;
+	MYSQL *m_pPlutoDatabase;
 	MYSQL m_mysqlMysql;
 	MYSQL_RES *m_msqlResult;
 	MYSQL_ROW m_mysqlRow;

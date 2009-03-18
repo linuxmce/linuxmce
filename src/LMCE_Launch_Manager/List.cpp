@@ -38,3 +38,19 @@ int List::end()
 {
 	return m_vList.size()-1;
 }
+string List::join(string sSeparator) 
+{
+	string s;	
+	for(unsigned int i=0;i<m_vList.size();i++) {
+		s+=m_vList[i] + sSeparator;
+	}
+	return s;
+}
+unsigned int List::size()
+{
+	return m_vList.size();
+}
+
+string List::index(int i) {
+	return m_vList[i];
+}

@@ -2,6 +2,7 @@
 #define List_h
 //Simple list class. Provides methods to append an entry, clear the list, and see if the list contains a certain entry.
 //This is needed to replace the QStringList in the old code.
+//jondecker76
 #include <vector>
 #include "LMCE_Launch_Manager.h"
 #include "Gen_Devices/LMCE_Launch_ManagerBase.h"
@@ -21,5 +22,8 @@ public:
 	bool contains(string s);
 	int find(string s);
 	int end();
+	unsigned int size();
+	string index(int i);
+	string join(string sSeparator);
 };
 #endif

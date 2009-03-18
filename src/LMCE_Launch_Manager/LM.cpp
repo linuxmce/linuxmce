@@ -2,6 +2,7 @@
 #include "LMCE_Launch_Manager.h"
 #include "LM.h"
 #include "List.h"
+#include "DB.h"
 #include "DCE/DCEConfig.h"
 #include "DCE/Logger.h"
 #include "DCE/ClientSocket.h"
@@ -98,7 +99,7 @@ void LM::Initialize()
 	if ( m_bCoreRunning || m_bMediaRunning )
 	{
         	updateSerialPorts();
-		//respawnNewChildren();
+		respawnNewChildren();
 		//reportDeviceUp();
 	}
 	
@@ -150,7 +151,7 @@ void LM::initialize_Connections()
 	if (m_sDCERouterPort== "")
 		m_sDCERouterPort = "3450";
 	
-	//SHOULD CHANGE THESE TO BOOL
+	//SHOULD CHANGE THESE TO BOOL?
 	m_sAutostartCore = pConfig->m_mapParameters_Find("AutostartCore");
 	m_sAutostartMedia = pConfig->m_mapParameters_Find("AutostartMedia");
 	
@@ -248,7 +249,7 @@ string LM::getRAid()
 bool LM::openDB()
 {
 	//see usage at http://c-programming.suite101.com/article.cfm/using_a_mysql_databases_with_c
-	if (pm_mysqlPlutoDatabase)
+	if (m_pPlutoDatabase)
 	{
 		writeLog("Attempted to reopen already opened DB, closing current connection first", false, LV_WARNING);
 		closeDB();
@@ -257,7 +258,7 @@ bool LM::openDB()
 	writeLog("Opening DB connection..", true);
 	
 	mysql_init(&m_mysqlMysql);
-	if(pm_mysqlPlutoDatabase=mysql_real_connect(&m_mysqlMysql,m_sMySQLHost.c_str(),m_sMySQLUser.c_str(),m_sMySQLPass.c_str(),"pluto_main",0,0,0))
+	if(m_pPlutoDatabase=mysql_real_connect(&m_mysqlMysql,m_sMySQLHost.c_str(),m_sMySQLUser.c_str(),m_sMySQLPass.c_str(),"pluto_main",0,0,0))
 	{
 		writeLog("Successful", true);
 		return true;
@@ -266,8 +267,8 @@ bool LM::openDB()
 	{
 		//writeLog("Error: " + mysql_error(&m_mysqlMysql, true, LV_WARNING);
 		writeLog("Error: Could not connect to database",true,LV_WARNING);
-		delete pm_mysqlPlutoDatabase;
-		pm_mysqlPlutoDatabase = NULL;
+		delete m_pPlutoDatabase;
+		m_pPlutoDatabase = NULL;
 		return false;
 	}
 }
@@ -276,11 +277,11 @@ bool LM::closeDB()
 {
 	writeLog("Closing DB connection..");
 	
-	if (pm_mysqlPlutoDatabase)
+	if (m_pPlutoDatabase)
 	{
-		mysql_close(pm_mysqlPlutoDatabase);
+		mysql_close(m_pPlutoDatabase);
 		writeLog("Successful", true);
-		pm_mysqlPlutoDatabase = NULL;
+		m_pPlutoDatabase = NULL;
 		return true;
 	}
 	else
@@ -296,9 +297,9 @@ string LM::queryDB(string query)
 	MYSQL_RES *queryResult;
 	MYSQL_ROW resultRow;
 
-	mysql_query(pm_mysqlPlutoDatabase,query.c_str());
+	mysql_query(m_pPlutoDatabase,query.c_str());
 
-	queryResult = mysql_store_result(pm_mysqlPlutoDatabase);
+	queryResult = mysql_store_result(m_pPlutoDatabase);
 	resultRow = mysql_fetch_row(queryResult);
 	sResult = resultRow[0];
 	mysql_free_result(queryResult);
@@ -317,6 +318,7 @@ string LM::queryDB(string query)
 	return sResult;
 }
 /*
+//WILL NOT RE-IMPLEMENT THIS, IT IS NOT NEEDED!
 bool LM::performQueryDB(string query, MYSQL_RES &queryResult)
 {
 	writeLog("Running query: \"" + query + "\"", false, LV_DEBUG);
@@ -583,7 +585,7 @@ bool LM::checkMySQL(bool showMessage)
 	string msg = "Connection to specified MySQL server failed";
 	bool bResult = false;
 	
-	if ( pm_mysqlPlutoDatabase ) {
+	if ( m_pPlutoDatabase ) {
 		msg = "Connection to specified MySQL server succeeded";
 		bResult = true;
 	}
@@ -819,99 +821,112 @@ void LM::respawnNewChildren()
 void LM::syncWithLockList(bool eraseDeadLocalDevices)
 {
 	writeLog("Reading lockfile");
-	/*		
+			
 	// reading list
-	QStringList qsl;
-	QFile f(QString(PLUTO_LOCKS));
-	if (f.open(IO_ReadOnly))
-	{
-		QString sID;
-		int iRet;
+	List::List qsl;
 	
-		while ( !f.atEnd() )
+	//File f(string(PLUTO_LOCKS));
+	//TODO: do some simple error checking to make sure the file opened...
+	ifstream textStream (string(PLUTO_LOCKS).c_str());
+	if (!textStream.fail())
+	{
+		string sID;
+		int iRet;
+		while ( getline(textStream,sID) )
 		{
-			if  ( (iRet = f.readLine(sID, 100))!=-1)
-			{
-				sID = sID.replace(" ", "");
-				sID = sID.replace("\n", "");
-				sID = sID.replace("\t", "");
+			//if  ( (iRet = f.readLine(sID, 100))!=-1)
+			//{
+				sID=StringUtils::Replace(sID," ","");
+				sID=StringUtils::Replace(sID,"\n","");
+				sID=StringUtils::Replace(sID,"\t","");
+				//sID = sID.replace(" ", "");
+				//sID = sID.replace("\n", "");
+				//sID = sID.replace("\t", "");
 				
 				if (sID != "") 
 				{
 					qsl.append(sID);
 				}
-			}
+			//}
 		}
 		
-		f.close();
+		textStream.close();
 
 		writeLog("Detected running devices: " + qsl.join(" "));
 	}
 	else
 	{
-		writeLog("Failed to open file" + QString(":") + PLUTO_LOCKS, false, LV_WARNING);
+		writeLog("Failed to open file "+ string(PLUTO_LOCKS), false, LV_WARNING);
 		writeLog("Continuing, assuming no devices are running", false, LV_WARNING);
 	}
 	
 	// purging dead devices
 	if (eraseDeadLocalDevices)
 	{
-		QValueVector<int> newV;
+		vector<string> newV;
 		
 		// cleaning up dead core devices
-		for (QValueVector<int>::iterator it=m_qvvCoreDevices.begin(); it!=m_qvvCoreDevices.end(); ++it)
+		//for (vector<int>::iterator it=m_vCoreDevices.begin(); it!=m_vCoreDevices.end(); ++it)
+		for(unsigned int i=0;i<m_vCoreDevices.size();i++)
 		{
-			QString sID = QString::number(*it);
-			if (qsl.find(sID) == qsl.end())
+			string sID = m_vCoreDevices[i];
+			if ( !qsl.contains(sID) )
 			{
-				writeLog("Device " + QString::number(*it) + " seem to be dead" );
+				writeLog("Device " + sID + " seem to be dead" );
 			}
 			else
-				newV.append(*it);
+				newV.push_back(sID);
 		}
 		
-		m_qvvCoreDevices  = newV;
+		m_vCoreDevices = newV;
 		newV.clear();
 		
 		// cleaning up dead core devices
-		for (QValueVector<int>::iterator  it=m_qvvMediaDevices.begin(); it!=m_qvvMediaDevices.end(); ++it)
+		//for (QValueVector<int>::iterator  it=m_qvvMediaDevices.begin(); it!=m_qvvMediaDevices.end(); ++it)
+		for(unsigned int i=0;i<m_vMediaDevices.size();i++)
 		{
-			QString sID = QString::number(*it);
-			if (qsl.find(sID) == qsl.end())
+			string sID = m_vMediaDevices[i];
+			if ( !qsl.contains(sID) )
 			{
-				writeLog("Device " + QString::number(*it) + " seem to be dead");
+				writeLog("Device " + sID + " seem to be dead");
 			}
 			else
-				newV.append(*it);
+				newV.push_back(sID);
 		}
 		
-		m_qvvMediaDevices  = newV;
+		m_vMediaDevices  = newV;
 		newV.clear();
-	}*/
+	}
+	//writeLog("Detected running devices: " + qsl.join(" ")); // for debug purposes
 }
 
 void LM::startCoreDevices(bool checkForAlreadyRunning)
-{/*
-	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-//	m_iDevicesLevel = 0;
+{
+	string s;
+	
+	//QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+	m_iDevicesLevel = 0;
 //	m_pDevicesUpdateTimer->start(1000);
 	
 	writeLog("startCoreDevices()");
 
-	if ( pPlutoDatabase ) {
+	if ( m_pPlutoDatabase ) {
 		// fetching list of non-MD devices under Core
-		QStringList devices;
-		devices.append(m_qsCoreDeviceID);
+		List devices;
+		devices.append(m_sCoreDeviceID);
 		
 		// filtering out the MD/Hybrid PC
-		QString extraCondition = "";
-		if (m_qsMediaID!="")
-			extraCondition += " AND PK_Device<>" + m_qsMediaID;
+		string extraCondition = "";
+		if (m_sMediaID!="")
+			extraCondition += " AND PK_Device<>" + m_sMediaID;
 		    
-		for (QStringList::iterator it=devices.begin(); it!=devices.end(); ++it)
-		{
-			QString query = QString("SELECT Device.PK_Device, DeviceTemplate.Description, DeviceTemplate.CommandLine, Device.Disabled, DeviceTemplate.ImplementsDCE, Device.FK_DeviceTemplate,DeviceTemplate.IsPlugin FROM Device JOIN DeviceTemplate ON Device.FK_DeviceTemplate=DeviceTemplate.PK_DeviceTemplate WHERE (PK_Device=") + *it + extraCondition + ")";
-			QSqlQuery q;
+		//for (QStringList::iterator it=devices.begin(); it!=devices.end(); ++it)
+		//for( unsigned int i=0;i<devices.size();i++ )
+		//{
+			int i=999; //debug
+			string query = "SELECT Device.PK_Device, DeviceTemplate.Description, DeviceTemplate.CommandLine, Device.Disabled, DeviceTemplate.ImplementsDCE, Device.FK_DeviceTemplate,DeviceTemplate.IsPlugin FROM Device JOIN DeviceTemplate ON Device.FK_DeviceTemplate=DeviceTemplate.PK_DeviceTemplate WHERE (PK_Device=" + devices.index(i) + extraCondition + ")";
+			cout << query.c_str();			
+			/*QSqlQuery q;
 			bool bQueryExecResult = performQueryDB(query, q);
 		
 			// if device exist
@@ -1005,20 +1020,22 @@ void LM::startCoreDevices(bool checkForAlreadyRunning)
 						
 					}
 				}
-			}
-		}
+			}*/
+		//}
 	}
 	else
 	{
 		writeLog("Failed to query MySQL DB");
 	}
 	
-	QApplication::restoreOverrideCursor();*/
+	//QApplication::restoreOverrideCursor();
 }
 
 
 void LM::startMediaDevices(bool checkForAlreadyRunning)
-{/*
+{
+	string s;
+	/*
 	if (m_qsMediaID=="")
 		return;
 	
