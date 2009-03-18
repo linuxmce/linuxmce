@@ -9,6 +9,7 @@
 #include "PlutoUtils/ProcessUtils.h"
 #include <iostream>
 #include <fstream>
+#include "List.h"
 
 using namespace std; //DCE
 
@@ -93,14 +94,14 @@ void LM::Initialize()
 	//	qdir.mkdir(SCREENLOGS_BASE, true);
 
 	// if the system was already running when we started, let's catch new children and report we are up
-	//if ( m_bCoreRunning || m_bMediaRunning )
-	//{
-        //  updateSerialPorts();
-	//	respawnNewChildren();
-	//	reportDeviceUp();
-	//}
+	if ( m_bCoreRunning || m_bMediaRunning )
+	{
+        	updateSerialPorts();
+		//respawnNewChildren();
+		//reportDeviceUp();
+	}
 	
-	//writeLog("=>loadSettings()");
+	writeLog("=>loadSettings()");
 	// reding autostart settings
 	//loadSettings();
 	
@@ -661,8 +662,8 @@ bool LM::checkCore(string coreIP)
 bool LM::initialize_LMdevice(bool bRetryForever/*=false*/)
 {
 	// if we already have a connection
-	//if (m_pLaunch_Manager)
-	//	return true;
+	if (m_pLMCE_Launch_Manager)
+		return true;
 	
 	//QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 	
@@ -672,13 +673,14 @@ bool LM::initialize_LMdevice(bool bRetryForever/*=false*/)
 		sCoreIP = "127.0.0.1";
 	
 	writeLog("Connecting to router at " + sCoreIP, true, LV_STATUS);
-	
+
 	while (true)
 	{
-		m_pLMCE_Launch_Manager = new DCE::Launch_Manager(m_sDeviceID.toInt(), sCoreIP,  true, false);
 
-		bool bConnected = m_pLaunch_Manager->GetConfig();
-		if ( bConnected && m_pLaunch_Manager->m_pEvent->m_pClientSocket->m_eLastError==DCE::ClientSocket::cs_err_NeedReload )
+		m_pLMCE_Launch_Manager = new DCE::LMCE_Launch_Manager(atoi(m_sDeviceID.c_str()), sCoreIP,  true, false);//int(m_sDeviceID.c_str())
+
+		bool bConnected = m_pLMCE_Launch_Manager->GetConfig();
+		if ( bConnected && m_pLMCE_Launch_Manager->m_pEvent->m_pClientSocket->m_eLastError==DCE::ClientSocket::cs_err_NeedReload )
 		{
 			//lbMessages->clear();
 			writeLog("Please go to an existing Orbiter and choose 'quick reload router'. ", true, LV_WARNING);
@@ -691,7 +693,7 @@ bool LM::initialize_LMdevice(bool bRetryForever/*=false*/)
 			delete m_pLMCE_Launch_Manager;
 			m_pLMCE_Launch_Manager = NULL;
 		}
-		if( bConnected && m_pLaunch_Manager->Connect(m_pLaunch_Manager->PK_DeviceTemplate_get()) ) 
+		if( bConnected && m_pLMCE_Launch_Manager->Connect(m_pLMCE_Launch_Manager->PK_DeviceTemplate_get()) ) 
 		{
 			writeLog("initialize_LMdevice: Connect OK", true, LV_STATUS);
 			
@@ -702,10 +704,9 @@ bool LM::initialize_LMdevice(bool bRetryForever/*=false*/)
 				writeLog("initialize_LMdevice: Failed to find Orbiter plugin", false, LV_WARNING);
 			}
 		
-			//map<int,string>::iterator it = devicesMap.begin();
-		
-			//m_qOrbiterPluginID = QString::number( (*it).first );
-			
+			map<int,string>::iterator it = devicesMap.begin();
+			m_sOrbiterPluginID = StringUtils::itos((*it).first) ;
+			cout <<m_sOrbiterPluginID << endl;
 			//m_pLaunch_Manager->lmWidget = this;
 			
 			//QTimer::singleShot(5000, this, SLOT(LMdeviceKeepAlive()));
@@ -727,9 +728,411 @@ bool LM::initialize_LMdevice(bool bRetryForever/*=false*/)
 		}
 		else
 		{
-			writeLog(QString("initialize_LMdevice: Retrying (forever)"), true, LV_WARNING);
+			writeLog("initialize_LMdevice: Retrying (forever)", true, LV_WARNING);
 		}
 	}
 }
 
+// TODO refactor
+void LM::updateSerialPorts()
+{
+	writeLog("Running UpdateAvailableSerialPorts.sh", true, LV_WARNING);
+					
+	string sCmd = "/usr/pluto/bin/UpdateAvailableSerialPorts.sh";
+	//QString qsBackground = "0";
+	//QString qsParameter = "";
+	//string qsDescription = "Updating available serial ports";
+	
+	//QFileInfo qfi(qsCommand);
+	//QString baseName = qfi.baseName(true);
+	//QString qsWorkDir = QString(SCREENLOGS_BASE) + "/" + baseName;
+	//QDir qd(qsWorkDir);
+	//if (!qd.exists(qsWorkDir, true))
+	//{
+	//	qd.mkdir(qsWorkDir, true);
+	//}
+	
+	// copied from start foreground service
+	//QStringList args;
+					
+	//args.push_back(qsCommand);
+	//if (qsParameter!="")
+	//	args.push_back(qsParameter);
+					
+	//QProcess *pService = new QProcess(args);
+	//pService->setWorkingDirectory(qsWorkDir);
+	//writeLog("Starting core service " + qsCommand + ": " + args.join(" "));
+	//pService->start();
+	//int iCounter = 30;
+	//while (pService->isRunning() && iCounter)
+	//{
+	//	sleep(1);
+	//	iCounter--;
+	//	qApp->eventLoop()->processEvents(QEventLoop::ExcludeUserInput);
+	//}
+					
+	//if (pService->isRunning())
+	//{
+	//	writeLog("Process didn't exit after 30 secs of running, let it run in background", true, LV_WARNING);
+	//	m_qpvCoreServices.push_back(pService);
+	//}
+	//else
+	//{
+	
+	//TODO: Fork this and monitor progress and implement a timeout
+	string s;
+	s=system(sCmd.c_str());
+	writeLog("Process completed with status: " + s);
+	//	delete pService;
+	//}
+					
+}
+
+void LM::respawnNewChildren()
+{
+	writeLog("Requested respawning of new children devices", true, LV_WARNING);
+	
+	//allowRedraw = false;
+	
+	syncWithLockList(true);
+	
+	if (m_bCoreHere && m_bCoreRunning)
+	{
+		writeLog("Spawning new children devices - core", true, LV_WARNING);
+		startCoreDevices(true);
+		writeLog("Finished spawning new children devices - core", true, LV_WARNING);
+	}
+	
+	if (m_bMediaHere && m_bMediaRunning)
+	{
+		writeLog("Spawning new children devices - media", true, LV_WARNING);
+		startMediaDevices(true);
+		writeLog("Finished spawning new children devices - media", true, LV_WARNING);
+	}
+	
+	writeLog("Finished respawning of new children devices", true, LV_WARNING);
+	
+	//allowRedraw = true;
+}
+
+void LM::syncWithLockList(bool eraseDeadLocalDevices)
+{
+	writeLog("Reading lockfile");
+			
+	// reading list
+	QStringList qsl;
+	QFile f(QString(PLUTO_LOCKS));
+	if (f.open(IO_ReadOnly))
+	{
+		QString sID;
+		int iRet;
+	
+		while ( !f.atEnd() )
+		{
+			if  ( (iRet = f.readLine(sID, 100))!=-1)
+			{
+				sID = sID.replace(" ", "");
+				sID = sID.replace("\n", "");
+				sID = sID.replace("\t", "");
+				
+				if (sID != "") 
+				{
+					qsl.append(sID);
+				}
+			}
+		}
+		
+		f.close();
+
+		writeLog("Detected running devices: " + qsl.join(" "));
+	}
+	else
+	{
+		writeLog("Failed to open file" + QString(":") + PLUTO_LOCKS, false, LV_WARNING);
+		writeLog("Continuing, assuming no devices are running", false, LV_WARNING);
+	}
+	
+	// purging dead devices
+	if (eraseDeadLocalDevices)
+	{
+		QValueVector<int> newV;
+		
+		// cleaning up dead core devices
+		for (QValueVector<int>::iterator it=m_qvvCoreDevices.begin(); it!=m_qvvCoreDevices.end(); ++it)
+		{
+			QString sID = QString::number(*it);
+			if (qsl.find(sID) == qsl.end())
+			{
+				writeLog("Device " + QString::number(*it) + " seem to be dead" );
+			}
+			else
+				newV.append(*it);
+		}
+		
+		m_qvvCoreDevices  = newV;
+		newV.clear();
+		
+		// cleaning up dead core devices
+		for (QValueVector<int>::iterator  it=m_qvvMediaDevices.begin(); it!=m_qvvMediaDevices.end(); ++it)
+		{
+			QString sID = QString::number(*it);
+			if (qsl.find(sID) == qsl.end())
+			{
+				writeLog("Device " + QString::number(*it) + " seem to be dead");
+			}
+			else
+				newV.append(*it);
+		}
+		
+		m_qvvMediaDevices  = newV;
+		newV.clear();
+	}
+}
+
+void LM::startCoreDevices(bool checkForAlreadyRunning)
+{
+	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+//	m_iDevicesLevel = 0;
+//	m_pDevicesUpdateTimer->start(1000);
+	
+	writeLog("startCoreDevices()");
+
+	if ( pPlutoDatabase ) {
+		// fetching list of non-MD devices under Core
+		QStringList devices;
+		devices.append(m_qsCoreDeviceID);
+		
+		// filtering out the MD/Hybrid PC
+		QString extraCondition = "";
+		if (m_qsMediaID!="")
+			extraCondition += " AND PK_Device<>" + m_qsMediaID;
+		    
+		for (QStringList::iterator it=devices.begin(); it!=devices.end(); ++it)
+		{
+			QString query = QString("SELECT Device.PK_Device, DeviceTemplate.Description, DeviceTemplate.CommandLine, Device.Disabled, DeviceTemplate.ImplementsDCE, Device.FK_DeviceTemplate,DeviceTemplate.IsPlugin FROM Device JOIN DeviceTemplate ON Device.FK_DeviceTemplate=DeviceTemplate.PK_DeviceTemplate WHERE (PK_Device=") + *it + extraCondition + ")";
+			QSqlQuery q;
+			bool bQueryExecResult = performQueryDB(query, q);
+		
+			// if device exist
+			while ( bQueryExecResult && q.next() )
+			{
+				if (q.value(3).toString()=="1")
+					writeLog("Not starting device " + q.value(0).toString() + " "  + q.value(1).toString() + " - it is disabled", true);
+				else if (q.value(6).toInt()==1)
+					writeLog("Not starting device " + q.value(0).toString() + " "  + q.value(1).toString() + " - it is plugin", true);
+				else
+				{			
+					// if device implements DCE, start it
+					if (q.value(4).toString()=="1")
+					{
+						bool alreadyRunning=false;
+						
+						if (checkForAlreadyRunning)
+							for (QValueVector<int>::iterator jt=m_qvvCoreDevices.begin(); jt!=m_qvvCoreDevices.end(); ++jt)
+							{
+								if ( *jt == q.value(0).toInt() )
+								{
+									alreadyRunning = true;
+									break;
+								}
+							}
+						
+						if (alreadyRunning)
+						{
+							writeLog("Not starting device " +  q.value(0).toString() + " "  + q.value(1).toString() + " - it is already running", true);
+						}
+						else
+						{
+							writeLog("Starting device " +  q.value(0).toString() + " "  + q.value(1).toString(), true);
+							
+							//screen -d -m -S "$Description-$DeviceID" /usr/pluto/bin/Spawn_Device.sh $DeviceID $DCERouter $Command	
+												
+							QString deviceCommand = q.value(2).toString();
+							if (deviceCommand=="")
+								deviceCommand = q.value(1).toString().simplifyWhiteSpace().replace(" ","_");
+							
+							if (!QFile::exists("/usr/pluto/bin/"+deviceCommand))
+							{
+								writeLog("Not starting device " +  q.value(0).toString() + " "  + q.value(1).toString() + " -  binary is not found, probably it is in the middle of installation", true, LV_WARNING);
+								continue;
+							}
+							
+							QString screenName = q.value(1).toString();
+							screenName = FileUtils::ValidCPPName(screenName) + "-" + q.value(0).toString();
+
+							// starting device
+							QStringList args;
+	
+							args.push_back("/usr/bin/screen");
+							args.push_back("-d");
+							args.push_back("-m");
+							args.push_back("-S");
+							args.push_back(screenName);
+							args.push_back("/usr/pluto/bin/Spawn_Device.sh");
+							args.push_back(q.value(0).toString());
+							args.push_back(leCoreIP->text());
+							args.push_back(deviceCommand);
+							
+							QProcess process(args);
+							writeLog("Starting device " +  q.value(0).toString() + " "  + q.value(1).toString() + ": " + args.join(" "));
+							process.start();
+							
+							// wait for register
+							waitForDevice(q.value(0).toInt());
+							
+							// recording device in list
+							m_qvvCoreDevices.append(q.value(0).toInt());
+						}
+					}
+					else
+					{
+						writeLog("Not starting device " +  q.value(0).toString() + " "  + q.value(1).toString() + " - it doesn't implement DCE. Adding its children into start queue instead", false);
+						
+						// adding child devices of this device - maybe some of them implement DCE
+						QString child_query = QString("SELECT PK_Device FROM Device WHERE FK_Device_ControlledVia=") + q.value(0).toString();
+						QString children = "[ ";
+						QSqlQuery cq;
+						bool bChildQueryExecResult = performQueryDB(child_query, cq);
+
+						while( bChildQueryExecResult && cq.next() )
+						{
+							devices.append(cq.value(0).toString());
+							children += cq.value(0).toString() + " ";
+						}
+						children += "]";
+						writeLog("Children list: " + children, false);
+						
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		writeLog("Failed to query MySQL DB");
+	}
+	
+	QApplication::restoreOverrideCursor();
+}
+
+
+void LM::startMediaDevices(bool checkForAlreadyRunning)
+{
+	if (m_qsMediaID=="")
+		return;
+	
+	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+	
+//	m_iDevicesLevel = 0;
+//	m_pDevicesUpdateTimer->start(1000);
+
+	writeLog("startMediaDevices()");
+	
+	if ( pPlutoDatabase  ) {
+		// fetching full list of devices under current MD
+		QStringList devices;
+		devices.append(m_qsMediaID);
+		for (QStringList::iterator it=devices.begin(); it!=devices.end(); ++it)
+		{
+			QString query = QString("SELECT Device.PK_Device, DeviceTemplate.Description, DeviceTemplate.CommandLine, Device.Disabled, DeviceTemplate.ImplementsDCE FROM Device JOIN DeviceTemplate ON Device.FK_DeviceTemplate=DeviceTemplate.PK_DeviceTemplate WHERE  PK_Device=") + *it;
+			QSqlQuery q;
+			bool bQueryExecResult = performQueryDB(query, q);
+			
+			// if device exist
+			if ( bQueryExecResult && q.next() )
+			{
+				if (q.value(3).toString()=="1")
+					writeLog("Not starting device " +  q.value(0).toString() + " "  + q.value(1).toString() + " - it is disabled", true);
+				else
+				{
+					// starting device if it implements DCE
+					if (q.value(4).toString()=="1")
+					{
+						bool alreadyRunning=false;
+						
+						if (checkForAlreadyRunning)
+							for (QValueVector<int>::iterator jt=m_qvvMediaDevices.begin(); jt!=m_qvvMediaDevices.end(); ++jt)
+							{
+								if ( *jt == q.value(0).toInt() )
+								{
+									alreadyRunning = true;
+									break;
+								}
+							}
+						
+						if (alreadyRunning)
+						{
+							writeLog("Not starting device " +  q.value(0).toString() + " "  + q.value(1).toString() + " - it is already running", true);
+						}
+						else
+						{
+							writeLog("Starting device " +  q.value(0).toString() + " "  + q.value(1).toString(), true);
+							
+							//screen -d -m -S "$Description-$DeviceID" /usr/pluto/bin/Spawn_Device.sh $DeviceID $DCERouter $Command	
+												
+							QString deviceCommand = q.value(2).toString();
+							if (deviceCommand=="")
+								deviceCommand = q.value(1).toString().simplifyWhiteSpace().replace(" ","_");
+							
+							if (!QFile::exists("/usr/pluto/bin/"+deviceCommand))
+							{
+								writeLog("Not starting device " +  q.value(0).toString() + " "  + q.value(1).toString() + " - binary is not found, probably it is in the middle of installation", true, LV_WARNING);
+								continue;
+							}
+							
+							QString screenName = q.value(1).toString();
+							screenName = FileUtils::ValidCPPName(screenName) + "-" + q.value(0).toString();
+							
+							// starting device
+							QStringList args;
+	
+							args.push_back("/usr/bin/screen");
+							args.push_back("-d");
+							args.push_back("-m");
+							args.push_back("-S");
+							args.push_back(screenName);
+							args.push_back("/usr/pluto/bin/Spawn_Device.sh");
+							args.push_back(q.value(0).toString());
+							args.push_back(leCoreIP->text());
+							args.push_back(deviceCommand);
+							
+							QProcess process(args);
+							writeLog("Starting device " +  q.value(0).toString() + " "  + q.value(1).toString() + ": " + args.join(" "));						
+							process.start();
+							
+							// wait for register
+							waitForDevice(q.value(0).toInt());
+							
+							// recording device ID in list
+							m_qvvMediaDevices.push_back(q.value(0).toInt());
+						}
+					}
+					else
+					{
+						writeLog("Not starting device " +  q.value(0).toString() + " "  + q.value(1).toString() + " - it doesn't implement DCE. Adding its children into start queue instead", false);
+						// starting devices recursively
+						QString child_query = QString("SELECT PK_Device FROM Device WHERE FK_Device_ControlledVia=") + *it;
+						QString children = "[ ";
+						QSqlQuery cq;
+						bool bChildQueryExecResult = performQueryDB(child_query, cq);
+						while(bChildQueryExecResult && cq.next())
+						{
+							devices.append(cq.value(0).toString());
+							children += cq.value(0).toString() + " ";
+						}
+						children += "]";
+						writeLog("Children list: " + children, false);
+					}
+				}
+			}
+		}
+		
+	}
+	else
+	{
+		writeLog("Failed to query MySQL DB");
+	}
+	
+	QApplication::restoreOverrideCursor();
+}
 

@@ -1,9 +1,9 @@
 
-#ifndef LMCE_Launch_Manager_h
-#define LMCE_Launch_Manager_h
+#ifndef LM_h
+#define LM_h
 
-//	DCE Implemenation for #1888 LMCE Launch Manager
 #include "LMCE_Launch_Manager.h"
+#include "List.h"
 #include "Gen_Devices/LMCE_Launch_ManagerBase.h"
 #include <mysql.h>
 
@@ -14,7 +14,7 @@ class LM
 {
 private:	
 	// Private member variables
-	DCE::LMCE_Launch_Manager *m_pLMCE_Launch_Manager;
+	DCE::LMCE_Launch_Manager * m_pLMCE_Launch_Manager;
 	int m_iDevicesLevel;
 	bool m_bRemoteAssistanceRunning;
 
@@ -29,7 +29,6 @@ private:
 	
 	string m_sAutostartCore;
 	string m_sAutostartMedia;
-
 
 	string m_sDeviceID;
 	string m_sOrbiterID;
@@ -68,7 +67,11 @@ private:
 	void initialize_AudioSettings();
 	void initialize_LogOptions();
 	bool initialize_LMdevice(bool bRetryForever=false);
-
+	void updateSerialPorts();
+	void respawnNewChildren()
+	void syncWithLockList(bool eraseDeadLocalDevices=false)
+	void startMediaDevices(bool checkForAlreadyRunning=false);
+	void startCoreDevices(bool checkForAlreadyRunning=false);
 public:
 	// Public member variables
 
@@ -85,6 +88,6 @@ public:
 
 };
 
-//<-dceag-end-b->
+
 #endif
-//<-dceag-end-e->
+
