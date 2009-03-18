@@ -1,94 +1,74 @@
+/*
+     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
 
+     www.plutohome.com
+
+     Phone: +1 (877) 758-8648
+ 
+
+     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+     of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+     See the GNU General Public License for more details.
+
+*/
+//<-dceag-d-b->
 #ifndef LMCE_Launch_Manager_h
 #define LMCE_Launch_Manager_h
 
 //	DCE Implemenation for #1888 LMCE Launch Manager
 
 #include "Gen_Devices/LMCE_Launch_ManagerBase.h"
-#include <mysql.h>
+//<-dceag-d-e->
 
-
-
-//namespace DCE
-//{
-//	class LMCE_Launch_Manager
-//}
-	
-
-class LM
+//<-dceag-decl-b->
+namespace DCE
 {
-private:	
-	// Private member variables
-	int m_iDevicesLevel;
-	bool m_bRemoteAssistanceRunning;
+	class LMCE_Launch_Manager : public LMCE_Launch_Manager_Command
+	{
+//<-dceag-decl-e->
+		// Private member variables
 
-	bool m_bCoreRunning;
-	bool m_bMediaRunning;
-
-	bool m_bCoreHere;
-	bool m_bMediaHere;
-
-	bool m_bRegenInProgress;
-	bool m_bRegenTrackingCurrentOrbiterOnly;
-	
-	string m_sAutostartCore;
-	string m_sAutostartMedia;
-
-
-	string m_sDeviceID;
-	string m_sOrbiterID;
-	string m_sOrbiterPluginID;
-	string m_sMediaID;
-	string m_sCoreDeviceID;
-	string m_sMySQLPort;
-	string m_sDCERouterPort;
-	string m_sRAInfo;
-	string m_sVideoResolution;
-	string m_sVideoDriver;
-
-	//MySQL Related 	
-	MYSQL *pm_mysqlPlutoDatabase;
-	MYSQL m_mysqlMysql;
-	MYSQL_RES *m_msqlResult;
-	MYSQL_ROW m_mysqlRow;
-	string m_sCoreIP;
-	string m_sMySQLHost;
-	string m_sMySQLUser;
-	string m_sMySQLPass;
-	string m_qsMySQLPort;
-
-	// Private methods
-	void writeLog(string s, bool toScreen=false,int logLevel=LV_STATUS);
-	string getRAid();
-	bool checkRAStatus();  
-	bool openDB();
-	bool closeDB();
-	string queryDB(string query);
-	bool checkMySQL(bool showMessage=false);
-	bool checkCore(string coreIP);
-	void initialize_Start();
-	void initialize_Connections();
-	void initialize_VideoSettings();
-	void initialize_AudioSettings();
-	void initialize_LogOptions();
-	bool initialize_LMdevice(bool bRetryForever=false);
-
+		// Private methods
 public:
-	// Public member variables
+		// Public member variables
 
-	
+//<-dceag-const-b->
 public:
-	// Constructors/Destructor
-	LM();
-	~LM();
-	void Initialize();
-	void Draw();	
-	
+		// Constructors/Destructor
+		LMCE_Launch_Manager(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
+		virtual ~LMCE_Launch_Manager();
+		virtual bool GetConfig();
+		virtual bool Register();
+		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
+		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
+//<-dceag-const-e->
 
+//<-dceag-const2-b->
+		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
+		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
+		LMCE_Launch_Manager(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
+//<-dceag-const2-e->
 
+//<-dceag-h-b->
+	/*
+				AUTO-GENERATED SECTION
+				Do not change the declarations
+	*/
 
-};
+	/*
+			*****DATA***** accessors inherited from base class
+
+			*****EVENT***** accessors inherited from base class
+
+			*****COMMANDS***** we need to implement
+	*/
+
+//<-dceag-h-e->
+	};
 
 //<-dceag-end-b->
+}
 #endif
 //<-dceag-end-e->

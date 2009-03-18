@@ -1,734 +1,199 @@
-
-#include "LMCE_Launch_Manager.h"
-#include "DCE/DCEConfig.h"
-#include "DCE/Logger.h"
-#include "DCE/ClientSocket.h"
-#include "pluto_main/Define_DeviceData.h"
-#include "Gen_Devices/AllCommandsRequests.h"
-#include "PlutoUtils/ProcessUtils.h"
-#include <iostream>
-#include <fstream>
-
-//using namespace DCE;
-
-#include "Gen_Devices/AllCommandsRequests.h"
-
-// timeouts in seconds
-#define MEDIA_DEVICE_TIMEOUT 10
-#define CORE_DEVICE_TIMEOUT 10
-#define CORE_SERVICE_TIMEOUT 600
-
-// time in milliseconds
-#define LOG_REFRESH_INTERVAL 30000
-
-
-#define	PLUTO_CONFIG "/etc/pluto.conf"
-#define PLUTO_LOG_DIR "/var/log/pluto"
-#define SCREENLOGS_BASE "/home/screenlogs"
-#define APP_UI_DIAG "/usr/pluto/bin/UIdiag"
-#define APP_UI_DIAG_WORKDIR "/usr/pluto/bin"
-#define APP_UI_DIAG_LIBS "/opt/libsdl1.2-1.2.7+1.2.8cvs20041007/lib"
-
-#define SCRIPT_X_CHECK_SETTINGS "/usr/pluto/bin/X-CheckSettings.sh"
-
-#define SCRIPT_SETUP_AV_SETTINGS "/usr/pluto/bin/SetupAudioVideo.sh"
-
-#define VIDEO_DRIVER_NAME_FILE "/tmp/lmce_lm.video.dat"
-#define VIDEO_DRIVER_TOOL "/usr/pluto/bin/GetVideoDriver.py"
-
-#define KILL_XORG_SCRIPT "/usr/pluto/bin/Stop_X.sh"
-
-#define PLUTO_LOCKS "/usr/pluto/locks/pluto_spawned_local_devices.txt"
-#define LM_PROGRESS_LOG "/var/log/pluto/LaunchManager.progress.log"
-#define NETWORK_SETTINGS_SCRIPT "/usr/pluto/bin/Network_DisplaySettings.sh --all"
-#define RA_SCRIPT "/usr/pluto/bin/RA-handler.sh"
-
-// Remote Assistance script options
-#define RA_ON "--enable"
-#define RA_OFF "--disable"
-
-#define START_CORE_SCRIPT "/usr/pluto/bin/StartCoreServices.sh"
-#define STOP_CORE_SCRIPT "/usr/pluto/bin/StopCoreServices.sh"
-
-#define DCEROUTER_LOCK "/usr/pluto/locks/DCERouter"
-
-//
-// The primary constructor when the class is created as a stand-alone device
-LM::LM()
-{
-}
-
-LM::~LM()
-
-{
-	
-}
-void LM::Initialize()
-{
-	DCE::LoggerWrapper::SetType(LT_LOGGER_FILE, PLUTO_LOG_DIR "/LaunchManager.log");
-	DCE::LoggerWrapper::GetInstance()->Write(LV_STATUS, "Starting...");
-	
-	writeLog("=>initialize_Connections()",true);
-	initialize_Connections();
-	writeLog("=>initialize_VideoSettings()");
-	initialize_VideoSettings();
-	writeLog("=>initialize_AudioSettings()");
-	initialize_AudioSettings();
-	writeLog("=>initialize_LogOptions()");
-	initialize_LogOptions();
-	//writeLog("=>initialize_ViewLog()"); //<=====Not going to implement in new version, no need to.
-	//initialize_ViewLog();
-	
-	//writeLog("=>initialize_ConfigurationFiles()");  //<======Not going to implement here, re-implement it in the web admin.
-	//initialize_ConfigurationFiles();
-
-	// after all is read, initializing server
-	writeLog("=>initialize_Start()");
-	initialize_Start();
-	
-	// creating required dir
-	//QDir qdir(SCREENLOGS_BASE);
-	//if (!qdir.exists(SCREENLOGS_BASE, true))
-	//	qdir.mkdir(SCREENLOGS_BASE, true);
-
-	// if the system was already running when we started, let's catch new children and report we are up
-	//if ( m_bCoreRunning || m_bMediaRunning )
-	//{
-        //  updateSerialPorts();
-	//	respawnNewChildren();
-	//	reportDeviceUp();
-	//}
-	
-	//writeLog("=>loadSettings()");
-	// reding autostart settings
-	//loadSettings();
-	
-	//writeLog("Started!");
-	
-
-	
-
-}
-
-void LM::writeLog(string s, bool toScreen, int logLevel)
-{
-	if (toScreen)
-	{
-		string timestamp = "Today";//QDateTime::currentDateTime().toString();
-		//cout << timestamp + " " + s << endl;
-		//lbMessages->update();
-		//doRedraw();
-	}
-
-	cout << s << endl;
-	DCE::LoggerWrapper::GetInstance()->Write(logLevel, s.c_str());
-}
-
-
-void LM::initialize_Connections()
-{
-	// initing connections
-	DCEConfig *pConfig = new DCEConfig(PLUTO_CONFIG);
-
-	m_sCoreIP = pConfig->m_mapParameters_Find("DCERouter");
-	
-	m_sMySQLHost = pConfig->m_mapParameters_Find("MySqlHost");
-
-	m_sMySQLUser = pConfig->m_mapParameters_Find("MySqlUser");
-
-	m_sMySQLPass = pConfig->m_mapParameters_Find("MySqlPassword");
-
-
-	m_sMySQLPort = pConfig->m_mapParameters_Find("MySqlPort");
-	if (m_sMySQLPort=="")
-		m_sMySQLPort = "3306";
-	
-	m_sDCERouterPort = pConfig->m_mapParameters_Find("DCERouterPort");
-	if (m_sDCERouterPort== "")
-		m_sDCERouterPort = "3450";
-	
-	//SHOULD CHANGE THESE TO BOOL
-	m_sAutostartCore = pConfig->m_mapParameters_Find("AutostartCore");
-	m_sAutostartMedia = pConfig->m_mapParameters_Find("AutostartMedia");
-	
-	m_bRemoteAssistanceRunning = checkRAStatus();
-	
-	// trying to connect to DB
-	openDB();
-	
-	m_sDeviceID = pConfig->m_mapParameters_Find("PK_Device");
-	
-	// detecting core
-	m_sCoreDeviceID = queryDB("SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=7");
-	if (m_sCoreDeviceID=="")
-	{
-		m_sCoreDeviceID = "1";
-		writeLog("Hmm... core device ID is empty, setting it to 1", false, LV_WARNING);
-	}
-	else
-		writeLog("Detected core as device #" + m_sCoreDeviceID, false, LV_WARNING);
-	
-	string mdID;
-	
-	if (m_sDeviceID == m_sCoreDeviceID)
-	{
-		m_bCoreHere = true;
-		mdID = queryDB("SELECT PK_Device FROM Device LEFT JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE FK_Device_ControlledVia=" + m_sDeviceID + " AND FK_DeviceCategory IN (8)");
-		
-		if (mdID != "")
-		{
-			m_bMediaHere = true;
-		}
-	}
-	else
-	{
-		m_bMediaHere = true;
-		mdID = m_sDeviceID;
-	}
-	string sCoreHere = m_bCoreHere?"X":" ";
-	string sMediaHere = m_bMediaHere?"X":" ";
-	cout << "Core is  here: [" + sCoreHere + "]" << endl;
-	cout << "Media is Here: [" +  sMediaHere + "]" << endl;
-
-	
-	if (m_sDeviceID!="")
-	{
-		string localOrbiterID = queryDB("SELECT PK_Device FROM Device LEFT JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE FK_Device_ControlledVia=" + mdID + " AND FK_DeviceCategory IN (2, 3, 5)");
-		m_sOrbiterID = localOrbiterID;
-	}
-
-	m_sMediaID = mdID;
-	
-	delete pConfig;
-}
-
-void LM::Draw() {
-	system("clear");  //yes, I know this is not the best way to do it...
-	cout << "+------------------------------------------------------------------------------+" << endl;
-	cout << "|LinuxMCE Launch Manager, V1.0                                                 |" << endl;
-	cout << "+------------------------------------------------------------------------------+" << endl;
-	cout << "Core Ip: " + m_sCoreIP + "                     MySQL Host: " + m_sMySQLHost + " " << endl;
-	cout << "MD Status:                              MySQL User: " + m_sMySQLUser + " " << endl;
-	cout << "Video Driver:                           MySQL Pass: " + m_sMySQLPass + " " << endl;
-        cout << "Resolution:                                                                     " << endl;
-	//cout << "["+m_bAutostartCore?"X":" "; +"]Autostart Core                                                                                " << endl;
-	cout << "                                                                                " << endl;
-	cout << "                                                                                " << endl;
-	cout << "+-LOG--------------------------------------------------------------------------+" << endl;
-	cout << "                                                                                " << endl;
-	cout << "                                                                                " << endl;
-	cout << "                                                                                " << endl;
-
-
-}
-
-
-
-bool LM::checkRAStatus()
-{
-	return getRAid() != "";
-}
-
-string LM::getRAid()
-{
-	DCEConfig *pConfig = new DCEConfig(PLUTO_CONFIG);
-	string sPass = pConfig->m_mapParameters_Find("remote");
-	string sInst =  pConfig->m_mapParameters_Find("PK_Installation");
-	delete pConfig;
-	
-	if (sPass == "")
-		return m_sRAInfo = "";
-	else
-		return m_sRAInfo = sInst + "-" + sPass;
-}
-
-bool LM::openDB()
-{
-	//see usage at http://c-programming.suite101.com/article.cfm/using_a_mysql_databases_with_c
-	if (pm_mysqlPlutoDatabase)
-	{
-		writeLog("Attempted to reopen already opened DB, closing current connection first", false, LV_WARNING);
-		closeDB();
-	}
-	
-	writeLog("Opening DB connection..", true);
-	
-	mysql_init(&m_mysqlMysql);
-	if(pm_mysqlPlutoDatabase=mysql_real_connect(&m_mysqlMysql,m_sMySQLHost.c_str(),m_sMySQLUser.c_str(),m_sMySQLPass.c_str(),"pluto_main",0,0,0))
-	{
-		writeLog("Successful", true);
-		return true;
-	}
-	else
-	{
-		//writeLog("Error: " + mysql_error(&m_mysqlMysql, true, LV_WARNING);
-		writeLog("Error: Could not connect to database",true,LV_WARNING);
-		delete pm_mysqlPlutoDatabase;
-		pm_mysqlPlutoDatabase = NULL;
-		return false;
-	}
-}
-
-bool LM::closeDB()
-{
-	writeLog("Closing DB connection..");
-	
-	if (pm_mysqlPlutoDatabase)
-	{
-		mysql_close(pm_mysqlPlutoDatabase);
-		writeLog("Successful", true);
-		pm_mysqlPlutoDatabase = NULL;
-		return true;
-	}
-	else
-	{
-		writeLog("No need: it wasn't open");
-		return false;
-	}
-}
-
-string LM::queryDB(string query)
-{
-	string sResult;
-	MYSQL_RES *queryResult;
-	MYSQL_ROW resultRow;
-
-	mysql_query(pm_mysqlPlutoDatabase,query.c_str());
-
-	queryResult = mysql_store_result(pm_mysqlPlutoDatabase);
-	resultRow = mysql_fetch_row(queryResult);
-	sResult = resultRow[0];
-	mysql_free_result(queryResult);
-	//if ( performQueryDB(query, queryResult) )
-	//{
-	//	if (queryResult.next())
-	//		sResult = queryResult.value(0).toString();
-	///	else
-	//		writeLog("Query: \"" + query +"\" returned no records", false, LV_DEBUG);
-	//}
-	//else
-	//{
-	//	writeLog("Query: \"" + query +"\" failed", false, LV_DEBUG);
-	//}
-	
-	return sResult;
-}
 /*
-bool LM::performQueryDB(string query, MYSQL_RES &queryResult)
-{
-	writeLog("Running query: \"" + query + "\"", false, LV_DEBUG);
+     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
 
-	if ( pPlutoDatabase ) {
-		//if (!pPlutoDatabase->isOpen())
-		//{
-		//	writeLog("Attempted to exec query via closed DB connection, trying to reopen it", false, LV_WARNING);
-		//	closeDB();
-		//	if (!openDB())
-		//	{
-		//		writeLog("Reopening failed, giving up", false, LV_CRITICAL);
-		//		return false;
-		//	}
-		//}
-		
-		queryResult = pPlutoDatabase->exec(query);
-		if ( queryResult.isActive() )
-			return true;
-		
-		writeLog("Error executing query", false, LV_CRITICAL);
-		QSqlError err = pPlutoDatabase->lastError();
-		printSQLerror(err);
-		
-		writeLog("Trying to reopen DB connection", false, LV_WARNING);
-		closeDB();
-		if (!openDB())
-		{
-			writeLog("Reopening failed, giving up", false, LV_CRITICAL);
-			return false;
-		}
-		
-		queryResult = pPlutoDatabase->exec(query);
-		if ( queryResult.isActive() )
-			return true;
-		
-		writeLog("Error executing query after reopen", false, LV_CRITICAL);
-		//printSQLerror(err);
+     www.plutohome.com
+
+     Phone: +1 (877) 758-8648
+ 
+
+     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+     of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+     See the GNU General Public License for more details.
+
+*/
+//<-dceag-d-b->
+#include "LMCE_Launch_Manager.h"
+#include "DCE/Logger.h"
+#include "PlutoUtils/FileUtils.h"
+#include "PlutoUtils/StringUtils.h"
+#include "PlutoUtils/Other.h"
+
+#include <iostream>
+using namespace std;
+using namespace DCE;
+
+#include "Gen_Devices/AllCommandsRequests.h"
+//<-dceag-d-e->
+
+//<-dceag-const-b->
+// The primary constructor when the class is created as a stand-alone device
+LMCE_Launch_Manager::LMCE_Launch_Manager(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
+	: LMCE_Launch_Manager_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
+//<-dceag-const-e->
+{
+}
+
+//<-dceag-const2-b->
+// The constructor when the class is created as an embedded instance within another stand-alone device
+LMCE_Launch_Manager::LMCE_Launch_Manager(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
+	: LMCE_Launch_Manager_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
+//<-dceag-const2-e->
+{
+}
+
+//<-dceag-dest-b->
+LMCE_Launch_Manager::~LMCE_Launch_Manager()
+//<-dceag-dest-e->
+{
+	
+}
+
+//<-dceag-getconfig-b->
+bool LMCE_Launch_Manager::GetConfig()
+{
+	if( !LMCE_Launch_Manager_Command::GetConfig() )
 		return false;
-	}
-	else
-	{
-		writeLog("Attempted to query not initialized DB", false, LV_CRITICAL);
-		return false;
-	}
-}*/
-void LM::initialize_VideoSettings()
-{
-	if (m_sOrbiterID == "")
-		return;
+//<-dceag-getconfig-e->
 
-	m_sVideoResolution = queryDB("SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=" + m_sMediaID + " AND FK_DeviceData=" + StringUtils::itos(DEVICEDATA_Video_settings_CONST));
-	cout << m_sVideoResolution << endl;
-	
-	//The old Launch Manager used a python script which use the now obsolete xorgconfig module to get the video driver name
-	//Let just do it manuall in good ol' c++
-	//vector thisText;
-	string line;
-	string xorgFile;
-	ifstream textStream ("/etc/X11/xorg.conf");
-	while(getline(textStream,line)){
-		line=StringUtils::TrimSpaces(line) + "\n";
-		line=StringUtils::Replace(line,"\t","");
-		xorgFile += line;
-	}
-	textStream.close();
-	
-	//now lets get the correct section
-	size_t startPos;
-
-	startPos=xorgFile.find("\nSection \"Device\"\n");
-  	xorgFile = xorgFile.substr(startPos,-1);
-
-	
-	startPos=xorgFile.find("\nEndSection\n");
-	xorgFile = xorgFile.substr(0,startPos+11);
-	
-	
-	//Now we have the Device section, find the driver!
-	startPos=xorgFile.find("\nDriver");
-	startPos+=7;
-	xorgFile=xorgFile.substr(startPos,-1);
-
-	startPos=xorgFile.find("\n");
-	xorgFile=xorgFile.substr(0,startPos);
-	xorgFile=StringUtils::Replace(xorgFile,"\"","");	
-	m_sVideoDriver = xorgFile;
-	cout << m_sVideoDriver << endl;
-	
-	//system("python /usr/pluto/bin/GetVideoDriver.py /tmp/lmce_lm.video.dat");//" + VIDEO_DRIVER_TOOL.c_Str() + " " + VIDEO_DRIVER_NAME_FILE.c_str());
-	// fetching video driver info
-	//if ( QFile::exists(VIDEO_DRIVER_TOOL) )
-	//{
-	//	QProcess qp(QString(VIDEO_DRIVER_TOOL));
-	//	qp.addArgument(VIDEO_DRIVER_NAME_FILE);
-	//	qp.start();
-	//	
-	//	int iTimeout = 10; // 10 secs
-	//			
-	//	while(qp.isRunning() && iTimeout--)
-	//	{
-	//		sleep(1);
-	//	}
-	//	
-	//	if (  qp.normalExit() && qp.exitStatus()==0 && QFile::exists(VIDEO_DRIVER_NAME_FILE) )
-	//	{
-	//		QFile f(VIDEO_DRIVER_NAME_FILE);
-	//		if (f.open(IO_ReadOnly))
-	//		{
-	//			QString vDriver;
-	//			int iRet = f.readLine(vDriver, 100);
-	//			f.close();
-	//			if (iRet != -1)
-	//				leVideoDriver->setText(vDriver);
-	//		}
-	//		else
-	//			writeLog("Failed to open file" + QString(":") + VIDEO_DRIVER_NAME_FILE, false, LV_WARNING);
-	//	}
-	//}
+	// Put your code here to initialize the data in this class
+	// The configuration parameters DATA_ are now populated
+	return true;
 }
 
-void LM::initialize_AudioSettings()
+//<-dceag-reg-b->
+// This function will only be used if this device is loaded into the DCE Router's memory space as a plug-in.  Otherwise Connect() will be called from the main()
+bool LMCE_Launch_Manager::Register()
+//<-dceag-reg-e->
 {
-	if (m_sMediaID == "")
-		return;
-
-	string sSettings = queryDB("SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=" + m_sMediaID + " AND FK_DeviceData=" + StringUtils::itos(DEVICEDATA_Audio_settings_CONST));
-	cout << sSettings;
-	if (sSettings=="")
-		return;
-	
-	//cbAC3Pass->setChecked(aSettings.contains("3"));
-	/*	
-	int iSelected = 0;
-	switch(aSettings.at(0).cell())
-	{
-		case 'C':
-			iSelected = 1;
-			break;
-		case 'O':
-			iSelected = 2;
-			break;
-		case 'S':
-			iSelected = 3;
-			break;
-		case 'L':
-			iSelected = 4;
-			break;
-		case 'M':
-		default:
-			break;
-	}
-	
-	cmbAudioConnector->setCurrentItem(iSelected);
-	*/
+	return Connect(PK_DeviceTemplate_get()); 
 }
 
-void LM::initialize_LogOptions()
+/*  Since several parents can share the same child class, and each has it's own implementation, the base class in Gen_Devices
+	cannot include the actual implementation.  Instead there's an extern function declared, and the actual new exists here.  You 
+	can safely remove this block (put a ! after the dceag-createinst-b block) if this device is not embedded within other devices. */
+//<-dceag-createinst-b->
+LMCE_Launch_Manager_Command *Create_LMCE_Launch_Manager(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
 {
-	// initing list of log levels
-	//initLogLevels();
-	
-	// filling list
-	//lvLogLevels->setSorting(-1);
-	
-	//{
-	//	QMap<int,QString>::iterator i=m_qmapLogLevels.end();
-	//	while (i!=m_qmapLogLevels.begin())
-	//	{
-	//		--i;
-	//		new QCheckListItem(lvLogLevels, *i, QCheckListItem::CheckBox);
-	//	}
-	//}
-	
-	// hiding progressbar
-	//pbProgress->hide();
-	
-	// initing connections
-	DCEConfig *pConfig = new DCEConfig(PLUTO_CONFIG);
-	string s = pConfig->m_mapParameters_Find("LogLevels");
-	delete pConfig;
-	cout << "Log Levels: " + s + " " << endl;
-	//QStringList levels = QStringList::split(',', s, false);
-	/*
-	for (QStringList::iterator i=levels.begin(); i!=levels.end(); ++i)
-	{
-		bool bOk;
-		int logLevel = (*i).toInt(&bOk);
-		if (bOk)
-		{
-			QMap<int,QString>::iterator j = m_qmapLogLevels.find(logLevel);
-			if (j!=m_qmapLogLevels.end())
-			{
-				QString sItem = *j;
-				QCheckListItem *pItem = (QCheckListItem*) lvLogLevels->findItem(sItem, 0);
-				if (pItem)
-					pItem->setState(QCheckListItem::On);
-			}
-		}
-	}*/
+	return new LMCE_Launch_Manager(pPrimaryDeviceCommand, pData, pEvent, pRouter);
+}
+//<-dceag-createinst-e->
+
+/*
+	When you receive commands that are destined to one of your children,
+	then if that child implements DCE then there will already be a separate class
+	created for the child that will get the message.  If the child does not, then you will 
+	get all	commands for your children in ReceivedCommandForChild, where 
+	pDeviceData_Base is the child device.  If you handle the message, you 
+	should change the sCMD_Result to OK
+*/
+//<-dceag-cmdch-b->
+void LMCE_Launch_Manager::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
+//<-dceag-cmdch-e->
+{
+	sCMD_Result = "UNHANDLED CHILD";
 }
 
-void LM::initialize_Start()
+/*
+	When you received a valid command, but it wasn't for one of your children,
+	then ReceivedUnknownCommand gets called.  If you handle the message, you 
+	should change the sCMD_Result to OK
+*/
+//<-dceag-cmduk-b->
+void LMCE_Launch_Manager::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
+//<-dceag-cmduk-e->
 {
-	writeLog("Checking for mysql...");
-	bool bMySQL = checkMySQL();
-	string s;
-	s = bMySQL?"connection OK":"connection failed";
-	writeLog("Done checking for mysql..." + s);
-	
-	//TODO decide are we dedicated core, hybrid or disk-based MD
-	
-	writeLog("Checking for core services...");
-	bool bCore=checkCore(m_sCoreIP);
-	s=bCore?"core is running":"core is not running";
-	writeLog("Done checking for core services..." + s);
-	m_bCoreRunning = bCore;
-
-	
-	
-	
-	// connecting LM device to core
-	if (m_bCoreRunning)
-	{
-		if ( initialize_LMdevice() )
-		{
-			//if (m_bMediaHere)
-				//m_bMediaRunning = checkMedia();
-		}
-		else
-		{
-			writeLog("Failed to connect to DCERouter!", true, LV_WARNING);
-		}
-	}
-	/*
-	tuneConnectionsWidgets();
-	
-	if (!m_pDevicesUpdateTimer)
-	{
-		m_pDevicesUpdateTimer = new QTimer();
-		connect(m_pDevicesUpdateTimer, SIGNAL(timeout()), this, SLOT(updateDevicesProgressBar()));
-	}
-	
-	
-	// enabling all tabs
-	for (uint i=0; i<=6; i++)
-		twAllTabs->setTabEnabled(twAllTabs->page(i), true);
-	
-	if (!m_bMediaHere)
-	{
-		twAllTabs->removePage(twAllTabs->page(2));
-		twAllTabs->removePage(twAllTabs->page(2));
-	}
-	
-	// starting RA monitoring timer
-	m_pRemoteAssistanceStatusRefreshTimer = new QTimer();
-	connect(m_pRemoteAssistanceStatusRefreshTimer, SIGNAL(timeout()), this, SLOT(updateRAstatus()));
-	m_pRemoteAssistanceStatusRefreshTimer->start(5000);
-	*/
+	sCMD_Result = "UNKNOWN COMMAND";
 }
 
-bool LM::checkMySQL(bool showMessage)
+//<-dceag-sample-b->
+/*		**** SAMPLE ILLUSTRATING HOW TO USE THE BASE CLASSES ****
+
+**** IF YOU DON'T WANT DCEGENERATOR TO KEEP PUTTING THIS AUTO-GENERATED SECTION ****
+**** ADD AN ! AFTER THE BEGINNING OF THE AUTO-GENERATE TAG, LIKE //<=dceag-sample-b->! ****
+Without the !, everything between <=dceag-sometag-b-> and <=dceag-sometag-e->
+will be replaced by DCEGenerator each time it is run with the normal merge selection.
+The above blocks are actually <- not <=.  We don't want a substitution here
+
+void LMCE_Launch_Manager::SomeFunction()
 {
-	string msg = "Connection to specified MySQL server failed";
-	bool bResult = false;
-	
-	if ( pm_mysqlPlutoDatabase ) {
-		msg = "Connection to specified MySQL server succeeded";
-		bResult = true;
-	}
+	// If this is going to be loaded into the router as a plug-in, you can implement: 	virtual bool Register();
+	// to do all your registration, such as creating message interceptors
 
-	if (showMessage)
-	{
-		writeLog("Checking for core services...",true,LV_STATUS);	
-	}
+	// If you use an IDE with auto-complete, after you type DCE:: it should give you a list of all
+	// commands and requests, including the parameters.  See "AllCommandsRequests.h"
+
+	// Examples:
 	
-	return bResult;
+	// Send a specific the "CMD_Simulate_Mouse_Click" command, which takes an X and Y parameter.  We'll use 55,77 for X and Y.
+	DCE::CMD_Simulate_Mouse_Click CMD_Simulate_Mouse_Click(m_dwPK_Device,OrbiterID,55,77);
+	SendCommand(CMD_Simulate_Mouse_Click);
+
+	// Send the message to orbiters 32898 and 27283 (ie a device list, hence the _DL)
+	// And we want a response, which will be "OK" if the command was successfull
+	string sResponse;
+	DCE::CMD_Simulate_Mouse_Click_DL CMD_Simulate_Mouse_Click_DL(m_dwPK_Device,"32898,27283",55,77)
+	SendCommand(CMD_Simulate_Mouse_Click_DL,&sResponse);
+
+	// Send the message to all orbiters within the house, which is all devices with the category DEVICECATEGORY_Orbiter_CONST (see pluto_main/Define_DeviceCategory.h)
+	// Note the _Cat for category
+	DCE::CMD_Simulate_Mouse_Click_Cat CMD_Simulate_Mouse_Click_Cat(m_dwPK_Device,DEVICECATEGORY_Orbiter_CONST,true,BL_SameHouse,55,77)
+    SendCommand(CMD_Simulate_Mouse_Click_Cat);
+
+	// Send the message to all "DeviceTemplate_Orbiter_CONST" devices within the room (see pluto_main/Define_DeviceTemplate.h)
+	// Note the _DT.
+	DCE::CMD_Simulate_Mouse_Click_DT CMD_Simulate_Mouse_Click_DT(m_dwPK_Device,DeviceTemplate_Orbiter_CONST,true,BL_SameRoom,55,77);
+	SendCommand(CMD_Simulate_Mouse_Click_DT);
+
+	// This command has a normal string parameter, but also an int as an out parameter
+	int iValue;
+	DCE::CMD_Get_Signal_Strength CMD_Get_Signal_Strength(m_dwDeviceID, DestDevice, sMac_address,&iValue);
+	// This send command will wait for the destination device to respond since there is
+	// an out parameter
+	SendCommand(CMD_Get_Signal_Strength);  
+
+	// This time we don't care about the out parameter.  We just want the command to 
+	// get through, and don't want to wait for the round trip.  The out parameter, iValue,
+	// will not get set
+	SendCommandNoResponse(CMD_Get_Signal_Strength);  
+
+	// This command has an out parameter of a data block.  Any parameter that is a binary
+	// data block is a pair of int and char *
+	// We'll also want to see the response, so we'll pass a string for that too
+
+	int iFileSize;
+	char *pFileContents
+	string sResponse;
+	DCE::CMD_Request_File CMD_Request_File(m_dwDeviceID, DestDevice, "filename",&pFileContents,&iFileSize,&sResponse);
+	SendCommand(CMD_Request_File);
+
+	// If the device processed the command (in this case retrieved the file),
+	// sResponse will be "OK", and iFileSize will be the size of the file
+	// and pFileContents will be the file contents.  **NOTE**  We are responsible
+	// free deleting pFileContents.
+
+
+	// To access our data and events below, you can type this-> if your IDE supports auto complete to see all the data and events you can access
+
+	// Get our IP address from our data
+	string sIP = DATA_Get_IP_Address();
+
+	// Set our data "Filename" to "myfile"
+	DATA_Set_Filename("myfile");
+
+	// Fire the "Finished with file" event, which takes no parameters
+	EVENT_Finished_with_file();
+	// Fire the "Touch or click" which takes an X and Y parameter
+	EVENT_Touch_or_click(10,150);
 }
-bool LM::checkCore(string coreIP)
-{
-	writeLog("Checking if core is up...", true);
-	
-	struct stat fInfo;
+*/
+//<-dceag-sample-e->
 
-	if ( lstat(DCEROUTER_LOCK, &fInfo)==0 )
-	{
-		writeLog("Found router lock file at " + string(DCEROUTER_LOCK) );
-		//string s;
+/*
 
-		//s=system("/bin/nc -z 192.168.80.1");
-		//cout << s << endl;		
-		//return true;
-		 
-		time_t tStart = time(NULL);
-		time_t tEnd = tStart;
-		
-		string cmd = "/bin/nc -z " + m_sCoreIP + " " + m_sDCERouterPort;
+	COMMANDS TO IMPLEMENT
 
-		string sRet = "";
-		const double checkCoreTimeout = 60; // 60 seconds
-		
-		while ( (difftime(tEnd,tStart)<checkCoreTimeout) && (sRet.size()!=1) )
-		{
-			writeLog("Attempting to connect to " + m_sCoreIP + ":" + m_sDCERouterPort);
-			sRet = system(cmd.c_str());
-			tEnd = time(NULL);
-			sleep(1);
-		}
-		
-		if (sRet.size() != 1)
-		{
-			writeLog("Timeout waiting for router restart, suggesting user to reboot the system");
-			
-			//int iResult = QMessageBox::warning(this, "Important", "The DCERouter is not responding. A reboot may be needed. Reboot the system now?", 
-			//		     QMessageBox::Yes, QMessageBox::No);
-			//
-			//if (iResult == QMessageBox::Yes)
-			//{
-			//	writeLog("User selected to reboot box");
-			//	rebootPC();				
-			//	return false;
-			//}
-			//else
-			//{
-			//	writeLog("User selected not to reboot box");
-			//	return false;
-			//}
-			
-			return false;
-		}
-		else
-		{
-			writeLog("Core is running, connected successfully");
-			return true;
-		}
-	}
-	else
-	{
-		writeLog("No router lock file found, core is down");
-		return false;
-	}
-}
-
-bool LM::initialize_LMdevice(bool bRetryForever/*=false*/)
-{
-	// if we already have a connection
-	//if (m_pLaunch_Manager)
-	//	return true;
-	
-	//QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-	
-	string sCoreIP = m_sCoreIP;
-	
-	if (sCoreIP == "localhost")
-		sCoreIP = "127.0.0.1";
-	
-	writeLog("Connecting to router at " + sCoreIP, true, LV_STATUS);
-	/*
-	while (true)
-	{
-		m_pLaunch_Manager = new DCE::Launch_Manager(m_qsDeviceID.toInt(), sCoreIP,  true, false);
-
-		bool bConnected = m_pLaunch_Manager->GetConfig();
-		if ( bConnected && m_pLaunch_Manager->m_pEvent->m_pClientSocket->m_eLastError==DCE::ClientSocket::cs_err_NeedReload )
-		{
-			lbMessages->clear();
-			writeLog(QString("Please go to an existing Orbiter and choose 'quick reload router'. "), true, LV_WARNING);
-			writeLog(QString("This media director will start after you do..."), true, LV_WARNING);
-
-			
-			sleep(10);
-
-			writeLog(QString("initialize_LMdevice: router should be reloaded, retrying connect"), false, LV_WARNING);
-			delete m_pLaunch_Manager;
-			m_pLaunch_Manager = NULL;
-		}
-		if( bConnected && m_pLaunch_Manager->Connect(m_pLaunch_Manager->PK_DeviceTemplate_get()) ) 
-		{
-			writeLog(QString("initialize_LMdevice: Connect OK"), true, LV_STATUS);
-			
-			map<int,string> devicesMap;
-			m_pLaunch_Manager->GetDevicesByTemplate(DEVICETEMPLATE_Orbiter_Plugin_CONST, &devicesMap);
-			if (devicesMap.empty())
-			{
-				writeLog("initialize_LMdevice: Failed to find Orbiter plugin", false, LV_WARNING);
-			}
-		
-			map<int,string>::iterator it = devicesMap.begin();
-		
-			m_qsOrbiterPluginID = QString::number( (*it).first );
-			
-			m_pLaunch_Manager->lmWidget = this;
-			
-			QTimer::singleShot(5000, this, SLOT(LMdeviceKeepAlive()));
-			
-			QApplication::restoreOverrideCursor();
-			return true;
-		}
-		
-		delete m_pLaunch_Manager;
-		m_pLaunch_Manager = NULL;
-		
-		writeLog(QString("initialize_LMdevice: Connect failed"), true, LV_WARNING);
-		
-		if (!bRetryForever)
-		{
-			writeLog(QString("initialize_LMdevice: Not retrying"), true, LV_WARNING);
-			QApplication::restoreOverrideCursor();
-			return false;
-		}
-		else
-		{
-			writeLog(QString("initialize_LMdevice: Retrying (forever)"), true, LV_WARNING);
-		}
-	}*/
-}
+*/
 
 
