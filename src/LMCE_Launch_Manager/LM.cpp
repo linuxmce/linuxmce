@@ -1,5 +1,6 @@
 
-#include "LMCE_Launch_Manager.h"
+//#include "LMCE_Launch_Manager.h"
+#include "LM.h"
 #include "DCE/DCEConfig.h"
 #include "DCE/Logger.h"
 #include "DCE/ClientSocket.h"
