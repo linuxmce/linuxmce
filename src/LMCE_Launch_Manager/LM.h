@@ -3,22 +3,18 @@
 #define LMCE_Launch_Manager_h
 
 //	DCE Implemenation for #1888 LMCE Launch Manager
-
+#include "LMCE_Launch_Manager.h"
 #include "Gen_Devices/LMCE_Launch_ManagerBase.h"
 #include <mysql.h>
 
 
 
-//namespace DCE
-//{
-//	class LMCE_Launch_Manager
-//}
-	
 
 class LM
 {
 private:	
 	// Private member variables
+	DCE::LMCE_Launch_Manager *m_pLMCE_Launch_Manager;
 	int m_iDevicesLevel;
 	bool m_bRemoteAssistanceRunning;
 

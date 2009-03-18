@@ -16,7 +16,7 @@ const char *g_szCompile_Date="<=compile_date=>";
 /*SVN_REVISION*/
 
 
-//using namespace DCE;
+//using namespace LM;
 
 
 int main(int argc, char* argv[]) 

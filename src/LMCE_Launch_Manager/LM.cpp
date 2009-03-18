@@ -1,5 +1,5 @@
 
-//#include "LMCE_Launch_Manager.h"
+#include "LMCE_Launch_Manager.h"
 #include "LM.h"
 #include "DCE/DCEConfig.h"
 #include "DCE/Logger.h"
@@ -10,7 +10,7 @@
 #include <iostream>
 #include <fstream>
 
-//using namespace DCE;
+using namespace std; //DCE
 
 #include "Gen_Devices/AllCommandsRequests.h"
 
@@ -104,7 +104,7 @@ void LM::Initialize()
 	// reding autostart settings
 	//loadSettings();
 	
-	//writeLog("Started!");
+	//writeLog("Started!");http://www.google.com/
 	
 
 	
@@ -672,64 +672,64 @@ bool LM::initialize_LMdevice(bool bRetryForever/*=false*/)
 		sCoreIP = "127.0.0.1";
 	
 	writeLog("Connecting to router at " + sCoreIP, true, LV_STATUS);
-	/*
+	
 	while (true)
 	{
-		m_pLaunch_Manager = new DCE::Launch_Manager(m_qsDeviceID.toInt(), sCoreIP,  true, false);
+		m_pLMCE_Launch_Manager = new DCE::Launch_Manager(m_sDeviceID.toInt(), sCoreIP,  true, false);
 
 		bool bConnected = m_pLaunch_Manager->GetConfig();
 		if ( bConnected && m_pLaunch_Manager->m_pEvent->m_pClientSocket->m_eLastError==DCE::ClientSocket::cs_err_NeedReload )
 		{
-			lbMessages->clear();
-			writeLog(QString("Please go to an existing Orbiter and choose 'quick reload router'. "), true, LV_WARNING);
-			writeLog(QString("This media director will start after you do..."), true, LV_WARNING);
+			//lbMessages->clear();
+			writeLog("Please go to an existing Orbiter and choose 'quick reload router'. ", true, LV_WARNING);
+			writeLog("This media director will start after you do...", true, LV_WARNING);
 
 			
 			sleep(10);
 
-			writeLog(QString("initialize_LMdevice: router should be reloaded, retrying connect"), false, LV_WARNING);
-			delete m_pLaunch_Manager;
-			m_pLaunch_Manager = NULL;
+			writeLog("initialize_LMdevice: router should be reloaded, retrying connect", false, LV_WARNING);
+			delete m_pLMCE_Launch_Manager;
+			m_pLMCE_Launch_Manager = NULL;
 		}
 		if( bConnected && m_pLaunch_Manager->Connect(m_pLaunch_Manager->PK_DeviceTemplate_get()) ) 
 		{
-			writeLog(QString("initialize_LMdevice: Connect OK"), true, LV_STATUS);
+			writeLog("initialize_LMdevice: Connect OK", true, LV_STATUS);
 			
 			map<int,string> devicesMap;
-			m_pLaunch_Manager->GetDevicesByTemplate(DEVICETEMPLATE_Orbiter_Plugin_CONST, &devicesMap);
+			m_pLMCE_Launch_Manager->GetDevicesByTemplate(DEVICETEMPLATE_Orbiter_Plugin_CONST, &devicesMap);
 			if (devicesMap.empty())
 			{
 				writeLog("initialize_LMdevice: Failed to find Orbiter plugin", false, LV_WARNING);
 			}
 		
-			map<int,string>::iterator it = devicesMap.begin();
+			//map<int,string>::iterator it = devicesMap.begin();
 		
-			m_qsOrbiterPluginID = QString::number( (*it).first );
+			//m_qOrbiterPluginID = QString::number( (*it).first );
 			
-			m_pLaunch_Manager->lmWidget = this;
+			//m_pLaunch_Manager->lmWidget = this;
 			
-			QTimer::singleShot(5000, this, SLOT(LMdeviceKeepAlive()));
+			//QTimer::singleShot(5000, this, SLOT(LMdeviceKeepAlive()));
 			
-			QApplication::restoreOverrideCursor();
+			//QApplication::restoreOverrideCursor();
 			return true;
 		}
 		
-		delete m_pLaunch_Manager;
-		m_pLaunch_Manager = NULL;
+		delete m_pLMCE_Launch_Manager;
+		m_pLMCE_Launch_Manager = NULL;
 		
-		writeLog(QString("initialize_LMdevice: Connect failed"), true, LV_WARNING);
+		writeLog("initialize_LMdevice: Connect failed", true, LV_WARNING);
 		
 		if (!bRetryForever)
 		{
-			writeLog(QString("initialize_LMdevice: Not retrying"), true, LV_WARNING);
-			QApplication::restoreOverrideCursor();
+			writeLog("initialize_LMdevice: Not retrying", true, LV_WARNING);
+			//QApplication::restoreOverrideCursor();
 			return false;
 		}
 		else
 		{
 			writeLog(QString("initialize_LMdevice: Retrying (forever)"), true, LV_WARNING);
 		}
-	}*/
+	}
 }
 
 
