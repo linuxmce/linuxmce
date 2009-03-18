@@ -1,6 +1,7 @@
 
 #include "LMCE_Launch_Manager.h"
 #include "LM.h"
+#include "List.h"
 #include "DCE/DCEConfig.h"
 #include "DCE/Logger.h"
 #include "DCE/ClientSocket.h"
@@ -9,7 +10,7 @@
 #include "PlutoUtils/ProcessUtils.h"
 #include <iostream>
 #include <fstream>
-#include "List.h"
+
 
 using namespace std; //DCE
 
@@ -818,7 +819,7 @@ void LM::respawnNewChildren()
 void LM::syncWithLockList(bool eraseDeadLocalDevices)
 {
 	writeLog("Reading lockfile");
-			
+	/*		
 	// reading list
 	QStringList qsl;
 	QFile f(QString(PLUTO_LOCKS));
@@ -886,11 +887,11 @@ void LM::syncWithLockList(bool eraseDeadLocalDevices)
 		
 		m_qvvMediaDevices  = newV;
 		newV.clear();
-	}
+	}*/
 }
 
 void LM::startCoreDevices(bool checkForAlreadyRunning)
-{
+{/*
 	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 //	m_iDevicesLevel = 0;
 //	m_pDevicesUpdateTimer->start(1000);
@@ -1012,12 +1013,12 @@ void LM::startCoreDevices(bool checkForAlreadyRunning)
 		writeLog("Failed to query MySQL DB");
 	}
 	
-	QApplication::restoreOverrideCursor();
+	QApplication::restoreOverrideCursor();*/
 }
 
 
 void LM::startMediaDevices(bool checkForAlreadyRunning)
-{
+{/*
 	if (m_qsMediaID=="")
 		return;
 	
@@ -1133,6 +1134,6 @@ void LM::startMediaDevices(bool checkForAlreadyRunning)
 		writeLog("Failed to query MySQL DB");
 	}
 	
-	QApplication::restoreOverrideCursor();
+	QApplication::restoreOverrideCursor();*/
 }
 

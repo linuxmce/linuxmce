@@ -68,8 +68,8 @@ private:
 	void initialize_LogOptions();
 	bool initialize_LMdevice(bool bRetryForever=false);
 	void updateSerialPorts();
-	void respawnNewChildren()
-	void syncWithLockList(bool eraseDeadLocalDevices=false)
+	void respawnNewChildren();
+	void syncWithLockList(bool eraseDeadLocalDevices=false);
 	void startMediaDevices(bool checkForAlreadyRunning=false);
 	void startCoreDevices(bool checkForAlreadyRunning=false);
 public:
