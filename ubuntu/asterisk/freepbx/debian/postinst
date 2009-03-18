@@ -55,4 +55,5 @@ if [[ "$1" == configure ]]; then
 	## the installed modules add files to some of these directories and the ownership needs to be set for them too
 	chown -R asterisk.asterisk {/usr/share,/var/{log,lib,spool},/etc}/asterisk
 	chown -R www-data: /etc/asterisk/{{sip,iax,zapata,queues}_additional,{sip,iax}_registrations}.conf
+	chown -R www-data: /var/lib/asterisk/mohmp3
 fi
