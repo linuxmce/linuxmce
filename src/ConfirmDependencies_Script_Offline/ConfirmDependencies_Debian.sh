@@ -97,7 +97,9 @@ case "$URL_TYPE" in
 		EndSlashRepos=$(echo "$REPOS_SRC" | sed "$SingleEndSlash")
 		AptSrc_ParseSourcesList
 		if AptSrc_AddSource "deb $EndSlashRepos $REPOS $SECTIONS"; then
-			AptSrc_WriteSourcesList >/etc/apt/sources.list
+			if ! BlacklistConfFiles '/etc/apt/sources.list' ;then
+				AptSrc_WriteSourcesList >/etc/apt/sources.list
+			fi
 			if [[ "$InternetConnection" != NoInternetConnection ]]; then
 				apt-get update
 			fi
