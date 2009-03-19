@@ -4,6 +4,7 @@
 
 #include "LMCE_Launch_Manager.h"
 #include "List.h"
+#include "DB.h"
 #include "Gen_Devices/LMCE_Launch_ManagerBase.h"
 #include <mysql.h>
 
@@ -53,7 +54,7 @@ private:
 	string m_sMySQLUser;
 	string m_sMySQLPass;
 	string m_qsMySQLPort;
-
+	DB testDB;
 	// Private methods
 	void writeLog(string s, bool toScreen=false,int logLevel=LV_STATUS);
 	string getRAid();
@@ -79,6 +80,8 @@ private:
 	void waitForDevice(int deviceID);
 	void reportDeviceUp();
 	void loadSettings();
+	void LMdeviceKeepAlive();
+	void deinitialize_LMdevice();
 public:
 	// Public member variables
 

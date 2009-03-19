@@ -20,8 +20,7 @@ private:
 
 	MYSQL *m_pConnection;
 	MYSQL m_mysqlInit;
-	MYSQL_RES *m_pResult;
-	MYSQL_ROW m_mysqlRow;	
+		
 
 public:
 	//constructor
@@ -31,10 +30,23 @@ public:
 	//connect to databse
 	bool connect(string sHost, string sUser, string sPass, string sDatabase);
 	void close();
-	string query(string sQuery);
-	bool next();
+	DBResult query(string sQuery);
 	bool connected();
-	string value(int i);
+	
 
+}
+
+
+class DBResult
+{
+private:
+	MYSQL_RES *m_pResult;
+	MYSQL_ROW m_mysqlRow;
+public:
+	DBResult();
+	~DBResult();
+	bool next();
+	string value(int i);
+	
 };
 #endif

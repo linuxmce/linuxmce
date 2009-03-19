@@ -32,31 +32,31 @@ bool DB::connected()
 	//TODO: Actually test connection to make sure it is still there	
 	return m_bConnected;
 }
-string DB::query(string sQuery)
+DBResult DB::query(string sQuery)
 {
-	string sResult;
-	mysql_free_result(m_pResult); //get rid of old result first
-	mysql_query(m_pConnection,sQuery.c_str());
-
-	if(m_pResult = mysql_store_result(m_pConnection))
-	{
-		if (next())
-			sResult = value(0);
-		else
-			sResult = "";
-	}
+	DBResult result;
 	
-	return sResult;
+	mysql_query(m_pConnection,sQuery.c_str());
+	result->m_pResult = mysql_store_result(m_pConnection);
+	//if(m_pResult = mysql_store_result(m_pConnection))
+	//{
+	//	if (next())
+	//		sResult = value(0);
+	//	else
+	//		sResult = "";
+	//}
+	
+	return result;
 }
-bool DB::next()
+bool DBResult::next()
 {
-	if(m_mysqlRow = mysql_fetch_row(m_pResult)) {
+	if (m_mysqlRow = mysql_fetch_row(m_pResult))
 		return true;
-	} else {
+	else
 		return false;
-	}
+
 }
-string DB::value(int i)
+string DBResult::value(int i)
 {
 	return m_mysqlRow[i];
 }

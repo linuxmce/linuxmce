@@ -60,6 +60,7 @@ using namespace std; //DCE
 // The primary constructor when the class is created as a stand-alone device
 LM::LM()
 {
+	m_pLMCE_Launch_Manager=NULL;
 	m_pPlutoDatabase=NULL;
 	m_pResult=NULL;
 }
@@ -91,7 +92,7 @@ void LM::Initialize()
 	// after all is read, initializing server
 	writeLog("=>initialize_Start()");
 	initialize_Start();
-	
+	//LMdeviceKeepAlive();//DEBUG--REMOVE
 	// creating required dir
 	//QDir qdir(SCREENLOGS_BASE);
 	//if (!qdir.exists(SCREENLOGS_BASE, true))
@@ -101,8 +102,11 @@ void LM::Initialize()
 	if ( m_bCoreRunning || m_bMediaRunning )
 	{
         	updateSerialPorts();
+LMdeviceKeepAlive();//DEBUG--REMOV
 		respawnNewChildren();
+LMdeviceKeepAlive();//DEBUG--REMOV
 		reportDeviceUp();
+LMdeviceKeepAlive();//DEBUG--REMOV
 	}
 	
 	writeLog("=>loadSettings()");
@@ -260,6 +264,7 @@ bool LM::openDB()
 	writeLog("Opening DB connection..", true);
 	
 	mysql_init(&m_mysqlMysql);
+	
 	if(m_pPlutoDatabase=mysql_real_connect(&m_mysqlMysql,m_sMySQLHost.c_str(),m_sMySQLUser.c_str(),m_sMySQLPass.c_str(),"pluto_main",0,0,0))
 	{
 		writeLog("Successful", true);
@@ -680,7 +685,7 @@ bool LM::checkCore(string coreIP)
 bool LM::initialize_LMdevice(bool bRetryForever/*=false*/)
 {
 	// if we already have a connection
-	if (m_pLMCE_Launch_Manager)
+	if (m_pLMCE_Launch_Manager!=NULL)
 		return true;
 	
 	//QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -800,7 +805,7 @@ void LM::updateSerialPorts()
 	//TODO: Fork this and monitor progress and implement a timeout
 	string s;
 	s=system(sCmd.c_str());
-	writeLog("Process completed with status: " + s);
+	writeLog("Process completed.");//with status: " + s);
 	//	delete pService;
 	//}
 					
@@ -1229,7 +1234,13 @@ void LM::waitForDevice(int deviceID)
 void LM::reportDeviceUp()
 {
 	// saying we're up
-	DCE::Message *pMessage = new DCE::Message(atoi(m_sDeviceID.c_str()), DEVICEID_DCEROUTER, DCE::PRIORITY_NORMAL, DCE::MESSAGETYPE_SYSCOMMAND, DCE::SYSCOMMAND_DEVICE_UP, 0);
+	long i = atoi(m_sDeviceID.c_str());
+	//DCE::Command_Impl::m_bRouterReloading = false;
+	DCE::Message *pMessage = new DCE::Message(1, DEVICEID_DCEROUTER, DCE::PRIORITY_NORMAL, DCE::MESSAGETYPE_SYSCOMMAND, DCE::SYSCOMMAND_DEVICE_UP, 0);
+	//cout << m_sDeviceID;
+	
+	//cout << StringUtils::itos(i);
+	
 	if (m_pLMCE_Launch_Manager)
 	{
 		writeLog("Sending  SYSCOMMAND_DEVICE_UP from LM device " + m_sDeviceID, false);
@@ -1243,4 +1254,75 @@ void LM::reportDeviceUp()
 }
 void LM::loadSettings()
 {
+}
+void LM::LMdeviceKeepAlive()
+{
+	if (m_pLMCE_Launch_Manager)
+	{
+		// if device is finishing
+		if (m_pLMCE_Launch_Manager->m_bTerminate)
+		{
+			writeLog("Connection to DCERouter terminated", true);
+			bool bReload = m_pLMCE_Launch_Manager->m_bReload;
+			deinitialize_LMdevice();
+			if (bReload)
+			{
+				writeLog("Reconnecting to DCERouter as requested", true);
+				if (!initialize_LMdevice())
+				{
+					writeLog("Will retry later..", true);
+					//QTimer::singleShot(5000, this, SLOT(LMdeviceKeepAlive()));
+				}
+				else
+				{
+                                        updateSerialPorts();
+					respawnNewChildren();
+					reportDeviceUp();
+				}
+			}
+			else
+			{
+				writeLog("Reconnect to DCERouter was not requested", true);
+				m_bCoreRunning = false;
+				m_bMediaRunning = false;
+				//tuneConnectionsWidgets();
+			}
+		}
+		else
+		{
+			//QTimer::singleShot(5000, this, SLOT(LMdeviceKeepAlive()));
+		}
+	}
+	else
+	{
+		if (m_bCoreRunning || m_bMediaRunning)
+		{
+			writeLog("Reconnecting to DCERouter as requested", true);
+			if (!initialize_LMdevice())
+			{
+				writeLog("Will retry later..", true);
+				//QTimer::singleShot(5000, this, SLOT(LMdeviceKeepAlive()));
+			}
+			else
+			{
+                                updateSerialPorts();
+				respawnNewChildren();
+				reportDeviceUp();
+			}
+		}
+                else
+                {
+                    writeLog("LMdeviceKeepAlive() not reconnecting, as this is not required");
+                }
+	}
+}
+void LM::deinitialize_LMdevice()
+{
+	if (m_pLMCE_Launch_Manager)
+	{
+		m_pLMCE_Launch_Manager->OnQuit();
+		pthread_join(m_pLMCE_Launch_Manager->m_RequestHandlerThread, NULL);
+		delete m_pLMCE_Launch_Manager;
+		m_pLMCE_Launch_Manager = NULL;
+	}
 }
