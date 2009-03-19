@@ -19,7 +19,7 @@ private:
 	vector<string> m_vMediaDevices;
 
 	bool m_bRemoteAssistanceRunning;
-
+	bool m_bDelayUpReport;
 	bool m_bCoreRunning;
 	bool m_bMediaRunning;
 
@@ -46,7 +46,7 @@ private:
 	//MySQL Related 	
 	MYSQL *m_pPlutoDatabase;
 	MYSQL m_mysqlMysql;
-	MYSQL_RES *m_msqlResult;
+	MYSQL_RES *m_pResult;
 	MYSQL_ROW m_mysqlRow;
 	string m_sCoreIP;
 	string m_sMySQLHost;
@@ -60,7 +60,7 @@ private:
 	bool checkRAStatus();  
 	bool openDB();
 	bool closeDB();
-	string queryDB(string query);
+	string queryDB(string query, bool getFirstResult=true);
 	bool checkMySQL(bool showMessage=false);
 	bool checkCore(string coreIP);
 	void initialize_Start();
@@ -74,6 +74,11 @@ private:
 	void syncWithLockList(bool eraseDeadLocalDevices=false);
 	void startMediaDevices(bool checkForAlreadyRunning=false);
 	void startCoreDevices(bool checkForAlreadyRunning=false);
+	bool nextResultDB();
+	string valueDB(int i);
+	void waitForDevice(int deviceID);
+	void reportDeviceUp();
+	void loadSettings();
 public:
 	// Public member variables
 
