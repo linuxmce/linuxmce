@@ -7,6 +7,8 @@ CleanCoreSetup
 
 FixAsteriskConfig
 
+addAdditionalTTYStart
+
 #To please the "PlutoRestorePoint.sh" script.
 mkdir -p /home/backup/upload
 
