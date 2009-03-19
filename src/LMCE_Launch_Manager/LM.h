@@ -45,7 +45,7 @@ private:
 	string m_sVideoDriver;
 
 	//MySQL Related 	
-	MYSQL *m_pPlutoDatabase;
+	DB m_dbPlutoDatabase;
 	MYSQL m_mysqlMysql;
 	MYSQL_RES *m_pResult;
 	MYSQL_ROW m_mysqlRow;
@@ -82,6 +82,8 @@ private:
 	void loadSettings();
 	void LMdeviceKeepAlive();
 	void deinitialize_LMdevice();
+	bool checkMedia();
+	void findRunningMediaDevices();
 public:
 	// Public member variables
 

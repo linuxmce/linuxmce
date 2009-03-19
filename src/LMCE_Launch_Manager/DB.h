@@ -7,7 +7,20 @@
 #include <mysql.h>
 #include <vector>
 
+class DBResult
+{
+private:
+	
+public:
+	DBResult();
+	~DBResult();
+	bool next();
+	string value(int i);
 
+	MYSQL_RES *m_pResult; //TODO:these should be private with some accessor methods
+	MYSQL_ROW m_mysqlRow;
+	
+};
 class DB {
 private:
 	//vector m_vResults;
@@ -32,21 +45,7 @@ public:
 	void close();
 	DBResult query(string sQuery);
 	bool connected();
-	
+	string quickQuery(string sQuery);
 
-}
-
-
-class DBResult
-{
-private:
-	MYSQL_RES *m_pResult;
-	MYSQL_ROW m_mysqlRow;
-public:
-	DBResult();
-	~DBResult();
-	bool next();
-	string value(int i);
-	
 };
 #endif

@@ -23,7 +23,7 @@ bool DB::connect(string sHost, string sUser, string sPass, string sDatabase)
 void DB::close()
 {
 	mysql_close(m_pConnection);
-	mysql_free_result(m_pResult);
+	//mysql_free_result(m_pResult);
 	m_pConnection=NULL;
 	m_bConnected = false;
 }
@@ -37,7 +37,7 @@ DBResult DB::query(string sQuery)
 	DBResult result;
 	
 	mysql_query(m_pConnection,sQuery.c_str());
-	result->m_pResult = mysql_store_result(m_pConnection);
+	result.m_pResult = mysql_store_result(m_pConnection);
 	//if(m_pResult = mysql_store_result(m_pConnection))
 	//{
 	//	if (next())
@@ -47,6 +47,24 @@ DBResult DB::query(string sQuery)
 	//}
 	
 	return result;
+}
+string DB::quickQuery(string sQuery) 
+{
+	string sResult;
+	DBResult result;
+	result=query(sQuery);
+	result.next();
+	sResult = result.value(0);
+	//delete result;//TODO: How to clean this up? delete only works on pointers....
+	return sResult;	
+}
+DBResult::DBResult()
+{
+
+}
+DBResult::~DBResult()
+{
+
 }
 bool DBResult::next()
 {

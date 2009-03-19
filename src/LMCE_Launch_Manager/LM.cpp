@@ -61,7 +61,7 @@ using namespace std; //DCE
 LM::LM()
 {
 	m_pLMCE_Launch_Manager=NULL;
-	m_pPlutoDatabase=NULL;
+	//m_pPlutoDatabase=NULL;
 	m_pResult=NULL;
 }
 
@@ -169,7 +169,7 @@ void LM::initialize_Connections()
 	m_sDeviceID = pConfig->m_mapParameters_Find("PK_Device");
 	
 	// detecting core
-	m_sCoreDeviceID = queryDB("SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=7");
+	m_sCoreDeviceID = m_dbPlutoDatabase.quickQuery("SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=7");
 	if (m_sCoreDeviceID=="")
 	{
 		m_sCoreDeviceID = "1";
@@ -183,7 +183,7 @@ void LM::initialize_Connections()
 	if (m_sDeviceID == m_sCoreDeviceID)
 	{
 		m_bCoreHere = true;
-		mdID = queryDB("SELECT PK_Device FROM Device LEFT JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE FK_Device_ControlledVia=" + m_sDeviceID + " AND FK_DeviceCategory IN (8)");
+		mdID = m_dbPlutoDatabase.quickQuery("SELECT PK_Device FROM Device LEFT JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE FK_Device_ControlledVia=" + m_sDeviceID + " AND FK_DeviceCategory IN (8)");
 		
 		if (mdID != "")
 		{
@@ -203,7 +203,7 @@ void LM::initialize_Connections()
 	
 	if (m_sDeviceID!="")
 	{
-		string localOrbiterID = queryDB("SELECT PK_Device FROM Device LEFT JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE FK_Device_ControlledVia=" + mdID + " AND FK_DeviceCategory IN (2, 3, 5)");
+		string localOrbiterID = m_dbPlutoDatabase.quickQuery("SELECT PK_Device FROM Device LEFT JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE FK_Device_ControlledVia=" + mdID + " AND FK_DeviceCategory IN (2, 3, 5)");
 		m_sOrbiterID = localOrbiterID;
 	}
 
@@ -255,7 +255,7 @@ string LM::getRAid()
 bool LM::openDB()
 {
 	//see usage at http://c-programming.suite101.com/article.cfm/using_a_mysql_databases_with_c
-	if (m_pPlutoDatabase!=NULL)
+	if (m_dbPlutoDatabase.connected())
 	{
 		writeLog("Attempted to reopen already opened DB, closing current connection first", false, LV_WARNING);
 		closeDB();
@@ -263,9 +263,9 @@ bool LM::openDB()
 	
 	writeLog("Opening DB connection..", true);
 	
-	mysql_init(&m_mysqlMysql);
+	//mysql_init(&m_mysqlMysql);
 	
-	if(m_pPlutoDatabase=mysql_real_connect(&m_mysqlMysql,m_sMySQLHost.c_str(),m_sMySQLUser.c_str(),m_sMySQLPass.c_str(),"pluto_main",0,0,0))
+	if(m_dbPlutoDatabase.connect(m_sMySQLHost,m_sMySQLUser,m_sMySQLPass,"pluto_main"))
 	{
 		writeLog("Successful", true);
 		return true;
@@ -274,8 +274,8 @@ bool LM::openDB()
 	{
 		//writeLog("Error: " + mysql_error(&m_mysqlMysql, true, LV_WARNING);
 		writeLog("Error: Could not connect to database",true,LV_WARNING);
-		delete m_pPlutoDatabase;
-		m_pPlutoDatabase = NULL;
+		//delete m_pPlutoDatabase;
+		//m_pPlutoDatabase = NULL;
 		return false;
 	}
 }
@@ -284,13 +284,10 @@ bool LM::closeDB()
 {
 	writeLog("Closing DB connection..");
 	
-	if (m_pPlutoDatabase)
+	if (m_dbPlutoDatabase.connected())
 	{
-		if(m_pResult!=NULL)
-			mysql_free_result(m_pResult);
-		mysql_close(m_pPlutoDatabase);
+		m_dbPlutoDatabase.close();
 		writeLog("Successful", true);
-		m_pPlutoDatabase = NULL;
 		return true;
 	}
 	else
@@ -299,7 +296,7 @@ bool LM::closeDB()
 		return false;
 	}
 }
-
+/*
 string LM::queryDB(string query,bool getFirstResult)
 {
 	string sResult;
@@ -337,6 +334,7 @@ string LM::valueDB(int i)
 {
 	return m_mysqlRow[i];
 }
+*/
 /*
 //WILL NOT RE-IMPLEMENT THIS, IT IS NOT NEEDED!
 bool LM::performQueryDB(string query, MYSQL_RES &queryResult)
@@ -390,7 +388,7 @@ void LM::initialize_VideoSettings()
 	if (m_sOrbiterID == "")
 		return;
 
-	m_sVideoResolution = queryDB("SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=" + m_sMediaID + " AND FK_DeviceData=" + StringUtils::itos(DEVICEDATA_Video_settings_CONST));
+	m_sVideoResolution = m_dbPlutoDatabase.quickQuery("SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=" + m_sMediaID + " AND FK_DeviceData=" + StringUtils::itos(DEVICEDATA_Video_settings_CONST));
 	cout << m_sVideoResolution << endl;
 	
 	//The old Launch Manager used a python script which use the now obsolete xorgconfig module to get the video driver name
@@ -465,7 +463,7 @@ void LM::initialize_AudioSettings()
 	if (m_sMediaID == "")
 		return;
 
-	string sSettings = queryDB("SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=" + m_sMediaID + " AND FK_DeviceData=" + StringUtils::itos(DEVICEDATA_Audio_settings_CONST));
+	string sSettings = m_dbPlutoDatabase.quickQuery("SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=" + m_sMediaID + " AND FK_DeviceData=" + StringUtils::itos(DEVICEDATA_Audio_settings_CONST));
 	cout << sSettings << endl; //DEBUG
 	if (sSettings=="")
 		return;
@@ -565,8 +563,8 @@ void LM::initialize_Start()
 	{
 		if ( initialize_LMdevice() )
 		{
-			//if (m_bMediaHere)
-				//m_bMediaRunning = checkMedia();
+			if (m_bMediaHere)
+				m_bMediaRunning = checkMedia();
 		}
 		else
 		{
@@ -605,7 +603,7 @@ bool LM::checkMySQL(bool showMessage)
 	string msg = "Connection to specified MySQL server failed";
 	bool bResult = false;
 	
-	if ( m_pPlutoDatabase ) {
+	if ( m_dbPlutoDatabase.connected() ) {
 		msg = "Connection to specified MySQL server succeeded";
 		bResult = true;
 	}
@@ -729,7 +727,7 @@ bool LM::initialize_LMdevice(bool bRetryForever/*=false*/)
 		
 			map<int,string>::iterator it = devicesMap.begin();
 			m_sOrbiterPluginID = StringUtils::itos((*it).first) ;
-			cout <<m_sOrbiterPluginID << endl;
+			//cout <<m_sOrbiterPluginID << endl; // DEBUG
 			//m_pLaunch_Manager->lmWidget = this;
 			
 			//QTimer::singleShot(5000, this, SLOT(LMdeviceKeepAlive()));
@@ -923,14 +921,15 @@ void LM::syncWithLockList(bool eraseDeadLocalDevices)
 void LM::startCoreDevices(bool checkForAlreadyRunning)
 {
 	string s;
-	
+	DBResult dbrCoreDevices;
+
 	//QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 	m_iDevicesLevel = 0;
 //	m_pDevicesUpdateTimer->start(1000);
 	
 	writeLog("startCoreDevices()");
 
-	if ( m_pPlutoDatabase!=NULL ) {
+	if ( m_dbPlutoDatabase.connected() ) {
 		// fetching list of non-MD devices under Core
 		List devices;
 		
@@ -947,23 +946,24 @@ void LM::startCoreDevices(bool checkForAlreadyRunning)
 			//int i=0; //debug
 			string query = "SELECT Device.PK_Device, DeviceTemplate.Description, DeviceTemplate.CommandLine, Device.Disabled, DeviceTemplate.ImplementsDCE, Device.FK_DeviceTemplate,DeviceTemplate.IsPlugin FROM Device JOIN DeviceTemplate ON Device.FK_DeviceTemplate=DeviceTemplate.PK_DeviceTemplate WHERE (PK_Device=" + devices.index(i) + extraCondition + ")";
 						
-			//cout << query.c_str() << endl << endl;//DEBUG		
-			queryDB(query,false);
+			//cout << query.c_str() << endl << endl;//DEBUG	
+				
+			dbrCoreDevices=m_dbPlutoDatabase.query(query);
 		
 			// if device exist
 			//while ( bQueryExecResult && q.next() )
-			while (nextResultDB())
+			while (dbrCoreDevices.next())
 			{
 	
-				if (valueDB(3)=="1")
-					writeLog("Not starting device " + valueDB(0) + " "  + valueDB(1) + " - it is disabled", true);
-				else if (valueDB(6)=="1")
-					writeLog("Not starting device " + valueDB(0) + " "  + valueDB(1) + " - it is a plugin", true);
+				if (dbrCoreDevices.value(3)=="1")
+					writeLog("Not starting device " + dbrCoreDevices.value(0) + " "  + dbrCoreDevices.value(1) + " - it is disabled", true);
+				else if (dbrCoreDevices.value(6)=="1")
+					writeLog("Not starting device " + dbrCoreDevices.value(0) + " "  + dbrCoreDevices.value(1) + " - it is a plugin", true);
 				else
 				{			
 									
 					//if device implements DCE, start it
-					if (valueDB(4)=="1")
+					if (dbrCoreDevices.value(4)=="1")
 					{
 						bool alreadyRunning=false;
 						
@@ -971,7 +971,7 @@ void LM::startCoreDevices(bool checkForAlreadyRunning)
 							//for (QValueVector<int>::iterator jt=m_qvvCoreDevices.begin(); jt!=m_qvvCoreDevices.end(); ++jt)
 							for (int j=0;j<m_vCoreDevices.size();j++)
 							{
-								if ( m_vCoreDevices[j] == valueDB(0) )
+								if ( m_vCoreDevices[j] == dbrCoreDevices.value(0) )
 								{
 									alreadyRunning = true;
 									break;
@@ -980,27 +980,27 @@ void LM::startCoreDevices(bool checkForAlreadyRunning)
 						
 						if (alreadyRunning)
 						{
-							writeLog("Not starting device " +  valueDB(0) + " "  + valueDB(1) + " - it is already running", true);
+							writeLog("Not starting device " +  dbrCoreDevices.value(0) + " "  + dbrCoreDevices.value(1) + " - it is already running", true);
 						}
 						else
 						{
-							writeLog("Starting device " + valueDB(0) + " "  + valueDB(1), true);
+							writeLog("Starting device " + dbrCoreDevices.value(0) + " "  + dbrCoreDevices.value(1), true);
 							
 							//screen -d -m -S "$Description-$DeviceID" /usr/pluto/bin/Spawn_Device.sh $DeviceID $DCERouter $Command	
 												
-							string deviceCommand = valueDB(2);
+							string deviceCommand = dbrCoreDevices.value(2);
 							if (deviceCommand=="")
-								deviceCommand=StringUtils::Replace(valueDB(1)," ","_");
+								deviceCommand=StringUtils::Replace(dbrCoreDevices.value(1)," ","_");
 								//deviceCommand = q.value(1).toString().simplifyWhiteSpace().replace(" ","_");
 							
 							if (!FileUtils::FileExists(deviceCommand))
 							{
-								writeLog("Not starting device " +  valueDB(0) + " "  + valueDB(1) + " -  binary is not found, probably it is in the middle of installation", true, LV_WARNING);
+								writeLog("Not starting device " +  dbrCoreDevices.value(0) + " "  + dbrCoreDevices.value(1) + " -  binary is not found, probably it is in the middle of installation", true, LV_WARNING);
 								continue;
 							}
 							
-							string screenName = valueDB(1);
-							screenName = FileUtils::ValidCPPName(screenName + "-" + valueDB(0));
+							string screenName = dbrCoreDevices.value(1);
+							screenName = FileUtils::ValidCPPName(screenName + "-" + dbrCoreDevices.value(0));
 
 							// starting device
 							//QStringList args;
@@ -1016,36 +1016,37 @@ void LM::startCoreDevices(bool checkForAlreadyRunning)
 							//args.push_back(deviceCommand);
 							string sCmd = "/usr/bin/screen -d -m -S " + screenName;
 							system(sCmd.c_str());
-							sCmd = "/usr/pluto/bin/Spawn_Device.sh " + valueDB(0) + " " + m_sCoreIP;
+							sCmd = "/usr/pluto/bin/Spawn_Device.sh " + dbrCoreDevices.value(0) + " " + m_sCoreIP;
 							system(sCmd.c_str());
 							//QProcess process(args);
-							writeLog("Starting device " +  valueDB(0) + " " + valueDB(1));// + ": " + args.join(" "));
+							writeLog("Starting device " +  dbrCoreDevices.value(0) + " " + dbrCoreDevices.value(1));// + ": " + args.join(" "));
 							//process.start();
 							
 							// wait for register
-							waitForDevice(atoi(valueDB(0).c_str()));
+							waitForDevice(atoi(dbrCoreDevices.value(0).c_str()));
 							
 							// recording device in list
-							m_vCoreDevices.push_back(valueDB(0));
+							m_vCoreDevices.push_back(dbrCoreDevices.value(0));
 						}
 					}
 					else
 					{
-						writeLog("Not starting device " +  valueDB(0) + " "  + valueDB(1) + " - it doesn't implement DCE. Adding its children into start queue instead", false);
+						writeLog("Not starting device " +  dbrCoreDevices.value(0) + " "  + dbrCoreDevices.value(1) + " - it doesn't implement DCE. Adding its children into start queue instead", false);
 						
 						// adding child devices of this device - maybe some of them implement DCE
-						//string child_query = "SELECT PK_Device FROM Device WHERE FK_Device_ControlledVia=" + valueDB(0);
-						//QString children = "[ ";
-						//QSqlQuery cq;
-						//bool bChildQueryExecResult = performQueryDB(child_query, cq);
+						string child_query = "SELECT PK_Device FROM Device WHERE FK_Device_ControlledVia=" + dbrCoreDevices.value(0);
+						string children = "[ ";
+						DBResult dbrChildren;
+						dbrChildren = m_dbPlutoDatabase.query(child_query);
 
-						//while( bChildQueryExecResult && cq.next() )
-						//{
-						//	devices.append(cq.value(0).toString());
-						//	children += cq.value(0).toString() + " ";
-						//}
-						//children += "]";
-						//writeLog("Children list: " + children, false);
+						while( dbrChildren.next() )
+						{
+							devices.append(dbrChildren.value(0));
+							children += dbrChildren.value(0) + " ";
+						}
+						children += "]";
+						writeLog("Children list: " + children, false);
+						
 						
 					}
 				}
@@ -1056,7 +1057,7 @@ void LM::startCoreDevices(bool checkForAlreadyRunning)
 	{
 		writeLog("Failed to query MySQL DB");
 	}
-	
+	//delete &dbrCoreDevices;
 	//QApplication::restoreOverrideCursor();
 }
 
@@ -1064,7 +1065,7 @@ void LM::startCoreDevices(bool checkForAlreadyRunning)
 void LM::startMediaDevices(bool checkForAlreadyRunning)
 {
 	string s;
-	
+	DBResult dbrMediaDevices;
 	if (m_sMediaID=="")
 		return;
 	
@@ -1075,7 +1076,7 @@ void LM::startMediaDevices(bool checkForAlreadyRunning)
 
 	writeLog("startMediaDevices()");
 	
-	if ( m_pPlutoDatabase!=NULL  ) {
+	if ( m_dbPlutoDatabase.connected()  ) {
 		// fetching full list of devices under current MD
 		List devices;
 		devices.append(m_sMediaID);
@@ -1085,18 +1086,19 @@ void LM::startMediaDevices(bool checkForAlreadyRunning)
 			string query = "SELECT Device.PK_Device, DeviceTemplate.Description, DeviceTemplate.CommandLine, Device.Disabled, DeviceTemplate.ImplementsDCE FROM Device JOIN DeviceTemplate ON Device.FK_DeviceTemplate=DeviceTemplate.PK_DeviceTemplate WHERE  PK_Device=" + devices.index(i);
 			//QSqlQuery q;
 			//bool bQueryExecResult = performQueryDB(query, q);
-			queryDB(query,false);
+			
+			dbrMediaDevices=m_dbPlutoDatabase.query(query);
 
 			// if device exist
 			//if ( bQueryExecResult && q.next() )
-			if(nextResultDB())
+			if(dbrMediaDevices.next())
 			{
-				if (valueDB(3)=="1")
-					writeLog("Not starting device " +  valueDB(0) + " "  + valueDB(1) + " - it is disabled", true);
+				if (dbrMediaDevices.value(3)=="1")
+					writeLog("Not starting device " +  dbrMediaDevices.value(0) + " "  +dbrMediaDevices.value(1) + " - it is disabled", true);
 				else
 				{
 					// starting device if it implements DCE
-					if (valueDB(4)=="1")
+					if (dbrMediaDevices.value(4)=="1")
 					{
 						bool alreadyRunning=false;
 						
@@ -1104,7 +1106,7 @@ void LM::startMediaDevices(bool checkForAlreadyRunning)
 							//for (QValueVector<int>::iterator jt=m_qvvMediaDevices.begin(); jt!=m_qvvMediaDevices.end(); ++jt)
 							for (int j=0;j<m_vMediaDevices.size();j++)							
 							{
-								if ( m_vMediaDevices[j] == valueDB(0) )
+								if ( m_vMediaDevices[j] == dbrMediaDevices.value(0) )
 								{
 									alreadyRunning = true;
 									break;
@@ -1113,29 +1115,29 @@ void LM::startMediaDevices(bool checkForAlreadyRunning)
 						
 						if (alreadyRunning)
 						{
-							writeLog("Not starting device " +  valueDB(0) + " "  + valueDB(1) + " - it is already running", true);
+							writeLog("Not starting device " +  dbrMediaDevices.value(0) + " "  + dbrMediaDevices.value(1) + " - it is already running", true);
 						}
 						else
 						{
-							writeLog("Starting device " +  valueDB(0) + " "  + valueDB(1), true);
+							writeLog("Starting device " +  dbrMediaDevices.value(0) + " "  + dbrMediaDevices.value(1), true);
 							
 							//screen -d -m -S "$Description-$DeviceID" /usr/pluto/bin/Spawn_Device.sh $DeviceID $DCERouter $Command	
 												
-							string deviceCommand = valueDB(2);
+							string deviceCommand = dbrMediaDevices.value(2);
 							if (deviceCommand=="")
-								deviceCommand=StringUtils::Replace(valueDB(1)," ","_");
-								//deviceCommand = valueDB(1)).simplifyWhiteSpace().replace(" ","_");
+								deviceCommand=StringUtils::Replace(dbrMediaDevices.value(1)," ","_");
+								//deviceCommand = dbrMediaDevices.value(1)).simplifyWhiteSpace().replace(" ","_");
 							
 							if (!FileUtils::FileExists(deviceCommand))
 							{
-								writeLog("Not starting device " +  valueDB(0) + " "  + valueDB(1) + " - binary is not found, probably it is in the middle of installation", true, LV_WARNING);
+								writeLog("Not starting device " +  dbrMediaDevices.value(0) + " "  + dbrMediaDevices.value(1) + " - binary is not found, probably it is in the middle of installation", true, LV_WARNING);
 								continue;
 							}
 							
 							
 
-							string screenName = valueDB(1);
-							screenName = FileUtils::ValidCPPName(screenName + "-" + valueDB(0));
+							string screenName = dbrMediaDevices.value(1);
+							screenName = FileUtils::ValidCPPName(screenName + "-" + dbrMediaDevices.value(0));
 
 							// starting device
 							//QStringList args;
@@ -1151,17 +1153,17 @@ void LM::startMediaDevices(bool checkForAlreadyRunning)
 							//args.push_back(deviceCommand);
 							string sCmd = "/usr/bin/screen -d -m -S " + screenName;
 							system(sCmd.c_str());
-							sCmd = "/usr/pluto/bin/Spawn_Device.sh " + valueDB(0) + " " + m_sCoreIP;
+							sCmd = "/usr/pluto/bin/Spawn_Device.sh " + dbrMediaDevices.value(0) + " " + m_sCoreIP;
 							system(sCmd.c_str());
 							//QProcess process(args);
-							writeLog("Starting device " +  valueDB(0) + " " + valueDB(1));// + ": " + args.join(" "));
+							writeLog("Starting device " +  dbrMediaDevices.value(0) + " " + dbrMediaDevices.value(1));// + ": " + args.join(" "));
 							//process.start();
 							
 							// wait for register
-							waitForDevice(atoi(valueDB(0).c_str()));
+							waitForDevice(atoi(dbrMediaDevices.value(0).c_str()));
 							
 							// recording device in list
-							m_vMediaDevices.push_back(valueDB(0));
+							m_vMediaDevices.push_back(dbrMediaDevices.value(0));
 
 
 							
@@ -1169,19 +1171,19 @@ void LM::startMediaDevices(bool checkForAlreadyRunning)
 					}
 					else
 					{
-						writeLog("Not starting device " +  valueDB(0) + " "  + valueDB(1) + " - it doesn't implement DCE. Adding its children into start queue instead", false);
+						writeLog("Not starting device " +  dbrMediaDevices.value(0) + " "  + dbrMediaDevices.value(1) + " - it doesn't implement DCE. Adding its children into start queue instead", false);
 						// starting devices recursively
-						//QString child_query = QString("SELECT PK_Device FROM Device WHERE FK_Device_ControlledVia=") + *it;
-						//QString children = "[ ";
-						//QSqlQuery cq;
-						//bool bChildQueryExecResult = performQueryDB(child_query, cq);
-						//while(bChildQueryExecResult && cq.next())
-						//{
-						//	devices.append(cq.value(0).toString());
-						//	children += cq.value(0).toString() + " ";
-						//}
-						//children += "]";
-						//writeLog("Children list: " + children, false);
+						string child_query = "SELECT PK_Device FROM Device WHERE FK_Device_ControlledVia=" + devices.index(i);
+						string children = "[ ";
+						DBResult dbrChildren;
+						dbrChildren = m_dbPlutoDatabase.query(child_query);
+						while(dbrChildren.next())
+						{
+							devices.append(dbrChildren.value(0));
+							children += dbrChildren.value(0) + " ";
+						}
+						children += "]";
+						writeLog("Children list: " + children, false);
 					}
 				}
 			}
@@ -1324,5 +1326,88 @@ void LM::deinitialize_LMdevice()
 		pthread_join(m_pLMCE_Launch_Manager->m_RequestHandlerThread, NULL);
 		delete m_pLMCE_Launch_Manager;
 		m_pLMCE_Launch_Manager = NULL;
+	}
+}
+
+bool LM::checkMedia()
+{
+	writeLog("Checking if Media Station is already running..", true);
+	
+	findRunningMediaDevices();
+	
+	char cStatus = m_pLMCE_Launch_Manager->DeviceIsRegistered(atoi(m_sOrbiterID.c_str()));
+	if (cStatus == 'Y')
+	{
+		writeLog("Orbiter #" + m_sOrbiterID + " is registered");
+		return true;
+	}
+	else
+	{
+		writeLog("Orbiter #" + m_sOrbiterID + " is not registered");
+		return false;
+	}
+}
+
+void LM::findRunningMediaDevices()
+{
+	if (m_sMediaID=="")
+		return;
+
+	writeLog("Searching for running media devices...");
+	
+	if ( m_dbPlutoDatabase.connected() ) {
+		string runningDevices;
+		// fetching full list of devices under current MD
+		List devices;
+		devices.append(m_sMediaID);
+		//for (QStringList::iterator it=devices.begin(); it!=devices.end(); ++it)
+		for (int i=0; i<devices.size();i++)
+		{
+			string query = "SELECT Device.PK_Device, DeviceTemplate.Description, DeviceTemplate.CommandLine, Device.Disabled, DeviceTemplate.ImplementsDCE FROM Device JOIN DeviceTemplate ON Device.FK_DeviceTemplate=DeviceTemplate.PK_DeviceTemplate WHERE  PK_Device=" + devices.index(i);
+			DBResult res;
+			res= m_dbPlutoDatabase.query(query);
+			
+			// if device exist
+			if ( res.next() )
+			{
+				if (res.value(3)!="1")
+				{
+					// checking device if it implements DCE
+					if (res.value(4)=="1")
+					{
+						writeLog("Checking device " +  res.value(0) + " "  + res.value(1), false);
+						char cStatus = m_pLMCE_Launch_Manager->DeviceIsRegistered(atoi(res.value(0).c_str()));
+						if (cStatus == 'Y')
+						{
+							m_vMediaDevices.push_back(res.value(0));
+							runningDevices += res.value(0) + " ";
+						}
+					}
+					else
+					{
+						writeLog("Not checking device " +  res.value(0) + " "  + res.value(1) + " - it doesn't implement DCE. Adding its children into check instead", false);
+						// adding devices recursively
+						string child_query = "SELECT PK_Device FROM Device WHERE FK_Device_ControlledVia=" + devices.index(i);
+						string children = "[ ";
+						DBResult childRes;
+						childRes = m_dbPlutoDatabase.query(child_query);
+						
+						while( childRes.next() )
+						{
+							devices.append(childRes.value(0));
+							children += childRes.value(0) + " ";
+						}
+						children += "]";
+						writeLog("Children list: " + children, false);
+					}
+				}
+			}
+		}
+		
+		writeLog("Running media devices found: " + runningDevices, true);
+	}
+	else
+	{
+		writeLog("Failed to query MySQL DB");
 	}
 }
