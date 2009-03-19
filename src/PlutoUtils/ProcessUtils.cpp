@@ -399,9 +399,6 @@ int ProcessUtils::GetCommandOutput(const char * path, const char *const args[], 
 			close(errput[1]);
 			
 			fd_set fdset;
-			FD_ZERO(&fdset);
-			FD_SET(output[0], &fdset);
-			FD_SET(errput[0], &fdset);
 
 			int maxfd = max(output[0], errput[0]) + 1;
 			
@@ -410,6 +407,10 @@ int ProcessUtils::GetCommandOutput(const char * path, const char *const args[], 
 			
 			while (waitpid(pid, &status, WNOHANG) == 0)
 			{
+				FD_ZERO(&fdset);
+				FD_SET(output[0], &fdset);
+				FD_SET(errput[0], &fdset);
+
 				int bytes = 0;
 				
 				select(maxfd, &fdset, NULL, NULL, NULL);
