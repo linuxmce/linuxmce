@@ -102,6 +102,8 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 	int node_id = atoi(pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST).c_str());
 	if (node_id > 0 && node_id <= 233) {
 		sCMD_Result = "OK";
+		int level,temp,tempf,fan;
+		string heat;
 		switch (pMessage->m_dwID) {
 			case COMMAND_Generic_On_CONST:
 				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ON RECEIVED FOR CHILD %d",node_id);
@@ -114,12 +116,29 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 				break;
 				;;
 			case COMMAND_Set_Level_CONST:
-				int level = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST].c_str());
+				level = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST].c_str());
 				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET LEVEL RECEIVED FOR CHILD %d, level: %d",node_id,level);
 				myZWApi->zwBasicSet(node_id,level>99?99:level);
 				break;
 				;;
-				
+			case COMMAND_Set_Temperature_CONST:
+				temp = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST].c_str());
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET TEMPERATURE RECEIVED FOR CHILD %d, level: %d",node_id,temp);
+				tempf = (int)( (9.0/5.0) * (float)temp + 32.0 );
+				break;
+				;;
+			case COMMAND_Set_Fan_CONST:
+				fan = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_OnOff_CONST].c_str());
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET FAN RECEIVED FOR CHILD %d, level: %d",node_id,fan);
+				break;
+				;;	
+			case COMMAND_Set_HeatCool_CONST:
+				heat = pMessage->m_mapParameters[COMMANDPARAMETER_OnOff_CONST];
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET HEAT/COOL RECEIVED FOR CHILD %d, string: %s",node_id,heat.c_str());
+				// A - auto changeover; H - heat; C - cool; F - fan; 
+				break;
+				;;
+	
 		}
 	} else {
 		sCMD_Result = "BAD NODE ID";
