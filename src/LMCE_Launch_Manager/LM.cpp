@@ -1,8 +1,18 @@
+//TODO
+//[ ]initloglevels method, as well as the member map for converting them to the string equivalent
+//[ ]logLevel screen to add/remove log levels and write to pluto.conf
+//[ ]Rotate Logs button and methods
+//[ ]btnSwitchCore_clicked() and related methods to stop/start LMCE
+//[ ]btnRegenThisOrbiter_clicked()
+//[ ]btnReloadRouter_clicked()
+//[ ]btnRegenAllOrbiters_clicked()
+//[ ]startCoreServices() and media services
 
 #include "LMCE_Launch_Manager.h"
 #include "LM.h"
 #include "List.h"
 #include "DB.h"
+#include "UI.h"
 #include "DCE/DCEConfig.h"
 #include "DCE/Logger.h"
 #include "DCE/ClientSocket.h"
@@ -11,7 +21,11 @@
 #include "PlutoUtils/ProcessUtils.h"
 #include <iostream>
 #include <fstream>
-
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <time.h>
+#include <signal.h>
 
 using namespace std; //DCE
 
@@ -27,7 +41,7 @@ using namespace std; //DCE
 
 
 #define	PLUTO_CONFIG "/etc/pluto.conf"
-#define PLUTO_LOG_DIR "/var/log/pluto"
+
 #define SCREENLOGS_BASE "/home/screenlogs"
 #define APP_UI_DIAG "/usr/pluto/bin/UIdiag"
 #define APP_UI_DIAG_WORKDIR "/usr/pluto/bin"
@@ -41,7 +55,7 @@ using namespace std; //DCE
 #define VIDEO_DRIVER_TOOL "/usr/pluto/bin/GetVideoDriver.py"
 
 #define KILL_XORG_SCRIPT "/usr/pluto/bin/Stop_X.sh"
-
+#define PLUTO_LOG_DIR "/var/log/pluto"
 #define PLUTO_LOCKS "/usr/pluto/locks/pluto_spawned_local_devices.txt"
 #define LM_PROGRESS_LOG "/var/log/pluto/LaunchManager.progress.log"
 #define NETWORK_SETTINGS_SCRIPT "/usr/pluto/bin/Network_DisplaySettings.sh --all"
@@ -63,18 +77,23 @@ LM::LM()
 	m_pLMCE_Launch_Manager=NULL;
 	//m_pPlutoDatabase=NULL;
 	m_pResult=NULL;
+	m_pAlarmManager = NULL;
 }
 
 LM::~LM()
 
 {
-	
+	delete m_pAlarmManager;
+	m_pAlarmManager=NULL;
 }
 void LM::Initialize()
 {
+	 m_pAlarmManager = new DCE::AlarmManager();
+	m_pAlarmManager->Start(2);      //4 = number of worker threads
 	DCE::LoggerWrapper::SetType(LT_LOGGER_FILE, PLUTO_LOG_DIR "/LaunchManager.log");
 	DCE::LoggerWrapper::GetInstance()->Write(LV_STATUS, "Starting...");
-	
+	m_uiMainUI.initialize("LinuxMCE Launch Manager");
+
 	writeLog("=>initialize_Connections()",true);
 	initialize_Connections();
 	writeLog("=>initialize_VideoSettings()");
@@ -92,21 +111,13 @@ void LM::Initialize()
 	// after all is read, initializing server
 	writeLog("=>initialize_Start()");
 	initialize_Start();
-	//LMdeviceKeepAlive();//DEBUG--REMOVE
-	// creating required dir
-	//QDir qdir(SCREENLOGS_BASE);
-	//if (!qdir.exists(SCREENLOGS_BASE, true))
-	//	qdir.mkdir(SCREENLOGS_BASE, true);
-
+	
 	// if the system was already running when we started, let's catch new children and report we are up
 	if ( m_bCoreRunning || m_bMediaRunning )
 	{
-        	updateSerialPorts();
-LMdeviceKeepAlive();//DEBUG--REMOV
+        	updateScripts();
 		respawnNewChildren();
-LMdeviceKeepAlive();//DEBUG--REMOV
 		reportDeviceUp();
-LMdeviceKeepAlive();//DEBUG--REMOV
 	}
 	
 	writeLog("=>loadSettings()");
@@ -120,19 +131,19 @@ LMdeviceKeepAlive();//DEBUG--REMOV
 
 }
 
-void LM::writeLog(string s, bool toScreen, int logLevel)
-{
-	if (toScreen)
-	{
-		string timestamp = "Today";//QDateTime::currentDateTime().toString();
-		//cout << timestamp + " " + s << endl;
-		//lbMessages->update();
-		//doRedraw();
-	}
-
-	cout << s << endl;
-	DCE::LoggerWrapper::GetInstance()->Write(logLevel, s.c_str());
-}
+//void LM::writeLog(string s, bool toScreen, int logLevel)
+//{
+//	if (toScreen)
+//	{
+//		string timestamp = "Today";//QDateTime::currentDateTime().toString();
+//		//cout << timestamp + " " + s << endl;
+//		//lbMessages->update();
+//		//doRedraw();
+//	}
+//
+//	cout << s << endl;
+//	DCE::LoggerWrapper::GetInstance()->Write(logLevel, s.c_str());
+//}
 
 
 void LM::initialize_Connections()
@@ -157,7 +168,7 @@ void LM::initialize_Connections()
 	if (m_sDCERouterPort== "")
 		m_sDCERouterPort = "3450";
 	
-	//SHOULD CHANGE THESE TO BOOL?
+	//TODO:SHOULD CHANGE THESE TO BOOL?
 	m_sAutostartCore = pConfig->m_mapParameters_Find("AutostartCore");
 	m_sAutostartMedia = pConfig->m_mapParameters_Find("AutostartMedia");
 	
@@ -167,6 +178,7 @@ void LM::initialize_Connections()
 	openDB();
 	
 	m_sDeviceID = pConfig->m_mapParameters_Find("PK_Device");
+
 	
 	// detecting core
 	m_sCoreDeviceID = m_dbPlutoDatabase.quickQuery("SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=7");
@@ -195,12 +207,7 @@ void LM::initialize_Connections()
 		m_bMediaHere = true;
 		mdID = m_sDeviceID;
 	}
-	string sCoreHere = m_bCoreHere?"X":" ";
-	string sMediaHere = m_bMediaHere?"X":" ";
-	cout << "Core is  here: [" + sCoreHere + "]" << endl; //DEBUG
-	cout << "Media is Here: [" +  sMediaHere + "]" << endl; //DEBUG
 
-	
 	if (m_sDeviceID!="")
 	{
 		string localOrbiterID = m_dbPlutoDatabase.quickQuery("SELECT PK_Device FROM Device LEFT JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE FK_Device_ControlledVia=" + mdID + " AND FK_DeviceCategory IN (2, 3, 5)");
@@ -212,25 +219,7 @@ void LM::initialize_Connections()
 	delete pConfig;
 }
 
-void LM::Draw() {
-	system("clear");  //yes, I know this is not the best way to do it...
-	cout << "+------------------------------------------------------------------------------+" << endl;
-	cout << "|LinuxMCE Launch Manager, V1.0                                                 |" << endl;
-	cout << "+------------------------------------------------------------------------------+" << endl;
-	cout << "Core Ip: " + m_sCoreIP + "                     MySQL Host: " + m_sMySQLHost + " " << endl;
-	cout << "MD Status:                              MySQL User: " + m_sMySQLUser + " " << endl;
-	cout << "Video Driver:                           MySQL Pass: " + m_sMySQLPass + " " << endl;
-        cout << "Resolution:                                                                     " << endl;
-	//cout << "["+m_bAutostartCore?"X":" "; +"]Autostart Core                                                                                " << endl;
-	cout << "                                                                                " << endl;
-	cout << "                                                                                " << endl;
-	cout << "+-LOG--------------------------------------------------------------------------+" << endl;
-	cout << "                                                                                " << endl;
-	cout << "                                                                                " << endl;
-	cout << "                                                                                " << endl;
 
-
-}
 
 
 
@@ -254,7 +243,8 @@ string LM::getRAid()
 
 bool LM::openDB()
 {
-	//see usage at http://c-programming.suite101.com/article.cfm/using_a_mysql_databases_with_c
+	//information from:
+	//low-level mysql tutorial at http://c-programming.suite101.com/article.cfm/using_a_mysql_databases_with_c
 	if (m_dbPlutoDatabase.connected())
 	{
 		writeLog("Attempted to reopen already opened DB, closing current connection first", false, LV_WARNING);
@@ -263,8 +253,6 @@ bool LM::openDB()
 	
 	writeLog("Opening DB connection..", true);
 	
-	//mysql_init(&m_mysqlMysql);
-	
 	if(m_dbPlutoDatabase.connect(m_sMySQLHost,m_sMySQLUser,m_sMySQLPass,"pluto_main"))
 	{
 		writeLog("Successful", true);
@@ -272,10 +260,9 @@ bool LM::openDB()
 	}
 	else
 	{
-		//writeLog("Error: " + mysql_error(&m_mysqlMysql, true, LV_WARNING);
 		writeLog("Error: Could not connect to database",true,LV_WARNING);
-		//delete m_pPlutoDatabase;
-		//m_pPlutoDatabase = NULL;
+		m_dbPlutoDatabase.close();
+
 		return false;
 	}
 }
@@ -389,9 +376,8 @@ void LM::initialize_VideoSettings()
 		return;
 
 	m_sVideoResolution = m_dbPlutoDatabase.quickQuery("SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=" + m_sMediaID + " AND FK_DeviceData=" + StringUtils::itos(DEVICEDATA_Video_settings_CONST));
-	cout << m_sVideoResolution << endl;
 	
-	//The old Launch Manager used a python script which use the now obsolete xorgconfig module to get the video driver name
+	//The old Launch Manager used a python script which used the now obsolete xorgconfig module to get the video driver name
 	//Let just do it manuall in good ol' c++
 	//vector thisText;
 	string line;
@@ -426,36 +412,7 @@ void LM::initialize_VideoSettings()
 	m_sVideoDriver = xorgFile;
 	cout << m_sVideoDriver << endl;
 	
-	//system("python /usr/pluto/bin/GetVideoDriver.py /tmp/lmce_lm.video.dat");//" + VIDEO_DRIVER_TOOL.c_Str() + " " + VIDEO_DRIVER_NAME_FILE.c_str());
-	// fetching video driver info
-	//if ( QFile::exists(VIDEO_DRIVER_TOOL) )
-	//{
-	//	QProcess qp(QString(VIDEO_DRIVER_TOOL));
-	//	qp.addArgument(VIDEO_DRIVER_NAME_FILE);
-	//	qp.start();
-	//	
-	//	int iTimeout = 10; // 10 secs
-	//			
-	//	while(qp.isRunning() && iTimeout--)
-	//	{
-	//		sleep(1);
-	//	}
-	//	
-	//	if (  qp.normalExit() && qp.exitStatus()==0 && QFile::exists(VIDEO_DRIVER_NAME_FILE) )
-	//	{
-	//		QFile f(VIDEO_DRIVER_NAME_FILE);
-	//		if (f.open(IO_ReadOnly))
-	//		{
-	//			QString vDriver;
-	//			int iRet = f.readLine(vDriver, 100);
-	//			f.close();
-	//			if (iRet != -1)
-	//				leVideoDriver->setText(vDriver);
-	//		}
-	//		else
-	//			writeLog("Failed to open file" + QString(":") + VIDEO_DRIVER_NAME_FILE, false, LV_WARNING);
-	//	}
-	//}
+	
 }
 
 void LM::initialize_AudioSettings()
@@ -464,7 +421,7 @@ void LM::initialize_AudioSettings()
 		return;
 
 	string sSettings = m_dbPlutoDatabase.quickQuery("SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=" + m_sMediaID + " AND FK_DeviceData=" + StringUtils::itos(DEVICEDATA_Audio_settings_CONST));
-	cout << sSettings << endl; //DEBUG
+
 	if (sSettings=="")
 		return;
 	
@@ -518,7 +475,7 @@ void LM::initialize_LogOptions()
 	DCEConfig *pConfig = new DCEConfig(PLUTO_CONFIG);
 	string s = pConfig->m_mapParameters_Find("LogLevels");
 	delete pConfig;
-	cout << "Log Levels: " + s + " " << endl;
+	//cout << "Log Levels: " + s + " " << endl;
 	//QStringList levels = QStringList::split(',', s, false);
 	/*
 	for (QStringList::iterator i=levels.begin(); i!=levels.end(); ++i)
@@ -571,31 +528,31 @@ void LM::initialize_Start()
 			writeLog("Failed to connect to DCERouter!", true, LV_WARNING);
 		}
 	}
-	/*
-	tuneConnectionsWidgets();
+
 	
-	if (!m_pDevicesUpdateTimer)
-	{
-		m_pDevicesUpdateTimer = new QTimer();
-		connect(m_pDevicesUpdateTimer, SIGNAL(timeout()), this, SLOT(updateDevicesProgressBar()));
-	}
+
+	
+	//tuneConnectionsWidgets();
+	
+	//if (!m_pDevicesUpdateTimer)
+	//{
+	//	m_pDevicesUpdateTimer = new QTimer();
+	//	connect(m_pDevicesUpdateTimer, SIGNAL(timeout()), this, SLOT(updateDevicesProgressBar()));
+	//}
 	
 	
-	// enabling all tabs
-	for (uint i=0; i<=6; i++)
-		twAllTabs->setTabEnabled(twAllTabs->page(i), true);
+		
+	//if (!m_bMediaHere)
+	//{
+	//	twAllTabs->removePage(twAllTabs->page(2));
+	//	twAllTabs->removePage(twAllTabs->page(2));
+	//}
 	
-	if (!m_bMediaHere)
-	{
-		twAllTabs->removePage(twAllTabs->page(2));
-		twAllTabs->removePage(twAllTabs->page(2));
-	}
 	
 	// starting RA monitoring timer
-	m_pRemoteAssistanceStatusRefreshTimer = new QTimer();
-	connect(m_pRemoteAssistanceStatusRefreshTimer, SIGNAL(timeout()), this, SLOT(updateRAstatus()));
-	m_pRemoteAssistanceStatusRefreshTimer->start(5000);
-	*/
+	m_pAlarmManager->AddRelativeAlarm(5,this,UPDATE_RA_STATUS,NULL);
+	
+	
 }
 
 bool LM::checkMySQL(bool showMessage)
@@ -615,6 +572,7 @@ bool LM::checkMySQL(bool showMessage)
 	
 	return bResult;
 }
+
 bool LM::checkCore(string coreIP)
 {
 	writeLog("Checking if core is up...", true);
@@ -630,20 +588,22 @@ bool LM::checkCore(string coreIP)
 		//cout << s << endl;		
 		//return true;
 		 
-		time_t tStart = time(NULL);
-		time_t tEnd = tStart;
-		
+		//time_t tStart = time(NULL);
+		//time_t tEnd = tStart;
+		int iElapsedSeconds=0;
+
 		string cmd = "/bin/nc -z " + m_sCoreIP + " " + m_sDCERouterPort;
 
 		string sRet = "";
-		const double checkCoreTimeout = 60; // 60 seconds
+		const int checkCoreTimeout = 60; // 60 seconds
 		
-		while ( (difftime(tEnd,tStart)<checkCoreTimeout) && (sRet.size()!=1) )
+		while ( (iElapsedSeconds<checkCoreTimeout) && (sRet.size()!=1) )
 		{
 			writeLog("Attempting to connect to " + m_sCoreIP + ":" + m_sDCERouterPort);
 			sRet = system(cmd.c_str());
-			tEnd = time(NULL);
+			
 			sleep(1);
+			iElapsedSeconds++;
 		}
 		
 		if (sRet.size() != 1)
@@ -727,12 +687,7 @@ bool LM::initialize_LMdevice(bool bRetryForever/*=false*/)
 		
 			map<int,string>::iterator it = devicesMap.begin();
 			m_sOrbiterPluginID = StringUtils::itos((*it).first) ;
-			//cout <<m_sOrbiterPluginID << endl; // DEBUG
-			//m_pLaunch_Manager->lmWidget = this;
-			
-			//QTimer::singleShot(5000, this, SLOT(LMdeviceKeepAlive()));
-			
-			//QApplication::restoreOverrideCursor();
+			m_pAlarmManager->AddRelativeAlarm(5,this,LM_KEEP_ALIVE,NULL);
 			return true;
 		}
 		
@@ -744,7 +699,7 @@ bool LM::initialize_LMdevice(bool bRetryForever/*=false*/)
 		if (!bRetryForever)
 		{
 			writeLog("initialize_LMdevice: Not retrying", true, LV_WARNING);
-			//QApplication::restoreOverrideCursor();
+
 			return false;
 		}
 		else
@@ -753,60 +708,31 @@ bool LM::initialize_LMdevice(bool bRetryForever/*=false*/)
 		}
 	}
 }
-
-// TODO refactor
-void LM::updateSerialPorts()
+void LM::AlarmCallback(int id, void* param)
 {
-	writeLog("Running UpdateAvailableSerialPorts.sh", true, LV_WARNING);
-					
+	
+	if(id==LM_KEEP_ALIVE) {
+		LMdeviceKeepAlive();
+	} else if (id==UPDATE_RA_STATUS) {
+		//auto-schedule next call to create an interval timer
+		m_pAlarmManager->CancelAlarmByType(UPDATE_RA_STATUS);
+		m_pAlarmManager->AddRelativeAlarm(5,this,UPDATE_RA_STATUS,NULL);
+		updateRAstatus();
+	}
+}
+// TODO refactor
+void LM::updateScripts()
+{
+	writeLog("Running UpdateAvailableSerialPorts.sh", true, LV_STATUS);
 	string sCmd = "/usr/pluto/bin/UpdateAvailableSerialPorts.sh";
-	//QString qsBackground = "0";
-	//QString qsParameter = "";
-	//string qsDescription = "Updating available serial ports";
-	
-	//QFileInfo qfi(qsCommand);
-	//QString baseName = qfi.baseName(true);
-	//QString qsWorkDir = QString(SCREENLOGS_BASE) + "/" + baseName;
-	//QDir qd(qsWorkDir);
-	//if (!qd.exists(qsWorkDir, true))
-	//{
-	//	qd.mkdir(qsWorkDir, true);
-	//}
-	
-	// copied from start foreground service
-	//QStringList args;
-					
-	//args.push_back(qsCommand);
-	//if (qsParameter!="")
-	//	args.push_back(qsParameter);
-					
-	//QProcess *pService = new QProcess(args);
-	//pService->setWorkingDirectory(qsWorkDir);
-	//writeLog("Starting core service " + qsCommand + ": " + args.join(" "));
-	//pService->start();
-	//int iCounter = 30;
-	//while (pService->isRunning() && iCounter)
-	//{
-	//	sleep(1);
-	//	iCounter--;
-	//	qApp->eventLoop()->processEvents(QEventLoop::ExcludeUserInput);
-	//}
-					
-	//if (pService->isRunning())
-	//{
-	//	writeLog("Process didn't exit after 30 secs of running, let it run in background", true, LV_WARNING);
-	//	m_qpvCoreServices.push_back(pService);
-	//}
-	//else
-	//{
-	
-	//TODO: Fork this and monitor progress and implement a timeout
-	string s;
-	s=system(sCmd.c_str());
-	writeLog("Process completed.");//with status: " + s);
-	//	delete pService;
-	//}
-					
+	exec_system(sCmd,true);
+	writeLog("Process completed.");
+
+	writeLog("Running checkforRaids.sh",true,LV_STATUS);
+	sCmd = "/usr/pluto/bin/checkforRaids.sh";
+	exec_system(sCmd,true);
+	writeLog("Process completed.");
+				
 }
 
 void LM::respawnNewChildren()
@@ -995,7 +921,7 @@ void LM::startCoreDevices(bool checkForAlreadyRunning)
 							
 							if (!FileUtils::FileExists(deviceCommand))
 							{
-								writeLog("Not starting device " +  dbrCoreDevices.value(0) + " "  + dbrCoreDevices.value(1) + " -  binary is not found, probably it is in the middle of installation", true, LV_WARNING);
+								writeLog("Not starting device " +  dbrCoreDevices.value(0) + " "  + dbrCoreDevices.value(1) + " -  binary is not found.", true, LV_WARNING);
 								continue;
 							}
 							
@@ -1015,9 +941,9 @@ void LM::startCoreDevices(bool checkForAlreadyRunning)
 							//args.push_back(leCoreIP->text());
 							//args.push_back(deviceCommand);
 							string sCmd = "/usr/bin/screen -d -m -S " + screenName;
-							system(sCmd.c_str());
+							exec_system(sCmd);
 							sCmd = "/usr/pluto/bin/Spawn_Device.sh " + dbrCoreDevices.value(0) + " " + m_sCoreIP;
-							system(sCmd.c_str());
+							exec_system(sCmd);
 							//QProcess process(args);
 							writeLog("Starting device " +  dbrCoreDevices.value(0) + " " + dbrCoreDevices.value(1));// + ": " + args.join(" "));
 							//process.start();
@@ -1130,7 +1056,7 @@ void LM::startMediaDevices(bool checkForAlreadyRunning)
 							
 							if (!FileUtils::FileExists(deviceCommand))
 							{
-								writeLog("Not starting device " +  dbrMediaDevices.value(0) + " "  + dbrMediaDevices.value(1) + " - binary is not found, probably it is in the middle of installation", true, LV_WARNING);
+								writeLog("Not starting device " +  dbrMediaDevices.value(0) + " "  + dbrMediaDevices.value(1) + " - binary is not found.", true, LV_WARNING);
 								continue;
 							}
 							
@@ -1152,9 +1078,12 @@ void LM::startMediaDevices(bool checkForAlreadyRunning)
 							//args.push_back(leCoreIP->text());
 							//args.push_back(deviceCommand);
 							string sCmd = "/usr/bin/screen -d -m -S " + screenName;
-							system(sCmd.c_str());
+							exec_system(sCmd);
 							sCmd = "/usr/pluto/bin/Spawn_Device.sh " + dbrMediaDevices.value(0) + " " + m_sCoreIP;
-							system(sCmd.c_str());
+							
+							exec_system(sCmd,true);
+														
+							//system(sCmd.c_str());
 							//QProcess process(args);
 							writeLog("Starting device " +  dbrMediaDevices.value(0) + " " + dbrMediaDevices.value(1));// + ": " + args.join(" "));
 							//process.start();
@@ -1236,9 +1165,9 @@ void LM::waitForDevice(int deviceID)
 void LM::reportDeviceUp()
 {
 	// saying we're up
-	long i = atoi(m_sDeviceID.c_str());
+	//long i = atoi(m_sDeviceID.c_str());
 	//DCE::Command_Impl::m_bRouterReloading = false;
-	DCE::Message *pMessage = new DCE::Message(1, DEVICEID_DCEROUTER, DCE::PRIORITY_NORMAL, DCE::MESSAGETYPE_SYSCOMMAND, DCE::SYSCOMMAND_DEVICE_UP, 0);
+	DCE::Message *pMessage = new DCE::Message(atoi(m_sDeviceID.c_str()), DEVICEID_DCEROUTER, DCE::PRIORITY_NORMAL, DCE::MESSAGETYPE_SYSCOMMAND, DCE::SYSCOMMAND_DEVICE_UP, 0);
 	//cout << m_sDeviceID;
 	
 	//cout << StringUtils::itos(i);
@@ -1273,11 +1202,12 @@ void LM::LMdeviceKeepAlive()
 				if (!initialize_LMdevice())
 				{
 					writeLog("Will retry later..", true);
-					//QTimer::singleShot(5000, this, SLOT(LMdeviceKeepAlive()));
+					m_pAlarmManager->CancelAlarmByType(LM_KEEP_ALIVE);
+					m_pAlarmManager->AddRelativeAlarm(5,this,LM_KEEP_ALIVE,NULL);
 				}
 				else
 				{
-                                        updateSerialPorts();
+                                        updateScripts();
 					respawnNewChildren();
 					reportDeviceUp();
 				}
@@ -1292,7 +1222,8 @@ void LM::LMdeviceKeepAlive()
 		}
 		else
 		{
-			//QTimer::singleShot(5000, this, SLOT(LMdeviceKeepAlive()));
+			m_pAlarmManager->CancelAlarmByType(LM_KEEP_ALIVE);
+			m_pAlarmManager->AddRelativeAlarm(5,this,LM_KEEP_ALIVE,NULL);
 		}
 	}
 	else
@@ -1303,11 +1234,12 @@ void LM::LMdeviceKeepAlive()
 			if (!initialize_LMdevice())
 			{
 				writeLog("Will retry later..", true);
-				//QTimer::singleShot(5000, this, SLOT(LMdeviceKeepAlive()));
+				m_pAlarmManager->CancelAlarmByType(LM_KEEP_ALIVE);
+				m_pAlarmManager->AddRelativeAlarm(5,this,LM_KEEP_ALIVE,NULL);
 			}
 			else
 			{
-                                updateSerialPorts();
+                                updateScripts();
 				respawnNewChildren();
 				reportDeviceUp();
 			}
@@ -1315,6 +1247,7 @@ void LM::LMdeviceKeepAlive()
                 else
                 {
                     writeLog("LMdeviceKeepAlive() not reconnecting, as this is not required");
+			m_pAlarmManager->CancelAlarmByType(LM_KEEP_ALIVE); //TODO: consolidate all of these CancelAlarmByType calls at the top
                 }
 	}
 }
@@ -1411,3 +1344,175 @@ void LM::findRunningMediaDevices()
 		writeLog("Failed to query MySQL DB");
 	}
 }
+
+void LM::rebootPC()
+{
+	writeLog("Rebooting");	
+	m_uiMainUI.flushLog();
+	
+	exec_system("/sbin/reboot");
+	// giving system time to start actual reboot
+	sleep(60);
+}
+void LM::flushLog()
+{
+	DCE::LoggerWrapper::GetInstance()->Flush();
+}
+void LM::writeLog(string s, bool toScreen, int logLevel)
+{
+	DCE::LoggerWrapper::GetInstance()->Write(logLevel, s.c_str());
+	if (toScreen)
+	{
+		m_uiMainUI.writeLog(s);	
+	}
+
+
+	
+}
+void LM::appendLog(string s)
+{
+	//appends the most recent log entry in the UI for dynamic display purposes
+	m_uiMainUI.appendLog(s);
+}
+void LM::updateRAstatus()
+{
+	bool bRAstatus = checkRAStatus();
+	
+	if (bRAstatus != m_bRemoteAssistanceRunning)
+	{
+		m_bRemoteAssistanceRunning = bRAstatus;
+		//tuneConnectionsWidgets();
+	}
+}
+string LM::getOrbiterStatusMessage(const string &orbiterStatus)
+{
+	if (orbiterStatus=="!")
+		return "Failed to get Orbiter status";
+	
+	if (orbiterStatus=="O")
+		return "Orbiter status is OK";
+	
+	if (orbiterStatus=="N")
+		return "Generated skin for new Orbiter, you need to reload router";
+	
+	if (orbiterStatus=="n")
+		return "There are no skins generated yet for this new Orbiter";
+	
+	if (orbiterStatus=="R")
+		return "Skin generation for Orbiter is in progress now";
+	
+	if (orbiterStatus=="r")
+		return "Skin generation for new Orbiter is in progress now";
+	
+	if (orbiterStatus=="U")
+		return "The device with this ID is unknown";
+	
+	if (orbiterStatus=="D")
+		return "The device with this ID is not an Orbiter";
+	
+	return "Unknown status: " + orbiterStatus;
+}
+
+void LM::Run()
+{
+	string s;
+	while(true) {
+		s=s;
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////
+void LM::exec_system(std::string cmd, bool wait) {
+	
+        char command[1024];
+	char *args[512];
+        int fork_res;
+	int arg_count;
+	std::string::size_type pos;
+	std::string token;
+	bool done;
+
+        sprintf(command,cmd.c_str());
+
+	// Parse the arguments
+	pos=0;
+	done=false;
+	arg_count=0;
+
+	while (!done) {
+	    token=StringUtils::Tokenize(cmd," ",pos);
+
+	    if (token!="") {
+		args[arg_count]=strdup(token.c_str());
+		arg_count++;
+	    }
+
+	    if (pos>=cmd.length()) {
+		done=true;
+	    }
+	}
+
+	args[arg_count]=0; // NULL terminte the arg list
+
+        writeLog("exec_system: args parsed like this:",false,LV_STATUS);
+	for (int i=0; i<arg_count; i++) {
+             writeLog("exec_system: arg " + StringUtils::itos(i) +  " is " + args[i]);
+	}
+
+        fork_res=fork();
+
+        // Child thread
+        if (fork_res==0) {
+           int retval;
+           writeLog("exec_system: within child fork",false,LV_STATUS);
+	   //close terminal output!!!(stdin,stdout,stderr - 0,1 and 2)
+	   close(0); close(1); close(2);
+	   retval=execvp(args[0],args);
+
+           if (retval<0) {
+               writeLog("exec_system: child exec returned res = " + StringUtils::itos(retval),false,LV_WARNING);
+           }
+           exit(0);
+        }
+
+        if (fork_res<0) {
+            writeLog("exec_system: fork failed!",false,LV_CRITICAL);
+        } else {
+            writeLog("exec_system: fork ok",false,LV_STATUS);
+
+            if (wait) {
+                int wait_res;
+                writeLog("exec_system: waiting for child process " + StringUtils::itos(fork_res) + " to finish",false,LV_STATUS);
+
+                wait_res=waitpid(fork_res,NULL,0);
+
+                if (wait_res<0) {
+                   writeLog("exec_system: wait_res returned an error! res="+StringUtils::itos(wait_res),false,LV_WARNING);
+                } else if (wait_res==fork_res) {
+                    writeLog("exec_system: detected end of child process OK",false,LV_STATUS);
+                }
+            }
+        }
+
+    }
+
+
+

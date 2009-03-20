@@ -30,8 +30,9 @@ int main(int argc, char* argv[])
 	
 	LM LM;
 	LM.Initialize();
+	LM.Run();
 	//LM.Draw();
-	cout << "ENDING" << endl;
+	//cout << "ENDING" << endl;
 		return 0;
 }
 //<-dceag-main-e->

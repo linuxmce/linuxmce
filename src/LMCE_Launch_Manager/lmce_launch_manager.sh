@@ -21,7 +21,7 @@ fi
 trap 'Unlock "Launch_Manager" "LM"' EXIT
 
 KDE_DEBUG=1
-LM_BINARY=/usr/pluto/bin/lmce_launch_manager
+LM_BINARY=/usr/pluto/bin/LMCE_Launch_Manager
 LM_EXIT_CODE=-1
 
 while [[ "$LM_EXIT_CODE" != "0" ]] ;do

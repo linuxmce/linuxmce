@@ -38,14 +38,6 @@ DBResult DB::query(string sQuery)
 	
 	mysql_query(m_pConnection,sQuery.c_str());
 	result.m_pResult = mysql_store_result(m_pConnection);
-	//if(m_pResult = mysql_store_result(m_pConnection))
-	//{
-	//	if (next())
-	//		sResult = value(0);
-	//	else
-	//		sResult = "";
-	//}
-	
 	return result;
 }
 string DB::quickQuery(string sQuery) 
