@@ -12,7 +12,9 @@
 
 #define LM_KEEP_ALIVE	1
 #define UPDATE_RA_STATUS 2
-
+#define REPORT_DEVICE_UP 3
+#define DO_AUTOSTART 4
+#define UPDATE_ORBITER_REGEN_PROGRESS 5
 
 class LM : public DCE::AlarmEvent
 {
@@ -92,9 +94,27 @@ private:
 	void flushLog();
 	void updateRAstatus();
 	string getOrbiterStatusMessage(const string &orbiterStatus);
-	void exec_system(std::string cmd, bool wait=true);
-	void LMdeviceKeepAlive();
 	
+	void LMdeviceKeepAlive();
+	void doAutostart();
+	bool startCore();
+	bool startCoreServices();
+	bool checkScreenDimensions(bool askUser/*=true*/);
+	bool startMediaStation();
+	void jumpToOrbiter();
+	void updateOrbiterRegenProgress();
+	void startOrbiterRegenProgressTracking(bool currentOrbiterOnly=true);
+	bool triggerOrbiterRegen(bool bAllOrbiters=false);
+	string getOrbiterStatus(const string &orbiterID, int &iProgressValue);
+	string getOrbiterStatus();
+	string getOrbiterStatus(int &iProgressValue);
+	bool confirmOrbiterSkinIsReady();
+
+	//Process Methods
+	//TODO: group together and name similarly...  Candidate for a new class??
+	int exec_system(std::string cmd, bool wait=true);
+	bool isRunning(int iPID);
+	bool started(int iPID);
 public:
 	// Public member variables
 	class DCE::AlarmManager *m_pAlarmManager;
