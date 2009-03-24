@@ -2599,7 +2599,7 @@ list<pair<string, string> > General_Info_Plugin::GetUserBookmarks(string sPK_Use
 
     if( Bookmarks.size()==0 )
     {
-        Bookmarks.push_back(make_pair<string,string> ("http://dcerouter/pluto-admin","Pluto Admin"));
+        Bookmarks.push_back(make_pair<string,string> ("http://dcerouter/lmce-admin","LinuxMCE Admin"));
         //Bookmarks.push_back(make_pair<string,string> ("http://dcerouter/support","Pluto Support"));
     }
 
