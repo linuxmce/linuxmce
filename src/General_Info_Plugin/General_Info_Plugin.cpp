@@ -941,7 +941,7 @@ class DataGridTable *General_Info_Plugin::QuickStartApps( string GridID, string 
 		if( pRow_QuickStartTemplate )
 		{
 			if( !pBuffer )
-                pBuffer = FileUtils::ReadFileIntoBuffer("/usr/pluto/orbiter/quickstart/" + StringUtils::itos(pRow_QuickStartTemplate->PK_QuickStartTemplate_get()) + "_tn.jpg",iSize);
+                pBuffer = FileUtils::ReadFileIntoBuffer("/home/quick_start_icons/template_" + StringUtils::itos(pRow_QuickStartTemplate->PK_QuickStartTemplate_get()) + ".jpg", iSize);
 		}
 
 		if( sBinary.size()==0 )
@@ -2599,7 +2599,7 @@ list<pair<string, string> > General_Info_Plugin::GetUserBookmarks(string sPK_Use
 
     if( Bookmarks.size()==0 )
     {
-        Bookmarks.push_back(make_pair<string,string> ("http://dcerouter/lmce-admin","LinuxMCE Admin"));
+        Bookmarks.push_back(make_pair<string,string> ("http://dcerouter/pluto-admin","Pluto Admin"));
         //Bookmarks.push_back(make_pair<string,string> ("http://dcerouter/support","Pluto Support"));
     }
 
