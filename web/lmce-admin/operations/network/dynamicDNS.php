@@ -26,7 +26,8 @@ function dynamicDNS($output, $dbADO) {
 		exec('sudo -u root /usr/pluto/bin/DynamicDNS.sh get', $retArray);
 		$ddLogin = $retArray[0];
 		$ddProvider = $retArray[1];
-		$ddDomains = $retArray[2];
+		$ddUse = $retArray[2];
+		$ddDomains = $retArray[3];
 
 		$ddProvider_options='';
 		foreach ( $DynamicDnsProviders as $providerName => $providerString ) {
@@ -46,9 +47,9 @@ function dynamicDNS($output, $dbADO) {
 					</td>
 				</tr>
 				<tr>
-					<td><b>'.$TEXT_DYNAMIC_DNS_PROVIDER.'</b></td>
+					<td width="150"><b>'.$TEXT_DYNAMIC_DNS_PROVIDER_CONST.'</b></td>
 					<td>
-					<select name="ddProvider">
+					<select name="ddProvider" STYLE="width:250px">
 						'.$ddProvider_options.'
 					</select>
 					</td>
@@ -56,25 +57,38 @@ function dynamicDNS($output, $dbADO) {
 				<tr>
 					<td><b>'.$TEXT_DYNAMIC_DNS_DOMAINS_CONST.'</b></td>
 					<td>
-					<input type="text" name="ddDomains" value="'.$ddDomains.'">
+					<input type="text" name="ddDomains" value="'.$ddDomains.'" STYLE="width:250px">
 					</td>
 				</tr>
 				<tr>
 					<td><b>'.$TEXT_DYNAMIC_DNS_LOGIN_CONST.'</b></td>
 					<td>
-					<input type="text" name="ddLogin" value="'.$ddLogin.'">
+					<input type="text" name="ddLogin" value="'.$ddLogin.'" STYLE="width:250px">
 					</td>
 				</tr>
 				<tr>
 					<td><b>'.$TEXT_DYNAMIC_DNS_PASSWORD_CONST.'</b></td>
 					<td>
-					<input type="password" name="ddPassword">
+					<input type="password" name="ddPassword" STYLE="width:250px">
 					</td>
 				</tr>
 				<tr>
-					<td colspan="2" align="center">
+					<td><b>&nbsp;</b></td>
+					<td>
+						<input type="checkbox" name="ddUse" '.($ddUse=="web"?'checked':'').'>'.$TEXT_DYNAMIC_DNS_USE_CONST.'<font color="FF0000"><b>*</b></font>
+					</td>
+				</tr>
+				<tr>
+					<td>&nbsp;</td>
+					<td>
 					<input type="submit" class="button" name="Save" value="Save">
 					</td>
+				</tr>
+				<tr>
+					<td colspan="2">&nbsp;</td>
+				</tr>
+				<tr>
+					<td colspan="2">'.$TEXT_DYNAMIC_DNS_NOTE_CONST.'</td>
 				</tr>
 			</table>
 		</form>
@@ -92,8 +106,10 @@ function dynamicDNS($output, $dbADO) {
 		$ddProvider=$_POST['ddProvider'];
 		$ddPassword=$_POST['ddPassword'];
 		$ddDomains=$_POST['ddDomains'];
+		$ddUse=$_POST['ddUse'];
+		$ddUse=$ddUse?'web':'if';
 
-		exec("sudo -u root /usr/pluto/bin/DynamicDNS.sh set '{$ddLogin}' '{$ddPassword}' '{$ddProvider}' '{$ddDomains}' ");
+		exec("sudo -u root /usr/pluto/bin/DynamicDNS.sh set '{$ddLogin}' '{$ddPassword}' '{$ddProvider}' '{$ddUse}' '{$ddDomains}' ");
 
 		header("Location: index.php?section=dynamicDNS&msg={$TEXT_DYNAMIC_DNS_UPDATED_CONST}");
 	}
