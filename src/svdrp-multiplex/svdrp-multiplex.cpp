@@ -98,7 +98,10 @@ bool bridge_svdrp(FILE *sock_client, FILE *sock_svdrp)
 	if (fgets(buffer, 1024, sock_client) == false)
 		return false;
 
-	if (strncmp(buffer, "QUIT", 4) == 0)
+	if (buffer[strlen(buffer) - 1] != '\n')
+		return false;
+
+	if (strncasecmp(buffer, "QUIT", 4) == 0)
 	{
 		const char *quit_message = "221 dcerouter SVDRP multiplexer closing connection\r\n";
 		fputs(quit_message, sock_client);
