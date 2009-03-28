@@ -3075,7 +3075,8 @@ function formatDeviceData($deviceID,$DeviceDataArray,$dbADO,$isIPBased=0,$specif
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
 		
 	$jsValidation='';
-	$deviceDataBox='<table cellpadding="2" cellspacing="0" border="0">';
+	$deviceDataBox='<script type="text/javascript" src="javascript/wz_tooltip/wz_tooltip.js"></script>';
+	$deviceDataBox.='<table cellpadding="2" cellspacing="0" border="0">';
 
 	foreach ($DeviceDataArray AS $rowDDforDevice){
 		if(!in_array($rowDDforDevice['FK_DeviceData'],$GLOBALS['DeviceDataToDisplay']))
@@ -3163,9 +3164,15 @@ function formatDeviceData($deviceID,$DeviceDataArray,$dbADO,$isIPBased=0,$specif
 			$deviceDataBox.=($itemDisabled=='disabled')?'<input type="hidden" name="isDisabled_'.$deviceID.'_'.$rowDDforDevice['FK_DeviceData'].'" value="1">':'';
 			$deviceDataBox.='
 							<input type="hidden" name="oldDeviceData_'.$deviceID.'_'.$rowDDforDevice['FK_DeviceData'].'" value="'.$ddValue.'">';					
-			unset($ddValue);
+			unset($ddValue);	
+			if($rowDDforDevice['Tooltip']=="") {
+				$tooltip = "Sorry, no tip available for this device data.";
+			} else {
+				$tooltip = $rowDDforDevice['Tooltip'];
+			}
 			$deviceDataBox.='
 					</td>
+					<td valign="top"><img src="img/question.gif" onmouseover="Tip(\''.trim(addslashes($tooltip)).'\',ABOVE,true,WIDTH,350,FADEIN,250,FADEOUT,250,BGCOLOR,\'#C0FFC0\')" onmouseout="UnTip()"></td>
 				</tr>';
 		}
 
