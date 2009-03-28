@@ -2,6 +2,8 @@
 #ifndef LM_h
 #define LM_h
 
+//#include "ServerSocket.h"
+//#include "SocketException.h"
 #include "LMCE_Launch_Manager.h"
 #include "List.h"
 #include "DB.h"
@@ -15,6 +17,7 @@
 #define REPORT_DEVICE_UP 3
 #define DO_AUTOSTART 4
 #define UPDATE_ORBITER_REGEN_PROGRESS 5
+#define INITIALIZATION 6
 
 class LM : public DCE::AlarmEvent
 {
@@ -60,6 +63,9 @@ private:
 	string m_sMySQLPass;
 	string m_qsMySQLPort;
 	DB testDB;
+	//ServerSocket m_Socket;
+	//ServerSocket m_SocketConnection;
+
 	// Private methods
 	void writeLog(string s, bool toScreen=false,int logLevel=LV_STATUS);
 	void appendLog(string s);

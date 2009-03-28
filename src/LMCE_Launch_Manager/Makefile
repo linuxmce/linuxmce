@@ -16,7 +16,7 @@ VERSION = 2.0.0
 MYDEVTEMPLATEID = 1888mplateID
 
 Gen_Dev_Files = $(GENDEV)/LMCE_Launch_ManagerBase.cpp
-sources = Main.cpp LMCE_Launch_Manager.cpp LM.cpp List.cpp DB.cpp UI.cpp Socket.cpp ServerSocket.cpp $(Gen_Dev_Files)
+sources = Main.cpp LMCE_Launch_Manager.cpp LM.cpp List.cpp DB.cpp UI.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=

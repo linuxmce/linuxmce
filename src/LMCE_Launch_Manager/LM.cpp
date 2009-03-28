@@ -3,6 +3,8 @@
 #include "List.h"
 #include "DB.h"
 #include "UI.h"
+//#include "ServerSocket.h"
+//#include "SocketException.h"
 #include "DCE/DCEConfig.h"
 #include "DCE/Logger.h"
 #include "DCE/ClientSocket.h"
@@ -67,6 +69,7 @@ LM::LM()
 	m_pLMCE_Launch_Manager=NULL;
 	m_pResult=NULL;
 	m_pAlarmManager = NULL;
+	//m_SocketConnection = NULL;
 }
 
 // TODO: comb over and make sure everything is bein initialized that needs to be
@@ -299,7 +302,11 @@ bool LM::checkMySQL(bool showMessage)
 //COMPLETE
 void LM::AlarmCallback(int id, void* param)
 {
-	if(id==LM_KEEP_ALIVE) {
+	
+	if (id==INITIALIZATION) {
+		m_pAlarmManager->CancelAlarmByType(INITIALIZATION);
+		Initialize();
+	} else if(id==LM_KEEP_ALIVE) {
 		LMdeviceKeepAlive();
 	} else if (id==UPDATE_RA_STATUS) {
 		//auto-schedule next call to immitate an interval timer
@@ -905,7 +912,8 @@ void LM::syncWithLockList(bool eraseDeadLocalDevices)
 	// purging dead devices
 	if (eraseDeadLocalDevices)
 	{
-		vector<string> newV;
+		vector<string> newV;	
+	// purging dead devices
 		
 		// cleaning up dead core devices
 		//for (vector<int>::iterator it=m_vCoreDevices.begin(); it!=m_vCoreDevices.end(); ++it) //TODO: learn how to use iterators properly and refactor the for clause...
@@ -936,7 +944,8 @@ void LM::syncWithLockList(bool eraseDeadLocalDevices)
 				newV.push_back(sID);
 		}
 		
-		m_vMediaDevices  = newV;
+		m_vMediaDevices  = newV;	
+	// purging dead devices
 		newV.clear();
 	}
 
@@ -1043,6 +1052,7 @@ void LM::startCoreDevices(bool checkForAlreadyRunning)
 						dbrChildren = m_dbPlutoDatabase.query(child_query);
 
 						while( dbrChildren.next() )
+
 						{
 							devices.append(dbrChildren.value(0));
 							children += dbrChildren.value(0) + " ";
@@ -1318,7 +1328,7 @@ void LM::writeLog(string s, bool toScreen, int logLevel)
 	DCE::LoggerWrapper::GetInstance()->Write(logLevel, s.c_str());
 	if (toScreen)
 	{
-		m_uiMainUI.writeLog(s);	
+		m_uiMainUI.writeLog(s);
 	}	
 }
 //TODO: refactor after socket layer is in place
@@ -1786,9 +1796,12 @@ void LM::updateOrbiterRegenProgress()
 //TODO: Anything we want to process while we're in here??
 void LM::Run()
 {
-	while(true) {
-		sleep(1);
-	}	
+	//schedule initialization to run
+	//m_pAlarmManager->AddRelativeAlarm(1,this,INITIALIZATION,NULL);
+
+	while(true) {}
+
+	return;
 }
 
 

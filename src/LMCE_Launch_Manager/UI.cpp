@@ -55,12 +55,12 @@ void UI::draw()
 	system("clear");  //yes, I know this is not the best way to do it...
 	cout << " LinuxMCE Launch Manager, V1.0                                                  " << endl;
 	cout << "+-GENERAL INFO------------+--MYSQL INFO--------------+-STATUS------------------+" << endl;
-	cout << "Core Ip: localhost           MySQL Host: localhost     Remote Assistance [X]    " << endl;
-	cout << "MD Status: OK                MySQL User: root          Autostart Core    [X]    " << endl;
-	cout << "Video Driver: nvidia         MySQL Pass:               Autostart MD      [ ]    " << endl;
-        cout << "Resolution:720 1280/60                                                          " << endl;
-	cout << "Audio Connector: S	   							 " << endl;  
-	cout << "IP Address: 192.168.80.1                                                        " << endl;
+	cout << "Core Ip:                     MySQL Host:               Remote Assistance [ ]    " << endl;
+	cout << "MD Status:                   MySQL User:               Autostart Core    [ ]    " << endl;
+	cout << "Video Driver:                MySQL Pass:               Autostart MD      [ ]    " << endl;
+        cout << "Resolution:                                                                     " << endl;
+	cout << "Audio Connector:  	   							 " << endl;  
+	cout << "IP Address:                                                                     " << endl;
 	cout << "-ACTIONS------------------+--------------------------+-------------------------+" << endl;	
 	cout << "[1]Reload Router             [5]Toggle Remote Asst.                             " << endl;
 	cout << "[2]Regen Orbiter             [6]Reboot                                          " << endl;
