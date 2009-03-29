@@ -122,7 +122,7 @@ void UpdateEntArea::AddDefaultTelecomScenarios(Row_Room *pRow_Room)
 		//Voicemail Button.
 		//Use Nickname when available. 
 		string sName = "";						
-		if( pRow_Users->Nickname_get().size() ||  pRow_Users->Nickname_isNull()) {
+		if( pRow_Users->Nickname_get().size() && !(pRow_Users->Nickname_isNull())) {
 			//There is a Nickname, use it!
 			sName = pRow_Users->Nickname_get();
 		} else {
