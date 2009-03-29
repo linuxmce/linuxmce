@@ -6249,6 +6249,7 @@ function editCommandGroupCommands($commandGroupID,$dbADO){
 	$resCommandAssigned = $dbADO->Execute($selectCommandsAssigned,array($commandGroupID));
 	
 	$out='
+	<script type="text/javascript" src="javascript/wz_tooltip/wz_tooltip.js"></script>
 	<input type="hidden" name="cgcID" id="cgcID" value="">';
 	if ($resCommandAssigned->RecordCount()>0) {
 		$out.='	<fieldset>
@@ -6356,6 +6357,11 @@ function editCommandGroupCommands($commandGroupID,$dbADO){
 							$commandsToSend[$deviceID] .= "+escape(((document.getElementById('CommandParameterValue_".$rowCommandAssigned['PK_CommandGroup_Command']."_".$rowSelectParameters['FK_CommandParameter']."').value!='')?' ".$rowSelectParameters['FK_CommandParameter']." '+document.getElementById('CommandParameterValue_".$rowCommandAssigned['PK_CommandGroup_Command']."_".$rowSelectParameters['FK_CommandParameter']."').value:''))";
 						}					
 					}
+if($rowSelectParameters['C_CP_Description']=="") {
+	$tooltip = "Sorry, no tip available for this command parameter."; 
+} else { 
+	$tooltip = $rowSelectParameters['C_CP_Description']; 
+} 
 										
 					$out.="
 						<tr ".(strlen(trim($rowSelectParameters['CP_Description']))==0?" bgColor='lightgreen' ":"").">
@@ -6365,6 +6371,8 @@ function editCommandGroupCommands($commandGroupID,$dbADO){
 							// if command == 13, display file picker link
 							if($rowSelectParameters['FK_CommandParameter']==13){
 								$out.=' <a href="javascript:windowOpen(\'index.php?section=filePicker&from=editCommandGroup&cgcID='.$rowCommandAssigned['PK_CommandGroup_Command'].'&cp='.$rowSelectParameters['FK_CommandParameter'].'\',\'width=640,height=480,toolbar=1,resizable=1,scrollbars=1\');"><img src="include/images/pick.gif" border="0" align="bottom"></a>';
+							} else {
+								$out.=' <img src="img/question.gif" onmouseover="Tip(\''.trim(addslashes($tooltip)).'\',ABOVE,true,WIDTH,350,FADEIN,250,FADEOUT,250,BGCOLOR,\'#C0FFC0\')" onmouseout="UnTip()">';
 							}
 							$out.='					
 							<td>
