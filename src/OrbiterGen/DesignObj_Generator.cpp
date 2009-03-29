@@ -1978,7 +1978,7 @@ vector<class ArrayValue *> *DesignObj_Generator::GetArrayValues(Row_DesignObjVar
 						//User selection names.
 						//Use Nickname when available. 
 						string sName = "";						
-						if( drIU->FK_Users_getrow()->Nickname_get().size() ||  drIU->FK_Users_getrow()->Nickname_isNull()) {
+						if( drIU->FK_Users_getrow()->Nickname_get().size() && !(drIU->FK_Users_getrow()->Nickname_isNull())) {
 							//There is a Nickname, use it!
 							sName = pRow_Users->Nickname_get();
 						} else {
@@ -2268,7 +2268,7 @@ int k=2;
 				sValue = "";
             } else {
 		   //not sure where this is used exactly?
-	           if(drUser->Nickname_get().size() || drUser->Nickname_isNull()) {
+	           if(drUser->Nickname_get().size() && !(drUser->Nickname_isNull())) {
 			//There is a Nickname, use it!
 			sValue = drUser->Nickname_get();
 		   } else {
