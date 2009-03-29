@@ -10,11 +10,13 @@ done
 
 #Temporarily disable startCore.sh cleancore script for 3-29-2009 build LM testing.
 #Backup the original, then replace it with a "neutered" version
-mv /usr/pluto/bin/startCore.sh /usr/pluto/bin/startCore.sh._backup
-cat >/usr/pluto/bin/startCore.sh <<"EOF"
+if [ -f /usr/pluto/bin/startCore.sh ] ; then
+	mv /usr/pluto/bin/startCore.sh /usr/pluto/bin/startCore.sh._backup
+	cat >/usr/pluto/bin/startCore.sh <<"EOF"
 #!/bin/sh
 
 exit 0
 EOF
-chmod +x /usr/pluto/bin/startCore.sh
+	chmod +x /usr/pluto/bin/startCore.sh
+fi
 
