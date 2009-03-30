@@ -1799,7 +1799,9 @@ void LM::Run()
 	//schedule initialization to run
 	//m_pAlarmManager->AddRelativeAlarm(1,this,INITIALIZATION,NULL);
 
-	while(true) {}
+	while(true) {
+		sleep(1);
+	}
 
 	return;
 }
