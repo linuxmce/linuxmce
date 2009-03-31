@@ -68,8 +68,8 @@ function assign_res(val)
 
 function start_drag(val)
 {
-	eval("tmpx=xMousePos-parseInt(document.getElementById('"+val+"').style.left)");
-	eval("tmpy=yMousePos-parseInt(document.getElementById('"+val+"').style.top)");
+  tmpx = xMousePos - document.getElementById(val).offsetLeft;
+  tmpy = yMousePos - document.getElementById(val).offsetTop;
 	startX=xMousePos;
 	startY=yMousePos;
 	flag_drag=1;
@@ -90,10 +90,12 @@ function start_drag(val)
 
 function drag_layer()
 {
+  window.status = 'flag_drag=' + flag_drag + ', xMousePos=' + xMousePos + ', yMousePos=' + yMousePos + ', tmpx=' + tmpx + ', tmpy=' + tmpy;
+
 	if(flag_drag==1)
 	{
-		eval("document.getElementById('"+object_to_drag+"').style.left=xMousePos-tmpx");
-		eval("document.getElementById('"+object_to_drag+"').style.top=yMousePos-tmpy");
+	  document.getElementById(object_to_drag).style.left = (xMousePos-tmpx) + "px";
+	  document.getElementById(object_to_drag).style.top = (yMousePos-tmpy) + "px";
 	}
 }
 
@@ -130,33 +132,45 @@ function clearPipe(pipeName)
 // the calls are generated from PHP for missing pipes
 function generatePipe(deviceFrom,commandOut,deviceTo,commandIn,connectionType,description)
 {
-	eval("xContainer=parseInt(document.getElementById('device_"+deviceFrom+"').style.left)");
-	eval("yContainer=parseInt(document.getElementById('device_"+deviceFrom+"').style.top)");
-	eval("xContainerTo=parseInt(document.getElementById('device_"+deviceTo+"').style.left)");
-	eval("yContainerTo=parseInt(document.getElementById('device_"+deviceTo+"').style.top)");
+  eval(connectionType+"Pipe["+deviceFrom+"]=new Array();");
+  eval(connectionType+"Pipe["+deviceFrom+"]['to']="+deviceTo+";");
+  eval(connectionType+"Pipe["+deviceFrom+"]['input']="+commandIn+";");
+  eval(connectionType+"Pipe["+deviceFrom+"]['output']="+commandOut+";");
+  eval(connectionType+"Pipe["+deviceFrom+"]['description']='"+description+"'");
+  
+  var coords = calculatePipeCoords(deviceFrom, commandOut, deviceTo, commandIn, connectionType);
+  drawPipe(deviceFrom,connectionType,coords.coordXFrom,coords.coordYFrom,coords.coordXTo,coords.coordYTo);
+}
 
+// deviceFrom is the key to the pipe array
+// commandOut is .output
+// deviceTo is .to
+// commandIn is .input
+// connectionType is 'audio' or 'video'
+function calculatePipeCoords(deviceFrom, commandOut, deviceTo, commandIn, connectionType) {
+  var from = document.getElementById('device_' + deviceFrom);
+  var to = document.getElementById('device_' + deviceTo);
+  xContainer = from.offsetLeft;
+  yContainer = from.offsetTop;
+  xContainerTo = to.offsetLeft;
+  yContainerTo = to.offsetTop;
 	
-	eval("fromX=parseInt(document.getElementById('out_"+deviceFrom+"_cmd_"+commandOut+"').style.left)");
-	eval("fromY=parseInt(document.getElementById('out_"+deviceFrom+"_cmd_"+commandOut+"').style.top)");
-	eval("toX=parseInt(document.getElementById('in_"+deviceTo+"_cmd_"+commandIn+"').style.left)");
-	eval("toY=parseInt(document.getElementById('in_"+deviceTo+"_cmd_"+commandIn+"').style.top)");
-	
-	yHook=getYHook(connectionType);
-	coordXFrom=xContainer+fromX+110;
-	coordYFrom=yContainer+fromY+yHook;
-	coordXTo=xContainerTo+toX;
-	coordYTo=yContainerTo+toY+yHook;
-	
-	eval(connectionType+"Pipe["+deviceFrom+"]=new Array();");
-	eval(connectionType+"Pipe["+deviceFrom+"]['to']="+deviceTo+";");
-	eval(connectionType+"Pipe["+deviceFrom+"]['input']="+commandIn+";");
-	eval(connectionType+"Pipe["+deviceFrom+"]['output']="+commandOut+";");
-	eval(connectionType+"Pipe["+deviceFrom+"]['coords']='"+coordXFrom+","+coordYFrom+","+coordXTo+","+coordYTo+"';");
-	eval(connectionType+"Pipe["+deviceFrom+"]['description']='"+description+"'");
-	
-	drawPipe(deviceFrom,connectionType,coordXFrom,coordYFrom,coordXTo,coordYTo);
-	
-	
+  var fromCmd = document.getElementById('out_' + deviceFrom + '_cmd_' + commandOut);
+  var toCmd = document.getElementById('in_' + deviceTo + '_cmd_' + commandIn);
+  fromX = fromCmd.offsetLeft;
+  fromY = fromCmd.offsetTop;
+  toX = toCmd.offsetLeft;
+  toY = toCmd.offsetTop;
+
+  yHook=getYHook(connectionType);
+  var retval = {
+    coordXFrom: xContainer+fromX+110,
+    coordYFrom: yContainer+fromY+yHook,
+    coordXTo: xContainerTo+toX,
+    coordYTo: yContainerTo+toY+yHook
+  }
+
+  return retval;
 }
 
 function disabletext(e){
@@ -192,7 +206,7 @@ function setPipeVariables()
 	eval(globalPipe+"Pipe["+globalFromDevice+"]['to']="+globalToDevice+";");
 	eval(globalPipe+"Pipe["+globalFromDevice+"]['input']="+globalInput+";");
 	eval(globalPipe+"Pipe["+globalFromDevice+"]['output']="+globalOutput+";");
-	eval(globalPipe+"Pipe["+globalFromDevice+"]['coords']='"+globalXFrom+","+globalYFrom+","+globalXTo+","+globalYTo+"';");
+	//	eval(globalPipe+"Pipe["+globalFromDevice+"]['coords']='"+globalXFrom+","+globalYFrom+","+globalXTo+","+globalYTo+"';");
 	eval(globalPipe+"Pipe["+globalFromDevice+"]['description']='From "+document.getElementById('fromMessage').innerHTML+" to "+document.getElementById('toMessage').innerHTML+"';");
 	switch(globalPipe){
 		case 'audio':
@@ -209,11 +223,12 @@ function setPipeVariables()
 // create a graphical pipe and display it if it's a valid one
 function setPipe(device,command,prefix,itemName)
 {
-	eval("xContainer=parseInt(document.getElementById('device_"+device+"').style.left)");
-	eval("yContainer=parseInt(document.getElementById('device_"+device+"').style.top)");
-	
-	eval("xOffsetItem=parseInt(document.getElementById('"+prefix+device+"_cmd_"+command+"').style.left)");
-	eval("yOffsetItem=parseInt(document.getElementById('"+prefix+device+"_cmd_"+command+"').style.top)");
+  var dev = document.getElementById('device_' + device);
+  var item = document.getElementById(prefix + device + '_cmd_' + command);
+  xContainer = dev.offsetLeft;
+  yContainer = dev.offsetTop;
+  xOffsetItem = item.offsetLeft;
+  yOffsetItem = item.offsetTop;
 
 	yHook=getYHook(globalPipe);
 	if(prefix=='in_'){
@@ -282,22 +297,12 @@ function redrawPipes(val)
 function redrawConnectors(connectorType,pipeArray,deviceID)
 {
 		for(dev in pipeArray){
-			if(pipeArray[dev] && dev==deviceID){
-				// there are audio pipes who start from this device
-				oldCoords = pipeArray[dev]['coords'].split(','); 
-				newX=parseInt(oldCoords[0])+parseInt(xMousePos)-parseInt(startX);
-				newY=parseInt(oldCoords[1])+parseInt(yMousePos)-parseInt(startY);
-				drawPipe(deviceID,connectorType,newX,newY,oldCoords[2],oldCoords[3]);
-				pipeArray[deviceID]['coords']=newX+','+newY+','+oldCoords[2]+','+oldCoords[3];
-			}
-			if(pipeArray[dev] && pipeArray[dev]['to']==deviceID){
-				// redraw the pipes who end in this device
-				oldCoords = pipeArray[dev]['coords'].split(','); 
-				newX=parseInt(oldCoords[2])+parseInt(xMousePos)-parseInt(startX);
-				newY=parseInt(oldCoords[3])+parseInt(yMousePos)-parseInt(startY);
-				drawPipe(dev,connectorType,oldCoords[0],oldCoords[1],newX,newY);
-				pipeArray[dev]['coords']=oldCoords[0]+','+oldCoords[1]+','+newX+','+newY;
-			}
+		  var info = pipeArray[dev];
+		  if(info && (dev==deviceID || info.to == deviceID)) {
+		    // there are pipes that start or end from this device
+		    var coords = calculatePipeCoords(dev, info.output, info.to, info.input, connectorType);
+		    drawPipe(dev, connectorType, coords.coordXFrom, coords.coordYFrom, coords.coordXTo,coords.coordYTo);
+		  }
 		}
 }
 
@@ -326,23 +331,39 @@ function setPipeType()
 function savePositions()
 {
 	toSave='';
-	for(key in layersArray){
-		eval("xCoord=document.getElementById('device_"+layersArray[key]+"').style.left");
-		eval("yCoord=document.getElementById('device_"+layersArray[key]+"').style.top");
-		audioCoords=(audioPipe[layersArray[key]])?audioPipe[layersArray[key]]['to']+':'+audioPipe[layersArray[key]]['coords']+':'+audioPipe[layersArray[key]]['input']+':'+audioPipe[layersArray[key]]['output']+':'+audioPipe[layersArray[key]]['description']:'none';
-		videoCoords=(videoPipe[layersArray[key]])?videoPipe[layersArray[key]]['to']+':'+videoPipe[layersArray[key]]['coords']+':'+videoPipe[layersArray[key]]['input']+':'+videoPipe[layersArray[key]]['output']+':'+videoPipe[layersArray[key]]['description']:'none';
-		toSave+=';'+layersArray[key]+';'+xCoord+';'+yCoord+';'+audioCoords+';'+videoCoords;
+	var len = layersArray.length;
+	for (var key=0; key<len; ++key){
+	  var dev = layersArray[key];
+	  var thisLayer = document.getElementById('device_' + dev);
+	  xCoord = thisLayer.offsetLeft + "px";
+	  yCoord = thisLayer.offsetTop + "px";
+	  audioCoords = getPipeCookieValue(audioPipe[dev], dev, 'audio');
+	  videoCoords = getPipeCookieValue(videoPipe[dev], dev, 'video');
+	  toSave += ';' + [dev, xCoord, yCoord, audioCoords, videoCoords].join(';');
 	}
 	document.forms[0].devicesCoords.value=toSave;
 	document.connectionWizard.action.value='setCookie';
 	document.connectionWizard.submit();
 }
 
+function getPipeCookieValue(pipe, deviceFrom, connectionType)
+{
+  var retval = "none";
+  if (pipe) {
+    var coords = calculatePipeCoords(deviceFrom, pipe.output, pipe.to, pipe.input, connectionType);
+    var coordsString = [coords.coordXFrom, coords.coordYFrom, coords.coordXTo, coords.coordYTo].join(',');
+    retval = [pipe.to, coordsString, pipe.input, pipe.output, pipe.description].join(':');
+  }
+
+  return retval;
+}
+
 // display info toolbar with checkboxes to be able to delete existing pipes
 function showInfoToolbar(device)
 {
-	eval("document.getElementById('deleteToolbar').style.left="+(xMousePos-10));
-	eval("document.getElementById('deleteToolbar').style.top="+(yMousePos-10));
+  var toolbar = document.getElementById('deleteToolbar');
+  toolbar.style.left = (xMousePos-10) + "px";
+  toolbar.style.top = (yMousePos-10) + "px";
 	for(i=0;i<pipesArray.length;i++){
 		hasPipe=eval("("+pipesArray[i]+"Pipe["+device+"]!=null)?1:0");	
 		if(hasPipe==1){
@@ -359,7 +380,7 @@ function showInfoToolbar(device)
 			eval("document.getElementById('del_"+pipesArray[i]+"').value=1");
 		}
 	}
-	document.getElementById('deleteToolbar').style.display='';	
+	toolbar.style.display='';	
 }
 
 // delete the graphical pipe (not the arrays used for rebuild)
@@ -403,4 +424,5 @@ function getYHook(pipeType)
 		break;
 	}
 	return yHook;
+
 }

@@ -220,7 +220,7 @@ if ($action == 'form') {
 			while($rowInputs=$resInputs->FetchRow()){
 				$img=(@$rowInputs['FK_ConnectorType']=='')?$connectorsArray[0]:@$connectorsArray[@$rowInputs['FK_ConnectorType']];
 				$img=(file_exists('include/images/connectors/'.$img) && $img!='')?$img:$connectorsArray[0];
-				$inputsForDevice[]='<div align="left" id="in_'.$rowD['PK_Device'].'_cmd_'.$rowInputs['PK_Command'].'" style="position:absolute;Z-INDEX: 1000;width:110px;height:20px;left:5;top:'.$inputHeight.';border: 1px solid black;align:left;valign:middle;background-color:white;" title="'.$rowInputs['Description'].'" onClick="setPipe(\''.$rowD['PK_Device'].'\',\''.$rowInputs['PK_Command'].'\',\'in_\',\''.urlencode($rowInputs['Description']).' ('.str_replace('.png','',$img).') on '.urlencode($rowD['Description']).'\');"><img src="include/images/connectors/'.$img.'" align="top"> '.$rowInputs['Description'].'</div>';
+				$inputsForDevice[]='<div align="left" id="in_'.$rowD['PK_Device'].'_cmd_'.$rowInputs['PK_Command'].'" style="position:absolute;Z-INDEX: 1000;width:110px;height:20px;left:5px;top:'.$inputHeight.'px;border: 1px solid black;align:left;valign:middle;background-color:white;" title="'.$rowInputs['Description'].'" onClick="setPipe(\''.$rowD['PK_Device'].'\',\''.$rowInputs['PK_Command'].'\',\'in_\',\''.htmlspecialchars($rowInputs['Description']).' ('.str_replace('.png','',$img).') on '.htmlspecialchars($rowD['Description']).'\');"><img src="include/images/connectors/'.$img.'" align="top"> '.$rowInputs['Description'].'</div>';
 				$inputHeight+=25;
 			}
 			
@@ -232,11 +232,11 @@ if ($action == 'form') {
 				WHERE FK_DeviceTemplate=?';
 			$resOutput=$dbADO->Execute($queryOutput,$rowD['FK_DeviceTemplate']);
 			$outHeight=20;
-			$outputsForDevice[]='<div align="right" id="out_'.$rowD['PK_Device'].'_cmd_0" style="position:absolute;Z-INDEX: 1000;width:110px;height:20px;left:235;top:'.$outHeight.';border: 1px solid black;background-color:white;" title="Output" onClick="setPipe(\''.$rowD['PK_Device'].'\',\'0\',\'out_\',\'Output on '.urlencode($rowD['Description']).'\');">Output <img src="include/images/connectors/none.png" align="top"></div>';
+			$outputsForDevice[]='<div align="right" id="out_'.$rowD['PK_Device'].'_cmd_0" style="position:absolute;Z-INDEX: 1000;width:110px;height:20px;left:235px;top:'.$outHeight.'px;border: 1px solid black;background-color:white;" title="Output" onClick="setPipe(\''.$rowD['PK_Device'].'\',\'0\',\'out_\',\'Output on '.htmlspecialchars($rowD['Description']).'\');">Output <img src="include/images/connectors/none.png" align="top"></div>';
 			$outHeight+=25;
 			while($rowOutputs=$resOutput->FetchRow()){
 				$img=($rowOutputs['FK_ConnectorType']=='')?$connectorsArray[0]:$connectorsArray[$rowOutputs['FK_ConnectorType']];
-				$outputsForDevice[]='<div align="right" id="out_'.$rowD['PK_Device'].'_cmd_'.$rowOutputs['PK_Command'].'" style="position:absolute;Z-INDEX: 1000;width:110px;height:20px;left:235;top:'.$outHeight.';border: 1px solid black;background-color:white;" title="'.$rowOutputs['Description'].'" onClick="setPipe(\''.$rowD['PK_Device'].'\',\''.$rowOutputs['PK_Command'].'\',\'out_\',\''.urlencode($rowOutputs['Description']).' ('.str_replace('.png','',$img).') on '.urlencode($rowD['Description']).'\');">'.$rowOutputs['Description'].' <img src="include/images/connectors/'.$img.'" align="middle"></div>';
+				$outputsForDevice[]='<div align="right" id="out_'.$rowD['PK_Device'].'_cmd_'.$rowOutputs['PK_Command'].'" style="position:absolute;Z-INDEX: 1000;width:110px;height:20px;left:235px;top:'.$outHeight.'px;border: 1px solid black;background-color:white;" title="'.$rowOutputs['Description'].'" onClick="setPipe(\''.$rowD['PK_Device'].'\',\''.$rowOutputs['PK_Command'].'\',\'out_\',\''.htmlspecialchars($rowOutputs['Description']).' ('.str_replace('.png','',$img).') on '.htmlspecialchars($rowD['Description']).'\');">'.$rowOutputs['Description'].' <img src="include/images/connectors/'.$img.'" align="middle"></div>';
 				$outHeight+=25;
 			}
 			$height=($inputHeight>$outHeight)?$inputHeight:$outHeight;
@@ -260,6 +260,10 @@ if ($action == 'form') {
 					$topPosC1+=(15+$height);
 				}
 			}
+			
+			// fix left/top
+			$left = ensurePx($left);
+			$top = ensurePx($top);
 						
 			$out.='
 <div id="device_'.$rowD['PK_Device'].'_pipe_1" style="position:absolute;Z-INDEX: 100;left:0;top:0;"></div>
@@ -303,7 +307,7 @@ if ($action == 'form') {
 			foreach ($existingPipes as $devicePipe){
 				foreach($pipeTypesArray as $pipeType=>$pipeTypeDescription){
 					if(isset($devicePipe[$pipeType]) && $devicePipe[$pipeType]['isDisplayed']==0){
-						$jsMissingPipes.='generatePipe('.$devicePipe[$pipeType]['from'].','.(int)$devicePipe[$pipeType]['output'].','.$devicePipe[$pipeType]['to'].','.(int)$devicePipe[$pipeType]['input'].',\''.$pipeTypeDescription.'\',\''.urlencode($devicePipe[$pipeType]['description']).'\');';	
+						$jsMissingPipes.='generatePipe('.$devicePipe[$pipeType]['from'].','.(int)$devicePipe[$pipeType]['output'].','.$devicePipe[$pipeType]['to'].','.(int)$devicePipe[$pipeType]['input'].',\''.$pipeTypeDescription.'\',\''.htmlspecialchars($devicePipe[$pipeType]['description']).'\');';	
 					}
 				}
 			}
@@ -330,7 +334,7 @@ if ($action == 'form') {
 	// ToDO: add rebuild later
 	$out.='<script>
 	'.@$jsMissingPipes.'
-	'.@$jsDrawPipes.'
+/*	'.@$jsDrawPipes.' */
 	</script>';
 	
 
@@ -399,6 +403,9 @@ function addDeletePipe($operation,$deviceFrom,$pipe,$dbADO)
 		$arr=explode(':',$operation);
 		$deviceTo=$arr[0];
 		$commandOut=($arr[3]!=0)?$arr[3]:NULL;
+		// must delete any existing pipes of this type from
+		// this output before adding the new one
+		$dbADO->Execute('DELETE FROM Device_Device_Pipe WHERE FK_Device_From=? AND FK_Pipe=?',array($deviceFrom,$pipe));
 		$dbADO->Execute('INSERT IGNORE INTO Device_Device_Pipe (FK_Device_From,FK_Device_To,FK_Pipe,FK_Command_Input,FK_Command_Output) VALUES (?,?,?,?,?)',array($deviceFrom,$deviceTo,$pipe,$arr[2],$commandOut));
 	}
 }
@@ -412,4 +419,13 @@ function getConnectorsArray($dbADO){
 	
 	return $pics;
 }
+
+function ensurePx($str) {
+  if (strlen($str) < 2 || strtolower(substr($str, strlen($str)-2)) != "px") {
+    return $str."px";
+  } else {
+    return $str;
+  }
+}
+
 ?>
