@@ -7,40 +7,44 @@ set -e
 #set -x
 
 function fake_win32bins() {
-	touch ${svn_dir}/${svn_branch_name}/src/bin/Pluto_S60.sis
-	touch ${svn_dir}/${svn_branch_name}/src/bin/Orbiter.CAB
-	touch ${svn_dir}/${svn_branch_name}/src/bin/Orbiter_Treo.CAB
+	pushd ${svn_dir}/${svn_branch_name}/src/bin
+	touch Pluto_S60.sis
+	touch Orbiter.CAB
+	touch Orbiter_Treo.CAB
 
-	touch ${svn_dir}/${svn_branch_name}/src/bin/UpdateBinary.exe
-	touch ${svn_dir}/${svn_branch_name}/src/bin/UpdateBinaryCE.exe 
-	touch ${svn_dir}/${svn_branch_name}/src/bin/UpdateBinaryCE_x86.exe
-	touch ${svn_dir}/${svn_branch_name}/src/bin/{Orbiter_Win32.dat,Orbiter_CeNet4_XScale.dat}
-	touch "${svn_dir}/${svn_branch_name}/src/bin/Symbian Series 60 mobile.vmc"
-	touch "${svn_dir}/${svn_branch_name}/src/bin/Windows Mobile Smartphone.vmc"
-	touch ${svn_dir}/${svn_branch_name}/src/bin/Orbiter_CeNet4_x86.dat
+	touch UpdateBinary.exe
+	touch UpdateBinaryCE.exe 
+	touch UpdateBinaryCE_x86.exe
+	touch {Orbiter_Win32.dat,Orbiter_CeNet4_XScale.dat}
+	touch "Symbian Series 60 mobile.vmc"
+	touch "Windows Mobile Smartphone.vmc"
+	touch Orbiter_CeNet4_x86.dat
 
-	touch ${svn_dir}/${svn_branch_name}/src/bin/OrbiterInstaller.msi
-	touch ${svn_dir}/${svn_branch_name}/src/bin/OrbiterCE_SDL.CAB
-	touch ${svn_dir}/${svn_branch_name}/src/bin/Orbiter_CeNet4_XScale.CAB
-	touch ${svn_dir}/${svn_branch_name}/src/bin/Orbiter_CeNet4_x86.CAB
-	touch ${svn_dir}/${svn_branch_name}/src/bin/ImportContacts.zip
+	touch OrbiterInstaller.msi
+	touch OrbiterCE_SDL.CAB
+	touch Orbiter_CeNet4_XScale.CAB
+	touch Orbiter_CeNet4_x86.CAB
+	touch ImportContacts.zip
 
-	touch ${svn_dir}/${svn_branch_name}/src/bin/Orbiter.exe
-	touch ${svn_dir}/${svn_branch_name}/src/bin/Orbiter_CeNet4_XScale.exe
-	touch ${svn_dir}/${svn_branch_name}/src/bin/OrbiterSmartphone.exe
-	touch ${svn_dir}/${svn_branch_name}/src/bin/OrbiterCE_SDL.exe
-	touch ${svn_dir}/${svn_branch_name}/src/bin/Orbiter_CeNet4_x86.exe
+	touch Orbiter.exe
+	touch Orbiter_CeNet4_XScale.exe
+	touch OrbiterSmartphone.exe
+	touch OrbiterCE_SDL.exe
+	touch Orbiter_CeNet4_x86.exe
 
-	touch ${svn_dir}/${svn_branch_name}/src/bin/AYGSHELL.DLL
-	touch ${svn_dir}/${svn_branch_name}/src/bin/PthreadsCE.dll
-	touch ${svn_dir}/${svn_branch_name}/src/bin/Orbiter.MD5
-	touch ${svn_dir}/${svn_branch_name}/src/bin/logo.gif
+	touch AYGSHELL.DLL
+	touch PthreadsCE.dll
+	touch Orbiter.MD5
+	touch logo.gif
 
-	touch ${svn_dir}/${svn_branch_name}/src/bin/PlutoBaSInstaller.msi
-	touch ${svn_dir}/${svn_branch_name}/src/bin/PlutoRebootSetup.msi
+	touch PlutoBaSInstaller.msi
+	touch PlutoRebootSetup.msi
 
-	touch ${svn_dir}/${svn_branch_name}/src/bin/JavaMO.jar
-	touch ${svn_dir}/${svn_branch_name}/src/bin/JavaMO.jad
+	wget -q http://hob.dyndns.org/javamo/JavaMO.jar
+	wget -q http://hob.dyndns.org/javamo/JavaMO.jad
+	
+	touch JavaMO.jar
+	touch JavaMO.jad
 	
 
 }
@@ -53,6 +57,7 @@ function import_win32bins() {
 	pushd ${svn_dir}/${svn_branch_name}/src/lib
 	wget --ftp-user="$win32_ftp_user" --ftp-password="$win32_ftp_password" \
 		"$win32_ftp_url"/lib/* 
+	
 }
 
 DisplayMessage "*** STEP: Importing WIN32 binaries"
