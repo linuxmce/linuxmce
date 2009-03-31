@@ -165,7 +165,6 @@ function Build_Replacements_Intrepid
 	DisplayMessage "Building zaptel-modules"
 	m-a --non-inter -ft -l $KVER a-b zaptel
 	cp /usr/src/zaptel-modules*.deb "${replacements_dir}"
-
 }
 
 function Build_Replacements_Hardy

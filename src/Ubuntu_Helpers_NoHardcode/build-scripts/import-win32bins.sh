@@ -38,6 +38,11 @@ function fake_win32bins() {
 
 	touch ${svn_dir}/${svn_branch_name}/src/bin/PlutoBaSInstaller.msi
 	touch ${svn_dir}/${svn_branch_name}/src/bin/PlutoRebootSetup.msi
+
+	touch ${svn_dir}/${svn_branch_name}/src/bin/JavaMO.jar
+	touch ${svn_dir}/${svn_branch_name}/src/bin/JavaMO.jad
+	
+
 }
 
 function import_win32bins() {
