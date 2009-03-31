@@ -45,7 +45,8 @@ function fake_win32bins() {
 	
 	touch JavaMO.jar
 	touch JavaMO.jad
-	
+	popd
+		
 
 }
 
