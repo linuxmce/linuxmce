@@ -42,7 +42,7 @@ echo "0.0.0.0/0">>/etc/vdr/plugins/streamdev.conf
 
 #
 
-IF [ "$PK_Device" = "1" ] 
+if [ "$PK_Device" = "1" ] 
 then
 	# On the CORE
 	# added configuration from streamdev-server
