@@ -25,6 +25,13 @@ void GAMEROM::InitDatabase()
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"GAMEROM::InitDatabase() successful.");
 }
 
+void GAMEROM::CloseDatabase()
+{
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"GAMEROM::CloseDatabase()");
+	m_pMyDatabase->Disconnect();
+	delete(m_pMyDatabase);
+}
+
 string GAMEROM::getTitleForROM(string sROMName) 
 {
 	Row_Rom 				*pRow_Rom;

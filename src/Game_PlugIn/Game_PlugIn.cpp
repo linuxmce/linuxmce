@@ -102,6 +102,7 @@ void Game_PlugIn::PrepareToDelete()
 {
 	Command_Impl::PrepareToDelete();
 	delete m_pAlarmManager;
+	m_pGAMEROM->CloseDatabase();
 	delete m_pGAMEROM;
 	m_pGAMEROM = NULL;
 	m_pAlarmManager = NULL;

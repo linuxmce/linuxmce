@@ -43,6 +43,7 @@ using namespace std;
 			string getManufacturerForROM(string sROMName);
 			string getGenreForROM(string sROMName);		
 			void InitDatabase();
+			void CloseDatabase();
 
 	 		GAMEROM();	
 			virtual ~GAMEROM();
