@@ -34,8 +34,6 @@ void UI::initialize(string sTitle, bool bCenterTitle)
 }
 void UI::writeLog(string s)
 {
-	string timestamp = "Today";//QDateTime::currentDateTime().toString();
-	s = "+"+s;
 	m_vLog.push_back(s);
 	if (m_vLog.size() > 10) {
 		m_vLog.erase(m_vLog.begin());
@@ -44,7 +42,6 @@ void UI::writeLog(string s)
 }
 void UI::appendLog(string s)
 {
-	s = "+"+s;
 	m_vLog.pop_back();
 	m_vLog.push_back(s);
 	draw();
@@ -58,7 +55,7 @@ void UI::draw()
 {
 	system("clear");  //yes, I know this is not the best way to do it...
 	cout << " LinuxMCE Launch Manager, V1.0                                                  " << endl;
-	cout << "+-GENERAL INFO------------+--MYSQL INFO--------------+-STATUS------------------+" << endl;
+	cout << "+-GENERAL INFO------------+-MYSQL INFO---------------+-STATUS------------------+" << endl;
 	cout << "Core Ip:                     MySQL Host:               Remote Assistance [ ]    " << endl;
 	cout << "MD Status:                   MySQL User:               Autostart Core    [ ]    " << endl;
 	cout << "Video Driver:                MySQL Pass:               Autostart MD      [ ]    " << endl;
@@ -66,10 +63,10 @@ void UI::draw()
 	cout << "Audio Connector:  	   							 " << endl;  
 	cout << "IP Address:                                                                     " << endl;
 	cout << "-ACTIONS------------------+--------------------------+-------------------------+" << endl;	
-	cout << "[1]Reload Router             [5]Toggle Remote Asst.                             " << endl;
-	cout << "[2]Regen Orbiter             [6]Reboot                                          " << endl;
-	cout << "[3]Regen All Orbiters                                                           " << endl;
-	cout << "[4]Change Resolutions                                                           " << endl;
+	cout << "[1]Reload Router            [5]Toggle Remote Asst.                              " << endl;
+	cout << "[2]Regen Orbiter            [6]Toggle AutostartCore                             " << endl;
+	cout << "[3]Regen All Orbiters       [7]Toggle AutostartMedia                            " << endl;
+	cout << "[4]Change Resolutions       [8]Reboot                                           " << endl;
 	cout << "+-LOG--------------------------------------------------------------------------+" << endl;
 	for(int i=0;i<m_vLog.size();i++) {
 		cout << m_vLog[i] << endl;
@@ -106,7 +103,7 @@ void CB::set(bool bValue){
 }
 
 //Other functions
-string padString(string s, int len)
+string padString(string s, string sPad, int len)
 {
 
 }

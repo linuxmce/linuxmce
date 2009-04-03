@@ -42,6 +42,6 @@ public:
 
 };
 
-string padString(string s, int len);
+string padString(string s, string sPad, int len);
 string wrapTo(string s, int width);
 #endif

@@ -94,6 +94,8 @@ private:
 	string valueDB(int i);
 	void waitForDevice(int deviceID);
 	void reportDeviceUp();
+	void reportDeviceDown();
+	bool checkIfOrbiterIsOK();
 	void loadSettings();
 	
 	void deinitialize_LMdevice();
@@ -118,12 +120,22 @@ private:
 	string getOrbiterStatus();
 	string getOrbiterStatus(int &iProgressValue);
 	bool confirmOrbiterSkinIsReady();
+	void updateOrbiterSize(int width, int height);
+	void waitForDeviceShutdown(int deviceID);
+	void stopCoreDevices();
+	void actionActivateOrbiter();
+	void saveSettings();
+	void actionSaveBootupSettings();
 	void actionReloadRouter();
+	void actionSaveConnectionsSettings();
+	void action_Resolution();
 	//Process Methods
 	//TODO: group together and name similarly...  Candidate for a new class??
 	int exec_system(std::string cmd, bool wait=true);
 	bool isRunning(int iPID);
 	bool started(int iPID);
+
+	void syncUI();
 public:
 	// Public member variables
 	class DCE::AlarmManager *m_pAlarmManager;

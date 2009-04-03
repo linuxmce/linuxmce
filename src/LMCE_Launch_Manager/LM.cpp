@@ -246,7 +246,7 @@ bool LM::closeDB()
 	}
 }
 //COMPLETE
-void LM::initialize_LogOptions()
+void LM::initialize_LogOptions() //TODO: is this needed? I have no plans for LM to have log interaction like the old one did.. This functionality can be moved to the web admin
 {
 	DCEConfig *pConfig = new DCEConfig(PLUTO_CONFIG);
 	string s = pConfig->m_mapParameters_Find("LogLevels");
@@ -408,10 +408,39 @@ void LM::reportDeviceUp()
 		writeLog("Sending  SYSCOMMAND_DEVICE_UP from LM device " + m_sDeviceID + " failed", false, LV_WARNING);
 	}
 }
+void LM::reportDeviceDown()
+{
+	// saying we're down
+	DCE::Message *pMessage = new DCE::Message(atoi(m_sDeviceID.c_str()), DEVICEID_DCEROUTER, DCE::PRIORITY_NORMAL, DCE::MESSAGETYPE_SYSCOMMAND, DCE::SYSCOMMAND_DEVICE_DOWN, 0);
+	if (m_pLMCE_Launch_Manager)
+	{
+		writeLog("Sending  SYSCOMMAND_DEVICE_DOWN from LM device " + m_sDeviceID, false);
+		m_pLMCE_Launch_Manager->QueueMessageToRouter(pMessage);
+	}
+	else
+	{
+		writeLog("Sending  SYSCOMMAND_DEVICE_DOWN from LM device " + m_sDeviceID + " failed", false, LV_WARNING);
+	}
+}
 //COMPLETE - but not used(yet?)
 void LM::loadSettings()
 {
 }
+//COMPLETE - but not used(yet?)
+void LM::saveSettings()
+{
+	DCEConfig *pConfig = new DCEConfig(PLUTO_CONFIG);
+	pConfig->AddInteger("AutostartCore", atoi(m_sAutostartCore.c_str()));
+	pConfig->AddInteger("AutostartMedia", atoi(m_sAutostartMedia.c_str()));
+	pConfig->WriteSettings();
+	delete pConfig;
+}
+//COMPLETE - but not used(yet?)
+void LM::actionSaveBootupSettings()
+{
+	saveSettings();
+}
+
 //COMPLETE
 void LM::deinitialize_LMdevice()
 {
@@ -522,7 +551,7 @@ string LM::getOrbiterStatusMessage(const string &orbiterStatus)
 	if (orbiterStatus=="n")
 		return "There are no skins generated yet for this new Orbiter";
 	
-	if (orbiterStatus=="R")
+	if (orbiterStatus=="Rvoid lmce_launch_managerWidget::btnActivateOrbiter_clicked()")
 		return "Skin generation for Orbiter is in progress now";
 	
 	if (orbiterStatus=="r")
@@ -673,6 +702,17 @@ void LM::jumpToOrbiter()
 	}
 }
 //COMPLETE
+bool LM::checkIfOrbiterIsOK()
+{
+	if (!m_bMediaHere || m_sOrbiterID=="")
+	{
+		writeLog("Not getting Orbiter status - there is no Orbiter at this PC", true);
+		return false;
+	}
+	
+	return getOrbiterStatus() == "O";
+}
+//COMPLETE
 void LM::actionReloadRouter()
 {
 	if (m_pLMCE_Launch_Manager)
@@ -755,10 +795,117 @@ void LM::LMdeviceKeepAlive()
                 }
 	}
 }
+//COMPLETE
+void LM::stopCoreDevices()
+{
+}
+//TODO: test
+void LM::waitForDeviceShutdown(int deviceID)
+{
+	// TODO generalize to 'wait for device status'?
+	char cStatus = 'Y';
+	int iCount = MEDIA_DEVICE_TIMEOUT;
+	
+	if (!m_pLMCE_Launch_Manager)
+		cStatus = 'E';
+	
+	while (cStatus=='Y' && iCount--)
+	{
+		sleep(1);
+		cStatus = m_pLMCE_Launch_Manager->DeviceIsRegistered(deviceID);
+	}
+	
+	if (cStatus=='Y')
+		writeLog("Timeout waiting for device shutdown", false, LV_WARNING);
+}
+//TODO: Test!
+void LM::actionActivateOrbiter()
+{
+	jumpToOrbiter();
+}
+//TODO: test!
+void LM::updateOrbiterSize(int width, int height)
+{
+	writeLog("Updating Orbiter size to " + StringUtils::itos(width) + "x" + StringUtils::itos(height));
+	
+	if (m_sOrbiterID!="")
+	{
+		string query = "SELECT PK_Size FROM Size WHERE Width=" + StringUtils::itos(width) + " AND Height=" + StringUtils::itos(height);
+		writeLog("Query: " + query, false, LV_DEBUG);
+		string sizeID = m_dbPlutoDatabase.quickQuery(query);
+		if (sizeID=="")
+		{
+			writeLog("No direct match, trying to find Size that will fit into screen and have maximal square");
+			query = "SELECT PK_Size, Width*Height AS Square FROM Size WHERE Width<=" + StringUtils::itos(width) + " AND Height<=" + StringUtils::itos(height) + " ORDER BY Square DESC";
+			writeLog("Query: " + query, false, LV_DEBUG);
+			sizeID = m_dbPlutoDatabase.quickQuery(query);
+		}
+		
+		if (sizeID=="")
+		{
+			writeLog("No luck, aborting :(");
+		}
+		else
+		{
+			writeLog("Setting PK_Size for Orbiter #"+m_sOrbiterID + " to " + sizeID);
+			string query = "UPDATE Device_DeviceData SET IK_DeviceData='"+sizeID+"' WHERE FK_Device="+m_sOrbiterID +
+					 " AND FK_DeviceData="+StringUtils::itos(DEVICEDATA_PK_Size_CONST);
+			writeLog("Query: " + query, false, LV_DEBUG);
+			m_dbPlutoDatabase.quickQuery(query);
+		}
+	} else {
+		writeLog("Aborting, orbiterID is empty");
+	}
+}
+//TODO:Test!
+void LM::action_Resolution()
+{
+	// scheduling AVWizard
+	DCEConfig *pConfig = new DCEConfig(PLUTO_CONFIG);
+	pConfig->AddString("AVWizardOverride", "1");
+	pConfig->WriteSettings();	
+	delete pConfig;
+	
+	writeLog("AVWizard will start on the next reboot.");
+	//TODO: prompt client to reboot!	
+	
+	
+	//TODO: Need to execute these on client response??
+	//if (iResult == QMessageBox::Yes)
+	//{
+	//	writeLog("Stopping LMCE");	
+	//	
+	//	if ( m_bMediaHere && m_bMediaRunning )
+	//		actionSwitchMedia();
+	//		
+	//	if ( m_bCoreHere && m_bCoreRunning )
+	//		actionSwitchCore();
+	//	
+	//	rebootPC();
+	//}
+}
+//TODO: test
+void LM::actionSaveConnectionsSettings()
+{
+	DCEConfig *pConfig = new DCEConfig(PLUTO_CONFIG);
+	
+	pConfig->AddString("DCERouter", m_sCoreIP);
+	pConfig->AddString("MySqlHost", m_sMySQLHost);
+	pConfig->AddString("MySqlUser", m_sMySQLUser);
+	pConfig->AddString("MySqlPassword", m_sMySQLPass);
+	pConfig->WriteSettings();
+	
+	delete pConfig;
+	
+	writeLog("Saved new settings to "+ string(PLUTO_CONFIG));
 
+	//TODO should we restart anything here?
+}
 //TODO: move this to its own source file and call the function from here. This will make it easier in the future to change how we get this information. Also, clean up this mess of code!!!!!
 void LM::initialize_VideoSettings()
 {
+	//Lets assume that we can't find the driver information
+	m_sVideoDriver = "Unknown";
 	if (m_sOrbiterID == "")
 		return;
 
@@ -766,10 +913,12 @@ void LM::initialize_VideoSettings()
 	
 	//The old Launch Manager used a python script which used the now obsolete xorgconfig module to get the video driver name
 	//Let just do it manuall in good ol' c++
-	//vector thisText;
 	string line;
 	string xorgFile;
-	ifstream textStream ("/etc/X11/xorg.conf"); //TODO error checking if file opened...
+	ifstream textStream ("/etc/X11/xorg.conf");
+	if (textStream.fail())
+		return;
+
 	while(getline(textStream,line)){
 		line=StringUtils::TrimSpaces(line) + "\n";
 		line=StringUtils::Replace(line,"\t","");
@@ -781,25 +930,30 @@ void LM::initialize_VideoSettings()
 	size_t startPos;
 
 	startPos=xorgFile.find("\nSection \"Device\"\n");
-  	xorgFile = xorgFile.substr(startPos,-1);
+	if (startPos==string::npos)
+		return;
+	xorgFile = xorgFile.substr(startPos,-1);
 
 	
 	startPos=xorgFile.find("\nEndSection\n");
+	if (startPos==string::npos)
+		return;	
 	xorgFile = xorgFile.substr(0,startPos+11);
 	
 	
 	//Now we have the Device section, find the driver!
 	startPos=xorgFile.find("\nDriver");
+	if (startPos==string::npos)
+		return;
 	startPos+=7;
 	xorgFile=xorgFile.substr(startPos,-1);
 
 	startPos=xorgFile.find("\n");
+	if (startPos==string::npos)
+		return;
 	xorgFile=xorgFile.substr(0,startPos);
 	xorgFile=StringUtils::Replace(xorgFile,"\"","");	
 	m_sVideoDriver = xorgFile;
-	cout << m_sVideoDriver << endl;
-	
-	
 }
 //TODO: make member variables to track passthrough(m_bAC3Pass) (contains"3") and setting type (stereo, etc..) m_sSoundSetting
 void LM::initialize_AudioSettings()
@@ -1073,7 +1227,7 @@ void LM::startCoreDevices(bool checkForAlreadyRunning)
 					writeLog("Not starting device " + dbrCoreDevices.value(0) + " "  + dbrCoreDevices.value(1) + " - it is disabled", true);
 				else if (dbrCoreDevices.value(6)=="1")
 					writeLog("Not starting device " + dbrCoreDevices.value(0) + " "  + dbrCoreDevices.value(1) + " - it is a plugin", true);
-				else
+				elsehttp://pastebin.com/m7cfcd3f2
 				{			
 									
 					//if device implements DCE, start it
@@ -1103,8 +1257,6 @@ void LM::startCoreDevices(bool checkForAlreadyRunning)
 							if (deviceCommand=="")
 								deviceCommand=StringUtils::Replace(dbrCoreDevices.value(1)," ","_");//TODO: remove leading and trialing whitespace, as well as simplifying multiple spaces to a single space before replacing with "_"
 
-							//writeLog("Starting device " + dbrCoreDevices.value(0) + " "  + dbrCoreDevices.value(1)+" - using " + deviceCommand, true);//TODO: remove DEBUG
-							
 							if (!FileUtils::FileExists("/usr/pluto/bin/"+deviceCommand))
 							{
 								writeLog("Not starting device " +  dbrCoreDevices.value(0) + " "  + dbrCoreDevices.value(1) + " -  binary \"" + deviceCommand + "\" is not found.", true, LV_WARNING);
@@ -1217,8 +1369,6 @@ void LM::startMediaDevices(bool checkForAlreadyRunning)
 								deviceCommand=StringUtils::Replace(dbrMediaDevices.value(1)," ","_");
 								//deviceCommand = dbrMediaDevices.value(1)).simplifyWhiteSpace().replace(" ","_");//TODO: remove leading and trialing whitespace, as well as simplifying multiple spaces to a single space before replacing with "_"
 
-							//writeLog("Starting device " +  dbrMediaDevices.value(0) + " "  + dbrMediaDevices.value(1)+" - using " + deviceCommand, true);	//TODO: romove, DEBUG	
-				
 							if (!FileUtils::FileExists("/usr/pluto/bin/"+deviceCommand))
 							{
 								writeLog("Not starting device " +  dbrMediaDevices.value(0) + " "  + dbrMediaDevices.value(1) + " - binary \"" +deviceCommand+"\" is not found.", true, LV_WARNING);
@@ -1655,7 +1805,7 @@ bool LM::checkScreenDimensions(bool askUser/*=true*/)
 					writeLog("User decided not to update Orbiter configuration", true, LV_WARNING);
 		}
 		else
-		{http://www.google.com/
+		{
 			iResult = QMessageBox::Yes;
 			writeLog("Autorun mode: updating Orbiter configuration", true, LV_WARNING);
 		}
@@ -1797,10 +1947,9 @@ void LM::updateOrbiterRegenProgress()
 		}
 		else
 		{
-			//pbProgress->hide();
+			m_bShowProgress = false; //pbProgress->hide();
 
 			//m_pProgressBarUpdateTimer->stop();
-			
 			//tlStatusMessages->setText("");
 			//tlStatusMessages->hide();
 			
@@ -1842,7 +1991,13 @@ void LM::Run()
 
 
 
+void LM::syncUI() 
+{
+	
 
+
+
+}
 
 
 //////////////////////////////////////////////
