@@ -83,6 +83,7 @@ bool SimplePhone::GetConfig()
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Server IP: %s", SimplePhoneConf::Instance().Get_Server_IP().c_str());
 
 	/* Get MD Audio Settings */
+
 	string sAudioSettings = Get_MD_AudioSettings();
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "MD Audio Settings: %s", sAudioSettings.c_str());
 	string sAlsaDevice = "asym_analog";
@@ -99,6 +100,8 @@ bool SimplePhone::GetConfig()
 			case 'L':
 				sAlsaDevice = "asym_analog";
 				break;
+			case 'H':
+				sAlsaDevice = "plughw:1";
 			default:
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Flag unprocessed: '%c'", sAudioSettings[i]);
 		}
@@ -114,6 +117,22 @@ bool SimplePhone::GetConfig()
 		{
 			vectLinphoneConfig[i] = "alsadev=" + sAlsaDevice;
 		}
+
+                if (strstr(pcConfigLine, "playback_dev_id=") == pcConfigLine)
+		{
+			vectLinphoneConfig[i] = "playback_dev_id=ALSA: " + sAlsaDevice;
+		}
+
+		if (strstr(pcConfigLine, "ringer_dev_id=") == pcConfigLine)
+		{
+			vectLinphoneConfig[i] = "ringer_dev_id=ALSA: " + sAlsaDevice;
+		}
+
+		if (strstr(pcConfigLine, "capture_dev_id=") == pcConfigLine)
+		{
+			vectLinphoneConfig[i] = "capture_dev_id=ALSA: " + sAlsaDevice;		
+		}
+
 	}
 	FileUtils::WriteVectorToFile("/etc/pluto/simplephone.conf", vectLinphoneConfig);
 
@@ -386,10 +405,20 @@ void SimplePhone::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string s
 
 string SimplePhone::Get_MD_AudioSettings()
 {
-	// M/D where we are attached to
-	int PK_MD = m_pData->m_dwPK_Device_MD;
 
-	return m_pData->m_pEvent_Impl->GetDeviceDataFromDatabase(PK_MD,DEVICEDATA_Audio_settings_CONST);
+	m_pUSBMicrophoneDevice = m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_Conference_Microphones_CONST);
+
+	if (!m_pUSBMicrophoneDevice)
+	{
+		// M/D where we are attached to
+		int PK_MD = m_pData->m_dwPK_Device_MD;
+
+		return m_pData->m_pEvent_Impl->GetDeviceDataFromDatabase(PK_MD,DEVICEDATA_Audio_settings_CONST);
+	} else
+	{
+		return "H";
+	}
+
 }
 
 string SimplePhone::GetExtension()

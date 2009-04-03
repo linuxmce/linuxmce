@@ -119,6 +119,8 @@
 #define DEVICECATEGORY_LCD_CONST 172
 #define DEVICECATEGORY_Raid_Controllers_CONST 173
 #define DEVICECATEGORY_Workstations_CONST 174
+#define DEVICECATEGORY_Network_Video_Player_CONST 175
+#define DEVICECATEGORY_Conference_Microphones_CONST 176
 
 #define DEVICECATEGORY_TABLE "DeviceCategory"
 #define DEVICECATEGORY_PK_DEVICECATEGORY_FIELD "PK_DeviceCategory"

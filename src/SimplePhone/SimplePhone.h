@@ -42,6 +42,10 @@ public:
         // Public methods
         virtual void CreateChildren();
 	string GetExtension();
+
+	// Used to find any USB microphones
+	DeviceData_Base *m_pUSBMicrophoneDevice;
+	
 //<-dceag-const-b->
 public:
 		// Constructors/Destructor

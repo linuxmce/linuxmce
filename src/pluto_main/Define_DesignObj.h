@@ -2332,7 +2332,6 @@
 #define DESIGNOBJ_mnuGamesMonitorMode_CONST 5653
 #define DESIGNOBJ_Monitor_Mode_Off_CONST 5654
 #define DESIGNOBJ_Videos_FS_Replacement_CONST 5656
-#define DESIGNOBJ_butPauseVDR_CONST 5657
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"
