@@ -1,3 +1,5 @@
+//TODO import pbProgress and tlStatusMessages stuff!!!;
+
 #include "LMCE_Launch_Manager.h"
 #include "LM.h"
 #include "List.h"
@@ -69,6 +71,9 @@ LM::LM()
 	m_pLMCE_Launch_Manager=NULL;
 	m_pResult=NULL;
 	m_pAlarmManager = NULL;
+	//Init progress tracking vars	
+	m_iProgress = 0;
+	m_bShowProgress = false;
 	//m_SocketConnection = NULL;
 }
 
@@ -667,6 +672,90 @@ void LM::jumpToOrbiter()
 		writeLog("Failed to activate Orbiter - no connection to DCE router", true, LV_WARNING);
 	}
 }
+//COMPLETE
+void LM::actionReloadRouter()
+{
+	if (m_pLMCE_Launch_Manager)
+	{
+		writeLog("Reloading router", true);
+		DCE::Message *pMessage = new DCE::Message(0, DEVICEID_DCEROUTER, DCE::PRIORITY_NORMAL, DCE::MESSAGETYPE_SYSCOMMAND, DCE::SYSCOMMAND_RELOAD, 0);
+		m_pLMCE_Launch_Manager->QueueMessageToRouter(pMessage);
+	}
+	else
+	{
+		writeLog("Failed to reload router -  no connection", true);
+		return;
+	}
+	
+	// updating serial ports
+	updateScripts();
+}
+//COMPLETE
+void LM::LMdeviceKeepAlive()
+{
+	if (m_pLMCE_Launch_Manager)
+	{
+		// if device is finishing
+		if (m_pLMCE_Launch_Manager->m_bTerminate)
+		{
+			writeLog("Connection to DCERouter terminated", true);
+			bool bReload = m_pLMCE_Launch_Manager->m_bReload;
+			deinitialize_LMdevice();
+			if (bReload)
+			{
+				writeLog("Reconnecting to DCERouter as requested", true);
+				if (!initialize_LMdevice())
+				{
+					writeLog("Will retry later..", true);
+					m_pAlarmManager->CancelAlarmByType(LM_KEEP_ALIVE);
+					m_pAlarmManager->AddRelativeAlarm(5,this,LM_KEEP_ALIVE,NULL);
+				}
+				else
+				{
+                                        updateScripts();
+					respawnNewChildren();
+					reportDeviceUp();
+				}
+			}
+			else
+			{
+				writeLog("Reconnect to DCERouter was not requested", true);
+				m_bCoreRunning = false;
+				m_bMediaRunning = false;
+			}
+		}
+		else
+		{
+			m_pAlarmManager->CancelAlarmByType(LM_KEEP_ALIVE);
+			m_pAlarmManager->AddRelativeAlarm(5,this,LM_KEEP_ALIVE,NULL);
+		}
+	}
+	else
+	{
+		if (m_bCoreRunning || m_bMediaRunning)
+		{
+			writeLog("Reconnecting to DCERouter as requested", true);
+			if (!initialize_LMdevice())
+			{
+				writeLog("Will retry later..", true);
+				m_pAlarmManager->CancelAlarmByType(LM_KEEP_ALIVE);
+				m_pAlarmManager->AddRelativeAlarm(5,this,LM_KEEP_ALIVE,NULL);
+			}
+			else
+			{
+                                updateScripts();
+				respawnNewChildren();
+				reportDeviceUp();
+			}
+		}
+                else
+                {
+                    writeLog("LMdeviceKeepAlive() not reconnecting, as this is not required");
+			m_pAlarmManager->CancelAlarmByType(LM_KEEP_ALIVE);
+                }
+	}
+}
+
 //TODO: move this to its own source file and call the function from here. This will make it easier in the future to change how we get this information. Also, clean up this mess of code!!!!!
 void LM::initialize_VideoSettings()
 {
@@ -862,19 +951,16 @@ bool LM::initialize_LMdevice(bool bRetryForever/*=false*/)
 	}
 }
 
-//TODO: Lets find out if there are any other scripts that should be run on boot and any reload..
-//Also, this seems like its called a bit too often. Lets find a single place to call it that will work in all situations.
+//COMPLETED
 void LM::updateScripts()
 {
+	//Put all scripts we want to run on boot and each reload here
 	writeLog("Running UpdateAvailableSerialPorts.sh", true, LV_STATUS);
 	string sCmd = "/usr/pluto/bin/UpdateAvailableSerialPorts.sh";
 	exec_system(sCmd,true);
 	writeLog("Process completed.");
 
-	//writeLog("Running checkforRaids.sh",true,LV_STATUS);  TODO: remove checkforraids call... it appears to remove unmount the raid device...
-	//sCmd = "/usr/pluto/bin/checkforRaids.sh";
-	//writeLog("Process completed.");
-				
+		
 }
 
 //TODO: Do I really need a custom list type? It was used to make porting easier, but maybe using a vector would be best.. Also general cleanup of code...
@@ -1017,7 +1103,7 @@ void LM::startCoreDevices(bool checkForAlreadyRunning)
 							if (deviceCommand=="")
 								deviceCommand=StringUtils::Replace(dbrCoreDevices.value(1)," ","_");//TODO: remove leading and trialing whitespace, as well as simplifying multiple spaces to a single space before replacing with "_"
 
-							writeLog("Starting device " + dbrCoreDevices.value(0) + " "  + dbrCoreDevices.value(1)+" - using " + deviceCommand, true);
+							//writeLog("Starting device " + dbrCoreDevices.value(0) + " "  + dbrCoreDevices.value(1)+" - using " + deviceCommand, true);//TODO: remove DEBUG
 							
 							if (!FileUtils::FileExists("/usr/pluto/bin/"+deviceCommand))
 							{
@@ -1131,7 +1217,7 @@ void LM::startMediaDevices(bool checkForAlreadyRunning)
 								deviceCommand=StringUtils::Replace(dbrMediaDevices.value(1)," ","_");
 								//deviceCommand = dbrMediaDevices.value(1)).simplifyWhiteSpace().replace(" ","_");//TODO: remove leading and trialing whitespace, as well as simplifying multiple spaces to a single space before replacing with "_"
 
-							writeLog("Starting device " +  dbrMediaDevices.value(0) + " "  + dbrMediaDevices.value(1)+" - using " + deviceCommand, true);			
+							//writeLog("Starting device " +  dbrMediaDevices.value(0) + " "  + dbrMediaDevices.value(1)+" - using " + deviceCommand, true);	//TODO: romove, DEBUG	
 				
 							if (!FileUtils::FileExists("/usr/pluto/bin/"+deviceCommand))
 							{
@@ -1186,71 +1272,6 @@ void LM::startMediaDevices(bool checkForAlreadyRunning)
 	}
 }
 
-//TODO:I hate this method name.. Rename to LMMonitor()?
-void LM::LMdeviceKeepAlive()
-{
-	if (m_pLMCE_Launch_Manager)
-	{
-		// if device is finishing
-		if (m_pLMCE_Launch_Manager->m_bTerminate)
-		{
-			writeLog("Connection to DCERouter terminated", true);
-			bool bReload = m_pLMCE_Launch_Manager->m_bReload;
-			deinitialize_LMdevice();
-			if (bReload)
-			{
-				writeLog("Reconnecting to DCERouter as requested", true);
-				if (!initialize_LMdevice())
-				{
-					writeLog("Will retry later..", true);
-					m_pAlarmManager->CancelAlarmByType(LM_KEEP_ALIVE);
-					m_pAlarmManager->AddRelativeAlarm(5,this,LM_KEEP_ALIVE,NULL);
-				}
-				else
-				{
-                                        updateScripts();
-					respawnNewChildren();
-					reportDeviceUp();
-				}
-			}
-			else
-			{
-				writeLog("Reconnect to DCERouter was not requested", true);
-				m_bCoreRunning = false;
-				m_bMediaRunning = false;
-			}
-		}
-		else
-		{
-			m_pAlarmManager->CancelAlarmByType(LM_KEEP_ALIVE);
-			m_pAlarmManager->AddRelativeAlarm(5,this,LM_KEEP_ALIVE,NULL);
-		}
-	}
-	else
-	{
-		if (m_bCoreRunning || m_bMediaRunning)
-		{
-			writeLog("Reconnecting to DCERouter as requested", true);
-			if (!initialize_LMdevice())
-			{
-				writeLog("Will retry later..", true);
-				m_pAlarmManager->CancelAlarmByType(LM_KEEP_ALIVE);
-				m_pAlarmManager->AddRelativeAlarm(5,this,LM_KEEP_ALIVE,NULL);
-			}
-			else
-			{
-                                updateScripts();
-				respawnNewChildren();
-				reportDeviceUp();
-			}
-		}
-                else
-                {
-                    writeLog("LMdeviceKeepAlive() not reconnecting, as this is not required");
-			m_pAlarmManager->CancelAlarmByType(LM_KEEP_ALIVE);
-                }
-	}
-}
 
 //TODO:see below
 void LM::findRunningMediaDevices()
@@ -1397,8 +1418,7 @@ bool LM::startCoreServices()
 	string cmd = "echo -n > " + log; //clear log
 	system(cmd.c_str());
 	
-	//QFile flog(log);
-	//textstream ts;
+
 	ifstream textStream (LM_PROGRESS_LOG);
 	
 	if (textStream.fail())
@@ -1406,39 +1426,29 @@ bool LM::startCoreServices()
 		writeLog("Failed to open file :" + string( LM_PROGRESS_LOG), false, LV_WARNING);
 	}
 
-	int startCoreScript = exec_system(START_CORE_SCRIPT);	
+	int startCoreScript = exec_system(START_CORE_SCRIPT,false);	
 
 	if ( started(startCoreScript) )
 	{
 		bool bOkDB = m_dbPlutoDatabase.connected();
-		
-		//pbProgress->setProgress(0);
-		//pbProgress->show();
-		
-		//tlStatusMessages->setText("");
-		//tlStatusMessages->show();
+		m_iProgress = 0;
+		m_bShowProgress = true;
 		
 		string currOrbiterID="";
-		//qApp->eventLoop()->processEvents(QEventLoop::ExcludeUserInput);
 
 		int iCounter = CORE_SERVICE_TIMEOUT;
 		int iQueryCounter=5; // trigger on start
-		while (isRunning(startCoreScript) && iCounter--)
+		while (isRunning(startCoreScript) && iCounter--)  //TODO: Should this be done with the orbiter regen tracking function???
 		{
-			// every second checking config log messages
+			// every second checking config log messages //TODO: is this extra information from LM_PROGRESS_LOG even useful or needed?? As of now, it is overwritten by the appendLog calls...
 			string s, s1;
-			//while ( (s=ts.readLine()) != QString::null)
 			while(getline(textStream,s))
 			{
-				s1 = s;
+				if(s!="") {				
+					writeLog("+Progress message: " + s, true);
+				}
 			}
-			
-			if (s1!="")
-			{
-				//tlStatusMessages->setText(s1);
-				writeLog("Progress message: " + s1, false);
-			}
-			
+						
 			// every 5 seconds checking orbiters
 			if (iQueryCounter>=5)
 			{
@@ -1447,30 +1457,39 @@ bool LM::startCoreServices()
 				// retrieve orbiter progress
 				if (bOkDB)
 				{
-					string sQuery = "select PK_Orbiter, RegenPercent,RegenStatus from Orbiter where RegenInProgress=1";
-					//QSqlQuery q;
-					//bool bQueryExecResult = performQueryDB(sQuery, q);
+					string sQuery = "select PK_Orbiter, RegenPercent,RegenStatus,Regen from Orbiter where RegenInProgress=1 ORDER BY PK_Orbiter";
 					DBResult res = m_dbPlutoDatabase.query(sQuery);
 					string O_ID;
 					string O_Message;
-					int O_Progress = 100; //was uint TODO
+					int O_Progress = 100; 
 					
 					// some orbiter is being regen-ed
-					if (res.next())//( bQueryExecResult && res.next() )
+					if (res.next())
 					{
 						O_ID = res.value(0);
 						O_Progress = atoi(res.value(1).c_str());
+						
+						//correct for incorrect calculations above 100%
+						if (O_Progress>100) 
+							O_Progress = 100;
+
 						O_Message = "Orbiter #"+O_ID+"\n"+res.value(2);
 						
-						if (O_ID != currOrbiterID)
+						if (O_ID != currOrbiterID) 
 						{
+							//Don't append the log on the first time through
+							if(currOrbiterID!="") {
+								appendLog("Regenerating Orbiter #" + currOrbiterID +" - Finished.");
+							}
 							currOrbiterID = O_ID;
-							writeLog("Generating skin for Orbiter #" + currOrbiterID + "...", true);
+							writeLog("Regenerating Orbiter #" + O_ID +" - starting...",true);	
+						} else {
+							appendLog("Regenerating Orbiter #" + O_ID + " - "+StringUtils::itos(O_Progress) + "% ("+res.value(2)+")");
 						}
-						
-						//pbProgress->setProgress(O_Progress);
-						//tlStatusMessages->setText(O_Message);
+						m_iProgress = O_Progress;
 					}
+				} else {
+					writeLog("Error. No database connection to track orbiter progress.",true,LV_CRITICAL);
 				}
 			}
 			
@@ -1481,7 +1500,9 @@ bool LM::startCoreServices()
 		
 
 		textStream.close();
-		
+		m_iProgress = 0;
+		m_bShowProgress = false;
+
 		if (isRunning(startCoreScript))
 		{
 			writeLog("Process didn't exit after " + StringUtils::itos(CORE_SERVICE_TIMEOUT) + " secs of running, let it run in background");
@@ -1499,6 +1520,7 @@ bool LM::startCoreServices()
 		return false;
 	}
 }
+
 //TODO: a lot of cleanup and TODO's below
 bool LM::startMediaStation()
 {
@@ -1526,8 +1548,8 @@ bool LM::startMediaStation()
                 while (status != "O")
                 {
                     // firing reload event //TODO: should this be implemented through socket once socket layer is implemented??
-                    //if (!bRouterReloaded)
-                    //   btnReloadRouter_clicked();
+                    if (!bRouterReloaded)
+                       actionReloadRouter();
                     
                     writeLog("Trying to reload router to use new skin for this Orbiter, please wait (giving router 10 seconds to reload)...", true);
                      
@@ -1633,7 +1655,7 @@ bool LM::checkScreenDimensions(bool askUser/*=true*/)
 					writeLog("User decided not to update Orbiter configuration", true, LV_WARNING);
 		}
 		else
-		{
+		{http://www.google.com/
 			iResult = QMessageBox::Yes;
 			writeLog("Autorun mode: updating Orbiter configuration", true, LV_WARNING);
 		}
@@ -1715,34 +1737,32 @@ void LM::updateOrbiterRegenProgress()
 		
 		if (sOrbiterStatus=="R" || sOrbiterStatus=="r")
 		{
-			//pbProgress->show();
-			//pbProgress->setProgress(iRegenProgress);
+			m_bShowProgress = true;
+			m_iProgress = iRegenProgress;
 			
-			//QString sQuery = "select PK_Orbiter, RegenPercent,RegenStatus from Orbiter where RegenInProgress=1 AND PK_Orbiter="+m_qsOrbiterID;
-			//QSqlQuery q;
-			//bool bQueryExecResult = performQueryDB(sQuery, q);
+			
 			DBResult res = m_dbPlutoDatabase.query("select PK_Orbiter, RegenPercent,RegenStatus from Orbiter where RegenInProgress=1 AND PK_Orbiter="+m_sOrbiterID);
-			//if ( bQueryExecResult && q.next() )
 			if(res.next())
 			{
 				string statusMessage = "Orbiter #" + res.value(0)+ "\n"+res.value(2);
 				//TODO: appendLog??
+				appendLog("Regenerating orbiter #" +res.value(0)+"..."+res.value(1)+"%");
 				//tlStatusMessages->setText(statusMessage);
 				//tlStatusMessages->show();
 			}
 			m_pAlarmManager->AddRelativeAlarm(5,this,UPDATE_ORBITER_REGEN_PROGRESS,NULL);
-			writeLog("Waiting for OrbiterGen to complete", false);
+			//writeLog("Waiting for OrbiterGen to complete", false);
 		}
 		else
 		{
-			//pbProgress->hide();
+			m_bShowProgress = false;
 
 			//m_pProgressBarUpdateTimer->stop();
 			
 			//tlStatusMessages->hide();
 			//tlStatusMessages->setText("");QString lmce_launch_managerWidget::getOrbiterStatus(const QString &orbiterID, int &iProgressValue)  //TODO: where to display getOrbiterStatus????
 
-
+			//writeLog(getOrbiterStatus(string &orbiterID,&iProgressValue)); //TODO - why doesn't this work?
 			writeLog("OrbiterGen run completed", true);
 			
 			m_bRegenInProgress = false;
@@ -1768,11 +1788,12 @@ void LM::updateOrbiterRegenProgress()
 			{
 				string statusMessage = "Orbiter #" + res.value(0) + "\n"+res.value(2);
 				//TODO: where to display this??
+				appendLog("Regenerating orbiter #" +res.value(0)+"..."+res.value(1)+"%");
 				//tlStatusMessages->setText(statusMessage);
 				//tlStatusMessages->show();
 			}
 			m_pAlarmManager->AddRelativeAlarm(5,this,UPDATE_ORBITER_REGEN_PROGRESS,NULL);
-			writeLog("Waiting for OrbiterGen to complete", false);
+			//writeLog("Waiting for OrbiterGen to complete", false);
 		}
 		else
 		{

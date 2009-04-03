@@ -44,6 +44,10 @@ void UI::writeLog(string s)
 }
 void UI::appendLog(string s)
 {
+	s = "+"+s;
+	m_vLog.pop_back();
+	m_vLog.push_back(s);
+	draw();
 
 }
 void UI::flushLog()

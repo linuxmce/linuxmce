@@ -40,6 +40,9 @@ private:
 	int m_iDevicesLevel;
 	string m_sAutostartCore;
 	string m_sAutostartMedia;
+	//Progress Tracking
+	int m_iProgress;
+	bool m_bShowProgress;
 
 	string m_sDeviceID;
 	string m_sOrbiterID;
@@ -115,7 +118,7 @@ private:
 	string getOrbiterStatus();
 	string getOrbiterStatus(int &iProgressValue);
 	bool confirmOrbiterSkinIsReady();
-
+	void actionReloadRouter();
 	//Process Methods
 	//TODO: group together and name similarly...  Candidate for a new class??
 	int exec_system(std::string cmd, bool wait=true);
