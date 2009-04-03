@@ -551,7 +551,7 @@ string LM::getOrbiterStatusMessage(const string &orbiterStatus)
 	if (orbiterStatus=="n")
 		return "There are no skins generated yet for this new Orbiter";
 	
-	if (orbiterStatus=="Rvoid lmce_launch_managerWidget::btnActivateOrbiter_clicked()")
+	if (orbiterStatus=="R")
 		return "Skin generation for Orbiter is in progress now";
 	
 	if (orbiterStatus=="r")
@@ -1227,7 +1227,7 @@ void LM::startCoreDevices(bool checkForAlreadyRunning)
 					writeLog("Not starting device " + dbrCoreDevices.value(0) + " "  + dbrCoreDevices.value(1) + " - it is disabled", true);
 				else if (dbrCoreDevices.value(6)=="1")
 					writeLog("Not starting device " + dbrCoreDevices.value(0) + " "  + dbrCoreDevices.value(1) + " - it is a plugin", true);
-				elsehttp://pastebin.com/m7cfcd3f2
+				else
 				{			
 									
 					//if device implements DCE, start it
