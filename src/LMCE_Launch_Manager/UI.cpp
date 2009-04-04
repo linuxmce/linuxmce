@@ -56,12 +56,14 @@ void UI::draw()
 	system("clear");  //yes, I know this is not the best way to do it...
 	cout << " LinuxMCE Launch Manager, V1.0                                                  " << endl;
 	cout << "+-GENERAL INFO------------+-MYSQL INFO---------------+-STATUS------------------+" << endl;
-	cout << "Core Ip:                     MySQL Host:               Remote Assistance [ ]    " << endl;
-	cout << "MD Status:                   MySQL User:               Autostart Core    [ ]    " << endl;
-	cout << "Video Driver:                MySQL Pass:               Autostart MD      [ ]    " << endl;
-        cout << "Resolution:                                                                     " << endl;
-	cout << "Audio Connector:  	   							 " << endl;  
-	cout << "IP Address:                                                                     " << endl;
+	cout << "Core Ip:"+padString(m_sCoreIP," ",21)+"MySQL Host:"+padString(m_sMySQLHost," ",15)+"Remote Assistance "+checkBox(m_bRemoteAssistanceRunning) << endl;
+	cout << "Video Driver:"+padString(m_sVideoDriver," ",16)+"MySQL User:"+padString(m_sMySQLUser," ",15)+"Autostart Core    "+checkBox(m_sAutostartCore) << endl;
+	cout << "Resolution:"+padString(m_sVideoResolution," ",18)+"MySQL Pass:"+padString(m_sMySQLPass," ",15)+"Autostart MD      "+checkBox(m_sAutostartMedia) << endl;
+	string sAC3 = "";
+	if(m_bAC3Pass)
+		sAC3 = " (AC3 Passthrough enabled)";
+	cout << "Audio Connector:"+padString(m_sSoundSetting+sAC3," ",64) << endl;  
+	//cout << "IP Address:"+padString(""," ",69) << endl;
 	cout << "-ACTIONS------------------+--------------------------+-------------------------+" << endl;	
 	cout << "[1]Reload Router            [5]Toggle Remote Asst.                              " << endl;
 	cout << "[2]Regen Orbiter            [6]Toggle AutostartCore                             " << endl;
@@ -72,8 +74,81 @@ void UI::draw()
 		cout << m_vLog[i] << endl;
 	}  
 }
+string UI::checkBox(string s)
+{
+	string sRet;
 
+	if(s=="1") {
+		sRet = "[X]";
+	} else {
+		sRet = "[ ]";
+	}
+	return sRet;
+}
+string UI::checkBox(bool b)
+{
+	string sRet;
+	
+	if(b) {
+		sRet = "[X]";
+	} else {
+		sRet = "[ ]";
+	}
+	return sRet;
+}
+void UI::setCoreIP(string thisIP)
+{
+	m_sCoreIP = thisIP;
+}
+void UI::setVideoDriver(string thisVideoDriver)
+{
+	m_sVideoDriver = thisVideoDriver;
+}
+void UI::setVideoResolution(string thisVideoResolution)
+{
+	m_sVideoResolution = thisVideoResolution;
+}
+void UI::setMySQLInfo(string mysqlHost, string mysqlUser, string mysqlPass)
+{
+	m_sMySQLHost = mysqlHost;
+	m_sMySQLUser = mysqlUser;
+	m_sMySQLPass = mysqlPass;
+}
+void UI::setAudioInfo(string thisSetting, bool thisAC3Pass)
+{
+	m_bAC3Pass = thisAC3Pass;
+	m_sSoundSetting = thisSetting;
+}
+void UI::setStatus(string sAutostartCore, string sAutostartMedia, bool bRemoteAssistance)
+{
+	m_sAutostartCore = sAutostartCore;
+	m_sAutostartMedia = sAutostartMedia;
+	m_bRemoteAssistanceRunning = bRemoteAssistance;
+}
+string UI::padString(std::string s, std::string sPad, int len)
+{
+	string sRet;
 
+	if(s.length()>len) {
+		//chop off the rest
+		return s.substr(0,len);
+		
+	}
+	//Pad the string
+	for(int i=0;i<len-s.length();i++) {
+		sRet=sRet+sPad;
+	}
+	return s+sRet;
+}
+string UI::wrapTo(string s, int width)
+{
+	int len = s.length();
+	while (len>width) {
+		s=s;
+	}
+	return s;
+	
+}
 
 //CB (checkbox) class method implementations
 CB::CB()
@@ -103,16 +178,4 @@ void CB::set(bool bValue){
 }
 
 //Other functions
-string padString(string s, string sPad, int len)
-{
 
-}
-string wrapTo(string s, int width)
-{
-	int len = s.length();
-	while (len>width) {
-		s=s;
-	}
-	return s;
-	
-}

@@ -120,6 +120,7 @@ void LM::Initialize()
 
 	//Schedule the Autostart routine to start in 1 second...
 	m_pAlarmManager->AddRelativeAlarm(1,this,DO_AUTOSTART,NULL);
+	syncUI();
 }
 //COMPLETE
 void LM::initialize_Connections()
@@ -955,7 +956,7 @@ void LM::initialize_VideoSettings()
 	xorgFile=StringUtils::Replace(xorgFile,"\"","");	
 	m_sVideoDriver = xorgFile;
 }
-//TODO: make member variables to track passthrough(m_bAC3Pass) (contains"3") and setting type (stereo, etc..) m_sSoundSetting
+//COMPLETE
 void LM::initialize_AudioSettings()
 {
 	if (m_sMediaID == "")
@@ -966,30 +967,25 @@ void LM::initialize_AudioSettings()
 	if (sSettings=="")
 		return;
 	
-	//cbAC3Pass->setChecked(aSettings.contains("3"));
-	/*	
-	int iSelected = 0;
-	switch(aSettings.at(0).cell())
-	{
-		case 'C':
-			iSelected = 1;
-			break;
-		case 'O':
-			iSelected = 2;
-			break;
-		case 'S':
-			iSelected = 3;
-			break;
-		case 'L':
-			iSelected = 4;
-			break;
-		case 'M':
-		default:
-			break;
+	if(sSettings.find("3")!=string::npos) {	
+		m_bAC3Pass = true;
+	} else {
+		m_bAC3Pass = false;
+	}
+		
+
+	if(sSettings=="C"){
+		m_sSoundSetting = "SPDIF Coax";
+	}else if(sSettings=="O"){
+		m_sSoundSetting = "SPDIF TosLink";
+	}else if(sSettings=="S"){
+		m_sSoundSetting = "Stereo";
+	}else if(sSettings=="L"){
+		m_sSoundSetting = "Multichannel Analog";
+	}else{
+		m_sSoundSetting = "Manual/Unknown";
 	}
 	
-	cmbAudioConnector->setCurrentItem(iSelected);
-	*/
 }
 
 //TODO: when socket layer is implemented, send a signal to client that tells the user they should reboot...
@@ -1271,7 +1267,6 @@ void LM::startCoreDevices(bool checkForAlreadyRunning)
 							//writeLog("Command string: " + sCmd,true);//TODO REMOVE DEBUG
 							exec_system(sCmd);
 							writeLog("Starting device " +  dbrCoreDevices.value(0) + " " + dbrCoreDevices.value(1),true);// + ": " + args.join(" "));//TODO make a join method for custom list type
-						
 							// wait for the device to register
 							waitForDevice(atoi(dbrCoreDevices.value(0).c_str()));
 							
@@ -1993,8 +1988,13 @@ void LM::Run()
 
 void LM::syncUI() 
 {
-	
-
+	m_uiMainUI.setCoreIP(m_sCoreIP);
+	m_uiMainUI.setVideoDriver(m_sVideoDriver);
+	m_uiMainUI.setVideoResolution(m_sVideoResolution);	
+	m_uiMainUI.setMySQLInfo(m_sMySQLHost, m_sMySQLUser, m_sMySQLPass);
+	m_uiMainUI.setAudioInfo(m_sSoundSetting, m_bAC3Pass);
+	m_uiMainUI.setStatus(m_sAutostartCore, m_sAutostartMedia, m_bRemoteAssistanceRunning);
+	m_uiMainUI.draw();
 
 
 }

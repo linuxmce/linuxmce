@@ -54,6 +54,8 @@ private:
 	string m_sRAInfo;
 	string m_sVideoResolution;
 	string m_sVideoDriver;
+	bool m_bAC3Pass;
+	string m_sSoundSetting;
 
 	//MySQL Related 	
 	DB m_dbPlutoDatabase;
@@ -64,7 +66,7 @@ private:
 	string m_sMySQLHost;
 	string m_sMySQLUser;
 	string m_sMySQLPass;
-	string m_qsMySQLPort;
+	string m_qsMySQLPort;  //TODO: m_qs??
 	DB testDB;
 	//ServerSocket m_Socket;
 	//ServerSocket m_SocketConnection;
