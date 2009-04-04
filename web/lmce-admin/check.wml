@@ -290,7 +290,7 @@ function displayScreens($dbADO)
 					$count++;
 					$msg.=$count.'. <a href="check.wml?opt=1&amp;cgid='.$scenarioID['PK_CommandGroup'].extraLinks().'">'.$scenarioID['Description'].'</a><br/>';
 				}
-			}http://www.instant-web-site-tools.com/html-redirect.html
+			}
 			break;
 		case 2:
 			if(isset($_REQUEST['mode'])){
