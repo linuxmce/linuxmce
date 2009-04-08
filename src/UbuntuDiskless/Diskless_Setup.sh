@@ -65,7 +65,13 @@ function setup_tftp_boot
 			Value="${line#*=}"
 			mkdir -p "/tftpboot/${Moon_DeviceID}/$Name"
 			rm -f "/tftpboot/${Moon_DeviceID}/$Name/"{vmlinuz,initrd.img}
-			ln -s "${Moon_RootLocation}/boot/vmlinuz-${Kernel}" "/tftpboot/${Moon_DeviceID}/$Name/vmlinuz"
+                        if [[ ! -f "${Moon_RootLocation}/boot/vmlinuz-${Kernel}" ]]; then
+                        	# If the moon's kernel image does not correspond to the core's image, we have a problem
+                                # and we try to install the correct version
+                                chroot "${Moon_RootLocation}" apt-get install "linux-image-${Kernel}"
+                        fi
+                                                                                                                                                
+                        ln -s "${Moon_RootLocation}/boot/vmlinuz-${Kernel}" "/tftpboot/${Moon_DeviceID}/$Name/vmlinuz"
 			ln -s "${Moon_RootLocation}/boot/initrd.img-${Kernel}" "/tftpboot/${Moon_DeviceID}/$Name/initrd.img"
 		done
 
