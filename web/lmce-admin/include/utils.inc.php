@@ -5866,19 +5866,19 @@ function GetIRCodesForDevice($deviceID,$dbADO,$dtID=0,$restricted=0){
 		$res=$dbADO->Execute('SHOW TABLES LIKE "InfraredGroup_Command"');
 		if($res->RecordCount()!=0){
 			// get the codes for the device template or infrared group
-			$notImported=import_remote_sql($LinuxMCEHost.'/GetInfraredCodes.php?PK_InfraredGroup='.$data['FK_InfraredGroup'][0].'&PK_DeviceTemplate='.$data['FK_DeviceTemplate'][0],$dbADO,'InfraredGroup_Command');	
+			$notImported=import_remote_sql($LinuxMCEHost.'/GetIRCodes.php?Server='.urlencode($GLOBALS['sqlCVS_Server']).'&PK_InfraredGroup='.$data['FK_InfraredGroup'][0].'&PK_DeviceTemplate='.$data['FK_DeviceTemplate'][0],$dbADO,'InfraredGroup_Command');	
 			
 			// get the codes for the same manufacturer and device category
-			$notImported=import_remote_sql($LinuxMCEHost.'/GetInfraredCodes.php?PK_Manufacturer='.$data['FK_Manufacturer'][0].'&PK_DeviceCategory='.$data['FK_DeviceCategory'][0],$dbADO,'InfraredGroup_Command');	
+			$notImported=import_remote_sql($LinuxMCEHost.'/GetIRCodes.php?Server='.urlencode($GLOBALS['sqlCVS_Server']).'&PK_Manufacturer='.$data['FK_Manufacturer'][0].'&PK_DeviceCategory='.$data['FK_DeviceCategory'][0],$dbADO,'InfraredGroup_Command');	
 			
 			return $notImported;
 		}else{
 			// create schema
-			$notCreated=import_remote_sql($LinuxMCEHost.'/GetInfraredCodes.php?Create=1',$dbADO);
+			$notCreated=import_remote_sql($LinuxMCEHost.'/GetIRCodes.php?Server='.urlencode($GLOBALS['sqlCVS_Server']).'&Create=1',$dbADO);
 			
 			if($notCreated==0){
 				// get the codes for the device template or infrared group
-				$notImported=import_remote_sql($LinuxMCEHost.'/GetInfraredCodes.php?PK_InfraredGroup='.$data['FK_InfraredGroup'][0].'&PK_DeviceTemplate='.$data['FK_DeviceTemplate'][0],$dbADO,'InfraredGroup_Command');	
+				$notImported=import_remote_sql($LinuxMCEHost.'/GetIRCodes.php?Server='.urlencode($GLOBALS['sqlCVS_Server']).'&PK_InfraredGroup='.$data['FK_InfraredGroup'][0].'&PK_DeviceTemplate='.$data['FK_DeviceTemplate'][0],$dbADO,'InfraredGroup_Command');	
 				
 				return $notImported;
 			}else{

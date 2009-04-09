@@ -5,6 +5,7 @@
   	$_SESSION['skin']=0;
   	
   	error_reporting(E_ALL ^ E_NOTICE);
+	$GLOBALS['sqlCVS_Server']='schema.linuxmce.org';
   	$GLOBALS['globalConfigPath']='/var/www/lmce-admin/include/config/';
   	$GLOBALS['floorplansPath']='/var/www/lmce-admin/floorplans';
   	$GLOBALS['usersPicsPath']='/var/www/lmce-admin/users/';
