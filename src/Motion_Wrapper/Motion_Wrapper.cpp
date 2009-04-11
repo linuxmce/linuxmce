@@ -203,7 +203,7 @@ bool Motion_Wrapper::Connect(int iPK_DeviceTemplate) {
 					<< "snapshot_interval 60" << endl
 					<< "snapshot_filename %Y/%m/%d/%H/%M_%S" << endl
 					<< "jpeg_filename %Y/%m/%d/%H/%M_%S" << endl
-					<< "ffmpeg_filename movies/%d_%m_%Y_%H_%M_%S" << endl
+					<< "movie_filename movies/%d_%m_%Y_%H_%M_%S" << endl
 					<< "timelapse_filename %Y/%m/%d-timelapse" << endl
 					*/
            /*DEVICEDATA_Extra_Parameters_CONST 139 for Extra Parameters*/
