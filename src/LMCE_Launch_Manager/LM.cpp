@@ -13,6 +13,7 @@
 #include "pluto_main/Define_DeviceData.h"
 #include "Gen_Devices/AllCommandsRequests.h"
 #include "PlutoUtils/ProcessUtils.h"
+#include "PlutoUtils/getch.h"
 #include <iostream>
 #include <fstream>
 #include <sys/types.h>
@@ -867,7 +868,7 @@ void LM::action_Resolution()
 	pConfig->WriteSettings();	
 	delete pConfig;
 	
-	writeLog("AVWizard will start on the next reboot.");
+	writeLog("AVWizard will start on the next reboot.",true);
 	//TODO: prompt client to reboot!	
 	
 	
@@ -1965,7 +1966,53 @@ void LM::Run()
 	//m_pAlarmManager->AddRelativeAlarm(1,this,INITIALIZATION,NULL);
 
 	while(true) {
-		sleep(1);
+		char c = getch();  //TODO: use timeout version if we ever have to do other things in main loop
+
+		if(c=='1') {
+			//Reload Router
+			writeLog("Received command to reload the router...",true);
+			actionReloadRouter();
+		} else if(c=='2') {
+			//Regen Orbiter
+			writeLog("Received command to regen this orbiter...",true);
+			triggerOrbiterRegen(false);
+			startOrbiterRegenProgressTracking();
+		} else if(c=='3') {
+			//Regen All Orbiters
+			writeLog("Received command to regen ALL orbiters...",true);
+			triggerOrbiterRegen(true);
+			startOrbiterRegenProgressTracking();
+		} else if(c=='4') {
+			//Change Resolutions (schedule A/V setup wizard for next reboot)
+			writeLog("Received command to change resolutions...",true);
+			action_Resolution();
+		} else if(c=='5') {
+			//Toggle Remote Assistance
+			writeLog("Received command to toggle RA. COMMAND NOT YET IMPLEMENTED.",true);
+			//Hell, just for fun, lets fake this one for now
+			if(m_bRemoteAssistanceRunning) {
+				m_bRemoteAssistanceRunning = false;
+			} else {
+				m_bRemoteAssistanceRunning = true;
+			}
+			syncUI();
+			m_uiMainUI.draw();
+		} else if(c=='6') {
+			//Toggle Autostart Core
+			//TODO: make separate function to crate a new config, set the plag and write it out to pluto.conf
+			writeLog("Received command to toggle Autostart Core. COMMAND NOT YET IMPLEMENTED.",true);
+		} else if(c=='7') {
+			//Toggle Autostart Media
+			//TODO: make separate function to crate a new config, set the plag and write it out to pluto.conf
+			writeLog("Received command to toggle Autostart Media. COMMAND NOT YET IMPLEMENTED.",true);
+		} else if(c=='8') {
+			//Reboot
+			writeLog("Received command to reboot...",true);
+			rebootPC(); //TODO - confirmation!! (handled here or in rebootPC()?)
+		} else {
+			writeLog("Unrecognized Command.",true);
+		}
+		sleep(1); //TODO: get rid of this cheap hack and record as last_char for comparison at the top of loop for a once-per-click effect
 	}
 
 	return;
