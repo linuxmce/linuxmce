@@ -1,7 +1,7 @@
 <-dceag-p-b->
 Package = DCE_Destination_Package
 Dir = 
-desc = DCE Implemenation for #1944 Game Player
+desc = DCE Implemenation for #1966 Game Player
 Maintainer = thomName
 Email = 
 Depend = DCE_Dependencies

@@ -1,19 +1,19 @@
 #<-dceag-mh-b->
 GENDEV=../Gen_Devices
 
-SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES -I/opt/libxine1-pluto/include -I/opt/linphone-1.3.5/include
-SNR_LDFLAGS ?= -L/opt/libxine1-pluto/lib -L/opt/linphone-1.3.5/lib
+SNR_CPPFLAGS ?= <-mkr_t_compile_defines->
+SNR_LDFLAGS ?= <-mkr_t_compile_libs->
 
 ROOT = ..
 CXX = g++
 CXXFLAGS = -Wall -fPIC -ggdb3
-CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE $(SNR_CPPFLAGS)
+CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
 BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
 MYNAME = Game_PlugIn
 VERSION = 2.0.0
-MYDEVTEMPLATEID = 1943mplateID
+MYDEVTEMPLATEID = 1965mplateID
 
 Gen_Dev_Files = $(GENDEV)/Game_PlugInBase.cpp
 sources = Main.cpp Game_PlugIn.cpp $(Gen_Dev_Files)

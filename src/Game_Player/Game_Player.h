@@ -17,7 +17,7 @@
 #ifndef Game_Player_h
 #define Game_Player_h
 
-//	DCE Implemenation for #1944 Game Player
+//	DCE Implemenation for #1966 Game Player
 
 #include "Gen_Devices/Game_PlayerBase.h"
 //<-dceag-d-e->
@@ -109,16 +109,14 @@ public:
 
 	/*
 			*****DATA***** accessors inherited from base class
-	string DATA_Get_Alsa_Output_Device();
 	string DATA_Get_Name();
+	bool DATA_Get_Only_One_Per_PC();
 	string DATA_Get_Hardware_acceleration();
-	int DATA_Get_Port();
 
 			*****EVENT***** accessors inherited from base class
 	void EVENT_Playback_Info_Changed(string sMediaDescription,string sSectionDescription,string sSynposisDescription);
 	void EVENT_Menu_Onscreen(int iStream_ID,bool bOnOff);
 	void EVENT_Playback_Completed(string sMRL,int iStream_ID,bool bWith_Errors);
-	void EVENT_Media_Description_Changed(string sText);
 	void EVENT_Playback_Started(string sMRL,int iStream_ID,string sSectionDescription,string sAudio,string sVideo);
 
 			*****COMMANDS***** we need to implement
@@ -351,39 +349,6 @@ public:
 	virtual void CMD_Play(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
-	/** @brief COMMAND: #140 - Audio Track */
-	/** Go to an audio track */
-		/** @param #5 Value To Assign */
-			/** The audio track to go to.  Simple A/V equipment ignores this and just toggles. */
-		/** @param #41 StreamID */
-			/** ID of stream to apply */
-
-	virtual void CMD_Audio_Track(string sValue_To_Assign,int iStreamID) { string sCMD_Result; CMD_Audio_Track(sValue_To_Assign.c_str(),iStreamID,sCMD_Result,NULL);};
-	virtual void CMD_Audio_Track(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage);
-
-
-	/** @brief COMMAND: #141 - Subtitle */
-	/** Go to a subtitle */
-		/** @param #5 Value To Assign */
-			/** The subtitle to go to.  Simple A/V equipment ignores this and just toggles. */
-		/** @param #41 StreamID */
-			/** ID of stream to apply */
-
-	virtual void CMD_Subtitle(string sValue_To_Assign,int iStreamID) { string sCMD_Result; CMD_Subtitle(sValue_To_Assign.c_str(),iStreamID,sCMD_Result,NULL);};
-	virtual void CMD_Subtitle(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage);
-
-
-	/** @brief COMMAND: #142 - Angle */
-	/** Go to an angle */
-		/** @param #5 Value To Assign */
-			/** The angle to go to.  Simple A/V equipment ignores this and just toggles. */
-		/** @param #41 StreamID */
-			/** ID of stream to apply */
-
-	virtual void CMD_Angle(string sValue_To_Assign,int iStreamID) { string sCMD_Result; CMD_Angle(sValue_To_Assign.c_str(),iStreamID,sCMD_Result,NULL);};
-	virtual void CMD_Angle(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage);
-
-
 	/** @brief COMMAND: #190 - Enter/Go */
 	/** Select the currently highlighted menu item */
 		/** @param #41 StreamID */
@@ -602,7 +567,6 @@ public:
 
 	virtual void CMD_Set_Media_ID(string sID,int iStreamID) { string sCMD_Result; CMD_Set_Media_ID(sID.c_str(),iStreamID,sCMD_Result,NULL);};
 	virtual void CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,Message *pMessage);
-
 
 	/** @brief COMMAND: #943 - Game 1P Start */
 	/** 1P start */

@@ -17,7 +17,7 @@
 #ifndef Game_PlugIn_h
 #define Game_PlugIn_h
 
-//	DCE Implemenation for #1943 Game PlugIn
+//	DCE Implemenation for #1965 Game PlugIn
 
 #include "Gen_Devices/Game_PlugInBase.h"
 //<-dceag-d-e->
@@ -40,7 +40,7 @@
 //<-dceag-decl-b->
 namespace DCE
 {
-  class Game_PlugIn : public Game_PlugIn_Command, public MediaHandlerBase, public AlarmEvent
+	class Game_PlugIn : public Game_PlugIn_Command, public MediaHandlerBase, public AlarmEvent
 	{
 //<-dceag-decl-e->
 		// Private member variables
@@ -55,10 +55,10 @@ protected:
 		class Orbiter_Plugin *m_pOrbiter_Plugin;
 
 
-
 		// Private methods
 public:
 		// Public member variables
+		int m_iPriority;
 
 //<-dceag-const-b->
 public:
@@ -123,9 +123,9 @@ public:
 	/*
 			*****DATA***** accessors inherited from base class
 	int DATA_Get_Priority();
+	bool DATA_Get_Only_One_Per_PC();
 
 			*****EVENT***** accessors inherited from base class
-	void EVENT_Playback_Info_Changed(string sMediaDescription,string sSectionDescription,string sSynposisDescription);
 
 			*****COMMANDS***** we need to implement
 	*/

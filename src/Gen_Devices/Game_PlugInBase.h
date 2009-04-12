@@ -44,16 +44,6 @@ public:
 	* @brief Events methods for our device
 	*/
 
-	virtual void Playback_Info_Changed(string sMediaDescription,string sSectionDescription,string sSynposisDescription)
-	{
-		SendMessage(new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, 
-			EVENT_Playback_Info_Changed_CONST,
-			3 /* number of parameter's pairs (id, value) */,
-			EVENTPARAMETER_MediaDescription_CONST, sMediaDescription.c_str(),
-			EVENTPARAMETER_SectionDescription_CONST, sSectionDescription.c_str(),
-			EVENTPARAMETER_SynposisDescription_CONST, sSynposisDescription.c_str()));
-	}
-
 };
 
 
@@ -96,6 +86,14 @@ public:
 			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Priority_CONST).c_str());
 		else
 			return atoi(m_mapParameters[DEVICEDATA_Priority_CONST].c_str());
+	}
+
+	bool Get_Only_One_Per_PC()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Only_One_Per_PC_CONST)=="1" ? true : false);
+		else
+			return (m_mapParameters[DEVICEDATA_Only_One_Per_PC_CONST]=="1" ? true : false);
 	}
 
 };
@@ -203,8 +201,8 @@ public:
 	Command_Impl *CreateCommand(int PK_DeviceTemplate, Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent);
 	//Data accessors
 	int DATA_Get_Priority() { return GetData()->Get_Priority(); }
+	bool DATA_Get_Only_One_Per_PC() { return GetData()->Get_Only_One_Per_PC(); }
 	//Event accessors
-	void EVENT_Playback_Info_Changed(string sMediaDescription,string sSectionDescription,string sSynposisDescription) { GetEvents()->Playback_Info_Changed(sMediaDescription.c_str(),sSectionDescription.c_str(),sSynposisDescription.c_str()); }
 	//Commands - Override these to handle commands from the server
 
 	//This distributes a received message to your handler.

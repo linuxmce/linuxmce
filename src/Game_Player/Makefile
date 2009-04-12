@@ -1,19 +1,19 @@
 #<-dceag-mh-b->
 GENDEV=../Gen_Devices
 
-SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES -I/opt/libxine1-pluto/include -I/opt/linphone-1.3.5/include
-SNR_LDFLAGS ?= -L/opt/libxine1-pluto/lib -L/opt/linphone-1.3.5/lib
+SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES -I/opt/libxine1-pluto/include -I/opt/libsdl1.2-1.2.7+1.2.8cvs20041007/include -I/opt/libsdl1.2-1.2.7+1.2.8cvs20041007/include/SD
+SNR_LDFLAGS ?= -L/opt/libxine1-pluto/lib -L/opt/libsdl1.2-1.2.7+1.2.8cvs20041007/lib
 
 ROOT = ..
 CXX = g++
 CXXFLAGS = -Wall -fPIC -ggdb3
-CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE $(SNR_CPPFLAGS)
+CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
-BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lX11 -lXmu -lXtst -lWindowUtils -lmysqlclient_r -lpthread
+BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
 MYNAME = Game_Player
 VERSION = 2.0.0
-MYDEVTEMPLATEID = 1944mplateID
+MYDEVTEMPLATEID = 1966mplateID
 
 Gen_Dev_Files = $(GENDEV)/Game_PlayerBase.cpp
 sources = Main.cpp Game_Player.cpp $(Gen_Dev_Files)
@@ -21,7 +21,7 @@ sources = Main.cpp Game_Player.cpp $(Gen_Dev_Files)
 
 CXXFLAGS +=
 CPPFLAGS +=
-LDFLAGS +=
+LDFLAGS +=  -lX11 -lXmu -lXtst -lWindowUtils -lmysqlclient_r -lpthread
 XTRALDLIBS =
 
 Gen_Dev_Files +=
