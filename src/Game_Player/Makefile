@@ -1,8 +1,8 @@
 #<-dceag-mh-b->
 GENDEV=../Gen_Devices
 
-SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES -I/opt/libxine1-pluto/include -I/opt/libsdl1.2-1.2.7+1.2.8cvs20041007/include -I/opt/libsdl1.2-1.2.7+1.2.8cvs20041007/include/SD
-SNR_LDFLAGS ?= -L/opt/libxine1-pluto/lib -L/opt/libsdl1.2-1.2.7+1.2.8cvs20041007/lib
+SNR_CPPFLAGS ?= <-mkr_t_compile_defines->
+SNR_LDFLAGS ?= <-mkr_t_compile_libs->
 
 ROOT = ..
 CXX = g++
@@ -13,7 +13,7 @@ BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
 MYNAME = Game_Player
 VERSION = 2.0.0
-MYDEVTEMPLATEID = 1966mplateID
+MYDEVTEMPLATEID = 1965mplateID
 
 Gen_Dev_Files = $(GENDEV)/Game_PlayerBase.cpp
 sources = Main.cpp Game_Player.cpp $(Gen_Dev_Files)

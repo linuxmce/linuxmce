@@ -113,7 +113,9 @@ void Game_PlugIn::PrepareToDelete()
 bool Game_PlugIn::Register()
 //<-dceag-reg-e->
 {
- 
+
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Starting Game_Plugin::Register()");
+
 	m_iPriority=DATA_Get_Priority();
  
 	m_pMedia_Plugin=( Media_Plugin * ) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
@@ -127,7 +129,9 @@ bool Game_PlugIn::Register()
 	vector<int> vectPK_DeviceTemplate;
 	vectPK_DeviceTemplate.push_back(DEVICETEMPLATE_Game_Player_CONST);
 	m_pMedia_Plugin->RegisterMediaPlugin( this, this, vectPK_DeviceTemplate, true );
- 
+
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Registered device %d",DEVICETEMPLATE_Game_Player_CONST);
+
 	/* Register my Alert Plugin */
  	m_pAlarmManager->AddRelativeAlarm(30,this,CHECK_FOR_NEW_ROMS,NULL);
 

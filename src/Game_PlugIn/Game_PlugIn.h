@@ -17,7 +17,7 @@
 #ifndef Game_PlugIn_h
 #define Game_PlugIn_h
 
-//	DCE Implemenation for #1965 Game PlugIn
+//	DCE Implemenation for #1964 Game PlugIn
 
 #include "Gen_Devices/Game_PlugInBase.h"
 //<-dceag-d-e->

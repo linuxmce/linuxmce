@@ -17,7 +17,7 @@
 #ifndef Game_Player_h
 #define Game_Player_h
 
-//	DCE Implemenation for #1966 Game Player
+//	DCE Implemenation for #1965 Game Player
 
 #include "Gen_Devices/Game_PlayerBase.h"
 //<-dceag-d-e->
@@ -567,6 +567,7 @@ public:
 
 	virtual void CMD_Set_Media_ID(string sID,int iStreamID) { string sCMD_Result; CMD_Set_Media_ID(sID.c_str(),iStreamID,sCMD_Result,NULL);};
 	virtual void CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,Message *pMessage);
+
 
 	/** @brief COMMAND: #943 - Game 1P Start */
 	/** 1P start */

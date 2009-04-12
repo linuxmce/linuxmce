@@ -14,7 +14,7 @@ DeviceData_Impl *Game_Player_Data::CreateData(DeviceData_Impl *Parent,char *pDat
 	int iPK_Installation = b.Read_unsigned_long();
 	int iPK_DeviceTemplate = b.Read_unsigned_long();
 	switch(iPK_DeviceTemplate) {
-		case 1966:
+		case 1965:
 			return new Game_Player_Data();
 	};
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got CreateData for unknown type %d.", iPK_DeviceTemplate);
@@ -24,7 +24,7 @@ DeviceData_Impl *Game_Player_Data::CreateData(DeviceData_Impl *Parent,char *pDat
 Event_Impl *Game_Player_Event::CreateEvent( unsigned long dwPK_DeviceTemplate, ClientSocket *pOCClientSocket, unsigned long dwDevice )
 {
 	switch(dwPK_DeviceTemplate) {
-		case 1966:
+		case 1965:
 			return (Event_Impl *) new Game_Player_Event(pOCClientSocket, dwDevice);
 	};
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got CreateEvent for unknown type %d.", dwPK_DeviceTemplate);
