@@ -8,7 +8,7 @@ fi
 
 echo "Downloading and installing the Nitech HTS festival voices..."
 cd /tmp/
-mkdir hts_tmp
+mkdir -p hts_tmp
 cd hts_tmp/
 #Download the voices
 wget -c http://download.linuxmce.org/Festival/festvox_nitech_us_awb_arctic_hts-2.1.tar.bz2
@@ -18,7 +18,7 @@ wget -c http://download.linuxmce.org/Festival/festvox_nitech_us_rms_arctic_hts-2
 wget -c http://download.linuxmce.org/Festival/festvox_nitech_us_slt_arctic_hts-2.1.tar.bz2
 wget -c http://download.linuxmce.org/Festival/festvox_nitech_us_jmk_arctic_hts-2.1.tar.bz2
 wget -c http://download.linuxmce.org/Festival/cmu_us_kal_com_hts.tar.gz
-wget -c http://download.linuxmce.org/Festival/cstr_us_ked_timit_hts_.tar.gz
+wget -c http://download.linuxmce.org/Festival/cstr_us_ked_timit_hts.tar.gz
 
 #Extract the voices
 for t in $(ls); do 
