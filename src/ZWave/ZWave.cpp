@@ -102,7 +102,7 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 	int node_id = atoi(pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST).c_str());
 	if (node_id > 0 && node_id <= 233) {
 		sCMD_Result = "OK";
-		int level,temp,tempf,fan;
+		int level,temp,fan;
 		string heat;
 		switch (pMessage->m_dwID) {
 			case COMMAND_Generic_On_CONST:
@@ -124,18 +124,47 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 			case COMMAND_Set_Temperature_CONST:
 				temp = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST].c_str());
 				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET TEMPERATURE RECEIVED FOR CHILD %d, level: %d",node_id,temp);
-				tempf = (int)( (9.0/5.0) * (float)temp + 32.0 );
+				// tempf = (int)( (9.0/5.0) * (float)temp + 32.0 );
+				myZWApi->zwThermostatSetpointSet(node_id,1,temp); // heating
+				myZWApi->zwThermostatSetpointSet(node_id,2,temp); // cooling
+				myZWApi->zwThermostatSetpointSet(node_id,10,temp); // auto changeover
 				break;
 				;;
 			case COMMAND_Set_Fan_CONST:
 				fan = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_OnOff_CONST].c_str());
 				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET FAN RECEIVED FOR CHILD %d, level: %d",node_id,fan);
+				if (fan == 1) {
+					myZWApi->zwThermostatFanModeSet(node_id,3); // on high
+					myZWApi->zwThermostatModeSet(node_id,6); // fan only
+				} else {
+					myZWApi->zwThermostatFanModeSet(node_id,0); // auto 
+					myZWApi->zwThermostatModeSet(node_id,10); // auto changeover
+				}
 				break;
 				;;	
 			case COMMAND_Set_HeatCool_CONST:
 				heat = pMessage->m_mapParameters[COMMANDPARAMETER_OnOff_CONST];
+				char mode_tmp = 'A';
+				if (heat.size()>0) {
+					mode_tmp = heat.c_str()[0];
+				}
 				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET HEAT/COOL RECEIVED FOR CHILD %d, string: %s",node_id,heat.c_str());
 				// A - auto changeover; H - heat; C - cool; F - fan; 
+				switch(mode_tmp) {
+					default:
+					case 'A':
+						myZWApi->zwThermostatModeSet(node_id,10); // auto changeover
+						break;
+					case 'H':
+						myZWApi->zwThermostatModeSet(node_id,1); // heat
+						break;
+					case 'C':
+						myZWApi->zwThermostatModeSet(node_id,2); // cool
+						break;
+					case 'F':
+						myZWApi->zwThermostatModeSet(node_id,6); // fan only
+						break;
+				}
 				break;
 				;;
 	
