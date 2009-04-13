@@ -2075,7 +2075,7 @@ bool ZWApi::ZWApi::zwThermostatFanModeSet(int node_id, int fan_mode) {
 
         mybuf[0] = FUNC_ID_ZW_SEND_DATA;
         mybuf[1] = node_id;
-        mybuf[2] = 5; // length of command
+        mybuf[2] = 3; // length of command
 	mybuf[3] = COMMAND_CLASS_THERMOSTAT_FAN_MODE;
 	mybuf[4] = THERMOSTAT_FAN_MODE_SET;
 	mybuf[5] = fan_mode & 0xf; // zero high nibble conf. to specs
@@ -2089,7 +2089,7 @@ bool ZWApi::ZWApi::zwThermostatModeSet(int node_id, int mode) {
 
         mybuf[0] = FUNC_ID_ZW_SEND_DATA;
         mybuf[1] = node_id;
-        mybuf[2] = 5; // length of command
+        mybuf[2] = 3; // length of command
 	mybuf[3] = COMMAND_CLASS_THERMOSTAT_MODE;
 	mybuf[4] = THERMOSTAT_MODE_SET;
 	mybuf[5] = mode & 0x1f; // zero highest 3 bit
@@ -2103,10 +2103,38 @@ void ZWApi::ZWApi::zwThermostatModeGet(int node_id) {
 
         mybuf[0] = FUNC_ID_ZW_SEND_DATA;
         mybuf[1] = node_id;
-        mybuf[2] = 5; // length of command
+        mybuf[2] = 2; // length of command
 	mybuf[3] = COMMAND_CLASS_THERMOSTAT_MODE;
 	mybuf[4] = THERMOSTAT_MODE_GET;
         mybuf[5] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
         sendFunction( mybuf , 6, REQUEST, 1);
+
+}
+bool ZWApi::ZWApi::zwThermostatSetpointSet(int node_id, int type, int value) {
+        char mybuf[1024];
+
+        mybuf[0] = FUNC_ID_ZW_SEND_DATA;
+        mybuf[1] = node_id;
+        mybuf[2] = 5; // length of command
+	mybuf[3] = COMMAND_CLASS_THERMOSTAT_SETPOINT;
+	mybuf[4] = THERMOSTAT_MODE_SET;
+	mybuf[5] = type & 0xf; // zero high-nibble
+	mybuf[6] = 1; // 3 bit precision, 2 bit scale (0 = C,1=F), 3 bit size
+	mybuf[7] = value; // TODO: proper negative values..
+        mybuf[8] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+        sendFunction( mybuf , 9, REQUEST, 1);
+
+}
+void ZWApi::ZWApi::zwThermostatSetpointGet(int node_id,int type) {
+        char mybuf[1024];
+
+        mybuf[0] = FUNC_ID_ZW_SEND_DATA;
+        mybuf[1] = node_id;
+        mybuf[2] = 3; // length of command
+	mybuf[3] = COMMAND_CLASS_THERMOSTAT_SETPOINT;
+	mybuf[4] = THERMOSTAT_SETPOINT_GET;
+	mybuf[5] = type & 0xf; // zero high nibble
+        mybuf[6] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+        sendFunction( mybuf , 7, REQUEST, 1);
 
 }
