@@ -1,4 +1,4 @@
-!#/bin/bash
+#!/bin/bash
 
 #Check to see if the voices already exist...
 if [ -d "/usr/share/festival/voices/us" ] ; then
