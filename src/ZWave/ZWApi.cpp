@@ -2070,3 +2070,43 @@ void ZWApi::ZWApi::zwRequestMultilevelSensorReportInstance(int node_id,int insta
 
 }
 
+bool ZWApi::ZWApi::zwThermostatFanModeSet(int node_id, int fan_mode) {
+        char mybuf[1024];
+
+        mybuf[0] = FUNC_ID_ZW_SEND_DATA;
+        mybuf[1] = node_id;
+        mybuf[2] = 5; // length of command
+	mybuf[3] = COMMAND_CLASS_THERMOSTAT_FAN_MODE;
+	mybuf[4] = THERMOSTAT_FAN_MODE_SET;
+	mybuf[5] = fan_mode & 0xf; // zero high nibble conf. to specs
+        mybuf[6] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+        sendFunction( mybuf , 7, REQUEST, 1);
+
+}
+
+bool ZWApi::ZWApi::zwThermostatModeSet(int node_id, int mode) {
+        char mybuf[1024];
+
+        mybuf[0] = FUNC_ID_ZW_SEND_DATA;
+        mybuf[1] = node_id;
+        mybuf[2] = 5; // length of command
+	mybuf[3] = COMMAND_CLASS_THERMOSTAT_MODE;
+	mybuf[4] = THERMOSTAT_MODE_SET;
+	mybuf[5] = mode & 0x1f; // zero highest 3 bit
+        mybuf[6] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+        sendFunction( mybuf , 7, REQUEST, 1);
+
+}
+
+void ZWApi::ZWApi::zwThermostatModeGet(int node_id) {
+        char mybuf[1024];
+
+        mybuf[0] = FUNC_ID_ZW_SEND_DATA;
+        mybuf[1] = node_id;
+        mybuf[2] = 5; // length of command
+	mybuf[3] = COMMAND_CLASS_THERMOSTAT_MODE;
+	mybuf[4] = THERMOSTAT_MODE_GET;
+        mybuf[5] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+        sendFunction( mybuf , 6, REQUEST, 1);
+
+}

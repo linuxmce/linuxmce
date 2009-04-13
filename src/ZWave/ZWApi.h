@@ -265,9 +265,31 @@
 #define COMMAND_CLASS_SWITCH_TOGGLE_BINARY		0x28
 #define COMMAND_CLASS_SWITCH_TOGGLE_MULTILEVEL		0x29
 #define COMMAND_CLASS_THERMOSTAT_FAN_MODE		0x44
+
+#define THERMOSTAT_FAN_MODE_VERSION                                                      0x01
+#define THERMOSTAT_FAN_MODE_GET                                                          0x02
+#define THERMOSTAT_FAN_MODE_REPORT                                                       0x03
+#define THERMOSTAT_FAN_MODE_SET                                                          0x01
+#define THERMOSTAT_FAN_MODE_SUPPORTED_GET                                                0x04
+#define THERMOSTAT_FAN_MODE_SUPPORTED_REPORT                                             0x05
+#define THERMOSTAT_FAN_MODE_REPORT_FAN_MODE_MASK                                         0x0F
+#define THERMOSTAT_FAN_MODE_REPORT_RESERVED_MASK                                         0xF0
+#define THERMOSTAT_FAN_MODE_REPORT_RESERVED_SHIFT                                        0x04
+#define THERMOSTAT_FAN_MODE_SET_FAN_MODE_MASK                                            0x0F
+#define THERMOSTAT_FAN_MODE_SET_RESERVED_MASK                                            0xF0
+#define THERMOSTAT_FAN_MODE_SET_RESERVED_SHIFT                                           0x04
+
 #define COMMAND_CLASS_THERMOSTAT_FAN_STATE		0x45
 #define COMMAND_CLASS_THERMOSTAT_HEATING		0x38
 #define COMMAND_CLASS_THERMOSTAT_MODE			0x40
+
+#define THERMOSTAT_MODE_VERSION                                                          0x01
+#define THERMOSTAT_MODE_GET                                                              0x02
+#define THERMOSTAT_MODE_REPORT                                                           0x03
+#define THERMOSTAT_MODE_SET                                                              0x01
+#define THERMOSTAT_MODE_SUPPORTED_GET                                                    0x04
+#define THERMOSTAT_MODE_SUPPORTED_REPORT                                                 0x05
+
 #define COMMAND_CLASS_THERMOSTAT_OPERATING_STATE	0x42
 #define COMMAND_CLASS_THERMOSTAT_SETBACK		0x47
 #define COMMAND_CLASS_THERMOSTAT_SETPOINT		0x43
@@ -465,9 +487,21 @@ namespace ZWApi {
 	// read meter
 	bool zwMeterGet(int node_id);
 
+	// thermostat
+	// fan mode, 0 - auto/auto low, 1 - on/on low, 2 - auto high, 3 - on high
+	bool zwThermostatFanModeSet(int node_id, int fan_mode);
+
+	// 0 off, 1 heat, 2 cool, 3 auto, 4 aux/emer heat, 5 resume, 6 fan only, 7 furnace, 8 dry air, 9 moist air, 10 auto changeover
+	bool zwThermostatModeSet(int node_id, int mode);
+	void zwThermostatModeGet(int node_id);
+
 	void zwMultiInstanceGet(int node_id, int command_class);
 	void zwRequestMultilevelSensorReportInstance(int node_id,int instance);
+
+
     };
+
+
 
 }
 #endif
