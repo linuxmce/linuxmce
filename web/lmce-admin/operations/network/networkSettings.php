@@ -7,7 +7,8 @@ function networkSettings($output,$dbADO) {
 	/* @var $dbADO ADOConnection */
 	/* @var $rs ADORecordSet */
 //	$dbADO->debug=true;
-	$number_of_cards = exec('ip link|grep ether|wc -l');
+	// # TODO - We should take wlan adapters into account as well, especially for the external network
+	$number_of_cards = exec('ip link|grep eth|grep -v ether|wc -l');
 	$out='';
 	$action = isset($_REQUEST['action'])?cleanString($_REQUEST['action']):'form';
 	$installationID = (int)@$_SESSION['installationID'];
