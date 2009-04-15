@@ -140,7 +140,16 @@ bool Game_PlugIn::Register()
 	return Connect(PK_DeviceTemplate_get()); 
 }
 
-//<-dceag-createinst-b->!
+/*  Since several parents can share the same child class, and each has it's own implementation, the base class in Gen_Devices
+        cannot include the actual implementation.  Instead there's an extern function declared, and the actual new exists here.  You 
+        can safely remove this block (put a ! after the dceag-createinst-b block) if this device is not embedded within other devices. */
+//<-dceag-createinst-b->
+Game_PlugIn_Command *Create_Game_PlugIn(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
+{
+        return new Game_PlugIn(pPrimaryDeviceCommand, pData, pEvent, pRouter);
+}
+//<-dceag-createinst-e->
+
 
 
 /*
