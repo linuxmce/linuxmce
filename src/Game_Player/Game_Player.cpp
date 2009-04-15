@@ -47,7 +47,7 @@ using namespace DCE;
 Game_Player::Game_Player(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
 	: Game_Player_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
-	,m_GameMutex("game")
+	,m_GameMutex("game_player")
 {
 
 	m_GameMutex.Init(NULL);

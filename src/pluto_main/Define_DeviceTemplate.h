@@ -1836,6 +1836,7 @@
 #define DEVICETEMPLATE_Solo_USB_Conference_Microphone_CONST 1963
 #define DEVICETEMPLATE_Game_PlugIn_CONST 1964
 #define DEVICETEMPLATE_Game_Player_CONST 1965
+#define DEVICETEMPLATE_Screen_Capture_Camera_CONST 1966
 
 #define DEVICETEMPLATE_TABLE "DeviceTemplate"
 #define DEVICETEMPLATE_PK_DEVICETEMPLATE_FIELD "PK_DeviceTemplate"
