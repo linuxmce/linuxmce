@@ -176,7 +176,7 @@ void Game_PlugIn::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
 void Game_PlugIn::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 //<-dceag-cmduk-e->
 {
-	sCMD_Result = "UNKNOWN COMMAND";
+	sCMD_Result = "UNKNOWN DEVICE";
 }
 
 //<-dceag-sample-b->
