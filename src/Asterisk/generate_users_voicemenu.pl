@@ -47,7 +47,7 @@ $DB_STATEMENT->finish();
 
 $list .= "/tmp/pluto-default-voicemenu4.gsm";
 `/usr/bin/sox $list /var/lib/asterisk/sounds/pluto/pluto-default-voicemenu.gsm`;
-
+`/bin/mkdir -p /var/spool/asterisk/voicemail/default/`
 `/bin/chown -R asterisk:www-data /var/spool/asterisk/voicemail/*`;
 `/bin/chmod 770 -R /var/spool/asterisk/voicemail/*`;
 
