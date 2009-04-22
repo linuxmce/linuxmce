@@ -143,7 +143,7 @@ function coverArt($output,$mediadbADO) {
 					$toScan.=$scanUrl."\n";
 					
 					
-					$cmd='wget \'http://'.$_SERVER['HTTP_HOST'].'/lmce-admin/'.$scanUrl.'\' --header=\'User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.0.4) Gecko/20060508 Firefox/1.5.0.4\' -O -';
+					$cmd='wget \'http://localhost/lmce-admin/'.$scanUrl.'\' --header=\'User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.0.4) Gecko/20060508 Firefox/1.5.0.4\' -O -';
 					//echo $cmd.'<br>';
 					exec_batch_command($cmd);	
 				}
