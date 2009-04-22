@@ -63,13 +63,13 @@ else
 	# scrap all old streamdev-server info from setup.conf
 	sed -i "/$STREAMDEVPLUGIN/d" /var/lib/vdr/setup.conf
 	#
-	echo "$STREAMDEVPLUGIN.'RemoteIp = 192.168.80.1">>/var/lib/vdr/setup.conf
-	echo "$STREAMDEVPLUGIN.'RemotePort = 2004">>/var/lib/vdr/setup.conf
-	echo "$STREAMDEVPLUGIN.'StartClient = 1">>/var/lib/vdr/setup.conf
+	echo "$STREAMDEVPLUGIN.RemoteIp = 192.168.80.1">>/var/lib/vdr/setup.conf
+	echo "$STREAMDEVPLUGIN.RemotePort = 2004">>/var/lib/vdr/setup.conf
+	echo "$STREAMDEVPLUGIN.StartClient = 1">>/var/lib/vdr/setup.conf
 	# StreamFilters sends additional information, like EPG
-	echo "$STREAMDEVPLUGIN.'StreamFilter = 1">>/var/lib/vdr/setup.conf
+	echo "$STREAMDEVPLUGIN.StreamFilter = 1">>/var/lib/vdr/setup.conf
 	# Obsolete due to StreamFilters
-	echo "$STREAMDEVPLUGIN.'SyncEPG = 0">>/var/lib/vdr/setup.conf
+	echo "$STREAMDEVPLUGIN.SyncEPG = 0">>/var/lib/vdr/setup.conf
 fi		
 chown vdr:vdr /var/lib/vdr/*
 
