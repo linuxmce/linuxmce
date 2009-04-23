@@ -10,24 +10,18 @@
 	Most of the scenarios of the regular UI1 orbiter are used in this
 	Orbiter as well.
  */
- 	include_once("lib.inc.php");
+	include_once("lib.inc.php");
 	error_reporting(E_ALL);
 	connectDB();
-	$currentUser = 1;
-	$currentScreen = 1;
-	$currentRoom = 3; 
-	$media = True;
 	global $currentUser, $currentScreen, $currentRoom, $currentEntertainArea, $link, $mediaLink;
-	if (isset($_GET["currentRoom"])) {
-		$currentRoom = $_GET["currentRoom"];
-		$currentRoom = intval($currentRoom);
-	}
+	if (isset($_COOKIE["currentUser"])) {	$currentUser = $_COOKIE["currentUser"]; }
+	if (isset($_COOKIE["currentRoom"])) {	$currentRoom = $_COOKIE["currentRoom"]; }
+	$currentScreen = 1;
+	$media = True;
+	
 	if (isset($_GET["screen"])) {
 		$currentScreen = $_GET["screen"];
 		$currentScreen = intval($currentScreen);
-	}
-	if (isset($_GET["currentUser"])) {
-		$currentUser = $_GET["currentUser"];
 	}
 	$currentEntertainArea = getMyValue($link,"SELECT PK_EntertainArea FROM EntertainArea WHERE FK_Room = $currentRoom");
 	if (intval($currentEntertainArea)==0) {
@@ -81,7 +75,7 @@
 	// Media
 	// Only show the media sub menu, if we are in an Entertainment Area.
 	if ($media) {
-		doDesignObjVariations(1346,$link);	
+		doDesignObjVariations(1346,$link, $currentUser, $currentRoom);	
 	} else {
 		print "<ul id='Media-Scenarios'>\n";
 		print "<li>No media devices in this room</li>\n";

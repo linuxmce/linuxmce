@@ -7,6 +7,30 @@
 //	error_reporting(E_ALL);
 	
 //	connectToDCERouter();
+	include_once("libMessageSend.php");
+
+	
+	function playFile($mediaLink, $pk_file) {
+		global $currentRoom,$link,$currentEntertainArea;
+		print "entertain: $currentEntertainArea\n";
+		print "current room: $currentRoom\n";
+		$currentEntertainArea = getEntertainArea($link,$currentRoom);
+		// Get the path of the file to play, and call messagesend
+		// to play it in the current entertainment area
+		$queryFilePath = "SELECT Concat(Path,'/',Filename) From File Where PK_File = " . $pk_file . ";";
+		
+		$filePath = getMyValue($mediaLink, $queryFilePath);
+		print "<li>$filePath</li>";
+		// myMessageSend($server,$port,$deviceFromID,$deviceToID,$messageType,$messageID,$parameter1ID,$parameter1Content,$parameter2ID,$parameter2Content);		
+		myMessageSend("dcerouter",3450, 1,10,1,43,13,'"' . $filePath . '"', 45, $currentEntertainArea);
+	}	
+	
+	function getEntertainArea($link, $room) {
+		$query = "SELECT PK_EntertainArea From EntertainArea Where FK_Room = $room";
+		$return = getMyValue($link,$query);
+		return $return;
+	}
+	
 
 	function DoParameter29($mediaLink, $parameterValue, $commandGroup) {
 		// DoParameter29 is called, when ever a file listing needs to
@@ -74,9 +98,9 @@
 		orbiterTakeCareOfObjects($link, $array, $currentRoom, $currentEntertainArea,$UI);
 	}
 
-	function doDesignObjVariations($designObjVariation,$link) {
-		global $currentRoom, $currentScreen, $currentEntertainArea;
-		$url = "design.php?CommandGroup";
+	function doDesignObjVariations($designObjVariation, $link) {
+		global $currentScreen,$currentEntertainArea, $currentUser, $currentRoom;
+		$url = "design.php?currentRoom=$currentRoom&currentUser=$currentUser&CommandGroup";
 		$target = "";  // Set to self to start over. -> For example after room and user selection.
 		// How do I get to the CommandGroup_Room containing the list of lights?
 		$query = "SELECT Value FROM DesignObjVariation_DesignObjParameter ";
@@ -100,13 +124,13 @@
 		} elseif ($PK_Array == 13) {
 			// List of users that are not hidden from the Orbiter
 			$target = " target='_self'";
-			$url = "iOrbiter.php?currentUser";
+			$url = "setEnvironment.php?setCurrentUser";
 			$query = "SELECT PK_Users, UserName FROM Users ";
 			$query .= "Where HideFromOrbiter = 0";
 		} elseif ($PK_Array == 14) {
 			// List of rooms that are not hidden from the Orbiter
 			$target = " target='_self'";
-			$url = "iOrbiter.php?currentRoom";
+			$url = "setEnvironment.php?setCurrentRoom";
 			$query = "SELECT PK_Room, Description FROM Room ";
 			$query .= "Where HideFromOrbiter = 0";
 		} else {
@@ -123,6 +147,7 @@
 		// This function takes all the objects in the array
 		// and displays interesting stuff about it. Creates links
 		// shows headings, etc.
+		global $currentUser;
 		foreach($array as $arrayEntry) {
 			$designObject = $arrayEntry[0];
 			$query = "SELECT FK_DesignObjType FROM DesignObj Where PK_DesignObj = $designObject";
@@ -163,7 +188,7 @@
 				if (is_null($commandGroup_D_OnActivate) or $commandGroup_D_OnActivate == "" or $commandGroup_D_OnActivate == 0) {
 //					$query = "SELECT FK_CommandGroup
 				}
-				print "<a href='design.php?CommandGroup_D=$commandGroup_D_OnActivate'>$commandGroup_D_OnActivate</a>\n";
+				print "<a href='design.php?currentUser=$currentUser&currentRoom=$currentRoom&CommandGroup_D=$commandGroup_D_OnActivate'>$commandGroup_D_OnActivate</a>\n";
 			} 
 			print "</p><hr></hr>\n";
 		}
@@ -227,7 +252,7 @@
 
 	function buildSpeedDialList($link) {
 		// Get a list of speed dial scenarios for the current room
-		global $currentRoom;
+		global $currentRoom, $currentUser;
 		$query = "SELECT CommandGroup.Description,FK_CommandParameter,IK_CommandParameter FROM CommandGroup";
 		$query .= " JOIN CommandGroup_Command ON CommandGroup_Command.FK_CommandGroup=PK_CommandGroup";
 		$query .= " JOIN CommandGroup_Command_CommandParameter ON FK_CommandGroup_Command=PK_CommandGroup_Command";
@@ -236,12 +261,12 @@
 		$query .= " AND FK_Array=4";   // ARRAY_Communication_Scenarios_CONST
 		$query .= " AND FK_Room=" . $currentRoom;
 		$query .= " ORDER BY PK_CommandGroup,FK_CommandParameter";
-		listMyArray($link,$query,"Speed Dial",-1,-1,"speeddial.php");
+		listMyArray($link,$query,"Speed Dial",-1,-1,"speeddial.php?currentUser=$currentUser&currentRoom=$currentRoom&");
 	}
 
 	function buildVoiceMailList() {
 		// Scan the voicemail dir of the current user, and return list of new and saved msgs.
-		global $currentUser;
+		global $currentUser, $currentRoom;		
 		global $link;
 		$extension = getMyValue($link,"SELECT Extension From Users WHERE PK_Users = $currentUser");
 		$VOICEMAIL_EVENT = "/usr/pluto/bin/SendVoiceMailEvent.sh";
@@ -252,13 +277,15 @@
 	}
 
 	function buildRecentCallList($link) {
+		global $currentUser, $currentRoom;
 		// Get a list of recent calls - We don't distinguish between users.
 		$query = "SELECT src, dst, calldate, billsec, channel FROM asteriskcdrdb.cdr";
 		$query .= " ORDER BY calldate DESC LIMIT 0,20";
-		listMyArray($link,$query,"Recent Calls",-1,-1,"call.php");
+		listMyArray($link,$query,"Recent Calls",-1,-1,"call.php?currentUser=$currentUser&currentRoom=$currentRoom&");
 	}
 
 	function buildSortByList($mediaLink, $pk_mediatype) {
+		global $currentUser, $currentRoom;
 		// Get a list of Attributes to Sort by
 		$query = "SELECT Distinct PK_AttributeType, Description FROM MediaType_AttributeType ";
 		$query .= "JOIN AttributeType ON PK_AttributeType = FK_AttributeType ";
@@ -268,10 +295,11 @@
 		} else {
 			$query .= "and EK_MediaType = $pk_mediatype ";
 		}
-		listMyArray($mediaLink,$query,"SortedBy",-1,-1,"findmore.php?mediaType=$pk_mediatype&");
+		listMyArray($mediaLink,$query,"SortedBy",-1,-1,"findmore.php?currentUser=$currentUser&currentRoom=$currentRoom&mediaType=$pk_mediatype&");
 	}
 
 	function buildMediaSubTypes($mediaLink, $pk_mediatype = 5) {
+		global $currentUser, $currentRoom;
 		// Display a list of available media subtypes for the
 		// provided mediatype.
 		$query = "SELECT PK_MediaSubType, Description FROM MediaSubType ";
@@ -281,29 +309,30 @@
 		} else {
 			$query .= "AND EK_MediaType = $pk_mediatype ";
 		}
-		listMyArray($mediaLink, $query, "Subtype",-1,-1,"findmore.php?");
+		listMyArray($mediaLink, $query, "Subtype",-1,-1,"findmore.php?currentUser=$currentUser&currentRoom=$currentRoom&");
 	}
 
 	
 	function buildFileList($mediaLink, $pk_mediatype, $commandGroup = -1) {
+		global $currentUser, $currentRoom;
 		// Build a list of files that have the supplied media type. For Video we add MediaType 3 to it.
-		if ($pk_mediatype == 5) // Video -> sort by filename
+		if ($pk_mediatype == 5) // Video -> sort by filename		
 		{
-			$query = "SELECT PK_File,Filename,concat('detail.php?PK_File=',PK_File) as Target,Substr(Filename,1,1) ";
+			$query = "SELECT PK_File,Filename,concat('detail.php?currentUser=$currentUser&currentRoom=$currentRoom&PK_File=',PK_File) as Target,Substr(Filename,1,1) ";
 			$query .= "FROM pluto_media.File ";
 			$query .= "WHERE EK_MediaType in (3,5) AND EK_Users_Private IS NULL And IsDirectory = 0 And Missing = 0 ";
 			$query .= "ORDER By Filename ";
 			$query .= "LIMIT 0,200";
 		} elseif ($pk_mediatype == 4) // Audio -> Sort by artist
 		{
-			$query = "SELECT PK_File,Filename,concat('detail.php?PK_File=',PK_File) as Target,Substr(Filename,1,1) ";
+			$query = "SELECT PK_File,Filename,concat('detail.php?currentUser=$currentUser&currentRoom=$currentRoom&PK_File=',PK_File) as Target,Substr(Filename,1,1) ";
 			$query .= "FROM pluto_media.File ";
 			$query .= "WHERE EK_MediaType = $pk_mediatype AND EK_Users_Private IS NULL And IsDirectory = 0 And Missing = 0 ";
 			$query .= "ORDER By Filename ";
 			$query .= "LIMIT 0,200";
 		} elseif ($pk_mediatype == 7) // Audio -> Sort by artist
 		{
-			$query = "SELECT PK_File,Filename,concat('detail.php?PK_File=',PK_File) as Target,Substr(Filename,1,1) ";
+			$query = "SELECT PK_File,Filename,concat('detail.php?currentUser=$currentUser&currentRoom=$currentRoom&PK_File=',PK_File) as Target,Substr(Filename,1,1) ";
 			$query .= "FROM pluto_media.File ";
 			$query .= "WHERE EK_MediaType = $pk_mediatype AND EK_Users_Private IS NULL And IsDirectory = 0 And Missing = 0 ";
 			$query .= "ORDER By Filename ";
@@ -316,6 +345,7 @@
 	}
 
 	function buildFileListFromSortedBy($mediaLink, $pk_sortedby,$pk_media = 5) {
+		global $currentUser, $currentRoom;
 		// Build a list of files that have the supplied attribute.
 		// Get all attributes belonging to a specific media file.
 		$query = "SELECT Distinct PK_Attribute, Attribute.Name, AttributeType.Description FROM Attribute ";
@@ -334,12 +364,13 @@
 		$query .= "LIMIT 0,100";
 		
 		
-		listMyArray($mediaLink,$query,"Details",2,array($pk_sortedby,"Play All","play-all"),"findmore.php?mediaType=$pk_media&");
+		listMyArray($mediaLink,$query,"Details",2,array($pk_sortedby,"Play All","play-all"),"findmore.php?currentUser=$currentUser&currentRoom=$currentRoom&mediaType=$pk_media&");
 	}
 
 	function buildFileListFromAttribute($mediaLink, $pk_attribute) {
+		global $currentUser, $currentRoom;
 		// Build a list of files that have the supplied attribute.
-		$query = "SELECT Distinct PK_File,Filename,concat('detail.php?PK_File=',PK_File) as Target,Substr(Filename,1,1) ";
+		$query = "SELECT Distinct PK_File,Filename,concat('detail.php?currentUser=$currentUser&currentRoom=$currentRoom&PK_File=',PK_File) as Target,Substr(Filename,1,1) ";
 		$query .= "FROM pluto_media.File ";
 		$query .= "JOIN pluto_media.File_Attribute ON PK_File = FK_File ";
 		$query .= "WHERE EK_Users_Private IS NULL And IsDirectory = 0 And Missing = 0 And FK_Attribute = $pk_attribute ";
@@ -349,8 +380,9 @@
 	}
 
 	function buildFileListFromSubtype($mediaLink, $pk_mediatype) {
+		global $currentUser, $currentRoom;
 		// Build a list of files that have the supplied attribute.
-		$query = "SELECT PK_File,Filename,concat('detail.php?PK_File=',PK_File) as Target,Substr(Filename,1,1) ";
+		$query = "SELECT PK_File,Filename,concat('detail.php?currentUser=$currentUser&currentRoom=$currentRoom&PK_File=',PK_File) as Target,Substr(Filename,1,1) ";
 		$query .= "FROM pluto_media.File ";
 		$query .= "JOIN pluto_media.File_Attribute ON PK_File = FK_File ";
 		$query .= "WHERE EK_Users_Private IS NULL And IsDirectory = 0 And Missing = 0 And FK_Attribute = $pk_attribute ";
@@ -361,6 +393,7 @@
 
 	function buildAttributeList($mediaLink, $pk_file, $withUL = True) {
 		// Get all attributes belonging to a specific media file.
+		global $currentUser, $currentRoom;
 		$query = "SELECT PK_Attribute, Attribute.Name, AttributeType.Description FROM Attribute ";
 		$query .= "JOIN File_Attribute ON FK_Attribute = PK_Attribute ";
 		$query .= "JOIN AttributeType ON PK_AttributeType = FK_AttributeType ";
@@ -368,7 +401,7 @@
 		$query .= "Order By (Description != \"Title\"),(Description != \"Performer\"), Description";
 	//	print "Query: $query";
 		
-		listMyArray($mediaLink,$query,"Details",2,array($pk_file,"Play","play"),"findmore.php?",$withUL = $withUL);
+		listMyArray($mediaLink,$query,"Details",2,array($pk_file,"Play","play.php?currentUser=$currentUser&currentRoom=$currentRoom&pk_file=$pk_file"),"findmore.php?currentUser=$currentUser&currentRoom=$currentRoom&",$withUL = $withUL);
 	}
 	
 	function getMyValue($link,$query) {
@@ -394,21 +427,6 @@
 		return $returnValue;
 	}
 
-  function connectToDCERouter($deviceFromID=2, $DCERouter='dcerouter', $port=3450) {
-  	// Create a connection to the DCERouter and announce the from device.
-    if (!is_numeric($port)) {
-      return false;
-    }	
-	print "Trying to create socket DCEROUTER: $DCERouter PORT: $port FROMDEVICE: $deviceFromID\n";
-    $socket = fsockopen($DCERouter,$port);
-    if (!$socket) {
-      die("Can't open socket to DCERouter at $DCEROUTER : $port\n");
-	}
-	print "Socket created\n";
-    $result = fwrite($socket,"EVENT $deviceFromID\n");
-    return $socket;
-  }
-
 
 	function doCommandGroup($link,$commandGroup) {
 		global $current, $mediaLink;
@@ -421,7 +439,7 @@
 		// print "<p>query: $query</p>\n";
 //		print "<ul>$commandGroupDescription</ul>\n";
 		$commands = getMyArray($link,$query);
-		$socket = connectToDCERouter($deviceFromID);
+		// $socket = connectToDCERouter($deviceFromID);
 		
 		foreach($commands as $commandDetail) {
 			$messageToSend = "";
@@ -464,10 +482,10 @@
 	//			print "<p>Parameter: $parameterType - $parameterDescription - $parameterValue</p>\n";
 
 			}
-			messageSend($socket, $messageToSend);
+		//	messageSend($socket, $messageToSend);
 						
 		}
-		fclose($socket);
+		// fclose($socket);
 	}
 
 	function doCommandGroup_D($link,$commandGroup) {
@@ -532,7 +550,7 @@ function messageSend($socket,$request) {
 
 
 function connectdb() {
-	global $link, $mediaLink, $currentRoom, $currentUser, $currentScreen, $currentEntertainArea, $UI, $SKIN;
+	global $link, $mediaLink, $currentScreen, $currentEntertainArea, $UI, $SKIN;
 
 	$user = "root";
 	$password = "";

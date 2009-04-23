@@ -50,9 +50,9 @@
 		$messageLength = strlen($messageToSend);
 		$result = sendSocket($socket, "MESSAGET " . $messageLength . "\n");
 		$result = sendSocket($socket, $messageToSend . "\n");
-		echo "Message to send: ";
+		echo "<li>Message to send: ";
 		echo $messageToSend;
-		print "\n";
+		print "</li>\n";
 		socket_close($socket);
 	}
 

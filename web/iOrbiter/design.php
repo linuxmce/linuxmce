@@ -7,6 +7,9 @@
 	include("lib.inc.php");
 	connectdb();
 	global $UI, $SKIN;
+	global $PK_File, $currentUser, $currentScreen, $currentRoom, $currentEntertainArea, $link, $mediaLink;
+	if (isset($_COOKIE["currentUser"])) {	$currentUser = $_COOKIE["currentUser"]; }
+	if (isset($_COOKIE["currentRoom"])) {	$currentRoom = $_COOKIE["currentRoom"]; }
 	If (isset($_GET["CommandGroup"])) {
 		$commandGroup = $_GET["CommandGroup"];
 		doCommandGroup($link,$commandGroup);
@@ -15,7 +18,10 @@
 		$commandGroup = $_GET["CommandGroup_D"];
 		doCommandGroup_D($link,$commandGroup);
 	} 
-	
+	if (isset($_GET["PK_File"])) {
+		$PK_File = $_GET["PK_File"];
+	}	
+
 		
 
 	// We get the main Screens object
