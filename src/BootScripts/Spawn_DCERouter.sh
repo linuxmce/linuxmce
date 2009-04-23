@@ -13,6 +13,11 @@ Lock "DCERouter" "Spawn_DCERouter" || exit 1
 # TODO: remove this when correct locking will be implemented
 rm -f /usr/pluto/locks/pluto_spawned_local_devices.txt
 
+# The following directory needs to exist, for people who want to
+# load plugins without a device template (and the existance of the
+# dir gets rid of a warning on DCERouter startup
+
+mkdir -p /usr/pluto/bin/plugin-inject
 LogFile="/var/log/pluto/DCERouter.log";
 
 echo "== FRESH START =="
