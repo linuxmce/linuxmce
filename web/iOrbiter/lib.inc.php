@@ -1,6 +1,6 @@
 <?php
 /*
-	Copyright 2008 - Peer Oliver Schmidt
+	Copyright 2008,2009 - Peer Oliver Schmidt
 	GPLv2 Licensed
 */
 
@@ -43,7 +43,7 @@
 		$summary = getMyValue($mediaLink,$query);
 		if ($fileName != "") {
 			print "<li>"; // style='height: 320px;'>";
-			print "<img style='float:left;' src='/pluto-admin/mediapics/" . $fileName . "_tn.jpg' height='320px'>";			
+			print "<img style='float:left;' src='/lmce-admin/mediapics/" . $fileName . "_tn.jpg' height='320px'>";			
 			print "<p>$summary</p>";
 			print "</li>\n";
 			print "<li style='clear:left;'></li>\n";
