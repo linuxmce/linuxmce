@@ -4,7 +4,7 @@
 	GPLv2 Licensed
 */
 
-//	error_reporting(E_ALL);
+	error_reporting(E_ALL);
 	
 //	connectToDCERouter();
 
@@ -42,7 +42,9 @@
 	function DoParameter29($mediaLink, $parameterValue, $commandGroup) {
 		// DoParameter29 is called, when ever a file listing needs to
 		// be presented.
-		if ($commandGroup == 41 or $commandGroup == 43 or $commandGroup == 44) // Playlist, Pictures and Docs
+		if ($commandGroup == 77) {
+			buildFileList($mediaLink, $parameterValue);
+		} elseif ($commandGroup == 41 or $commandGroup == 43 or $commandGroup == 44) // Playlist, Pictures and Docs
 		{	
 			buildFileList($mediaLink, $parameterValue);
 		} elseif ($commandGroup == 39 or $commandGroup = 40) // Audio and Video
@@ -52,7 +54,7 @@
 	//		buildFileList($mediaLink, $parameterValue);
 		} else
 		{
-			die("<p>No file listing for commandGroup $commandGroup setup</p>");
+			die("<li>No file listing for commandGroup $commandGroup setup</li>");
 		}
 	}
 
@@ -348,7 +350,15 @@
 			$query .= "WHERE EK_MediaType = $pk_mediatype AND EK_Users_Private IS NULL And IsDirectory = 0 And Missing = 0 ";
 			$query .= "ORDER By Filename ";
 			$query .= "LIMIT 0,200";
-		} else
+		} elseif ($pk_mediatype == 21) // Playlist
+		{	
+			$query = "SELECT PK_Playlist,Name as Filename,concat('detail.php?currentUser=$currentUser&currentRoom=$currentRoom&PK_Playlist=',PK_Playlist) as Target,Substr(Name,1,1) ";
+			$query .= "FROM pluto_media.Playlist ";
+			$query .= "WHERE EK_User IS NULL Or EK_User = 0 ";
+			$query .= "ORDER By Name ";
+			$query .= "LIMIT 0,200";
+		}
+		else
 		{
 			$query = "SELECT 0,'Media Type $pk_mediatype is currently unsupported' as Filename, '' As Target, ' ' As Heading";
 		}
