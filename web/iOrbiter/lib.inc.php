@@ -58,6 +58,10 @@
 	function getPicture($mediaLink, $PK_File) {
 		// Get a link to the picture associated with the supplied
 		// file.	
+		$path = "/lmce-admin/mediapics/";
+		if ( ! file_exists("/var/www/" . $path) ) {
+			$path = "/pluto-admin/mediapics/";
+		}
 		$fileName = "";
 		$summary = "";
 		$query = "SELECT FK_Picture From Picture_File Where FK_File = $PK_File";
@@ -67,7 +71,7 @@
 		$summary = getMyValue($mediaLink,$query);
 		if ($fileName != "") {
 			print "<li>"; // style='height: 320px;'>";
-			print "<img style='float:left;' src='/lmce-admin/mediapics/" . $fileName . "_tn.jpg' height='320px'>";			
+			print "<img style='float:left;' src='$path" . $fileName . "_tn.jpg' height='320px'>";			
 			print "<p>$summary</p>";
 			print "</li>\n";
 			print "<li style='clear:left;'></li>\n";
