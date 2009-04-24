@@ -33,6 +33,21 @@ function InstallNeededPackages
 
 }
 
+function AddAptRetries
+{
+        local changed
+                
+                 
+        if ! grep -q "^[^#]*Acquire::Retries" /etc/apt/apt.conf
+        then
+           echo 'Acquire::Retries "0"'>>/etc/apt/apt.conf
+           changed=0
+        else
+           echo "Acquire::Retries already set."
+           changed=1
+        fi
+        return $changed
+}
 
 
 function CopyDebsFromIso
