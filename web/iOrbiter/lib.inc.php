@@ -7,11 +7,15 @@
 //	error_reporting(E_ALL);
 	
 //	connectToDCERouter();
+
+	global $possyDeviceFromID;
+	$possyDeviceFromID = 1;
+
 	include_once("libMessageSend.php");
 
 	
 	function playFile($mediaLink, $pk_file) {
-		global $currentRoom,$link,$currentEntertainArea;
+		global $currentRoom,$link,$currentEntertainArea,$possyDeviceFromID;
 		print "entertain: $currentEntertainArea\n";
 		print "current room: $currentRoom\n";
 		$currentEntertainArea = getEntertainArea($link,$currentRoom);
@@ -21,8 +25,11 @@
 		
 		$filePath = getMyValue($mediaLink, $queryFilePath);
 		print "<li>$filePath</li>";
-		// myMessageSend($server,$port,$deviceFromID,$deviceToID,$messageType,$messageID,$parameter1ID,$parameter1Content,$parameter2ID,$parameter2Content);		
-		myMessageSend("dcerouter",3450, 1,10,1,43,13,'"' . $filePath . '"', 45, $currentEntertainArea);
+		// commStart($server, $port, $deviceIDFrom)
+		$socket = commStart("dcerouter",3450,$possyDeviceFromID);
+		// myMessageSend($socket,$deviceFromID,$deviceToID,$messageType,$messageID,$parameter1ID,$parameter1Content,$parameter2ID,$parameter2Content);		
+		myMessageSend($socket,$possyDeviceFromID,10,1,43,13,'"' . $filePath . '"', 45, $currentEntertainArea);
+		commEnd($socket);
 	}	
 	
 	function getEntertainArea($link, $room) {
@@ -433,8 +440,7 @@
 
 
 	function doCommandGroup($link,$commandGroup) {
-		global $current, $mediaLink;
-		$deviceFromID = 2;
+		global $current, $mediaLink, $possyDeviceFromID;
 		$messageType = 1;   // 1 = COMMAND, 2 = EVENT
 		
 		$commandGroupDescription = getMyValue($link,"SELECT Description FROM CommandGroup WHERE PK_CommandGroup = $commandGroup");
@@ -443,7 +449,7 @@
 		// print "<p>query: $query</p>\n";
 //		print "<ul>$commandGroupDescription</ul>\n";
 		$commands = getMyArray($link,$query);
-		// $socket = connectToDCERouter($deviceFromID);
+		$socket = commStart("dcerouter",3450,$possyDeviceFromID);
 		
 		foreach($commands as $commandDetail) {
 			$messageToSend = "";
@@ -462,7 +468,7 @@
 
 			$commandGroupCommand = $commandDetail[0];
 			$parameters = getMyArray($link,"SELECT FK_CommandParameter, IK_CommandParameter FROM CommandGroup_Command_CommandParameter C Where FK_CommandGroup_Command = $commandGroupCommand");
-			$messageToSend = "$deviceFromID $deviceToID $messageType $messageID";
+			$messageToSend = "$deviceToID $messageType $messageID";
 			foreach($parameters as $parameter) {
 				
 				$parameterType = $parameter[0];
@@ -477,18 +483,28 @@
 						// PK_Screen
 						$currentScreen = $parameterValue;
 					}
-				}
-				if ($messageID == 401) {
+				} elseif ($messageID == 401) {
 					if ($parameterType == 29) {
 						DoParameter29($mediaLink, $parameterValue, $commandGroup);
 					}
+				} elseif ($messageID == 44) {
+					// Nothing special - it will be taken care of with message send later on.					
+				} else {
+					print "<li>messageID: $messageID</li>\n";
 				}
+				
 	//			print "<p>Parameter: $parameterType - $parameterDescription - $parameterValue</p>\n";
 
 			}
-		//	messageSend($socket, $messageToSend);
-						
+			$sendMessageArray = array(1 => 44, 193);
+			$found = array_search($messageID, $sendMessageArray);
+			if ( ! $found) {
+				// Handled elsewhere.
+			} else {
+				myMessageSend($socket, $possyDeviceFromID,$deviceToID,1,$messageID, $parameters);
+			}
 		}
+		commEnd($socket);
 		// fclose($socket);
 	}
 
@@ -541,17 +557,6 @@
 			}
 		}
 	}
-
-function messageSend($socket,$request) {
-	// This function uses the ASCII DCE protocol to send a message to the DCERouter.
-//	print "<h1>Message to send: $request</h1>\n";
-	$messageLength = strlen($request);	
-	$result = fwrite($socket,"MESSAGET ");
-	$result = fwrite($socket,"$messageLength\n");
-	$result = fwrite($socket,$request . "\n");
-	
-} 
-
 
 function connectdb() {
 	global $link, $mediaLink, $currentScreen, $currentEntertainArea, $UI, $SKIN;

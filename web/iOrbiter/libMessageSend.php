@@ -14,6 +14,7 @@
 		return $socket;
 	}
 	
+	
 	function sendSocket($socket, $message) {
 		// Send message to the socket
 		$result = socket_write($socket, $message, strlen($message));
@@ -24,28 +25,40 @@
 		}		
 		return $result;
 	}
-
-	function myMessageSend($server = "localhost",$port = 3450,$deviceFromID,$deviceToID,$messageType = 1,$messageID,$parameter1ID,$parameter1Content,$parameter2ID,$parameter2Content) {
-		// Careful:
-		//    parameter1 und parameter2 content must include " if it is a long string!
-		print "Server: $server\n";
-
+	
+	function commStart($server = "localhost",$port = 3450, $deviceFromID) { 
 		$socket = getSocket($server, $port);
-
-
 		$result = sendSocket($socket,"EVENT " . $deviceFromID . "\n");
+
 		$result = socket_read($socket,1024, PHP_NORMAL_READ);
 		print "Result from Event: $result\n";		
+		return $socket;
+	}
+
+	function myMessageSend($socket,$deviceFromID,$deviceToID,$messageType = 1,$messageID,$parameter1ID=0,$parameter1Content="",$parameter2ID=0,$parameter2Content="") {
+		// Careful:
+		//    parameter1 und parameter2 content must include " if it is a long string!
+
 		$messageToSend = $deviceFromID . " " . $deviceToID . " " . $messageType . " " . $messageID;
-		if ($parameter1ID <> 0) {
-			$messageToSend .=  " " . $parameter1ID . " " . $parameter1Content;
-		} else {
-			print "No parameter 1\n";
-		}
-		if ($parameter2ID <> 0) {
-			$messageToSend .= " " . $parameter2ID . " " . $parameter2Content;
-		} else {
-			print "No parameter 2\n";
+		if (is_array($parameter1ID)) {
+			print "<li>Parameter Array</li>\n";
+			foreach ($parameter1ID as $parameterPair) {
+				$messageToSend .= " " . $parameterPair[0] . " " . $parameterPair[1];
+				print "<li>parameter: " . $parameterPair[0] . " - " . $parameterPair[1] . "</li>\n";
+			}
+			unset($parameter1ID);
+		} 
+		if (isset($parameter1ID)) {
+			if ($parameter1ID <> 0) {
+				$messageToSend .=  " " . $parameter1ID . " " . $parameter1Content;
+			} else {
+				print "No parameter 1\n";
+			}
+			if ($parameter2ID <> 0) {
+				$messageToSend .= " " . $parameter2ID . " " . $parameter2Content;
+			} else {
+				print "No parameter 2\n";
+			}
 		}
 		$messageLength = strlen($messageToSend);
 		$result = sendSocket($socket, "MESSAGET " . $messageLength . "\n");
@@ -53,6 +66,9 @@
 		echo "<li>Message to send: ";
 		echo $messageToSend;
 		print "</li>\n";
+	}
+
+	function commEnd($socket) { 
 		socket_close($socket);
 	}
 
