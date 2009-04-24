@@ -329,6 +329,11 @@
 	function buildFileList($mediaLink, $pk_mediatype, $commandGroup = -1) {
 		global $currentUser, $currentRoom;
 		// Build a list of files that have the supplied media type. For Video we add MediaType 3 to it.
+		// the query should return
+		// 1) The ID
+		// 2) The name to display
+		// 3) The URL to call excluding the ID 
+		// 4) The Group-By string.
 		if ($pk_mediatype == 5) // Video -> sort by filename		
 		{
 			$query = "SELECT PK_File,Filename,concat('detail.php?currentUser=$currentUser&currentRoom=$currentRoom&PK_File=',PK_File) as Target,Substr(Filename,1,1) ";
