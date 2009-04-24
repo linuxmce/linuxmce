@@ -38,9 +38,9 @@ function AddAptRetries
         local changed
                 
                  
-        if ! grep -q "^[^#]*Acquire::Retries" /etc/apt/apt.conf
+        if ! grep -q "^[^#]*APT::Acquire { Retries" /etc/apt/apt.conf
         then
-           echo 'Acquire::Retries "0"'>>/etc/apt/apt.conf
+           echo 'APT::Acquire { Retries  "0" }'>>/etc/apt/apt.conf
            changed=0
         else
            echo "Acquire::Retries already set."
