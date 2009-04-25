@@ -88,11 +88,12 @@
 	doDesignObjVariations(1349,$link);
 	// Security
 	doDesignObjVariations(1348,$link);
-	// Rooms
+	// Rooms / Location
 	doDesignObjVariations(2918,$link);
 	// Users
 	doDesignObjVariations(1903,$link);
-
+	// Power
+	doDesignObjVariations(4206,$link);
 
 	If (isset($_GET["CommandGroup"])) {
 		$commandGroup = $_GET["CommandGroup"];

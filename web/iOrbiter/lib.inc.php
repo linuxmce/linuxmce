@@ -120,38 +120,44 @@
 		$query .= "Where FK_DesignObjVariation = $designObjVariation AND FK_DesignObjParameter = 11";
 		$PK_Array = getMyValue($link,$query);
 		// $PK_Array = 1;
-		$query = "SELECT Description FROM Array Where PK_Array = $PK_Array";
-		$buttonDescription = getMyValue($link,$query);
-		$buttonDescription = ereg_replace(" ","-",$buttonDescription);
-		print "<ul id='$buttonDescription'>\n";
-		// $buttonDescription = "Lighting Scenario";
-		If (in_array($PK_Array,array(1,2,3,4))) {
-			$query = "SELECT PK_CommandGroup, Description FROM CommandGroup ";
-			$query .= " JOIN CommandGroup_Room ON CommandGroup_Room.FK_CommandGroup = PK_CommandGroup ";
-			$query .= " WHERE FK_Array = $PK_Array AND FK_Room = $currentRoom";
-		} elseif ($PK_Array == 5) {
-			// Media Scenarios are not room based, but EntertainmentArea based
-			$query = "SELECT PK_CommandGroup, Description FROM CommandGroup ";
-			$query .= "JOIN CommandGroup_EntertainArea ON CommandGroup_EntertainArea.FK_CommandGroup = PK_CommandGroup ";
-			$query .= "WHERE FK_Array = $PK_Array AND CommandGroup_EntertainArea.FK_EntertainArea = $currentEntertainArea";
-		} elseif ($PK_Array == 13) {
-			// List of users that are not hidden from the Orbiter
-			$target = " target='_self'";
-			$url = "setEnvironment.php?setCurrentUser";
-			$query = "SELECT PK_Users, UserName FROM Users ";
-			$query .= "Where HideFromOrbiter = 0";
-		} elseif ($PK_Array == 14) {
-			// List of rooms that are not hidden from the Orbiter
-			$target = " target='_self'";
-			$url = "setEnvironment.php?setCurrentRoom";
-			$query = "SELECT PK_Room, Description FROM Room ";
-			$query .= "Where HideFromOrbiter = 0";
+		// print "<ul><li>PK Array $PK_Array</li>\n";
+		If (! Isset($PK_Array)) {
+			print "<ul id='Power'>\n";
+			print "<li>not yet</li>\n";
 		} else {
-			die("<p>Unknown PK_Array $PK_Array</p>\n");
-		}
-		$buttonArray = getMyArray($link,$query);
-		foreach($buttonArray as $buttonDetail) {
-			print "<li><a href='$url=$buttonDetail[0]' $target>$buttonDetail[1]</a></li>\n";
+			$query = "SELECT Description FROM Array Where PK_Array = $PK_Array";
+			$buttonDescription = getMyValue($link,$query);
+			$buttonDescription = ereg_replace(" ","-",$buttonDescription);
+			print "<ul id='$buttonDescription'>\n";
+			// $buttonDescription = "Lighting Scenario";
+			If (in_array($PK_Array,array(1,2,3,4))) {
+				$query = "SELECT PK_CommandGroup, Description FROM CommandGroup ";
+				$query .= " JOIN CommandGroup_Room ON CommandGroup_Room.FK_CommandGroup = PK_CommandGroup ";
+				$query .= " WHERE FK_Array = $PK_Array AND FK_Room = $currentRoom";
+			} elseif ($PK_Array == 5) {
+				// Media Scenarios are not room based, but EntertainmentArea based
+				$query = "SELECT PK_CommandGroup, Description FROM CommandGroup ";
+				$query .= "JOIN CommandGroup_EntertainArea ON CommandGroup_EntertainArea.FK_CommandGroup = PK_CommandGroup ";
+				$query .= "WHERE FK_Array = $PK_Array AND CommandGroup_EntertainArea.FK_EntertainArea = $currentEntertainArea";
+			} elseif ($PK_Array == 13) {
+				// List of users that are not hidden from the Orbiter
+				$target = " target='_self'";
+				$url = "setEnvironment.php?setCurrentUser";
+				$query = "SELECT PK_Users, UserName FROM Users ";
+				$query .= "Where HideFromOrbiter = 0";
+			} elseif ($PK_Array == 14) {
+				// List of rooms that are not hidden from the Orbiter
+				$target = " target='_self'";
+				$url = "setEnvironment.php?setCurrentRoom";
+				$query = "SELECT PK_Room, Description FROM Room ";
+				$query .= "Where HideFromOrbiter = 0";
+			} else {
+				die("<p>Unknown PK_Array $PK_Array</p>\n");
+			}
+			$buttonArray = getMyArray($link,$query);
+			foreach($buttonArray as $buttonDetail) {
+				print "<li><a href='$url=$buttonDetail[0]' $target>$buttonDetail[1]</a></li>\n";
+			}
 		}
 		print "</ul>";
 	}
