@@ -294,7 +294,7 @@ void MythBackEnd_Socket::ProcessIncomingString(string sResponse)
 		else if( sResponse.substr(20,14)=="DONE_RECORDING" )
 			m_pMythTV_PlugIn->m_pAlarmManager->AddRelativeAlarm(0,m_pMythTV_PlugIn,CHECK_FOR_NEW_RECORDINGS,NULL);
 	}
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythBackEnd_Socket::ProcessIncomingString %s", 
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"MythBackEnd_Socket::ProcessIncomingString %s", 
 		sResponse.c_str());
 }
 

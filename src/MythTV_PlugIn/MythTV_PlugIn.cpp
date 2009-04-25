@@ -188,6 +188,8 @@ bool MythTV_PlugIn::Register()
 		}
 	}
 
+	/*
+	Note: SetPaths() is now obsolete and handled in PlutoStorageDevices
 	bool bPathsChanged = SetPaths();
 	if( bPathsChanged )
         { // Paths were changed so we need to restart the backend[s].
@@ -198,7 +200,7 @@ bool MythTV_PlugIn::Register()
 			"", "", false, false, false, false);
 		SendCommand(CMD_Spawn_Application);
         }
-
+	*/
 
 	// Don't actually build the bookmark/channel list because Sync_Cards_Providers will fill in m_mapDevicesToSources,
 	// but it's not run until about 20 seconds after everything starts so if it needs to send a message to the orbiters
@@ -1535,11 +1537,12 @@ void MythTV_PlugIn::CheckForNewRecordings()
 
 	string sSQL = "SELECT max(PK_File) FROM File";
 	PlutoSqlResult result;
-    DB_ROW row;
+    	DB_ROW row;
     
 	int PK_File_Max=0;
-	if( ( result.r=m_pMedia_Plugin->m_pDatabase_pluto_media->db_wrapper_query_result( sSQL ) ) && ( row=db_wrapper_fetch_row( result.r ) ) && row[0] )
+	if( ( result.r=m_pMedia_Plugin->m_pDatabase_pluto_media->db_wrapper_query_result( sSQL ) ) && ( row=db_wrapper_fetch_row( result.r ) ) && row[0] ) {
 		PK_File_Max = atoi(row[0]);
+	}
 
 	PLUTO_SAFETY_LOCK(mm,m_pMedia_Plugin->m_MediaMutex); // protect m_sNewRecordings
 	sSQL = "LEFT JOIN File_Attribute ON FK_File=PK_File WHERE (Missing=0 AND Path like '%tv_shows_%' AND FK_File IS NULL AND PK_File>" + StringUtils::itos(m_dwPK_File_LastCheckedForNewRecordings) + ")";
@@ -1551,7 +1554,7 @@ void MythTV_PlugIn::CheckForNewRecordings()
 	vector<Row_File *> vectRow_File;
 	m_pMedia_Plugin->m_pDatabase_pluto_media->File_get()->GetRows( sSQL, &vectRow_File );
 
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::CheckForNewRecordings PK_File_Max %d m_dwPK_File_LastCheckedForNewRecordings %d files: %d %s",
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"MythTV_PlugIn::CheckForNewRecordings PK_File_Max %d m_dwPK_File_LastCheckedForNewRecordings %d files: %d %s",
 		PK_File_Max, m_dwPK_File_LastCheckedForNewRecordings, (int) vectRow_File.size(), sSQL.c_str());
 
 	for(vector<Row_File *>::iterator it=vectRow_File.begin();it!=vectRow_File.end();++it)
@@ -1561,10 +1564,11 @@ void MythTV_PlugIn::CheckForNewRecordings()
 
 		sSQL = 
 			"SELECT recorded.chanid, recorded.starttime, recorded.title, recorded.subtitle, recorded.stars, recorded.category, recorded.description,"
-			"recordedprogram.hdtv, recordedprogram.category_type, channel.name, recordedrating.rating, recgroup, recordedprogram.seriesid, recordedprogram.programid, channel.icon FROM recorded "
+			"recordedprogram.hdtv, recordedprogram.category_type, channel.name, recordedrating.rating, recgroup, recordedprogram.seriesid, recordedprogram.programid, channel.icon, CONCAT(storagegroup.dirname,'/',recorded.basename,'.png') AS screenshot FROM recorded "
 			"LEFT JOIN recordedprogram ON recorded.chanid=recordedprogram.chanid and recorded.starttime=recordedprogram.starttime "
 			"LEFT JOIN channel ON recorded.chanid=channel.chanid "
 			"LEFT JOIN recordedrating ON recorded.chanid=recordedrating.chanid and recorded.starttime=recordedrating.starttime "
+			"LEFT JOIN storagegroup ON recorded.storagegroup = storagegroup.groupname "
 			"WHERE basename='" + pRow_File->Filename_get() + "'";
 
 		PlutoSqlResult result;
@@ -1575,181 +1579,213 @@ void MythTV_PlugIn::CheckForNewRecordings()
 			if( row[11] && strcmp(row[11],"LiveTV")==0 )
 			{
 				pRow_File->Ignore_set(1);
-				LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::CheckForNewRecordings file: %s is live tv title %s",pRow_File->Filename_get().c_str(), title.c_str());
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG,"MythTV_PlugIn::CheckForNewRecordings file: %s is live tv title %s",pRow_File->Filename_get().c_str(), title.c_str());
 	
-				if( title!="" )
+				if( title!="" ) {
 					title = "LiveTV: " + title;
-				else
+				} else {
 					continue;
+				}
 			}
 
 			int PK_Attribute_CreationDate,PK_Attribute_Title=0,PK_Attribute_Episode=0,PK_Attribute_Channel=0,PK_Attribute_Misc;
 
 			LoggerWrapper::GetInstance()->Write(
-				LV_STATUS,
+				LV_DEBUG,
 				"RESULT ROW: file %s chanid %s start_time %s title %s subtitle %s stars %s category %s " // 6
 				"description %s hdtv %s category_type %s chan_name %s rating %s recgroup %s " // 6
-				"seriesid %s programid %s icon %s", // 3
+				"seriesid %s programid %s icon %s screenshot %s", // 3
 				pRow_File->Filename_get().c_str(),
 				row[0], row[1], row[2], row[3], row[4], row[5],
 				row[6], row[7], row[8], row[9], row[10], row[11],
-				row[12], row[13], row[14]);
+				row[12], row[13], row[14], row[15]);
 
 			if( row[1] && row[1][0] != 0 /*starttime*/)
 			{
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Fetching starttime attribute -- start (%s)", row[1]);
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching starttime attribute -- 35start (%s)", row[1]);
 				m_pMedia_Plugin->CMD_Add_Media_Attribute(
 					/*val*/row[1],/*streamid*/0,/*tracks*/"",
 					/*attr type*/ATTRIBUTETYPE_Creation_Date_CONST,
 					/*section*/"",
 					/*file*/pRow_File->PK_File_get(),
 					/*int attr key*/&PK_Attribute_CreationDate);
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Fetching starttime attribute -- end\n");
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching starttime attribute -- end\n");
 			}
 			if( title != "" )
 			{
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Fetching title attribute -- start (%s)", title.c_str());
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching title attribute -- start (%s)", title.c_str());
 				m_pMedia_Plugin->CMD_Add_Media_Attribute(title,0,"",ATTRIBUTETYPE_Title_CONST,"",
 									 pRow_File->PK_File_get(),&PK_Attribute_Title);
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Fetching title attribute -- end\n");
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching title attribute -- end\n");
 			}
 			if( row[3] && row[3][0] != 0 /*subtitle*/)
 			{
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Fetching subtitle attribute -- start (%s)", row[3]);
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching subtitle attribute -- start (%s)", row[3]);
 				m_pMedia_Plugin->CMD_Add_Media_Attribute(row[3],0,"",ATTRIBUTETYPE_Episode_CONST,"",pRow_File->PK_File_get(),&PK_Attribute_Episode);
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Fetching subtitle attribute -- end\n");
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching subtitle attribute -- end\n");
 			}
 			if( row[4] && row[4][0] != 0 /*stars*/)
 			{
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Fetching stars attribute -- start (%s)", row[4]);
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching stars attribute -- start (%s)", row[4]);
 				m_pMedia_Plugin->CMD_Add_Media_Attribute(row[4],0,"",ATTRIBUTETYPE_Rating_CONST,"",pRow_File->PK_File_get(),&PK_Attribute_Misc);
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Fetching stars attribute -- end\n");
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching stars attribute -- end\n");
 			}
 			if( row[5] && row[5][0] != 0 /*category*/)
 			{
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Fetching category attribute -- start (%s)", row[5]);
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching category attribute -- start (%s)", row[5]);
 				m_pMedia_Plugin->CMD_Add_Media_Attribute(row[5],0,"",ATTRIBUTETYPE_Genre_CONST,"",pRow_File->PK_File_get(),&PK_Attribute_Misc);
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Fetching category attribute -- end\n");
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching category attribute -- end\n");
 			}
 			if( row[6] && row[6][0] != 0 /*description*/)
 			{
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Fetching description attribute -- start (%s)", row[6]);
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching description attribute -- start (%s)", row[6]);
 				Row_LongAttribute *pRow_LongAttribute = m_pMedia_Plugin->m_pDatabase_pluto_media->LongAttribute_get()->AddRow();
 				pRow_LongAttribute->FK_File_set( pRow_File->PK_File_get() );
 				pRow_LongAttribute->FK_AttributeType_set( ATTRIBUTETYPE_Synopsis_CONST );
 				pRow_LongAttribute->Text_set( row[6] );
 				m_pMedia_Plugin->m_pDatabase_pluto_media->LongAttribute_get()->Commit();
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Fetching description attribute -- end\n");
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching description attribute -- end\n");
 			}
-			if( row[7] && row[7][0] != 0 && atoi(row[7]) /*hdtv*/)
+			
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching HDTV attribute -- start (%s)", row[7]);
+			if( row[7] && row[7][0] != 0 && atoi(row[7]) /*hdtv*/) {
 				pRow_File->FK_FileFormat_set(FILEFORMAT_HD_1080_CONST);
-			else
+			} else {
 				pRow_File->FK_FileFormat_set(FILEFORMAT_Standard_Def_CONST);
+			}
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching description attribute -- end\n");
+			
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching Category Type attribute -- start (%s)", row[8]);
 			if( row[8] && row[8][0] != 0 /*category_type*/)
 			{
 				string sType = row[8];
-				if( StringUtils::StartsWith(sType,"Sports",true) )
+				if( StringUtils::StartsWith(sType,"Sports",true) ) {
 					pRow_File->FK_MediaSubType_set(MEDIASUBTYPE_Sports_Events_CONST);
-				else
+				} else {
 					pRow_File->FK_MediaSubType_set(MEDIASUBTYPE_TV_Shows_CONST);
-			}
-			else
+				}
+			} else {
 				pRow_File->FK_MediaSubType_set(MEDIASUBTYPE_TV_Shows_CONST);
+			}
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching Category Type attribute -- end\n");
 
-			if( row[9] && row[9][0] != 0 /*channel name*/)
+
+			if( row[9] && row[9][0] != 0 /*channel name*/) {
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching Channel Name attribute -- start (%s)", row[9]);
 				m_pMedia_Plugin->CMD_Add_Media_Attribute(row[9],0,"",ATTRIBUTETYPE_Channel_CONST,"",pRow_File->PK_File_get(),&PK_Attribute_Channel);
-			if( row[10] && row[10][0] != 0 /*rating*/)
-				m_pMedia_Plugin->CMD_Add_Media_Attribute(row[10],0,"",ATTRIBUTETYPE_Rated_CONST,"",pRow_File->PK_File_get(),&PK_Attribute_Misc);
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching Channel Name attribute -- end\n");
+			}
 
-			LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::CheckForNewRecordings file: %s %d %d",pRow_File->Filename_get().c_str(),PK_Attribute_Title,PK_Attribute_Episode);
+			if( row[10] && row[10][0] != 0 /*rating*/) {
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching rating attribute -- start (%s)", row[10]);
+				m_pMedia_Plugin->CMD_Add_Media_Attribute(row[10],0,"",ATTRIBUTETYPE_Rated_CONST,"",pRow_File->PK_File_get(),&PK_Attribute_Misc);
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Fetching rating attribute -- end\n");
+			}
+
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"MythTV_PlugIn::CheckForNewRecordings file: %s %d %d",pRow_File->Filename_get().c_str(),PK_Attribute_Title,PK_Attribute_Episode);
 
 			int PK_Picture = 0;
 			if( PK_Attribute_Title || PK_Attribute_Episode )
 			{
-				if( row[12] )
+				if( row[12] ) {
 					sSQL = string("seriesid='") + row[12] + "'";
-				else
+				} else {
 					sSQL = "";
+				}
 
 				if( row[13] )
 				{
-					if( sSQL.empty()==false )
+					if( sSQL.empty()==false ) {
 						sSQL += " OR ";
+					}
 					sSQL += string("programid='") + row[13] + "'";
 				}
-				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CheckForNewRecordings %s",sSQL.c_str());
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG,"CheckForNewRecordings: Title/Episode %s",sSQL.c_str());
 
 				PlutoSqlResult result;
-			    DB_ROW row_pic;
+			    	DB_ROW row_pic;
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG,"CheckForNewRecordings: Look For Picture...");				
 				if( (sSQL!="") && (result.r=m_pDBHelper_Myth->db_wrapper_query_result( "SELECT EK_Picture FROM `pluto_myth`.Picture WHERE " + sSQL ) ) && ( row_pic=db_wrapper_fetch_row( result.r ) ) && row_pic[0] && atoi(row_pic[0]) )
 				{
-					LoggerWrapper::GetInstance()->Write(LV_STATUS,"CheckForNewRecordings ok - %s",sSQL.c_str());
+					LoggerWrapper::GetInstance()->Write(LV_DEBUG,"CheckForNewRecordings: Custom MythTV picture found - %s",sSQL.c_str());
 					PK_Picture = atoi(row_pic[0]);
-					if( PK_Attribute_Title )
+					if( PK_Attribute_Title ) {
 						m_pMedia_Plugin->m_pMediaAttributes->m_pMediaAttributes_LowLevel->AddPictureToAttribute(PK_Attribute_Title,atoi(row_pic[0]));
-					if( PK_Attribute_Episode )
+					}
+					if( PK_Attribute_Episode ) {
 						m_pMedia_Plugin->m_pMediaAttributes->m_pMediaAttributes_LowLevel->AddPictureToAttribute(PK_Attribute_Episode,atoi(row_pic[0]));
+					}				
 				}
 				else  // Look for a channel logo
 				{
 					PlutoSqlResult result;
 					if( (result.r=m_pDBHelper_Myth->db_wrapper_query_result( "SELECT EK_Picture FROM `pluto_myth`.Picture WHERE chanid=" + string(row[0]) ) ) && ( row_pic=db_wrapper_fetch_row( result.r ) ) && row_pic[0] && atoi(row_pic[0]) )
 					{
-						LoggerWrapper::GetInstance()->Write(LV_STATUS,"CheckForNewRecordings ok - %s",sSQL.c_str());
+						LoggerWrapper::GetInstance()->Write(LV_DEBUG,"CheckForNewRecordings: Channel Picture Found. - %s",sSQL.c_str());
 						PK_Picture = atoi(row_pic[0]);
-						if( PK_Attribute_Title )
+						if( PK_Attribute_Title ) {
 							m_pMedia_Plugin->m_pMediaAttributes->m_pMediaAttributes_LowLevel->AddPictureToAttribute(PK_Attribute_Title,atoi(row_pic[0]));
-						if( PK_Attribute_Episode )
+						}						
+						if( PK_Attribute_Episode ) {
 							m_pMedia_Plugin->m_pMediaAttributes->m_pMediaAttributes_LowLevel->AddPictureToAttribute(PK_Attribute_Episode,atoi(row_pic[0]));
+						}					
 					}
 					else if( row[14] )  // Use the icon from myth channel
 					{
-						Row_Picture *pRow_Picture = m_pMedia_Plugin->m_pMediaAttributes->m_pMediaAttributes_LowLevel->AddPicture(row[14]);
-						if( !pRow_Picture )
-							LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Failed to add picture %s",row[15]);
-						else
-						{
-							LoggerWrapper::GetInstance()->Write(LV_STATUS,"Adding Picture %d / %s", pRow_Picture->PK_Picture_get(), row[15]);
+						Row_Picture *pRow_Picture = m_pMedia_Plugin->m_pMediaAttributes->m_pMediaAttributes_LowLevel->AddPicture(row[15]);
+						if( !pRow_Picture ) {
+							LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CheckForNewRecordings: Failed to add picture %s",row[15]);
+						} else {
+							LoggerWrapper::GetInstance()->Write(LV_DEBUG,"CheckForNewRecordings: Adding Picture %d / %s", pRow_Picture->PK_Picture_get(), row[15]);
 							PK_Picture = pRow_Picture->PK_Picture_get();
-							if( PK_Attribute_Title )
+							if( PK_Attribute_Title ) {
 								m_pMedia_Plugin->m_pMediaAttributes->m_pMediaAttributes_LowLevel->AddPictureToAttribute(PK_Attribute_Title,pRow_Picture->PK_Picture_get());
-							if( PK_Attribute_Episode )
+							}							
+							if( PK_Attribute_Episode ) {
 								m_pMedia_Plugin->m_pMediaAttributes->m_pMediaAttributes_LowLevel->AddPictureToAttribute(PK_Attribute_Episode,pRow_Picture->PK_Picture_get());
+							}						
 						}
 					}
 				}
 			}
 
-			if( PK_Picture )
+			if( PK_Picture ) {
 				m_pMedia_Plugin->m_pMediaAttributes->m_pMediaAttributes_LowLevel->AddPictureToFile(pRow_File->PK_File_get(),PK_Picture);
-			
-			sSQL = 
+			}
+
+
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"CheckForNewRecordings: Looking for Personnel attributes...");
+			/*sSQL = 
 				"SELECT role,name FROM recordedcredits JOIN people on recordedcredits.person=people.person "
 				"WHERE chanid='" + string(row[0]) + "' AND starttime='" + row[1] + "'";
 
 			PlutoSqlResult result_person;
 			if( (result_person.r=m_pDBHelper_Myth->db_wrapper_query_result( sSQL ) ) )
 			{
-				while( (row=db_wrapper_fetch_row( result_person.r )) )
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG,"CheckForNewRecordings: Personell results fetched - lets add them in!");
+				while( row=db_wrapper_fetch_row( result_person.r ) )
 				{
 					string sRole = row[0];
-					if( sRole=="director" )
+					LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Adding Petsonell attribute -- (%s)%s", sRole,row[1]);
+					if( sRole=="director" ) {
 						m_pMedia_Plugin->CMD_Add_Media_Attribute(row[1],0,"",ATTRIBUTETYPE_Director_CONST,"",pRow_File->PK_File_get(),&PK_Attribute_Misc);
-					else if( sRole=="actor" )
+					} else if( sRole=="actor" ) {
 						m_pMedia_Plugin->CMD_Add_Media_Attribute(row[1],0,"",ATTRIBUTETYPE_Performer_CONST,"",pRow_File->PK_File_get(),&PK_Attribute_Misc);
-					else if( sRole=="producer" )
+					} else if( sRole=="producer" ) {
 						m_pMedia_Plugin->CMD_Add_Media_Attribute(row[1],0,"",ATTRIBUTETYPE_Producer_CONST,"",pRow_File->PK_File_get(),&PK_Attribute_Misc);
-					else if( sRole=="executive_producer" )
+					} else if( sRole=="executive_producer" ) {
 						m_pMedia_Plugin->CMD_Add_Media_Attribute(row[1],0,"",ATTRIBUTETYPE_Executive_Producer_CONST,"",pRow_File->PK_File_get(),&PK_Attribute_Misc);
-					else if( sRole=="writer" )
+					} else if( sRole=="writer" ) {
 						m_pMedia_Plugin->CMD_Add_Media_Attribute(row[1],0,"",ATTRIBUTETYPE_ComposerWriter_CONST,"",pRow_File->PK_File_get(),&PK_Attribute_Misc);
-
+					}
 				}
+			} else {
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG,"CheckForNewRecordings: No personell results!");
 			}
-
-		}
-		else
+			*/
+		} else {
 			LoggerWrapper::GetInstance()->Write(LV_WARNING,"MythTV_PlugIn::CheckForNewRecordings couldn't locate file %s", pRow_File->Filename_get().c_str());
+		}
 	}
 	
 	m_pMedia_Plugin->m_pDatabase_pluto_media->File_get()->Commit();
@@ -1757,6 +1793,7 @@ void MythTV_PlugIn::CheckForNewRecordings()
 	m_pAlarmManager->AddRelativeAlarm(3600,this,CHECK_FOR_NEW_RECORDINGS,NULL);  /* check again in an hour */
 
 	m_dwPK_File_LastCheckedForNewRecordings = PK_File_Max;
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG, "MythTV_PlugIn::CheckForNewRecordings run complete.");
 }
 
 void MythTV_PlugIn::AlarmCallback(int id, void* param)
@@ -2304,6 +2341,8 @@ void MythTV_PlugIn::CMD_Abort_Task(int iParameter_ID,string &sCMD_Result,Message
 
 bool MythTV_PlugIn::SetPaths()
 {
+	//Note: This SetPaths() function is no longer called from MythTV_PlugIn::Register()
+	//This functionality is now included in PlutoStorageDevices.
 	bool bChanged = false;
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::SetPaths");
 

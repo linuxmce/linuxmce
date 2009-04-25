@@ -4651,7 +4651,7 @@ void Media_Plugin::CMD_Set_Media_Private(string sPK_EntertainArea,bool bTrueFals
 	EntertainArea *pEntertainArea = m_mapEntertainAreas_Find( atoi(sPK_EntertainArea.c_str()) );
 	if( !pEntertainArea )
 	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Tried to set private flag on non-existant ea");
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Tried to set private flag on non-existant ea (%s)%i",sPK_EntertainArea,bTrueFalse);
 		return;
 	}
 	pEntertainArea->m_bMediaIsPrivate=!bTrueFalse;
@@ -4721,17 +4721,23 @@ void Media_Plugin::CMD_Add_Media_Attribute(string sValue_To_Assign,int iStreamID
 	Row_Attribute *pRow_Attribute = m_pMediaAttributes->m_pMediaAttributes_LowLevel->GetAttributeFromDescription(pRow_File->EK_MediaType_get(),iEK_AttributeType,sValue_To_Assign);
 	if( pRow_Attribute )
 	{
+		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "CMD_Add_Media_Attribute: pRow_Attribute found!");
 		*iEK_Attribute=pRow_Attribute->PK_Attribute_get();
 		Row_File_Attribute *pRow_File_Attribute = m_pDatabase_pluto_media->File_Attribute_get()->GetRow(iEK_File,pRow_Attribute->PK_Attribute_get(),atoi(sTracks.c_str()),atoi(sSection.c_str()));
 		if( !pRow_File_Attribute )
 		{
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "CMD_Add_Media_Attribute: Add and commit changes!");
 			pRow_File_Attribute = m_pDatabase_pluto_media->File_Attribute_get()->AddRow();
 			pRow_File_Attribute->FK_File_set(iEK_File);
 			pRow_File_Attribute->FK_Attribute_set(pRow_Attribute->PK_Attribute_get());
 			pRow_File_Attribute->Track_set(atoi(sTracks.c_str()));
 			pRow_File_Attribute->Section_set(atoi(sSection.c_str()));
 			m_pDatabase_pluto_media->File_Attribute_get()->Commit();
+		} else {
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "CMD_Add_Media_Attribute: COULD NOT Add and commit changes!");
 		}
+	} else {
+		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "CMD_Add_Media_Attribute: pRow_Attribute NOT found!");
 	}
 }
 

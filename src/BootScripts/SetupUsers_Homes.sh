@@ -185,7 +185,12 @@ if [[ "$MakeUsers" == yes ]]; then
 		PlutoUserID=$(Field 1 "$Users")
 		UserName=$(Field 2 "$Users" | tr 'A-Z' 'a-z' | tr -dc "a-z0-9-")
 		adduser pluto_$UserName public &>/dev/null
-		
+		## If MythTV is installed, lets add the MythTV User and add the mythtv user to the user_* groups
+		userMythTV=$(grep mythtv -i /etc/passwd)
+		if [ ${userMythTV%%:*} ]; then
+			usermod -a -G pluto_$UserName mythtv
+		fi
+
 		if [[ ! -f "/home/user_$PlutoUserID/bookmarks.html" ]]; then
 			echo "User $PlutoUserID doesn't have bookmarks yet"
 			cp /home/public/bookmarks.html "/home/user_$PlutoUserID/bookmarks.html"
