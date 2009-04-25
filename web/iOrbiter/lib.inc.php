@@ -390,7 +390,7 @@
 		$query .= "LIMIT 0,100";
 		
 		
-		listMyArray($mediaLink,$query,"Details",2,array($pk_sortedby,"Play All","play-all"),"findmore.php?currentUser=$currentUser&currentRoom=$currentRoom&mediaType=$pk_media&");
+		listMyArray($mediaLink,$query,"Details",2,array($pk_sortedby,"Play All","play-all.php"),"findmore.php?currentUser=$currentUser&currentRoom=$currentRoom&mediaType=$pk_media&");
 	}
 
 	function buildFileListFromAttribute($mediaLink, $pk_attribute) {
@@ -402,7 +402,7 @@
 		$query .= "WHERE EK_Users_Private IS NULL And IsDirectory = 0 And Missing = 0 And FK_Attribute = $pk_attribute ";
 		$query .= "ORDER By Filename ";
 		$query .= "LIMIT 0,200";
-		listMyArray($mediaLink,$query,"File",3);
+		listMyArray($mediaLink,$query,"File",3,array($pk_attribute,"Play All","play-all.php"));
 	}
 
 	function buildFileListFromSubtype($mediaLink, $pk_mediatype) {
