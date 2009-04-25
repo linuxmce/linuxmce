@@ -484,6 +484,8 @@
 			$commandGroupCommand = $commandDetail[0];
 			$parameters = getMyArray($link,"SELECT FK_CommandParameter, IK_CommandParameter FROM CommandGroup_Command_CommandParameter C Where FK_CommandGroup_Command = $commandGroupCommand");
 			$messageToSend = "$deviceToID $messageType $messageID";
+
+			// This loop is needed for commands with special needs, like the file listing for media playback.
 			foreach($parameters as $parameter) {
 				
 				$parameterType = $parameter[0];
@@ -502,8 +504,6 @@
 					if ($parameterType == 29) {
 						DoParameter29($mediaLink, $parameterValue, $commandGroup);
 					}
-				} elseif ($messageID == 44) {
-					// Nothing special - it will be taken care of with message send later on.					
 				} else {
 					print "<li>messageID: $messageID</li>\n";
 				}
@@ -512,8 +512,12 @@
 
 			}
 			
-			// Now we will 
-			$sendMessageArray = array(1 => 44, 193, 184);
+			//  41 = TV
+			// 43 = Execute Playlist
+			// 44 = House to sleep
+			// 193 = Light Off
+			// 184 = Light On
+			$sendMessageArray = array(1 => 41, 43, 44, 193, 184);
 			$found = array_search($messageID, $sendMessageArray);
 			if ( ! $found) {
 				// Handled elsewhere.
