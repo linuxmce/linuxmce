@@ -511,7 +511,9 @@
 	//			print "<p>Parameter: $parameterType - $parameterDescription - $parameterValue</p>\n";
 
 			}
-			$sendMessageArray = array(1 => 44, 193);
+			
+			// Now we will 
+			$sendMessageArray = array(1 => 44, 193, 184);
 			$found = array_search($messageID, $sendMessageArray);
 			if ( ! $found) {
 				// Handled elsewhere.
