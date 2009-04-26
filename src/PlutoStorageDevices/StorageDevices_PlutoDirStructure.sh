@@ -178,7 +178,7 @@ for i in `seq 1 $countDirs` ;do
 	chown root:public /home/public/data/$mediaDir
 	chmod 2775 /home/public/data/$mediaDir
 
-done
+donehttp://wiki.linuxmce.org/index.php/Building_LinuxMCE_0810
 
 
 ## And now add the user directories
@@ -187,12 +187,6 @@ for Device in $Devices; do
 	Device_Description=$(Field 2 "$Device")
 
 	Device_MountPoint="/mnt/device/$Device_ID"
-
-	Device_IsMounted=$(cd /mnt/device/$Device_ID && mount | grep "\/mnt\/device\/$Device_ID ")
-	if [[ "$Device_IsMounted" == "" ]]; then
-		echo "WARNING: Device $Device_ID is not mounted, skiping ..."
-		continue
-	fi
 
 	##For every directory
 	for i in `seq 1 $countDirs` ;do
@@ -211,7 +205,7 @@ for Device in $Devices; do
 			RunSQL "$Q"
 		fi
 		#public storage group
-		AddMythTVStorageGroup "home/public/data/$mediaDir/$Device_Description [$Device_ID]" "public/$Device_Description [$Device_ID]"
+		AddMythTVStorageGroup "/home/public/data/$mediaDir/$Device_Description [$Device_ID]" "public/$Device_Description [$Device_ID]"
 
 		## For every user
 		for User in $Users; do
@@ -223,7 +217,7 @@ for Device in $Devices; do
 			mkdir -p $Device_MountPoint/user_$User_ID/data/$mediaDir
 			chown $User_UnixUname:$User_UnixUname $Device_MountPoint/user_$User_ID/data/$mediaDir
 			chmod 2770 $Device_MountPoint/user_$User_ID/data/$mediaDir
-			AddMythTVStorageGroup "home/user_$User_ID/data/$mediaDir/$Device_Description [$Device_ID]" "user_$User_ID/$Device_Description [$Device_ID]"	
+			AddMythTVStorageGroup "/home/user_$User_ID/data/$mediaDir/$Device_Description [$Device_ID]" "user_$User_ID/$Device_Description [$Device_ID]"	
 		done
 	done
 done
