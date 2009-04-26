@@ -178,7 +178,7 @@ for i in `seq 1 $countDirs` ;do
 	chown root:public /home/public/data/$mediaDir
 	chmod 2775 /home/public/data/$mediaDir
 
-donehttp://wiki.linuxmce.org/index.php/Building_LinuxMCE_0810
+done
 
 
 ## And now add the user directories
