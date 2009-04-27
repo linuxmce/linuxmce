@@ -110,9 +110,12 @@ mount none -t proc  $TEMP_DIR/proc
 
 ## Setup apt in pluto style
 ## FIXME: maybe we need to make sources.list from scratch ?
-cp /etc/apt/sources.list $TEMP_DIR/etc/apt
-cp {,"$TEMP_DIR"}/etc/apt/apt.conf.d/30pluto
+cp {,"$TEMP_DIR"}/etc/apt/sources.list
+[[ -f /etc/apt/apt.conf.d/30pluto ]] && cp {,"$TEMP_DIR"}/etc/apt/apt.conf.d/30pluto
 cp {,"$TEMP_DIR"}/etc/apt/preferences
+[[ -f /etc/apt/apt.conf ]] && cp {,"$TEMP_DIR"}/etc/apt/apt.conf
+
+
 
 ## Update the chrooted system (needed when created from archive)
 #chroot $TEMP_DIR /bin/bash
@@ -255,5 +258,21 @@ echo "$PlutoVersion" > "$ARH_DIR/$DisklessFS.version"
 popd >/dev/null
 
 rm -rf $TEMP_DIR
+
+# Let's create the default files needed for successful PXE boot.
+/usr/pluto/bin/Diskless_BuildDefaultImage.sh
+
+# HACK'O'MATIC And make sure, we have files for both architectures.
+if [ -f /usr/pluto/install/PlutoMD-i386.tar.bz2 ]; then
+	FILENEEDED=PlutoMD-amd64
+else
+	FILENEEDED=PlutoMD-i386
+fi
+if [ ! -f /usr/pluto/install/$FILENEEDED.tar.bz2 ]; then
+	ln -sf /usr/pluto/install/$DisklessFS /usr/pluto/install/$FILENEEDED.tar.bz2
+fi	
+if [ ! -f /usr/pluto/install/$FILENEEDED.tar.bz2.version ]; then
+	ln -sf /usr/pluto/install/$DisklessFS.version /usr/pluto/install/$FILENEEDED.tar.bz2.version
+fi	
 
 trap - EXIT

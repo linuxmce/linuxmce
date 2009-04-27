@@ -60,6 +60,7 @@ function unpack_filesystem {
 function is_image_upgradable {
 	## Test to see if the image is upgradable
 	cp /etc/resolv.conf ${Moon_RootLocation}/etc/resolv.conf
+	[[ -f /etc/apt/apt.conf ]] &&  cp /etc/apt/apt.conf ${Moon_RootLocation}/etc/apt/apt.conf
 	cp /etc/apt/sources.list ${Moon_RootLocation}/etc/apt/sources.list
 
 	chroot $Moon_RootLocation apt-get update 2>/dev/null 1>/dev/null
