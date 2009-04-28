@@ -426,7 +426,7 @@
 	function buildAttributeList($mediaLink, $pk_file, $withUL = True) {
 		// Get all attributes belonging to a specific media file.
 		global $currentUser, $currentRoom;
-		$query = "SELECT PK_Attribute, Attribute.Name, AttributeType.Description FROM Attribute ";
+		$query = "SELECT Distinct PK_Attribute, Attribute.Name, AttributeType.Description FROM Attribute ";
 		$query .= "JOIN File_Attribute ON FK_Attribute = PK_Attribute ";
 		$query .= "JOIN AttributeType ON PK_AttributeType = FK_AttributeType ";
 		$query .= "WHERE File_Attribute.FK_File = $pk_file And Name <> \"*\" ";
