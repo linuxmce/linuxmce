@@ -14,8 +14,18 @@
 	error_reporting(E_ALL);
 	connectDB();
 	global $currentUser, $currentScreen, $currentRoom, $currentEntertainArea, $link, $mediaLink;
-	if (isset($_COOKIE["currentUser"])) {	$currentUser = $_COOKIE["currentUser"]; }
-	if (isset($_COOKIE["currentRoom"])) {	$currentRoom = $_COOKIE["currentRoom"]; }
+	
+	
+	if (isset($_COOKIE["currentUser"])) {	
+		$currentUser = $_COOKIE["currentUser"]; 
+	} else {
+		$currentUser = getMyValue($link,"SELECT PK_Users FROM Users ORDER BY PK_Users Limit 1;");	
+	}
+	if (isset($_COOKIE["currentRoom"])) {	
+		$currentRoom = $_COOKIE["currentRoom"]; 
+	} else {
+		$currentRoom = getMyValue($link,"SELECT PK_Room FROM Room ORDER BY PK_ROOM Limit 1;");		
+	}
 	$currentScreen = 1;
 	$media = True;
 	
