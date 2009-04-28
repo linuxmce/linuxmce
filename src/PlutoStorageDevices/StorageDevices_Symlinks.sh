@@ -33,7 +33,11 @@ for userdir in /home/user_* /home/public ;do
 	find ${userdir}/data -xdev -mindepth 1 -maxdepth 2 -lname "*/mnt/device/*"
 	find ${userdir}/data -xdev -mindepth 1 -maxdepth 2 -lname "*/mnt/device/*" -print0 | xargs -0 rm -f
 done
-
+## This will remove old symlinks from the tv_shows_* directories if they exist
+for userdir in /home/user_* /home/public ;do
+	find ${userdir}/data/videos -xdev -mindepth 1 -maxdepth 2 -lname "*/mnt/device/*"
+	find ${userdir}/data/videos -xdev -mindepth 1 -maxdepth 2 -lname "*/mnt/device/*" -print0 | xargs -0 rm -f
+done
 ## Lookup our internal storage devices in the db
 Q="SELECT PK_Device, Description  FROM Device WHERE FK_DeviceTemplate IN ($TPL_GENERIC_INTERNAL_DRIVE, $TPL_GENERIC_SAMBA_SHARE, $TPL_GENERIC_NFS_SHARE, $TPL_RAID_0, $TPL_RAID_1, $TPL_RAID_5)"
 InternalOwnStorageDevices=$(RunSQL "$Q")

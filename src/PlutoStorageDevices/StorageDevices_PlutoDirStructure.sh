@@ -181,12 +181,18 @@ for i in `seq 1 $countDirs` ;do
 done
 
 
-## And now add the user directories
+## And now add the directories to each extra storage device.
 for Device in $Devices; do
 	Device_ID=$(Field 1 "$Device")
 	Device_Description=$(Field 2 "$Device")
 
 	Device_MountPoint="/mnt/device/$Device_ID"
+
+	Device_IsMounted=$(cd /mnt/device/$Device_ID && mount | grep "\/mnt\/device\/$Device_ID ") 
+        if [[ "$Device_IsMounted" == "" ]]; then 
+                echo "WARNING: Device $Device_ID is not mounted, skiping ..." 
+                continue 
+        fi 
 
 	##For every directory
 	for i in `seq 1 $countDirs` ;do
