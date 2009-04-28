@@ -188,8 +188,8 @@ bool MythTV_PlugIn::Register()
 		}
 	}
 
-	/*
-	Note: SetPaths() is now obsolete and handled in PlutoStorageDevices
+
+	
 	bool bPathsChanged = SetPaths();
 	if( bPathsChanged )
         { // Paths were changed so we need to restart the backend[s].
@@ -200,7 +200,6 @@ bool MythTV_PlugIn::Register()
 			"", "", false, false, false, false);
 		SendCommand(CMD_Spawn_Application);
         }
-	*/
 
 	// Don't actually build the bookmark/channel list because Sync_Cards_Providers will fill in m_mapDevicesToSources,
 	// but it's not run until about 20 seconds after everything starts so if it needs to send a message to the orbiters
@@ -2341,8 +2340,7 @@ void MythTV_PlugIn::CMD_Abort_Task(int iParameter_ID,string &sCMD_Result,Message
 
 bool MythTV_PlugIn::SetPaths()
 {
-	//Note: This SetPaths() function is no longer called from MythTV_PlugIn::Register()
-	//This functionality is now included in PlutoStorageDevices.
+	
 	bool bChanged = false;
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::SetPaths");
 
@@ -2381,6 +2379,11 @@ bool MythTV_PlugIn::SetPaths()
 
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::SetPaths row %s/%s device %d directory %s", row[1], row[0] ? row[0] : "x", PK_Device, sDirectory.c_str());
 
+			//TODO:
+			//This would be a good place to update the "Default" mythtv storage group to the device with the most space...
+
+			/*
+			Note:This section is no longer needed, as this is now handled in PlutoStorageDevices
 			const string CmdList[] =
 			{
 				"mkdir -p \"" + sDirectory + "\"",
@@ -2393,7 +2396,7 @@ bool MythTV_PlugIn::SetPaths()
 			{
 				LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::Register %s", CmdList[i].c_str());
 				system(CmdList[i].c_str());
-			}
+			}*/
 
 			bChanged |= UpdateMythSetting("LiveBufferDir",sDirectory,row[1]);
 			bChanged |= UpdateMythSetting("RecordFilePrefix",sDirectory,row[1]);
