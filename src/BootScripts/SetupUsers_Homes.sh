@@ -22,6 +22,11 @@ while [[ "$#" -gt 0 ]]; do
 	shift
 done
 
+#Create a way to determine if MythTV is installed...
+Q="SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=36"
+MythTV_Installed=$(RunSQL "$Q")
+
+echo "Backing up old permissions files..."
 if [ ! -e /etc/samba/smbpasswd.pbackup ] ;then
 	cp /etc/samba/smbpasswd /etc/samba/smbpasswd.pbackup
 fi
@@ -64,11 +69,25 @@ DefaultLinuxPassword=
 
 global_static_dirs="public temp_pvr mydvd cameras tv_listing"
 user_dirs="audio pictures documents videos games/MAME"
+## Add in the tv_shows_* directories, and get information such as IPAddress vs. Hostname if MythTV is installed
+if [ $MythTV_Installed ];then
+	Q="SELECT p.PK_Device,p.IPaddress, m.hostname FROM pluto_main.Device p 
+	LEFT JOIN pluto_main.DeviceTemplate p2 ON p2.PK_DeviceTemplate = p.FK_DeviceTemplate ##For every directory
+	RIGHT JOIN mythconverg.settings m ON m.data = p.IPaddress
+	WHERE (p2.FK_DeviceCategory=7 OR p2.FK_DeviceCategory=8) AND p.FK_Device_ControlledVia IS Null AND m.hostname IS NOT NULL"
+	UseDB "pluto_main"
+	deviceList=$(RunSQL "$Q")
+	for thisDevice in $deviceList; do
+		user_dirs=$user_dirs,videos/tv_shows_$(Field 1 "$thisDevice")
+	done
+fi
+## Done adding tv_shows_* directories
 user_static_dirs="data"
 
 UserList=
 SambaUserShares=
 
+echo "Setting up users..."
 for Users in $R; do
 	PlutoUserID=$(Field 1 "$Users")
 	UserName=$(Field 2 "$Users" | tr 'A-Z' 'a-z' | tr -dc "a-z0-9-")
@@ -142,16 +161,19 @@ if [[ "$MakeUsers" == yes ]] ;then
 	PopulateSection "/etc/samba/smb.conf" "User Shares" "$SambaUserShares"
 fi
 
+echo "Setting up Global Static Directories..."
 for dir in $global_static_dirs; do
 	mkdir -p -m 0755 "$BaseDir/${dir/~/ }"
 	chmod 0755 "$BaseDir/${Dir/~/ }"
 done
 
+echo "Setting up User Static Directories..."
 for dir in $user_static_dirs; do
 	mkdir -p -m 0755 "$BaseDir/public/${dir/~/ }"
 	chmod 0755 "$BaseDir/public/${dir/~/ }"
 done
 
+echo "Setting up User Directories..."
 for dir in $user_dirs; do
 	mkdir -p -m 0755 "$BaseDir/public/data/${dir/~/ }"
 	chmod 0755 "$BaseDir/public/data/${dir/~/ }"
