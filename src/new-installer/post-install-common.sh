@@ -266,9 +266,9 @@ EOF
 
 function addAdditionalTTYStart
 {
-	echo "start on rc5">>/etc/event.d/tty2
-	echo "start on rc5">>/etc/event.d/tty3
-	echo "start on rc5">>/etc/event.d/tty4
+	echo "start on runlevel 5">>/etc/event.d/tty2
+	echo "start on runlevel 5">>/etc/event.d/tty3
+	echo "start on runlevel 5">>/etc/event.d/tty4
 	
 }
 
