@@ -190,6 +190,7 @@ function Setup_XOrg {
 	done
 
 	Dir="/etc/skel/.kde/Autostart"
+	mkdir -p "$Dir"
 	echo "$KDExhost" >"$Dir/xhost"
 	chmod +x "$Dir/xhost"
 	
