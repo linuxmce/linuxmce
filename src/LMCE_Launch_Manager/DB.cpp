@@ -42,12 +42,13 @@ DBResult DB::query(string sQuery)
 }
 string DB::quickQuery(string sQuery) 
 {
-	string sResult;
+	string sResult="";
 	DBResult result;
 	result=query(sQuery);
-	result.next();
-	sResult = result.value(0);
-	//delete result;//TODO: How to clean this up? delete only works on pointers....
+	if result.next() {
+		sResult = result.value(0);
+	}
+
 	return sResult;	
 }
 DBResult::DBResult()
