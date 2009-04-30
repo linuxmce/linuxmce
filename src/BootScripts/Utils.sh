@@ -377,7 +377,7 @@ GetVideoDriver()
 	VideoDriver=$(lshwd | grep ' VGA ' | head -1 | sed 's/^.*(\([^()]*\)).*$/\1/')
 	case "$VideoDriver" in
 		nv) 
-			if PackageIsInstalled nvidia-glx || PackageIsInstalled nvidia-glx-new ;then
+			if PackageIsInstalled nvidia-glx || PackageIsInstalled nvidia-glx-new || PackageIsInstalled nvidia-glx-180 ;then
 			       	VideoDriver="nvidia" 
 			fi
 		;;
