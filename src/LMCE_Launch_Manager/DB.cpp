@@ -45,7 +45,7 @@ string DB::quickQuery(string sQuery)
 	string sResult="";
 	DBResult result;
 	result=query(sQuery);
-	if result.next() {
+	if ( result.next() ) {
 		sResult = result.value(0);
 	}
 
