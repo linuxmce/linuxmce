@@ -110,7 +110,11 @@ else
 fi
 
 echo /usr/pluto/bin/ConfirmDependencies $ConfDep_Distro -n $PLUTO_DB_CRED -D "$MySqlDBName" -d $PK_Device $Orbiter_Alert install
+# Give feedback on the main console.
+echo ConfirmDependencies INSTALL is running >>/dev/tty1
+
 /usr/pluto/bin/ConfirmDependencies $ConfDep_Distro -n $PLUTO_DB_CRED -D "$MySqlDBName" -d $PK_Device $Orbiter_Alert install >"$CUsh.$$"
+
 linecount=$(cat "$CUsh.$$" | wc -l)
 awk "NR<$linecount-4" "$CUsh.$$" >"$CUsh"
 rm "$CUsh.$$"
