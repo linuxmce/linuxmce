@@ -143,7 +143,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					for (int i=5;i<5+MAGIC_LEN;i++) {
 						for (int j=0;j<8;j++) {
 							// printf("test node %d\n",(i-5)*8+j+1);
-							if (frame[i] && (0x01 << j)) {
+							if (frame[i] & (0x01 << j)) {
 								// DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"found node %d",(i-5)*8+j+1);
 								// requesting node protocol information
 								// tempbuf[0]=0x60; // req. node info frame - test
