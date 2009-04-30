@@ -11,7 +11,7 @@ fi
 
 FILLDB=/usr/bin/mythfilldatabase
 FILLDB_LOG=/var/log/mythtv/mythfilldatabase.log
-FILLDBINITRUN=/home/MythTV/MythTvInitialFillDBRun
+FILLDBINITRUN=/home/mythtv/MythTvInitialFillDBRun
 
 # If the user installed a their own mythfilldatabase, adjust..
 if test -f /usr/local/bin/mythfilldatabase ; then

@@ -9,10 +9,25 @@ MythTV_Installed=$(RunSQL "$Q")
 
 function ClearMythTVStorageGroups
 {
+	#Allow users to have custom storage groups. Lets store them now so we can restore them after clearing the storagegroups table
 	UseDB "mythconverg"
+	Q="SELECT groupname,hostname,dirname FROM storagegroup WHERE groupname LIKE 'custom:%'"
+	customSG=$(RunSQL "$Q")
+
+	#Clear the table.. This also resets th auto-increment number
 	echo "Cleaning out MythTV Storage Groups..."
 	Q="TRUNCATE TABLE storagegroup"
 	RunSQL "$Q"
+
+	#restore custom storage groups.
+	for SG in $customSG; do
+		groupName=$(Field 1 "$SG")
+		hostName=$(Field 2 "$SG")
+		dirName=$(Field 3 "$SG")
+
+		Q="INSERT INTO storagegroup (groupname,hostname,dirname) VALUES ('$groupName','$hostName','$dirName')"
+		RunSQL "$Q"
+	done
 }
 
 function AddMythTVStorageGroup
@@ -138,15 +153,6 @@ else
 	Devices=$(RunSQL "$Q")
 fi
 
-## Lets get the device with the most storage space so we can set up the default mythtv storage groups
-Q="SELECT FK_Device
-FROM Device_DeviceData
-WHERE IK_DeviceData=
-(SELECT MAX(IK_DeviceData) FROM Device_DeviceData WHERE FK_DeviceData=160)"
-UseDB "pluto_main"
-freespace=$(RunSQL "$Q")
-hasMostFreespace=$(Field 1 "$freespace")
-
 ## Before we start, lets clean out mythconverg.storagegroups
 ClearMythTVStorageGroups
 
@@ -156,7 +162,7 @@ for i in `seq 1 $countDirs` ;do
 	mediaDir=$(echo $Directories | cut -d',' -f$i)
 
 	
-	AddMythTVStorageGroup "/home/public/data/$mediaDir" "Default"      #Put the special "Default" storage group in. It will be removed and overwritten below if there is a device with more freespace
+	AddMythTVStorageGroup "/home/public/data/$mediaDir" "Default"      #Put the special "Default" storage group in. 
 	AddMythTVStorageGroup "/home/public/data/$mediaDir" "LiveTV"       #Put the special "LiveTV" storage group into the moons root tv_shows_* directory	
 	AddMythTVStorageGroup "/home/public/data/$mediaDir" "public"	
 
@@ -170,7 +176,7 @@ for i in `seq 1 $countDirs` ;do
 		mkdir -p /home/user_$User_ID/data/$mediaDir
 		chown $User_UnixUname:$User_UnixUname /home/user_$User_ID/data/$mediaDir
 		chmod 2770 /home/user_$User_ID/data/$mediaDir
-		AddMythTVStorageGroup "/home/user_$User_ID/data/$mediaDir" "user_$User_ID"
+		AddMythTVStorageGroup "/home/user_$User_ID/data/$mediaDir" "$User_Uname"
 		
 	done
 
@@ -202,16 +208,9 @@ for Device in $Devices; do
 		mkdir -p $Device_MountPoint/public/data/$mediaDir
 		chown root:public $Device_MountPoint/public/data/$mediaDir
 		chmod 2775 $Device_MountPoint/public/data/$mediaDir
-		#Update the default if needed
-		if [ $Device_ID == $hasMostFreespace ]; then
-
-			#This device has the most freespace, lets update the Default storage group for it	
-			Q="UPDATE storagegroup SET dirname='/home/user_${User_ID}/data/${mediaDir}/${Device_Description} [${Device_ID}]' WHERE groupname = 'Default' AND dirname='/home/public/data/$mediaDir'"
-			UseDB "mythconverg"
-			RunSQL "$Q"
-		fi
+		
 		#public storage group
-		AddMythTVStorageGroup "/home/public/data/$mediaDir/$Device_Description [$Device_ID]" "public/$Device_Description [$Device_ID]"
+		AddMythTVStorageGroup "/home/public/data/$mediaDir/$Device_Description [$Device_ID]" "public:$Device_Description [$Device_ID]"
 
 		## For every user
 		for User in $Users; do
@@ -223,7 +222,7 @@ for Device in $Devices; do
 			mkdir -p $Device_MountPoint/user_$User_ID/data/$mediaDir
 			chown $User_UnixUname:$User_UnixUname $Device_MountPoint/user_$User_ID/data/$mediaDir
 			chmod 2770 $Device_MountPoint/user_$User_ID/data/$mediaDir
-			AddMythTVStorageGroup "/home/user_$User_ID/data/$mediaDir/$Device_Description [$Device_ID]" "user_$User_ID/$Device_Description [$Device_ID]"	
+			AddMythTVStorageGroup "/home/user_$User_ID/data/$mediaDir/$Device_Description [$Device_ID]" "$User_Uname:$Device_Description [$Device_ID]"	
 		done
 	done
 done
