@@ -200,7 +200,7 @@ for device in $DEVICE_LIST; do
 		pkg_name=$(Field 1 "$Row")
 	done
 
-	echo "#### Installing $pkg_name"
+	echo "#### Installing $pkg_name for device $device"
 	LC_ALL=C chroot $TEMP_DIR apt-get -y install $pkg_name
 	if [[ "$?" == "0" ]] ;then
 		echo "#### Package $pkg_name installed ok!"
