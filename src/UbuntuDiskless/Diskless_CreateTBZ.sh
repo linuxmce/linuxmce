@@ -112,16 +112,16 @@ mount none -t proc  $TEMP_DIR/proc
 ## FIXME: maybe we need to make sources.list from scratch ?
 cp {,"$TEMP_DIR"}/etc/apt/sources.list
 [[ -f /etc/apt/apt.conf.d/30pluto ]] && cp {,"$TEMP_DIR"}/etc/apt/apt.conf.d/30pluto
-cp {,"$TEMP_DIR"}/etc/apt/preferences
+[[ -f /etc/apt/preferences ]] && cp {,"$TEMP_DIR"}/etc/apt/preferences
 [[ -f /etc/apt/apt.conf ]] && cp {,"$TEMP_DIR"}/etc/apt/apt.conf
 
 
 
 ## Update the chrooted system (needed when created from archive)
 #chroot $TEMP_DIR /bin/bash
-chroot $TEMP_DIR apt-get -y update
-chroot $TEMP_DIR apt-get -f -y install
-chroot $TEMP_DIR apt-get -f -y dist-upgrade
+chroot $TEMP_DIR LC_ALL=C apt-get -y update
+chroot $TEMP_DIR LC_ALL=C apt-get -f -y install
+chroot $TEMP_DIR LC_ALL=C apt-get -f -y dist-upgrade
 
 ## Preeseed the diskless root with our debconf values so the user
 ## won't need to interact with the installer
