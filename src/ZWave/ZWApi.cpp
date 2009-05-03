@@ -180,7 +180,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					newNode->associationList[2]="";
 					newNode->associationList[3]="";
 
-					if (((unsigned char)frame[2]) && (0x01 << 7)) {
+					if (((unsigned char)frame[2]) & (0x01 << 7)) {
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"listening node");
 						newNode->sleepingDevice = false;
 						// request version from the device
@@ -190,7 +190,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"sleeping node");
 						newNode->sleepingDevice = true;
 					}
-					if (((unsigned char)frame[3]) && (0x01 << 7)) {
+					if (((unsigned char)frame[3]) & (0x01 << 7)) {
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"optional functionality");
 					}
 					switch (frame[5]) {
@@ -525,7 +525,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							wakeupHandler((unsigned char) frame[3]);	
 
 							// handle broadcasts from unconfigured devices
-							if (frame[2] && RECEIVE_STATUS_TYPE_BROAD ) { 
+							if (frame[2] & RECEIVE_STATUS_TYPE_BROAD ) { 
 								DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got broadcast wakeup from node %i, doing WAKE_UP_INTERVAL_SET",frame[3]);
 								if (ournodeid != -1) { 
 									// we assume an ACT PIR for now, no other known devices show that behavior
