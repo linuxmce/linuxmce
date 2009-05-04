@@ -119,9 +119,9 @@ cp {,"$TEMP_DIR"}/etc/apt/sources.list
 
 ## Update the chrooted system (needed when created from archive)
 #chroot $TEMP_DIR /bin/bash
-chroot $TEMP_DIR LC_ALL=C apt-get -y update
-chroot $TEMP_DIR LC_ALL=C apt-get -f -y install
-chroot $TEMP_DIR LC_ALL=C apt-get -f -y dist-upgrade
+LC_ALL=C chroot $TEMP_DIR apt-get -y update
+LC_ALL=C chroot $TEMP_DIR apt-get -f -y install
+LC_ALL=C chroot $TEMP_DIR apt-get -f -y dist-upgrade
 
 ## Preeseed the diskless root with our debconf values so the user
 ## won't need to interact with the installer
@@ -144,7 +144,7 @@ for setting in "${preseed[@]}"; do
 	echo "db_fset \"$variable\" seen true"		>> $TEMP_DIR/tmp/script.sh
 
 	chmod +x $TEMP_DIR/tmp/script.sh
-	chroot $TEMP_DIR /tmp/script.sh
+	LC_ALL=C chroot $TEMP_DIR /tmp/script.sh
 done
 
 # generate locales
@@ -180,7 +180,7 @@ echo > "$TEMP_DIR"/sbin/discover
 
 ## Begin installing the packages needed for the pluto devices
 echo "do_initrd = Yes" > $TEMP_DIR/etc/kernel-img.conf
-chroot "$TEMP_DIR" invoke-rc.d exim4 force-stop
+LC_ALL=C chroot "$TEMP_DIR" invoke-rc.d exim4 force-stop
 
 for device in $DEVICE_LIST; do
 	Q="SELECT
@@ -229,12 +229,12 @@ if [[ -d /usr/share/doc/libdvdcss2 ]] ;then
 	popd
 fi
 
-chroot $TEMP_DIR apt-get -y install kubuntu-desktop
+LC_ALL=C chroot $TEMP_DIR apt-get -y install kubuntu-desktop
 mv "$TEMP_DIR"/etc/init.d/kdm{,.save}
 mv "$TEMP_DIR"/etc/rc2.d/*kdm "$TEMP_DIR"/etc/rc2.d/S99kdm
 
-chroot $TEMP_DIR apt-get -y install xserver-xorg-video-all
-chroot $TEMP_DIR apt-get -y install linux-firmware
+LC_ALL=C chroot $TEMP_DIR apt-get -y install xserver-xorg-video-all
+LC_ALL=C chroot $TEMP_DIR apt-get -y install linux-firmware
 
 umount $TEMP_DIR/var/cache/apt
 umount $TEMP_DIR/usr/pluto/deb-cache
@@ -249,7 +249,7 @@ rm -f "$TEMP_DIR"/etc/X11/xorg.conf || :
 
 #invoke-rc.d nfs-common restart
 
-chroot "$TEMP_DIR" apt-get clean
+LC_ALL=C chroot "$TEMP_DIR" apt-get clean
 COLUMNS=1024 chroot "$TEMP_DIR" dpkg -l | awk '/^ii/ {print $2}' >/tmp/pkglist-diskless.txt # used for deb-cache cleanup in the builder
 
 mkdir -p "$ARH_DIR"
