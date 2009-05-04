@@ -65,6 +65,9 @@ Setup_XOrg
 
 /usr/pluto/bin/Network_Setup.sh
 
+# NOTE: Fix for initramfs-tools
+patch -Np0 -i mkinitramfs_dot-fix1.patch -r /dev/null >/dev/null 2>&1 || echo "The initramfs-tools dot-problem was already fixed."
+
 StatsMessage "Building a disk image for your Diskless Media Directors"
 /usr/pluto/bin/Diskless_CreateTBZ.sh
 
