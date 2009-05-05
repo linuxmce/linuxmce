@@ -194,6 +194,7 @@ if [ "$MySqlHost" ] ; then PLUTO_DB_CRED="$PLUTO_DB_CRED -h $MySqlHost"; fi
 if [ "$MySqlPort" ] ; then PLUTO_DB_CRED="$PLUTO_DB_CRED -P $MySqlPort"; fi
 if [ "$MySqlUser" ] ; then PLUTO_DB_CRED="$PLUTO_DB_CRED -u $MySqlUser"; fi
 if [ "$MySqlPassword" ] ; then PLUTO_DB_CRED="$PLUTO_DB_CRED -p $MySqlPassword"; fi
+PLUTO_DB_CRED=`echo $PLUTO_DB_CRED` 
 export PLUTO_DB_CRED
 
 MYSQL_DB_CRED=""
