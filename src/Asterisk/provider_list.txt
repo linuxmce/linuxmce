@@ -11,4 +11,4 @@ Xs4all	http://www.xs4all.nl/	xs4all	SIP
 Viatalk (US Central)	http://www.viatalk.com/	viatalk_us-central	SIP
 1und1	http://www.1und1.de/	1und1	SIP
 sipgate (DE)	http://www.sipgate.de	sipgate_de	SIP
-
+voipwa (AU)	http://www.voipwa.net.au	voipwa	IAX
