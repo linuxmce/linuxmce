@@ -418,7 +418,7 @@ function Create_And_Config_Devices {
 
 	## Create a hybrid if needed
 	if [[ "$c_deviceType" == "2" ]] ;then
-		StatsMessage "Setting up you computer to act as a 'Media Director'"
+		StatsMessage "Setting up your computer to act as a 'Media Director'"
 		/usr/pluto/bin/CreateDevice -d $DEVICE_TEMPLATE_MediaDirector -C "$Core_PK_Device"
 		Hybrid_DT=$(RunSQL "SELECT PK_Device FROM Device WHERE FK_DeviceTemplate='$DEVICE_TEMPLATE_MediaDirector' LIMIT 1")
 
@@ -450,7 +450,9 @@ function Create_And_Config_Devices {
 
 	StatsMessage "Configuring the LinuxMCE devices"
         # "DCERouter postinstall"
-        devices=$(echo "SELECT PK_Device FROM Device;" | /usr/bin/mysql pluto_main | tail +2 | tr '\n' ' ')
+        # TODO: I really wonder, what the original author wants to do here, as it never worked before
+        #       It now worked (thanks to tail -2 instead of tail +2), and returns the last two device IDs.
+        devices=$(echo "SELECT PK_Device FROM Device;" | /usr/bin/mysql pluto_main | tail -2 | tr '\n' ' ')
 
 	for i in $devices; do
 		echo "Running device $i"
