@@ -7,6 +7,7 @@
 . /usr/pluto/bin/Utils.sh
 
 trap 'Unlock "SOG" "Start_Orbiter_Gen"' EXIT
+echo Orbiter Generation Start >>/dev/tty1
 Lock "SOG" "Start_Orbiter_Gen"
 
 UseAlternativeLibs
@@ -51,4 +52,4 @@ AND FK_Installation=$installation"
 		/usr/pluto/bin/OrbiterGen -d "$OrbiterDev" "$ToSplash" -g "$SkinDir" -f "$FontDir" -o "$OutDir" $PLUTO_DB_CRED -D "$MySqlDBName" > >(tee -a /var/log/pluto/orbitergen.log) 2> >(grep -vF "WARNING: You are using the SDL dummy video driver!" >&2) || Logging "$TYPE" "$SEVERITY_CRITICAL" "$0" "Failed to generate Orbiter nr. $OrbiterDev"
 	done
 fi
-
+echo Orbiter Generation Done >> /dev/tty1

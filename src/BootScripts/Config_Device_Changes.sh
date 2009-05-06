@@ -114,12 +114,15 @@ echo /usr/pluto/bin/ConfirmDependencies $ConfDep_Distro -n $PLUTO_DB_CRED -D "$M
 echo ConfirmDependencies INSTALL is running >>/dev/tty1
 
 /usr/pluto/bin/ConfirmDependencies $ConfDep_Distro -n $PLUTO_DB_CRED -D "$MySqlDBName" -d $PK_Device $Orbiter_Alert install >"$CUsh.$$"
+echo ConfirmDependencies INSTALL done >>/dev/tty1
 
 linecount=$(cat "$CUsh.$$" | wc -l)
 awk "NR<$linecount-4" "$CUsh.$$" >"$CUsh"
 rm "$CUsh.$$"
 
 chmod +x "$CUsh"
+echo InstallNewDevice is running >>/dev/tty1
+
 WaitLock "InstallNewDevice" "Config_Device_Changes" # don't step on InstallNewDevices scripts that may be running in the background
 date -R
 if bash -x "$CUsh"; then
@@ -127,6 +130,8 @@ if bash -x "$CUsh"; then
 fi
 Unlock "InstallNewDevice" "Config_Device_Changes"
 #rm "$CUsh"
+
+echo ConfirmDependencies buildall is running >>/dev/tty1
 
 echo /usr/pluto/bin/ConfirmDependencies $ConfDep_Distro -n $PLUTO_DB_CRED -D "$MySqlDBName" -d $PK_Device $Orbiter_Alert buildall
 mkdir -p /usr/pluto/sources
@@ -139,7 +144,9 @@ rm -f "/usr/pluto/install/compile.sh" # old version mistake precaution
 ln -sf "/usr/pluto/sources/buildall.sh" "/usr/pluto/install/compile.sh"
 chmod +x "/usr/pluto/sources/buildall.sh"
 
+
 if [[ "$StartLocalDevice" == "y" ]]; then
+	echo Starting local devices >>/dev/tty1
         echo "$(date -R) Starting local devices $DCERouter $PK_Device"
         /usr/pluto/bin/MessageSend "$DCERouter" 0 "$PK_Device" 7 12
 fi
