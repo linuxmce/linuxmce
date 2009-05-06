@@ -21,7 +21,7 @@ TryInstall()
 
 	error=1
 	retries=0
-	while [[ $retries < 10 && $error != 0 ]]; do
+	while [[ $retries < 9 && $error != 0 ]]; do
 		apt-get -y install "$Package"
 		error=$?
 		if [[ $error != 0 ]]; then
@@ -31,7 +31,7 @@ TryInstall()
 		((retries++))
 	done
 
-	if [[ $retries == 10 ]]; then
+	if [[ $retries == 9 ]]; then
 		echo "All retries failed"
 	else
 		echo "Package installed successfully"
