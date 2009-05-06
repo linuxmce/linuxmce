@@ -117,6 +117,12 @@ EOF
 function createStartcoreScript
 {
 
+#	cat >/usr/pluto/bin/startCore.sh <<"EOF"
+#	#!/bin/sh
+#	exit 0
+#EOF
+#	chmod +x /usr/pluto/bin/startCore.sh
+	
 	cat >/usr/pluto/bin/startCore.sh <<"EOF"
 #!/bin/sh
 
