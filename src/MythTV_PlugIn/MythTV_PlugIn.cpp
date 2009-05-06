@@ -192,15 +192,16 @@ bool MythTV_PlugIn::Register()
 	/*
 	bool bPathsChanged = SetPaths();
 	if( bPathsChanged )
-        { // Paths were changed so we need to restart the backend[s].
-		DeviceData_Base *pDevice_App_Server = (DeviceData_Router *)
-			m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_App_Server_CONST);
-		DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
-			SCRIPT_RESTART_ALL_BACKENDS, "restart_all_backends_in_register", "",
-			"", "", false, false, false, false);
-		SendCommand(CMD_Spawn_Application);
-        }
-	*/
+        { // Paths were changed so we need to restart the backend[s].*/
+	
+	DeviceData_Base *pDevice_App_Server = (DeviceData_Router *)
+	m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_App_Server_CONST);
+	DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
+	SCRIPT_RESTART_ALL_BACKENDS, "restart_all_backends_in_register", "",
+	"", "", false, false, false, false);
+	SendCommand(CMD_Spawn_Application);
+        //}
+	
 	// Don't actually build the bookmark/channel list because Sync_Cards_Providers will fill in m_mapDevicesToSources,
 	// but it's not run until about 20 seconds after everything starts so if it needs to send a message to the orbiters
 	// or use AppServer, those devices will be available
@@ -1462,14 +1463,18 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 		(int) bModifiedRows,(int) m_bFillDbRunning,(int) m_bNeedToRunFillDb, (int) bContainsVideoSources);
 	if( (bModifiedRows && bContainsVideoSources) )  // We've changed stuff.  Need to run the fill process
 	{
-		if( m_bFillDbRunning )
+		if( m_bFillDbRunning ) {
 			m_bNeedToRunFillDb = true;  // A fill is already running.  Need to re-run it when we're done
-		else
-		{
+		} else {
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::SyncCardsAndProviders -- setting m_bFillDbRunning=true and starting fill");
 			m_bFillDbRunning=true;
 			StartFillDatabase(bAddedProviders);
 		}
+	} else {
+		DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
+		SCRIPT_RESTART_ALL_BACKENDS, "restart_all_backends_in_sync", "",
+		"", "", false, false, false, false);
+		SendCommand(CMD_Spawn_Application);
 	}
 	/*else if( bPathsChanged )
         { // Paths were changed, so we don't need to call mythfilldatabase, but we do need to restart the backend[s].
