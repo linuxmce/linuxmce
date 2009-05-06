@@ -209,9 +209,11 @@ for Device in $Devices; do
 		chown root:public $Device_MountPoint/public/data/$mediaDir
 		chmod 2775 $Device_MountPoint/public/data/$mediaDir
 		
-		#public storage group
-		AddMythTVStorageGroup "/home/public/data/$mediaDir/$Device_Description [$Device_ID]" "public:$Device_Description [$Device_ID]"
-
+		#public storage groups
+		AddMythTVStorageGroup "/home/public/data/$mediaDir/$Device_Description [$Device_ID]" "Default"      #Put the special "Default" storage group in. 
+		AddMythTVStorageGroup "/home/public/data/$mediaDir/$Device_Description [$Device_ID]" "LiveTV"       #Put the special "LiveTV" storage group into the moons root tv_shows_* directory	
+		AddMythTVStorageGroup "/home/public/data/$mediaDir/$Device_Description [$Device_ID]" "public: $Device_Description [$Device_ID]"
+	
 		## For every user
 		for User in $Users; do
 			User_ID=$(Field 1 "$User")
@@ -222,7 +224,7 @@ for Device in $Devices; do
 			mkdir -p $Device_MountPoint/user_$User_ID/data/$mediaDir
 			chown $User_UnixUname:$User_UnixUname $Device_MountPoint/user_$User_ID/data/$mediaDir
 			chmod 2770 $Device_MountPoint/user_$User_ID/data/$mediaDir
-			AddMythTVStorageGroup "/home/user_$User_ID/data/$mediaDir/$Device_Description [$Device_ID]" "$User_Uname:$Device_Description [$Device_ID]"	
+			AddMythTVStorageGroup "/home/user_$User_ID/data/$mediaDir/$Device_Description [$Device_ID]" "$User_Uname: $Device_Description [$Device_ID]"	
 		done
 	done
 done
