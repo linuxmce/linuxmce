@@ -25,6 +25,6 @@ LM_BINARY=/usr/pluto/bin/LMCE_Launch_Manager
 LM_EXIT_CODE=-1
 
 while [[ "$LM_EXIT_CODE" != "0" ]] ;do
-	$LM_BINARY --nofork --nocrashhandler
+	/usr/bin/screen -d -m -S LMCE_Launch_Manager $LM_BINARY --nofork --nocrashhandler
 	LM_EXIT_CODE=$?
 done
