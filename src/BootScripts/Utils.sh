@@ -377,6 +377,7 @@ GetVideoDriver()
 	VideoDriver=$(lshwd | grep ' VGA ' | head -1 | sed 's/^.*(\([^()]*\)).*$/\1/')
 	# If we only detect a vesa based system, lets see if we can find out what else it might be
 	if [[ "$VideoDriver" = "vesa" ]]; then
+	{
 		DisplayNote=$(lshwd|grep "Display controller"| cut -f 2 -d \|)
 		# This should work beautifully for the ASUS eee Box
 		if [[ "$DisplayNote" = "Mobile Integrated Graphics Controller (vesa)" ]]; then
