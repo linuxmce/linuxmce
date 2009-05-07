@@ -383,6 +383,7 @@ GetVideoDriver()
 		{
 			VideoDriver="intel"
 		}
+		fi
 	}		
 	case "$VideoDriver" in
 		nv) 
