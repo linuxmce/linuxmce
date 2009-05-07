@@ -380,6 +380,7 @@ GetVideoDriver()
 		DisplayNote=$(lshwd|grep "Display controller"| cut -f 2 -d \|)
 		# This should work beautifully for the ASUS eee Box
 		if [[ "$DisplayNote" = "Mobile Integrated Graphics Controller (vesa)" ]]; then
+		{
 			VideoDriver="intel"
 		}
 	}		
