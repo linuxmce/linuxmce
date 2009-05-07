@@ -385,6 +385,7 @@ GetVideoDriver()
 		}
 		fi
 	}		
+	fi
 	case "$VideoDriver" in
 		nv) 
 			if PackageIsInstalled nvidia-glx || PackageIsInstalled nvidia-glx-new || PackageIsInstalled nvidia-glx-180 ;then
