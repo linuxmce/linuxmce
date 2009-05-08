@@ -585,7 +585,7 @@ function MangleStartupFiles {
 	if [[ "$c_startupType" == "1" ]] ;then
 		# Make sure non of the other display manager starts
 		[ -f /etc/init.d/gdm ] && mv /etc/init.d/gdm /etc/init.d/gdm.saved
-		[ -f /etc/init.d/kdm ]mv /etc/init.d/kdm /etc/init.d/kdm.saved
+		[ -f /etc/init.d/kdm ] && mv /etc/init.d/kdm /etc/init.d/kdm.saved
 		echo '#!/bin/bash
 	if [[ "$1" == start ]]; then
 		/usr/pluto/bin/Startup_Core-Hybrid.sh
