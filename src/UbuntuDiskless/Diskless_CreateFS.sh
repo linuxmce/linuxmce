@@ -46,7 +46,7 @@ function unpack_filesystem {
 			Value="${line#*=}"
 			mkdir -p "$Moon_RootLocation/$Name"
 			pushd "$Moon_RootLocation/$Name"
-				tar -xzf "/usr/pluto/install/$Value"
+				tar -xf "/usr/pluto/install/$Value"
 			popd
 		done
 	elif [[ ! -e ${Moon_RootLocation}/var/lib/dpkg/status ]] ;then
