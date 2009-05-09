@@ -31,7 +31,7 @@ mke2fs -m 0 /dev/ram0
 mkdir -p /mnt/recovery-rd
 mount /dev/ram0 /mnt/recovery-rd
 cd /mnt/recovery-rd
-tar -xjf /usr/pluto/install/ramdisk.tar.bz2
+tar -xf /usr/pluto/install/ramdisk.tar.bz2
 mount -t devfs devfs dev
 mount -t proc proc proc
 
