@@ -75,6 +75,8 @@ StatsMessage "Building a disk image for your Diskless Media Directors"
 
 MangleStartupFiles
 
+RemoveInstallerIcons
+
 ClearInstallationTable
 
 apt-get -y -f dist-upgrade
