@@ -201,13 +201,16 @@ for device in $DEVICE_LIST; do
 	done
 
 	echo "#### Installing $pkg_name for device $device"
-	LC_ALL=C chroot $TEMP_DIR apt-get -y install $pkg_name
-	if [[ "$?" == "0" ]] ;then
-		echo "#### Package $pkg_name installed ok!"
-	else
-		echo "#### Package $pkg_name failed ($TEMP_DIR)"
-		exit 1
-	fi
+	RETURNCODE=1
+	while [[ $RETURNCODE != 0 ]]; do
+		LC_ALL=C chroot $TEMP_DIR apt-get -y install $pkg_name
+		if [[ "$?" == "0" ]] ;then
+			echo "#### Package $pkg_name installed ok!"
+		else
+			echo "#### Package $pkg_name failed ($TEMP_DIR) - We wait 10sec and try again - to stop retrying press Ctrl-C. "
+			sleep 10s
+		fi
+	done
 done
 
 ## Packages that are marked as dependencies only in the database
