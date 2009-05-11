@@ -206,6 +206,7 @@ for device in $DEVICE_LIST; do
 		LC_ALL=C chroot $TEMP_DIR apt-get -y install $pkg_name
 		if [[ "$?" == "0" ]] ;then
 			echo "#### Package $pkg_name installed ok!"
+			RETURNCODE=0
 		else
 			echo "#### Package $pkg_name failed ($TEMP_DIR) - We wait 10sec and try again - to stop retrying press Ctrl-C. "
 			sleep 10s
