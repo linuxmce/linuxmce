@@ -68,7 +68,7 @@ then
 	# Needed for UPnP server mediatomb for live TV
 	echo "$STREAMDEVPLUGIN.StartHTTPServer = 1">>/var/lib/vdr/setup.conf
 	# Needed for live TV on MDs.
-	echo "$STREAMDEVPLUGIN.StartVTPServer = 1">>/var/lib/vdr/setup.conf
+	echo "$STREAMDEVPLUGIN.StartServer = 1">>/var/lib/vdr/setup.conf
 	echo "$STREAMDEVPLUGIN.SuspendMode = 1">>/var/lib/vdr/setup.conf
 else
 	# all other systems utilize the streamdev-server on the core via the streamdev-client
@@ -81,7 +81,7 @@ else
 	echo "$STREAMDEVPLUGIN.RemotePort = 2004">>/var/lib/vdr/setup.conf
 	echo "$STREAMDEVPLUGIN.StartClient = 1">>/var/lib/vdr/setup.conf
 	# StreamFilters sends additional information, like EPG
-	echo "$STREAMDEVPLUGIN.StreamFilter = 1">>/var/lib/vdr/setup.conf
+	echo "$STREAMDEVPLUGIN.StreamFilters = 1">>/var/lib/vdr/setup.conf
 	# Obsolete due to StreamFilters
 	echo "$STREAMDEVPLUGIN.SyncEPG = 0">>/var/lib/vdr/setup.conf
 fi		
