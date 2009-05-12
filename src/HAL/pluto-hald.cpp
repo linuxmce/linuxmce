@@ -26,6 +26,8 @@
 #include "DCE/DCEConfig.h"
 
 #include "PlutoUtils/StringUtils.h"
+#include "PlutoUtils/FileUtils.h"
+#include "PlutoUtils/ProcessUtils.h"
 
 #include "pluto_main/Define_DeviceTemplate.h"
 #include "pluto_main/Define_DeviceData.h"
@@ -147,9 +149,22 @@ void PlutoHalD::getSerialParent(const char * sysfs, std::string & parentSysfs)
 	if( iRet > 0 && iRet < (int)sizeof(buffer) )
 	{
 		buffer[iRet] = 0;
+
+#if 0
+		/* In 0710 we used the value stored in the symlink */
 		string parentPath = buffer;
+#else
+		/* In 0810 the sysfs path works as the symlink value did in 0710
+		 * Using the symlink here actually breaks things
+		 */
+		string parentPath = sysfs;
+#endif
+
 		size_t iFind1 = parentPath.find("pci");
 		size_t iFind2 = parentPath.rfind(":");
+
+		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "+++++++ getSerialParent %s: parent=%s, iFind1=%d, iFind2=%d", sysfs, parentPath.c_str(), iFind1, iFind2);
+
 		if( iFind1 != string::npos && iFind2 != string::npos && iFind1 < iFind2 )
 		{
 			parentSysfs = "/sys/devices/" + parentPath.substr(iFind1, iFind2 - iFind1);
@@ -158,6 +173,7 @@ void PlutoHalD::getSerialParent(const char * sysfs, std::string & parentSysfs)
 			{
 				parentSysfs = parentSysfs.substr(0, iFind3);
 			}
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "XXXXX getSerialPort: parentSysfs=%s", parentSysfs.c_str());
 		}
 		else
 		{
@@ -181,6 +197,13 @@ void PlutoHalD::myDeviceAdded(LibHalContext * ctx, const char * udi)
 	
 	gchar *bus = libhal_device_get_property_string (ctx, udi, "info.subsystem", NULL);
 	gchar *category = libhal_device_get_property_string (ctx, udi, "info.category", NULL);
+
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG, "XXXXX udi: %s", udi);
+	if (bus != NULL)
+		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "XXXXX bus: %s", bus);
+	if (category != NULL)
+		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "XXXXX category: %s", category);
+
 	if( bus != NULL &&
 		strcmp(bus, "usb_device") == 0 &&
 		strlen(bus) == strlen("usb_device") )
@@ -203,6 +226,7 @@ void PlutoHalD::myDeviceAdded(LibHalContext * ctx, const char * udi)
 	{
 		if( 0 == strcmp(category, "serial") && strlen(category) == strlen("serial") )
 		{
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "+++++++ Process serial device = %s", udi);
 			string parent;
 				
 			getParentId(ctx, udi, "info.subsystem", "usb_device", parent);
@@ -254,6 +278,10 @@ void PlutoHalD::myDeviceAdded(LibHalContext * ctx, const char * udi)
 					g_free (parentSysfsPath);
 					parentSysfsPath = NULL;
 				}
+				else
+				{
+					LoggerWrapper::GetInstance()->Write(LV_DEBUG, "+++++++ Sysfs parent null = %s", udi);
+				}
 					
 				if( !mainParent.empty() )
 				{
@@ -268,6 +296,10 @@ void PlutoHalD::myDeviceAdded(LibHalContext * ctx, const char * udi)
 						if( !serial_parent.empty() )
 							break;
 					}
+				}
+				else
+				{
+					LoggerWrapper::GetInstance()->Write(LV_DEBUG, "+++++++ Main parent null = %s", udi);
 				}
 					
 				if( !serial_parent.empty() )
@@ -659,6 +691,13 @@ void PlutoHalD::initialize(LibHalContext * ctx)
 		
 		bus = libhal_device_get_property_string (ctx, udi, "info.subsystem", NULL);
 		category = libhal_device_get_property_string (ctx, udi, "info.category", NULL);
+
+		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "XXXXX udi: %s", udi);
+		if (bus != NULL)
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "XXXXX bus: %s", bus);
+		if (category != NULL)
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "XXXXX category: %s", category);
+
 		if( bus != NULL && 0 == strcmp(bus, "usb_device") && strlen(bus) == strlen("usb_device") )
 		{
 			int usb_device_product_id = libhal_device_get_property_int(ctx, udi, "usb_device.product_id", NULL);
@@ -675,6 +714,8 @@ void PlutoHalD::initialize(LibHalContext * ctx)
 		}
 		else if( category != NULL )
 		{
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "+++++++ Process serial device = %s", udi);
+
 			if( 0 == strcmp(category, "serial") && strlen(category) == strlen("serial") )
 			{
 				string parent;
@@ -706,6 +747,7 @@ void PlutoHalD::initialize(LibHalContext * ctx)
 						
 //						LoggerWrapper::GetInstance()->Write(LV_DEBUG, "=======####### parentSysfsPath = %s", parentSysfsPath);
 						
+						LoggerWrapper::GetInstance()->Write(LV_DEBUG, "XXXXX parentSysfsPath=%s", parentSysfsPath);
 						if( parentSysfsPath != NULL &&
 							parentSysfsPath == parentSysfs )
 						{
@@ -728,6 +770,10 @@ void PlutoHalD::initialize(LibHalContext * ctx)
 						g_free (parentSysfsPath);
 						parentSysfsPath = NULL;
 					}
+					else
+					{
+						LoggerWrapper::GetInstance()->Write(LV_DEBUG, "+++++++ Sysfs parent null = %s", udi);
+					}
 					
 					if( !mainParent.empty() )
 					{
@@ -742,6 +788,10 @@ void PlutoHalD::initialize(LibHalContext * ctx)
 							if( !serial_parent.empty() )
 								break;
 						}
+					}
+					else
+					{
+						LoggerWrapper::GetInstance()->Write(LV_DEBUG, "+++++++ Main parent null = %s", udi);
 					}
 					
 					if( !serial_parent.empty() )
