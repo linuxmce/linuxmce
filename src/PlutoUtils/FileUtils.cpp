@@ -144,7 +144,12 @@ char *FileUtils::ReadURL(string sUrl, size_t &Size,bool bNullTerminate)
 
 	string sDownloadedFile = fileName;
 
-	string sCommand = "wget " + sUrl + " -O " + sDownloadedFile;
+	// For some reason, the file is 0 bytes just after the system() call is done, as if the file was not written yet
+	// To avoid this, we delete the temp file and wait for it to appear after download
+	// Remove file so we can wait for it to appear after the system call
+	FileUtils::DelFile(sDownloadedFile);
+
+	string sCommand = "wget -O " + sDownloadedFile + " " + sUrl;
 	int iRetCode = system(sCommand.c_str());
 	if (iRetCode)
 	{
@@ -152,7 +157,19 @@ char *FileUtils::ReadURL(string sUrl, size_t &Size,bool bNullTerminate)
 		return NULL;
 	}
 
-	char *pData = FileUtils::ReadFileIntoBuffer(sDownloadedFile, Size);
+        // wait for file
+	int retries = 10;
+	FILE *pFile = fopen( sDownloadedFile.c_str(), "rb" );
+	while (retries > 0 && pFile == NULL) {
+		sleep(1);
+		retries--;
+		pFile = fopen( sDownloadedFile.c_str(), "rb" );
+	}
+	fclose(pFile);
+
+	size_t filesize;
+	char *pData = FileUtils::ReadFileIntoBuffer(sDownloadedFile, filesize);
+	Size = filesize;
 	FileUtils::DelFile(sDownloadedFile);
 
 	return pData;
