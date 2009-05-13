@@ -16,6 +16,7 @@
  or FITNESS FOR A PARTICULAR PURPOSE. See the Pluto Public License for more details.
 
  */
+#define LMCE_VER 810 // TODO: put this in a global space
 
 #include "pluto-hald.h"
 #include "HAL.h"
@@ -140,50 +141,55 @@ void PlutoHalD::getChildId(LibHalContext * ctx, const char * udi,
 // ../../../devices/pci0000:00/0000:00:0b.0/usb1/1-2/1-2:1.0/ttyUSB2
 void PlutoHalD::getSerialParent(const char * sysfs, std::string & parentSysfs)
 {
-	string sysfsPath = sysfs;
-	sysfsPath += "/device";
-	char buffer[1024];
-	ssize_t iRet = readlink(sysfsPath.c_str(), buffer, sizeof(buffer));
 	parentSysfs = "";
-	
-	if( iRet > 0 && iRet < (int)sizeof(buffer) )
+	string parentPath;
+
+#if LMCE_VER == 710
+	/* In 0710 we used the value stored in the symlink */
 	{
-		buffer[iRet] = 0;
-
-#if 0
-		/* In 0710 we used the value stored in the symlink */
-		string parentPath = buffer;
-#else
-		/* In 0810 the sysfs path works as the symlink value did in 0710
-		 * Using the symlink here actually breaks things
-		 */
-		string parentPath = sysfs;
-#endif
-
-		size_t iFind1 = parentPath.find("pci");
-		size_t iFind2 = parentPath.rfind(":");
-
-		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "+++++++ getSerialParent %s: parent=%s, iFind1=%d, iFind2=%d", sysfs, parentPath.c_str(), iFind1, iFind2);
-
-		if( iFind1 != string::npos && iFind2 != string::npos && iFind1 < iFind2 )
+		string sysfsPath = sysfs;
+		sysfsPath += "/device";
+		char buffer[1024];
+		ssize_t iRet = readlink(sysfsPath.c_str(), buffer, sizeof(buffer));
+		
+		if( iRet > 0 && iRet < (int)sizeof(buffer) )
 		{
-			parentSysfs = "/sys/devices/" + parentPath.substr(iFind1, iFind2 - iFind1);
-			size_t iFind3 = parentSysfs.rfind("/");
-			if( iFind3 != string::npos )
-			{
-				parentSysfs = parentSysfs.substr(0, iFind3);
-			}
-			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "XXXXX getSerialPort: parentSysfs=%s", parentSysfs.c_str());
+			buffer[iRet] = 0;
+
+			parentPath = buffer;
 		}
 		else
 		{
-			LoggerWrapper::GetInstance()->Write
-				(LV_DEBUG, "+++++++ getSerialParent error = %s\nPath = %s", sysfs, buffer);
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "+++++++ Readlink error = %s", sysfs);
+			return;
 		}
+	}
+#elif LMCE_VER == 810
+	/* In 0810 the sysfs path works as the symlink value did in 0710
+	 * Using the symlink here actually breaks things, and some devices don't even have this symlink
+	 * The sysfs path itself is what we used to get in 0710 from the symlink
+	 */
+	parentPath = sysfs;
+#endif
+	size_t iFind1 = parentPath.find("pci");
+	size_t iFind2 = parentPath.rfind(":");
+
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG, "+++++++ getSerialParent %s: parent=%s, iFind1=%d, iFind2=%d", sysfs, parentPath.c_str(), iFind1, iFind2);
+
+	if( iFind1 != string::npos && iFind2 != string::npos && iFind1 < iFind2 )
+	{
+		parentSysfs = "/sys/devices/" + parentPath.substr(iFind1, iFind2 - iFind1);
+		size_t iFind3 = parentSysfs.rfind("/");
+		if( iFind3 != string::npos )
+		{
+			parentSysfs = parentSysfs.substr(0, iFind3);
+		}
+		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "XXXXX getSerialPort: parentSysfs=%s", parentSysfs.c_str());
 	}
 	else
 	{
-		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "+++++++ Readlink error = %s", sysfs);
+		LoggerWrapper::GetInstance()->Write
+			(LV_DEBUG, "+++++++ getSerialParent error = %s\nPath = %s", sysfs, parentPath.c_str());
 	}
 }
 
@@ -203,7 +209,7 @@ void PlutoHalD::myDeviceAdded(LibHalContext * ctx, const char * udi)
 		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "XXXXX bus: %s", bus);
 	if (category != NULL)
 		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "XXXXX category: %s", category);
-
+	
 	if( bus != NULL &&
 		strcmp(bus, "usb_device") == 0 &&
 		strlen(bus) == strlen("usb_device") )
@@ -600,6 +606,41 @@ void PlutoHalD::myDeviceAdded(LibHalContext * ctx, const char * udi)
 				(unsigned int) ((subsys_device_vendor_id & 0xffff) << 16) | (subsys_device_product_id & 0xffff));
 			
 			halDevice->EVENT_Device_Detected("", "", "", 0, buffer, PCI_COMM_METHOD, 0, udi, deviceData.c_str(), "", halDevice->m_sSignature_get());
+			
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Finished firing event for %s",buffer);
+	}
+	else if (bus != NULL &&
+			strcmp(bus, "usb") == 0 &&
+			strlen(bus) == strlen("usb"))
+	{
+			int device_product_id = 0;
+			int device_vendor_id = 0;
+			int subsys_device_product_id = 0;
+			int subsys_device_vendor_id = 0;
+			int iBusType = UNKNOWN_COMM_METHOD;
+			string sysfsPath;
+			getProductVendorId(
+				ctx, udi,
+				&device_product_id, &device_vendor_id,
+				&subsys_device_product_id, &subsys_device_vendor_id,
+				&iBusType , sysfsPath );
+
+			string deviceData;
+			string parentSysfs;
+
+			getSerialParent(sysfsPath.c_str(), parentSysfs);
+			StringUtils::Replace(&parentSysfs, "/sys/devices/", "");
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "=== USB %s %s", sysfsPath.c_str(), parentSysfs.c_str());
+			deviceData += StringUtils::itos( DEVICEDATA_Location_on_PCI_bus_CONST );
+			deviceData += "|";
+			deviceData += parentSysfs;
+
+			char buffer[64];
+			snprintf(buffer, sizeof(buffer), "%08x%08x",
+				(unsigned int) ((device_vendor_id & 0xffff) << 16) | (device_product_id & 0xffff),
+				(unsigned int) ((subsys_device_vendor_id & 0xffff) << 16) | (subsys_device_product_id & 0xffff));
+			
+			halDevice->EVENT_Device_Detected("", "", "", 0, buffer, USB_COMM_METHOD, 0, udi, deviceData.c_str(), "", halDevice->m_sSignature_get());
 			
 			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Finished firing event for %s",buffer);
 	}
@@ -1095,6 +1136,41 @@ void PlutoHalD::initialize(LibHalContext * ctx)
 				halDevice->EVENT_Device_Detected("", "", "", 0, buffer, PCI_COMM_METHOD, 0, udi, deviceData.c_str(), "", halDevice->m_sSignature_get());
 	
 				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Finished firing event for %s",buffer);
+		}
+		else if (bus != NULL &&
+				strcmp(bus, "usb") == 0 &&
+				strlen(bus) == strlen("usb"))
+		{
+			int device_product_id = 0;
+			int device_vendor_id = 0;
+			int subsys_device_product_id = 0;
+			int subsys_device_vendor_id = 0;
+			int iBusType = UNKNOWN_COMM_METHOD;
+			string sysfsPath;
+			getProductVendorId(
+				ctx, udi,
+				&device_product_id, &device_vendor_id,
+				&subsys_device_product_id, &subsys_device_vendor_id,
+				&iBusType , sysfsPath );
+
+			string deviceData;
+			string parentSysfs;
+
+			getSerialParent(sysfsPath.c_str(), parentSysfs);
+			StringUtils::Replace(&parentSysfs, "/sys/devices/", "");
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "=== USB %s %s", sysfsPath.c_str(), parentSysfs.c_str());
+			deviceData += StringUtils::itos( DEVICEDATA_Location_on_PCI_bus_CONST );
+			deviceData += "|";
+			deviceData += parentSysfs;
+
+			char buffer[64];
+			snprintf(buffer, sizeof(buffer), "%08x%08x",
+				(unsigned int) ((device_vendor_id & 0xffff) << 16) | (device_product_id & 0xffff),
+				(unsigned int) ((subsys_device_vendor_id & 0xffff) << 16) | (subsys_device_product_id & 0xffff));
+			
+			halDevice->EVENT_Device_Detected("", "", "", 0, buffer, USB_COMM_METHOD, 0, udi, deviceData.c_str(), "", halDevice->m_sSignature_get());
+			
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Finished firing event for %s",buffer);
 		}
 		else
 		{
