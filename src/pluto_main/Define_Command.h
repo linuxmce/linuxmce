@@ -881,6 +881,7 @@
 #define COMMAND_sRGB_CONST 972
 #define COMMAND_Video_Mute_On_CONST 973
 #define COMMAND_Video_Mute_Off_CONST 974
+#define COMMAND_XPromptReload_CONST 975
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"
