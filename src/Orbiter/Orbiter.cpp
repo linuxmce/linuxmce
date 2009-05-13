@@ -10257,3 +10257,28 @@ void Orbiter::CMD_Spawn_Application(string sFilename,string sName,string sArgume
 
 void Orbiter::CMD_XPromptReload(string sText,string &sCMD_Result,Message *pMessage)
 //<-dceag-c975-e->
+{
+	map<int,string> mapPrompts;
+	enum PromptsResp {prYes, prNo};
+	mapPrompts[prYes]    = "Yes - Reload now";
+	mapPrompts[prNo]     = "No - I'll do it later";
+	int iResponse = m_pOrbiterRenderer->PromptUser(sText, 0, &mapPrompts);
+	if( iResponse==prYes )
+	{
+		string sResponse;
+		Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName);
+		event_Impl.m_pClientSocket->SendString( "RELOAD" );
+		if( !event_Impl.m_pClientSocket->ReceiveString( sResponse ) || sResponse!="OK" )
+		{
+			CannotReloadRouter();
+			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Reload request denied: %s",sResponse.c_str());
+		}
+		Sleep(10000);
+		return 2; // Retry
+	}
+	else
+	{
+		OnReload();
+		exit(1);
+	}
+}
