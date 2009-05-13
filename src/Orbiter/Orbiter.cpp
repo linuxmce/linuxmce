@@ -10274,11 +10274,6 @@ void Orbiter::CMD_XPromptReload(string sText,string &sCMD_Result,Message *pMessa
 			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Reload request denied: %s",sResponse.c_str());
 		}
 		Sleep(10000);
-		return 2; // Retry
 	}
-	else
-	{
-		OnReload();
-		exit(1);
-	}
+
 }
