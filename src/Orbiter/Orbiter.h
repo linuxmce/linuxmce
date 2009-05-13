@@ -1010,6 +1010,9 @@ namespace DCE
 	string DATA_Get_Alert_Filter_Level();
 	bool DATA_Get_Ignore_First_Event();
 	void DATA_Set_Ignore_First_Event(bool Value,bool bUpdateDatabase=false);
+	bool DATA_Get_Automatically_Go_to_Remote();
+	bool DATA_Get_Queue_Instead_of_Instant_Play();
+	void DATA_Set_Queue_Instead_of_Instant_Play(bool Value,bool bUpdateDatabase=false);
 
 			*****EVENT***** accessors inherited from base class
 	void EVENT_Touch_or_click(int iX_Position,int iY_Position);
@@ -1983,6 +1986,14 @@ light, climate, media, security, telecom */
 	virtual void CMD_Assisted_Make_Call(int iPK_Users,string sPhoneExtension,string sPK_Device_From,int iPK_Device_To) { string sCMD_Result; CMD_Assisted_Make_Call(iPK_Users,sPhoneExtension.c_str(),sPK_Device_From.c_str(),iPK_Device_To,sCMD_Result,NULL);};
 	virtual void CMD_Assisted_Make_Call(int iPK_Users,string sPhoneExtension,string sPK_Device_From,int iPK_Device_To,string &sCMD_Result,Message *pMessage);
 
+
+	/** @brief COMMAND: #975 - XPromptReload */
+	/** This command displays a message using custom drawn X primitives and asks the user if they want to reload the router. */
+		/** @param #9 Text */
+			/** Text to display on the screen */
+
+	virtual void CMD_XPromptReload(string sText) { string sCMD_Result; CMD_XPromptReload(sText.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_XPromptReload(string sText,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
 

@@ -10248,3 +10248,12 @@ void Orbiter::CMD_Spawn_Application(string sFilename,string sName,string sArgume
 		::CreateProcess(NULL, const_cast<char *>(sCompleteCmdLine.c_str()), NULL, NULL, NULL, 0, NULL, NULL, &si, &pi);
 #endif 
 }
+//<-dceag-c975-b->
+
+	/** @brief COMMAND: #975 - XPromptReload */
+	/** This command displays a message using custom drawn X primitives and asks the user if they want to reload the router. */
+		/** @param #9 Text */
+			/** Text to display on the screen */
+
+void Orbiter::CMD_XPromptReload(string sText,string &sCMD_Result,Message *pMessage)
+//<-dceag-c975-e->
