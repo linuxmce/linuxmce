@@ -61,10 +61,11 @@ DBResult::~DBResult()
 }
 bool DBResult::next()
 {
-	if (m_mysqlRow = mysql_fetch_row(m_pResult))
+	if (m_mysqlRow = mysql_fetch_row(m_pResult)) {
 		return true;
-	else
+	} else {
 		return false;
+	}
 
 }
 string DBResult::value(int i)

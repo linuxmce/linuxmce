@@ -1060,8 +1060,11 @@ bool LM::initialize_LMdevice(bool bRetryForever/*=false*/)
 			writeLog("Please go to an existing Orbiter and choose 'quick reload router'. ", true, LV_WARNING);
 			writeLog("This media director will start after you do...", true, LV_WARNING);
 
-			
-			sleep(10);
+			//Display a message on the screen that a reload is necessary.
+			string sReloadMessage = "This Media Director is now ready to go, but first you must reload the router.";
+			DCE::CMD_XPromptReload cmd( atoi(m_sDeviceID.c_str()),  atoi(m_sOrbiterID.c_str()), sReloadMessage );
+			m_pLMCE_Launch_Manager->SendCommandNoResponse(cmd);
+			sleep(30);
 
 			writeLog("initialize_LMdevice: router should be reloaded, retrying connect", false, LV_WARNING);
 			delete m_pLMCE_Launch_Manager;
