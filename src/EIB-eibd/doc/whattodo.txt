@@ -1,0 +1,6 @@
+ok, what is to be done now:
+
+there should be some ways to autfill Telegrams from values.
+there are 15 standardised datataypes that can be used. on, off are standardised dtp. but that may need another class..
+
+then, it would be easier to create the Telegramm: translate Message to value, operate on value, fill Telegram with value and required datapoint. then you just need to tell the "knxDevice" to fill datagram groupaddress with the good one..
