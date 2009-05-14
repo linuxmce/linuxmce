@@ -529,6 +529,15 @@ public:
 	string GetMRLFromDiscID( int PK_Disc,int PK_Device_Drive );
 	void TransformFilenameToDeque(string sFilename,deque<MediaFile *> &dequeMediaFile);
 
+	/**
+	 * @brief Check a file and add its individual items to the deque if it is a playlist
+	 * sFileName - check this file if it is a playlist
+	 * MediaType - the mediatype to set for each added MediaFile, as we dont load and detect each and every one
+	 * dequeMediaFile - The deque to add the playlist items to
+	 * @returns true if the playlist was succesfully expanded into its components, false if not
+	 */
+	bool ExpandPlaylist(string sFilename, int MediaType, deque<MediaFile* > &dequeMediaFile);
+
 	/*
 	*	Since this class is so big, all the datagrid function have been moved to Media_Plugin_Grids.cpp
 	*/

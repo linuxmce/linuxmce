@@ -32,6 +32,7 @@ using namespace DCE;
 #include <algorithm>
 
 #include "PlutoUtils/DatabaseUtils.h"
+#include "PlaylistParser.h"
 #include "MediaHandlerInfo.h"
 #include "MediaHandlerBase.h"
 #include "Generic_NonPluto_Media.h"
@@ -5319,8 +5320,9 @@ void Media_Plugin::AddFileToDatabase(MediaFile *pMediaFile,int PK_MediaType)
 {
 	if( StringUtils::StartsWith(pMediaFile->m_sFilename,"/dev/",true) || 
 		StringUtils::StartsWith(pMediaFile->m_sFilename,"cdda:/",true) ||
+		StringUtils::StartsWith(pMediaFile->m_sFilename,"http://",true) ||
 		pMediaFile->m_sFilename.empty() )
-			return;  // Don't add it if it's just a drive
+			return;  // Don't add it if it's just a drive or a http link
 
 	LoggerWrapper::GetInstance()->Write( LV_STATUS, "Media_Plugin::AddFileToDatabase %s",pMediaFile->m_sFilename.c_str());
 
@@ -7081,8 +7083,46 @@ void Media_Plugin::TransformFilenameToDeque(string sFilename,deque<MediaFile *> 
 				LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::TransformFilenameToDeque unable to get cd info from %d",PK_Device_Disk_Drive);
 		}
 	}
+	else if( sFilename[1] == 'E' || sFilename[1] == 'o')  // external media
+	{
+	        vector<string> parts;
+		StringUtils::Tokenize(sFilename,",",parts);
+		string url = parts[2];
+		string sPK_MediaSource = parts[1];
+		int MediaType = 4;
+		if (parts[1] == "shoutcast_audio") {
+		        MediaType = 4;
+		}
+		ExpandPlaylist(url, MediaType, dequeFilenames);
+	    
+	}
 	else
 		dequeFilenames.push_back(new MediaFile(m_pMediaAttributes->m_pMediaAttributes_LowLevel,sFilename));  // Just a normal file
+}
+
+bool Media_Plugin::ExpandPlaylist(string sFilename, int MediaType, deque<MediaFile *> &dequeFilenames) {
+	// Detect playlists
+	if (StringUtils::EndsWith(sFilename, ".pls"))
+	{
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::ExpandPlaylist fileName indicates playlist");
+		// Parse playlist
+		PlaylistParser playlistParser(sFilename.c_str());
+		if (playlistParser.isPlaylist()) {
+			deque<PlaylistItem> playlistItems = playlistParser.getItems();
+			for(deque<PlaylistItem>::iterator it=playlistItems.begin();it!=playlistItems.end();++it)
+			{
+				PlaylistItem item = *it;
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Media_Plugin::ExpandPlaylist adding playlist item %s, title %s", item.url.c_str(), item.title.c_str());
+			
+				MediaFile *pMediaFile = new MediaFile(item.url);
+				pMediaFile->m_dwPK_MediaType = MediaType;
+				pMediaFile->m_sTitle = item.title;
+				dequeFilenames.push_back(pMediaFile);
+			}
+			return true;
+		}
+	}
+	return false;
 }
 
 void Media_Plugin::UpdateSearchTokens()
