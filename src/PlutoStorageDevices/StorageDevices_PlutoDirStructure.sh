@@ -6,16 +6,22 @@
 #Create a way to determine if MythTV is installed...
 Q="SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=36"
 MythTV_Installed=$(RunSQL "$Q")
-
+# TODO:
+# Looks like its time to clean this up by making a new include for MythTV related stuff (MythTV_Ops.sh)
 function ClearMythTVStorageGroups
 {
+	#Exit if mythtv is not installed
+	if [ -z $MythTV_Installed ];then
+        	return 0
+	fi
+
+	echo "Cleaning out MythTV Storage Groups..."
 	#Allow users to have custom storage groups. Lets store them now so we can restore them after clearing the storagegroups table
 	UseDB "mythconverg"
 	Q="SELECT groupname,hostname,dirname FROM storagegroup WHERE groupname LIKE 'custom:%'"
 	customSG=$(RunSQL "$Q")
 
 	#Clear the table.. This also resets th auto-increment number
-	echo "Cleaning out MythTV Storage Groups..."
 	Q="TRUNCATE TABLE storagegroup"
 	RunSQL "$Q"
 
@@ -29,7 +35,33 @@ function ClearMythTVStorageGroups
 		RunSQL "$Q"
 	done
 }
+function CleanMythTVSettings
+{
+	# The mythconverg.settings table may contain entries for hosts that no longer exist... This can happen if a user deletes a MD device.
+	# This function will remove entries from the settings table where the host no longer exists...
 
+	#Exit if mythtv is not installed
+	if [ -z $MythTV_Installed ];then
+        	return 0
+	fi
+
+	echo "Performing cleanup of mythtv.settings table..."
+
+	Q="SELECT p.PK_Device FROM pluto_main.Device p 
+	LEFT JOIN pluto_main.DeviceTemplate p2 ON p2.PK_DeviceTemplate = p.FK_DeviceTemplate ##For every directory
+
+	WHERE (p2.FK_DeviceCategory=7 OR p2.FK_DeviceCategory=8) AND p.FK_Device_ControlledVia IS Null AND PK_Device!=1"
+	UseDB "pluto_main"
+	moons=$(RunSQL "$Q")
+	hostNames="'localhost','dcerouter'"
+	for moon in $moons; do
+		hostNames="$hostNames,'moon$(Field 1 "$moon")'"
+	done
+
+	Q="DELETE FROM settings WHERE hostname NOT IN($hostNames)"
+	UseDB "mythconverg"
+	RunSQL "$Q"
+}
 function AddMythTVStorageGroup
 {
 	## Parameters 
@@ -53,25 +85,27 @@ function AddMythTVStorageGroup
 		return 0
 	fi
 
-	
-	echo "Adding storage group $name"
 	#echo "$contains_tv_shows_"
 	#echo "$path"
 	#echo "$name"
 	Q="SELECT p.PK_Device,p.IPaddress,m.hostname FROM pluto_main.Device p 
 	LEFT JOIN pluto_main.DeviceTemplate p2 ON p2.PK_DeviceTemplate = p.FK_DeviceTemplate 
 	LEFT JOIN mythconverg.settings m ON m.data = p.IPaddress
-	WHERE p.PK_Device="$pk_dev" AND m.hostname IS NOT NULL"
+	WHERE p.PK_Device=$pk_dev AND m.hostname IS NOT NULL AND m.hostname like '%$pk_dev' LIMIT 1"
 	UseDB "pluto_main"
 	res=$(RunSQL "$Q")
-	# echo "$res"
+	hostname=$(Field 3 "$res")
 
-	
-	Q="INSERT INTO mythconverg.storagegroup (groupname,hostname,dirname) VALUES ('$name','$(Field 3 "$res")','$path')"
+	if [ "$hostname" == "" ] ; then
+		hostname="dcerouter"
+	fi
+	echo "Adding MythTV storage group $name for host $hostname"
+	Q="INSERT INTO mythconverg.storagegroup (groupname,hostname,dirname) VALUES ('$name','$hostname','$path')"
 	#echo "$Q"
 	UseDB "mythconverg"
 	RunSQL "$Q"
 }
+CleanMythTVSettings
 
 TPL_STORAGE_DEVICES="1790, 1794, 1768, 1769, 1854, 1851, 1849"
 DD_USERS=3
@@ -156,11 +190,11 @@ fi
 ## Before we start, lets clean out mythconverg.storagegroups
 ClearMythTVStorageGroups
 
+
 ##lets handle the /home/public paths....
 ##For every directory
 for i in `seq 1 $countDirs` ;do
 	mediaDir=$(echo $Directories | cut -d',' -f$i)
-
 	
 	AddMythTVStorageGroup "/home/public/data/$mediaDir" "Default"      #Put the special "Default" storage group in. 
 	AddMythTVStorageGroup "/home/public/data/$mediaDir" "LiveTV"       #Put the special "LiveTV" storage group into the moons root tv_shows_* directory	
@@ -213,7 +247,8 @@ for Device in $Devices; do
 		AddMythTVStorageGroup "/home/public/data/$mediaDir/$Device_Description [$Device_ID]" "Default"      #Put the special "Default" storage group in. 
 		AddMythTVStorageGroup "/home/public/data/$mediaDir/$Device_Description [$Device_ID]" "LiveTV"       #Put the special "LiveTV" storage group into the moons root tv_shows_* directory	
 		AddMythTVStorageGroup "/home/public/data/$mediaDir/$Device_Description [$Device_ID]" "public: $Device_Description [$Device_ID]"
-	
+
+
 		## For every user
 		for User in $Users; do
 			User_ID=$(Field 1 "$User")
