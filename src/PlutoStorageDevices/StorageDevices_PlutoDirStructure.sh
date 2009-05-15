@@ -48,8 +48,7 @@ function CleanMythTVSettings
 	echo "Performing cleanup of mythtv.settings table..."
 
 	Q="SELECT p.PK_Device FROM pluto_main.Device p 
-	LEFT JOIN pluto_main.DeviceTemplate p2 ON p2.PK_DeviceTemplate = p.FK_DeviceTemplate ##For every directory
-
+	LEFT JOIN pluto_main.DeviceTemplate p2 ON p2.PK_DeviceTemplate = p.FK_DeviceTemplate
 	WHERE (p2.FK_DeviceCategory=7 OR p2.FK_DeviceCategory=8) AND p.FK_Device_ControlledVia IS Null AND PK_Device!=1"
 	UseDB "pluto_main"
 	moons=$(RunSQL "$Q")
@@ -91,14 +90,11 @@ function AddMythTVStorageGroup
 	Q="SELECT p.PK_Device,p.IPaddress,m.hostname FROM pluto_main.Device p 
 	LEFT JOIN pluto_main.DeviceTemplate p2 ON p2.PK_DeviceTemplate = p.FK_DeviceTemplate 
 	LEFT JOIN mythconverg.settings m ON m.data = p.IPaddress
-	WHERE p.PK_Device=$pk_dev AND m.hostname IS NOT NULL AND m.hostname like '%$pk_dev' LIMIT 1"
+	WHERE p.PK_Device=$pk_dev AND m.hostname IS NOT NULL LIMIT 1"
 	UseDB "pluto_main"
 	res=$(RunSQL "$Q")
 	hostname=$(Field 3 "$res")
 
-	if [ "$hostname" == "" ] ; then
-		hostname="dcerouter"
-	fi
 	echo "Adding MythTV storage group $name for host $hostname"
 	Q="INSERT INTO mythconverg.storagegroup (groupname,hostname,dirname) VALUES ('$name','$hostname','$path')"
 	#echo "$Q"
