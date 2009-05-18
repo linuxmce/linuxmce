@@ -123,7 +123,7 @@ function rubyCodes($output,$dbADO,$mediaADO) {
 			
 			$out.='
 			<tr>
-				<td colspan="2">'.$TEXT_USES_GROUP_CODESET_CONST.' '.pulldownFromArray($irGroups,'irGroup',$irGroup,'onChange="document.rubyCodes.submit();"','key','').' '.$error_not_saved.'
+				<td colspan="2">'.$TEXT_USES_GROUP_CODESET_CONST.' '.pulldownFromArray($irGroups,'irGroup',$irGroup,'onxChange="document.rubyCodes.submit();"','key','').' '.$error_not_saved.'
 			</td>
 			</tr>
 			<tr>
