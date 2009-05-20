@@ -9,7 +9,7 @@ function deleteInfraredCommandFromMasterDevice($output,$dbADO) {
 	
 		
 	if ($commandID!=0 && $infraredGroupID!=0) {
-			$deleteObjFromDevice = 'delete from InfraredGroup_Command where FK_Command = ? and FK_InfraredGroup= ?';
+			$deleteObjFromDevice = 'DELETE FROM InfraredGroup_Command WHERE FK_Command = ? AND FK_InfraredGroup= ?';
 			$query = $dbADO->Execute($deleteObjFromDevice,array($commandID,$infraredGroupID));
 			$out.="
 			<script>
