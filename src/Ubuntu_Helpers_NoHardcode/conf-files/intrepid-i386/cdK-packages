@@ -625,10 +625,14 @@ libxxf86vm1
 linux-generic
 linux-headers-2.6.27-7
 linux-headers-2.6.27-7-generic
+linux-headers-2.6.27-14
+linux-headers-2.6.27-14-generic
 linux-headers-generic
 linux-image-2.6.27-7-generic
+linux-image-2.6.27-14-generic
 linux-image-generic
 linux-restricted-modules-2.6.27-7-generic
+linux-restricted-modules-2.6.27-14-generic
 linux-restricted-modules-common
 linux-restricted-modules-generic
 linux-sound-base
