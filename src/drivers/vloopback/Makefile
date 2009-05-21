@@ -7,7 +7,7 @@ obj-m	:= $(MODULENAME).o
 
 else
 
-KVER  := $(shell uname -r)
+#KVER  := $(shell uname -r)
 KLINK := $(shell test -e /lib/modules/${KVER}/source/ && echo source || echo "build")
 KSRC  := /lib/modules/$(KVER)/$(KLINK)
 PWD   := $(shell pwd)
