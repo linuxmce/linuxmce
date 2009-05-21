@@ -33,6 +33,7 @@ ifeq ($(KERNELRELEASE),)
   ifeq ($(strip $(KREL)),)
     KREL := $(shell uname -r)
   endif
+  KREL := $(KVER)
   ifeq ($(strip $(KDIR)),)
     KDIR := /lib/modules/$(KREL)/build
   endif

@@ -29,7 +29,8 @@
 ifeq ($(KERNELRELEASE),)
 
   # Override any of these if you'd like
-  KREL := $(shell uname -r)
+#  KREL := $(shell uname -r)
+  KREL := $(KVER)
   KDIR := /lib/modules/$(KREL)/build
   INSTALL_MOD_DIR := pvrusb2
 

@@ -2,6 +2,8 @@
 
 set -ex
 
+. /etc/lmce-build/builder.conf
+
 COMP_MODULES_DIR="$(pwd)/compiledModules"
 
 mkdir -p "$COMP_MODULES_DIR"
@@ -25,6 +27,8 @@ function BuildModules() {
 	mkdir -p "$COMP_MODULES_DIR/$KVER/misc"
 	find '(' -type d -name 'compiledModules' -prune -false ')' -or -name '*.ko' -exec cp  '{}' "$COMP_MODULES_DIR/$KVER/misc" ';'
 }
+
+MakeRelease_Kernel=$KVER
 
 if [[ "$MakeRelease_Kernel" == "" ]] ;then
 	echo "ERROR: No kernel to build for!"

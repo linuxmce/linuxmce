@@ -29,7 +29,7 @@ EXTRA_CFLAGS += -DCONFIG_PWC_DEBUG=0
 endif
 
 else
-KVER  := $(shell uname -r)
+# KVER  := $(shell uname -r)
 KLINK := $(shell test -e /lib/modules/${KVER}/source/ && echo source || echo "build")
 KSRC  := /lib/modules/$(KVER)/$(KLINK)
 KMISC := /lib/modules/$(KVER)/kernel/drivers/usb/media
