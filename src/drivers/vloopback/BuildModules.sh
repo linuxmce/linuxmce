@@ -29,6 +29,7 @@ function BuildModules() {
 
 
 KERN=$(uname -r)
+KERN="$MakeRelease_Kernel"
 BuildModules "$KERN"
 echo "depmod \"$KERN\" 2>/dev/null || /bin/true" >> mkr_postinst.sh
 chmod +x mkr_postinst.sh
