@@ -34,7 +34,7 @@ EIB::EIB(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLoca
 //<-dceag-const-e->
 {
 	con=0;
-	_beibdStarted=false;
+	_beibdStarted=true;
 	_bhasToStop=false;
 	_bfirstcon=true;
 	_bisreaddone=false;
@@ -76,11 +76,7 @@ bool EIB::GetConfig()
 	populate_children();
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"  EIB populating done");
 	
-	//here we need to get the bus to reach the gateway, and the adress on this bus
-	getAway();
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"EIB got its gateway:%s",sgateway.c_str());
 	//we start the threads needed to handle eibd
-	startEibdSpawner();
 	startEibdListener();
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"EIB threadspawning done");
@@ -322,79 +318,6 @@ void EIB::CMD_Process_Receive_Command_For_Child(string &sCMD_Result,Message *pMe
 }
 
 
-void EIB::getAway()
-{
-	const char *bus_type=DATA_Get_bus_type().c_str();
-	if(strcmp(bus_type,"ft12")==0)
-	{
-		sgateway=string("ft12:/dev/ttySx");
-	}else if(strcmp(bus_type,"bcu1")==0)
-	{
-		sgateway=string("bcu1:/dev/eib");
-	}else if(strcmp(bus_type,"tpuart24")==0)
-	{
-		sgateway=string("tpuart24:/dev/tpuartX");
-	}else if(strcmp(bus_type,"tpuart")==0)
-	{
-		sgateway=string("tpuart:/dev/tpuartX");
-	}else if(strcmp(bus_type,"bcu1s")==0)
-	{
-		sgateway=string("bcu1s:/dev/ttySx");
-	}else if(strcmp(bus_type,"tpuarts")==0)
-	{
-		sgateway=string("tpuarts:/dev/ttySx");
-	}else if( (strcmp(bus_type,"ip")==0) || (strcmp(bus_type,"ipt")==0) || (strcmp(bus_type,"usb")==0) )
-	{
-		sgateway=DATA_Get_bus_type()+string(":")+DATA_Get_bus_address();
-	}else
-	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "bad eibd interface bus type:%s",bus_type);
-		sgateway=string("ipt:192.168.80.130");
-	}
-}
-
-
-//start the eibd spawner
-extern "C" void *launchSpawn( void* );
-
-void *launchSpawn(void *pt)
-{
-	EIB *base = static_cast<EIB*>(pt);
-	base->SpawnEibd();
-	return NULL;
-}
-
-void EIB::startEibdSpawner()
-{
-	pthread_create(&spawnerThread, NULL, launchSpawn, (void*)this);
-}
-
-void EIB::SpawnEibd()
-{
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "starting spawning thread");
-	while(! _bhasToStop)
-	{
-		string command("eibd -u -S -T -t1023 ");
-		string commandqueue(" >> /var/log/pluto/eibd.log");
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "  spawning eibd with command: %s",(command+sgateway+commandqueue).c_str());
-		system("(echo ;echo; echo NEW LOG ENTRY;echo $(date +%Y%m%d:%HH); echo) >> /var/log/pluto/eibd.log");
-		_beibdStarted=true;
-		system((command+sgateway+commandqueue).c_str());
-		_beibdStarted=false;
-		_bisreaddone=false;
-		pthread_mutex_lock (&mutexCon);
-		EIBClose(con);
-		con=0;
-		pthread_mutex_unlock (&mutexCon);
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "eibd has died.");
-		system("killall -15 eibd");
-		sleep(EIBERRORDELAY);
-		system("killall -9 eibd");
-
-	}
-}
-
-
 //start the eibd listener
 extern "C" void *launchListen( void* );
 
@@ -581,9 +504,6 @@ void EIB::crash(bool withexit)
 	pthread_mutex_unlock (&mutexCon);
 	pthread_join(listenerThread, NULL);
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "  listener child crashed");
-	system("killall eibd -15");	//crash the eibd to force the spawner to exit
-	pthread_join(spawnerThread, NULL);
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "  spawner child crashed");
 	if (withexit) exit(1);
 	return;
 }
