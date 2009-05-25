@@ -20,7 +20,7 @@ sources = Main.cpp Shoutcast_Radio_Plugin.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=
-CPPFLAGS +=
+CPPFLAGS += -I/usr/include/libxml2
 LDFLAGS +=
 XTRALDLIBS =
 
