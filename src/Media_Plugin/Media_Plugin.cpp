@@ -7106,7 +7106,7 @@ bool Media_Plugin::ExpandPlaylist(string sFilename, int MediaType, deque<MediaFi
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::ExpandPlaylist fileName indicates playlist");
 		// Parse playlist
-		PlaylistParser playlistParser(sFilename.c_str());
+		PlaylistParser playlistParser(sFilename);
 		if (playlistParser.isPlaylist()) {
 			deque<PlaylistItem> playlistItems = playlistParser.getItems();
 			for(deque<PlaylistItem>::iterator it=playlistItems.begin();it!=playlistItems.end();++it)
