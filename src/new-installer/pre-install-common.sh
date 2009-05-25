@@ -68,7 +68,7 @@ function CopyDebsFromIso
 }
 
 
-function CopyDebsFromIso
+function CopyDebsFromDir
 {
 	local packages_dir=$1
 
