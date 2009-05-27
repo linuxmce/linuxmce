@@ -3,105 +3,7 @@
 . /usr/pluto/bin/SQL_Ops.sh
 . /usr/pluto/bin/Config_Ops.sh
 
-#Create a way to determine if MythTV is installed...
-Q="SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=36"
-MythTV_Installed=$(RunSQL "$Q")
-# TODO:
-# Looks like its time to clean this up by making a new include for MythTV related stuff (MythTV_Ops.sh)
-function ClearMythTVStorageGroups
-{
-	#Exit if mythtv is not installed
-	if [ -z $MythTV_Installed ];then
-        	return 0
-	fi
 
-	echo "Cleaning out MythTV Storage Groups..."
-	#Allow users to have custom storage groups. Lets store them now so we can restore them after clearing the storagegroups table
-	UseDB "mythconverg"
-	Q="SELECT groupname,hostname,dirname FROM storagegroup WHERE groupname LIKE 'custom:%'"
-	customSG=$(RunSQL "$Q")
-
-	#Clear the table.. This also resets th auto-increment number
-	Q="TRUNCATE TABLE storagegroup"
-	RunSQL "$Q"
-
-	#restore custom storage groups.
-	for SG in $customSG; do
-		groupName=$(Field 1 "$SG")
-		hostName=$(Field 2 "$SG")
-		dirName=$(Field 3 "$SG")
-
-		Q="INSERT INTO storagegroup (groupname,hostname,dirname) VALUES ('$groupName','$hostName','$dirName')"
-		RunSQL "$Q"
-	done
-}
-function CleanMythTVSettings
-{
-	# The mythconverg.settings table may contain entries for hosts that no longer exist... This can happen if a user deletes a MD device.
-	# This function will remove entries from the settings table where the host no longer exists...
-
-	#Exit if mythtv is not installed
-	if [ -z $MythTV_Installed ];then
-        	return 0
-	fi
-
-	echo "Performing cleanup of mythtv.settings table..."
-
-	Q="SELECT p.PK_Device FROM pluto_main.Device p 
-	LEFT JOIN pluto_main.DeviceTemplate p2 ON p2.PK_DeviceTemplate = p.FK_DeviceTemplate
-	WHERE (p2.FK_DeviceCategory=7 OR p2.FK_DeviceCategory=8) AND p.FK_Device_ControlledVia IS Null AND PK_Device!=1"
-	UseDB "pluto_main"
-	moons=$(RunSQL "$Q")
-	hostNames="'localhost','dcerouter'"
-	for moon in $moons; do
-		hostNames="$hostNames,'moon$(Field 1 "$moon")'"
-	done
-
-	Q="DELETE FROM settings WHERE hostname NOT IN($hostNames)"
-	UseDB "mythconverg"
-	RunSQL "$Q"
-}
-function AddMythTVStorageGroup
-{
-	## Parameters 
-	## 1 - path
-	## 2 - groupname
-	path=$1
-	name=$2
-
-	#Exit if mythtv is not installed
-	if [ -z $MythTV_Installed ];then
-        	return 0
-	fi
-
-	
-	#Exit if the path does not contain tv_shows_*!!
-	tv_dir=${path##*videos/}
-	pk_dev=${tv_dir##*_}
-	pk_dev=${pk_dev%/*}
-	contains_tv_shows_=${tv_dir%_*}
-	if [ "$contains_tv_shows_" != "tv_shows" ] ; then
-		return 0
-	fi
-
-	#echo "$contains_tv_shows_"
-	#echo "$path"
-	#echo "$name"
-	Q="SELECT p.PK_Device,p.IPaddress,m.hostname FROM pluto_main.Device p 
-	LEFT JOIN pluto_main.DeviceTemplate p2 ON p2.PK_DeviceTemplate = p.FK_DeviceTemplate 
-	LEFT JOIN mythconverg.settings m ON m.data = p.IPaddress
-	WHERE p.PK_Device=$pk_dev AND m.hostname IS NOT NULL LIMIT 1"
-	UseDB "pluto_main"
-	res=$(RunSQL "$Q")
-	hostname=$(Field 3 "$res")
-
-	echo "Adding MythTV storage group $name for host $hostname"
-	Q="INSERT INTO mythconverg.storagegroup (groupname,hostname,dirname) VALUES ('$name','$hostname','$path')"
-	#echo "$Q"
-	UseDB "mythconverg"
-	RunSQL "$Q"
-}
-CleanMythTVSettings
 
 TPL_STORAGE_DEVICES="1790, 1794, 1768, 1769, 1854, 1851, 1849"
 DD_USERS=3
@@ -114,24 +16,8 @@ for ((i = 0; i < ${#Params[@]}; i++)); do
 done
 
 ## A list containing the pluto directories
-Directories="pictures,audio,documents,videos,games/MAME"
-## Add in the tv_shows_* directories, and get information such as IPAddress vs. Hostname if MythTV is installed
-if [ $MythTV_Installed ];then
-	Q="SELECT p.PK_Device,p.IPaddress, m.hostname FROM pluto_main.Device p 
-	LEFT JOIN pluto_main.DeviceTemplate p2 ON p2.PK_DeviceTemplate = p.FK_DeviceTemplate ##For every directory
-	RIGHT JOIN mythconverg.settings m ON m.data = p.IPaddress
-	WHERE (p2.FK_DeviceCategory=7 OR p2.FK_DeviceCategory=8) AND p.FK_Device_ControlledVia IS Null AND m.hostname IS NOT NULL"
-	UseDB "pluto_main"
-	deviceList=$(RunSQL "$Q")
-	for thisDevice in $deviceList; do
-		Directories=$Directories,videos/tv_shows_$(Field 1 "$thisDevice")
-		IPAddresses=$IPAddresses,$(Field 2 "$thisDevice")
-		HostNames=$HostNames,$(Field 3 "$thisDevice")
-	done
-	IPAddresses=${IPAddresses#,}
-	HostNames=${HostNames#,}
-fi
-## Done adding tv_shows_* directories
+Directories="pictures,audio,documents,videos,games/MAME,pvr"
+
 
 countDirs=$(echo $Directories | sed 's/,/\n/g' | wc -l)
 
@@ -183,19 +69,12 @@ else
 	Devices=$(RunSQL "$Q")
 fi
 
-## Before we start, lets clean out mythconverg.storagegroups
-ClearMythTVStorageGroups
-
-
+echo "Creating /home/public paths..."
 ##lets handle the /home/public paths....
 ##For every directory
 for i in `seq 1 $countDirs` ;do
 	mediaDir=$(echo $Directories | cut -d',' -f$i)
 	
-	AddMythTVStorageGroup "/home/public/data/$mediaDir" "Default"      #Put the special "Default" storage group in. 
-	AddMythTVStorageGroup "/home/public/data/$mediaDir" "LiveTV"       #Put the special "LiveTV" storage group into the moons root tv_shows_* directory	
-	AddMythTVStorageGroup "/home/public/data/$mediaDir" "public"	
-
 	## For every user
 	for User in $Users; do
 		User_ID=$(Field 1 "$User")
@@ -206,8 +85,6 @@ for i in `seq 1 $countDirs` ;do
 		mkdir -p /home/user_$User_ID/data/$mediaDir
 		chown $User_UnixUname:$User_UnixUname /home/user_$User_ID/data/$mediaDir
 		chmod 2770 /home/user_$User_ID/data/$mediaDir
-		AddMythTVStorageGroup "/home/user_$User_ID/data/$mediaDir" "$User_Uname"
-		
 	done
 
 	mkdir -p /home/public/data/$mediaDir
@@ -216,7 +93,7 @@ for i in `seq 1 $countDirs` ;do
 
 done
 
-
+echo "Creating paths for each extra storage device..."
 ## And now add the directories to each extra storage device.
 for Device in $Devices; do
 	Device_ID=$(Field 1 "$Device")
@@ -239,12 +116,6 @@ for Device in $Devices; do
 		chown root:public $Device_MountPoint/public/data/$mediaDir
 		chmod 2775 $Device_MountPoint/public/data/$mediaDir
 		
-		#public storage groups
-		AddMythTVStorageGroup "/home/public/data/$mediaDir/$Device_Description [$Device_ID]" "Default"      #Put the special "Default" storage group in. 
-		AddMythTVStorageGroup "/home/public/data/$mediaDir/$Device_Description [$Device_ID]" "LiveTV"       #Put the special "LiveTV" storage group into the moons root tv_shows_* directory	
-		AddMythTVStorageGroup "/home/public/data/$mediaDir/$Device_Description [$Device_ID]" "public: $Device_Description [$Device_ID]"
-
-
 		## For every user
 		for User in $Users; do
 			User_ID=$(Field 1 "$User")
@@ -255,14 +126,9 @@ for Device in $Devices; do
 			mkdir -p $Device_MountPoint/user_$User_ID/data/$mediaDir
 			chown $User_UnixUname:$User_UnixUname $Device_MountPoint/user_$User_ID/data/$mediaDir
 			chmod 2770 $Device_MountPoint/user_$User_ID/data/$mediaDir
-			AddMythTVStorageGroup "/home/user_$User_ID/data/$mediaDir/$Device_Description [$Device_ID]" "$User_Uname: $Device_Description [$Device_ID]"	
 		done
 	done
 done
 
-#Reset the MythTV Backend so that new storage groups are available
-if [ $MythTV_Installed ];then
-        /usr/pluto/bin/Restart_Backend_With_SchemaLock.sh
-fi
 
 

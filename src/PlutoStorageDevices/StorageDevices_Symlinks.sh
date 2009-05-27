@@ -1,7 +1,6 @@
 #!/bin/bash
 . /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/SQL_Ops.sh
-
 . /usr/pluto/bin/TeeMyOutput.sh --outfile /var/log/pluto/StorageDevices_Symlinks.log --infile /dev/null --stdboth -- "$@"
 
 TPL_GENERIC_PC_AS_CORE=7
@@ -17,9 +16,6 @@ TPL_RAID_5=1849
 DD_DIRECTORIES=153
 DD_USERS=3
 
-#Create a way to determine if MythTV is installed...
-Q="SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=36"
-MythTV_Installed=$(RunSQL "$Q")
 
 ## Only run on Core
 FK_DeviceTemplate=$(RunSQL "SELECT FK_DeviceTemplate FROM Device WHERE PK_Device='$PK_Device'")
@@ -29,15 +25,18 @@ fi
 
 ## Remove old symlinks from home
 echo -e "\n$(date -R) Removing old symlinks"
-for userdir in /home/user_* /home/public ;do
-	find ${userdir}/data -xdev -mindepth 1 -maxdepth 2 -lname "*/mnt/device/*"
-	find ${userdir}/data -xdev -mindepth 1 -maxdepth 2 -lname "*/mnt/device/*" -print0 | xargs -0 rm -f
+for userdir in /home/user_* /home/public;do
+	find ${userdir}/data -xdev -mindepth 1 -maxdepth 3 -lname "*/mnt/device/*"
+	find ${userdir}/data -xdev -mindepth 1 -maxdepth 3 -lname "*/mnt/device/*" -print0 | xargs -0 rm -f
 done
-## This will remove old symlinks from the tv_shows_* directories if they exist
-for userdir in /home/user_* /home/public ;do
-	find ${userdir}/data/videos -xdev -mindepth 1 -maxdepth 2 -lname "*/mnt/device/*"
-	find ${userdir}/data/videos -xdev -mindepth 1 -maxdepth 2 -lname "*/mnt/device/*" -print0 | xargs -0 rm -f
-done
+
+## Maybe its best to let the user clean up the old mythtv tv_shows_* directories and symlinks...
+# This will remove legacy symlinks from the tv_shows_* directories if they exist
+#for userdir in /home/user_* /home/public ;do
+#	find ${userdir}/data/videos -xdev -mindepth 1 -maxdepth 2 -lname "*/mnt/device/*"
+#	find ${userdir}/data/videos -xdev -mindepth 1 -maxdepth 2 -lname "*/mnt/device/*" -print0 | xargs -0 rm -f
+#done
+
 ## Lookup our internal storage devices in the db
 Q="SELECT PK_Device, Description  FROM Device WHERE FK_DeviceTemplate IN ($TPL_GENERIC_INTERNAL_DRIVE, $TPL_GENERIC_SAMBA_SHARE, $TPL_GENERIC_NFS_SHARE, $TPL_RAID_0, $TPL_RAID_1, $TPL_RAID_5)"
 InternalOwnStorageDevices=$(RunSQL "$Q")
@@ -60,18 +59,7 @@ set +o noglob
 	## Sanitize Device_Directories/Users
 	if [[ $Device_Directories == "" ]]; then
 		## A list containing the pluto directories
-		Device_Directories="pictures,audio,documents,videos,games/MAME"
-		if [ $MythTV_Installed ];then
-			## Add in the tv_shows_* directories
-			Q="SELECT PK_Device FROM Device 
-			LEFT JOIN DeviceTemplate ON DeviceTemplate.PK_DeviceTemplate = Device.FK_DeviceTemplate 
-			WHERE (DeviceTemplate.FK_DeviceCategory=7 OR DeviceTemplate.FK_DeviceCategory=8) AND Device.FK_Device_ControlledVia IS Null"
-			deviceList=$(RunSQL "$Q")
-			for thisDevice in $deviceList; do
-				Device_Directories="$Device_Directories,videos/tv_shows_$thisDevice"
-			done
-		fi
-		## Done adding tv_shows_* directories
+		Device_Directories="pictures,audio,documents,videos,games/MAME,pvr"
 	fi
 
 	if [[ $Device_Users == "" ]]; then
