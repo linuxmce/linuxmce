@@ -66,10 +66,6 @@ set +o noglob
 		Device_Users="0"
 	fi
 
-	#Device_Directories=$(echo $Device_Directories | sed 's/ *, */,/g')
-	#Device_Directories=$(echo $Device_Directories | sed 's/^ *//g')
-	#Device_Directories=$(echo $Device_Directories | sed 's/ *$//g')
-
 	Device_Users=$(echo $Device_Users | sed 's/ *, */,/g')
 	Device_Users=$(echo $Device_Users | sed 's/^ *//g')
 	Device_Users=$(echo $Device_Users | sed 's/ *$//g')
