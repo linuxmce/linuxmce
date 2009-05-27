@@ -58,6 +58,7 @@ static const string SCRIPT_RESTART_BACKEND = SCRIPT_DIR + "/Restart_MythBackend.
 static const string SCRIPT_RESTART_ALL_BACKENDS = SCRIPT_DIR + "/Restart_Backend_With_SchemaLock.sh";
 static const string SCRIPT_INITIAL_FILLDB =  SCRIPT_DIR + "/MythTvInitialFillDB.sh";
 static const string SCRIPT_FORCE_KILL =      SCRIPT_DIR + "/ForciblyKillProcess.sh";
+static const string SCRIPT_MYTHTV_SETUP =    SCRIPT_DIR + "/mythtv_setup.sh";
 
 // For sorting channels
 static bool ChannelComparer(MythChannel *x, MythChannel *y)
@@ -188,11 +189,15 @@ bool MythTV_PlugIn::Register()
 		}
 	}
 
+	//Setup Mythtv
+	//This includes purging the settings table of any deleted MD devices
+	//as well as generating and keeping the storagegroups up-to-date
+	system(SCRIPT_MYTHTV_SETUP.c_str());
 
 	/*
 	bool bPathsChanged = SetPaths();
 	if( bPathsChanged )
-        { // Paths were changed so we need to restart the backend[s].*/
+        { // Paths were changed so we need to restart the backend[s].
 	
 	DeviceData_Base *pDevice_App_Server = (DeviceData_Router *)
 	m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_App_Server_CONST);
@@ -200,7 +205,7 @@ bool MythTV_PlugIn::Register()
 	SCRIPT_RESTART_ALL_BACKENDS, "restart_all_backends_in_register", "",
 	"", "", false, false, false, false);
 	SendCommand(CMD_Spawn_Application);
-        //}
+        }*/
 	
 	// Don't actually build the bookmark/channel list because Sync_Cards_Providers will fill in m_mapDevicesToSources,
 	// but it's not run until about 20 seconds after everything starts so if it needs to send a message to the orbiters
@@ -1471,10 +1476,7 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 			StartFillDatabase(bAddedProviders);
 		}
 	} else {
-		DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
-		SCRIPT_RESTART_ALL_BACKENDS, "restart_all_backends_in_sync", "",
-		"", "", false, false, false, false);
-		SendCommand(CMD_Spawn_Application);
+		system(SCRIPT_MYTHTV_SETUP.c_str());
 	}
 	/*else if( bPathsChanged )
         { // Paths were changed, so we don't need to call mythfilldatabase, but we do need to restart the backend[s].
@@ -1536,7 +1538,7 @@ void MythTV_PlugIn::CheckForNewRecordings()
 {
 	/* I haven't been able to find a clean way to get myth back end to notify us
 	when it has finished making new recordings.  So we'll do it the brute force way
-	and search for new files that have 'tv_shows' in the path but don't yet have any
+	and search for new files that have 'pvr' in the path but don't yet have any
 	attributes */
 
 	string sSQL = "SELECT max(PK_File) FROM File";
@@ -1549,7 +1551,7 @@ void MythTV_PlugIn::CheckForNewRecordings()
 	}
 
 	PLUTO_SAFETY_LOCK(mm,m_pMedia_Plugin->m_MediaMutex); // protect m_sNewRecordings
-	sSQL = "LEFT JOIN File_Attribute ON FK_File=PK_File WHERE (Missing=0 AND Path like '%tv_shows_%' AND FK_File IS NULL AND PK_File>" + StringUtils::itos(m_dwPK_File_LastCheckedForNewRecordings) + ")";
+	sSQL = "LEFT JOIN File_Attribute ON FK_File=PK_File WHERE (Missing=0 AND Path like '%pvr%' AND FK_File IS NULL AND PK_File>" + StringUtils::itos(m_dwPK_File_LastCheckedForNewRecordings) + ")";
 	if( m_sNewRecordings.empty()==false )
 	{
 		sSQL += " OR Filename in (" + m_sNewRecordings + ")";
