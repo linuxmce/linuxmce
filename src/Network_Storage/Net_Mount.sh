@@ -110,18 +110,8 @@ else
 		done
 	else # not using Pluto directory structure, no mount point specified
 		Logging "NAS" $SEVERITY_NORMAL "share mount" "Not using Pluto directory structure. Links all over the place"
-		user_dirs="pictures audio documents videos games/MAME"
-		if [ $MythTV_Installed ];then
-			## Add in the tv_shows_* directories
-			Q="SELECT PK_Device FROM Device 
-			LEFT JOIN DeviceTemplate ON DeviceTemplate.PK_DeviceTemplate = Device.FK_DeviceTemplate 
-			WHERE (DeviceTemplate.FK_DeviceCategory=7 OR DeviceTemplate.FK_DeviceCategory=8) AND Device.FK_Device_ControlledVia IS Null"
-			deviceList=$(RunSQL "$Q")
-			for thisDevice in $deviceList; do
-				user_dirs="$user_dirs,videos/tv_shows_$thisDevice"
-			done
-		fi
-		## Done adding tv_shows_* directories
+		user_dirs="pictures audio documents videos games/MAME,pvr"
+		
 		Q="SELECT PK_Users FROM Users"
 		R=$(RunSQL "$Q")
 
