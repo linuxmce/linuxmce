@@ -1,7 +1,7 @@
 #!/bin/bash
 
 VERSION=0810
-PACKAGE_VERSION=alpha01
+PACKAGE_VERSION=alpha02
 OS=os2008
 HOME=Maemo
 DEST=build
@@ -23,9 +23,13 @@ rm -f lib/* bin/*
 
 for TARGET in PlutoUtils SerializeClass SDL_Helpers DCE
 do
-	echo "Building ${TARGET} ..."
+	echo "== Building ${TARGET} ... =="
 	cd ${TARGET}
 	make clean && make
+	if [ $? -ne 0 ] ; then
+		echo "Failed building of ${TARGET}: ${?}!"
+		exit 1
+	fi		
 	cd ../
 done
 
@@ -35,6 +39,10 @@ echo "Buiding the Orbiter ..."
 
 cd Orbiter
 make clean && make bin
+if [ $? -ne 0 ] ; then
+	echo "Failed building of Maemo wrapper: ${?}!"
+	exit 1
+fi		
 
 echo "Finished with building of the Orbiter. ..."
 
