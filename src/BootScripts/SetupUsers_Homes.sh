@@ -68,7 +68,7 @@ DefaultSambaPassword=609FCABC7B0F9AEAAAD3B435B51404EE:DDFF3B733E17BE6500375694FE
 DefaultLinuxPassword=
 
 global_static_dirs="public temp_pvr mydvd cameras tv_listing"
-user_dirs="audio pictures documents videos games/MAME pvr"
+
 
 user_static_dirs="data"
 
@@ -126,7 +126,7 @@ for Users in $R; do
 		mkdir -p -m 0770 "$BaseDir/user_$PlutoUserID/${dir/~/ }"
 	done
 	
-	for dir in $user_dirs; do
+	for dir in $LMCE_DIRS; do
 
 		mkdir -p -m 0770 "$BaseDir/user_$PlutoUserID/data/${dir/~/ }"
 		if [[ -n "$ExtraDir" ]]; then
@@ -162,7 +162,7 @@ for dir in $user_static_dirs; do
 done
 
 echo "Setting up User Directories..."
-for dir in $user_dirs; do
+for dir in $LMCE_DIRS; do
 	mkdir -p -m 0755 "$BaseDir/public/data/${dir/~/ }"
 	chmod 0755 "$BaseDir/public/data/${dir/~/ }"
 	if [[ -n "$ExtraDir" ]]; then

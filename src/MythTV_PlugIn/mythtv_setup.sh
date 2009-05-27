@@ -93,11 +93,6 @@ for ((i = 0; i < ${#Params[@]}; i++)); do
         esac
 done
 
-## A list containing the pluto directories
-Directories="pictures,audio,documents,videos,games/MAME,pvr"
-
-
-countDirs=$(echo $Directories | sed 's/,/\n/g' | wc -l)
 
 ## A list containing the pluto users that need to use those directories
 Q="SELECT PK_Users, UserName FROM Users"

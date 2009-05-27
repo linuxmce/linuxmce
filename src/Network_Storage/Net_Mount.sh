@@ -110,14 +110,13 @@ else
 		done
 	else # not using Pluto directory structure, no mount point specified
 		Logging "NAS" $SEVERITY_NORMAL "share mount" "Not using Pluto directory structure. Links all over the place"
-		user_dirs="pictures audio documents videos games/MAME pvr"
 		
 		Q="SELECT PK_Users FROM Users"
 		R=$(RunSQL "$Q")
 
 		for user in public $R; do
 			[[ "$user" == public ]] || user="user_$user"
-			for dir in $user_dirs; do
+			for dir in $LMCE_DIRS; do
 				Target="/home/$user/data/$dir/$LinkName"
 				ln -sf "$Dst" "$Target"
 			done

@@ -15,11 +15,6 @@ for ((i = 0; i < ${#Params[@]}; i++)); do
         esac
 done
 
-## A list containing the pluto directories
-Directories="pictures,audio,documents,videos,games/MAME,pvr"
-
-
-countDirs=$(echo $Directories | sed 's/,/\n/g' | wc -l)
 
 ## A list containin the pluto users that need to use those directories
 Q="SELECT PK_Users, UserName FROM Users"
@@ -72,8 +67,7 @@ fi
 echo "Creating /home/public paths..."
 ##lets handle the /home/public paths....
 ##For every directory
-for i in `seq 1 $countDirs` ;do
-	mediaDir=$(echo $Directories | cut -d',' -f$i)
+for mediaDir in $LMCE_DIRS ;do
 	
 	## For every user
 	for User in $Users; do
@@ -108,8 +102,7 @@ for Device in $Devices; do
         fi 
 
 	##For every directory
-	for i in `seq 1 $countDirs` ;do
-		mediaDir=$(echo $Directories | cut -d',' -f$i)
+	for mediaDir in $LMCE_DIRS ;do
 
 		## one for public
 		mkdir -p $Device_MountPoint/public/data/$mediaDir

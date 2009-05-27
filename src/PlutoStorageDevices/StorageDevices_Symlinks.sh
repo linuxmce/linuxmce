@@ -59,16 +59,16 @@ set +o noglob
 	## Sanitize Device_Directories/Users
 	if [[ $Device_Directories == "" ]]; then
 		## A list containing the pluto directories
-		Device_Directories="pictures,audio,documents,videos,games/MAME,pvr"
+		Device_Directories=$LMCE_DIRS
 	fi
 
 	if [[ $Device_Users == "" ]]; then
 		Device_Users="0"
 	fi
 
-	Device_Directories=$(echo $Device_Directories | sed 's/ *, */,/g')
-	Device_Directories=$(echo $Device_Directories | sed 's/^ *//g')
-	Device_Directories=$(echo $Device_Directories | sed 's/ *$//g')
+	#Device_Directories=$(echo $Device_Directories | sed 's/ *, */,/g')
+	#Device_Directories=$(echo $Device_Directories | sed 's/^ *//g')
+	#Device_Directories=$(echo $Device_Directories | sed 's/ *$//g')
 
 	Device_Users=$(echo $Device_Users | sed 's/ *, */,/g')
 	Device_Users=$(echo $Device_Users | sed 's/^ *//g')
@@ -77,14 +77,12 @@ set +o noglob
 	
 	Device_Description=$(echo $Device_Description | tr '/' '-')	# Prevent / char to get in a file name
 
-	## Count dirs and users
-	countDirs=$(echo $Device_Directories | sed 's/,/\n/g' | wc -l)
+	## Count users
 	countUsers=$(echo $Device_Users | sed 's/,/\n/g' | wc -l)
 
 	## If we use a pluto directory structure
 	if [[ "$Device_Users" == "-1" ]] ;then
-		for i in `seq 1 $countDirs`; do
-			mediaDir=$(echo $Device_Directories | cut -d',' -f$i)
+		for mediaDir in $Device_Directories; do
 		
 			for userDir in /home/user_* /home/public ;do
 				userDir=$(basename $userDir)
