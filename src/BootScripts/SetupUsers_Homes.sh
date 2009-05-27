@@ -68,20 +68,8 @@ DefaultSambaPassword=609FCABC7B0F9AEAAAD3B435B51404EE:DDFF3B733E17BE6500375694FE
 DefaultLinuxPassword=
 
 global_static_dirs="public temp_pvr mydvd cameras tv_listing"
-user_dirs="audio pictures documents videos games/MAME"
-## Add in the tv_shows_* directories, and get information such as IPAddress vs. Hostname if MythTV is installed
-if [ $MythTV_Installed ];then
-	Q="SELECT p.PK_Device,p.IPaddress, m.hostname FROM pluto_main.Device p 
-	LEFT JOIN pluto_main.DeviceTemplate p2 ON p2.PK_DeviceTemplate = p.FK_DeviceTemplate ##For every directory
-	RIGHT JOIN mythconverg.settings m ON m.data = p.IPaddress
-	WHERE (p2.FK_DeviceCategory=7 OR p2.FK_DeviceCategory=8) AND p.FK_Device_ControlledVia IS Null AND m.hostname IS NOT NULL"
-	UseDB "pluto_main"
-	deviceList=$(RunSQL "$Q")
-	for thisDevice in $deviceList; do
-		user_dirs=$user_dirs,videos/tv_shows_$(Field 1 "$thisDevice")
-	done
-fi
-## Done adding tv_shows_* directories
+user_dirs="audio pictures documents videos games/MAME pvr"
+
 user_static_dirs="data"
 
 UserList=
