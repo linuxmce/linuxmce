@@ -298,6 +298,8 @@ bool PnpQueueEntry::IsDuplicate(PnpQueueEntry *pPnpQueueEntry)
 		m_pRow_PnpQueue->VendorModelId_get()==pPnpQueueEntry->m_pRow_PnpQueue->VendorModelId_get() &&
 		m_pRow_PnpQueue->IPaddress_get()==pPnpQueueEntry->m_pRow_PnpQueue->IPaddress_get() &&
 		m_pRow_PnpQueue->MACaddress_get()==pPnpQueueEntry->m_pRow_PnpQueue->MACaddress_get() &&
+		m_pRow_PnpQueue->FK_DeviceTemplate_get()==pPnpQueueEntry->m_pRow_PnpQueue->FK_DeviceTemplate_get() &&
+		m_pRow_PnpQueue->FK_PnpProtocol_get()==pPnpQueueEntry->m_pRow_PnpQueue->FK_PnpProtocol_get() &&
 		(m_pRow_PnpQueue->SerialNumber_get()==pPnpQueueEntry->m_pRow_PnpQueue->SerialNumber_get() || CompareShortSerialNumberAndPCILocation(pPnpQueueEntry)) &&
 		m_pRow_PnpQueue->Category_get()==pPnpQueueEntry->m_pRow_PnpQueue->Category_get() &&
 		CompareParms(pPnpQueueEntry)) )
