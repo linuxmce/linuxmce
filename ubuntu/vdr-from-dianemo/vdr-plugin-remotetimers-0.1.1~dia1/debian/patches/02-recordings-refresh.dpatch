@@ -1,0 +1,19 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 02-recordings-refresh.dpatch
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Patch for the Recordings menu of the Remote Timers plugin
+## DP: reload the recordings list each time the menu is accessed
+
+@DPATCH@
+diff -ur remotetimers-0.1.1.orig/menu.c remotetimers-0.1.1/menu.c
+--- remotetimers-0.1.1.orig/menu.c	2009-02-13 22:25:12.000000000 +0000
++++ remotetimers-0.1.1/menu.c	2009-05-11 21:01:32.000000000 +0100
+@@ -1440,6 +1440,7 @@
+ 
+ void cMenuRecording::Display(void)
+ {
++  Recordings.Update();
+   cOsdMenu::Display();
+   DisplayMenu()->SetRecording(recording);
+   if (recording->Info()->Description())

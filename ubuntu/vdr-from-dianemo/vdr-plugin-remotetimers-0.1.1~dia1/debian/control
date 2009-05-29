@@ -1,0 +1,14 @@
+Source: vdr-plugin-remotetimers
+Section: misc
+Priority: extra
+Maintainer: Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>
+Uploaders: Thomas Schmidt <tschmidt@debian.org>, Tobias Grimm <etobi@debian.org>, Thomas Günther <tom@toms-cafe.de>
+Build-Depends: debhelper (>= 5), cdbs, vdr-dev (>= 1.6.0-5), svdrpservice-dev
+Standards-Version: 3.8.0
+
+Package: vdr-plugin-remotetimers
+Architecture: any
+Depends: ${shlibs:Depends}, ${vdr:Depends}, vdr-plugin-svdrpservice
+Description: VDR plugin that provides a SVDRP service for other plugins
+ This VDR plugin offers SVDRP connections as a service to other plugins.
+ Connecting to streamdev's VTP server port is possible too.

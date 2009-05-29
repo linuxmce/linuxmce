@@ -1,0 +1,121 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## opt-32_cuttime.dpatch by Udo Richter <udo_richter@gmx.de>
+##
+## Thomas Günther <tom@toms-cafe.de>:
+##   - adapted to VDR-1.5.7 with liemikuutio patch
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Modifies the start time of recordings to the first cutting mark.
+## DP: 
+## DP: 2007-07-01 Tobias Grimm <tg@e-tobi.net>
+## DP:     - Added setup option to enable/disable CutTime
+
+@DPATCH@
+diff -Naur vdr-1.5.7-liemikuutio/config.c vdr-1.5.7-liemikuutio-cuttime/config.c
+--- vdr-1.5.7-liemikuutio/config.c	2007-08-12 19:29:08.000000000 +0000
++++ vdr-1.5.7-liemikuutio-cuttime/config.c	2007-08-12 19:30:55.000000000 +0000
+@@ -214,6 +214,7 @@
+ 
+ cSetup::cSetup(void)
+ {
++  CutTimePatchEnabled = 0;
+   strcpy(OSDLanguage, ""); // default is taken from environment
+   strcpy(OSDSkin, "sttng");
+   strcpy(OSDTheme, "default");
+@@ -464,6 +465,7 @@
+   else if (!strcasecmp(Name, "ShowRecLength"))       ShowRecLength      = atoi(Value);
+   else if (!strcasecmp(Name, "ShowProgressBar"))     ShowProgressBar    = atoi(Value);
+   else if (!strcasecmp(Name, "MenuCmdPosition"))     MenuCmdPosition    = atoi(Value);
++  else if (!strcasecmp(Name, "CutTimePatchEnabled")) CutTimePatchEnabled= atoi(Value);
+   else
+      return false;
+   return true;
+@@ -546,6 +548,7 @@
+   Store("ShowRecLength",      ShowRecLength);
+   Store("ShowProgressBar",    ShowProgressBar);
+   Store("MenuCmdPosition",    MenuCmdPosition);
++  Store("CutTimePatchEnabled",CutTimePatchEnabled);
+ 
+   Sort();
+ 
+diff -Naur vdr-1.5.7-liemikuutio/config.h vdr-1.5.7-liemikuutio-cuttime/config.h
+--- vdr-1.5.7-liemikuutio/config.h	2007-08-12 19:29:08.000000000 +0000
++++ vdr-1.5.7-liemikuutio-cuttime/config.h	2007-08-12 19:29:39.000000000 +0000
+@@ -265,6 +265,7 @@
+   int InitialChannel;
+   int InitialVolume;
+   int ShowRecDate, ShowRecTime, ShowRecLength, ShowProgressBar, MenuCmdPosition;
++  int CutTimePatchEnabled;
+   int __EndData__;
+   cSetup(void);
+   cSetup& operator= (const cSetup &s);
+diff -Naur vdr-1.5.7-liemikuutio/cutter.c vdr-1.5.7-liemikuutio-cuttime/cutter.c
+--- vdr-1.5.7-liemikuutio/cutter.c	2006-07-30 10:22:08.000000000 +0000
++++ vdr-1.5.7-liemikuutio-cuttime/cutter.c	2007-08-12 19:29:39.000000000 +0000
+@@ -190,6 +190,14 @@
+      error = false;
+      ended = false;
+      cRecording Recording(FileName);
++     
++     if (Setup.CutTimePatchEnabled) {
++        cMarks FromMarks;
++        FromMarks.Load(FileName);
++        cMark *First=FromMarks.First();
++        if (First) Recording.SetStartTime(Recording.start+((First->position/FRAMESPERSEC+30)/60)*60);
++     }
++     
+      const char *evn = Recording.PrefixFileName('%');
+      if (evn && RemoveVideoFile(evn) && MakeDirs(evn, true)) {
+         // XXX this can be removed once RenameVideoFile() follows symlinks (see videodir.c)
+diff -Naur vdr-1.5.7-liemikuutio/menu.c vdr-1.5.7-liemikuutio-cuttime/menu.c
+--- vdr-1.5.7-liemikuutio/menu.c	2007-08-12 19:29:08.000000000 +0000
++++ vdr-1.5.7-liemikuutio-cuttime/menu.c	2007-08-12 19:29:39.000000000 +0000
+@@ -2887,6 +2887,7 @@
+   Add(new cMenuEditBoolItem(tr("Setup.Recording$Show date"),                 &data.ShowRecDate));
+   Add(new cMenuEditBoolItem(tr("Setup.Recording$Show time"),                 &data.ShowRecTime));
+   Add(new cMenuEditBoolItem(tr("Setup.Recording$Show length"),               &data.ShowRecLength));
++  Add(new cMenuEditBoolItem(tr("Setup.CutTimePatch$Adapt start time to cutting marks"), &data.CutTimePatchEnabled));
+ }
+ 
+ // --- cMenuSetupReplay ------------------------------------------------------
+diff -Naur vdr-1.5.7-liemikuutio/po/de_DE.po vdr-1.5.7-liemikuutio-cuttime/po/de_DE.po
+--- vdr-1.5.7-liemikuutio/po/de_DE.po       2007-08-12 12:18:04.000000000 +0000
++++ vdr-1.5.7-liemikuutio-cuttime/po/de_DE.po        2007-08-21 21:58:37.000000000 +0000
+@@ -606,2 +606,5 @@
+-msgid "Setup.Recording$Show length"
+-msgstr "Länge der Aufnahme anzeigen"
++msgid "Setup.Recording$Show length"
++msgstr "Länge der Aufnahme anzeigen"
++
++msgid "Setup.CutTimePatch$Adapt start time to cutting marks"
++msgstr "Startzeit an Schnittmarken anpassen"
+diff -Naur vdr-1.5.7-liemikuutio/recording.c vdr-1.5.7-liemikuutio-cuttime/recording.c
+--- vdr-1.5.7-liemikuutio/recording.c	2007-08-12 19:29:08.000000000 +0000
++++ vdr-1.5.7-liemikuutio-cuttime/recording.c	2007-08-12 19:29:39.000000000 +0000
+@@ -780,6 +780,15 @@
+   return titleBuffer;
+ }
+ 
++void cRecording::SetStartTime(time_t Start) 
++{
++  start=Start;
++  if (fileName) {
++  	 free(fileName);
++  	 fileName = NULL;
++  	 }
++}
++
+ const char *cRecording::PrefixFileName(char Prefix)
+ {
+   cString p = PrefixVideoFileName(FileName(), Prefix);
+diff -Naur vdr-1.5.7-liemikuutio/recording.h vdr-1.5.7-liemikuutio-cuttime/recording.h
+--- vdr-1.5.7-liemikuutio/recording.h	2007-08-12 19:29:08.000000000 +0000
++++ vdr-1.5.7-liemikuutio-cuttime/recording.h	2007-08-12 19:29:39.000000000 +0000
+@@ -89,6 +89,7 @@
+   const char *FileName(void) const;
+   const char *Title(char Delimiter = ' ', bool NewIndicator = false, int Level = -1, bool Original = true) const;
+   const cRecordingInfo *Info(void) const { return info; }
++  void SetStartTime(time_t Start);
+   const char *PrefixFileName(char Prefix);
+   int HierarchyLevels(void) const;
+   void ResetResume(void) const;
