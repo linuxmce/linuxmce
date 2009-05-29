@@ -1,5 +1,0 @@
-* Carefully check X-Server-Lib-dependencies
-* Manpages for binaries
-* Check why 01_gnome-screensaver.dpatch requires dbus - it probably
-  shold not cause any failure with dbus not installed
-
