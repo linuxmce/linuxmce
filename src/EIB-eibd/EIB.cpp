@@ -386,6 +386,8 @@ void EIB::ListenEibd()
 			case(0)	:
 			{//no data to receive
 				pthread_mutex_unlock (&mutexCon);
+				// nothing to do, sleep a bit to not hog the cpu
+				usleep(50);
 			}break;
 			default	:
 			{//data to receive
