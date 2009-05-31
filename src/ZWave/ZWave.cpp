@@ -365,18 +365,27 @@ void ZWave::CMD_Set_Association(int iNodeID,int iGroup_ID,string sNodes_List,str
 //<-dceag-c842-e->
 {
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWave::CMD_Set_Association");
-	myZWApi->zwAssociationGet(iNodeID,iGroup_ID);
+
+	// empty node list: show actual associations for group
+	// positive node id in list: add to group
+	// negative node id in list: remove from group
 	if (sNodes_List.size() > 0) {
 		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "parsing node list");
 		std::vector<std::string> target;
 		StringUtils::Tokenize(sNodes_List, std::string(","), target);
 		for(std::vector<string>::iterator it=target.begin(); it!=target.end(); ++it) {
-			myZWApi->zwAssociationSet(iNodeID,iGroup_ID,atoi((*it).c_str()));
+			if (atoi((*it).c_str()) > 0) {
+				myZWApi->zwAssociationSet(iNodeID,iGroup_ID,atoi((*it).c_str()));
+			}
+			if (atoi((*it).c_str()) < 0) {
+				myZWApi->zwAssociationRemove(iNodeID,iGroup_ID,atoi((*it).c_str()) * -1);
+			}
 		}
 
+	//	myZWApi->zwAssociationGet(iNodeID,iGroup_ID);
+	} else {
 		myZWApi->zwAssociationGet(iNodeID,iGroup_ID);
 	}
-// 	myZWApi->zwAssociationSet(iNodeID,iGroup_ID,8);
 	
 }
 
