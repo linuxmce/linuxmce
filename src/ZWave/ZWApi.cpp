@@ -886,9 +886,9 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					case UPDATE_STATE_NODE_INFO_RECEIVED:
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"FUNC_ID_ZW_APPLICATION_UPDATE:UPDATE_STATE_NODE_INFO_RECEIVED received from node %d - ",(unsigned int)frame[3]);
 
-						// TODO: check if this is a sleeping device and only call for those
-						// wakeuphandler is needed for remote switches, they don't support WAKE UP COMMAND CLASS
-						wakeupHandler((unsigned char) frame[3]);	
+						if (zwIsSleepingNode((unsigned char) frame[3])) {
+							wakeupHandler((unsigned char) frame[3]);	
+						}
 						switch(frame[5]) {
 							case BASIC_TYPE_ROUTING_SLAVE:
 							case BASIC_TYPE_SLAVE:
@@ -1350,6 +1350,29 @@ bool ZWApi::ZWApi::zwAssociationSet(int node_id, int group, int target_node_id) 
 
 	if (zwIsSleepingNode(node_id)) {
 		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Postpone Association Set - device is not always listening");
+		sendFunctionSleeping(node_id, mybuf , 8, REQUEST, 1);
+	} else {
+		sendFunction( mybuf , 8, REQUEST, 1);
+
+	}
+	return true;
+
+}
+
+bool ZWApi::ZWApi::zwAssociationRemove(int node_id, int group, int target_node_id) {
+	char mybuf[1024];
+
+        mybuf[0] = FUNC_ID_ZW_SEND_DATA;
+	mybuf[1] = node_id;
+	mybuf[2] = 4;
+	mybuf[3] = COMMAND_CLASS_ASSOCIATION;
+	mybuf[4] = ASSOCIATION_REMOVE;
+	mybuf[5] = group;
+	mybuf[6] = target_node_id;
+	mybuf[7] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+
+	if (zwIsSleepingNode(node_id)) {
+		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Postpone Association Remove - device is not always listening");
 		sendFunctionSleeping(node_id, mybuf , 8, REQUEST, 1);
 	} else {
 		sendFunction( mybuf , 8, REQUEST, 1);

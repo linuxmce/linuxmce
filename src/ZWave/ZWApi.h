@@ -458,6 +458,7 @@ namespace ZWApi {
 	// get the association list for a specific group from a device
 	bool zwAssociationGet(int node_id, int group);
 	bool zwAssociationSet(int node_id, int group, int target_node_id);
+	bool zwAssociationRemove(int node_id, int group, int target_node_id);
 
 	bool zwAssignReturnRoute(int src_node_id, int dst_node_id);
 
