@@ -885,6 +885,10 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 				switch(frame[2]) {
 					case UPDATE_STATE_NODE_INFO_RECEIVED:
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"FUNC_ID_ZW_APPLICATION_UPDATE:UPDATE_STATE_NODE_INFO_RECEIVED received from node %d - ",(unsigned int)frame[3]);
+
+						// TODO: check if this is a sleeping device and only call for those
+						// wakeuphandler is needed for remote switches, they don't support WAKE UP COMMAND CLASS
+						wakeupHandler((unsigned char) frame[3]);	
 						switch(frame[5]) {
 							case BASIC_TYPE_ROUTING_SLAVE:
 							case BASIC_TYPE_SLAVE:
