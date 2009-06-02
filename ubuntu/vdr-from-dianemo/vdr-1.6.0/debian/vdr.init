@@ -101,8 +101,8 @@ setup_network()
 
 	# LinuxMCE/Dianemo: setup streamdev on MDs
 	if [[ "$RootFs" == nfs ]]; then
+		DCERouter=$(getent hosts dcerouter | awk '{print $1}')
 		if ! grep -q '^streamdev-client' /var/lib/vdr/setup.conf; then
-			DCERouter=$(getent hosts dcerouter | awk '{print $1}')
 echo "streamdev-client.RemoteIp = $DCERouter
 streamdev-client.RemotePort = 2004
 streamdev-client.StartClient = 1

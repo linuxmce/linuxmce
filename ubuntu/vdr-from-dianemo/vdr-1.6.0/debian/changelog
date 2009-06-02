@@ -1,3 +1,9 @@
+vdr (1.6.0-5ubuntu2~dia1.3) intrepid; urgency=low
+
+  * Fix IP autoconfiguration on MDs (/etc/init.d/vdr)
+
+ -- Radu C <radu.cx@gmail.com>  Tue, 02 Jun 2009 17:47:23 +0100
+
 vdr (1.6.0-5ubuntu2~dia1.2) intrepid; urgency=low
 
   * Added remote timers plugin patches
