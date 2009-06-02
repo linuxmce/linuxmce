@@ -35,13 +35,15 @@ function networkSettings($output,$dbADO) {
 	$rowDHCP=$resDHCP->FetchRow();
 	$enableDHCP=($rowDHCP['IK_DeviceData']!='')?1:0;
 	
-	if(ereg(',',$rowDHCP['IK_DeviceData'])){
+	$nonPlutoIP=0;
+	$oldCoreDHCP = $rowDHCP['IK_DeviceData'];
+	if(ereg(',',$oldCoreDHCP)){
 		$nonPlutoIP=1;
-		$ipArray=explode(',',$rowDHCP['IK_DeviceData']);
+		$ipArray=explode(',',$oldCoreDHCP);
 		$coreDHCPArray=explode('.',str_replace('-','.',$ipArray[0]));
 		$nonPlutoIPArray=explode('.',str_replace('-','.',$ipArray[1]));
 	}else{
-		$coreDHCPArray=explode('.',str_replace('-','.',$rowDHCP['IK_DeviceData']));
+		$coreDHCPArray=explode('.',str_replace('-','.',$oldCoreDHCP));
 	}
 
 	$queryNC='SELECT * FROM Device_DeviceData WHERE FK_Device=? AND FK_DeviceData=?';
@@ -272,8 +274,6 @@ function networkSettings($output,$dbADO) {
 			exit(0);
 		}
 		$newEnableDHCP=(isset($_POST['enableDHCP']))?1:0;
-		// old IP range
-		$oldCoreDHCP=$coreDHCPArray[0].'.'.$coreDHCPArray[1].'.'.$coreDHCPArray[2].'.'.$coreDHCPArray[3].'-'.$coreDHCPArray[4].'.'.$coreDHCPArray[5].'.'.$coreDHCPArray[6].'.'.$coreDHCPArray[7];
 		
 		// new ip range
 		$coreDHCP=getIpFromParts('coreDHCP_',1).'-'.getIpFromParts('coreDHCP_',5);
@@ -288,36 +288,25 @@ function networkSettings($output,$dbADO) {
 			$coreDHCP.=','.getIpFromParts('nonPlutoIP_').'-'.getIpFromParts('nonPlutoIP_',5);
 		}
 
-		if($enableDHCP==0){
-			if($newEnableDHCP==1){
-				$insertDDD='UPDATE Device_DeviceData SET  IK_DeviceData=? WHERE FK_Device=? AND FK_DeviceData=?';
-				$dbADO->Execute($insertDDD,array($coreDHCP,$coreID,$GLOBALS['DHCPDeviceData']));
-				if($dbADO->Affected_Rows()>0){
-					$isChanged=1;
-				}
-			}
-		}elseif($newEnableDHCP==1){
-			if($coreDHCP!=$rowDHCP['IK_DeviceData']){
-				$updateDDD='UPDATE Device_DeviceData SET IK_DeviceData=? WHERE FK_Device=? AND FK_DeviceData=?';
-				$dbADO->Execute($updateDDD,array($coreDHCP,$coreID,$GLOBALS['DHCPDeviceData']));
-				if($dbADO->Affected_Rows()>0){
-					$isChanged=1;
-				}
+		if($newEnableDHCP==1){
+			if($coreDHCP!=$oldCoreDHCP){
+				$SQL='REPLACE INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_Devicedata) VALUES(?,?,?)';
+				$dbADO->Execute($SQL,array($coreID,$GLOBALS['DHCPDeviceData'],$coreDHCP));
 			}
 		}
 		else{
-			$emptyDDD='UPDATE Device_DeviceData SET IK_DeviceData=\'\' WHERE FK_Device=? AND FK_DeviceData=?';
-			$dbADO->Execute($emptyDDD,array($coreID,$GLOBALS['DHCPDeviceData']));
-			if($dbADO->Affected_Rows()>0){
-				$isChanged=1;
-			}
+			$SQL='REPLACE INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_Devicedata) VALUES(?,?,?)';
+			$dbADO->Execute($SQL,array($coreID,$GLOBALS['DHCPDeviceData'],''));
 		}
+		$needReboot=0;
+		$willReboot=0;
 
 		$externalInterface=$externalInterfaceArray[0];
 		$internalInterface=$internalInterfaceArray[0];
 		if(isset($_POST['swap'])){
 			$externalInterface=($externalInterface=='eth1')?'eth0':'eth1';
 			$internalInterface=($internalInterface=='eth1')?'eth0':'eth1';
+			$needReboot=1;
 		}
 		if($resNC->RecordCount()>0){
 			$networkInterfaces=$externalInterface;
@@ -333,11 +322,8 @@ function networkSettings($output,$dbADO) {
 				$networkInterfaces.=$internalInterface.','.$internalCoreIP.','.getIpFromParts('internalCoreNetMask_');
 			}
 			if($networkInterfaces!=$rowNC['IK_DeviceData']){
-				$updateDDD='UPDATE Device_DeviceData SET IK_DeviceData=? WHERE FK_Device=? AND FK_DeviceData=?';
-				$dbADO->Execute($updateDDD,array($networkInterfaces,$coreID,$GLOBALS['NetworkInterfaces']));
-				if($dbADO->Affected_Rows()>0){
-					$isChanged=1;
-				}
+				$SQL="REPLACE INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData) VALUES(?,?,?)";
+				$dbADO->Execute($SQL,array($coreID,$GLOBALS['NetworkInterfaces'],$networkInterfaces));
 			}
 		}
 
@@ -365,28 +351,30 @@ function networkSettings($output,$dbADO) {
 		}
 
 		// NOTE: Serial stuff completed. Now it's OK to reboot.
-		if($coreDHCP !=$oldCoreDHCP || $internalCoreIP!=$oldInternalCoreIP){
-			if($coreDHCP !=$oldCoreDHCP){
-				writeFile($GLOBALS['WebExecLogFile'],date('d-m-Y H:i:s')."\tIP range changed from $oldCoreDHCP to $coreDHCP\n",'a+');
-			}
+		if($coreDHCP !=$oldCoreDHCP){
+			writeFile($GLOBALS['WebExecLogFile'],date('d-m-Y H:i:s')."\tIP range changed from $oldCoreDHCP to $coreDHCP\n",'a+');
+		}
 		
-			if($internalCoreIP!=$oldInternalCoreIP){
-				writeFile($GLOBALS['WebExecLogFile'],date('d-m-Y H:i:s')."\tIP changed from $oldInternalCoreIP to $internalCoreIP\n",'a+');
-			}
-			
-			if($isChanged==1){
-				// v-- THIS THING REBOOTS THE COMPUTER WITHOUT ASKING!!!
-				exec_batch_command('sudo -u root /usr/pluto/bin/InternalIPChange.sh');
-				// ^-- THIS THING REBOOTS THE COMPUTER WITHOUT ASKING!!!
-				$ipchanged_msg=' IP updated, please reboot.';
-			}
+		if($internalCoreIP!=$oldInternalCoreIP){
+			writeFile($GLOBALS['WebExecLogFile'],date('d-m-Y H:i:s')."\tIP changed from $oldInternalCoreIP to $internalCoreIP\n",'a+');
+			// v-- THIS THING REBOOTS THE COMPUTER WITHOUT ASKING!!!
+			exec_batch_command('sudo -u root /usr/pluto/bin/InternalIPChange.sh');
+			// ^-- THIS THING REBOOTS THE COMPUTER WITHOUT ASKING!!!
+			$willReboot=1;
 		}
 		
 		// TODO: call a script who will set the domain and computer name
 		
-		$msg=($isChanged==1)?urlencode("Network settings updated.".@$ipchanged_msg):'No changes.';
+		if ($needReboot)
+			$willReboot=1;
+
+		if ($willReboot)
+			$ipchanged_msg=' The system will reboot in the following moments.';
+		$msg=urlencode("Network settings updated.".@$ipchanged_msg);
 		
 		header("Location: index.php?section=networkSettings&msg=".$msg);
+		if ($needReboot)
+			exec_batch_command("sudo -u root /sbin/reboot");
 	}
 
 	$output->setMenuTitle($TEXT_ADVANCED_CONST.' |');
