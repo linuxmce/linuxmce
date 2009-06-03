@@ -68,8 +68,8 @@ if [[ "$1" == "--backup" ]]; then
 	
 	# make archive
 	cd $MASTERDIR/download	
-	tar cfj backup-$BKPDIR.tar.bz2 $BKPDIR
-	md5sum backup-$BKPDIR.tar.bz2 > backup-$BKPDIR.md5
+	tar cfz backup-$BKPDIR.tar.gz $BKPDIR
+	md5sum backup-$BKPDIR.tar.gz > backup-$BKPDIR.md5
 
 	echo "Restore point created."
 	rm -rf $FULLPATH
