@@ -3,7 +3,7 @@
 
 # vars
 MASTERDIR="/home/backup"
-BKPDIR=$(date +%Y-%m-%d)
+BKPDIR=$(date +%Y-%m-%d-%H-%M)
 FULLPATH="$MASTERDIR/download/$BKPDIR"
 
 Usage () {
