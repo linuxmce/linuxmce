@@ -55,6 +55,12 @@ if [[ "$1" == "--backup" ]]; then
 	cp -Lr /usr/pluto/orbiter/users $FULLPATH/usr/pluto/orbiter
 	cp -Lr /usr/pluto/orbiter/rooms $FULLPATH/usr/pluto/orbiter
 	cp -Lr /usr/pluto/orbiter/scenarios $FULLPATH/usr/pluto/orbiter
+
+	# backup coverart and attribute
+	mkdir -p $FULLPATH/home/mediapics
+	cp -Lr /home/mediapics $FULLPATH/home/mediapics	
+	mkdir -p $FULLPATH/pluto_media
+	/usr/bin/mysqldump -e --quote-names --allow-keywords --add-drop-table --skip-extended-insert $MYSQL_DB_CRED pluto_media > $FULLPATH/pluto_media/pluto_media.sql
 	
 	# backup conf files
 	mkdir -p $FULLPATH/etc
@@ -84,7 +90,7 @@ if [[ "$1" == "--restore" ]]; then
 		fi
 		. /usr/pluto/bin/Config_Ops.sh
 
-		tar xfj "$backupfile"
+		tar xf "$backupfile"
 		BKPDIR=$(find $MASTERDIR/upload -maxdepth 1 -mindepth 1 -type d)
 		# process data from backup
 		cp -L -r $BKPDIR/etc/* /etc
@@ -115,7 +121,15 @@ if [[ "$1" == "--restore" ]]; then
 		if [[ -f /var/lib/dpkg/info/freepbx.postinst ]] ;then
 			apt-get -y --reinstall install freepbx
 		fi
-
+		
+		# Restore the media file details.
+		#
+		# TODO: amend the directory names to point to the new location of media files.
+		mysql $MYSQL_DB_CRED -f pluto_media < $BKPDIR/pluto_media/pluto_media.sql
+		
+		# restore old mediapics
+		cp -Lr $BKPDIR/home/mediapics/* /home/mediapics
+	
 		## Mark MDs for reconfigure
 		RunSQL "UPDATE Device SET NeedConfigure = '1' WHERE FK_DeviceTemplate = 28"
 
@@ -123,8 +137,8 @@ if [[ "$1" == "--restore" ]]; then
 		ConfDel remote
 
 		arch=$(apt-config dump | grep 'APT::Architecture' | sed 's/APT::Architecture.*"\(.*\)".*/\1/g')
-		RunSQL "UPDATE Device_DeviceData SET IK_DeviceData='LMCE_CORE_u0710_$arch' WHERE IK_DeviceData='LMCE_CORE_1_1'"
-		RunSQL "UPDATE Device_DeviceData SET IK_DeviceData='LMCE_MD_u0710_i386'   WHERE IK_DeviceData='LMCE_MD_1_1'"
+		RunSQL "UPDATE Device_DeviceData SET IK_DeviceData='LMCE_CORE_u0810_$arch' WHERE IK_DeviceData='LMCE_CORE_1_1'"
+		RunSQL "UPDATE Device_DeviceData SET IK_DeviceData='LMCE_MD_u0810_i386'   WHERE IK_DeviceData='LMCE_MD_1_1'"
 		RunSQL "UPDATE Device_DeviceData SET IK_DeviceData='0' WHERE FK_DeviceData='234'"
 		RunSQL "UPDATE Device_DeviceData SET IK_DeviceData='i386' WHERE FK_DeviceData='112' AND IK_DeviceData='686'"
 		RunSQL "USE asterisk; UPDATE incoming SET destination=CONCAT('custom-linuxmce', SUBSTR(destination, 18)) WHERE destination LIKE 'from-pluto-custom%'"
