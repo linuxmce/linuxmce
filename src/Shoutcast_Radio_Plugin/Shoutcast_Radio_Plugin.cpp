@@ -70,29 +70,37 @@ bool Shoutcast_Radio_Plugin::GetConfig()
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
-/*
-TODO: configuration
+
 	string sConfig = DATA_Get_Configuration();
 
 	vector<string> vectString;
 	StringUtils::Tokenize(sConfig,"\n",vectString);
-	for(int i=0; i < vectString.size(); ++i) {
-	  string s = StringUtils::Replace(vectString[i],"\r","");
-
+	for(uint i=0; i < vectString.size(); ++i) {
+	        string s = StringUtils::Replace(vectString[i],"\r","");
+		if (StringUtils::StartsWith(s, "baseURL=") && 8 < s.length()) {
+		        m_sBaseUrl = s.substr(8, s.length());
+		}
+		if (StringUtils::StartsWith(s, "xmlURL=") && 7 < s.length()) {
+		        m_sXMLUrl = s.substr(7, s.length());
+		}
+		if (StringUtils::StartsWith(s, "genresToLoad=") && 13 < s.length()) {
+		        string genreString = s.substr(13, s.length());
+			vector<string> vectGenres;
+			StringUtils::Tokenize(genreString, ",", vectGenres);
+			for (uint j = 0; j < vectGenres.size(); j++) {
+			        m_vectGenresToLoad.push_back(vectGenres[j]);
+			}
+		}
+		if (StringUtils::StartsWith(s, "limitStations=") && 14 < s.length()) {
+		        m_iLimit = atoi(s.substr(14, s.length()).c_str());
+		}
+		if (StringUtils::StartsWith(s, "getInterval=") && 12 < s.length()) {
+		        m_iGetInterval = atoi(s.substr(12, s.length()).c_str());
+		}
+		if (StringUtils::StartsWith(s, "runInterval=") && 12 < s.length()) {
+		        m_iRunInterval = atoi(s.substr(12, s.length()).c_str());
+		}
 	}
-*/
-	m_sBaseUrl = "http://yp.shoutcast.com";
-	m_sXMLUrl = "/sbin/newxml.phtml";
-
-	m_iGetInterval = 60;
-	m_iRunInterval = 60 * 60 * 24; // run through all updates once a day
-
-	m_iLimit = 20;
-
-	m_vectGenresToLoad.push_back("Rock");
-	m_vectGenresToLoad.push_back("Blues");
-	m_vectGenresToLoad.push_back("Eurodance");
-	m_vectGenresToLoad.push_back("Techno");
 
 	//start alarm if not already started
 	m_pUpdate->type = 'G';
