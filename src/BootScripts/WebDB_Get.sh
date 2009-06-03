@@ -38,19 +38,10 @@ if [[ "$Table" != ""  && "$PSC" != "" ]]; then
 
 	## Get a list of local modified records
 	Q="SELECT psc_id FROM $Table WHERE psc_id IN ($PSC) AND psc_mod != 0"
-
 	
 	LocalModifiedPscIDs=$(RunSQL "$Q" | tr ' ' ',')
 	if [[ "$LocalModifiedPscIDs" == ""  ]] ;then
 		LocalModifiedPscIDs="0"
-	else
-		# Dump locally modified records 
-		LocalChanges=$(mktemp)
-		trap "rm -f '$LocalChanges'" EXIT
-
-		mysqldump $MYSQL_DB_CRED "$MySqlDBName" $Table --where '"psc_id in ($LocalModifiedPscIDs)"' > $LocalChanges
-		Q="DELETE FROM $Table Where psc_id in ($PSC)"
-		RunSQL "$Q"
 	fi
 fi
 
