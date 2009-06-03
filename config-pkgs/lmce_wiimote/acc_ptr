@@ -1,0 +1,8 @@
+#acc_ptr
+
+include buttons
+
+include gamepad
+
+Plugin.acc.X	= REL_X
+Plugin.acc.Y	= REL_Y
