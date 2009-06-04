@@ -296,6 +296,8 @@ void ZWave::CMD_StatusReport(string sArguments,string &sCMD_Result,Message *pMes
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Received command #788 - StatusReport");
 	cout << "Need to implement command #788 - StatusReport" << endl;
 	cout << "Parm #51 - Arguments=" << sArguments << endl;
+	myZWApi->zwSoftReset();
+	sleep(2);
 	myZWApi->zwStatusReport();
 }
 

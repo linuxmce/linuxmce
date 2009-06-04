@@ -1382,24 +1382,6 @@ bool ZWApi::ZWApi::zwAssociationRemove(int node_id, int group, int target_node_i
 
 }
 
-bool ZWApi::ZWApi::zwAssignReturnRoute(int src_node_id, int dst_node_id) {
-	char mybuf[1024];
-
-        mybuf[0] = FUNC_ID_ZW_ASSIGN_RETURN_ROUTE;
-	mybuf[1] = src_node_id;
-	mybuf[2] = dst_node_id;
-	//mybuf[7] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
-//        sendFunction( mybuf , 3, REQUEST, 1);
-
-	// suc test code
-        mybuf[0] = 0x51;
-	mybuf[1] = src_node_id;
-	mybuf[2] = 0x00;
-        sendFunction( mybuf , 3, REQUEST, 1);
-	return true;
-
-} 
-
 bool ZWApi::ZWApi::zwReplicateController(int mode) {
 	char mybuf[1024];
 	
@@ -1950,6 +1932,18 @@ bool ZWApi::ZWApi::zwRequestNodeNeighborUpdate(int node_id) {
 	sendFunction( mybuf , 2, REQUEST, 1);
 	return true;
 }
+
+bool  ZWApi::ZWApi::zwAssignReturnRoute(int node_id, int target_node_id){
+	char mybuf[1024];
+
+	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Assigning return route for node %i, targetr %i",node_id,target_node_id);
+	mybuf[0] = FUNC_ID_ZW_ASSIGN_RETURN_ROUTE;
+	mybuf[1] = node_id;
+	mybuf[2] = target_node_id;
+	sendFunction( mybuf , 3, REQUEST, 1);
+	return true;
+}
+
 void ZWApi::ZWApi::zwReadMemory(int offset) {
 	char mybuf[1024];
 
@@ -1959,6 +1953,13 @@ void ZWApi::ZWApi::zwReadMemory(int offset) {
 	mybuf[2] = offset & 0xff;;
 	mybuf[3] = 64;
 	sendFunction( mybuf , 4, REQUEST, 0);
+}
+void ZWApi::ZWApi::zwSoftReset() {
+	char mybuf[1024];
+
+	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Soft-resetting the Z-Wave chip");
+	mybuf[0] = FUNC_ID_SERIAL_API_SOFT_RESET;
+	sendFunction( mybuf , 1, REQUEST, 0);
 }
 
 

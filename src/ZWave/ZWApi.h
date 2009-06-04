@@ -41,6 +41,9 @@
 
 #define FUNC_ID_SERIAL_API_GET_INIT_DATA		0x02
 #define FUNC_ID_SERIAL_API_GET_CAPABILITIES             0x07
+
+#define FUNC_ID_SERIAL_API_SOFT_RESET			0x8
+
 #define FUNC_ID_APPLICATION_COMMAND_HANDLER             0x04
 
 #define FUNC_ID_ZW_APPLICATION_UPDATE                   0x49
@@ -527,8 +530,8 @@ namespace ZWApi {
 
 	void zwMultiInstanceGet(int node_id, int command_class);
 	void zwRequestMultilevelSensorReportInstance(int node_id,int instance);
-
-
+	
+	void zwSoftReset();
     };
 
 
