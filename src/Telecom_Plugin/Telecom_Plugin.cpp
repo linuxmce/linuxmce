@@ -77,6 +77,8 @@ int UniqueColors[MAX_TELECOM_COLORS];
 #include <string.h>
 #endif
 
+#include <sstream>
+
 #define CONFERENCE_MAX_NO 50
 
 #define SPEAKINTHEHOUSE_INVALID_EXT "555"
@@ -2607,6 +2609,49 @@ bool Telecom_Plugin::VoiceMailChanged(class Socket *pSocket,class Message *pMess
 	return false;	
 }
 
+string Telecom_Plugin::ParseVoiceMailMetadata(string s_VoiceMailFile)
+{
+	vector<string> vectVoiceMailFile;
+	string s_CallerID, s_CallDuration, s_TimeStamp;
+	int iCallDuration;
+
+	s_CallerID = "Unknown Caller ID";
+	s_TimeStamp = "Unknown Time Stamp";
+	s_CallDuration = "00:00";
+
+	FileUtils::ReadFileIntoVector(s_VoiceMailFile, vectVoiceMailFile);
+
+	for (size_t i = 0; i < vectVoiceMailFile.size(); i++) 
+	{
+		if (vectVoiceMailFile[i].find("callerid=") != string::npos) 
+		{
+			vector<string> vectParam;
+			StringUtils::Tokenize(vectVoiceMailFile[i],"=",vectParam);
+			s_CallerID = vectParam[1];
+		}
+
+		if (vectVoiceMailFile[i].find("origdate=") != string::npos) 
+		{
+			vector<string> vectParam;
+			StringUtils::Tokenize(vectVoiceMailFile[i],"=",vectParam);
+			s_TimeStamp = vectParam[1];
+		}
+
+		if (vectVoiceMailFile[i].find("duration=") != string::npos) 
+		{
+			vector<string> vectParam;
+			StringUtils::Tokenize(vectVoiceMailFile[i],"=",vectParam);
+			s_CallDuration = vectParam[1];
+			istringstream is(s_CallDuration);
+			is >> iCallDuration;
+			s_CallDuration = StringUtils::SecondsAsTime(iCallDuration);
+		}
+	}
+
+	return "From: " + s_CallerID + "\nDuration: " + s_CallDuration + " When: " + s_TimeStamp;
+
+}
+
 class DataGridTable *Telecom_Plugin::UserVoiceMailGrid(string GridID,string Parms,void *ExtraData,int *iPK_Variable,string *sValue_To_Assign,class Message *pMessage)
 {
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "UserVoiceMailGrid request received for GridID: %s with Params: %s",GridID.c_str(),Parms.c_str());
@@ -2653,8 +2698,8 @@ class DataGridTable *Telecom_Plugin::UserVoiceMailGrid(string GridID,string Parm
 
         if((S_ISREG(statbuf.st_mode)) && (dir_ent->d_name[0] != '.') && (strstr(dir_ent->d_name,".txt") != NULL))
         {
-			string text = "New message " + StringUtils::itos(Row+1);
 			string file_path=user_path+(dir_ent->d_name);
+			string text = "New Message " + StringUtils::itos(Row+1) + ": " + ParseVoiceMailMetadata(file_path);
 			file_path.replace(file_path.length()-4,4,".wav");
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"WILL SHOW %s / %s",text.c_str(),file_path.c_str());
 

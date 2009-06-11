@@ -116,6 +116,9 @@ public:
 	Database_pluto_main *m_pDatabase_pluto_main;
 	Database_pluto_telecom *m_pDatabase_pluto_telecom;
 
+	// Parse the metadata for the voicemail grid
+	string ParseVoiceMailMetadata(string s_VoiceMailFile);
+
 	// Datagrids
 	class DataGridTable *TelecomScenariosGrid(string GridID,string Parms,void *ExtraData,int *iPK_Variable,string *sValue_To_Assign,class Message *pMessage);
 	class DataGridTable *PhoneBookAutoCompl(string GridID,string Parms,void *ExtraData,int *iPK_Variable,string *sValue_To_Assign,class Message *pMessage);
