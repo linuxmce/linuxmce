@@ -2710,9 +2710,11 @@ class DataGridTable *Telecom_Plugin::UserVoiceMailGrid(string GridID,string Parm
 				ProcessUtils::GetCommandOutput(args[0], args, URL_Parm, StdErr);
 			}
 			string url= VOICEMAIL_URL + StringUtils::Replace(URL_Parm, "\n", "");
-			
+		
+			// Put url in place of file_path if things get weird.
+			//
 			DCE::CMD_MH_Play_Media CMD_MH_Play_Media_
-				(pMessage->m_dwPK_Device_From, pMediaPlugin->m_dwPK_Device, pMessage->m_dwPK_Device_From, url, MEDIATYPE_pluto_StoredAudio_CONST,0,"",0,0,0 /* bQueue */, 0 /* bBypassEvent */, 0 /* bDontSetupAV */ );
+				(pMessage->m_dwPK_Device_From, pMediaPlugin->m_dwPK_Device, pMessage->m_dwPK_Device_From, file_path, MEDIATYPE_pluto_StoredAudio_CONST,0,"",0,0,0 /* bQueue */, 0 /* bBypassEvent */, 0 /* bDontSetupAV */ );
 			
 			pCell = new DataGridCell(text,"");
 			pCell->m_pMessage=CMD_MH_Play_Media_.m_pMessage;
