@@ -11,16 +11,16 @@
 ; Series 60 identifier
 (0x101F6F88), 0, 0, 0, {"Series60ProductID"}
 
-"\Symbian\7.0s\Series60_v21\Epoc32\release\armi\urel\PlutoMO.app"         -"!:\system\apps\PlutoMO\PlutoMO.app"
+"\root\symbian-sdks\s60_20\\epoc32\release\armi\urel\PlutoMO.app"         -"!:\system\apps\PlutoMO\PlutoMO.app"
 {
-"C:\pluto\trunk\src\PlutoMO\group\Res\PlutoMO.rsc"
+"Res\PLUTOMO.RSC"
 }
 -"!:\system\apps\PlutoMO\PlutoMO.rsc"
 
-"C:\pluto.makerelease\trunk\src\PlutoMO\group\Res\PlutoMO_caption.rsc" -"!:\system\apps\PlutoMO\PlutoMO_caption.rsc"
-"C:\pluto.makerelease\trunk\src\PlutoMO\group\Res\PlutoMO.aif"         -"!:\system\apps\PlutoMO\PlutoMO.aif"
-"C:\pluto.makerelease\trunk\src\PlutoMO\group\PlutoMO.cfg"         -"!:\system\apps\PlutoMO\PlutoMO.cfg"
-"C:\pluto.makerelease\trunk\src\PlutoMO\group\PlutoEvent.png"         -"!:\system\apps\PlutoMO\PlutoEvent.png"
+"Res\PLUTOMO_CAPTION.RSC" -"!:\system\apps\PlutoMO\PlutoMO_caption.rsc"
+"Res\PLUTOMO.AIF"         -"!:\system\apps\PlutoMO\PlutoMO.aif"
+"PlutoMO.cfg"         -"!:\system\apps\PlutoMO\PlutoMO.cfg"
+"PlutoEvent.png"         -"!:\system\apps\PlutoMO\PlutoEvent.png"
 
 
 
