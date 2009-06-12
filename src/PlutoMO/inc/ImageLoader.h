@@ -21,7 +21,7 @@
 #define __IMAGELOADER_H 
 
 #include <e32base.h> 
-#include <MdaImageConverter.h> 
+#include <mdaimageconverter.h> 
 #include <fbs.h> 
 #include <e32math.h> 
 #define IMAGEREAD_TIMEOUT 5 * 1000 * 1000 

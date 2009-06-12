@@ -25,7 +25,7 @@
 #include <http/mhttptransactioncallback.h>
 #include "eikmenub.h"
 #include <aknnotewrappers.h> 
-#include <AknGlobalConfirmationQuery.h>
+#include <aknglobalconfirmationquery.h>
 //----------------------------------------------------------------------------------------------
 #include "PlutoMO.hrh"
 //----------------------------------------------------------------------------------------------

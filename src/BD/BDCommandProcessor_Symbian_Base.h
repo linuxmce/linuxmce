@@ -25,8 +25,8 @@
 #include <btmanclient.h>
 #include <btsdp.h>
 #include <eikprogi.h>
-#include <AknWaitDialog.h>
-#include <AknProgressDialog.h>
+#include <aknwaitdialog.h>
+#include <aknprogressdialog.h> 
 
 #include "VIPShared/VIPIncludes.h"
 #include "VIPMenu.h"
