@@ -78,11 +78,6 @@ HEADER
 TARGETPATH \resource\Apps
 END
 
-START RESOURCE ..\data\PlutoMO_reg.rss
-HEADER
-TARGETPATH \resource\Apps
-END
-
 LANG     SC
 
 USERINCLUDE . ..\inc
