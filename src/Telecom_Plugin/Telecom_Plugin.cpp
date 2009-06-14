@@ -2699,7 +2699,7 @@ class DataGridTable *Telecom_Plugin::UserVoiceMailGrid(string GridID,string Parm
         if((S_ISREG(statbuf.st_mode)) && (dir_ent->d_name[0] != '.') && (strstr(dir_ent->d_name,".txt") != NULL))
         {
 			string file_path=user_path+(dir_ent->d_name);
-			string text = "New Message " + StringUtils::itos(Row+1) + ": " + ParseVoiceMailMetadata(file_path);
+			string text = "" + StringUtils::itos(Row+1) + ": " + ParseVoiceMailMetadata(file_path);
 			file_path.replace(file_path.length()-4,4,".wav");
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"WILL SHOW %s / %s",text.c_str(),file_path.c_str());
 
@@ -2713,11 +2713,11 @@ class DataGridTable *Telecom_Plugin::UserVoiceMailGrid(string GridID,string Parm
 		
 			// Put url in place of file_path if things get weird.
 			//
-			DCE::CMD_MH_Play_Media CMD_MH_Play_Media_
-				(pMessage->m_dwPK_Device_From, pMediaPlugin->m_dwPK_Device, pMessage->m_dwPK_Device_From, file_path, MEDIATYPE_pluto_StoredAudio_CONST,0,"",0,0,0 /* bQueue */, 0 /* bBypassEvent */, 0 /* bDontSetupAV */ );
-			
-			pCell = new DataGridCell(text,"");
-			pCell->m_pMessage=CMD_MH_Play_Media_.m_pMessage;
+			// DCE::CMD_MH_Play_Media CMD_MH_Play_Media_
+			//	(pMessage->m_dwPK_Device_From, pMediaPlugin->m_dwPK_Device, pMessage->m_dwPK_Device_From, file_path, MEDIATYPE_pluto_StoredAudio_CONST,0,"",0,0,0 /* bQueue */, 0 /* bBypassEvent */, 0 /* bDontSetupAV */ );
+			//
+			pCell = new DataGridCell(text,file_path);
+			// pCell->m_pMessage=CMD_MH_Play_Media_.m_pMessage;
 			pDataGrid->SetData(0,Row,pCell);
 			Row++;
 		}
@@ -2732,8 +2732,8 @@ class DataGridTable *Telecom_Plugin::UserVoiceMailGrid(string GridID,string Parm
         stat(buffer.c_str(),&statbuf);
         if((S_ISREG(statbuf.st_mode)) && (dir_ent->d_name[0] != '.') && (strstr(dir_ent->d_name,".txt") != NULL))
         {
-			string text = "Old message " + StringUtils::itos(Row+1);
 			string file_path=user_path+(dir_ent->d_name);
+                      	string text = "" + StringUtils::itos(Row+1) + ": " + ParseVoiceMailMetadata(file_path);
 			file_path.replace(file_path.length()-4,4,".wav");
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"WILL SHOW %s / %s",text.c_str(),file_path.c_str());
 
@@ -2745,11 +2745,11 @@ class DataGridTable *Telecom_Plugin::UserVoiceMailGrid(string GridID,string Parm
 			}
 			string url = VOICEMAIL_URL + StringUtils::Replace(URL_Parm, "\n", "");
 			
-			DCE::CMD_MH_Play_Media CMD_MH_Play_Media_
-				(pMessage->m_dwPK_Device_From, pMediaPlugin->m_dwPK_Device, pMessage->m_dwPK_Device_From, url, MEDIATYPE_pluto_StoredAudio_CONST,0,"",0,0,0 /* bQueue */, 0 /* bBypassEvent */, 0 /* bDontSetupAV */);
+//			DCE::CMD_MH_Play_Media CMD_MH_Play_Media_
+//				(pMessage->m_dwPK_Device_From, pMediaPlugin->m_dwPK_Device, pMessage->m_dwPK_Device_From, url, MEDIATYPE_pluto_StoredAudio_CONST,0,"",0,0,0 /* bQueue */, 0 /* bBypassEvent */, 0 /* bDontSetupAV */);
 			
-			pCell = new DataGridCell(text,"");
-			pCell->m_pMessage=CMD_MH_Play_Media_.m_pMessage;
+			pCell = new DataGridCell(text,file_path);
+//			pCell->m_pMessage=CMD_MH_Play_Media_.m_pMessage;
 			pDataGrid->SetData(0,Row,pCell);
 			Row++;
 		}
