@@ -115,9 +115,9 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 	if (frame[0] == RESPONSE) {
 		switch (frame[1]) {
 			case FUNC_ID_ZW_GET_SUC_NODE_ID:
-				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got reply to GET_SUC_NODE_ID, node: %d",frame[2]);
+				DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"Got reply to GET_SUC_NODE_ID, node: %d",frame[2]);
 				if (frame[2] == 0) {
-					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"No SUC, we become SUC");
+					DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"No SUC, we become SUC");
 					tempbuf[0]=FUNC_ID_ZW_ENABLE_SUC;
 					tempbuf[1]=1; // 0=SUC,1=SIS
 					// tempbuf[2]=ZW_SUC_FUNC_BASIC_SUC;
@@ -133,7 +133,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 				break;
 			;;
 			case ZW_MEMORY_GET_ID:
-				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got reply to ZW_MEMORY_GET_ID, Home id: 0x%02x%02x%02x%02x, our node id: %d",(unsigned char) frame[2],(unsigned char) frame[3],(unsigned char)frame[4],(unsigned char)frame[5],(unsigned char)frame[6]);
+				DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"Got reply to ZW_MEMORY_GET_ID, Home id: 0x%02x%02x%02x%02x, our node id: %d",(unsigned char) frame[2],(unsigned char) frame[3],(unsigned char)frame[4],(unsigned char)frame[5],(unsigned char)frame[6]);
 				ournodeid = frame[6];
 				break;
 			;;
@@ -276,10 +276,10 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 				}
 				if (getIntentSize() == 0) {
 					// we got all protcol info responses
-					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Finished building node list:");
+					DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"Finished building node list:");
 					ZWNodeMapIt = ZWNodeMap.begin();
 					while (ZWNodeMapIt!=ZWNodeMap.end()) {
-						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Node: %i basic: 0x%x generic: 0x%x specific: 0x%x pluto: %i",(*ZWNodeMapIt).first,(*ZWNodeMapIt).second->typeBasic,(*ZWNodeMapIt).second->typeGeneric,(*ZWNodeMapIt).second->typeSpecific,(*ZWNodeMapIt).second->plutoDeviceTemplateConst);
+						DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"Node: %i basic: 0x%x generic: 0x%x specific: 0x%x pluto: %i",(*ZWNodeMapIt).first,(*ZWNodeMapIt).second->typeBasic,(*ZWNodeMapIt).second->typeGeneric,(*ZWNodeMapIt).second->typeSpecific,(*ZWNodeMapIt).second->plutoDeviceTemplateConst);
 						ZWNodeMapIt++;
 		
 					}
@@ -1067,7 +1067,7 @@ void *ZWApi::ZWApi::receiveFunction() {
 						WriteSerialStringEx(serialPort,retbuf,1);
 						decodeFrame(mybuf2+2,len2-3);
 					} else {
-						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Checksum incorrect %x - sending NAK",(unsigned char) checksum(mybuf2+1,mybuf2[1]));
+						DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Checksum incorrect %x - sending NAK",(unsigned char) checksum(mybuf2+1,mybuf2[1]));
 						retbuf[0]=NAK;
 						WriteSerialStringEx(serialPort,retbuf,1);
 
@@ -1100,7 +1100,7 @@ void *ZWApi::ZWApi::receiveFunction() {
 					break;
 				;;
 				default:
-					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ERROR! Out of frame flow!!");
+					DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "ERROR! Out of frame flow!!");
 				;;
 			}
 			idletimer=0;
@@ -1124,14 +1124,14 @@ void *ZWApi::ZWApi::receiveFunction() {
 					// DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "QUEUE FILLED: await_callback: %i timer: %i",await_callback,timer++);
 					timer++;
 					if (timer > 30 && await_callback != 0) {
-						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "No callback received: await_callback: %i timer: %i",await_callback,timer);
+						DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING, "No callback received: await_callback: %i timer: %i",await_callback,timer);
 						timer = 0;
 						// resend, we got no final callback 
 						await_ack = 0;	
 						await_callback = 0;
 						if (ZWSendQueue.front()->sendcount > 2) {
 							ZWSendQueue.pop_front();
-							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ERROR: Dropping command, no callback received after three resends");
+							DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "ERROR: Dropping command, no callback received after three resends");
 
 						}
 					}
