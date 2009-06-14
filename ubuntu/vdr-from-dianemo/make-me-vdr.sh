@@ -10,8 +10,6 @@
 
 function BuildPackages() {
 	PackagesToBuild=$1
-	echo $PATCHVARIANT
-	read
 	for Package in $PackagesToBuild
 	do
 		pushd  "$Package"
