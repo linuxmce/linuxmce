@@ -79,6 +79,9 @@ int UniqueColors[MAX_TELECOM_COLORS];
 
 #include <sstream>
 
+#include <stdlib.h>
+#include <time.h>
+
 #define CONFERENCE_MAX_NO 50
 
 #define SPEAKINTHEHOUSE_INVALID_EXT "555"
@@ -2609,14 +2612,14 @@ bool Telecom_Plugin::VoiceMailChanged(class Socket *pSocket,class Message *pMess
 	return false;	
 }
 
-string Telecom_Plugin::ParseVoiceMailMetadata(string s_VoiceMailFile)
+string Telecom_Plugin::ParseVoiceMailMetadata(string s_VoiceMailFile, map<string, string>& mapVMData)
 {
 	vector<string> vectVoiceMailFile;
 	string s_CallerID, s_CallDuration, s_TimeStamp;
-	int iCallDuration;
+	int iCallDuration, iTimeStamp;
 
 	s_CallerID = "Unknown Caller ID";
-	s_TimeStamp = "Unknown Time Stamp";
+	s_TimeStamp = "Unk";
 	s_CallDuration = "00:00";
 
 	FileUtils::ReadFileIntoVector(s_VoiceMailFile, vectVoiceMailFile);
@@ -2630,11 +2633,20 @@ string Telecom_Plugin::ParseVoiceMailMetadata(string s_VoiceMailFile)
 			s_CallerID = vectParam[1];
 		}
 
-		if (vectVoiceMailFile[i].find("origdate=") != string::npos) 
+		if (vectVoiceMailFile[i].find("origtime=") != string::npos) 
 		{
+			char temp[16];
+			struct tm *tmp;
+			time_t mytime;
 			vector<string> vectParam;
 			StringUtils::Tokenize(vectVoiceMailFile[i],"=",vectParam);
 			s_TimeStamp = vectParam[1];
+			istringstream is(s_TimeStamp);
+			is >> iTimeStamp;
+			mytime = iTimeStamp;
+			tmp = localtime(&mytime);
+			strftime(temp, sizeof(temp), "%d %b", tmp);
+			s_TimeStamp = temp;
 		}
 
 		if (vectVoiceMailFile[i].find("duration=") != string::npos) 
@@ -2647,6 +2659,10 @@ string Telecom_Plugin::ParseVoiceMailMetadata(string s_VoiceMailFile)
 			s_CallDuration = StringUtils::SecondsAsTime(iCallDuration);
 		}
 	}
+
+	mapVMData["vmCallerID"] = s_CallerID;
+	mapVMData["vmDuration"] = s_CallDuration;
+	mapVMData["vmTimestamp"] = s_TimeStamp;
 
 	return "From: " + s_CallerID + "\nDuration: " + s_CallDuration + " When: " + s_TimeStamp;
 
@@ -2698,8 +2714,9 @@ class DataGridTable *Telecom_Plugin::UserVoiceMailGrid(string GridID,string Parm
 
         if((S_ISREG(statbuf.st_mode)) && (dir_ent->d_name[0] != '.') && (strstr(dir_ent->d_name,".txt") != NULL))
         {
+			map<string, string> mapVMData;
 			string file_path=user_path+(dir_ent->d_name);
-			string text = "" + StringUtils::itos(Row+1) + ": " + ParseVoiceMailMetadata(file_path);
+			string text = "" + StringUtils::itos(Row+1) + ": " + ParseVoiceMailMetadata(file_path,mapVMData);
 			file_path.replace(file_path.length()-4,4,".wav");
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"WILL SHOW %s / %s",text.c_str(),file_path.c_str());
 
@@ -2711,13 +2728,12 @@ class DataGridTable *Telecom_Plugin::UserVoiceMailGrid(string GridID,string Parm
 			}
 			string url= VOICEMAIL_URL + StringUtils::Replace(URL_Parm, "\n", "");
 		
-			// Put url in place of file_path if things get weird.
-			//
-			// DCE::CMD_MH_Play_Media CMD_MH_Play_Media_
-			//	(pMessage->m_dwPK_Device_From, pMediaPlugin->m_dwPK_Device, pMessage->m_dwPK_Device_From, file_path, MEDIATYPE_pluto_StoredAudio_CONST,0,"",0,0,0 /* bQueue */, 0 /* bBypassEvent */, 0 /* bDontSetupAV */ );
-			//
 			pCell = new DataGridCell(text,file_path);
-			// pCell->m_pMessage=CMD_MH_Play_Media_.m_pMessage;
+
+			pCell->m_mapAttributes["vmTimestamp"] = mapVMData["vmTimestamp"];
+			pCell->m_mapAttributes["vmDuration"] = mapVMData["vmDuration"];
+			pCell->m_mapAttributes["vmCallerID"] = mapVMData["vmCallerID"];
+
 			pDataGrid->SetData(0,Row,pCell);
 			Row++;
 		}
@@ -2732,8 +2748,9 @@ class DataGridTable *Telecom_Plugin::UserVoiceMailGrid(string GridID,string Parm
         stat(buffer.c_str(),&statbuf);
         if((S_ISREG(statbuf.st_mode)) && (dir_ent->d_name[0] != '.') && (strstr(dir_ent->d_name,".txt") != NULL))
         {
+			map<string, string> mapVMData;
 			string file_path=user_path+(dir_ent->d_name);
-                      	string text = "" + StringUtils::itos(Row+1) + ": " + ParseVoiceMailMetadata(file_path);
+                      	string text = "" + StringUtils::itos(Row+1) + ": " + ParseVoiceMailMetadata(file_path, mapVMData);
 			file_path.replace(file_path.length()-4,4,".wav");
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"WILL SHOW %s / %s",text.c_str(),file_path.c_str());
 
