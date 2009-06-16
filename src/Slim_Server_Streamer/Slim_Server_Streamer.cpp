@@ -302,9 +302,10 @@ void Slim_Server_Streamer::CMD_Stop_Streaming(int iStreamID,string sStreamingTar
 		currentPlayerAddress = getMacAddressForDevice(pPlayerDeviceData);
 
 		// break this players syncronization.
-        SendReceiveCommand(currentPlayerAddress + " sync -");
+	        SendReceiveCommand(currentPlayerAddress + " sync -");
 		SendReceiveCommand(currentPlayerAddress + " playlist clear");
 		SendReceiveCommand(currentPlayerAddress + " stop");
+		SendReceiveCommand(currentPlayerAddress + " power 0");
 
 		itPlaybackDevices = vectDevices.begin();
 		while ( itPlaybackDevices != vectDevices.end() && *itPlaybackDevices != pPlayerDeviceData )
