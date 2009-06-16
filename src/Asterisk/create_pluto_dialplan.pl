@@ -314,5 +314,8 @@ sub get_timeout()
     $DB_STATEMENT->finish();
 }									
 
+# Make sure all files are correctly owned by the asterisk user.
+
+`chown asterisk:asterisk /etc/asterisk/*`
 
 `asterisk -rx reload`;
