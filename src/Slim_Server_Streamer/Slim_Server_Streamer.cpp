@@ -635,7 +635,17 @@ void Slim_Server_Streamer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string
 	}
 
 	SetStateForStream(iStreamID, STATE_CHANGING);
-	SendReceiveCommand(sControlledPlayerMac + " playlist play " + StringUtils::URLEncode(string("file://") + StringUtils::Replace(&sMediaURL,"//", "/")));
+	
+	// tschak - adding an if here to handle other URL types. I am looking for two slashes in succession, if so, then 
+	// i simply do not prepend the URL stuff and decode it.
+	
+	if (sMediaURL.find("://") != string::npos)
+	{
+		SendReceiveCommand(sControlledPlayerMac + " playlist play " + StringUtils::URLEncode(StringUtils::Replace(&sMediaURL,"/", "/")));
+	} else 
+	{
+		SendReceiveCommand(sControlledPlayerMac + " playlist play " + StringUtils::URLEncode(string("file://") + StringUtils::Replace(&sMediaURL,"//", "/")));
+	}
 
 	string strResult = SendReceiveCommand(sControlledPlayerMac + " mode ?", false);
 	if( strResult == sControlledPlayerMac + " mode stop" || strResult == sControlledPlayerMac + " mode %3F" )
