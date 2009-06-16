@@ -256,4 +256,4 @@ sub add_embed_phones()
 }
 
 # fix some permisions
-`chown asterisk.asterisk /usr/share/asterisk/agi-bin/*`;
+`chown asterisk.asterisk /usr/share/asterisk/agi-bin/* /etc/asterisk/*`;
