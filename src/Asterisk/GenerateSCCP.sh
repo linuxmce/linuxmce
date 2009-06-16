@@ -140,3 +140,5 @@ while read line; do
 		echo "$lines"
 	fi
 done < <(sed 's/^/+/; s/$/+/' "$SCCPconfFile".template) >"$SCCPconfFile"
+`chown asterisk:asterisk /etc/asterisk/*`
+
