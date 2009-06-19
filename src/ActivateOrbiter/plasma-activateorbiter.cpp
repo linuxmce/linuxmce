@@ -69,13 +69,16 @@ bool PlasmaActivateorbiter::AOdeinitialize()
 
 void PlasmaActivateorbiter::AODeviceKeepAlive() 
 {
+	bool bTerminate = m_pActivate_Orbiter_Plasmoid->m_bTerminate;
+	bool bReload = m_pActivate_Orbiter_Plasmoid->m_bReload;
+
 	if (m_pActivate_Orbiter_Plasmoid) 
 	{
-		if (m_pActivate_Orbiter_Plasmoid->m_bTerminate) 
+		if (bTerminate) 
 		{
 			// Check for a reload.
 			AOdeinitialize();
-			if (m_pActivate_Orbiter_Plasmoid->m_bReload)
+			if (bReload)
 			{
 				// We need to reload
 				if (!AOinitialize()) 
