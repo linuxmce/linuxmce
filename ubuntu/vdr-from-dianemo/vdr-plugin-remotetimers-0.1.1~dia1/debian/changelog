@@ -1,3 +1,9 @@
+vdr-plugin-remotetimers (0.1.1-1~dia1.1) unstable; urgency=low
+
+  * Fixed patch list
+
+ -- Radu C <radu.cx@gmail.com>  Tue, 12 May 2009 00:21:38 +0100
+
 vdr-plugin-remotetimers (0.1.1-1~dia1) unstable; urgency=low
 
   * Packaged for Dianemo 0710

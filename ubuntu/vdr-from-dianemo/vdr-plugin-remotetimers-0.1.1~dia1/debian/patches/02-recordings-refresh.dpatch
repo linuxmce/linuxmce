@@ -6,14 +6,15 @@
 ## DP: reload the recordings list each time the menu is accessed
 
 @DPATCH@
-diff -ur remotetimers-0.1.1.orig/menu.c remotetimers-0.1.1/menu.c
---- remotetimers-0.1.1.orig/menu.c	2009-02-13 22:25:12.000000000 +0000
-+++ remotetimers-0.1.1/menu.c	2009-05-11 21:01:32.000000000 +0100
-@@ -1440,6 +1440,7 @@
- 
- void cMenuRecording::Display(void)
- {
-+  Recordings.Update();
-   cOsdMenu::Display();
-   DisplayMenu()->SetRecording(recording);
-   if (recording->Info()->Description())
+Index: menu.c
+===================================================================
+--- a/menu.c	(revision 629)
++++ b/menu.c	(working copy)
+@@ -1835,6 +1835,7 @@
+   SetFreeDiskDisplay(true);
+   OpenSubMenus |= replayEnded;
+   replayEnded = false;
++  Recordings.Update(true);
+   if (Current() < 0)
+      SetCurrent(First());
+   else if (OpenSubMenus && cReplayControl::LastReplayed() && Open(true))
