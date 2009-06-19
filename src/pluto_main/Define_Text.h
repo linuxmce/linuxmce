@@ -1107,6 +1107,22 @@
 #define TEXT_type_filename_CONST 2050
 #define TEXT_Start_rip_CONST 2051
 #define TEXT_Monitor_Mode_Off_CONST 2052
+#define TEXT_Previous_CONST 2053
+#define TEXT_Which_Wiimote_Mode_CONST 2054
+#define TEXT_Wiimote_IR_Pointer_CONST 2055
+#define TEXT_Wiimote_ACC_Pointer_CONST 2056
+#define TEXT_Cell_Using_MythTV_CONST 2057
+#define TEXT_Bookmark_Channel_MythTV_CONST 2058
+#define TEXT_15_s_CONST 2059
+#define TEXT_30_s_CONST 2060
+#define TEXT_1_m_CONST 2061
+#define TEXT_2_m_CONST 2062
+#define TEXT_4_m_CONST 2063
+#define TEXT_8_m_CONST 2064
+#define TEXT_Jog_CONST 2065
+#define TEXT_Voicemail_Timestamp_CONST 2066
+#define TEXT_Voicemail_Caller_ID_CONST 2067
+#define TEXT_Voicemail_Duration_CONST 2068
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"
