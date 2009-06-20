@@ -31,5 +31,5 @@ zvalue=0
 EOF
 
 # Rebuild the System Database. 
-/usr/bin/kbuildsycoca
+# /usr/bin/kbuildsycoca
 
