@@ -48,6 +48,7 @@
 //----------------------------------------------------------------------------------------------
 char CPlutoMOAppUi::GetCurrentDrive()
 {
+	bool bRes = false;
 	char cDrive = 'c';
 
 	TUint attr;
