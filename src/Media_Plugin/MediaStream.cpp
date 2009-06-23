@@ -34,6 +34,24 @@
 #include "pluto_media/Table_Attribute.h"
 #include "pluto_media/Define_AttributeType.h"
 #include "pluto_media/Table_Attribute_Settings.h"
+#include "pluto_media/Table_Attribute.h"
+#include "pluto_media/Table_Bookmark.h"
+#include "pluto_media/Table_File_Attribute.h"
+#include "pluto_media/Table_File.h"
+#include "pluto_media/Table_Disc.h"
+#include "pluto_media/Table_DiscLocation.h"
+#include "pluto_media/Table_Picture_Disc.h"
+#include "pluto_media/Table_Disc_Attribute.h"
+#include "pluto_media/Table_Playlist.h"
+#include "pluto_media/Table_Picture.h"
+#include "pluto_media/Table_Picture_File.h"
+#include "pluto_media/Table_Picture_Attribute.h"
+#include "pluto_media/Table_AttributeType.h"
+#include "pluto_media/Table_MediaType_AttributeType.h"
+#include "pluto_media/Table_MediaProvider.h"
+#include "pluto_media/Table_ProviderSource.h"
+#include "pluto_media/Table_LongAttribute.h"
+#include "pluto_media/Table_RipStatus.h"
 #include "pluto_main/Table_MediaType_DesignObj.h"
 #include "pluto_main/Table_DeviceTemplate_MediaType_DesignObj.h"
 
@@ -430,6 +448,20 @@ void MediaStream::UpdateDescriptions(bool bAllFiles,MediaFile *pMediaFile_In)
 
 			if( pMediaFile )
 				pMediaFile->m_sDescription = m_sSectionDescription;
+
+                       if( pMediaFile )
+                        {
+                                vector<Row_LongAttribute *> vectRow_LongAttribute;
+                                pMedia_Plugin->m_pDatabase_pluto_media->LongAttribute_get()->GetRows("FK_File=" + StringUtils::itos(pMediaFile->m_dwPK_File) + " AND FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Synopsis_CONST),&vectRow_LongAttribute);
+                                if( vectRow_LongAttribute.size() )
+                                        {
+                                                string sSynopsis = vectRow_LongAttribute[0]->Text_get();
+                                                StringUtils::Replace(&sSynopsis,"\t","");
+                                                m_sMediaSynopsis = sSynopsis;
+
+                                        }
+                        }
+
 		}
 		else if( pRow_Attribute_Title )
 				m_sMediaDescription = pRow_Attribute_Title->Name_get();
@@ -518,6 +550,24 @@ void MediaStream::UpdateDescriptions(bool bAllFiles,MediaFile *pMediaFile_In)
 			else
 				m_sMediaDescription = "<%=T" + StringUtils::itos(TEXT_Unknown_Disc_CONST) + "%>";
 		}
+
+		{
+			MediaFile *pMediaFile=NULL;
+			if ( !pMediaFile )
+				pMediaFile = GetCurrentMediaFile();
+	                if( pMediaFile && (pMediaFile->m_dwPK_File > 0))
+	                {
+	                        vector<Row_LongAttribute *> vectRow_LongAttribute;
+	                        pMedia_Plugin->m_pDatabase_pluto_media->LongAttribute_get()->GetRows("FK_File=" + StringUtils::itos(pMediaFile->m_dwPK_File) + " AND FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Synopsis_CONST),&vectRow_LongAttribute);
+	                        if( vectRow_LongAttribute.size() )
+      	                          {
+        	                                string sSynopsis = vectRow_LongAttribute[0]->Text_get();
+                	                        StringUtils::Replace(&sSynopsis,"\t","");
+                        	                m_sMediaSynopsis = sSynopsis;
+                                  }
+                	}
+		}
+
 	}
 
 	if( m_sMediaDescription.size()==0 )
@@ -536,6 +586,24 @@ void MediaStream::UpdateDescriptions(bool bAllFiles,MediaFile *pMediaFile_In)
 			m_sMediaDescription = pDeviceData_Router->m_sDescription;
 			if( pRow_MediaType )
 				m_sMediaDescription += "(" + pRow_MediaType->Description_get() + ")";
+		}
+	}
+
+	{
+		MediaFile *pMediaFile = NULL;
+		pMediaFile = GetCurrentMediaFile();
+		if( pMediaFile )
+		{
+			vector<Row_LongAttribute *> vectRow_LongAttribute;
+			pMedia_Plugin->m_pDatabase_pluto_media->LongAttribute_get()->GetRows("FK_File=" + StringUtils::itos(pMediaFile->m_dwPK_File) + " AND FK_AttributeType=" TOSTRING(ATTRIBUTETYPE_Synopsis_CONST),&vectRow_LongAttribute);
+			if( vectRow_LongAttribute.size() )
+			{
+				string sSynopsis = vectRow_LongAttribute[0]->Text_get();
+				StringUtils::Replace(&sSynopsis,"\t","");
+				m_sMediaSynopsis = sSynopsis;
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"BLARG Synopsis: %s",m_sMediaSynopsis.c_str());
+                	}
+
 		}
 	}
 }
