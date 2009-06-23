@@ -179,52 +179,49 @@ void Slim_Server_Streamer::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,s
 {
 	PLUTO_SAFETY_LOCK(dataMutexLock, m_dataStructureAccessMutex);
 
-    LoggerWrapper::GetInstance()->Write(LV_STATUS, "Processing Start streaming command for target devices: %s", sStreamingTargets.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Processing Start streaming command for target devices: %s", sStreamingTargets.c_str());
 
-    vector<string> vectPlayersIds;
-    vector<DeviceData_Base*> vectDevices;
+	vector<string> vectPlayersIds;
+	vector<DeviceData_Base*> vectDevices;
 
-    StringUtils::Tokenize(sStreamingTargets, ",", vectPlayersIds);
+	StringUtils::Tokenize(sStreamingTargets, ",", vectPlayersIds);
 
-    string lastPlayerAddress = "-";
-    string currentPlayerAddress = "-";
+	string currentPlayerAddress = "-";
 
-    vector<string>::iterator itPlayerIds = vectPlayersIds.begin();
-    while ( itPlayerIds != vectPlayersIds.end() )
-    {
-        int iPlayerId = atoi((*itPlayerIds).c_str());
+	vector<string>::iterator itPlayerIds;
+	for (itPlayerIds = vectPlayersIds.begin(); itPlayerIds != vectPlayersIds.end(); ++itPlayerIds)
+	{
+		int iPlayerId = atoi((*itPlayerIds).c_str());
 
-        if ( iPlayerId == 0 )
-        {
-            LoggerWrapper::GetInstance()->Write(LV_WARNING, "Player id string %s parsed to 0. Ignoring.", (*itPlayerIds).c_str() );
-			itPlayerIds++;
-            continue;
-        }
+		if (iPlayerId == 0)
+		{
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Player id string %s parsed to 0. Ignoring.", (*itPlayerIds).c_str());
+			continue;
+		}
 
-        DeviceData_Base *pPlayerDeviceData = m_pData->m_AllDevices.m_mapDeviceData_Base_Find(iPlayerId);
-        if ( pPlayerDeviceData == NULL )
-        {
-            LoggerWrapper::GetInstance()->Write(LV_WARNING, "Child with id: %d was not found. Ignoring", iPlayerId);
-			itPlayerIds++;
-            continue;
-        }
+		DeviceData_Base *pPlayerDeviceData = m_pData->m_AllDevices.m_mapDeviceData_Base_Find(iPlayerId);
+		if (pPlayerDeviceData == NULL)
+		{
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Child with id: %d was not found. Ignoring", iPlayerId);
+			continue;
+		}
 
-        currentPlayerAddress = getMacAddressForDevice(pPlayerDeviceData);
+		currentPlayerAddress = getMacAddressForDevice(pPlayerDeviceData);
 
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Slim_Server_Streamer::CMD_Start_Streaming() Making sure that the player \"%s\" is connected before doing anything.", StringUtils::URLDecode(currentPlayerAddress).c_str());
 		int nTries = 10;
-		while ( nTries && SendReceiveCommand(currentPlayerAddress + " connected ?") != currentPlayerAddress + " connected 1" )
+		while (nTries && SendReceiveCommand(currentPlayerAddress + " connected ?") != currentPlayerAddress + " connected 1")
 		{
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Slim_Server_Streamer::CMD_Start_Streaming() Not yet connected");
 			Sleep(500);
 			nTries--;
 		}
 
-		if ( nTries == 0 )
+		if (nTries == 0)
 		{
 			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Slim_Server_Streamer::CMD_Start_Streaming() Device %d (%s) with mac address %s was not detected as connected. Ignoring device.",
 				pPlayerDeviceData->m_dwPK_Device, pPlayerDeviceData->m_sDescription.c_str(), currentPlayerAddress.c_str());
-			return;
+			continue;
 		}
 		else
 		{
@@ -233,15 +230,11 @@ void Slim_Server_Streamer::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,s
 			SendReceiveCommand(currentPlayerAddress + " playlist clear"); // clear previous playlist (if any)
 			SendReceiveCommand(currentPlayerAddress + " playlist repeat 0"); // set the playlist to non repeating.
 			SendReceiveCommand(currentPlayerAddress + " sync -"); // break previous syncronization;
-        	SendReceiveCommand(currentPlayerAddress + " sync " + lastPlayerAddress); // synchronize with the last one.
-	        lastPlayerAddress = currentPlayerAddress;
 		}
-
-		itPlayerIds++;
-    }
+	}
 
 	// add this stream to the list of playing streams.
-    m_mapStreamsToPlayers[iStreamID] = make_pair(STATE_PAUSE, vectDevices);
+	m_mapStreamsToPlayers[iStreamID] = make_pair(STATE_PAUSE, vectDevices);
 	pthread_cond_signal(&m_stateChangedCondition);
 }
 
@@ -664,6 +657,17 @@ void Slim_Server_Streamer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string
 			SendReceiveCommand(sControlledPlayerMac + " stop");
 			SendReceiveCommand(sControlledPlayerMac + " playlist play " + StringUtils::URLEncode(string("file://") + StringUtils::Replace(&sMediaURL,"//", "/")));
 		}
+	}
+
+	// synchronize the rest of the devices in the stream's list with the main one
+	vector<DeviceData_Base *> *pvectDeviceData_Base = &(m_mapStreamsToPlayers[iStreamID].second);
+	vector<DeviceData_Base *>::iterator itDeviceData;
+	for (itDeviceData = pvectDeviceData_Base->begin(); itDeviceData != pvectDeviceData_Base->end(); ++itDeviceData)
+	{
+		string sMacCurrentDevice = getMacAddressForDevice(*itDeviceData);
+		if (sMacCurrentDevice == sControlledPlayerMac)
+			continue; // don't sync with ourselves
+		SendReceiveCommand(sControlledPlayerMac + " sync " + sMacCurrentDevice);
 	}
 
 //	if ( sMediaPosition != 0 )
