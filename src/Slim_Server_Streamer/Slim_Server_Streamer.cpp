@@ -226,10 +226,12 @@ void Slim_Server_Streamer::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,s
 		else
 		{
 			vectDevices.push_back(pPlayerDeviceData);
+#if 0
 			SendReceiveCommand(currentPlayerAddress + " stop"); // stop playback (if any)
 			SendReceiveCommand(currentPlayerAddress + " playlist clear"); // clear previous playlist (if any)
 			SendReceiveCommand(currentPlayerAddress + " playlist repeat 0"); // set the playlist to non repeating.
 			SendReceiveCommand(currentPlayerAddress + " sync -"); // break previous syncronization;
+#endif
 		}
 	}
 
@@ -628,6 +630,17 @@ void Slim_Server_Streamer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string
 		return;
 	}
 
+ 	// synchronize the rest of the devices in the stream's list with the main one
+ 	vector<DeviceData_Base *> *pvectDeviceData_Base = &(m_mapStreamsToPlayers[iStreamID].second);
+ 	vector<DeviceData_Base *>::iterator itDeviceData;
+ 	for (itDeviceData = pvectDeviceData_Base->begin(); itDeviceData != pvectDeviceData_Base->end(); ++itDeviceData)
+ 	{
+ 		string sMacCurrentDevice = getMacAddressForDevice(*itDeviceData);
+ 		if (sMacCurrentDevice == sControlledPlayerMac)
+ 			continue; // don't sync with ourselves
+ 		SendReceiveCommand(sControlledPlayerMac + " sync " + sMacCurrentDevice);
+ 	}
+ 
 	SetStateForStream(iStreamID, STATE_CHANGING);
 	
 	// tschak - adding an if here to handle other URL types. I am looking for two slashes in succession, if so, then 
@@ -641,6 +654,7 @@ void Slim_Server_Streamer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string
 		SendReceiveCommand(sControlledPlayerMac + " playlist play " + StringUtils::URLEncode(string("file://") + StringUtils::Replace(&sMediaURL,"//", "/")));
 	}
 
+#if 0
 	string strResult = SendReceiveCommand(sControlledPlayerMac + " mode ?", false);
 	if( strResult == sControlledPlayerMac + " mode stop" || strResult == sControlledPlayerMac + " mode %3F" )
 	{
@@ -658,17 +672,7 @@ void Slim_Server_Streamer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string
 			SendReceiveCommand(sControlledPlayerMac + " playlist play " + StringUtils::URLEncode(string("file://") + StringUtils::Replace(&sMediaURL,"//", "/")));
 		}
 	}
-
-	// synchronize the rest of the devices in the stream's list with the main one
-	vector<DeviceData_Base *> *pvectDeviceData_Base = &(m_mapStreamsToPlayers[iStreamID].second);
-	vector<DeviceData_Base *>::iterator itDeviceData;
-	for (itDeviceData = pvectDeviceData_Base->begin(); itDeviceData != pvectDeviceData_Base->end(); ++itDeviceData)
-	{
-		string sMacCurrentDevice = getMacAddressForDevice(*itDeviceData);
-		if (sMacCurrentDevice == sControlledPlayerMac)
-			continue; // don't sync with ourselves
-		SendReceiveCommand(sControlledPlayerMac + " sync " + sMacCurrentDevice);
-	}
+#endif
 
 //	if ( sMediaPosition != 0 )
 //		SendReceiveCommand(sControlledPlayerMac + " gototime " + StringUtils::itos(iMediaPosition / 1000));
