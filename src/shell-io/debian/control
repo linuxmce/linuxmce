@@ -1,0 +1,16 @@
+Source: shell-io
+Section: unknown
+Priority: extra
+Maintainer: Radu C <radu.cx@gmail.com>
+Build-Depends: debhelper (>= 5)
+Standards-Version: 3.7.2
+
+Package: shell-io
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Provides: fdselect
+Conflicts: fdselect
+Replaces: fdselect
+Description: I/O utilities for shell scripts
+ A collection of utilities that bring the I/O functions from libc to the shell.
+ Attempting to work around shell limitations regarding I/O.

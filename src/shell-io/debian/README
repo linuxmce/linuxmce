@@ -1,0 +1,36 @@
+The Debian Package shell-io
+----------------------------
+
+This package contains utilities to facilitate I/O operations in shell scripts.
+
+== Included commands:
+
+- fdread
+  Read content from a file descriptor and display it unprocessed
+- fdreadhex
+  Read content from a file descriptor and display its hex representation
+- fdreadenc
+  Read content from a file descriptor and display it with non-printable
+  characters in encoded form.
+- fdwrite
+  Take a string in encoded form, decode it, and write it to a file descriptor.
+
+== Usage:
+
+Var=$(fdread $fd)
+Var=$(fdreadhex $fd)
+Var=$(fdreadenc $fd)
+fdwrite $fd "string"
+ReadyFDs=$(fdselect $sec $msec $fd1 [$fd2...])
+
+== Encoding of non-printable characters:
+
+Characters with ASCII code below 32 or above 127 are encoded as %XX, where XX
+is the hex encoding. The percent sign is doubled when it is the wanted character.
+
+== Where do the file descriptors come from?
+
+You open them using "exec" in the shell script, and they are inherited by child
+processes, and that's why this works.
+
+ -- Radu C <radu.cx@gmail.com>  Fri, 01 May 2009 19:03:23 +0100
