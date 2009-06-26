@@ -633,6 +633,7 @@ void Slim_Server_Streamer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string
  	// synchronize the rest of the devices in the stream's list with the main one
  	vector<DeviceData_Base *> *pvectDeviceData_Base = &(m_mapStreamsToPlayers[iStreamID].second);
  	vector<DeviceData_Base *>::iterator itDeviceData;
+	SendReceiveCommand(sControlledPlayerMac + " sync -");
  	for (itDeviceData = pvectDeviceData_Base->begin(); itDeviceData != pvectDeviceData_Base->end(); ++itDeviceData)
  	{
  		string sMacCurrentDevice = getMacAddressForDevice(*itDeviceData);
