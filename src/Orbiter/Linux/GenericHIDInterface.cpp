@@ -91,7 +91,7 @@ bool GenericHIDInterface::DecodeEventInFD(int fd)
 
   struct input_event ev[64];
 
-  LoggerWrapper::GetInstance()->Write(LV_STATUS,"GenericHIDInterface::DecodeEventInFD() Begin");
+//  LoggerWrapper::GetInstance()->Write(LV_STATUS,"GenericHIDInterface::DecodeEventInFD() Begin");
   int rd;
 
   rd = read(fd, ev, sizeof(struct input_event) * 64);
@@ -126,7 +126,7 @@ bool GenericHIDInterface::DecodeEventInFD(int fd)
 	}
     }
   
-  LoggerWrapper::GetInstance()->Write(LV_STATUS,"GenericHIDInterface::DecodeEventInFD() End");
+//  LoggerWrapper::GetInstance()->Write(LV_STATUS,"GenericHIDInterface::DecodeEventInFD() End");
   return true;
 }
 
