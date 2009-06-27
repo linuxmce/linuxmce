@@ -97,7 +97,11 @@ using namespace DCE;
 #define KEY_DOWN_DURATION		1000
 
 #ifdef HID_REMOTE
-	#include "Linux/HIDInterface.h"
+#include "Linux/HIDInterface.h"
+#endif
+
+#ifdef HID_REMOTE
+#include "Linux/GenericHIDInterface.h"
 #endif
 
 //#define PROFILING_GRID
@@ -248,7 +252,9 @@ Orbiter::Orbiter( int DeviceID, int PK_DeviceTemplate, string ServerAddress,  st
 
 #ifdef HID_REMOTE
     m_pHIDInterface=NULL;
-	m_HidThreadID=(pthread_t)NULL;
+    m_HidThreadID=(pthread_t)NULL;
+    m_pGenericHIDInterface=NULL;
+    m_GenericHidThreadID=(pthread_t)NULL;
 #endif
 
 	m_MaintThreadID = (pthread_t)NULL;
@@ -371,6 +377,18 @@ Orbiter::~Orbiter()
 //<-dceag-dest-e->
 {
 #ifdef HID_REMOTE
+  if (m_GenericHidThreadID)
+  {
+    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Waiting for Generic HID Handler Thread to finish...");
+    pthread_join(m_GenericHidThreadID, NULL);
+    m_GenericHidThreadID = 0;
+  }
+  
+  delete m_pGenericHIDInterface;
+  m_pGenericHIDInterface = NULL;
+
+  LoggerWrapper::GetInstance()->Write(LV_STATUS, "Done with Generic HID Handler Thread");
+
 	if(m_HidThreadID)
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Waiting for HID thread to finish...");
@@ -759,6 +777,8 @@ void Orbiter::PostConnect()
 #ifdef HID_REMOTE
 	m_pHIDInterface=new PlutoHIDInterface(this);
 	pthread_create(&m_HidThreadID, NULL, ProcessHIDEvents, (void*)m_pHIDInterface);
+	m_pGenericHIDInterface=new GenericHIDInterface(this);
+	pthread_create(&m_GenericHidThreadID, NULL, ProcessGenericHIDEvents, (void*)m_pGenericHIDInterface);
 #endif
 
 }

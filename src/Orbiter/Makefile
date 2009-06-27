@@ -106,7 +106,8 @@ sources += \
 
 # Remove unnessesary libraries for Maemo Orbiter
 ifneq (MAEMO_NOKIA770,$(findstring MAEMO_NOKIA770, $(SNR_CPPFLAGS)))
-sources += Linux/HIDInterface.cpp
+sources += Linux/HIDInterface.cpp \
+	   Linux/GenericHIDInterface.cpp
 endif
 
 #<-dceag-mf-b->

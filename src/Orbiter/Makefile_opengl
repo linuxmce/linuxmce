@@ -46,6 +46,7 @@ sources += \
 	../utilities/linux/wrapper/image_file.cpp \
 	Linux/win_list_manager.cpp \
 	Linux/HIDInterface.cpp \
+	Linux/GenericHIDInterface.cpp \
 	Linux/OrbiterRenderer_Linux.cpp \
 	Linux/WindowContext.cpp \
 	DesignObj_Data.cpp \

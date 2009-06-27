@@ -60,6 +60,7 @@ class DataGridRenderer;
 /** For brevity,  DesignObj_Orbiter will be abbreviated Obj */
 #ifdef HID_REMOTE
 	class PlutoHIDInterface;
+        class GenericHIDInterface;
 #endif
 
 #define AUDIO_STATION_SKIN "NuForce"
@@ -151,6 +152,7 @@ namespace DCE
 		friend class ::ObjectRenderer;
 #ifdef HID_REMOTE
 		friend class ::PlutoHIDInterface;
+		friend class ::GenericHIDInterface;
 #endif
 
 #ifdef ENABLE_MOUSE_BEHAVIOR
@@ -238,7 +240,9 @@ namespace DCE
 #endif
 #ifdef HID_REMOTE
 		PlutoHIDInterface *m_pHIDInterface;
+		GenericHIDInterface *m_pGenericHIDInterface;
 		pthread_t m_HidThreadID;
+		pthread_t m_GenericHidThreadID;
 #endif
 		//<-dceag-const-b->!
 
