@@ -376,8 +376,6 @@ function mediaDirectors($output,$dbADO) {
 							<tr>
 								<td colspan="8" bgcolor="black" height="5"><img src="include/images/spacer.gif" border="0"></td>
 							</tr>						';
-						$setupDisklessMD=' <input type="button" class="button_fixed" name="setupDisklessMD" value="'.$TEXT_SETUP_DISKLESS_MD_CONST.' *" onClick="self.location=\'index.php?section=setupDisklessMD\';">';
-						$setupDisklessMDInfo='* '.$TEXT_DISKLESS_MD_NOTICE_CONST;
 					}
 				}
 			}
@@ -386,7 +384,7 @@ function mediaDirectors($output,$dbADO) {
 				<input type="hidden" name="displayedDevices" value="'.join(',',array_keys($displayedDevices)).'">';
 
 			if($resDevice->RecordCount()!=0){
-				$update_buttons='<input type="submit" class="button_fixed" name="update" value="'.$TEXT_UPDATE_CONST.'"> <input type="reset" class="button_fixed" name="cancelBtn" value="'.$TEXT_CANCEL_CONST.'">'.@$setupDisklessMD;
+				$update_buttons='<input type="submit" class="button_fixed" name="update" value="'.$TEXT_UPDATE_CONST.'"> <input type="reset" class="button_fixed" name="cancelBtn" value="'.$TEXT_CANCEL_CONST.'">';
 			}
 			$out.='
 				<tr>
@@ -396,7 +394,7 @@ function mediaDirectors($output,$dbADO) {
 					<td colspan="8" align="center">'.@$update_buttons.' <input type="button" class="button_fixed" name="button" value="'.$TEXT_ADD_MD_CONST.'" onClick="document.mediaDirectors.action.value=\'externalSubmit\';document.mediaDirectors.submit();windowOpen(\'index.php?section=deviceTemplatePicker&allowAdd=1&from=mediaDirectors&categoryID='.$deviceCategory.'\',\'width=800,height=600,toolbar=1,scrollbars=1,resizable=1\');"></td>
 				</tr>
 				<tr>
-					<td colspan="8" align="left">'.@$setupDisklessMDInfo.'</td>
+					<td colspan="8" align="left">&nbsp;</td>
 				</tr>			
 			</table>
 	</form>
