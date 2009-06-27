@@ -16,7 +16,7 @@ VDRInfoFileHandler::~VDRInfoFileHandler(void)
 {
 }
 //-----------------------------------------------------------------------------------------------------
-bool VDRInfoFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes, 
+bool VDRInfoFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 	list<pair<char *, size_t> >& /*listPicturesForTags*/)
 {
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# VDRInfoFileHandler::LoadAttributes: loading %d attributes in the attribute file %s",
@@ -58,7 +58,7 @@ bool VDRInfoFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttribu
 					break;
 			}
 
-			string sValue = sLine.substr(2, sLine.length() - 3);
+			string sValue = sLine.substr(2, sLine.length() - 2);
 			PlutoMediaAttribute *pma = new PlutoMediaAttribute(0, nAttributeType, sValue);
 
 			if(nAttributeType == ATTRIBUTETYPE_Synopsis_CONST)
@@ -78,7 +78,7 @@ bool VDRInfoFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttribu
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# VDRInfoFileHandler::SaveAttributes: saving %d attributes in the attribute file %s",
 		pPlutoMediaAttributes->m_mapAttributes.size(), GetFileAttribute().c_str());
 
-	for(MapPlutoMediaAttributes::iterator it = pPlutoMediaAttributes->m_mapAttributes.begin(); 
+	for(MapPlutoMediaAttributes::iterator it = pPlutoMediaAttributes->m_mapAttributes.begin();
 		it != pPlutoMediaAttributes->m_mapAttributes.end(); ++it)
 	{
 		char cAttributeType = '?';
