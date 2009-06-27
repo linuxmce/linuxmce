@@ -7,18 +7,40 @@ ntpdate ntp.ubuntu.com
 
 . ./mce-install-common.sh
 
-
 if [ ! -e /tmp/mce_wizard_data.sh ]
 then
 #	cp ./mce_wizard_data.sh /tmp
-	if ifconfig -a | grep -q '^eth1'
+	if [ `ifconfig -s | awk '$1 != "Iface" && $1 != "lo" { print $1 }' | wc -l` > 1 ]
 	then
 		cp ./mce_wizard_data-double_nic.sh /tmp/mce_wizard_data.sh
+		#Use these for the defaults if we cannot automatically determine which to use
+		#TODO: Error out and instruct the user to setup a working connection? Or ask them to manually choose?
+		extif="eth0"
+		intif="eth1"
+		if route -n | grep -q '^0.0.0.0'
+		then
+		  #We have a default route, use it for finding external interface.
+			extif=`route -n | awk '$1 == "0.0.0.0" { print $8 }'`
+			#Use the first available interface as the internal interface.
+		  for if in `ifconfig -s | awk '$1 != "Iface" && $1 != "lo" { print $1 }'`
+		  do
+			 if [ "$if" != "$extif" ]
+			 then
+				  intif=$if
+				  break
+			 fi
+		  done
+		fi
+		echo "Using $extif for external interface."
+		echo "Using $intif for internal interface"
+		
+		sed -e "s,\({extif}\),$extif,g" /tmp/mce_wizard_data.sh > /tmp/tmpfile && mv /tmp/tmpfile /tmp/mce_wizard_data.sh
+		sed -e "s,\({intif}\),$intif,g" /tmp/mce_wizard_data.sh > /tmp/tmpfile && mv /tmp/tmpfile /tmp/mce_wizard_data.sh
 	else
 		cp ./mce_wizard_data-single_nic.sh /tmp/mce_wizard_data.sh
 	fi
 fi
-
+exit
 rm -rf /tmp/mce_installer_error
 InstallerLogFile="/var/log/mce-installer-$(date +%Y%m%d_%H%M%S).log"
 exec &> >(tee $InstallerLogFile)
