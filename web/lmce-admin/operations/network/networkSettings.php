@@ -8,7 +8,7 @@ function networkSettings($output,$dbADO) {
 	/* @var $rs ADORecordSet */
 //	$dbADO->debug=true;
 	// # TODO - We should take wlan adapters into account as well, especially for the external network
-	$number_of_cards = exec('ip link|grep eth|grep -v ether|wc -l');
+	$number_of_cards = exec('/sbin/ifconfig -s | awk \'$1 != "Iface" && $1 != "lo" { print $1 }\' | wc -l');
 	$out='';
 	$action = isset($_REQUEST['action'])?cleanString($_REQUEST['action']):'form';
 	$installationID = (int)@$_SESSION['installationID'];
@@ -73,8 +73,8 @@ function networkSettings($output,$dbADO) {
 	}	
 
 	$swaphtml = "";
-	if ((@$externalInterfaceArray[0] === "eth0" && @$internalInterfaceArray[0] === "eth1")
-		|| (@$externalInterfaceArray[0] === "eth1" && @$internalInterfaceArray[0] === "eth0"))
+  if (!empty($externalInterfaceArray[0]) && !empty($internalInterfaceArray[0]))
+
 	{
 		$swaphtml = '<br><input type="submit" class="button" name="swap" value="Swap Interfaces"><br>';
 	}
@@ -304,8 +304,9 @@ function networkSettings($output,$dbADO) {
 		$externalInterface=$externalInterfaceArray[0];
 		$internalInterface=$internalInterfaceArray[0];
 		if(isset($_POST['swap'])){
-			$externalInterface=($externalInterface=='eth1')?'eth0':'eth1';
-			$internalInterface=($internalInterface=='eth1')?'eth0':'eth1';
+      $externalInterface=$internalInterfaceArray[0];
+      $internalInterface=$externalInterfaceArray[0];
+
 			$needReboot=1;
 		}
 		if($resNC->RecordCount()>0){
