@@ -26,6 +26,9 @@ namespace DCE
 	{
 //<-dceag-decl-e->
 		// Private member variables
+		int irtrans_socket;
+		struct sockaddr_in server_addr;
+		struct hostent *host;
 
 		// Private methods
 public:
