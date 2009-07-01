@@ -24,33 +24,45 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
-extern "C" {
+#include "pluto_main/Define_DeviceData.h"
+#include "pluto_main/Define_DeviceCategory.h"
 
 #include <sys/types.h>      
 #include <sys/socket.h>
 
-}
-//<-dceag-const-b->
+//<-dceag-const-b->!
 // The primary constructor when the class is created as a stand-alone device
 IRTrans_Ethernet::IRTrans_Ethernet(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
 	: IRTrans_Ethernet_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
+	, IRReceiverBase(this), VFD_LCD_Base(40,2,20)
 //<-dceag-const-e->
 {
 }
 
-//<-dceag-const2-b->
-// The constructor when the class is created as an embedded instance within another stand-alone device
+//<-dceag-const2-b->!
+/* The constructor when the class is created as an embedded instance within another stand-alone device
 IRTrans_Ethernet::IRTrans_Ethernet(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
-	: IRTrans_Ethernet_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
+	: IRTrans_Ethernet_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter) */
 //<-dceag-const2-e->
+
+
+// Must override so we can call IRBase::Start() after creating children
+void IRTrans_Ethernet::CreateChildren()
 {
+        IRTrans_Ethernet_Command::CreateChildren();
+        Start();
 }
 
-//<-dceag-dest-b->
-IRTrans_Ethernet::~IRTrans_Ethernet()
-//<-dceag-dest-e->
+void IRTrans_Ethernet::SendIR(string Port, string IRCode,int iRepeat)
 {
-	
+        LoggerWrapper::GetInstance()->Write(LV_STATUS,"IRTrans_Ethernet Sending: %s",IRCode.c_str());
+	string udpcommand;
+	udpcommand.assign("sndccf ");
+	udpcommand.append(IRCode);
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "sending udp payload: %s",udpcommand.c_str());
+	sendto(irtrans_socket, udpcommand.c_str(), udpcommand.length(), 0, (struct sockaddr *)&server_addr, sizeof(struct sockaddr));
+
+
 }
 
 //<-dceag-getconfig-b->
@@ -60,8 +72,15 @@ bool IRTrans_Ethernet::GetConfig()
 		return false;
 //<-dceag-getconfig-e->
 
-	// Put your code here to initialize the data in this class
-	// The configuration parameters DATA_ are now populated
+	if( m_dwPK_Device!=DEVICEID_MESSAGESEND ) {
+		if( !m_Virtual_Device_Translator.GetConfig(m_pData) )
+			return false;
+
+		IRReceiverBase::GetConfig(m_pData);
+		IRBase::setCommandImpl(this);
+		IRBase::setAllDevices(&(GetData()->m_AllDevices));
+	}
+	
 
 	// read hostname string from device data
 	host= (struct hostent *) gethostbyname((char *)GetIpAddress().c_str());
@@ -82,6 +101,13 @@ bool IRTrans_Ethernet::GetConfig()
 	return true;
 }
 
+//<-dceag-dest-b->
+IRTrans_Ethernet::~IRTrans_Ethernet()
+//<-dceag-dest-e->
+{
+	
+}
+
 //<-dceag-reg-b->
 // This function will only be used if this device is loaded into the DCE Router's memory space as a plug-in.  Otherwise Connect() will be called from the main()
 bool IRTrans_Ethernet::Register()
@@ -90,14 +116,7 @@ bool IRTrans_Ethernet::Register()
 	return Connect(PK_DeviceTemplate_get()); 
 }
 
-/*  Since several parents can share the same child class, and each has it's own implementation, the base class in Gen_Devices
-	cannot include the actual implementation.  Instead there's an extern function declared, and the actual new exists here.  You 
-	can safely remove this block (put a ! after the dceag-createinst-b block) if this device is not embedded within other devices. */
-//<-dceag-createinst-b->
-IRTrans_Ethernet_Command *Create_IRTrans_Ethernet(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
-{
-	return new IRTrans_Ethernet(pPrimaryDeviceCommand, pData, pEvent, pRouter);
-}
+//<-dceag-createinst-b->!
 //<-dceag-createinst-e->
 
 /*
@@ -131,6 +150,15 @@ void IRTrans_Ethernet::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl
 		return;
 	}
 
+
+	// Let the IR Base class try to handle the message
+        if ( IRBase::ProcessMessage(pMessage) )
+        {
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Message %d processed by IRBase class",pMessage->m_dwID);
+		sCMD_Result = "OK";
+		return;
+	}
+
 	sCMD_Result = "UNHANDLED CHILD";
 }
 
@@ -143,7 +171,7 @@ void IRTrans_Ethernet::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl
 void IRTrans_Ethernet::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 //<-dceag-cmduk-e->
 {
-	sCMD_Result = "UNKNOWN COMMAND";
+	sCMD_Result = "UNKNOWN DEVICE";
 }
 
 //<-dceag-sample-b->!

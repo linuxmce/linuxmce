@@ -16,4 +16,12 @@ IRTrans_Ethernet.o IRTrans_Ethernet.d : IRTrans_Ethernet.cpp IRTrans_Ethernet.h 
   ../Gen_Devices/../pluto_main/Define_Event.h \
   ../Gen_Devices/../pluto_main/Define_EventParameter.h \
   ../Gen_Devices/../pluto_main/Define_DeviceData.h \
-  ../Gen_Devices/AllCommandsRequests.h ../DCE/PreformedCommand.h
+  ../LIRC_DCE/IRReceiverBase.h ../DCE/Command_Impl.h \
+  ../DCE/Virtual_Device_Translator.h ../VFD_LCD/VFD_LCD_Base.h \
+  ../VFD_LCD/MenuStructure.h ../VFD_LCD/MenuNode.h ../IRBase/IRBase.h \
+  ../MessageTranslation/AVMessageTranslation.h \
+  ../MessageTranslation/DefaultMessageTranslation.h \
+  ../MessageTranslation/MessageTranslation.h ../DCE/DeviceData_Base.h \
+  ../PlutoUtils/ProcessUtils.h ../pluto_main/Define_Command.h \
+  ../Gen_Devices/AllCommandsRequests.h ../DCE/PreformedCommand.h \
+  ../pluto_main/Define_DeviceData.h
