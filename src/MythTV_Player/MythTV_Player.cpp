@@ -773,8 +773,10 @@ void MythTV_Player::CMD_PIP_Channel_Down(string &sCMD_Result,Message *pMessage)
 
 	/** @brief COMMAND: #190 - Enter/Go */
 	/** Select the currently highlighted menu item */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
-void MythTV_Player::CMD_EnterGo(string &sCMD_Result,Message *pMessage)
+void MythTV_Player::CMD_EnterGo(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c190-e->
 {
 	PLUTO_SAFETY_LOCK(mm,m_MythMutex);
@@ -786,8 +788,10 @@ void MythTV_Player::CMD_EnterGo(string &sCMD_Result,Message *pMessage)
 
 	/** @brief COMMAND: #200 - Move Up */
 	/** Move the highlighter */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
-void MythTV_Player::CMD_Move_Up(string &sCMD_Result,Message *pMessage)
+void MythTV_Player::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c200-e->
 {
 	PLUTO_SAFETY_LOCK(mm,m_MythMutex);
@@ -799,8 +803,10 @@ void MythTV_Player::CMD_Move_Up(string &sCMD_Result,Message *pMessage)
 
 	/** @brief COMMAND: #201 - Move Down */
 	/** Move the highlighter */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
-void MythTV_Player::CMD_Move_Down(string &sCMD_Result,Message *pMessage)
+void MythTV_Player::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c201-e->
 {
 	PLUTO_SAFETY_LOCK(mm,m_MythMutex);
@@ -812,8 +818,10 @@ void MythTV_Player::CMD_Move_Down(string &sCMD_Result,Message *pMessage)
 
 	/** @brief COMMAND: #202 - Move Left */
 	/** Move the highlighter */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
-void MythTV_Player::CMD_Move_Left(string &sCMD_Result,Message *pMessage)
+void MythTV_Player::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c202-e->
 {
 	PLUTO_SAFETY_LOCK(mm,m_MythMutex);
@@ -826,8 +834,10 @@ void MythTV_Player::CMD_Move_Left(string &sCMD_Result,Message *pMessage)
 
 	/** @brief COMMAND: #203 - Move Right */
 	/** Move the highlighter */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
-void MythTV_Player::CMD_Move_Right(string &sCMD_Result,Message *pMessage)
+void MythTV_Player::CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c203-e->
 {
 	PLUTO_SAFETY_LOCK(mm,m_MythMutex);
@@ -959,8 +969,10 @@ void MythTV_Player::CMD_9(string &sCMD_Result,Message *pMessage)
 
 	/** @brief COMMAND: #240 - Back / Prior Menu */
 	/** Navigate back .. ( Escape ) */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
-void MythTV_Player::CMD_Back_Prior_Menu(string &sCMD_Result,Message *pMessage)
+void MythTV_Player::CMD_Back_Prior_Menu(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c240-e->
 {
 	PLUTO_SAFETY_LOCK(mm,m_MythMutex);
@@ -1173,8 +1185,10 @@ void MythTV_Player::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int i
 	/** Jump to a specific position in the playlist, or a track, or a chapter.  Smart media players should also understand the skip fwd/skip back (which non-DCE media players use) to be the same thing as a jump +1 or -1 */
 		/** @param #5 Value To Assign */
 			/** The track to go to.  A number is considered an absolute.  "+2" means forward 2, "-1" means back 1. */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
-void MythTV_Player::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,string &sCMD_Result,Message *pMessage)
+void MythTV_Player::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c65-e->
 {
 #ifndef WIN32
@@ -1240,10 +1254,12 @@ void MythTV_Player::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,s
 	/** Send a key to the device's OSD, or simulate keypresses on the device's panel */
 		/** @param #26 PK_Button */
 			/** What key to simulate being pressed.  If 2 numbers are specified, separated by a comma, the second will be used if the Shift key is specified. */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 		/** @param #50 Name */
 			/** The application to send the keypress to. If not specified, it goes to the DCE device. */
 
-void MythTV_Player::CMD_Simulate_Keypress(string sPK_Button,string sName,string &sCMD_Result,Message *pMessage)
+void MythTV_Player::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName,string &sCMD_Result,Message *pMessage)
 //<-dceag-c28-e->
 {
 	PLUTO_SAFETY_LOCK(mm,m_MythMutex);
@@ -1317,8 +1333,10 @@ void MythTV_Player::CMD_Simulate_Keypress(string sPK_Button,string sName,string 
 			/** position X */
 		/** @param #12 Position Y */
 			/** position Y */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
-void MythTV_Player::CMD_Simulate_Mouse_Click(int iPosition_X,int iPosition_Y,string &sCMD_Result,Message *pMessage)
+void MythTV_Player::CMD_Simulate_Mouse_Click(int iPosition_X,int iPosition_Y,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c29-e->
 {
 }
@@ -1409,8 +1427,10 @@ void MythTV_Player::CMD_Text(string &sCMD_Result,Message *pMessage)
 	/** Show a menu associated with this media */
 		/** @param #9 Text */
 			/** A string indicating which menu should appear.  The parameter is only used for smart media devices */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
-void MythTV_Player::CMD_Menu(string sText,string &sCMD_Result,Message *pMessage)
+void MythTV_Player::CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c548-e->
 {
 	PLUTO_SAFETY_LOCK(mm,m_MythMutex);
@@ -1647,10 +1667,12 @@ bool MythTV_Player::StopMythFrontend()
 
 	/** @brief COMMAND: #916 - Set Aspect Ratio */
 	/** Force aspect ratio */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 		/** @param #260 Aspect Ratio */
 			/** aspect ratio to set: auto, 1:1, 4:3, 16:9, 2.11:1 */
 
-void MythTV_Player::CMD_Set_Aspect_Ratio(string sAspect_Ratio,string &sCMD_Result,Message *pMessage)
+void MythTV_Player::CMD_Set_Aspect_Ratio(int iStreamID,string sAspect_Ratio,string &sCMD_Result,Message *pMessage)
 //<-dceag-c916-e->
 {
 }
@@ -1658,10 +1680,175 @@ void MythTV_Player::CMD_Set_Aspect_Ratio(string sAspect_Ratio,string &sCMD_Resul
 
 	/** @brief COMMAND: #917 - Set Zoom */
 	/** Sets zoom level, relative, absolute or 'auto' */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 		/** @param #261 Zoom Level */
 			/** Zoom level to set */
 
-void MythTV_Player::CMD_Set_Zoom(string sZoom_Level,string &sCMD_Result,Message *pMessage)
+void MythTV_Player::CMD_Set_Zoom(int iStreamID,string sZoom_Level,string &sCMD_Result,Message *pMessage)
 //<-dceag-c917-e->
 {
 }
+//<-dceag-c63-b->
+
+	/** @brief COMMAND: #63 - Skip Fwd - Channel/Track Greater */
+	/** VDR chan + */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+void MythTV_Player::CMD_Skip_Fwd_ChannelTrack_Greater(int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c63-e->
+//<-dceag-c64-b->
+
+	/** @brief COMMAND: #64 - Skip Back - Channel/Track Lower */
+	/** VDR chan - */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+void MythTV_Player::CMD_Skip_Back_ChannelTrack_Lower(int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c64-e->
+//<-dceag-c92-b->
+
+	/** @brief COMMAND: #92 - Pause */
+	/** VDR pause */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+void MythTV_Player::CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c92-e->
+//<-dceag-c95-b->
+
+	/** @brief COMMAND: #95 - Stop */
+	/** VDR stop */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+		/** @param #203 Eject */
+			/** If true, the drive will be ejected if there is no media currently playing, so a remote's stop button acts as stop/eject. */
+
+void MythTV_Player::CMD_Stop(int iStreamID,bool bEject,string &sCMD_Result,Message *pMessage)
+//<-dceag-c95-e->
+//<-dceag-c97-b->
+
+	/** @brief COMMAND: #97 - Mute */
+	/** VDR mute */
+
+void MythTV_Player::CMD_Mute(string &sCMD_Result,Message *pMessage)
+//<-dceag-c97-e->
+//<-dceag-c124-b->
+
+	/** @brief COMMAND: #124 - Favorites */
+	/** Show favorites */
+
+void MythTV_Player::CMD_Favorites(string &sCMD_Result,Message *pMessage)
+//<-dceag-c124-e->
+//<-dceag-c139-b->
+
+	/** @brief COMMAND: #139 - Play */
+	/** vdr play */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+void MythTV_Player::CMD_Play(int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c139-e->
+//<-dceag-c368-b->
+
+	/** @brief COMMAND: #368 - Help */
+	/** Help */
+
+void MythTV_Player::CMD_Help(string &sCMD_Result,Message *pMessage)
+//<-dceag-c368-e->
+//<-dceag-c455-b->
+
+	/** @brief COMMAND: #455 - Blue */
+	/** VDR blue */
+
+void MythTV_Player::CMD_Blue(string &sCMD_Result,Message *pMessage)
+//<-dceag-c455-e->
+//<-dceag-c476-b->
+
+	/** @brief COMMAND: #476 - Day Down */
+	/** Day + */
+
+void MythTV_Player::CMD_Day_Down(string &sCMD_Result,Message *pMessage)
+//<-dceag-c476-e->
+//<-dceag-c477-b->
+
+	/** @brief COMMAND: #477 - Day Up */
+	/** Day - */
+
+void MythTV_Player::CMD_Day_Up(string &sCMD_Result,Message *pMessage)
+//<-dceag-c477-e->
+//<-dceag-c518-b->
+
+	/** @brief COMMAND: #518 - Green */
+	/** VDR Green */
+
+void MythTV_Player::CMD_Green(string &sCMD_Result,Message *pMessage)
+//<-dceag-c518-e->
+//<-dceag-c528-b->
+
+	/** @brief COMMAND: #528 - Instant Replay */
+	/** Instant replay */
+
+void MythTV_Player::CMD_Instant_Replay(string &sCMD_Result,Message *pMessage)
+//<-dceag-c528-e->
+//<-dceag-c535-b->
+
+	/** @brief COMMAND: #535 - Last Play */
+	/** Last */
+
+void MythTV_Player::CMD_Last_Play(string &sCMD_Result,Message *pMessage)
+//<-dceag-c535-e->
+//<-dceag-c571-b->
+
+	/** @brief COMMAND: #571 - Page Down */
+	/** Page + */
+
+void MythTV_Player::CMD_Page_Down(string &sCMD_Result,Message *pMessage)
+//<-dceag-c571-e->
+//<-dceag-c572-b->
+
+	/** @brief COMMAND: #572 - Page Up */
+	/** Page - */
+
+void MythTV_Player::CMD_Page_Up(string &sCMD_Result,Message *pMessage)
+//<-dceag-c572-e->
+//<-dceag-c592-b->
+
+	/** @brief COMMAND: #592 - PVR Menu */
+	/** Show the pvr menu */
+
+void MythTV_Player::CMD_PVR_Menu(string &sCMD_Result,Message *pMessage)
+//<-dceag-c592-e->
+//<-dceag-c605-b->
+
+	/** @brief COMMAND: #605 - Red */
+	/** VDR red */
+
+void MythTV_Player::CMD_Red(string &sCMD_Result,Message *pMessage)
+//<-dceag-c605-e->
+//<-dceag-c682-b->
+
+	/** @brief COMMAND: #682 - Yellow */
+	/** VDR yellow */
+
+void MythTV_Player::CMD_Yellow(string &sCMD_Result,Message *pMessage)
+//<-dceag-c682-e->
+//<-dceag-c919-b->
+
+	/** @brief COMMAND: #919 - On Demand */
+	/** Go to Video on demand */
+
+void MythTV_Player::CMD_On_Demand(string &sCMD_Result,Message *pMessage)
+//<-dceag-c919-e->
+//<-dceag-c920-b->
+
+	/** @brief COMMAND: #920 - Set Media ID */
+	/** Set Media ID - information about media stream */
+		/** @param #10 ID */
+			/** Media ID (special format) */
+		/** @param #41 StreamID */
+			/** ID of stream to set media information for */
+
+void MythTV_Player::CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c920-e->

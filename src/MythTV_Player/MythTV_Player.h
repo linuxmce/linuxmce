@@ -120,6 +120,7 @@ public:
 	/*
 			*****DATA***** accessors inherited from base class
 	string DATA_Get_Name();
+	bool DATA_Get_Only_One_Per_PC();
 
 			*****EVENT***** accessors inherited from base class
 	void EVENT_Playback_Info_Changed(string sMediaDescription,string sSectionDescription,string sSynposisDescription);
@@ -136,11 +137,13 @@ public:
 	/** Send a key to the device's OSD, or simulate keypresses on the device's panel */
 		/** @param #26 PK_Button */
 			/** What key to simulate being pressed.  If 2 numbers are specified, separated by a comma, the second will be used if the Shift key is specified. */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 		/** @param #50 Name */
 			/** The application to send the keypress to. If not specified, it goes to the DCE device. */
 
-	virtual void CMD_Simulate_Keypress(string sPK_Button,string sName) { string sCMD_Result; CMD_Simulate_Keypress(sPK_Button.c_str(),sName.c_str(),sCMD_Result,NULL);};
-	virtual void CMD_Simulate_Keypress(string sPK_Button,string sName,string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName) { string sCMD_Result; CMD_Simulate_Keypress(sPK_Button.c_str(),iStreamID,sName.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #29 - Simulate Mouse Click */
@@ -149,9 +152,11 @@ public:
 			/** position X */
 		/** @param #12 Position Y */
 			/** position Y */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
-	virtual void CMD_Simulate_Mouse_Click(int iPosition_X,int iPosition_Y) { string sCMD_Result; CMD_Simulate_Mouse_Click(iPosition_X,iPosition_Y,sCMD_Result,NULL);};
-	virtual void CMD_Simulate_Mouse_Click(int iPosition_X,int iPosition_Y,string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Simulate_Mouse_Click(int iPosition_X,int iPosition_Y,int iStreamID) { string sCMD_Result; CMD_Simulate_Mouse_Click(iPosition_X,iPosition_Y,iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Simulate_Mouse_Click(int iPosition_X,int iPosition_Y,int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #32 - Update Object Image */
@@ -237,13 +242,33 @@ public:
 	virtual void CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
+	/** @brief COMMAND: #63 - Skip Fwd - Channel/Track Greater */
+	/** VDR chan + */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+	virtual void CMD_Skip_Fwd_ChannelTrack_Greater(int iStreamID) { string sCMD_Result; CMD_Skip_Fwd_ChannelTrack_Greater(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Skip_Fwd_ChannelTrack_Greater(int iStreamID,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #64 - Skip Back - Channel/Track Lower */
+	/** VDR chan - */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+	virtual void CMD_Skip_Back_ChannelTrack_Lower(int iStreamID) { string sCMD_Result; CMD_Skip_Back_ChannelTrack_Lower(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Skip_Back_ChannelTrack_Lower(int iStreamID,string &sCMD_Result,Message *pMessage);
+
+
 	/** @brief COMMAND: #65 - Jump Position In Playlist */
 	/** Jump to a specific position in the playlist, or a track, or a chapter.  Smart media players should also understand the skip fwd/skip back (which non-DCE media players use) to be the same thing as a jump +1 or -1 */
 		/** @param #5 Value To Assign */
 			/** The track to go to.  A number is considered an absolute.  "+2" means forward 2, "-1" means back 1. */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
-	virtual void CMD_Jump_Position_In_Playlist(string sValue_To_Assign) { string sCMD_Result; CMD_Jump_Position_In_Playlist(sValue_To_Assign.c_str(),sCMD_Result,NULL);};
-	virtual void CMD_Jump_Position_In_Playlist(string sValue_To_Assign,string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID) { string sCMD_Result; CMD_Jump_Position_In_Playlist(sValue_To_Assign.c_str(),iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #81 - Navigate Next */
@@ -301,10 +326,37 @@ public:
 	/** @brief COMMAND: #91 - Input Select */
 	/** toggle inputs */
 		/** @param #71 PK_Command_Input */
-			/** The Input to select, or 0=toggle  */
+			/** The Input to select, or 0=toggle */
 
 	virtual void CMD_Input_Select(int iPK_Command_Input) { string sCMD_Result; CMD_Input_Select(iPK_Command_Input,sCMD_Result,NULL);};
 	virtual void CMD_Input_Select(int iPK_Command_Input,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #92 - Pause */
+	/** VDR pause */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+	virtual void CMD_Pause(int iStreamID) { string sCMD_Result; CMD_Pause(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #95 - Stop */
+	/** VDR stop */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+		/** @param #203 Eject */
+			/** If true, the drive will be ejected if there is no media currently playing, so a remote's stop button acts as stop/eject. */
+
+	virtual void CMD_Stop(int iStreamID,bool bEject) { string sCMD_Result; CMD_Stop(iStreamID,bEject,sCMD_Result,NULL);};
+	virtual void CMD_Stop(int iStreamID,bool bEject,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #97 - Mute */
+	/** VDR mute */
+
+	virtual void CMD_Mute() { string sCMD_Result; CMD_Mute(sCMD_Result,NULL);};
+	virtual void CMD_Mute(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #102 - Record */
@@ -321,6 +373,13 @@ public:
 
 	virtual void CMD_Info(string sText) { string sCMD_Result; CMD_Info(sText.c_str(),sCMD_Result,NULL);};
 	virtual void CMD_Info(string sText,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #124 - Favorites */
+	/** Show favorites */
+
+	virtual void CMD_Favorites() { string sCMD_Result; CMD_Favorites(sCMD_Result,NULL);};
+	virtual void CMD_Favorites(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #126 - Guide */
@@ -344,6 +403,15 @@ public:
 	virtual void CMD_PIP_Channel_Down(string &sCMD_Result,Message *pMessage);
 
 
+	/** @brief COMMAND: #139 - Play */
+	/** vdr play */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+	virtual void CMD_Play(int iStreamID) { string sCMD_Result; CMD_Play(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Play(int iStreamID,string &sCMD_Result,Message *pMessage);
+
+
 	/** @brief COMMAND: #187 - Tune to channel */
 	/** This will make the device to tune to a specific channel. */
 		/** @param #39 Options */
@@ -357,37 +425,47 @@ public:
 
 	/** @brief COMMAND: #190 - Enter/Go */
 	/** Select the currently highlighted menu item */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
-	virtual void CMD_EnterGo() { string sCMD_Result; CMD_EnterGo(sCMD_Result,NULL);};
-	virtual void CMD_EnterGo(string &sCMD_Result,Message *pMessage);
+	virtual void CMD_EnterGo(int iStreamID) { string sCMD_Result; CMD_EnterGo(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_EnterGo(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #200 - Move Up */
 	/** Move the highlighter */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
-	virtual void CMD_Move_Up() { string sCMD_Result; CMD_Move_Up(sCMD_Result,NULL);};
-	virtual void CMD_Move_Up(string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Move_Up(int iStreamID) { string sCMD_Result; CMD_Move_Up(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #201 - Move Down */
 	/** Move the highlighter */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
-	virtual void CMD_Move_Down() { string sCMD_Result; CMD_Move_Down(sCMD_Result,NULL);};
-	virtual void CMD_Move_Down(string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Move_Down(int iStreamID) { string sCMD_Result; CMD_Move_Down(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #202 - Move Left */
 	/** Move the highlighter */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
-	virtual void CMD_Move_Left() { string sCMD_Result; CMD_Move_Left(sCMD_Result,NULL);};
-	virtual void CMD_Move_Left(string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Move_Left(int iStreamID) { string sCMD_Result; CMD_Move_Left(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #203 - Move Right */
 	/** Move the highlighter */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
-	virtual void CMD_Move_Right() { string sCMD_Result; CMD_Move_Right(sCMD_Result,NULL);};
-	virtual void CMD_Move_Right(string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Move_Right(int iStreamID) { string sCMD_Result; CMD_Move_Right(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #204 - 0 */
@@ -462,9 +540,11 @@ public:
 
 	/** @brief COMMAND: #240 - Back / Prior Menu */
 	/** Navigate back .. ( Escape ) */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
-	virtual void CMD_Back_Prior_Menu() { string sCMD_Result; CMD_Back_Prior_Menu(sCMD_Result,NULL);};
-	virtual void CMD_Back_Prior_Menu(string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Back_Prior_Menu(int iStreamID) { string sCMD_Result; CMD_Back_Prior_Menu(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Back_Prior_Menu(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #249 - Start Streaming */
@@ -504,6 +584,13 @@ public:
 	virtual void CMD_Text(string &sCMD_Result,Message *pMessage);
 
 
+	/** @brief COMMAND: #368 - Help */
+	/** Help */
+
+	virtual void CMD_Help() { string sCMD_Result; CMD_Help(sCMD_Result,NULL);};
+	virtual void CMD_Help(string &sCMD_Result,Message *pMessage);
+
+
 	/** @brief COMMAND: #412 - Set Media Position */
 	/** Jump to a certain media position */
 		/** @param #41 StreamID */
@@ -515,13 +602,92 @@ public:
 	virtual void CMD_Set_Media_Position(int iStreamID,string sMediaPosition,string &sCMD_Result,Message *pMessage);
 
 
+	/** @brief COMMAND: #455 - Blue */
+	/** VDR blue */
+
+	virtual void CMD_Blue() { string sCMD_Result; CMD_Blue(sCMD_Result,NULL);};
+	virtual void CMD_Blue(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #476 - Day Down */
+	/** Day + */
+
+	virtual void CMD_Day_Down() { string sCMD_Result; CMD_Day_Down(sCMD_Result,NULL);};
+	virtual void CMD_Day_Down(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #477 - Day Up */
+	/** Day - */
+
+	virtual void CMD_Day_Up() { string sCMD_Result; CMD_Day_Up(sCMD_Result,NULL);};
+	virtual void CMD_Day_Up(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #518 - Green */
+	/** VDR Green */
+
+	virtual void CMD_Green() { string sCMD_Result; CMD_Green(sCMD_Result,NULL);};
+	virtual void CMD_Green(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #528 - Instant Replay */
+	/** Instant replay */
+
+	virtual void CMD_Instant_Replay() { string sCMD_Result; CMD_Instant_Replay(sCMD_Result,NULL);};
+	virtual void CMD_Instant_Replay(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #535 - Last Play */
+	/** Last */
+
+	virtual void CMD_Last_Play() { string sCMD_Result; CMD_Last_Play(sCMD_Result,NULL);};
+	virtual void CMD_Last_Play(string &sCMD_Result,Message *pMessage);
+
+
 	/** @brief COMMAND: #548 - Menu */
 	/** Show a menu associated with this media */
 		/** @param #9 Text */
 			/** A string indicating which menu should appear.  The parameter is only used for smart media devices */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
-	virtual void CMD_Menu(string sText) { string sCMD_Result; CMD_Menu(sText.c_str(),sCMD_Result,NULL);};
-	virtual void CMD_Menu(string sText,string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Menu(string sText,int iStreamID) { string sCMD_Result; CMD_Menu(sText.c_str(),iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #571 - Page Down */
+	/** Page + */
+
+	virtual void CMD_Page_Down() { string sCMD_Result; CMD_Page_Down(sCMD_Result,NULL);};
+	virtual void CMD_Page_Down(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #572 - Page Up */
+	/** Page - */
+
+	virtual void CMD_Page_Up() { string sCMD_Result; CMD_Page_Up(sCMD_Result,NULL);};
+	virtual void CMD_Page_Up(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #592 - PVR Menu */
+	/** Show the pvr menu */
+
+	virtual void CMD_PVR_Menu() { string sCMD_Result; CMD_PVR_Menu(sCMD_Result,NULL);};
+	virtual void CMD_PVR_Menu(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #605 - Red */
+	/** VDR red */
+
+	virtual void CMD_Red() { string sCMD_Result; CMD_Red(sCMD_Result,NULL);};
+	virtual void CMD_Red(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #682 - Yellow */
+	/** VDR yellow */
+
+	virtual void CMD_Yellow() { string sCMD_Result; CMD_Yellow(sCMD_Result,NULL);};
+	virtual void CMD_Yellow(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #762 - Live TV */
@@ -584,21 +750,42 @@ public:
 
 	/** @brief COMMAND: #916 - Set Aspect Ratio */
 	/** Force aspect ratio */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 		/** @param #260 Aspect Ratio */
 			/** aspect ratio to set: auto, 1:1, 4:3, 16:9, 2.11:1 */
 
-	virtual void CMD_Set_Aspect_Ratio(string sAspect_Ratio) { string sCMD_Result; CMD_Set_Aspect_Ratio(sAspect_Ratio.c_str(),sCMD_Result,NULL);};
-	virtual void CMD_Set_Aspect_Ratio(string sAspect_Ratio,string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Set_Aspect_Ratio(int iStreamID,string sAspect_Ratio) { string sCMD_Result; CMD_Set_Aspect_Ratio(iStreamID,sAspect_Ratio.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Set_Aspect_Ratio(int iStreamID,string sAspect_Ratio,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #917 - Set Zoom */
 	/** Sets zoom level, relative, absolute or 'auto' */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 		/** @param #261 Zoom Level */
 			/** Zoom level to set */
 
-	virtual void CMD_Set_Zoom(string sZoom_Level) { string sCMD_Result; CMD_Set_Zoom(sZoom_Level.c_str(),sCMD_Result,NULL);};
-	virtual void CMD_Set_Zoom(string sZoom_Level,string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Set_Zoom(int iStreamID,string sZoom_Level) { string sCMD_Result; CMD_Set_Zoom(iStreamID,sZoom_Level.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Set_Zoom(int iStreamID,string sZoom_Level,string &sCMD_Result,Message *pMessage);
 
+
+	/** @brief COMMAND: #919 - On Demand */
+	/** Go to Video on demand */
+
+	virtual void CMD_On_Demand() { string sCMD_Result; CMD_On_Demand(sCMD_Result,NULL);};
+	virtual void CMD_On_Demand(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #920 - Set Media ID */
+	/** Set Media ID - information about media stream */
+		/** @param #10 ID */
+			/** Media ID (special format) */
+		/** @param #41 StreamID */
+			/** ID of stream to set media information for */
+
+	virtual void CMD_Set_Media_ID(string sID,int iStreamID) { string sCMD_Result; CMD_Set_Media_ID(sID.c_str(),iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
 };

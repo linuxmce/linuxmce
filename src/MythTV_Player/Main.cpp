@@ -183,8 +183,8 @@ int main(int argc, char* argv[])
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",PK_Device,sRouter_IP.c_str());
 
-	bool bAppError = false;
-	bool bReload = false;
+	bool bAppError=false;
+	bool bReload=false;
 	try
 	{
 		MythTV_Player *pMythTV_Player = new MythTV_Player(PK_Device, sRouter_IP,true,bLocalMode);
