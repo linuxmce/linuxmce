@@ -1127,7 +1127,8 @@ void Orbiter_Plugin::CMD_New_Orbiter(string sType,int iPK_Users,int iPK_DeviceTe
 		}
 		else if( sType=="Symbian60" )
 		{
-			iPK_DeviceTemplate=DEVICETEMPLATE_Symbian_Series_60_mobile_CONST;
+			iPK_DeviceTemplate=DEVICETEMPLATE_Symbian_S60_v1v2_CONST;
+			// iPK_DeviceTemplate=DEVICETEMPLATE_Symbian_Series_60_mobile_CONST;
 			PK_UI=UI_Symbian_Series_60_Phone_CONST;
 			iWidth=176;
 			iHeight=208;
