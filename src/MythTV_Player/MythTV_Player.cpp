@@ -755,7 +755,7 @@ void MythTV_Player::CMD_PIP_Channel_Up(string &sCMD_Result,Message *pMessage)
 //<-dceag-c129-e->
 {
 	PLUTO_SAFETY_LOCK(mm,m_MythMutex);
-	CMD_Move_Up(sCMD_Result, pMessage);
+	CMD_Move_Up(0, sCMD_Result, pMessage);
 }
 
 //<-dceag-c130-b->
@@ -767,7 +767,7 @@ void MythTV_Player::CMD_PIP_Channel_Down(string &sCMD_Result,Message *pMessage)
 //<-dceag-c130-e->
 {
 	PLUTO_SAFETY_LOCK(mm,m_MythMutex);
-	CMD_Move_Down(sCMD_Result, pMessage);
+	CMD_Move_Down(0, sCMD_Result, pMessage);
 }
 //<-dceag-c190-b->
 
@@ -1698,6 +1698,8 @@ void MythTV_Player::CMD_Set_Zoom(int iStreamID,string sZoom_Level,string &sCMD_R
 
 void MythTV_Player::CMD_Skip_Fwd_ChannelTrack_Greater(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c63-e->
+{
+}
 //<-dceag-c64-b->
 
 	/** @brief COMMAND: #64 - Skip Back - Channel/Track Lower */
@@ -1707,6 +1709,8 @@ void MythTV_Player::CMD_Skip_Fwd_ChannelTrack_Greater(int iStreamID,string &sCMD
 
 void MythTV_Player::CMD_Skip_Back_ChannelTrack_Lower(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c64-e->
+{
+}
 //<-dceag-c92-b->
 
 	/** @brief COMMAND: #92 - Pause */
@@ -1716,6 +1720,8 @@ void MythTV_Player::CMD_Skip_Back_ChannelTrack_Lower(int iStreamID,string &sCMD_
 
 void MythTV_Player::CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c92-e->
+{
+}
 //<-dceag-c95-b->
 
 	/** @brief COMMAND: #95 - Stop */
@@ -1727,6 +1733,8 @@ void MythTV_Player::CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessag
 
 void MythTV_Player::CMD_Stop(int iStreamID,bool bEject,string &sCMD_Result,Message *pMessage)
 //<-dceag-c95-e->
+{
+}
 //<-dceag-c97-b->
 
 	/** @brief COMMAND: #97 - Mute */
@@ -1734,6 +1742,8 @@ void MythTV_Player::CMD_Stop(int iStreamID,bool bEject,string &sCMD_Result,Messa
 
 void MythTV_Player::CMD_Mute(string &sCMD_Result,Message *pMessage)
 //<-dceag-c97-e->
+{
+}
 //<-dceag-c124-b->
 
 	/** @brief COMMAND: #124 - Favorites */
@@ -1741,6 +1751,8 @@ void MythTV_Player::CMD_Mute(string &sCMD_Result,Message *pMessage)
 
 void MythTV_Player::CMD_Favorites(string &sCMD_Result,Message *pMessage)
 //<-dceag-c124-e->
+{
+}
 //<-dceag-c139-b->
 
 	/** @brief COMMAND: #139 - Play */
@@ -1750,6 +1762,8 @@ void MythTV_Player::CMD_Favorites(string &sCMD_Result,Message *pMessage)
 
 void MythTV_Player::CMD_Play(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c139-e->
+{
+}
 //<-dceag-c368-b->
 
 	/** @brief COMMAND: #368 - Help */
@@ -1757,6 +1771,8 @@ void MythTV_Player::CMD_Play(int iStreamID,string &sCMD_Result,Message *pMessage
 
 void MythTV_Player::CMD_Help(string &sCMD_Result,Message *pMessage)
 //<-dceag-c368-e->
+{
+}
 //<-dceag-c455-b->
 
 	/** @brief COMMAND: #455 - Blue */
@@ -1764,6 +1780,10 @@ void MythTV_Player::CMD_Help(string &sCMD_Result,Message *pMessage)
 
 void MythTV_Player::CMD_Blue(string &sCMD_Result,Message *pMessage)
 //<-dceag-c455-e->
+{
+	PLUTO_SAFETY_LOCK(mm, m_MythMutex);
+	sendMythCommand("key f5");
+}
 //<-dceag-c476-b->
 
 	/** @brief COMMAND: #476 - Day Down */
@@ -1771,6 +1791,8 @@ void MythTV_Player::CMD_Blue(string &sCMD_Result,Message *pMessage)
 
 void MythTV_Player::CMD_Day_Down(string &sCMD_Result,Message *pMessage)
 //<-dceag-c476-e->
+{
+}
 //<-dceag-c477-b->
 
 	/** @brief COMMAND: #477 - Day Up */
@@ -1778,6 +1800,8 @@ void MythTV_Player::CMD_Day_Down(string &sCMD_Result,Message *pMessage)
 
 void MythTV_Player::CMD_Day_Up(string &sCMD_Result,Message *pMessage)
 //<-dceag-c477-e->
+{
+}
 //<-dceag-c518-b->
 
 	/** @brief COMMAND: #518 - Green */
@@ -1785,6 +1809,10 @@ void MythTV_Player::CMD_Day_Up(string &sCMD_Result,Message *pMessage)
 
 void MythTV_Player::CMD_Green(string &sCMD_Result,Message *pMessage)
 //<-dceag-c518-e->
+{
+	PLUTO_SAFETY_LOCK(mm, m_MythMutex);
+	sendMythCommand("key f3");
+}
 //<-dceag-c528-b->
 
 	/** @brief COMMAND: #528 - Instant Replay */
@@ -1792,6 +1820,8 @@ void MythTV_Player::CMD_Green(string &sCMD_Result,Message *pMessage)
 
 void MythTV_Player::CMD_Instant_Replay(string &sCMD_Result,Message *pMessage)
 //<-dceag-c528-e->
+{
+}
 //<-dceag-c535-b->
 
 	/** @brief COMMAND: #535 - Last Play */
@@ -1799,6 +1829,8 @@ void MythTV_Player::CMD_Instant_Replay(string &sCMD_Result,Message *pMessage)
 
 void MythTV_Player::CMD_Last_Play(string &sCMD_Result,Message *pMessage)
 //<-dceag-c535-e->
+{
+}
 //<-dceag-c571-b->
 
 	/** @brief COMMAND: #571 - Page Down */
@@ -1806,6 +1838,8 @@ void MythTV_Player::CMD_Last_Play(string &sCMD_Result,Message *pMessage)
 
 void MythTV_Player::CMD_Page_Down(string &sCMD_Result,Message *pMessage)
 //<-dceag-c571-e->
+{
+}
 //<-dceag-c572-b->
 
 	/** @brief COMMAND: #572 - Page Up */
@@ -1813,6 +1847,8 @@ void MythTV_Player::CMD_Page_Down(string &sCMD_Result,Message *pMessage)
 
 void MythTV_Player::CMD_Page_Up(string &sCMD_Result,Message *pMessage)
 //<-dceag-c572-e->
+{
+}
 //<-dceag-c592-b->
 
 	/** @brief COMMAND: #592 - PVR Menu */
@@ -1820,6 +1856,8 @@ void MythTV_Player::CMD_Page_Up(string &sCMD_Result,Message *pMessage)
 
 void MythTV_Player::CMD_PVR_Menu(string &sCMD_Result,Message *pMessage)
 //<-dceag-c592-e->
+{
+}
 //<-dceag-c605-b->
 
 	/** @brief COMMAND: #605 - Red */
@@ -1827,6 +1865,10 @@ void MythTV_Player::CMD_PVR_Menu(string &sCMD_Result,Message *pMessage)
 
 void MythTV_Player::CMD_Red(string &sCMD_Result,Message *pMessage)
 //<-dceag-c605-e->
+{
+	PLUTO_SAFETY_LOCK(mm, m_MythMutex);
+	sendMythCommand("key f2");
+}
 //<-dceag-c682-b->
 
 	/** @brief COMMAND: #682 - Yellow */
@@ -1834,6 +1876,10 @@ void MythTV_Player::CMD_Red(string &sCMD_Result,Message *pMessage)
 
 void MythTV_Player::CMD_Yellow(string &sCMD_Result,Message *pMessage)
 //<-dceag-c682-e->
+{
+	PLUTO_SAFETY_LOCK(mm, m_MythMutex);
+	sendMythCommand("key f4");
+}
 //<-dceag-c919-b->
 
 	/** @brief COMMAND: #919 - On Demand */
@@ -1841,6 +1887,8 @@ void MythTV_Player::CMD_Yellow(string &sCMD_Result,Message *pMessage)
 
 void MythTV_Player::CMD_On_Demand(string &sCMD_Result,Message *pMessage)
 //<-dceag-c919-e->
+{
+}
 //<-dceag-c920-b->
 
 	/** @brief COMMAND: #920 - Set Media ID */
@@ -1852,3 +1900,5 @@ void MythTV_Player::CMD_On_Demand(string &sCMD_Result,Message *pMessage)
 
 void MythTV_Player::CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c920-e->
+{
+}
