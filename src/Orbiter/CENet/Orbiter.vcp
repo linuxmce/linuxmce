@@ -118,8 +118,8 @@ RSC=rc.exe
 # ADD RSC /l 0x409 /d UNDER_CE=$(CEVersion) /d _WIN32_WCE=$(CEVersion) /d "NDEBUG" /d "UNICODE" /d "_UNICODE" /d "$(CePlatform)" /d "ARM" /d "_ARM_" /d "ARMV4" /r
 CPP=clarm.exe
 # ADD BASE CPP /nologo /W3 /D _WIN32_WCE=$(CEVersion) /D "$(CePlatform)" /D "ARM" /D "_ARM_" /D "ARMV4" /D UNDER_CE=$(CEVersion) /D "UNICODE" /D "_UNICODE" /D "NDEBUG" /Yu"stdafx.h" /O2 /M$(CECrtMT) /c
-# ADD CPP /nologo /D _WIN32_WCE=$(CEVersion) /D "$(CePlatform)" /D "ARM" /D "_ARM_" /D "ARMV4" /D UNDER_CE=$(CEVersion) /D "UNICODE" /D "_UNICODE" /D "NDEBUG" /O2 /M$(CECrtMT) /c
-# SUBTRACT CPP /YX /Yc /Yu
+# ADD CPP /nologo /GR /Zi /Gy /I "." /I ".." /I "../Win32" /I "../SDL" /I "../.." /I "../../DCE" /I "../../../libs/Libraries/pthreads-snap-2002-11-04" /I "../../../libs/Libraries/pthreads-win32/include" /I "../../../libs/CrossPlatform/sge030809-w32/src" /I "../../../libs/CrossPlatform/SDL_ttf-2.0.6" /I "../../../libs/CrossPlatform/SDL_image-1.2.3" /I "../../../libs/CrossPlatform/SDL-1.2.7/include" /I "../../Splitter" /I "../../../libs/CrossPlatform/zlib" /I "../../../libs/CrossPlatform/lpng127" /I "../../../libs/Libraries/STLport-4.5.3/stlport" /I "../../../libs/Libraries/STLport-4.5.3/src" /I "../../PlutoUtils" /I "../../../libs/CrossPlatform/SDL_rotozoom-1.6" /I "../../OrbiterGen" /D "ARM" /D "_ARM_" /D "ARMV4" /D UNDER_CE=$(CEVersion) /D _WIN32_WCE=$(CEVersion) /D "$(CePlatform)" /D "UNICODE" /D "_UNICODE" /D "WIN32" /D "WINCE" /D "ORBITER" /D "__STL_NO_IOSTREAMS" /D "LOAD_PNG" /I /pluto/trunk" /M$(CECrtMT) " /c
+# SUBTRACT CPP /Fr
 MTL=midl.exe
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
@@ -128,7 +128,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 commctrl.lib coredll.lib /nologo /base:"0x00010000" /stack:0x10000,0x1000 /entry:"WinMainCRTStartup" /nodefaultlib:"$(CENoDefaultLib)" /subsystem:$(CESubsystem) /align:"4096" /MACHINE:ARM
-# ADD LINK32 commctrl.lib coredll.lib /nologo /base:"0x00010000" /stack:0x10000,0x1000 /entry:"WinMainCRTStartup" /nodefaultlib:"$(CENoDefaultLib)" /subsystem:$(CESubsystem) /align:"4096" /MACHINE:ARM
+# ADD LINK32 commctrl.lib coredll.lib aygshell.lib PthreadsCE.lib winsock.lib sdl.lib sdl_image_wince.lib sdl_ttf_wince.lib freetype_wince.lib zlib_wince.lib ccrtrtti.lib sge_wince.lib lpng_wince.lib sdlrotozoom-wince-pluto-d.lib /nologo /base:"0x00010000" /stack:0x10000,0x1000 /entry:"WinMainCRTStartup" /incremental:yes /nodefaultlib:"$(CENoDefaultLib)" /out:"../../bin/OrbiterCE_SDL.exe" /libpath:"Ritti/ArmV4" /libpath:"../../../libs/CrossPlatform/zlib/zlib_wince/ARMV4Dbg" /libpath:"../../../libs/CrossPlatform/sge030809-w32/sge_wince/ARMV4Dbg" /libpath:"../../../libs/CrossPlatform/lpng127/lpng_wince/ARMV4Dbg\\" /libpath:"../../../libs/CrossPlatform/SDL_rotozoom-1.6/WinCE/ARMV4Dbg" /libpath:"../../../libs/CrossPlatform/SDL-1.2.7/VisualCE/SDL/ARMV4Dbg" /libpath:"../../../libs/CrossPlatform/SDL_image-1.2.3/WINCE/ARMV4Dbg" /libpath:"../../../libs/CrossPlatform/lpng127/lpng_wince/ARMV4Dbg" /libpath:"../../../libs/Libraries/pthreads-snap-2002-11-04/PthreadsCE/ARMDbg" /libpath:"../../../libs/CrossPlatform/SDL_ttf-2.0.6/WinCE/ARMV4Dbg" /libpath:"../../../libs/CrossPlatform/freetype-2.1.9/freetype_wince/ARMV4Dbg" /libpath:""../../CrossPlatform-Libs/SDL_image-1.2.3/WINCE/ARMV4Dbg"" /libpath:""../../CrossPlatform-Libs/SDL_ttf-2.0.6/WinCE/ARMV4Dbg"" /libpath:""c:\pluto\trunk\CrossPlatform-Libs\freetype-2.1.9\freetype_wince\ARMV4Dbg\"" /libpath:""../../CrossPlatform-Libs/SDL-1.2.7/VisualCE/SDL/ARMV4Dbg"" /libpath:""../../Libraries/pthreads-snap-2002-11-04/PthreadsCE/ARMDbg"" /libpath:""C:\Program /libpath:""../../CrossPlatform-Libs/SDL-1.2.7/VisualC7/SDL/Debug"" /libpath:""../../CrossPlatform-Libs/SDL_image-1.2.3/VisualC/Debug"" /libpath:""../../CrossPlatform-Libs/SDL_ttf-2.0.6/VisualC/Debug"" /libpath:""../../CrossPlatform-Libs/sge030809-w32/sge-msvc/sge/VisualC/Debug"" /libpath:""../../CrossPlatform-Libs/lpng127/projects/visualc6/Win32_DLL_Debug"" /libpath:""../../CrossPlatform-Libs/zlib/projects/visualc6/Win32_DLL_Debug"" /subsystem:$(CESubsystem) /align:"4096" /MACHINE:THUMB
 
 !ELSEIF  "$(CFG)" == "Orbiter - Win32 (WCE ARMV4) Debug"
 
@@ -578,7 +578,6 @@ DEP_CPP_COMMA=\
 	"..\..\PlutoUtils\getch.h"\
 	"..\..\PlutoUtils\MultiThreadIncludes.h"\
 	"..\..\PlutoUtils\MyMap.h"\
-	"..\..\PlutoUtils\MySQLHelper.h"\
 	"..\..\PlutoUtils\MyStl.h"\
 	"..\..\PlutoUtils\MyString.h"\
 	"..\..\PlutoUtils\Other.h"\
@@ -587,6 +586,7 @@ DEP_CPP_COMMA=\
 	".\wince.h"\
 	
 NODEP_CPP_COMMA=\
+	"..\..\PlutoUtils\MySQLHelper.h"\
 	"..\..\PlutoUtils\PKFUNCS.H"\
 	
 
@@ -1127,7 +1127,6 @@ DEP_CPP_DESIG=\
 	"..\..\PlutoUtils\GraphicFormat.h"\
 	"..\..\PlutoUtils\MultiThreadIncludes.h"\
 	"..\..\PlutoUtils\MyMap.h"\
-	"..\..\PlutoUtils\MySQLHelper.h"\
 	"..\..\PlutoUtils\MyStl.h"\
 	"..\..\PlutoUtils\MyString.h"\
 	"..\..\PlutoUtils\Other.h"\
@@ -1143,6 +1142,7 @@ DEP_CPP_DESIG=\
 	".\wince.h"\
 	
 NODEP_CPP_DESIG=\
+	"..\..\PlutoUtils\MySQLHelper.h"\
 	"..\..\PlutoUtils\PKFUNCS.H"\
 	
 
@@ -2619,13 +2619,13 @@ DEP_CPP_MAIN_=\
 	".\resource.h"\
 	".\stdafx.h"\
 	".\wince.h"\
-	{$(INCLUDE)}"aygshell.h"\
-	{$(INCLUDE)}"sipapi.h"\
-	{$(INCLUDE)}"winuserm.h"\
 	
 NODEP_CPP_MAIN_=\
 	"..\..\..\..\..\Program Files\Windows CE Tools\wce420\POCKET PC 2003\Include\ARMV4\vibrate.h"\
 	"..\..\PlutoUtils\PKFUNCS.H"\
+	".\inuserm.h"\
+	".\ipapi.h"\
+	".\ygshell.h"\
 	
 
 !ELSEIF  "$(CFG)" == "Orbiter - Win32 (WCE x86) Debug x86"
@@ -2794,13 +2794,13 @@ DEP_CPP_MAIND=\
 	".\resource.h"\
 	".\stdafx.h"\
 	".\wince.h"\
-	{$(INCLUDE)}"aygshell.h"\
-	{$(INCLUDE)}"sipapi.h"\
-	{$(INCLUDE)}"winuserm.h"\
 	
 NODEP_CPP_MAIND=\
 	"..\..\..\..\..\Program Files\Windows CE Tools\wce420\POCKET PC 2003\Include\ARMV4\vibrate.h"\
 	"..\..\PlutoUtils\PKFUNCS.H"\
+	".\inuserm.h"\
+	".\ipapi.h"\
+	".\ygshell.h"\
 	
 
 !ELSEIF  "$(CFG)" == "Orbiter - Win32 (WCE x86) Debug x86"
@@ -3161,14 +3161,27 @@ NODEP_CPP_MULTI=\
 
 !ELSEIF  "$(CFG)" == "Orbiter - Win32 (WCE ARMV4) Release"
 
+DEP_CPP_MULTI=\
+	"..\..\..\libs\Libraries\pthreads-snap-2002-11-04\config.h"\
+	"..\..\..\libs\Libraries\pthreads-snap-2002-11-04\need_errno.h"\
+	"..\..\..\libs\Libraries\pthreads-snap-2002-11-04\pthread.h"\
+	"..\..\..\libs\Libraries\pthreads-snap-2002-11-04\sched.h"\
+	"..\..\DCE\Logger.h"\
+	"..\..\DCE\PlutoLockLogger.h"\
+	"..\..\PlutoUtils\CommonIncludes.h"\
+	"..\..\PlutoUtils\FileUtils.h"\
+	"..\..\PlutoUtils\getch.h"\
+	"..\..\PlutoUtils\MultiThreadIncludes.h"\
+	"..\..\PlutoUtils\MyMap.h"\
+	"..\..\PlutoUtils\MyStl.h"\
+	"..\..\PlutoUtils\MyString.h"\
+	"..\..\PlutoUtils\Other.h"\
+	"..\..\PlutoUtils\StringUtils.h"\
+	"..\..\SerializeClass\SerializeClass.h"\
+	".\wince.h"\
+	
 NODEP_CPP_MULTI=\
-	"..\..\PlutoUtils\DCE\Logger.h"\
-	"..\..\PlutoUtils\PlutoUtils\CommonIncludes.h"\
-	"..\..\PlutoUtils\PlutoUtils\FileUtils.h"\
-	"..\..\PlutoUtils\PlutoUtils\MultiThreadIncludes.h"\
-	"..\..\PlutoUtils\PlutoUtils\Other.h"\
-	"..\..\PlutoUtils\PlutoUtils\StringUtils.h"\
-	"..\..\PlutoUtils\wince.h"\
+	"..\..\PlutoUtils\PKFUNCS.H"\
 	
 
 !ELSEIF  "$(CFG)" == "Orbiter - Win32 (WCE ARMV4) Debug"
@@ -3920,13 +3933,13 @@ DEP_CPP_ORBIT=\
 	"..\Win32\StartOrbiter.h"\
 	".\stdafx.h"\
 	".\wince.h"\
-	{$(INCLUDE)}"aygshell.h"\
-	{$(INCLUDE)}"sipapi.h"\
-	{$(INCLUDE)}"winuserm.h"\
 	
 NODEP_CPP_ORBIT=\
 	"..\..\..\..\..\Program Files\Windows CE Tools\wce420\POCKET PC 2003\Include\ARMV4\vibrate.h"\
 	"..\..\PlutoUtils\PKFUNCS.H"\
+	".\inuserm.h"\
+	".\ipapi.h"\
+	".\ygshell.h"\
 	
 
 !ELSEIF  "$(CFG)" == "Orbiter - Win32 (WCE x86) Debug x86"
@@ -4879,13 +4892,13 @@ DEP_CPP_ORBITERRE=\
 	"..\Win32\StartOrbiter.h"\
 	".\stdafx.h"\
 	".\wince.h"\
-	{$(INCLUDE)}"aygshell.h"\
-	{$(INCLUDE)}"sipapi.h"\
-	{$(INCLUDE)}"winuserm.h"\
 	
 NODEP_CPP_ORBITERRE=\
 	"..\..\..\..\..\Program Files\Windows CE Tools\wce420\POCKET PC 2003\Include\ARMV4\vibrate.h"\
 	"..\..\PlutoUtils\PKFUNCS.H"\
+	".\inuserm.h"\
+	".\ipapi.h"\
+	".\ygshell.h"\
 	
 
 !ELSEIF  "$(CFG)" == "Orbiter - Win32 (WCE x86) Debug x86"
@@ -5216,13 +5229,13 @@ DEP_CPP_ORBITERREN=\
 	"..\Win32\VirtualKeysTranslator.h"\
 	".\stdafx.h"\
 	".\wince.h"\
-	{$(INCLUDE)}"aygshell.h"\
-	{$(INCLUDE)}"sipapi.h"\
-	{$(INCLUDE)}"winuserm.h"\
 	
 NODEP_CPP_ORBITERREN=\
 	"..\..\..\..\..\Program Files\Windows CE Tools\wce420\POCKET PC 2003\Include\ARMV4\vibrate.h"\
 	"..\..\PlutoUtils\PKFUNCS.H"\
+	".\inuserm.h"\
+	".\ipapi.h"\
+	".\ygshell.h"\
 	
 
 !ELSEIF  "$(CFG)" == "Orbiter - Win32 (WCE x86) Debug x86"
@@ -5800,13 +5813,13 @@ DEP_CPP_POPUP=\
 	"..\Win32\StartOrbiter.h"\
 	".\resource.h"\
 	".\stdafx.h"\
-	{$(INCLUDE)}"aygshell.h"\
-	{$(INCLUDE)}"sipapi.h"\
-	{$(INCLUDE)}"winuserm.h"\
 	
 NODEP_CPP_POPUP=\
 	"..\..\..\..\..\Program Files\Windows CE Tools\wce420\POCKET PC 2003\Include\ARMV4\vibrate.h"\
 	"..\..\PlutoUtils\PKFUNCS.H"\
+	".\inuserm.h"\
+	".\ipapi.h"\
+	".\ygshell.h"\
 	
 
 !ELSEIF  "$(CFG)" == "Orbiter - Win32 (WCE x86) Debug x86"
@@ -5967,12 +5980,12 @@ DEP_CPP_PROGR=\
 	"..\Win32\StartOrbiter.h"\
 	".\resource.h"\
 	".\stdafx.h"\
-	{$(INCLUDE)}"aygshell.h"\
-	{$(INCLUDE)}"sipapi.h"\
-	{$(INCLUDE)}"winuserm.h"\
 	
 NODEP_CPP_PROGR=\
 	"..\..\..\..\..\Program Files\Windows CE Tools\wce420\POCKET PC 2003\Include\ARMV4\vibrate.h"\
+	".\inuserm.h"\
+	".\ipapi.h"\
+	".\ygshell.h"\
 	
 
 !ELSEIF  "$(CFG)" == "Orbiter - Win32 (WCE x86) Debug x86"
@@ -7383,13 +7396,13 @@ DEP_CPP_SELFU=\
 	"..\Win32\StartOrbiter.h"\
 	".\stdafx.h"\
 	".\wince.h"\
-	{$(INCLUDE)}"aygshell.h"\
-	{$(INCLUDE)}"sipapi.h"\
-	{$(INCLUDE)}"winuserm.h"\
 	
 NODEP_CPP_SELFU=\
 	"..\..\..\..\..\Program Files\Windows CE Tools\wce420\POCKET PC 2003\Include\ARMV4\vibrate.h"\
 	"..\..\PlutoUtils\PKFUNCS.H"\
+	".\inuserm.h"\
+	".\ipapi.h"\
+	".\ygshell.h"\
 	
 
 !ELSEIF  "$(CFG)" == "Orbiter - Win32 (WCE x86) Debug x86"
@@ -7776,13 +7789,13 @@ DEP_CPP_SIMUL=\
 	"..\Win32\StartOrbiter.h"\
 	".\stdafx.h"\
 	".\wince.h"\
-	{$(INCLUDE)}"aygshell.h"\
-	{$(INCLUDE)}"sipapi.h"\
-	{$(INCLUDE)}"winuserm.h"\
 	
 NODEP_CPP_SIMUL=\
 	"..\..\..\..\..\Program Files\Windows CE Tools\wce420\POCKET PC 2003\Include\ARMV4\vibrate.h"\
 	"..\..\PlutoUtils\PKFUNCS.H"\
+	".\inuserm.h"\
+	".\ipapi.h"\
+	".\ygshell.h"\
 	
 
 !ELSEIF  "$(CFG)" == "Orbiter - Win32 (WCE x86) Debug x86"
@@ -8074,13 +8087,13 @@ DEP_CPP_START=\
 	"..\Win32\StartOrbiter.h"\
 	".\stdafx.h"\
 	".\wince.h"\
-	{$(INCLUDE)}"aygshell.h"\
-	{$(INCLUDE)}"sipapi.h"\
-	{$(INCLUDE)}"winuserm.h"\
 	
 NODEP_CPP_START=\
 	"..\..\..\..\..\Program Files\Windows CE Tools\wce420\POCKET PC 2003\Include\ARMV4\vibrate.h"\
 	"..\..\PlutoUtils\PKFUNCS.H"\
+	".\inuserm.h"\
+	".\ipapi.h"\
+	".\ygshell.h"\
 	
 
 !ELSEIF  "$(CFG)" == "Orbiter - Win32 (WCE x86) Debug x86"
@@ -8327,7 +8340,6 @@ DEP_CPP_TEXTST=\
 	"..\..\PlutoUtils\getch.h"\
 	"..\..\PlutoUtils\MultiThreadIncludes.h"\
 	"..\..\PlutoUtils\MyMap.h"\
-	"..\..\PlutoUtils\MySQLHelper.h"\
 	"..\..\PlutoUtils\MyStl.h"\
 	"..\..\PlutoUtils\MyString.h"\
 	"..\..\PlutoUtils\Other.h"\
@@ -8338,6 +8350,7 @@ DEP_CPP_TEXTST=\
 	".\wince.h"\
 	
 NODEP_CPP_TEXTST=\
+	"..\..\PlutoUtils\MySQLHelper.h"\
 	"..\..\PlutoUtils\PKFUNCS.H"\
 	
 
