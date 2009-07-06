@@ -118,7 +118,7 @@ bool GenericHIDInterface::DecodeEventInFD(int fd)
 		  pEvent->type=((iValue > 0) ? Orbiter::Event::BUTTON_DOWN : Orbiter::Event::BUTTON_UP);
 		  pEvent->data.button.m_bSimulated = false;
 		  pEvent->data.button.m_iPK_Button = 0;
-		  pEvent->data.button.m_iKeycode = iKeyCode + 20000;
+		  pEvent->data.button.m_iKeycode = iKeyCode + 120000;
 		  LoggerWrapper::GetInstance()->Write(LV_STATUS,"GenericHIDInterface::DecodeEventInFD code %d value %d.",iKeyCode+20000,iValue);
 		  m_pOrbiter->CallMaintenanceInMiliseconds(0, &Orbiter::QueueEventForProcessing, pEvent, pe_NO, false);
 		}
