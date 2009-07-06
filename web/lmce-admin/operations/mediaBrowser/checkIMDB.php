@@ -17,7 +17,7 @@ function checkIMDB($output,$mediadbADO,$dbADO) {
 	$extension=strtolower(str_replace('.','',strrchr($fileData['Filename'][0],".")));
 	$filename=str_replace('.'.$extension,'',$fileData['Filename'][0]);
 	$_SESSION['lastFileID']=$fileID;
-	$searchIndex=(in_array($fileData['EK_MediaType'][0],array(3,5)))?'DVD':'Music';
+	$searchIndex=(in_array($fileData['EK_MediaType'][0],array(3,5,28)))?'DVD':'Music';
 	
 	if($action=='form'){
 		

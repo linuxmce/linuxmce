@@ -95,9 +95,12 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 		}
 
 		$externalAttributesBtn='';
-		if(in_array($rowFile['EK_MediaType'],array(3,4,5))){
-			$externalAttributesBtn='<input type="button" class="button_fixed" value="Check Amazon" onClick="self.location=\'index.php?section=checkAmazon&fileID='.$fileID.'\'">';
-			$externalAttributesBtn .='<input type="button" class="button_fixed" value="Check IMDB" onClick="self.location=\'index.php?section=checkIMDB&fileID='.$fileID.'\'">';
+		if(in_array($rowFile['EK_MediaType'],array(3,4,5,28))){
+			$externalAttributesBtn='<select name="metadata_section"><option value="checkAmazon">'.$OPTION_CHECK_AMAZON.'</option>';
+			$externalAttributesBtn.='<option value="checkIMDB">'.$OPTION_CHECK_IMDB.'</option></selection>';
+			
+			$externalAttributesBtn.='<input type="button" class="button_fixed" value="'.$BUTTON_GET_METADATA.'"
+			onClick="self.location=\'index.php?section=\'+document.editMediaFile.metadata_section.options[document.editMediaFile.metadata_section.selectedIndex].value+\'&fileID='.$fileID.'\'">';
 		}
 
 		$mediaSubTypes=getAssocArray('MediaSubType','PK_MediaSubType','Description',$mediadbADO,'ORDER BY Description ASC');
