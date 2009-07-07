@@ -129,7 +129,7 @@ namespace knx
 		DEVICEHEADER( LightSwitchOnOff , 1, "\0" ) ;
 		virtual Telegram *Command_On(){return createsTelegramFromAddress(1,0);};
 		virtual Telegram *Command_Off(){return createsTelegramFromAddress(0,0);};
-		virtual Telegram *Command_Set_Level(int level){return createsTelegramFromAddress( (level>125?1:0) ,0);};
+		virtual Telegram *Command_Set_Level(int level){return createsTelegramFromAddress( (level>0?1:0) ,0);};
 	};
 
 	class LightSwitchdimmable:public knxDevice
