@@ -21,6 +21,12 @@ using namespace DCE;
 
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
+#include "PlutoUtils/LinuxSerialUSB.h"
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -54,6 +60,31 @@ bool Chromoflex_USP3::GetConfig()
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Open port: %s", TranslateSerialUSB(DATA_Get_COM_Port_on_PC()).c_str());
+	fd = open(TranslateSerialUSB(DATA_Get_COM_Port_on_PC()).c_str(), O_RDWR);
+	unsigned char buf[1024];
+
+	// init crc
+	usp_crc = 0xffff;
+
+	// disable any programs on the units
+	buf[0]=0xca; // preamble
+	buf[1]=0x00; // broadcast
+	buf[2]=0x00; // broadcast
+	buf[3]=0x00; // broadcast
+	buf[4]=0x00; // length 
+	buf[5]=0x02; // length
+	buf[6]=0x7e; // 7e == write register
+	buf[7]=18; // register addr
+	buf[8]=0x01; // disable internal programs
+	for (int i = 0; i < 9; i++) process_crc(buf[i]);
+	buf[9] = (usp_crc >> 8);
+	buf[10] = (usp_crc & 0xff);
+
+	// TODO: setup B9600 8N1 first
+
+	write (fd, buf, 11);
+
 	return true;
 }
 
@@ -87,7 +118,67 @@ Chromoflex_USP3_Command *Create_Chromoflex_USP3(Command_Impl *pPrimaryDeviceComm
 void Chromoflex_USP3::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
-	sCMD_Result = "UNHANDLED CHILD";
+	int red = 0;
+	int green = 0;
+	int blue = 0;
+	unsigned char buf[1024];
+
+	int level = 0;
+
+	int address = atoi(pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST).c_str());
+
+	switch (pMessage->m_dwID) {
+		case COMMAND_Generic_On_CONST:
+			red = 255; green = 255; blue = 255;
+			break;
+		;;
+		case COMMAND_Generic_Off_CONST:
+			red = 0; green = 0; blue = 0;
+			break;
+		;;
+		case COMMAND_Set_Level_CONST:
+			level = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST].c_str());
+			red = green = blue = (int) ( 255.0 * level / 100 );
+			break;
+		;;
+		case COMMAND_Set_Color_RGB_CONST:
+			red = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Red_Level_CONST].c_str());
+			green = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Green_Level_CONST].c_str());
+			blue = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Blue_Level_CONST].c_str());
+			break;
+		;;
+		default:
+			break;
+		;;
+	}
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL," Setting RGB: %d %d %d",red,green,blue);
+
+	// assemble frame
+	buf[0]=0xca; // preamble
+	buf[1]=0x00; // broadcast
+	buf[2]=0x00; // broadcast
+	buf[3]=0x00; // broadcast
+	buf[4]=0x00; // length 
+	buf[5]=0x05; // length
+	buf[6]=0x7e; // 7e == effect color
+	buf[7]=0x04; // register addr
+	buf[8]=red; // R
+	buf[9]=green; // G
+	buf[10]=blue; // B
+	buf[11]=0x00; // X
+
+	// calc crc16
+	usp_crc = 0xffff;
+	for (int i = 0; i < 12; i++) process_crc(buf[i]);
+
+	buf[12] = (usp_crc >> 8);
+	buf[13] = (usp_crc & 0xff);
+
+	write (fd, buf, 14);
+
+	// TODO: handle multiple childs, we just broadcast for now
+	sCMD_Result = "OK";
+	//	sCMD_Result = "UNHANDLED CHILD";
 }
 
 /*
@@ -102,87 +193,7 @@ void Chromoflex_USP3::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessa
 	sCMD_Result = "UNKNOWN COMMAND";
 }
 
-//<-dceag-sample-b->
-/*		**** SAMPLE ILLUSTRATING HOW TO USE THE BASE CLASSES ****
-
-**** IF YOU DON'T WANT DCEGENERATOR TO KEEP PUTTING THIS AUTO-GENERATED SECTION ****
-**** ADD AN ! AFTER THE BEGINNING OF THE AUTO-GENERATE TAG, LIKE //<=dceag-sample-b->! ****
-Without the !, everything between <=dceag-sometag-b-> and <=dceag-sometag-e->
-will be replaced by DCEGenerator each time it is run with the normal merge selection.
-The above blocks are actually <- not <=.  We don't want a substitution here
-
-void Chromoflex_USP3::SomeFunction()
-{
-	// If this is going to be loaded into the router as a plug-in, you can implement: 	virtual bool Register();
-	// to do all your registration, such as creating message interceptors
-
-	// If you use an IDE with auto-complete, after you type DCE:: it should give you a list of all
-	// commands and requests, including the parameters.  See "AllCommandsRequests.h"
-
-	// Examples:
-	
-	// Send a specific the "CMD_Simulate_Mouse_Click" command, which takes an X and Y parameter.  We'll use 55,77 for X and Y.
-	DCE::CMD_Simulate_Mouse_Click CMD_Simulate_Mouse_Click(m_dwPK_Device,OrbiterID,55,77);
-	SendCommand(CMD_Simulate_Mouse_Click);
-
-	// Send the message to orbiters 32898 and 27283 (ie a device list, hence the _DL)
-	// And we want a response, which will be "OK" if the command was successfull
-	string sResponse;
-	DCE::CMD_Simulate_Mouse_Click_DL CMD_Simulate_Mouse_Click_DL(m_dwPK_Device,"32898,27283",55,77)
-	SendCommand(CMD_Simulate_Mouse_Click_DL,&sResponse);
-
-	// Send the message to all orbiters within the house, which is all devices with the category DEVICECATEGORY_Orbiter_CONST (see pluto_main/Define_DeviceCategory.h)
-	// Note the _Cat for category
-	DCE::CMD_Simulate_Mouse_Click_Cat CMD_Simulate_Mouse_Click_Cat(m_dwPK_Device,DEVICECATEGORY_Orbiter_CONST,true,BL_SameHouse,55,77)
-    SendCommand(CMD_Simulate_Mouse_Click_Cat);
-
-	// Send the message to all "DeviceTemplate_Orbiter_CONST" devices within the room (see pluto_main/Define_DeviceTemplate.h)
-	// Note the _DT.
-	DCE::CMD_Simulate_Mouse_Click_DT CMD_Simulate_Mouse_Click_DT(m_dwPK_Device,DeviceTemplate_Orbiter_CONST,true,BL_SameRoom,55,77);
-	SendCommand(CMD_Simulate_Mouse_Click_DT);
-
-	// This command has a normal string parameter, but also an int as an out parameter
-	int iValue;
-	DCE::CMD_Get_Signal_Strength CMD_Get_Signal_Strength(m_dwDeviceID, DestDevice, sMac_address,&iValue);
-	// This send command will wait for the destination device to respond since there is
-	// an out parameter
-	SendCommand(CMD_Get_Signal_Strength);  
-
-	// This time we don't care about the out parameter.  We just want the command to 
-	// get through, and don't want to wait for the round trip.  The out parameter, iValue,
-	// will not get set
-	SendCommandNoResponse(CMD_Get_Signal_Strength);  
-
-	// This command has an out parameter of a data block.  Any parameter that is a binary
-	// data block is a pair of int and char *
-	// We'll also want to see the response, so we'll pass a string for that too
-
-	int iFileSize;
-	char *pFileContents
-	string sResponse;
-	DCE::CMD_Request_File CMD_Request_File(m_dwDeviceID, DestDevice, "filename",&pFileContents,&iFileSize,&sResponse);
-	SendCommand(CMD_Request_File);
-
-	// If the device processed the command (in this case retrieved the file),
-	// sResponse will be "OK", and iFileSize will be the size of the file
-	// and pFileContents will be the file contents.  **NOTE**  We are responsible
-	// free deleting pFileContents.
-
-
-	// To access our data and events below, you can type this-> if your IDE supports auto complete to see all the data and events you can access
-
-	// Get our IP address from our data
-	string sIP = DATA_Get_IP_Address();
-
-	// Set our data "Filename" to "myfile"
-	DATA_Set_Filename("myfile");
-
-	// Fire the "Finished with file" event, which takes no parameters
-	EVENT_Finished_with_file();
-	// Fire the "Touch or click" which takes an X and Y parameter
-	EVENT_Touch_or_click(10,150);
-}
-*/
+//<-dceag-sample-b->!
 //<-dceag-sample-e->
 
 /*
@@ -192,3 +203,12 @@ void Chromoflex_USP3::SomeFunction()
 */
 
 
+void Chromoflex_USP3::process_crc(unsigned char ucData) {
+      int i;
+      usp_crc^=ucData;
+      for(i=0;i<8;i++){ // Process each Bit
+             if(usp_crc&1){ usp_crc >>=1; usp_crc^=0xA001;}
+             else{          usp_crc >>=1; }
+      }
+
+}

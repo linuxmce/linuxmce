@@ -24,8 +24,11 @@ namespace DCE
 	{
 //<-dceag-decl-e->
 		// Private member variables
-
+		int fd; // file desc for device
+		unsigned short   usp_crc; // initialise per packet with $FFFF.
 		// Private methods
+		virtual void process_crc(unsigned char ucData);
+
 public:
 		// Public member variables
 

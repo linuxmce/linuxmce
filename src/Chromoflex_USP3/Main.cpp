@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
 
 	if (bError)
 	{
-		cout << "A Pluto DCE Device.  See www.plutohome.com/dce for details." << endl
+		cout << "A LinuxMCE DCE Device to control a chromoflex RGB LED controller." << endl
 			<< "Usage: Chromoflex_USP3 [-r Router's IP] [-d My Device ID] [-l dcerouter|stdout|null|filename]" << endl
 			<< "-r -- the IP address of the DCE Router  Defaults to 'dcerouter'." << endl
 			<< "-d -- This device's ID number.  If not specified, it will be requested from the router based on our IP address." << endl
