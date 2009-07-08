@@ -27,6 +27,8 @@ using namespace DCE;
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include <termios.h>
+#include <stdio.h>
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -81,7 +83,12 @@ bool Chromoflex_USP3::GetConfig()
 	buf[9] = (usp_crc >> 8);
 	buf[10] = (usp_crc & 0xff);
 
-	// TODO: setup B9600 8N1 first
+	// setup B9600 8N1 first
+	struct termios tio;
+	tcgetattr(fd, &tio);
+	tio.c_cflag = B9600 | CS8 | CLOCAL | CREAD;
+	tcflush(fd, TCIFLUSH);
+	tcsetattr(fd,TCSANOW,&tio);
 
 	write (fd, buf, 11);
 
