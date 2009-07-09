@@ -161,7 +161,7 @@ function backups_table(){
 		foreach ($files AS $file){
 			$ext= get_extension($file);
 			if($ext!='md5'){
-				$md5=@join('',file('/home/backup/download/'.str_replace('tar.bz2','md5',$file)));
+				$md5=@join('',file('/home/backup/download/'.str_replace('tar.gz','md5',$file))); 
 				$md5=trim(str_replace($file,'',$md5));
 				$out.='
 				<tr>
