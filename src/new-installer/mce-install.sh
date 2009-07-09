@@ -40,7 +40,6 @@ then
 		cp ./mce_wizard_data-single_nic.sh /tmp/mce_wizard_data.sh
 	fi
 fi
-exit
 rm -rf /tmp/mce_installer_error
 InstallerLogFile="/var/log/mce-installer-$(date +%Y%m%d_%H%M%S).log"
 exec &> >(tee $InstallerLogFile)
