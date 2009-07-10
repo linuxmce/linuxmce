@@ -40,9 +40,11 @@
 	#include "../SDL/OrbiterRenderer_SDL.h"
 #endif
 
+#ifndef DIRECTFB
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #include <SDL.h>
+#endif
 
 class OrbiterLinux;
 class OrbiterRendererFactory;
@@ -89,9 +91,11 @@ namespace DCE
 	private:
 
 		//UI2 - non alpha blending with xshape
+#ifndef DIRECTFB
 		Pixmap m_screenMaskObjects; //"layer for object non-popup
 		Pixmap m_screenMaskPopups;  //"layer" for popups
 		Pixmap m_screenMaskCurrent; //the mask to apply
+#endif
 		bool m_bHasPopups;
 		bool m_bScreenRendered;
 	};

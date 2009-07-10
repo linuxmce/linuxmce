@@ -69,7 +69,7 @@
 	#include <SDL/SDL_syswm.h>
 #endif
 
-#if !defined(WIN32) && !defined(BLUETOOTH_DONGLE) && !defined(PROXY_ORBITER) && !defined(MOXI_ORBITER)
+#if !defined(DIRECTFB) && !defined(WIN32) && !defined(BLUETOOTH_DONGLE) && !defined(PROXY_ORBITER) && !defined(MOXI_ORBITER)
 	#include "utilities/linux/transparency/transparency.h"
 	#include "utilities/linux/wrapper/wrapper_x11.h"
 #endif
@@ -129,7 +129,7 @@ void OrbiterRenderer_SDL::Configure()
 		uSDLInitFlags |= SDL_FULLSCREEN;
 
     // Switch Nokia into fullscreen mode
-    #ifdef MAEMO_NOKIA770
+    #if defined(MAEMO_NOKIA770) && !defined(DIRECTFB)
 		uSDLInitFlags |= SDL_FULLSCREEN;
 	   	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Added SDL_FULLSCREEN flag to the uSDLInitFlags");
 	#endif
@@ -142,7 +142,7 @@ void OrbiterRenderer_SDL::Configure()
 			printf("Failed to initialize SDL %s\n", SDL_GetError());
 	#endif //WINCE
 
-	#ifndef WIN32 //linux
+	#if !defined(WIN32) && !defined(DIRECTFB) //linux
             string sCmd = "/usr/pluto/bin/Start_X.sh";//; /usr/pluto/bin/Start_WM.sh";
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "X is not running! Starting X and the window manager: %s", sCmd.c_str());
             system(sCmd.c_str());
@@ -176,11 +176,11 @@ void OrbiterRenderer_SDL::Configure()
 #endif
 
 
-#ifdef MAEMO_NOKIA770
+#if defined(MAEMO_NOKIA770) && !defined(DIRECTFB)
     uVideoModeFlags |= SDL_FULLSCREEN;
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "Added SDL_FULLSCREEN flag to the uVideoModeFlags");
 #endif
-	
+
 	g_bResettingVideoMode=true;
 	pthread_t hackthread;
 	pthread_create(&hackthread, NULL, SetVideoModeWatchDogThread, (void*)this);
@@ -280,7 +280,7 @@ void OrbiterRenderer_SDL::SetOrbiterWindowTransparency(double TransparencyLevel)
 {
     // FIXME: we shold go until we find the root window
     // FIXME: use GetMainWindow(), to avoid duplicate code
-#if !defined(WIN32) && !defined(BLUETOOTH_DONGLE) && !defined(PROXY_ORBITER) && !defined(MOXI_ORBITER)
+#if !defined(DIRECTFB) && !defined(WIN32) && !defined(BLUETOOTH_DONGLE) && !defined(PROXY_ORBITER) && !defined(MOXI_ORBITER)
 	X11_Locker_NewDisplay locker_NewDisplay;
 	SDL_SysWMinfo info;
 	SDL_VERSION(&info.version); // this is important!
@@ -690,7 +690,7 @@ void OrbiterRenderer_SDL::EventLoop()
 				orbiterEvent.data.region.m_iButton = Event.button.button;
 				OrbiterLogic()->ProcessEvent(orbiterEvent);
 
-#if defined(WIN32) && !defined(PROXY_ORBITER) && !defined(BLUETOOTH_DONGLE) && !defined(MOXI_ORBITER)
+#if defined(WIN32) && !defined(DIRECTFB) && !defined(PROXY_ORBITER) && !defined(BLUETOOTH_DONGLE) && !defined(MOXI_ORBITER)
 				RecordMouseAction(Event.button.x, Event.button.y);
 #endif
 			}

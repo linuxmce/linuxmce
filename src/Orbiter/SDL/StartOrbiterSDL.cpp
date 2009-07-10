@@ -42,6 +42,7 @@
 
 bool Init_System()
 {
+#ifndef DIRECTFB
 	//disable repeated keys while orbiter is active
 	system("/usr/bin/X11/xset r off");
 
@@ -52,6 +53,7 @@ bool Init_System()
         return false;
     }
 
+#endif
     return true;
 }
 
