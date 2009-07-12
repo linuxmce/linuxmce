@@ -289,9 +289,9 @@ int main(int argc, char *argv[])
 			<< "input path  -- Where to find the template files.  Default is . then ../MakeRelease" << endl
 			<< "-a(abort)   -- Abort on error without prompting" << endl
 			<< "-V		-- Don't set version" << endl 
-			<< "-d          -- Don't make changes to the database" << endl;
-			<< "-X          -- Simulate" << endl;
-			<< "-x          -- Replace pluto" << endl;
+			<< "-d          -- Don't make changes to the database" << endl
+			<< "-X          -- Simulate" << endl
+			<< "-x          -- Replace pluto" << endl
 			<< "-y          -- DH_STRIP all packages" << endl;
 
 		exit(1);
