@@ -101,7 +101,13 @@ bool Shoutcast_Radio_Plugin::GetConfig()
 		        m_iRunInterval = atoi(s.substr(12, s.length()).c_str());
 		}
 	}
-
+	// Sanity check for some values, setting these too low will increase the load on the core
+	if (m_iGetInterval < 60) {
+	        m_iGetInterval = 60;
+	}
+	if (m_iRunInterval < 1800) {
+	        m_iRunInterval = 1800;
+	}
 	//start alarm if not already started
 	m_pUpdate->type = 'G';
 	if(-1 == m_pAlarmManager->FindAlarmByType(UPDATE_SHOUTCAST))
