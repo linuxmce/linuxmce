@@ -75,8 +75,9 @@ public:
 string g_sPackages, g_sPackages_Exclude, g_sManufacturer, g_sSourcecodePrefix, g_sNonSourcecodePrefix, g_sCompile_Date, g_sBaseVersion, g_sReplacePluto, g_sOutputPath;
 string g_sPK_RepositorySource;
 int g_iPK_Distro=0,g_iSVNRevision=0;
-int g_iCoresToUse=1; 
+int g_iCoresToUse=1;
 bool g_bBuildSource = true, g_bCreatePackage = true, g_bInteractive = false, g_bSimulate = false, g_bSupressPrompts = false, g_bDontTouchDB = false, g_bSetVersion = true, g_bOnlyCompileIfNotFound = false;
+bool g_bStripAll = false;
 Database_pluto_main *g_pDatabase_pluto_main;
 Row_Version *g_pRow_Version;
 Row_Distro *g_pRow_Distro;
@@ -129,6 +130,11 @@ bool isDriverPackage(int iPK_Package)
 bool isStrippablePackage(int iPK_Package)
 {
 	static const int StripPkgs[] = { 237, -1 };
+	// -y allows us to strip all packages.
+	if (g_bStripall) 
+	{
+		return true;
+	}
 	for (int i = 0; StripPkgs[i] != -1; i++)
 	{
 		if (iPK_Package == StripPkgs[i])
@@ -259,6 +265,9 @@ int main(int argc, char *argv[])
 			// if (!verify_next(argv, optnum, argc, "-j")) { bError=true; break; } 
 			g_iCoresToUse = atoi(argv[++optnum]); 
 			break; 
+		case 'y':
+			g_bStripAll = true;
+			break;
 		default:
 			cout << "Unknown: " << argv[optnum] << endl;
 			bError=true;
@@ -270,7 +279,7 @@ int main(int argc, char *argv[])
 	{
 		cout << "MakeRelease, v." << VERSION << endl
 			<< "Usage: MakeRelease [-h hostname] [-u username] [-p password] [-D database] [-P mysql port] [-j] [-k Packages] [-K Exclude Packages] [-m Manufacturers] [-o Distro] [-a] [-f Defines]" << endl 
-			<< "\t[-d]" << endl
+			<< "\t[-d] [-r PK repository source] [-v version] [-V]" << endl
 			<< "hostname    -- address or DNS of database host, default is `dce_router`" << endl
 			<< "username    -- username for database connection" << endl
 			<< "password    -- password for database connection, default is `` (empty)" << endl
@@ -279,7 +288,11 @@ int main(int argc, char *argv[])
 			<< "output path -- Where to put the output files.  Default is ../[database name]" << endl
 			<< "input path  -- Where to find the template files.  Default is . then ../MakeRelease" << endl
 			<< "-a(abort)   -- Abort on error without prompting" << endl
+			<< "-V		-- Don't set version" << endl 
 			<< "-d          -- Don't make changes to the database" << endl;
+			<< "-X          -- Simulate" << endl;
+			<< "-x          -- Replace pluto" << endl;
+			<< "-y          -- DH_STRIP all packages" << endl;
 
 		exit(1);
 	}
