@@ -131,7 +131,7 @@ bool isStrippablePackage(int iPK_Package)
 {
 	static const int StripPkgs[] = { 237, -1 };
 	// -y allows us to strip all packages.
-	if (g_bStripall) 
+	if (g_bStripAll) 
 	{
 		return true;
 	}
