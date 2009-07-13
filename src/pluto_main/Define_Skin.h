@@ -2,14 +2,8 @@
 #define __Define_Skin_H__
 
 #define SKIN_Basic_CONST 1
-#define SKIN_BO_CONST 2
 #define SKIN_Mobile_Phone_Basic_CONST 3
-#define SKIN_Mobile_Phone_BO_CONST 4
 #define SKIN_SmallUI_CONST 6
-#define SKIN_Marbella_CONST 9
-#define SKIN_Mobile_Phone_Monster_CONST 10
-#define SKIN_Small_UI_Monster_CONST 11
-#define SKIN_NuForce_CONST 12
 
 #define SKIN_TABLE "Skin"
 #define SKIN_PK_SKIN_FIELD "PK_Skin"

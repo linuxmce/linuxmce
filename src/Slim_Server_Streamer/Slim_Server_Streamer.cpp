@@ -650,7 +650,10 @@ void Slim_Server_Streamer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string
 	if (sMediaURL.find("://") != string::npos)
 	{
 		SendReceiveCommand(sControlledPlayerMac + " playlist play " + StringUtils::URLEncode(StringUtils::Replace(&sMediaURL,"/", "/")));
-	} else 
+	} else if (sMediaURL.find("/asterisk/voicemail") != string::npos)
+	{
+		SendReceiveCommand(sControlledPlayerMac + " playlist play " + sMediaURL);
+	} else	
 	{
 		SendReceiveCommand(sControlledPlayerMac + " playlist play " + StringUtils::URLEncode(string("file://") + StringUtils::Replace(&sMediaURL,"//", "/")));
 	}

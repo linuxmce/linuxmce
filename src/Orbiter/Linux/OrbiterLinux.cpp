@@ -631,11 +631,7 @@ void OrbiterLinux::CMD_Surrender_to_OS(string sOnOff,bool bFully_release_keyboar
 #ifndef DIRECTFB
 /*virtual*/ ScreenHandler *OrbiterLinux::CreateScreenHandler()
 {
-#ifndef DIRECTFB
 	return new OSDScreenHandler(this, &m_mapDesignObj);
-#else
-	return new ScreenHandler(this, &m_mapDesignObj);
-#endif
 }
 #endif
 

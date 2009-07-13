@@ -2381,6 +2381,9 @@
 #define DESIGNOBJ_cellVoicemail_CONST 5705
 #define DESIGNOBJ_cellVoiceMail_smallUI_CONST 5707
 #define DESIGNOBJ_mnuJogShuttle_SmallUI_CONST 5708
+#define DESIGNOBJ_mnuViewAttributes_Synopsis_CONST 5709
+#define DESIGNOBJ_butMoreSynopsis_CONST 5710
+#define DESIGNOBJ_butShowSynopsis_CONST 5712
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"
