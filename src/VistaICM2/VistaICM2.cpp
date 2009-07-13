@@ -314,7 +314,7 @@ bool VistaICM2::GetConfig()
   // The configuration parameters DATA_ are now populated
 
   // Set up the various class vars.
-  m_sURL = "http://192.168.80.238";
+  m_sURL = GetIpAddress();
 
 	DCE::CMD_Get_Device_Data CMD_Get_Device_Data(
 		m_dwPK_Device, 4,
