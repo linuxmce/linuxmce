@@ -6,6 +6,7 @@ use diagnostics;
 use strict;
 require "/usr/pluto/bin/config_ops.pl";
 
+
 sub showUsage
 {
 	print "\n$_[0] -d <Device Template> -i <IP> -m <mac address>\n";
@@ -53,8 +54,24 @@ sub updateSqueezeBoxControlledViaField
 	}
 }
 
+sub findMachineID
+{ 
+ 	map  
+ 	{ 
+ 		if ( /^(\w+)\s+=\s+(.*)$/ ) 
+ 		{ 
+ 			my $name = $1; 
+ 			my $value = $2; 
+	 	                         
+ 			$machineID = $value if ( $name eq "PK_Device" ); 
+		} 
+	} `cat /etc/pluto.conf`; 
+	 	 
+} 
+
 $dbConnection = DBI->connect(&read_pluto_cred()) or die "Could not connect to MySQL";
 
+findMachineID;
 $installationID = findInstallationID;
 
 print "\n\n00 Configuring new squeeze box device: $deviceID, $deviceIP, $deviceMAC\n";
