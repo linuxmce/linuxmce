@@ -47,6 +47,7 @@ public:
 		string m_sURL;
 		string m_sCurrentHouseMode;
 		string m_sZones;
+		string m_sHouseCode;
 
 		// The CCP UDP thread.
 		pthread_t m_ccpThread;
@@ -90,8 +91,8 @@ private:	// Internal methods
 
 	/*
 			*****DATA***** accessors inherited from base class
+	string DATA_Get_Password();
 	string DATA_Get_Zones();
-	string DATA_Get_Server_IP();
 
 			*****EVENT***** accessors inherited from base class
 	void EVENT_Sensor_Tripped(bool bTripped);

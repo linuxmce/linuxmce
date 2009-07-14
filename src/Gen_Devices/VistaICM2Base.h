@@ -114,6 +114,14 @@ public:
 	* @brief Device data access methods:
 	*/
 
+	string Get_Password()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Password_CONST);
+		else
+			return m_mapParameters[DEVICEDATA_Password_CONST];
+	}
+
 	string Get_Zones()
 	{
 		if( m_bRunningWithoutDeviceData )
@@ -226,6 +234,7 @@ public:
 	virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage) { };
 	Command_Impl *CreateCommand(int PK_DeviceTemplate, Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent);
 	//Data accessors
+	string DATA_Get_Password() { return GetData()->Get_Password(); }
 	string DATA_Get_Zones() { return GetData()->Get_Zones(); }
 	//Event accessors
 	void EVENT_Sensor_Tripped(bool bTripped) { GetEvents()->Sensor_Tripped(bTripped); }

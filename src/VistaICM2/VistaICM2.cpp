@@ -327,6 +327,7 @@ bool VistaICM2::GetConfig()
 	m_viHouseModes = parseHouseModes();
 	m_sZones = DATA_Get_Zones();
 	m_miZones = parseZones();
+	m_sHouseCode = DATA_Get_Password();
 
   m_bRunning = true;
   // Start the CCP monitoring Thread
@@ -651,7 +652,7 @@ VistaICM2::doArmEvent (int iValue)
 			sHouseMode = "2";
 			break;
 	}
- 	DCE::CMD_Set_House_Mode CMD_Set_House_Mode(m_dwPK_Device,13,sHouseMode,0,"7234",0,"W");
+ 	DCE::CMD_Set_House_Mode CMD_Set_House_Mode(m_dwPK_Device,13,sHouseMode,0,m_sHouseCode,0,"W");
 	SendCommand(CMD_Set_House_Mode);
 }
 
