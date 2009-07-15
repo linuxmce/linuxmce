@@ -1009,7 +1009,20 @@ class DataGridTable *Media_Plugin::CurrentMediaSections( string GridID, string P
 			// int index = itFiles - pMediaStream->m_dequeMediaFile.begin();
 			sCurrentFile = pMediaFile->m_sDescription.size() ? pMediaFile->m_sDescription : FileUtils::FilenameWithoutPath(pMediaFile->FullyQualifiedFile());
 
-			pDataGrid->SetData(0, currentPos++,new DataGridCell(sCurrentFile, StringUtils::itos(itFiles - pMediaStream->m_dequeMediaFile.begin())));
+			string sCurrentTitle; 
+			
+			if (pMediaFile->m_sEpisode.size()) {
+			  sCurrentTitle = pMediaFile->m_sTitle + " - \"" + pMediaFile->m_sEpisode + "\"";
+			} else {
+			  sCurrentTitle = pMediaFile->m_sTitle;
+			}
+
+			if (sCurrentTitle.size()) {
+			  pDataGrid->SetData(0, currentPos++, new DataGridCell(sCurrentTitle, StringUtils::itos(itFiles - pMediaStream->m_dequeMediaFile.begin())));
+			} else {
+			  pDataGrid->SetData(0, currentPos++,new DataGridCell(sCurrentFile, StringUtils::itos(itFiles - pMediaStream->m_dequeMediaFile.begin())));
+			}
+
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Returning data: (%d) -> %s section %d", itFiles - pMediaStream->m_dequeMediaFile.begin(), ((*itFiles)->m_sFilename).c_str(),iSection);
 			mapSections[ make_pair<int,int> (iSection,0) ] = true;
 		}
