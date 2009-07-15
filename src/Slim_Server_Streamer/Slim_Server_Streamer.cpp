@@ -678,8 +678,7 @@ void Slim_Server_Streamer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string
 	}
 #endif
 
-//	if ( sMediaPosition != 0 )
-//		SendReceiveCommand(sControlledPlayerMac + " gototime " + StringUtils::itos(iMediaPosition / 1000));
+	CMD_Set_Media_Position(iStreamID, sMediaPosition, sCMD_Result, pMessage);
 
 	SetStateForStream(iStreamID, STATE_PLAY);
 }
@@ -704,11 +703,9 @@ void Slim_Server_Streamer::CMD_Stop_Media(int iStreamID,string *sMediaPosition,s
 		return;
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Stop Media for stream %d",iStreamID);
-	string sOptions;
-	int mediaPosition;
-	int mediaLength;
-//	CMD_Report_Playback_Position(iStreamID,&sOptions,&mediaPosition,&mediaLength,sCMD_Result,pMessage);
-//	*iMediaPosition = mediaPosition;
+	string sText;
+	CMD_Report_Playback_Position(iStreamID,&sText,sMediaPosition,sCMD_Result,pMessage);
+
 	m_mapStreamsToPlayers.erase(iStreamID);
 	SendReceiveCommand(sControlledPlayerMac + " playlist clear");
 	SendReceiveCommand(sControlledPlayerMac + " stop");
@@ -835,6 +832,11 @@ void Slim_Server_Streamer::CMD_Report_Playback_Position(int iStreamID,string *sT
 
 	iMedia_Length = (int)(floatValue * 1000);
 
+
+	string sPosition;
+	sPosition += " POS:" + StringUtils::itos(iMediaPosition) + " TOTAL:"+ StringUtils::itos(iMedia_Length);
+	*sMediaPosition = sPosition;
+
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Detected data: position %d from %d", iMediaPosition, iMedia_Length);
 }
 //<-dceag-createinst-b->!
@@ -958,6 +960,27 @@ string Slim_Server_Streamer::getMacAddressForDevice(DeviceData_Base *pDevice)
 void Slim_Server_Streamer::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,string &sCMD_Result,Message *pMessage)
 //<-dceag-c412-e->
 {
+
+	PLUTO_SAFETY_LOCK(dataMutexLock, m_dataStructureAccessMutex);
+
+	string sControlledPlayerMac;
+	if ( (sControlledPlayerMac = FindControllingMacForStream(iStreamID)) == "" )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "No controlling mac was found for this stream id: %d", iStreamID);
+		return;
+	}
+
+	uint posPos = sMediaPosition.find(" POS:");
+	int iPos = 0;
+	if( posPos != string::npos )
+	        iPos = atoi( sMediaPosition.substr(posPos+5).c_str() );
+	iPos = iPos / 1000; // slim uses seconds
+
+	if ( iPos > 0 )
+	{
+		SendReceiveCommand(sControlledPlayerMac + " gototime " + StringUtils::itos(iPos));
+	}
+
 }
 
 //<-dceag-c42-b->
