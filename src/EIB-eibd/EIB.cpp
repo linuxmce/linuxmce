@@ -163,6 +163,8 @@ void EIB::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD
 								ptel->decodeType().c_str(),
 								aff.c_str());
 		sendTelegram(ptel);
+		// cleanup regarding http://forum.linuxmce.org/index.php?topic=5648.msg57082#msg57082
+		delete(ptel);
 	}
 }
 
