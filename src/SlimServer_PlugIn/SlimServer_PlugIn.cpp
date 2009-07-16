@@ -266,6 +266,12 @@ bool SlimServer_PlugIn::StopMedia( class MediaStream *pMediaStream )
 	if ( (pSlimServerMediaStream = ConvertToSlimServerMediaStream(pMediaStream, "SlimServer_PlugIn::StopMedia() ")) == NULL )
 		return false;
 
+	if( !pSlimServerMediaStream->m_pMediaDevice_Source )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Stopping media in SlimServer_PlugIn but mediadevice_source is null");
+		return false;
+	}
+
 	int PK_Device = pSlimServerMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device;
 	int StreamID = pSlimServerMediaStream->m_iStreamID_get( );
 	string text;
@@ -287,11 +293,6 @@ bool SlimServer_PlugIn::StopMedia( class MediaStream *pMediaStream )
 	}
 	pSlimServerMediaStream->setIsStreaming(false);
 
-	if( !pSlimServerMediaStream->m_pMediaDevice_Source )
-	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Stopping media in SlimServer_PlugIn but mediadevice_source is null");
-		return false;
-	}
 	string SavedPosition2;
 	DCE::CMD_Stop_Media cmd(m_dwPK_Device,                          // Send from us
 							PK_Device,  		// Send to the device that is actually playing
