@@ -266,8 +266,25 @@ bool SlimServer_PlugIn::StopMedia( class MediaStream *pMediaStream )
 	if ( (pSlimServerMediaStream = ConvertToSlimServerMediaStream(pMediaStream, "SlimServer_PlugIn::StopMedia() ")) == NULL )
 		return false;
 
+	int PK_Device = pSlimServerMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device;
+	int StreamID = pSlimServerMediaStream->m_iStreamID_get( );
+	string text;
+	string SavedPosition;
 	if( pSlimServerMediaStream->isStreaming() )
+	{
+	        // Get media position before stopping streaming, if we dont, the media might have stopped and its too late
+		DCE::CMD_Report_Playback_Position reportPositionCommand(
+				m_dwPK_Device,
+				PK_Device,
+				StreamID,
+				&text,
+				&SavedPosition);
+
+		SendCommand(reportPositionCommand);
+	  
+		// send the StopStreaming command to the SlimServerStreamer
 		StopStreaming(pSlimServerMediaStream,NULL);  // NULL=stop all
+	}
 	pSlimServerMediaStream->setIsStreaming(false);
 
 	if( !pSlimServerMediaStream->m_pMediaDevice_Source )
@@ -275,13 +292,11 @@ bool SlimServer_PlugIn::StopMedia( class MediaStream *pMediaStream )
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Stopping media in SlimServer_PlugIn but mediadevice_source is null");
 		return false;
 	}
-	int PK_Device = pSlimServerMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device;
-	int StreamID = pSlimServerMediaStream->m_iStreamID_get( );
-	string SavedPosition;
+	string SavedPosition2;
 	DCE::CMD_Stop_Media cmd(m_dwPK_Device,                          // Send from us
 							PK_Device,  		// Send to the device that is actually playing
 							StreamID,      		// Send the stream ID that we want to actually stop
-							&SavedPosition);
+							&SavedPosition2);
 
 
 	// TODO: Remove the device from the list of players also.
@@ -293,6 +308,11 @@ bool SlimServer_PlugIn::StopMedia( class MediaStream *pMediaStream )
 	}
 	else
 	{
+	        if (SavedPosition2.length() > 0) {
+		        // If Stop_Media replied with a media position, use that, as it might be more accurate
+		        SavedPosition = SavedPosition2;
+	        }
+
 		if( pSlimServerMediaStream->m_iDequeMediaFile_Pos>=0 && pSlimServerMediaStream->m_iDequeMediaFile_Pos<pSlimServerMediaStream->m_dequeMediaFile.size() )
 		{
 			pSlimServerMediaStream->m_dequeMediaFile[pSlimServerMediaStream->m_iDequeMediaFile_Pos]->m_sStartPosition = SavedPosition;
