@@ -27,7 +27,7 @@
 #include <stdio.h>
 #endif
 
-#include <pthread/pthread.h>
+#include <pthread.h>
 #ifndef WIN32
 #include <features.h>
 #endif
