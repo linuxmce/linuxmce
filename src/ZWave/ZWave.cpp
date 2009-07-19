@@ -625,6 +625,18 @@ void ZWave::SendLightChangedEvents(unsigned short node_id, int value)
 	}
 }
 
+void ZWave::SendOnOffEvent(unsigned short node_id, int value) {
+        DeviceData_Impl *pChildDevice = NULL;	
+	if ( (pChildDevice = InternalIDToDevice(StringUtils::itos(node_id)) ) != NULL) {
+		m_pEvent->SendMessage( new Message(pChildDevice->m_dwPK_Device,
+			DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,
+			EVENT_Device_OnOff_CONST,
+			1,
+			EVENTPARAMETER_OnOff_CONST,
+			(value == 0) ? "0" : "1")
+		);
+	}
+}
 
 void ZWave::SendOrbiterPopup(const char *message) {
 	string timeout = "10";
@@ -651,9 +663,6 @@ void ZWave::SendOrbiterPopup(const char *message) {
 	);
 }
 
-void ZWave::SendOnOffEvent(unsigned short node_id, int value) {
-
-}
 
 int ZWave::AddDevice(int parent, string sInternalID, int PK_DeviceTemplate) {
 	int iPK_Device = 0;

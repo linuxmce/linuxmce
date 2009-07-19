@@ -707,6 +707,17 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got BASIC_SET from node %i, value %i",(unsigned char)frame[3],(unsigned char)frame[7]);
 							ZWNodeMapIt = ZWNodeMap.find((unsigned int)frame[3]);
 							if (ZWNodeMapIt != ZWNodeMap.end()) {
+
+								// send OnOff event for remote switches and controllers to support scenarios
+								if  ( ( (*ZWNodeMapIt).second->typeGeneric == GENERIC_TYPE_SWITCH_REMOTE) || 
+									( (*ZWNodeMapIt).second->typeBasic == BASIC_TYPE_CONTROLLER) ) {
+									if ((unsigned char)frame[7] == 0xff) {
+										DCEcallback->SendOnOffEvent ((unsigned char)frame[3],1);
+									} else {
+										DCEcallback->SendOnOffEvent ((unsigned char)frame[3],0);
+									}
+								}
+
 								if (((*ZWNodeMapIt).second->typeGeneric == GENERIC_TYPE_SWITCH_REMOTE) && ((*ZWNodeMapIt).second->typeBasic == BASIC_TYPE_ROUTING_SLAVE)) {
 									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"This is a powered remote switch, we will traverse the association list and request reports");
 									const char *tmp_str = (*ZWNodeMapIt).second->associationList[1].c_str();
