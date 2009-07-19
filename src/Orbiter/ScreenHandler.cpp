@@ -767,10 +767,10 @@ bool ScreenHandler::MediaBrowser_DatagridSelected(CallBackData *pData)
 
 #endif
 
-	if(	pCellInfoData->m_pDesignObj_DataGrid->m_iBaseObjectID == DESIGNOBJ_dgFileList2_CONST || pCellInfoData->m_pDesignObj_DataGrid->m_iBaseObjectID == DESIGNOBJ_dgFileList2_Pics_CONST )
+	if(	pCellInfoData->m_pDesignObj_DataGrid->m_iBaseObjectID == DESIGNOBJ_dgFileList2_CONST || pCellInfoData->m_pDesignObj_DataGrid->m_iBaseObjectID == DESIGNOBJ_dgFileList2_Pics_CONST || pCellInfoData->m_pDesignObj_DataGrid->m_iBaseObjectID == DESIGNOBJ_dgFileList_SmallUI_CONST )
 	{
 		DataGridCell *pCell_Pic=NULL,*pCell_List=NULL;
-		if( pCellInfoData->m_pDesignObj_DataGrid->m_iBaseObjectID == DESIGNOBJ_dgFileList2_CONST )
+		if( pCellInfoData->m_pDesignObj_DataGrid->m_iBaseObjectID == DESIGNOBJ_dgFileList2_CONST || pCellInfoData->m_pDesignObj_DataGrid->m_iBaseObjectID == DESIGNOBJ_dgFileList_SmallUI_CONST )
 		{
 			pCell_List=pCellInfoData->m_pDataGridCell;
 			if( mediaFileBrowserOptions.m_pObj_PicGrid && mediaFileBrowserOptions.m_pObj_ListGrid )
@@ -2075,6 +2075,15 @@ void ScreenHandler::BadGotoScreen(int PK_Screen)
 		//No command
 		"" //do nothing
 		);
+}
+
+//-----------------------------------------------------------------------------------------------------
+/*virtual*/ void ScreenHandler::SCREEN_PVR_Remote(long PK_Screen)
+{
+	m_pOrbiter->CMD_Set_Variable(VARIABLE_PK_DesignObj_CurrentSecti_CONST, TOSTRING(DESIGNOBJ_butAddSoftware_CONST));
+	ScreenHandlerBase::SCREEN_PVR_Remote(PK_Screen);
+	RegisterCallBack(cbDataGridRendering, (ScreenHandlerCallBack) &ScreenHandler::TV_Channels_GridRendering,	new DatagridAcquiredBackData());
+	RegisterCallBack(cbObjectSelected, (ScreenHandlerCallBack) &ScreenHandler::TV_Channels_ObjectSelected,	new ObjectInfoBackData());
 }
 //-----------------------------------------------------------------------------------------------------
 /*virtual*/ void ScreenHandler::SCREEN_TV_Channels(long PK_Screen)
