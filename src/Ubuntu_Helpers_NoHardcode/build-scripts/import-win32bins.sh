@@ -9,6 +9,7 @@ set -e
 function fake_win32bins() {
 	pushd ${svn_dir}/${svn_branch_name}/src/bin
 	touch Pluto_S60.sis
+	touch Pluto_S60.sisx
 	touch Orbiter.CAB
 	touch Orbiter_Treo.CAB
 
