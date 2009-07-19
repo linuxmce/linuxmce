@@ -651,6 +651,10 @@ void ZWave::SendOrbiterPopup(const char *message) {
 	);
 }
 
+void ZWave::SendOnOffEvent(unsigned short node_id, int value) {
+
+}
+
 int ZWave::AddDevice(int parent, string sInternalID, int PK_DeviceTemplate) {
 	int iPK_Device = 0;
 

@@ -68,6 +68,7 @@ public:
 		virtual void SendTemperatureChangedEvent(unsigned short node_id, float value);
 		virtual void SendBrightnessChangedEvent(unsigned short node_id, int value);
 		virtual void SendHumidityChangedEvent(unsigned short node_id, int value);
+		virtual void SendOnOffEvent(unsigned short node_id, int value);
 		virtual void SendOrbiterPopup(const char *message); 
         	virtual int AddDevice(int parent, string sInternalID, int PK_DeviceTemplate);
         	virtual bool DeleteDevice(string sInternalID);
