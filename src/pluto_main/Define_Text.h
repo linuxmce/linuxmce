@@ -1123,6 +1123,15 @@
 #define TEXT_Voicemail_Timestamp_CONST 2066
 #define TEXT_Voicemail_Caller_ID_CONST 2067
 #define TEXT_Voicemail_Duration_CONST 2068
+#define TEXT_LIGHTING_FLOORPLAN_CONST 2069
+#define TEXT_ABC_CONST 2070
+#define TEXT_DEF_CONST 2071
+#define TEXT_GHI_CONST 2072
+#define TEXT_JKL_CONST 2073
+#define TEXT_MNO_CONST 2074
+#define TEXT_PQRS_CONST 2075
+#define TEXT_TUV_CONST 2076
+#define TEXT_WXYZ_CONST 2077
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"

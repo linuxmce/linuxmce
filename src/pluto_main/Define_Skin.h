@@ -4,6 +4,7 @@
 #define SKIN_Basic_CONST 1
 #define SKIN_Mobile_Phone_Basic_CONST 3
 #define SKIN_SmallUI_CONST 6
+#define SKIN_Poison_Arrows_CONST 13
 
 #define SKIN_TABLE "Skin"
 #define SKIN_PK_SKIN_FIELD "PK_Skin"
