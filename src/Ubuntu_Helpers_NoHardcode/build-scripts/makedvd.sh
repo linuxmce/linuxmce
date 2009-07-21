@@ -60,7 +60,6 @@ sudo cp /etc/resolv.conf edit/etc/
 echo Depending on your configuration, you may also need to copy the hosts file
 
 sudo cp /etc/hosts edit/etc/
-
 #echo "Acquire::http::Proxy \"http://10.1.3.5:3128\";">edit/etc/apt/apt.conf
 sudo mount -t proc none ~/live/edit/proc
 echo "Get Installer from build environment"
