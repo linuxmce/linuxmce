@@ -65,6 +65,11 @@ sudo mount -t proc none ~/live/edit/proc
 echo "Get Installer from build environment"
 cp -r $BUILDER_ROOT/var/lmce-build/svn/branches/LinuxMCE-0810/src/new-installer edit/root/
 
+echo "Copying over the current debs"
+mkdir -p extract-cd/usr/pluto/deb-cache
+cp $BUILDER_ROOT/var/www/{*.deb,Package*,Release*} extract-cd/usr/pluto/deb-cache
+
+
 echo Now updating the install
 echo Creating an upgrade script
 cp ~/installed-programs edit/root/
@@ -75,12 +80,13 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get dist-upgrade -y
 dpkg --configure -a --abort-after 20000
-apt-get autoremove -y
+# apt-get autoremove -y
 wget http://deb.linuxmce.org/ubuntu/kubuntu810desktop-selection
 dpkg --set-selections < kubuntu810desktop-selection
 apt-get dselect-upgrade -y
 cd /root/new-installer
 bash pre-install-from-DVD.sh
+apt-get install mail-transport-agent
 eol
 
 chmod +x edit/root/upgrade.sh
@@ -105,9 +111,6 @@ Terminal=true
 TerminalOptions=\s--noclose
 eol
 
-echo "Copying over the current debs"
-mkdir -p extract-cd/usr/pluto/deb-cache
-cp $BUILDER_ROOT/var/www/{*.deb,Package*,Release*} extract-cd/usr/pluto/deb-cache
 
 umount -l edit/{proc,sys}
 umount -l edit/lib/modules/2.6.27-14-generic/volatile
