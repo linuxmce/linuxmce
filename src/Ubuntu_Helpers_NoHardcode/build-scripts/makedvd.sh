@@ -25,7 +25,6 @@ pushd ~/live
 sudo umount {squashfs,mnt}
 echo "Deleting old contents"
 rm -fR ~/live/*
-
 # 
 
 echo Extracting the CD contents
@@ -69,6 +68,7 @@ cp -r $BUILDER_ROOT/var/lmce-build/svn/branches/LinuxMCE-0810/src/new-installer 
 
 echo Now updating the install
 echo Creating an upgrade script
+cp ~/installed-programs edit/root/
 cat <<eol >edit/root/upgrade.sh
 #!/bin/bash
 export LC_ALL=C
@@ -76,6 +76,9 @@ apt-get update
 apt-get dist-upgrade -y
 dpkg --configure -a --abort-after 20000
 apt-get autoremove -y
+wget http://deb.linuxmce.org/kubuntu810desktop-selection
+dpkg --set-selections < kubuntu810desktop-selection
+apt-get dselect-upgrade -y
 cd /root/new-installer
 bash pre-install-from-DVD.sh
 eol
@@ -84,15 +87,15 @@ chmod +x edit/root/upgrade.sh
 sudo chroot edit root/upgrade.sh
 
 echo Creating Desktop button
-cat <<eol >edit/etc/skel/Desktop/LinuxMCE.Desktop
+mkdir -p edit/etc/skel/Desktop
+cat <<eol >edit/etc/skel/Desktop/LinuxMCE
 [Desktop Entry]
 Encoding=UTF-8
 Version=8.10
 Type=Application
 Terminal=false
-Icon[en_US]=gnome-panel-launcher
-Name[en_US]=LinuxMCE Installer
-Exec=ksudo /root/new-installer/mce-install.sh
+Exec=kdesudo /root/new-installer/mce-install.sh
+Path=/root/new-installer
 Name=LinuxMCE Installer
 Icon=gnome-panel-launcher
 eol

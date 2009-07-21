@@ -58,7 +58,7 @@ echo "
 label LinuxMCE
   menu label ^LinuxMCE Install
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/lmce.seed boot=casper only-ubiquity initrd=/casper/initrd.gz quiet noprompt splash --">> extract-cd/isolinux/text.cfg
+  append  file=/cdrom/preseed/lmce.seed boot=casper only-ubiquity initrd=/casper/initrd.gz quiet splash --">> extract-cd/isolinux/text.cfg
   
 echo Calculate a new MD5sum
 sudo rm extract-cd/md5sum.txt
