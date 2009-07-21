@@ -218,7 +218,6 @@ unsigned short Telegram::getUShortFromFloat( float tempr )
 
 void Telegram::generate_head()
 {
-        _data[2] = _data[0];
 	_data[0]=(_type>>8) & 0x3;
 
 	if(_type==EIBWRITE && _length==0)
