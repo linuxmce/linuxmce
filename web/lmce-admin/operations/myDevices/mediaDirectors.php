@@ -21,7 +21,8 @@ function mediaDirectors($output,$dbADO) {
 		'C'=>'SPDIF Coax', 
 		'O'=>'SPDIF TosLink', 
 		'S'=>'Stereo', 
-		'L'=>'Multi-channel analog'
+		'L'=>'Multi-channel analog',
+		'H'=>'HDMI',
 		);
 	$deinterlaceQualityArray=array_flip(array(
 		"None" => "",
