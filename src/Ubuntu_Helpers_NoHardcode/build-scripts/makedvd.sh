@@ -61,7 +61,7 @@ echo Depending on your configuration, you may also need to copy the hosts file
 
 sudo cp /etc/hosts edit/etc/
 
-# echo "Acquire::http::Proxy \"http://10.1.3.5:3128\";">edit/etc/apt/apt.conf
+#echo "Acquire::http::Proxy \"http://10.1.3.5:3128\";">edit/etc/apt/apt.conf
 sudo mount -t proc none ~/live/edit/proc
 echo "Get Installer from build environment"
 cp -r $BUILDER_ROOT/var/lmce-build/svn/branches/LinuxMCE-0810/src/new-installer edit/root/
@@ -72,11 +72,12 @@ cp ~/installed-programs edit/root/
 cat <<eol >edit/root/upgrade.sh
 #!/bin/bash
 export LC_ALL=C
+export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get dist-upgrade -y
 dpkg --configure -a --abort-after 20000
 apt-get autoremove -y
-wget http://deb.linuxmce.org/kubuntu810desktop-selection
+wget http://deb.linuxmce.org/ubuntu/kubuntu810desktop-selection
 dpkg --set-selections < kubuntu810desktop-selection
 apt-get dselect-upgrade -y
 cd /root/new-installer
