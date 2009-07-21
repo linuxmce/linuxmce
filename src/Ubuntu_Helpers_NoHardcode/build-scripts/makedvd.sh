@@ -86,6 +86,9 @@ eol
 chmod +x edit/root/upgrade.sh
 sudo chroot edit root/upgrade.sh
 
+echo "deb http://archive.ubuntu.com/ubuntu/ intrepid  main restricted universe multiverse">> edit/etc/apt/sources.list
+
+
 echo Creating Desktop button
 mkdir -p edit/etc/skel/Desktop
 cat <<eol >edit/etc/skel/Desktop/LinuxMCE
@@ -98,6 +101,8 @@ Exec=kdesudo /root/new-installer/mce-install.sh
 Path=/root/new-installer
 Name=LinuxMCE Installer
 Icon=gnome-panel-launcher
+Terminal=true
+TerminalOptions=\s--noclose
 eol
 
 echo "Copying over the current debs"
