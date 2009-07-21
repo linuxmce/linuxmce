@@ -25,10 +25,10 @@ void Telegram::setUserData(const unsigned char *data, int length)
 	if(_type==EIBREAD) return;
 	_shortdata=0;
 	
-	_length=length=(length>MAXTELEGRAMDATALENGTH?MAXTELEGRAMDATALENGTH:length);
+	_length=length=(length>MAXTELEGRAMDATALENGTH-2?MAXTELEGRAMDATALENGTH-2:length);
 	for(int i=0;i<length;i++)
 	{
-		_data[i]=data[i];
+		_data[i+2]=data[i];
 	}
 	generate_head();
 }
@@ -77,8 +77,8 @@ bool Telegram::receivefrom(EIBConnection *con)
 
 int Telegram::getUserData(unsigned char *buffer, int maxsize) const
 {
-	int leng=(maxsize<_length?maxsize:_length);
-	for(int i =0;i<leng;i++) buffer[i]=_data[i];
+	int leng=(maxsize<_length-2?maxsize:_length-2);
+	for(int i =0;i<leng;i++) buffer[i]=_data[i+2];
 	return leng;
 }
 
@@ -88,7 +88,7 @@ int Telegram::getIntData() const
 	{
 		case(0): return _shortdata; break;
 		case(1): return (int)*_data;break;
-		case(2): return (int)_data[0] <<8 + (int)_data[1];
+		case(2): return ( (int)_data[0] <<8 )  + (int)_data[1];
 		default: return 0;
 	}
 }
