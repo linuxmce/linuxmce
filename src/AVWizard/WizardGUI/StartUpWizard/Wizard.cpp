@@ -409,6 +409,7 @@ void Wizard::EvaluateEvents()
 		DoMouseClick(Event.MouseX, Event.MouseY);
 		break;
 	case WMET_NUMBER_KEY:
+	case WMET_ALPHA_KEY:
 #ifdef DEBUG
 		std::cout<<"Numeric key pressed: "<<char(Event.KeyCode)<<std::endl;
 #endif

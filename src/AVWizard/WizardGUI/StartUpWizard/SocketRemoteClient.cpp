@@ -222,6 +222,21 @@ void* SocketClientCallBack(void* SocketClientCallBackPtr)
 		Event.key.state = SDL_RELEASED;
 		Event.key.keysym.sym = SDLK_9;
 	}
+	if(Message == "q" || Message == "Q") {
+		Event.type = SDL_KEYUP;
+		Event.key.state = SDL_RELEASED;
+		Event.key.keysym.sym = SDLK_q;
+	}
+	if(Message == "w" || Message == "W") {
+		Event.type = SDL_KEYUP;
+		Event.key.state = SDL_RELEASED;
+		Event.key.keysym.sym = SDLK_w;
+	}
+	if(Message == "l" || Message == "L") {
+		Event.type = SDL_KEYUP;
+		Event.key.state = SDL_RELEASED;
+		Event.key.keysym.sym = SDLK_l;
+	}
 
 
 	SafetyLock Lock(&Client->Server->SafeMutex);

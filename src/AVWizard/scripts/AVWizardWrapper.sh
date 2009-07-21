@@ -68,7 +68,7 @@ while [[ "$Done" -eq 0 ]]; do
 	esac
 
 	# if AVWizard fails to start at a certain step, like the video confirmation step,
-	# ensure that it is treaded as if it was interrupted, not the previous step
+	# ensure that it is treated as if it was interrupted, not the previous step
 	WizSet InterruptedStep "$NextStep"
 	
 	sleep 2 # things seem to mess up at random when X is stopped and started too fast

@@ -708,7 +708,7 @@ void GenerateWizardConfigDefaults::GeneratePage_AudioConnector(
 	Page->AddChild(CreateControlButton(
 		"Btn1",
 		"Analog Stereo",
-		105, 285,
+		320, 250,
 		0,
 		true
 		));
@@ -716,7 +716,7 @@ void GenerateWizardConfigDefaults::GeneratePage_AudioConnector(
 	Page->AddChild(CreateControlButton(
 		"Btn2",
 		"SPDIF Coaxial",
-		265, 285,
+		320, 280,
 		0,
 		true
 		));
@@ -724,15 +724,23 @@ void GenerateWizardConfigDefaults::GeneratePage_AudioConnector(
 	Page->AddChild(CreateControlButton(
 		"Btn3",
 		"SPDIF Optical",
-		420, 285,
+		320, 310,
 		0,
 		true
 		));
 
 	Page->AddChild(CreateControlButton(
 		"Btn4",
+		"HDMI",
+		320, 340,
+		0,
+		true
+		));
+
+	Page->AddChild(CreateControlButton(
+		"Btn5",
 		"No sound",
-		550, 285,
+		320, 370,
 		0,
 		true
 		));

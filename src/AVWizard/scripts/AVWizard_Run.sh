@@ -57,10 +57,10 @@ SetupX()
 	fi
 	rmmod nvidia &>/dev/null || :
 	# default test
-	bash -x "$BaseDir"/Xconfigure.sh --conffile "$XF86Config" --resolution '640x480@60' --no-test | tee-pluto /var/log/pluto/Xconfigure.log
+	bash -x "$BaseDir"/Xconfigure.sh --conffile "$XF86Config" --resolution '640x480@60' --output VGA --no-test | tee-pluto /var/log/pluto/Xconfigure.log
 	if ! TestXConfig "$Display" "$XF86Config"; then
 		# vesa test
-		bash -x "$BaseDir"/Xconfigure.sh --conffile "$XF86Config" --resolution '640x480@60' --force-vesa --no-test | tee-pluto /var/log/pluto/Xconfigure.log
+		bash -x "$BaseDir"/Xconfigure.sh --conffile "$XF86Config" --resolution '640x480@60' --output VGA --force-vesa --no-test | tee-pluto /var/log/pluto/Xconfigure.log
 		if ! TestXConfig "$Display" "$XF86Config"; then
 			# all tests failed
 			beep -l 350 -f 300 &
@@ -155,6 +155,9 @@ UpdateAudioSettings()
 		;;
 		'SPDIF Optical')
 			AudioOutput="O"
+		;;
+		'HDMI')
+			AudioOutput="H"
 		;;
 	esac
 	

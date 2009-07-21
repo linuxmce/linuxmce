@@ -80,7 +80,10 @@ WizardPageVideoResolution::~WizardPageVideoResolution(void)
 	// Fill connector select list
 	WizardWidgetScrollList *List = dynamic_cast<WizardWidgetScrollList*> (Page->GetChildRecursive("VideoConnectorScroll"));
 	List->AddItem("VGA", "VGA");
+	List->AddItem("VGA 2", "VGA-2");
 	List->AddItem("DVI/HDMI", "DVI");
+	List->AddItem("DVI/HDMI 2", "DVI-2");
+	List->AddItem("LVDS", "LVDS");
 	List->AddItem("Component", "Component");
 	List->AddItem("Composite", "Composite");
 	List->AddItem("S-Video","S-Video");
@@ -130,7 +133,10 @@ void WizardPageVideoResolution::FillResolutionStandard(WizardWidgetScrollList* L
 	switch (FillType) {
 		default:
 		case 0: // VGA
-		case 1: // DVI
+		case 1: // VGA 2
+		case 2: // DVI
+		case 3: // DVI 2
+		case 4: // LVDS
 		{
 			ResolutionConf ResCnf("/usr/pluto/share/Resolutions.conf");
 			ResResolutionVector ResolutionVector;
@@ -149,7 +155,7 @@ void WizardPageVideoResolution::FillResolutionStandard(WizardWidgetScrollList* L
 			}
 		}
 			break;
-		case 2: // Component
+		case 5: // Component
 			List->AddItem("HD480p", "480p");
 			List->AddItem("HD720p", "720p");
 #if 0
@@ -157,8 +163,8 @@ void WizardPageVideoResolution::FillResolutionStandard(WizardWidgetScrollList* L
 			List->AddItem("HD1080p", "1080p");
 #endif
 			break;
-		case 3: // Composite
-		case 4:	// S-Video
+		case 6: // Composite
+		case 7:	// S-Video
 			List->AddItem("PAL-B", "640x480");
 			List->AddItem("PAL-D", "640x480");
 			List->AddItem("PAL-G", "640x480");
@@ -182,7 +188,9 @@ void WizardPageVideoResolution::FillRefresh(WizardWidgetScrollList* List, const 
 	switch(FillType) {
 		default:
 		case 0: // VGA
-		case 1: // DVI
+		case 1: // VGA 2
+		case 2: // DVI
+		case 3: // DVI 2
 			List->AddItem("50 Hz", "50");
 			List->AddItem("60 Hz", "60");
 			List->AddItem("65 Hz", "65");
@@ -192,9 +200,10 @@ void WizardPageVideoResolution::FillRefresh(WizardWidgetScrollList* List, const 
 			List->AddItem("85 Hz", "85");
 			List->SetItemIndex(1);
 			break;
-		case 2: // Component
-		case 3: // Composite
-		case 4:	// S-Video
+		case 4: // LVDS
+		case 5: // Component
+		case 6: // Composite
+		case 7:	// S-Video
 			break;
 	}
 }

@@ -42,8 +42,8 @@ class WizardPageAudioConnector :
 public:
 	virtual int DoApplySetting(SettingsDictionary* Dictionary);
 	virtual void DefaultSetup(SettingsDictionary* AVWizardSettings);
-	virtual void DoIncreaseSetting();
-	virtual void DoDecreaseSetting();
+	virtual void DoNextFocusItem();
+	virtual void DoPreviousFocusItem();
 	virtual void DoClickWidget(WizardWidgetBase *pWidget);
 
 	WizardPageAudioConnector(GenericBackEnd* FrontEnd, std::string Name);
