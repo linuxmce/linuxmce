@@ -65,10 +65,23 @@ sudo mount -t proc none ~/live/edit/proc
 echo "Get Installer from build environment"
 cp -r $BUILDER_ROOT/var/lmce-build/svn/branches/LinuxMCE-0810/src/new-installer edit/root/
 
+echo "Make sure, mail-transport-agent is available"
+if [ ! -f $BUILDER_ROOT/var/www/mail-transport-agent* ]; then
+	echo "Please provide the dummy mail-transport-agent package, otherwise install will fail."
+	exit 1;
+fi
+
 echo "Copying over the current debs"
 mkdir -p extract-cd/usr/pluto/deb-cache
 cp $BUILDER_ROOT/var/www/{*.deb,Package*,Release*} extract-cd/usr/pluto/deb-cache
-
+echo "Updating packages file"
+pushd  extract-cd/usr/pluto/deb-cache
+# Generate the Packages files
+echo  "Generating Packages / Packages.gz files"
+dpkg-scanpackages . /dev/null > Packages
+cat Packages | gzip -9c > Packages.gz
+popd
+                                                                
 
 echo Now updating the install
 echo Creating an upgrade script
@@ -86,14 +99,12 @@ dpkg --set-selections < kubuntu810desktop-selection
 apt-get dselect-upgrade -y
 cd /root/new-installer
 bash pre-install-from-DVD.sh
-apt-get install mail-transport-agent
 eol
 
 chmod +x edit/root/upgrade.sh
 sudo chroot edit root/upgrade.sh
 
 echo "deb http://archive.ubuntu.com/ubuntu/ intrepid  main restricted universe multiverse">> edit/etc/apt/sources.list
-
 
 echo Creating Desktop button
 mkdir -p edit/etc/skel/Desktop
