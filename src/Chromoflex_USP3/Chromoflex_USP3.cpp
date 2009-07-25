@@ -66,6 +66,9 @@ bool Chromoflex_USP3::GetConfig()
 	fd = open(TranslateSerialUSB(DATA_Get_COM_Port_on_PC()).c_str(), O_RDWR);
 	unsigned char buf[1024];
 
+	increment=1;
+	speed=1;
+
 	// init crc
 	usp_crc = 0xffff;
 
@@ -175,9 +178,9 @@ void Chromoflex_USP3::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,
 	buf[9]=green; // G
 	buf[10]=blue; // B
 	buf[11]=0x00; // X
-	buf[12]=0xff; // reg 8 - red increment
-	buf[13]=0xff; // reg 9 - green increment
-	buf[14]=0xff; // reg 10 - blue increment
+	buf[12]=increment; // reg 8 - red increment
+	buf[13]=increment; // reg 9 - green increment
+	buf[14]=increment; // reg 10 - blue increment
 
 	// calc crc16
 	usp_crc = 0xffff;

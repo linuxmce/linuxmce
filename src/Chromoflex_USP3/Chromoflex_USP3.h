@@ -26,6 +26,9 @@ namespace DCE
 		// Private member variables
 		int fd; // file desc for device
 		unsigned short   usp_crc; // initialise per packet with $FFFF.
+		int increment;
+		int speed;
+
 		// Private methods
 		virtual void process_crc(unsigned char ucData);
 
@@ -42,7 +45,6 @@ public:
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
-
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
 		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
