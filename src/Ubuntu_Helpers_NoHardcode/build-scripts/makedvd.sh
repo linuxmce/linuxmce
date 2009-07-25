@@ -63,8 +63,7 @@ sudo cp /etc/hosts edit/etc/
 #echo "Acquire::http::Proxy \"http://10.1.3.5:3128\";">edit/etc/apt/apt.conf
 sudo mount -t proc none ~/live/edit/proc
 echo "Get Installer from build environment"
-wget http://deb.linuxmce.org/ubuntu/dists/intrepid/lmce-alpha2/binary-all/libft-perl_1.0_all.deb
-wget http://deb.linuxmce.org/ubuntu/dists/intrepid/lmce-alpha-latest/binary-all/mail-transport-agent_1.0_all.deb 
+cp -r $BUILDER_ROOT/var/lmce-build/svn/branches/LinuxMCE-0810/src/new-installer edit/root/
 
 echo "Copying over the current debs"
 mkdir -p extract-cd/usr/pluto/deb-cache
@@ -72,6 +71,8 @@ cp $BUILDER_ROOT/var/www/{*.deb,Package*,Release*} extract-cd/usr/pluto/deb-cach
 echo "Updating packages file"
 pushd  extract-cd/usr/pluto/deb-cache
 # Generate the Packages files
+wget http://deb.linuxmce.org/ubuntu/dists/intrepid/lmce-alpha2/binary-all/libft-perl_1.0_all.deb 
+wget http://deb.linuxmce.org/ubuntu/dists/intrepid/lmce-alpha-latest/binary-all/mail-transport-agent_1.0_all.deb 
 echo  "Generating Packages / Packages.gz files"
 dpkg-scanpackages . /dev/null > Packages
 cat Packages | gzip -9c > Packages.gz
