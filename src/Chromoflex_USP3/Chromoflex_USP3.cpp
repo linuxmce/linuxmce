@@ -90,9 +90,11 @@ bool Chromoflex_USP3::GetConfig()
 	tcflush(fd, TCIFLUSH);
 	tcsetattr(fd,TCSANOW,&tio);
 
-	write (fd, buf, 11);
-
-	return true;
+	if (write (fd, buf, 11) == 11) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
 //<-dceag-reg-b->
@@ -166,22 +168,28 @@ void Chromoflex_USP3::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,
 	buf[2]=0x00; // broadcast
 	buf[3]=0x00; // broadcast
 	buf[4]=0x00; // length 
-	buf[5]=0x05; // length
+	buf[5]=0x08; // length
 	buf[6]=0x7e; // 7e == effect color
 	buf[7]=0x04; // register addr
 	buf[8]=red; // R
 	buf[9]=green; // G
 	buf[10]=blue; // B
 	buf[11]=0x00; // X
+	buf[12]=0xff; // reg 8 - red increment
+	buf[13]=0xff; // reg 9 - green increment
+	buf[14]=0xff; // reg 10 - blue increment
 
 	// calc crc16
 	usp_crc = 0xffff;
-	for (int i = 0; i < 12; i++) process_crc(buf[i]);
+	for (int i = 0; i < 15; i++) process_crc(buf[i]);
 
-	buf[12] = (usp_crc >> 8);
-	buf[13] = (usp_crc & 0xff);
+	buf[15] = (usp_crc >> 8);
+	buf[16] = (usp_crc & 0xff);
 
-	write (fd, buf, 14);
+	if (write (fd, buf, 17) != 17) {
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Write error: %s", strerror(errno ));
+		exit(-1);
+	}
 
 	// TODO: handle multiple childs, we just broadcast for now
 	sCMD_Result = "OK";
