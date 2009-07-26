@@ -64,6 +64,15 @@ sudo cp /etc/hosts edit/etc/
 sudo mount -t proc none ~/live/edit/proc
 echo "Get Installer from build environment"
 cp -r $BUILDER_ROOT/var/lmce-build/svn/branches/LinuxMCE-0810/src/new-installer edit/root/
+cat <<eol > edit/root/new-installer/full-install.sh
+#!/bin/bash
+echo "Starting mce-install.sh"
+bash mce-install.sh
+echo "Running post-install.sh"
+bash post-install.sh
+echo "Done!"
+eol
+chmod +x edit/root/new-installer/full-install.sh
 
 echo "Copying over the current debs"
 mkdir -p extract-cd/usr/pluto/deb-cache
@@ -110,7 +119,7 @@ Encoding=UTF-8
 Version=8.10
 Type=Application
 Terminal=false
-Exec=kdesudo /root/new-installer/mce-install.sh
+Exec=kdesudo /root/new-installer/full-install.sh
 Path=/root/new-installer
 Name=LinuxMCE Installer
 Icon=gnome-panel-launcher
