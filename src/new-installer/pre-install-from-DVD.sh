@@ -22,4 +22,7 @@ then
 fi
 
 apt-get update
-apt-get install mail-transport-agent
+# We add all the deb's here, that can be pre-installed without causing problems
+apt-get -y -f install video-wizard-videos
+apt-get -y -f install pluto-sample-media
+        
