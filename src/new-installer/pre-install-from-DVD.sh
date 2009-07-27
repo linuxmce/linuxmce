@@ -22,4 +22,4 @@ then
 fi
 
 apt-get update
-
+apt-get install mail-transport-agent
