@@ -58,11 +58,14 @@
 #endif
 #include "../ScreenHistory.h"
 
-#ifndef DIRECTFB
+#if !defined(DIRECTFB) && !defined(PADORBITER)
 #include "OSDScreenHandler.h"
 #endif
 
+#if !defined(PADORBITER) 
 #include "MouseBehavior_Linux.h"
+#endif
+
 #include "pluto_main/Define_DesignObjParameter.h"
 
 #if !defined(DIRECTFB) && defined(VIA_OVERLAY) && defined(ORBITER_OPENGL)
@@ -395,7 +398,7 @@ void OrbiterLinux::Initialize(GraphicType Type, int iPK_Room, int iPK_EntertainA
 
     //we know here the ui version!
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "Orbiter UI Version is %d", m_iUiVersion);
-#ifndef DIRECTFB
+#if !defined(DIRECTFB) && !defined(PADORBITER)
     if(UsesUIVersion2())
 	{
 		m_pMouseBehavior = new MouseBehavior_Linux(this);
@@ -454,14 +457,15 @@ void OrbiterLinux::Destroy()
 #if !defined(MAEMO) && !defined(DIRECTFB)
     delete m_pRecordHandler;
     m_pRecordHandler = NULL;
-#endif	
+#endif
+#if !defined(PADORBITER) && !defined(DIRECTFB)    
     if (m_pMouseBehavior)
     {
 	    LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::Destroy() killing mouse behavior");
         delete m_pMouseBehavior;
         m_pMouseBehavior = NULL;
     }
-
+#endif
 #ifndef DIRECTFB
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "OrbiterLinux::Destroy() calling X11 Exit");
     X11_Exit();
@@ -628,7 +632,7 @@ void OrbiterLinux::CMD_Surrender_to_OS(string sOnOff,bool bFully_release_keyboar
 #endif
 }
 
-#ifndef DIRECTFB
+#if !defined(DIRECTFB) && !defined(PADORBITER)
 /*virtual*/ ScreenHandler *OrbiterLinux::CreateScreenHandler()
 {
 	return new OSDScreenHandler(this, &m_mapDesignObj);
@@ -1071,7 +1075,7 @@ void OrbiterLinux::StopActivateExternalWindowTask()
 
 void OrbiterLinux::ConfirmPcDesktop()
 {
-#ifndef DIRECTFB
+#if !defined(PADORBITER) && !defined(DIRECTFB)
 #if defined(VIA_OVERLAY) && defined(ORBITER_OPENGL)
 	if(!ProcessUtils::SpawnDaemon("/usr/pluto/bin/Fiire_KDE.sh", "", true))
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Failed to start KDE (with Fiire_KDE.sh)");

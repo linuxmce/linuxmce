@@ -162,7 +162,7 @@ public:
 
     virtual void CMD_Surrender_to_OS(string sOnOff,bool bFully_release_keyboard,bool bAlways,string &sCMD_Result,Message *pMessage);
 
-#ifndef DIRECTFB    
+#if !defined(DIRECTFB) && !defined(PADORBITER)     
 	virtual class ScreenHandler *CreateScreenHandler();
 #endif
 

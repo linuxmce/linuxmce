@@ -5,6 +5,14 @@
 #define SKIN_Mobile_Phone_Basic_CONST 3
 #define SKIN_SmallUI_CONST 6
 #define SKIN_Poison_Arrows_CONST 13
+#define SKIN_Slate_CONST 14
+#define SKIN_Titanium_Blue_CONST 15
+#define SKIN_Titanium_Purple_CONST 16
+#define SKIN_Titanium_Orange_CONST 17
+#define SKIN_Titanium_Silver_CONST 18
+#define SKIN_Titanium_Pink_CONST 19
+#define SKIN_Titanium_Green_CONST 20
+#define SKIN_Titanium_Apple_CONST 21
 
 #define SKIN_TABLE "Skin"
 #define SKIN_PK_SKIN_FIELD "PK_Skin"

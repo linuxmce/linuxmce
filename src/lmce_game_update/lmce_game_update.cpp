@@ -61,11 +61,21 @@ bool LMCE_Game_Update::GetMetadataForRom(string sRomName, string& sMetaData)
   char * const args[] = {"./get_rom_info.pl",csRomName,NULL};
   if (ProcessUtils::GetCommandOutput(args[0], args, sOutput, sStdErr) == 0)
     {
-      sMetaData = sOutput;
+      vector<string> vectTmp;  // used for a basic sanity check.
+      StringUtils::Tokenize(sOutput,"|",vectTmp);
+      if (vectTmp.size() == 4)
+	{
+	  sMetaData = sOutput;
+	}
+      else 
+	{
+	  sMetaData = "ERROR";
+	}
       return true;
     }
   else
     {
+      sMetaData = "ERROR";
       return false;
     }
 }
@@ -112,7 +122,7 @@ bool LMCE_Game_Update::RomExists(string sRomName)
   vector<class Row_Rom *> v_Rom;
   string sRomFile = sRomName + ".zip";
   string sWhereQuery = "WHERE Romname = '"+sRomFile+"'";
-
+  //  LoggerWrapper::GetInstance()->Write(LV_STATUS,"sWhereQuery is %s",sWhereQuery.c_str());
   if (!m_pMyDatabase->Rom_get()->GetRows(sWhereQuery,&v_Rom)) 
     {
       return false;
@@ -120,10 +130,12 @@ bool LMCE_Game_Update::RomExists(string sRomName)
   else 
     {
       // Rom DOES exist in DB already.
+      //      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Size is %d",v_Rom.size());
+
       // LoggerWrapper::GetInstance()->Write(LV_STATUS,"Rom %s does exist.",sRomName.c_str());
-      if (v_Rom.size() == 0) 
+      if (v_Rom.empty()) 
 	{
-	  // LoggerWrapper::GetInstance()->Write(LV_STATUS,"Rom %s does not exist",sRomName.c_str());
+	  //	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Rom %s does not exist",sRomName.c_str());
 	  return false;
 	}
       else
@@ -136,7 +148,9 @@ bool LMCE_Game_Update::RomExists(string sRomName)
 int LMCE_Game_Update::AddRomm(string sRomName)
 {
   Row_Rom *pRow_Rom = m_pMyDatabase->Rom_get()->AddRow();
-  pRow_Rom->Romname_set(sRomName);
+  string sRomFile = sRomName + ".zip";
+  pRow_Rom->Romname_set(sRomFile);
+  pRow_Rom->FK_GameSystem_set(GAMESYSTEM_MAME_CONST);
   pRow_Rom->Table_Rom_get()->Commit();
   return pRow_Rom->PK_Rom_get();
 }
@@ -154,7 +168,7 @@ bool LMCE_Game_Update::AddRommAttribute(int iPK_Rom, int iRomAttributeType, stri
   Row_RomAttribute *pRow_RomAttribute;
   Row_Rom_RomAttribute *pRow_Rom_RomAttribute;
   
-  m_pMyDatabase->RomAttribute_get()->GetRows("WHERE Name = '"+sName+"' AND FK_RomAttributeType = '"+StringUtils::itos(iRomAttributeType)+"'",&vectRow_RomAttributes);
+  m_pMyDatabase->RomAttribute_get()->GetRows("WHERE Name = '"+StringUtils::SQLEscape(sName)+"' AND FK_RomAttributeType = '"+StringUtils::itos(iRomAttributeType)+"'",&vectRow_RomAttributes);
 
   if (vectRow_RomAttributes.size() == 0)
     {
@@ -217,7 +231,7 @@ int LMCE_Game_Update::Run()
       if (!RomExists(sRomName)) 
 	{
 	  LoggerWrapper::GetInstance()->Write(LV_WARNING,"Rom %s does not exist in database. Grabbing info.",sRomName.c_str());
-	  if (!GetMetadataForRom(sRomName,sMetaData)) 
+	  if (!GetMetadataForRom(sRomName,sMetaData) || (sMetaData == "ERROR")) 
 	    {
 	      // Could not grab metadata.
 	      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not get metadata for Rom %s from MAWS.",sRomName.c_str());
@@ -235,6 +249,7 @@ int LMCE_Game_Update::Run()
 		{
 		  vector<string> vectMetadata;
 		  StringUtils::Tokenize(sMetaData,"|",vectMetadata);
+		  
 		  string sTitle = vectMetadata[0];
 		  string sManufacturer = vectMetadata[1];
 		  string sYear = vectMetadata[2];

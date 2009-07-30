@@ -5,7 +5,7 @@ CC=$(CXX)
 CPPFLAGS=-W -Wall -pipe -ggdb3 -DUPDATE_MEDIA
 CXXFLAGS=-I. -I.. -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/taglib
 LDFLAGS=-L$(ROOT)/lib -L/usr/local/lib
-LDLIBS= -lpluto_media -lpluto_main -lDCECommon -lSerializeClass -lPlutoUtils -lpthread -lid3 -ltag -llmce_game
+LDLIBS= -lpluto_media -lpluto_main -lDCECommon -lSerializeClass -lPlutoUtils -lpthread -lid3 -ltag
 
 #<-mkr_B_use_mysql_wrapper_b->
 CPPFLAGS += -I/usr/include/mysql
@@ -29,7 +29,6 @@ VDRInfoFileHandler.cpp \
 FileHandlerFactory.cpp \
 TagFileHandler.cpp \
 RomFileHandler.cpp \
-GAMEROM.cpp \
 FileUtils/file_utils.cpp \
 id3info/id3info.cpp \
 $(ROOT)/Media_Plugin/MediaAttributes_LowLevel.cpp \
@@ -39,6 +38,10 @@ $(ROOT)/inotify/inotify_class.cpp
 all: $(sources:.cpp=.o)
 	$(CXX) -o UpdateMedia $+ $(LDFLAGS) $(LDLIBS)
 	cp UpdateMedia $(ROOT)/bin/
+
+GAMEROM: GAMEROM.o GAMEROMMain.o
+	$(CXX) -o GAMEROM $+ $(LDFLAGS) -llmce_game -lPlutoUtils -lSerializeClass -lDCECommon -lpthread
+	cp GAMEROM $(ROOT)/bin/
 
 clean:
 	rm -f UpdateMedia $(sources:.cpp=.o) 

@@ -32,6 +32,15 @@ GenericHIDInterface::GenericHIDInterface(Orbiter *pOrbiter) : m_GenericHIDMutex(
   m_bRunning = false;
   m_GenericHIDMutex.Init(&m_pOrbiter->m_MutexAttr);
   m_iHoldingDownButton=m_iRepeat=m_tLastButtonPress=m_iLastButtonPress=0;
+  m_pAlarmManager = new AlarmManager();
+}
+
+void GenericHIDInterface::AlarmCallback(int id, void* param)
+{
+  if (id==ALARM_CHECK_FOR_NEW_DEVICES) 
+    {
+      UpdateEventDevices();
+    }
 }
 
 void GenericHIDInterface::UpdateEventDevices()
@@ -68,6 +77,9 @@ void GenericHIDInterface::UpdateEventDevices()
 	}
     }
 
+    m_pAlarmManager->CancelAlarmByType(ALARM_CHECK_FOR_NEW_DEVICES);		// cancel to provide sync
+    m_pAlarmManager->AddRelativeAlarm(8,this,ALARM_CHECK_FOR_NEW_DEVICES,NULL); // schedule another device check in 8 secs.
+
   LoggerWrapper::GetInstance()->Write(LV_STATUS,"GenericHIDInterface::UpdateEventDevices() - End");
 }
 
@@ -99,6 +111,9 @@ bool GenericHIDInterface::DecodeEventInFD(int fd)
   if ( rd < (int) sizeof(struct input_event))
     {
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "GenericHIDInterface::DecodeEventInFD: Short read from fd %d");
+      m_pAlarmManager->CancelAlarmByType(ALARM_CHECK_FOR_NEW_DEVICES);
+      m_pAlarmManager->AddRelativeAlarm(4,this,ALARM_CHECK_FOR_NEW_DEVICES,NULL);
+      Sleep(4000);  // Stupid, i know, but it will keep things quiet for a moment.
     } else 
     {
       for ( unsigned int i = 0; i < rd / sizeof(struct input_event); i++ )
@@ -109,7 +124,7 @@ bool GenericHIDInterface::DecodeEventInFD(int fd)
 	    }
 	  else 
 	    {
-	      if ((ev[i].type == EV_KEY))
+	      if ((ev[i].type == EV_KEY) && (ev[i].code > 57))   // Try to not chop keys that already have meaning
 		{
 		  /* oOo, a keypress, let's deal with it. */
 		  int iKeyCode = ev[i].code;
@@ -186,7 +201,9 @@ void GenericHIDInterface::ProcessGenericHIDEvents()
 	      }
 	    }
 	}
-    
+   
+	
+
       //      LoggerWrapper::GetInstance()->Write(LV_STATUS,"GenericHIDInterface::ProcessGenericHIDEvents() - Bottom of Thread.");
   
     }

@@ -19,10 +19,8 @@ GAMEROM::~GAMEROM()
 
 void GAMEROM::InitDatabase()
 {
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"GAMEROM::InitDatabase() start");
-    	m_pMyDatabase = new Database_lmce_game(LoggerWrapper::GetInstance());
+    	m_pMyDatabase = new Database_lmce_game(new NullLogger());
 	m_pMyDatabase->Connect("localhost","root","","lmce_game",3306);
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"GAMEROM::InitDatabase() successful.");
 }
 
 string GAMEROM::getTitleForROM(string sROMName) 
@@ -74,6 +72,8 @@ string GAMEROM::getYearForROM(string sROMName)
 	string 					sRomName = sROMName + ".zip";
 	string					s_WhereQuery = "WHERE Romname = '"+sRomName+"'";
 
+	InitDatabase();
+
 	if (!m_pMyDatabase->Rom_get()->GetRows(s_WhereQuery,&v_Rom)) 
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not get Rom matching ROMName: %s",sRomName.c_str());
@@ -114,6 +114,8 @@ string GAMEROM::getManufacturerForROM(string sROMName)
 	string 					sRomName = sROMName + ".zip";
 	string					s_WhereQuery = "WHERE Romname = '"+sRomName+"'";
 
+	InitDatabase();
+
 	if (!m_pMyDatabase->Rom_get()->GetRows(s_WhereQuery,&v_Rom)) 
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not get Rom matching ROMName: %s",sRomName.c_str());
@@ -152,6 +154,8 @@ string GAMEROM::getGenreForROM(string sROMName)
 	vector<class Row_Rom_RomAttribute *>	v_Rom_RomAttributes;
 	string 					sRomName = sROMName + ".zip";
 	string					s_WhereQuery = "WHERE Romname = '"+sRomName+"'";
+
+	InitDatabase();
 
 	if (!m_pMyDatabase->Rom_get()->GetRows(s_WhereQuery,&v_Rom)) 
 	{

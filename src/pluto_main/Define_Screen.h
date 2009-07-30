@@ -263,7 +263,7 @@
 #define SCREEN_VDR_Full_Screen_Options_CONST 277
 #define SCREEN_VDR_Full_Screen_CONST 278
 #define SCREEN_VDR_Recordings_CONST 279
-#define SCREEN_aJAd_CONST 280
+#define SCREEN_Simple_TV_Remote_CONST 280
 #define SCREEN_Non_Pluto_TV_Full_screen_CONST 281
 #define SCREEN_Non_Pluto_TV_Full_screen_options_CONST 282
 #define SCREEN_Cannot_Reload_Router_CONST 283

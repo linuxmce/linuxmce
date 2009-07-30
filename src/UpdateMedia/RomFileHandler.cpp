@@ -13,6 +13,7 @@
 #include "PlutoMediaAttributes.h"
 #include "FileUtils/file_utils.h"
 #include "DCE/Logger.h"
+#include "PlutoUtils/ProcessUtils.h"
 #include "pluto_main/Table_MediaType.h"
 #include "pluto_media/Define_AttributeType.h"
 #include "RomFileHandler.h"
@@ -34,14 +35,12 @@ RomFileHandler::RomFileHandler(string sDirectory, string sFile) :
 	GenericFileHandler(sDirectory, sFile)
 {
 
-  m_pGAMEROM = NULL;
 
 }
 
 //-----------------------------------------------------------------------------------------------------
 RomFileHandler::~RomFileHandler(void)
 {
-  m_pGAMEROM = NULL;
 }
 //-----------------------------------------------------------------------------------------------------
 
@@ -84,22 +83,40 @@ bool RomFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 
 	return true;
 }
+//-----------------------------------------------------------------------------------------------------
+void RomFileHandler::getRomData(string sRomName)
+{
+	string sOutput, sStdErr;
+	char csRomName[100];
+	strcpy(csRomName,sRomName.c_str());
+	char * const args[] = {"/usr/pluto/bin/GAMEROM",csRomName,NULL};
+	if (ProcessUtils::GetCommandOutput(args[0], args, sOutput, sStdErr) == 0)
+	{
+		vector<string> vectOutput_Rows;
+		vector<string>::iterator it;
+		StringUtils::Tokenize(sOutput,"\n",vectOutput_Rows);
+		m_sROMTitle = vectOutput_Rows[0];
+		m_sROMYear = vectOutput_Rows[1];
+		m_sROMManufacturer = vectOutput_Rows[2];
+		m_sROMGenre = vectOutput_Rows[3];
+	}
 
+}
 //-----------------------------------------------------------------------------------------------------
 void RomFileHandler::GetRomInfo(string sFilename, map<int,string>& mapAttributes, list<pair<char *, size_t> >& listPictures)
 {
 
   string sROMTitle, sROMYear, sROMManufacturer, sROMGenre;
   string sROMName = FileUtils::FilenameWithoutPath(sFilename,false);
-  m_pGAMEROM = new(GAMEROM);
-  m_pGAMEROM->InitDatabase();
 
   // Use MAMEROM to grab text attributes.
 
-  sROMTitle = m_pGAMEROM->getTitleForROM(sROMName);
-  sROMYear = m_pGAMEROM->getYearForROM(sROMName);
-  sROMManufacturer = m_pGAMEROM->getManufacturerForROM(sROMName);
-  sROMGenre = m_pGAMEROM->getGenreForROM(sROMName);
+  getRomData(sROMName);
+
+  sROMTitle = m_sROMTitle;
+  sROMYear =  m_sROMYear;
+  sROMManufacturer = m_sROMManufacturer;
+  sROMGenre = m_sROMGenre;
 
   if (sROMTitle != "NOMATCH")
     mapAttributes[ATTRIBUTETYPE_Title_CONST] = sROMTitle;
@@ -123,9 +140,6 @@ void RomFileHandler::GetRomInfo(string sFilename, map<int,string>& mapAttributes
   pSnapData = FileUtils::ReadFileIntoBuffer(sSnapfilename,nSnapSize);
   if (nSnapSize > 0)
     listPictures.push_back(make_pair(pSnapData,nSnapSize));
-
-  delete(m_pGAMEROM);
-  m_pGAMEROM = NULL;
 
 }
 

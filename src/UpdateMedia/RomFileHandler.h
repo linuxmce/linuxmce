@@ -22,8 +22,11 @@ public:
 	string GetFileAttribute();
 	string GetFileSourceForDB();
 
+	string m_sROMTitle, m_sROMManufacturer, m_sROMYear, m_sROMGenre;
+
 private:
 	void GetRomInfo(string sFilename, map<int,string>& mapAttributes, list<pair<char *, size_t> >& listPictures);
+	void getRomData(string sRomName);
 	string FileWithAttributes(PlutoMediaAttributes *pPlutoMediaAttributes, bool bCreateId3File);
 	bool IsSupported();
 	void GetTagInfo(string sFilename, map<int,string>& mapAttributes, list<pair<char *, size_t> >& listPictures);

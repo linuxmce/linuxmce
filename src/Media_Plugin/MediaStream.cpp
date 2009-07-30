@@ -360,7 +360,7 @@ void MediaStream::UpdateDescriptions(bool bAllFiles,MediaFile *pMediaFile_In)
 	m_sMediaDescription=""; m_sSectionDescription="";
 	Media_Plugin *pMedia_Plugin = m_pMediaHandlerInfo->m_pMediaHandlerBase->m_pMedia_Plugin;
 
-	if( m_iPK_MediaType==MEDIATYPE_pluto_StoredAudio_CONST || m_iPK_MediaType==MEDIATYPE_pluto_CD_CONST || (m_iPK_MediaType==MEDIATYPE_pluto_StoredVideo_CONST && !m_bContainsTitlesOrSections) )
+	if( m_iPK_MediaType==MEDIATYPE_lmce_Game_CONST || m_iPK_MediaType==MEDIATYPE_pluto_StoredAudio_CONST || m_iPK_MediaType==MEDIATYPE_pluto_CD_CONST || (m_iPK_MediaType==MEDIATYPE_pluto_StoredVideo_CONST && !m_bContainsTitlesOrSections) )
 	{
 		MediaFile *pMediaFile=pMediaFile_In;
 		if( bAllFiles )
@@ -444,9 +444,9 @@ void MediaStream::UpdateDescriptions(bool bAllFiles,MediaFile *pMediaFile_In)
 			if( pRow_Attribute_Title )
 				m_sSectionDescription = pRow_Attribute_Title->Name_get();
 			else
-				m_sSectionDescription = pMediaFile->m_sFilename;
+				m_sSectionDescription = pMediaFile->m_sFilename; 
 
-			if( pMediaFile )
+			if( pMediaFile && (m_sSectionDescription.size() > 0))
 				pMediaFile->m_sDescription = m_sSectionDescription;
 
                        if( pMediaFile )
@@ -484,14 +484,14 @@ void MediaStream::UpdateDescriptions(bool bAllFiles,MediaFile *pMediaFile_In)
 		}
 
 		// Let's see if putting it down here makes a dent. 
-		if( (pRow_Attribute_Title) && m_iPK_MediaType==MEDIATYPE_pluto_StoredVideo_CONST )
+		if( (pRow_Attribute_Title) && (m_iPK_MediaType==MEDIATYPE_pluto_StoredVideo_CONST || m_iPK_MediaType==MEDIATYPE_lmce_Game_CONST) )
 		{
 			m_sMediaDescription = pRow_Attribute_Title->Name_get();
 
 			if (pRow_Attribute_Episode) {
 				m_sSectionDescription = pRow_Attribute_Episode->Name_get();			
 			} else {
-				m_sSectionDescription = m_sMediaDescription;
+				// m_sSectionDescription = m_sMediaDescription;
 			}
 
 		}
