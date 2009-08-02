@@ -213,6 +213,7 @@ namespace DCE
 		// True if the orbiter is an on screen display for this stream.  If ppEntertainArea is not NULL
 		// it will be set to the entertainment area for the OSD
 		virtual bool OrbiterIsOSD(int PK_Orbiter,EntertainArea **ppEntertainArea=NULL);
+		virtual void GetGameMediaType();
 		virtual int GetRemoteControlScreen(int PK_Orbiter);
 		virtual void GetRenderDevices(map<int, MediaDevice *> *pmapMediaDevices);
 
