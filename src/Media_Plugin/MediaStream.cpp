@@ -651,7 +651,7 @@ int MediaStream::GetRemoteControlScreen(int PK_Orbiter)
 		PK_MediaType = MEDIATYPE_pluto_DVD_CONST;
 
 	if( m_iPK_MediaType==MEDIATYPE_lmce_Game_CONST )
-		PK_Mediatype = GetRemoteControlScreen();
+		PK_MediaType = GetRemoteControlScreen();
 
 	Media_Plugin *pMedia_Plugin = m_pMediaHandlerInfo->m_pMediaHandlerBase->m_pMedia_Plugin;
 	RemoteControlSet *pRemoteControlSet = pMedia_Plugin->PickRemoteControlMap(
