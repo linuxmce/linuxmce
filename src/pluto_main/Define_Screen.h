@@ -276,6 +276,10 @@
 #define SCREEN_Current_Disc_Contents_CONST 290
 #define SCREEN_Edit_Attributes_CONST 291
 #define SCREEN_Game_Monitor_Mode_CONST 292
+#define SCREEN_Game_Atari_2600_Monitor_Mode_CONST 293
+#define SCREEN_Game_Atari_2600_FS_Options_CONST 294
+#define SCREEN_Game_Atari_2600_CONST 295
+#define SCREEN_Game_Atari_2600_FS_CONST 296
 
 #define SCREEN_TABLE "Screen"
 #define SCREEN_PK_SCREEN_FIELD "PK_Screen"

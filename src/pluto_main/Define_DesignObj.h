@@ -2437,6 +2437,16 @@
 #define DESIGNOBJ_butOnScreenKeyboard_CONST 5767
 #define DESIGNOBJ_generic_app_full_screen_virtua_CONST 5768
 #define DESIGNOBJ_butVirtualKeyboardOff_CONST 5769
+#define DESIGNOBJ_mnuSimpleTVRemote_CONST 5770
+#define DESIGNOBJ_arrFavouriteChannels_CONST 5771
+#define DESIGNOBJ_butFavouriteTVChannel_CONST 5772
+#define DESIGNOBJ_mnuGamesRemote_atari2600_CONST 5773
+#define DESIGNOBJ_grpMediaNavigation_Game_Base_CONST 5774
+#define DESIGNOBJ_Game_Select_CONST 5775
+#define DESIGNOBJ_mnuGamesMonitorMode_atari2600_CONST 5776
+#define DESIGNOBJ_Games_FS_Options_a2600_CONST 5777
+#define DESIGNOBJ_popGameOptions_a2600_CONST 5778
+#define DESIGNOBJ_Games_FS_Atari_2600_CONST 5779
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"

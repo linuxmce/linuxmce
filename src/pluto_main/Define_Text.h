@@ -1136,6 +1136,7 @@
 #define TEXT_FooTest_CONST 2079
 #define TEXT_Keyboard_CONST 2080
 #define TEXT_Virtual_Keyboard_Off_CONST 2081
+#define TEXT_Select_CONST 2082
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"

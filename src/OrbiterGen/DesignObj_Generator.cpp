@@ -92,10 +92,11 @@
 #include "pluto_media/Table_FileFormat.h"
 #include "pluto_media/Table_MediaSubType.h"
 #include "pluto_media/Table_MediaSource.h"
+#include "pluto_media/Table_Bookmark.h"
 
 extern bool g_bBootSplash;
 
-#define TOTAL_ESTIMATED_SCREENS 200
+#define TOTAL_ESTIMATED_SCREENS 330
 
 DesignObj_Generator::DesignObj_Generator(OrbiterGenerator *pGenerator,class Row_DesignObj * drDesignObj,class PlutoRectangle rPosition,class DesignObj_Generator *ocoParent,bool bAddToGenerated,bool bDontShare,bool bProcess)
 {
@@ -2030,6 +2031,33 @@ vector<class ArrayValue *> *DesignObj_Generator::GetArrayValues(Row_DesignObjVar
                 }
             }
             break;
+    case ARRAY_Favourite_TV_Channels_CONST:
+      {
+	DBHelper *pDBHelper_Myth = new DBHelper("localhost", "root", "","mythconverg");
+	vector <class Row_Bookmark *> vectBookMarks;
+	string sWhereQuery = "WHERE EK_MediaType = 1";  // Grab all TV Related bookmarks.
+	m_pOrbiterGenerator->m_spDatabase_pluto_media->Bookmark_get()->GetRows(sWhereQuery,&vectBookMarks);
+	for ( vector<Row_Bookmark *>::iterator it=vectBookMarks.begin();it!=vectBookMarks.end();++it )
+	  {
+	    // Get channel from bookmark position, grab related data in mythconverg.
+	    Row_Bookmark *pRow_Bookmark = *it;
+	    vector<string> vectTmp;
+	    string sPosition = pRow_Bookmark->Position_get();
+	    string sChannel = sPosition.substr(sPosition.find(":")+1);
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"FAVE: %s",sChannel.c_str());;
+	    string sSQLForChannel = "select chanid, callsign, icon FROM channel WHERE chanid = '"+sChannel+"'";
+	    PlutoSqlResult result_set_channel;
+	    if ((result_set_channel.r=pDBHelper_Myth->db_wrapper_query_result(sSQLForChannel))!=NULL &&
+		result_set_channel.r->row_count>0 )
+	      {
+		DB_ROW row=db_wrapper_fetch_row(result_set_channel.r);
+		string sCallsign=row[1];
+		string sIcon=row[2];
+		alArray->push_back(new ArrayValue(sPosition,sCallsign,NULL,0,0,0,0,false,false,false));
+	      }
+	  }
+      }
+      break;
 
     }
 
