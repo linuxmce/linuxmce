@@ -62,7 +62,7 @@ bool LMCE_Game_Update::GetMetadataForRom(string sRomName, string& sMetaData)
   if (ProcessUtils::GetCommandOutput(args[0], args, sOutput, sStdErr) == 0)
     {
       vector<string> vectTmp;  // used for a basic sanity check.
-      StringUtils::Tokenize(sOutput,"|",vectTmp);
+      StringUtils::Tokenize(sOutput,"|",&vectTmp);
       if (vectTmp.size() == 4)
 	{
 	  sMetaData = sOutput;
