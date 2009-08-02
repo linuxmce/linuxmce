@@ -364,7 +364,21 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 	pGameMediaStream->m_sMediaDescription = m_pGAMEROM->getTitleForROM(sROMName);
     	pGameMediaStream->m_sSectionDescription = m_pGAMEROM->getManufacturerForROM(sROMName) + " (" + m_pGAMEROM->getYearForROM(sROMName) + ")";
     	pGameMediaStream->m_sMediaSynopsis = "Example Synopsis!";
- 
+
+
+///////////////////////////////////////////////////////////////////////
+// Game System specific code here. Basically, if we need to
+// we set the window name.
+// yes, i know this is a hack. hopefully it will be replaced later.
+// -tschak
+///////////////////////////////////////////////////////////////////////
+
+	if (mediaURL.find("/a2600/") != string::npos )
+	{
+		pGameMediaStream->m_sAppName = "stella.stella";
+		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_a2600_CONST;
+	}
+
 	DCE::CMD_Play_Media CMD_Play_Media(m_dwPK_Device,
 						pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
 						pGameMediaStream->m_iPK_MediaType,
