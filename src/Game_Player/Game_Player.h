@@ -69,9 +69,15 @@ private:
 public:
 		virtual void PrepareToDelete();
 		string m_sROMName;
+		string m_sFilename;
+		int m_iPK_MediaType;    // Used by the stop media method.
+
 		// Public member variables
 
 protected:
+		bool UpdateA2600Config(string sMediaURL);
+		bool LaunchA2600(string sMediaURL);
+		bool StopA2600();
 		bool UpdateMAMEConfig(string sMediaURL);
 		bool LaunchMAME(string sMediaURL);
 		bool StopMAME();

@@ -53,6 +53,7 @@ Game_Player::Game_Player(int DeviceID, string ServerAddress,bool bConnectEventHa
 	m_GameMutex.Init(NULL);
 	m_pAlarmManager = NULL;
 	m_pDevice_App_Server = NULL;
+	m_iPK_MediaType = 0;
 
 }
 
@@ -71,6 +72,7 @@ void Game_Player::PrepareToDelete()
 	delete m_pAlarmManager;
 	m_pAlarmManager = NULL;
 	m_pDevice_App_Server = NULL;
+	m_iPK_MediaType = 0;
 }
 
 //<-dceag-getconfig-b->
@@ -111,6 +113,101 @@ bool Game_Player::Register()
 //<-dceag-reg-e->
 {
 	return Connect(PK_DeviceTemplate_get()); 
+}
+
+/**
+ * UpdateA2600Config() - similar to the function just below, except.
+ * tailored for Stella's configuration file.
+ */
+bool Game_Player::UpdateA2600Config(string sMediaURL)
+{
+  // vars to replace inside config file
+  string s_MediaPath = FileUtils::BasePath(sMediaURL);
+  string s_HardwareAccelleration = DATA_Get_Hardware_acceleration();
+  string s_VideoDriver;
+  const string s_OutputFile = "/root/.stella/stellarc";
+  const string s_OutputDir = "/root/.stella/";
+
+  if (s_HardwareAccelleration == "opengl")
+    {
+      s_VideoDriver = "gl";
+    } else 
+    {
+      s_VideoDriver = "soft";
+    }
+
+  string s_ConfigFile = 
+    "video = ##VIDEO##"
+    "dirtyrects = true"
+    "ppblend = 77"
+    "gl_filter = nearest"
+    "gl_aspect = 2.0"
+    "gl_fsmax = 1"
+    "gl_lib = libGL.so"
+    "zoom = 6"
+    "fullscreen = false"
+    "center = -gl_fsmax"
+    "grabmouse = false"
+    "palette = standard"
+    "debugheight = 27"
+    "sound = true"
+    "fragsize = 512"
+    "freq = 31400"
+    "tiafreq = 31400"
+    "volume = 100"
+    "clipvol = true"
+    "keymap = 90:0:0:0:0:0:0:0:0:87:83:0:0:0:0:0:0:0:0:0:81:0:0:0:0:0:0:0:86:0:0:0:0:15:0:0:0:0:0:0:0:0:0:0:0:66:0:67:68:59:45:46:47:21:22:23:24:57:58:0:65:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:84:0:0:0:85:51:0:56:53:50:20:18:17:60:19:63:64:0:0:61:62:48:0:52:0:0:0:49:55:16:54:0:0:0:0:74:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:11:12:14:13:70:72:76:69:73:9:10:3:4:5:6:7:8:79:77:78:80:0:0:0:0:0:0:0:0:0:0:0:0:15:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:"
+    "joymap = 90:15:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:20:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:"
+    "joyaxismap = 90:13:14:11:12:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:18:19:16:17:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:"
+    "joyhatmap = 90:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:"
+    "paddle = 0"
+    "sa1 = left"
+    "sa2 = right"
+    "joymouse = false"
+    "p1speed = 50"
+    "p2speed = 50"
+    "p3speed = 50"
+    "p4speed = 50"
+    "pthresh = 600"
+    "showinfo = false"
+    "ssdir = /tmp"
+    "ssname = romname"
+    "sssingle = false"
+    "romdir = ##ROMPATH1##"
+    "rombrowse = false"
+    "lastrom = "
+    "modtime = "
+    "tiadefaults = false"
+    "accurate = false";
+
+  s_ConfigFile = StringUtils::Replace(s_ConfigFile, "##ROMPATH##",s_MediaPath);
+  s_ConfigFile = StringUtils::Replace(s_ConfigFile,"##VIDEO##",s_VideoDriver);
+
+  if (!FileUtils::DirExists(s_OutputDir)) 
+    {
+      // hopefully try to create it.
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"%s didn't exist, attempting to create.",s_OutputDir.c_str());
+      FileUtils::MakeDir(s_OutputDir);
+      if (!FileUtils::DirExists(s_OutputDir)) 
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Couldn't create %s, bailing...",s_OutputDir.c_str());
+	  return false;
+	}
+      else
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Created %s Successfully.",s_OutputDir.c_str());		
+	}
+    }
+  
+  if (!FileUtils::WriteTextFile(s_OutputFile,s_ConfigFile)) 
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Couldn't write %s",s_OutputFile.c_str());		
+      return false;	
+    } else {
+    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Wrote %s",s_OutputFile.c_str());
+    return true;	
+  }
+  
 }
 
 /**
@@ -286,7 +383,7 @@ bool Game_Player::UpdateMAMEConfig(string sMediaURL)
 		"#\r\n"
 		"# PERFORMANCE OPTIONS\r\n"
 		"#\r\n"
-		"multithreading            0\r\n"
+		"multithreading            1\r\n"
 		"sdlvideofps               0\r\n"
 		"\r\n"
 		"#\r\n"
@@ -415,6 +512,51 @@ bool Game_Player::UpdateMAMEConfig(string sMediaURL)
 	}
 }
 
+bool Game_Player::LaunchA2600(string sMediaURL)
+{
+  size_t iROMNameSize = FileUtils::FilenameWithoutPath(sMediaURL).size();
+  m_sROMName = FileUtils::FilenameWithoutPath(sMediaURL).substr(0,iROMNameSize-4);
+  m_sFilename = FileUtils::FilenameWithoutPath(sMediaURL);
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"ROM is: %s",m_sROMName.c_str());
+  DeviceData_Base *pDevice_App_Server = m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_App_Server_CONST,this);
+  if( pDevice_App_Server )
+    {
+      string sMessage = StringUtils::itos(m_dwPK_Device) + " " + StringUtils::itos(m_dwPK_Device) + " 1 " 
+	TOSTRING(COMMAND_Application_Exited_CONST) " " 
+	TOSTRING(COMMANDPARAMETER_Exit_Code_CONST) " ";
+      
+      if (!UpdateA2600Config(sMediaURL)) 
+	{
+	  return false;
+	} // Make sure stella's configuration is correct. 
+      
+      DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
+			"stella", "stella", sMediaURL,
+						       sMessage + "1",sMessage + "0",false,false,true,false);
+      if( SendCommand(CMD_Spawn_Application) ) {
+	m_bMAMEIsRunning = true;
+	
+	Sleep(5000); // FIXME !!!!
+	
+	if (!WindowUtils::FindWindowMatching(m_pDisplay, "stella", m_iMAMEWindowId))
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Couldn't find stella Window");	
+	  }
+	else
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_STATUS,"stella window found: Window ID %d",m_iMAMEWindowId);
+	    
+	  }
+	
+	return true; }
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::LaunchA2600 - failed to launch");
+    }
+  else
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::LaunchA2600 - no app server");
+  return false;
+  
+}
+
 bool Game_Player::LaunchMAME(string sMediaURL) 
 {
 
@@ -458,6 +600,26 @@ bool Game_Player::LaunchMAME(string sMediaURL)
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::LaunchMAME - no app server");
 	return false;
 	
+}
+
+bool Game_Player::StopA2600() 
+{
+  DeviceData_Base *pDevice_App_Server = NULL;
+  string sResponse;
+  if(!m_bRouterReloading)
+    {
+      pDevice_App_Server = m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_App_Server_CONST,this);
+      if( pDevice_App_Server )
+	{
+	  DCE::CMD_Kill_Application CMD_Kill_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
+							 "stella", false);
+	  m_iMAMEWindowId = 0;
+	  return SendCommand(CMD_Kill_Application,&sResponse);  // Get return confirmation so we know it's gone before we continue
+	}
+    }
+  
+  LoggerWrapper::GetInstance()->Write(LV_STATUS, "Game_Player::StopMAME %p %s", pDevice_App_Server,sResponse.c_str());
+  return false;
 }
 
 bool Game_Player::StopMAME() {
@@ -759,8 +921,20 @@ void Game_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 	cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
 
-	LaunchMAME(sMediaURL);
+	m_iPK_MediaType = iPK_MediaType;
 
+	switch(iPK_MediaType)
+	{
+		case MEDIATYPE_lmce_Game_CONST:
+			LaunchMAME(sMediaURL);
+			break;
+		case MEDIATYPE_lmce_Game_a2600_CONST:
+			LaunchA2600(sMediaURL);
+			break;
+		default:
+			LaunchMAME(sMediaURL);
+			break;
+	}
 }
 
 //<-dceag-c38-b->
@@ -779,7 +953,15 @@ void Game_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sC
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 
-        StopMAME();
+	switch( m_iPK_MediaType)
+	  {
+	  case MEDIATYPE_lmce_Game_CONST:
+	    StopMAME();
+	    break;
+	  case MEDIATYPE_lmce_Game_a2600_CONST:
+	    StopA2600();
+	    break;
+	  }
 }
 
 //<-dceag-c39-b->
@@ -957,22 +1139,37 @@ void Game_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,
 	cout << "Parm #61 - Height=" << iHeight << endl;
 
 	PLUTO_SAFETY_LOCK(mm,m_GameMutex);
-	string snapPath = "/home/mamedata/shots/" + m_sROMName + "/";
-	FileUtils::DelFile("/home/mamedata/shots/"+m_sROMName + "/0000.png");
-	FileUtils::DelFile("/home/mamedata/shots/"+m_sROMName + "/0000.jpg");
+
+	string sPath, screenName;
+
+	switch(m_iPK_MediaType)
+	  {
+	  case MEDIATYPE_lmce_Game_CONST:
+	    sPath = "/home/mamedata/shots/";
+	    screenName = m_sROMName + "/0000";
+	    break;
+	  case MEDIATYPE_lmce_Game_a2600_CONST:
+	    sPath = "/tmp/";
+	    screenName = m_sFilename;
+	    break;
+	  }
+
+	string snapPath = sPath + m_sROMName + "/";
+	FileUtils::DelFile( sPath + screenName + "_1.png");
+	FileUtils::DelFile( sPath + screenName + "_1.jpg");
 
 	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_F12,m_iEventSerialNum++); // hehe, hack++
 	
 	Sleep(50);
-	string s_OutputString = "convert -sample 800x800 /home/mamedata/shots/" + m_sROMName + "/0000.png /home/mamedata/shots/" + m_sROMName + "/0000.jpg";	
+	string s_OutputString = "convert -sample 800x800 " + sPath + screenName + "_1.png "+sPath+screenName+".jpg";	
 	system(s_OutputString.c_str());
 	size_t size;
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "MAME_Player::CMD_Get_Video_Frame got %d",size);
-	*pData = FileUtils::ReadFileIntoBuffer("/home/mamedata/shots/"+m_sROMName+"/0000.png",size);
+	*pData = FileUtils::ReadFileIntoBuffer(sPath+screenName+"_1.png",size);
 	*iData_Size = size;
 
-	FileUtils::DelFile("/home/mamedata/shots/"+m_sROMName + "/0000.png");
-	FileUtils::DelFile("/home/mamedata/shots/"+m_sROMName + "/0000.jpg");
+	FileUtils::DelFile(sPath+screenName+"_1.png");
+	FileUtils::DelFile(sPath+screenName+"_1.jpg");
 
 	return;	
 
@@ -1483,8 +1680,18 @@ void Game_Player::CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,
 void Game_Player::CMD_Game_1P_Start(string &sCMD_Result,Message *pMessage)
 //<-dceag-c943-e->
 {
+  int iKey;
 	cout << "Need to implement command #943 - Game 1P Start" << endl;
-	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_1,m_iEventSerialNum++);
+	switch(m_iPK_MediaType)
+	  {
+	  case MEDIATYPE_lmce_Game_CONST:
+	    iKey = XK_1;
+	    break;
+	  case MEDIATYPE_lmce_Game_a2600_CONST:
+	    iKey = XK_F2;
+	    break;
+	  }
+	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,iKey,m_iEventSerialNum++);
 
 }
 
@@ -1572,7 +1779,18 @@ void Game_Player::CMD_Game_Start(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_Game_Select(string &sCMD_Result,Message *pMessage)
 //<-dceag-c950-e->
 {
-	cout << "Need to implement command #950 - Game Select" << endl;
+  int iKey;
+  switch (m_iPK_MediaType)
+    {
+    case MEDIATYPE_lmce_Game_CONST: 
+      break;
+    case MEDIATYPE_lmce_Game_a2600_CONST:
+      iKey = XK_F1;
+      break;
+    }
+
+  WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,iKey,m_iEventSerialNum++);
+
 }
 
 //<-dceag-c951-b->
