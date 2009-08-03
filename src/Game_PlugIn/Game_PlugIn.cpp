@@ -361,9 +361,9 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Game_PlugIn::CreateMediaStream(): Setting m_sMediaDescription to: %s",
 							m_pGAMEROM->getTitleForROM(sROMName).c_str());
  
-	pGameMediaStream->m_sMediaDescription = m_pGAMEROM->getTitleForROM(sROMName);
-    	pGameMediaStream->m_sSectionDescription = m_pGAMEROM->getManufacturerForROM(sROMName) + " (" + m_pGAMEROM->getYearForROM(sROMName) + ")";
-    	pGameMediaStream->m_sMediaSynopsis = "Example Synopsis!";
+	// pGameMediaStream->m_sMediaDescription = m_pGAMEROM->getTitleForROM(sROMName);
+    	// pGameMediaStream->m_sSectionDescription = m_pGAMEROM->getManufacturerForROM(sROMName) + " (" + m_pGAMEROM->getYearForROM(sROMName) + ")";
+    	// pGameMediaStream->m_sMediaSynopsis = "Example Synopsis!";
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -373,9 +373,9 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 // -tschak
 ///////////////////////////////////////////////////////////////////////
 
-	if (mediaURL.find("/a2600/") != string::npos )
+	if (mediaURL.find("/a2600") != string::npos )
 	{
-		pGameMediaStream->m_sAppName = "stella.stella";
+		pGameMediaStream->m_sAppName = "mess.mess";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_a2600_CONST;
 	}
 

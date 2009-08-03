@@ -121,93 +121,296 @@ bool Game_Player::Register()
  */
 bool Game_Player::UpdateA2600Config(string sMediaURL)
 {
-  // vars to replace inside config file
-  string s_MediaPath = FileUtils::BasePath(sMediaURL);
-  string s_HardwareAccelleration = DATA_Get_Hardware_acceleration();
-  string s_VideoDriver;
-  const string s_OutputFile = "/root/.stella/stellarc";
-  const string s_OutputDir = "/root/.stella/";
+	// Vars to replace inside the config file:
+	string s_MediaPath = FileUtils::BasePath(sMediaURL);			// for rompath
+	string s_HardwareAccelleration = DATA_Get_Hardware_acceleration();	// for mapping Video Driver values.
+	string s_VideoDriver;
+	const string s_OutputFile = "/root/.mess/mess.ini";
+	const string s_OutputDir = "/root/.mess";
 
-  if (s_HardwareAccelleration == "opengl")
-    {
-      s_VideoDriver = "gl";
-    } else 
-    {
-      s_VideoDriver = "soft";
-    }
-
-  string s_ConfigFile = 
-    "video = ##VIDEO##"
-    "dirtyrects = true"
-    "ppblend = 77"
-    "gl_filter = nearest"
-    "gl_aspect = 2.0"
-    "gl_fsmax = 1"
-    "gl_lib = libGL.so"
-    "zoom = 6"
-    "fullscreen = false"
-    "center = -gl_fsmax"
-    "grabmouse = false"
-    "palette = standard"
-    "debugheight = 27"
-    "sound = true"
-    "fragsize = 512"
-    "freq = 31400"
-    "tiafreq = 31400"
-    "volume = 100"
-    "clipvol = true"
-    "keymap = 90:0:0:0:0:0:0:0:0:87:83:0:0:0:0:0:0:0:0:0:81:0:0:0:0:0:0:0:86:0:0:0:0:15:0:0:0:0:0:0:0:0:0:0:0:66:0:67:68:59:45:46:47:21:22:23:24:57:58:0:65:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:84:0:0:0:85:51:0:56:53:50:20:18:17:60:19:63:64:0:0:61:62:48:0:52:0:0:0:49:55:16:54:0:0:0:0:74:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:11:12:14:13:70:72:76:69:73:9:10:3:4:5:6:7:8:79:77:78:80:0:0:0:0:0:0:0:0:0:0:0:0:15:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:"
-    "joymap = 90:15:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:20:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:"
-    "joyaxismap = 90:13:14:11:12:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:18:19:16:17:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:"
-    "joyhatmap = 90:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:"
-    "paddle = 0"
-    "sa1 = left"
-    "sa2 = right"
-    "joymouse = false"
-    "p1speed = 50"
-    "p2speed = 50"
-    "p3speed = 50"
-    "p4speed = 50"
-    "pthresh = 600"
-    "showinfo = false"
-    "ssdir = /tmp"
-    "ssname = romname"
-    "sssingle = false"
-    "romdir = ##ROMPATH1##"
-    "rombrowse = false"
-    "lastrom = "
-    "modtime = "
-    "tiadefaults = false"
-    "accurate = false";
-
-  s_ConfigFile = StringUtils::Replace(s_ConfigFile, "##ROMPATH##",s_MediaPath);
-  s_ConfigFile = StringUtils::Replace(s_ConfigFile,"##VIDEO##",s_VideoDriver);
-
-  if (!FileUtils::DirExists(s_OutputDir)) 
-    {
-      // hopefully try to create it.
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"%s didn't exist, attempting to create.",s_OutputDir.c_str());
-      FileUtils::MakeDir(s_OutputDir);
-      if (!FileUtils::DirExists(s_OutputDir)) 
+	// map hardware accelleration values
+	if (s_HardwareAccelleration == "opengl") 
 	{
-	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Couldn't create %s, bailing...",s_OutputDir.c_str());
-	  return false;
+		s_VideoDriver = "opengl";
+	} else {
+		s_VideoDriver = "soft";	
 	}
-      else
+
+	string s_ConfigFile = 
+		"<UNADORNED0>\r\n"
+		"\r\n"
+		"#\r\n"
+		"# CORE CONFIGURATION OPTIONS\r\n"
+		"#\r\n"
+		"readconfig                1\r\n"
+		"\r\n"
+		"#\r\n"
+		"# CORE SEARCH PATH OPTIONS\r\n"
+		"#\r\n"
+		"rompath                   ##ROMPATH##\r\n"
+		"samplepath                /home/mamedata/samples\r\n"
+		"artpath                   /home/mamedata/artwork\r\n"
+		"ctrlrpath                 /home/mamedata/ctrlr\r\n"
+		"inipath                   $HOME/.mess;.;ini\r\n"
+		"fontpath                  .\r\n"
+		"\r\n"
+		"#\r\n"
+		"# CORE OUTPUT DIRECTORY OPTIONS\r\n"
+		"#\r\n"
+		"cfg_directory             /home/mamedata/cfg\r\n"
+		"nvram_directory           /home/mamedata/nvram\r\n"
+		"memcard_directory         /home/mamedata/memcard\r\n"
+		"input_directory           /home/mamedata/inp\r\n"
+		"state_directory           /home/mamedata/sta\r\n"
+		"snapshot_directory        /home/mamedata/shots\r\n" 
+		"diff_directory            /home/mamedata/diff\r\n"
+		"comment_directory         /home/mamedata/comments\r\n"
+		"\r\n"
+		"#\r\n"
+		"# CORE FILENAME OPTIONS\r\n"
+		"#\r\n"
+		"cheat_file                cheat.dat\r\n"
+		"\r\n"
+		"#\r\n"
+		"# CORE STATE/PLAYBACK OPTIONS\r\n"
+		"#\r\n"
+		"state\r\n"
+		"autosave                  0\r\n"
+		"playback\r\n"
+		"record\r\n"                    
+		"mngwrite\r\n"                 
+		"wavwrite\r\n"                  
+		"\r\n"
+		"#\r\n"
+		"# CORE PERFORMANCE OPTIONS\r\n"
+		"#\r\n"
+		"autoframeskip             0\r\n"
+		"frameskip                 0\r\n"
+		"seconds_to_run            0\r\n"
+		"throttle                  1\r\n"
+		"sleep                     1\r\n"
+		"speed                     1.0\r\n"
+		"refreshspeed              0\r\n"
+		"\r\n"
+		"#\r\n"
+		"# CORE ROTATION OPTIONS\r\n"
+		"#\r\n"
+		"rotate                    1\r\n"
+		"ror                       0\r\n"
+		"rol                       0\r\n"
+		"autoror                   0\r\n"
+		"autorol                   0\r\n"
+		"flipx                     0\r\n"
+		"flipy                     0\r\n"
+		"\r\n"
+		"#\r\n"
+		"# CORE ARTWORK OPTIONS\r\n"
+		"#\r\n"
+		"artwork_crop              1\r\n"
+		"use_backdrops             1\r\n"
+		"use_overlays              1\r\n"
+		"use_bezels                1\r\n"
+		"\r\n"
+		"#\r\n"
+		"# CORE SCREEN OPTIONS\r\n"
+		"#\r\n"
+		"brightness                1.0\r\n"
+		"contrast                  1.0\r\n"
+		"gamma                     1.0\r\n"
+		"pause_brightness          0.65\r\n"
+		"\r\n"
+		"\r\n#"
+		"# CORE VECTOR OPTIONS\r\n"
+		"#\r\n"
+		"antialias                 1\r\n"
+		"beam                      2.0\r\n"
+		"flicker                   0\r\n"
+		"\r\n"
+		"#\r\n"
+		"# CORE SOUND OPTIONS\r\n"
+		"#\r\n"
+		"sound                     1\r\n"
+		"samplerate                48000\r\n"
+		"samples                   1\r\n"
+		"volume                    0\r\n"
+		"\r\n"
+		"#\r\n"
+		"# CORE INPUT OPTIONS\r\n"
+		"#\r\n"
+		"ctrlr\r\n"                     
+		"mouse                     1\r\n"
+		"joystick                  1\r\n" 
+		"lightgun                  0\r\n"
+		"multikeyboard             0\r\n"
+		"multimouse                0\r\n"
+		"steadykey                 0\r\n"
+		"offscreen_reload          0\r\n"
+		"joystick_map              auto\r\n"
+		"joystick_deadzone         0.3\r\n"
+		"joystick_saturation       0.85\r\n"
+		"\r\n"
+		"#\r\n"
+		"# CORE INPUT AUTOMATIC ENABLE OPTIONS\r\n"
+		"#\r\n"
+		"paddle_device             keyboard\r\n"
+		"adstick_device            keyboard\r\n"
+		"pedal_device              keyboard\r\n"
+		"dial_device               keyboard\r\n"
+		"trackball_device          mouse\r\n"
+		"lightgun_device           keyboard\r\n"
+		"positional_device         keyboard\r\n"
+		"mouse_device              mouse\r\n"
+		"\r\n"
+		"#\r\n"
+		"# CORE DEBUGGING OPTIONS\r\n"
+		"#\r\n"
+		"log                       0\r\n"
+		"verbose                   0\r\n"
+		"update_in_pause           0\r\n"
+		"\r\n"
+		"#\r\n"
+		"# CORE MISC OPTIONS\r\n"
+		"#\r\n"
+		"bios                      default\r\n"
+		"cheat                     0\r\n"
+		"skip_gameinfo             1\r\n"
+		"\r\n"
+		"#\r\n"
+		"# DEBUGGING OPTIONS\r\n"
+		"#\r\n"
+		"oslog                     0\r\n"
+		"\r\n"
+		"#\r\n"
+		"# PERFORMANCE OPTIONS\r\n"
+		"#\r\n"
+		"multithreading            1\r\n"
+		"sdlvideofps               0\r\n"
+		"\r\n"
+		"#\r\n"
+		"# VIDEO OPTIONS\r\n"
+		"#\r\n"
+		"video                     ##VIDEO##\r\n" 
+		"numscreens                1\r\n"
+		"window                    1\r\n" 
+		"keepaspect                1\r\n"
+		"unevenstretch             1\r\n"
+		"effect                    none\r\n"
+		"centerh                   1\r\n"
+		"centerv                   1\r\n"
+		"waitvsync                 0\r\n"
+		"yuvmode                   none\r\n"
+		"\r\n"
+		"#\r\n"
+		"# OpenGL-SPECIFIC OPTIONS\r\n"
+		"#\r\n"
+		"filter                    1\r\n"
+		"prescale                  1\r\n"
+		"gl_forcepow2texture       0\r\n"
+		"gl_notexturerect          0\r\n"
+		"gl_vbo                    1\r\n"
+		"gl_pbo                    1\r\n"
+		"gl_glsl                   0\r\n"
+		"gl_glsl_filter            1\r\n"
+		"glsl_shader_mame0         none\r\n"
+		"glsl_shader_mame1         none\r\n"
+		"glsl_shader_mame2         none\r\n"
+		"glsl_shader_mame3         none\r\n"
+		"glsl_shader_mame4         none\r\n"
+		"glsl_shader_mame5         none\r\n"
+		"glsl_shader_mame6         none\r\n"
+		"glsl_shader_mame7         none\r\n"
+		"glsl_shader_mame8         none\r\n"
+		"glsl_shader_mame9         none\r\n"
+		"glsl_shader_screen0       none\r\n"
+		"glsl_shader_screen1       none\r\n"
+		"glsl_shader_screen2       none\r\n"
+		"glsl_shader_screen3       none\r\n"
+		"glsl_shader_screen4       none\r\n"
+		"glsl_shader_screen5       none\r\n"
+		"glsl_shader_screen6       none\r\n"
+		"glsl_shader_screen7       none\r\n"
+		"glsl_shader_screen8       none\r\n"
+		"glsl_shader_screen9       none\r\n"
+		"gl_glsl_vid_attr          1\r\n"
+		"\r\n"
+		"#\r\n"
+		"# PER-WINDOW VIDEO OPTIONS\r\n"
+		"#\r\n"
+		"screen                    auto\r\n"
+		"aspect                    auto\r\n"
+		"resolution                auto\r\n"
+		"view                      auto\r\n"
+		"screen0                   auto\r\n"
+		"aspect0                   auto\r\n"
+		"resolution0               auto\r\n"
+		"view0                     auto\r\n"
+		"screen1                   auto\r\n"
+		"aspect1                   auto\r\n"
+		"resolution1               auto\r\n"
+		"view1                     auto\r\n"
+		"screen2                   auto\r\n"
+		"aspect2                   auto\r\n"
+		"resolution2               auto\r\n"
+		"view2                     auto\r\n"
+		"screen3                   auto\r\n"
+		"aspect3                   auto\r\n"
+		"resolution3               auto\r\n"
+		"view3                     auto\r\n"
+		"\r\n"
+		"#\r\n"
+		"# FULL SCREEN OPTIONS\r\n"
+		"#\r\n"
+		"switchres                 0\r\n"
+		"useallheads               0\r\n"
+		"\r\n"
+		"#\r\n"
+		"# SOUND OPTIONS\r\n"
+		"#\r\n"
+		"audio_latency             3\r\n"
+		"\r\n"
+		"#\r\n"
+		"# SDL KEYBOARD MAPPING\r\n"
+		"#\r\n"
+		"keymap                    0\r\n"
+		"keymap_file               keymap.dat\r\n"
+		"\r\n"
+		"#\r\n"
+		"# SDL JOYSTICK MAPPING\r\n"
+		"#\r\n"
+		"remapjoys                 0\r\n"
+		"remapjoyfile              joymap.dat\r\n"
+		"sixaxis                   0\r\n";
+	
+	// replace, and spit out the config.
+	
+	s_ConfigFile = StringUtils::Replace(s_ConfigFile,"##ROMPATH##",s_MediaPath);
+	s_ConfigFile = StringUtils::Replace(s_ConfigFile,"##VIDEO##",s_VideoDriver);
+	
+	if (!FileUtils::DirExists(s_OutputDir)) 
 	{
-	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Created %s Successfully.",s_OutputDir.c_str());		
+		// hopefully try to create it.
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"%s didn't exist, attempting to create.",s_OutputDir.c_str());
+		FileUtils::MakeDir(s_OutputDir);
+		if (!FileUtils::DirExists(s_OutputDir)) 
+		{
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Couldn't create %s, bailing...",s_OutputDir.c_str());
+			return false;
+		}
+		else
+		{
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Created %s Successfully.",s_OutputDir.c_str());		
+		}
 	}
-    }
-  
-  if (!FileUtils::WriteTextFile(s_OutputFile,s_ConfigFile)) 
-    {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Couldn't write %s",s_OutputFile.c_str());		
-      return false;	
-    } else {
-    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Wrote %s",s_OutputFile.c_str());
-    return true;	
-  }
-  
+
+	if (!FileUtils::WriteTextFile(s_OutputFile,s_ConfigFile)) 
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Couldn't write %s",s_OutputFile.c_str());		
+		return false;	
+	} else {
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Wrote %s",s_OutputFile.c_str());
+		return true;	
+	}
+
 }
 
 /**
@@ -531,14 +734,14 @@ bool Game_Player::LaunchA2600(string sMediaURL)
 	} // Make sure stella's configuration is correct. 
       
       DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
-			"stella", "stella", sMediaURL,
+			"mess", "mess", sMediaURL,
 						       sMessage + "1",sMessage + "0",false,false,true,false);
       if( SendCommand(CMD_Spawn_Application) ) {
 	m_bMAMEIsRunning = true;
 	
 	Sleep(5000); // FIXME !!!!
 	
-	if (!WindowUtils::FindWindowMatching(m_pDisplay, "stella", m_iMAMEWindowId))
+	if (!WindowUtils::FindWindowMatching(m_pDisplay, "MESS", m_iMAMEWindowId))
 	  {
 	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Couldn't find stella Window");	
 	  }

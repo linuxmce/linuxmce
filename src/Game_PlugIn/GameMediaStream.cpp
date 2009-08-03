@@ -24,7 +24,7 @@ namespace DCE {
 				: MediaStream(pMediaHandlerInfo, iPK_MediaProvider, pMediaDevice, PK_Users,sourceType, iStreamID)
 	{
 		m_iPK_DesignObj_Remote_After_Menu=m_iPK_DesignObj_RemoteOSD_After_Menu=m_iPK_DesignObj_Remote_Popup_After_Menu=0;
-		m_bPlugInWillSetDescription = true;
+		// m_bPlugInWillSetDescription = true;  // No longer needed.
 	}
 
 	GameMediaStream::~GameMediaStream()
