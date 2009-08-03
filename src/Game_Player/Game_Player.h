@@ -75,6 +75,7 @@ public:
 		// Public member variables
 
 protected:
+		string GetMessParametersFor(string sMediaURL);
 		bool UpdateA2600Config(string sMediaURL);
 		bool LaunchA2600(string sMediaURL);
 		bool StopA2600();

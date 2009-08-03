@@ -715,6 +715,29 @@ bool Game_Player::UpdateMAMEConfig(string sMediaURL)
 	}
 }
 
+// Attempt to figure out what to pass to MESS.
+string Game_Player::GetMessParametersFor(string sMediaURL)
+{
+  string sParameters, sPeripheralType;     // The final parameters to send.
+  string sTmpPath = FileUtils::BasePath(sMediaURL);
+  string sFileName = FileUtils::FilenameWithoutPath(sMediaURL);
+  string sToken = "/";
+  vector<string> vect_Path;
+
+  StringUtils::Tokenize(sTmpPath,sToken,vect_Path);  // split it up
+  
+  string sMachineType = vect_Path[vect_Path.size()-1]; // Get the last element.
+
+  if ((sFileName.find(".bin") != string::npos) || (sFileName.find(".a26") != string::npos))
+    {
+      sPeripheralType = "-cartridge";
+    }
+
+  sParameters = sMachineType + "\t" + sPeripheralType + "\t" + sMediaURL;
+
+  return sParameters;
+}
+
 bool Game_Player::LaunchA2600(string sMediaURL)
 {
   size_t iROMNameSize = FileUtils::FilenameWithoutPath(sMediaURL).size();
@@ -733,8 +756,10 @@ bool Game_Player::LaunchA2600(string sMediaURL)
 	  return false;
 	} // Make sure stella's configuration is correct. 
       
+      string sParameters = GetMessParametersFor(sMediaURL);
+
       DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
-			"mess", "mess", sMediaURL,
+			"mess", "mess", sParameters,
 						       sMessage + "1",sMessage + "0",false,false,true,false);
       if( SendCommand(CMD_Spawn_Application) ) {
 	m_bMAMEIsRunning = true;
@@ -743,11 +768,11 @@ bool Game_Player::LaunchA2600(string sMediaURL)
 	
 	if (!WindowUtils::FindWindowMatching(m_pDisplay, "MESS", m_iMAMEWindowId))
 	  {
-	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Couldn't find stella Window");	
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Couldn't find MESS Window");	
 	  }
 	else
 	  {
-	    LoggerWrapper::GetInstance()->Write(LV_STATUS,"stella window found: Window ID %d",m_iMAMEWindowId);
+	    LoggerWrapper::GetInstance()->Write(LV_STATUS,"MESS window found: Window ID %d",m_iMAMEWindowId);
 	    
 	  }
 	
