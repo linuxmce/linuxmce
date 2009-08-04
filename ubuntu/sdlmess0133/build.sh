@@ -8,5 +8,5 @@ then
 	MKOPTS="PTR64=1"	
 fi
 
-make $MKOPTS
+make $MKOPTS -f makefile.sdl
 
