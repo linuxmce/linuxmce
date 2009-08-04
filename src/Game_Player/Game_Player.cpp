@@ -840,13 +840,13 @@ bool Game_Player::StopA2600()
       if( pDevice_App_Server )
 	{
 	  DCE::CMD_Kill_Application CMD_Kill_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
-							 "stella", false);
+							 "mess", false);
 	  m_iMAMEWindowId = 0;
 	  return SendCommand(CMD_Kill_Application,&sResponse);  // Get return confirmation so we know it's gone before we continue
 	}
     }
   
-  LoggerWrapper::GetInstance()->Write(LV_STATUS, "Game_Player::StopMAME %p %s", pDevice_App_Server,sResponse.c_str());
+  LoggerWrapper::GetInstance()->Write(LV_STATUS, "Game_Player::StopMESS %p %s", pDevice_App_Server,sResponse.c_str());
   return false;
 }
 
@@ -1377,27 +1377,27 @@ void Game_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,
 	    screenName = m_sROMName + "/0000";
 	    break;
 	  case MEDIATYPE_lmce_Game_a2600_CONST:
-	    sPath = "/tmp/";
-	    screenName = m_sFilename;
+	    sPath = "/home/mamedata/shots/a2600";
+	    screenName = "/0000";
 	    break;
 	  }
 
 	string snapPath = sPath + m_sROMName + "/";
-	FileUtils::DelFile( sPath + screenName + "_1.png");
-	FileUtils::DelFile( sPath + screenName + "_1.jpg");
+	FileUtils::DelFile( sPath + screenName + ".png");
+	FileUtils::DelFile( sPath + screenName + ".jpg");
 
 	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_F12,m_iEventSerialNum++); // hehe, hack++
 	
 	Sleep(50);
-	string s_OutputString = "convert -sample 800x800 " + sPath + screenName + "_1.png "+sPath+screenName+".jpg";	
+	string s_OutputString = "convert -sample 800x800 " + sPath + screenName + ".png "+sPath+screenName+".jpg";	
 	system(s_OutputString.c_str());
 	size_t size;
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "MAME_Player::CMD_Get_Video_Frame got %d",size);
-	*pData = FileUtils::ReadFileIntoBuffer(sPath+screenName+"_1.png",size);
+	*pData = FileUtils::ReadFileIntoBuffer(sPath+screenName+".png",size);
 	*iData_Size = size;
 
-	FileUtils::DelFile(sPath+screenName+"_1.png");
-	FileUtils::DelFile(sPath+screenName+"_1.jpg");
+	FileUtils::DelFile(sPath+screenName+".png");
+	FileUtils::DelFile(sPath+screenName+".jpg");
 
 	return;	
 
@@ -1916,7 +1916,7 @@ void Game_Player::CMD_Game_1P_Start(string &sCMD_Result,Message *pMessage)
 	    iKey = XK_1;
 	    break;
 	  case MEDIATYPE_lmce_Game_a2600_CONST:
-	    iKey = XK_F2;
+	    iKey = XK_2;
 	    break;
 	  }
 	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,iKey,m_iEventSerialNum++);
@@ -2013,7 +2013,7 @@ void Game_Player::CMD_Game_Select(string &sCMD_Result,Message *pMessage)
     case MEDIATYPE_lmce_Game_CONST: 
       break;
     case MEDIATYPE_lmce_Game_a2600_CONST:
-      iKey = XK_F1;
+      iKey = XK_1;
       break;
     }
 
