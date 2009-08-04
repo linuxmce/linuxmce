@@ -1,0 +1,152 @@
+#include "driver.h"
+#include "cpu/sc61860/sc61860.h"
+
+#include "includes/pocketc.h"
+#include "includes/pc1350.h"
+
+static UINT8 outa,outb;
+
+static int power=1; /* simulates pressed cce when mess is started */
+
+void pc1350_outa(const device_config *device, int data)
+{
+	outa=data;
+}
+
+void pc1350_outb(const device_config *device, int data)
+{
+	outb=data;
+}
+
+void pc1350_outc(const device_config *device, int data)
+{
+
+}
+
+int pc1350_ina(const device_config *device)
+{
+	running_machine *machine = device->machine;
+	int data = outa;
+	int t = pc1350_keyboard_line_r();
+
+	if (t & 0x01)
+		data |= input_port_read(machine, "KEY0");
+
+	if (t & 0x02)
+		data |= input_port_read(machine, "KEY1");
+
+	if (t & 0x04)
+		data |= input_port_read(machine, "KEY2");
+
+	if (t & 0x08)
+		data |= input_port_read(machine, "KEY3");
+
+	if (t & 0x10)
+		data |= input_port_read(machine, "KEY4");
+
+	if (t & 0x20)
+		data |= input_port_read(machine, "KEY5");
+
+	if (outa & 0x01)
+		data |= input_port_read(machine, "KEY6");
+
+	if (outa & 0x02)
+		data |= input_port_read(machine, "KEY7");
+
+	if (outa & 0x04)
+	{
+		data |= input_port_read(machine, "KEY8");
+	
+		/* At Power Up we fake a 'CLS' pressure */
+		if (power)
+			data |= 0x08;
+	}
+
+	if (outa & 0x08)
+		data |= input_port_read(machine, "KEY9");
+
+	if (outa & 0x10)
+		data |= input_port_read(machine, "KEY10");
+
+	if (outa & 0xc0) 
+		data |= input_port_read(machine, "KEY11");
+
+	// missing lshift
+
+	return data;
+}
+
+int pc1350_inb(const device_config *device)
+{
+	int data=outb;
+	return data;
+}
+
+int pc1350_brk(const device_config *device)
+{
+	return (input_port_read(device->machine, "EXTRA") & 0x01);
+}
+
+/* currently enough to save the external ram */
+NVRAM_HANDLER( pc1350 )
+{
+	const device_config *main_cpu = cputag_get_cpu(machine, "maincpu");
+	UINT8 *ram = memory_region(machine, "maincpu") + 0x2000;
+	UINT8 *cpu = sc61860_internal_ram(main_cpu);
+
+	if (read_or_write)
+	{
+		mame_fwrite(file, cpu, 96);
+		mame_fwrite(file, ram, 0x5000);
+	}
+	else if (file)
+	{
+		mame_fread(file, cpu, 96);
+		mame_fread(file, ram, 0x5000);
+	}
+	else
+	{
+		memset(cpu, 0, 96);
+		memset(ram, 0, 0x5000);
+	}
+}
+
+static TIMER_CALLBACK(pc1350_power_up)
+{
+	power=0;
+}
+
+MACHINE_START( pc1350 )
+{
+	const address_space *space = cputag_get_address_space(machine, "maincpu", ADDRESS_SPACE_PROGRAM);
+	
+	timer_set(machine, ATTOTIME_IN_SEC(1), NULL, 0, pc1350_power_up);
+
+	memory_install_read8_handler(space, 0x6000, 0x6fff, 0, 0, SMH_BANK(1));
+	memory_install_write8_handler(space, 0x6000, 0x6fff, 0, 0, SMH_BANK(1));
+	memory_set_bankptr(machine, 1, &mess_ram[0x0000]);
+
+	if (mess_ram_size >= 0x3000)
+	{
+		memory_install_read8_handler(space, 0x4000, 0x5fff, 0, 0, SMH_BANK(2));
+		memory_install_write8_handler(space, 0x4000, 0x5fff, 0, 0, SMH_BANK(2));
+		memory_set_bankptr(machine, 2, &mess_ram[0x1000]);
+	}
+	else
+	{
+		memory_install_read8_handler(space, 0x4000, 0x5fff, 0, 0, SMH_NOP);
+		memory_install_write8_handler(space, 0x4000, 0x5fff, 0, 0, SMH_NOP);
+	}
+
+	if (mess_ram_size >= 0x5000)
+	{
+		memory_install_read8_handler(space, 0x2000, 0x3fff, 0, 0, SMH_BANK(3));
+		memory_install_write8_handler(space, 0x2000, 0x3fff, 0, 0, SMH_BANK(3));
+		memory_set_bankptr(machine, 3, &mess_ram[0x3000]);
+	}
+	else
+	{
+		memory_install_read8_handler(space, 0x2000, 0x3fff, 0, 0, SMH_NOP);
+		memory_install_write8_handler(space, 0x2000, 0x3fff, 0, 0, SMH_NOP);
+	}
+}
