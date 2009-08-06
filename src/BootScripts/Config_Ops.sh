@@ -206,7 +206,7 @@ if [ "$MySqlPassword" ] ; then MYSQL_DB_CRED="$MYSQL_DB_CRED -p$MySqlPassword"; 
 MYSQL_DB_CRED=`echo $MYSQL_DB_CRED` 
 export MYSQL_DB_CRED
 
-LMCE_DIRS="pictures audio documents videos games/MAME pvr"
+LMCE_DIRS="pictures audio documents videos games/MAME games/a2600 games/a2600p pvr"
 export LMCE_DIRS
 
 VGcmd=""
