@@ -292,7 +292,7 @@ bool Xine_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
 
 	// hack: redirect MythTV recordings to MythTV_Player
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Doing MythTV redirection check...");
-	bool bRedirectToMythTV = (mediaURL.find("tv_shows") != string::npos);
+	bool bRedirectToMythTV = (mediaURL.find("/pvr/") != string::npos);
 
 	if (bRedirectToMythTV)
 	  LoggerWrapper::GetInstance()->Write(LV_WARNING,"Redirecting to MythTV.");

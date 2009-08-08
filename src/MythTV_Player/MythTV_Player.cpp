@@ -279,7 +279,7 @@ void MythTV_Player::pollMythStatus()
 		m_CurrentProgram.clear();
 		
 		// TODO: The controllers don't get updated if I set this there. Why?
-		// updateMode("live");
+		updateMode("live");
 	
 		string sResult;
 		time_t timeout=60+time(NULL);

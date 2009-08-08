@@ -32,7 +32,7 @@ public:
 	* @brief Constructors
 	*/
 	Launch_Manager_Event(int DeviceID, string ServerAddress, bool bConnectEventHandler=true) :
-		Event_Impl(DeviceID, DEVICETEMPLATE_Launch_Manager_CONST, ServerAddress, bConnectEventHandler, SOCKET_TIMEOUT) {};
+		Event_Impl(DeviceID, DEVICETEMPLATE_LMCE_Launch_Manager_CONST, ServerAddress, bConnectEventHandler, SOCKET_TIMEOUT) {};
 	Launch_Manager_Event(class ClientSocket *pOCClientSocket, int DeviceID) : Event_Impl(pOCClientSocket, DeviceID) {};
 
 	/**
@@ -69,7 +69,7 @@ public:
 	/**
 	* @brief Returns the id of the device template
 	*/
-	virtual int GetPK_DeviceList() { return DEVICETEMPLATE_Launch_Manager_CONST; } ;
+	virtual int GetPK_DeviceList() { return DEVICETEMPLATE_LMCE_Launch_Manager_CONST; } ;
 
 	/**
 	* @brief Returns the description of the device
@@ -164,7 +164,7 @@ public:
 			return false;
 		delete[] pConfig;
 		m_pData->m_pEvent_Impl = m_pEvent;
-		m_pcRequestSocket = new Event_Impl(m_dwPK_Device, DEVICETEMPLATE_Launch_Manager_CONST,m_sHostName);
+		m_pcRequestSocket = new Event_Impl(m_dwPK_Device, DEVICETEMPLATE_LMCE_Launch_Manager_CONST,m_sHostName);
 		if( m_iInstanceID )
 		{
 			m_pEvent->m_pClientSocket->SendString("INSTANCE " + StringUtils::itos(m_iInstanceID));
@@ -178,8 +178,8 @@ public:
 	Launch_Manager_Event *GetEvents() { return (Launch_Manager_Event *) m_pEvent; };
 	Launch_Manager_Data *GetData() { return (Launch_Manager_Data *) m_pData; };
 	const char *GetClassName() { return "Launch_Manager_Command"; };
-	virtual int PK_DeviceTemplate_get() { return DEVICETEMPLATE_Launch_Manager_CONST; };
-	static int PK_DeviceTemplate_get_static() { return DEVICETEMPLATE_Launch_Manager_CONST; };
+	virtual int PK_DeviceTemplate_get() { return DEVICETEMPLATE_LMCE_Launch_Manager_CONST; };
+	static int PK_DeviceTemplate_get_static() { return DEVICETEMPLATE_LMCE_Launch_Manager_CONST; };
 	virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage) { };
 	virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage) { };
 	Command_Impl *CreateCommand(int PK_DeviceTemplate, Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent);
