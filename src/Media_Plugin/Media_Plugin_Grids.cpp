@@ -1011,13 +1011,13 @@ class DataGridTable *Media_Plugin::CurrentMediaSections( string GridID, string P
 
 			string sCurrentTitle; 
 			
-			if (pMediaFile->m_sEpisode.size() > 0) {
-			  sCurrentTitle = pMediaFile->m_sTitle + "\n\"" + pMediaFile->m_sEpisode + "\"";
+			if (pMediaFile->m_sEpisode.size()) {
+			  sCurrentTitle = pMediaFile->m_sTitle + " - \"" + pMediaFile->m_sEpisode + "\"";
 			} else {
 			  sCurrentTitle = pMediaFile->m_sTitle;
 			}
 
-			if (sCurrentTitle.size() > 0) {
+			if (sCurrentTitle.size()) {
 			  pDataGrid->SetData(0, currentPos++, new DataGridCell(sCurrentTitle, StringUtils::itos(itFiles - pMediaStream->m_dequeMediaFile.begin())));
 			} else {
 			  pDataGrid->SetData(0, currentPos++,new DataGridCell(sCurrentFile, StringUtils::itos(itFiles - pMediaStream->m_dequeMediaFile.begin())));
