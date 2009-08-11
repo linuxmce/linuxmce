@@ -93,7 +93,7 @@ GetHddToUse()
 				DiskDescription="$(hdparm -I $DiskDev | grep "Model Number:" | cut -d ':' -f2 | sed 's/ *//g')"
 				DiskSerial="$(hdparm -I $DiskDev | grep "Serial Number:" | cut -d ':' -f2 | sed 's/ *//g')"
 				set -e
-				if mount "$DiskDev"1 /media/target; then
+				if mount $(fdisk -l $DiskDev |cut -d' ' -f1 |grep '^/dev.*[^0-9]1$') /media/target; then
 					if [[ -f /media/target/etc/pluto.conf ]]; then
 						Choice=
 						until [[ "$Choice" == [YyNn] ]] ;do
@@ -249,7 +249,7 @@ FormatPartitions()
 		return 0
 	fi
 	mkdir -p /media/target
-	if [[ "$FromHdd" == 1 || "$Upgrade" == 1 ]] && mount "$TargetHdd"1 /media/target; then
+	if [[ "$FromHdd" == 1 || "$Upgrade" == 1 ]] && mount $(fdisk -l $TargetHdd |cut -d' ' -f1 |grep '^/dev.*[^0-9]1$') /media/target; then
 		pushd /media/target &>/dev/null
 
 		if [[ "$KeepMedia" == "1" ]] ;then
@@ -274,27 +274,27 @@ FormatPartitions()
 		popd &>/dev/null
 		umount "$TargetHdd"1
 	else
-		echo y|mkfs.ext3 "$TargetHdd"1 # root filesystem
+		echo y|mkfs.ext3 $(fdisk -l $TargetHdd |cut -d' ' -f1 |grep '^/dev.*[^0-9]1$') # root filesystem
 	fi
 	if [[ "$FromHdd" != 1 && "$Upgrade" != 1 ]]; then
-		mkswap "$TargetHdd"5 # swap
-		echo y|mkfs.ext3 "$TargetHdd"6 # recovery system
+		mkswap $(fdisk -l $TargetHdd |cut -d' ' -f1 |grep '^/dev.*[^0-9]5$') # swap
+		echo y|mkfs.ext3 $(fdisk -l $TargetHdd |cut -d' ' -f1 |grep '^/dev.*[^0-9]6$') # recovery system
 	fi
 
 	blkid -w /etc/blkid.tab || :
-	RootUUID=$(vol_id --skip-raid -u "$TargetHdd"1 2>/dev/null)
-	SwapUUID=$(vol_id --skip-raid -u "$TargetHdd"5 2>/dev/null)
-	RecoveryUUID=$(vol_id --skip-raid -u "$TargetHdd"6 2>/dev/null || :)
+	RootUUID=$(vol_id --skip-raid -u $(fdisk -l $TargetHdd |cut -d' ' -f1 |grep '^/dev.*[^0-9]1$') 2>/dev/null)
+	SwapUUID=$(vol_id --skip-raid -u $(fdisk -l $TargetHdd |cut -d' ' -f1 |grep '^/dev.*[^0-9]5$') 2>/dev/null)
+	RecoveryUUID=$(vol_id --skip-raid -u $(fdisk -l $TargetHdd |cut -d' ' -f1 |grep '^/dev.*[^0-9]6$') 2>/dev/null || :)
 }
 
 MountPartitions()
 {
 	mkdir -p /media/target /media/recovery
-	mount -t ext3 "$TargetHdd"1 /media/target
+	mount -t ext3 $(fdisk -l $TargetHdd |cut -d' ' -f1 |grep '^/dev.*[^0-9]1$') /media/target
 
 	if [[ "$Upgrade" != "1" ]] ;then
 		if [[ "$FromHdd" != 1 ]]; then
-			mount -t ext3 "$TargetHdd"6 /media/recovery || :
+			mount -t ext3 $(fdisk -l $TargetHdd |cut -d' ' -f1 |grep '^/dev.*[^0-9]6$') /media/recovery || :
 		else
 			mount -o bind / /media/recovery
 		fi
