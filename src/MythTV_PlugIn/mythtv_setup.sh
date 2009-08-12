@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# We execute the perl script instead of this shell script
+# due to problems with escaping strings
+/usr/bin/perl /usr/pluto/bin/mythtv_setup.pl
+exit 0
+
 . /usr/pluto/bin/SQL_Ops.sh
 . /usr/pluto/bin/Config_Ops.sh
 
@@ -241,5 +246,3 @@ done
 if [ $MythTV_Installed ];then
         /usr/pluto/bin/Restart_Backend_With_SchemaLock.sh
 fi
-
-
