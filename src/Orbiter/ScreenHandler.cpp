@@ -2078,6 +2078,14 @@ void ScreenHandler::BadGotoScreen(int PK_Screen)
 }
 
 //-----------------------------------------------------------------------------------------------------
+/*virtual*/ void ScreenHandler::SCREEN_PVR_Recordings(long PK_Screen)
+{
+        m_pOrbiter->CMD_Set_Variable(VARIABLE_PK_DesignObj_CurrentSecti_CONST, TOSTRING(DESIGNOBJ_butAddSoftware_CONST));
+	ScreenHandlerBase::SCREEN_PVR_Remote(PK_Screen);
+	RegisterCallBack(cbDataGridRendering, (ScreenHandlerCallBack) &ScreenHandler::TV_Channels_GridRendering,        new DatagridAcquiredBackData());
+	RegisterCallBack(cbObjectSelected, (ScreenHandlerCallBack) &ScreenHandler::TV_Channels_ObjectSelected,  new ObjectInfoBackData());
+}
+//-----------------------------------------------------------------------------------------------------
 /*virtual*/ void ScreenHandler::SCREEN_PVR_Remote(long PK_Screen)
 {
 	m_pOrbiter->CMD_Set_Variable(VARIABLE_PK_DesignObj_CurrentSecti_CONST, TOSTRING(DESIGNOBJ_butAddSoftware_CONST));

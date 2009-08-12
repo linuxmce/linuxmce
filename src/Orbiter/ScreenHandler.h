@@ -330,6 +330,7 @@ public:
 
 	virtual bool New_Phone_Enter_Number_DeviceConfigured(CallBackData *pData);
 	virtual void SCREEN_PVR_Remote(long PK_Screen);
+	virtual void SCREEN_PVR_Recordings(long PK_Screen);
 	virtual void SCREEN_TV_Channels(long PK_Screen);
 	bool TV_Channels_ObjectSelected(CallBackData *pData);
 	bool TV_Channels_GridRendering(CallBackData *pData);

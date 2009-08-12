@@ -6632,14 +6632,14 @@ void Orbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,s
 		m_pMouseBehavior->MediaStopped();
 #endif
 //<-mkr_b_aj_b->
-	this->CMD_Show_Object("5666.0.0.5670",0,"","",iPK_MediaType==0 ? "0" : "1");
-	this->CMD_Show_Object("5666.0.0.5588",0,"","",iPK_MediaType==0 ? "0" : "1");
-	this->CMD_Show_Object("5666.0.0.5668",0,"","",iPK_MediaType!=0 ? "0" : "1");
-	this->CMD_Show_Object("5667.0.0.5670",0,"","",iPK_MediaType==0 ? "0" : "1");
-	this->CMD_Show_Object("5667.0.0.5588",0,"","",iPK_MediaType==0 ? "0" : "1");
-	this->CMD_Show_Object("5667.0.0.5668",0,"","",iPK_MediaType!=0 ? "0" : "1");
-	DCE::CMD_Refresh CMD_Refresh(m_dwPK_Device,m_dwPK_Device,"");  // send ourselves a refresh since the nbc logo may not show/hide
-	SendCommand(CMD_Refresh);
+//	this->CMD_Show_Object("5666.0.0.5670",0,"","",iPK_MediaType==0 ? "0" : "1");
+//	this->CMD_Show_Object("5666.0.0.5588",0,"","",iPK_MediaType==0 ? "0" : "1");
+//	this->CMD_Show_Object("5666.0.0.5668",0,"","",iPK_MediaType!=0 ? "0" : "1");
+//	this->CMD_Show_Object("5667.0.0.5670",0,"","",iPK_MediaType==0 ? "0" : "1");
+//	this->CMD_Show_Object("5667.0.0.5588",0,"","",iPK_MediaType==0 ? "0" : "1");
+//	this->CMD_Show_Object("5667.0.0.5668",0,"","",iPK_MediaType!=0 ? "0" : "1");
+//	DCE::CMD_Refresh CMD_Refresh(m_dwPK_Device,m_dwPK_Device,"");  // send ourselves a refresh since the nbc logo may not show/hide
+//	SendCommand(CMD_Refresh);
 //<-mkr_b_aj_e->
 
 	m_iStreamID=iStreamID;
@@ -6750,6 +6750,18 @@ void Orbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,s
 
 		if( UsesUIVersion2() )
 			StartScreenSaver(false);  // Don't go to the menu, just start the app in the background
+	}
+
+	if ( m_dwPK_Device_NowPlaying && !m_bContainsVideo ) // Special case to make sure changing audio....
+	{
+		if (m_sActiveApplication_Window.empty()==false && m_pScreenHistory_Current
+				&& (m_pScreenHistory_Current->PK_Screen()==m_PK_Screen_ActiveApp_OSD || m_pScreenHistory_Current->PK_Screen()==m_PK_Screen_ActiveApp_Remote) )
+		{
+			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Orbiter::CMD_Set_Now_Playing media is playing, but so is the application. %s",m_sActiveApplication_Window.c_str());
+			CMD_Activate_Window(m_sActiveApplication_Window); // ...does not disrupt the browser.
+		}
+		else
+			CMD_Activate_Window(m_sNowPlaying_Window);
 	}
 
 	if(m_bReportTimeCode && !m_bUpdateTimeCodeLoopRunning )
