@@ -189,4 +189,6 @@ case "$URL_TYPE" in
 	;;
 esac
 
+/usr/pluto/bin/BootMessage.sh ""
+
 exit 0
