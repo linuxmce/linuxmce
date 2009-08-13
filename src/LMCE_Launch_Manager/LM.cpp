@@ -105,7 +105,9 @@ void LM::Initialize()
 	// after all is read, initialize server
 	writeLog("=>initialize_Start()");
 	initialize_Start();
-	
+
+	writeOSD("Welcome to LinuxMCE");
+
 	// if the system was already running when we started, let's catch new children and report we are up
 	if ( m_bCoreRunning || m_bMediaRunning )
 	{
@@ -403,7 +405,7 @@ void LM::reportDeviceUp()
 	{
 		writeLog("Sending  SYSCOMMAND_DEVICE_UP from LM device " + m_sDeviceID, false);
 		m_pLMCE_Launch_Manager->QueueMessageToRouter(pMessage);
-		
+		writeOSD("");		
 	}
 	else
 	{
@@ -624,6 +626,7 @@ bool LM::confirmOrbiterSkinIsReady()
 			if (orbiterRecordID=="")
 				writeLog("First time generating skin for current Orbiter #"+m_sOrbiterID, true);
 			else
+				writeOSD("Regenerating skin for current Orbiter #"+m_sOrbiterID);
 				writeLog("Regenerating skin for current Orbiter #"+m_sOrbiterID, true);
 			sleep(3);
 		}
@@ -639,7 +642,10 @@ bool LM::confirmOrbiterSkinIsReady()
 	string sOrbiterStatus = getOrbiterStatus();
 	
 	if (sOrbiterStatus=="O")
+	{
 		writeLog("Generated skin successfully", true);
+		writeOSD("Generated skin successfully");
+	}
 	else
 	{
 		writeLog("Skin generation completed, server says: " + getOrbiterStatusMessage(sOrbiterStatus), true, LV_WARNING);
@@ -695,6 +701,7 @@ void LM::jumpToOrbiter()
 	if (m_pLMCE_Launch_Manager)
 	{
 		writeLog("Activating Orbiter...", true);
+		writeOSD("");
 		DCE::CMD_Activate_PC_Desktop cmd(atoi(m_sDeviceID.c_str()), atoi(m_sOrbiterID.c_str()), 0);
 		m_pLMCE_Launch_Manager->SendCommandNoResponse(cmd);
 	}
@@ -746,6 +753,7 @@ void LM::LMdeviceKeepAlive()
 			if (bReload)
 			{
 				writeLog("Reconnecting to DCERouter as requested", true);
+				writeOSD("Reconnecting to DCE Router as requested");
 				if (!initialize_LMdevice())
 				{
 					writeLog("Will retry later..", true);
@@ -777,6 +785,7 @@ void LM::LMdeviceKeepAlive()
 		if (m_bCoreRunning || m_bMediaRunning)
 		{
 			writeLog("Reconnecting to DCERouter as requested", true);
+			writeLog("Reconnecting to DCERouter as requested");
 			if (!initialize_LMdevice())
 			{
 				writeLog("Will retry later..", true);
@@ -829,7 +838,7 @@ void LM::actionActivateOrbiter()
 void LM::updateOrbiterSize(int width, int height)
 {
 	writeLog("Updating Orbiter size to " + StringUtils::itos(width) + "x" + StringUtils::itos(height));
-	
+	writeOSD("Updating Orbiter size to " + StringUtils::itos(width) + "x" + StringUtils::itos(height));
 	if (m_sOrbiterID!="")
 	{
 		string query = "SELECT PK_Size FROM Size WHERE Width=" + StringUtils::itos(width) + " AND Height=" + StringUtils::itos(height);
@@ -1059,6 +1068,7 @@ bool LM::initialize_LMdevice(bool bRetryForever/*=false*/)
 			//TODO:refactor this part using the socket layer
 			writeLog("Please go to an existing Orbiter and choose 'quick reload router'. ", true, LV_WARNING);
 			writeLog("This media director will start after you do...", true, LV_WARNING);
+			writeOSD("Please go to an existing Orbiter and choose 'quick reload router'");
 
 			//Display a message on the screen that a reload is necessary.
 			string sReloadMessage = "This Media Director is now ready to go, but first you must reload the router.";
@@ -1200,6 +1210,7 @@ void LM::startCoreDevices(bool checkForAlreadyRunning)
 	m_iDevicesLevel = 0;
 //	m_pDevicesUpdateTimer->start(1000); TODO: Need to add an Alarm to do the same thing....
 	writeLog("startCoreDevices()");
+	writeOSD("Starting Core Devices");
 
 	if ( m_dbPlutoDatabase.connected() ) {
 		// fetching list of non-MD devices under Core
@@ -1321,6 +1332,7 @@ void LM::startMediaDevices(bool checkForAlreadyRunning)
 //	m_pDevicesUpdateTimer->start(1000);//TODO: Should I implement an alarm here, to update progress more??
 
 	writeLog("startMediaDevices()");
+	writeOSD("Starting Media Director Devices");
 	if ( m_dbPlutoDatabase.connected()  ) {
 		// fetching full list of devices under current MD
 		List devices;
@@ -1501,6 +1513,13 @@ void LM::writeLog(string s, bool toScreen, int logLevel)
 		m_uiMainUI.writeLog(s);
 	}	
 }
+
+void LM::writeOSD(string s)
+{
+	string command = "/usr/pluto/bin/BootMessage.sh " + s;
+	system(command.c_str());
+}
+
 //TODO: refactor after socket layer is in place
 void LM::appendLog(string s)
 {
@@ -1560,6 +1579,7 @@ bool LM::startCoreServices()
 {
 	
 	writeLog("Starting process " + string(START_CORE_SCRIPT), true, LV_WARNING);
+	writeOSD("Starting Core Services. Please be patient.");
 	writeLog("Please be patient. This may take a while...", true);
 	
 	
@@ -1896,6 +1916,7 @@ void LM::updateOrbiterRegenProgress()
 				string statusMessage = "Orbiter #" + res.value(0)+ "\n"+res.value(2);
 				//TODO: appendLog??
 				appendLog("Regenerating orbiter #" +res.value(0)+"..."+res.value(1)+"%");
+				writeOSD("Regenerating Orbiter #"+res.value(0)+" "+res.value(1)+"%");
 				//tlStatusMessages->setText(statusMessage);
 				//tlStatusMessages->show();
 			}
@@ -1913,6 +1934,7 @@ void LM::updateOrbiterRegenProgress()
 
 			//writeLog(getOrbiterStatus(string &orbiterID,&iProgressValue)); //TODO - why doesn't this work?
 			writeLog("OrbiterGen run completed", true);
+			writeOSD("Orbiters were regenerated.");
 			
 			m_bRegenInProgress = false;
 		}
@@ -1938,6 +1960,7 @@ void LM::updateOrbiterRegenProgress()
 				string statusMessage = "Orbiter #" + res.value(0) + "\n"+res.value(2);
 				//TODO: where to display this??
 				appendLog("Regenerating orbiter #" +res.value(0)+"..."+res.value(1)+"%");
+				writeOSD("Regenerating Orbiter #"+res.value(0)+" "+res.value(1)+"%");
 				//tlStatusMessages->setText(statusMessage);
 				//tlStatusMessages->show();
 			}
@@ -1953,6 +1976,7 @@ void LM::updateOrbiterRegenProgress()
 			//tlStatusMessages->hide();
 			
 			writeLog("OrbiterGen run completed ", true);
+			writeOSD("Orbiters were Regenerated.");
 			
 			m_bRegenInProgress = false;
 		}

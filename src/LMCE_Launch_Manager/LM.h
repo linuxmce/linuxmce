@@ -73,6 +73,7 @@ private:
 
 	// Private methods
 	void writeLog(string s, bool toScreen=false,int logLevel=LV_STATUS);
+	void writeOSD(string s);
 	void appendLog(string s);
 	string getRAid();
 	bool checkRAStatus();  
