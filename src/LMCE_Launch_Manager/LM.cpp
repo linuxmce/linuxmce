@@ -624,10 +624,15 @@ bool LM::confirmOrbiterSkinIsReady()
 		else
 		{
 			if (orbiterRecordID=="")
+			{
 				writeLog("First time generating skin for current Orbiter #"+m_sOrbiterID, true);
+				writeOSD("First time generating skin for Orbiter #"+m_sOrbiterID);
+			}
 			else
+			{
 				writeOSD("Regenerating skin for current Orbiter #"+m_sOrbiterID);
 				writeLog("Regenerating skin for current Orbiter #"+m_sOrbiterID, true);
+			}
 			sleep(3);
 		}
 	}
@@ -1002,7 +1007,7 @@ void LM::initialize_AudioSettings()
 bool LM::checkCore(string coreIP)
 {
 	writeLog("Checking if core is up...", true);
-	
+	writeOSD("Checking Core. Please Wait.");	
 	struct stat fInfo;
 
 	if ( lstat(DCEROUTER_LOCK, &fInfo)==0 )
@@ -1056,6 +1061,7 @@ bool LM::initialize_LMdevice(bool bRetryForever/*=false*/)
 		sCoreIP = "127.0.0.1";
 	
 	writeLog("Connecting to router at " + sCoreIP, true, LV_STATUS);
+	writeLog("Connecting to Core. Please Wait.");
 
 	while (true)
 	{
@@ -1119,6 +1125,7 @@ bool LM::initialize_LMdevice(bool bRetryForever/*=false*/)
 void LM::updateScripts()
 {
 	//Put all scripts we want to run on boot and each reload here
+	writeOSD("Detecting Serial Ports. Please Wait.");
 	writeLog("Running UpdateAvailableSerialPorts.sh", true, LV_STATUS);
 	string sCmd = "/usr/pluto/bin/UpdateAvailableSerialPorts.sh";
 	exec_system(sCmd,true);
@@ -1282,6 +1289,7 @@ void LM::startCoreDevices(bool checkForAlreadyRunning)
 							//writeLog("Command string: " + sCmd,true);//TODO REMOVE DEBUG
 							exec_system(sCmd);
 							writeLog("Starting device " +  dbrCoreDevices.value(0) + " " + dbrCoreDevices.value(1),true);// + ": " + args.join(" "));//TODO make a join method for custom list type
+							writeOSD("Starting device " +  dbrCoreDevices.value(0) + " " + dbrCoreDevices.value(1));
 							// wait for the device to register
 							waitForDevice(atoi(dbrCoreDevices.value(0).c_str()));
 							
@@ -1397,7 +1405,7 @@ void LM::startMediaDevices(bool checkForAlreadyRunning)
 							exec_system(sCmd,true);
 
 							writeLog("Starting device " +  dbrMediaDevices.value(0) + " " + dbrMediaDevices.value(1),true);// + ": " + args.join(" "));
-							
+							writeOSD("Starting device " +  dbrMediaDevices.value(0) + " " + dbrMediaDevices.value(1));
 							// wait for device to register
 							waitForDevice(atoi(dbrMediaDevices.value(0).c_str()));
 							
@@ -1532,7 +1540,7 @@ void LM::appendLog(string s)
 void LM::doAutostart()
 {
 	writeLog(">>Performing autostart if configured..", true);
-
+	writeOSD("Loading LinuxMCE. Please Wait.");
 	m_bDelayUpReport = false;
 	
 	bool bReport = false;
@@ -1694,6 +1702,8 @@ bool LM::startCoreServices()
 bool LM::startMediaStation()
 {
 	updateScripts();
+
+	writeOSD("Loading LinuxMCE. Please Wait.");
 
 	// retrying forever, as KeepAlive timer is not running yet
 	bool bLMinit = initialize_LMdevice(true);
