@@ -1750,8 +1750,12 @@ loop_to_keep_looking_for_objs_to_include:
 				if( !m_iLastReportedPercentage || Percent - m_iLastReportedPercentage > 3 )
 				{
 					m_iLastReportedPercentage = max(1,Percent);
-					if( g_bBootSplash )
-						system( ("/usr/pluto/bin/BootMessage.sh \"Stage 2 of 2 - Rendering screen " + StringUtils::itos(m_iScreensToRender) + " of " + StringUtils::itos(m_iScreensTotal) + "\"").c_str());
+					if( g_bBootSplash ) 
+					{
+						string myCmd = "/usr/pluto/bin/BootMessage.sh \"Stage 2 of 2 - Rendering screen " + StringUtils::itos(m_iScreensToRender) + " of " + StringUtils::itos(m_iScreensTotal) + "\"";
+						LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Executing %s",myCmd.c_str());
+						system(myCmd.c_str());
+					}
 					else
 					{
 						m_pRow_Orbiter->Reload();
