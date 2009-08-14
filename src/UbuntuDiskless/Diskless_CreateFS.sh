@@ -55,6 +55,10 @@ function unpack_filesystem {
 			tar -xf $Moon_RootArchive
 		popd
 	fi
+	# Copy core's apt.conf.d/02proxy to generated MD
+	if [[ -e /etc/apt/apt.conf.d/02proxy ]] ;then
+	  cp /etc/apt/apt.conf.d/02proxy ${Moon_RootLocation}/etc/apt/apt.conf.d/02proxy
+	fi
 }
 
 function is_image_upgradable {
