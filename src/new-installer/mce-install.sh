@@ -71,6 +71,7 @@ Setup_NIS
 
 #trap 'RemoveOfflineSource' EXIT
 #Setup_Apt_Conffiles
+
 Setup_Pluto_Apt_Conf
 ./mce-install-preseed.sh
 apt-get update
@@ -108,6 +109,9 @@ RemoveInstallerIcons
 ClearInstallationTable
 
 apt-get -y -f dist-upgrade
+
+# Fix apt proxy settings so it apply to core and MDs after lmce is configured.
+sed -i 's@localhost:3142@dcerouter:3142@' /etc/apt/apt.conf.d/02proxy
 
 StatsMessage "Installation Finished"
 

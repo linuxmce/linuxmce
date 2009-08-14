@@ -4,6 +4,9 @@ source pre-install-common.sh
 
 AddAptRetries
 
+InstallAptCacherNg
+ConfigureApt
+
 InstallNeededPackages
 CreatePackagesFiles
 

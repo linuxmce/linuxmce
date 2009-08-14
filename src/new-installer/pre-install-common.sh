@@ -119,5 +119,20 @@ function AddGpgKeyToKeyring
 
 }
 
+function InstallAptCacherNg
+{
+    echo "Installing apt-cacher-ng"
+    # this should be installed first of all.
+    apt-get -y install apt-cacher-ng
+    invoke-rc.d apt-cacher-ng stop
+    invoke-rc.d apt-cacher-ng start
+}
+ 
+function ConfigureApt
+{
+    echo "Configuring apt-cacher-ng"
+    echo 'Acquire::http { Proxy "http://localhost:3142"; };' > /etc/apt/apt.conf.d/02proxy
+    apt-get update
+}
 
 
