@@ -2032,3 +2032,38 @@ void Game_Player::CMD_Game_Option(string &sCMD_Result,Message *pMessage)
 	cout << "Need to implement command #951 - Game Option" << endl;
 }
 
+//<-dceag-c942-b->
+
+	/** @brief COMMAND: #942 - Get Ripping Status */
+	/** Tell Game to Start 1 Player */
+		/** @param #199 Status */
+			/** Ripping status */
+
+void Game_Player::CMD_Get_Ripping_Status(string *sStatus,string &sCMD_Result,Message *pMessage)
+//<-dceag-c942-e->
+{
+}
+//<-dceag-c982-b->
+
+	/** @brief COMMAND: #982 - Set Game Options */
+	/** Set Options for the running Game System driver. */
+		/** @param #5 Value To Assign */
+			/** Dependent on driver, but usually a single line in the format of key,value */
+
+void Game_Player::CMD_Set_Game_Options(string sValue_To_Assign,string &sCMD_Result,Message *pMessage)
+//<-dceag-c982-e->
+{
+}
+//<-dceag-c983-b->
+
+	/** @brief COMMAND: #983 - Get Game Options */
+	/** Get Options for the currently running driver. */
+		/** @param #5 Value To Assign */
+			/** The Returned value. */
+		/** @param #219 Path */
+			/** The Parameter to return, usually left side of comma in Set Game Options. */
+
+void Game_Player::CMD_Get_Game_Options(string sPath,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
+//<-dceag-c983-e->
+{
+}

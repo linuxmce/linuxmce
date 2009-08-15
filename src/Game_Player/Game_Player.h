@@ -576,6 +576,15 @@ public:
 	virtual void CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
+	/** @brief COMMAND: #942 - Get Ripping Status */
+	/** Tell Game to Start 1 Player */
+		/** @param #199 Status */
+			/** Ripping status */
+
+	virtual void CMD_Get_Ripping_Status(string *sStatus) { string sCMD_Result; CMD_Get_Ripping_Status(sStatus,sCMD_Result,NULL);};
+	virtual void CMD_Get_Ripping_Status(string *sStatus,string &sCMD_Result,Message *pMessage);
+
+
 	/** @brief COMMAND: #943 - Game 1P Start */
 	/** 1P start */
 
@@ -637,6 +646,26 @@ public:
 
 	virtual void CMD_Game_Option() { string sCMD_Result; CMD_Game_Option(sCMD_Result,NULL);};
 	virtual void CMD_Game_Option(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #982 - Set Game Options */
+	/** Set Options for the running Game System driver. */
+		/** @param #5 Value To Assign */
+			/** Dependent on driver, but usually a single line in the format of key,value */
+
+	virtual void CMD_Set_Game_Options(string sValue_To_Assign) { string sCMD_Result; CMD_Set_Game_Options(sValue_To_Assign.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Set_Game_Options(string sValue_To_Assign,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #983 - Get Game Options */
+	/** Get Options for the currently running driver. */
+		/** @param #5 Value To Assign */
+			/** The Returned value. */
+		/** @param #219 Path */
+			/** The Parameter to return, usually left side of comma in Set Game Options. */
+
+	virtual void CMD_Get_Game_Options(string sPath,string *sValue_To_Assign) { string sCMD_Result; CMD_Get_Game_Options(sPath.c_str(),sValue_To_Assign,sCMD_Result,NULL);};
+	virtual void CMD_Get_Game_Options(string sPath,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
 	};
