@@ -887,6 +887,9 @@
 #define COMMAND_Classic_CONST 978
 #define COMMAND_Pop_CONST 979
 #define COMMAND_Set_Color_RGB_CONST 980
+#define COMMAND_SFC_CONST 981
+#define COMMAND_Set_Game_Options_CONST 982
+#define COMMAND_Get_Game_Options_CONST 983
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"

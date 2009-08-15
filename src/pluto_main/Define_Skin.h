@@ -13,6 +13,7 @@
 #define SKIN_Titanium_Pink_CONST 19
 #define SKIN_Titanium_Green_CONST 20
 #define SKIN_Titanium_Apple_CONST 21
+#define SKIN_Jarvis_CONST 22
 
 #define SKIN_TABLE "Skin"
 #define SKIN_PK_SKIN_FIELD "PK_Skin"

@@ -1137,6 +1137,12 @@
 #define TEXT_Keyboard_CONST 2080
 #define TEXT_Virtual_Keyboard_Off_CONST 2081
 #define TEXT_Select_CONST 2082
+#define TEXT_Controller_1_CONST 2083
+#define TEXT_Controller_2_CONST 2084
+#define TEXT_Joystick_CONST 2085
+#define TEXT_Paddle_CONST 2086
+#define TEXT_Driving_CONST 2087
+#define TEXT_Keypad_CONST 2088
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"
