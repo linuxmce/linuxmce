@@ -1143,6 +1143,13 @@
 #define TEXT_Paddle_CONST 2086
 #define TEXT_Driving_CONST 2087
 #define TEXT_Keypad_CONST 2088
+#define TEXT_Difficulty_A_CONST 2089
+#define TEXT_Difficulty_B_CONST 2090
+#define TEXT_controller_options_help_CONST 2091
+#define TEXT_Controller_1_Type_CONST 2092
+#define TEXT_Controller_2_Type_CONST 2093
+#define TEXT_Difficulty_CONST 2094
+#define TEXT_Controller_Options_CONST 2095
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"

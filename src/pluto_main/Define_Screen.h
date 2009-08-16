@@ -280,6 +280,7 @@
 #define SCREEN_Game_Atari_2600_FS_Options_CONST 294
 #define SCREEN_Game_Atari_2600_CONST 295
 #define SCREEN_Game_Atari_2600_FS_CONST 296
+#define SCREEN_Game_Atari_2600_Controller_Options_CONST 297
 
 #define SCREEN_TABLE "Screen"
 #define SCREEN_PK_SCREEN_FIELD "PK_Screen"
