@@ -1222,7 +1222,7 @@ void OrbiterRenderer::ObjectOnScreen( VectDesignObj_Orbiter *pVectDesignObj_Orbi
 		OrbiterLogic()->m_vectObjs_Selected.push_back( pObj );
 
 // Hidden on WIN32/WINCE
-#if defined(WIN32) && !defined(TEST_OSD)
+#if defined(WIN32) || defined(PADORBITER) 
 	if(pObj->m_iBaseObjectID == DESIGNOBJ_butKDEDesktop_CONST || pObj->m_iBaseObjectID == DESIGNOBJ_butKDEDesktop_CONST + 1)
 		pObj->m_bHidden = true;
 
