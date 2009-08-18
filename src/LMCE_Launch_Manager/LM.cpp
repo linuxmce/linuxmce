@@ -1657,11 +1657,14 @@ bool LM::startCoreServices()
 							//Don't append the log on the first time through
 							if(currOrbiterID!="") {
 								appendLog("Regenerating Orbiter #" + currOrbiterID +" - Finished.");
+								writeOSD("Regenerating Orbiter #" + currOrbiterID + " - Finished");
 							}
 							currOrbiterID = O_ID;
-							writeLog("Regenerating Orbiter #" + O_ID +" - starting...",true);	
+							writeLog("Regenerating Orbiter #" + O_ID +" - starting...",true);
+							writeOSD("Regenerating Orbiter #" + O_ID +" - starting");	
 						} else {
 							appendLog("Regenerating Orbiter #" + O_ID + " - "+StringUtils::itos(O_Progress) + "% ("+res.value(2)+")");
+							writeOSD ("Regenerating Orbiter #" + O_ID + " - "+StringUtils::itos(O_Progress) + "% ("+res.value(2)+")");
 						}
 						m_iProgress = O_Progress;
 					}
