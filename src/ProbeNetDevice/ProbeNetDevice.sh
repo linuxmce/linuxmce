@@ -192,7 +192,7 @@ DisconnectFromRemoteHost()
 		exec 3>&-
 	fi
 
-	if [[ -n "$PID_RemoteHostSocat" ]]; then
+	if [[ -n "$PID_RemoteHostSocat" && -d "/proc/$PID_RemoteHostSocat" ]] && grep -qF "$0" "/proc/$PID_RemoteHostSocat/cmdline"; then
 		kill "$PID_RemoteHostSocat"
 	fi
 }
