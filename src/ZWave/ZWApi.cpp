@@ -635,10 +635,11 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 								case SENSOR_MULTILEVEL_REPORT_TEMPERATURE:
 									if (scale == 0) {
 										DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Temperature level measurement received: %d C",value);
+										DCEcallback->SendTemperatureChangedEvent ((unsigned char)frame[3],value);
 									} else {
 										DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Temperature level measurement received: %d F",value);
+										DCEcallback->SendTemperatureChangedEvent ((unsigned char)frame[3],(value-32) *5 / 9);
 									}
-									DCEcallback->SendTemperatureChangedEvent ((unsigned char)frame[3],value);
 								;;
 								break;
 								default:
@@ -1164,6 +1165,7 @@ void *ZWApi::ZWApi::receiveFunction() {
 			if ((idletimer > 300) && poll_state) {
 				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "We have been idle for %i seconds, polling device states", idletimer / 10);
 				zwRequestBasicReport(NODE_BROADCAST);
+				zwRequestMultilevelSensorReport(NODE_BROADCAST);
 			}
 
 		}

@@ -545,7 +545,7 @@ void ZWave::SendTemperatureChangedEvent(unsigned short node_id, float value)
 	sprintf(tmp_node_id,"%i",node_id);
         DeviceData_Impl *pChildDevice = InternalIDToDevice(tmp_node_id);
 	if (pChildDevice != NULL) {		
-		LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending co2 level changed event from node %s",tmp_node_id);
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending temperature changed event from node %s",tmp_node_id);
 		m_pEvent->SendMessage( new Message(pChildDevice->m_dwPK_Device,
 			DEVICEID_EVENTMANAGER,
 			PRIORITY_NORMAL,
