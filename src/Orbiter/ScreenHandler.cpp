@@ -3938,7 +3938,8 @@ void ScreenHandler::SCREEN_Call_Dropped(long PK_Screen, string sReason)
 		GetCurrentScreen_PK_DesignObj() == DESIGNOBJ_mnuPopupMessage_CONST				||
 		GetCurrentScreen_PK_DesignObj() == DESIGNOBJ_mnuActiveCalls_CONST				|| 
 		GetCurrentScreen_PK_DesignObj() == DESIGNOBJ_mnuMakingLinPhoneBroadcast_CONST		||
-		GetCurrentScreen_PK_DesignObj() == DESIGNOBJ_mnuMenu2_CONST
+		GetCurrentScreen_PK_DesignObj() == DESIGNOBJ_mnuMenu2_CONST				||
+		GetCurrentScreen_PK_DesignObj() == DESIGNOBJ_mnuAudioCallInProgress_CONST
 	)
 	{
 		DCE::SCREEN_Main screen_Main(m_pOrbiter->m_dwPK_Device, m_pOrbiter->m_dwPK_Device, "");
@@ -4065,7 +4066,7 @@ bool ScreenHandler::Telecom_ObjectSelected(CallBackData *pData)
 	{
 		int nPK_DesignObj_Parent = GetCurrentScreen_PK_DesignObj();
 		
-		if(nPK_DesignObj_Parent == DESIGNOBJ_devCallInProgress_CONST)
+		if(nPK_DesignObj_Parent == DESIGNOBJ_devCallInProgress_CONST || nPK_DesignObj_Parent == DESIGNOBJ_mnuAudioCallInProgress_CONST)
 		{
 			switch(pObjectInfoData->m_PK_DesignObj_SelectedObject)
 			{
@@ -4161,7 +4162,7 @@ bool ScreenHandler::Telecom_CapturedKeyboardBufferChanged(CallBackData *pData)
 {
 	switch(GetCurrentScreen_PK_DesignObj())
 	{
-		case DESIGNOBJ_devCallInProgress_CONST:
+		case (DESIGNOBJ_devCallInProgress_CONST || DESIGNOBJ_mnuAudioCallInProgress_CONST):
 		{
 			string sBuffer = m_pOrbiter->m_mapVariable_Find(VARIABLE_Seek_Value_CONST);
 	
