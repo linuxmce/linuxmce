@@ -40,6 +40,8 @@ using namespace DCE;
 
 #include "SIP_Thread.h"
 
+#include "pluto_main/Define_Button.h"
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 SimplePhone::SimplePhone(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
@@ -380,12 +382,59 @@ void SimplePhone::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string s
     sCMD_Result="ERROR";
     if(LS_ActiveCall())
     {
-		if( !sPK_Button.empty() )
+
+	    if (!sPK_Button.empty()) {
+	    	switch(atoi(sPK_Button.c_str()))
+		    {
+		    	case BUTTON_0_CONST:
+				ch = '0';
+				break;
+			case BUTTON_1_CONST:
+				ch = '1';
+				break;
+			case BUTTON_2_CONST:
+				ch = '2';
+				break;
+			case BUTTON_3_CONST:
+				ch = '3';
+				break;
+			case BUTTON_4_CONST:
+				ch = '4';
+				break;
+			case BUTTON_5_CONST:
+				ch = '5';
+				break;
+			case BUTTON_6_CONST:
+				ch = '6';
+				break;
+			case BUTTON_7_CONST:
+				ch = '7';
+				break;
+			case BUTTON_8_CONST:
+				ch = '8';
+				break;
+			case BUTTON_9_CONST:
+				ch = '9';
+				break;
+			case BUTTON_Asterisk_CONST:
+				ch = '*';
+				break;
+			case BUTTON_Pound_CONST:
+				ch = '#';
+				break;
+		    }
+	    }
+
+	    /*		if( !sPK_Button.empty() )
 		{
 			// only read the first character
 			ch = sPK_Button[0];
 		}
-		
+	    */
+	
+
+	// why the hell was it done this way?
+
         if( isdigit(ch) || (ch == '*') || (ch == '#'))
         {
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Will send '%d'(%c) as DTMF",ch,ch);
@@ -401,6 +450,7 @@ void SimplePhone::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string s
     {
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "Looks like there is no call");
     }
+    
 }
 
 string SimplePhone::Get_MD_AudioSettings()

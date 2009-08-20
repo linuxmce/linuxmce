@@ -1802,13 +1802,14 @@ string Telecom_Plugin::GetDialNumber(Row_PhoneNumber *pRow_PhoneNumber)
 void Telecom_Plugin::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName,string &sCMD_Result,Message *pMessage)
 //<-dceag-c28-e->
 {
-	int phoneID=map_orbiter2embedphone[pMessage->m_dwPK_Device_From];
-	if(phoneID>0)
+	sCMD_Result="ERROR";
+	int nEmbeddedPhoneID = 0;
+	if (GetEmbeddedPhoneAssociated(pMessage->m_dwPK_Device_From, nEmbeddedPhoneID))
 	{
-		DCE::CMD_Simulate_Keypress cmd(m_dwPK_Device,phoneID,sPK_Button,0,sName);
+		DCE::CMD_Simulate_Keypress cmd(m_dwPK_Device,nEmbeddedPhoneID,sPK_Button,0,sName);
 		SendCommand(cmd);
+		sCMD_Result="OK";
 	}
-	sCMD_Result="OK";
 }
 
 //<-dceag-c334-b->
