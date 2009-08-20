@@ -12,7 +12,7 @@ then
 	NoOrbitersRunning=$OrbiterGLisNotRunning || $OrbiterIsNotRunning
 
 	if [ $NoOrbitersRunning -eq 1 ] 
-
+	then
 		# Orbiter is not running, feedback needed.
 
 		export DISPLAY=:0
