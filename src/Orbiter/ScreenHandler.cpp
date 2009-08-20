@@ -3939,7 +3939,8 @@ void ScreenHandler::SCREEN_Call_Dropped(long PK_Screen, string sReason)
 		GetCurrentScreen_PK_DesignObj() == DESIGNOBJ_mnuActiveCalls_CONST				|| 
 		GetCurrentScreen_PK_DesignObj() == DESIGNOBJ_mnuMakingLinPhoneBroadcast_CONST		||
 		GetCurrentScreen_PK_DesignObj() == DESIGNOBJ_mnuMenu2_CONST				||
-		GetCurrentScreen_PK_DesignObj() == DESIGNOBJ_mnuAudioCallInProgress_CONST
+		GetCurrentScreen_PK_DesignObj() == DESIGNOBJ_mnuAudioCallInProgress_CONST		||
+		GetCurrentScreen_PK_DesignObj() == 4815 	// devCallInProgress for SmallUI. BAD Pluto, BAD! Duplicate CONST!
 	)
 	{
 		DCE::SCREEN_Main screen_Main(m_pOrbiter->m_dwPK_Device, m_pOrbiter->m_dwPK_Device, "");
