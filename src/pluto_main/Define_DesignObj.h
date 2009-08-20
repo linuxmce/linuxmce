@@ -2509,10 +2509,8 @@
 #define DESIGNOBJ_JarvisSecurityArray_CONST 5871
 #define DESIGNOBJ_ArraySecurityButton_CONST 5872
 #define DESIGNOBJ_mnuGamesOptions_a2600_CONST 5873
-#define DESIGNOBJ_a2600_Options_CONST 5874
-#define DESIGNOBJ_mnuAudioCallInProgress_CONST 5875
-#define DESIGNOBJ_phone0_CONST 5876
-#define DESIGNOBJ_phone1_CONST 5877
+#define DESIGNOBJ_a2600_Options_CONST 5876
+#define DESIGNOBJ_mnuAudioCallInProgress_CONST 5877
 #define DESIGNOBJ_phone2_CONST 5878
 #define DESIGNOBJ_phone3_CONST 5879
 #define DESIGNOBJ_phone4_CONST 5880
@@ -2531,6 +2529,8 @@
 #define DESIGNOBJ_butVolDown_Phone_CONST 5893
 #define DESIGNOBJ_butVolMute_Phone_CONST 5894
 #define DESIGNOBJ_butVolUp_Phone_CONST 5895
+#define DESIGNOBJ_phone0_CONST 5896
+#define DESIGNOBJ_phone1_CONST 5897
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"
