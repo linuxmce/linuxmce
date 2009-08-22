@@ -28,11 +28,13 @@ function editPlaylist($output,$mediadbADO,$dbADO) {
 		$pic=($picID!=0)?'<a href="mediapics/'.$picID.'.jpg" target="_blank"><img src="mediapics/'.$picID.'_tn.jpg" border="0"></a>':'';
 
 		// media types - hardcoded to music, videos and movies
+		// games added 2009/05/26 tschak
 		$mediaTypes=array(
 			0=>'All',
 			4=>'Music',
 			5=>'Video',
-			3=>'Movies'
+			3=>'Movies',
+			29=>'Games'
 		);
 
 		//Layouts

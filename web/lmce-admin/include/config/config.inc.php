@@ -8,7 +8,8 @@
 	$GLOBALS['sqlCVS_Server']='schema.linuxmce.org';
   	$GLOBALS['globalConfigPath']='/var/www/lmce-admin/include/config/';
   	$GLOBALS['floorplansPath']='/var/www/lmce-admin/floorplans';
-  	$GLOBALS['usersPicsPath']='/var/www/lmce-admin/users/';
+	$GLOBALS['contactPicturesPath']='/var/www/lmce-admin/contacts';
+	$GLOBALS['usersPicsPath']='/var/www/lmce-admin/users/';
   	$GLOBALS['roomsPicsPath']='/var/www/lmce-admin/rooms/';
   	$GLOBALS['scenariosPicsPath']='/var/www/lmce-admin/scenarios/';
   	$GLOBALS['pluto.conf']='/etc/pluto.conf';

@@ -6,6 +6,7 @@ function editContact($output,$telecomADO) {
 	
 	/* @var $telecomADO ADOConnection */
 	/* @var $rs ADORecordSet */
+	$picture_path = $GLOBALS['contactPicturesPath'];
 	$userID = (int)@$_SESSION['userID'];
 	$out='';
 	$action = isset($_REQUEST['action'])?cleanString($_REQUEST['action']):'form';
@@ -18,7 +19,7 @@ function editContact($output,$telecomADO) {
 	<div class="err" align="center">'.@$_GET['error'].'</div>
 	<div class="confirm" align="center">'.@$_GET['msg'].'</div>
 		
-	<form action="index.php" method="POST" name="editContact">
+	<form action="index.php" method="POST" enctype="multipart/form-data" name="editContact">
 	<input type="hidden" name="section" value="editContact">
 	<input type="hidden" name="action" value="add">	
 		'.phoneNumberForm($telecomADO,$userID,$cid).'
@@ -27,6 +28,7 @@ function editContact($output,$telecomADO) {
 	} else {
 		
 		if(isset($_POST['editContact'])){
+			$wasError = false;
 			$Name=cleanString($_POST['Name']);
 			$Company=cleanString($_POST['Company']);
 			$Title=cleanString($_POST['Title']);
@@ -40,6 +42,18 @@ function editContact($output,$telecomADO) {
 					`EK_Users`=?
 				WHERE PK_Contact=?',
 			array($Name,$Company,$Title,$EK_Users,$cid));
+
+			if ($_FILES['Picture']['name'] != ''){
+
+				if (!move_uploaded_file($_FILES['Picture']['tmp_name'],$picture_path.'/'.$cid.'.jpg')) {
+					$msg='Unable to move uploaded contact picture into storage.';
+					$wasError = true;
+				}
+
+				system('convert -resize 400x400 '.$picture_path.'/' . $cid. '.jpg '.$picture_path.'/'.$cid.'.png');
+
+			}
+
 			$msg='The contact was updated.';
 		}	
 		header("Location: index.php?section=phoneBook&msg=".@$msg);
@@ -83,7 +97,15 @@ function phoneNumberForm($telecomADO,$userID,$cid){
 		<tr>
 			<td><B>'.$TEXT_TITLE_CONST.'</B></td>
 			<td><input type="text" name="Title" value="'.$cData['Title'][0].'"></td>
-		</tr>	
+		</tr>
+		<tr>
+			<td><B>'.$TEXT_CONTACT_PICTURE_CONST.'</B></td>
+			<td><input type="file" name="Picture" value=""></td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td><img src="'.(file_exists('/var/www/lmce-admin/contacts/' . $cid . '.png') ? '/lmce-admin/contacts/' . $cid . '.png' : '/lmce-admin/UnknownUser.png').'"></td>
+		</tr>
 		<tr>
 			<td><B>'.$TEXT_PRIVATE_CONTACT_CONST.'</B></td>
 			<td><input type="checkbox" name="EK_Users" value="'.$userID.'" '.((!is_null($cData['EK_Users'][0]))?'checked':'').'></td>

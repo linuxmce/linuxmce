@@ -3913,9 +3913,31 @@ void Telecom_Plugin::CMD_Get_Associated_Picture_For_Channel(string sChannel,char
 					"/usr/pluto/orbiter/users/" + StringUtils::ltos(pOH_Orbiter->m_pOH_User->m_iPK_Users) + ".png";
 
 				if(FileUtils::FileExists(sUserPicturePath))
-					sPath = sUserPicturePath;
+				  sPath = sUserPicturePath;
 			}
+			
 		}
+		
+		// Attempt to get image for contact in contacts database.
+		vector<Row_PhoneNumber *> vectRow_PhoneNumber;
+		string sWhere = "DialAs LIKE '%"+sExten+"%'";
+
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"BLARG sWhere is %s",sWhere.c_str());
+
+		m_pDatabase_pluto_telecom->PhoneNumber_get()->GetRows(sWhere,&vectRow_PhoneNumber);
+		if (vectRow_PhoneNumber.size())
+		  {
+		    Row_PhoneNumber *pRow_PhoneNumber = vectRow_PhoneNumber[0];  // first match
+		    int iContactID = pRow_PhoneNumber->FK_Contact_get();
+		    string sContactPicturePath = "/usr/pluto/orbiter/contacts/" + StringUtils::itos(iContactID) + 
+		      ".png";
+			
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"BLARG sContactPicturePath IS %s",sContactPicturePath.c_str());
+
+		    if(FileUtils::FileExists(sContactPicturePath))
+		      sPath = sContactPicturePath;
+		  }
+		
 
 		size_t ulSize = 0;
 		*pData = FileUtils::ReadFileIntoBuffer(sPath, ulSize);

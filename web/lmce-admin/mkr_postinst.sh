@@ -48,6 +48,12 @@ rm -f /var/www/lmce-admin/orbiter_bg
 rm -f /var/www/pluto-admin/orbiter_bg #get rid of of old pluto-admin link
 ln -s /usr/pluto/orbiter/orbiter_bg /var/www/lmce-admin/orbiter_bg
 
+# Adding contact images folder - tschak
+mkdir -p /usr/pluto/orbiter/contacts
+chmod -R 777 /usr/pluto/orbiter/contacts
+rm -f /var/www/lmce-admin/contacts
+ln -s /usr/pluto/orbiter/contacts /var/www/lmce-admin/contacts
+
 mkdir -p /var/www/lmce-admin/security_images
 chmod -R 777 /var/www/lmce-admin/security_images
 rm -rf /var/www/pluto-admin/security_images #get rid of old pluto-admin directory

@@ -29,4 +29,5 @@ $TEXT_SHOW_ALL_CONST='Show all';
 $TEXT_NO_PHONE_NUMBERS_AVAILABLE_CONST='No phone numbers available.';
 $TEXT_DELETE_NUMBER_CONFIRMATION_CONST='Are you sure you want to delete this number?';
 $TEXT_RECORDS_CONST='Records';
+$TEXT_CONTACT_PICTURE_CONST='Contact Picture';
 ?>
