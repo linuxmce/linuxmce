@@ -1,0 +1,7 @@
+v0.2 Rewrite  21 May 2004
+	-Rewrote dhcpd.leases parsing class to make cleaner and OO.
+	-Added class to parse host defs in dhcpd.conf file.
+v0.1 Initial Release April 2004
+	-Contains functions to parse a dhcpd.leases file.
+	-Sloppy but it works.
+

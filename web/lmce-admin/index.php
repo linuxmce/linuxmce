@@ -923,6 +923,13 @@ switch ($section) {
 	    $output->setHelpSrc('/wiki/index.php/Network_Settings');
 	    networkSettings($output,$dbADO);
 	break;
+	case 'DHCPLeases';
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('large');
+	    include_once('operations/network/DHCPLeases.php');
+	    $output->setHelpSrc('');
+	    DHCPLeases($output,$dbADO);
+	break;
 	case 'firewall';
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('large');
