@@ -2687,15 +2687,13 @@ class DataGridTable *Telecom_Plugin::UserVoiceMailGrid(string GridID,string Parm
 	Row_Users *pRow_Users = m_pDatabase_pluto_main->Users_get()->GetRow(atoi(userid.c_str()));
 	if(NULL == pRow_Users)
 	{
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Got now record for user %s", userid.c_str());
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Got no record for user %s", userid.c_str());
 		return pDataGrid;
 	}
 
 	string sExtension = StringUtils::ltos(pRow_Users->Extension_get());
 	
 	string user_path=string(VOICEMAIL_LOCATION)+sExtension+string("/INBOX/");
-	DIR * dir=opendir(user_path.c_str());
-	struct dirent *dir_ent = NULL;
 	
     Command_Impl * pMediaPlugin = m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
     if( pMediaPlugin == NULL )
@@ -2705,73 +2703,103 @@ class DataGridTable *Telecom_Plugin::UserVoiceMailGrid(string GridID,string Parm
     }
     
     LoggerWrapper::GetInstance()->Write(LV_WARNING, "Getting new voicemails from %s", user_path.c_str());
-	while(NULL != dir && (dir_ent = readdir(dir)))
+
+    int n = 0; // Number of directory entries
+    struct dirent **namelist;
+    n = scandir(user_path.c_str(),&namelist, 0, alphasort);	// alphasort Defined in _SVID_SOURCE
+    if (n < 0)
+    {
+    	// Don't do a damn thing.
+    }
+    else 
+    {
+    	while(n--)	// Descending. 
 	{
-	    struct stat statbuf;
-		string buffer = user_path+dir_ent->d_name;
-        stat(buffer.c_str(),&statbuf);
+		// stat() the file for some basic info.
+		struct stat statbuf;
+		string buffer = user_path+namelist[n]->d_name;
+		stat(buffer.c_str(),&statbuf);
 
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Voicemail ? %s", buffer.c_str());
+		if((S_ISREG(statbuf.st_mode)) && (namelist[n]->d_name[0] != '.') && (strstr(namelist[n]->d_name,".txt") != NULL))
+		{
+                        map<string, string> mapVMData;
+                        string file_path=user_path+(namelist[n]->d_name);
+                        string text = "" + StringUtils::itos(Row+1) + ": " + ParseVoiceMailMetadata(file_path,mapVMData);
+                        file_path.replace(file_path.length()-4,4,".wav");
+                        LoggerWrapper::GetInstance()->Write(LV_STATUS,"WILL SHOW %s / %s",text.c_str(),file_path.c_str());
 
-        if((S_ISREG(statbuf.st_mode)) && (dir_ent->d_name[0] != '.') && (strstr(dir_ent->d_name,".txt") != NULL))
-        {
-			map<string, string> mapVMData;
-			string file_path=user_path+(dir_ent->d_name);
-			string text = "" + StringUtils::itos(Row+1) + ": " + ParseVoiceMailMetadata(file_path,mapVMData);
-			file_path.replace(file_path.length()-4,4,".wav");
-			LoggerWrapper::GetInstance()->Write(LV_STATUS,"WILL SHOW %s / %s",text.c_str(),file_path.c_str());
-
-			string URL_Parm;
-			{
-				string StdErr;
-				const char * const args[] = { VOICEMAIL_URL_PARAM, file_path.c_str(), NULL };
+                        string URL_Parm;
+                        {
+	          		string StdErr;
+		       		const char * const args[] = { VOICEMAIL_URL_PARAM, file_path.c_str(), NULL };
 				ProcessUtils::GetCommandOutput(args[0], args, URL_Parm, StdErr);
 			}
-			string url= VOICEMAIL_URL + StringUtils::Replace(URL_Parm, "\n", "");
-		
-			pCell = new DataGridCell(text,file_path);
 
-			pCell->m_mapAttributes["vmTimestamp"] = mapVMData["vmTimestamp"];
-			pCell->m_mapAttributes["vmDuration"] = mapVMData["vmDuration"];
-			pCell->m_mapAttributes["vmCallerID"] = mapVMData["vmCallerID"];
+                        string url= VOICEMAIL_URL + StringUtils::Replace(URL_Parm, "\n", "");
 
-			pDataGrid->SetData(0,Row,pCell);
-			Row++;
+                        pCell = new DataGridCell(text,file_path);
+
+                        pCell->m_mapAttributes["vmTimestamp"] = mapVMData["vmTimestamp"];
+                        pCell->m_mapAttributes["vmDuration"] = mapVMData["vmDuration"];
+                        pCell->m_mapAttributes["vmCallerID"] = mapVMData["vmCallerID"];
+
+                        pDataGrid->SetData(0,Row,pCell);
+                        Row++;			
 		}
+
+		free(namelist[n]);	// aren't doubly indirect pointers wonderful? :P
 	}
-	user_path=string(VOICEMAIL_LOCATION)+sExtension+string("/INBOX/Old");
-	dir=opendir(user_path.c_str());
-	dir_ent = NULL;
-	while(NULL != dir && (dir_ent = readdir(dir)))
-	{
-	    struct stat statbuf;
-		string buffer = user_path+dir_ent->d_name;
-        stat(buffer.c_str(),&statbuf);
-        if((S_ISREG(statbuf.st_mode)) && (dir_ent->d_name[0] != '.') && (strstr(dir_ent->d_name,".txt") != NULL))
-        {
-			map<string, string> mapVMData;
-			string file_path=user_path+(dir_ent->d_name);
-                      	string text = "" + StringUtils::itos(Row+1) + ": " + ParseVoiceMailMetadata(file_path, mapVMData);
-			file_path.replace(file_path.length()-4,4,".wav");
-			LoggerWrapper::GetInstance()->Write(LV_STATUS,"WILL SHOW %s / %s",text.c_str(),file_path.c_str());
+    }
 
-			string URL_Parm;
-			{
-				string StdErr;
-				const char * const args[] = { VOICEMAIL_URL_PARAM, file_path.c_str(), NULL };
-				ProcessUtils::GetCommandOutput(args[0], args, URL_Parm, StdErr);
-			}
-			string url = VOICEMAIL_URL + StringUtils::Replace(URL_Parm, "\n", "");
-			
-//			DCE::CMD_MH_Play_Media CMD_MH_Play_Media_
-//				(pMessage->m_dwPK_Device_From, pMediaPlugin->m_dwPK_Device, pMessage->m_dwPK_Device_From, url, MEDIATYPE_pluto_StoredAudio_CONST,0,"",0,0,0 /* bQueue */, 0 /* bBypassEvent */, 0 /* bDontSetupAV */);
-			
-			pCell = new DataGridCell(text,file_path);
-//			pCell->m_pMessage=CMD_MH_Play_Media_.m_pMessage;
-			pDataGrid->SetData(0,Row,pCell);
-			Row++;
-		}
-	}	
+    // now for the Old voicemails
+    user_path=string(VOICEMAIL_LOCATION)+sExtension+string("/INBOX/Old");
+    n = scandir(user_path.c_str(),&namelist, 0, alphasort);     // alphasort Defined in _SVID_SOURCE
+    if (n < 0)
+    {
+        // Don't do a damn thing.
+    }
+    else
+    {
+        while(n--)      // Descending.
+        {
+                // stat() the file for some basic info.
+                struct stat statbuf;
+                string buffer = user_path+namelist[n]->d_name;
+                stat(buffer.c_str(),&statbuf);
+
+                if((S_ISREG(statbuf.st_mode)) && (namelist[n]->d_name[0] != '.') && (strstr(namelist[n]->d_name,".txt") != NULL))
+                {
+                        map<string, string> mapVMData;
+                        string file_path=user_path+(namelist[n]->d_name);
+                        string text = "" + StringUtils::itos(Row+1) + ": " + ParseVoiceMailMetadata(file_path,mapVMData);
+                        file_path.replace(file_path.length()-4,4,".wav");
+                        LoggerWrapper::GetInstance()->Write(LV_STATUS,"WILL SHOW %s / %s",text.c_str(),file_path.c_str());
+
+                        string URL_Parm;
+                        {
+                                string StdErr;
+                                const char * const args[] = { VOICEMAIL_URL_PARAM, file_path.c_str(), NULL };
+                                ProcessUtils::GetCommandOutput(args[0], args, URL_Parm, StdErr);
+                        }
+
+                        string url= VOICEMAIL_URL + StringUtils::Replace(URL_Parm, "\n", "");
+
+                        pCell = new DataGridCell(text,file_path);
+
+                        pCell->m_mapAttributes["vmTimestamp"] = mapVMData["vmTimestamp"];
+                        pCell->m_mapAttributes["vmDuration"] = mapVMData["vmDuration"];
+                        pCell->m_mapAttributes["vmCallerID"] = mapVMData["vmCallerID"];
+
+                        pDataGrid->SetData(0,Row,pCell);
+                        Row++;
+                }
+
+                free(namelist[n]);      // aren't doubly indirect pointers wonderful? :P
+        }
+    }
+
+    // FIXME Come back here and do the same thing for Old.
+
 #endif
 	return pDataGrid;
 }
