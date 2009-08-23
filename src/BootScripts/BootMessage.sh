@@ -11,6 +11,8 @@ then
 
 	NoOrbitersRunning=$OrbiterGLisNotRunning || $OrbiterIsNotRunning
 
+	echo NoOrbitersRunning is $NoOrbitersRunning
+
 	if [ $NoOrbitersRunning -eq 1 ] 
 	then
 		# Orbiter is not running, feedback needed.
@@ -21,7 +23,8 @@ then
 	else
 		# Orbiter is running, feedback not needed.
 		# clear out any messages pending.
-		gnome-osd-client --full --dbus "<message id='bootmsg'><span></span></message>"
+		echo "Orbiter Is Running"
+		gnome-osd-client --full --dbus "<message id='bootmsg' osd_fake_translucent_bg='off' osd_vposition='center' hide_timeout='1000000' osd_halignment='center'><span foreground='white' font='Arial 72'> </span></message>"
 	fi
 
 else
