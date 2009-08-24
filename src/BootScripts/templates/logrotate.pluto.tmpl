@@ -1,9 +1,19 @@
-/var/log/pluto/*.log /var/log/pluto/*.newlog {
+#
+#	Group all Spawn*log files into CumulativeSpawn.log
+#	Rotate all *.log files
+#	Rotate all *.newlog files
+#	Rotate running.pids file
+#
+#	Change: Added copytruncate option, to be able to
+#		rotate logfiles.
+#
+/var/log/pluto/*.log /var/log/pluto/*.newlog /var/log/pluto/running.pids {
 	rotate 7
 	daily
 	compress
 	delaycompress
 	missingok
+	copytruncate
 	
 	sharedscripts
 	prerotate
