@@ -2531,6 +2531,12 @@
 #define DESIGNOBJ_butVolUp_Phone_CONST 5895
 #define DESIGNOBJ_phone0_CONST 5896
 #define DESIGNOBJ_phone1_CONST 5897
+#define DESIGNOBJ_popNonPlutoBluRay_CONST 5898
+#define DESIGNOBJ_butBluRayHome_CONST 5899
+#define DESIGNOBJ_mnuGenericBluRayRemote_CONST 5900
+#define DESIGNOBJ_mnuGenericBluRayRemote_SmallUI_CONST 5901
+#define DESIGNOBJ_External_BluRay_FS_CONST 5902
+#define DESIGNOBJ_External_BluRay_FS_Options_CONST 5904
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"
