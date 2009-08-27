@@ -124,17 +124,28 @@ bool GenericHIDInterface::DecodeEventInFD(int fd)
 	    }
 	  else 
 	    {
-	      if ((ev[i].type == EV_KEY) && (ev[i].code > 57))   // Try to not chop keys that already have meaning
+	      if ((ev[i].type == EV_KEY) && ev[i].code > 300)   // Try to not chop keys that already have meaning
 		{
 		  /* oOo, a keypress, let's deal with it. */
 		  int iKeyCode = ev[i].code;
 		  int iValue = ev[i].value;
 		  Orbiter::Event *pEvent = new Orbiter::Event;
-		  pEvent->type=((iValue > 0) ? Orbiter::Event::BUTTON_DOWN : Orbiter::Event::BUTTON_UP);
+		  switch(iValue)
+		  {
+		  	case 0:
+				pEvent->type=Orbiter::Event::BUTTON_UP;
+				break;
+			case 1:
+				pEvent->type=Orbiter::Event::BUTTON_DOWN;
+				break;
+			case 2:
+				pEvent->type=Orbiter::Event::BUTTON_DOWN;
+				break;
+		  }
 		  pEvent->data.button.m_bSimulated = false;
 		  pEvent->data.button.m_iPK_Button = 0;
 		  pEvent->data.button.m_iKeycode = iKeyCode + 120000;
-		  LoggerWrapper::GetInstance()->Write(LV_STATUS,"GenericHIDInterface::DecodeEventInFD code %d value %d.",iKeyCode+20000,iValue);
+		  LoggerWrapper::GetInstance()->Write(LV_STATUS,"GenericHIDInterface::DecodeEventInFD code %d value %d.",iKeyCode+120000,iValue);
 		  m_pOrbiter->CallMaintenanceInMiliseconds(0, &Orbiter::QueueEventForProcessing, pEvent, pe_NO, false);
 		}
 	    }
