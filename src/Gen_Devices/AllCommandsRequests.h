@@ -26840,5 +26840,77 @@ namespace DCE
 			1 /* number of parameters */,
 			COMMANDPARAMETER_Path_CONST, sPath.c_str()); }
 	};
+	class CMD_HDMI1 : public PreformedCommand {
+	public:
+		CMD_HDMI1(long DeviceIDFrom, long DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+			COMMAND_HDMI1_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_HDMI1_DL : public PreformedCommand {
+	public:
+		CMD_HDMI1_DL(long DeviceIDFrom, string DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_HDMI1_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_HDMI1_DT : public PreformedCommand {
+	public:
+		CMD_HDMI1_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_HDMI1_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_HDMI1_Cat : public PreformedCommand {
+	public:
+		CMD_HDMI1_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_HDMI1_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_HDMI_4 : public PreformedCommand {
+	public:
+		CMD_HDMI_4(long DeviceIDFrom, long DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+			COMMAND_HDMI_4_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_HDMI_4_DL : public PreformedCommand {
+	public:
+		CMD_HDMI_4_DL(long DeviceIDFrom, string DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_HDMI_4_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_HDMI_4_DT : public PreformedCommand {
+	public:
+		CMD_HDMI_4_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_HDMI_4_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_HDMI_4_Cat : public PreformedCommand {
+	public:
+		CMD_HDMI_4_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_HDMI_4_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_Sync_Storage_Groups : public PreformedCommand {
+	public:
+		CMD_Sync_Storage_Groups(long DeviceIDFrom, long DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+			COMMAND_Sync_Storage_Groups_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_Sync_Storage_Groups_DL : public PreformedCommand {
+	public:
+		CMD_Sync_Storage_Groups_DL(long DeviceIDFrom, string DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Sync_Storage_Groups_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_Sync_Storage_Groups_DT : public PreformedCommand {
+	public:
+		CMD_Sync_Storage_Groups_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Sync_Storage_Groups_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_Sync_Storage_Groups_Cat : public PreformedCommand {
+	public:
+		CMD_Sync_Storage_Groups_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Sync_Storage_Groups_CONST,
+			0 /* number of parameters */); }
+	};
 }
 #endif

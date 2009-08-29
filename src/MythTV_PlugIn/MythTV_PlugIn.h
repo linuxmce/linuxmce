@@ -254,6 +254,7 @@ public:
 			*****DATA***** accessors inherited from base class
 	string DATA_Get_PK_Device();
 	int DATA_Get_Priority();
+	bool DATA_Get_Only_One_Per_PC();
 	bool DATA_Get_Dont_Auto_Configure();
 
 			*****EVENT***** accessors inherited from base class
@@ -268,9 +269,11 @@ public:
 	/** Change channels.  +1 and -1 mean up and down 1 channel. */
 		/** @param #5 Value To Assign */
 			/** The track to go to.  A number is considered an absolute.  "+2" means forward 2, "-1" means back 1. */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
 
-	virtual void CMD_Jump_Position_In_Playlist(string sValue_To_Assign) { string sCMD_Result; CMD_Jump_Position_In_Playlist(sValue_To_Assign.c_str(),sCMD_Result,NULL);};
-	virtual void CMD_Jump_Position_In_Playlist(string sValue_To_Assign,string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID) { string sCMD_Result; CMD_Jump_Position_In_Playlist(sValue_To_Assign.c_str(),iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #185 - Schedule Recording */
@@ -361,6 +364,12 @@ live, nonlive, osd */
 	virtual void CMD_Remove_Scheduled_Recording(string sID,string sProgramID) { string sCMD_Result; CMD_Remove_Scheduled_Recording(sID.c_str(),sProgramID.c_str(),sCMD_Result,NULL);};
 	virtual void CMD_Remove_Scheduled_Recording(string sID,string sProgramID,string &sCMD_Result,Message *pMessage);
 
+
+	/** @brief COMMAND: #986 - Sync Storage Groups */
+	/** Synchronize Storage Groups. Sent in response to a storage device being added. */
+
+	virtual void CMD_Sync_Storage_Groups() { string sCMD_Result; CMD_Sync_Storage_Groups(sCMD_Result,NULL);};
+	virtual void CMD_Sync_Storage_Groups(string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
     };
