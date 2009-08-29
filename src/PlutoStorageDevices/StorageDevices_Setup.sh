@@ -49,8 +49,10 @@ if ! mountpoint /mnt/upnp ;then
 	djmount -o allow_other,default_permissions /mnt/upnp
 fi
 
-# Call MythTV Setup to alter storage groups.
-/usr/pluto/bin/mythtv_setup.sh
+if [ -f /usr/pluto/bin/storagegroups_sync.sh ]
+	# Call MythTV Setup to alter storage groups.
+	/usr/pluto/bin/storagegroups_sync.sh
+fi
 
 ## Call this script on the other machines too
 if [[ $TrigerCascade == "true" ]] ;then

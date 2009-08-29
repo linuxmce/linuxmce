@@ -123,3 +123,6 @@ fi
 
 mkdir -p /root/.mythtv/ || :
 touch /root/.mythtv/ignoregroup || :
+
+# sync storage groups
+/usr/pluto/bin/storagegroups_sync.sh
