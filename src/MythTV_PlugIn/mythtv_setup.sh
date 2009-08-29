@@ -1,112 +1,132 @@
-#!/bin/bash
+#!/usr/bin/perl
+	
+use DBI;
+#DBI->trace(1);
+use Getopt::Std;
+require "/usr/pluto/bin/config_ops.pl";
 
-# We execute the perl script instead of this shell script
-# due to problems with escaping strings
-/usr/bin/perl /usr/pluto/bin/mythtv_setup.pl
-exit 0
+$dbh = DBI->connect(&read_pluto_cred()) or die "Couldn't connect to database: $DBI::errstr\n";
 
-. /usr/pluto/bin/SQL_Ops.sh
-. /usr/pluto/bin/Config_Ops.sh
+sub addslashes {
+    my $text = shift;
+    $text =~ s/\\/\\\\/g;
+    $text =~ s/'/\\'/g;
+    $text =~ s/"/\\"/g;
+    $text =~ s/\(/\\\(/g;
+    $text =~ s/\)/\\\)/g;
+    $text =~ s/\[/\\\[/g;
+    $text =~ s/\]/\\\]/g;
+    $text =~ s/\\0/\\\\0/g;
+    return $text;
+}
+
+sub RunSQL {
+  my $sql = shift;
+  my $sth = $dbh->prepare($sql) or die $dbh->err;
+	$sth->execute() or die $sth->err;
+	my @results;
+	while (my $row = $sth->fetchrow_hashref()) {
+    push(@results,$row);
+  }
+  $sth->finish();
+	return(@results);
+}
+
+sub UseDB {
+  my $db = shift;
+  my $sql = "use $db";
+  $dbh->do($sql);
+}
 
 #Create a way to determine if MythTV is installed...
-Q="SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=36"
-MythTV_Installed=$(RunSQL "$Q")
-
-function ClearMythTVStorageGroups
-{
-	#Exit if mythtv is not installed
-	if [ -z $MythTV_Installed ];then
-        	return 0
-	fi
-
-	echo "Cleaning out MythTV Storage Groups..."
-	#Allow users to have custom storage groups. Lets store them now so we can restore them after clearing the storagegroups table
-	UseDB "mythconverg"
-	Q="SELECT groupname,hostname,dirname FROM storagegroup WHERE groupname LIKE 'custom:%'"
-	customSG=$(RunSQL "$Q")
-
-	#Clear the table.. This also resets th auto-increment number
-	Q="TRUNCATE TABLE storagegroup"
-	RunSQL "$Q"
-
-	#restore custom storage groups.
-	for SG in $customSG; do
-		groupName=$(Field 1 "$SG")
-		hostName=$(Field 2 "$SG")
-		dirName=$(Field 3 "$SG")
-
-		echo "Retaining custom storagegroup:     '$groupName'"
-		Q="INSERT INTO storagegroup (groupname,hostname,dirname) VALUES ('$groupName','$hostName','$dirName')"
-		RunSQL "$Q"
-	done
+$sql="SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=36";
+@results = RunSQL($sql);
+if($results[0]) {
+	$MythTV_Installed = $results[0]->{'PK_Device'};
 }
-function CleanMythTVSettings
+
+sub CleanMythTVSettings
 {
-	# The mythconverg.settings table may contain entries for hosts that no longer exist... This can happen if a user deletes a MD device.
-	# This function will remove entries from the settings table where the host no longer exists...
+  # The mythconverg.settings table may contain entries for hosts that no longer exist... This can happen if a user deletes a MD device.
+  # This function will remove entries from the settings table where the host no longer exists...
 
-	#Exit if mythtv is not installed
-	if [ -z $MythTV_Installed ];then
-        	return 0
-	fi
+  #Exit if mythtv is not installed
+  return unless $MythTV_Installed;
 
-	echo "Performing cleanup of mythtv.settings table..."
+  print "Performing cleanup of mythtv.settings table...\n";
 
-	Q="SELECT p.PK_Device FROM pluto_main.Device p 
-	LEFT JOIN pluto_main.DeviceTemplate p2 ON p2.PK_DeviceTemplate = p.FK_DeviceTemplate
-	WHERE (p2.FK_DeviceCategory=7 OR p2.FK_DeviceCategory=8) AND p.FK_Device_ControlledVia IS Null AND PK_Device!=1"
-	UseDB "pluto_main"
-	moons=$(RunSQL "$Q")
-	hostNames="'localhost','dcerouter'"
-	for moon in $moons; do
-		hostNames="$hostNames,'moon$(Field 1 "$moon")'"
-	done
+  $sql="SELECT p.PK_Device FROM pluto_main.Device p 
+  LEFT JOIN pluto_main.DeviceTemplate p2 ON p2.PK_DeviceTemplate = p.FK_DeviceTemplate
+  WHERE (p2.FK_DeviceCategory=7 OR p2.FK_DeviceCategory=8) AND p.FK_Device_ControlledVia IS Null AND PK_Device!=1";
+  my @results=RunSQL($sql);
+  @hostNames=('localhost','dcerouter');
+  foreach $row (@results) {
+    push(@hostNames,"moon" . $row->{"PK_Device"});
+	}
 
-	Q="DELETE FROM settings WHERE hostname NOT IN($hostNames)"
-	UseDB "mythconverg"
-	RunSQL "$Q"
+	$sql="DELETE FROM settings WHERE hostname NOT IN('" . join("','",@hostNames) . "')";
+	UseDB("mythconverg");
+	$dbh->do($sql);
 }
-function AddMythTVStorageGroup
+
+sub AddMythTVStorageGroup
 {
 	## Parameters 
 	## 1 - path
 	## 2 - groupname
-	path=$1
-	name=$2
-	host=$3
+	my $path=shift;
+	my $name=shift;
+	my $host=shift;
 
 	#Exit if mythtv is not installed
-	if [ -z $MythTV_Installed ];then
-        	return 0
-	fi
+	return unless $MythTV_Installed;
 	
-	echo "Adding MythTV storage group $name for host $host"
-	Q="INSERT INTO mythconverg.storagegroup (groupname,hostname,dirname) VALUES ('$name','$host','$path')"
-	#echo "$Q"
-	UseDB "mythconverg"
-	RunSQL "$Q"
+	print "Adding MythTV storage group $name for host $host\n";
+	$sql="INSERT INTO mythconverg.storagegroup (groupname,hostname,dirname) VALUES ('$name','$host','$path')";
+	UseDB("mythconverg");
+	$dbh->do($sql);
 }
-CleanMythTVSettings
 
-TPL_STORAGE_DEVICES="1790, 1794, 1768, 1769, 1854, 1851, 1849"
-DD_USERS=3
+sub CheckMythTVStorageGroup
+{
+	## Parameters 
+	## 1 - path
+	## 2 - groupname
+	my $path=shift;
+	my $name=shift;
+	my $host=shift;
 
-Params=("$@")
-for ((i = 0; i < ${#Params[@]}; i++)); do
-        case "${Params[$i]}" in
-                -d) ((i++)); CommaSeparatedDeviceList="${Params[$i]}" ;;
-        esac
-done
+	#Exit if mythtv is not installed
+	return unless $MythTV_Installed;
+	
+	print "Checking MythTV storage group $name for host $host...";
+	$sql="SELECT count(*) AS count FROM storagegroup  WHERE groupname='$name' AND hostname='$host' and dirname='$path'";
+	my @results = RunSQL($sql);
+	if (!$results[0]->{count}) {
+    print "missing!\n";
+    AddMythTVStorageGroup($path,$name,$host);
+    return;
+  }
+  print "Ok\n";
+}
+#CleanMythTVSettings();
 
+@TPL_STORAGE_DEVICES=(1790, 1794, 1768, 1769, 1854, 1851, 1849);
+$DD_USERS=3;
+
+getopt('d');
+$CommaSeparatedDeviceList = $opt_d;
 
 ## A list containing the pluto users that need to use those directories
-Q="SELECT PK_Users, UserName FROM Users"
-UseDB "pluto_main"
-Users=$(RunSQL "$Q")
+$sql="SELECT PK_Users, UserName FROM Users";
+@results = RunSQL($sql);
+foreach $row (@results) {
+  push(@Users,$row);
+}
 
 ## Get a list of storage devices that use the pluto dir structure
-if [[ "$CommaSeparatedDeviceList" == "" ]]; then
-	Q="
+if ($CommaSeparatedDeviceList eq '') {
+	$sql="
 		SELECT 
 		Device.PK_Device,
 		Device.Description
@@ -114,7 +134,7 @@ if [[ "$CommaSeparatedDeviceList" == "" ]]; then
 		Device 
 		JOIN Device_DeviceData ON FK_Device = PK_Device
 	WHERE 
-		FK_DeviceTemplate IN ($TPL_STORAGE_DEVICES)
+		FK_DeviceTemplate IN (" . join(",",@TPL_STORAGE_DEVICES) . ")
 		AND
 		FK_DeviceData = $DD_USERS
 		AND
@@ -122,11 +142,13 @@ if [[ "$CommaSeparatedDeviceList" == "" ]]; then
 		AND
 		FK_Device_ControlledVia = '$PK_Device'
 	ORDER BY PK_Device
-	"
-	UseDB "pluto_main"
-	Devices=$(RunSQL "$Q")
-else
-        Q="
+	";
+	@results=RunSQL($sql);
+	foreach $row (@results) {
+    push(@Devices,$row);
+  }
+} else {
+        $sql="
                 SELECT
                 PK_Device,
 		Description
@@ -134,7 +156,7 @@ else
                 Device
                 JOIN Device_DeviceData ON FK_Device = PK_Device
         WHERE
-                FK_DeviceTemplate IN ($TPL_STORAGE_DEVICES)
+                FK_DeviceTemplate IN (" . join(",",@TPL_STORAGE_DEVICES) . ")
                 AND
                 FK_DeviceData = $DD_USERS
                 AND
@@ -142,107 +164,119 @@ else
                 AND
 		PK_Device IN ($CommaSeparatedDeviceList)
 	 ORDER BY PK_Device
-        "
-	UseDB "pluto_main"
-	Devices=$(RunSQL "$Q")
-fi
+        ";
+	#UseDB("pluto_main");
+	@results=RunSQL($sql);
+	foreach $row (@results) {
+    push(@Devices,$row);
+  }
+}
 
 ## Make a list of hostnames
-Q="SELECT p.PK_Device FROM pluto_main.Device p 
+$sql="SELECT p.PK_Device FROM pluto_main.Device p 
 LEFT JOIN pluto_main.DeviceTemplate p2 ON p2.PK_DeviceTemplate = p.FK_DeviceTemplate
-WHERE (p2.FK_DeviceCategory=7 OR p2.FK_DeviceCategory=8) AND p.FK_Device_ControlledVia IS Null AND PK_Device!=1"
-UseDB "pluto_main"
-moons=$(RunSQL "$Q")
-hostNames="dcerouter"
-for moon in $moons; do
-	hostNames="$hostNames moon$(Field 1 "$moon")"
-done
+WHERE (p2.FK_DeviceCategory=7 OR p2.FK_DeviceCategory=8) AND p.FK_Device_ControlledVia IS Null AND PK_Device!=1";
+#UseDB("pluto_main");
+@results=RunSQL($sql);
+@hostNames=('localhost','dcerouter');
+foreach $row (@results) {
+  push(@hostNames,"moon" . $row->{"PK_Device"});
+}
 
-# Exit gracefully if no new MD's or storage devices were added.
-# This makes sure that we don't have to reset the backend more than we should have to...
-UpdateStorageGroups=1
-for thisHost in $hostNames; do
-	Q="SELECT hostname FROM storagegroup WHERE hostname='$thisHost'"
-	UseDB "mythconverg"
-	resHosts=$(RunSQL "$Q")
-	if [ -z $resHost ]; then
-		UpdateStorageGroups=0
-	fi
-done
-for thisDevice in $Devices; do
-	Device_Description=$(Field 2 "$Device")
-	Q="SELECT id from storagegroup WHERE dirname LIKE '%$Device_Description%'"
-	UseDB "mythconverg"
-	resHDevices=$(RunSQL "$Q")
-	if [ -z $resHost ]; then
-		UpdateStorageGroups=0
-	fi
-done
-#echo "$UpdateStorageGroups"
-if [ UpdateStorageGroups==0 ]; then
-	echo "No new media directors or storage devices found, skipping storagegroup update and backend reload..."
-	exit 0
-fi
+# Check for and remove extra or invalid storage group entries
+foreach $thisHost (@hostNames) {
+	$sql="FROM storagegroup WHERE hostname='$thisHost' AND groupname NOT LIKE 'custom:%' AND dirname NOT LIKE '/home/\%/data/pvr\%'";
+  UseDB("mythconverg");
+  @results=RunSQL("SELECT count(hostname) as count " . $sql);
+	if ($results[0] && $results[0]->{"count"}) {
+    $dbh->do("DELETE " . $sql);
+    print "Removed $results[0]->{count} invalid Host entries.\n";
+	}
+}
+
+$sql="FROM storagegroup WHERE hostname not in ('" . join("','",@hostNames) . "')";
+@results=RunSQL("SELECT count(hostname) as count " . $sql);
+if ($results[0] && $results[0]->{"count"}) {
+  $dbh->do("DELETE " . $sql);
+  print "Removed $results[0]->{count} extraneous Host entries.\n";
+}
 
 
-## Something has changed, so we must update the storagegroups and reset the backends!!
-## Before we start, lets clean out mythconverg.storagegroups
-ClearMythTVStorageGroups
+foreach $thisDevice (@Devices) {
+	$Device_Description = addslashes($thisDevice->{"Description"});
+	$sql="FROM storagegroup WHERE dirname LIKE '\%$Device_Description\%' AND groupname NOT LIKE 'custom:%' AND dirname NOT LIKE '/home/\%/data/pvr/$Device_Description \[$thisDevice->{PK_Device}\]'";
+	@results=RunSQL("SELECT count(id) as count " . $sql);
+	if ($results[0] && $results[0]->{"count"}) {
+    $dbh->do("DELETE " . $sql);
+    print "Removed $results[0]->{count} invalid Device entries.\n";
+	}
+}
+
+$sql = "FROM storagegroup s where dirname NOT LIKE '%pvr' AND groupname NOT LIKE 'custom:%'";
+foreach $thisDevice (@Devices) {
+	$Device_Description = addslashes($thisDevice->{"Description"});
+	$sql .= " AND dirname NOT LIKE '%$Device_Description \[$thisDevice->{PK_Device}\]'";
+}
+
+@results=RunSQL("SELECT count(id) as count " . $sql);
+if ($results[0] && $results[0]->{"count"}) {
+  $dbh->do("DELETE " . $sql);
+  print "Removed $results[0]->{count} extraneous Device entries.\n";
+}
+
+# Now check that every required entry is there, inserting a new one as needed
 
 ##For every host...
-for hostName in $hostNames; do
+foreach my $hostName (@hostNames) {
 
 	##lets handle the /home/public paths....
-	AddMythTVStorageGroup "/home/public/data/pvr" "Default" "$hostName"     #Put the special "Default" storage group in. 
-	AddMythTVStorageGroup "/home/public/data/pvr" "LiveTV" "$hostName"    #Put the special "LiveTV" storage group into the moons root tv_shows_* directory	
-	AddMythTVStorageGroup "/home/public/data/pvr" "public" "$hostName"	
+	CheckMythTVStorageGroup("/home/public/data/pvr","Default","$hostName");     #Put the special "Default" storage group in. 
+	CheckMythTVStorageGroup("/home/public/data/pvr","LiveTV","$hostName");    #Put the special "LiveTV" storage group into the moons root tv_shows_* directory	
+	CheckMythTVStorageGroup("/home/public/data/pvr","public","$hostName");	
 
 
 	## For every user
-	for User in $Users; do
-		User_ID=$(Field 1 "$User")
-		User_Uname=$(Field 2 "$User")
-		User_UnixUname=$(Field 2 "$User" | tr 'A-Z' 'a-z' | tr -dc "a-z0-9-")
-		User_UnixUname="pluto_$User_UnixUname"
-	
-		AddMythTVStorageGroup "/home/user_$User_ID/data/pvr" "$User_Uname" "$hostName"
-	done
+	foreach my $User (@Users) {
+		my $User_ID=$User->{"PK_Users"};
+		my $User_Uname=$User->{"UserName"};
+		my $User_UnixUname=lc($User_Uname);
+		$User_UnixUsername =~ s/[^a-z0-9-]//;
+		$User_UnixUname="pluto_$User_UnixUname";
+		CheckMythTVStorageGroup("/home/user_$User_ID/data/pvr","$User_Uname","$hostName");
+	}
 
 
 
 	## And now add the directories to each extra storage device.
-	for Device in $Devices; do
-		Device_ID=$(Field 1 "$Device")
-		Device_Description=$(Field 2 "$Device")
+	for my $Device (@Devices) {
+		my $Device_ID=$Device->{"PK_Device"};
+		my $Device_Description=$Device->{"Description"};
 
-		Device_MountPoint="/mnt/device/$Device_ID"
+		my $Device_MountPoint="/mnt/device/$Device_ID";
 
-		Device_IsMounted=$(cd /mnt/device/$Device_ID && mount | grep "\/mnt\/device\/$Device_ID ") 
-		if [[ "$Device_IsMounted" == "" ]]; then 
-		        echo "WARNING: Device $Device_ID is not mounted, skiping ..." 
-		        continue 
-		fi 
+		my $Device_IsMounted=`cd /mnt/device/$Device_ID && mount | grep "\/mnt\/device\/$Device_ID "`; 
+		unless ($Device_IsMounted) {
+		        print "WARNING: Device $Device_ID is not mounted, skiping ..." ;
+		        next; 
+		} 
 
 		#public storage groups
-		AddMythTVStorageGroup "/home/public/data/pvr/$Device_Description [$Device_ID]" "Default" "$hostName"      #Put the special "Default" storage group in. 
-		AddMythTVStorageGroup "/home/public/data/pvr/$Device_Description [$Device_ID]" "LiveTV" "$hostName"       #Put the special "LiveTV" storage group into the moons root tv_shows_* directory	
-		AddMythTVStorageGroup "/home/public/data/pvr/$Device_Description [$Device_ID]" "public: $Device_Description [$Device_ID]" "$hostName"
+		CheckMythTVStorageGroup("/home/public/data/pvr/$Device_Description [$Device_ID]","Default","$hostName");      #Put the special "Default" storage group in. 
+		CheckMythTVStorageGroup("/home/public/data/pvr/$Device_Description [$Device_ID]","LiveTV","$hostName");       #Put the special "LiveTV" storage group into the moons root tv_shows_* directory	
+		CheckMythTVStorageGroup("/home/public/data/pvr/$Device_Description [$Device_ID]","public: $Device_Description [$Device_ID]","$hostName");
 
 
 		## For every user
-		for User in $Users; do
-			User_ID=$(Field 1 "$User")
-			User_Uname=$(Field 2 "$User")
-			User_UnixUname=$(Field 2 "$User" | tr 'A-Z' 'a-z' | tr -dc "a-z0-9-")
-			User_UnixUname="pluto_$User_UnixUname"
+		foreach my $User (@Users) {
+		  my $User_ID=$User->{"PK_Users"};
+      my $User_Uname=$User->{"UserName"};
+		  my $User_UnixUname=lc($User_Uname);
+		  $User_UnixUsername =~ s/[^a-z0-9-]//;
+		  $User_UnixUname="pluto_$User_UnixUname";
 		
-			AddMythTVStorageGroup "/home/user_$User_ID/data/pvr/$Device_Description [$Device_ID]" "$User_Uname: $Device_Description [$Device_ID]" "$hostName"
+			CheckMythTVStorageGroup("/home/user_$User_ID/data/pvr/$Device_Description [$Device_ID]","$User_Uname: $Device_Description [$Device_ID]","$hostName");
 
-		done
-	done
-done
-
-#Reset the MythTV Backend so that the new storage groups are available
-if [ $MythTV_Installed ];then
-        /usr/pluto/bin/Restart_Backend_With_SchemaLock.sh
-fi
+		}
+	}
+}
+# no mythbackend restart is required; it will find changes on the fly
