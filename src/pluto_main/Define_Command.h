@@ -892,6 +892,7 @@
 #define COMMAND_Get_Game_Options_CONST 983
 #define COMMAND_HDMI1_CONST 984
 #define COMMAND_HDMI_4_CONST 985
+#define COMMAND_Sync_Storage_Groups_CONST 986
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"

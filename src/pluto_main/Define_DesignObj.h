@@ -2536,7 +2536,8 @@
 #define DESIGNOBJ_mnuGenericBluRayRemote_CONST 5900
 #define DESIGNOBJ_mnuGenericBluRayRemote_SmallUI_CONST 5901
 #define DESIGNOBJ_External_BluRay_FS_CONST 5902
-#define DESIGNOBJ_External_BluRay_FS_Options_CONST 5904
+#define DESIGNOBJ_External_BluRay_FS_Options_CONST 5903
+#define DESIGNOBJ_butDisplay_CONST 5906
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"

@@ -1152,6 +1152,7 @@
 #define TEXT_Controller_Options_CONST 2095
 #define TEXT_Participants_CONST 2096
 #define TEXT_Blu_Ray_Home_CONST 2097
+#define TEXT_Show_Display_CONST 2098
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"
