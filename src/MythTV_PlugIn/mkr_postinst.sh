@@ -21,3 +21,6 @@ RunSQL "$Q"
 #Re-run SetupUsers_Homes PlutoStorageDevices to make sure that the mythtv user gets added to each user's group
 /usr/pluto/bin/SetupUsers_Homes.sh
 /usr/pluto/bin/StorageDevices_Setup.sh
+
+#Run mythtv-setup.sh to make sure storage groups get added. -tschak
+/usr/pluto/bin/mythtv_setup.sh
