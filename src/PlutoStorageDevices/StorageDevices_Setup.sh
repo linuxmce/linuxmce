@@ -49,6 +49,9 @@ if ! mountpoint /mnt/upnp ;then
 	djmount -o allow_other,default_permissions /mnt/upnp
 fi
 
+# Call MythTV Setup to alter storage groups.
+/usr/pluto/bin/mythtv_setup.sh
+
 ## Call this script on the other machines too
 if [[ $TrigerCascade == "true" ]] ;then
 	/usr/pluto/bin/MessageSend "$DCERouter" -targetType template 0 26 1 67 13 "/usr/pluto/bin/StorageDevices_Setup.sh" 51 "--nocascade"
