@@ -1,4 +1,4 @@
-#!/usr/sbin/perl
+#!/usr/bin/perl
 
 use DBI;
 require "/usr/pluto/bin/config_ops.pl";
