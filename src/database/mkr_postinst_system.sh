@@ -43,6 +43,8 @@ if [ $PROCESS = "upgrade" ]; then
 	## FIXME - schema.linuxmce.org is hard coded
 	/usr/pluto/bin/sqlCVS -R 3999 -H schema.linuxmce.org $PLUTO_DB_CRED -n -d anonymous -U anonymous~nopass -D $MySqlDBName -r constants,dce,designer,document,ir,website -A -e update || exit $?
 fi
+# Make sure Text_LS has the correct character set (UTF-8)
+/usr/bin/perl /usr/pluto/update2utf8.pl
 # update quick start icons
 /bin/bash /usr/pluto/bin/UpdateQuickStartIcons.sh || /bin/true
 
