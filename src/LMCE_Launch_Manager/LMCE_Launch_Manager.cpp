@@ -33,6 +33,7 @@ LMCE_Launch_Manager::LMCE_Launch_Manager(int DeviceID, string ServerAddress,bool
 	: LMCE_Launch_Manager_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
+	lmWidget = NULL;
 }
 
 //<-dceag-const2-b->
@@ -41,13 +42,14 @@ LMCE_Launch_Manager::LMCE_Launch_Manager(Command_Impl *pPrimaryDeviceCommand, De
 	: LMCE_Launch_Manager_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
 //<-dceag-const2-e->
 {
+	lmWidget = NULL;
 }
 
 //<-dceag-dest-b->
 LMCE_Launch_Manager::~LMCE_Launch_Manager()
 //<-dceag-dest-e->
 {
-	
+	lmWidget = NULL;
 }
 
 //<-dceag-getconfig-b->
@@ -196,4 +198,11 @@ void LMCE_Launch_Manager::SomeFunction()
 
 */
 
+void LMCE_Launch_Manager::CreateNewChildren()
+{
+	if (lmWidget)
+	{
+		lmWidget->respawnNewChildren();
+	}
+}
 

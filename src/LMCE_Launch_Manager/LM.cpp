@@ -70,6 +70,10 @@ using namespace std; //DCE
 LM::LM()
 {
 	m_pLMCE_Launch_Manager=NULL;
+	m_pDisplay=NULL;
+	m_iDisplayWidth=m_iDisplayHeight=0;
+	m_iRootWindow=0;
+	m_iScreen=0;
 	m_pResult=NULL;
 	m_pAlarmManager = NULL;
 	//Init progress tracking vars	
@@ -83,10 +87,20 @@ LM::~LM()
 {
 	delete m_pAlarmManager;
 	m_pAlarmManager=NULL;
+	delete m_pDisplay;
+	m_pDisplay=NULL;
 }
 //COMPLETE
 void LM::Initialize()
 {
+	if (getenv("DISPLAY") != NULL) 
+	{
+		m_pDisplay = XOpenDisplay(getenv("DISPLAY"));
+		m_iScreen = DefaultScreen(m_pDisplay);
+		m_iRootWindow = RootWindow(m_pDisplay,m_iScreen);
+		m_pSc = XRRGetScreenInfo(m_pDisplay,m_iRootWindow);
+	}
+
 	m_pAlarmManager = new DCE::AlarmManager();
 	m_pAlarmManager->Start(2);      
 	DCE::LoggerWrapper::SetType(LT_LOGGER_FILE, PLUTO_LOG_DIR "/LaunchManager.log");
@@ -339,12 +353,14 @@ void LM::AlarmCallback(int id, void* param)
 void LM::respawnNewChildren()
 {
 	writeLog("Requested respawning of new children devices", true, LV_WARNING);
-	
+	writeOSD("Respawning New Devices");
+
 	syncWithLockList(true);
 	
 	if (m_bCoreHere && m_bCoreRunning)
 	{
 		writeLog("Spawning new children devices - core", true, LV_WARNING);
+		writeOSD("Spawning new Core Devices.");
 		startCoreDevices(true);
 		writeLog("Finished spawning new children devices - core", true, LV_WARNING);
 	}
@@ -352,6 +368,7 @@ void LM::respawnNewChildren()
 	if (m_bMediaHere && m_bMediaRunning)
 	{
 		writeLog("Spawning new children devices - media", true, LV_WARNING);
+		writeOSD("Spawning new Media Devices.");
 		startMediaDevices(true);
 		writeLog("Finished spawning new children devices - media", true, LV_WARNING);
 	}
@@ -1100,6 +1117,10 @@ bool LM::initialize_LMdevice(bool bRetryForever/*=false*/)
 			map<int,string>::iterator it = devicesMap.begin();
 			m_sOrbiterPluginID = StringUtils::itos((*it).first) ;
 			m_pAlarmManager->AddRelativeAlarm(5,this,LM_KEEP_ALIVE,NULL);
+
+			// Link the DCE device to our UI
+			m_pLMCE_Launch_Manager->lmWidget = this;
+
 			return true;
 		}
 		
@@ -1564,7 +1585,7 @@ void LM::doAutostart()
 	{
 		if (!m_bMediaRunning)
 		{
-			//checkScreenDimensions(false);//TODO: This needs re-implemented..  Its purpose is to regen orbiters if screen resolution is different than waht is listed in xorg.conf... Is this even needed?
+			checkScreenDimensions(false);//TODO: This needs re-implemented..  Its purpose is to regen orbiters if screen resolution is different than waht is listed in xorg.conf... Is this even needed?
 			writeLog(">>Autostarting media station....", true);
 			m_bMediaRunning = startMediaStation();
 			bReport |= m_bMediaRunning;
@@ -1774,126 +1795,29 @@ bool LM::startMediaStation()
 //TODO:decide if this is needed and port if it is
 bool LM::checkScreenDimensions(bool askUser/*=true*/)
 {
-	//TODO: port this to standard library stuff
-/*
-	QDesktopWidget qdw;
-	QRect dims = qdw.screenGeometry();
-	QString s = QString::number(dims.width()) + " " + QString::number(dims.height());
-	QString s1 = QString::number(dims.width()) + "x" + QString::number(dims.height());
-		
-	QString currentDimensions = leVideoResolution->text();
-	int index = currentDimensions.find('/');
-	QString resolution, rate;
-	if (index!=-1)
-	{
-		rate = currentDimensions.mid(index);
-	}
-	else
-		rate = "/60";
-	
-	int newX = dims.width();
-	int newY = dims.height();
-	
-	int currentX=-1;
-	int currentY=-1;
-	
-	index = currentDimensions.find(' ');
-	if (index != -1)
-	{
-		currentX = currentDimensions.mid(0, index).toInt();
-		// if it is like "1920 1080 i/60"
-		int index1 = currentDimensions.find(" ", index+1);
-		// if it is like "1024 768/60"
-		if (index1 == -1)
-			index1 = currentDimensions.find("/", index+1);
-			
-		if (index1 != -1)
-			currentY = currentDimensions.mid(index+1, index1-index-1).toInt();
-	}
-	
-	QString newDimensions = s+rate;
-	
-	writeLog("Checking screen resolution: current is " + s1);
-	
-	if ( (currentX != newX) || (currentY != newY) )
-	{
-		writeLog("Detected new screen resolution \""+newDimensions+"\" " + " [" + QString::number(currentX)+"x"+QString::number(currentY)+"] => [" + QString::number(newX)+"x"+QString::number(newY)+"]", true);
-		int iResult = QMessageBox::No;
-		
-		if (askUser)
-		{
-				iResult = 	QMessageBox::question(this, "Resolution changed", "Launch Manager detected that your screen resolution \nrecently changed to " + 
-						s1+ ". Do you want to update Orbiter \nconfiguration for this box and regenerate Orbiter skin?", QMessageBox::Yes, QMessageBox::No, QMessageBox::Cancel);
 
-				if (iResult == QMessageBox::Cancel)
-				{
-					writeLog("User decided to abort startup", true, LV_WARNING);
-					return false;
-				}
-				
-				if (iResult == QMessageBox::Yes)
-					writeLog("User decided to update Orbiter configuration", true, LV_WARNING);
-				else
-					writeLog("User decided not to update Orbiter configuration", true, LV_WARNING);
-		}
-		else
+	if (m_pDisplay != NULL)
+	{
+		int nSizes; 	// Number of returned screen sizes. (resolutions)
+		int have_pixel_size = 0;
+		Rotation rotation, current_rotation, rotations;
+	
+		SizeID current_size = XRRConfigCurrentConfiguration (m_pSc, &current_rotation);
+		int current_rate = XRRConfigCurrentRate(m_pSc);
+		m_pSizes = XRRConfigSizes(m_pSc,&nSizes);
+	
+		int current_width = DisplayWidth(m_pDisplay,m_iScreen);
+		int current_height = DisplayHeight(m_pDisplay,m_iScreen);
+	
+	
+		if (!m_pDisplay) 
 		{
-			iResult = QMessageBox::Yes;
-			writeLog("Autorun mode: updating Orbiter configuration", true, LV_WARNING);
+			return true;	// If X is not running, then just ignore this whole funnction.
 		}
-		
-		if (iResult == QMessageBox::Yes)
-		{
-			// saving M/D screen info
-			queryDB( QString("UPDATE Device_DeviceData SET IK_DeviceData=\""+ newDimensions + "\"WHERE FK_Device=" + m_qsMediaID + " AND FK_DeviceData=" + 
-					QString::number(DEVICEDATA_Video_settings_CONST) ));
-			
-			updateOrbiterSize(dims.width(), dims.height());
-			
-			// just for case OrbiterGen won't succeed first time
-			queryDB( QString("UPDATE Orbiter SET Regen=1 WHERE PK_Orbiter=" + m_qsOrbiterID));
-			
-			leVideoResolution->setText(newDimensions);
-			
-			// if the core is already running, ask it to regen the given orbiter
-			if (m_bCoreRunning)
-			{
-				writeLog("Core is running, attempting to send 'regen orbiter' command...");
-				if (m_pLaunch_Manager)
-				{
-					int orbiterPluginID=-1;
-					map<int,string> mapDevices;
-					m_pLaunch_Manager->GetDevicesByTemplate(DEVICETEMPLATE_Orbiter_Plugin_CONST, &mapDevices);
-					if (!mapDevices.empty())
-					{
-						orbiterPluginID = mapDevices.begin()->first;
-						DCE::CMD_Regen_Orbiter cmd( m_qsDeviceID.toInt(),  orbiterPluginID, m_qsOrbiterID.toInt(),"-a", "" );
-						m_pLaunch_Manager->SendCommandNoResponse(cmd);
-						writeLog("Command sent", false);
-						
-						startOrbiterRegenProgressTracking();
-						
-						while (m_bRegenInProgress)
-						{
-							sleep(1);
-							qApp->eventLoop()->processEvents(QEventLoop::ExcludeUserInput);
-						}
-					}
-					else
-						writeLog("Failed to find Orbiter Plugin", false, LV_WARNING);
-				}
-				else
-				{
-					writeLog("Command not sent - no connection to core", false, LV_WARNING);
-				}
-			}
-			else
-				writeLog("Core is not running, not sending any commands - orbiter will be regenerated on core startup");
-				
-		}
+	
+		return true;	// for now until i finish this sucker.
 	}
-	*/
-	return true;
+
 }
 
 //TODO: A lot of cleanup and hook into socket once socket layer is complete

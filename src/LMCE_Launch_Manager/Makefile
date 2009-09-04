@@ -22,7 +22,7 @@ sources = Main.cpp LMCE_Launch_Manager.cpp LM.cpp List.cpp DB.cpp UI.cpp $(Gen_D
 CXXFLAGS +=
 CPPFLAGS +=
 LDFLAGS +=
-XTRALDLIBS = -lmysqlclient_r
+XTRALDLIBS = -lmysqlclient_r -lX11 -lXext -lXrandr
 
 Gen_Dev_Files +=
 sources +=

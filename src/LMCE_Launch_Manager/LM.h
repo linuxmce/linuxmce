@@ -19,10 +19,28 @@
 #define UPDATE_ORBITER_REGEN_PROGRESS 5
 #define INITIALIZATION 6
 
+// This is for the RandR bits.
+#include <X11/Xlib.h>
+#include <X11/Xlibint.h>
+#include <X11/Xproto.h>
+#include <X11/extensions/Xrandr.h>
+
+
+
 class LM : public DCE::AlarmEvent
 {
 private:	
 	// Private member variables
+	Display *m_pDisplay;
+	int m_iDisplayWidth;
+	int m_iDisplayHeight;
+	short m_iRate;
+	XRRScreenConfiguration *m_pSc;
+	Window m_iRootWindow;	// The Root Window
+	int m_iScreen;  	// The Screen #
+	SizeID m_siCurrentSize;	// The Current Size as reported by RandR
+       	XRRScreenSize *m_pSizes;
+
 	DCE::LMCE_Launch_Manager * m_pLMCE_Launch_Manager;
 	UI m_uiMainUI;
 	vector<string> m_vCoreDevices;
@@ -89,7 +107,6 @@ private:
 	void initialize_LogOptions();
 	bool initialize_LMdevice(bool bRetryForever=false);
 	void updateScripts();
-	void respawnNewChildren();
 	void syncWithLockList(bool eraseDeadLocalDevices=false);
 	void startMediaDevices(bool checkForAlreadyRunning=false);
 	void startCoreDevices(bool checkForAlreadyRunning=false);
@@ -151,7 +168,7 @@ public:
 	void Draw();	
 	void AlarmCallback(int id, void* param);
 	void Run();
-
+	void respawnNewChildren();
 
 
 		
