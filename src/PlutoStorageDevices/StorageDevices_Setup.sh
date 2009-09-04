@@ -49,7 +49,7 @@ if ! mountpoint /mnt/upnp ;then
 	djmount -o allow_other,default_permissions /mnt/upnp
 fi
 
-if [ -f /usr/pluto/bin/storagegroups_sync.sh ]
+if [ -f /usr/pluto/bin/storagegroups_sync.sh ] ;then
 	# Call MythTV Setup to alter storage groups.
 	/usr/pluto/bin/storagegroups_sync.sh
 fi
