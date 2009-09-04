@@ -46,7 +46,9 @@ fi
 ## Start UPNP media files client
 mkdir -p /mnt/upnp
 if ! mountpoint /mnt/upnp ;then
-	djmount -o allow_other,default_permissions /mnt/upnp
+	if [ -x /usr/bin/djmount ] ;then
+		djmount -o allow_other,default_permissions /mnt/upnp
+	fi
 fi
 
 if [ -f /usr/pluto/bin/storagegroups_sync.sh ] ;then
