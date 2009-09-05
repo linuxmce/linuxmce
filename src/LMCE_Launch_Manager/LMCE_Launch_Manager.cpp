@@ -27,6 +27,9 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
+
+#include "LM.h"
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 LMCE_Launch_Manager::LMCE_Launch_Manager(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
