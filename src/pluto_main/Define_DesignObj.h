@@ -2489,7 +2489,6 @@
 #define DESIGNOBJ_JarvisLightsArray_CONST 5836
 #define DESIGNOBJ_JarvisTeleComArray_CONST 5838
 #define DESIGNOBJ_JarvisAdvanceArray_CONST 5839
-#define DESIGNOBJ_mnuGamesRemote_controls_CONST 5840
 #define DESIGNOBJ_controller_1_joystick_CONST 5855
 #define DESIGNOBJ_controller_1_paddle_CONST 5856
 #define DESIGNOBJ_controller_1_driving_CONST 5857
@@ -2538,6 +2537,21 @@
 #define DESIGNOBJ_External_BluRay_FS_CONST 5902
 #define DESIGNOBJ_External_BluRay_FS_Options_CONST 5903
 #define DESIGNOBJ_butDisplay_CONST 5906
+#define DESIGNOBJ_butOSDNavigation_SmallUI_CONST 5908
+#define DESIGNOBJ_mnuOSDArrows_CONST 5909
+#define DESIGNOBJ_mnuGamesRemote_atari5200_CONST 5910
+#define DESIGNOBJ_grpNumberPad_Games_CONST 5911
+#define DESIGNOBJ_butPound_Media_CONST 5912
+#define DESIGNOBJ_butAsterisk_Media_CONST 5913
+#define DESIGNOBJ_butStart_Pad_CONST 5914
+#define DESIGNOBJ_butPause_Pad_CONST 5915
+#define DESIGNOBJ_butReset_Pad_CONST 5916
+#define DESIGNOBJ_grpLogoAtari5200_CONST 5917
+#define DESIGNOBJ_Games_FS_Atari_5200_CONST 5918
+#define DESIGNOBJ_Games_FS_Options_a5200_CONST 5919
+#define DESIGNOBJ_mnuGamesMonitorMode_a5200_CONST 5920
+#define DESIGNOBJ_mnuGamesRemote_atari5200_small_CONST 5921
+#define DESIGNOBJ_popGameOptions_a5200_CONST 5923
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"

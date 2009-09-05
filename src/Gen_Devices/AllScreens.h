@@ -8046,10 +8046,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiCarSetup : public PreformedCommand
+	class SCREEN_Game_Atari_5200 : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiCarSetup(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_Atari_5200(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "153" /* screen ID */
@@ -8059,10 +8059,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiCarSetup_DL : public PreformedCommand
+	class SCREEN_Game_Atari_5200_DL : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiCarSetup_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_Atari_5200_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "153" /* screen ID */
@@ -8072,10 +8072,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiCarSetup_DT : public PreformedCommand
+	class SCREEN_Game_Atari_5200_DT : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiCarSetup_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_Atari_5200_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "153" /* screen ID */
@@ -8085,10 +8085,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiCarSetup_Cat : public PreformedCommand
+	class SCREEN_Game_Atari_5200_Cat : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiCarSetup_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_Atari_5200_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "153" /* screen ID */
@@ -8098,10 +8098,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiMedia : public PreformedCommand
+	class SCREEN_Game_Atari_5200_Monitor_Mode : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiMedia(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_Atari_5200_Monitor_Mode(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "154" /* screen ID */
@@ -8111,10 +8111,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiMedia_DL : public PreformedCommand
+	class SCREEN_Game_Atari_5200_Monitor_Mode_DL : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiMedia_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_Atari_5200_Monitor_Mode_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "154" /* screen ID */
@@ -8124,10 +8124,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiMedia_DT : public PreformedCommand
+	class SCREEN_Game_Atari_5200_Monitor_Mode_DT : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiMedia_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_Atari_5200_Monitor_Mode_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "154" /* screen ID */
@@ -8137,10 +8137,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiMedia_Cat : public PreformedCommand
+	class SCREEN_Game_Atari_5200_Monitor_Mode_Cat : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiMedia_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_Atari_5200_Monitor_Mode_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "154" /* screen ID */
@@ -8150,10 +8150,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiComputing : public PreformedCommand
+	class SCREEN_Game_Atari_5200_FS : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiComputing(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_Atari_5200_FS(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "155" /* screen ID */
@@ -8163,10 +8163,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiComputing_DL : public PreformedCommand
+	class SCREEN_Game_Atari_5200_FS_DL : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiComputing_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_Atari_5200_FS_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "155" /* screen ID */
@@ -8176,10 +8176,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiComputing_DT : public PreformedCommand
+	class SCREEN_Game_Atari_5200_FS_DT : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiComputing_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_Atari_5200_FS_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "155" /* screen ID */
@@ -8189,10 +8189,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiComputing_Cat : public PreformedCommand
+	class SCREEN_Game_Atari_5200_FS_Cat : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiComputing_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_Atari_5200_FS_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "155" /* screen ID */
@@ -8202,10 +8202,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiRadio : public PreformedCommand
+	class SCREEN_Game_Atari_5200_FS_Options : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiRadio(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_Atari_5200_FS_Options(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "156" /* screen ID */
@@ -8215,10 +8215,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiRadio_DL : public PreformedCommand
+	class SCREEN_Game_Atari_5200_FS_Options_DL : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiRadio_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_Atari_5200_FS_Options_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "156" /* screen ID */
@@ -8228,10 +8228,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiRadio_DT : public PreformedCommand
+	class SCREEN_Game_Atari_5200_FS_Options_DT : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiRadio_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_Atari_5200_FS_Options_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "156" /* screen ID */
@@ -8241,10 +8241,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiRadio_Cat : public PreformedCommand
+	class SCREEN_Game_Atari_5200_FS_Options_Cat : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiRadio_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_Atari_5200_FS_Options_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "156" /* screen ID */
@@ -15354,10 +15354,10 @@ PK_DeviceData .... */, sOptions.c_str(), 224 /* PK_PnpQueue */, StringUtils::lto
 		virtual void SCREEN_popTelecom(long PK_Screen, string sLocation){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_popSecurity(long PK_Screen, string sLocation){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_popOthers(long PK_Screen){ GotoScreen(PK_Screen); }
-		virtual void SCREEN_AudiCarSetup(long PK_Screen){ GotoScreen(PK_Screen); }
-		virtual void SCREEN_AudiMedia(long PK_Screen){ GotoScreen(PK_Screen); }
-		virtual void SCREEN_AudiComputing(long PK_Screen){ GotoScreen(PK_Screen); }
-		virtual void SCREEN_AudiRadio(long PK_Screen){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_Game_Atari_5200(long PK_Screen){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_Game_Atari_5200_Monitor_Mode(long PK_Screen){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_Game_Atari_5200_FS(long PK_Screen){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_Game_Atari_5200_FS_Options(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_AudiTV(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_AudiCD(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_AudiStoredMedia(long PK_Screen){ GotoScreen(PK_Screen); }
@@ -16452,25 +16452,25 @@ PK_DeviceData .... */, sOptions.c_str(), 224 /* PK_PnpQueue */, StringUtils::lto
 				case 153:
 				{
 					ResetCallBacks();
-					SCREEN_AudiCarSetup(nPK_Screen);
+					SCREEN_Game_Atari_5200(nPK_Screen);
 					break;
 				}
 				case 154:
 				{
 					ResetCallBacks();
-					SCREEN_AudiMedia(nPK_Screen);
+					SCREEN_Game_Atari_5200_Monitor_Mode(nPK_Screen);
 					break;
 				}
 				case 155:
 				{
 					ResetCallBacks();
-					SCREEN_AudiComputing(nPK_Screen);
+					SCREEN_Game_Atari_5200_FS(nPK_Screen);
 					break;
 				}
 				case 156:
 				{
 					ResetCallBacks();
-					SCREEN_AudiRadio(nPK_Screen);
+					SCREEN_Game_Atari_5200_FS_Options(nPK_Screen);
 					break;
 				}
 				case 157:

@@ -151,10 +151,10 @@
 #define SCREEN_popTelecom_CONST 150
 #define SCREEN_popSecurity_CONST 151
 #define SCREEN_popOthers_CONST 152
-#define SCREEN_AudiCarSetup_CONST 153
-#define SCREEN_AudiMedia_CONST 154
-#define SCREEN_AudiComputing_CONST 155
-#define SCREEN_AudiRadio_CONST 156
+#define SCREEN_Game_Atari_5200_CONST 153
+#define SCREEN_Game_Atari_5200_Monitor_Mode_CONST 154
+#define SCREEN_Game_Atari_5200_FS_CONST 155
+#define SCREEN_Game_Atari_5200_FS_Options_CONST 156
 #define SCREEN_AudiTV_CONST 157
 #define SCREEN_AudiCD_CONST 158
 #define SCREEN_AudiStoredMedia_CONST 159
