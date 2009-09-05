@@ -1224,6 +1224,9 @@ void Game_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sC
 	  case MEDIATYPE_lmce_Game_a2600_CONST:
 	    StopMESS();
 	    break;
+	  case MEDIATYPE_lmce_Game_a5200_CONST:
+	    StopMESS();
+	    break;
 	  }
 }
 
