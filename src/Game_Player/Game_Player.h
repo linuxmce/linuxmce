@@ -76,9 +76,9 @@ public:
 
 protected:
 		string GetMessParametersFor(string sMediaURL);
-		bool UpdateA2600Config(string sMediaURL);
-		bool LaunchA2600(string sMediaURL);
-		bool StopA2600();
+		bool UpdateMESSConfig(string sMediaURL);
+		bool LaunchMESS(string sMediaURL);
+		bool StopMESS();
 		bool UpdateMAMEConfig(string sMediaURL);
 		bool LaunchMAME(string sMediaURL);
 		bool StopMAME();
@@ -88,8 +88,8 @@ protected:
 		void processKeyBoardInputRequest(int iXKeySym);
         	// This should be Window but if i put #include <X11/Xlib.h>  in this it will break the compilation.
         	bool locateMAMEWindow(long unsigned int window);
-
-
+		void ProcessPoundForMediaType(int iPK_MediaType);	// Key remapping for (*)
+		void ProcessAsteriskForMediaType(int iPK_MediaType);	// key remapping for (#), thanks a lot MESS.
 
 //<-dceag-const-b->
 public:

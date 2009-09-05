@@ -116,10 +116,10 @@ bool Game_Player::Register()
 }
 
 /**
- * UpdateA2600Config() - similar to the function just below, except.
+ * UpdateMESSConfig() - similar to the function just below, except.
  * tailored for Stella's configuration file.
  */
-bool Game_Player::UpdateA2600Config(string sMediaURL)
+bool Game_Player::UpdateMESSConfig(string sMediaURL)
 {
 	// Vars to replace inside the config file:
 	string s_MediaPath = FileUtils::BasePath(sMediaURL);			// for rompath
@@ -738,7 +738,7 @@ string Game_Player::GetMessParametersFor(string sMediaURL)
   return sParameters;
 }
 
-bool Game_Player::LaunchA2600(string sMediaURL)
+bool Game_Player::LaunchMESS(string sMediaURL)
 {
   size_t iROMNameSize = FileUtils::FilenameWithoutPath(sMediaURL).size();
   m_sROMName = FileUtils::FilenameWithoutPath(sMediaURL).substr(0,iROMNameSize-4);
@@ -751,7 +751,7 @@ bool Game_Player::LaunchA2600(string sMediaURL)
 	TOSTRING(COMMAND_Application_Exited_CONST) " " 
 	TOSTRING(COMMANDPARAMETER_Exit_Code_CONST) " ";
       
-      if (!UpdateA2600Config(sMediaURL)) 
+      if (!UpdateMESSConfig(sMediaURL)) 
 	{
 	  return false;
 	} // Make sure stella's configuration is correct. 
@@ -777,10 +777,10 @@ bool Game_Player::LaunchA2600(string sMediaURL)
 	  }
 	
 	return true; }
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::LaunchA2600 - failed to launch");
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::LaunchMESS - failed to launch");
     }
   else
-    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::LaunchA2600 - no app server");
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::LaunchMESS - no app server");
   return false;
   
 }
@@ -830,7 +830,7 @@ bool Game_Player::LaunchMAME(string sMediaURL)
 	
 }
 
-bool Game_Player::StopA2600() 
+bool Game_Player::StopMESS() 
 {
   DeviceData_Base *pDevice_App_Server = NULL;
   string sResponse;
@@ -1079,9 +1079,41 @@ void Game_Player::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string s
 		break;	
 	case BUTTON_Back_CONST:
 		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_Escape,m_iEventSerialNum++);
-		break;	
+		break;
+	case BUTTON_Asterisk_CONST:
+		ProcessAsteriskForMediaType(m_iPK_MediaType);
+		break;
+	case BUTTON_Pound_CONST:
+		ProcessPoundForMediaType(m_iPK_MediaType);
+		break;
 	}
 
+}
+
+void Game_Player::ProcessPoundForMediaType(int iPK_MediaType)
+{
+	switch (iPK_MediaType)
+	{
+		case MEDIATYPE_lmce_Game_a5200_CONST:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_Enter,m_iEventSerialNum++);
+			break;
+		default:
+			// Do we need a default?
+			break;
+	}
+}
+
+void Game_Player::ProcessAsteriskForMediaType(int iPK_MediaType)
+{
+	switch (iPK_MediaType)
+	{
+		case MEDIATYPE_lmce_Game_a5200_CONST:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_Add,m_iEventSerialNum++);
+			break;
+		default:
+			// Do we need a default?
+			break;
+	}
 }
 
 //<-dceag-c29-b->
@@ -1157,7 +1189,10 @@ void Game_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
 			LaunchMAME(sMediaURL);
 			break;
 		case MEDIATYPE_lmce_Game_a2600_CONST:
-			LaunchA2600(sMediaURL);
+			LaunchMESS(sMediaURL);
+			break;
+		case MEDIATYPE_lmce_Game_a5200_CONST:
+			LaunchMESS(sMediaURL);
 			break;
 		default:
 			LaunchMAME(sMediaURL);
@@ -1187,7 +1222,7 @@ void Game_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sC
 	    StopMAME();
 	    break;
 	  case MEDIATYPE_lmce_Game_a2600_CONST:
-	    StopA2600();
+	    StopMESS();
 	    break;
 	  }
 }
@@ -1380,6 +1415,11 @@ void Game_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,
 	    sPath = "/home/mamedata/shots/a2600";
 	    screenName = "/0000";
 	    break;
+	  case MEDIATYPE_lmce_Game_a5200_CONST:
+	    sPath = "/home/mamedata/shots/a5200";
+	    screenName = "/0000";
+	    break;
+
 	  }
 
 	string snapPath = sPath + m_sROMName + "/";
@@ -1602,8 +1642,16 @@ void Game_Player::CMD_0(string &sCMD_Result,Message *pMessage)
 {
 	cout << "Need to implement command #204 - 0" << endl;
 
-	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_0,m_iEventSerialNum++);
+	switch(m_iPK_MediaType)
+	{
+		case MEDIATYPE_lmce_Game_a5200_CONST:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_0,m_iEventSerialNum++);
+			break;
 
+		default:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_0,m_iEventSerialNum++);
+			break;
+	}
 }
 
 //<-dceag-c205-b->
@@ -1615,8 +1663,16 @@ void Game_Player::CMD_1(string &sCMD_Result,Message *pMessage)
 //<-dceag-c205-e->
 {
 	cout << "Need to implement command #205 - 1" << endl;
-	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_1,m_iEventSerialNum++);
 
+	switch(m_iPK_MediaType)
+	{
+		case MEDIATYPE_lmce_Game_a5200_CONST:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_1,m_iEventSerialNum++);
+			break;
+		default:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_1,m_iEventSerialNum++);
+			break;
+	}
 }
 
 //<-dceag-c206-b->
@@ -1628,8 +1684,16 @@ void Game_Player::CMD_2(string &sCMD_Result,Message *pMessage)
 //<-dceag-c206-e->
 {
 	cout << "Need to implement command #206 - 2" << endl;
-	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_2,m_iEventSerialNum++);
 
+	switch(m_iPK_MediaType)
+	{	
+		case MEDIATYPE_lmce_Game_a5200_CONST:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_2,m_iEventSerialNum++);
+			break;
+		default:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_2,m_iEventSerialNum++);
+			break;
+	}
 }
 
 //<-dceag-c207-b->
@@ -1641,7 +1705,15 @@ void Game_Player::CMD_3(string &sCMD_Result,Message *pMessage)
 //<-dceag-c207-e->
 {
 	cout << "Need to implement command #207 - 3" << endl;
-	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_3,m_iEventSerialNum++);
+
+	switch(m_iPK_MediaType)
+	{
+		case MEDIATYPE_lmce_Game_a5200_CONST:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_3,m_iEventSerialNum++);
+		default:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_3,m_iEventSerialNum++);
+			break;
+	}
 
 }
 
@@ -1654,8 +1726,16 @@ void Game_Player::CMD_4(string &sCMD_Result,Message *pMessage)
 //<-dceag-c208-e->
 {
 	cout << "Need to implement command #208 - 4" << endl;
-	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_4,m_iEventSerialNum++);
 
+	switch(m_iPK_MediaType)
+	{	
+		case MEDIATYPE_lmce_Game_a5200_CONST:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_4,m_iEventSerialNum++);
+			break;
+		default:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_4,m_iEventSerialNum++);
+			break;
+	}
 }
 
 //<-dceag-c209-b->
@@ -1667,7 +1747,16 @@ void Game_Player::CMD_5(string &sCMD_Result,Message *pMessage)
 //<-dceag-c209-e->
 {
 	cout << "Need to implement command #209 - 5" << endl;
-	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_5,m_iEventSerialNum++);
+	
+	switch(m_iPK_MediaType)
+	{
+		case MEDIATYPE_lmce_Game_a5200_CONST:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_5,m_iEventSerialNum++);
+			break;
+		default:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_5,m_iEventSerialNum++);
+			break;
+	}
 
 }
 
@@ -1680,8 +1769,16 @@ void Game_Player::CMD_6(string &sCMD_Result,Message *pMessage)
 //<-dceag-c210-e->
 {
 	cout << "Need to implement command #210 - 6" << endl;
-	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_6,m_iEventSerialNum++);
 
+	switch(m_iPK_MediaType)
+	{
+		case MEDIATYPE_lmce_Game_a5200_CONST:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_6,m_iEventSerialNum++);
+			break;
+		default:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_6,m_iEventSerialNum++);
+			break;
+	}
 }
 
 //<-dceag-c211-b->
@@ -1693,8 +1790,15 @@ void Game_Player::CMD_7(string &sCMD_Result,Message *pMessage)
 //<-dceag-c211-e->
 {
 	cout << "Need to implement command #211 - 7" << endl;
-	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_7,m_iEventSerialNum++);
 
+	switch(m_iPK_MediaType)
+	{
+		case MEDIATYPE_lmce_Game_a5200_CONST:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_7,m_iEventSerialNum++);
+		default:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_7,m_iEventSerialNum++);
+			break;
+	}
 }
 
 //<-dceag-c212-b->
@@ -1706,10 +1810,18 @@ void Game_Player::CMD_8(string &sCMD_Result,Message *pMessage)
 //<-dceag-c212-e->
 {
 	cout << "Need to implement command #212 - 8" << endl;
-	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_8,m_iEventSerialNum++);
 
+	switch(m_iPK_MediaType)
+	{	
+		case MEDIATYPE_lmce_Game_a5200_CONST:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_8,m_iEventSerialNum++);
+			break;
+		default:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_8,m_iEventSerialNum++);
+			break;
+
+	}
 }
-
 //<-dceag-c213-b->
 
 	/** @brief COMMAND: #213 - 9 */
@@ -1719,8 +1831,16 @@ void Game_Player::CMD_9(string &sCMD_Result,Message *pMessage)
 //<-dceag-c213-e->
 {
 	cout << "Need to implement command #213 - 9" << endl;
-	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_9,m_iEventSerialNum++);
 
+	switch(m_iPK_MediaType)
+	{
+		default:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_9,m_iEventSerialNum++);
+			break;
+		case MEDIATYPE_lmce_Game_a5200_CONST:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_9,m_iEventSerialNum++);
+			break;
+	}
 }
 
 //<-dceag-c240-b->
@@ -1917,6 +2037,9 @@ void Game_Player::CMD_Game_1P_Start(string &sCMD_Result,Message *pMessage)
 	    break;
 	  case MEDIATYPE_lmce_Game_a2600_CONST:
 	    iKey = XK_2;
+	    break;
+	  case MEDIATYPE_lmce_Game_a5200_CONST:
+	    iKey = XK_F3;
 	    break;
 	  }
 	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,iKey,m_iEventSerialNum++);

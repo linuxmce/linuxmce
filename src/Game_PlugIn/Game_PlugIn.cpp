@@ -379,6 +379,12 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_a2600_CONST;
 	}
 
+	if (mediaURL.find("/a5200") != string::npos )
+	{
+		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_a5200_CONST;
+	}
+
 	DCE::CMD_Play_Media CMD_Play_Media(m_dwPK_Device,
 						pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
 						pGameMediaStream->m_iPK_MediaType,
