@@ -1194,6 +1194,9 @@ void Game_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
 		case MEDIATYPE_lmce_Game_a5200_CONST:
 			LaunchMESS(sMediaURL);
 			break;
+		case MEDIATYPE_lmce_Game_a7800_CONST:
+			LaunchMESS(sMediaURL);
+			break;
 		default:
 			LaunchMAME(sMediaURL);
 			break;
@@ -1225,6 +1228,9 @@ void Game_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sC
 	    StopMESS();
 	    break;
 	  case MEDIATYPE_lmce_Game_a5200_CONST:
+	    StopMESS();
+	    break;
+	  case MEDIATYPE_lmce_Game_a7800_CONST:
 	    StopMESS();
 	    break;
 	  }
@@ -1420,6 +1426,10 @@ void Game_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,
 	    break;
 	  case MEDIATYPE_lmce_Game_a5200_CONST:
 	    sPath = "/home/mamedata/shots/a5200";
+	    screenName = "/0000";
+	    break;
+	  case MEDIATYPE_lmce_Game_a7800_CONST:
+	    sPath = "/home/mamedata/shots/a7800";
 	    screenName = "/0000";
 	    break;
 
@@ -2044,6 +2054,9 @@ void Game_Player::CMD_Game_1P_Start(string &sCMD_Result,Message *pMessage)
 	  case MEDIATYPE_lmce_Game_a5200_CONST:
 	    iKey = XK_F3;
 	    break;
+	  case MEDIATYPE_lmce_Game_a7800_CONST:
+	    iKey = XK_r;
+	    break;
 	  }
 	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,iKey,m_iEventSerialNum++);
 
@@ -2140,6 +2153,9 @@ void Game_Player::CMD_Game_Select(string &sCMD_Result,Message *pMessage)
       break;
     case MEDIATYPE_lmce_Game_a2600_CONST:
       iKey = XK_1;
+      break;
+    case MEDIATYPE_lmce_Game_a7800_CONST:
+      iKey = XK_s;
       break;
     }
 
