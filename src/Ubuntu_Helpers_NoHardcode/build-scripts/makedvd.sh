@@ -1,5 +1,5 @@
 #!/bin/bash
-# SourceIso contains the name of the ISO file, which MUST reside in the live directory
+# SourceIso contains the name of the ISO file, which MUST reside in the users home directory
 # BUILD_ROOT is a link to the base of the builder environement
 #
 # This procedure creates a live dir under the users homedir. This directory is recreated 
