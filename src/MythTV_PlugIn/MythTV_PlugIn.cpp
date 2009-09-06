@@ -58,7 +58,7 @@ static const string SCRIPT_RESTART_BACKEND = SCRIPT_DIR + "/Restart_MythBackend.
 static const string SCRIPT_RESTART_ALL_BACKENDS = SCRIPT_DIR + "/Restart_Backend_With_SchemaLock.sh";
 static const string SCRIPT_INITIAL_FILLDB =  SCRIPT_DIR + "/MythTvInitialFillDB.sh";
 static const string SCRIPT_FORCE_KILL =      SCRIPT_DIR + "/ForciblyKillProcess.sh";
-static const string SCRIPT_MYTHTV_SETUP =    SCRIPT_DIR + "/mythtv_setup.sh";
+static const string SCRIPT_MYTHTV_SETUP =    SCRIPT_DIR + "/mythtv_setup.pl";
 
 // For sorting channels
 static bool ChannelComparer(MythChannel *x, MythChannel *y)
