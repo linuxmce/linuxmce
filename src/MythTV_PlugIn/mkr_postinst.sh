@@ -23,4 +23,4 @@ RunSQL "$Q"
 /usr/pluto/bin/StorageDevices_Setup.sh
 
 #Run mythtv-setup.sh to make sure storage groups get added. -tschak
-/usr/pluto/bin/mythtv_setup.sh
+/usr/pluto/bin/mythtv_setup.pl
