@@ -152,7 +152,7 @@ fi
 echo "Setting up Global Static Directories..."
 for dir in $global_static_dirs; do
 	mkdir -p -m 0755 "$BaseDir/${dir/~/ }"
-	chmod 0755 "$BaseDir/${Dir/~/ }"
+	chmod 0755 "$BaseDir/${dir/~/ }"
 done
 
 echo "Setting up User Static Directories..."
