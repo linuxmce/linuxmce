@@ -47,7 +47,6 @@
 #define ATTRIBUTETYPE_Screen_saver_disabled_CONST 46
 #define ATTRIBUTETYPE_Manufacturer_CONST 47
 #define ATTRIBUTETYPE_Year_CONST 48
-#define ATTRIBUTETYPE_System_CONST 49
 
 #define ATTRIBUTETYPE_TABLE "AttributeType"
 #define ATTRIBUTETYPE_PK_ATTRIBUTETYPE_FIELD "PK_AttributeType"

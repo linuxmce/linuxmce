@@ -83,7 +83,6 @@ void Row_MediaSubType::Delete()
 	Row_MediaSubType *pRow = this; // Needed so we will have only 1 version of get_primary_fields_assign_from_row
 	
 	if (!is_deleted)
-	{
 		if (is_added)	
 		{	
 			vector<TableRow*>::iterator i;	
@@ -105,7 +104,6 @@ void Row_MediaSubType::Delete()
 			table->deleted_cachedRows[key] = this;
 			is_deleted = true;	
 		}	
-	}
 }
 
 void Row_MediaSubType::Reload()
