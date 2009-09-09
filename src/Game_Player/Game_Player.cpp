@@ -1099,7 +1099,7 @@ void Game_Player::ProcessPoundForMediaType(int iPK_MediaType)
 		case MEDIATYPE_lmce_Game_a5200_CONST:
 			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_Enter,m_iEventSerialNum++);
 			break;
-		case MEDIATYPE_lmce_coleco_CONST:
+		case MEDIATYPE_lmce_Game_coleco_CONST:
 			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_minus,m_iEventSerialNum++);
 			break;
 		default:
