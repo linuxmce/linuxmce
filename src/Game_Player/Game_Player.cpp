@@ -730,7 +730,8 @@ string Game_Player::GetMessParametersFor(string sMediaURL)
 
   if ((sFileName.find(".bin") != string::npos) || (sFileName.find(".a26") != string::npos) || 
 		  (sFileName.find(".a52") != string::npos) ||
-		  (sFileName.find(".a78") != string::npos))
+		  (sFileName.find(".a78") != string::npos) ||
+		  (sFileName.find(".col") != string::npos))
     {
       sPeripheralType = "-cartridge";
     }
