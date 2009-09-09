@@ -31,6 +31,7 @@
 #define MEDIATYPE_np_BluRay_CONST 31
 #define MEDIATYPE_lmce_Game_a5200_CONST 32
 #define MEDIATYPE_lmce_Game_a7800_CONST 33
+#define MEDIATYPE_lmce_Game_coleco_CONST 34
 
 #define MEDIATYPE_TABLE "MediaType"
 #define MEDIATYPE_PK_MEDIATYPE_FIELD "PK_MediaType"

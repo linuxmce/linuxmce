@@ -648,6 +648,13 @@ public:
 	virtual void CMD_Game_Option(string &sCMD_Result,Message *pMessage);
 
 
+	/** @brief COMMAND: #952 - Game Reset */
+	/** Game Reset */
+
+	virtual void CMD_Game_Reset() { string sCMD_Result; CMD_Game_Reset(sCMD_Result,NULL);};
+	virtual void CMD_Game_Reset(string &sCMD_Result,Message *pMessage);
+
+
 	/** @brief COMMAND: #982 - Set Game Options */
 	/** Set Options for the running Game System driver. */
 		/** @param #5 Value To Assign */

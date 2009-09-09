@@ -31,11 +31,10 @@ namespace UpdateMediaVars
 };
 //-----------------------------------------------------------------------------------------------------
 
-RomFileHandler::RomFileHandler(string sDirectory, string sFile) :
+RomFileHandler::RomFileHandler(string sDirectory, string sFile, int iRomType) :
 	GenericFileHandler(sDirectory, sFile)
 {
-
-
+	m_iRomType = iRomType;
 }
 
 //-----------------------------------------------------------------------------------------------------
@@ -84,7 +83,7 @@ bool RomFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 	return true;
 }
 //-----------------------------------------------------------------------------------------------------
-void RomFileHandler::getRomData(string sRomName)
+void RomFileHandler::getMAMEData(string sRomName)
 {
 	string sOutput, sStdErr;
 	char csRomName[100];
@@ -99,24 +98,126 @@ void RomFileHandler::getRomData(string sRomName)
 		m_sROMYear = vectOutput_Rows[1];
 		m_sROMManufacturer = vectOutput_Rows[2];
 		m_sROMGenre = vectOutput_Rows[3];
+		m_sROMSystem = "Arcade"; // FIXME: deal with this?
 	}
+
+}
+//-----------------------------------------------------------------------------------------------------
+void RomFileHandler::getCoweringData(string sRomName)
+{
+	m_sROMTitle = "NOMATCH";
+	m_sROMYear = "NOMATCH";
+	m_sROMManufacturer = "NOMATCH";
+	m_sROMGenre = "NOMATCH";
+	m_sROMSystem = "NOMATCH";
+
+	// Cowering format ROM data is of the format: A Game Title (Year) (Manufacturer) [c] [c] [c]
+	// where [c] are ancilliary codes not currently parsed. 
+	
+	// Assume that the first parenthesis ends the title.
+	int iTitleEnd = sRomName.find("(");
+
+	if (iTitleEnd == string::npos) 
+	{
+	  //cout << "Rom does not appear to have any cowering codes." << endl;
+	  m_sROMTitle = sRomName;
+	} 
+	else 
+	{
+	    m_sROMTitle = sRomName.substr(0,iTitleEnd);
+	}
+
+
+	// Assume that (1 or (2 is the start of a year, with the ) being the end delimiter.
+	int iYearStart = sRomName.find("(19");
+	int iYearEnd;
+
+	if (iYearStart == string::npos) 
+	{
+		iYearStart = sRomName.find("(20");
+	}
+
+	if (iYearStart == string::npos)
+	{
+	  //cout << "No Year was found." << endl;
+	} else 
+	{
+		iYearEnd = sRomName.find(")");
+		m_sROMYear = sRomName.substr(iYearStart+1,iYearEnd-iYearStart-1);
+		//cout << "Year parsed to: " << sYear << endl;
+	}
+
+	// Attempt to find manufacturer, and weed out memory size specifications.
+	// FIXME: Are there roms that are Berzerk (Bally Midway).rom ???
+	if (iYearEnd != string::npos) 
+	{
+		int iMemorySize = sRomName.find("k)",iYearEnd); // FIXME: Manufacturers that end in k?
+		if (iMemorySize != string::npos) 
+		{
+		  //cout << "Possible memory size detection!" << endl;
+			string sD = sRomName.substr(iMemorySize-1,1);
+			//cout << "Character before the k: " << sD << endl;
+			if (sD == "0" || sD == "1" || sD == "2" || sD == "3" || sD == "4" || sD == "5" ||  
+					sD == "6" || sD == "7" || sD == "8" || sD == "9") // Yeah yeah... 
+			{
+			  //cout << "Memory Size detected, ignoring." << endl;
+			} 
+			else
+			{
+				// Not a memory size, let's fall back.
+			}
+		}
+		else
+		{
+			int iManufacturerStart = sRomName.find("(",iYearEnd);
+			if (iManufacturerStart != string::npos) 
+			{
+				int iManufacturerEnd = sRomName.find(")",iManufacturerStart);
+				m_sROMManufacturer = sRomName.substr(iManufacturerStart+1,iManufacturerEnd-iManufacturerStart-1);
+				//cout << "Manufacturer Parsed to: " << sManufacturer << endl;
+			}
+		}
+	}
+
+}
+//-----------------------------------------------------------------------------------------------------
+void RomFileHandler::getSystem(string sFilename)
+{
+	m_sROMSystem = "NOMATCH";
+
+	if (sFilename.find("/a2600") != string::npos ) 
+		m_sROMSystem = "Atari 2600";
+	if (sFilename.find("/a5200") != string::npos )
+		m_sROMSystem = "Atari 5200";
+	if (sFilename.find("/a7800") != string::npos )
+		m_sROMSystem = "Atari 7800";
 
 }
 //-----------------------------------------------------------------------------------------------------
 void RomFileHandler::GetRomInfo(string sFilename, map<int,string>& mapAttributes, list<pair<char *, size_t> >& listPictures)
 {
 
-  string sROMTitle, sROMYear, sROMManufacturer, sROMGenre;
+  string sSnapFilename, sROMSystem, sROMTitle, sROMYear, sROMManufacturer, sROMGenre;
   string sROMName = FileUtils::FilenameWithoutPath(sFilename,false);
 
   // Use MAMEROM to grab text attributes.
 
-  getRomData(sROMName);
+  switch (m_iRomType)
+  {
+  	case ROMTYPE_DEFAULT:
+		getMAMEData(sROMName);
+		break;
+	case ROMTYPE_COWERING:
+		getCoweringData(sROMName);
+		getSystem(sFilename); // The system is part of the path. 
+		break;
+  }
 
   sROMTitle = m_sROMTitle;
   sROMYear =  m_sROMYear;
   sROMManufacturer = m_sROMManufacturer;
   sROMGenre = m_sROMGenre;
+  sROMSystem = m_sROMSystem;
 
   if (sROMTitle != "NOMATCH")
     mapAttributes[ATTRIBUTETYPE_Title_CONST] = sROMTitle;
@@ -130,14 +231,33 @@ void RomFileHandler::GetRomInfo(string sFilename, map<int,string>& mapAttributes
   if (sROMGenre != "NOMATCH")
     mapAttributes[ATTRIBUTETYPE_Genre_CONST] = sROMGenre;
 
+  if (sROMSystem != "NOMATCH")
+	  mapAttributes[ATTRIBUTETYPE_System_CONST] = sROMSystem;
+
   // Grab Cover art.
 
-  string sSnapfilename = "/home/snap/" + sROMName + ".jpeg";
-  LoggerWrapper::GetInstance()->Write(LV_STATUS, "# RomFileHandler: Adding ROM Picture: %s",sSnapfilename.c_str());
+  if (m_iRomType == ROMTYPE_DEFAULT)
+  {
+  	sSnapFilename = "/home/snap/" + sROMName + ".jpeg";
+  }
+
+  if (m_iRomType == ROMTYPE_COWERING)
+  {
+  	if (sFilename.find("/a2600") == string::npos)
+		sSnapFilename = "/home/snap/a2600/" + sROMName + ".jpg";
+
+	if (sFilename.find("/a5200") == string::npos)
+		sSnapFilename = "/home/snap/a5200/" + sROMName + ".jpg";
+
+	if (sFilename.find("/a7800") == string::npos)
+		sSnapFilename = "/home/snap/a7800/" + sROMName + ".jpg";
+  }
+
+  LoggerWrapper::GetInstance()->Write(LV_STATUS, "# RomFileHandler: Adding ROM Picture: %s",sSnapFilename.c_str());
 
   size_t nSnapSize = 0;
   char *pSnapData;
-  pSnapData = FileUtils::ReadFileIntoBuffer(sSnapfilename,nSnapSize);
+  pSnapData = FileUtils::ReadFileIntoBuffer(sSnapFilename,nSnapSize);
   if (nSnapSize > 0)
     listPictures.push_back(make_pair(pSnapData,nSnapSize));
 

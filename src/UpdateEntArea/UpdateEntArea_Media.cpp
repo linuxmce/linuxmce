@@ -189,7 +189,7 @@ void UpdateEntArea::AddDefaultMediaScenarios(Row_EntertainArea *pRow_EntertainAr
 			"JOIN Device ON FK_Device=PK_Device "
 			"JOIN DeviceTemplate_MediaType ON Device.FK_DeviceTemplate=DeviceTemplate_MediaType.FK_DeviceTemplate "
 			"JOIN MediaType ON FK_MediaType=PK_MediaType "
-			"WHERE FK_EntertainArea=" + StringUtils::itos(pRow_EntertainArea->PK_EntertainArea_get()) + " AND FK_MediaType NOT IN (1,2,3,4,5,6,7,20,21,22,23,24,27,28,29,30) ORDER BY PK_Device";
+			"WHERE FK_EntertainArea=" + StringUtils::itos(pRow_EntertainArea->PK_EntertainArea_get()) + " AND FK_MediaType NOT IN (1,2,3,4,5,6,7,20,21,22,23,24,27,28,29,30,32,33) ORDER BY PK_Device";
 
 		iOrder=1;
 		PlutoSqlResult result_set;
@@ -209,7 +209,7 @@ void UpdateEntArea::AddDefaultMediaScenarios(Row_EntertainArea *pRow_EntertainAr
 				}
 
 				string sDesc = row[2] + string("\n") + pRow_Device->Description_get();
-				pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Media_Wiz_NP_Sources_CONST,sDesc,0,atoi(row[0]),atoi(row[1]),NULL,iOrder+20);
+				pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Media_Wiz_NP_Sources_CONST,sDesc,0,atoi(row[0]),atoi(row[1]),NULL,iOrder+30);
 				if( pCommandGroup )
 					pCommandGroup->AddCommand(m_dwPK_Device_MediaPlugIn,COMMAND_MH_Play_Media_CONST,iOrder++,3,
 						COMMANDPARAMETER_PK_MediaType_CONST,row[1],

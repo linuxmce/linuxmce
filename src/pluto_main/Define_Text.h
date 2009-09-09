@@ -1156,6 +1156,7 @@
 #define TEXT_Go_Back_CONST 2099
 #define TEXT_Game_Start_CONST 2100
 #define TEXT_Game_Pause_CONST 2101
+#define TEXT_Player_1_CONST 2102
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"

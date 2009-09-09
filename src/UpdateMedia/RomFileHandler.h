@@ -6,12 +6,15 @@
 #include "GAMEROM.h"
 #include <map>
 using namespace std;
+//-- Rom Type Defines ---------------------------------------------------------------------------------
+#define ROMTYPE_DEFAULT 0
+#define ROMTYPE_COWERING 1
 //-----------------------------------------------------------------------------------------------------
 
 class RomFileHandler : public GenericFileHandler
 {
 public:
-	RomFileHandler(string sDirectory, string sFile);
+	RomFileHandler(string sDirectory, string sFile, int iRomType);
 	~RomFileHandler(void);
 
 	bool LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes, 
@@ -22,11 +25,14 @@ public:
 	string GetFileAttribute();
 	string GetFileSourceForDB();
 
-	string m_sROMTitle, m_sROMManufacturer, m_sROMYear, m_sROMGenre;
+	int m_iRomType;
+	string m_sROMSystem, m_sROMTitle, m_sROMManufacturer, m_sROMYear, m_sROMGenre;
 
 private:
 	void GetRomInfo(string sFilename, map<int,string>& mapAttributes, list<pair<char *, size_t> >& listPictures);
-	void getRomData(string sRomName);
+	void getMAMEData(string sRomName);
+	void getCoweringData(string sRomName);
+	void getSystem(string sFilename);
 	string FileWithAttributes(PlutoMediaAttributes *pPlutoMediaAttributes, bool bCreateId3File);
 	bool IsSupported();
 	void GetTagInfo(string sFilename, map<int,string>& mapAttributes, list<pair<char *, size_t> >& listPictures);

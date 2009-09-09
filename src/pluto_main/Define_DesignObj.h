@@ -2552,6 +2552,11 @@
 #define DESIGNOBJ_mnuGamesMonitorMode_a5200_CONST 5920
 #define DESIGNOBJ_mnuGamesRemote_atari5200_small_CONST 5921
 #define DESIGNOBJ_popGameOptions_a5200_CONST 5923
+#define DESIGNOBJ_butP1KeypadSelect_CONST 5924
+#define DESIGNOBJ_butP1KeypadSelectOn_CONST 5925
+#define DESIGNOBJ_butP2KeypadSelect_CONST 5926
+#define DESIGNOBJ_butP2KeypadSelectOn_CONST 5927
+#define DESIGNOBJ_butSeeA5200Playlist_CONST 5928
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"

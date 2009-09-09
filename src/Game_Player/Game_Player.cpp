@@ -728,7 +728,9 @@ string Game_Player::GetMessParametersFor(string sMediaURL)
   
   string sMachineType = vect_Path[vect_Path.size()-1]; // Get the last element.
 
-  if ((sFileName.find(".bin") != string::npos) || (sFileName.find(".a26") != string::npos))
+  if ((sFileName.find(".bin") != string::npos) || (sFileName.find(".a26") != string::npos) || 
+		  (sFileName.find(".a52") != string::npos) ||
+		  (sFileName.find(".a78") != string::npos))
     {
       sPeripheralType = "-cartridge";
     }
@@ -1097,6 +1099,9 @@ void Game_Player::ProcessPoundForMediaType(int iPK_MediaType)
 		case MEDIATYPE_lmce_Game_a5200_CONST:
 			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_Enter,m_iEventSerialNum++);
 			break;
+		case MEDIATYPE_lmce_coleco_CONST:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_minus,m_iEventSerialNum++);
+			break;
 		default:
 			// Do we need a default?
 			break;
@@ -1109,6 +1114,9 @@ void Game_Player::ProcessAsteriskForMediaType(int iPK_MediaType)
 	{
 		case MEDIATYPE_lmce_Game_a5200_CONST:
 			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_Add,m_iEventSerialNum++);
+			break;
+		case MEDIATYPE_lmce_Game_coleco_CONST:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_equal,m_iEventSerialNum++);
 			break;
 		default:
 			// Do we need a default?
@@ -1197,6 +1205,9 @@ void Game_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
 		case MEDIATYPE_lmce_Game_a7800_CONST:
 			LaunchMESS(sMediaURL);
 			break;
+		case MEDIATYPE_lmce_Game_coleco_CONST:
+			LaunchMESS(sMediaURL);
+			break;
 		default:
 			LaunchMAME(sMediaURL);
 			break;
@@ -1231,6 +1242,9 @@ void Game_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sC
 	    StopMESS();
 	    break;
 	  case MEDIATYPE_lmce_Game_a7800_CONST:
+	    StopMESS();
+	    break;
+	  case MEDIATYPE_lmce_Game_coleco_CONST:
 	    StopMESS();
 	    break;
 	  }
@@ -1432,7 +1446,10 @@ void Game_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,
 	    sPath = "/home/mamedata/shots/a7800";
 	    screenName = "/0000";
 	    break;
-
+	  case MEDIATYPE_lmce_Game_coleco_CONST:
+	    sPath = "/home/mamedata/shots/coleco";
+	    screenName = "/0000";
+	    break;
 	  }
 
 	string snapPath = sPath + m_sROMName + "/";
@@ -1533,6 +1550,7 @@ void Game_Player::CMD_Guide(string &sCMD_Result,Message *pMessage)
 //<-dceag-c126-e->
 {
 	cout << "Need to implement command #126 - Guide" << endl;
+	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_Tab,m_iEventSerialNum++);
 }
 
 //<-dceag-c139-b->
@@ -1660,7 +1678,6 @@ void Game_Player::CMD_0(string &sCMD_Result,Message *pMessage)
 		case MEDIATYPE_lmce_Game_a5200_CONST:
 			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_0,m_iEventSerialNum++);
 			break;
-
 		default:
 			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_0,m_iEventSerialNum++);
 			break;
@@ -2052,10 +2069,13 @@ void Game_Player::CMD_Game_1P_Start(string &sCMD_Result,Message *pMessage)
 	    iKey = XK_2;
 	    break;
 	  case MEDIATYPE_lmce_Game_a5200_CONST:
-	    iKey = XK_F3;
+	    iKey = XK_F1;
 	    break;
 	  case MEDIATYPE_lmce_Game_a7800_CONST:
 	    iKey = XK_r;
+	    break;
+	  case MEDIATYPE_lmce_Game_coleco_CONST:
+	    iKey = XK_1;
 	    break;
 	  }
 	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,iKey,m_iEventSerialNum++);
@@ -2208,4 +2228,31 @@ void Game_Player::CMD_Set_Game_Options(string sValue_To_Assign,string &sCMD_Resu
 void Game_Player::CMD_Get_Game_Options(string sPath,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
 //<-dceag-c983-e->
 {
+}
+//<-dceag-c952-b->
+
+	/** @brief COMMAND: #952 - Game Reset */
+	/** Game Reset */
+
+void Game_Player::CMD_Game_Reset(string &sCMD_Result,Message *pMessage)
+//<-dceag-c952-e->
+{
+	int iKey;
+
+	switch (m_iPK_MediaType)
+	{
+		case MEDIATYPE_lmce_Game_CONST:
+			break;
+		case MEDIATYPE_lmce_Game_a2600_CONST:
+			iKey = XK_1;
+			break;
+		case MEDIATYPE_lmce_Game_a5200_CONST:
+			iKey = XK_F3;
+			break;
+		case MEDIATYPE_lmce_Game_a7800_CONST:
+			iKey = XK_R;
+			break;
+	}
+
+	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,iKey,m_iEventSerialNum++);
 }

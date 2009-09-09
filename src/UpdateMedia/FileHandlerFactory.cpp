@@ -22,7 +22,11 @@ FileHandlerFactory::~FileHandlerFactory(void)
 	switch(GetFileHandlerType(sDirectory, sFile))
 	{
 		case fhtRom:
-			pFileHandler = new RomFileHandler(sDirectory, sFile);
+			if (sDirectory.find("MAME") == string::npos)
+				pFileHandler = new RomFileHandler(sDirectory, sFile, ROMTYPE_COWERING);
+			else
+				// Assume that this should be handled by the MAME/Default handler.
+				pFileHandler = new RomFileHandler(sDirectory, sFile, ROMTYPE_DEFAULT);
 			break;
 
 		case fhtVdr:
@@ -63,8 +67,24 @@ FileHandlerFactory::~FileHandlerFactory(void)
 //-----------------------------------------------------------------------------------------------------
 /*static*/ bool FileHandlerFactory::IsValidRomFile(string sDirectory, string sFile)
 {
+	// With the advent of MESS support, the entire ROM code needed revamping.
+	// It's not perfect. But if you have a better way to hand off to the RomFileHandler,
+	// then please, help and do a patch. -tschak
+	
+	// The Point here is merely to do a series of quick checks, and if ANY of them pass, then
+	// set a file handler type, which will be passed further up the factory line and more
+	// detailed checks will be done, to pass parameters to the FileHandler to do the final work.
+
 	string sExtension = FileUtils::FindExtension(sFile);
-	return sExtension == "zip";
+	bool bHasRomExtension = (sExtension == "zip") ||
+			   (sExtension == "bin") || 
+			   (sExtension == "a26") ||
+			   (sExtension == "a52") ||
+			   (sExtension == "a78") ||
+			   (sExtension == "col") ||
+			   (sExtension == "int");
+
+	return bHasRomExtension;	// do we do more tests here?
 }
 //-----------------------------------------------------------------------------------------------------
 /*static*/ bool FileHandlerFactory::IsValidVDRFile(string sDirectory, string sFile)
