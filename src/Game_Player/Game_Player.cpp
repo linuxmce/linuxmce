@@ -731,7 +731,9 @@ string Game_Player::GetMessParametersFor(string sMediaURL)
   if ((sFileName.find(".bin") != string::npos) || (sFileName.find(".a26") != string::npos) || 
 		  (sFileName.find(".a52") != string::npos) ||
 		  (sFileName.find(".a78") != string::npos) ||
-		  (sFileName.find(".col") != string::npos))
+		  (sFileName.find(".col") != string::npos) ||
+		  (sFileName.find(".int") != string::npos) ||
+		  (sFileName.find(".itv") != string::npos))
     {
       sPeripheralType = "-cartridge";
     }
@@ -1209,6 +1211,9 @@ void Game_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
 		case MEDIATYPE_lmce_Game_coleco_CONST:
 			LaunchMESS(sMediaURL);
 			break;
+		case MEDIATYPE_lmce_Game_intv_CONST:
+			LaunchMESS(sMediaURL);
+			break;
 		default:
 			LaunchMAME(sMediaURL);
 			break;
@@ -1246,6 +1251,9 @@ void Game_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sC
 	    StopMESS();
 	    break;
 	  case MEDIATYPE_lmce_Game_coleco_CONST:
+	    StopMESS();
+	    break;
+	  case MEDIATYPE_lmce_Game_intv_CONST:
 	    StopMESS();
 	    break;
 	  }
