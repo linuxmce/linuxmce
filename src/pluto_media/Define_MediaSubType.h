@@ -12,6 +12,7 @@
 #define MEDIASUBTYPE_Learning_CONST 9
 #define MEDIASUBTYPE_Audio_Books_CONST 10
 #define MEDIASUBTYPE_Arcade_CONST 11
+#define MEDIASUBTYPE_Console_CONST 12
 
 #define MEDIASUBTYPE_TABLE "MediaSubType"
 #define MEDIASUBTYPE_PK_MEDIASUBTYPE_FIELD "PK_MediaSubType"
