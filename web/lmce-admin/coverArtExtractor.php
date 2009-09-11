@@ -2,6 +2,15 @@
 require('include/config/config.inc.php');
 require('include/utils.inc.php');
 require_once("include/amazonTools.inc.php");
+/**
+  * This function will take an existing Amazon request and change it so that it will be usable 
+  * with the new authentication.
+  *
+  * @param string $secret_key - your Amazon AWS secret key
+  * @param string $request - your existing request URI
+  * @param string $access_key - your Amazon AWS access key
+  * @param string $version - (optional) the version of the service you are using
+  */
 
 /* @var $mediadbADO ADOConnection */
 /* @var $rs ADORecordSet */
@@ -41,7 +50,8 @@ echo $request;
 writeFile($GLOBALS['WebExecLogFile'],date('d-m-Y H:i:s')."\t".$request."\n",'a+');
 
 // Get the response from Amazon
-$xml = file_get_contents($request);
+$newRequest = getRequest('pO56I5EnilQ+e5FBFk862q+LXPkeyXvmimMGyuDe', $request, 'AKIAJXTAVQJC3NKAQM4A');
+$xml = file_get_contents($newRequest);
 
 // Parse the results
 $Result = xmlparser($xml);

@@ -22,6 +22,46 @@ $getdata_error='';
 
 // returns associative array or false on error. If there's an error, the global $parser_error will
 // contain the error details
+function getRequest($secret_key, $request, $access_key = false, $version = '2009-03-01') {
+    // Get a nice array of elements to work with
+    $uri_elements = parse_url($request);
+ 
+    // Grab our request elements
+    $request = $uri_elements['query'];
+ 
+    // Throw them into an array
+    parse_str($request, $parameters);
+ 
+    // Add the new required paramters
+    $parameters['Timestamp'] = gmdate("Y-m-d\TH:i:s\Z");
+    $parameters['Version'] = $version;
+    if (strlen($access_key) > 0) {
+        $parameters['AWSAccessKeyId'] = $access_key;
+    }   
+ 
+    // The new authentication requirements need the keys to be sorted
+    ksort($parameters);
+ 
+    // Create our new request
+    foreach ($parameters as $parameter => $value) {
+        // We need to be sure we properly encode the value of our parameter
+        $parameter = str_replace("%7E", "~", rawurlencode($parameter));
+        $value = str_replace("%7E", "~", rawurlencode($value));
+        $request_array[] = $parameter . '=' . $value;
+    }   
+ 
+    // Put our & symbol at the beginning of each of our request variables and put it in a string
+    $new_request = implode('&', $request_array);
+ 
+    // Create our signature string
+    $signature_string = "GET\n{$uri_elements['host']}\n{$uri_elements['path']}\n{$new_request}";
+ 
+    // Create our signature using hash_hmac
+    $signature = urlencode(base64_encode(hash_hmac('sha256', $signature_string, $secret_key, true)));
+ 
+    // Return our new request
+    return "http://{$uri_elements['host']}{$uri_elements['path']}?{$new_request}&Signature={$signature}";
+}
 function XmlParser($string)
 {
     global $parser_error;
