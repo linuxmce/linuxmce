@@ -33,6 +33,10 @@
 #define MEDIATYPE_lmce_Game_a7800_CONST 33
 #define MEDIATYPE_lmce_Game_coleco_CONST 34
 #define MEDIATYPE_lmce_Game_intv_CONST 35
+#define MEDIATYPE_lmce_Game_famicom_CONST 36
+#define MEDIATYPE_lmce_Game_nes_CONST 37
+#define MEDIATYPE_lmce_Game_sms_CONST 38
+#define MEDIATYPE_lmce_Game_sg1000_CONST 39
 
 #define MEDIATYPE_TABLE "MediaType"
 #define MEDIATYPE_PK_MEDIATYPE_FIELD "PK_MediaType"

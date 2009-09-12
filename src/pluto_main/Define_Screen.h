@@ -155,10 +155,10 @@
 #define SCREEN_Game_Atari_5200_Monitor_Mode_CONST 154
 #define SCREEN_Game_Atari_5200_FS_CONST 155
 #define SCREEN_Game_Atari_5200_FS_Options_CONST 156
-#define SCREEN_AudiTV_CONST 157
-#define SCREEN_AudiCD_CONST 158
-#define SCREEN_AudiStoredMedia_CONST 159
-#define SCREEN_AudiInternet_CONST 160
+#define SCREEN_Game_SG1000_SMS_NES_Famicom_CONST 157
+#define SCREEN_Game_SG1000_SMS_NES_Famicom_Monitor_Mode_CONST 158
+#define SCREEN_Game_SG1000_SMS_NES_Famicom_FS_CONST 159
+#define SCREEN_Game_SG1000_SMS_NES_Famicom_FS_Options_CONST 160
 #define SCREEN_AudiEmail_CONST 161
 #define SCREEN_AudiAgenda_CONST 162
 #define SCREEN_AudiOther_CONST 163
@@ -173,7 +173,7 @@
 #define SCREEN_AudiFullScreen_CONST 172
 #define SCREEN_AudiVideoRemote_CONST 173
 #define SCREEN_AudiAudioRemote_CONST 174
-#define SCREEN_VideoWizard_CONST 175
+#define SCREEN_CleanScreen_CONST 175
 #define SCREEN_DialogCannotPlayMedia_CONST 176
 #define SCREEN_DialogRippingInProgress_CONST 178
 #define SCREEN_DialogCheckingDrive_CONST 179
