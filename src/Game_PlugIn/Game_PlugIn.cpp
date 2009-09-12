@@ -403,6 +403,30 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_intv_CONST;
 	}
 
+	if (mediaURL.find("/sg1000") != string::npos )
+	{
+		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_sg1000_CONST;
+	}
+
+	if (mediaURL.find("/sms") != string::npos)
+	{
+		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_sms_CONST;
+	}
+
+	if (mediaURL.find("/nes") != string::npos)
+	{
+		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_nes_CONST;
+	}
+
+	if (mediaURL.find("/famicom") != string::npos)
+	{
+		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_famicom_CONST;
+	}
+
 	DCE::CMD_Play_Media CMD_Play_Media(m_dwPK_Device,
 						pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
 						pGameMediaStream->m_iPK_MediaType,
@@ -499,9 +523,10 @@ GameMediaStream *Game_PlugIn::ConvertToGameMediaStream(MediaStream *pMediaStream
 
 void Game_PlugIn::AlarmCallback(int id, void* param) 
 {
-	if (id==CHECK_FOR_NEW_ROMS) {
-		Game_PlugIn::CheckForNewROMs();	
-	}
+	//no longer appropriate.
+	//if (id==CHECK_FOR_NEW_ROMS) {
+	//	Game_PlugIn::CheckForNewROMs();	
+	//}
 }
 
 void Game_PlugIn::CheckForNewROMs() 
@@ -618,6 +643,3 @@ bool Game_PlugIn::MenuOnScreen( class Socket *pSocket, class Message *pMessage, 
 
 	return false;
 }
-
-
-

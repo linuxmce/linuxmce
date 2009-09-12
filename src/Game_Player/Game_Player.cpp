@@ -733,7 +733,10 @@ string Game_Player::GetMessParametersFor(string sMediaURL)
 		  (sFileName.find(".a78") != string::npos) ||
 		  (sFileName.find(".col") != string::npos) ||
 		  (sFileName.find(".int") != string::npos) ||
-		  (sFileName.find(".itv") != string::npos))
+		  (sFileName.find(".itv") != string::npos) ||
+		  (sFileName.find(".sg") != string::npos) ||
+		  (sFileName.find(".sms") != string::npos))
+
     {
       sPeripheralType = "-cartridge";
     }
@@ -1200,18 +1203,14 @@ void Game_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
 			LaunchMAME(sMediaURL);
 			break;
 		case MEDIATYPE_lmce_Game_a2600_CONST:
-			LaunchMESS(sMediaURL);
-			break;
 		case MEDIATYPE_lmce_Game_a5200_CONST:
-			LaunchMESS(sMediaURL);
-			break;
 		case MEDIATYPE_lmce_Game_a7800_CONST:
-			LaunchMESS(sMediaURL);
-			break;
 		case MEDIATYPE_lmce_Game_coleco_CONST:
-			LaunchMESS(sMediaURL);
-			break;
 		case MEDIATYPE_lmce_Game_intv_CONST:
+		case MEDIATYPE_lmce_Game_sg1000_CONST:
+		case MEDIATYPE_lmce_Game_sms_CONST:
+		case MEDIATYPE_lmce_Game_nes_CONST:
+		case MEDIATYPE_lmce_Game_famicom_CONST:
 			LaunchMESS(sMediaURL);
 			break;
 		default:
@@ -1242,18 +1241,14 @@ void Game_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sC
 	    StopMAME();
 	    break;
 	  case MEDIATYPE_lmce_Game_a2600_CONST:
-	    StopMESS();
-	    break;
 	  case MEDIATYPE_lmce_Game_a5200_CONST:
-	    StopMESS();
-	    break;
 	  case MEDIATYPE_lmce_Game_a7800_CONST:
-	    StopMESS();
-	    break;
 	  case MEDIATYPE_lmce_Game_coleco_CONST:
-	    StopMESS();
-	    break;
 	  case MEDIATYPE_lmce_Game_intv_CONST:
+	  case MEDIATYPE_lmce_Game_sg1000_CONST:
+	  case MEDIATYPE_lmce_Game_sms_CONST:
+	  case MEDIATYPE_lmce_Game_famicom_CONST:
+	  case MEDIATYPE_lmce_Game_nes_CONST:
 	    StopMESS();
 	    break;
 	  }
@@ -1457,6 +1452,26 @@ void Game_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,
 	    break;
 	  case MEDIATYPE_lmce_Game_coleco_CONST:
 	    sPath = "/home/mamedata/shots/coleco";
+	    screenName = "/0000";
+	    break;
+	  case MEDIATYPE_lmce_Game_intv_CONST:
+	    sPath = "/home/mamedata/shots/intv";
+	    screenName = "/0000";
+	    break;
+	  case MEDIATYPE_lmce_Game_sg1000_CONST:
+	    sPath = "/home/mamedata/shots/sg1000";
+	    screenName = "/0000";
+	    break;
+	  case MEDIATYPE_lmce_Game_sms_CONST:
+	    sPath = "/home/mamedata/shots/sms";
+	    screenName = "/0000";
+	    break;
+	  case MEDIATYPE_lmce_Game_famicom_CONST:
+	    sPath = "/home/mamedata/shots/famicom";
+	    screenName = "/0000";
+	    break;
+	  case MEDIATYPE_lmce_Game_nes_CONST:
+	    sPath = "/home/mamedata/shots/nes";
 	    screenName = "/0000";
 	    break;
 	  }

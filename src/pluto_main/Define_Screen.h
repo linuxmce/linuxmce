@@ -172,8 +172,8 @@
 #define SCREEN_AudiTelecom_CONST 171
 #define SCREEN_AudiFullScreen_CONST 172
 #define SCREEN_AudiVideoRemote_CONST 173
-#define SCREEN_AudiAudioRemote_CONST 174
-#define SCREEN_CleanScreen_CONST 175
+#define SCREEN_CleanScreen_CONST 174
+#define SCREEN_VideoWizard_CONST 175
 #define SCREEN_DialogCannotPlayMedia_CONST 176
 #define SCREEN_DialogRippingInProgress_CONST 178
 #define SCREEN_DialogCheckingDrive_CONST 179
