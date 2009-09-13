@@ -18,6 +18,11 @@ Q="UPDATE settings SET data=10 where value='AutoExpireExtraSpace'"
 UseDB "mythconverg"
 RunSQL "$Q"
 
+#Alter mythconverg.settings to force Media Directors to stream recordings from the backend on the core to avoid errors with non-system drive storage groups
+Q="UPDATE settings SET data=1 where value='AlwaysStreamFiles'"
+UseDB "mythconverg"
+RunSQL "$Q"
+
 #Re-run SetupUsers_Homes PlutoStorageDevices to make sure that the mythtv user gets added to each user's group
 /usr/pluto/bin/SetupUsers_Homes.sh
 /usr/pluto/bin/StorageDevices_Setup.sh
