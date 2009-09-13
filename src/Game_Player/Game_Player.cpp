@@ -746,6 +746,14 @@ string Game_Player::GetMessParametersFor(string sMediaURL)
   return sParameters;
 }
 
+string Game_Player::CreateWindowIDString(long unsigned int window)
+{
+	// FIXME: Provide some sanity checking later.
+	stringstream ss;
+	ss << window;
+	return ss.str();
+}
+
 bool Game_Player::LaunchMESS(string sMediaURL)
 {
   size_t iROMNameSize = FileUtils::FilenameWithoutPath(sMediaURL).size();
@@ -781,7 +789,7 @@ bool Game_Player::LaunchMESS(string sMediaURL)
 	else
 	  {
 	    LoggerWrapper::GetInstance()->Write(LV_STATUS,"MESS window found: Window ID %d",m_iMAMEWindowId);
-	    
+	    m_sMAMEWindowId = CreateWindowIDString(m_iMAMEWindowId); 
 	  }
 	
 	return true; }
@@ -826,7 +834,7 @@ bool Game_Player::LaunchMAME(string sMediaURL)
 	else
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"MAME window found: Window ID %d",m_iMAMEWindowId);
-		
+	 	m_sMAMEWindowId = CreateWindowIDString(m_iMAMEWindowId);	
 	}
 
 		 	return true; }
@@ -835,7 +843,7 @@ bool Game_Player::LaunchMAME(string sMediaURL)
 	else
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::LaunchMAME - no app server");
 	return false;
-	
+
 }
 
 bool Game_Player::StopMESS() 
@@ -1430,58 +1438,71 @@ void Game_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,
 
 	PLUTO_SAFETY_LOCK(mm,m_GameMutex);
 
-	string sPath, screenName;
+	string sPath, screenName; 
 
-	switch(m_iPK_MediaType)
-	  {
-	  case MEDIATYPE_lmce_Game_CONST:
-	    sPath = "/home/mamedata/shots/";
-	    screenName = m_sROMName + "/0000";
-	    break;
-	  case MEDIATYPE_lmce_Game_a2600_CONST:
-	    sPath = "/home/mamedata/shots/a2600";
-	    screenName = "/0000";
-	    break;
-	  case MEDIATYPE_lmce_Game_a5200_CONST:
-	    sPath = "/home/mamedata/shots/a5200";
-	    screenName = "/0000";
-	    break;
-	  case MEDIATYPE_lmce_Game_a7800_CONST:
-	    sPath = "/home/mamedata/shots/a7800";
-	    screenName = "/0000";
-	    break;
-	  case MEDIATYPE_lmce_Game_coleco_CONST:
-	    sPath = "/home/mamedata/shots/coleco";
-	    screenName = "/0000";
-	    break;
-	  case MEDIATYPE_lmce_Game_intv_CONST:
-	    sPath = "/home/mamedata/shots/intv";
-	    screenName = "/0000";
-	    break;
-	  case MEDIATYPE_lmce_Game_sg1000_CONST:
-	    sPath = "/home/mamedata/shots/sg1000";
-	    screenName = "/0000";
-	    break;
-	  case MEDIATYPE_lmce_Game_sms_CONST:
-	    sPath = "/home/mamedata/shots/sms";
-	    screenName = "/0000";
-	    break;
-	  case MEDIATYPE_lmce_Game_famicom_CONST:
-	    sPath = "/home/mamedata/shots/famicom";
-	    screenName = "/0000";
-	    break;
-	  case MEDIATYPE_lmce_Game_nes_CONST:
-	    sPath = "/home/mamedata/shots/nes";
-	    screenName = "/0000";
-	    break;
-	  }
-
-	string snapPath = sPath + m_sROMName + "/";
-	FileUtils::DelFile( sPath + screenName + ".png");
-	FileUtils::DelFile( sPath + screenName + ".jpg");
-
-	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_F12,m_iEventSerialNum++); // hehe, hack++
+	if (m_bOSDIsVisible)
+	{
+		// Use alternate code to display OSD
+		sPath = "/tmp/";
+		screenName = "OSD";
 	
+		string cmd = "import -window " + m_sMAMEWindowId + " "+sPath+screenName+".png";
+		system(cmd.c_str());
+	}
+	else
+	{
+	
+		switch(m_iPK_MediaType)
+		  {
+		  case MEDIATYPE_lmce_Game_CONST:
+		    sPath = "/home/mamedata/shots/";
+		    screenName = m_sROMName + "/0000";
+		    break;
+		  case MEDIATYPE_lmce_Game_a2600_CONST:
+		    sPath = "/home/mamedata/shots/a2600";
+		    screenName = "/0000";
+		    break;
+		  case MEDIATYPE_lmce_Game_a5200_CONST:
+		    sPath = "/home/mamedata/shots/a5200";
+		    screenName = "/0000";
+		    break;
+		  case MEDIATYPE_lmce_Game_a7800_CONST:
+		    sPath = "/home/mamedata/shots/a7800";
+		    screenName = "/0000";
+		    break;
+		  case MEDIATYPE_lmce_Game_coleco_CONST:
+		    sPath = "/home/mamedata/shots/coleco";
+		    screenName = "/0000";
+		    break;
+		  case MEDIATYPE_lmce_Game_intv_CONST:
+		    sPath = "/home/mamedata/shots/intv";
+		    screenName = "/0000";
+		    break;
+		  case MEDIATYPE_lmce_Game_sg1000_CONST:
+		    sPath = "/home/mamedata/shots/sg1000";
+		    screenName = "/0000";
+		    break;
+		  case MEDIATYPE_lmce_Game_sms_CONST:
+		    sPath = "/home/mamedata/shots/sms";
+		    screenName = "/0000";
+		    break;
+		  case MEDIATYPE_lmce_Game_famicom_CONST:
+		    sPath = "/home/mamedata/shots/famicom";
+		    screenName = "/0000";
+		    break;
+		  case MEDIATYPE_lmce_Game_nes_CONST:
+		    sPath = "/home/mamedata/shots/nes";
+		    screenName = "/0000";
+		    break;
+		  }
+	
+		string snapPath = sPath + m_sROMName + "/";
+		FileUtils::DelFile( sPath + screenName + ".png");
+		FileUtils::DelFile( sPath + screenName + ".jpg");
+	
+		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_F12,m_iEventSerialNum++); // hehe, hack++
+	}
+
 	Sleep(50);
 	string s_OutputString = "convert -sample 800x800 " + sPath + screenName + ".png "+sPath+screenName+".jpg";	
 	system(s_OutputString.c_str());
@@ -1492,7 +1513,7 @@ void Game_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,
 
 	FileUtils::DelFile(sPath+screenName+".png");
 	FileUtils::DelFile(sPath+screenName+".jpg");
-
+	
 	return;	
 
 }
@@ -1519,12 +1540,19 @@ void Game_Player::CMD_Goto_Media_Menu(int iStreamID,int iMenuType,string &sCMD_R
 
 	switch(iMenuType) {
 		case SHOW_GAME_VIEW:
+			m_bOSDIsVisible = false;
 			EVENT_Menu_Onscreen(iStreamID,true);
 			break;
 		case SHOW_REMOTE:
+			m_bOSDIsVisible = false;
 			EVENT_Menu_Onscreen(iStreamID,false);
 			break;
+		case SHOW_OSD:
+			m_bOSDIsVisible = true;
+			EVENT_Menu_Onscreen(iStreamID,true);
+			break;
 		default:
+			m_bOSDIsVisible = false;
 			EVENT_Menu_Onscreen(iStreamID,false);
 			break;
 		}

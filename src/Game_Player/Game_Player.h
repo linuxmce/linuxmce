@@ -32,7 +32,7 @@
 
 #define SHOW_REMOTE 0
 #define SHOW_GAME_VIEW 1
-
+#define SHOW_OSD 2
 
 #include "DCE/PlainClientSocket.h"
 #include "X11/Xlib.h"
@@ -57,12 +57,14 @@ public:
 private:
 		pluto_pthread_mutex_t m_GameMutex;
 		unsigned long m_iMAMEWindowId;
+		string m_sMAMEWindowId;
 		DeviceData_Base *m_pDevice_Game_Plugin;
 		DeviceData_Base *m_pDevice_App_Server;
 		Display *m_pDisplay;
 		class AlarmManager *m_pAlarmManager;
 		bool checkWindowName(long unsigned int window, string windowName);
 		bool m_bMAMEIsRunning;
+		bool m_bOSDIsVisible; // toggled when OSD is requested so we use alternate frame grabber.
 		int m_iEventSerialNum; // X event Serial #, incremented each event. 
 
 		// Private methods
@@ -88,6 +90,7 @@ protected:
 		void processKeyBoardInputRequest(int iXKeySym);
         	// This should be Window but if i put #include <X11/Xlib.h>  in this it will break the compilation.
         	bool locateMAMEWindow(long unsigned int window);
+		string CreateWindowIDString(long unsigned int window); // used by alternate OSD grabber
 		void ProcessPoundForMediaType(int iPK_MediaType);	// Key remapping for (*)
 		void ProcessAsteriskForMediaType(int iPK_MediaType);	// key remapping for (#), thanks a lot MESS.
 

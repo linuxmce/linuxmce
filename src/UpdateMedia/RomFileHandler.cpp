@@ -191,6 +191,18 @@ void RomFileHandler::getSystem(string sFilename)
 		m_sROMSystem = "Atari 5200";
 	if (sFilename.find("/a7800") != string::npos )
 		m_sROMSystem = "Atari 7800";
+	if (sFilename.find("/coleco") != string::npos )
+		m_sROMSystem = "ColecoVision";
+	if (sFilename.find("/intv") != string::npos )
+		m_sROMSystem = "Intellivision";
+	if (sFilename.find("/sg1000") != string::npos )
+		m_sROMSystem = "Sega SG-1000";
+	if (sFilename.find("/sms") != string::npos )
+		m_sROMSystem = "Sega Master System";
+	if (sFilename.find("/nes") != string::npos )
+		m_sROMSystem = "Nintendo Entertainment System";
+	if (sFilename.find("/famicom") != string::npos )
+		m_sROMSystem = "Nintendo Famicom";
 
 }
 //-----------------------------------------------------------------------------------------------------
@@ -243,14 +255,33 @@ void RomFileHandler::GetRomInfo(string sFilename, map<int,string>& mapAttributes
 
   if (m_iRomType == ROMTYPE_COWERING)
   {
-  	if (sFilename.find("/a2600") == string::npos)
+  	if (sFilename.find("/a2600") != string::npos)
 		sSnapFilename = "/home/snap/a2600/" + sROMName + ".jpg";
 
-	if (sFilename.find("/a5200") == string::npos)
+	if (sFilename.find("/a5200") != string::npos)
 		sSnapFilename = "/home/snap/a5200/" + sROMName + ".jpg";
 
-	if (sFilename.find("/a7800") == string::npos)
+	if (sFilename.find("/a7800") != string::npos)
 		sSnapFilename = "/home/snap/a7800/" + sROMName + ".jpg";
+
+	if (sFilename.find("/intv") != string::npos)
+		sSnapFilename = "/home/snap/intv/" + sROMName + ".jpg";
+	
+	if (sFilename.find("/coleco") != string::npos)
+		sSnapFilename = "/home/snap/coleco/" + sROMName + ".jpg";
+
+	if (sFilename.find("/sg1000") != string::npos)
+		sSnapFilename = "/home/snap/sg1000/" + sROMName + ".jpg";
+
+	if (sFilename.find("/sms") != string::npos)
+	       sSnapFilename = "/home/snap/sms/" + sROMName + ".jpg";
+
+	if (sFilename.find("/nes") != string::npos)
+		sSnapFilename = "/home/snap/nes/" + sROMName + ".jpg";
+
+	if (sFilename.find("/famicom") != string::npos)
+		sSnapFilename = "/home/snap/famicom/" + sROMName + ".jpg";
+
   }
 
   LoggerWrapper::GetInstance()->Write(LV_STATUS, "# RomFileHandler: Adding ROM Picture: %s",sSnapFilename.c_str());
