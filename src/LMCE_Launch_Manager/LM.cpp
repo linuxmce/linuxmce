@@ -192,7 +192,7 @@ void LM::initialize_Connections()
 		mdID = m_sDeviceID;
 	}
 
-	if (m_sDeviceID!="")
+	if (mdID!="")
 	{
 		string localOrbiterID = m_dbPlutoDatabase.quickQuery("SELECT PK_Device FROM Device LEFT JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE FK_Device_ControlledVia=" + mdID + " AND FK_DeviceCategory IN (2, 3, 5)");
 		m_sOrbiterID = localOrbiterID;
