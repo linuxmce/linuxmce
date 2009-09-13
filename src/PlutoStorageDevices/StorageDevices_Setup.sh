@@ -51,10 +51,8 @@ if ! mountpoint /mnt/upnp ;then
 	fi
 fi
 
-if [ -f /usr/pluto/bin/storagegroups_sync.sh ] ;then
-	# Call MythTV Setup to alter storage groups.
-	/usr/pluto/bin/storagegroups_sync.sh
-fi
+# Call MythTV Setup to alter storage groups. 
+/usr/pluto/bin/mythtv_setup.pl
 
 ## Call this script on the other machines too
 if [[ $TrigerCascade == "true" ]] ;then
