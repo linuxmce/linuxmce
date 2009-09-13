@@ -122,7 +122,7 @@ ExtNetmask=
 Gateway=
 DNS=
 NetIfConf=0
-NCards=$(ip addr | grep -cF 'link/ether')
+NCards=$(ip addr | grep "^[0-9]*:" | grep -v "^[0-9]*: lo" | grep -v "^[0-9]*: pan" | grep -c ".")
 
 Q="SELECT IK_DeviceData
 FROM Device_DeviceData
