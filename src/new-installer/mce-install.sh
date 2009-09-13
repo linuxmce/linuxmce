@@ -45,6 +45,30 @@ then
 		cp ./mce_wizard_data-single_nic.sh /tmp/mce_wizard_data.sh
 		echo "Using $extif for single nic install"
 		sed --in-place -e "s,\({extif}\),$extif,g" /tmp/mce_wizard_data.sh
+
+                # set c_netExtIP and friends , as this is used in Configure_Network_Options (i.e. before Network_Setup...)
+                extIP=$(ip addr | grep "$extif" | grep -m 1 'inet ' | awk '{print $2}' | cut -d/ -f1)
+                sed --in-place -e "s,\({extip}\),$extIP,g" /tmp/mce_wizard_data.sh
+
+                # Set use external DHCP and run own dhcp based on extifs current setting
+                ExtUsesDhcp=$(grep "iface $extif " /etc/network/interfaces | grep -cF 'dhcp')
+                RunDHCP=0
+                if [[ $ExtUsesDhcp == 0 ]]
+                then
+                        echo "$extif does not use DHCP, setting ExtUseDhcp=0 and RunDHCPServer=1 and detecting current network settings"
+                        RunDHCP=1
+
+                        ExtGateway=$(grep -A 10 "^iface $extif" /etc/network/interfaces | grep '^\s*gateway' -m 1 | grep -o  '[0-9.]*')
+                        ExtMask=$(grep -A 10 "^iface $extif" /etc/network/interfaces | grep '^\s*netmask' -m 1 | grep -o '[0-9.]*')
+                        ExtDNS=$(grep 'nameserver' /etc/resolv.conf | grep -o '[0-9.]*' -m 1)
+		fi
+                
+		sed --in-place -e "s,\({extMask}\),$ExtMask,g" /tmp/mce_wizard_data.sh
+		sed --in-place -e "s,\({extGW}\),$ExtGateway,g" /tmp/mce_wizard_data.sh
+		sed --in-place -e "s,\({extDNS}\),$ExtDNS,g" /tmp/mce_wizard_data.sh
+
+		sed --in-place -e "s,\({extUseDhcp}\),$ExtUsesDhcp,g" /tmp/mce_wizard_data.sh
+		sed --in-place -e "s,\({runDhcp}\),$RunDHCP,g" /tmp/mce_wizard_data.sh
 	fi
 fi
 
