@@ -381,7 +381,7 @@ function Install_DCERouter {
 	apt-get -y -f install pluto-sample-media
 	apt-get -y -f install video-wizard-videos
 #	apt-get -y -f install pluto-mysql-wrapper
-	apt-get -y -f install pluto-default-tftpboot
+#	apt-get -y -f install pluto-default-tftpboot
 
 	StatsMessage "Installing LinuxMCE Base Software"
 	apt-get -y -f install pluto-dcerouter || ExitInstaller "Failed to install and configure the base software"
