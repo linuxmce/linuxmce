@@ -160,6 +160,7 @@ function createCoreInitScript
 
 	cat >/etc/init.d/core <<"EOF"
 #!/bin/sh
+exit 0
 
 case "$1" in
 	start)
