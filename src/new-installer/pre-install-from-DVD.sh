@@ -4,7 +4,9 @@ source pre-install-common.sh
 
 
 # PACKAGES_DIR=/media/kubuntu-8.10/var/www
-
+AddAptRetries
+InstallAptCacherNg
+ConfigureApt
 
 InstallNeededPackages
 
