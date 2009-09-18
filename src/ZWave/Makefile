@@ -1,13 +1,13 @@
 #<-dceag-mh-b->
 GENDEV=../Gen_Devices
 
-SNR_CPPFLAGS ?= <-mkr_t_compile_defines->
+SNR_CPPFLAGS ?= 
 
 ROOT = ..
-CXX = g++
-CXXFLAGS = -Wall -fPIC -ggdb3
-CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE $(SNR_CPPFLAGS)
-LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
+
+CXXFLAGS += -fPIC
+CPPFLAGS += -I$(ROOT) -I$(ROOT)/DCE $(SNR_CPPFLAGS)
+LDFLAGS += $(SNR_LDFLAGS) -L$(ROOT)/lib
 BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
 MYNAME = ZWave
