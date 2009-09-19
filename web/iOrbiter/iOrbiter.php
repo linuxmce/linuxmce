@@ -1,4 +1,4 @@
- <?php
+<?php
 /*
 	Copyright 2008 - Peer Oliver Schmidt
 	GPLv2 Licensed
@@ -19,7 +19,7 @@
 		$currentUser = $_COOKIE["currentUser"]; 
 	} else {
 		$currentUser = getMyValue($link,"SELECT PK_Users FROM Users ORDER BY PK_Users Limit 1;");	
-		setcookie("currentUser","" . $currentUSer);		
+		setcookie("currentUser","" . $currentUser);		
 	}
 	if (isset($_COOKIE["currentRoom"])) {	
 		$currentRoom = $_COOKIE["currentRoom"]; 
