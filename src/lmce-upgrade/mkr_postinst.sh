@@ -10,7 +10,8 @@ WHERE (p2.FK_DeviceCategory=7 OR p2.FK_DeviceCategory=8) AND p.FK_Device_Control
 UseDB "pluto_main"
 moons=$(RunSQL "$Q")
 for moon in $moons; do
-	chroot /usr/pluto/diskless/$moon apt-get update
+	# Even if we encounter errors during apt-get update (due to bad connections etc, we carry on)
+	chroot /usr/pluto/diskless/$moon apt-get update || /bin/true
 	if ping moon$moon -c 1 >/dev/null ; then
 		# the moon is up and running, let's update it using the ssh
 		rsh moon$moon apt-get dist-upgrade -y		
