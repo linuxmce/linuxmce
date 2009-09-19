@@ -27,7 +27,7 @@
 		print "<li>$filePath</li>";
 		// commStart($server, $port, $deviceIDFrom)
 		$socket = commStart("dcerouter",3450,$possyDeviceFromID);
-		// myMessageSend($socket,$deviceFromID,$deviceToID,$messageType,$messageID,$parameter1ID,$parameter1Content,$parameter2ID,$parameter2Content);		
+		// myMessageSend($socket,$deviceFromID,$deviceToID (10 == media plugin),$messageType,$messageID,$parameter1ID,$parameter1Content,$parameter2ID,$parameter2Content);		
 		myMessageSend($socket,$possyDeviceFromID,10,1,43,13,'"' . $filePath . '"', 45, $currentEntertainArea);
 		commEnd($socket);
 	}	
