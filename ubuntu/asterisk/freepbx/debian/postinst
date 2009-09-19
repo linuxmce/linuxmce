@@ -58,4 +58,5 @@ if [[ "$1" == configure ]]; then
 	touch /etc/asterisk/{{sip,iax,zapata,queues}_additional,{sip,iax}_registrations}.conf
 	chown -R www-data: /etc/asterisk/{{sip,iax,zapata,queues}_additional,{sip,iax}_registrations}.conf
 	chown -R www-data: /var/lib/asterisk/mohmp3
+	chown -R www-data: /var/www/admin
 fi
