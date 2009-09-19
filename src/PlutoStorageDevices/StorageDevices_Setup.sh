@@ -52,7 +52,9 @@ if ! mountpoint /mnt/upnp ;then
 fi
 
 # Call MythTV Setup to alter storage groups. 
-/usr/pluto/bin/mythtv_setup.pl
+if [ -x /usr/pluto/bin/mythtv_setup.pl ] ; then
+	/usr/pluto/bin/mythtv_setup.pl
+fi
 
 ## Call this script on the other machines too
 if [[ $TrigerCascade == "true" ]] ;then
