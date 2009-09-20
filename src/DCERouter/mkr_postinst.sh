@@ -115,18 +115,18 @@ if [[ -n "$PrevVersion" ]]; then
 fi
 
 #<-mkr_b_ubuntu_b->
-File="/etc/event.d/media-center-startup"
-Content="
-start on runlevel 2
-
-stop on shutdown
-stop on runlevel 3
-stop on runlevel 4
-stop on runlevel 5
-
-script
-/usr/pluto/bin/startup-script.sh
-end script
-"
-echo "${Content}" > ${File} || :
+#File="/etc/event.d/media-center-startup"
+#Content="
+#start on runlevel 2
+#
+#stop on shutdown
+#stop on runlevel 3
+#stop on runlevel 4
+#stop on runlevel 5
+#
+#script
+#/usr/pluto/bin/startup-script.sh
+#end script
+#"
+#echo "${Content}" > ${File} || :
 #<-mkr_b_ubuntu_e->
