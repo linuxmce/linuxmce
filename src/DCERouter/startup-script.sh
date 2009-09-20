@@ -118,8 +118,8 @@ StartDaemon  "Start Voicemail Monitor" "/usr/pluto/bin/VoiceMailMonitor.sh" "Voi
 StartService "Creating Firewire 2 Video4Linux Pipes" "/usr/pluto/bin/Firewire2Video4Linux.sh"
 StartService "Configuring Pluto Storage Devices" "/usr/pluto/bin/StorageDevices_Setup.sh"
 /etc/init.d/samba start
-StartService "Starting UPNP Server" "/usr/pluto/bin/StorageDevices_UPNPServer.sh" "&"
-StartService "Samba Server Detection" "/usr/pluto/bin/StorageDevices_SambaRadar.sh"
+# StartService "Starting UPNP Server" "/usr/pluto/bin/StorageDevices_UPNPServer.sh" "&"
+# StartService "Samba Server Detection" "/usr/pluto/bin/StorageDevices_SambaRadar.sh"
 StartService "Detecting Timezone" "/usr/pluto/bin/Timezone_Detect.sh" "&"
 StartService "Status Radar" "/usr/pluto/bin/StorageDevices_StatusRadar.sh"
 StartService "Samba Radar" "/usr/pluto/bin/StorageDevices_SambaRadar.sh"
