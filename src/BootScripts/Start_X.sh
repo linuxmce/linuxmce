@@ -1,6 +1,12 @@
 #!/bin/bash
 . /usr/pluto/bin/pluto.func
 . /usr/pluto/bin/Utils.sh
+. /etc/pluto.conf
+
+if [ "$AutostartMedia" -ne "1" ] ; then
+	# We don't want to start X, if we don't need the media director
+	exit 0
+fi
 
 function assureXorgSane()
 {
