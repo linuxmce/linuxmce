@@ -582,17 +582,17 @@ function RemoveOfflineSource {
 
 function MangleStartupFiles {
 
-	if [[ "$c_startupType" == "1" ]] ;then
-		# Make sure non of the other display manager starts
-		[ -f /etc/init.d/gdm ] && mv /etc/init.d/gdm /etc/init.d/gdm.saved
-		[ -f /etc/init.d/kdm ] && mv /etc/init.d/kdm /etc/init.d/kdm.saved
-		echo '#!/bin/bash
-	if [[ "$1" == start ]]; then
-		/usr/pluto/bin/Startup_Core-Hybrid.sh
-	fi
-	' > /etc/init.d/kdm
-	chmod +x /etc/init.d/kdm
-	mv /etc/rc2.d/*kdm /etc/rc2.d/S99kdm
+#	if [[ "$c_startupType" == "1" ]] ;then
+#		# Make sure non of the other display manager starts
+#		[ -f /etc/init.d/gdm ] && mv /etc/init.d/gdm /etc/init.d/gdm.saved
+#		[ -f /etc/init.d/kdm ] && mv /etc/init.d/kdm /etc/init.d/kdm.saved
+#		echo '#!/bin/bash
+#	if [[ "$1" == start ]]; then
+#		/usr/pluto/bin/Startup_Core-Hybrid.sh
+#	fi
+#	' > /etc/init.d/kdm
+#	chmod +x /etc/init.d/kdm
+#	mv /etc/rc2.d/*kdm /etc/rc2.d/S99kdm
 		
 #	elif [[ "$c_startuptype" == "2" ]] ;then
 #		echo "
@@ -607,20 +607,20 @@ function MangleStartupFiles {
 #/usr/share/mce-launcher/scripts/mce-launcher-core.sh
 #end script
 #" > /etc/event.d/pluto
-	fi
+#	fi
 
-	echo "
-start on runlevel 2
-
-stop on shutdown
-stop on runlevel 3
-stop on runlevel 4
-stop on runlevel 5
-
-script
-screen -d -m -S DhcpdPlugin /usr/pluto/bin/Dhcpd-Plugin.sh
-end script
-" > /etc/event.d/pluto-dhcpd-plugin
+#	echo "
+#start on runlevel 2
+#
+#stop on shutdown
+#stop on runlevel 3
+#stop on runlevel 4
+#stop on runlevel 5
+#
+#script
+#screen -d -m -S DhcpdPlugin /usr/pluto/bin/Dhcpd-Plugin.sh
+#end script
+#" > /etc/event.d/pluto-dhcpd-plugin
 
 }
 

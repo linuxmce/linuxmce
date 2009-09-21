@@ -1,217 +1,6 @@
 #!/bin/bash
 
 
-function createStartdevicesScript
-{
-
-	cat >/usr/pluto/bin/startDevices.sh <<"EOF"
-#!/bin/sh
-
-
-BASEDIR=/usr/pluto/bin
-DeviceTemplate_MeDi=28
-
-source $BASEDIR/SQL_Ops.sh
-
-
-DEVICES=$*
-
-
-for DEVICE in $DEVICES
-do
-
-
-	QUERY="SELECT ImplementsDCE, IsPlugin, Disabled, IF(PK_DeviceTemplate=${DeviceTemplate_MeDi},1,0) AS IsMeDi, REPLACE(DeviceTemplate.Description,' ','_') AS Description, CommandLine FROM Device JOIN DeviceTemplate ON Device.FK_DeviceTemplate=DeviceTemplate.PK_DeviceTemplate WHERE PK_Device=${DEVICE}"
-
-	RESULT=$(RunSQL "$QUERY")
-	for ROW in $RESULT
-	do
-		IMPLEMENTSDCE=$(Field 1 "$ROW")
-		ISPLUGIN=$(Field 2 "$ROW")
-		DISABLED=$(Field 3 "$ROW")
-		ISMEDI=$(Field 4 "$ROW")
-		DESCRIPTION=$(Field 5 "$ROW")
-		COMMANDLINE=$(Field 6 "$ROW")
-
-#		echo $RESULT, $IMPLEMENTSDCE $ISPLUGIN $DISABLED $ISMEDI $DESCRIPTION \"$COMMANDLINE\"
-
-		if [ "$ISMEDI" != "0" ]
-		then
-			echo "Device $DEVICE ($DESCRIPTION) is a Media Director"
-			continue
-		fi
-
-
-
-		if [ "$IMPLEMENTSDCE" = "0" ]
-		then
-
-			echo "Device $DEVICE ($DESCRIPTION) no DCE, going after the children"
-
-			CHILDREN=""
-			QUERY="SELECT PK_Device FROM Device WHERE FK_Device_ControlledVia=$DEVICE"
-			RESULT=$(RunSQL "$QUERY")
-			for ROW in $RESULT
-			do
-				CHILD=$(Field 1 "$ROW")
-				CHILDREN="$CHILDREN $CHILD"
-			done
-
-
-			if [ "$CHILDREN" ]
-			then
-
-				$0 $CHILDREN
-			else
-				echo "Device $DEVICE ($DESCRIPTION) has no children"
-			fi
-
-		else
-
-			if [ "$ISPLUGIN" = "0" ]
-			then
-
-				if [ "$DISABLED" = "0" ]
-				then
-
-					if [ -z "$COMMANDLINE" ]
-					then
-						COMMANDLINE=$DESCRIPTION
-					fi
-
-					if [ -x "$BASEDIR/${COMMANDLINE}" ]
-					then
-
-#						echo "/usr/bin/screen -d -m -S ${DESCRIPTION}-${DEVICE} $BASEDIR/Spawn_Device.sh ${DEVICE} ${DCERouter} ${COMMANDLINE}"
-						/usr/bin/screen -d -m -S ${DESCRIPTION}-${DEVICE} $BASEDIR/Spawn_Device.sh ${DEVICE} ${DCERouter} ${COMMANDLINE}
-						echo "Device $DEVICE ($DESCRIPTION) started  ${COMMANDLINE}"
-
-					else
-						echo "Device $DEVICE ($DESCRIPTION) unable to start ${COMMANDLINE}"
-					fi
-
-
-
-				else
-					echo "Device $DEVICE ($DESCRIPTION) is disabled"
-				fi
-
-
-			else
-				echo "Device $DEVICE ($DESCRIPTION) is a plugin"
-			fi
-
-		fi
-
-	done
-
-done
-
-EOF
-	chmod +x /usr/pluto/bin/startDevices.sh
-
-}
-
-
-
-function createStartcoreScript
-{
-
-#	cat >/usr/pluto/bin/startCore.sh <<"EOF"
-#	#!/bin/sh
-#	exit 0
-#EOF
-#	chmod +x /usr/pluto/bin/startCore.sh
-	
-	cat >/usr/pluto/bin/startCore.sh <<"EOF"
-#!/bin/sh
-
-BASEDIR=/usr/pluto/bin
-DeviceTemplate_Core=7
-
-source $BASEDIR/SQL_Ops.sh
-
-$BASEDIR/Config_Device_Changes.sh
-$BASEDIR/Start_OrbiterGen.sh
-$BASEDIR/UpdateMediaDaemonControl.sh -enable
-
-$BASEDIR/Start_DCERouter.sh
-
-$BASEDIR/checkforRaids.sh
-$BASEDIR/UpdateAvailableSerialPorts.sh
-
-QUERY="SELECT PK_Device FROM Device JOIN DeviceTemplate ON Device.FK_DeviceTemplate=DeviceTemplate.PK_DeviceTemplate WHERE PK_DeviceTemplate=${DeviceTemplate_Core}"
-RESULT=$(RunSQL "$QUERY")
-for ROW in $RESULT
-do
-	CoreDev=$(Field 1 "$ROW")
-	$BASEDIR/startDevices.sh $CoreDev
-done
-
-EOF
-	chmod +x /usr/pluto/bin/startCore.sh
-
-}
-
-
-
-function createCoreInitScript
-{
-
-	cat >/etc/init.d/core <<"EOF"
-#!/bin/sh
-exit 0
-
-case "$1" in
-	start)
-		/usr/pluto/bin/startCore.sh
-		;;
-	stop)
-
-		/usr/pluto/bin/StopCoreServices.sh
-		;;
-
-	*)
-		echo "Usage: /etc/init.d/core {start|stop}"
-		exit 1
-		;;
-esac
-
-exit 0
-EOF
-	chmod +x /etc/init.d/core
-
-}
-
-
-
-function createLaunchmanagerInitScript
-{
-
-	cat >/etc/init.d/launch-manager <<"EOF"
-#!/bin/sh
-if [ "$1" = "start" ]
-then
-	/usr/pluto/bin/Startup_Core-Hybrid.sh
-fi
-
-EOF
-	chmod +x /etc/init.d/launch-manager
-
-}
-
-
-
-function restoreKdmInitScript
-{
-
-	yes 'n' | mv -iv /etc/init.d/kdm /etc/init.d/launch-manager
-	yes 'n' | cp -iv /etc/init.d/kdm.saved /etc/init.d/kdm
-
-}
-
-
-
 function setupRunlevel3
 {
 
@@ -325,9 +114,9 @@ EOF
 function CleanCoreSetup
 {
 
-	createStartdevicesScript
-	createStartcoreScript
-	createCoreInitScript
+#	createStartdevicesScript
+#	createStartcoreScript
+#	createCoreInitScript
 
 	restoreKdmInitScript
 
@@ -335,11 +124,11 @@ function CleanCoreSetup
 	setupRunlevel4
 	setupRunlevel5
 
-	modifyUpstartFile /etc/event.d/media-center-startup
+#	modifyUpstartFile /etc/event.d/media-center-startup
 #	modifyUpstartFile /etc/event.d/pluto-dhcpd-plugin
-	if [ -e /etc/event.d/pluto-dhcpd-plugin ]
-	then
-		mv -fv /etc/event.d/pluto-dhcpd-plugin /var/tmp
+#	if [ -e /etc/event.d/pluto-dhcpd-plugin ]
+#	then
+#		mv -fv /etc/event.d/pluto-dhcpd-plugin /var/tmp
 #		rm -fv /etc/event.d/pluto-dhcpd-plugin
 	fi
 
