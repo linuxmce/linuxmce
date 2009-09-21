@@ -417,8 +417,8 @@ void App_Server::CMD_Halt_Device(int iPK_Device,string sForce,string &sCMD_Resul
 		DisplayMessageOnOrbVFD("Suspending...");
 
 #ifndef WIN32
-		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling halt");
-		system("halt");  // Don't know how to do this
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling initiateSuspend.sh");
+		system("/usr/pluto/bin/initiateSuspend.sh");
 #else
 		EnablePrivileges();
 		::ExitWindowsEx(EWX_POWEROFF | EWX_FORCE, 0);
