@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 #       0-example.py -- Examples which rely on xorgparser
 #       
 #       Copyright 2008 Alberto Milone <albertomilone@alice.it>
@@ -22,13 +24,16 @@ from XKit.xorgparser import *
 import sys
 import os
 
-def main():
+def main(argv=sys.argv):
     '''
     Replace the first line of this example with a source and a destination file
     '''
-    destination = os.path.join(os.path.expanduser('~'), 'xorgnew.txt')
-    destination = '/etc/X11/xorg.conf.$$'
-    source = '/etc/X11/xorg.conf'
+    ResolutionString = ' '.join([argv[1], argv[2]])
+    source = argv[3]
+    destination = '.'.join([source,'$$'])
+    #destination = os.path.join(os.path.expanduser('~'), 'xorgnew.txt')
+    #destination = '/etc/X11/xorg.conf.$$'
+    #source = '/etc/X11/xorg.conf'
     # source = None
     a = Parser(source)
 
@@ -38,24 +43,21 @@ def main():
     TVStandard = ""
     try:
       TVStandard = a.getValue('Screen','TVStandard',0)[0]
-      Resolution = TVStandard.split('x')
-      Resolution[1] = Resolution[1].split(' ')[0]
-      ResolutionString=' '.join(Resolution)
       a.removeOption('Screen','TVStandard')
       a.addOption('Screen','TVStandard',TVStandard)
-      '''
-      Remove all Display subsection, so we have a clean plate	
-      '''
-      a.removeSubSection('Screen','Display')
-      '''
-      Add an option to the Display subsection of the 1st Screen section
-      '''
-      a.addSubOption('Screen', 'Display', 'Depth', value='24', position=0)
-      a.addSubOption('Screen', 'Display', 'Virtual', value=ResolutionString, position=0)
-      a.addSubOption('Screen', 'Display', 'Modes', value=ResolutionString, position=0)
     except:
       print "No TVStandard set"        
     
+    '''
+    Remove all Display subsection, so we have a clean plate	
+    '''
+    a.removeSubSection('Screen','Display')
+    '''
+    Add an option to the Display subsection of the 1st Screen section
+    '''
+    a.addSubOption('Screen', 'Display', 'Depth', value='24', position=0)
+    a.addSubOption('Screen', 'Display', 'Virtual', value=ResolutionString, position=0)
+    a.addSubOption('Screen', 'Display', 'Modes', value=ResolutionString, position=0)
 
 #    a.removeOption('ServerFlags', 'AutoAddDevices');
     

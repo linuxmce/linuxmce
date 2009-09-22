@@ -134,7 +134,7 @@ SetResolution()
 	# TODO: Use python-Xkit for all xorg.conf manipulations
 	# 
 	if [ -f /usr/pluto/bin/X-ChangeResolution.py ] ; then
-		python /usr/pluto/bin/X-ChangeResolution.py
+		python /usr/pluto/bin/X-ChangeResolution.py $ResX $ResY $Configfile
 		mv "$ConfigFile"{.$$,}
 	fi
 }
