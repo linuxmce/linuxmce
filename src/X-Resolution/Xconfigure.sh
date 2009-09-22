@@ -1,5 +1,4 @@
 #!/bin/bash
-
 function XorgConfLogging() {
 	local message="$1"
 	local xorgLog="/var/log/pluto/xorg.conf.log"
@@ -127,9 +126,17 @@ SetResolution()
 	esac
 
 	Modeline="$(GenModeline "$DisplayDriver" "$ResX" "$ResY" "$Refresh" "$ScanType")"
+	
 
 	awk -v"ResX=$ResX" -v"ResY=$ResY" -v"Refresh=$Refresh" -v"Modeline=$Modeline" -v"nvHD=$TVStandard" -v"ConnectedMonitor=$ConnectedMonitor" -v"TVOutFormat=$TVOutFormat" -f/usr/pluto/bin/X-ChangeResolution.awk "$ConfigFile" >"$ConfigFile.$$"
 	mv "$ConfigFile"{.$$,}
+
+	# TODO: Use python-Xkit for all xorg.conf manipulations
+	# 
+	if [ -f /usr/pluto/bin/X-ChangeResolution.py ] ; then
+		python /usr/pluto/bin/X-ChangeResolution.py
+		mv "$ConfigFile"{.$$,}
+	fi
 }
 
 XvMC_Lib()
