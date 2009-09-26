@@ -132,7 +132,7 @@ function CleanCoreSetup
 #	then
 #		mv -fv /etc/event.d/pluto-dhcpd-plugin /var/tmp
 #		rm -fv /etc/event.d/pluto-dhcpd-plugin
-	fi
+#	fi
 
 	createIninttabConfig
 	createDefaultEventFile
