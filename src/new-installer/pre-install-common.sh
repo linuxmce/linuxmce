@@ -131,7 +131,9 @@ function InstallAptCacherNg
 function ConfigureApt
 {
     echo "Configuring apt-cacher-ng"
-    echo 'Acquire::http { Proxy "http://localhost:3142"; };' > /etc/apt/apt.conf.d/02proxy
+#	apt-cacher seems to be the culprit for lots of problems for people who have flakey connections.
+# 	therefore we disable apt-cacher for the time
+#    echo 'Acquire::http { Proxy "http://localhost:3142"; };' > /etc/apt/apt.conf.d/02proxy
     apt-get update
 }
 
