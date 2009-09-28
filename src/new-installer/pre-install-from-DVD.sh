@@ -25,6 +25,6 @@ fi
 
 apt-get update
 # We add all the deb's here, that can be pre-installed without causing problems
-apt-get -y -f install video-wizard-videos
-apt-get -y -f install pluto-sample-media
+apt-get -y -f --force-yes install video-wizard-videos
+apt-get -y -f --force-yes install pluto-sample-media
         
