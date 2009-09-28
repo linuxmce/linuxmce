@@ -14,7 +14,7 @@ for dir in /home/* ;do
 done
 
 # Make sure the old startup scripts no longer exists
-rm /etc/rc5.d/{S99core,S99launch-manager}
+rm -f /etc/rc5.d/{S99core,S99launch-manager}
 
 # Make sure the new startup scripts are being used
 ln -sfv /usr/pluto/bin/Start_X.sh /etc/rc5.d/S30Start_X.sh
