@@ -8,7 +8,7 @@ if [[ ! -d "$PIXDIR" ]]; then
 	mkdir -p "$PIXDIR"
 fi
 
-Q="SELECT PK_QuickStartTemplate,Icon FROM QuickStartTemplate"
+Q="SELECT PK_QuickStartTemplate,Icon FROM QuickStartTemplate Where Icon != ''"
 R=$(RunSQL "$Q")
 
 for Row in $R; do
