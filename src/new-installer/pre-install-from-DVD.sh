@@ -22,7 +22,7 @@ AddRepoToSources "http://packages.medibuntu.org/ ${DISTRO}  free non-free"
 AddGpgKeyToKeyring http://packages.medibuntu.org/medibuntu-key.gpg
 
 AddRepoToSources "http://www.avenard.org/files/ubuntu-repos intrepid release"
-AddGpgKeyToKeyRing  http://www.avenard.org/files/ubuntu-repos/ubuntu-repos.key
+AddGpgKeyToKeyring  http://www.avenard.org/files/ubuntu-repos/ubuntu-repos.key
 apt-get update
 # We add all the deb's here, that can be pre-installed without causing problems
 apt-get -y -f --force-yes install video-wizard-videos
