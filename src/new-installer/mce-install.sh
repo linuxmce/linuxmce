@@ -135,7 +135,8 @@ ClearInstallationTable
 apt-get -y -f dist-upgrade
 
 # Fix apt proxy settings so it apply to core and MDs after lmce is configured.
-sed -i 's@localhost:3142@dcerouter:3142@' /etc/apt/apt.conf.d/02proxy
-
+if [ -f /etc/apt/apt.conf.d/02proxy ]; then
+	sed -i 's@localhost:3142@dcerouter:3142@' /etc/apt/apt.conf.d/02proxy
+fi
 StatsMessage "Installation Finished"
 
