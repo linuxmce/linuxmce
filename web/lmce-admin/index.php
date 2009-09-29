@@ -1437,6 +1437,13 @@ switch ($section) {
 		include_once('operations/telecom/editPhoneNumber.php');
 	    editPhoneNumber($output,$telecomADO);
 	break;
+	case 'importContacts':
+	    $output = new Template($dbADO);
+	    $output->setTemplateFileType('large');
+	    @include($GLOBALS['globalConfigPath'].'telecom.inc.php');
+	    include_once('operations/telecom/importContacts.php');
+	    importContacts($output,$telecomADO);
+	break;
 	case 'editContact':
     	$output = new Template($dbADO);
        	$output->setTemplateFileType('large');

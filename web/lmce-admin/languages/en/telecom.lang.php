@@ -30,4 +30,13 @@ $TEXT_NO_PHONE_NUMBERS_AVAILABLE_CONST='No phone numbers available.';
 $TEXT_DELETE_NUMBER_CONFIRMATION_CONST='Are you sure you want to delete this number?';
 $TEXT_RECORDS_CONST='Records';
 $TEXT_CONTACT_PICTURE_CONST='Contact Picture';
+$TEXT_IMPORT_CONTACTS_CONST='Import contacts';
+$TEXT_UPLOAD_VCARD_FILE_CONST="Upload vCard file";
+$TEXT_IMPORT_CONTACTS_NOTE_CONST="Importing contacts from the vCards file";
+$TEXT_IMPORT_CONTACTS_OPT_CONST="Additional options";
+$TEXT_IMPORT_CONTACTS_DUP_CONST="Check Duplicates";
+$TEXT_IMPORT_CONTACTS_OVER_CONST="Overwrite";
+$TEXT_IMPORT_CONTACTS_OPT_NOTE_CONST="<i>*)If option 'Check Duplicates' is chosen then already exising phone numbers will be
+skipped from inserting to the phone book.<br />*)If option 'Overwrite' is chosen then exising contact information will be
+overwritten by imported one based on contact name</i>";
 ?>

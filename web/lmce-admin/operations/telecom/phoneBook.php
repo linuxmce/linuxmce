@@ -173,7 +173,11 @@ function phonesTable($telecomADO,$userID,$page){
 	}
 	$out.='	
 		<tr>
-			<td colspan="11" align="center"><input type="button" class="button" name="add" value="'.$TEXT_ADD_PHONE_NUMBER_CONST.'" onClick="self.location=\'index.php?section=addPhoneNumber\'"> <input type="button" class="button" name="add" value="'.$TEXT_ADD_CONTACT_CONST.'" onClick="self.location=\'index.php?section=addPhoneNumber&addContact=1\'"></td>
+			<td colspan="11" align="center">
+				<input type="button" class="button" name="add" value="'.$TEXT_ADD_PHONE_NUMBER_CONST.'" onClick="self.location=\'index.php?section=addPhoneNumber\'"> 
+				<input type="button" class="button" name="add" value="'.$TEXT_ADD_CONTACT_CONST.'" onClick="self.location=\'index.php?section=addPhoneNumber&addContact=1\'">
+				<input type="button" class="button" name="add" value="'.$TEXT_IMPORT_CONTACTS_CONST.'"onClick="self.location=\'index.php?section=importContacts\'">	
+			</td>
 		</tr>	
 		<tr>
 			<td colspan="11" align="left">	* CC='.$TEXT_COUNTRY_CODE_CONST.'<br>
