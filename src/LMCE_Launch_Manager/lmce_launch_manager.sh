@@ -2,7 +2,7 @@
 
 . /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/LockUtils.sh
-/etc/pluto.conf
+ConfEval
 
 if ["$AutostartMedia" -eq "1"] ; then
 	# Only start X if we want to autostart the media.
