@@ -4,6 +4,7 @@ function importContacts($output,$telecomADO) {
 	// include language files
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/telecom.lang.php');
+	
 	include('include/vcard.inc.php');
 		
 	$title = $TEXT_IMPORT_CONTACTS_CONST;
@@ -12,6 +13,7 @@ function importContacts($output,$telecomADO) {
 	
 	$check_duplicates = isset($_REQUEST['check_dupl']) ? true : false;
 	$overwrite_existing = isset($_REQUEST['overwrite_ex']) ? true : false;
+	$clear_cont = isset($_REQUEST['clear_cont']) ? true : false;
 
 	if($action == 'import') {
 		
@@ -29,7 +31,8 @@ function importContacts($output,$telecomADO) {
 		}
 		$cards = parse_vcard_file($lines);
 		$result = process_vcards($cards);
-		$ret = insert_data($result, $telecomADO, $check_duplicates, $overwrite_existing);
+		$ret = insert_data($result, $telecomADO, $TEXT_IMPORT_CONTACTS_RES_CONST, $check_duplicates, $overwrite_existing, $clear_cont);
+		
 		header("Location: index.php?section=phoneBook&msg=".@$ret);
 		exit();
 	} else {
@@ -54,7 +57,8 @@ function importContacts($output,$telecomADO) {
 			<td><b>'.$TEXT_IMPORT_CONTACTS_OPT_CONST.'</b></td>
 			<td>
 				<input type="checkbox" name="check_dupl" value=""> '.$TEXT_IMPORT_CONTACTS_DUP_CONST.' 
-				<input type="checkbox" name="overwrite_ex" value=""> '.$TEXT_IMPORT_CONTACTS_OVER_CONST.' 
+				<input type="checkbox" name="overwrite_ex" value=""> '.$TEXT_IMPORT_CONTACTS_OVER_CONST.'
+				<input type="checkbox" name="clear_cont" value=""> '.$TEXT_IMPORT_CONTACTS_CLEAR_CONST.'
 			</td>
 		</tr>
 		<tr>
@@ -141,7 +145,7 @@ function process_vcards ($cards) {
 					$name = $property->name;
 					$value = $property->value;
 					
-					error_log("[$card_name] $name => $value: $phone_type");   		
+					//error_log("[$card_name] $name => $value: $phone_type");   		
 					
 					switch($type) {
 						case 'FN':
@@ -170,25 +174,55 @@ function process_vcards ($cards) {
 	return $result;
 }
 
-function insert_data($data, $telecomADO, $check_duplicates=false, $overwrite_existing=false) {
-	
+function insert_data($data, $telecomADO, $msg_templ, $check_duplicates=false, $overwrite_existing=false, $clear_cont=false) {
+
 	$userID = (int)@$_SESSION['userID'];
 	
+	if($clear_cont) {
+		$ret = clear_phone_book($telecomADO, $userID);
+		error_log("Phone book is cleared!");
+	}
+
 	$cont_count = 0;
 	$phone_count = 0;
 	foreach($data as $name => $item) {
-		$ret = $telecomADO->Execute('
-				INSERT INTO Contact
-					(`Name`, `Company`, `Title`, `EK_Users`)
-				VALUES
-					(?,?,?,?)',
-			array($item['Name'],$item['Company'],$item['Title'],$UserID));
+		$update = false;
+		if($overwrite_existing) {
+			$res_arr = $telecomADO->GetAll("SELECT PK_Contact FROM Contact WHERE Name=?", array($item['Name']));
+			$num_cont = count($res_arr);
+			if($num_cont > 1) {
+				error_log("Contact [".$item['Name']."] is duplicated in the phone book $num_cont times. Please, remove unnessesary copies via admin site!");
+				continue;
+			} elseif($num_cont == 1) {
+				$update = true;
+				error_log("Contact [".$item['Name']."] exists in the phone book. Just update it!");
+			}
+		}
 		
-		$cont_count++;
-		
+		if($update) {
+			$query = "UPDATE Contact SET Company=?, Title=? WHERE PK_Contact=?";
+			$pars = array($item['Company'], $item['Title'], $res_arr[0]['PK_Contact']);
+		} else {
+			$query = "INSERT INTO Contact (`Name`, `Company`, `Title`, `EK_Users`) VALUES (?,?,?,?)";	
+			$pars = array($item['Name'], $item['Company'], $item['Title'], $userID);
+		}
+
+		$ret = $telecomADO->Execute($query, $pars);		
+		$cont_count++;		
 		$contact = $telecomADO->Insert_ID();
 
 		foreach($item['Tel'] as $phone) {
+			if($check_duplicates) {
+				$res = $telecomADO->GetAll("SELECT count(*) AS phone_count FROM PhoneNumber WHERE PhoneNumber=?",
+																								array($phone['Number']));
+				// If flag 'Check Duplicates' is ticked and phone exists in our phone book
+				// just skip it
+				if($res[0]['phone_count'] > 0) {	
+					error_log("Phone [".$phone['Number']."] already exists in the phone book: ".$res[0]['phone_count']."!");
+					continue;
+				}	
+			}
+
 			$telecomADO->Execute('
 				INSERT INTO PhoneNumber
 					(`FK_Contact`, `FK_PhoneType`, `CountryCode`, `AreaCode`, `PhoneNumber`, `Extension`, `DialAs`)
@@ -199,9 +233,19 @@ function insert_data($data, $telecomADO, $check_duplicates=false, $overwrite_exi
 		}
 	}
 
-	$result = "Added $cont_count contacts and $phone_count phone numbers";
+	$result = sprintf($msg_templ, $cont_count, $phone_count);
 
 	return $result;
+}
+
+function clear_phone_book($telecomADO, $userID) {
+	$query = "DELETE FROM PhoneNumber WHERE FK_Contact IN (SELECT PK_Contact FROM Contact WHERE EK_Users=?)";
+	$ret = $telecomADO->Execute($query, $userID);
+	
+	$query = "DELETE FROM Contact WHERE EK_Users=?";
+	$ret = $telecomADO->Execute($query, $userID);
+
+	return $ret;
 }
 
 ?>

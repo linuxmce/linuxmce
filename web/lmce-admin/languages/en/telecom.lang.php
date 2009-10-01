@@ -37,6 +37,9 @@ $TEXT_IMPORT_CONTACTS_OPT_CONST="Additional options";
 $TEXT_IMPORT_CONTACTS_DUP_CONST="Check Duplicates";
 $TEXT_IMPORT_CONTACTS_OVER_CONST="Overwrite";
 $TEXT_IMPORT_CONTACTS_OPT_NOTE_CONST="<i>*)If option 'Check Duplicates' is chosen then already exising phone numbers will be
-skipped from inserting to the phone book.<br />*)If option 'Overwrite' is chosen then exising contact information will be
-overwritten by imported one based on contact name</i>";
+	skipped from inserting to the phone book.<br />*)If option 'Overwrite' is chosen then exising contact information will be
+	overwritten by imported one based on contact name.<br />*)<font color='red'>If option 'Clear Before Import' is chosen then all contacts
+	in the phone book will be DELETED!</font></i>";
+$TEXT_IMPORT_CONTACTS_RES_CONST="Added %s contacts and %s phone numbers";	
+$TEXT_IMPORT_CONTACTS_CLEAR_CONST="Clear Before Import";
 ?>
