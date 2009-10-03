@@ -25,6 +25,6 @@ mkdir -p "${Parm_RootLocation}/usr/pluto/var"
 mkdir -p "${Parm_RootLocation}/usr/pluto/orbiter"
 mkdir -p "${Parm_RootLocation}/usr/pluto/keys"
 mkdir -p "${Parm_RootLocation}/usr/pluto/deb-cache"
-
+mkdir -p "${Parm_RootLocation}/var/spool/asterisk
 
 
