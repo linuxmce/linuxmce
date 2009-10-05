@@ -17,6 +17,8 @@ CreatePackagesFiles
 AddRepoToSources "file:${LOCAL_REPO_BASE} ${LOCAL_REPO_DIR}"
 AddRepoToSources "http://deb.linuxmce.org/ubuntu/ ${DISTRO}  ${COMPOS}"
 AddRepoToSources "http://debian.slimdevices.com/ stable  main"
+AddRepoToSources "http://security.ubuntu.com/ubuntu intrepid-security main restricted universe multiverse"
+AddRepoToSources "http://archive.ubuntu.com/ubuntu intrepid-security main restricted universe multiverse"
 
 AddRepoToSources "http://packages.medibuntu.org/ ${DISTRO}  free non-free"
 AddGpgKeyToKeyring http://packages.medibuntu.org/medibuntu-key.gpg
