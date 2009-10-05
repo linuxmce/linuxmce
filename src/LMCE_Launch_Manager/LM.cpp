@@ -79,6 +79,7 @@ LM::LM()
 	//Init progress tracking vars	
 	m_iProgress = 0;
 	m_bShowProgress = false;
+	m_bMediaRunning = false;	// FIXME: Verify this behaviour is correct. Thanks Phenigma.
 	//m_SocketConnection = NULL;
 }
 
