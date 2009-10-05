@@ -621,7 +621,7 @@ function MangleStartupFiles {
 #screen -d -m -S DhcpdPlugin /usr/pluto/bin/Dhcpd-Plugin.sh
 #end script
 #" > /etc/event.d/pluto-dhcpd-plugin
-
+echo We dont mangle startup files anymore
 }
 
 
