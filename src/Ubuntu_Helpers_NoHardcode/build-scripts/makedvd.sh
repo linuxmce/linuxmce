@@ -1,5 +1,5 @@
 #!/bin/bash
-# SourceIso contains the name of the ISO file, which MUST reside in the users home directory
+# SourceIso contains the name of the ISO file, which MUST reside in the live directory
 # BUILD_ROOT is a link to the base of the builder environement
 #
 # This procedure creates a live dir under the users homedir. This directory is recreated 
@@ -13,8 +13,10 @@
 #
 # In part copied from various places on the web.
 
+SourceIso=kubuntu-8.10-dvd-i386.iso
 SourceIso=kubuntu-8.10-desktop-i386.iso
-BUILDER_ROOT=/opt/intrepid-i386
+# SourceIso=karmic-desktop-i386.iso
+BUILDER_ROOT=/opt/builder386
 echo Make sure rsync, squashfs-tools and mkisofs is installed
 sudo apt-get install rsync squashfs-tools genisoimage -y
 #rm -fR ~/live-old
@@ -60,8 +62,12 @@ sudo cp /etc/resolv.conf edit/etc/
 echo Depending on your configuration, you may also need to copy the hosts file
 
 sudo cp /etc/hosts edit/etc/
-#echo "Acquire::http::Proxy \"http://10.1.3.5:3128\";">edit/etc/apt/apt.conf
+#echo "Acquire::http::Proxy \"http://127.0.0.1:3128\";">edit/etc/apt/apt.conf
 sudo mount -t proc none ~/live/edit/proc
+
+sudo mount --bind /dev edit/dev
+sudo mount none edit/dev/pts -t devpts
+
 echo "Get Installer from build environment"
 cp -r $BUILDER_ROOT/var/lmce-build/svn/branches/LinuxMCE-0810/src/new-installer edit/root/
 cat <<eol > edit/root/new-installer/full-install.sh
@@ -75,10 +81,15 @@ eol
 chmod +x edit/root/new-installer/full-install.sh
 
 echo "Copying over the current debs"
-mkdir -p extract-cd/usr/pluto/deb-cache
-cp $BUILDER_ROOT/var/www/{*.deb,Package*,Release*} extract-cd/usr/pluto/deb-cache
+DEST=edit
+mkdir -p $DEST/usr/pluto/deb-cache
+cp $BUILDER_ROOT/var/www/{*.deb,Package*,Release*} $DEST/usr/pluto/deb-cache
+# Temporarily remove the biggest files.
+rm $DEST/usr/pluto/deb-cache/{video-wizard-videos*,lmce-mame-metadata*,pluto-sample-media*}
+
+
 echo "Updating packages file"
-pushd  extract-cd/usr/pluto/deb-cache
+pushd  $DEST/usr/pluto/deb-cache
 # Generate the Packages files
 wget http://deb.linuxmce.org/ubuntu/dists/intrepid/lmce-alpha2/binary-all/libft-perl_1.0_all.deb 
 wget http://deb.linuxmce.org/ubuntu/dists/intrepid/lmce-alpha-latest/binary-all/mail-transport-agent_1.0_all.deb 
@@ -95,21 +106,38 @@ cat <<eol >edit/root/upgrade.sh
 #!/bin/bash
 export LC_ALL=C
 export DEBIAN_FRONTEND=noninteractive
+export http_proxy="http://127.0.0.1:3128/"
 apt-get update
-apt-get dist-upgrade -y
+apt-get dist-upgrade -dy
 dpkg --configure -a --abort-after 20000
-# apt-get autoremove -y
-wget http://deb.linuxmce.org/ubuntu/kubuntu810desktop-selection
-dpkg --set-selections < kubuntu810desktop-selection
-apt-get dselect-upgrade -y
+# We run some pre-installer- which sets up sources.list among other things
 cd /root/new-installer
-bash pre-install-from-DVD.sh
+bash ./mce-install-preseed.sh
+bash ./pre-install-from-DVD.sh
+apt-get update
+apt-get install -y --force-yes mplayer
+apt-get -dy --force-yes install pluto-dcerouter
+# Install the nVidia drivers
+apt-get install -y --force-yes nvidia-glx-190 nvidia-190-modaliases nvidia-190-libvdpau
+
+# I want joe
+apt-get install -y joe
+
+# Install festival voices
+apt-get install -y --force-yes festival festival-czech festival-hi festival-mr festival-te festvox-czech-ph festvox-don festvox-ellpc11k festvox-hi-nsk festvox-italp16k festvox-itapc16k festvox-kallpc16k festvox-kdlpc16k festvox-mr-nsk festvox-rablpc16k festvox-suopuhe-common festvox-suopuhe-lj festvox-suopuhe-mv festvox-te-nsk 
+# Now we setup the package selection that we'd like to have
+wget http://deb.linuxmce.org/ubuntu/kubuntu810desktop-selection
+# Add the packages that are already installed
+dpkg --get-selections >> /root/kubuntu810desktop-selection
+sort /root/kubuntu810desktop-selection > /root/test.selection
+# and import the whole shebang so everything is marked
+dpkg --set-selections < /root/test.selection
+# And get all the stuff downloaded.
+apt-get dselect-upgrade -dy --force-yes
 eol
 
 chmod +x edit/root/upgrade.sh
-sudo chroot edit root/upgrade.sh
-
-echo "deb http://archive.ubuntu.com/ubuntu/ intrepid  main restricted universe multiverse">> edit/etc/apt/sources.list
+sudo chroot edit /root/upgrade.sh
 
 echo Creating Desktop button
 mkdir -p edit/etc/skel/Desktop
@@ -128,9 +156,10 @@ TerminalOptions=\s--noclose
 eol
 
 
-umount -l edit/{proc,sys}
+umount -l edit/{dev/pts,dev,proc,sys}
 umount -l edit/lib/modules/2.6.27-14-generic/volatile
 umount squashfs
 umount mnt
 umount edit
 echo "Done. Please run finalizedvd.sh"
+exit 0

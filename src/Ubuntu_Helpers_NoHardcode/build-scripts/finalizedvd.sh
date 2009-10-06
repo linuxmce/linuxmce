@@ -20,8 +20,8 @@ sudo sed -i '/ubiquity/d' extract-cd/casper/filesystem.manifest-desktop
 #
 echo Compress filesystem
 sudo rm extract-cd/casper/filesystem.squashfs
-sudo mksquashfs edit extract-cd/casper/filesystem.squashfs -nolzma -processors 1 -e edit/proc/* edit/lib/modules/2.6.27-14-generic/volatile 
-
+sudo mksquashfs edit extract-cd/casper/filesystem.squashfs -nolzma -processors 2 -e edit/proc/* edit/lib/modules/2.6.27-14-generic/volatile 
+echo Done mksquashfs - PRESS A KEY
 echo Set a name to the disk image
 IMAGE_NAME="LinuxMCE 8.10 i386"
 
@@ -46,6 +46,7 @@ d-i	pkgsel/language-pack-patterns	string language-pack-kde-$LL kde-i18n-$LL
 # Install the KDE oem-config frontend (if in OEM mode).
 d-i	oem-config-udeb/frontend	string kde
 d-i	apt-setup/local0/repository	string deb file:/usr/pluto/deb-cache ./
+d-i	apt-setup/local1/repository	string deb http://www.avenard.org/files/ubuntu-repos intrepid testing
 # d-i	preseed/late_command	string	bash /laterun.sh
 d-i	ubiquity/success_command	string	cp -r /cdrom/usr/pluto /target/usr
 d-i	ubiquity/summary	note
@@ -68,5 +69,6 @@ rm extract-cd/md5sum.draft
 
 echo Create ISO Image
 cd extract-cd
-sudo mkisofs -quiet -D -r -V "$IMAGE_NAME" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o ../LinuxMCE-8.10-i386.iso .
+sudo mkisofs -allow-limited-size -quiet -D -r -V "$IMAGE_NAME" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o ../LinuxMCE-8.10-i386.iso .
 echo Done!
+exit 0
