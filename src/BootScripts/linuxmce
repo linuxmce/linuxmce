@@ -161,10 +161,10 @@ if ["$AutostartMedia" -eq "1"] ; then
 	else
 		XPID=""
 	fi
-	if [ -z "$XPID" -o ! -d /proc/"$XPID" ]
-	then
+#	if [ -z "$XPID" -o ! -d /proc/"$XPID" ]
+#	then
 		/usr/pluto/bin/Start_X.sh -config /etc/X11/xorg.conf
-	fi
+#	fi
 
 fi
 if ! Lock "Launch_Manager" "LM"; then
