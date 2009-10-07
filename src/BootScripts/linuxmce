@@ -85,25 +85,19 @@ if [[ -f /usr/pluto/bin/Utils.sh ]] ;then
 	. /usr/pluto/bin/Utils.sh
 fi
 
-## Assure that /home is mounted
-for i in `seq 1 5` ;do
-	if ! mountpoint /home ;then
-		echo "$(date -R) /home is not mounted, retrying ($i of 5) ..." >> /var/log/pluto/umount-wrapper.log
-		mount /home
-		sleep $( echo "0.5 * $i" | bc  -l )
-	else
-		break
-	fi
-done
+ConfEval
 
-## Setup ALSA mixers
-amixer sset Capture 90%
-#amixer sset 'Mic Boost (+20dB)' unmute
-alsactl store
+StartService "Starting MySQL Server" "/etc/init.d/mysql start"
+RunSQL "UPDATE Orbiter set Regen=2,RegenInProgress=0 where RegenInProgress=1"
 
-export DISPLAY=":${Display}"
-
+StartService "Starting DHCP Server" "/etc/init.d/dhcp3-server start"
+StartService "Starting DNS Server" "/etc/init.d/bind9 start"
+StartService "Configuring Network Firewall" "/usr/pluto/bin/Network_Firewall.sh"
 StartService "Loading Kernel Modules" "/usr/pluto/bin/LoadModules.sh"
+StartService "Reporting Machine Status" "/usr/pluto/bin/Report_Machine_Status.sh" "&"
+
+
+
 if [[ -f /usr/pluto/bin/SQL_Ops.sh  && -f /usr/pluto/bin/Config_Ops.sh ]] ;then
 	Q="SELECT FK_Installation FROM Device WHERE PK_Device='$PK_Device'"
 	R="$(RunSQL "$Q")"
@@ -114,23 +108,43 @@ if [[ -f /usr/pluto/bin/SQL_Ops.sh  && -f /usr/pluto/bin/Config_Ops.sh ]] ;then
 	ConfSet PK_Users "$R"
 fi
 
-StartService "Enable Wake on LAN" "/usr/pluto/bin/enable_wol.sh"
+
+
+if [[ "$FirstBoot" != "false" && ! -f /usr/pluto/install/.notdone ]] ;then
+	#StartService "Updating Software Database" "/usr/pluto/bin/getxmls" "&"
+	/usr/pluto/bin/getxmls &> /var/log/pluto/add_software_debug.log &
+	ConfSet "FirstBoot" "false" 2>/dev/null 1>/dev/null
+fi
+
 StartService "Setting SSH Keys" "/usr/pluto/bin/SSH_Keys.sh" "&"
-StartService "Configure Device Changes" "/usr/pluto/bin/Config_Device_Changes.sh"
+StartService "Confirm Installation" "/usr/pluto/bin/ConfirmInstallation.sh"
 StartService "Setting Coredump Location" "/usr/pluto/bin/corefile.sh"
+StartDaemon  "Starting Dhcp Plugin" "/usr/pluto/bin/Dhcpd-Plugin.sh" "DhcpdPlugin"
+StartDaemon  "Start PNP MD Plugin" "/usr/pluto/bin/Start_NewMD_interactor.sh" "NewMDinteractor"
+StartDaemon  "Start Voicemail Monitor" "/usr/pluto/bin/VoiceMailMonitor.sh" "VoiceMailMonitor"
 StartService "Creating Firewire 2 Video4Linux Pipes" "/usr/pluto/bin/Firewire2Video4Linux.sh"
+StartService "Configuring Pluto Storage Devices" "/usr/pluto/bin/StorageDevices_Setup.sh"
+/etc/init.d/samba start
+# StartService "Starting UPNP Server" "/usr/pluto/bin/StorageDevices_UPNPServer.sh" "&"
+# StartService "Samba Server Detection" "/usr/pluto/bin/StorageDevices_SambaRadar.sh"
+StartService "Detecting Timezone" "/usr/pluto/bin/Timezone_Detect.sh" "&"
+StartService "Status Radar" "/usr/pluto/bin/StorageDevices_StatusRadar.sh"
+StartService "Samba Radar" "/usr/pluto/bin/StorageDevices_SambaRadar.sh"
+StartService "PVR-250 tuner restore" "/usr/pluto/bin/CaptureCards_BootConfig_PVR-250.sh"
+
+## Setup ALSA mixers
+amixer sset Capture 90%
+#amixer sset 'Mic Boost (+20dB)' unmute
+alsactl store
+
+export DISPLAY=":${Display}"
+
+#StartService "Configure Device Changes" "/usr/pluto/bin/Config_Device_Changes.sh"
 
 # hack: cleaning lockfile on M/D start to allow
 # local devices to start
 # TODO: remove this when correct locking will be implemented
 rm -f /usr/pluto/locks/pluto_spawned_local_devices.txt
-
-StartService "Configuring Pluto Storage Devices" "/usr/pluto/bin/StorageDevices_Setup.sh" "&"
-#StartDaemon "Report machine is on" "/usr/pluto/bin/Report_MachineOn.sh" "ReportingOn"
-StartService "Status Radar" "/usr/pluto/bin/StorageDevices_StatusRadar.sh"
-StartService "PVR-250 tuner restore" "/usr/pluto/bin/CaptureCards_BootConfig_PVR-250.sh"
-
-ConfEval
 
 if ["$AutostartMedia" -eq "1"] ; then
 	# Only start X if we want to autostart the media.
