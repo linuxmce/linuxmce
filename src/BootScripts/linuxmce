@@ -146,7 +146,7 @@ export DISPLAY=":${Display}"
 # TODO: remove this when correct locking will be implemented
 rm -f /usr/pluto/locks/pluto_spawned_local_devices.txt
 
-if ["$AutostartMedia" -eq "1"] ; then
+if [ "$AutostartMedia" -eq "1" ] ; then
 	# Only start X if we want to autostart the media.
 	if [[ "$Display" == "" ]] ;then
 		if [[ "$DISPLAY" == "" ]] ;then
