@@ -143,6 +143,7 @@ function ImportPublicSkinFromHTTPHost {
 #		pushd /usr/pluto/orbiter/skins
 		echo "Copying LinuxMCE skins to ${skins_dir}/Basic/"
 		pushd "${skins_dir}"
+			mkdir -p Basic
 			cp -r LinuxMCE/* Basic/
 		popd
 
