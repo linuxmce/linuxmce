@@ -80,6 +80,8 @@ echo "Starting mce-install.sh"
 bash mce-install.sh
 echo "Running post-install.sh"
 bash post-install.sh
+echo "Creating startup script"
+ln -s /etc/rc5.d/S99linuxmce /etc/init.d/linuxmce
 echo "Done!"
 eol
 chmod +x edit/root/new-installer/full-install.sh
