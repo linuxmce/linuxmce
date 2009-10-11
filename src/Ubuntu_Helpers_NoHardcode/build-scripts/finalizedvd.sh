@@ -45,6 +45,18 @@ tasksel	tasksel/first	multiselect kubuntu-desktop
 d-i	pkgsel/language-pack-patterns	string language-pack-kde-$LL kde-i18n-$LL
 # Install the KDE oem-config frontend (if in OEM mode).
 d-i	oem-config-udeb/frontend	string kde
+d-i	debian-installer/locale		string en_US
+d-i	debian-installer/layoutcode	string us
+d-i	time/zone	string Europe/Berlin
+d-i	partman-auto/disk	string	regular
+d-i	partman-auto/choose_recipe	select atomic
+d-i	partman/confirm_write_new_label	boolean	true
+d-i	partman/choose_partition	select	finish
+d-i	partman/confirm boolean	true
+d-i	apt-setup/restricted	boolean	true
+d-i	apt-setup/universe	boolean	true
+d-i	debian-installer/allow_unauthenticated	string	true
+d-i	pkgsel/include	string mysql-server openssh-server 
 d-i	apt-setup/local0/repository	string deb file:/usr/pluto/deb-cache ./
 d-i	apt-setup/local1/repository	string deb http://www.avenard.org/files/ubuntu-repos intrepid testing
 # d-i	preseed/late_command	string	bash /laterun.sh

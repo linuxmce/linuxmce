@@ -70,6 +70,10 @@ sudo mount none edit/dev/pts -t devpts
 
 echo "Get Installer from build environment"
 cp -r $BUILDER_ROOT/var/lmce-build/svn/branches/LinuxMCE-0810/src/new-installer edit/root/
+# 
+# We disable the creation of the Diskless base during DVD install
+#
+sed '/Diskless_CreateTBZ.sh/d' -i edit/root/new-installer/mce-install.sh
 cat <<eol > edit/root/new-installer/full-install.sh
 #!/bin/bash
 echo "Starting mce-install.sh"
@@ -106,15 +110,17 @@ cat <<eol >edit/root/upgrade.sh
 #!/bin/bash
 export LC_ALL=C
 export DEBIAN_FRONTEND=noninteractive
-export http_proxy="http://127.0.0.1:3128/"
+#export http_proxy="http://127.0.0.1:3128/"
 apt-get update
 apt-get dist-upgrade -dy
+apt-get autoremove
 dpkg --configure -a --abort-after 20000
 # We run some pre-installer- which sets up sources.list among other things
 cd /root/new-installer
 bash ./mce-install-preseed.sh
 bash ./pre-install-from-DVD.sh
 apt-get update
+apt-get dist-upgrade -y --force-yes
 apt-get install -y --force-yes mplayer
 apt-get -dy --force-yes install pluto-dcerouter
 # Install the nVidia drivers
@@ -146,7 +152,6 @@ cat <<eol >edit/etc/skel/Desktop/LinuxMCE
 Encoding=UTF-8
 Version=8.10
 Type=Application
-Terminal=false
 Exec=kdesudo /root/new-installer/full-install.sh
 Path=/root/new-installer
 Name=LinuxMCE Installer
