@@ -97,9 +97,15 @@ void LM::Initialize()
 	if (getenv("DISPLAY") != NULL) 
 	{
 		m_pDisplay = XOpenDisplay(getenv("DISPLAY"));
-		m_iScreen = DefaultScreen(m_pDisplay);
-		m_iRootWindow = RootWindow(m_pDisplay,m_iScreen);
-		m_pSc = XRRGetScreenInfo(m_pDisplay,m_iRootWindow);
+		if (m_pDisplay)
+		{
+			m_iScreen = DefaultScreen(m_pDisplay);
+			m_iRootWindow = RootWindow(m_pDisplay,m_iScreen);
+			m_pSc = XRRGetScreenInfo(m_pDisplay,m_iRootWindow);
+		} else {
+			// running in console all by itself.
+		}
+
 	}
 
 	m_pAlarmManager = new DCE::AlarmManager();
