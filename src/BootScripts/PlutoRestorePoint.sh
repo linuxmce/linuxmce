@@ -46,8 +46,13 @@ if [[ "$1" == "--backup" ]]; then
 		/usr/bin/mysqldump -e --quote-names --allow-keywords --add-drop-table --skip-extended-insert $MYSQL_DB_CRED "$MySqlDBName" $table  > $FULLPATH/mysql/$table-$BKPDIR.sql
 	done
 
+	# backup asterisk database
 	mkdir -p $FULLPATH/asterisk
 	/usr/bin/mysqldump -e --quote-names --allow-keywords --add-drop-table --skip-extended-insert $MYSQL_DB_CRED asterisk > $FULLPATH/asterisk/asterisk.sql
+
+	# backup mythtv database
+	mkdir -p $FULLPATH/mythtv
+	/usr/bin/mysqldump -e --quote-names --allow-keywords --add-drop-table --skip-extended-insert $MYSQL_DB_CRED mythtvconverg > $FULLPATH/mythtv/mythconverg.sql
 	
 	# backup lmce-admin
 	mkdir -p $FULLPATH/usr/pluto/orbiter
@@ -111,6 +116,13 @@ if [[ "$1" == "--restore" ]]; then
 		RunSQL < asterisk.sql
 		UseDB "$MySqlDBName"
 		/etc/init.d/asterisk restart
+
+		# restore mythtv settings
+		cd $BKPDIR/mythtv
+		UseDB mythtvconverg
+		RunSQL < mythtvconverg.sql
+		UseDB "$MySqlDBName"
+		/etc/init.d/mythtv restart
 
 		## Reinstall this packages so we'll have an updates database schema
 		apt-get -y --reinstall install pluto-system-database
