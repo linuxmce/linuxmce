@@ -121,28 +121,33 @@ fi
 
 ConfEval
 
-StartService "Starting MySQL Server" "/etc/init.d/mysql start"
-RunSQL "UPDATE Orbiter set Regen=2,RegenInProgress=0 where RegenInProgress=1"
 
-StartService "Starting DHCP Server" "/etc/init.d/dhcp3-server start"
-StartService "Starting DNS Server" "/etc/init.d/bind9 start"
-StartService "Configuring Network Firewall" "/usr/pluto/bin/Network_Firewall.sh"
+# Start core services
+if [ "$AutostartCore" -eq "1" ] ; then
+	StartService "Starting MySQL Server" "/etc/init.d/mysql start"
+
+	if [[ -f /usr/pluto/bin/SQL_Ops.sh  && -f /usr/pluto/bin/Config_Ops.sh ]] ;then
+		Q="SELECT FK_Installation FROM Device WHERE PK_Device='$PK_Device'"
+		R="$(RunSQL "$Q")"
+		ConfSet PK_Installation "$R"
+	
+		Q="SELECT PK_Users FROM Users LIMIT 1"
+		R="$(RunSQL "$Q")"
+		ConfSet PK_Users "$R"
+	fi
+
+	RunSQL "UPDATE Orbiter set Regen=2,RegenInProgress=0 where RegenInProgress=1"
+
+	StartService "Starting DHCP Server" "/etc/init.d/dhcp3-server start"
+	StartService "Starting DNS Server" "/etc/init.d/bind9 start"
+	StartService "Configuring Network Firewall" "/usr/pluto/bin/Network_Firewall.sh"
+	StartService "Confirm Installation" "/usr/pluto/bin/ConfirmInstallation.sh"
+	StartDaemon  "Starting Dhcp Plugin" "/usr/pluto/bin/Dhcpd-Plugin.sh" "DhcpdPlugin"
+	StartDaemon  "Start PNP MD Plugin" "/usr/pluto/bin/Start_NewMD_interactor.sh" "NewMDinteractor"
+	StartDaemon  "Start Voicemail Monitor" "/usr/pluto/bin/VoiceMailMonitor.sh" "VoiceMailMonitor"
+fi
 StartService "Loading Kernel Modules" "/usr/pluto/bin/LoadModules.sh"
 StartService "Reporting Machine Status" "/usr/pluto/bin/Report_Machine_Status.sh" "&"
-
-
-
-if [[ -f /usr/pluto/bin/SQL_Ops.sh  && -f /usr/pluto/bin/Config_Ops.sh ]] ;then
-	Q="SELECT FK_Installation FROM Device WHERE PK_Device='$PK_Device'"
-	R="$(RunSQL "$Q")"
-	ConfSet PK_Installation "$R"
-
-	Q="SELECT PK_Users FROM Users LIMIT 1"
-	R="$(RunSQL "$Q")"
-	ConfSet PK_Users "$R"
-fi
-
-
 
 if [[ "$FirstBoot" != "false" && ! -f /usr/pluto/install/.notdone ]] ;then
 	#StartService "Updating Software Database" "/usr/pluto/bin/getxmls" "&"
@@ -151,16 +156,10 @@ if [[ "$FirstBoot" != "false" && ! -f /usr/pluto/install/.notdone ]] ;then
 fi
 
 StartService "Setting SSH Keys" "/usr/pluto/bin/SSH_Keys.sh" "&"
-StartService "Confirm Installation" "/usr/pluto/bin/ConfirmInstallation.sh"
 StartService "Setting Coredump Location" "/usr/pluto/bin/corefile.sh"
-StartDaemon  "Starting Dhcp Plugin" "/usr/pluto/bin/Dhcpd-Plugin.sh" "DhcpdPlugin"
-StartDaemon  "Start PNP MD Plugin" "/usr/pluto/bin/Start_NewMD_interactor.sh" "NewMDinteractor"
-StartDaemon  "Start Voicemail Monitor" "/usr/pluto/bin/VoiceMailMonitor.sh" "VoiceMailMonitor"
 StartService "Creating Firewire 2 Video4Linux Pipes" "/usr/pluto/bin/Firewire2Video4Linux.sh"
 StartService "Configuring Pluto Storage Devices" "/usr/pluto/bin/StorageDevices_Setup.sh"
 /etc/init.d/samba start
-# StartService "Starting UPNP Server" "/usr/pluto/bin/StorageDevices_UPNPServer.sh" "&"
-# StartService "Samba Server Detection" "/usr/pluto/bin/StorageDevices_SambaRadar.sh"
 StartService "Detecting Timezone" "/usr/pluto/bin/Timezone_Detect.sh" "&"
 StartService "Status Radar" "/usr/pluto/bin/StorageDevices_StatusRadar.sh"
 StartService "Samba Radar" "/usr/pluto/bin/StorageDevices_SambaRadar.sh"
