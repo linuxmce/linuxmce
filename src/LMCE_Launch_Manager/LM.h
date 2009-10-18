@@ -132,7 +132,6 @@ private:
 	bool startCoreServices();
 	bool checkScreenDimensions(bool askUser/*=true*/);
 	bool startMediaStation();
-	void jumpToOrbiter();
 	void updateOrbiterRegenProgress();
 	void startOrbiterRegenProgressTracking(bool currentOrbiterOnly=true);
 	bool triggerOrbiterRegen(bool bAllOrbiters=false);
@@ -169,7 +168,7 @@ public:
 	void AlarmCallback(int id, void* param);
 	void Run();
 	void respawnNewChildren();
-
+	void jumpToOrbiter();
 
 		
 
