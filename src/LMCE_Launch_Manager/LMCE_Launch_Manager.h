@@ -70,6 +70,15 @@ public:
 			*****COMMANDS***** we need to implement
 	*/
 
+
+	/** @brief COMMAND: #912 - Activate PC Desktop */
+	/** This is here so programs can send commands to the Launch Manager to switch between the Orbiter and the PC Desktop */
+		/** @param #119 True/False */
+			/** If true, switch to the last PC desktop.  If false, switch to Orbiter's desktop */
+
+	virtual void CMD_Activate_PC_Desktop(bool bTrueFalse) { string sCMD_Result; CMD_Activate_PC_Desktop(bTrueFalse,sCMD_Result,NULL);};
+	virtual void CMD_Activate_PC_Desktop(bool bTrueFalse,string &sCMD_Result,Message *pMessage);
+
 //<-dceag-h-e->
 	};
 

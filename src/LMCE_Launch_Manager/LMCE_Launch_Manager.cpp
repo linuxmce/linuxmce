@@ -209,3 +209,17 @@ void LMCE_Launch_Manager::CreateNewChildren()
 	}
 }
 
+//<-dceag-c912-b->
+
+	/** @brief COMMAND: #912 - Activate PC Desktop */
+	/** This is here so programs can send commands to the Launch Manager to switch between the Orbiter and the PC Desktop */
+		/** @param #119 True/False */
+			/** If true, switch to the last PC desktop.  If false, switch to Orbiter's desktop */
+
+void LMCE_Launch_Manager::CMD_Activate_PC_Desktop(bool bTrueFalse,string &sCMD_Result,Message *pMessage)
+//<-dceag-c912-e->
+{
+	if (lmWidget)
+		lmWidget->jumpToOrbiter();
+
+}
