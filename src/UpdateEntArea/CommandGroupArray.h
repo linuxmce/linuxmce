@@ -117,10 +117,10 @@ public:
 	// If PK_CommandGroup is not NULL, that means the caller is only interested in the ID of an existing
 	// command group.  In this case, if it exists, the value will be filled in, if it does not, then
 	// this will exit returning NULL, and leave PK_CommandGroup=0
-	CommandGroup *FindCommandGroupByTemplate(int PK_Template,string sDescription,int PK_Icon,int TemplateParm1,int TemplateParm2,int *PK_CommandGroup=NULL,int Sort=0);
-	CommandGroup *FindCommandGroupByTemplate(Row_Room *pRow_Room,int PK_Template,string sDescription,int PK_Icon,int TemplateParm1,int TemplateParm2,int *PK_CommandGroup,int Sort=0);
-	CommandGroup *FindCommandGroupByTemplate(Row_EntertainArea *pRow_EntertainArea,int PK_Template,string sDescription,int PK_Icon,int TemplateParm1,int TemplateParm2,int *PK_CommandGroup,int Sort=0);
-	CommandGroup *FindCommandGroupByTemplate_NoRoom(int PK_Template,string sDescription,int PK_Icon,int TemplateParm1,int TemplateParm2,int *PK_CommandGroup);
+	CommandGroup *FindCommandGroupByTemplate(int PK_Template,string sDescription,int PK_Icon,int TemplateParm1,int TemplateParm2,int *PK_CommandGroup=NULL,int Sort=0,int PK_Text=0);
+	CommandGroup *FindCommandGroupByTemplate(Row_Room *pRow_Room,int PK_Template,string sDescription,int PK_Icon,int TemplateParm1,int TemplateParm2,int *PK_CommandGroup,int Sort=0,int PK_Text=0);
+	CommandGroup *FindCommandGroupByTemplate(Row_EntertainArea *pRow_EntertainArea,int PK_Template,string sDescription,int PK_Icon,int TemplateParm1,int TemplateParm2,int *PK_CommandGroup,int Sort=0,int PK_Text=0);
+	CommandGroup *FindCommandGroupByTemplate_NoRoom(int PK_Template,string sDescription,int PK_Icon,int TemplateParm1,int TemplateParm2,int *PK_CommandGroup,int PK_Text=0);
 
 	// The following versions just do a lookup.  No CommandGroup class is created, and AutoDelete is unaffected
 	static Row_CommandGroup *FindCommandGroupByTemplate(Row_Room *pRow_Room,int PK_Array,int PK_Template,int TemplateParm1,int TemplateParm2);

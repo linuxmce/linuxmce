@@ -65,6 +65,7 @@
 #include "pluto_main/Table_Users.h"
 #include "pluto_main/Define_Screen.h"
 #include "pluto_main/Define_RoomType.h"
+#include "pluto_main/Define_Text.h"
 
 #include "CommandGroupArray.h"
 
@@ -88,27 +89,27 @@ void UpdateEntArea::AddDefaultTelecomScenarios(Row_Room *pRow_Room)
 	CommandGroup *pCommandGroup;
 	CommandGroupArray commandGroupArray(pRow_Room,ARRAY_Communication_Scenarios_CONST,true);
 
-	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,"Active Calls",ICON_Phone_CONST,1,0);
+	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,"Active Calls",ICON_Phone_CONST,1,0,0,0,TEXT_Active_Calls_CONST);
 	if( pCommandGroup )
 		pCommandGroup->AddCommand(DEVICETEMPLATE_This_Orbiter_CONST,COMMAND_Goto_Screen_CONST,1,1,
 		COMMANDPARAMETER_PK_Screen_CONST,StringUtils::itos(SCREEN_Active_Calls_CONST).c_str());
 
-	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,"Speed Dial",ICON_Phone_CONST,2,0);
+	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,"Speed Dial",ICON_Phone_CONST,2,0,0,0,TEXT_SPEED_DIAL_CONST);
 	if( pCommandGroup )
 		pCommandGroup->AddCommand(DEVICETEMPLATE_This_Orbiter_CONST,COMMAND_Goto_Screen_CONST,1,1,
 			COMMANDPARAMETER_PK_Screen_CONST,StringUtils::itos(SCREEN_MakeCallFavorites_CONST).c_str());
 
-	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,"Dial Direct",ICON_Phone_CONST,3,0);
+	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,"Dial Direct",ICON_Phone_CONST,3,0,0,0,0);
 	if( pCommandGroup )
 		pCommandGroup->AddCommand(DEVICETEMPLATE_This_Orbiter_CONST,COMMAND_Goto_Screen_CONST,1,1,
 			COMMANDPARAMETER_PK_Screen_CONST,StringUtils::itos(SCREEN_MakeCallDialNumber_CONST).c_str());
 
-	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,"Phone Book",ICON_Phone_CONST,4,0);
+	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,"Phone Book",ICON_Phone_CONST,4,0,0,0,0);
 	if( pCommandGroup )
 		pCommandGroup->AddCommand(DEVICETEMPLATE_This_Orbiter_CONST,COMMAND_Goto_Screen_CONST,1,1,
 			COMMANDPARAMETER_PK_Screen_CONST,StringUtils::itos(SCREEN_MakeCallPhonebook_CONST).c_str());
 
-	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,"Intercom",ICON_Phone_CONST,5,0);
+	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,"Intercom",ICON_Phone_CONST,5,0,0,0,TEXT_CALL_INTERCOM_CONST);
 	if( pCommandGroup )
 		pCommandGroup->AddCommand(DEVICETEMPLATE_This_Orbiter_CONST,COMMAND_Goto_Screen_CONST,1,1,
 			COMMANDPARAMETER_PK_Screen_CONST,StringUtils::itos(SCREEN_MakeCallIntercom_CONST).c_str());
