@@ -1721,7 +1721,9 @@ vector<class ArrayValue *> *DesignObj_Generator::GetArrayValues(Row_DesignObjVar
                     if( pRow_CommandGroup && pRow_CommandGroup->FK_Array_get()==PK_Array && !pRow_CommandGroup->Disabled_get() )
                     {
                         alArray->push_back(new ArrayValue(drAG_E->FK_CommandGroup_getrow()->AltID_isNull() ? StringUtils::itos(drAG_E->FK_CommandGroup_get()) : StringUtils::itos(drAG_E->FK_CommandGroup_getrow()->AltID_get()),
-                            (!drAG_E->FK_CommandGroup_getrow()->FK_Icon_isNull() && m_pOrbiterGenerator->m_iUiVersion==1 ? "~cb~" : "") +  drAG_E->FK_CommandGroup_getrow()->Description_get(),
+                            (!drAG_E->FK_CommandGroup_getrow()->FK_Icon_isNull() && m_pOrbiterGenerator->m_iUiVersion==1 ? "~cb~" : "") +  
+								// Try to get descriprion from Text table if we have PK_Text
+								(!drAG_E->FK_CommandGroup_getrow()->FK_Text_isNull() ? GetText(drAG_E->FK_CommandGroup_getrow()->FK_Text_get()) : drAG_E->FK_CommandGroup_getrow()->Description_get()),
                             drAG_E->FK_CommandGroup_getrow()->FK_Icon_isNull() ? NULL : drAG_E->FK_CommandGroup_getrow()->FK_Icon_getrow(),
                             drAG_E->FK_CommandGroup_getrow()->FK_Criteria_Orbiter_isNull() ? 0 : drAG_E->FK_CommandGroup_getrow()->FK_Criteria_Orbiter_get(),
                             !bNoSubstitutions && drAG_E->FK_CommandGroup_getrow()->FK_DesignObj_isNull() ? 0 : drAG_E->FK_CommandGroup_getrow()->FK_DesignObj_get(),
@@ -1759,6 +1761,10 @@ vector<class ArrayValue *> *DesignObj_Generator::GetArrayValues(Row_DesignObjVar
 
 				alArray->push_back(new ArrayValue("0",	GetText(TEXT_Filename_CONST),
                     NULL, 0, 0, 0, 0,false,false,false));
+				
+				// TODO: Add another filter to show recently added media files
+				//alArray->push_back(new ArrayValue("-2",	GetText(TEXT_Recently_Added_CONST),
+                //    NULL, 0, 0, 0, 0,false,false,false));
 
 				vector<Row_MediaType_AttributeType *> vectRow_MediaType_AttributeType;
 				m_pOrbiterGenerator->m_spDatabase_pluto_media->MediaType_AttributeType_get()->GetRows(sSQL,&vectRow_MediaType_AttributeType);
