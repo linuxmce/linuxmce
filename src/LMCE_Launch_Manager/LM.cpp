@@ -649,13 +649,13 @@ bool LM::confirmOrbiterSkinIsReady()
 		{
 			if (orbiterRecordID=="")
 			{
-				writeLog("First time generating skin for current Orbiter #"+m_sOrbiterID, true);
-				writeOSD("First time generating skin for Orbiter #"+m_sOrbiterID);
+				writeLog("First time generating skin for current Orbiter "+m_sOrbiterID, true);
+				writeOSD("First time generating skin for Orbiter "+m_sOrbiterID);
 			}
 			else
 			{
-				writeOSD("Regenerating skin for current Orbiter #"+m_sOrbiterID);
-				writeLog("Regenerating skin for current Orbiter #"+m_sOrbiterID, true);
+				writeOSD("Regenerating skin for current Orbiter "+m_sOrbiterID);
+				writeLog("Regenerating skin for current Orbiter "+m_sOrbiterID, true);
 			}
 			sleep(3);
 		}
@@ -1684,15 +1684,15 @@ bool LM::startCoreServices()
 						{
 							//Don't append the log on the first time through
 							if(currOrbiterID!="") {
-								appendLog("Regenerating Orbiter #" + currOrbiterID +" - Finished.");
-								writeOSD("Regenerating Orbiter #" + currOrbiterID + " - Finished");
+								appendLog("Regenerating Orbiter " + currOrbiterID +" - Finished.");
+								writeOSD("Regenerating Orbiter " + currOrbiterID + " - Finished");
 							}
 							currOrbiterID = O_ID;
-							writeLog("Regenerating Orbiter #" + O_ID +" - starting...",true);
-							writeOSD("Regenerating Orbiter #" + O_ID +" - starting");	
+							writeLog("Regenerating Orbiter " + O_ID +" - starting...",true);
+							writeOSD("Regenerating Orbiter " + O_ID +" - starting");	
 						} else {
-							appendLog("Regenerating Orbiter #" + O_ID + " - "+StringUtils::itos(O_Progress) + "% ("+res.value(2)+")");
-							writeOSD ("Regenerating Orbiter #" + O_ID + " - "+StringUtils::itos(O_Progress) + "% ("+res.value(2)+")");
+							appendLog("Regenerating Orbiter " + O_ID + " - "+StringUtils::itos(O_Progress) + "% ("+res.value(2)+")");
+							writeOSD ("Regenerating Orbiter " + O_ID + " - "+StringUtils::itos(O_Progress) + "% ("+res.value(2)+")");
 						}
 						m_iProgress = O_Progress;
 					}
@@ -1857,10 +1857,10 @@ void LM::updateOrbiterRegenProgress()
 			DBResult res = m_dbPlutoDatabase.query("select PK_Orbiter, RegenPercent,RegenStatus from Orbiter where RegenInProgress=1 AND PK_Orbiter="+m_sOrbiterID);
 			if(res.next())
 			{
-				string statusMessage = "Orbiter #" + res.value(0)+ "\n"+res.value(2);
+				string statusMessage = "Orbiter " + res.value(0)+ "\n"+res.value(2);
 				//TODO: appendLog??
-				appendLog("Regenerating orbiter #" +res.value(0)+"..."+res.value(1)+"%");
-				writeOSD("Regenerating Orbiter #"+res.value(0)+" "+res.value(1)+"%");
+				appendLog("Regenerating orbiter " +res.value(0)+"..."+res.value(1)+"%");
+				writeOSD("Regenerating Orbiter "+res.value(0)+" "+res.value(1)+"%");
 				//tlStatusMessages->setText(statusMessage);
 				//tlStatusMessages->show();
 			}
@@ -1901,10 +1901,10 @@ void LM::updateOrbiterRegenProgress()
 			//if ( bQueryExecResult && q.next() )
 			if(res.next())
 			{
-				string statusMessage = "Orbiter #" + res.value(0) + "\n"+res.value(2);
+				string statusMessage = "Orbiter " + res.value(0) + "\n"+res.value(2);
 				//TODO: where to display this??
-				appendLog("Regenerating orbiter #" +res.value(0)+"..."+res.value(1)+"%");
-				writeOSD("Regenerating Orbiter #"+res.value(0)+" "+res.value(1)+"%");
+				appendLog("Regenerating orbiter " +res.value(0)+"..."+res.value(1)+"%");
+				writeOSD("Regenerating Orbiter "+res.value(0)+" "+res.value(1)+"%");
 				//tlStatusMessages->setText(statusMessage);
 				//tlStatusMessages->show();
 			}
