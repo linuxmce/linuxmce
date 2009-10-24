@@ -13,10 +13,15 @@
 #
 # In part copied from various places on the web.
 
+
 SourceIso=kubuntu-8.10-dvd-i386.iso
 SourceIso=kubuntu-8.10-desktop-i386.iso
 # SourceIso=karmic-desktop-i386.iso
 BUILDER_ROOT=/opt/builder386
+SVNrevision=$(svn info "$BUILDER_ROOT/var/lmce-build/svn/branches/LinuxMCE-0810/src" |grep ^Revision | cut -d" " -f2)
+
+echo Aktuell svn Revision $SVNrevision
+
 echo Make sure rsync, squashfs-tools and mkisofs is installed
 sudo apt-get install rsync squashfs-tools genisoimage -y
 #rm -fR ~/live-old
@@ -80,8 +85,6 @@ echo "Starting mce-install.sh"
 bash mce-install.sh
 echo "Running post-install.sh"
 bash post-install.sh
-echo "Creating startup script"
-ln -s /etc/rc5.d/S99linuxmce /etc/init.d/linuxmce
 echo "Done!"
 eol
 chmod +x edit/root/new-installer/full-install.sh
@@ -99,6 +102,7 @@ pushd  $DEST/usr/pluto/deb-cache
 # Generate the Packages files
 wget http://deb.linuxmce.org/ubuntu/dists/intrepid/lmce-alpha2/binary-all/libft-perl_1.0_all.deb 
 wget http://deb.linuxmce.org/ubuntu/dists/intrepid/lmce-alpha-latest/binary-all/mail-transport-agent_1.0_all.deb 
+wget http://deb.linuxmce.org/ubuntu/dists/intrepid/lmce-alpha-latest-updates/binary-i386/id-my-disc_1.8.ub0710_i386.deb
 echo  "Generating Packages / Packages.gz files"
 dpkg-scanpackages . /dev/null > Packages
 cat Packages | gzip -9c > Packages.gz
@@ -112,7 +116,7 @@ cat <<eol >edit/root/upgrade.sh
 #!/bin/bash
 export LC_ALL=C
 export DEBIAN_FRONTEND=noninteractive
-#export http_proxy="http://127.0.0.1:3128/"
+export http_proxy="http://127.0.0.1:3128/"
 apt-get update
 apt-get dist-upgrade -dy
 apt-get autoremove
@@ -124,6 +128,7 @@ bash ./pre-install-from-DVD.sh
 apt-get update
 apt-get dist-upgrade -y --force-yes
 apt-get install -y --force-yes mplayer
+apt-get install -y --force-yes libdancer-xml0
 apt-get -dy --force-yes install pluto-dcerouter
 # Install the nVidia drivers
 apt-get install -y --force-yes nvidia-glx-190 nvidia-190-modaliases nvidia-190-libvdpau
@@ -133,6 +138,12 @@ apt-get install -y joe
 
 # Install festival voices
 apt-get install -y --force-yes festival festival-czech festival-hi festival-mr festival-te festvox-czech-ph festvox-don festvox-ellpc11k festvox-hi-nsk festvox-italp16k festvox-itapc16k festvox-kallpc16k festvox-kdlpc16k festvox-mr-nsk festvox-rablpc16k festvox-suopuhe-common festvox-suopuhe-lj festvox-suopuhe-mv festvox-te-nsk 
+# pre Install Diskless tools
+apt-get install -y --force-yes mce-diskless-tools
+pushd /usr/pluto/bin
+./Diskless_CreateTBZ.sh
+echo Done!
+popd
 # Now we setup the package selection that we'd like to have
 wget http://deb.linuxmce.org/ubuntu/kubuntu810desktop-selection
 # Add the packages that are already installed
@@ -168,5 +179,7 @@ umount -l edit/lib/modules/2.6.27-14-generic/volatile
 umount squashfs
 umount mnt
 umount edit
-echo "Done. Please run finalizedvd.sh"
+echo "Done. Please run finalizedvd.sh $SVNrevision"
+bash ~/finalizedvd.sh $SVNrevision
+mv ~/live/L*.iso /var/www
 exit 0

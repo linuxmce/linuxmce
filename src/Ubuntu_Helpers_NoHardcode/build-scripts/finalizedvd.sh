@@ -4,6 +4,8 @@
 # Copyright 2009, Peer Oliver Schmidt
 # License GPL v3
 #
+SVNrevision=$1
+echo Revision $SVNrevision
 pushd ~/live
 echo "Make files writeable"
 chmod +w extract-cd/casper/filesystem.manifest
@@ -81,6 +83,8 @@ rm extract-cd/md5sum.draft
 
 echo Create ISO Image
 cd extract-cd
-sudo mkisofs -allow-limited-size -quiet -D -r -V "$IMAGE_NAME" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o ../LinuxMCE-8.10-i386.iso .
+ISONAME=../LinuxMCE-8.10-$(SVNrevision)i386.iso
+SVNrevision=$(svn info "$svn_dir/$svn_branch_name/src" |grep ^Revision | cut -d" " -f2)
+sudo mkisofs -allow-limited-size -quiet -D -r -V "$IMAGE_NAME" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o $ISONAME .
 echo Done!
 exit 0
