@@ -6,9 +6,9 @@ function setupRunlevel3
 
 	rm -rfv /etc/rc3.d/*
 	cp -av /etc/rc2.d/* /etc/rc3.d/
-	ln -sfv ../init.d/core /etc/rc3.d/S99core
+	ln -sfv /etc/init.d/linuxmce /etc/rc5.d/S99linuxmce
 	rm -fv /etc/rc3.d/S99kdm /etc/rc3.d/S990start_avwizard
-
+	
 }
 
 
@@ -18,7 +18,7 @@ function setupRunlevel4
 
 	rm -rfv /etc/rc4.d/*
 	cp -av /etc/rc2.d/* /etc/rc4.d/
-	ln -sfv ../init.d/core /etc/rc4.d/S99core
+	ln -sfv /etc/init.d/linuxmce /etc/rc5.d/S99linuxmce
 
 }
 
@@ -32,7 +32,7 @@ function setupRunlevel5
 #	ln -sfv /usr/pluto/bin/Start_X.sh /etc/rc5.d/S30Start_X.sh
 #	ln -sfv /usr/pluto/bin/startup-script.sh /etc/rc5.d/S93startup-script.sh
 #	ln -sfv /usr/pluto/bin/lmce_launch_manager.sh /etc/rc5.d/S99lmce_launch_manager.sh
-	ln -sfv /etc/init.d/linuxmce /etc/rc5.d/S93linuxmce
+	ln -sfv /etc/init.d/linuxmce /etc/rc5.d/S99linuxmce
 #	rm -fv /etc/rc5.d/S99kdm
 
 }
