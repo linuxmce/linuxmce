@@ -14,14 +14,7 @@ for dir in /home/* ;do
 done
 
 # Make sure the old startup scripts no longer exists
-rm -f /etc/rc5.d/{S99core,S99launch-manager}
+rm -f /etc/rc{3,4,5}.d/{S30Start_X.sh,S93startup-script.sh,S99lmce_launch_manager.sh,S93linuxmce,S99core,S99launch-manager}
 
-# Make sure the new startup scripts are being used
-#ln -sfv /usr/pluto/bin/Start_X.sh /etc/rc5.d/S30Start_X.sh
-#ln -sfv /usr/pluto/bin/startup-script.sh /etc/rc5.d/S93startup-script.sh
-#ln -sfv /usr/pluto/bin/lmce_launch_manager.sh /etc/rc5.d/S99lmce_launch_manager.sh
-rm -f /etc/rc5.d/S30Start_X.sh
-rm -f /etc/rc5.d/S93startup-script.sh
-rm -f /etc/rc5.d/S99lmce_launch_manager.sh
- 
-ln -sfv /etc/init.d/linuxmce /etc/rc5.d/S93linuxmce
+# Add a single new startup script.
+ln -sfv /etc/init.d/linuxmce /etc/rc5.d/S99linuxmce
