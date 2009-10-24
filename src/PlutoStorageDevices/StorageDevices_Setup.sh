@@ -52,15 +52,21 @@ if ! mountpoint /mnt/upnp ;then
 	fi
 fi
 
-# Call MythTV Setup to alter storage groups. 
-if [ -x /usr/pluto/bin/mythtv_setup.pl ] ; then
-	/usr/pluto/bin/mythtv_setup.pl
-fi
+#Create a way to determine if MythTV is installed...
+Q="SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=36"
+MythTV_Installed=$(RunSQL "$Q")
 
-#Alter mythconverg.settings to force Media Directors to stream recordings from the backend on the core to avoid errors with non-system drive storage groups
-Q="UPDATE settings SET data=1 where value='AlwaysStreamFiles'"
-UseDB "mythconverg"
-RunSQL "$Q"
+if [[ $MythTV_Installed ]] ;then
+	# Call MythTV Setup to alter storage groups. 
+	if [ -x /usr/pluto/bin/mythtv_setup.pl ] ; then
+		/usr/pluto/bin/mythtv_setup.pl
+	fi
+
+	#Alter mythconverg.settings to force Media Directors to stream recordings from the backend on the core to avoid errors with non-system drive storage groups
+	Q="UPDATE settings SET data=1 where value='AlwaysStreamFiles'"
+	UseDB "mythconverg"
+	RunSQL "$Q"
+fi
 
 ## Call this script on the other machines too
 if [[ $TrigerCascade == "true" ]] ;then
