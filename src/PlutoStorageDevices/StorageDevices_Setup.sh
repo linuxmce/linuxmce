@@ -4,6 +4,7 @@
 . /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/Section_Ops.sh
 . /usr/pluto/bin/Utils.sh
+. /usr/pluto/bin/SQL_Ops.sh
 AutoMaster_StorageDevices="/mnt/device /etc/auto.PlutoStorageDevices --timeout=30"
 PopulateSection "/etc/auto.master" "PlutoStorageDevices" "$AutoMaster_StorageDevices"
 mkdir -p /mnt/device
@@ -55,6 +56,11 @@ fi
 if [ -x /usr/pluto/bin/mythtv_setup.pl ] ; then
 	/usr/pluto/bin/mythtv_setup.pl
 fi
+
+#Alter mythconverg.settings to force Media Directors to stream recordings from the backend on the core to avoid errors with non-system drive storage groups
+Q="UPDATE settings SET data=1 where value='AlwaysStreamFiles'"
+UseDB "mythconverg"
+RunSQL "$Q"
 
 ## Call this script on the other machines too
 if [[ $TrigerCascade == "true" ]] ;then
