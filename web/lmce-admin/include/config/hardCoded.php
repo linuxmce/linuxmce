@@ -335,6 +335,8 @@
 	$GLOBALS['CVSorSVN']=array(2,5,6);  	// the PK_RepositoryType for CVS or SVN  from table RepositoryType
 	
 	$GLOBALS['hardware_acceleration']=array(
+	'auto'=>'auto',
+	'vdpau'=>'vdpau',
 	'cle266x11'=>'cle266x11',
 	'xv'=>'xv',
 	'xxmc'=>'xxmc',
