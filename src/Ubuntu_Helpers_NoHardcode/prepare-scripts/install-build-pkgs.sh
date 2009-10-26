@@ -11,7 +11,7 @@ echo "*** Running: $0"
 echo "********************************************************************************"
 
 # Install packages
-apt-get -q -f -y install `cat $lmce_build_conf_dir/build-packages`
+apt-get -q -f -y --force-yes install `cat $lmce_build_conf_dir/build-packages`
 
 # Unpack kernel source
 pushd /usr/src
