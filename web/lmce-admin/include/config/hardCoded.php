@@ -342,6 +342,7 @@
 	'xxmc'=>'xxmc',
 	'opengl'=>'opengl',
 	'sdl'=>'sdl',
+	'manual'=>'manual',
 	'xshm'=>'xshm');
 	
 	$GLOBALS['vdr_from_path']='/usr/pluto/templates/vdr/';
