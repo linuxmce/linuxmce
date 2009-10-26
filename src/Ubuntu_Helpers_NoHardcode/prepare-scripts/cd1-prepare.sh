@@ -28,7 +28,7 @@ if ! grep -qF "$avenard_repo" /etc/apt/sources.list; then
 fi
 
 pushd "${build_dir}/cd1-packages"
-	aptitude download `cat /etc/lmce-build/cd1-packages`
+	aptitude -y --force-yes download `cat /etc/lmce-build/cd1-packages`
 popd
 
 echo "*** Done: $0"
