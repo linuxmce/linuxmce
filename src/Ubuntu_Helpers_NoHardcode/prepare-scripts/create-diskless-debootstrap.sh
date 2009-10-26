@@ -15,10 +15,21 @@ function Create_Diskless_Debootstrap_Archive {
 	local temp_dir="$(mktemp -d)"
 
 	# Run debootstrap in that dir
-	debootstrap "${build_name}" "$temp_dir" http://ro.archive.ubuntu.com/ubuntu/
+	debootstrap "${build_name}" "$temp_dir" http://archive.ubuntu.com/ubuntu/
 
 	# Clean it's apt cache so we don't end up with it in the archive
 	rm -f $temp_dir/var/cache/apt/archives/*.deb
+	
+	# Add some needed repos
+	echo deb http://archive.ubuntu.com/ubuntu/ $build_name main restricted universe multiverse >$temp_dir/etc/apt/sources.list
+	echo deb http://security.ubuntu.com/ubuntu/ $build_name main restricted universe multiverse >>$temp_dir/etc/apt/sources.list
+	echo deb http://www.avenard.org/files/ubuntu-repos $build_name release testing >>$temp_dir/etc/apt/sources.list
+#	echo deb http://deb.linuxmce.org/ubuntu/  ${DISTRO}  ${COMPOS} >$temp_dir/etc/apt/sources.list
+	
+	echo "192.168.80.1 dcerouter" >>$temp_dir/etc/hosts
+
+	# And make sure, the latest repos info is available
+	chroot $temp_dir apt-get update
 
 	# Pack the diskless image in the right dir
 	mkdir -p "$diskless_dir"
