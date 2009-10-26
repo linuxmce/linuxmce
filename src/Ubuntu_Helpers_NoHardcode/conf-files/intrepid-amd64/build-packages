@@ -125,6 +125,7 @@ libtool
 libtwolame-dev
 libupnp-dev
 libusb-dev
+libvdpau-dev
 libvte-dev
 libwavpack-dev
 libx11-dev
@@ -143,6 +144,12 @@ libxxf86vm-dev
 linux-headers-2.6.27-9-generic
 linux-image-2.6.27-9-generic
 linux-restricted-modules-2.6.27-9-generic
+linux-headers-2.6.27-14-generic
+linux-image-2.6.27-14-generic
+linux-restricted-modules-2.6.27-14-generic
+linux-headers-2.6.27-15-generic
+linux-image-2.6.27-15-generic
+linux-restricted-modules-2.6.27-15-generic
 linux-source-2.6.27
 lirc-modules-source
 module-assistant
