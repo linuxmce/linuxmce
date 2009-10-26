@@ -224,15 +224,16 @@ void Xine_Stream_Factory::DetectOutputDrivers()
 	xine_config_register_enum( m_pXineLibrary, "video.driver", 0, driver_ids, "video driver to use", "Choose video driver. NOTE: you may restart xine to use the new driver", 0, NULL, NULL );	
 	
 	// setting video driver
+	// TODO: Shouldn't we use Xine_Stream_Factory::setVideoDriver in here as well?
 	if ( xine_config_lookup_entry ( m_pXineLibrary, "video.driver", &xineConfigEntry ) )
 	{
 		driver_names = xine_list_video_output_plugins( m_pXineLibrary );
 		m_sXineVideoDriverName = driver_ids[ xineConfigEntry.num_value ];
 		LoggerWrapper::GetInstance()->Write( LV_STATUS, "Using video driver: %s", m_sXineVideoDriverName.c_str() );
 	}
-	else
+	else	
 		LoggerWrapper::GetInstance()->Write( LV_STATUS, "Video driver key was not defined in the config file, using hardcoded default: %s", m_sXineVideoDriverName.c_str() );
-	
+
 	i = 0;
 	while (driver_ids[i])
 	{
@@ -621,15 +622,8 @@ void Xine_Stream_Factory::CloseStreamAV(int iStreamID)
 
 void Xine_Stream_Factory::setVideoDriver(string strVideoDriver)
 {
-	if ( (strVideoDriver!="") && (strVideoDriver=="cle266x11"||strVideoDriver=="xv"||strVideoDriver=="xxmc"||strVideoDriver=="opengl"||strVideoDriver=="sdl"||strVideoDriver=="xshm") )
-	{
-		LoggerWrapper::GetInstance()->Write( LV_STATUS, "Overriding video driver setting, using '%s' for video output", strVideoDriver.c_str());
-		m_sXineVideoDriverName = strVideoDriver;
-	}
-	else
-	{
-		LoggerWrapper::GetInstance()->Write( LV_STATUS, "Not overriding video driver setting, device data is not acceptable: '%s'", strVideoDriver.c_str());
-	}
+	LoggerWrapper::GetInstance()->Write( LV_STATUS, "Overriding video.driver setting in xine.conf, using '%s' from web admin for video output", strVideoDriver.c_str());
+	m_sXineVideoDriverName = strVideoDriver;
 }
 
 
