@@ -437,7 +437,7 @@ void MythTV_Player::pollMythStatus()
 			if (SetMode == "Playback")
 			{
 				m_mythStatus_set(MYTHSTATUS_PLAYBACK);
-				if (vectResults[1]=="TV")
+				if (vectResults[1]=="LiveTV")
 				{
 					m_CurTime = StringUtils::TimeAsSeconds(vectResults[2]);
 					m_EndTime = StringUtils::TimeAsSeconds(vectResults[4]);
