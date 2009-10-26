@@ -22,7 +22,7 @@ eval `cat /etc/mythtv/mysql.txt | grep -v "^#" | grep -v "^$"`;
 mysql_command="mysql -s -B -u $DBUserName -h $DBHostName -p$DBPassword $DBName";
 
 Q="select IK_DeviceData from Device_DeviceData where FK_DeviceData=206"
-AutoConf=$(echo "$Q" | /usr/bin/mysql -h $MySqlHost pluto_main | tail -n +2)
+AutoConf=$(echo "$Q" | /usr/bin/mysql -h $MySqlHost $MySqlDBName | tail -n +2)
 
 if [[ "$AutoConf" == "1" ]]; then
     echo "Auto Configure is set"
