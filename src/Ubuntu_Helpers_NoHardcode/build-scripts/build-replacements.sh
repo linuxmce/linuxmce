@@ -156,6 +156,9 @@ function Build_Replacements_Intrepid
 		popd
 	fi
 
+        #Package: libxine 
+	Build_Replacement_Package libxine ubuntu/xine-lib-1.1.16.3-0ubuntu2~xine 
+		 
 	#Package: vdr-plugin-xineliboutput
 	Build_Replacement_Package vdr-plugin-xineliboutput ubuntu/vdr-plugin-xineliboutput-1.0.1+lmce
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/libxine*.deb ${replacements_dir}
