@@ -104,7 +104,7 @@ function Build_Replacements_Common
 	#Package: linux-image-diskless
 	dir_=${svn_dir}/${svn_branch_name}/ubuntu/linux-image-dummy
 	if Changed_Since_Last_Build "$dir_" ;then
-		DisplayMessage "Building linux-image-diskless"
+		DisplayMessage "Building linux-image-diskless for $KVER"
 		pushd "$dir_"
 		./makepackage.sh	
 		cp linux-image-diskless_*.deb "${replacements_dir}"		
