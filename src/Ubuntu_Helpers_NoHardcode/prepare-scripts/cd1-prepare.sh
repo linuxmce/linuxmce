@@ -21,6 +21,12 @@ if ! grep -qF "$slim_repo" /etc/apt/sources.list; then
 	apt-get update
 fi
 
+avenard_repo="deb http://www.avenard.org/files/ubuntu-repos/ intrepid release testing"
+if ! grep -qF "$avenard_repo" /etc/apt/sources.list; then
+	echo "$avenard_repo" >> /etc/apt/sources.list
+	apt-get update
+fi
+
 pushd "${build_dir}/cd1-packages"
 	aptitude download `cat /etc/lmce-build/cd1-packages`
 popd
