@@ -318,4 +318,4 @@ sub get_timeout()
 
 `chown asterisk:asterisk /etc/asterisk/*`;
 
-`asterisk -rx reload`;
+`asterisk -r -x reload`;
