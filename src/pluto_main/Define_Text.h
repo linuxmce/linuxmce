@@ -1159,6 +1159,7 @@
 #define TEXT_Player_1_CONST 2102
 #define TEXT_Clean_Screen_CONST 2103
 #define TEXT_Clean_Screen_Button_CONST 2104
+#define TEXT_On_Screen_Remote_Active_CONST 2105
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"

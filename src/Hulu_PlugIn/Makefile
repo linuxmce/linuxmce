@@ -11,23 +11,21 @@ CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
 BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
-MYNAME = Game_PlugIn
+MYNAME = Hulu_PlugIn
 VERSION = 2.0.0
-MYDEVTEMPLATEID = 1964mplateID
+MYDEVTEMPLATEID = 2021mplateID
 
-Gen_Dev_Files = $(GENDEV)/Game_PlugInBase.cpp
-sources = Main.cpp Game_PlugIn.cpp $(Gen_Dev_Files)
+Gen_Dev_Files = $(GENDEV)/Hulu_PlugInBase.cpp
+sources = Main.cpp Hulu_PlugIn.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=
 CPPFLAGS +=
 LDFLAGS +=
-XTRALDLIBS = -llmce_game
+XTRALDLIBS = -lmysqlclient_r
 
 Gen_Dev_Files +=
-sources += GAMEROM.cpp \
-	GameMediaStream.cpp
-	
+sources += HuluMediaStream.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
@@ -37,23 +35,23 @@ whattodo:
 
 all: bin so
 
-bin: Game_PlugIn
+bin: Hulu_PlugIn
 
-so: Game_PlugIn.so
+so: Hulu_PlugIn.so
 
-Game_PlugIn.so: $(sources:.cpp=.o)
+Hulu_PlugIn.so: $(sources:.cpp=.o)
 	$(CXX) -shared -o $(MYNAME).so $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	cp $@ ../bin
 	chmod +x post_make.sh
 	./post_make.sh $@
 		
-Game_PlugIn: $(sources:.cpp=.o)
+Hulu_PlugIn: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	cp $@ ../bin
 	./post_make.sh $@
 
 clean: clean-recursive
-	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) Game_PlugIn.bin Game_PlugIn.so >/dev/null
+	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) Hulu_PlugIn Hulu_PlugIn.so >/dev/null
 
 package:
 	chmod +x make_package.sh

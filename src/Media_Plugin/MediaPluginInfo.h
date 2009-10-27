@@ -52,6 +52,7 @@ namespace DCE
 #define MEDIASTREAM_TYPE_MYTHTV         100
 #define MEDIASTREAM_TYPE_XINE           101
 #define MEDIASTREAM_TYPE_GAME		106
+#define MEDIASTREAM_TYPE_HULU		107
 
     /** @brief
      *

@@ -59,6 +59,7 @@ namespace DCE
 #define MEDIASTREAM_TYPE_VDR			104
 #define MEDIASTREAM_TYPE_MOXI			105
 #define MEDIASTREAM_TYPE_GAME			106
+#define MEDIASTREAM_TYPE_HULU			107
 
 	/** @brief
 	*

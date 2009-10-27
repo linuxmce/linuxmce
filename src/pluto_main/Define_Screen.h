@@ -159,8 +159,8 @@
 #define SCREEN_Game_SG1000_SMS_NES_Famicom_Monitor_Mode_CONST 158
 #define SCREEN_Game_SG1000_SMS_NES_Famicom_FS_CONST 159
 #define SCREEN_Game_SG1000_SMS_NES_Famicom_FS_Options_CONST 160
-#define SCREEN_AudiEmail_CONST 161
-#define SCREEN_AudiAgenda_CONST 162
+#define SCREEN_Game_Menu_Onscreen_NonOSD_CONST 161
+#define SCREEN_Hulu_Remote_CONST 162
 #define SCREEN_AudiOther_CONST 163
 #define SCREEN_AudiNav_CONST 164
 #define SCREEN_AudiInfo_CONST 165

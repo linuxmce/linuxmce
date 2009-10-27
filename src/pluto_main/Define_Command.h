@@ -893,6 +893,12 @@
 #define COMMAND_HDMI1_CONST 984
 #define COMMAND_HDMI_4_CONST 985
 #define COMMAND_Sync_Storage_Groups_CONST 986
+#define COMMAND_VCRDVR_CONST 987
+#define COMMAND_CBLSAT_CONST 988
+#define COMMAND_TV_Power_Script_CONST 989
+#define COMMAND_Virtual_On_CONST 990
+#define COMMAND_Virtual_Off_CONST 991
+#define COMMAND_Virtual_Power_Toggle_CONST 992
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"

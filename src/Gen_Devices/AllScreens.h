@@ -8254,10 +8254,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiTV : public PreformedCommand
+	class SCREEN_Game_SG1000_SMS_NES_Famicom : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiTV(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_SG1000_SMS_NES_Famicom(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "157" /* screen ID */
@@ -8267,10 +8267,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiTV_DL : public PreformedCommand
+	class SCREEN_Game_SG1000_SMS_NES_Famicom_DL : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiTV_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_SG1000_SMS_NES_Famicom_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "157" /* screen ID */
@@ -8280,10 +8280,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiTV_DT : public PreformedCommand
+	class SCREEN_Game_SG1000_SMS_NES_Famicom_DT : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiTV_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_SG1000_SMS_NES_Famicom_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "157" /* screen ID */
@@ -8293,10 +8293,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiTV_Cat : public PreformedCommand
+	class SCREEN_Game_SG1000_SMS_NES_Famicom_Cat : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiTV_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_SG1000_SMS_NES_Famicom_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "157" /* screen ID */
@@ -8306,10 +8306,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiCD : public PreformedCommand
+	class SCREEN_Game_SG1000_SMS_NES_Famicom_Monitor_Mode : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiCD(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_SG1000_SMS_NES_Famicom_Monitor_Mode(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "158" /* screen ID */
@@ -8319,10 +8319,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiCD_DL : public PreformedCommand
+	class SCREEN_Game_SG1000_SMS_NES_Famicom_Monitor_Mode_DL : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiCD_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_SG1000_SMS_NES_Famicom_Monitor_Mode_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "158" /* screen ID */
@@ -8332,10 +8332,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiCD_DT : public PreformedCommand
+	class SCREEN_Game_SG1000_SMS_NES_Famicom_Monitor_Mode_DT : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiCD_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_SG1000_SMS_NES_Famicom_Monitor_Mode_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "158" /* screen ID */
@@ -8345,10 +8345,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiCD_Cat : public PreformedCommand
+	class SCREEN_Game_SG1000_SMS_NES_Famicom_Monitor_Mode_Cat : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiCD_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_SG1000_SMS_NES_Famicom_Monitor_Mode_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "158" /* screen ID */
@@ -8358,10 +8358,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiStoredMedia : public PreformedCommand
+	class SCREEN_Game_SG1000_SMS_NES_Famicom_FS : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiStoredMedia(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_SG1000_SMS_NES_Famicom_FS(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "159" /* screen ID */
@@ -8371,10 +8371,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiStoredMedia_DL : public PreformedCommand
+	class SCREEN_Game_SG1000_SMS_NES_Famicom_FS_DL : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiStoredMedia_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_SG1000_SMS_NES_Famicom_FS_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "159" /* screen ID */
@@ -8384,10 +8384,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiStoredMedia_DT : public PreformedCommand
+	class SCREEN_Game_SG1000_SMS_NES_Famicom_FS_DT : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiStoredMedia_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_SG1000_SMS_NES_Famicom_FS_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "159" /* screen ID */
@@ -8397,10 +8397,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiStoredMedia_Cat : public PreformedCommand
+	class SCREEN_Game_SG1000_SMS_NES_Famicom_FS_Cat : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiStoredMedia_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_SG1000_SMS_NES_Famicom_FS_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "159" /* screen ID */
@@ -8410,10 +8410,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiInternet : public PreformedCommand
+	class SCREEN_Game_SG1000_SMS_NES_Famicom_FS_Options : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiInternet(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_SG1000_SMS_NES_Famicom_FS_Options(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "160" /* screen ID */
@@ -8423,10 +8423,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiInternet_DL : public PreformedCommand
+	class SCREEN_Game_SG1000_SMS_NES_Famicom_FS_Options_DL : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiInternet_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_SG1000_SMS_NES_Famicom_FS_Options_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "160" /* screen ID */
@@ -8436,10 +8436,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiInternet_DT : public PreformedCommand
+	class SCREEN_Game_SG1000_SMS_NES_Famicom_FS_Options_DT : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiInternet_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_SG1000_SMS_NES_Famicom_FS_Options_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "160" /* screen ID */
@@ -8449,10 +8449,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiInternet_Cat : public PreformedCommand
+	class SCREEN_Game_SG1000_SMS_NES_Famicom_FS_Options_Cat : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiInternet_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_SG1000_SMS_NES_Famicom_FS_Options_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "160" /* screen ID */
@@ -8462,10 +8462,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiEmail : public PreformedCommand
+	class SCREEN_Game_Menu_Onscreen_NonOSD : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiEmail(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_Menu_Onscreen_NonOSD(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "161" /* screen ID */
@@ -8475,10 +8475,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiEmail_DL : public PreformedCommand
+	class SCREEN_Game_Menu_Onscreen_NonOSD_DL : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiEmail_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_Menu_Onscreen_NonOSD_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "161" /* screen ID */
@@ -8488,10 +8488,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiEmail_DT : public PreformedCommand
+	class SCREEN_Game_Menu_Onscreen_NonOSD_DT : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiEmail_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_Menu_Onscreen_NonOSD_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "161" /* screen ID */
@@ -8501,10 +8501,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiEmail_Cat : public PreformedCommand
+	class SCREEN_Game_Menu_Onscreen_NonOSD_Cat : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiEmail_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Game_Menu_Onscreen_NonOSD_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "161" /* screen ID */
@@ -8514,10 +8514,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiAgenda : public PreformedCommand
+	class SCREEN_Hulu_Remote : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiAgenda(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Hulu_Remote(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "162" /* screen ID */
@@ -8527,10 +8527,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiAgenda_DL : public PreformedCommand
+	class SCREEN_Hulu_Remote_DL : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiAgenda_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Hulu_Remote_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "162" /* screen ID */
@@ -8540,10 +8540,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiAgenda_DT : public PreformedCommand
+	class SCREEN_Hulu_Remote_DT : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiAgenda_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Hulu_Remote_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "162" /* screen ID */
@@ -8553,10 +8553,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiAgenda_Cat : public PreformedCommand
+	class SCREEN_Hulu_Remote_Cat : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiAgenda_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Hulu_Remote_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "162" /* screen ID */
@@ -9138,10 +9138,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiAudioRemote : public PreformedCommand
+	class SCREEN_CleanScreen : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiAudioRemote(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_CleanScreen(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "174" /* screen ID */
@@ -9151,10 +9151,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiAudioRemote_DL : public PreformedCommand
+	class SCREEN_CleanScreen_DL : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiAudioRemote_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_CleanScreen_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "174" /* screen ID */
@@ -9164,10 +9164,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiAudioRemote_DT : public PreformedCommand
+	class SCREEN_CleanScreen_DT : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiAudioRemote_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_CleanScreen_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "174" /* screen ID */
@@ -9177,10 +9177,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiAudioRemote_Cat : public PreformedCommand
+	class SCREEN_CleanScreen_Cat : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiAudioRemote_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_CleanScreen_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "174" /* screen ID */
@@ -15358,12 +15358,12 @@ PK_DeviceData .... */, sOptions.c_str(), 224 /* PK_PnpQueue */, StringUtils::lto
 		virtual void SCREEN_Game_Atari_5200_Monitor_Mode(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_Game_Atari_5200_FS(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_Game_Atari_5200_FS_Options(long PK_Screen){ GotoScreen(PK_Screen); }
-		virtual void SCREEN_AudiTV(long PK_Screen){ GotoScreen(PK_Screen); }
-		virtual void SCREEN_AudiCD(long PK_Screen){ GotoScreen(PK_Screen); }
-		virtual void SCREEN_AudiStoredMedia(long PK_Screen){ GotoScreen(PK_Screen); }
-		virtual void SCREEN_AudiInternet(long PK_Screen){ GotoScreen(PK_Screen); }
-		virtual void SCREEN_AudiEmail(long PK_Screen){ GotoScreen(PK_Screen); }
-		virtual void SCREEN_AudiAgenda(long PK_Screen){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_Game_SG1000_SMS_NES_Famicom(long PK_Screen){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_Game_SG1000_SMS_NES_Famicom_Monitor_Mode(long PK_Screen){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_Game_SG1000_SMS_NES_Famicom_FS(long PK_Screen){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_Game_SG1000_SMS_NES_Famicom_FS_Options(long PK_Screen){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_Game_Menu_Onscreen_NonOSD(long PK_Screen){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_Hulu_Remote(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_AudiOther(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_AudiNav(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_AudiInfo(long PK_Screen){ GotoScreen(PK_Screen); }
@@ -15375,7 +15375,7 @@ PK_DeviceData .... */, sOptions.c_str(), 224 /* PK_PnpQueue */, StringUtils::lto
 		virtual void SCREEN_AudiTelecom(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_AudiFullScreen(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_AudiVideoRemote(long PK_Screen){ GotoScreen(PK_Screen); }
-		virtual void SCREEN_AudiAudioRemote(long PK_Screen){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_CleanScreen(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_VideoWizard(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_DialogCannotPlayMedia(long PK_Screen, string sErrors){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_DialogRippingInProgress(long PK_Screen, string sPK_Device_From, string sPK_Device_Ripping){ GotoScreen(PK_Screen); }
@@ -16476,37 +16476,37 @@ PK_DeviceData .... */, sOptions.c_str(), 224 /* PK_PnpQueue */, StringUtils::lto
 				case 157:
 				{
 					ResetCallBacks();
-					SCREEN_AudiTV(nPK_Screen);
+					SCREEN_Game_SG1000_SMS_NES_Famicom(nPK_Screen);
 					break;
 				}
 				case 158:
 				{
 					ResetCallBacks();
-					SCREEN_AudiCD(nPK_Screen);
+					SCREEN_Game_SG1000_SMS_NES_Famicom_Monitor_Mode(nPK_Screen);
 					break;
 				}
 				case 159:
 				{
 					ResetCallBacks();
-					SCREEN_AudiStoredMedia(nPK_Screen);
+					SCREEN_Game_SG1000_SMS_NES_Famicom_FS(nPK_Screen);
 					break;
 				}
 				case 160:
 				{
 					ResetCallBacks();
-					SCREEN_AudiInternet(nPK_Screen);
+					SCREEN_Game_SG1000_SMS_NES_Famicom_FS_Options(nPK_Screen);
 					break;
 				}
 				case 161:
 				{
 					ResetCallBacks();
-					SCREEN_AudiEmail(nPK_Screen);
+					SCREEN_Game_Menu_Onscreen_NonOSD(nPK_Screen);
 					break;
 				}
 				case 162:
 				{
 					ResetCallBacks();
-					SCREEN_AudiAgenda(nPK_Screen);
+					SCREEN_Hulu_Remote(nPK_Screen);
 					break;
 				}
 				case 163:
@@ -16578,7 +16578,7 @@ PK_DeviceData .... */, sOptions.c_str(), 224 /* PK_PnpQueue */, StringUtils::lto
 				case 174:
 				{
 					ResetCallBacks();
-					SCREEN_AudiAudioRemote(nPK_Screen);
+					SCREEN_CleanScreen(nPK_Screen);
 					break;
 				}
 				case 175:
