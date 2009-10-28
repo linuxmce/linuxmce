@@ -17,4 +17,4 @@ done
 rm -f /etc/rc{3,4,5}.d/{S30Start_X.sh,S93startup-script.sh,S99lmce_launch_manager.sh,S93linuxmce,S99core,S99launch-manager}
 
 # Add a single new startup script.
-ln -sfv /etc/init.d/linuxmce /etc/rc5.d/S99linuxmce
+ln -sfv /etc/init.d/linuxmce /etc/rc{2,5}.d/S99linuxmce
