@@ -28,9 +28,9 @@ foreach $dbname (@databases) {
 
 # Add new field to CommandGroup
 $sql = "ALTER TABLE pluto_main.CommandGroup ADD FK_Text INT(11) DEFAULT NULL AFTER TemplateParm2";
-$st2 = $db->prepare($sql)
+$st2 = $db->prepare($sql);
 # or die "Error in prepare $sql\n";
-$st2->execute()
+$st2->execute();
 # or die "Error on execute $sql\n";
                                  
 $db->disconnect();
