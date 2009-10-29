@@ -10,7 +10,7 @@
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 
-#define MPLAYER_BINARY "/opt/pluto-mplayer/bin/mplayer"
+#define MPLAYER_BINARY "/usr/bin/mplayer"
 #define MPLAYER_BINARY_SHORT "mplayer"
 
 using namespace std;
