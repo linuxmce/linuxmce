@@ -191,6 +191,7 @@ void WizardPageVideoResolution::FillRefresh(WizardWidgetScrollList* List, const 
 		case 1: // VGA 2
 		case 2: // DVI
 		case 3: // DVI 2
+			List->AddItem("24 Hz", "24");
 			List->AddItem("50 Hz", "50");
 			List->AddItem("60 Hz", "60");
 			List->AddItem("65 Hz", "65");
