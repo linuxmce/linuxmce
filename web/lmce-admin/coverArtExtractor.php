@@ -42,7 +42,8 @@ $searchString=(isset($_REQUEST['Keyword1Type']))?$_REQUEST['Keyword1Type'].'='.$
 $searchString.=(isset($_REQUEST['Keyword2Type']))?'&'.$_REQUEST['Keyword2Type'].'='.$Keyword2Search:'';
 $searchString.=(isset($_REQUEST['Keyword3Type']))?'&'.$_REQUEST['Keyword3Type'].'='.$Keyword3Search:'';
 
-$orderBy=($searchIndex=='Music')?'titlerank':'salesrank';
+$isMusic = $searchIndex=='Music';
+$orderBy=($isMusic)?'titlerank':'salesrank';
 // Make the request for cover arts
 $requestCountry = "com"; // can be changed to co.uk, de, jp, fr or ca instead - Thanks to xtra on the wiki.
 $request='http://webservices.amazon.' . $requestCountry . '/onca/xml?Service=AWSECommerceService&AssociateTag='.ASSOCIATES_ID.'&Version='.AES_VERSION.'&SubscriptionId='. SUBID.'&Operation=ItemSearch&SearchIndex='.$searchIndex.'&ResponseGroup=Medium&Sort='.$orderBy.'&'.$searchString;
@@ -92,6 +93,11 @@ foreach ($Result['ItemSearchResponse']['Items'][0]['Item'] as $item) {
 		}		
 		if(isset($item['EditorialReviews']['EditorialReview'][0]['Content'])){
 			$attributes.="Synopsis\t".nl2br($item['EditorialReviews']['EditorialReview'][0]['Content'])."\n";
+		}
+
+		// If music, the Title should be imported as an Album attribute
+		if ($isMusic) {
+			$attributes = str_ireplace("\nTitle\t", "\nAlbum\t", $attributes);
 		}
 		
 		// grab the cover art if exist, download it and save the record in database

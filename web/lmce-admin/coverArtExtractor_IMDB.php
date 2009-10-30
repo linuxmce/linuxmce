@@ -40,6 +40,9 @@ $mediadbADO->Execute('
 	(?,?,?,?,?,?,?,?,?,?)',array($fileID,$discID,$attributeID,ENGINE.' | '.$searchIndex,$Keyword1Type,$Keyword1Search,$Keyword2Type,$Keyword2Search,$Keyword3Type,$Keyword3Search));
 $casID=$mediadbADO->Insert_ID();
 
+// If music, the Title should be imported as an Album attribute
+$isMusic = $searchIndex == "Music";
+$titleAttrName = $isMusic ? "Album" : "Title";
 
 $found=0;
 foreach ($myImdbIdResults as $item) { 
@@ -50,7 +53,7 @@ foreach ($myImdbIdResults as $item) {
 	$attributes = "";
 	
 	$attributes .= "IMDBID\t".$item->imdbid()."\n";
-	$attributes .= "Title\t".$myImdb->title()."\n";
+	$attributes .= $titleAttrName."\t".$myImdb->title()."\n";
 	$attributes .= "Release Date\t".$myImdb->year()."\n";
 	$attributes .= "Run Time\t".$myImdb->runtime()."\n";
 	$plot = $myImdb->plot();
