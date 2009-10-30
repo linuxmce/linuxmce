@@ -21,37 +21,38 @@ while(<CONF>)
 	chomp;
 	# In case we have a blank line in the configuration file, we don't want
 	# to choke
-	$option = "";
-	$value = "";
-	my ($option, $eq, $value) = split(/ /,$_);
+	if (length($_) > 0) 
+	{
+		my ($option, $eq, $value) = split(/ /,$_);
 
-	if ($option eq "DCERouter")
-	{
-		$DCERouter=$value;
-	}
-	elsif ($option eq "PK_Device")
-	{
-		$PK_Device=$value;
-	}
-	elsif ($option eq "MySqlHost")
-	{
-		$MySqlHost=$value;
-	}
-	elsif ($option eq "MySqlPort")
-	{
-		$MySqlPort=$value;
-	}
-	elsif ($option eq "MySqlUser")
-	{
-		$MySqlUser=$value;
-	}
-	elsif ($option eq "MySqlPassword")
-	{
-		$MySqlPassword=$value;
-	}
-	elsif ($option eq "MySqlDBName")
-	{
-		$MySqlDBName=$value;
+		if ($option eq "DCERouter")
+		{
+			$DCERouter=$value;
+		}
+		elsif ($option eq "PK_Device")
+		{
+			$PK_Device=$value;
+		}
+		elsif ($option eq "MySqlHost")
+		{
+			$MySqlHost=$value;
+		}
+		elsif ($option eq "MySqlPort")
+		{
+			$MySqlPort=$value;
+		}
+		elsif ($option eq "MySqlUser")
+		{
+			$MySqlUser=$value;
+		}
+			elsif ($option eq "MySqlPassword")
+		{
+			$MySqlPassword=$value;
+		}
+		elsif ($option eq "MySqlDBName")
+		{
+			$MySqlDBName=$value;
+		}
 	}
 }
 close(CONF);
