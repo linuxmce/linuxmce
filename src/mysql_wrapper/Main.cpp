@@ -115,8 +115,13 @@ int main(int argc, char **argv) {
 				unlink(unix_socket.c_str());
 			}
 			else
+			{
 				LOG << "Connected OK" << endl;
-
+				if( mysql_set_character_set( &mysql, "utf8" ) )
+					LOG << "Changing character set for connection to UTF-8\n");
+				else
+					LOG << "FAILED: " <<  "Failed to change character set for connection to UTF-8: " << mysql_error(&mysql) << endl;					
+			}	
 			try
 			{
 				while ( runConnection )
