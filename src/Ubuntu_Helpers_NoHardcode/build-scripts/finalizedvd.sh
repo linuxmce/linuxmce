@@ -76,7 +76,7 @@ label LinuxMCE
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/lmce.seed boot=casper only-ubiquity initrd=/casper/initrd.gz quiet splash --
 ">> extract-cd/isolinux/text.cfg
-sed -i s/default live/default LinuxMCE/g extract-cd/isolinux/text.cfg
+sed -i "s/default live/default LinuxMCE/g" extract-cd/isolinux/text.cfg
 echo Calculate a new MD5sum
 sudo rm extract-cd/md5sum.txt
 sudo find extract-cd -type f -print0 | xargs -0 md5sum > extract-cd/md5sum.draft
