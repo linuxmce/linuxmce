@@ -60,7 +60,8 @@ d-i	apt-setup/universe	boolean	true
 d-i	debian-installer/allow_unauthenticated	string	true
 d-i	pkgsel/include	string mysql-server openssh-server 
 d-i	apt-setup/local0/repository	string deb file:/usr/pluto/deb-cache ./
-d-i	apt-setup/local1/repository	string deb http://www.avenard.org/files/ubuntu-repos intrepid testing
+d-i	apt-setup/local1/repository	string deb http://www.avenard.org/files/ubuntu-repos intrepid release
+d-i	apt-setup/local2/repository	string deb http://deb.linuxmce.org/ intrepid beta2
 # d-i	preseed/late_command	string	bash /laterun.sh
 d-i	ubiquity/success_command	string	cp -r /cdrom/usr/pluto /target/usr
 d-i	ubiquity/summary	note
@@ -73,8 +74,9 @@ echo "
 label LinuxMCE
   menu label ^LinuxMCE Install
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/lmce.seed boot=casper only-ubiquity initrd=/casper/initrd.gz quiet splash --">> extract-cd/isolinux/text.cfg
-  
+  append  file=/cdrom/preseed/lmce.seed boot=casper only-ubiquity initrd=/casper/initrd.gz quiet splash --
+">> extract-cd/isolinux/text.cfg
+sed -i s/default live/default LinuxMCE/g extract-cd/isolinux/text.cfg
 echo Calculate a new MD5sum
 sudo rm extract-cd/md5sum.txt
 sudo find extract-cd -type f -print0 | xargs -0 md5sum > extract-cd/md5sum.draft
@@ -83,7 +85,7 @@ rm extract-cd/md5sum.draft
 
 echo Create ISO Image
 cd extract-cd
-ISONAME=../LinuxMCE-8.10-$(SVNrevision)i386.iso
+ISONAME=../LinuxMCE-8.10-$SVNrevision-i386.iso
 SVNrevision=$(svn info "$svn_dir/$svn_branch_name/src" |grep ^Revision | cut -d" " -f2)
 sudo mkisofs -allow-limited-size -quiet -D -r -V "$IMAGE_NAME" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o $ISONAME .
 echo Done!

@@ -94,8 +94,9 @@ DEST=edit
 mkdir -p $DEST/usr/pluto/deb-cache
 cp $BUILDER_ROOT/var/www/{*.deb,Package*,Release*} $DEST/usr/pluto/deb-cache
 # Temporarily remove the biggest files.
-rm $DEST/usr/pluto/deb-cache/{video-wizard-videos*,lmce-mame-metadata*,pluto-sample-media*}
-
+rm $DEST/usr/pluto/deb-cache/lmce-mame-metadata*
+#{video-wizard-videos*,pluto-sample-media*}
+# ,
 
 echo "Updating packages file"
 pushd  $DEST/usr/pluto/deb-cache
@@ -112,6 +113,7 @@ popd
 echo Now updating the install
 echo Creating an upgrade script
 cp ~/installed-programs edit/root/
+cp ~/selection edit/root/
 cat <<eol >edit/root/upgrade.sh
 #!/bin/bash
 export LC_ALL=C
@@ -125,6 +127,7 @@ dpkg --configure -a --abort-after 20000
 cd /root/new-installer
 bash ./mce-install-preseed.sh
 bash ./pre-install-from-DVD.sh
+echo deb http://fluffybitch.org/build/ ./>>/etc/apt/sources.list
 apt-get update
 apt-get dist-upgrade -y --force-yes
 apt-get install -y --force-yes mplayer
@@ -141,14 +144,15 @@ apt-get install -y --force-yes festival festival-czech festival-hi festival-mr f
 # pre Install Diskless tools
 apt-get install -y --force-yes mce-diskless-tools
 pushd /usr/pluto/bin
-./Diskless_CreateTBZ.sh
+# ./Diskless_CreateTBZ.sh
 echo Done!
 popd
 # Now we setup the package selection that we'd like to have
 wget http://deb.linuxmce.org/ubuntu/kubuntu810desktop-selection
 # Add the packages that are already installed
-dpkg --get-selections >> /root/kubuntu810desktop-selection
-sort /root/kubuntu810desktop-selection > /root/test.selection
+dpkg --get-selections >> /root/selection
+# kubuntu810desktop-selection
+sort /root/selection > /root/test.selection
 # and import the whole shebang so everything is marked
 dpkg --set-selections < /root/test.selection
 # And get all the stuff downloaded.
@@ -180,6 +184,6 @@ umount squashfs
 umount mnt
 umount edit
 echo "Done. Please run finalizedvd.sh $SVNrevision"
-bash ~/finalizedvd.sh $SVNrevision
-mv ~/live/L*.iso /var/www
+~/finalizedvd.sh $SVNrevision
+mv ~/live/L*.iso /var/www/rsync
 exit 0
