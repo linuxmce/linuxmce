@@ -48,7 +48,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title>LinuxMCE</title>
-<meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 <style type="text/css" media="screen">@import "iui/iui.css";</style>
 <style type="text/css" media="screen">@import "iOrbiter.css";</style>
 <script type="application/x-javascript" src="iui/iui.js"></script>
@@ -72,6 +73,7 @@
 		<li><a href="#Communication-Scenarios">Communication Scenarios</a></li>
 		<li><a href="#Security-Scenarios">Security Scenarios</a></li>
 		<li><a href="#Power">Power</a></li>
+		<li><a href="#AdvancedOptions">Advanced</a></li>
 		<li><a href="#linuxmce-links">LinuxMCE Links</a></li>
 	</ul>
 	<ul id="linuxmce-links" title="Links">
@@ -104,8 +106,10 @@
 	// Users
 	doDesignObjVariations(1903,$link);
 	// Power
-	doDesignObjVariations(4206,$link);
-
+	doDesignObjVariations(3332,$link);
+	// Advanced
+	doDesignObjVariations(2022,$link);
+	//
 	If (isset($_GET["CommandGroup"])) {
 		$commandGroup = $_GET["CommandGroup"];
 		doCommandGroup($link,$commandGroup);

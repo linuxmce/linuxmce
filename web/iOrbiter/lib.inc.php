@@ -9,7 +9,10 @@
 //	connectToDCERouter();
 
 	global $possyDeviceFromID;
+	global $limit;
 	$possyDeviceFromID = 1;
+//	$limit = " Limit 0,200";
+	$limit = "";
 
 	include_once("libMessageSend.php");
 
@@ -90,7 +93,7 @@
 		}
 	}
 
-	function orbiterDoVariation($link, $mainDesignObj, $currentRoom, $currentEntertainArea, $PK_UI = NULL) {
+	function orbiterDoVariation($link, $mainDesignObj, $currentRoom, $currentEntertainArea, $PK_UI = NULL, $isParent = false) {
 		// Get the description for the current variation, and the variation designobj containing all other
 		// objects of the page.
 		if (Is_Null($PK_UI)) {
@@ -100,15 +103,29 @@
 			$UI = "FK_UI = $PK_UI";
 			$header = getMyValue($link,"Select Description From UI Where PK_UI = $PK_UI");
 		}
-		print "<h1>$header</h1>";
+		// print "<h1>$header</h1>";
 		$query = "SELECT PK_DesignObjVariation FROM DesignObjVariation Where FK_DesignObj = $mainDesignObj AND $UI";
 		$mainDesignObjVariation = getMyValue($link,$query);
-		print "<pre>$UI mainDesignObjVariation $mainDesignObjVariation</pre>\n";
+		//print "<pre>$UI mainDesignObjVariation $mainDesignObjVariation</pre>\n";
+		//print "<pre>mainDesignObj $mainDesignObj</pre>\n";
+		// If we can't find the main DesignObjVariation, we use the supplied designobj direct.
+		if (is_null($mainDesignObjVariation) or $isParent) {
+			print "<pre>Setting variation = $mainDesignObj</pre>";
+			$mainDesignObjVariation = $mainDesignObj;
+		}
+		// Try to get a title for the current screen
+		$query = "SELECT Screen.Description From Screen Where Screen.PK_Screen = (Select FK_Screen From Screen_DesignObj Where FK_DesignObj = $mainDesignObj);";
+		//print "<pre>$query</pre>";
+		$title = getMyValue($link,$query);
+		print "<ul id='$title'>\n";
 		// Each of the objects on the main menu needs to be fetched.
 		$query = "SELECT FK_DesignObj_Child FROM DesignObjVariation_DesignObj D Where FK_DesignObjVariation_Parent = $mainDesignObjVariation";
+		//print "<pre>$query</pre>";
 		$array = getMyArray($link,$query);
+		// print_r($array);
 		// Get all screens objects for the current variation.
 		orbiterTakeCareOfObjects($link, $array, $currentRoom, $currentEntertainArea,$UI);
+		print "</ul>\n";
 	}
 
 	function doDesignObjVariations($designObjVariation, $link) {
@@ -122,8 +139,12 @@
 		// $PK_Array = 1;
 		// print "<ul><li>PK Array $PK_Array</li>\n";
 		If (! Isset($PK_Array)) {
-			print "<ul id='Power'>\n";
-			print "<li>not yet</li>\n";
+			// Take care of all the childs of this variation
+			
+			print "<li><a href='$designObjVariation'>DesignObjVariation $designObjVariation</a></li>\n";
+			orbiterDoVariation($link, $designObjVariation,$currentRoom,$currentEntertainArea,$isParent = true);
+			// print "<ul id='Power'>\n";
+			// print "<li>not yet</li>\n";
 		} else {
 			$query = "SELECT Description FROM Array Where PK_Array = $PK_Array";
 			$buttonDescription = getMyValue($link,$query);
@@ -151,6 +172,11 @@
 				$url = "setEnvironment.php?setCurrentRoom";
 				$query = "SELECT PK_Room, Description FROM Room ";
 				$query .= "Where HideFromOrbiter = 0";
+			} elseif ($PK_Array == 10) {
+				// List of Media Directors
+				$query = "SELECT PK_Room, concat('Reset ',Description) As Description From Room ";
+				$query .= "Where HideFromOrbiter = 0";
+		
 			} else {
 				die("<p>Unknown PK_Array $PK_Array</p>\n");
 			}
@@ -176,9 +202,11 @@
 				// Array
 				$query = "SELECT PK_DesignObjVariation FROM DesignObjVariation WHERE FK_DesignObj = $designObject AND $UI";
 				$designObjVariation = getMyValue($link,$query);
-				doDesignObjVariations($designObjVariation,$link);
+				if (! is_null($designObjVariation)) {
+					doDesignObjVariations($designObjVariation,$link);
+				}
 				// If we are working on a specific UI, we need to include the Standard variation as well
-				if ($UI != "FK_UI IS NULL") {
+				if (is_null($designObjVariation) or $UI != "FK_UI IS NULL") {
 					$query = "SELECT PK_DesignObjVariation FROM DesignObjVariation WHERE FK_DesignObj = $designObject AND FK_UI IS NULL";
 					$designObjVariation = getMyValue($link,$query);
 					doDesignObjVariations($designObjVariation,$link);
@@ -333,7 +361,7 @@
 
 	
 	function buildFileList($mediaLink, $pk_mediatype, $commandGroup = -1) {
-		global $currentUser, $currentRoom;
+		global $currentUser, $currentRoom,$limit;
 		// Build a list of files that have the supplied media type. For Video we add MediaType 3 to it.
 		// the query should return
 		// 1) The ID
@@ -346,28 +374,28 @@
 			$query .= "FROM pluto_media.File ";
 			$query .= "WHERE EK_MediaType in (3,5) AND EK_Users_Private IS NULL And IsDirectory = 0 And Missing = 0 ";
 			$query .= "ORDER By Filename ";
-			$query .= "LIMIT 0,200";
+			$query .= $limit;
 		} elseif ($pk_mediatype == 4) // Audio -> Sort by artist
 		{
 			$query = "SELECT PK_File,Filename,concat('detail.php?currentUser=$currentUser&currentRoom=$currentRoom&PK_File=',PK_File) as Target,Substr(Filename,1,1) ";
 			$query .= "FROM pluto_media.File ";
 			$query .= "WHERE EK_MediaType = $pk_mediatype AND EK_Users_Private IS NULL And IsDirectory = 0 And Missing = 0 ";
 			$query .= "ORDER By Filename ";
-			$query .= "LIMIT 0,200";
+			$query .= $limit;
 		} elseif ($pk_mediatype == 7) // Audio -> Sort by artist
 		{
 			$query = "SELECT PK_File,Filename,concat('detail.php?currentUser=$currentUser&currentRoom=$currentRoom&PK_File=',PK_File) as Target,Substr(Filename,1,1) ";
 			$query .= "FROM pluto_media.File ";
 			$query .= "WHERE EK_MediaType = $pk_mediatype AND EK_Users_Private IS NULL And IsDirectory = 0 And Missing = 0 ";
 			$query .= "ORDER By Filename ";
-			$query .= "LIMIT 0,200";
+			$query .= $limit;
 		} elseif ($pk_mediatype == 21) // Playlist
 		{	
 			$query = "SELECT PK_Playlist,Name as Filename,concat('detail.php?currentUser=$currentUser&currentRoom=$currentRoom&PK_Playlist=',PK_Playlist) as Target,Substr(Name,1,1) ";
 			$query .= "FROM pluto_media.Playlist ";
 			$query .= "WHERE EK_User IS NULL Or EK_User = 0 ";
 			$query .= "ORDER By Name ";
-			$query .= "LIMIT 0,200";
+			$query .= $limit;
 		}
 		else
 		{
@@ -377,7 +405,7 @@
 	}
 
 	function buildFileListFromSortedBy($mediaLink, $pk_sortedby,$pk_media = 5) {
-		global $currentUser, $currentRoom;
+		global $currentUser, $currentRoom, $limit;
 		// Build a list of files that have the supplied attribute.
 		// Get all attributes belonging to a specific media file.
 		$query = "SELECT Distinct PK_Attribute, Attribute.Name, AttributeType.Description FROM Attribute ";
@@ -393,33 +421,33 @@
 			$query .= "AND EK_MediaType = $pk_media ";
 		}
 		$query .= "Order By Attribute.Name ";
-		$query .= "LIMIT 0,100";
+		$query .= $limit;
 		
 		
 		listMyArray($mediaLink,$query,"Details",2,array($pk_sortedby,"Play All","play-all.php"),"findmore.php?currentUser=$currentUser&currentRoom=$currentRoom&mediaType=$pk_media&");
 	}
 
 	function buildFileListFromAttribute($mediaLink, $pk_attribute) {
-		global $currentUser, $currentRoom;
+		global $currentUser, $currentRoom, $limit;
 		// Build a list of files that have the supplied attribute.
 		$query = "SELECT Distinct PK_File,Filename,concat('detail.php?currentUser=$currentUser&currentRoom=$currentRoom&PK_File=',PK_File) as Target,Substr(Filename,1,1) ";
 		$query .= "FROM pluto_media.File ";
 		$query .= "JOIN pluto_media.File_Attribute ON PK_File = FK_File ";
 		$query .= "WHERE EK_Users_Private IS NULL And IsDirectory = 0 And Missing = 0 And FK_Attribute = $pk_attribute ";
 		$query .= "ORDER By Filename ";
-		$query .= "LIMIT 0,200";
+		$query .= $limit;
 		listMyArray($mediaLink,$query,"File",3,array($pk_attribute,"Play All","play-all.php"));
 	}
 
 	function buildFileListFromSubtype($mediaLink, $pk_mediatype) {
-		global $currentUser, $currentRoom;
+		global $currentUser, $currentRoom, $limit;
 		// Build a list of files that have the supplied attribute.
 		$query = "SELECT PK_File,Filename,concat('detail.php?currentUser=$currentUser&currentRoom=$currentRoom&PK_File=',PK_File) as Target,Substr(Filename,1,1) ";
 		$query .= "FROM pluto_media.File ";
 		$query .= "JOIN pluto_media.File_Attribute ON PK_File = FK_File ";
 		$query .= "WHERE EK_Users_Private IS NULL And IsDirectory = 0 And Missing = 0 And FK_Attribute = $pk_attribute ";
 		$query .= "ORDER By Filename ";
-		$query .= "LIMIT 0,200";
+		$query .= $limit;
 		listMyArray($mediaLink,$query,"File",3);
 	}
 
@@ -591,10 +619,12 @@ function connectdb() {
 	$user = "root";
 	$password = "";
 	$link = mysql_connect("127.0.0.1",$user,$password);
+	mysql_set_charset('utf8',$link); 
 	
 	mysql_select_db("pluto_main",$link);
 
 	$mediaLink = mysql_connect("127.0.0.1",$user,$password,true);
+	mysql_set_charset('utf8',$mediaLink); 
 	
 	mysql_select_db("pluto_media",$mediaLink);
 
