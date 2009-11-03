@@ -1552,7 +1552,7 @@ void LM::writeLog(string s, bool toScreen, int logLevel)
 
 void LM::writeOSD(string s)
 {
-	string command = "/usr/pluto/bin/BootMessage.sh " + s;
+	string command = "/usr/pluto/bin/BootMessage.sh \"" + s + "\"";
 	system(command.c_str());
 }
 
