@@ -17,10 +17,21 @@ if ! BlacklistConfFiles "$MyCnf" ;then
 	sed -i 's/^expire_logs_days/#expire_logs_days/g' "$MyCnf"
 	grep -q '^default-table-type=' "$MyCnf" || echo "default-table-type=$DefTableType" >>"$MyCnf"
 	grep -q '^skip-name-resolve' "$MyCnf" || sed -i 's/^\[mysqld\].*$/[mysqld]\nskip-name-resolve/g' "$MyCnf"
+	# Make sure we have a UTF-8 functioning system
+	echo "[mysqld]
+	default-table-type=$DefTableType
+	init_connect='SET NAMES utf8; SET collation_connection = utf8_general_ci;' # Set UTF8 for connection
+	default-character-set=utf8
+	character-set-server=utf8
+	collation-server=utf8_general_ci
+	skip-character-set-client-handshake  # Tells to server to ignore client's charset for connetion
+	skip-name-resolve
+	"> /etc/mysql/files.d/lmce-my.cnf
 
 	Q="GRANT ALL PRIVILEGES ON pluto_main.* to 'root'@'127.0.0.1';"
 	mysql $MYSQL_DB_CRED -e "$Q"
 	Q="FLUSH PRIVILEGES;"
 	mysql $MYSQL_DB_CRED -e "$Q"
+
 	invoke-rc.d mysql restart
 fi
