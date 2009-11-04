@@ -13,12 +13,18 @@ foreach $dbname (@databases) {
 #	print "$sql\n";
 	$st = $db->prepare($sql) or die "Error in prepare $sql\n";
 	$st->execute() or die "Error on execute $sql\n";
+	$first = 1;
 	while($local_row = $st->fetchrow_hashref()) {
+                if ($first == 1) {
+                        $first = 0;
+                        print "\nWorking on non-UTF-8 tables in database $dbname\n"
+                }
 		$table_name = $local_row->{'TABLE_NAME'};
 		$sql = "ALTER TABLE $dbname.$table_name CHARACTER SET utf8;";
 #		print "$sql\n";
 		$st2 = $db->prepare($sql) or die "Error in prepare $sql";
 		$st2->execute() or die "Error on execute $sql";
+		print ".";
 		$st2->finish();
 	}
 	$st->finish();
@@ -26,29 +32,46 @@ foreach $dbname (@databases) {
         # Select all columns that have a specific character set, and reset them to default
 	$sql_column = "SELECT TABLE_NAME,COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COLUMN_DEFAULT, COLUMN_KEY FROM information_schema.COLUMNS where TABLE_SCHEMA = '$dbname' ";
 	$sql_column .= " AND (DATA_TYPE = 'varchar' OR DATA_TYPE = 'text' OR DATA_TYPE = 'char') ";
-	$sql_column .= " AND CHARACTER_SET_NAME IS NOT NULL;";
+	$sql_column .= " AND CHARACTER_SET_NAME IS NOT NULL";
+	$sql_column .= " AND CHARACTER_SET_NAME != 'utf8';";
 	$st_column = $db->prepare($sql_column);
 	$st_column->execute() or die "Error on execute $sql_column";
+	$first = 1;
 	while ($local_column = $st_column->fetchrow_hashref()) {
+                if ($first == 1) {
+                        $first = 0;
+                        print "\nWorking on non-UTF-8 columns in database $dbname\n"
+                }
 	        $table_name = $local_column->{'TABLE_NAME'};
 	        $column_name = $local_column->{'COLUMN_NAME'};
 		$column_type = $local_column->{'COLUMN_TYPE'};
-		$sql = "ALTER TABLE $dbname.$table_name MODIFY COLUMN $column_name $column_type";
-		# print $sql . "\n";
+		$sql = "ALTER TABLE $dbname.`$table_name` MODIFY COLUMN `$column_name` $column_type";
+		print $sql . "\n";
 		$st2 = $db->prepare($sql) or die "Error in prepare $sql";
-		$st2->execute() or die "Error on execute $sql";
+		$st2->execute() or print "\nNot updating column $column_name in $dbname.$table_name on execute $sql\n";
 		$st2->finish();
+		print ".";
         }
 
 }
 
 # Add new field to CommandGroup
-$sql = "ALTER TABLE pluto_main.CommandGroup ADD FK_Text INT(11) DEFAULT NULL AFTER TemplateParm2";
-$st2 = $db->prepare($sql);
-# or die "Error in prepare $sql\n";
-$st2->execute();
-# or die "Error on execute $sql\n";
-                                 
+# Check to see if table contains the column alreads
+$sql = "SELECT COUNT(*) AS NUMBER FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = 'pluto_main' and TABLE_NAME = 'CommandGroup' AND COLUMN_NAME = ' FK_Text';";
+$st2 = $db->prepare($sql) or die "Error on prepare $sql\n";
+$st2->execute() or die "Error on execute $sql\n";
+$row = $st2->fetchrow_hashref();
+$st2->finish;
+if ($row{'NUMBER'} == 1) {
+  print "\nAltering table pluto_main.CommandGroup to add additional field FK_Text\n";
+  $sql = "ALTER TABLE pluto_main.CommandGroup ADD FK_Text INT(11) DEFAULT NULL AFTER TemplateParm2";
+  $st2 = $db->prepare($sql);
+  # or die "Error in prepare $sql\n";
+  $st2->execute();
+  # or die "Error on execute $sql\n";
+  $st2->finish();
+}                
+                 
 $db->disconnect();
 
 print "[DONE]\n";
