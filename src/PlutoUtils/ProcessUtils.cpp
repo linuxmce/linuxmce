@@ -369,7 +369,13 @@ int ProcessUtils::GetCommandOutput(const char * path, const char *const args[], 
 
 	pipe(output);
 	pipe(errput);
-	
+
+	struct sigaction act, oldact;
+	act.sa_handler = SIG_DFL;
+	act.sa_flags = SA_NOCLDSTOP;
+	sigemptyset(&act.sa_mask);
+	sigaction(SIGCHLD, &act, &oldact);
+
 	switch (pid = fork())
 	{
 		case 0: /* child */
@@ -448,6 +454,8 @@ int ProcessUtils::GetCommandOutput(const char * path, const char *const args[], 
 			close(output[0]);
 			close(errput[0]);
 	}
+
+	sigaction(SIGCHLD, &oldact, NULL);
 
 	return status;
 #endif
