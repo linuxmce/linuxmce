@@ -40,18 +40,25 @@ function netmaskLen() {
 
 while : ;do
 
-	if [[ "$IntNetmask" == "" ]] ;then
+	if ! [[ "$IntIP" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+		exit 0
+	fi
+	if ! [[ "$IntNetmask" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]] ;then
 		exit 0
 	fi
 
 	## Store in IntNetwork the network address with netmask in decimal format
-	IntNetwork="${IntIP}/$(netmaskLen "${IntNetmask}")"
+	NetMaskLen=$(netmaskLen "$IntNetmask")
+	if [[ "$NetMaskLen" == 0 ]]; then
+		exit 0
+	fi
+	IntNetwork="$IntIP/$NetMaskLen"
 
 
 	## Scan the network for samba servers
 	Log "Scanning network $IntNetwork"
 
-	nbtscan_output=$( nbtscan $IntNetwork -s '#' -q | tr -d ' ') 
+	nbtscan_output=$( nbtscan "$IntNetwork" -s '#' -q | tr -d ' ') 
 	if [[ $? != "0" ]]; then
 		nbtscan_output=""
 	fi
