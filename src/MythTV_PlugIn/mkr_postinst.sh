@@ -23,6 +23,11 @@ Q="UPDATE settings SET data=1 where value='AlwaysStreamFiles'"
 UseDB "mythconverg"
 RunSQL "$Q"
 
+#Alter mythconverg.settings to force Media Directors to delete files slowly for performance reasons
+Q="UPDATE settings SET data=1 where value='TruncateDeletesSlowly'"
+UseDB "mythconverg"
+RunSQL "$Q"
+
 #Re-run SetupUsers_Homes PlutoStorageDevices to make sure that the mythtv user gets added to each user's group
 /usr/pluto/bin/SetupUsers_Homes.sh
 /usr/pluto/bin/StorageDevices_Setup.sh

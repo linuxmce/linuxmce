@@ -66,6 +66,11 @@ if [[ $MythTV_Installed ]] ;then
 	Q="UPDATE settings SET data=1 where value='AlwaysStreamFiles'"
 	UseDB "mythconverg"
 	RunSQL "$Q"
+
+        #Sync some settings to MDs
+        Q="UPDATE settings SET data=1 where value='TruncateDeletesSlowly'"
+        UseDB "mythconverg"
+        RunSQL "$Q"
 fi
 
 ## Call this script on the other machines too
