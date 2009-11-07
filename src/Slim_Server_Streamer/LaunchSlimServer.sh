@@ -15,12 +15,12 @@ sed -ri "s,SLIMOPTIONS=.*,SLIMOPTIONS=\"$PARAMS\",g" /etc/default/squeezeboxserv
 found=0
 
 # Three settings need to exist in the server.prefs file.
-grep "audiodir: /home/public/data/audio" /var/lib/squeezeboxserver/prefs/server.prefs && let found+=1
-grep "playlistdir: /home/public/data/audio" /var/lib/squeezeboxserver/prefs/server.prefs && let found+=1
-grep "wizardDone: 1" /var/lib/squeezeboxserver/prefs/server.prefs && let found+=1
-if [ "$found" -ne "3"] ; then
+grep -q "audiodir: /home/public/data/audio" /var/lib/squeezeboxserver/prefs/server.prefs && let found+=1
+grep -q "playlistdir: /home/public/data/audio" /var/lib/squeezeboxserver/prefs/server.prefs && let found+=1
+grep -q "wizardDone: 1" /var/lib/squeezeboxserver/prefs/server.prefs && let found+=1
+if [ "$found" -ne "3" ] ; then
         echo "audiodir: /home/public/data/audio" >> /var/lib/squeezeboxserver/prefs/server.prefs
-        echo "playlistdir: /home/public/data/audio" >> /var/lib/squeezeboxserver/pres/server.prefs
+        echo "playlistdir: /home/public/data/audio" >> /var/lib/squeezeboxserver/prefs/server.prefs
         echo "wizardDone: 1" >> /var/lib/squeezeboxserver/prefs/server.prefs
 	invoke-rc.d squeezeboxserver restart
 fi                                
