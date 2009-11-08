@@ -1,5 +1,35 @@
 #!/bin/bash
 
+# Check if any driver is installed. If not, check what hardware is in the box, and install the relevant driver using
+# the binary drivers
+DriverInstalled=0
+driverConfig=none
+grep -q "^Driver" /etc/X11/xorg.conf && DriverInstalled=1
+
+#
+# Check if we have nVidia or ATI cards in here, and specify proper config programs and commandline options.
+if [[ $DriverInstalled -eq 0 ]]; then
+	driverConfig=none
+	lspci|grep nVidia|grep "VGA compatible controller" -q && driverConfig=nvidia-xconfig
+	if [[ $driverConfig == nvidia-xconfig ]]; then
+		driverLine = ""
+	fi
+	if [[ $driverConfig == none ]]; then
+		lshwd|grep ATI|grep -v Non-VGA|grep VGA -q && driverConfig=aticonfig
+	fi
+	if [[ $driverConfig == aticonfig ]]; then
+		driverLine="--initial"
+	fi
+fi
+
+if [[ "$driverConfig" != none ]]; then
+	# Is it installed
+	driverConfigLocation=`which $driverConfig`
+	if [[ -x $driverConfigLocation ]]; then
+		$driverConfigLocation $driverLine
+	fi
+fi
+
 function XorgConfLogging() {
         local message="$1"
         local xorgLog="/var/log/pluto/xorg.conf.log"
@@ -41,6 +71,8 @@ UI_V2_Normal_Horizontal=4
 . /usr/pluto/bin/X-Common.sh
 
 . /usr/pluto/bin/TeeMyOutput.sh --outfile /var/log/pluto/AVWizard.log --infile /dev/null --stdboth -- "$@"
+
+
 
 UseAlternativeLibs
 
@@ -283,28 +315,7 @@ UpdateOrbiterUI()
 SetupViaXine()
 {
 	local Q OrbiterDev XineDev
-#<-mkr_b_via_b->
-	Q="
-		SELECT PK_Device
-		FROM Device
-		WHERE FK_DeviceTemplate=62 AND FK_Device_ControlledVia=$PK_Device
-	"
-	OrbiterDev="$(RunSQL "$Q")"
-
-	Q="
-		SELECT PK_Device
-		FROM Device
-		WHERE FK_DeviceTemplate=5 AND FK_Device_ControlledVia=$OrbiterDev
-	"
-	XineDev="$(RunSQL "$Q")"
-
-	# Hardware acceleration
-	RunSQL "
-		UPDATE Device_DeviceData
-		SET IK_DeviceData='cle266x11'
-		WHERE FK_DeviceData=168 AND FK_Device=$XineDev
-	"
-#<-mkr_b_via_e->
+#
 }
 
 ConfSet AVWizardOverride 0
