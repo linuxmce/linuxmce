@@ -19,9 +19,10 @@ grep -q "audiodir: /home/public/data/audio" /var/lib/squeezeboxserver/prefs/serv
 grep -q "playlistdir: /home/public/data/audio" /var/lib/squeezeboxserver/prefs/server.prefs && let found+=1
 grep -q "wizardDone: 1" /var/lib/squeezeboxserver/prefs/server.prefs && let found+=1
 if [ "$found" -ne "3" ] ; then
-        echo "audiodir: /home/public/data/audio" >> /var/lib/squeezeboxserver/prefs/server.prefs
-        echo "playlistdir: /home/public/data/audio" >> /var/lib/squeezeboxserver/prefs/server.prefs
-        echo "wizardDone: 1" >> /var/lib/squeezeboxserver/prefs/server.prefs
+	# According to niz the audiodir and playlist dir entries always exist
+	sed -i 's|'"audiodir: ''"'|audiodir: /home/public/data/audio|' /var/lib/squeezeboxserver/prefs/server.prefs
+	sed -i 's|'"playlistdir: ''"'|playlistdir: /home/public/data/audio|' /var/lib/squeezeboxserver/prefs/server.prefs
+	echo 'wizardDone: 1' >> /var/lib/squeezeboxserver/prefs/server.prefs
 	invoke-rc.d squeezeboxserver restart
 fi                                
 
