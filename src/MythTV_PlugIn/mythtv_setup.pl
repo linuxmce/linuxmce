@@ -84,6 +84,12 @@ sub AddMythTVStorageGroup
 	print "Adding MythTV storage group $name for host $host\n";
 	$sql="INSERT INTO mythconverg.storagegroup (groupname,hostname,dirname) VALUES ('$name','$host','$path')";
 	$dbh->do($sql);
+	if ($path =~ /livetv$/) {
+		`mkdir -p "$path"`;
+	        `chown root:public "$path"`;
+	        `chmod 2775 "$path"`;
+		`touch "$path.folderlock"`;
+	}
 }
 
 sub CheckMythTVStorageGroup
@@ -200,7 +206,7 @@ if ($results[0] && $results[0]->{"count"}) {
 
 foreach $thisDevice (@Devices) {
 	$Device_Description = addslashes($thisDevice->{"Description"});
-	$sql="FROM storagegroup WHERE dirname LIKE '\%$Device_Description\%' AND groupname NOT LIKE 'custom:%' AND dirname NOT LIKE '/home/\%/data/pvr/$Device_Description \[$thisDevice->{PK_Device}\]'";
+	$sql="FROM storagegroup WHERE dirname LIKE '\%$Device_Description\%' AND groupname NOT LIKE 'custom:%' AND dirname NOT LIKE '/home/\%/data/pvr/$Device_Description \[$thisDevice->{PK_Device}\]\%' ";
 	@results=RunSQL("SELECT count(id) as count " . $sql);
 	if ($results[0] && $results[0]->{"count"}) {
     $dbh->do("DELETE " . $sql);
@@ -208,10 +214,10 @@ foreach $thisDevice (@Devices) {
 	}
 }
 
-$sql = "FROM storagegroup s where dirname NOT LIKE '%pvr' AND groupname NOT LIKE 'custom:%'";
+$sql = "FROM storagegroup where dirname NOT LIKE '%pvr' AND dirname NOT LIKE '%livetv' AND groupname NOT LIKE 'custom:%'";
 foreach $thisDevice (@Devices) {
 	$Device_Description = addslashes($thisDevice->{"Description"});
-	$sql .= " AND dirname NOT LIKE '%$Device_Description \[$thisDevice->{PK_Device}\]'";
+	$sql .= " AND dirname NOT LIKE '%$Device_Description \[$thisDevice->{PK_Device}\]\%'";
 }
 
 @results=RunSQL("SELECT count(id) as count " . $sql);
@@ -220,6 +226,14 @@ if ($results[0] && $results[0]->{"count"}) {
   print "Removed $results[0]->{count} extraneous Device entries.\n";
 }
 
+$sql="FROM storagegroup where groupname='LiveTV' and dirname not like '%livetv'";
+@results=RunSQL("SELECT count(hostname) as count " . $sql);
+if ($results[0] && $results[0]->{"count"}) {
+  $dbh->do("DELETE " . $sql);
+  print "Removed $results[0]->{count} extraneous Host entries.\n";
+}
+
+
 # Now check that every required entry is there, inserting a new one as needed
 
 #For every host...
@@ -227,7 +241,7 @@ foreach my $hostName (@hostNames) {
 
 	##lets handle the /home/public paths....
 	CheckMythTVStorageGroup("/home/public/data/pvr","Default","$hostName");     #Put the special "Default" storage group in. 
-	CheckMythTVStorageGroup("/home/public/data/pvr","LiveTV","$hostName");    #Put the special "LiveTV" storage group into the moons root tv_shows_* directory	
+	CheckMythTVStorageGroup("/home/public/data/pvr/livetv","LiveTV","$hostName");    #Put the special "LiveTV" storage group into the moons root pvr* directory	
 	CheckMythTVStorageGroup("/home/public/data/pvr","public","$hostName");	
 
 
@@ -258,7 +272,7 @@ foreach my $hostName (@hostNames) {
 
 		#public storage groups
 		CheckMythTVStorageGroup("/home/public/data/pvr/$Device_Description [$Device_ID]","Default","$hostName");      #Put the special "Default" storage group in. 
-		CheckMythTVStorageGroup("/home/public/data/pvr/$Device_Description [$Device_ID]","LiveTV","$hostName");       #Put the special "LiveTV" storage group into the moons root tv_shows_* directory	
+		CheckMythTVStorageGroup("/home/public/data/pvr/$Device_Description [$Device_ID]/livetv","LiveTV","$hostName");       #Put the special "LiveTV" storage group into the moons root pvr* directory	
 		CheckMythTVStorageGroup("/home/public/data/pvr/$Device_Description [$Device_ID]","public: $Device_Description [$Device_ID]","$hostName");
 
 
