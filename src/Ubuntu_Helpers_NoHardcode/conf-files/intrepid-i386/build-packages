@@ -127,6 +127,7 @@ libtwolame-dev
 libupnp-dev
 libusb-dev
 libvdpau-dev
+libvdpau1
 libvte-dev
 libwavpack-dev
 libx11-dev
