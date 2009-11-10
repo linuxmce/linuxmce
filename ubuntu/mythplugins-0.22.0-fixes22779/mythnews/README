@@ -1,0 +1,37 @@
+MythNews (A RSS News Feed Plugin for MythTV) for MythTV
+---------------------------------------------------------------------
+
+INSTALLATION:
+---------------------------------------------------------------------
+
+Run the mythplugins configure script './configure'.
+
+Type 'make' in the main directory to begin compiling
+
+Once the make is completed, do a 'make install'.
+
+Load mythfrontend and you should see entries for mythnews in the main
+menu and in the settings menu
+
+
+CONFIGURATION/USAGE:
+---------------------------------------------------------------------
+
+Once you have installed mythnews you need to set it up. Go to
+Settings->NEWS Settings. On the Settings page there will be news feed sites on
+the left window. Double clicking or selecting and pressing
+return/space will add them to the database (These will also be shown
+on the right window). Also set the frequency (in
+minutes) with which the news should be updated (Note: the minimum
+value is 30 Min to prevent DOSing the news sites). Now exit the setup
+page (by pressing ESC).
+
+Go to the NEWS main page and you should see the news feed sites on the
+left column and corresponding news articles on the right). You can
+move between news sites/articles using the UP/DOWN keys and between
+the news sites column and articles column using the LEFT/RIGHT
+keys. Pressing "U" will update all old news. Pressing "F" will
+force updating news from all sites (WARNING: Don't use this key
+frequently unless you want to DOS the news sites and get locked). The
+news gets updated automatically depending on the frequency which you
+set in the setup page.

@@ -1,0 +1,21 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 10-mythweb_directory.dpatch by laga <>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: This patch sets the mythweb directory in mythweb.conf.apache to 
+## DP: "/var/www/mythweb"
+## DP: Updated Dec 10, 2008 for MythTV .22 by tgm4883
+
+@DPATCH@
+diff -urNad mythplugins-trunk-022~/mythweb/mythweb.conf.apache mythplugins-trunk-022/mythweb/mythweb.conf.apache
+--- mythplugins-trunk-022~/mythweb/mythweb.conf.apache	2008-12-10 18:24:57.000000000 -0800
++++ mythplugins-trunk-022/mythweb/mythweb.conf.apache	2008-12-10 18:25:25.000000000 -0800
+@@ -29,7 +29,7 @@
+     <Directory "/var/www/html/data">
+         Options -All +FollowSymLinks +IncludesNoExec
+     </Directory>
+-    <Directory "/var/www/html" >
++    <Directory "/var/www/mythweb" >
+ 
+     ############################################################################
+     # I *strongly* urge you to turn on authentication for MythWeb.  It is disabled

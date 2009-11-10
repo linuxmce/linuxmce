@@ -1,0 +1,8 @@
+/var/log/mythtv/mtd.log {
+        daily
+        rotate 7
+        notifempty
+        copytruncate
+        missingok
+}
+

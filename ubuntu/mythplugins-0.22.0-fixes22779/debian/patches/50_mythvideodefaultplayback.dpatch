@@ -1,0 +1,147 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 50_mythvideodefaultplayback.dpatch by  <jean-yves@avenard.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: No description.
+
+@DPATCH@
+diff -urNad mythplugins~/mythvideo/mythvideo/playercommand.cpp mythplugins/mythvideo/mythvideo/playercommand.cpp
+--- mythplugins~/mythvideo/mythvideo/playercommand.cpp	2009-05-10 16:14:02.000000000 +1000
++++ mythplugins/mythvideo/mythvideo/playercommand.cpp	2009-06-20 23:11:45.000000000 +1000
+@@ -184,7 +184,7 @@
+         ClearPlayerList();
+     }
+ 
+-    void PlayerFor(const Metadata *item)
++    void PlayerFor(const Metadata *item, bool defaultplayer = false)
+     {
+         if (item)
+         {
+@@ -197,7 +197,7 @@
+             else
+                 filename = item->GetFilename();
+ 
+-            if (play_command.length())
++            if (!defaultplayer && play_command.length())
+             {
+                 AddPlayer(play_command, filename, item->GetPlot(),
+                         item->GetTitle(), item->GetDirector(),
+@@ -206,12 +206,12 @@
+             }
+             else
+             {
+-                PlayerFor(filename, item);
++	      PlayerFor(filename, item, defaultplayer);
+             }
+         }
+     }
+ 
+-    void PlayerFor(const QString &filename, const Metadata *extraData = 0)
++  void PlayerFor(const QString &filename, const Metadata *extraData = 0, bool defaultplayer = false)
+     {
+         QString extension = filename.section(".", -1, -1);
+         QDir dir_test(QString("%1/VIDEO_TS").arg(filename));
+@@ -222,16 +222,17 @@
+ 
+         const FileAssociations::association_list fa_list =
+                 FileAssociations::getFileAssociation().getList();
+-        for (FileAssociations::association_list::const_iterator p =
++        if (!defaultplayer)
++            for (FileAssociations::association_list::const_iterator p =
+                 fa_list.begin(); p != fa_list.end(); ++p)
+-        {
+-            if (p->extension.toLower() == extension.toLower() &&
+-                    !p->use_default)
+             {
+-                play_command = p->playcommand;
+-                break;
++                if (p->extension.toLower() == extension.toLower() &&
++                        !p->use_default)
++                {
++                    play_command = p->playcommand;
++                    break;
++                }
+             }
+-        }
+ 
+         if (play_command.trimmed().isEmpty())
+             play_command = "Internal";
+@@ -297,10 +298,10 @@
+ 
+ ////////////////////////////////////////////////////////////////////////
+ 
+-VideoPlayerCommand VideoPlayerCommand::PlayerFor(const Metadata *item)
++VideoPlayerCommand VideoPlayerCommand::PlayerFor(const Metadata *item, bool defaultplayer)
+ {
+     VideoPlayerCommand ret;
+-    ret.m_d->PlayerFor(item);
++    ret.m_d->PlayerFor(item, defaultplayer);
+     return ret;
+ }
+ 
+diff -urNad mythplugins~/mythvideo/mythvideo/playercommand.h mythplugins/mythvideo/mythvideo/playercommand.h
+--- mythplugins~/mythvideo/mythvideo/playercommand.h	2009-05-10 16:14:02.000000000 +1000
++++ mythplugins/mythvideo/mythvideo/playercommand.h	2009-06-20 23:11:45.000000000 +1000
+@@ -4,7 +4,7 @@
+ class VideoPlayerCommand
+ {
+   public:
+-    static VideoPlayerCommand PlayerFor(const class Metadata *item);
++    static VideoPlayerCommand PlayerFor(const class Metadata *item, bool defaultplayer = false);
+     static VideoPlayerCommand PlayerFor(const QString &filename);
+ 
+   public:
+diff -urNad mythplugins~/mythvideo/mythvideo/videodlg.cpp mythplugins/mythvideo/mythvideo/videodlg.cpp
+--- mythplugins~/mythvideo/mythvideo/videodlg.cpp	2009-05-10 16:14:02.000000000 +1000
++++ mythplugins/mythvideo/mythvideo/videodlg.cpp	2009-06-20 23:11:45.000000000 +1000
+@@ -840,7 +840,7 @@
+     }
+ 
+     void PlayVideo(const QString &filename,
+-            const MetadataListManager &video_list)
++            const MetadataListManager &video_list, bool defaultplayer = false)
+     {
+         const int WATCHED_WATERMARK = 10000; // Less than this and the chain of
+                                              // videos will not be followed when
+@@ -856,7 +856,7 @@
+         {
+             playing_time.start();
+ 
+-            VideoPlayerCommand::PlayerFor(item.get()).Play();
++            VideoPlayerCommand::PlayerFor(item.get(), defaultplayer).Play();
+ 
+             if (item->GetChildID() > 0)
+                 item = video_list.byID(item->GetChildID());
+@@ -2186,6 +2186,7 @@
+             }
+         }
+ 
++        m_menuPopup->AddButton(tr("Watch This Video (default player)"), SLOT(playVideoDefault()));
+         m_menuPopup->AddButton(tr("Video Info"), SLOT(InfoMenu()), true);
+         m_menuPopup->AddButton(tr("Manage Video"), SLOT(ManageMenu()), true);
+     }
+@@ -2434,6 +2435,13 @@
+         PlayVideo(metadata->GetFilename(), m_d->m_videoList->getListCache());
+ }
+ 
++void VideoDialog::playVideoDefault()
++{
++    Metadata *metadata = GetMetadata(GetItemCurrent());
++    if (metadata)
++        PlayVideo(metadata->GetFilename(), m_d->m_videoList->getListCache(), true);
++}
++
+ namespace
+ {
+     struct SimpleCollect : public DirectoryHandler
+diff -urNad mythplugins~/mythvideo/mythvideo/videodlg.h mythplugins/mythvideo/mythvideo/videodlg.h
+--- mythplugins~/mythvideo/mythvideo/videodlg.h	2009-05-10 16:14:02.000000000 +1000
++++ mythplugins/mythvideo/mythvideo/videodlg.h	2009-06-20 23:11:45.000000000 +1000
+@@ -58,6 +58,7 @@
+     void SetCurrentNode(MythGenericTree *);
+ 
+     void playVideo();
++    void playVideoDefault();
+     void playVideoWithTrailers();
+     void playTrailer();
+ 
