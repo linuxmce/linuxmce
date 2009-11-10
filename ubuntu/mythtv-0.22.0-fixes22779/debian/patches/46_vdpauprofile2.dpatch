@@ -1,0 +1,37 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 46_vdpauprofile2.dpatch by Jean-Yves Avenard <jean-yves@avenard.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: No description.
+
+@DPATCH@
++++ mythtv-0.22.0-fixes22520/libs/libmythtv/videodisplayprofile.cpp	2009-10-19 05:29:37.000000000 +0200
+@@ -1120,24 +1120,24 @@
+     uint groupid = CreateProfileGroup("VDPAU High Quality", hostname);
+     CreateProfile(groupid, 1, ">", 0, 0, "", 0, 0,
+                   "vdpau", 1, "vdpau", "vdpau", true,
+-                  "vdpauadvanceddoublerate", "vdpauadvanced", "");
++                  "vdpauadvanceddoublerate", "vdpauadvanced", "vdpaucolorspace=auto");
+ 
+     (void) QObject::tr("VDPAU Normal", "Sample: VDPAU average quality");
+     DeleteProfileGroup("VDPAU Normal", hostname);
+     groupid = CreateProfileGroup("VDPAU Normal", hostname);
+     CreateProfile(groupid, 1, ">=", 0, 720, "", 0, 0,
+                   "vdpau", 1, "vdpau", "vdpau", true,
+-                  "vdpaubasicdoublerate", "vdpaubasic", "");
++                  "vdpaubasicdoublerate", "vdpaubasic", "vdpaucolorspace=auto");
+     CreateProfile(groupid, 2, ">", 0, 0, "", 0, 0,
+                   "vdpau", 1, "vdpau", "vdpau", true,
+-                  "vdpauadvanceddoublerate", "vdpauadvanced", "");
++                  "vdpauadvanceddoublerate", "vdpauadvanced", "vdpaucolorspace=auto");
+ 
+     (void) QObject::tr("VDPAU Slim", "Sample: VDPAU low power GPU");
+     DeleteProfileGroup("VDPAU Slim", hostname);
+     groupid = CreateProfileGroup("VDPAU Slim", hostname);
+     CreateProfile(groupid, 1, ">", 0, 0, "", 0, 0,
+                   "vdpau", 1, "vdpau", "vdpau", false,
+-                  "vdpaubobdeint", "vdpauonefield", "vdpauskipchroma");
++                  "vdpaubobdeint", "vdpauonefield", "vdpauskipchroma,vdpaucolorspace=auto");
+ }
+ 
+ void VideoDisplayProfile::CreateProfiles(const QString &hostname)

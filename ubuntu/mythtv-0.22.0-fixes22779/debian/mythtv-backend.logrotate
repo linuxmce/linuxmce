@@ -1,0 +1,7 @@
+/var/log/mythtv/mythbackend.log {
+        daily
+	size=10M
+        rotate 7
+        notifempty
+        copytruncate
+}
