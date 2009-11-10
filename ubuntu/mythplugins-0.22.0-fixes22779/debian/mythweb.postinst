@@ -126,6 +126,9 @@ s/\(^[ \t]*setenv[ \t]\+db_password[ \t]\+\"\)[^\"]*\"/\1$mythtv_password\"/g;
             fi
         done
 
+	# data dir needs write access
+	chown -R www-data: /var/www/mythweb/data
+
         # handle password protection/ authentication setup
         # get our values from the DB
         DIGESTFILE=/etc/mythtv/mythweb-digest
