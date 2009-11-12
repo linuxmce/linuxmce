@@ -38,3 +38,5 @@ BuildPackages $PACKAGES_SECOND_RUN
 # But we do not need to clutter the builder with this package.
 #
 dpkg -r svdrpservice-dev
+
+tar cf /var/www/vdr.tar *.deb
