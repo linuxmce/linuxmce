@@ -1,0 +1,317 @@
+vdr-plugin-vompserver (0.3.1-1) experimental; urgency=low
+
+  [ Marten Richter ]
+  * New upstream release
+  * Removed 90_vompserver-0.3.0-1.7.3.dpatch, since patches for 1.7.x are
+    included in upstream release
+
+  [ Tobias Grimm ]
+  * Increased standards version to 3.8.2
+  * Updated debian/copyright
+  * Changed Maintainer to Debian VDR Team
+
+ -- Tobias Grimm <etobi@debian.org>  Sat, 25 Jul 2009 16:27:41 +0200
+
+vdr-plugin-vompserver (0.3.0-5) experimental; urgency=low
+
+  * Release for vdrdevel 1.7.6
+  * Added ${misc:Depends}
+  * Bumped standards version to 3.8.1
+  * Changed section to "video"
+
+ -- Thomas Günther <tom@toms-cafe.de>  Wed, 29 Apr 2009 23:11:37 +0200
+
+vdr-plugin-vompserver (0.3.0-4) experimental; urgency=low
+
+  * Added 90_vompserver-0.3.0-1.7.3.dpatch
+  * Updated debian/copyright
+
+ -- Thomas Günther <tom@toms-cafe.de>  Sun, 19 Apr 2009 20:00:23 +0200
+
+vdr-plugin-vompserver (0.3.0-3) experimental; urgency=low
+
+   [Marten Richter]
+   * Fixes permissions problem of plugin directory 
+
+ -- Marten Richter <marten.richter@freenet.de>  Sun,  2 Nov 2008 16:43:30 +0100
+
+vdr-plugin-vompserver (0.3.0-2) experimental; urgency=low
+
+   [Marten Richter]
+   * Fixed bug in postinst
+   * Postrm purge updated
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sat, 02 Aug 2008 10:48:05 +0200
+
+vdr-plugin-vompserver (0.3.0-1) experimental; urgency=low
+  
+  [Marten Richter]
+  * New upstream release
+  * Added install for new internationalisation support
+  * Changed symlink for config file
+  * Added moving of old configs in postinst
+  * Removing obsolete uninitialised patch
+  * Removed reference to HISTORY
+
+  [Tobias Grimm]
+  * Dropped patchlevel control field
+  * Build-Depend on vdr-dev (>=1.6.0-5)
+  * Bumped Standards-Version to 3.8.0
+  * Switched Build-System to cdbs, Build-Depend on cdbs
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 27 Jul 2008 13:21:03 +0200
+
+vdr-plugin-vompserver (0.2.7-5) experimental; urgency=low
+
+  * Increased package version to force rebuild for vdr 1.6.0-1ctvdr7
+
+ -- Tobias Grimm <tg@e-tobi.net>  Mon, 12 May 2008 00:57:24 +0200
+
+vdr-plugin-vompserver (0.2.7-4) experimental; urgency=low
+
+  * Build-Depend on vdr-dev (>= 1.6.0)
+
+ -- Tobias Grimm <tg@e-tobi.net>  Mon, 24 Mar 2008 20:14:41 +0100
+
+vdr-plugin-vompserver (0.2.7-3) experimental; urgency=low
+
+  * Force rebuild for vdr 1.5.15
+
+ -- Tobias Grimm <tg@e-tobi.net>  Mon, 18 Feb 2008 21:34:01 +0100
+
+vdr-plugin-vompserver (0.2.7-2) unstable; urgency=low
+
+  * Release for vdrdevel 1.5.13
+
+ -- Thomas Günther <tom@toms-cafe.de>  Wed, 16 Jan 2008 10:31:52 +0100
+
+vdr-plugin-vompserver (0.2.7-1) unstable; urgency=low
+
+  [ Marten Richter ]
+  * New upstream release
+  * Removed VDR compaticility patch - now in upstream release
+
+  [ Thomas Günther ]
+  * Added changes for VDR >= 1.5.0 to 01_uninitialized.dpatch
+
+ -- Tobias Grimm <tg@e-tobi.net>  Tue, 27 Nov 2007 20:30:07 +0100
+
+vdr-plugin-vompserver (0.2.6-10) unstable; urgency=low
+
+  * Release for vdrdevel 1.5.11
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue,  6 Nov 2007 23:34:43 +0100
+
+vdr-plugin-vompserver (0.2.6-9) unstable; urgency=low
+
+  * Release for vdrdevel 1.5.10
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue, 16 Oct 2007 23:51:22 +0200
+
+vdr-plugin-vompserver (0.2.6-8) unstable; urgency=low
+
+  * Release for vdrdevel 1.5.9
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue, 28 Aug 2007 01:01:31 +0200
+
+vdr-plugin-vompserver (0.2.6-7) unstable; urgency=low
+
+  * Release for vdrdevel 1.5.8
+
+ -- Thomas Günther <tom@toms-cafe.de>  Thu, 23 Aug 2007 01:09:36 +0200
+
+vdr-plugin-vompserver (0.2.6-6) unstable; urgency=low
+
+  * Release for vdrdevel 1.5.6
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue, 14 Aug 2007 01:46:49 +0200
+
+vdr-plugin-vompserver (0.2.6-5) unstable; urgency=low
+
+  * Release for vdrdevel 1.5.5
+  * Build-Depend on vdr-dev (>= 1.4.7-2)
+
+ -- Thomas Günther <tom@toms-cafe.de>  Wed, 27 Jun 2007 23:03:15 +0200
+
+vdr-plugin-vompserver (0.2.6-4) unstable; urgency=low
+
+  * Release for vdrdevel 1.5.2
+
+ -- Thomas Günther <tom@toms-cafe.de>  Sat, 28 Apr 2007 00:01:28 +0200
+
+vdr-plugin-vompserver (0.2.6-3) unstable; urgency=low
+
+  * Added 01_uninitialized.dpatch to avoid compiler warnings with
+    recent g++
+
+ -- Tobias Grimm <tg@e-tobi.net>  Thu,  5 Apr 2007 17:37:35 +0200
+
+vdr-plugin-vompserver (0.2.6-2) unstable; urgency=low
+
+  * Release for vdrdevel 1.5.1
+
+ -- Thomas Günther <tom@toms-cafe.de>  Tue, 27 Feb 2007 19:59:42 +0100
+
+vdr-plugin-vompserver (0.2.6-1) unstable; urgency=low
+
+  [ Marten Richter ]
+  * New upstream release
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 11 Feb 2007 13:23:31 +0100
+
+vdr-plugin-vompserver (0.2.5-3) unstable; urgency=low
+
+  * Added 91_vompserver-vdr-1.5.0.dpatch
+
+ -- Thomas Günther <tom@toms-cafe.de>  Sun, 21 Jan 2007 14:59:23 +0100
+
+vdr-plugin-vompserver (0.2.5-2) unstable; urgency=low
+
+  [ Thomas Günther ]
+  * Replaced VDRdevel adaptions in debian/rules with make-special-vdr
+  * Adapted call of dependencies.sh and patchlevel.sh to the new location
+    in /usr/share/vdr-dev/
+
+  [ Tobias Grimm ]
+  * Build-Depend on vdr-dev (>=1.4.5-1)
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 14 Jan 2007 19:25:51 +0100
+
+vdr-plugin-vompserver (0.2.5-1) unstable; urgency=low
+
+  [ Marten Richter ]
+  * New upstream release
+
+  [ Tobias Grimm ]
+  * Added note about the Debian Maintainers to debian/copyright
+
+ -- Tobias Grimm <tg@e-tobi.net>  Tue, 28 Nov 2006 00:23:35 +0100
+
+vdr-plugin-vompserver (0.2.4-5) unstable; urgency=low
+
+  * Build-Depend on vdr-dev (>=1.4.4-1)
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun,  5 Nov 2006 11:45:46 +0100
+
+vdr-plugin-vompserver (0.2.4-4) unstable; urgency=low
+
+  * Build-Depend on vdr-dev (>=1.4.3-1)
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sat, 23 Sep 2006 20:33:04 +0200
+
+vdr-plugin-vompserver (0.2.4-3) unstable; urgency=low
+
+  * Build-Depend on vdr-dev (>=1.4.2-1)
+  * Bumped Standards-Version to 3.7.2
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sun, 27 Aug 2006 14:39:38 +0200
+
+vdr-plugin-vompserver (0.2.4-2) unstable; urgency=low
+
+  * Tobias Grimm <tg@e-tobi.net>
+    - Fixed postinst, Thx to Peter Siering for pointing this out
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Sun, 25 Jun 2006 11:22:53 +0200
+
+vdr-plugin-vompserver (0.2.4-1) unstable; urgency=low
+
+  * Marten Richter <marten.richter@freenet.de>
+    - New upstream release
+    - Removed patch to load default vomp-dongle, now in upstream release
+    - Dongle moved to vdr-vompclient-mvp
+    - Removed debconf questions for TFTP-configuration from this package, will
+      now be done by dongle package
+  * Tobias Grimm <tg@e-tobi.net>
+    - New upstream version + new dongle 0.2.3
+    - Removed 01_Makefile-fPIC-fix.dpatch
+    - Removed 02_bootp-patch.dpatch
+    - Removed 90_APIVERSION.dpatch
+  * Thomas Schmidt <tschmidt@debian.org>
+    - Build-Depend on vdr-dev (>=1.4.1-1)
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Thu, 22 Jun 2006 22:48:12 +0200
+
+vdr-plugin-vompserver (0.2.2-5) unstable; urgency=low
+
+  * Thomas Schmidt <tschmidt@debian.org>
+    - Build-Depend on vdr-dev (>=1.4.0-1)
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Wed,  3 May 2006 23:10:18 +0200
+
+vdr-plugin-vompserver (0.2.2-4) unstable; urgency=low
+
+  * Tobias Grimm <tg@e-tobi.net>
+    - Build-Depend on vdr (>=1.3.48-1)
+    - Added 90_APIVERSION.dpatch
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Mon, 24 Apr 2006 22:08:38 +0200
+
+vdr-plugin-vompserver (0.2.2-3) unstable; urgency=low
+
+  * Tobias Grimm <tg@e-tobi.net>
+    - Build-Depend on vdr (>=1.3.46-1)
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Wed, 12 Apr 2006 22:14:12 +0200
+
+vdr-plugin-vompserver (0.2.2-2) unstable; urgency=low
+
+  * Tobias Grimm <tg@e-tobi.net>
+    - Build-Depend on vdr (>=1.3.45-1)
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Mon, 27 Mar 2006 21:44:28 +0200
+
+vdr-plugin-vompserver (0.2.2-1) unstable; urgency=low
+
+  * Marten Richter <marten.richter@freenet.de>
+    - New upstream version + new dongle 0.2.2
+    - Removed mvploader in favour of the internal bootp, tftp server
+    - Integrated patch to load default vomp-dongle
+  * Thomas Günther <tom@toms-cafe.de>
+    - Moved dongle directory to /usr/share/vdr-plugin-vompserver
+    - Added debian/watch file for uscan
+    - Removed debconf dependency
+  * Tobias Grimm <tg@e-tobi.net>
+    - Changed debconf text and German translation
+    - Deleted vomp-<MAC-ADDRESS>.conf -Files on purge
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Sat,  4 Mar 2006 18:34:12 +0100
+
+vdr-plugin-vompserver (0.1.1-3) unstable; urgency=low
+
+  * Tobias Grimm <tg@e-tobi.net>
+    - Build-Depend on vdr (>=1.3.41-1)
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Tue, 31 Jan 2006 01:40:56 +0100
+
+vdr-plugin-vompserver (0.1.1-2) unstable; urgency=low
+
+  * Tobias Grimm <tg@e-tobi.net>
+    - Build-Depend on vdr (>=1.3.40-1)
+
+ -- Debian VDR Team <pkg-vdr-dvb-devel@lists.alioth.debian.org>  Thu, 26 Jan 2006 14:40:47 +0100
+
+vdr-plugin-vompserver (0.1.1-1) unstable; urgency=low
+
+  * Marten Richter <marten.richter@freenet.de>
+    - New upstream release
+    - New dongle version 0.1.1
+
+ -- Tobias Grimm <tg@e-tobi.net>  Fri, 23 Dec 2005 11:41:23 +0100
+
+vdr-plugin-vompserver (0.0.0+cvs20051214-1) unstable; urgency=low
+
+  * Marten Richter <marten.richter@freenet.de>
+    - New cvs upstream release
+    - New dongle version 0.0.17
+  * Tobias Grimm <tg@e-tobi.net>
+    - Fixed unpatch in 10_dongle.dpatch
+    - Removed remove_vdr from debian/config
+
+ -- Tobias Grimm <tg@e-tobi.net>  Sat, 17 Dec 2005 23:38:47 +0100
+
+vdr-plugin-vompserver (0.0.0+cvs20051113-1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Marten Richter <marten.richter@freenet.de>  Sun, 13 Nov 2005 13:25:37 +0100
+

@@ -1,0 +1,132 @@
+l10n-vomp: nl Nederlands
+* Missing texts for nl (Nederlands) supplemented with en (English)
+x:	5. MediaPlayer
+nl:	5. MediaPlayer
+
+x:	Remote Control
+nl:	Remote Control
+
+x:	Command
+nl:	Command
+
+x:	Hard wired
+nl:	Hard wired
+
+x:	User assignable
+nl:	User assignable
+
+x:	Press [ok] for learning or MENU to reset to defaults.
+nl:	Press [ok] for learning or MENU to reset to defaults.
+
+x:	TCP receive window size
+nl:	TCP receive window size
+
+x:	Use WSS (PAL only)
+nl:	Use WSS (PAL only)
+
+x:	Directory
+nl:	Directory
+
+x:	Start
+nl:	Start
+
+x:	Stop
+nl:	Stop
+
+x:	Connection lost
+nl:	Connection lost
+
+x:	Timer set successfully
+nl:	Timer set successfully
+
+x:	There is already a timer for this event
+nl:	There is already a timer for this event
+
+x:	Failure setting timer
+nl:	Failure setting timer
+
+* MEDIA PLAYER *
+x:	Loading
+nl:	Loading
+
+x:	rotate
+nl:	rotate
+
+x:	No Media found
+nl:	No Media found
+
+x:	no VDR connection
+nl:	no VDR connection
+
+x:	Format(px)
+nl:	Format(px)
+
+x:	Filesize
+nl:	Filesize
+
+x:	Time
+nl:	Time
+
+x:	Rotation
+nl:	Rotation
+
+x:	Scale
+nl:	Scale
+
+x:	MpegInfo
+nl:	MpegInfo
+
+x:	FileName
+nl:	FileName
+
+x:	Playlist
+nl:	Playlist
+
+x:	unable to open audio file
+nl:	unable to open audio file
+
+x:	Rand
+nl:	Rand
+
+x:	unable to get media list
+nl:	unable to get media list
+
+x:	JointStereo
+nl:	JointStereo
+
+x:	Stereo
+nl:	Stereo
+
+x:	Dual
+nl:	Dual
+
+x:	Mono
+nl:	Mono
+
+x:	Artist
+nl:	Artist
+
+x:	Year
+nl:	Year
+
+x:	Genre
+nl:	Genre
+
+x:	Album
+nl:	Album
+
+x:	Title
+nl:	Title
+
+x:	Track
+nl:	Track
+
+x:	Composer
+nl:	Composer
+
+x:	Comment
+nl:	Comment
+
+x:	Recordings sort order
+nl:	Recordings sort order
+

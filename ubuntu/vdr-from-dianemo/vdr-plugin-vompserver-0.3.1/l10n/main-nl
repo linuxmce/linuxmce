@@ -1,0 +1,308 @@
+l10n-vomp: nl Nederlands
+* Translation by Hans Dingemans
+
+x:	VDR
+nl:	VDR
+
+x:	Welcome
+nl:	Welkom
+
+x:	1. Live TV
+nl:	1. TV
+
+x:	2. Radio
+nl:	2. Radio
+
+x:	3. Recordings
+nl:	3. Opnames
+
+x:	4. Timers
+nl:	4. Timers
+
+x:	5. Options
+nl:	5. Instellingen
+
+x:	6. Options
+nl:	6. Instellingen
+
+x:	6. Reboot
+nl:	6. Herstarten
+
+x:	7. Reboot
+nl:	7. Herstarten
+
+x:	Downloading recordings list
+nl:	Laden lijst van opnames
+
+* RECORDINGS LIST *
+x:	Loading...
+nl:	Aan het laden...
+
+x:	Recordings - %s
+nl:	Opnames - %s
+
+x:	Recordings
+nl:	Opnames
+
+x:	<dir> %lu\t%s
+nl:	<dir> %lu\t%s
+
+x:	[ok] = menu
+nl:	[ok] = menu
+
+x:	%lu%% used, %iGB free
+nl:	%lu%% gebruikt, %iGB vrij
+
+* Also used in channels list
+x:	%i to %i of %i
+nl:	%i tot %i (van %i)
+
+* QUESTION *
+x:	Yes
+nl:	Ja
+
+x:	No
+nl:	Nee
+
+* RECORDING MENU *
+x:	Programme menu
+nl:	Opname menu
+
+x:	Play
+nl:	Afspelen
+
+x:	Resume
+nl:	Hervatten
+
+x:	Summary
+nl:	Samenvatting
+
+x:	Delete
+nl:	Wissen
+
+x:	Programme summary
+nl:	Samenvatting van programma
+
+x:	Summary unavailable
+nl:	Samenvatting niet beschikbaar
+
+x:	Delete recording
+nl:	Opname wissen
+
+x:	Are you sure you want to delete this recording?
+nl:	Weet u zeker dat u deze opname wilt wissen?
+
+* SERVER SELECT *
+x:	Choose a VDR server
+nl:	Kies een VDR server
+
+* OPTION MENUS *
+x:	Options
+nl:	Instellingen
+
+x:	General
+nl:	Algemeen
+
+x:	Advanced
+nl:	Geavanceerd
+
+x:	General Options
+nl:	Algemene instellingen
+
+x:	Timer Options
+nl:	Timer instellingen
+
+x:	Default start margin (minutes)
+nl:	Standaard start marge (minuten)
+
+x:	Default end margin (minutes)
+nl:	Standaard eind marge (minuten)
+
+x:	Default priority
+nl:	Standaard prioriteit
+
+x:	Default lifetime
+nl:	Standaard levensduur
+
+x:	Advanced Options
+nl:	Geavanceerde instellingen
+
+x:	TV connection type
+nl:	Type TV aansluiting
+
+x:	Remote control type
+nl:	Type afstandsbediening
+
+x:	TV aspect ratio
+nl:	TV aspect ratio
+
+x:	16:9 on 4:3 display mode
+nl:	16:9 op 4:3 mode
+
+x:	Power state after bootup
+nl:	Inschakelen na herstart
+
+x:	Display channels
+nl:	Kanalen tonen
+
+x:	Language
+nl:	Taal
+
+x:	Press back to exit, <, > or [ok] to change
+nl:	Toets [back] om terug te gaan, <, > of [ok] om aan te passen
+
+x:	VDR-Pri 0=OK !See forums!
+nl:	VDR-Pri 0=OK !Zie forums!
+
+* OPTION CHOICES *
+x:	Old
+nl:	Oud
+
+x:	New
+nl:	Nieuw
+
+x:	RGB+composite
+nl:	RGB+composiet
+
+x:	S-Video
+nl:	S-Video
+
+x:	Chop sides
+nl:	Zijkanten afkappen
+
+x:	Letterbox
+nl:	Letterbox
+
+x:	Last state
+nl:	Laatste toestand
+
+x:	All
+nl:	Alle
+
+x:	FTA only
+nl:	Alleen FTA
+
+x:	On
+nl:	Aan
+
+x:	Off
+nl:	Uit
+
+* CHANNEL LISTS *
+x:	Channels
+nl:	Kanalen
+
+x:	Radio Stations
+nl:	Radio stations
+
+* BANNERS *
+x:	No channel data available
+nl:	Geen kanaalgegevens beschikbaar
+
+x:	info
+nl:	Info
+
+x:	Channel unavailable
+nl:	Kanaal niet beschikbaar
+
+* CONNECT SCREEN *
+x:	Locating server
+nl:	Zoeken naar server
+
+x:	Connecting to VDR
+nl:	Verbinden met VDR
+
+x:	Login failed
+nl:	Login mislukt
+
+x:	Connection failed
+nl:	Verbinding mislukt
+
+* COMMAND *
+x:	Connected, loading config
+nl:	Verbonden, laden configuratie
+
+* EPG *
+x:	EPG
+nl:	EPG
+
+x:	OK
+nl:	OK
+
+x:	Page up
+nl:	Pag.omhoog
+
+x:	Page down
+nl:	Pag.omlaag
+
+x:	-24 hours
+nl:	-24 uur
+
+x:	+24 hours
+nl:	+24 uur
+
+x:	Go: Preview
+nl:	Go: Preview
+
+x:	Guide / Back: Close
+nl:	Guide/Back: Sluiten
+
+x:	Rec: Set timer
+nl:	Rec: Zet timer
+
+x:	Sel channel
+nl:	Kan. select.
+
+x:	There are no programme details available for this period
+nl:	Geen programmagegevens beschikbaar voor deze periode
+
+x:	No programme details
+nl:	Geen programmagegevens
+
+x:	Set Timer
+nl:	Zet Timer
+
+x:	Create this timer?
+nl:	Deze timer creëren?
+
+* TIMERS *
+x:	Timers
+nl:	Timers
+
+* EDIT TIMER *
+x:	Edit Timer
+nl:	Timer wijzigen
+
+x:	Active
+nl:	Actief
+
+x:	Channel
+nl:	Kanaal
+
+x:	Name
+nl:	Naam
+
+x:	Priority
+nl:	Prioriteit
+
+x:	Lifetime
+nl:	Levensduur
+
+x:	Current
+nl:	Heden
+
+x:	Recording
+nl:	Opname loopt
+
+x:	Move
+nl:	Verplaatsen
+
+x:	Failed to delete recording
+nl:	Verwijderen opname mislukt
+
+x:	Failed to move recording
+nl:	Verplaatsen opname mislukt
+
+x:	Move recording
+nl:	Verplaatsen opname
+
