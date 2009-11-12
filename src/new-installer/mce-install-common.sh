@@ -378,6 +378,15 @@ function Install_DCERouter {
 	apt-get -y -f install mysql-server || ExitInstaller "Failed to install mysql server"
 	invoke-rc.d mysql start # Because of this : https://bugs.launchpad.net/bugs/107224
 
+	# Fix for http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=512309
+	# to address http://svn.linuxmce.org/trac.cgi/ticket/397
+	# This will not be necessary for 9.10+
+	echo "UPDATE user SET Create_view_priv = 'Y', Show_view_priv = 'Y', \
+ Create_routine_priv = 'Y', Alter_routine_priv = 'Y', \
+ Create_user_priv = 'Y' WHERE User = 'debian-sys-maint'; \
+FLUSH PRIVILEGES; \
+" | mysql --defaults-extra-file=/etc/mysql/debian.cnf mysql
+
 	apt-get -y -f install pluto-sample-media
 	apt-get -y -f install video-wizard-videos
 #	apt-get -y -f install pluto-mysql-wrapper
