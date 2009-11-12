@@ -32,7 +32,7 @@ echo "Done building first batch of packages"
 # We need to have the svdrpservice-dev package to build the remote timer.
 #
 dpkg -i svdrpservice-dev_0.0.4-1~dia1_all.deb
-PACKAGES_SECOND_RUN="vdr-1.6.0 vdr-plugin-remotetimers-0.1.1~dia1 vdr-plugin-streamdev-0.3.3~cvs20080406.1321 vdr-plugin-xineliboutput-1.0.4 vdr-plugin-vompserver-0.3.0"
+PACKAGES_SECOND_RUN="vdr-1.6.0 vdr-plugin-remotetimers-0.1.1~dia1 vdr-plugin-streamdev-0.3.3~cvs20080406.1321 vdr-plugin-xineliboutput-1.0.4 vdr-plugin-vompserver-0.3.0 vdr-plugin-vompserver-0.3.1"
 BuildPackages $PACKAGES_SECOND_RUN
 #
 # But we do not need to clutter the builder with this package.
