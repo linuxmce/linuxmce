@@ -6854,7 +6854,7 @@ function getRows($tableName,$fields,$dbADO,$filter='')
 	return $result;	
 }
 
-function delete_media_pic($picID,$mediaADO){
+function delete_media_pic($picID,$mediadbADO){
 	if($picID!=0){
 		$mediadbADO->Execute('DELETE FROM Picture WHERE PK_Picture=?',$picID);
 	
@@ -6864,6 +6864,17 @@ function delete_media_pic($picID,$mediaADO){
 	
 		@unlink($GLOBALS['mediaPicsPath'].$picID.'.jpg');
 		@unlink($GLOBALS['mediaPicsPath'].$picID.'_tn.jpg');
+	}
+}
+
+function delete_media_pic_if_unused($picID,$mediadbADO) {
+	// Remove picture if no references
+	$fileReferences=getFields('Picture_File','FK_File',$mediadbADO,'WHERE FK_Picture='.$picID);
+	if (count($fileReferences)<=0) {
+		$attrReferences=getFields('Picture_Attribute','FK_Picture',$mediadbADO,'WHERE FK_Picture='.$picID);
+		if (count($attrReferences)<=0) {
+		  	delete_media_pic($picsArray[$i]['FK_Picture'],$mediadbADO);
+		}
 	}
 }
 
