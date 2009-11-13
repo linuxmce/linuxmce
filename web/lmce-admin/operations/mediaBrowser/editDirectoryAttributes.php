@@ -71,9 +71,10 @@ function editDirectoryAttributes($output,$mediadbADO,$dbADO) {
 			}else{
 				$out.='<table>';
 				foreach ($filesArray AS $id=>$filename){
+					$file_checked = !isset($_POST['newAttributeType']) || (int)@$_POST['file_'.$id]==1 ? 'checked' : '';
 					$out.='
 					<tr>
-						<td><input type="checkbox" name="file_'.$id.'" value="1" checked></td>
+						<td><input type="checkbox" name="file_'.$id.'" value="1" '.$file_checked.'></td>
 						<td><a href="index.php?section=editMediaFile&fileID='.$id.'">'.$filename.'</a></td>
 					</tr>
 					';
@@ -126,12 +127,12 @@ function editDirectoryAttributes($output,$mediadbADO,$dbADO) {
 							'.pulldownFromArray($attributeTypes,'newAttributeType',(int)@$_POST['newAttributeType'],'onChange="document.editDirectoryAttributes.action.value=\'form\';document.editDirectoryAttributes.submit();"').'
 							<br><input type="checkbox" name="replace_attributes" value="1"> '.$TEXT_REPLACE_ATTRIBUTES_CONST.'
 							</td>
-							<td><B>'.$TEXT_ATTRIBUTE_NAME_CONST.' *</B><br><input type="text" name="newAttributeName" value="" onKeyPress="document.editDirectoryAttributes.existingAttributes.selectedIndex=-1;"></td>
+							<td><B>'.$TEXT_ATTRIBUTE_NAME_CONST.' *</B><br><input type="text" id="newAttributeName" name="newAttributeName" value="" onKeyPress="document.editDirectoryAttributes.existingAttributes.selectedIndex=-1;"></td>
 						</tr>';
 						if(isset($_POST['newAttributeType']) && $_POST['newAttributeType']!='0'){
 							$newAttributeType=(int)$_POST['newAttributeType'];
 							$resAttributesByType=$mediadbADO->Execute('SELECT * FROM Attribute WHERE FK_AttributeType=? ORDER BY Name ASC',$newAttributeType);
-							$out.='
+							$out.='<script>var newANF = document.getElementById("newAttributeName"); if (newANF) newANF.focus();</script>
 							<tr>
 								<td>&nbsp;</td>
 								<td>';
