@@ -6868,13 +6868,19 @@ function delete_media_pic($picID,$mediadbADO){
 }
 
 function delete_media_pic_if_unused($picID,$mediadbADO) {
-	// Remove picture if no references
-	$fileReferences=getFields('Picture_File','FK_File',$mediadbADO,'WHERE FK_Picture='.$picID);
-	if (count($fileReferences)<=0) {
-		$attrReferences=getFields('Picture_Attribute','FK_Picture',$mediadbADO,'WHERE FK_Picture='.$picID);
-		if (count($attrReferences)<=0) {
-		  	delete_media_pic($picsArray[$i]['FK_Picture'],$mediadbADO);
-		}
+	//Is anything else referencing this picture?
+	$pictureReference =         'SELECT * FROM Picture_Attribute WHERE FK_Picture = '.$picID;
+	$pictureReference .= ' UNION SELECT * FROM Picture_Disc WHERE FK_Picture = '.$picID;
+	$pictureReference .= ' UNION SELECT * FROM Picture_Download WHERE FK_Picture = '.$picID;
+	$pictureReference .= ' UNION SELECT * FROM Picture_File WHERE FK_Picture = '.$picID;
+	$numPictureReferences = $mediadbADO->Execute($pictureReference);
+
+	//Delete picture from database and file system only if nothing else is referencing it!
+	if($numPictureReferences->RecordCount()==0) {
+		$deletePic='DELETE FROM Picture WHERE PK_Picture=?';
+		$mediadbADO->Execute($deletePic,$toDelete);
+		unlink($GLOBALS['mediaPicsPath'].$toDelete.'.jpg');
+		unlink($GLOBALS['mediaPicsPath'].$toDelete.'_tn.jpg');
 	}
 }
 
