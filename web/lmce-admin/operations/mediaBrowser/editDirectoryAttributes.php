@@ -310,7 +310,9 @@ function add_pic_to_files($insertID,$filesArray,$mediadbADO){
 				// delete all existing pics for selected files
 				$picsArray=getFields('Picture_File','FK_Picture',$mediadbADO,'WHERE FK_File='.$id);
 				for($i=0;$i<count($picsArray);$i++){
-					delete_media_pic($picsArray[$i]['FK_Picture'],$mediaADO);
+					// Remove link to file
+					$mediadbADO->Execute('DELETE FROM Picture_File WHERE FK_File = ? AND FK_Picture = ?',array($id,$picsArray[$i]['FK_Picture']));
+					delete_media_pic_if_unused($picsArray[$i]['FK_Picture'], $mediadbADO);
 				}
 			}
 			$mediadbADO->Execute('INSERT INTO Picture_File (FK_File, FK_Picture) VALUES (?,?)',array($id,$insertID));
