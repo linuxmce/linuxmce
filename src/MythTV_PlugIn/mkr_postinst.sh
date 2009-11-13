@@ -32,5 +32,9 @@ RunSQL "$Q"
 /usr/pluto/bin/SetupUsers_Homes.sh
 /usr/pluto/bin/StorageDevices_Setup.sh
 
+#hack to fix broken mythweb package
+#FIXME: remove once mythtv packages are fixed
+chown -R www-data: /var/www/mythweb/data
+
 #Run mythtv-setup.sh to make sure storage groups get added. -tschak
 /usr/pluto/bin/mythtv_setup.pl
