@@ -20,6 +20,9 @@ update-rc.d -f kdm remove
 ## NOTE: Fix for initramfs-tools - no longer needed - done in mce-install.sh
 #patch -Np0 -i mkinitramfs_dot-fix1.patch -r /dev/null >/dev/null 2>&1 || echo "The initramfs-tools dot-problem was already fixed."
 
+# Disable compcache
+rm -f /usr/share/initramfs-tools/conf.d/compcache && update-initramfs
+
 #
 echo 
 echo The first phase of the install process is completed
