@@ -6878,9 +6878,9 @@ function delete_media_pic_if_unused($picID,$mediadbADO) {
 	//Delete picture from database and file system only if nothing else is referencing it!
 	if($numPictureReferences->RecordCount()==0) {
 		$deletePic='DELETE FROM Picture WHERE PK_Picture=?';
-		$mediadbADO->Execute($deletePic,$toDelete);
-		unlink($GLOBALS['mediaPicsPath'].$toDelete.'.jpg');
-		unlink($GLOBALS['mediaPicsPath'].$toDelete.'_tn.jpg');
+		$mediadbADO->Execute($deletePic,$picID);
+		unlink($GLOBALS['mediaPicsPath'].$picID.'.jpg');
+		unlink($GLOBALS['mediaPicsPath'].$picID.'_tn.jpg');
 	}
 }
 
