@@ -131,21 +131,8 @@ function mainMediaBrowser($output,$mediadbADO,$dbADO) {
 			//Remove the reference to the picture from the attribute
 			$deletePicAttribute='DELETE FROM Picture_Attribute WHERE FK_Picture=? AND FK_Attribute=?';
 			$mediadbADO->Execute($deletePicAttribute,array($toDelete,$attributeID));
-			
-			//Is anything else referencing this picture?
-			$pictureReference =         'SELECT * FROM Picture_Attribute WHERE FK_Picture = '.$toDelete;
-			$pictureReference .= ' UNION SELECT * FROM Picture_Disc WHERE FK_Picture = '.$toDelete;
-			$pictureReference .= ' UNION SELECT * FROM Picture_Download WHERE FK_Picture = '.$toDelete;
-			$pictureReference .= ' UNION SELECT * FROM Picture_File WHERE FK_Picture = '.$toDelete;
-			$numPictureReferences = $mediadbADO->Execute($pictureReference);
 
-			//Delete picture from database and file system only if nothing else is referencing it!
-			if($numPictureReferences->RecordCount()==0) {
-				$deletePic='DELETE FROM Picture WHERE PK_Picture=?';
-				$mediadbADO->Execute($deletePic,$toDelete);
-				unlink($GLOBALS['mediaPicsPath'].$toDelete.'.jpg');
-				unlink($GLOBALS['mediaPicsPath'].$toDelete.'_tn.jpg');
-			}
+			delete_media_pic_if_unused($toDelete, $mediadbADO);
 		}
 		$out.='
 			<div class="err">'.((isset($_REQUEST['error']))?$_REQUEST['error']:'').'</div>
