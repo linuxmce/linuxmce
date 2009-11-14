@@ -81,6 +81,10 @@ if [ x"$1" = x"master" ] ; then
 	# Don't change this unless you KNOW what you are doing
 	UpdateMythSetting "MasterServerIP"      $IPADDR "NULL"
 	UpdateMythSetting "MasterServerPort"    "6543"  "NULL"
+
+	# Now that we're on MythTV 0.22, we have to set a PIN.
+	UpdateMythSettingAllHosts "SecurityPin"	"0000"
+
 elif [ x"$1" = x"slave" ] ; then
 	IPADDR="$2"
 	NAME="$3"
