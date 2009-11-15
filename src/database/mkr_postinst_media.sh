@@ -27,3 +27,13 @@ if [ $PROCESS = "install" ]; then
 	mysql $MYSQL_DB_CRED pluto_media -e "$Q"
 fi
 
+Q="ALTER TABLE pluto_media.File ADD INDEX FatGroupBy(PK_File,Path,Filename,INode,AttrDate,AttrCount,ModificationDate);"
+mysql $MYSQL_DB_CRED pluto_media -e "$Q"
+
+Q="ALTER TABLE pluto_media.Bookmark ADD INDEX FK_File(FK_File);"
+mysql $MYSQL_DB_CRED pluto_media -e "$Q"
+
+Q="ALTER TABLE pluto_media.LongAttribute ADD INDEX FK_File(FK_File);"
+mysql $MYSQL_DB_CRED pluto_media -e "$Q"
+
+exit 0
