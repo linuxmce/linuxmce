@@ -1,6 +1,8 @@
 
 echo
 . /usr/pluto/bin/Config_Ops.sh || :
+. /usr/pluto/bin/SQL_Ops.sh 
+. /usr/pluto/bin/pluto.func
 /usr/pluto/bin/Debug_LogKernelModules.sh "$0" || :
 PROCESS="upgrade"
 # Check if we have an existing install, by verifying the DeviceTemplate table exists
@@ -14,26 +16,39 @@ if [ $PROCESS = "install" ]; then
 	/usr/pluto/bin/Debug_LogKernelModules.sh "$0" || :
 
 	Q="GRANT ALL PRIVILEGES ON pluto_media.* TO 'plutomedia'@'localhost';"
-	mysql $MYSQL_DB_CRED -e "$Q"
+	RunSQL "$Q"
 
 	Q="GRANT ALL PRIVILEGES ON pluto_media.* TO '$MySqlUser'@'127.0.0.1' IDENTIFIED BY '$MySqlPassword';"
-	mysql $MYSQL_DB_CRED -e "$Q"
+	RunSQL "$Q"
 	
 	Q="FLUSH PRIVILEGES;"
-	mysql $MYSQL_DB_CRED -e "$Q"
+	RunSQL "$Q"
 
 	#temporary code -- we got rid of the 
 	Q="UPDATE Attribute SET FK_AttributeType=13 WHERE FK_AttributeType=4;"
-	mysql $MYSQL_DB_CRED pluto_media -e "$Q"
+	RunSQL "$Q"
 fi
 
-Q="ALTER TABLE pluto_media.File ADD INDEX FatGroupBy(PK_File,Path,Filename,INode,AttrDate,AttrCount,ModificationDate);"
-mysql $MYSQL_DB_CRED pluto_media -e "$Q"
+Q="SELECT Count(*) AS Entries FROM information_schema.STATISTICS S WHERE TABLE_NAME = 'File' AND INDEX_NAME='FatGroupBy'"
 
-Q="ALTER TABLE pluto_media.Bookmark ADD INDEX FK_File(FK_File);"
-mysql $MYSQL_DB_CRED pluto_media -e "$Q"
+Entries=$(RunSQL "$Q" )
+if [[ "$Entries" -eq "0" ]]; then
+	Q="ALTER TABLE pluto_media.File ADD INDEX FatGroupBy(PK_File,Path,Filename,INode,AttrDate,AttrCount,ModificationDate);"
+	RunSQL "$Q"
+fi
 
-Q="ALTER TABLE pluto_media.LongAttribute ADD INDEX FK_File(FK_File);"
-mysql $MYSQL_DB_CRED pluto_media -e "$Q"
+Q="SELECT Count(*) AS Entries FROM information_schema.STATISTICS S WHERE TABLE_NAME = 'Bookmark' AND INDEX_NAME='FK_File'"
+Entries=$(RunSQL "$Q")
+if [[ "$Entries" -eq "0" ]]; then
+	Q="ALTER TABLE pluto_media.Bookmark ADD INDEX FK_File(FK_File);"
+	RunSQL "$Q"
+fi
+
+Q="SELECT Count(*) AS Entries FROM information_schema.STATISTICS S WHERE TABLE_NAME = 'LongAttribute' AND INDEX_NAME='FK_File'"
+Entries=$(RunSQL "$Q")
+if [[ "$Entries" -eq "0" ]]; then
+	Q="ALTER TABLE pluto_media.LongAttribute ADD INDEX FK_File(FK_File);"
+	RunSQL "$Q"
+fi
 
 exit 0
