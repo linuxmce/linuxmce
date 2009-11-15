@@ -89,6 +89,10 @@ function build_main_debs() {
 			;;
 	esac
 
+	# Set version of packages to todays date, plus 00:19 as time
+	Q="Update Version Set VersionName= concat('2.0.0.44.',substr(now()+0,3,6),'$SVNrevision') Where PK_Version = 1;"
+	mysql $PLUTO_BUILD_CRED -D 'pluto_main_build' -e "$Q"
+
 	# Compile the packages
 	echo "\"${mkr_dir}/MakeRelease\" -a -R \"$SVNrevision\" $PLUTO_BUILD_CRED -O \"$out_dir\" -D 'pluto_main_build' -o \"$Distro_ID\" -r 21 -m 1 -K \"$exclude_list\" -s \"${svn_dir}/${svn_branch_name}\" -n / -d"
 	"${mkr_dir}/MakeRelease" -a -R "$SVNrevision" $PLUTO_BUILD_CRED -O "$out_dir" -D 'pluto_main_build' -o "$Distro_ID" -r 21 -m 1 -K "$exclude_list" -s "${svn_dir}/${svn_branch_name}" -n / -d || Error "MakeRelease failed"
