@@ -2564,7 +2564,41 @@ function PortForHumans($device,$deviceNames)
 	
 	return "Unknown: $devname";
 }
+function SerialPortInfo($parent,$name,$dbADO)
+{
+	//This function will return a more readable form of the serial device stored in the database.
+	//This will make the SerialPort dropdowns easier to read in the web admin, while retaining the ability
+	//to use the correct serial port even if the /dev/ttyUSBx number changes.
 
+
+	//This function has no purpose for REAL serial devices, so lets omit them
+	if(substr($name,0,4) == "/dev") {
+		return $name;
+	}
+
+	//Lets get the PCI_ID and USB_ID from the condensed string	
+	list($PciId,$UsbId)=explode("+",$name);
+
+	//Is this serial port on a Media Director?
+	$cmd = "";
+	if($parent != 1) {
+		//Serial port is located on an MD
+		$ip=getFieldsAsArray('Device','IPaddress',$dbADO,'WHERE PK_Device='.$parent);
+		$ipAddress=$ip['IPaddress'][0];
+
+		$cmd = "ssh ".$IPaddress." ";
+	}
+
+	//Un-condense the stored serial port string
+	$cmd .= "find /sys/devices -name '*tty*' | egrep '/tty[:/]' | grep usb | grep '" . $PciId . ".*-" . $UsbId . ".*' | sed -r 's,tty[:/],,g'";
+	$res=exec($cmd);
+	
+	//and return the ACTUAL serial port device
+	return "/dev/".basename($res)." (".$name.")";
+
+
+	
+}
 function serialPortsPulldown($name,$selectedPort,$allowedToModify,$topParent,$dbADO,$deviceID,$cssStyle="")
 {
 	// include language files
@@ -2577,11 +2611,6 @@ function serialPortsPulldown($name,$selectedPort,$allowedToModify,$topParent,$db
 		return $TEXT_ERROR_TOP_PARENT_DEVICE_NOT_FOUND_CONST;
 	}
 	
-	/*
-	$serial_ports=array();
-	$cmd="sudo -u root /usr/pluto/bin/LaunchRemoteCmd.sh '$topParentIP' /usr/pluto/bin/ListSerialPorts.sh";
-	exec($cmd, $serial_ports);
-	*/
 	$portDeviceData=getDeviceData($topParent,$GLOBALS['AvailableSerialPorts'],$dbADO);
 	if($portDeviceData==''){
 		return $TEXT_ERROR_NO_SERIAL_PORTS_FOUND_CONST;
@@ -2589,7 +2618,7 @@ function serialPortsPulldown($name,$selectedPort,$allowedToModify,$topParent,$db
 
 	$serial_ports=explode(',',$portDeviceData);
 
-	$usedPorts=getFieldsAsArray('Device_DeviceData','Device.Description,FK_Device,IK_DeviceData',$dbADO,'INNER JOIN Device ON FK_Device=PK_Device WHERE FK_Installation='.$installationID.' AND FK_DeviceData='.$GLOBALS['Port'].' AND PK_Device!='.$deviceID);
+	$usedPorts=getFieldsAsArray('Device_DeviceData','Device.Description,Device.IPaddress,FK_Device,IK_DeviceData',$dbADO,'INNER JOIN Device ON FK_Device=PK_Device WHERE FK_Installation='.$installationID.' AND FK_DeviceData='.$GLOBALS['Port'].' AND PK_Device!='.$deviceID);
 	$serialPortAsoc=array();
 	foreach($serial_ports AS $key=>$value){
 		$usedBy=array();
@@ -2601,9 +2630,9 @@ function serialPortsPulldown($name,$selectedPort,$allowedToModify,$topParent,$db
 			}
 		}
 		if(count($usedBy)>0){
-			$serialPortAsoc[$value]=$value.' Used by '.join(', ',$usedBy);
+			$serialPortAsoc[$value]=SerialPortInfo($topParent,$value,$dbADO)." Used by '".join(', ',$usedBy)."'";
 		}else{
-			$serialPortAsoc[$value]=$value;
+			$serialPortAsoc[$value]=SerialPortInfo($topParent,$value,$dbADO);
 		}
 	}
 	
