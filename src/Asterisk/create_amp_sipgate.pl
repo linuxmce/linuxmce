@@ -60,7 +60,7 @@ $TRUNK_VARS{'peerdetails'}.="context=from-trunk\n";
 #$TRUNK_VARS{'peerdetails'}.="disallow=all\n";
 $TRUNK_VARS{'peerdetails'}.="host=$DECLARED_HOST\n";
 $TRUNK_VARS{'peerdetails'}.="username=$DECLARED_USERNAME\n";
-$TRUNK_VARS{'peerdetails'}.="callerid=$DECLARED_USERNAME\n";
+#$TRUNK_VARS{'peerdetails'}.="callerid=$DECLARED_USERNAME\n";
 $TRUNK_VARS{'peerdetails'}.="user=$DECLARED_USERNAME\n";
 $TRUNK_VARS{'peerdetails'}.="fromuser=$DECLARED_USERNAME\n";
 $TRUNK_VARS{'peerdetails'}.="authuser=$DECLARED_USERNAME\n";
