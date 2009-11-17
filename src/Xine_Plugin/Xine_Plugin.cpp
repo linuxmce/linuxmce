@@ -290,6 +290,16 @@ bool Xine_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
 	mediaURL = StringUtils::Replace(mediaURL, "\\", "/"); // replacing all the \ in a windows path with /
 #endif
 
+	// hack: redirect MOV, EVO, M2TS files to MPlayer_Player
+	// TODO rework Media Dispatcher to make it more clear - later
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Doing MPlayer redirection check...");
+	bool bRedirectToMPlayer = ( pXineMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_HDDVD_CONST ) ||
+			( pXineMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_BD_CONST ) ||
+			( (pXineMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_StoredVideo_CONST) && 
+			( StringUtils::EndsWith(mediaURL, ".EVO", true) || StringUtils::EndsWith(mediaURL, ".M2TS", true) ) 
+			);
+
+
 	// hack: redirect MythTV recordings to MythTV_Player
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Doing MythTV redirection check...");
 
@@ -307,9 +317,6 @@ bool Xine_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
 //
 	bool bRedirectToMythTV = false;
 
-	if (bRedirectToMythTV)
-	  LoggerWrapper::GetInstance()->Write(LV_WARNING,"Redirecting to MythTV.");
-
 	if( !bRedirectToMythTV && pXineMediaStream->StreamingRequired() )
 	{
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "sending CMD_Play_Media from %d to %d with deq pos %d", 
@@ -325,8 +332,9 @@ bool Xine_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
 		// No handling of errors (it will in some cases deadlock the router.)
 		SendCommand(cmd);
 	}
-	else
+	else if (bRedirectToMythTV)
 	{
+		LoggerWrapper::GetInstance()->Write(LV_WARNING,"Redirecting to MythTV.");
 		MediaDevice *pMediaDevice_MythTV = NULL;
 		
 		if (bRedirectToMythTV)
@@ -364,22 +372,7 @@ bool Xine_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
 
 		// No handling of errors (it will in some cases deadlock the router.)
 		SendCommand(cmd);	
-	}
-
-
-	// hack: redirect MOV, EVO, M2TS files to MPlayer_Player
-	// TODO rework Media Dispatcher to make it more clear - later
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Doing MPlayer redirection check...");
-	bool bRedirectToMPlayer = ( pXineMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_HDDVD_CONST ) ||
-			( pXineMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_BD_CONST ) ||
-			( (pXineMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_StoredVideo_CONST) && 
-			( StringUtils::EndsWith(mediaURL, ".EVO", true) || StringUtils::EndsWith(mediaURL, ".M2TS", true) ) 
-			);
-	
-	if (bRedirectToMPlayer)
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Redirecting CMD_Play_Media to MPlayer instead of Xine: media type is %i", pXineMediaStream->m_iPK_MediaType);
-	
-	if( !bRedirectToMPlayer && pXineMediaStream->StreamingRequired() )
+	} else if( !bRedirectToMPlayer && pXineMediaStream->StreamingRequired() )
 	{
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "sending CMD_Play_Media from %d to %d with deq pos %d", 
 			m_dwPK_Device, pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
@@ -401,6 +394,7 @@ bool Xine_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
 		
 		if (bRedirectToMPlayer)
 		{
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Redirecting CMD_Play_Media to MPlayer instead of Xine: media type is %i", pXineMediaStream->m_iPK_MediaType);
 			pMediaDevice_MPlayer = m_pMedia_Plugin->m_mapMediaDevice_Find(m_pRouter->FindClosestRelative(DEVICETEMPLATE_MPlayer_Player_CONST, pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device));
 			if (!pMediaDevice_MPlayer)
 			{
