@@ -1356,7 +1356,7 @@ dequeMediaFile->size() ? (*dequeMediaFile)[0]->m_sPath.c_str() : "NO",
     {
         pMediaStream = pMediaStream_AllEAsPlaying;
         pMediaStream->m_dequeMediaFile += *dequeMediaFile;
-        pMediaStream->m_iDequeMediaFile_Pos = pMediaStream->m_dequeMediaFile.size()-1;
+        pMediaStream->m_iDequeMediaFile_Pos = pMediaStream->m_dequeMediaFile.size()-dequeMediaFile->size();
 	    pMediaStream->m_iPK_MediaType = pMediaHandlerInfo->m_PK_MediaType;
     }
     else
