@@ -295,7 +295,7 @@ Router::~Router()
 	for(it=m_mapPlugIn.begin();it!=m_mapPlugIn.end();++it)
 	{
 		class Command_Impl *pCommand_Impl = (*it).second;
-		delete pCommand_Impl;
+		if (pCommand_Impl) delete pCommand_Impl;
 	}
 	m_mapPlugIn.clear();
 	m_bTerminate=true;
