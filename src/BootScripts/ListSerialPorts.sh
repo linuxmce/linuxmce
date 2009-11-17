@@ -12,7 +12,7 @@ fi
 # Ubuntu 7.10: ../../../devices/pci0000:00/0000:00:04.0/usb1/1-1/1-1:1.0
 # Ubuntu 8.10:    ../../devices/pci0000:00/0000:00:1d.0/usb2/2-2/2-2:1.0/ttyUSB0/tty/ttyUSB0
 # Ubuntu 8.10:    ../../devices/pci0000:00/0000:00:1d.0/usb2/2-1/2-1:1.0/tty/ttyACM0
-SedPattern_UsbId='s,^.*(pci.*)/usb[0-9]*/[0-9./-]*/[0-9]*-([0-9.]*):[0-9.]*(/tty(USB[0-9]*(/tty/.*)?|/ttyACM[0-9]*))?$,\1+\2,g'
+SedPattern_UsbId='s,.*(pci.*)/usb[0-9]*/[0-9./-]*/[0-9]*-([0-9.:]*)[0-9.]*(/tty(USB[0-9]*(/tty/.*)?|/ttyACM[0-9]*))?$,\1+\2,g' 
 
 # Look for ttyUSB and ttyACM devices
 Ports=
