@@ -42,9 +42,11 @@ fi
 ## Ouch 
 chmod 777 /usr/pluto/locks
 
+
 ## Copy our logrotate policy -- every package should have its own policy but we are from Pluto :)
 if ! BlacklistConfFiles '/etc/logrotate.d/pluto' ;then
-	cp /usr/pluto/templates/logrotate.pluto.tmpl /etc/logrotate.d/pluto
+	rm -f /etc/logrotate.d/pluto
+	cp /usr/pluto/templates/logrotate.pluto.tmpl /etc/logrotate.d/linuxmce
 fi
 
 ## Copy our asound.conf to the system
