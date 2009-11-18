@@ -840,6 +840,14 @@ bool UpdateMedia::AnyReasonToSkip(string sDirectory, string sFile)
 					   sDirectory.c_str(), sFile.c_str());
 		return true;
 	}
+
+	if (FileUtils::FileSize(sDirectory + "/" + sFile) == 0)
+	{
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "The file %s/%s is 0 bytes. We'll skip it!",
+			sDirectory.c_str(), sFile.c_str());
+		return true;
+
+	}
 		
 	return false;
 }
