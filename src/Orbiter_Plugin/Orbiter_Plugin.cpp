@@ -1883,7 +1883,7 @@ void Orbiter_Plugin::CMD_Regen_Orbiter(int iPK_Device,string sForce,string sRese
 			{
 				int Minutes = (int)(time(NULL) - pOH_Orbiter->m_tRegenTime) /60;
 				string sMessage = "We already started regenerating the orbiter " + pOH_Orbiter->m_pDeviceData_Router->m_sDescription + " " + StringUtils::itos(Minutes) +
-					" minutes ago.  When it is finished, it will return to the main menu automatically.  If you think it is stuck, you may want to reset the Pluto system";
+					" minutes ago.  When it is finished, it will return to the main menu automatically.  If you think it is stuck, you may want to reset the LinuxMCE system";
 				SCREEN_PopupMessage SCREEN_PopupMessage(m_dwPK_Device, pMessage->m_dwPK_Device_From,
 					sMessage, // Main message
 					"", // Command Line
