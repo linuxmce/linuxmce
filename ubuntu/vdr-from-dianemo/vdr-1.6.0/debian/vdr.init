@@ -2,6 +2,7 @@
 #
 # vdr start-stop script
 #
+
 ### BEGIN INIT INFO
 # Provides:          vdr
 # Required-Start:    $network $syslog
