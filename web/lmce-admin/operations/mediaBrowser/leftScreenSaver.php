@@ -16,8 +16,8 @@ function leftScreenSaver($output,$mediadbADO,$dbADO) {
 		<script>
 		function syncPath(path)
 		{
-			top.basefrm.location=\'index.php?section=mainScreenSaver&path=\'+encodeURI(path);
-			self.location=\'index.php?section=leftScreenSaver&startPath=\'+encodeURI(path);
+			top.basefrm.location=\'index.php?section=mainScreenSaver&path=\'+encodeURIComponent(path);
+			self.location=\'index.php?section=leftScreenSaver&startPath=\'+encodeURIComponent(path);
 		}
 		</script>
 		<form action="index.php" method="POST" name="leftScreenSaver">
@@ -51,13 +51,13 @@ function leftScreenSaver($output,$mediadbADO,$dbADO) {
 		foreach ($pathsArray AS $directory){
 			if($directory!=''){
 				$pathTo.='/'.$directory;
-				$linksTree.=$indent.(($pathTo==$startPath)?'<B>[ <a href="javascript:syncPath(\''.urlencode($pathTo).'\')"><B> '.stripslashes($directory).'</B></a> ]</B><br>':'<a href="javascript:syncPath(\''.urlencode($pathTo).'\')"><B>&gt; '.stripslashes($directory).'</B></a><br>');
+				$linksTree.=$indent.(($pathTo==$startPath)?'<B>[ <a href="javascript:syncPath(\''.$pathTo.'\')"><B> '.stripslashes($directory).'</B></a> ]</B><br>':'<a href="javascript:syncPath(\''.$pathTo.'\')"><B>&gt; '.stripslashes($directory).'</B></a><br>');
 				$indent.='&nbsp;&nbsp;&nbsp;&nbsp;';
 			}
 		}
 		
 		foreach ($childsArray AS $childPath=>$childName){
-			$linksTree.=$indent.'<a href="javascript:syncPath(\''.urlencode(addslashes($childPath)).'\')">&gt; '.stripslashes($childName).'</a><br>';
+			$linksTree.=$indent.'<a href="javascript:syncPath(\''.addslashes($childPath).'\')">&gt; '.stripslashes($childName).'</a><br>';
 		}
 
 		$out.='
