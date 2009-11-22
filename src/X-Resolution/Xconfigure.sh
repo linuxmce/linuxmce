@@ -317,6 +317,8 @@ if [[ "$DisplayDriver" == intel ]]; then
 	. /usr/pluto/bin/X-IntelSpecificFunctions.sh
 elif [[ "$DisplayDriver" == nvidia ]]; then
 	. /usr/pluto/bin/X-nVidiaSpecificFunctions.sh
+#elif [[ "$DisplayDriver" == fglrx ]]; then
+#	. /usr/pluto/bin/X-ATISpecificFunction.sh
 fi
 
 Logging "$TYPE" "$SEVERITY_STATUS" "Xconfigure" "Display Driver: $DisplayDriver" >&2
