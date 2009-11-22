@@ -16,8 +16,8 @@ function leftScreenSaver($output,$mediadbADO,$dbADO) {
 		<script>
 		function syncPath(path)
 		{
-			top.basefrm.location=\'index.php?section=mainScreenSaver&path=\'+escape(path);
-			self.location=\'index.php?section=leftScreenSaver&startPath=\'+escape(path);
+			top.basefrm.location=\'index.php?section=mainScreenSaver&path=\'+encodeURI(path);
+			self.location=\'index.php?section=leftScreenSaver&startPath=\'+encodeURI(path);
 		}
 		</script>
 		<form action="index.php" method="POST" name="leftScreenSaver">
