@@ -6,7 +6,7 @@ function leftMediaFilesSync($output,$mediadbADO,$dbADO) {
 	/* @var $mediadbADO ADOConnection */
 	/* @var $rs ADORecordSet */
 	
-	$startPath=(isset($_REQUEST['startPath']))?urldecode($_REQUEST['startPath']):'/home/public/data';
+	$startPath=(isset($_REQUEST['startPath']))?$_REQUEST['startPath']:'/home/public/data';
 	$action = isset($_REQUEST['action'])?cleanString($_REQUEST['action']):'form';
 	$out='';	
 	$switchDirURL=(substr($startPath,0,5)!='/home')?'<a href="javascript:syncPath(\'/home/public/data\')">Switch to /home/public/data</a>':'<a href="javascript:syncPath(\'/mnt/upnp\')">Switch to /mnt/upnp</a>';
@@ -16,14 +16,14 @@ function leftMediaFilesSync($output,$mediadbADO,$dbADO) {
 		<script>
 		function syncPath(path)
 		{
-			top.basefrm.location=\'index.php?section=mainMediaFilesSync&path=\'+escape(path);
-			self.location=\'index.php?section=leftMediaFilesSync&startPath=\'+escape(path);
+			top.basefrm.location=\'index.php?section=mainMediaFilesSync&path=\'+encodeURIComponent(path);
+			self.location=\'index.php?section=leftMediaFilesSync&startPath=\'+encodeURIComponent(path);
 		}
 		</script>
 		<form action="index.php" method="POST" name="leftMediaFilesSync">
 		<input type="hidden" name="section" value="leftMediaFilesSync">
 		<input type="hidden" name="action" value="search">
-		<input type="hidden" name="startPath" value="'.htmlentities($startPath).'">
+		<input type="hidden" name="startPath" value="'.htmlspecialchars($startPath).'">
 		
 	<table border="0" cellpading="2" cellspacing="0" width="100%">
 			<tr>
@@ -51,13 +51,13 @@ function leftMediaFilesSync($output,$mediadbADO,$dbADO) {
 		foreach ($pathsArray AS $directory){
 			if($directory!=''){
 				$pathTo.='/'.$directory;
-				$linksTree.=$indent.(($pathTo==$startPath)?'<B>[ <a href="javascript:syncPath(\''.htmlentities($pathTo).'\')"><B> '.stripslashes($directory).'</B></a> ]</B><br>':'<a href="javascript:syncPath(\''.htmlentities($pathTo).'\')"><B>&gt; '.stripslashes($directory).'</B></a><br>');
+				$linksTree.=$indent.(($pathTo==$startPath)?'<B>[ <a href="javascript:syncPath(\''.htmlspecialchars($pathTo).'\')"><B> '.stripslashes($directory).'</B></a> ]</B><br>':'<a href="javascript:syncPath(\''.htmlspecialchars($pathTo).'\')"><B>&gt; '.stripslashes($directory).'</B></a><br>');
 				$indent.='&nbsp;&nbsp;&nbsp;&nbsp;';
 			}
 		}
 		
 		foreach ($childsArray AS $childPath=>$childName){
-			$linksTree.=$indent.'<a href="javascript:syncPath(\''.htmlentities(addslashes($childPath)).'\')">&gt; '.stripslashes($childName).'</a><br>';
+			$linksTree.=$indent.'<a href="javascript:syncPath(\''.htmlspecialchars(addslashes($childPath)).'\')">&gt; '.stripslashes($childName).'</a><br>';
 		}
 
 		$out.='
