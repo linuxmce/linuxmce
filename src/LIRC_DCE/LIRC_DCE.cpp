@@ -46,7 +46,7 @@ void * StartLeeching(void * Arg)
 
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
 	pLIRC_DCE->lirc_leech(pLIRC_DCE->m_DeviceID);
-	exit(-1);
+	return NULL;
 }
 
 //<-dceag-const-b->
@@ -120,7 +120,7 @@ bool LIRC_DCE::GetConfig()
 		else
 		{
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "No SerialPort selected and no default entry found. Exiting.");
-			exit(1);
+			return false;
 		}
 #endif
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "No SerialPort selected, selecting default %s", sSerialPort.c_str());
@@ -205,7 +205,7 @@ bool LIRC_DCE::GetConfig()
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Failed to create Leeching Thread");
 		m_bQuit_set(true);
-		exit(1);
+		return false;
 	}
 	return true;
 }
