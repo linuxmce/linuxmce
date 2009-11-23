@@ -237,7 +237,8 @@ LC_ALL=C chroot $TEMP_DIR apt-get -y install kubuntu-desktop
 mv "$TEMP_DIR"/etc/init.d/kdm{,.save}
 mv "$TEMP_DIR"/etc/rc2.d/*kdm "$TEMP_DIR"/etc/rc2.d/S99kdm
 # Remove whatever 
-update-rc.d -f kdm remove
+LC_ALL=C chroot $TEMP_DIR update-rc.d -f kdm remove
+LC_ALL=C chroot $TEMP_DIR update-rc.d -f NetworkManager remove
 
 LC_ALL=C chroot $TEMP_DIR apt-get -y install xserver-xorg-video-all
 LC_ALL=C chroot $TEMP_DIR apt-get -y install linux-firmware
