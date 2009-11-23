@@ -6442,6 +6442,12 @@ void Orbiter::CMD_Set_Current_Location(int iLocationID,string &sCMD_Result,Messa
 void Orbiter::RenderFloorplan(DesignObj_Orbiter *pDesignObj_Orbiter, DesignObj_Orbiter *pDesignObj_Orbiter_Screen, PlutoPoint point)
 {
 	int Type = atoi(pDesignObj_Orbiter->GetParameterValue(DESIGNOBJPARAMETER_Type_CONST).c_str());
+	int selectedFloorplan = atoi(m_mapVariable[VARIABLE_Misc_Data_1_CONST].c_str());
+	bool showThisFloorplan = pDesignObj_Orbiter->m_iPage == selectedFloorplan;
+	if (!showThisFloorplan)
+	{
+	        return;
+	}
 
 	string sResult;
 	DCE::CMD_Get_Current_Floorplan CMD_Get_Current_Floorplan(m_dwPK_Device, m_dwPK_Device_OrbiterPlugIn, StringUtils::itos(pDesignObj_Orbiter->m_iPage), Type, &sResult);
