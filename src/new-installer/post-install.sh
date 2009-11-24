@@ -1,4 +1,5 @@
 #!/bin/bash
+. /usr/pluto/bin/Utils.sh
 
 source post-install-common.sh
 
@@ -22,6 +23,9 @@ update-rc.d -f kdm remove
 
 # Disable compcache
 rm -f /usr/share/initramfs-tools/conf.d/compcache && update-initramfs
+
+# install the correct nvidia driver
+installCorrectNvidiaDriver
 
 #
 echo 
