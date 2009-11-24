@@ -115,6 +115,25 @@ sub CheckMythTVStorageGroup
   print "Ok\n";
 }
 
+# getHostFromMD
+# This function takes a primary key as input, and maps that primary key
+# to a hostname. PK=1 is always the core, and most MD's have a "moon"xxx host name.
+# The oddball here is the hybrid MD - it needs to map back to dcerouter as well. This function takes care of that.
+sub getHostFromMD {
+	my $thisPK = shift;
+
+	#find out if this is a Hybrid MD. If it is, return the dcerouter host
+	$sql="SELECT Count(*) FROM Device WHERE FK_Device_ControlledVia=1 AND PK_Device=$thisPK";
+	UseDB("pluto_main");
+	@results=RunSQL($sql);
+	if ($results[0]->{"Count(*)"} eq "1" || $thisPK eq 1) {
+		return "dcerouter"
+	}
+
+	# Otherwise, return "moon"+primary key
+	return "moon".$thisPK;
+}
+
 @TPL_STORAGE_DEVICES=(1790, 1794, 1768, 1769, 1854, 1851, 1849);
 $DD_USERS=3;
 
@@ -289,4 +308,37 @@ foreach my $hostName (@hostNames) {
 		}
 	}
 }
+
+##############################
+# Synchronize AC3/DTS Settings
+##############################
+print "Synchronizing MythTV audio settings...\n\n";
+# Lets build a list of all of the primary keys to the MD's (including the Hybrid if it exists) (note that these settings don't apply to the core device, but its hybrid MD)
+$sql="SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=28";
+UseDB("pluto_main");
+@results=RunSQL($sql);
+foreach $row (@results) {
+	push(@md_devices,$row->{"PK_Device"});
+}
+
+# Loop through all of the MD's, and update MythTV DTS/AC3 settings
+foreach my $thisMD (@md_devices) {
+	$sql="SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device='$thisMD' AND FK_DeviceData=88";
+	UseDB("pluto_main");
+	@results=RunSQL($sql);
+	$LMCE_Audio_Setting=$results[0]->{"IK_DeviceData"};	
+
+	$host=getHostFromMD($thisMD);
+
+	if ($LMCE_Audio_Setting && $LMCE_Audio_Setting =~ /3/) {
+		$sql="UPDATE settings SET data=1 WHERE (value='ACPassThru' OR value='DTSPassThru') AND hostname='$host'";
+		print "Updating DTS/AC3 MythTV settings for $host -- setting them to true to match MD settings.\n"
+	} else {
+		$sql="UPDATE settings SET data=0 WHERE (value='ACPassThru' OR value='DTSPassThru') AND hostname='$host'";
+		print "Updating DTS/AC3 MythTV settings for $host -- setting them to false to match MD settings.\n"
+	}
+	UseDB("mythconverg");
+	$dbh->do($sql); #RunSQL doesn't seem to support results not being returned, so do it this way
+}
+
 # no mythbackend restart is required; it will find changes on the fly
