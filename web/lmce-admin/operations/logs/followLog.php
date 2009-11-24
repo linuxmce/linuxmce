@@ -27,7 +27,7 @@ function followLog($output,$dbADO) {
 		$rowDevice=$resDevice->FetchRow();
 		$isGSD=($rowDevice['CommandLine']=='Generic_Serial_Device')?1:0;
 		
-		$logName=(isset($_REQUEST['system_log']))?'/var/log/syslog':getLogName($deviceID,$rowDevice['FK_DeviceTemplate'],$rowDevice['Template'],(int)@$_REQUEST['parentID'],(int)@$_REQUEST['orbiter'],$isGSD,$rowDevice['CommandLine']);;
+		$logName=(isset($_REQUEST['system_log']))?'/var/log/syslog':getLogName($dbADO,$deviceID,$rowDevice['FK_DeviceTemplate'],$rowDevice['Template'],(int)@$_REQUEST['parentID'],(int)@$_REQUEST['orbiter'],$isGSD,$rowDevice['CommandLine']);;
 		
 		if(file_exists($logName)){
 			$logBody='<iframe src="operations/logs/taillog.php?log='.$logName.'" width="1005" height="600"></iframe>';

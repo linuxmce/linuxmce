@@ -3028,7 +3028,7 @@ function processReceiver($mdID,$dbADO)
 	}
 }
 
-function getLogName($deviceID,$dtID,$dtDescription,$parentID=0,$isOrbiter=0,$isGSD=0,$commandLine='')
+function getLogName($dbADO,$deviceID,$dtID,$dtDescription,$parentID=0,$isOrbiter=0,$isGSD=0,$commandLine='')
 {
 	if($commandLine!='' && $isGSD==0){
 		$logName=$deviceID.'_'.$commandLine.'.log';
@@ -3053,8 +3053,46 @@ function getLogName($deviceID,$dtID,$dtDescription,$parentID=0,$isOrbiter=0,$isG
 			$logName=$deviceID.'_LaunchOrbiter.sh.log';
 		}
 	}
-	
+
+	// Find PK_Device of MD if this device is running on a MD
+	$MDID = 0;
+	$foundDevice = false;
+	while (!$foundDevice) {
+	      $selectDevice='
+			SELECT 
+			d2.FK_Device_ControlledVia,
+			d2.PK_Device as ParentPKDevice,
+			dt.FK_DeviceCategory as ParentDeviceCategory
+			FROM Device d1
+			INNER JOIN Device d2 ON d1.FK_Device_ControlledVia=d2.PK_Device
+			INNER JOIN DeviceTemplate dt ON d2.FK_DeviceTemplate=dt.PK_DeviceTemplate
+			WHERE d1.PK_Device=?';
+		$resDevice=$dbADO->Execute($selectDevice,$deviceID);
+		$rowDevice=$resDevice->FetchRow();
+		if ($resDevice->RecordCount()>0) {
+			$parentDeviceCategory=$rowDevice['ParentDeviceCategory'];
+			$parentDevicePK = $rowDevice['ParentPKDevice'];
+			if ($parentDeviceCategory == 8) {
+			       // Device is on MD
+			       $MDID = $parentDevicePK;
+			       $foundDevice = true;
+			} else if ($parentDeviceCategory == 7) {
+		               // device is on Core
+		               $found = true;
+			} else if ($parentDevicePK == '') {
+		       	       // no more devices up the tree
+		               $foundDevice = true;
+		        }
+		        $deviceID = $parentDevicePK;
+		} else {
+		        // Unable to find computer device
+			$foundDevice = true;
+		}
+	}
 	$logName='/var/log/pluto/'.$logName;
+	if ($MDID > 0) {
+	        $logName='/usr/pluto/diskless/'.$MDID.$logName;
+	}
 	
 	return $logName;
 }

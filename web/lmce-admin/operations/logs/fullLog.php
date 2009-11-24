@@ -31,7 +31,7 @@ function fullLog($output,$dbADO) {
 		$rowDevice=$resDevice->FetchRow();
 		$isGSD=($rowDevice['CommandLine']=='Generic_Serial_Device')?1:0;
 		
-		$logName=getLogName($deviceID,$rowDevice['FK_DeviceTemplate'],$rowDevice['Template'],(int)@$_REQUEST['parentID'],(int)@$_REQUEST['orbiter'],$isGSD,$rowDevice['CommandLine']);
+		$logName=getLogName($dbADO,$deviceID,$rowDevice['FK_DeviceTemplate'],$rowDevice['Template'],(int)@$_REQUEST['parentID'],(int)@$_REQUEST['orbiter'],$isGSD,$rowDevice['CommandLine']);
 		$pagesArray=array();
 		if(file_exists($logName)){
 			exec('wc -l '.$logName,$retArray);	// (afisheaza: <nr. linii> <spatziu> <nume fishier>)
