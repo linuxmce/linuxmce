@@ -1,7 +1,7 @@
 #!/bin/bash
 
 . /usr/pluto/bin/Config_Ops.sh
-. /usr/pluto/bin/Utils.sh
+. /usr/pluto/bin/nvidia-install.sh
 
 # Make sure the currect NVidia driver is installed
 installCorrectNvidiaDriver reboot
