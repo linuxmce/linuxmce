@@ -151,7 +151,7 @@ installCorrectNvidiaDriver() {
 	# Install the driver if needed
 	if [[ "$current_driver" -ne "$preferred_driver" ]]; then
 		echo "installing NEW driver $preferred_driver!"
-		apt-get install $preferred_driver
+		apt-get install -y $preferred_driver
 		if [[ "$param" == "reboot" ]];then
 			# Give the user a warning message and beep, then reboot
 			echo ""
@@ -163,7 +163,7 @@ installCorrectNvidiaDriver() {
 			reboot
 		fi
 	else
-		echo "Preferred driver already installed"
+		echo "Preferred driver $preferred_driver already installed."
 	fi
 
 	echo "*************************************************"
