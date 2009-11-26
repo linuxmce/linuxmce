@@ -16,7 +16,7 @@
 #######################################################################################################################
 
 . /usr/pluto/bin/Utils.sh
-LogFile="/var/log/pluto/${device_id}_$(basename $cmd_line).log";
+LogFile="/var/log/pluto/nvidia-install.log";
 
 # DRIVER LISTS
 # Make lists of all PCI_ID's supported under each driver version
