@@ -15,6 +15,9 @@
 # These will need redone for each LMCE release, depending on the drivers available to the base kubuntu installation
 #######################################################################################################################
 
+. /usr/pluto/bin/Utils.sh
+LogFile="/var/log/pluto/${device_id}_$(basename $cmd_line).log";
+
 # DRIVER LISTS
 # Make lists of all PCI_ID's supported under each driver version
 DRIVER_195_SUPPORTED="0040 0041 0042 0043 0044 0045 0046 0047 0048 0090 0091 0092 0093 0095 0098 0099 00c0 00c1 00c2 00c3 00c8 00c9 00f1 00f2 00f3 00f4 00f5 00f6 00f9 0140 0141 0142 0143 0144 0145 0146 0147 0148 0149  014f 0160 0161 0162 0163 0164 0166 0167 0168 0169 016a 0191 0193 0194 0197 01d0 01d1 01d3 01d6 01d7 01d8 01dd 01df 0221 0222 0240 0241 0242 0244 0247 0290 0291 0292 0293 0294 0295 0297 0298 02e0 02e1 02e2  02e3 02e4 0390 0391 0392 0393 0394 0395 0397 0398 0399 03d0 03d1 03d2 03d5 0400 0401 0402 0403 0404 0405 0407 0408 0409 0420 0421 0422 0423 0424 0425 0426 0427 0428 042c 042e 0531 0533 053a 053b 053e 05e0  05e1 05e2 05e3 05e6 05eb 0600 0601 0602 0604 0605 0606 0608 0609 060a 060b 060c 060d 0610 0611 0612 0613 0614 0615 0617 0618 0622 0623 0625 0626 0627 0628 062a 062b 062c 0640 0641 0643 0644 0646 0647 0648  0649 064a 064b 064c 0652 0656 06e0 06e1 06e4 06e5 06e6 06e8 06e9 06ec 06ef 07e0 07e1 07e3 0844 0845 0847 0848 0849 084a 084b 084c 084d 084f 0862 0863 086c 0872 0873 087d 0a20 0a2a 0a34 0a60 0a74 0ca8 0ca9 004e 009d 00cc 00cd 00ce 00f8 014a 014c 014d 014e 0165 019d 019e 01da 01db 01dc 01de 0245 0299 029a 029b 029c 029d 029e 029f 039e 040a 040b 040c 040d 040e 040f 0429 042a 042b 042d 042f 05f9 05fd 05fe 05ff 061a 061c 06ad 061e 061f 0638 063a 0658 0659 065a 065c 06ea 06eb 06f8 06f9 06fa 06fd 087a"
@@ -130,11 +133,13 @@ installCorrectNvidiaDriver() {
 	echo "*************************************************"
 	echo "       Begin NVidia driver installation          "
 	echo "*************************************************"
+	Log "$LogFile" "== Begin NVidia driver installation ($(date)) =="
 
 	# first, lets see if there is even an nvidia card installed in the system
 	# If there is no nVidia card even installed, lets get out of here.
 	if ! getNvidiaInstalled;then
 		echo "No nVidia card detected in the system. Exiting..."
+		Log "$LogFile" "No nVidia card detected in the system. Exiting..."
 		exit 1
 	fi
 
@@ -142,15 +147,19 @@ installCorrectNvidiaDriver() {
 	current_driver=$(getInstalledNvidiaDriver)
 	if [[ "$current_driver" -ne "" ]];then
 		echo "Detected installed driver $current_driver"
+		Log "$LogFile" "Detected installed driver $current_driver"
 	fi
 
 	# Get the preferred driver to install
 	preferred_driver=$(getPreferredNvidiaDriver)
 	echo "LMCE prefers driver $preferred_driver"
+	Log "$LogFile" "LMCE prefers driver $preferred_driver"
 
 	# Install the driver if needed
 	if [[ "$current_driver" -ne "$preferred_driver" ]]; then
 		echo "installing NEW driver $preferred_driver!"
+		Log "$LogFile" "installing NEW driver $preferred_driver!"
+
 		apt-get install -y $preferred_driver
 		if [[ "$param" == "reboot" ]];then
 			# Give the user a warning message and beep, then reboot
@@ -164,11 +173,13 @@ installCorrectNvidiaDriver() {
 		fi
 	else
 		echo "Preferred driver $preferred_driver already installed."
+		Log "$LogFile" "Preferred driver $preferred_driver already installed."
 	fi
 
 	echo "*************************************************"
 	echo "       End NVidia driver installation          "
 	echo "*************************************************"
+	Log "$LogFile" "== End NVidia driver installation ($(date)) =="
 }
 #######################################################################################################################
 # END NVIDIA DRIVER HELPER FUNCTIONS
