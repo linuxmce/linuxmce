@@ -93,6 +93,8 @@ echo "Copying over the current debs"
 DEST=edit
 mkdir -p $DEST/usr/pluto/deb-cache
 cp $BUILDER_ROOT/var/www/{*.deb,Package*,Release*} $DEST/usr/pluto/deb-cache
+# Get the saved alsa files 
+#cp /var/www/*.deb $DEST/usr/pluto/deb-cache
 # Temporarily remove the biggest files.
 rm $DEST/usr/pluto/deb-cache/lmce-mame-metadata*
 #{video-wizard-videos*,pluto-sample-media*}
@@ -134,7 +136,7 @@ apt-get install -y --force-yes mplayer
 apt-get install -y --force-yes libdancer-xml0
 apt-get -dy --force-yes install pluto-dcerouter
 # Install the nVidia drivers
-apt-get install -y --force-yes nvidia-glx-190 nvidia-190-modaliases nvidia-190-libvdpau
+apt-get install -y --force-yes nvidia-glx-195 nvidia-195-modaliases nvidia-195-libvdpau
 
 # I want joe
 apt-get install -y joe
