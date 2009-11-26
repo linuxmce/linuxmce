@@ -134,6 +134,8 @@ installCorrectNvidiaDriver() {
 	echo "       Begin NVidia driver installation          "
 	echo "*************************************************"
 	Log "$LogFile" "== Begin NVidia driver installation ($(date)) =="
+	Log "$LogFile" "Card Detected: $(lspci -nn | grep -vi non-vga | grep -i vga)"
+	Log "$LogFile" "PCI_ID Detected: $(getPCI_ID)"
 
 	# first, lets see if there is even an nvidia card installed in the system
 	# If there is no nVidia card even installed, lets get out of here.
