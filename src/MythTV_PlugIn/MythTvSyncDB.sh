@@ -26,7 +26,7 @@ if [ x"$1" = x"master" ] ; then
 	# to show up in LMCE's recording list with metadata.
 	UpdateMythSettingAllHosts "JobAllowUserJob1" "1"
 	UpdateMythSetting "AutoRunUserJob1"  "1" "NULL"
-	UpdateMythSetting "UserJob1"         "/usr/pluto/bin/SaveMythRecording.sh %CHANID% %STARTTIME% %DIR% %FILE%" "NULL"
+	UpdateMythSetting "UserJob1"         "/usr/pluto/bin/SaveMythRecording.sh %CHANID% %STARTTIME% \"%DIR%\" \"%FILE%\"" "NULL"
 	UpdateMythSetting "UserJobDesc1"     "Save the recorded show into Pluto\'s database" "NULL"
 
 	# This is only to default to English, if you set a different
