@@ -64,7 +64,7 @@ getNvidiaInstalled() {
 # getInstalledNvidiaDriver()
 # echos the currently installed nVidia driver (if there is one)
 getInstalledNvidiaDriver() {
-	echo "$(dpkg-query -l nvidia-glx*|grep "^ii"|awk '{print $2}')"
+	echo $(dpkg-query -l "nvidia-glx*" | grep "^ii" | awk '{print $2}')
 	#echo "$(dpkg -l | grep -i "ii .*" | grep -i 'nvidia-glx' | awk '{print $2}')" 
 }
 
@@ -147,7 +147,7 @@ installCorrectNvidiaDriver() {
 
 	# Now lets get the currently installed nvidia driver (if there is one)
 	current_driver=$(getInstalledNvidiaDriver)
-	if [[ "$current_driver" -ne "" ]];then
+	if [[ "$current_driver" != "" ]];then
 		echo "Detected installed driver $current_driver"
 		Log "$LogFile" "Detected installed driver $current_driver"
 	fi
@@ -158,7 +158,7 @@ installCorrectNvidiaDriver() {
 	Log "$LogFile" "LMCE prefers driver $preferred_driver"
 
 	# Install the driver if needed
-	if [[ "$current_driver" -ne "$preferred_driver" ]]; then
+	if [[ "$current_driver" != "$preferred_driver" ]]; then
 		echo "installing NEW driver $preferred_driver!"
 		Log "$LogFile" "installing NEW driver $preferred_driver!"
 
