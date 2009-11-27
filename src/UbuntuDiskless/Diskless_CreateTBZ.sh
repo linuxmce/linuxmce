@@ -159,10 +159,22 @@ LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y install linux-image-diskless
 LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y install linux-restricted-modules-${KVER}
 #LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y install linux-ubuntu-modules-${KVER}
 
-## Create a list of devices that will run on the md so we will know
+
+########## START CREATE LIST OF DEVICES #################"
+## that will run on the md so we will know
 ## what software to preinstall there
 ## FIXME: get this list from the database 
-DEVICE_LIST="28 62 1759 5 35 11 1825 26 1808 1901"
+DEVICE_LIST="28 62 1759 5 11 1825 26 1808 1901"
+
+# Determine if MythTV is installed by looking for MythTV_Plugin...
+Q="SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=36"
+MythTV_Installed=$(RunSQL "$Q")
+if [ $MythTV_Installed ];then
+	#MythTV_Plugin is installed, so install MythTV_Player on MD
+	DEVICE_LIST="$DEVICE_LIST 35"
+fi
+########## END CREATE LIST OF DEVICES ###################"
+
 
 ## Prevent lpadmin from running as it blocks the system
 LC_ALL=C chroot "$TEMP_DIR" apt-get -y install cupsys-client
