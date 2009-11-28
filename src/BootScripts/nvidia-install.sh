@@ -161,11 +161,12 @@ installCorrectNvidiaDriver() {
 	if [[ "$current_driver" != "$preferred_driver" ]]; then
 		echo "installing NEW driver $preferred_driver!"
 		Log "$LogFile" "installing NEW driver $preferred_driver!"
-
+		INSTALLED="1"
 		apt-get install -y $preferred_driver
 	else
 		echo "Preferred driver $preferred_driver already installed."
 		Log "$LogFile" "Preferred driver $preferred_driver already installed."
+		INSTALLED="0"
 	fi
 
 	echo "*************************************************"
@@ -175,8 +176,8 @@ installCorrectNvidiaDriver() {
 
 	Log "$LogFile" "== End NVidia driver installation ($(date)) =="
 
-	# Reboot if needed
-	if [[ "$param" == "reboot" ]];then
+	# Reboot only if requested and a new driver was installed
+	if [[ "$param" == "reboot" && "$INSTALLED" == "1" ]];then
 		# Give the user a warning message and beep, then reboot
 		echo ""
 		echo -e "\e[1;31mNvidia driver installation requires a reboot.\e[0m"
