@@ -163,16 +163,6 @@ installCorrectNvidiaDriver() {
 		Log "$LogFile" "installing NEW driver $preferred_driver!"
 
 		apt-get install -y $preferred_driver
-		if [[ "$param" == "reboot" ]];then
-			# Give the user a warning message and beep, then reboot
-			echo ""
-			echo -e "\e[1;31mNvidia driver installation requires a reboot.\e[0m"
-			echo -e "\e[1;31mPlease stand by while your system is rebooted.\e[0m"
-			echo ""
-			beep -l 100 -f 500 -d 50 -r 3
-			sleep 5
-			reboot
-		fi
 	else
 		echo "Preferred driver $preferred_driver already installed."
 		Log "$LogFile" "Preferred driver $preferred_driver already installed."
@@ -181,7 +171,21 @@ installCorrectNvidiaDriver() {
 	echo "*************************************************"
 	echo "       End NVidia driver installation          "
 	echo "*************************************************"
+	echo ""
+
 	Log "$LogFile" "== End NVidia driver installation ($(date)) =="
+
+	# Reboot if needed
+	if [[ "$param" == "reboot" ]];then
+		# Give the user a warning message and beep, then reboot
+		echo ""
+		echo -e "\e[1;31mNvidia driver installation requires a reboot.\e[0m"
+		echo -e "\e[1;31mPlease stand by while your system is rebooted.\e[0m"
+		echo ""
+		beep -l 100 -f 500 -d 50 -r 3
+		sleep 5
+		reboot
+	fi
 }
 #######################################################################################################################
 # END NVIDIA DRIVER HELPER FUNCTIONS

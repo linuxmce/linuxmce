@@ -3,10 +3,10 @@
 . /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/nvidia-install.sh
 
-# Make sure the currect NVidia driver is installed
-installCorrectNvidiaDriver reboot
-
 if [[ "$AVWizardOverride" == "1" || "$AVWizardDone" != "1" ]] ;then
+	# Make sure the currect NVidia driver is installed
+	installCorrectNvidiaDriver reboot
+
 	ConfSet "AVWizardOverride" "0"
 	/usr/pluto/bin/AVWizard_Run.sh 1>/dev/null 2>/dev/null </dev/null
 else
