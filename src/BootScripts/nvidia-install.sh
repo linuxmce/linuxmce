@@ -142,7 +142,7 @@ installCorrectNvidiaDriver() {
 	if ! getNvidiaInstalled;then
 		echo "No nVidia card detected in the system. Exiting..."
 		Log "$LogFile" "No nVidia card detected in the system. Exiting..."
-		exit 1
+		return
 	fi
 
 	# Now lets get the currently installed nvidia driver (if there is one)
