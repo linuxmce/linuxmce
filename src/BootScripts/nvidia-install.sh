@@ -130,20 +130,19 @@ installCorrectNvidiaDriver() {
 	#see if the caller wanted to reboot after installing packages
 	param="$1"
 
+
+	# first, lets see if there is even an nvidia card installed in the system
+	# If there is no nVidia card even installed, lets get out of here.
+	if ! getNvidiaInstalled;then
+		return
+	fi
+
 	echo "*************************************************"
 	echo "       Begin NVidia driver installation          "
 	echo "*************************************************"
 	Log "$LogFile" "== Begin NVidia driver installation ($(date)) =="
 	Log "$LogFile" "Card Detected: $(lspci -nn | grep -vi non-vga | grep -i vga)"
 	Log "$LogFile" "PCI_ID Detected: $(getPCI_ID)"
-
-	# first, lets see if there is even an nvidia card installed in the system
-	# If there is no nVidia card even installed, lets get out of here.
-	if ! getNvidiaInstalled;then
-		echo "No nVidia card detected in the system. Exiting..."
-		Log "$LogFile" "No nVidia card detected in the system. Exiting..."
-		return
-	fi
 
 	# Now lets get the currently installed nvidia driver (if there is one)
 	current_driver=$(getInstalledNvidiaDriver)
