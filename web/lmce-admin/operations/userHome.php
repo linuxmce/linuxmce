@@ -10,6 +10,17 @@ function userHome($output,$dbADO) {
 	$dbADO->debug=false;
 	$reloadTree = @$_REQUEST['reloadTree']=='false'?false:true;
 
+	//See if a web orbiter is installed
+	$query_weborbiter = "SELECT * FROM Device WHERE FK_DeviceTemplate=1749";
+	$res_weborbiter = $dbADO->Execute($query_weborbiter);
+	if($res_weborbiter->RecordCount()==0){
+		//Web orbiter not installed
+		$weborbiterInstalled=false;
+	} else {
+		//Web orbiter is installed
+		$weborbiterInstalled=true;
+	}
+
 	$scriptInHead='
 <script>
 	'.($reloadTree===true?'
@@ -20,8 +31,11 @@ function userHome($output,$dbADO) {
 ';
 	$content=(isset($_REQUEST['voicemail']))?'<iframe src="amp/recordings/index.php?s=voicemail" style="width:98%;height:85%"></iframe>':$TEXT_USER_HOME_TEXT_CONST;
 	
+	if($weborbiterInstalled) {
+		$out.=$TEXT_USER_HOME_WEBORBITER;
+	}
 	$out.=$content;
-
+	
 	$output->setMenuTitle($TEXT_WELCOME_MESSAGE_CONST);
 	$output->setHelpSrc('/wiki/index.php/LinuxMCE_Admin_Website');
 	$output->setBody($out);

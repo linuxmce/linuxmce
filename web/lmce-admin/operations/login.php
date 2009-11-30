@@ -11,6 +11,18 @@ function login($output,$dbADO) {
 
 	$users=getAssocArray('Users','PK_Users','Username',$dbADO);
 	
+	//See if a web orbiter is installed
+	$query_weborbiter = "SELECT * FROM Device WHERE FK_DeviceTemplate=1749";
+	$res_weborbiter = $dbADO->Execute($query_weborbiter);
+	if($res_weborbiter->RecordCount()==0){
+		//Web orbiter not installed
+		$weborbiterInstalled=false;
+	} else {
+		//Web orbiter is installed
+		$weborbiterInstalled=true;
+	}
+
+
 	$loginFormBig= '
 		<script>
 			function windowOpen(locationA,attributes) {
@@ -60,10 +72,20 @@ function login($output,$dbADO) {
 	      <td colspan="2" align="center"><a href="'.$wikiHost.'/index.php/LinuxMCE_Admin_Website" target="_top">'.$TEXT_HELP_WITH_ADMIN_SITE_CONST.'</a></td>
 	    </tr>
 	    <tr>
-	      <td colspan="2" align="center">Learn about LinuxMCE at <a href="http://www.linuxmce.org" target="_top">www.linuxmce.org</a><br><br>'.$TEXT_DOWNLOAD_CONST.' <a href="index.php?section=orbitersWin">'.$TEXT_ORBITER_WIN_INSTALLER_CONST.'</a></td>
+	      <td>&nbsp;</td>
+	    </tr>';
+	if($weborbiterInstalled) {
+		$loginFormBig.='
+		<tr>
+		  <td colspan="2" align="left">'.$TEXT_WEBORBITER_LOGIN.' <a href="weborbiter.php" target="_top">'.$TEXT_WEBORBITER.'</a></td>
+		</tr>';
+	}
+	$loginFormBig.='
+	    <tr>
+	      <td colspan="2" align="left">Learn about LinuxMCE at <a href="http://www.linuxmce.org" target="_top">www.linuxmce.org</a><br><br>'.$TEXT_DOWNLOAD_CONST.' <a href="index.php?section=orbitersWin">'.$TEXT_ORBITER_WIN_INSTALLER_CONST.'</a></td>
 	    </tr>
 	    <tr>
-	      <td colspan="2" align="center">'.$TEXT_VERSION_CONST.': <=version=></td>
+	      <td colspan="2" align="left">'.$TEXT_VERSION_CONST.': 2.0.0.44.09112522510</td>
 	    </tr>
 	  </table>
 	</form>

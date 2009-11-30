@@ -10,4 +10,6 @@ $TEXT_ERROR_INVALID_USER_OR_PASSWORD_CONST='Invalid username or password, try ag
 $TEXT_LOGOUT_MSG_CONST='Thank you for your visit!';
 $TEXT_NO_USERS_CONST='There are no users in database.';
 $TEXT_CREATE_NEW_ADMIN_USER_CONST='Create new user.';
+$TEXT_WEBORBITER_LOGIN='Log in to the';
+$TEXT_WEBORBITER='Web Orbiter';
 ?>
