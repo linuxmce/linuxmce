@@ -4,8 +4,6 @@ function infraredCommands($output,$publicADO) {
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/infraredCommands.lang.php');
 	
-	//These are actually purposely offset by +1. The reason is,
-	//
 	define('SORT_CATEGORY', 0);
 	define('SORT_COMMAND', 	1);
 	define('SORT_ID', 	2);
