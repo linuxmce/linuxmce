@@ -61,7 +61,9 @@ d-i	debian-installer/allow_unauthenticated	string	true
 d-i	pkgsel/include	string mysql-server openssh-server 
 d-i	apt-setup/local0/repository	string deb file:/usr/pluto/deb-cache ./
 d-i	apt-setup/local1/repository	string deb http://www.avenard.org/files/ubuntu-repos intrepid release
-d-i	apt-setup/local2/repository	string deb http://deb.linuxmce.org/ intrepid beta2
+d-i	apt-setup/local2/repository	string deb http://deb.linuxmce.org/ubuntu/ intrepid beta2
+d-i	apt-setup/local3/repository	string deb http://debian.slimdevices.com/ stable  main
+d-i	apt-setup/local4/repository	string deb http://packages.medibuntu.org/ intrepid  free non-free
 # d-i	preseed/late_command	string	bash /laterun.sh
 d-i	ubiquity/success_command	string	cp -r /cdrom/usr/pluto /target/usr
 d-i	ubiquity/summary	note
@@ -86,7 +88,7 @@ rm extract-cd/md5sum.draft
 echo Create ISO Image
 cd extract-cd
 ISONAME=../LinuxMCE-8.10-$SVNrevision-i386.iso
-SVNrevision=$(svn info "$svn_dir/$svn_branch_name/src" |grep ^Revision | cut -d" " -f2)
+#SVNrevision=$(svn info "$svn_dir/$svn_branch_name/src" |grep ^Revision | cut -d" " -f2)
 sudo mkisofs -allow-limited-size -quiet -D -r -V "$IMAGE_NAME" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o $ISONAME .
 echo Done!
 exit 0

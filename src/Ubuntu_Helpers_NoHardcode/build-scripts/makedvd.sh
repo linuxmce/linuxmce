@@ -94,7 +94,7 @@ DEST=edit
 mkdir -p $DEST/usr/pluto/deb-cache
 cp $BUILDER_ROOT/var/www/{*.deb,Package*,Release*} $DEST/usr/pluto/deb-cache
 # Get the saved alsa files 
-#cp /var/www/*.deb $DEST/usr/pluto/deb-cache
+cp /var/www/*.deb $DEST/usr/pluto/deb-cache
 # Temporarily remove the biggest files.
 rm $DEST/usr/pluto/deb-cache/lmce-mame-metadata*
 #{video-wizard-videos*,pluto-sample-media*}
