@@ -46,6 +46,13 @@ function addPhoneNumber($output,$telecomADO) {
 					(?,?,?,?,?,?,?)',
 			array($contact,$PhoneType,$CountryCode,$AreaCode,$PhoneNumber,$Extension,$DialAs));
 			$msg=$TEXT_PHONE_NUMBER_ADDED_CONST;
+
+			// We added a phone line, lets make sure that the IVR voice menu is generated
+			$commandToSend='sudo -u root /usr/pluto/bin/generate_users_voicemenu.pl';
+			if( file_exists("/usr/pluto/bin/generate_users_voicemenu.pl") ){
+				exec_batch_command($commandToSend);
+			}
+
 			header("Location: index.php?section=phoneBook&msg=".@$msg);
 			exit();
 		}
