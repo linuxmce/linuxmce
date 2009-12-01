@@ -110,11 +110,11 @@ function phoneNumberForm($telecomADO,$userID,$addContact){
 		</tr>
 		<tr>
 			<td><B>'.$TEXT_CONTACT_CONST.' *</B></td>
-			<td>'.pulldownFromArray($contacts,'contact',0).'</td>
+			<td>'.pulldownFromArray($contacts,'contact',0,'style="width:160px;"').'</td>
 		</tr>	
 		<tr>
 			<td><B>'.$TEXT_PHONE_TYPE_CONST.' *</B></td>
-			<td>'.pulldownFromArray($PhoneTypes,'PhoneType',0).'</td>
+			<td>'.pulldownFromArray($PhoneTypes,'PhoneType',0,'style="width:160px;"').'</td>
 		</tr>	
 		<tr>
 			<td><B>'.$TEXT_COUNTRY_CODE_CONST.'</B></td>

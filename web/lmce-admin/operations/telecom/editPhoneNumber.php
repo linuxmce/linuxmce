@@ -97,11 +97,11 @@ function phoneNumberForm($telecomADO,$userID){
 	<table celspacing="0" cellpadding="3" align="center">
 		<tr>
 			<td><B>'.$TEXT_CONTACT_CONST.' *</B></td>
-			<td>'.pulldownFromArray($contacts,'contact',$pnData['FK_Contact'][0]).'</td>
+			<td>'.pulldownFromArray($contacts,'contact',$pnData['FK_Contact'][0],'style="width:160px;"').'</td>
 		</tr>	
 		<tr>
 			<td><B>'.$TEXT_PHONE_TYPE_CONST.' *</B></td>
-			<td>'.pulldownFromArray($PhoneTypes,'PhoneType',$pnData['FK_PhoneType'][0]).'</td>
+			<td>'.pulldownFromArray($PhoneTypes,'PhoneType',$pnData['FK_PhoneType'][0],'style="width:160px;"').'</td>
 		</tr>	
 		<tr>
 			<td><B>'.$TEXT_COUNTRY_CODE_CONST.'</B></td>
