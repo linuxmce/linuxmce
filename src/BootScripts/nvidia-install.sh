@@ -45,8 +45,7 @@ VDPAU_REV_C_SUPPORTED="0a20 0a2a 0a34 0a60 0a74 0ca8 0ca9"
 # getPCI_ID()
 # returns the last 4 digits of the PCI ID of the currently installed nVidia card.
 getPCI_ID() {
-	echo $(lspci -nn | grep -vi "non-vga" | grep -i vga | sed 's/.*://;s/\].*//'
-)
+	lspci -nn | grep -vi "non-vga" | grep -i vga | sed 's/.*://;s/\].*//'
 }
 
 
@@ -64,8 +63,7 @@ getNvidiaInstalled() {
 # getInstalledNvidiaDriver()
 # echos the currently installed nVidia driver (if there is one)
 getInstalledNvidiaDriver() {
-	echo $(dpkg-query -l "nvidia-glx\*" | grep "^ii" | awk '{print $2}')
-	#echo "$(dpkg -l | grep -i "ii .*" | grep -i 'nvidia-glx' | awk '{print $2}')" 
+	dpkg-query -l "nvidia-glx*"| grep "^ii" | awk '{print $2}'
 }
 
 # getPreferredNvidiaDriver()
