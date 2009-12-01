@@ -45,6 +45,7 @@ function devices($output,$dbADO) {
 			$deviceCategory=$GLOBALS['rootCameras'];
 			$specificFloorplanType=$GLOBALS['SecurityFoorplanType'];
 			$output->setHelpSrc($wikiHost.'/index.php/Surveillance_Cameras');
+			$GLOBALS['Room_Name']=2;
 			$lightsArray=getDevicesArrayFromCategory($GLOBALS['rootLights'],$dbADO);
 			$sensorsArray=getDevicesArrayFromCategory($GLOBALS['rootSecurity'],$dbADO);
 			
@@ -205,8 +206,8 @@ function devices($output,$dbADO) {
 						</td>
 					</tr>';
 					if($type=='surveillance_cameras'){
-						$associatedLightText=(count(@$lightsRelated[$rowD['PK_Device']])>0)?join(', ',array_values($lightsRelated[$rowD['PK_Device']])):'- '.$TEXT_NO_DEVICES_ASSOCIATED_CONST.' -';
-						$associatedSensorsText=(count(@$sensorsRelated[$rowD['PK_Device']])>0)?join(', ',array_values($sensorsRelated[$rowD['PK_Device']])):'- '.$TEXT_NO_DEVICES_ASSOCIATED_CONST.' -';
+						$associatedLightText=(count(@$lightsRelated[$rowD['PK_Device']])>0)?join('<br>',array_values($lightsRelated[$rowD['PK_Device']])):'- '.$TEXT_NO_DEVICES_ASSOCIATED_CONST.' -';
+						$associatedSensorsText=(count(@$sensorsRelated[$rowD['PK_Device']])>0)?join('<br>',array_values($sensorsRelated[$rowD['PK_Device']])):'- '.$TEXT_NO_DEVICES_ASSOCIATED_CONST.' -';
 						
 						$out.='
 						<tr>
@@ -381,7 +382,7 @@ function getDevicesRelated($devicesRelated,$dbADO){
 	$res=$dbADO->Execute('SELECT * FROM Device_Device_Related WHERE (FK_Device IN ('.join(',',array_keys($devicesRelated)).') OR FK_Device_Related IN ('.join(',',array_keys($devicesRelated)).'))');
 	while($row=$res->FetchRow()){
 		if(isset($devicesRelated[$row['FK_Device']])){
-			$devices[$row['FK_Device_Related']][$row['FK_Device']]=$devicesRelated[$row['FK_Device']];
+			$devices[ $row['FK_Device_Related'] ][ $row['FK_Device'] ]=$devicesRelated[$row['FK_Device']];
 		}else{
 			$devices[$row['FK_Device']][$row['FK_Device_Related']]=$devicesRelated[$row['FK_Device_Related']];
 		}

@@ -1038,8 +1038,8 @@ function getDevicesArrayFromCategory($categoryID,$dbADO,$extra='')
 	
 	$label=(@$GLOBALS['DT_&_Room']==1)?'IF(Device.FK_Room IS NOT NULL,CONCAT(Device.Description,\' (\',DeviceTemplate.Description,\') \',Room.Description),CONCAT(Device.Description,\' (\',DeviceTemplate.Description,\')\')) AS Description':'Device.Description AS Description';
 	$label=(@$GLOBALS['Room_Name']==1)?'IF(Device.FK_Room IS NOT NULL,CONCAT(Device.Description,\' (\',Room.Description,\')\'),Device.Description) AS Description':$label;
-
-	$devicesList=getAssocArray('Device','PK_Device',$label,$dbADO,'INNER JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate	LEFT JOIN Room ON FK_Room=PK_Room WHERE FK_DeviceCategory IN ('.join(',',$categories).') AND Device.FK_Installation='.(int)@$_SESSION['installationID'].$extra,'ORDER BY Description ASC');
+	$label=(@$GLOBALS['Room_Name']==2)?'IF(Device.FK_Room IS NOT NULL,CONCAT(Room.Description,\' - \',Device.Description),Device.Description) AS Description':$label;
+	$devicesList=getAssocArray('Device','PK_Device',$label,$dbADO,'INNER JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate	INNER JOIN Room ON FK_Room=PK_Room WHERE FK_DeviceCategory IN ('.join(',',$categories).') AND Device.FK_Installation='.(int)@$_SESSION['installationID'].$extra,'ORDER BY Description ASC');
 	
 	return $devicesList;
 }
