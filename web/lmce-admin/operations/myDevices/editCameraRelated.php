@@ -13,7 +13,9 @@ function editCameraRelated($output,$dbADO) {
 	$from = isset($_REQUEST['from'])?cleanString($_REQUEST['from']):'';
 	$deviceID = (int)@$_REQUEST['deviceID'];
 	$type=@$_REQUEST['type'];
-	
+
+	$GLOBALS['Room_Name']=2; //specify order for getDevicesArrayFromCategory()
+
 	if ($action=='form') {
 		$fields=getFieldsAsArray('Device','Description',$dbADO,'WHERE PK_Device='.$deviceID);
 		switch ($type){
@@ -53,7 +55,7 @@ function editCameraRelated($output,$dbADO) {
 			if(count($devicesArray)>0){
 				$saveBtn='<input type="submit" class="button" value="'.$TEXT_SAVE_CONST.'">';
 				$out.='<table align="center" cellpadding="2" cellspacing="0">';
-				foreach ($devicesArray AS $device=>$name){
+				foreach ($devicesArray AS $device=>$name ){
 					$out.='
 					<tr>
 						<td><input type="checkbox" name="device_'.$device.'" value="1" '.((in_array($device,$checkedDevices))?'checked':'').'></td>
