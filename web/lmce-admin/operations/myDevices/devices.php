@@ -112,14 +112,11 @@ function devices($output,$dbADO) {
 		</div>
 		
 		<div id="content" style="display:none;">
-		<table align="center" cellpadding="0" cellspacing="0">
+		<table align="center" cellpadding="0" cellspacing="0" border="0">
 				<tr class="tablehead">
-					<td align="center"><B>#</B></td>
-					<td align="center"><B>'.$TEXT_DESCRIPTION_CONST.'</B></td>
-					<td align="center"><B>'.$TEXT_ROOM_CONST.'</B></td>
-					<td align="center"><B>'.$TEXT_CONTROLLED_BY_CONST.'</B></td>
-					<td align="center"><B>'.$TEXT_DEVICE_DATA_CONST.'</B></td>
-					<td align="center"><B>'.$TEXT_ACTION_CONST.'</B></td>
+					<td align="center" width="200"><B>'.$TEXT_DESCRIPTION_CONST.' / '.$TEXT_ROOM_CONST.'</B></td>
+					<td align="center" width="400"><B>'.$TEXT_DEVICE_DATA_CONST.'</B></td>
+					<td align="center" width="135"><B>'.$TEXT_ACTION_CONST.'</B></td>
 				</tr>';			
 		
 				$displayedDevices=array();
@@ -181,7 +178,7 @@ function devices($output,$dbADO) {
 			if($resDevice->RecordCount()==0){
 				$out.='
 				<tr>
-					<td colspan="5" align="center">'.$TEXT_NO_RECORDS_CONST.'</td>
+					<td colspan="3" align="center">'.$TEXT_NO_RECORDS_CONST.'</td>
 				</tr>';
 			}		
 			$resDevice->MoveFirst();
@@ -192,13 +189,16 @@ function devices($output,$dbADO) {
 					$out.='
 					<input type="hidden" name="parent_'.$rowD['PK_Device'].'" value="'.$rowD['FK_Device_ControlledVia'].'">
 					<tr class="regular">
-						<td align="center" class="alternate_back">'.$rowD['PK_Device'].'</td>
-						<td class="alternate_back" align="center" title="'.$TEXT_DEVICE_TEMPLATE_CONST.': '.$rowD['TemplateName'].', '.$TEXT_DEVICE_CATEGORY_CONST.': '.$rowD['CategoryName'].', '.strtolower($TEXT_MANUFACTURER_CONST).': '.$rowD['ManufacturerName'].'"><input type="text" name="description_'.$rowD['PK_Device'].'" value="'.$rowD['Description'].'"></td>
-						<td>'.pulldownFromArray($roomsArray,'room_'.$rowD['PK_Device'],$rowD['FK_Room']).'</td>
-						<td class="alternate_back"><a href="javascript:windowOpen(\'index.php?section=editDeviceControlledVia&deviceID='.$rowD['PK_Device'].'&from='.urlencode('devices&type='.$type).'\',\'width=600,height=300,toolbar=1,scrollbars=1,resizable=1\');" title="'.$TEXT_CLICK_TO_CHANGE_CONST.'">'.((is_null($rowD['FK_Device_ControlledVia']))?$TEXT_EDIT_CONST:$rowD['PDescription']).'</a></td>
+						<td class="alternate_back" align="left" valign="top" title="'.$TEXT_DEVICE_TEMPLATE_CONST.': '.$rowD['TemplateName'].', '.$TEXT_DEVICE_CATEGORY_CONST.': '.$rowD['CategoryName'].', '.strtolower($TEXT_MANUFACTURER_CONST).': '.$rowD['ManufacturerName'].'">
+							'.$TEXT_DEVICE_NUM_CONST.': '.$rowD['PK_Device'].'<br>
+							'.$TEXT_DEVICE_TEMPLATE_NUM_CONST.': '.$rowD['FK_DeviceTemplate'].'<br>
+							'.$TEXT_CONTROLLED_BY_CONST.': <a href="javascript:windowOpen(\'index.php?section=editDeviceControlledVia&deviceID='.$rowD['PK_Device'].'&from='.urlencode('devices&type='.$type).'\',\'width=600,height=300,toolbar=1,scrollbars=1,resizable=1\');" title="'.$TEXT_CLICK_TO_CHANGE_CONST.'">'.((is_null($rowD['FK_Device_ControlledVia']))?$TEXT_EDIT_CONST:$rowD['PDescription']).'</a><br><br>
+							<input type="text" name="description_'.$rowD['PK_Device'].'" value="'.$rowD['Description'].'" style="width:200px;"><br><br>'.pulldownFromArray($roomsArray,'room_'.$rowD['PK_Device'],$rowD['FK_Room'],'style="width:200px;"').'
+							<br><br>							
+							'.device_test_buttons($type,$rowD['PK_Device'],$dbADO).'						
+						</td>
 						<td align="right" valign="top">'.formatDeviceData($rowD['PK_Device'],$deviceDataArray[$rowD['PK_Device']],$dbADO,$rowD['IsIPBased'],@$specificFloorplanType,1,'textarea').'</td>
-						<td align="center" valign="center" class="alternate_back">
-							'.lights_test_buttons($type,$rowD['PK_Device'],$dbADO).'
+						<td align="center" valign="top" class="alternate_back">
 							<input value="'.$TEXT_HELP_CONST.'" type="button" class="button_fixed" name="help" onClick="self.location=\''.$wikiHost.'/index.php/'.wikiLink($rowD['TemplateName']).'\'"><br>
 							<input type="button" class="button_fixed" name="edit_'.$rowD['PK_Device'].'" value="'.$TEXT_ADVANCED_CONST.'"  onClick="self.location=\'index.php?section=editDeviceParams&deviceID='.$rowD['PK_Device'].'\';"><br>
 							<input type="submit" class="button_fixed" name="delete_'.$rowD['PK_Device'].'" value="'.$TEXT_DELETE_CONST.'"  onClick="if(!confirm(\'Are you sure you want to delete this device?\'))return false;">
@@ -209,19 +209,29 @@ function devices($output,$dbADO) {
 						$associatedSensorsText=(count(@$sensorsRelated[$rowD['PK_Device']])>0)?join(', ',array_values($sensorsRelated[$rowD['PK_Device']])):'- '.$TEXT_NO_DEVICES_ASSOCIATED_CONST.' -';
 						
 						$out.='
-						<tr class="alternate_back">
-							<td colspan="5" style="padding-left:10px;"><B>'.$TEXT_LIGHTS_CONST.':</B> '.$associatedLightText.'</td>
-							<td><input type="button" class="button_fixed" name="edit1" value='.$TEXT_EDIT_CONST.' onClick="windowOpen(\'index.php?section=editCameraRelated&deviceID='.$rowD['PK_Device'].'&from='.urlencode('devices&type='.$type).'&type=lights\',\'width=600,height=300,toolbar=1,scrollbars=1,resizable=1\');"></td>
+						<tr>
+							<td colspan="3" height="1" bgcolor="black"><img src="include/images/spacer.gif" border="0" height="1" width="1"></td>
 						</tr>
-						<tr class="alternate_back">
-							<td colspan="5" style="padding-left:10px;"><B>'.$TEXT_SENSORS_CONST.':</B> '.$associatedSensorsText.'</td>
-							<td><input type="button" class="button_fixed" name="edit2" value='.$TEXT_EDIT_CONST.' onClick="windowOpen(\'index.php?section=editCameraRelated&deviceID='.$rowD['PK_Device'].'&from='.urlencode('devices&type='.$type).'&type=sensors\',\'width=600,height=300,toolbar=1,scrollbars=1,resizable=1\');"></td>
+						<tr>
+							<td style="padding-left:10px;"class="alternate_back"><B>'.$TEXT_LIGHTS_CONST.':</B> </td>
+							<td align="left">'.$associatedLightText.'</td>
+							<td align="center" class="alternate_back"><input type="button" class="button_fixed" name="edit1" value='.$TEXT_EDIT_CONST.' onClick="windowOpen(\'index.php?section=editCameraRelated&deviceID='.$rowD['PK_Device'].'&from='.urlencode('devices&type='.$type).'&type=lights\',\'width=600,height=300,toolbar=1,scrollbars=1,resizable=1\');"></td>
+						</tr>
+						<tr>
+							<td colspan="3" height="1" bgcolor="black"><img src="include/images/spacer.gif" border="0" height="1" width="1"></td>
+						</tr>
+						<tr>
+							<td style="padding-left:10px;" class="alternate_back"><B>'.$TEXT_SENSORS_CONST.':</B> </td>
+							<td align="left">'.$associatedSensorsText.'</td>
+							<td align="center" class="alternate_back"><input type="button" class="button_fixed" name="edit2" value='.$TEXT_EDIT_CONST.' onClick="windowOpen(\'index.php?section=editCameraRelated&deviceID='.$rowD['PK_Device'].'&from='.urlencode('devices&type='.$type).'&type=sensors\',\'width=600,height=300,toolbar=1,scrollbars=1,resizable=1\');"></td>
 						</tr>';
 					}
 					$out.='
 					<tr>
-						<td colspan="8" height="3" bgcolor="black"><img src="include/images/spacer.gif" border="0" height="1" width="1"></td>
-					</tr>';
+						<td colspan="3" height="3" bgcolor="black"><img src="include/images/spacer.gif" border="0" height="1" width="1"></td>
+					</tr>
+					<tr><td colspan="3">&nbsp;</td></tr>
+					<tr><td colspan="3">&nbsp;</td></tr>';
 				}
 			}
 			$out.='
@@ -265,7 +275,7 @@ function devices($output,$dbADO) {
 		}
 				
 		$msg='';
-		if(isset($_POST['update']) || $action=='externalSubmit' || isset($_POST['addGC100']) || isset($_POST['lights_test'])){
+		if(isset($_POST['update']) || $action=='externalSubmit' || isset($_POST['addGC100']) || isset($_POST['device_test'])){
 			if(isset($_POST['addGC100'])){
 				$infraredPlugIn=getInfraredPlugin($installationID,$dbADO);
 				
@@ -329,7 +339,7 @@ function devices($output,$dbADO) {
 			$msg.='<br>Devices updated.';
 			
 			foreach($displayedDevicesArray as $value){
-				process_test_lights($value,@$_POST['parent_'.$value],@$_POST['deviceData_'.$value.'_12'],$dbADO);			
+				process_test_device($value,@$_POST['parent_'.$value],@$_POST['deviceData_'.$value.'_12'],$dbADO);			
 			}
 		}
 		
@@ -379,21 +389,100 @@ function getDevicesRelated($devicesRelated,$dbADO){
 	return $devices;
 }
 
-function lights_test_buttons($type,$deviceID,$dbADO){
-	if($type!='lights'){
-		return '';
+function device_test_buttons($type,$deviceID,$dbADO){
+	//TODO: it would be nice to make a new file with DT constants...
+	define('WALL_OUTLET', 1897);
+	define('STANDARD_THERMOSTAT', 4);
+	define('LIGHT_SWITCH', 37);
+	define('LIGHT_SWITCH_DIMMABLE', 38);
+	define('STANDARD_SPRINKLER', 1637);
+	define('STANDARD_IRRIGATION_SPRINKLER', 1780);
+
+	$query='SELECT FK_DeviceTemplate FROM Device WHERE PK_Device='.$deviceID.'';
+	$res=$dbADO->Execute($query);
+	$row=$res->FetchRow();
+	$deviceTemplate=$row['FK_DeviceTemplate'];
+
+	$out='<center><B>Test Commands:</B></center>';
+	if($type=='irrigation'){
+		if($deviceTemplate==STANDARD_IRRIGATION_SPRINKLER){
+		$out.='<input type="submit" class="button" name="on_'.$deviceID.'" value="ON"> 
+		       <input type="submit" class="button" name="off_'.$deviceID.'" value="OFF">
+			<input type="submit" class="button" name="delay_'.$deviceID.'" value="Delay 5 min.">
+		';
+		}
+		return $out;
+	}
+	else if($type=='lights'){
+		$out.='
+		<input type="hidden" name="device_test" value="1">';
+		
+		if($deviceTemplate==LIGHT_SWITCH) {
+			$out.='<input type="submit" class="button" name="on_'.$deviceID.'" value="ON"> 
+			<input type="submit" class="button" name="off_'.$deviceID.'" value="OFF">';
+		}
+
+		else if($deviceTemplate==LIGHT_SWITCH_DIMMABLE) {
+			$out.='<input type="submit" class="button" name="on_'.$deviceID.'" value="ON"> 
+			<input type="submit" class="button" name="off_'.$deviceID.'" value="OFF">
+			<input type="submit" class="button" name="50_'.$deviceID.'" value="50%"><br>';
+		} else {
+			$out.='No test commands supported for this lighting device';
+		}
+
+		return $out;
+	} else if($type=='climate') {
+		$out.='
+		<input type="hidden" name="device_test" value="1">';
+		
+		if($deviceTemplate==WALL_OUTLET) { 
+			$out.='<input type="submit" class="button" name="on_'.$deviceID.'" value="ON"> 
+			<input type="submit" class="button" name="off_'.$deviceID.'" value="OFF">';
+		}
+		else if($deviceTemplate==STANDARD_SPRINKLER) { 
+			$out.='<input type="submit" class="button" name="on_'.$deviceID.'" value="ON"> 
+			<input type="submit" class="button" name="off_'.$deviceID.'" value="OFF">';
+		}
+		else if($deviceTemplate==STANDARD_THERMOSTAT) {
+			$out.='<table border="0">
+			<tr>
+				<td>Power: </td>
+				<td><input type="submit" class="button" name="on_'.$deviceID.'" value="ON"> 
+				<input type="submit" class="button" name="off_'.$deviceID.'" value="OFF">
+				<input type="submit" class="button" name="50_'.$deviceID.'" value="50%"
+				</td>
+			</tr>
+			<tr>
+				<td>Fan: </td>
+				<td><input type="submit" class="button" name="fan_on_'.$deviceID.'" value="Fan On">
+					<input type="submit" class="button" name="fan_auto_'.$deviceID.'" value="Fan Auto"><br> 
+				</td>
+			</tr>
+			<tr>
+				<td>Mode: </td>
+				<td><input type="submit" class="button" name="mode_heat_'.$deviceID.'" value="Heat">
+					<input type="submit" class="button" name="mode_cool_'.$deviceID.'" value="Cool">
+					<input type="submit" class="button" name="mode_auto_'.$deviceID.'" value="Auto">
+				</td>
+			</tr>
+			<tr>
+				<td>Temp: </td>
+				<td><input type="submit" class="button" name="set_temp72_'.$deviceID.'" value="72 deg.">
+				<input type="submit" class="button" name="set_temp68_'.$deviceID.'" value="68 deg.">
+				</td>
+			</tr>	
+			</table>	
+			';
+		} else {
+			$out.='No test commands supported for this climate device';
+		}
+		return $out;
 	}
 	
-	$out='
-	<input type="hidden" name="lights_test" value="1"> 
-	<input type="submit" class="button" name="on_'.$deviceID.'" value="ON"> 
-	<input type="submit" class="button" name="off_'.$deviceID.'" value="OFF"> 
-	<input type="submit" class="button" name="50_'.$deviceID.'" value="50%"><br>';
-	
-	return $out;
+	return '';
 }
 
-function process_test_lights($deviceID,$parentID,$port,$dbADO){
+function process_test_device($deviceID,$parentID,$port,$dbADO){
 	$cmd='sudo -u root /usr/pluto/bin/MessageSend localhost -targetType device 0 '.$deviceID.' 1 ';
 	
 	if(isset($_POST['on_'.$deviceID])){
@@ -408,9 +497,41 @@ function process_test_lights($deviceID,$parentID,$port,$dbADO){
 		$cmd.='184 76 50';
 		$send=1;
 	}
-	
+	if(isset($_POST['fan_on_'.$deviceID])){
+		$cmd.='279 8 1';
+		$send=1;
+	}
+	if(isset($_POST['fan_auto_'.$deviceID])){
+		$cmd.='279 8 0';
+		$send=1;
+	}
+	if(isset($_POST['mode_heat_'.$deviceID])){
+		$cmd.='280 8 H';
+		$send=1;
+	}
+	if(isset($_POST['mode_cool_'.$deviceID])){
+		$cmd.='280 8 C';
+		$send=1;
+	}
+	if(isset($_POST['mode_auto_'.$deviceID])){
+		$cmd.='280 8 A';
+		$send=1;
+	}
+	if(isset($_POST['set_temp72_'.$deviceID])){
+		$cmd.='278 5 72';
+		$send=1;
+	}
+	if(isset($_POST['set_temp68_'.$deviceID])){
+		$cmd.='278 5 68';
+		$send=1;
+	}
+	if(isset($_POST['delay_'.$deviceID])){
+		$cmd.='257 102 5';
+		$send=1;
+	}
 	if(@$send==1){
 		exec_batch_command($cmd);
 	}
+	return;
 }
 ?>

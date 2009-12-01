@@ -3158,7 +3158,7 @@ function formatDeviceData($deviceID,$DeviceDataArray,$dbADO,$isIPBased=0,$specif
 					<td align="left" valign="middle" title="'.@$rowDDforDevice['Tooltip'].'"><b>'.((@$rowDDforDevice['ShortDescription']!='')?$rowDDforDevice['ShortDescription']:$rowDDforDevice['dd_Description']).'</b></td>
 					<td align="right">';
 			$itemDisabled=((isset($rowDDforDevice['AllowedToModify']) && $rowDDforDevice['AllowedToModify']==0)?'disabled':'');
-			$defaultFormElement=($default=='input')?'<input type="text" name="'.$formElementName.'" value="'.@$ddValue.'" '.$itemDisabled.' class="'.$cssStyle.'">':'<textarea name="'.$formElementName.'" '.$itemDisabled.' rows="2" class="'.$cssStyle.'">'.@$ddValue.'</textarea>';
+			$defaultFormElement=($default=='input')?'<input type="text" name="'.$formElementName.'" value="'.@$ddValue.'" '.$itemDisabled.' style="width:200px;" class="'.$cssStyle.'">':'<textarea name="'.$formElementName.'" '.$itemDisabled.' rows="2" style="width:200px;" "class="'.$cssStyle.'">'.@$ddValue.'</textarea>';
 			
 			switch($rowDDforDevice['typeParam']){
 				case 'int':
@@ -3189,7 +3189,7 @@ function formatDeviceData($deviceID,$DeviceDataArray,$dbADO,$isIPBased=0,$specif
 
 					$queryTable="SELECT $tableFields FROM $tableName $filterQuery $orderQuery";
 					$resTable=$dbADO->Execute($queryTable);
-					$deviceDataBox.='<select name="deviceData_'.$deviceID.'_'.$rowDDforDevice['FK_DeviceData'].'" '.$itemDisabled.' class="'.$cssStyle.'">
+					$deviceDataBox.='<select name="deviceData_'.$deviceID.'_'.$rowDDforDevice['FK_DeviceData'].'" '.$itemDisabled.' style="width:200px;" class="'.$cssStyle.'">
 												<option value="0">'.(in_array($rowDDforDevice['FK_DeviceCategory'],array($GLOBALS['StorageDevices'],$GLOBALS['RaidCategory'],$GLOBALS['NetworkStorage']))?'Public':'').'</option>';
 					$deviceDataBox.=(in_array($rowDDforDevice['FK_DeviceCategory'],array($GLOBALS['StorageDevices'],$GLOBALS['RaidCategory'],$GLOBALS['NetworkStorage'])))?'<option value="-1" '.(($ddValue==-1)?'selected':'').'>Use LMCE\'s directory structure</option>':'';							
 					
@@ -3238,7 +3238,7 @@ function formatDeviceData($deviceID,$DeviceDataArray,$dbADO,$isIPBased=0,$specif
 				$tooltip = $rowDDforDevice['Tooltip'];
 			}
 			$deviceDataBox.='
-					</td>
+				</td>
 					<td valign="top"><img src="img/question.gif" onmouseover="Tip(\''.trim(addslashes($tooltip)).'\',ABOVE,true,WIDTH,350,FADEIN,250,FADEOUT,250,BGCOLOR,\'#C0FFC0\')" onmouseout="UnTip()"></td>
 				</tr>';
 		}
@@ -3250,11 +3250,11 @@ function formatDeviceData($deviceID,$DeviceDataArray,$dbADO,$isIPBased=0,$specif
 			<input type="hidden" name="oldMAC_'.$deviceID.'" value="'.@$rowDDforDevice['MACaddress'].'">
 			<tr>
 				<td align="left"><B>IP</B></td>
-				<td align="right"><input type="text" name="ip_'.$deviceID.'" value="'.@$rowDDforDevice['IPaddress'].'"></td>
+				<td align="right"><input type="text" name="ip_'.$deviceID.'" value="'.@$rowDDforDevice['IPaddress'].'" style="width:200px;"></td>
 			</tr>
 			<tr>
 				<td align="left"><B>MAC</B></td>
-				<td align="right"><input type="text" name="mac_'.$deviceID.'" value="'.@$rowDDforDevice['MACaddress'].'"></td>
+				<td align="right"><input type="text" name="mac_'.$deviceID.'" value="'.@$rowDDforDevice['MACaddress'].'" style="width:200px;"></td>
 			</tr>';
 		if($boolJsValidation==1){
 			$jsValidation.=' frmvalidator.addValidation("mac_'.$deviceID.'","mac","'.$TEXT_INVALID_MAC_ADDRESS_CONST.'");';
@@ -6110,7 +6110,7 @@ function displayScreenSavers($orbiterID,$dbADO)
 		<input type="hidden" name="oldssDT_'.$orbiterID.'" value="'.@$ssArray['FK_DeviceTemplate'][0].'">
 		<input type="hidden" name="oldss_'.$orbiterID.'" value="'.$selectedss.'">';
 		
-	$out.=pulldownFromArray($templateArray,'ss_'.$orbiterID,@$ssArray['FK_DeviceTemplate'][0],style="width:200px;");
+	$out.=pulldownFromArray($templateArray,'ss_'.$orbiterID,@$ssArray['FK_DeviceTemplate'][0],'style="width:200px;"');
 	
 	return $out;
 }

@@ -237,7 +237,7 @@ function mediaDirectors($output,$dbADO) {
 					
 					$deviceName='Device #: '.$rowD['PK_Device'].'<br>';
 					$deviceName.=$TEXT_DEVICE_TEMPLATE_CONST.' #: '.$rowD['FK_DeviceTemplate'].'('.$rowD['TemplateName'].')<br><br>';
-					$deviceName.='<input type="text" name="description_'.$rowD['PK_Device'].'" value="'.$rowD['Description'].'" style="width:200px;">';
+					$deviceName.='<input type="text" name="description_'.$rowD['PK_Device'].'" value="'.$rowD['Description'].'" style="width:225px;">';
 					
 					$roomPulldown='<select name="room_'.$rowD['PK_Device'].'">
 							<option value="0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Select room -&nbsp;&nbsp;&nbsp;&nbsp;</option>';
@@ -258,32 +258,41 @@ function mediaDirectors($output,$dbADO) {
 						
 					$out.='
 				<tr class="tablehead">
-					<td align="center" rowspan="2"><B>'.$TEXT_DEVICE_CONST.' / '.$TEXT_ROOM_CONST.'</B></td>
-					<td align="center" rowspan="2"><B>'.$TEXT_OUTPUT_CONST.'</B></td>
-					<td align="center"><B>'.$TEXT_PIPES_CONST.'</B></td>
-					<td align="center" rowspan="2"><B>'.$TEXT_INPUT_CONST.'</B></td>
-					<td align="center" rowspan="2">&nbsp;</td>
-					<td align="center" rowspan="2"><B>'.$TEXT_DEVICE_DATA_CONST.'</B></td>
-					<td align="center" rowspan="2"><B>'.$TEXT_ACTION_CONST.'</B></td>
+					<td align="center" rowspan="2" width="250"><B>'.$TEXT_DEVICE_CONST.' / '.$TEXT_ROOM_CONST.'</B></td>
+					<td align="center" rowspan="2" width="100"><B>'.$TEXT_OUTPUT_CONST.'</B></td>
+					<td align="center" width="100"><B>'.$TEXT_PIPES_CONST.'</B></td>
+					<td align="center" rowspan="2" width="100"><B>'.$TEXT_INPUT_CONST.'</B></td>
+
+					<td align="center" rowspan="2" width="400"><B>'.$TEXT_DEVICE_DATA_CONST.'</B></td>
+					<td align="center" rowspan="2" width="125"><B>'.$TEXT_ACTION_CONST.'</B></td>
 				</tr>
 				<tr class="tablehead">
 					<td align="center"><B>'.$TEXT_CONNECTED_TO_CONST.'</B></td>
-				</tr>		
+				</tr>	
 					<tr>
-						<td rowspan="2" align="left" valign="top" class="alternate_back"><a name="deviceLink_'.$rowD['PK_Device'].'"></a><br>'.$deviceName.'<br><br>'.pulldownFromArray($roomPulldownArray,'room_'.$rowD['PK_Device'],$rowD['FK_Room'],'style="width:200px;"').'</td>
-						<td>A: '.@$devicePipes['1']['output'].'</td>
-						<td>'.@$devicePipes['1']['to'].'</td>
-						<td>'.@$devicePipes['1']['input'].'</td>
-						<td rowspan="2" align="right"><input type="button" class="button" name="edit_pipes" value="'.$TEXT_EDIT_CONST.'" onClick="windowOpen(\'index.php?section=editPipes&deviceID='.$rowD['PK_Device'].'&from=mediaDirectors\',\'width=600,height=300,toolbar=1,scrollbars=1,resizable=1\');"></td>
-						<td rowspan="2" valign="top" align="right" class="alternate_back">'.formatDeviceData($rowD['PK_Device'],$deviceDataArray[$rowD['PK_Device']],$dbADO,$rowD['IsIPBased']).'</td>
-						<td align="center" rowspan="2" valign="top"><br>'.$buttons.'</td>
+						<td rowspan="5" align="left" valign="top" class="alternate_back"><a name="deviceLink_'.$rowD['PK_Device'].'"></a><br>'.$deviceName.'<br><br>'.pulldownFromArray($roomPulldownArray,'room_'.$rowD['PK_Device'],$rowD['FK_Room'],'style="width:225px;"').'</td>
+						<td colspan="3" align="center" height="10"><B>'.$TXT_AUDIO_PIPE_CONST.'</B></td>
+						<td rowspan="5" valign="top" align="right" class="alternate_back">'.formatDeviceData($rowD['PK_Device'],$deviceDataArray[$rowD['PK_Device']],$dbADO,$rowD['IsIPBased']).'</td>
+						<td align="center" rowspan="3" valign="top"><br>'.$buttons.'</td>
+					</tr>
+					<tr>
+						<td valign="top"  height="20">'.@$devicePipes['1']['output'].'</td>
+						<td valign="top" class="alternate_back"  height="20">'.@$devicePipes['1']['to'].'</td>
+						<td valign="top"  height="20">'.@$devicePipes['1']['input'].'</td>
 					</tr>
 					<tr>			
+						<td colspan="3" height="10" align="center"><B>'.$TXT_AUDIO_PIPE_CONST.'</B></td>
+					</tr>
+					<tr>
+						<td valign="top"  height="20">'.@$devicePipes['2']['output'].'</td>
+						<td valign="top" class="alternate_back"  height="20">'.@$devicePipes['2']['to'].'</td>
+						<td valign="top"  height="20">'.@$devicePipes['2']['input'].'</td>
 
-						<td>V: '.@$devicePipes['2']['output'].'</td>
-						<td>'.@$devicePipes['2']['to'].'</td>
-						<td>'.@$devicePipes['2']['input'].'</td>
-					</tr>';
+					</tr>
+					<tr>
+						<td colspan="3" valign="top" ><b><input type="button" class="button" style="width:100%;" name="edit_pipes" value="'.$TEXT_EDIT_PIPES_CONST.'" onClick="windowOpen(\'index.php?section=editPipes&deviceID='.$rowD['PK_Device'].'&from=mediaDirectors\',\'width=600,height=300,toolbar=1,scrollbars=1,resizable=1\');"></b></td>
+					</tr>
+					';
 
 					$orbiterMDChild=getMediaDirectorOrbiterChild($rowD['PK_Device'],$dbADO);
 					if($orbiterMDChild){
