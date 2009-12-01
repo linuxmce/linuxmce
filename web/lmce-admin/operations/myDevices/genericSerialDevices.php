@@ -76,14 +76,7 @@ function genericSerialDevices($output,$dbADO) {
 			
 		$out.='
 		<table align="center" border="0" cellpadding="2" cellspacing="0">
-				<tr class="tablehead">
-					<td align="center"><B>#</B></td>
-					<td align="center"><B>'.$TEXT_DEVICE_CONST.'</B></td>
-					<td align="center"><B>'.$TEXT_ROOM_CONST.'</b>
-					<td align="center"><B>'.$TEXT_CONTROLLED_BY_CONST.'</B></td>
-					<td align="center"><B>'.$TEXT_DATA_CONST.'</B></td>
-					<td align="center"><B>'.$TEXT_ACTION_CONST.'</B></td>
-				</tr>
+				
 					';
 				$displayedGSDDevices=array();
 				$displayedGSDDevicesDescription=array();
@@ -134,6 +127,7 @@ function genericSerialDevices($output,$dbADO) {
 						FK_Device_RouteTo,
 						FK_Room,
 						Device.FK_DeviceTemplate,
+						Device.FK_Device_ControlledVia,
 						DeviceTemplate.Description AS TemplateName, 
 						DeviceCategory.Description AS CategoryName, 
 						Manufacturer.Description AS ManufacturerName, 
@@ -145,7 +139,7 @@ function genericSerialDevices($output,$dbADO) {
 						Device_DeviceData.IK_DeviceData,
 						ShowInWizard,ShortDescription,
 						AllowedToModify,
-						DeviceTemplate_DeviceData.Description AS Tooltip 
+						DeviceTemplate_DeviceData.Description AS Tooltip
 					FROM Device 
 					LEFT JOIN Device_DeviceData ON Device_DeviceData.FK_Device=PK_Device
 					LEFT JOIN DeviceData ON Device_DeviceData.FK_DeviceData=PK_DeviceData
@@ -187,8 +181,8 @@ function genericSerialDevices($output,$dbADO) {
 				if($rowD['PK_Device']!=$deviceDisplayed){
 					$deviceDisplayed=$rowD['PK_Device'];
 				
-					$deviceName=(@$childOf[$rowD['PK_Device']]=='')?'<input type="text" name="description_'.$rowD['PK_Device'].'" value="'.$rowD['Description'].'">':'<input type="hidden" name="description_'.$rowD['PK_Device'].'" value="'.$rowD['Description'].'"><B>'.$rowD['Description'].'</B>';
-					$roomPulldown=pulldownFromArray($roomsArray,'room_'.$rowD['PK_Device'],$rowD['FK_Room']);
+					$deviceName=(@$childOf[$rowD['PK_Device']]=='')?'<input type="text" name="description_'.$rowD['PK_Device'].'" value="'.$rowD['Description'].'">':'<input type="hidden" name="description_'.$rowD['PK_Device'].'" value="'.$rowD['Description'].'" style="width:200px;"><B>'.$rowD['Description'].'</B>';
+					$roomPulldown=pulldownFromArray($roomsArray,'room_'.$rowD['PK_Device'],$rowD['FK_Room'],'style="width:200px;"');
 										
 					$wikiLink=wikiLink($rowD['TemplateName']);
 						
@@ -218,19 +212,32 @@ function genericSerialDevices($output,$dbADO) {
 					unset($GLOBALS['DeviceIDControlledVia']);
 					unset($GLOBALS['DeviceControlledVia']);
 
-	
+				$controlledViaLink='
+				<input type="hidden" name="controlledBy_'.$rowD['PK_Device'].'" value="'.$rowD['FK_Device_ControlledVia'].'">		
+				<a href="javascript:windowOpen(\'index.php?section=editDeviceControlledVia&deviceID='.$rowD['PK_Device'].'&from=genericSerialDevices\',\'width=600,height=300,toolbar=1,scrollbars=1,resizable=1\');" title="'.$TEXT_CLICK_TO_CHANGE_CONST.'">'.((is_null($rowD['FK_Device_ControlledVia']))?$TEXT_EDIT_CONST:GetDeviceName($dbADO,$rowD['FK_Device_ControlledVia'])).'</a>';
 					
 				$out.='
+				<tr class="tablehead">
+
+					<td align="center"><B>'.$TEXT_DEVICE_INFO_CONST.'</B></td>
+					
+					
+					<td align="center"><B>'.$TEXT_DATA_CONST.'</B></td>
+					<td align="center"><B>'.$TEXT_ACTION_CONST.'</B></td>
+				</tr>
 					<tr>
-						<td class="alternate_back" align="center" title="'.$TEXT_DEVICE_TEMPLATE_CONST.': '.$rowD['TemplateName'].', '.$TEXT_DEVICE_CATEGORY_CONST.': '.$rowD['CategoryName'].', '.strtolower($TEXT_MANUFACTURER_CONST).': '.$rowD['ManufacturerName'].'">'.$rowD['PK_Device'].'</td>
-						<td class="alternate_back" align="center" title="'.$TEXT_DEVICE_TEMPLATE_CONST.': '.$rowD['TemplateName'].', '.$TEXT_DEVICE_CATEGORY_CONST.': '.$rowD['CategoryName'].', '.strtolower($TEXT_MANUFACTURER_CONST).': '.$rowD['ManufacturerName'].'"><a name="deviceLink_'.$rowD['PK_Device'].'"></a>'.$deviceName.'</td>
-						<td align="right">'.$roomPulldown.'</td>
-						<td class="alternate_back" align="right">'.$controlledByPulldown.'</td>
+						<td class="alternate_back" align="left" valign="top" title="'.$TEXT_DEVICE_TEMPLATE_CONST.': '.$rowD['TemplateName'].', '.$TEXT_DEVICE_CATEGORY_CONST.': '.$rowD['CategoryName'].', '.strtolower($TEXT_MANUFACTURER_CONST).': '.$rowD['ManufacturerName'].'"><a name="deviceLink_'.$rowD['PK_Device'].'"></a>
+						'.$TEXT_DEVICE_CONST.'#: '.$rowD['PK_Device'].'<br>
+						'.$TEXT_DEVICE_TEMPLATE_CONST.'#: '.$rowD['FK_DeviceTemplate'].'<br>
+						'.$TEXT_CONTROLLED_BY_CONST.': '.$controlledViaLink.'<br><br>
+						'.$deviceName.'<br>
+						'.$roomPulldown.'<br>
+						</td>
 						<td valign="top" align="right">'.formatDeviceData($rowD['PK_Device'],$deviceDataArray[$rowD['PK_Device']],$dbADO,$rowD['IsIPBased']).'</td>
 						<td class="alternate_back" align="center" valign="top">'.$buttons.'</td>
 					</tr>
 					<tr>
-						<td colspan="8" height="3" bgcolor="black"><img src="include/images/spacer.gif" border="0" height="1" width="1"></td>
+						<td colspan="3" height="3" bgcolor="black"><img src="include/images/spacer.gif" border="0" height="1" width="1"></td>
 					</tr>';					
 				}
 			}
@@ -403,5 +410,11 @@ function getChildDevices($childs,$deviceID,$dbADO,$filter){
 function ReinitCanBus($myObj, $myParam='CANBUS')
 {
 	exec("/usr/pluto/bin/MessageSend localhost 0 $myObj 1 776 51 $myParam");
+}
+function GetDeviceName($dbADO,$PK_Device) {
+	$query='SELECT Description FROM Device WHERE PK_Device="'.$PK_Device.'"';
+	$res=$dbADO->Execute($query);
+	$row=$res->FetchRow();
+	return $row['Description'];
 }
 ?>
