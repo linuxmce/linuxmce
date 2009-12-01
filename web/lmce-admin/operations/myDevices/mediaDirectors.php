@@ -258,39 +258,38 @@ function mediaDirectors($output,$dbADO) {
 						
 					$out.='
 				<tr class="tablehead">
-					<td align="center" rowspan="2" width="250"><B>'.$TEXT_DEVICE_CONST.' / '.$TEXT_ROOM_CONST.'</B></td>
-					<td align="center" rowspan="2" width="100"><B>'.$TEXT_OUTPUT_CONST.'</B></td>
-					<td align="center" width="100"><B>'.$TEXT_PIPES_CONST.'</B></td>
-					<td align="center" rowspan="2" width="100"><B>'.$TEXT_INPUT_CONST.'</B></td>
-
-					<td align="center" rowspan="2" width="400"><B>'.$TEXT_DEVICE_DATA_CONST.'</B></td>
-					<td align="center" rowspan="2" width="125"><B>'.$TEXT_ACTION_CONST.'</B></td>
+					<td align="center" width="200"><B>'.$TEXT_DEVICE_CONST.' / '.$TEXT_ROOM_CONST.'</B></td>
+					<td align="center" width="200"><B>'.$TEXT_PIPES_CONST.'</B></td>
+					<td align="center" width="400"><B>'.$TEXT_DEVICE_DATA_CONST.'</B></td>
+					<td align="center" width="125"><B>'.$TEXT_ACTION_CONST.'</B></td>
 				</tr>
-				<tr class="tablehead">
-					<td align="center"><B>'.$TEXT_CONNECTED_TO_CONST.'</B></td>
-				</tr>	
+
 					<tr>
 						<td rowspan="5" align="left" valign="top" class="alternate_back"><a name="deviceLink_'.$rowD['PK_Device'].'"></a><br>'.$deviceName.'<br><br>'.pulldownFromArray($roomPulldownArray,'room_'.$rowD['PK_Device'],$rowD['FK_Room'],'style="width:225px;"').'</td>
-						<td colspan="3" align="center" height="10"><B>'.$TXT_AUDIO_PIPE_CONST.'</B></td>
+						<td align="center" height="10"><B>'.$TXT_AUDIO_PIPE_CONST.'</B></td>
 						<td rowspan="5" valign="top" align="right" class="alternate_back">'.formatDeviceData($rowD['PK_Device'],$deviceDataArray[$rowD['PK_Device']],$dbADO,$rowD['IsIPBased']).'</td>
-						<td align="center" rowspan="3" valign="top"><br>'.$buttons.'</td>
+						<td align="center" rowspan="5" valign="top"><br>'.$buttons.'</td>
 					</tr>
 					<tr>
-						<td valign="top"  height="20">'.@$devicePipes['1']['output'].'</td>
-						<td valign="top" class="alternate_back"  height="20">'.@$devicePipes['1']['to'].'</td>
-						<td valign="top"  height="20">'.@$devicePipes['1']['input'].'</td>
+						<td valign="top"  height="20">
+						<u>'.$TEXT_OUTPUT_CONST.'</u>: '.@$devicePipes['1']['output'].'<br>
+						<u>'.$TEXT_TO_CONST.'</u>: '.@$devicePipes['1']['to'].'<br>
+						<u>'.$TEXT_INPUT_CONST.'</u>: '.@$devicePipes['1']['input'].'<br><br>
+						</td>
 					</tr>
 					<tr>			
-						<td colspan="3" height="10" align="center"><B>'.$TXT_VIDEO_PIPE_CONST.'</B></td>
+						<td height="10" align="center"><B>'.$TXT_VIDEO_PIPE_CONST.'</B></td>
 					</tr>
 					<tr>
-						<td valign="top"  height="20">'.@$devicePipes['2']['output'].'</td>
-						<td valign="top" class="alternate_back"  height="20">'.@$devicePipes['2']['to'].'</td>
-						<td valign="top"  height="20">'.@$devicePipes['2']['input'].'</td>
+						<td valign="top"  height="20">
+						<u>'.$TEXT_OUTPUT_CONST.'</u>: '.@$devicePipes['2']['output'].'<br>
+						<u>'.$TEXT_TO_CONST.'</u>: '.@$devicePipes['2']['to'].'<br>
+						<u>'.$TEXT_INPUT_CONST.'</u>: '.@$devicePipes['2']['input'].'<br><br>
+						</td>
 
 					</tr>
 					<tr>
-						<td colspan="3" valign="top" ><b><input type="button" class="button" style="width:100%;" name="edit_pipes" value="'.$TEXT_EDIT_PIPES_CONST.'" onClick="windowOpen(\'index.php?section=editPipes&deviceID='.$rowD['PK_Device'].'&from=mediaDirectors\',\'width=600,height=300,toolbar=1,scrollbars=1,resizable=1\');"></b></td>
+						<td valign="top" align="center"><a href="javascript:windowOpen(\'index.php?section=editPipes&deviceID='.$rowD['PK_Device'].'&from=mediaDirectors\',\'width=600,height=300,toolbar=1,scrollbars=1,resizable=1\');">'.$TEXT_EDIT_PIPES_CONST.'</a></td>					
 					</tr>
 					';
 
@@ -314,9 +313,10 @@ function mediaDirectors($output,$dbADO) {
 							<input type="hidden" name="oldSound_'.$rowD['PK_Device'].'" value="'.$soundDevice.'">
 							<input type="hidden" name="oldVideo_'.$rowD['PK_Device'].'" value="'.$videoDevice.'">
 							<tr>
-								<td colspan="7"><img src="include/images/spacer.gif" border="0" height="10"></td>
-							</tr>						
-								<td colspan="7">
+								<td colspan="4" bgcolor="black"><img src="include/images/spacer.gif" border="0" height="1"></td>
+							</tr>	
+							<tr>					
+								<td colspan="4">
 									<table border="0" width="100%">
 										<tr>
 											<td valign="top" rowspan="2" class="alternate_back">'.$TEXT_PVR_CAPTURE_CARD_CONST.' '.pulldownFromArray($pvrArray,'PVRCaptureCard_'.$rowD['PK_Device'],0,'style="width:200px;"','key','None').'<br>
@@ -335,10 +335,12 @@ function mediaDirectors($output,$dbADO) {
 								</td>
 							</tr>';
 	
-						$out.='
+						$out.='<tr>
+							<td colspan="4" bgcolor="black"><img src="include/images/spacer.gif" border="0" height="1"></td>
+							</tr>
 							<tr>
-								<td colspan="7">
-									<table>
+								<td colspan="4">
+									<table cellpadding="0" cellspacing="0" border="0">
 										<tr>
 											<td><B>'.$TEXT_SOFTWARE_MODULES_CONST.'</B></td>
 											<td><input type="button" class="button_fixed" name="edit_modules" value="'.$TEXT_EDIT_CONST.'" onClick="windowOpen(\'index.php?section=editModules&deviceID='.$rowD['PK_Device'].'&from=mediaDirectors\',\'width=800,height=600,toolbar=1,scrollbars=1,resizable=1\');"></td>
@@ -385,7 +387,7 @@ function mediaDirectors($output,$dbADO) {
 							<tr><td>&nbsp;</td></tr>
 							<tr><td>&nbsp;</td></tr>
 							<tr>
-								<td colspan="7" bgcolor="black" height="5"><img src="include/images/spacer.gif" border="0"></td>
+								<td colspan="4" bgcolor="black" height="5"><img src="include/images/spacer.gif" border="0"></td>
 							</tr>
 							<tr><td>&nbsp;</td></tr>
 							<tr><td>&nbsp;</td></tr>';	
