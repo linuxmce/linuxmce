@@ -114,11 +114,7 @@ function devices($output,$dbADO) {
 		
 		<div id="content" style="display:none;">
 		<table align="center" cellpadding="0" cellspacing="0" border="0">
-				<tr class="tablehead">
-					<td align="center" width="200"><B>'.$TEXT_DESCRIPTION_CONST.' / '.$TEXT_ROOM_CONST.'</B></td>
-					<td align="center" width="400"><B>'.$TEXT_DEVICE_DATA_CONST.'</B></td>
-					<td align="center" width="135"><B>'.$TEXT_ACTION_CONST.'</B></td>
-				</tr>';			
+				';			
 		
 				$displayedDevices=array();
 				$GLOBALS['DeviceDataToDisplay']=array();
@@ -189,6 +185,11 @@ function devices($output,$dbADO) {
 					$deviceDisplayed=$rowD['PK_Device'];
 					$out.='
 					<input type="hidden" name="parent_'.$rowD['PK_Device'].'" value="'.$rowD['FK_Device_ControlledVia'].'">
+					<tr class="tablehead">
+					<td align="center" width="200"><B>'.$TEXT_DESCRIPTION_CONST.' / '.$TEXT_ROOM_CONST.'</B></td>
+					<td align="center" width="400"><B>'.$TEXT_DEVICE_DATA_CONST.'</B></td>
+					<td align="center" width="135"><B>'.$TEXT_ACTION_CONST.'</B></td>
+					</tr>
 					<tr class="regular">
 						<td class="alternate_back" align="left" valign="top" title="'.$TEXT_DEVICE_TEMPLATE_CONST.': '.$rowD['TemplateName'].', '.$TEXT_DEVICE_CATEGORY_CONST.': '.$rowD['CategoryName'].', '.strtolower($TEXT_MANUFACTURER_CONST).': '.$rowD['ManufacturerName'].'">
 							'.$TEXT_DEVICE_NUM_CONST.': '.$rowD['PK_Device'].'<br>

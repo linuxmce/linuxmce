@@ -281,7 +281,7 @@ function mediaDirectors($output,$dbADO) {
 						<td valign="top"  height="20">'.@$devicePipes['1']['input'].'</td>
 					</tr>
 					<tr>			
-						<td colspan="3" height="10" align="center"><B>'.$TXT_AUDIO_PIPE_CONST.'</B></td>
+						<td colspan="3" height="10" align="center"><B>'.$TXT_VIDEO_PIPE_CONST.'</B></td>
 					</tr>
 					<tr>
 						<td valign="top"  height="20">'.@$devicePipes['2']['output'].'</td>

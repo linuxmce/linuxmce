@@ -3158,7 +3158,7 @@ function formatDeviceData($deviceID,$DeviceDataArray,$dbADO,$isIPBased=0,$specif
 					<td align="left" valign="middle" title="'.@$rowDDforDevice['Tooltip'].'"><b>'.((@$rowDDforDevice['ShortDescription']!='')?$rowDDforDevice['ShortDescription']:$rowDDforDevice['dd_Description']).'</b></td>
 					<td align="right">';
 			$itemDisabled=((isset($rowDDforDevice['AllowedToModify']) && $rowDDforDevice['AllowedToModify']==0)?'disabled':'');
-			$defaultFormElement=($default=='input')?'<input type="text" name="'.$formElementName.'" value="'.@$ddValue.'" '.$itemDisabled.' style="width:200px;" class="'.$cssStyle.'">':'<textarea name="'.$formElementName.'" '.$itemDisabled.' rows="2" style="width:200px;" "class="'.$cssStyle.'">'.@$ddValue.'</textarea>';
+			$defaultFormElement=($default=='input')?'<input type="text" name="'.$formElementName.'" value="'.@$ddValue.'" '.$itemDisabled.' class="'.$cssStyle.'" style="width:200px;">':'<textarea name="'.$formElementName.'" '.$itemDisabled.' rows="2" "class="'.$cssStyle.'" style="width:200px;">'.@$ddValue.'</textarea>';
 			
 			switch($rowDDforDevice['typeParam']){
 				case 'int':
@@ -3189,7 +3189,7 @@ function formatDeviceData($deviceID,$DeviceDataArray,$dbADO,$isIPBased=0,$specif
 
 					$queryTable="SELECT $tableFields FROM $tableName $filterQuery $orderQuery";
 					$resTable=$dbADO->Execute($queryTable);
-					$deviceDataBox.='<select name="deviceData_'.$deviceID.'_'.$rowDDforDevice['FK_DeviceData'].'" '.$itemDisabled.' style="width:200px;" class="'.$cssStyle.'">
+					$deviceDataBox.='<select name="deviceData_'.$deviceID.'_'.$rowDDforDevice['FK_DeviceData'].'" '.$itemDisabled.' class="'.$cssStyle.'" style="width:200px;">
 												<option value="0">'.(in_array($rowDDforDevice['FK_DeviceCategory'],array($GLOBALS['StorageDevices'],$GLOBALS['RaidCategory'],$GLOBALS['NetworkStorage']))?'Public':'').'</option>';
 					$deviceDataBox.=(in_array($rowDDforDevice['FK_DeviceCategory'],array($GLOBALS['StorageDevices'],$GLOBALS['RaidCategory'],$GLOBALS['NetworkStorage'])))?'<option value="-1" '.(($ddValue==-1)?'selected':'').'>Use LMCE\'s directory structure</option>':'';							
 					
@@ -3214,7 +3214,7 @@ function formatDeviceData($deviceID,$DeviceDataArray,$dbADO,$isIPBased=0,$specif
 						if($rowDDforDevice['FK_DeviceData']==$GLOBALS['PortChannel']){
 							$choicesArray=parentHasChoices($deviceID,$dbADO);
 							if(count($choicesArray)>0){
-								$formElement=pulldownFromArray($choicesArray,'deviceData_'.$deviceID.'_'.$rowDDforDevice['FK_DeviceData'],$ddValue,'style="width:200px;" class="'.$cssStyle.'"');
+								$formElement=pulldownFromArray($choicesArray,'deviceData_'.$deviceID.'_'.$rowDDforDevice['FK_DeviceData'],$ddValue,'class="'.$cssStyle.'" style="width:200px;"');
 								$deviceDataBox.=$formElement;
 							}else{
 								$deviceDataBox.=$defaultFormElement;
