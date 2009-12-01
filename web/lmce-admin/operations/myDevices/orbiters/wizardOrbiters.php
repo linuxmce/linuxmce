@@ -207,7 +207,7 @@ function wizardOrbiters($output,$dbADO) {
 						$content[$orbiterGroupDisplayed][$rowD['PK_Device']]['description']='
 								<tr>
 									<td align="right"><B>'.$TEXT_DESCRIPTION_CONST.'</B></td>
-									<td align="left"><input type="text" name="description_'.$rowD['PK_Device'].'" value="'.stripslashes($rowD['Description']).'"> # '.$rowD['PK_Device'].'</td>
+									<td align="left"><input type="text" name="description_'.$rowD['PK_Device'].'" value="'.stripslashes($rowD['Description']).'" style="width:200px;"> # '.$rowD['PK_Device'].'</td>
 								</tr>';
 					}
 	
@@ -215,11 +215,11 @@ function wizardOrbiters($output,$dbADO) {
 						$content[$orbiterGroupDisplayed][$rowD['PK_Device']]['ip_mac']='
 									<tr>
 										<td align="right"><B>'.$TEXT_IP_ADDRESS_CONST.'</B></td>
-										<td><input type="text" name="ip_'.$rowD['PK_Device'].'" value="'.$rowD['IPaddress'].'"></td>
+										<td><input type="text" name="ip_'.$rowD['PK_Device'].'" value="'.$rowD['IPaddress'].'" style="width:200px;"></td>
 									</tr>
 									<tr>
 										<td align="right"><B>'.$TEXT_MAC_ADDRESS_CONST.'</B></td>
-										<td><input type="text" name="mac_'.$rowD['PK_Device'].'" value="'.$rowD['MACaddress'].'"></td>
+										<td><input type="text" name="mac_'.$rowD['PK_Device'].'" value="'.$rowD['MACaddress'].'" style="width:200px;"></td>
 									</tr>';
 					}
 					
@@ -227,7 +227,7 @@ function wizardOrbiters($output,$dbADO) {
 						$content[$orbiterGroupDisplayed][$rowD['PK_Device']]['room']='
 								<tr>
 									<td align="right"><B>'.$TEXT_ROOM_CONST.'</B></td>
-									<td>'.pulldownFromArray($roomsArray,'room_'.$rowD['PK_Device'],$rowD['FK_Room']).'</td>
+									<td>'.pulldownFromArray($roomsArray,'room_'.$rowD['PK_Device'],$rowD['FK_Room'],'style="width:200px;"').'</td>
 								</tr>
 								';
 					}
@@ -488,17 +488,17 @@ function formatDDRows($rowD,$dbADO)
 							$GLOBALS['ddTableArray_'.$tableName]=getAssocArray('Users','PK_Users','UserName',$dbADO,'','ORDER BY UserName ASC');
 					}
 					
-					$ddHTML.=pulldownFromArray($GLOBALS['ddTableArray_'.$tableName],'deviceData_'.$rowD['PK_Device'].'_'.$rowD['FK_DeviceData'],$ddValue,((isset($rowD['AllowedToModify']) && $rowD['AllowedToModify']==0)?'disabled':'').' '.(($rowD['FK_DeviceData']==24)?'onChange="document.wizardOrbiters.action.value=\'form\';document.wizardOrbiters.submit();"':''),'key','- Please select -');
+					$ddHTML.=pulldownFromArray($GLOBALS['ddTableArray_'.$tableName],'deviceData_'.$rowD['PK_Device'].'_'.$rowD['FK_DeviceData'],$ddValue,((isset($rowD['AllowedToModify']) && $rowD['AllowedToModify']==0)?'disabled':'').' style="width:200px;"'.(($rowD['FK_DeviceData']==24)?'onChange="document.wizardOrbiters.action.value=\'form\';document.wizardOrbiters.submit();"':''),'key','- Please select -');
 				}
 				else
-					$ddHTML.='<input type="text" name="deviceData_'.$rowD['PK_Device'].'_'.$rowD['FK_DeviceData'].'" value="'.@$ddValue.'" '.((isset($rowD['AllowedToModify']) && $rowD['AllowedToModify']==0)?'disabled':'').'>';
+					$ddHTML.='<input type="text" name="deviceData_'.$rowD['PK_Device'].'_'.$rowD['FK_DeviceData'].'" value="'.@$ddValue.'" '.((isset($rowD['AllowedToModify']) && $rowD['AllowedToModify']==0)?'disabled':'').' style="width:200px;">';
 				$jsValidation.="frmvalidator.addValidation(\"$formElementName\",\"numeric\",\"$TEXT_WARNING_NUMERICAL_ONLY_CONST\");\n";
 				break;
 				case 'bool':
-					$ddHTML.='<input type="checkbox" name="deviceData_'.$rowD['PK_Device'].'_'.$rowD['FK_DeviceData'].'" value="1" '.((@$ddValue!=0)?'checked':'').' '.((isset($rowD['AllowedToModify']) && $rowD['AllowedToModify']==0)?'disabled':'').'>';
+					$ddHTML.='<input type="checkbox" name="deviceData_'.$rowD['PK_Device'].'_'.$rowD['FK_DeviceData'].'" value="1" '.((@$ddValue!=0)?'checked':'').' '.((isset($rowD['AllowedToModify']) && $rowD['AllowedToModify']==0)?'disabled':'').' style="width:200px;">';
 				break;
 				default:
-					$ddHTML.='<input type="text" name="deviceData_'.$rowD['PK_Device'].'_'.$rowD['FK_DeviceData'].'" value="'.@$ddValue.'" '.((isset($rowD['AllowedToModify']) && $rowD['AllowedToModify']==0)?'disabled':'').'>';
+					$ddHTML.='<input type="text" name="deviceData_'.$rowD['PK_Device'].'_'.$rowD['FK_DeviceData'].'" value="'.@$ddValue.'" '.((isset($rowD['AllowedToModify']) && $rowD['AllowedToModify']==0)?'disabled':'').' style="width:200px;">';
 			}
 			if($rowD['FK_DeviceData']==172){
 				$ddHTML.=' If checked you need to reload the router';
@@ -511,11 +511,11 @@ function formatDDRows($rowD,$dbADO)
 			$ddHTML.='
 					<tr>
 						<td align="right"><B>'.$TEXT_SECONDS_BEFORE_SCREEN_SAVER_CONST.'</B></td>
-						<td><input type="text" name="timeoutSS_'.$rowD['PK_Device'].'" value="'.@$parts[0].'"></td>
+						<td><input type="text" name="timeoutSS_'.$rowD['PK_Device'].'" value="'.@$parts[0].'" style="width:200px;"></td>
 					</tr>
 						<tr>
 						<td align="right"><B>'.$TEXT_SECONDS_BEFORE_POWER_OFF_CONST.'</B></td>
-						<td><input type="text" name="timeoutPO_'.$rowD['PK_Device'].'" value="'.@$parts[1].'"></td>
+						<td><input type="text" name="timeoutPO_'.$rowD['PK_Device'].'" value="'.@$parts[1].'" style="width:200px;"></td>
 					</tr>							';			
 		}
 		$ddHTML.='
