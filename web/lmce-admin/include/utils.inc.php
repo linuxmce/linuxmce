@@ -2637,7 +2637,7 @@ function serialPortsPulldown($name,$selectedPort,$allowedToModify,$topParent,$db
 	}
 	
 	$extra=((isset($allowedToModify) && $allowedToModify==0)?'disabled':'');
-	$extra.=' class="'.$cssStyle.'"';
+	$extra.='style="width:300px;" class="'.$cssStyle.'"';
 	$out=pulldownFromArray($serialPortAsoc,$name,$selectedPort,$extra,'key');
 	
 	return $out;
@@ -3004,7 +3004,7 @@ function displayReceivers($mdID,$categArray,$dbADO)
 		<input type="hidden" name="oldReceiverDT_'.$mdID.'" value="'.@$receiverArray['FK_DeviceTemplate'][0].'">
 		<input type="hidden" name="oldReceiver_'.$mdID.'" value="'.$selectedReceiver.'">';
 		
-	$out.=pulldownFromArray($templateArray,'receiver_'.$mdID,@$receiverArray['FK_DeviceTemplate'][0]);
+	$out.=pulldownFromArray($templateArray,'receiver_'.$mdID,@$receiverArray['FK_DeviceTemplate'][0],'style="width:300px;"');
 	
 	return $out;
 }
@@ -3143,7 +3143,7 @@ function formatDeviceData($deviceID,$DeviceDataArray,$dbADO,$isIPBased=0,$specif
 		
 	$jsValidation='';
 	$deviceDataBox='<script type="text/javascript" src="javascript/wz_tooltip/wz_tooltip.js"></script>';
-	$deviceDataBox.='<table cellpadding="2" cellspacing="0" border="0">';
+	$deviceDataBox.='<table cellpadding="2" cellspacing="0" border="0" width="100%">';
 
 	foreach ($DeviceDataArray AS $rowDDforDevice){
 		if(!in_array($rowDDforDevice['FK_DeviceData'],$GLOBALS['DeviceDataToDisplay']))
@@ -3214,7 +3214,7 @@ function formatDeviceData($deviceID,$DeviceDataArray,$dbADO,$isIPBased=0,$specif
 						if($rowDDforDevice['FK_DeviceData']==$GLOBALS['PortChannel']){
 							$choicesArray=parentHasChoices($deviceID,$dbADO);
 							if(count($choicesArray)>0){
-								$formElement=pulldownFromArray($choicesArray,'deviceData_'.$deviceID.'_'.$rowDDforDevice['FK_DeviceData'],$ddValue,'class="'.$cssStyle.'"');
+								$formElement=pulldownFromArray($choicesArray,'deviceData_'.$deviceID.'_'.$rowDDforDevice['FK_DeviceData'],$ddValue,'style="width:200px;" class="'.$cssStyle.'"');
 								$deviceDataBox.=$formElement;
 							}else{
 								$deviceDataBox.=$defaultFormElement;
@@ -4161,7 +4161,7 @@ function getMediaTypeCheckboxes($dtID,$publicADO,$mediaADO,$deviceID)
 				if(count($mediaProvidersArray)==0){
 					$puldown='&nbsp;';
 				}else{
-					$puldown=pulldownFromArray($mediaProvidersArray,'mediaProvider_'.$rowMT['PK_MediaType'],@$currentMediaProvider[$rowMT['PK_MediaType']]);
+					$puldown=pulldownFromArray($mediaProvidersArray,'mediaProvider_'.$rowMT['PK_MediaType'],@$currentMediaProvider[$rowMT['PK_MediaType']],'style="width:200px;"');
 				}
 			}
 		}
@@ -5283,26 +5283,26 @@ function pickDeviceTemplate($categoryID, $manufacturerID,$returnValue,$defaultAl
 	switch (@$deviceCategoryPicker){
 		case 1:
 			$deviceCategoriesArray=getHierachicalCategories($dbADO,@$restrictToCategory);
-			$deviceCategoryFormElement=pulldownFromArray($deviceCategoriesArray,'categoryID',$categoryID,'class="input_big" onChange="setDeviceCategory(-1);"');
+			$deviceCategoryFormElement=pulldownFromArray($deviceCategoriesArray,'categoryID',$categoryID,'style="width:400px;" class="input_big" onChange="setDeviceCategory(-1);"');
 		break;
 		case 2:
 			$deviceCategoryFormElement=getdTree($categoryID,$dbADO,@$restrictToCategory);
 		break;
 		default:
 			$deviceCategoriesArray=getAlphaCategories($dbADO,@$restrictToCategory);
-			$deviceCategoryFormElement=pulldownFromArray($deviceCategoriesArray,'categoryID',$categoryID,'class="input_big" onChange="setDeviceCategory(-1);"');
+			$deviceCategoryFormElement=pulldownFromArray($deviceCategoriesArray,'categoryID',$categoryID,'style="width:400px;" class="input_big" onChange="setDeviceCategory(-1);"');
 	}
 
 	if(isset($_REQUEST['do_filter']) || (int)@$_REQUEST['autofilter']==1 || (int)@$_SESSION['parentID']>0 || (int)@$_REQUEST['categoryID']>0){
 		//echo 'do_filter categ: '.$categoryID.' manuf: '.$manufacturerID;
 		
 		$deviceTemplatesArray=getAllowedDT((int)@$_SESSION['parentID'],$categoryID,$manufacturerID,$dbADO,$from);
-		$deviceTemplatesPulldown=pulldownFromArray($deviceTemplatesArray,'template',$dtID,'class="input_big" onchange="setDeviceTemplate();"');
+		$deviceTemplatesPulldown=pulldownFromArray($deviceTemplatesArray,'template',$dtID,'style="width:400px;" class="input_big" onchange="setDeviceTemplate();"');
 		
 	}else{
 		$filter=($from=='genericSerialDevices')?' WHERE CommandLine=\''.$GLOBALS['GenericSerialDeviceCommandLine'].'\'':'';
 		$deviceTemplatesArray=getAssocArray('DeviceTemplate','PK_DeviceTemplate','Description',$dbADO,$filter,'ORDER BY Description ASC');
-		$deviceTemplatesPulldown=pulldownFromArray($deviceTemplatesArray,'template',$dtID,'class="input_big" onchange="setDeviceTemplate();"');
+		$deviceTemplatesPulldown=pulldownFromArray($deviceTemplatesArray,'template',$dtID,'style="width:400px;" class="input_big" onchange="setDeviceTemplate();"');
 	}
 	$parentDeviceText=$TEXT_NONE_CONST;
 	if((int)@$_SESSION['parentID']>0){
@@ -5333,7 +5333,7 @@ function pickDeviceTemplate($categoryID, $manufacturerID,$returnValue,$defaultAl
 	$out.='
 		<tr class="alternate_back">
 			<td><B>'.$TEXT_MANUFACTURER_CONST.'</B></td>
-			<td>'.pulldownFromArray($manufacturersArray,'manufacturerID',$manufacturerID,'class="input_big" onchange="setManufacturer();"').'</td>
+			<td>'.pulldownFromArray($manufacturersArray,'manufacturerID',$manufacturerID,'style="width:400px;" class="input_big" onchange="setManufacturer();"').'</td>
 			<td width="35"><b><span id="manufacturerSelected" class="confirm"></span></b></td>
 			<td><input type="button" class="button_fixed" value="'.$TEXT_ADD_MANUFACTURER_CONST.'" onclick="add_manufacturer_popup();"></td>
 		</tr>
@@ -6110,7 +6110,7 @@ function displayScreenSavers($orbiterID,$dbADO)
 		<input type="hidden" name="oldssDT_'.$orbiterID.'" value="'.@$ssArray['FK_DeviceTemplate'][0].'">
 		<input type="hidden" name="oldss_'.$orbiterID.'" value="'.$selectedss.'">';
 		
-	$out.=pulldownFromArray($templateArray,'ss_'.$orbiterID,@$ssArray['FK_DeviceTemplate'][0]);
+	$out.=pulldownFromArray($templateArray,'ss_'.$orbiterID,@$ssArray['FK_DeviceTemplate'][0],style="width:200px;");
 	
 	return $out;
 }

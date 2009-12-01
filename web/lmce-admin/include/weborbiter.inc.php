@@ -87,7 +87,7 @@ function get_installation($userID,$dbADO,$installationID=0){
 		$instalation_form_element='# '.$installationIDs[0].'<input type="hidden" name="installationID" value="'.$installationIDs[0].'">';
 		$GLOBALS['installationID']=$installationIDs[0];
 	}else{
-		$instalation_form_element=pulldownFromArray($instalationsArray,'installationID',$installationID,'onChange="document.worbiter.submit();"');
+		$instalation_form_element=pulldownFromArray($instalationsArray,'installationID',$installationID,' style="width:275px;" onChange="document.worbiter.submit();"');
 	}
 	return $instalation_form_element;
 }
@@ -99,7 +99,7 @@ function get_devices($installationID,$userID,$dbADO,$deviceID=0){
 	if(count($devicesArray)==0){
 		return 'You don\'t have any generic web device in current installation.';
 	}
-	$out=pulldownFromArray($devicesArray,'deviceID',$deviceID,'onChange="document.worbiter.submit();"');
+	$out=pulldownFromArray($devicesArray,'deviceID',$deviceID,' style="width:275px;" onChange="document.worbiter.submit();"');
 	
 	return $out;
 }
