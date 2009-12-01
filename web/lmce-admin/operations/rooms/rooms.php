@@ -108,8 +108,8 @@ function rooms($output,$dbADO) {
 					<input type="text" name="roomDesc_'.$rowRoom['PK_Room'].'" value="'.$rowRoom['Description'].'"><br>
 					<a href="javascript:if(confirm(\''.$TEXT_DELETE_ROOM_CONFIRMATION_CONST.' '.$rowRoom['NoDevices'].'\')){self.location=\'index.php?section=rooms&action=delete&delRoom='.$rowRoom['PK_Room'].'\';}">'.$TEXT_DELETE_ROOM_CONST.' #'.$rowRoom['PK_Room'].'</a>
 				</td>
-				<td align="center" valign="top">'.pulldownFromArray($roomTypes,'roomType_'.$rowRoom['PK_Room'],$rowRoom['FK_RoomType']).'</td>
-				<td align="center" valign="top">'.pulldownFromArray($fotRoomArray,'fotRoom_'.$rowRoom['PK_Room'],$rowRoom['FK_FloorplanObjectType']).'</td>
+				<td align="center" valign="top">'.pulldownFromArray($roomTypes,'roomType_'.$rowRoom['PK_Room'],$rowRoom['FK_RoomType'],'style="width:200px;"').'</td>
+				<td align="center" valign="top">'.pulldownFromArray($fotRoomArray,'fotRoom_'.$rowRoom['PK_Room'],$rowRoom['FK_FloorplanObjectType'],'style="width:150px;"').'</td>
 				<td valign="top">'.@$roomImage.'<input type="file" name="pic_'.$rowRoom['PK_Room'].'"></td>
 				<td valign="top" align="center"><input type="checkbox" name="hidden_'.$rowRoom['PK_Room'].'" value="1" '.(($rowRoom['HideFromOrbiter']==1)?'checked':'').'></td>
 				';
@@ -147,7 +147,7 @@ function rooms($output,$dbADO) {
 				<td colspan="4" align="center"> &nbsp;</td>
 			</tr>
 			<tr>
-				<td colspan="4" align="center"> '.pulldownFromArray($roomTypes,'roomType',0).' <input type="submit" class="button" name="add" value="'.$TEXT_ADD_ROOM_CONST.'"> <input type="submit" class="button" name="save" value="'.$TEXT_SAVE_CONST.'"> <input type="reset" class="button" name="cancelBtn" value="'.$TEXT_CANCEL_CONST.'"></td>
+				<td colspan="4" align="center"> '.pulldownFromArray($roomTypes,'roomType',0,'style="width:200px;"').' <input type="submit" class="button" name="add" value="'.$TEXT_ADD_ROOM_CONST.'"> <input type="submit" class="button" name="save" value="'.$TEXT_SAVE_CONST.'"> <input type="reset" class="button" name="cancelBtn" value="'.$TEXT_CANCEL_CONST.'"></td>
 			</tr>
 			<tr>
 				<td colspan="4" align="left"><em>* '.$TEXT_REQUIRED_FIELDS_CONST.'<br>** '.$TEXT_PICTURES_RESTRICTION_WARNING_CONST.'</em></td>

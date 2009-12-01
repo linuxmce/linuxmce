@@ -117,7 +117,7 @@ function installationSettings($output,$dbADO) {
 				</tr>
 				<tr>
 					<td><B>'.$TEXT_COUNTRY_CONST.'</B></td>
-					<td>'.generatePullDown('countryID','Country','PK_Country','Description',$selectedCountry,$dbADO,'','onChange="document.installationSettings.action.value=\'form\';document.installationSettings.submit();"').'</td>
+					<td>'.generatePullDown('countryID','Country','PK_Country','Description',$selectedCountry,$dbADO,'','onChange="document.installationSettings.action.value=\'form\';document.installationSettings.submit();" style="width:230px;"').'</td>
 				</tr>';
 				if($selectedCountry>0){
 					$selectedRegion=(isset($_POST['region']))?(int)$_POST['region']:(int)@$selectedRegion;	
@@ -126,7 +126,7 @@ function installationSettings($output,$dbADO) {
 					$out.='
 					<tr>
 						<td><B>'.$TEXT_REGION_CONST.'</B></td>
-						<td>'.pulldownFromArray($regionsArray,'region',@$selectedRegion,'onChange="document.installationSettings.action.value=\'form\';document.installationSettings.submit();"').'</td>
+						<td>'.pulldownFromArray($regionsArray,'region',@$selectedRegion,'onChange="document.installationSettings.action.value=\'form\';document.installationSettings.submit();" style="width:230px;"').'</td>
 					</tr>';
 
 					if($selectedRegion>0 && in_array($selectedRegion,array_keys($regionsArray))){
@@ -135,16 +135,26 @@ function installationSettings($output,$dbADO) {
 					$out.='
 					<tr>
 						<td><B>'.$TEXT_CITY_CONST.'</B></td>
-						<td>'.pulldownFromArray($citiesArray,'city_coords',@$selectedCity,'onChange="setCoordinates()"').'</td>
+						<td>'.pulldownFromArray($citiesArray,'city_coords',@$selectedCity,'onChange="setCoordinates()" style="width:230px;"').'</td>
 					</tr>';
 					
 					}
 				}
 				$out.='		
 				<tr>
-					<td colspan="2">
-						<B>'.$TEXT_LONGITUDE_CONST.'</B> <input type="text" size="5" name="Longitude" value="'.@$Longitude.'">
-						<B>'.$TEXT_LATITUDE_CONST.'</B> <input type="text" size="5" name="Latitude" value="'.@$Latitude.'">
+					<td>
+						<B>'.$TEXT_LONGITUDE_CONST.'</B> 
+					</td>
+					<td>
+						<input type="text" size="30" name="Longitude" value="'.@$Longitude.'">
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<B>'.$TEXT_LATITUDE_CONST.'</B>
+					</td>
+					<td>
+						 <input type="text" size="30" name="Latitude" value="'.@$Latitude.'">
 					</td>
 				</tr>
 				<tr>
@@ -166,10 +176,11 @@ function installationSettings($output,$dbADO) {
 					<td colspan="2" align="center" class="tablehead"><B>'.$TEXT_MISCELANEOUS_CONST.'</B>:</td>
 				</tr>
 				<tr>
-					<td align="left" colspan="2"><B>'.$TEXT_RIPPING_FORMAT_CONST.': </B>'.pulldownFromArray($ripFormats,'rip',$pulldownValue,'onChange="setOptions();"').'</td>
+					<td align="left""><B>'.$TEXT_RIPPING_FORMAT_CONST.': </B></td>
+					<td align="right">'.pulldownFromArray($ripFormats,'rip',$pulldownValue,'onChange="setOptions();" style="width:180px;"').'</td>
 				</tr>				
 				<tr>
-					<td align="left" colspan="2">'.rippingSettings($selectedRipFormat).'</td>
+				'.rippingSettings($selectedRipFormat).'
 				</tr>		
 				<tr>
 					<td colspan="2" align="center"><input type="submit" class="button" name="submitX" value="'.$TEXT_SAVE_CONST.'"  > <input type="reset" class="button" name="cancelBtn" value="'.$TEXT_CANCEL_CONST.'"></td>
@@ -337,15 +348,14 @@ function rippingSettings($selectedRipFormat){
 	$ql=(!isset($ql))?3:$ql;
 	
 	$out='
-	<table>
-		<tr>
+
 			<td><B>'.$TEXT_SETTINGS_CONST.'</B></td>
 			<td><div id="mp3_opt" style="display:'.(($ripFormat=='mp3')?'':'none').';">
-				'.$TEXT_BIT_RATE_CONST.': '.pulldownFromArray($bitRateArray,'bit_rate_predefined',@$bit_rate,'onchange="document.installationSettings.bit_rate_user.value=document.installationSettings.bit_rate_predefined.value;"','key','').' or type <input type="text" name="bit_rate_user" value="'.@$bit_rate.'"><br>
+				'.$TEXT_BIT_RATE_CONST.': '.pulldownFromArray($bitRateArray,'bit_rate_predefined',@$bit_rate,'onchange="document.installationSettings.bit_rate_user.value=document.installationSettings.bit_rate_predefined.value;" style="width:180px;"','key','').' or type <input type="text" name="bit_rate_user" value="'.@$bit_rate.'"><br>
 				<input type="radio" name="cbr_vbr" value="cbr" '.((!isset($cbr_vbr) || @$cbr_vbr=='cbr')?'checked':'').'>CBR <input type="radio" name="cbr_vbr" value="vbr" '.((@$cbr_vbr=='vbr')?'checked':'').'> VBR
 			</div>
 			<div id="ogg_opt" style="display:'.(($ripFormat=='ogg')?'':'none').';">
-				'.$TEXT_QUALITY_CONST.': '.pulldownFromArray($optarray,'ogg_ql',@$ql,'','key','').'
+				'.$TEXT_QUALITY_CONST.': '.pulldownFromArray($optarray,'ogg_ql',@$ql,'style="width:180px;"','key','').'
 			</div>	
 			<div id="flac_opt" style="display:'.(($ripFormat=='flac')?'':'none').';">
 				'.$TEXT_NO_OPTIONS_AVAILABLE_CONST.'
@@ -354,8 +364,7 @@ function rippingSettings($selectedRipFormat){
 				'.$TEXT_NO_OPTIONS_AVAILABLE_CONST.'
 			</div>	
 			</td>
-		</tr>
-	</table>';
+';
 	
 	return $out;
 }
