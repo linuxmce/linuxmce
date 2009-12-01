@@ -181,7 +181,7 @@ function genericSerialDevices($output,$dbADO) {
 				if($rowD['PK_Device']!=$deviceDisplayed){
 					$deviceDisplayed=$rowD['PK_Device'];
 				
-					$deviceName=(@$childOf[$rowD['PK_Device']]=='')?'<input type="text" name="description_'.$rowD['PK_Device'].'" value="'.$rowD['Description'].'">':'<input type="hidden" name="description_'.$rowD['PK_Device'].'" value="'.$rowD['Description'].'" style="width:200px;"><B>'.$rowD['Description'].'</B>';
+					$deviceName=(@$childOf[$rowD['PK_Device']]=='')?'<input type="text" name="description_'.$rowD['PK_Device'].'" value="'.$rowD['Description'].'" style="width:200px;">':'<input type="hidden" name="description_'.$rowD['PK_Device'].'" value="'.$rowD['Description'].'"><B>'.$rowD['Description'].'</B>';
 					$roomPulldown=pulldownFromArray($roomsArray,'room_'.$rowD['PK_Device'],$rowD['FK_Room'],'style="width:200px;"');
 										
 					$wikiLink=wikiLink($rowD['TemplateName']);
@@ -230,7 +230,7 @@ function genericSerialDevices($output,$dbADO) {
 						'.$TEXT_DEVICE_CONST.'#: '.$rowD['PK_Device'].'<br>
 						'.$TEXT_DEVICE_TEMPLATE_CONST.'#: '.$rowD['FK_DeviceTemplate'].'<br>
 						'.$TEXT_CONTROLLED_BY_CONST.': '.$controlledViaLink.'<br><br>
-						'.$deviceName.'<br>
+						'.$deviceName.'<br><br>
 						'.$roomPulldown.'<br>
 						</td>
 						<td valign="top" align="right">'.formatDeviceData($rowD['PK_Device'],$deviceDataArray[$rowD['PK_Device']],$dbADO,$rowD['IsIPBased']).'</td>
