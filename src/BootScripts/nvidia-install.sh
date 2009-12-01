@@ -64,7 +64,7 @@ getNvidiaInstalled() {
 # getInstalledNvidiaDriver()
 # echos the currently installed nVidia driver (if there is one)
 getInstalledNvidiaDriver() {
-	echo $(dpkg-query -l "nvidia-glx*" | grep "^ii" | awk '{print $2}')
+	echo $(dpkg-query -l "nvidia-glx\*" | grep "^ii" | awk '{print $2}')
 	#echo "$(dpkg -l | grep -i "ii .*" | grep -i 'nvidia-glx' | awk '{print $2}')" 
 }
 
