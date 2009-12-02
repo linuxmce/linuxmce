@@ -12,7 +12,7 @@ function avWizard($output,$dbADO) {
 	$out='';
 	$action = isset($_REQUEST['action'])?cleanString($_REQUEST['action']):'form';
 	$installationID = (int)@$_SESSION['installationID'];
-	$_SESSION['selectedEntArea']=(isset($_REQUEST['entArea']))?(int)$_REQUEST['entArea']:(int)@$_SESSION['selectedEntArea'];		
+	$_SESSION['selectedEntArea']=(isset($_REQUEST['entArea']))?(int)$_REQUEST['entArea']:-2; //make the default All Entertain Areas		
 
 	$deviceCategory=$GLOBALS['rootAVEquipment'];
 	$specificFloorplanType=$GLOBALS['AVEquipmentFlorplanType'];
@@ -174,16 +174,10 @@ function avWizard($output,$dbADO) {
 		
 		<input type="hidden" name="coreID" value="'.$coreID.'">
 		<input type="hidden" name="oldShareIRCodes" value="'.((@$sharedWithOthers>0)?'1':'0').'">
-		'.$TEXT_CHOOSE_ENTERTAIN_AREA_CONST.': '.pulldownFromArray($entAreas,'entArea',$_SESSION['selectedEntArea'],'onchange="document.avWizard.action.value=\'form\';document.avWizard.submit();"','key',$TEXT_UNASSIGNED_CONST).'
 		
-		<table align="center" border="0" cellpadding="0" cellspacing="0">
-			
-					';
+		<div align="center"><B>'.$TEXT_CHOOSE_ENTERTAIN_AREA_CONST.'</B>:<BR> '.pulldownFromArray($entAreas,'entArea',$_SESSION['selectedEntArea'],'onchange="document.avWizard.action.value=\'form\';document.avWizard.submit();" style="width:200px;"','key',$TEXT_UNASSIGNED_CONST).'</div>
 
-
-
-		
-
+		<table align="center" border="0" cellpadding="0" cellspacing="0">';
 		$childOf=array();
 		$firstDevice=0;
 		$deviceDataArray=array();
@@ -254,8 +248,7 @@ function avWizard($output,$dbADO) {
 	
 
 				if(@$childOf[$rowD['PK_Device']]==''){
-					$out.='
-					<tr class="tablehead">
+					$out.='<tr class="tablehead">
 						<td align="center" width="200"><B>'.$TEXT_DEVICE_ROOM_CONTROLLED_BY_CONST.'</B></td>
 						<td align="center" width="200"><B>'.$TEXT_PIPES_CONST.'</B></td>
 						<td align="center" width="200"><B>'.$TEXT_DEVICE_DATA_CONST.'</B></td>
