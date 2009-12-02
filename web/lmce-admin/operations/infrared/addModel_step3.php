@@ -23,6 +23,7 @@
 	
 	$cdContent=(in_array($dtDataArray['FK_DeviceCategory'][0],$dtDataArray))?'<p class="normaltext">'.$dtDataArray['Description'][0].' devices don’t normally tune to stations or channels, so you can probably ignore this step and just click next.':'';
 	
+
 	if($return==0){
 		$navigationButtons='<div align="right" class="normaltext"><a href="index.php?section=addModel&dtID='.$dtID.'&step='.($step-1).(((int)@$_REQUEST['isDef']==1)?'&isDef=1':'').'&deviceID='.$deviceID.'">&lt;&lt;</a> <a href="index.php?section=addModel&dtID='.$dtID.'&step='.($step+1).(((int)@$_REQUEST['isDef']==1)?'&isDef=1':'').'&deviceID='.$deviceID.'">&gt;&gt;</a></div>';
 		$submitLabel=$TEXT_NEXT_CONST;
@@ -30,14 +31,15 @@
 		$submitLabel=$TEXT_SAVE_CONST;
 	}
 		
-	if(@$_SESSION['selectedCommMethod']!=1){
+/*	if(@$_SESSION['selectedCommMethod']!=1){
 		$comMethod=(isset($_SESSION['selectedCommMethod']))?$_SESSION['selectedCommMethod']:$dtDataArray['FK_CommMethod'][0];
 		$commMethodArray=getAssocArray('CommMethod','PK_CommMethod','Description',$publicADO,'','ORDER BY PK_CommMethod ASC');
 		$comMethodName=($comMethod!=0)?$commMethodArray[$comMethod]:'This';
 		$Content='
 			<p class="normaltext">'.$comMethodName.' devices don’t normally require any special rules to tune.<br><br><br>
 			<div align="center"><input type="button" class="button" name="next" value="Next" onClick="self.location=\'index.php?section=addModel&step=4&dtID='.$dtID.'&deviceID='.$deviceID.'\'"></div>';
-	}else{
+	}else */ { 
+
 		$Content='
 		<table class="normaltext">
 			<tr>
