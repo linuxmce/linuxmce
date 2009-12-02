@@ -422,6 +422,11 @@ void Xine_Stream_Factory::setAudioSettings()
 		case 'O':
 			sAlsaDevice = "asym_spdif";
 			break;
+
+		case 'H':
+			sAlsaDevice = "asym_hdmi";
+			sPassthroughDevice = "hdmi:AES0=0x6,AES1=0x82,AES2=0x0,AES3=0x2";
+			break;
 		
 		case 'S':		
 		case 'L':
