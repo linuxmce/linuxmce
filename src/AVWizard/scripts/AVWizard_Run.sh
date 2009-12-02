@@ -4,7 +4,7 @@
 # the binary drivers
 DriverInstalled=0
 driverConfig=none
-grep "Driver" /etc/X11/xorg.conf | grep -v "vesa"|grep -v "mouse"|grep -vq "kbd" && DriverInstalled=1
+grep "Driver" /etc/X11/xorg.conf |grep -v "keyboard"| grep -v "#" | grep -v "vesa"|grep -v "mouse"|grep -vq "kbd" && DriverInstalled=1
 
 #
 # Check if we have nVidia or ATI cards in here, and specify proper config programs and commandline options.
