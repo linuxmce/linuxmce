@@ -8,6 +8,7 @@ require "/usr/pluto/bin/config_ops.pl";
 #declare vars (it's safer this way)
 my $DEVICE_ID=0;
 my $DEVICE_EXT = 0;
+my $DEVICE_SECRET = "";
 my $DEVICE_TYPE = "";
 my $DEVICE_PORT = 0;
 
@@ -15,6 +16,9 @@ my $DB_PL_HANDLE;
 my $DB_AS_HANDLE;
 
 my $STATUS = 0;
+
+# Set the secret to be used for connecting
+$DEVICE_SECRET=$DEVICE_EXT;
 
 #fix permissions on each run
 `chmod g+w /etc/asterisk/*`;
@@ -228,7 +232,7 @@ sub add_to_asterisk_db()
     $EXT_VARS{'outboundcid'}="\"pl_".$DEVICE_ID."\" <$DEVICE_EXT>";
     $EXT_VARS{'qualify'}="yes" if ($DEVICE_TYPE eq 'sip');
     $EXT_VARS{'vm'}="disabled";
-    $EXT_VARS{'secret'}=$DEVICE_EXT if ($DEVICE_TYPE ne 'custom');
+    $EXT_VARS{'secret'}=$DEVICE_SECRET if ($DEVICE_TYPE ne 'custom');
     $EXT_VARS{'devinfo_dial'}="SCCP/".$DEVICE_EXT if ($DEVICE_TYPE eq 'custom');
     $EXT_VARS{'port'}=$DEVICE_PORT;
     foreach my $var (keys %EXT_VARS)
