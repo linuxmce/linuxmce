@@ -92,6 +92,7 @@ fi
 
 	Setup_Pluto_Apt_Conf
 
+# this need to be discussed. For now we remove it so duplicate packages get fetched from repo with newest package. 
 	pluto_apt_preferences='
 Package: *
 Pin: origin
@@ -101,7 +102,7 @@ Package: *
 Pin: release v=8.04,o=Ubuntu,a=hardy,l=Ubuntu
 Pin-Priority: 9998
 '
-	echo -n "$pluto_apt_preferences" >/etc/apt/preferences
+#	echo -n "$pluto_apt_preferences" >/etc/apt/preferences
 
 	ln -s /usr/pluto/var/apt.conf.offline /etc/apt/apt.conf.d/99offline
 
