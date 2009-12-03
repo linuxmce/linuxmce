@@ -4114,8 +4114,8 @@ bool Telecom_Plugin::ConcurrentAccessToSoundCardAllowed(int nOrbiterID)
 	{
 
 		// First, look for a USB Conference mic in the device tree.
-		DeviceData_Base *pDevice_USBMic = pDevice_Orbiter->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_Conference_Microphones_CONST);
-		if (!pDevice_USBMic)
+		DeviceData_Base *pDevice_USBMic = pDevice_Orbiter->FindSelfOrParentWithinCategory(DEVICECATEGORY_Conference_Microphones_CONST);
+		if (NULL != pDevice_USBMic)
 		{
 			DeviceData_Base *pDevice_MD = pDevice_Orbiter->FindSelfOrParentWithinCategory(DEVICECATEGORY_Media_Director_CONST);
 	
