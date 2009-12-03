@@ -4112,33 +4112,45 @@ bool Telecom_Plugin::ConcurrentAccessToSoundCardAllowed(int nOrbiterID)
 
 	if(NULL != pDevice_Orbiter)
 	{
-		DeviceData_Base *pDevice_MD = pDevice_Orbiter->FindSelfOrParentWithinCategory(DEVICECATEGORY_Media_Director_CONST);
 
-		if(NULL != pDevice_MD)
+		// First, look for a USB Conference mic in the device tree.
+		DeviceData_Base *pDevice_USBMic = pDevice_Orbiter->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_Conference_Microphones_CONST);
+		if (!pDevice_USBMic)
 		{
-			string sAudioSettings;
-			CMD_Get_Device_Data_DT cmd_Get_Device_Data_DT(
-				m_dwPK_Device, DEVICETEMPLATE_General_Info_Plugin_CONST, BL_SameHouse,
-				pDevice_MD->m_dwPK_Device, DEVICEDATA_Audio_settings_CONST, true,
-				&sAudioSettings
-			);
-			SendCommand(cmd_Get_Device_Data_DT);
-
-			// search for C or O, if it is present - then no simultaneous access
-			if(sAudioSettings.find("C") == string::npos && sAudioSettings.find("O") == string::npos)
+			DeviceData_Base *pDevice_MD = pDevice_Orbiter->FindSelfOrParentWithinCategory(DEVICECATEGORY_Media_Director_CONST);
+	
+			if(NULL != pDevice_MD)
 			{
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Audio settings '%s', concurrent access allowed!", sAudioSettings.c_str());
-				return true;
+				string sAudioSettings;
+				CMD_Get_Device_Data_DT cmd_Get_Device_Data_DT(
+					m_dwPK_Device, DEVICETEMPLATE_General_Info_Plugin_CONST, BL_SameHouse,
+					pDevice_MD->m_dwPK_Device, DEVICEDATA_Audio_settings_CONST, true,
+					&sAudioSettings
+				);
+				SendCommand(cmd_Get_Device_Data_DT);
+	
+				// search for C or O, if it is present - then no simultaneous access
+				if(sAudioSettings.find("C") == string::npos && sAudioSettings.find("O") == string::npos)
+				{
+					LoggerWrapper::GetInstance()->Write(LV_STATUS, "Audio settings '%s', concurrent access allowed!", sAudioSettings.c_str());
+					return true;
+				}
+				else
+				{
+					LoggerWrapper::GetInstance()->Write(LV_STATUS, "Audio settings '%s', concurrent access is NOT allowed!", sAudioSettings.c_str());
+				}
 			}
 			else
 			{
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Audio settings '%s', concurrent access is NOT allowed!", sAudioSettings.c_str());
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "Can't find parent MD device for %d", nOrbiterID);
 			}
 		}
 		else
 		{
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Can't find parent MD device for %d", nOrbiterID);
+			// There is a USB Conference Microphone present.
+			return true;
 		}
+
 	}
 	else
 	{
