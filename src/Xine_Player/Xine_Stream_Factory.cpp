@@ -625,15 +625,12 @@ void Xine_Stream_Factory::CloseStreamAV(int iStreamID)
 
 void Xine_Stream_Factory::setVideoDriver(string strVideoDriver)
 {
-	if ( (strVideoDriver!="") && (strVideoDriver=="cle266x11"||strVideoDriver=="xv"||strVideoDriver=="xxmc"||strVideoDriver=="opengl"||strVideoDriver=="sdl"||strVideoDriver=="xshm") )
-	{
-		LoggerWrapper::GetInstance()->Write( LV_STATUS, "Overriding video driver setting, using '%s' for video output", strVideoDriver.c_str());
-		m_sXineVideoDriverName = strVideoDriver;
-	}
-	else
-	{
-		LoggerWrapper::GetInstance()->Write( LV_STATUS, "Not overriding video driver setting, device data is not acceptable: '%s'", strVideoDriver.c_str());
-	}
+
+        if (strVideoDriver!="Manual")
+        {
+                LoggerWrapper::GetInstance()->Write( LV_STATUS, "Overriding video.driver setting in xine.conf, using '%s' from web admin for video output", strVideoDriver.c_str());
+                m_sXineVideoDriverName = strVideoDriver;
+        }
 }
 
 
