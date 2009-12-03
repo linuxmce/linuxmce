@@ -22,6 +22,19 @@
 #include "Gen_Devices/RPC_PluginBase.h"
 //<-dceag-d-e->
 
+#include <sys/types.h>
+#include <sys/select.h>
+#include <sys/wait.h>
+#include <time.h>
+#include <errno.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <string.h>
+
+#include "mongoose.h"
+
 //<-dceag-decl-b->
 namespace DCE
 {

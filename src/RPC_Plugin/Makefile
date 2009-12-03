@@ -1,19 +1,19 @@
 #<-dceag-mh-b->
 GENDEV=../Gen_Devices
 
-SNR_CPPFLAGS ?= <-mkr_t_compile_defines->
-SNR_LDFLAGS ?= <-mkr_t_compile_libs->
 
 ROOT = ..
-CXX = g++
-CXXFLAGS = -Wall -fPIC -ggdb3
-CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
-LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
-BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
+CC ?= gcc
+CXX ?= g++
+CFLAGS ?= -Wall -fPIC -ggdb3
+CXXFLAGS ?= -Wall -fPIC -ggdb3
+CPPFLAGS ?= -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
+LDFLAGS ?= $(SNR_LDFLAGS) -L$(ROOT)/lib
+BASELDLIBS += -lSerializeClass -lDCECommon -lPlutoUtils -lpthread -ldl
 
 MYNAME = RPC_Plugin
 VERSION = 2.0.0
-MYDEVTEMPLATEID = 2032mplateID
+MYDEVTEMPLATEID = 2032
 
 Gen_Dev_Files = $(GENDEV)/RPC_PluginBase.cpp
 sources = Main.cpp RPC_Plugin.cpp $(Gen_Dev_Files)
@@ -25,7 +25,7 @@ LDFLAGS +=
 XTRALDLIBS = -lmysqlclient_r
 
 Gen_Dev_Files +=
-sources +=
+sources += 
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
@@ -40,7 +40,8 @@ bin: RPC_Plugin
 so: RPC_Plugin.so
 
 RPC_Plugin.so: $(sources:.cpp=.o)
-	$(CXX) -shared -o $(MYNAME).so $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	$(CC) $(CFLAGS) -c mongoose.c
+	$(CXX) -shared -o $(MYNAME).so $(call cpath,$+) mongoose.o $(LDFLAGS) $(LDLIBS)
 	cp $@ ../bin
 	chmod +x post_make.sh
 	./post_make.sh $@
@@ -52,6 +53,7 @@ RPC_Plugin: $(sources:.cpp=.o)
 
 clean: clean-recursive
 	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) RPC_Plugin.bin RPC_Plugin.so >/dev/null
+	rm -f mongoose.o >/dev/null
 
 package:
 	chmod +x make_package.sh

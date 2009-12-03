@@ -24,6 +24,49 @@
 using namespace std;
 using namespace DCE;
 
+// mongoose handler
+struct mg_context	*ctx;
+int data = 0;
+
+static void
+show_index(struct mg_connection *conn,
+		const struct mg_request_info *request_info,
+		void *user_data)
+{
+	char		*value;
+	const char	*host;
+
+	/* Change the value of integer variable */
+	value = mg_get_var(conn, "name1");
+	if (value != NULL) {
+		* (int *) user_data = atoi(value);
+		mg_free(value);
+		if (!strcmp(request_info->request_method, "POST")) {
+			(void) mg_printf(conn, "HTTP/1.1 303 See Other\r\n"
+				"Location: %s\r\n\r\n", request_info->uri);
+			return;
+		}
+	}
+
+	mg_printf(conn, "%s",
+		"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"
+		"<html><body><h1>Welcome to embedded example of Mongoose");
+	mg_printf(conn, " v. %s </h1><ul>", mg_version());
+
+	mg_printf(conn, "<li><code>REQUEST_METHOD: %s "
+	    "REQUEST_URI: \"%s\" QUERY_STRING: \"%s\""
+	    " REMOTE_ADDR: %lx REMOTE_USER: \"(null)\"</code><hr>",
+	    request_info->request_method, request_info->uri,
+	    request_info->query_string ? request_info->query_string : "(null)",
+	    request_info->remote_ip);
+	mg_printf(conn, "<li>Internal int variable value: <b>%d</b>",
+			* (int *) user_data);
+	host = mg_get_header(conn, "Host");
+	mg_printf(conn, "<li>'Host' header value: [%s]<hr>",
+	    host ? host : "NOT SET");
+	mg_printf(conn, "%s", "</body></html>");
+}
+
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
@@ -59,6 +102,12 @@ bool RPC_Plugin::GetConfig()
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
+
+
+	// start web server
+	ctx = mg_start();
+	mg_set_option(ctx, "ports", "8088");
+	mg_set_uri_callback(ctx, "/", &show_index, (void *) &data);
 	return true;
 }
 
