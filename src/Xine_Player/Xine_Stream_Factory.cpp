@@ -231,9 +231,9 @@ void Xine_Stream_Factory::DetectOutputDrivers()
 		m_sXineVideoDriverName = driver_ids[ xineConfigEntry.num_value ];
 		LoggerWrapper::GetInstance()->Write( LV_STATUS, "Using video driver: %s", m_sXineVideoDriverName.c_str() );
 	}
-	else	
+	else
 		LoggerWrapper::GetInstance()->Write( LV_STATUS, "Video driver key was not defined in the config file, using hardcoded default: %s", m_sXineVideoDriverName.c_str() );
-
+	
 	i = 0;
 	while (driver_ids[i])
 	{
@@ -412,7 +412,7 @@ void Xine_Stream_Factory::setAudioSettings()
 	bool updateConfig = true;
 	string sAlsaDevice = "plug:dmix";
 	string sSpeakersArrangement = "Stereo 2.0";
-	string sPassThroughDevice = "";	
+	string sPassthroughDevice = "iec958:AES0=0x6,AES1=0x82,AES2=0x0,AES3=0x2";
 	bool bUsePassThrough = false;
 	
 	for (uint i=0; i<sAudioSettings.length(); i++)
@@ -422,12 +422,12 @@ void Xine_Stream_Factory::setAudioSettings()
 		case 'C':
 		case 'O':
 			sAlsaDevice = "asym_spdif";
+			sPassthroughDevice = "iec958:AES0=0x6,AES1=0x82,AES2=0x0,AES3=0x2";
 			break;
 
 		case 'H':
 			sAlsaDevice = "asym_hdmi";
-			bUsePassThrough = true;
-			sPassThroughDevice = "hdmi:AES0=0x6,AES1=0x82,AES2=0x0,AES3=0x2";
+			sPassthroughDevice = "hdmi:AES0=0x6,AES1=0x82,AES2=0x0,AES3=0x2";
 			break;
 		
 		case 'S':		
@@ -438,7 +438,6 @@ void Xine_Stream_Factory::setAudioSettings()
 		case '3':
 			sSpeakersArrangement = "Pass Through";
 			bUsePassThrough = true;
-			sPassThroughDevice = "iec958:AES0=0x6,AES1=0x82,AES2=0x0,AES3=0x2";
 			break;
 		
 		case 'M':
@@ -449,28 +448,24 @@ void Xine_Stream_Factory::setAudioSettings()
 			LoggerWrapper::GetInstance()->Write( LV_STATUS, "Unknown audio settings flag: '%c'", sAudioSettings[i]);
 		}
 	}
-	
+
 	if (!updateConfig)
 	{
 		LoggerWrapper::GetInstance()->Write( LV_STATUS, "Flag 'M' found, we won't override the defaults from /etc/pluto/xine.conf");
 		return;
 	}
 	
-	RegisterALSAConfigurationString("audio.alsa_front_device", "default", "ALSA front device setting");
-	SetALSAConfigurationEntry("audio.alsa_front_device", sAlsaDevice);
-	
-	
 	RegisterALSAConfigurationString("audio.device.alsa_front_device", "default", "device used for stereo output");
+	SetALSAConfigurationEntry("audio.device.alsa_front_device", sAlsaDevice);
+	
+	RegisterALSAConfigurationString("audio.device.alsa_default_device", "default", "device used for mono output");
 	SetALSAConfigurationEntry("audio.device.alsa_front_device", sAlsaDevice);
 	
 	if (bUsePassThrough)
 	{
-		RegisterALSAConfigurationString("audio.device.alsa_passthrough_device", sPassThroughDevice, "device used for 5.1-channel passthrough output");
-		SetALSAConfigurationEntry("audio.device.alsa_passthrough_device", sAlsaDevice);
+		RegisterALSAConfigurationString("audio.device.alsa_passthrough_device", "default", "device used for 5.1-channel passthrough output");
+		SetALSAConfigurationEntry("audio.device.alsa_passthrough_device", sPassthroughDevice);
 	}
-	
-	RegisterALSAConfigurationEnum("audio.speaker_arrangement", 1, "Speakers arrangement", audio_out_types_strs);
-	SetALSAConfigurationEntry("audio.speaker_arrangement", sSpeakersArrangement, audio_out_types_strs);
 	
 	RegisterALSAConfigurationEnum("audio.output.speaker_arrangement", 1, "Speakers arrangement", audio_out_types_strs);
 	SetALSAConfigurationEntry("audio.output.speaker_arrangement", sSpeakersArrangement, audio_out_types_strs);
@@ -630,12 +625,15 @@ void Xine_Stream_Factory::CloseStreamAV(int iStreamID)
 
 void Xine_Stream_Factory::setVideoDriver(string strVideoDriver)
 {
-
-        if (strVideoDriver!="Manual")
-        {
-                LoggerWrapper::GetInstance()->Write( LV_STATUS, "Overriding video.driver setting in xine.conf, using '%s' from web admin for video output", strVideoDriver.c_str());
-                m_sXineVideoDriverName = strVideoDriver;
-        }
+	if ( (strVideoDriver!="") && (strVideoDriver=="cle266x11"||strVideoDriver=="xv"||strVideoDriver=="xxmc"||strVideoDriver=="opengl"||strVideoDriver=="sdl"||strVideoDriver=="xshm") )
+	{
+		LoggerWrapper::GetInstance()->Write( LV_STATUS, "Overriding video driver setting, using '%s' for video output", strVideoDriver.c_str());
+		m_sXineVideoDriverName = strVideoDriver;
+	}
+	else
+	{
+		LoggerWrapper::GetInstance()->Write( LV_STATUS, "Not overriding video driver setting, device data is not acceptable: '%s'", strVideoDriver.c_str());
+	}
 }
 
 
@@ -694,9 +692,18 @@ bool Xine_Stream_Factory::CreateWindows()
 	XSetStandardProperties( m_pXDisplay, windows[ 0 ], m_sWindowTitle.c_str(), m_sWindowTitle.c_str(), None, NULL, 0, 0 );
 	XSetStandardProperties( m_pXDisplay, windows[ 1 ], "pluto-stub", "pluto-stub", None, NULL, 0, 0 );
 
+	int WidthMM = DisplayWidthMM(m_pXDisplay, m_iCurrentScreen);
+	int HeightMM = DisplayHeightMM(m_pXDisplay, m_iCurrentScreen);
+
+	// Projectors can return a physical size of 0x0 mm. This prevents a division by zero when 0x0 occurs.
+	if (WidthMM == 0)
+		WidthMM = 1;
+	if (HeightMM == 0)
+		HeightMM = 1;
+
 	// calculating pixel aspect
-	double res_h = ( DisplayWidth( m_pXDisplay, m_iCurrentScreen ) * 1000 / DisplayWidthMM( m_pXDisplay, m_iCurrentScreen ) );
-	double res_v = ( DisplayHeight( m_pXDisplay, m_iCurrentScreen ) * 1000 / DisplayHeightMM( m_pXDisplay, m_iCurrentScreen ) );
+	double res_h = DisplayWidth(m_pXDisplay, m_iCurrentScreen) * 1000 / WidthMM;
+	double res_v = DisplayHeight(m_pXDisplay, m_iCurrentScreen) * 1000 / HeightMM;
 
 	m_dScreenPixelAspect = res_v / res_h;
 
