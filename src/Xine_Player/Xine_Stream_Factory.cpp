@@ -412,7 +412,7 @@ void Xine_Stream_Factory::setAudioSettings()
 	bool updateConfig = true;
 	string sAlsaDevice = "plug:dmix";
 	string sSpeakersArrangement = "Stereo 2.0";
-	string sPassthroughDevice = "";	
+	string sPassThroughDevice = "";	
 	bool bUsePassThrough = false;
 	
 	for (uint i=0; i<sAudioSettings.length(); i++)
@@ -427,7 +427,7 @@ void Xine_Stream_Factory::setAudioSettings()
 		case 'H':
 			sAlsaDevice = "asym_hdmi";
 			bUsePassThrough = true;
-			sPassthroughDevice = "hdmi:AES0=0x6,AES1=0x82,AES2=0x0,AES3=0x2";
+			sPassThroughDevice = "hdmi:AES0=0x6,AES1=0x82,AES2=0x0,AES3=0x2";
 			break;
 		
 		case 'S':		
@@ -465,7 +465,7 @@ void Xine_Stream_Factory::setAudioSettings()
 	
 	if (bUsePassThrough)
 	{
-		RegisterALSAConfigurationString("audio.device.alsa_passthrough_device", sPathThroughDevice, "device used for 5.1-channel passthrough output");
+		RegisterALSAConfigurationString("audio.device.alsa_passthrough_device", sPassThroughDevice, "device used for 5.1-channel passthrough output");
 		SetALSAConfigurationEntry("audio.device.alsa_passthrough_device", sAlsaDevice);
 	}
 	
