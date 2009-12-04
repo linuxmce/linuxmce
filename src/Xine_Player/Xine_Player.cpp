@@ -254,7 +254,8 @@ void Xine_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
 		//trying this for 2 seconds to avoid huge delays in case PSS is stuck
 		const int iQueryTimeout=2;
 		DeviceData_Base *pDevice_pss = m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_Screen_Savers_CONST,this,iQueryTimeout);
-		if (pDevice_pss)
+		if (pDevice_pss && 
+		    (iPK_MediaType != MEDIATYPE_pluto_StoredAudio_CONST && iPK_MediaType != MEDIATYPE_pluto_LiveRadio_CONST))
 		{
 			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Xine_Player::CMD_Play_Media() stopping PSS");
 			DCE::CMD_Off cmd(m_dwPK_Device, pDevice_pss->m_dwPK_Device, 0);
