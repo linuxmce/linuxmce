@@ -1,10 +1,5 @@
 /*
-     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
-
-     www.plutohome.com
-
-     Phone: +1 (877) 758-8648
- 
+     Copyright (C) 2009 Harald Klein <hari@vt100.at>
 
      This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
      This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
@@ -35,57 +30,28 @@ int data=0;
 
 static void show_index(struct mg_connection *conn, const struct mg_request_info *request_info, void *user_data)
 {
-	char		*value;
-	const char	*host;
-
-	/* Change the value of integer variable */
-	value = mg_get_var(conn, "name1");
-	if (value != NULL) {
-		* (int *) user_data = atoi(value);
-		mg_free(value);
-		if (!strcmp(request_info->request_method, "POST")) {
-			(void) mg_printf(conn, "HTTP/1.1 303 See Other\r\n"
-				"Location: %s\r\n\r\n", request_info->uri);
-			return;
-		}
-	}
-
 	mg_printf(conn, "%s",
 		"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"
 		"<html><body><h1>Welcome to DCERouter/RPC-Plugin</h1>");
-/*
-	mg_printf(conn, "<li><code>REQUEST_METHOD: %s "
-	    "REQUEST_URI: \"%s\" QUERY_STRING: \"%s\""
-	    " REMOTE_ADDR: %lx REMOTE_USER: \"(null)\"</code><hr>",
-	    request_info->request_method, request_info->uri,
-	    request_info->query_string ? request_info->query_string : "(null)",
-	    request_info->remote_ip);
-	mg_printf(conn, "<li>Internal int variable value: <b>%d</b>",
-			* (int *) user_data);
-	host = mg_get_header(conn, "Host");
-	mg_printf(conn, "<li>'Host' header value: [%s]<hr>",
-	    host ? host : "NOT SET");
-*/
-	mg_printf(conn, "%s", "<a href=\"/status\">device status</a>");
+	mg_printf(conn, "%s", "<a href=\"/status\">/status</a> - device status<br>");
+	mg_printf(conn, "%s", "<a href=\"/rooms\">/rooms</a> - rooms");
 	mg_printf(conn, "%s", "</body></html>");
 }
 
 
 static void show_status (struct mg_connection *conn, const struct mg_request_info *request_info, void *user_data) {
-	string sValue_To_Assign;
 	mg_printf(conn, "%s", "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n");
+	mg_printf(conn, "%s", "ID|Room|Category|Template|Description|State\n");
 
-
-	DeviceData_Router *pDeviceData_Router = myRouter->m_mapDeviceData_Router_Find(25);
-	if( !pDeviceData_Router ) {
-		sValue_To_Assign = "";
-	} else {
-		sValue_To_Assign = pDeviceData_Router->m_sState_get();
+	// iterate over all devices
+	for(map<int,class DeviceData_Router *>::const_iterator it=myRouter->m_mapDeviceData_Router_get()->begin();it!=myRouter->m_mapDeviceData_Router_get()->end();++it) {
+		DeviceData_Router *pDeviceData_Router = (*it).second; 
+		if( !pDeviceData_Router ) {
+		} else {
+			mg_printf(conn, "%i|%i|%i|%i|%s|%s\n", pDeviceData_Router->m_dwPK_Device,pDeviceData_Router->m_dwPK_Room,pDeviceData_Router->m_dwPK_DeviceCategory,pDeviceData_Router->m_dwPK_DeviceTemplate,pDeviceData_Router->m_sDescription.c_str(),pDeviceData_Router->m_sState_get().c_str());
+		
+		}
 	}
-
-	mg_printf(conn, "%i|%s", 25, sValue_To_Assign.c_str());
-
-
 }
 
 
@@ -128,8 +94,8 @@ bool RPC_Plugin::GetConfig()
 	// start web server
 	ctx = mg_start();
 	mg_set_option(ctx, "ports", "8088");
-	mg_set_uri_callback(ctx, "/", &show_index, (void *) &data);
-	mg_set_uri_callback(ctx, "/status", &show_status, (void *) &data);
+	mg_set_uri_callback(ctx, "/", &show_index, NULL);
+	mg_set_uri_callback(ctx, "/status", &show_status, NULL);
 	return true;
 }
 
