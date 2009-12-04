@@ -22,6 +22,10 @@
 #include "Gen_Devices/RPC_PluginBase.h"
 //<-dceag-d-e->
 
+#include "DCE/DCERouter.h"
+#include "DeviceData_Router.h"
+
+
 #include <sys/types.h>
 #include <sys/select.h>
 #include <sys/wait.h>
@@ -42,7 +46,7 @@ namespace DCE
 	{
 //<-dceag-decl-e->
 		// Private member variables
-
+		class Router *m_pRouter;
 		// Private methods
 public:
 		// Public member variables

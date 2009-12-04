@@ -24,14 +24,16 @@
 using namespace std;
 using namespace DCE;
 
-// mongoose handler
-struct mg_context	*ctx;
-int data = 0;
+#include "Gen_Devices/AllCommandsRequests.h"
+//<-dceag-d-e->
 
-static void
-show_index(struct mg_connection *conn,
-		const struct mg_request_info *request_info,
-		void *user_data)
+#include "DCERouter.h"
+
+class Router *myRouter;
+struct mg_context       *ctx;
+int data=0;
+
+static void show_index(struct mg_connection *conn, const struct mg_request_info *request_info, void *user_data)
 {
 	char		*value;
 	const char	*host;
@@ -50,9 +52,8 @@ show_index(struct mg_connection *conn,
 
 	mg_printf(conn, "%s",
 		"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"
-		"<html><body><h1>Welcome to embedded example of Mongoose");
-	mg_printf(conn, " v. %s </h1><ul>", mg_version());
-
+		"<html><body><h1>Welcome to DCERouter/RPC-Plugin</h1>");
+/*
 	mg_printf(conn, "<li><code>REQUEST_METHOD: %s "
 	    "REQUEST_URI: \"%s\" QUERY_STRING: \"%s\""
 	    " REMOTE_ADDR: %lx REMOTE_USER: \"(null)\"</code><hr>",
@@ -64,11 +65,29 @@ show_index(struct mg_connection *conn,
 	host = mg_get_header(conn, "Host");
 	mg_printf(conn, "<li>'Host' header value: [%s]<hr>",
 	    host ? host : "NOT SET");
+*/
+	mg_printf(conn, "%s", "<a href=\"/status\">device status</a>");
 	mg_printf(conn, "%s", "</body></html>");
 }
 
-#include "Gen_Devices/AllCommandsRequests.h"
-//<-dceag-d-e->
+
+static void show_status (struct mg_connection *conn, const struct mg_request_info *request_info, void *user_data) {
+	string sValue_To_Assign;
+	mg_printf(conn, "%s", "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n");
+
+
+	DeviceData_Router *pDeviceData_Router = myRouter->m_mapDeviceData_Router_Find(25);
+	if( !pDeviceData_Router ) {
+		sValue_To_Assign = "";
+	} else {
+		sValue_To_Assign = pDeviceData_Router->m_sState_get();
+	}
+
+	mg_printf(conn, "%i|%s", 25, sValue_To_Assign.c_str());
+
+
+}
+
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -76,6 +95,8 @@ RPC_Plugin::RPC_Plugin(int DeviceID, string ServerAddress,bool bConnectEventHand
 	: RPC_Plugin_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
+	m_pRouter = pRouter;
+	myRouter = pRouter;
 }
 
 //<-dceag-const2-b->
@@ -108,6 +129,7 @@ bool RPC_Plugin::GetConfig()
 	ctx = mg_start();
 	mg_set_option(ctx, "ports", "8088");
 	mg_set_uri_callback(ctx, "/", &show_index, (void *) &data);
+	mg_set_uri_callback(ctx, "/status", &show_status, (void *) &data);
 	return true;
 }
 
