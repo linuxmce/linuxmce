@@ -6736,9 +6736,9 @@ void Orbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,s
 	}
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Orbiter::CMD_Set_Now_Playing device %d video %d",m_dwPK_Device_NowPlaying,(int) m_bContainsVideo);
-	if( m_dwPK_Device_NowPlaying && m_bContainsVideo )
+	if( m_dwPK_Device_NowPlaying )
 	{
-		if( UsesUIVersion2() )
+	        if ( m_bContainsVideo && UsesUIVersion2() )
 			StopScreenSaver();
 
 		if( m_sActiveApplication_Window.empty()==false && m_pScreenHistory_Current
@@ -6747,38 +6747,26 @@ void Orbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,s
 			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Orbiter::CMD_Set_Now_Playing media is playing, but so is the application %s",m_sActiveApplication_Window.c_str());
 			CMD_Activate_Window(m_sActiveApplication_Window);
 		}
-		else
-			CMD_Activate_Window(m_sNowPlaying_Window);
-	}
-	else if ( m_dwPK_Device_NowPlaying && ! m_bContainsVideo )
-	{
-		if( m_sActiveApplication_Window.empty()==false && m_pScreenHistory_Current
-			&& (m_pScreenHistory_Current->PK_Screen()==m_PK_Screen_ActiveApp_OSD || m_pScreenHistory_Current->PK_Screen()==m_PK_Screen_ActiveApp_Remote) )
+		else 
 		{
-			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Orbiter::CMD_Set_Now_Playing media is playing, but so is the application %s",m_sActiveApplication_Window.c_str());
-			CMD_Activate_Window(m_sActiveApplication_Window);
-		}
-		else
-			CMD_Activate_Window(m_sNowPlaying_Window);
+		        // No application active, we can show the NowPlayingWindow or start screen saver if audio only
+		        if (m_bContainsVideo)
+			        CMD_Activate_Window(m_sNowPlaying_Window);
+			else
+			{
+			        HideWindow(m_sNowPlaying_Window);
+				if( UsesUIVersion2() )
+				        StartScreenSaver(false);  // Don't go to the menu, just start the app in the background
+			}
+		}        
 	}
 	else
 	{
+	        // device is not playing, make sure NowPlayingWindow is hidden and screen saver is started
 		HideWindow(m_sNowPlaying_Window);
 
 		if( UsesUIVersion2() )
 			StartScreenSaver(false);  // Don't go to the menu, just start the app in the background
-	}
-
-	if ( m_dwPK_Device_NowPlaying && !m_bContainsVideo ) // Special case to make sure changing audio....
-	{
-		if (m_sActiveApplication_Window.empty()==false && m_pScreenHistory_Current
-				&& (m_pScreenHistory_Current->PK_Screen()==m_PK_Screen_ActiveApp_OSD || m_pScreenHistory_Current->PK_Screen()==m_PK_Screen_ActiveApp_Remote) )
-		{
-			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Orbiter::CMD_Set_Now_Playing media is playing, but so is the application. %s",m_sActiveApplication_Window.c_str());
-			CMD_Activate_Window(m_sActiveApplication_Window); // ...does not disrupt the browser.
-		}
-		else
-			CMD_Activate_Window(m_sNowPlaying_Window);
 	}
 
 	if(m_bReportTimeCode && !m_bUpdateTimeCodeLoopRunning )
