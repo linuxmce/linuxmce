@@ -32,7 +32,7 @@ using namespace DCE;
 #include "Gen_Devices/AllScreens.h"
 #include "pluto_main/Define_DeviceCategory.h"
 #include "PlutoUtils/ProcessUtils.h"
-
+#include "pluto_main/Define_MediaType.h"
 #include "XineMediaInfo.h"
 
 //<-dceag-const-b->
