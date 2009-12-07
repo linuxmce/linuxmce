@@ -25,6 +25,7 @@ using namespace DCE;
 #include "DCERouter.h"
 
 class Router *myRouter;
+
 struct mg_context       *ctx;
 int data=0;
 
@@ -54,6 +55,18 @@ static void show_status (struct mg_connection *conn, const struct mg_request_inf
 	}
 }
 
+static void show_rooms (struct mg_connection *conn, const struct mg_request_info *request_info, void *user_data) {
+	mg_printf(conn, "%s", "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n");
+	mg_printf(conn, "%s", "ID|Description\n");
+
+	for(map<int,class Room *>::const_iterator it=myRouter->m_mapRoom_get()->begin();it!=myRouter->m_mapRoom_get()->end();++it) {
+		Room *pRoom = (*it).second;
+		if ( !pRoom ) {
+		} else {
+			mg_printf(conn, "%i|%s\n", pRoom->m_dwPK_Room, pRoom->m_sDescription.c_str());
+		}		
+	}
+}
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -90,12 +103,12 @@ bool RPC_Plugin::GetConfig()
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
 
-
 	// start web server
 	ctx = mg_start();
 	mg_set_option(ctx, "ports", "8088");
 	mg_set_uri_callback(ctx, "/", &show_index, NULL);
 	mg_set_uri_callback(ctx, "/status", &show_status, NULL);
+	mg_set_uri_callback(ctx, "/rooms", &show_rooms, NULL);
 	return true;
 }
 
@@ -233,4 +246,7 @@ void RPC_Plugin::SomeFunction()
 
 */
 
+void DCE::RPC_Plugin::SendDCEMessage() {
+	SendMessage( new Message(27,DEVICEID_EVENTMANAGER,PRIORITY_NORMAL,MESSAGETYPE_EVENT,EVENT_State_Changed_CONST,1,EVENTPARAMETER_State_CONST," "));
 
+}
