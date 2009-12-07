@@ -25,6 +25,7 @@ using namespace DCE;
 #include "DCERouter.h"
 
 class Router *myRouter;
+class RPC_Plugin *myPlugin;
 
 struct mg_context       *ctx;
 int data=0;
@@ -50,7 +51,6 @@ static void show_status (struct mg_connection *conn, const struct mg_request_inf
 		if( !pDeviceData_Router ) {
 		} else {
 			mg_printf(conn, "%i|%i|%i|%i|%s|%s\n", pDeviceData_Router->m_dwPK_Device,pDeviceData_Router->m_dwPK_Room,pDeviceData_Router->m_dwPK_DeviceCategory,pDeviceData_Router->m_dwPK_DeviceTemplate,pDeviceData_Router->m_sDescription.c_str(),pDeviceData_Router->m_sState_get().c_str());
-		
 		}
 	}
 }
@@ -68,6 +68,41 @@ static void show_rooms (struct mg_connection *conn, const struct mg_request_info
 	}
 }
 
+
+static void json_data (struct mg_connection *conn, const struct mg_request_info *request_info, void *user_data) {
+
+	mg_printf(conn, "%s", "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n");
+
+	mg_printf(conn, "%s (\n", mg_get_var(conn, "callback") );
+	mg_printf(conn, "%s", "{ \"devices\": [\n");
+	for(map<int,class DeviceData_Router *>::const_iterator it=myRouter->m_mapDeviceData_Router_get()->begin();it!=myRouter->m_mapDeviceData_Router_get()->end();++it) {
+		DeviceData_Router *pDeviceData_Router = (*it).second; 
+		if( !pDeviceData_Router ) {
+		} else {
+			mg_printf(conn, "{ \"id\": %i, \"room\": %i, \"category\": %i, \"template\": %i, \"description\": \"%s\", \"state\": \"%s\" }", pDeviceData_Router->m_dwPK_Device,pDeviceData_Router->m_dwPK_Room,pDeviceData_Router->m_dwPK_DeviceCategory,pDeviceData_Router->m_dwPK_DeviceTemplate,pDeviceData_Router->m_sDescription.c_str(),pDeviceData_Router->m_sState_get().c_str());
+			if (it == myRouter->m_mapDeviceData_Router_get()->end() ) {
+				mg_printf(conn, "\n");			
+			} else {
+				mg_printf(conn, ",\n");			
+			}
+		}
+	}
+	mg_printf(conn, "%s", "] } );\n");
+} 
+
+static void control_device (struct mg_connection *conn, const struct mg_request_info *request_info, void *user_data) {
+	char *device, *command, *level;
+	
+	device = mg_get_var(conn, "device");
+	command = mg_get_var(conn, "command");
+	level = mg_get_var(conn, "level");
+	mg_printf(conn, "%s", "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n");
+	mg_printf(conn, "%s - %s", device, command);
+	myPlugin->SendDCEMessage(device, command, level);
+
+
+}
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 RPC_Plugin::RPC_Plugin(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
@@ -76,6 +111,7 @@ RPC_Plugin::RPC_Plugin(int DeviceID, string ServerAddress,bool bConnectEventHand
 {
 	m_pRouter = pRouter;
 	myRouter = pRouter;
+	myPlugin = this;
 }
 
 //<-dceag-const2-b->
@@ -109,6 +145,8 @@ bool RPC_Plugin::GetConfig()
 	mg_set_uri_callback(ctx, "/", &show_index, NULL);
 	mg_set_uri_callback(ctx, "/status", &show_status, NULL);
 	mg_set_uri_callback(ctx, "/rooms", &show_rooms, NULL);
+	mg_set_uri_callback(ctx, "/control", &control_device, NULL);
+	mg_set_uri_callback(ctx, "/jsondata", &json_data, NULL);
 	return true;
 }
 
@@ -246,7 +284,23 @@ void RPC_Plugin::SomeFunction()
 
 */
 
-void DCE::RPC_Plugin::SendDCEMessage() {
-	SendMessage( new Message(27,DEVICEID_EVENTMANAGER,PRIORITY_NORMAL,MESSAGETYPE_EVENT,EVENT_State_Changed_CONST,1,EVENTPARAMETER_State_CONST," "));
+void DCE::RPC_Plugin::SendDCEMessage(char *device, char *command, char *parameter) {
+	// printf("DCE Callback: %s %s %s\n", device, command, parameter);	
+	Message *pMessageOut = NULL;
+	if ((device != NULL) && (command != NULL)) {
+		if (strncmp(command, "on", 2) == 0) {
+			pMessageOut = new Message (DEVICEID_MESSAGESEND, atoi(device), PRIORITY_NORMAL, MESSAGETYPE_COMMAND,COMMAND_Generic_On_CONST,0);
+		} else if (strncmp(command, "off", 3) == 0) {
+			pMessageOut = new Message (DEVICEID_MESSAGESEND, atoi(device), PRIORITY_NORMAL, MESSAGETYPE_COMMAND,COMMAND_Generic_Off_CONST,0);
+		} else if (strncmp(command, "setlevel", 8) == 0) {
+			if (parameter != NULL) { 
+				pMessageOut = new Message (DEVICEID_MESSAGESEND, atoi(device), PRIORITY_NORMAL, MESSAGETYPE_COMMAND,COMMAND_Set_Level_CONST,1,COMMANDPARAMETER_Level_CONST,parameter);
+			}
+
+		}
+	}
+	if (pMessageOut != NULL) {
+		SendMessageToRouter(pMessageOut);
+	}
 
 }
