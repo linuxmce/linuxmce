@@ -24,7 +24,7 @@ update-rc.d -f kdm remove
 #patch -Np0 -i mkinitramfs_dot-fix1.patch -r /dev/null >/dev/null 2>&1 || echo "The initramfs-tools dot-problem was already fixed."
 
 # Disable compcache
-rm -f /usr/share/initramfs-tools/conf.d/compcache && update-initramfs
+rm -f /usr/share/initramfs-tools/conf.d/compcache && update-initramfs -u
 
 #
 echo 
