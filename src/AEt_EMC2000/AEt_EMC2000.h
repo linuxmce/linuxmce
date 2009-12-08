@@ -29,6 +29,7 @@ namespace DCE
 	{
 //<-dceag-decl-e->
 		// Private member variables
+		int fd; // file desc for device
 
 		// Private methods
 public:

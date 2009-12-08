@@ -27,6 +27,57 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
+#include "PlutoUtils/LinuxSerialUSB.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include <termios.h>
+#include <stdio.h>
+
+
+
+int serial_write (int dev,uint8_t pnt[],int len)
+{
+        int res;
+
+        res = write (dev,pnt,len);
+        if (res != len) {
+                return (-1);
+        }
+        tcflush(dev, TCIOFLUSH);
+
+        return (len);
+}
+
+int serial_read (int dev,uint8_t pnt[],int len,long timeout)
+{
+        int bytes = 0;
+        int total = 0;
+        struct timeval tv;
+        fd_set fs;
+
+        while (total < len) {
+                FD_ZERO (&fs);
+                FD_SET (dev,&fs);
+                tv.tv_sec = 0;
+                tv.tv_usec = 100000;
+                // bytes = select (FD_SETSIZE,&fs,NULL,NULL,&tv);
+                bytes = select (dev+1,&fs,NULL,NULL,&tv);
+
+                // 0 bytes or error
+                if( bytes <= 0 )
+                {
+                       return total;
+                }
+
+                bytes = read (dev,pnt+total,len-total);
+                total += bytes;
+        }
+	return total;
+}
+
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 AEt_EMC2000::AEt_EMC2000(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
@@ -59,6 +110,19 @@ bool AEt_EMC2000::GetConfig()
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
+
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Open port: %s", TranslateSerialUSB(DATA_Get_COM_Port_on_PC()).c_str());
+	fd = open(TranslateSerialUSB(DATA_Get_COM_Port_on_PC()).c_str(), O_RDWR);
+
+	// B19200 8n1
+	struct termios tio;
+	tcgetattr(fd, &tio);
+	tio.c_cflag = CS8 | CLOCAL | CREAD;
+	cfsetispeed(&tio, B19200);
+	cfsetospeed(&tio, B19200);
+	tcflush(fd, TCIFLUSH);
+	tcsetattr(fd,TCSANOW,&tio);
+
 	return true;
 }
 
@@ -92,7 +156,63 @@ AEt_EMC2000_Command *Create_AEt_EMC2000(Command_Impl *pPrimaryDeviceCommand, Dev
 void AEt_EMC2000::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
-	sCMD_Result = "UNHANDLED CHILD";
+
+	uint8_t buf[1024];
+	uint8_t bufr[1024];
+
+	buf[0] = 0x2; // header
+	buf[1] = '0'; // instnr
+	buf[2] = '3'; // instnr
+	buf[3] = '9'; // instnr
+	buf[4] = '9'; // instnr
+	buf[5] = '0'; // reglernr
+	buf[6] = '1'; // reglernr
+	//buf[7] = 'I'; // TA
+	buf[7] = 'Z'; // TA
+	buf[8] = '2'; // ETX
+	buf[9] = '2'; // ETX
+	buf[10] = 0x3; // ETX
+	buf[11] = 0xd; // RET
+
+
+	int address = atoi(pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST).c_str());
+	buf[8]=48+address;
+
+	switch (pMessage->m_dwID) {
+		case COMMAND_Generic_On_CONST:
+			sCMD_Result = "OK";
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"COMMAND_Generic_On_CONST received for child %i",address);
+			buf[9] = '2'; // ETX
+			break;
+		;;
+		case COMMAND_Generic_Off_CONST:
+			sCMD_Result = "OK";
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"COMMAND_Generic_Off_CONST received for child %i",address);
+			buf[9] = '0'; // ETX
+			break;
+		;;
+		case COMMAND_Set_Level_CONST:
+			sCMD_Result = "OK";
+			break;
+		;;
+		default:
+			sCMD_Result = "UNHANDLED CHILD";
+			break;
+		;;
+	}
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Sending buffer...");
+	serial_write(fd,(uint8_t*)buf,12);
+	int len = serial_read(fd, bufr, 1020,3);
+	for(int i=0;i<len;i++) {
+		printf("%c",(unsigned char) bufr[i]);
+	}
+	len = serial_read(fd, bufr, 1020,7);
+	for(int i=0;i<len;i++) {
+		printf("%c",(unsigned char) bufr[i]);
+	}
+	printf("\n");
+
+	
 }
 
 /*
@@ -107,87 +227,7 @@ void AEt_EMC2000::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 	sCMD_Result = "UNKNOWN COMMAND";
 }
 
-//<-dceag-sample-b->
-/*		**** SAMPLE ILLUSTRATING HOW TO USE THE BASE CLASSES ****
-
-**** IF YOU DON'T WANT DCEGENERATOR TO KEEP PUTTING THIS AUTO-GENERATED SECTION ****
-**** ADD AN ! AFTER THE BEGINNING OF THE AUTO-GENERATE TAG, LIKE //<=dceag-sample-b->! ****
-Without the !, everything between <=dceag-sometag-b-> and <=dceag-sometag-e->
-will be replaced by DCEGenerator each time it is run with the normal merge selection.
-The above blocks are actually <- not <=.  We don't want a substitution here
-
-void AEt_EMC2000::SomeFunction()
-{
-	// If this is going to be loaded into the router as a plug-in, you can implement: 	virtual bool Register();
-	// to do all your registration, such as creating message interceptors
-
-	// If you use an IDE with auto-complete, after you type DCE:: it should give you a list of all
-	// commands and requests, including the parameters.  See "AllCommandsRequests.h"
-
-	// Examples:
-	
-	// Send a specific the "CMD_Simulate_Mouse_Click" command, which takes an X and Y parameter.  We'll use 55,77 for X and Y.
-	DCE::CMD_Simulate_Mouse_Click CMD_Simulate_Mouse_Click(m_dwPK_Device,OrbiterID,55,77);
-	SendCommand(CMD_Simulate_Mouse_Click);
-
-	// Send the message to orbiters 32898 and 27283 (ie a device list, hence the _DL)
-	// And we want a response, which will be "OK" if the command was successfull
-	string sResponse;
-	DCE::CMD_Simulate_Mouse_Click_DL CMD_Simulate_Mouse_Click_DL(m_dwPK_Device,"32898,27283",55,77)
-	SendCommand(CMD_Simulate_Mouse_Click_DL,&sResponse);
-
-	// Send the message to all orbiters within the house, which is all devices with the category DEVICECATEGORY_Orbiter_CONST (see pluto_main/Define_DeviceCategory.h)
-	// Note the _Cat for category
-	DCE::CMD_Simulate_Mouse_Click_Cat CMD_Simulate_Mouse_Click_Cat(m_dwPK_Device,DEVICECATEGORY_Orbiter_CONST,true,BL_SameHouse,55,77)
-    SendCommand(CMD_Simulate_Mouse_Click_Cat);
-
-	// Send the message to all "DeviceTemplate_Orbiter_CONST" devices within the room (see pluto_main/Define_DeviceTemplate.h)
-	// Note the _DT.
-	DCE::CMD_Simulate_Mouse_Click_DT CMD_Simulate_Mouse_Click_DT(m_dwPK_Device,DeviceTemplate_Orbiter_CONST,true,BL_SameRoom,55,77);
-	SendCommand(CMD_Simulate_Mouse_Click_DT);
-
-	// This command has a normal string parameter, but also an int as an out parameter
-	int iValue;
-	DCE::CMD_Get_Signal_Strength CMD_Get_Signal_Strength(m_dwDeviceID, DestDevice, sMac_address,&iValue);
-	// This send command will wait for the destination device to respond since there is
-	// an out parameter
-	SendCommand(CMD_Get_Signal_Strength);  
-
-	// This time we don't care about the out parameter.  We just want the command to 
-	// get through, and don't want to wait for the round trip.  The out parameter, iValue,
-	// will not get set
-	SendCommandNoResponse(CMD_Get_Signal_Strength);  
-
-	// This command has an out parameter of a data block.  Any parameter that is a binary
-	// data block is a pair of int and char *
-	// We'll also want to see the response, so we'll pass a string for that too
-
-	int iFileSize;
-	char *pFileContents
-	string sResponse;
-	DCE::CMD_Request_File CMD_Request_File(m_dwDeviceID, DestDevice, "filename",&pFileContents,&iFileSize,&sResponse);
-	SendCommand(CMD_Request_File);
-
-	// If the device processed the command (in this case retrieved the file),
-	// sResponse will be "OK", and iFileSize will be the size of the file
-	// and pFileContents will be the file contents.  **NOTE**  We are responsible
-	// free deleting pFileContents.
-
-
-	// To access our data and events below, you can type this-> if your IDE supports auto complete to see all the data and events you can access
-
-	// Get our IP address from our data
-	string sIP = DATA_Get_IP_Address();
-
-	// Set our data "Filename" to "myfile"
-	DATA_Set_Filename("myfile");
-
-	// Fire the "Finished with file" event, which takes no parameters
-	EVENT_Finished_with_file();
-	// Fire the "Touch or click" which takes an X and Y parameter
-	EVENT_Touch_or_click(10,150);
-}
-*/
+//<-dceag-sample-b->!
 //<-dceag-sample-e->
 
 /*
