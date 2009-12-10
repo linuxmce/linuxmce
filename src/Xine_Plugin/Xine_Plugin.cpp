@@ -264,26 +264,28 @@ bool Xine_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
 		}
 	}
 
-	if ( pXineMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_DVD_CONST || FileUtils::FindExtension(mediaURL)=="dvd" || FileUtils::FindExtension(mediaURL)=="iso" )
+	if ( pXineMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_DVD_CONST || FileUtils::FindExtension(mediaURL)=="dvd" || FileUtils::FindExtension(mediaURL)=="iso" ) {
 			mediaURL = "dvd://" + mediaURL;
+
+		// If the source is one ea and the destination in another, it could be remotely playing a disc, so 
+		// let ConfirmSourceIsADestination process it
+		// and see if it can still make it non-streaming by using network block
+		// If it changes the source to use an nbd device, then the subsequent StreamingRequired will return true
+		// Only for DVD, Audio CDs cannot use network block(nbd), so we must always stream
+		if( pXineMediaStream->StreamingRequired() )
+		{
+		        // For now we're not able to have a xine that renders to a NULL window and can do dvd's.  They require 
+		        // a live window with events.  So for the moment this function will confirm that if we're playing a dvd disc remotely that we make the 
+		        // source be one of the destinations, and change the mrl to reference the source disk
+		        if( !ConfirmSourceIsADestination(mediaURL,pXineMediaStream,pMediaFile ? pMediaFile->m_dwPK_Device_Disk_Drive : 0) )
+			        LoggerWrapper::GetInstance()->Write(LV_WARNING,"Xine_Plugin::StartMedia don't know how media will get to destination.  Unless there's some output zones in the mix results won't be right");
+	        }
+	}
 	else if( mediaURL.size()>5 && mediaURL.substr(0,5)=="/dev/" && pXineMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_CD_CONST )
 	{
 		mediaURL = "cdda://" + mediaURL;
 		if( pMediaFile && pMediaFile->m_iTrack )
 			mediaURL += "/" + StringUtils::itos(pMediaFile->m_iTrack);
-	}
-
-	// If the source is one ea and the destination in another, it could be remotely playing a disc, so 
-	// let ConfirmSourceIsADestination process it
-	// and see if it can still make it non-streaming by using network block
-	// If it changes the source to use an nbd device, then the subsequent StreamingRequired will return true
-	if( pXineMediaStream->StreamingRequired() )
-	{
-		// For now we're not able to have a xine that renders to a NULL window and can do dvd's.  They require 
-		// a live window with events.  So for the moment this function will confirm that if we're playing a dvd disc remotely that we make the 
-		// source be one of the destinations, and change the mrl to reference the source disk
-		if( !ConfirmSourceIsADestination(mediaURL,pXineMediaStream,pMediaFile ? pMediaFile->m_dwPK_Device_Disk_Drive : 0) )
-			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Xine_Plugin::StartMedia don't know how media will get to destination.  Unless there's some output zones in the mix results won't be right");
 	}
 
 #ifdef WIN32
