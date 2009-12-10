@@ -634,8 +634,12 @@ void Disk_Drive::CMD_Abort_Task(int iParameter_ID,string &sCMD_Result,Message *p
 
 	/** @brief COMMAND: #914 - Get Disk Info */
 	/** Retrieve the information on the current disk */
+		/** @param #9 sRippingStatus */
+			/** If ripping going on, this will contain the ripping status */
 		/** @param #29 PK_MediaType */
 			/** The type of media */
+		/** @param #131 EK_Dics */
+			/** PK_Disc from pluto_media */
 		/** @param #157 Disks */
 			/** The disk id */
 		/** @param #193 URL */
@@ -643,7 +647,7 @@ void Disk_Drive::CMD_Abort_Task(int iParameter_ID,string &sCMD_Result,Message *p
 		/** @param #223 Block Device */
 			/** The block device for the drive */
 
-void Disk_Drive::CMD_Get_Disk_Info(int *iPK_MediaType,string *sDisks,string *sURL,string *sBlock_Device,string &sCMD_Result,Message *pMessage)
+void Disk_Drive::CMD_Get_Disk_Info(string *sRippingStatus,int *iPK_MediaType,int *iEK_Disc,string *sDisks,string *sURL,string *sBlock_Device,string &sCMD_Result,Message *pMessage)
 //<-dceag-c914-e->
 {
 	m_pDisk_Drive_Functions->internal_reset_drive(false,iPK_MediaType,sDisks,sURL,sBlock_Device,true);
