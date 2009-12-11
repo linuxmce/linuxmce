@@ -31,11 +31,11 @@ function outputScreenOrDevice()
 	print "\tOption \"XvmcUsesTextures\" \"true\"";
 	print "\tOption \"renderAccel\" \"true\"";
 	print "\tOption \"NoDDCValue\"";
-	print "\tOption \"UseEDID\" \"false\"";
+	print "\tOption \"UseEDID\" \"true\"";
 	print "\tOption \"ExactModeTimingsDVI\" \"true\"";
 	print "\tOption \"NoLogo\" \"true\"";
 	print "\tOption \"NoBandWidthTest\" \"true\"";
-	print "\tOption \"ModeValidation\" \"NoDFPNativeResolutionCheck, NoEdidMaxPClkCheck, NoMaxPClkCheck, AllowInterlacedModes, AllowNon60HzDFPModes\"";
+	print "\tOption \"ModeValidation\" \"NoDFPNativeResolutionCheck, NoEdidMaxPClkCheck, NoMaxPClkCheck, AllowInterlacedModes, AllowNon60HzDFPModes, NoEdidModes\"";
 	print "\tOption \"DynamicTwinView\" \"false\"";
 	print "\tOption \"UseEvents\" \"true\"";
 
