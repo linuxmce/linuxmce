@@ -1,0 +1,16 @@
+# core_oss_framepointer.patch by Steve Kowalik
+#
+# Compile snd-pcm-oss.o with -fno-omit-frame-pointer.
+Index: alsa-driver-1.0.18.dfsg/alsa-kernel/core/oss/Makefile
+===================================================================
+--- alsa-driver-1.0.18.dfsg.orig/alsa-kernel/core/oss/Makefile	2008-10-29 13:41:35.000000000 +0100
++++ alsa-driver-1.0.18.dfsg/alsa-kernel/core/oss/Makefile	2008-11-02 18:27:24.000000000 +0100
+@@ -3,6 +3,8 @@
+ # Copyright (c) 1999 by Jaroslav Kysela <perex@perex.cz>
+ #
+ 
++EXTRA_CFLAGS += -fno-omit-frame-pointer
++
+ snd-mixer-oss-objs := mixer_oss.o
+ 
+ snd-pcm-oss-y := pcm_oss.o

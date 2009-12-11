@@ -1,0 +1,16 @@
+if SND_ARM
+
+config SND_S3C2410
+	tristate "S3C24XX Sound core"
+	depends on ARCH_S3C2410
+	select I2C_SENSOR
+	select SND_PCM
+	help
+	  Say Y here if you want to use the inbuilt audio controller
+	  on the S3C2410 or S3C2440
+
+config SND_PXA2xx_I2SOUND
+	tristate
+	select SND_PCM
+
+endif	# SND_ARM

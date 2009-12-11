@@ -1,0 +1,5 @@
+debian/tmp/usr/lib/libasound.so.2.0.0
+debian/tmp/usr/lib/libasound.so.2
+debian/tmp/usr/lib/alsa-lib/smixer/*.so
+debian/tmp/usr/share/alsa
+debian/user-must-execute-asoundconf-set-default-card.update-notifier usr/share/alsa

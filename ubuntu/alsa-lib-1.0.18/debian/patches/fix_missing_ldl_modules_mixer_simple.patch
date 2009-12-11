@@ -1,0 +1,17 @@
+Index: alsa-lib-1.0.18/modules/mixer/simple/Makefile.in
+===================================================================
+--- alsa-lib-1.0.18.orig/modules/mixer/simple/Makefile.in	2009-01-29 17:28:25.000000000 -0500
++++ alsa-lib-1.0.18/modules/mixer/simple/Makefile.in	2009-01-29 17:29:20.000000000 -0500
+@@ -241,10 +241,10 @@
+ smixer_sbase_la_LIBADD = ../../../src/libasound.la
+ smixer_ac97_la_SOURCES = ac97.c sbasedl.c
+ smixer_ac97_la_LDFLAGS = -module -avoid-version
+-smixer_ac97_la_LIBADD = ../../../src/libasound.la
++smixer_ac97_la_LIBADD = ../../../src/libasound.la -ldl
+ smixer_hda_la_SOURCES = hda.c sbasedl.c
+ smixer_hda_la_LDFLAGS = -module -avoid-version
+-smixer_hda_la_LIBADD = ../../../src/libasound.la
++smixer_hda_la_LIBADD = ../../../src/libasound.la -ldl
+ @BUILD_PYTHON_TRUE@smixer_python_la_SOURCES = python.c
+ @BUILD_PYTHON_TRUE@smixer_python_la_LDFLAGS = -module -avoid-version $(pythonlibs)
+ @BUILD_PYTHON_TRUE@smixer_python_la_CFLAGS = $(pythonincludes)

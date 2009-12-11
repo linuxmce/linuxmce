@@ -1,0 +1,17 @@
+move_asound_state_to_var.patch
+#alsaconf_safe_tmp.patch
+#debian_alsaconf_paths.patch
+#debian_alsaconf_idmode.patch
+#debian_alsaconf_noclear.patch
+#debian_alsaconf_unload_modules.patch
+#debian_alsaconf_improve_intro.patch
+#debian_alsaconf_nodup.patch
+#debian_alsaconf_modprobe_ignoreinstall.patch
+#debian_alsaconf_udev.patch
+#debian_alsaconf_rcalsasound.patch
+force_state_reinit_when_new_mixer_elements_exist.patch
+fix_possible_fpe_speaker-test.patch
+aplay_logic_inversion.patch
+unset_pulse_internal.patch
+fix_misspelling_speaker-test_man_page.patch
+adjust_init_hda_db.patch

@@ -1,0 +1,372 @@
+alsa-plugins (1.0.18-1ubuntu4~dia1) jaunty; urgency=low
+
+  * Backport to 7.10
+
+ -- Radu C <radu.cx@gmail.com>  Wed, 20 May 2009 00:20:36 +0100
+
+alsa-plugins (1.0.18-1ubuntu4) jaunty; urgency=low
+
+  [ Daniel T Chen ]
+  * Backport from git HEAD:
+    - 0001_validate_optimise_lookup.patch
+
+  [ Luke Yelavich ]
+  * debian/control: bump libasound2-dev build dependency to 1.0.18-1ubuntu7
+
+ -- Luke Yelavich <themuso@ubuntu.com>  Fri, 20 Feb 2009 15:14:08 +1100
+
+alsa-plugins (1.0.18-1ubuntu3) jaunty; urgency=low
+
+  * debian/control: lib32asound2-plugins should conflict against ia32-libs.
+    (LP: #305860)
+
+ -- Luke Yelavich <themuso@ubuntu.com>  Sun, 07 Dec 2008 10:26:02 -0800
+
+alsa-plugins (1.0.18-1ubuntu2) jaunty; urgency=critical
+
+  * Dropped build-dep on ia32-libs/amd64-libs to clear
+    dep-wait FTBFS (LP: #295278)
+
+ -- Michael Casadevall <sonicmctails@gmail.com>  Sat, 08 Nov 2008 04:10:20 -0500
+
+alsa-plugins (1.0.18-1ubuntu1) jaunty; urgency=low
+
+  * Merge from debian unstable, remaining changes:
+    - debian/control:
+      - Do not build-depend on libjack-dev and libavcodec-dev.
+
+ -- Luke Yelavich <themuso@ubuntu.com>  Thu, 06 Nov 2008 14:43:55 +1100
+
+alsa-plugins (1.0.18-1) experimental; urgency=low
+
+  * New upstream release.
+
+  [ Elimar Riesebieter ]
+  * Bumped libasound2-dev version to >= 1.0.18 in Build-Depends.
+  * Removed pulse_fixes.patch. Applied differently upstream.
+
+  [ Jordi Mallach ]
+  * Add lpia to the list of supported architectures.
+  * Extend package descriptions to mention the most prominent plugins
+    (closes: #497636).
+  * Require debhelper 7.
+
+  [ Christopher James Halse Rogers ]
+  * debian/control, debian/rules: import the multi-arch magic from
+    alsa-lib to build a lib32asound2-plugins package wherever
+    lib32asound2 is built, and similarly for lib64asound2 (closes: #436201).
+
+ -- Jordi Mallach <jordi@debian.org>  Thu, 06 Nov 2008 00:46:19 +0100
+
+alsa-plugins (1.0.17-1) experimental; urgency=low
+
+  * New upstream release.
+
+  [ Elimar Riesebieter ]
+  * Reworked pulse_fixes.patch
+  * Switched to debhelper 7.
+  * Bumped Standard-Version to 3.8.0; no changes needed.
+
+ -- Elimar Riesebieter <riesebie@lxtec.de>  Sat, 30 Aug 2008 16:23:08 +0200
+
+alsa-plugins (1.0.17-0ubuntu4) intrepid; urgency=low
+
+  * Revert commit b05f0176d1427586e411a91cda02a8877c5c8c0d from alsa-plugins
+    git. This commit enabled the pulseaudio alsa plugin to use 32-bit sample
+    lengths via PulseAudio, however PulseAudio 0.9.10 in Intrepid doesn't
+    support these sample lenths in its API. This resulted in gstreamer
+    applications failing to play audio with an error, when attempting to use
+    pulseaudio output via the alsa pulseaudio plugin. It was also breaking
+    SDL applications/games that were using SDL's ALSA output. (LP: #274124)
+
+ -- Luke Yelavich <themuso@ubuntu.com>  Tue, 30 Sep 2008 13:44:03 +1000
+
+alsa-plugins (1.0.17-0ubuntu3) intrepid; urgency=low
+
+  * debian/patches/pulse_update.patch: Added some further fixes from Lennart's
+    alsa-plugins tree.
+
+ -- Luke Yelavich <themuso@ubuntu.com>  Thu, 25 Sep 2008 12:21:51 +1000
+
+alsa-plugins (1.0.17-0ubuntu2) intrepid; urgency=low
+
+  * debian/patches/pulse_update.patch: Latest pulseaudio plugin taken from
+    alsa-plugins GIT. This code update massively improves the plugin's
+    behavior, particularly with some applications that may work with alsa
+    in an unusual way.
+
+ -- Luke Yelavich <themuso@ubuntu.com>  Mon, 22 Sep 2008 10:30:50 +1000
+
+alsa-plugins (1.0.17-0ubuntu1) intrepid; urgency=low
+
+  * New upstream release.
+  * debian/control: Update libasound2 build dep.
+
+ -- Luke Yelavich <themuso@ubuntu.com>  Thu, 28 Aug 2008 10:17:38 +1000
+
+alsa-plugins (1.0.16-1ubuntu2) intrepid; urgency=low
+
+  * debian/patches/pulse-remove-useless-asserts.diff: Remove an extra
+    assert from pulseaudio plugin.
+
+ -- Luke Yelavich <luke.yelavich@canonical.com>  Thu, 08 May 2008 23:31:48 +1000
+
+alsa-plugins (1.0.16-1ubuntu1) intrepid; urgency=low
+
+  * Merge from debian unstable, remaining changes:
+    - debian/control:
+      - Do not build-depend on libjack-dev and libavcodec-dev.
+      - add lpia to supported arches;
+      - adhere to DebianMaintainerField spec.
+
+ -- Luke Yelavich <luke.yelavich@canonical.com>  Thu, 08 May 2008 23:09:21 +1000
+
+alsa-plugins (1.0.16-1) unstable; urgency=low
+
+  * New upstream release
+
+  [Jordi Mallach]
+  * Switch to now official Vcs-* control fields.
+  * Apply some important Pulse fixes, provided by lool, neurocyte and sjoerd.
+
+  [ Elimar Riesebieter ]
+  * Switched to debhelper 6.
+  * Bumped Standard-Version to 3.7.3; no changes needed.
+  * Fullified copyright not in copyright file.
+  * Removed pulse patches. applied upstream.
+
+ -- Jordi Mallach <jordi@debian.org>  Tue, 26 Feb 2008 17:42:37 +0100
+
+alsa-plugins (1.0.15-1ubuntu3) hardy; urgency=low
+
+  * Backport remaining pcm_pulse.c patches from hg tip (LP: #112948)
+    that allow Ekiga to work again with PulseAudio
+    - debian/patches/pulse-{minmax,assert}.diff
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Fri, 29 Feb 2008 12:28:40 -0500
+
+alsa-plugins (1.0.15-1ubuntu2) hardy; urgency=low
+
+  * libavcodec cannot be shipped on CDs, disabled the dependency again to make
+    CDs installable
+
+ -- Oliver Grawert <ogra@ubuntu.com>  Thu, 29 Nov 2007 14:59:58 +0100
+
+alsa-plugins (1.0.15-1ubuntu1) hardy; urgency=low
+
+  * Merge from Debian unstable.
+  * Apply Ubuntu-specific change:
+    - debian/control:
+      + drop libjack-dev build-dependency since we don't build the
+        jack plugin [yet];
+      + add lpia to supported arches;
+      + adhere to DebianMaintainerField spec.
+  * Drop unnecessary Ubuntu-specific change:
+    - debian/control: drop libavcodec-dev build-dependency to save
+      space [this Ubuntu delta didn't save significant space and
+      removed a feature].
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Sat, 17 Nov 2007 18:00:56 -0500
+
+alsa-plugins (1.0.15-1) unstable; urgency=low
+
+  * New upstream release.
+
+  [ Elimar Riesebieter ]
+  * Added Homepage header in debian/control.
+  * debian/rules: s/-$(MAKE) distclean/[ ! -f Makefile ] || $(MAKE) distclean/
+
+  [ Jordi Mallach ]
+  * Add patches pulse-buffer_attr.diff and pulse-state_xrun.diff, taken from
+    Fedora, to fix various issues with the Pulse plugin. Thanks Sjoerd Simons
+    for the pointer.
+
+ -- Jordi Mallach <jordi@debian.org>  Tue, 30 Oct 2007 17:10:08 +0100
+
+alsa-plugins (1.0.14-1ubuntu3) gutsy; urgency=low
+
+  * Build packages for lpia as well.
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Wed, 15 Aug 2007 23:49:36 +1000
+
+alsa-plugins (1.0.14-1ubuntu2) gutsy; urgency=low
+
+  * debian/control:
+    - Don't build-depend on libavcodec-dev (saves space for cd image),
+      thus disabling the a52 alsa-lib plugin,
+    - Amend Description to note the above change.
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Mon, 25 Jun 2007 04:56:35 -0400
+
+alsa-plugins (1.0.14-1ubuntu1) gutsy; urgency=low
+
+  * Merge from Debian unstable, remaining changes:
+    - debian/control:
+      + Don't build-depend on JACK, as it's in universe.  Clarify and
+        update the Description to note the above restriction and
+        {in,ex}clusion of newer plugins (LP: #57089),
+      + Adhere to DebianMaintainerField.
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Tue, 12 Jun 2007 19:03:08 -0400
+
+alsa-plugins (1.0.14-1) unstable; urgency=low
+
+  * New upstream release.
+
+  [ Elimar Riesebieter ]
+  * Prepared to use quilt as the patch manager.
+
+  [ Jordi Mallach ]
+  * debian/control: build-depend on libavcodec-dev, to enable the a52
+    plugin (closes: #407428).
+
+ -- Jordi Mallach <jordi@debian.org>  Sat, 09 Jun 2007 21:41:47 +0200
+
+alsa-plugins (1.0.14~rc4-1) experimental; urgency=low
+
+  * New upstream release candidate.
+
+  [ Elimar Riesebieter ]
+  * Changed Build-Depends from libjack0.100-dev to libjack-dev as the headers
+    are really in libjack-dev.
+  * Removed 01_hgnew.patch: Done upstream.
+
+  [ Jordi Mallach ]
+  * debian/control: add XS-Vcs-Svn and XS-Vcs-Browser headers.
+
+ -- Jordi Mallach <jordi@debian.org>  Sun, 13 May 2007 11:44:15 +0200
+
+alsa-plugins (1.0.14~rc3-2) experimental; urgency=low
+
+  [ Elimar Riesebieter ]
+  * Updated to latest mercurial version via 01_hgnew.dpatch as some files were
+    missing. It is still 1.0.14rc3. Removed the stolen gcd.h ;)
+
+ -- Jordi Mallach <jordi@debian.org>  Tue, 17 Apr 2007 11:30:22 +0200
+
+alsa-plugins (1.0.14~rc3-1) experimental; urgency=low
+
+  * New upstream release candidate.
+
+  [ Elimar Riesebieter ]
+  * Added missing gcd.h. Stolen from gnulibs which installs the libs not in
+    include.
+
+ -- Elimar Riesebieter <riesebie@lxtec.de>  Sat, 31 Mar 2007 18:40:48 +0200
+
+alsa-plugins (1.0.14~rc1a-1) experimental; urgency=low
+
+  * New upstream release candidate.
+
+  [ Elimar Riesebieter ]
+  * Added arch armel to libasound2-plugins. (closes: #408771)
+
+ -- Elimar Riesebieter <riesebie@lxtec.de>  Sat, 30 Dec 2006 02:48:26 +0100
+
+alsa-plugins (1.0.13-3ubuntu1) feisty; urgency=low
+
+  * disable jack dependencies for main inclusion
+
+ -- Oliver Grawert <ogra@ubuntu.com>  Fri,  2 Feb 2007 15:30:22 +0100
+
+alsa-plugins (1.0.13-3) unstable; urgency=low
+
+  [ Elimar Riesebieter ]
+  * Added XS-X-Vcs-Svn field in control.
+
+  [ Jordi Mallach ]
+  * Upload to unstable.
+
+ -- Jordi Mallach <jordi@debian.org>  Mon, 16 Oct 2006 14:49:06 +0200
+
+alsa-plugins (1.0.13-2) experimental; urgency=low
+
+  * debian/control:
+    - build-depend on libsamplerate0-dev, to enable the samplerate plugin.
+    - build-depend on libpulse-dev, to enable the pulseaudio plugin.
+  * Target experimental, while pulseaudio gets shaked out by the buildds.
+
+ -- Jordi Mallach <jordi@debian.org>  Thu,  5 Oct 2006 11:19:06 +0200
+
+alsa-plugins (1.0.13-1) unstable; urgency=low
+
+  * New upstream release
+
+  [ Jordi Mallach ]
+  * Add Enhances: libasound2.
+
+ -- Jordi Mallach <jordi@debian.org>  Tue,  3 Oct 2006 14:22:54 +0200
+
+alsa-plugins (1.0.12-1) unstable; urgency=low
+
+  * New upstream release
+
+  [ Elimar Riesebieter ]
+  * debian/control: bumped build-deps to libasound2-dev (>= 1.0.12)
+  * debian/control: bumped Standards-Version to 3.7.2, no changes.
+  * Bumped compat to 5 and debhelper version >=5.0.37
+  * Enabled all plugins (closes: #384029)
+  * Completed /usr/share/doc/libasound2-plugins.
+
+ -- Jordi Mallach <jordi@debian.org>  Mon, 11 Sep 2006 13:10:10 +0200
+
+alsa-plugins (1.0.11-1) unstable; urgency=low
+
+  [ Elimar Riesebieter ]
+  * New upstream release
+  * Added myself to Uploaders
+  * Updated changelog.ALSA
+  * Adjusted rules:
+    sed s/pcm\/jack/jack/
+
+  [ Jordi Mallach ]
+  * debian/control: bump build-deps to libasound2-dev (>= 1.0.11).
+
+ -- Jordi Mallach <jordi@debian.org>  Sun, 23 Apr 2006 18:07:36 +0200
+
+alsa-plugins (1.0.10-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Jordi Mallach <jordi@debian.org>  Tue, 22 Nov 2005 23:24:32 +0100
+
+alsa-plugins (1.0.9+1.0.10rc2-1) experimental; urgency=low
+
+  * New upstream release candidate
+  * Thomas Hood
+    - debian/control: s/Architecture: any/Architecture: <Linux arches>/
+
+ -- Thomas Hood <jdthood@yahoo.co.uk>  Wed, 12 Oct 2005 12:10:54 +0200
+
+alsa-plugins (1.0.9+1.0.10rc1-1) experimental; urgency=low
+
+  * New upstream release candidate
+  * Thomas Hood
+    - Build-Depend on new libasound2-dev (otherwise build fails)
+    - Fix watch file
+
+ -- Jordi Mallach <jordi@debian.org>  Mon, 19 Sep 2005 21:35:27 +0200
+
+alsa-plugins (1.0.9-2) unstable; urgency=low
+
+  * Thomas Hood
+    - Simplify versioned dependency on libasound2
+    - Bump Standards-Version to 3.6.2.1; no changes required
+    - Add upstream changelog
+  * Jordi Mallach
+    - debian/control: switch to libjack0.100.0-dev.
+
+ -- Jordi Mallach <jordi@debian.org>  Wed,  6 Jul 2005 20:35:02 +0200
+
+alsa-plugins (1.0.9-1) unstable; urgency=low
+
+  * New source package generating the libasound2-plugins binary package,
+    formerly generated by alsa-lib.  libasound2-plugins contains the "jack"
+    ALSA library plugin.
+  * An "oss" ALSA library plugin is also available.  Please file a wish
+    if you have some use for it.
+  * Thomas Hood
+    - Include asound.conf example of how to use the jack plugin
+
+ -- Jordi Mallach <jordi@debian.org>  Sat,  4 Jun 2005 13:00:00 +0200
+

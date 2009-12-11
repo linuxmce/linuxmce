@@ -1,0 +1,82 @@
+.TH asoundconf "1" "06 May 2008"
+.SH NAME
+asoundconf \- utility to read and change the user's ALSA library configuration
+.SH SYNOPSIS
+\fBasoundconf\fR \fBis\-active\fR
+.PP
+\fBasoundconf\fR \fBget\fR|\fBdelete\fR \fIPARAMETER\fR
+.PP
+\fBasoundconf\fR \fBset\fR \fIPARAMETER\fR \fIVALUE\fR
+.PP
+\fBasoundconf\fR \fBlist\fR
+
+Convenience macro functions:
+.PP
+\fBasoundconf\fR \fBset\-default\-card\fR \fIPARAMETER\fR
+.PP
+\fBasoundconf\fR \fBreset\-default\-card\fR
+.PP
+\fBasoundconf\fR \fBset\-pulseaudio\fR
+.PP
+\fBasoundconf\fR \fBunset\-pulseaudio\fR
+.PP
+\fBasoundconf\fR \fBset\-oss\fR \fIPARAMETER\fR
+.PP
+\fBasoundconf\fR \fBunset\-oss\fR
+
+.SH DESCRIPTION
+.B asoundconf
+configures the ALSA library for the user.
+It does this by reading the values of parameters from
+and writing the values of parameters
+to the special file .asoundrc.asoundconf
+in the user's home directory.
+The .asoundrc.asoundconf file should not be edited by hand!
+.PP
+The .asoundrc.asoundconf file only has an effect
+on the ALSA library
+if it is included by the user's .asoundrc file,
+also located in the user's home directory.
+When
+.B asoundconf
+is run and it finds either
+that the ~/.asoundrc file does not exist
+or that the file exists and contains the markers
+of the obsolete
+.B set\-default\-soundcard
+program then
+.B asoundconf
+adds the required inclusion statement to ~/.asoundrc;
+otherwise
+.B asoundconf
+does not change ~/.asoundrc.
+Hence, if you want to disable control
+of ALSA library configuration parameters by
+.B asoundconf
+then simply comment out this inclusion statement
+but do not delete the ~/.asoundrc file.
+(It is OK for ~/.asoundrc to be an empty file.)
+.SH WARNING
+This program is under development.
+Its features will change without notice
+and without preservation of backward compatibility,
+except insofar as they are put to use
+by other components of
+the Debian and/or Ubuntu operating systems.
+(As of this writing the Ubuntu developers have plans to use
+.B asoundconf
+for setting parameters listed in /usr/share/alsa/alsa.conf
+under the defaults section.  Separate graphical frontend
+tools are under development to ease the configuration of
+multichannel .asoundrc files.)
+.SH FILES
+.TP
+.I ~/.asoundrc
+user-specific ALSA library configuration file
+.TP
+.I ~/.asoundrc.asoundconf
+file containing
+.BR asoundconf -managed
+parameter settings
+.SH AUTHOR
+This program was written by Martin Pitt <martin.pitt@ubuntu.com>.

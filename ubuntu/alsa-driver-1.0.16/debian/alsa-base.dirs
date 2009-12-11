@@ -1,8 +1,0 @@
-etc/modprobe.d
-etc/apm/scripts.d
-etc/apm/resume.d
-etc/apm/suspend.d
-usr/share/alsa-base
-usr/share/lintian/overrides
-usr/share/bug/alsa-base
-sbin

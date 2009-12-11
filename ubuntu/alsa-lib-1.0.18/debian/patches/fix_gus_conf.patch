@@ -1,0 +1,55 @@
+Index: alsa-lib-1.0.18/src/conf/cards/GUS.conf
+===================================================================
+--- alsa-lib-1.0.18.orig/src/conf/cards/GUS.conf	2009-01-29 17:31:03.000000000 -0500
++++ alsa-lib-1.0.18/src/conf/cards/GUS.conf	2009-01-29 17:32:45.000000000 -0500
+@@ -17,50 +17,3 @@
+ 		card $CARD
+ 	}
+ }	
+-
+-#
+-# It's a temporary solution.
+-#
+-
+-!pcm.hw {
+-	@args [ CARD DEV SUBDEV ]
+-	@args.CARD {
+-		type string
+-		default {
+-			@func getenv
+-			vars [
+-				ALSA_PCM_CARD
+-				ALSA_CARD
+-			]
+-			default {
+-				@func refer
+-				name defaults.pcm.card
+-			}
+-		}
+-	}
+-	@args.DEV {
+-		type integer
+-		default {
+-			@func igetenv
+-			vars [
+-				ALSA_PCM_DEVICE
+-			]
+-			default {
+-				@func refer
+-				name defaults.pcm.device
+-			}
+-		}
+-	}
+-	@args.SUBDEV {
+-		type integer
+-		default {
+-			@func refer
+-			name defaults.pcm.subdevice
+-		}
+-	}		
+-	type hw
+-	card $CARD
+-	device $DEV
+-	subdevice $SUBDEV
+-	mmap_emulation on
+-}

@@ -1,0 +1,1 @@
+lib64asound2: shlib-without-PT_GNU_STACK-section usr/lib64/libasound.so.2.0.0

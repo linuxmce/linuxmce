@@ -1,0 +1,56 @@
+# debian_alsaconf_unload_modules.patch by Thomas Hood
+#
+# Run initscript force-unload method rather than stop
+# and do it after the intro rather than before
+Index: alsa-utils-1.0.18/alsaconf/alsaconf.in
+===================================================================
+--- alsa-utils-1.0.18.orig/alsaconf/alsaconf.in	2008-11-02 20:59:26.000000000 +0100
++++ alsa-utils-1.0.18/alsaconf/alsaconf.in	2008-11-02 20:59:26.000000000 +0100
+@@ -521,11 +521,13 @@
+ 
+     
+ # MAIN
++if false; then # In Debian don't do this
+ if [ -d $PROCFS/asound ]; then
+   $rcalsasound stop >/dev/null 2>&1
+   $rcalsasound unload >/dev/null 2>&1
+   /sbin/rmmod dmasound dmasound_awacs 2>/dev/null
+ fi
++fi
+ 
+ 
+ cleanup () {
+@@ -1358,6 +1360,24 @@
+     date >> "$LOGFILE"
+ fi
+ 
++intro
++
++[ -x /etc/init.d/alsa ] && /etc/init.d/alsa force-unload
++
++if [ -d /proc/asound ]; then
++  /sbin/rmmod dmasound dmasound_awacs 2>/dev/null
++fi
++
++# Try to unload all sound modules
++for S in OSS ALSA ; do
++	L="/usr/share/linux-sound-base/${S}-module-list"
++	if [ -r "$L" ] ; then
++		for M in $(sed -e 's/#.*//' -e '/^[[:space:]]*$/d' "$L") ; do
++			[ "$M" ] && /sbin/modprobe -r "$M" >/dev/null 2>&1 || :
++		done
++	fi
++done
++
+ if [ x"$legacy_probe_card" != x ]; then
+     ac_opts=""
+     if eval ac_try_card_$legacy_probe_card >/dev/null 2>&1; then
+@@ -1370,8 +1390,6 @@
+     fi
+ fi
+ 
+-intro
+-
+ if [ $do_legacy_only = 1 ]; then
+     ac_config_legacy
+     exit 0

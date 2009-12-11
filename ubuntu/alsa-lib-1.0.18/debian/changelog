@@ -1,0 +1,1707 @@
+alsa-lib (1.0.18-1ubuntu9~dia1) jaunty; urgency=low
+
+  * Backport to 7.10
+
+ -- Radu C <radu.cx@gmail.com>  Tue, 19 May 2009 23:51:07 +0100
+
+alsa-lib (1.0.18-1ubuntu9) jaunty; urgency=low
+
+  * Don't display notifier hint if ~/.asoundrc and
+    ~/.asoundrc.asoundconf aren't writable, either
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Sun, 29 Mar 2009 18:10:58 -0400
+
+alsa-lib (1.0.18-1ubuntu8) jaunty; urgency=low
+
+  * Don't display notifier hint if in GNOME (LP: #328245)
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Mon, 23 Mar 2009 01:27:49 -0400
+
+alsa-lib (1.0.18-1ubuntu7) jaunty; urgency=low
+
+  * Backport fix from git HEAD for validating numid of external
+    plugins (also requires alsa-plugins update)
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Tue, 17 Feb 2009 16:34:39 -0500
+
+alsa-lib (1.0.18-1ubuntu6) jaunty; urgency=low
+
+  * Backport fix from git HEAD for non-zero device number on
+    HDA codecs' digital stream
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Sat, 14 Feb 2009 01:28:26 -0500
+
+alsa-lib (1.0.18-1ubuntu5) jaunty; urgency=low
+
+  * Backport fixes from git HEAD:
+    - fix_unhandled_pcm_access_cases.patch,
+    - pcm-set-params-doc.patch
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Thu, 12 Feb 2009 18:20:21 -0500
+
+alsa-lib (1.0.18-1ubuntu4) jaunty; urgency=low
+
+  * Backport fixes from git HEAD:
+    - fix_missing_ldl_modules_mixer_simple.patch,
+    - fix_gus_conf.patch,
+    - fix_plug_conv_mmap_emul.patch (required for fix_gus_conf),
+    - fix_off-t_mmap_offset.patch,
+    - strict_revents.patch
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Tue, 03 Feb 2009 18:01:10 -0500
+
+alsa-lib (1.0.18-1ubuntu3) jaunty; urgency=low
+
+  * Backport fixes from 1.0.19:
+    - fix_vol_switch_updates.patch,
+    - use_linear_plug_for_ice1724.patch,
+    - fix_uninitialised_type-conf.patch,
+    - fix_softvol_outside_plug.patch,
+    - fix_softvol_access.patch,
+    - fix_alsa-config-patch_check.patch,
+    - add_softvol_for_cmi8788.patch
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Mon, 19 Jan 2009 23:38:43 -0500
+
+alsa-lib (1.0.18-1ubuntu2) jaunty; urgency=low
+
+  * debian/libasound2.install: Ship smixer plugins located in
+    /usr/lib/alsa-lib/smixer.
+
+ -- Luke Yelavich <themuso@ubuntu.com>  Mon, 19 Jan 2009 15:16:23 +1100
+
+alsa-lib (1.0.18-1ubuntu1) jaunty; urgency=low
+
+  * Merge from Debian unstable.
+  * Packaging
+    + debian/libasound2.p{ostinst,rerm}: Install,remove update-notifier
+      file, respectively;
+    + debian/user-must-execute-asoundconf-set-default-card.update-notifier:
+      Tighten Display test;
+    + debian/control: Add Vcs-Bzr URI.
+  * Add configuration files for bluetooth/bluez-alsa and pulseaudio.
+
+ -- Luke Yelavich <themuso@ubuntu.com>  Thu, 06 Nov 2008 02:55:25 +1100
+
+alsa-lib (1.0.18-1) unstable; urgency=low
+
+  * New upstream release
+
+  [ Elimar Riesebieter ]
+  * Adjusted short descriptions in debisn/control. (closes: #493512)
+  * Pulseaudio 0.9.11 should be supported now. (closes: 499597)
+  * Bump shlibs to 1.0.18, as new symbols have been added.
+    - Adjusted suggested libasound2-plugins versions to 1.0.18.
+
+ -- Elimar Riesebieter <riesebie@lxtec.de>  Sun, 02 Nov 2008 13:55:55 +0100
+
+alsa-lib (1.0.17a-0ubuntu4) intrepid; urgency=low
+
+  [ Mario Limonciello ]
+  * debian/patches/bluetooth_configuration.patch:
+    - Adds a pointer to the bluetooth configuration file.
+      If a user has bluez-audio installed and a heaset paired
+      this will allow them to use a headset by the name of
+      "headset" (LP: #274950)
+
+  [ Luke Yelavich ]
+  * Add files to /etc/ld.so.conf.d for libasound2 and libasound2 bi-arch
+    packages. This Allows for alsa plugins to be referred to in alsa
+    configuration files without the need for absolute paths, the pulseaudio
+    runtime check is one such example. (LP: #273693)
+
+ -- Luke Yelavich <themuso@ubuntu.com>  Tue, 07 Oct 2008 17:49:28 +1100
+
+alsa-lib (1.0.17a-0ubuntu3) intrepid; urgency=low
+
+  * Revert below patches due to 100% CPU usage with amarok: (LP: #273645)
+    - from_git_dont_lose_no_xxx_flags.patch
+    - from_git_remove_access_type_change_for_refine.patch
+
+ -- Luke Yelavich <themuso@ubuntu.com>  Wed, 24 Sep 2008 11:04:22 +1000
+
+alsa-lib (1.0.17a-0ubuntu2) intrepid; urgency=low
+
+  * Some fixes from alsa-lib git (no API/ABI changes):
+    - from_git_dont_lose_no_xxx_flags.patch
+    - from_git_Reword_snd_pcm_delay_doxygen_doc.patch
+    - from_git_dont_call_simple_mixer_interface_legacy.patch
+    - from_git_remove_access_type_change_for_refine.patch
+    - from_git_fix_snd_pcm_read_comment.patch
+    - from_git_fix_async_callback_error_messages.patch
+  * debian/patches/pulseaudio_configuration.patch: Add a pointer to
+    an alsa configuration file for pulseaudio, which will allow the pulseaudio
+    alsa plugin to be used whenever pulseaudio is installed and running.
+
+ -- Luke Yelavich <themuso@ubuntu.com>  Mon, 22 Sep 2008 09:57:25 +1000
+
+alsa-lib (1.0.17a-0ubuntu1) intrepid; urgency=low
+
+  * New upstream release.
+  * Merge from Debian experimental.
+  * Packaging
+    + debian/libasound2.p{ostinst,rerm}: Install,remove update-notifier
+      file, respectively;
+    + debian/user-must-execute-asoundconf-set-default-card.update-notifier:
+      Tighten Display test;
+    + debian/control: Add Vcs-Bzr URI.
+
+ -- Luke Yelavich <themuso@ubuntu.com>  Fri, 22 Aug 2008 12:39:52 +1000
+
+alsa-lib (1.0.17-1) experimental; urgency=low
+
+  [ Elimar Riesebieter ]
+  * New upstream release.
+    - The "let's cleanup fixed bugs" release ;)
+    (closes: #473384, #372735, #302227, #342026, #257797, #335046, #312577)
+    (closes: #456643, #274951, #275573, #289206, #317426, #356049, #369530)
+    (closes: #400268, #469641, #470568, #470865, #383054, #477991, #407641)
+  * Removed patches as they are not needed anymore:
+    - aclocal_libs_fix.patch
+    - alpha_versioned_symbols.patch
+    - dmix_first_set_fix.patch
+    - doxygen_links.patch
+  * Reorganized relibtoolise.patch
+  * Switched to debhelper 7.
+  * Bumped Standard-Version to 3.8.0; no changes needed.
+  * libasound2-doc.doc-base: s/\/Apps//
+
+  [ Jordi Mallach ]
+  * Bump shlibs to 1.0.17, as new symbols have been added.
+  * Target experimental, due to lenny freeze and the shlibs bump which could
+    interfere.
+  * Add lpia to supported arches for libasound2 and libasound2-dev.
+
+ -- Jordi Mallach <jordi@debian.org>  Thu, 24 Jul 2008 22:22:44 +0200
+
+alsa-lib (1.0.16-2ubuntu1) intrepid; urgency=low
+
+  * Merge from Debian unstable.
+  * Patches
+    - debian/patches/{dont,fix}*: Remove (already applied upstream).
+  * Packaging
+    + debian/libasound2.p{ostinst,rerm}: Install,remove update-notifier
+      file, respectively;
+    + debian/user-must-execute-asoundconf-set-default-card.update-notifier:
+      Tighten Display test;
+    + debian/control: Add lpia to supported arches, adhere to
+      DebianMaintainerField, add Vcs-Bzr URI.
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Thu, 01 May 2008 18:40:46 -0400
+
+alsa-lib (1.0.16-2) unstable; urgency=medium
+
+  [ Elimar Riesebieter ]
+  * Introduced dmix_first_set_fix.patch from ALSA hg repository.
+    (closes: #469064)
+
+ -- Jordi Mallach <jordi@debian.org>  Tue, 11 Mar 2008 13:09:32 +0100
+
+alsa-lib (1.0.16-1) unstable; urgency=low
+
+  * New upstream release
+
+  [ Elimar Riesebieter ]
+  * Switched to debhelper 6.
+  * Bumped Standard-Version to 3.7.3; no changes needed.
+  * Removed fix-sampling-bit-shifts.patch. Applied from upstream.
+  * debian/rules: Let dh_shlibdeps run with lib64asound2 too.
+  * Removed useless dir files.
+  * Fullified copyright not in copyright file.
+
+  [ Jordi Mallach ]
+  * Bump shlibs to 1.0.16, new symbols have been added.
+
+ -- Jordi Mallach <jordi@debian.org>  Mon, 25 Feb 2008 23:36:01 +0100
+
+alsa-lib (1.0.15-3ubuntu4) hardy; urgency=low
+
+  * Backport fixes from hg tip (no API/ABI changes):
+    - fix_sem_deadlock_in_dmix.patch (LP: #190059),
+    - fix_const_casts.patch,
+    - fix_ioplug.patch,
+    - fix_control_range.patch,
+    - dont_use_hackish_callback_in_rate_plugin.patch,
+    - fix_cpu_hog_in_rate_plug.patch,
+    - fix_mmap_with_multi_plug.patch,
+    - fix_wrong_return_values_in_direct_plug.patch,
+    - fix_timestamp_in_status_pcm_direct_plug.patch,
+    - fix_configs_error_handling.patch,
+    - fix_not_updated_bit_set.patch,
+    - fix_device_assignment.patch,
+    - fix_missing_aliases.patch.
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Tue, 11 Mar 2008 23:31:24 -0400
+
+alsa-lib (1.0.15-3ubuntu3) hardy; urgency=low
+
+  * Fix the inverted logic in the test whether pulseaudio is running.
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Sat, 12 Jan 2008 17:08:01 -0500
+
+alsa-lib (1.0.15-3ubuntu2) hardy; urgency=low
+
+  * Don't display notifier on update if pulseaudio is running.
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Sat, 12 Jan 2008 13:12:01 -0500
+
+alsa-lib (1.0.15-3ubuntu1) hardy; urgency=low
+
+  * Merge from Debian unstable.
+  * Ubuntu-specific changes:
+    - debian/libasound2.p{ostinst,rerm}: Install,remove update-notifier
+      file, respectively;
+    - debian/control: Add lpia to supported arches, adhere to
+      DebianMaintainerField, add Vcs-Bzr URI.
+  * Included patch addresses clicking/snapping/crackling, LP: #116990.
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Tue, 11 Dec 2007 21:41:52 +0000
+
+alsa-lib (1.0.15-3) unstable; urgency=medium
+
+  [ Jordi Mallach ]
+  * Switch to now official Vcs-* control fields.
+  * New patch fix-sampling-bit-shifts.patch, provided by Loïc Minier
+    which reverts broken bit shifts introduced in alsa-lib HG r2264,
+    which were causing lots of clicks and creaking on at least
+    GStreamer-based audio. Closes: #452282 and countless others.
+
+ -- Jordi Mallach <jordi@debian.org>  Tue, 11 Dec 2007 10:55:26 +0100
+
+alsa-lib (1.0.15-2ubuntu1) hardy; urgency=low
+
+  * Merge from Debian unstable.
+  * Ubuntu-specific changes:
+    - debian/libasound2.p{ostinst,rerm}: Install,remove update-notifier
+      file, respectively;
+    - debian/control: Add lpia to supported arches, adhere to
+      DebianMaintainerField.
+  * Dmix/dsnoop no longer use sockets (LP: #85157).
+  * Biarch plugins support fixed (LP: #145645).
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Sat, 01 Dec 2007 18:50:12 -0500
+
+alsa-lib (1.0.15-2) unstable; urgency=low
+
+  [ Elimar Riesebieter ]
+  * Added --with-plugindir=/$(bilibdir)/alsa-lib to config flags.
+    (closes: #449418)
+
+ -- Jordi Mallach <jordi@debian.org>  Wed, 14 Nov 2007 00:57:45 +0100
+
+alsa-lib (1.0.15-1ubuntu1) hardy; urgency=low
+
+  * Merge from Debian unstable, remaining changes:
+    - Install/remove libasound2.p{ostinst,rerm};
+    - Add lpia to the arch lists for libasound and libasound-dev;
+    - Adhere to DebianMaintainerField;
+  * Remove obsoleted changes:
+    - Fix lfloat plugin logic error, LP: #132037;
+    - Drop debian/patches/fix-sampling-bit-shifts.patch, fixed
+      upstream;
+    - Drop --with-plugindir=\$${prefix}/lib/alsa-lib \
+      for configure targets in debian/rules.
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Sun, 28 Oct 2007 11:34:42 -0400
+
+alsa-lib (1.0.15-1) unstable; urgency=low
+
+  * New upstream release
+
+  [ Elimar Riesebieter ]
+  * Removed mdw.patch. Applied from upstream.
+  * Added python2.4-dev to BuildDepends.
+  * Added Homepage header in debian/control.
+  * Added --disable-python for crosscompiling 64bit flavour.
+  * debian/rules biarch code doesn't work for new architectures. Patch from
+    Martin Michlmayr (closes: #447879)
+
+ -- Jordi Mallach <jordi@debian.org>  Thu, 25 Oct 2007 21:27:14 +0200
+
+alsa-lib (1.0.14a-2) unstable; urgency=low
+
+  [ Elimar Riesebieter ]
+  * PCM plugin `lfloat' not built: patch from Mark Wooding. The patch is
+    applied upstream and should be disabled next rc release. (closes: #430833)
+  * For some reason quilt refreshed relibtoolise.patch.
+  * debian/control: s/${Source-Version}/${binary:Version}/
+  * debian/rules: s/-$(MAKE) distclean/[ ! -f Makefile ] || $(MAKE) distclean/
+
+ -- Jordi Mallach <jordi@debian.org>  Wed, 04 Jul 2007 14:40:59 +0200
+
+alsa-lib (1.0.14a-1) unstable; urgency=low
+
+  [ Elimar Riesebieter ]
+  * New upstream release
+    - Fix plugin directory
+    - Properly disable -Bsymbolic-functions if ld doesn't support
+  * Revert passing --with-plugindir.
+
+ -- Jordi Mallach <jordi@debian.org>  Wed, 13 Jun 2007 20:31:01 +0200
+
+alsa-lib (1.0.14-2) unstable; urgency=low
+
+  * debian/rules: pass --with-plugindir to configure, as a typo in
+    configure.in sets a bad default (closes: #428334).
+
+ -- Jordi Mallach <jordi@debian.org>  Mon, 11 Jun 2007 15:19:20 +0200
+
+alsa-lib (1.0.14-1ubuntu8) gutsy; urgency=high
+
+  * New patch, fix-sampling-bit-shifts, revert HG r2264 (changeset
+    23c4c0f5de40) as the bit shifts overflow when the volume is high for 32
+    bits to 16 bits resampling; Alsa #3360; GNOME #436192; LP: #116990;
+    Mandriva #33908.
+
+ -- Loic Minier <lool@dooz.org>  Sun, 14 Oct 2007 19:28:45 +0200
+
+alsa-lib (1.0.14-1ubuntu7) gutsy; urgency=low
+
+  * Trigger rebuild for hppa.
+
+ -- LaMont Jones <lamont@ubuntu.com>  Tue, 02 Oct 2007 06:32:36 -0600
+
+alsa-lib (1.0.14-1ubuntu6) gutsy; urgency=low
+
+  * Add lpia to the arch lists for libasound and libasound-dev.
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Tue, 31 Jul 2007 14:31:02 +1000
+
+alsa-lib (1.0.14-1ubuntu5) gutsy; urgency=low
+
+  * debian/user-must-execute-asoundconf-set-default-card.update-notifier:
+    - Fix DisplayIf invocation, and make the message more meaningful,
+      LP: #122252.
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Fri, 29 Jun 2007 01:34:15 -0400
+
+alsa-lib (1.0.14-1ubuntu4) gutsy; urgency=low
+
+  * debian/:
+    - libasound2.p{ostinst,rerm}: Install/remove, respectively, the
+      update-notifier hook mentioned next,
+    - user-must-execute-asoundconf-set-default-card.update-notifier:
+      Add this update-notifier hook so that the user is informed that
+      he/she needs to execute the asoundconf(1) set-default-card macro,
+      because new ALSA configuration presets have been added
+      (LP: #120691).
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Mon, 25 Jun 2007 23:47:17 -0400
+
+alsa-lib (1.0.14-1ubuntu3) gutsy; urgency=low
+
+  * debian/patches/fix_plugindir.patch: Omit useless libtool hunk.
+  * debian/rules: Use the prefix, resolving the plugindir issue.
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Tue, 12 Jun 2007 18:24:38 -0400
+
+alsa-lib (1.0.14-1ubuntu2) gutsy; urgency=low
+
+  * debian/patches/{fix_plugindir.patch,series}: Pull proper upstream
+    fix for plugindir from 1.0.14a configure{,.in}.
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Tue, 12 Jun 2007 02:56:34 -0400
+
+alsa-lib (1.0.14-1ubuntu1) gutsy; urgency=low
+
+  * Merge from Debian unstable, remaining changes:
+    - debian/control: Adhere to DebianMaintainerField,
+    - debian/patches/*.dpatch: Remove - incorporated into upstream,
+    - debian/rules: Pass --with-plugindir=\$${prefix}/lib/alsa-lib \
+      to configure targets (Debian #428334).
+  * New upstream version fixes LP: #33736, LP: #97004.
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Mon, 11 Jun 2007 16:48:21 -0400
+
+alsa-lib (1.0.14-1) unstable; urgency=low
+
+  * New upstream release
+
+  [ Elimar Riesebieter ]
+  * Patch management switched to quilt. This is more comfortable.
+
+  [ Jordi Mallach ]
+  * Bump shlibs to 1.0.14, as new symbols have been added. 
+
+ -- Jordi Mallach <jordi@debian.org>  Sat, 09 Jun 2007 19:17:41 +0200
+
+alsa-lib (1.0.14~rc4-2) experimental; urgency=low
+
+  [ Jordi Mallach ]
+  * debian/control:
+    - add XS-Vcs-Browser and XS-Vcs-Svn headers.
+    - Build-Depend on gcc-multilib only on the available architectures
+      (thanks Frank Lichtenheld; closes: #424310).
+ 
+ -- Jordi Mallach <jordi@debian.org>  Thu, 17 May 2007 01:44:35 +0200
+
+alsa-lib (1.0.14~rc4-1) experimental; urgency=low
+
+  [ Elimar Riesebieter ]
+  * New upstream release candidate.
+  * Added gcc-multilib to Build-Depends. Thanks Bastian Blank and Matthias
+    Klose. (closes: #422513)
+
+ -- Jordi Mallach <jordi@debian.org>  Sun, 13 May 2007 02:04:31 +0200
+
+alsa-lib (1.0.14~rc3-2) experimental; urgency=low
+
+  [ Jordi Mallach ]
+  * debian/control: fix typo which broke hppa build (closes: #420999).
+
+ -- Jordi Mallach <jordi@debian.org>  Wed, 25 Apr 2007 20:33:04 +0200
+
+alsa-lib (1.0.14~rc3-1) experimental; urgency=low
+
+  [ Elimar Riesebieter ]
+  * New upstream release candidate.
+
+ -- Jordi Mallach <jordi@debian.org>  Wed, 11 Apr 2007 00:45:26 +0200
+
+alsa-lib (1.0.14~rc1-1) experimental; urgency=low
+
+  * New upstream release candidate.
+
+  [ Elimar Riesebieter ]
+  * Added arch armel to libasound. (closes: #408766)
+
+ -- Elimar Riesebieter <riesebie@lxtec.de>  Fri, 29 Dec 2006 17:43:48 +0100
+
+alsa-lib (1.0.13-2) unstable; urgency=medium
+
+  [ Elimar Riesebieter ]
+  * Added XS-X-Vcs-Svn field in control.
+  * Make recording sound on Thinkpad t20 with chip Cirrus Logic CS 4614/22/24
+    work (closes: #410863)
+  * Urgency medium to serve this feature to etch users. This is fixed in 1.0.14
+    version and doesn't need be patched there.
+
+ -- Jordi Mallach <jordi@debian.org>  Mon, 26 Feb 2007 18:20:43 +0100
+
+alsa-lib (1.0.13-1ubuntu5) feisty; urgency=low
+
+  * debian/patches/{00list,62_add_dmix_usbaudio.dpatch}:
+    Don't apply for Feisty release. I made a test patch that has
+    yet to receive feedback, so this close to release we take the
+    conservative approach (reopens LP #33736).
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Tue, 10 Apr 2007 10:46:59 -0400
+
+alsa-lib (1.0.13-1ubuntu4) feisty; urgency=low
+
+  The "grey is a color" release.
+
+  * debian/control: Adhere to DebianMaintainerField,
+  * debian/patches/:
+    - 63_improved_resampling.dpatch: Add, fixes resampling issues in
+      plugins,
+    - 64_duplex_multi.dpatch: Add, fixes linked start/stop for multiple
+      audio devices,
+      Closes LP: #44275, LP: #66657,
+      Thanks to Luke Yelavich <themuso@ubuntu.com> for testing.
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Tue, 13 Mar 2007 02:45:33 -0400
+
+alsa-lib (1.0.13-1ubuntu3) feisty; urgency=low
+
+  * debian/patches: Add 62_add_dmix_usbaudio.dpatch. This patch
+    enables dmix and proper 5.1 routing by default for USB audio
+    devices. Closes LP #33736.
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Wed, 14 Feb 2007 21:11:05 -0500
+
+alsa-lib (1.0.13-1ubuntu2) feisty; urgency=low
+
+  The "What Super Bowl?" release.
+
+  * debian/patches: Add (backported from alsa-lib hg):
+    - 50_fix_error_recovery_path_for_volume_switch_write.dpatch,
+    - 51_fix_rate_plugin_boundary_calc.dpatch,
+    - 52_use_dmix_dsnoop_for_maestro3.dpatch,
+    - 53_fix_pkgconfig_libs.dpatch,
+    - 54_fix_sconf_mem_leak.dpatch,
+    - 55_fix_ipc_offset_calc_for_direct_plugins.dpatch,
+    - 56_fix_cs46xx_capture_ubuntu_76311.dpatch (lp#76311),
+    - 57_fix_channel_number_select_for_direct_plugins.dpatch,
+    - 58_fix_format_select_for_direct_plugins.dpatch,
+    - 59_fix_ladspa_none_policy.dpatch,
+    - 60_init_dl_handles.dpatch,
+    - 61_fix_timer_query_exit_code.dpatch,
+  * debian/rules: Don't bail when removing include/alsa.
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Sun,  4 Feb 2007 17:45:12 -0500
+
+alsa-lib (1.0.13-1ubuntu1) feisty; urgency=low
+
+  * Merge from Debian unstable, remaining Ubuntu changes:
+    - debian/control: Don't Conflict with ia32-libs (<< 1.9),
+    - debian/rules: Install into /usr/lib32/ on amd64.
+  * Remove Ubuntu changes to debian/patches/ and snd-aoa conf,
+    included in new upstream version already.
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Fri, 17 Nov 2006 22:01:56 -0500
+
+alsa-lib (1.0.13-1) unstable; urgency=low
+
+  * New upstream release
+
+  [ Elimar Riesebieter ]
+  * Rebuild patches/40_relibtoolise.dpatch.
+  * Removed debian/patches/11_libtool_version.dpatch. Applied different from
+    upstream
+
+ -- Jordi Mallach <jordi@debian.org>  Tue,  3 Oct 2006 09:53:01 +0200
+
+alsa-lib (1.0.12-1) unstable; urgency=low
+
+  * New upstream release.
+
+  [ Elimar Riesebieter ]
+  * Removed 06_pcm_rate_hwptr_update.dpatch. Applied upstream.
+  * Bumped compat to 5 and debhelper version >=5.0.37.
+  * Cleaned out fuzzes and offsets in patches/*
+  * Rebuild patches/40_relibtoolise.dpatch.
+  * Removed description-synopsis-starts-with-a-capital-letter lintian
+    overrides. No longer needed.
+  * Added lib64asound2.lintian-overrides.
+
+  [ Jordi Mallach ]
+  * Bump shlibs due to newly added symbols.
+
+ -- Jordi Mallach <jordi@debian.org>  Mon, 11 Sep 2006 11:14:58 +0200
+
+alsa-lib (1.0.11-7ubuntu3) edgy; urgency=low
+
+  * On amd64, install into /usr/lib32.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 13 Jul 2006 12:08:28 +0000
+
+alsa-lib (1.0.11-7ubuntu2) edgy; urgency=low
+
+  * Add config for snd-aoa (aliased to PMacToonie) now that Edgy's
+    kernel supports it (taken from upstream alsa-lib hg changeset
+    2318a83a6145).
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Thu, 13 Jul 2006 02:41:00 -0400
+
+alsa-lib (1.0.11-7ubuntu1) edgy; urgency=low
+
+  * Merge from debian unstable:
+    - debian/control: Don't Conflict with ia32-libs (<< 1.9).
+    - debian/patches/: Remove 05* (except for multiarch) and 24*
+      (they're present in 1.0.11); don't apply
+      41_configure_cross_compile (already applied).
+    - debian/rules: Use Debian Sid's changes (--datadir, disabling
+      maintainer mode).
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Fri, 30 Jun 2006 15:01:52 +0100
+
+alsa-lib (1.0.11-7) unstable; urgency=medium
+
+  [ Elimar Riesebieter ]
+  * Introduced --datadir=\$${prefix}/share in debian/rules. Otherwise soundapps
+    are looking in $BUILDDIR/${prefix}/share.
+
+ -- Jordi Mallach <jordi@debian.org>  Sun, 28 May 2006 22:02:37 +0200
+
+alsa-lib (1.0.11-6) unstable; urgency=high
+
+  * debian/patches/11_libtool_version: correctly detect libtool version in
+    configure, avoiding some libasound symbols from becoming weak.
+    Patch by Adeodato Simó, thanks! (closes: #369040 + 13 more).
+
+ -- Jordi Mallach <jordi@debian.org>  Sun, 28 May 2006 12:02:33 +0200
+
+alsa-lib (1.0.11-5) unstable; urgency=medium
+
+  * debian/rules: Run dh_makeshlibs for the biarch libraries. Thanks,
+    Matthias Klose (closes: #366277).
+  * Fix FTBFS on systems with automake & autoconf installed, via adding
+    AM_MAINTAINER_MODE to configure.in, a full relibtoolisation patch, and
+    applying the cross-compiling patch after relibtoolisation
+    (thanks Loïc Minier, closes: #368260).
+    [debian/rules, debian/patches/05_multiarch.dpatch,
+    debian/patches/10_add-maintainer-mode.dpatch, 40_relibtoolise.dpatch,
+    41_configure_cross_compile.dpatch]
+
+ -- Jordi Mallach <jordi@debian.org>  Wed, 26 May 2006 10:57:03 +0200
+
+alsa-lib (1.0.11-4) unstable; urgency=low
+
+  * debian/patches/06_pcm_rate_hwptr_update.dpatch: Fix the update of hwptr
+    in rate plugin to avoid bad sounds on Ekiga and other applications
+    (closes: #367524).
+  * Bumped Standard-Version to 3.7.2; no changes needed.
+
+ -- Jordi Mallach <jordi@debian.org>  Fri, 19 May 2006 00:36:26 +0200
+
+alsa-lib (1.0.11-3) unstable; urgency=low
+
+  * debian/control: make lib32asound2 Replace/Conflict ia32-libs (<< 1.9),
+    by suggestion of Frederik Schueler.
+
+ -- Jordi Mallach <jordi@debian.org>  Tue, 25 Apr 2006 13:57:08 +0200
+
+alsa-lib (1.0.11-2) unstable; urgency=low
+
+  * debian/rules:
+    - bump shlibs to 1.0.11.
+    - move a comment to a variable assignment that was breaking amd64 builds.
+
+ -- Jordi Mallach <jordi@debian.org>  Sun, 23 Apr 2006 18:31:11 +0200
+
+alsa-lib (1.0.11-1) unstable; urgency=low
+
+  [ Jordi Mallach ]
+  * New upstream release
+
+  [ Matthias Klose / Thomas Hood ]
+  * amd64: Drop dependencies on ia32-libs*, install into /emul/ia32-linux
+
+ -- Jordi Mallach <jordi@debian.org>  Sun, 23 Apr 2006 16:30:28 +0200
+
+alsa-lib (1.0.10+1.0.11rc3-1) experimental; urgency=low
+
+  * New upstream release candidate
+
+  [ Jordi Mallach ]
+  * Tweak descriptions.
+
+ -- Jordi Mallach <jordi@debian.org>  Thu, 23 Feb 2006 20:41:53 +0100
+
+alsa-lib (1.0.10+1.0.11rc2-2) experimental; urgency=low
+
+  [ Jordi Mallach ]
+  * Apply Matthias Klose's patch to build biarch packages (closes: #339443)
+
+  [ Peter De Schrijver ]
+  * 05_multiarch.dpatch: Fix configure script for biarch builds.
+
+ -- Jordi Mallach <jordi@debian.org>  Thu, 26 Jan 2006 13:15:22 +0100
+
+alsa-lib (1.0.10+1.0.11rc2-1) experimental; urgency=low
+
+  [ Thomas Hood ]
+  * New upstream release candidate
+    Closes: #336115 LADSPA plugin rewrite for multiple channel LADSPA
+    plugins
+
+ -- Jordi Mallach <jordi@debian.org>  Tue, 10 Jan 2006 00:49:33 +0100
+
+alsa-lib (1.0.10+1.0.11rc1-1) experimental; urgency=low
+
+  * New upstream release candidate
+    Closes: #340478 "Breaks PMacToonie.conf"
+
+  [ Thomas Hood ]
+  * Move libasound2-doc to Section: doc  (Closes: #343900)
+
+ -- Jordi Mallach <jordi@debian.org>  Fri, 30 Dec 2005 13:51:41 +0100
+
+alsa-lib (1.0.10-2ubuntu4) dapper; urgency=low
+
+  * debian/patches: Add:
+    - 24_dont_free_uninitialised_pointer.
+    - 24_fix_generation_of_iec958_subframes_and_preamble.
+    - 24_fix_pcm_no_control_status_mmap_on_32_compat_mode_64_bit_kernel.
+    - 24_make_dmix_dsnoop_defaults_for_aureonxx,
+      24_make_dmix_dsnoop_defaults_for_ice17xx.
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Wed, 10 May 2006 19:54:05 -0400
+
+alsa-lib (1.0.10-2ubuntu3) dapper; urgency=low
+
+  * Run dh_makeshlibs for the biarch libraries.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat,  6 May 2006 22:20:06 +0000
+
+alsa-lib (1.0.10-2ubuntu2) dapper; urgency=low
+
+  * debian/patches/: Add:
+    - Memory leak fixes: 05_fix_mem_double_free,05_fix_mem_leaks_1,
+      05_fix_mem_leaks_2,05_fix_mem_leaks_3 .
+    - Minor fixes: 05_fix_nonblocking_mode_typo,
+      05_fix_plugin_dmix_crackling_from_byteswapping,
+      05_fix_possible_infinite_loop_in_snd-pcm-wait_when_xrun
+    - 32/64-bit cpu polling issue:
+      05_fix_timer_read_poll_100_percent_cpu__malone_41367
+      (Closes: Malone #41367).
+
+ -- Daniel T Chen <crimsun@ubuntu.com>  Sat, 29 Apr 2006 19:53:05 -0400
+
+alsa-lib (1.0.10-2ubuntu1) dapper; urgency=low
+
+  * Synchronize to Debian.
+  * src/conf/cards/PMacToonie.conf: Fix missing 'playback.pcm {'.
+    (Malone #29722)
+  * debian/rules: Do not fail the build on dh_shlibdeps failures since
+    dh_shlibdeps cannot use ldd on 64 bit libraries on i386 buildds.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Thu, 26 Jan 2006 14:54:36 +0100
+
+alsa-lib (1.0.10-2) unstable; urgency=low
+
+  [ Thomas Hood ]
+  * Remove obsolete .asoundrc example for enabling dmix.  dmix is now
+    enabled by default for all sound cards that support it
+    (Closes: #340763, #342026)
+
+  [ Mikael Magnusson ]
+  * Fix broken doxygen links in pcm.c and rawmidi.c. (Closes: #337251)
+
+ -- Jordi Mallach <jordi@debian.org>  Tue, 13 Dec 2005 21:49:29 +0100
+
+alsa-lib (1.0.10-1ubuntu2) dapper; urgency=low
+
+  * Replace (build-)dependency ia32-libs-dev [amd64] -> libc6-dev-i386 [amd64]
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 13 Jan 2006 20:27:30 +0000
+
+alsa-lib (1.0.10-1ubuntu1) dapper; urgency=low
+
+  * Synchronise with unstable.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 24 Nov 2005 11:01:37 +0100
+
+alsa-lib (1.0.10-1) unstable; urgency=low
+
+  * New upstream release
+    Closes: #336110 Fails to read config when locale delim not '.'
+    Closes: #336111 LADSPA plugins no work when locale delim not '.'
+  * Jordi Mallach
+    - Bump shlibs to 1.0.10.
+
+ -- Jordi Mallach <jordi@debian.org>  Mon, 21 Nov 2005 20:11:12 +0100
+
+alsa-lib (1.0.9+1.0.10rc3-1) experimental; urgency=low
+
+  * New upstream release candidate
+  * Thomas Hood
+    - Conflict with pre-1.0.9 libasound2-plugins
+  * Jordi Mallach
+    - Add "armeb" to our static list of target architectures.
+
+ -- Jordi Mallach <jordi@debian.org>  Thu, 10 Nov 2005 17:18:45 -0500
+
+alsa-lib (1.0.9+1.0.10rc2-1) experimental; urgency=low
+
+  * New upstream release candidate
+  * Thomas Hood
+    - debian/control: s/Architecture: any/Architecture: <Linux arches>/
+      (Closes: #327186)
+
+ -- Jordi Mallach <jordi@debian.org>  Tue, 25 Oct 2005 10:25:11 +0200
+
+alsa-lib (1.0.9+1.0.10rc1-1) experimental; urgency=low
+
+  * New upstream release candidate
+    - Closes: #277539 (allow control of shm gid)
+  * Thomas Hood
+    - Update upstream changelog; put it and NOTES in -doc
+    - Replace -dev's doc dir with a symlink
+    - Make -dev and -doc Suggest each other
+  * Jordi Mallach
+    - Bump shlibs
+
+ -- Jordi Mallach <jordi@debian.org>  Mon, 19 Sep 2005 21:32:10 +0200
+
+alsa-lib (1.0.9-3ubuntu1) dapper; urgency=low
+
+  * Build biarch library packages.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 16 Nov 2005 06:38:30 +0000
+
+alsa-lib (1.0.9+1.0.10rc3-1) experimental; urgency=low
+
+  * New upstream release candidate
+  * Thomas Hood
+    - Conflict with pre-1.0.9 libasound2-plugins
+  * Jordi Mallach
+    - Add "armeb" to our static list of target architectures.
+
+ -- Jordi Mallach <jordi@debian.org>  Thu, 10 Nov 2005 17:18:45 -0500
+
+alsa-lib (1.0.9+1.0.10rc2-1) experimental; urgency=low
+
+  * New upstream release candidate
+  * Thomas Hood
+    - debian/control: s/Architecture: any/Architecture: <Linux arches>/
+      (Closes: #327186)
+
+ -- Jordi Mallach <jordi@debian.org>  Tue, 25 Oct 2005 10:25:11 +0200
+
+alsa-lib (1.0.9+1.0.10rc1-1) experimental; urgency=low
+
+  * New upstream release candidate
+    - Closes: #277539 (allow control of shm gid)
+  * Thomas Hood
+    - Update upstream changelog; put it and NOTES in -doc
+    - Replace -dev's doc dir with a symlink
+    - Make -dev and -doc Suggest each other
+  * Jordi Mallach
+    - Bump shlibs
+
+ -- Jordi Mallach <jordi@debian.org>  Mon, 19 Sep 2005 21:32:10 +0200
+
+alsa-lib (1.0.9-3) unstable; urgency=low
+
+  * Thomas Hood
+    - Bump Standards-Version to 3.6.2.1; no changes required
+    - Make libasound2-dev Conflict with alsa-headers (old dummy pkg)
+    - Add upstream changelog
+    - Drop aserver program  (Closes: #290735, #285320).
+      If you need the aserver program, please file a wish in the
+      Debian BTS.  For bonus marks, include a man page!
+    - Eliminate obsolete dependencies
+
+ -- Jordi Mallach <jordi@debian.org>  Thu,  7 Jul 2005 18:40:59 +0200
+
+alsa-lib (1.0.9-2) unstable; urgency=low
+
+  * Thomas Hood
+    - Conflict with pre-1.0.9 libasound2-plugins
+
+ -- Jordi Mallach <jordi@debian.org>  Wed,  8 Jun 2005 15:20:32 +0200
+
+alsa-lib (1.0.9-1) unstable; urgency=low
+
+  * New upstream release
+    - Fix bug that disabled stack protection (CAN-2005-0087)
+      (RedHat bug #144518)  (Closes: #301164)
+    - Fixes related to mplayer (Closes: #310189)
+  * Jordi Mallach
+    - debian/rules: bump shlibs to 1.0.9.
+
+ -- Jordi Mallach <jordi@debian.org>  Sun,  5 Jun 2005 23:00:51 +0200
+
+alsa-lib (1.0.8+1.0.9rc3-1) experimental; urgency=low
+
+  * New upstream release
+    - Closes: #291533 "ttable in .asoundrc do not accept fractions"
+    - Closes: #293928 "wrong routings of channels for 5.1 ICH5"
+    - Closes: #299423 "Please include asound_fm.h"
+    - Closes: #300792 "FTBFS (ppc64/gcc-4.0): static declaration ..."
+    - libasound2-plugins is no longer built from this source package
+  * Thomas Hood
+    - Remove the control entry, commands in rules, build dependencies
+      related to libasound2-plugins
+    - Add some mutual Suggestions among the ALSA library packages
+    - Drop dpatch applied upstream: 10_conf-space-fix
+    - debian/NOTES:
+      + Add note about what to do if we ever have libasound3
+      + Remove note about building libasound2-plugins
+    - Tweak descriptions
+
+ -- Jordi Mallach <jordi@sindominio.net>  Wed, 11 May 2005 13:32:05 +0200
+
+alsa-lib (1.0.8-3) unstable; urgency=medium
+
+  * Thomas Hood:
+    - debian/control
+      + s/alsalib-dev/libasound-dev/ in libasound2-dev's Conflicts: and
+        Provides:, to use a more standard naming scheme
+
+ -- Jordi Mallach <jordi@debian.org>  Thu, 24 Feb 2005 20:09:09 +0100
+
+alsa-lib (1.0.8-2) unstable; urgency=medium
+
+  * Thomas Hood:
+    - Add 10_conf-space-fix.dpatch so that libasound2 works with sound
+      card names containing spaces  (Closes: #294880, #293907)
+
+ -- Jordi Mallach <jordi@debian.org>  Fri, 18 Feb 2005 01:53:09 +0100
+
+alsa-lib (1.0.8-1) unstable; urgency=low
+
+  * New upstream release
+    (Closes: #290034 "libasound2 1.0.7 causing problems with XMMS")
+  * Thomas Hood:
+    - Eliminate 10_pcm_wait_assertion.dpatch (applied upstream)
+    - examples/asound.conf_dmix
+      + Simplify
+      + Mention /usr/share/doc/libasound2-doc/html/conf.html
+    - debian/rules 
+      + Eliminate debian/libasound2.shlibs; instead, use
+           dh_makeshibs -V'libasound2 (>> 1.0.8)'
+        (Version bumped up from 1.0.5)
+      + Add -n option to dh_makeshlibs -plibasound2-plugins so that
+        no ldconfig is done in libasound2-plugins's post(rm|inst).
+        Eliminates lintian warning postinst-has-useless-call-to-ldconfig
+  * Jordi Mallach:
+    - debian/rules: minor simplification.
+
+ -- Jordi Mallach <jordi@debian.org>  Sun, 16 Jan 2005 19:34:04 +0100
+
+alsa-lib (1.0.7-4) unstable; urgency=high
+
+  * Thomas Hood:
+    - debian/patches/
+      + Add 10_pcm_wait_assertion  (Closes: #284555)
+
+ -- Jordi Mallach <jordi@debian.org>  Mon, 13 Dec 2004 18:50:33 +0100
+
+alsa-lib (1.0.7-3) unstable; urgency=low
+
+  * debian/control: move doxygen to Build-Depends, to avoid our old
+    "policy vs. reality" conflict. Thanks LaMont for the live help. :)
+
+ -- Jordi Mallach <jordi@debian.org>  Thu,  9 Dec 2004 20:08:24 +0100
+
+alsa-lib (1.0.7-2) unstable; urgency=medium
+
+  * Thomas Hood:
+    - libasound2.postinst: Remove cruft only on configure
+    - libasound2.postrm: Add to remove cruft on purge too
+  * Jordi Mallach:
+    - revert modifications made for libasound2-data, as that didn't
+      get past ftpmasters. Not providing an upgrade path as this never
+      hit the archive. No beer for Kinnison! ;)
+
+ -- Jordi Mallach <jordi@debian.org>  Thu,  9 Dec 2004 13:04:40 +0100
+
+alsa-lib (1.0.7-1) unstable; urgency=low
+
+  * New upstream release
+    - Closes: #273498  "Rhythmbox won't playback on ICE1712 card"
+    - Closes: #280543  "emu10k1: sound cut when passthru enabled"
+  * Thomas Hood:
+    - Move arch-indep files from libasound2 to libasound2-data
+      (Closes: #281389)
+    - debian/rules
+      + Extensive changes because of introduction of libasound2-data
+      + Set DH_VERBOSE=1 until we're less worried about build failures
+    - debian/patches/
+      + 01_aclocal_underquote_warning   Delete unused
+      + 01_aserver_options              Remove obsolete
+      + 01_conf_backslash               Remove obsolete
+      + 01_alpha_versioned_symbols      Leave
+      + 02_aclocal_libs_fix             Leave
+    - debian/control
+      + Eliminate duplicate dependencies from Build-Depends-Indep
+    - debian/watch: update
+    - libasound2.NEWS:
+      + Update
+  * Jordi Mallach:
+    - debian/control
+      + Make libasound2-data replace libasound2 (<< 1.0.7)
+
+ -- Jordi Mallach <jordi@debian.org>  Wed,  1 Dec 2004 18:42:14 +0100
+
+alsa-lib (1.0.6-5) unstable; urgency=medium
+
+  * Thomas Hood:
+    - debian/control:
+      + Add libjack0.80.0-dev back to Build-Depends  (Closes: #281685)
+
+ -- Jordi Mallach <jordi@debian.org>  Wed, 17 Nov 2004 10:24:10 +0100
+
+alsa-lib (1.0.6-4) unstable; urgency=medium
+
+  * Thomas Hood:
+    - /usr/share/doc/libasound2/examples/asound.conf_dmix
+      + Add as an example of how to set up /etc/asound.conf
+        or ~/.asoundrc so that the dmix plugin is used to
+        mix together multiple sound sources
+    - debian/control:
+      + Tweak Descriptions
+  * Jordi Mallach:
+    - debian/rules:
+      + Install doxygen docs in /usr/share/doc/libasound2-doc/,
+        not in .../libasound2-dev/  (Closes: #277837)
+    - debian/libasound2-doc.install:
+      + Update html docs path
+    - debian/libasound2-doc.doc-base:
+      + Add this file to register the doxygen docs
+    - debian/rules:
+      + Implement an easy way to disable the build of the jack plugin,
+        thus allowing breaking of the circular build dependency
+        between jack-audio-connection-kit and alsa-lib.  Please see
+        the README.build file for more information.  (Closes: #222677)
+        Thanks to Colin Watson for the suggestion.
+    - debian/README.build:
+      + Added (to the source package) with instructions on how
+        to build alsa-lib without libjack0.80.0-dev.
+
+ -- Jordi Mallach <jordi@debian.org>  Wed, 17 Nov 2004 00:58:42 +0100
+
+alsa-lib (1.0.6-3) unstable; urgency=medium
+
+  * Jordi Mallach:
+    - Add NEWS file for libasound2 to describe the version mismatch
+      problem (#275573) and to provide solution alternatives
+    - debian/control: require debhelper (>= 4.1.51) for NEWS.Debian
+      support
+  * Thomas Hood:
+    - Fix up copyright file
+    - debian/control:
+      + Tweak Description
+      + Don't Depend on alsa-headers which doesn't exist any more.
+      + Build-Depend on doxygen >> 1.3.8-20040913-1 in order to
+        prevent build segfault
+
+ -- Jordi Mallach <jordi@debian.org>  Mon, 18 Oct 2004 17:48:28 +0200
+
+alsa-lib (1.0.6-2) unstable; urgency=medium
+
+  * Thomas Hood:
+    - conf.c
+      + Add 01_conf_backslash.dpatch:
+        Make backslash a LOCAL_UNEXPECTED_CHAR
+        Patch backported from CVS
+    - aserver.c
+      + Add 01_aserver_options.dpatch:
+        Terminate long_options structure  (Closes: #211893)
+        Thanks to Clement Stenac for the patch
+  * Jordi Mallach:
+    - this rebuild should fix the version missmatch in version.h
+      (closes: #271047).
+    - debian/patches/01_alpha_versioned_symbols.dpatch: apply patch from
+      Steve Langasek to force the usage of USE_VERSIONED_SYMBOLS on
+      alpha to workaround the usage of non-portable assembly
+      (closes: #272998).
+
+ -- Jordi Mallach <jordi@debian.org>  Sun, 26 Sep 2004 18:38:47 +0200
+
+alsa-lib (1.0.6-1) unstable; urgency=low
+
+  * New upstream release.
+  * Jordi Mallach:
+    - debian/control: add Thomas Hood to Uploaders.
+
+ -- Jordi Mallach <jordi@debian.org>  Wed, 22 Sep 2004 22:24:00 +0200
+
+alsa-lib (1.0.5-1) unstable; urgency=low
+
+  * New upstream release.
+  * Jordi Mallach:
+    - debian/libasound2.shlibs: bump shlibs again, new symbols added.
+
+ -- Jordi Mallach <jordi@debian.org>  Thu, 10 Jun 2004 01:25:30 +0200
+
+alsa-lib (1.0.4-1) unstable; urgency=low
+
+  * New upstream release.
+    - More snd_pcm_mmap_commit fixes (Closes: #238212)
+  * David B. Harris:
+    - Bump shlibs, several new symbols were added.
+  * Jordi Mallach:
+    - debian/rules: remove workaround for hppa build, works ok now.
+    - debian/control:
+      + change Maintainer name to "Debian ALSA Maintainers".
+      + update Standards-Version to 3.6.1.0 (no changes needed).
+
+ -- Jordi Mallach <jordi@debian.org>  Tue, 13 Apr 2004 21:53:47 +0200
+
+alsa-lib (1.0.3b-1) unstable; urgency=medium
+
+  * New upstream release
+    + Various and sundry dmix problems fixed (Closes: #236394)
+    + snd_pcm_mmap_commit fixed (Closes: #238212)
+    + Urgency set to 'medium' as these bugs caused problems for a lot of
+      people.
+  * Don't distribute ancient and non-updated changelog.gz (Closes: #236294)
+
+ -- David B. Harris <dbharris@debian.org>  Wed, 17 Mar 2004 12:40:44 -0500
+
+alsa-lib (1.0.3-1) unstable; urgency=low
+
+  * New upstream release
+    + works on exec-shield enabled kernels (Closes: #235954)
+  * David B. Harris:
+    + Change Maintainer: email address from my private address to
+      dbharris@debian.org
+
+ -- David B. Harris <dbharris@debian.org>  Wed, 25 Feb 2004 22:40:10 -0500
+
+alsa-lib (1.0.2-1) unstable; urgency=low
+
+  * New upstream release.
+  * David B Harris:
+    + debian/patches/00list: Remove 01_aclocal_underquote_warning, it has been
+      integrated upstream.
+    + debian/libasound2.shlibs: bump shlibs version, forgot to do this for
+      the new upstream release (symbol sndo_pcm_transfer_block was added).
+
+ -- Jordi Mallach <jordi@debian.org>  Sat, 21 Feb 2004 18:29:37 +0100
+
+alsa-lib (1.0.1-1) unstable; urgency=medium
+
+  * New upstream release (closes: #228102).
+    + NOTE! This version includes source incompatibility with previous
+      versions. We tested a great many packages and filed bugs, but you may
+      want to check your own package too if it Build-Depends: on
+      libasound2-dev. The change is briefly documented at
+      /usr/share/doc/libasound2-dev/NOTES.
+  * David B Harris:
+    + Bump libasound2.shlibs to this release (>> 1.0.0) as a new
+      symbol (snd_seq_port_subscribe_set_voices)
+    + Install "NOTES" file as documentation in libasound2-dev, which documents
+      the recent source-incompatible change
+  * Jordi Mallach:
+    + debian/rules: dpatchify this package.
+    + debian/patches/01_aclocal_underquote_warning.dpatch: Apply patch from
+      Alexander Kogan to avoid a warning with automake 1.8 (closes: #228687).
+    + debian/patches/02_aclocal_libs_fix.dpatch: Move Joy's patch to a dpatch.
+    + debian/control: switch to JACK 0.80.0.
+
+ -- Jordi Mallach <jordi@debian.org>  Mon, 26 Jan 2004 14:18:06 +0100
+
+alsa-lib (0.9.8-2) unstable; urgency=medium
+
+  * Jordi Mallach:
+    + debian/rules: workaround weird FTBFS in hppa using -O0 in this arch
+      (thanks for the testing, LaMont).
+
+ -- Jordi Mallach <jordi@debian.org>  Thu, 20 Nov 2003 16:46:04 +0100
+
+alsa-lib (0.9.8-1) unstable; urgency=low
+
+  * New upstream release.
+  * David B Harris:
+    + Bump shlibs requirement, as new symbols have been added
+
+ -- David B Harris <david@eelf.ddts.net>  Fri, 14 Nov 2003 12:54:11 +0100
+
+alsa-lib (0.9.6-3) unstable; urgency=low
+
+  * Jordi Mallach:
+    + utils/alsa.m4: further fixes from Joy. Don't despair, XMMS users.
+
+ -- Jordi Mallach <jordi@debian.org>  Tue,  9 Sep 2003 03:03:34 +0200
+
+alsa-lib (0.9.6-2) unstable; urgency=low
+
+  * Jordi Mallach:
+    + utils/alsa.m4: don't modify LIBS gratuitously (closes: #208883).
+      Thanks, Josip Rodin.
+
+ -- Jordi Mallach <jordi@debian.org>  Tue, 09 Sep 2003 02:03:49 +0200
+
+alsa-lib (0.9.6-1) unstable; urgency=low
+
+  * New upstream release.
+  * David B. Harris
+    + Import new upstream version to our CVS tree
+    + Remove outdated Suggests: alsadriver. alsadriver doesn't exist any more,
+      and nothing Provides: it. (Closes: #199389)
+
+ -- David B Harris <david@eelf.ddts.net>  Tue, 26 Aug 2003 14:19:26 +0200
+
+alsa-lib (0.9.4-2) unstable; urgency=low
+
+  * Jordi Mallach:
+    + debian/libasound2-plugins.links: symlink libasound_module_pcm_jack.so
+      to libasound_module_pcm_jack.so.2.0.0 (thanks Neil Darlow,
+      closes: #197497).
+
+ -- Jordi Mallach <jordi@debian.org>  Sun, 15 Jun 2003 17:40:27 +0200
+
+alsa-lib (0.9.4-1) unstable; urgency=low
+
+  * David B. Harris:
+    + New upstream release.
+  * Jordi Mallach:
+    + debian/copyright: update list of ALSA maintainers.
+    + debian/control: update JACK build dependency to libjack0.71.2-dev
+      (closes: #197121).
+
+ -- Jordi Mallach <jordi@debian.org>  Fri, 13 Jun 2003 13:10:26 +0200
+
+alsa-lib (0.9.3-2) unstable; urgency=low
+
+  * Steve Kowalik:
+    - Don't jump to build-stamp-indep in the build rule. (Closes: #194297)
+    - Bump to Standards-Version 3.5.10.0; no changes needed.
+
+ -- Steve Kowalik <stevenk@debian.org>  Sat, 24 May 2003 17:17:01 +1000
+
+alsa-lib (0.9.3-1) unstable; urgency=low
+
+  * New upstream release.
+  * Jordi Mallach:
+    + debian/control:
+      - add libc6-dev | libc-dev to libasound2-dev's dependencies
+        (closes: #147649).
+      - add libasound2-doc to libasounds2-dev's suggestions.
+      - add Build-Depends on libjack0.50.0-dev to build the JACK plugin.
+      - add Build-Depends-Indep on debhelper and doxygen to build
+        alsa-lib docs.
+      - new binary package, libasound2-plugins, which holds extra plugins.
+    + debian/rules: build and install the JACK plugin into libasound2-plugins.
+    + debian/libasound2-plugins.install: add usr/lib/alsa-lib.
+  * David B Harris:
+    + debian/control: Move libasound2-dev to section libdevel.
+    + debian/libasound2.shlibs: Bump required version to 0.9.3, several new
+      symbols were added.
+    + Add a new package, libasound2-doc. Contains the doxygen-generated HTML
+      documentation for the libasound2 APIs. (Closes: #189638)
+
+ -- Jordi Mallach <jordi@debian.org>  Sat, 10 May 2003 18:19:27 +0200
+
+alsa-lib (0.9.2-2) unstable; urgency=medium
+
+  * Jordi Mallach:
+    + Rebuild the package with the correct options for cvs-buildpackage
+      (closes: #186840).
+
+ -- Jordi Mallach <jordi@debian.org>  Sun, 30 Mar 2003 16:42:34 +0200
+
+alsa-lib (0.9.2-1) unstable; urgency=low
+
+  * New upstream release.
+  * Jordi Mallach:
+    + debian/control: bump depends to 0.9.2.
+    + debian/libasound2.shlibs: update to 0.9.2.
+
+ -- Jordi Mallach <jordi@debian.org>  Fri, 28 Mar 2003 23:38:40 +0100
+
+alsa-lib (0.9.1-1) unstable; urgency=low
+
+  * New upstream release.
+  * Jordi Mallach:
+    + debian/libasound2.shlibs: bump to 0.9.1.
+    + debian/control: depend on alsa-headers 0.9.1, too.
+
+ -- Jordi Mallach <jordi@debian.org>  Thu, 13 Mar 2003 13:38:46 +0100
+
+alsa-lib (0.9.0rc8c-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/control: add David B. Harris <david@eelf.ddts.net> to Uploaders:,
+    drop Martin Loschwitz.
+  * debian/shlibs: updated to rc8.
+
+ -- Jordi Mallach <jordi@debian.org>  Tue, 11 Mar 2003 12:49:21 +0100
+
+alsa-lib (0.9.0rc7-3) unstable; urgency=low
+
+  * debian/control:
+    + sigh, add Replaces: libasound2 (<< 0.9.0rc7-2) to libasound2-dev.
+      Promise I tested this (with dpkg -i, right...) (closes: #181711).
+    + drop the pkg-config dependency from libasound2-dev, as the aclocal
+      macro doesn't use it.
+
+ -- Jordi Mallach <jordi@debian.org>  Thu, 20 Feb 2003 17:32:19 +0100
+
+alsa-lib (0.9.0rc7-2) unstable; urgency=low
+
+  * debian/control:
+    + sync maintainer name with alsa-driver.
+    + fix debhelper requirement to (>= 4.0.0), as we're using DH_COMPAT=4.
+    + add Depends: pkg-config to libasound2-dev.
+    + Standards-Version: 3.5.8.0.
+  * debian/rules:
+    + install stuff in debian/tmp, not debian/libasound2.
+    + use dh_install instead of dh_movefiles.
+    + remove call to dh_undocumented.
+    + don't remove libtool stuff by hand.
+  * debian/libasound2.install: install lib, aserver and alsa config files.
+  * debian/libasound2-dev.install: install development, aclocal and pkgconfig
+    files (closes: #181589).
+    
+ -- Jordi Mallach <jordi@debian.org>  Wed, 19 Feb 2003 10:55:49 +0100
+
+alsa-lib (0.9.0rc7-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/compat: use DH_COMPAT=4.
+  * debian/control:
+    + change maintainer to "Debian Alsa Psychos
+      <debian-alsa@lists.wedontsleep.org", add Martin to Uploaders:.
+    + update Depends: to rc7.
+    + minor fix to descriptions.
+  * debian/copyright: update packaging history.
+  * debian/shlibs: bump to rc7.
+  * debian/rules: remove DH_COMPAT definition.
+
+ -- Jordi Mallach <jordi@debian.org>  Sun,  2 Feb 2003 11:31:47 +0100
+
+alsa-lib (0.9.0rc6-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/control:
+    + new Maintainers, Martin Loschwitz <madkiss@madkiss.org>,
+      Jordi Mallach <jordi@debian.org> and
+      Steve Kowalik <stevenk@debian.org>.
+    + drop alsa-headers from Build-Depends. They are included in the tarball
+      now.
+  * debian/rules:
+    + use the symlink method for config.{guess,sub} updating.
+    + remove stuff for DEB_BUILD_OPTIONS "strip", as it's handled by
+      debhelper.
+    + cleanup libtool stuff that is left behind.
+  * debian/shlibs: tighten depends again, gratuitously.
+  * Maintainer upload, ack NMU's (closes: #101287, #145016, #149159,
+    closes: #122775, #162359, #70370, #81018, #126069, #142877, #144592,
+    closes: #156448, #157056, #117109).
+
+ -- Jordi Mallach <jordi@debian.org>  Tue, 10 Dec 2002 16:27:43 +0100
+
+alsa-lib (0.9.0rc5-0.2) unstable; urgency=low
+
+  * Non-Maintainer Upload.
+  * debian/control: Build-Depend & Depend on alsa-headers (>= 0.9.0rc5).
+  * debian/shlibs: tighten depends to (>> 0.9.0rc5). Sigh.
+
+ -- Jordi Mallach <jordi@debian.org>  Wed, 30 Oct 2002 23:09:55 +0100
+
+alsa-lib (0.9.0rc5-0.1) unstable; urgency=low
+
+  * Non-Maintainer Upload.
+  * New upstream release.
+  * debian/changelog: remove emacs local variables.
+  * debian/rules: call "make distclean" instead of "make clean".
+
+ -- Jordi Mallach <jordi@debian.org>  Wed, 30 Oct 2002 18:39:57 +0100
+
+alsa-lib (0.9.0rc3-0.3) unstable; urgency=low
+
+  * debian/libasound2.postinst: remove crufty /usr/doc link left over by
+    ancient alsalib0.3.0 (closes: #81018).
+  * debian/rules:
+    + add support for DEB_BUILD_OPTIONS "noopt", drop "debug".
+    + quote around $(CFLAGS).
+  * debian/shlibs: tighten to (>> 0.9.0rc3). Somewhere between beta10 and
+    rc3 there was an incompatible change which breaks alsactl (thanks,
+    Peter Cordes; closes: #162359).
+
+ -- Jordi Mallach <jordi@debian.org>  Tue, 15 Oct 2002 19:14:34 +0200
+
+alsa-lib (0.9.0rc3-0.2) unstable; urgency=low
+
+  * Non-Maintainer Upload.
+  * debian/copyright: correct alsa-lib's license, it's LGPL, not GPL.
+    (closes: #142877).
+  * EMU10K1.conf is fixed in this version (closes: #144592).
+  * alsa-base dependency was downgraded on 0.9.0beta10a-1 (closes: #117109).
+  * User error, libasound2-dev's Depends: are ok (closes: #156448).
+  * alsa/asoundlib.h is correct in this version (closes: #126069).
+  * Build-Depends have been fixed for a long time (closes: #70370).
+
+ -- Jordi Mallach <jordi@debian.org>  Sun, 22 Sep 2002 14:32:32 +0200
+
+alsa-lib (0.9.0rc3-0.1) unstable; urgency=low
+
+  * Non-Maintainer Upload. Nearly all the work was done by
+    Bastian Kleineidam <calvin@debian.org>.
+  * New upstream release.
+  * New upstream has updated iatomic.h for mips 
+    (closes: #149159, #145016).
+  * Removed unnecessary powerpc patch.
+  * Removed libtool hack (dont know why this was there).
+  * Removed call to auto* tools, adjust build-depends.
+  * Build-depend on latest alsa-headers.
+  * Standards-Version: 3.5.6.1.
+  * DH_COMPAT=3; change debian/tmp references to debian/$(package)
+    (closes: #157056).
+  * Update config.{guess,sub}, ran libtoolize (closes: #101287).
+  * Do s/make/$(MAKE)/ in debian/rules.
+  * Add install target to debian/rules.
+  * Removed unnecessary debian/libasound0.4*.
+  * Removed unnecessary debian/postinst.
+  * Link asound.1 to undocumented.
+
+ -- Jordi Mallach <jordi@debian.org>  Sun, 08 Sep 2002 17:20:52 +0200
+
+alsa-lib (0.9.0rc1-1) unstable; urgency=low
+
+  * New upstream release
+  * Standards-Version: 3.5.6.0
+
+ -- Masato Taruishi <taru@debian.org>  Sun, 12 May 2002 22:01:47 +0900
+
+alsa-lib (0.9.0beta12-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Masato Taruishi <taru@debian.org>  Tue,  2 Apr 2002 18:45:52 +0900
+
+alsa-lib (0.9.0beta10a-1) unstable; urgency=low
+
+  * New upstream release
+  * Applied powerpc patch from Jack Howarth <howarth@bromo.msbb.uc.edu>
+  * Changed Recommends: alsa-base to Suggests.
+
+ -- Masato Taruishi <taru@debian.org>  Sat, 15 Dec 2001 13:11:36 +0900
+
+alsa-lib (0.9.0beta9-1) unstable; urgency=low
+
+  * New upstream release
+  * Maintainer release (closes: #97988)
+  * add --enable-static.
+  * some lintian fixes.
+
+ -- Masato Taruishi <taru@debian.org>  Tue, 27 Nov 2001 04:06:27 +0900
+
+alsa-lib (0.9.0beta7-1.2) unstable; urgency=low
+
+  * NMU
+  * Avoid use of functions from <asm/atomic.h> on HPPA.  More of #97988.
+
+ -- LaMont Jones <lamont@debian.org>  Thu, 22 Nov 2001 18:04:07 -0700
+
+alsa-lib (0.9.0beta7-1.1) unstable; urgency=low
+
+  * Non-maintainer upload
+  * Avoid use of functions from <asm/atomic.h> on ARM and SPARC.
+    (Closes: #97988) 
+
+ -- Phil Blundell <pb@debian.org>  Thu, 22 Nov 2001 13:56:50 +0000
+
+alsa-lib (0.9.0beta7-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Masato Taruishi <taru@debian.org>  Thu,  6 Sep 2001 15:54:18 +0900
+
+alsa-lib (0.9.0beta4-1.1) unstable; urgency=low
+  * Run libtoolize to get support for new architectures.  Closes: #101287
+  * printf is a macro as of gcc 3.0.  Fix usage of printf as a field.
+
+ -- LaMont Jones <lamont@debian.org>  Mon,  9 Jul 2001 21:39:34 -0600
+
+alsa-lib (0.9.0beta4-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Masato Taruishi <taru@debian.org>  Thu, 17 May 2001 18:28:36 +0900
+
+alsa-lib (0.9.0beta3-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Masato Taruishi <taru@debian.org>  Fri,  6 Apr 2001 00:42:03 +0900
+
+alsa-lib (0.5.10-1) unstable; urgency=low
+
+  * New upstream release
+  * Changed a relationship severity of alsadriver
+     from recommends to suggets.
+      (closes: #79527, #79427)
+  * Added Build-Depends: debhelper.
+
+ -- Masato Taruishi <taru@debian.org>  Mon, 15 Jan 2001 13:16:29 +0900
+
+alsa-lib (0.5.9-4) unstable; urgency=low
+
+  * Removed a confliction with alsa-base (<< 0.5.9d-6)
+    and added a recommendation to alsa-base.
+
+ -- Masato Taruishi <taru@debian.org>  Thu,  7 Dec 2000 00:36:25 +0900
+
+alsa-lib (0.5.9-3) unstable; urgency=low
+
+  * Removed Provides: alsalib.
+  * Updated for new Debian ALSA system.
+     - now can coexist with different version of ALSA library.
+       Removed a dependency to alsa-base.
+       (closes: #74188).
+     - Added Conflicts: alsa-base (<< 0.5.9d-6).
+
+ -- Masato Taruishi <taru@debian.org>  Mon, 27 Nov 2000 02:00:44 +0900
+
+alsa-lib (0.5.9-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Masato Taruishi <taru@debian.org>  Thu, 17 Aug 2000 12:20:13 +0900
+
+alsa-lib (0.5.8-1) unstable; urgency=low
+
+  * new upstream release.
+
+ -- Masato Taruishi <taru@debian.org>  Tue,  6 Jun 2000 22:02:25 +0900
+
+alsa-lib (0.5.7-4) unstable; urgency=low
+
+  * Changed section of libasound1 and libasound1-dev to libs and devel.
+
+ -- Masato Taruishi <taru@debian.org>  Mon,  5 Jun 2000 03:32:41 +0900
+
+alsa-lib (0.5.7-3) unstable; urgency=low
+
+  * Changed dependency relationships.
+     ALSA Kernel API was fixed. This menas we dont't need to consider
+     ALSA kernel version :)
+  * Added automake, autoconf, libtool entries to build depends.
+
+ -- Masato Taruishi <taru@debian.org>  Mon, 10 Apr 2000 20:39:24 +0900
+
+alsa-lib (0.5.7-2) unstable; urgency=low
+
+  * Updated dependency info. (closes: #62011)
+  * Removed minor dependencies for alsa-base of libasound1.
+  
+ -- Masato Taruishi <taru@debian.org>  Sun,  9 Apr 2000 01:23:23 +0900
+
+alsa-lib (0.5.7-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Masato Taruishi <taru@debian.org>  Fri,  7 Apr 2000 17:21:38 +0900
+
+alsa-lib (0.5.6-2) unstable; urgency=low
+
+  * Fixed debian/copyright.
+
+ -- Masato Taruishi <taru@debian.org>  Wed, 15 Mar 2000 00:45:39 +0900
+
+alsa-lib (0.5.6-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Masato Taruishi <taru@debian.org>  Mon, 13 Mar 2000 02:05:41 +0900
+
+alsa-lib (0.5.5-2) unstable; urgency=low
+
+  * Removed version name from this source name.
+
+ -- Masato Taruishi <taru@debian.org>  Sat, 11 Mar 2000 04:46:31 +0900
+
+alsa-lib-0.5 (0.5.5-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Masato Taruishi <taru@debian.org>  Fri,  3 Mar 2000 00:12:24 +0900
+
+alsa-lib-0.5 (0.5.4-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Masato Taruishi <taru@debian.org>  Tue, 29 Feb 2000 18:28:02 +0900
+
+alsa-lib-0.5 (0.5.3-1) unstable; urgency=low
+
+  * New upstream release.
+  * Added -version-info to src/Makefile.am because of wrong versioning
+    of the upstream.
+
+ -- Masato Taruishi <taru@debian.org>  Thu, 17 Feb 2000 23:01:02 +0900
+
+alsa-lib-0.5 (0.5.2-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Masato Taruishi <taru@debian.org>  Wed,  9 Feb 2000 10:55:53 +0900
+
+alsa-lib-0.4 (0.4.1e-3) unstable; urgency=low
+
+  * Renamed source name.
+
+ -- Masato Taruishi <taru@debian.org>  Wed,  9 Feb 2000 07:33:01 +0900
+
+alsalib (0.4.1e-2) unstable; urgency=low
+
+  * Added 'Conflicts: alsalib0.1.3'. (Closes: #36206, #39446)
+  * Changed GPL's path info in copyright.
+
+ -- Masato Taruishi <taru@debian.org>  Sat,  8 Jan 2000 00:00:00 +0900
+
+alsalib (0.4.1e-1) unstable; urgency=low
+
+  * new upstream release.
+
+ -- Masato Taruishi <taru@debian.org>  Mon,  8 Nov 1999 21:29:24 +0900
+
+alsalib (0.4.1d-1) unstable; urgency=low
+
+  * new upstream release.
+
+ -- Masato Taruishi <taru@debian.org>  Sat, 30 Oct 1999 00:46:37 +0900
+
+alsalib (0.4.1-4) unstable; urgency=low
+
+  * wrong closes format in -3 (Closes: #46751)
+  * Added shlibs info libasound0 (<< 0.4.2).
+
+ -- Masato Taruishi <taru@debian.org>  Mon, 25 Oct 1999 22:06:29 +0900
+
+alsalib (0.4.1-3) unstable; urgency=low
+
+  * new upstream release.
+  * Changed package name.
+  * Fixed missing headers files: Need alsa-headers (Closes #46751)
+
+ -- Masato Taruishi <taru@debian.org>  Sun, 17 Oct 1999 05:11:17 +0900
+
+alsalib (0.3.2-2) unstable; urgency=low
+
+  * Now includes a dummy alsalib0.3.0 package to attempt to cover up for
+    the evil bug in the previous alsalib0.3.0's prerm.
+
+ -- David Huggins-Daines <dhd@debian.org>  Thu, 15 Jul 1999 19:45:05 -0400
+
+alsalib (0.3.2-1) unstable; urgency=low
+
+  * New upstream version (skipped 0.3.1, because I'm too slow)
+  * Resolved namespace clash in the doc-base documentation.
+
+ -- David Huggins-Daines <dhd@debian.org>  Thu, 24 Jun 1999 02:50:06 -0400
+
+alsalib (0.3.0-pre4-1) unstable; urgency=low
+
+  * New upstream version
+  * Use maintainer-clean-am target to clean libtool stuff up
+
+ -- Wichert Akkerman <wakkerma@debian.org>  Sun, 14 Feb 1999 23:48:20 +0100
+
+alsalib (0.3.0-pre3a-1) unstable; urgency=low
+
+  * New upstream version
+  * Move libtool-hack into debian/rules so I don't have to patch it in
+    at every new upstream release
+  * Upstream documentation is now no longer sgml, but html made with LyX;
+    update doc-base registration accordinglt
+  * Change priority to extra
+
+ -- Wichert Akkerman <wakkerma@debian.org>  Wed,  3 Feb 1999 00:36:11 +0100
+
+alsalib (0.3.0-pre2-2) unstable; urgency=low
+
+  * Fixed wrong documentID in doc-base registration
+
+ -- Wichert Akkerman <wakkerma@debian.org>  Sat, 23 Jan 1999 23:45:06 +0100
+
+alsalib (0.3.0-pre2-1) unstable; urgency=low
+
+  * New upstream version
+  * Register API documentation with doc-base
+  * Move autoconf-stuff to -dev package
+
+ -- Wichert Akkerman <wakkerma@debian.org>  Sat, 23 Jan 1999 21:14:19 +0100
+
+alsalib (0.1.3-2) unstable; urgency=low
+
+  * Rebuild with new alsadriver installed so we get the new ioctls
+
+ -- Wichert Akkerman <wakkerma@debian.org>  Thu, 26 Nov 1998 20:20:24 +0100
+
+alsalib (0.1.3-1) unstable; urgency=low
+
+  * New upstream version
+  * Renamed package 
+  * Fix a couple of lintian errors & warnings
+
+ -- Wichert Akkerman <wakkerma@debian.org>  Sun, 15 Nov 1998 02:34:38 +0100
+
+alsalib (0.1.1-1) unstable; urgency=low
+
+  * New upstream version
+  * Suggest alsadriver
+
+ -- Wichert Akkerman <wakkerma@debian.org>  Wed, 16 Sep 1998 03:02:57 +0200
+
+alsalib (0.0.9-1) unstable; urgency=low
+
+  * New uptream version
+  * Use --strip-unneeded on /usr/lib/libsound.so
+  * Use --strip-debug on /usr/lib/libsound.a
+
+ -- Wichert Akkerman <wakkerma@debian.org>  Fri,  3 Jul 1998 00:20:25 +0200
+
+alsalib (0.0.8-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Wichert Akkerman <wakkerma@debian.org>  Sun,  7 Jun 1998 16:53:01 +0200
+

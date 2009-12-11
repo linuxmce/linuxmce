@@ -1,0 +1,20 @@
+Index: alsa-driver-1.0.18.dfsg/pci/Makefile
+===================================================================
+--- alsa-driver-1.0.18.dfsg.orig/pci/Makefile	2008-10-29 13:42:10.000000000 +0100
++++ alsa-driver-1.0.18.dfsg/pci/Makefile	2008-11-02 18:27:24.000000000 +0100
+@@ -10,7 +10,7 @@
+ #
+ 
+ clean-files := ad1889.c atiixp.c atiixp_modem.c bt87x.c cmipci.c ens1370.c \
+-	fm801.c intel8x0.c maestro3.c via82xx.c via82xx_modem.c
++	fm801.c intel8x0.c via82xx.c via82xx_modem.c
+ 
+ obj-$(CONFIG_SND) += pdplus/ asihpi/
+ 
+@@ -31,6 +31,5 @@
+ ens1371.c: ens1370.c
+ fm801.c: fm801.patch $(SND_TOPDIR)/alsa-kernel/pci/fm801.c
+ intel8x0.c: intel8x0.patch $(SND_TOPDIR)/alsa-kernel/pci/intel8x0.c
+-maestro3.c: maestro3.patch $(SND_TOPDIR)/alsa-kernel/pci/maestro3.c
+ via82xx.c: via82xx.patch $(SND_TOPDIR)/alsa-kernel/pci/via82xx.c
+ via82xx_modem.c: via82xx_modem.patch $(SND_TOPDIR)/alsa-kernel/pci/via82xx_modem.c
