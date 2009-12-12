@@ -751,7 +751,7 @@ void Router::ExecuteCommandGroup(int PK_CommandGroup,DeviceData_Router *pDevice_
 				PlutoSqlResult result_set2;
 				if( (result_set.r=db_wrapper_query_result(sSql)) && (row = db_wrapper_fetch_row(result_set.r)) )
 				{
-					int Milliseconds = atoi(row[0]);
+					int iSeconds = atoi(row[0]);
 					DelayedCommandInfo *pDelayedCommandInfo = new DelayedCommandInfo;
 					pDelayedCommandInfo->m_PK_CommandGroup=PK_CommandGroup;
 					pDelayedCommandInfo->m_iStartingCommand=RowCount+1;
@@ -767,7 +767,7 @@ void Router::ExecuteCommandGroup(int PK_CommandGroup,DeviceData_Router *pDevice_
 							pDelayedCommandInfo->m_sHint = row[1];
 					}
 
-					m_pAlarmManager->AddRelativeAlarm(Milliseconds/1000,this,ALARM_DELAYED_COMMAND_EXECUTION,pDelayedCommandInfo);
+					m_pAlarmManager->AddRelativeAlarm(iSeconds,this,ALARM_DELAYED_COMMAND_EXECUTION,pDelayedCommandInfo);
 					return;
 				}
 				else
