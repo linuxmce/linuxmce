@@ -159,6 +159,16 @@ function Build_Replacements_Intrepid
         #Package: libxine 
 	Build_Replacement_Package libxine ubuntu/xine-lib-1.1.16.3-0ubuntu2~xine 
 
+        #Package: alsa dianemo packages
+	Build_Replacement_Package alsa-utils ubuntu/alsa-utils-1.0.18
+	Build_Replacement_Package alsa-lib ubuntu/alsa-lib-1.0.18
+	Build_Replacement_Package alsa-plugins ubuntu/alsa-plugins-1.0.18
+	cp ${svn_dir}/${svn_branch_name}/ubuntu/*asound*deb ${replacements_dir}
+	cp ${svn_dir}/${svn_branch_name}/ubuntu/*sound-base*deb ${replacements_dir}
+	cp ${svn_dir}/${svn_branch_name}/ubuntu/alsa*deb ${replacements_dir}
+
+
+
 	#Package: vdr-plugin-xineliboutput
 	Build_Replacement_Package vdr-plugin-xineliboutput ubuntu/vdr-plugin-xineliboutput-1.0.1+lmce
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/libxine*.deb ${replacements_dir}
