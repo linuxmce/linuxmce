@@ -213,7 +213,7 @@ function mediaDirectors($output,$dbADO) {
 					$oldAudioDD=($rowD['FK_DeviceData']==$GLOBALS['AudioSettings'])?$rowD['IK_DeviceData']:$oldAudioDD;
 					if(!is_null($oldAudioDD)){
 						$oldAudioSettings[$rowD['PK_Device']]=str_replace(array('3','K'), '', $oldAudioDD);
-						$oldAC3[$rowD['PK_Device']]=(strstr($oldAudioDD,'3') && in_array($oldAudioSettings[$rowD['PK_Device']],array('C','O')))?'checked':(!in_array($oldAudioSettings[$rowD['PK_Device']],array('C','O'))?' disabled':'');
+						$oldAC3[$rowD['PK_Device']]=(strstr($oldAudioDD,'3') && in_array($oldAudioSettings[$rowD['PK_Device']],array('C','O','H')))?'checked':(!in_array($oldAudioSettings[$rowD['PK_Device']],array('C','O','H'))?' disabled':'');
 					}
 					$oldVideoDD=($rowD['FK_DeviceData']==$GLOBALS['VideoSettings'])?$rowD['IK_DeviceData']:$oldVideoDD;
 					if(!is_null($oldVideoDD)){
