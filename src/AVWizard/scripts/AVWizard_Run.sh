@@ -318,6 +318,22 @@ SetupViaXine()
 #
 }
 
+VerifyAlsaModuleInstall()
+{
+	local Installed, DriverPackage
+	Installed="0"
+	DriverPackage="alsa-modules-`uname -r`"
+	dpkg -l $DriverPackage && Installed="1"
+	if [[ "$Installed" == "0" ]]; then
+		apt-get install $DriverPackage && shutdown -r now
+	fi
+	apt-get install alsa-utils libasound2 lib64asound2 libasound2-plugins
+	
+}
+
+# Before doing anything else, we make sure that Alsa is installed.
+VerifyAlsaModuleInstall
+
 ConfSet AVWizardOverride 0
 rm -f /tmp/AVWizard_Started
 
