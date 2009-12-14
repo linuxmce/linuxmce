@@ -248,14 +248,16 @@ void Xine_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
     
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Xine_Player::CMD_Play_Media() called for id %d filename: %s (%s)", iStreamID, sMediaURL.c_str(),sMediaPosition.c_str());
 	
-	if(!m_bRouterReloading)
+	// No need to stop Screen saver the media is audio only
+	bool bStopScreenSaver = (iPK_MediaType != MEDIATYPE_pluto_StoredAudio_CONST && iPK_MediaType != MEDIATYPE_pluto_LiveRadio_CONST
+				&& iPK_MediaType != MEDIATYPE_pluto_CD_CONST);
+	if(!m_bRouterReloading && bStopScreenSaver)
 	{
 		//stopping PSS to get more video memory
 		//trying this for 2 seconds to avoid huge delays in case PSS is stuck
 		const int iQueryTimeout=2;
 		DeviceData_Base *pDevice_pss = m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_Screen_Savers_CONST,this,iQueryTimeout);
-		if (pDevice_pss && 
-		    (iPK_MediaType != MEDIATYPE_pluto_StoredAudio_CONST && iPK_MediaType != MEDIATYPE_pluto_LiveRadio_CONST))
+		if (pDevice_pss)
 		{
 			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Xine_Player::CMD_Play_Media() stopping PSS");
 			DCE::CMD_Off cmd(m_dwPK_Device, pDevice_pss->m_dwPK_Device, 0);
@@ -374,7 +376,6 @@ void Xine_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Xine_Player::CMD_Play_Media() Failed to open media");
 	}
 	
-	Sleep(1000);  // There's a bug in libxine that if you send other commands like change playback speed right after the stream starts it deadlocks
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Xine_Player::CMD_Play_Media() ended for filename: %s with stream %p.", sMediaURL.c_str(), pStream);
 	
 }
