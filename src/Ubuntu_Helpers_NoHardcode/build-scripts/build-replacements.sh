@@ -156,15 +156,14 @@ function Build_Replacements_Intrepid
 		popd
 	fi
 
-        #Package: libxine 
+        #Package: libxine 	
 	Build_Replacement_Package libxine ubuntu/xine-lib-1.1.16.3-0ubuntu2~xine 
 
         #Package: alsa dianemo packages
 	Build_Replacement_Package alsa-utils ubuntu/alsa-utils-1.0.18
-	Build_Replacement_Package alsa-lib ubuntu/alsa-lib-1.0.18
-	Build_Replacement_Package alsa-plugins ubuntu/alsa-plugins-1.0.18
+	Build_Replacement_Package libasound2 ubuntu/alsa-lib-1.0.18
+	Build_Replacement_Package libasound2-plugins ubuntu/alsa-plugins-1.0.18
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/*asound*deb ${replacements_dir}
-	cp ${svn_dir}/${svn_branch_name}/ubuntu/*sound-base*deb ${replacements_dir}
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/alsa*deb ${replacements_dir}
 
 
@@ -178,6 +177,15 @@ function Build_Replacements_Intrepid
 	DisplayMessage "Building zaptel-modules"
 	m-a --non-inter -ft -l $KVER a-b zaptel
 	cp /usr/src/zaptel-modules*.deb "${replacements_dir}"
+
+	#Package: alsa-modules
+	if [[ -f alsa-driver.tar.bz2 ]]; then
+		DisplayMessage "Building alsa-modules from existing drivers archive"
+		m-a --non-inter -t -l $KVER a-b alsa
+		cp /usr/src/alsa-modules*.deb "${replacements_dir}"
+	else
+		DisplayMessage "Not building alsa-modules, as the drivers archive does not exist"
+	fi
 }
 
 function Build_Replacements_Hardy
