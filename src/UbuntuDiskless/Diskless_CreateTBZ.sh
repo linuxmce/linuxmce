@@ -52,6 +52,13 @@ else
 	create_initial_root_with_debootstrap
 fi
 
+# Make sure, the root user is connecting to DCEROUTER for any MySQL connection
+echo "[client]
+host = dcerouter
+" > "$TEMP_DIR"/root/.my.cnf
+
+
+
 ## Setup debconf interface to 'noninteractive'
 export DEBIAN_FRONTEND=noninteractive
 echo "Setting Debconf interface to 'noninteractive' and default priority 'critical'"
