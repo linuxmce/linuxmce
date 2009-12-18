@@ -55,6 +55,20 @@ Restore() {
 	# -------------
 	# MISC. CLEANUP
 	# -------------
+	chown -R  www-data /usr/pluto/orbiter/floorplans/
+	/etc/init.d/asterisk restart
+	
+	## Reinstall this packages so we'll have an updates database schema
+	apt-get -y --reinstall install pluto-system-database
+	apt-get -y --reinstall install pluto-media-database
+	apt-get -y --reinstall install pluto-local-database
+	apt-get -y --reinstall install pluto-security-database
+	apt-get -y --reinstall install pluto-telecom-database
+	
+	if [[ -f /var/lib/dpkg/info/freepbx.postinst ]] ;then
+		apt-get -y --reinstall install freepbx
+	fi
+	
 	## Mark MDs for reconfigure
 	RunSQL "UPDATE Device SET NeedConfigure = '1' WHERE FK_DeviceTemplate = 28"
 
@@ -208,15 +222,15 @@ if [[ "$1" == "--backup" ]]; then
 	done
 
 	# Backup asterisk database
-	mkdir -p $FULLPATH/database/asterisk
+	mkdir -p $FULLPATH/$DATABASEFOLDER/asterisk
 	/usr/bin/mysqldump -e --quote-names --allow-keywords --add-drop-table --skip-extended-insert $MYSQL_DB_CRED asterisk > $FULLPATH/$DATABASEFOLDER/asterisk/asterisk.sql
 
 	# Backup mythtv database
-	mkdir -p $FULLPATH/database/mythconverg
+	mkdir -p $FULLPATH/$DATABASEFOLDER/mythconverg
 	/usr/bin/mysqldump -e --quote-names --allow-keywords --add-drop-table --skip-extended-insert $MYSQL_DB_CRED mythconverg > $FULLPATH/$DATABASEFOLDER/mythconverg/mythconverg.sql
 	
 	# Backup pluto_media database
-	mkdir -p $FULLPATH/database/pluto_media
+	mkdir -p $FULLPATH/$DATABASEFOLDER/pluto_media
 	/usr/bin/mysqldump -e --quote-names --allow-keywords --add-drop-table --skip-extended-insert $MYSQL_DB_CRED pluto_media > $FULLPATH/$DATABASEFOLDER/pluto_media/pluto_media.sql
 
 	# -----------------------
