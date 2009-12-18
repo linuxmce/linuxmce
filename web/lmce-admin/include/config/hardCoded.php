@@ -119,6 +119,7 @@
 	$GLOBALS['genericOFFCommand']=193;				// Generic OFF
 	$GLOBALS['powerCommand']=194;					// toggle power
 	$GLOBALS['genericSetLevelCommand']=184;			// Set Level
+	$GLOBALS['setTemperatureCommand']=278;			// Set Temperature
 	$GLOBALS['genericHeatCommand']=197;				// Generic Heat
 	$GLOBALS['genericCoolCommand']=196;				// Generic Cool
 	$GLOBALS['setCoolHeat']=280;					// Set cool/Heat, with parm C for Cool and H for Heat

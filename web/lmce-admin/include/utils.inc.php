@@ -2135,7 +2135,7 @@ function processClimateScenario($cgID,$dbADO)
 			$dbADO->Execute($deleteCommand,array($cgID,$elem,$GLOBALS['genericCoolCommand']));
 			$dbADO->Execute($deleteCommand,array($cgID,$elem,$GLOBALS['genericOFFCommand']));
 			$dbADO->Execute($deleteCommand,array($cgID,$elem,$GLOBALS['setCoolHeat']));
-			$dbADO->Execute($deleteCommand,array($cgID,$elem,$GLOBALS['genericSetLevelCommand']));
+			$dbADO->Execute($deleteCommand,array($cgID,$elem,$GLOBALS['setTemperatureCommand']));
 			$dbADO->Execute($deleteParameters,array($cgID,$elem));
 
 			switch($deviceCommand){
@@ -2176,14 +2176,14 @@ function processClimateScenario($cgID,$dbADO)
 
 			if($dimValue!=''){
 				$insertCG_C='INSERT INTO CommandGroup_Command (FK_CommandGroup, FK_Device, FK_Command) VALUES (?,?,?)';
-				$dbADO->Execute($insertCG_C,array($cgID,$elem,$GLOBALS['genericSetLevelCommand']));
+				$dbADO->Execute($insertCG_C,array($cgID,$elem,$GLOBALS['setTemperatureCommand']));
 				$cgcInsertID=$dbADO->Insert_ID();
 
 
 				$values=array();
-				$values[$GLOBALS['commandParamAbsoluteLevel']]=$dimValue;
+				$values[$GLOBALS['commandParameterValueToAsign']]=$dimValue;
 						
-				addScenarioCommandParameters($cgcInsertID,$GLOBALS['genericSetLevelCommand'],$dbADO,$values);						
+				addScenarioCommandParameters($cgcInsertID,$GLOBALS['setTemperatureCommand'],$dbADO,$values);						
 				
 			}
 
