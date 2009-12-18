@@ -539,7 +539,7 @@ void Security_Plugin::CMD_Set_House_Mode(string sValue_To_Assign,int iPK_Users,s
 	vector<Row_Device *> vectAlarmPanelDevices;
 	m_pDatabase_pluto_main->Device_get()->GetRows(
 		"JOIN DeviceTemplate ON FK_DeviceTemplate = PK_DeviceTemplate "
-		"WHERE FK_DeviceCategory = " + StringUtils::ltos(DEVICECATEGORY_Security_Interface_CONST) + 
+		"WHERE (FK_DeviceCategory = " + StringUtils::ltos(DEVICECATEGORY_Security_Interface_CONST) + " OR FK_DeviceCategory = " + StringUtils::ltos(DEVICECATEGORY_Specialized_CONST) + ")" +
 		" AND FK_Installation = " + StringUtils::ltos(m_pRouter->iPK_Installation_get()), &vectAlarmPanelDevices);
 
 	if(vectAlarmPanelDevices.size())
