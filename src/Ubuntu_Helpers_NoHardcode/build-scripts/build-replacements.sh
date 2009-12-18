@@ -160,9 +160,12 @@ function Build_Replacements_Intrepid
 	Build_Replacement_Package libxine ubuntu/xine-lib-1.1.16.3-0ubuntu2~xine 
 
         #Package: alsa dianemo packages
-	Build_Replacement_Package alsa-utils ubuntu/alsa-utils-1.0.18
 	Build_Replacement_Package libasound2 ubuntu/alsa-lib-1.0.18
+	if ! dpkg -l libasound2-dev &>/dev/null; then
+		dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/libasound2-dev*deb
+	fi
 	Build_Replacement_Package libasound2-plugins ubuntu/alsa-plugins-1.0.18
+	Build_Replacement_Package alsa-utils ubuntu/alsa-utils-1.0.18
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/*asound*deb ${replacements_dir}
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/alsa*deb ${replacements_dir}
 
