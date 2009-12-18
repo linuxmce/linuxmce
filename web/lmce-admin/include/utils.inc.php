@@ -1978,7 +1978,7 @@ function climateDevicesTable($cgID,$dbADO)
 			ORDER BY Description ASC';
 
 		$resCGCommands=$dbADO->Execute($queryCGCommands,array($rowGetRoomsDevice['PK_Device'],$cgID));
-		$dimValue='';
+		$temperature='';
 		if($resCGCommands->RecordCount()==0)
 			$selectedCommand=1;
 		else{
@@ -2005,7 +2005,7 @@ function climateDevicesTable($cgID,$dbADO)
 					$selectedCommand=0;
 				break;
 			}
-			$dimValue=(@$rowCGCSetLevel['FK_CommandParameter']==$GLOBALS['commandParamAbsoluteLevel'])?$rowCGCSetLevel['IK_CommandParameter']:'';
+			$temperature=(@$rowCGCSetLevel['FK_CommandParameter']==$GLOBALS['commandParamAbsoluteLevel'])?$rowCGCSetLevel['IK_CommandParameter']:'';
 		}
 		$out.='
 			<tr bgcolor="'.(($lineCount%2==0)?'#DDDDDD':'').'">
@@ -2016,10 +2016,10 @@ function climateDevicesTable($cgID,$dbADO)
 				<td align="center"><input type="radio" name="command_'.$rowGetRoomsDevice['PK_Device'].'" value="3" '.(($selectedCommand==3)?'checked':'').'></td>
 				<td align="center"><input type="radio" name="command_'.$rowGetRoomsDevice['PK_Device'].'" value="4" '.(($selectedCommand==4)?'checked':'').'></td>
 				<td align="center"><input type="radio" name="command_'.$rowGetRoomsDevice['PK_Device'].'" value="5" '.(($selectedCommand==5)?'checked':'').'></td>
-				<td align="center"><input type="text" name="dimValue_'.$rowGetRoomsDevice['PK_Device'].'" value="'.@$dimValue.'" size="3" onClick="eval(\'document.scenarioWizard.command_'.$rowGetRoomsDevice['PK_Device'].'[4].checked=true\');"></td>
+				<td align="center"><input type="text" name="temperature_'.$rowGetRoomsDevice['PK_Device'].'" value="'.@$temperature.'" size="3" onClick="eval(\'document.scenarioWizard.command_'.$rowGetRoomsDevice['PK_Device'].'[4].checked=true\');"></td>
 			</tr>
 			<input type="hidden" name="oldCommand_'.$rowGetRoomsDevice['PK_Device'].'" value="'.$selectedCommand.'">
-			<input type="hidden" name="oldDimValue_'.$rowGetRoomsDevice['PK_Device'].'" value="'.@$dimValue.'">		
+			<input type="hidden" name="oldTemperature_'.$rowGetRoomsDevice['PK_Device'].'" value="'.@$temperature.'">		
 		';
 	}
 	if(count($displayedDevices)>0){
@@ -2120,16 +2120,16 @@ function processClimateScenario($cgID,$dbADO)
 	$displayedDevicesArray=explode(',',$_POST['displayedDevices']);
 	foreach($displayedDevicesArray AS $elem){
 		$deviceCommand=(int)@$_POST['command_'.$elem];
-		$dimValue=@$_POST['dimValue_'.$elem];
+		$temperature=@$_POST['temperature_'.$elem];
 		$oldCommand=@$_POST['oldCommand_'.$elem];
-		$oldDimValue=@$_POST['oldDimValue_'.$elem];
+		$oldTemperature=@$_POST['oldTemperature_'.$elem];
 		$deleteCommand='DELETE FROM CommandGroup_Command WHERE FK_CommandGroup=? AND FK_Device=? AND FK_Command=?';
 		$deleteParameters='
 			DELETE CommandGroup_Command_CommandParameter
 			FROM CommandGroup_Command_CommandParameter
 			JOIN CommandGroup_Command on FK_CommandGroup_Command=PK_CommandGroup_Command
 			WHERE FK_CommandGroup=? AND FK_Device=?';
-		if($deviceCommand!=$oldCommand || ($deviceCommand==$oldCommand && $oldDimValue!=$dimValue))	{
+		if($deviceCommand!=$oldCommand || ($deviceCommand==$oldCommand && $oldTemperature!=$temperature))	{
 			$dbADO->Execute($deleteCommand,array($cgID,$elem,$GLOBALS['genericONCommand']));
 			$dbADO->Execute($deleteCommand,array($cgID,$elem,$GLOBALS['genericHeatCommand']));
 			$dbADO->Execute($deleteCommand,array($cgID,$elem,$GLOBALS['genericCoolCommand']));
@@ -2174,14 +2174,14 @@ function processClimateScenario($cgID,$dbADO)
 				break;
 			}
 
-			if($dimValue!=''){
+			if($temperature!=''){
 				$insertCG_C='INSERT INTO CommandGroup_Command (FK_CommandGroup, FK_Device, FK_Command) VALUES (?,?,?)';
 				$dbADO->Execute($insertCG_C,array($cgID,$elem,$GLOBALS['setTemperatureCommand']));
 				$cgcInsertID=$dbADO->Insert_ID();
 
 
 				$values=array();
-				$values[$GLOBALS['commandParameterValueToAsign']]=$dimValue;
+				$values[$GLOBALS['commandParameterValueToAsign']]=$temperature;
 						
 				addScenarioCommandParameters($cgcInsertID,$GLOBALS['setTemperatureCommand'],$dbADO,$values);						
 				
