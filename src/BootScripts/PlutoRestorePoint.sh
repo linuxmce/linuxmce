@@ -9,6 +9,7 @@ BKPDIR=$(date +%Y-%m-%d-%H-%M)
 FULLPATH="$MASTERDIR/download/$BKPDIR"
 DATABASEFOLDER="database"
 FILESYSTEMFOLDER="filesystem"
+VERSION==$(awk -F= '$1=="DISTRIB_RELEASE"{ sub(/\./,""); printf "%04d\n", $2 }' /etc/lsb-release)
 
 
 Usage () {
@@ -76,10 +77,9 @@ Restore() {
 	ConfDel remote
 
 	# Update Version/Architecture infromation
-	# TODO:  See if we can get the version number (I.e. 0810) programatically
 	arch=$(apt-config dump | grep 'APT::Architecture' | sed 's/APT::Architecture.*"\(.*\)".*/\1/g')
-	RunSQL "UPDATE Device_DeviceData SET IK_DeviceData='LMCE_CORE_u0810_$arch' WHERE IK_DeviceData='LMCE_CORE_1_1'"
-	RunSQL "UPDATE Device_DeviceData SET IK_DeviceData='LMCE_MD_u0810_i386'   WHERE IK_DeviceData='LMCE_MD_1_1'"
+	RunSQL "UPDATE Device_DeviceData SET IK_DeviceData='LMCE_CORE_u${VERSION}_${arch}' WHERE IK_DeviceData='LMCE_CORE_1_1'"
+	RunSQL "UPDATE Device_DeviceData SET IK_DeviceData='LMCE_MD_u${VERSION}_i386'   WHERE IK_DeviceData='LMCE_MD_1_1'"
 	RunSQL "UPDATE Device_DeviceData SET IK_DeviceData='0' WHERE FK_DeviceData='234'"
 	RunSQL "UPDATE Device_DeviceData SET IK_DeviceData='i386' WHERE FK_DeviceData='112' AND IK_DeviceData='686'"
 	RunSQL "USE asterisk; UPDATE incoming SET destination=CONCAT('custom-linuxmce', SUBSTR(destination, 18)) WHERE destination LIKE 'from-pluto-custom%'"
@@ -154,8 +154,8 @@ LegacyRestore() {
 	ConfDel remote
 
 	arch=$(apt-config dump | grep 'APT::Architecture' | sed 's/APT::Architecture.*"\(.*\)".*/\1/g')
-	RunSQL "UPDATE Device_DeviceData SET IK_DeviceData='LMCE_CORE_u0710_$arch' WHERE IK_DeviceData='LMCE_CORE_1_1'"
-	RunSQL "UPDATE Device_DeviceData SET IK_DeviceData='LMCE_MD_u0710_i386'   WHERE IK_DeviceData='LMCE_MD_1_1'"
+	RunSQL "UPDATE Device_DeviceData SET IK_DeviceData='LMCE_CORE_u${VERSION}_${arch}' WHERE IK_DeviceData='LMCE_CORE_1_1'"
+	RunSQL "UPDATE Device_DeviceData SET IK_DeviceData='LMCE_MD_u${VERSION}_i386'   WHERE IK_DeviceData='LMCE_MD_1_1'"
 	RunSQL "UPDATE Device_DeviceData SET IK_DeviceData='0' WHERE FK_DeviceData='234'"
 	RunSQL "UPDATE Device_DeviceData SET IK_DeviceData='i386' WHERE FK_DeviceData='112' AND IK_DeviceData='686'"
 	RunSQL "USE asterisk; UPDATE incoming SET destination=CONCAT('custom-linuxmce', SUBSTR(destination, 18)) WHERE destination LIKE 'from-pluto-custom%'"
@@ -205,7 +205,7 @@ if [[ "$1" == "--backup" ]]; then
 	echo "$BackupDescription" > "$FULLPATH/README"
 
 	# Make the Version file
-	echo "0810" > "$FULLPATH/Version"
+	echo "$VERSION" > "$FULLPATH/Version"
 	
 	# ----------------------
 	# BACKUP DATABASE TABLES
