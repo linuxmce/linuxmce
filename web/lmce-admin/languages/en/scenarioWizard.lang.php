@@ -10,4 +10,7 @@ $TEXT_WIZARD_Sleeping_Scenarios_SCENARIOS_CONST='Sleeping Scenarios';
 $TEXT_EDIT_SCENARIO_CONST='Edit scenario';
 $TEXT_SCENARIO_NAME_CONST='Scenario name';
 $TEXT_EDIT_SCENARIO_USING_WIZARD_CONST='Edit scenario using wizard';
+$TEXT_CLIMATE_SECTION_THERMOSTAT_DEVICES_CONST='Thermostat Devices';
+$TEXT_CLIMATE_SECTION_ONOFF_DEVICES_CONST='Other Climate Devices';
+$TEXT_CLIMATE_NO_DEVICES_AVAILABLE_CONST='No climate devices available for this device type.';
 ?>

@@ -1929,9 +1929,13 @@ function climateDevicesTable($cgID,$dbADO)
 	// include language files
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/utils.lang.php');
+	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/scenarioWizard.lang.php');
 	
 	$out='
 		<table>
+			<tr bgcolor="#000000" class="sectionhead">
+				<td colspan="8" align="center"><B>'.$TEXT_CLIMATE_SECTION_THERMOSTAT_DEVICES_CONST.'</B></td>
+			</tr>
 			<tr bgcolor="#DDDDDD">
 				<td align="center"><B>'.$TEXT_DEVICE_CONST.' / '.$TEXT_ROOM_CONST.'</B></td>
 				<td align="center"><B>'.$TEXT_TYPE_CONST.'</B></td>
@@ -1960,7 +1964,7 @@ function climateDevicesTable($cgID,$dbADO)
 	if($resGetRoomsDevice->RecordCount()==0){
 		$out.='
 			<tr>
-				<td colspan="9">'.$TEXT_NO_CLIMATE_DEVICES_CONST.'</td>
+				<td colspan="9">'.$TEXT_CLIMATE_NO_DEVICES_AVAILABLE_CONST.'</td>
 			</tr>';
 	}
 	$displayedDevices=array();
@@ -1983,7 +1987,7 @@ function climateDevicesTable($cgID,$dbADO)
 			$selectedCommand=1;
 		else{
 			while($rowCGC=$resCGCommands->FetchRow()){
-				if($rowCGC['FK_Command']!=$GLOBALS['genericSetLevelCommand'])
+				if($rowCGC['FK_Command']!=$GLOBALS['setTemperatureCommand'])
 					$rowCGCommands=$rowCGC;
 				else
 					$rowCGCSetLevel=$rowCGC;
@@ -2017,11 +2021,91 @@ function climateDevicesTable($cgID,$dbADO)
 				<td align="center"><input type="radio" name="command_'.$rowGetRoomsDevice['PK_Device'].'" value="4" '.(($selectedCommand==4)?'checked':'').'></td>
 				<td align="center"><input type="radio" name="command_'.$rowGetRoomsDevice['PK_Device'].'" value="5" '.(($selectedCommand==5)?'checked':'').'></td>
 				<td align="center"><input type="text" name="temperature_'.$rowGetRoomsDevice['PK_Device'].'" value="'.@$temperature.'" size="3" onClick="eval(\'document.scenarioWizard.command_'.$rowGetRoomsDevice['PK_Device'].'[4].checked=true\');"></td>
+			</tr>';
+	}
+
+
+
+
+
+
+
+	$out.='		<tr><td colspan="8">&nbsp;</td></tr>
+			<tr class="sectionhead">
+				<td colspan="8" align="center"><B>'.$TEXT_CLIMATE_SECTION_ONOFF_DEVICES_CONST.'</B></td>
+			</tr>
+			<tr bgcolor="#DDDDDD">
+				<td align="center"><B>'.$TEXT_DEVICE_CONST.' / '.$TEXT_ROOM_CONST.'</B></td>
+				<td align="center"><B>'.$TEXT_TYPE_CONST.'</B></td>
+				<td align="center"><B>'.$TEXT_UNCHANGED_CONST.'</B></td>
+				<td align="center"><B>'.$TEXT_ON_CONST.'</B></td>
+				<td align="center"><B>'.$TEXT_OFF_CONST.'</B></td>
+				<td align="center" colspan="3">&nbsp;</td>	
+			</tr>';
+	$queryGetRoomsDevice = '
+			SELECT Device.*, DeviceTemplate.Description AS Type, Room.Description AS RoomName 
+				FROM Device 
+			INNER JOIN DeviceTemplate ON Device.FK_DeviceTemplate=PK_DeviceTemplate
+			LEFT JOIN Room ON FK_Room=PK_Room
+			LEFT JOIN DeviceTemplate_DeviceCommandGroup ON DeviceTemplate_DeviceCommandGroup.FK_DeviceTemplate=Device.FK_DeviceTemplate
+			WHERE PK_Device IN ('.join(',',$climateDevicesArray).') AND FK_DeviceCommandGroup = ?
+			ORDER BY Description ASC';
+	$lineCount=0;
+	$resGetRoomsDevice = $dbADO->Execute($queryGetRoomsDevice,83);
+	if($resGetRoomsDevice->RecordCount()==0){
+		$out.='
+			<tr>
+				<td colspan="9">'.$TEXT_CLIMATE_NO_DEVICES_AVAILABLE_CONST.'</td>
+			</tr>';
+	}
+	$displayedDevices=array();
+	while ($rowGetRoomsDevice = $resGetRoomsDevice->FetchRow()) {
+		$displayedDevices[]=$rowGetRoomsDevice['PK_Device'];
+		$lineCount++;
+		$climateCommands=$GLOBALS['genericONCommand'].','.$GLOBALS['genericOFFCommand'];
+		$queryCGCommands='
+			SELECT Device.PK_Device,Device.Description, CommandGroup_Command.FK_Command,FK_CommandParameter,IK_CommandParameter 
+			FROM Command 
+			INNER JOIN CommandGroup_Command ON CommandGroup_Command.FK_Command=PK_Command
+			INNER JOIN Device ON CommandGroup_Command.FK_Device=PK_Device
+			LEFT JOIN CommandGroup_Command_CommandParameter ON CommandGroup_Command_CommandParameter.FK_CommandGroup_Command=PK_CommandGroup_Command  
+			WHERE FK_Device =? AND PK_Command IN ('.$climateCommands.') AND FK_CommandGroup=?
+			ORDER BY Description ASC';
+		$resCGCommands=$dbADO->Execute($queryCGCommands,array($rowGetRoomsDevice['PK_Device'],$cgID));
+		$temperature='';
+		if($resCGCommands->RecordCount()==0) {
+			$selectedCommand=1;
+		}else{
+			$rowCGCommands=$resCGCommands->FetchRow();
+
+			switch(@$rowCGCommands['FK_Command']){
+				case $GLOBALS['genericONCommand']:
+					$selectedCommand=2;
+				break;
+				case $GLOBALS['genericOFFCommand']:
+					$selectedCommand=5;
+				break;
+				default:
+					$selectedCommand=0;
+				break;
+			}
+			$temperature=(@$rowCGCSetLevel['FK_CommandParameter']==$GLOBALS['commandParamAbsoluteLevel'])?$rowCGCSetLevel['IK_CommandParameter']:'';
+		}
+		$out.='
+			<tr bgcolor="'.(($lineCount%2==0)?'#DDDDDD':'').'">
+				<td>&nbsp;&nbsp;&nbsp;&nbsp;<B>'.$rowGetRoomsDevice['Description'].' / '.(($rowGetRoomsDevice['RoomName']=='')?'None':$rowGetRoomsDevice['RoomName']).'</B></td>
+				<td>&nbsp;&nbsp;&nbsp;&nbsp;<B>'.$rowGetRoomsDevice['Type'].'</B></td>
+				<td align="center"><input type="radio" name="command_'.$rowGetRoomsDevice['PK_Device'].'" value="1" '.(($selectedCommand==1)?'checked':'').'></td>
+				<td align="center"><input type="radio" name="command_'.$rowGetRoomsDevice['PK_Device'].'" value="2" '.(($selectedCommand==2)?'checked':'').'></td>
+				<td align="center"><input type="radio" name="command_'.$rowGetRoomsDevice['PK_Device'].'" value="5" '.(($selectedCommand==5)?'checked':'').'></td>
+				<td align="center" colspan="3">&nbsp;</td>
 			</tr>
 			<input type="hidden" name="oldCommand_'.$rowGetRoomsDevice['PK_Device'].'" value="'.$selectedCommand.'">
 			<input type="hidden" name="oldTemperature_'.$rowGetRoomsDevice['PK_Device'].'" value="'.@$temperature.'">		
 		';
 	}
+
+
 	if(count($displayedDevices)>0){
 		$out.='
 				<tr>

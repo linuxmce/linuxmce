@@ -162,6 +162,13 @@ textarea {
 	color: #CCCCCC;
 }
 
+.sectionhead{
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+	font-size: 12px;
+	color: #FFFFFF;
+	background-color: #000000;
+}
+
 .tablehead{
    font-family: Arial, Verdana, Helvetica, sans-serif;
    font-size: 12px;
