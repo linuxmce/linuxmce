@@ -3173,9 +3173,18 @@ function getLogName($dbADO,$deviceID,$dtID,$dtDescription,$parentID=0,$isOrbiter
 			$foundDevice = true;
 		}
 	}
+	
+	
+
 	$logName='/var/log/pluto/'.$logName;
 	if ($MDID > 0) {
-	        $logName='/usr/pluto/diskless/'.$MDID.$logName;
+		//omit the Hybrid device (which is the only MD type that does not have a null entry in FK_Device_ControlledVia)
+		$hybridQuery='SELECT PK_Device FROM Device WHERE PK_Device=? AND FK_Device_ControlledVia IS NULL';
+		$resHybridQuery=$dbADO->Execute($hybridQuery,$MDID);
+
+		if ($resHybridQuery->RecordCount()>0) {
+	        	$logName='/usr/pluto/diskless/'.$MDID.$logName;
+		}
 	}
 	
 	return $logName;
