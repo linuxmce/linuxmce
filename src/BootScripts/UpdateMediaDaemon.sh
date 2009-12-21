@@ -1,6 +1,7 @@
 #!/bin/bash
 
 . /usr/pluto/bin/LockUtils.sh
+. /usr/pluto/bin/Utils.sh
 
 trap 'Unlock "UM" "Update_Media"' EXIT
 Lock "UM" "Update_Media"
@@ -11,6 +12,14 @@ for dir in /home/user_*/;do
 		dir_list="${dir_list}||${dir}data" 
 	fi
 done
+
+if VDRInstalled; then
+	. /etc/default/vdr
+	if [ "${VIDEO_DIR}" != "" ]; then
+		dir_list="${dir_list}||${VIDEO_DIR}"
+	fi
+fi
+                                        
 
 counter=30
 while ((counter > 0)); do
