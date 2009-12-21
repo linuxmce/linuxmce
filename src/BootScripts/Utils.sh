@@ -562,3 +562,16 @@ function BlacklistConfFiles()
 	return 1				
 }
 
+function VDRInstalled() {
+	# Return true if VDR is installed
+	DEVICETEMPLATE_VDR_Plugin="1704"
+	Q="SELECT PK_Device FROM Device Where FK_DeviceTemplate = $DEVICETEMPLATE_VDR_Plugin" 
+	VDRDevice=$(RunSQL "$Q")                                          
+	if [ "$VDRDevice" == "" ] ; then                                  
+		RETURNVALUE=1                                             
+	else                                                              
+		RETURNVALUE=0                                             
+	fi                                                                
+	return $RETURNVALUE
+}
+
