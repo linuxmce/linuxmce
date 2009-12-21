@@ -256,6 +256,22 @@ if [ "$AutostartMedia" -eq "1" ] ; then
 	fi
 
 fi
+# If we are using VDR as our PVR, make sure the video dir is available, and restart VDR
+# if needed.
+if VDRInstalled ; then
+	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Loading VDR defaults"
+	. /etc/default/vdr
+	cd $VIDEO_DIR
+	sleep 1s
+	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Check if VDR is running"
+	if ! pidof vdr ; then
+		Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Starting VDR again"
+		service vdr restart
+	fi
+fi
+                                                                                
+
+
 if ! Lock "Launch_Manager" "LM"; then
 	# LM is running
 	echo "LM already running"
