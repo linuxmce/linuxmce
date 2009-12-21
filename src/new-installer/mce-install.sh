@@ -52,6 +52,14 @@ then
 
                 # Set use external DHCP and run own dhcp based on extifs current setting
                 ExtUsesDhcp=$(grep "iface $extif " /etc/network/interfaces | grep -cF 'dhcp')
+		if [[ $ExtUsesDhcp == 0 ]]
+                then
+		       # Not dhcp defined in config file, test if dhclient got us an IP
+		       if [[ -e /var/lib/dhcp3/dhclient-$extif.lease && `pgrep -c dhclient` == 1 ]]
+		       then
+			       ExtUsesDhcp=1
+		       fi
+		fi
                 RunDHCP=0
                 if [[ $ExtUsesDhcp == 0 ]]
                 then
