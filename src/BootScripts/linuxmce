@@ -5,6 +5,14 @@
 # and executes LMCE_Launch_Manager to start devices and taking care of the rest.
 #
 
+if [ "$1" == "status" ]; then
+	if pidof DCERouter &>/dev/null ; then
+        	echo "* DCERouter is running"
+	fi
+	exit 0
+fi
+                                                
+
 Message() {
     echo -en "\033[1m# $*"
     tput sgr0
