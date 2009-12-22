@@ -157,6 +157,26 @@ bool SimplePhone::GetConfig()
 		}
 	}
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "SimplePhone::GetConfig: Starting with extension '%s'", m_sExtension.c_str());
+
+	m_sPassword = m_pEvent->GetDeviceDataFromDatabase(m_dwPK_Device, DEVICEDATA_Password_CONST);
+	if (m_sPassword.length() == 0)
+	{
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "SimplePhone::GetConfig: Password is empty. Attempting to sync with AMP");
+
+		const char * const cmd[] = { "/usr/pluto/bin/LaunchRemoteCmd.sh", "dcerouter", "/usr/pluto/bin/sync_pluto2amp.pl", NULL };
+		string sOutput, sStdErr;
+		ProcessUtils::GetCommandOutput(cmd[0], cmd, sOutput, sStdErr);
+
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "SimplePhone::GetConfig: Output of sync command:\n%s\nSimplePhone::GetConfig: End of output", sOutput.c_str());
+
+		m_sPassword = m_pEvent->GetDeviceDataFromDatabase(m_dwPK_Device, DEVICEDATA_Password_CONST);
+		if (m_sPassword.length() == 0)
+		{
+			LoggerWrapper::GetInstance()->Write(LV_WARNNG, "SimplePhone::GetConfig: Password is empty after sync. Will use extension as password. This is a security risk.");
+			m_sPassword = m_sExtension;
+		}
+	}
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "SimplePhone::GetConfig: Received password for extension '%s'", m_sExtension.c_str());
 	
 	// set mic as default capture device, mute, increase capture volume level
 	const char * cmd = "/usr/pluto/bin/SoundCards_SetupAudioCapture.sh";
@@ -474,4 +494,9 @@ string SimplePhone::Get_MD_AudioSettings()
 string SimplePhone::GetExtension()
 {
 	return m_sExtension;
+}
+
+string SimplePhone::GetPassword()
+{
+	return m_sPassword;
 }
