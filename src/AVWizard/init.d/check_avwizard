@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ "$1" == "status" ] ; then
+	exit 0
+fi
+        
 if [[ -x /usr/pluto/bin/WatchGyroRemote ]] ;then
 	 beep -l 50 -f 2200 -n -l 50 -f 2000 -n -l 50 -f 1800 -n -l 50 -f 1600 -n -l 50 -f 1400 -n -l 50 -f 1200 -n -l 50 -f 1000 &
 	 /usr/pluto/bin/WatchGyroRemote &>/dev/null </dev/null &
