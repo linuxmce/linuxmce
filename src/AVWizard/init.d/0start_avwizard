@@ -1,5 +1,14 @@
 #!/bin/bash
 
+if [ "$1" == "status" ] ; then
+	if [ pidof AVWizard_Run.sh &> /dev/null ] ; then
+        	echo "* AVWizard is running"
+	else
+		echo "* AVWizard is not running"
+	fi
+	exit 0
+fi
+                                                                
 . /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/nvidia-install.sh
 
