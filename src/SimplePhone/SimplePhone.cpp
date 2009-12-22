@@ -172,7 +172,7 @@ bool SimplePhone::GetConfig()
 		m_sPassword = m_pEvent->GetDeviceDataFromDatabase(m_dwPK_Device, DEVICEDATA_Password_CONST);
 		if (m_sPassword.length() == 0)
 		{
-			LoggerWrapper::GetInstance()->Write(LV_WARNNG, "SimplePhone::GetConfig: Password is empty after sync. Will use extension as password. This is a security risk.");
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "SimplePhone::GetConfig: Password is empty after sync. Will use extension as password. This is a security risk.");
 			m_sPassword = m_sExtension;
 		}
 	}
