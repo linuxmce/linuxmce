@@ -55,7 +55,8 @@ then
 		if [[ $ExtUsesDhcp == 0 ]]
                 then
 		       # Not dhcp defined in config file, test if dhclient got us an IP
-		       if [[ -e /var/lib/dhcp3/dhclient-$extif.lease && `pgrep -c dhclient` == 1 ]]
+		       # /var/run/dhcp3 for newer than 810, /var/run in 810
+		       if [[ (-e /var/lib/dhcp3/dhclient-$extif.lease || -e /var/run/dhclient-$extif.lease) && `pgrep -c dhclient` == 1 ]]
 		       then
 			       ExtUsesDhcp=1
 		       fi
