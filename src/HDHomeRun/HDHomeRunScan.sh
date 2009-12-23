@@ -6,8 +6,8 @@
 # HDHomeRunScan.sh <Tuner_ID> <HDHR_ID>
 # where Tuner_ID is the PK of the actual tuner device
 # where HDHR_ID is the PK of the HDHomerun device
-PK_Tuner = $1
-PK_HDHR = $2
+PK_Tuner=$1
+PK_HDHR=$2
 
 
 
@@ -23,7 +23,7 @@ Port=$(RunSQL "$Q")
 
 echo "$(date -R) HDHomeRunScan Starting /usr/pluto/bin/hdhomerun_mythconfig $PK_Tuner $HDHR_IP $Port"
 
-/usr/pluto/bin/hdhomerun_mythconfig $PK_Tuner $HDHR_IP $Port $MySqlHost root "" mythconverg &> /var/log/pluto/hdhomerun_mythconfig.log
+/usr/pluto/bin/hdhomerun_mythconfig "$PK_Tuner" "$HDHR_IP" "$Port" "$MySqlHost" root "" mythconverg
 
 if [[ "$?" == "0" ]] ;then
 	sleep 2  # Give the database a chance to flush???  Shouldn't be necessary, but the modulation value somehow isn't getting written out

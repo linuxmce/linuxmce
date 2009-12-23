@@ -9,7 +9,7 @@ BKPDIR=$(date +%Y-%m-%d-%H-%M)
 FULLPATH="$MASTERDIR/download/$BKPDIR"
 DATABASEFOLDER="database"
 FILESYSTEMFOLDER="filesystem"
-VERSION==$(awk -F= '$1=="DISTRIB_RELEASE"{ sub(/\./,""); printf "%04d\n", $2 }' /etc/lsb-release)
+VERSION=$(awk -F= '$1=="DISTRIB_RELEASE"{ sub(/\./,""); printf "%04d\n", $2 }' /etc/lsb-release)
 
 
 Usage () {
