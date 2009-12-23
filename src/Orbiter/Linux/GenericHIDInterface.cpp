@@ -66,7 +66,7 @@ void GenericHIDInterface::UpdateEventDevices()
 	{
 	  string filePath = event_path + "/" + dir_ent->d_name;
 	  int fd = open(filePath.c_str(),O_RDONLY|O_NONBLOCK);
-	  if (!fd)
+	  if (!fd || fd < 0)
 	    {
 	      // don't add it
 	    } else
