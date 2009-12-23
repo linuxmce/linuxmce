@@ -1403,6 +1403,71 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 		}
 	}
 
+	// MythTV crashes sometimes when you have an entry in capturecard with no corresponding entries in cardinput.
+	// We will create a "dummy" videosource to use as a default when no videosource has been assigned in cardinput.
+	sSQL = "SELECT sourceid FROM videosource WHERE name = 'LMCE-Default'";
+	PlutoSqlResult result_videosource;
+	if( (result_videosource.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL)) )
+	{
+		row=db_wrapper_fetch_row( result_videosource.r );
+		if(result_videosource.r->row_count==0) {
+			//LMCE-Default does not exist, create it!
+			sSQL = "INSERT INTO videosource (name,xmltvgrabber,freqtable) values ('LMCE-Default','/bin/true','us-bcast')";
+			m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
+		}
+	}
+
+	// Myth crashes when you have an entry in capture card with no corresponding entires in cardinput for some types of capture cards
+	// So if there are no inputs, we will point to the LMCE-Default videosource. To do this, we need to manage INSERTING, UPDATING and DELETING the appropriate entries.
+	string sDefaultSourceID;
+	
+	sSQL = "SELECT sourceid FROM videosource WHERE name = 'LMCE-Default'";
+	PlutoSqlResult result_defaultVideoSource;
+	if( (result_defaultVideoSource.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL)) )
+	{
+		row=db_wrapper_fetch_row( result_defaultVideoSource.r );
+		sDefaultSourceID = row[0];
+	}
+	
+	sSQL="SELECT cardid FROM capturecard";
+	PlutoSqlResult result_captureCards;
+	if( (result_captureCards.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL)) )
+	{
+		string sThisCard;
+		while( ( row=db_wrapper_fetch_row( result_captureCards.r ) ) )
+		{
+			sThisCard=row[0];
+			sSQL="SELECT sourceid FROM cardinput WHERE cardid="+sThisCard;
+			PlutoSqlResult result_sourceid;
+			if( (result_sourceid.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL)) )
+			{
+				if (result_sourceid.r->row_count==0) {
+					// There is NO ENTRY, create one to LMCE-Default!
+					sSQL="INSERT INTO cardinput (cardid,sourceid,inputname) VALUES ('"+sThisCard+"','"+sDefaultSourceID+"','MPEG2')";
+					m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
+				} else if (result_sourceid.r->row_count > 1) {
+					// More than one videosources exist, so we can safely remove the LMCE-Default videosource.
+
+					// There is more than one sourceid associated with this capturecard.
+					// If one of them is LMCE-Default, we can safely remove it now!
+					sSQL="DELETE FROM cardinput WHERE sourceid='"+sDefaultSourceID+"'";
+					m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);						
+				} else {
+					// There is nothing to do. There is exactly 1 sourceid. This means that either
+					// the sourceid is real, or the sourceid the LMCE-Default one.
+				}				
+			}
+		}
+	}
+
+	// Use LMCE-Default for any videosource that does not exist
+	sSQL = "UPDATE cardinput LEFT JOIN videosource on cardinput.sourceid=videosource.sourceid SET cardinput.sourceid='"+sDefaultSourceID+"' WHERE videosource.sourceid IS NULL";
+	m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);	
+	
+	// If for some reason there is a problem and cardinput table is incorrect, delete the hostname to keep some cards from crashing MythTV out (this should never happen, as we make sure its populated above)
+	sSQL = "update capturecard LEFT JOIN cardinput on capturecard.cardid=cardinput.cardid set hostname=NULL WHERE cardinput.cardid IS NULL";
+	m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
+		
 	// Delete any stray rows for cards that no longer exist
 	sSQL = "DELETE cardinput FROM cardinput LEFT JOIN capturecard ON capturecard.cardid=cardinput.cardid WHERE capturecard.cardid IS NULL";
 	if( m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL)>0 )
@@ -1410,11 +1475,6 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::CMD_Sync_Providers_and_Cards bModifiedRows=true %s",sSQL.c_str());
 		bModifiedRows=true;
 	}
-
-	// Myth crashes when you have an entry in capture card with no corresponding entires in cardinput for some types of capture cards
-	// So if there are no inputs, just clear the hostname
-	sSQL = "update capturecard LEFT JOIN cardinput on capturecard.cardid=cardinput.cardid set hostname=NULL WHERE cardinput.cardid IS NULL";
-	m_pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
 
 	// We may have videosources with no inputs if the user unplugged a pvr capture device temporarily and is going to reconnect it.
 	// So don't delete the source

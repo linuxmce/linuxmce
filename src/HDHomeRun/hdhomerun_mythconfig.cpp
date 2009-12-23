@@ -491,8 +491,9 @@ static int myth_scan_tuner(struct hdhomerun_device_t *pHD)
 	sprintf(sSQL,
 		"SELECT capturecard.cardid,cardinput.cardinputid,cardinput.sourceid from capturecard "
 		"LEFT JOIN cardinput ON capturecard.cardid=cardinput.cardid "
-		"WHERE videodevice='%08lX' AND cardtype='HDHOMERUN' and dbox2_port=%u",
+		"WHERE videodevice='%08lX-%u' AND cardtype='HDHOMERUN' and dbox2_port='31338'",
 		(unsigned long)DeviceID, Tuner);
+
 
 	time_t timeout = time(NULL) + 60;  // Wait up to 60 seconds for the HD Home Run device to get into the database
 	int iresult;
@@ -570,6 +571,8 @@ static int myth_scan_tuner(struct hdhomerun_device_t *pHD)
 	int result = myth_scan_tuner_wrapper(pHD, cardid, sourceid, cardinputid );
 	if( result <= 0) {
 		printf("myth_scan_tuner failed\n");
+	} else {
+		printf("myth_scan_tuner SUCCESS!\n");
 	}
 	return result;
 }
