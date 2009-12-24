@@ -1,7 +1,7 @@
 
 /*
  *
- *  $Id: decode_log.cpp 1535 2007-01-26 04:32:54Z isely $
+ *  $Id: decode_log.cpp 2016 2008-05-27 04:40:56Z isely $
  *
  *  Copyright (C) 2005 Mike Isely <isely@pobox.com>
  *
@@ -57,8 +57,8 @@
   forms of interleaved transactions (e.g. a video output transaction
   in the middle of an I2C operation).
 
-  There are no command options at all for the decompiler.  However, in
-  reality there are some internal tweaks you can make to the source
+  There are few command options at all for the decompiler.  However,
+  in reality there are some internal tweaks you can make to the source
   code which affects the level of decompiling and the verbosity of the
   output.  I'm just too lazy to turn these into command options - but
   if someone would like to contribute a patch that enables these as
@@ -1706,7 +1706,7 @@ TransDesc transTypes[] = {
     0x0c,"I2C Batch",
     0x22,"I2C 1 byte transaction",
     0x24,"I2C 2 byte write",
-    0x28,"EncMem Block Read",
+    0x28,"EncMem 16 word Block Read",
     0x36,"Start Video Capture Endpoint",
     0x37,"Stop Video Capture Endpoint",
     0x38,"Unknown cmd 38",
@@ -1717,17 +1717,24 @@ TransDesc transTypes[] = {
     0x43,"Start Endpoint (vbi?)",
     0x44,"Stop Endpoint (vbi?)",
     0x52,"Stop Endpoint #2 (firmware) & cmd encoder",
+    0xa0,"OnAir DTV Streaming On",
+    0xa1,"OnAir DTV Streaming Off",
+    0xa2,"OnAir DTV Power On",
+    0xa3,"OnAir DTV Power Off",
     0xd0,"Unknown cmd d0",
     0xd1,"Unknown cmd d1",
     0xd2,"Unknown cmd d2",
-    0xdc,"Encoder suspend",
+    0xdc,"Power Off",
     0xdd,"Encoder reset",
-    0xde,"Encoder resume",
+    0xde,"Power On",
     0xe8,"Stop Endpoint #2 (firmware)",
     0xe9,"Clear Endpoint #2 config",
     0xea,"Mystery 3 item manipulation",
     0xeb,"Get eeprom addr",
     0xec,"Get IR code",
+    0xf0,"HCW Demod Resetin",
+    0xf1,"HCW DTV Streaming On",
+    0xf2,"HCW DTV Streaming Off",
 };
 
 class USBNotedCommand : public TransactionList {
@@ -2614,6 +2621,7 @@ I2CCommand *I2CCommand::parse(Transaction *tp)
 	if (bwb->getCount() < offs) return 0;
 	i2cAddr = bwb->get8(1);
 	i2cWLen = bwb->get8(2);
+	mode = 0;
 	break;
     case 0x09: // I2C read
 	offs = 4;
@@ -2708,6 +2716,26 @@ inline unsigned long RegisterCommand::getData(void) const
 }
 
 
+struct RegisterName {
+    unsigned short id;
+    const char *name;
+};
+
+
+RegisterName registerNames[] = {
+    0x9008,"gpio_in",
+    0x900c,"gpio_out",
+    0x9020,"gpio_dir",
+    0x0048,"int_mask",
+    0xa064,"apu_cmd",
+    0x9054,"hw_blocks",
+    0x9058,"vpu_ctrl",
+    0x07f8,"sdram_refresh",
+    0x07fc,"sdram_precharge",
+    0x0700,"i2c_cllk",
+};
+
+
 RegisterCommand::RegisterCommand(void)
     :cmd(0),okFl(0),readMode(0),readValid(0),rData(0),regAddr(0)
 {
@@ -2733,14 +2761,26 @@ int RegisterCommand::isSame(const Transaction *tp) const
 void RegisterCommand::describe(OutputFormatter &fmt) const
 {
     unsigned int idx,cnt,mc;
+    RegisterName *rn;
     fmt.startLine();
-    fmt.printf("Register");
+    fmt.printf("Encoder Register");
     if (!okFl) {
         fmt.printf(" unexpected format ");
         cmd->describe(fmt);
         return;
     }
-    fmt.printf(" %5s [%04x]",readMode ? "read" : "write",regAddr);
+    rn = 0;
+    for (idx = 0; idx < ASZ(registerNames); idx++) {
+	if (registerNames[idx].id == regAddr) {
+	    rn = registerNames + idx;
+	}
+    }
+    if (rn) {
+	fmt.printf(" %5s [%04x (%s)]",readMode ? "read" : "write",regAddr,
+		   rn->name);
+    } else {
+	fmt.printf(" %5s [%04x]",readMode ? "read" : "write",regAddr);
+    }
     if ((!readMode) || (readValid)) {
         fmt.printf(" %s %08x",
 		   (readMode ? "-->" : "<--"),
@@ -2963,7 +3003,7 @@ void FirmwareUpload::describe(OutputFormatter &fmt) const
 	}
 	fp = fopen(newname,"wb");
 	if (fp) {
-	    if (cnt == 0x40000) {
+	    if (cnt >= 0x40000) {
 		// This looks like encoder firmware, in which case we
 		// have to byte&word swap it :-(
 		swabfl = !0;
@@ -3038,6 +3078,8 @@ protected:
     I2CDeviceTransaction(I2CCommand *);
     I2CCommand *cmd;
 private:
+public:
+    I2CCommand *getI2CCommand(void) const {return cmd; }
 };
 
 int I2CDeviceTransaction::subEnableFl = 0;
@@ -3096,7 +3138,7 @@ unsigned long DataFormat::getItem(const BlockBuf &bb,unsigned int idx) const
 }
 
 
-/* Generic base for I2C devices which can be completed described via
+/* Generic base for I2C devices which can be completely described via
    normal register access mappings. */
 class I2CDeviceRegistered : public I2CDeviceTransaction {
     friend class I2CDeviceTransaction;
@@ -3104,9 +3146,12 @@ public:
     I2CDeviceRegistered(I2CCommand *);
     void describe(OutputFormatter &fmt) const;
     virtual int isOk(void) const;
+    void subDescribe(OutputFormatter &) const;
+    static int subEnableFl;
 protected:
     DataFormat addrFormat;
     DataFormat dataFormat;
+    int incMode; //0=not legal 1=increment 2=static
 private:
     virtual const char *getName(void) const = 0;
     virtual const RegisterTable *getRegisterTable(void) const {return 0;}
@@ -3117,6 +3162,16 @@ private:
 				 unsigned long &addr,
 				 unsigned long &data) const;
 };
+
+
+int I2CDeviceRegistered::subEnableFl = 0;
+
+
+void I2CDeviceRegistered::subDescribe(OutputFormatter &fmt) const
+{
+    if (!subEnableFl) return;
+    TransactionList::subDescribe(fmt);
+}
 
 
 void I2CDeviceRegistered::getWriteAddrData(const BlockBuf &bb,unsigned int idx,
@@ -3147,6 +3202,7 @@ I2CDeviceRegistered::I2CDeviceRegistered(I2CCommand *_cmd)
     addrFormat.bigEndian = 0;
     dataFormat.size = 8;
     dataFormat.bigEndian = 0;
+    incMode = 0;
 }
 
 
@@ -3159,14 +3215,18 @@ int I2CDeviceRegistered::isOk(void) const
     databytes = (dataFormat.size / 8) + ((dataFormat.size % 8) ? 1 : 0);
 
     if (wcnt < abytes) return 0;
-    if (rcnt == databytes) {
+    wcnt -= abytes;
+    if (rcnt) {
 	if (cmd->getWriteBlocks() != 1) return 0;
-	if (wcnt != abytes) return 0;
+	if (wcnt) return 0;
+	if ((rcnt != 1) && !incMode) return 0;
+	if (rcnt % databytes) return 0;
 	return !0;
-    } else if (!rcnt) {
-	return wcnt == (abytes + databytes);
     }
-    return 0;
+    if (wcnt < databytes) return 0;
+    if ((wcnt != 1) && !incMode) return 0;
+    if (wcnt % databytes) return 0;
+    return !0;
 }
 
 
@@ -3222,8 +3282,8 @@ void I2CDeviceRegistered::describe(OutputFormatter &fmt) const
 		dw);
     }
     if (readCnt == 0) {
-	// Print using really nice compact format
-	if (writeBlocks == 1) {
+	if ((writeBlocks == 1) && ((ab + db) == writeCnt)) {
+	    // Print using really nice compact format
 	    getWriteAddrData(bwb,0,addr,data);
 	    regdp = lookupRegisterDef(rtab,addr);
 	    regName = regdp ? regdp->regName : 0;
@@ -3239,10 +3299,49 @@ void I2CDeviceRegistered::describe(OutputFormatter &fmt) const
 	    fmt.endLine();
 	    IndentScope iScope(fmt,4);
 	    for (unsigned int idx = 0; idx < writeBlocks; idx++) {
-		offs = ab + db;
+		offs = ab + writeCnt;
 		offs *= idx;
+		addr = addrFormat.getItem(bwb,offs);
+		offs += ab;
+		for (unsigned int wdx = 0; wdx < writeCnt; wdx += db) {
+		    fmt.startLine();
+		    data = dataFormat.getItem(bwb,offs);
+		    offs += db;
+		    regdp = lookupRegisterDef(rtab,addr);
+		    regName = regdp ? regdp->regName : 0;
+		    fmt.printf(fmtbuf,
+			       regName ? regName : "",
+			       regName ? " " : "",
+			       addr,data);
+		    fmt.endLine();
+		    if (regdp) printBitsAction(fmt,regdp,dw,data,0);
+		    if (incMode == 1) addr++;
+		}
+	    }
+	}
+    } else {
+	if (db == readCnt) {
+	    // Print using really nice compact format
+	    getReadAddrData(bwb,brb,addr,data);
+	    regdp = lookupRegisterDef(rtab,addr);
+	    regName = regdp ? regdp->regName : 0;
+	    fmt.printf(fmtbuf,
+		       regName ? regName : "",
+		       regName ? " " : "",
+		       addr,data);
+	    cmd->describeRetCode(fmt);
+	    fmt.endLine();
+	    if (regdp) printBitsAction(fmt,regdp,dw,data,!0);
+	} else {
+	    cmd->describeRetCode(fmt);
+	    fmt.endLine();
+	    IndentScope iScope(fmt,4);
+	    addr = addrFormat.getItem(bwb,0);
+	    offs = 0;
+	    for (unsigned int idx = 0; idx < readCnt; idx += db) {
 		fmt.startLine();
-		getWriteAddrData(bwb,offs,addr,data);
+		data = dataFormat.getItem(brb,offs);
+		offs += db;
 		regdp = lookupRegisterDef(rtab,addr);
 		regName = regdp ? regdp->regName : 0;
 		fmt.printf(fmtbuf,
@@ -3251,20 +3350,9 @@ void I2CDeviceRegistered::describe(OutputFormatter &fmt) const
 			   addr,data);
 		fmt.endLine();
 		if (regdp) printBitsAction(fmt,regdp,dw,data,0);
+		if (incMode == 1) addr++;
 	    }
 	}
-    } else {
-	// Print using really nice compact format
-	getReadAddrData(bwb,brb,addr,data);
-	regdp = lookupRegisterDef(rtab,addr);
-	regName = regdp ? regdp->regName : 0;
-	fmt.printf(fmtbuf,
-		   regName ? regName : "",
-		   regName ? " " : "",
-		   addr,data);
-	cmd->describeRetCode(fmt);
-	fmt.endLine();
-	if (regdp) printBitsAction(fmt,regdp,dw,data,!0);
     }
 }
 
@@ -3380,6 +3468,7 @@ private:
 	addrFormat.size = 16;
 	addrFormat.bigEndian = !0;
 	dataFormat.size = 8;
+	incMode = 1;
     }
     const char *getName(void) const {return "cx25840";}
 public:
@@ -3926,6 +4015,128 @@ I2CDeviceBatchEEPROM *I2CDeviceBatchEEPROM::parse(Transaction *tp)
 
 /*------------------------------------------------------------------------*/
 
+class I2CDeviceFirmwareCX25840 : public TransactionList {
+public:
+    static I2CDeviceFirmwareCX25840 *parse(Transaction *);
+    ~I2CDeviceFirmwareCX25840(void);
+    void describe(OutputFormatter &fmt) const;
+    void subDescribe(OutputFormatter &) const;
+    static int subEnableFl;
+private:
+    I2CDeviceFirmwareCX25840(void);
+    unsigned int cnt;
+    unsigned int num;
+};
+
+int I2CDeviceFirmwareCX25840::subEnableFl = 0;
+
+
+void I2CDeviceFirmwareCX25840::subDescribe(OutputFormatter &fmt) const
+{
+    if (!subEnableFl) return;
+    TransactionList::subDescribe(fmt);
+}
+
+
+I2CDeviceFirmwareCX25840::I2CDeviceFirmwareCX25840(void)
+    :cnt(0),num(firmwareCount++)
+{
+    // Intentionally Empty
+}
+
+
+I2CDeviceFirmwareCX25840::~I2CDeviceFirmwareCX25840(void)
+{
+    // Intentionally Empty
+}
+
+
+static I2CDeviceCX25840 *firmwareCX25840FetchOp(Transaction *tp)
+{
+    unsigned int wcnt;
+    I2CCommand *cmd;
+    I2CDeviceCX25840 *bp = dynamic_cast<I2CDeviceCX25840 *>(tp);
+    if (!bp) return 0;
+    cmd = bp->getI2CCommand();
+    if (!cmd) return 0;
+    if (cmd->getReadCnt()) return 0;
+    if (cmd->getWriteBlocks() != 1) return 0;
+    wcnt = cmd->getWriteCnt();
+    if (wcnt <= 2) return 0;
+    const BlockBuf &bwb = cmd->getWriteBlockBuf();
+    if (bwb.get16be(0) != 0x0802) return 0;
+    return bp;
+}
+
+
+void I2CDeviceFirmwareCX25840::describe(OutputFormatter &fmt) const
+{
+    fmt.startLine();
+    fmt.printf("cx25840 firmware upload size: 0x%x",cnt);
+    if (tGetCount() > 1) {
+        fmt.printf(" (%d transactions)",tGetCount());
+    }
+    fmt.endLine();
+    if (saveFirmwareName) {
+	char *newname;
+	FILE *fp;
+	I2CDeviceCX25840 *bp;
+	Transaction *tp;
+	// This is an ugly, ugly hack job.
+	if (firmwareCount > 1) {
+	    newname = new char[strlen(saveFirmwareName)+10+1];
+	    sprintf(newname,"%s-%u",saveFirmwareName,num);
+	} else {
+	    newname = new char[strlen(saveFirmwareName)+1];
+	    sprintf(newname,"%s",saveFirmwareName);
+	}
+	fp = fopen(newname,"wb");
+	if (fp) {
+	    for (tp = tGetFirst(); tp; tp = tp->tGetNext()) {
+		bp = firmwareCX25840FetchOp(tp);
+		if (!bp) continue;
+		const BlockBuf &bb = bp->getI2CCommand()->getWriteBlockBuf();
+		for (unsigned int offs = 2; offs < bb.getCount(); offs++) {
+		    fputc(bb.get8(offs),fp);
+		}
+	    }
+	    fclose(fp);
+	    fprintf(stderr,"Wrote %u bytes of cx25840 firmware data to %s\n",
+		    cnt,
+		    newname);
+	    delete[] newname;
+	} else {
+	    fprintf(stderr,"Failed to open %s for writing firmware data\n",
+		    saveFirmwareName);
+	}
+    }
+}
+
+
+I2CDeviceFirmwareCX25840 *I2CDeviceFirmwareCX25840::parse(Transaction *tp)
+{
+    I2CDeviceCX25840 *bp = firmwareCX25840FetchOp(tp);
+    Transaction *tp2;
+    if (!bp) return 0;
+    I2CDeviceFirmwareCX25840 *p = new I2CDeviceFirmwareCX25840;
+    p->cnt = bp->getI2CCommand()->getWriteCnt()-2;
+    tp2 = tp->tGetNext();
+    p->tInsertBefore(tp);
+    p->tAppend(tp);
+    while (tp2) {
+        bp = firmwareCX25840FetchOp(tp2);
+        if (!bp) break;
+        p->cnt += bp->getI2CCommand()->getWriteCnt()-2;
+        tp = tp2;
+        tp2 = tp2->tGetNext();
+        p->tAppend(tp);
+    }
+    return p;
+}
+
+
+/*------------------------------------------------------------------------*/
+
 Transaction *tryUSBCommand(Transaction *tp)
 {
     return USBCommand::parse(tp);
@@ -3968,6 +4179,12 @@ Transaction *tryFirmwareUpload(Transaction *tp)
 }
 
 
+Transaction *tryI2CDeviceFirmwareCX25840(Transaction *tp)
+{
+    return I2CDeviceFirmwareCX25840::parse(tp);
+}
+
+
 Transaction *tryVideoData(Transaction *tp)
 {
     return VideoData::parse(tp);
@@ -4001,6 +4218,7 @@ ParseTransactionFunc parseTransactionFuncs[] = {
     tryI2CCommand,
     tryRegisterCommand,
     tryFirmwareUpload,
+    tryI2CDeviceFirmwareCX25840,
     tryI2CDeviceTransaction,
     tryI2CDeviceBatchEEPROM,
     tryVideoData,

@@ -1,0 +1,6 @@
+# local rules by rja for moria
+
+# pvrusb2
+# Create a symlink /dev/comcasta pointing to WinTV-PVR-USB2 with serial sn-7653922 tuning comcast analog
+# Create a symlink /dev/comcastd pointing to WinTV-PVR-USB2 with serial sn-8257134 using composite comcast digital
+KERNEL=="video[0-9]*", PROGRAM="/usr/local/bin/udev-pvrusb2 %m", SYMLINK+="%c", OWNER="mythtv", GROUP="mythtv"

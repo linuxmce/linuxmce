@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Id: svn_helper.pl 1572 2007-02-28 04:57:33Z isely $
+# $Id: svn_helper.pl 2336 2009-10-11 22:00:39Z isely $
 
 #
 #  Copyright (C) 2006 Mike Isely <isely@pobox.com>
@@ -221,7 +221,8 @@ sub istrip_data {
 
     foreach $line (@$idata) {
 	if ($line =~ /\$Id:.+\$/) {
-	    $line =~ s/(.*)\$(Id)[:].+\$(.*)/$1\$$2\$$3/g;
+	    next;
+#	    $line =~ s/(.*)\$(Id)[:].+\$(.*)/$1\$$2\$$3/g;
 	}
 	push @odata,$line;
     }
@@ -663,6 +664,9 @@ my $snap_symtab = {
     PVR2_ENABLE_V4L2COMMON => {
 	defined => 1,
     },
+    PVR2_ENABLE_V4L2IOCTL => {
+	defined => 1,
+    },
     PVR2_ENABLE_OLDAUDC => {
 	defined => 0,
     },
@@ -674,6 +678,24 @@ my $snap_symtab = {
     },
     PVR2_CX2341X_HDR_MEDIA => {
 	defined => 1,
+    },
+    PVR2_ENABLE_CS53L32A => {
+	defined => 1,
+    },
+    PVR2_ENABLE_OLD_SEMAPHORES => {
+	defined => 0,
+    },
+    PVR2_ENABLE_OLD_URBASYNC => {
+	defined => 0,
+    },
+    PVR2_ENABLE_OLD_OWNERSTUFF => {
+	defined => 0,
+    },
+    PVR2_ENABLE_OLD_I2CSTUFF => {
+	defined => 0,
+    },
+    PVR2_ENABLE_OLD_SYSFS_HOTPLUG => {
+	defined => 0,
     },
     PVR2_ENABLE_V4L_PRINT_IOCTL => {
 	defined => 1,
@@ -696,6 +718,9 @@ my $snap_symtab = {
     PVR2_ENABLE_OLDREGISTER_ACCESS => {
 	defined => 0,
     },
+    PVR2_ENABLE_OLD2REGISTER_ACCESS => {
+	defined => 0,
+    },
     PVR2_ENABLE_SAA7115 => {
 	defined => undef,
     },
@@ -706,6 +731,12 @@ my $snap_symtab = {
 	defined => 1,
     },
     PVR2_ENABLE_STDADJ => {
+	defined => 0,
+    },
+    PVR2_ENABLE_STDEEPROMHACK => {
+	defined => 1,
+    },
+    PVR2_ENABLE_OLD_MODULE_OWNER => {
 	defined => 0,
     },
     PVR2_EEPROM_IVTV => {
@@ -729,6 +760,18 @@ my $snap_symtab = {
     PVR2_ENABLE_CX2341XMOD => {
 	defined => 1,
     },
+    PVR2_ENABLE_CX2341XOLD => {
+	defined => 0,
+    },
+    PVR2_ENABLE_CX2341XOLD2 => {
+	defined => 0,
+    },
+    PVR2_ENABLE_CX2341XOLD3 => {
+	defined => 0,
+    },
+    PVR2_ENABLE_DVB_NO_ADAPTER_NR => {
+	defined => 0,
+    },
     PVR2_ENABLE_EXT_CTRLS => {
 	defined => 1,
     },
@@ -740,6 +783,78 @@ my $snap_symtab = {
     },
     PVR2_EEPROM_INDIRECT => {
 	defined => undef,
+    },
+    PVR2_ENABLE_I2CALGOCONTROL => {
+	defined => 0,
+    },
+    PVR2_ENABLE_V4L1HARDWARE => {
+	defined => 0,
+    },
+    PVR2_ENABLE_DEVICE_CREATOR => {
+	defined => 1,
+    },
+    PVR2_ENABLE_DEVICE_AV400 => {
+	defined => 0,
+    },
+    TUNER_LG_TDVS_H06XF => {
+	defined => 1,
+    },
+    TUNER_PHILIPS_FCV1236D => {
+	defined => 1,
+    },
+    PVR2_ENABLE_TDA18271_OUTPUT_LT_OFF => {
+	defined => 1,
+    },
+    PVR2_ENABLE_V4L_TYPE => {
+	defined => 0,
+    },
+    PVR2_ENABLE_OLD_V4L_INODE1 => {
+	defined => 0,
+    },
+    PVR2_ENABLE_OLD_V4L_INODE2 => {
+	defined => 0,
+    },
+    PVR2_ENABLE_OLD_V4L_DEVNUM => {
+	defined => 0,
+    },
+    PVR2_ENABLE_NO_DEV_NAME_API => {
+	defined => 0,
+    },
+    PVR2_ENABLE_INITUSBRESET => {
+	defined => 0,
+    },
+    PVR2_ENABLE_OLD_V4L_FILEOPS => {
+	defined => 0,
+    },
+    PVR2_ENABLE_OLD_MODULE_INIT => {
+	defined => 0,
+    },
+    PVR2_ENABLE_OLD_I2COPS => {
+	defined => 0,
+    },
+    PVR2_ENABLE_V4L2SUBDEV => {
+	defined => 1,
+    },
+    PVR2_ENABLE_V4L2SUBDEV_DISCONNECT => {
+	defined => 1,
+    },
+    PVR2_ENABLE_V4L2SUBDEV_THRASH1 => {
+	defined => 1,
+    },
+    PVR2_ENABLE_V4L2SUBDEV_THRASH2 => {
+	defined => 1,
+    },
+    PVR2_ENABLE_NOSETTOGGLE => {
+	defined => 1,
+    },
+    PVR2_ENABLE_OLD_DVB_TDA10048 => {
+	defined => 0,
+    },
+    PVR2_ENABLE_DEV_PARENT => {
+	defined => 1,
+    },
+    PVR2_ENABLE_DEV_PARENT_OLD => {
+	defined => 0,
     },
 };
 
@@ -755,13 +870,23 @@ my $snap_transfer_changes = {
     'pvrusb2-demod.h' => undef,
     'pvrusb2-i2c-cmd-v4l1.h' => undef,
     'pvrusb2-i2c-cmd-v4l1.c' => undef,
+    'pvrusb2-i2c-cmd-v4l2.h' => undef,
+    'pvrusb2-i2c-cmd-v4l2.c' => undef,
+    'pvrusb2-i2c-track.h' => undef,
+    'pvrusb2-i2c-track.c' => undef,
     'pvrusb2-i2c-chips-all.c' => undef,
+    'pvrusb2-i2c-chips-v4l2.c' => undef,
+    'pvrusb2-tuner.c' => undef,
+    'pvrusb2-tuner.h' => undef,
     'pvrusb2-compat.c' => undef,
     'pvrusb2-cx2584x-old.c' => undef,
     'pvrusb2-cx2584x-old.h' => undef,
     'pvrusb2-audio-old.c' => undef,
     'pvrusb2-audio-old.h' => undef,
     'pvrusb2-version.h' => undef,
+    'pvrusb2-sysfs-sel.c' => undef,
+    'pvrusb2-sysfs-cd.c' => undef,
+    'pvrusb2-dvb-wrap.c' => undef,
     'compat.h' => undef,
     'Modules.symvers' => undef,
     'Module.symvers' => undef,

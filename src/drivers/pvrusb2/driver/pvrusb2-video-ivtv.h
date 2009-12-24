@@ -1,6 +1,6 @@
 /*
  *
- *  $Id: pvrusb2-video-ivtv.h 1563 2007-02-28 03:30:33Z isely $
+ *  $Id: pvrusb2-video-ivtv.h 2226 2009-03-07 05:17:32Z isely $
  *
  *  Copyright (C) 2005 Mike Isely <isely@pobox.com>
  *  Copyright (C) 2004 Aurelien Alleaume <slts@free.fr>
@@ -35,13 +35,15 @@
 #include "pvrusb2-options.h"
 #include "compat.h"
 
+#ifdef PVR2_ENABLE_OLD_I2COPS
 #ifdef PVR2_ENABLE_SAA7115
 
-#include "pvrusb2-i2c-core.h"
+#include "pvrusb2-i2c-track.h"
 
 int pvr2_i2c_decoder_ivtv_setup(struct pvr2_hdw *,struct pvr2_i2c_client *);
 
 #endif /* PVR2_ENABLE_SAA7115 */
+#endif /* PVR2_ENABLE_OLD_I2COPS */
 
 #endif /* __PVRUSB2_VIDEO__IVTV_H */
 

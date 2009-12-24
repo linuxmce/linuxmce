@@ -1,5 +1,5 @@
 
-$Id: models.txt 1545 2007-01-28 17:39:30Z isely $
+$Id: models.txt 2109 2008-12-14 23:32:46Z isely $
 
 Here's the results so far of a census taken among users on the pvrusb2
 mailing list.  The idea here was to collect a list of all the various
@@ -15,10 +15,17 @@ This is a list of all known model numbers encountered so far.
   # seen   Description
   ------   -----------------------------
     4      24012 LF Rev C2A3 NTSC/NTSC-J
+    1      24012 Rev C2A3 NTSC/NTSC-J
+    1      24012 Rev D2A3 NTSC/NTSC-J
+    1      24012 LF Rev C3A3 NTSC/NTSC-J
     1      24012 Rev C3A3 NTSC/NTSC-J
+    1	   24012 LF Rev D3A3 NTSC/NTSC-J
 
     2      24019 Rev C289 PAL-B/G-I-D/K-SECAM
     1      24019 Rev C389 PAL-B/G-I-D/K-SECAM
+    2      24019 LF Rev E189 PAL-B/G-I-D/K-SECAM
+
+    2      24029 LF Rev E189 Multi-PAL
 
     2      29022 Rev C523 NTSC/NTSC-J
 
@@ -31,7 +38,9 @@ This is a list of all known model numbers encountered so far.
     1      29132 Rev D168 NTSC/NTSC-J
 
     2      29034 Rev C347 PAL-B/G
+    1      29034 Rev C547 PAL-B/G
 
+    1      29035 Rev C324 PAL-I
     1      29035 Rev C524 PAL-I
 
     2      29039 Rev C552 PAL-G/G-I-D/K-SECAM

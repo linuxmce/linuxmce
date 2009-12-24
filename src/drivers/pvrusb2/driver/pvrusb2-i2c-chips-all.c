@@ -1,6 +1,6 @@
 /*
  *
- *  $Id: pvrusb2-i2c-chips-all.c 1563 2007-02-28 03:30:33Z isely $
+ *  $Id: pvrusb2-i2c-chips-all.c 2249 2009-03-15 20:49:05Z isely $
  *
  *  Copyright (C) 2005 Mike Isely <isely@pobox.com>
  *
@@ -21,7 +21,7 @@
 
 #include "pvrusb2-options.h"
 #include "compat.h"
-#include "pvrusb2-i2c-core.h"
+#include "pvrusb2-i2c-track.h"
 #include "pvrusb2-hdw-internal.h"
 #include "pvrusb2-debug.h"
 #include "pvrusb2-i2c-cmd-v4l2.h"
@@ -37,22 +37,29 @@
 #include "pvrusb2-cx2584x-old.h"
 #include "pvrusb2-cx2584x-v4l.h"
 #include "pvrusb2-wm8775.h"
+#ifdef PVR2_ENABLE_CS53L32A
+#include "pvrusb2-cs53l32a.h"
+#endif
+
+#ifdef PVR2_ENABLE_OLD_I2COPS
 
 #define trace_i2c(...) pvr2_trace(PVR2_TRACE_I2C,__VA_ARGS__)
 
-#define OP_V4L2_STANDARD 0
-#define OP_V4L2_AUDIOMODE 1
-#define OP_V4L2_BCSH 2
-#define OP_V4L2_VOLUME 3
-#define OP_V4L2_FREQ 4
-#define OP_V4L2_AUDIORATE 5
-#define OP_V4L2_SIZE 6
-#define OP_V4L1_STANDARD 7
-#define OP_V4L1_VOLUME 8
-#define OP_V4L1_FREQ 9
-#define OP_V4L2_LOG 10
+#define OP_V4L2_INIT 0 /* MUST come first so it is run first */
+#define OP_V4L2_STANDARD 1
+#define OP_V4L2_AUDIOMODE 2
+#define OP_V4L2_BCSH 3
+#define OP_V4L2_VOLUME 4
+#define OP_V4L2_FREQ 5
+#define OP_V4L2_AUDIORATE 6
+#define OP_V4L2_SIZE 7
+#define OP_V4L1_STANDARD 8
+#define OP_V4L1_VOLUME 9
+#define OP_V4L1_FREQ 10
+#define OP_V4L2_LOG 11
 
 static const struct pvr2_i2c_op * const ops[] = {
+	[OP_V4L2_INIT] = &pvr2_i2c_op_v4l2_init,
 	[OP_V4L2_STANDARD] = &pvr2_i2c_op_v4l2_standard,
 	[OP_V4L2_AUDIOMODE] = &pvr2_i2c_op_v4l2_audiomode,
 	[OP_V4L2_BCSH] = &pvr2_i2c_op_v4l2_bcsh,
@@ -65,7 +72,8 @@ static const struct pvr2_i2c_op * const ops[] = {
 	[OP_V4L1_FREQ] = &pvr2_i2c_op_v4l1_frequency,
 };
 
-#define OP_V4L2_MASK_ALL ((1 << OP_V4L2_STANDARD) | \
+#define OP_V4L2_MASK_ALL ((1 << OP_V4L2_INIT) | \
+			  (1 << OP_V4L2_STANDARD) | \
 			  (1 << OP_V4L2_AUDIOMODE) | \
 			  (1 << OP_V4L2_BCSH) | \
 			  (1 << OP_V4L2_VOLUME) | \
@@ -134,6 +142,15 @@ void pvr2_i2c_probe(struct pvr2_hdw *hdw,struct pvr2_i2c_client *cp)
 		}
 	}
 #endif
+#ifdef PVR2_ENABLE_CS53L32A
+#ifdef I2C_DRIVERID_CS53L32A
+	if (id == I2C_DRIVERID_CS53L32A) {
+		if (pvr2_i2c_cs53l32a_setup(hdw,cp)) {
+			return;
+		}
+	}
+#endif
+#endif
 #ifdef I2C_DRIVERID_SAA711X
 	if (id == I2C_DRIVERID_SAA711X) {
 #ifdef PVR2_ENABLE_SAA711X
@@ -199,6 +216,8 @@ const struct pvr2_i2c_op *pvr2_i2c_get_op(unsigned int idx)
 	if (idx >= ARRAY_SIZE(ops)) return NULL;
 	return ops[idx];
 }
+
+#endif /* PVR2_ENABLE_OLD_I2COPS */
 
 
 /*

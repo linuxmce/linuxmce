@@ -1,6 +1,6 @@
 /*
  *
- *  $Id: pvrusb2-wm8775.h 1571 2007-02-28 04:27:44Z isely $
+ *  $Id: pvrusb2-wm8775.h 2226 2009-03-07 05:17:32Z isely $
  *
  *  Copyright (C) 2005 Mike Isely <isely@pobox.com>
  *  Copyright (C) 2004 Aurelien Alleaume <slts@free.fr>
@@ -37,9 +37,16 @@
 
 #ifdef PVR2_ENABLE_WM8775
 
-#include "pvrusb2-i2c-core.h"
+#ifdef PVR2_ENABLE_OLD_I2COPS
+#include "pvrusb2-i2c-track.h"
 
 int pvr2_i2c_wm8775_setup(struct pvr2_hdw *,struct pvr2_i2c_client *);
+#endif /* PVR2_ENABLE_OLD_I2COPS */
+#ifdef PVR2_ENABLE_V4L2SUBDEV
+#include "pvrusb2-hdw-internal.h"
+
+void pvr2_wm8775_subdev_update(struct pvr2_hdw *, struct v4l2_subdev *sd);
+#endif
 
 #endif /* PVR2_ENABLE_WM8775 */
 

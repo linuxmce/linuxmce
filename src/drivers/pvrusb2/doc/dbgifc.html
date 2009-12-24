@@ -1,0 +1,346 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=iso-8859-1">
+	<TITLE>pvrusb2 Linux Driver - Debug Interface Usage</TITLE>
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<H1>pvrusb2 driver debug interface usage</H1>
+<P>$Id: dbgifc.html 1875 2008-02-09 00:26:43Z isely $</P>
+<P>Mike Isely &lt;isely at pobox dot com&gt;</P>
+
+<P>You can find the main driver page on the web at <A
+HREF="http://www.isely.net/pvrusb2/pvrusb2.html">http://www.isely.net/pvrusb2/pvrusb2.html</A>.</P>
+
+<P>This page provides additional information related to operation of
+the driver's debug interface.  You don't need to worry about this
+information unless you're actually trying to debug a problem.  (This
+interface is also used for part of the manual firmware extraction
+process however in that case, the instructions for that process
+include the debug interface information you would need.)</P>
+
+<HR>
+<P>Contents</P>
+
+<BLOCKQUOTE>
+<A HREF="#Overview">Overview</A><BR>
+<A HREF="#Basics">Debug Interface Basics</A><BR>
+<A HREF="#Commands">Debug Interface Available Commands</A><BR>
+</BLOCKQUOTE>
+
+<HR>
+<H2><A NAME="Overview">Overview</A></H2>
+
+<P>The pvrusb2 driver includes a debug interface, which is a method
+for inspecting driver information and injecting actions into the
+driver.  The interface is command line-based; i.e. you feed the driver
+a string containing a command and read back results.</P>
+
+<P>Given that we're talking about a Linux kernel mode driver and not
+some kind of userspace application, then how is it possible to even
+<em>have</em> a command interface?  It's just another sysfs trick.
+Commands are issued by echoing the string into a particular sysfs
+file.  Reading that same file back returns status information.  It's
+that simple.</P>
+
+<HR>
+<H2><A NAME="Basics">Debug Interface Basics</A></H2>
+
+<P>First, you need to ensure that the debug interface has been
+compiled into the driver.  Since this interface isn't needed for
+normal driver operation, then it's likely that a distribution's
+precompiled kernel with this driver might not have it on.  If that is
+the case for you, then you'll have to rebuild the driver with the
+appropriate CONFIG option set.  Sorry, but that's unavoidable.</P>
+
+<P>The CONFIG option that needs to be on is
+&quot;CONFIG_VIDEO_PVRUSB2_DEBUGIFC&quot;; it is described as
+&quot;pvrusb2 debug interface&quot; as an option related to selecting
+the pvrusb2 driver itself.</P>
+
+<P>If you are using a standalone snapshot of the driver (i.e. you
+downloaded a tarball from the pvrusb2 web site), then the build
+process normally always turns on this option for you.  In that case,
+you can ignore the previous two paragraphs.</P>
+
+<P>To access the debug interface, plug in your device as usual, open a
+shell prompt, then change directory to the driver's sysfs directory.
+The directory you want will be of the pattern
+&quot;<tt>/sys/class/pvrusb2/sn-XXXXXXXX</tt>&quot;.  (General
+information about the sysfs interface can be found <A
+HREF="usage.html#sysfs">here</A>.)  List that directory and you should
+find two entries of interest, one named &quot;<tt>debugcmd</tt>&quot;
+and the other named &quot;<tt>debuginfo</tt>&quot;.  If they aren't
+present, then odds are that the debug interface has not been compiled
+into the driver - see above for information on fixing that
+problem.</P>
+
+<P>The &quot;<tt>debugcmd</tt>&quot; file is how commands are issued;
+anything written to here will be parsed and acted upon by the pvrusb2
+driver.</LI>
+
+<P>You can read from either of &quot;<tt>debugcmd</tt>&quot; or
+&quot;<tt>debuginfo</tt>&quot; to retrieve debugging information from
+the driver.  Different information is produced in each case.</P>
+
+<P>Generally, reading from debugcmd returns information more directly
+related to specific low level debugging and only really has meaning in
+the context of other debug commands.  Information printed from
+debugcmd will include a report of USB link speed, GPIO states, and an
+indication if streaming should be in progress or not.</P>
+
+<P>Reading from &quot;<tt>debuginfo</tt>&quot; produces information
+about the driver as a whole - and the mere act of reading this file
+also triggers a dump of more information into the system log.  You'll
+get 3 categories of information here:</P>
+
+<UL>
+
+<LI>First, a complete dump of the driver's current control state will
+be printed - these variables indicate how the driver currently has
+configured various parts of the streaming pipeline.  This is used to
+help in debugging the driver's pipeline control logic (which can be
+somewhat complex).</LI>
+
+<LI>Following the control state dump will be a list of currently
+attached I2C modules, one line per module.  This can be used to
+determine if a module is not attached / missing (e.g. perhaps tuner.ko
+didn't get loaded into the kernel).<LI>
+
+<LI>In addition to producing
+this direct output, the act of reading from this file <em>also</em>
+triggers an internal action that causes all attached I2C modules to
+dump debug info into the system log.  The driver itself will also dump
+additional info into the system log.</LI>
+
+</UL>
+
+<P>A lot can be learned about what is going on simply by reading
+&quot;<tt>debuginfo</tt>&quot; and also examining the system log
+afterwards.</P>
+
+<P>To make this a little more clear, let's consider an example.
+Suppose you wanted to force the FX2 processor to reset.  The command in
+that case would be:</P>
+
+<blockquote><code>echo &quot;reset cpu&quot; &gt;debugcmd</code></blockquote>
+
+<P>That then causes the driver to issue USB control transfers that
+ultimately force the FX2 to reset.  (However you probably don't want
+to do this just for kicks, as it will cause the device to momentarily
+disconnect its USB interface which will look to the kernel like you
+unplugged then replugged in the cable, which will then cause this
+sysfs instance to be reset as well.  But hey, I said this was a
+<em>debug</em> interface...)</P>
+
+<P>To summarize:</P>
+
+<UL>
+
+<LI>Write to &quot;<tt>debugcmd</tt>&quot; to issue a debug interface
+command.</LI>
+
+<LI>Read from &quot;<tt>debugcmd</tt>&quot; to retrieve debug
+interface status.</LI>
+
+<LI>Read from &quot;<tt>debuginfo</tt>&quot; to retrieve general
+driver status information.</LI>
+
+</UL>
+
+<HR>
+<H2><A NAME="Commands">Debug Interface Available Commands</A></H2>
+
+<P>Below is a list of the currently available debug interface
+commands.  Please remember that these commands <em>are</em> for
+debugging issues and not for normal operation.  Many of these actions
+can potentially leave the driver in an operable state and/or require
+power cycling of the PVR USB2 hardware.</P>
+
+<H3>Various Resets</H3>
+
+<DL>
+
+<DT><code>reset cpu</code></DT><DD>A CPU reset triggers a direct reset
+of the FX2 microcontroller within the PVR USB2 device.  Doing this
+<em>will</em> cause the PVR USB2 hardware to temporarily disconnect
+itself from the USB controller; that will have the effect of causing
+the entire sysfs interface to momentarily disappear then reinitialize
+(same action as if you unplugged the hardware then plugged it back
+in).</DD>
+
+<DT><code>reset bus</code></DT><DD>A bus reset causes the USB-level
+transaction that resets the bus itself.  This reset is specific to the
+device at the other end of the bus, that being the PVR USB2 device.
+It should not affect any other connected devices.</DD>
+
+<DT><code>reset soft</code></DT><DD>A soft reset triggers a specific
+FX2 command that is suspected to reset some internal state.  This
+might not be entirely correct, but the command is here.</DD>
+
+<DT><code>reset deep</code></DT><DD>A &quot;deep&quot; reset triggers
+a specific FX2 command that is suspected to reset additional internal
+PVR USB2 hardware.  Again, this might be entirely correct, but the
+command remains mainly due to history.</DD>
+
+<DT><code>reset firmware</code></DT><DD>To reset the
+&quot;firmware&quot; in this case is actually an action to cause the
+encoder's firmware to be reloaded.  Normally you never need to do this
+because the driver itself figures out when the encoder needs a reload
+and will do it on its own.</DD>
+
+<DT><code>reset decoder</code></DT><DD>This issues a reset command to
+the decoder chip (e.g. the cx25843 or the saa7115) inside the device.
+Again this sort of action is normally handled automatically.</DD>
+
+<DT><code>reset worker</code></DT><DD>The driver has a soft
+&quot;error&quot; state it can get into under certain circumstances.
+At the moment this can happen if it fails to load the encoder
+firmware.  This error state is implemented in an attempt to keep the
+driver from getting into a tight loop where it might be continuously
+trying to fruitlessly reload the firmware.  Once the state it set, the
+driver essentially gives up until the state is cleared.  Under normal
+circumstances the driver will automatically clear this state if it
+thinks there is a reason why it might now succeed where previously it
+had failed.  But you can also manually clear the error state with this
+command.</DD>
+
+</DL>
+
+<H3>Firmware Fetching</H3>
+
+<P>The driver implements a mechanism for pulling firmware data back
+out of the device.  This refers to only the FX2 firmware - currently
+there isn't any known means for retrieving the encoder firmware after
+it has been loaded.  This ability is used as part of the manual
+firmware extraction process (relevant part described <A
+HREF="firmware.html#FX2">here</A>).</P>
+
+<P>The debug interface itself has no means for actually reading large
+amounts of data (and sysfs itself really isn't that suitable for such
+a thing).  Because of this, the actual act of slurping out the
+firmware contents happens through the V4L interface.  But it is
+controlled through the debug interface.  This works by first issuing a
+debug interface command to put the driver into &quot;suck firmware
+mode&quot;, then you can grab the contents with a normal cat command
+from the <tt>/dev</tt> node (e.g. &quot;<tt>/dev/video0</tt>&quot;)
+you would normally use to stream video.  Finally another debug
+interface command is issued to return the driver back to normal
+mode.  The debug interface commands are:</P>
+
+<DL>
+
+<DT><code>cpufw fetch ram</code></DT><DD>Put the driver into firmware
+fetching mode and grab the in-memory contents of the FX2 microcontroller.</DD>
+
+<DT><code>cpufw fetch prom</code></DT><DD>Put the driver into firmware
+fetching mode and grab the contents of the device's I2C PROM.  This
+may or may not make sense for the particular device.  Some devices
+load their FX2 firmware from a nearby I2C PROM device; others expect
+to be loaded by the host.  In the host-loaded cases the PROM might not
+have anything useful (it might not even be present).</DD>
+
+<DT><code>cpufw done</code></DT><DD>Undo the effects of either of the
+cpufw fetch commands and return the driver to normal operation.</DD>
+
+</DL>
+
+<P>So, to use this mechanism one must do:</P>
+
+<OL>
+
+<LI>Issue either &quot;cpufw fetch ram&quot; or &quot;cpufw fetch
+prom&quot; to the debug interface</LI>
+
+<LI>Grab the firmware contents, by for example doing: <code>cat /dev/video &gt;tmp/foo.fw</code></LI>
+
+<LI>Issue either &quot;cpufw done&quot; to the debug interface</LI>
+
+</OL>
+
+<P>Note that the hardware implementation that makes the &quot;cpufw
+fetch ram&quot; command possible is somewhat destructive to the
+device's current state.  No permanent harm is done of course, but when
+the &quot;done&quot; step is performed, the device will reset itself
+and the driver will re-initialize it.  That will also have the effect
+of causing the driver's sysfs interface to be torn down and recreated
+(thus affecting this debug interface).</P>
+
+<H3>GPIO Manipulation</H3>
+
+<P>The encoder chip has the ability to control a set of general
+purpose I/O (GPIO) signals.  Various tuner devices use these signals
+to affect aspects of the device.  For example, Hauppauge tuners use
+one GPIO to control the LED.  Other devices might use a GPIO to switch
+an analog mux that might control selection of the stereo audio input
+versus the internal FM tuner.  Encoder firmware loading also seems to
+require manipulation of various GPIO signals.  As a Linux driver
+author, there's a certain amount of guesswork needed to figure this
+out.  So the debug interface here includes the ability to directly
+access GPIO signals.</P>
+
+<P>In our case, there are 3 GPIO registers of interest: an input
+register, an output register, and a direction register.  Generally
+(there is one important exception), each bit of each register
+corresponds to a specific GPIO.  For example, bit 11 of each register
+corresponds to hardware GPIO bit 11.  The direction register control
+the in vs out setting of each bit.  Reading the input register reads
+all the GPIO states, while writing the output register sets the GPIO
+states (for all GPIOs that are set as outputs).</P>
+
+<P>Setting a bit in the direction register sets the corresponding GPIO
+as an output bit.  There is one exception here for our hardware
+however:  GPIO bits 0 through 7 are treated as a unit in the direction
+register, controlled by direction register bit 7.  Said another way,
+setting bit 7 in the direction register programs all of GPIO bits 0
+through 7 as outputs; cleaing direction register bit 7 programs all of
+GPIO bits 0 through 7 as inputs.  Best I can tell right now is that
+direction register bits 0 through 6 simply have no effect.</P>
+
+<P>So, suppose you wish to clear GPIO bit 11.  To do this, you first
+must ensure that bit position 11 in the direction register has a 1 in
+it, then put a 0 in bit position 11 of the output register.</P>
+
+<P>To read current GPIO states, just read debugcmd itself; part of the
+output includes all GPIO states.</P>
+
+<P>With all that said, here are the debug interface commands to
+control GPIO signals:</P>
+
+<DL>
+
+<DT><code>gpio dir &lt;mask&gt; &lt;value&gt;</code></DT><DD>This
+command controls the direction register.  The &lt;mask&gt; argument
+specifies which bits you wish to modify in the register.  The
+&lt;value&gt; argument specifies new bit values for those bits that
+were set in the &lt;mask&gt;.</DD>
+
+<DT><code>gpio out &lt;mask&gt; &lt;value&gt;</code></DT><DD>This
+command controls the output register.  The &lt;mask&gt; argument
+specifies which bits you wish to modify in the register.  The
+&lt;value&gt; argument specifies new bit values for those bits that
+were set in the &lt;mask&gt;.</DD>
+</DL>
+
+<P>There is no command to control the input register - it is a
+read-only register and its value is always provided as part of the
+output when reading the &quot;<tt>debugcmd</tt>&quot; file itself.</P>
+
+<P>The argument values are expected to be integers.  But since they
+are interpreted as bit mask combinations you will naturally want to
+use hex values here.  Just use the usual C language convention of
+prefixing 0x to the number and that will have the desired effect.</P>
+
+<P>Given the above and revisiting our example, then to clear GPIO bit
+11, the following commands would be issued:</P>
+
+<BLOCKQUOTE><code>
+echo &quot;gpio dir 0x0800 0x0800&quot; &gt;debugcmd
+<br>
+echo &quot;gpio out 0x0800 0x0000&quot; &gt;debugcmd
+</code></BLOCKQUOTE>
+
+<HR>
+<BR>
+</BODY>
+</HTML>

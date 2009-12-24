@@ -7,7 +7,7 @@
 </HEAD>
 <BODY LANG="en-US" DIR="LTR">
 <H1>pvrusb2 driver manual firmware extraction</H1>
-<P>$Id: firmware.html 1556 2007-02-08 05:07:27Z isely $</P>
+<P>$Id: firmware.html 2358 2009-11-01 03:55:08Z isely $</P>
 <P>Mike Isely &lt;isely at pobox dot com&gt;</P>
 
 <P>You can find the main driver page on the web at <A
@@ -32,33 +32,35 @@ through this page.)</P>
 <HR>
 <H2><A NAME="Overview">Overview</A></H2>
 
-<P>The PVR USB2 hardware has several parts within it that require
-firmware images to be loaded first in order to operate correctly.
-That firmware is not a part of this driver; you must obtain it from
-elsewhere (e.g. your Windows driver CD or from Hauppauge's web site).
-In addition, the exact firmware files you will need will depend on
-which model of the PVR USB2 device you have.  Whether you are using
-the standalone pvrusb2 driver snapshot or the in-V4L version of the
-pvrusb2 driver, you will need to obtain and install the appropriate
-firmware images before your device will function correctly.</P>
+<P>Hardware driven by the pvrusb2 driver has several parts within it
+that require firmware images to be loaded first in order to operate
+correctly.  That firmware is not a part of this driver; you must
+obtain it from elsewhere (e.g. your Windows driver CD, the device
+maker's web site, or perhaps a 3rd party).  In addition, the exact
+firmware files you will need will depend on which device you have.
+Whether you are using the standalone pvrusb2 driver snapshot or the
+in-V4L version of the pvrusb2 driver, you will need to obtain and
+install the appropriate firmware images before your device will
+function correctly.</P>
 
-<P>The easiest means for extracting the firmware is <em>NOT</em>
-described here.  It is instead documented as part of the normal driver
-setup.  You can find that information in the <A
-HREF="setup.html#Firmware">Firmware extraction and installation</A>
+<P>The easiest means for obtaining or extracting the firmware is
+<em>NOT</em> described here.  It is instead documented as part of the
+normal driver setup.  You can find that information in the <A
+HREF="setup.html#Firmware">Firmware retrieval and installation</A>
 section within <A HREF="setup.html">setup.html</A>.  Try there first,
 and if that failed to work, then read on.</P>
 
 <P>There is the occasional situation where the easy method doesn't
 work.  It is possible that <tt>fwextract.pl</tt> might not recognize
-your driver package no matter what you throw at it; you'll see
-messages of the form &quot;failed to locate data for writing
-filename&quot; (where filename is the firmware file it tried to
-generate).  This can happen if Hauppauge releases new drivers and
-<tt>fwextract.pl</tt> hasn't been updated yet.  If this is indeed the
-case, then things are somewhat more difficult - we need to manually
-identify the firmware data and teach the script where to find it when
-it encounters the new driver package.</P>
+your driver package (you did uncompress it first, right?) no matter
+what you throw at it; you'll see messages of the form &quot;failed to
+locate data for writing filename&quot; (where filename is the firmware
+file it tried to generate).  This can happen if the device vendor
+releases new drivers and <tt>fwextract.pl</tt> hasn't been updated
+yet.  If this is indeed the case, then things are somewhat more
+difficult - we need to manually identify the firmware data and teach
+the script where to find it when it encounters the new driver
+package.</P>
 
 <P>Basically what has to be done if this happens is something like
 this:</P>
@@ -84,20 +86,16 @@ hacking effort.</P>
 approaches to it.  One approach is that someone good at
 reverse-engineering starts hacking away with a hex editor to find the
 embedded data.  Yuck.  Another approach is to capture the firmware
-from the hardware itself - which we can do.  There are at least two
+from the hardware itself - which we can do.  There are typically two
 pieces of data to capture: the cx23416 (mpeg encoder) firmware and the
-FX2 (device microcontroller) firmware.  If you have 24xxx hardware,
-then you need to capture the cx25840 (video & audio digitizer)
-firmware as well.</P>
+FX2 (device microcontroller) firmware.  If you have 24xxx, Gotview, or
+HVR-1950 hardware, then you also need to capture the cx25840 (video &
+audio digitizer) firmware as well.  Note: The Gotview and OnAir
+devices store the FX2's program in a local ROM so there's no need to
+worry about FX2 firmware in those cases.</P>
 
 <HR>
 <H2><A NAME="Encoder">cx23416 &amp; cx25840 firmware capture</A></H2>
-
-<blockquote><strong>Important Note:</strong> Since the pvrusb2 driver needs the
-cx23416 firmware to be successfully loaded in order to function at all
-right now, you will need to <em>first</em> capture at least the
-cx23416 firmware (which doesn't involve the pvrusb2 driver)
-<em>before</em> you attempt to capture the FX2 firmware.</blockquote>
 
 <P>To manually capture the cx23416 and cx25840 firmware images, you
 need to use the USB sniffer to grab it &quot;in flight&quot; from
@@ -105,25 +103,28 @@ within Windows and then use several tools included with the standalone
 driver snapshot to extract the firmware data from the stream.</P>
 
 <P>The USB sniffer is a handy free utility that can be found at
-<A HREF="http://benoit.papillault.free.fr/usbsnoop/">http://benoit.papillault.free.fr/usbsnoop/</A>.</P>
+<AHREF="http://benoit.papillault.free.fr/usbsnoop/">http://benoit.papillault.free.fr/usbsnoop/</A>.
+Make sure you grab the latest version of the sniffer - the download
+list on the site shows version oldest to newest, so be sure to scroll
+to the bottom of the list.  The sniffer version I've used is 1.8.</P>
 
 <P>The additional tools you will need are included with the standalone
-driver snapshot.  Specifically, you will need usbreplay.pl to distill
-the output of the USB sniffer down to a simpler form, and you will
-need the decompiler (decode_log with the &quot;--firmware&quot;
-option) to extract the firmware data from the stream.  Note that the
-decompiler is C++; if you haven't yet compiled it then just run
-<tt>make</tt> in the <tt>utils</tt> directory to build it.</P>
+driver snapshot.  Specifically, you will need <tt>usbreplay.pl</tt> to
+distill the output of the USB sniffer down to a simpler form, and you
+will need the decompiler (<tt>decode_log</tt> with the
+&quot;--firmware&quot; option) to extract the firmware data from the
+stream.  Note that the decompiler is C++; if you haven't yet compiled
+it then just run <tt>make</tt> in the <tt>utils</tt> directory to
+build it.</P>
 
 <P>Additional information about all of this can be found in the <A
 HREF="utils.html#sniff">Sniffing and decompiling USB traffic</A>
 section of of the <A HREF="utils.html">utils.html</A> page.</P>
 
-
 <P>The process is roughly the same regardless of the type of hardware
 you have - you'll get one file out of this if you are using 29xxx
-hardware and two files if you are using 24xxx hardware.  Here's the
-exact procedure:</P>
+hardware and two files if you are using 24xxx or Gotview hardware.
+Here's the exact procedure:</P>
 
 <OL>
 
@@ -146,17 +147,18 @@ you got from the sniffer):</LI>
 
 <P>The result of that last step will be either 1 or 2 files.  If you
 are using 29xxx hardware you should see one file named
-&quot;<tt>firmware_file</tt>&quot;.  If you are using 24xxx hardware
-you should see two files, named &quot;<tt>firmware_file-1</tt>&quot;
-and &quot;<tt>firmware_file-2</tt>&quot;.  You need to rename these
-files.  For 29xxx hardware with a single file, just do this:</P>
+&quot;<tt>firmware_file</tt>&quot;.  Otherwise you should see two
+files, named &quot;<tt>firmware_file-1</tt>&quot; and
+&quot;<tt>firmware_file-2</tt>&quot;.  You need to rename these files.
+For 29xxx hardware with a single file, just do this:</P>
 
 <BLOCKQUOTE><PRE><CODE>mv firmware_file v4l-cx2341x-enc.fw</CODE></PRE></BLOCKQUOTE>
 
-<P>For 24xxx hardware, you first need to figure out which file is
-which and then rename them accordingly.  You must <strong>not</strong>
-get this backwards!  One file will be approximately 256KB in size -
-that will be the cx23416 image and you should rename that to
+<P>For 24xxx or Gotview hardware, you first need to figure out which
+file is which and then rename them accordingly.  You must
+<strong>not</strong> get this backwards!  One file will be
+approximately 256KB (or slightly larger) in size - that will be the
+cx23416 image and you should rename that to
 &quot;<tt>v4l-cx2341x-enc.fw</tt>&quot;.  The other file will be
 roughly 13KB in size (this might vary); rename that file to
 &quot;<tt>v4l-cx25840.fw</tt>&quot;.</P>
@@ -164,12 +166,21 @@ roughly 13KB in size (this might vary); rename that file to
 <HR>
 <H2><A NAME="FX2">FX2 firmware capture</A></H2>
 
+<P>If you are using a Gotview or OnAir device, the FX2 program is held
+in the device in ROM, so there's no FX2 firmware to extract and you
+can safely skip this entire part of the procedure.</P>
+
 <blockquote><strong>Important note:</strong> If you are using the
-in-V4L version of the pvrusb2 driver, be sure you have built it with
-the debug interface option (CONFIG_VIDEO_PVRUSB2_DEBUGIFC) enabled.
-Doing this enables a feature that you need in order to capture the FX2
-firmware.  For the standalone pvrusb2 driver, this is enabled by
-default.</blockquote>
+in-V4L or in-kernel versions of the pvrusb2 driver, be sure you have
+built it with the debug interface option
+(CONFIG_VIDEO_PVRUSB2_DEBUGIFC) enabled.  Doing this enables a feature
+that you need in order to capture the FX2 firmware.  Frequently
+distro-supplied precompiled kernels will <em>not</em> have this option
+set!  For the standalone pvrusb2 driver, this is enabled by default.
+If you are using a distro-supplied kernel and it appears that the
+debug interface is not enabled, it is probably easier to just grab and
+build the standalone driver rather than trying to recompile a piece of
+the distro's kernel package...</blockquote>
 
 <P>Capturing of the FX2 firmware is entirely different.  The USB
 sniffer doesn't see this traffic right now so we have to take a
@@ -196,12 +207,25 @@ echo "cpufw done" >/sys/class/pvrusb2/sn-XXXXXXX/debugcmd</CODE></PRE></LI>
 <LI>Rename the firmware file to correspond to your hardware type.  For
 29xxx hardware, rename <tt>fx2.fw</tt> to
 <tt>v4l-pvrusb2-29xxx-01.fw</tt>.  For 24xxx hardware, rename
-<tt>fx2.fw</tt> to <tt>v4l-pvrusb2-24xxx-01.fw</tt>.  This
-differentiation of firmware name is <strong>extremely</strong>
+<tt>fx2.fw</tt> to <tt>v4l-pvrusb2-24xxx-01.fw</tt>.  For HVR-1950
+hardware, rename <tt>fx2.fw</tt> to <tt>v4l-pvrusb2-73xxx-01.fw</tt>.
+This differentiation of firmware name is <strong>extremely</strong>
 important because the FX2 firmware is actually different and
-incompatible between the two versions of the PVR USB2 hardware.</LI>
+incompatible among all device versions.</LI>
 
 </OL>
+
+<P><em>Very</em> important exception to the above procedure: If you
+are doing this on an HVR-1950 device, then it is likely that the
+firmware image will be 16KB (16384) instead of 8KB (8192).  The above
+procedure only grabs the first 8KB and this will ultimately result in
+corrupted firmware (it won't be subtle when you later test it).  To
+deal with this, modify the first echo command to be this instead:</P>
+
+<BLOCKQUOTE><PRE><CODE>echo "cpufw fetch ram16k" >/sys/class/pvrusb2/sn-XXXXXXX/debugcmd</CODE></PRE></BLOCKQUOTE>
+
+<P>That tells the pvrusb2 driver to grab 16KB instead of 8KB.  (Yes I
+can make this work smarter but that still needs more work.)</P>
 
 <P>It is imperative that you do not power cycle the device when
 switching from Windows to Linux.  This allows the FX2 firmware to be
@@ -243,8 +267,26 @@ v4l-pvrusb2-24xxx-01.fw<BR>
 v4l-cx25840.fw<BR>
 </code></blockquote>
 
-<P>Now unpack the Hauppauage Windows driver package again into an
-empty &quot;<tt>win_driver</tt>&quot; subdirectory, then run
+<P>For Gotview hardware:</P>
+<blockquote><code>
+v4l-cx2341x-enc.fw<BR>
+v4l-cx25840.fw<BR>
+</code></blockquote>
+
+<P>For OnAir hardware:</P>
+<blockquote><code>
+v4l-cx2341x-enc.fw<BR>
+</code></blockquote>
+
+<P>For HVR-1950 hardware:</P>
+<blockquote><code>
+v4l-cx2341x-enc.fw<BR>
+v4l-pvrusb2-73xxx-01.fw<BR>
+v4l-cx25840.fw<BR>
+</code></blockquote>
+
+<P>Now unpack the vendor's Windows driver package again into an empty
+&quot;<tt>win_driver</tt>&quot; subdirectory, then run
 <tt>fwextract.pl --search</tt>.  (If you installed from a cdrom, you
 can alternatively mount the cdrom under Linux and use the
 --driverDir=&lt;path&gt; option to point at the mount point instead of
@@ -256,11 +298,11 @@ extract this firmware data in the future.  Send that magic chunk to me
 the next release of <tt>fwextract.pl</tt> includes it.</P>
 
 <P>You should in theory be able to just use the manually extracted
-firmware files.  However the FX2 firmware image (either
-<tt>v4l-pvrusb2-29xxx-01.fw</tt> or <tt>v4l-pvrusb2-24xxx-01.fw</tt>)
-may not be exactly identical to what is really loaded, so you may
-really want to go back and get the real firmware out of the driver
-directory anyway.  Do the following:</P>
+firmware files.  However the FX2 firmware image (one of
+<tt>v4l-pvrusb2-29xxx-01.fw</tt>, <tt>v4l-pvrusb2-24xxx-01.fw</tt>, or
+<tt>v4l-pvrusb2-73xxx-01.fw</tt>) may not be exactly identical to what
+is really loaded, so you may really want to go back and get the real
+firmware out of the driver directory anyway.  Do the following:</P>
 
 <OL>
 

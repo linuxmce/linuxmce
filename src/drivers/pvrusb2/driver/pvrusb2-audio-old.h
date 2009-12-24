@@ -1,6 +1,6 @@
 /*
  *
- *  $Id: pvrusb2-audio-old.h 1563 2007-02-28 03:30:33Z isely $
+ *  $Id: pvrusb2-audio-old.h 2226 2009-03-07 05:17:32Z isely $
  *
  *  Copyright (C) 2005 Mike Isely <isely@pobox.com>
  *  Copyright (C) 2004 Aurelien Alleaume <slts@free.fr>
@@ -26,7 +26,7 @@
 #include "pvrusb2-options.h"
 #include "compat.h"
 
-#include "pvrusb2-i2c-core.h"
+#include "pvrusb2-i2c-track.h"
 
 #ifdef ENABLE_PVRUSB2_AUDIO_OLD
 

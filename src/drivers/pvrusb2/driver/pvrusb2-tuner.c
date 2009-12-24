@@ -1,6 +1,6 @@
 /*
  *
- *  $Id: pvrusb2-tuner.c 1571 2007-02-28 04:27:44Z isely $
+ *  $Id: pvrusb2-tuner.c 2261 2009-04-01 04:21:26Z isely $
  *
  *  Copyright (C) 2005 Mike Isely <isely@pobox.com>
  *  Copyright (C) 2004 Aurelien Alleaume <slts@free.fr>
@@ -33,6 +33,8 @@
 #include <media/v4l2-common.h>
 #endif
 
+#ifdef PVR2_ENABLE_OLD_I2COPS
+
 struct pvr2_tuner_handler {
 	struct pvr2_hdw *hdw;
 	struct pvr2_i2c_client *client;
@@ -51,6 +53,7 @@ static void set_type(struct pvr2_tuner_handler *ctxt)
 	if (((int)(hdw->tuner_type)) < 0) return;
 
 #ifdef PVR2_ENABLE_TUNER_SETUPADDR
+	memset(&setup, 0, sizeof(setup));
 	setup.addr = ADDR_UNSET;
 	setup.type = hdw->tuner_type;
 	setup.mode_mask = T_RADIO | T_ANALOG_TV;
@@ -117,6 +120,7 @@ int pvr2_i2c_tuner_setup(struct pvr2_hdw *hdw,struct pvr2_i2c_client *cp)
 	return !0;
 }
 
+#endif /* PVR2_ENABLE_OLD_I2COPS */
 
 
 

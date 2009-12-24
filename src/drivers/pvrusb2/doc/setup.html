@@ -7,7 +7,7 @@
 </HEAD>
 <BODY LANG="en-US" DIR="LTR">
 <H1>pvrusb2 driver setup information</H1>
-<P>$Id: setup.html 1389 2006-10-25 02:39:44Z isely $</P>
+<P>$Id: setup.html 2361 2009-11-01 04:33:58Z isely $</P>
 <P>Mike Isely &lt;isely at pobox dot com&gt;</P>
 
 <P>You can find the main driver page on the web at <A
@@ -18,7 +18,7 @@ Linux driver and what steps you need to take in order to get your PVR
 USB2 hardware working.</P>
 
 <P>To use the pvrusb2 driver in your Linux system, you must (1)
-satisfy the prerequisites, (2) compile the driver, and (3) extract and
+satisfy the prerequisites, (2) compile the driver, and (3) obtain and
 install appropriate firmware images.  You might also (4) have to deal
 with various support modules (chip-level drivers) if you are using an
 old kernel.  This page is divided into sections corresponding to those
@@ -30,7 +30,7 @@ steps.</P>
 <BLOCKQUOTE>
 <A HREF="#Prerequisites">Prerequisites / Compatibility</A><BR>
 <A HREF="#Compilation">Driver compilation and installation</A><BR>
-<A HREF="#Firmware">Firmware extraction and installation</A><BR>
+<A HREF="#Firmware">Firmware retrieval and installation</A><BR>
 <A HREF="#Modules">Support Modules</A><BR>
 </BLOCKQUOTE>
 
@@ -48,6 +48,19 @@ use the in-kernel version of the driver, then you can ignore
 everything below about kernel versions.  If you are using any kernel
 older than 2.6.18, then keep reading.</P>
 
+<P>Note: Newer hardware support in this driver generally means
+correspondingly newer kernel versions are required.  In particular
+you'll need 2.6.26 or later to handle the digital side of hybrid
+devices.</P>
+
+<P>Note: Gotview an OnAir support are newer than 24xxx or 29xxx, and
+definitely not in any kernel version prior to 2.6.25.  If you are
+using a kernel older than that with a Gotview device, then you must
+use either the in-V4L or standalone pvrusb2 drivers.</P>
+
+<P>HVR-1950 devices use a very new type of tuner; you will likely need
+2.6.26 or later to run such a device.</P>
+
 <P>Within the 2.6.x kernel series and if you are using the standalone
 driver (as opposed to the in-V4L or in-kernel variations), then there
 are additional limits, due mainly to the state of V4L in a given
@@ -57,29 +70,54 @@ have.  Going backwards in time:</P>
 
 <DL>
 
+<DT>2.6.28 - 2.6.29</DT><DD>No issues.</DD>
+
+<DT>2.6.27</DT><DD>This kernel has had some earlier issues with the
+tuner module required for HVR-1950 support.  Otherwise everything
+should work.</DD>
+
+<DT>2.6.26</DT><DD>The 2.6.26 kernel version adds new features to the
+V4L and DVB subsystems that permit implementation of the DVB interface
+within the pvrusb2 driver.  Thus to use DVB you need at least this
+kernel version (or the in-V4L driver version which carries all the DVB
+stuff as part of the package).  To use the digital side of supported
+hybrid devices requires DVB (and thus this kernel or better).  Also,
+this kernel version adds a tuner type to V4L/DVB that is required for
+correct operation of the HVR-1950.</DD>
+
+<DT>2.6.19 - 2.6.25</DT><DD>No issues for analog support.</DD>
+
 <DT>2.6.18</DT><DD>Starting with 2.6.18, the pvrusb2 driver is a part
-of the kernel tree.  You can just use that if you want...  However if
-you want to use the standalone version, then things should still be
-fine (just build the standalone driver normally and replace the
-in-kernel pvrusb2.ko with it).</DD>
+of the kernel tree.  You can just use that if you want (for 24xxx or
+29xxx hardware)...  However if you want to use the standalone version,
+then things should still be fine (just build the standalone driver
+normally and replace the in-kernel pvrusb2.ko with it).</DD>
 
 <P>Note that only the 2.6.18 kernel (and later) have the pvrusb2
 driver in-kernel.  Everything below this point requires you to use the
 standalone driver or the in-V4L driver version.</P>
 
-<DT>2.6.17 - 2.6.16</DT><DD>This kernel is known to work just fine.
-You don't need to replace any supporting chip-level drivers (and the
-supplied versions won't compile there anyway).</DD>
+<DT>2.6.17</DT><DD>This kernel is known to work just fine.  You don't
+need to replace any supporting chip-level drivers (and the supplied
+versions won't compile there anyway).</DD>
+
+<DT>2.6.16</DT><DD>Support for the cs53l32a chip-level driver is not
+available in the pvrusb2 driver for this kernel or older.  This
+impacts the ability to use OnAir devices when composite or s-video
+analog input is desired.</DD>
 
 <DT>2.6.15</DT><DD>This kernel is known to work just fine with the
-model 29xxx series, but for the newer model 24xxx series it has not
-had a lot of burn-in yet.  You don't need to replace any supporting
-chip-level drivers.</DD>
+model 29xxx series, but for the newer model 24xxx series it is more of
+an unknown.  For Gotview hardware it probably won't work (cx25840
+routing setup is too different.)  You don't need to replace any
+supporting chip-level drivers, however the cx25840 chip-level driver
+in that kernel was very new and has undergone many changes since then.
+User beware.</DD>
 
 <DT>2.6.14 - 2.6.11</DT><DD>These kernels are known to work just fine
 with the model 29xxx series (after installing a suitable saa7115.ko
 chip-level driver from the standalone driver snapshot), but they will
-not work for the newer model 24xxx series at all, since the critical
+not work for 24xxx or Gotview hardware at all, since the critical
 cx25840 support module did not appear until 2.6.15.  You might need to
 replace one or more of the kernel-supplied chip-level drivers with
 versions from elsewhere or included with the driver snapshot.</DD>
@@ -112,18 +150,26 @@ HREF="chipdrivers.html">chipdrivers.html</A> for more details.</P>
 pvrusb2 driver.  The in-V4L variant of the driver is separately
 constrained by the V4L environment there itself - but it also means
 that it should work anywhere that the V4L repository can be made to
-work.  Basically, if the current Mercurial snapshot of V4L is known to
-work well in kernel 2.6.X, then the in-V4L pvrusb2 driver will
-probably work there as well (including the newer model 24xxx series).
-This is because most of the constraints that limit the standalone
-driver have to do with whatever V4L modules were included in that
-kernel.  When you build the in-V4L variant of the driver you are also
-building <em>all</em> of the V4L modules as well and therefore you
-will be using the latest versions regardless of whatever the kernel
-might have included.  I said in the background section that if you use
-the driver in-V4L that you would also have to install the other 50+
-modules that come with it.  Well, for older kernels that might
-actually be considered to be an advantage...</P>
+work (as of 14-Mar-2009: only for kernels 2.6.19 or later, and
+probably soon that floor will rise to 2.6.22).  Basically, if the
+current Mercurial snapshot of V4L is known to work well in kernel
+2.6.X, then the in-V4L pvrusb2 driver will probably work there as
+well.  This is because most of the constraints that limit the
+standalone driver have to do with whatever V4L modules were included
+in that kernel.  When you build the in-V4L variant of the driver you
+are also building <em>all</em> of the V4L modules as well and
+therefore you will be using the latest versions regardless of whatever
+the kernel might have included.  I said in the background section that
+if you use the driver in-V4L that you would also have to install the
+other 50+ modules that come with it.  Well, for older kernels that
+might actually be considered to be an advantage.</P>
+
+<BLOCKQUOTE>Unfortunately at this writing the V4L repository only
+actually is known to work with kernels back to 2.6.19.  This is due to
+some API-breaking changes in the Linux kernel tree that the V4L
+repository is unable to cope with in a backwards compatible fashion.
+So if you go the in-V4L route, you are unfortunately effectively
+limited to kernel versions 2.6.19 or later.</BLOCKQUOTE>
 
 <P>None of the above applies for the in-kernel variant of the driver.
 As one might expect all support needs for the in-kernel pvrusb2 driver
@@ -171,17 +217,15 @@ continue to build correctly in the future.</P>
 many kernel variants I can juggle here and still have time left to
 actually improve the driver.</P>
 
-<H3>Firmware loading support (hotplug)</H3>
+<H3>Firmware loading support (udev / hotplug)</H3>
 
-<P>This driver uses a standard kernel facility for
-loading firmware images from the file system, and that facility
-requires a userspace utility to be present.  Currently that utility is
-hotplug.  Supposedly udev can also fill this role but I have not
-tested this so I can't be sure.  If hotplug (or whatever can stand in
-as a functional replacement) is not installed on your system, then the
-driver will fail when it tries to load required firmware images into
-the hardware.  Therefore, <strong>you must have hotplug or its
-equivalent installed in order for this driver to work.</strong></P>
+<P>This driver uses a standard kernel facility for loading firmware
+images from the file system, and that facility requires a userspace
+utility to be present.  Currently that utility is udev.  For older
+Linux distributions, the hotplug utility filled this role.  Either way,
+you need one or the other or firmware loading will not work correctly.
+<strong>You must have udev or its equivalent installed in order for
+this driver to work.</strong></P>
 
 <H3>Kernel configuration</H3>
 
@@ -197,9 +241,9 @@ then you may want to at least ensure that these options have been set
 
 <DL>
 
-<DT><tt>CONFIG_FW_LOADER</tt></DT> <DD>This enables firmware
-retrieval and loading - needed because the pvrusb2 driver has to load
-2-3 firmware images (depending on hardware type).</DD>
+<DT><tt>CONFIG_FW_LOADER</tt></DT> <DD>This enables firmware retrieval
+and loading - needed because the pvrusb2 driver has to load one or
+more firmware images (depending on hardware type).</DD>
 
 </DL>
 
@@ -216,12 +260,12 @@ subsystem.  Being that this is a V4L driver...</DD>
 
 <DT><tt>CONFIG_VIDEO_BT848</tt></DT> <DD>We need this for 2.6.16 or
 earlier because the msp3400.ko chip-level driver is built as part of
-the bt848 driver.  (You don't need this for model 24xxx
+the bt848 driver.  (You don't need this for model 24xxx or Gotview
 hardware).</DD>
 
 <DT><tt>CONFIG_VIDEO_MSP3400</tt></DT> <DD>This switch enables the
 msp3400.ko chip-level driver for 2.6.17 or later kernels (not needed
-for model 24xxx hardware).</DD>
+for 24xxx or Gotview hardware).</DD>
 
 <DT><tt>CONFIG_VIDEO_TUNER</tt></DT> <DD>We need this for the tuner.ko
 and tda9887.ko chip-level drivers.</DD>
@@ -242,7 +286,7 @@ only for 29xxx hardware.</DD>
 
 <DT><tt>CONFIG_VIDEO_CX25840</tt></DT> <DD>For kernel 2.6.17 or later,
 this enables inclusion of the cx25840.ko chip-level driver, needed for
-24xxx hardware.</DD>
+24xxx and Gotview hardware.</DD>
 
 <DT><tt>CONFIG_VIDEO_WM8775</tt></DT> <DD>For kernel 2.6.17 or later,
 this enables inclusion of the wm8775.ko chip-level driver, needed for
@@ -269,13 +313,13 @@ things get a little trickier, because it wasn't until 2.6.15 when all
 the chip-level drivers actually made it into the kernel tree.  See the
 <A HREF="#Modules">Support Modules</A> section below for more
 information about this.  Best advice: stick to kernel versions 2.6.15
-or later.</P>
+or (preferably) later.</P>
 
-<P>If you see messages in the log of the form &quot;No decoder
-present&quot;, that is an indication that saa7115 or (if you have
-24xxx hardware) cx25840 was not configured into your kernel.  It's
-always a good idea to check that you have the appropriate options set,
-as defined above.</P>
+<P>If you see messages in the log of the form &quot;WARNING: No
+decoder present&quot;, that is an indication that saa7115 or (if you
+have 24xxx or Gotview hardware) cx25840 was not configured into your
+kernel.  It's always a good idea to check that you have the
+appropriate options set, as defined above.</P>
 
 <HR>
 <H2><A NAME="Compilation">Driver compilation and installation</A></H2>
@@ -403,29 +447,113 @@ tree.  This is OK.  Provided you have the V4L repository compiled and
 installed as well, then everything should be fine.</P>
 
 <HR>
-<H2><A NAME="Firmware">Firmware extraction and installation</A></H2>
+<H2><A NAME="Firmware">Firmware retrieval and installation</A></H2>
 
 <blockquote><strong>NOTE: Even if you intend to use the in-V4L or
-in-kernel versions of the driver, you must still extract the firmware
+in-kernel versions of the driver, you must still either obtain the
+firmware from somewhere or extract the firmware from your driver CD
 using the instructions here.</strong></blockquote>
 
-<P>The PVR USB2 hardware has several parts within it that require
-firmware in order to operate correctly.  That firmware is not a part
-of this driver; you must obtain it from elsewhere (e.g. your Windows
-driver CD or from Hauppauge's web site).  In addition, the exact
-firmware files you will need will depend on which model of the PVR
-USB2 device you have.</P>
+<P>Hardware driven by the pvrusb2 driver has several parts within it
+that require firmware in order to operate correctly.  That firmware is
+not a part of this driver; you must obtain it from elsewhere
+(e.g. your Windows driver CD, the device maker's web site, or perhaps
+a 3rd party).  In addition, the exact firmware files you will need
+will depend on which type device you have.</P>
 
-<P>The central piece of the firmware extraction puzzle is a Perl
-script, called <tt>fwextract.pl</tt>.  This program is fairly smart;
-you need only point it at a directory where the Windows driver files
-have been placed and it will automatically hunt down and extract
-appropriate firmware images.  This script uses MD5 sums to identify
-its target(s) and so it works across all currently known driver
-package versions and hardware variants.  It also verifies the
-extracted results with additional MD5 sums, so if it writes a firmware
-image file at all, you can have high confidence that it is indeed
-correct.</P>
+<H3><A NAME="Firmware_Obtaining">Obtaining firmware images</A></H3>
+
+<blockquote><strong>IMPORTANT: If you are using an HVR-1950, the
+vendor FX2 firmware for that device has recently increased in size
+from 8KB to 16KB.  This causes an issue because <em>all</em> in-kernel
+pvrusb2 driver versions up through kernel 2.6.32 enforce this size to
+be strictly 8KB - anything else will cause the driver to reject the
+firmware image.  This has been fixed in the standalone driver
+(anything 31-Oct-2009 or later) and should propagate to the in-kernel
+and in-V4L drivers shortly.  But this strictly requires that if your
+kernel is 2.6.32 or older and your FX2 firmware size is 16384 then you
+absolutely must use the standalone pvrusb2 driver or the in-V4L
+pvrusb2 driver.</strong></blockquote>
+
+<P>In order to obtain the firmware, there are multiple posssible
+strategies available, depending on the vendor:</P>
+
+<UL>
+
+<LI>For Hauppauge hardware <em>except HVR-1950</em>, you can directly
+download a reasonable set of full firmware from ivtvdriver.org.  The
+ivtv driver project maintains a tarball of firmware images.  You can
+retrieve the required firmware from this tarball.  It can be found at
+<A
+HREF="http://dl.ivtvdriver.org/ivtv/firmware/">http://dl.ivtvdriver.org/ivtv/firmware/</A>.
+This distribution contains firmware from Hauppauge, and they have
+granted permission to the ivtv project to redistribute these images.
+Clearly if you are using a Hauppauge device, you can just grab what
+you need from there.  Unfortunately if you have an HVR-1950, that
+tarball does not currently contain the particular FX2 image that you
+will need - thus the exception.</LI>
+
+<LI>For the Hauppauge HVR-1950, you can directly download a usable FX2
+firmware image from <A
+HREF="http://www.steventoth.net/linux/hvr1950/v4l-pvrusb2-73xxx-01.fw">
+http://www.steventoth.net/linux/hvr1950/v4l-pvrusb2-73xxx-01.fw</A>.
+All of the required firmware files are actually in that directory,
+however the other images are using non-V4L-standard names.  You can
+rename them if you know what you are doing, but I suggest you just
+grab the tarball from ivtvdriver.org in this case (as described above)
+to get the other files and don't worry about possibly messing up the
+rename steps you would otherwise have to do.</LI>
+
+
+<LI>For OnAir hardware, you can directly download the required
+firmware from the vendor's <a
+href="http://www.autumnwave.com/index.php?option=com_docman&task=doc_details&gid=127&Itemid=282">site</a>.
+I've also been given permission to distribute their firmware, so you
+can find it here as well, as <a href="http://www.isely.net/downloads/autumnwave-v4l-cx2341x-enc.zip">autumnwave-v4l-cx2341x-enc.zip</a>.</LI>
+
+<LI>For all hardware <em>except</em> OnAir (their driver package is
+compressed in a way that can't be dissected by any Linux tool), you
+can also extract the firmware yourself.  Keep reading...</LI>
+
+</UL>
+
+<H3>Extracting the firmware yourself</H3>
+
+<P>The central piece of the firmware extraction puzzle is just a Perl
+script, called <tt>fwextract.pl</tt>.  It is included in the
+<tt>utils</tt> subdirectory of the standalone driver snapshot.  If you
+are using the in-V4L driver driver version however you won't want to
+deal with grabbing that whole snapshot - in that case you can download
+a reasonably recent version of the script from here:</P>
+
+<blockquote><A
+HREF="http://www.isely.net/downloads/fwextract.pl">http://www.isely.net/downloads/fwextract.pl</A></blockquote>
+
+<P>This extraction program is fairly smart; you need only point it at
+a directory where the actual Windows driver files have been placed and
+it will automatically hunt down and extract appropriate firmware
+images.  This script uses MD5 sums to identify its target(s) and so it
+normally works across all currently known driver versions and hardware
+variants.  It also verifies the extracted results with additional MD5
+sums, so if it writes a firmware image file at all, you can have high
+confidence that it is indeed correct.</P>
+
+<BLOCKQUOTE>Note about compressed driver packages in general and OnAir
+drivers in particular: The <tt>fwextract.pl</tt> program knows how to
+scan files, but it cannot decompress them.  This means that if you
+download a driver from the vendor's site as, say, a zip file, then you
+must unzip it <em>first</em> and then point <tt>fwextract.pl</tt> at
+the results.  Otherwise <tt>fwextract.pl</tt> won't find anything to
+extract.  This has an undesirable effect: If the vendor compressed the
+driver package in a way that can't be uncompressed with any Linux
+tool, then you may be out of luck.  This can happen if the driver
+package is a self-extracting EXE and something other than a zip
+variant was used to compress it.  And unfortunately this is in fact
+the case for OnAir supplied Windows drivers.  This is why you can't
+easily use <tt>fwextract.pl</tt> for OnAir (unless you first go find a
+Windows system to uncompress the package first).  This is also why
+OnAir has made their firmware directly available (see earlier section
+above).</BLOCKQUOTE>
 
 <BLOCKQUOTE>Note: The <tt>fwextract.pl</tt> program will scan any
 nested subdirectories it might find.  This means two things: First, if
@@ -437,15 +565,6 @@ then <tt>fwextract.pl</tt> will likely take a <em>very</em> long time
 to find the firmware.  (It will however probably still find it if you
 wait long enough and have enough virtual memory
 available...)</BLOCKQUOTE>
-
-<P>The <tt>fwextract.pl</tt> script is included in the <tt>utils</tt>
-subdirectory of the standalone driver snapshot.  If you are using the
-in-V4L driver driver version however you won't want to deal with
-grabbing that whole snapshot - in that case you can download a
-reasonably recent version of the script from here:</P>
-
-<blockquote><A
-HREF="http://www.isely.net/downloads/fwextract.pl">http://www.isely.net/downloads/fwextract.pl</A></blockquote>
 
 <P>The general process of firmware extraction is this:</P>
 
@@ -464,18 +583,18 @@ you can even omit the command argument.</LI>
 
 <BLOCKQUOTE>Note that when the term &quot;Windows driver files&quot;
 is used above, it is refering to a directory tree full of files that
-contains the drivers from Hauppauge.  That unfortunately is easier
-defined than found because Hauppauge seems to like packaging these
-drivers in different ways.  If you're working from a CDROM
-distribution, then we're refering to the root directory of the CDROM -
-for 29xxx hardware but the <tt>DriverD2</tt> subdirectory of the CDROM
-for 24xxx harware(!).  If you are working from a download package,
-there might be several such packages but only one has the files you
-want.  For example, the packages pvrusb2_23_31351.exe and
-pvrusb2_27_23178.zip each contain a driver set, but
-pvrusb2_26_23055.exe does not - instead in that case the actual
-drivers are in pvrusb2_inf.zip.  Why did they do this?  I have no
-idea; it just confuses.  Best advice here is make a guess and if
+contains the drivers from Hauppauge (or Gotview).  That unfortunately
+is easier defined than found because Hauppauge in particular seems to
+like packaging these drivers in different ways.  If you're working
+from a CDROM distribution, then we're refering to the root directory
+of the CDROM - for 29xxx hardware but the <tt>DriverD2</tt>
+subdirectory of the CDROM for 24xxx hardware(!).  If you are working
+from a download package, there might be several such packages but only
+one has the files you want.  For example, the packages
+pvrusb2_23_31351.exe and pvrusb2_27_23178.zip each contain a driver
+set, but pvrusb2_26_23055.exe does not - instead in that case the
+actual drivers are in pvrusb2_inf.zip.  Why did they do this?  I have
+no idea; it just confuses.  Best advice here is make a guess and if
 <tt>fwextract.pl</tt> doesn't spot anything then try a related
 package.</BLOCKQUOTE>
 
@@ -496,7 +615,7 @@ can do:</P>
 
 </OL>
 
-<P>Substitute the name of the driver package you got from Hauppauge
+<P>Substitute the name of the driver package you got from the vendor
 for &quot;<tt>driver_package.EXE</tt>&quot; which is just a
 placeholder above.  If you're starting from a CDROM copy of the
 drivers, then just copy the driver subdirectory contents into
@@ -511,9 +630,9 @@ should then see the following two firmware files:</P>
 <BLOCKQUOTE><TABLE BORDER=1>
 <TR><TH>File</TH><TH>Size</TH><TH>Description</TH></TR>
 
-<TR><TD><TT>v4l-pvrusb2-29xxx-01.fw</TT></TD><TD>8KB</TD><TD>FX2 program</TD></TR>
+<TR><TD><TT>v4l-pvrusb2-29xxx-01.fw</TT></TD><TD>8KB</TD><TD>FX2 program for 29xxx device</TD></TR>
 
-<TR><TD><TT>v4l-cx2341x-enc.fw</TT></TD><TD>256KB</TD><TD>cx23416
+<TR><TD><TT>v4l-cx2341x-enc.fw</TT></TD><TD>256KB (approx)</TD><TD>cx23416
 encoder firmware</TD></TR>
 
 </TABLE></BLOCKQUOTE>
@@ -531,9 +650,9 @@ should then see the following three firmware files:</P>
 <TR><TH>File</TH><TH>Size</TH><TH>Description</TH></TR>
 
 <TR><TD><TT>v4l-pvrusb2-24xxx-01.fw</TT></TD><TD>8KB</TD><TD>FX2
-program</TD></TR>
+program for 24xxx device</TD></TR>
 
-<TR><TD><TT>v4l-cx2341x-enc.fw</TT></TD><TD>256KB</TD><TD>cx23416
+<TR><TD><TT>v4l-cx2341x-enc.fw</TT></TD><TD>256KB (approx)</TD><TD>cx23416
 encoder firmware</TD></TR>
 
 <TR><TD><TT>v4l-cx25840.fw</TT></TD><TD>13KB
@@ -541,7 +660,7 @@ encoder firmware</TD></TR>
 
 </TABLE></BLOCKQUOTE>
 
-<P>With more recent Hauppauge firmware packages both sets of firmware
+<P>With more recent Hauppauge driver packages both sets of firmware
 will be in the same package, in which case <tt>fwextract.pl</tt> will
 locate and extract everything:</P>
 
@@ -549,12 +668,12 @@ locate and extract everything:</P>
 <TR><TH>File</TH><TH>Size</TH><TH>Description</TH></TR>
 
 <TR><TD><TT>v4l-pvrusb2-29xxx-01.fw</TT></TD><TD>8KB</TD><TD>FX2
-program for 29xxx devices</TD></TR>
+program for 29xxx device</TD></TR>
 
 <TR><TD><TT>v4l-pvrusb2-24xxx-01.fw</TT></TD><TD>8KB</TD><TD>FX2
-program for 24xxx devices</TD></TR>
+program for 24xxx device</TD></TR>
 
-<TR><TD><TT>v4l-cx2341x-enc.fw</TT></TD><TD>256KB</TD><TD>cx23416
+<TR><TD><TT>v4l-cx2341x-enc.fw</TT></TD><TD>256KB (approx)</TD><TD>cx23416
 encoder firmware</TD></TR>
 
 <TR><TD><TT>v4l-cx25840.fw</TT></TD><TD>13KB
@@ -562,7 +681,59 @@ encoder firmware</TD></TR>
 
 </TABLE></BLOCKQUOTE>
 
-<P>If the extraction didn't work, then possibly you're dealing with a
+<P>If you extracted from a driver package for Gotview hardware, you
+should then see the following two firmware files:</P>
+
+<BLOCKQUOTE><TABLE BORDER=1>
+<TR><TH>File</TH><TH>Size</TH><TH>Description</TH></TR>
+
+<TR><TD><TT>v4l-cx2341x-enc.fw</TT></TD><TD>256KB (approx)</TD><TD>cx23416
+encoder firmware</TD></TR>
+
+<TR><TD><TT>v4l-cx25840.fw</TT></TD><TD>13KB
+(approx)</TD><TD>cx25840 audio/video decoder firmware</TD></TR>
+
+</TABLE></BLOCKQUOTE>
+
+<P>If you extracted from a driver package for OnAir hardware (but
+probably not since OnAir driver packages can't be uncompressed in
+Linux), you should then see just the following firmware file:</P>
+
+<BLOCKQUOTE><TABLE BORDER=1>
+<TR><TH>File</TH><TH>Size</TH><TH>Description</TH></TR>
+
+<TR><TD><TT>v4l-cx2341x-enc.fw</TT></TD><TD>256KB (approx)</TD><TD>cx23416
+encoder firmware</TD></TR>
+
+</TABLE></BLOCKQUOTE>
+
+<P>If you extracted from a driver package for HVR-1950 hardware, you
+should then see the following three firmware files:</P>
+
+<BLOCKQUOTE><TABLE BORDER=1>
+<TR><TH>File</TH><TH>Size</TH><TH>Description</TH></TR>
+
+<TR><TD><TT>v4l-pvrusb2-73xxx-01.fw</TT></TD><TD>8KB or 16KB</TD><TD>FX2
+program for HVR-1950 device</TD></TR>
+
+<TR><TD><TT>v4l-cx2341x-enc.fw</TT></TD><TD>256KB (approx)</TD><TD>cx23416
+encoder firmware</TD></TR>
+
+<TR><TD><TT>v4l-cx25840.fw</TT></TD><TD>13KB
+(approx)</TD><TD>cx25840 audio/video decoder firmware</TD></TR>
+</TABLE></BLOCKQUOTE>
+
+<BLOCKQUOTE>Note: The HVR-1950's FX2 firmware can be either 8KB or
+16KB.  More recent versions are 16KB.  If you have a 16KB (16384
+bytes) sized FX2 image, you may need a more recent pvrusb2 driver.
+Definitely any in-kernel pvrusb2 driver in kernels 2.6.32 or older
+will <em>not</em> successfully load a 16KB FX2 image.  Any standalone
+driver dated 31-Oct-2009 or later should handle it fine.  See the
+warning at the top of this page (<A
+HREF="setup.html#Firmware_Obtaining">here</A>) for more
+detail.</BLOCKQUOTE>
+
+<P>If the extraction didn't work, then possibly you are dealing with a
 later driver version that <tt>fwextract.pl</tt> doesn't know how to
 handle yet.  Solving this requires a more complex manual extraction.
 See <A HREF="firmware.html">firmware.html</A> for more info.</P>
@@ -574,45 +745,45 @@ The extract script doesn't care about file names or history; it works
 purely by recognizing file MD5 sums and acting on what it finds.</P>
 
 <P>Assuming that <tt>fwextract.pl</tt> recognizes the driver files, it
-will automatically locate and extract the firmware.  No more firmware
-file guesswork, ever.</P>
+will automatically locate and extract the firmware.  No firmware file
+guesswork, ever.</P>
 
 <P>Failing all of the above, you can still try to extract the firmware
 using an older method (before I started working on this) - but such a
 method does <strong>not</strong> verify the image, is specific to a
 single version of the Hauppauge driver package and is of no use to
-anyone with 24xxx hardware.  Information on this can be found on
-Bj&ouml;rn's <A HREF="http://pvrusb2.dax.nu/">web page</A>.  Note that
-you may need to rename the firmware file names in that case (see table
-above for clues on the correct names).  If you find you <em>must</em>
-use this (frankly obsolete) method of extraction, please contact me so
-we can figure out why <tt>fwextract.pl</tt> apparently did not work
-for you.</P>
+anyone with other than 29xxx hardware.  Information on this can be
+found on Bj&ouml;rn's <A HREF="http://pvrusb2.dax.nu/">web page</A>.
+Note that you may need to rename the firmware file names in that case
+(see table above for clues on the correct names).  If you find you
+<em>must</em> use this (frankly obsolete) method of extraction, please
+contact me so we can figure out why <tt>fwextract.pl</tt> apparently
+did not work for you.</P>
 
 <BLOCKQUOTE>The pvrusb2 standalone driver also includes a wrapper
 script in the <tt>utils</tt> subdirectory that will attempt to further
-simplify the process.  This is a contributed script, called
-<tt>fwfind.sh</tt>.  What this does is attempt the surrounding steps:
-It will locate or download the Windows drivers for you and then it
-will run <tt>fwextract.pl</tt> to perform the actual extraction.  Thus
-to extract using this method involves just one step: run
-<tt>fwfind.sh</tt>.  If it works for you, great.  If not, then just
-use <tt>fwextract.pl</tt> directly, as described above.  As of this
-writing, <tt>fwfind.sh</tt> will only work for 29xxx hardware, i.e. it
-only downloads and extracts using a Hauppauge driver package for 29xxx
-hardware - so if you're using 24xxx hardware then this is not an
-option for you.</BLOCKQUOTE>
+simplify the process, for 29xxx devices.  This is a contributed
+script, called <tt>fwfind.sh</tt>.  What this does is attempt the
+surrounding steps: It will locate or download the Windows drivers for
+you and then it will run <tt>fwextract.pl</tt> to perform the actual
+extraction.  Thus to extract using this method involves just one step:
+run <tt>fwfind.sh</tt>.  If it works for you, great.  If not, then
+just use <tt>fwextract.pl</tt> directly, as described above.  As of
+this writing, <tt>fwfind.sh</tt> will only work for 29xxx hardware,
+i.e. it only downloads and extracts using a Hauppauge driver package
+for 29xxx hardware - so if you're using 24xxx hardware then this is
+not an option for you.</BLOCKQUOTE>
 
-<P>The result of the extraction process will be two to four firmware
-files that have to be put somewhere.  During its initialization the
-pvrusb2 driver (and possibly also the cx25840.ko chip-level driver)
-will expect to find these files, load them into memory and then upload
-their contents to the pvrusb2 device.  For this to work, you have to
-be using hotplug (or something that supports the kernel firmware
-request facility), and you have to place these files in a spot where
-they can be found.  The exact location may be distribution and utility
-dependant.  On my Debian system while using hotplug, viable locations
-include:</P>
+<P>The result of the extraction process will be some number of
+firmware files that have to be put somewhere.  During its
+initialization the pvrusb2 driver (and possibly also the cx25840.ko
+chip-level driver) will expect to find these files, load them into
+memory and then upload their contents to the pvrusb2 device.  For this
+to work, you have to be using udev (or something that supports the
+kernel firmware request facility), and you have to place these files
+in a spot where they can be found.  The exact location may be
+distribution and utility dependant.  On my Debian system, viable
+locations include:</P>
 
 <BLOCKQUOTE><CODE>
 /lib/firmware<BR>
@@ -637,21 +808,28 @@ upload appropriate data to the device hardware.</P>
 <HR>
 <H2><A NAME="Modules">Support Modules</A></H2>
 
-<P>The architecture of the pvrusb2 driver (and for that matter
-probably all V4L drivers) is that &quot;the&quot; driver doesn't
-actually do all of the work.  Most chip-level operations are instead
-handled by an ensemble of common chip-level drivers - the exact
-modules needed will depend on which chips are in your device.  The
-pvrusb2 driver performs in the role of the &quot;conductor&quot;
-within that ensemble, sending commands to those attached chip-level
-drivers as needed to accomplish whatever overall task is being
-executed at a given moment.  (And the chip-level drivers in turn work
-back through the pvrusb2 driver to communicate with the controlled
-hardware in the device.)  This scheme works because many different TV
-tuner / capture devices happen to use a lot of common chips.  All that
-the &quot;conductor&quot; driver has to do is ensure that the various
-chip-level drivers work in concert correctly to operate the
-device.</P>
+<BLOCKQUOTE>The following information is rather old and only really
+applies if you are running a <em>really</em> old kernel.  It will be a
+rare circumstance indeed if you have to deal with what is described in
+this section; I only still include it because the current pvrusb2
+driver should in theory still work with kernels this old (though
+honestly I haven't tested anything this old in quite a long
+time).</BLOCKQUOTE>
+
+<P>The architecture of the pvrusb2 driver (and for that matter all V4L
+drivers) is that &quot;the&quot; driver doesn't actually do all of the
+work.  Most chip-level operations are instead handled by an ensemble
+of common chip-level drivers - the exact modules needed will depend on
+which chips are in your device.  The pvrusb2 driver performs in the
+role of the &quot;conductor&quot; within that ensemble, sending
+commands to those attached chip-level drivers as needed to accomplish
+whatever overall task is being executed at a given moment.  (And the
+chip-level drivers in turn work back through the pvrusb2 driver to
+communicate with the controlled hardware in the device.)  This scheme
+works because many different TV tuner / capture devices happen to use
+a lot of common chips.  All that the &quot;conductor&quot; driver has
+to do is ensure that the various chip-level drivers work in concert
+correctly to operate the device.</P>
 
 <P>Unfortunately, working with common modules like that means that
 it's another boundary where compatibility / breakage can occur.  In an
@@ -664,7 +842,9 @@ of those modules before your hardware is going to work...</P>
 later, then you should be able to safely ignore everything about
 dealing with chip-level drivers.  This is because in those cases all
 the drivers you need will already be present and are usually mature
-enough not to be a problem.</P>
+enough not to be a problem.  (Note: For Gotview hardware, 2.6.15 is
+probably not good enough by itself due to the cx25840 module being too
+different with its method for handling video/audio routing.)</P>
 
 <P>On the other hand if you are compiling against a kernel older than
 2.6.15, then things get a little trickier, because it wasn't until
@@ -681,21 +861,29 @@ gun solution but probably has the least amount of potential pain
 associated with it.  When you build all of V4L which includes the
 pvrusb2 driver, then you're building the latest versions of all the
 chip-level drivers anyway so then you're fine.  Using this method you
-might be able to use just about any 2.6.x kernel version.</LI>
+might be able to use just about any 2.6.x kernel version.  Update
+(14-Mar-2009): The v4l-dvb distribution currently only works correctly
+in kernels back to 2.6.19 and with recent I2C framework changes that
+compatibility will soon change to being only 2.6.22 or later.  So this
+isn't really an option at all for kernels old enough that you're
+actually reading this :-( </LI>
 
 <LI>Install an ivtv distribution appropriate for your desired kernel.
 The <A HREF=" http://ivtvdriver.org">ivtv driver</A> comes bundled
-with all the chip-level drivers that you might need.</LI>
+with all the chip-level drivers that you might need.  Update
+(14-Mar-2009): The ivtv distribution has been a part of the v4l-dvb
+distribution for quite a while now, so the caveats in the previous
+bulle also apply here.  Sorry...</LI>
 
 <LI>Build the chip-level drivers bundled with the pvrusb2 driver.  As
 an attempt to ease the pain, a set of chip-level drivers are included
 with the pvrusb2 driver (in the <tt>ivtv</tt> subdirectory of the
 snapshot).  These just came from ivtv, from roughly September 2005.
-By today's standard they are fairly ancient now, but they work for
-kernels 2.6.11 through 2.6.15.  You don't need them for 2.6.15
+By today's standard they are astoundingly ancient now, but they work
+for kernels 2.6.11 through 2.6.15.  You don't need them for 2.6.15
 actually, and they no longer even compile for 2.6.16 or later.  In
 addition, those modules only include enough to handle 29xxx hardware;
-if you have 24xxx hardware then this is not an option for you at
+if you have any other hardware then this is not an option for you at
 all.</LI>
 
 </UL>

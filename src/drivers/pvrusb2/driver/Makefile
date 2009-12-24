@@ -33,7 +33,6 @@ ifeq ($(KERNELRELEASE),)
   ifeq ($(strip $(KREL)),)
     KREL := $(shell uname -r)
   endif
-  KREL := $(KVER)
   ifeq ($(strip $(KDIR)),)
     KDIR := /lib/modules/$(KREL)/build
   endif
@@ -53,6 +52,9 @@ ifeq ($(KERNELRELEASE),)
 
   # Build sysfs module
   CONFIG_VARS+= CONFIG_VIDEO_PVRUSB2_SYSFS=y
+
+  # Build dvb module
+  CONFIG_VARS+= CONFIG_VIDEO_PVRUSB2_DVB=y
 
   # Build debug interface (you need this for manual firmware extraction)
   CONFIG_VARS+= CONFIG_VIDEO_PVRUSB2_DEBUGIFC=y

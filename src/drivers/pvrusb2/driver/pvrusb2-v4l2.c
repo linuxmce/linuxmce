@@ -1,6 +1,6 @@
 /*
  *
- *  $Id: pvrusb2-v4l2.c 1572 2007-02-28 04:57:33Z isely $
+ *  $Id: pvrusb2-v4l2.c 2345 2009-10-12 03:11:00Z isely $
  *
  *  Copyright (C) 2005 Mike Isely <isely@pobox.com>
  *  Copyright (C) 2004 Aurelien Alleaume <slts@free.fr>
@@ -38,6 +38,9 @@
 #ifdef PVR2_ENABLE_V4L2COMMON
 #include <media/v4l2-common.h>
 #endif
+#ifdef PVR2_ENABLE_V4L2IOCTL
+#include <media/v4l2-ioctl.h>
+#endif
 #include "compat.h"
 
 struct pvr2_v4l2_dev;
@@ -65,7 +68,9 @@ struct pvr2_v4l2_fh {
 	struct pvr2_v4l2_fh *vprev;
 	wait_queue_head_t wait_data;
 	int fw_mode_flag;
-	int prev_input_val;
+	/* Map contiguous ordinal value to input id */
+	unsigned char *input_map;
+	unsigned int input_cnt;
 };
 
 struct pvr2_v4l2 {
@@ -96,8 +101,8 @@ static struct v4l2_capability pvr_capability ={
 	.driver         = "pvrusb2",
 	.card           = "Hauppauge WinTV pvr-usb2",
 	.bus_info       = "usb",
-	.version        = KERNEL_VERSION(0,8,0),
-	.capabilities   = (V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_VBI_CAPTURE |
+	.version        = KERNEL_VERSION(0, 9, 0),
+	.capabilities   = (V4L2_CAP_VIDEO_CAPTURE |
 			   V4L2_CAP_TUNER | V4L2_CAP_AUDIO | V4L2_CAP_RADIO |
 			   V4L2_CAP_READWRITE),
 	.reserved       = {0,0,0,0}
@@ -244,6 +249,8 @@ static const char *get_cmd_code(int cmd)
 	case VIDIOC_LOG_STATUS:
 		return "VIDIOC_LOG_STATUS";
 #endif
+	case VIDIOC_CROPCAP:
+		return "VIDIOC_CROPCAP";
 #ifdef PVR2_ENABLE_EXT_CTRLS
 	case VIDIOC_G_EXT_CTRLS:
 		return "VIDIOC_G_EXT_CTRLS";
@@ -267,14 +274,22 @@ static const char *get_cmd_code(int cmd)
  * This is part of Video 4 Linux API. The procedure handles ioctl() calls.
  *
  */
+#ifdef PVR2_ENABLE_OLD_V4L_INODE1
 static int pvr2_v4l2_do_ioctl(struct inode *inode, struct file *file,
 			      unsigned int cmd, void *arg)
+#else
+#ifdef PVR2_ENABLE_OLD_V4L_INODE2
+static int pvr2_v4l2_do_ioctl(struct file *file, unsigned int cmd, void *arg)
+#else
+static long pvr2_v4l2_do_ioctl(struct file *file, unsigned int cmd, void *arg)
+#endif
+#endif
 {
 	struct pvr2_v4l2_fh *fh = file->private_data;
 	struct pvr2_v4l2 *vp = fh->vhead;
 	struct pvr2_v4l2_dev *dev_info = fh->dev_info;
 	struct pvr2_hdw *hdw = fh->channel.mc_head->hdw;
-	int ret = -EINVAL;
+	long ret = -EINVAL;
 
 #ifdef PVR2_ENABLE_V4L_PRINT_IOCTL
 	if (pvrusb2_debug & PVR2_TRACE_V4LIOCTL) {
@@ -310,6 +325,9 @@ static int pvr2_v4l2_do_ioctl(struct inode *inode, struct file *file,
 		struct v4l2_capability *cap = arg;
 
 		memcpy(cap, &pvr_capability, sizeof(struct v4l2_capability));
+		strlcpy(cap->bus_info,pvr2_hdw_get_bus_info(hdw),
+			sizeof(cap->bus_info));
+		strlcpy(cap->card,pvr2_hdw_get_desc(hdw),sizeof(cap->card));
 
 		ret = 0;
 		break;
@@ -363,14 +381,21 @@ static int pvr2_v4l2_do_ioctl(struct inode *inode, struct file *file,
 		struct v4l2_input *vi = (struct v4l2_input *)arg;
 		struct v4l2_input tmp;
 		unsigned int cnt;
+		int val;
 
 		cptr = pvr2_hdw_get_ctrl_by_id(hdw,PVR2_CID_INPUT);
 
 		memset(&tmp,0,sizeof(tmp));
 		tmp.index = vi->index;
 		ret = 0;
-		switch (vi->index) {
+		if (vi->index >= fh->input_cnt) {
+			ret = -EINVAL;
+			break;
+		}
+		val = fh->input_map[vi->index];
+		switch (val) {
 		case PVR2_CVAL_INPUT_TV:
+		case PVR2_CVAL_INPUT_DTV:
 		case PVR2_CVAL_INPUT_RADIO:
 			tmp.type = V4L2_INPUT_TYPE_TUNER;
 			break;
@@ -385,7 +410,7 @@ static int pvr2_v4l2_do_ioctl(struct inode *inode, struct file *file,
 		if (ret < 0) break;
 
 		cnt = 0;
-		pvr2_ctrl_get_valname(cptr,vi->index,
+		pvr2_ctrl_get_valname(cptr,val,
 				      tmp.name,sizeof(tmp.name)-1,&cnt);
 		tmp.name[cnt] = 0;
 
@@ -407,22 +432,33 @@ static int pvr2_v4l2_do_ioctl(struct inode *inode, struct file *file,
 
 	case VIDIOC_G_INPUT:
 	{
+		unsigned int idx;
 		struct pvr2_ctrl *cptr;
 		struct v4l2_input *vi = (struct v4l2_input *)arg;
 		int val;
 		cptr = pvr2_hdw_get_ctrl_by_id(hdw,PVR2_CID_INPUT);
 		val = 0;
 		ret = pvr2_ctrl_get_value(cptr,&val);
-		vi->index = val;
+		vi->index = 0;
+		for (idx = 0; idx < fh->input_cnt; idx++) {
+			if (fh->input_map[idx] == val) {
+				vi->index = idx;
+				break;
+			}
+		}
 		break;
 	}
 
 	case VIDIOC_S_INPUT:
 	{
 		struct v4l2_input *vi = (struct v4l2_input *)arg;
+		if (vi->index >= fh->input_cnt) {
+			ret = -ERANGE;
+			break;
+		}
 		ret = pvr2_ctrl_set_value(
 			pvr2_hdw_get_ctrl_by_id(hdw,PVR2_CID_INPUT),
-			vi->index);
+			fh->input_map[vi->index]);
 		break;
 	}
 
@@ -617,7 +653,7 @@ static int pvr2_v4l2_do_ioctl(struct inode *inode, struct file *file,
 
 			lmin = pvr2_ctrl_get_min(hcp);
 			lmax = pvr2_ctrl_get_max(hcp);
-			ldef = pvr2_ctrl_get_def(hcp);
+			pvr2_ctrl_get_def(hcp, &ldef);
 			if (w == -1) {
 				w = ldef;
 			} else if (w < lmin) {
@@ -627,7 +663,7 @@ static int pvr2_v4l2_do_ioctl(struct inode *inode, struct file *file,
 			}
 			lmin = pvr2_ctrl_get_min(vcp);
 			lmax = pvr2_ctrl_get_max(vcp);
-			ldef = pvr2_ctrl_get_def(vcp);
+			pvr2_ctrl_get_def(vcp, &ldef);
 			if (h == -1) {
 				h = ldef;
 			} else if (h < lmin) {
@@ -688,6 +724,7 @@ static int pvr2_v4l2_do_ioctl(struct inode *inode, struct file *file,
 	case VIDIOC_QUERYCTRL:
 	{
 		struct pvr2_ctrl *cptr;
+		int val;
 		struct v4l2_queryctrl *vc = (struct v4l2_queryctrl *)arg;
 		ret = 0;
 #ifdef PVR2_ENABLE_EXT_CTRLS
@@ -715,7 +752,8 @@ static int pvr2_v4l2_do_ioctl(struct inode *inode, struct file *file,
 			   pvr2_ctrl_get_desc(cptr));
 		strlcpy(vc->name,pvr2_ctrl_get_desc(cptr),sizeof(vc->name));
 		vc->flags = pvr2_ctrl_get_v4lflags(cptr);
-		vc->default_value = pvr2_ctrl_get_def(cptr);
+		pvr2_ctrl_get_def(cptr, &val);
+		vc->default_value = val;
 		switch (pvr2_ctrl_get_type(cptr)) {
 		case pvr2_ctl_enum:
 			vc->type = V4L2_CTRL_TYPE_MENU;
@@ -847,6 +885,92 @@ static int pvr2_v4l2_do_ioctl(struct inode *inode, struct file *file,
 	}
 
 #endif
+	case VIDIOC_CROPCAP:
+	{
+		struct v4l2_cropcap *cap = (struct v4l2_cropcap *)arg;
+		if (cap->type != V4L2_BUF_TYPE_VIDEO_CAPTURE) {
+			ret = -EINVAL;
+			break;
+		}
+		ret = pvr2_hdw_get_cropcap(hdw, cap);
+		cap->type = V4L2_BUF_TYPE_VIDEO_CAPTURE; /* paranoia */
+		break;
+	}
+	case VIDIOC_G_CROP:
+	{
+		struct v4l2_crop *crop = (struct v4l2_crop *)arg;
+		int val = 0;
+		if (crop->type != V4L2_BUF_TYPE_VIDEO_CAPTURE) {
+			ret = -EINVAL;
+			break;
+		}
+		ret = pvr2_ctrl_get_value(
+			pvr2_hdw_get_ctrl_by_id(hdw, PVR2_CID_CROPL), &val);
+		if (ret != 0) {
+			ret = -EINVAL;
+			break;
+		}
+		crop->c.left = val;
+		ret = pvr2_ctrl_get_value(
+			pvr2_hdw_get_ctrl_by_id(hdw, PVR2_CID_CROPT), &val);
+		if (ret != 0) {
+			ret = -EINVAL;
+			break;
+		}
+		crop->c.top = val;
+		ret = pvr2_ctrl_get_value(
+			pvr2_hdw_get_ctrl_by_id(hdw, PVR2_CID_CROPW), &val);
+		if (ret != 0) {
+			ret = -EINVAL;
+			break;
+		}
+		crop->c.width = val;
+		ret = pvr2_ctrl_get_value(
+			pvr2_hdw_get_ctrl_by_id(hdw, PVR2_CID_CROPH), &val);
+		if (ret != 0) {
+			ret = -EINVAL;
+			break;
+		}
+		crop->c.height = val;
+	}
+	case VIDIOC_S_CROP:
+	{
+		struct v4l2_crop *crop = (struct v4l2_crop *)arg;
+		struct v4l2_cropcap cap;
+		if (crop->type != V4L2_BUF_TYPE_VIDEO_CAPTURE) {
+			ret = -EINVAL;
+			break;
+		}
+		cap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+		ret = pvr2_ctrl_set_value(
+			pvr2_hdw_get_ctrl_by_id(hdw, PVR2_CID_CROPL),
+			crop->c.left);
+		if (ret != 0) {
+			ret = -EINVAL;
+			break;
+		}
+		ret = pvr2_ctrl_set_value(
+			pvr2_hdw_get_ctrl_by_id(hdw, PVR2_CID_CROPT),
+			crop->c.top);
+		if (ret != 0) {
+			ret = -EINVAL;
+			break;
+		}
+		ret = pvr2_ctrl_set_value(
+			pvr2_hdw_get_ctrl_by_id(hdw, PVR2_CID_CROPW),
+			crop->c.width);
+		if (ret != 0) {
+			ret = -EINVAL;
+			break;
+		}
+		ret = pvr2_ctrl_set_value(
+			pvr2_hdw_get_ctrl_by_id(hdw, PVR2_CID_CROPH),
+			crop->c.height);
+		if (ret != 0) {
+			ret = -EINVAL;
+			break;
+		}
+	}
 #ifdef PVR2_ENABLE_LOG_STATUS
 	case VIDIOC_LOG_STATUS:
 	{
@@ -861,16 +985,26 @@ static int pvr2_v4l2_do_ioctl(struct inode *inode, struct file *file,
 	case VIDIOC_DBG_G_REGISTER:
 	{
 		u64 val;
+#ifdef PVR2_ENABLE_OLD2REGISTER_ACCESS
 		struct v4l2_register *req = (struct v4l2_register *)arg;
+#else
+		struct v4l2_dbg_register *req = (struct v4l2_dbg_register *)arg;
+#endif
 		if (cmd == VIDIOC_DBG_S_REGISTER) val = req->val;
 #ifdef PVR2_ENABLE_OLDREGISTER_ACCESS
 		ret = pvr2_hdw_register_access(
 			hdw,1,req->i2c_id,req->reg,
 			cmd == VIDIOC_DBG_S_REGISTER,&val);
 #else
+#ifdef PVR2_ENABLE_OLD2REGISTER_ACCESS
 		ret = pvr2_hdw_register_access(
 			hdw,req->match_type,req->match_chip,req->reg,
 			cmd == VIDIOC_DBG_S_REGISTER,&val);
+#else
+		ret = pvr2_hdw_register_access(
+			hdw, &req->match, req->reg,
+			cmd == VIDIOC_DBG_S_REGISTER, &val);
+#endif
 #endif
 		if (cmd == VIDIOC_DBG_G_REGISTER) req->val = val;
 		break;
@@ -879,8 +1013,13 @@ static int pvr2_v4l2_do_ioctl(struct inode *inode, struct file *file,
 #endif
 
 	default :
+#ifdef PVR2_ENABLE_OLD_V4L_INODE1
 		ret = v4l_compat_translate_ioctl(inode,file,cmd,
 						 arg,pvr2_v4l2_do_ioctl);
+#else
+		ret = v4l_compat_translate_ioctl(file, cmd,
+						 arg, pvr2_v4l2_do_ioctl);
+#endif
 	}
 
 	pvr2_hdw_commit_ctl(hdw);
@@ -889,12 +1028,12 @@ static int pvr2_v4l2_do_ioctl(struct inode *inode, struct file *file,
 #ifdef PVR2_ENABLE_V4L_PRINT_IOCTL
 		if (pvrusb2_debug & PVR2_TRACE_V4LIOCTL) {
 			pvr2_trace(PVR2_TRACE_V4LIOCTL,
-				   "pvr2_v4l2_do_ioctl failure, ret=%d",ret);
+				   "pvr2_v4l2_do_ioctl failure, ret=%ld", ret);
 		} else {
 			if (pvrusb2_debug & PVR2_TRACE_V4LIOCTL) {
 				pvr2_trace(PVR2_TRACE_V4LIOCTL,
-					   "pvr2_v4l2_do_ioctl failure, ret=%d"
-					   " command was:",ret);
+					   "pvr2_v4l2_do_ioctl failure, ret=%ld"
+					   " command was:", ret);
 				v4l_print_ioctl(pvr2_hdw_get_driver_name(hdw),
 						cmd);
 			}
@@ -906,16 +1045,29 @@ static int pvr2_v4l2_do_ioctl(struct inode *inode, struct file *file,
 #endif
 	} else {
 		pvr2_trace(PVR2_TRACE_V4LIOCTL,
-			   "pvr2_v4l2_do_ioctl complete, ret=%d (0x%x)",
-			   ret,ret);
+			   "pvr2_v4l2_do_ioctl complete, ret=%ld (0x%lx)",
+			   ret, ret);
 	}
 	return ret;
 }
 
+#ifdef PVR2_ENABLE_OLD_V4L_INODE2
+#ifndef PVR2_ENABLE_OLD_V4L_INODE1
+static int pvr2_v4l2_old_do_ioctl(struct inode *inode, struct file *file,
+				  unsigned int cmd, void *arg)
+{
+	return pvr2_v4l2_do_ioctl(file, cmd, arg);
+}
 
+#endif
+#endif
 static void pvr2_v4l2_dev_destroy(struct pvr2_v4l2_dev *dip)
 {
-	int minor_id = dip->devbase.minor;
+#ifdef PVR2_ENABLE_OLD_V4L_DEVNUM
+	int num = dip->devbase.minor & 0x1f;
+#else
+	int num = dip->devbase.num;
+#endif
 	struct pvr2_hdw *hdw = dip->v4lp->channel.mc_head->hdw;
 	enum pvr2_config cfg = dip->config;
 	int v4l_type = dip->v4l_type;
@@ -931,9 +1083,33 @@ static void pvr2_v4l2_dev_destroy(struct pvr2_v4l2_dev *dip)
 	video_unregister_device(&dip->devbase);
 
 	printk(KERN_INFO "pvrusb2: unregistered device %s%u [%s]\n",
-	       get_v4l_name(v4l_type),minor_id & 0x1f,
+	       get_v4l_name(v4l_type), num,
 	       pvr2_config_get_name(cfg));
 
+}
+
+
+static void pvr2_v4l2_dev_disassociate_parent(struct pvr2_v4l2_dev *dip)
+{
+	if (!dip) return;
+#ifdef PVR2_ENABLE_DEV_PARENT
+#ifdef PVR2_ENABLE_DEV_PARENT_OLD
+	if (!dip->devbase.dev) return;
+	dip->devbase.dev = NULL;
+#else
+	if (!dip->devbase.parent) return;
+	dip->devbase.parent = NULL;
+#endif
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,30))
+	device_move(&dip->devbase.dev, NULL, DPM_ORDER_NONE);
+#else
+#ifdef PVR2_ENABLE_DEV_PARENT_OLD
+	device_move(&dip->devbase.class_dev, NULL);
+#else
+	device_move(&dip->devbase.dev, NULL);
+#endif
+#endif
+#endif
 }
 
 
@@ -941,11 +1117,11 @@ static void pvr2_v4l2_destroy_no_lock(struct pvr2_v4l2 *vp)
 {
 	if (vp->dev_video) {
 		pvr2_v4l2_dev_destroy(vp->dev_video);
-		vp->dev_video = 0;
+		vp->dev_video = NULL;
 	}
 	if (vp->dev_radio) {
 		pvr2_v4l2_dev_destroy(vp->dev_radio);
-		vp->dev_radio = 0;
+		vp->dev_radio = NULL;
 	}
 
 	pvr2_trace(PVR2_TRACE_STRUCT,"Destroying pvr2_v4l2 id=%p",vp);
@@ -967,28 +1143,42 @@ static void pvr2_v4l2_internal_check(struct pvr2_channel *chp)
 	struct pvr2_v4l2 *vp;
 	vp = container_of(chp,struct pvr2_v4l2,channel);
 	if (!vp->channel.mc_head->disconnect_flag) return;
+	pvr2_v4l2_dev_disassociate_parent(vp->dev_video);
+	pvr2_v4l2_dev_disassociate_parent(vp->dev_radio);
 	if (vp->vfirst) return;
 	pvr2_v4l2_destroy_no_lock(vp);
 }
 
 
+#ifdef PVR2_ENABLE_OLD_V4L_FILEOPS
 static int pvr2_v4l2_ioctl(struct inode *inode, struct file *file,
 			   unsigned int cmd, unsigned long arg)
+#else
+static long pvr2_v4l2_ioctl(struct file *file,
+			   unsigned int cmd, unsigned long arg)
+#endif
 {
 
-/* Temporary hack : use ivtv api until a v4l2 one is available. */
-#define IVTV_IOC_G_CODEC        0xFFEE7703
-#define IVTV_IOC_S_CODEC        0xFFEE7704
-	if (cmd == IVTV_IOC_G_CODEC || cmd == IVTV_IOC_S_CODEC) return 0;
+#ifdef PVR2_ENABLE_OLD_V4L_INODE2
+#ifdef PVR2_ENABLE_OLD_V4L_INODE1
 	return video_usercopy(inode, file, cmd, arg, pvr2_v4l2_do_ioctl);
+#else
+	return video_usercopy(inode, file, cmd, arg, pvr2_v4l2_old_do_ioctl);
+#endif
+#else
+	return video_usercopy(file, cmd, arg, pvr2_v4l2_do_ioctl);
+#endif
 }
 
 
+#ifdef PVR2_ENABLE_OLD_V4L_FILEOPS
 static int pvr2_v4l2_release(struct inode *inode, struct file *file)
+#else
+static int pvr2_v4l2_release(struct file *file)
+#endif
 {
 	struct pvr2_v4l2_fh *fhp = file->private_data;
 	struct pvr2_v4l2 *vp = fhp->vhead;
-	struct pvr2_context *mp = fhp->vhead->channel.mc_head;
 	struct pvr2_hdw *hdw = fhp->channel.mc_head->hdw;
 
 	pvr2_trace(PVR2_TRACE_OPEN_CLOSE,"pvr2_v4l2_release");
@@ -1005,52 +1195,47 @@ static int pvr2_v4l2_release(struct inode *inode, struct file *file)
 	v4l2_prio_close(&vp->prio, &fhp->prio);
 	file->private_data = NULL;
 
-	pvr2_context_enter(mp); do {
-		/* Restore the previous input selection, if it makes sense
-		   to do so. */
-		if (fhp->dev_info->v4l_type == VFL_TYPE_RADIO) {
-			struct pvr2_ctrl *cp;
-			int pval;
-			cp = pvr2_hdw_get_ctrl_by_id(hdw,PVR2_CID_INPUT);
-			pvr2_ctrl_get_value(cp,&pval);
-			/* Only restore if we're still selecting the radio */
-			if (pval == PVR2_CVAL_INPUT_RADIO) {
-				pvr2_ctrl_set_value(cp,fhp->prev_input_val);
-				pvr2_hdw_commit_ctl(hdw);
-			}
-		}
-
-		if (fhp->vnext) {
-			fhp->vnext->vprev = fhp->vprev;
-		} else {
-			vp->vlast = fhp->vprev;
-		}
-		if (fhp->vprev) {
-			fhp->vprev->vnext = fhp->vnext;
-		} else {
-			vp->vfirst = fhp->vnext;
-		}
-		fhp->vnext = NULL;
-		fhp->vprev = NULL;
-		fhp->vhead = NULL;
-		pvr2_channel_done(&fhp->channel);
-		pvr2_trace(PVR2_TRACE_STRUCT,
-			   "Destroying pvr_v4l2_fh id=%p",fhp);
-		kfree(fhp);
-		if (vp->channel.mc_head->disconnect_flag && !vp->vfirst) {
-			pvr2_v4l2_destroy_no_lock(vp);
-		}
-	} while (0); pvr2_context_exit(mp);
+	if (fhp->vnext) {
+		fhp->vnext->vprev = fhp->vprev;
+	} else {
+		vp->vlast = fhp->vprev;
+	}
+	if (fhp->vprev) {
+		fhp->vprev->vnext = fhp->vnext;
+	} else {
+		vp->vfirst = fhp->vnext;
+	}
+	fhp->vnext = NULL;
+	fhp->vprev = NULL;
+	fhp->vhead = NULL;
+	pvr2_channel_done(&fhp->channel);
+	pvr2_trace(PVR2_TRACE_STRUCT,
+		   "Destroying pvr_v4l2_fh id=%p",fhp);
+	if (fhp->input_map) {
+		kfree(fhp->input_map);
+		fhp->input_map = NULL;
+	}
+	kfree(fhp);
+	if (vp->channel.mc_head->disconnect_flag && !vp->vfirst) {
+		pvr2_v4l2_destroy_no_lock(vp);
+	}
 	return 0;
 }
 
 
+#ifdef PVR2_ENABLE_OLD_V4L_FILEOPS
 static int pvr2_v4l2_open(struct inode *inode, struct file *file)
+#else
+static int pvr2_v4l2_open(struct file *file)
+#endif
 {
 	struct pvr2_v4l2_dev *dip; /* Our own context pointer */
 	struct pvr2_v4l2_fh *fhp;
 	struct pvr2_v4l2 *vp;
 	struct pvr2_hdw *hdw;
+	unsigned int input_mask = 0;
+	unsigned int input_cnt,idx;
+	int ret = 0;
 
 	dip = container_of(video_devdata(file),struct pvr2_v4l2_dev,devbase);
 
@@ -1073,32 +1258,62 @@ static int pvr2_v4l2_open(struct inode *inode, struct file *file)
 	init_waitqueue_head(&fhp->wait_data);
 	fhp->dev_info = dip;
 
-	pvr2_context_enter(vp->channel.mc_head); do {
-		pvr2_trace(PVR2_TRACE_STRUCT,"Creating pvr_v4l2_fh id=%p",fhp);
-		pvr2_channel_init(&fhp->channel,vp->channel.mc_head);
+	pvr2_trace(PVR2_TRACE_STRUCT,"Creating pvr_v4l2_fh id=%p",fhp);
+	pvr2_channel_init(&fhp->channel,vp->channel.mc_head);
 
-		fhp->vnext = NULL;
-		fhp->vprev = vp->vlast;
-		if (vp->vlast) {
-			vp->vlast->vnext = fhp;
-		} else {
-			vp->vfirst = fhp;
-		}
-		vp->vlast = fhp;
-		fhp->vhead = vp;
+	if (dip->v4l_type == VFL_TYPE_RADIO) {
+		/* Opening device as a radio, legal input selection subset
+		   is just the radio. */
+		input_mask = (1 << PVR2_CVAL_INPUT_RADIO);
+	} else {
+		/* Opening the main V4L device, legal input selection
+		   subset includes all analog inputs. */
+		input_mask = ((1 << PVR2_CVAL_INPUT_RADIO) |
+			      (1 << PVR2_CVAL_INPUT_TV) |
+			      (1 << PVR2_CVAL_INPUT_COMPOSITE) |
+			      (1 << PVR2_CVAL_INPUT_SVIDEO));
+	}
+	ret = pvr2_channel_limit_inputs(&fhp->channel,input_mask);
+	if (ret) {
+		pvr2_channel_done(&fhp->channel);
+		pvr2_trace(PVR2_TRACE_STRUCT,
+			   "Destroying pvr_v4l2_fh id=%p (input mask error)",
+			   fhp);
 
-		/* Opening the /dev/radioX device implies a mode switch.
-		   So execute that here.  Note that you can get the
-		   IDENTICAL effect merely by opening the normal video
-		   device and setting the input appropriately. */
-		if (dip->v4l_type == VFL_TYPE_RADIO) {
-			struct pvr2_ctrl *cp;
-			cp = pvr2_hdw_get_ctrl_by_id(hdw,PVR2_CID_INPUT);
-			pvr2_ctrl_get_value(cp,&fhp->prev_input_val);
-			pvr2_ctrl_set_value(cp,PVR2_CVAL_INPUT_RADIO);
-			pvr2_hdw_commit_ctl(hdw);
-		}
-	} while (0); pvr2_context_exit(vp->channel.mc_head);
+		kfree(fhp);
+		return ret;
+	}
+
+	input_mask &= pvr2_hdw_get_input_available(hdw);
+	input_cnt = 0;
+	for (idx = 0; idx < (sizeof(input_mask) << 3); idx++) {
+		if (input_mask & (1 << idx)) input_cnt++;
+	}
+	fhp->input_cnt = input_cnt;
+	fhp->input_map = kzalloc(input_cnt,GFP_KERNEL);
+	if (!fhp->input_map) {
+		pvr2_channel_done(&fhp->channel);
+		pvr2_trace(PVR2_TRACE_STRUCT,
+			   "Destroying pvr_v4l2_fh id=%p (input map failure)",
+			   fhp);
+		kfree(fhp);
+		return -ENOMEM;
+	}
+	input_cnt = 0;
+	for (idx = 0; idx < (sizeof(input_mask) << 3); idx++) {
+		if (!(input_mask & (1 << idx))) continue;
+		fhp->input_map[input_cnt++] = idx;
+	}
+
+	fhp->vnext = NULL;
+	fhp->vprev = vp->vlast;
+	if (vp->vlast) {
+		vp->vlast->vnext = fhp;
+	} else {
+		vp->vfirst = fhp;
+	}
+	vp->vlast = fhp;
+	fhp->vhead = vp;
 
 	fhp->file = file;
 	file->private_data = fhp;
@@ -1146,10 +1361,8 @@ static int pvr2_v4l2_iosetup(struct pvr2_v4l2_fh *fh)
 	sp = fh->dev_info->stream->stream;
 	pvr2_stream_set_callback(sp,(pvr2_stream_callback)pvr2_v4l2_notify,fh);
 	pvr2_hdw_set_stream_type(hdw,fh->dev_info->config);
-	pvr2_hdw_set_streaming(hdw,!0);
-	ret = pvr2_ioread_set_enabled(fh->rhp,!0);
-
-	return ret;
+	if ((ret = pvr2_hdw_set_streaming(hdw,!0)) < 0) return ret;
+	return pvr2_ioread_set_enabled(fh->rhp,!0);
 }
 
 
@@ -1241,26 +1454,40 @@ static unsigned int pvr2_v4l2_poll(struct file *file, poll_table *wait)
 }
 
 
+#ifdef PVR2_ENABLE_OLD_V4L_FILEOPS
 static const struct file_operations vdev_fops = {
+#else
+static const struct v4l2_file_operations vdev_fops = {
+#endif
 	.owner      = THIS_MODULE,
 	.open       = pvr2_v4l2_open,
 	.release    = pvr2_v4l2_release,
 	.read       = pvr2_v4l2_read,
 	.ioctl      = pvr2_v4l2_ioctl,
+#ifdef PVR2_ENABLE_OLD_V4L_FILEOPS
 	.llseek     = no_llseek,
+#endif
 	.poll       = pvr2_v4l2_poll,
 };
 
 
+#ifdef PVR2_ENABLE_V4L1HARDWARE
 #define VID_HARDWARE_PVRUSB2    38  /* FIXME : need a good value */
 
+#endif
 static struct video_device vdev_template = {
+#ifdef PVR2_ENABLE_OLD_MODULE_OWNER
 	.owner      = THIS_MODULE,
+#endif
+#ifdef PVR2_ENABLE_V4L_TYPE
 	.type       = VID_TYPE_CAPTURE | VID_TYPE_TUNER,
 	.type2      = (V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_VBI_CAPTURE
 		       | V4L2_CAP_TUNER | V4L2_CAP_AUDIO
 		       | V4L2_CAP_READWRITE),
+#endif
+#ifdef PVR2_ENABLE_V4L1HARDWARE
 	.hardware   = VID_HARDWARE_PVRUSB2,
+#endif
 	.fops       = &vdev_fops,
 };
 
@@ -1269,18 +1496,17 @@ static void pvr2_v4l2_dev_init(struct pvr2_v4l2_dev *dip,
 			       struct pvr2_v4l2 *vp,
 			       int v4l_type)
 {
-#if 0
+#ifdef PVR2_ENABLE_DEV_PARENT
 	struct usb_device *usbdev;
 #endif
 	int mindevnum;
 	int unit_number;
-	int *nr_ptr = 0;
+	int *nr_ptr = NULL;
 	dip->v4lp = vp;
 
-#if 0
+#ifdef PVR2_ENABLE_DEV_PARENT
 	usbdev = pvr2_hdw_get_dev(vp->channel.mc_head->hdw);
 #endif
-
 	dip->v4l_type = v4l_type;
 	switch (v4l_type) {
 	case VFL_TYPE_GRABBER:
@@ -1289,8 +1515,9 @@ static void pvr2_v4l2_dev_init(struct pvr2_v4l2_dev *dip,
 		dip->minor_type = pvr2_v4l_type_video;
 		nr_ptr = video_nr;
 		if (!dip->stream) {
-			err("Failed to set up pvrusb2 v4l video dev"
-			    " due to missing stream instance");
+			pr_err(KBUILD_MODNAME
+				": Failed to set up pvrusb2 v4l video dev"
+				" due to missing stream instance\n");
 			return;
 		}
 		break;
@@ -1307,8 +1534,8 @@ static void pvr2_v4l2_dev_init(struct pvr2_v4l2_dev *dip,
 		break;
 	default:
 		/* Bail out (this should be impossible) */
-		err("Failed to set up pvrusb2 v4l dev"
-		    " due to unrecognized config");
+		pr_err(KBUILD_MODNAME ": Failed to set up pvrusb2 v4l dev"
+		    " due to unrecognized config\n");
 		return;
 	}
 
@@ -1320,15 +1547,27 @@ static void pvr2_v4l2_dev_init(struct pvr2_v4l2_dev *dip,
 	if (nr_ptr && (unit_number >= 0) && (unit_number < PVR_NUM)) {
 		mindevnum = nr_ptr[unit_number];
 	}
+#ifdef PVR2_ENABLE_DEV_PARENT
+#ifdef PVR2_ENABLE_DEV_PARENT_OLD
+	dip->devbase.dev = &usbdev->dev;
+#else
+	dip->devbase.parent = &usbdev->dev;
+#endif
+#endif
 	if ((video_register_device(&dip->devbase,
 				   dip->v4l_type, mindevnum) < 0) &&
 	    (video_register_device(&dip->devbase,
 				   dip->v4l_type, -1) < 0)) {
-		err("Failed to register pvrusb2 v4l device");
+		pr_err(KBUILD_MODNAME
+			": Failed to register pvrusb2 v4l device\n");
 	}
 
 	printk(KERN_INFO "pvrusb2: registered device %s%u [%s]\n",
-	       get_v4l_name(dip->v4l_type),dip->devbase.minor & 0x1f,
+#ifdef PVR2_ENABLE_OLD_V4L_DEVNUM
+	       get_v4l_name(dip->v4l_type), dip->devbase.minor & 0x1f,
+#else
+	       get_v4l_name(dip->v4l_type), dip->devbase.num,
+#endif
 	       pvr2_config_get_name(dip->config));
 
 	pvr2_hdw_v4l_store_minor_number(vp->channel.mc_head->hdw,
@@ -1342,24 +1581,27 @@ struct pvr2_v4l2 *pvr2_v4l2_create(struct pvr2_context *mnp)
 
 	vp = kzalloc(sizeof(*vp),GFP_KERNEL);
 	if (!vp) return vp;
-	vp->dev_video = kzalloc(sizeof(*vp->dev_video),GFP_KERNEL);
-	vp->dev_radio = kzalloc(sizeof(*vp->dev_radio),GFP_KERNEL);
-	if (!(vp->dev_video && vp->dev_radio)) {
-		kfree(vp->dev_video);
-		kfree(vp->dev_radio);
-		kfree(vp);
-		return NULL;
-	}
 	pvr2_channel_init(&vp->channel,mnp);
 	pvr2_trace(PVR2_TRACE_STRUCT,"Creating pvr2_v4l2 id=%p",vp);
 
 	vp->channel.check_func = pvr2_v4l2_internal_check;
 
 	/* register streams */
+	vp->dev_video = kzalloc(sizeof(*vp->dev_video),GFP_KERNEL);
+	if (!vp->dev_video) goto fail;
 	pvr2_v4l2_dev_init(vp->dev_video,vp,VFL_TYPE_GRABBER);
-	pvr2_v4l2_dev_init(vp->dev_radio,vp,VFL_TYPE_RADIO);
+	if (pvr2_hdw_get_input_available(vp->channel.mc_head->hdw) &
+	    (1 << PVR2_CVAL_INPUT_RADIO)) {
+		vp->dev_radio = kzalloc(sizeof(*vp->dev_radio),GFP_KERNEL);
+		if (!vp->dev_radio) goto fail;
+		pvr2_v4l2_dev_init(vp->dev_radio,vp,VFL_TYPE_RADIO);
+	}
 
 	return vp;
+ fail:
+	pvr2_trace(PVR2_TRACE_STRUCT,"Failure creating pvr2_v4l2 id=%p",vp);
+	pvr2_v4l2_destroy_no_lock(vp);
+	return NULL;
 }
 
 /*

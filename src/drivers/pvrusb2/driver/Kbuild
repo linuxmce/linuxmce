@@ -1,5 +1,5 @@
 
-obj-pvrusb2-sysfs-$(CONFIG_VIDEO_PVRUSB2_SYSFS) := pvrusb2-sysfs.o
+obj-pvrusb2-sysfs-$(CONFIG_VIDEO_PVRUSB2_SYSFS) := pvrusb2-sysfs-sel.o
 obj-pvrusb2-debugifc-$(CONFIG_VIDEO_PVRUSB2_DEBUGIFC) := pvrusb2-debugifc.o
 
 pvrusb2-objs := \
@@ -7,6 +7,8 @@ pvrusb2-objs := \
                 pvrusb2-compat.o \
                 pvrusb2-ctrl.o \
 		pvrusb2-hdw.o \
+                pvrusb2-devattr.o \
+		pvrusb2-i2c-track.o \
 		pvrusb2-i2c-core.o \
 		pvrusb2-i2c-cmd-v4l2.o \
 		pvrusb2-i2c-cmd-v4l1.o \
@@ -24,9 +26,11 @@ pvrusb2-objs := \
 		pvrusb2-context.o \
 		pvrusb2-io.o \
 		pvrusb2-ioread.o \
+		pvrusb2-cs53l32a.o \
 		pvrusb2-cx2584x-old.o \
 		pvrusb2-cx2584x-v4l.o \
                 pvrusb2-wm8775.o \
+                pvrusb2-dvb-wrap.o \
                 $(obj-pvrusb2-sysfs-y) \
                 $(obj-pvrusb2-debugifc-y) \
 		$(END)
@@ -34,11 +38,39 @@ pvrusb2-objs := \
 obj-$(CONFIG_VIDEO_PVRUSB2) += pvrusb2.o
 
 #EXTRA_CFLAGS += -I$(srctree)/drivers/media/video
+T1 := 
+T2 :=
 ifneq ($(strip $(V4LDIR)),)
-CPPFLAGS := -I$(V4LDIR)/linux/include $(CPPFLAGS)
+T1 += -I$(V4LDIR)/linux/include
+T2 += -I$(V4LDIR)/linux/drivers/media/common/tuners
+ifeq ($(CONFIG_VIDEO_PVRUSB2_DVB),y)
+T2 += -I$(V4LDIR)/linux/drivers/media/dvb/dvb-core
+T2 += -I$(V4LDIR)/linux/drivers/media/dvb/frontends
+T2 += -I$(V4LDIR)/linux/drivers/media/video
+endif
+
+# Patch in V4L-DVB directories in a manner that overrides the kernel.  This
+# is a hack job :-(
+
+# First attempt
+CPPFLAGS := $(T1) $(CPPFLAGS) $(T2)
+
+# Needed for kernel 2.6.24 or higher
+KBUILD_CPPFLAGS := $(T1) $(KBUILD_CPPFLAGS) $(T2)
+
+# Needed for kernel 2.6.29 or higher
+LINUXINCLUDE := $(T1) $(LINUXINCLUDE) $(T2)
+
 EXTRA_CFLAGS += -DPVR2_ENABLE_V4LCVS
+else
+ifeq ($(CONFIG_VIDEO_PVRUSB2_DVB),y)
+EXTRA_CFLAGS += -I$(srctree)/drivers/media/dvb/dvb-core
+EXTRA_CFLAGS += -I$(srctree)/drivers/media/dvb/frontends
+EXTRA_CFLAGS += -I$(srctree)/drivers/media/common/tuners
+endif
 endif
 EXTRA_CFLAGS += $(if $(findstring y,$(CONFIG_VIDEO_PVRUSB2_SYSFS)),-DCONFIG_VIDEO_PVRUSB2_SYSFS)
+EXTRA_CFLAGS += $(if $(findstring y,$(CONFIG_VIDEO_PVRUSB2_DVB)),-DCONFIG_VIDEO_PVRUSB2_DVB)
 EXTRA_CFLAGS += $(if $(findstring y,$(CONFIG_VIDEO_PVRUSB2_DEBUGIFC)),-DCONFIG_VIDEO_PVRUSB2_DEBUGIFC)
 EXTRA_CFLAGS += $(if $(findstring y,$(CONFIG_VIDEO_PVRUSB2_24XXX)),-DCONFIG_VIDEO_PVRUSB2_24XXX)
 EXTRA_CFLAGS += $(if $(findstring y,$(CONFIG_VIDEO_ADV_DEBUG)),-DCONFIG_VIDEO_ADV_DEBUG)

@@ -7,7 +7,7 @@
 </HEAD>
 <BODY LANG="en-US" DIR="LTR">
 <H1>pvrusb2 driver usage information</H1>
-<P>$Id: usage.html 1542 2007-01-27 18:29:15Z isely $</P>
+<P>$Id: usage.html 2304 2009-06-14 21:50:27Z isely $</P>
 <P>Mike Isely &lt;isely at pobox dot com&gt;</P>
 
 <P>You can find the main driver page on the web at <A
@@ -24,8 +24,8 @@ effects with certain apps.</P>
 <A HREF="#Logging">Driver logging / parameters</A><BR>
 <A HREF="#Hotplug">Hotplug behavior / recovery</A><BR>
 <A HREF="#V4L">V4L apps</A><BR>
-<A HREF="#sysfs">Sysfs Interface</A><BR>
 <A HREF="#DVB">DVB Interface</A><BR>
+<A HREF="#sysfs">Sysfs Interface</A><BR>
 <A HREF="#IR_handling">IR handling</A><BR>
 <A HREF="#Radio_mode">Radio Mode</A><BR>
 <A HREF="#FreqTab">Frequency Table</A><BR>
@@ -99,6 +99,21 @@ near the front of <TT>pvrusb2-main.c</TT>.  You can change this mask
 at any time via sysfs (the directory just mentioned above); the effect
 will be immediate.</DD>
 
+<DT><tt>disable_autoload_ir_video</tt></DT><DD>This prevents the
+pvrusb2 driver from attempting to automatically, explicitly load an IR
+handling module (e.g. ir-kbd-i2c).  The default state of this option
+is &quot;0&quot;, i.e. &quot;<tt>disbable_autoload_ir=0</tt>&quot;.
+(Note that for the 20090509 standlone snapshot this option defaulted
+to &quot;1&quot;.)  Previously the pvrusb2 driver made no attempt to
+load any such module since lirc is also a valid choice and autoloading
+one particular choice will interfere with other possible choices.
+However there are changes coming which force this issue so now the
+pvrusb2 driver normally will attempt to autoload "ir_video" (which
+will cause ir-kbd-i2c to be pulled in).  But if you don't want that to
+happen, set this option to &quot;1&quot;.  See the <A
+href="#IR_handling">IR handling</A> section for further information
+about this.</DD>
+
 <DT><tt>i2cscan</tt></DT> <DD>This parameter when set to non-zero
 enables a full scan of the internal I2C bus as part of the
 initialization of the device.  The results of the scan will go to the
@@ -116,7 +131,26 @@ enables the issuance of a USB-standard reset command to the PVR USB2
 device when it is probed.  It might help recover from a stuck device
 (which is why I implemented it) but I haven't actually seen it help
 when I've tried in the past.  It is on by default since it shouldn't
-hurt.</DD>
+hurt.  <strong>Important note for later kernels:</strong> This
+parameter is deprecated.  It is fact no longer implemented for the
+in-V4L driver or for the standalone driver in any kernel 2.6.27 or
+later.  In those cases using it can lead to a fatal deadlock between
+the driver and the USB core.  I only continue to list it here for
+older kernels.</DD>
+
+<DT><tt>ir_mode</tt></DT> <DD>This parameter allows you to enable /
+disable the IR receiver on a per device basis.  This parameter takes a
+list of comma-separated values; each value is used for successive
+instances of the driver (i.e. you can disable IR reception
+per-instance).  By default IR reception is enabled.  To disable the IR
+receiver, specify a zero here for each specific instance to disable.
+(Any other value currently indicates that IR should be enabled.)  This
+feature is useful in cases where there are multiple PVR USB2 (or other
+IR-receiving) tuners and you want to designate one specific instance
+as the IR receiver.  Note that actual IR reception is handled by code
+outside of this driver; what this option does is to prevent that
+outside code from detecting the IR receiver chip in devices where you
+have disabled reception.</DD>
 
 <DT><tt>procreload</tt></DT> <DD>This parameter when set to non-zero
 permits the driver to forcibly reload the microcontroller firmware as
@@ -234,7 +268,7 @@ the v4l app you want to use does <em>not</em> support decoding of an
 mpeg2 stream from the driver, then it will definitely <em>not</em>
 work.</P>
 
-<H3>xawtv</H3>
+<H3><A NAME="xawtv">xawtv</H3>
 
 <P>One application you can try is <A
 HREF="http://linux.bytesex.org/xawtv/">xawtv</A> 4.x. Note that
@@ -282,7 +316,7 @@ happens, consider trying to tune a stronger station.</LI>
 
 </UL>
 
-<H3>mplayer</H3>
+<H3><A NAME="mplayer">mplayer</H3>
 
 <P>Another application that works is mplayer.  There are two ways to
 use mplayer: You can tell mplayer it's dealing with a tv device, or
@@ -295,11 +329,27 @@ mplayer goes &quot;dumb&quot; and decides to only attempt streaming of
 uncompressed video (i.e. no mpeg2 streaming), which of course won't
 work since our hardware here produces mpeg2...</P>
 
+<P>Unfortunately that second method also means you can't use mplayer
+to control the various V4L specific attributes of the device
+(e.g. frequency, volume, etc) since after all in this case mplayer is
+unaware that it is working with a V4L device.  This means that when
+running mplayer you must do something else alongside mplayer in order
+to control the device.  Basically we're talking about an arrangement
+where mplayer is showing you the output but you have to use some other
+method to provide control input.  I test a lot with mplayer, and in my
+case I just use the driver's sysfs interface.  But I've heard of other
+stories where people have used for example xawtv (3.x) in parallel
+with mplayer, or even an ivtv utility (e.g. ivtv-tune) to control the
+device.  The pvrusb2 driver supports multiple opens of course so you
+should be able to use any other app (or just sysfs) as a control
+interface while mplayer is running (or before starting it).</P>
+
 <P>I've seen floating around the net a variant of mplayer which has
 been adjusted to work with the ivtv driver.  I imagine that the
 adjustment is to cause mplayer to still attempt mpeg2 streaming when
-in tv mode.  If that is the case, then that version should work here.
-However I have never gotten around to trying it.</P>
+in tv mode.  If that is the case, then that version should work here -
+including the ability to control the device through mplayer.  However
+I have never gotten around to trying it.</P>
 
 <P>Several people have encountered problems reading pvrusb2 output
 with mplayer if the the <tt>avisynth.dll</tt> codec is installed in
@@ -327,7 +377,7 @@ with 29xxx devices.  This might be because 29xxx devices might simply
 be a little slower in reacquiring video sync after a channel change
 (the digitizer chip is different between the two).</P>
 
-<H3>xine and vlc</H3>
+<H3><A NAME="xine">xine and vlc</H3>
 
 <P>Similar to mplayer, xine and vlc are reported to work provided you
 treat the device file as just a normal file with mpeg contents.  There
@@ -339,7 +389,13 @@ invocations should work:</P>
 <blockquote><pre><code>xine - < /dev/video
 vlc - < /dev/video</code></pre></blockquote>
 
-<H3>Kaffeine</H3>
+<P>For vlc, I've heard later reports where the above didn't work.  I'm
+really not a vlc expert, but I've also seen this work:</P>
+
+<blockquote><pre><code>vlc stream:///video/video0
+cat /dev/video0 | vlc stream:///dev/stdin</code></pre></blockquote>
+
+<H3><A NAME="Kaffeine">Kaffeine</H3>
 
 <P>It is possible to get Kaffeine to work with this driver (streaming
 only?) using the following MRL:</P>
@@ -347,29 +403,47 @@ only?) using the following MRL:</P>
 <blockquote><pre><code>fifo:/dev/video#demux:mpeg</code></pre></blockquote>
 
 
-<H3>MythTV</H3>
+<H3><A NAME="MythTV">MythTV</H3>
 
 <P>The <A HREF="http://www.mythtv.org">MythTV</A> application of
 course is the holy grail for this driver.  I got sucked into this
-whole effort because of this desire.  Several people have since tested
-this driver against MythTV and are reporting success.</P>
+whole effort because of this desire.  This driver is known to work
+well in MythTV.</P>
 
-<P>If want to try MythTV, here are some tips:</P>
+<P>If you want to try MythTV, here are some tips:</P>
 
 <UL>
 
-<LI>Configure MythTV to treat the pvrusb2 driver as an ivtv type of
-device (e.g. PVR-250).</LI>
+<LI>Configure MythTV to treat the pvrusb2 driver as an mpeg2-encoder
+type of device (e.g. PVR-250).  This is important.  If you mistakenly
+tell MythTV that your device is &quot;just&quot; an analog V4L device
+(the default setting), then MythTV will try to operate it as a dumb
+framebuffer device which of course won't work at all.</LI>
 
-<LI>Disable the use of VBI - that definitely does not work in the
-driver, and while missing this detail seems to be non-fatal (just
-extra noise in the system log about additional missing
-<tt>ioctl()</tt> functions), it is probably a good idea to just leave
-VBI off.</LI>
+<LI>Disable the use of VBI - the driver definitely does not support
+VBI, and while missing this detail seems to be non-fatal (just extra
+noise in the system log about additional missing <tt>ioctl()</tt>
+functions), it is probably a good idea to just leave VBI off.</LI>
 
 </UL>
 
-<H3>tvtime</H3>
+<P>The MythTV wiki has a nice page (<A
+HREF="http://www.mythtv.org/wiki/index.php/Hauppauge_WinTV-PVR-USB2">http://www.mythtv.org/wiki/index.php/Hauppauge_WinTV-PVR-USB2</A>)
+about using the pvrusb2 driver.  The page's author (I didn't write it)
+apparently put it together from his own experiences with the device in
+combination with the driver and the notes you see from the various parts
+from the pvrusb2 web site here.  The additional perspective provided
+by that article might provide further clarity on the subject.</P>
+
+<P>MythTV is of course also a DVB application.  It should work fine
+with the DVB interface provided by the pvrusb2 driver, when operating
+the digital side of a hybrid device.  However this interface is new
+for the driver and could use some solid testing - I'd appreciate
+hearing from people who have confirmed that this works well.  You
+should be able to specify both the V4L and DVB interfaces to MythTV,
+which would then allow you to fully utilize the hardware.</P>
+
+<H3><A NAME="tvtime">tvtime</H3>
 
 <P>I think one of the best v4l TV apps out there is tvtime.  It's
 got a clean and simple interface, yet is very powerful and just
@@ -409,6 +483,34 @@ can stream video.  A second attempt at streaming will be greeted with
 an I/O error.</P>
 
 <HR>
+<H2><A NAME="DVB">DVB Interface</A></H2>
+
+<P>The pvrusb2 driver exports a limited DVB interface.  This will be
+created if the device being handled is a hybrid (i.e. has a digital
+tuner).  Right now the <em>only</em> means to access the digital side
+is through the DVB interface.  Similarly the DVB interface does not
+operate the analog side, which is why this interface is currently only
+made available for hybrid devices.</P>
+
+<P>I have not yet gained a lot of experience in playing with DVB apps,
+however the DVB interface is well defined so I would expect about any
+DVB supporting app to be able to operate the digital side of
+pvrusb2-supported hybrid tuners through this interface.</P>
+
+<P>MythTV is a well known app that uses DVB.  This driver should work
+with it.  For more information, see the MythTV description above as part
+of <A HREF="#V4L">V4L apps</A> section.</P>
+
+<P>In the long term I would like very much to put the V4L and DVB
+interfaces on an equal footing.  It would be a lot simpler
+conceptually if all features were equally available through both
+interfaces.  The fact that the hardware mpeg encoder can make the
+analog side &quot;look&quot; like a digital stream should in theory
+make DVB operation of the analog not impossible.  But right now this
+is not the case, and thus the DVB side is limited to digital tuning
+and the V4L side is limited to analog tuning.</P>
+
+<HR>
 <H2><A NAME="sysfs">Sysfs Interface</A></H2>
 
 <P>There is an additional interface available with this driver. In
@@ -427,31 +529,44 @@ system looks like:</P>
 
 <BLOCKQUOTE><PRE>londo:~# cd /sys/class/pvrusb2/sn-6829718/
 londo:/sys/class/pvrusb2/sn-6829718# ls
-ctl_audio_bitrate             ctl_resolution_ver
-ctl_audio_crc                 ctl_saturation
-ctl_audio_emphasis            ctl_signal_present
-ctl_audio_layer               ctl_srate
-ctl_audio_mode                ctl_streaming_enabled
-ctl_balance                   ctl_treble
-ctl_bass                      ctl_usb_speed
-ctl_brightness                ctl_vbr
-ctl_channel                   ctl_video_average_bitrate
-ctl_contrast                  ctl_video_peak_bitrate
-ctl_debug_subsys_mask         ctl_video_standard
-ctl_debug_subsys_stream_mask  ctl_video_standard_mask_active
-ctl_freq_table_channel        ctl_video_standard_mask_available
-ctl_freq_table_value          ctl_volume
-ctl_frequency                 debugcmd
-ctl_hue                       debuginfo
-ctl_input                     device
-ctl_interlace                 uevent
-ctl_mute                      unit_number
-ctl_resolution_hor            v4l_minor_number
+bus_info_str                   ctl_video_b_frames
+ctl_audio_bitrate              ctl_video_bitrate
+ctl_audio_crc                  ctl_video_bitrate_mode
+ctl_audio_emphasis             ctl_video_bitrate_peak
+ctl_audio_layer                ctl_video_chroma_median_filter_bottom
+ctl_audio_mode                 ctl_video_chroma_median_filter_top
+ctl_audio_modes_present        ctl_video_chroma_spatial_filter_type
+ctl_balance                    ctl_video_gop_closure
+ctl_bass                       ctl_video_gop_size
+ctl_brightness                 ctl_video_luma_median_filter_bottom
+ctl_channel                    ctl_video_luma_median_filter_top
+ctl_contrast                   ctl_video_luma_spatial_filter_type
+ctl_freq_table_channel         ctl_video_median_filter_type
+ctl_freq_table_value           ctl_video_spatial_filter
+ctl_frequency                  ctl_video_spatial_filter_mode
+ctl_hue                        ctl_video_standard
+ctl_input                      ctl_video_standard_mask_active
+ctl_master_state               ctl_video_standard_mask_available
+ctl_mpeg_audio_mode            ctl_video_temporal_decimation
+ctl_mpeg_audio_mode_extension  ctl_video_temporal_filter
+ctl_mute                       ctl_video_temporal_filter_mode
+ctl_resolution_hor             ctl_volume
+ctl_resolution_ver             debugcmd
+ctl_saturation                 debuginfo
+ctl_signal_present             device
+ctl_srate                      power
+ctl_streaming_enabled          subsystem
+ctl_stream_type                uevent
+ctl_treble                     unit_number
+ctl_usb_speed                  v4l_minor_number
+ctl_video_aspect               v4l_radio_minor_number
 londo:/sys/class/pvrusb2/sn-6829718#</PRE></BLOCKQUOTE>
 
 <P>(The device and driver links you see there by the way are standard
 things which point off to other parts of sysfs where the driver's and
-device's lower level control files can be found.)</P>
+device's lower level control files can be found.  There are also other
+bits and pieces showing here that help with debugging the driver or
+learning things about how it is set up.)</P>
 
 <BLOCKQUOTE>Note: As said above, the &quot;XXXXXXX&quot; part of the
 path is the device's serial number.  It is possible that the driver
@@ -533,12 +648,13 @@ you, then you can just safely ignore the existence of the
 <TT>custom_val</TT> file.</P>
 
 <P>I initially put together this interface to make it easier to debug
-the driver, independent of an application like xawtv. But the
-possibilities here are obvious. For example, it is possible open the
-/dev/ entry into mplayer and then completely control everything else
-with this sysfs interface while mplayer is running.  (I routinely test
-the driver this way.)  One could write a shell script control program
-with this interface...</P>
+the driver, independent of an application like xawtv (in fact, see <a
+href="dbgifc.html">dbgifc.html</a> for further info on debug aspects
+of this interface). But the possibilities here are obvious. For
+example, it is possible open the /dev/ entry into mplayer and then
+completely control everything else with this sysfs interface while
+mplayer is running.  (I routinely test the driver this way.)  One
+could write a shell script control program with this interface...</P>
 
 <P>Please be aware that with this interface one has complete run of
 all the driver's controls. There are certainly combinations of
@@ -556,49 +672,59 @@ not.  I put this together after experimentation with the device.
 Others may find it handy so I've made the results available.</P>
 
 <HR>
-<H2><A NAME="DVB">DVB Interface</A></H2>
-
-<P>I have several interesting thoughts towards also making a DVB
-interface concurrently available.  This device after all deals in
-mpeg2 streams not video frames, so from a purist standpoint it's
-probably closer to DVB in behavior than v4l.  The internal
-architecture of the driver should make this sort of stunt possible,
-but I need to do more research before I can determine if it is truly
-feasible.  In the mean time, there's no DVB interface.</P>
-
-<HR>
 <H2><A NAME="IR_handling">IR handling</A></H2>
 
 <P>The IR receiver within the model 29xxx series devices is an I2C
 part that is already understood by the <A
 HREF="http://www.lirc.org/html/lircd.html">lircd</A> software package
-(0.7 or later).  Previously Aurelien's driver hardcoded something here
-which made the IR receiver into another source for
+(0.7 or later).  A long long time ago Aurelien's driver hardcoded
+something here which made the IR receiver into another source for
 <TT>/dev/input</TT>, but I had stability problems with this and just
 decided to rip it out in favor of letting more stable external
 software handle this function.</P>
 
-<P>The IR receiver within the model 24xxx series devices is some glue
-logic and firmware within the FX2 microcontroller that is operating
-the device.  There's no actual I2C interface and thus no way for any
-external chip-level driver to reach into the pvrusb2 driver and
-operate the part.  The pvrusb2 driver handles this situation by
+<P>The IR receiver within the early model 24xxx series devices is some
+glue logic and firmware within the FX2 microcontroller that is
+operating the device.  There's no actual I2C interface and thus no way
+for any external chip-level driver to reach into the pvrusb2 driver
+and operate the part.  The pvrusb2 driver handles this situation by
 operating this feature itself and presenting the results as an
 emulation of the I2C chip that would otherwise be present in 29xxx
-devices.  Thus, even though 24xxx devices don't actually <em>have</em>
-the expected chip, everything still works properly and outside logic
-(e.g. lirc) still thinks it is talking to a normal Hauppauge I2C-based
-IR receiver.</P>
+devices.  Thus, even though those early 24xxx devices don't actually
+<em>have</em> the expected chip, everything still works properly and
+outside logic (e.g. lirc) still thinks it is talking to a normal
+Hauppauge I2C-based IR receiver.</P>
 
-<P>Making IR reception work is mostly just a case of install lircd and
-go.  It's the same thing you would do to get IR working in ivtv.  In
-other words, grab lircd 0.7 or later, build it, modprobe the I2C
-driver into the kernel and when configured with the appropriate
-lircd.conf (one appropriate for the PVR USB2's included remote is
-provided with the standalone pvrusb2 driver), it will &quot;just
+<P>Later 24xxx models (the &quot;MCE&quot; version) included an IR
+blaster, and with that change the IR landscape there changes again.
+In that case the IR receiver is an I2C device again but its interface
+is alien to what had been used in the 29xxx models.  The pvrusb2
+driver makes no attempt to emulate anything here and just stays out of
+the way.  However lirc should still be able to work with this device
+(just a different low level driver is inserted, try the one used for
+the &quot;PVR-150&quot;).</P>
+
+<P>The HVR-1950 / HVR-1900 models contain an IR receiver / blaster
+that I believe resembles that from the later 24xxx models and in
+theory should also work with lirc in the same manner.  However I have
+not heard any reports of success there yet (if somebody gets this to
+work, tell me)...</P>
+
+<P>It appears that onair hardware has an IR receiver, but I do not
+know if it is usable.</P>
+
+<P>Generally, making IR reception work is mostly just a case of
+install lircd and go (see important note at the end of this section
+about ir-kbd-i2c).  It's the same thing you would do to get IR working
+in ivtv.  In other words, grab lirc, build it, modprobe the
+appropriate driver into the kernel and when configured with the
+correct lircd.conf (one appropriate for the PVR USB2's included remote
+is provided with the standalone pvrusb2 driver), it will &quot;just
 work&quot;.  The I2C driver will discover the internal I2C bus made
 available by the pvrusb2 driver, probe that bus, and attach itself
-when it finds the IR receiver chip it will be looking for.</P>
+when it finds the IR receiver chip it will be looking for.  For later
+devices (e.g. HVR-1950) you will likely need a much more recent
+version of lirc.</P>
 
 <BLOCKQUOTE>Note that if you are a Debian user, there is an
 lirc-modules-source package which you can in theory just install and
@@ -609,22 +735,43 @@ for the current situation with this package.)  You're probably better
 off just using the vanilla version from the lirc web
 site.</BLOCKQUOTE>
 
-<P>There is a second way to make IR work with the pvrusb2 driver, if
-you dislike lirc and would prefer something which works with a
-<tt>/dev/input</tt> style interface.  Included as part of the V4L core
-is the module <tt>ir-kbd-i2c.ko</tt>.  If you insert that module into
-your kernel, then it will drive the I2C chip and present the results
-via <tt>/dev/input</tt>.</P>
+<P>There is a second but limited way to make IR work with the pvrusb2
+driver, if you dislike lirc and would prefer something which works
+with a <tt>/dev/input</tt> style interface.  Included as part of the
+V4L core is the module <tt>ir-kbd-i2c.ko</tt>.  If you insert that
+module into your kernel, then it will drive the I2C chip and present
+the results via <tt>/dev/input</tt>.  This is true for kernels up to
+2.6.29.  Note: This only works for 29xxx and earlier non-MCE 24xxx
+devices; for other devices the IR hardware is too different to be
+handled by ir-kbd-i2c.</P>
+
+<P>For kernels 2.6.30 or later things are messier at the moment.  The
+I2C internal infrastructure changes such that now the pvrusb2 driver
+must explicitly issue a call that binds clients like ir-kbd-i2c into
+its I2C bus.  Thus, just modprobe'ing ir-kbd-i2c won't work without
+help.  In fact, it's entirely likely that lirc won't work either until
+/ unless some changes are made there.  Right now I'm not very clear on
+this.  However to support ir-kbd-i2c, the pvrusb2 will try to autoload
+it where appropriate, regardless of kernel version.  <strong>This
+means that if you are using lirc, then there may be some interference
+from ir-kbd-i2c.</strong> When I say &quot;appropriate&quot; what I
+mean is that the attempt will only be made if the device in question
+has an IR receiver that is known specifically to work with ir-kbd-i2c
+(e.g. currently only 29xxx and early 24xxx models).  In an attempt to
+still allow lirc to work (if it will work at all), there's a module
+option available.  Specifiy &quot;disable_autoload_ir_video=1&quot;
+and the pvrusb2 driver's autoloading of ir-kbd-i2c will be
+suppressed.</P>
 
 <HR>
 <H2><A NAME="Radio_mode">Radio Mode</A></H2>
 
 <P>As of the 20061227 snapshot, the pvrusb2 driver supports operation
-of the FM tuner.  Many thanks go to Pantelis Koukousoulas
-<pakt223@freemail.gr> for implementing the key pieces.  So far I've
-only tested this with mplayer and kradio, but a lot should be
-possible.  To use the PVR USB2 as an FM radio, you really only need to
-do two things:</P>
+of the FM tuner where possible in the hardware.  Many thanks go to
+Pantelis Koukousoulas <pakt223@freemail.gr> for implementing the key
+pieces.  So far I've only tested this with mplayer and kradio, but a
+lot should be possible.  To use the PVR USB2 as an FM radio, you
+really only need to do two things:</P>
 
 <OL>
 <LI>Change the input selection to &quot;radio&quot;.</LI>
@@ -639,13 +786,14 @@ you have tuned.  Other things to be aware of:</P>
 
 <UL>
 
-<LI>The pvrusb2 driver now registers a V4L radio device
+<LI>The pvrusb2 driver registers a V4L radio device
 (e.g. <tt>/dev/radio0</tt>) in addition to the usual video device
-(e.g. <tt>/dev/video0</tt>).  The mere act of opening it will cause
-the driver input to switch to the radio (but you can switch it back at
-any time in the usual way(s)).  Other than that, there is nothing special
-about the radio device node.  All the usual ioctl()'s should also work
-with the radio device node.</LI>
+(e.g. <tt>/dev/video0</tt>).  This is only done for devices where the
+radio exists and is supported by the driver.  The mere act of opening
+it will cause the driver input to switch to the radio (but you can
+switch it back at any time in the usual way(s)).  Other than that,
+there is nothing special about the radio device node.  All the usual
+ioctl()'s should also work with the radio device node.</LI>
 
 <LI>The pvrusb2 driver tracks the current frequency in radio mode
 separately from television mode.  It does this since the two frequency
@@ -654,11 +802,12 @@ mode.  The outward effect of this is that when you switch modes, the
 frequency will magically also switch to whatever the last value was
 when it was last in that mode.</LI>
 
-<LI>The PVR USB2 hardware has separate F-connectors for the FM tuner
-versus the television tuner.  Don't forget to connect something to the
-FM tuner's F-connector is you plan on using the radio!</LI>
+<LI>Note that most hardware devices supported by this driver have
+separate F-connectors for the FM tuner versus the television tuner.
+Don't forget to connect something to the FM tuner's F-connector if you
+plan on using the radio!</LI>
 
- </UL>
+</UL>
 
 <P>Getting a full mpeg stream with (blanked) video embedded is kind of
 wasteful.  Usually you really only want the more familiar mp3 audio
@@ -794,6 +943,72 @@ then contact me or check the mailing list for chatter about such
 a problem.  And of course you can elect to simply update to the latest
 v4l repository snapshot, with its included in-V4L version of the
 pvrusb2 driver.</P>
+
+<H3>V4L vs DVB interactions</H3>
+
+<P>Hybrid devices are handled in the pvrusb2 driver with both V4L and
+DVB interfaces.  Internally it's all one driver under unified control,
+but externally the two interfaces make it look like two drivers.  So
+what interactions can happen between the interfaces?</P>
+
+<P>Digital tuning in the pvrusb2 driver is implemented as logically
+another input choice.  Thus if you use sysfs to enumerate the choices
+for ctl_input you'll also see a &quot;dtv&quot; choice for the digital
+tuner.</P>
+
+<P>In theory the V4L side can simply select the &quot;dtv&quot; input
+and stream digital TV.  However the current architecture of the
+V4L/DVB subsystem makes this impossible, due to the fact that digital
+tuning is tightly entangled with the DVB subsystem.  The only way to
+perform digital tuning at the moment is through DVB, simple as that.
+There are some ideas to solve this, but it's still a work in
+progress.</P>
+
+<P>The DVB interface currently has no ability to select an input
+choice.  This causes an issue in the pvrusb2 driver since the
+&quot;dtv&quot; input choice must be selected in order to perform
+digital streaming.</P>
+
+<P>The above two issues led to implementation of a special feature in
+the pvrusb2 driver, both to prevent inoperable hardware configurations
+from being run and to keep V4L and DVB from stepping on each other.
+The feature is known as &quot;narrowing&quot;.  It works like this:
+When a given interface is opened, the list of legal input selections
+in the driver is automatically narrowed to that which is usable for
+the open interface.  Thus when a V4L app opens the V4L interface, the
+&quot;dtv&quot; choice is dropped from the list of inputs - and when a
+DVB app opens the DVB interface, every choice <em>except</em> the
+&quot;dtv&quot; choice is dropped from the list of inputs.</P>
+
+<P>If the current input selection is no longer valid after the
+narrowing step, the driver immediately switches to one of the
+remaining choices.</P>
+
+<P>The effect of the narrowing operation is canceled when the
+interface that caused the narrowing is closed.</P>
+
+<P>If the set of remaining valid input choices becomes empty, then it
+is a disallowed narrowing operation and the interface which caused it
+will get back an error.  This prevents simultaneous opening of the V4L
+and DVB interfaces - the second one to open will be denied with an
+error because the other interface has already narrowed-away the
+desired input choice(s).</P>
+
+<BLOCKQUOTE>Along a similar line of reasoning, the V4L radio device
+behaves in a similar manner.  If the radio device is opened, then the
+set of input choices is narrowed to be only the radio - therefore the
+radio become active when the V4L radio interface is
+opened.</BLOCKQUOTE>
+
+<P>You can observe this behavior through the sysfs interface - dump
+the enumerated list of input selections under various conditions and
+note how the list changes depending on what interface is open.</P>
+
+<P>All of the above is long-winded way of saying the the pvrusb2
+driver currently enforces mutual exclusion between the V4L and DVB
+interfaces - when one is open, the other will be denied.  Any app
+wanting to use both interfaces (e.g. MythTV) must be aware of
+this.</P>
 
 <HR>
 <BR><BR>

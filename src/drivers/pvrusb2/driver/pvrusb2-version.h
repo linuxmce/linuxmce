@@ -1,4 +1,4 @@
 #ifndef _INCLUDED_PVRUSB2_DRIVER_VERSION
 #define _INCLUDED_PVRUSB2_DRIVER_VERSION
-#define DRIVER_VERSION "20070227 (from www.isely.net)"
+#define DRIVER_VERSION "20091031 (from www.isely.net)"
 #endif

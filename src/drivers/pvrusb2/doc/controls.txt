@@ -1,5 +1,5 @@
 
-$Id: controls.txt 1299 2006-07-27 05:10:44Z isely $
+$Id: controls.txt 1580 2007-03-23 05:43:00Z isely $
 
 The following list describes known information about each control
 available in the driver's sysfs interface.  Some items are known
@@ -176,9 +176,17 @@ ctl_saturation - Video saturation, also known as "color" control on
     some televisions.
 
 
-ctl_signal_present - This is a read only boolean value, reports true
-    when there is a valid signal present for the television input.  If
-    any other input is selected this will always be true.
+ctl_signal_present - This is a read only integer value, and reports
+    strength of the received signal.  Zero means no signal, any other
+    value suggests the presence of a signal up to a value of 65535 for
+    maximum strength.  The granularity and accuracy of this value
+    depends on the underlying v4l chip-level drivers which report this
+    value to the pvrusb2 driver.  For example a driver might only ever
+    report 0 or 65535.  This status value also seems to work for
+    composite & s-video input in additional to television and radio.
+    Older versions of the driver (up to the in-kernel 2.6.20 version)
+    instead reported a boolean value here.  Now we attempt to report
+    actual signal strength.
 
 
 ctl_srate - Default is 48KHz.  Alternate setting is 44.1KHz.  Works

@@ -1,6 +1,6 @@
 /*
  *
- *  $Id: pvrusb2-io.h 1253 2006-07-02 03:22:36Z isely $
+ *  $Id: pvrusb2-io.h 1926 2008-03-28 01:32:04Z isely $
  *
  *  Copyright (C) 2005 Mike Isely <isely@pobox.com>
  *
@@ -36,6 +36,15 @@ enum pvr2_buffer_state {
 struct pvr2_stream;
 struct pvr2_buffer;
 
+struct pvr2_stream_stats {
+	unsigned int buffers_in_queue;
+	unsigned int buffers_in_idle;
+	unsigned int buffers_in_ready;
+	unsigned int buffers_processed;
+	unsigned int buffers_failed;
+	unsigned int bytes_processed;
+};
+
 /* Initialize / tear down stream structure */
 struct pvr2_stream *pvr2_stream_create(void);
 void pvr2_stream_destroy(struct pvr2_stream *);
@@ -45,6 +54,9 @@ void pvr2_stream_setup(struct pvr2_stream *,
 void pvr2_stream_set_callback(struct pvr2_stream *,
 			      pvr2_stream_callback func,
 			      void *data);
+void pvr2_stream_get_stats(struct pvr2_stream *,
+			   struct pvr2_stream_stats *,
+			   int zero_counts);
 
 /* Query / set the nominal buffer count */
 int pvr2_stream_get_buffer_count(struct pvr2_stream *);

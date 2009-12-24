@@ -1,6 +1,6 @@
 /*
  *
- *  $Id: pvrusb2-audio.h 798 2005-12-31 20:30:29Z isely $
+ *  $Id: pvrusb2-audio.h 2226 2009-03-07 05:17:32Z isely $
  *
  *  Copyright (C) 2005 Mike Isely <isely@pobox.com>
  *  Copyright (C) 2004 Aurelien Alleaume <slts@free.fr>
@@ -23,10 +23,16 @@
 #ifndef __PVRUSB2_AUDIO_H
 #define __PVRUSB2_AUDIO_H
 
-#include "pvrusb2-i2c-core.h"
+#ifdef PVR2_ENABLE_OLD_I2COPS
+#include "pvrusb2-i2c-track.h"
 
 int pvr2_i2c_msp3400_setup(struct pvr2_hdw *,struct pvr2_i2c_client *);
 
+#endif /* PVR2_ENABLE_OLD_I2COPS */
+#ifdef PVR2_ENABLE_V4L2SUBDEV
+#include "pvrusb2-hdw-internal.h"
+void pvr2_msp3400_subdev_update(struct pvr2_hdw *, struct v4l2_subdev *);
+#endif /* PVR2_ENABLE_V4L2SUBDEV */
 #endif /* __PVRUSB2_AUDIO_H */
 
 /*

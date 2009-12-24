@@ -1,6 +1,6 @@
 /*
  *
- *  $Id: pvrusb2-i2c-cmd-v4l1.c 1438 2006-12-27 22:52:12Z isely $
+ *  $Id: pvrusb2-i2c-cmd-v4l1.c 2226 2009-03-07 05:17:32Z isely $
  *
  *  Copyright (C) 2005 Mike Isely <isely@pobox.com>
  *  Copyright (C) 2004 Aurelien Alleaume <slts@free.fr>
@@ -30,6 +30,8 @@
 #include <media/v4l2-common.h>
 #endif
 
+#ifdef PVR2_ENABLE_OLD_I2COPS
+
 
 static void set_standard(struct pvr2_hdw *hdw)
 {
@@ -58,6 +60,8 @@ static void set_standard(struct pvr2_hdw *hdw)
 		}
 		pvr2_i2c_core_cmd(hdw,VIDIOCSCHAN,&vc);
 	}
+	hdw->tuner_signal_stale = !0;
+	hdw->cropcap_stale = !0;
 }
 
 
@@ -143,6 +147,8 @@ const struct pvr2_i2c_op pvr2_i2c_op_v4l1_frequency = {
 	.name = "v4l1_freq",
 };
 
+
+#endif /* PVR2_ENABLE_OLD_I2COPS */
 
 /*
   Stuff for Emacs to see, in order to encourage consistent editing style:

@@ -1,6 +1,6 @@
 /*
  *
- *  $Id: pvrusb2-eeprom.c 1563 2007-02-28 03:30:33Z isely $
+ *  $Id: pvrusb2-eeprom.c 1758 2007-11-18 01:24:46Z isely $
  *
  *  Copyright (C) 2005 Mike Isely <isely@pobox.com>
  *  Copyright (C) 2004 Aurelien Alleaume <slts@free.fr>
@@ -107,6 +107,7 @@ int pvr2_eeprom_analyze(struct pvr2_hdw *hdw)
 	trace_eeprom("has_radio=%d",props[4]);
 
 	hdw->tuner_type = props[0];
+	hdw->tuner_updated = !0;
 	hdw->video_standards = props[1];
 
 	return 0;
@@ -235,6 +236,7 @@ int pvr2_eeprom_analyze(struct pvr2_hdw *hdw)
 	trace_eeprom("serial_number=%d",tvdata.serial_number);
 	trace_eeprom("rev_str=%s",tvdata.rev_str);
 	hdw->tuner_type = tvdata.tuner_type;
+	hdw->tuner_updated = !0;
 	hdw->serial_number = tvdata.serial_number;
 	hdw->std_mask_eeprom = tvdata.tuner_formats;
 
@@ -339,6 +341,7 @@ int pvr2_eeprom_analyze(struct pvr2_hdw *hdw)
 		trace_eeprom("serial_number=%d",tvdata.v4l.serial_number);
 		trace_eeprom("rev_str=%s",tvdata.v4l.rev_str);
 		hdw->tuner_type = tvdata.v4l.tuner_type;
+		hdw->tuner_updated = !0;
 		hdw->serial_number = tvdata.v4l.serial_number;
 		hdw->std_mask_eeprom = tvdata.v4l.tuner_formats;
 	} else {
@@ -354,6 +357,7 @@ int pvr2_eeprom_analyze(struct pvr2_hdw *hdw)
 		trace_eeprom("serial_number=%d",tvdata.ivtv.serial_number);
 		trace_eeprom("rev_str=%s",tvdata.ivtv.rev_str);
 		hdw->tuner_type = tvdata.ivtv.tuner_type;
+		hdw->tuner_updated = !0;
 		hdw->serial_number = tvdata.ivtv.serial_number;
 		hdw->std_mask_eeprom = tvdata.ivtv.tuner_formats;
 	}
