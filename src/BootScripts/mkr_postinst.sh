@@ -14,9 +14,7 @@ if [ ! -e /etc/apt/apt.conf.d/30pluto.pbackup ] ;then
 	cp /etc/apt/apt.conf.d/30pluto /etc/apt/apt.conf.d/30pluto.pbackup || :
 fi
 
-if [ ! -e /etc/logrotate.d/pluto.pbackup ] ;then
-	cp /etc/logrotate.d/pluto /etc/logrotate.d/pluto.pbackup || :
-fi
+rm -f /etc/logrotate.d/plut*
 
 if [ ! -e /etc/asound.conf.pbackup ] ;then
 	cp /etc/asound.conf /etc/asound.conf.pbackup || :
