@@ -4,8 +4,9 @@
 # Please improve upon it and add error/validity checkign if you want this!
 
 # this is a bit of a cheap hack, but I really like the SQL_Ops library and the builder does have this file in the unprepped source branch
-. ${svn_dir}/${svn_branch_name}/src/Bootscripts/SQL_Ops.sh
+
 . /etc/lmce-build/builder.conf
+. ${svn_dir}/${svn_branch_name}-last/src/BootScripts/SQL_Ops.sh
 
 function Usage() {
 	echo "test-src.sh"
