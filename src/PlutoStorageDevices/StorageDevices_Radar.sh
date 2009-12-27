@@ -52,6 +52,11 @@ function Detect {
 	## Remove Unmountable partitions (swap / extended)
 	auxPart=""
 	for part in $availPart ;do
+		## If is a boot partition
+		if file -s /dev/$part | grep -q "x86 boot sector" ;then
+			continue
+		fi
+
 		## If is extended partition
 		if file -s /dev/$part | grep -q "extended partition table"  ;then
 			continue
