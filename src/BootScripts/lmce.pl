@@ -10,6 +10,15 @@ require "/usr/pluto/bin/config_ops.pl";
 
 $DB_PL_HANDLE = DBI->connect(&read_pluto_cred()) or die "Could not connect to MySQL";
 
+sub getCoreIP {
+  my $dbh = DBI->connect(&read_pluto_cred()) or die "Can't connect to database: $DBI::errstr\n";
+  my $sth = $dbh->prepare("SELECT IPaddress FROM Device WHERE FK_DeviceTemplate = 7");
+  $sth->execute || die "Sql Error retrieving IP address for devicetemplate 7";
+  my $row = $sth->fetchrow_hashref;
+  my $IP = $row->{IPaddress};
+  return $IP;
+}
+
 function get_device_devicedata(( {
   # This function should be called with the DeviceID and DeviceData ID
   my ($DEVICE_ID, $DEVICE_DATA) = @_;
