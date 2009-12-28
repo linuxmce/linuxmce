@@ -162,7 +162,10 @@ function Build_Replacements_Intrepid
         #Package: alsa dianemo packages
 	Build_Replacement_Package libasound2 ubuntu/alsa-lib-1.0.18
 	if ! dpkg -l libasound2-dev &>/dev/null; then
-		dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/libasound2-dev*deb
+		dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/libasound2_*deb
+		dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/lib32asound2_*deb
+		dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/libasound2-dev_*deb
+		dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/lib32asound2-dev_*deb
 	fi
 	Build_Replacement_Package libasound2-plugins ubuntu/alsa-plugins-1.0.18
 	Build_Replacement_Package alsa-utils ubuntu/alsa-utils-1.0.18
@@ -334,6 +337,8 @@ function Build_Replacements_Gutsy
 trap 'Error "Undefined error in $0"' EXIT
 
 DisplayMessage "*** STEP: Building replacement debs"
+# make sure the headers are there
+apt-get -y install linux-headers-$KVER
 case "${build_name}" in
 	"gutsy")
 		Build_Replacements_Gutsy
