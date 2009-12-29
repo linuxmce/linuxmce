@@ -115,7 +115,7 @@ foreach $dev (@de) {
 					foreach $day (@days) {
 						$path4 = $path3."/".$day;
 						
-						if($day <= $omday) {
+						if($day <= $omday || $day > $lday) {
 
 						
 							print "Found expired day! Removing $path4\n";
