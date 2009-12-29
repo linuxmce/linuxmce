@@ -28,6 +28,7 @@ while($local_row = $st->fetchrow_hashref()) {
 			$st4->execute() or die "Error on execute";
 			if($rowl = $st4->fetchrow_hashref()) {
 				$data = $rowl->{'IK_DeviceData'};
+				
 				if($devices eq "") {
 					$devices = $deviceid.",";
 				} else {
@@ -38,6 +39,7 @@ while($local_row = $st->fetchrow_hashref()) {
 				} else {
 					$datas = $datas.$data.",";
 				}
+				print "Camera $deviceid has a purge period of $data days.\n";
 			}
 			$st4->finish();
 		}
@@ -70,33 +72,36 @@ foreach $line (@de) {
 	}
 	$count = $count + 1;
 }
-print "Found $count camera devices. Purgeing ...";
+print "Purging $count camera devices....\n";
 
 ($lsec,$lmin,$lhour,$lmday,$lmon,$lyear,$lwday,$lyday,$lisdst) = localtime(time);
-$lmon = $lmon + 1;
 
+#the month is 0-11, lets make it 1-12 to match the directory structure
+$lmon = $lmon + 1;
+print "DEBUG: lyear = $lyear\n";
 $lyear = $lyear - 100;
-if($lyear < 10) {
-	$lyear = 2000 + $lyear;
-} else {
-	$lyear = 2000 + $lyear;
-}
+print "DEBUG: after -100, lyear = $lyear\n";
+
+$lyear = 2000 + $lyear;
+
 
 $count = 0;
 $path = "/home/cameras/";
+
 foreach $dev (@de) {
-	$path1 = "/home/cameras/".$dev;
+	# convert purge period days to number of seconds (60*60*24=86400 seconds per day)
 	$time = time - $da[$count]*86400;
+	# make expiry time varibles from time differential
 	($osec,$omin,$ohour,$omday,$omon,$oyear,$owday,$oyday,$oisdst) = localtime($time);
 	$oyear = $oyear - 100;
-	if($oyear < 10) {
-        	$oyear = 2000 + $oyear;
-        } else {
-                $oyear = 2000 + $oyear;
-        }
+       	$oyear = 2000 + $oyear;
+	# convert 0-11 months to 1-12
 	$omon = $omon + 1;
+
+	$path1 = "/home/cameras/".$dev;
 	opendir(ROOTDIR, $path1);
 	@years = grep {!/^\./} readdir(ROOTDIR);
+
 	foreach $year (@years) {
 		if($year >= $lyear && $year <= $oyear) {
 			$path2 = $path1."/".$year;
@@ -108,18 +113,25 @@ foreach $dev (@de) {
 					opendir(MONTHDIR, $path3);
 					@days = grep {!/^\./} readdir(MONTHDIR);
 					foreach $day (@days) {
-						if($day >= $lmday && $day <= $omday) {
+						$path4 = $path3."/".$day;
+						
+						if($day <= $omday) {
+
+						
+							print "Found expired day! Removing $path4\n";
 							system("rm -rf $path4");
 						}
 					}
 					closedir(MONTHDIR);
 				} else {
+					print "Found Expired month! Removing $path3\n";
 					system("rm -rf $path3");
 				}
 			}
 			closedir(YEARDIR);
 		} else {
 			$path2 = $path1."/".$year;
+			print "Found Expired year! Removing $path2\n";
 			system("rm -rf $path2");
 		}
 	}
