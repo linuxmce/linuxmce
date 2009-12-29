@@ -204,7 +204,7 @@ bool Motion_Wrapper::Connect(int iPK_DeviceTemplate) {
 					 snapshot config  << endl
 					<< "snapshot_interval 60" << endl
 					<< "snapshot_filename %Y/%m/%d/%H/%M_%S" << endl
-					<< "jpeg_filenamALARM_PURGE_ARCHIVEe %Y/%m/%d/%H/%M_%S" << endl
+					<< "jpeg_filename %Y/%m/%d/%H/%M_%S" << endl
 					<< "movie_filename movies/%d_%m_%Y_%H_%M_%S" << endl
 					<< "timelapse_filename %Y/%m/%d-timelapse" << endl
 					*/
@@ -244,8 +244,7 @@ bool Motion_Wrapper::Connect(int iPK_DeviceTemplate) {
 				if(AddChildDeviceToConfigFile(tconffile, pDeviceData_Impl, i)) {
 					mconffile << "thread " << sPath << endl;
 				}
-			} catch(ifstream::failure e) {m_pAlarmManager = new DCE::AlarmManager();
-	m_pAlarmManager->Start(2);      
+			} catch(ifstream::failure e) {
 				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Cannot open %s for writing...", sPath.c_str());
 				continue;
 			}
