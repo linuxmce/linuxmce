@@ -35,7 +35,7 @@ using namespace DCE;
 
 #define MOTION_CONF_PATH	"/etc/motion/"
 #define MOTION_CONF_FILE	"motion.conf"
-
+#define ALARM_PURGE_ARCHIVE	1
 #define SNAPSHOT_SLEEP_TIME	100
 
 static pid_t * my_motion_pid = NULL;
@@ -113,6 +113,7 @@ Motion_Wrapper::Motion_Wrapper(Command_Impl *pPrimaryDeviceCommand, DeviceData_I
 	: Motion_Wrapper_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
 //<-dceag-const2-e->
 {
+	m_pAlarmManager = NULL;
 }
 
 //<-dceag-dest-b->
@@ -133,7 +134,8 @@ Motion_Wrapper::~Motion_Wrapper()
 		kill(*i, SIGKILL);
 		waitpid(*i,NULL,0);
 	}
-
+	delete m_pAlarmManager;
+	m_pAlarmManager = NULL;
 }
 
 bool Motion_Wrapper::Connect(int iPK_DeviceTemplate) {
@@ -202,7 +204,7 @@ bool Motion_Wrapper::Connect(int iPK_DeviceTemplate) {
 					 snapshot config  << endl
 					<< "snapshot_interval 60" << endl
 					<< "snapshot_filename %Y/%m/%d/%H/%M_%S" << endl
-					<< "jpeg_filename %Y/%m/%d/%H/%M_%S" << endl
+					<< "jpeg_filenamALARM_PURGE_ARCHIVEe %Y/%m/%d/%H/%M_%S" << endl
 					<< "movie_filename movies/%d_%m_%Y_%H_%M_%S" << endl
 					<< "timelapse_filename %Y/%m/%d-timelapse" << endl
 					*/
@@ -242,12 +244,17 @@ bool Motion_Wrapper::Connect(int iPK_DeviceTemplate) {
 				if(AddChildDeviceToConfigFile(tconffile, pDeviceData_Impl, i)) {
 					mconffile << "thread " << sPath << endl;
 				}
-			} catch(ifstream::failure e) {
+			} catch(ifstream::failure e) {m_pAlarmManager = new DCE::AlarmManager();
+	m_pAlarmManager->Start(2);      
 				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Cannot open %s for writing...", sPath.c_str());
 				continue;
 			}
 		}
 	}
+	
+	m_pAlarmManager = new DCE::AlarmManager();
+	m_pAlarmManager->Start(2);      
+	m_pAlarmManager->AddRelativeAlarm(1,this,ALARM_PURGE_ARCHIVE,NULL);
 
 	signal(SIGCHLD, sighandler);
 	StartMotion(&motionpid_);
@@ -596,7 +603,17 @@ DeviceData_Router* Motion_Wrapper::find_Device(int iPK_Device) {
 	return m_pRouter->m_mapDeviceData_Router_Find(iPK_Device);
 }
 
-
+void Motion_Wrapper::AlarmCallback(int id, void* param)
+{
+	
+	if (id==ALARM_PURGE_ARCHIVE) {
+		m_pAlarmManager->CancelAlarmByType(ALARM_PURGE_ARCHIVE);
+		// Purge Camera Archive once every 6 hours
+		m_pAlarmManager->AddRelativeAlarm(60*60*6,this,ALARM_PURGE_ARCHIVE,NULL);
+		string sCmd = "/usr/pluto/bin/Purge_Camera_Archive.pl";
+		system(sCmd.c_str());
+	}
+}
 /*
 
 this came from generic_analog_camera
