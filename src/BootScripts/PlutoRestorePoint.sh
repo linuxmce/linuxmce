@@ -38,12 +38,11 @@ Restore() {
 	Databases=$(ls -d */ | sed '1,$s/\///g') # sed removes trailing "/" character
 	for thisDatabase in $Databases
 	do
-		UseDB $thisDatabase
 		# Get a list of all the backup files to restore to this database
 		BackupFiles=$(ls $thisDatabase)
 		for thisFile in $BackupFiles
 		do
-			RunSQL < $thisFile
+			/usr/bin/mysql -u root -D $thisDatabase < $thisFile
 		done
 	done
 
