@@ -127,6 +127,17 @@
 		orbiterTakeCareOfObjects($link, $array, $currentRoom, $currentEntertainArea,$UI);
 		print "</ul>\n";
 	}
+	
+	function doPower() {
+                global $currentScreen,$currentEntertainArea, $currentUser, $currentRoom;                
+                $url = "design.php?currentRoom=$currentRoom&currentUser=$currentUser&CommandGroup_D";                                 
+		print "<ul id='Power'>\n";
+		print "<li><a href='" . $url . "=7717'>Display On</a></li>\n";
+		print "<li><a href='" . $url . "=9803'>Power On</a></li>\n";
+		print "<li><a href='" . $url . "=7718'>Media Off</a></li>\n";
+		print "<li><a href='" . $url . "=7725'>Display Off</a></li>\n";
+		print "<li><a href='" . $url . "=7721'>Power Off</a></li>\n";
+	} 
 
 	function doDesignObjVariations($designObjVariation, $link) {
 		global $currentScreen,$currentEntertainArea, $currentUser, $currentRoom;
@@ -138,8 +149,9 @@
 		$PK_Array = getMyValue($link,$query);
 		// $PK_Array = 1;
 		// print "<ul><li>PK Array $PK_Array</li>\n";
-		If (! Isset($PK_Array)) {
-			// Take care of all the childs of this variation
+		if ($designObjVariation == 3332) {
+			doPower();
+		} elseif (! Isset($PK_Array)) {
 			
 			print "<li><a href='$designObjVariation'>DesignObjVariation $designObjVariation</a></li>\n";
 			orbiterDoVariation($link, $designObjVariation,$currentRoom,$currentEntertainArea,$isParent = true);
@@ -566,11 +578,13 @@
 	function doCommandGroup_D($link,$commandGroup) {
 		// Get all associated commands and their parameters from the supplied commandgroup_D
 		// $commandGroupDescription = getMyValue($link,"SELECT Description FROM CommandGroup_D WHERE PK_CommandGroup_D = $commandGroup");
-		global $currentScreen;
+		global $currentScreen, $currentRoom, $possyDeviceFromID;
 		$commandGroupDescription = "empty";
 		// print "<h1>CommandGroup_D $commandGroup - $commandGroupDescription</h1>\n";
 		$query = "SELECT PK_CommandGroup_D" . "_Command,FK_Command, FK_DeviceTemplate FROM CommandGroup_D_Command Where FK_CommandGroup_D = $commandGroup Order By OrderNum";
-		// print "<p>query: $query</p>\n";
+		// print "<p>query: $query</p>\n";                
+		$socket = commStart("dcerouter",3450,$possyDeviceFromID);
+		
 		$commands = getMyArray($link,$query);
 
 		foreach($commands as $commandDetail) {
@@ -589,6 +603,7 @@
 
 			$commandGroupCommand = $commandDetail[0];
 			$parameters = getMyArray($link,"SELECT FK_CommandParameter, IK_CommandParameter FROM CommandGroup_D_Command_CommandParameter C Where FK_CommandGroup_D"."_Command = $commandGroupCommand");
+			$messageSendParameter = array();
 			foreach($parameters as $parameter) {
 				
 				$parameterType = $parameter[0];
@@ -607,11 +622,33 @@
 						DoParameter29($mediaLink, $parameterValue,$commandGroup);
 					}
 				}
-				print "<p>Parameter: $parameterType - $parameterDescription - $parameterValue</p>\n";
+				// Maintain replacement variables
+				if ($parameterValue == "<%=MD%>") {
+					$parameterValue = getCurrentMD();
+					$parameter[1] = $parameterValue;
+				}
+
+				if ($parameterValue != "") {
+					array_push($messageSendParameter, array($parameterType, $parameterValue));
+				} else {
+					array_push($messageSendParameter, array($parameterType,""));
+				}
+				// print "<p>xyCommand: $command - Parameter: $parameterType - $parameterDescription - $parameterValue</p>\n";
 
 			}
-		}
+			// print "<p>messageSendParamter: ";
+			myMessageSend($socket, $possyDeviceFromID, $destinationDevice,1,$command,$messageSendParameter);
+			// print_r ($messageSendParameter);
+		}		
 	}
+	
+function getCurrentMD() {
+	global $link, $currentRoom;
+	print "currentRoom $currentRoom -";
+	$sql = "SELECT PK_Device FROM Device D Where FK_DeviceTemplate = 28 And FK_Room = $currentRoom;";
+	$currentMD = getMyValue($link, $sql);
+	return $currentMD;
+} 
 
 function connectdb() {
 	global $link, $mediaLink, $currentScreen, $currentEntertainArea, $UI, $SKIN;
