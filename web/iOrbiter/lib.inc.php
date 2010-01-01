@@ -516,12 +516,7 @@
 		foreach($commands as $commandDetail) {
 			$messageToSend = "";
 			$destinationDeviceDescription = "";
-			$deviceToID = $commandDetail[2];
-			if( $deviceToID >= 0) {
-				$destinationDeviceDescription = getMyValue($link,"SELECT Description From Device Where PK_Device = $deviceToID");
-			} elseif ($deviceToID = -300) {
-				$destinationDeviceDescription = "Current Orbiter";
-			}
+			$deviceToID = getDestinationDevice($link,$commandDetail[2]);
 			$messageID = $commandDetail[1];
 			
 			$commandDescription = getMyValue($link,"SELECT Description FROM Command Where PK_Command = $messageID");
@@ -575,6 +570,67 @@
 		commEnd($socket);
 		// fclose($socket);
 	}
+	
+function getDestinationDevice($link, $destinationDevice) {
+	if( $destinationDevice >= 0) {
+		$destinationDeviceDescription = getMyValue($link,"SELECT Description From Device Where PK_Device = $destinationDevice");
+	} elseif ($destinationDevice == -100) {
+		$destinationDevice = getDeviceForTemplate($link,1); // DCERouterDevice
+	} elseif ($destinationDevice == -101) {
+		$destinationDevice = getDeviceForTemplate($link,12); // Orbiter Plug-In
+	} elseif ($destinationDevice == -102) {
+		$destinationDevice = getDeviceForTemplate($link,9); // DataGrid Plug-In
+	} elseif ($destinationDevice == -103) {
+		$destinationDevice = getDeviceForTemplate($link,27); // GeneralInfoPlugin
+	} elseif ($destinationDevice == -104) {
+		$destinationDevice = getDeviceForTemplate($link,32); // LightingPlugin
+	} elseif ($destinationDevice == -105) {
+		$destinationDevice = getDeviceForTemplate($link,31); // ClimatePlugin
+	} elseif ($destinationDevice == -106) {
+		$destinationDevice = getDeviceForTemplate($link,2); // MediaPlugin
+	} elseif ($destinationDevice == -107) {
+		$destinationDevice = getDeviceForTemplate($link,34); // TelecomPlugin
+	} elseif ($destinationDevice == -108) {
+		$destinationDevice = getDeviceForTemplate($link,33); // SecurityPlugin
+	} elseif ($destinationDevice == -109) {
+		$destinationDevice = getDeviceForTemplate($link,52); // EventPlugin
+	} elseif ($destinationDevice == -110) {
+		$destinationDevice = getDeviceForTemplate($link,39); // InfraRedPlugin
+	} elseif ($destinationDevice == -111) {
+		$destinationDevice = getDeviceForTemplate($link,1809); // Plug And Play Interface
+	} elseif ($destinationDevice == -150) {
+		$destinationDevice = getDeviceForTemplateInRoom($link,26); // Local App Server
+	} elseif ($destinationDevice == -151) {
+		$destinationDevice = getDeviceForTemplateInRoom($link,28); // Local Media Director
+	} elseif ($destinationDevice == -152) {
+		$destinationDevice = getDeviceForTemplateInRoom($link,5); // Local Media Player
+	} elseif ($destinationDevice == -200) {
+		$destinationDevice = getDeviceForTemplateInRoom($link,28); // Media Director
+	} elseif ($destinationDevice == -300) {
+	// TODO - what is the current Orbiter for the iOrbiter
+	//	$destinationDevice = getCurrentOrbiter();
+	}
+	return $destinationDevice;
+}	
+
+function getDeviceForTemplate($link, $deviceTemplate) {
+	$query = "SELECT PK_Device FROM Device D Where FK_DeviceTemplate = $deviceTemplate";
+	return getMyValue($link,$query);
+}	
+
+function getDeviceForTemplateInRoom($link, $deviceTemplate) {
+	global $currentRoom;
+	$query = "SELECT PK_Device FROM Device D Where FK_DeviceTemplate = $deviceTemplate and FK_Room = $currentRoom";
+	return getMyValue($link,$query);
+}	
+
+	
+function getCurrentMD() {
+	global $link;
+	return getDeviceForTemplateInRoom($link, 28);
+} 
+
+
 
 	function doCommandGroup_D($link,$commandGroup) {
 		// Get all associated commands and their parameters from the supplied commandgroup_D
@@ -591,14 +647,9 @@
 		
 		foreach($commands as $commandDetail) {
 			$destinationDeviceDescription = "";
-			$destinationDevice = $commandDetail[2];
-			if( $destinationDevice >= 0) {
-				$destinationDeviceDescription = getMyValue($link,"SELECT Description From Device Where PK_Device = $destinationDevice");
-			} elseif ($destinationDevice == -103) {
-				$destinationDevice = getGeneralInfoPluginDevice();
-			} elseif ($destinationDevice == -300) {
-				$destinationDeviceDescription = "Current Orbiter";
-			}	
+			
+			$destinationDevice = getDestinationDevice($link,$commandDetail[2]);
+			
 			$command = $commandDetail[1];
 			
 			$commandDescription = getMyValue($link,"SELECT Description FROM Command Where PK_Command = $command");
@@ -647,20 +698,6 @@
 		}		
 	}
 	
-function getGeneralInfoPluginDevice() {
-	global $link;
-	$sql = "SELECT PK_Device FROM Device D Where FK_DeviceTemplate = 27;";
-	$GeneralInfoPluginDevice = getMyValue($link,$sql);
-	return $GeneralInfoPluginDevice;
-}
-	
-function getCurrentMD() {
-	global $link, $currentRoom;
-	print "currentRoom $currentRoom -";
-	$sql = "SELECT PK_Device FROM Device D Where FK_DeviceTemplate = 28 And FK_Room = $currentRoom;";
-	$currentMD = getMyValue($link, $sql);
-	return $currentMD;
-} 
 
 function connectdb() {
 	global $link, $mediaLink, $currentScreen, $currentEntertainArea, $UI, $SKIN;
