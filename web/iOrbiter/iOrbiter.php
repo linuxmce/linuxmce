@@ -77,7 +77,8 @@
 		<li><a href="#linuxmce-links">LinuxMCE Links</a></li>
 	</ul>
 	<ul id="linuxmce-links" title="Links">
-		<li><a href="http://dcerouter/" target="_self">Web Admin</a></li>
+		<li><a href="/" target="_self">Web Admin</a></li>
+		<li><a href="/lmce-admin/weborbiter" target="_self">Weborbiter</a></li>
 		<li><a href="http://www.linuxmce.org/" target="_self">Website</a></li>
 		<li><a href="http://forum.linuxmce.org/" target="_self">Forum</a></li>
 		<li><a href="http://wiki.linuxmce.org/" target="_self">Wiki</a></li>
