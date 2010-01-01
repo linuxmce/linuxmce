@@ -192,7 +192,6 @@ function installationSettings($output,$dbADO) {
 		<script>
 		 	var frmvalidator = new formValidator("installationSettings");
  			frmvalidator.addValidation("Description","req","'.$TEXT_INSTALLATION_DESCRIPTION_REQUIRED_CONST.'");
-			frmvalidator.addValidation("Zip","numeric","'.$TEXT_NUMERIC_ONLY_CONST.'");			
 		</script>
 		';
 	} else {
