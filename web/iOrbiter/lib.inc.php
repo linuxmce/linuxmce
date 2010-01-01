@@ -11,6 +11,7 @@
 	global $possyDeviceFromID;
 	global $limit;
 	$possyDeviceFromID = 1;
+//	$possyDeviceFromID = 45; // Proxy Orbiter
 //	$limit = " Limit 0,200";
 	$limit = "";
 
@@ -586,13 +587,16 @@
 		$socket = commStart("dcerouter",3450,$possyDeviceFromID);
 		
 		$commands = getMyArray($link,$query);
-
+		$commandDetail = array();
+		
 		foreach($commands as $commandDetail) {
 			$destinationDeviceDescription = "";
 			$destinationDevice = $commandDetail[2];
 			if( $destinationDevice >= 0) {
 				$destinationDeviceDescription = getMyValue($link,"SELECT Description From Device Where PK_Device = $destinationDevice");
-			} elseif ($destinationDevice = -300) {
+			} elseif ($destinationDevice == -103) {
+				$destinationDevice = getGeneralInfoPluginDevice();
+			} elseif ($destinationDevice == -300) {
 				$destinationDeviceDescription = "Current Orbiter";
 			}	
 			$command = $commandDetail[1];
@@ -631,16 +635,24 @@
 				if ($parameterValue != "") {
 					array_push($messageSendParameter, array($parameterType, $parameterValue));
 				} else {
-					array_push($messageSendParameter, array($parameterType,""));
+//					array_push($messageSendParameter, array($parameterType,"0"));
 				}
 				// print "<p>xyCommand: $command - Parameter: $parameterType - $parameterDescription - $parameterValue</p>\n";
 
 			}
 			// print "<p>messageSendParamter: ";
+			// print "<p>xDestinationDevice: $destinationDevice - $query </p>";
 			myMessageSend($socket, $possyDeviceFromID, $destinationDevice,1,$command,$messageSendParameter);
 			// print_r ($messageSendParameter);
 		}		
 	}
+	
+function getGeneralInfoPluginDevice() {
+	global $link;
+	$sql = "SELECT PK_Device FROM Device D Where FK_DeviceTemplate = 27;";
+	$GeneralInfoPluginDevice = getMyValue($link,$sql);
+	return $GeneralInfoPluginDevice;
+}
 	
 function getCurrentMD() {
 	global $link, $currentRoom;
