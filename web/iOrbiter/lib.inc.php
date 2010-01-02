@@ -630,6 +630,13 @@ function getCurrentMD() {
 	return getDeviceForTemplateInRoom($link, 28);
 } 
 
+function getCurrentEA() {
+	global $link, $currentRoom;
+	
+	$query = "SELECT PK_EntertainArea From EntertainArea WHERE FK_Room = $currentRoom";
+	return getMyValue($link,$query);
+} 
+
 
 
 	function doCommandGroup_D($link,$commandGroup) {
@@ -680,6 +687,9 @@ function getCurrentMD() {
 				// Maintain replacement variables
 				if ($parameterValue == "<%=MD%>") {
 					$parameterValue = getCurrentMD();
+					$parameter[1] = $parameterValue;
+				} else if ($parameterValue == "<%=E%>") {
+					$parameterValue = getCurrentEA();
 					$parameter[1] = $parameterValue;
 				}
 
