@@ -172,7 +172,8 @@
 				// Media Scenarios are not room based, but EntertainmentArea based
 				$query = "SELECT PK_CommandGroup, Description FROM CommandGroup ";
 				$query .= "JOIN CommandGroup_EntertainArea ON CommandGroup_EntertainArea.FK_CommandGroup = PK_CommandGroup ";
-				$query .= "WHERE FK_Array = $PK_Array AND CommandGroup_EntertainArea.FK_EntertainArea = $currentEntertainArea";
+				$query .= "WHERE FK_Array = $PK_Array AND CommandGroup_EntertainArea.FK_EntertainArea = $currentEntertainArea ";
+				$query .= "ORDER BY Sort";
 			} elseif ($PK_Array == 13) {
 				// List of users that are not hidden from the Orbiter
 				$target = " target='_self'";
