@@ -157,10 +157,16 @@ function Build_Replacements_Intrepid
 	fi
 
         #Package: libxine 	
-	Build_Replacement_Package libxine ubuntu/xine-lib-1.1.16.3-0ubuntu2~xine 
+#	Build_Replacement_Package libxine ubuntu/xine-lib-1.1.16.3-0ubuntu2~xine 
+	Build_Replacement_Package libxine ubuntu/xine-lib-1.1.16.3-lmce0
 
         #Package: alsa dianemo packages
-	Build_Replacement_Package libasound2 ubuntu/alsa-lib-1.0.18
+
+        wget http://ftp.sjtu.edu.cn/ubuntu/pool/main/libt/libtool/libtool_1.5.26-1ubuntu1_i386.deb
+        dpkg -i libtool_1.5.26-1ubuntu1_i386.deb
+        Build_Replacement_Package libasound2 ubuntu/alsa-lib-1.0.18
+        # and now we go back to the latest libtool
+        apt-get install libtool
 	if ! dpkg -l libasound2-dev &>/dev/null; then
 		dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/libasound2_*deb
 		dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/lib32asound2_*deb
