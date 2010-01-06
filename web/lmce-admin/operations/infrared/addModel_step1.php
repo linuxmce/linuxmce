@@ -17,7 +17,7 @@
 		$out='
 		<h3 align="center">'.$TEXT_ADD_MODEL_CONST.'</h3><br>
 		<B>'.$TEXT_QUESTION_1_TITLE_CONST.'</B><br>
-		<p class="normaltext">'.$TEXT_Q1_INFO_CONST.' <a href="http://plutohome.com/wiki/index.php/Tell_Pluto_about_your_home">('.strtolower($TEXT_DETAILS_CONST).')</a> 
+ 		<p class="normaltext">'.$TEXT_Q1_INFO_CONST.' <a href="http://wiki.linuxmce.org/index.php/Tell_LinuxMCE_about_your_home">('.strtolower($TEXT_DETAILS_CONST).')</a> 
 		 '.$TEXT_Q1_NOTE_CONST.'
 		
 		<form action="index.php" method="POST" name="addModel">

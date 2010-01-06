@@ -40,7 +40,7 @@
   	
   	include_once($GLOBALS['globalConfigPath'].'globalconfig.inc.php');
   	
-	$GLOBALS['sendErrorsTo']='support@plutohome.com';
+  	$GLOBALS['sendErrorsTo']='INSERT_VALID_EMAIL_HERE';
 	
 	$directory="/lmce-admin/";
 	$domain="http://localhost";

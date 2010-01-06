@@ -233,7 +233,8 @@ function irCodes($output,$dbADO,$mediaADO) {
 			<input type="hidden" name="displayedIRGC" value="'.join(',',$GLOBALS['displayedIRGC']).'">
 		</form>
 		<iframe name="codeTester" src="" style="display:none;"></iframe>
-	<span class="normaltext"><a href="mailto:support@plutohome.com?subject=IR Group '.$infraredGroupID.' x Device Template '.$dtID.' x UserID '.$userID.'">'.$TEXT_IR_CONTACT_US_CONST.'</a>.</span><br><br>		
+	<!-- <span class="normaltext"><a href="mailto:support@plutohome.com?subject=IR Group '.$infraredGroupID.' x Device Template '.$dtID.' x UserID '.$userID.'">'.$TEXT_IR_CONTACT_US_CONST.'</a>.</span> -->
+	<br><br>		
 	';	
 
 	} else {
