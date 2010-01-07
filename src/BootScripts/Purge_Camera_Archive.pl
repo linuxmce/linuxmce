@@ -8,7 +8,7 @@ $db = DBI->connect(&read_pluto_cred()) or die "Couldn't connect to database: $DB
 $devices = "";
 $datas = "";
 
-$sql = "SELECT PK_DeviceCategory FROM DeviceCategory WHERE Description='Surveillance Cameras'";
+$sql = "SELECT PK_DeviceCategory FROM DeviceCategory WHERE Description='Surveillance Cameras' OR Description='IP Cameras'";
 $st = $db->prepare($sql) or die "Error in code";
 $st->execute() or die "Error on execute";
 while($local_row = $st->fetchrow_hashref()) {
@@ -74,15 +74,14 @@ foreach $line (@de) {
 }
 print "Purging $count camera devices....\n";
 
-($lsec,$lmin,$lhour,$lmday,$lmon,$lyear,$lwday,$lyday,$lisdst) = localtime(time);
+($curSec,$curMin,$curHour,$curDayOfMonth,$curMonth,$curYear,$curDayOfWeek,$curDayOfYear,$curIsDst) = localtime(time);
 
 #the month is 0-11, lets make it 1-12 to match the directory structure
-$lmon = $lmon + 1;
-print "DEBUG: lyear = $lyear\n";
-$lyear = $lyear - 100;
-print "DEBUG: after -100, lyear = $lyear\n";
+$curMonth = $curMonth + 1;
 
-$lyear = 2000 + $lyear;
+$curYear = $curYear - 100;
+
+$curYear = 2000 + $curYear;
 
 
 $count = 0;
@@ -92,32 +91,33 @@ foreach $dev (@de) {
 	# convert purge period days to number of seconds (60*60*24=86400 seconds per day)
 	$time = time - $da[$count]*86400;
 	# make expiry time varibles from time differential
-	($osec,$omin,$ohour,$omday,$omon,$oyear,$owday,$oyday,$oisdst) = localtime($time);
-	$oyear = $oyear - 100;
-       	$oyear = 2000 + $oyear;
+	($ExpSec,$ExpMin,$ExpHour,$ExpDayOfMonth,$ExpMonth,$ExpYear,$ExpDayOfWeek,$ExpDayOfYear,$ExpIsDst) = localtime($time);
+	$ExpYear = $ExpYear - 100;
+       	$ExpYear = 2000 + $ExpYear;
 	# convert 0-11 months to 1-12
-	$omon = $omon + 1;
+	$ExpMonth = $ExpMonth + 1;
 
 	$path1 = "/home/cameras/".$dev;
 	opendir(ROOTDIR, $path1);
 	@years = grep {!/^\./} readdir(ROOTDIR);
 
 	foreach $year (@years) {
-		if($year >= $lyear && $year <= $oyear) {
+		# Skip the special lastsnap.jpg file
+		next if($year=="lastsnap.jpg");
+
+		if($year >= $curYear && $year <= $ExpYear) {
 			$path2 = $path1."/".$year;
 			opendir(YEARDIR, $path2);
 			@months = grep {!/^\./} readdir(YEARDIR);
 			foreach $month (@months) {
 				$path3 = $path2."/".$month;
-				if($month >= $lmon && $month <= $omon) {
+				if($month >= $curMonth && $month <= $ExpMonth) {
 					opendir(MONTHDIR, $path3);
 					@days = grep {!/^\./} readdir(MONTHDIR);
 					foreach $day (@days) {
 						$path4 = $path3."/".$day;
 						
-						if($day <= $omday || $day > $lday) {
-
-						
+						if($day <= $ExpDayOfMonth || $day > $curDayOfMonth) {
 							print "Found expired day! Removing $path4\n";
 							system("rm -rf $path4");
 						}
