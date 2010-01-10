@@ -65,7 +65,6 @@ public:
 
 	/*
 			*****DATA***** accessors inherited from base class
-	bool DATA_Get_Only_One_Per_PC();
 
 			*****EVENT***** accessors inherited from base class
 
