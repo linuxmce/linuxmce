@@ -3371,6 +3371,36 @@ bool ScreenHandler::PendingTasks_ObjectSelected(CallBackData *pData)
 
 void ScreenHandler::SCREEN_AutoConfigure_TV(long PK_Screen, int iPK_PnpQueue)
 {
+	// Temporarily remove the message from displaying on the orbiters so we can go directly to the providers screen!
+	DeviceData_Base *pMythTV_Plugin = m_pOrbiter->m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate( DEVICETEMPLATE_MythTV_PlugIn_CONST );
+
+	string sUseAutomatically;
+	string sDontAutoConfigure;
+
+	int iPk_MythTV_Plugin = pMythTV_Plugin ? pMythTV_Plugin->m_dwPK_Device : 0;
+
+	DCE::CMD_Get_Device_Data CMD_Get_Device_Data(
+		0,
+		DEVICETEMPLATE_VirtDev_General_Info_Plugin_CONST,
+		iPk_MythTV_Plugin,
+		DEVICEDATA_Dont_Auto_Configure_CONST,
+		true,
+		&sDontAutoConfigure
+		);
+	m_pOrbiter->SendCommand(CMD_Get_Device_Data);
+
+	if (sDontAutoConfigure=="0") {
+		sUseAutomatically="1";
+	} else {
+		sUseAutomatically="0";
+	}
+
+	DCE::CMD_Set_Pnp_Options CMD_Set_Pnp_Options(m_pOrbiter->m_dwPK_Device, m_pOrbiter->m_dwPK_Device_PlugAndPlayPlugIn, sUseAutomatically, DEVICEDATA_Use_Automatically_CONST, iPK_PnpQueue);
+	m_pOrbiter->SendCommand(CMD_Set_Pnp_Options);
+	return;
+
+	/* OLD CODE WHICH DISPLAYED THE CONFUSING METHOD
+	DeviceData_Base *pDevice = m_pOrbiter->m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate( DEVICETEMPLATE_MythTV_PlugIn_CONST );
 	string sSetPnpOptions = 
 		StringUtils::itos(m_pOrbiter->m_dwPK_Device) + " " + StringUtils::itos(m_pOrbiter->m_dwPK_Device_PlugAndPlayPlugIn) + " 1 " 
 		TOSTRING(COMMAND_Set_Pnp_Options_CONST)  " " 
@@ -3378,17 +3408,17 @@ void ScreenHandler::SCREEN_AutoConfigure_TV(long PK_Screen, int iPK_PnpQueue)
 		TOSTRING(COMMANDPARAMETER_PK_DeviceData_CONST) " " TOSTRING(DEVICEDATA_Use_Automatically_CONST) " "
 		TOSTRING(COMMANDPARAMETER_Value_To_Assign_CONST) " ";
 
-	DeviceData_Base *pDevice = m_pOrbiter->m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate( DEVICETEMPLATE_MythTV_PlugIn_CONST );
-
 	string sManualConfig = StringUtils::itos(m_pOrbiter->m_dwPK_Device) + " " + StringUtils::itos(m_pOrbiter->m_dwPK_Device_GeneralInfoPlugIn) + " 1 " 
 		TOSTRING(COMMAND_Set_Device_Data_CONST) " " TOSTRING(COMMANDPARAMETER_PK_Device_CONST) " " + StringUtils::itos(pDevice ? pDevice->m_dwPK_Device : 0) + " "
 		TOSTRING(COMMANDPARAMETER_PK_DeviceData_CONST) " " TOSTRING(DEVICEDATA_Dont_Auto_Configure_CONST) " "
 		TOSTRING(COMMANDPARAMETER_Value_To_Assign_CONST) " ";
 
 	string sMessage = m_pOrbiter->m_bNewOrbiter ? m_pOrbiter->m_mapTextString[TEXT_Confirm_PNP_TV_Tuner_1stRegen_CONST] : m_pOrbiter->m_mapTextString[TEXT_Confirm_PNP_TV_Tuner_CONST];
+
 	DisplayMessageOnOrbiter(PK_Screen, sMessage, false, "", false,
 		m_pOrbiter->m_mapTextString[TEXT_YES_CONST],sSetPnpOptions + "1 & " + sManualConfig + "0",
 		m_pOrbiter->m_mapTextString[TEXT_NO_CONST],sSetPnpOptions + "0 & " + sManualConfig + "1");
+	*/
 }
 
 void ScreenHandler::SCREEN_Remote_Assistance(long PK_Screen)
