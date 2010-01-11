@@ -1,0 +1,682 @@
+Mauro Carvalho Chehab <mchehab at infradead dot org>
+					Updated on 2009 February 9
+
+This file describes the general procedures used by the LinuxTV team (*)
+and by the v4l-dvb community.
+
+(*) This is just an aka for the main developers involved in V4L/DVB
+drivers. They are a volunteer and unremunerated group of people that
+have the common interest of providing a good support on Linux for
+receiving and capturing video streams from webcams, analog TV, digital
+TV and radio broadcast AM/FM.
+
+   CONTENTS
+   ========
+
+	1. A brief introduction about patch management
+	2. Git trees' relationships with v4l/dvb development
+	3. Mercurial trees used for v4l/dvb development
+	4. Community best practices
+	5. Knowing about newer patches committed at master hg repository
+	6. Patch handling for kernel submission
+	7. Patch submission from the community
+	8. Identifying regressions with Mercurial
+	9. Creating a newer driver
+
+1. A brief introduction about patch management
+   ==========================================
+
+Current V4L/DVB development is based on a modern SCM system that
+fits better into kernel development model, called Mercurial (aka hg).
+
+Kernel development model is based on a similar SCM, called git. While
+very powerful for distributed development, git usage is not simple for
+final users. That's the reason why hg was selected for V4L/DVB
+development.
+
+There are some tutorials, FAQs and other valuable information at
+http://selenic.com/mercurial/ about hg usage.
+
+Mercurial is a distributed SCM, which means every developer gets his
+own full copy of the repository (including the complete revision
+history), and can work and commit locally without network connection.
+The resulting changesets can then be exchanged between repositories and
+finally merged into a common repository on linuxtv.org.
+
+A list of current available repositories is available at:
+	http://linuxtv.org/hg/
+
+2. Git and Mercurial trees' relationships with v4l/dvb development
+   ===============================================================
+
+The main kernel trees are hosted at http://git.kernel.org. Each tree
+is owned by a maintainer.
+
+The main kernel trees is owned by Linus Torvalds, being located at:
+	http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git
+
+The subsystem master tree is owned by the subsystem maintainer (Mauro
+Carvalho Chehab) being located at:
+	http://git.kernel.org/?p=linux/kernel/git/mchehab/linux-2.6.git
+
+A tree with development patches that aren't ready yet for upstream is
+handled at:
+	http://git.kernel.org/?p=linux/kernel/git/mchehab/devel.git
+
+There is also an experimental tree, that contains all experimental patches
+from subsystem trees, called linux-next. Its purpose is to check in
+advance if patches from different trees would conflict. The main tree for
+linux-next is owned by Stephen Rothwell and it is located at:
+	http://git.kernel.org/?p=linux/kernel/git/sfr/linux-next.git
+
+Warning: linux-next is meant to be used by developers. As it may contain broken
++++++++  patches on several subsystems, it may cause damage if used on
+	 production systems.
+
+The subsystem linux-next tree is also owned by Mauro Carvalho Chehab, and it is
+located at:
+	http://www.kernel.org/git/?p=linux/kernel/git/mchehab/linux-next.git
+
+Before committing into the master -git tree, the finished patches from
+each maintainers tree are added on a staging tree, owned by the
+subsystem maintainer, at:
+	http://linuxtv.org/hg/v4l-dvb/
+
+The main function of this tree is to merge patches from other
+repositories and to test the entire subsystem with the finished patches.
+This is also the recommended tree for users interested on testing newer V4L/DVB
+patches and drivers.
+
+Users are welcome to use, test and report any issues via the mailing
+lists or via the Kernel Bug Tracker, available at:
+	http://bugzilla.kernel.org
+
+Michael Krufky maintains a backport tree, containing a subset of the
+patches from the subsystem tree that are meant to be sent to kernel
+-stable team, at:
+	http://git.kernel.org/http://git.kernel.org/?p=linux/kernel/git/mkrufky/v4l-dvb-2.6.x.y.git
+
+3. Other Mercurial trees used for v4l/dvb development
+   ==================================================
+
+V4L/DVB driver development is hosted at http://linuxtv.org. There are a
+number of trees there each owned by a developer of the LinuxTV team.
+
+When a developer believes that he has patches done to be merged, he
+sends a request the developers' mailing list and to the subsystem
+maintainer. The patches are analyzed and, if they look ok, merged into
+the master repository.
+
+A script called hg-pull-req.pl is included that will generate this
+request, providing a list of patches that will be pulled, links to each
+patch, and a diffstat of the all patches.  It will work best if Hg has
+been configured with the correct username (also used by the commit
+message generator) and push path.  The script is designed to be easy to
+modify to produce text for a given contributor's style.
+
+It is good practice that each developer will have at least one tree
+called 'v4l-dvb', which keeps their patches, and periodically update
+this tree with the master tree's patches.
+
+4. Community best practices
+   ========================
+
+From accumulated experience, there are some basic rules that should
+be followed by the community:
+
+a) Every developer should follow the "rules of thumb" of kernel development
+   stated at Linux source code, especially those stated at kernel,
+   under:
+	Documentation/HOWTO
+	Documentation/SubmittingPatches
+	Documentation/SubmittingDrivers
+	Documentation/SubmitChecklist
+	Documentation/CodingStyle
+
+b) All commits at Mercurial trees should have a consistent message,
+   describing the patch. This is done by using:
+
+	make commit
+
+   This will run some scripts that check changed files, correct
+   bad whitespace and prepare the last Signed-off-by: field, as
+   described below. A good comment will have a brief
+   description at the first line, up to 68 characters wide, a blank
+   line, the patch author's name on the third line, a blank line, and
+   then a brief description, with no more than 80 chars per line, e. g.:
+
+	   This patch does nothing
+
+	   From: nowhere <nowhere@noplace.org>
+
+	   This is just a sample commit comment, just for reference purposes.
+
+	   This "patch" does nothing.
+
+	   Priority: normal
+
+	   Signed-off-by: nowhere <nowhere@noplace.org>
+
+   All lines starting with # and all lines starting with HG: will be
+   removed from the Mercurial commit log.
+
+   *WARNING* Be careful not to leave the first line blank, otherwise hg
+   will leave subject blank.
+
+   From: line shouldn't be omitted, since it will be used for the
+   patch author when converting to -git.
+
+   Priority: meta-tag will be used as a hint to the subsystem maintainer, to help him to
+   identify if the patch is an improvement or board addition ("normal"), that will follow
+   the normal lifecycle of a patch (e.g. will be sent upstream on the next merge tree), if
+   the patch is a bug fix tree for a while without merging upstream ("low").
+
+   Valid values for "Priority:" are "low", "normal" and "high".
+
+c) All patches are requested to have their coding style validated by using
+   script/checkpatch.pl. This check runs automatically by using "make commit". By default,
+   it will try to use the newest version of the script, between the kernel one and a copy
+   at v4l-dvb development tree.
+
+   It is always a good idea to use in-kernel version, since additional tests
+   are performed (like checking for the usage of deprecated API's that are
+   about to be removed).
+
+   It is possible to override the in-kernel checkpatch.pl location, by using
+   the CHECKPATCH shell environment var to something like:
+	CHECKPATCH="/usr/src/linux/scripts/checkpatch.pl"
+
+d) For "make commit" to work properly, the HGUSER shell environment var
+   should be defined (replacing the names at the left):
+
+	HGUSER="My Name <myemail@mysite.com>"
+
+   If HGUSER is not set, then, if present, the username defined in the
+   user's ~/.hgrc file will be used.  Use of the .hgrc file is preferred
+   over the HGUSER variable according to the hg man page.
+
+   This name will be used for both the user metadata in the Hg commit
+   log and the initial values of the "From:" and "Signed-off-by:" lines
+   in the pre-made commit message.
+
+   It is also possible to use a different login name at the site
+   hosting the repository, by using:
+
+	CHANGE_LOG_LOGIN=my_log_name
+
+   With this, "make push" will use my_log_name, instead of the name for
+   the current Unix user.
+
+   Don't forget to export the vars at shell, with something like:
+
+	export CHANGE_LOG_LOGIN HGUSER
+
+   It is strongly recommended to have those lines in .bashrc or .profile.
+
+e) All patches shall have a Developer's Certificate of Origin
+   version 1.1 in the commit log or the email description, signed by the
+   patch authors, as postulated in the Linux kernel source at:
+
+	Documentation/SubmittingPatches
+
+   This is done by adding Signed-off-by: fields to the commit message.
+
+   It is not acceptable to use fake signatures, e.g.:
+
+	Signed-off-by: Fake me <me@snakeoilcompany.com>
+
+   The email must be a valid one.
+   The author that is submitting the email should be at the button of
+   the author's signed-off-by (SOB) block. Other SOBs or Acked-by: will be
+   added at the bottom, marking that somebody else reviewed the patch.
+
+   Each person who is in the kernel patch submission chain (driver author
+   and/or driver maintainer, subsystem/core maintainers, etc) will
+   review each patch. If they agree, the patch will be added to their
+   trees and signed. Otherwise, they may comment on the patch, asking
+   for some review.
+
+f) Although not documented at kernel's Documentation/, a common kernel
+   practice is to use Acked-by: tag.
+
+   An Acked-by: tag usually means that the acked person didn't write the
+   patch, nor is in the chain responsible for sending the patch to
+   kernel, but tested or reviewed the patch and agreed that it was good.
+
+   A patch acked-by can be added at hg trees, if received by each tree
+   maintainer. It is also common to receive acks after having a patch
+   inserted at master repository. In this case, the ack will be added
+   only at -git tree.
+
+g) Another kernel's practice that is agreed to be good is that a
+   patchset should be reviewed/tested by other developers. So, a new
+   tag should be used by testers/reviewers. So, reviewers are welcome.
+   After reviewing a patchset, please send an e-mail indicating that, if
+   possible, with some additional data about the testing, with the tag:
+	Reviewed-by: My Name <myemail@mysite.com>
+   This is particularly important for Kernel to userspace ABI changes.
+
+h) If the patch also affects other parts of kernel (like ALSA
+   or i2c), it is required that, when submitting upstream, the patch
+   also goes to the maintainers of that subsystem. To do this, the
+   developer shall copy the interested parties.
+
+   At Mercurial tree, this can be handled automatically by the LinuxTV
+   scripts, by using the cc: meta tag, together with the Signed-off-by
+   lines. Something like:
+
+	CC: someotherkerneldeveloper@someplace
+	Signed-off-by: nowhere <nowhere@noplace.org>
+
+   This way, when a patch arrives Mercurial hg tree, a mailbomb script
+   will copy the proper interested parties.
+
+   When submitting a patch via e-mail, it is better to copy all interested
+   parties directly, by adding them as cc's to the email itself.
+
+   Please note that those changes generally require ack from the
+   other subsystem maintainers. So, the best practice is to first ask
+   for their acks, then commit to the development tree or send the
+   patch via email with their Acked-by: already included.
+
+i) If the patch modifies the include/linux/videodev2.h file, then you
+   must also run 'make spec' to verify that the V4L2 specification
+   document still builds. Of course, any changes you make to the public
+   V4L2 API must be documented anyway.
+
+j) Sometimes, mainstream changes affect the v4l-dvb tree, and must be
+   backported to the v4l-dvb tree. This kind of commit to the Mercurial
+   tree should follow the rules above and should also have the line:
+
+	kernel-sync:
+
+   Patches with this line will not be submitted upstream.
+
+k) Sometimes it is necessary to introduce some testing code inside a
+   module or remove parts that are not yet finished. Also, compatibility
+   tests may be required to provide backporting.
+
+   To allow compatibility tests, linux/version.h is automatically
+   included by the building system. This allows adding tests like:
+
+	#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 16)
+	#include <linux/mutex.h>
+	#else
+	#include <asm/semaphore.h>
+	#endif
+
+   It should be noticed, however, that an explicit inclusion of
+   linux/version.h is required if it is needed to use KERNEL_VERSION()
+   macro (this is required, for example, by V4L2 VIDIOC_QUERYCAP
+   ioctl), otherwise, the driver won't compile when submitted to kernel.
+
+   There are several compatibility procedures already defined
+   in "compat.h" file. If needed, it is better to include it after all
+   other kernel standard headers, and before any specific header
+   for that file. Something like:
+
+	#include <linux/kernel.h>
+	#include <linux/module.h>
+		...
+	#include <linux/videodev2.h>
+	#include <media/v4l2-common.h>
+
+	#include "compat.h"
+
+	#include "mydriver-header.h"
+
+   should be included at the files under v4l-dvb tree. This header also
+   includes linux/version.h.
+
+   To include testing code, #if 0 or #if 1 may be used. If this code
+   is meant to go also to kernel, a comment with the word "keep" should
+   be used, e.g:
+
+    #if 0 /* keep */
+	or
+    #if 1 /* keep */
+
+   The kernel submit scripts will remove the compatibility codes, the
+   tests for specific kernel versions and the #if 0/1 that doesn't have
+   the "keep meta tag".
+
+   See the file v4l/scripts/gentree.pl for a more complete description
+   of what kind of code will be kept and what kind will be removed.
+
+l) To import contributed stuff to a developer's, a script is provided.
+   This allows an easy import of mbox-based patch emails.
+   This is done with (called from the root tree directory):
+
+	./mailimport <mbox file>
+
+    For it to work properly, git tools need to be installed on the local
+    machine, since git has a gitimport script that is used by mailimport.
+
+    There's also a helper script to make easier to retrieve patches from
+    other Mercurial repositories. The syntax is:
+	./hgimport <URL>
+
+    Also, hg has a feature, called mqueue, that allows having several patches
+    that can be applied/unapplied for testing. mailimport trusts on it to work,
+    so, this extension should be enabled for mailimport script to work.
+
+m) By submitting a patch to the subsystem maintainer, either via email
+   or via pull request, the patch author(s) are agreeing that the
+   submitted code will be added on Kernel, and that the submitted code
+   are being released as GPLv2. The author may grant additional licenses
+   to the submitted code (for example, using dual GPL/BSD) or GPLv2 or
+   later. If no specific clause are added, the added code will be
+   assumed as GPLv2 only.
+
+n) "Commit earlier and commit often". This is a common used rule at
+   Kernel. This means that a sooner submission of a patch will mean that
+   a review can happen sooner, and help the develop to address the
+   comments. This helps to reduce the life-cycle for having a changeset
+   committed at kernel at the proper time. It also means that the one
+   changeset should ideally address just one issue. So, mixing different
+   things at the same patch should be avoided.
+
+o) Sometimes, the maintainer may need to slightly modify patches you receive
+   in order to merge them, because the code is not exactly the same in your
+   tree and the submitters'. In order to save time, it may do the changes and
+   add a line before his SOB, as stated on Documentation/SubmittingPatches,
+   describing what he did to merge it. Something like:
+
+	Signed-off-by: Random J Developer <random@developer.example.org>
+	[lucky@maintainer.example.org: struct foo moved from foo.c to foo.h]
+	Signed-off-by: Lucky K Maintainer <lucky@maintainer.example.org>
+
+5. Knowing about newer patches committed at master hg repository
+   =============================================================
+
+There's a patchbomb script at linuxtv.org that will send one copy of
+each patch applied to -hg tree to:
+
+1) The subscribers of the linuxtv-commits mailing list, hosted on
+   linuxtv.org;
+
+2) The patch author (as stated on the From: field in the patch comments);
+
+3) The patch committer (the "user" at hg metadata);
+
+4) All people with Signed-off-by:, Acked-by:, or CC: metadata clause
+   in the patch's comment.
+
+If, for some reason, there's no "From:" metatag (or it is on the first
+line, instead of the second one), sometimes the script may fail, maybe
+filling patch authorship wrongly. So people should take care to properly
+commit patches with "From:".
+
+6. Patch handling for kernel submission
+   ====================================
+
+The subsystem maintainer, when preparing the kernel patches to be sent
+to mainstream (or to -mm series), uses some scripts and a manual
+procedure, based on a quilt-like procedure, where a patch series file is
+generated, and patches can be handled one by one. This means that -git
+patches can be properly fixed, when required, if not already sent to
+mainstream, to fulfill the best practices and resolve conflicts with
+other patches directly merged in mainstream.
+
+There's a delay between updating a patch at master and sending it to
+mainstream. During this period, it is possible to review a patch. The
+common situations are:
+
+1) If a patch at master tree receives a late Acked-by: or a
+Reviewed-by:, this can be added at -git tree;
+
+2) If somebody fully nacks a patch applied at -hg, A reverse patch
+can be applied at -hg, and the original patch can be removed -git;
+
+3) If somebody partially nacks a patch or sends a reviewing patch,
+the -git patch may be a result of the merger of the two patches.
+
+By merging both patches at -git will allow avoiding storing unnecessary
+patch history details at -git and at Mainstream.
+
+Those changes will require some manual sync between -git and -hg, it is
+better to avoid those circumstances.
+
+During the procedure of generating kernel patches, the maintainer uses
+to do a diff between the kernel tree and v4l-dvb Mercurial tree
+(without any backport code there). If there are discrepancies, a
+backport patch from mainstream to v4l-dvb is generally applied by the
+maintainer.
+
+8. Commit windows
+   ==============
+
+Kernel development occurs on some cycles, according with the following
+picture:
+
+------------   2 week    ------------     ---------------     ---------
+| 2.6.(x-1) | ---------> | 2.6.x-rc1 | .. | 2.6.x-rc[n] | --> | 2.6.x |
+------------             ------------     ---------------     ---------
+	      Submission
+		Window
+
+Once a kernel release is done (for example, 2.6.(x-1) version), a
+submission window for the newer features and board additions to the next
+kernel release should start. This means that the subsystem maintainer
+will use this window to submit the work that were done during 2.6.(x-2)
+time.
+
+For this to happen, patches for 2.6.x should be already at the subsystem
+maintainers -hg tree before the release of 2.6.(x-1), to allow proper
+testing.
+
+After the submission window, only patches with bug fixes should be sent
+to mainstream. This means that the subsystem maintainer will separate
+those patches from the submitted ones for kernel submission during -rc
+cycle. Generally, the stabilization process (rc kernels) takes from 5
+to 7 weeks.
+
+To make life easier for the subsystem maintainer, please add:
+[FIX] at the subject of the submitted emails or at the commit first
+lines.
+
+7. Patch submission from the community
+   ===================================
+
+Patch submission is open to all the Free Software community. The general
+procedure to have a patch accepted in the v4l/dvb subsystem and in the
+kernel is the following:
+
+a. Post your patches to the corresponding mailing list for review and
+   test by other people, at:
+	linux-media@vger.kernel.org
+
+	This mailing list doesn't require subscription, although
+	it is recommended to subscribe, expecially if you're
+	developing V4L/DVB drivers.
+
+b. Use [PATCH] and a brief description in the email's subject.
+   This will help the LinuxTV team to better handle it.
+
+c. Please include a brief description in the headers of your
+   patch, like described above. Something like:
+
+	   This is just a sample commit comment, just for reference purposes.
+	   This does nothing.
+
+	   Signed-off-by: nowhere <nowere@noplace.org>
+
+d. Every patch shall have a Developer's Certificate of Origin and should
+   be submitted by one of its authors. All the patch authors should sign
+   it.
+
+e. People will eventually comment about the patch. In this case,
+   please fix problems and repeat until everyone is happy ;)
+
+f. If the patch is fixing an existing maintained driver, the
+   low-level driver maintainer will apply to his tree, and at some later
+   time, ask the subsystem maintainer to pull it. It is a good idea to
+   send the patch to the maintainer C/C the mailing list for him to know
+   that you're expecting him to forward the patch.
+
+g. If it is a newer driver (not yet in one of the development trees),
+   please send the patch to the subsystem maintainer, C/C the proper
+   mailing lists.
+
+8. Identifying regressions with Mercurial
+   ======================================
+
+   The better way for you to identify regressions with Mercurial is to
+   use hg bisect. This is an extension provided with the current
+   Mercurial versions. For it to work, you need to have the proper setup
+   at an hgrc file. To test if bisect is working, you can do:
+	hg bisect help
+
+   If Mercurial answers with
+	hg: unknown command 'bisect'
+
+   You will need to add the following lines to your ~/.hgrc file:
+	[extensions]
+	hgext.hbisect=/usr/lib/python2.5/site-packages/hgext/hbisect.py
+
+	(assuming that hbisect.py is installed under python2.5 default dir)
+
+   The first step is to initialize bisect for a newer regression testing
+   session. This is done with:
+	hg bisect init
+
+   If the bisect were previously initialized, you should, instead do:
+	hg bisect reset
+
+   Supposing that the latest kernel version have some regression, you
+   should do something like:
+	hg update -C
+
+   (This will clean any changes you had on your tree, and will update to
+    the latest patch)
+
+   Then, you will mark the latest version as "bad":
+	hg bisect bad
+
+   The next step is to find one version where the your board is properly
+   working. Supposing that review "4000" is ok, you would do:
+	hg update 4000
+
+   Test if the review is really ok. If so, you should mark it as good:
+	hg bisect good
+
+   If everything is ok, it should print something like:
+
+	Testing changeset 4481:a53c7904e47d (944 changesets remaining, ~9 tests)
+	405 files updated, 0 files merged, 8 files removed, 0 files unresolved
+
+   The above line shows that Mercurial selected another revision for you
+   to test. Redo your tests. If this version is ok, you would do:
+
+	hg bisect good
+
+   otherwise, if the version is broken, you should do:
+
+	hg bisect bad
+
+   This should be repeated until you have an answer like:
+
+	The first bad revision is:
+	changeset:   4593:26d1ce012c5e
+	user:        Someone <Someone@somewhere>
+	date:        Thu Feb 31 17:52:53 2006 -0300
+	summary:     This is the broken patch that we should find
+
+   If, in the middle of the process, you need to know on what revision
+      you are, you can do something like:
+	hg log -r `hg id|cut -d' ' -f 1`
+
+9. Creating a newer driver
+   =======================
+
+   This quick HOWTO explains how to create a new driver using v4l-dvb
+   tree.
+
+   The v4l-dvb tree have a the following basic structure:
+	/
+	|-- Documentation
+	|   |-- dvb		<== DVB drivers documentation
+	|   `-- video4linux	<== V4L drivers documentation
+	|-- drivers
+	|   `-- media
+	|       |-- common	<== Common stuff, like IR
+	|       |-- dvb		<== DVB only drivers
+	|       |-- radio	<== V4L Radio only drivers
+	|       `-- video	<== V4L Analog TV  (plus radio and/or
+	|					    DVB) drivers
+	`-- include
+	    |-- linux		<== V4L userspace API files
+	    |   `-- dvb		<== DVB userspace API files
+	    `-- media		<== V4L internal API files
+
+   9.1 - simple drivers
+   ====================
+
+   For very simple drivers that have only one .c and one .h file, the
+   recommended way is not to create a newer directory, but keep the
+   driver into an existing one.
+
+   Assuming that the will be V4L+DVB, the better place for it to be is under
+   /linux/drivers/media/video. Assuming also that the newer driver
+   will be called as "newdevice", you need to do:
+
+   a) add at /linux/drivers/media/video/Kconfig something like:
+
+config VIDEO_NEWDEVICE
+	tristate "newdevice driver"
+	select VIDEO_V4L2
+	select VIDEO_BUF
+	help
+	  Support for newdevice Device
+
+	  Say Y if you own such a device and want to use it.
+
+   b) add at /linux/drivers/media/video/Makefile something like:
+
+obj-$(CONFIG_VIDEO_NEWDEVICE) += newdevice.o
+EXTRA_CFLAGS = -Idrivers/media/video
+
+   9.2 - bigger drivers
+   ====================
+
+   In this case, a driver will be splitted into several different source
+   codes. Ideally, a source file should have up to 1000 source code
+   lines. After that, you should consider splitting it into smaller files.
+
+   In this case, assuming that the will be V4L+DVB, and that the driver
+   is called "newdevice", all that is needed to add the newer driver is:
+
+   a) create a newer dir with your driver, for example:
+	/linux/drivers/media/video/newdevice
+   b) create /linux/drivers/media/video/newdevice/Kconfig with something
+      like:
+
+config VIDEO_NEWDEVICE
+	tristate "newdevice driver"
+	select VIDEO_V4L2
+	select VIDEO_BUF
+	help
+	  Support for new device Device
+
+	  Say Y if you own such a device and want to use it.
+
+   c) create /linux/drivers/media/video/newdevice/Makefile with
+      something like:
+
+obj-$(CONFIG_VIDEO_NEWDEVICE) += newdevice.o
+EXTRA_CFLAGS = -Idrivers/media/video
+
+   d) Add your driver directory at /linux/drivers/media/Makefile:
+
+obj-$(CONFIG_VIDEO_NEWDEVICE) += newdevice/
+
+   e) Add your driver directory at /linux/drivers/media/Kconfig:
+
+source "drivers/media/video/newdevice/Kconfig"
+
+   After that, you will be able to use v4l-dvb Makefile to compile your
+   driver.  With:
+
+	make help
+
+   you'll see some useful syntax that may help your development.
