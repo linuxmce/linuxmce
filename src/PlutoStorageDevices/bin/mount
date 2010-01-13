@@ -8,7 +8,10 @@ trap "sigusr1" USR1
 
 # Make sure a directory exists, before trying to create file in there.
 mkdir -p /var/log/pluto
-echo >> /var/log/pluto/umount-wrapper.log || { /bin/mount.wraped "$@" && exit 0; }
+if [ ! -w /var/log/pluto ]; then
+	/bin/mount.wraped "$@"
+	exit 0
+fi
 DoLocks=0
 if [ -x /usr/pluto/bin/LockUtils.sh ]; then
 	. /usr/pluto/bin/LockUtils.sh
