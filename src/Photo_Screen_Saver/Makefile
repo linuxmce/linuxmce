@@ -7,8 +7,8 @@ SNR_LDFLAGS ?= <-mkr_t_compile_libs->
 ROOT = ..
 CXX = g++
 CXXFLAGS = -Wall -fPIC -ggdb3
-CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I../STEngine $(SNR_CPPFLAGS)
-LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
+CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I../STEngine -I/usr/include/exiv2 $(SNR_CPPFLAGS)
+LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib -lexiv2
 BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
 MYNAME = Photo_Screen_Saver
