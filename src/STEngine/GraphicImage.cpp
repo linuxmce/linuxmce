@@ -40,6 +40,62 @@ GraphicImage::~GraphicImage()
 	ReleaseTexture();
 }
 
+void GraphicImage::adjustImageZoomAndOrientation(string FileName) {
+	// Check orientation if jpeg
+	Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(FileName);
+	if(image.get() != 0) {
+	        image->readMetadata();
+		Exiv2::ExifData &exifData = image->exifData();
+
+		if(!exifData.empty()) {
+		        Exiv2::ExifData::const_iterator end = exifData.end();
+		        for (Exiv2::ExifData::const_iterator i = exifData.begin(); i != end; ++i) {
+			        if (i->tag() == 274) {
+				        int orientation = i->value().toLong();
+					if (orientation > 1) {
+					        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Image needs to be rotated: orientation = %d", orientation);
+						double rotAngle = 0;
+						// TODO: support other rotation/flip combinations
+						if (orientation == 6) {
+						  rotAngle = -90;
+						} else if (orientation = 8) {
+						  rotAngle = 90;
+						}
+						LoggerWrapper::GetInstance()->Write(LV_STATUS, "Image rotation = %f",rotAngle);
+						SDL_Surface *pSDL_Surface = LocalSurface;
+						
+						LocalSurface = rotozoomSurface(pSDL_Surface, rotAngle, 1, 1);
+						SDL_FreeSurface(pSDL_Surface);
+
+					}
+					break;
+			        }
+			}
+		}
+        }
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "After rotation w: %d h: %d",LocalSurface->w,LocalSurface->h);
+
+	if(m_nMaxSize && (LocalSurface->w > m_nMaxSize || LocalSurface->h > m_nMaxSize)) 
+	{
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Pictures too big %s, downscaling it", FileName.c_str());
+
+		SDL_Surface *pSDL_Surface = LocalSurface;
+
+		//zoom
+		double ZoomX = 1;
+		double ZoomY = 1;
+
+		SDL_Surface *rotozoom_picture;
+
+		ZoomX = ZoomY = min(m_nMaxSize / double(pSDL_Surface->w),
+			m_nMaxSize / double(pSDL_Surface->h));
+
+		LocalSurface = zoomSurface(pSDL_Surface, ZoomX, ZoomY, SMOOTHING_ON);
+		SDL_FreeSurface(pSDL_Surface);
+	}
+
+}
+
 bool GraphicImage::Load(string FileName)
 {
 	LocalSurface = IMG_Load(FileName.c_str()); 
