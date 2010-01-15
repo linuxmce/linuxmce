@@ -101,27 +101,8 @@ bool GraphicImage::Load(string FileName)
 	LocalSurface = IMG_Load(FileName.c_str()); 
 	if( LocalSurface )
 	{
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Loaded %s w: %d h: %d",FileName.c_str(),LocalSurface->w,LocalSurface->h);
-
-		if(m_nMaxSize && (LocalSurface->w > m_nMaxSize || LocalSurface->h > m_nMaxSize)) 
-		{
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Pictures too big %s, downscaling it", FileName.c_str());
-
-			SDL_Surface *pSDL_Surface = LocalSurface;
-
-			//zoom
-			double ZoomX = 1;
-			double ZoomY = 1;
-
-			SDL_Surface *rotozoom_picture;
-
-			ZoomX = ZoomY = min(m_nMaxSize / double(pSDL_Surface->w),
-				m_nMaxSize / double(pSDL_Surface->h));
-
-			LocalSurface = zoomSurface(pSDL_Surface, ZoomX, ZoomY, SMOOTHING_ON);
-			SDL_FreeSurface(pSDL_Surface);
-		}
-
+	        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Loaded %s",FileName.c_str());
+	        adjustImageZoomAndOrientation(FileName);
 	}
 	else
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Failed to load '%s'", FileName.c_str());
@@ -231,6 +212,7 @@ void GraphicImage::ScaleImage(int nScreenWidth, int nScreenHeight)
 	if (Width == Surface->w && Height == Surface->h)
 		return;
 
+	// Max values tell us how much of the new surface holds an image
 	MaxU = ((float)Surface->w)/Width;
 	MaxV = ((float)Surface->h)/Height;
 
