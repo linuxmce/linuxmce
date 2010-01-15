@@ -26,6 +26,11 @@
 #include "TextureManager.h"
 
 #include "DCE/Logger.h"
+
+#include <exiv2/image.hpp>
+#include <exiv2/exif.hpp>
+#include <exiv2/iptc.hpp>
+
 using namespace DCE;
 
 GraphicImage::GraphicImage(int nMaxSize)
