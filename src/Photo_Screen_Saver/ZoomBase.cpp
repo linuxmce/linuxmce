@@ -32,27 +32,6 @@ ZoomBase::ZoomBase(Frame* PictureObject,
 	this->Width = Width;
 	this->Height = Height;
 
-	if(ScreenWidth < Width)
-	{
-		this->Height = int(Height*(float)ScreenWidth/Width + 1);
-		this->Width = ScreenWidth;
-	}
-	if(ScreenHeight < Height)
-	{
-		this->Width = int(Width*(float)ScreenWidth/Width + 1);
-		this->Height = ScreenHeight;
-	}
-
-	if(ScreenWidth > Width)
-	{
-		this->Height = int(Height*(float)ScreenWidth/Width + 1);
-		this->Width = ScreenWidth;
-	}
-	if(ScreenHeight > Height)
-	{
-		this->Width = int(Width*(float)ScreenWidth/Width + 1);
-		this->Height = ScreenHeight;
-	}
 }
 
 ZoomBase::~ZoomBase(void)
