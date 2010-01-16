@@ -279,15 +279,24 @@ int main(int argc, char *argv[])
 	{
 		cout << "MakeRelease, v." << VERSION << endl
 			<< "Usage: MakeRelease [-h hostname] [-u username] [-p password] [-D database] [-P mysql port] [-j] [-k Packages] [-K Exclude Packages] [-m Manufacturers] [-o Distro] [-a] [-f Defines]" << endl 
-			<< "\t[-d] [-r PK repository source] [-v version] [-V]" << endl
+			<< "                   [-d] [-r PK repository source] [-v version] [-V] [-O outputpath]" << endl
+			<< "                   [-g] [-b] [-c] [-i] [-s source code prefix] [-S] [-j number of cores to use] " << endl
+			<< "                   [-n non-source code prefix]  [-r PK repository source] [-v version] [-V]" << endl
 			<< "hostname    -- address or DNS of database host, default is `dce_router`" << endl
 			<< "username    -- username for database connection" << endl
 			<< "password    -- password for database connection, default is `` (empty)" << endl
 			<< "database    -- database name.  default is pluto_main" << endl
 			<< "port        -- port for database connection, default is 3306" << endl
-			<< "output path -- Where to put the output files.  Default is ../[database name]" << endl
 			<< "input path  -- Where to find the template files.  Default is . then ../MakeRelease" << endl
 			<< "-a(abort)   -- Abort on error without prompting" << endl
+			<< "-g          -- Use file log" << endl
+			<< "-b          -- Don't build source package" << endl
+			<< "-c          -- Don't build bin package" << endl
+			<< "-i          -- Interactive" << endl
+			<< "-s prefix   -- Prefix for source code" << endl
+			<< "-n prefix   -- Prefix for non-source code" << endl
+			<< "-S          -- Simulate" << endl
+			<< "-O path     -- Where to put the output files. Default is ../[database name]" << endl
 			<< "-V		-- Don't set version" << endl 
 			<< "-d          -- Don't make changes to the database" << endl
 			<< "-X          -- Simulate" << endl
