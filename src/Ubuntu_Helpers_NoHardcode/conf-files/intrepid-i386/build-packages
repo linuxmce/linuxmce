@@ -67,6 +67,7 @@ libdvb-dev
 libdvdnav-dev
 libdvdread-dev
 libesd0-dev
+libexiv2-dev
 libfaad-dev
 libflac-dev
 libfuse-dev
@@ -175,6 +176,9 @@ x11proto-xext-dev
 x11proto-xf86vidmode-dev
 xorg-dev
 zaptel-source
+libfftw3-dev 
+libxvidcore4 
+libxvidcore4-dev
 libfftw3-dev 
 libxvidcore4 
 libxvidcore4-dev
