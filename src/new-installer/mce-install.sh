@@ -104,6 +104,7 @@ Setup_NIS
 
 #trap 'RemoveOfflineSource' EXIT
 #Setup_Apt_Conffiles
+PinMythTVAt22
 
 Setup_Pluto_Apt_Conf
 ./mce-install-preseed.sh
