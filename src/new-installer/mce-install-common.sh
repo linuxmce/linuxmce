@@ -45,7 +45,7 @@ $newlines
 function PinMythTVAt22 {
 	# Make sure, we never use a newer version that 0.22
 	echo "
-	Package: mythtv mythtv-frontend mythtv-backend mythtv-common mythtv-database mythtv-transcode-utils mythweb
+	Package: mythtv mythtv-frontend mythtv-backend mythtv-common mythtv-database mythtv-transcode-utils mythweb libmyth-perl
 	Pin: version 2:0.22*
 	Pin-Priority: 1001
 	">>/etc/apt/preferences
