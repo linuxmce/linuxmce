@@ -203,7 +203,7 @@ bool VDR::LaunchVDR(bool bSelectWindow)
 		//string sWidth = m_pEvent->GetDeviceDataFromDatabase(m_pData->m_dwPK_Device_ControlledVia, DEVICEDATA_ScreenWidth_CONST);
 		//string sHeight = m_pEvent->GetDeviceDataFromDatabase(m_pData->m_dwPK_Device_ControlledVia, DEVICEDATA_ScreenHeight_CONST); 
 		DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
-			"/usr/bin/vdr-sxfe", "VDR.VDR", "--reconnect\t--fullscreen\txvdr://127.0.0.1:37890",
+			"/usr/pluto/bin/StartVDRClient.sh", "VDR.VDR", "--reconnect\t--fullscreen\txvdr://127.0.0.1:37890",
 			sMessage + "1",sMessage + "0",false,false,true,false);
 		if( SendCommand(CMD_Spawn_Application) )
 		{
