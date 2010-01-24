@@ -1,7 +1,14 @@
 #!/bin/bash
 /usr/pluto/bin/Debug_LogKernelModules.sh "$0" || :
 
+# Get the device ID of this system
 . /usr/pluto/bin/Config_Ops.sh
+ConfEval()
+
+
+# Get the video dir of VDR
+VIDEO_DIR=/home/public/data/pvr
+. /etc/default/vdr
 
 # We can't have VDR running during setup file edit
 invoke-rc.d vdr stop
@@ -141,14 +148,23 @@ svdrpservice.ServerPort = 2001
 #
 #
 # vdr-plugin-streamdev-server
-echo "
+if [[ "$PK_Device" -eq "1" ]]; then
+	echo "
 streamdev-server.AllowSuspend = 1
 streamdev-server.MaxClients = 6
 streamdev-server.StartHTTPServer = 1
 streamdev-server.StartServer = 1
 streamdev-server.SuspendMode = 1
 " >> /var/lib/vdr/setup.conf
-
+else
+	echo "
+streamdev-client.RemoteIp = 192.168.80.1
+streamdev-client.RemotePort = 2004
+streamdev-client.StartClient = 1
+streamdev-client.StreamFilters = 1
+streamdev-client.SyncEPG = 0
+" >> /var/lib/vdr/setup.conf
+fi
 # vdr-plugin-xineliboutput
 echo "
 xineliboutput.OSD.AlphaCorrection = 0
@@ -178,7 +194,8 @@ xineliboutput.Video.SwScale = 0" >> /var/lib/vdr/setup.conf
 #
 # for the MediaDirector
 #
-echo "
+if [[ "$PK_Device" -ne "1" ]]; then
+	echo "
 remotetimers.AddToRemote = 1
 remotetimers.DefaultUser = 0
 remotetimers.HideMainMenuEntry = 0
@@ -187,7 +204,7 @@ remotetimers.RemotePause = 0
 remotetimers.ReplaceRecordings = 0
 remotetimers.ReplaceSchedule = 1
 remotetimers.ReplaceTimers = 1
-remotetimers.ServerDir = /mnt/device/28/video.0
+remotetimers.ServerDir = $VIDEO_DIR
 remotetimers.ServerIp = 192.168.80.1
 remotetimers.ServerPort = 2001
 remotetimers.ShowProgressBar = 0
@@ -197,3 +214,4 @@ remotetimers.UserFilterSchedule = 0
 remotetimers.UserFilterTimers = 0
 remotetimers.WatchUpdate = 1
 ">> /var/lib/vdr/setup.conf
+fi
