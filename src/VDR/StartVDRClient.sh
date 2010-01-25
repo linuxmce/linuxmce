@@ -20,4 +20,4 @@ else
 	sleep 5
 fi
 
-/usr/bin/vdr-sxfe --reconnect xvdr://127.0.0.1 --post tvtime:method=use_vo_driver --video xv --tcp --syslog --verbose
+/usr/bin/vdr-sxfe --reconnect xvdr://127.0.0.1 --post tvtime:method=use_vo_driver --tcp --syslog --verbose
