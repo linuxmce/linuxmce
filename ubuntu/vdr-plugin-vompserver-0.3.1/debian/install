@@ -1,0 +1,3 @@
+libvdr-vompserver.so.*    usr/lib/vdr/plugins/
+debian/vomp.conf          etc/vdr/plugins/
+l10n/*                    usr/share/vdr-plugin-vompserver/l10n/  

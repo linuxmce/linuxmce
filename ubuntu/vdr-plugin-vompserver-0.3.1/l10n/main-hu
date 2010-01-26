@@ -1,0 +1,234 @@
+l10n-vomp: hu Magyar
+* Translation by Pák Gergely
+
+x:	VDR
+hu:	VDR
+
+x:	Welcome
+hu:	Tervetuloa
+
+x:	1. Live TV
+hu:	1. TV
+
+x:	2. Radio
+hu:	2. Rádió
+
+x:	3. Recordings
+hu:	3. Felvett müsorok
+
+x:	4. Timers
+hu:	4. Felvétel
+
+x:	5. Options
+hu:	5. Beállítások
+
+x:	6. Options
+hu:	6. Beállítások
+
+x:	6. Reboot
+hu:	6. Újraindítás
+
+x:	7. Reboot
+hu:	7. Újraindítás
+
+x:	Downloading recordings list
+hu:	Felvétellista letöltése
+
+x:	Recordings - %s
+hu:	Felvételek - %s
+
+x:	Recordings
+hu:	Felvételek
+
+x:	<dir> %lu\t%s
+hu:	<dir> %lu\t%s
+
+x:	[ok] = menu
+hu:	[ok] = menü
+
+x:	%lu%% used, %iGB free
+hu:	%lu%% felhasznált, %iGB szabad
+
+* Also used in channels list
+x:	%i to %i of %i
+hu:	%i - %i (összesen %i)
+
+* QUESTION *
+x:	Yes
+hu:	Igen
+
+x:	No
+hu:	Nem
+
+* RECORDING MENU *
+x:	Programme menu
+hu:	Müsor menü
+
+x:	Play
+hu:	Lejátszás
+
+x:	Resume
+hu:	Folytatás
+
+x:	Summary
+hu:	Tartalom
+
+x:	Delete
+hu:	Törlés
+
+x:	Programme summary
+hu:	Müsor tartalom
+
+x:	Summary unavailable
+hu:	Tartalom nem elérhetö
+
+x:	Delete recording
+hu:	Felvétel törlése
+
+x:	Are you sure you want to delete this recording?
+hu:	Biztosan törölni szeretné ezt a felvételt?
+
+* SERVER SELECT *
+x:	Choose a VDR server
+hu:	Válasszon egy VDR szervert
+
+* OPTION MENUS *
+x:	Options
+hu:	Beállitások
+
+x:	TV connection type
+hu:	TV csatlakozás tipusa
+
+x:	Remote control type
+hu:	Távirányitó tipusa
+
+x:	TV aspect ratio
+hu:	TV képformátum
+
+x:	16:9 on 4:3 display mode
+hu:	16:9 a 4:3-as képernyön
+
+x:	Power state after bootup
+hu:	Bekapcsolás utáni állapot
+
+x:	Display channels
+hu:	Csatornák megjelenítése
+
+x:	Language
+hu:	Nyelv
+
+x:	Press back to exit, <, > or [ok] to change
+hu:	[back] gombbal kilép, [<], [>] vagy [ok] gombbal választ
+
+x:	VDR-Pri 0=OK !See forums!
+hu:	VDR-Pri 0=OK !lásd. fórum!
+
+* OPTION CHOICES *
+x:	Old
+hu:	Régi
+
+x:	New
+hu:	Új
+
+x:	RGB+composite
+hu:	RGB+composite
+
+x:	S-Video
+hu:	S-Video
+
+x:	Chop sides
+hu:	Szélek levágva
+
+x:	Letterbox
+hu:	Letterbox
+
+x:	Last state
+hu:	Utolsó állapot
+
+x:	All
+hu:	Összes
+
+x:	FTA only
+hu:	Csak FTA
+
+x:	On
+hu:	Be
+
+x:	Off
+hu:	Ki
+
+* CHANNEL LISTS *
+x:	Channels
+hu:	Csatornák
+
+x:	Radio Stations
+hu:	Rádiócsatornák
+
+* BANNERS *
+x:	No channel data available
+hu:	Csatorna-adatok nem állnak rendelkezésre
+
+x:	info
+hu:	Infó
+
+x:	Channel unavailable
+hu:	A csatorna nem elérhetö
+
+* CONNECT SCREEN *
+x:	Locating server
+hu:	Szerver keresése
+
+x:	Connecting to VDR
+hu:	Csatlakozás a VDR-hez
+
+x:	Login failed
+hu:	Bejelentkezés sikertelen
+
+x:	Connection failed
+hu:	Kapcsolódás sikertelen
+
+* COMMAND *
+x:	Connected, loading config
+hu:	Kapcsolódva, beállitások betöltése
+
+* EPG *
+x:	EPG
+hu:	EPG
+
+x:	OK
+hu:	OK
+
+x:	Page up
+hu:	Fel
+
+x:	Page down
+hu:	Le
+
+x:	-24 hours
+hu:	-24 óra
+
+x:	+24 hours
+hu:	+24 óra
+
+x:	Go: Preview
+hu:	Go: Betekintés
+
+x:	Guide / Back: Close
+hu:	Guide/Back: Bezárás
+
+x:	Rec: Set timer
+hu:	Rec: Felvétel beállítása
+
+x:	Sel channel
+hu:	Csatornaválasztás
+
+x:	There are no programme details available for this period
+hu:	Nincs programinformáció ehhez az idöszakhoz
+
+x:	No programme details
+hu:	Nincs programinformáció
+
+* TIMERS *
+x:	Timers
+hu:	Felvétel
+

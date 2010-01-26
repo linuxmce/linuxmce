@@ -1,0 +1,227 @@
+l10n-vomp: sv Svenska
+* Translation by Lars Fredriksson
+
+x:	VDR
+sv:	VDR
+
+x:	Welcome
+sv:	Välkommen
+
+x:	1. Live TV
+sv:	1. TV
+
+x:	2. Radio
+sv:	2. Radio
+
+x:	3. Recordings
+sv:	3. Inspelningar
+
+x:	5. Options
+sv:	5. Inställningar
+
+x:	6. Options
+sv:	6. Inställningar
+
+x:	6. Reboot
+sv:	6. Starta om
+
+x:	7. Reboot
+sv:	7. Starta om
+
+x:	Downloading recordings list
+sv:	Laddar lista över inspelningar
+
+x:	Recordings - %s
+sv:	Inspelningar - %s
+
+x:	Recordings
+sv:	Inspelningar
+
+x:	<dir> %lu\t%s
+sv:	<dir> %lu\t%s
+
+x:	[ok] = menu
+sv:	[ok] = meny
+
+x:	%lu%% used, %iGB free
+sv:	%lu%% använt, %iGB ledigt
+
+* Also used in channels list
+x:	%i to %i of %i
+sv:	%i av %i till %i
+
+* QUESTION *
+x:	Yes
+sv:	Ja
+
+x:	No
+sv:	Nej
+
+* RECORDING MENU *
+x:	Programme menu
+sv:	Programmeny
+
+x:	Play
+sv:	Spela upp
+
+x:	Resume
+sv:	Återuppta
+
+x:	Summary
+sv:	Sammanfattning
+
+x:	Delete
+sv:	Ta bort
+
+x:	Programme summary
+sv:	Programsammanfattning
+
+x:	Summary unavailable
+sv:	Ingen sammanfattning tillgänglig
+
+x:	Delete recording
+sv:	Ta bort inspelning
+
+x:	Are you sure you want to delete this recording?
+sv:	Är du säker att du vill ta bort den här inspelningen
+
+* SERVER SELECT *
+x:	Choose a VDR server
+sv:	Välj VDR server
+
+* OPTION MENUS *
+x:	Options
+sv:	Inställningar
+
+x:	TV connection type
+sv:	Typ av TV-anslutning
+
+x:	Remote control type
+sv:	Fjärrkontroll
+
+x:	TV aspect ratio
+sv:	TV-format
+
+x:	16:9 on 4:3 display mode
+sv:	16:9 på 4:3-skärm
+
+x:	Power state after bootup
+sv:	Läge efter strömborfall
+
+x:	Display channels
+sv:	Visa kanaler
+
+x:	Language
+sv:	Språk
+
+x:	Press back to exit, <, > or [ok] to change
+sv:	Tryck [back] för att avsluta, eller [ok] för att ändra
+
+x:	VDR-Pri 0=OK !See forums!
+sv:	VDR-Prio 0=OK !Se forum!
+
+* OPTION CHOICES *
+x:	Old
+sv:	Gammal modell
+
+x:	New
+sv:	Ny modell
+
+x:	RGB+composite
+sv:	RGB+komposit
+
+x:	S-Video
+sv:	S-Video
+
+x:	Chop sides
+sv:	Ta bort på sidorna
+
+x:	Letterbox
+sv:	Letterbox
+
+x:	Last state
+sv:	Återgå til senaste läge
+
+x:	All
+sv:	Alla
+
+x:	FTA only
+sv:	Endast FTA
+
+x:	On
+sv:	På
+
+x:	Off
+sv:	Av
+
+* CHANNEL LISTS *
+x:	Channels
+sv:	Kanaler
+
+x:	Radio Stations
+sv:	Radiostationer
+
+* BANNERS *
+x:	No channel data available
+sv:	Ingen programinformation tillgänglig
+
+x:	info
+sv:	Info
+
+x:	Channel unavailable
+sv:	Kanalen är inte tillgänglig
+
+* CONNECT SCREEN *
+x:	Locating server
+sv:	Letar efter server
+
+x:	Connecting to VDR
+sv:	Ansluter till VDR
+
+x:	Login failed
+sv:	Inloggning misslycklades
+
+x:	Connection failed
+sv:	Anslutning misslyckades
+
+* COMMAND *
+x:	Connected, loading config
+sv:	Ansluten, laddar konfigurering
+
+* EPG *
+x:	EPG
+sv:	EPG
+
+x:	OK
+sv:	OK
+
+x:	Page up
+sv:	Föregående sida
+
+x:	Page down
+sv:	Nästa sida
+
+x:	-24 hours
+sv:	-24 timmar
+
+x:	+24 hours
+sv:	+24 timmar
+
+x:	Go: Preview
+sv:	Go: Visa
+
+x:	Guide / Back: Close
+sv:	Guide / Back: Stäng
+
+x:	Rec: Set timer
+sv:	Rec: Programmera timer
+
+x:	Sel channel
+sv:	Välj kanal
+
+x:	There are no programme details available for this period
+sv:	Det finns ingen programinforamtion för denna period
+
+x:	No programme details
+sv:	Ingen programinformation tillgänglig
+

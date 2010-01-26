@@ -1,0 +1,436 @@
+l10n-vomp:en English
+
+x:	VDR
+en:	VDR
+
+x:	Welcome
+en:	Welcome
+
+x:	1. Live TV
+en:	1. Live TV
+
+x:	2. Radio
+en:	2. Radio
+
+x:	3. Recordings
+en:	3. Recordings
+
+x:	4. Timers
+en:	4. Timers
+
+x:	5. MediaPlayer
+en:	5. MediaPlayer
+
+x:	5. Options
+en:	5. Options
+
+x:	6. Options
+en:	6. Options
+
+x:	6. Reboot
+en:	6. Reboot
+
+x:	7. Reboot
+en:	7. Reboot
+
+x:	Downloading recordings list
+en:	Downloading recordings list
+
+* RECORDINGS LIST *
+x:	Loading...
+en:	Loading...
+
+x:	Recordings - %s
+en:	Recordings - %s
+
+x:	Recordings
+en:	Recordings
+
+x:	<dir> %lu\t%s
+en:	<dir> %lu\t%s
+
+x:	[ok] = menu
+en:	[ok] = menu
+
+x:	%lu%% used, %iGB free
+en:	%lu%% used, %iGB free
+
+* Also used in channels list
+x:	%i to %i of %i
+en:	%i to %i of %i
+
+* QUESTION *
+x:	Yes
+en:	Yes
+
+x:	No
+en:	No
+
+* RECORDING MENU *
+x:	Programme menu
+en:	Programme menu
+
+x:	Play
+en:	Play
+
+x:	Resume
+en:	Resume
+
+x:	Summary
+en:	Summary
+
+x:	Delete
+en:	Delete
+
+x:	Programme summary
+en:	Programme summary
+
+x:	Summary unavailable
+en:	Summary unavailable
+
+x:	Delete recording
+en:	Delete recording
+
+x:	Are you sure you want to delete this recording?
+en:	Are you sure you want to delete this recording?
+
+* SERVER SELECT *
+x:	Choose a VDR server
+en:	Choose a VDR server
+
+* OPTION MENUS *
+x:	Options
+en:	Options
+
+x:	General
+en:	General
+
+x:	Remote Control
+en:	Remote Control
+
+x:	Command
+en:	Command
+
+x:	Hard wired
+en:	Hard wired
+
+x:	User assignable
+en:	User assignable
+
+x:	Advanced
+en:	Advanced
+
+x:	General Options
+en:	General Options
+
+x:	Timer Options
+en:	Timer Options
+
+x:	Default start margin (minutes)
+en:	Default start margin (minutes)
+
+x:	Default end margin (minutes)
+en:	Default end margin (minutes)
+
+x:	Default priority
+en:	Default priority
+
+x:	Default lifetime
+en:	Default lifetime
+
+x:	Advanced Options
+en:	Advanced Options
+
+x:	TV connection type
+en:	TV connection type
+
+x:	Remote control type
+en:	Remote control type
+
+x:	TV aspect ratio
+en:	TV aspect ratio
+
+x:	16:9 on 4:3 display mode
+en:	16:9 on 4:3 display mode
+
+x:	Power state after bootup
+en:	Power state after bootup
+
+x:	Display channels
+en:	Display channels
+
+x:	Language
+en:	Language
+
+x:	Press back to exit, <, > or [ok] to change
+en:	Press back to exit, <, > or [ok] to change
+
+x:	Press [ok] for learning or MENU to reset to defaults.
+en:	Press [ok] for learning or MENU to reset to defaults.
+
+x:	VDR-Pri 0=OK !See forums!
+en:	VDR-Pri 0=OK !See forums!
+
+x:	TCP receive window size
+en:	TCP receive window size
+
+x:	Use WSS (PAL only)
+en:	Use WSS (PAL only)
+
+* OPTION CHOICES *
+x:	Old
+en:	Old
+
+x:	New
+en:	New
+
+x:	RGB+composite
+en:	RGB+composite
+
+x:	S-Video
+en:	S-Video
+
+x:	Chop sides
+en:	Chop sides
+
+x:	Letterbox
+en:	Letterbox
+
+x:	Last state
+en:	Last state
+
+x:	All
+en:	All
+
+x:	FTA only
+en:	FTA only
+
+x:	On
+en:	On
+
+x:	Off
+en:	Off
+
+* CHANNEL LISTS *
+x:	Channels
+en:	Channels
+
+x:	Radio Stations
+en:	Radio Stations
+
+* BANNERS *
+x:	No channel data available
+en:	No channel data available
+
+x:	info
+en:	info
+
+x:	Channel unavailable
+en:	Channel unavailable
+
+* CONNECT SCREEN *
+x:	Locating server
+en:	Locating server
+
+x:	Connecting to VDR
+en:	Connecting to VDR
+
+x:	Login failed
+en:	Login failed
+
+x:	Connection failed
+en:	Connection failed
+
+* COMMAND *
+x:	Connected, loading config
+en:	Connected, loading config
+
+* EPG *
+x:	EPG
+en:	EPG
+
+x:	OK
+en:	OK
+
+x:	Page up
+en:	Page up
+
+x:	Page down
+en:	Page down
+
+x:	-24 hours
+en:	-24 hours
+
+x:	+24 hours
+en:	+24 hours
+
+x:	Go: Preview
+en:	Go: Preview
+
+x:	Guide / Back: Close
+en:	Guide / Back: Close
+
+x:	Rec: Set timer
+en:	Rec: Set timer
+
+x:	Sel channel
+en:	Sel channel
+
+x:	There are no programme details available for this period
+en:	There are no programme details available for this period
+
+x:	No programme details
+en:	No programme details
+
+x:	Set Timer
+en:	Set Timer
+
+x:	Create this timer?
+en:	Create this timer?
+
+* TIMERS *
+x:	Timers
+en:	Timers
+
+* EDIT TIMER *
+x:	Edit Timer
+en:	Edit Timer
+
+x:	Active
+en:	Active
+
+x:	Channel
+en:	Channel
+
+x:	Name
+en:	Name
+
+x:	Directory
+en:	Directory
+
+x:	Start
+en:	Start
+
+x:	Stop
+en:	Stop
+
+x:	Priority
+en:	Priority
+
+x:	Lifetime
+en:	Lifetime
+
+x:	Current
+en:	Current
+
+x:	Recording
+en:	Recording
+
+x:	Move
+en:	Move
+
+x:	Failed to delete recording
+en:	Failed to delete recording
+
+x:	Failed to move recording
+en:	Failed to move recording
+
+x:	Move recording
+en:	Move recording
+
+x:	Connection lost
+en:	Connection lost
+
+x:	Timer set successfully
+en:	Timer set successfully
+
+x:	There is already a timer for this event
+en:	There is already a timer for this event
+
+x:	Failure setting timer
+en:	Failure setting timer
+
+* MEDIA PLAYER *
+x:	Loading
+en:	Loading
+
+x:	rotate
+en:	rotate
+
+x:	No Media found
+en:	No Media found
+
+x:	no VDR connection
+en:	no VDR connection
+
+x:	Format(px)
+en:	Format(px)
+
+x:	Filesize
+en:	Filesize
+
+x:	Time
+en:	Time
+
+x:	Rotation
+en:	Rotation
+
+x:	Scale
+en:	Scale
+
+x:	MpegInfo
+en:	MpegInfo
+
+x:	FileName
+en:	FileName
+
+x:	Playlist
+en:	Playlist
+
+x:	unable to open audio file
+en:	unable to open audio file
+
+x:	Rand
+en:	Rand
+
+x:	unable to get media list
+en:	unable to get media list
+
+x:	JointStereo
+en:	JointStereo
+
+x:	Stereo
+en:	Stereo
+
+x:	Dual
+en:	Dual
+
+x:	Mono
+en:	Mono
+
+x:	Artist
+en:	Artist
+
+x:	Year
+en:	Year
+
+x:	Genre
+en:	Genre
+
+x:	Album
+en:	Album
+
+x:	Title
+en:	Title
+
+x:	Track
+en:	Track
+
+x:	Composer
+en:	Composer
+
+x:	Comment
+en:	Comment
+
+x:	Recordings sort order
+en:	Recordings sort order

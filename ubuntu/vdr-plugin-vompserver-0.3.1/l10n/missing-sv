@@ -1,0 +1,213 @@
+l10n-vomp: sv Svenska
+* Missing texts for sv (Svenska) supplemented with en (English)
+x:	4. Timers
+sv:	4. Timers
+
+x:	5. MediaPlayer
+sv:	5. MediaPlayer
+
+* RECORDINGS LIST *
+x:	Loading...
+sv:	Loading...
+
+x:	General
+sv:	General
+
+x:	Remote Control
+sv:	Remote Control
+
+x:	Command
+sv:	Command
+
+x:	Hard wired
+sv:	Hard wired
+
+x:	User assignable
+sv:	User assignable
+
+x:	Advanced
+sv:	Advanced
+
+x:	General Options
+sv:	General Options
+
+x:	Timer Options
+sv:	Timer Options
+
+x:	Default start margin (minutes)
+sv:	Default start margin (minutes)
+
+x:	Default end margin (minutes)
+sv:	Default end margin (minutes)
+
+x:	Default priority
+sv:	Default priority
+
+x:	Default lifetime
+sv:	Default lifetime
+
+x:	Advanced Options
+sv:	Advanced Options
+
+x:	Press [ok] for learning or MENU to reset to defaults.
+sv:	Press [ok] for learning or MENU to reset to defaults.
+
+x:	TCP receive window size
+sv:	TCP receive window size
+
+x:	Use WSS (PAL only)
+sv:	Use WSS (PAL only)
+
+x:	Set Timer
+sv:	Set Timer
+
+x:	Create this timer?
+sv:	Create this timer?
+
+* TIMERS *
+x:	Timers
+sv:	Timers
+
+* EDIT TIMER *
+x:	Edit Timer
+sv:	Edit Timer
+
+x:	Active
+sv:	Active
+
+x:	Channel
+sv:	Channel
+
+x:	Name
+sv:	Name
+
+x:	Directory
+sv:	Directory
+
+x:	Start
+sv:	Start
+
+x:	Stop
+sv:	Stop
+
+x:	Priority
+sv:	Priority
+
+x:	Lifetime
+sv:	Lifetime
+
+x:	Current
+sv:	Current
+
+x:	Recording
+sv:	Recording
+
+x:	Move
+sv:	Move
+
+x:	Failed to delete recording
+sv:	Failed to delete recording
+
+x:	Failed to move recording
+sv:	Failed to move recording
+
+x:	Move recording
+sv:	Move recording
+
+x:	Connection lost
+sv:	Connection lost
+
+x:	Timer set successfully
+sv:	Timer set successfully
+
+x:	There is already a timer for this event
+sv:	There is already a timer for this event
+
+x:	Failure setting timer
+sv:	Failure setting timer
+
+* MEDIA PLAYER *
+x:	Loading
+sv:	Loading
+
+x:	rotate
+sv:	rotate
+
+x:	No Media found
+sv:	No Media found
+
+x:	no VDR connection
+sv:	no VDR connection
+
+x:	Format(px)
+sv:	Format(px)
+
+x:	Filesize
+sv:	Filesize
+
+x:	Time
+sv:	Time
+
+x:	Rotation
+sv:	Rotation
+
+x:	Scale
+sv:	Scale
+
+x:	MpegInfo
+sv:	MpegInfo
+
+x:	FileName
+sv:	FileName
+
+x:	Playlist
+sv:	Playlist
+
+x:	unable to open audio file
+sv:	unable to open audio file
+
+x:	Rand
+sv:	Rand
+
+x:	unable to get media list
+sv:	unable to get media list
+
+x:	JointStereo
+sv:	JointStereo
+
+x:	Stereo
+sv:	Stereo
+
+x:	Dual
+sv:	Dual
+
+x:	Mono
+sv:	Mono
+
+x:	Artist
+sv:	Artist
+
+x:	Year
+sv:	Year
+
+x:	Genre
+sv:	Genre
+
+x:	Album
+sv:	Album
+
+x:	Title
+sv:	Title
+
+x:	Track
+sv:	Track
+
+x:	Composer
+sv:	Composer
+
+x:	Comment
+sv:	Comment
+
+x:	Recordings sort order
+sv:	Recordings sort order
+

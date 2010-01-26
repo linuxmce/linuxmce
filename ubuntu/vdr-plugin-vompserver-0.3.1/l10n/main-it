@@ -1,0 +1,432 @@
+l10n-vomp: it Italiano
+* Translation by Rob Davis (rdoac)
+
+x:	VDR
+it:	VDR
+
+x:	Welcome
+it:	Benvenuti
+
+x:	1. Live TV
+it:	1. TV
+
+x:	2. Radio
+it:	2. Radio
+
+x:	3. Recordings
+it:	3. Registrati
+
+x:	4. Timers
+it:	4. I Timer
+
+x:	5. MediaPlayer
+it:	5. Media
+
+x:	5. Options
+it:	5. Opzioni
+
+x:	6. Options
+it:	6. Opzione
+
+x:	6. Reboot
+it:	6. Riavviare
+
+x:	7. Reboot
+it:	7. Riavviare
+
+x:	Downloading recordings list
+it:	Scaricando l'elenco delle registrazione
+
+* RECORDINGS LIST *
+x:	Loading...
+it:	Caricando
+
+x:	Recordings - %s
+it:	Registrati - %s
+
+x:	Recordings
+it:	Registrati
+
+x:	<dir> %lu\t%s
+it:	<dir> %lu\t%s
+
+x:	[ok] = menu
+it:	[ok] = menu
+
+x:	%lu%% used, %iGB free
+it:	%lu%% usato, %iGB libera
+
+* Also used in channels list
+x:	%i to %i of %i
+it:	%i a %i di %i
+
+* QUESTION *
+x:	Yes
+it:	Sì
+
+x:	No
+it:	Non
+
+* RECORDING MENU *
+x:	Programme menu
+it:	Menu di registrazione
+
+x:	Play
+it:	Vai
+
+x:	Resume
+it:	Reprendere
+
+x:	Summary
+it:	Riassunto
+
+x:	Delete
+it:	Cancella
+
+x:	Programme summary
+it:	Riassunta dalla programma
+
+x:	Summary unavailable
+it:	Riassunta non disponibile
+
+x:	Delete recording
+it:	Cancella registrazione
+
+x:	Are you sure you want to delete this recording?
+it:	Sei sicuro vuoi cancellare questo registrazione?
+
+* SERVER SELECT *
+x:	Choose a VDR server
+it:	Scegli un VDR-Server
+
+* OPTION MENUS *
+x:	Options
+it:	Opzione
+
+x:	General
+it:	Generale
+
+x:	Remote Control
+it:	Telecommando
+
+x:	Command
+it:	Commando
+
+x:	Hard wired
+it:	Fissato
+
+x:	User assignable
+it:	Assegnato di utente
+
+x:	Advanced
+it:	Avanzato
+
+x:	General Options
+it:	Opzione Generale
+
+x:	Timer Options
+it:	Opzione del timer
+
+x:	Default start margin (minutes)
+it:	Margine dal Inizio normale
+
+x:	Default end margin (minutes)
+it:	Margine dalla fine normale
+
+x:	Default priority
+it:	Priorita Normale
+
+x:	Default lifetime
+it:	Lungheza di vita
+
+x:	Advanced Options
+it:	Opzione avanzato
+
+x:	TV connection type
+it:	Tipo di connessione del TV
+
+x:	Remote control type
+it:	Tipo di telecomando
+
+x:	TV aspect ratio
+it:	TV aspect radio
+
+x:	16:9 on 4:3 display mode
+it:	16:9 o 4:3 modelita
+
+x:	Power state after bootup
+it:	Stato di potenza dopo il boot
+
+x:	Display channels
+it:	Mostra i canali
+
+x:	Language
+it:	Lingua
+
+x:	Press back to exit, <, > or [ok] to change
+it:	Premi [back] di uscire, <, > o [ok] di cambiare
+
+x:	Press [ok] for learning or MENU to reset to defaults.
+it:	Premi [ok] di imparare o MENU di Azzerare!
+
+x:	VDR-Pri 0=OK !See forums!
+it:	VDR-Pri 0=OK !Leggi i forum!
+
+x:	TCP receive window size
+it:	TCP ricevere finistra misura
+
+x:	Use WSS (PAL only)
+it:	Segnale WSS (Solo PAL)
+
+* OPTION CHOICES *
+x:	Old
+it:	Vecchio
+
+x:	New
+it:	Nuovo
+
+x:	RGB+composite
+it:	RGB+Composite
+
+x:	S-Video
+it:	S-Video
+
+x:	Chop sides
+it:	Taglia i lati
+
+x:	Letterbox
+it:	Letterbox
+
+x:	Last state
+it:	L'ultimo stato
+
+x:	All
+it:	Tutto
+
+x:	FTA only
+it:	Solo FTA
+
+x:	On
+it:	Acesso
+
+x:	Off
+it:	Spento
+
+* CHANNEL LISTS *
+x:	Channels
+it:	Elenco dei canali
+
+x:	Radio Stations
+it:	Canali di Radio
+
+* BANNERS *
+x:	No channel data available
+it:	Nessuno informazione disponibile
+
+x:	info
+it:	Info
+
+x:	Channel unavailable
+it:	Canale non disponibile
+
+* CONNECT SCREEN *
+x:	Locating server
+it:	Cercando Server
+
+x:	Connecting to VDR
+it:	Collegando al VDR
+
+x:	Login failed
+it:	Login falito
+
+x:	Connection failed
+it:	Connessione falito
+
+* COMMAND *
+x:	Connected, loading config
+it:	Connesso, configurando me stesso
+
+* EPG *
+x:	EPG
+it:	EPG
+
+x:	OK
+it:	OK
+
+x:	Page up
+it:	Pag. su
+
+x:	Page down
+it:	Pag. Giu
+
+x:	-24 hours
+it:	-24 ore
+
+x:	+24 hours
+it:	+24 ore
+
+x:	Go: Preview
+it:	Go: Antiprima
+
+x:	Guide / Back: Close
+it:	Guida/Back: Chuide
+
+x:	Rec: Set timer
+it:	Rec: Imposta timer
+
+x:	Sel channel
+it:	Scegli Can.
+
+x:	There are no programme details available for this period
+it:	Non ci sono detagli per questo periodo
+
+x:	No programme details
+it:	Senza detaglio
+
+x:	Set Timer
+it:	Imposta Timer
+
+x:	Create this timer?
+it:	Crea questo Timer?
+
+* TIMERS *
+x:	Timers
+it:	I Timer
+
+* EDIT TIMER *
+x:	Edit Timer
+it:	Editare i Timer
+
+x:	Active
+it:	Attiva
+
+x:	Channel
+it:	Canale
+
+x:	Name
+it:	Nome
+
+x:	Directory
+it:	Dir
+
+x:	Start
+it:	Inizia
+
+x:	Stop
+it:	Fine
+
+x:	Priority
+it:	Priorita
+
+x:	Lifetime
+it:	Lung. di vita
+
+x:	Current
+it:	Attuale
+
+x:	Recording
+it:	Registrazione
+
+x:	Move
+it:	Spostare
+
+x:	Failed to delete recording
+it:	Non posso cancellare la registrazione
+
+x:	Failed to move recording
+it:	Non posso spostare la registrazione
+
+x:	Move recording
+it:	Spostare la registrazione
+
+x:	Connection lost
+it:	Connessione perso
+
+x:	Timer set successfully
+it:	Timer impostato
+
+x:	There is already a timer for this event
+it:	C'è gia un Timer per questo evento
+
+x:	Failure setting timer
+it:	Falito di impostare questo Timer
+
+* MEDIA PLAYER *
+x:	Loading
+it:	Caricando
+
+x:	rotate
+it:	Gira
+
+x:	No Media found
+it:	Non ho trovaro la media
+
+x:	no VDR connection
+it:	Non c'è una connesione al VDR
+
+x:	Format(px)
+it:	Formatto(px)
+
+x:	Filesize
+it:	Misura dalla fila
+
+x:	Time
+it:	Ora
+
+x:	Rotation
+it:	Rotazione
+
+x:	Scale
+it:	Scala
+
+x:	MpegInfo
+it:	MpegInfo
+
+x:	FileName
+it:	Nome dalla fila
+
+x:	Playlist
+it:	Elenco di suonare
+
+x:	unable to open audio file
+it:	Non posso aprire questa fila audio
+
+x:	unable to get media list
+it:	Non posso prendere l'elenco dalla media
+
+x:	JointStereo
+it:	JointStereo
+
+x:	Stereo
+it:	Stereo
+
+x:	Dual
+it:	Doppia
+
+x:	Mono
+it:	Mono
+
+x:	Artist
+it:	L'artista
+
+x:	Year
+it:	Anno
+
+x:	Genre
+it:	Genre
+
+x:	Album
+it:	Album
+
+x:	Title
+it:	Tittilo
+
+x:	Track
+it:	Trk
+
+x:	Comment
+it:	Commento
+
+x:	Recordings sort order
+it:	Ordine dalla registrazione
+

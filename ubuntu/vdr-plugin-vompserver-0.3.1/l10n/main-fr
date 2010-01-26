@@ -1,0 +1,227 @@
+l10n-vomp: fr Français
+* Translation by jtk
+
+x:	VDR
+fr:	VDR
+
+x:	Welcome
+fr:	Bonjour
+
+x:	1. Live TV
+fr:	1. TV en direct
+
+x:	2. Radio
+fr:	2. Radio
+
+x:	3. Recordings
+fr:	3. Enregistrements
+
+x:	5. Options
+fr:	5. Options
+
+x:	6. Options
+fr:	6. Options
+
+x:	6. Reboot
+fr:	6. Redemarrer
+
+x:	7. Reboot
+fr:	7. Redemarrer
+
+x:	Downloading recordings list
+fr:	Recuperer liste enregistrements
+
+x:	Recordings - %s
+fr:	Enregistrements - %s
+
+x:	Recordings
+fr:	Enregistrements
+
+x:	<dir> %lu\t%s
+fr:	<dir> %lu\t%s
+
+x:	[ok] = menu
+fr:	[ok] = menu
+
+x:	%lu%% used, %iGB free
+fr:	%lu%% utilise, %iGB libre
+
+* Also used in channels list
+x:	%i to %i of %i
+fr:	%i de %i a %i
+
+* QUESTION *
+x:	Yes
+fr:	Oui
+
+x:	No
+fr:	Non
+
+* RECORDING MENU *
+x:	Programme menu
+fr:	Menu Programation
+
+x:	Play
+fr:	Jouer
+
+x:	Resume
+fr:	Reprendre
+
+x:	Summary
+fr:	Resume
+
+x:	Delete
+fr:	Supprimer
+
+x:	Programme summary
+fr:	Sommaire programmes
+
+x:	Summary unavailable
+fr:	Sommaire indisponible
+
+x:	Delete recording
+fr:	Effacer enregistrement
+
+x:	Are you sure you want to delete this recording?
+fr:	Etes-vous sur de vouloir supprimer cet enregistrement?
+
+* SERVER SELECT *
+x:	Choose a VDR server
+fr:	Choisir une serveur VDR
+
+* OPTION MENUS *
+x:	Options
+fr:	Options
+
+x:	TV connection type
+fr:	Type de connection TV
+
+x:	Remote control type
+fr:	Type telecommande
+
+x:	TV aspect ratio
+fr:	Rapport TV
+
+x:	16:9 on 4:3 display mode
+fr:	16:9 sur affichage 4:3
+
+x:	Power state after bootup
+fr:	Marche apres demarrage
+
+x:	Display channels
+fr:	Afficher chaines
+
+x:	Language
+fr:	Langue
+
+x:	Press back to exit, <, > or [ok] to change
+fr:	Appuyer retour pour sortir <, > ou [ok] pour valider
+
+x:	VDR-Pri 0=OK !See forums!
+fr:	VDR-Pri 0=OK !Voir forums!
+
+* OPTION CHOICES *
+x:	Old
+fr:	Vieux
+
+x:	New
+fr:	Nouveau
+
+x:	RGB+composite
+fr:	RGB+composite
+
+x:	S-Video
+fr:	S-Video
+
+x:	Chop sides
+fr:	Couper bords
+
+x:	Letterbox
+fr:	Letterbox
+
+x:	Last state
+fr:	Etat precedent
+
+x:	All
+fr:	Tout
+
+x:	FTA only
+fr:	FTA seulement
+
+x:	On
+fr:	On
+
+x:	Off
+fr:	Off
+
+* CHANNEL LISTS *
+x:	Channels
+fr:	Chaines
+
+x:	Radio Stations
+fr:	Stations Radio
+
+* BANNERS *
+x:	No channel data available
+fr:	Pas de chaines disponibles
+
+x:	info
+fr:	Info
+
+x:	Channel unavailable
+fr:	Chaine indisponible
+
+* CONNECT SCREEN *
+x:	Locating server
+fr:	Recherche serveur
+
+x:	Connecting to VDR
+fr:	Connection au VDR
+
+x:	Login failed
+fr:	Echec de login
+
+x:	Connection failed
+fr:	Echec de connection
+
+* COMMAND *
+x:	Connected, loading config
+fr:	Connecte, chargement configuration
+
+* EPG *
+x:	EPG
+fr:	EPG
+
+x:	OK
+fr:	OK
+
+x:	Page up
+fr:	Haut de page
+
+x:	Page down
+fr:	Bas de page
+
+x:	-24 hours
+fr:	-24 heures
+
+x:	+24 hours
+fr:	+24 heures
+
+x:	Go: Preview
+fr:	Go: apercu
+
+x:	Guide / Back: Close
+fr:	Guide / Back: Fermer
+
+x:	Rec: Set timer
+fr:	Rec: Definir heure
+
+x:	Sel channel
+fr:	Selection chaine
+
+x:	There are no programme details available for this period
+fr:	Aucune information sur le programme pour cette periode
+
+x:	No programme details
+fr:	Pas de detail du programme
+
