@@ -15,6 +15,7 @@ docbook-utils
 dpatch
 dpkg-dev
 dpkg-repack
+dvb-s2api-liplianin-headers
 fakeroot
 fuse-utils
 gdb
