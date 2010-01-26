@@ -1,0 +1,33 @@
+This is a "patch" for the Video Disk Recorder (VDR).
+
+* Description:
+Apply this patch to VDR if its video directory is a mounted network share.
+It changes the way VDR checks for different filesystems. The current method
+fails if the video directory and at least one of its subdirectories are
+network mounts of different shares. In this case the calculated amount of
+free diskspace will not always be accurate.
+
+* Installation
+Change into the VDR source directory, then issue
+  patch -p0 < path/to/vdr-1.5.15-1.7.9-video_on_networkshare.diff
+and recompile.
+
+--- tools.c.orig	2009-11-02 12:44:36.000000000 +0100
++++ tools.c	2009-11-02 13:44:27.000000000 +0100
+@@ -279,11 +279,11 @@
+ 
+ bool EntriesOnSameFileSystem(const char *File1, const char *File2)
+ {
+-  struct statfs statFs;
+-  if (statfs(File1, &statFs) == 0) {
+-     fsid_t fsid1 = statFs.f_fsid;
+-     if (statfs(File2, &statFs) == 0)
+-        return memcmp(&statFs.f_fsid, &fsid1, sizeof(fsid1)) == 0;
++  struct stat st;
++  if (stat(File1, &st) == 0) {
++     dev_t dev1 = st.st_dev;
++     if (stat(File2, &st) == 0)
++        return st.st_dev == dev1;
+      else
+         LOG_ERROR_STR(File2);
+      }

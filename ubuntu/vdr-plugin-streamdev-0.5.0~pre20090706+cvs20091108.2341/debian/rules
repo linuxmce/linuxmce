@@ -1,0 +1,27 @@
+#!/usr/bin/make -f
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/rules/dpatch.mk
+
+DEB_INSTALL_CHANGELOGS_ALL = HISTORY
+
+MAKE_OPTIONS = VDRDIR=/usr/include/vdr LIBDIR=. \
+               LOCALEDIR=debian/tmp/usr/share/locale
+
+common-build-arch::
+	$(MAKE) all $(MAKE_OPTIONS)
+
+clean::
+	$(MAKE) -o .dependencies clean $(MAKE_OPTIONS)
+	rm -f libvdr-*.so.*
+
+common-binary-predeb-arch::
+	sh /usr/share/vdr-dev/dependencies.sh
+
+VERSION_ID = $(shell echo $(DEB_UPSTREAM_VERSION) | sed 's/\+cvs.*//')+cvs$(shell date --utc +%0Y%0m%0d.%0k%0M)
+get-orig-source::
+	echo Downloading $(DEB_SOURCE_PACKAGE) $(VERSION_ID) from cvs...
+	cvs -d:pserver:anoncvs@vdr-developer.org:/var/cvsroot export -D NOW -d $(DEB_SOURCE_PACKAGE)-$(VERSION_ID) streamdev
+	tar czf ../$(DEB_SOURCE_PACKAGE)_$(VERSION_ID).orig.tar.gz $(DEB_SOURCE_PACKAGE)-$(VERSION_ID)
+	rm -rf $(DEB_SOURCE_PACKAGE)-$(VERSION_ID)
+	dch -v "$(VERSION_ID)-1" "New Upstream Snapshot"

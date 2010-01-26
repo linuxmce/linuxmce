@@ -1,0 +1,2 @@
+libvdr-streamdev-client.so.*            usr/lib/vdr/plugins/
+debian/tmp/usr/share/locale

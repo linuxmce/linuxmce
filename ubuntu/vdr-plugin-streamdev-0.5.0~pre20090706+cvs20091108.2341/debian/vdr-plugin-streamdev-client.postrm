@@ -1,0 +1,12 @@
+#! /bin/sh
+set -e
+
+# Uninstall diversions for locale files
+if [ "$1" = "remove" ]; then
+    for lang in de_DE fi_FI fr_FR it_IT ru_RU sk_SK; do
+        dpkg-divert --package vdr-plugin-streamdev-client --rename --remove \
+                    /usr/share/locale/$lang/LC_MESSAGES/vdr-streamdev.mo
+    done
+fi
+
+#DEBHELPER#

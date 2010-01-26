@@ -1,0 +1,7 @@
+vdr-plugin-xineliboutput (1.0.4+cvs20090615.1936-1) unstable; urgency=low
+
+  Xineliboutput now comes with its own demuxer. The "demux:mpeg_block"
+  option of the Xine MRL is deprecated. So please make sure, you don't
+  use the demux option as part of the MRL passed to Xine.
+
+ -- Tobias Grimm <etobi@debian.org>  Fri, 16 Oct 2009 13:09:31 +0200

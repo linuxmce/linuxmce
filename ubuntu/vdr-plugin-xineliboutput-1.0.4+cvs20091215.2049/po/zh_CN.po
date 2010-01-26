@@ -1,0 +1,654 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Xineliboutput 1.1.0\n"
+"Report-Msgid-Bugs-To: <phintuka@users.sourceforge.net>\n"
+"POT-Creation-Date: 2009-09-21 03:00+0800\n"
+"PO-Revision-Date: 2009-09-21 23:32+0800\n"
+"Last-Translator: NanFeng <nfgx@21cn.com>\n"
+"Language-Team: <vdr@linuxtv.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "custom"
+msgstr "自定义"
+
+msgid "tiny"
+msgstr "微小"
+
+msgid "small"
+msgstr "小"
+
+msgid "medium"
+msgstr "中"
+
+msgid "large"
+msgstr "大"
+
+msgid "huge"
+msgstr "巨大"
+
+msgid "automatic"
+msgstr "自动"
+
+msgid "default"
+msgstr "默认"
+
+msgid "Pan&Scan"
+msgstr "全景扫描"
+
+msgid "CenterCutOut"
+msgstr "CenterCutOut"
+
+msgid "square"
+msgstr "广场"
+
+msgid "anamorphic"
+msgstr "变形"
+
+msgid "DVB"
+msgstr "DVB"
+
+msgid "off"
+msgstr "关"
+
+msgid "normal"
+msgstr "正常"
+
+msgid "inverted"
+msgstr "反转"
+
+msgid "no audio"
+msgstr "没有音频"
+
+msgid "no video"
+msgstr "没有视频"
+
+msgid "Off"
+msgstr "关"
+
+msgid "Goom"
+msgstr "Goom"
+
+msgid "Oscilloscope"
+msgstr "示波器"
+
+msgid "FFT Scope"
+msgstr "FFT的范围"
+
+msgid "FFT Graph"
+msgstr "FFT 图像"
+
+msgid "Mono 1.0"
+msgstr "单声道 1.0"
+
+msgid "Stereo 2.0"
+msgstr "立体声2.0"
+
+msgid "Headphones 2.0"
+msgstr "耳机2.0"
+
+msgid "Stereo 2.1"
+msgstr "立体声2.1"
+
+msgid "Surround 3.0"
+msgstr "环绕声3.0"
+
+msgid "Surround 4.0"
+msgstr "环绕声4.0"
+
+msgid "Surround 4.1"
+msgstr "环绕声4.1"
+
+msgid "Surround 5.0"
+msgstr "环绕声5.0"
+
+msgid "Surround 5.1"
+msgstr "环绕声5.1"
+
+msgid "Surround 6.0"
+msgstr "环绕声6.0"
+
+msgid "Surround 6.1"
+msgstr "环绕声6.1"
+
+msgid "Surround 7.1"
+msgstr "环绕声7.1"
+
+msgid "Pass Through"
+msgstr "通过"
+
+msgid "very large"
+msgstr "非常大"
+
+msgid "Software"
+msgstr "软件"
+
+msgid "Hardware"
+msgstr "硬件"
+
+msgid "no"
+msgstr "否"
+
+msgid "grayscale"
+msgstr "灰度"
+
+msgid "transparent"
+msgstr "透明"
+
+msgid "transparent grayscale"
+msgstr "透明灰度"
+
+msgid "yes"
+msgstr "是"
+
+msgid "nearest"
+msgstr "最近"
+
+msgid "bilinear"
+msgstr "双线性"
+
+msgid "none"
+msgstr "无"
+
+msgid "nonref"
+msgstr "nonref"
+
+msgid "bidir"
+msgstr "双向口"
+
+msgid "nonkey"
+msgstr "nonkey"
+
+msgid "all"
+msgstr "所有"
+
+msgid "Frontend initialization failed"
+msgstr "前端初始化失败"
+
+msgid "Server initialization failed"
+msgstr "服务器初始化失败"
+
+msgid "Playlist"
+msgstr "播放列表"
+
+msgid "Button$Random"
+msgstr "按钮$随机"
+
+msgid "Button$Normal"
+msgstr "按钮$正常"
+
+msgid "Button$Add files"
+msgstr "按钮$添加文件"
+
+msgid "Button$Remove"
+msgstr "按钮$删除"
+
+msgid "Button$Sort"
+msgstr "按钮$排序"
+
+msgid "Queued to playlist"
+msgstr "选择队列到播放列表"
+
+msgid "Random play"
+msgstr "随机播放"
+
+msgid "Normal play"
+msgstr "正常播放"
+
+msgid "Delete image ?"
+msgstr "是否删除图片?"
+
+msgid "Images"
+msgstr "图片"
+
+msgid "Play music"
+msgstr "播放音乐"
+
+msgid "Add to playlist"
+msgstr "添加列表"
+
+msgid "Play file"
+msgstr "播放文件"
+
+msgid "Button$Queue"
+msgstr "按钮$队列"
+
+msgid "Media"
+msgstr "媒体"
+
+msgid "Play file >>"
+msgstr "播放文件 >>"
+
+msgid "Play music >>"
+msgstr "播放音乐 >>"
+
+msgid "View images >>"
+msgstr "浏览图像 >>"
+
+msgid "Play remote DVD >>"
+msgstr "玩遥控影碟 >>"
+
+msgid "Play DVD disc >>"
+msgstr "播放DVD光盘 >>"
+
+msgid "Play remote CD >>"
+msgstr "播放远程光盘 >>"
+
+msgid "Play audio CD >>"
+msgstr "播放音乐CD >>"
+
+msgid "Video settings"
+msgstr "视频设置"
+
+msgid "Play only audio"
+msgstr "只播放声音"
+
+msgid "Crop letterbox 4:3 to 16:9"
+msgstr "选择4:3或者16:9"
+
+msgid "Overscan (crop image borders)"
+msgstr "过扫描(去掉图像边框)"
+
+msgid "Interlaced Field Order"
+msgstr "隔行场令"
+
+msgid "Audio settings"
+msgstr "音频设置"
+
+msgid "Headphone audio mode"
+msgstr "耳机音频模式"
+
+msgid "Audio Compression"
+msgstr "音频压缩"
+
+msgid "Audio equalizer >>"
+msgstr "音频均衡器 >>"
+
+msgid "Local Frontend"
+msgstr "本地前端"
+
+msgid "Aspect ratio"
+msgstr "画面比例"
+
+msgid "Video aspect ratio"
+msgstr "视频宽高比"
+
+msgid "On"
+msgstr "开"
+
+msgid "Deinterlacing"
+msgstr "去隔行"
+
+msgid "Upmix stereo to 5.1"
+msgstr "上混立体声到5.1"
+
+msgid "Downmix AC3 to surround"
+msgstr "缩混的AC3"
+
+msgid "Default playlist not found"
+msgstr "默认播放列表没有找到"
+
+msgid "Default playlist is not symlink"
+msgstr "默认播放列表不是符号"
+
+msgid "Default playlist not defined"
+msgstr "默认播放列表没有定义"
+
+msgid "Delay"
+msgstr "延迟"
+
+msgid "ms"
+msgstr "毫秒"
+
+#, c-format
+msgid "xineliboutput: hotkey %s not binded"
+msgstr "xineliboutput的：热键%s不可绑定"
+
+msgid "Audio"
+msgstr "音频"
+
+msgid "Speakers"
+msgstr "喇叭"
+
+msgid "Volume control"
+msgstr "音量控制"
+
+msgid "Mix to headphones"
+msgstr "组合，以耳机"
+
+msgid "Visualization"
+msgstr "可视化"
+
+msgid "  Width"
+msgstr "宽度"
+
+msgid "px"
+msgstr "px"
+
+msgid "  Height"
+msgstr "高度"
+
+msgid "  Speed"
+msgstr "速度"
+
+msgid "fps"
+msgstr "帧"
+
+msgid "Audio Equalizer"
+msgstr "音频均衡器"
+
+msgid "Use Video-Out Driver"
+msgstr "使用视频输出驱动器"
+
+msgid "vector"
+msgstr "载体"
+
+msgid "full"
+msgstr "全"
+
+msgid "half (top)"
+msgstr "半(上)"
+
+msgid "half (bottom)"
+msgstr "半(下)"
+
+msgid "Video"
+msgstr "视频"
+
+msgid "  Autodetect letterbox"
+msgstr "自动检测盒子模式"
+
+msgid "  Soft start"
+msgstr "软启动"
+
+msgid "  Crop to"
+msgstr "剪裁"
+
+msgid "  Detect subtitles"
+msgstr "检测的字幕"
+
+msgid "Software scaling"
+msgstr "软件缩放"
+
+msgid "  Change aspect ratio"
+msgstr "更改宽高比"
+
+msgid "  Change video size"
+msgstr "改变视频大小"
+
+msgid "  Allow downscaling"
+msgstr "允许缩小尺度"
+
+msgid "Post processing (ffmpeg)"
+msgstr "后处理（ffmpeg）"
+
+msgid "  Quality"
+msgstr "  Quality"
+
+msgid "  Mode"
+msgstr "  Mode"
+
+msgid "  Method"
+msgstr "  Method"
+
+msgid "  Cheap mode"
+msgstr "  Cheap mode"
+
+msgid "  Pulldown"
+msgstr "  Pulldown"
+
+msgid "  Frame rate"
+msgstr "  Frame rate"
+
+msgid "  Judder Correction"
+msgstr "  Judder Correction"
+
+msgid "  Use progressive frame flag"
+msgstr "  Use progressive frame flag"
+
+msgid "  Chroma Filter"
+msgstr "  Chroma Filter"
+
+msgid "Sharpen / Blur"
+msgstr "锐化/模糊"
+
+msgid "  Width of the luma matrix"
+msgstr "  Width of the luma matrix"
+
+msgid "  Height of the luma matrix"
+msgstr "  Height of the luma matrix"
+
+msgid "  Amount of luma sharpness/blur"
+msgstr "  Amount of luma sharpness/blur"
+
+msgid "  Width of the chroma matrix"
+msgstr "  Width of the chroma matrix"
+
+msgid "  Height of the chroma matrix"
+msgstr "  Height of the chroma matrix"
+
+msgid "  Amount of chroma sharpness/blur"
+msgstr "  Amount of chroma sharpness/blur"
+
+msgid "3D Denoiser"
+msgstr "3D噪点去除"
+
+msgid "  Spatial luma strength"
+msgstr "  Spatial luma strength"
+
+msgid "  Spatial chroma strength"
+msgstr "  Spatial luma strength"
+
+msgid "  Temporal strength"
+msgstr "  Temporal strength"
+
+msgid "HUE"
+msgstr "色相"
+
+msgid "Saturation"
+msgstr "饱和度"
+
+msgid "Contrast"
+msgstr "对比度"
+
+msgid "Brightness"
+msgstr "亮度"
+
+msgid "Sharpness"
+msgstr "锐利"
+
+msgid "Noise Reduction"
+msgstr "降噪"
+
+msgid "Smooth fast forward"
+msgstr "平稳快速前进"
+
+msgid "Fastest trick speed"
+msgstr "速度最快的方式"
+
+msgid "On-Screen Display"
+msgstr "屏幕显示"
+
+msgid "Hide main menu"
+msgstr "隐藏主菜单"
+
+msgid "Resolution"
+msgstr "解决方案"
+
+msgid "Blending method"
+msgstr "混合方法"
+
+msgid "  Use hardware for low-res video"
+msgstr "低清晰度视频使用硬"
+
+msgid "Scaling method"
+msgstr "缩放方法"
+
+msgid "Show all layers"
+msgstr "显示所有层"
+
+msgid "Dynamic transparency correction"
+msgstr "动态透明度更正"
+
+msgid "Static transparency correction"
+msgstr "静态透明度更正"
+
+msgid "External subtitle size"
+msgstr "外部字幕大小"
+
+msgid "DVB subtitle decoder"
+msgstr "DVB字幕解码器"
+
+msgid "Decoder"
+msgstr "解码器"
+
+msgid "Buffer size"
+msgstr "缓冲区大小"
+
+msgid "  Number of PES packets"
+msgstr "PES的数据包"
+
+msgid "Local Display Frontend"
+msgstr "本地显示前端"
+
+msgid "Use keyboard"
+msgstr "使用键盘"
+
+msgid "Driver"
+msgstr "驱动"
+
+msgid "Display address"
+msgstr "显示地址"
+
+msgid "Framebuffer device"
+msgstr "帧缓冲设备"
+
+msgid "Fullscreen mode"
+msgstr "全屏模式"
+
+msgid "  Window width"
+msgstr "窗口宽度"
+
+msgid "  Window height"
+msgstr "窗口的高度"
+
+msgid "Window aspect"
+msgstr "窗口缩放"
+
+msgid "Scale to window size"
+msgstr "缩放到窗口大小"
+
+msgid "Port"
+msgstr "端口"
+
+msgid "Remote Clients"
+msgstr "远程用户"
+
+msgid "Allow remote clients"
+msgstr "允许远程客户"
+
+msgid "  Listen port (TCP and broadcast)"
+msgstr "听端口(TCP和广播)"
+
+msgid "  Listen address"
+msgstr "侦听地址"
+
+msgid "  Remote keyboard"
+msgstr "远程键盘"
+
+msgid "  Max number of clients"
+msgstr "最大数量的客户"
+
+msgid "  PIPE transport"
+msgstr "PIPE 传送"
+
+msgid "  TCP transport"
+msgstr "TCP 传送"
+
+msgid "  UDP transport"
+msgstr "UDP 传送"
+
+msgid "  RTP (multicast) transport"
+msgstr "RTP (组播) 传送"
+
+msgid "    Address"
+msgstr "地址"
+
+msgid "    Port"
+msgstr "端口"
+
+msgid "    TTL"
+msgstr "TTL"
+
+msgid "    Transmit always on"
+msgstr "传送永远在线"
+
+msgid "    SAP announcements"
+msgstr "SAP公司公布"
+
+msgid "  Server announce broadcasts"
+msgstr "服务器宣布广播"
+
+msgid "  HTTP transport for media files"
+msgstr "HTTP传输媒体文件"
+
+msgid "Additional network services"
+msgstr "其他网络服务"
+
+msgid "HTTP server"
+msgstr "HTTP服务器"
+
+msgid "HTTP clients can control VDR"
+msgstr "HTTP客户端可以控制VDR"
+
+msgid "RTSP server"
+msgstr "RTSP服务器"
+
+msgid "RTSP clients can control VDR"
+msgstr "RTSP协议的客户可以控制VDR"
+
+msgid "Playlist settings"
+msgstr "播放设置"
+
+msgid "Show the track number"
+msgstr "显示曲目数量"
+
+msgid "Show the name of the artist"
+msgstr "显示艺术家的名字"
+
+msgid "Show the name of the album"
+msgstr "显示的专辑名称"
+
+msgid "Scan for metainfo"
+msgstr "信息扫描"
+
+msgid "Cache metainfo"
+msgstr "缓存信息"
+
+msgid "Arrow keys control DVD playback"
+msgstr "允许按键控制DVD回放"
+
+msgid "Grayscale"
+msgstr "灰度"
+
+msgid "Bitmap"
+msgstr "位图"
+
+msgid "OSD"
+msgstr "菜单"
+
+msgid "Media Player"
+msgstr "媒体播放器"
+
+msgid "Test Images"
+msgstr "测试图像"
+
+msgid "X11/xine-lib output plugin"
+msgstr "X11/xine-lib 视频输出插件 by NFVDR-HD"
+
