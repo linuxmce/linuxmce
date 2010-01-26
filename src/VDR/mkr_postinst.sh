@@ -3,11 +3,13 @@
 
 # Get the device ID of this system
 . /usr/pluto/bin/Config_Ops.sh
-ConfEval()
+ConfEval
 
 
 # Get the video dir of VDR
-VIDEO_DIR=/home/public/data/pvr
+VIDEO_DIR="/home/public/data/pvr"
+
+# If the user already overwrote the default, get it.
 . /etc/default/vdr
 
 # We can't have VDR running during setup file edit
@@ -215,3 +217,8 @@ remotetimers.UserFilterTimers = 0
 remotetimers.WatchUpdate = 1
 ">> /var/lib/vdr/setup.conf
 fi
+
+# We restart VDR after the install on the core
+if [[ "$PK_Device" -eq "1" ]]; then
+        invoke-rc.d vdr restart
+fi    
