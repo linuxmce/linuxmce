@@ -131,7 +131,7 @@ function Build_Replacements_Common
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/lmcevdr_*.deb ${replacements_dir}
 
 	#Package: vdr-plugin-control
-	Build_Replacement_Package vdr-plugin-control ubuntu/vdr-plugin-control-0.0.2a+lmce
+#	Build_Replacement_Package vdr-plugin-control ubuntu/vdr-plugin-control-0.0.2a+lmce
 
 }
 
@@ -151,41 +151,52 @@ function Build_Replacements_Intrepid
 		DisplayMessage "Building lirc"
 		pushd "$dir_"
 		echo "dpkg-buildpackage -rfakeroot -us -uc -b"
-		dpkg-buildpackage -rfakeroot -us -uc -b
-		cp -r ../*lirc*.deb "${replacements_dir}"
+#		dpkg-buildpackage -rfakeroot -us -uc -b
+#		cp -r ../*lirc*.deb "${replacements_dir}"
 		popd
 	fi
 
         #Package: libxine 	
 #	Build_Replacement_Package libxine ubuntu/xine-lib-1.1.16.3-0ubuntu2~xine 
-	Build_Replacement_Package libxine ubuntu/xine-lib-1.1.16.3-lmce0
+	Build_Replacement_Package libxine1 ubuntu/xine-lib-1.1.16.4
+	# install the results
+	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/libxine1_*.deb ${svn_dir}/${svn_branch_name}/ubuntu/libxine-dev_*.deb
 
-        #Package: alsa dianemo packages
-
-        if [ ! -f libtool_1.5.26-1ubuntu1_i386.deb ]; then 
-        	wget http://ftp.sjtu.edu.cn/ubuntu/pool/main/libt/libtool/libtool_1.5.26-1ubuntu1_i386.deb
-        fi
+        wget http://ftp.sjtu.edu.cn/ubuntu/pool/main/libt/libtool/libtool_1.5.26-1ubuntu1_i386.deb
         dpkg -i libtool_1.5.26-1ubuntu1_i386.deb
         Build_Replacement_Package libasound2 ubuntu/alsa-lib-1.0.18
         # and now we go back to the latest libtool
         apt-get install libtool
 	if ! dpkg -l libasound2-dev &>/dev/null; then
 		dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/libasound2_*deb
-		dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/lib64asound2_*deb
+		dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/lib32asound2_*deb
 		dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/libasound2-dev_*deb
-		dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/lib64asound2-dev_*deb
+		dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/lib32asound2-dev_*deb
 	fi
 	Build_Replacement_Package libasound2-plugins ubuntu/alsa-plugins-1.0.18
 	Build_Replacement_Package alsa-utils ubuntu/alsa-utils-1.0.18
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/*asound*deb ${replacements_dir}
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/alsa*deb ${replacements_dir}
+#	v4l-modules-source
+	Build_Replacement_Package v4l2 ubuntu/v4l-modules-source
 
-
-
-	#Package: vdr-plugin-xineliboutput
-	Build_Replacement_Package vdr-plugin-xineliboutput ubuntu/vdr-plugin-xineliboutput-1.0.1+lmce
+	# VDR Packages
+	DisplayMessage "Building VDR packages and plugins"
+	Build_Replacement_Package vdr ubuntu/vdr-1.7.11
+	# To build the plugins, we need to have the current -dev package installed
+	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/vdr-dev_*.deb
+	
+	Build_Replacement_Package vdr-plugin-control ubuntu/vdr-plugin-control-0.0.2a
+	Build_Replacement_Package vdr-plugin-svdrpservice ubuntu/vdr-plugin-svdrpservice-0.0.4
+	# The dev package needs to be installed to build the remote timers plugin.
+        dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/svdrpservice-dev_*.deb
+	Build_Replacement_Package vdr-plugin-remotetimers ubuntu/vdr-plugin-remotetimers-0.1.2
+	Build_Replacement_Package vdr-plugin-streamdev ubuntu/vdr-plugin-streamdev-0.5.0~pre20090706+cvs20091108.2341
+	Build_Replacement_Package vdr-plugin-vompserver ubuntu/vdr-plugin-vompserver-0.3.1
+	Build_Replacement_Package vdr-plugin-xineliboutput ubuntu/vdr-plugin-xineliboutput-1.0.4+cvs20091215.2049
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/libxine*.deb ${replacements_dir}
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/xineliboutput-*.deb ${replacements_dir}
+
 
 	#Package: zaptel-modules
 	DisplayMessage "Building zaptel-modules"
