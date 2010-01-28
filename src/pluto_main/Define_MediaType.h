@@ -37,7 +37,8 @@
 #define MEDIATYPE_lmce_Game_nes_CONST 37
 #define MEDIATYPE_lmce_Game_sms_CONST 38
 #define MEDIATYPE_lmce_Game_sg1000_CONST 39
-#define MEDIATYPE_lmce_LiveTV_Hulu_CONST 40
+#define MEDIATYPE_np_Tivo3_CONST 40
+#define MEDIATYPE_np_Tivo2_CONST 41
 
 #define MEDIATYPE_TABLE "MediaType"
 #define MEDIATYPE_PK_MEDIATYPE_FIELD "PK_MediaType"

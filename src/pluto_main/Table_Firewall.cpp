@@ -321,8 +321,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[21];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Protocol.c_str(), (unsigned long) min((size_t)10,m_Protocol.size()));
+char *buf = new char[61];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Protocol.c_str(), (unsigned long) min((size_t)30,m_Protocol.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -374,8 +374,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[5])
 return "NULL";
 
-char *buf = new char[101];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_SourceIP.c_str(), (unsigned long) min((size_t)50,m_SourceIP.size()));
+char *buf = new char[301];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_SourceIP.c_str(), (unsigned long) min((size_t)150,m_SourceIP.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -388,8 +388,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[6])
 return "NULL";
 
-char *buf = new char[101];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_DestinationIP.c_str(), (unsigned long) min((size_t)50,m_DestinationIP.size()));
+char *buf = new char[301];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_DestinationIP.c_str(), (unsigned long) min((size_t)150,m_DestinationIP.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -402,8 +402,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[7])
 return "NULL";
 
-char *buf = new char[101];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_RuleType.c_str(), (unsigned long) min((size_t)50,m_RuleType.size()));
+char *buf = new char[301];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_RuleType.c_str(), (unsigned long) min((size_t)150,m_RuleType.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;

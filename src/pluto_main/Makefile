@@ -3,7 +3,7 @@ CXXFLAGS = -pipe -Wall -O2 -D_GNU_SOURCE -fPIC -g -ggdb3
 CPPFLAGS =  -I.. -I../.. -I../DCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DMULTI_THREADED -DNO_SQL_THREAD_LOG
 CXX = g++
 LDFLAGS = -L$(ROOT)/lib
-
+sources = Database_pluto_main.cpp TableRow.cpp
 #<-mkr_B_use_mysql_wrapper_b->
 CPPFLAGS += -I/usr/include/mysql
 LDFLAGS += -lmysqlclient_r
@@ -11,7 +11,7 @@ LDFLAGS += -lmysqlclient_r
 
 #
 
-sources = ../db_wrapper/db_wrapper.cpp ../db_wrapper/ClientSocket.cpp ../db_wrapper/Socket.cpp Database_pluto_main.cpp TableRow.cpp \
+sources +=  \
 Table_Array.cpp \
 Table_Broadcast.cpp \
 Table_Button.cpp \

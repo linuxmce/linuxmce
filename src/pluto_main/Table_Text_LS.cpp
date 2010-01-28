@@ -297,7 +297,7 @@ if (is_null[2])
 return "NULL";
 
 char *buf = new char[5000000];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)-1,m_Description.size()));
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)-3,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;

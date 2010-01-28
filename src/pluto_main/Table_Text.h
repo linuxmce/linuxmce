@@ -166,7 +166,8 @@ void psc_restrict_setNull(bool val);
 
 
 		// Return the rows in other tables with foreign keys pointing here
-		void DesignObjVariation_Text_FK_Text_getrows(vector <class Row_DesignObjVariation_Text*> *rows);
+		void CommandGroup_FK_Text_getrows(vector <class Row_CommandGroup*> *rows);
+void DesignObjVariation_Text_FK_Text_getrows(vector <class Row_DesignObjVariation_Text*> *rows);
 void DesignObjVariation_Text_FK_Text_OverrideFromHeader_getrows(vector <class Row_DesignObjVariation_Text*> *rows);
 void Text_LS_FK_Text_getrows(vector <class Row_Text_LS*> *rows);
 void Text_LS_AltVersions_FK_Text_getrows(vector <class Row_Text_LS_AltVersions*> *rows);

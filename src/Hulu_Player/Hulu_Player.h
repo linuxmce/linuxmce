@@ -93,7 +93,10 @@ public:
 	bool DATA_Get_Only_One_Per_PC();
 
 			*****EVENT***** accessors inherited from base class
+	void EVENT_Playback_Info_Changed(string sMediaDescription,string sSectionDescription,string sSynposisDescription);
 	void EVENT_Menu_Onscreen(int iStream_ID,bool bOnOff);
+	void EVENT_Playback_Completed(string sMRL,int iStream_ID,bool bWith_Errors);
+	void EVENT_Playback_Started(string sMRL,int iStream_ID,string sSectionDescription,string sAudio,string sVideo);
 
 			*****COMMANDS***** we need to implement
 	*/

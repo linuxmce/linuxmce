@@ -160,7 +160,7 @@
 #define SCREEN_Game_SG1000_SMS_NES_Famicom_FS_CONST 159
 #define SCREEN_Game_SG1000_SMS_NES_Famicom_FS_Options_CONST 160
 #define SCREEN_Game_Menu_Onscreen_NonOSD_CONST 161
-#define SCREEN_Hulu_Remote_CONST 162
+#define SCREEN_AudiAgenda_CONST 162
 #define SCREEN_AudiOther_CONST 163
 #define SCREEN_AudiNav_CONST 164
 #define SCREEN_AudiInfo_CONST 165
@@ -284,6 +284,8 @@
 #define SCREEN_Generic_BluRay_Remote_CONST 298
 #define SCREEN_NonPluto_BluRay_FS_CONST 299
 #define SCREEN_NonPluto_BluRay_FS_Options_CONST 300
+#define SCREEN_Tivo_Series_3_Remote_CONST 301
+#define SCREEN_Tivo_Series_2_Remote_CONST 302
 
 #define SCREEN_TABLE "Screen"
 #define SCREEN_PK_SCREEN_FIELD "PK_Screen"

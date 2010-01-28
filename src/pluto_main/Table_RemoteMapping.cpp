@@ -321,8 +321,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[1])
 return "NULL";
 
-char *buf = new char[81];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)40,m_Description.size()));
+char *buf = new char[241];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)120,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -335,8 +335,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[3];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_ScreenType.c_str(), (unsigned long) min((size_t)1,m_ScreenType.size()));
+char *buf = new char[7];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_ScreenType.c_str(), (unsigned long) min((size_t)3,m_ScreenType.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -349,8 +349,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[3])
 return "NULL";
 
-char *buf = new char[3];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_RemoteLayout.c_str(), (unsigned long) min((size_t)1,m_RemoteLayout.size()));
+char *buf = new char[7];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_RemoteLayout.c_str(), (unsigned long) min((size_t)3,m_RemoteLayout.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -363,8 +363,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[4])
 return "NULL";
 
-char *buf = new char[131071];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Mapping.c_str(), (unsigned long) min((size_t)65535,m_Mapping.size()));
+char *buf = new char[393211];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Mapping.c_str(), (unsigned long) min((size_t)196605,m_Mapping.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;

@@ -304,8 +304,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[61];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_FindStr.c_str(), (unsigned long) min((size_t)30,m_FindStr.size()));
+char *buf = new char[181];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_FindStr.c_str(), (unsigned long) min((size_t)90,m_FindStr.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -318,8 +318,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[3])
 return "NULL";
 
-char *buf = new char[131071];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_ReplaceStr.c_str(), (unsigned long) min((size_t)65535,m_ReplaceStr.size()));
+char *buf = new char[393211];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_ReplaceStr.c_str(), (unsigned long) min((size_t)196605,m_ReplaceStr.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -515,7 +515,7 @@ sprintf(tmp_FK_ConfigType_Setting, "%li", key.pk_FK_ConfigType_Setting);
 char tmp_FK_ConfigType_File[32];
 sprintf(tmp_FK_ConfigType_File, "%li", key.pk_FK_ConfigType_File);
 
-char tmp_FindStr[61];
+char tmp_FindStr[181];
 db_wrapper_real_escape_string(database->m_pDB,tmp_FindStr, key.pk_FindStr.c_str(), (unsigned long) key.pk_FindStr.size());
 
 
@@ -580,7 +580,7 @@ sprintf(tmp_FK_ConfigType_Setting, "%li", key.pk_FK_ConfigType_Setting);
 char tmp_FK_ConfigType_File[32];
 sprintf(tmp_FK_ConfigType_File, "%li", key.pk_FK_ConfigType_File);
 
-char tmp_FindStr[61];
+char tmp_FindStr[181];
 db_wrapper_real_escape_string(database->m_pDB,tmp_FindStr, key.pk_FindStr.c_str(), (unsigned long) key.pk_FindStr.size());
 
 
@@ -849,7 +849,7 @@ sprintf(tmp_FK_ConfigType_Setting, "%li", key.pk_FK_ConfigType_Setting);
 char tmp_FK_ConfigType_File[32];
 sprintf(tmp_FK_ConfigType_File, "%li", key.pk_FK_ConfigType_File);
 
-char tmp_FindStr[61];
+char tmp_FindStr[181];
 db_wrapper_real_escape_string(database->m_pDB,tmp_FindStr, key.pk_FindStr.c_str(), (unsigned long) key.pk_FindStr.size());
 
 

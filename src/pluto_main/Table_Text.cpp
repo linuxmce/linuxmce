@@ -33,6 +33,7 @@ using namespace std;
 #include "Table_Text.h"
 #include "Table_TextCategory.h"
 
+#include "Table_CommandGroup.h"
 #include "Table_DesignObjVariation_Text.h"
 #include "Table_DesignObjVariation_Text.h"
 #include "Table_Text_LS.h"
@@ -322,8 +323,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[81];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)40,m_Description.size()));
+char *buf = new char[241];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Description.c_str(), (unsigned long) min((size_t)120,m_Description.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -336,8 +337,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[3])
 return "NULL";
 
-char *buf = new char[81];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)40,m_Define.size()));
+char *buf = new char[241];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)120,m_Define.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;
@@ -1051,6 +1052,13 @@ return pTable->GetRow(m_FK_TextCategory);
 }
 
 
+void Row_Text::CommandGroup_FK_Text_getrows(vector <class Row_CommandGroup*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_CommandGroup *pTable = table->database->CommandGroup_get();
+pTable->GetRows("`FK_Text`=" + StringUtils::itos(m_PK_Text),rows);
+}
 void Row_Text::DesignObjVariation_Text_FK_Text_getrows(vector <class Row_DesignObjVariation_Text*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);

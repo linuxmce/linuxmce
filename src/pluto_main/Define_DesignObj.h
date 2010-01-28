@@ -2629,13 +2629,17 @@
 #define DESIGNOBJ_grpNumberPad_RC_CONST 6020
 #define DESIGNOBJ_butNavSelect_CONST 6021
 #define DESIGNOBJ_butNavOk_CONST 6022
-#define DESIGNOBJ_Tivo2_CONST 6023
 #define DESIGNOBJ_Tivo3_CONST 6024
 #define DESIGNOBJ_HuluDesktop_CONST 6025
 #define DESIGNOBJ_grpNavigationLargeArrows_CONST 6026
 #define DESIGNOBJ_mnuBasicOSDRemote_CONST 6027
 #define DESIGNOBJ_mnuBasicOSDRemote_SmallUI_CONST 6028
-#define DESIGNOBJ_popHuluTVOptions_CONST 6029
+#define DESIGNOBJ_VideosRemote_CONST 6029
+#define DESIGNOBJ_butTivoThumbsDown_CONST 6030
+#define DESIGNOBJ_butTivo2Menu_CONST 6031
+#define DESIGNOBJ_butTivo3Menu_CONST 6032
+#define DESIGNOBJ_butTivoThumbsUp_CONST 6033
+#define DESIGNOBJ_Tivo2_CONST 6034
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"
