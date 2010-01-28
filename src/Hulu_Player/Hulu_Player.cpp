@@ -146,10 +146,48 @@ void Hulu_Player::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 
 bool Hulu_Player::UpdateHuluConfig()
 {
-  // STUB: may be used later. It's here just in case we need to rebuild hulu desktop's
-  // config file.
-  
-  return true;
+ 
+	const string s_OutputFile = "/root/.huludesktop";
+	string s_ConfigFile = 
+	"[display]\n"
+	"fullscreen = FALSE\n"
+	"width = 640\n"
+	"height = 480\n"
+	"pos_x = 0\n"
+	"pos_y = 0\n"
+	"\n"
+	"[remote]\n"
+	"lirc_device = /dev/lircd\n"
+	"lirc_remote_identifier = mceusb\n"
+	"lirc_release_suffix = _UP\n"
+	"lirc_repeat_threshold = 10\n"
+	"button_name_up = Up\n"
+	"button_name_down = Down\n"
+	"button_name_left = Left\n"
+	"button_name_right = Right\n"
+	"button_name_select = OK\n"
+	"button_name_menu = Home\n"
+	"\n"
+	"[flash]\n"
+	"flash_location = /usr/lib/mozilla/plugins/flashplugin-alternative.so\n"
+	"\n"
+	"[screensaver]\n"
+	"suspend_script = (null)\n"
+	"resume_script = (null)\n"
+	"\n"
+	"[version]\n"
+	"latest = (null)\n"
+	"eula_version = 1\n";
+
+
+	if (!FileUtils::WriteTextFile(s_OutputFile,s_ConfigFile)) 
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Couldn't write %s",s_OutputFile.c_str());		
+		return false;	
+	} else {
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Wrote %s",s_OutputFile.c_str());
+		return true;	
+	}
 
 }
 
