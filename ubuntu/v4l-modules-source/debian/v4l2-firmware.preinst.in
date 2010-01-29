@@ -5,7 +5,7 @@ if [ install = "$1" -o upgrade = "$1" ]; then
 	/lib/firmware/v4l-pvrusb2-29xxx-01.fw
         dpkg-divert --add --rename --package v4l2-firmware --divert /lib/firmware/v4l-cx2341x-init.mpg.wraped /lib/firmware/v4l-cx2341x-init.mpg
         dpkg-divert --add --rename --package v4l2-firmware --divert /lib/firmware/v4l-pvrusb2-29xxx-01.fw.wraped /lib/firmware/v4l-pvrusb2-29xxx-01.fw
-
+	dpkg-divert --add --rename --package v4l2-firmware --divert /lib/firmware/v4l-pvrusb2-24xxx-01.fw.wraped /lib/firmware/v4l-pvrusb2-24xxx-01.fw
 fi
                 
                 
