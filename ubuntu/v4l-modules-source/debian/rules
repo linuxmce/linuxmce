@@ -31,7 +31,7 @@ configure-stamp:
 
 
 build: build-stamp
-	for file in dkms.conf debian/v4l2-modules.postinst debian/v4l2-modules.prerm debian.v4l2-firmware.preinst ; do \
+	for file in dkms.conf debian/v4l2-modules.postinst debian/v4l2-modules.prerm debian/v4l2-firmware.preinst ; do \
 		sed -r 's,package_version,$(PKGVER),g' $$file.in >$$file; \
 	done
 
