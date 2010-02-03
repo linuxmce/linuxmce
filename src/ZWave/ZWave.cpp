@@ -244,11 +244,11 @@ PK_CommandParameter|Value|... */
 void ZWave::CMD_Send_Command_To_Child(string sID,int iPK_Command,string sParameters,string &sCMD_Result,Message *pMessage)
 //<-dceag-c760-e->
 {
-	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Received command #760 - Send Command To Child");
 	int node_id = atoi(sID.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Received command #760 - Send Command To Child, node id: %i",node_id);
 	if (node_id > 0 && node_id <= 233) {
 		sCMD_Result = "OK";
-		switch (pMessage->m_dwID) {
+		switch (iPK_Command) {
 			case COMMAND_Generic_On_CONST:
 				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ON RECEIVED FOR CHILD %d",node_id);
 				myZWApi->zwBasicSet(node_id,255);
@@ -260,6 +260,7 @@ void ZWave::CMD_Send_Command_To_Child(string sID,int iPK_Command,string sParamet
 				break;
 				;;
 			default:
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"NOT IMPLEMENTED COMMAND RECEIVED FOR CHILD %d",node_id);
 				sCMD_Result = "ZWave NOT IMPLEMENTED";
 		}
 	} else {
