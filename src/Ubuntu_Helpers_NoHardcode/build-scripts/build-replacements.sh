@@ -168,10 +168,7 @@ function Build_Replacements_Intrepid
         # and now we go back to the latest libtool
         apt-get install libtool
 	if ! dpkg -l libasound2-dev &>/dev/null; then
-		dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/libasound2_*deb
-		dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/lib32asound2_*deb
-		dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/libasound2-dev_*deb
-		dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/lib32asound2-dev_*deb
+		dpkg --force-all -i ${svn_dir}/${svn_branch_name}/ubuntu/libasound2_*deb ${svn_dir}/${svn_branch_name}/ubuntu/lib32asound2_*deb ${svn_dir}/${svn_branch_name}/ubuntu/libasound2-dev_*deb ${svn_dir}/${svn_branch_name}/ubuntu/lib32asound2-dev_*deb
 	fi
 	Build_Replacement_Package libasound2-plugins ubuntu/alsa-plugins-1.0.18
 	Build_Replacement_Package alsa-utils ubuntu/alsa-utils-1.0.18
