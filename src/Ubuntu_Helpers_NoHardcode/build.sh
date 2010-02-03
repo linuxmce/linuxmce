@@ -19,8 +19,8 @@ fi
 
 "${build_scripts_dir}/create-repo.sh"
 
-"${build_scripts_dir}/cd1-build.sh"
-"${build_scripts_dir}/cd2-build.sh"
+#"${build_scripts_dir}/cd1-build.sh"
+#"${build_scripts_dir}/cd2-build.sh"
 
 if [ x"$do_not_build_sl_dvd" != x"yes" ] ; then
 
@@ -45,3 +45,4 @@ pushd /usr/local/lmce-build/build-dvd
 popd
 
 fi
+wget http://vt100.at/announce.php?text=fluffy\ is\ done -O /dev/null

@@ -23,7 +23,7 @@ function Create_Diskless_Debootstrap_Archive {
 	# Add some needed repos
 	echo deb http://archive.ubuntu.com/ubuntu/ $build_name main restricted universe multiverse >$temp_dir/etc/apt/sources.list
 	echo deb http://security.ubuntu.com/ubuntu/ $build_name main restricted universe multiverse >>$temp_dir/etc/apt/sources.list
-	echo deb http://www.avenard.org/files/ubuntu-repos $build_name release testing >>$temp_dir/etc/apt/sources.list
+	echo deb http://www.avenard.org/files/ubuntu-repos $build_name release >>$temp_dir/etc/apt/sources.list
 #	echo deb http://deb.linuxmce.org/ubuntu/  ${DISTRO}  ${COMPOS} >$temp_dir/etc/apt/sources.list
 	
 	echo "192.168.80.1 dcerouter" >>$temp_dir/etc/hosts

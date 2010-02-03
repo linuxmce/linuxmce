@@ -160,7 +160,7 @@ function Build_Replacements_Intrepid
 #	Build_Replacement_Package libxine ubuntu/xine-lib-1.1.16.3-0ubuntu2~xine 
 	Build_Replacement_Package libxine1 ubuntu/xine-lib-1.1.16.4
 	# install the results
-	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/libxine1_*.deb ${svn_dir}/${svn_branch_name}/ubuntu/libxine-dev_*.deb
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/libxine1_*.deb ${svn_dir}/${svn_branch_name}/ubuntu/libxine-dev_*.deb
 
         wget http://ftp.sjtu.edu.cn/ubuntu/pool/main/libt/libtool/libtool_1.5.26-1ubuntu1_i386.deb
         dpkg -i libtool_1.5.26-1ubuntu1_i386.deb
@@ -182,6 +182,7 @@ function Build_Replacements_Intrepid
 
 	# VDR Packages
 	DisplayMessage "Building VDR packages and plugins"
+	export PATCHVARIANT=multipatch
 	Build_Replacement_Package vdr ubuntu/vdr-1.7.11
 	# To build the plugins, we need to have the current -dev package installed
 	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/vdr-dev_*.deb
