@@ -45,4 +45,3 @@ pushd /usr/local/lmce-build/build-dvd
 popd
 
 fi
-wget http://vt100.at/announce.php?text=fluffy\ is\ done -O /dev/null
