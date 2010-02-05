@@ -280,6 +280,23 @@ void Event_Plugin::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 	sCMD_Result = "UNKNOWN DEVICE";
 }
 
+void Event_Plugin::GetHouseModes() {
+
+	PLUTO_SAFETY_LOCK(em,m_EventMutex);
+        Row_Device_DeviceData *pRow_Device_DeviceData = m_pDatabase_pluto_main->Device_DeviceData_get()->GetRow(m_dwPK_Device,DEVICEDATA_Configuration_CONST);
+	if( !pRow_Device_DeviceData )
+	        return;
+
+        m_mapPK_HouseMode.clear();
+	string sData=pRow_Device_DeviceData->IK_DeviceData_get();
+	string::size_type pos=0;
+	while( pos<sData.size() && pos!=string::npos )
+	{
+	        int PK_DeviceGroup = atoi( StringUtils::Tokenize(sData,",",pos).c_str() );
+		m_mapPK_HouseMode[PK_DeviceGroup]=atoi( StringUtils::Tokenize(sData,",",pos).c_str() );
+	}
+}
+
 bool Event_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessage,class DeviceData_Base *pDeviceFrom,class DeviceData_Base *pDeviceTo)
 {
 	ListEventHandler *pListEventHandler = m_mapListEventHandler_Find(pMessage->m_dwID);
@@ -289,7 +306,8 @@ bool Event_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessage,cl
 		return false;
 	}
 
-	EventInfo *pEventInfo = new EventInfo(pMessage->m_dwID,pMessage,(DeviceData_Router *)pDeviceFrom,1 /*m_iPKID_C_HouseMode*/);
+	GetHouseModes(); // Update house modes
+	EventInfo *pEventInfo = new EventInfo(pMessage->m_dwID,pMessage,(DeviceData_Router *)pDeviceFrom, m_mapPK_HouseMode[0]);
 //	m_listEventInfo.push_back(pEventInfo);
 
 //	LoggerWrapper::GetInstance()->Write(LV_EVENT,"Event #%d has %d handlers",pEventInfo->m_iPKID_Event,(int)pEvent->m_vectEventHandlers.size());

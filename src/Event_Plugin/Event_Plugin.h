@@ -59,8 +59,10 @@ namespace DCE
 		double m_fLongitude,m_fLatitude;
 		bool m_bIsDaytime;
 		time_t m_tNextSunriseSunset;
+		map<int,int> m_mapPK_HouseMode;
 
 		// Private methods
+		void GetHouseModes();
 public:
 		// Public member variables
 
