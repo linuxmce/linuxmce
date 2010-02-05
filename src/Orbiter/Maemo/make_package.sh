@@ -1,7 +1,7 @@
 #!/bin/bash
 
 VERSION=0810
-PACKAGE_VERSION=alpha02
+PACKAGE_VERSION=beta02
 OS=os2008
 HOME=Maemo
 DEST=build
@@ -64,7 +64,7 @@ strip ${DEST}/usr/bin/* ${DEST}/usr/lib/*
 cd ${DEST}
 
 touch md5sum
-for FILE in `find usr`; do
+for FILE in `find usr | grep -v "svn"`; do
 	if [ -f $FILE ] 
 	then
 		md5sum $FILE >> md5sum
@@ -74,11 +74,15 @@ done
 for VAL in OS VERSION PACKAGE_VERSION
 do
 	eval RES="$"${VAL};
-	sed "s/%%${VAL}%%/${RES}/" control > control
+	sed "s/%%${VAL}%%/${RES}/" control > control.tmp
+	mv control.tmp control
 done
 
+sed "s/%%SIZE%%/`du -s usr/ | awk '{print $1}'`/" control > control.tmp
+mv control.tmp control
+
 tar vzcf data.tar.gz --exclude=".svn" usr/
-tar vzcf control.tar.gz control md5sum postinst
+tar vzcf control.tar.gz control md5sum
 ar q lmceorbiter-${OS}-${VERSION}-${PACKAGE_VERSION}_armel.deb  debian-binary control.tar.gz data.tar.gz
 
 echo "Maemo Orbiter package is build"
