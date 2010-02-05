@@ -51,15 +51,16 @@
 #define VERSION "0710"
 #endif
 
+int orbiterPid = 0;
+int isConnected = 0;
 
 GtkWidget *coreIP, *orbiterID, *lCheckBox;
 HildonWindow *window;
 GConfClient *gc_client;
 
-gint* gloggin_prefs;
-gchar* gorbiter_id;
-gchar* gcore_ip;
-gint* gRetsart;
+gchar* gOrbiterID;
+gchar* gCoreIP;
+gint* gRestart;
 
 static ConIcConnection *cnx = NULL;
 
@@ -68,88 +69,46 @@ static void window_destroy (GtkWidget* widget, gpointer data)
 	  gtk_main_quit ();
 }
 
-static void on_connection_event (ConIcConnection *cnx, ConIcConnectionEvent *event, gpointer user_data)
+
+static void my_connection_handler(ConIcConnection *connection,
+                                  ConIcConnectionEvent *event,
+                                  gpointer user_data)
 {
-    printf ("%s\n", __FUNCTION__);
-
-    /* Handle errors: */
-    switch (con_ic_connection_event_get_error(event)) {
-    case CON_IC_CONNECTION_ERROR_NONE:
-        break;
-    case CON_IC_CONNECTION_ERROR_INVALID_IAP:
-        g_warning ("conic: IAP is invalid");
-        break;
-    case CON_IC_CONNECTION_ERROR_CONNECTION_FAILED:
-        g_warning ("conic: connection failed");
-        break;
-    case CON_IC_CONNECTION_ERROR_USER_CANCELED:
-        g_warning ("conic: user cancelled");
-        break;
-    default:
-        g_warning ("conic: unexpected error");
-        break;
+    ConIcConnectionStatus status = con_ic_connection_event_get_status(event);
+    ConIcConnectionError error;
+    const gchar *iap_id = con_ic_event_get_iap_id(CON_IC_EVENT(event));
+    const gchar *bearer = con_ic_event_get_bearer_type(CON_IC_EVENT(event));
+    switch(status) {
+        case CON_IC_STATUS_CONNECTED:
+            g_debug("We are connected to IAP %s with bearer %s!", iap_id, bearer);
+	    	isConnected = 1;
+            break;
+        case CON_IC_STATUS_DISCONNECTING:
+            g_debug("We are disconnecting...");
+	    	isConnected = 0;
+            break;
+        case CON_IC_STATUS_DISCONNECTED:
+            g_debug("And we are disconnected. Let's see what went wrong...");
+	    	isConnected = 0;
+            error = con_ic_connection_event_get_error(event);
+            switch(error) {
+                case CON_IC_CONNECTION_ERROR_NONE:
+                    g_debug("Libconic thinks there was nothing wrong.");
+                    break;
+                case CON_IC_CONNECTION_ERROR_INVALID_IAP:
+                    g_debug("Invalid (non-existing?) IAP was requested.");
+                    break;
+                case CON_IC_CONNECTION_ERROR_CONNECTION_FAILED:
+                    g_debug("Connection just failed.");
+                    break;
+                case CON_IC_CONNECTION_ERROR_USER_CANCELED:
+                    g_debug("User canceled the connection attempt");
+                    break;
+            }
+            break;
+        default:
+            g_debug("Unknown connection status received");
     }
-
-    /* Handle status changes: */
-    switch (con_ic_connection_event_get_status(event)) {
-    case CON_IC_STATUS_CONNECTED:
-        printf ("DEBUG: %s: Connected.\n", __FUNCTION__);
-    
-        break;
-    case CON_IC_STATUS_DISCONNECTED:
-        printf ("DEBUG: %s: Disconnected.\n", __FUNCTION__);
-        break;
-    case CON_IC_STATUS_DISCONNECTING:
-        printf ("DEBUG: %s: new status: DISCONNECTING.\n", __FUNCTION__);
-
-        break;
-    default:
-        printf ("DEBUG: %s: Unexpected status.\n", __FUNCTION__);
-        break;
-    }
-
-}
-
-static gboolean check_wifi_connection(void)
-{
-    printf ("%s: Creating ConIcConnection.\n", __FUNCTION__);
-
-    cnx = con_ic_connection_new ();
-    if (!cnx) {
-        g_warning ("con_ic_connection_new failed.");
-        return FALSE;
-    }
-
-    const int connection = g_signal_connect (cnx, "connection-event", G_CALLBACK(on_connection_event), NULL);
-
-    g_object_set (cnx, "automatic-connection-events", TRUE, NULL);
-
-    printf ("%s: Attempting automatic connect. Waiting for signal.\n", __FUNCTION__);
-    
-    if (!con_ic_connection_connect (cnx, CON_IC_CONNECT_FLAG_AUTOMATICALLY_TRIGGERED))
-    {
-        g_warning ("could not send connect dbus message");
-        return FALSE;
-    }
-
-    printf ("%s: After automatic connect. Waiting for signal.\n", __FUNCTION__);
-
-    return TRUE;
-}
-
-/*
- * A simple way to check if WiFi connection is up
- */
-static gboolean check_is_online(void)
-{
-    gboolean ret = check_wifi_connection();
-        
-    if (!g_file_test ("/var/run/resolv.conf", G_FILE_TEST_EXISTS))
-        if (!g_file_test ("/tmp/resolv.conf.wlan0", G_FILE_TEST_EXISTS))
-            if (!g_file_test ("/tmp/resolv.conf.ppp0", G_FILE_TEST_EXISTS))
-                return FALSE;
-
-    return TRUE;
 }
 
 /*
@@ -172,19 +131,18 @@ static void start_po (GtkButton * button, gpointer data)
     snd[0] = 0;
     swp[0] = 0;
 
-    if(!check_is_online())    
+    if(isConnected == 0)    
     {
         GtkWidget *dialog = gtk_message_dialog_new (GTK_WINDOW (window),
 							GTK_DIALOG_DESTROY_WITH_PARENT,
 							GTK_MESSAGE_ERROR,
 							GTK_BUTTONS_CLOSE,
-							"Please connect to WiFi access point!");
+							"Make sure you have open Internet connection via WiFi, 3G or GPRS!");
 	    gtk_dialog_run (GTK_DIALOG (dialog));
 	    gtk_widget_destroy (dialog);
 	    return;
     }    
-
-
+	
     if (strcmp ("", (char *) gtk_entry_get_text (GTK_ENTRY (coreIP))) == 0)
 	{
 	    GtkWidget *dialog = gtk_message_dialog_new (GTK_WINDOW (window),
@@ -227,49 +185,22 @@ static void start_po (GtkButton * button, gpointer data)
 	gconf_client_set_string(gc_client, "/apps/maemo/" SYSTEM_CAPTION "orbiter/orbiter_id", gtk_entry_get_text (GTK_ENTRY (orbiterID)), NULL);
 	gconf_client_set_int(gc_client, "/apps/maemo/" SYSTEM_CAPTION "orbiter/l_restart", can_restart, NULL);
   
-    while(1) {
-        int status = start_orbiter();
-        int restart = 0;
-	
-        if (status == -1) { perror("system"); exit(EXIT_FAILURE); }
-        if (WIFEXITED(status)) {
-            printf("exited, status=%d\n", WEXITSTATUS(status));
-            if(WEXITSTATUS(status) != 0)
-                restart = 1;            
-        } else if (WIFSIGNALED(status)) {
-            printf("killed by signal %d\n", WTERMSIG(status));
-                restart = 1;
-        } else if (WIFSTOPPED(status)) {
-            printf("stopped by signal %d\n", WSTOPSIG(status));
-        } else if (WIFCONTINUED(status)) {
-            printf("continued\n");
-        }
-
-        if((restart == 0) || (restart != 0 && can_restart != 1))
-            break;       
-        else
-            sleep(30);        
-    }
-    
+    start_orbiter(NULL, NULL, NULL, NULL, NULL, 800, 480, NULL);
 }
-
 
 int start_orbiter(void) 
 {
-	/* Start Orbiter */
-    char buffer[250];
-	sprintf (buffer, "Orbiter -r %s -d %s > /dev/null 2>&1",
-		     gtk_entry_get_text (GTK_ENTRY (coreIP)),
-		     gtk_entry_get_text (GTK_ENTRY (orbiterID)));
-	puts (buffer);
-	int status = system (buffer);
-
-    return status;
+	int pid = fork();
+	if (pid != 0) {
+		execl("Orbiter", "0", "-r", gtk_entry_get_text (GTK_ENTRY (coreIP)), "-d",  gtk_entry_get_text (GTK_ENTRY (orbiterID)), NULL);
+	} else {
+		orbiterPid = pid;
+	}
+		
 }
 
 static void quit_po (GtkButton * button, gpointer data)
 {
-	//gtk_widget_destroy (GTK_WIDGET (data));
 	gtk_main_quit();
 }
 
@@ -305,12 +236,12 @@ HildonWindow *create_form (void)
     gtk_container_add(GTK_CONTAINER(window), fix);
 
 	imgLogo = gtk_image_new_from_file ("/usr/share/" SYSTEM_CAPTION "orbiter/" SYSTEM_CAPTION "logo.png");
-    gtk_fixed_put (GTK_FIXED (fix), imgLogo, 20, 10);
+    gtk_fixed_put (GTK_FIXED (fix), imgLogo, 10, 0);
     
     label = gtk_label_new (NULL);
 	/* Info Label */
     gtk_label_set_markup (GTK_LABEL (label),
-			  "<small>" SYSTEM_TITLE " Orbiter <b>" VERSION "</b>, built <b>" __DATE__ "</b></small>\n");
+			  "<small>" SYSTEM_TITLE " Maemo Orbiter, built " __DATE__ "</small>\n");
 	gtk_fixed_put(GTK_FIXED (fix), label, 200, 20);
 
     /* Frame Preferences */
@@ -323,19 +254,19 @@ HildonWindow *create_form (void)
     coreIP = gtk_entry_new_with_max_length (200);
 	gtk_widget_set_size_request(coreIP, 200, 30);
     gtk_fixed_put (GTK_FIXED (fix), coreIP, 290, 150);
-    gtk_entry_set_text(GTK_ENTRY(coreIP),gcore_ip ? gcore_ip : "");
+    gtk_entry_set_text(GTK_ENTRY(coreIP),gCoreIP ? gCoreIP : "");
 
     /* Enter Orbiter ID */
     gtk_fixed_put (GTK_FIXED (fix), gtk_label_new ("Orbiter ID:"), 80, 200);
     orbiterID = gtk_entry_new_with_max_length (10);	
 	gtk_widget_set_size_request(orbiterID, 60, 30);
     gtk_fixed_put (GTK_FIXED (fix), orbiterID, 290, 200);
-    gtk_entry_set_text(GTK_ENTRY(orbiterID),gorbiter_id ? gorbiter_id : "");
+    gtk_entry_set_text(GTK_ENTRY(orbiterID),gOrbiterID ? gOrbiterID : "");
 
     /* Checkbuttons to restart Orbiter automatically */
 	lCheckBox = gtk_check_button_new_with_label ("Restart if crash");
     gtk_fixed_put (GTK_FIXED (fix), lCheckBox, 240, 240);	
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (lCheckBox), gRetsart ? 1 : 0);
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (lCheckBox), gRestart ? 1 : 0);
     
     /* Three Buttons: Start, Info and Quit */
     btnStart = gtk_button_new_with_label ("Start Orbiter");
@@ -366,9 +297,9 @@ void init_properties (void)
 	/*
 	 * Restore properties from GConf
 	 */
-	gorbiter_id 	= gconf_client_get_string(gc_client, "/apps/maemo/" SYSTEM_CAPTION "orbiter/orbiter_id", NULL);
-	gcore_ip 		= gconf_client_get_string(gc_client, "/apps/maemo/" SYSTEM_CAPTION "orbiter/core_ip", NULL);
-	gRetsart 		= gconf_client_get_int(gc_client, "/apps/maemo/" SYSTEM_CAPTION "orbiter/l_restart", NULL);
+	gOrbiterID	= gconf_client_get_string(gc_client, "/apps/maemo/" SYSTEM_CAPTION "orbiter/orbiter_id", NULL);
+	gCoreIP 	= gconf_client_get_string(gc_client, "/apps/maemo/" SYSTEM_CAPTION "orbiter/core_ip", NULL);
+	gRestart	= gconf_client_get_int(gc_client, "/apps/maemo/" SYSTEM_CAPTION "orbiter/l_restart", NULL);
 }
 
 gint dbus_callback (const gchar * interface, const gchar * method,
@@ -418,8 +349,19 @@ int main(int argc, char *argv[])
 		fprintf (stderr, "osso_rpc_set_default_cb_f failed: %d.\n", ret);
 		exit (1);
 	}	  
-    
-    gtk_main();
 
+	gboolean success = FALSE;
+	/* Create connection object */
+	ConIcConnection *connection = con_ic_connection_new();
+	/* Connect signal to receive connection events */
+	g_signal_connect(G_OBJECT(connection), "connection-event", 
+						                     G_CALLBACK(my_connection_handler), NULL);
+	/* Request connection and check for the result */
+	success = con_ic_connection_connect(connection, CON_IC_CONNECT_FLAG_NONE);
+	if (!success) g_warning("Request for connection failed");
+	else g_debug("Connection is ok!");
+
+	gtk_main();
+	
     return 0;
 }
