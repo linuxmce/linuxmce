@@ -99,11 +99,10 @@ bool Game_Player::GetConfig()
 		return false;
 	}
 
-	m_pDevice_Joystick = m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_Joysticks_CONST,this);
+	m_pDevice_Joystick = m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_Joysticks_CONST);
 	if ( !m_pDevice_Joystick )
 	  {
 	      LoggerWrapper::GetInstance()->Write(LV_STATUS,"No Special Joysticks Found");
-	      return false;
 	  }
 	else
 	  {
@@ -450,7 +449,7 @@ bool Game_Player::UpdateControllerFile()
 {
 
 	string s_OutputDir = "/home/mamedata/ctrlr";
-	string s_OutputFile = "MamePlayer.cfg";
+	string s_OutputFile = "/home/mamedata/ctrlr/GamePlayer.cfg";
 
 	if (!FileUtils::DirExists(s_OutputDir)) 
 	{
