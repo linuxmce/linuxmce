@@ -17,7 +17,7 @@
 #ifndef Hulu_PlugIn_h
 #define Hulu_PlugIn_h
 
-//	DCE Implemenation for #2021 Hulu PlugIn
+//	DCE Implemenation for #2101 Hulu PlugIn
 
 #include "Gen_Devices/Hulu_PlugInBase.h"
 //<-dceag-d-e->
@@ -31,7 +31,7 @@
 //<-dceag-decl-b->
 namespace DCE
 {
-  class Hulu_PlugIn : public Hulu_PlugIn_Command, public MediaHandlerBase
+	class Hulu_PlugIn : public Hulu_PlugIn_Command
 	{
 //<-dceag-decl-e->
 		// Private member variables

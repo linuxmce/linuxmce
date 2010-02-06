@@ -39,7 +39,6 @@
 #define MEDIATYPE_lmce_Game_sg1000_CONST 39
 #define MEDIATYPE_np_Tivo3_CONST 40
 #define MEDIATYPE_np_Tivo2_CONST 41
-#define MEDIATYPE_lmce_Hulu_CONST 42
 
 #define MEDIATYPE_TABLE "MediaType"
 #define MEDIATYPE_PK_MEDIATYPE_FIELD "PK_MediaType"

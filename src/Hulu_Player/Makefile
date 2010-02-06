@@ -13,7 +13,7 @@ BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
 MYNAME = Hulu_Player
 VERSION = 2.0.0
-MYDEVTEMPLATEID = 2022mplateID
+MYDEVTEMPLATEID = 2102mplateID
 
 Gen_Dev_Files = $(GENDEV)/Hulu_PlayerBase.cpp
 sources = Main.cpp Hulu_Player.cpp $(Gen_Dev_Files)

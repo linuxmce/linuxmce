@@ -845,3 +845,129 @@ void Hulu_Player::CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,
 }
 
 
+//<-dceag-c63-b->
+
+	/** @brief COMMAND: #63 - Skip Fwd - Channel/Track Greater */
+	/** Raise  the channel, track, station, etc. by 1.  Same as Jump to Pos in Playlist with value +1 for a smart media player */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+void Hulu_Player::CMD_Skip_Fwd_ChannelTrack_Greater(int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c63-e->
+//<-dceag-c64-b->
+
+	/** @brief COMMAND: #64 - Skip Back - Channel/Track Lower */
+	/** Lower the channel, track, station, etc. by 1.  Same as Jump to Pos in Playlist with value -1 for a smart media player */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+void Hulu_Player::CMD_Skip_Back_ChannelTrack_Lower(int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c64-e->
+//<-dceag-c92-b->
+
+	/** @brief COMMAND: #92 - Pause */
+	/** Pause the media */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+void Hulu_Player::CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c92-e->
+//<-dceag-c95-b->
+
+	/** @brief COMMAND: #95 - Stop */
+	/** Stop the media */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+		/** @param #203 Eject */
+			/** If true, the drive will be ejected if there is no media currently playing, so a remote's stop button acts as stop/eject. */
+
+void Hulu_Player::CMD_Stop(int iStreamID,bool bEject,string &sCMD_Result,Message *pMessage)
+//<-dceag-c95-e->
+//<-dceag-c139-b->
+
+	/** @brief COMMAND: #139 - Play */
+	/** Play the media */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+void Hulu_Player::CMD_Play(int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c139-e->
+//<-dceag-c204-b->
+
+	/** @brief COMMAND: #204 - 0 */
+	/** 0 */
+
+void Hulu_Player::CMD_0(string &sCMD_Result,Message *pMessage)
+//<-dceag-c204-e->
+//<-dceag-c205-b->
+
+	/** @brief COMMAND: #205 - 1 */
+	/** 1 */
+
+void Hulu_Player::CMD_1(string &sCMD_Result,Message *pMessage)
+//<-dceag-c205-e->
+//<-dceag-c206-b->
+
+	/** @brief COMMAND: #206 - 2 */
+	/** 2 */
+
+void Hulu_Player::CMD_2(string &sCMD_Result,Message *pMessage)
+//<-dceag-c206-e->
+//<-dceag-c207-b->
+
+	/** @brief COMMAND: #207 - 3 */
+	/** 3 */
+
+void Hulu_Player::CMD_3(string &sCMD_Result,Message *pMessage)
+//<-dceag-c207-e->
+//<-dceag-c208-b->
+
+	/** @brief COMMAND: #208 - 4 */
+	/** 4 */
+
+void Hulu_Player::CMD_4(string &sCMD_Result,Message *pMessage)
+//<-dceag-c208-e->
+//<-dceag-c209-b->
+
+	/** @brief COMMAND: #209 - 5 */
+	/** 5 */
+
+void Hulu_Player::CMD_5(string &sCMD_Result,Message *pMessage)
+//<-dceag-c209-e->
+//<-dceag-c210-b->
+
+	/** @brief COMMAND: #210 - 6 */
+	/** 6 */
+
+void Hulu_Player::CMD_6(string &sCMD_Result,Message *pMessage)
+//<-dceag-c210-e->
+//<-dceag-c211-b->
+
+	/** @brief COMMAND: #211 - 7 */
+	/** 7 */
+
+void Hulu_Player::CMD_7(string &sCMD_Result,Message *pMessage)
+//<-dceag-c211-e->
+//<-dceag-c212-b->
+
+	/** @brief COMMAND: #212 - 8 */
+	/** 8 */
+
+void Hulu_Player::CMD_8(string &sCMD_Result,Message *pMessage)
+//<-dceag-c212-e->
+//<-dceag-c213-b->
+
+	/** @brief COMMAND: #213 - 9 */
+	/** 9 */
+
+void Hulu_Player::CMD_9(string &sCMD_Result,Message *pMessage)
+//<-dceag-c213-e->
+//<-dceag-c240-b->
+
+	/** @brief COMMAND: #240 - Back / Prior Menu */
+	/** Navigate back .. ( Escape ) */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+void Hulu_Player::CMD_Back_Prior_Menu(int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c240-e->

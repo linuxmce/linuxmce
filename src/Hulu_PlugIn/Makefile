@@ -13,7 +13,7 @@ BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
 MYNAME = Hulu_PlugIn
 VERSION = 2.0.0
-MYDEVTEMPLATEID = 2021mplateID
+MYDEVTEMPLATEID = 2101mplateID
 
 Gen_Dev_Files = $(GENDEV)/Hulu_PlugInBase.cpp
 sources = Main.cpp Hulu_PlugIn.cpp $(Gen_Dev_Files)

@@ -64,7 +64,6 @@ Hulu_PlugIn::~Hulu_PlugIn()
 //<-dceag-getconfig-b->
 bool Hulu_PlugIn::GetConfig()
 {
-
 	if( !Hulu_PlugIn_Command::GetConfig() )
 		return false;
 //<-dceag-getconfig-e->

@@ -1,7 +1,7 @@
 <-dceag-p-b->
 Package = DCE_Destination_Package
 Dir = 
-desc = DCE Implemenation for #2022 Hulu Player
+desc = DCE Implemenation for #2102 Hulu Player
 Maintainer = thomName
 Email = 
 Depend = DCE_Dependencies

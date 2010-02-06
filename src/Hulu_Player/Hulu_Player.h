@@ -17,7 +17,7 @@
 #ifndef Hulu_Player_h
 #define Hulu_Player_h
 
-//	DCE Implemenation for #2022 Hulu Player
+//	DCE Implemenation for #2102 Hulu Player
 
 #include "Gen_Devices/Hulu_PlayerBase.h"
 //<-dceag-d-e->
@@ -91,6 +91,7 @@ public:
 			*****DATA***** accessors inherited from base class
 	string DATA_Get_Name();
 	bool DATA_Get_Only_One_Per_PC();
+	string DATA_Get_Hardware_acceleration();
 
 			*****EVENT***** accessors inherited from base class
 	void EVENT_Playback_Info_Changed(string sMediaDescription,string sSectionDescription,string sSynposisDescription);
@@ -211,6 +212,24 @@ public:
 	virtual void CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
+	/** @brief COMMAND: #63 - Skip Fwd - Channel/Track Greater */
+	/** Raise  the channel, track, station, etc. by 1.  Same as Jump to Pos in Playlist with value +1 for a smart media player */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+	virtual void CMD_Skip_Fwd_ChannelTrack_Greater(int iStreamID) { string sCMD_Result; CMD_Skip_Fwd_ChannelTrack_Greater(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Skip_Fwd_ChannelTrack_Greater(int iStreamID,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #64 - Skip Back - Channel/Track Lower */
+	/** Lower the channel, track, station, etc. by 1.  Same as Jump to Pos in Playlist with value -1 for a smart media player */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+	virtual void CMD_Skip_Back_ChannelTrack_Lower(int iStreamID) { string sCMD_Result; CMD_Skip_Back_ChannelTrack_Lower(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Skip_Back_ChannelTrack_Lower(int iStreamID,string &sCMD_Result,Message *pMessage);
+
+
 	/** @brief COMMAND: #65 - Jump Position In Playlist */
 	/** Jump to a specific position in the playlist, or a track, or a chapter.  Smart media players should also understand the skip fwd/skip back (which non-DCE media players use) to be the same thing as a jump +1 or -1 */
 		/** @param #5 Value To Assign */
@@ -274,11 +293,40 @@ public:
 	virtual void CMD_Goto_Media_Menu(int iStreamID,int iMenuType,string &sCMD_Result,Message *pMessage);
 
 
+	/** @brief COMMAND: #92 - Pause */
+	/** Pause the media */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+	virtual void CMD_Pause(int iStreamID) { string sCMD_Result; CMD_Pause(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #95 - Stop */
+	/** Stop the media */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+		/** @param #203 Eject */
+			/** If true, the drive will be ejected if there is no media currently playing, so a remote's stop button acts as stop/eject. */
+
+	virtual void CMD_Stop(int iStreamID,bool bEject) { string sCMD_Result; CMD_Stop(iStreamID,bEject,sCMD_Result,NULL);};
+	virtual void CMD_Stop(int iStreamID,bool bEject,string &sCMD_Result,Message *pMessage);
+
+
 	/** @brief COMMAND: #126 - Guide */
 	/** Show guide information.  For a dvd this may be the menu, just like the menu command */
 
 	virtual void CMD_Guide() { string sCMD_Result; CMD_Guide(sCMD_Result,NULL);};
 	virtual void CMD_Guide(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #139 - Play */
+	/** Play the media */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+	virtual void CMD_Play(int iStreamID) { string sCMD_Result; CMD_Play(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Play(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #190 - Enter/Go */
@@ -324,6 +372,85 @@ public:
 
 	virtual void CMD_Move_Right(int iStreamID) { string sCMD_Result; CMD_Move_Right(iStreamID,sCMD_Result,NULL);};
 	virtual void CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #204 - 0 */
+	/** 0 */
+
+	virtual void CMD_0() { string sCMD_Result; CMD_0(sCMD_Result,NULL);};
+	virtual void CMD_0(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #205 - 1 */
+	/** 1 */
+
+	virtual void CMD_1() { string sCMD_Result; CMD_1(sCMD_Result,NULL);};
+	virtual void CMD_1(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #206 - 2 */
+	/** 2 */
+
+	virtual void CMD_2() { string sCMD_Result; CMD_2(sCMD_Result,NULL);};
+	virtual void CMD_2(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #207 - 3 */
+	/** 3 */
+
+	virtual void CMD_3() { string sCMD_Result; CMD_3(sCMD_Result,NULL);};
+	virtual void CMD_3(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #208 - 4 */
+	/** 4 */
+
+	virtual void CMD_4() { string sCMD_Result; CMD_4(sCMD_Result,NULL);};
+	virtual void CMD_4(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #209 - 5 */
+	/** 5 */
+
+	virtual void CMD_5() { string sCMD_Result; CMD_5(sCMD_Result,NULL);};
+	virtual void CMD_5(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #210 - 6 */
+	/** 6 */
+
+	virtual void CMD_6() { string sCMD_Result; CMD_6(sCMD_Result,NULL);};
+	virtual void CMD_6(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #211 - 7 */
+	/** 7 */
+
+	virtual void CMD_7() { string sCMD_Result; CMD_7(sCMD_Result,NULL);};
+	virtual void CMD_7(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #212 - 8 */
+	/** 8 */
+
+	virtual void CMD_8() { string sCMD_Result; CMD_8(sCMD_Result,NULL);};
+	virtual void CMD_8(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #213 - 9 */
+	/** 9 */
+
+	virtual void CMD_9() { string sCMD_Result; CMD_9(sCMD_Result,NULL);};
+	virtual void CMD_9(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #240 - Back / Prior Menu */
+	/** Navigate back .. ( Escape ) */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+	virtual void CMD_Back_Prior_Menu(int iStreamID) { string sCMD_Result; CMD_Back_Prior_Menu(iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Back_Prior_Menu(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #249 - Start Streaming */
