@@ -41,7 +41,7 @@ function Build_Replacement_Package
 		DisplayMessage "Building ${pkg_name}"
 		pushd "$dir_"
 		echo "dpkg-buildpackage -rfakeroot -us -uc -b -tc"
-		dpkg-buildpackage -rfakeroot -us -uc -b -tc
+		dpkg-buildpackage -rfakeroot -us -uc -b 
 		cp -r ../${pkg_name}*.deb "${replacements_dir}"
 		popd
 	fi
