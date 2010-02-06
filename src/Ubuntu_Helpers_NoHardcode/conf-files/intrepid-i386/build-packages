@@ -69,6 +69,7 @@ libdvdnav-dev
 libdvdread-dev
 libesd0-dev
 libexiv2-dev
+libextractor-dev
 libfaad-dev
 libflac-dev
 libfuse-dev
