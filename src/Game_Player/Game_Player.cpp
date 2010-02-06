@@ -99,6 +99,24 @@ bool Game_Player::GetConfig()
 		return false;
 	}
 
+	m_pDevice_Joystick = m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_Joysticks_CONST,this);
+	if ( !m_pDevice_Joystick )
+	  {
+	      LoggerWrapper::GetInstance()->Write(LV_STATUS,"No Special Joysticks Found");
+	      return false;
+	  }
+	else
+	  {
+	      if (!m_pData->m_bDisabled)
+	      {
+		m_sJoystick_Configuration = m_pData->m_pEvent_Impl->GetDeviceDataFromDatabase(m_pDevice_Joystick->m_dwPK_Device,DEVICEDATA_Configuration_CONST);
+	      }
+	      else
+	      {
+		m_sJoystick_Configuration = "";
+	      }
+	  }
+
 	m_iMAMEWindowId = 0;
 	m_iEventSerialNum = 0;
  	m_pDisplay = XOpenDisplay(getenv("DISPLAY"));
@@ -237,7 +255,7 @@ bool Game_Player::UpdateMESSConfig(string sMediaURL)
 		"#\r\n"
 		"# CORE INPUT OPTIONS\r\n"
 		"#\r\n"
-		"ctrlr\r\n"                     
+		"ctrlr			   ##CTRLR##\r\n"                     
 		"mouse                     1\r\n"
 		"joystick                  1\r\n" 
 		"lightgun                  0\r\n"
@@ -386,6 +404,17 @@ bool Game_Player::UpdateMESSConfig(string sMediaURL)
 	s_ConfigFile = StringUtils::Replace(s_ConfigFile,"##ROMPATH##",s_MediaPath);
 	s_ConfigFile = StringUtils::Replace(s_ConfigFile,"##VIDEO##",s_VideoDriver);
 	
+	if (m_sJoystick_Configuration == "")
+	{
+	  // Do nothing.
+	}
+	else
+	{
+	  // Custom Controller Information found, specify and update controller file.
+	  s_ConfigFile = StringUtils::Replace(s_ConfigFile,"##CTRLR##","GamePlayer");
+	  UpdateControllerFile();
+	}
+
 	if (!FileUtils::DirExists(s_OutputDir)) 
 	{
 		// hopefully try to create it.
@@ -412,6 +441,44 @@ bool Game_Player::UpdateMESSConfig(string sMediaURL)
 	}
 
 }
+
+/**
+ * UpdateControllerFile() - If a joystick device is found, with configuration devicedata
+ * then this is run to update the controller file. It does no sanity checking.
+ */
+bool Game_Player::UpdateControllerFile()
+{
+
+	string s_OutputDir = "/home/mamedata/ctrlr";
+	string s_OutputFile = "MamePlayer.cfg";
+
+	if (!FileUtils::DirExists(s_OutputDir)) 
+	{
+		// hopefully try to create it.
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"%s didn't exist, attempting to create.",s_OutputDir.c_str());
+		FileUtils::MakeDir(s_OutputDir);
+		if (!FileUtils::DirExists(s_OutputDir)) 
+		{
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Couldn't create %s, bailing...",s_OutputDir.c_str());
+			return false;
+		}
+		else
+		{
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Created %s Successfully.",s_OutputDir.c_str());		
+		}
+	}
+
+	if (!FileUtils::WriteTextFile(s_OutputFile,m_sJoystick_Configuration)) 
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Couldn't write %s",s_OutputFile.c_str());		
+		return false;	
+	} else {
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Wrote %s",s_OutputFile.c_str());
+		return true;	
+	}
+
+}
+
 
 /**
  * UpdateMAMEConfig(sMediaURL) - Update MAME Configuration before MAME
@@ -540,7 +607,7 @@ bool Game_Player::UpdateMAMEConfig(string sMediaURL)
 		"#\r\n"
 		"# CORE INPUT OPTIONS\r\n"
 		"#\r\n"
-		"ctrlr\r\n"                     
+		"ctrlr		           ##CTRLR##\r\n"                     
 		"mouse                     1\r\n"
 		"joystick                  1\r\n" 
 		"lightgun                  0\r\n"
@@ -688,6 +755,17 @@ bool Game_Player::UpdateMAMEConfig(string sMediaURL)
 	
 	s_ConfigFile = StringUtils::Replace(s_ConfigFile,"##ROMPATH##",s_MediaPath);
 	s_ConfigFile = StringUtils::Replace(s_ConfigFile,"##VIDEO##",s_VideoDriver);
+
+	if (m_sJoystick_Configuration == "")
+	{
+	  // Do nothing.
+	}
+	else
+	{
+	  // Custom Controller Information found, specify and update controller file.
+	  s_ConfigFile = StringUtils::Replace(s_ConfigFile,"##CTRLR##","GamePlayer");
+	  UpdateControllerFile();
+	}
 	
 	if (!FileUtils::DirExists(s_OutputDir)) 
 	{

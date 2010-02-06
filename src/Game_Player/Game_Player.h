@@ -60,12 +60,14 @@ private:
 		string m_sMAMEWindowId;
 		DeviceData_Base *m_pDevice_Game_Plugin;
 		DeviceData_Base *m_pDevice_App_Server;
+		DeviceData_Base *m_pDevice_Joystick;
 		Display *m_pDisplay;
 		class AlarmManager *m_pAlarmManager;
 		bool checkWindowName(long unsigned int window, string windowName);
 		bool m_bMAMEIsRunning;
 		bool m_bOSDIsVisible; // toggled when OSD is requested so we use alternate frame grabber.
 		int m_iEventSerialNum; // X event Serial #, incremented each event. 
+		string m_sJoystick_Configuration; // If a joystick configuration devicedata is found, it is put here.
 
 		// Private methods
 public:
@@ -77,6 +79,7 @@ public:
 		// Public member variables
 
 protected:
+		bool UpdateControllerFile();
 		string GetMessParametersFor(string sMediaURL);
 		bool UpdateMESSConfig(string sMediaURL);
 		bool LaunchMESS(string sMediaURL);
