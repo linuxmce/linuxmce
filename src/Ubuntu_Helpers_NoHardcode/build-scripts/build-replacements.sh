@@ -167,9 +167,7 @@ function Build_Replacements_Intrepid
         Build_Replacement_Package libasound2 ubuntu/alsa-lib-1.0.18
         # and now we go back to the latest libtool
         apt-get install libtool
-	if ! dpkg -l libasound2-dev &>/dev/null; then
-		dpkg --force-all -i ${svn_dir}/${svn_branch_name}/ubuntu/libasound2_*deb ${svn_dir}/${svn_branch_name}/ubuntu/lib32asound2_*deb ${svn_dir}/${svn_branch_name}/ubuntu/libasound2-dev_*deb ${svn_dir}/${svn_branch_name}/ubuntu/lib32asound2-dev_*deb
-	fi
+	dpkg --force-all -i ${svn_dir}/${svn_branch_name}/ubuntu/libasound2_*deb ${svn_dir}/${svn_branch_name}/ubuntu/lib32asound2_*deb ${svn_dir}/${svn_branch_name}/ubuntu/libasound2-dev_*deb ${svn_dir}/${svn_branch_name}/ubuntu/lib32asound2-dev_*deb
 	Build_Replacement_Package libasound2-plugins ubuntu/alsa-plugins-1.0.18
 	Build_Replacement_Package alsa-utils ubuntu/alsa-utils-1.0.18
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/*asound*deb ${replacements_dir}
@@ -351,7 +349,7 @@ function Build_Replacements_Gutsy
 	popd
 }
 
-trap 'Error "Undefined error in $0"' EXIT
+trap 'Error "Undefined error in $0" ; apt-get install libtool -y' EXIT
 
 DisplayMessage "*** STEP: Building replacement debs"
 # make sure the headers are there
