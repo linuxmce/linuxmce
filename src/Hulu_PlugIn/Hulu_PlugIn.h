@@ -31,7 +31,7 @@
 //<-dceag-decl-b->
 namespace DCE
 {
-	class Hulu_PlugIn : public Hulu_PlugIn_Command
+	class Hulu_PlugIn : public Hulu_PlugIn_Command, public MediaHandlerBase 
 	{
 //<-dceag-decl-e->
 		// Private member variables
