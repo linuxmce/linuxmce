@@ -73,6 +73,7 @@
 #define LV_TV				39
 #define LV_SEND_DATA		40
 #define LV_RECEIVE_DATA		41
+#define LV_INSTEON			42
 #define LV_COLOR			99
 
 #include "SerializeClass/SerializeClass.h"
