@@ -17,7 +17,7 @@
 #ifndef Insteon_PLM_DCE_h
 #define Insteon_PLM_DCE_h
 
-//	DCE Implemenation for #2165 Insteon PLM DCE
+//	DCE Implemenation for #2103 Insteon PLM DCE
 
 #include "Gen_Devices/Insteon_PLM_DCEBase.h"
 //<-dceag-d-e->

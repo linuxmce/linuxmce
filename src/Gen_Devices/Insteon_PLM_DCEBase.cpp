@@ -14,7 +14,7 @@ DeviceData_Impl *Insteon_PLM_DCE_Data::CreateData(DeviceData_Impl *Parent,char *
 	int iPK_Installation = b.Read_unsigned_long();
 	int iPK_DeviceTemplate = b.Read_unsigned_long();
 	switch(iPK_DeviceTemplate) {
-		case 2165:
+		case 2103:
 			return new Insteon_PLM_DCE_Data();
 	};
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got CreateData for unknown type %d.", iPK_DeviceTemplate);
@@ -24,7 +24,7 @@ DeviceData_Impl *Insteon_PLM_DCE_Data::CreateData(DeviceData_Impl *Parent,char *
 Event_Impl *Insteon_PLM_DCE_Event::CreateEvent( unsigned long dwPK_DeviceTemplate, ClientSocket *pOCClientSocket, unsigned long dwDevice )
 {
 	switch(dwPK_DeviceTemplate) {
-		case 2165:
+		case 2103:
 			return (Event_Impl *) new Insteon_PLM_DCE_Event(pOCClientSocket, dwDevice);
 	};
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got CreateEvent for unknown type %d.", dwPK_DeviceTemplate);

@@ -13,7 +13,7 @@ BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
 MYNAME = Insteon_PLM_DCE
 VERSION = 2.0.0
-MYDEVTEMPLATEID = 2165mplateID
+MYDEVTEMPLATEID = 2103mplateID
 
 Gen_Dev_Files = $(GENDEV)/Insteon_PLM_DCEBase.cpp
 sources = Main.cpp Insteon_PLM_DCE.cpp InsteonAPI.cpp Serial.cpp $(Gen_Dev_Files)

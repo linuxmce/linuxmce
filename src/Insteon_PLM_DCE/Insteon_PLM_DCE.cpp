@@ -21,7 +21,8 @@
 #include "PlutoUtils/Other.h"
 
 #include <iostream>
-
+using namespace std;
+using namespace DCE;
 
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
