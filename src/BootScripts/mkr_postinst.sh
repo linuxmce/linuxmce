@@ -75,3 +75,18 @@ if [[ -f /bin/sh.distrib ]] ;then
 	mv /bin/sh.distrib /bin/sh || :
 	dpkg-divert --remove /bin/sh || :
 fi
+
+## Add shortcut to the desktop to get back to LinuxMCE orbiter
+cat <<eol >/etc/skel/Desktop/LinuxMCE
+[Desktop Entry]
+Encoding=UTF-8
+Version=8.10
+Type=Application
+Exec=/usr/pluto/bin/ActivateOrbiterFromKDE.sh
+Path=/usr/pluto/bin
+Name=Back To LinuxMCE Orbiter
+Icon=gnome-panel-launcher
+eol
+
+cp -r /etc/skel/Desktop/* /root/Desktop
+
