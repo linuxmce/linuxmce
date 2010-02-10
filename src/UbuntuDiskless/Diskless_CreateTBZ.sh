@@ -258,7 +258,6 @@ mv "$TEMP_DIR"/etc/rc2.d/*kdm "$TEMP_DIR"/etc/rc2.d/S99kdm
 # Remove whatever 
 LC_ALL=C chroot $TEMP_DIR update-rc.d -f kdm remove
 LC_ALL=C chroot $TEMP_DIR update-rc.d -f NetworkManager remove
-
 LC_ALL=C chroot $TEMP_DIR apt-get -y install xserver-xorg-video-all
 LC_ALL=C chroot $TEMP_DIR apt-get -y install linux-firmware
 
@@ -272,6 +271,20 @@ mv "$TEMP_DIR"/sbin/start-stop-daemon{.pluto-install,}
 mv "$TEMP_DIR"/usr/sbin/invoke-rc.d{.pluto-install,}
 rm -f "$TEMP_DIR"/etc/chroot-install
 rm -f "$TEMP_DIR"/etc/X11/xorg.conf || :
+
+# Setup Link for the desktop to point to Activate Orbiter
+cat <<eol >"$TEMP_DIR"/etc/skel/Desktop/LinuxMCE
+[Desktop Entry]
+Encoding=UTF-8
+Version=8.10
+Type=Application
+Exec=/usr/pluto/bin/ActivateOrbiterFromKDE.sh
+Path=/usr/pluto/bin
+Name=Back To LinuxMCE Orbiter
+Icon=gnome-panel-launcher
+eol
+
+cp -r "$TEMP_DIR"/etc/skel/Desktop/* "$TEMP_DIR"/root/Desktop
 
 #invoke-rc.d nfs-common restart
 
