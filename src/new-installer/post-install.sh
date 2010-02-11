@@ -22,6 +22,13 @@ dpkg-divert --add --rename --divert /etc/init.d/kdm.wraped /etc/init.d/kdm
 
 # make sure the kubuntu desktop environment is installed
 apt-get install -y kubuntu-desktop
+
+# make sure to install latest alsa drivers
+apt-get install -y alsa-modules-`uname -r`
+
+# get the latest v4l modules
+apt-get install -y v4l2-modules
+apt-get install -y v4l2-firmware
 # update-rc.d -f kdm remove
 
 ## NOTE: Fix for initramfs-tools - no longer needed - done in mce-install.sh
