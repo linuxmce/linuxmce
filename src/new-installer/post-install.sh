@@ -20,6 +20,8 @@ echo "Remove softlink to start KDM"
 # an alternative would be to disable it in runlevel 5 only
 dpkg-divert --add --rename --divert /etc/init.d/kdm.wraped /etc/init.d/kdm
 
+# make sure the kubuntu desktop environment is installed
+apt-get install -y kubuntu-desktop
 # update-rc.d -f kdm remove
 
 ## NOTE: Fix for initramfs-tools - no longer needed - done in mce-install.sh
