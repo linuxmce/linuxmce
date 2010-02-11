@@ -17,7 +17,9 @@ invoke-rc.d vdr stop
 #
 # Make a backup copy of the existing setup.conf
 #
-cp /var/lib/vdr/setup.conf `tempfile -d /var/lib/vdr -p setup -s \.conf`
+if [ -f /var/lib/vdr/setup.conf ]
+	cp /var/lib/vdr/setup.conf `tempfile -d /var/lib/vdr -p setup -s \.conf`
+fi
 # The setup.conf defaults:
 echo "AntiAlias = 1
 AudioLanguages =
