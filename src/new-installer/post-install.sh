@@ -18,7 +18,9 @@ mkdir -p /home/backup/upload
 # Remove KDM startup
 echo "Remove softlink to start KDM"
 # an alternative would be to disable it in runlevel 5 only
-update-rc.d -f kdm remove
+dpkg-divert --add --rename --divert /etc/init.d/kdm.wraped /etc/init.d/kdm
+
+# update-rc.d -f kdm remove
 
 ## NOTE: Fix for initramfs-tools - no longer needed - done in mce-install.sh
 #patch -Np0 -i mkinitramfs_dot-fix1.patch -r /dev/null >/dev/null 2>&1 || echo "The initramfs-tools dot-problem was already fixed."
