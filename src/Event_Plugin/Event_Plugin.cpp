@@ -283,12 +283,28 @@ void Event_Plugin::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 void Event_Plugin::GetHouseModes() {
 
 	PLUTO_SAFETY_LOCK(em,m_EventMutex);
-        Row_Device_DeviceData *pRow_Device_DeviceData = m_pDatabase_pluto_main->Device_DeviceData_get()->GetRow(m_dwPK_Device,DEVICEDATA_Configuration_CONST);
+        // find PK_Device of security plugin
+	map<int,string> mapDevices;
+	GetDevicesByTemplate(DEVICETEMPLATE_Security_Plugin_CONST, &mapDevices);
+	int PK_SecurityPlugin;
+	if( mapDevices.begin() == mapDevices.end() )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Cannot find sister plugins to event plugin (Security Plugin)");
+		return;
+	} else {
+	        PK_SecurityPlugin = mapDevices.begin()->first;
+	}
+	
+	Row_Device_DeviceData *pRow_Device_DeviceData =
+	        m_pDatabase_pluto_main->Device_DeviceData_get()->GetRow(PK_SecurityPlugin,DEVICEDATA_Configuration_CONST);
 	if( !pRow_Device_DeviceData )
 	        return;
 
-        m_mapPK_HouseMode.clear();
+	pRow_Device_DeviceData->Reload();
 	string sData=pRow_Device_DeviceData->IK_DeviceData_get();
+
+	// decode int list to int,int map
+        m_mapPK_HouseMode.clear();
 	string::size_type pos=0;
 	while( pos<sData.size() && pos!=string::npos )
 	{
