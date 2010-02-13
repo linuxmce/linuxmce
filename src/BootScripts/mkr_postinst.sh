@@ -77,6 +77,7 @@ if [[ -f /bin/sh.distrib ]] ;then
 fi
 
 ## Add shortcut to the desktop to get back to LinuxMCE orbiter
+mkdir -p /etc/skel/Desktop
 cat <<eol >/etc/skel/Desktop/LinuxMCE
 [Desktop Entry]
 Encoding=UTF-8
