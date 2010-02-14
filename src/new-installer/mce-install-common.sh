@@ -309,7 +309,7 @@ function ExitInstaller {
 
 
 function StatsMessage {
-	echo "MESSAGE: $*"
+	echo "`date` MESSAGE: $*"
 }
 
 
