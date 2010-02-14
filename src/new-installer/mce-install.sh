@@ -143,6 +143,7 @@ RemoveInstallerIcons
 ClearInstallationTable
 
 apt-get -y -f dist-upgrade
+VerifyExitCode "dist-upgrade"
 
 # Fix apt proxy settings so it apply to core and MDs after lmce is configured.
 if [ -f /etc/apt/apt.conf.d/02proxy ]; then

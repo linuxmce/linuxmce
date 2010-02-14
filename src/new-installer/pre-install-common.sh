@@ -22,13 +22,22 @@ function error
 	exit 1
 }
 
-
+function VerifyExitCode
+{
+        EXITCODE=$?
+        if [ "$EXITCODE" != "0" ] ; then
+        	echo "An error (Exit code $EXITCODE) occured during the last action"
+        	echo "$1"
+                exit 1
+        fi
+}
 
 function InstallNeededPackages
 {
 	apt-get update
-	apt-get -y install dpkg-dev || error "installing dpkg-dev"
-
+	apt-get -y install dpkg-dev
+	VerifyExitCode "dpkg-dev"
+	
 	mkdir -pv "${LOCAL_REPO_BASE}/${LOCAL_REPO_DIR}"
 
 }
@@ -123,9 +132,9 @@ function InstallAptCacherNg
 {
     echo "Installing apt-cacher-ng"
     # this should be installed first of all.
-    apt-get -y install apt-cacher-ng
-    invoke-rc.d apt-cacher-ng stop
-    invoke-rc.d apt-cacher-ng start
+#    apt-get -y install apt-cacher-ng
+#    invoke-rc.d apt-cacher-ng stop
+#    invoke-rc.d apt-cacher-ng start
 }
  
 function ConfigureApt

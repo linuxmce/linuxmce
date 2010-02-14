@@ -27,5 +27,3 @@ AddGpgKeyToKeyring  http://www.avenard.org/files/ubuntu-repos/ubuntu-repos.key
 
 
 apt-get update
-
-

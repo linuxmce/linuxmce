@@ -5,6 +5,17 @@ DT_CORE=1
 DT_HYBRID=2
 
 
+function VerifyExitCode
+{
+	EXITCODE=$?
+	
+        if [ "$EXITCODE" != "0" ] ; then
+		echo "An error (Exit code $EXITCODE) occured during the last action"
+		echo "$1"
+                exit 1
+	fi
+}
+                                                
 
 function Replace_Mirror {
 	local mirror=$1
@@ -385,7 +396,8 @@ AutostartMedia=$AutostartMedia
 function Install_DCERouter {
 	StatsMessage "Installing MySQL Server"
 	apt-get update
-	apt-get -y -f install mysql-server || ExitInstaller "Failed to install mysql server"
+	apt-get -y -f install mysql-server
+	VerifyExitCode "MySQL Server"
 	invoke-rc.d mysql start # Because of this : https://bugs.launchpad.net/bugs/107224
 
 	# Fix for http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=512309
@@ -398,12 +410,15 @@ FLUSH PRIVILEGES; \
 " | mysql --defaults-extra-file=/etc/mysql/debian.cnf mysql
 
 	apt-get -y -f install pluto-sample-media
+	VerifyExitCode "pluto-sample-media"
 	apt-get -y -f install video-wizard-videos
+	VerifyExitCode "video-wizard-videos"
 #	apt-get -y -f install pluto-mysql-wrapper
 #	apt-get -y -f install pluto-default-tftpboot
 
 	StatsMessage "Installing LinuxMCE Base Software"
-	apt-get -y -f install pluto-dcerouter || ExitInstaller "Failed to install and configure the base software"
+	apt-get -y -f install pluto-dcerouter
+	VerifyExitCode "pluto-dcerouter"
 }
 
 
