@@ -17,7 +17,7 @@ invoke-rc.d vdr stop
 #
 # Make a backup copy of the existing setup.conf
 #
-if [ -f /var/lib/vdr/setup.conf ]
+if [ -f /var/lib/vdr/setup.conf ]; then
 	cp /var/lib/vdr/setup.conf `tempfile -d /var/lib/vdr -p setup -s \.conf`
 fi
 # The setup.conf defaults:
