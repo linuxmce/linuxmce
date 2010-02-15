@@ -30,9 +30,11 @@
 #include "EventInfo.h"
 #include "DeviceData_Router.h"
 #include "Message.h"
+#include "DCERouter.h"
 
 #include "pluto_main/Define_CriteriaParmList.h"
 #include "pluto_main/Define_ParameterType.h"
+#include "pluto_main/Table_EventParameter.h"
 
 #define OPERATOR_EQUALS			1
 #define OPERATOR_NOTEQUALS		2
@@ -57,11 +59,7 @@ bool Criteria::EvaluateExpression(class CriteriaParm *pCriteriaParm,class EventI
 	int iRValue=0;
 	string sRValue="";
 
-	if( pCriteriaParm->m_iPK_ParameterType==PARAMETERTYPE_int_CONST || pCriteriaParm->m_iPK_ParameterType==PARAMETERTYPE_bool_CONST)
-		iRValue = atoi(pCriteriaParm->m_sValue.c_str());
-	else
-		sRValue = pCriteriaParm->m_sValue;
-
+	int PK_ParameterType= pCriteriaParm->m_iPK_ParameterType;
 	string *sLValue=NULL;
 	unsigned long *iLValue=NULL;
 
@@ -123,13 +121,31 @@ bool Criteria::EvaluateExpression(class CriteriaParm *pCriteriaParm,class EventI
 			int PK_EventParameter = atoi( pCriteriaParm->m_sParm.c_str() );
 			temp = pEventInfo->m_pMessage->m_mapParameters[PK_EventParameter];
 			sLValue = &temp;
+			// Look up parameter type and override criteria type
+			Router *pRouter = (Router *) pExtraInfo;
+			if (pRouter)
+			{
+			        Row_EventParameter* eventParameter = pRouter->GetDatabase()->EventParameter_get()->GetRow(PK_EventParameter);
+				PK_ParameterType = eventParameter->FK_ParameterType_get();
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Criteria::EvaluateExpression parameterType %d", PK_ParameterType);
+				if (PK_ParameterType == PARAMETERTYPE_int_CONST)
+				{
+				        unsigned long i = (unsigned long)atoi(sLValue->c_str());
+					iLValue = &i;
+				}
+			}
 		}
 		break;
 	default:
 		throw(string("Unknown Criteria Parm List" + StringUtils::itos(pCriteriaParm->m_iPK_CriteriaParmList)));
 	}
 
-	if( pCriteriaParm->m_iPK_ParameterType==PARAMETERTYPE_int_CONST || pCriteriaParm->m_iPK_ParameterType==PARAMETERTYPE_bool_CONST )
+	if( PK_ParameterType==PARAMETERTYPE_int_CONST || PK_ParameterType==PARAMETERTYPE_bool_CONST)
+		iRValue = atoi(pCriteriaParm->m_sValue.c_str());
+	else
+		sRValue = pCriteriaParm->m_sValue;
+
+	if( PK_ParameterType==PARAMETERTYPE_int_CONST || PK_ParameterType==PARAMETERTYPE_bool_CONST )
 	{
 		pCriteriaParm->m_sComparedValue = StringUtils::itos(*iLValue);
 	}
@@ -138,43 +154,43 @@ bool Criteria::EvaluateExpression(class CriteriaParm *pCriteriaParm,class EventI
 		pCriteriaParm->m_sComparedValue = *sLValue;
 	}
 
-	if( pCriteriaParm->m_iPK_ParameterType==PARAMETERTYPE_string_CONST && sLValue==NULL )
+	if( PK_ParameterType==PARAMETERTYPE_string_CONST && sLValue==NULL )
 		throw(string("comparing string, string is null"));
-	else if( (pCriteriaParm->m_iPK_ParameterType==PARAMETERTYPE_int_CONST || pCriteriaParm->m_iPK_ParameterType==PARAMETERTYPE_bool_CONST) && iLValue==NULL )
+	else if( (PK_ParameterType==PARAMETERTYPE_int_CONST || PK_ParameterType==PARAMETERTYPE_bool_CONST) && iLValue==NULL )
 		throw(string("comparing int, int is null"));
 
 	if( pCriteriaParm->m_Operator==OPERATOR_EQUALS )
 	{
-		if( pCriteriaParm->m_iPK_ParameterType==PARAMETERTYPE_string_CONST )
+		if( PK_ParameterType==PARAMETERTYPE_string_CONST )
 			return *sLValue==sRValue;
-		else if( pCriteriaParm->m_iPK_ParameterType==PARAMETERTYPE_int_CONST || pCriteriaParm->m_iPK_ParameterType==PARAMETERTYPE_bool_CONST)
+		else if( PK_ParameterType==PARAMETERTYPE_int_CONST || PK_ParameterType==PARAMETERTYPE_bool_CONST)
 			return *iLValue==iRValue;
 	}
 	if( pCriteriaParm->m_Operator==OPERATOR_NOTEQUALS )
 	{
-		if( pCriteriaParm->m_iPK_ParameterType==PARAMETERTYPE_string_CONST )
+		if( PK_ParameterType==PARAMETERTYPE_string_CONST )
 			return *sLValue!=sRValue;
-		else if( pCriteriaParm->m_iPK_ParameterType==PARAMETERTYPE_int_CONST || pCriteriaParm->m_iPK_ParameterType==PARAMETERTYPE_bool_CONST)
+		else if( PK_ParameterType==PARAMETERTYPE_int_CONST || PK_ParameterType==PARAMETERTYPE_bool_CONST)
 			return *iLValue!=iRValue;
 	}
 	if( pCriteriaParm->m_Operator==OPERATOR_CONTAINS )
 	{
-		if( pCriteriaParm->m_iPK_ParameterType==PARAMETERTYPE_string_CONST )
+		if( PK_ParameterType==PARAMETERTYPE_string_CONST )
 			return StringUtils::ToUpper(*sLValue).find(StringUtils::ToUpper(sRValue))!=string::npos;
 		return false;  // Nothing else can do this
 	}
 	if( pCriteriaParm->m_Operator==OPERATOR_GREATERTHAN )
 	{
-		if( pCriteriaParm->m_iPK_ParameterType==PARAMETERTYPE_string_CONST )
+		if( PK_ParameterType==PARAMETERTYPE_string_CONST )
 			return *sLValue>sRValue;
-		else if( pCriteriaParm->m_iPK_ParameterType==PARAMETERTYPE_int_CONST || pCriteriaParm->m_iPK_ParameterType==PARAMETERTYPE_bool_CONST)
+		else if( PK_ParameterType==PARAMETERTYPE_int_CONST || PK_ParameterType==PARAMETERTYPE_bool_CONST)
 			return *iLValue>iRValue;
 	}
 	if( pCriteriaParm->m_Operator==OPERATOR_LESSTHAN )
 	{
-		if( pCriteriaParm->m_iPK_ParameterType==PARAMETERTYPE_string_CONST )
+		if( PK_ParameterType==PARAMETERTYPE_string_CONST )
 			return *sLValue<sRValue;
-		else if( pCriteriaParm->m_iPK_ParameterType==PARAMETERTYPE_int_CONST || pCriteriaParm->m_iPK_ParameterType==PARAMETERTYPE_bool_CONST)
+		else if( PK_ParameterType==PARAMETERTYPE_int_CONST || PK_ParameterType==PARAMETERTYPE_bool_CONST)
 			return *iLValue<iRValue;
 	}
 
