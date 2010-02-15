@@ -137,7 +137,8 @@ bool Criteria::EvaluateExpression(class CriteriaParm *pCriteriaParm,class EventI
 		}
 		break;
 	default:
-		throw(string("Unknown Criteria Parm List" + StringUtils::itos(pCriteriaParm->m_iPK_CriteriaParmList)));
+	  LoggerWrapper::GetInstance()->Write(LV_WARNING,"Criteria::EvaluateExpression Unknown Criteria Parm List %d", pCriteriaParm->m_iPK_CriteriaParmList);
+	        throw exception();
 	}
 
 	if( PK_ParameterType==PARAMETERTYPE_int_CONST || PK_ParameterType==PARAMETERTYPE_bool_CONST)
