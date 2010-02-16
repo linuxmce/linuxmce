@@ -42,7 +42,8 @@
 #define OPERATOR_LESSTHAN		4
 #define OPERATOR_CONTAINS		5
 
-bool EvaluateTimeOfDay(string Expression,void *pExtraInfo);
+bool EvaluateTimeOfDay(CriteriaParm* pCriteriaParm,void *pExtraInfo, struct tm newtime);
+bool EvaluateInt(int oper, int val1, int val2);
 
 bool Criteria::EvaluateExpression(class CriteriaParm *pCriteriaParm,class EventInfo *pEventInfo,void *pExtraInfo)
 {
@@ -82,7 +83,7 @@ bool Criteria::EvaluateExpression(class CriteriaParm *pCriteriaParm,class EventI
 		iLValue = (unsigned long *)&pEventInfo->m_pDevice->m_dwPK_DeviceTemplate;
 		break;
 	case CRITERIAPARMLIST_Time_of_day_CONST:
-		return EvaluateTimeOfDay(StringUtils::ToUpper(pCriteriaParm->m_sValue),pExtraInfo);
+	        return EvaluateTimeOfDay(pCriteriaParm,pExtraInfo, newtime);
 	case CRITERIAPARMLIST_PK_DeviceCategory_CONST:
 		iLValue = &pEventInfo->m_pDevice->m_dwPK_DeviceCategory;
 		break;
@@ -130,8 +131,8 @@ bool Criteria::EvaluateExpression(class CriteriaParm *pCriteriaParm,class EventI
 				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Criteria::EvaluateExpression parameterType %d", PK_ParameterType);
 				if (PK_ParameterType == PARAMETERTYPE_int_CONST)
 				{
-				        unsigned long i = (unsigned long)atoi(sLValue->c_str());
-					iLValue = &i;
+				        iTmp = (unsigned long)atoi(sLValue->c_str());
+					iLValue = &iTmp;
 				}
 			}
 		}
@@ -202,8 +203,9 @@ bool Criteria::EvaluateExpression(class CriteriaParm *pCriteriaParm,class EventI
 #include "../General_Info_Plugin/General_Info_Plugin.h"
 #include "DCERouter.h"
 
-bool EvaluateTimeOfDay(string Expression,void *pExtraInfo)
+bool EvaluateTimeOfDay(CriteriaParm* pCriteriaParm,void *pExtraInfo, struct tm newtime)
 {
+        string Expression = StringUtils::ToUpper(pCriteriaParm->m_sValue);
 	General_Info_Plugin *pGeneral_Info_Plugin = NULL;
 	Router *pRouter = (Router *) pExtraInfo;
 	if( pRouter )
@@ -226,5 +228,37 @@ bool EvaluateTimeOfDay(string Expression,void *pExtraInfo)
 		return (Expression=="DAY" && bIsDaytime) || (Expression=="NIGHT" && !bIsDaytime);
 	}
 
+	if (Expression.find(":")!=string::npos) 
+	{
+	        if (Expression.find(":", Expression.find(":")+1)==string::npos)
+		{
+		  // Only one :, add 00 seconds
+		  Expression += ":00";
+		}
+		int iTimeNow = newtime.tm_hour * 3600 + newtime.tm_min * 60 + newtime.tm_sec;
+		int iTimeExp = StringUtils::TimeAsSeconds(Expression);
+		return EvaluateInt(pCriteriaParm->m_Operator, iTimeNow, iTimeExp);
+	}
 	return true;
+}
+
+bool EvaluateInt(int oper, int val1, int val2)
+{
+        if (oper == OPERATOR_EQUALS)
+	{
+	        return val1 == val2;
+	}
+        if (oper == OPERATOR_NOTEQUALS)
+	{
+	        return val1 != val2;
+	}
+        if (oper == OPERATOR_GREATERTHAN)
+	{
+	        return val1 > val2;
+	}
+        if (oper == OPERATOR_LESSTHAN)
+	{
+	        return val1 < val2;
+	}
+	return false;
 }
