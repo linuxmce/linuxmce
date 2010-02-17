@@ -89,6 +89,9 @@ Name=Back To LinuxMCE Orbiter
 Icon=gnome-panel-launcher
 eol
 
+if [[ -f /root/Desktop ]] ; then
+	rm -f /root/Desktop
+fi
 mkdir -p /root/Desktop
 cp -r /etc/skel/Desktop/* /root/Desktop
 
