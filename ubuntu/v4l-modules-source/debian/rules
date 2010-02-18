@@ -66,7 +66,7 @@ install: build
 	mkdir -p $(DESTDIR)/lib/firmware
 	tar -C v4l-dvb --exclude .svn -c .| tar -C $(DESTDIR)/usr/src/v4l2-modules-$(PKGVER) -x
 	find firmware -type d -name .svn -prune -or -type f -exec cp '{}' $(DESTDIR)/lib/firmware ';'
-	cp dkms.conf dkms-mods.conf $(DESTDIR)/usr/src/v4l2-modules-$(PKGVER)
+	cp dkms.conf $(DESTDIR)/usr/src/v4l2-modules-$(PKGVER)
 
 
 # Build architecture-independent files here.
