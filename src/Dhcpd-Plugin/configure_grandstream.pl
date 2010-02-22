@@ -31,7 +31,7 @@ else
 `/usr/pluto/bin/sync_pluto2amp.pl $Device_ID`;
 
 # Let's see what the database thinks about the extension of this phone
-$Device_EXTdb = getDevice_DeviceData($Device_ID,31);
+$Device_EXT = getDevice_DeviceData($Device_ID,31);
 open(FILE,"/tmp/phone${Device_ID}extension");
 $Device_EXT=<FILE>;
 close(FILE);
