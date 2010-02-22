@@ -553,7 +553,7 @@ void OrbiterRenderer_SDL::ReplaceColorInRectangle(int x, int y, int width, int h
 						((ReplacementColor.G() >> PF->Gloss) << PF->Gshift) +
 						((ReplacementColor.B() >> PF->Bloss) << PF->Bshift);
 #else
-    PlutoPixelDest = (ReplacementColor.R() << rshift) | (ReplacementColor.G() << gshift) | (ReplacementColor.B() << bshift);//  TODO -- this should work | ReplacementColor.A() << PF->Ashift;
+    PlutoPixelDest = (ReplacementColor.R() << PF->Rshift) | (ReplacementColor.G() << PF->Gshift) | (ReplacementColor.B() << PF->Bshift);//  TODO -- this should work | ReplacementColor.A() << PF->Ashift;
 #endif
 
     const int max_diff = 3;
@@ -564,7 +564,7 @@ void OrbiterRenderer_SDL::ReplaceColorInRectangle(int x, int y, int width, int h
             // we may need locking on the surface
             Pixel = SDLGraphic::getpixel(m_pScreenImage, i + x, j + y);
             unsigned char *pPixel = (unsigned char *) &Pixel;
-#ifndef MAEMO_NOKIA770           
+#ifndef MAEMO_NOKIA770
             if ( abs(Source[0]-pPixel[0])<max_diff && abs(Source[1]-pPixel[1])<max_diff && abs(Source[2]-pPixel[2])<max_diff && abs(Source[3]-pPixel[3])<max_diff )
             {
                 SDLGraphic::putpixel(m_pScreenImage,i + x, j + y, PlutoPixelDest);
