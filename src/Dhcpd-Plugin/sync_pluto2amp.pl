@@ -4,6 +4,8 @@ use strict;
 #use diagnostics;
 use DBI;
 require "/usr/pluto/bin/config_ops.pl";
+# Some helper functions
+require "/usr/pluto/bin/lmce.pl";
 
 #declare vars (it's safer this way)
 my $DEVICE_ID=0;
@@ -56,7 +58,9 @@ foreach my $I (sort keys %DEVICES)
 {
     $DEVICE_ID = $I;
     $DEVICE_EXT = 0;
+    $DEVICE_SECRET="";
     &read_pluto_device_data();
+    
     if($STATUS == -1)
     {
         &writelog("Will delete device #$DEVICE_ID from FreePBX\n");
@@ -121,7 +125,7 @@ sub read_pluto_device_data()
     my $DB_SQL;
     my $DB_STATEMENT;
 
-    $DB_SQL = "select FK_Device, IK_DeviceData, FK_DeviceData from Device_DeviceData where FK_Device=$DEVICE_ID and (FK_DeviceData=31 or FK_DeviceData=29)";
+    $DB_SQL = "select FK_Device, IK_DeviceData, FK_DeviceData from Device_DeviceData where FK_Device=$DEVICE_ID and (FK_DeviceData in (31,29,128))";
     $DB_STATEMENT = $DB_PL_HANDLE->prepare($DB_SQL) or die "Couldn't prepare query '$DB_SQL': $DBI::errstr\n";
     $DB_STATEMENT->execute() or die "Couldn't execute query '$DB_SQL': $DBI::errstr\n";
     $STATUS = -1;
@@ -134,6 +138,10 @@ sub read_pluto_device_data()
         elsif($DB_ROW->{'FK_DeviceData'} == 29)
         {
             $DEVICE_TYPE = $DB_ROW->{'IK_DeviceData'};
+        }
+        elsif($DB_ROW->{'FK_DeviceData'} == 128) 
+        {
+            $DEVICE_SECRET = $DB_ROW->{'IK_DeviceData'};
         }
         $STATUS=0;
     }
