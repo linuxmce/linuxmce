@@ -260,8 +260,13 @@ string Hulu_Player::CreateWindowIDString(long unsigned int window)
   return ss.str();
 }
 
-// End Private Methods ////////////////////////////////////////////////////////
+void Hulu_Player::SendKeyToWindow(Display *disp, long unsigned int wnd, int iXKeySym, int srlnum)
+{
+    XTestFakeKeyEvent( m_pDisplay, XKeysymToKeycode(m_pDisplay, iXKeySym), True, 0 );
+    XTestFakeKeyEvent( m_pDisplay, XKeysymToKeycode(m_pDisplay, iXKeySym), False, 0 );
+}
 
+// End Private Methods ////////////////////////////////////////////////////////
 /*
 
 	COMMANDS TO IMPLEMENT
@@ -290,19 +295,19 @@ void Hulu_Player::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string s
   switch(atoi(sPK_Button.c_str()))
     {
     case BUTTON_Up_Arrow_CONST:
-      WindowUtils::SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Up,m_iEventSerialNum++);
+      SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Up,m_iEventSerialNum++);
       break;		
     case BUTTON_Down_Arrow_CONST:
-      WindowUtils::SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Down,m_iEventSerialNum++);
+      SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Down,m_iEventSerialNum++);
       break;	
     case BUTTON_Left_Arrow_CONST:
-      WindowUtils::SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Left,m_iEventSerialNum++);
+      SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Left,m_iEventSerialNum++);
       break;	
     case BUTTON_Right_Arrow_CONST:
-      WindowUtils::SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Right,m_iEventSerialNum++);
+      SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Right,m_iEventSerialNum++);
       break;	
     case BUTTON_Enter_CONST:
-      WindowUtils::SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Return,m_iEventSerialNum++);
+      SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Return,m_iEventSerialNum++);
       break;	
     }
 }
@@ -610,7 +615,7 @@ void Hulu_Player::CMD_EnterGo(int iStreamID,string &sCMD_Result,Message *pMessag
 	cout << "Need to implement command #190 - Enter/Go" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-      WindowUtils::SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Return,m_iEventSerialNum++);
+      SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Return,m_iEventSerialNum++);
 
 }
 
@@ -627,7 +632,7 @@ void Hulu_Player::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessag
 	cout << "Need to implement command #200 - Move Up" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-      WindowUtils::SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Up,m_iEventSerialNum++);
+      SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Up,m_iEventSerialNum++);
 
 }
 
@@ -644,7 +649,7 @@ void Hulu_Player::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMess
 	cout << "Need to implement command #201 - Move Down" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-      WindowUtils::SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Down,m_iEventSerialNum++);
+      SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Down,m_iEventSerialNum++);
 
 }
 
@@ -661,7 +666,7 @@ void Hulu_Player::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMess
 	cout << "Need to implement command #202 - Move Left" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-      WindowUtils::SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Left,m_iEventSerialNum++);
+      SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Left,m_iEventSerialNum++);
 
 }
 
@@ -678,7 +683,7 @@ void Hulu_Player::CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMes
 	cout << "Need to implement command #203 - Move Right" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-      WindowUtils::SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Right,m_iEventSerialNum++);
+      SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Right,m_iEventSerialNum++);
 
 }
 
@@ -936,6 +941,8 @@ void Hulu_Player::CMD_2(string &sCMD_Result,Message *pMessage)
 
 void Hulu_Player::CMD_3(string &sCMD_Result,Message *pMessage)
 //<-dceag-c207-e->
+{
+}
 //<-dceag-c208-b->
 {
 }

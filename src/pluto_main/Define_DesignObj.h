@@ -2640,6 +2640,11 @@
 #define DESIGNOBJ_butTivo3Menu_CONST 6032
 #define DESIGNOBJ_butTivoThumbsUp_CONST 6033
 #define DESIGNOBJ_Tivo2_CONST 6034
+#define DESIGNOBJ_Basic_OSD_FS_CONST 6035
+#define DESIGNOBJ_Basic_OSD_FS_Options_CONST 6036
+#define DESIGNOBJ_popBasicOSDOptions_CONST 6037
+#define DESIGNOBJ_objNowPlayingInverted_CONST 6038
+#define DESIGNOBJ_MusicRemote_CONST 6039
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"

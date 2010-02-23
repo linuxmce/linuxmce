@@ -60,6 +60,7 @@ namespace DCE
 	  Display *getDisplay() { return m_pDisplay; }
 	  bool locateHuluWindow(long unsigned int window);  // Analog of Window type.
 	  string CreateWindowIDString(long unsigned int window);
+	  void SendKeyToWindow(Display *disp, long unsigned int wnd, int iXKeySym, int srlnum);
 public:
 	  // Public member variables
 	  virtual void PrepareToDelete();
