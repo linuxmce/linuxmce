@@ -944,8 +944,7 @@ void Hulu_Player::CMD_3(string &sCMD_Result,Message *pMessage)
 {
 }
 //<-dceag-c208-b->
-{
-}
+
 	/** @brief COMMAND: #208 - 4 */
 	/** 4 */
 
