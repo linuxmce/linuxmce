@@ -28,5 +28,15 @@ if su - "$TheChosenOne" -c "DISPLAY=:$Display kcheckrunning"; then
 	exit
 fi
 
+# Disable the KDE Screensaver
+mkdir -p ~/.kde/share/config/
+echo "[ScreenSaver]
+Enabled=false
+Lock=false
+LockGrace=60000
+Saver=kblank.desktop
+Timeout=900" > ~/.kde/share/config/kscreensaverrc
+
+
 su - "$TheChosenOne" -c "DISPLAY=:$Display /usr/pluto/bin/startkde-keepdcop" &>/dev/null </dev/null &
 disown -a
