@@ -55,25 +55,39 @@ LIRCD_Thread (void *arg)
   while (!LIRCD_bQuit)
     {
 
+	LoggerWrapper::GetInstance ()->Write(LV_CRITICAL,
+						"LIRCD_Thread: Listening for Hulu Desktop");
+
       // This call blocks.
       lircd_clientfd = accept (lircd_sockfd,
 			       (sockaddr *) & lircd_client_address,
 			       &lircd_client_len);
 
-      LoggerWrapper::GetInstance ()->Write (LV_STATUS,
-					    "Accepted socket connection: %d",
+      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
+					    "LIRCD_Thread: Accepted socket connection: %d",
 					    lircd_clientfd);
 
       LIRCD_bConnectionActive = true;
 
-      while (!LIRCD_bConnectionActive)
+      while (LIRCD_bConnectionActive)
 	{
 	  // While the connection is active, we basically sit here.
 	  // Since we do not have to process anything from hulu at all
 	  // but we do need to prevent the accept connection from running
 	  // prematurely.
+		
+		if (LIRCD_bQuit)
+		{
+			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
+								"LIRCD_Thread: Got Quit while connection active. Quitting.");
+			LIRCD_bConnectionActive = false;
+		}
 	  Sleep (20);
 	}
+
+	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
+						"LIRCD_Thread: Closing Socket connection: %d",
+						lircd_clientfd);
 
       close (lircd_clientfd);	// Drop the FD
 
@@ -152,7 +166,7 @@ bool
 LIRCD_Close ()
 {
   // Close the open client file descriptor.
-  close (lircd_sockfd);
+  close (lircd_clientfd);
   LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
 					"Closed File Descriptor: %d",
 					lircd_sockfd);

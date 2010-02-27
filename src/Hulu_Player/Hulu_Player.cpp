@@ -288,6 +288,9 @@ Hulu_Player::StopHulu ()
 							  m_dwPK_Device,
 							  "huludesktop",
 							  false);
+
+	  LIRCD_bConnectionActive = false;  // Drop the connection.
+
 	  return SendCommand (CMD_Kill_Application, &sResponse);	// Get return confirmation so we know it's gone before we continue
 	}
     }
