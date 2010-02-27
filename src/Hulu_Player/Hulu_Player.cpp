@@ -47,84 +47,96 @@ using namespace DCE;
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
-Hulu_Player::Hulu_Player(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
-	: Hulu_Player_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
+Hulu_Player::Hulu_Player (int DeviceID, string ServerAddress,
+			  bool bConnectEventHandler, bool bLocalMode,
+			  class Router * pRouter):
+Hulu_Player_Command (DeviceID, ServerAddress, bConnectEventHandler,
+		     bLocalMode, pRouter)
 //<-dceag-const-e->
-	,m_HuluMutex("hulu_player")
+,
+m_HuluMutex ("hulu_player")
 {
-  m_HuluMutex.Init(NULL);
+  m_HuluMutex.Init (NULL);
   m_pDevice_App_Server = NULL;
-  m_LIRCD_Thread = (pthread_t)NULL;
+  m_LIRCD_Thread = (pthread_t) NULL;
 }
 
 //<-dceag-const2-b->!
 
 //<-dceag-dest-b->
-Hulu_Player::~Hulu_Player()
+Hulu_Player::~Hulu_Player ()
 //<-dceag-dest-e->
 {
-	// Exit the LIRCD Thread
-	LIRCD_bQuit = true;
-	if (m_LIRCD_Thread != (pthread_t)NULL)
-		pthread_join(m_LIRCD_Thread,NULL);
+  // Exit the LIRCD Thread
+  LIRCD_bQuit = true;
+  if (m_LIRCD_Thread != (pthread_t) NULL)
+    pthread_join (m_LIRCD_Thread, NULL);
 }
 
-void Hulu_Player::PrepareToDelete()
+void
+Hulu_Player::PrepareToDelete ()
 {
-  Command_Impl::PrepareToDelete();
+  Command_Impl::PrepareToDelete ();
   m_pDevice_App_Server = NULL;
 }
 
-void Hulu_Player::CreateChildren()
+void
+Hulu_Player::CreateChildren ()
 {
-	if (pthread_create(&m_LIRCD_Thread,NULL,LIRCD_Thread,(void *)this))
-	{
-		m_LIRCD_Thread = (pthread_t)NULL;
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Failed to create LIRCD Thread. Exiting with error code 1.");
-		m_bQuit_set(true);
-		exit(1);
-	}
+  if (pthread_create (&m_LIRCD_Thread, NULL, LIRCD_Thread, (void *) this))
+    {
+      m_LIRCD_Thread = (pthread_t) NULL;
+      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
+					    "Failed to create LIRCD Thread. Exiting with error code 1.");
+      m_bQuit_set (true);
+      exit (1);
+    }
 }
 
 
 //<-dceag-getconfig-b->
-bool Hulu_Player::GetConfig()
+bool
+Hulu_Player::GetConfig ()
 {
-	if( !Hulu_Player_Command::GetConfig() )
-		return false;
+  if (!Hulu_Player_Command::GetConfig ())
+    return false;
 //<-dceag-getconfig-e->
 
-	
-	// Put your code here to initialize the data in this class
-	// The configuration parameters DATA_ are now populated
-	
-	m_pDevice_Game_Plugin = m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Hulu_PlugIn_CONST);
-	if( !m_pDevice_Game_Plugin )
-	  {
-	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"I need a Hulu plugin to function.");
-	    return false;
-	  }
-	
-	m_pDevice_App_Server = m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_App_Server_CONST,this);
-	if( !m_pDevice_App_Server )
-	  {
-	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"I need an App Server to function.");
-	    return false;
-	  }
-	
-	m_iHuluWindowId = 0;
-	m_iEventSerialNum = 0;
- 	m_pDisplay = XOpenDisplay(getenv("DISPLAY"));
-	
-	return true;
+
+  // Put your code here to initialize the data in this class
+  // The configuration parameters DATA_ are now populated
+
+  m_pDevice_Hulu_Plugin =
+    m_pData->m_AllDevices.
+    m_mapDeviceData_Base_FindFirstOfTemplate
+    (DEVICETEMPLATE_Hulu_PlugIn_CONST);
+  if (!m_pDevice_Hulu_Plugin)
+    {
+      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
+					    "I need a Hulu plugin to function.");
+      return false;
+    }
+
+  m_pDevice_App_Server =
+    m_pData->
+    FindFirstRelatedDeviceOfCategory (DEVICECATEGORY_App_Server_CONST, this);
+  if (!m_pDevice_App_Server)
+    {
+      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
+					    "I need an App Server to function.");
+      return false;
+    }
+
+  return true;
 }
 
 //<-dceag-reg-b->
 // This function will only be used if this device is loaded into the DCE Router's memory space as a plug-in.  Otherwise Connect() will be called from the main()
-bool Hulu_Player::Register()
+bool
+Hulu_Player::Register ()
 //<-dceag-reg-e->
 {
-	return Connect(PK_DeviceTemplate_get()); 
+  return Connect (PK_DeviceTemplate_get ());
 }
 
 /*  Since several parents can share the same child class, and each has it's own implementation, the base class in Gen_Devices
@@ -141,10 +153,13 @@ bool Hulu_Player::Register()
 	should change the sCMD_Result to OK
 */
 //<-dceag-cmdch-b->
-void Hulu_Player::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::ReceivedCommandForChild (DeviceData_Impl * pDeviceData_Impl,
+				      string & sCMD_Result,
+				      Message * pMessage)
 //<-dceag-cmdch-e->
 {
-	sCMD_Result = "UNHANDLED CHILD";
+  sCMD_Result = "UNHANDLED CHILD";
 }
 
 /*
@@ -153,146 +168,146 @@ void Hulu_Player::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
 	should change the sCMD_Result to OK
 */
 //<-dceag-cmduk-b->
-void Hulu_Player::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::ReceivedUnknownCommand (string & sCMD_Result, Message * pMessage)
 //<-dceag-cmduk-e->
 {
-	sCMD_Result = "UNKNOWN COMMAND";
+  sCMD_Result = "UNKNOWN COMMAND";
 }
 
 //<-dceag-sample-b->!
 
 // Private Methods ////////////////////////////////////////////////////////////
 
-bool Hulu_Player::UpdateHuluConfig()
+bool
+Hulu_Player::UpdateHuluConfig ()
 {
- 
-	const string s_OutputFile = "/root/.huludesktop";
-	string s_ConfigFile = 
-	"[display]\n"
-	"fullscreen = FALSE\n"
-	"width = 640\n"
-	"height = 480\n"
-	"pos_x = 0\n"
-	"pos_y = 0\n"
-	"\n"
-	"[remote]\n"
-	"lirc_device = /tmp/hulu_lircd\n"
-	"lirc_remote_identifier = mceusb\n"
-	"lirc_release_suffix = _UP\n"
-	"lirc_repeat_threshold = 10\n"
-	"button_name_up = Up\n"
-	"button_name_down = Down\n"
-	"button_name_left = Left\n"
-	"button_name_right = Right\n"
-	"button_name_select = OK\n"
-	"button_name_menu = Home\n"
-	"\n"
-	"[flash]\n"
-	"flash_location = /usr/lib/mozilla/plugins/flashplugin-alternative.so\n"
-	"\n"
-	"[screensaver]\n"
-	"suspend_script = (null)\n"
-	"resume_script = (null)\n"
-	"\n"
-	"[version]\n"
-	"latest = (null)\n"
-	"eula_version = 1\n";
+
+  const string s_OutputFile = "/root/.huludesktop";
+  string s_ConfigFile =
+    "[display]\n"
+    "fullscreen = FALSE\n"
+    "width = 640\n"
+    "height = 480\n"
+    "pos_x = 0\n"
+    "pos_y = 0\n"
+    "\n"
+    "[remote]\n"
+    "lirc_device = /tmp/hulu_lircd\n"
+    "lirc_remote_identifier = mceusb\n"
+    "lirc_release_suffix = _UP\n"
+    "lirc_repeat_threshold = 10\n"
+    "button_name_up = Up\n"
+    "button_name_down = Down\n"
+    "button_name_left = Left\n"
+    "button_name_right = Right\n"
+    "button_name_select = OK\n"
+    "button_name_menu = Home\n"
+    "\n"
+    "[flash]\n"
+    "flash_location = /usr/lib/mozilla/plugins/flashplugin-alternative.so\n"
+    "\n"
+    "[screensaver]\n"
+    "suspend_script = (null)\n"
+    "resume_script = (null)\n"
+    "\n" "[version]\n" "latest = (null)\n" "eula_version = 1\n";
 
 
-	if (!FileUtils::WriteTextFile(s_OutputFile,s_ConfigFile)) 
-	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Couldn't write %s",s_OutputFile.c_str());		
-		return false;	
-	} else {
-		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Wrote %s",s_OutputFile.c_str());
-		return true;	
-	}
+  if (!FileUtils::WriteTextFile (s_OutputFile, s_ConfigFile))
+    {
+      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "Couldn't write %s",
+					    s_OutputFile.c_str ());
+      return false;
+    }
+  else
+    {
+      LoggerWrapper::GetInstance ()->Write (LV_STATUS, "Wrote %s",
+					    s_OutputFile.c_str ());
+      return true;
+    }
 
 }
 
-bool Hulu_Player::LaunchHulu()
+bool
+Hulu_Player::LaunchHulu ()
 {
-  DeviceData_Base *pDevice_App_Server = m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_App_Server_CONST,this);
-  if( pDevice_App_Server )
+  DeviceData_Base *pDevice_App_Server =
+    m_pData->
+    FindFirstRelatedDeviceOfCategory (DEVICECATEGORY_App_Server_CONST, this);
+  if (pDevice_App_Server)
     {
-      string sMessage = StringUtils::itos(m_dwPK_Device) + " " + StringUtils::itos(m_dwPK_Device) + " 1 " 
-	TOSTRING(COMMAND_Application_Exited_CONST) " " 
-	TOSTRING(COMMANDPARAMETER_Exit_Code_CONST) " ";
-      
-      if (!UpdateHuluConfig()) 
+      string sMessage =
+	StringUtils::itos (m_dwPK_Device) + " " +
+	StringUtils::itos (m_dwPK_Device) +
+	" 1 " TOSTRING (COMMAND_Application_Exited_CONST) " "
+	TOSTRING (COMMANDPARAMETER_Exit_Code_CONST) " ";
+
+      if (!UpdateHuluConfig ())
 	{
 	  return false;
-	} 
+	}
 
-      DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
-			"huludesktop", "huludesktop", "",
-						       sMessage + "1",sMessage + "0",false,false,true,false);
-      if( SendCommand(CMD_Spawn_Application) ) {
-	m_bHuluIsRunning = true;
-	
-	Sleep(5000); // FIXME !!!!
-	
-	if (!WindowUtils::FindWindowMatching(m_pDisplay, "Hulu", m_iHuluWindowId))
-	  {
-	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Couldn't find Hulu Desktop Window");	
-	  }
-	else
-	  {
-	    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Hulu window found: Window ID %x",m_iHuluWindowId);
-	    m_sHuluWindowId = CreateWindowIDString(m_iHuluWindowId); 
-	  }
-	
-	return true; }
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Hulu_Player::LaunchHulu - failed to launch");
+      DCE::CMD_Spawn_Application CMD_Spawn_Application (m_dwPK_Device,
+							pDevice_App_Server->
+							m_dwPK_Device,
+							"huludesktop",
+							"huludesktop", "",
+							sMessage + "1",
+							sMessage + "0", false,
+							false, true, false);
+      if (SendCommand (CMD_Spawn_Application))
+	{
+	  m_bHuluIsRunning = true;
+
+	  return true;
+	}
+      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
+					    "Hulu_Player::LaunchHulu - failed to launch");
     }
   else
-    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Hulu_Player::LaunchHulu - no app server");
+    LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
+					  "Hulu_Player::LaunchHulu - no app server");
   return false;
 }
 
-bool Hulu_Player::StopHulu()
+bool
+Hulu_Player::StopHulu ()
 {
   DeviceData_Base *pDevice_App_Server = NULL;
   string sResponse;
-  if(!m_bRouterReloading)
+  if (!m_bRouterReloading)
     {
-      pDevice_App_Server = m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_App_Server_CONST,this);
-      if( pDevice_App_Server )
+      pDevice_App_Server =
+	m_pData->
+	FindFirstRelatedDeviceOfCategory (DEVICECATEGORY_App_Server_CONST,
+					  this);
+      if (pDevice_App_Server)
 	{
-	  DCE::CMD_Kill_Application CMD_Kill_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
-							 "huludesktop", false);
-	  m_iHuluWindowId = 0;
-	  return SendCommand(CMD_Kill_Application,&sResponse);  // Get return confirmation so we know it's gone before we continue
+	  DCE::CMD_Kill_Application CMD_Kill_Application (m_dwPK_Device,
+							  pDevice_App_Server->
+							  m_dwPK_Device,
+							  "huludesktop",
+							  false);
+	  return SendCommand (CMD_Kill_Application, &sResponse);	// Get return confirmation so we know it's gone before we continue
 	}
     }
 
-  LoggerWrapper::GetInstance()->Write(LV_STATUS, "Hulu_Player::StopHulu %p %s", pDevice_App_Server,sResponse.c_str());
+  LoggerWrapper::GetInstance ()->Write (LV_STATUS,
+					"Hulu_Player::StopHulu %p %s",
+					pDevice_App_Server,
+					sResponse.c_str ());
   return false;
-  
+
 }
 
-string Hulu_Player::CreateWindowIDString(long unsigned int window)
+void
+Hulu_Player::SendLIRCDCommand (string sCommand)
 {
-  // FIXME: Provide some sanity checking later.
-  stringstream ss;
-  ss << window;
-  return ss.str();
-}
-
-void Hulu_Player::SendKeyToWindow(Display *disp, long unsigned int wnd, int iXKeySym, int srlnum)
-{
-    XTestFakeKeyEvent( m_pDisplay, XKeysymToKeycode(m_pDisplay, iXKeySym), True, 0 );
-    XTestFakeKeyEvent( m_pDisplay, XKeysymToKeycode(m_pDisplay, iXKeySym), False, 0 );
-}
-
-
-void Hulu_Player::SendLIRCDCommand(string sCommand)
-{
-	// Send a formatted command to the LIRCD socket. Currently calls the LIRCd socket
-	// since the lircd thread deals with raw commands, This is a convienience method
-	// that fakes the necessary formatted command bits.
-	//
-	LIRCD_SendCommand("00000000 0 "+sCommand+"_UP mceusb\n");
+  // Send a formatted command to the LIRCD socket. Currently calls the LIRCd socket
+  // since the lircd thread deals with raw commands, This is a convienience method
+  // that fakes the necessary formatted command bits.
+  //
+  LIRCD_SendCommand ("00000000 0 " + sCommand + "_UP mceusb\n");
 }
 
 // End Private Methods ////////////////////////////////////////////////////////
@@ -313,30 +328,33 @@ void Hulu_Player::SendLIRCDCommand(string sCommand)
 		/** @param #50 Name */
 			/** The application to send the keypress to. If not specified, it goes to the DCE device. */
 
-void Hulu_Player::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Simulate_Keypress (string sPK_Button, int iStreamID,
+				    string sName, string & sCMD_Result,
+				    Message * pMessage)
 //<-dceag-c28-e->
 {
   cout << "Need to implement command #28 - Simulate Keypress" << endl;
   cout << "Parm #26 - PK_Button=" << sPK_Button << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #50 - Name=" << sName << endl;
-  
-  switch(atoi(sPK_Button.c_str()))
+
+  switch (atoi (sPK_Button.c_str ()))
     {
     case BUTTON_Up_Arrow_CONST:
-	SendLIRCDCommand("Up");
-      break;		
+      SendLIRCDCommand ("Up");
+      break;
     case BUTTON_Down_Arrow_CONST:
-     	SendLIRCDCommand("Down");
-      break;	
+      SendLIRCDCommand ("Down");
+      break;
     case BUTTON_Left_Arrow_CONST:
-      	SendLIRCDCommand("Left");
-      break;	
+      SendLIRCDCommand ("Left");
+      break;
     case BUTTON_Right_Arrow_CONST:
-    	SendLIRCDCommand("Right");
-      break;	
+      SendLIRCDCommand ("Right");
+      break;
     case BUTTON_Enter_CONST:
-      	SendLIRCDCommand("OK");
+      SendLIRCDCommand ("OK");
       break;
     }
 }
@@ -352,13 +370,16 @@ void Hulu_Player::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string s
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void Hulu_Player::CMD_Simulate_Mouse_Click(int iPosition_X,int iPosition_Y,int iStreamID,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Simulate_Mouse_Click (int iPosition_X, int iPosition_Y,
+				       int iStreamID, string & sCMD_Result,
+				       Message * pMessage)
 //<-dceag-c29-e->
 {
-	cout << "Need to implement command #29 - Simulate Mouse Click" << endl;
-	cout << "Parm #11 - Position_X=" << iPosition_X << endl;
-	cout << "Parm #12 - Position_Y=" << iPosition_Y << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Need to implement command #29 - Simulate Mouse Click" << endl;
+  cout << "Parm #11 - Position_X=" << iPosition_X << endl;
+  cout << "Parm #12 - Position_Y=" << iPosition_Y << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c32-b->
@@ -374,14 +395,19 @@ void Hulu_Player::CMD_Simulate_Mouse_Click(int iPosition_X,int iPosition_Y,int i
 		/** @param #23 Disable Aspect Lock */
 			/** If 1, the image will be stretched to fit the object */
 
-void Hulu_Player::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *pData,int iData_Size,string sDisable_Aspect_Lock,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Update_Object_Image (string sPK_DesignObj, string sType,
+				      char *pData, int iData_Size,
+				      string sDisable_Aspect_Lock,
+				      string & sCMD_Result,
+				      Message * pMessage)
 //<-dceag-c32-e->
 {
-	cout << "Need to implement command #32 - Update Object Image" << endl;
-	cout << "Parm #3 - PK_DesignObj=" << sPK_DesignObj << endl;
-	cout << "Parm #14 - Type=" << sType << endl;
-	cout << "Parm #19 - Data  (data value)" << endl;
-	cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
+  cout << "Need to implement command #32 - Update Object Image" << endl;
+  cout << "Parm #3 - PK_DesignObj=" << sPK_DesignObj << endl;
+  cout << "Parm #14 - Type=" << sType << endl;
+  cout << "Parm #19 - Data  (data value)" << endl;
+  cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
 }
 
 //<-dceag-c37-b->
@@ -397,16 +423,19 @@ void Hulu_Player::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char
 		/** @param #59 MediaURL */
 			/** The file to play, or other media id.  The format is specific on the media type and the media player. */
 
-void Hulu_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Play_Media (int iPK_MediaType, int iStreamID,
+			     string sMediaPosition, string sMediaURL,
+			     string & sCMD_Result, Message * pMessage)
 //<-dceag-c37-e->
 {
-	cout << "Need to implement command #37 - Play Media" << endl;
-	cout << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
-	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
-	cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
+  cout << "Need to implement command #37 - Play Media" << endl;
+  cout << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+  cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
 
-	LaunchHulu();
+  LaunchHulu ();
 
 }
 
@@ -419,14 +448,16 @@ void Hulu_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
 		/** @param #42 MediaPosition */
 			/** The position at which this stream was last played. */
 
-void Hulu_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Stop_Media (int iStreamID, string * sMediaPosition,
+			     string & sCMD_Result, Message * pMessage)
 //<-dceag-c38-e->
 {
-	cout << "Need to implement command #38 - Stop Media" << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
-	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+  cout << "Need to implement command #38 - Stop Media" << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 
-	StopHulu();
+  StopHulu ();
 
 }
 
@@ -437,11 +468,13 @@ void Hulu_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sC
 		/** @param #41 StreamID */
 			/** The media stream for which we need to pause playback. */
 
-void Hulu_Player::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Pause_Media (int iStreamID, string & sCMD_Result,
+			      Message * pMessage)
 //<-dceag-c39-e->
 {
-	cout << "Need to implement command #39 - Pause Media" << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Need to implement command #39 - Pause Media" << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c40-b->
@@ -451,11 +484,13 @@ void Hulu_Player::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMe
 		/** @param #41 StreamID */
 			/** The media stream that we need to restart playback for. */
 
-void Hulu_Player::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Restart_Media (int iStreamID, string & sCMD_Result,
+				Message * pMessage)
 //<-dceag-c40-e->
 {
-	cout << "Need to implement command #40 - Restart Media" << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Need to implement command #40 - Restart Media" << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c41-b->
@@ -469,13 +504,17 @@ void Hulu_Player::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *p
 		/** @param #220 Report */
 			/** If true, report this speed to the user on the OSD */
 
-void Hulu_Player::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed,bool bReport,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Change_Playback_Speed (int iStreamID,
+					int iMediaPlaybackSpeed, bool bReport,
+					string & sCMD_Result,
+					Message * pMessage)
 //<-dceag-c41-e->
 {
-	cout << "Need to implement command #41 - Change Playback Speed" << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
-	cout << "Parm #43 - MediaPlaybackSpeed=" << iMediaPlaybackSpeed << endl;
-	cout << "Parm #220 - Report=" << bReport << endl;
+  cout << "Need to implement command #41 - Change Playback Speed" << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Parm #43 - MediaPlaybackSpeed=" << iMediaPlaybackSpeed << endl;
+  cout << "Parm #220 - Report=" << bReport << endl;
 }
 
 //<-dceag-c42-b->
@@ -487,12 +526,17 @@ void Hulu_Player::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpee
 		/** @param #41 StreamID */
 			/** The stream */
 
-void Hulu_Player::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Jump_to_Position_in_Stream (string sValue_To_Assign,
+					     int iStreamID,
+					     string & sCMD_Result,
+					     Message * pMessage)
 //<-dceag-c42-e->
 {
-	cout << "Need to implement command #42 - Jump to Position in Stream" << endl;
-	cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Need to implement command #42 - Jump to Position in Stream" <<
+    endl;
+  cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c65-b->
@@ -504,12 +548,16 @@ void Hulu_Player::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iSt
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void Hulu_Player::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Jump_Position_In_Playlist (string sValue_To_Assign,
+					    int iStreamID,
+					    string & sCMD_Result,
+					    Message * pMessage)
 //<-dceag-c65-e->
 {
-	cout << "Need to implement command #65 - Jump Position In Playlist" << endl;
-	cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Need to implement command #65 - Jump Position In Playlist" << endl;
+  cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c81-b->
@@ -519,11 +567,13 @@ void Hulu_Player::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStr
 		/** @param #41 StreamID */
 			/** The stream on which to do the navigation. */
 
-void Hulu_Player::CMD_Navigate_Next(int iStreamID,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Navigate_Next (int iStreamID, string & sCMD_Result,
+				Message * pMessage)
 //<-dceag-c81-e->
 {
-	cout << "Need to implement command #81 - Navigate Next" << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Need to implement command #81 - Navigate Next" << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c82-b->
@@ -533,11 +583,13 @@ void Hulu_Player::CMD_Navigate_Next(int iStreamID,string &sCMD_Result,Message *p
 		/** @param #41 StreamID */
 			/** The stream on which to do the navigation. */
 
-void Hulu_Player::CMD_Navigate_Prev(int iStreamID,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Navigate_Prev (int iStreamID, string & sCMD_Result,
+				Message * pMessage)
 //<-dceag-c82-e->
 {
-	cout << "Need to implement command #82 - Navigate Prev" << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Need to implement command #82 - Navigate Prev" << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c84-b->
@@ -557,17 +609,24 @@ void Hulu_Player::CMD_Navigate_Prev(int iStreamID,string &sCMD_Result,Message *p
 		/** @param #61 Height */
 			/** Frame height */
 
-void Hulu_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,int iWidth,int iHeight,char **pData,int *iData_Size,string *sFormat,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Get_Video_Frame (string sDisable_Aspect_Lock, int iStreamID,
+				  int iWidth, int iHeight, char **pData,
+				  int *iData_Size, string * sFormat,
+				  string & sCMD_Result, Message * pMessage)
 //<-dceag-c84-e->
 {
-	cout << "Need to implement command #84 - Get Video Frame" << endl;
-	cout << "Parm #19 - Data  (data value)" << endl;
-	cout << "Parm #20 - Format=" << sFormat << endl;
-	cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
-	cout << "Parm #60 - Width=" << iWidth << endl;
-	cout << "Parm #61 - Height=" << iHeight << endl;
+  cout << "Need to implement command #84 - Get Video Frame" << endl;
+  cout << "Parm #19 - Data  (data value)" << endl;
+  cout << "Parm #20 - Format=" << sFormat << endl;
+  cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Parm #60 - Width=" << iWidth << endl;
+  cout << "Parm #61 - Height=" << iHeight << endl;
 
+	/** 
+         * Temporarily commented out until i can find a sane way to do this nicely.
+         *
 	PLUTO_SAFETY_LOCK(mm,m_HuluMutex);
 
 	FileUtils::DelFile("/tmp/HuluOSD.png");
@@ -584,7 +643,10 @@ void Hulu_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,
 	*iData_Size = size;
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Hulu_Player::CMD_Get_Video_Frame got %d",size);
  
-	return;
+	*
+	**/
+
+  return;
 
 }
 
@@ -601,22 +663,24 @@ void Hulu_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,
 1 - Title menu
 2 - Media menu */
 
-void Hulu_Player::CMD_Goto_Media_Menu(int iStreamID,int iMenuType,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Goto_Media_Menu (int iStreamID, int iMenuType,
+				  string & sCMD_Result, Message * pMessage)
 //<-dceag-c87-e->
 {
-	cout << "Need to implement command #87 - Goto Media Menu" << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
-	cout << "Parm #64 - MenuType=" << iMenuType << endl;
+  cout << "Need to implement command #87 - Goto Media Menu" << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Parm #64 - MenuType=" << iMenuType << endl;
 
-	switch (iMenuType)
-	  {
-	  case SHOW_OSD:
-	    EVENT_Menu_Onscreen(iStreamID,true);
-	    break;
-	  case SHOW_REMOTE:
-	  default:
-	    EVENT_Menu_Onscreen(iStreamID,false);
-	  }
+  switch (iMenuType)
+    {
+    case SHOW_OSD:
+      EVENT_Menu_Onscreen (iStreamID, true);
+      break;
+    case SHOW_REMOTE:
+    default:
+      EVENT_Menu_Onscreen (iStreamID, false);
+    }
 
 }
 
@@ -625,10 +689,11 @@ void Hulu_Player::CMD_Goto_Media_Menu(int iStreamID,int iMenuType,string &sCMD_R
 	/** @brief COMMAND: #126 - Guide */
 	/** Show guide information.  For a dvd this may be the menu, just like the menu command */
 
-void Hulu_Player::CMD_Guide(string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Guide (string & sCMD_Result, Message * pMessage)
 //<-dceag-c126-e->
 {
-	cout << "Need to implement command #126 - Guide" << endl;
+  cout << "Need to implement command #126 - Guide" << endl;
 }
 
 //<-dceag-c190-b->
@@ -638,13 +703,15 @@ void Hulu_Player::CMD_Guide(string &sCMD_Result,Message *pMessage)
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void Hulu_Player::CMD_EnterGo(int iStreamID,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_EnterGo (int iStreamID, string & sCMD_Result,
+			  Message * pMessage)
 //<-dceag-c190-e->
 {
-	cout << "Need to implement command #190 - Enter/Go" << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Need to implement command #190 - Enter/Go" << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-      SendLIRCDCommand("OK");
+  SendLIRCDCommand ("OK");
 
 }
 
@@ -655,13 +722,15 @@ void Hulu_Player::CMD_EnterGo(int iStreamID,string &sCMD_Result,Message *pMessag
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void Hulu_Player::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Move_Up (int iStreamID, string & sCMD_Result,
+			  Message * pMessage)
 //<-dceag-c200-e->
 {
-	cout << "Need to implement command #200 - Move Up" << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Need to implement command #200 - Move Up" << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-      SendLIRCDCommand("Up");
+  SendLIRCDCommand ("Up");
 
 }
 
@@ -672,13 +741,15 @@ void Hulu_Player::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessag
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void Hulu_Player::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Move_Down (int iStreamID, string & sCMD_Result,
+			    Message * pMessage)
 //<-dceag-c201-e->
 {
-	cout << "Need to implement command #201 - Move Down" << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Need to implement command #201 - Move Down" << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-      SendLIRCDCommand("Down");
+  SendLIRCDCommand ("Down");
 
 }
 
@@ -689,13 +760,15 @@ void Hulu_Player::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMess
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void Hulu_Player::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Move_Left (int iStreamID, string & sCMD_Result,
+			    Message * pMessage)
 //<-dceag-c202-e->
 {
-	cout << "Need to implement command #202 - Move Left" << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Need to implement command #202 - Move Left" << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-      SendLIRCDCommand("Left");
+  SendLIRCDCommand ("Left");
 
 }
 
@@ -706,13 +779,15 @@ void Hulu_Player::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMess
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void Hulu_Player::CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Move_Right (int iStreamID, string & sCMD_Result,
+			     Message * pMessage)
 //<-dceag-c203-e->
 {
-	cout << "Need to implement command #203 - Move Right" << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Need to implement command #203 - Move Right" << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-      SendLIRCDCommand("Right");
+  SendLIRCDCommand ("Right");
 
 }
 
@@ -731,15 +806,19 @@ void Hulu_Player::CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMes
 		/** @param #105 StreamingTargets */
 			/** Target destinations for streaming. Semantics dependent on the target device. */
 
-void Hulu_Player::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string sStreamingTargets,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Start_Streaming (int iPK_MediaType, int iStreamID,
+				  string sMediaPosition, string sMediaURL,
+				  string sStreamingTargets,
+				  string & sCMD_Result, Message * pMessage)
 //<-dceag-c249-e->
 {
-	cout << "Need to implement command #249 - Start Streaming" << endl;
-	cout << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
-	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
-	cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
-	cout << "Parm #105 - StreamingTargets=" << sStreamingTargets << endl;
+  cout << "Need to implement command #249 - Start Streaming" << endl;
+  cout << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+  cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
+  cout << "Parm #105 - StreamingTargets=" << sStreamingTargets << endl;
 }
 
 //<-dceag-c259-b->
@@ -753,13 +832,17 @@ void Hulu_Player::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sMe
 		/** @param #42 MediaPosition */
 			/** A media player readable representation of the current position including all options */
 
-void Hulu_Player::CMD_Report_Playback_Position(int iStreamID,string *sText,string *sMediaPosition,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Report_Playback_Position (int iStreamID, string * sText,
+					   string * sMediaPosition,
+					   string & sCMD_Result,
+					   Message * pMessage)
 //<-dceag-c259-e->
 {
-	cout << "Need to implement command #259 - Report Playback Position" << endl;
-	cout << "Parm #9 - Text=" << sText << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
-	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+  cout << "Need to implement command #259 - Report Playback Position" << endl;
+  cout << "Parm #9 - Text=" << sText << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 }
 
 //<-dceag-c412-b->
@@ -771,12 +854,14 @@ void Hulu_Player::CMD_Report_Playback_Position(int iStreamID,string *sText,strin
 		/** @param #42 MediaPosition */
 			/** The media position.  When MediaPlugin gets this, it will be a bookmark ID, when a media player gets it, the string */
 
-void Hulu_Player::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Set_Media_Position (int iStreamID, string sMediaPosition,
+				     string & sCMD_Result, Message * pMessage)
 //<-dceag-c412-e->
 {
-	cout << "Need to implement command #412 - Set Media Position" << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
-	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+  cout << "Need to implement command #412 - Set Media Position" << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 }
 
 //<-dceag-c548-b->
@@ -788,14 +873,16 @@ void Hulu_Player::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,str
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void Hulu_Player::CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Menu (string sText, int iStreamID, string & sCMD_Result,
+		       Message * pMessage)
 //<-dceag-c548-e->
 {
-	cout << "Need to implement command #548 - Menu" << endl;
-	cout << "Parm #9 - Text=" << sText << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Need to implement command #548 - Menu" << endl;
+  cout << "Parm #9 - Text=" << sText << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-	SendLIRCDCommand("Home");
+  SendLIRCDCommand ("Home");
 
 }
 
@@ -808,23 +895,31 @@ void Hulu_Player::CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Messag
 		/** @param #228 Exit Code */
 			/** Exit Code to be passed to the ApplicationExited function */
 
-void Hulu_Player::CMD_Application_Exited(int iPID,int iExit_Code,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Application_Exited (int iPID, int iExit_Code,
+				     string & sCMD_Result, Message * pMessage)
 //<-dceag-c812-e->
 {
-	cout << "Need to implement command #812 - Application Exited" << endl;
-	cout << "Parm #227 - PID=" << iPID << endl;
-	cout << "Parm #228 - Exit_Code=" << iExit_Code << endl;
+  cout << "Need to implement command #812 - Application Exited" << endl;
+  cout << "Parm #227 - PID=" << iPID << endl;
+  cout << "Parm #228 - Exit_Code=" << iExit_Code << endl;
 
 #ifndef WIN32
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Process exited %d %d", iPID, iExit_Code);
+  LoggerWrapper::GetInstance ()->Write (LV_STATUS, "Process exited %d %d",
+					iPID, iExit_Code);
 
-	// void *data;
+  // void *data;
 
-	{
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Send go back to the caller!");
-		DCE::CMD_MH_Stop_Media_Cat CMD_MH_Stop_Media_Cat(m_dwPK_Device,DEVICECATEGORY_Media_Plugins_CONST,false,BL_SameHouse,m_dwPK_Device,0,0,"",false);
-		SendCommand(CMD_MH_Stop_Media_Cat);
-	}
+  {
+    LoggerWrapper::GetInstance ()->Write (LV_STATUS,
+					  "Send go back to the caller!");
+    DCE::CMD_MH_Stop_Media_Cat CMD_MH_Stop_Media_Cat (m_dwPK_Device,
+						      DEVICECATEGORY_Media_Plugins_CONST,
+						      false, BL_SameHouse,
+						      m_dwPK_Device, 0, 0, "",
+						      false);
+    SendCommand (CMD_MH_Stop_Media_Cat);
+  }
 
 #endif
 
@@ -839,12 +934,14 @@ void Hulu_Player::CMD_Application_Exited(int iPID,int iExit_Code,string &sCMD_Re
 		/** @param #260 Aspect Ratio */
 			/** aspect ratio to set: auto, 1:1, 4:3, 16:9, 2.11:1 */
 
-void Hulu_Player::CMD_Set_Aspect_Ratio(int iStreamID,string sAspect_Ratio,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Set_Aspect_Ratio (int iStreamID, string sAspect_Ratio,
+				   string & sCMD_Result, Message * pMessage)
 //<-dceag-c916-e->
 {
-	cout << "Need to implement command #916 - Set Aspect Ratio" << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
-	cout << "Parm #260 - Aspect_Ratio=" << sAspect_Ratio << endl;
+  cout << "Need to implement command #916 - Set Aspect Ratio" << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Parm #260 - Aspect_Ratio=" << sAspect_Ratio << endl;
 }
 
 //<-dceag-c917-b->
@@ -856,12 +953,14 @@ void Hulu_Player::CMD_Set_Aspect_Ratio(int iStreamID,string sAspect_Ratio,string
 		/** @param #261 Zoom Level */
 			/** Zoom level to set */
 
-void Hulu_Player::CMD_Set_Zoom(int iStreamID,string sZoom_Level,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Set_Zoom (int iStreamID, string sZoom_Level,
+			   string & sCMD_Result, Message * pMessage)
 //<-dceag-c917-e->
 {
-	cout << "Need to implement command #917 - Set Zoom" << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
-	cout << "Parm #261 - Zoom_Level=" << sZoom_Level << endl;
+  cout << "Need to implement command #917 - Set Zoom" << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Parm #261 - Zoom_Level=" << sZoom_Level << endl;
 }
 
 //<-dceag-c920-b->
@@ -873,12 +972,14 @@ void Hulu_Player::CMD_Set_Zoom(int iStreamID,string sZoom_Level,string &sCMD_Res
 		/** @param #41 StreamID */
 			/** ID of stream to set media information for */
 
-void Hulu_Player::CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Set_Media_ID (string sID, int iStreamID,
+			       string & sCMD_Result, Message * pMessage)
 //<-dceag-c920-e->
 {
-	cout << "Need to implement command #920 - Set Media ID" << endl;
-	cout << "Parm #10 - ID=" << sID << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Need to implement command #920 - Set Media ID" << endl;
+  cout << "Parm #10 - ID=" << sID << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 
@@ -889,10 +990,14 @@ void Hulu_Player::CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void Hulu_Player::CMD_Skip_Fwd_ChannelTrack_Greater(int iStreamID,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Skip_Fwd_ChannelTrack_Greater (int iStreamID,
+						string & sCMD_Result,
+						Message * pMessage)
 //<-dceag-c63-e->
 {
 }
+
 //<-dceag-c64-b->
 
 	/** @brief COMMAND: #64 - Skip Back - Channel/Track Lower */
@@ -900,10 +1005,14 @@ void Hulu_Player::CMD_Skip_Fwd_ChannelTrack_Greater(int iStreamID,string &sCMD_R
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void Hulu_Player::CMD_Skip_Back_ChannelTrack_Lower(int iStreamID,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Skip_Back_ChannelTrack_Lower (int iStreamID,
+					       string & sCMD_Result,
+					       Message * pMessage)
 //<-dceag-c64-e->
 {
 }
+
 //<-dceag-c92-b->
 
 	/** @brief COMMAND: #92 - Pause */
@@ -911,10 +1020,13 @@ void Hulu_Player::CMD_Skip_Back_ChannelTrack_Lower(int iStreamID,string &sCMD_Re
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void Hulu_Player::CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Pause (int iStreamID, string & sCMD_Result,
+			Message * pMessage)
 //<-dceag-c92-e->
 {
 }
+
 //<-dceag-c95-b->
 
 	/** @brief COMMAND: #95 - Stop */
@@ -924,10 +1036,13 @@ void Hulu_Player::CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage)
 		/** @param #203 Eject */
 			/** If true, the drive will be ejected if there is no media currently playing, so a remote's stop button acts as stop/eject. */
 
-void Hulu_Player::CMD_Stop(int iStreamID,bool bEject,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Stop (int iStreamID, bool bEject, string & sCMD_Result,
+		       Message * pMessage)
 //<-dceag-c95-e->
 {
 }
+
 //<-dceag-c139-b->
 
 	/** @brief COMMAND: #139 - Play */
@@ -935,100 +1050,123 @@ void Hulu_Player::CMD_Stop(int iStreamID,bool bEject,string &sCMD_Result,Message
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void Hulu_Player::CMD_Play(int iStreamID,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Play (int iStreamID, string & sCMD_Result,
+		       Message * pMessage)
 //<-dceag-c139-e->
 {
 }
+
 //<-dceag-c204-b->
 
 	/** @brief COMMAND: #204 - 0 */
 	/** 0 */
 
-void Hulu_Player::CMD_0(string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_0 (string & sCMD_Result, Message * pMessage)
 //<-dceag-c204-e->
 {
 }
+
 //<-dceag-c205-b->
 
 	/** @brief COMMAND: #205 - 1 */
 	/** 1 */
 
-void Hulu_Player::CMD_1(string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_1 (string & sCMD_Result, Message * pMessage)
 //<-dceag-c205-e->
 {
 }
+
 //<-dceag-c206-b->
 
 	/** @brief COMMAND: #206 - 2 */
 	/** 2 */
 
-void Hulu_Player::CMD_2(string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_2 (string & sCMD_Result, Message * pMessage)
 //<-dceag-c206-e->
 {
 }
+
 //<-dceag-c207-b->
 
 	/** @brief COMMAND: #207 - 3 */
 	/** 3 */
 
-void Hulu_Player::CMD_3(string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_3 (string & sCMD_Result, Message * pMessage)
 //<-dceag-c207-e->
 {
 }
+
 //<-dceag-c208-b->
 
 	/** @brief COMMAND: #208 - 4 */
 	/** 4 */
 
-void Hulu_Player::CMD_4(string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_4 (string & sCMD_Result, Message * pMessage)
 //<-dceag-c208-e->
 {
 }
+
 //<-dceag-c209-b->
 
 	/** @brief COMMAND: #209 - 5 */
 	/** 5 */
 
-void Hulu_Player::CMD_5(string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_5 (string & sCMD_Result, Message * pMessage)
 //<-dceag-c209-e->
 {
 }
+
 //<-dceag-c210-b->
 
 	/** @brief COMMAND: #210 - 6 */
 	/** 6 */
 
-void Hulu_Player::CMD_6(string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_6 (string & sCMD_Result, Message * pMessage)
 //<-dceag-c210-e->
 {
 }
+
 //<-dceag-c211-b->
 
 	/** @brief COMMAND: #211 - 7 */
 	/** 7 */
 
-void Hulu_Player::CMD_7(string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_7 (string & sCMD_Result, Message * pMessage)
 //<-dceag-c211-e->
 {
 }
+
 //<-dceag-c212-b->
 
 	/** @brief COMMAND: #212 - 8 */
 	/** 8 */
 
-void Hulu_Player::CMD_8(string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_8 (string & sCMD_Result, Message * pMessage)
 //<-dceag-c212-e->
 {
 }
+
 //<-dceag-c213-b->
 
 	/** @brief COMMAND: #213 - 9 */
 	/** 9 */
 
-void Hulu_Player::CMD_9(string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_9 (string & sCMD_Result, Message * pMessage)
 //<-dceag-c213-e->
 {
 }
+
 //<-dceag-c240-b->
 
 	/** @brief COMMAND: #240 - Back / Prior Menu */
@@ -1036,8 +1174,10 @@ void Hulu_Player::CMD_9(string &sCMD_Result,Message *pMessage)
 		/** @param #41 StreamID */
 			/** ID of stream to apply */
 
-void Hulu_Player::CMD_Back_Prior_Menu(int iStreamID,string &sCMD_Result,Message *pMessage)
+void
+Hulu_Player::CMD_Back_Prior_Menu (int iStreamID, string & sCMD_Result,
+				  Message * pMessage)
 //<-dceag-c240-e->
 {
-	SendLIRCDCommand("Home");
+  SendLIRCDCommand ("Home");
 }

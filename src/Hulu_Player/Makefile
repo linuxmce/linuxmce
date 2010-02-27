@@ -22,7 +22,7 @@ sources = Main.cpp Hulu_Player.cpp $(Gen_Dev_Files)
 CXXFLAGS +=
 CPPFLAGS +=
 LDFLAGS +=
-XTRALDLIBS = -lX11 -lXmu -lXtst -lWindowUtils -lmysqlclient_r
+XTRALDLIBS = -lmysqlclient_r
 
 Gen_Dev_Files +=
 sources += LIRCD_Thread.cpp

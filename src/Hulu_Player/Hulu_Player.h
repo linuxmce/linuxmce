@@ -24,11 +24,6 @@
 
 // Additional libraries
 #include "DCE/PlainClientSocket.h"
-#include "X11/Xlib.h"
-#include "X11/Xutil.h"
-#include "X11/keysym.h"
-#include <X11/extensions/XTest.h>
-#include "DCE/PlainClientSocket.h"
 #include "AlarmManager.h"
 
 // Defines for the OSD/Remote states.
@@ -46,13 +41,9 @@ namespace DCE
 	  pthread_t m_LIRCD_Thread;
 
 	  pluto_pthread_mutex_t m_HuluMutex;
-	  unsigned long m_iHuluWindowId;
-	  string m_sHuluWindowId;
-	  DeviceData_Base *m_pDevice_Game_Plugin;
+	  DeviceData_Base *m_pDevice_Hulu_Plugin;
 	  DeviceData_Base *m_pDevice_App_Server;
-	  Display *m_pDisplay;
 	  bool m_bHuluIsRunning;
-	  int m_iEventSerialNum;
 
 	  // Private methods
 	  // Protected Methods
@@ -61,10 +52,6 @@ namespace DCE
 	  bool LaunchHulu();
 	  bool StopHulu();
 	  void SendLIRCDCommand(string sCommand);
-	  Display *getDisplay() { return m_pDisplay; }
-	  bool locateHuluWindow(long unsigned int window);  // Analog of Window type.
-	  string CreateWindowIDString(long unsigned int window);
-	  void SendKeyToWindow(Display *disp, long unsigned int wnd, int iXKeySym, int srlnum);
 public:
 	  // Public member variables
 	  virtual void PrepareToDelete();

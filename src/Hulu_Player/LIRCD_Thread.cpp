@@ -13,59 +13,79 @@
 using namespace DCE;
 
 /* mutex (dunno if we really need it, but it's there.) */
-pluto_pthread_mutex_t LIRCD_mutex("lircd");
+pluto_pthread_mutex_t LIRCD_mutex ("lircd");
 
 /* Private Methods */
-static void LIRCD_SignalHandler(int ExitStatus);
-static bool LIRCD_Open();
+static void LIRCD_SignalHandler (int ExitStatus);
+static bool LIRCD_Open ();
 
 /* Public bits */
 bool LIRCD_bQuit = false;
-int lircd_sockfd;			/* file descriptor for lirc socket 	*/
-int lircd_clientfd;			/* file descriptor for the initial client conn */
-sockaddr_un lircd_address;		/* Address to the lirc socket		*/
+bool LIRCD_bConnectionActive = false;
+int lircd_sockfd;		/* file descriptor for lirc socket      */
+int lircd_clientfd;		/* file descriptor for the initial client conn */
+sockaddr_un lircd_address;	/* Address to the lirc socket           */
 sockaddr_un lircd_client_address;	/* Address to the lirc socket from the client end */
 socklen_t lircd_len;
 socklen_t lircd_client_len;
 
-static void LIRCD_SignalHandler(int ExitStatus)
+static void
+LIRCD_SignalHandler (int ExitStatus)
 {
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Hulu_Player: Terminated by signal %d",ExitStatus);
-	LIRCD_bQuit = true;
+  LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
+					"Hulu_Player: Terminated by signal %d",
+					ExitStatus);
+  LIRCD_bQuit = true;
 }
 
 
-void * LIRCD_Thread(void * arg)
+void *
+LIRCD_Thread (void *arg)
 {
 
-	// Attach signal handlers to handle premature termination.
-	signal(SIGTERM, LIRCD_SignalHandler);
-        signal(SIGINT, LIRCD_SignalHandler);
+  // Attach signal handlers to handle premature termination.
+  signal (SIGTERM, LIRCD_SignalHandler);
+  signal (SIGINT, LIRCD_SignalHandler);
 
-	// Initialize the mutex
-	LIRCD_mutex.Init(NULL);
+  // Initialize the mutex
+  LIRCD_mutex.Init (NULL);
 
-	LIRCD_Open();
+  LIRCD_Open ();
 
-	while (!LIRCD_bQuit)
+  while (!LIRCD_bQuit)
+    {
+
+      // This call blocks.
+      lircd_clientfd = accept (lircd_sockfd,
+			       (sockaddr *) & lircd_client_address,
+			       &lircd_client_len);
+
+      LoggerWrapper::GetInstance ()->Write (LV_STATUS,
+					    "Accepted socket connection: %d",
+					    lircd_clientfd);
+
+      LIRCD_bConnectionActive = true;
+
+      while (!LIRCD_bConnectionActive)
 	{
-
-		lircd_clientfd = accept(lircd_sockfd,
-					(sockaddr*)&lircd_client_address,
-					&lircd_client_len);
-
-		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Accepted socket connection: %d",lircd_clientfd);
-
-		Sleep(20);
+	  // While the connection is active, we basically sit here.
+	  // Since we do not have to process anything from hulu at all
+	  // but we do need to prevent the accept connection from running
+	  // prematurely.
+	  Sleep (20);
 	}
 
-	LIRCD_Close();
+      close (lircd_clientfd);	// Drop the FD
+
+    }
+
+  LIRCD_Close ();
 
 
-	// Restore the signal handlers to their defaults.
-        signal(SIGTERM, SIG_DFL);
-        signal(SIGINT, SIG_DFL);
-        return NULL;
+  // Restore the signal handlers to their defaults.
+  signal (SIGTERM, SIG_DFL);
+  signal (SIGINT, SIG_DFL);
+  return NULL;
 
 }
 
@@ -73,34 +93,39 @@ void * LIRCD_Thread(void * arg)
 /** Socket functions								**/
 /*********************************************************************************/
 
-inline int write_socket(int fd, const char *buf, int len)
+inline int
+write_socket (int fd, const char *buf, int len)
 {
-        int done,todo=len;
+  int done, todo = len;
 
-        while(todo)
-        {
+  while (todo)
+    {
 #ifdef SIM_REC
-                do{
-                        done=write(fd,buf,todo);
-                }
-                while(done<0 && errno == EAGAIN);
+      do
+	{
+	  done = write (fd, buf, todo);
+	}
+      while (done < 0 && errno == EAGAIN);
 #else
-                done=write(fd,buf,todo);
+      done = write (fd, buf, todo);
 #endif
-                if(done<=0) return(done);
-                buf+=done;
-                todo-=done;
-        }
-        return(len);
+      if (done <= 0)
+	return (done);
+      buf += done;
+      todo -= done;
+    }
+  return (len);
 }
 
-inline int write_socket_len(int fd, const char *buf)
+inline int
+write_socket_len (int fd, const char *buf)
 {
-        int len;
+  int len;
 
-        len=strlen(buf);
-        if(write_socket(fd,buf,len)<len) return(0);
-        return(1);
+  len = strlen (buf);
+  if (write_socket (fd, buf, len) < len)
+    return (0);
+  return (1);
 }
 
 
@@ -108,34 +133,39 @@ inline int write_socket_len(int fd, const char *buf)
 /** Fake LIRCD stuff                                                  		**/
 /*********************************************************************************/
 
-bool LIRCD_Open()
+bool
+LIRCD_Open ()
 {
 
-	unlink(LIRCD_SOCKET);
-	lircd_sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
-	lircd_address.sun_family = AF_UNIX;
-	strcpy(lircd_address.sun_path,LIRCD_SOCKET);
-	lircd_len = sizeof(lircd_address);
-	bind(lircd_sockfd, (sockaddr *)&lircd_address, lircd_len);
-	listen(lircd_sockfd, 0); // Should we set this to 1 ???
+  unlink (LIRCD_SOCKET);
+  lircd_sockfd = socket (AF_UNIX, SOCK_STREAM, 0);
+  lircd_address.sun_family = AF_UNIX;
+  strcpy (lircd_address.sun_path, LIRCD_SOCKET);
+  lircd_len = sizeof (lircd_address);
+  bind (lircd_sockfd, (sockaddr *) & lircd_address, lircd_len);
+  listen (lircd_sockfd, 0);	// Should we set this to 1 ???
 
-	return true;
+  return true;
 }
 
-bool LIRCD_Close()
+bool
+LIRCD_Close ()
 {
-	// Close the open client file descriptor.
-	close(lircd_sockfd);
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Closed File Descriptor: %d",lircd_sockfd);
-	return true;	
+  // Close the open client file descriptor.
+  close (lircd_sockfd);
+  LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
+					"Closed File Descriptor: %d",
+					lircd_sockfd);
+  return true;
 }
 
-bool LIRCD_SendCommand(string sCommand)
+bool
+LIRCD_SendCommand (string sCommand)
 {
-	// Write a command to the server socket.
-	PLUTO_SAFETY_LOCK(sl, LIRCD_mutex);
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Sending %s",sCommand.c_str());
-	write_socket_len(lircd_clientfd,sCommand.c_str());
-	return true;
-} 
-
+  // Write a command to the server socket.
+  PLUTO_SAFETY_LOCK (sl, LIRCD_mutex);
+  LoggerWrapper::GetInstance ()->Write (LV_STATUS, "Sending %s",
+					sCommand.c_str ());
+  write_socket_len (lircd_clientfd, sCommand.c_str ());
+  return true;
+}

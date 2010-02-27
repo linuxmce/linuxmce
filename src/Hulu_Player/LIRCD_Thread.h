@@ -13,6 +13,8 @@ bool LIRCD_SendCommand(string Command);
 bool LIRCD_Close();
 
 /* The C forward declaration for the main thread. */
-extern bool LIRCD_bQuit;
+
+extern bool LIRCD_bQuit;		// Do we need to quit the thread?
+extern bool LIRCD_bConnectionActive;	// Is a connection active?
 
 #endif /* LIRCD_THREAD_H */
