@@ -40,6 +40,9 @@ using namespace DCE;
 
 #include <sstream>
 #include <pthread.h>
+
+#include "LIRCD_Thread.h"
+
 // ------------------- ///////////////////////
 
 //<-dceag-const-b->
@@ -51,6 +54,7 @@ Hulu_Player::Hulu_Player(int DeviceID, string ServerAddress,bool bConnectEventHa
 {
   m_HuluMutex.Init(NULL);
   m_pDevice_App_Server = NULL;
+  m_LIRCD_Thread = (pthread_t)NULL;
 }
 
 //<-dceag-const2-b->!
@@ -59,7 +63,10 @@ Hulu_Player::Hulu_Player(int DeviceID, string ServerAddress,bool bConnectEventHa
 Hulu_Player::~Hulu_Player()
 //<-dceag-dest-e->
 {
-	
+	// Exit the LIRCD Thread
+	LIRCD_bQuit = true;
+	if (m_LIRCD_Thread != (pthread_t)NULL)
+		pthread_join(m_LIRCD_Thread,NULL);
 }
 
 void Hulu_Player::PrepareToDelete()
@@ -67,6 +74,18 @@ void Hulu_Player::PrepareToDelete()
   Command_Impl::PrepareToDelete();
   m_pDevice_App_Server = NULL;
 }
+
+void Hulu_Player::CreateChildren()
+{
+	if (pthread_create(&m_LIRCD_Thread,NULL,LIRCD_Thread,(void *)this))
+	{
+		m_LIRCD_Thread = (pthread_t)NULL;
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Failed to create LIRCD Thread. Exiting with error code 1.");
+		m_bQuit_set(true);
+		exit(1);
+	}
+}
+
 
 //<-dceag-getconfig-b->
 bool Hulu_Player::GetConfig()
@@ -157,7 +176,7 @@ bool Hulu_Player::UpdateHuluConfig()
 	"pos_y = 0\n"
 	"\n"
 	"[remote]\n"
-	"lirc_device = /dev/lircd\n"
+	"lirc_device = /tmp/hulu_lircd\n"
 	"lirc_remote_identifier = mceusb\n"
 	"lirc_release_suffix = _UP\n"
 	"lirc_repeat_threshold = 10\n"
@@ -266,6 +285,16 @@ void Hulu_Player::SendKeyToWindow(Display *disp, long unsigned int wnd, int iXKe
     XTestFakeKeyEvent( m_pDisplay, XKeysymToKeycode(m_pDisplay, iXKeySym), False, 0 );
 }
 
+
+void Hulu_Player::SendLIRCDCommand(string sCommand)
+{
+	// Send a formatted command to the LIRCD socket. Currently calls the LIRCd socket
+	// since the lircd thread deals with raw commands, This is a convienience method
+	// that fakes the necessary formatted command bits.
+	//
+	LIRCD_SendCommand("00000000 0 "+sCommand+"_UP mceusb\n");
+}
+
 // End Private Methods ////////////////////////////////////////////////////////
 /*
 
@@ -295,20 +324,20 @@ void Hulu_Player::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string s
   switch(atoi(sPK_Button.c_str()))
     {
     case BUTTON_Up_Arrow_CONST:
-      SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Up,m_iEventSerialNum++);
+	SendLIRCDCommand("Up");
       break;		
     case BUTTON_Down_Arrow_CONST:
-      SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Down,m_iEventSerialNum++);
+     	SendLIRCDCommand("Down");
       break;	
     case BUTTON_Left_Arrow_CONST:
-      SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Left,m_iEventSerialNum++);
+      	SendLIRCDCommand("Left");
       break;	
     case BUTTON_Right_Arrow_CONST:
-      SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Right,m_iEventSerialNum++);
+    	SendLIRCDCommand("Right");
       break;	
     case BUTTON_Enter_CONST:
-      SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Return,m_iEventSerialNum++);
-      break;	
+      	SendLIRCDCommand("OK");
+      break;
     }
 }
 
@@ -615,7 +644,7 @@ void Hulu_Player::CMD_EnterGo(int iStreamID,string &sCMD_Result,Message *pMessag
 	cout << "Need to implement command #190 - Enter/Go" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-      SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Return,m_iEventSerialNum++);
+      SendLIRCDCommand("OK");
 
 }
 
@@ -632,7 +661,7 @@ void Hulu_Player::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessag
 	cout << "Need to implement command #200 - Move Up" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-      SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Up,m_iEventSerialNum++);
+      SendLIRCDCommand("Up");
 
 }
 
@@ -649,7 +678,7 @@ void Hulu_Player::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMess
 	cout << "Need to implement command #201 - Move Down" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-      SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Down,m_iEventSerialNum++);
+      SendLIRCDCommand("Down");
 
 }
 
@@ -666,7 +695,7 @@ void Hulu_Player::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMess
 	cout << "Need to implement command #202 - Move Left" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-      SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Left,m_iEventSerialNum++);
+      SendLIRCDCommand("Left");
 
 }
 
@@ -683,7 +712,7 @@ void Hulu_Player::CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMes
 	cout << "Need to implement command #203 - Move Right" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-      SendKeyToWindow(m_pDisplay,m_iHuluWindowId,XK_Right,m_iEventSerialNum++);
+      SendLIRCDCommand("Right");
 
 }
 
@@ -765,6 +794,9 @@ void Hulu_Player::CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Messag
 	cout << "Need to implement command #548 - Menu" << endl;
 	cout << "Parm #9 - Text=" << sText << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+	SendLIRCDCommand("Home");
+
 }
 
 //<-dceag-c812-b->
@@ -786,7 +818,7 @@ void Hulu_Player::CMD_Application_Exited(int iPID,int iExit_Code,string &sCMD_Re
 #ifndef WIN32
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Process exited %d %d", iPID, iExit_Code);
 
-	void *data;
+	// void *data;
 
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Send go back to the caller!");
@@ -1007,4 +1039,5 @@ void Hulu_Player::CMD_9(string &sCMD_Result,Message *pMessage)
 void Hulu_Player::CMD_Back_Prior_Menu(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c240-e->
 {
+	SendLIRCDCommand("Home");
 }

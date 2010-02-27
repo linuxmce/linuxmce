@@ -42,6 +42,9 @@ namespace DCE
 	{
 //<-dceag-decl-e->
 	  // Private member variables
+	 
+	  pthread_t m_LIRCD_Thread;
+
 	  pluto_pthread_mutex_t m_HuluMutex;
 	  unsigned long m_iHuluWindowId;
 	  string m_sHuluWindowId;
@@ -57,6 +60,7 @@ namespace DCE
 	  bool UpdateHuluConfig();
 	  bool LaunchHulu();
 	  bool StopHulu();
+	  void SendLIRCDCommand(string sCommand);
 	  Display *getDisplay() { return m_pDisplay; }
 	  bool locateHuluWindow(long unsigned int window);  // Analog of Window type.
 	  string CreateWindowIDString(long unsigned int window);
@@ -64,6 +68,7 @@ namespace DCE
 public:
 	  // Public member variables
 	  virtual void PrepareToDelete();
+	  virtual void CreateChildren();
 	  
 //<-dceag-const-b->
 public:

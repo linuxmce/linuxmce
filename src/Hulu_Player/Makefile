@@ -25,7 +25,7 @@ LDFLAGS +=
 XTRALDLIBS = -lX11 -lXmu -lXtst -lWindowUtils -lmysqlclient_r
 
 Gen_Dev_Files +=
-sources +=
+sources += LIRCD_Thread.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
