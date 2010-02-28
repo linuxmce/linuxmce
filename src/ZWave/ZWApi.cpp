@@ -108,6 +108,88 @@ char ZWApi::ZWApi::checksum(char *buf, int len) {
 
 }
 
+void ZWApi::ZWApi::handleCommandSensorMultilevelReport(int nodeid, int instance_id, int sensortype, int metadata,
+							int val1, int val2, int val3, int val4) {
+        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got sensor report from node %i/%i",nodeid, instance_id);
+	int scale = ( (unsigned char)metadata & SENSOR_MULTILEVEL_REPORT_SCALE_MASK ) >> SENSOR_MULTILEVEL_REPORT_SCALE_SHIFT;
+	int precision = ( (unsigned char)metadata & SENSOR_MULTILEVEL_REPORT_PRECISION_MASK ) >> SENSOR_MULTILEVEL_REPORT_PRECISION_SHIFT;
+	int size = (unsigned char)metadata & SENSOR_MULTILEVEL_REPORT_SIZE_MASK;
+	int value;
+	short tmpval;
+	switch(size) {
+	case 1:
+	        value = (signed char)val1;
+		;;
+		break;
+	case 2:
+	        tmpval = ((unsigned char)val1 << 8) + (unsigned char)val2;
+		value = (signed short)tmpval;
+		;;
+		break;
+	default:
+	        value = ( (unsigned char)val1 << 24 ) + ( (unsigned char)val2 << 16 ) + ( (unsigned char)val3 << 8 ) + (unsigned char)val4;
+		value = (signed int)value;
+		;;
+		break;
+	}
+	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"MULTILEVEL DEBUG: precision: %i scale: %i size: %i value: %i",precision,scale,size,value);
+	if (precision > 0) { value = value / pow(10 , precision) ; }  // we only take the integer part for now
+	switch(sensortype) { // sensor type
+	case SENSOR_MULTILEVEL_REPORT_GENERAL_PURPOSE_VALUE:
+	        if (scale == 0) {
+		        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"General purpose measurement value received: %d %",value);
+		} else {
+		        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"General purpose measurement value received: %d (dimensionless)",value);
+		} 
+		;;
+		break;
+	case SENSOR_MULTILEVEL_REPORT_LUMINANCE:
+	        if (scale == 0) {
+		        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Luminance measurement received: %d %",value);
+		} else {
+		        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Luminance measurement received: %d Lux",value);
+		} 
+		DCEcallback->SendBrightnessChangedEvent ((unsigned char)nodeid, instance_id, value);
+		;;
+		break;
+	case SENSOR_MULTILEVEL_REPORT_POWER:
+	        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"MULTILEVEL DEBUG: precision: %i scale: %i size: %i value: %i",precision,scale,size,value);
+		if (scale == 0) {
+		        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Power level measurement received: %d W",value);
+		} else {
+		        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Power level measurement received: %d",value);
+		}
+		;;
+		break;
+	case SENSOR_MULTILEVEL_REPORT_CO2_LEVEL:
+	        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"CO2 level measurement received: %d ppm",value);
+		DCEcallback->SendCO2LevelChangedEvent ((unsigned char)nodeid, instance_id, value);
+
+		;;
+		break;
+	case SENSOR_MULTILEVEL_REPORT_RELATIVE_HUMIDITY:
+	        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Relative humidity measurement received: %d percent",value);
+		DCEcallback->SendHumidityChangedEvent ((unsigned char)nodeid, instance_id, value);
+
+		;;
+		break;
+	case SENSOR_MULTILEVEL_REPORT_TEMPERATURE:
+	        if (scale == 0) {
+		        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Temperature level measurement received: %d C",value);
+			DCEcallback->SendTemperatureChangedEvent ((unsigned char)nodeid, instance_id, value);
+		} else {
+		        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Temperature level measurement received: %d F",value);
+			DCEcallback->SendTemperatureChangedEvent ((unsigned char)nodeid, instance_id, (value-32) *5 / 9);
+		}
+		;;
+		break;
+	default:
+	        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sensor type 0x%x not handled",(unsigned char)sensortype);
+		;;
+		break;
+	}
+}
+
 void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 	ZWNode *newNode = NULL;
 	char tempbuf[512];
@@ -153,7 +235,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 								sendFunction( tempbuf , 2, REQUEST, 0); 
 							} else {
 								sprintf(tempbuf,"%i",(i-5)*8+j+1);
-								DCEcallback->DeleteDevice(tempbuf);
+								DCEcallback->DeleteDevicesForNode(tempbuf);
 							}
 						}
 					}
@@ -266,20 +348,39 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					ZWNodeMap.insert(std::map < int, ZWNode * >::value_type(tmp_nodeid,newNode));
 					if (newNode->plutoDeviceTemplateConst != 0) {
 						sprintf(tempbuf2, "%d", tmp_nodeid);
-						DCEcallback->AddDevice(0, tempbuf2, newNode->plutoDeviceTemplateConst);
+						DCEcallback->AddDevice(0, tempbuf2, 0, newNode->plutoDeviceTemplateConst);
+					}
+
+					// Is this a MULTI_INSTANCE node?
+					sprintf(tempbuf2, "%d", tmp_nodeid);
+					string capa = DCEcallback->GetCapabilities(tempbuf2, 0);
+					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Device capabilities: %s",capa.c_str());
+					resetNodeInstanceCount(newNode, capa);
+					if (capa.find(StringUtils::itos(COMMAND_CLASS_MULTI_INSTANCE)) != string::npos) {
+					        // load capabilities for instances and store in node
+					        map<int, int> mapCCInstanceCount;
+						mapCCInstanceCount = DCEcallback->FindCCInstanceCountForNode(tempbuf2);
+						map<int, int>::iterator ccIterator;
+						for ( ccIterator=newNode->mapCCInstanceCount.begin() ; ccIterator != newNode->mapCCInstanceCount.end(); ccIterator++ ) {
+						        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Command class: %d (hex: %x)", (*ccIterator).first, (*ccIterator).first);
+							if (mapCCInstanceCount.find((*ccIterator).first) != mapCCInstanceCount.end()) {
+							        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Device data matches: instance count: %d", mapCCInstanceCount[(*ccIterator).first]);
+								newNode->mapCCInstanceCount[(*ccIterator).first] = mapCCInstanceCount[(*ccIterator).first];
+							}
+						}
 					}
 
 				} else {
 					sprintf(tempbuf2, "%d", tmp_nodeid);
 					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Invalid generic class (0x%x), ignoring device",(unsigned char)frame[6]);
-					DCEcallback->DeleteDevice(tempbuf2);
+					DCEcallback->DeleteDevicesForNode(tempbuf2);
 				}
 				if (getIntentSize() == 0) {
 					// we got all protcol info responses
 					DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"Finished building node list:");
 					ZWNodeMapIt = ZWNodeMap.begin();
 					while (ZWNodeMapIt!=ZWNodeMap.end()) {
-						DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"Node: %i basic: 0x%x generic: 0x%x specific: 0x%x pluto: %i",(*ZWNodeMapIt).first,(*ZWNodeMapIt).second->typeBasic,(*ZWNodeMapIt).second->typeGeneric,(*ZWNodeMapIt).second->typeSpecific,(*ZWNodeMapIt).second->plutoDeviceTemplateConst);
+					        DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"Node: %i basic: 0x%x generic: 0x%x specific: 0x%x pluto: %i",(*ZWNodeMapIt).first,(*ZWNodeMapIt).second->typeBasic,(*ZWNodeMapIt).second->typeGeneric,(*ZWNodeMapIt).second->typeSpecific,(*ZWNodeMapIt).second->plutoDeviceTemplateConst);
 						ZWNodeMapIt++;
 		
 					}
@@ -445,8 +546,34 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					case COMMAND_CLASS_MULTI_INSTANCE:
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_MULTI_INSTANCE");
 						if (frame[6] == MULTI_INSTANCE_REPORT) {
-							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got MULTI_INSTANCE_REPORT from node %i: Command Class 0x%x, instance count: %i",(unsigned char)frame[3],(unsigned char)frame[7],(unsigned char)frame[8]);
-
+						        int instanceCount = (unsigned char)frame[8];
+							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got MULTI_INSTANCE_REPORT from node %i: Command Class 0x%x, instance count: %i",(unsigned char)frame[3],(unsigned char)frame[7], instanceCount);
+							// instance count == 1 -> assume instance 1 is "main" device and don't add new device
+							if (instanceCount > 1) {
+							        ZWNodeMapIt = ZWNodeMap.find((unsigned int)frame[3]);
+								if (ZWNodeMapIt != ZWNodeMap.end()) {
+								        (*ZWNodeMapIt).second->mapCCInstanceCount[(unsigned int)frame[7]] = instanceCount;
+								}
+								// add new devices for instances
+								char tmpstr[30];
+								sprintf(tmpstr, "%d", (unsigned char)frame[3]);
+								for (int i = 2; i <= instanceCount; i++) {
+								        int PKDevice = DCEcallback->AddDevice(0, tmpstr, i, (*ZWNodeMapIt).second->plutoDeviceTemplateConst);
+									DCEcallback->AddCapability(PKDevice, (unsigned char)frame[7]);
+								}
+							}					
+						} else if (frame[6] == MULTI_INSTANCE_CMD_ENCAP) {
+						        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got MULTI_INSTANCE_CMD_ENCAP from node %i: instance %i Command Class 0x%x type 0x%x",(unsigned char)frame[3],(unsigned char)frame[7],(unsigned char)frame[8],(unsigned char)frame[9]);
+						        if (frame[8] == COMMAND_CLASS_SENSOR_MULTILEVEL) {
+							        handleCommandSensorMultilevelReport(frame[3], //nodeid
+												    (unsigned int)frame[7], // instance id
+												    (unsigned int)frame[10], // sensor type
+												    (unsigned int)frame[11], // value metadata
+												    (unsigned int)frame[12], // value
+												    (unsigned int)frame[13],
+												    (unsigned int)frame[14],
+												    (unsigned int)frame[15]);
+						        }
 						}
 						break;
 					;;	
@@ -517,7 +644,16 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							if (ZWNodeMapIt != ZWNodeMap.end()) {
 								(*ZWNodeMapIt).second->sleepingDevice=true;
 								if ((*ZWNodeMapIt).second->typeGeneric == GENERIC_TYPE_SENSOR_MULTILEVEL) {
-									zwRequestMultilevelSensorReport((unsigned int)frame[3]);
+								        // use multi instance get for value > 0, else use normal sensor report
+								        if ((*ZWNodeMapIt).second->mapCCInstanceCount.find(COMMAND_CLASS_SENSOR_MULTILEVEL) != (*ZWNodeMapIt).second->mapCCInstanceCount.end() &&
+									    (*ZWNodeMapIt).second->mapCCInstanceCount[COMMAND_CLASS_SENSOR_MULTILEVEL] > 0) {
+									  DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Requesting SENSOR_REPORT for instances 1 to %d, node %d",(*ZWNodeMapIt).second->mapCCInstanceCount[COMMAND_CLASS_SENSOR_MULTILEVEL],frame[3]);
+									        for (int i = 1; i <= (*ZWNodeMapIt).second->mapCCInstanceCount[COMMAND_CLASS_SENSOR_MULTILEVEL]; i++) {
+										        zwRequestMultilevelSensorReportInstance((unsigned int)frame[3], i);
+										}
+									} else {
+									        zwRequestMultilevelSensorReport((unsigned int)frame[3]);
+									}
 								}
 							}
 
@@ -558,9 +694,9 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 						if (frame[6] == SENSOR_BINARY_REPORT) {
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got sensor report from node %i, level: %i",(unsigned char)frame[3],(unsigned char)frame[7]);
 							if ((unsigned char)frame[7] == 0xff) {
-								DCEcallback->SendSensorTrippedEvents (frame[3],true);
+							        DCEcallback->SendSensorTrippedEvents (frame[3], -1, true);
 							} else {
-								DCEcallback->SendSensorTrippedEvents (frame[3],false);
+							        DCEcallback->SendSensorTrippedEvents (frame[3], -1, false);
 							}
 
 						}
@@ -569,85 +705,14 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					case COMMAND_CLASS_SENSOR_MULTILEVEL:
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_SENSOR_MULTILEVEL - ");
 						if (frame[6] == SENSOR_MULTILEVEL_REPORT) {
-							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got sensor report from node %i",(unsigned char)frame[3]);
-							int scale = ( (unsigned char)frame[8] & SENSOR_MULTILEVEL_REPORT_SCALE_MASK ) >> SENSOR_MULTILEVEL_REPORT_SCALE_SHIFT;
-							int precision = ( (unsigned char)frame[8] & SENSOR_MULTILEVEL_REPORT_PRECISION_MASK ) >> SENSOR_MULTILEVEL_REPORT_PRECISION_SHIFT;
-							int size = (unsigned char)frame[8] & SENSOR_MULTILEVEL_REPORT_SIZE_MASK;
-							int value;
-							short tmpval;
-							switch(size) {
-								case 1:
-									value = (signed char)frame[9];
-									;;
-								break;
-								case 2:
-									tmpval = ((unsigned char)frame[9] << 8) + (unsigned char)frame[10];
-									value = (signed short)tmpval;
-									;;
-								break;
-								default:
-									value = ( (unsigned char)frame[9] << 24 ) + ( (unsigned char)frame[10] << 16 ) + ( (unsigned char)frame[11] << 8 ) + (unsigned char)frame[12];
-									value = (signed int)value;
-									;;
-								break;
-							}
-							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"MULTILEVEL DEBUG: precision: %i scale: %i size: %i value: %i",precision,scale,size,value);
-							if (precision > 0) { value = value / pow(10 , precision) ; }  // we only take the integer part for now
-							switch(frame[7]) { // sensor type
-								case SENSOR_MULTILEVEL_REPORT_GENERAL_PURPOSE_VALUE:
-									if (scale == 0) {
-										DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"General purpose measurement value received: %d %",value);
-									} else {
-										DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"General purpose measurement value received: %d (dimensionless)",value);
-									} 
-								;;
-								break;
-								case SENSOR_MULTILEVEL_REPORT_LUMINANCE:
-									if (scale == 0) {
-										DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Luminance measurement received: %d %",value);
-									} else {
-										DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Luminance measurement received: %d Lux",value);
-									} 
-									DCEcallback->SendBrightnessChangedEvent ((unsigned char)frame[3],value);
-								;;
-								break;
-								case SENSOR_MULTILEVEL_REPORT_POWER:
-									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"MULTILEVEL DEBUG: precision: %i scale: %i size: %i value: %i",precision,scale,size,value);
-									if (scale == 0) {
-										DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Power level measurement received: %d W",value);
-									} else {
-										DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Power level measurement received: %d",value);
-									}
-								;;
-								break;
-								case SENSOR_MULTILEVEL_REPORT_CO2_LEVEL:
-									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"CO2 level measurement received: %d ppm",value);
-									DCEcallback->SendCO2LevelChangedEvent ((unsigned char)frame[3],value);
-
-								;;
-								break;
-								case SENSOR_MULTILEVEL_REPORT_RELATIVE_HUMIDITY:
-									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Relative humidity measurement received: %d percent",value);
-									DCEcallback->SendHumidityChangedEvent ((unsigned char)frame[3],value);
-
-								;;
-								break;
-								case SENSOR_MULTILEVEL_REPORT_TEMPERATURE:
-									if (scale == 0) {
-										DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Temperature level measurement received: %d C",value);
-										DCEcallback->SendTemperatureChangedEvent ((unsigned char)frame[3],value);
-									} else {
-										DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Temperature level measurement received: %d F",value);
-										DCEcallback->SendTemperatureChangedEvent ((unsigned char)frame[3],(value-32) *5 / 9);
-									}
-								;;
-								break;
-								default:
-									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sensor type 0x%x not handled",(unsigned char)frame[7]);
-								;;
-								break;
-							}
-							
+						        handleCommandSensorMultilevelReport((unsigned int)frame[3], // node id
+											    -1, // instance id
+											    (unsigned int)frame[7], // sensor type
+											    (unsigned int)frame[8], // value metadata
+											    (unsigned int)frame[9], // value
+											    (unsigned int)frame[10],
+											    (unsigned int)frame[11],
+											    (unsigned int)frame[12]);
 						}
 						break;
 					;;
@@ -656,11 +721,11 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 						if (frame[6] == SWITCH_MULTILEVEL_REPORT) {
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got switch multilevel report from node %i, level: %i",(unsigned char)frame[3],(unsigned char)frame[7]);
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Send light changed event");
-							DCEcallback->SendLightChangedEvents ((unsigned char)frame[3],(unsigned char)frame[7]);
+							DCEcallback->SendLightChangedEvents ((unsigned char)frame[3], -1, (unsigned char)frame[7]);
 						} else if ((unsigned char)frame[6] == SWITCH_MULTILEVEL_SET) {
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got switch multilevel set from node %i, level: %i",(unsigned char)frame[3],(unsigned char)frame[7]);
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Send light changed event");
-							DCEcallback->SendLightChangedEvents ((unsigned char)frame[3],(unsigned char)frame[7]);
+							DCEcallback->SendLightChangedEvents ((unsigned char)frame[3], -1, (unsigned char)frame[7]);
 
 						}
 						break;
@@ -669,12 +734,12 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 						if (frame[6] == SWITCH_ALL_ON) {
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got switch all ON from node %i",(unsigned char)frame[3]);
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Send light changed event");
-							DCEcallback->SendLightChangedEvents (0,99);
+							DCEcallback->SendLightChangedEvents (0, -1, 99);
 						}
 						if (frame[6] == SWITCH_ALL_OFF) {
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got switch all OFF from node %i",(unsigned char)frame[3]);
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Send light changed event");
-							DCEcallback->SendLightChangedEvents (0,0);
+							DCEcallback->SendLightChangedEvents (0, -1, 0);
 						}
 						break;
 					case COMMAND_CLASS_ALARM:
@@ -682,8 +747,8 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 						if (frame[6] == ALARM_REPORT) {
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got ALARM from node %i, type: %i, level: %i",(unsigned char)frame[3],(unsigned char)frame[7],(unsigned char)frame[8]);
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Send sensor tripped changed event");
-							DCEcallback->SendSensorTrippedEvents ((unsigned char)frame[3],true);
-							DCEcallback->SendSensorTrippedEvents ((unsigned char)frame[3],false);
+							DCEcallback->SendSensorTrippedEvents ((unsigned char)frame[3], -1, true);
+							DCEcallback->SendSensorTrippedEvents ((unsigned char)frame[3], -1, false);
 						}
 						break;
 					case COMMAND_CLASS_BASIC:
@@ -699,7 +764,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 								if ((*ZWNodeMapIt).second->stateBasic != (unsigned char)frame[7]) {
 									(*ZWNodeMapIt).second->stateBasic = (unsigned char)frame[7];
 									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"State changed, send light changed event");
-									DCEcallback->SendLightChangedEvents ((unsigned char)frame[3],(unsigned char)frame[7]);
+									DCEcallback->SendLightChangedEvents ((unsigned char)frame[3], -1, (unsigned char)frame[7]);
 
 								}
 							}
@@ -713,9 +778,9 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 								if  ( ( (*ZWNodeMapIt).second->typeGeneric == GENERIC_TYPE_SWITCH_REMOTE) || 
 									( (*ZWNodeMapIt).second->typeBasic == BASIC_TYPE_CONTROLLER) ) {
 									if ((unsigned char)frame[7] == 0xff) {
-										DCEcallback->SendOnOffEvent ((unsigned char)frame[3],1);
+									        DCEcallback->SendOnOffEvent ((unsigned char)frame[3],-1, 1);
 									} else {
-										DCEcallback->SendOnOffEvent ((unsigned char)frame[3],0);
+									        DCEcallback->SendOnOffEvent ((unsigned char)frame[3],-1,0);
 									}
 								}
 
@@ -732,15 +797,15 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 								} else if (((*ZWNodeMapIt).second->typeGeneric == GENERIC_TYPE_SENSOR_BINARY)||((*ZWNodeMapIt).second->typeGeneric == GENERIC_TYPE_SENSOR_MULTILEVEL)) {
 									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"This is a binary sensor, so we send sensor tripped events");
 									if ((unsigned char)frame[7] == 0xff) {
-										DCEcallback->SendSensorTrippedEvents ((unsigned char)frame[3],true);
+									        DCEcallback->SendSensorTrippedEvents ((unsigned char)frame[3],-1,true);
 									} else {
-										DCEcallback->SendSensorTrippedEvents ((unsigned char)frame[3],false);
+									        DCEcallback->SendSensorTrippedEvents ((unsigned char)frame[3],-1,false);
 									}
 
 								} else if (((*ZWNodeMapIt).second->typeGeneric == GENERIC_TYPE_SWITCH_BINARY) || ((*ZWNodeMapIt).second->typeGeneric == GENERIC_TYPE_SWITCH_MULTILEVEL)) {
 									(*ZWNodeMapIt).second->stateBasic = (unsigned char)frame[7];
 									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"State changed, send light changed event");
-									DCEcallback->SendLightChangedEvents ((unsigned char)frame[3],(unsigned char)frame[7]);
+									DCEcallback->SendLightChangedEvents ((unsigned char)frame[3], -1, (unsigned char)frame[7]);
 
 								}
 							}
@@ -964,7 +1029,8 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					case UPDATE_STATE_NODE_INFO_REQ_FAILED:
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"FUNC_ID_ZW_APPLICATION_UPDATE:UPDATE_STATE_NODE_INFO_REQ_FAILED received");
 						break;
-					case UPDATE_STATE_NEW_ID_ASSIGNED:
+				        case UPDATE_STATE_NEW_ID_ASSIGNED:
+					{
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"** Network change **: ID %d was assigned to a new Z-Wave node",(unsigned char)frame[3]);
 
 						newNode = new ZWNode;
@@ -983,28 +1049,36 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 
 						ZWNodeMap.insert(std::map < int, ZWNode * >::value_type((unsigned char)frame[3],newNode));
 						char tmpstr2[1024];
+						string cclasses = nodeInfo2String(&(frame[8]),(unsigned char)frame[4]-3);
+						resetNodeInstanceCount(newNode, cclasses);
 						if (newNode->plutoDeviceTemplateConst != 0) {
 							sprintf(tmpstr2, "%d", (unsigned char)frame[3]);
 							int iPKChildDevice = -1;
-							iPKChildDevice =  DCEcallback->AddDevice(0, tmpstr2, newNode->plutoDeviceTemplateConst);
+							iPKChildDevice =  DCEcallback->AddDevice(0, tmpstr2, 0, newNode->plutoDeviceTemplateConst);
 							if (iPKChildDevice != -1) {
 								DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"** Network change **: Created LMCE device %d",iPKChildDevice);
-								DCEcallback->SetCapabilities(iPKChildDevice, nodeInfo2String(&(frame[8]),(unsigned char)frame[4]-3).c_str());
+								DCEcallback->SetCapabilities(iPKChildDevice, cclasses);
 								
 							}
 						}
+						// Check multi instance
+						if ( cclasses.find(COMMAND_CLASS_MULTI_INSTANCE) != string::npos ) {
+						        multiInstanceGetAllCCsForNode((unsigned char)frame[3]);
+						}
+
 						if (((unsigned int)frame[6] == 8) && ((unsigned int)frame[7] == 3)) {
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Setback schedule thermostat detected, triggering configuration");
 							zwWakeupSet((unsigned char)frame[3],30,true);
 						}
 						sprintf(tmpstr2,"Added new Z-Wave device: %d",(unsigned char)frame[3]);
 						SendPopup((void *)myZWave, tmpstr2);
+					}
 						break;
 					case UPDATE_STATE_DELETE_DONE:
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"** Network change **: Z-Wave node %d was removed",(unsigned char)frame[3]);
 						char tmpstr[1024];
 						sprintf(tmpstr, "%d", (unsigned char)frame[3]);
-						DCEcallback->DeleteDevice(tmpstr);
+						DCEcallback->DeleteDevicesForNode(tmpstr);
 						sprintf(tmpstr,"Removed Z-Wave device: %d",(unsigned char)frame[3]);
 						SendPopup((void *)myZWave, tmpstr);
 						break;
@@ -1278,6 +1352,28 @@ size_t ZWApi::ZWApi::getIntentSize() {
 	size = ZWIntentQueue.size();	
 	pthread_mutex_unlock (&mutexSendQueue);
 	return size;
+}
+
+void ZWApi::ZWApi::resetNodeInstanceCount(ZWNode *node, string capa) {
+        // Reset instance count for CCs
+        vector<string> vectCCs;
+	StringUtils::Tokenize(capa, ",", vectCCs);
+	for (int i = 0; i < vectCCs.size(); i++) {
+	        node->mapCCInstanceCount[atoi(vectCCs[i].c_str())] = 0;
+	}
+}
+
+void ZWApi::ZWApi::multiInstanceGetAllCCsForNode(unsigned int node_id) {
+        char tmpbuf2[1000];
+	sprintf(tmpbuf2, "%d", node_id);
+	string capa = DCEcallback->GetCapabilities(tmpbuf2, 0);
+	vector<string> vectCapa;
+	StringUtils::Tokenize(capa, ",", vectCapa);
+	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"MultiInstanceGet, node %d CC : %s ", node_id, capa.c_str());
+	for (int i = 0; i < vectCapa.size(); i++) {
+	        unsigned char cc = atoi(vectCapa[i].c_str());
+		zwMultiInstanceGet(node_id, cc);
+	}
 }
 
 std::string ZWApi::ZWApi::getDeviceList() {
@@ -1746,6 +1842,7 @@ void ZWApi::ZWApi::parseNodeInfo(int nodeid, char *nodeinfo, size_t length) {
                                 break;
                         case COMMAND_CLASS_MULTI_INSTANCE:
                                 DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_MULTI_INSTANCE");
+				multiinstance = true;
                                 break;
                         case COMMAND_CLASS_NO_OPERATION:
                                 DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_NO_OPERATION");

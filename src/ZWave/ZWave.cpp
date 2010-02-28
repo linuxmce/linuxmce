@@ -99,14 +99,25 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 //<-dceag-cmdch-e->
 {
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Received command for child");
-	int node_id = atoi(pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST).c_str());
+	string nodeInstance = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST).c_str();
+	int node_id;
+	int instance_id;
+	if (nodeInstance.find("/") != string::npos) {
+	        vector<string> vectNI;
+		StringUtils::Tokenize(nodeInstance, "/", vectNI);
+		node_id = atoi(vectNI[0].c_str());
+		instance_id = atoi(vectNI[1].c_str());
+	} else {
+	        node_id = atoi(nodeInstance.c_str());
+	}
+	// TODO: use instance id in commands below
 	if (node_id > 0 && node_id <= 233) {
 		sCMD_Result = "OK";
 		int level,temp,fan;
 		string heat;
 		switch (pMessage->m_dwID) {
 			case COMMAND_Generic_On_CONST:
-				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ON RECEIVED FOR CHILD %d",node_id);
+			        LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ON RECEIVED FOR CHILD %d/%d",node_id, instance_id);
 				myZWApi->zwBasicSet(node_id,255);
 				break;
 				;;
@@ -497,11 +508,11 @@ void ZWave::CMD_Remove_Node(string sOptions,int iValue,string sTimeout,bool bMul
 }
 
 
-void ZWave::SendSensorTrippedEvents(unsigned short node_id, bool value)
+void ZWave::SendSensorTrippedEvents(unsigned short node_id, int instance_id, bool value)
 {
 	char tmp_node_id[16];
 	sprintf(tmp_node_id,"%i",node_id);
-        DeviceData_Impl *pChildDevice = InternalIDToDevice(tmp_node_id);
+        DeviceData_Impl *pChildDevice = InternalIDToDevice(tmp_node_id, instance_id);
 	if (pChildDevice != NULL) {		
 		LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending sensor tripped event from node %d",node_id);
 		m_pEvent->SendMessage( new Message(pChildDevice->m_dwPK_Device,
@@ -516,13 +527,13 @@ void ZWave::SendSensorTrippedEvents(unsigned short node_id, bool value)
 	}
 }
 
-void ZWave::SendCO2LevelChangedEvent(unsigned short node_id, int value)
+void ZWave::SendCO2LevelChangedEvent(unsigned short node_id, int instance_id, int value)
 {
 	char tmp_node_id[16];
 	char tmp_value[16];
 	sprintf(tmp_node_id,"%i",node_id);
 	sprintf(tmp_value,"%i",value);
-        DeviceData_Impl *pChildDevice = InternalIDToDevice(tmp_node_id);
+        DeviceData_Impl *pChildDevice = InternalIDToDevice(tmp_node_id, instance_id);
 	if (pChildDevice != NULL) {		
 		LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending co2 level changed event from node %s",tmp_node_id);
 		m_pEvent->SendMessage( new Message(pChildDevice->m_dwPK_Device,
@@ -538,13 +549,13 @@ void ZWave::SendCO2LevelChangedEvent(unsigned short node_id, int value)
 
 }
 
-void ZWave::SendTemperatureChangedEvent(unsigned short node_id, float value)
+void ZWave::SendTemperatureChangedEvent(unsigned short node_id, int instance_id, float value)
 {
 	char tempstr[512];
 	sprintf(tempstr, "%.1f", value);
 	char tmp_node_id[16];
 	sprintf(tmp_node_id,"%i",node_id);
-        DeviceData_Impl *pChildDevice = InternalIDToDevice(tmp_node_id);
+        DeviceData_Impl *pChildDevice = InternalIDToDevice(tmp_node_id, instance_id);
 	if (pChildDevice != NULL) {		
 		LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending temperature changed event from node %s",tmp_node_id);
 		m_pEvent->SendMessage( new Message(pChildDevice->m_dwPK_Device,
@@ -557,13 +568,13 @@ void ZWave::SendTemperatureChangedEvent(unsigned short node_id, float value)
 	}
 
 }
-void ZWave::SendHumidityChangedEvent(unsigned short node_id, int value)
+void ZWave::SendHumidityChangedEvent(unsigned short node_id, int instance_id, int value)
 {
 	char tempstr[512];
 	sprintf(tempstr, "%i", value);
 	char tmp_node_id[16];
 	sprintf(tmp_node_id,"%i",node_id);
-        DeviceData_Impl *pChildDevice = InternalIDToDevice(tmp_node_id);
+        DeviceData_Impl *pChildDevice = InternalIDToDevice(tmp_node_id, instance_id);
 	if (pChildDevice != NULL) {		
 		LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending humidity level changed event from node %s",tmp_node_id);
 		m_pEvent->SendMessage( new Message(pChildDevice->m_dwPK_Device,
@@ -576,13 +587,13 @@ void ZWave::SendHumidityChangedEvent(unsigned short node_id, int value)
 	}
 
 }
-void ZWave::SendBrightnessChangedEvent(unsigned short node_id, int value)
+void ZWave::SendBrightnessChangedEvent(unsigned short node_id, int instance_id, int value)
 {
 	char tempstr[512];
 	sprintf(tempstr, "%i", value);
 	char tmp_node_id[16];
 	sprintf(tmp_node_id,"%i",node_id);
-        DeviceData_Impl *pChildDevice = InternalIDToDevice(tmp_node_id);
+        DeviceData_Impl *pChildDevice = InternalIDToDevice(tmp_node_id, instance_id);
 	if (pChildDevice != NULL) {		
 		LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending brightness level changed event from node %s",tmp_node_id);
 		m_pEvent->SendMessage( new Message(pChildDevice->m_dwPK_Device,
@@ -596,7 +607,7 @@ void ZWave::SendBrightnessChangedEvent(unsigned short node_id, int value)
 
 }
 
-void ZWave::SendLightChangedEvents(unsigned short node_id, int value)
+void ZWave::SendLightChangedEvents(unsigned short node_id, int instance_id, int value)
 {
 	char svalue[32];
 	sprintf(svalue, "%d", value==99?100:value);
@@ -626,9 +637,9 @@ void ZWave::SendLightChangedEvents(unsigned short node_id, int value)
 	}
 }
 
-void ZWave::SendOnOffEvent(unsigned short node_id, int value) {
+void ZWave::SendOnOffEvent(unsigned short node_id, int instance_id, int value) {
         DeviceData_Impl *pChildDevice = NULL;	
-	if ( (pChildDevice = InternalIDToDevice(StringUtils::itos(node_id)) ) != NULL) {
+	if ( (pChildDevice = InternalIDToDevice(StringUtils::itos(node_id), instance_id) ) != NULL) {
 		m_pEvent->SendMessage( new Message(pChildDevice->m_dwPK_Device,
 			DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,
 			EVENT_Device_OnOff_CONST,
@@ -665,46 +676,21 @@ void ZWave::SendOrbiterPopup(const char *message) {
 }
 
 
-int ZWave::AddDevice(int parent, string sInternalID, int PK_DeviceTemplate) {
+int ZWave::AddDevice(int parent, string sInternalID, int iInstanceID, int PK_DeviceTemplate) {
 	int iPK_Device = 0;
 
 	int tmp_parent = 0;
 	if (parent > 0) { tmp_parent = parent; } else { tmp_parent = m_dwPK_Device; }
 
 	string tmp_s = StringUtils::itos(DEVICEDATA_PortChannel_Number_CONST) + "|" + sInternalID;
-	bool bFound = false;
-
-        DeviceData_Impl *pChildDevice = NULL;
-        for( VectDeviceData_Impl::const_iterator it = m_pData->m_vectDeviceData_Impl_Children.begin();
-                        it != m_pData->m_vectDeviceData_Impl_Children.end(); ++it )
-        {
-                pChildDevice = (*it);
-                if( pChildDevice != NULL )
-                {
-			int tmp_node_id = atoi(pChildDevice->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST).c_str());
-			// check if child already exists
-			if ( tmp_node_id == atoi(sInternalID.c_str())) {
-				bFound = true;
-			}
-
-			// iterate over embedded interfaces
-			DeviceData_Impl *pChildDevice1 = NULL;
-			for( VectDeviceData_Impl::const_iterator it1 = pChildDevice->m_vectDeviceData_Impl_Children.begin();
-				it1 != pChildDevice->m_vectDeviceData_Impl_Children.end(); ++it1 )
-			{
-				pChildDevice1 = (*it1);
-				if( pChildDevice1 != NULL )
-				{
-					int tmp_node_id = atoi(pChildDevice1->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST).c_str());
-					if ( tmp_node_id == atoi(sInternalID.c_str())) {
-						bFound = true;
-					}
-				}
-			}
-
-		}
-	}
+	DeviceData_Impl *pDevice = InternalIDToDevice(sInternalID, iInstanceID);
+	bool bFound = pDevice != NULL;
+	
 	if (!bFound) {
+	        string sInternalIDInst = sInternalID;
+		if (iInstanceID > 0) {
+		        sInternalIDInst = sInternalIDInst + "/" + StringUtils::itos(iInstanceID);
+		}
 		// does not exist, create child
 		/*
 		m_pEvent->SendMessage( new Message(m_dwPK_Device,4,
@@ -727,62 +713,43 @@ int ZWave::AddDevice(int parent, string sInternalID, int PK_DeviceTemplate) {
 		); */
 		// CMD_Create_Device add_command(m_dwPK_Device,DEVICETEMPLATE_VirtDev_General_Info_Plugin_CONST, PK_DeviceTemplate,"",0,"",
 		CMD_Create_Device add_command(m_dwPK_Device,4, PK_DeviceTemplate,"",0,"",
-			StringUtils::itos(DEVICEDATA_PortChannel_Number_CONST) + "|" + sInternalID, 0,tmp_parent,"",0,0,&iPK_Device) ;
+			StringUtils::itos(DEVICEDATA_PortChannel_Number_CONST) + "|" + sInternalIDInst, 0,tmp_parent,"",0,0,&iPK_Device) ;
 		SendCommand(add_command);
+	} else {
+	        iPK_Device = pDevice->m_dwPK_Device;
 	}
 
 	return iPK_Device;
 
 } 
-bool ZWave::DeleteDevice(string sInternalID) {
+bool ZWave::DeleteDevicesForNode(string sInternalID) {
 	DeviceData_Impl *pTargetChildDevice = NULL;
 	// CMD_Delete_Device del_command(m_dwPK_Device,DEVICETEMPLATE_VirtDev_General_Info_Plugin_CONST,device_id);
-        DeviceData_Impl *pChildDevice = NULL;
-        for( VectDeviceData_Impl::const_iterator it = m_pData->m_vectDeviceData_Impl_Children.begin();
-                        it != m_pData->m_vectDeviceData_Impl_Children.end(); ++it )
-        {
-                pChildDevice = (*it);
-                if( pChildDevice != NULL )
-                {
-			int tmp_node_id = atoi(pChildDevice->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST).c_str());
-			// check if child already exists
-			if ( tmp_node_id == atoi(sInternalID.c_str())) {
-				pTargetChildDevice = pChildDevice;
-			}
 
-			// iterate over embedded interfaces
-			DeviceData_Impl *pChildDevice1 = NULL;
-			for( VectDeviceData_Impl::const_iterator it1 = pChildDevice->m_vectDeviceData_Impl_Children.begin();
-				it1 != pChildDevice->m_vectDeviceData_Impl_Children.end(); ++it1 )
-			{
-				pChildDevice1 = (*it1);
-				if( pChildDevice1 != NULL )
-				{
-					int tmp_node_id = atoi(pChildDevice1->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST).c_str());
-					if ( tmp_node_id == atoi(sInternalID.c_str())) {
-						pTargetChildDevice = pChildDevice1;
-					}
-				}
-			}
-
+        vector<DeviceData_Impl *> vectDevices = FindDevicesForNode(sInternalID);
+	if (vectDevices.size() > 0) {
+	        for( vector<DeviceData_Impl*>::const_iterator it = vectDevices.begin(); it != vectDevices.end(); ++it )
+		{
+		        pTargetChildDevice = (*it);
+			CMD_Delete_Device del_command(m_dwPK_Device,4,pTargetChildDevice->m_dwPK_Device);
+			SendCommand(del_command);
 		}
-	}
-	if (pTargetChildDevice != NULL) {
-		CMD_Delete_Device del_command(m_dwPK_Device,4,pTargetChildDevice->m_dwPK_Device);
-		SendCommand(del_command);
 		return true;
 	} else {
 		return false;
 	}
 }
 
-string ZWave::GetCapabilities(string sInternalID) {
+string ZWave::GetCapabilities(string sInternalID, int iInstanceID) {
 	string sCapabilities;
-	/*	CMD_Get_Device_Data cmd_Get_Device_Data(
-			m_dwPK_Device, m_dwPK_Device_GeneralInfoPlugIn,
-			pDeviceData_Base->m_dwPK_Device, DEVICEDATA_PhoneNumber_CONST, true,
-			&sExtension
-		); */
+	DeviceData_Impl* device = InternalIDToDevice(sInternalID, iInstanceID);
+	if (device != NULL) {
+	        CMD_Get_Device_Data cmd_Get_Device_Data(m_dwPK_Device, 4,
+							device->m_dwPK_Device, DEVICEDATA_Capabilities_CONST, true,
+							&sCapabilities
+							);
+		SendCommand(cmd_Get_Device_Data);
+	}
 	return sCapabilities;
 }
 
@@ -801,25 +768,50 @@ void ZWave::SetCapabilities(int PKDevice, string sCapabilities) {
 	}
 }
 
+void ZWave::AddCapability(int PKDevice, int iCC) {
+	if (PKDevice != -1) {
+	        string sCapabilities;
+	        CMD_Get_Device_Data cmd_Get_Device_Data(m_dwPK_Device, 4,
+							PKDevice, DEVICEDATA_Capabilities_CONST, true,
+							&sCapabilities
+							);
+		SendCommand(cmd_Get_Device_Data);
+		if (sCapabilities.find("BAD DEVICE") == string::npos) {
+		        // can happen when device was just added(before reload), it will still add the device data below
+		        sCapabilities = "";
+		}
+		if (sCapabilities.find(StringUtils::itos(iCC)) == string::npos) {
+		        if (sCapabilities.size() > 0)
+			         sCapabilities += ",";
+		        sCapabilities += StringUtils::itos(iCC);
+			CMD_Set_Device_Data cmd_Set_Device_Data(m_dwPK_Device, 4, PKDevice, sCapabilities.c_str(), DEVICEDATA_Capabilities_CONST);
+			SendCommand(cmd_Set_Device_Data);
+		  }
+	}
+}
+
 void ZWave::SetManufacturerSpecificString(string sManufacturerSpecific) {
 
 }
 
-DeviceData_Impl *ZWave::InternalIDToDevice(string sInternalID) {
+DeviceData_Impl *ZWave::InternalIDToDevice(string sInternalID, int iInstanceID) {
         DeviceData_Impl *pChildDevice = NULL;
 
 	if (sInternalID == "") return NULL;
-
+	string sInternalIDInst = sInternalID;
+	if (iInstanceID > 0) {
+	        sInternalIDInst = sInternalIDInst + "/" + StringUtils::itos(iInstanceID);
+	}
         for( VectDeviceData_Impl::const_iterator it = m_pData->m_vectDeviceData_Impl_Children.begin();
                         it != m_pData->m_vectDeviceData_Impl_Children.end(); ++it )
-        {
+	{
                 pChildDevice = (*it);
                 if( pChildDevice != NULL )
                 {
-			int tmp_node_id = atoi(pChildDevice->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST).c_str());
+		        string tmp_node_id = pChildDevice->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 			// check if child exists
-			if ( tmp_node_id == atoi(sInternalID.c_str())) {
-				return pChildDevice;
+			if ( tmp_node_id.compare(sInternalIDInst) == 0) {
+			        return pChildDevice;
 			}
 
 			// iterate over embedded interfaces
@@ -830,14 +822,85 @@ DeviceData_Impl *ZWave::InternalIDToDevice(string sInternalID) {
 				pChildDevice1 = (*it1);
 				if( pChildDevice1 != NULL )
 				{
-					int tmp_node_id = atoi(pChildDevice1->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST).c_str());
-					if ( tmp_node_id == atoi(sInternalID.c_str())) {
-						return pChildDevice1;
+					string tmp_node_id = pChildDevice1->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+					if ( tmp_node_id.compare(sInternalIDInst) == 0) {
+					        return pChildDevice1;
 					}
 				}
 			}
 
 		}
 	}
+        LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::InternalIDToDevice() No device found for id %s", sInternalIDInst.c_str());
 	return NULL;
+}
+
+map<int, int> ZWave::FindCCInstanceCountForNode(string sInternalID) {
+        vector<DeviceData_Impl*> vecDevices = FindDevicesForNode(sInternalID);
+	map<int, int> mapCCInstanceCount;
+	for(uint i=0; i < vecDevices.size(); ++i) {
+	        string nodeInstance = vecDevices[i]->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+		string sNodeid;
+		int instanceid = 0;
+		if (nodeInstance.find("/") != string::npos) {
+		        vector<string> parts;
+			StringUtils::Tokenize(nodeInstance, "/", parts);
+			sNodeid = parts[0].c_str();
+			instanceid = atoi(parts[1].c_str()); 
+		} else {
+		        sNodeid = nodeInstance;
+		}
+		int nodeid =  atoi(nodeInstance.c_str());
+		string capa = GetCapabilities(sNodeid, instanceid);
+		vector<string> vectCCs;
+		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Node/instance: %d/%d, capabilities: %s", nodeid, instanceid, capa.c_str());
+		StringUtils::Tokenize(capa, ",", vectCCs);
+		// Count number of instances that support each CC
+		for (int i = 0; i < vectCCs.size(); i++) {
+		        int cc = atoi(vectCCs[i].c_str());
+			if (mapCCInstanceCount.find(cc) == mapCCInstanceCount.end()) {
+			        mapCCInstanceCount[cc] = 0;
+			}
+			mapCCInstanceCount[cc] = mapCCInstanceCount[cc] + 1;
+		}
+	}
+	return mapCCInstanceCount;
+}
+
+vector<DeviceData_Impl*> ZWave::FindDevicesForNode(string sInternalID) {
+        vector<DeviceData_Impl*> vecDevices;
+	DeviceData_Impl* pChildDevice = NULL;
+
+	if (sInternalID == "") return vecDevices;
+        string sInternalIDInst = sInternalID;
+        for( VectDeviceData_Impl::const_iterator it = m_pData->m_vectDeviceData_Impl_Children.begin();
+                        it != m_pData->m_vectDeviceData_Impl_Children.end(); ++it )
+        {
+                pChildDevice = (*it);
+                if( pChildDevice != NULL )
+                {
+		        string tmp_node_id = pChildDevice->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+			// check if child exists
+			if ( StringUtils::StartsWith(tmp_node_id, sInternalIDInst) ) {
+			      vecDevices.push_back(pChildDevice);
+			}
+
+			// iterate over embedded interfaces
+			DeviceData_Impl *pChildDevice1 = NULL;
+			for( VectDeviceData_Impl::const_iterator it1 = pChildDevice->m_vectDeviceData_Impl_Children.begin();
+				it1 != pChildDevice->m_vectDeviceData_Impl_Children.end(); ++it1 )
+			{
+				pChildDevice1 = (*it1);
+				if( pChildDevice1 != NULL )
+				{
+					string tmp_node_id = pChildDevice1->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+					if ( StringUtils::StartsWith(tmp_node_id, sInternalIDInst) ) {
+					         vecDevices.push_back(pChildDevice1);
+					}
+				}
+			}
+
+		}
+	}
+	return vecDevices;
 }

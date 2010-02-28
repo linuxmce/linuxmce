@@ -47,7 +47,8 @@ namespace DCE
 		int myDeviceID;
 
 		// Private methods
-		virtual DeviceData_Impl *InternalIDToDevice(string sInternalID);
+		virtual DeviceData_Impl *InternalIDToDevice(string sInternalID, int instance_id);
+		virtual vector<DeviceData_Impl*> FindDevicesForNode(string sInternalID);
 		
 public:
 		// Public member variables
@@ -62,19 +63,21 @@ public:
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
-		virtual void SendSensorTrippedEvents(unsigned short node_id, bool value);
-		virtual void SendCO2LevelChangedEvent(unsigned short node_id, int value);
-		virtual void SendLightChangedEvents(unsigned short node_id, int value);
-		virtual void SendTemperatureChangedEvent(unsigned short node_id, float value);
-		virtual void SendBrightnessChangedEvent(unsigned short node_id, int value);
-		virtual void SendHumidityChangedEvent(unsigned short node_id, int value);
-		virtual void SendOnOffEvent(unsigned short node_id, int value);
+		virtual void SendSensorTrippedEvents(unsigned short node_id, int instance_id, bool value);
+		virtual void SendCO2LevelChangedEvent(unsigned short node_id, int instance_id, int value);
+		virtual void SendLightChangedEvents(unsigned short node_id, int instance_id, int value);
+		virtual void SendTemperatureChangedEvent(unsigned short node_id, int instance_id, float value);
+		virtual void SendBrightnessChangedEvent(unsigned short node_id, int instance_id, int value);
+		virtual void SendHumidityChangedEvent(unsigned short node_id, int instance_id, int value);
+		virtual void SendOnOffEvent(unsigned short node_id, int instance_id, int value);
 		virtual void SendOrbiterPopup(const char *message); 
-        	virtual int AddDevice(int parent, string sInternalID, int PK_DeviceTemplate);
-        	virtual bool DeleteDevice(string sInternalID);
-		virtual string GetCapabilities(string sInternalID);
+        	virtual int AddDevice(int parent, string sInternalID, int iInstanceID, int PK_DeviceTemplate);
+        	virtual bool DeleteDevicesForNode(string sInternalID);
+		virtual string GetCapabilities(string sInternalID, int iInstanceID);
 		virtual void SetCapabilities(int PKDevice, string sCapabilities);
+		virtual void AddCapability(int PKDevice, int capability);
 		virtual void SetManufacturerSpecificString(string sManufacturerSpecific);
+		virtual std::map<int, int> FindCCInstanceCountForNode(string sInternalID);
 
 
 

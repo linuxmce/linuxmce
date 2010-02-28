@@ -361,7 +361,7 @@ namespace ZWApi {
 	int typeGeneric;
 	int typeSpecific;
 	bool sleepingDevice;
-	bool multiInstance;
+	std::map <int, int>mapCCInstanceCount;
 	int plutoDeviceTemplateConst;
 	// holds the device state (used by setback schedule thermostat)
 	int stateBasic;
@@ -532,6 +532,11 @@ namespace ZWApi {
 	void zwRequestMultilevelSensorReportInstance(int node_id,int instance);
 	
 	void zwSoftReset();
+
+	void resetNodeInstanceCount(ZWNode *node, std::string capa);
+	void multiInstanceGetAllCCsForNode(unsigned int node_id);
+	void handleCommandSensorMultilevelReport(int nodeid, int instance_id, int sensortype, int metadata,
+						 int val1, int val2, int val3, int val4); 
     };
 
 
