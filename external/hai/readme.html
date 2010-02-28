@@ -1,0 +1,440 @@
+<html>
+
+<head>
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>HAI Omni Communication Library</title>
+</head>
+
+<body>
+
+<p align="center"><b><font size="6">HAI Omni Communication Library</font></b></p>
+
+<p align="center"><font size="4">Version 0.9</font></p>
+
+<hr>
+
+<p>The purpose of this project is to provide a comprehensive library to
+support communication to HAI's family of Omni home automation controllers
+via Ethernet and serial. The code is compatible with GCC and MS VC++. It can be 
+compiled into a static library, dynamic library, Windows DLL, or a stand-alone 
+test application.&nbsp; It has been tested on Linux, Cygwin, and WinXP.<br>
+<br>
+<u>Table of Contents</u></p>
+
+<ul>
+  <li><a href="#Documentation">Documentation</a></li>
+  <li><a href="#GNU Compile Instructions">GNU Compile Instructions</a></li>
+  <li><a href="#MS VC++ Compile Instructions">MS VC++ Compile Instructions</a></li>
+  <li><a href="#Configuration">Configuration</a></li>
+  <li><a href="#Command-line Options">Command-line Options</a></li>
+  <li><a href="#Usage Instructions">Usage Instructions</a></li>
+  <li><a href="#Revision History">Revision History</a></li>
+  <li><a href="#ToDo List">Todo List</a></li>
+  <li><a href="#Project Ideas">Project Ideas</a></li>
+  <li><a href="#Download">Download</a></li>
+  <li><a href="#Contact">Contact</a></li>
+  <li><a href="#License">License</a></li>
+</ul>
+<hr>
+<p><u><a name="Documentation">Documentation</a></u><br>
+<br>
+HTML documentation can be found <a href="docs/html/index.html">here</a>. 
+PDF documentation is  not available yet.</p>
+
+<p><u><a name="GNU Compile Instructions">GNU Compile Instructions</a></u></p>
+
+<p>The HAI library and test app can be compiled with the GNU compiler on Linux 
+or <a href="http://www.cygwin.com/">cygwin</a>:</p>
+
+<blockquote>
+  <p><font face="Courier New">make&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  -</font> compile hai stand-alone app<br>
+  <font face="Courier New">make hail&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -</font> 
+  compile hail test app (uses static library)<br>
+  <font face="Courier New">make hais&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -</font> 
+  compile hais test app (uses shared library)<br>
+  <font face="Courier New">make clean&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -</font> 
+  delete all intermediate files<br>
+  <font face="Courier New">make build&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -</font> 
+  delete intermediate files and compile hai stand-alone app<br>
+  <font face="Courier New">make all&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  -</font> compile hai stand-alone app, static library, and shared library<br>
+  <font face="Courier New">make install&nbsp;&nbsp;&nbsp;&nbsp; -</font> copy 
+  hai app to <font face="Courier New">/usr/local/bin</font><br>
+  <font face="Courier New">make libinstall&nbsp; -</font> install static library 
+  and copy header file<br>
+  <font face="Courier New">make slibinstall -</font> install shared library and 
+  copy header file<br>
+  <font face="Courier New">make installall&nbsp; -</font> copy hai app to
+  <font face="Courier New">/usr/local/bin</font> and install all libraries<br>
+  <font face="Courier New">make dox&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  -</font> generate documentation</p>
+</blockquote>
+<p>If you just want to run the hai program, then the following is sufficient:</p>
+<blockquote>
+  <p><font face="Courier New">make install</font></p>
+</blockquote>
+<p>If you're using other programs which use the libraries, the most common 
+sequence would be:</p>
+<blockquote>
+  <p><font face="Courier New">make all<br>
+  su<br>
+  make installall</font></p>
+</blockquote>
+
+<p><u><a name="MS VC++ Compile Instructions">MS VC++ Compile Instructions</a></u></p>
+
+<p>The HAI test app can be compiled with the MS VC++ compiler (only 6.0 tested):</p>
+
+<blockquote>
+
+<p><font face="Courier New">nmake /f hai.mak&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+-</font> compile hai.exe stand-alone app<br>
+<font face="Courier New">nmake /f hai.mak clean&nbsp; -</font> delete all 
+intermediate files</p>
+
+</blockquote>
+
+<p>To compile the windows DLL you need to open the haidll.dsw file in the IDE 
+and select Build -&gt; Rebuild All.</p>
+
+<p><u><a name="Configuration">Configuration</a></u></p>
+
+<p>By default, the hai test application obtains configuration information from 
+the <font face="Courier New">/etc/hai.conf</font> or <font face="Courier New">
+c:\windows\hai.ini</font> depending on if the application was compiled with the 
+GNU compiler or MS VC++ compiler.&nbsp; The location of the configuration file 
+can be overridden with the HAICONF environment variable. An example 
+configuration file (with comments) can be found <a href="hai.conf">here</a>. The 
+parameters in the configuration file and command-line options when executing the 
+hai command are identical.</p>
+
+<p><u><a name="Command-line Options">Command-line Options</a></u></p>
+
+<p><font face="Courier New">Format:&nbsp; hai [opts] [command]<br>
+<br>
+Options: -w=&nbsp;&nbsp;&nbsp; specify password<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -f=&nbsp;&nbsp;&nbsp; specify config file<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -i=&nbsp;&nbsp;&nbsp; specify HAI ip address<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -ix=&nbsp;&nbsp; specify encrypted HAI ip 
+address<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -p=&nbsp;&nbsp;&nbsp; specify HAI port<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -px=&nbsp;&nbsp; specify encrypted HAI port<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -k=&nbsp;&nbsp;&nbsp; specify key<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -kx=&nbsp;&nbsp; specify encrypted key<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -c=&nbsp;&nbsp;&nbsp; specify user code<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -cx=&nbsp;&nbsp; specify encrypted user code<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -n=&nbsp;&nbsp;&nbsp; specify name cache file<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -s=&nbsp;&nbsp;&nbsp; specify serial path<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -b=&nbsp;&nbsp;&nbsp; specify baud rate<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -r&nbsp;&nbsp;&nbsp;&nbsp; comma separated values (CSV) 
+display<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -d&nbsp;&nbsp;&nbsp;&nbsp; dump 
+config<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -h&nbsp;&nbsp;&nbsp;&nbsp; help<br>
+<br>
+Commands: 'help' to see info on commands<br>
+<br>
+Example: hai -i=192.168.0.101 -p=4369 info</font></p>
+
+<p><u><a name="Usage Instructions">Usage Instructions</a></u></p>
+
+<p>Typing &quot;help&quot; at the hai command prompt will list the available commands and 
+a short description:</p>
+
+<blockquote>
+
+<p><font face="Courier New">help&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+display help info<br>
+h&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+display help info<br>
+?&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+display help info<br>
+exit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+quit program<br>
+x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+quit program<br>
+quit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+quit program<br>
+q&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+quit program<br>
+encrypt&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; display 
+encrypted configuration<br>
+csv&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+change display mode<br>
+info&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+display system information<br>
+stat&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+display system status<br>
+sum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+display status summary<br>
+zones&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+display zone status<br>
+ready&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+display zone ready status<br>
+units&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+display unit status<br>
+sensors&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; display temp 
+sensor status<br>
+thermos&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; display 
+thermostat status<br>
+temps&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+display temps from thermos &amp; sensors<br>
+mesgs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+display message status<br>
+users&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+display user setting status<br>
+events&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; display 
+system events<br>
+unit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+send unit command<br>
+all&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+send all command<br>
+counter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; send counter 
+command<br>
+alc&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+send alc command<br>
+compose&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; send compose 
+command<br>
+upb&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+send upb command<br>
+radiora&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; send RadioRA 
+command<br>
+scene&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+send scene command<br>
+arm&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+send arm command<br>
+button&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; execute 
+macro button<br>
+cost&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+set energy cost<br>
+saver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+send saver command<br>
+sensor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; set 
+temp sensor setpoint<br>
+thermo&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; send 
+thermostat commands<br>
+mesg&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+send message commands<br>
+audio&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+send audio commands<br>
+user&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+send user commands<br>
+getnames&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; display/download 
+names<br>
+putnames&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; upload names<br>
+names&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+display names<br>
+buttons&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; display 
+button names<br>
+log&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+display event log<br>
+valid&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+validate security code<br>
+emergency&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; activate keypad 
+emergency<br>
+memo&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+play/record voice memo<br>
+settime&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; set time<br>
+getsetup&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; display/download 
+setup<br>
+putsetup&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; upload setup<br>
+getprogram&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; display/download program<br>
+putprogram&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; upload program<br>
+getvoices&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; display/download 
+voices<br>
+putvoices&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; upload voices</font></p>
+
+</blockquote>
+
+<p>Typing &quot;help&quot; followed by a command name will display details on the 
+command and its arguments.</p>
+
+<p><u><a name="Revision History">Revision History</a></u></p>
+
+<ul>
+  <li>Version 0.9 (November 9, 2009)<ul>
+  <li>Updates from Rick Macdonald</li><ul>
+  <li>Support to set and display User Settings (for firmware >= 3.0 only).</li>
+  <li>Support to set and display fan mode = Cycle (for firmware >= 3.0 only).</li>
+  <li>Incomplete support for access readers: names are saved and loaded.</li>
+  <li>The firmware version is fetched for the controller to enable/disable support (for example, user settings) as required.</li>
+  <li>The display commands (zones, units, etc) only printed named items by default but a new option "all" is available to print all, including unnamed ones.</li>
+  <li>Allow input and display of fractional temperatures, and fixed rounding of fractional temperatures.</li>
+  <li>Allow input of temperatures in C or F (default=F) (do_sensor_cmd, do_thermo_cmd, do_user_cmd).</li>
+  <li>Expand and clarify help for some commands, especially "unit".</li>
+  <li>Change unit "level" command 9 to unit "level" command 101 which allows an optional duration.</li>
+  <li>Added User Setting duration values to unit commands (on/off/dim/brighten/level/ramp), ALC commands (ramp).</li>
+  <li>Fix command-line handling and the "help" display to make it clear which commands require an argument value with "=" and no spaces.</li>
+  <li>If I left hai sitting at its command prompt for several minutes, commands such as thermos would fail with (2013) : Bad CRC from Omni. In cmd_loop(), EOMNIRESPONSE and EHAITIMEOUT errors already triggered a logout and login to get the connection working again. I added EOMNICRC to this check and I don't see the CRC errors now.</li>
+  <li>In makefile, set the doxygen program automaticially for Windows or UN*X depending on the cygwin setting.</li>
+  <li>Added details of Chuck Cannon's v0.8 changes to this Revision History.</li>
+  <li>Fixed bug where buttons command didn't print the last button.</li>
+  <li>More detailed error message when certain command arguments (area, button, unit, etc) 
+are out of range.</li>
+  <li>Each panel model has a different number of security zones, "max_zones". There are a number of additional zones with status values that vary by model: freeze alarm, fire emergency (for each area), police emergency (for each area), auxiliary emergency (for each area), duress alarm (for each area), battery low trouble, AC power failure trouble, phone line dead trouble, digital communicator trouble, fire tamper trouble, fuse trouble. The "zones" and "ready" commands display the status for zones up to max_zones_status and print meaningful names (for example, Freeze alarm, Area 1 fire, etc).</li>
+  <li>Each panel model has a different number of buttons, "max_buttons" (from 16 to 128), which can be named, given a voice description, and executed by the user through a console, telephone or PC Access Software. All panel models have additional buttons up to 255 ("max_buttons_program") which cannot be named or given a voice description, and can only be executed through a program. The "button" command now processes buttons up to max_button_program (255).</li>
+  </ul>
+</ul>
+  &nbsp;</li>
+  <li>Version 0.8 (January 21, 2007)<ul>
+  <li>Updated for Rev 2.12 Omni Protocol Spec</li>
+  <li>Renamed "temp" and "temps" commands to "sensor" and "sensors".</li>
+  <li>Added audio support.</li>
+  <li>Added commands: audio, sum, ready, emergency, memo, quit.</li>
+  <li>Set model constants for each model (number of zones, number of units, etc) for "display" options (zones, units, etc).</li>
+  <li>Added -d command-line option to dump config file.</li>
+  <li>Added more helpful error messages, especially for network connection and login.</li>
+  <li>Added support for Omni IIe, Lumina and Lumina Pro.</li>
+  <li>Changes for gcc 4 compiler.</li>
+</ul>
+  &nbsp;</li>
+  <li>Version 0.7 (March 6, 2005)<ul>
+  <li>Added UPB support</li>
+  <li>Added RadioRA support</li>
+  <li>Added level option to unit command</li>
+  <li>Updated for Rev H Omni Protocol Spec</li>
+  <li>Fixed temp rounding issue</li>
+  <li>Improved error messages</li>
+  <li>Add macro/defines for event field parsing</li>
+  <li>Fixed X-10 event display</li>
+  <li>Support caching of names</li>
+  <li>Display names when available</li>
+  <li>Support displaying all zones, units, temp sensors, or&nbsp; thermostats in 
+  one request</li>
+  <li>Support displaying status of only named zones, units, temp sensors, or 
+  thermostats</li>
+  <li>Support comma  separated values output format<br>
+&nbsp;</li>
+</ul>
+  </li>
+  <li>Version 0.6 (February 13, 2005)<ul>
+    <li>Fixed build issue with MS VC++</li>
+  </ul>
+  &nbsp;</li>
+  <li>Version 0.5 (February 12, 2005)<ul>
+    <li>Switched to HTML readme</li>
+    <li>Handle names/events nak</li>
+    <li>Support encrypted parameters in config file</li>
+    <li>Support building MS VC++ DLL</li>
+    <li>Added omni functions for get/put of setup, programs, and voices</li>
+    <li>Corrected missing hold status in thermostat status display</li>
+  </ul>
+  </li>
+</ul>
+<ul>
+  <li>Version 0.4 (November 28, 2004)<ul>
+  <li>Added <font face="Courier New">mesg</font> command</li>
+  <li>Cleaned up use of const, static, etc.</li>
+  <li>Added <font face="Courier New">temp</font> and <font face="Courier New">
+  thermo</font> commands</li>
+  <li>Added build of static and shared libraries</li>
+  <li>Added build of versions of <font face="Courier New">hai</font> to test libs 
+  (<font face="Courier New">hail</font> and <font face="Courier New">hais</font>)</li>
+  <li>Made AES reentrant</li>
+  <li>Made use of readline library conditional</li>
+  <li>Improved <font face="Courier New">putnames</font> error detection</li>
+  <li>Added sample names file</li>
+  <li>Added MSVC makefile</li>
+  <li>Added energy <font face="Courier New">cost</font> and
+  <font face="Courier New">saver</font> commands</li>
+  <li>Added <font face="Courier New">counter</font> increment/decrement/set 
+  command</li>
+  <li>Added <font face="Courier New">scene</font> command</li>
+  <li>Added <font face="Courier New">ALC</font> and <font face="Courier New">compose</font> commands</li>
+  <li>Included Bob's readline support (for MSVC)</li>
+  <li>Improved error handling</li>
+  <li>Added some doxygen</li>
+  </ul>
+  </li>
+</ul>
+<ul>
+  <li>Version 0.3 (November 13, 2004)<ul>
+    <li>Incorporated changes to compile with MSVC</li>
+    <li>Added support for save/load names from file</li>
+    <li>Added temp sensor support</li>
+    <li>Added <font face="Courier New">all</font> command</li>
+    <li>Added set time support</li>
+    <li>Added <font face="Courier New">mesgs</font> command</li>
+    <li>Added <font face="Courier New">thermos</font> command</li>
+    <li>Made use of GNU readline library for better line editing</li>
+    <li>Improved makefile (works for Linux and cygwin)</li>
+    <li>Made command parsing case insensitive</li>
+    <li>Fixed rounding error on temp display calculations</li>
+  </ul>
+  </li>
+</ul>
+<ul>
+  <li>Version 0.2 (October 24, 2004)<ul>
+    <li>Added serial port support</li>
+    <li>Added system events support</li>
+  </ul>
+  </li>
+</ul>
+<ul>
+  <li>Version 0.1 (October 21, 2004)<ul>
+    <li>Initial version</li>
+  </ul>
+  </li>
+</ul>
+<p><u><a name="ToDo List">ToDo List</a></u></p>
+
+<ul>
+  <li>Complete doxygen (html, PDF)</li>
+  <li>Decode setup and program info</li>
+  <li>Add voice definitions</li>
+  <li>Support addressable messages</li>
+  <li>Copyless buffers</li>
+  <li>Add MS VC++ serial support</li>
+</ul>
+
+<p><u><a name="Project Ideas">Project Ideas</a></u></p>
+
+<p>I hope availability of this library results on many interesting open-source
+programs to support HAI Omni systems.</p>
+
+<p>Ideas include:</p>
+
+<ul>
+  <li>iPhone Widget</li>
+  <li>Linux-based Web Interface</li>
+  <li>Linux-based event email daemon</li>
+  <li>Better configuration tools (cut/paste code in text form, etc.)</li>
+  <li>System tray program for quick button execution</li>
+  <li>Program compiler</li>
+</ul>
+<p><u><a name="Download">Download</a></u></p>
+
+<p>Updates to this program can be obtained from:</p>
+
+<p><a href="http://home.austin.rr.com/ccannon7/downloads.htm">
+http://home.austin.rr.com/ccannon7/downloads.htm</a></p>
+
+<p><u><a name="Contact">Contact</a></u><br>
+<br>
+<a href="mailto:ccannon7@austin.rr.com">ccannon7@austin.rr.com</a><br>
+<br>
+<u><a name="License">License</a></u><br>
+<br>
+Copyright (C) 2004-2007 Chuck Cannon <br>
+<br>
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version. <br>
+<br>
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details. <br>
+<br>
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.<br>
+&nbsp;</p>
+
+</body>
+
+</html>

@@ -1,0 +1,76 @@
+Zone     1 : Smoke
+Zone     2 : Heat
+Zone     3 : Outdoor Temp
+Zone     4 : Mud Room
+Zone     5 : Master Bdrm 1
+Zone     6 : Garage Window 2
+Zone     7 : Media
+Zone     8 : Dining Room 1
+Zone     9 : Front Door
+Zone    10 : Kitchen
+Zone    11 : Utility Room
+Zone    12 : Garage
+Zone    13 : Back Door
+Zone    14 : Samantha's Room
+Zone    15 : Garage Window 1
+Zone    17 : Master Bedrm 2
+Zone    18 : Guest Door
+Zone    19 : Study
+Zone    20 : Master Door
+Zone    21 : Guest 1
+Zone    22 : Living Room
+Zone    23 : Craft Room
+Zone    24 : Guest 2
+Zone    25 : Dining Room 2
+Zone    26 : Garage Door 1
+Zone    27 : Garage Door 2
+Zone    28 : Master Bath
+Zone    29 : Living Motion
+Unit     1 : Front Flood
+Unit     2 : Front Entry
+Unit     3 : Back Flood
+Unit     4 : Garage Entry
+Unit     5 : Control 5
+Unit     6 : Control 6
+Unit     7 : Control 7
+Unit     8 : Control 8
+Unit     9 : Garage
+Unit    10 : Master
+Unit    11 : Craft Room
+Unit    12 : Baby's Room
+Unit    13 : Kitchen
+Unit    14 : Living Flood
+Unit   385 : Garage Out 1
+Unit   386 : Garage Out 2
+Unit   394 : AC Disable
+Unit   395 : Fire Alarm
+Unit   396 : Master Enabl
+Unit   397 : Tire Counter
+Unit   398 : Motion Detec
+Unit   399 : Motion Disab
+Button   1 : Bedtime
+Button   2 : Lockup
+Button   3 : Close Garage
+Button   4 : Open Garage
+Button   5 : Interior On
+Button   6 : Interior Dim
+Button   7 : Comfort Day
+Button   8 : Comfort Nite
+Button   9 : Comfort Away
+Button  10 : Comfort Vac
+Button  11 : Comfort Off
+Button  12 : Comfort On
+Button  13 : Welcome
+Code     1 : Chuck
+Code     2 : Nicole
+Code     3 : Samantha
+Code     4 : Maid's Code
+Code     6 : Karen
+Area     1 : House
+Thermo   1 : Main AC
+Thermo   2 : Guest AC
+Mesg     1 : Empty Garbage
+Mesg     2 : Take Jacket
+Mesg     3 : Check Tires
+Mesg     4 : Mom's Birthday
+Mesg     5 : Dad's Birthday
