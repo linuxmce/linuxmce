@@ -184,7 +184,7 @@ void Climate_Plugin::GetFloorplanDeviceInfo(DeviceData_Router *pDeviceData_Route
 			iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_HEATING_CONST;
 		} else if ( sMode=="COOL" )	{
 			iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_COOLING_CONST;
-		} else if ( sMode=="AUTO" ) {		
+		} else if ( sMode=="AUTO" || sMode=="AUTO (COOL)" || sMode=="AUTO (HEAT)") {	
 			iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_FAN_CONST;
 		};
 		break;
@@ -203,7 +203,7 @@ void Climate_Plugin::GetFloorplanDeviceInfo(DeviceData_Router *pDeviceData_Route
 			iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_HEATING_CONST;
 		} else if ( sMode=="COOL" ) {
 			iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_COOLING_CONST;
-		} else if ( sMode=="AUTO" ) {
+		} else if ( sMode=="AUTO" || sMode=="AUTO (COOL)" || sMode=="AUTO (HEAT)") {
 			iPK_FloorplanObjectType_Color = FLOORPLANOBJECTTYPE_COLOR_CLIMATE_THERMOSTAT_FAN_CONST;
 		};
 		break;
@@ -319,13 +319,13 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Climate_Plugin: COMMAND_Set_HeatCool_CONST !");
 			string sState = pMessage->m_mapParameters[COMMANDPARAMETER_OnOff_CONST];
 			if( sState=="H" )
-				SetStateValue(pDevice, sOn, "HEAT", sFan, sSetPoint, sTemp);
+				SetStateValue(pDevice, "ON", "HEAT", sFan, sSetPoint, sTemp);
 			else if( sState=="C" )
-				SetStateValue(pDevice, sOn, "COOL", sFan, sSetPoint, sTemp);
+				SetStateValue(pDevice, "ON", "COOL", sFan, sSetPoint, sTemp);
 			else if( sState=="F" )
-				SetStateValue(pDevice, sOn, "FAN_ONLY", sFan, sSetPoint, sTemp);
+				SetStateValue(pDevice, "ON", "FAN_ONLY", sFan, sSetPoint, sTemp);
 			else
-				SetStateValue(pDevice, sOn, "AUTO", sFan, sSetPoint, sTemp);
+				SetStateValue(pDevice, "ON", "AUTO", sFan, sSetPoint, sTemp);
 		}
 		else if( pMessage->m_dwID == COMMAND_Set_Fan_CONST )
 		{
@@ -333,11 +333,11 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 			string sState = pMessage->m_mapParameters[COMMANDPARAMETER_OnOff_CONST];
 			if( 1 == atoi(sState.c_str()) )
 			{
-				SetStateValue(pDevice, sOn, "FAN_ONLY", "HIGH", sSetPoint, sTemp);
+				SetStateValue(pDevice, "ON", sMode, "HIGH", sSetPoint, sTemp);
 			}
 			else
 			{
-				SetStateValue(pDevice, sOn, "AUTO", "AUTO", sSetPoint, sTemp);
+				SetStateValue(pDevice, "ON", sMode, "AUTO", sSetPoint, sTemp);
 			}
 		}
 	}
@@ -355,7 +355,7 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Climate_Plugin: EVENT_Thermostat_Set_Point_Chan_CONST !");
 			// Replace the current temp
 			string sLevel = pMessage->m_mapParameters[EVENTPARAMETER_Value_CONST];
-			SetStateValue(pDevice, sOn, sMode, sFan, sLevel, sTemp);
+			SetStateValue(pDevice, "ON", sMode, sFan, sLevel, sTemp);
 		}
 		else if( pMessage->m_dwID == EVENT_Fan_Mode_Changed_CONST )
 		{
@@ -368,12 +368,12 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 				default:
 				case 0:
 				case 1:
-					SetStateValue(pDevice, sOn, sMode, "AUTO", sSetPoint, sTemp);
+					SetStateValue(pDevice, "ON", sMode, "AUTO", sSetPoint, sTemp);
 					break;
 					
 				case 2:
 				case 3:
-					SetStateValue(pDevice, sOn, sMode, "HIGH", sSetPoint, sTemp);
+					SetStateValue(pDevice, "ON", sMode, "HIGH", sSetPoint, sTemp);
 					break;
 			}
 		}
@@ -388,19 +388,31 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 			{
 				default:
 				case 10:
-					SetStateValue(pDevice, sOn, "AUTO", sFan, sSetPoint, sTemp);
+					SetStateValue(pDevice, "ON", "AUTO", sFan, sSetPoint, sTemp);
 					break;
 			
 				case 1:
-					SetStateValue(pDevice, sOn, "HEAT", sFan, sSetPoint, sTemp);
+					SetStateValue(pDevice, "ON", "HEAT", sFan, sSetPoint, sTemp);
 					break;
 			
 				case 2:
-					SetStateValue(pDevice, sOn, "COOL", sFan, sSetPoint, sTemp);
+					SetStateValue(pDevice, "ON", "COOL", sFan, sSetPoint, sTemp);
 					break;
 			
+				case 3:
+					SetStateValue(pDevice, "OFF", sMode, sFan, sSetPoint, sTemp);
+					break;
+
+				case 4:
+					SetStateValue(pDevice, "ON", "AUTO (COOL)", sFan, sSetPoint, sTemp);
+					break;
+
+				case 5:
+					SetStateValue(pDevice, "ON", "AUTO (HEAT)", sFan, sSetPoint, sTemp);
+					break;
+					
 				case 6:
-					SetStateValue(pDevice, sOn, "FAN_ONLY", sFan, sSetPoint, sTemp);
+					SetStateValue(pDevice, "ON", "FAN_ONLY", sFan, sSetPoint, sTemp);
 					break;
 			}
 		}

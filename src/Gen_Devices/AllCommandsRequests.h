@@ -28812,5 +28812,29 @@ namespace DCE
 			COMMAND_HOME_MEDIA_GALLERY_CONST,
 			0 /* number of parameters */); }
 	};
+	class CMD_Trip_Unit : public PreformedCommand {
+	public:
+		CMD_Trip_Unit(long DeviceIDFrom, long DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+			COMMAND_Trip_Unit_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_Trip_Unit_DL : public PreformedCommand {
+	public:
+		CMD_Trip_Unit_DL(long DeviceIDFrom, string DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Trip_Unit_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_Trip_Unit_DT : public PreformedCommand {
+	public:
+		CMD_Trip_Unit_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Trip_Unit_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_Trip_Unit_Cat : public PreformedCommand {
+	public:
+		CMD_Trip_Unit_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Trip_Unit_CONST,
+			0 /* number of parameters */); }
+	};
 }
 #endif
