@@ -96,6 +96,9 @@ MPlayer_Player::MPlayer_Player(int DeviceID, string ServerAddress,bool bConnectE
 	
 	m_pNotificationSocket = new TimecodeNotification_SocketListener(string("m_pTimecodeNotificationSocket"));
 	m_pNotificationSocket->m_bSendOnlySocket = true; // one second
+	
+	sGraphicsDriver = "";
+	sGraphicsDeinterlace = "";
 }
 
 //<-dceag-const2-b->
@@ -1062,7 +1065,9 @@ void MPlayer_Player::InitializePlayerEngine()
 	bool bUseAudioSettings = ParseAudioConfig(sAudioSettings, sAudioDevice, bUsePassthrough);
 	
 	//TODO wrap into try-catch block
-	m_pPlayerEngine = new MPlayerEngine(bUseAudioSettings, sAudioDevice, bUsePassthrough);
+	sGraphicsDriver = DATA_Get_Hardware_acceleration();
+	sGraphicsDeinterlace = DATA_Get_Deinterlacing_Mode();
+	m_pPlayerEngine = new MPlayerEngine(bUseAudioSettings, sAudioDevice, bUsePassthrough, sGraphicsDriver, sGraphicsDeinterlace);
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Started MPlayer slave instance");
 	m_bPlayerEngineInitialized = true;
 	

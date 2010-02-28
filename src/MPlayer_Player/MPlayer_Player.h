@@ -57,7 +57,11 @@ namespace DCE
 		float m_fCurrentFileLength;
 				
 		int m_iCurrentStreamID;
-		
+	
+		// GPU related settings
+		string sGraphicsDriver;
+		string sGraphicsDeinterlace;
+			
 		// Private methods
 		void InitializePlayerEngine();
 		void SmartLoadPlaylist(string sFolder, string sExtensions, list<string>& vFiles, string &sLargestFile, int& iLargestFilePosition);
