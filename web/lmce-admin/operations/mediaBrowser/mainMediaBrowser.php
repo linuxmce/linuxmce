@@ -3,6 +3,7 @@ function mainMediaBrowser($output,$mediadbADO,$dbADO) {
 	// include language files
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/mainMediaBrowser.lang.php');
+	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/utils.lang.php');
 
 	/* @var $mediadbADO ADOConnection */
 	/* @var $rs ADORecordSet */
@@ -148,7 +149,7 @@ function mainMediaBrowser($output,$mediadbADO,$dbADO) {
 				</tr>		
 				<tr>
 					<td><B>Name:</B> </td>
-					<td><input type="text" name="attrName" value="'.$rowAttribute['Name'].'" size="40"></td>
+					<td><input type="text" name="attrName" value="'.preg_replace('/\"/','',$rowAttribute['Name']).'" size="40"></td>
 					<td><B>&nbsp;</B> </td>
 					<td><input type="hidden" name="attrType" value="'.$rowAttribute['FK_AttributeType'].'"></td>
 				</tr>
@@ -218,15 +219,20 @@ function mainMediaBrowser($output,$mediadbADO,$dbADO) {
 		$name=stripslashes($_POST['attrName']);
 		$attrType=($_POST['attrType']!='0')?(int)$_POST['attrType']:NULL;
 		$attributeID=(int)$_POST['attributeID'];
+		$GLOBALS['attrType']=$attrType;
 		
 		if(!isset($_POST['merge'])){
 			$queryExistingAttribute='
-				SELECT Attribute.*, AttributeType.Description AS AttributeType
-				FROM Attribute 
-					INNER JOIN AttributeType ON FK_AttributeType=PK_AttributeType
+				SELECT Attribute.*, AttributeType.Description AS AttributeType,
+				FK_File, FK_Attribute,EK_MediaType, Path, Filename,PK_File, Missing
+				FROM Attribute
+				INNER JOIN AttributeType ON FK_AttributeType=PK_AttributeType
+				inner join File_Attribute fa on fa.FK_Attribute=Attribute.PK_Attribute
+				inner join `File` f on fa.FK_File=f.PK_File
 				WHERE Name=? AND FK_AttributeType=? AND PK_Attribute!=?';
 			$resExistingAttribute=$mediadbADO->Execute($queryExistingAttribute,array($name,$attrType,$attributeID));
-			if($resExistingAttribute->RecordCount()>0){
+			$total = $resExistingAttribute->RecordCount();
+			if($total>0){
 				$rowExistingAttribute=$resExistingAttribute->FetchRow();
 				$out.='
 					<form action="index.php" method="POST" name="mainMediaBrowser" enctype="multipart/form-data">
@@ -252,6 +258,24 @@ function mainMediaBrowser($output,$mediadbADO,$dbADO) {
 				</table>
 					</form>
 				';
+				$AttrIDs = $rowExistingAttribute['PK_Attribute'];
+						$out .=$TEXT_FOUND_CONST.': '.$total;
+						$out.='<table>
+					<tr class="tablehead">
+						<td align="center"><B>'.$TEXT_FILES_CONST.'</B></td>
+						<td align="center">&nbsp;</td>
+					</tr>';
+			$out .= multi_page_format($rowExistingAttribute,$index++,$mediadbADO);
+			while ($rowExistingAttribute = $resExistingAttribute->FetchRow()) {
+				  $out .= multi_page_format($rowExistingAttribute,$index++,$mediadbADO);
+			}
+
+			$out.='</td>
+				</tr>
+
+			</table>
+		';
+				
 				$dontRedirect=true;
 			}else{
 				$updateCmd=updateAttribute($name,$attributeID,$dbADO);
@@ -259,21 +283,34 @@ function mainMediaBrowser($output,$mediadbADO,$dbADO) {
 				
 		}else{
 			$existingAttributeID=(int)$_POST['existingAttributeID'];
-
+			$name=stripslashes($_POST['attrName']);
+			$attrType=($_POST['attrType']!='0')?(int)$_POST['attrType']:NULL;
+			$attributeID=(int)$_POST['attributeID'];
+			$queryExistingAttribute='
+				SELECT Attribute.*, AttributeType.Description AS AttributeType,
+				FK_File, FK_Attribute,EK_MediaType, Path, Filename,PK_File, Missing
+				FROM Attribute
+				INNER JOIN AttributeType ON FK_AttributeType=PK_AttributeType
+				inner join File_Attribute fa on fa.FK_Attribute=Attribute.PK_Attribute
+				inner join `File` f on fa.FK_File=f.PK_File
+				WHERE Name=? AND FK_AttributeType=? AND PK_Attribute!=?';
+			$resExistingAttribute=$mediadbADO->Execute($queryExistingAttribute,array($name,$attrType,$attributeID));
+			while ($row=$resExistingAttribute->FetchRow()){
+			
+			$existingAttributeID = $row[PK_Attribute];
 			// delete current attribute
 			$deleteCurrentAttribute='DELETE FROM Attribute WHERE PK_Attribute=?';
-			$mediadbADO->Execute($deleteCurrentAttribute,$attributeID);
+			$mediadbADO->Execute($deleteCurrentAttribute,$existingAttributeID);
 			
 			//	asign Files and Pictures from current attribute to existing one
 			$updateFileAttribute='UPDATE IGNORE File_Attribute SET FK_Attribute=? WHERE FK_Attribute=?';
-			$mediadbADO->Execute($updateFileAttribute,array($existingAttributeID,$attributeID));
+			$mediadbADO->Execute($updateFileAttribute,array($attributeID,$existingAttributeID));
 			
 			$updatePictureAttribute='UPDATE IGNORE Picture_Attribute SET FK_Attribute=? WHERE FK_Attribute=?';
-			$mediadbADO->Execute($updatePictureAttribute,array($existingAttributeID,$attributeID));
+			$mediadbADO->Execute($updatePictureAttribute,array($attributeID,$existingAttributeID));
 
-			// set return attribute to existing one
-			$attributeID=$existingAttributeID;
-
+			
+			}
 		}		
 
 		$newFile=stripslashes(@$_POST['newFile']);
