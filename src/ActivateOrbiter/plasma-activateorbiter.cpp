@@ -17,7 +17,6 @@
 #include "DCE/Logger.h"
 #include "DCE/ClientSocket.h"
 #include "pluto_main/Define_DeviceData.h"
-#include "Gen_Devices/AllCommandsRequests.h"
 #include "PlutoUtils/ProcessUtils.h"
 #include "PlutoUtils/FileUtils.h"
 #include "DB.h"
@@ -32,10 +31,6 @@ PlasmaActivateorbiter::PlasmaActivateorbiter(QObject *parent, const QVariantList
     m_icon = new Plasma::Icon (QString(), this);
     m_icon->setFlag(ItemIsMovable, false);
 
-    // DCE bits
-    m_pActivate_Orbiter_Plasmoid = NULL;
-    m_pAlarmManager = NULL;
-
 }
  
  
@@ -44,114 +39,34 @@ PlasmaActivateorbiter::~PlasmaActivateorbiter()
 
    AOdeinitialize();
 
-   delete m_pAlarmManager;
-   m_pAlarmManager = NULL;
-
-   closeDB();
+  closeDB();
 
 }
 
 bool PlasmaActivateorbiter::AOdeinitialize()
 {
-	if (m_pActivate_Orbiter_Plasmoid)
-	{
-		m_pActivate_Orbiter_Plasmoid->OnQuit();
-		pthread_join(m_pActivate_Orbiter_Plasmoid->m_RequestHandlerThread, NULL);
-		delete m_pActivate_Orbiter_Plasmoid;
-		m_pActivate_Orbiter_Plasmoid = NULL;
-		return true;
-	} else 
-	{
-		return false;
-	}
 
 }
 
 void PlasmaActivateorbiter::AODeviceKeepAlive() 
 {
-	bool bTerminate = m_pActivate_Orbiter_Plasmoid->m_bTerminate;
-	bool bReload = m_pActivate_Orbiter_Plasmoid->m_bReload;
-
-	if (m_pActivate_Orbiter_Plasmoid) 
-	{
-		if (bTerminate) 
-		{
-			// Check for a reload.
-			AOdeinitialize();
-			if (bReload)
-			{
-				// We need to reload
-				if (!AOinitialize()) 
-				{
-					// Add a trigger to retry in 5 seconds.
-					m_pAlarmManager->CancelAlarmByType(AO_KEEP_ALIVE);
-					m_pAlarmManager->AddRelativeAlarm(5,this,AO_KEEP_ALIVE,NULL);
-				} else 
-				{
-					// we're up, let's tell the router we're up.
-					reportDeviceUp();
-				}
-			} else 
-			{
-				// We DON'T need to reload.
-				m_pAlarmManager->CancelAlarmByType(AO_KEEP_ALIVE);
-			}
-
-		} else 
-		{
-			m_pAlarmManager->CancelAlarmByType(AO_KEEP_ALIVE);
-			m_pAlarmManager->AddRelativeAlarm(5,this,AO_KEEP_ALIVE,NULL);
-		}
-	}
 }
 
 void PlasmaActivateorbiter::reportDeviceUp()
 {
-	DCE::Message *pMessage = new DCE::Message(atoi(m_sDeviceID.c_str()), DEVICEID_DCEROUTER, DCE::PRIORITY_NORMAL, DCE::MESSAGETYPE_SYSCOMMAND, DCE::SYSCOMMAND_DEVICE_UP, 0);
-
-	if (m_pActivate_Orbiter_Plasmoid) 
-	{
-		m_pActivate_Orbiter_Plasmoid->QueueMessageToRouter(pMessage);
-	}
 }
 
 void PlasmaActivateorbiter::reportDeviceDown()
 {
-	DCE::Message *pMessage = new DCE::Message(atoi(m_sDeviceID.c_str()), DEVICEID_DCEROUTER, DCE::PRIORITY_NORMAL, DCE::MESSAGETYPE_SYSCOMMAND, DCE::SYSCOMMAND_DEVICE_DOWN, 0);
-
-	if (m_pActivate_Orbiter_Plasmoid)
-	{
-		m_pActivate_Orbiter_Plasmoid->QueueMessageToRouter(pMessage);
-	}
-
 }
 
 
 void PlasmaActivateorbiter::AlarmCallback(int id, void* param)
 {
-	if (id==AO_KEEP_ALIVE) {
-		AODeviceKeepAlive();
-	}
 }
 
 bool PlasmaActivateorbiter::AOinitialize()
 {
-
-    if (m_sCoreIP == "localhost")
-	    m_sCoreIP = "127.0.0.1";
-
-    m_pActivate_Orbiter_Plasmoid = new DCE::Activate_Orbiter_Plasmoid(atoi(m_sDeviceID.c_str()), m_sCoreIP, true, false);
-
-    bool bConnected = m_pActivate_Orbiter_Plasmoid->GetConfig();
-
-	m_pAlarmManager = new DCE::AlarmManager();
-	m_pAlarmManager->Start(2);	// work threads	
-
-
-    if (bConnected && m_pActivate_Orbiter_Plasmoid->Connect(m_pActivate_Orbiter_Plasmoid->PK_DeviceTemplate_get())) 
-    {
-	m_pAlarmManager->AddRelativeAlarm(5,this,AO_KEEP_ALIVE,NULL);
-    }
 
 }
 
@@ -181,24 +96,22 @@ void PlasmaActivateorbiter::AOReadConfig()
                 m_sCoreDeviceID = "1";
         }
 
-	string mdID;
-
        if (m_sDeviceID == m_sCoreDeviceID)
         {
-                mdID = m_dbPlutoDatabase.quickQuery("SELECT PK_Device FROM Device LEFT JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE FK_Device_ControlledVia=" + m_sDeviceID + " AND FK_DeviceCategory IN (8)");
+                m_sMDID = m_dbPlutoDatabase.quickQuery("SELECT PK_Device FROM Device LEFT JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE FK_Device_ControlledVia=" + m_sDeviceID + " AND FK_DeviceCategory IN (8)");
 
-                if (mdID != "")
+                if (m_sMDID != "")
                 {
                 }
         }
         else
         {
-                mdID = m_sDeviceID;
+                m_sMDID = m_sDeviceID;
         }
 
         if (m_sDeviceID!="")
         {
-                string localOrbiterID = m_dbPlutoDatabase.quickQuery("SELECT PK_Device FROM Device LEFT JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE FK_Device_ControlledVia=" + mdID + " AND FK_DeviceCategory IN (2, 3, 5)");
+                string localOrbiterID = m_dbPlutoDatabase.quickQuery("SELECT PK_Device FROM Device LEFT JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE FK_Device_ControlledVia=" + m_sMDID + " AND FK_DeviceCategory IN (2, 3, 5)");
                 m_sOrbiterID = localOrbiterID;
         }
 }
@@ -227,11 +140,7 @@ void PlasmaActivateorbiter::jumpToOrbiter(bool clicked)
 {
 	if (clicked)
 	{	
-		if (m_pActivate_Orbiter_Plasmoid)
-		{
-			DCE::CMD_Activate_PC_Desktop cmd(atoi(m_sDeviceID.c_str()), atoi(m_sOrbiterID.c_str()), 0);
-			m_pActivate_Orbiter_Plasmoid->SendCommandNoResponse(cmd);
-		}
+		string sMessageSendCmd = "/usr/pluto/bin/MessageSend localhost 0 "+m_sDeviceID+" 1 912 119 0";
 	}
 }
 

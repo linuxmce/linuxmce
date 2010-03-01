@@ -2,10 +2,11 @@
 #define DB_h
 //Simple  MySQL DB accessor class. Uses standard mysql library.
 //jondecker76
-#include "Activate_Orbiter_Plasmoid.h"
-#include "Gen_Devices/Activate_Orbiter_PlasmoidBase.h"
 #include <mysql.h>
 #include <vector>
+#include <string>
+
+using namespace std;
 
 class DBResult
 {

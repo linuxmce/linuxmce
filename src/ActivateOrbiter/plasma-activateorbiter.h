@@ -8,19 +8,19 @@
 #include <Plasma/Svg>
 #include "plasma/widgets/pushbutton.h"
 #include "plasma/widgets/icon.h" 
-#include "Activate_Orbiter_Plasmoid.h"
 #include "DB.h"
-#include "AlarmManager.h"
 // Defines
 #define PLUTO_CONFIG "/etc/pluto.conf"
 
 // Alarm Callbacks
 #define AO_KEEP_ALIVE 1
 
+using namespace std;
+
 class QSizeF;
  
 // Define our plasma Applet
-class PlasmaActivateorbiter : public Plasma::Applet, public DCE::AlarmEvent
+class PlasmaActivateorbiter : public Plasma::Applet
 {
     Q_OBJECT
     public:
@@ -34,9 +34,6 @@ class PlasmaActivateorbiter : public Plasma::Applet, public DCE::AlarmEvent
                 const QRect& contentsRect);
 	void init();
 
-	DCE::Activate_Orbiter_Plasmoid *m_pActivate_Orbiter_Plasmoid;
-	class DCE::AlarmManager *m_pAlarmManager;
-
 	bool AOinitialize();
 	bool AOdeinitialize();
 	void AODeviceKeepAlive();
@@ -48,7 +45,7 @@ class PlasmaActivateorbiter : public Plasma::Applet, public DCE::AlarmEvent
 	bool closeDB();
 	void AOReadConfig();
 
-	string m_sDeviceID, m_sCoreDeviceID, m_sOrbiterID, m_sCoreIP, m_sMySQLHost, m_sMySQLUser, m_sMySQLPass, m_sMySQLPort, m_sDCERouterPort;
+	string m_sDeviceID, m_sCoreDeviceID, m_sOrbiterID, m_sMDID, m_sCoreIP, m_sMySQLHost, m_sMySQLUser, m_sMySQLPass, m_sMySQLPort, m_sDCERouterPort;
 
         DB m_dbPlutoDatabase;
 	MYSQL m_mysqlMysql;
