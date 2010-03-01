@@ -8,7 +8,11 @@ function timedEvents($output,$dbADO) {
 	$out='';
 	$installationID = (int)@$_SESSION['installationID'];
 	$action = isset($_REQUEST['action'])?cleanString($_REQUEST['action']):'form';
+	$timedEventType = isset($_REQUEST['action'])?cleanString($_REQUEST['action']):'form';
 	$lastAction = isset($_REQUEST['lastAction'])?cleanString($_REQUEST['lastAction']):'';
+	if (!$lastAction && $action != "add") { //fix bug 618 - Timed Events adding new entries by itself
+	  $action="form";
+	}
 	$canModifyInstallation = getUserCanModifyInstallation($_SESSION['userID'],$installationID,$dbADO);
 	
 	if(isset($_REQUEST['dID']) && $_REQUEST['dID']!=0){
