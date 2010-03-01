@@ -432,6 +432,12 @@ switch ($section) {
 	    deleteRoomFromEntertainArea($output,$dbADO);	    
 	break;	 
 	//users_settings
+        case 'emailSetup':
+                $output = new Template($dbADO);
+                $output->setTemplateFileType('large');
+            include_once('operations/users_settings/emailSetup.php');
+            emailSetup($output,$dbADO);
+        break;
 	case 'installationSettings':
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('large');
