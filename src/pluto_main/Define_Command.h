@@ -973,6 +973,8 @@
 #define COMMAND_HDMI_cyclic_CONST 1071
 #define COMMAND_HOME_MEDIA_GALLERY_CONST 1072
 #define COMMAND_Trip_Unit_CONST 1073
+#define COMMAND_Subject_CONST 1074
+#define COMMAND_Send_Email_CONST 1075
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"
