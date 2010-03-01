@@ -189,7 +189,7 @@ bool DataLogger_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessa
 		// TODO: FIXME: I'm sure i need to free something here
 	}
 
-	return true;
+	return false;
 
 }
 
