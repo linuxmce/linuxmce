@@ -28836,5 +28836,65 @@ namespace DCE
 			COMMAND_Trip_Unit_CONST,
 			0 /* number of parameters */); }
 	};
+	class CMD_Subject : public PreformedCommand {
+	public:
+		CMD_Subject(long DeviceIDFrom, long DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+			COMMAND_Subject_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_Subject_DL : public PreformedCommand {
+	public:
+		CMD_Subject_DL(long DeviceIDFrom, string DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Subject_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_Subject_DT : public PreformedCommand {
+	public:
+		CMD_Subject_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Subject_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_Subject_Cat : public PreformedCommand {
+	public:
+		CMD_Subject_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Subject_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_Send_Email : public PreformedCommand {
+	public:
+		CMD_Send_Email(long DeviceIDFrom, long DeviceIDTo,string sTo,string sSubject,string sMessageBody) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+			COMMAND_Send_Email_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_To_CONST, sTo.c_str(),
+			COMMANDPARAMETER_Subject_CONST, sSubject.c_str(),
+			COMMANDPARAMETER_MessageBody_CONST, sMessageBody.c_str()); }
+	};
+	class CMD_Send_Email_DL : public PreformedCommand {
+	public:
+		CMD_Send_Email_DL(long DeviceIDFrom, string DeviceIDTo,string sTo,string sSubject,string sMessageBody) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Send_Email_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_To_CONST, sTo.c_str(),
+			COMMANDPARAMETER_Subject_CONST, sSubject.c_str(),
+			COMMANDPARAMETER_MessageBody_CONST, sMessageBody.c_str()); }
+	};
+	class CMD_Send_Email_DT : public PreformedCommand {
+	public:
+		CMD_Send_Email_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sTo,string sSubject,string sMessageBody) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Send_Email_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_To_CONST, sTo.c_str(),
+			COMMANDPARAMETER_Subject_CONST, sSubject.c_str(),
+			COMMANDPARAMETER_MessageBody_CONST, sMessageBody.c_str()); }
+	};
+	class CMD_Send_Email_Cat : public PreformedCommand {
+	public:
+		CMD_Send_Email_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sTo,string sSubject,string sMessageBody) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Send_Email_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_To_CONST, sTo.c_str(),
+			COMMANDPARAMETER_Subject_CONST, sSubject.c_str(),
+			COMMANDPARAMETER_MessageBody_CONST, sMessageBody.c_str()); }
+	};
 }
 #endif
