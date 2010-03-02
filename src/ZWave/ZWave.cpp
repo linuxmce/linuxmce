@@ -99,7 +99,7 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 //<-dceag-cmdch-e->
 {
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Received command for child");
-	string nodeInstance = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST).c_str();
+	string nodeInstance = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 	int node_id;
 	int instance_id;
 	if (nodeInstance.find("/") != string::npos) {
