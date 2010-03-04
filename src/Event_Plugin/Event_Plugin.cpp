@@ -85,7 +85,15 @@ bool Event_Plugin::GetConfig()
         m_bQuit_set(true);
         return false;
     }
+    m_pAlarmManager = new AlarmManager();
+    m_pAlarmManager->Start(2);      //4 = number of worker threads
 
+    Initialize();
+	return true;
+}
+
+void Event_Plugin::Initialize()
+{
 	Row_Installation *pRow_Installation = m_pDatabase_pluto_main->Installation_get()->GetRow( m_pRouter->iPK_Installation_get() );
 
 	vector<Row_Criteria *> vectRow_Criteria;
@@ -138,9 +146,7 @@ bool Event_Plugin::GetConfig()
 			pListEventHandler->push_back(pEventHandler);
 		}
 	}
-
-	m_pAlarmManager = new AlarmManager();
-    m_pAlarmManager->Start(2);      //4 = number of worker threads
+	m_pAlarmManager->Clear();
 
 	PLUTO_SAFETY_LOCK(em,m_EventMutex);
 	m_fLongitude = DATA_Get_Longitude();
@@ -160,7 +166,6 @@ bool Event_Plugin::GetConfig()
 		SetFirstSunriseSunset();
 	
 	SetNextTimedEventCallback();
-	return true;
 }
 
 //<-dceag-const2-b->!
@@ -207,6 +212,11 @@ Event_Plugin::~Event_Plugin()
 	delete m_pDatabase_pluto_main;
 	m_pDatabase_pluto_main = NULL;
 
+	DeleteMembers();
+}
+
+void Event_Plugin::DeleteMembers()
+{
 	for(map<int,ListEventHandler *>::iterator it = m_mapListEventHandler.begin(), end =
 		m_mapListEventHandler.end(); it != end; ++it)
 	{
@@ -220,9 +230,16 @@ Event_Plugin::~Event_Plugin()
 	}
 	m_mapListEventHandler.clear();	
 
+	for(map<int,TimedEvent *>::iterator it = m_mapTimedEvent.begin(), end =
+		m_mapTimedEvent.end(); it != end; ++it)
+	{
+	  delete it->second;
+	}
+	
 	for(map<int,Criteria *>::iterator itc = m_mapCriteria.begin(), endc = m_mapCriteria.end(); itc != endc; ++itc)
 		delete itc->second;
 	m_mapCriteria.clear();
+
 }
 
 void Event_Plugin::PrepareToDelete()
@@ -294,7 +311,7 @@ void Event_Plugin::GetHouseModes() {
 	} else {
 	        PK_SecurityPlugin = mapDevices.begin()->first;
 	}
-	
+
 	Row_Device_DeviceData *pRow_Device_DeviceData =
 	        m_pDatabase_pluto_main->Device_DeviceData_get()->GetRow(PK_SecurityPlugin,DEVICEDATA_Configuration_CONST);
 	if( !pRow_Device_DeviceData )
@@ -315,6 +332,7 @@ void Event_Plugin::GetHouseModes() {
 
 bool Event_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessage,class DeviceData_Base *pDeviceFrom,class DeviceData_Base *pDeviceTo)
 {
+	PLUTO_SAFETY_LOCK(em,m_EventMutex);
 	ListEventHandler *pListEventHandler = m_mapListEventHandler_Find(pMessage->m_dwID);
 	if( pListEventHandler==NULL ) // No handlers for this type of event
 	{
@@ -621,4 +639,19 @@ void Event_Plugin::FireSunriseSunsetEvent()
 
 	m_pAlarmManager->AddAbsoluteAlarm( m_tNextSunriseSunset, this, ALARM_SUNRISE_SUNSET, NULL );
 
+}
+//<-dceag-c757-b->
+
+	/** @brief COMMAND: #757 - Download Configuration */
+	/** Request event plugint to reload its configuration */
+		/** @param #9 Text */
+			/** Any information the device may want to do the download */
+
+void Event_Plugin::CMD_Download_Configuration(string sText,string &sCMD_Result,Message *pMessage)
+//<-dceag-c757-e->
+{
+	PLUTO_SAFETY_LOCK(em,m_EventMutex);
+	DeleteMembers();
+	Initialize();
+	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Event_Plugin::CMD_Download_Configuration() : Done");
 }

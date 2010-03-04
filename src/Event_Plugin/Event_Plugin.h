@@ -63,6 +63,8 @@ namespace DCE
 
 		// Private methods
 		void GetHouseModes();
+		void DeleteMembers();
+		void Initialize();
 public:
 		// Public member variables
 
@@ -120,6 +122,14 @@ public:
 	virtual void CMD_Toggle_Event_Handler(int iPK_EventHandler) { string sCMD_Result; CMD_Toggle_Event_Handler(iPK_EventHandler,sCMD_Result,NULL);};
 	virtual void CMD_Toggle_Event_Handler(int iPK_EventHandler,string &sCMD_Result,Message *pMessage);
 
+
+	/** @brief COMMAND: #757 - Download Configuration */
+	/** Request event plugint to reload its configuration */
+		/** @param #9 Text */
+			/** Any information the device may want to do the download */
+
+	virtual void CMD_Download_Configuration(string sText) { string sCMD_Result; CMD_Download_Configuration(sText.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Download_Configuration(string sText,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
 	};
