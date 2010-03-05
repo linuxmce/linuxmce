@@ -122,6 +122,7 @@ void Event_Plugin::Initialize()
 #ifdef DEBUG
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Adding timed event %d",pRow_EventHandler->PK_EventHandler_get());
 #endif
+			// TODO: as the commands are kept in the router itself, we wont get the most up to date values using this approach
 			pTimedEvent->m_pCommandGroup = m_pRouter->m_mapCommandGroup_Find(pRow_EventHandler->FK_CommandGroup_get());
 			if( !pTimedEvent->m_pCommandGroup )
 			{
@@ -233,8 +234,9 @@ void Event_Plugin::DeleteMembers()
 	for(map<int,TimedEvent *>::iterator it = m_mapTimedEvent.begin(), end =
 		m_mapTimedEvent.end(); it != end; ++it)
 	{
-	  delete it->second;
+	        delete it->second;
 	}
+	m_mapTimedEvent.clear();
 	
 	for(map<int,Criteria *>::iterator itc = m_mapCriteria.begin(), endc = m_mapCriteria.end(); itc != endc; ++itc)
 		delete itc->second;
