@@ -28,7 +28,6 @@ function mainMediaBrowser($output,$mediadbADO,$dbADO) {
 			unset($_SESSION['mediaSearchString']);
 		}else
 			$searchString='%'.@$_SESSION['mediaSearchString'].'%';
-		
 		if(count($checkedTypes)>0){
 			$_SESSION['searchString']=$searchString;
 			$_SESSION['checkedTypes']=join(',',$checkedTypes);
@@ -81,7 +80,7 @@ function mainMediaBrowser($output,$mediadbADO,$dbADO) {
 						SELECT Attribute.*, AttributeType.Description AS AttrType 
 							FROM Attribute 
 						INNER JOIN AttributeType ON FK_AttributeType=PK_AttributeType
-						WHERE (Name REGEXP '^[0-9|\"|\']') AND FK_AttributeType IN (".$_SESSION['checkedTypes'].") 
+						WHERE (Name REGEXP '^[^a-zA-Z]') AND FK_AttributeType IN (".$_SESSION['checkedTypes'].") 
 						ORDER BY Name ASC";
 				$resSearch=$mediadbADO->Execute($querySearch);
 			}
