@@ -308,9 +308,10 @@ function mainMediaBrowser($output,$mediadbADO,$dbADO) {
 			
 			$updatePictureAttribute='UPDATE IGNORE Picture_Attribute SET FK_Attribute=? WHERE FK_Attribute=?';
 			$mediadbADO->Execute($updatePictureAttribute,array($attributeID,$existingAttributeID));
-
-			
 			}
+		#update the merged attribute (if required)
+		$queryUpdateAttribute = "UPDATE Attribute set Name=? where PK_Attribute=?";
+		$mediadbADO->Execute($queryUpdateAttribute,array($name,$attributeID));
 		}		
 
 		$newFile=stripslashes(@$_POST['newFile']);
