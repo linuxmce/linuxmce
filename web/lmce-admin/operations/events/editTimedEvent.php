@@ -3,6 +3,7 @@ function editTimedEvent($output,$dbADO) {
 	// include language files
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/timedEvents.lang.php');
+	include('eventUtils.inc.php');
 		
 	/* @var $dbADO ADOConnection */
 	$out='';
@@ -40,6 +41,8 @@ function editTimedEvent($output,$dbADO) {
 		$deleteParamValues = 'DELETE FROM CommandGroup_Command_CommandParameter WHERE FK_CommandGroup_Command = ?';
 		$dbADO->Execute($deleteParamValues,$objID);
 		
+		reloadEventPlugin($installationID, $dbADO);
+
 		$_REQUEST['msg']=$TEXT_COMMAND_DELETED_NOTIFICATION_CONST;
 	}
 	
@@ -401,6 +404,8 @@ function editTimedEvent($output,$dbADO) {
 			break;	
 		}
 	
+		reloadEventPlugin($installationID, $dbADO);
+
 		setOrbitersNeedConfigure($installationID,$dbADO);
 		if($wizard!=$oldWizard){
 			if((int)@$_REQUEST['addNewDevice']!=0)

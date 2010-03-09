@@ -3,6 +3,7 @@ function respondToEvents($output,$dbADO) {
 	// include language file
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/respondToEvents.lang.php');
+	include('eventUtils.inc.php');
 	
 	/* @var $dbADO ADOConnection */
 	$out='';
@@ -41,6 +42,7 @@ function respondToEvents($output,$dbADO) {
 			$dbADO->Execute($deleteEventHandler,$eventHandlerID);
 			
 			$_REQUEST['msg']='The event handler was deleted.';
+			reloadEventPlugin($installationID, $dbADO);
 		}
 	}
 	if ($action=='form') {
@@ -159,6 +161,7 @@ function respondToEvents($output,$dbADO) {
 			SELECT '$description',$criteriaID,$installationID,$cgID,$cannedEvent,FK_Event FROM CannedEvents WHERE PK_CannedEvents=?";
 		$dbADO->Execute($insertEventHandler,$cannedEvent);
 		$ehID=$dbADO->Insert_ID();
+		reloadEventPlugin($installationID, $dbADO);
 		header("Location: index.php?section=editRespondToEvent&ehID=".$ehID);
 	}
 

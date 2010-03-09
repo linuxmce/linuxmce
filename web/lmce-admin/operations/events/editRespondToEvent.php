@@ -3,6 +3,7 @@ function editRespondToEvent($output,$dbADO) {
 	// include language files
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/editRespondToEvent.lang.php');
+	include('eventUtils.inc.php');
 	
 	/* @var $dbADO ADOConnection */
 	$out='';
@@ -37,7 +38,9 @@ function editRespondToEvent($output,$dbADO) {
 
 		$deleteParamValues = 'DELETE FROM CommandGroup_Command_CommandParameter WHERE FK_CommandGroup_Command = ?';
 		$dbADO->Execute($deleteParamValues,$objID);
-		
+
+		reloadEventPlugin($installationID, $dbADO);
+
 		$_REQUEST['msg']='The command was deleted from the command group.';
 	}
 	
@@ -291,6 +294,8 @@ function editRespondToEvent($output,$dbADO) {
 			break;	
 		}
 	
+		reloadEventPlugin($installationID, $dbADO);
+
 		setOrbitersNeedConfigure($installationID,$dbADO);
 		if((int)@$_REQUEST['addNewDevice']!=0)
 			$sufix='&addNewDevice='.(int)@$_REQUEST['addNewDevice'];

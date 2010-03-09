@@ -3,6 +3,7 @@ function editCriteria($output,$dbADO) {
 	// include language files
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/editCriteria.lang.php');
+	include('eventUtils.inc.php');
 	
 	/* @var $dbADO ADOConnection */
 	$out='';
@@ -76,6 +77,7 @@ function editCriteria($output,$dbADO) {
 		if(isset($_GET['dcpID'])){
 			$dcpID=$_GET['dcpID'];
 			$dbADO->Execute('DELETE FROM CriteriaParm WHERE PK_CriteriaParm=?',$dcpID);
+			reloadEventPlugin($installationID, $dbADO);
 			header('Location: index.php?section=editCriteria&ehID='.$eventHandlerID.'&msg='.urlencode($TEXT_CRITERIA_DELETED_CONST));
 			exit();
 		}
@@ -103,6 +105,7 @@ function editCriteria($output,$dbADO) {
 				$value=@$_POST['CriteriaParmValue_'.$cpID];
 				$dbADO->Execute('UPDATE CriteriaParm SET Operator=?, Value=? WHERE PK_CriteriaParm=?',array($operator,$value,$cpID));
 			}
+			reloadEventPlugin($installationID, $dbADO);
 		}
 
 		

@@ -3,6 +3,7 @@ function advancedEvents($output,$dbADO) {
 	// include language files
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/advancedEvents.lang.php');
+	include('eventUtils.inc.php');
 		
 	/* @var $dbADO ADOConnection */
 	$out='';
@@ -42,6 +43,8 @@ function advancedEvents($output,$dbADO) {
 			
 			$deleteEventHandler='DELETE FROM EventHandler WHERE PK_EventHandler=?';
 			$dbADO->Execute($deleteEventHandler,$eventHandlerID);
+
+			reloadEventPlugin($installationID, $dbADO);
 			
 			$_REQUEST['msg']=$TEXT_THE_EVENT_WAS_DELETED_CONST;
 		}
@@ -127,6 +130,8 @@ function advancedEvents($output,$dbADO) {
 			$dbADO->Execute('UPDATE EventHandler SET Description=? WHERE PK_EventHandler=?',array($description,$ehID));
 		}
 		
+		reloadEventPlugin($installationID, $dbADO);
+
 		header("Location: index.php?section=advancedEvents&msg=$TEXT_THE_EVENT_DESCRIPTION_WAS_UPDATED_CONST");
 	}
 

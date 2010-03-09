@@ -3,6 +3,7 @@ function timedEvents($output,$dbADO) {
 	// include language files
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/timedEvents.lang.php');
+	include('eventUtils.inc.php');
 	
 	/* @var $dbADO ADOConnection */
 	$out='';
@@ -45,6 +46,7 @@ function timedEvents($output,$dbADO) {
 			$dbADO->Execute($deleteEventHandler,$eventHandlerID);
 			
 			$_REQUEST['msg']=$TEXT_DELETE_EVENT_NOTIFICATION_CONST;
+			reloadEventPlugin($installationID, $dbADO);
 		}
 	}
 	if ($action=='form') {
@@ -153,6 +155,7 @@ function timedEvents($output,$dbADO) {
 				(?,?,?,?,?,?,?) ";
 		$dbADO->Execute($insertEventHandler,array($description,$criteriaID,$installationID,$cgID,NULL,NULL,$timedEventType));
 		$ehID=$dbADO->Insert_ID();
+		reloadEventPlugin($installationID, $dbADO);
 		header("Location: index.php?section=editTimedEvent&ehID=".$ehID);
 	}
 
