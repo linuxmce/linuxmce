@@ -2753,7 +2753,13 @@ void Orbiter::QueueEventForProcessing( void *eventData )
 			spEvent->type, spEvent->data.button.m_iPK_Button, spEvent->data.button.m_iKeycode, (int) spEvent->data.button.m_bSimulated);
 #endif
 
-	map< pair<int,int>,pair<int,int> >::iterator it = m_mapEventToSubstitute.find( make_pair<int,int> (spEvent->type,spEvent->data.button.m_iKeycode) );
+	// For mouse events, use mouse button id (m_iButton)
+	int iButton = spEvent->data.button.m_iKeycode;
+	if (spEvent->type == Orbiter::Event::REGION_DOWN || spEvent->type == Orbiter::Event::REGION_UP)
+	{
+	        iButton = spEvent->data.region.m_iButton;
+	}
+	map< pair<int,int>,pair<int,int> >::iterator it = m_mapEventToSubstitute.find( make_pair<int,int> (spEvent->type,iButton) );
 	if( it!=m_mapEventToSubstitute.end() )
 	{
 		spEvent->type = (DCE::Orbiter::Event::EventType) it->second.first;
