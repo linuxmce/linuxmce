@@ -75,7 +75,7 @@
 				$fk_package=307;
 			}
 			
-			$publicADO->Execute('INSERT INTO DeviceTemplate (Description,FK_DeviceCategory,FK_Manufacturer,psc_user,ImplementsDCE,CommandLine,FK_Package,FK_CommMethod) values(?,?,?,?,?,?,?,?)',array($description,$dcID,$mID,$userID,$implementDCE,$commandLine,$fk_package,$_SESSION['selectedCommMethod']));
+			$publicADO->Execute('INSERT INTO DeviceTemplate (Description,FK_DeviceCategory,FK_Manufacturer,psc_user,ImplementsDCE,CommandLine,FK_Package,FK_CommMethod,Define) values(?,?,?,?,?,?,?,?,"")',array($description,$dcID,$mID,$userID,$implementDCE,$commandLine,$fk_package,$_SESSION['selectedCommMethod']));
 			$dtID=$publicADO->Insert_ID();
 			
 			// add record to DeviceTemplate_AV

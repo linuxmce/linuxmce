@@ -4181,7 +4181,7 @@ function pickDeviceTemplate_old($categoryID, $boolManufacturer,$boolCategory,$bo
 			 	
 			 	if ($DeviceTemplate_Desc!='') {
 			 		if ($deviceSelected!=0 && $manufacturerSelected!=0) {	 			
-			 			$queryInsertMasterDevice = 'INSERT INTO DeviceTemplate (Description,FK_DeviceCategory,FK_Manufacturer) values(?,?,?)';
+			 			$queryInsertMasterDevice = 'INSERT INTO DeviceTemplate (Description,FK_DeviceCategory,FK_Manufacturer,Define) values(?,?,?,"")';
 			 			$res = $dbADO->Execute($queryInsertMasterDevice,array($DeviceTemplate_Desc,$deviceSelected,$manufacturerSelected));	 			
 			 			$dtID=$dbADO->Insert_ID();
 
@@ -4446,9 +4446,9 @@ function formatCode($section,$dataArray,$pos,$infraredGroupID,$dtID,$deviceID){
 function createEmbeddedDeviceTemplate($name,$manufacturer,$deviceCategory,$userID,$parentID,$commandID,$mediaType,$publicADO){
 	$publicADO->Execute('
 		INSERT INTO DeviceTemplate 
-			(Description,FK_Manufacturer,FK_DeviceCategory) 
+			(Description,FK_Manufacturer,FK_DeviceCategory,Define) 
 		VALUES 
-			(?,?,?)',
+			(?,?,?,"")',
 	array($name,$manufacturer,$deviceCategory));
 	$embeddedID=$publicADO->Insert_ID();
 

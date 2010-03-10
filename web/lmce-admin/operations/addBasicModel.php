@@ -123,7 +123,7 @@
 		}
 		
 		if($dcID!=0 && $mID!=0 && $description!=''){
-			$publicADO->Execute('INSERT INTO DeviceTemplate (Description,FK_DeviceCategory,FK_Manufacturer,psc_user,ImplementsDCE,CommandLine,FK_Package) values(?,?,?,?,?,?,?)',array($description,$dcID,$mID,$userID,$implementDCE,$commandLine,$fk_package));
+			$publicADO->Execute('INSERT INTO DeviceTemplate (Description,FK_DeviceCategory,FK_Manufacturer,psc_user,ImplementsDCE,CommandLine,FK_Package,Define) values(?,?,?,?,?,?,?,"")',array($description,$dcID,$mID,$userID,$implementDCE,$commandLine,$fk_package));
 			$dtID=$publicADO->Insert_ID();
 			
 			if($dtID>0 && isset($addInstance)){
