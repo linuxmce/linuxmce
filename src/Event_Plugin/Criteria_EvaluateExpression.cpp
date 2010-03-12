@@ -129,7 +129,7 @@ bool Criteria::EvaluateExpression(class CriteriaParm *pCriteriaParm,class EventI
 			        Row_EventParameter* eventParameter = pRouter->GetDatabase()->EventParameter_get()->GetRow(PK_EventParameter);
 				PK_ParameterType = eventParameter->FK_ParameterType_get();
 				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Criteria::EvaluateExpression parameterType %d", PK_ParameterType);
-				if (PK_ParameterType == PARAMETERTYPE_int_CONST)
+				if (PK_ParameterType == PARAMETERTYPE_int_CONST || PK_ParameterType == PARAMETERTYPE_bool_CONST)
 				{
 				        iTmp = (unsigned long)atoi(sLValue->c_str());
 					iLValue = &iTmp;
