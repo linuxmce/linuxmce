@@ -1,0 +1,123 @@
+/*
+     Copyright (C) 2010 LinuxMCE
+
+     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+     of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+     See the GNU General Public License for more details.
+
+*/
+#include "PictureCanvas.h"
+#include "DCE/Logger.h"
+
+#include "SDL.h"
+
+using namespace DCE;
+using namespace std;
+
+PictureCanvas::PictureCanvas()
+{
+        m_iScreenWidth = 0;
+	m_iScreenHeight = 0;
+	quit = false;
+}
+
+PictureCanvas::~PictureCanvas()
+{
+        Shutdown();
+}
+
+bool PictureCanvas::Setup(int width, int height, string sWindowName)
+{
+        m_iScreenWidth = width;
+	m_iScreenHeight = height;
+        if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+	        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "PictureCanvas::Setup() Unable to set up SDL video : %s", SDL_GetError());
+		return false;
+	}
+
+	screen = SDL_SetVideoMode(m_iScreenWidth, m_iScreenHeight, 24, SDL_DOUBLEBUF | SDL_SWSURFACE /*| SDL_FULLSCREEN*/);
+	if (screen == NULL) {
+	        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "PictureCanvas::Setup() Unable to create video screen : %s", SDL_GetError());
+		return false;
+	}
+	SDL_WM_SetCaption(sWindowName.c_str(), sWindowName.c_str());
+
+	pthread_create(&ThreadID, NULL, PictureCanvasEventThread, this);
+	return true;
+}
+
+void *PictureCanvasEventThread(void* pCanvas)
+{
+        SDL_Event event;
+	bool quit = false;
+	while (!quit && !((PictureCanvas*)pCanvas)->Quit()) {
+	    while (SDL_WaitEvent(&event)) {
+		switch (event.type)
+		  {
+		  case SDL_VIDEOEXPOSE:
+		    break;
+		  case SDL_QUIT:
+		    quit = true;
+		    break;
+		  }
+	    }
+	}
+	return 0;
+}
+
+void PictureCanvas::Shutdown()
+{
+	quit = true;
+        SDL_Quit();
+}
+
+bool PictureCanvas::Quit() {
+        return quit;
+}
+
+void PictureCanvas::Clear()
+{
+        SDL_Rect rect;
+	rect.x = 0;
+	rect.y = 0;
+	rect.w = m_iScreenWidth;
+	rect.h = m_iScreenHeight;
+	SDL_FillRect(screen, &rect, 0);
+}
+
+void PictureCanvas::Paint(SDL_Surface *surface, SDL_Rect *source, SDL_Rect *dest)
+{
+        SDL_BlitSurface(surface, source, screen, dest);
+}
+
+void PictureCanvas::PaintPicture(Picture *pPicture)
+{
+        pThisPicture = pPicture;
+        SDL_Surface *picture = pPicture->GetSurface();
+	if (!picture)
+	        return;
+	// get the zoomed picture and display it in the center of the screen
+	SDL_Rect rect;
+	rect.w = m_iScreenWidth;
+	rect.h = m_iScreenHeight;
+	pPicture->GetViewRect(&rect);
+	
+	SDL_Rect dest;
+	dest.x = 0;
+	dest.y = 0;
+	Paint(picture, &rect, &dest);
+}
+
+void PictureCanvas::Update() {
+        SDL_Flip(screen);
+}
+
+int PictureCanvas::GetHeight() {
+        return m_iScreenHeight;
+}
+
+int PictureCanvas::GetWidth() {
+        return m_iScreenWidth;
+}
