@@ -21,7 +21,7 @@ sources = Main.cpp Picture_Viewer.cpp $(Gen_Dev_Files)
 
 CXXFLAGS +=
 CPPFLAGS += -I/usr/include/SDL -I/usr/include/exiv2
-LDFLAGS += -lGL -lGLU -lSDL -lSDL_image -lSDL_ttf -lXrender -lglib-2.0 -lXmu -lSDL_gfx -lexiv2
+LDFLAGS += -lSDL -lSDL_image -lXrender -lglib-2.0 -lXmu -lSDL_gfx -lexiv2
 XTRALDLIBS = -lmysqlclient_r
 
 Gen_Dev_Files +=

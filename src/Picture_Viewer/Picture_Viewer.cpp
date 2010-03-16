@@ -227,7 +227,7 @@ void Picture_Viewer::SetupPictureCanvas()
 void Picture_Viewer::AlarmCallback(int id, void* param) {
         if (id == 1) {
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Picture_Viewer::AlarmCallback() Timer expired");
-	        Event_Playback_Completed("", 0, false);
+	        EVENT_Playback_Completed("", 0, false);
 	}
 }
 
