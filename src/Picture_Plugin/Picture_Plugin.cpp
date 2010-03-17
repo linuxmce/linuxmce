@@ -32,7 +32,9 @@ using namespace DCE;
 Picture_Plugin::Picture_Plugin(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
 	: Picture_Plugin_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
+	, m_PicturePluginMutex("picture plugin mutex")
 {
+	m_PicturePluginMutex.Init(NULL);
 }
 
 //<-dceag-const2-b->
@@ -40,7 +42,9 @@ Picture_Plugin::Picture_Plugin(int DeviceID, string ServerAddress,bool bConnectE
 Picture_Plugin::Picture_Plugin(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
 	: Picture_Plugin_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
 //<-dceag-const2-e->
+	, m_PicturePluginMutex("picture plugin mutex")
 {
+        m_PicturePluginMutex.Init(NULL);
 }
 
 //<-dceag-dest-b->
@@ -67,6 +71,19 @@ bool Picture_Plugin::GetConfig()
 bool Picture_Plugin::Register()
 //<-dceag-reg-e->
 {
+	m_pMedia_Plugin=( Media_Plugin * ) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
+	m_pOrbiter_Plugin=( Orbiter_Plugin * ) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Orbiter_Plugin_CONST);
+	if( !m_pMedia_Plugin || !m_pOrbiter_Plugin )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Cannot find sister plugins to picture plugin");
+		return false;
+	}
+
+	vector<int> vectPK_DeviceTemplate;
+	vectPK_DeviceTemplate.push_back(DEVICETEMPLATE_Picture_Viewer_CONST);
+	m_pMedia_Plugin->RegisterMediaPlugin( this, this, vectPK_DeviceTemplate, true );
+
+	RegisterMsgInterceptor(( MessageInterceptorFn )( &Picture_Plugin::MenuOnScreen ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Menu_Onscreen_CONST );
 	return Connect(PK_DeviceTemplate_get()); 
 }
 
@@ -105,6 +122,195 @@ void Picture_Plugin::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessag
 //<-dceag-cmduk-e->
 {
 	sCMD_Result = "UNKNOWN COMMAND";
+}
+
+MediaStream *Picture_Plugin::CreateMediaStream( class MediaHandlerInfo *pMediaHandlerInfo, int iPK_MediaProvider, vector<class EntertainArea *> &vectEntertainArea, MediaDevice *pMediaDevice, int iPK_Users, deque<MediaFile *> *dequeFilenames, int StreamID )
+{
+	MediaDevice *pMediaDevice_PassedIn;
+	PLUTO_SAFETY_LOCK( xm, m_PicturePluginMutex );
+
+	if(m_bQuit_get())
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Picture_Plugin::CreateMediaStream with m_bQuit");
+		return NULL;
+	}
+
+	PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
+
+	pMediaDevice_PassedIn = NULL;
+	if ( vectEntertainArea.size()==0 && pMediaDevice == NULL )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "I can't create a media stream without an entertainment area or a media device");
+		return NULL;
+	}
+
+	if ( pMediaDevice != NULL  && // test the media device only if it set
+		 pMediaDevice->m_pDeviceData_Router->m_dwPK_DeviceTemplate != DEVICETEMPLATE_Picture_Viewer_CONST)
+	{
+		pMediaDevice_PassedIn = pMediaDevice;
+		pMediaDevice = m_pMedia_Plugin->m_mapMediaDevice_Find(m_pRouter->FindClosestRelative(DEVICETEMPLATE_Picture_Viewer_CONST, pMediaDevice->m_pDeviceData_Router->m_dwPK_Device));
+	}
+
+	if ( !pMediaDevice )
+	{
+		for(size_t s=0;s<vectEntertainArea.size();++s)
+		{
+			EntertainArea *pEntertainArea = vectEntertainArea[0];
+			pMediaDevice = FindMediaDeviceForEntertainArea(pEntertainArea);
+			if( pMediaDevice )
+				break;
+		}
+		if( !pMediaDevice )
+		{
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "I didn't find a device in the target ent area.");
+			return NULL;
+		}
+	}
+
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Selected device (%d: %s) as playback device!",
+			pMediaDevice->m_pDeviceData_Router->m_dwPK_Device,
+			pMediaDevice->m_pDeviceData_Router->m_sDescription.c_str());
+
+	MediaStream *pMediaStream = new MediaStream( pMediaHandlerInfo,iPK_MediaProvider,
+							pMediaDevice,
+							iPK_Users, st_RemovableMedia, StreamID );
+
+	// if the source device is a disk drive then we can't move this media stream around.
+	if ( pMediaDevice_PassedIn && pMediaDevice_PassedIn->m_pDeviceData_Router->m_dwPK_DeviceTemplate == DEVICETEMPLATE_Disk_Drive_CONST )
+		pMediaStream->setIsMovable(false);
+
+	m_mapDevicesToStreams[pMediaDevice->m_pDeviceData_Router->m_dwPK_Device] = StreamID;
+
+	return pMediaStream;
+
+}
+
+bool Picture_Plugin::StartMedia( class MediaStream *pMediaStream,string &sError )
+{
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"StartMedia Called");
+ 
+	PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
+ 
+	LoggerWrapper::GetInstance()->Write( LV_STATUS, "Picture_PlugIn::StartMedia() Starting media stream playback. pos: %d", pMediaStream->m_iDequeMediaFile_Pos );
+ 
+	string sFileToPlay;
+
+	sFileToPlay = pMediaStream->GetFilenameToPlay("Empty file name");
+ 
+	LoggerWrapper::GetInstance()->Write( LV_STATUS, "Picture_PlugIn::StartMedia() Media type %d %s", pMediaStream->m_iPK_MediaType, sFileToPlay.c_str());
+ 
+	string mediaURL;
+	string Response;
+ 
+	mediaURL = sFileToPlay;
+
+	DCE::CMD_Play_Media CMD_Play_Media(m_dwPK_Device,
+						pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
+						pMediaStream->m_iPK_MediaType,
+						pMediaStream->m_iStreamID_get( ),
+						"00:00:00",mediaURL);
+	SendCommand(CMD_Play_Media);
+
+	/** We're going to send a message to all the orbiters in this area so they know what the remote is,
+	and we will send all bound remotes to the new screen */
+	for( MapEntertainArea::iterator itEA = pMediaStream->m_mapEntertainArea.begin( );itEA != pMediaStream->m_mapEntertainArea.end( );++itEA )
+	{
+		EntertainArea *pEntertainArea = ( *itEA ).second;
+		LoggerWrapper::GetInstance()->Write( LV_STATUS, "Looking into the ent area (%p) with id %d and %d remotes", pEntertainArea, pEntertainArea->m_iPK_EntertainArea, (int) pEntertainArea->m_mapBoundRemote.size() );
+        for(map<int,OH_Orbiter *>::iterator it=m_pOrbiter_Plugin->m_mapOH_Orbiter.begin();it!=m_pOrbiter_Plugin->m_mapOH_Orbiter.end();++it)
+        {
+            OH_Orbiter *pOH_Orbiter = (*it).second;
+			if( pOH_Orbiter->m_pEntertainArea!=pEntertainArea )
+				continue;
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Processing remote: for orbiter: %d", pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device);
+			bool bBound = pEntertainArea->m_mapBoundRemote.find(pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device)!=pEntertainArea->m_mapBoundRemote.end();
+			pMediaStream->SetNowPlaying(pOH_Orbiter,false,bBound);
+		}
+	}
+
+	return MediaHandlerBase::StartMedia(pMediaStream,sError);
+
+}
+
+bool Picture_Plugin::StopMedia( class MediaStream *pMediaStream )
+{
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"StopMedia Called");
+	PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
+ 
+	map<int, int>::iterator it = m_mapDevicesToStreams.find(pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device);
+	if( it!=m_mapDevicesToStreams.end() )
+	        m_mapDevicesToStreams.erase(it);
+
+	LoggerWrapper::GetInstance()->Write( LV_STATUS, "Picture_Plugin::StopMedia() Stopping Media Stream Playback... Pos: %d", pMediaStream->m_iDequeMediaFile_Pos );
+ 
+	string savedPosition;
+ 
+	DCE::CMD_Stop_Media CMD_Stop_Media(m_dwPK_Device,
+						pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
+						pMediaStream->m_iStreamID_get(),
+						&savedPosition);
+ 
+	SendCommand(CMD_Stop_Media);
+ 
+	return MediaHandlerBase::StopMedia(pMediaStream);
+}
+
+MediaDevice *Picture_Plugin::FindMediaDeviceForEntertainArea(EntertainArea *pEntertainArea)
+{
+	PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
+ 
+	MediaDevice *pMediaDevice;
+	pMediaDevice = GetMediaDeviceForEntertainArea(pEntertainArea, DEVICETEMPLATE_Picture_Viewer_CONST);
+ 
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Looking for a proper device in the ent area %d (%s)", pEntertainArea->m_iPK_EntertainArea, pEntertainArea->m_sDescription.c_str());
+	if ( pMediaDevice == NULL )
+	{
+		return NULL;
+	}
+ 
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Returning this device %d (%s)", pMediaDevice->m_pDeviceData_Router->m_dwPK_Device, pMediaDevice->m_pDeviceData_Router->m_sDescription.c_str());
+ 
+	return pMediaDevice;
+}
+
+bool Picture_Plugin::MenuOnScreen( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo )
+{
+	PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
+
+	/** Confirm this is from one of ours */
+	if( !pDeviceFrom || pDeviceFrom->m_dwPK_DeviceTemplate != DEVICETEMPLATE_Picture_Viewer_CONST )
+		return false; 
+
+	int StreamID = atoi( pMessage->m_mapParameters[EVENTPARAMETER_Stream_ID_CONST].c_str( ) );
+	bool bOnOff = pMessage->m_mapParameters[EVENTPARAMETER_OnOff_CONST]=="1";
+
+	/** Find the stream */
+	MediaStream *pMediaStream = m_pMedia_Plugin->m_mapMediaStream_Find( StreamID,pMessage->m_dwPK_Device_From );
+	
+	pMediaStream->m_bUseAltScreens=bOnOff;
+
+	LoggerWrapper::GetInstance()->Write( LV_STATUS, "MediaStream %p with id %d and type %d reached an OnScreen Menu.", pMediaStream, pMediaStream->m_iStreamID_get( ), pMediaStream->m_iPK_MediaType );
+	LoggerWrapper::GetInstance()->Write( LV_STATUS, "MediaStream m_mapEntertainArea.size( ) %d", pMediaStream->m_mapEntertainArea.size( ) );
+
+	
+	/** We're going to send a message to all the orbiters in this area so they know what the remote is,
+	and we will send all bound remotes to the new screen */
+	for( MapEntertainArea::iterator itEA = pMediaStream->m_mapEntertainArea.begin( );itEA != pMediaStream->m_mapEntertainArea.end( );++itEA )
+	{
+		EntertainArea *pEntertainArea = ( *itEA ).second;
+		LoggerWrapper::GetInstance()->Write( LV_STATUS, "Looking into the ent area (%p) with id %d and %d remotes", pEntertainArea, pEntertainArea->m_iPK_EntertainArea, (int) pEntertainArea->m_mapBoundRemote.size() );
+        for(map<int,OH_Orbiter *>::iterator it=m_pOrbiter_Plugin->m_mapOH_Orbiter.begin();it!=m_pOrbiter_Plugin->m_mapOH_Orbiter.end();++it)
+        {
+            OH_Orbiter *pOH_Orbiter = (*it).second;
+			if( pOH_Orbiter->m_pEntertainArea!=pEntertainArea )
+				continue;
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Processing remote: for orbiter: %d", pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device);
+			bool bBound = pEntertainArea->m_mapBoundRemote.find(pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device)!=pEntertainArea->m_mapBoundRemote.end();
+			pMediaStream->SetNowPlaying(pOH_Orbiter,false,bBound);
+		}
+	}
+	
+	return false;
 }
 
 //<-dceag-sample-b->

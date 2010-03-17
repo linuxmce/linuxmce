@@ -21,14 +21,21 @@
 
 #include "Gen_Devices/Picture_PluginBase.h"
 //<-dceag-d-e->
+#include "../Media_Plugin/Media_Plugin.h"
+#include "../Media_Plugin/MediaStream.h"
+#include "../Media_Plugin/MediaHandlerBase.h"
+#include "../Orbiter_Plugin/Orbiter_Plugin.h"
 
-//<-dceag-decl-b->
+//<-dceag-decl-b->!
 namespace DCE
 {
-	class Picture_Plugin : public Picture_Plugin_Command
+	class Picture_Plugin : public Picture_Plugin_Command, public MediaHandlerBase
 	{
 //<-dceag-decl-e->
 		// Private member variables
+		pluto_pthread_mutex_t m_PicturePluginMutex;
+		map<int, int> m_mapDevicesToStreams;
+		Orbiter_Plugin *m_pOrbiter_Plugin;
 
 		// Private methods
 public:
@@ -50,6 +57,31 @@ public:
 		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
 		Picture_Plugin(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
 //<-dceag-const2-e->
+
+	/** Mandatory implementations */
+
+		/**
+		* @brief
+		*/
+		virtual class MediaStream *CreateMediaStream( class MediaHandlerInfo *pMediaHandlerInfo, int iPK_MediaProvider, vector<class EntertainArea *> &vectEntertainArea, MediaDevice *pMediaDevice, int iPK_Users, deque<MediaFile *> *dequeFilenames, int StreamID );
+
+		/**
+		* @brief Start media playback
+		*/
+		virtual bool StartMedia( class MediaStream *pMediaStream,string &sError );
+
+		/**
+		* @brief Stop media playback
+		*/
+		virtual bool StopMedia( class MediaStream *pMediaStream );
+
+		virtual MediaDevice *FindMediaDeviceForEntertainArea(EntertainArea *pEntertainArea);
+		/**
+		* @brief We need to see all media inserted events so we can start the appropriate media devices
+		*/
+
+		bool MenuOnScreen( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
+
 
 //<-dceag-h-b->
 	/*
