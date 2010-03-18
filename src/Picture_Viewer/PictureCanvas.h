@@ -48,6 +48,7 @@ public:
 
 		void PaintPicture(Picture *pPicture);
 		void Paint(SDL_Surface *surface, SDL_Rect *source, SDL_Rect *dest);
+		void Repaint();
 		void Update();
 		void Clear();
 

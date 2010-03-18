@@ -42,9 +42,10 @@ bool Picture::Load()
         if (picture) {
 	        return true;
 	}
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Picture.Load() loading image file : %s ", m_sFile.c_str());
         picture = IMG_Load(m_sFile.c_str());
 	if (!picture) {
-	        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Picture.Load() Unable to load image : %s", SDL_GetError());
+	        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Picture.Load() Unable to load image, error %s", SDL_GetError());
 		return false;
 	} else {
 	        ExifAdjust();

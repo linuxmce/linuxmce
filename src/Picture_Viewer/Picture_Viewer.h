@@ -38,6 +38,8 @@ namespace DCE
 		int m_iAlarmID;
 		long m_iTimeLeft;
 
+		int m_iStreamID;
+
 		// Private methods
 public:
 		// Public member variables

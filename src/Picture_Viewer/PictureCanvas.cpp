@@ -21,12 +21,16 @@ PictureCanvas::PictureCanvas() : m_ScreenMutex("screen mutex")
 	m_ScreenMutex.Init(NULL);
         m_iScreenWidth = 0;
 	m_iScreenHeight = 0;
+	pThisPicture = NULL;
 	quit = false;
 }
 
 PictureCanvas::~PictureCanvas()
 {
         Shutdown();
+	if (pThisPicture != NULL) {
+	  delete pThisPicture;
+	}
 }
 
 bool PictureCanvas::Setup(int width, int height, string sWindowName)
@@ -57,8 +61,6 @@ bool PictureCanvas::SetScreenSize(int width, int height)
 	m_iScreenHeight = height;
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "PictureCanvas::SetScreenSize() Changing to %d x %d", width, height);
 	int flags = SDL_RESIZABLE;
-	/*	if (width == m_iDisplayWidth && height == m_iDisplayHeight) */
-	//		flags |= SDL_NOFRAME;
 	screen = SDL_SetVideoMode(m_iScreenWidth, m_iScreenHeight, 0, flags);
 	if (screen == NULL) {
 	        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "PictureCanvas::SetScreenSize() Unable to set screen size : %s", SDL_GetError());
@@ -80,6 +82,7 @@ void *PictureCanvasEventThread(void* pCanvas)
 		    ((PictureCanvas*)pCanvas)->SetScreenSize(event.resize.w, event.resize.h);
 		    break;
 		  case SDL_VIDEOEXPOSE:
+		    ((PictureCanvas*)pCanvas)->Update();
 		    break;
 		  case SDL_QUIT:
 		    quit = true;
@@ -102,6 +105,8 @@ bool PictureCanvas::Quit() {
 
 void PictureCanvas::Clear()
 {
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "PictureCanvas::Clear() ");
+        PLUTO_SAFETY_LOCK(sm, m_ScreenMutex);
         SDL_Rect rect;
 	rect.x = 0;
 	rect.y = 0;
@@ -112,12 +117,16 @@ void PictureCanvas::Clear()
 
 void PictureCanvas::Paint(SDL_Surface *surface, SDL_Rect *source, SDL_Rect *dest)
 {
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "PictureCanvas::Paint() ");
         PLUTO_SAFETY_LOCK(sm, m_ScreenMutex);
         SDL_BlitSurface(surface, source, screen, dest);
 }
 
 void PictureCanvas::PaintPicture(Picture *pPicture)
 {
+	if (pThisPicture != NULL) {
+	  delete pThisPicture;
+	}
         pThisPicture = pPicture;
         SDL_Surface *picture = pPicture->GetSurface();
 	if (!picture)
@@ -134,8 +143,15 @@ void PictureCanvas::PaintPicture(Picture *pPicture)
 	Paint(picture, &rect, &dest);
 }
 
+void PictureCanvas::Repaint() {
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "PictureCanvas::Repaint() ");
+	PaintPicture(pThisPicture);
+}
+
 void PictureCanvas::Update() {
-        PLUTO_SAFETY_LOCK(sm, m_ScreenMutex);        
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "PictureCanvas::Update() ");
+
+        PLUTO_SAFETY_LOCK(sm, m_ScreenMutex);
 	SDL_Flip(screen);
 }
 

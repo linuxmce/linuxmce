@@ -226,8 +226,9 @@ void Picture_Viewer::SetupPictureCanvas()
 
 void Picture_Viewer::AlarmCallback(int id, void* param) {
         if (id == 1) {
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Picture_Viewer::AlarmCallback() Timer expired");
-	        EVENT_Playback_Completed("", 0, false);
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Picture_Viewer::AlarmCallback() Timer expired");
+	        EVENT_Playback_Completed("", m_iStreamID, false);
+
 	}
 }
 
@@ -296,16 +297,23 @@ void Picture_Viewer::CMD_Update_Object_Image(string sPK_DesignObj,string sType,c
 void Picture_Viewer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string &sCMD_Result,Message *pMessage)
 //<-dceag-c37-e->
 {
-        Picture picture(sMediaURL);
-	if (picture.Load()) {
-	        picture.ZoomToFit(m_PictureCanvas.GetWidth(), m_PictureCanvas.GetHeight());
+        // clear the alarm, so when we don't get a EVENT for the previous image before this has been shown (when skipping fwd/back)
+	m_pAlarmManager->Clear();
+	m_iAlarmID = 0;
+        m_iStreamID = iStreamID;
+	// new - if it is passed to PictureCanvas, it will be deleted there, if not delete it below
+        Picture *pPicture = new Picture(sMediaURL);
+	if (pPicture->Load()) {
+	        pPicture->ZoomToFit(m_PictureCanvas.GetWidth(), m_PictureCanvas.GetHeight());
 		m_PictureCanvas.Clear();
-		m_PictureCanvas.PaintPicture(&picture);
+		m_PictureCanvas.PaintPicture(pPicture);
 		m_PictureCanvas.Update();
-		m_pAlarmManager->Clear();
 	        m_iAlarmID = m_pAlarmManager->AddRelativeAlarm(m_iDisplayTime, this, 1, NULL);
+
 	} else {
-	        EVENT_Playback_Completed("", 0, true);
+	        EVENT_Playback_Completed("", m_iStreamID, true);
+		m_iStreamID = 0;
+		delete pPicture;
 	}
 }
 
@@ -321,6 +329,8 @@ void Picture_Viewer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMedi
 void Picture_Viewer::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCMD_Result,Message *pMessage)
 //<-dceag-c38-e->
 {
+        EVENT_Playback_Completed("", m_iStreamID, false);
+	m_PictureCanvas.Clear();
         m_pAlarmManager->Clear();
 	m_iAlarmID = -1;
 }
@@ -335,14 +345,9 @@ void Picture_Viewer::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string 
 void Picture_Viewer::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c39-e->
 {
-
-  /*        if (m_iAlarmID >= 0) {
-	        m_pAlarmManager->GetAlarmInfo(m_iAlarmID, &m_iTimeLeft);
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Picture_Viewer::CMD_Pause_Media() Timer paused, time left = %d", m_iTimeLeft);
-
-		m_pAlarmManager->Clear();
-		m_iAlarmID = -1;
-		}*/
+        // Stop timer, so we don't get the playback completed event
+	m_pAlarmManager->Clear();
+	m_iAlarmID = -1;
 }
 
 //<-dceag-c40-b->
@@ -355,8 +360,9 @@ void Picture_Viewer::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *
 void Picture_Viewer::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c40-e->
 {
-  // m_iAlarmID = m_pAlarmManager->AddRelativeAlarm(m_iTimeLeft, this, 1, NULL);
-  // Event_Playback_completed?
+        // Assume user have looked enough at image as s/he have just been paused at it
+        EVENT_Playback_Completed("", m_iStreamID, false);
+	m_iStreamID = 0;
 }
 
 //<-dceag-c41-b->
