@@ -15,6 +15,7 @@ using namespace std;
 
 #include <string>
 #include "SDL_image.h"
+#include "../PlutoUtils/MultiThreadIncludes.h"
 
 #include "Picture.h"
 
@@ -23,7 +24,9 @@ namespace DCE
   class PictureCanvas
 	{
 		// Private member variables
+		pluto_pthread_mutex_t m_ScreenMutex;
 	        SDL_Surface *screen;
+		int m_iDisplayWidth, m_iDisplayHeight;
 		int m_iScreenWidth, m_iScreenHeight;
 		Picture *pThisPicture;
 
@@ -39,6 +42,7 @@ public:
 		virtual ~PictureCanvas();
 
 		bool Setup(int w, int h, string sWindowName);
+		bool SetScreenSize(int w, int h);
 		void Shutdown();
 		bool Quit();
 

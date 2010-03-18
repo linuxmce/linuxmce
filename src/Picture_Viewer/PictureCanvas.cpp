@@ -16,8 +16,9 @@
 using namespace DCE;
 using namespace std;
 
-PictureCanvas::PictureCanvas()
+PictureCanvas::PictureCanvas() : m_ScreenMutex("screen mutex")
 {
+	m_ScreenMutex.Init(NULL);
         m_iScreenWidth = 0;
 	m_iScreenHeight = 0;
 	quit = false;
@@ -30,21 +31,40 @@ PictureCanvas::~PictureCanvas()
 
 bool PictureCanvas::Setup(int width, int height, string sWindowName)
 {
-        m_iScreenWidth = width;
-	m_iScreenHeight = height;
+
+	unsetenv("SDL_VIDEO_X11_WMCLASS");
+
         if (SDL_Init(SDL_INIT_VIDEO) != 0) {
 	        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "PictureCanvas::Setup() Unable to set up SDL video : %s", SDL_GetError());
 		return false;
 	}
-
-	screen = SDL_SetVideoMode(m_iScreenWidth, m_iScreenHeight, 24, SDL_DOUBLEBUF | SDL_SWSURFACE /*| SDL_FULLSCREEN*/);
-	if (screen == NULL) {
-	        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "PictureCanvas::Setup() Unable to create video screen : %s", SDL_GetError());
-		return false;
+	// This is the size of the orbiter, i.e. the display size
+	m_iDisplayWidth = width;
+	m_iDisplayHeight = height;
+	if (!SetScreenSize(width, height)) {
+	        return false;
 	}
 	SDL_WM_SetCaption(sWindowName.c_str(), sWindowName.c_str());
 
 	pthread_create(&ThreadID, NULL, PictureCanvasEventThread, this);
+	return true;
+}
+
+bool PictureCanvas::SetScreenSize(int width, int height)
+{
+        PLUTO_SAFETY_LOCK(sm, m_ScreenMutex);
+        m_iScreenWidth = width;
+	m_iScreenHeight = height;
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "PictureCanvas::SetScreenSize() Changing to %d x %d", width, height);
+	int flags = SDL_RESIZABLE;
+	/*	if (width == m_iDisplayWidth && height == m_iDisplayHeight) */
+	//		flags |= SDL_NOFRAME;
+	screen = SDL_SetVideoMode(m_iScreenWidth, m_iScreenHeight, 0, flags);
+	if (screen == NULL) {
+	        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "PictureCanvas::SetScreenSize() Unable to set screen size : %s", SDL_GetError());
+		return false;
+	}
+
 	return true;
 }
 
@@ -56,6 +76,9 @@ void *PictureCanvasEventThread(void* pCanvas)
 	    while (SDL_WaitEvent(&event)) {
 		switch (event.type)
 		  {
+		  case SDL_VIDEORESIZE:
+		    ((PictureCanvas*)pCanvas)->SetScreenSize(event.resize.w, event.resize.h);
+		    break;
 		  case SDL_VIDEOEXPOSE:
 		    break;
 		  case SDL_QUIT:
@@ -89,6 +112,7 @@ void PictureCanvas::Clear()
 
 void PictureCanvas::Paint(SDL_Surface *surface, SDL_Rect *source, SDL_Rect *dest)
 {
+        PLUTO_SAFETY_LOCK(sm, m_ScreenMutex);
         SDL_BlitSurface(surface, source, screen, dest);
 }
 
@@ -111,7 +135,8 @@ void PictureCanvas::PaintPicture(Picture *pPicture)
 }
 
 void PictureCanvas::Update() {
-        SDL_Flip(screen);
+        PLUTO_SAFETY_LOCK(sm, m_ScreenMutex);        
+	SDL_Flip(screen);
 }
 
 int PictureCanvas::GetHeight() {

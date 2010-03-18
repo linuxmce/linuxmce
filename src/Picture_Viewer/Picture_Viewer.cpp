@@ -57,6 +57,7 @@ Picture_Viewer::Picture_Viewer(Command_Impl *pPrimaryDeviceCommand, DeviceData_I
 Picture_Viewer::~Picture_Viewer()
 //<-dceag-dest-e->
 {
+        m_PictureCanvas.Shutdown();
         delete m_pAlarmManager;
 	m_pAlarmManager = NULL;
 	pthread_mutex_destroy(&m_GalleryMutex.mutex);
@@ -221,7 +222,6 @@ void Picture_Viewer::SetupPictureCanvas()
 	int height = atoi(h.c_str());
 	m_PictureCanvas.Setup(width, height, string("Picture_Viewer"));
 
-		//		pthread_create(&m_ThreadID, NULL, ThreadAnimation, SetupInfo);
 }
 
 void Picture_Viewer::AlarmCallback(int id, void* param) {
@@ -304,6 +304,8 @@ void Picture_Viewer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMedi
 		m_PictureCanvas.Update();
 		m_pAlarmManager->Clear();
 	        m_iAlarmID = m_pAlarmManager->AddRelativeAlarm(m_iDisplayTime, this, 1, NULL);
+	} else {
+	        EVENT_Playback_Completed("", 0, true);
 	}
 }
 
@@ -321,7 +323,6 @@ void Picture_Viewer::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string 
 {
         m_pAlarmManager->Clear();
 	m_iAlarmID = -1;
-	m_PictureCanvas.Shutdown();
 }
 
 //<-dceag-c39-b->
