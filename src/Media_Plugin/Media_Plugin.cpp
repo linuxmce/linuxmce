@@ -2939,6 +2939,11 @@ void Media_Plugin::CMD_MH_Play_Media(int iPK_Device,string sFilename,int iPK_Med
 									dequeMediaFile.push_back(pMediaFile);
 								}
 							}
+						} else if ( pValue[0]=='/' )
+						{
+						        // Assume file name
+						        MediaFile *pMediaFile = new MediaFile(string(pValue));
+							dequeMediaFile.push_back(pMediaFile);
 						}
 					}
 				}
