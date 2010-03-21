@@ -6,9 +6,8 @@ function tellemCommand(command,pkfile)
    tellemRequest.onReadyStateChange = function() {
      if (tellemRequest.readyState != 4) { return; }
      var toldme = tellemRequest.responseText;
-     alert("hey");
    };
-   tellemRequest.send("command=123");
+   tellemRequest.send("command="+command+"&pkfile"+pkfile);
 }
 
 function tellemXineStatus(room)
