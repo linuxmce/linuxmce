@@ -20,12 +20,19 @@
 	
 	function getMediaStatus($room) {
 	// Checks the media players (Xine and MPlayer) if they have anything playing right now
+		global $currentMediaPlayer;
+		$remote = "";
 		$status ="";
 		$ipAddress = getMDIP($room);
 		if ($status == "") { $status = XineMplayerStatus($ipAddress,12000); }
 		if ($status == "") { $status = XineMplayerStatus($ipAddress,12010); }
-		if ($status == "") { $status = vdrStatus($ipAddress); }
-		// $status .= "IP $ipAddress - Room $room<br>";
+		if ($status == "") { $status = vdrStatus($ipAddress);  }
+
+		if ($status <> "") {
+			$remote = "remote.php?type=$currentMediaPlayer";
+			$status = "<a href='$remote' title='$status'>$status</a>";
+		}
+// $status .= "IP $ipAddress - Room $room<br>";
 		return $status;
 	}
 	
@@ -53,6 +60,7 @@
 			if ($errorString <> "") {
 				return "";
 			}
+			$currentMediaPlayer = "TV";
 			$status="TV";
 		}
 		return $status;
@@ -62,7 +70,7 @@
 	// Returns a string containing information about the currently playing media in Xine or MPlayer
 		$timeout = 5;
 
-		global $link, $mediaLink;
+		global $link, $mediaLink, $currentMediaPlayer;
 		$errorNumber = 0;
 		$errorString = "";
 		$oldStatus = error_reporting(E_ERROR);
@@ -112,7 +120,7 @@
 					// print fgets($fp);
 					//      ob_flush();
 					fclose($fp);
-					$currentMediaPlayer = "Audio/Video";
+					$currentMediaPlayer = "AV";
 					return "$status";
 				}
 				$printed = 1;

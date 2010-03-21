@@ -55,7 +55,7 @@
 <script type="application/x-javascript" src="iui/iui.js"></script>
 <script type="application/x-javascript" src="tellem.js"></script>
 </head>
-<body onLoad="setInterval('tellemXineStatus(1)', 5000);" onclick="console.log('Hello', event.target);">
+<body onLoad="setInterval('tellemXineStatus(<?php print $currentRoom; ?>)', 5000);" onclick="console.log('Hello', event.target);">
 	<div class="toolbar">
 		<h1 id="status" ></h1>
 		<a id="backButton" class="button"></a>
