@@ -10,13 +10,159 @@
 
 	global $possyDeviceFromID;
 	global $limit;
+	global $currentMediaPlayer;
 	$possyDeviceFromID = 1;
 //	$possyDeviceFromID = 45; // Proxy Orbiter
 //	$limit = " Limit 0,200";
 	$limit = "";
 
 	include_once("libMessageSend.php");
+	
+	function getMediaStatus($room) {
+	// Checks the media players (Xine and MPlayer) if they have anything playing right now
+		$status ="";
+		$ipAddress = getMDIP($room);
+		if ($status == "") { $status = XineMplayerStatus($ipAddress,12000); }
+		if ($status == "") { $status = XineMplayerStatus($ipAddress,12010); }
+		if ($status == "") { $status = vdrStatus($ipAddress); }
+		$status .= "IP $ipAddress - Room $room<br>";
+		return $status;
+	}
+	
+	function vdrStatus($ipAddress) {
+		global $currentMediaPlayer;
+		$port = 2001;
+		$status = "";
+		$output = "";
+		$exitCode = 0;
+		$errorNumber = 0;
+		$errorString = "";
+		$timeout = 3;
+		if (($ipAddress == "192.168.80.1") or ($ipAddress == "127.0.0.1")) {
+			// Checking a VDR running on the core, we check for a running vdr-sxfe process
+			$retVal = exec("ps ax|grep vdr-sxfe|grep -v grep",&$output,&$exitCode);
+			if ($exitCode == 0) {
+				$currentMediaPlayer = "TV";
+				$status = "TV";
+			}
+		} else {
+			// Checking a VDR running on an MD, we check for an open SVDRP connection
+			$oldStatus = error_reporting(E_ERROR);
+			$fp = fsockopen($ipAddress, $port, &$errorNumber, &$errorString, $timeout);
+			error_reporting($oldStatus);
+			if ($errorString <> "") {
+				return "";
+			}
+			$status="TV";
+		}
+		return $status;
+	}
 
+	function xineMplayerStatus($ipAddress,$port) {
+	// Returns a string containing information about the currently playing media in Xine or MPlayer
+		$timeout = 5;
+
+		global $link, $mediaLink;
+		$errorNumber = 0;
+		$errorString = "";
+		$oldStatus = error_reporting(E_ERROR);
+		$fp = fsockopen($ipAddress, $port, &$errorNumber, &$errorString, $timeout);
+		error_reporting($oldStatus);
+		if ($errorString <> "") {
+			return "";
+		}
+		stream_set_timeout($fp,$timeout);
+		$printed = 0;
+		if (($fp) and ($printed == 0)){
+			while ((!feof($fp)) And ($printed==0)) { //    && (!$info['timed_out'])) {
+				if ($errorNumber != 0) {
+					print "Error $errorNumber - $errorString";
+					break;
+				}
+				$data = fgets($fp);
+				if (strlen($data) > 4) {
+					$tabelle = explode(",",$data);
+					$attribute = "";
+					$attributeSQL="SELECT Name FROM pluto_media.Attribute Join pluto_media.File_Attribute ON FK_Attribute = PK_Attribute";
+					$attributeSQL .= " WHERE FK_File = " . $tabelle[7];
+					$attributeSQL .= " AND FK_AttributeType = 13"; // Title
+					$attribute = GetMyValue($link,$attributeSQL);
+					if ($tabelle[0] == "0") {
+						$status='Pausing ';
+					} else {
+						$status='Playing ';
+					}
+					if ($attribute == "") {
+						$status .= $tabelle[8];
+					} else {
+						$status .= $attribute;
+					}
+					// print "<br>Geschwindigkeit: " . $tabelle[0];
+					// print "<br>Position: " . $tabelle[1];
+					//print "<br>Gesamt: " . $tabelle[2];
+					// print "<br>unbekannt: " . $tabelle[3];
+					//print "<br>unbekannt: " . $tabelle[4];
+					// print "<br>unbekannt: " . $tabelle[5];
+					// print "<br>unbekannt: " . $tabelle[6];
+					// print "<br>PK_File: " . $tabelle[7];
+					// print "<br>Path: " . $tabelle[8];
+					//      if ($tabelle[7]+1 > 1) {
+					//        print "<br>Wir haben jetzt eine PK_File Info";
+					//      }                      
+					// print fgets($fp);
+					//      ob_flush();
+					fclose($fp);
+					$currentMediaPlayer = "Audio/Video";
+					return "$status";
+				}
+				$printed = 1;
+				fclose($fp);
+				return "";
+			}
+		} else {
+			return "";
+		}
+	}
+
+
+	function getMD($room = 0) {
+		// Return the device id of the MD in the current room
+		global $currentRoom,$link;
+		if ($room == 0) {
+			$room = $currentRoom;
+		}
+		$queryMD="SELECT PK_Device FROM Device Where FK_Room = $room AND FK_DeviceTemplate in (7,28);";
+		$MD = getMyValue($link,$queryMD);
+		return $MD;
+	}
+	
+	function getMDIP($room = 0) {
+		// Return the IP address of the MD in the current room
+		global $currentRoom,$link;
+		if ($room == 0) {
+			$room = $currentRoom;
+		}
+		$queryMDIP="SELECT IPaddress FROM Device Where FK_Room = $room AND FK_DeviceTemplate in (7,28);";
+		$MDIP = getMyValue($link,$queryMDIP);
+		return $MDIP;
+	}
+
+	function getMediaDevices($room = 0) {
+		// Return a list of Media playback devices in the current room
+		// At the moment we support
+		// 5 = Xine Player
+		// 1901 = MPlayer
+		// 58 = SqueezeBox
+		// 1705 = VDR
+		
+		global $currentRoom,$link;
+		if ($room == 0) {
+			$room = $currentRoom;
+		}
+		$queryMediaDevices="SELECT PK_Device,FK_Device_Template FROM Device Where FK_Room = $room AND FK_DeviceTemplate in (5,1901,58,1705);";
+		$mediaDevices = getMyArray($link,$queryMediaDevices);
+		return $mediaDevices;
+	}					
 	
 	function playFile($mediaLink, $pk_file) {
 		global $currentRoom,$link,$currentEntertainArea,$possyDeviceFromID;
