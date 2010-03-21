@@ -25,7 +25,7 @@
 		if ($status == "") { $status = XineMplayerStatus($ipAddress,12000); }
 		if ($status == "") { $status = XineMplayerStatus($ipAddress,12010); }
 		if ($status == "") { $status = vdrStatus($ipAddress); }
-		$status .= "IP $ipAddress - Room $room<br>";
+		// $status .= "IP $ipAddress - Room $room<br>";
 		return $status;
 	}
 	

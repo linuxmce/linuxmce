@@ -53,10 +53,11 @@
 <style type="text/css" media="screen">@import "iui/iui.css";</style>
 <style type="text/css" media="screen">@import "iOrbiter.css";</style>
 <script type="application/x-javascript" src="iui/iui.js"></script>
+<script type="application/x-javascript" src="tellem.js"></script>
 </head>
-<body onclick="console.log('Hello', event.target);">
+<body onLoad="setInterval('tellemXineStatus(1)', 5000);" onclick="console.log('Hello', event.target);">
 	<div class="toolbar">
-		<h1 id="pageXXTitle" ></h1>
+		<h1 id="status" ></h1>
 		<a id="backButton" class="button"></a>
 		
 <?php
