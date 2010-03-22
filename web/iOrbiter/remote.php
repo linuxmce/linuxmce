@@ -14,6 +14,7 @@
 	$currentScreen = 1;
 	$currentRoom = 3; 
 */	$PK_File = 0;
+	$remoteType='';
 	global $pk_file,$currentUser, $currentScreen, $currentRoom, $currentEntertainArea, $link, $mediaLink;
 	if (isset($_COOKIE["currentUser"])) {	$currentUser = $_COOKIE["currentUser"]; }
 	if (isset($_COOKIE["currentRoom"])) {	$currentRoom = $_COOKIE["currentRoom"]; }
@@ -36,16 +37,20 @@
 	if (isset($_GET["type"])) {
 		$remoteType = $_GET["type"]; // Type of Remote, either AV or TV atm.
 	}
-	print "<ul title='Media Playback'>\n";
+	print "<ul>\n";
+	
 	if ($PK_File <> 0) {
+		print "<li class='group'>Media Information</li>\n";
 		print "<li>Playing $currentRoom $currentEntertainArea</li>\n";
 		print "<li>pk file $PK_File</li>\n";
 		getPicture($mediaLink,$PK_File);
 	}		
+	print "";
 	if ($remoteType == 'AV') {
+		print "<li class='group'>Control</li>\n";
 		print "<li onClick='tellemCommand(\"play\",$PK_File);'>Play/Pause</li>\n";
-		print "<li>Skip Forward</li>\n";
-		print "<li>Skip Backward</li>\n";
+		print "<li onClick='tellemCommand(\"skip\",$PK_File);'>Skip Forward</li>\n";
+		print "<li onClick='tellemCommand(\"skip\",$PK_File);'>Skip Backward</li>\n";
 	}
 	print "</ul>\n";
 ?>
