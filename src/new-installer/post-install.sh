@@ -26,9 +26,6 @@ apt-get install -y kubuntu-desktop
 # make sure to install latest alsa drivers
 apt-get install -y alsa-modules-`uname -r`
 
-# get the latest v4l modules
-apt-get install -y v4l2-modules
-apt-get install -y v4l2-firmware
 # update-rc.d -f kdm remove
 
 ## NOTE: Fix for initramfs-tools - no longer needed - done in mce-install.sh
@@ -36,6 +33,11 @@ apt-get install -y v4l2-firmware
 
 # Disable compcache
 rm -f /usr/share/initramfs-tools/conf.d/compcache && update-initramfs -u
+echo Installing the latest v4l2 modules - If this process takes longer than 1 hour, ctrl-c out. Your LinuxMCE
+echo install will work.
+# get the latest v4l modules
+apt-get install -y v4l2-modules
+apt-get install -y v4l2-firmware
 
 #
 echo 
