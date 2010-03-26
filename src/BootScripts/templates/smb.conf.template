@@ -21,7 +21,8 @@
 	passwd program = /usr/bin/passwd %u
 	passwd chat = *Enter\snew\sUNIX\spassword:* %n\n *Retype\snew\sUNIX\spassword:* %n\n .
 	username map = /etc/samba/usermap.txt
-	unix extensions = yes
+        unix extensions = no
+        wide links = yes
 	security = user
 ########## Printing ##########
 
