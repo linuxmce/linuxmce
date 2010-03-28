@@ -125,7 +125,7 @@ function CleanCoreSetup
 #	createStartcoreScript
 #	createCoreInitScript
 
-	restoreKdmInitScript
+#	restoreKdmInitScript
 
 	setupRunlevel3
 	setupRunlevel4
