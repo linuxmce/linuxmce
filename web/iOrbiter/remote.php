@@ -47,10 +47,16 @@
 	}		
 	print "";
 	if ($remoteType == 'AV') {
-		print "<li class='group'>Control</li>\n";
+		print "<li class='group'>Media Control</li>\n";
 		print "<li onClick='tellemCommand(\"play\",$PK_File);'>Play/Pause</li>\n";
-		print "<li onClick='tellemCommand(\"skip\",$PK_File);'>Skip Forward</li>\n";
-		print "<li onClick='tellemCommand(\"skip\",$PK_File);'>Skip Backward</li>\n";
+		print "<li onClick='tellemCommand(\"skipfwd\",$PK_File);'>Skip Forward</li>\n";
+		print "<li onClick='tellemCommand(\"skipback\",$PK_File);'>Skip Backward</li>\n";
 	}
+	print "<li class='group'>Other Control</li>\n";
+	print "<li onClick='tellemCommand(\"louder\",$PK_File);'>Volume+</li>\n";
+	print "<li onClick='tellemCommand(\"mute\",$PK_File);'>Mute</li>\n";
+	print "<li onClick='tellemCommand(\"quieter\",$PK_File);'>Volume-</li>\n";
+	print "<li onClick='tellemCommand(\"brighter\",$PK_File);'>Brighter</li>\n";
+	print "<li onClick='tellemCommand(\"darker\",$PK_File);'>Darker</li>\n";
 	print "</ul>\n";
 ?>

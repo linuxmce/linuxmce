@@ -714,13 +714,16 @@
 			// 44 = House to sleep
 			// 193 = Light Off
 			// 184 = Light On
-			$sendMessageArray = array(1 => 41, 43, 44, 193, 184);
-			$found = array_search($messageID, $sendMessageArray);
-			if ( ! $found) {
+			// 
+			// We send every message for the time being, and no longer limit us
+			// to known messages.
+//			$sendMessageArray = array(1 => 41, 43, 44, 193, 184);
+//			$found = array_search($messageID, $sendMessageArray);
+//			if ( ! $found) {
 				// Handled elsewhere.
-			} else {
+//			} else {
 				myMessageSend($socket, $possyDeviceFromID,$deviceToID,1,$messageID, $parameters);
-			}
+//			}
 		}
 		commEnd($socket);
 		// fclose($socket);

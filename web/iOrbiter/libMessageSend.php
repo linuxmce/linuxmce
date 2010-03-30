@@ -74,6 +74,7 @@
 
 	function examplePlaySecurityMessage() {
 		// Just an example on how to call the messagesend function	
+		global $possyDeviceFromID;
 		$server = "dcerouter";
 		$port = 3450;
 		$timeout = 10;
@@ -84,8 +85,6 @@
 		$messageType = 1;
 		$messageID = 43; # MH_Play_File
 		$parameters = array();
-		$noOfParameters = array_push($parameters,array(13,"\"/home/public/data/samples/security/security.mpg\""));
-		$noOfParameters = array_push($parameters,array(45,2));
 
 		$parameter1ID = 13; // filename
 		$parameter1Content = '"/home/public/data/samples/security/security.mpg"';
@@ -93,6 +92,9 @@
 		$parameter2ID = 45; // Entertainment Area
 		$parameter2Content = "2";
 
-		myMessageSend($server,$port,$deviceFromID,$deviceToID,$messageType,$messageID,$parameter1ID,$parameter1Content,$parameter2ID,$parameter2Content);
+		// commStart($server, $port, $deviceIDFrom)
+		$socket = commStart($server,$port,$possyDeviceFromID);		
+		myMessageSend($socket,$possyDeviceFromID,$devceToID,$messageType,$messageID,$parameter1ID,$parameter1Content,$parameter2ID, $parameter2Content);
+		commEnd($socket);
 	}
 ?>

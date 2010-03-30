@@ -45,7 +45,8 @@
           playFile($mediaLink,$PK_File);
         } elseif ($command == 'stop') {
           stopFile($currentRoom);
-        } elseif ($command == 'current') {
-          getCurrentlyPlaying($currentRoom);
+        } elseif ($command == 'skipfwd') {
+        } elseif ($command == 'skipback') {
+
         }
 ?>
