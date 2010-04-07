@@ -51,6 +51,11 @@ Picture_Plugin::Picture_Plugin(Command_Impl *pPrimaryDeviceCommand, DeviceData_I
 Picture_Plugin::~Picture_Plugin()
 //<-dceag-dest-e->
 {
+	{
+		PLUTO_SAFETY_LOCK( mm, m_PicturePluginMutex );
+	}
+
+	pthread_mutex_destroy(&m_PicturePluginMutex.mutex);
 	
 }
 
@@ -109,7 +114,7 @@ Picture_Plugin_Command *Create_Picture_Plugin(Command_Impl *pPrimaryDeviceComman
 void Picture_Plugin::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
-	sCMD_Result = "UNHANDLED CHILD";
+	sCMD_Result = "UNHANDLED";
 }
 
 /*
@@ -121,7 +126,7 @@ void Picture_Plugin::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,s
 void Picture_Plugin::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 //<-dceag-cmduk-e->
 {
-	sCMD_Result = "UNKNOWN COMMAND";
+	sCMD_Result = "UNHANDLED";
 }
 
 MediaStream *Picture_Plugin::CreateMediaStream( class MediaHandlerInfo *pMediaHandlerInfo, int iPK_MediaProvider, vector<class EntertainArea *> &vectEntertainArea, MediaDevice *pMediaDevice, int iPK_Users, deque<MediaFile *> *dequeFilenames, int StreamID )
