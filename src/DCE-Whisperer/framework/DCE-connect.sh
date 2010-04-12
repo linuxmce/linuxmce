@@ -324,7 +324,7 @@ Framework_ReadFromDCE()
 	local Reply From To Type Cmd
 	local Action
 	local -a Parms
-	local i
+	local i line
 	local ParmName ParmValue
 	local CmdReply CmdReplyFile ReplyString ReplyOutVars
 	local ExitCode
@@ -344,7 +344,11 @@ Framework_ReadFromDCE()
 		fi
 		exit "$ExitCode"
 	else
-		DCECmd=($DCEline)
+		DCECmd=()
+		## This is done this was in order to prevent path expansion on parameters containing stars and other shell pattern characters
+		while read line; do
+			DCECmd=("${DCECmd[@]}" "$line")
+		done < <(builtin echo "$DCEline" | tr ' ' '\n')
 		Reply="${DCECmd[0]}"
 		From="${DCECmd[1]}"
 		To="${DCECmd[2]}"
