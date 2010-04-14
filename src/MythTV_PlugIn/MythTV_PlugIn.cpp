@@ -1143,7 +1143,7 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 			}
 
 			// Skip card if the Use Automatically devdata isn't set
-			sNoConfig = DatabaseUtils::GetDeviceData(m_pMedia_Plugin->m_pDatabase_pluto_main,pRow_Device->FK_Device_ControlledVia_get(),DEVICEDATA_Use_Automatically_CONST);
+			sNoConfig = DatabaseUtils::GetDeviceData(m_pMedia_Plugin->m_pDatabase_pluto_main,pRow_Device_CaptureCard->PK_Device_get(),DEVICEDATA_Use_Automatically_CONST);
 			if( !atoi(sNoConfig.c_str()) )
 			{
 				LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::SyncCardsAndProviders -- skipping because Use Automatically DeviceData is not set");
