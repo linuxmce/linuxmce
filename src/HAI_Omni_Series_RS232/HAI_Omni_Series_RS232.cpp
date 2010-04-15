@@ -109,7 +109,7 @@ bool HAI_Omni_Series_RS232::UpdateHAIConfig()
         m_pAlarmManager->AddRelativeAlarm(10,this,MODE_TIMEUPDATE,NULL);
         m_pAlarmManager->AddRelativeAlarm(10,this,MODE_QUEUE,NULL);
 
-        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Waiting 10 seconds for the device to start FUCKOFF.");
+        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Waiting 10 seconds for the device to start.");
 
         // Vars to replace inside the config file
         string s_UserCode = DATA_Get_Password();                // Master code for the panel
@@ -234,9 +234,10 @@ void HAI_Omni_Series_RS232::AddChildren()
                         sDescription=StringUtils::Replace(sDescription,"\t","");
                         sDescription=StringUtils::TrimSpaces(sDescription);
 
-                        //LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"sSensorType %s",sSensorType.c_str());
-                        //LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"sZone %s",sZone.c_str());
-                        //LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"sDescription %s",sDescription.c_str());
+			// Debug sensor autodetection
+                        // LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"sSensorType %s",sSensorType.c_str());
+                        // LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"sZone %s",sZone.c_str());
+                        // LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"sDescription %s",sDescription.c_str());
 
                         // Convert our zone to an int and get ready to do a lookup
                         int iSensorZone = atoi(sZone.c_str());
@@ -244,7 +245,7 @@ void HAI_Omni_Series_RS232::AddChildren()
                         int iDeviceTemplate=0;
                         string sCategory;
 			string sUnhandled;
-                        string sNewChild = m_mvNewChildren[sZone];
+			string sZoneByType;
 
                         // Lookup the zone
                         if (sSensorType == "Zone")
@@ -253,29 +254,37 @@ void HAI_Omni_Series_RS232::AddChildren()
                                 iDeviceTemplate = DEVICETEMPLATE_Generic_Sensor_CONST;
                                 sCategory = "security";
 				sUnhandled = "False";
-                        }
-                        if (sSensorType == "Unit")
+				sZoneByType = "Z" + sZone;
+				// LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "SensorType detected properly as zone %i", iPK_Device);
+                        }	
+                        else if (sSensorType == "Unit")
                         {
                                 iPK_Device = m_pHAI_Omni_Series_RS232->getExactDeviceForZone(iSensorZone, DEVICECATEGORY_Security_Device_CONST, DEVICETEMPLATE_HAI_Unit_CONST);
                                 iDeviceTemplate = DEVICETEMPLATE_HAI_Unit_CONST;
                                 sCategory = "unit";
 				sUnhandled = "False";
+				sZoneByType = "U" + sZone;
+				// LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "SensorType detected properly as unit %i", iPK_Device);
                         }
-                        if (sSensorType == "Thermo")
+                        else if (sSensorType == "Thermo")
                         {
                                 iPK_Device = m_pHAI_Omni_Series_RS232->getDeviceForZone(iSensorZone, DEVICECATEGORY_Climate_Device_CONST);
                                 iDeviceTemplate = DEVICETEMPLATE_Standard_Thermostat_CONST;
                                 sCategory = "climate";
 				sUnhandled = "False";
+				sZoneByType = "T" + sZone;
+				// LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "SensorType detected properly as thermo %i", iPK_Device);
                         }
-			
-			if (sSensorType != "Thermo" || sSensorType != "Unit" || sSensorType != "Zone")
+			else
 			{
 				sUnhandled = "True";
+				// LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "SensorType is unhandled");
 			}
 
+			string sNewChild = m_mvNewChildren[sZoneByType];
+
                         // If we couldn't find it and it is a sensor we handle then add it
-                        if (iPK_Device == 0 && sUnhandled == "False" && (sSensorType == "Zone" || sSensorType == "Thermo" || sSensorType == "Unit") && sNewChild != "Acknowledged")
+			if (iPK_Device == 0 && sUnhandled == "False" && sNewChild != "Acknowledged")
                         {
                                 //CMD_Create_Device_Callback add_command(m_dwPK_Device,m_dwPK_Device,"","","","");
 /*
@@ -356,7 +365,7 @@ void HAI_Omni_Series_RS232::AddChildren()
                                 SendCommand(add_command);
 
                                 // Update our map so we don't keep prompting
-                                m_mvNewChildren[sZone] = "Acknowledged";
+				m_mvNewChildren[sZoneByType] = "Acknowledged";
 
                                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Added LMCE Device for sensor of type %s, on zone %i",sSensorType.c_str(),iSensorZone);
                         }
@@ -520,7 +529,7 @@ void HAI_Omni_Series_RS232::PollSecurityZoneStatus()
 
                         if (iPK_Device == 0)
                         {
-                                QueueMessageToPanel("hai getnames > /etc/hainame.cache", Q_FUNCT_ADDCHILDREN);
+                                // QueueMessageToPanel("hai getnames > /etc/hainame.cache", Q_FUNCT_ADDCHILDREN);
                         }
 
                         // Check our map to make sure the zone's status has changed
@@ -550,7 +559,7 @@ void HAI_Omni_Series_RS232::PollSecurityZoneStatus()
 
                         if (iPK_Device == 0)
                         {
-                                QueueMessageToPanel("hai getnames > /etc/hainame.cache", Q_FUNCT_ADDCHILDREN);
+                                // QueueMessageToPanel("hai getnames > /etc/hainame.cache", Q_FUNCT_ADDCHILDREN);
                         }
 
                         // Check our map to make sure the zone's status has changed
@@ -689,7 +698,7 @@ void HAI_Omni_Series_RS232::PollSecurityMode()
                 PanelLine = buffer;
 
                 // Detect whether or not this is a partition line
-                unsigned int Area = PanelLine.find("Area");
+                unsigned int Area = PanelLine.find("Area 1");
                 if (Area != string::npos)
                 {
                         // Get our mode
@@ -756,7 +765,7 @@ void HAI_Omni_Series_RS232::PollSecurityMode()
                                 }
                         }
 
-                        else if(PanelState=="vac")
+                        else if(PanelState=="vac" || PanelState=="vacation")
                         {
                                 sHouseMode = "6";
 
@@ -842,7 +851,7 @@ void HAI_Omni_Series_RS232::PollThermos()
 
                                 if (iPK_Device == 0)
                                 {
-                                        QueueMessageToPanel("hai getnames > /etc/hainame.cache", Q_FUNCT_ADDCHILDREN);
+                                        // QueueMessageToPanel("hai getnames > /etc/hainame.cache", Q_FUNCT_ADDCHILDREN);
                                 }
 
                                 else if (iPK_Device >> 0)
@@ -954,7 +963,7 @@ void HAI_Omni_Series_RS232::PollThermos()
                                                         sMode = "5";
                                                         Mode = "Auto (Heat)";
                                                 }
-                                                if(iCurrentTemp >> iAverageSetPoint)
+                                                if(iCurrentTemp >= iAverageSetPoint)
                                                 {
                                                         sMode = "4";
                                                         Mode = "Auto (Cool)";
