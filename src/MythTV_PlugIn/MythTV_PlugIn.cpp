@@ -1142,6 +1142,9 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 				}
 			}
 
+			/* Don't work as expected, I think the data is not set properly in the screenhandler
+			   (see changeset 22677)
+
 			// Skip card if the Use Automatically devdata isn't set
 			sNoConfig = DatabaseUtils::GetDeviceData(m_pMedia_Plugin->m_pDatabase_pluto_main,pRow_Device_CaptureCard->PK_Device_get(),DEVICEDATA_Use_Automatically_CONST);
 			if( !atoi(sNoConfig.c_str()) )
@@ -1149,7 +1152,7 @@ void MythTV_PlugIn::CMD_Sync_Providers_and_Cards(int iPK_Device,int iPK_Orbiter,
 				LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::SyncCardsAndProviders -- skipping because Use Automatically DeviceData is not set");
 				continue;
 			}
-		 	
+		 	*/
 			bool bTunersAsSeparateDevices = DatabaseUtils::GetDeviceData(m_pMedia_Plugin->m_pDatabase_pluto_main,pRow_Device_CaptureCard->PK_Device_get(),DEVICEDATA_Children_as_Separate_Tuners_CONST)=="1";
 
 			// We need to add configure scripts for each model of card, or the sql statement to insert for each card. 
