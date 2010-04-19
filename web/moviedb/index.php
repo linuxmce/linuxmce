@@ -11,6 +11,7 @@ $Q = "
 	ORDER BY Filename;
 ";
 $R = mysql_query($Q);
+echo "<table border=\"0\">\n";
 while ($row = mysql_fetch_assoc($R))
 {
 	$Q2 = "
@@ -23,6 +24,11 @@ while ($row = mysql_fetch_assoc($R))
 	$CovertArt = $row2['Count'] > 0 ? "keep" : "none";
 
 	$Filename = urlencode($row['Filename']);
-	echo "<a href=\"start.php?Filename=$Filename&PK_File={$row['PK_File']}&CoverArt=$CovertArt\">{$row['Filename']}</a><br>\n";
+	echo "<tr>\n";
+	echo "<td><a href=\"start.php?Filename=$Filename&PK_File={$row['PK_File']}&CoverArt=$CovertArt\">Search&nbsp;tMDb</a></td>\n";
+	echo "<td><a href=\"title.php?Filename=$Filename&PK_File={$row['PK_File']}\"><i><b>Set&nbsp;title&nbsp;only</b></i></a></td>\n";
+	echo "<td>{$row['Filename']}<td>\n";
+	echo "</tr>\n";
 }
+echo "</table>\n";
 ?>

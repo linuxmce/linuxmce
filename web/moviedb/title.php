@@ -16,30 +16,31 @@ if (get_magic_quotes_gpc()) {
     unset($process);
 }
 
+require_once("tmdb.inc.php");
+
 if (!isset($_REQUEST['PK_File']) || empty($_REQUEST['PK_File']))
 {
 	header("Location: index.php");
 	exit();
 }
-$PK_File = $_REQUEST['PK_File'];
-if (isset($_REQUEST['CoverArt']))
-	$CoverArt = $_REQUEST['CoverArt'];
-else
-	$CoverArt = "replace";
+if (!isset($_REQUEST['Filename']) || empty($_REQUEST['Filename']))
+{
+	header("Location: index.php");
+	exit();
+}
 
+$PK_File = $_REQUEST['PK_File'];
 $Filename = $_REQUEST['Filename'];
-$QueryString = $Filename;
-$ExtPos = strrpos($QueryString, '.');
+
+$Title = $Filename;
+$ExtPos = strrpos($Title, '.');
 if ($ExtPos !== FALSE)
-	$QueryString = substr($QueryString, 0, $ExtPos);
-$QueryString = preg_replace("/[\.\-,]/", " ", $QueryString);
-$QueryString = preg_replace("/ +/", " ", $QueryString);
+	$Title = substr($Title, 0, $ExtPos);
 ?>
 <b>Now operating on <font color="red"><i><?=htmlentities($Filename)?></i></font></b><br>
-<form method="GET" action="search.php">
-<input type="text" size="100" name="q" value="<?=htmlentities($QueryString)?>"><input type="submit" value="Search">
-<input type="hidden" name="CoverArt" value="<?=$CoverArt?>">
-<input type="hidden" name="PK_File" value="<?=$PK_File?>">
-<input type="hidden" name="Filename" value="<?=htmlentities($Filename)?>">
+<form method="POST" action="save.php">
+<input type="hidden" name="PK_File" value="<?=htmlentities($PK_File)?>">
+Title: <input type="text" name="name" size="100" value="<?=htmlentities($Title)?>">
+<input type="submit" value="Set title">
 </form>
-<b>Will search the Movie Database</b>
+<b>Will set title only</b><br>

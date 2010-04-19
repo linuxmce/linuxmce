@@ -76,19 +76,34 @@ function insert_attribute($PK_File, $PK_AttributeType, &$Value)
 	mysql_query("INSERT INTO File_Attribute(FK_File, FK_Attribute) VALUES($PK_File, $PK_Attribute);");
 }
 
+function insert_long_attribute($PK_File, $PK_AttributeType, &$Value)
+{
+	if (!isset($Value) || empty($Value) || empty($PK_AttributeType))
+		return;
+	$ValueEsq = mysql_escape_string($Value);
+	mysql_query("INSERT INTO LongAttribute(FK_AttributeType, FK_File, Text) VALUES($PK_AttributeType, $PK_File, '$ValueEsq');");
+}
+
 mysql_query("DELETE FROM File_Attribute WHERE FK_File=$PK_File;");
+mysql_query("DELETE FROM LongAttribute WHERE FK_File=$PK_File;");
 insert_attribute($PK_File, $map['name'], $_REQUEST['name']);
 insert_attribute($PK_File, $map['released'], $_REQUEST['released']);
-insert_attribute($PK_File, $map['overview'], $_REQUEST['overview']);
+insert_long_attribute($PK_File, $map['overview'], $_REQUEST['overview']);
 insert_attribute($PK_File, $map['runtime'], $_REQUEST['runtime']);
-foreach (@$_REQUEST['genre'] as $genre)
-	insert_attribute($PK_File, $map['genre'], $genre);
-foreach (@$_REQUEST['cast'] as $job => $persons)
+if (isset($_REQUEST['genre']))
 {
-	foreach(@$persons as $person)
-		insert_attribute($PK_File, $map['job'][$job], $person);
+	foreach (@$_REQUEST['genre'] as $genre)
+		insert_attribute($PK_File, $map['genre'], $genre);
 }
-echo "-- Cover art<br>\n";
+if (isset($_REQUEST['cast']))
+{
+	foreach (@$_REQUEST['cast'] as $job => $persons)
+	{
+		foreach(@$persons as $person)
+			insert_attribute($PK_File, $map['job'][$job], $person);
+	}
+}
+//echo "-- Cover art<br>\n";
 if (isset($_REQUEST['cover']) && !empty($_REQUEST['cover']))
 {
 	$cover = $_REQUEST['cover'];
@@ -110,6 +125,7 @@ if (isset($_REQUEST['cover']) && !empty($_REQUEST['cover']))
 		system("rm -f '$filename'; wget -O '/tmp/$id.tmpimg' '$cover' && convert '/tmp/$id.tmpimg' '$filename' && convert -sample 256x256 '$filename' '$thumb' && rm -f '/tmp/$id.tmpimg'");
 	}
 }
-echo "-- Done<br>\n";
-echo "<a href=\"index.php\">Go to the beninning</a>";
+//echo "-- Done<br>\n";
+//echo "<a href=\"index.php\">Go to the beninning</a>";
+header("Location: index.php");
 ?>
