@@ -68,8 +68,9 @@ function viewDatalog($output,$dbADO){
      }
 
 // Add ore remove devices from the page
-     if ($action=='addDevice'){
-          $conf[]=array($_REQUEST['addDevice'],$_REQUEST['days'],$_REQUEST['color']);
+     if ($action=='addDevice' && $_REQUEST['addDevice'] != 0){
+          $addDevice = explode(',',$_REQUEST['addDevice']);
+          $conf[]=array($addDevice[0],$_REQUEST['days'],$_REQUEST['color'],$addDevice[1]);
           set_device_data($PK_Datalogger,59,multimplode($conf),$dbADO);
      }
      else if ($action=='removeDevice'){
@@ -83,23 +84,24 @@ function viewDatalog($output,$dbADO){
     	<input type="hidden" value="viewDatalog" name="section">
     	<input type="hidden" value="addDevice" name="action">
     	<p>Add graph for device: </p>
-    	<select id="addDevice" name="addDevice">';
+    	<select id="addDevice" name="addDevice"><option value="0">-Sensor-</option>';
 
 // Create list of devices that have data in lmce_datalog
-     $query = mysql_query("select distinct EK_Device from Datapoints ORDER BY EK_Device");
+     $query = mysql_query('SELECT  DISTINCT EK_Device,FK_Unit FROM Datapoints WHERE timestamp > DATE_SUB(NOW(), INTERVAL 7 DAY) ORDER BY EK_Device');
      while ($devices = mysql_fetch_array($query)){
-          $q = "SELECT `Description` FROM `Device` where `PK_Device` = ".$devices['EK_Device'];
-          $resGP = $dbADO->Execute($q);
+          $queryDescription = "SELECT `Description` FROM `Device` where `PK_Device` = ".$devices['EK_Device'];
+          $resGP = $dbADO->Execute($queryDescription);
           $row=$resGP->FetchRow();
-         	$out.= '<option value="'.$devices['EK_Device'].'">'.$row['Description'].' ('.$devices['EK_Device'].')</option>';
+          $rowUnit = mysql_fetch_row(mysql_query('SELECT Description FROM Unit WHERE PK_Unit ='.$devices['FK_Unit']));
+         	$out.= '<option value="'.$devices['EK_Device'].','.$devices['FK_Unit'].'">'.$devices['EK_Device'].' - '.$row['Description'].' ('.$rowUnit[0].')</option>';
      }
 
-     $out.='</select><select id="days" name="days"><option value="1">1-day</option><option value="3">3-days</option>
+     $out.='</select><select id="days" name="days"><option value="">-Days-</option><option value="1">1-day</option><option value="3">3-days</option>
      <option value="7">7-days</option></select>
-    	<select id="color" name="color"><option value="red@0.4">red</option><option value="blue@0.4">blue</option>
+    	<select id="color" name="color"><option value="">-Color-</option><option value="red@0.4">red</option><option value="blue@0.4">blue</option>
     	<option value="yellow@0.4">yellow</option><option value="green@0.4">green</option></select>
     	<input type="submit" value="Add" name="add" class="button"></form>';
-
+	
 // show graphs
 	$out.='<form action="index.php" method="POST" name="datalogGraph">
 	<input type="hidden" name="section" value="viewDatalog">
@@ -108,7 +110,10 @@ function viewDatalog($output,$dbADO){
 
 	if (!empty($conf)) {
 		for ($i = 0; $i < count($conf); $i++) {
-		    $out = $out.'<IMG SRC="operations/datalog/graph.php?device='.$conf[$i][0].'&days='.$conf[$i][1].'&color='.$conf[$i][2].'">';
+		    $q = "SELECT `Description` FROM `Device` where `PK_Device` = ".$conf[$i][0];
+              $resGP = $dbADO->Execute($q);
+              $row=$resGP->FetchRow();
+		    $out = $out.'<IMG SRC="operations/datalog/graph.php?device='.$conf[$i][0].'&days='.$conf[$i][1].'&color='.$conf[$i][2].'&unit='.$conf[$i][3].'&name='.$row['Description'].'">';
 		    $out = $out.'<input type="submit" class="button" name="remove" onclick="document.datalogGraph.removeDevice.value='.$i.'" value="Remove"/><br>';
 	    	}
 	} 
@@ -119,6 +124,7 @@ function viewDatalog($output,$dbADO){
 	$output->setBody($out);
 	$output->setMenuTitle($TEXT_ADVANCED_CONST.' |');
 	$output->setPageTitle("Data Logger");
+	$output->setNavigationMenu(array('Data Logger'=>'index.php?section=viewDatalog'));	
 	$output->setTitle(APPLICATION_NAME);			
 	$output->output();  		
 }
