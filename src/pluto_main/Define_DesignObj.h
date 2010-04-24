@@ -2645,6 +2645,7 @@
 #define DESIGNOBJ_popBasicOSDOptions_CONST 6037
 #define DESIGNOBJ_objNowPlayingInverted_CONST 6038
 #define DESIGNOBJ_MusicRemote_CONST 6039
+#define DESIGNOBJ_popPictureOptions_CONST 6040
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"

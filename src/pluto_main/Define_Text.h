@@ -1160,6 +1160,8 @@
 #define TEXT_Clean_Screen_CONST 2103
 #define TEXT_Clean_Screen_Button_CONST 2104
 #define TEXT_On_Screen_Remote_Active_CONST 2105
+#define TEXT_SymbolAsterisk_CONST 2106
+#define TEXT_SymbolPound_CONST 2107
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"

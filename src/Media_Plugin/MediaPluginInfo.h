@@ -53,6 +53,7 @@ namespace DCE
 #define MEDIASTREAM_TYPE_XINE           101
 #define MEDIASTREAM_TYPE_GAME		106
 #define MEDIASTREAM_TYPE_HULU		107
+#define MEDIASTREAM_TYPE_SMARTQ		108
 
     /** @brief
      *
