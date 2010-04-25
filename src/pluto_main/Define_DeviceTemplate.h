@@ -1977,6 +1977,7 @@
 #define DEVICETEMPLATE_Proliphix_NT_series_thermostat_CONST 2127
 #define DEVICETEMPLATE_SmartQ_Media_Plugin_CONST 2128
 #define DEVICETEMPLATE_SmartQ_Media_Player_CONST 2129
+#define DEVICETEMPLATE_SmartQ_V5V7_MID_CONST 2130
 
 #define DEVICETEMPLATE_TABLE "DeviceTemplate"
 #define DEVICETEMPLATE_PK_DEVICETEMPLATE_FIELD "PK_DeviceTemplate"

@@ -277,6 +277,18 @@ void UpdateEntArea::GetMediaAndRooms()
 				if( !pRow_Room->ManuallyConfigureEA_get() )
 					PutMDsChildrenInRoom(pRow_Device);
 			}
+
+                        // Check up 3 generations of DeviceCategories to see if this is a mobile internet device
+                        if( pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_get()==DEVICECATEGORY_Mobile_Internet_Devices_CONST ||
+                                pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_getrow()->FK_DeviceCategory_Parent_get()==DEVICECATEGORY_Mobile_Internet_Devices_CONST ||
+                                (pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_getrow()->FK_DeviceCategory_Parent_get() &&
+                                pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_getrow()->FK_DeviceCategory_Parent_getrow()->FK_DeviceCategory_Parent_get()==DEVICECATEGORY_Mobile_Internet_Devices_CONST) )
+                        {
+                                levelOfMedia = lomContainsMD;
+                                if( !pRow_Room->ManuallyConfigureEA_get() )
+                                        PutMDsChildrenInRoom(pRow_Device);
+                        }
+
 		}
 
 		if( levelOfMedia==lomNone )

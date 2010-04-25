@@ -33,7 +33,7 @@ namespace DCE {
 
 	int SmartQMediaStream::GetType()
 	{
-		return MEDIASTREAM_TYPE_HULU;
+		return MEDIASTREAM_TYPE_SMARTQ;
 	}
 
 	bool SmartQMediaStream::ShouldUseStreaming()
