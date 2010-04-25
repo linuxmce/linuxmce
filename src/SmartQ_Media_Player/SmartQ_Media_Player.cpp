@@ -131,7 +131,7 @@ void SmartQ_Media_Player::ReceivedUnknownCommand(string &sCMD_Result,Message *pM
  * Send a command to the rc.lua remote control port and spit back the
  * response.
  */
-string SmartQ_Media_Player::sendCommand(const char *Cmd)
+string SmartQ_Media_Player::sendCommand(const char *Cmd, bool bExpectResponse )
 {
 	string sResponse;
 	char ch=0;
@@ -173,22 +173,32 @@ string SmartQ_Media_Player::sendCommand(const char *Cmd)
 		return "";
 	}
 	LoggerWrapper::GetInstance()->Write(LV_WARNING,"========== Command is sent");
-	// Receive the response
-	do
+
+	if (bExpectResponse)
 	{
-		if( !m_pVLCSocket->ReceiveString(sResponse,VLC_SOCKET_TIMEOUT) )
+		// Receive the response
+		do
 		{
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Didn't get reply.");
-			return "";
-		}
-	} while (sResponse==">");
+			if( !m_pVLCSocket->ReceiveString(sResponse,VLC_SOCKET_TIMEOUT) )
+			{
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Didn't get reply.");
+				return "";
+			}
+		} while (sResponse!=">");
 		
-	LoggerWrapper::GetInstance()->Write(LV_WARNING,"========== Got the answer: %s", sResponse.c_str());
+		LoggerWrapper::GetInstance()->Write(LV_WARNING,"========== Got the answer: %s", sResponse.c_str());
 		
-	sResponse = StringUtils::TrimSpaces(sResponse);
-	LoggerWrapper::GetInstance()->Write(LV_WARNING,"VLC Responded: %s",sResponse.c_str());
-	
+		sResponse = StringUtils::TrimSpaces(sResponse);
+		LoggerWrapper::GetInstance()->Write(LV_WARNING,"VLC Responded: %s",sResponse.c_str());
+	}
+	else
+	{
+		LoggerWrapper::GetInstance()->Write(LV_WARNING,"========= No Response Required.");	
+		sResponse=""; // nothing.	
+	}	
+
 	return sResponse;
+
 }
 
 /**
@@ -290,7 +300,7 @@ void SmartQ_Media_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string 
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 	cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
 
-	string sAddString = getRealPath(sMediaURL);
+	string sAddString = "add " + getRealPath(sMediaURL);
 
 	sendCommand("clear");
 	sendCommand(sAddString.c_str());

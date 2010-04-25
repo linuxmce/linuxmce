@@ -59,7 +59,7 @@ public:
 //
 public:
 		PlainClientSocket *m_pVLCSocket;
-		string sendCommand(const char *Cmd);
+		string sendCommand(const char *Cmd, bool bExpectResponse = false);
 		
 		string getRealPath(string originalPath);
 		int getSeconds();
