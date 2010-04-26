@@ -98,7 +98,17 @@ function Detect {
 			partition_diskname=$(udevinfo --query=all --name="/dev/$partition" | grep 'ID_MODEL' | cut -d'=' -f2)
 			partition_haludi=$(hal-find-by-property --key 'block.device' --string "/dev/$partition")
 			partition_uuid=$(hal-get-property --udi "$partition_haludi" --key 'volume.uuid')
+			partition_serial=$(hal-get-property --udi "$partition_haludi" --key 'storage.serial')
+			partition_label=$(hal-get-property --udi "$partition_haludi" --key 'volume.label')
 
+			# fallback to serial number if no UUID available (for instance FAT devices)
+			if [[ "$partition_uuid" == "" && "$partition_serial" != "" ]] ;then
+			        partition_uuid="$partition_serial"
+			fi
+			# fallback to volume.label if no UUID or serial number available
+			if [[ "$partition_uuid" == "" && "$partition_label" != "" ]] ;then
+			        partition_uuid="$partition_label"
+			fi
 			if [[ "$partition_uuid" == "" ]] ;then
 				continue
 			fi

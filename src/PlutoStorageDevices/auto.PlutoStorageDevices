@@ -117,7 +117,16 @@ case "$Template" in
 			Drive_HalUDI=$(hal-find-by-property --key 'volume.uuid' --string "$Drive_UUID")
 			if [[ "$Drive_HalUDI" == "" ]] ;then
 				Log $LOG_WARN "Cannot find hal object with volume.uuid = $IDrive_UUID"
-				exit 0
+			        # as in the StorageDevices_Radar.sh script, fall back to serial number and storage_device
+				Drive_HalUDI=$(hal-find-by-property --key 'storage.serial' --string "$Drive_UUID")
+				if [[ "$Drive_HalUDI" == "" ]] ;then
+				        Log $LOG_WARN "Cannot find hal object with storage.serial = $Drive_UUID either"
+					Drive_HalUDI=$(hal-find-by-property --key 'volume.label' --string "$Drive_UUID")
+					if [[ "$Drive_HalUDI" == "" ]] ;then
+					        Log $LOG_WARN "Cannot find hal object with volume.label = $Drive_UUID either, aborting!"
+						exit 0
+					fi
+				fi
 			fi
 
 			## Convert udi to block device
