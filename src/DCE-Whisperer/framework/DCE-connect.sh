@@ -133,21 +133,6 @@ Log()
 	fi
 }
 
-TranslateSerialPort()
-{
-	local SerialPort="$1"
-	local PCI USB
-
-	if [[ "$SerialPort" == pci* ]]; then
-		PCI="${SerialPort%+*}"
-		USB="${SerialPort#*+}"
-		SerialPort=$(find /sys/devices -name '*tty*' | grep '/tty:' | grep usb | grep "$PCI.*-$USB:.*"|sed 's/tty://'|head -1)
-		SerialPort="/dev/"$(basename "$SerialPort")
-	fi
-
-	builtin echo "$SerialPort"
-}
-
 ##############################################################################
 ## Internal functions
 ## Make sure no echo messes things up by mistake

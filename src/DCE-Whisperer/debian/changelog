@@ -1,3 +1,9 @@
+dce-whisperer (3.0.8) unstable; urgency=low
+
+  * Moved TranslateSerialPort out of the framework, into Utils.sh
+
+ -- Radu C <radu.gx@gmail.com>  Tue, 27 Apr 2010 15:38:27 +0100
+
 dce-whisperer (3.0.7) unstable; urgency=low
 
   * Prevent shell expansion of DCE parameters

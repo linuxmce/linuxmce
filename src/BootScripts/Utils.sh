@@ -62,6 +62,21 @@ function DelBookmark {
 	done
 }
 
+TranslateSerialPort()
+{
+	local SerialPort="$1"
+	local PCI USB
+
+	if [[ "$SerialPort" == pci* ]]; then
+		PCI="${SerialPort%+*}"
+		USB="${SerialPort#*+}"
+		SerialPort=$(find /sys/devices -name '*tty*' | grep '/tty:' | grep usb | grep "$PCI.*-$USB:.*"|sed 's/tty://'|head -1)
+		SerialPort="/dev/"$(basename "$SerialPort")
+	fi
+
+	builtin echo "$SerialPort"
+}
+
 UseAlternativeLibs() 
 {
 	export LD_LIBRARY_PATH=/opt/libsdl/lib:/opt/libxine/lib:/opt/libsdl1.2-1.2.7+1.2.8cvs20041007/lib:/opt/linphone-1.3.5/lib
