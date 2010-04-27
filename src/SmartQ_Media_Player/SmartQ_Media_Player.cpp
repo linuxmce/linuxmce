@@ -54,7 +54,7 @@ SmartQ_Media_Player::SmartQ_Media_Player(Command_Impl *pPrimaryDeviceCommand, De
 SmartQ_Media_Player::~SmartQ_Media_Player()
 //<-dceag-dest-e->
 {
-	
+	sendCommand("shutdown");	
 }
 
 //<-dceag-getconfig-b->
@@ -126,6 +126,14 @@ void SmartQ_Media_Player::ReceivedUnknownCommand(string &sCMD_Result,Message *pM
 }
 
 //<-dceag-sample-b->!
+
+/**
+ * override CreateChildren to spawn VLC 
+ */
+void SmartQ_Media_Player::CreateChildren()
+{
+	system("screen -d -m -h 3000 -S vlcSession /usr/pluto/bin/LinuxMCE.launchVLC.sh");
+}
 
 /**
  * Send a command to the rc.lua remote control port and spit back the
@@ -647,4 +655,39 @@ void SmartQ_Media_Player::CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
+
+//<-dceag-c89-b->
+
+	/** @brief COMMAND: #89 - Vol Up */
+	/** volume up */
+		/** @param #72 Repeat Command */
+			/** If specified, repeat the volume up this many times */
+
+void SmartQ_Media_Player::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *pMessage)
+//<-dceag-c89-e->
+{
+	sendCommand("volup");
+}
+//<-dceag-c90-b->
+
+	/** @brief COMMAND: #90 - Vol Down */
+	/** volume down */
+		/** @param #72 Repeat Command */
+			/** If specified, repeat the volume down this many times. */
+
+void SmartQ_Media_Player::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message *pMessage)
+//<-dceag-c90-e->
+{
+	sendCommand("voldown");
+}
+
+//<-dceag-c97-b->
+
+	/** @brief COMMAND: #97 - Mute */
+	/** mute */
+
+void SmartQ_Media_Player::CMD_Mute(string &sCMD_Result,Message *pMessage)
+//<-dceag-c97-e->        
+{
+}
 
