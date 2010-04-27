@@ -41,7 +41,7 @@ function setup_tftp_boot
 		BootConf="${BootConf}DEFAULT Pluto\n"
 		BootConf="${BootConf}LABEL Pluto\n"
 		BootConf="${BootConf}KERNEL ${Moon_DeviceID}/vmlinuz\n"
-		BootConf="${BootConf}APPEND initrd=${Moon_DeviceID}/initrd.img ramdisk=10240 rw root=/dev/nfs boot=nfs nfsroot=${IntIP}:/usr/pluto/diskless/${Moon_DeviceID} ${BootParams_Extra}\n"
+		BootConf="${BootConf}APPEND initrd=${Moon_DeviceID}/initrd.img ramdisk=10240 rw root=/dev/nfs boot=nfs nfsroot=${IntIP}:/usr/pluto/diskless/${Moon_DeviceID} ${BootParams}\n"
 		
 		echo -e "$BootConf" > "$Moon_BootConfFile"
 
@@ -78,7 +78,7 @@ function setup_tftp_boot
 		BootConf="${BootConf}DEFAULT Pluto\n"
 		BootConf="${BootConf}LABEL Pluto\n"
 		BootConf="${BootConf}KERNEL ${Moon_DeviceID}/$DefaultBootName/vmlinuz\n"
-		BootConf="${BootConf}APPEND initrd=${Moon_DeviceID}/$DefaultBootName/initrd.img ramdisk=10240 rw root=/dev/nfs boot=nfs nfsroot=${IntIP}:/usr/pluto/diskless/${Moon_DeviceID}/$DefaultBootName ${BootParams_Extra}\n"
+		BootConf="${BootConf}APPEND initrd=${Moon_DeviceID}/$DefaultBootName/initrd.img ramdisk=10240 rw root=/dev/nfs boot=nfs nfsroot=${IntIP}:/usr/pluto/diskless/${Moon_DeviceID}/$DefaultBootName ${BootParams}\n"
 		
 		echo -e "$BootConf" > "$Moon_BootConfFile"
 	fi
