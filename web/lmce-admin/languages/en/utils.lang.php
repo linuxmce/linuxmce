@@ -32,6 +32,7 @@ $TEXT_ERROR_COMMAND_NOT_REMOVED_FROM_COMMAND_GROUP_CONST='Command not removed fr
 $TEXT_PARAMETERS_UPDATED_CONST='Parameters updated!';
 $TEXT_ERROR_TOP_PARENT_DEVICE_NOT_FOUND_CONST='Error: top parent device not found';
 $TEXT_ERROR_NO_SERIAL_PORTS_FOUND_CONST='No serial ports found.';
+$TEXT_ERROR_NO_SOUND_CARDS_FOUND_CONST='No sound cards found.';
 $TEXT_DELETE_REMOTE_CONFIRMATION_CONST='Are you sure you want to delete this remote?';
 $TEXT_ADD_REMOTE_CONST='Add Remote';
 $TEXT_SEND_CODES_TO_DEVICE_CONST='Send codes to device';

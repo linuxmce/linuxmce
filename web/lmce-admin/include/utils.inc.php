@@ -2727,6 +2727,49 @@ function serialPortsPulldown($name,$selectedPort,$allowedToModify,$topParent,$db
 	return $out;
 }
 
+function soundCardPulldown($name,$selectedCard,$allowedToModify,$topParent,$dbADO,$deviceID,$cssStyle="")
+{
+	// include language files
+	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
+	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/utils.lang.php');
+
+	$installationID=(int)$_SESSION['installationID'];
+
+	if($topParent==0){
+		return $TEXT_ERROR_TOP_PARENT_DEVICE_NOT_FOUND_CONST;
+	}
+	
+	$cardDeviceData=getDeviceData($topParent,$GLOBALS['AvailableSoundCards'],$dbADO);
+	if($cardDeviceData==''){
+		return $TEXT_ERROR_NO_SOUND_CARDS_FOUND_CONST;
+	}
+
+	$sound_cards=explode(',',$cardDeviceData);
+
+	$usedCards=getFieldsAsArray('Device_DeviceData','Device.Description,FK_Device,IK_DeviceData',$dbADO,'INNER JOIN Device ON FK_Device=PK_Device WHERE FK_Installation='.$installationID.' AND FK_DeviceData='.$GLOBALS['SoundCard'].' AND PK_Device!='.$deviceID);
+	$soundCardAsoc=array();
+	foreach($sound_cards AS $key=>$value){
+		$usedBy=array();
+		for($i=0;$i<count(@$usedCards['IK_DeviceData']);$i++){
+			if($value==$usedCards['IK_DeviceData'][$i]){
+				if(getTopLevelParent($usedCards['FK_Device'][$i],$dbADO)==$topParent){
+					$usedBy[]=$usedCards['Description'][$i];
+				}
+			}
+		}
+		if(count($usedBy)>0){
+			$soundCardAsoc[$value]=$value.' Used by '.join(', ',$usedBy);
+		}else{
+			$soundCardAsoc[$value]=$value;
+		}
+	}
+	
+	$extra=((isset($allowedToModify) && $allowedToModify==0)?'disabled':'');
+	$extra.=' class="'.$cssStyle.'"';
+	$out=pulldownFromArray($soundCardAsoc,$name,$selectedCard,$extra,'key');
+	
+	return $out;
+}
 // return the deviceID of the Infrared plugin from current installation
 function getInfraredPlugin($installationID,$dbADO)
 {
@@ -3301,8 +3344,16 @@ function formatDeviceData($deviceID,$DeviceDataArray,$dbADO,$isIPBased=0,$specif
 					$deviceDataBox.='<input type="checkbox" name="deviceData_'.$deviceID.'_'.$rowDDforDevice['FK_DeviceData'].'" value="1" '.((@$ddValue!=0)?'checked':'').' '.$itemDisabled.'>';
 				break;
 				default:
-					if ($rowDDforDevice['FK_DeviceData']!=$GLOBALS['Port']){
-
+					if ($rowDDforDevice['FK_DeviceData']==$GLOBALS['Port'])
+					{
+						$deviceDataBox.=serialPortsPulldown('deviceData_'.$deviceID.'_'.$rowDDforDevice['FK_DeviceData'],$ddValue,$rowDDforDevice['AllowedToModify'],getTopLevelParent($deviceID,$dbADO),$dbADO,$deviceID,$cssStyle);
+					}
+					elseif ($rowDDforDevice['FK_DeviceData']==$GLOBALS['SoundCard'])
+					{
+						$deviceDataBox.=soundCardPulldown('deviceData_'.$deviceID.'_'.$rowDDforDevice['FK_DeviceData'],$ddValue,$rowDDforDevice['AllowedToModify'],getTopLevelParent($deviceID,$dbADO),$dbADO,$deviceID,$cssStyle);
+					}
+					else
+					{
 						// if port channel, check for controlled via options
 						if($rowDDforDevice['FK_DeviceData']==$GLOBALS['PortChannel']){
 							$choicesArray=parentHasChoices($deviceID,$dbADO);
@@ -3315,8 +3366,6 @@ function formatDeviceData($deviceID,$DeviceDataArray,$dbADO,$isIPBased=0,$specif
 						}else{
 							$deviceDataBox.=$defaultFormElement;
 						}
-					}else{
-						$deviceDataBox.=serialPortsPulldown('deviceData_'.$deviceID.'_'.$rowDDforDevice['FK_DeviceData'],$ddValue,$rowDDforDevice['AllowedToModify'],getTopLevelParent($deviceID,$dbADO),$dbADO,$deviceID,$cssStyle);
 					}
 			}
 			$GLOBALS['mdDistro']=($rowDDforDevice['FK_DeviceData']==$GLOBALS['rootPK_Distro'])?@$ddValue:0;

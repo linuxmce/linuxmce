@@ -181,6 +181,7 @@
 	$GLOBALS['OtherPhoneNotifications']=35;		// Other Phone Notifications 
 	$GLOBALS['NeighborstoCall']=36;				// Neighbors to Call 
 	$GLOBALS['Port']=37;						// Port
+	$GLOBALS['SoundCard']=288;				// Sound Card
 	$GLOBALS['securityAlertType']=45;			// Alert type 
 	$GLOBALS['InfraredPort']=12;				// Infrared Port
 	$GLOBALS['PK_Device']=77;					// PK_Device
@@ -200,6 +201,7 @@
 	$GLOBALS['SupportIframes']=122;				// Support iframes
 	$GLOBALS['RefreshInterval']=123;			// Refresh Interval
 	$GLOBALS['AvailableSerialPorts']=133;		// Available Serial Ports
+	$GLOBALS['AvailableSoundCards']=287;		// Available Serial Ports
 	$GLOBALS['OutputSpeakerArrangement']=71;	// Output Speaker arrangement
 	$GLOBALS['TelecomLocalPrefix']=141;			// Telecom Local Prefix
 	$GLOBALS['TelecomPrependDigit']=142;		// Telecom Prepend Digit
