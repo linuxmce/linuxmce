@@ -77,6 +77,43 @@ TranslateSerialPort()
 	builtin echo "$SerialPort"
 }
 
+TranslateSoundCard()
+{
+	local SoundCard="$1" AlsaCard=
+	local PCI USB
+	local Cards Card Dev
+
+	if [[ -d /sys/class/sound && "$SoundCard" == pci* ]]; then
+		if [[ "$SoundCard" == *+* ]]; then
+			PCI="${SoundCard%+*}"
+			USB="${SoundCard#*+}"
+		else
+			PCI="${SoundCard}"
+			USB=
+		fi
+		pushd /sys/class/sound &>/dev/null
+		Cards=$(find -name 'controlC*')
+		for Card in $Cards; do
+			Card="${Card#./}"
+			Dev=$(readlink "$Card/device")
+			if [[ -n "$USB" ]]; then
+				if [[ "$Dev" == *"$PCI"*usb*"$USB:"* ]]; then
+					AlsaCard="hw:${Card#controlC}"
+					break
+				fi
+			else
+				if [[ "$Dev" == *"$PCI" ]]; then
+					AlsaCard="hw:${Card#controlC}"
+					break
+				fi
+			fi
+		done
+		popd &>/dev/null
+	fi
+
+	builtin echo "$AlsaCard"
+}
+
 UseAlternativeLibs() 
 {
 	export LD_LIBRARY_PATH=/opt/libsdl/lib:/opt/libxine/lib:/opt/libsdl1.2-1.2.7+1.2.8cvs20041007/lib:/opt/linphone-1.3.5/lib
