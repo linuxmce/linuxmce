@@ -39,6 +39,8 @@ SmartQ_Media_Player::SmartQ_Media_Player(int DeviceID, string ServerAddress,bool
 //<-dceag-const-e->
 	,m_VLCMutex("vlc"), m_pVLCSocket(NULL)
 {
+	m_iVolume = 0;
+	m_bMute = false;
 }
 
 //<-dceag-const2-b->
@@ -48,6 +50,8 @@ SmartQ_Media_Player::SmartQ_Media_Player(Command_Impl *pPrimaryDeviceCommand, De
 //<-dceag-const2-e->
 	,m_VLCMutex("vlc"), m_pVLCSocket(NULL)
 {
+	m_iVolume = 0;
+	m_bMute = false;
 }
 
 //<-dceag-dest-b->
@@ -136,6 +140,20 @@ void SmartQ_Media_Player::CreateChildren()
 }
 
 /**
+ * Accessors for: m_iVolume - The Current volume of the string.
+ */
+int SmartQ_Media_Player::getVolume()
+{
+	return m_iVolume;
+}
+
+void SmartQ_Media_Player::setVolume(int iNewVolume)
+{
+	m_iVolume = iNewVolume;
+	cout << "New Volume is: " << iNewVolume << endl;
+}
+
+/**
  * Send a command to the rc.lua remote control port and spit back the
  * response.
  */
@@ -184,20 +202,27 @@ string SmartQ_Media_Player::sendCommand(const char *Cmd, bool bExpectResponse )
 
 	if (bExpectResponse)
 	{
-		// Receive the response
-		do
-		{
-			if( !m_pVLCSocket->ReceiveString(sResponse,VLC_SOCKET_TIMEOUT) )
-			{
-				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Didn't get reply.");
-				return "";
-			}
-		} while (sResponse!=">");
-		
-		LoggerWrapper::GetInstance()->Write(LV_WARNING,"========== Got the answer: %s", sResponse.c_str());
+	
+		char *pData = NULL;
+		int nSize = 0;
+
+                if(!m_pVLCSocket->ReceiveDataDelimited(nSize, pData, '\n') || NULL == pData)
+                {
+                        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC not ok with command");
+              		return ""; 
+		}
+
+                //we want a string
+		sResponse.assign(pData);
+
+                // Done with it...
+                delete [] pData;
+                pData = NULL;
+	
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"========== Got the answer: %s", sResponse.c_str());
 		
 		sResponse = StringUtils::TrimSpaces(sResponse);
-		LoggerWrapper::GetInstance()->Write(LV_WARNING,"VLC Responded: %s",sResponse.c_str());
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC Responded: %s",sResponse.c_str());
 	}
 	else
 	{
@@ -303,16 +328,23 @@ void SmartQ_Media_Player::CMD_Update_Object_Image(string sPK_DesignObj,string sT
 void SmartQ_Media_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string &sCMD_Result,Message *pMessage)
 //<-dceag-c37-e->
 {
-	cout << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
-	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
-	cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
+	PLUTO_SAFETY_LOCK(vlcLock, m_VLCMutex);
+	string sAddString = "add " + getRealPath(sMediaURL) + "\r";
+	int iNewVolume;
+	string sNewVolume = "1234567890";
+	istringstream ssNewVolume;
 
-	string sAddString = "add " + getRealPath(sMediaURL);
+	// Get current volume and set our state appropriately.
+	sNewVolume = sendCommand("volume\r",true);
+	cout << "Volume is now: " << sNewVolume << endl;	
+	ssNewVolume.str(sNewVolume);
+	ssNewVolume >> iNewVolume;
 
-	sendCommand("clear");
+	sendCommand("clear\r");
 	sendCommand(sAddString.c_str());
-	sendCommand("fullscreen");
+	sendCommand("fullscreen\r");
+
+	setVolume(iNewVolume);	
 }
 
 //<-dceag-c38-b->
@@ -327,10 +359,11 @@ void SmartQ_Media_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string 
 void SmartQ_Media_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCMD_Result,Message *pMessage)
 //<-dceag-c38-e->
 {
+        PLUTO_SAFETY_LOCK(vlcLock, m_VLCMutex);	
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 
-	sendCommand("clear");
+	sendCommand("clear\r");
 }
 
 //<-dceag-c39-b->
@@ -343,7 +376,8 @@ void SmartQ_Media_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,st
 void SmartQ_Media_Player::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c39-e->
 {
-	sendCommand("pause");
+        PLUTO_SAFETY_LOCK(vlcLock, m_VLCMutex);
+	sendCommand("pause\r");
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
@@ -357,7 +391,8 @@ void SmartQ_Media_Player::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Mess
 void SmartQ_Media_Player::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c40-e->
 {
-	sendCommand("play");
+        PLUTO_SAFETY_LOCK(vlcLock, m_VLCMutex);
+	sendCommand("play\r");
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
@@ -393,6 +428,7 @@ void SmartQ_Media_Player::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlay
 void SmartQ_Media_Player::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c42-e->
 {
+        PLUTO_SAFETY_LOCK(vlcLock, m_VLCMutex);
 	bool		bHasModif; // If a modifier is used.
 	bool		bHasPlus;  // Is a + used?
 	bool 		bHasMinus; // Is a - used?
@@ -403,8 +439,6 @@ void SmartQ_Media_Player::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign
 
 	cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
-
-	PLUTO_SAFETY_LOCK(timeLock, m_VLCMutex);
 
 	bHasPlus = (sValue_To_Assign.find("+") != string::npos);
 	bHasMinus = (sValue_To_Assign.find("-") != string::npos);
@@ -440,7 +474,7 @@ void SmartQ_Media_Player::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign
 		sNewSeconds = sValue_To_Assign;	
 	}
 
-	string sSeekCommand = "seek " + sNewSeconds;	
+	string sSeekCommand = "seek " + sNewSeconds + "\r";	
 	sendCommand(sSeekCommand.c_str());
 
 }
@@ -666,7 +700,15 @@ void SmartQ_Media_Player::CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD
 void SmartQ_Media_Player::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *pMessage)
 //<-dceag-c89-e->
 {
-	sendCommand("volup");
+        PLUTO_SAFETY_LOCK(vlcLock, m_VLCMutex);	
+	string sNewVolume;
+	istringstream ssNewVolume;
+	int iNewVolume;
+	sendCommand("volup\r");
+	sNewVolume = sendCommand("volume");
+	ssNewVolume.str(sNewVolume);
+	ssNewVolume >> iNewVolume;
+	setVolume(iNewVolume);		
 }
 //<-dceag-c90-b->
 
@@ -678,7 +720,30 @@ void SmartQ_Media_Player::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Mes
 void SmartQ_Media_Player::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message *pMessage)
 //<-dceag-c90-e->
 {
-	sendCommand("voldown");
+        PLUTO_SAFETY_LOCK(vlcLock, m_VLCMutex);
+        string sNewVolume;
+        istringstream ssNewVolume;
+        int iNewVolume;
+        sendCommand("voldown\r");
+        sNewVolume = sendCommand("volume");
+        ssNewVolume.str(sNewVolume);
+        ssNewVolume >> iNewVolume;
+        setVolume(iNewVolume);
+}
+
+bool SmartQ_Media_Player::getMute() 
+{
+	return m_bMute;
+}
+
+void SmartQ_Media_Player::setMute(bool bNewMute)
+{
+	m_bMute = bNewMute;
+}
+
+void SmartQ_Media_Player::toggleMute()
+{
+	setMute(!getMute());
 }
 
 //<-dceag-c97-b->
@@ -689,5 +754,13 @@ void SmartQ_Media_Player::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,M
 void SmartQ_Media_Player::CMD_Mute(string &sCMD_Result,Message *pMessage)
 //<-dceag-c97-e->        
 {
+	string sCurrentVolume;
+	stringstream ssCurrentVolume;
+	
+	ssCurrentVolume << getVolume();
+	sCurrentVolume = ssCurrentVolume.str();
+	toggleMute();
+	string sVolumeCommand = "volume " + (getMute() ? "0" : sCurrentVolume);
+	sendCommand(sVolumeCommand.c_str());
 }
 

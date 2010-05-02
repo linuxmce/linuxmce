@@ -38,7 +38,8 @@ public:
 	  	DeviceData_Base *m_pDevice_SmartQ_Media_Plugin;
 		int m_iSeconds;   	// The # of seconds in currently playing media.
 		bool m_bTimeBeingSet;	// Simple locking for get time thread.
-
+		int m_iVolume;		// The current volume of the playing stream.
+		bool m_bMute;		// are we muted?
 
 //<-dceag-const-b->
 public:
@@ -65,6 +66,15 @@ public:
 		string getRealPath(string originalPath);
 		int getSeconds();
 		void setSeconds(int iSeconds);
+
+		// getting and setting volume
+		int getVolume();
+		void setVolume(int iNewVolume);
+
+		// getting, setting, and toggling mute
+		bool getMute();
+		void setMute(bool bNewMute);
+		void toggleMute();
 
 //<-dceag-h-b->
 	/*
