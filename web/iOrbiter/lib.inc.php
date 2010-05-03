@@ -215,15 +215,15 @@
 	
 	function playFile($mediaLink, $pk_file) {
 		global $currentRoom,$link,$currentEntertainArea,$possyDeviceFromID;
-		print "entertain: $currentEntertainArea\n";
-		print "current room: $currentRoom\n";
+/*		print "entertain: $currentEntertainArea\n";
+		print "current room: $currentRoom\n";*/
 		$currentEntertainArea = getEntertainArea($link,$currentRoom);
 		// Get the path of the file to play, and call messagesend
 		// to play it in the current entertainment area
 		$queryFilePath = "SELECT Concat(Path,'/',Filename) From File Where PK_File = " . $pk_file . ";";
 		
 		$filePath = getMyValue($mediaLink, $queryFilePath);
-		print "<li>$filePath</li>";
+/*		print "<li>$filePath</li>"; */ 
 		// commStart($server, $port, $deviceIDFrom)
 		$socket = commStart("dcerouter",3450,$possyDeviceFromID);
 		// myMessageSend($socket,$deviceFromID,$deviceToID (10 == media plugin),$messageType,$messageID,$parameter1ID,$parameter1Content,$parameter2ID,$parameter2Content);		

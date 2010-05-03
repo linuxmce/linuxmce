@@ -34,8 +34,9 @@
 		$PK_File = $_GET["pk_file"];
 	}	
 	
-	print "<ul><li>Playing $currentRoom $currentEntertainArea</li>\n";
-	print "<li>pk file $PK_File</li>\n";
+	print "<ul><li>Playing</li>\n";
+//  $currentRoom $currentEntertainArea</li>\n";
+//	print "<li>pk file $PK_File</li>\n";
 	getPicture($mediaLink,$PK_File);
 	playFile($mediaLink,$PK_File);
 	print "</ul>\n";

@@ -31,7 +31,7 @@
 		$result = sendSocket($socket,"EVENT " . $deviceFromID . "\n");
 
 		$result = socket_read($socket,1024, PHP_NORMAL_READ);
-		print "Result from Event: $result\n";		
+//		print "Result from Event: $result\n";		
 		return $socket;
 	}
 
@@ -63,10 +63,10 @@
 		$messageLength = strlen($messageToSend);
 		$result = sendSocket($socket, "MESSAGET " . $messageLength . "\n");
 		$result = sendSocket($socket, $messageToSend . "\n");
-		echo "<li>Message to send: ";
+/*		echo "<li>Message to send: ";
 		echo $messageToSend;
 		print "</li>\n";
-	}
+*/	}
 
 	function commEnd($socket) { 
 		socket_close($socket);
