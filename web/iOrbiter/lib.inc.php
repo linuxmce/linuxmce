@@ -212,11 +212,14 @@
 		commEnd($socket);
 	}
 
-	function sendCommand($destination, $command) {
+	function sendCommand($destination, $command, $parameter=0) {
 		global $link;
 		$socket = commStart("dcerouter",3450,$possyDeviceFromID);
-		// myMessageSend($socket,$deviceFromID,$deviceToID (10 == media plugin),$messageType,$messageID,$parameter1ID,$parameter1Content,$parameter2ID,$parameter2Content);		
-		myMessageSend($socket,$possyDeviceFromID,getDestinationDevice($link,$destination),1,$command); // ,13,'"' . $filePath . '"', 45, $currentEntertainArea);
+		if (! is_array($parameter)) {
+			myMessageSend($socket,$possyDeviceFromID,getDestinationDevice($link,$destination),1,$command); // ,13,'"' . $filePath . '"', 45, $currentEntertainArea);
+		} else { 
+			myMessageSend($socket,$possyDeviceFromID,getDestinationDevice($link,$destination),1,$command,$parameter);		
+		}
 		commEnd($socket);
 	}
 

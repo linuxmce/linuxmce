@@ -41,10 +41,10 @@
 
 		$messageToSend = $deviceFromID . " " . $deviceToID . " " . $messageType . " " . $messageID;
 		if (is_array($parameter1ID)) {
-			print "<li>Parameter Array</li>\n";
+//			print "<li>Parameter Array</li>\n";
 			foreach ($parameter1ID as $parameterPair) {
 				$messageToSend .= " " . $parameterPair[0] . " " . $parameterPair[1];
-				print "<li>parameter: " . $parameterPair[0] . " - " . $parameterPair[1] . "</li>\n";
+//				print "<li>parameter: " . $parameterPair[0] . " - " . $parameterPair[1] . "</li>\n";
 			}
 			unset($parameter1ID);
 		} 
@@ -52,7 +52,7 @@
 			if ($parameter1ID <> 0) {
 				$messageToSend .=  " " . $parameter1ID . " " . $parameter1Content;
 			} else {
-				print "No parameter 1\n";
+//				print "No parameter 1\n";
 			}
 			if ($parameter2ID <> 0) {
 				$messageToSend .= " " . $parameter2ID . " " . $parameter2Content;

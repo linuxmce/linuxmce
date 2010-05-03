@@ -58,5 +58,9 @@
           sendCommand(-106,90);  // Vol-
         } elseif ($command == 'mute') {
           sendCommand(-106,97);  // Mute
+        } elseif ($command == 'brighter') {
+          sendCommand(-104,223);  // BrightnessUp
+        } elseif ($command == 'darker') {
+          sendCommand(-104,224);  // BrightnessDown
         }
 ?>
