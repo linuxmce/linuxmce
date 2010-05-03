@@ -19,16 +19,6 @@
 	include_once("libMessageSend.php");
 
 
-	function sendCommandToMediaPlayer($room,$command) {
-	// This function receives a room designation, and sends the provided 
-	// command to the room. if the command is an array, it will be disected
-	// as command/paramter pairs
-		global $currentMediaPlayer;
-		$mediaDevices = getMediaDevices();
-		
-	// TODO!!		
-	}
-	
 	function lightinroom() {
 	// Returns an array of light devices in the current room
 		global $currentRoom, $link;
@@ -179,6 +169,24 @@
 		$MDIP = getMyValue($link,$queryMDIP);
 		return $MDIP;
 	}
+	
+	function getCurrentMediaDevice($room = 0) {
+		// Return the media device PK_Device of the currently playing device.
+		global $currentMedia
+		$listOfDevices=getMediaDevices($room);
+		if ($currentMediaPlayer == "AV-Xine") {
+			$currentMediaDevice = getDeviceForTemplateInRoom($room,5); // Get Xine Player Device
+		} elseif ($currentMediaPlayer == "AV-Mplayer") {
+			$currentMediaDevice = getDeviceForTemplateInRoom($room,1901); // Get Mplayer Device
+		} elseif ($currentMediaPlayer == "AV-unknown") {
+			$currentMediaDevice = getDeviceForTemplateInRoom($room,58);  // We assume a SqueezeBox
+		} elseif ($currentMediaPlayer == "TV") {
+			$currentMediaDevice = getDeviceForTemplateInRoom($room,1705);  // We assume a VDR device
+		} else {
+			$currentMediaDevice = 0;
+		}
+		return $currentMediaDevice;
+	}
 
 	function getMediaDevices($room = 0) {
 		// Return a list of Media playback devices in the current room
@@ -196,6 +204,14 @@
 		$mediaDevices = getMyArray($link,$queryMediaDevices);
 		return $mediaDevices;
 	}					
+
+	function sendPlayerCommand($room, $command) {
+		$socket = commStart("dcerouter",3450,$possyDeviceFromID);
+		// myMessageSend($socket,$deviceFromID,$deviceToID (10 == media plugin),$messageType,$messageID,$parameter1ID,$parameter1Content,$parameter2ID,$parameter2Content);		
+		myMessageSend($socket,$possyDeviceFromID,$getCurrentMediaDevice($room),1,$command); // ,13,'"' . $filePath . '"', 45, $currentEntertainArea);
+		commEnd($socket);
+	}
+
 	
 	function playFile($mediaLink, $pk_file) {
 		global $currentRoom,$link,$currentEntertainArea,$possyDeviceFromID;

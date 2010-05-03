@@ -47,10 +47,10 @@
 	if ($command == 'play') {
           playFile($mediaLink,$PK_File);
         } elseif ($command == 'stop') {
-          stopFile($currentRoom);
+          sendPlayerCommand($currentRoom,44);  // MH_Stop_Media          
         } elseif ($command == 'skipfwd') {
-          skipfwd($currentRoom);
+          sendPlayerCommand($currentRoom,63);  // Skip_Fwd
         } elseif ($command == 'skipback') {
-          skipback($currentRoom);
+          sendPlayerCommand($currentRoom,64);  // Skip_Back
         }
 ?>
