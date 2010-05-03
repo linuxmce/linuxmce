@@ -172,7 +172,7 @@
 	
 	function getCurrentMediaDevice($room = 0) {
 		// Return the media device PK_Device of the currently playing device.
-		global $currentMedia
+		global $currentMedia;
 		$listOfDevices=getMediaDevices($room);
 		if ($currentMediaPlayer == "AV-Xine") {
 			$currentMediaDevice = getDeviceForTemplateInRoom($room,5); // Get Xine Player Device
