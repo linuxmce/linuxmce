@@ -1,4 +1,4 @@
-function tellemCommand(command,pkfile)
+function tellemCommand(command,remotetype,pkfile)
 {
 	var self = this;
 	var tellemRequest = new self.XMLHttpRequest();
@@ -8,7 +8,7 @@ function tellemCommand(command,pkfile)
 	if (tellemRequest.readyState != 4) { return; }
      var toldme = tellemRequest.responseText;
    };
-   tellemRequest.send("command="+command+"&pkfile"+pkfile);
+   tellemRequest.send("command="+command+"&remotetype="+remotetype+"&pkfile"+pkfile);
 }
 
 function tellemXineStatus(room)

@@ -17,7 +17,7 @@
 */	global $pk_file,$currentUser, $currentScreen, $currentRoom, $currentEntertainArea, $link, $mediaLink;
 	if (isset($_COOKIE["currentUser"])) {	$currentUser = $_COOKIE["currentUser"]; }
 	if (isset($_COOKIE["currentRoom"])) {	$currentRoom = $_COOKIE["currentRoom"]; }
-
+	$remotetype = "";
 	
 
 	if (isset($_GET["room"])) {
@@ -35,6 +35,9 @@
 	if (isset($_GET["pk_file"])) {
 		$PK_File = $_GET["pk_file"];
 	}	
+	if (isset($_GET["remotetype"])) {
+	        $remoteType = $_GET["remotetype"];
+        fi
 
 	if (isset($_GET["command"])) {
 		$command = $_GET["command"];
@@ -46,7 +49,8 @@
         } elseif ($command == 'stop') {
           stopFile($currentRoom);
         } elseif ($command == 'skipfwd') {
+          skipfwd($currentRoom);
         } elseif ($command == 'skipback') {
-
+          skipback($currentRoom);
         }
 ?>

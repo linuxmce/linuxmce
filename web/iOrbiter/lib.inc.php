@@ -17,6 +17,25 @@
 	$limit = "";
 
 	include_once("libMessageSend.php");
+
+
+	function sendCommandToMediaPlayer($room,$command) {
+	// This function receives a room designation, and sends the provided 
+	// command to the room. if the command is an array, it will be disected
+	// as command/paramter pairs
+		global $currentMediaPlayer;
+		$mediaDevices = getMediaDevices();
+		
+	// TODO!!		
+	}
+	
+	function lightinroom() {
+	// Returns an array of light devices in the current room
+		global $currentRoom, $link;
+		$deviceCategoryLights = 73;
+		$lights = getDeviceForDeviceCategoryInRoom($link, $deviceCategoryLights);		
+		return $lights;
+	}
 	
 	function getMediaStatus($room) {
 	// Checks the media players (Xine and MPlayer) if they have anything playing right now
@@ -120,7 +139,13 @@
 					// print fgets($fp);
 					//      ob_flush();
 					fclose($fp);
-					$currentMediaPlayer = "AV";
+					if ($port == 12000) {
+						$currentMediaPlayer = "AV-Xine";	
+					} elseif ($port == 12001) {
+						$currentMediaPlayer = "AV-Mplayer";
+					} else {
+						$currentMediaPlayer = "AV-unknown";
+					}
 					return "$status";
 				}
 				$printed = 1;
@@ -779,9 +804,37 @@ function getDeviceForTemplate($link, $deviceTemplate) {
 function getDeviceForTemplateInRoom($link, $deviceTemplate) {
 	global $currentRoom;
 	$query = "SELECT PK_Device FROM Device D Where FK_DeviceTemplate = $deviceTemplate and FK_Room = $currentRoom";
-	return getMyValue($link,$query);
+	// There can be more than one device for a given template. For example multiple lights
+	$value = getMyArray($link,$query);	
+	if (count($value) == 1) {
+		return $value[0];
+	} else { 
+		return $value;
+	}
+//	return getMyValue($link,$query);
 }	
 
+function getDeviceForDeviceCategory($link, $deviceCategory) {
+	$query = "SELECT PK_Device FROM Device D Where FK_DeviceTemplate IN (Select PK_DeviceTemplate FROM DeviceTemplate Where FK_DeviceCategory = $deviceCategory)";
+	$value = getMyArray($link,$query);
+	$value = getMyArray($link,$query);	
+	if (count($value) == 1) {
+		return $value[0];
+	} else { 
+		return $value;
+	}
+}	
+
+function getDeviceForDeviceCategoryInRoom($link, $deviceCategory) {
+	global $currentRoom;
+	$query = "SELECT PK_Device FROM Device D Where FK_DeviceTemplate IN (Select PK_DeviceTemplate FROM DeviceTemplate Where FK_DeviceCategory = $deviceCategory) AND FK_Room = $currentRoom";
+	$value = getMyArray($link,$query);	
+	if (count($value) == 1) {
+		return $value[0];
+	} else { 
+		return $value;
+	}
+}	
 	
 function getCurrentMD() {
 	global $link;
@@ -863,7 +916,8 @@ function getCurrentEA() {
 			// print "<p>xDestinationDevice: $destinationDevice - $query </p>";
 			myMessageSend($socket, $possyDeviceFromID, $destinationDevice,1,$command,$messageSendParameter);
 			// print_r ($messageSendParameter);
-		}		
+		}
+		commEnd($socket);
 	}
 	
 
