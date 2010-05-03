@@ -52,5 +52,11 @@
           sendPlayerCommand($currentRoom,63);  // Skip_Fwd
         } elseif ($command == 'skipback') {
           sendPlayerCommand($currentRoom,64);  // Skip_Back
+        } elseif ($command == 'louder') {
+          sendCommand(-106,89);  // Vol+
+        } elseif ($command == 'quieter') {
+          sendCommand(-106,90);  // Vol-
+        } elseif ($command == 'mute') {
+          sendCommand(-106,97);  // Mute
         }
 ?>

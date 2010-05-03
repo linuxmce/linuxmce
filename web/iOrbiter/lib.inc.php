@@ -212,6 +212,14 @@
 		commEnd($socket);
 	}
 
+	function sendCommand($destination, $command) {
+		global $link;
+		$socket = commStart("dcerouter",3450,$possyDeviceFromID);
+		// myMessageSend($socket,$deviceFromID,$deviceToID (10 == media plugin),$messageType,$messageID,$parameter1ID,$parameter1Content,$parameter2ID,$parameter2Content);		
+		myMessageSend($socket,$possyDeviceFromID,getDestinationDevice($link,$destination),1,$command); // ,13,'"' . $filePath . '"', 45, $currentEntertainArea);
+		commEnd($socket);
+	}
+
 	
 	function playFile($mediaLink, $pk_file) {
 		global $currentRoom,$link,$currentEntertainArea,$possyDeviceFromID;
