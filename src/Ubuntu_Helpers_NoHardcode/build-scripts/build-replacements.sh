@@ -179,8 +179,13 @@ function Build_Replacements_Intrepid
 	Build_Replacement_Package alsa-utils ubuntu/alsa-utils-1.0.18
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/*asound*deb ${replacements_dir}
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/alsa*deb ${replacements_dir}
-#	v4l-modules-source
+
+	#v4l-modules-source
 	Build_Replacement_Package v4l2 ubuntu/v4l-modules-source
+
+	#Package: mythtv
+	Build_Replacement_Package mythtv ubuntu/mythtv-0.23.0+fixes24158
+	cp ${svn_dir}/${svn_branch_name}/ubuntu/{libmyth,mythtv}*.deb ${replacements_dir}
 
 	# VDR Packages
 	DisplayMessage "Building VDR packages and plugins"
