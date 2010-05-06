@@ -17,6 +17,7 @@ DEVICEDATA_Reboot=236
 DEVICEDATA_Connector=68
 DEVICEDATA_TV_Standard=229
 DEVICEDATA_Setup_Script=189
+DEVICEDATA_Sound_Card=288
 
 SettingsFile=/etc/pluto/lastaudiovideo.conf
 
@@ -25,6 +26,7 @@ rm -f {/home/*,/root}/.kde/share/config/displayconfigrc
 
 Reboot=NoReboot
 ReloadX=NoReloadX
+AudioSetting_Override="$1"
 
 ComputerDev=$(FindDevice_Category "$PK_Device" "$DEVICECATEGORY_Media_Director" '' 'include-parent')
 OrbiterDev=$(FindDevice_Template "$ComputerDev" "$DEVICETEMPLATE_OnScreen_Orbiter")
@@ -92,6 +94,34 @@ SaveSettings()
 	done >"$SettingsFile"
 }
 
+Setup_AsoundConf()
+{
+	local AudioSetting="$1"
+	local SoundCard
+
+	SoundCard=$(GetDeviceData "$PK_Device" "$DEVICEDATA_Sound_Card")
+	SoundCard=$(TranslateSoundCard "$SoundCard")
+	if [[ -z "$SoundCard" ]]; then
+		SoundCard=0
+	fi
+	sed -r "s,%MAIN_CARD%,$SoundCard,g" /usr/pluto/templates/asound.conf >/etc/asound.conf
+
+	case "$AudioSetting" in
+		*[CO]*)
+			# audio setting is Coaxial or Optical, i.e. S/PDIF
+			echo 'pcm.!default asym_spdif' >>/etc/asound.conf
+		;;
+		*H*)
+			# audio setting is HDMI
+			echo 'pcm.!default asym_hdmi' >>/etc/asound.conf
+		;;
+		*)
+			# audio setting is Stereo or something unknown
+			echo 'pcm.!default asym_analog' >>/etc/asound.conf
+		;;
+	esac
+}
+
 VideoSettings_Check()
 {
 	local Update_XorgConf="NoXorgConf"
@@ -149,7 +179,11 @@ AudioSettings_Check()
 	local DB_AudioSetting DB_AudioScript DB_Reboot
 	local ScriptPath
 
-	DB_AudioSetting=$(GetDeviceData "$ComputerDev" "$DEVICEDATA_Audio_settings")
+	if [[ -z "$AudioSetting_Override" ]]; then
+		DB_AudioSetting=$(GetDeviceData "$ComputerDev" "$DEVICEDATA_Audio_settings")
+	else
+		DB_AudioSetting="$AudioSetting_Override"
+	fi
 	DB_Reboot=$(GetDeviceData "$AudioCardDev" "$DEVICEDATA_Reboot")
 
 	Logging "$TYPE" "$SEVERITY_NORMAL" "SetupAudioVideo" "'"
@@ -169,22 +203,7 @@ AudioSettings_Check()
 		# S3 is not a valid combination and will break things
 		NewSetting_AudioSetting="${NewSetting_AudioSetting//3}"
 	fi
-
-	sed -i '/pcm.!default/ d' /etc/asound.conf
-	case "$NewSetting_AudioSetting" in
-		*[CO]*)
-			# audio setting is Coaxial or Optical, i.e. S/PDIF
-			echo 'pcm.!default asym_spdif' >>/etc/asound.conf
-		;;
-		*H*)
-			# audio setting is HDMI
-			echo 'pcm.!default asym_hdmi' >>/etc/asound.conf
-		;;
-		*)
-			# audio setting is Stereo or something unknown
-			echo 'pcm.!default asym_analog' >>/etc/asound.conf
-		;;
-	esac
+	Setup_AsoundConf "$NewSetting_AudioSetting"
 
 	if [[ "$DB_Reboot" == 1 ]]; then
 		Reboot="Reboot"
