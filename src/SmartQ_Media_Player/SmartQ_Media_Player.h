@@ -23,6 +23,8 @@
 //<-dceag-d-e->
 
 #include "DCE/PlainClientSocket.h" // needed for sendCommand
+#include "DCE/SocketListener.h"
+#include "DCE/ServerSocket.h"
 
 //<-dceag-decl-b->
 namespace DCE
@@ -52,6 +54,8 @@ public:
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
 
+		virtual bool Connect(int iPK_DeviceTemplate );
+
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
 		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
@@ -60,6 +64,9 @@ public:
 //
 public:
 		virtual void CreateChildren();
+
+		string m_sIPofMD;
+
 		PlainClientSocket *m_pVLCSocket;
 		string sendCommand(const char *Cmd, bool bExpectResponse = false);
 		
@@ -353,6 +360,40 @@ public:
 	virtual void CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
+
+        // Borrowed from Xine_Player ...
+
+	class SmartQNotification_SocketListener : public SocketListener
+	{
+	public:
+		SmartQNotification_SocketListener(string sName):SocketListener(sName){};
+	
+		virtual void ReceivedMessage( Socket *pSocket, Message* pMessage ){};
+		virtual bool ReceivedString( Socket *pSocket, string sLine, int nTimeout = - 1 )
+		{
+			std::cout << "Socket got: " << sLine << std::endl; 
+			return true; 
+		};
+		
+		void SendStringToAll(string sString)
+		{
+			PLUTO_SAFETY_LOCK( lm, m_ListenerMutex );
+			for(std::vector<ServerSocket *>::iterator i=m_vectorServerSocket.begin(); i!=m_vectorServerSocket.end(); i++)
+			{
+				if ((*i)->SendString(sString))
+				{
+					LoggerWrapper::GetInstance()->Write(LV_STATUS,"Sending time code %s to %s",sString.c_str(),(*i)->m_sHostName.c_str());
+				}
+				else
+				{
+					std::cout << "Not sent timecode to " << (*i)->m_sHostName<<  std::endl;
+				}
+			}
+		}
+	};
+	
+	SmartQNotification_SocketListener *m_pNotificationSocket;
+
 	};
 
 //<-dceag-end-b->

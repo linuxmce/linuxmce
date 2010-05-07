@@ -41,6 +41,10 @@ SmartQ_Media_Player::SmartQ_Media_Player(int DeviceID, string ServerAddress,bool
 {
 	m_iVolume = 0;
 	m_bMute = false;
+
+	m_pNotificationSocket = new SmartQNotification_SocketListener(string("m_pNotificationSocket"));
+	m_pNotificationSocket->m_bSendOnlySocket = true; // one second
+
 }
 
 //<-dceag-const2-b->
@@ -58,6 +62,13 @@ SmartQ_Media_Player::SmartQ_Media_Player(Command_Impl *pPrimaryDeviceCommand, De
 SmartQ_Media_Player::~SmartQ_Media_Player()
 //<-dceag-dest-e->
 {
+
+	if (m_pNotificationSocket)
+	{
+		delete m_pNotificationSocket;
+		m_pNotificationSocket = NULL;
+	}
+
 	sendCommand("shutdown");	
 }
 
@@ -137,6 +148,21 @@ void SmartQ_Media_Player::ReceivedUnknownCommand(string &sCMD_Result,Message *pM
 void SmartQ_Media_Player::CreateChildren()
 {
 	system("screen -d -m -h 3000 -S vlcSession /usr/pluto/bin/LinuxMCE.launchVLC.sh");
+}
+
+bool SmartQ_Media_Player::Connect(int iPK_DeviceTemplate )
+{
+    if ( ! Command_Impl::Connect(iPK_DeviceTemplate) )
+		return false;
+
+	DeviceData_Base *pDevice = m_pData->GetTopMostDevice();
+	m_sIPofMD = pDevice->m_sIPAddress;
+
+	m_pNotificationSocket->StartListening (12000);
+
+	EVENT_Playback_Completed("",0,false);  // In case media plugin thought something was playing, let it know that there's not
+
+	return true;
 }
 
 /**
