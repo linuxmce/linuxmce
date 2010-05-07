@@ -9,7 +9,8 @@ Standards-Version: 3.8.4
 Vcs-Bzr: bzr+ssh://bazaar.launchpad.net/~mythbuntu/mythtv/mythtv-fixes
 Vcs-Browser: http://bazaar.launchpad.net/~mythbuntu/mythtv/mythtv-fixes
 Build-Conflicts: libqt3-mt-dev
-Build-Depends:  debhelper (>= 7.0.50~),
+Build-Depends:  
+#		debhelper (>= 7.0.50~),
                 quilt,
                 ccache,
                 yasm,
@@ -45,7 +46,7 @@ Build-Depends:  debhelper (>= 7.0.50~),
                 xserver-xorg-video-openchrome [i386 amd64] | libchromexvmc1 [i386 amd64],
                 xserver-xorg-video-openchrome [i386 amd64] | libchromexvmcpro1 [i386 amd64],
                 libvdpau-dev [i386 amd64 armel] | nvidia-190-libvdpau-dev [i386 amd64] | nvidia-185-libvdpau-dev [i386 amd64] | nvidia-180-libvdpau-dev [i386 amd64],
-                libudev-dev
+#                libudev-dev
 
 Package: mythtv
 Architecture: all
