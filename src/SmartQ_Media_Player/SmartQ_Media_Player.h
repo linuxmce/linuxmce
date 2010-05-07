@@ -91,6 +91,8 @@ public:
 
 	/*
 			*****DATA***** accessors inherited from base class
+	int DATA_Get_Time_Code_Report_Frequency();
+	int DATA_Get_Port();
 
 			*****EVENT***** accessors inherited from base class
 	void EVENT_Playback_Info_Changed(string sMediaDescription,string sSectionDescription,string sSynposisDescription);
