@@ -129,6 +129,22 @@ public:
 	* @brief Device data access methods:
 	*/
 
+	int Get_Time_Code_Report_Frequency()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Time_Code_Report_Frequency_CONST).c_str());
+		else
+			return atoi(m_mapParameters[DEVICEDATA_Time_Code_Report_Frequency_CONST].c_str());
+	}
+
+	int Get_Port()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Port_CONST).c_str());
+		else
+			return atoi(m_mapParameters[DEVICEDATA_Port_CONST].c_str());
+	}
+
 };
 
 
@@ -233,6 +249,8 @@ public:
 	virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage) { };
 	Command_Impl *CreateCommand(int PK_DeviceTemplate, Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent);
 	//Data accessors
+	int DATA_Get_Time_Code_Report_Frequency() { return GetData()->Get_Time_Code_Report_Frequency(); }
+	int DATA_Get_Port() { return GetData()->Get_Port(); }
 	//Event accessors
 	void EVENT_Playback_Info_Changed(string sMediaDescription,string sSectionDescription,string sSynposisDescription) { GetEvents()->Playback_Info_Changed(sMediaDescription.c_str(),sSectionDescription.c_str(),sSynposisDescription.c_str()); }
 	void EVENT_Menu_Onscreen(int iStream_ID,bool bOnOff) { GetEvents()->Menu_Onscreen(iStream_ID,bOnOff); }
