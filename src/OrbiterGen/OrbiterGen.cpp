@@ -709,7 +709,7 @@ m_bNoEffects = true;
 
 	m_pRow_Size = NULL;
 	if( !m_pRow_Device->FK_Device_ControlledVia_isNull() &&
-		m_pRow_Device->FK_Device_ControlledVia_getrow()->FK_DeviceTemplate_getrow()->FK_DeviceCategory_get()==DEVICECATEGORY_Media_Director_CONST )
+		( m_pRow_Device->FK_Device_ControlledVia_getrow()->FK_DeviceTemplate_getrow()->FK_DeviceCategory_get()==DEVICECATEGORY_Media_Director_CONST || m_pRow_Device->FK_Device_ControlledVia_getrow()->FK_DeviceTemplate_getrow()->FK_DeviceCategory_get()==DEVICECATEGORY_Mobile_Internet_Devices_CONST ) )
 	{
 		// This is an on-screen orbiter
 		pRow_Device_DeviceData = m_spDatabase_pluto_main->Device_DeviceData_get()->GetRow(m_pRow_Device->FK_Device_ControlledVia_get(),DEVICEDATA_Video_settings_CONST);
@@ -1085,7 +1085,7 @@ m_bNoEffects = true;
 			{
 				Row_Device_EntertainArea *pRow_Device_EntertainArea = vectRow_Device_EntertainArea[s];
 				Row_Device *pRow_Device = pRow_Device_EntertainArea->FK_Device_getrow();
-				if( pRow_Device && pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_get()==DEVICECATEGORY_Media_Director_CONST )
+				if( pRow_Device && ( pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_get()==DEVICECATEGORY_Media_Director_CONST || pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_get()==DEVICECATEGORY_Mobile_Internet_Devices_CONST  ) )
 					pRow_Device_MediaDirector = pRow_Device_EntertainArea->FK_Device_getrow();
 				if( pRow_Device && pRow_Device->FK_DeviceTemplate_getrow()->FK_DeviceCategory_get()==DEVICECATEGORY_Standard_Orbiter_CONST )
 					pRow_Device_Orbiter = pRow_Device_EntertainArea->FK_Device_getrow();
@@ -2828,14 +2828,14 @@ void OrbiterGenerator::FixupSpecialOrbiters(list<LocationInfo *> &listLocationIn
 			if( !pRow_DeviceTemplate )
 				continue;
 
-			if( pRow_DeviceTemplate->FK_DeviceCategory_get()!=DEVICECATEGORY_Media_Director_CONST )
+			if( pRow_DeviceTemplate->FK_DeviceCategory_get()!=DEVICECATEGORY_Media_Director_CONST || pRow_DeviceTemplate->FK_DeviceCategory_get()!=DEVICECATEGORY_Mobile_Internet_Devices_CONST )
 			{
 				// See if it was the child
 				pRow_Device_MD = pRow_Device_MD->FK_Device_ControlledVia_getrow();
 				pRow_DeviceTemplate = pRow_Device_MD->FK_DeviceTemplate_getrow();
 				if( !pRow_DeviceTemplate )
 					continue;
-				if( pRow_DeviceTemplate->FK_DeviceCategory_get()!=DEVICECATEGORY_Media_Director_CONST )
+				if( pRow_DeviceTemplate->FK_DeviceCategory_get()!=DEVICECATEGORY_Media_Director_CONST || pRow_DeviceTemplate->FK_DeviceCategory_get()!=DEVICECATEGORY_Mobile_Internet_Devices_CONST )
 					continue;
 			}
 
