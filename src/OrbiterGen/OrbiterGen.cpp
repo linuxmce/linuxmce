@@ -598,7 +598,7 @@ m_bNoEffects = true;
 	Row_DeviceCategory *pDeviceCategory_MD=pRow_Device_MD ? pRow_Device_MD->FK_DeviceTemplate_getrow()->FK_DeviceCategory_getrow() : NULL;
 	while( pDeviceCategory_MD )
 	{
-		if( pDeviceCategory_MD->PK_DeviceCategory_get()==DEVICECATEGORY_Media_Director_CONST )
+		if( pDeviceCategory_MD->PK_DeviceCategory_get()==DEVICECATEGORY_Media_Director_CONST || pDeviceCategory_MD->PK_DeviceCategory_get()== DEVICECATEGORY_Mobile_Internet_Devices_CONST )
 		{
 			m_bIsOSD=true;
 			break;
