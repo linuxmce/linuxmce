@@ -42,6 +42,14 @@ XTRALDLIBS += -lhid -lGL -lGLU
 CPPFLAGS += -DHID_REMOTE
 endif
 
+# USE_GTK can be passed in as additional defines to SNR_CPPFLAGS to add support for GTK progress bars and prompt dialogues.
+ifeq (USE_GTK,$(findstring USE_GTK, $(SNR_CPPFLAGS)))
+CPPFLAGS += `pkg-config --cflags gtk+-x11-2.0`
+LDFLAGS += `pkg-config --libs gtk+-x11-2.0`
+sources += Linux/GTKPromptUser.cpp \
+	   Linux/GTKProgressWnd.cpp
+endif
+
 # wmctrl wrapper
 CPPFLAGS += -I/usr/X11R6/include -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include
 XTRALDLIBS += -lX11 -lXmu -lglib-2.0

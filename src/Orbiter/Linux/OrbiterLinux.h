@@ -44,9 +44,22 @@
 #include "win_list_manager.h"
 #include "utilities/linux/wrapper/wrapper_x11.h"
 
+#ifndef USE_GTK
 // should be deleted
-#include "XProgressWnd.h"
 #include "XPromptUser.h"
+#endif
+
+#ifdef USE_GTK
+#include "GTKPromptUser.h"
+#endif
+
+#ifndef USE_GTK
+#include "XProgressWnd.h"
+#endif
+
+#ifdef USE_GTK
+#include "GTKProgressWnd.h"
+#endif
 
 class wxDialog_WaitGrid;
 class wxDialog_WaitList;
@@ -93,8 +106,12 @@ private:
     int m_nProgressWidth;
     int m_nProgressHeight;
 #ifndef DIRECTFB
-    XProgressWnd *m_pProgressWnd;
 
+#ifdef USE_GTK
+    GTKProgressWnd *m_pProgressWnd;
+#else
+    XProgressWnd *m_pProgressWnd;
+#endif
     wxDialog_WaitGrid *m_pWaitGrid;
     bool m_bButtonPressed_WaitGrid;
     wxDialog_WaitList *m_pWaitList;

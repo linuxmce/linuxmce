@@ -383,7 +383,11 @@ bool OrbiterRenderer_Linux::DisplayProgress(string sMessage, const map<string, b
     if (nProgress != -1 && !pOrbiterLinux->m_pProgressWnd)
     {
         // Create the progress window ...
+#ifdef USE_GTK
+	pOrbiterLinux->m_pProgressWnd = new GTKProgressWnd();
+#else
         pOrbiterLinux->m_pProgressWnd = new XProgressWnd();
+#endif
         pOrbiterLinux->m_pProgressWnd->UpdateProgress(sMessage, nProgress);
         pOrbiterLinux->m_pProgressWnd->Run();
         pOrbiterLinux->m_pWinListManager->PositionWindow(pOrbiterLinux->m_pProgressWnd->m_wndName, 0, 0, pOrbiterLinux->m_iImageWidth, pOrbiterLinux->m_iImageHeight);
@@ -433,7 +437,11 @@ bool OrbiterRenderer_Linux::DisplayProgress(string sMessage, int nProgress)
 	if (nProgress != -1 && !pOrbiterLinux->m_pProgressWnd)
     {
         // Create the progress window ...
+#ifdef USE_GTK
+	pOrbiterLinux->m_pProgressWnd = new GTKProgressWnd();
+#else
         pOrbiterLinux->m_pProgressWnd = new XProgressWnd();
+#endif
         pOrbiterLinux->m_pProgressWnd->UpdateProgress(sMessage, nProgress);
         pOrbiterLinux->m_pProgressWnd->Run();
 		pOrbiterLinux->m_pWinListManager->PositionWindow(pOrbiterLinux->m_pProgressWnd->m_wndName, 0, 0, pOrbiterLinux->m_iImageWidth, pOrbiterLinux->m_iImageHeight);
@@ -480,8 +488,12 @@ int OrbiterRenderer_Linux::PromptUser(string sPrompt, int iTimeoutSeconds, map<i
 		return false;
 
 	pOrbiterLinux->m_pWinListManager->SetSdlWindowVisibility(false);
+#ifdef USE_GTK
+    GTKPromptUser promptDlg(sPrompt, iTimeoutSeconds, p_mapPrompts);
+#else
     XPromptUser promptDlg(sPrompt, iTimeoutSeconds, p_mapPrompts);
     promptDlg.SetButtonPlacement(XPromptUser::BTN_VERT);
+#endif
     promptDlg.Init();
 	pOrbiterLinux->m_pWinListManager->PositionWindow(promptDlg.m_wndName, 0, 0, pOrbiterLinux->m_iImageWidth, pOrbiterLinux->m_iImageHeight);
 	pOrbiterLinux->m_pWinListManager->ApplyContext();
