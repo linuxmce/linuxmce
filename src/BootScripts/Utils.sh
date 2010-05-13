@@ -98,12 +98,12 @@ TranslateSoundCard()
 			Dev=$(readlink "$Card/device")
 			if [[ -n "$USB" ]]; then
 				if [[ "$Dev" == *"$PCI"*usb*"$USB:"* ]]; then
-					AlsaCard="hw:${Card#controlC}"
+					AlsaCard="${Card#controlC}"
 					break
 				fi
 			else
 				if [[ "$Dev" == *"$PCI" ]]; then
-					AlsaCard="hw:${Card#controlC}"
+					AlsaCard="${Card#controlC}"
 					break
 				fi
 			fi
