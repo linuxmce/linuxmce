@@ -31,7 +31,6 @@
 		$result = sendSocket($socket,"EVENT " . $deviceFromID . "\n");
 
 		$result = socket_read($socket,1024, PHP_NORMAL_READ);
-//		print "Result from Event: $result\n";		
 		return $socket;
 	}
 
@@ -41,10 +40,8 @@
 
 		$messageToSend = $deviceFromID . " " . $deviceToID . " " . $messageType . " " . $messageID;
 		if (is_array($parameter1ID)) {
-//			print "<li>Parameter Array</li>\n";
 			foreach ($parameter1ID as $parameterPair) {
 				$messageToSend .= " " . $parameterPair[0] . " " . $parameterPair[1];
-//				print "<li>parameter: " . $parameterPair[0] . " - " . $parameterPair[1] . "</li>\n";
 			}
 			unset($parameter1ID);
 		} 
@@ -63,10 +60,7 @@
 		$messageLength = strlen($messageToSend);
 		$result = sendSocket($socket, "MESSAGET " . $messageLength . "\n");
 		$result = sendSocket($socket, $messageToSend . "\n");
-/*		echo "<li>Message to send: ";
-		echo $messageToSend;
-		print "</li>\n";
-*/	}
+	}
 
 	function commEnd($socket) { 
 		socket_close($socket);
