@@ -154,8 +154,12 @@
 		if ($room == 0) {
 			$room = $currentRoom;
 		}
-		$queryMD="SELECT PK_Device FROM Device Where FK_Room = $room AND FK_DeviceTemplate in (7,28);";
-		$MD = getMyValue($link,$queryMD);
+		$MD = getDeviceForTemplateInRoom(7);
+		if ($MD == "") {
+			$MD = getDeviceForTemplateInRoom(28);
+		}
+//		$queryMD="SELECT PK_Device FROM Device Where FK_Room = $room AND FK_DeviceTemplate in (7,28);";
+//		$MD = getMyValue($link,$queryMD);
 		return $MD;
 	}
 	
@@ -172,7 +176,7 @@
 	
 	function getCurrentMediaDevice($room = 0) {
 		// Return the media device PK_Device of the currently playing device.
-		global $currentMedia, $link;
+		global $currentMediaPlayer, $link;
 		$listOfDevices=getMediaDevices($room);
 		if ($currentMediaPlayer == "AV-Xine") {
 			$currentMediaDevice = getDeviceForTemplateInRoom($link,5); // Get Xine Player Device
@@ -205,10 +209,25 @@
 		return $mediaDevices;
 	}					
 
-	function sendPlayerCommand($room, $command) {
+	function sendPlayerCommand($room, $command, $parameter=0) {
+		global $possyDeviceFromID;
+		global $currentMediaPlayer;
+		// The media plugin needs to receive its messages from a device in the current room.
+		$possyDeviceFromID = getCurrentMD();
+		$status = getMediaStatus($room);		
 		$socket = commStart("dcerouter",3450,$possyDeviceFromID);
 		// myMessageSend($socket,$deviceFromID,$deviceToID (10 == media plugin),$messageType,$messageID,$parameter1ID,$parameter1Content,$parameter2ID,$parameter2Content);		
-		myMessageSend($socket,$possyDeviceFromID,$getCurrentMediaDevice($room),1,$command); // ,13,'"' . $filePath . '"', 45, $currentEntertainArea);
+		$file = fopen("/tmp/test.txt","w");
+		fwrite($file,"start\n");
+		// $destinationDevice = getCurrentMediaDevice($room);
+
+		$destinationDevice = getDeviceForTemplate(2);
+		fwrite($file, "from device: $possyDeviceFromID\n");
+		fwrite($file, "destination device: $destinationDevice\n");
+		fwrite($file,"room: $room currentmp: $currentMediaPlayer myMessageSend($socket,$possyDeviceFromID,x-$destinationDevice-x,1,$command,". implode($parameter).");");
+		fclose($file);
+//		myMessageSend($socket,$possyDeviceFromID,getCurrentMediaDevice($room),1,$command); // ,13,'"' . $filePath . '"', 45, $currentEntertainArea);
+		myMessageSend($socket,$possyDeviceFromID,$destinationDevice,1,$command,$parameter); // ,13,'"' . $filePath . '"', 45, $currentEntertainArea);
 		commEnd($socket);
 	}
 
@@ -830,11 +849,11 @@ function getDeviceForTemplate($link, $deviceTemplate) {
 
 function getDeviceForTemplateInRoom($link, $deviceTemplate) {
 	global $currentRoom;
-	$query = "SELECT PK_Device FROM Device D Where FK_DeviceTemplate = $deviceTemplate and FK_Room = $currentRoom";
+	$query = "SELECT Distinct PK_Device FROM Device D Where FK_DeviceTemplate = $deviceTemplate and FK_Room = $currentRoom";
 	// There can be more than one device for a given template. For example multiple lights
 	$value = getMyArray($link,$query);	
-	if (count($value) == 1) {
-		return $value[0];
+	if (count($value) < 2) {
+		return $value[0][0];
 	} else { 
 		return $value;
 	}
@@ -865,7 +884,8 @@ function getDeviceForDeviceCategoryInRoom($link, $deviceCategory) {
 	
 function getCurrentMD() {
 	global $link;
-	return getDeviceForTemplateInRoom($link, 28);
+//	return getMD();
+ 	return getDeviceForTemplateInRoom($link, 28);
 } 
 
 function getCurrentEA() {
