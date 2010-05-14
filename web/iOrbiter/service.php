@@ -20,38 +20,43 @@
 	$remotetype = "";
 	
 
-	if (isset($_GET["room"])) {
-		$currentRoom = $_GET["room"];
+	if (isset($_POST["room"])) {
+		$currentRoom = $_POST["room"];
 		$currentRoom = intval($currentRoom);
 		$currentEntertainArea = getEntertainArea($link,$currentRoom);
 	}
-	if (isset($_GET["screen"])) {
-		$currentScreen = $_GET["screen"];
+	if (isset($_POST["screen"])) {
+		$currentScreen = $_POST["screen"];
 		$currentScreen = intval($currentScreen);
 	}
-	if (isset($_GET["user"])) {
-		$currentUser = $_GET["user"];
+	if (isset($_POST["user"])) {
+		$currentUser = $_POST["user"];
 	}
-	if (isset($_GET["pk_file"])) {
-		$PK_File = $_GET["pk_file"];
+	if (isset($_POST["pk_file"])) {
+		$PK_File = $_POST["pk_file"];
 	}	
-	if (isset($_GET["remotetype"])) {
-	        $remoteType = $_GET["remotetype"];
-        fi
+	if (isset($_POST["remotetype"])) {
+	        $remoteType = $_POST["remotetype"];
+        }
 
-	if (isset($_GET["command"])) {
-		$command = $_GET["command"];
+	if (isset($_POST["command"])) {
+		$command = $_POST["command"];
 	} else {
 		$command = 'play';
 	}
+	$file=fopen("/tmp/test.txt","w+");
+	fwrite($file,"command= $command");
+	fclose($file);
 	if ($command == 'play') {
           playFile($mediaLink,$PK_File);
         } elseif ($command == 'stop') {
           sendPlayerCommand($currentRoom,44);  // MH_Stop_Media          
         } elseif ($command == 'skipfwd') {
-          sendPlayerCommand($currentRoom,63);  // Skip_Fwd
+//          sendPlayerCommand($currentRoom,63);  // Skip_Fwd / 
+            sendPlayerCommand($currentRoom,65,array(array("5", "+1"))); // Jump Position in Play list
         } elseif ($command == 'skipback') {
-          sendPlayerCommand($currentRoom,64);  // Skip_Back
+            sendPlayerCommand($currentRoom,65,array(array("5", "-1"))); // Jump Position in Play list
+//          sendPlayerCommand($currentRoom,64);  // Skip_Back
         } elseif ($command == 'louder') {
           sendCommand(-106,89);  // Vol+
         } elseif ($command == 'quieter') {
