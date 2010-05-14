@@ -48,9 +48,9 @@
 	print "";
 	if (substr($remoteType,0,2) == 'AV') {
 		print "<li class='group'>Media Control</li>\n";
-		print "<li onClick='tellemCommand(\"play\",$remoteType,$PK_File);'>Play/Pause</li>\n";
-		print "<li onClick='tellemCommand(\"skipfwd\",$remoteType,$PK_File);'>Skip Forward</li>\n";
-		print "<li onClick='tellemCommand(\"skipback\",$remoteType,$PK_File);'>Skip Backward</li>\n";
+		print "<li onClick='tellemCommand(\"play\",\"$remoteType\",$PK_File);'>Play/Pause</li>\n";
+		print "<li onClick='tellemCommand(\"skipfwd\",\"$remoteType\",$PK_File);'>Skip Forward</li>\n";
+		print "<li onClick='tellemCommand(\"skipback\",\"$remoteType\",$PK_File);'>Skip Backward</li>\n";
 	}
 	print "<li class='group'>Other Control</li>\n";
 	print "<li onClick='tellemCommand(\"louder\",$PK_File);'>Volume+</li>\n";
