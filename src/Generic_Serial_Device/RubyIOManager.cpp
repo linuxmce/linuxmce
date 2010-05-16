@@ -383,6 +383,32 @@ RubyIOManager::SendCommand(RubyCommandWrapper* pcmd) {
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Command sent.");
 }
 
+void 
+RubyIOManager::SendReceiveCommand(RubyCommandWrapper* pcmd) {
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Ruby code requested to send +receive command %d, from %d to %d... Sending...", 
+								pcmd->getId(), pcmd->getDevIdFrom(), pcmd->getDevIdTo());
+
+	Message* pmsg;
+	if( pcmd->getDevIdTo() == DEVICEID_CATEGORY )
+		pmsg = new Message(pcmd->getDevIdFrom(), pcmd->getCategory(), true, BL_SameHouse, pcmd->getPriority(), pcmd->getType(), pcmd->getId(), 0);
+	else if( pcmd->getDevIdTo() == DEVICEID_MASTERDEVICE )
+		pmsg = new Message(pcmd->getDevIdFrom(), pcmd->getTemplate(), BL_SameHouse, pcmd->getPriority(), pcmd->getType(), pcmd->getId(), 0);
+	else
+		pmsg = new Message(pcmd->getDevIdFrom(), pcmd->getDevIdTo(), pcmd->getPriority(), pcmd->getType(), pcmd->getId(), 0);
+	pmsg->m_mapParameters = pcmd->getParams();
+	Message* pResponse = pevdisp_->SendReceiveMessage(pmsg);
+
+	if (pResponse)
+	{
+	        map<long, string>::iterator it;
+		for(it = pResponse->m_mapParameters.begin(); it != pResponse->m_mapParameters.end(); it++) {
+	                pcmd->setParam(it->first, it->second.c_str());
+		}
+	}
+	
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Command sent.");
+}
+
 string 
 RubyIOManager::SendCommandReceiveString(RubyCommandWrapper* pcmd) {
 

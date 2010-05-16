@@ -32,6 +32,7 @@ class RubyDCEConnector {
 public:
 	/*methods for comunicating with DCE */
 	virtual void SendCommand(RubyCommandWrapper* pcmd) = 0;
+	virtual void SendReceiveCommand(RubyCommandWrapper* pcmd) = 0;
 	virtual string SendCommandReceiveString(RubyCommandWrapper* pcmd) = 0;
 };
 

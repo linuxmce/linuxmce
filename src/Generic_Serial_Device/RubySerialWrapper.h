@@ -85,6 +85,7 @@ public:
 
 public:
 	void SendCommand(RubyCommandWrapper* pcmd);
+	void SendReceiveCommand(RubyCommandWrapper* pcmd);
 
 	/*accessed from ruby code*/
 public:
