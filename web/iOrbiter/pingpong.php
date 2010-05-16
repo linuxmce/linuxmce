@@ -6,8 +6,8 @@ error_reporting(E_ALL);
 $possyDeviceFromID = 214; // an Orbiter device id, which only exists to receive messages.
 
 // commStart, commEnd and myMessageSend are in libMessageSend.php
-
-$socket = commStart("dcerouter",3450,$possyDeviceFromID,"EVENT",1);
+$socketCommand = commStart("dcerouter",3450,$possyDeviceFromID,"COMMAND");
+$socketEvent = commStart("dcerouter",3450,$possyDeviceFromID,"EVENT",1);
 // Register Message Receiptor
 $destination = -1000; // DCE Router Device
 $messageType = 8; // MessageType Register Interceptor
@@ -26,32 +26,34 @@ $criteriaTypeFrom = 1;
 $criteriaTypeTo = 2;
 $criteriaTypeCategory = 4;
 
-/* myMessageSend($socket,$possyDeviceFromID,$destination,$messageTypeClearCriteria,0);
+// Clear all registrations
+/* myMessageSend($socket,$possyDeviceFromID,$destination,$messageTypeClearCriteria,0,0,"");
 
 $input = socket_read($socket, 1024);
 print "clear register returned: $input \n";
 */
 
-myMessageSend($socket,$possyDeviceFromID,$destination,$messageTypeRegister,0,5,$messageTypeEvent,$criteriaTypeFrom,1);
+// Setup regstration to receive all Events from DCERouter (device 1)
+// myMessageSend($socket,$possyDeviceFromID,$destination,$messageTypeRegister,0,5,$messageTypeEvent,$criteriaTypeFrom,1);
 
-$input = socket_read($socket, 1024);
+// Register an interceptor without detailing what we want
+myMessageSend($socketEvent,$possyDeviceFromID,$destination,$messageTypeRegister,0);
+
+$input = socket_read($socketEvent, 1024);
 print "first return: $input \n";
 print "PLAIN_TEXT\n";
-socket_write($socket, "PLAIN_TEXT\n",strlen("PLAIN_TEXT\n"));
-$input = socket_read($socket, 1024);
+socket_write($socketEvent, "PLAIN_TEXT\n",strlen("PLAIN_TEXT\n"));
+$input = socket_read($socketEvent, 1024);
 print "second return: $input \n";
 
-$socket = commEnd($socket);
-$socket = commStart("dcerouter",3450,$possyDeviceFromID,"COMMAND");
 
-
-
-while ($input = socket_read($socket, 1024)) {
+while ($input = socket_read($socketCommand, 1024)) {
   print "Return: $input --EOL--\n";
-  socket_write($socket,"OK\n",3);
+  socket_write($socketCommand,"OK\n",3);
 }
 // myMessageSend($socket,$possyDeviceFromID,10,1,43,13,'"' . $filePath . '"', 45, $currentEntertainArea)
-commEnd($socket);
+commEnd($socketEvent);
+commEnd($socketCommand);
                                                                  
 
 
