@@ -30,50 +30,50 @@ $criteriaTypeMessageID = 6;
 
 $deviceMediaPlugin = 10;
 $deviceDCERouter = 1;
+$deviceOrbiterPlugin = 9;
 
 $messageSetNowPlaying = 242;
+$messageOrbiterRegistered = 255;
 
-/* // Clear all registrations
+// Clear all registrations - does NOT return anything on the socketEvent
 myMessageSend($socketEvent,$possyDeviceFromID,$destination,$messageTypeClearCriteria,0,0,"");
 
-$input = socket_read($socketEvent, 1024);
-print "clear register returned: $input \n";
-*/
 // Setup regstration to receive all Events from DCERouter (device 1)
 // myMessageSend($socketEvent,$possyDeviceFromID,$destination,$messageTypeRegister,0,5,$messageTypeEvent,$criteriaTypeFrom,1);
 
 // Setup regstration to receive all Events from DCERouter (device 1)
 // myMessageSend($socketEvent,$possyDeviceFromID,$destination,$messageTypeRegister,0,$parameterMessageType,$messageTypeCommand,$criteriaTypeMessageID,$messageSetNowPlaying);
 
-// Register an interceptor without detailing what we want
-myMessageSend($socketEvent,$possyDeviceFromID,$destination,$messageTypeRegister,0,$parameterMessageType,$messageTypeCommand);
+// Register an interceptor to receive a message whenever playback starts.
 
+/* myMessageSend($socketEvent,$possyDeviceFromID,$destination,$messageTypeRegister,0,$parameterMessageType,$messageTypeCommand,$criteriaTypeMessageID,242);
 $input = socket_read($socketEvent, 1024);
-print "first return: $input \n";
+print "input $input\n";
+*/
+
+// For now, we are happy with PLAIN_TEXT messages
 print "PLAIN_TEXT\n";
 socket_write($socketEvent, "PLAIN_TEXT\n",strlen("PLAIN_TEXT\n"));
 $input = socket_read($socketEvent, 1024);
 print "second return: $input \n";
+
+// Tell Orbiter plugin we are alive - does NOT return anything on the socketEvent
+$messageSendParameter = array(array(8,"1"));  // Register ON
+array_push($messageSendParameter, array(17,"")); // Current User
+array_push($messageSendParameter, array(45,"6")); // Entertainment Area
+array_push($messageSendParameter, array(57,"6")); // Current Room
+ 
+myMessageSend($socketEvent,$possyDeviceFromID,$deviceOrbiterPlugin,$messageTypeCommand,$messageOrbiterRegistered,$messageSendParameter);
+// After registering this devie with Orbiter-plugin, we automatically receive messages destined for an Orbiter. No need to intercept
+// any more messages per se
+
+
 
 while ($input = socket_read($socketCommand, 1024, PHP_NORMAL_READ)) {
   print $input . "\n";
   $arrayReturn = explode(" ",$input);  
   $length = intval($arrayReturn[1]) + 1;
   print "Reading $length bytes\n";
-/*  $chunks = intval($length / 16000);
-  $rest = $length - ($chunks * 16000);
-  print "Doing it in $chunks chunk(s)\n";
-  if ($rest > 0) {
-	print "First get the remains: $rest\n";
-  	$input = socket_read($socketCommand,$rest,PHP_BINARY_READ);
-	print "Got " . strlen($input) . " long string\n";
-  }
-  for ($i=0;$i < $chunks; $i++) {
-	print "Doing " . $i + 1 . " chunk";
-  	$input .= socket_read($socketCommand,16000, PHP_BINARY_READ);
-	print "New length of \$input: " . strlen($input) . "\n";
-  }
-*/  
   $input = readSocketForDataLength($socketCommand,$length);
   digestMessage($input);
   socket_write($socketCommand,"OK\n",3);
@@ -87,6 +87,9 @@ commEnd($socketEvent);
 commEnd($socketCommand);
 
 function digestMessage($input) {
+  if (strlen($input) > 500) {
+      $input = "only the first 200byte: " . substr($input,0,500);
+  }
   print "Return: $input --EOL--\n";
 }                                                                 
 
@@ -162,6 +165,9 @@ function readSocketForDataLength ($socket, $len)
 		$messageToSend = $deviceFromID . " " . $deviceToID . " " . $messageType . " " . $messageID;
 		if (is_array($parameter1ID)) {
 			foreach ($parameter1ID as $parameterPair) {
+				if (substr($parameterPair[1],0,1) != '"') {
+				  $parameterPair[1] = '"' . $parameterPair[1] . '"';
+				}
 				$messageToSend .= " " . $parameterPair[0] . " " . $parameterPair[1];
 			}
 			unset($parameter1ID);
