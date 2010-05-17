@@ -183,9 +183,13 @@ function Build_Replacements_Intrepid
 	#v4l-modules-source
 	Build_Replacement_Package v4l2 ubuntu/v4l-modules-source
 
+	#Package: debhelper
+        Build_Replacement_Package debhelper ubuntu/debhelper-7.4.20
+	cp ${svn_dir}/${svn_branch_name}/ubuntu/debhelper*.deb ${replacements_dir}
+
 	#Package: mythtv
-	Build_Replacement_Package mythtv ubuntu/mythtv-0.23.0+fixes24158
-	cp ${svn_dir}/${svn_branch_name}/ubuntu/{libmyth,mythtv}*.deb ${replacements_dir}
+#	Build_Replacement_Package mythtv ubuntu/mythtv-0.23.0+fixes24158
+#	cp ${svn_dir}/${svn_branch_name}/ubuntu/{libmyth,mythtv}*.deb ${replacements_dir}
 
 	# VDR Packages
 	DisplayMessage "Building VDR packages and plugins"
