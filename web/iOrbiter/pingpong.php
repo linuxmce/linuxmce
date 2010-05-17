@@ -6,7 +6,7 @@ error_reporting(E_ALL);
 $possyDeviceFromID = 214; // an Orbiter device id, which only exists to receive messages.
 
 // commStart, commEnd and myMessageSend are in libMessageSend.php
-$socketCommand = commStart("dcerouter",3450,$possyDeviceFromID,"COMMAND");
+$socketCommand = commStart("dcerouter",3450,$possyDeviceFromID,"COMMAND",1);
 $socketEvent = commStart("dcerouter",3450,$possyDeviceFromID,"EVENT",1);
 // Register Message Receiptor
 $destination = -1000; // DCE Router Device
@@ -17,6 +17,7 @@ $paramValue = 1;
 //$paramValue = 10 ; // Media Plug-Ins (8=MDs, 11=MediaPlayer Plugins,13=MediaPlayers,64=VirtualMediaDriector)
 // myMessageSend($socket,$deviceFromID,$deviceToID,$messageType = 1,$messageID,$parameter1ID=0,$parameter1Content="",$parameter2ID=0,$parameter2Content="") {
 
+$parameterMessageType = 5;
 $messageTypeRegister = 8;
 $messageTypeEvent = 2;
 $messageTypeCommand = 1;
@@ -25,19 +26,27 @@ $messageTypeClearCriteria = 13;
 $criteriaTypeFrom = 1;
 $criteriaTypeTo = 2;
 $criteriaTypeCategory = 4;
+$criteriaTypeMessageID = 6;
 
-// Clear all registrations
-/* myMessageSend($socket,$possyDeviceFromID,$destination,$messageTypeClearCriteria,0,0,"");
+$deviceMediaPlugin = 10;
+$deviceDCERouter = 1;
 
-$input = socket_read($socket, 1024);
+$messageSetNowPlaying = 242;
+
+/* // Clear all registrations
+myMessageSend($socketEvent,$possyDeviceFromID,$destination,$messageTypeClearCriteria,0,0,"");
+
+$input = socket_read($socketEvent, 1024);
 print "clear register returned: $input \n";
 */
+// Setup regstration to receive all Events from DCERouter (device 1)
+// myMessageSend($socketEvent,$possyDeviceFromID,$destination,$messageTypeRegister,0,5,$messageTypeEvent,$criteriaTypeFrom,1);
 
 // Setup regstration to receive all Events from DCERouter (device 1)
-// myMessageSend($socket,$possyDeviceFromID,$destination,$messageTypeRegister,0,5,$messageTypeEvent,$criteriaTypeFrom,1);
+// myMessageSend($socketEvent,$possyDeviceFromID,$destination,$messageTypeRegister,0,$parameterMessageType,$messageTypeCommand,$criteriaTypeMessageID,$messageSetNowPlaying);
 
 // Register an interceptor without detailing what we want
-myMessageSend($socketEvent,$possyDeviceFromID,$destination,$messageTypeRegister,0);
+myMessageSend($socketEvent,$possyDeviceFromID,$destination,$messageTypeRegister,0,$parameterMessageType,$messageTypeCommand);
 
 $input = socket_read($socketEvent, 1024);
 print "first return: $input \n";
@@ -46,15 +55,62 @@ socket_write($socketEvent, "PLAIN_TEXT\n",strlen("PLAIN_TEXT\n"));
 $input = socket_read($socketEvent, 1024);
 print "second return: $input \n";
 
-
-while ($input = socket_read($socketCommand, 1024)) {
-  print "Return: $input --EOL--\n";
+while ($input = socket_read($socketCommand, 1024, PHP_NORMAL_READ)) {
+  print $input . "\n";
+  $arrayReturn = explode(" ",$input);  
+  $length = intval($arrayReturn[1]) + 1;
+  print "Reading $length bytes\n";
+/*  $chunks = intval($length / 16000);
+  $rest = $length - ($chunks * 16000);
+  print "Doing it in $chunks chunk(s)\n";
+  if ($rest > 0) {
+	print "First get the remains: $rest\n";
+  	$input = socket_read($socketCommand,$rest,PHP_BINARY_READ);
+	print "Got " . strlen($input) . " long string\n";
+  }
+  for ($i=0;$i < $chunks; $i++) {
+	print "Doing " . $i + 1 . " chunk";
+  	$input .= socket_read($socketCommand,16000, PHP_BINARY_READ);
+	print "New length of \$input: " . strlen($input) . "\n";
+  }
+*/  
+  $input = readSocketForDataLength($socketCommand,$length);
+  digestMessage($input);
   socket_write($socketCommand,"OK\n",3);
+  if ($length == 1) {
+  	die();
+  }
 }
+
 // myMessageSend($socket,$possyDeviceFromID,10,1,43,13,'"' . $filePath . '"', 45, $currentEntertainArea)
 commEnd($socketEvent);
 commEnd($socketCommand);
-                                                                 
+
+function digestMessage($input) {
+  print "Return: $input --EOL--\n";
+}                                                                 
+
+function readSocketForDataLength ($socket, $len)
+{
+    // This function was copied from the php.net site
+    $offset = 0;
+    $socketData = '';
+   
+    while ($offset < $len) {
+        if (($data = @socket_read ($socket, $len-$offset, PHP_BINARY_READ)) === false) {
+            return false;
+        }
+       
+        $dataLen = strlen ($data);
+        $offset += $dataLen;
+        $socketData .= $data;
+       
+        if ($dataLen == 0) { break; }
+    }
+
+    return $socketData;
+}
+
 
 
 // included from libMessageSend.php
@@ -74,9 +130,11 @@ commEnd($socketCommand);
 	}
 	
 	
-	function sendSocket($socket, $message) {
+	function sendSocket($socket, $message, $debug = 0) {
 		// Send message to the socket
-		print $message;
+		if ($debug == 1) {
+			print $message;		
+		}
 		$result = socket_write($socket, $message, strlen($message));
 		if ( ! $result) {
 			$errCode = socket_last_error();
@@ -121,8 +179,8 @@ commEnd($socketCommand);
 			}
 		}
 		$messageLength = strlen($messageToSend);
-		$result = sendSocket($socket, "MESSAGET " . $messageLength . "\n");
-		$result = sendSocket($socket, $messageToSend . "\n");
+		$result = sendSocket($socket, "MESSAGET " . $messageLength . "\n",1);
+		$result = sendSocket($socket, $messageToSend . "\n",1);
 	}
 
 	function commEnd($socket) { 
