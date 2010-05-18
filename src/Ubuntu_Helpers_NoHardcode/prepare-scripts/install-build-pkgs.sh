@@ -20,13 +20,18 @@ pushd /usr/src
 popd
 
 # Build new debhelper package
-pushd ${svn_dir}/${svn_branch_name}/ubuntu/debhelper-7.4.20
+pushd /usr/src
+      # download new file
+      wget http://ftp.de.debian.org/debian/pool/main/d/debhelper/debhelper_7.4.20.tar.gz
+      echo "Unpacking debhelper_7.4.20.tar.gz"
+      tar -zxvf debhelper_7.4.20.tar.gz
       echo "Creating debhelper-7.4.20 debian package"
+      mv debhelper debhelper_7.4.20
+      cd debhelper_7.4.20
+      sed -i 's/--utf8//' Makefile
       dpkg-buildpackage -rfakeroot -b -us -uc
-      cp ${svn_dir}/${svn_branch_name}/ubuntu/debhelper*.deb ${replacements_dir}
+      echo "Installing debhelper-7.4.20 debian package"
+      dpkg -i --force-all /usr/src/debhelper_7.4.20_all.deb
 popd
-
-# Install new debhelper
-dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/debhelper_7.4.20_all.deb
 
 echo "*** Done: $0"
