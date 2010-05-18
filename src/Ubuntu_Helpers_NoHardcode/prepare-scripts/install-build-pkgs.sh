@@ -34,4 +34,7 @@ pushd /usr/src
       dpkg -i --force-all /usr/src/debhelper_7.4.20_all.deb
 popd
 
+# Install packages needed for mythtv .23 build
+apt-get -q -f -y --force-yes install yasm libfaac-dev libfribidi-dev liba52-0.7.4-dev
+
 echo "*** Done: $0"
