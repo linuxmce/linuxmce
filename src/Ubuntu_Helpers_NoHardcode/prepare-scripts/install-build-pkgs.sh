@@ -19,4 +19,14 @@ pushd /usr/src
 	tar xjf linux-source-"$KVER_SHORT".tar.bz2
 popd
 
+# Build new debhelper package
+pushd ${svn_dir}/${svn_branch_name}/ubuntu/debhelper-7.4.20
+      echo "Creating debhelper-7.4.20 debian package"
+      dpkg-buildpackage -rfakeroot -b -us -uc
+      cp ${svn_dir}/${svn_branch_name}/ubuntu/debhelper*.deb ${replacements_dir}
+popd
+
+# Install new debhelper
+dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/debhelper_7.4.20_all.deb
+
 echo "*** Done: $0"
