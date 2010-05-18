@@ -1,5 +1,14 @@
 <?php
+/*
 
+  pingpong.php
+  run it from the commandline with php pingpong.php. It will register itself with a dcerouter 
+  using the defined Orbiter ID. Make sure the Orbiter ID exists. After registering, it receives
+  all messages for the Orbiter and displays these messages on the screen.
+
+  Copyright 2010, Peer Oliver Schmidt
+  Licence: GPL v3
+*/
 error_reporting(E_ALL); 
         
 
