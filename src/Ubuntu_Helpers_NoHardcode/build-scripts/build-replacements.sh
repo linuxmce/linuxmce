@@ -185,7 +185,7 @@ function Build_Replacements_Intrepid
 
 	#Package: mythtv
 	# Remove packages that conflict with mythtv .23 build
-	dpkg -r libmyth-dev qt3-dev-tools libqt3-mt-dev libartsc0-dev
+	apt-get remove -y libarts1-dev libmediastreamer0-dev libmyth-dev qt3-dev-tools libqt3-mt-dev libartsc0-dev
 	Build_Replacement_Package mythtv ubuntu/mythtv-0.23
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/{libmyth,mythtv,python}*.deb ${replacements_dir}
 
