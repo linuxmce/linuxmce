@@ -6,13 +6,13 @@ my $pluto_conf = "/etc/pluto.conf";
 ### TODO: get all variables from config?
 
 
-$DCERouter="dcerouter";
-$PK_Device="1";
-$MySqlHost="dcerouter";
-$MySqlPort="3306";
-$MySqlUser="root";
-$MySqlPassword="";
-$MySqlDBName="pluto_main";
+our $DCERouter="dcerouter";
+our $PK_Device="1";
+our $MySqlHost="dcerouter";
+our $MySqlPort="3306";
+our $MySqlUser="root";
+our $MySqlPassword="";
+our $MySqlDBName="pluto_main";
 
 
 open(CONF,$pluto_conf) or die "Could not open pluto configfile \"$pluto_conf\"\n";
