@@ -36,5 +36,7 @@ popd
 
 # Install packages needed for mythtv .23 build
 apt-get -q -f -y --force-yes install yasm libfaac-dev libfribidi-dev liba52-0.7.4-dev
+# Remove packages that are conflicts with mythtv .23 build
+dpkg -r libmyth-dev qt3-dev-tools libqt3-mt-dev libartsc0-dev
 
 echo "*** Done: $0"
