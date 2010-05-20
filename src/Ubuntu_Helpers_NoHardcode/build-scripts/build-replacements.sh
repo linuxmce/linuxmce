@@ -190,9 +190,9 @@ function Build_Replacements_Intrepid
 	# The dev package needs to be installed to build mythtv plugins.
 	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/libmyth-0.23-0*.deb
 	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/libmyth-dev_0.23-0*.deb
-	Build_Replacement_Package mythtv ubuntu/mythplugins-0.23
+	Build_Replacement_Package mythplugins ubuntu/mythplugins-0.23
         # Reinstall package needed for SimplePhone (package 498,499)
-        apt-get install -y liblinphone2-dev
+        apt-get install -y liblinphone2-dev 
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/{libmyth,myth,python}*.deb ${replacements_dir}
 
 	# VDR Packages
