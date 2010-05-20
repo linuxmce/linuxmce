@@ -83,6 +83,7 @@ libgtk2.0-dev
 libhal-dev
 libhid-dev
 libid3-3.8.3-dev
+libid3tag0-dev
 libiec61883-dev
 libimlib2-dev
 libirman-dev
