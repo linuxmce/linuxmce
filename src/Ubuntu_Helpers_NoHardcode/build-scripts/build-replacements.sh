@@ -185,11 +185,15 @@ function Build_Replacements_Intrepid
 
 	#Package: mythtv
 	# Remove packages that conflict with mythtv .23 build
-        apt-get remove -y libmyth-dev qt3-dev-tools libqt3-mt-dev libartsc0-dev
+        apt-get remove -y libmyth-dev qt3-dev-tools libqt3-mt-dev libartsc0-dev 
         Build_Replacement_Package mythtv ubuntu/mythtv-0.23
+	# The dev package needs to be installed to build mythtv plugins.
+	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/libmyth-0.23.0_*.deb
+	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/libmyth-dev_*.deb
+	Build_Replacement_Package mythtv ubuntu/mythplugins-0.23
         # Reinstall package needed for SimplePhone (package 498,499)
         apt-get install -y liblinphone2-dev
-	cp ${svn_dir}/${svn_branch_name}/ubuntu/{libmyth,mythtv,python}*.deb ${replacements_dir}
+	cp ${svn_dir}/${svn_branch_name}/ubuntu/{libmyth,myth,python}*.deb ${replacements_dir}
 
 	# VDR Packages
 	DisplayMessage "Building VDR packages and plugins"
