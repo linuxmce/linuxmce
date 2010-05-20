@@ -191,3 +191,11 @@ libc6-dev-amd64
 lib64gcc1 
 gcc-multilib 
 python2.4-dev
+yasm
+libfaac-dev
+libfribidi-dev 
+liba52-0.7.4-dev 
+libcdaudio1 
+libcdaudio-dev  
+libvisual-0.4-dev
+

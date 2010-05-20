@@ -35,6 +35,6 @@ popd
 #popd
 
 # Install packages needed for mythtv .23 build
-apt-get -q -f -y --force-yes install yasm libfaac-dev libfribidi-dev liba52-0.7.4-dev libcdaudio1 libcdaudio-dev libid3tag0-dev libvisual-0.4-dev
+#apt-get -q -f -y --force-yes install yasm libfaac-dev libfribidi-dev liba52-0.7.4-dev libcdaudio1 libcdaudio-dev libid3tag0-dev libvisual-0.4-dev
 
 echo "*** Done: $0"
