@@ -2,7 +2,12 @@
 
 use DBI;
 require "/usr/pluto/bin/config_ops.pl";
-
+use vars '$DCERouter';
+use vars '$PK_Device';
+use vars '$MySqlHost';
+use vars '$MySqlUser';
+use vars '$MySqlPassword';
+use vars '$MySqlDBName';
 $db = DBI->connect(&read_pluto_cred()) or die "Couldn't connect to database: $DBI::errstr\n";
 
 $devices = "";
