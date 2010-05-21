@@ -22,8 +22,8 @@ then
 	AddGpgKeyToKeyring http://packages.medibuntu.org/medibuntu-key.gpg
 fi
 
-AddRepoToSources "http://www.avenard.org/files/ubuntu-repos intrepid release"
-AddGpgKeyToKeyring  http://www.avenard.org/files/ubuntu-repos/ubuntu-repos.key
+# AddRepoToSources "http://www.avenard.org/files/ubuntu-repos intrepid release"
+# AddGpgKeyToKeyring  http://www.avenard.org/files/ubuntu-repos/ubuntu-repos.key
 
 
 apt-get update

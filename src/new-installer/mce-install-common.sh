@@ -54,10 +54,10 @@ $newlines
 
 
 function PinMythTVAt22 {
-	# Make sure, we never use a newer version that 0.22
+	# Make sure, Pinning is setup for deb.linuxmce.org
 	echo "
-Package: mythtv mythtv-frontend mythtv-backend mythtv-common mythtv-database mythtv-transcode-utils mythweb libmyth-perl
-Pin: version 2:0.22*
+Package: *
+Pin: origin deb.linuxmce.org
 Pin-Priority: 1001
 ">>/etc/apt/preferences
 }
