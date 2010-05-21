@@ -5,6 +5,8 @@ use diagnostics;
 use DBI;
 require "/usr/pluto/bin/config_ops.pl";
 
+use vars ('$DCERouter','$PK_Device','$MySqlHost','$MySqlPort','$MySqlUser','$MySqlPassword','$MySqlDBName');
+
 my $DB_PL_HANDLE;
 my $DB_STATEMENT;
 my $DB_SQL;
