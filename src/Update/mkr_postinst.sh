@@ -15,3 +15,15 @@ if [[ "$EXIST" == "0" ]]; then
 else
    echo "Pinning for deb.linuxmce.org already exists"
 fi
+
+EXIST=0
+grep -q "Pin: origin file:/usr/pluto/deb-cache" /etc/apt/preferences 2>/dev/null && EXIST=1
+
+if [[ "$EXIST" == "0" ]]; then
+   echo "Package: *">> /etc/apt/preferences
+   echo "Pin: origin file:/usr/pluto/deb-cache">>/etc/apt/preferences
+   echo "Pin-Priority: 1001">>/etc/apt/preferences
+   echo "Pinning setup for local deb-cache"
+else
+   echo "Pinning for local deb-cache already exists"
+fi
