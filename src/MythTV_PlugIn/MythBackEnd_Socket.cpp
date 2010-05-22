@@ -165,7 +165,7 @@ bool MythBackEnd_Socket::Connect( )
 	}
 
 	sResponse="";
-	if( !InternalSendMythString("ANN Playback mythtv_plugin 01",&sResponse,"OK") )
+	if( !InternalSendMythString("ANN Playback mythtv_plugin 1",&sResponse,"OK") )
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MythBackEnd_Socket::Connect couldn't send ANN m_bConnected=false");
 		DeleteSocket();
