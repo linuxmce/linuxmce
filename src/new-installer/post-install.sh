@@ -16,10 +16,10 @@ addAdditionalTTYStart
 mkdir -p /home/backup/upload
 
 # make sure the kubuntu desktop environment is installed
-apt-get install -y kubuntu-desktop
+apt-get install -y --force-yes kubuntu-desktop
 
 # make sure to install latest alsa drivers
-apt-get install -y alsa-modules-`uname -r`
+apt-get install -y --force-yes alsa-modules-`uname -r`
 
 # update-rc.d -f kdm remove
 
@@ -30,8 +30,8 @@ apt-get install -y alsa-modules-`uname -r`
 rm -f /usr/share/initramfs-tools/conf.d/compcache && update-initramfs -u
 echo Installing the latest v4l2 modules 
 # get the latest v4l modules
-apt-get install -y v4l2-modules
-apt-get install -y v4l2-firmware
+apt-get install -y --force-yes v4l2-modules
+apt-get install -y --force-yes v4l2-firmware
 
 # Remove KDM startup
 echo "Remove softlink to start KDM"

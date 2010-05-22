@@ -35,7 +35,7 @@ function VerifyExitCode
 function InstallNeededPackages
 {
 	apt-get update
-	apt-get -y install dpkg-dev
+	apt-get -y --force-yes install dpkg-dev
 	VerifyExitCode "dpkg-dev"
 	
 	mkdir -pv "${LOCAL_REPO_BASE}/${LOCAL_REPO_DIR}"

@@ -396,7 +396,7 @@ AutostartMedia=$AutostartMedia
 function Install_DCERouter {
 	StatsMessage "Installing MySQL Server"
 	apt-get update
-	apt-get -y -f install mysql-server
+	apt-get -y --force-yes -f install mysql-server
 	VerifyExitCode "MySQL Server"
 	invoke-rc.d mysql start # Because of this : https://bugs.launchpad.net/bugs/107224
 
@@ -409,15 +409,15 @@ function Install_DCERouter {
 FLUSH PRIVILEGES; \
 " | mysql --defaults-extra-file=/etc/mysql/debian.cnf mysql
 
-	apt-get -y -f install pluto-sample-media
+	apt-get -y --force-yes -f install pluto-sample-media
 	VerifyExitCode "pluto-sample-media"
-	apt-get -y -f install video-wizard-videos
+	apt-get -y --force-yes -f install video-wizard-videos
 	VerifyExitCode "video-wizard-videos"
 #	apt-get -y -f install pluto-mysql-wrapper
 #	apt-get -y -f install pluto-default-tftpboot
 
 	StatsMessage "Installing LinuxMCE Base Software"
-	apt-get -y -f install pluto-dcerouter
+	apt-get -y --force-yes -f install pluto-dcerouter
 	VerifyExitCode "pluto-dcerouter"
 }
 
