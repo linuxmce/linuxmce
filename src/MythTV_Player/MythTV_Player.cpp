@@ -175,7 +175,7 @@ bool MythTV_Player::LaunchMythFrontend(bool bSelectWindow)
 		string sHeight = m_pEvent->GetDeviceDataFromDatabase(m_pData->m_dwPK_Device_ControlledVia, DEVICEDATA_ScreenHeight_CONST); 
 
 		DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
-			"/usr/bin/mythfrontend", "mythfrontend", "-w\t" MYTH_WINDOW_NAME "\t-geometry\t" + sWidth + "x" + sHeight,
+			"/usr/bin/mythfrontend", "mythfrontend", "-w\t-geometry\t" + sWidth + "x" + sHeight,
 			sMessage + "1",sMessage + "0",false,false,true,false);
 		if( SendCommand(CMD_Spawn_Application) )
 		 	return true;
