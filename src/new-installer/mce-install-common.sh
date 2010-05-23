@@ -56,7 +56,7 @@ $newlines
 function PinMythTVAt22 {
 	# Make sure, Pinning is setup for deb.linuxmce.org
 	echo "
-Package: mythtv mythtv-frontend mythtv-backend mythtv-common mythtv-database mythtv-transcode-utils mythweb libmyth-perl python-myth
+Package: mythtv mythtv-frontend mythtv-backend mythtv-common mythtv-database mythtv-transcode-utils mythweb libmyth-perl python-myth mythtv-themes mythplugins mytharchive mytharchive-data mythbrowser mythgallery mythgame mythmovies mythmusic mythnetvison mythnetvision-data mythnews mythvideo mythweather mythzoneminder 
 Pin: origin deb.linuxmce.org
 Pin-Priority: 1001
 ">>/etc/apt/preferences
