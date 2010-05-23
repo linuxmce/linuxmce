@@ -4,26 +4,12 @@ update-rc.d LMCEUpdate start 98 2 . > /dev/null
 
 # Check if we have a pinning to origin deb.linuxmce.org, and if not add it.
 
-EXIST=0
-grep -q "Pin: origin deb.linuxmce.org" /etc/apt/preferences 2>/dev/null && EXIST=1
+KEEPOLD=0
+grep -q "# Dont overwrite" /etc/apt/preferences 2>/dev/null && KEEPOLD
 
-if [[ "$EXIST" == "0" ]]; then
-   echo "Package: *">> /etc/apt/preferences
+if [[ "$KEEPOLD" == "0" ]]; then
+   echo "Package: mythtv mythtv-frontend mythtv-backend mythtv-common mythtv-database mythtv-transcode-utils mythweb libmyth-perl python-myth">> /etc/apt/preferences
    echo "Pin: origin deb.linuxmce.org">>/etc/apt/preferences
    echo "Pin-Priority: 1001">>/etc/apt/preferences
    echo "Pinning setup for deb.linuxmce.org"
-else
-   echo "Pinning for deb.linuxmce.org already exists"
-fi
-
-EXIST=0
-grep -q "Pin: origin file:/usr/pluto/deb-cache" /etc/apt/preferences 2>/dev/null && EXIST=1
-
-if [[ "$EXIST" == "0" ]]; then
-   echo "Package: *">> /etc/apt/preferences
-   echo "Pin: origin file:/usr/pluto/deb-cache">>/etc/apt/preferences
-   echo "Pin-Priority: 1001">>/etc/apt/preferences
-   echo "Pinning setup for local deb-cache"
-else
-   echo "Pinning for local deb-cache already exists"
 fi
