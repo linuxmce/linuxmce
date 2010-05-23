@@ -3,6 +3,7 @@
 #include <sys/un.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <fcntl.h>
 
 #include "LIRCD_Thread.h"
 
@@ -18,6 +19,7 @@ pluto_pthread_mutex_t LIRCD_mutex ("lircd");
 /* Private Methods */
 static void LIRCD_SignalHandler (int ExitStatus);
 static bool LIRCD_Open ();
+static int setNonblocking(int fd);
 
 /* Public bits */
 bool LIRCD_bQuit = false;
@@ -52,22 +54,31 @@ LIRCD_Thread (void *arg)
 
   LIRCD_Open ();
 
+  lircd_clientfd = -1;  // No client connected yet.
+
   while (!LIRCD_bQuit)
     {
 
 	LoggerWrapper::GetInstance ()->Write(LV_CRITICAL,
 						"LIRCD_Thread: Listening for Hulu Desktop");
+      do
+      {
+	// This call blocks.
+	lircd_clientfd = accept (lircd_sockfd,
+				(sockaddr *) & lircd_client_address,
+				&lircd_client_len);
+	Sleep(100);	// XXX HACK!
+      } while (!LIRCD_bQuit && lircd_clientfd == -1);
 
-      // This call blocks.
-      lircd_clientfd = accept (lircd_sockfd,
-			       (sockaddr *) & lircd_client_address,
-			       &lircd_client_len);
+      if (lircd_clientfd != -1)
+      {
 
-      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
-					    "LIRCD_Thread: Accepted socket connection: %d",
-					    lircd_clientfd);
+	LoggerWrapper::GetInstance()->Write (LV_CRITICAL, 
+					      "LIRCD_Thread: Accepted Socket Connection: %d",
+					      lircd_clientfd);
+	LIRCD_bConnectionActive = true;
 
-      LIRCD_bConnectionActive = true;
+      }
 
       while (LIRCD_bConnectionActive)
 	{
@@ -88,8 +99,8 @@ LIRCD_Thread (void *arg)
 	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
 						"LIRCD_Thread: Closing Socket connection: %d",
 						lircd_clientfd);
-
-      close (lircd_clientfd);	// Drop the FD
+      if (lircd_clientfd != -1)
+	close (lircd_clientfd);	// Drop the FD
 
     }
 
@@ -153,6 +164,7 @@ LIRCD_Open ()
 
   unlink (LIRCD_SOCKET);
   lircd_sockfd = socket (AF_UNIX, SOCK_STREAM, 0);
+  setNonblocking(lircd_sockfd);
   lircd_address.sun_family = AF_UNIX;
   strcpy (lircd_address.sun_path, LIRCD_SOCKET);
   lircd_len = sizeof (lircd_address);
@@ -182,4 +194,21 @@ LIRCD_SendCommand (string sCommand)
 					sCommand.c_str ());
   write_socket_len (lircd_clientfd, sCommand.c_str ());
   return true;
+}
+
+int setNonblocking(int fd)
+{
+    int flags;
+
+    /* If they have O_NONBLOCK, use the Posix way to do it */
+#if defined(O_NONBLOCK)
+    /* Fixme: O_NONBLOCK is defined but broken on SunOS 4.1.x and AIX 3.2.5. */
+    if (-1 == (flags = fcntl(fd, F_GETFL, 0)))
+        flags = 0;
+    return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+#else
+    /* Otherwise, use the old way of doing it */
+    flags = 1;
+    return ioctl(fd, FIOBIO, &flags);
+#endif
 }
