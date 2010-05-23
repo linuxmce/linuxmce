@@ -4,8 +4,8 @@ exec 1>&2
 
 DT=$(/scripts/DeviceTemplate.sh)
 
-MyIP=`ifconfig  | grep "inet addr" | sed -r 's/^.* inet addr:([0-9.]*).*/\1/g'`
-MyMAC=`ifconfig  | grep "HWaddr "  | sed -r 's/^.* HWaddr ([a-zA-Z0-9:]*)/\1/g'`
+MyIP=`ifconfig eth0 | grep "inet addr" | sed -r 's/^.* inet addr:([0-9.]*).*/\1/g'`
+MyMAC=`ifconfig eth0 | grep "HWaddr "  | sed -r 's/^.* HWaddr ([a-zA-Z0-9:]*)/\1/g'`
 Gateway=`ip route | grep "default via" | cut -d " " -f3`
 
 Architecture="i386"
