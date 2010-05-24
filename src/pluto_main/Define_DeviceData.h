@@ -237,6 +237,9 @@
 #define DEVICEDATA_Units_CONST 284
 #define DEVICEDATA_Duration_CONST 285
 #define DEVICEDATA_Modeline_CONST 286
+#define DEVICEDATA_Available_Sound_Cards_CONST 287
+#define DEVICEDATA_Sound_Card_CONST 288
+#define DEVICEDATA_Energy_Consumption_CONST 289
 
 #define DEVICEDATA_TABLE "DeviceData"
 #define DEVICEDATA_PK_DEVICEDATA_FIELD "PK_DeviceData"
