@@ -19,7 +19,7 @@
 #define Pandora_Plugin_h
 
 //	DCE Implemenation for #2140 Pandora PlugIn
-#include DEVICETEMPLATE_Pandora_Player_CONST 2141
+#define DEVICETEMPLATE_Pandora_Player_CONST 2141
 #include "Gen_Devices/Pandora_PluginBase.h"
 //<-dceag-d-e->
 
