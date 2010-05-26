@@ -53,16 +53,6 @@ $newlines
 }
 
 
-function PinMythTVAt22 {
-	# Make sure, Pinning is setup for deb.linuxmce.org
-	echo "
-Package: mythtv mythtv-frontend mythtv-backend mythtv-common mythtv-database mythtv-transcode-utils mythweb libmythtv-perl libmyth python-myth mythtv-themes mythplugins mytharchive mytharchive-data mythbrowser mythgallery mythgame mythmovies mythmusic mythnetvison mythnetvision-data mythnews mythvideo mythweather mythzoneminder myth-doc 
-Pin: origin deb.linuxmce.org
-Pin-Priority: 1001
-">>/etc/apt/preferences
-}
-	
-
 function Setup_Apt_Conffiles {	
 	## Backup initial apt sources.list
 	if [ ! -e /etc/apt/sources.list.pbackup ] ;then
@@ -114,13 +104,13 @@ fi
 
 # this need to be discussed. For now we remove it so duplicate packages get fetched from repo with newest package. 
 	pluto_apt_preferences='
-Package: *
-Pin: origin
-Pin-Priority: 9999
+Package: mythtv mythtv-frontend mythtv-backend mythtv-common mythtv-database mythtv-transcode-utils mythweb libmythtv-perl libmyth python-myth mythtv-themes mythplugins mytharchive mytharchive-data mythbrowser mythgallery mythgame mythmovies mythmusic mythnetvison mythnetvision-data mythnews mythvideo mythweather mythzoneminder myth-doc 
+Pin: origin deb.linuxmce.org
+Pin-Priority: 1001
 
 Package: *
-Pin: release v=8.04,o=Ubuntu,a=hardy,l=Ubuntu
-Pin-Priority: 9998
+Pin: origin
+Pin-Priority: 600
 '
 #	echo -n "$pluto_apt_preferences" >/etc/apt/preferences
 
