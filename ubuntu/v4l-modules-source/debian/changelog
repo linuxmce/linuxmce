@@ -1,0 +1,11 @@
+v4l2-modules (304cfde05b3f-0ubuntu2~ppa1i) Intrepid; urgency=low
+
+  * DKMS package for V4L
+
+ -- Mandingo <Mandingo@Mydingo.com>  Thu, 27 May 2010 03:06:19 -0500
+
+v4l2-modules (cc01851735c3-0ubuntu1~ppa1i) Intrepid; urgency=low
+
+  * DKMS package for V4L
+
+ -- Mandingo <Mandingo@Mydingo.com>  Sat, 09 Jan 2010 23:39:19 -0500
