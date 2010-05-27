@@ -1,0 +1,419 @@
+#!/bin/bash
+
+. /usr/pluto/bin/Config_Ops.sh
+. /usr/pluto/bin/Utils.sh
+
+DEVICEDATA_COM_Port_on_PC=37
+DEVICEDATA_Port=171
+DEVICETEMPLATE_Denon_AVR_Zone=1948
+
+## Mandatory functions
+Configure()
+{
+	local Q R
+	local SerialPort
+
+	Q="SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=$DevNo AND FK_DeviceData=$DEVICEDATA_COM_Port_on_PC"
+	R=$(RunSQL "$Q")
+	SerialPort=$(Field 1 "$R")
+	SerialPort=$(TranslateSerialPort "$SerialPort")
+
+	## Device connection generics
+	DeviceConnection_Type=serial # choices: none, serial, inet, custom
+	## Connection parameters
+	# type=serial:
+	DeviceConnection_BaudRate=9600
+	DeviceConnection_Parity=N81 # choices: N81, E81, O81
+	DeviceConnection_SerialPort="$SerialPort"
+	# type=inet:
+	DeviceConnection_Protocol=TCP4 # choices: TCP4, TCP6, UDP4, UDP6
+	DeviceConnection_Endpoint=127.0.0.1:2001 # Address:Port
+	# type=custom:
+	DeviceConnection_Command=
+
+	## What to do when the device is lost
+	DeviceConnection_OnDisconnect=reconnect # choices: disable, reconnect
+
+	## Device protocol generics
+	DeviceProtocol_Type=line # choices: line, stream
+	# type=line:
+	DeviceProtocol_Separator=$'\r' # must match encoding
+
+	DeviceProtocol_Encoding=none # choices: none, enc, hex
+	DeviceProtocol_AutoAppendSeparator=yes # choices: yes, no
+	DeviceProtocol_Delay=.2 # delay between commands (seconds)
+}
+
+ProcessDeviceStream()
+{
+	local Data="$1"
+	Data=$(builtin echo "$Data" | tr -d '\r')
+	echo "Denon Amp said: $Data"
+
+	local Zone Parm
+
+	case "$Data" in
+		SI*) ZM_CurrentInput="${Data:2}" ;;
+		MUOFF) ZM_Mute=NoMute ;;
+		MUON) ZM_Mute=Mute ;;
+		MV[0-9][0-9])
+			ZM_VolumeLevel="${Data:2}"
+			if [[ "$ZM_VolumeLevel" == 0* ]]; then
+				ZM_VolumeLevel="${ZM_VolumeLevel:1}"
+			fi
+		;;
+		Z*)
+			Zone="${Data:1:1}"
+			Parm="${Data:2}"
+			case "$Parm" in
+				MUOFF) eval "Z${Zone}_Mute=NoMute" ;; # not muted
+				MUON) eval "Z${Zone}_Mute=Mute" ;; # muted
+				OFF|ON) : ;; # on/off
+				[0-9][0-9]) # volume
+					if [[ "$Parm" == 0* ]]; then
+						Parm="${Parm:1}"
+					fi
+					eval "Z${Zone}_VolumeLevel=$Parm"
+				;;
+				PHONO|CD|TUNER|DVD|TV|TV/CBL|VDR|DVR|V.AUX|XM|IPOD|AUX) eval "Z${Zone}_CurrentInput=$Parm" ;; # input
+			esac
+		;;
+	esac
+}
+
+## Unknown command handlers
+ReceivedCommandForChild()
+{
+	local From="$1" To="$2" Type="$3" Cmd="$4"
+	local Zone
+	local VarZone
+
+	VarZone="Child_$To"
+	if [[ -z "${!VarZone}" || "$Type" != 1 ]]; then
+		ReplyToDCE "UNHANDLED" ""
+		return
+	fi
+
+	Zone="${!VarZone}"
+	case "$Cmd" in
+		966) RouteMediaPath "$Zone" "$Parm_219" ;;
+		91) InputSelect "$Zone" "$Parm_71" ;;
+		97) Mute "$Zone" ;;
+		90) VolDown "$Zone" ;;
+		89) VolUp "$Zone" ;;
+		193) TurnOff "$Zone" ;;
+		192) TurnOn "$Zone" ;;
+	esac
+
+	ReplyToDCE "OK" ""
+}
+
+ReceivedUnknownCommand()
+{
+	local From="$1" To="$2" Type="$3" Cmd="$4"
+	ReplyToDCE "UNHANDLED" ""
+}
+
+## Hooks
+OnDeviceConnect()
+{
+	SendToDevice "PW?"
+}
+
+OnInit()
+{
+	## User configuration code
+	##########################
+	
+	SendToDevice "SI?"
+	#SendToDevice "MV40"
+	SendToDevice "MV?"
+	ZM_CurrentInput=
+	ZM_Mute=Mute
+	ZM_VolumeLevel=40
+
+	VolumeStep=4
+
+	local Q R Var
+	local ZoneDevice
+	Q="SELECT PK_Device FROM Device WHERE FK_Device_ControlledVia=$DevNo AND FK_DeviceTemplate=$DEVICETEMPLATE_Denon_AVR_Zone"
+	R=$(RunSQL "$Q")
+
+	for ZoneDevice in $R; do
+		Q="SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=$ZoneDevice AND FK_DeviceData=$DEVICEDATA_Port"
+		R=$(RunSQL "$Q")
+		if [[ -z "$R" ]]; then
+			continue
+		fi
+		eval "Child_$ZoneDevice=$R"
+		eval "Z${R}_VolumeLevel=40"
+		#SendToDevice "Z${R}40"
+		SendToDevice "Z${R}?"
+	done
+}
+
+OnExit()
+{
+	:
+}
+
+## Command functions
+# Parameters come as environment variables of this form: Parm_<Number>
+
+## Route media path
+Cmd_966()
+{
+	local From="$1" To="$2"
+	local MediaPath
+
+	MediaPath="$Parm_219"
+	RouteMediaPath M "$MediaPath"
+	ReplyToDCE "OK" ""
+}
+
+## Input Select
+Cmd_91()
+{
+	local From="$1" To="$2"
+	local Input="$Parm_71"
+	InputSelect M "$Input"
+	ReplyToDCE "OK" ""
+}
+
+## Mute
+Cmd_97()
+{
+	local From="$1" To="$2"
+	Mute M
+	ReplyToDCE "OK"
+}
+
+## Vol Down
+Cmd_90()
+{
+	local From="$1" To="$2"
+	VolDown M
+	ReplyToDCE "OK"
+}
+
+## Vol Up
+Cmd_89()
+{
+	local From="$1" To="$2"
+	VolUp M
+	ReplyToDCE "OK"
+}
+
+## Off
+Cmd_193()
+{
+	local From="$1" To="$2"
+	TurnOff M
+	ReplyToDCE "OK"
+}
+
+## On
+Cmd_192()
+{
+	local From="$1" To="$2"
+	TurnOn M
+	ReplyToDCE "OK"
+}
+
+Cmd_1000()
+{
+	Log "One thousand!! $Parm_999"
+	SendToDevice "$Parm_999"
+}
+
+## User functions
+
+VolUp()
+{
+	local Zone="$1"
+	local VarVolumeLevel VolumeCmd
+
+	if [[ -z "$Zone" ]]; then
+		return
+	fi
+	
+	Log "Volume up zone $Zone"
+	if [[ "$Zone" == M ]]; then
+		VolumeCmd=MV
+	else
+		VolumeCmd=Z2
+	fi
+	VarVolumeLevel="Z${Zone}_VolumeLevel"
+
+	((${VarVolumeLevel} += $VolumeStep))
+	if ((${!VarVolumeLevel} > 98)); then
+		eval "$VarVolumeLevel=98"
+	fi
+	SendToDevice "$VolumeCmd$(builtin printf "%02d" "${!VarVolumeLevel}")"
+}
+
+VolDown()
+{
+	local Zone="$1"
+	local VarVolumeLevel VolumeCmd
+
+	if [[ -z "$Zone" ]]; then
+		return
+	fi
+	
+	Log "Volume down zone $Zone"
+	if [[ "$Zone" == M ]]; then
+		VolumeCmd=MV
+	else
+		VolumeCmd=Z2
+	fi
+	VarVolumeLevel="Z${Zone}_VolumeLevel"
+
+	((${VarVolumeLevel} -= $VolumeStep))
+	if ((${!VarVolumeLevel} < 0)); then
+		eval "${VarVolumeLevel}=0"
+	fi
+	SendToDevice "$VolumeCmd$(builtin printf "%02d" "${!VarVolumeLevel}")"
+}
+
+Mute()
+{
+	local Zone="$1"
+	local VarMute MuteCmd
+
+	if [[ -z "$Zone" ]]; then
+		return
+	fi
+
+	if [[ "$Zone" == M ]]; then
+		MuteCmd="MU"
+	else
+		MuteCmd="Z${Zone}MU"
+	fi
+
+	VarMute="Z${Zone}_Mute"
+	if [[ "${!VarMute}" == Mute ]]; then
+		eval "$VarMute=NoMute"
+		SendToDevice "${MuteCmd}OFF"
+		Log "Unmute zone $Zone"
+	else
+		eval "$VarMute=Mute"
+		SendToDevice "${MuteCmd}ON"
+		Log "Mute zone $Zone"
+	fi
+}
+
+RouteMediaPath()
+{
+	local Zone="$1" MediaPath="$2"
+	local Path Type Input
+
+	if [[ -z "$Zone" ]]; then
+		return
+	fi
+
+	Log "Route media path zone $Zone: MediaPath=$MediaPath"
+	MediaPath="${MediaPath//:/ }"
+
+	for Path in $MediaPath; do
+		Type="${Path%_*}"
+		Input="${Path#*_}"
+		if [[ "$Type" != IN ]]; then
+			continue
+		fi
+		InputSelect "$Zone" "$Input"
+	done
+}
+
+InputSelect()
+{
+	local Zone="$1" Input="$2"
+	local VarCurrentInput InputCmd
+
+	if [[ -z "$Zone" ]]; then
+		return
+	fi
+
+	Log "Input Select for zone $Zone: $Input"
+	if [[ "$Zone" == M ]]; then
+		InputCmd="SI"
+	else
+		InputCmd="Z${Zone}"
+	fi
+	VarCurrentInput="Z${Zone}_CurrentInput"
+
+	Input=$(TranslateInput "$Input")
+	SendToDevice "$InputCmd$Input"
+	if [[ "$Input" == "TV" ]];
+		SendToDevice "$InputCmd$Input/CBL"
+	fi
+	eval "$VarCurrentInput=$Input"
+}
+
+TurnOff()
+{
+	local Zone="$1"
+	if [[ -z "$Zone" ]]; then
+		return
+	fi
+	Log "Turn off zone $Zone"
+	SendToDevice "Z${Zone}OFF"
+}
+
+TurnOn()
+{
+	local Zone="$1"
+	if [[ -z "$Zone" ]]; then
+		return
+	fi
+	Log "Turn on zone $Zone"
+	SendToDevice "Z${Zone}ON"
+}
+
+TranslateInput()
+{
+	local Input="$1"
+	local input_name
+
+	if [[ -z "$Input" ]]; then
+		return
+	fi
+
+	case "$Input" in
+		162) # CD
+			input_name="CD"
+		;;
+		164) # Aux
+			input_name="AUX"
+		;;
+		165) # DVD
+			input_name="DVD"
+		;;
+		714) # DVR
+			input_name="DVR"
+		;;
+		163) # Phono
+			input_name="Phono"
+		;;
+		166) # Tuner
+			input_name="Tuner"
+		;;
+		161) # TV
+			input_name="TV"
+		;;
+		285) # V.AUX
+			input_name="V.AUX"
+		;;
+		282) # VCR
+			input_name="VCR"
+		;;
+		909) # XM
+			input_name="XM"
+		;;
+		*) input_name="$Input" ;;
+	esac
+	builtin echo "$input_name"
+}
+
+## Start eveything up
+. /usr/pluto/bin/DCE-connect.sh "$@"
