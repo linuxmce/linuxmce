@@ -112,7 +112,7 @@ Package: *
 Pin: origin
 Pin-Priority: 600
 '
-#	echo -n "$pluto_apt_preferences" >/etc/apt/preferences
+	echo -n "$pluto_apt_preferences" >/etc/apt/preferences
 
 	ln -s /usr/pluto/var/apt.conf.offline /etc/apt/apt.conf.d/99offline
 
