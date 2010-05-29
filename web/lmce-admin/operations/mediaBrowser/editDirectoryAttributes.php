@@ -6,7 +6,8 @@ function editDirectoryAttributes($output,$mediadbADO,$dbADO) {
 	
 	/* @var $mediadbADO ADOConnection */
 	/* @var $rs ADORecordSet */
-	
+	$mediaSubTypeEnum = array (1 => "TV Shows",2 => "Movies",3 => "Home Videos", 4 => "Sports Events", 5 => "Music Videos", 6 => "Alternative", 7 => "Popular Music", 8 => "Classical Music");
+	$fileFormatEnum = array (1 => "Low Res",2 => "DVD",3 => "Standard Def", 4 => "HD 720", 5 => "HD 1080", 6 => "Low Quality", 7 => "MP3", 8 => "CD Quality", 9 => "High-def audio");
 	$action = (isset($_REQUEST['action']) && $_REQUEST['action']!='')?cleanString($_REQUEST['action']):'form';
 	$fileID=$_REQUEST['fileID'];
 	$dirData=getRows('File','File.*',$mediadbADO,'WHERE PK_File=\''.$fileID.'\'');
@@ -88,7 +89,7 @@ function editDirectoryAttributes($output,$mediadbADO,$dbADO) {
 						<td colspan="3"><a href="javascript:setAll(1);">Select/unselect all</a> </td>
 					</tr>
 					<tr>
-						<td colspan="4">
+						<td colspan="4">																							
 						<fieldset><legend><B>'.$TEXT_ADD_PICTURE_CONST.'</B><em>'.$TEXT_JPG_ONLY_CONST.'</em></legend>
 							<table>
 							<tr>
@@ -115,7 +116,7 @@ function editDirectoryAttributes($output,$mediadbADO,$dbADO) {
 						<td colspan="4"><hr width="60%" align="left"></td>
 					</tr>					
 					<tr>
-						<td colspan="4"><fieldset><legend><B>'.$TEXT_ADD_ATTRIBUTE_CONST.'</B></legend>
+						<td colspan="4"><fieldset><legend><B>'.$TEXT_ADD_ATTRIBUTE_CONST.'</B></legend>			
 						<table>
 						<tr>
 							<td>&nbsp;</td>
@@ -149,12 +150,43 @@ function editDirectoryAttributes($output,$mediadbADO,$dbADO) {
 							<input type="submit" class="button" name="add" value="'.$TEXT_ADD_CONST.'"></td>
 							</tr>';
 					}
+					
 				$out.='						
 						</table>
 						</fieldset></td>
-					</tr>					
-			
-									
+					</tr>
+				<tr>
+						<td colspan="4">																							
+						<fieldset><legend><B>'.$TEXT_FILE_FORMAT_CONST.'</B></legend>
+							<table>
+							<tr>
+								<td>'.$TEXT_FILE_FORMAT_CONST.'</td>
+								<td><select name="fileFormat" >';
+								foreach ($fileFormatEnum as $key => $value)
+								{
+								$out.='<option value="'.$key.'">'.$value.'</option>';
+								}								
+								$out.='</select>
+								</td>
+							</tr>
+							<tr>
+								<td>'.$TEXT_SUB_TYPE_CONST.'</td>
+								<td><select name="subType" >';
+								foreach ($mediaSubTypeEnum as $key => $value)
+								{
+								$out.='<option value="'.$key.'">'.$value.'</option>';
+								}								
+								$out.='</select>
+								</td>
+							</tr>						
+													
+							<tr>
+								<td></td>
+								<td><input type="submit" class="button" name="MediaSubTypes" value="Update"></td>
+							</tr>							
+						</table>
+						</fieldset>
+															
 				</table>';
 			}			
 		}
@@ -250,6 +282,13 @@ function editDirectoryAttributes($output,$mediadbADO,$dbADO) {
 			exit();
 		}		
 		
+		if (isset($_POST['MediaSubTypes'])) 
+		{
+		$subType = $_POST['subType'];
+		$fileFormat = $_POST['fileFormat'];
+		updateMediaType($subType, $fileFormat, $filesArray, $mediadbADO);
+		}
+		
 		header('Location: index.php?section=editDirectoryAttributes&fileID='.$fileID.'&msg='.$TEXT_MEDIA_FILE_UPDATED_CONST);			
 		exit();
 	}
@@ -318,5 +357,17 @@ function add_pic_to_files($insertID,$filesArray,$mediadbADO){
 			$mediadbADO->Execute('INSERT INTO Picture_File (FK_File, FK_Picture) VALUES (?,?)',array($id,$insertID));
 		}
 	}
+}
+
+function updateMediaType($subType, $fileFormat, $filesArray, $mediadbADO)
+{
+
+	foreach ($filesArray AS $id=>$filename)
+		{
+			//$mediadbADO->Execute('UPDATE File SET (FK_MediaSubType, FK_FileFormat) VALUES (?,?) where PK_File = `'.$id.'`',array($subType,$fileFormat));
+		//$mediadbADO->Execute('Update File Set Field = FK_MediaSubType Where Search = ?',array($subType,$id));
+		$mediadbADO->Execute("UPDATE File SET FK_MediaSubType=? WHERE PK_File = $id $where",array($subType));
+		$mediadbADO->Execute("UPDATE File SET FK_FileFormat=? WHERE PK_File = $id $where",array($fileFormat));
+		}
 }
 ?>
