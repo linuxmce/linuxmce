@@ -166,7 +166,7 @@ Description: Common library code for MythTV and add-on modules (development)
 Package: libmythtv-perl
 Architecture: all
 Section: perl
-Replaces: mythtv-perl (<= 0.20.2.svn20071109-0.0)
+Replaces: mythtv-perl (<= 0.20.2.svn20071109-0.0), libmyth-perl
 Conflicts: mythtv-perl (<= 0.20.2.svn20071109-0.0)
 Depends: ${perl:Depends}, ${misc:Depends}, libdbi-perl, libdbd-mysql-perl, libwww-perl, libnet-upnp-perl
 Description: A personal video recorder application (common data)
