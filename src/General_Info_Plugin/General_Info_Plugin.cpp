@@ -941,7 +941,7 @@ class DataGridTable *General_Info_Plugin::QuickStartApps( string GridID, string 
 		if( pRow_QuickStartTemplate )
 		{
 			if( !pBuffer )
-                pBuffer = FileUtils::ReadFileIntoBuffer("/home/quick_start_icons/template_" + StringUtils::itos(pRow_QuickStartTemplate->PK_QuickStartTemplate_get()) + ".jpg", iSize);
+                pBuffer = FileUtils::ReadFileIntoBuffer("/home/quick_start_icons/template_" + StringUtils::itos(pRow_QuickStartTemplate->PK_QuickStartTemplate_get()) + ".png", iSize);
 		}
 
 		if( sBinary.size()==0 )
