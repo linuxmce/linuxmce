@@ -14,7 +14,7 @@ R=$(RunSQL "$Q")
 for Row in $R; do
 	Template=$(Field 1 "$Row")
 	Icon=$(Field 2 "$Row")
-	LocalIcon="$PIXDIR/template_$Template.jpg"
+	LocalIcon="$PIXDIR/template_$Template.png"
 	if [[ "$Icon" = "http://"* ]]; then
 		# URL
 		wget --tries=1 --timeout=2 -O "$PIXDIR/$Template" "$Icon"
