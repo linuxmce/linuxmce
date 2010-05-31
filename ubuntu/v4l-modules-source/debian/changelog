@@ -1,4 +1,4 @@
-v4l2-modules (lmce-20100531) Intrepid; urgency=low
+v4l2-modules (lmce20100531) Intrepid; urgency=low
 
   * Modified version numbering
   * Added execute bit to the rules file
