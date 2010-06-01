@@ -8,11 +8,13 @@
 #
 . /usr/pluto/bin/Config_Ops.sh
 
-ConfEval()
+ConfEval
 
 if [[ "$PK_Device" -eq "1" ]]; then
 	# We are running on the core, and do not want to stop VDR
 	trap 'killall -KILL vdr-sxfe' EXIT
+	# Make sure VDR is running
+	invoke-rc.d vdr start
 else
 	# We are running on a MD, and don't want VDR running after the user closes the TV app.
 	trap 'killall -KILL vdr-sxfe && invoke-rc.de vdr stop'
