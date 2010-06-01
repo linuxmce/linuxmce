@@ -26,11 +26,14 @@
 		return $result;
 	}
 	
-	function commStart($server = "localhost",$port = 3450, $deviceFromID) { 
+	function commStart($server = "localhost",$port = 3450, $deviceFromID, $command = "EVENT") { 
 		$socket = getSocket($server, $port);
-		$result = sendSocket($socket,"EVENT " . $deviceFromID . "\n");
-
+		$result = sendSocket($socket,$command . " " . $deviceFromID . "\n");
+		
 		$result = socket_read($socket,1024, PHP_NORMAL_READ);
+		if ($command == "COMMAND") { 
+			print "Result: <<$result>> \n";
+		}
 		return $socket;
 	}
 
