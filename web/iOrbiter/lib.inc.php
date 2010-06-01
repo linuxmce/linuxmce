@@ -212,16 +212,17 @@
 	function sendPlayerCommand($room, $command, $parameter=0) {
 		global $possyDeviceFromID;
 		global $currentMediaPlayer;
+		
 		// The media plugin needs to receive its messages from a device in the current room.
 		$possyDeviceFromID = getCurrentMD();
-		$status = getMediaStatus($room);		
+		// $status = getMediaStatus($room);		
 		$socket = commStart("dcerouter",3450,$possyDeviceFromID);
 		// myMessageSend($socket,$deviceFromID,$deviceToID (10 == media plugin),$messageType,$messageID,$parameter1ID,$parameter1Content,$parameter2ID,$parameter2Content);		
 		$file = fopen("/tmp/test.txt","w");
 		fwrite($file,"start\n");
 		// $destinationDevice = getCurrentMediaDevice($room);
 
-		$destinationDevice = getDeviceForTemplate(2);
+		$destinationDevice = getCurrentMediaDevice($room); // getDeviceForTemplate(2);
 		fwrite($file, "from device: $possyDeviceFromID\n");
 		fwrite($file, "destination device: $destinationDevice\n");
 		fwrite($file,"room: $room currentmp: $currentMediaPlayer myMessageSend($socket,$possyDeviceFromID,x-$destinationDevice-x,1,$command,". implode($parameter).");");
@@ -675,7 +676,7 @@
 		$query .= "WHERE EK_Users_Private IS NULL And IsDirectory = 0 And Missing = 0 And FK_Attribute = $pk_attribute ";
 		$query .= "ORDER By Filename ";
 		$query .= $limit;
-		listMyArray($mediaLink,$query,"File",3,array($pk_attribute,"Play All","play-all.php"));
+		listMyArray($mediaLink,$query,"File",3,array($pk_attribute,"Play All","play-all.php?where=FK_Attribute&content=$pk_attribute"));
 	}
 
 	function buildFileListFromSubtype($mediaLink, $pk_mediatype) {
