@@ -35,16 +35,70 @@
 		$ipAddress = getMDIP($room);
 		if ($status == "") { $status = XineMplayerStatus($ipAddress,12000); }
 		if ($status == "") { $status = XineMplayerStatus($ipAddress,12010); }
-		if ($status == "") { $status = vdrStatus($ipAddress);  }
+		if (pvrInstalled() == "VDR") {
+			if ($status == "") { $status = vdrStatus($ipAddress);  }
+		} else if (pvrInstalled() == "MythTV") {
+			if ($status == "") { $status = mythTVStatus($ipAddress);  }
+		}
+						
 
 		if ($status <> "") {
 			$remote = "remote.php?type=$currentMediaPlayer";
 			$status = "<a href='$remote' title='$status'>$status</a>";
 		}
 // $status .= "IP $ipAddress - Room $room<br>";
-		return $status;
+		return $status;		
 	}
 	
+	function pvrInstalled() {
+		// Returns the installed PVR based on the installed plugin
+		// 36 for MythTV Plugin
+		// 1704 for VDR Plugin
+		// If an id ten tea installs both, VDR wins :P
+		global $link;
+		$query = "SELECT PK_Device FROM Device WHERE FK_DeviceTemplate = 36;";
+		if (getMyValue($link,$query) != "") {
+			$pvrInstalled = "MythTV";
+		}
+		$query = "SELECT PK_Device FROM Device WHERE FK_DeviceTemplate = 1704;";
+		if (getMyValue($link,$query) != "") {
+			$pvrInstalled = "VDR";
+		}
+		return $pvrInstalled;
+	}
+	
+	function mythTVStatus($ipAddress) {
+		global $currentMediaPlayer;
+		$port = 10001;
+		$status = "";
+		$output = "";
+		$exitCode = 0;
+		$errorNumber = 0;
+		$errorString = "";
+		$timeout = 3;
+		// We check if a mythfrontend process is running. If it is, we assume, MythTV is running
+		if (($ipAddress == "192.168.80.1") or ($ipAddress == "127.0.0.1")) {
+			// Checking if mythtv is running on the core
+			$retVal = exec("ps ax|grep mythfrontend|grep -v grep",&$output,&$exitCode);
+			if ($exitCode == 0) {
+				$currentMediaPlayer = "TV";
+				$status = "TV";
+			}
+		} else {
+			// Checking a mythfrontend running on an MD, we check for an open port at 10001
+			$oldStatus = error_reporting(E_ERROR);
+			$fp = fsockopen($ipAddress, $port, &$errorNumber, &$errorString, $timeout);
+			error_reporting($oldStatus);
+			if ($errorString <> "") {
+				return "";
+			}
+			$currentMediaPlayer = "TV";
+			$status="TV";
+		}
+		return $status;
+	}	
+
+
 	function vdrStatus($ipAddress) {
 		global $currentMediaPlayer;
 		$port = 2001;
