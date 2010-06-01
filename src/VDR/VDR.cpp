@@ -598,8 +598,19 @@ void VDR::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID,st
 //<-dceag-c65-e->
 {
 	string sCommand;
+	string sValue;
 	string sVDRResponse;
-	sCommand = "HITK channel+";
+	if (sValue_To_Assign == '-1') {
+		sValue = '-';
+	} else { 
+		if (sValue_To_Assign == '+1') {
+			sValue = '+';
+		} else {
+			sValue = sValue_To_Assign;
+		} 
+	} 
+	sCommand = "CHAN " + sValue;
+
 	SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
 
 }
