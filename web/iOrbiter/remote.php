@@ -52,6 +52,11 @@
 		print "<li onClick='tellemCommand(\"skipfwd\",\"$remoteType\",$PK_File);'>Skip Forward</li>\n";
 		print "<li onClick='tellemCommand(\"skipback\",\"$remoteType\",$PK_File);'>Skip Backward</li>\n";
 	}
+	if (substr($remoteType,0,2) == 'TV') {
+		print "<li class='group'>TV Remote</li>\n";
+		print "<li onClick='tellemCommand(\"skipfwd\",\"$remoteType\",$PK_File);'>Next Program</li>\n";
+		print "<li onClick='tellemCommand(\"skipback\",\"$remoteType\",$PK_File);'>Prev Program</li>\n";
+	}
 	print "<li class='group'>Other Control</li>\n";
 	print "<li onClick='tellemCommand(\"louder\",$PK_File);'>Volume+</li>\n";
 	print "<li onClick='tellemCommand(\"quieter\",$PK_File);'>Volume-</li>\n";

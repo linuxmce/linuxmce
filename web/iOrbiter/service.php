@@ -14,7 +14,7 @@
 	$currentScreen = 1;
 	$currentRoom = 3; 
 	$PK_File = 0;
-*/	global $pk_file,$currentUser, $currentScreen, $currentRoom, $currentEntertainArea, $link, $mediaLink;
+*/	global $pk_file,$currentUser, $currentScreen, $currentRoom, $currentEntertainArea, $link, $mediaLink, $currentMediaPlayer;
 	if (isset($_COOKIE["currentUser"])) {	$currentUser = $_COOKIE["currentUser"]; }
 	if (isset($_COOKIE["currentRoom"])) {	$currentRoom = $_COOKIE["currentRoom"]; }
 	$remotetype = "";
@@ -37,6 +37,7 @@
 	}	
 	if (isset($_POST["remotetype"])) {
 	        $remoteType = $_POST["remotetype"];
+	        $currentMediaPlayer = $remoteType;
         }
 
 	if (isset($_POST["command"])) {
@@ -44,6 +45,7 @@
 	} else {
 		$command = 'play';
 	}
+
 	$file=fopen("/tmp/test.txt","w+");
 	fwrite($file,"command= $command");
 	fclose($file);
