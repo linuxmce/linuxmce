@@ -288,11 +288,15 @@
 
 	function sendCommand($destination, $command, $parameter=0) {
 		global $link;
-		$socket = commStart("dcerouter",3450,$possyDeviceFromID);
+		// We send the messages from the MD/Hybrid device, instead of our usual
+		// device. Let's see, if lighting etc works.
+		$deviceFromID = getMD();
+		        
+		$socket = commStart("dcerouter",3450,$deviceFromID);
 		if (! is_array($parameter)) {
-			myMessageSend($socket,$possyDeviceFromID,getDestinationDevice($link,$destination),1,$command); // ,13,'"' . $filePath . '"', 45, $currentEntertainArea);
+			myMessageSend($socket,$deviceFromID,getDestinationDevice($link,$destination),1,$command); // ,13,'"' . $filePath . '"', 45, $currentEntertainArea);
 		} else { 
-			myMessageSend($socket,$possyDeviceFromID,getDestinationDevice($link,$destination),1,$command,$parameter);		
+			myMessageSend($socket,$deviceFromID,getDestinationDevice($link,$destination),1,$command,$parameter);		
 		}
 		commEnd($socket);
 	}
