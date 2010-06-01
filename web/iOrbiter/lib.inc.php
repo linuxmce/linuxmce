@@ -239,7 +239,11 @@
 		} elseif ($currentMediaPlayer == "AV-unknown") {
 			$currentMediaDevice = getDeviceForTemplateInRoom($link,58);  // We assume a SqueezeBox
 		} elseif ($currentMediaPlayer == "TV") {
-			$currentMediaDevice = getDeviceForTemplateInRoom($link,1705);  // We assume a VDR device
+			if (pvrInstalled() == "VDR") {
+				$currentMediaDevice = getDeviceForTemplateInRoom($link,1705);  // We assume a VDR device
+			} else if (pvrInstalled() == "MythTV") {
+				$currentMediaDevice = getDeviceForTemplateInRoom($link,35); // The MythTV player device
+			}
 		} else {
 			$currentMediaDevice = getDeviceForTemplate($link,2);
 		}
