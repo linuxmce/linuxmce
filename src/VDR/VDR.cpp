@@ -600,11 +600,11 @@ void VDR::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID,st
 	string sCommand;
 	string sValue;
 	string sVDRResponse;
-	if (sValue_To_Assign == '-1') {
-		sValue = '-';
+	if (sValue_To_Assign == "-1") {
+		sValue = "-";
 	} else { 
-		if (sValue_To_Assign == '+1') {
-			sValue = '+';
+		if (sValue_To_Assign == "+1") {
+			sValue = "+";
 		} else {
 			sValue = sValue_To_Assign;
 		} 
