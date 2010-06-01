@@ -856,6 +856,17 @@ void VDR::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *pData,
 void VDR::CMD_Navigate_Next(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c81-e->
 {
+        string sCommand;
+        string sVDRResponse;
+        if (m_menustatus==0)
+        {
+         sCommand = "CHAN +";
+        }
+        else
+        {
+         sCommand = "HITK Up";
+        }
+        SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
 
 }
 //<-dceag-c82-b->
@@ -868,6 +879,20 @@ void VDR::CMD_Navigate_Next(int iStreamID,string &sCMD_Result,Message *pMessage)
 void VDR::CMD_Navigate_Prev(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c82-e->
 {
+	// Navigational commands should remember where they are. If they are in the menu, they move around
+	// in the menu. 
+	// If they are watching stuff, the should change the channel.
+        string sCommand;
+        string sVDRResponse;
+        if (m_menustatus==0)
+        {
+         sCommand = "CHAN -";
+        }
+        else
+        {
+         sCommand = "HITK Down";
+        }
+        SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
 
 }
 //<-dceag-c87-b->
