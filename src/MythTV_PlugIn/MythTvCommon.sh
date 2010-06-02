@@ -174,6 +174,7 @@ function WaitUntilMythTvInitialRunXMinutesOld {
 
 		# in case end time changed, redo if we waited more
 		# than a few seconds
+		TIMETOWAIT=$(echo $ENDTIME - $NOW | bc)
 		if [ $TIMETOWAIT -gt 5 ] ; then
 			WaitUntilMythTvInitialRunXMinutesOld $MINS
 		fi

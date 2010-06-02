@@ -130,6 +130,8 @@ string Proxy_Orbiter::GetDeviceXmlFileName()
 //-----------------------------------------------------------------------------------------------------
 bool Proxy_Orbiter::PushRefreshEvent(bool bForce,bool bIgnoreMinimumInterval/*=false*/)
 {
+	if (m_sRemotePhoneIP == "")
+		return false;
     static bool bFirstTime = true;
     static timespec tLastImageGenerated;
     timespec tCurrentImageGenerated;
