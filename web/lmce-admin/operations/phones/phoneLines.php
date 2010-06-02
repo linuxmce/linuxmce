@@ -293,7 +293,7 @@ function phoneLinesTable($astADO){
 			<td>'.@$phoneState['SIP'][$row['pdata']].'</td>
 			<td align="center">
 				<a href="index.php?section=phoneLines&type=SIP&eid='.$row['id'].'">'.$TEXT_EDIT_CONST.'</a> 
-				<a href="index.php?section=incomingCallsSettings&type=SIP&id='.$row['id'].'">'.$TEXT_SETTINGS_CONST.'</a> 
+				<a href="index.php?section=incomingCallsSettings&type=SIP&data='.$row['data'].'&id='.$row['id'].'">'.$TEXT_SETTINGS_CONST.'</a> 
 				<a href="javascript:if(confirm(\''.$TEXT_DELETE_PHONE_LINE_CONFIRMATION_CONST.'\'))self.location=\'index.php?section=phoneLines&action=del&id='.$row['id'].'&line_name='.$row['data'].'&phone_number='.$phoneNumber.'\'">'.$TEXT_DELETE_CONST.'</a>
 			</td>
 		</tr>';

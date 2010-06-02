@@ -12,6 +12,7 @@ function incomingCallsSettings($output,$dbADO,$telecomADO,$asteriskADO) {
 	$action = (isset($_REQUEST['action']) && $_REQUEST['action']!='')?cleanString($_REQUEST['action']):'form';
 	$installationID = (int)@$_SESSION['installationID'];
 	$id=$_REQUEST['id'];
+	$data=$_REQUEST['data'];
 	$type=$_REQUEST['type'];
 	
 	if($action=='form'){
@@ -26,9 +27,10 @@ function incomingCallsSettings($output,$dbADO,$telecomADO,$asteriskADO) {
 			<input type="hidden" name="section" value="incomingCallsSettings">
 			<input type="hidden" name="action" value="update">
 			<input type="hidden" name="id" value="'.$id.'">
+			<input type="hidden" name="data" value="'.$data.'">
 			<input type="hidden" name="type" value="'.$type.'">
 			
-			'.getPhoneLineDetails($id,$type,$asteriskADO).'<br>
+			'.getPhoneLineDetails($id,$data,$type,$asteriskADO).'<br>
 			'.getPhoneLinesSettings($id,$type,$dbADO,$telecomADO,$selectedValues).'
 		</form>';
 	}else{
@@ -53,14 +55,15 @@ function incomingCallsSettings($output,$dbADO,$telecomADO,$asteriskADO) {
 	$output->output();
 }
 
-function getPhoneLineDetails($id,$type,$astADO){
+function getPhoneLineDetails($id,$data,$type,$astADO){
 	$count=0;
 	$res=$astADO->Execute("
 		SELECT sip.id,sip.data,sips.data AS sdata, sipp.data AS pdata 
 		FROM sip 
 		INNER JOIN sip sips ON (sips.id=sip.id) AND (sips.keyword='secret')
 		INNER JOIN sip sipp ON (sipp.id=sip.id) AND (sipp.keyword='username')
-		WHERE (sip.keyword='account') AND ((sip.data='broadvoice') OR (sip.data='sipgate') OR (sip.data='inphonex')) AND sip.id='$id'");
+		WHERE (sip.keyword='account') AND ((sip.id='$id') AND (sip.data='$data'))");
+#		WHERE (sip.keyword='account') AND ((sip.data='broadvoice') OR (sip.data='sipgate') OR (sip.data='inphonex')) AND sip.id='$id'");
 	$out='
 	<table align="center" cellpadding="3" cellspacing="0">
 		<tr class="tablehead">
@@ -86,7 +89,8 @@ function getPhoneLineDetails($id,$type,$astADO){
 		FROM iax 
 		INNER JOIN iax iaxs ON (iaxs.id=iax.id) AND (iaxs.keyword='secret')
 		INNER JOIN iax iaxp ON (iaxp.id=iax.id) AND (iaxp.keyword='username')
-		WHERE (iax.keyword='account') AND ((iax.data='fwd') OR (iax.data='teliax') OR (iax.data='efon')) AND iax.id='$id'");
+		WHERE (iax.keyword='account') AND ((iax.id='$id') AND (iax.data='$data'))");
+#		WHERE (iax.keyword='account') AND ((iax.data='fwd') OR (iax.data='teliax') OR (iax.data='efon')) AND iax.id='$id'");
 	while($row=$res->FetchRow()){
 		$count++;
 		$color=($count%2==0)?'#F0F3F8':'#FFFFFF';
