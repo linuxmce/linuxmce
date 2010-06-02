@@ -70,7 +70,7 @@ bool DataLogger_Plugin::GetConfig()
 	{
 		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Cannot connect to database 'lmce_datalog'!" );
 		return false;
-	}
+	} 
 	return true;
 }
 
@@ -134,7 +134,6 @@ bool DataLogger_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessa
 	int iValue = 0;
 	string sValue = "";
 
-	// LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"DataLogger Received Event: %d",pMessage->m_dwID);
 
 	switch( pMessage->m_dwID ) {
 
@@ -164,38 +163,12 @@ bool DataLogger_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessa
 			fValue = iValue;
 			;;
 			break;
-                case EVENT_State_Changed_CONST:
-                        unit = 5;
-                        sValue = pMessage->m_mapParameters[EVENTPARAMETER_State_CONST];
-                        sscanf(sValue.c_str(),"%i",&iValue);
-                        fValue = iValue;
-                        ;;
-                        break;
-		case EVENT_Voltage_Changed_CONST:
-			unit = 6;
-			sValue = pMessage->m_mapParameters[EVENTPARAMETER_Voltage_CONST];
-                        sscanf(sValue.c_str(),"%f",&fValue);
-			;;
-			break;
-		case EVENT_Power_Usage_Changed_CONST:
-                        unit = 7;
-                        sValue = pMessage->m_mapParameters[EVENTPARAMETER_Watts_CONST];
-                        sscanf(sValue.c_str(),"%f",&fValue);
-                        ;;
-			break;
-		case EVENT_Energy_Cost_Changed_CONST:
-                        unit = 8;
-                        sValue = pMessage->m_mapParameters[EVENTPARAMETER_Cost_CONST];
-                        sscanf(sValue.c_str(),"%f",&fValue);
-                        ;;
-			break;
 		default:
 			handled=false;
 			;;
 	}
 
 	if (handled) {
-		// LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"DataLogger Handling Event: %d",pMessage->m_dwID);
 		time_t timestamp;
 		struct tm *timestruct;
 		timestamp = time(NULL);
