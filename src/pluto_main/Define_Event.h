@@ -82,6 +82,9 @@
 #define EVENT_State_Changed_CONST 81
 #define EVENT_Media_Removed_CONST 82
 #define EVENT_CO2_Level_Changed_CONST 83
+#define EVENT_Voltage_Changed_CONST 84
+#define EVENT_Power_Usage_Changed_CONST 85
+#define EVENT_Energy_Cost_Changed_CONST 86
 
 #define EVENT_TABLE "Event"
 #define EVENT_PK_EVENT_FIELD "PK_Event"
