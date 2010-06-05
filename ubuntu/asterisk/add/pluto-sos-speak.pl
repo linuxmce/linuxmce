@@ -1,9 +1,11 @@
 #!/usr/bin/perl -w
 
-# use strict;
+use strict;
 use diagnostics;
 use DBI;
 require "/usr/pluto/bin/config_ops.pl";
+
+use vars ('$DCERouter','$PK_Device','$MySqlHost','$MySqlPort','$MySqlUser','$MySqlPassword','$MySqlDBName');
 
 #$|=1;
 
@@ -14,7 +16,6 @@ my $row;
 my @data;
 my $secpluginid;
 my $telpluginid;
-our $DCERouter;
 
 # Connect to pluto_main database
 $db_handle = DBI->connect(&read_pluto_cred()) or die "Can't connect to database: $DBI::errstr\n";
