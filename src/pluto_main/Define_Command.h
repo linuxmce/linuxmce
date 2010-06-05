@@ -975,6 +975,13 @@
 #define COMMAND_Trip_Unit_CONST 1073
 #define COMMAND_Subject_CONST 1074
 #define COMMAND_Send_Email_CONST 1075
+#define COMMAND_Add_Station_CONST 1076
+#define COMMAND_Remove_Station_CONST 1077
+#define COMMAND_Rename_Station_CONST 1078
+#define COMMAND_Explain_Song_CONST 1079
+#define COMMAND_Add_Music_to_Station_CONST 1080
+#define COMMAND_Add_Station_to_QuickMix_CONST 1081
+#define COMMAND_Remove_Station_from_QuickMix_CONST 1082
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"
