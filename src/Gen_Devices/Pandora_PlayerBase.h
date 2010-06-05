@@ -271,7 +271,7 @@ public:
 	virtual void CMD_Explain_Song(int iStreamID,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Add_Music_to_Station(string sID,int iStreamID,string sName,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Add_Station_to_QuickMix(string sID,int iStreamID,string &sCMD_Result,class Message *pMessage) {};
-	virtual void CMD_Remove_Station_from_QuickMix(string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Remove_Station_from_QuickMix(string sID,int iStreamID,string &sCMD_Result,class Message *pMessage) {};
 
 	//This distributes a received message to your handler.
 	virtual ReceivedMessageResult ReceivedMessage(class Message *pMessageOriginal)
@@ -685,7 +685,9 @@ public:
 				case COMMAND_Remove_Station_from_QuickMix_CONST:
 					{
 						string sCMD_Result="OK";
-						CMD_Remove_Station_from_QuickMix(sCMD_Result,pMessage);
+						string sID=pMessage->m_mapParameters[COMMANDPARAMETER_ID_CONST];
+						int iStreamID=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_StreamID_CONST].c_str());
+						CMD_Remove_Station_from_QuickMix(sID.c_str(),iStreamID,sCMD_Result,pMessage);
 						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
 						{
 							pMessage->m_bRespondedToMessage=true;
@@ -702,7 +704,7 @@ public:
 						{
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
-								CMD_Remove_Station_from_QuickMix(sCMD_Result,pMessage);
+								CMD_Remove_Station_from_QuickMix(sID.c_str(),iStreamID,sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;

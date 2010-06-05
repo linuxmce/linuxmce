@@ -227,9 +227,13 @@ public:
 
 	/** @brief COMMAND: #1082 - Remove Station from QuickMix */
 	/** Remove Radio Station from the currently playing QuickMix */
+		/** @param #10 ID */
+			/** The Station ID */
+		/** @param #41 StreamID */
+			/** The Stream ID */
 
-	virtual void CMD_Remove_Station_from_QuickMix() { string sCMD_Result; CMD_Remove_Station_from_QuickMix(sCMD_Result,NULL);};
-	virtual void CMD_Remove_Station_from_QuickMix(string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Remove_Station_from_QuickMix(string sID,int iStreamID) { string sCMD_Result; CMD_Remove_Station_from_QuickMix(sID.c_str(),iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Remove_Station_from_QuickMix(string sID,int iStreamID,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
 	};

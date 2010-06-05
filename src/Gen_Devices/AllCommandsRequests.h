@@ -29154,27 +29154,35 @@ namespace DCE
 	};
 	class CMD_Remove_Station_from_QuickMix : public PreformedCommand {
 	public:
-		CMD_Remove_Station_from_QuickMix(long DeviceIDFrom, long DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+		CMD_Remove_Station_from_QuickMix(long DeviceIDFrom, long DeviceIDTo,string sID,int iStreamID) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
 			COMMAND_Remove_Station_from_QuickMix_CONST,
-			0 /* number of parameters */); }
+			2 /* number of parameters */,
+			COMMANDPARAMETER_ID_CONST, sID.c_str(),
+			COMMANDPARAMETER_StreamID_CONST, StringUtils::itos(iStreamID).c_str()); }
 	};
 	class CMD_Remove_Station_from_QuickMix_DL : public PreformedCommand {
 	public:
-		CMD_Remove_Station_from_QuickMix_DL(long DeviceIDFrom, string DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+		CMD_Remove_Station_from_QuickMix_DL(long DeviceIDFrom, string DeviceIDTo,string sID,int iStreamID) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
 			COMMAND_Remove_Station_from_QuickMix_CONST,
-			0 /* number of parameters */); }
+			2 /* number of parameters */,
+			COMMANDPARAMETER_ID_CONST, sID.c_str(),
+			COMMANDPARAMETER_StreamID_CONST, StringUtils::itos(iStreamID).c_str()); }
 	};
 	class CMD_Remove_Station_from_QuickMix_DT : public PreformedCommand {
 	public:
-		CMD_Remove_Station_from_QuickMix_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+		CMD_Remove_Station_from_QuickMix_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sID,int iStreamID) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
 			COMMAND_Remove_Station_from_QuickMix_CONST,
-			0 /* number of parameters */); }
+			2 /* number of parameters */,
+			COMMANDPARAMETER_ID_CONST, sID.c_str(),
+			COMMANDPARAMETER_StreamID_CONST, StringUtils::itos(iStreamID).c_str()); }
 	};
 	class CMD_Remove_Station_from_QuickMix_Cat : public PreformedCommand {
 	public:
-		CMD_Remove_Station_from_QuickMix_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+		CMD_Remove_Station_from_QuickMix_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sID,int iStreamID) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
 			COMMAND_Remove_Station_from_QuickMix_CONST,
-			0 /* number of parameters */); }
+			2 /* number of parameters */,
+			COMMANDPARAMETER_ID_CONST, sID.c_str(),
+			COMMANDPARAMETER_StreamID_CONST, StringUtils::itos(iStreamID).c_str()); }
 	};
 }
 #endif

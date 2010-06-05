@@ -435,11 +435,17 @@ void Pandora_Player::CMD_Add_Station_to_QuickMix(string sID,int iStreamID,string
 
 	/** @brief COMMAND: #1082 - Remove Station from QuickMix */
 	/** Remove Radio Station from the currently playing QuickMix */
+		/** @param #10 ID */
+			/** The Station ID */
+		/** @param #41 StreamID */
+			/** The Stream ID */
 
-void Pandora_Player::CMD_Remove_Station_from_QuickMix(string &sCMD_Result,Message *pMessage)
+void Pandora_Player::CMD_Remove_Station_from_QuickMix(string sID,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c1082-e->
 {
 	cout << "Need to implement command #1082 - Remove Station from QuickMix" << endl;
+	cout << "Parm #10 - ID=" << sID << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 
