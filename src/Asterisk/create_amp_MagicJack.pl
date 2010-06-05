@@ -8,7 +8,7 @@ require "/usr/pluto/bin/config_ops.pl";
 my $DECLARED_USERNAME;
 my $DECLARED_USERPASSWD;
 my $DECLARED_NUMBER;
-my $DECLARED_HOST = "127.0.0.1";
+my $DECLARED_HOST;
 my $DECLARED_PREFIX = "9";
 my $LOCAL_PREFIX1 = "";
 my $LOCAL_PREFIX2 = "";
@@ -134,10 +134,10 @@ close (MYFILE);
 
 # Chmod the script and run it
 chmod(0777, "/etc/init.d/StartMjProxy.sh");
-'/etc/init.d/StartMjProxy.sh';
+`/etc/init.d/StartMjProxy.sh`;
 
 # Update RC to run StartMjProxy.sh after each reboot
-'update-rc.d StartMjProxy.sh defaults';
+`update-rc.d StartMjProxy.sh defaults`;
 
 #reload asterisk
 `asterisk -r -x reload`;
