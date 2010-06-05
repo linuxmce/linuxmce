@@ -4,11 +4,9 @@
   <!-- interface-naming-policy project-wide -->
   <object class="GtkWindow" id="progressWindow">
     <property name="border_width">8</property>
-    <property name="type">popup</property>
     <property name="title" translatable="yes">Progress Window</property>
     <property name="modal">True</property>
     <property name="window_position">center-always</property>
-    <property name="type_hint">splashscreen</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <property name="decorated">False</property>
@@ -16,15 +14,11 @@
     <property name="gravity">center</property>
     <child>
       <object class="GtkTable" id="progressTable">
-        <property name="width_request">640</property>
-        <property name="height_request">480</property>
         <property name="visible">True</property>
         <property name="n_rows">3</property>
         <property name="n_columns">3</property>
         <child>
           <object class="GtkVBox" id="progressVbox">
-            <property name="width_request">640</property>
-            <property name="height_request">52</property>
             <property name="visible">True</property>
             <property name="spacing">6</property>
             <child>

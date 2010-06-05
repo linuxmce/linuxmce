@@ -59,7 +59,7 @@ void GTKPromptUser::Init()
 
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"+++ GTK: Loading Built GTKOrbiter Glade");
   pBuilder = gtk_builder_new();
-  gtk_builder_add_from_file(pBuilder, "GTKOrbiter.glade", NULL);
+  gtk_builder_add_from_file(pBuilder, "/usr/pluto/bin/GTKOrbiter.glade", NULL);
 
   pWindow = GTK_WIDGET(gtk_builder_get_object(pBuilder, "promptWindow"));
   m_pWindow = pWindow;

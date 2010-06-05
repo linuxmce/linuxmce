@@ -101,7 +101,7 @@ void GTKProgressWnd::CreateWindow()
   GtkWidget		*pProgressBar;
 
   pBuilder = gtk_builder_new();
-  gtk_builder_add_from_file(pBuilder, "GTKOrbiter.glade", NULL);
+  gtk_builder_add_from_file(pBuilder, "/usr/pluto/bin/GTKOrbiter.glade", NULL);
 
   pWindow = GTK_WIDGET(gtk_builder_get_object(pBuilder, "progressWindow"));
   gtk_window_set_wmclass(GTK_WINDOW(pWindow),m_wndName.c_str(),m_wndName.c_str());
