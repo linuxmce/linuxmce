@@ -1,15 +1,9 @@
 #!/usr/bin/perl -w
 
-use strict;
+# use strict;
 use diagnostics;
 use DBI;
 require "/usr/pluto/bin/config_ops.pl";
-use vars '$DCERouter';
-use vars '$PK_Device';
-use vars '$MySqlHost';
-use vars '$MySqlUser';
-use vars '$MySqlPassword';
-use vars '$MySqlDBName';
 
 #$|=1;
 
@@ -20,9 +14,12 @@ my $row;
 my @data;
 my $secpluginid;
 my $telpluginid;
+our $DCERouter;
 
-#connect to pluto_main database
+# Connect to pluto_main database
 $db_handle = DBI->connect(&read_pluto_cred()) or die "Can't connect to database: $DBI::errstr\n";
+
+# Lookup the security plugin device id
 $sql = "select PK_Device from Device where FK_DeviceTemplate=33;";
 $statement = $db_handle->prepare($sql) or die "Couldn't prepare query '$sql': $DBI::errstr\n";
 $statement->execute() or die "Couldn't execute query '$sql': $DBI::errstr\n";
@@ -31,9 +28,11 @@ unless($row = $statement->fetchrow_hashref())
     print STDERR "NO SECURITY PLUGIN\n";
     exit(1);
 }
+
 $secpluginid=$row->{PK_Device};
 $statement->finish();
 
+# Lookup the telecom plugin device id
 $sql = "select PK_Device from Device where FK_DeviceTemplate=34;";
 $statement = $db_handle->prepare($sql) or die "Couldn't prepare query '$sql': $DBI::errstr\n";
 $statement->execute() or die "Couldn't execute query '$sql': $DBI::errstr\n";
@@ -45,6 +44,7 @@ unless($row = $statement->fetchrow_hashref())
 $telpluginid=$row->{PK_Device};
 $statement->finish();
 
+# Lookup devices that can speeak in the house
 $sql = "select FK_Device, IK_DeviceData from Device_DeviceData where FK_DeviceData='124';";
 $statement = $db_handle->prepare($sql) or die "Couldn't prepare query '$sql': $DBI::errstr\n";
 $statement->execute() or die "Couldn't execute query '$sql': $DBI::errstr\n";
@@ -65,7 +65,6 @@ unless(length($selected_devices)>0)
     exit(1);
 }
 
-
 $sql = "select FK_Device, IK_DeviceData from Device_DeviceData where (FK_Device in ($selected_devices)) and (FK_DeviceData='31');";
 $statement = $db_handle->prepare($sql) or die "Couldn't prepare query '$sql': $DBI::errstr\n";
 $statement->execute() or die "Couldn't execute query '$sql': $DBI::errstr\n";
@@ -79,8 +78,8 @@ for(my $i=0;defined($data[$i]);$i++)
 {
 	my $phone=$data[$i];
 	print STDERR "Will call device ".$phone."\n";
-	# 921 - Make Call   262 - FK_Device_From   83 - PhoneExtension
-	`/usr/pluto/bin/MessageSend $DCERouter -targetType device $phone $telpluginid 1 921 262 $phone 83 997`;
+	# 921 - Make Call   184 - FK_Device_From   83 - PhoneExtension
+	`/usr/pluto/bin/MessageSend $DCERouter -targetType device $phone $telpluginid 1 921 184 $phone 83 997`;
 }
 
 $statement->finish();
