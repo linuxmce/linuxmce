@@ -42,9 +42,9 @@ $DB_TC_HANDLE = DBI->connect("dbi:mysql:database=pluto_telecom;host=".$CONF_HOST
 
 &get_all_users_extensions();
 
-$PRIORITYCALLERID = $ARGV[0];
+$PRIORITYCALLERID = $AGI{'callerid'};
 
-print "EXEC NoOp \"Finding if ".$PRIORITYCALLERID." is a priority call for somebody\"\n";
+print "EXEC NoOp \"Finding if ".$PRIORITYCALLERID." is a caller for somebody\"\n";
 $line=<STDIN>;
 &checkresult($line);
 
