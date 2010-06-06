@@ -14,3 +14,4 @@ sipgate (DE)	http://www.sipgate.de	sipgate_de	SIP
 voipwa (AU)	http://www.voipwa.net.au	voipwa	IAX
 Messagenet (IT)	http://www.messagenet.it	Messagenet	SIP
 MagicJack (US Only, $20/yr.)	http://www.magicjack.com	MagicJack	SIP
+Vonage		http://www.vonage.com		Vonage		SIP
