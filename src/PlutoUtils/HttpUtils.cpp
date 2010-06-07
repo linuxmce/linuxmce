@@ -58,7 +58,7 @@ string HttpPost(string sURL, const vector<string>& vectHeaders, const map<string
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, sParams.length());
 		curl_easy_setopt(curl, CURLOPT_POST, 1); // set POST method 
 		curl_easy_setopt(curl, CURLOPT_VERBOSE, 1); 
-		curl_easy_setopt(curl, CURLOPT_PORT, 9999); 
+		curl_easy_setopt(curl, CURLOPT_PORT, nPort);
 
 		if(sUser != "")
 			curl_easy_setopt(curl, CURLOPT_USERPWD, Authenticate.c_str()); 
