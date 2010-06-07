@@ -51,6 +51,8 @@ bool PictureCanvas::Setup(int width, int height, string sWindowName)
 	SDL_WM_SetCaption(sWindowName.c_str(), sWindowName.c_str());
 
 	pthread_create(&ThreadID, NULL, PictureCanvasEventThread, this);
+
+	SDL_WM_IconifyWindow();
 	return true;
 }
 
