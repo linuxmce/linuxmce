@@ -36,10 +36,6 @@
 
 #include "DataGrid.h"
 
-#include <curl/curl.h>
-#include <curl/types.h>
-#include <curl/easy.h>
-
 using namespace DCE;
 #if defined(WIN32) 
 void WriteStatusOutput(const char *) {} //do nothing
@@ -170,7 +166,7 @@ bool Proxy_Orbiter::PushRefreshEvent(bool bForce,bool bIgnoreMinimumInterval/*=f
             "</CiscoIPPhoneExecute>";
     mapParams["XML"] = StringUtils::URLEncode(sRequestUrl);
 
-    string Response = PhonePost("http://" + m_sRemotePhoneIP + "/CGI/Execute", vectHeaders, mapParams, 
+    string Response = HttpPost("http://" + m_sRemotePhoneIP + "/CGI/Execute", vectHeaders, mapParams, 
             "user", "pluto");
 
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "XML param req %s", sRequestUrl.c_str());
@@ -592,64 +588,6 @@ bool Proxy_Orbiter::IsRepeatedKeyForScreen(DesignObj_Orbiter* pObj, int iPK_Butt
 
 	//no repeated keys for small ui or web orbiter
 	return false;
-}
-
-string Proxy_Orbiter::PhonePost(string sURL, const vector<string>& vectHeaders, const map<string, string>& mapParams, 
-				string sUser, string sPassword, int nPort)
-{
-	string sResponse;
-
-	CURLcode res;
-	struct curl_slist *headerlist = NULL;
-	string sParams;
-
-	curl_global_init(CURL_GLOBAL_ALL);
-	CURL *curl = curl_easy_init();
-
-	for(map<string, string>::const_iterator it = mapParams.begin(); it != mapParams.end();)	
-	{
-		string sParamName = it->first;
-		string sParamValue = it->second;
-		sParams += sParamName + "=" + sParamValue;
-		++it;
-		
-		if(it != mapParams.end())
-			sParams += "&";
-	}
-
-	for(vector<string>::const_iterator ith = vectHeaders.begin(); ith != vectHeaders.end(); ++ith)
-	{
-		string sHeader = *ith;
-		curl_slist_append(headerlist, sHeader.c_str()); 
-	}
-
-	string Authenticate = sUser + ":" + sPassword;
-
-	if(curl) 
-	{
-		curl_easy_setopt(curl, CURLOPT_URL, sURL.c_str());
-		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);// allow redirects 
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, sParams.c_str());
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, sParams.length());
-		curl_easy_setopt(curl, CURLOPT_POST, 1); // set POST method 
-		curl_easy_setopt(curl, CURLOPT_VERBOSE, 1); 
-		curl_easy_setopt(curl, CURLOPT_PORT, nPort); 
-
-		if(sUser != "")
-			curl_easy_setopt(curl, CURLOPT_USERPWD, Authenticate.c_str()); 
-
-		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
-
-		res = curl_easy_perform(curl);
-
-		//always cleanup 
-		curl_easy_cleanup(curl);
-
-		//free slist
-		curl_slist_free_all(headerlist);
-	}
-
-	return res == CURLE_OK ? "OK" : "ERROR";
 }
 
 void LoadUI_From_ConfigurationData()
