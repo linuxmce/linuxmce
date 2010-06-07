@@ -48,6 +48,29 @@ void WriteStatusOutput(const char *) {} //do nothing
 #define MINIMUM_PUSH_INTERVAL 6000
 #define XML_MAX_TOUCH_ZONES 32
 
+/* release the mutex when calling Orbiter methods to avoid deadlock, and relock after call
+ * sequence:
+ *     DCE::Proxy_Orbiter::ReceivedString
+ *         lock m_ActionMutex
+ *     DCE::Orbiter::RegionDown
+ *     DCE::Orbiter::ClickedRegion
+ *         lock m_ScreenMutex
+ * sequence:
+ *     OrbiterRenderer::RefreshScreen
+ *         lock m_ScreenMutex
+ *     DCE::Proxy_OrbiterRenderer_SDL::RenderScreen
+ *     DCE::OrbiterRenderer_SDL::RenderScreen
+ *     DCE::Proxy_OrbiterRenderer_SDL::DisplayImageOnScreen
+ *     DCE::Proxy_Orbiter::ImageGenerated
+ *         lock m_ActionMutex
+ */
+#define PROXY_ORBITER_MUTEX_SUSPEND(code) \
+	do { \
+		am.Release(); \
+		code; \
+		am.DoLock(); \
+	} while (false);
+
 //-----------------------------------------------------------------------------------------------------
 Proxy_Orbiter::Proxy_Orbiter(int DeviceID, int PK_DeviceTemplate, string ServerAddress)
 : Orbiter(DeviceID, PK_DeviceTemplate, ServerAddress, "", false, 0, 
@@ -479,8 +502,8 @@ bool Proxy_Orbiter::ReceivedString( Socket *pSocket, string sLine, int nTimeout 
 			{
 				StartProcessingRequest();
 				
-				ButtonDown(Key);
-				ButtonUp(Key);
+				PROXY_ORBITER_MUTEX_SUSPEND(ButtonDown(Key));
+				PROXY_ORBITER_MUTEX_SUSPEND(ButtonUp(Key));
 
 				LoggerWrapper::GetInstance()->Write(LV_WARNING, "Waiting the image/xml to be generated...");        
 				timespec abstime;
@@ -517,7 +540,7 @@ bool Proxy_Orbiter::ReceivedString( Socket *pSocket, string sLine, int nTimeout 
 		string::size_type pos_y = sLine.find('x');
 		if( pos_y!=string::npos )
 			Y = atoi(sLine.substr(pos_y+1).c_str());
-		RegionDown(X,Y);
+		PROXY_ORBITER_MUTEX_SUSPEND(RegionDown(X,Y));
 
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Waiting the image/xml to be generated...");        
 		timespec abstime;
