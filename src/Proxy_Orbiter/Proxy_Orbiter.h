@@ -61,7 +61,6 @@ namespace DCE
 
         pluto_pthread_mutex_t m_ActionMutex; 
 		pthread_cond_t m_ActionCond;
-        pluto_pthread_mutex_t m_ActionMutexWait;
 
         string sNoMediaSoftKeysXml;
         string sAllSoftKeysXml;

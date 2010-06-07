@@ -51,7 +51,7 @@ void WriteStatusOutput(const char *) {} //do nothing
 //-----------------------------------------------------------------------------------------------------
 Proxy_Orbiter::Proxy_Orbiter(int DeviceID, int PK_DeviceTemplate, string ServerAddress)
 : Orbiter(DeviceID, PK_DeviceTemplate, ServerAddress, "", false, 0, 
-	  0, false), SocketListener("Proxy_Orbiter"), m_ActionMutex("action"), m_ResourcesMutex("resources"),m_ActionMutexWait("action_wait")
+    0, false), SocketListener("Proxy_Orbiter"), m_ActionMutex("action"), m_ResourcesMutex("resources")
 {
 	m_iImageCounter = 1;
     m_iLastImageSent = -1;
@@ -63,7 +63,6 @@ Proxy_Orbiter::Proxy_Orbiter(int DeviceID, int PK_DeviceTemplate, string ServerA
     pthread_cond_init( &m_ActionCond, NULL );
     m_ActionMutex.Init(NULL, &m_ActionCond);
 	m_ResourcesMutex.Init(NULL);
-	m_ActionMutexWait.Init(NULL);
 }
 //-----------------------------------------------------------------------------------------------------
 /*virtual*/ bool Proxy_Orbiter::GetConfig()
@@ -417,7 +416,6 @@ bool Proxy_Orbiter::ReceivedString( Socket *pSocket, string sLine, int nTimeout 
     LoggerWrapper::GetInstance()->Write(LV_WARNING, "Received: %s", sLine.c_str());
 	m_bPhoneRespondedToPush = true;
 
-	PLUTO_SAFETY_LOCK(amw,m_ActionMutexWait);
 	PLUTO_SAFETY_LOCK(am, m_ActionMutex);
 	
 	if( sLine.substr(0,5)=="IMAGE" )
