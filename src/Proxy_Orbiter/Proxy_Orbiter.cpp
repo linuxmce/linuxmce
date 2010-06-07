@@ -54,54 +54,54 @@ Proxy_Orbiter::Proxy_Orbiter(int DeviceID, int PK_DeviceTemplate, string ServerA
     0, false), SocketListener("Proxy_Orbiter"), m_ActionMutex("action"), m_ResourcesMutex("resources")
 {
 	m_iImageCounter = 1;
-    m_iLastImageSent = -1;
+	m_iLastImageSent = -1;
 	m_nCurrentScreenId = 0;
 
-    m_ImageQuality = 70;
+	m_ImageQuality = 70;
 	m_bDisplayOn=true;  // Override the default behavior -- when the phone starts the display is already on
 
-    pthread_cond_init( &m_ActionCond, NULL );
-    m_ActionMutex.Init(NULL, &m_ActionCond);
+	pthread_cond_init( &m_ActionCond, NULL );
+	m_ActionMutex.Init(NULL, &m_ActionCond);
 	m_ResourcesMutex.Init(NULL);
 }
 //-----------------------------------------------------------------------------------------------------
 /*virtual*/ bool Proxy_Orbiter::GetConfig()
 {
-    if(!Orbiter::GetConfig())
-        return false;
+	if(!Orbiter::GetConfig())
+		return false;
 
-    m_ImageQuality = DATA_Get_ImageQuality();
+	m_ImageQuality = DATA_Get_ImageQuality();
 	m_sRemotePhoneIP = DATA_Get_Remote_Phone_IP();
 	m_bReportTimeCode = false;
 
-    if(m_ImageQuality < 10 || m_ImageQuality > 100)
-        m_ImageQuality = 70; //default
+	if(m_ImageQuality < 10 || m_ImageQuality > 100)
+		m_ImageQuality = 70; //default
 	m_iTimeoutScreenSaver=0; // disable it
-    m_iListenPort = DATA_Get_Listen_Port();
-    if( !m_iListenPort )
-        m_iListenPort = CISCO_LISTEN_PORT_START;
+	m_iListenPort = DATA_Get_Listen_Port();
+	if( !m_iListenPort )
+		m_iListenPort = CISCO_LISTEN_PORT_START;
 
-    m_sInternalServerAddress = m_pData->GetTopMostDevice()->GetIPAddress();
-    m_sBaseUrl = "http://" + m_sInternalServerAddress + "/lmce-admin/";
+	m_sInternalServerAddress = m_pData->GetTopMostDevice()->GetIPAddress();
+	m_sBaseUrl = "http://" + m_sInternalServerAddress + "/pluto-admin/";
 
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Server's internal ip address: %s", m_sInternalServerAddress.c_str()); 
 
-    return true;
+	return true;
 }
 //-----------------------------------------------------------------------------------------------------
 /*virtual*/ void Proxy_Orbiter::Run()
 {
-    m_sRequestUrl = m_sBaseUrl + 
-        "index.php?"
-        "section=proxySocket&amp;"
-        "address=" + m_sInternalServerAddress + "&amp;"
-        "port=" + StringUtils::ltos(m_iListenPort) + "&amp;"
-        "command=XML&amp;"
+	m_sRequestUrl = m_sBaseUrl + 
+		"index.php?"
+		"section=proxySocket&amp;"
+		"address=" + m_sInternalServerAddress + "&amp;"
+		"port=" + StringUtils::ltos(m_iListenPort) + "&amp;"
+		"command=XML&amp;"
 		"deviceID=" + StringUtils::ltos(m_dwPK_Device) + "&amp;";
 	m_sPngImageUrl = m_sBaseUrl + "security_images/" + StringUtils::ltos(m_dwPK_Device) + "_cisco.png";
 
-    Initialize(gtSDLGraphic);
-    StartListening(m_iListenPort);
+	Initialize(gtSDLGraphic);
+	StartListening(m_iListenPort);
 }
 //-----------------------------------------------------------------------------------------------------
 /*virtual*/ Proxy_Orbiter::~Proxy_Orbiter()
@@ -110,7 +110,7 @@ Proxy_Orbiter::Proxy_Orbiter(int DeviceID, int PK_DeviceTemplate, string ServerA
 
 	Sleep(2500);
 	PushRefreshEvent(true, true); //force push, ignore any previous push 
-    pthread_mutex_destroy(&m_ActionMutex.mutex);
+	pthread_mutex_destroy(&m_ActionMutex.mutex);
 }
 //-----------------------------------------------------------------------------------------------------
 string Proxy_Orbiter::GetDevicePngFileName()
@@ -127,11 +127,11 @@ bool Proxy_Orbiter::PushRefreshEvent(bool bForce,bool bIgnoreMinimumInterval/*=f
 {
 	if (m_sRemotePhoneIP == "")
 		return false;
-    static bool bFirstTime = true;
-    static timespec tLastImageGenerated;
-    timespec tCurrentImageGenerated;
-    gettimeofday(&tCurrentImageGenerated, NULL);
-    timespec tInterval = tCurrentImageGenerated - tLastImageGenerated;
+	static bool bFirstTime = true;
+	static timespec tLastImageGenerated;
+	timespec tCurrentImageGenerated;
+	gettimeofday(&tCurrentImageGenerated, NULL);
+	timespec tInterval = tCurrentImageGenerated - tLastImageGenerated;
 	long nMilisecondsPassed = tInterval.tv_sec * 1000 + tInterval.tv_nsec / 1000000;
 	
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Time for last push event %d ms", nMilisecondsPassed);
@@ -150,26 +150,25 @@ bool Proxy_Orbiter::PushRefreshEvent(bool bForce,bool bIgnoreMinimumInterval/*=f
 	}
 
 	tLastImageGenerated = tCurrentImageGenerated;	
-    bFirstTime = false;
+	bFirstTime = false;
 
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Need to refresh phone's browser!");
 
 	m_bPhoneRespondedToPush = false;
-    vector<string> vectHeaders;
-    map<string, string> mapParams;
+	vector<string> vectHeaders;
+	map<string, string> mapParams;
 	string sPriorityLevel = bForce ? "0" : "1";
-    string sRequestUrl = 
-            string() + 
-            "<CiscoIPPhoneExecute>"
-                "<ExecuteItem Priority=\"" + sPriorityLevel + "\" URL=\"" + m_sRequestUrl + "\"/>"
-            "</CiscoIPPhoneExecute>";
-    mapParams["XML"] = StringUtils::URLEncode(sRequestUrl);
+	string sRequestUrl = 
+		string() + 
+		"<CiscoIPPhoneExecute>"
+			"<ExecuteItem Priority=\"" + sPriorityLevel + "\" URL=\"" + m_sRequestUrl + "\"/>"
+		"</CiscoIPPhoneExecute>";
+	mapParams["XML"] = StringUtils::URLEncode(sRequestUrl);
 
-    string Response = HttpPost("http://" + m_sRemotePhoneIP + "/CGI/Execute", vectHeaders, mapParams, 
-            "user", "pluto");
+	string Response = HttpPost("http://" + m_sRemotePhoneIP + "/CGI/Execute", vectHeaders, mapParams, "user", "pluto");
 
-    LoggerWrapper::GetInstance()->Write(LV_STATUS, "XML param req %s", sRequestUrl.c_str());
-    LoggerWrapper::GetInstance()->Write(LV_WARNING, "Push phone action completed with response: %s", Response.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "XML param req %s", sRequestUrl.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Push phone action completed with response: %s", Response.c_str());
 
 	if(!bForce)
 	{
@@ -208,13 +207,13 @@ void Proxy_Orbiter::StartProcessingRequest()
 //-----------------------------------------------------------------------------------------------------
 void Proxy_Orbiter::EndProcessingRequest()
 {
-    LoggerWrapper::GetInstance()->Write(LV_STATUS, "Stopping processing request in few ms...");
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Stopping processing request in few ms...");
 	CallMaintenanceInMiliseconds(REQUEST_INTERVAL_TIMEOUT, (OrbiterCallBack)&Proxy_Orbiter::StopProcessingRequest, this, pe_ALL );
 }
 //-----------------------------------------------------------------------------------------------------
 void Proxy_Orbiter::StopProcessingRequest(void *p)
 {
-    LoggerWrapper::GetInstance()->Write(LV_STATUS, "Stopped processing request...");
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Stopped processing request...");
 	m_bProcessingRequest = false;
 }
 //-----------------------------------------------------------------------------------------------------
@@ -273,114 +272,114 @@ void Proxy_Orbiter::StopProcessingRequest(void *p)
 //-----------------------------------------------------------------------------------------------------
 /*virtual*/ void Proxy_Orbiter::GenerateXMLItems(DesignObj_Orbiter *pObj) //recursive
 {
-    bool bTouchArea = false;
-    DesignObjZoneList::iterator iZone;
-    for( iZone=pObj->m_ZoneList.begin(  );iZone!=pObj->m_ZoneList.end(  );++iZone )
-    {
-        DesignObjZone *pDesignObjZone = ( *iZone );
-        //ExecuteCommandsInList( &pDesignObjZone->m_Commands, pObj, -1, -1, pObj->m_iRepeatParm+1 );
+	bool bTouchArea = false;
+	DesignObjZoneList::iterator iZone;
+	for( iZone=pObj->m_ZoneList.begin(  );iZone!=pObj->m_ZoneList.end(  );++iZone )
+	{
+		DesignObjZone *pDesignObjZone = ( *iZone );
+		//ExecuteCommandsInList( &pDesignObjZone->m_Commands, pObj, -1, -1, pObj->m_iRepeatParm+1 );
 
-        if(pDesignObjZone->m_Commands.size())
-        {
-            bTouchArea = true;
-            break;
-        }
-    }
+		if(pDesignObjZone->m_Commands.size())
+		{
+		    bTouchArea = true;
+		    break;
+		}
+	}
 
-    if(bTouchArea)
-    {
-        string sX1 = StringUtils::ltos(pObj->m_rPosition.X);
-        string sY1 = StringUtils::ltos(pObj->m_rPosition.Y);
-        string sX2 = StringUtils::ltos(pObj->m_rPosition.Right());
-        string sY2 = StringUtils::ltos(pObj->m_rPosition.Bottom());
+	if(bTouchArea)
+	{
+		string sX1 = StringUtils::ltos(pObj->m_rPosition.X);
+		string sY1 = StringUtils::ltos(pObj->m_rPosition.Y);
+		string sX2 = StringUtils::ltos(pObj->m_rPosition.Right());
+		string sY2 = StringUtils::ltos(pObj->m_rPosition.Bottom());
 
-        string sTouchX = StringUtils::ltos(pObj->m_rPosition.X + pObj->m_rPosition.Width / 2);
-        string sTouchY = StringUtils::ltos(pObj->m_rPosition.Y + pObj->m_rPosition.Height / 2);
+		string sTouchX = StringUtils::ltos(pObj->m_rPosition.X + pObj->m_rPosition.Width / 2);
+		string sTouchY = StringUtils::ltos(pObj->m_rPosition.Y + pObj->m_rPosition.Height / 2);
 
-        string sXMLItem = 
-            "<MenuItem>\r\n"
-            "\t<Name>Button</Name>\r\n"
-            "\t<URL>" + m_sRequestUrl + "x=" + sTouchX + "&amp;" + "y=" + sTouchY + "</URL>\r\n"
-            "\t<TouchArea X1=\"" + sX1 + "\" Y1=\"" + sY1 + "\" X2=\"" + sX2 + "\" Y2=\"" + sY2 + "\"/>\r\n"
-            "</MenuItem>\r\n";
-        m_dequeXMLItems.push_front(sXMLItem);
-    }
+		string sXMLItem = 
+			"<MenuItem>\r\n"
+			"\t<Name>Button</Name>\r\n"
+			"\t<URL>" + m_sRequestUrl + "x=" + sTouchX + "&amp;" + "y=" + sTouchY + "</URL>\r\n"
+			"\t<TouchArea X1=\"" + sX1 + "\" Y1=\"" + sY1 + "\" X2=\"" + sX2 + "\" Y2=\"" + sY2 + "\"/>\r\n"
+			"</MenuItem>\r\n";
+		m_dequeXMLItems.push_front(sXMLItem);
+	}
 
-    DesignObj_DataList::iterator it;
-    for(it = pObj->m_ChildObjects.begin(); it != pObj->m_ChildObjects.end(); ++it)
-        GenerateXMLItems((DesignObj_Orbiter *)*it);
+	DesignObj_DataList::iterator it;
+	for(it = pObj->m_ChildObjects.begin(); it != pObj->m_ChildObjects.end(); ++it)
+		GenerateXMLItems((DesignObj_Orbiter *)*it);
 }
 //-----------------------------------------------------------------------------------------------------
 /*virtual*/ string Proxy_Orbiter::GenerateSoftKeys(DesignObj_Orbiter *pObj)
 {
-    if(m_sNowPlaying.length() > 0)
-        return sAllSoftKeysXml;
+	if(m_sNowPlaying.length() > 0)
+		return sAllSoftKeysXml;
 
-    return sNoMediaSoftKeysXml;
+	return sNoMediaSoftKeysXml;
 }
 //-----------------------------------------------------------------------------------------------------
 /*virtual*/ void Proxy_Orbiter::ParseHardKeys()
 {
-    string::size_type pos = 0;
-    string::size_type posTemp = 0;
-    string sKeymapping = DATA_Get_Hard_Keys_mapping();
-    int nIndex = 1;
+	string::size_type pos = 0;
+	string::size_type posTemp = 0;
+	string sKeymapping = DATA_Get_Hard_Keys_mapping();
+	int nIndex = 1;
 
-    while(pos < DATA_Get_Hard_Keys_mapping().size())
-    {
-        posTemp = 0;
+	while(pos < DATA_Get_Hard_Keys_mapping().size())
+	{
+		posTemp = 0;
 
-        //a line
-        string sLineToken = StringUtils::Tokenize(sKeymapping, "\n", pos);
+		//a line
+		string sLineToken = StringUtils::Tokenize(sKeymapping, "\n", pos);
 
-        //soft key name
-        string sName = StringUtils::Tokenize(sLineToken, "\t", posTemp);
+		//soft key name
+		string sName = StringUtils::Tokenize(sLineToken, "\t", posTemp);
 
-        //key
-        int nKey = atoi(StringUtils::Tokenize(sLineToken, "\t", posTemp).c_str());
-        if(!nKey)
-            continue;
+		//key
+		int nKey = atoi(StringUtils::Tokenize(sLineToken, "\t", posTemp).c_str());
+		if(!nKey)
+			continue;
 
-        //media playing flag
-        bool bMediaPlaying = 1 == atoi(StringUtils::Tokenize(sLineToken, "\t", posTemp).c_str());
-        
-        //the message to send
-        string sMessageArguments = StringUtils::Tokenize(sLineToken, "\t", posTemp);
-        sMessageArguments = StringUtils::Replace(sMessageArguments, "devid", StringUtils::ltos(m_dwPK_Device));
-        Message *pMessage = new Message(sMessageArguments);
-        if( pMessage->m_dwPK_Device_To<0 )
-            TranslateVirtualDevice(pMessage->m_dwPK_Device_To,pMessage->m_dwPK_Device_To);
-        m_mapHardKeys[nKey] = pMessage;
+		//media playing flag
+		bool bMediaPlaying = 1 == atoi(StringUtils::Tokenize(sLineToken, "\t", posTemp).c_str());
+		
+		//the message to send
+		string sMessageArguments = StringUtils::Tokenize(sLineToken, "\t", posTemp);
+		sMessageArguments = StringUtils::Replace(sMessageArguments, "devid", StringUtils::ltos(m_dwPK_Device));
+		Message *pMessage = new Message(sMessageArguments);
+		if( pMessage->m_dwPK_Device_To<0 )
+			TranslateVirtualDevice(pMessage->m_dwPK_Device_To,pMessage->m_dwPK_Device_To);
+		m_mapHardKeys[nKey] = pMessage;
 
-        //create xml tokens
-        string sXmlSoftKey;
+		//create xml tokens
+		string sXmlSoftKey;
 
-        string sUrl = 
-            nKey != BUTTON_F4_CONST ?
-            (m_sRequestUrl + "key=" + StringUtils::ltos(nKey)) :
-            (m_sBaseUrl + "ServicesMenu.php");
+		string sUrl = 
+			nKey != BUTTON_F4_CONST ?
+			(m_sRequestUrl + "key=" + StringUtils::ltos(nKey)) :
+			(m_sBaseUrl + "ServicesMenu.php");
 
-        sXmlSoftKey = 
-            "<SoftKeyItem>\r\n"
-            "\t<Name>" + sName + "</Name>\r\n"
-            "\t<URL>" + sUrl + "</URL>\r\n"
-            "\t<Position>" + StringUtils::ltos(nIndex++) + "</Position>\r\n"
-            "</SoftKeyItem>\r\n";
+		sXmlSoftKey = 
+			"<SoftKeyItem>\r\n"
+			"\t<Name>" + sName + "</Name>\r\n"
+			"\t<URL>" + sUrl + "</URL>\r\n"
+			"\t<Position>" + StringUtils::ltos(nIndex++) + "</Position>\r\n"
+			"</SoftKeyItem>\r\n";
 
-        if(!bMediaPlaying)
-            sNoMediaSoftKeysXml += sXmlSoftKey;
+		if(!bMediaPlaying)
+		    sNoMediaSoftKeysXml += sXmlSoftKey;
 
-        sAllSoftKeysXml += sXmlSoftKey;
-    }
+		sAllSoftKeysXml += sXmlSoftKey;
+	}
 }
 //-----------------------------------------------------------------------------------------------------
 /*virtual*/ void Proxy_Orbiter::FireImageQualityChanged(unsigned long nImageQuality)
 {
-    m_ImageQuality = nImageQuality;
-    DATA_Set_ImageQuality(nImageQuality, true);
+	m_ImageQuality = nImageQuality;
+	DATA_Set_ImageQuality(nImageQuality, true);
 
-    m_bRerenderScreen = true;
-    m_pOrbiterRenderer->RedrawObjects();
+	m_bRerenderScreen = true;
+	m_pOrbiterRenderer->RedrawObjects();
 }
 //-----------------------------------------------------------------------------------------------------
 void Proxy_Orbiter::ImageGenerated()
@@ -413,7 +412,7 @@ bool Proxy_Orbiter::ReceivedString( Socket *pSocket, string sLine, int nTimeout 
 		return false;
 	}
 
-    LoggerWrapper::GetInstance()->Write(LV_WARNING, "Received: %s", sLine.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Received: %s", sLine.c_str());
 	m_bPhoneRespondedToPush = true;
 
 	PLUTO_SAFETY_LOCK(am, m_ActionMutex);
@@ -422,9 +421,9 @@ bool Proxy_Orbiter::ReceivedString( Socket *pSocket, string sLine, int nTimeout 
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Current screen to analyze: %d", m_nCurrentScreenId);
 		if(
-				m_nCurrentScreenId == DESIGNOBJ_mnuFilelist_Video_Music_Small_CONST || 
-				m_nCurrentScreenId == DESIGNOBJ_mnuSecurityPanelSmallUI_CONST ||
-				m_nCurrentScreenId == DESIGNOBJ_mnuFileSaveSmallUI_CONST
+			m_nCurrentScreenId == DESIGNOBJ_mnuFilelist_Video_Music_Small_CONST || 
+			m_nCurrentScreenId == DESIGNOBJ_mnuSecurityPanelSmallUI_CONST ||
+			m_nCurrentScreenId == DESIGNOBJ_mnuFileSaveSmallUI_CONST
 		)
 		{
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "One of those screens. Sleeping 500 ms...");
@@ -434,80 +433,80 @@ bool Proxy_Orbiter::ReceivedString( Socket *pSocket, string sLine, int nTimeout 
 		PLUTO_SAFETY_LOCK(rm, m_ResourcesMutex);
         
 		size_t size;
-        char *pBuffer = FileUtils::ReadFileIntoBuffer(GetDevicePngFileName(),size);
-        if( !pBuffer )
-        {
+		char *pBuffer = FileUtils::ReadFileIntoBuffer(GetDevicePngFileName(),size);
+		if( !pBuffer )
+		{
 			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Sent: ERROR");
 			pSocket->SendString("ERROR"); // Shouldn't happen
 			return true;
 		}
 
-        LoggerWrapper::GetInstance()->Write(LV_WARNING, "Sent: IMAGE %d\\n\\n<IMAGE>", size);
-        pSocket->SendString("IMAGE " + StringUtils::itos(int(size)));
-        pSocket->SendData(int(size),pBuffer);
-        delete[] pBuffer;
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Sent: IMAGE %d\\n\\n<IMAGE>", size);
+		pSocket->SendString("IMAGE " + StringUtils::itos(int(size)));
+		pSocket->SendData(int(size),pBuffer);
+		delete[] pBuffer;
 
 		return true;
 	}
-    else if( sLine.substr(0,3)=="XML" )
-    {
+	else if( sLine.substr(0,3)=="XML" )
+	{
 		PLUTO_SAFETY_LOCK(rm, m_ResourcesMutex);
 		
-        size_t size;
-        char *pBuffer = FileUtils::ReadFileIntoBuffer(GetDeviceXmlFileName(),size);
-        if( !pBuffer )
-        {
-            LoggerWrapper::GetInstance()->Write(LV_WARNING, "Sent: ERROR");
-            pSocket->SendString("ERROR"); // Shouldn't happen
-            return true;
-        }
+		size_t size;
+		char *pBuffer = FileUtils::ReadFileIntoBuffer(GetDeviceXmlFileName(),size);
+		if( !pBuffer )
+		{
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Sent: ERROR");
+			pSocket->SendString("ERROR"); // Shouldn't happen
+			return true;
+		}
 
-        LoggerWrapper::GetInstance()->Write(LV_WARNING, "Sent: XML %d\\n<XML>", size);
-        pSocket->SendString("XML " + StringUtils::itos(int(size)));
-        pSocket->SendData(int(size), pBuffer);
-        delete[] pBuffer;
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Sent: XML %d\\n<XML>", size);
+		pSocket->SendString("XML " + StringUtils::itos(int(size)));
+		pSocket->SendData(int(size), pBuffer);
+		delete[] pBuffer;
 
 		EndProcessingRequest();
 		
-        return true;
-    }
+		return true;
+	}
 	else if( sLine.substr(0,9)=="PLUTO_KEY" && sLine.size()>10 )
 	{
 		int Key = atoi( sLine.substr(9).c_str() );
 		if( Key )
 		{
-            if(BUTTON_F4_CONST != Key)
-            {
+			if(BUTTON_F4_CONST != Key)
+			{
 				StartProcessingRequest();
 				
-			    ButtonDown(Key);
-			    ButtonUp(Key);
+				ButtonDown(Key);
+				ButtonUp(Key);
 
-                LoggerWrapper::GetInstance()->Write(LV_WARNING, "Waiting the image/xml to be generated...");        
-                timespec abstime;
-                abstime.tv_sec = (long) (time(NULL) + 2); //wait max 2 seconds
-                abstime.tv_nsec = 0;
-                am.TimedCondWait(abstime);
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "Waiting the image/xml to be generated...");        
+				timespec abstime;
+				abstime.tv_sec = (long) (time(NULL) + 2); //wait max 2 seconds
+				abstime.tv_nsec = 0;
+				am.TimedCondWait(abstime);
 
-		        if(m_bQuit_get()|| m_bReload)
-        		{
-            		pSocket->SendString("NOT_CONNECTED");
-            		return false;
-        		}
+				if(m_bQuit_get()|| m_bReload)
+				{
+					pSocket->SendString("NOT_CONNECTED");
+					return false;
+				}
 
-                LoggerWrapper::GetInstance()->Write(LV_WARNING, "Sent: OK");
-			    pSocket->SendString("OK");
-            }
-            else
-            {
-                LoggerWrapper::GetInstance()->Write(LV_WARNING, "F4 was sent. No need to kill proxy orbiter."); 
-            }
-        }
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "Sent: OK");
+				pSocket->SendString("OK");
+			}
+			else
+			{
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "F4 was sent. No need to kill proxy orbiter."); 
+			}
+		}
 		else
-        {
-            LoggerWrapper::GetInstance()->Write(LV_WARNING, "Sent: ERROR");        
+		{
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Sent: ERROR");        
 			pSocket->SendString("ERROR"); // Shouldn't happen
-        }
+		}
 		return true;
 	}
 	else if( sLine.substr(0,5)=="TOUCH" && sLine.size()>6 )
@@ -520,11 +519,11 @@ bool Proxy_Orbiter::ReceivedString( Socket *pSocket, string sLine, int nTimeout 
 			Y = atoi(sLine.substr(pos_y+1).c_str());
 		RegionDown(X,Y);
 
-        LoggerWrapper::GetInstance()->Write(LV_WARNING, "Waiting the image/xml to be generated...");        
-        timespec abstime;
-        abstime.tv_sec = (long) (time(NULL) + 2); //wait max 2 seconds
-        abstime.tv_nsec = 0;
-        am.TimedCondWait(abstime);
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Waiting the image/xml to be generated...");        
+		timespec abstime;
+		abstime.tv_sec = (long) (time(NULL) + 2); //wait max 2 seconds
+		abstime.tv_nsec = 0;
+		am.TimedCondWait(abstime);
 
 		if(m_bQuit_get()|| m_bReload)
 		{
@@ -532,7 +531,7 @@ bool Proxy_Orbiter::ReceivedString( Socket *pSocket, string sLine, int nTimeout 
 			return false;
 		}
 
-        LoggerWrapper::GetInstance()->Write(LV_WARNING, "Sent: OK");        
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Sent: OK");        
 		pSocket->SendString("OK");
 		return true;
 	}
@@ -568,7 +567,7 @@ void Proxy_Orbiter::CMD_Regen_Screen(string &sCMD_Result,Message *pMessage)
 	m_bQuit_set(true);
 	pthread_cond_broadcast(&m_ActionCond);
 }
-	
+
 void Proxy_Orbiter::OnReload()
 {
 	m_bReload = true;
@@ -604,7 +603,7 @@ bool StartOrbiter(class BDCommandProcessor *pBDCommandProcessor, int DeviceID,
 	Proxy_Orbiter *pProxy_Orbiter = new Proxy_Orbiter(DeviceID, 0, ServerAddress);
 	if ( pProxy_Orbiter->GetConfig() && pProxy_Orbiter->Connect(pProxy_Orbiter->PK_DeviceTemplate_get()) ) 
 	{
-        pProxy_Orbiter->Run();
+		pProxy_Orbiter->Run();
 		g_pCommand_Impl=pProxy_Orbiter;
 		g_pDeadlockHandler=DeadlockHandler;
 		g_pSocketCrashHandler=SocketCrashHandler;
@@ -623,5 +622,3 @@ bool StartOrbiter(class BDCommandProcessor *pBDCommandProcessor, int DeviceID,
 	delete pProxy_Orbiter;
 	return bReload;
 }
- 
-
