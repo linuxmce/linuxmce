@@ -22,13 +22,13 @@ sudo sed -i '/ubiquity/d' extract-cd/casper/filesystem.manifest-desktop
 #
 echo Compress filesystem
 sudo rm extract-cd/casper/filesystem.squashfs
-sudo mksquashfs edit extract-cd/casper/filesystem.squashfs -nolzma -processors 2 -e edit/proc/* edit/lib/modules/2.6.27-14-generic/volatile 
+sudo mksquashfs edit extract-cd/casper/filesystem.squashfs -nolzma -processors 2 -e edit/proc/* edit/lib/modules/2.6.27-17-generic/volatile 
 echo Done mksquashfs - PRESS A KEY
 echo Set a name to the disk image
 IMAGE_NAME="LinuxMCE 8.10 i386"
 
 echo Set name of the disk
-sudo sed -i '/#define DISKNAME/d' extract-cd/REAMDE.diskdefines
+sudo sed -i '/#define DISKNAME/d' extract-cd/README.diskdefines
 echo "#define DISKNAME  $IMAGE_NAME">>extract-cd/README.diskdefines
 
 #echo Create pre-installer
@@ -60,16 +60,17 @@ d-i	apt-setup/universe	boolean	true
 d-i	debian-installer/allow_unauthenticated	string	true
 d-i	pkgsel/include	string mysql-server openssh-server 
 d-i	apt-setup/local0/repository	string deb file:/usr/pluto/deb-cache ./
-d-i	apt-setup/local1/repository	string deb http://www.avenard.org/files/ubuntu-repos intrepid release
-d-i	apt-setup/local2/repository	string deb http://deb.linuxmce.org/ubuntu/ intrepid beta2
-d-i	apt-setup/local3/repository	string deb http://debian.slimdevices.com/ stable  main
-d-i	apt-setup/local4/repository	string deb http://packages.medibuntu.org/ intrepid  free non-free
-# d-i	preseed/late_command	string	bash /laterun.sh
+d-i	apt-setup/local1/repository	string deb http://deb.linuxmce.org/ubuntu/ intrepid beta2
+d-i	apt-setup/local2/repository	string deb http://debian.slimdevices.com/ stable  main
+d-i	apt-setup/local3/repository	string deb http://packages.medibuntu.org/ intrepid  free non-free
 d-i	ubiquity/success_command	string	cp -r /cdrom/usr/pluto /target/usr
 d-i	ubiquity/summary	note
 d-i	ubiquity/reboot	boolean	true
 #apt-install zsh; in-target chsh -s /bin/zsh
 eol
+
+# d-i	apt-setup/local1/repository	string deb http://www.avenard.org/files/ubuntu-repos intrepid release
+# d-i	preseed/late_command	string	bash /laterun.sh
 
 echo "Adding LinuxMCE install selection to boot menu" 
 echo "

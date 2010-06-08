@@ -23,7 +23,7 @@ SVNrevision=$(svn info "$BUILDER_ROOT/var/lmce-build/svn/branches/LinuxMCE-0810/
 echo Aktuell svn Revision $SVNrevision
 
 echo Make sure rsync, squashfs-tools and mkisofs is installed
-sudo apt-get install rsync squashfs-tools genisoimage -y
+sudo apt-get install rsync squashfs-tools=1:3.3-7ubuntu2 genisoimage -y
 #rm -fR ~/live-old
 #mv ~/live ~/live-old
 mkdir -p ~/live
@@ -50,8 +50,9 @@ echo Extracting the Desktop system
 
 echo Mount the squashfs filesystem
 
-mkdir -p squashfs
-sudo mount -t squashfs -o loop mnt/casper/filesystem.squashfs squashfs
+rm -fR squashfs
+unsquashfs -d squashfs mnt/casper/filesystem.squashfs
+# sudo mount -t squashfs -o loop mnt/casper/filesystem.squashfs squashfs
 
 echo Extract squashfs contents into dir 'edit'
 
@@ -82,6 +83,7 @@ sed '/Diskless_CreateTBZ.sh/d' -i edit/root/new-installer/mce-install.sh
 cat <<eol > edit/root/new-installer/full-install.sh
 #!/bin/bash
 echo "Starting mce-install.sh"
+echo "deb http://packages.medibuntu.org/ intrepid  free non-free">/etc/apt/sources.list.d/medibuntu.list
 bash mce-install.sh
 echo "Running post-install.sh"
 bash post-install.sh
@@ -159,11 +161,26 @@ sort /root/selection > /root/test.selection
 dpkg --set-selections < /root/test.selection
 # And get all the stuff downloaded.
 apt-get dselect-upgrade -dy --force-yes
+# and move it into our local cache dir
+mkdir -p /usr/pluto/deb-cache
+mv /var/cache/apt/archives/*.deb /usr/pluto/deb-cache
+cd /usr/pluto/deb-cache
+dpkg-scanpackages ./ /dev/null | tee Packages | gzip -9c > Packages.gz
+
 eol
 
 chmod +x edit/root/upgrade.sh
 sudo chroot edit /root/upgrade.sh
-
+echo Setup preferences file
+echo '
+Package: mythtv mythtv-frontend mythtv-backend mythtv-common mythtv-database mythtv-transcode-utils mythweb libmythtv-perl libmyth python-myth mythtv-themes mythplugins mytharchive mytharchive-data mythbrowser mythgallery mythgame mythmovies mythmusic mythnetvison mythnetvision-data mythnews mythvideo mythweather mythzoneminder myth-doc
+Pin: origin deb.linuxmce.org
+Pin-Priority: 1001
+Package: *
+Pin: origin
+Pin-Priority: 600
+' >edit/etc/apt/preferences
+        
 echo Creating Desktop button
 mkdir -p edit/etc/skel/Desktop
 cat <<eol >edit/etc/skel/Desktop/LinuxMCE
@@ -181,11 +198,11 @@ eol
 
 
 umount -l edit/{dev/pts,dev,proc,sys}
-umount -l edit/lib/modules/2.6.27-14-generic/volatile
+umount -l edit/lib/modules/2.6.27-17-generic/volatile
 umount squashfs
 umount mnt
 umount edit
 echo "Done. Please run finalizedvd.sh $SVNrevision"
 ~/finalizedvd.sh $SVNrevision
-mv ~/live/L*.iso /var/www/rsync
+# mv ~/live/L*.iso /var/www/rsync/snapshots
 exit 0
