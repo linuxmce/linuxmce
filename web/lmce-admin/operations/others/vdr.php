@@ -16,6 +16,7 @@ function vdr($output,$dbADO) {
 
 	// check if database pluto_vdr exist
 	$databases=$dbADO->MetaDatabases();
+	error_redirect("Please configure VDR using the commandline.",'index.php?section=vdr');
 	if(!in_array('pluto_vdr',$databases)){
 		error_redirect($TEXT_PACKAGE_NOT_INSTALLED_CONST,'index.php?section=vdr');
 	}
