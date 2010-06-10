@@ -11,7 +11,7 @@
 
 
 
-PKGVER=lmce20100531
+PKGVER=lmce20100610
 DESTDIR=$(CURDIR)/debian/tmp
 
 CFLAGS = -Wall -g
