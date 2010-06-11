@@ -1,0 +1,18 @@
+#!/usr/bin/make -f
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/rules/dpatch.mk
+include /usr/share/cdbs/1/class/autotools.mk
+
+DEB_CONFIGURE_EXTRA_FLAGS =
+  --host=$(DEB_HOST_GNU_TYPE) \
+  --build=$(DEB_BUILD_GNU_TYPE) \
+  --prefix=debian/vdr-addon-noad/usr \
+  --mandir=\$${prefix}/share/man \
+  --infodir=\$${prefix}/share/info \
+  --with-mpeglibdir=\$${prefix}/lib \
+  --with-ffmpeg
+
+install/vdr-addon-noad::
+	rm debian/vdr-addon-noad/usr/bin/statupd
+	rm debian/vdr-addon-noad/usr/bin/noadcall.sh

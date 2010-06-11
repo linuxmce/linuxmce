@@ -1,0 +1,4 @@
+* Write manpages for scripts in /usr/bin or move scripts to examples
+* Change maintainer to Debian-VDR-Packaging-Team and uploader to Alioth
+* Merge all the helper scripts into a single script with well documented
+  parameters (and a manpage)

@@ -1,0 +1,7 @@
+Template: vdr-addon-noad/auto
+Type: boolean
+Default: false
+_Description: Do you want noad to run automatically?
+ By selecting this, noad will automatically process each recording after it
+ has been finished. Otherwise, you can always run noad manually for a
+ specific recording using the OSD's reccording commands.

@@ -1,0 +1,54 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 20_vdr-1.6-backwards-compatibility.dpatch by Tobias Grimm <etobi@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: When recording dir contains info.vdr, assume VDR 1.6 PES recording
+## DP: and create marks.vdr instead of marks.
+
+@DPATCH@
+diff -urNad vdr-addon-noad-0.7.0+update1~/main.cpp vdr-addon-noad-0.7.0+update1/main.cpp
+--- vdr-addon-noad-0.7.0+update1~/main.cpp	2010-01-19 16:17:51.000000000 +0100
++++ vdr-addon-noad-0.7.0+update1/main.cpp	2010-01-28 23:27:34.000000000 +0100
+@@ -27,6 +27,7 @@
+ #include <execinfo.h>
+ #include "noad.h"
+ #include "tnoad.h"
++#include <unistd.h>
+ 
+ const char *recDir = NULL;
+ bool bFork = false;
+@@ -185,6 +186,7 @@
+   int niceLevel = 19; // changed to 19 (0.4.2)
+   const char *logoCacheDir = NULL;
+   const char *statFile = NULL;
++  bool customMarksFile = false;
+ 
+   while (1)
+   {
+@@ -310,6 +312,7 @@
+         printf ("\n");
+         */
+         setMarkfileName(optarg);
++        customMarksFile = true;
+         break;
+ 
+       case 2:
+@@ -401,6 +404,18 @@
+   // and recDir is given
+   if( (bImmediateCall || bAfter || bBefore || bEdited || bNice) && recDir )
+   {
++    if (!customMarksFile)
++    {
++      // try to auto-detect marks file name
++      char* info_name;
++      asprintf(&info_name, "%s/info.vdr", recDir);
++      if( access( info_name, F_OK ) != -1 )
++      {
++        setMarkfileName(MARKSFILESUFFIX, true);
++      }
++      free(info_name);
++    }
++
+     // do nothing if called from vdr after the video is cutted
+     if( bEdited )
+       return 0;

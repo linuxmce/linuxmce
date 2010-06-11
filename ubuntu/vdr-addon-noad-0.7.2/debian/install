@@ -1,0 +1,3 @@
+debian/reccmds.noad.conf  etc/vdr/command-hooks
+debian/S50.noad           usr/share/vdr/shutdown-hooks
+debian/R10.noad           etc/vdr/recording-hooks

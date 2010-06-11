@@ -1,0 +1,3 @@
+version=2
+http://rsync16.de.gentoo.org/files/noad/noad-(.*)\.tar\.bz2
+http://noad.heliohost.org/noad-(.*)\.tar\.bz2
