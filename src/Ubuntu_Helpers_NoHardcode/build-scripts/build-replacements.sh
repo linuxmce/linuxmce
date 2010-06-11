@@ -210,6 +210,7 @@ function Build_Replacements_Intrepid
 	Build_Replacement_Package vdr-plugin-remotetimers ubuntu/vdr-plugin-remotetimers-0.1.2
 	Build_Replacement_Package vdr-plugin-streamdev ubuntu/vdr-plugin-streamdev-0.5.0~pre20090706+cvs20091108.2341
 	Build_Replacement_Package vdr-plugin-vompserver ubuntu/vdr-plugin-vompserver-0.3.1
+	Build_Replacement_Package vdr-addon-noad ubuntu/vdr-addon-noad-0.7.2
 	Build_Replacement_Package vdr-plugin-xineliboutput ubuntu/vdr-plugin-xineliboutput-1.0.4+cvs20091215.2049
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/libxine*.deb ${replacements_dir}
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/xineliboutput-*.deb ${replacements_dir}
