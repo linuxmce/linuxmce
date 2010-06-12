@@ -1,0 +1,42 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 02_Makefile_locale_fix.dpatch by Oliver Grassl <O.Grassl@gmx.net>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Small fixes to include the locale-files in the package. 
+
+@DPATCH@
+diff -urNad remotetimers-0.1.1~/Makefile remotetimers-0.1.1/Makefile
+--- remotetimers-0.1.1~/Makefile	2008-06-05 21:01:03.000000000 +0200
++++ remotetimers-0.1.1/Makefile	2009-04-23 13:28:11.000000000 +0200
+@@ -32,9 +32,6 @@
+ 
+ APIVERSION = $(shell sed -ne '/define APIVERSION/s/^.*"\(.*\)".*$$/\1/p' $(VDRDIR)/config.h)
+ 
+-### Test whether VDR has locale support
+-VDRLOCALE = $(shell grep '^LOCALEDIR' $(VDRDIR)/Makefile)
+-
+ ### The name of the distribution archive:
+ 
+ ARCHIVE = $(PLUGIN)-$(VERSION)
+@@ -71,8 +68,6 @@
+ 
+ PODIR     = po
+ 
+-ifneq ($(strip $(VDRLOCALE)),)
+-
+ LOCALEDIR = $(VDRDIR)/locale
+ I18Npo    = $(wildcard $(PODIR)/*.po)
+ I18Nmsgs  = $(addprefix $(LOCALEDIR)/, $(addsuffix /LC_MESSAGES/vdr-$(PLUGIN).mo, $(notdir $(foreach file, $(I18Npo), $(basename $(file))))))
+@@ -94,12 +89,6 @@
+ 
+ i18n: $(I18Nmsgs)
+ 
+-else
+-
+-i18n:
+-	@### nothing to do
+-endif
+-
+ ### Targets:
+ 
+ libvdr-$(PLUGIN).so: $(OBJS)
