@@ -157,11 +157,22 @@ function Build_Replacements_Intrepid
 	fi
 
         #Package: libxine 	
+	# niz version
 #	Build_Replacement_Package libxine ubuntu/xine-lib-1.1.16.3-0ubuntu2~xine 
-	Build_Replacement_Package libxine1 ubuntu/xine-lib-1.1.16.4
-	# install the results
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/libxine1_*.deb ${svn_dir}/${svn_branch_name}/ubuntu/libxine-dev_*.deb
+#	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/libxine1_*.deb \
+#			    ${svn_dir}/${svn_branch_name}/ubuntu/libxine1-plugins_*.deb \
+#			    ${svn_dir}/${svn_branch_name}/ubuntu/libxine1-x_*.deb \
+#			    ${svn_dir}/${svn_branch_name}/ubuntu/libxine1-console_*.deb \
+#			    ${svn_dir}/${svn_branch_name}/ubuntu/libxine1-bin_*.deb \
+#			    ${svn_dir}/${svn_branch_name}/ubuntu/libxine1-misc-plugins_*.deb \
+#			    ${svn_dir}/${svn_branch_name}/ubuntu/libxine1-ffmpeg_*.deb \
+#			    ${svn_dir}/${svn_branch_name}/ubuntu/libxine-dev_*.deb \
+#			    ${svn_dir}/${svn_branch_name}/ubuntu/libxine1-plugins_*.deb
+#
 
+	# Original version
+	Build_Replacement_Package libxine1 ubuntu/xine-lib-1.1.16.4
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/libxine1_*.deb ${svn_dir}/${svn_branch_name}/ubuntu/libxine-dev_*.deb 
 	# alsa lib needs older libtool package
         if [ "$MACHTYPE" = "x86_64-pc-linux-gnu" ]; then
         	wget http://ftp.sjtu.edu.cn/ubuntu/pool/main/libt/libtool/libtool_1.5.26-1ubuntu1_amd64.deb
@@ -197,6 +208,17 @@ function Build_Replacements_Intrepid
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/{libmyth,myth,python}*.deb ${replacements_dir}
 
 	# VDR Packages
+	# When adding new VDR versions, and there is a need to modify the patches,
+	# these are the steps to be taken:
+	# 1) copy debian/patches/00list (or 00list.extensions) to debian/patches.00list.mypatchvariant
+	# 2) enable the patches you would like to use in debian/patches.00list.mypatchvariant by uncommenting/commenting them (keep in mind, that some patches depend on each other and therefore some combination might lead to rejects, that you have to resolve yourself)
+	# 3) PATCHVARIANT=mypatchvariant debian/rules accept-patches
+	# 4) PATCHVARIANT=mypatchvariant dpkg-buildpackage -tc -uc -us -rfakeroot
+	#   or
+	# 4) export PATCHVARIANT=mypatchvariant and dpkg-buildpackge
+	# 5) install vdr-dev (this is done in this script)
+	# 6) build ALL the plug-ins you would like to use (this is done in this script)
+	
 	DisplayMessage "Building VDR packages and plugins"
 	export PATCHVARIANT=multipatch
 	Build_Replacement_Package vdr ubuntu/vdr-1.7.11
