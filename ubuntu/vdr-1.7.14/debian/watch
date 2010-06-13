@@ -1,3 +1,0 @@
-version=2
-ftp://ftp.tvdr.de/vdr/vdr-([\d\.]+)\.tar\.bz2
-ftp://ftp.tvdr.de/vdr/Developer/vdr-([\d\.]+)\.tar\.bz2
