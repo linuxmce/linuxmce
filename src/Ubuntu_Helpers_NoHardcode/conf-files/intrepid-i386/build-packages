@@ -144,6 +144,7 @@ libxtst-dev
 libxv-dev
 libxvmc-dev
 libxxf86vm-dev
+libzvbi-dev
 linux-headers-2.6.27-16-generic
 linux-image-2.6.27-16-generic
 linux-restricted-modules-2.6.27-16-generic
