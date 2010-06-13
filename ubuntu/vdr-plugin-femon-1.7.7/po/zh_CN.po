@@ -1,0 +1,379 @@
+# VDR plugin language source file.
+# Copyright (C) 2007 Rolf Ahrenberg
+# This file is distributed under the same license as the femon package.
+# Nan Feng VDR <nfgx@21cn.com>, 2009.2
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: femon 1.7.7\n"
+"Report-Msgid-Bugs-To: Rolf Ahrenberg\n"
+"POT-Creation-Date: 2010-02-25 20:31+0200\n"
+"PO-Revision-Date: 2009-09-21 21:36+0800\n"
+"Last-Translator: NanFeng <nfgx@21cn.com>\n"
+"Language-Team: <vdr@linuxtv.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "DVB Signal Information Monitor (OSD)"
+msgstr "卫星信号信息显示(OSD)"
+
+msgid "Signal Information"
+msgstr "频道信息浏览"
+
+msgid "Femon not available"
+msgstr "Femon插件无法使用"
+
+msgid "basic"
+msgstr "基本"
+
+msgid "transponder"
+msgstr "转发器"
+
+msgid "stream"
+msgstr "数据流"
+
+msgid "AC-3"
+msgstr "AC-3"
+
+msgid "Classic"
+msgstr "经典"
+
+msgid "Elchi"
+msgstr "Elchi"
+
+msgid "ST:TNG"
+msgstr "ST:TNG"
+
+msgid "DeepBlue"
+msgstr "DeepBlue"
+
+msgid "Moronimo"
+msgstr "Moronimo"
+
+msgid "Enigma"
+msgstr "Enigma"
+
+msgid "EgalsTry"
+msgstr "EgalsTry"
+
+msgid "Duotone"
+msgstr "双色调"
+
+msgid "SilverGreen"
+msgstr "银绿"
+
+msgid "Hide main menu entry"
+msgstr "隐藏主菜单条目."
+
+msgid "Define whether the main menu entry is hidden."
+msgstr "确定是否进入主菜单是隐藏的."
+
+msgid "Default display mode"
+msgstr "默认启动时显示模式."
+
+msgid "Define the default display mode at startup."
+msgstr "定义默认启动时显示模式."
+
+msgid "Define the used OSD skin."
+msgstr "确定使用的菜单皮肤."
+
+msgid "Define the used OSD theme."
+msgstr "确定使用的菜单主题."
+
+msgid "Position"
+msgstr "位置"
+
+msgid "Define the position of OSD."
+msgstr "确定菜单的位置."
+
+msgid "Downscale OSD size [%]"
+msgstr ""
+
+msgid "Define the downscale ratio for OSD size."
+msgstr ""
+
+msgid "Red limit [%]"
+msgstr "红限制[ ％ ]"
+
+msgid "Define a limit for red bar, which is used to indicate a bad signal."
+msgstr "定义一个限制红键，这是用来表示一个坏的信号."
+
+msgid "Green limit [%]"
+msgstr "绿限制[ ％ ]"
+
+msgid "Define a limit for green bar, which is used to indicate a good signal."
+msgstr "定义一个限制的绿色键，这是用来表示一个良好的信号."
+
+msgid "OSD update interval [0.1s]"
+msgstr "菜单更新间隔时间 [0.1s]"
+
+msgid "Define an interval for OSD updates. The smaller interval generates higher CPU load."
+msgstr "确定一个OSD的更新时间间隔.较小的间隔产生较高的CPU负载."
+
+msgid "Analyze stream"
+msgstr "分析流"
+
+msgid "Define whether the DVB stream is analyzed and bitrates calculated."
+msgstr "确定是否DVB流分析和比特率计算."
+
+msgid "Calculation interval [0.1s]"
+msgstr "计算时间间隔 [0.1s]"
+
+msgid "Define an interval for calculation. The bigger interval generates more stable values."
+msgstr "定义一个时间间隔来计算.更大的时间价格产生将更稳定."
+
+msgid "Use SVDRP service"
+msgstr "使用SVDRP服务"
+
+msgid "Define whether the SVDRP service is used in client/server setups."
+msgstr "定义是否SVDRP服务是用来在客户机/服务器的设置."
+
+msgid "SVDRP service port"
+msgstr "SVDRP服务端口"
+
+msgid "Define the port number of SVDRP service."
+msgstr "定义SVDRP服务的端口号."
+
+msgid "SVDRP service IP"
+msgstr "SVDRP服务的IP地址"
+
+msgid "Define the IP address of SVDRP service."
+msgstr "定义SVDRP服务的IP地址."
+
+msgid "Help"
+msgstr "帮助"
+
+msgid "Video"
+msgstr "视频"
+
+msgid "Audio"
+msgstr "音频"
+
+msgid "Transponder Information"
+msgstr "转发器信息"
+
+msgid "Apid"
+msgstr "Apid"
+
+msgid "Dpid"
+msgstr "Dpid"
+
+msgid "Spid"
+msgstr "Spid"
+
+msgid "Nid"
+msgstr "Nid"
+
+msgid "Tid"
+msgstr "Tid"
+
+msgid "Rid"
+msgstr "Rid"
+
+msgid "Coderate"
+msgstr "码速率"
+
+msgid "Stream Information"
+msgstr "流信息"
+
+msgid "Video Stream"
+msgstr "视频流"
+
+msgid "Codec"
+msgstr "解码模式"
+
+msgid "Bitrate"
+msgstr "比特率"
+
+msgid "Aspect Ratio"
+msgstr "纵横比"
+
+msgid "Frame Rate"
+msgstr "帧速率"
+
+msgid "Video Format"
+msgstr "视频制式"
+
+msgid "Resolution"
+msgstr "分辨率"
+
+msgid "Audio Stream"
+msgstr "音频流"
+
+msgid "Channel Mode"
+msgstr "声道模式"
+
+msgid "Sampling Frequency"
+msgstr "采样频率"
+
+msgid "AC-3 Stream"
+msgstr "AC-3流"
+
+msgid "Bit Stream Mode"
+msgstr "比特流模式"
+
+msgid "Audio Coding Mode"
+msgstr "音频编码模式"
+
+msgid "Center Mix Level"
+msgstr "中心混合级别"
+
+msgid "Surround Mix Level"
+msgstr "环绕混合级别"
+
+msgid "Dolby Surround Mode"
+msgstr "杜比环绕声模式"
+
+msgid "Low Frequency Effects"
+msgstr "低频效果"
+
+msgid "Dialogue Normalization"
+msgstr "对话正常化"
+
+msgid "Fixed"
+msgstr "固定"
+
+msgid "Analog"
+msgstr "模拟"
+
+msgid "MPEG-2"
+msgstr "MPEG-2"
+
+msgid "H.264"
+msgstr "H.264"
+
+msgid "MPEG-1 Layer I"
+msgstr "MPEG-1 Layer I"
+
+msgid "MPEG-1 Layer II"
+msgstr "MPEG-1 Layer II"
+
+msgid "MPEG-1 Layer III"
+msgstr "MPEG-1 Layer III"
+
+msgid "MPEG-2 Layer I"
+msgstr "MPEG-2 Layer I"
+
+msgid "MPEG-2 Layer II"
+msgstr "MPEG-2 Layer II"
+
+msgid "MPEG-2 Layer III"
+msgstr "MPEG-2 Layer III"
+
+msgid "HE-AAC"
+msgstr "HE-AAC"
+
+msgid "stereo"
+msgstr "立体声"
+
+msgid "joint Stereo"
+msgstr "联合立体声"
+
+msgid "dual"
+msgstr "双重"
+
+msgid "mono"
+msgstr "单声道"
+
+msgid "interlaced"
+msgstr "隔行扫描"
+
+msgid "progressive"
+msgstr "进步"
+
+msgid "reserved"
+msgstr "保留"
+
+msgid "extended"
+msgstr "扩展"
+
+msgid "unknown"
+msgstr "未知"
+
+msgid "component"
+msgstr "组件"
+
+msgid "PAL"
+msgstr "PAL"
+
+msgid "NTSC"
+msgstr "NTSC"
+
+msgid "SECAM"
+msgstr "SECAM"
+
+msgid "MAC"
+msgstr "MAC"
+
+msgid "Hz"
+msgstr "赫兹"
+
+msgid "Complete Main (CM)"
+msgstr "完成主要 (CM)"
+
+msgid "Music and Effects (ME)"
+msgstr "音乐和效果 (ME)"
+
+msgid "Visually Impaired (VI)"
+msgstr "视障 (VI)"
+
+msgid "Hearing Impaired (HI)"
+msgstr "听障 (HI)"
+
+msgid "Dialogue (D)"
+msgstr "对话 (D)"
+
+msgid "Commentary (C)"
+msgstr "评论 (C)"
+
+msgid "Emergency (E)"
+msgstr "紧急 (E)"
+
+msgid "Voice Over (VO)"
+msgstr "旁白 (VO)"
+
+msgid "Karaoke"
+msgstr "卡拉OK"
+
+msgid "Ch1"
+msgstr "Ch1"
+
+msgid "Ch2"
+msgstr "Ch2"
+
+msgid "C"
+msgstr "C"
+
+msgid "L"
+msgstr "L"
+
+msgid "R"
+msgstr "R"
+
+msgid "S"
+msgstr "S"
+
+msgid "SL"
+msgstr "SL"
+
+msgid "SR"
+msgstr "SR"
+
+msgid "dB"
+msgstr "dB"
+
+msgid "not indicated"
+msgstr "没有说明"
+
+msgid "MHz"
+msgstr "兆赫兹"
+
+msgid "free"
+msgstr "免费"
+
+msgid "Mbit/s"
+msgstr "兆位/秒"
+
+msgid "kbit/s"
+msgstr "千字节/秒"

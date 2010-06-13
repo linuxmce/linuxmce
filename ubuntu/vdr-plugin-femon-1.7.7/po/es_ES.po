@@ -1,0 +1,379 @@
+# VDR plugin language source file.
+# Copyright (C) 2007 Rolf Ahrenberg
+# This file is distributed under the same license as the femon package.
+# Luis Palacios
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: femon 1.7.7\n"
+"Report-Msgid-Bugs-To: Rolf Ahrenberg\n"
+"POT-Creation-Date: 2010-02-25 20:31+0200\n"
+"PO-Revision-Date: 2007-08-12 23:22+0300\n"
+"Last-Translator: Luis Palacios\n"
+"Language-Team: <vdr@linuxtv.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-15\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "DVB Signal Information Monitor (OSD)"
+msgstr "Monitorización de la señal DVB"
+
+msgid "Signal Information"
+msgstr "Monitorización de la señal DVB"
+
+msgid "Femon not available"
+msgstr ""
+
+msgid "basic"
+msgstr "Básico"
+
+msgid "transponder"
+msgstr "Transpondedor"
+
+msgid "stream"
+msgstr "Flujo"
+
+msgid "AC-3"
+msgstr "AC-3"
+
+msgid "Classic"
+msgstr "Clásico"
+
+msgid "Elchi"
+msgstr "Elchi"
+
+msgid "ST:TNG"
+msgstr "ST:TNG"
+
+msgid "DeepBlue"
+msgstr "DeepBlue"
+
+msgid "Moronimo"
+msgstr "Moronimo"
+
+msgid "Enigma"
+msgstr "Enigma"
+
+msgid "EgalsTry"
+msgstr "EgalsTry"
+
+msgid "Duotone"
+msgstr "Duotone"
+
+msgid "SilverGreen"
+msgstr "SilverGreen"
+
+msgid "Hide main menu entry"
+msgstr "Ocultar en el menú principal"
+
+msgid "Define whether the main menu entry is hidden."
+msgstr ""
+
+msgid "Default display mode"
+msgstr "Modo de visualización estandar"
+
+msgid "Define the default display mode at startup."
+msgstr ""
+
+msgid "Define the used OSD skin."
+msgstr ""
+
+msgid "Define the used OSD theme."
+msgstr ""
+
+msgid "Position"
+msgstr "Posición"
+
+msgid "Define the position of OSD."
+msgstr ""
+
+msgid "Downscale OSD size [%]"
+msgstr ""
+
+msgid "Define the downscale ratio for OSD size."
+msgstr ""
+
+msgid "Red limit [%]"
+msgstr "Límite de rojo [%s]"
+
+msgid "Define a limit for red bar, which is used to indicate a bad signal."
+msgstr ""
+
+msgid "Green limit [%]"
+msgstr "Límite verde [%]"
+
+msgid "Define a limit for green bar, which is used to indicate a good signal."
+msgstr ""
+
+msgid "OSD update interval [0.1s]"
+msgstr "Intervalo de actualización (0,1)"
+
+msgid "Define an interval for OSD updates. The smaller interval generates higher CPU load."
+msgstr ""
+
+msgid "Analyze stream"
+msgstr "Analizar el flujo"
+
+msgid "Define whether the DVB stream is analyzed and bitrates calculated."
+msgstr ""
+
+msgid "Calculation interval [0.1s]"
+msgstr "Intervalo de cálculo (0,1s)"
+
+msgid "Define an interval for calculation. The bigger interval generates more stable values."
+msgstr ""
+
+msgid "Use SVDRP service"
+msgstr ""
+
+msgid "Define whether the SVDRP service is used in client/server setups."
+msgstr ""
+
+msgid "SVDRP service port"
+msgstr ""
+
+msgid "Define the port number of SVDRP service."
+msgstr ""
+
+msgid "SVDRP service IP"
+msgstr ""
+
+msgid "Define the IP address of SVDRP service."
+msgstr ""
+
+msgid "Help"
+msgstr "Ayuda"
+
+msgid "Video"
+msgstr "Video"
+
+msgid "Audio"
+msgstr "Audio"
+
+msgid "Transponder Information"
+msgstr "Información del transpondedor"
+
+msgid "Apid"
+msgstr "Apid"
+
+msgid "Dpid"
+msgstr "Dpid"
+
+msgid "Spid"
+msgstr "Spid"
+
+msgid "Nid"
+msgstr "Nid"
+
+msgid "Tid"
+msgstr "Tid"
+
+msgid "Rid"
+msgstr "Rid"
+
+msgid "Coderate"
+msgstr "Coderate"
+
+msgid "Stream Information"
+msgstr "Información del flujo"
+
+msgid "Video Stream"
+msgstr "Flujo de video"
+
+msgid "Codec"
+msgstr ""
+
+msgid "Bitrate"
+msgstr "Tasa de bits"
+
+msgid "Aspect Ratio"
+msgstr "Proporciones de la imagen"
+
+msgid "Frame Rate"
+msgstr "Tasa de frames"
+
+msgid "Video Format"
+msgstr "Formato de video"
+
+msgid "Resolution"
+msgstr "Resolución"
+
+msgid "Audio Stream"
+msgstr "Flujo de audio"
+
+msgid "Channel Mode"
+msgstr ""
+
+msgid "Sampling Frequency"
+msgstr "Frecuencia de muestreo"
+
+msgid "AC-3 Stream"
+msgstr "Flujo AC-3"
+
+msgid "Bit Stream Mode"
+msgstr "Modo bitstream"
+
+msgid "Audio Coding Mode"
+msgstr "Modo de codificación de audio"
+
+msgid "Center Mix Level"
+msgstr "Nivel sonoro central"
+
+msgid "Surround Mix Level"
+msgstr "Nivel sonoro surround"
+
+msgid "Dolby Surround Mode"
+msgstr "Nivel sonoro Dolby Surround"
+
+msgid "Low Frequency Effects"
+msgstr "Efectos de baja frecuencia"
+
+msgid "Dialogue Normalization"
+msgstr "Normalización del diálogo"
+
+msgid "Fixed"
+msgstr "Fijo"
+
+msgid "Analog"
+msgstr "Analógico"
+
+msgid "MPEG-2"
+msgstr ""
+
+msgid "H.264"
+msgstr ""
+
+msgid "MPEG-1 Layer I"
+msgstr ""
+
+msgid "MPEG-1 Layer II"
+msgstr ""
+
+msgid "MPEG-1 Layer III"
+msgstr ""
+
+msgid "MPEG-2 Layer I"
+msgstr ""
+
+msgid "MPEG-2 Layer II"
+msgstr ""
+
+msgid "MPEG-2 Layer III"
+msgstr ""
+
+msgid "HE-AAC"
+msgstr ""
+
+msgid "stereo"
+msgstr ""
+
+msgid "joint Stereo"
+msgstr ""
+
+msgid "dual"
+msgstr ""
+
+msgid "mono"
+msgstr "o"
+
+msgid "interlaced"
+msgstr ""
+
+msgid "progressive"
+msgstr ""
+
+msgid "reserved"
+msgstr "reservado"
+
+msgid "extended"
+msgstr ""
+
+msgid "unknown"
+msgstr "desconocido"
+
+msgid "component"
+msgstr ""
+
+msgid "PAL"
+msgstr "PAL"
+
+msgid "NTSC"
+msgstr "NTSC"
+
+msgid "SECAM"
+msgstr ""
+
+msgid "MAC"
+msgstr ""
+
+msgid "Hz"
+msgstr "Hz"
+
+msgid "Complete Main (CM)"
+msgstr "Principal (CM)"
+
+msgid "Music and Effects (ME)"
+msgstr "Música y efectos (ME)"
+
+msgid "Visually Impaired (VI)"
+msgstr "Imagen deteriorada (VI)"
+
+msgid "Hearing Impaired (HI)"
+msgstr "Hearing deteriorado"
+
+msgid "Dialogue (D)"
+msgstr "Diálogo (D)"
+
+msgid "Commentary (C)"
+msgstr "Comentario (C)"
+
+msgid "Emergency (E)"
+msgstr "Emergencia (E)"
+
+msgid "Voice Over (VO)"
+msgstr "Voz off (VO)"
+
+msgid "Karaoke"
+msgstr "Karaoke"
+
+msgid "Ch1"
+msgstr "Can. 1"
+
+msgid "Ch2"
+msgstr "Can. 2"
+
+msgid "C"
+msgstr "C"
+
+msgid "L"
+msgstr "I"
+
+msgid "R"
+msgstr "D"
+
+msgid "S"
+msgstr "S"
+
+msgid "SL"
+msgstr "SI"
+
+msgid "SR"
+msgstr "SD"
+
+msgid "dB"
+msgstr "dB"
+
+msgid "not indicated"
+msgstr "no indicado"
+
+msgid "MHz"
+msgstr "MHz"
+
+msgid "free"
+msgstr "libre"
+
+msgid "Mbit/s"
+msgstr "Mbit/s"
+
+msgid "kbit/s"
+msgstr "kbit/s"

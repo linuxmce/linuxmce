@@ -1,0 +1,380 @@
+# VDR plugin language source file.
+# Copyright (C) 2007 Rolf Ahrenberg
+# This file is distributed under the same license as the femon package.
+# Sean Carlos
+# Diego Pierotto <vdr-italian@tiscali.it>
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: femon 1.7.7\n"
+"Report-Msgid-Bugs-To: Rolf Ahrenberg\n"
+"POT-Creation-Date: 2010-02-25 20:31+0200\n"
+"PO-Revision-Date: 2008-11-10 23:37+0100\n"
+"Last-Translator: Diego Pierotto <vdr-italian@tiscali.it>\n"
+"Language-Team:  <vdr@linuxtv.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-15\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "DVB Signal Information Monitor (OSD)"
+msgstr "Mostra info segnale DVB (OSD)"
+
+msgid "Signal Information"
+msgstr "Info segnale"
+
+msgid "Femon not available"
+msgstr "Femon non disponibile"
+
+msgid "basic"
+msgstr "base"
+
+msgid "transponder"
+msgstr "transponder"
+
+msgid "stream"
+msgstr "flusso"
+
+msgid "AC-3"
+msgstr "AC-3"
+
+msgid "Classic"
+msgstr "Classico"
+
+msgid "Elchi"
+msgstr "Elchi"
+
+msgid "ST:TNG"
+msgstr "ST:TNG"
+
+msgid "DeepBlue"
+msgstr "DeepBlue"
+
+msgid "Moronimo"
+msgstr "Moronimo"
+
+msgid "Enigma"
+msgstr "Enigma"
+
+msgid "EgalsTry"
+msgstr "EgalsTry"
+
+msgid "Duotone"
+msgstr "Duotone"
+
+msgid "SilverGreen"
+msgstr "SilverGreen"
+
+msgid "Hide main menu entry"
+msgstr "Nascondi voce menu principale"
+
+msgid "Define whether the main menu entry is hidden."
+msgstr "Definisci se la voce del menu principale è nascosta."
+
+msgid "Default display mode"
+msgstr "Modalità visualizz. predefinita"
+
+msgid "Define the default display mode at startup."
+msgstr "Definisci la modalità di visualizz. predefinita all'avvio."
+
+msgid "Define the used OSD skin."
+msgstr "Definisci lo stile interfaccia OSD utilizzato."
+
+msgid "Define the used OSD theme."
+msgstr "Definisci il tema OSD utilizzato."
+
+msgid "Position"
+msgstr "Posizione"
+
+msgid "Define the position of OSD."
+msgstr "Definisci la posizione dell'OSD."
+
+msgid "Downscale OSD size [%]"
+msgstr ""
+
+msgid "Define the downscale ratio for OSD size."
+msgstr ""
+
+msgid "Red limit [%]"
+msgstr "Limite rosso [%]"
+
+msgid "Define a limit for red bar, which is used to indicate a bad signal."
+msgstr "Definisci un limite per la barra rossa, usata per indicare un cattivo segnale."
+
+msgid "Green limit [%]"
+msgstr "Limite verde [%]"
+
+msgid "Define a limit for green bar, which is used to indicate a good signal."
+msgstr "Definisci un limite per la barra verde, usata per indicare un buon segnale."
+
+msgid "OSD update interval [0.1s]"
+msgstr "Intervallo agg. OSD [0.1s]"
+
+msgid "Define an interval for OSD updates. The smaller interval generates higher CPU load."
+msgstr "Definisci un intervallo per gli agg. OSD. Più piccolo è l'intervallo maggiore sarà l'uso di CPU."
+
+msgid "Analyze stream"
+msgstr "Analizza flusso"
+
+msgid "Define whether the DVB stream is analyzed and bitrates calculated."
+msgstr "Definisci se il flusso DVB è analizzato e i bitrate calcolati."
+
+msgid "Calculation interval [0.1s]"
+msgstr "Intervallo di calcolo [0.1s]"
+
+msgid "Define an interval for calculation. The bigger interval generates more stable values."
+msgstr "Definisci un intervallo di calcolo. L'intervallo più grande genera valori più stabili."
+
+msgid "Use SVDRP service"
+msgstr "Utilizza servizio SVDRP"
+
+msgid "Define whether the SVDRP service is used in client/server setups."
+msgstr "Definisci se il servizio SVDRP viene usato nelle opzioni client/server."
+
+msgid "SVDRP service port"
+msgstr "Porta servizio SVDRP"
+
+msgid "Define the port number of SVDRP service."
+msgstr "Definisci il numero di porta del servizio SVDRP."
+
+msgid "SVDRP service IP"
+msgstr "IP servizio SVDRP"
+
+msgid "Define the IP address of SVDRP service."
+msgstr "Definisci l'indirizzo IP del servizio SVDRP."
+
+msgid "Help"
+msgstr "Aiuto"
+
+msgid "Video"
+msgstr "Video"
+
+msgid "Audio"
+msgstr "Audio"
+
+msgid "Transponder Information"
+msgstr "Informazioni transponder"
+
+msgid "Apid"
+msgstr "PID Audio"
+
+msgid "Dpid"
+msgstr "PID AC3"
+
+msgid "Spid"
+msgstr "Spid"
+
+msgid "Nid"
+msgstr "Nid"
+
+msgid "Tid"
+msgstr "Tid"
+
+msgid "Rid"
+msgstr "Rid"
+
+msgid "Coderate"
+msgstr "Coderate"
+
+msgid "Stream Information"
+msgstr "Informazioni flusso"
+
+msgid "Video Stream"
+msgstr "Flusso video"
+
+msgid "Codec"
+msgstr "Codifica"
+
+msgid "Bitrate"
+msgstr "Bitrate"
+
+msgid "Aspect Ratio"
+msgstr "Formato immagine"
+
+msgid "Frame Rate"
+msgstr "Frame rate"
+
+msgid "Video Format"
+msgstr "Formato video"
+
+msgid "Resolution"
+msgstr "Risoluzione"
+
+msgid "Audio Stream"
+msgstr "Flusso audio"
+
+msgid "Channel Mode"
+msgstr "Modalità canale"
+
+msgid "Sampling Frequency"
+msgstr "Frequenza campionamento"
+
+msgid "AC-3 Stream"
+msgstr "Flusso AC-3"
+
+msgid "Bit Stream Mode"
+msgstr "Modalità bitstream"
+
+msgid "Audio Coding Mode"
+msgstr "Modalità codifica audio"
+
+msgid "Center Mix Level"
+msgstr "Livello sonoro centrale"
+
+msgid "Surround Mix Level"
+msgstr "Livello sonoro surround"
+
+msgid "Dolby Surround Mode"
+msgstr "Modalità Dolby Surround"
+
+msgid "Low Frequency Effects"
+msgstr "Effetti bassa frequenza"
+
+msgid "Dialogue Normalization"
+msgstr "Normalizzazione dialoghi"
+
+msgid "Fixed"
+msgstr "Fisso"
+
+msgid "Analog"
+msgstr "Analogico"
+
+msgid "MPEG-2"
+msgstr "MPEG-2"
+
+msgid "H.264"
+msgstr "H.264"
+
+msgid "MPEG-1 Layer I"
+msgstr "MPEG-1 Layer I"
+
+msgid "MPEG-1 Layer II"
+msgstr "MPEG-1 Layer II"
+
+msgid "MPEG-1 Layer III"
+msgstr "MPEG-1 Layer III"
+
+msgid "MPEG-2 Layer I"
+msgstr "MPEG-2 Layer I"
+
+msgid "MPEG-2 Layer II"
+msgstr "MPEG-2 Layer II"
+
+msgid "MPEG-2 Layer III"
+msgstr "MPEG-2 Layer III"
+
+msgid "HE-AAC"
+msgstr "HE-AAC"
+
+msgid "stereo"
+msgstr "stereo"
+
+msgid "joint Stereo"
+msgstr "joint Stereo"
+
+msgid "dual"
+msgstr "dual"
+
+msgid "mono"
+msgstr "mono"
+
+msgid "interlaced"
+msgstr "interlacciato"
+
+msgid "progressive"
+msgstr "progressivo"
+
+msgid "reserved"
+msgstr "riservato"
+
+msgid "extended"
+msgstr "esteso"
+
+msgid "unknown"
+msgstr "sconosciuto"
+
+msgid "component"
+msgstr "componente"
+
+msgid "PAL"
+msgstr "PAL"
+
+msgid "NTSC"
+msgstr "NTSC"
+
+msgid "SECAM"
+msgstr "SECAM"
+
+msgid "MAC"
+msgstr "MAC"
+
+msgid "Hz"
+msgstr "Hz"
+
+msgid "Complete Main (CM)"
+msgstr "Principale (P)"
+
+msgid "Music and Effects (ME)"
+msgstr "Musica ed effetti (ME)"
+
+msgid "Visually Impaired (VI)"
+msgstr "Non vedenti (NV)"
+
+msgid "Hearing Impaired (HI)"
+msgstr "Non udenti (NU)"
+
+msgid "Dialogue (D)"
+msgstr "Dialogui (D)"
+
+msgid "Commentary (C)"
+msgstr "Commenti (C)"
+
+msgid "Emergency (E)"
+msgstr "Emergenza (E)"
+
+msgid "Voice Over (VO)"
+msgstr "Voce su (VS)"
+
+msgid "Karaoke"
+msgstr "Karaoke"
+
+msgid "Ch1"
+msgstr "Can. 1"
+
+msgid "Ch2"
+msgstr "Can. 2"
+
+msgid "C"
+msgstr "C"
+
+msgid "L"
+msgstr "S"
+
+msgid "R"
+msgstr "D"
+
+msgid "S"
+msgstr "S"
+
+msgid "SL"
+msgstr "SS"
+
+msgid "SR"
+msgstr "SD"
+
+msgid "dB"
+msgstr "dB"
+
+msgid "not indicated"
+msgstr "non indicato"
+
+msgid "MHz"
+msgstr "MHz"
+
+msgid "free"
+msgstr "libero"
+
+msgid "Mbit/s"
+msgstr "Mbit/s"
+
+msgid "kbit/s"
+msgstr "kbit/s"

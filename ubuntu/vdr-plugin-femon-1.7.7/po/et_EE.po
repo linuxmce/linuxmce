@@ -1,0 +1,379 @@
+# VDR plugin language source file.
+# Copyright (C) 2007 Rolf Ahrenberg
+# This file is distributed under the same license as the femon package.
+# Arthur Konovalov
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: femon 1.7.7\n"
+"Report-Msgid-Bugs-To: Rolf Ahrenberg\n"
+"POT-Creation-Date: 2010-02-25 20:31+0200\n"
+"PO-Revision-Date: 2007-08-12 23:22+0300\n"
+"Last-Translator: Arthur Konovalov\n"
+"Language-Team: <vdr@linuxtv.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-13\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "DVB Signal Information Monitor (OSD)"
+msgstr "DVB Signaalmonitor (OSD)"
+
+msgid "Signal Information"
+msgstr "Signaaliinfo"
+
+msgid "Femon not available"
+msgstr "Femon ei ole kättesaadav"
+
+msgid "basic"
+msgstr "standard"
+
+msgid "transponder"
+msgstr "transponder"
+
+msgid "stream"
+msgstr "voog"
+
+msgid "AC-3"
+msgstr "AC-3"
+
+msgid "Classic"
+msgstr "Classic"
+
+msgid "Elchi"
+msgstr "Elchi"
+
+msgid "ST:TNG"
+msgstr "ST:TNG"
+
+msgid "DeepBlue"
+msgstr "DeepBlue"
+
+msgid "Moronimo"
+msgstr "Moronimo"
+
+msgid "Enigma"
+msgstr "Enigma"
+
+msgid "EgalsTry"
+msgstr "EgalsTry"
+
+msgid "Duotone"
+msgstr "Duotone"
+
+msgid "SilverGreen"
+msgstr "SilverGreen"
+
+msgid "Hide main menu entry"
+msgstr "Peita valik peamenüüs"
+
+msgid "Define whether the main menu entry is hidden."
+msgstr "Valiku peamenüüs peitmise määritlemine."
+
+msgid "Default display mode"
+msgstr "Vaikemoodus"
+
+msgid "Define the default display mode at startup."
+msgstr "Käivitamisel vaikemooduse määritlemine."
+
+msgid "Define the used OSD skin."
+msgstr "Kasutatava ekraanikesta määritlemine."
+
+msgid "Define the used OSD theme."
+msgstr "Kasutatava teema määritlemine."
+
+msgid "Position"
+msgstr "Positsioon"
+
+msgid "Define the position of OSD."
+msgstr "Ekraaniinfo positsiooni määritlemine."
+
+msgid "Downscale OSD size [%]"
+msgstr "Ekraanimenüü vähendamine [%]"
+
+msgid "Define the downscale ratio for OSD size."
+msgstr "Ekraanimenüü suuruse vähendamise määritlemine"
+
+msgid "Red limit [%]"
+msgstr "Punase limiit [%]"
+
+msgid "Define a limit for red bar, which is used to indicate a bad signal."
+msgstr "Seaded punasele limiidile. Iseloomustab kehva signaali."
+
+msgid "Green limit [%]"
+msgstr "Rohelise limiit [%]"
+
+msgid "Define a limit for green bar, which is used to indicate a good signal."
+msgstr "Seaded rohelisele limiidile. Iseloomustab head signaali."
+
+msgid "OSD update interval [0.1s]"
+msgstr "Uuendusintervall [0,1s]"
+
+msgid "Define an interval for OSD updates. The smaller interval generates higher CPU load."
+msgstr "Ekraaniinfo uuendamise intervalli määritlemine. Väiksem intervall- suurem CPU koormus."
+
+msgid "Analyze stream"
+msgstr "Voo analüüs"
+
+msgid "Define whether the DVB stream is analyzed and bitrates calculated."
+msgstr "DVB voo bitikiiruse rehkendamise määritlemine."
+
+msgid "Calculation interval [0.1s]"
+msgstr "Arvutamise intervall [0,1s]"
+
+msgid "Define an interval for calculation. The bigger interval generates more stable values."
+msgstr "Arvutamise intervalli määritlemine. Suurem intervall annab stabiilsemaid tulemusi."
+
+msgid "Use SVDRP service"
+msgstr "SVDRP teenus"
+
+msgid "Define whether the SVDRP service is used in client/server setups."
+msgstr "SVDRP teenuse klient/server seadete määritlemine."
+
+msgid "SVDRP service port"
+msgstr "SVDRP port"
+
+msgid "Define the port number of SVDRP service."
+msgstr "SVDRP teenuse pordi määritlemine."
+
+msgid "SVDRP service IP"
+msgstr "SVDRP IP"
+
+msgid "Define the IP address of SVDRP service."
+msgstr "SVDRP teenuse IP aadressi määritlemine."
+
+msgid "Help"
+msgstr "Abi"
+
+msgid "Video"
+msgstr "Video"
+
+msgid "Audio"
+msgstr "Audio"
+
+msgid "Transponder Information"
+msgstr "Transponderi info"
+
+msgid "Apid"
+msgstr "Apid"
+
+msgid "Dpid"
+msgstr "Dpid"
+
+msgid "Spid"
+msgstr "Spid"
+
+msgid "Nid"
+msgstr "Nid"
+
+msgid "Tid"
+msgstr "Tid"
+
+msgid "Rid"
+msgstr "Rid"
+
+msgid "Coderate"
+msgstr "Coderate"
+
+msgid "Stream Information"
+msgstr "Vooinfo"
+
+msgid "Video Stream"
+msgstr "Videovoog"
+
+msgid "Codec"
+msgstr "Koodek"
+
+msgid "Bitrate"
+msgstr "Bitikiirus"
+
+msgid "Aspect Ratio"
+msgstr "Külgsuhe"
+
+msgid "Frame Rate"
+msgstr "Kaadrisagedus"
+
+msgid "Video Format"
+msgstr "Videoformaat"
+
+msgid "Resolution"
+msgstr "Resolutsioon"
+
+msgid "Audio Stream"
+msgstr "Audiovoog"
+
+msgid "Channel Mode"
+msgstr "Kanalimoodus"
+
+msgid "Sampling Frequency"
+msgstr "Sämplimissagedus"
+
+msgid "AC-3 Stream"
+msgstr "AC-3 voog"
+
+msgid "Bit Stream Mode"
+msgstr "Bitivoo tüüp"
+
+msgid "Audio Coding Mode"
+msgstr "Audiokodeering"
+
+msgid "Center Mix Level"
+msgstr "Keskmise kanali tase"
+
+msgid "Surround Mix Level"
+msgstr "Surround kanali tase"
+
+msgid "Dolby Surround Mode"
+msgstr "Dolby Surround'i tüüp"
+
+msgid "Low Frequency Effects"
+msgstr "LFE kanal"
+
+msgid "Dialogue Normalization"
+msgstr "Dialoogi normalisatsioon"
+
+msgid "Fixed"
+msgstr "Fikseeritud"
+
+msgid "Analog"
+msgstr "Analoog"
+
+msgid "MPEG-2"
+msgstr "MPEG-2"
+
+msgid "H.264"
+msgstr "H.264"
+
+msgid "MPEG-1 Layer I"
+msgstr "MPEG-1 Layet I"
+
+msgid "MPEG-1 Layer II"
+msgstr "MPEG-1 Layer II"
+
+msgid "MPEG-1 Layer III"
+msgstr "MPEG-1 Layer III"
+
+msgid "MPEG-2 Layer I"
+msgstr "MPEG-2 Layer I"
+
+msgid "MPEG-2 Layer II"
+msgstr "MPEG-2 Layer II"
+
+msgid "MPEG-2 Layer III"
+msgstr "MPEG-2 Layer III"
+
+msgid "HE-AAC"
+msgstr "HE-AAC"
+
+msgid "stereo"
+msgstr "stereo"
+
+msgid "joint Stereo"
+msgstr "joint stereo"
+
+msgid "dual"
+msgstr "duaalne"
+
+msgid "mono"
+msgstr "mono"
+
+msgid "interlaced"
+msgstr "ülerealaotus"
+
+msgid "progressive"
+msgstr "progressiivne"
+
+msgid "reserved"
+msgstr "reserv."
+
+msgid "extended"
+msgstr "laiendatud"
+
+msgid "unknown"
+msgstr "tundmatu"
+
+msgid "component"
+msgstr "komponentne"
+
+msgid "PAL"
+msgstr "PAL"
+
+msgid "NTSC"
+msgstr "NTSC"
+
+msgid "SECAM"
+msgstr "SECAM"
+
+msgid "MAC"
+msgstr "MAC"
+
+msgid "Hz"
+msgstr "Hz"
+
+msgid "Complete Main (CM)"
+msgstr "Täiskomplekt (CM)"
+
+msgid "Music and Effects (ME)"
+msgstr "Muusika ja efektid (ME)"
+
+msgid "Visually Impaired (VI)"
+msgstr "Vaegnägemine (VE)"
+
+msgid "Hearing Impaired (HI)"
+msgstr "Vaegkuulmine (HI)"
+
+msgid "Dialogue (D)"
+msgstr "Dialoog (D)"
+
+msgid "Commentary (C)"
+msgstr "Kommentaar (C)"
+
+msgid "Emergency (E)"
+msgstr "Hädateade (E)"
+
+msgid "Voice Over (VO)"
+msgstr "Pealerääkimine (VO)"
+
+msgid "Karaoke"
+msgstr "Karaoke"
+
+msgid "Ch1"
+msgstr "Kan.1"
+
+msgid "Ch2"
+msgstr "Kan.2"
+
+msgid "C"
+msgstr "C"
+
+msgid "L"
+msgstr "L"
+
+msgid "R"
+msgstr "R"
+
+msgid "S"
+msgstr "S"
+
+msgid "SL"
+msgstr "SL"
+
+msgid "SR"
+msgstr "SR"
+
+msgid "dB"
+msgstr "dB"
+
+msgid "not indicated"
+msgstr "märkimata"
+
+msgid "MHz"
+msgstr "MHz"
+
+msgid "free"
+msgstr "vaba"
+
+msgid "Mbit/s"
+msgstr "Mbit/s"
+
+msgid "kbit/s"
+msgstr "kbit/s"

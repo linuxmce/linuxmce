@@ -1,0 +1,379 @@
+# VDR plugin language source file.
+# Copyright (C) 2007 Rolf Ahrenberg
+# This file is distributed under the same license as the femon package.
+# Valdemaras Pipiras
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: femon 1.7.7\n"
+"Report-Msgid-Bugs-To: Rolf Ahrenberg\n"
+"POT-Creation-Date: 2010-02-25 20:31+0200\n"
+"PO-Revision-Date: 2007-08-12 23:22+0300\n"
+"Last-Translator: Valdemaras Pipiras\n"
+"Language-Team: <varas@ambernet.lt>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "DVB Signal Information Monitor (OSD)"
+msgstr "DVB signalo informacijos stebėjimas (OSD)"
+
+msgid "Signal Information"
+msgstr "Signalo informacija"
+
+msgid "Femon not available"
+msgstr "Femon įskiepas nepasiekiamas"
+
+msgid "basic"
+msgstr "Standartinis"
+
+msgid "transponder"
+msgstr "Siųstuvas"
+
+msgid "stream"
+msgstr "Srautas"
+
+msgid "AC-3"
+msgstr "AC-3"
+
+msgid "Classic"
+msgstr "Klasikinis"
+
+msgid "Elchi"
+msgstr "Elchi"
+
+msgid "ST:TNG"
+msgstr "ST:TNG"
+
+msgid "DeepBlue"
+msgstr "DeepBlue"
+
+msgid "Moronimo"
+msgstr "Moronimo"
+
+msgid "Enigma"
+msgstr "Enigma"
+
+msgid "EgalsTry"
+msgstr "EgalsTry"
+
+msgid "Duotone"
+msgstr "Duotone"
+
+msgid "SilverGreen"
+msgstr "SilverGreen"
+
+msgid "Hide main menu entry"
+msgstr "Paslėpti pagrindinio meniu įrašus"
+
+msgid "Define whether the main menu entry is hidden."
+msgstr "Nustatyti pagrindinio meniu įrašų paslėpimą."
+
+msgid "Default display mode"
+msgstr "Numatytasis rodymo būdas"
+
+msgid "Define the default display mode at startup."
+msgstr "Nustatyti numatytąjį rodymo būdą paleidžiant."
+
+msgid "Define the used OSD skin."
+msgstr "Nustatyti naudojamą ekrano apvalkalą."
+
+msgid "Define the used OSD theme."
+msgstr "Nustatyti naudojamą ekrano temą."
+
+msgid "Position"
+msgstr "Pozicija"
+
+msgid "Define the position of OSD."
+msgstr "Nustatyti ekrano užsklandos poziciją."
+
+msgid "Downscale OSD size [%]"
+msgstr ""
+
+msgid "Define the downscale ratio for OSD size."
+msgstr ""
+
+msgid "Red limit [%]"
+msgstr "Raudonoji ribą [%]"
+
+msgid "Define a limit for red bar, which is used to indicate a bad signal."
+msgstr "Nustatyti raudonos juostos ribą, kuri naudojama blogo signalo indikacijai."
+
+msgid "Green limit [%]"
+msgstr "Žalioji riba [%]"
+
+msgid "Define a limit for green bar, which is used to indicate a good signal."
+msgstr "Nustatyti žalios juostos ribą, kuri naudojama gero signalo indikacijai."
+
+msgid "OSD update interval [0.1s]"
+msgstr "Ekrano užsklandos atnaujinimo intervalas [0.1s]"
+
+msgid "Define an interval for OSD updates. The smaller interval generates higher CPU load."
+msgstr "Nustatyti ekrano užsklandos atnaujinimo intervalą. Mažesnis intervalas labiau apkrauna centrinį procesorių (CPU)."
+
+msgid "Analyze stream"
+msgstr "Analizuoti srautą"
+
+msgid "Define whether the DVB stream is analyzed and bitrates calculated."
+msgstr "Nurodyti ar DVB srautas turi būti analizuojamas bei jo kokybė išskaičiuojama."
+
+msgid "Calculation interval [0.1s]"
+msgstr "Apskaitos intervalos [0.1s]"
+
+msgid "Define an interval for calculation. The bigger interval generates more stable values."
+msgstr "Nustatyti apskaitos intervalą. Kuo didesnis intervalas, tuo tikslesni duomenys."
+
+msgid "Use SVDRP service"
+msgstr "Naudoti SVDRP paslaugą"
+
+msgid "Define whether the SVDRP service is used in client/server setups."
+msgstr "Nurodyti ar SVDRP paslauga naudojama kliento/serverio nustatymuose."
+
+msgid "SVDRP service port"
+msgstr "SVDRP įrenginio portas"
+
+msgid "Define the port number of SVDRP service."
+msgstr "Nustatyti SVDRP įrenginio prievadą."
+
+msgid "SVDRP service IP"
+msgstr "SVDRP įrenginio IP"
+
+msgid "Define the IP address of SVDRP service."
+msgstr "Nustatyti SVDRP įrenginio IP adresą."
+
+msgid "Help"
+msgstr "Pagalba"
+
+msgid "Video"
+msgstr "Video"
+
+msgid "Audio"
+msgstr "Audio"
+
+msgid "Transponder Information"
+msgstr "Siųstuvo informacija"
+
+msgid "Apid"
+msgstr "Apid"
+
+msgid "Dpid"
+msgstr "Dpid"
+
+msgid "Spid"
+msgstr "Spid"
+
+msgid "Nid"
+msgstr "Nid"
+
+msgid "Tid"
+msgstr "Tid"
+
+msgid "Rid"
+msgstr "Rid"
+
+msgid "Coderate"
+msgstr "Kodavimo dažnis"
+
+msgid "Stream Information"
+msgstr "Srauto informacija"
+
+msgid "Video Stream"
+msgstr "Video srautas"
+
+msgid "Codec"
+msgstr "Kodekas"
+
+msgid "Bitrate"
+msgstr "Kokybė"
+
+msgid "Aspect Ratio"
+msgstr "Proporcijos"
+
+msgid "Frame Rate"
+msgstr "Kadrų dažnis"
+
+msgid "Video Format"
+msgstr "Video formatas"
+
+msgid "Resolution"
+msgstr "Rezoliucija"
+
+msgid "Audio Stream"
+msgstr "Audio srautas"
+
+msgid "Channel Mode"
+msgstr "kanalo būsena"
+
+msgid "Sampling Frequency"
+msgstr "Parodomasis dažnis"
+
+msgid "AC-3 Stream"
+msgstr "AC-3 srautas"
+
+msgid "Bit Stream Mode"
+msgstr "Bitstream būsena"
+
+msgid "Audio Coding Mode"
+msgstr "Audio kodavimas"
+
+msgid "Center Mix Level"
+msgstr "Centerinis Mix lygis"
+
+msgid "Surround Mix Level"
+msgstr "Surround Mix lygis"
+
+msgid "Dolby Surround Mode"
+msgstr "Dolby Surround būklė"
+
+msgid "Low Frequency Effects"
+msgstr "Žemo dažnio efektai"
+
+msgid "Dialogue Normalization"
+msgstr "Dialogo normalizacija"
+
+msgid "Fixed"
+msgstr "Fest"
+
+msgid "Analog"
+msgstr "Analog"
+
+msgid "MPEG-2"
+msgstr "MPEG-2"
+
+msgid "H.264"
+msgstr "H.264"
+
+msgid "MPEG-1 Layer I"
+msgstr "MPEG-1 Layer I"
+
+msgid "MPEG-1 Layer II"
+msgstr "MPEG-1 Layer II"
+
+msgid "MPEG-1 Layer III"
+msgstr "MPEG-1 Layer III"
+
+msgid "MPEG-2 Layer I"
+msgstr "MPEG-2 Layer I"
+
+msgid "MPEG-2 Layer II"
+msgstr "MPEG-2 Layer II"
+
+msgid "MPEG-2 Layer III"
+msgstr "MPEG-2 Layer III"
+
+msgid "HE-AAC"
+msgstr "HE-AAC"
+
+msgid "stereo"
+msgstr "stereo"
+
+msgid "joint Stereo"
+msgstr "jungtinis stereo"
+
+msgid "dual"
+msgstr "dvigubas"
+
+msgid "mono"
+msgstr "mono"
+
+msgid "interlaced"
+msgstr "persipynęs (interlaced)"
+
+msgid "progressive"
+msgstr "progresyvinis"
+
+msgid "reserved"
+msgstr "belegt"
+
+msgid "extended"
+msgstr "išplėstas"
+
+msgid "unknown"
+msgstr "nežinomas"
+
+msgid "component"
+msgstr "komponentas"
+
+msgid "PAL"
+msgstr "PAL"
+
+msgid "NTSC"
+msgstr "NTSC"
+
+msgid "SECAM"
+msgstr "SECAM"
+
+msgid "MAC"
+msgstr "MAC"
+
+msgid "Hz"
+msgstr "Hz"
+
+msgid "Complete Main (CM)"
+msgstr "Pilnai pagrindinis (CM)"
+
+msgid "Music and Effects (ME)"
+msgstr "Muzika ir efektai (ME)"
+
+msgid "Visually Impaired (VI)"
+msgstr " (VI)"
+
+msgid "Hearing Impaired (HI)"
+msgstr " (HI)"
+
+msgid "Dialogue (D)"
+msgstr "Dialogas (D)"
+
+msgid "Commentary (C)"
+msgstr "Komentavimas (C)"
+
+msgid "Emergency (E)"
+msgstr "Avarinis (E)"
+
+msgid "Voice Over (VO)"
+msgstr "Voice over (VO)"
+
+msgid "Karaoke"
+msgstr "Karaoke"
+
+msgid "Ch1"
+msgstr "Kan1"
+
+msgid "Ch2"
+msgstr "Kan2"
+
+msgid "C"
+msgstr "C"
+
+msgid "L"
+msgstr "L"
+
+msgid "R"
+msgstr "R"
+
+msgid "S"
+msgstr "S"
+
+msgid "SL"
+msgstr "SL"
+
+msgid "SR"
+msgstr "SR"
+
+msgid "dB"
+msgstr "dB"
+
+msgid "not indicated"
+msgstr "nerasta"
+
+msgid "MHz"
+msgstr "MHz"
+
+msgid "free"
+msgstr "frei"
+
+msgid "Mbit/s"
+msgstr "Mbit/s"
+
+msgid "kbit/s"
+msgstr "kbit/s"
