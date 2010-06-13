@@ -1,0 +1,32 @@
+vdr-plugin-iptv for Debian
+--------------------------
+
+The IPTV plug-in can use an external script for transcoding input streams
+into an MPEG2 transport stream.
+
+The Debian package of the IPTV plug-in comes with its own script that uses
+VLC for transcoding. The script is called `vlc2iptv` and can be used
+as follows:
+
+In the channels.conf:
+
+    IPTV-EXT;IPTV:1:S=0|P=0|F=EXT|U=vlc2iptv|A=1:I:0:2:3:0:0:4:0:0:0
+      ^                                        ^
+      |- <Channel Name>                        |- <Parameter>
+
+<Channel Name> specifies, which URL should be transcoded. To configure this URL,
+create a file `/etc/vdr/plugins/iptv/vlcinput/<Channel Name>.conf` with the
+following contents:
+
+    URL="http://www.foo.net/bar-stream"
+    VPID=2
+    APID=3
+    SPID=4
+
+VPID, APID and SPID are the PID-Values you have to use in the channels.conf
+entry.
+
+<Channel Name> must be unique and you still have to set the numeric <Parameter>
+for `vlc2iptv` to a unique value.
+
+Please see also the section about the external streaming in the README.
