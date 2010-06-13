@@ -1,0 +1,3 @@
+version=3
+opts="uversionmangle=s/(.*)_([0-9]*)/$1~$2/" \
+http://wirbel.htpc-forum.de/wirbelscan/index2.html vdr-wirbelscan-(.*)\.tgz

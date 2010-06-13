@@ -1,0 +1,24 @@
+diff -Nru wirbelscan/Makefile wirbelscan_no_zvbi/Makefile
+--- wirbelscan/Makefile	2008-09-13 16:52:24.967329501 +0200
++++ wirbelscan_no_zvbi/Makefile	2008-09-13 16:54:00.342838536 +0200
+@@ -31,7 +31,7 @@
+ 
+ ### Comment this out, if want to compile without lbzvbi-0.2
+ 
+-USE_ZVBI = 1
++# USE_ZVBI = 1
+ 
+ ### Allow user defined options to overwrite defaults:
+ 
+diff -Nru wirbelscan/vbi.c wirbelscan_no_zvbi/vbi.c
+--- wirbelscan/vbi.c	2008-09-13 16:44:12.858500091 +0200
++++ wirbelscan_no_zvbi/vbi.c	2008-09-13 16:54:17.190045306 +0200
+@@ -17,7 +17,7 @@
+  * Makefile has to be adjusted this case too, remove -lzvbi
+  *
+  *****************************************************************/
+-#define USE_ZVBI
++// #define USE_ZVBI
+ 
+ 
+ #include <stdarg.h>

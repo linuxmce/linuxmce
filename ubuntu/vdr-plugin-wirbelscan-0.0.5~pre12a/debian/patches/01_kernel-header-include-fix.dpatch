@@ -1,0 +1,28 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 01_kernel-header-include-fix.dpatch by Tobias Grimm <tg@e-tobi.net>
+##
+## Thomas Günther <tom@toms-cafe.de>:
+##   - adapted to wirbelscan-0.0.5~pre11e
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Fixes problem with DVB kernel headers
+
+@DPATCH@
+--- wirbelscan-0.0.5-pre11e/dvb_wrapper.c
++++ wirbelscan-0.0.5-pre11e/dvb_wrapper.c
+@@ -1,4 +1,5 @@
+ 
++#include <stdlib.h>
+ #include <linux/dvb/frontend.h> //either API version 3.2 or 5.0
+ #include <linux/dvb/version.h>
+ #include <vdr/dvbdevice.h>
+--- wirbelscan-0.0.5~pre11e/menusetup.c
++++ wirbelscan-0.0.5~pre11e/menusetup.c
+@@ -7,6 +7,7 @@
+  */
+ 
+ 
++#include <stdlib.h>
+ #include <linux/dvb/frontend.h>
+ #include <vdr/menuitems.h>
+ #include <vdr/device.h>
