@@ -6,6 +6,12 @@ if [[ -f /root/.mozilla/firefox/pluto.default/prefs.js ]] ;then
 	echo 'user_pref("browser.sessionstore.enabled", false);' >> /root/.mozilla/firefox/pluto.default/prefs.js
 fi
 
+# Be sure to export bookmarks when firefox exits.
+if [[ -f /root/.mozilla/firefox/pluto.default/prefs.js ]] ;then
+	grep -q "browser.bookmarks.autoExportHTML" /root/.mozilla/firefox/pluto.default/prefs.js ||
+	echo 'user_pref("browser.bookmarks.autoExportHTML", true)' >> /root/.mozilla/firefox/pluto.default/prefs.js
+fi
+ 
 . /usr/pluto/bin/Config_Ops.sh
 export DISPLAY=":${Display}"
 

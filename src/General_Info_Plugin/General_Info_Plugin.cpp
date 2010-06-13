@@ -2591,7 +2591,10 @@ list<pair<string, string> > General_Info_Plugin::GetUserBookmarks(string sPK_Use
 
             Buffer = EndBraceA+1;
             LoggerWrapper::GetInstance()->Write(LV_STATUS,"add bookmarks %s / %s",Link.c_str(), LinkText.c_str());
-            Bookmarks.push_back(pair<string, string>(Link, LinkText));
+	    // Do not touch place: URLs.
+	    if (Link.find("place:") == string::npos)
+            	Bookmarks.push_back(pair<string, string>(Link, LinkText));
+
         }
 
         delete[] BufferTop;
