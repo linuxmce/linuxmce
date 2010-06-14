@@ -297,9 +297,13 @@ function step_options($selected,$user,$dbADO,$suffix='',$oldValues=''){
 	
 	global 	$stepsArray;
 
+	$origOldValues = $oldValues;	// Store the passed in oldValue, to recover from
+					// the casting snafus below.
+
 	$out='';
 	foreach ($stepsArray AS $currentStep=>$stepName){
 		$styleHidden=($selected==$currentStep)?'':'style="display:none"';
+		$oldValues = $origOldValues;  // Bring back the unaltered value again.
 		switch ($currentStep){
 			case 'ring':
 				$GLOBALS['Room_Name']=1;
