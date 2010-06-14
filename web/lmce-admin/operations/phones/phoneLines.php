@@ -65,7 +65,7 @@ function phoneLines($output,$astADO,$dbADO) {
 			</tr>		
 			<tr>
 				<td><B>'.$TEXT_PASSWORD_CONST.' *</B> </td>
-				<td><input type="text" name="password" value="'.@$phoneData['Password'].'"></td>
+				<td><input type="password" name="password" value="'.@$phoneData['Password'].'"></td>
 			</tr>
 			<tr>
 				<td colspan="2">'.$TEXT_PHONE_LINE_PASSWORD_NOTE_CONST.'</td>
@@ -269,7 +269,6 @@ function phoneLinesTable($astADO){
 		<tr class="tablehead">
 			<td align="center"><B>'.$TEXT_TYPE_CONST.'</B></td>
 			<td align="center"><B>'.$TEXT_DATA_CONST.'</B></td>
-			<td align="center"><B>'.$TEXT_PASSWORD_CONST.'</B></td>
 			<td align="center"><B>'.$TEXT_USERNAME_CONST.'</B></td>
 			<td align="center"><B>'.$TEXT_HOST_CONST.'</B></td>
 			<td align="center"><B>'.$TEXT_PHONE_NUMBER_CONST.'</B></td>
@@ -286,7 +285,6 @@ function phoneLinesTable($astADO){
 		<tr bgcolor="'.$color.'">
 			<td>SIP</td>
 			<td>'.$row['data'].'</td>
-			<td>'.$row['sdata'].'</td>
 			<td>'.$row['pdata'].'</td>
 			<td>'.$row['hdata'].'</td>
 			<td>'.$phoneNumber.'</td>
@@ -324,10 +322,8 @@ function phoneLinesTable($astADO){
 		$color=($GLOBALS['count']%2==0)?'#F0F3F8':'#FFFFFF';
 		$out.='
 		<tr bgcolor="'.$color.'">
-			<td>
-			IAX</td>
+			<td>IAX</td>
 			<td>'.$row['data'].'</td>
-			<td>'.$row['sdata'].'</td>
 			<td>'.$row['pdata'].'</td>
 			<td>'.$row['hdata'].'</td>
 			<td>'.$phoneNumber.'</td>
