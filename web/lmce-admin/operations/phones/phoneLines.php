@@ -10,8 +10,7 @@ function phoneLines($output,$astADO,$dbADO) {
 	$databases=$dbADO->MetaDatabases();
 	if(!in_array('asterisk',$databases)){
 		error_redirect($TEXT_ASTERISK_DB_NOT_FOUND_CONST,'index.php?section=phoneLines');
-	}
-		
+	}	
 	
 	/* @var $astADO ADOConnection */
 	/* @var $rs ADORecordSet */
@@ -21,27 +20,30 @@ function phoneLines($output,$astADO,$dbADO) {
 	$providerData=get_available_providers();
 	
 	$keywords=array();
+
 	foreach ($providerData AS $prID=>$providerArray){
 		$keywords[$providerArray['keyword']]=$prID;
 	}
-	
+
 	if(isset($_REQUEST['provider'])){
 		$provider=$_REQUEST['provider'];
 	}
+
 	$editedID=@$_REQUEST['eid'];
+
 	if($editedID!=0 && $editedID!=''){
 		$phoneData=getPLDetails($editedID,$_REQUEST['type'],$astADO);
 		$provider=$keywords[$phoneData['Data']];
 	}
 
-
 	$pulldownOptions='';
+
 	foreach (array_keys($providerData) AS $option){
 		$pulldownOptions.='<option value="'.$option.'" '.((@$provider==$option)?'selected':'').'>'.$option.'</option>';
 	}
-		
+
 	if(isset($provider)){
-		$providerUrl=@$providerData[@$_REQUEST['provider']]['url'];
+		$providerUrl=$providerData[$provider]['url'];
 		$providerScript='create_amp_phoneline.sh '.@$providerData[@$_REQUEST['provider']]['keyword'];
 		$userBox='
 		<input type="hidden" name="editedID" value="'.@$editedID.'">
@@ -62,7 +64,7 @@ function phoneLines($output,$astADO,$dbADO) {
 			</tr>
 			<tr bgcolor="#F0F3F8">
 				<td colspan="2">'.$TEXT_PHONE_LINE_USERNAME_NOTE_CONST.'</td>
-			</tr>		
+			</tr>
 			<tr>
 				<td><B>'.$TEXT_PASSWORD_CONST.' *</B> </td>
 				<td><input type="password" name="password" value="'.@$phoneData['Password'].'"></td>
@@ -146,7 +148,7 @@ function phoneLines($output,$astADO,$dbADO) {
 	}elseif($action=='activateManual'){
 		$out=activate_manualconfig_form();
 	}else{
-	// process area
+		// process area
 		if(isset($_POST['Add'])){
 			$editedID=$_REQUEST['editedID'];
 			if($editedID!=''){
@@ -224,7 +226,6 @@ function phoneLines($output,$astADO,$dbADO) {
 			header('Location: index.php?section=phoneLines&msg='.$TEXT_AUTOMATIC_OVERRIDE_CONFIGURATION_ACTIVATED_CONST);
 			exit();
 		}
-
 		
 		header('Location: index.php?section=phoneLines');
 	}
@@ -247,6 +248,7 @@ function phoneLinesTable($astADO){
 	$providersKeywords=get_providers_by_type('SIP');
 
 	$where='';
+
 	if(count($providersKeywords)>0){
 		$whereArray=array();
 		foreach ($providersKeywords as $key){
@@ -275,6 +277,7 @@ function phoneLinesTable($astADO){
 			<td align="center"><B>'.$TEXT_STATUS_CONST.'</B></td>
 			<td align="center"><B>'.$TEXT_ACTION_CONST.'</B></td>
 		</tr>	';
+
 	while($row=$res->FetchRow()){
 		$incomingData=array_values(getAssocArray('incoming','destination','extension',$astADO,'WHERE destination=\'custom-linuxmce,10'.substr($row['id'],-1).',1\''));
 		$phoneNumber=@$incomingData[0];
@@ -288,7 +291,7 @@ function phoneLinesTable($astADO){
 			<td>'.$row['pdata'].'</td>
 			<td>'.$row['hdata'].'</td>
 			<td>'.$phoneNumber.'</td>
-			<td>'.@$phoneState['SIP'][$row['pdata']].'</td>
+			<td>'.getSIPState().'</td>
 			<td align="center">
 				<a href="index.php?section=phoneLines&type=SIP&eid='.$row['id'].'">'.$TEXT_EDIT_CONST.'</a> 
 				<a href="index.php?section=incomingCallsSettings&type=SIP&data='.$row['data'].'&id='.$row['id'].'">'.$TEXT_SETTINGS_CONST.'</a> 
@@ -299,6 +302,7 @@ function phoneLinesTable($astADO){
 
 	$providersKeywords=get_providers_by_type('IAX');
 	$where='';
+
 	if(count($providersKeywords)>0){
 		$whereArray=array();
 		foreach ($providersKeywords as $key){
@@ -314,6 +318,7 @@ function phoneLinesTable($astADO){
 		INNER JOIN iax iaxp ON (iaxp.id=iax.id) AND (iaxp.keyword='username')
 		INNER JOIN iax iaxh ON (iaxh.id=iax.id) AND (iaxh.keyword='host')
 		WHERE (iax.keyword='account') $where");
+
 	while($row=$res->FetchRow()){
 		$incomingData=array_values(getAssocArray('incoming','destination','extension',$astADO,'WHERE destination=\'custom-linuxmce,10'.substr($row['id'],-1).',1\''));
 		$phoneNumber=@$incomingData[0];
@@ -327,7 +332,7 @@ function phoneLinesTable($astADO){
 			<td>'.$row['pdata'].'</td>
 			<td>'.$row['hdata'].'</td>
 			<td>'.$phoneNumber.'</td>
-			<td>'.@$phoneState['IAX'][$row['pdata']].'</td>
+			<td>'.getIAXState().'</td>
 			<td align="center">
 				<a href="index.php?section=phoneLines&type=IAX&eid='.$row['id'].'">'.$TEXT_EDIT_CONST.'</a> 
 				<a href="index.php?section=incomingCallsSettings&type=IAX&id='.$row['id'].'">'.$TEXT_SETTINGS_CONST.'</a> 
@@ -386,6 +391,7 @@ function getPLDetails($id,$type,$astADO){
 		$providersKeywords=get_providers_by_type('SIP');
 	
 		$where='';
+
 		if(count($providersKeywords)>0){
 			$whereArray=array();
 			foreach ($providersKeywords as $key){
@@ -393,6 +399,7 @@ function getPLDetails($id,$type,$astADO){
 			}
 			$where=' AND ('.join(' OR ',$whereArray).')';
 		}		
+
 		$res=$astADO->Execute("
 			SELECT sip.id,sip.data,sips.data AS sdata, sipp.data AS pdata,siph.data AS hdata 
 			FROM sip 
@@ -419,6 +426,7 @@ function getPLDetails($id,$type,$astADO){
 			INNER JOIN iax iaxh ON (iaxh.id=iax.id) AND (iaxh.keyword='host')
 			WHERE (iax.keyword='account') $where AND iax.id='$id'");
 	}
+
 	$data=array();
 	$row=$res->FetchRow();
 	$data['Password']=$row['sdata'];
@@ -436,10 +444,10 @@ function getPLDetails($id,$type,$astADO){
 function deletePhoneLine($id,$line_name,$phone_nr){
 	/*
 	$url='http://'.$_SERVER['SERVER_ADDR'].'/admin/config.php';
-	$params='display=6&extdisplay=OUT_'.$id.'&action=deltrunk';
-			
+	$params='display=6&extdisplay=OUT_'.$id.'&action=deltrunk';			
 	$answer=queryExternalServer($url.'?'.$params);
 	*/
+
 	// command to del phone line usr/pluto/bin/delete_phoneline.pl <line_nr> <line_name> <phone_nr>
 	$cmd="sudo -u root /usr/pluto/bin/delete_phoneline.pl $id $line_name $phone_nr";
 
@@ -455,57 +463,55 @@ function getPhonesState(){
 	return $state;
 }
 
-
 function getSIPState(){
-	// SIP get state command	
-	$cmd='sudo -u root /usr/sbin/asterisk -rx "sip show registry"';
-	$response=exec_batch_command($cmd,1);
+        // SIP get state command
+        $cmd='sudo -u root /usr/sbin/asterisk -rx "sip show registry"';
+        $response=exec_batch_command($cmd,1);
 
-	// response look like this
-	/*
-	   -- Remote UNIX connection
-	Host                            Username       Refresh State
-	sip.inphonex.com:5060           7588648             50 Registered
-	sip.inphonex.com:5060           123456             100 Unregistered
-	Verbosity is at least 3
-	*/
-	
-	$state=array();
-	
-	$lines=explode("\n",$response);
-	$last=count($lines);
-	for($i=0;$i<$last;$i++){
-		if(strpos($lines[$i],'Host')!==false || strpos($lines[$i],'Verbosity')!==false || strpos($lines[$i],'Core debug')!==false || strpos($lines[$i],'UNIX')!==false)
-		unset($lines[$i]);	
-	}
+        // response look like this
+        /*
+           -- Remote UNIX connection
+        Host                            Username       Refresh State
+        sip.inphonex.com:5060           7588648             50 Registered
+        sip.inphonex.com:5060           123456             100 Unregistered
+        Verbosity is at least 3
+        */
 
+        $state=array();
 
-	foreach ($lines AS $line){
-		$parsed=array();
-		$parts=explode(" ",$line);
+        $lines=explode("\n",$response);
+        $last=count($lines);
+        for($i=0;$i<$last;$i++){
+                if(strpos($lines[$i],'Host')!==false || strpos($lines[$i],'Verbosity')!==false || strpos($lines[$i],'Core debug')!==false || strpos($lines[$i],'UNIX')!==false)
+                unset($lines[$i]);
+        }
 
-		foreach ($parts AS $pos=>$value){
-			if(trim($value)!=''){
-				$parsed[]=$value;
-			}
-		}
+        foreach ($lines AS $line){
+                $parsed=array();
+                $parts=explode(" ",$line);
 
-		$dataArray=array_slice($parsed,4);
-		$ampersand=strpos(@$parsed[1],'@');
-		$nr=($ampersand===false)?@$parsed[1]:substr(@$parsed[1],0,$ampersand);
-		$state[$nr]=(!isset($parsed[4]))?@$parsed[3]:$parsed[3].' '.join(' ',$dataArray);
-	}
+                foreach ($parts AS $pos=>$value){
+                        if(trim($value)!=''){
+                                $parsed[]=$value;
+                        }
+                }
 
+                $dataArray=array_slice($parsed,4);
+                $ampersand=strpos(@$parsed[1],'@');
+                $nr=($ampersand===false)?@$parsed[1]:substr(@$parsed[1],0,$ampersand);
+                $state[$nr]=(!isset($parsed[4]))?@$parsed[3]:$parsed[3].' '.join(' ',$dataArray);
+        }
 
-	return $state;
+        return @$state[@$nr];
 }
 
 function getIAXState(){
 	// IAX get state command	
 	/*
-Host                  dnsmgr  Username    Perceived             Refresh  State
-207.174.202.3:4569    N       plutosf     82.77.255.193:4569         60  Registered
-*/
+	Host                  dnsmgr  Username    Perceived             Refresh  State
+	207.174.202.3:4569    N       plutosf     82.77.255.193:4569         60  Registered
+	*/
+
 	$cmd='sudo -u root /usr/sbin/asterisk -rx "iax2 show registry"';
 	$response=exec_batch_command($cmd,1);
 	
@@ -534,7 +540,7 @@ Host                  dnsmgr  Username    Perceived             Refresh  State
 		$state[$nr]=(!isset($parsed[6]))?@$parsed[5]:$parsed[5].' '.join(' ',$dataArray);
 	}
 
-	return $state;
+	return @$state[@$nr];
 }
 
 function isManualConfig($dbADO){
@@ -595,44 +601,40 @@ function activate_manualconfig_form(){
 }
 
 function get_available_providers(){
-	
-	// file format: [provider name]\t[url]\t[keyword]\t[SIP|IAX]
+	// File format: [provider name]\t[url]\t[keyword]\t[SIP|IAX]
 	$providerData=array();
 	$confFile=@file('/etc/asterisk/provider_list.txt');
 	
-	
 	if($confFile=='' || count($confFile)==0){
 		return $providerData;
-	}
-	
+	}	
+
 	foreach ($confFile AS $line){
+
 		if(trim($line)!=''){
 			$parts=explode("\t",$line);
-			
 			$providerData[$parts[0]]['url']=trim($parts[1]);
 			$providerData[$parts[0]]['keyword']=trim($parts[2]);
 		}
 	}
+
 	asort($providerData);
-	
 	return $providerData;
 }
 
 function get_providers_by_type($type){
-	
-	// file format: [provider name]\t[url]\t[keyword]\t[SIP|IAX]
+	// File format: [provider name]\t[url]\t[keyword]\t[SIP|IAX]
 	$providerData=array();
 	$confFile=@file('/etc/asterisk/provider_list.txt');
-	
-	
+		
 	if($confFile=='' || count($confFile)==0){
 		return $providerData;
 	}
 	
 	foreach ($confFile AS $line){
+
 		if(trim($line)!=''){
 			$parts=explode("\t",$line);
-			
 			$providerData[trim($parts[3])][]=trim($parts[2]);
 		}
 	}
