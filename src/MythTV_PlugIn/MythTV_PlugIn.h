@@ -198,6 +198,9 @@ public:
         /** All Shows available in the MythTv database */
     	class DataGridTable *AllShows(string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, Message *pMessage);
 
+	/** A traditional EPG Grid */
+	class DataGridTable *PVREPGGrid(string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, Message *pMessage);
+
         /** The interceptor for the MediaInfoChangedEvent from the playing device */
     	bool MediaInfoChanged( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
 

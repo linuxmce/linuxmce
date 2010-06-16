@@ -2646,6 +2646,19 @@
 #define DESIGNOBJ_objNowPlayingInverted_CONST 6038
 #define DESIGNOBJ_MusicRemote_CONST 6039
 #define DESIGNOBJ_popPictureOptions_CONST 6040
+#define DESIGNOBJ_mnuPVREPG_CONST 6041
+#define DESIGNOBJ_butEPGMonday_CONST 6042
+#define DESIGNOBJ_butEPGTuesday_CONST 6043
+#define DESIGNOBJ_butEPGWednesday_CONST 6044
+#define DESIGNOBJ_butEPGThursday_CONST 6045
+#define DESIGNOBJ_butEPGFriday_CONST 6046
+#define DESIGNOBJ_butEPGSaturday_CONST 6047
+#define DESIGNOBJ_butEPGSunday_CONST 6048
+#define DESIGNOBJ_butEPGScrollLeft_CONST 6049
+#define DESIGNOBJ_butEPGScrollRight_CONST 6050
+#define DESIGNOBJ_butEPGScrollUp_CONST 6051
+#define DESIGNOBJ_butEPGScrollDown_CONST 6052
+#define DESIGNOBJ_dgPVREPG_CONST 6053
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"

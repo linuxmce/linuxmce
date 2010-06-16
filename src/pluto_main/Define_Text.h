@@ -1162,6 +1162,13 @@
 #define TEXT_On_Screen_Remote_Active_CONST 2105
 #define TEXT_SymbolAsterisk_CONST 2106
 #define TEXT_SymbolPound_CONST 2107
+#define TEXT_Monday_CONST 2108
+#define TEXT_Tuesday_CONST 2109
+#define TEXT_DAY_WED_CONST 2110
+#define TEXT_Thursday_CONST 2111
+#define TEXT_Friday_CONST 2112
+#define TEXT_Saturday_CONST 2113
+#define TEXT_Sunday_CONST 2114
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"

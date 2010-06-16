@@ -51,6 +51,8 @@ using namespace DCE;
 
 #include "../Orbiter_Plugin/OH_Orbiter.h"
 
+#include <sstream>
+
 static const string SCRIPT_DIR =             "/usr/pluto/bin";
 static const string SCRIPT_SYNC_TO_DB =      SCRIPT_DIR + "/MythTvSyncDB.sh";
 static const string SCRIPT_TUNE =            SCRIPT_DIR + "/TuneToChannel.sh";
@@ -158,6 +160,9 @@ bool MythTV_PlugIn::Register()
 
     m_pDatagrid_Plugin->RegisterDatagridGenerator( new DataGridGeneratorCallBack(this,(DCEDataGridGeneratorFn)(&MythTV_PlugIn::AllShows))
                                                 ,DATAGRID_EPG_All_Shows_CONST,DEVICETEMPLATE_MythTV_Player_CONST);
+
+    m_pDatagrid_Plugin->RegisterDatagridGenerator( new DataGridGeneratorCallBack(this,(DCEDataGridGeneratorFn)(&MythTV_PlugIn::PVREPGGrid))
+                                                ,DATAGRID_EPG_Grid_CONST,DEVICETEMPLATE_MythTV_Player_CONST);
 
 	m_pDatagrid_Plugin->RegisterDatagridGenerator( new DataGridGeneratorCallBack(this,(DCEDataGridGeneratorFn)(&MythTV_PlugIn::TvProviders))
 												,DATAGRID_TV_Providers_CONST,DEVICETEMPLATE_MythTV_Player_CONST);
@@ -582,6 +587,180 @@ class DataGridTable *MythTV_PlugIn::AllShows(string GridID, string Parms, void *
 		(int) pDataGridTable->m_MemoryDataTable.size(), PK_Device_Source, p_list_int, (int) m_mapDevicesToSources.size() );
 
 	return pDataGridTable;
+}
+
+// A Traditional EPG Grid
+class DataGridTable *MythTV_PlugIn::PVREPGGrid(string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, Message *pMessage)
+{
+  DataGridTable *pDataGridTable = new DataGridTable();
+
+  if (m_bBookmarksNeedRefreshing)
+    RefreshBookmarks();
+
+  string::size_type tokenPos=0;
+  int iPK_Users = atoi(StringUtils::Tokenize(Parms,",",tokenPos).c_str());
+  int iPK_EntertainArea = atoi(StringUtils::Tokenize(Parms,",",tokenPos).c_str());
+
+  PLUTO_SAFETY_LOCK(mm, m_pMedia_Plugin->m_MediaMutex);
+
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::EPGGrid() a datagrid for the EPG was requested %s params %s", GridID.c_str(), Parms.c_str());
+
+  EntertainArea *pEntertainArea = m_pMedia_Plugin->m_mapEntertainAreas_Find(iPK_EntertainArea);
+
+  if (!pEntertainArea || !pEntertainArea->m_pMediaStream || !pEntertainArea->m_pMediaStream->m_pMediaDevice_Source)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_STATUS, "MythTV_PlugIn::EPGGrid can't find a stream %p",pEntertainArea);
+      // Come back here and do a data grid if a stream isn't available. For now, just be blank.
+      return pDataGridTable;
+    }
+  
+  // Row 0 column 0 is a blank 'shim' column.
+  DataGridCell *pShimColumn = new DataGridCell("","");
+  pDataGridTable->SetData(0,0,pShimColumn);
+
+  // Do the time columns.
+  // -------------------------------------------------------
+  // There are 12 cells, in an hour block (5 min increments)
+  // 6 cells in a 30 minute block
+  // 288 cells in all.
+
+  int iTimeColumn = 1; // Time column counter . The First column is blank (Channel)
+
+  // Do the AM slots.
+  for (int i=0;i<12;i++)
+    {
+      int iVisualTimeIndex = i;
+      string sVisualTimeHour, sActualTimeHour, sVisualTimeHalfHour, sActualTimeHalfHour;
+      ostringstream ssVisualTimeHour, ssActualTimeHour, ssVisualTimeHalfHour, ssActualTimeHalfHour;
+      
+      // Show midnight as 12:00 AM
+      if (i == 0)
+	iVisualTimeIndex = 12;
+
+      // Construct the streams
+      ssVisualTimeHour << iVisualTimeIndex << ":" << "00 AM";
+      ssActualTimeHour << i << ":" << "00";
+      ssVisualTimeHalfHour << iVisualTimeIndex << ":" << "30 AM";
+      ssActualTimeHalfHour << i << ":" << "30";
+
+      // Build the strings.
+      sVisualTimeHour = ssVisualTimeHour.str();
+      sActualTimeHour = ssActualTimeHour.str();
+      sVisualTimeHalfHour = ssVisualTimeHalfHour.str();
+      sActualTimeHalfHour = ssVisualTimeHalfHour.str();
+
+      DataGridCell *pCellHour = new DataGridCell(sVisualTimeHour,sActualTimeHour);
+      pCellHour->m_Colspan = 12;
+      DataGridCell *pCellHalfHour = new DataGridCell(sVisualTimeHalfHour,sActualTimeHalfHour);
+      pCellHalfHour->m_Colspan = 12;
+
+      pDataGridTable->SetData(i, iTimeColumn, pCellHour);
+      iTimeColumn += 6;
+      pDataGridTable->SetData(i, iTimeColumn, pCellHalfHour);
+      iTimeColumn += 6;
+
+    }
+
+  // Do the PM slots.
+  for (int i=0;i<12;i++)
+    {
+      int iVisualTimeIndex = i;
+      string sVisualTimeHour, sActualTimeHour, sVisualTimeHalfHour, sActualTimeHalfHour;
+      ostringstream ssVisualTimeHour, ssActualTimeHour, ssVisualTimeHalfHour, ssActualTimeHalfHour;
+      
+      // Show midnight as 12:00 AM
+      if (i == 0)
+	iVisualTimeIndex = 12;
+
+      // Construct the streams
+      ssVisualTimeHour << iVisualTimeIndex << ":" << "00 PM";
+      ssActualTimeHour << i+12 << ":" << "00";
+      ssVisualTimeHalfHour << iVisualTimeIndex << ":" << "30 PM";
+      ssActualTimeHalfHour << i+12 << ":" << "30";
+
+      // Build the strings.
+      sVisualTimeHour = ssVisualTimeHour.str();
+      sActualTimeHour = ssActualTimeHour.str();
+      sVisualTimeHalfHour = ssVisualTimeHalfHour.str();
+      sActualTimeHalfHour = ssVisualTimeHalfHour.str();
+
+      DataGridCell *pCellHour = new DataGridCell(sVisualTimeHour,sActualTimeHour);
+      pCellHour->m_Colspan = 12;
+      pCellHour->m_mapAttributes["timeslot"] = sVisualTimeHour;
+      DataGridCell *pCellHalfHour = new DataGridCell(sVisualTimeHalfHour,sActualTimeHalfHour);
+      pCellHalfHour->m_mapAttributes["timeslot"] = sVisualTimeHour;
+      pCellHalfHour->m_Colspan = 12;
+
+      pDataGridTable->SetData(i, iTimeColumn, pCellHour);
+      iTimeColumn += 6;
+      pDataGridTable->SetData(i, iTimeColumn, pCellHalfHour);
+      iTimeColumn += 6;
+
+    }
+
+  // Do the channels.
+  for (ListMythChannel::iterator it=m_ListMythChannel.begin();it!=m_ListMythChannel.end();++it)
+    {
+      MythChannel *pMythChannel = *it;
+      string sChannelName = StringUtils::itos(pMythChannel->m_dwChanNum) + " "+pMythChannel->m_sShortName;
+      pMythChannel->m_pCell = new DataGridCell(sChannelName,"i"+StringUtils::itos(pMythChannel->m_dwID));
+      pMythChannel->m_pCell->m_mapAttributes["Name"] = sChannelName;
+    }
+
+  // Grab the current channels and programs for current time.
+  string sCurrentSQL = "SELECT chanid, title, starttime, endtime, seriesid, programid"
+    "FROM program "
+    "WHERE starttime < '"+StringUtils::SQLDateTime()+
+    "' AND endtime > '"+StringUtils::SQLDateTime()+"'";
+
+  PlutoSqlResult result;
+  DB_ROW row;
+
+  if ( ( result.r=m_pDBHelper_Myth->db_wrapper_query_result(sCurrentSQL) ) != NULL  )
+    {
+      // Rows were returned, process them
+      while ((row = db_wrapper_fetch_row(result.r)))
+	{
+	  MythChannel *pMythChannel = m_mapMythChannel_Find(atoi(row[0])); // row[0] is chanid
+	  if ( !pMythChannel || !pMythChannel->m_pCell )
+	    continue;  // Technically, shouldn't happen.
+
+	  // Append the current show to the end of the channel description. 
+	  pMythChannel->m_pCell->SetText( string(pMythChannel->m_pCell->GetText()) + row[1] );
+
+	  // If Channel picture is attached, use it.
+	  if ( pMythChannel->m_pPic )
+	    {
+	      char *pPic = new char[ pMythChannel->m_Pic_size ];
+	      memcpy(pPic, pMythChannel->m_pPic, pMythChannel->m_Pic_size);
+	      pMythChannel->m_pCell->SetImage( pPic, pMythChannel->m_Pic_size, GR_JPG );
+	    }
+
+	  // Set Channel and Show attributes in this data grid cell.
+	  string sChannelID = (NULL != row[0] ? row[0] : "");
+	  string sShowTitle = (NULL != row[1] ? row[1] : "");
+
+	  pMythChannel->m_pCell->m_mapAttributes["ChannelID"] = sChannelID;
+	  pMythChannel->m_pCell->m_mapAttributes["ShowTitle"] = sShowTitle;
+
+	  // FIXME: Come back here and write code for Channel bookmarks!
+	  
+	}
+      
+      int iRow = 1;
+
+      // And finally, slap all the channels into the cells in our pDataGridTable
+      for (ListMythChannel::iterator it=m_ListMythChannel.begin();it!=m_ListMythChannel.end();++it)
+	{
+	  MythChannel *pMythChannel = *it;
+	  if ( pMythChannel->m_pCell )
+	    pDataGridTable->SetData(0, iRow++, pMythChannel->m_pCell);
+	}
+
+    }
+
+  return pDataGridTable;
+
 }
 
 // The shows on a given channel
