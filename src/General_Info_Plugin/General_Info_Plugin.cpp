@@ -4111,3 +4111,74 @@ void General_Info_Plugin::CMD_Get_Home_Symlink(string sPath,string *sSymlink,str
 
 	*sSymlink = sResult;
 }
+//<-dceag-c956-b->
+
+	/** @brief COMMAND: #956 - Get Devices To Start */
+	/** Get the list with devices to start. */
+		/** @param #2 PK_Device */
+			/** The parent device */
+		/** @param #5 Value To Assign */
+			/** A pipe delimited list like this: DeviceID1|TemplateName1|CommandLine1\nDeviceID2|DeviceTemplateName2|CommandLine2 etc */
+
+void General_Info_Plugin::CMD_Get_Devices_To_Start(int iPK_Device,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
+{
+}
+//<-dceag-c956-e->
+//<-dceag-c957-b->
+
+	/** @brief COMMAND: #957 - Update Device */
+	/** Will update the description, ip, mac, device data */
+		/** @param #2 PK_Device */
+			/** Device ID */
+		/** @param #47 Mac address */
+			/** Mac address */
+		/** @param #57 PK_Room */
+			/** Room ID */
+		/** @param #58 IP Address */
+			/** IP address */
+		/** @param #109 Data String */
+			/** pipe delimited list with device data */
+		/** @param #163 Description */
+			/** Device description */
+
+void General_Info_Plugin::CMD_Update_Device(int iPK_Device,string sMac_address,int iPK_Room,string sIP_Address,string sData_String,string sDescription,string &sCMD_Result,Message *pMessage)
+//<-dceag-c957-e->
+{
+}
+//<-dceag-c1075-b->
+
+	/** @brief COMMAND: #1075 - Send Email */
+	/** Send an email in response to events. */
+		/** @param #282 To */
+			/** Who does the message go to? */
+		/** @param #283 Subject */
+			/** Synopsis of what happened. */
+		/** @param #284 MessageBody */
+			/** Details about the event. */
+
+void General_Info_Plugin::CMD_Send_Email(string sTo,string sSubject,string sMessageBody,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1075-e->
+{
+        cout << "Need to implement command #1075 - Send Email" << endl;
+        cout << "Parm #282 - To=" << sTo << endl;
+        cout << "Parm #283 - Subject=" << sSubject << endl;
+        cout << "Parm #284 - MessageBody=" << sMessageBody << endl;
+
+        // Write our messagebody to a file
+        ofstream myfile ("/tmp/MessageBody.tmp");
+        if (myfile.is_open()){
+        myfile << sMessageBody.c_str();
+        myfile.close();
+        }
+
+        // Build our command
+        string sCommand = "mailx -s \"" + sSubject + "\" \"" + sTo + "\" < /tmp/MessageBody.tmp";
+
+        // Send our command
+        system(sCommand.c_str());
+
+	// Clean up
+	sCommand = "rm /tmp/MessageBody.tmp";
+
+	system(sCommand.c_str());
+}
