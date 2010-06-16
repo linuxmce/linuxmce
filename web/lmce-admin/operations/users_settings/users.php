@@ -100,7 +100,7 @@ function users($output,$dbADO) {
 						<td align="center">
 							<table width="100%">
 								<tr bgcolor="#DFDFDF">
-									<td align="center"><B>'.$TEXT_VOICEMAIL_CONST.'<br>+'.$TEXT_EMAIL_CONST.'</B></td>
+									<td align="center"><B>'.$TEXT_VOICEMAIL_CONST.' + '.$TEXT_EMAIL_CONST.'</B></td>
 								</tr>
 								<tr>
 									<td align="center"><input type="checkbox" name="userHasMailbox_'.$rowUser['PK_Users'].'" value="1" '.($rowUser['HasMailbox']?" checked='checked' ":'').'></td>
@@ -116,7 +116,14 @@ function users($output,$dbADO) {
 								</tr>
 								<tr>
 									<td align="center"><input type="text" name="userExtension_'.$rowUser['PK_Users'].'" value="'.$rowUser['Extension'].'"></td>
-								</tr>	
+								</tr>
+                                                                <tr bgcolor="#DFDFDF">
+                                                                        <td align="center"><B>'.$TEXT_EMAIL_ADDRESS_CONST.'</B></td>
+                                                                </tr>
+                                                                <tr>
+				                                        <td align="center"><input type="text" name="userEmailAddress_'.$rowUser['PK_Users'].'" value="'.$rowUser['ForwardEmail'].'"></td>
+                                                                </tr>
+
 							</table>
 						</td>
 						<td>
@@ -263,7 +270,7 @@ function users($output,$dbADO) {
 				$userNickname = cleanString($_POST['userNickname_'.$user]);
 
 				$userExtension = cleanString($_POST['userExtension_'.$user]);
-
+				$userEmailAddress = cleanString($_POST['userEmailAddress_'.$user]);
 
 				$userCanModifyInstallation = cleanInteger(@$_POST['userCanModifyInstallation_'.$user]);
 				$userCanChangeHouseMode= cleanInteger(@$_POST['userCanChangeHouseMode_'.$user]);
@@ -276,6 +283,7 @@ function users($output,$dbADO) {
 									HasMailbox =?,
 									AccessGeneralMailbox =?,
 									Extension=?,
+									ForwardEmail=?,
 									FirstName=?,
 									LastName=?,
 									Nickname=?,
@@ -283,7 +291,7 @@ function users($output,$dbADO) {
 									HideFromOrbiter=?
 							WHERE PK_Users = ?';
 				$resUpdUser = $dbADO->Execute($query,array($hasMailbox,$userAccessGeneralMailbox,
-				$userExtension,$userFirstName,$userLastName,$userNickname,
+				$userExtension,$userEmailAddress,$userFirstName,$userLastName,$userNickname,
 				$userLanguage,$HideFromOrbiter,$user));
 
 				// if the user is current user, update session variables

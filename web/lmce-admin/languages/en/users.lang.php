@@ -5,6 +5,7 @@ $TEXT_USER_CHANGE_PASSWORD_CONST='Change Password';
 $TEXT_USER_CHANGE_PIN_CONST='Change PIN';
 $TEXT_UPLOAD_PICTURE_CONST='Upload picture';
 $TEXT_ACCESS_GENERAL_MAILBOX_CONST='Access general mailbox';
+$TEXT_EMAIL_ADDRESS_CONST='Email Address';
 $TEXT_EXTENSION_FOR_INTERCOM_CONST='Extension for intercom';
 $TEXT_HIDE_FROM_ORBITER_CONST='Hide From Orbiter';
 $TEXT_CAN_MODIFY_CONFIGURATION_CONST='Master User (can modify configuration)?';
