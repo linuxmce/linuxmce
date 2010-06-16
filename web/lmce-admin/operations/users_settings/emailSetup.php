@@ -5,10 +5,10 @@ function emailSetup($output,$dbADO) {
         include(APPROOT.'/languages/'.$GLOBALS['lang'].'/emailSetup.lang.php');
 
 	// If the settings have been selected go ahead and process them
-	if(!empty($_POST["name"]) && ($_POST["strEmail"]) && ($_POST["password"]) && ($_POST[emailservice])) {
-		$name = $_POST["name"];
-		$email = $_POST["strEmail"]; 
-		$password = $_POST["password"]; 
+	if(!empty($_POST["emailName"]) && ($_POST["emailAddress"]) && ($_POST["emailPassword"]) && ($_POST[emailservice])) {
+		$name = $_POST["emailName"];
+		$email = $_POST["emailAddress"]; 
+		$password = $_POST["emailPassword"]; 
 		$emailservice = $_POST["emailservice"];
 
 		// Lookup the installationID
@@ -73,8 +73,10 @@ function emailSetup($output,$dbADO) {
 		}
 		
 		// Call our script to setup postfix using our settings
-		//system("sudo /usr/pluto/bin/Configure_Postfix_interactive.sh '$name' '$email' '$password' '$mta' '$port' '$tls' '$org' '$state' '$selectedCountry'",$retval);
-		exec("/usr/pluto/bin/Configure_Postfix_interactive.sh '$name' '$email' '$password' '$mta' '$port' '$tls' '$org' '$state' '$selectedCountry'");
+		// system("sudo -u root /usr/pluto/bin/Configure_Postfix_interactive.sh '$name' '$email' '$password' '$mta' '$port' '$tls' '$org' '$state' '$selectedCountry' '$emailservice'",$retval);
+		exec("sudo -u root /usr/pluto/bin/Configure_Postfix_interactive.sh '$name' '$email' '$password' '$mta' '$port' '$tls' '$org' '$state' '$selectedCountry' '$emailservice'");
+
+		// echo "$retval <br />";
 
 		// Uncomment to print our settings for debugging
 		// echo "<br />Name  $name <br />";
@@ -122,7 +124,7 @@ function emailSetup($output,$dbADO) {
 	}
 
 	// Display any status messages we have for the user
-	if(!empty($_POST["name"]) && ($_POST["strEmail"]) && ($_POST["password"]) && ($_POST[emailservice])) {
+	if(!empty($_POST["emailName"]) && ($_POST["emailAddress"]) && ($_POST["emailPassword"]) && ($_POST[emailservice])) {
 	$out='
 	<div class="confirm" align="center"><B>'.$TEXT_SAVED_CONST.'</B></div>.';
 	}
@@ -141,9 +143,9 @@ function emailSetup($output,$dbADO) {
 		<option value = "yahoo" '.$yahoo.'>'.$TEXT_YAHOO_CONST.'</option>
 		<option value = "other" '.$other.'>'.$TEXT_OTHER_CONST.'</option>
 		</td></tr>
-	<tr><td><B>'.$TEXT_NAMEFIRSTLAST_CONST.'</B></td><td><input type="text" name="name" value="'.$_POST["name"].'" /></td></tr>
-	<tr><td><B>'.$TEXT_EMAILADDRESS_CONST.'</B></td><td><input type="text" name="strEmail" value="'.$_POST["strEmail"].'" /></td></tr>
-	<tr><td><B>'.$TEXT_EMAILPASSWORD_CONST.'</B></td><td><input type="password" name="password" /></td></tr>.';
+	<tr><td><B>'.$TEXT_NAMEFIRSTLAST_CONST.'</B></td><td><input type="text" name="emailName" value="'.$_POST["emailName"].'" /></td></tr>
+	<tr><td><B>'.$TEXT_EMAILADDRESS_CONST.'</B></td><td><input type="text" name="emailAddress" value="'.$_POST["emailAddress"].'" /></td></tr>
+	<tr><td><B>'.$TEXT_EMAILPASSWORD_CONST.'</B></td><td><input type="password" name="emailPassword" /></td></tr>.';
 
 	// Check if other is selected and if so, display some other options
 	if($serviceselected=="other") {
