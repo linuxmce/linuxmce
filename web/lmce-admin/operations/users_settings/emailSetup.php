@@ -73,10 +73,13 @@ function emailSetup($output,$dbADO) {
 		}
 		
 		// Call our script to setup postfix using our settings
-		// system("sudo -u root /usr/pluto/bin/Configure_Postfix_interactive.sh '$name' '$email' '$password' '$mta' '$port' '$tls' '$org' '$state' '$selectedCountry' '$emailservice'",$retval);
-		exec("sudo -u root /usr/pluto/bin/Configure_Postfix_interactive.sh '$name' '$email' '$password' '$mta' '$port' '$tls' '$org' '$state' '$selectedCountry' '$emailservice'");
+		$cmd="sudo -u root /usr/pluto/bin/Configure_Postfix_interactive.sh '$name' '$email' '$password' '$mta' '$port' '$tls' '$org' '$state' '$selectedCountry' '$emailservice'";
+		$response=exec_batch_command($cmd,1);
 
-		// echo "$retval <br />";
+		// TODO: Parse out the status= and display either a positive status to the user that the message was sent successfully or the error
+
+		// Uncomment to print the output of the command for debugging
+		echo $response;
 
 		// Uncomment to print our settings for debugging
 		// echo "<br />Name  $name <br />";
