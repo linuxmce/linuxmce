@@ -97,6 +97,8 @@ sub CheckMythTVStorageGroup
 	## Parameters 
 	## 1 - path
 	## 2 - groupname
+	## 3 - hostname
+
 	my $path=shift;
 	my $name=shift;
 	my $host=shift;
@@ -104,6 +106,9 @@ sub CheckMythTVStorageGroup
 	#Exit if mythtv is not installed
 	return unless $MythTV_Installed;
 	
+	#truncate the group name to 32 chars so it fits the field size in the database
+	$name = substr($name,0,32) if (length($name) > 32);
+
 	print "Checking MythTV storage group $name for host $host...";
 	$sql="SELECT count(*) AS count FROM storagegroup  WHERE groupname='$name' AND hostname='$host' and dirname='$path'";
 	my @results = RunSQL($sql);
@@ -162,8 +167,6 @@ if ($CommaSeparatedDeviceList eq '') {
 		FK_DeviceData = $DD_USERS
 		AND
 		IK_DeviceData LIKE '%-1%'
-		AND
-		FK_Device_ControlledVia = '$PK_Device'
 	ORDER BY PK_Device
 	";
 	@results=RunSQL($sql);
@@ -290,8 +293,8 @@ foreach my $hostName (@hostNames) {
 		} 
 
 		#public storage groups
-		CheckMythTVStorageGroup("/home/public/data/pvr/$Device_Description [$Device_ID]","Default","$hostName");      #Put the special "Default" storage group in. 
-		CheckMythTVStorageGroup("/home/public/data/pvr/$Device_Description [$Device_ID]/livetv","LiveTV","$hostName");       #Put the special "LiveTV" storage group into the moons root pvr* directory	
+		CheckMythTVStorageGroup("/home/public/data/pvr/$Device_Description [$Device_ID]","Default: $Device_Description [$Device_ID]","$hostName");      #Put the special "Default" storage group in. 
+		CheckMythTVStorageGroup("/home/public/data/pvr/$Device_Description [$Device_ID]/livetv","LiveTV: $Device_Description [$Device_ID]","$hostName");       #Put the special "LiveTV" storage group into the moons root pvr* directory	
 		CheckMythTVStorageGroup("/home/public/data/pvr/$Device_Description [$Device_ID]","public: $Device_Description [$Device_ID]","$hostName");
 
 
