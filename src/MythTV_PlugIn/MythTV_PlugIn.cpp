@@ -654,9 +654,9 @@ class DataGridTable *MythTV_PlugIn::PVREPGGrid(string GridID, string Parms, void
       DataGridCell *pCellHalfHour = new DataGridCell(sVisualTimeHalfHour,sActualTimeHalfHour);
       pCellHalfHour->m_Colspan = 12;
 
-      pDataGridTable->SetData(i, iTimeColumn, pCellHour);
+      pDataGridTable->SetData(iTimeColumn, 0, pCellHour);
       iTimeColumn += 6;
-      pDataGridTable->SetData(i, iTimeColumn, pCellHalfHour);
+      pDataGridTable->SetData(iTimeColumn, 0, pCellHalfHour);
       iTimeColumn += 6;
 
     }
@@ -691,9 +691,9 @@ class DataGridTable *MythTV_PlugIn::PVREPGGrid(string GridID, string Parms, void
       pCellHalfHour->m_mapAttributes["timeslot"] = sVisualTimeHour;
       pCellHalfHour->m_Colspan = 12;
 
-      pDataGridTable->SetData(i, iTimeColumn, pCellHour);
+      pDataGridTable->SetData(iTimeColumn, 0, pCellHour);
       iTimeColumn += 6;
-      pDataGridTable->SetData(i, iTimeColumn, pCellHalfHour);
+      pDataGridTable->SetData(iTimeColumn, 0, pCellHalfHour);
       iTimeColumn += 6;
 
     }
