@@ -121,6 +121,8 @@ function viewDatalog($output,$dbADO){
 	  $out = $out.'<p>No devices selected for graph display</p>';
 	}
 
+     $out.='</form>';
+
 	$output->setBody($out);
 	$output->setMenuTitle($TEXT_ADVANCED_CONST.' |');
 	$output->setPageTitle("Data Logger");
