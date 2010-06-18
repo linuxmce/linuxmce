@@ -36,6 +36,7 @@ unless (defined($ARGV[0]) && defined($ARGV[1]) && defined($ARGV[2]))
 `chmod g+w /etc/asterisk/*`;
 #add local prefixes
 &get_local_prefixes();
+&open_firewallports();
 
 $DECLARED_USERNAME=$ARGV[0];
 $DECLARED_USERPASSWD=$ARGV[1];
@@ -186,6 +187,34 @@ sub get_local_prefixes()
         $LOCAL_PREFIX2 .= $long."\n";
         $LOCAL_PREFIX2 .= "9|112\n9|411\n9|911\n";
         $LOCAL_PREFIX2 .= "9|".($digit<0?"":$digit).$long."\n";
-		$LOCAL_PREFIX2 .= "9|0.\n9|*.\n";		
+	$LOCAL_PREFIX2 .= "9|0.\n9|*.\n";		
     }
+}
+
+sub open_firewallports()
+{
+my $DB_PL_HANDLE;
+my $DB_STATEMENT;
+my $DB_SQL;
+my $DB_ROW;
+my $Port = 0;
+$DB_PL_HANDLE = DBI->connect(&read_pluto_cred()) or die "Can't connect to database: $DBI::errstr\n";
+
+    $DB_SQL = "select SourcePort from Firewall where SourcePort = '5070' and Protocol = 'tcp'";
+    $DB_STATEMENT = $DB_PL_HANDLE->prepare($DB_SQL) or die "Couldn't prepare query '$DB_SQL': $DBI::errstr\n";
+    $DB_STATEMENT->execute() or die "Couldn't execute query '$DB_SQL': $DBI::errstr\n";
+    while($DB_ROW = $DB_STATEMENT->fetchrow_hashref())
+    { $Port = $DB_ROW->{'SourcePort'}; }
+    $DB_STATEMENT->finish();
+    if($Port != 5070)
+		{
+		  $DB_SQL = "insert into Firewall (Protocol,SourcePort,RuleType) values ('tcp','5070','core_input');";
+            	  $DB_STATEMENT = $DB_PL_HANDLE->prepare($DB_SQL) or die "Couldn't prepare query '$DB_SQL': $DBI::errstr\n";
+            	  $DB_STATEMENT->execute() or die "Couldn't execute query '$DB_SQL': $DBI::errstr\n";
+            	  $DB_STATEMENT->finish();
+            	  $DB_SQL = "insert into Firewall (Protocol,SourcePort,RuleType) values ('udp','5070','core_input');";
+            	  $DB_STATEMENT = $DB_PL_HANDLE->prepare($DB_SQL) or die "Couldn't prepare query '$DB_SQL': $DBI::errstr\n";
+            	  $DB_STATEMENT->execute() or die "Couldn't execute query '$DB_SQL': $DBI::errstr\n";
+            	  $DB_STATEMENT->finish();
+		}
 }
