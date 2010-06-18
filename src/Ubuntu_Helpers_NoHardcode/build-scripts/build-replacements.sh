@@ -243,6 +243,7 @@ function Build_Replacements_Intrepid
 #	Build_Replacement_Package vdr-plugin-xineliboutput ubuntu/vdr-plugin-xineliboutput-1.0.4+cvs20091215.2049
 	Build_Replacement_Package vdr-plugin-xineliboutput ubuntu/vdr-plugin-xineliboutput-1.0.6+cvs20100608.2009
 	Build_Replacement_Package vdr-plugin-wirbelscan ubuntu/vdr-plugin-wirbelscan-0.0.5~pre12a
+	Build_Replacement_Package vdr-plugin-iptv ubuntu/vdr-plugin-iptv-0.4.2
 
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/libxine*.deb ${replacements_dir}
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/xineliboutput-*.deb ${replacements_dir}
