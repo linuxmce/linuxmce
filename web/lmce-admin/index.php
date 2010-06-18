@@ -1019,6 +1019,13 @@ switch ($section) {
             $output->setHelpSrc('/wiki/index.php/DataLogger');
             viewDatalog($output,$dbADO);
         break;
+        case 'energyMonitor';
+                $output = new Template($dbADO);
+                $output->setTemplateFileType('large');
+            include_once('operations/datalog/energyMonitor.php');
+            $output->setHelpSrc('/wiki/index.php/energyMonitor');
+            energyMonitor($output,$dbADO);
+        break;
 	case 'pickScenario';
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('small');
