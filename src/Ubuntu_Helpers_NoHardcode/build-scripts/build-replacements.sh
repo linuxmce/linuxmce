@@ -157,6 +157,8 @@ function Build_Replacements_Intrepid
 	fi
 
         #Package: libxine 	
+	# Latest xine version
+#	Build_Replacement_Package libxine ubuntu/xine-lib-1.1.17
 	# niz version
 #	Build_Replacement_Package libxine ubuntu/xine-lib-1.1.16.3-0ubuntu2~xine 
 #	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/libxine1_*.deb \
@@ -221,19 +223,27 @@ function Build_Replacements_Intrepid
 	
 	DisplayMessage "Building VDR packages and plugins"
 	export PATCHVARIANT=multipatch
-	Build_Replacement_Package vdr ubuntu/vdr-1.7.11
+	Build_Replacement_Package vdr ubuntu/vdr-1.7.15
 	# To build the plugins, we need to have the current -dev package installed
 	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/vdr-dev_*.deb
 	
 	Build_Replacement_Package vdr-plugin-control ubuntu/vdr-plugin-control-0.0.2a
 	Build_Replacement_Package vdr-plugin-svdrpservice ubuntu/vdr-plugin-svdrpservice-0.0.4
+	# Before installing svdrservce-dev vdr needs to be installed
+	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/vdr_*.deb
+	/etc/init.d/vdr stop
 	# The dev package needs to be installed to build the remote timers plugin.
+	
         dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/svdrpservice-dev_*.deb
-	Build_Replacement_Package vdr-plugin-remotetimers ubuntu/vdr-plugin-remotetimers-0.1.2
+	Build_Replacement_Package vdr-plugin-remotetimers ubuntu/vdr-plugin-remotetimers-0.1.3
 	Build_Replacement_Package vdr-plugin-streamdev ubuntu/vdr-plugin-streamdev-0.5.0~pre20090706+cvs20091108.2341
+#	Build_Replacement_Package vdr-plugin-streamdev ubuntu/vdr-plugin-streamdev-0.5.0~pre20090706+cvs20100307.2102
 	Build_Replacement_Package vdr-plugin-vompserver ubuntu/vdr-plugin-vompserver-0.3.1
 	Build_Replacement_Package vdr-addon-noad ubuntu/vdr-addon-noad-0.7.2
-	Build_Replacement_Package vdr-plugin-xineliboutput ubuntu/vdr-plugin-xineliboutput-1.0.4+cvs20091215.2049
+#	Build_Replacement_Package vdr-plugin-xineliboutput ubuntu/vdr-plugin-xineliboutput-1.0.4+cvs20091215.2049
+	Build_Replacement_Package vdr-plugin-xineliboutput ubuntu/vdr-plugin-xineliboutput-1.0.6+cvs20100608.2009
+	Build_Replacement_Package vdr-plugin-wirbelscan ubuntu/vdr-plugin-wirbelscan-0.0.5~pre12a
+
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/libxine*.deb ${replacements_dir}
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/xineliboutput-*.deb ${replacements_dir}
 
