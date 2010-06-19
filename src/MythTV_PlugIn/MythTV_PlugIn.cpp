@@ -52,6 +52,8 @@ using namespace DCE;
 #include "../Orbiter_Plugin/OH_Orbiter.h"
 
 #include <sstream>
+#include <math.h>
+#include <time.h>
 
 static const string SCRIPT_DIR =             "/usr/pluto/bin";
 static const string SCRIPT_SYNC_TO_DB =      SCRIPT_DIR + "/MythTvSyncDB.sh";
@@ -615,7 +617,7 @@ class DataGridTable *MythTV_PlugIn::PVREPGGrid(string GridID, string Parms, void
     }
   
   // Row 0 column 0 is a blank 'shim' column.
-  DataGridCell *pShimColumn = new DataGridCell("","");
+  DataGridCell *pShimColumn = new DataGridCell("2010\nJun 17","");
   pDataGridTable->SetData(0,0,pShimColumn);
 
   // Do the time columns.
@@ -650,9 +652,9 @@ class DataGridTable *MythTV_PlugIn::PVREPGGrid(string GridID, string Parms, void
       sActualTimeHalfHour = ssVisualTimeHalfHour.str();
 
       DataGridCell *pCellHour = new DataGridCell(sVisualTimeHour,sActualTimeHour);
-      pCellHour->m_Colspan = 12;
+      pCellHour->m_Colspan = 6;
       DataGridCell *pCellHalfHour = new DataGridCell(sVisualTimeHalfHour,sActualTimeHalfHour);
-      pCellHalfHour->m_Colspan = 12;
+      pCellHalfHour->m_Colspan = 6;
 
       pDataGridTable->SetData(iTimeColumn, 0, pCellHour);
       iTimeColumn += 6;
@@ -685,11 +687,11 @@ class DataGridTable *MythTV_PlugIn::PVREPGGrid(string GridID, string Parms, void
       sActualTimeHalfHour = ssVisualTimeHalfHour.str();
 
       DataGridCell *pCellHour = new DataGridCell(sVisualTimeHour,sActualTimeHour);
-      pCellHour->m_Colspan = 12;
+      pCellHour->m_Colspan = 6;
       pCellHour->m_mapAttributes["timeslot"] = sVisualTimeHour;
       DataGridCell *pCellHalfHour = new DataGridCell(sVisualTimeHalfHour,sActualTimeHalfHour);
       pCellHalfHour->m_mapAttributes["timeslot"] = sVisualTimeHour;
-      pCellHalfHour->m_Colspan = 12;
+      pCellHalfHour->m_Colspan = 6;
 
       pDataGridTable->SetData(iTimeColumn, 0, pCellHour);
       iTimeColumn += 6;
@@ -708,7 +710,7 @@ class DataGridTable *MythTV_PlugIn::PVREPGGrid(string GridID, string Parms, void
     }
 
   // Grab the current channels and programs for current time.
-  string sCurrentSQL = "SELECT chanid, title, starttime, endtime, seriesid, programid"
+  string sCurrentSQL = "SELECT chanid, title, starttime, endtime, seriesid, programid "
     "FROM program "
     "WHERE starttime < '"+StringUtils::SQLDateTime()+
     "' AND endtime > '"+StringUtils::SQLDateTime()+"'";
@@ -728,6 +730,8 @@ class DataGridTable *MythTV_PlugIn::PVREPGGrid(string GridID, string Parms, void
 	  // Append the current show to the end of the channel description. 
 	  pMythChannel->m_pCell->SetText( string(pMythChannel->m_pCell->GetText()) + row[1] );
 
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Row: %s %s",row[0],row[1]);
+
 	  // If Channel picture is attached, use it.
 	  if ( pMythChannel->m_pPic )
 	    {
@@ -746,7 +750,9 @@ class DataGridTable *MythTV_PlugIn::PVREPGGrid(string GridID, string Parms, void
 	  // FIXME: Come back here and write code for Channel bookmarks!
 	  
 	}
-      
+     
+       m_vectRowToChannels.push_back(0); // First row is empty.
+    
       int iRow = 1;
 
       // And finally, slap all the channels into the cells in our pDataGridTable
@@ -754,13 +760,117 @@ class DataGridTable *MythTV_PlugIn::PVREPGGrid(string GridID, string Parms, void
 	{
 	  MythChannel *pMythChannel = *it;
 	  if ( pMythChannel->m_pCell )
-	    pDataGridTable->SetData(0, iRow++, pMythChannel->m_pCell);
+	    { 
+	      pDataGridTable->SetData(0, iRow++, pMythChannel->m_pCell);
+	      m_vectRowToChannels.push_back(pMythChannel->m_dwID);
+	    } 
 	}
 
     }
 
+  // Now, fill in the guide data in the middle. For now, this query is fixed to today
+  // so that I can work on the column span logic.
+  
+  string sGuideSQL = "SELECT * from program WHERE starttime > '2010-06-17' AND starttime < '2010-06-18'";
+
+  if ( ( result.r=m_pDBHelper_Myth->db_wrapper_query_result(sGuideSQL) ) != NULL  )
+    {
+      // Rows were returned, process them
+      int iRow = 1;
+      while ((row = db_wrapper_fetch_row(result.r)))
+	{
+	  // row[0] = channel ID
+	  // row[1] = starttime
+	  // row[2] = endtime
+	  // row[3] = title
+	  // row[4] = subtitle
+	  // row[5] = description	
+	  // row[6] = category (Comedy)
+	  // row[7] = category_type (series or blank)
+	  // row[8] = airdate
+	  // row[9] = stars
+	  // row[10] = previouslyshown (boolean)
+	  // row[11] = title_pronounce (???)
+	  // row[12] = stereo (boolean)
+	  // row[13] = subtitled (boolean)
+	  // row[14] = hdtv (boolean)
+	  // row[15] = closedcaptioned (boolean)
+	  // row[16] = partnumber (x of y)
+	  // row[17] = parttotal
+	  // row[18] = seriesID
+	  // row[19] = original Airdate
+	  // row[20] = showtype (Series)
+	  // row[21] = colorcode (???)
+	  // row[22] = syndicated episode number
+	  // row[23] = program ID
+	  // row[24] = manual ID
+	  // row[25] = generic (boolean)
+	  // row[26] = listing source (mythtv-setup)
+	  // row[27] = First
+	  // row[28] = Last occurance
+	  // row[29] = subtitletypes
+	  // row[30] = videoprop
+
+	  string sChannelID = row[0];
+	  string sStartTime = row[1];
+	  string sEndTime = row[2];
+	  string sShowTitle = row[3]; // FIXME: come back and handle show subtitles.
+	  string sShowID = sChannelID + "|" + sStartTime + "|" + sEndTime;
+	  int iTargetRow = FindTargetRowForChanID(sChannelID);
+	  int iTargetColumn = FindTargetColForStartTime(sStartTime);
+	  int iColSpan = FindColSpanForEndTime(sStartTime, sEndTime);
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"sChannelID %s sStartTime %s sEndTime %s sShowTitle %s iTargetRow %i iTargetColumn %i iColSpan %i",sChannelID.c_str(), sStartTime.c_str(), sEndTime.c_str(), sShowTitle.c_str(), iTargetRow, iTargetColumn, iColSpan);
+	  DataGridCell *pCell = new DataGridCell(sShowTitle, sShowID);
+	  pCell->m_Colspan = iColSpan;
+	  pDataGridTable->SetData(iTargetColumn,iTargetRow,pCell);
+	  iRow++;
+	}
+      
+    }
+
   return pDataGridTable;
 
+}
+
+int MythTV_PlugIn::FindTargetRowForChanID(string sChannelID)
+{
+	MythChannel *pMythChannel = m_mapMythChannel_Find(atoi(sChannelID.c_str()));
+	int iChan = pMythChannel->m_dwID;
+	
+	vector<int>::iterator it;
+
+	int iRow = 0;
+	for (it = m_vectRowToChannels.begin(); it != m_vectRowToChannels.end(); ++it)
+	{
+		if (*it == iChan)
+			return iRow;
+
+		iRow++; 
+	} 
+}
+
+int MythTV_PlugIn::FindTargetColForStartTime(string sStartTime)
+{
+	time_t tvStartTime = StringUtils::SQLDateTime(sStartTime);
+	struct tm t;
+	localtime_r(&tvStartTime,&t);
+	int hourColumn = t.tm_hour * 12;
+	int minuteColumn = floor(t.tm_min/5);
+	int columnStartTime = hourColumn+minuteColumn + 1;   // + 1 is the Channel Column
+	return columnStartTime;
+}
+
+int MythTV_PlugIn::FindColSpanForEndTime(string sStartTime, string sEndTime)
+{
+	time_t tvEndTime = StringUtils::SQLDateTime(sEndTime);
+	struct tm t;
+	localtime_r(&tvEndTime,&t);
+	int startColumn = FindTargetColForStartTime(sStartTime); 
+	int endHourColumn = t.tm_hour * 12;
+	int endMinuteColumn = floor(t.tm_min/5);
+	int endColumn = endHourColumn+endMinuteColumn;
+	int colspan = endColumn - startColumn + 1;	// + 1 is the Channel column
+	return colspan;
 }
 
 // The shows on a given channel

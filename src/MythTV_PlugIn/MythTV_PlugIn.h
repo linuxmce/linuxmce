@@ -201,6 +201,13 @@ public:
 	/** A traditional EPG Grid */
 	class DataGridTable *PVREPGGrid(string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, Message *pMessage);
 
+	/** The EPG Helper Functions */
+	int FindTargetRowForChanID(string sChannelID);
+	int FindTargetColForStartTime(string sStartTime);
+	int FindColSpanForEndTime(string sStartTime, string sEndTime);
+
+	vector<int> m_vectRowToChannels;
+
         /** The interceptor for the MediaInfoChangedEvent from the playing device */
     	bool MediaInfoChanged( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
 
