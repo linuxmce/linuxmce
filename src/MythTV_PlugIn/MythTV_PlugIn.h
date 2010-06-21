@@ -151,6 +151,7 @@ namespace DCE
 		MapBookmark *m_mapSeriesBookmarks_Find(string sSeries) { map<string,MapBookmark *>::iterator it = m_mapSeriesBookmarks.find(sSeries); return it==m_mapSeriesBookmarks.end() ? NULL : (*it).second; }
 		MapBookmark *m_mapProgramBookmarks_Find(string sProgram) { map<string,MapBookmark *>::iterator it = m_mapProgramBookmarks.find(sProgram); return it==m_mapProgramBookmarks.end() ? NULL : (*it).second; }
 
+
         /** Private methods */
     public:
         /** Public member variables */
@@ -192,6 +193,8 @@ public:
 
 		MythTvMediaStream* ConvertToMythMediaStream(MediaStream *pMediaStream, string callerIdMessage = "");
 
+	void BuildCategoryColors();
+
         /** Datagrids */
     	class DataGridTable *CurrentShows(string GridID,string Parms,void *ExtraData,int *iPK_Variable,string *sValue_To_Assign, class Message *pMessage);
 
@@ -203,9 +206,10 @@ public:
 
 	/** The EPG Helper Functions */
 	int FindTargetRowForChanID(string sChannelID);
-	int FindTargetColForStartTime(string sStartTime);
+	int FindTargetColForStartTime(string sStartTime, string sEndTime);
 	int FindColSpanForEndTime(string sStartTime, string sEndTime);
-
+	map<string, int> m_mapCategoryColors;	// Colors to Categories
+	int mapCategoryColor_Find(string sCategory) { map<string, int>::iterator it = m_mapCategoryColors.find(sCategory); return it==m_mapCategoryColors.end() ? 3165768 : (*it).second; }
 	vector<int> m_vectRowToChannels;
 
         /** The interceptor for the MediaInfoChangedEvent from the playing device */

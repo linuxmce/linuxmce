@@ -232,7 +232,89 @@ bool MythTV_PlugIn::Register()
 	m_pMythBackEnd_Socket = new MythBackEnd_Socket(this,m_pRouter->sDBHost_get( ));  // The master backend is on the same server as mysql
 	m_pMythBackEnd_Socket->Connect();
 
+	BuildCategoryColors();
+
     return Connect(PK_DeviceTemplate_get());
+}
+
+void MythTV_PlugIn::BuildCategoryColors()
+{
+	// for now, this is hardcoded until I do some databsae changes to pluto_myth -tschak
+	m_mapCategoryColors["Unknown"] = 3165768;
+	m_mapCategoryColors["Special"] = 1463685;
+	m_mapCategoryColors["Children"] = 2299525;
+	m_mapCategoryColors["House/garden"] = 4228374;
+	m_mapCategoryColors["Travel"] = 1475961;
+	m_mapCategoryColors["Educational"] = 1475922;
+	m_mapCategoryColors["Anthology"] = 6980886;
+	m_mapCategoryColors["News"] = 8721942;
+	m_mapCategoryColors["Talk"] = 8722044;
+	m_mapCategoryColors["Collectibles"] = 8722007;
+	m_mapCategoryColors["Documentary"] = 8732694;
+	m_mapCategoryColors["Home improvement"] = 4948062;
+	m_mapCategoryColors["Music"] = 7241803;
+	m_mapCategoryColors["Public affairs"] = 8416331;
+	m_mapCategoryColors["Cooking"] = 8142080;
+	m_mapCategoryColors["How-to"] = 31840;
+	m_mapCategoryColors["Interview"] = 1507452;
+	m_mapCategoryColors["Sitcom"] = 5374076;
+	m_mapCategoryColors["Drama"] = 7864444;
+	m_mapCategoryColors["Music special"] = 21116;
+	m_mapCategoryColors["Science"] = 31867;
+	m_mapCategoryColors["History"] = 8092672;
+	m_mapCategoryColors["Sports non-event"] = 40979;
+	m_mapCategoryColors["Shopping"] = 10519552;
+	m_mapCategoryColors["Religious"] = 10526880;
+	m_mapCategoryColors["Consumer"] = 12015104;
+	m_mapCategoryColors["Fantasy"] = 39066;
+	m_mapCategoryColors["Suspense"] = 5570560;
+	m_mapCategoryColors["Game show"] = 5746785;
+	m_mapCategoryColors["Crime Drama"] = 16648;
+	m_mapCategoryColors["Western"] = 8540160;
+	m_mapCategoryColors["Community"] = 33399;
+	m_mapCategoryColors["Entertainment"] = 3202;
+	m_mapCategoryColors["Bus./financial"] = 567552;
+	m_mapCategoryColors["Sports event"] = 423680;
+	m_mapCategoryColors["Newsmagazine"] = 8055;
+	m_mapCategoryColors["Sports talk"] = 7730;
+	m_mapCategoryColors["Reality"] = 7798784;
+	m_mapCategoryColors["Soap"] = 7798893;
+	m_mapCategoryColors["Health"] = 3897088;
+	m_mapCategoryColors["Action"] = 8131090;
+	m_mapCategoryColors["Science fiction"] = 4274446;
+	m_mapCategoryColors["Comedy"] = 3820938;
+	m_mapCategoryColors["Weather"] = 3836298;
+	m_mapCategoryColors["Romance-comedy"] = 9058953;
+	m_mapCategoryColors["Crime"] = 1109;
+	m_mapCategoryColors["Comedy-drama"] = 9324685;
+	m_mapCategoryColors["Musical comedy"] = 4755062;
+	m_mapCategoryColors["Animals"] = 149369984;
+	m_mapCategoryColors["Baseball"] = 3300920;
+	m_mapCategoryColors["Animated"] = 3294302;
+	m_mapCategoryColors["Holiday"] = 6173234;
+	m_mapCategoryColors["Mystery"] = 3092299;
+	m_mapCategoryColors["Musical"] = 4013960;
+	m_mapCategoryColors["Paranormal"] = 7032398;
+	m_mapCategoryColors["Nature"] = 5270350;
+	m_mapCategoryColors["Holiday Special"] = 7794327;
+	m_mapCategoryColors["Technology"] = 6384462;
+	m_mapCategoryColors["Adventure"] = 3822346;
+	m_mapCategoryColors["Exercise"] = 676666;
+	m_mapCategoryColors["Fundraiser"] = 669011;
+	m_mapCategoryColors["Biography"] = 676630;
+	m_mapCategoryColors["Variety"] = 4204112;
+	m_mapCategoryColors["War"] = 23398; 
+	m_mapCategoryColors["Horror"] = 10158080;
+	m_mapCategoryColors["Fashion"] = 7667867;
+	m_mapCategoryColors["Historical drama"] = 39804;
+	m_mapCategoryColors["Pro wrestling"] = 39702;
+	m_mapCategoryColors["Auction"] = 9870080;
+	m_mapCategoryColors["Auto"] = 23451;
+	m_mapCategoryColors["Motorcycle"] = 36507;
+	m_mapCategoryColors["Action sports"] = 4102912;
+	m_mapCategoryColors["Medical"] = 10158080;
+	m_mapCategoryColors["Politics"] = 4795436;
+	m_mapCategoryColors["Docudrama"] = 1382973;
 }
 
 void MythTV_PlugIn::BuildAttachedInfraredTargetsMap()
@@ -771,7 +853,7 @@ class DataGridTable *MythTV_PlugIn::PVREPGGrid(string GridID, string Parms, void
   // Now, fill in the guide data in the middle. For now, this query is fixed to today
   // so that I can work on the column span logic.
   
-  string sGuideSQL = "SELECT * from program WHERE starttime > '2010-06-17' AND starttime < '2010-06-18'";
+  string sGuideSQL = "SELECT * from program WHERE (endtime > '2010-06-20' AND endtime < '2010-06-21')";
 
   if ( ( result.r=m_pDBHelper_Myth->db_wrapper_query_result(sGuideSQL) ) != NULL  )
     {
@@ -815,13 +897,15 @@ class DataGridTable *MythTV_PlugIn::PVREPGGrid(string GridID, string Parms, void
 	  string sStartTime = row[1];
 	  string sEndTime = row[2];
 	  string sShowTitle = row[3]; // FIXME: come back and handle show subtitles.
+	  string sCategory = row[6];
 	  string sShowID = sChannelID + "|" + sStartTime + "|" + sEndTime;
 	  int iTargetRow = FindTargetRowForChanID(sChannelID);
-	  int iTargetColumn = FindTargetColForStartTime(sStartTime);
+	  int iTargetColumn = FindTargetColForStartTime(sStartTime, sEndTime);
 	  int iColSpan = FindColSpanForEndTime(sStartTime, sEndTime);
-	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"sChannelID %s sStartTime %s sEndTime %s sShowTitle %s iTargetRow %i iTargetColumn %i iColSpan %i",sChannelID.c_str(), sStartTime.c_str(), sEndTime.c_str(), sShowTitle.c_str(), iTargetRow, iTargetColumn, iColSpan);
+//	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"sChannelID %s sStartTime %s sEndTime %s sShowTitle %s iTargetRow %i iTargetColumn %i iColSpan %i",sChannelID.c_str(), sStartTime.c_str(), sEndTime.c_str(), sShowTitle.c_str(), iTargetRow, iTargetColumn, iColSpan);
 	  DataGridCell *pCell = new DataGridCell(sShowTitle, sShowID);
 	  pCell->m_Colspan = iColSpan;
+	  pCell->m_AltColor = mapCategoryColor_Find(sCategory);
 	  pDataGridTable->SetData(iTargetColumn,iTargetRow,pCell);
 	  iRow++;
 	}
@@ -849,26 +933,54 @@ int MythTV_PlugIn::FindTargetRowForChanID(string sChannelID)
 	} 
 }
 
-int MythTV_PlugIn::FindTargetColForStartTime(string sStartTime)
+int MythTV_PlugIn::FindTargetColForStartTime(string sStartTime,string sEndTime)
 {
+	// Convert sql time into a time struct we can deal with more easily.
 	time_t tvStartTime = StringUtils::SQLDateTime(sStartTime);
-	struct tm t;
-	localtime_r(&tvStartTime,&t);
-	int hourColumn = t.tm_hour * 12;
-	int minuteColumn = floor(t.tm_min/5);
+	time_t tvEndTime = StringUtils::SQLDateTime(sEndTime);
+	struct tm tStartTime;
+	struct tm tEndTime;
+	localtime_r(&tvStartTime,&tStartTime);
+	localtime_r(&tvEndTime,&tEndTime);
+
+	// Figure out where our first column starts.
+	int hourColumn;
+	if (tStartTime.tm_mday != tEndTime.tm_mday)
+	{
+		hourColumn = 0;	// This starts sometime the day before, set to 0
+	} else
+	{
+		hourColumn = tStartTime.tm_hour * 12;
+	}
+	int minuteColumn = ceil(tStartTime.tm_min/5);
 	int columnStartTime = hourColumn+minuteColumn + 1;   // + 1 is the Channel Column
 	return columnStartTime;
 }
 
 int MythTV_PlugIn::FindColSpanForEndTime(string sStartTime, string sEndTime)
 {
+	time_t tvStartTime = StringUtils::SQLDateTime(sStartTime);
 	time_t tvEndTime = StringUtils::SQLDateTime(sEndTime);
-	struct tm t;
-	localtime_r(&tvEndTime,&t);
-	int startColumn = FindTargetColForStartTime(sStartTime); 
-	int endHourColumn = t.tm_hour * 12;
-	int endMinuteColumn = floor(t.tm_min/5);
-	int endColumn = endHourColumn+endMinuteColumn;
+	struct tm tEndTime;
+	struct tm tStartTime;
+	localtime_r(&tvEndTime,&tEndTime);
+	localtime_r(&tvStartTime,&tStartTime);
+
+	// If the show actually winds up spilling into the net day
+	// then we need to make it so that the column span = the very last column...
+
+	int startColumn = FindTargetColForStartTime(sStartTime, sEndTime); 
+	int endHourColumn = tEndTime.tm_hour * 12;
+	int endMinuteColumn = ceil(tEndTime.tm_min/5);
+	int endColumn;
+	if (tStartTime.tm_mday < tEndTime.tm_mday)
+	{
+		endColumn = 288; // (12 * 12) * 2 = last possible cell in 24 hr period.
+	}
+	else
+	{
+		endColumn = endHourColumn + endMinuteColumn;
+	}
 	int colspan = endColumn - startColumn + 1;	// + 1 is the Channel column
 	return colspan;
 }
