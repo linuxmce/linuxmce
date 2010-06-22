@@ -207,7 +207,8 @@ sub remove_from_asterisk_db()
     if($DB_ROW = $DB_STATEMENT->fetchrow_hashref())
     {
         my $old_ext = $DB_ROW->{'user'};
-        `curl 'http://localhost/admin/config.php?display=extensions&extdisplay=$old_ext&action=del' &> /dev/null`;
+#        `curl 'http://localhost/admin/config.php?display=extensions&extdisplay=$old_ext&action=del' &> /dev/null`;  LmceCape's fix from the forum.
+        `curl 'http://localhost/admin/config.php?type=setup&display=extensions&extdisplay=$old_ext&skip=0&action=del' &> /dev/null`;
     }
     $DB_STATEMENT->finish();    
 }
