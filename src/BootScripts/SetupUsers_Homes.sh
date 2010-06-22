@@ -215,11 +215,15 @@ if [[ "$MakeUsers" == yes ]]; then
 	fi
 fi
 
+echo "Changing access rights for user directories"
 chmod -R 2770 "$BaseDir"/user_* 2>/dev/null
+echo "Changing access rights for public directories"
 chmod -R 2775 "$BaseDir"/public 2>/dev/null
+echo "Changing owner to public for all public directories"
 chgrp -R public "$BaseDir"/public
 echo "$(date -R) chgrp -R public $BaseDir/public" >> /var/log/pluto/SetupUsers_Homes.log
 
+echo "Adding sambahelper to smbpasswd"
 ## ReAdd the sambahelper user to smbpasswd
 if [[ -r /usr/pluto/var/sambaCredentials.secret ]] ;then
 	smbpass=$(cat /usr/pluto/var/sambaCredentials.secret | grep '^password' | cut -d '=' -f2)
@@ -242,6 +246,7 @@ if [[ -r /usr/pluto/var/sambaCredentials.secret ]] ;then
 fi
 
 ## Rebuild NIS cache
+echo "Rebuiling NIS cache"
 make -C /var/yp
 
 /usr/pluto/bin/UpdateMediaDaemonControl.sh  -disable
