@@ -526,8 +526,7 @@ namespace HADesigner
 
 		private void Create_Clicked(object sender, System.EventArgs e)
 		{
-            NewDesignObj createForm = new NewDesignObj(this.id_Category_Selected);
-			createForm.Owner = this;
+			NewDesignObj createForm = new NewDesignObj(this.id_Category_Selected, this);
 			createForm.ShowDialog();
 		}
 

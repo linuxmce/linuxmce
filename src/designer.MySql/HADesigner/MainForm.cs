@@ -351,9 +351,7 @@ namespace HADesigner
 			// 
 			// MDIForm
 			// 
-			//this.AutoScale = false;
 			this.AutoScaleMode = AutoScaleMode.Dpi;
-			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(692, 416);
 			this.IsMdiContainer = true;
 			this.Menu = this.mainMenu;

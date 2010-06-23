@@ -592,7 +592,7 @@ namespace HADesigner
 				if(this.NeedsDelete)
 				{
 
-					//uTODO nlink from ALL parent variations
+					//TODO nlink from ALL parent variations
 					this.NeedsParentVariationUnlink = true;
 					DataRow[] drLinks = mds.tDesignObjVariation_DesignObj.Select(DesignObjVariation_DesignObjData.FK_DESIGNOBJ_CHILD_FIELD + "=" + m_intDesignObjID, null);
 					foreach(DataRow dr in drLinks)

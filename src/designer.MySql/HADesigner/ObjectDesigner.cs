@@ -2382,8 +2382,8 @@ namespace HADesigner
             this.Name = "DesignObjDesigner";
             this.Text = "DesignObjXDesigner";
             this.Load += new System.EventHandler(this.DesignObjDesigner_Load);
-            this.Closed += new System.EventHandler(this.FormClosed);
-            this.Closing += new System.ComponentModel.CancelEventHandler(this.DesignObjDesigner_Closing);
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.DesignObjDesigner_FormClosed);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.DesignObjDesigner_FormClosing);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DesignObjDesigner_KeyDown);
             this.tabButtons.ResumeLayout(false);
             this.tabAllPages.ResumeLayout(false);
@@ -2487,7 +2487,7 @@ namespace HADesigner
 			}
 		}
 
-		private void FormClosed(object sender, System.EventArgs e)
+		private void DesignObjDesigner_FormClosed(object sender, System.EventArgs e)
 		{
 			if (this.m_objUIDesignObj != null)
 			{
@@ -3181,7 +3181,7 @@ namespace HADesigner
 			this.UpdateImage(false);
 		}
 
-		private void DesignObjDesigner_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+		private void DesignObjDesigner_FormClosing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
 			if (this.warnSaveChanges && this.m_objUIDesignObj.WarnToSave)
 			{

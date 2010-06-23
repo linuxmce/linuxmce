@@ -19,9 +19,10 @@ namespace HADesigner
 	/// </summary>
 	public class NewDesignObj : System.Windows.Forms.Form
 	{
+		private ObjsBrowser2 ObjectBrowser = null;
 		private MDIForm MainForm
 		{
-			get {return (MDIForm)this.Owner.MdiParent;}
+			get {return (MDIForm)this.Owner;}
 		}
 
 		private System.Windows.Forms.ComboBox cbDesignObjTypes;
@@ -68,7 +69,7 @@ namespace HADesigner
 		}
 
 
-		public NewDesignObj(int intDesignObjCategoryID)
+		public NewDesignObj(int intDesignObjCategoryID, ObjsBrowser2 ObjBrowser)
 		{
 			//
 			// Required for Windows Form Designer support
@@ -80,6 +81,7 @@ namespace HADesigner
 			//
 
 			this.DesignObjCategoryID = intDesignObjCategoryID;
+			this.ObjectBrowser = ObjBrowser;
 			UpdateDesignObjTypes();
 		}
 
@@ -407,8 +409,7 @@ namespace HADesigner
 
 				objUIDesignObj.SaveToDatabase();
 
-				ObjsBrowser2 owner = (ObjsBrowser2) this.Owner;
-				owner.insertNewDesignObjToTree(objUIDesignObj.ID);
+				ObjectBrowser.insertNewDesignObjToTree(objUIDesignObj.ID);
 				this.Close();
 			}
 		}
