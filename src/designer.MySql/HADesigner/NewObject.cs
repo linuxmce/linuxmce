@@ -85,7 +85,7 @@ namespace HADesigner
 
 		private void NewDesignObj_Load(object sender, System.EventArgs e)
 		{
-			this.defaultDirectory = MainForm.GraphicsDirectory + "\\" + mds.tSkin[1].fDataSubdirectory;
+			this.defaultDirectory = MainForm.GraphicsDirectory + "/" + mds.tSkin[1].fDataSubdirectory;
 		}
 
 		/// <summary>

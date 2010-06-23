@@ -129,7 +129,7 @@ namespace HADesigner
 		//METHODS
 		public void LoadFromDatabase()
 		{
-			string strErrorMessage = "";
+			//string strErrorMessage = "";
 
 
 			CommandParameterDataRow drCommandParameter = mds.tCommandParameter[this.ParameterID];
@@ -149,9 +149,9 @@ namespace HADesigner
 					CommandGroup_D_Command_CommandParameterDataRow drParameter = this.mds.tCommandGroup_D_Command_CommandParameter[this.ParentUIDesignObjVariationCommand.LinkID, this.ParameterID];
 					this.Value = (drParameter.fIK_CommandParameterIsNull) ? "" : drParameter.fIK_CommandParameter;
 				}
-				catch(Exception e)
+				catch(Exception /*e*/)
 				{
-					strErrorMessage = e.Message;
+					//strErrorMessage = e.Message;
 					this.NeedsInsert = true;
 				}
 			}

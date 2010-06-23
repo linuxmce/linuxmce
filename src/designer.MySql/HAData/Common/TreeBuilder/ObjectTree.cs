@@ -45,7 +45,7 @@ namespace HAData.Common.TreeBuilder
 					
 					AddDesignObjChildren(ct,tn);
 					AddDesignObjDesignObjs(ct,tn);
-					int i=tn.Index;
+					//int i=tn.Index;
 				}
 			}
 		}

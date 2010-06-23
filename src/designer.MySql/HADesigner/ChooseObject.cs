@@ -147,7 +147,6 @@ namespace HADesigner
 		private void tvAfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
 		{
 			DesignObjDataRow odr = null;
-			DesignObjCategoryDataRow ocdr = null;
 
 			bool isDesignObj = false;
 			//bool isCategory = false;
@@ -159,8 +158,11 @@ namespace HADesigner
 				odr = tn.DesignObjDataRow;
 				if( odr==null ) // not object, check if category (& get category row)
 				{
+					/*
+					DesignObjCategoryDataRow ocdr = null;
 					ocdr = tn.DesignObjCategoryDataRow;
 					//if (ocdr!=null) isCategory = true;
+					*/
 				}
 				else isDesignObj = true; // odr !null => is object
 			}

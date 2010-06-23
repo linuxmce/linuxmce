@@ -1,7 +1,9 @@
 namespace HAData.DataAccess {
 	using System;
 	using System.Data;
-	using Microsoft.Data.Odbc;
+	using MySql;
+	using MySql.Data;
+	using MySql.Data.MySqlClient;
 	using System.Collections;
 
 	using HAData.Common;
@@ -39,7 +41,7 @@ namespace HAData.DataAccess {
 		public const String FK_LANGUAGE_TABLE_FIELD = "Users.FK_Language";
 		public const String FK_INSTALLATION_MAIN_TABLE_FIELD = "Users.FK_Installation_Main";
 		// DataSetCommand object
-		protected OdbcDataAdapter m_DSCommand;
+		protected MySqlDataAdapter m_DSCommand;
 
 		// Stored procedure parameters
 		protected const String PK_USERS_PARM = "@PK_Users";
@@ -57,12 +59,12 @@ namespace HAData.DataAccess {
 		protected const String FK_INSTALLATION_MAIN_PARM = "@FK_Installation_Main";
 		protected const String USERID_PARM = "@UserID";
 
-		protected OdbcCommand m_LoadCommand;
-		protected OdbcCommand m_InsertCommand;
-		protected OdbcCommand m_UpdateCommand;
-		protected OdbcCommand m_DeleteCommand;
-		protected OdbcConnection m_Connection;
-		protected OdbcTransaction m_Transaction;
+		protected MySqlCommand m_LoadCommand;
+		protected MySqlCommand m_InsertCommand;
+		protected MySqlCommand m_UpdateCommand;
+		protected MySqlCommand m_DeleteCommand;
+		protected MySqlConnection m_Connection;
+		protected MySqlTransaction m_Transaction;
 		public DataTable Table { get { return Tables[0]; } }
 
 
@@ -71,21 +73,21 @@ namespace HAData.DataAccess {
 			// Create the tables in the dataset
 			//
 			Tables.Add(BuildDataTables());
-			m_Connection = HADataConfiguration.GetOdbcConnection();
+			m_Connection = HADataConfiguration.GetMySqlConnection();
 			CreateCommands(m_Connection, m_Transaction, ref m_LoadCommand, ref m_InsertCommand, ref m_UpdateCommand, ref m_DeleteCommand);
 			// Create our DataSetCommand
-			m_DSCommand = new OdbcDataAdapter();
+			m_DSCommand = new MySqlDataAdapter();
 
 			m_DSCommand.TableMappings.Add("Table", UsersData.USERS_TABLE);
 		}
 
-		public UsersData(OdbcConnection conn,OdbcTransaction trans) {
+		public UsersData(MySqlConnection conn,MySqlTransaction trans) {
 
 			m_Connection = conn;
 			m_Transaction = trans;
 			CreateCommands(m_Connection, m_Transaction, ref m_LoadCommand, ref m_InsertCommand, ref m_UpdateCommand, ref m_DeleteCommand);
 			// Create our DataSetCommand
-			m_DSCommand = new OdbcDataAdapter();
+			m_DSCommand = new MySqlDataAdapter();
 
 			m_DSCommand.TableMappings.Add("Table", UsersData.USERS_TABLE);
 		}
@@ -149,21 +151,21 @@ namespace HAData.DataAccess {
 
 			return Table;
 		}
-		protected static void CreateParameters(OdbcParameterCollection Params, bool IsInsert) {
-			Params.Add(new OdbcParameter(PK_USERS_PARM, OdbcType.Int,4));
-			Params.Add(new OdbcParameter(USERNAME_PARM, OdbcType.VarChar, 25));
-			Params.Add(new OdbcParameter(PASSWORD_PARM, OdbcType.VarChar, 32));
-			Params.Add(new OdbcParameter(HASMAILBOX_PARM, OdbcType.SmallInt,2));
-			Params.Add(new OdbcParameter(ACCESSGENERALMAILBOX_PARM, OdbcType.SmallInt,2));
-			Params.Add(new OdbcParameter(EXTENSION_PARM, OdbcType.Int,4));
-			Params.Add(new OdbcParameter(FIRSTNAME_PARM, OdbcType.VarChar, 20));
-			Params.Add(new OdbcParameter(LASTNAME_PARM, OdbcType.VarChar, 30));
-			Params.Add(new OdbcParameter(NICKNAME_PARM, OdbcType.VarChar, 15));
-			Params.Add(new OdbcParameter(EXTENSIONRINGTIMEOUT_PARM, OdbcType.Int,4));
-			Params.Add(new OdbcParameter(FORWARDEMAIL_PARM, OdbcType.VarChar, 50));
-			Params.Add(new OdbcParameter(FK_LANGUAGE_PARM, OdbcType.Int,4));
-			Params.Add(new OdbcParameter(FK_INSTALLATION_MAIN_PARM, OdbcType.Int,4));
-			Params.Add(new OdbcParameter(USERID_PARM, OdbcType.Int));
+		protected static void CreateParameters(MySqlParameterCollection Params, bool IsInsert) {
+			Params.Add(new MySqlParameter(PK_USERS_PARM, MySqlDbType.Int32,4));
+			Params.Add(new MySqlParameter(USERNAME_PARM, MySqlDbType.VarChar, 25));
+			Params.Add(new MySqlParameter(PASSWORD_PARM, MySqlDbType.VarChar, 32));
+			Params.Add(new MySqlParameter(HASMAILBOX_PARM, MySqlDbType.Int16,2));
+			Params.Add(new MySqlParameter(ACCESSGENERALMAILBOX_PARM, MySqlDbType.Int16,2));
+			Params.Add(new MySqlParameter(EXTENSION_PARM, MySqlDbType.Int32,4));
+			Params.Add(new MySqlParameter(FIRSTNAME_PARM, MySqlDbType.VarChar, 20));
+			Params.Add(new MySqlParameter(LASTNAME_PARM, MySqlDbType.VarChar, 30));
+			Params.Add(new MySqlParameter(NICKNAME_PARM, MySqlDbType.VarChar, 15));
+			Params.Add(new MySqlParameter(EXTENSIONRINGTIMEOUT_PARM, MySqlDbType.Int32,4));
+			Params.Add(new MySqlParameter(FORWARDEMAIL_PARM, MySqlDbType.VarChar, 50));
+			Params.Add(new MySqlParameter(FK_LANGUAGE_PARM, MySqlDbType.Int32,4));
+			Params.Add(new MySqlParameter(FK_INSTALLATION_MAIN_PARM, MySqlDbType.Int32,4));
+			Params.Add(new MySqlParameter(USERID_PARM, MySqlDbType.Int32));
 
 			// map the parameters to the data table
 
@@ -186,23 +188,23 @@ namespace HAData.DataAccess {
 			Params[FK_INSTALLATION_MAIN_PARM].SourceColumn = UsersData.FK_INSTALLATION_MAIN_FIELD;
 		}
 
-		protected static void CreateCommands(OdbcConnection Conn, OdbcTransaction Trans, ref OdbcCommand LoadCommand, ref OdbcCommand InsertCommand, ref OdbcCommand UpdateCommand, ref OdbcCommand DeleteCommand) {
+		protected static void CreateCommands(MySqlConnection Conn, MySqlTransaction Trans, ref MySqlCommand LoadCommand, ref MySqlCommand InsertCommand, ref MySqlCommand UpdateCommand, ref MySqlCommand DeleteCommand) {
 			if(LoadCommand == null) {
 				// Create the command since it's null
-				LoadCommand = new OdbcCommand("sp_Select_Users", Conn);
+				LoadCommand = new MySqlCommand("sp_Select_Users", Conn);
 				LoadCommand.CommandType = CommandType.StoredProcedure;
 				LoadCommand.Transaction = Trans;
 
-				LoadCommand.Parameters.Add(new OdbcParameter(PK_USERS_PARM, OdbcType.Int,4));
+				LoadCommand.Parameters.Add(new MySqlParameter(PK_USERS_PARM, MySqlDbType.Int32,4));
 			}
 
 			if(InsertCommand == null) {
 				// Create the command since it's null
-				InsertCommand = new OdbcCommand("sp_Insert_Users", Conn);
+				InsertCommand = new MySqlCommand("sp_Insert_Users", Conn);
 				InsertCommand.CommandType = CommandType.StoredProcedure;
 				InsertCommand.Transaction = Trans;
 
-				OdbcParameterCollection Params = InsertCommand.Parameters;
+				MySqlParameterCollection Params = InsertCommand.Parameters;
 
 				CreateParameters(Params, true);
 
@@ -210,34 +212,34 @@ namespace HAData.DataAccess {
 
 			if(UpdateCommand == null) {
 				// Create the command since it's null
-				UpdateCommand = new OdbcCommand("sp_Update_Users", Conn);
+				UpdateCommand = new MySqlCommand("sp_Update_Users", Conn);
 				UpdateCommand.CommandType = CommandType.StoredProcedure;
 				UpdateCommand.Transaction = Trans;
 
-				OdbcParameterCollection Params = UpdateCommand.Parameters;
+				MySqlParameterCollection Params = UpdateCommand.Parameters;
 
 				CreateParameters(Params, false);
 
 			}
 			if (DeleteCommand == null)
 			{
-				DeleteCommand = new OdbcCommand("sp_Delete_Users", Conn);
+				DeleteCommand = new MySqlCommand("sp_Delete_Users", Conn);
 				DeleteCommand.CommandType = CommandType.StoredProcedure;
 				DeleteCommand.Transaction = Trans;
 
-				DeleteCommand.Parameters.Add(PK_USERS_PARM, OdbcType.Int,4, PK_USERS_FIELD);
-				DeleteCommand.Parameters.Add(USERID_PARM, OdbcType.Int);
+				DeleteCommand.Parameters.Add(PK_USERS_PARM, MySqlDbType.Int32,4, PK_USERS_FIELD);
+				DeleteCommand.Parameters.Add(USERID_PARM, MySqlDbType.Int32);
 			}
 		}
 
-		protected static void CreateCommands(OdbcDataAdapter odbcda,OdbcConnection Conn, OdbcTransaction Trans, ref OdbcCommand LoadCommand, ref OdbcCommand InsertCommand, ref OdbcCommand UpdateCommand, ref OdbcCommand DeleteCommand) {
-				LoadCommand = new OdbcCommand("SELECT PK_Users,UserName,Password,HasMailbox,AccessGeneralMailbox,Extension,FirstName,LastName,Nickname,ExtensionRingTimeout,ForwardEmail,FK_Language,FK_Installation_Main FROM Users", Conn);
+		protected static void CreateCommands(MySqlDataAdapter odbcda,MySqlConnection Conn, MySqlTransaction Trans, ref MySqlCommand LoadCommand, ref MySqlCommand InsertCommand, ref MySqlCommand UpdateCommand, ref MySqlCommand DeleteCommand) {
+				LoadCommand = new MySqlCommand("SELECT PK_Users,UserName,Password,HasMailbox,AccessGeneralMailbox,Extension,FirstName,LastName,Nickname,ExtensionRingTimeout,ForwardEmail,FK_Language,FK_Installation_Main FROM Users", Conn);
 				LoadCommand.Transaction = Trans;
 
-				LoadCommand.Parameters.Add(new OdbcParameter(PK_USERS_PARM, OdbcType.Int,4));
+				LoadCommand.Parameters.Add(new MySqlParameter(PK_USERS_PARM, MySqlDbType.Int32,4));
 
 			odbcda.SelectCommand = LoadCommand;
-			OdbcCommandBuilder odbcCB = new OdbcCommandBuilder(odbcda);
+			MySqlCommandBuilder odbcCB = new MySqlCommandBuilder(odbcda);
 			odbcCB.RefreshSchema();
 			DeleteCommand = odbcCB.GetDeleteCommand();
 			InsertCommand = odbcCB.GetInsertCommand();
@@ -253,7 +255,7 @@ namespace HAData.DataAccess {
 			return this;
 		}
 
-		public static DataRowCollection LoadUsersWithWhere(ref MyDataSet ds, OdbcConnection conn, OdbcTransaction trans, string WhereClause) // marker:2
+		public static DataRowCollection LoadUsersWithWhere(ref MyDataSet ds, MySqlConnection conn, MySqlTransaction trans, string WhereClause) // marker:2
 		{
 			DataRowCollection dr;
 			if( ds==null )
@@ -272,12 +274,12 @@ namespace HAData.DataAccess {
 			dsTemp.Tables.Add(BuildDataTables());
 			
 			if( conn==null )
-				conn = HADataConfiguration.GetOdbcConnection();
+				conn = HADataConfiguration.GetMySqlConnection();
 			
-			OdbcDataAdapter sqlda = new OdbcDataAdapter();
+			MySqlDataAdapter sqlda = new MySqlDataAdapter();
 			string sSQL = "SELECT PK_Users, UserName, Password, HasMailbox, AccessGeneralMailbox, Extension, FirstName, LastName, Nickname, ExtensionRingTimeout, ForwardEmail, FK_Language, FK_Installation_Main FROM Users WHERE " + WhereClause;
 			
-			OdbcCommand LoadCommand = new OdbcCommand(sSQL,conn);
+			MySqlCommand LoadCommand = new MySqlCommand(sSQL,conn);
 			
 			if( trans!=null )
 				LoadCommand.Transaction = trans;
@@ -293,7 +295,7 @@ namespace HAData.DataAccess {
 			return dr;
 		}
 
-		public static DataRow LoadNoCacheUsers(ref MyDataSet ds, OdbcConnection conn, OdbcTransaction trans, System.Int32 PK_Users)
+		public static DataRow LoadNoCacheUsers(ref MyDataSet ds, MySqlConnection conn, MySqlTransaction trans, System.Int32 PK_Users)
 		{
 			DataRow dr = null;
 			if( ds==null )
@@ -308,15 +310,15 @@ namespace HAData.DataAccess {
 					ds.Tables.Add(BuildDataTables());
 			}
 
-			OdbcDataAdapter sqlda = new OdbcDataAdapter();
-			OdbcCommand LoadCommand;
+			MySqlDataAdapter sqlda = new MySqlDataAdapter();
+			MySqlCommand LoadCommand;
 			if( conn==null )
-				conn = HADataConfiguration.GetOdbcConnection();
+				conn = HADataConfiguration.GetMySqlConnection();
 
-			LoadCommand = new OdbcCommand("sp_Select_Users", conn);
+			LoadCommand = new MySqlCommand("sp_Select_Users", conn);
 
 			LoadCommand.CommandType = CommandType.StoredProcedure;
-			LoadCommand.Parameters.Add(new OdbcParameter(PK_USERS_PARM, OdbcType.Int,4));
+			LoadCommand.Parameters.Add(new MySqlParameter(PK_USERS_PARM, MySqlDbType.Int32,4));
 			LoadCommand.Parameters[PK_USERS_PARM].Value = PK_Users;
 			if( trans!=null )
 				LoadCommand.Transaction = trans;
@@ -326,7 +328,7 @@ namespace HAData.DataAccess {
 			return dr;
 		}
 
-		public static DataRow LoadUsers(ref MyDataSet ds, OdbcConnection conn, OdbcTransaction trans, System.Int32 PK_Users)  // marker:3
+		public static DataRow LoadUsers(ref MyDataSet ds, MySqlConnection conn, MySqlTransaction trans, System.Int32 PK_Users)  // marker:3
 		{
 			DataRow dr = null;
 			if( ds==null )
@@ -345,15 +347,15 @@ namespace HAData.DataAccess {
 
 			if( dr==null )
 			{
-				OdbcDataAdapter sqlda = new OdbcDataAdapter();
-				OdbcCommand LoadCommand;
+				MySqlDataAdapter sqlda = new MySqlDataAdapter();
+				MySqlCommand LoadCommand;
 				if( conn==null )
-					conn = HADataConfiguration.GetOdbcConnection();
+					conn = HADataConfiguration.GetMySqlConnection();
 
-				LoadCommand = new OdbcCommand("sp_Select_Users", conn);
+				LoadCommand = new MySqlCommand("sp_Select_Users", conn);
 
 				LoadCommand.CommandType = CommandType.StoredProcedure;
-				LoadCommand.Parameters.Add(new OdbcParameter(PK_USERS_PARM, OdbcType.Int,4));
+				LoadCommand.Parameters.Add(new MySqlParameter(PK_USERS_PARM, MySqlDbType.Int32,4));
 				LoadCommand.Parameters[PK_USERS_PARM].Value = PK_Users;
 				if( trans!=null )
 					LoadCommand.Transaction = trans;
@@ -367,7 +369,7 @@ namespace HAData.DataAccess {
 		public UsersData LoadAll() {
 
 			// Create the command since it's null
-			m_DSCommand.SelectCommand = new OdbcCommand("SELECT * FROM Users", m_Connection);
+			m_DSCommand.SelectCommand = new MySqlCommand("SELECT * FROM Users", m_Connection);
 			m_DSCommand.SelectCommand.CommandType = CommandType.Text;
 			m_DSCommand.SelectCommand.Transaction = m_Transaction;
 
@@ -376,12 +378,12 @@ namespace HAData.DataAccess {
 
 		}
 
-		public static DataRowCollection LoadAll(ref MyDataSet ds, OdbcConnection conn, OdbcTransaction trans) {
+		public static DataRowCollection LoadAll(ref MyDataSet ds, MySqlConnection conn, MySqlTransaction trans) {
 
 			if( conn==null )
-				conn = HADataConfiguration.GetOdbcConnection();
-			OdbcDataAdapter sqlda = new OdbcDataAdapter();
-			OdbcCommand LoadCommand = new OdbcCommand("SELECT * FROM Users", conn);
+				conn = HADataConfiguration.GetMySqlConnection();
+			MySqlDataAdapter sqlda = new MySqlDataAdapter();
+			MySqlCommand LoadCommand = new MySqlCommand("SELECT * FROM Users", conn);
 			LoadCommand.CommandType = CommandType.Text;
 			if( trans!=null )
 				LoadCommand.Transaction = trans;
@@ -400,7 +402,7 @@ namespace HAData.DataAccess {
 		public UsersData ExecuteQuery(String sSQL,String sTableName) {
 
 			// Create the command since it's null
-			m_DSCommand.SelectCommand = new OdbcCommand(sSQL, m_Connection);
+			m_DSCommand.SelectCommand = new MySqlCommand(sSQL, m_Connection);
 			m_DSCommand.SelectCommand.CommandType = CommandType.Text;
 			m_DSCommand.SelectCommand.Transaction = m_Transaction;
 
@@ -409,15 +411,15 @@ namespace HAData.DataAccess {
 			return this;
 		}
 
-		public static DataRowCollection ExecuteQuery(String sSQL,ref MyDataSet ds, OdbcConnection conn, OdbcTransaction trans) {
+		public static DataRowCollection ExecuteQuery(String sSQL,ref MyDataSet ds, MySqlConnection conn, MySqlTransaction trans) {
 			return ExecuteQuery(sSQL,ref ds,conn,trans,"Users");
 		}
 
-		public static DataRowCollection ExecuteQuery(String sSQL,ref MyDataSet ds, OdbcConnection conn, OdbcTransaction trans,string sTableName) {
+		public static DataRowCollection ExecuteQuery(String sSQL,ref MyDataSet ds, MySqlConnection conn, MySqlTransaction trans,string sTableName) {
 			if( conn==null )
-				conn = HADataConfiguration.GetOdbcConnection();
-			OdbcDataAdapter sqlda = new OdbcDataAdapter();
-			OdbcCommand LoadCommand = new OdbcCommand(sSQL, conn);
+				conn = HADataConfiguration.GetMySqlConnection();
+			MySqlDataAdapter sqlda = new MySqlDataAdapter();
+			MySqlCommand LoadCommand = new MySqlCommand(sSQL, conn);
 			LoadCommand.CommandType = CommandType.Text;
 			if( trans!=null )
 				LoadCommand.Transaction = trans;
@@ -449,33 +451,33 @@ namespace HAData.DataAccess {
 
 		public static bool UpdateUsers(ref MyDataSet ds, int CurUserID)
 		{
-			OdbcConnection OdbcConn = HADataConfiguration.GetOdbcConnection();
+			MySqlConnection OdbcConn = HADataConfiguration.GetMySqlConnection();
 			return UpdateUsers(ref ds,CurUserID,OdbcConn,null);
 		}
 
-		public static bool UpdateUsers(ref MyDataSet ds, int CurUserID,OdbcConnection OdbcConn,OdbcTransaction Trans)
+		public static bool UpdateUsers(ref MyDataSet ds, int CurUserID,MySqlConnection OdbcConn,MySqlTransaction Trans)
 		{
 			DataTable dt = ds.Tables[USERS_TABLE];
 			if( dt == null )
 				return false;
 
-			OdbcDataAdapter sqlda = new OdbcDataAdapter();
-			OdbcCommand LoadCommand = null;
-			OdbcCommand InsertCommand = null;
-			OdbcCommand UpdateCommand = null;
-			OdbcCommand DeleteCommand = null;
+			MySqlDataAdapter sqlda = new MySqlDataAdapter();
+			MySqlCommand LoadCommand = null;
+			MySqlCommand InsertCommand = null;
+			MySqlCommand UpdateCommand = null;
+			MySqlCommand DeleteCommand = null;
 			CreateCommands(sqlda,OdbcConn, Trans, ref LoadCommand, ref InsertCommand, ref UpdateCommand, ref DeleteCommand);
-			sqlda.RowUpdated += new OdbcRowUpdatedEventHandler(MyRowUpdated);
+			sqlda.RowUpdated += new MySqlRowUpdatedEventHandler(MyRowUpdated);
 
 			sqlda.Update(dt);
 			return true;
 		}
 
-		static void MyRowUpdated(Object sender, OdbcRowUpdatedEventArgs e)
+		static void MyRowUpdated(Object sender, MySqlRowUpdatedEventArgs e)
 		{
 			if( e.StatementType==StatementType.Insert )
 			{
-				OdbcCommand ocmd = new OdbcCommand("SELECT @@IDENTITY", e.Command.Connection);
+				MySqlCommand ocmd = new MySqlCommand("SELECT @@IDENTITY", e.Command.Connection);
 				int value = Int32.Parse(ocmd.ExecuteScalar().ToString());
 				e.Row[0]=value;
 				e.Row.AcceptChanges();
@@ -733,21 +735,21 @@ namespace HAData.DataAccess {
 	} // public class UsersDataRow
 	public class UsersDataReader
 	{
-		public OdbcDataReader dr;
+		public MySqlDataReader dr;
 		bool bCache=false;
 		int iRecord=-1,iNumRecords=-1;
 		ArrayList al = null;
 
-		public UsersDataReader(OdbcDataReader d)
+		public UsersDataReader(MySqlDataReader d)
 		{
 			dr=d;
 		}
-		public UsersDataReader(OdbcCommand cmd)
+		public UsersDataReader(MySqlCommand cmd)
 		{
 			dr = cmd.ExecuteReader();
 		}
 
-		public UsersDataReader(OdbcCommand cmd,bool Cache)
+		public UsersDataReader(MySqlCommand cmd,bool Cache)
 		{
 			dr = cmd.ExecuteReader();
 			bCache=Cache;
@@ -757,22 +759,22 @@ namespace HAData.DataAccess {
 
 		public UsersDataReader(string sSQL)
 		{
-			OdbcConnection conn = HADataConfiguration.GetOdbcConnection();
+			MySqlConnection conn = HADataConfiguration.GetMySqlConnection();
 
 			if( !sSQL.ToUpper().StartsWith("SELECT") )
 			{
 				sSQL = "SELECT * FROM Users WHERE " + sSQL;
 			}
 
-			OdbcCommand cmd = new OdbcCommand(sSQL,conn,null);
+			MySqlCommand cmd = new MySqlCommand(sSQL,conn,null);
 			dr = cmd.ExecuteReader();
 		}
 
-		public UsersDataReader(string sSQL,OdbcConnection conn)
+		public UsersDataReader(string sSQL,MySqlConnection conn)
 		{
 			if( conn==null )
 			{
-				conn = HADataConfiguration.GetOdbcConnection();
+				conn = HADataConfiguration.GetMySqlConnection();
 			}
 
 			if( !sSQL.ToUpper().StartsWith("SELECT") )
@@ -780,15 +782,15 @@ namespace HAData.DataAccess {
 				sSQL = "SELECT * FROM Users WHERE " + sSQL;
 			}
 
-			OdbcCommand cmd = new OdbcCommand(sSQL,conn,null);
+			MySqlCommand cmd = new MySqlCommand(sSQL,conn,null);
 			dr = cmd.ExecuteReader();
 		}
 
-		public UsersDataReader(string sSQL,OdbcConnection conn,OdbcTransaction trans,bool Cache)
+		public UsersDataReader(string sSQL,MySqlConnection conn,MySqlTransaction trans,bool Cache)
 		{
 			if( conn==null )
 			{
-				conn = HADataConfiguration.GetOdbcConnection();
+				conn = HADataConfiguration.GetMySqlConnection();
 			}
 
 			if( !sSQL.ToUpper().StartsWith("SELECT") )
@@ -796,7 +798,7 @@ namespace HAData.DataAccess {
 				sSQL = "SELECT * FROM Users WHERE " + sSQL;
 			}
 
-			OdbcCommand cmd = new OdbcCommand(sSQL,conn,trans);
+			MySqlCommand cmd = new MySqlCommand(sSQL,conn,trans);
 			dr = cmd.ExecuteReader();
 			bCache=Cache;
 			if( bCache )
@@ -1047,27 +1049,13 @@ namespace HAData.DataAccess {
 			get
 			{
 				UsersDataRow dr = new UsersDataRow(Rows.Find(PK_Users));
-				if( !dr.bIsValid  && false /* can't do this with ODBC */  )
-				{
-					MyDataSet mds = (MyDataSet) DataSet;
-					if( mds.m_conn==null )
-						return dr;
-					OdbcDataAdapter sqlda = new OdbcDataAdapter();
-					OdbcCommand LoadCommand = new OdbcCommand("sp_Select_Users", mds.m_conn,mds.m_trans);
-					LoadCommand.CommandType = CommandType.StoredProcedure;
-					LoadCommand.Parameters.Add(new OdbcParameter("@PK_Users", OdbcType.Int,4));
-					LoadCommand.Parameters["@PK_Users"].Value = PK_Users;
-					sqlda.SelectCommand = LoadCommand;
-					sqlda.Fill(mds,"Users");
-					dr = new UsersDataRow(Rows.Find(PK_Users));
-				}
 				return dr;
 			}
 		}
-		public DataRowCollection LoadAll(OdbcConnection conn, OdbcTransaction trans)
+		public DataRowCollection LoadAll(MySqlConnection conn, MySqlTransaction trans)
 		{
-			OdbcDataAdapter sqlda = new OdbcDataAdapter();
-			OdbcCommand LoadCommand = new OdbcCommand("SELECT PK_Users,UserName,Password,HasMailbox,AccessGeneralMailbox,Extension,FirstName,LastName,Nickname,ExtensionRingTimeout,ForwardEmail,FK_Language,FK_Installation_Main FROM Users", conn);
+			MySqlDataAdapter sqlda = new MySqlDataAdapter();
+			MySqlCommand LoadCommand = new MySqlCommand("SELECT PK_Users,UserName,Password,HasMailbox,AccessGeneralMailbox,Extension,FirstName,LastName,Nickname,ExtensionRingTimeout,ForwardEmail,FK_Language,FK_Installation_Main FROM Users", conn);
 			LoadCommand.CommandType = CommandType.Text;
 			if( trans!=null )
 				LoadCommand.Transaction = trans;
@@ -1082,7 +1070,7 @@ namespace HAData.DataAccess {
 		{
 			Update(PK_Users,((MyDataSet) DataSet).m_conn,((MyDataSet) DataSet).m_trans);
 		}
-		public void Update(int PK_Users,OdbcConnection conn, OdbcTransaction trans)
+		public void Update(int PK_Users,MySqlConnection conn, MySqlTransaction trans)
 		{
 			if( conn==null )
 				return;

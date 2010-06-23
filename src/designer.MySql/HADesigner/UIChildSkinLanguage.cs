@@ -10,7 +10,6 @@ using HAData.DataAccess;
 using System.Data;
 using System.Diagnostics;
 
-
 namespace HADesigner
 {
 	/// <summary>
@@ -731,7 +730,7 @@ namespace HADesigner
 			MyDataSet mds = HADataConfiguration.m_mdsCache;
 			
 			string SQL = "UPDATE DesignObj SET psc_mod='" + DateTime.Now.ToString("yyMMddhhmmss") + "' WHERE PK_DesignObj=" + drObject.fPK_DesignObj.ToString();
-			new Microsoft.Data.Odbc.OdbcCommand(SQL,mds.m_conn,mds.m_trans).ExecuteNonQuery();
+			new MySql.Data.MySqlClient.MySqlCommand(SQL,mds.m_conn,mds.m_trans).ExecuteNonQuery();
 		}
 
 		public void DeselectAllDesignObjs(bool blnRecursive) // Also Text

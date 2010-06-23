@@ -58,7 +58,7 @@ namespace HADesigner
 					if (System.IO.File.Exists(filePath))
 					{
 						filePath = filePath.Replace(this.defaultDirectory,"");
-						if (filePath.StartsWith("\\")) filePath = filePath.Substring(1);
+						if (filePath.StartsWith("/")) filePath = filePath.Substring(1);
 					}
 					else
 					{

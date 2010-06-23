@@ -41,7 +41,7 @@ namespace HAData.Common.TreeBuilder
 					
 					AddCommandCommands(ct,tn);
 					AddCommandChildren(ct,tn);
-					int i=tn.Index;
+					//int i=tn.Index;
 				}
 			}
 		}

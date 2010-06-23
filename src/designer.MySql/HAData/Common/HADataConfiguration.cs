@@ -1,7 +1,9 @@
 using System;
 using System.Data;
 using System.Data.SqlClient;
-using Microsoft.Data.Odbc;
+using MySql;
+	using MySql.Data;
+	using MySql.Data.MySqlClient;
 using System.Collections;
 using System.Configuration;
 using System.Diagnostics;
@@ -25,7 +27,7 @@ namespace HAData.Common
 //		public static string ConnectionString="server=localhost;User ID=sa;Password=msvirus;database=HA";
 //		public static string ConnectionString="server=192.168.1.116;User ID=sa;Password=orlando10;database=HA";
 //		public static string ConnectionString="server=localhost;user id=sa;password=msvirus;database=HA";
-		public static string ConnectionString=@"driver={MySQL ODBC 3.51 Driver};server=localhost;uid=root;database=pluto_dce;";
+		public static string ConnectionString=@"DRIVER={MySQL ODBC 3.51 Driver};SERVER=localhost;UID=root;PWD=;DATABASE=pluto_dce;";
 		public static string Company = "Business Advantages";
 		public static string AppName = "Home Automation";
 		public static string DataPath = @"Y:\graphics";
@@ -45,9 +47,9 @@ namespace HAData.Common
 			return new SqlConnection(ConnectionString);
 		}
 		
-		public static OdbcConnection GetOdbcConnection()
+		public static MySqlConnection GetMySqlConnection()
 		{
-			OdbcConnection oc=new OdbcConnection(ConnectionString);
+			MySqlConnection oc=new MySqlConnection(ConnectionString);
 			try
 			{
 				oc.Open();

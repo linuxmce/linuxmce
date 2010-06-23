@@ -48,7 +48,7 @@ namespace HAData.Common.TreeBuilder
 					
 					AddTextChildren(ct,tn);
 					AddTextDesignObjs(ct,tn);
-					int i=tn.Index;
+					//int i=tn.Index;
 				}
 			}
 		}

@@ -22,7 +22,7 @@ namespace HADesigner
 		{ 
 			try 
 			{ 
-				double d = System.Double.Parse(value.ToString(), System.Globalization.NumberStyles.Any); 
+				/*double d = */System.Double.Parse(value.ToString(), System.Globalization.NumberStyles.Any);
 				return true; 
 			} 
 			catch (FormatException) 

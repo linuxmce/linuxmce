@@ -31,11 +31,11 @@ namespace HADesigner
 		private string SkinDirectory(int SkinID)
 		{
 			string skinDir = (mds.tSkin[SkinID].bIsValid) ? mds.tSkin[SkinID].fDataSubdirectory : mds.tSkin[1].fDataSubdirectory;
-			return this.GraphicsDirectory + "\\" + skinDir;
+			return this.GraphicsDirectory + "/" + skinDir;
 		}
 		private string pathFileNotFound
 		{
-			get {return this.GraphicsDirectory + "\\" + strFileNotFoundBmp;}
+			get {return this.GraphicsDirectory + "/" + strFileNotFoundBmp;}
 		}
 
 		private MyDataSet mds
@@ -1301,22 +1301,26 @@ namespace HADesigner
 
 		private string GetFilePath(int ParmSkinID)
 		{
-			string path = this.GetParameterValue(DesignObjParameterData.GRAPHIC_FILENAME_CONST);
+			string path = this.GetParameterValue(DesignObjParameterData.GRAPHIC_FILENAME_CONST).Replace('\\', '/');
 
-			if (path == "" || path == " ") return "";
-			else if (path.StartsWith("C:") || path.StartsWith(@"\\")) return path;
+			if (path == "" || path == " ")
+				return "";
+			else if (path.StartsWith("C:") || path.StartsWith(@"/"))
+				return path;
 			else 
 			{
-				string fullPath = this.SkinDirectory(ParmSkinID) + "\\" + path;
-				if (System.IO.File.Exists(fullPath)) return fullPath;
-                else return this.SkinDirectory(1) + "\\" + path;
+				string fullPath = this.SkinDirectory(ParmSkinID) + "/" + path;
+				if (System.IO.File.Exists(fullPath))
+					return fullPath;
+                else
+					return this.SkinDirectory(1) + "/" + path;
 			}
 		}
 
 
 		private Bitmap GetBitmap(string strPath)
 		{
-			string strErrorMessage = "";
+			//string strErrorMessage = "";
 
 			if (strPath == "" || strPath == " " || strPath.IndexOf("<%")!=-1 ) return null;
 
@@ -1328,9 +1332,9 @@ namespace HADesigner
 				{
 					objReturnBitmap = new Bitmap(strPath);
 				}
-				catch(Exception e)
+				catch(Exception /*e*/)
 				{
-					strErrorMessage = e.Message;
+					//strErrorMessage = e.Message;
 					objReturnBitmap = new Bitmap(this.pathFileNotFound);
 				}
 			}

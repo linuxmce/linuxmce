@@ -1,425 +1,283 @@
-<VisualStudioProject>
-    <CSHARP
-        ProjectType = "Local"
-        ProductVersion = "7.10.3077"
-        SchemaVersion = "2.0"
-        ProjectGuid = "{C5679AE5-F8FF-451F-A97B-EA58F93B04AF}"
-    >
-        <Build>
-            <Settings
-                ApplicationIcon = ""
-                AssemblyKeyContainerName = ""
-                AssemblyName = "HAData"
-                AssemblyOriginatorKeyFile = ""
-                DefaultClientScript = "JScript"
-                DefaultHTMLPageLayout = "Grid"
-                DefaultTargetSchema = "IE50"
-                DelaySign = "false"
-                OutputType = "Library"
-                PreBuildEvent = ""
-                PostBuildEvent = ""
-                RootNamespace = "HAData"
-                RunPostBuildEvent = "OnBuildSuccess"
-                StartupObject = ""
-            >
-                <Config
-                    Name = "Debug"
-                    AllowUnsafeBlocks = "false"
-                    BaseAddress = "285212672"
-                    CheckForOverflowUnderflow = "false"
-                    ConfigurationOverrideFile = ""
-                    DefineConstants = "DEBUG;TRACE"
-                    DocumentationFile = ""
-                    DebugSymbols = "true"
-                    FileAlignment = "4096"
-                    IncrementalBuild = "true"
-                    NoStdLib = "false"
-                    NoWarn = ""
-                    Optimize = "false"
-                    OutputPath = "bin\Debug\"
-                    RegisterForComInterop = "false"
-                    RemoveIntegerChecks = "false"
-                    TreatWarningsAsErrors = "false"
-                    WarningLevel = "4"
-                />
-                <Config
-                    Name = "Release"
-                    AllowUnsafeBlocks = "false"
-                    BaseAddress = "285212672"
-                    CheckForOverflowUnderflow = "false"
-                    ConfigurationOverrideFile = ""
-                    DefineConstants = "TRACE"
-                    DocumentationFile = ""
-                    DebugSymbols = "false"
-                    FileAlignment = "4096"
-                    IncrementalBuild = "false"
-                    NoStdLib = "false"
-                    NoWarn = ""
-                    Optimize = "true"
-                    OutputPath = "bin\Release\"
-                    RegisterForComInterop = "false"
-                    RemoveIntegerChecks = "false"
-                    TreatWarningsAsErrors = "false"
-                    WarningLevel = "4"
-                />
-            </Settings>
-            <References>
-                <Reference
-                    Name = "System"
-                    AssemblyName = "System"
-                    HintPath = "..\..\WINNT\Microsoft.NET\Framework\v1.0.3705\System.dll"
-                />
-                <Reference
-                    Name = "System.Data"
-                    AssemblyName = "System.Data"
-                    HintPath = "..\..\WINNT\Microsoft.NET\Framework\v1.0.3705\System.Data.dll"
-                />
-                <Reference
-                    Name = "System.XML"
-                    AssemblyName = "System.Xml"
-                    HintPath = "..\..\WINNT\Microsoft.NET\Framework\v1.0.3705\System.XML.dll"
-                />
-                <Reference
-                    Name = "System.Windows.Forms"
-                    AssemblyName = "System.Windows.Forms"
-                    HintPath = "..\..\WINNT\Microsoft.NET\Framework\v1.0.3705\System.Windows.Forms.dll"
-                />
-                <Reference
-                    Name = "System.Drawing"
-                    AssemblyName = "System.Drawing"
-                    HintPath = "..\..\WINDOWS\Microsoft.NET\Framework\v1.0.3705\System.Drawing.dll"
-                />
-                <Reference
-                    Name = "System.Web"
-                    AssemblyName = "System.Web"
-                    HintPath = "..\..\WINDOWS\Microsoft.NET\Framework\v1.0.3705\System.Web.dll"
-                />
-                <Reference
-                    Name = "Microsoft.Data.Odbc"
-                    AssemblyName = "Microsoft.Data.Odbc"
-                    HintPath = "..\..\..\..\..\Program Files\Microsoft.NET\Odbc.Net\Microsoft.Data.Odbc.dll"
-                />
-            </References>
-        </Build>
-        <Files>
-            <Include>
-                <File
-                    RelPath = "AssemblyInfo.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "Class1.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "Common\HADataConfiguration.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "Common\HAServerConnection.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "Common\IDValue.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "Common\SerializableDataSet.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "Common\TreeBuilder\ActionTree.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "Common\TreeBuilder\ObjectTree.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "Common\TreeBuilder\TextTree.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\ArrayData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\ArrayData.resx"
-                    DependentUpon = "ArrayData.cs"
-                    BuildAction = "EmbeddedResource"
-                />
-                <File
-                    RelPath = "DataAccess\ButtonData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\Command_CommandParameterData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\CommandCategoryData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\CommandData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\CommandGroup_D_Command_CommandParameterData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\CommandGroup_D_CommandData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\CommandGroup_DData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\CommandParameterData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\CriteriaList_CriteriaParmListData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\CriteriaListData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\CriteriaParmListData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\DesignObjCategoryData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\DesignObjData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\DesignObjParameterData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\DesignObjType_DesignObjParameterData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\DesignObjTypeData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\DesignObjVariation_DesignObj_Skin_Language.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\DesignObjVariation_DesignObjData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\DesignObjVariation_DesignObjData.resx"
-                    DependentUpon = "DesignObjVariation_DesignObjData.cs"
-                    BuildAction = "EmbeddedResource"
-                />
-                <File
-                    RelPath = "DataAccess\DesignObjVariation_DesignObjParameterData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\DesignObjVariation_Text_Skin_LanguageData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\DesignObjVariation_TextData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\DesignObjVariation_ZoneData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\DesignObjVariation_ZoneData.resx"
-                    DependentUpon = "DesignObjVariation_ZoneData.cs"
-                    BuildAction = "EmbeddedResource"
-                />
-                <File
-                    RelPath = "DataAccess\DesignObjVariationData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\DesignObjVariationData.resx"
-                    DependentUpon = "DesignObjVariationData.cs"
-                    BuildAction = "EmbeddedResource"
-                />
-                <File
-                    RelPath = "DataAccess\DeviceTemplateData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\EffectTypeData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\EffectTypeData.resx"
-                    DependentUpon = "EffectTypeData.cs"
-                    BuildAction = "EmbeddedResource"
-                />
-                <File
-                    RelPath = "DataAccess\HorizAlignmentData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\IconData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\InstallationData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\LanguageData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\MyDataSet.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\ParameterTypeData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\Screen_CommandParameterData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\Screen_CommandParameterData.resx"
-                    DependentUpon = "Screen_CommandParameterData.cs"
-                    BuildAction = "EmbeddedResource"
-                />
-                <File
-                    RelPath = "DataAccess\SizeData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\SkinData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\StyleData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\StyleVariationData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\SystemData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\Text_LS_AltVersionsData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\Text_LSData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\TextCategoryData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\TextData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\UIData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\UserModeData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\UsersData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\VariableData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\VersionData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "DataAccess\VertAlignmentData.cs"
-                    SubType = "Component"
-                    BuildAction = "Compile"
-                />
-            </Include>
-        </Files>
-    </CSHARP>
-</VisualStudioProject>
-
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>8.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{C5679AE5-F8FF-451F-A97B-EA58F93B04AF}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>HAData</AssemblyName>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>Library</OutputType>
+    <RootNamespace>HAData</RootNamespace>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>0.0</OldToolsVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DocumentationFile>
+    </DocumentationFile>
+    <FileAlignment>4096</FileAlignment>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>none</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <Name>System.Drawing</Name>
+    </Reference>
+    <Reference Include="System.Web">
+      <Name>System.Web</Name>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <Name>System.Windows.Forms</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+    <Reference Include="MySql.Data, Version=6.1.3.0, Culture=neutral, PublicKeyToken=20449f9ba87f7ae2">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\..\usr\lib\cli\MySql.Data-6.1\MySql.Data.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Class1.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Common\HADataConfiguration.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Common\HAServerConnection.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Common\IDValue.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Common\SerializableDataSet.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Common\TreeBuilder\ActionTree.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Common\TreeBuilder\ObjectTree.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Common\TreeBuilder\TextTree.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DataAccess\ArrayData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\ButtonData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\CommandCategoryData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\CommandData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\CommandGroup_DData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\CommandGroup_D_CommandData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\CommandGroup_D_Command_CommandParameterData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\CommandParameterData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\Command_CommandParameterData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\CriteriaListData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\CriteriaList_CriteriaParmListData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\CriteriaParmListData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DesignObjCategoryData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DesignObjData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DesignObjParameterData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DesignObjTypeData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DesignObjType_DesignObjParameterData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DesignObjVariationData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DesignObjVariation_DesignObjData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DesignObjVariation_DesignObjParameterData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DesignObjVariation_DesignObj_Skin_Language.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DesignObjVariation_TextData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DesignObjVariation_Text_Skin_LanguageData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DesignObjVariation_ZoneData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\DeviceTemplateData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\EffectTypeData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\HorizAlignmentData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\IconData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\InstallationData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\LanguageData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\MyDataSet.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\ParameterTypeData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\Screen_CommandParameterData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\SizeData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\SkinData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\StyleData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\StyleVariationData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\SystemData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\TextCategoryData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\TextData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\Text_LSData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\Text_LS_AltVersionsData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\UIData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\UserModeData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\UsersData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\VariableData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\VersionData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\VertAlignmentData.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <EmbeddedResource Include="DataAccess\ArrayData.resx">
+      <DependentUpon>ArrayData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DataAccess\DesignObjVariationData.resx">
+      <DependentUpon>DesignObjVariationData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DataAccess\DesignObjVariation_DesignObjData.resx">
+      <DependentUpon>DesignObjVariation_DesignObjData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DataAccess\DesignObjVariation_ZoneData.resx">
+      <DependentUpon>DesignObjVariation_ZoneData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DataAccess\EffectTypeData.resx">
+      <DependentUpon>EffectTypeData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DataAccess\Screen_CommandParameterData.resx">
+      <DependentUpon>Screen_CommandParameterData.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>

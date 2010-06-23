@@ -2,7 +2,9 @@ namespace HAData.DataAccess {
 	using System;
 	using System.Data;
 	using System.IO;
-	using Microsoft.Data.Odbc;
+	using MySql;
+	using MySql.Data;
+	using MySql.Data.MySqlClient;
 	using System.Diagnostics;
 	using HAData.Common;
 
@@ -10,17 +12,17 @@ namespace HAData.DataAccess {
 	{
 		bool m_bIsCache=false;
 		MyDataSet m_mdsCache=null;
-		public OdbcConnection m_conn=null;
-		public OdbcTransaction m_trans=null;
+		public MySqlConnection m_conn=null;
+		public MySqlTransaction m_trans=null;
 		public MyDataSet()
 		{
-				m_conn = HADataConfiguration.GetOdbcConnection();
+				m_conn = HADataConfiguration.GetMySqlConnection();
 		}
-		public MyDataSet(OdbcConnection conn, OdbcTransaction trans,bool bKeepConnection,bool bCache)
+		public MyDataSet(MySqlConnection conn, MySqlTransaction trans,bool bKeepConnection,bool bCache)
 		{
 			if( conn==null && (bKeepConnection || bCache) )
 			{
-				conn = HADataConfiguration.GetOdbcConnection();
+				conn = HADataConfiguration.GetMySqlConnection();
 			}
 
 			if( bKeepConnection )
@@ -80,11 +82,11 @@ namespace HAData.DataAccess {
 				m_bIsCache=true;
 			}
 		}
-		public MyDataSet(OdbcConnection conn, OdbcTransaction trans,bool bKeepConnection,ref MyDataSet cache)
+		public MyDataSet(MySqlConnection conn, MySqlTransaction trans,bool bKeepConnection,ref MyDataSet cache)
 		{
 			if( conn==null )
 			{
-				conn = HADataConfiguration.GetOdbcConnection();
+				conn = HADataConfiguration.GetMySqlConnection();
 			}
 
 			if( bKeepConnection )
@@ -247,7 +249,7 @@ namespace HAData.DataAccess {
 				return;
 			Update(PK_Users,m_conn,m_trans);
 		}
-		public void Update(int PK_Users,OdbcConnection conn,OdbcTransaction trans)
+		public void Update(int PK_Users,MySqlConnection conn,MySqlTransaction trans)
 		{
 			if( conn==null )
 				return;

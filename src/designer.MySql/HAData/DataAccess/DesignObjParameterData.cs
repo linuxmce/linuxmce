@@ -1,7 +1,9 @@
 namespace HAData.DataAccess {
 	using System;
 	using System.Data;
-	using Microsoft.Data.Odbc;
+	using MySql;
+	using MySql.Data;
+	using MySql.Data.MySqlClient;
 	using System.Collections;
 
 	using HAData.Common;
@@ -69,7 +71,7 @@ namespace HAData.DataAccess {
 		public const int PRONTO_FILE_CONST = 58;
 		public const int HIGHLIGHTED_GRAPHIC_CONST = 59;
 		// DataSetCommand object
-		protected OdbcDataAdapter m_DSCommand;
+		protected MySqlDataAdapter m_DSCommand;
 
 		// Stored procedure parameters
 		protected const String PK_DESIGNOBJPARAMETER_PARM = "@PK_DesignObjParameter";
@@ -79,12 +81,12 @@ namespace HAData.DataAccess {
 		protected const String FK_PARAMETERTYPE_PARM = "@FK_ParameterType";
 		protected const String USERID_PARM = "@UserID";
 
-		protected OdbcCommand m_LoadCommand;
-		protected OdbcCommand m_InsertCommand;
-		protected OdbcCommand m_UpdateCommand;
-		protected OdbcCommand m_DeleteCommand;
-		protected OdbcConnection m_Connection;
-		protected OdbcTransaction m_Transaction;
+		protected MySqlCommand m_LoadCommand;
+		protected MySqlCommand m_InsertCommand;
+		protected MySqlCommand m_UpdateCommand;
+		protected MySqlCommand m_DeleteCommand;
+		protected MySqlConnection m_Connection;
+		protected MySqlTransaction m_Transaction;
 		public DataTable Table { get { return Tables[0]; } }
 
 
@@ -93,21 +95,21 @@ namespace HAData.DataAccess {
 			// Create the tables in the dataset
 			//
 			Tables.Add(BuildDataTables());
-			m_Connection = HADataConfiguration.GetOdbcConnection();
+			m_Connection = HADataConfiguration.GetMySqlConnection();
 			CreateCommands(m_Connection, m_Transaction, ref m_LoadCommand, ref m_InsertCommand, ref m_UpdateCommand, ref m_DeleteCommand);
 			// Create our DataSetCommand
-			m_DSCommand = new OdbcDataAdapter();
+			m_DSCommand = new MySqlDataAdapter();
 
 			m_DSCommand.TableMappings.Add("Table", DesignObjParameterData.DESIGNOBJPARAMETER_TABLE);
 		}
 
-		public DesignObjParameterData(OdbcConnection conn,OdbcTransaction trans) {
+		public DesignObjParameterData(MySqlConnection conn,MySqlTransaction trans) {
 
 			m_Connection = conn;
 			m_Transaction = trans;
 			CreateCommands(m_Connection, m_Transaction, ref m_LoadCommand, ref m_InsertCommand, ref m_UpdateCommand, ref m_DeleteCommand);
 			// Create our DataSetCommand
-			m_DSCommand = new OdbcDataAdapter();
+			m_DSCommand = new MySqlDataAdapter();
 
 			m_DSCommand.TableMappings.Add("Table", DesignObjParameterData.DESIGNOBJPARAMETER_TABLE);
 		}
@@ -157,13 +159,13 @@ namespace HAData.DataAccess {
 
 			return Table;
 		}
-		protected static void CreateParameters(OdbcParameterCollection Params, bool IsInsert) {
-			Params.Add(new OdbcParameter(PK_DESIGNOBJPARAMETER_PARM, OdbcType.Int,4));
-			Params.Add(new OdbcParameter(DEFINE_PARM, OdbcType.VarChar, 20));
-			Params.Add(new OdbcParameter(COMMENTS_PARM, OdbcType.VarChar, 255));
-			Params.Add(new OdbcParameter(DESCRIPTION_PARM, OdbcType.VarChar, 20));
-			Params.Add(new OdbcParameter(FK_PARAMETERTYPE_PARM, OdbcType.Int,4));
-			Params.Add(new OdbcParameter(USERID_PARM, OdbcType.Int));
+		protected static void CreateParameters(MySqlParameterCollection Params, bool IsInsert) {
+			Params.Add(new MySqlParameter(PK_DESIGNOBJPARAMETER_PARM, MySqlDbType.Int32,4));
+			Params.Add(new MySqlParameter(DEFINE_PARM, MySqlDbType.VarChar, 20));
+			Params.Add(new MySqlParameter(COMMENTS_PARM, MySqlDbType.VarChar, 255));
+			Params.Add(new MySqlParameter(DESCRIPTION_PARM, MySqlDbType.VarChar, 20));
+			Params.Add(new MySqlParameter(FK_PARAMETERTYPE_PARM, MySqlDbType.Int32,4));
+			Params.Add(new MySqlParameter(USERID_PARM, MySqlDbType.Int32));
 
 			// map the parameters to the data table
 
@@ -178,23 +180,23 @@ namespace HAData.DataAccess {
 			Params[FK_PARAMETERTYPE_PARM].SourceColumn = DesignObjParameterData.FK_PARAMETERTYPE_FIELD;
 		}
 
-		protected static void CreateCommands(OdbcConnection Conn, OdbcTransaction Trans, ref OdbcCommand LoadCommand, ref OdbcCommand InsertCommand, ref OdbcCommand UpdateCommand, ref OdbcCommand DeleteCommand) {
+		protected static void CreateCommands(MySqlConnection Conn, MySqlTransaction Trans, ref MySqlCommand LoadCommand, ref MySqlCommand InsertCommand, ref MySqlCommand UpdateCommand, ref MySqlCommand DeleteCommand) {
 			if(LoadCommand == null) {
 				// Create the command since it's null
-				LoadCommand = new OdbcCommand("sp_Select_DesignObjParameter", Conn);
+				LoadCommand = new MySqlCommand("sp_Select_DesignObjParameter", Conn);
 				LoadCommand.CommandType = CommandType.StoredProcedure;
 				LoadCommand.Transaction = Trans;
 
-				LoadCommand.Parameters.Add(new OdbcParameter(PK_DESIGNOBJPARAMETER_PARM, OdbcType.Int,4));
+				LoadCommand.Parameters.Add(new MySqlParameter(PK_DESIGNOBJPARAMETER_PARM, MySqlDbType.Int32,4));
 			}
 
 			if(InsertCommand == null) {
 				// Create the command since it's null
-				InsertCommand = new OdbcCommand("sp_Insert_DesignObjParameter", Conn);
+				InsertCommand = new MySqlCommand("sp_Insert_DesignObjParameter", Conn);
 				InsertCommand.CommandType = CommandType.StoredProcedure;
 				InsertCommand.Transaction = Trans;
 
-				OdbcParameterCollection Params = InsertCommand.Parameters;
+				MySqlParameterCollection Params = InsertCommand.Parameters;
 
 				CreateParameters(Params, true);
 
@@ -202,34 +204,34 @@ namespace HAData.DataAccess {
 
 			if(UpdateCommand == null) {
 				// Create the command since it's null
-				UpdateCommand = new OdbcCommand("sp_Update_DesignObjParameter", Conn);
+				UpdateCommand = new MySqlCommand("sp_Update_DesignObjParameter", Conn);
 				UpdateCommand.CommandType = CommandType.StoredProcedure;
 				UpdateCommand.Transaction = Trans;
 
-				OdbcParameterCollection Params = UpdateCommand.Parameters;
+				MySqlParameterCollection Params = UpdateCommand.Parameters;
 
 				CreateParameters(Params, false);
 
 			}
 			if (DeleteCommand == null)
 			{
-				DeleteCommand = new OdbcCommand("sp_Delete_DesignObjParameter", Conn);
+				DeleteCommand = new MySqlCommand("sp_Delete_DesignObjParameter", Conn);
 				DeleteCommand.CommandType = CommandType.StoredProcedure;
 				DeleteCommand.Transaction = Trans;
 
-				DeleteCommand.Parameters.Add(PK_DESIGNOBJPARAMETER_PARM, OdbcType.Int,4, PK_DESIGNOBJPARAMETER_FIELD);
-				DeleteCommand.Parameters.Add(USERID_PARM, OdbcType.Int);
+				DeleteCommand.Parameters.Add(PK_DESIGNOBJPARAMETER_PARM, MySqlDbType.Int32,4, PK_DESIGNOBJPARAMETER_FIELD);
+				DeleteCommand.Parameters.Add(USERID_PARM, MySqlDbType.Int32);
 			}
 		}
 
-		protected static void CreateCommands(OdbcDataAdapter odbcda,OdbcConnection Conn, OdbcTransaction Trans, ref OdbcCommand LoadCommand, ref OdbcCommand InsertCommand, ref OdbcCommand UpdateCommand, ref OdbcCommand DeleteCommand) {
-				LoadCommand = new OdbcCommand("SELECT PK_DesignObjParameter,Define,Comments,Description,FK_ParameterType FROM DesignObjParameter", Conn);
+		protected static void CreateCommands(MySqlDataAdapter odbcda,MySqlConnection Conn, MySqlTransaction Trans, ref MySqlCommand LoadCommand, ref MySqlCommand InsertCommand, ref MySqlCommand UpdateCommand, ref MySqlCommand DeleteCommand) {
+				LoadCommand = new MySqlCommand("SELECT PK_DesignObjParameter,Define,Comments,Description,FK_ParameterType FROM DesignObjParameter", Conn);
 				LoadCommand.Transaction = Trans;
 
-				LoadCommand.Parameters.Add(new OdbcParameter(PK_DESIGNOBJPARAMETER_PARM, OdbcType.Int,4));
+				LoadCommand.Parameters.Add(new MySqlParameter(PK_DESIGNOBJPARAMETER_PARM, MySqlDbType.Int32,4));
 
 			odbcda.SelectCommand = LoadCommand;
-			OdbcCommandBuilder odbcCB = new OdbcCommandBuilder(odbcda);
+			MySqlCommandBuilder odbcCB = new MySqlCommandBuilder(odbcda);
 			odbcCB.RefreshSchema();
 			DeleteCommand = odbcCB.GetDeleteCommand();
 			InsertCommand = odbcCB.GetInsertCommand();
@@ -245,7 +247,7 @@ namespace HAData.DataAccess {
 			return this;
 		}
 
-		public static DataRowCollection LoadDesignObjParameterWithWhere(ref MyDataSet ds, OdbcConnection conn, OdbcTransaction trans, string WhereClause) // marker:2
+		public static DataRowCollection LoadDesignObjParameterWithWhere(ref MyDataSet ds, MySqlConnection conn, MySqlTransaction trans, string WhereClause) // marker:2
 		{
 			DataRowCollection dr;
 			if( ds==null )
@@ -264,12 +266,12 @@ namespace HAData.DataAccess {
 			dsTemp.Tables.Add(BuildDataTables());
 			
 			if( conn==null )
-				conn = HADataConfiguration.GetOdbcConnection();
+				conn = HADataConfiguration.GetMySqlConnection();
 			
-			OdbcDataAdapter sqlda = new OdbcDataAdapter();
+			MySqlDataAdapter sqlda = new MySqlDataAdapter();
 			string sSQL = "SELECT PK_DesignObjParameter, Define, Comments, Description, FK_ParameterType FROM DesignObjParameter WHERE " + WhereClause;
 			
-			OdbcCommand LoadCommand = new OdbcCommand(sSQL,conn);
+			MySqlCommand LoadCommand = new MySqlCommand(sSQL,conn);
 			
 			if( trans!=null )
 				LoadCommand.Transaction = trans;
@@ -285,7 +287,7 @@ namespace HAData.DataAccess {
 			return dr;
 		}
 
-		public static DataRow LoadNoCacheDesignObjParameter(ref MyDataSet ds, OdbcConnection conn, OdbcTransaction trans, System.Int32 PK_DesignObjParameter)
+		public static DataRow LoadNoCacheDesignObjParameter(ref MyDataSet ds, MySqlConnection conn, MySqlTransaction trans, System.Int32 PK_DesignObjParameter)
 		{
 			DataRow dr = null;
 			if( ds==null )
@@ -300,15 +302,15 @@ namespace HAData.DataAccess {
 					ds.Tables.Add(BuildDataTables());
 			}
 
-			OdbcDataAdapter sqlda = new OdbcDataAdapter();
-			OdbcCommand LoadCommand;
+			MySqlDataAdapter sqlda = new MySqlDataAdapter();
+			MySqlCommand LoadCommand;
 			if( conn==null )
-				conn = HADataConfiguration.GetOdbcConnection();
+				conn = HADataConfiguration.GetMySqlConnection();
 
-			LoadCommand = new OdbcCommand("sp_Select_DesignObjParameter", conn);
+			LoadCommand = new MySqlCommand("sp_Select_DesignObjParameter", conn);
 
 			LoadCommand.CommandType = CommandType.StoredProcedure;
-			LoadCommand.Parameters.Add(new OdbcParameter(PK_DESIGNOBJPARAMETER_PARM, OdbcType.Int,4));
+			LoadCommand.Parameters.Add(new MySqlParameter(PK_DESIGNOBJPARAMETER_PARM, MySqlDbType.Int32,4));
 			LoadCommand.Parameters[PK_DESIGNOBJPARAMETER_PARM].Value = PK_DesignObjParameter;
 			if( trans!=null )
 				LoadCommand.Transaction = trans;
@@ -318,7 +320,7 @@ namespace HAData.DataAccess {
 			return dr;
 		}
 
-		public static DataRow LoadDesignObjParameter(ref MyDataSet ds, OdbcConnection conn, OdbcTransaction trans, System.Int32 PK_DesignObjParameter)  // marker:3
+		public static DataRow LoadDesignObjParameter(ref MyDataSet ds, MySqlConnection conn, MySqlTransaction trans, System.Int32 PK_DesignObjParameter)  // marker:3
 		{
 			DataRow dr = null;
 			if( ds==null )
@@ -337,15 +339,15 @@ namespace HAData.DataAccess {
 
 			if( dr==null )
 			{
-				OdbcDataAdapter sqlda = new OdbcDataAdapter();
-				OdbcCommand LoadCommand;
+				MySqlDataAdapter sqlda = new MySqlDataAdapter();
+				MySqlCommand LoadCommand;
 				if( conn==null )
-					conn = HADataConfiguration.GetOdbcConnection();
+					conn = HADataConfiguration.GetMySqlConnection();
 
-				LoadCommand = new OdbcCommand("sp_Select_DesignObjParameter", conn);
+				LoadCommand = new MySqlCommand("sp_Select_DesignObjParameter", conn);
 
 				LoadCommand.CommandType = CommandType.StoredProcedure;
-				LoadCommand.Parameters.Add(new OdbcParameter(PK_DESIGNOBJPARAMETER_PARM, OdbcType.Int,4));
+				LoadCommand.Parameters.Add(new MySqlParameter(PK_DESIGNOBJPARAMETER_PARM, MySqlDbType.Int32,4));
 				LoadCommand.Parameters[PK_DESIGNOBJPARAMETER_PARM].Value = PK_DesignObjParameter;
 				if( trans!=null )
 					LoadCommand.Transaction = trans;
@@ -359,7 +361,7 @@ namespace HAData.DataAccess {
 		public DesignObjParameterData LoadAll() {
 
 			// Create the command since it's null
-			m_DSCommand.SelectCommand = new OdbcCommand("SELECT * FROM DesignObjParameter", m_Connection);
+			m_DSCommand.SelectCommand = new MySqlCommand("SELECT * FROM DesignObjParameter", m_Connection);
 			m_DSCommand.SelectCommand.CommandType = CommandType.Text;
 			m_DSCommand.SelectCommand.Transaction = m_Transaction;
 
@@ -368,12 +370,12 @@ namespace HAData.DataAccess {
 
 		}
 
-		public static DataRowCollection LoadAll(ref MyDataSet ds, OdbcConnection conn, OdbcTransaction trans) {
+		public static DataRowCollection LoadAll(ref MyDataSet ds, MySqlConnection conn, MySqlTransaction trans) {
 
 			if( conn==null )
-				conn = HADataConfiguration.GetOdbcConnection();
-			OdbcDataAdapter sqlda = new OdbcDataAdapter();
-			OdbcCommand LoadCommand = new OdbcCommand("SELECT * FROM DesignObjParameter", conn);
+				conn = HADataConfiguration.GetMySqlConnection();
+			MySqlDataAdapter sqlda = new MySqlDataAdapter();
+			MySqlCommand LoadCommand = new MySqlCommand("SELECT * FROM DesignObjParameter", conn);
 			LoadCommand.CommandType = CommandType.Text;
 			if( trans!=null )
 				LoadCommand.Transaction = trans;
@@ -392,7 +394,7 @@ namespace HAData.DataAccess {
 		public DesignObjParameterData ExecuteQuery(String sSQL,String sTableName) {
 
 			// Create the command since it's null
-			m_DSCommand.SelectCommand = new OdbcCommand(sSQL, m_Connection);
+			m_DSCommand.SelectCommand = new MySqlCommand(sSQL, m_Connection);
 			m_DSCommand.SelectCommand.CommandType = CommandType.Text;
 			m_DSCommand.SelectCommand.Transaction = m_Transaction;
 
@@ -401,15 +403,15 @@ namespace HAData.DataAccess {
 			return this;
 		}
 
-		public static DataRowCollection ExecuteQuery(String sSQL,ref MyDataSet ds, OdbcConnection conn, OdbcTransaction trans) {
+		public static DataRowCollection ExecuteQuery(String sSQL,ref MyDataSet ds, MySqlConnection conn, MySqlTransaction trans) {
 			return ExecuteQuery(sSQL,ref ds,conn,trans,"DesignObjParameter");
 		}
 
-		public static DataRowCollection ExecuteQuery(String sSQL,ref MyDataSet ds, OdbcConnection conn, OdbcTransaction trans,string sTableName) {
+		public static DataRowCollection ExecuteQuery(String sSQL,ref MyDataSet ds, MySqlConnection conn, MySqlTransaction trans,string sTableName) {
 			if( conn==null )
-				conn = HADataConfiguration.GetOdbcConnection();
-			OdbcDataAdapter sqlda = new OdbcDataAdapter();
-			OdbcCommand LoadCommand = new OdbcCommand(sSQL, conn);
+				conn = HADataConfiguration.GetMySqlConnection();
+			MySqlDataAdapter sqlda = new MySqlDataAdapter();
+			MySqlCommand LoadCommand = new MySqlCommand(sSQL, conn);
 			LoadCommand.CommandType = CommandType.Text;
 			if( trans!=null )
 				LoadCommand.Transaction = trans;
@@ -441,33 +443,33 @@ namespace HAData.DataAccess {
 
 		public static bool UpdateDesignObjParameter(ref MyDataSet ds, int CurUserID)
 		{
-			OdbcConnection OdbcConn = HADataConfiguration.GetOdbcConnection();
+			MySqlConnection OdbcConn = HADataConfiguration.GetMySqlConnection();
 			return UpdateDesignObjParameter(ref ds,CurUserID,OdbcConn,null);
 		}
 
-		public static bool UpdateDesignObjParameter(ref MyDataSet ds, int CurUserID,OdbcConnection OdbcConn,OdbcTransaction Trans)
+		public static bool UpdateDesignObjParameter(ref MyDataSet ds, int CurUserID,MySqlConnection OdbcConn,MySqlTransaction Trans)
 		{
 			DataTable dt = ds.Tables[DESIGNOBJPARAMETER_TABLE];
 			if( dt == null )
 				return false;
 
-			OdbcDataAdapter sqlda = new OdbcDataAdapter();
-			OdbcCommand LoadCommand = null;
-			OdbcCommand InsertCommand = null;
-			OdbcCommand UpdateCommand = null;
-			OdbcCommand DeleteCommand = null;
+			MySqlDataAdapter sqlda = new MySqlDataAdapter();
+			MySqlCommand LoadCommand = null;
+			MySqlCommand InsertCommand = null;
+			MySqlCommand UpdateCommand = null;
+			MySqlCommand DeleteCommand = null;
 			CreateCommands(sqlda,OdbcConn, Trans, ref LoadCommand, ref InsertCommand, ref UpdateCommand, ref DeleteCommand);
-			sqlda.RowUpdated += new OdbcRowUpdatedEventHandler(MyRowUpdated);
+			sqlda.RowUpdated += new MySqlRowUpdatedEventHandler(MyRowUpdated);
 
 			sqlda.Update(dt);
 			return true;
 		}
 
-		static void MyRowUpdated(Object sender, OdbcRowUpdatedEventArgs e)
+		static void MyRowUpdated(Object sender, MySqlRowUpdatedEventArgs e)
 		{
 			if( e.StatementType==StatementType.Insert )
 			{
-				OdbcCommand ocmd = new OdbcCommand("SELECT @@IDENTITY", e.Command.Connection);
+				MySqlCommand ocmd = new MySqlCommand("SELECT @@IDENTITY", e.Command.Connection);
 				int value = Int32.Parse(ocmd.ExecuteScalar().ToString());
 				e.Row[0]=value;
 				e.Row.AcceptChanges();
@@ -563,21 +565,21 @@ namespace HAData.DataAccess {
 	} // public class DesignObjParameterDataRow
 	public class DesignObjParameterDataReader
 	{
-		public OdbcDataReader dr;
+		public MySqlDataReader dr;
 		bool bCache=false;
 		int iRecord=-1,iNumRecords=-1;
 		ArrayList al = null;
 
-		public DesignObjParameterDataReader(OdbcDataReader d)
+		public DesignObjParameterDataReader(MySqlDataReader d)
 		{
 			dr=d;
 		}
-		public DesignObjParameterDataReader(OdbcCommand cmd)
+		public DesignObjParameterDataReader(MySqlCommand cmd)
 		{
 			dr = cmd.ExecuteReader();
 		}
 
-		public DesignObjParameterDataReader(OdbcCommand cmd,bool Cache)
+		public DesignObjParameterDataReader(MySqlCommand cmd,bool Cache)
 		{
 			dr = cmd.ExecuteReader();
 			bCache=Cache;
@@ -587,22 +589,22 @@ namespace HAData.DataAccess {
 
 		public DesignObjParameterDataReader(string sSQL)
 		{
-			OdbcConnection conn = HADataConfiguration.GetOdbcConnection();
+			MySqlConnection conn = HADataConfiguration.GetMySqlConnection();
 
 			if( !sSQL.ToUpper().StartsWith("SELECT") )
 			{
 				sSQL = "SELECT * FROM DesignObjParameter WHERE " + sSQL;
 			}
 
-			OdbcCommand cmd = new OdbcCommand(sSQL,conn,null);
+			MySqlCommand cmd = new MySqlCommand(sSQL,conn,null);
 			dr = cmd.ExecuteReader();
 		}
 
-		public DesignObjParameterDataReader(string sSQL,OdbcConnection conn)
+		public DesignObjParameterDataReader(string sSQL,MySqlConnection conn)
 		{
 			if( conn==null )
 			{
-				conn = HADataConfiguration.GetOdbcConnection();
+				conn = HADataConfiguration.GetMySqlConnection();
 			}
 
 			if( !sSQL.ToUpper().StartsWith("SELECT") )
@@ -610,15 +612,15 @@ namespace HAData.DataAccess {
 				sSQL = "SELECT * FROM DesignObjParameter WHERE " + sSQL;
 			}
 
-			OdbcCommand cmd = new OdbcCommand(sSQL,conn,null);
+			MySqlCommand cmd = new MySqlCommand(sSQL,conn,null);
 			dr = cmd.ExecuteReader();
 		}
 
-		public DesignObjParameterDataReader(string sSQL,OdbcConnection conn,OdbcTransaction trans,bool Cache)
+		public DesignObjParameterDataReader(string sSQL,MySqlConnection conn,MySqlTransaction trans,bool Cache)
 		{
 			if( conn==null )
 			{
-				conn = HADataConfiguration.GetOdbcConnection();
+				conn = HADataConfiguration.GetMySqlConnection();
 			}
 
 			if( !sSQL.ToUpper().StartsWith("SELECT") )
@@ -626,7 +628,7 @@ namespace HAData.DataAccess {
 				sSQL = "SELECT * FROM DesignObjParameter WHERE " + sSQL;
 			}
 
-			OdbcCommand cmd = new OdbcCommand(sSQL,conn,trans);
+			MySqlCommand cmd = new MySqlCommand(sSQL,conn,trans);
 			dr = cmd.ExecuteReader();
 			bCache=Cache;
 			if( bCache )
@@ -737,27 +739,13 @@ namespace HAData.DataAccess {
 			get
 			{
 				DesignObjParameterDataRow dr = new DesignObjParameterDataRow(Rows.Find(PK_DesignObjParameter));
-				if( !dr.bIsValid  && false /* can't do this with ODBC */  )
-				{
-					MyDataSet mds = (MyDataSet) DataSet;
-					if( mds.m_conn==null )
-						return dr;
-					OdbcDataAdapter sqlda = new OdbcDataAdapter();
-					OdbcCommand LoadCommand = new OdbcCommand("sp_Select_DesignObjParameter", mds.m_conn,mds.m_trans);
-					LoadCommand.CommandType = CommandType.StoredProcedure;
-					LoadCommand.Parameters.Add(new OdbcParameter("@PK_DesignObjParameter", OdbcType.Int,4));
-					LoadCommand.Parameters["@PK_DesignObjParameter"].Value = PK_DesignObjParameter;
-					sqlda.SelectCommand = LoadCommand;
-					sqlda.Fill(mds,"DesignObjParameter");
-					dr = new DesignObjParameterDataRow(Rows.Find(PK_DesignObjParameter));
-				}
 				return dr;
 			}
 		}
-		public DataRowCollection LoadAll(OdbcConnection conn, OdbcTransaction trans)
+		public DataRowCollection LoadAll(MySqlConnection conn, MySqlTransaction trans)
 		{
-			OdbcDataAdapter sqlda = new OdbcDataAdapter();
-			OdbcCommand LoadCommand = new OdbcCommand("SELECT PK_DesignObjParameter,Define,Comments,Description,FK_ParameterType FROM DesignObjParameter", conn);
+			MySqlDataAdapter sqlda = new MySqlDataAdapter();
+			MySqlCommand LoadCommand = new MySqlCommand("SELECT PK_DesignObjParameter,Define,Comments,Description,FK_ParameterType FROM DesignObjParameter", conn);
 			LoadCommand.CommandType = CommandType.Text;
 			if( trans!=null )
 				LoadCommand.Transaction = trans;
@@ -772,7 +760,7 @@ namespace HAData.DataAccess {
 		{
 			Update(PK_Users,((MyDataSet) DataSet).m_conn,((MyDataSet) DataSet).m_trans);
 		}
-		public void Update(int PK_Users,OdbcConnection conn, OdbcTransaction trans)
+		public void Update(int PK_Users,MySqlConnection conn, MySqlTransaction trans)
 		{
 			if( conn==null )
 				return;
