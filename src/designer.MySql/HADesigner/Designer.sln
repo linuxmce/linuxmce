@@ -1,0 +1,35 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HADesigner", "HADesigner.csproj", "{A34C2628-3F2A-4A28-ADF7-39E13A2C6CFC}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HAData", "..\HAData\HAData.csproj", "{C5679AE5-F8FF-451F-A97B-EA58F93B04AF}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{A34C2628-3F2A-4A28-ADF7-39E13A2C6CFC}.Debug.ActiveCfg = Debug|.NET
+		{A34C2628-3F2A-4A28-ADF7-39E13A2C6CFC}.Debug.Build.0 = Debug|.NET
+		{A34C2628-3F2A-4A28-ADF7-39E13A2C6CFC}.Release.ActiveCfg = Release|.NET
+		{A34C2628-3F2A-4A28-ADF7-39E13A2C6CFC}.Release.Build.0 = Release|.NET
+		{C5679AE5-F8FF-451F-A97B-EA58F93B04AF}.Debug.ActiveCfg = Debug|.NET
+		{C5679AE5-F8FF-451F-A97B-EA58F93B04AF}.Debug.Build.0 = Debug|.NET
+		{C5679AE5-F8FF-451F-A97B-EA58F93B04AF}.Release.ActiveCfg = Release|.NET
+		{C5679AE5-F8FF-451F-A97B-EA58F93B04AF}.Release.Build.0 = Release|.NET
+	EndGlobalSection
+	GlobalSection(SolutionItems) = postSolution
+		Designer.vsd = Designer.vsd
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+	GlobalSection(DPCodeReviewSolutionGUID) = preSolution
+		DPCodeReviewSolutionGUID = {00000000-0000-0000-0000-000000000000}
+	EndGlobalSection
+EndGlobal
