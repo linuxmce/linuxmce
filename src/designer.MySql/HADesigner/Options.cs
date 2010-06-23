@@ -16,7 +16,7 @@ namespace HADesigner
         private string strRegKey = "Software\\Pluto\\OrbiterDesigner";
 		private string strDefaultDirectory = @"C:\PlutoSkins";
         private string strDefaultDirectoryKey = "GraphicsDirectory";
-		private string strDefaultConnection = @"driver={MySQL ODBC 3.51 Driver};server=localhost;uid=;password=;database=pluto_dce;";
+		private string strDefaultConnection = @"server=localhost;uid=;password=;database=pluto_dce;";
 		private string strDefaultConnectionKey = "ConnectionKey";
 
 		private System.Windows.Forms.Label label1;

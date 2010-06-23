@@ -62,6 +62,8 @@ namespace HADesigner
 		private System.Windows.Forms.TextBox tbSelectTextByID;
 		private System.Windows.Forms.MenuItem miNewDesignObj;
 		private System.Windows.Forms.MenuItem miNewText;
+		private System.Windows.Forms.FlowLayoutPanel panelMain_Obj, panelMain_Text;
+		private System.Windows.Forms.FlowLayoutPanel panelQuick_Obj, panelQuick_Text;
 		private System.ComponentModel.IContainer components;
 
 		public ObjsBrowser2()
@@ -134,6 +136,10 @@ namespace HADesigner
 			this.miEditTextCategory = new System.Windows.Forms.MenuItem();
 			this.miNewDesignObj = new System.Windows.Forms.MenuItem();
 			this.miNewText = new System.Windows.Forms.MenuItem();
+			this.panelMain_Obj = new System.Windows.Forms.FlowLayoutPanel();
+			this.panelMain_Text = new System.Windows.Forms.FlowLayoutPanel();
+			this.panelQuick_Obj = new System.Windows.Forms.FlowLayoutPanel();
+			this.panelQuick_Text = new System.Windows.Forms.FlowLayoutPanel();
 			this.tabControl1.SuspendLayout();
 			this.tpDesignObjs.SuspendLayout();
 			this.tpText.SuspendLayout();
@@ -164,17 +170,30 @@ namespace HADesigner
 			// tpDesignObjs
 			// 
 			this.tpDesignObjs.Controls.AddRange(new System.Windows.Forms.Control[] {
-																					this.label1,
-																					this.tbSelectByID,
-																					this.btnCreate,
-																					this.btnDelete,
-																					this.tvDesignObj,
-																					this.btnLoadUIDesignObj});
+				this.panelMain_Obj
+			});
+			this.panelMain_Obj.Controls.AddRange(new System.Windows.Forms.Control[] {
+				this.tvDesignObj,
+				this.panelQuick_Obj
+			});
+			this.panelQuick_Obj.Controls.AddRange(new System.Windows.Forms.Control[] {
+				this.label1,
+				this.tbSelectByID,
+				this.btnLoadUIDesignObj,
+				this.btnCreate,
+				this.btnDelete
+			});
+			this.panelMain_Obj.FlowDirection = FlowDirection.TopDown;
+			this.panelMain_Obj.Dock = DockStyle.Fill;
+			this.panelQuick_Obj.FlowDirection = FlowDirection.LeftToRight;
+			this.panelQuick_Obj.Dock = DockStyle.Bottom;
+			
 			this.tpDesignObjs.Location = new System.Drawing.Point(4, 22);
 			this.tpDesignObjs.Name = "tpDesignObjs";
 			this.tpDesignObjs.Size = new System.Drawing.Size(224, 387);
 			this.tpDesignObjs.TabIndex = 0;
 			this.tpDesignObjs.Text = "DesignObjs";
+			this.tpDesignObjs.Dock = DockStyle.Fill;
 			// 
 			// label1
 			// 
@@ -189,7 +208,7 @@ namespace HADesigner
 			// tbSelectByID
 			// 
 			this.tbSelectByID.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left);
-			this.tbSelectByID.Location = new System.Drawing.Point(136, 352);
+			//this.tbSelectByID.Location = new System.Drawing.Point(136, 352);
 			this.tbSelectByID.Name = "tbSelectByID";
 			this.tbSelectByID.Size = new System.Drawing.Size(72, 20);
 			this.tbSelectByID.TabIndex = 4;
@@ -222,9 +241,9 @@ namespace HADesigner
 			// tvDesignObj
 			// 
 			this.tvDesignObj.AllowDrop = true;
-			this.tvDesignObj.Anchor = (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-				| System.Windows.Forms.AnchorStyles.Left) 
-				| System.Windows.Forms.AnchorStyles.Right);
+			this.tvDesignObj.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom
+				| System.Windows.Forms.AnchorStyles.Left 
+				| System.Windows.Forms.AnchorStyles.Right;
 			this.tvDesignObj.ContextMenu = this.cmDesignObjTree;
 			this.tvDesignObj.ImageList = this.imageList1;
 			this.tvDesignObj.Location = new System.Drawing.Point(8, 8);
@@ -268,12 +287,24 @@ namespace HADesigner
 			// tpText
 			// 
 			this.tpText.Controls.AddRange(new System.Windows.Forms.Control[] {
-																				 this.label2,
-																				 this.tbSelectTextByID,
-																				 this.btnNewText,
-																				 this.btnDeleteText,
-																				 this.btnLoadText,
-																				 this.tvText});
+				this.panelMain_Text
+			});
+			this.panelMain_Text.Controls.AddRange(new System.Windows.Forms.Control[] {
+				this.tvText,
+				this.panelQuick_Text
+			});
+			this.panelQuick_Text.Controls.AddRange(new System.Windows.Forms.Control[] {
+				this.label2,
+				this.tbSelectTextByID,
+				this.btnLoadText,
+				this.btnNewText,
+				this.btnDeleteText
+			});
+			this.panelMain_Text.FlowDirection = FlowDirection.TopDown;
+			this.panelQuick_Text.FlowDirection = FlowDirection.LeftToRight;
+			this.panelQuick_Text.Dock = DockStyle.Bottom;
+			this.panelMain_Text.Dock = DockStyle.Fill;
+
 			this.tpText.Location = new System.Drawing.Point(4, 22);
 			this.tpText.Name = "tpText";
 			this.tpText.Size = new System.Drawing.Size(224, 387);
