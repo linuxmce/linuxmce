@@ -1411,8 +1411,8 @@ class xml2Array {
 			return $this->arrOutput;
 	}
 	function tagOpen($parser, $name, $attrs) {
-		$tag=array("name"=>$name,"attrs"=>$attrs); 
-		array_push($this->arrOutput,$tag);
+		$tag=array("name"=>$name,"attrs"=>$attrs);
+		@array_push($this->arrOutput,$tag);
 	}
 	
 	function tagData($parser, $tagData) {
