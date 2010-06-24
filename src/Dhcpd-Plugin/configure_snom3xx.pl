@@ -4,22 +4,14 @@ use strict;
 use diagnostics;
 use DBI;
 require "/usr/pluto/bin/config_ops.pl";
-
-
-sub getIP {
-        my $dbh = DBI->connect(&read_pluto_cred()) or die "Can't connect to database: $DBI::errstr\n";
-        my $sth = $dbh->prepare("SELECT IPaddress FROM Device WHERE FK_DeviceTemplate = 7");
-        $sth->execute || die "Sql Error";
-        my $row = $sth->fetchrow_hashref;
-        my $IP = $row->{IPaddress};
-        return $IP;
-}
+require "/usr/pluto/bin/lmce.pl";
 
 #declare vars (it's safer this way)
 my $Device_ID;
 my $Device_IP;
 my $Device_MAC;
 my $Device_EXT;
+my $Device_SECRET;
 my $IntIP;
 
 #check params
@@ -35,7 +27,7 @@ else
     $Device_MAC = $ARGV[5];
 }
 
-$IntIP = getIP();
+$IntIP = getCoreIP();
 if ($IntIP eq "") {
         $IntIP="192.168.80.1";
 }
@@ -43,14 +35,18 @@ if ($IntIP eq "") {
 #sync with AMP (practically do nothing but create a new extension number)
 `/usr/pluto/bin/sync_pluto2amp.pl $Device_ID`;
 
-open(FILE,"/tmp/phone${Device_ID}extension");
-$Device_EXT=<FILE>;
-close(FILE);
+# Let's see what the database thinks about the extension of this phone
+$Device_EXT = get_device_devicedata($Device_ID,31);
+$Device_SECRET = get_device_devicedata($Device_ID,128);
+
+#open(FILE,"/tmp/phone${Device_ID}extension");
+#$Device_EXT=<FILE>;
+#close(FILE);
 
 chomp($Device_EXT);
 
 sleep(10);
-system("curl -d \"user_active1=on&user_realname1=$Device_EXT&user_name1=$Device_EXT&user_pass1=$Device_EXT&user_host1=$IntIP&user_pname1=$Device_EXT&Settings=Save\" \"http://$Device_IP/line_login.htm?l=1\" > /dev/null");
+system("curl -d \"user_active1=on&user_realname1=$Device_EXT&user_name1=$Device_EXT&user_pass1=$Device_SECRET&user_host1=$IntIP&user_pname1=$Device_EXT&Settings=Save\" \"http://$Device_IP/line_login.htm?l=1\" > /dev/null");
 sleep(3);
 system("curl -d \"user_expiry1=60&Settings=Save\" \"http://$Device_IP/line_sip.htm?l=1\" > /dev/null");
 sleep(3);
