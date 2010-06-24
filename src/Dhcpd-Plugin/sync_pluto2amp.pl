@@ -68,6 +68,8 @@ foreach my $I (sort keys %DEVICES)
     }
     else
     {
+        # If we do not have an extension, we find the next unused extension
+        # add a record to the devicedata table, and generate a secret for it
         if($DEVICE_EXT == 0)
         {
             &find_next_extension();
@@ -98,7 +100,7 @@ $DB_AS_HANDLE->disconnect();
 #run AMP's scripts to generate asterisk's config
 `/var/lib/asterisk/bin/retrieve_conf`;
 
-# Change dtfm mode (thx freepbx for being so buggy)
+# Change dtmf mode (thx freepbx for being so buggy)
 `sed -i 's/^dtmfmode=.*\$/dtmfmode=auto/g' /etc/asterisk/sip_additional.conf`;
 
 #reload asterisk
@@ -185,7 +187,15 @@ sub update_device_data()
     $DB_SQL = "update Device_DeviceData SET IK_DeviceData='$DEVICE_EXT' WHERE FK_Device='$DEVICE_ID' AND FK_DeviceData='31'";
     $DB_STATEMENT = $DB_PL_HANDLE->prepare($DB_SQL) or die "Couldn't prepare query '$DB_SQL': $DBI::errstr\n";
     $DB_STATEMENT->execute() or die "Couldn't execute query '$DB_SQL': $DBI::errstr\n";
-    $DB_STATEMENT->finish();    
+    $DB_STATEMENT->finish();
+
+    # Generate a random 16 character secret and update the device data with it
+    $DEVICE_SECRET = generateSecret(16);
+
+    $DB_SQL = "update Device_DeviceData SET IK_DeviceData='$DEVICE_SECRET' WHERE FK_Device='$DEVICE_ID' AND FK_DeviceData='128'";
+    $DB_STATEMENT = $DB_PL_HANDLE->prepare($DB_SQL) or die "Couldn't prepare query '$DB_SQL': $DBI::errstr\n";
+    $DB_STATEMENT->execute() or die "Couldn't execute query '$DB_SQL': $DBI::errstr\n";
+    $DB_STATEMENT->finish();
 }
 
 sub update_asterisk_db()
@@ -267,6 +277,32 @@ sub add_embed_phones()
     }
     $DB_STATEMENT->finish();    
 }
+
+sub generateSecret {
+
+        my $secret;
+        my $_rand;
+
+        my $secret_length = $_[0];
+                if (!$secret_length) {
+                $secret_length = 10;
+        }
+
+        my @chars = split(" ",
+                "a b c d e f g h i j k l m n o
+                p q r s t u v w x y z - _ % # |
+                0 1 2 3 4 5 6 7 8 9");
+
+        srand;
+
+        for (my $i=0; $i <= $secret_length ;$i++) {
+                $_rand = int(rand 41);
+                $secret .= $chars[$_rand];
+        }
+
+        return $secret;
+}
+
 
 # fix some permisions
 `chown asterisk.asterisk /usr/share/asterisk/agi-bin/* /etc/asterisk/*`;
