@@ -61,6 +61,8 @@ class Parser {
 
 	global $show_bind, $show_inodes;
 
+	$results = array();
+
         $j = 0;
 
         $df = execute_program('df', '-k' . $this->df_param );
