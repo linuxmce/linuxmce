@@ -4,21 +4,14 @@ use strict;
 use diagnostics;
 use DBI;
 require "/usr/pluto/bin/config_ops.pl";
-
-sub getIP {
-	my $dbh = DBI->connect(&read_pluto_cred()) or die "Can't connect to database: $DBI::errstr\n";
-        my $sth = $dbh->prepare("SELECT IPaddress FROM Device WHERE FK_DeviceTemplate = 7");
-	$sth->execute || die "Sql Error";
-        my $row = $sth->fetchrow_hashref;
-        my $IP = $row->{IPaddress};
-        return $IP;
-}
+require "/usr/pluto/bin/lmce.pl";
 
 #declare vars (it's safer this way)
 my $Device_ID;
 my $Device_IP;
 my $Device_MAC;
 my $Device_EXT;
+my $Device_SECRET;
 my $IntIP;
 
 #check params
@@ -37,9 +30,9 @@ else
 #sync with AMP (practically do nothing but create a new extension number)
 `/usr/pluto/bin/sync_pluto2amp.pl $Device_ID`;
 
-open(FILE,"/tmp/phone${Device_ID}extension");
-$Device_EXT=<FILE>;
-close(FILE);
+# Let's see what the database thinks about the extension of this phone
+$Device_EXT = get_device_devicedata($Device_ID,31);
+$Device_SECRET = get_device_devicedata($Device_ID,128);
 
 chomp($Device_EXT);
 $IntIP = getIP();
@@ -62,7 +55,7 @@ if ($ret_status != 0) {
 exit(-1) if ($ret_status != 0);
 
 
-system("curl \"http://$Device_IP/cgi-bin/webctrl.cgi\" -d \"action=sipasetting_update&sip_port0_username=$Device_EXT&sip_port0_displayname=$Device_EXT&sip_port0_auth_username=$Device_EXT&sip_port0_auth_password=$Device_EXT&sip_port0_confirm_password=$Device_EXT&sip_port0_mwi_username=&sip_port0_mwi_auth_username=&sip_port0_mwi_auth_password=&sip_port0_mwi_confirm_password=&sip_port0_mwi_refresh_timeout=3600&sip_port0_voicemsg_netam_id=%23%2310\" -b \"/tmp/cookies.txt\" > /dev/null");
+system("curl \"http://$Device_IP/cgi-bin/webctrl.cgi\" -d \"action=sipasetting_update&sip_port0_username=$Device_EXT&sip_port0_displayname=$Device_EXT&sip_port0_auth_username=$Device_EXT&sip_port0_auth_password=$Device_SECRET&sip_port0_confirm_password=$Device_EXT&sip_port0_mwi_username=&sip_port0_mwi_auth_username=&sip_port0_mwi_auth_password=&sip_port0_mwi_confirm_password=&sip_port0_mwi_refresh_timeout=3600&sip_port0_voicemsg_netam_id=%23%2310\" -b \"/tmp/cookies.txt\" > /dev/null");
 
 sleep(5);
 
