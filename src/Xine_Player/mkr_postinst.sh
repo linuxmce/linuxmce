@@ -61,7 +61,7 @@ gui.post_audio_plugin:goom
 
 # Subtitle autoloading
 # bool, default: 1
-#gui.subtitle_autoload:1
+gui.subtitle_autoload:1
 
 # Visual animation style
 # { None  Post Plugin  Stream Animation }, default: 1
@@ -611,7 +611,7 @@ codec.real_codecs_path:/usr/lib/win32
 
 # subtitle size
 # { tiny  small  normal  large  very large  huge }, default: 1
-#misc.spu_subtitle_size:small
+misc.spu_subtitle_size:large
 
 # subtitle vertical offset
 # numeric, default: 0
