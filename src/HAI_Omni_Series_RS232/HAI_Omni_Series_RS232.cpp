@@ -361,7 +361,7 @@ void HAI_Omni_Series_RS232::AddChildren()
 */
                                 // CMD_Display_Dialog_Box_On_Orbiter(long DeviceIDFrom, long DeviceIDTo,string sText,string sOptions,string sList_PK_Device)
                                 CMD_Create_Device add_command(m_dwPK_Device,4,iDeviceTemplate,"",0,"",
-                                        StringUtils::itos(DEVICEDATA_PortChannel_Number_CONST) + "|" + sZone, 0,0,sDescription,0,0,&iPK_Device) ;
+                                        StringUtils::itos(DEVICEDATA_PortChannel_Number_CONST) + "|" + sZone, 0,m_dwPK_Device,sDescription,0,0,&iPK_Device) ;
                                 SendCommand(add_command);
 
                                 // Update our map so we don't keep prompting
