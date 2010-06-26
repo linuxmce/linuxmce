@@ -82,6 +82,7 @@ namespace DCE
 	string m_sMediaURL;		// This is used for playing back from the videos menu.
 	eMythState		     m_mythStatus;	
 	string parseMediaURL(string sMediaURL);
+	string getChannelCommandForMediaURL(string sMediaURL);
 
 //<-dceag-const-b->
 public:

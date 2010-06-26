@@ -89,6 +89,7 @@ VDR::VDR(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLoca
   m_sVDRIp="127.0.0.1";
   m_menustatus=0;
   m_sVDRmodus="";
+  m_sMediaURL="";
 }
                                 
 
@@ -281,7 +282,12 @@ void VDR::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPosition,s
 	PLUTO_SAFETY_LOCK(mm,m_VDRMutex);
 	string sResponse;	
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"VDR:IAM IN PLAY MEDIA NOW");
-		
+	
+	if (!sMediaURL.empty() && (sMediaURL.find("CHAN:") != string::npos))
+	{
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Channel specified in URL, setting..");
+		m_sMediaURL = sMediaURL;
+	}	
 	
 	if ( m_VDRStatus_get() == VDRSTATUS_DISCONNECTED )
 	{
@@ -1584,6 +1590,15 @@ void VDR::pollVDRStatus()
 			{
 				mm2.Release();
 				CMD_Tune_to_channel("",m_sInitialChannel);
+				m_sInitialChannel="";
+				mm2.Relock();
+			}
+
+			// We were passed a CHAN: from the Filename parameter, deal with it.
+			if(!m_sMediaURL.empty() && (!m_sMediaURL.find("CHAN:") != string::npos))
+			{
+				mm2.Release();
+				CMD_Tune_to_channel("",m_sMediaURL.substr(4));
 				m_sInitialChannel="";
 				mm2.Relock();
 			}

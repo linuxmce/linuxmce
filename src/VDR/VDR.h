@@ -77,6 +77,7 @@ public:
 			int m_menubefore;
 			string m_sVDRmodus;
 			string m_sVDRstatus;
+			string m_sMediaURL;
 			                                
 
 //<-dceag-const-b->

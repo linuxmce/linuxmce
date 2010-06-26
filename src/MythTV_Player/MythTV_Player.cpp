@@ -252,16 +252,74 @@ string MythTV_Player::parseMediaURL(string sMediaURL)
   string sMediaFilename = FileUtils::FilenameWithoutPath(sMediaURL);
 
   string sChannelID, sYear, sMonth, sDay, sHour, sMinute, sSeconds;
-  sChannelID 	= sMediaFilename.substr( 0,4 );
-  sYear 	= sMediaFilename.substr( 5,4 );
-  sMonth	= sMediaFilename.substr( 9,2 );
-  sDay		= sMediaFilename.substr(11,2 );
-  sHour		= sMediaFilename.substr(13,2 );
-  sMinute	= sMediaFilename.substr(15,2 );
-  sSeconds	= sMediaFilename.substr(17,2 );
+
+  // Double defensive measures
+  if (sMediaFilename.length() == 20)
+  {
+    sChannelID 	= sMediaFilename.substr( 0,4 );
+    sYear 	= sMediaFilename.substr( 5,4 );
+    sMonth	= sMediaFilename.substr( 9,2 );
+    sDay	= sMediaFilename.substr(11,2 );
+    sHour	= sMediaFilename.substr(13,2 );
+    sMinute	= sMediaFilename.substr(15,2 );
+    sSeconds	= sMediaFilename.substr(17,2 );
 
   return sChannelID + " " + sYear + "-" + sMonth + "-" +sDay + "T" + sHour + ":" + sMinute + ":" + sSeconds;
-  
+  }
+  else
+  {
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Malformed Media URL: %s",sMediaURL);
+    return "";
+  }
+
+}
+
+string MythTV_Player::getChannelCommandForMediaURL(string sMediaURL)
+{
+	string sCommand, sChan, sRet; // The final fragments for the command.
+
+	// all channel URLs must begin with CHAN:
+	if (sMediaURL.find("CHAN") != string::npos)
+	{
+		// Okay, let's deal with it.
+		// anything beginning with CHAN:i is a chanID.
+		if (sMediaURL.find("CHAN:i") != string::npos)
+		{
+			sCommand = "play chanid"; // CHAN:i1806 a channel ID
+			sChan = sMediaURL.substr(6);
+		}
+
+		else if (sMediaURL.find("CHAN:") != string::npos) // CHAN:4_1 a channel number
+		{
+			sCommand = "play channel";
+			sChan = sMediaURL.substr(5);
+		}
+
+		else 
+		{
+			// Not correctly parseable, just return empty.
+			sCommand = "";
+			sChan = "";
+		}
+
+		if (!sCommand.empty() && !sChan.empty())
+		{
+			sRet = sCommand + " " + sChan;
+		}
+		else
+		{
+			sRet = "";
+		}
+
+	}
+	else
+	{
+		// Double insurance.
+		sRet = "";
+	}
+
+	return sRet;
+
 }
 
 void MythTV_Player::pollMythStatus()
@@ -298,7 +356,7 @@ void MythTV_Player::pollMythStatus()
 		    mm.Release();
 		    Sleep(100);
 		    mm.Relock();
-		    if (!m_sMediaURL.empty()) // A MediaURL was passed into MediaHandler.
+		    if (!m_sMediaURL.empty() && (m_sMediaURL.find("CHAN:") == string::npos) && FileUtils::FileExists(m_sMediaURL) ) // A MediaURL was passed into MediaHandler.
 		    {
 		      string sCommand = "play program " + parseMediaURL(m_sMediaURL);
 		      sResult = sendMythCommand(sCommand.c_str());
@@ -342,6 +400,18 @@ void MythTV_Player::pollMythStatus()
 			mm.Release();
             Sleep(3000);
 			mm.Relock();
+
+			// This is a special case to check for sMediaURL's of CHAN:xxxx, if so,
+			// Tune the channel. 
+			if (!m_sMediaURL.empty() && (m_sMediaURL.find("CHAN:") != string::npos))
+			{
+				string sChannelCommand = getChannelCommandForMediaURL(m_sMediaURL);
+				if (!sChannelCommand.empty())
+				{
+					sendMythCommand(sChannelCommand.c_str());
+				}
+			}
+
 			string sResult = sendMythCommand("query location");
 			if( sResult.find("Playback")!=string::npos && sResult.find("ERROR")==string::npos )
 			{
@@ -1008,8 +1078,21 @@ void MythTV_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMedia
 	  if (m_sMediaURL != sMediaURL) 
 	  { 
 	    m_sMediaURL = sMediaURL;
-	    string sCommand = "play program " + parseMediaURL(m_sMediaURL);
-	    sendMythCommand(sCommand.c_str());
+	    if (sMediaURL.find("CHAN:") != string::npos )
+		{
+			// CHAN: URL detected, do a channel flip instead.
+			sendMythCommand("jump livetv");
+			string sCommand = getChannelCommandForMediaURL(sMediaURL);
+			if (!sCommand.empty())
+			{
+				sendMythCommand(sCommand.c_str());
+			}
+		}
+		else
+		{
+	    		string sCommand = "play program " + parseMediaURL(m_sMediaURL);
+	    		sendMythCommand(sCommand.c_str());
+		}
 	  }
 	}
 	else // A MythTV Stream was not already present. 
