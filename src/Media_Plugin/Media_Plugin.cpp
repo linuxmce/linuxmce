@@ -6622,13 +6622,66 @@ void Media_Plugin::CMD_Delete_File(string sFilename,string &sCMD_Result,Message 
 					pRow_File->PK_File_get(),sFilename.c_str(),pRow_File->Path_get().c_str(),pRow_File->Filename_get().c_str());
 		}
 	}
-	else if( FileUtils::DelFile(sFilename)==false )
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Media_Plugin::CMD_Delete_File cannot delete %s ",
-			sFilename.c_str());
-	else
-		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::CMD_Delete_File deleted %s ",
-			sFilename.c_str());
+	else if ( sFilename.size()>2 && sFilename[0]=='!' && sFilename[1]=='V' )
+	{
+		// It is a voicemail of the form !Vxxx,yyyy[,O]
+		// xxx = extension, yyyy = voicemail number, O = Old message.
+		string::size_type tokenPos = 0;
+		string sVoiceMailID = sFilename.substr(2);	// xxx,yyyy
+		string sExtension = StringUtils::Tokenize(sVoiceMailID,",",tokenPos);
+		string sMsg = StringUtils::Tokenize(sVoiceMailID,",",tokenPos);
+		string sOld = StringUtils::Tokenize(sVoiceMailID,",",tokenPos);
+		bool bIsOld = ( sOld[0] == 'O' );
 
+		string sFileToDelete = "/var/spool/asterisk/voicemail/default/" + sExtension + "/INBOX/" + ( bIsOld ? "Old/"  : "" ) + "msg" + sMsg;
+	
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Deleting Voicemail %s",sFileToDelete.c_str());
+	
+		// Delete the files.
+		if ( FileUtils::DelFile(sFileToDelete + ".txt") )
+		{
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::CMD_Delete_File deleted voicemail info file %s.txt",sFileToDelete.c_str());
+		}
+		else
+		{
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::CMD_Delete_File couldn't delete voicemail info file %s.txt",sFileToDelete.c_str());
+		}
+
+                if ( FileUtils::DelFile(sFileToDelete + ".gsm") )
+                {
+                        LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::CMD_Delete_File deleted voicemail raw GSM file %s.gsm",sFileToDelete.c_str());
+                }
+                else
+                {
+                        LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::CMD_Delete_File couldn't delete voicemail GSM file %s.gsm",sFileToDelete.c_str());
+                }
+
+                if ( FileUtils::DelFile(sFileToDelete + ".WAV") )
+                {
+                        LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::CMD_Delete_File deleted voicemail WAVE (GSM) file %s.WAV",sFileToDelete.c_str());
+                }
+                else
+                {
+                        LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::CMD_Delete_File couldn't delete voicemail WAVE (GSM) file %s.WAV",sFileToDelete.c_str());
+                }
+
+                if ( FileUtils::DelFile(sFileToDelete + ".wav") )
+                {
+                        LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::CMD_Delete_File deleted voicemail WAVE (PCM) file %s.wav",sFileToDelete.c_str());
+                }
+                else
+                {
+                        LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::CMD_Delete_File couldn't delete voicemail WAVE (PCM) file %s.wav",sFileToDelete.c_str());
+                }
+
+
+	}
+	else
+	{
+		// It is none of these things, error out and ignore the request.
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Media_Plugin::CMD_Delete_File will not delete arbitrary file %s",sFilename.c_str());
+		sCMD_Result = "ERROR";
+	}
 }
 //<-dceag-c868-b->
 
