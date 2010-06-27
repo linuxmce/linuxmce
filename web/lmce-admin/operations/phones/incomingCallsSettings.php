@@ -69,7 +69,6 @@ function getPhoneLineDetails($id,$data,$type,$astADO){
 		<tr class="tablehead">
 			<td align="center"><B>Type</B></td>
 			<td align="center"><B>Data</B></td>
-			<td align="center"><B>Password</B></td>
 			<td align="center"><B>Username</B></td>
 		</tr>	';
 	while($row=$res->FetchRow()){
@@ -79,7 +78,6 @@ function getPhoneLineDetails($id,$data,$type,$astADO){
 		<tr bgcolor="'.$color.'">
 			<td>SIP</td>
 			<td>'.$row['data'].'</td>
-			<td>'.$row['sdata'].'</td>
 			<td>'.$row['pdata'].'</td>
 		</tr>';
 	}
@@ -98,7 +96,6 @@ function getPhoneLineDetails($id,$data,$type,$astADO){
 		<tr bgcolor="'.$color.'">
 			<td>IAX</td>
 			<td>'.$row['data'].'</td>
-			<td>'.$row['sdata'].'</td>
 			<td>'.$row['pdata'].'</td>
 		</tr>';
 	}
