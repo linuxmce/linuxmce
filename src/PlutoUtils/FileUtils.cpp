@@ -378,6 +378,56 @@ bool FileUtils::DirExists( string sFile )
 #endif
 }
 
+/**
+ * Check the sanity of a path name, used to prevent malicious path writing.
+ * This needs to be augmented to prevent breaking out of the sanity checks
+ * with a symlink. 
+ */
+bool FileUtils::CheckPathSanity(string sPath)
+{
+	bool bIsHome = (sPath.find("/home/") != string::npos);
+	bool bIsMntDevice = (sPath.find("/mnt/device/") != string::npos);
+	return (bIsHome || bIsMntDevice);
+}
+
+bool FileUtils::MoveFile(string sSourceFileName, string sDestFileName, bool bOverwrite)
+{
+	bool bRet = false;
+	if (!FileUtils::CheckPathSanity(sSourceFileName))
+	{
+		return false;
+	}
+
+	if (!FileUtils::CheckPathSanity(sDestFileName))
+	{
+		return false;
+	}
+
+	bool bSourceExists = (FileUtils::FileExists(sSourceFileName));
+	bool bDestExists = (FileUtils::FileExists(sDestFileName));
+
+	if (bSourceExists && bDestExists && !bOverwrite)
+	{
+		// Do not overwrite if bOverwrite is false.
+		return false; 
+	}
+
+	string sCommand = "mv " + sSourceFileName + " " + sDestFileName;
+
+	int iRet = system(sCommand.c_str());
+
+	if (iRet)
+	{
+		bRet = true;
+	}
+	else
+	{
+		bRet = false;
+	}
+	// FIXME implement WIN32
+	return bRet;
+}
+
 bool FileUtils::DelFile(string sFileName)
 {
 #ifndef WINCE //no findfiles implemented under CE yet
