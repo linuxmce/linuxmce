@@ -7277,3 +7277,16 @@ void Media_Plugin::CMD_Specify_Repeat_Options(string sPK_EntertainArea,int iRepe
 //<-dceag-c955-e->
 {
 }
+//<-dceag-c1083-b->
+
+	/** @brief COMMAND: #1083 - Move File */
+	/** Move a file from one place to another. */
+		/** @param #13 Filename */
+			/** !F notation referring to PK_File entry in the pluto_media File table. */
+		/** @param #219 Path */
+			/** The fully qualified destination Path and Filename */
+
+void Media_Plugin::CMD_Move_File(string sFilename,string sPath,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1083-e->
+{
+}

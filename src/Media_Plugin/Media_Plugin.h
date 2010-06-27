@@ -1190,6 +1190,17 @@ VI=Video Input */
 	virtual void CMD_Specify_Repeat_Options(string sPK_EntertainArea,int iRepeat) { string sCMD_Result; CMD_Specify_Repeat_Options(sPK_EntertainArea.c_str(),iRepeat,sCMD_Result,NULL);};
 	virtual void CMD_Specify_Repeat_Options(string sPK_EntertainArea,int iRepeat,string &sCMD_Result,Message *pMessage);
 
+
+	/** @brief COMMAND: #1083 - Move File */
+	/** Move a file from one place to another. */
+		/** @param #13 Filename */
+			/** !F notation referring to PK_File entry in the pluto_media File table. */
+		/** @param #219 Path */
+			/** The fully qualified destination Path and Filename */
+
+	virtual void CMD_Move_File(string sFilename,string sPath) { string sCMD_Result; CMD_Move_File(sFilename.c_str(),sPath.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Move_File(string sFilename,string sPath,string &sCMD_Result,Message *pMessage);
+
 //<-dceag-h-e->
 };
 
