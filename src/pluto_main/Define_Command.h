@@ -982,6 +982,7 @@
 #define COMMAND_Add_Music_to_Station_CONST 1080
 #define COMMAND_Add_Station_to_QuickMix_CONST 1081
 #define COMMAND_Remove_Station_from_QuickMix_CONST 1082
+#define COMMAND_Move_File_CONST 1083
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"
