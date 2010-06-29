@@ -83,7 +83,7 @@ Proxy_Orbiter::Proxy_Orbiter(int DeviceID, int PK_DeviceTemplate, string ServerA
 	m_ImageQuality = 70;
 	m_bDisplayOn=true;  // Override the default behavior -- when the phone starts the display is already on
 
-	m_bNews = false;
+	m_bNews = true;
 
 	pthread_cond_init( &m_ActionCond, NULL );
 	m_ActionMutex.Init(NULL, &m_ActionCond);
