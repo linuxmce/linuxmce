@@ -525,18 +525,17 @@ void OrbiterRenderer_SDL::ReplaceColorInRectangle(int x, int y, int width, int h
 {
     SDL_PixelFormat * PF = m_pScreenImage->format;
     Uint32 PlutoPixelSrc, Pixel;
-	
 #ifdef MAEMO_NOKIA770
 	Uint16 PlutoPixelDest;
-	Uint8 red, green, blue; 
 #else
 	Uint32 PlutoPixelDest;
 #endif
+    Uint8 red, green, blue; 
 
 #ifdef DEBUG
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "ReplaceColor: ColorToReplace --> %u %u %u : ReplacementColor --> %u %u %u",
-        							ColorToReplace.R(), ColorToReplace.G(), ColorToReplace.B(),
-        							ReplacementColor.R(), ReplacementColor.G(), ReplacementColor.B());
+        ColorToReplace.R(), ColorToReplace.G(), ColorToReplace.B(),
+        ReplacementColor.R(), ReplacementColor.G(), ReplacementColor.B());
 #endif
 
 #ifdef MAEMO_NOKIA770
@@ -557,6 +556,7 @@ void OrbiterRenderer_SDL::ReplaceColorInRectangle(int x, int y, int width, int h
 #endif
 
     const int max_diff = 3;
+
     for (int j = 0; j < height; j++)
     {
         for (int i = 0; i < width; i++)
@@ -564,30 +564,15 @@ void OrbiterRenderer_SDL::ReplaceColorInRectangle(int x, int y, int width, int h
             // we may need locking on the surface
             Pixel = SDLGraphic::getpixel(m_pScreenImage, i + x, j + y);
             unsigned char *pPixel = (unsigned char *) &Pixel;
-#ifndef MAEMO_NOKIA770
-            if ( abs(Source[0]-pPixel[0])<max_diff && abs(Source[1]-pPixel[1])<max_diff && abs(Source[2]-pPixel[2])<max_diff && abs(Source[3]-pPixel[3])<max_diff )
+            SDL_GetRGB((Uint32)Pixel, m_pScreenImage->format, &red, &green, &blue);
+            if (abs(Source[0]-red)<max_diff && abs(Source[1]-green)<max_diff && abs(Source[2]-blue)<max_diff /*&& abs(Source[3]-pPixel[3])<max_diff*/)
             {
                 SDLGraphic::putpixel(m_pScreenImage,i + x, j + y, PlutoPixelDest);
             }
-#else
-			SDL_GetRGB((Uint32)Pixel, m_pScreenImage->format, &red, &green, &blue);		
-#ifdef DEBUG
-            LoggerWrapper::GetInstance()->Write(LV_STATUS, "Source=%u %u %u - Pixel=%u %u %u \n", Source[0], Source[1], Source[2], red, green, blue); 
-#endif			
-        
-	        if ( abs(Source[0]-red)<max_diff && abs(Source[1]-green)<max_diff && abs(Source[2]-blue)<max_diff )
-	        {
-		        SDLGraphic::putpixel(m_pScreenImage,i + x, j + y, PlutoPixelDest);
-#ifdef DEBUG				
-                LoggerWrapper::GetInstance()->Write(LV_STATUS, "Replace pixel: %u %u %u - 0x%x\n!", 
-																		Source[0], Source[1], Source[2], PlutoPixelDest);
-#endif			
-	        }
-#endif
         }
     }
 
-	
+
     PlutoRectangle rect(x, y, width, height);
 }
 //-----------------------------------------------------------------------------------------------------
