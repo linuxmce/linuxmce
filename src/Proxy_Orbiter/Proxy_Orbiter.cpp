@@ -83,6 +83,8 @@ Proxy_Orbiter::Proxy_Orbiter(int DeviceID, int PK_DeviceTemplate, string ServerA
 	m_ImageQuality = 70;
 	m_bDisplayOn=true;  // Override the default behavior -- when the phone starts the display is already on
 
+	m_bNews = false;
+
 	pthread_cond_init( &m_ActionCond, NULL );
 	m_ActionMutex.Init(NULL, &m_ActionCond);
 	m_ResourcesMutex.Init(NULL);
@@ -414,6 +416,7 @@ void Proxy_Orbiter::ImageGenerated()
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Image/xml generated. Wake up! Screen %s", 
 		m_pScreenHistory_Current->GetObj()->m_ObjectID.c_str());
 	pthread_cond_broadcast(&m_ActionCond);
+	m_bNews = true;
 
 	if(m_iListenPort >= CISCO_LISTEN_PORT_START && m_iListenPort < CISCO_LISTEN_PORT_START + 10 && //only cisco orbiters
 		!IsProcessingRequest() 
@@ -469,6 +472,7 @@ bool Proxy_Orbiter::ReceivedString( Socket *pSocket, string sLine, int nTimeout 
 		pSocket->SendData(int(size),pBuffer);
 		delete[] pBuffer;
 
+		m_bNews = false;
 		return true;
 	}
 	else if( sLine.substr(0,3)=="XML" )
@@ -491,6 +495,7 @@ bool Proxy_Orbiter::ReceivedString( Socket *pSocket, string sLine, int nTimeout 
 
 		EndProcessingRequest();
 		
+		m_bNews = false;
 		return true;
 	}
 	else if( sLine.substr(0,9)=="PLUTO_KEY" && sLine.size()>10 )
@@ -556,6 +561,20 @@ bool Proxy_Orbiter::ReceivedString( Socket *pSocket, string sLine, int nTimeout 
 
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Sent: OK");        
 		pSocket->SendString("OK");
+		return true;
+	}
+	else if (sLine.substr(0, 8) == "ANYNEWS?")
+	{
+		if (m_bNews)
+		{
+			pSocket->SendString("NEWS " + StringUtils::itos(3));
+			pSocket->SendString("yes");
+		}
+		else
+		{
+			pSocket->SendString("NEWS " + StringUtils::itos(2));
+			pSocket->SendString("no");
+		}
 		return true;
 	}
 	else

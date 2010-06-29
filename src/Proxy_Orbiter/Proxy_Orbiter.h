@@ -73,6 +73,8 @@ namespace DCE
 		int m_nCurrentScreenId;
 		pluto_pthread_mutex_t m_ResourcesMutex;
 
+		bool m_bNews;
+
 	public:
 		Proxy_Orbiter(int DeviceID, 
 			int PK_DeviceTemplate, string ServerAddress);
