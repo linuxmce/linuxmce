@@ -584,7 +584,9 @@ bool Xine_Stream::OpenMedia(string fileName, string &sMediaInfo, string sMediaPo
 	// TODO support multiple external subtitles files 
 	// TODO allow manage subtitles via UI, and store last used subtitles
 	string sSubtitlesSuffix = "";
-		
+	string fileNameWithoutExtension = "";
+	fileNameWithoutExtension = FileUtils::FileWithoutExtension(fileName);
+
 	for (vector<string>::iterator it=m_SubtitlesExtensions.begin(); it!=m_SubtitlesExtensions.end(); ++it)
 	{
 		if (FileUtils::FileExists(fileName + "." + *it))
@@ -595,8 +597,17 @@ bool Xine_Stream::OpenMedia(string fileName, string &sMediaInfo, string sMediaPo
 			sSubtitlesSuffix = "#subtitle:" + fileName + "." + *it;
 			break;
 		}
+		// Check for subtitle files that are named filename-without-extension.subtitle-extension
+		if (FileUtils::FileExists(fileNameWithoutExtension + "." + *it))
+                {
+                        LoggerWrapper::GetInstance()->Write(
+                                LV_WARNING, "Found subtitles file: %s ",
+                                (fileNameWithoutExtension + "." + *it).c_str() );
+                        sSubtitlesSuffix = "#subtitle:" + fileNameWithoutExtension + "." + *it;
+                        break;
+		}
 	}
-
+		
 	bool is_url = ( fileName.find(":/") != string::npos );
 	string tmp = (is_url) ? "" : "file://";
 	if (sURLsuffix!="")
@@ -618,7 +629,7 @@ bool Xine_Stream::OpenMedia(string fileName, string &sMediaInfo, string sMediaPo
 		if (!mediaOpened)
 			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Opening media FAILED");
 	}
-	
+
 	if (!mediaOpened)
 	{
 		tmp = (is_url) ? "" : "file://";
