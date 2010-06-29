@@ -23,85 +23,15 @@ function user_exists($username,$pass,$dbADO){
 	
 }
 
-function login_form($dbADO,$err=0){
-	$error_message=($err>0)?'Login failed':'';
-	$out='
-	<form name="login_form" action="process_web_orbiter.php" method="POST">
-	'.$error_message.'
-	<table>
-		<tr>
-			<td>User</td>
-			<td><input type="text" name="username" value=""></td>
-		</tr>
-		<tr>
-			<td>Password</td>
-			<td><input type="password" name="password" value=""></td>
-		</tr>
-		<tr>
-			<td colspan="2"><input type="submit" name="login" value="Login"></td>
-		</tr>
-	</table>
-	</form>
-	';
-	
-	return $out;
-}
-
-function get_web_orbiter($installationID,$deviceID,$userID,$pass,$dbADO){
-	if($deviceID==0){
-		$out='
-		<form name="worbiter" method="GET" action="">
-			<input type="hidden" name="userID" value="'.$userID.'">
-			<input type="hidden" name="pass" value="'.$pass.'">
-		<table>
-			<tr>
-				<td>Installation: </td>
-				<td>'.get_installation($userID,$dbADO,$installationID).'</td>
-			</tr>
-			<tr>
-				<td>Device: </td>
-				<td>'.get_devices($installationID,$userID,$dbADO,$deviceID).'</td>
-			</tr>
-			<tr>
-				<td><input type="submit" name="submit" value="Submit"></td>
-			</tr>		
-		</table>
-		</form>';
-		return $out;
-	}else{
-		$out=get_web_orbiter_screen($deviceID,$dbADO);
-	}
-	
-	return $out;
-}
-
-// return form element with installation(s): hidden field or pulldown
-function get_installation($userID,$dbADO,$installationID=0){
+function get_installation_array($userID,$dbADO,$installationID=0){
 	$instalationsArray=getAssocArray('Installation','PK_Installation','CONCAT(\'#\',PK_Installation,\' \',Description)',$dbADO,'INNER JOIN Installation_Users ON FK_Installation=PK_Installation WHERE FK_Users='.$userID);
-	$no=count($instalationsArray);
-	if($no==0){
-		return 'ERROR: this user does not have any installation.'; 
-	}
-	if($no==1){
-		$installationIDs=array_keys($instalationsArray);
-		$instalation_form_element='# '.$installationIDs[0].'<input type="hidden" name="installationID" value="'.$installationIDs[0].'">';
-		$GLOBALS['installationID']=$installationIDs[0];
-	}else{
-		$instalation_form_element=pulldownFromArray($instalationsArray,'installationID',$installationID,' style="width:275px;" onChange="document.worbiter.submit();"');
-	}
-	return $instalation_form_element;
+	return $instalationsArray;
 }
 
-// return weborbiter devices in pulldown
-function get_devices($installationID,$userID,$dbADO,$deviceID=0){
+function get_devices_array($installationID,$userID,$dbADO,$deviceID=0){
 	$installationID=($installationID==0)?$GLOBALS['installationID']:$installationID;
 	$devicesArray=getAssocArray('Device','PK_Device','Description',$dbADO,'WHERE FK_DeviceTemplate='.$GLOBALS['GenericWebDevice'].' AND FK_Installation='.$installationID.' ORDER BY Description ASC');
-	if(count($devicesArray)==0){
-		return 'You don\'t have any generic web device in current installation.';
-	}
-	$out=pulldownFromArray($devicesArray,'deviceID',$deviceID,' style="width:275px;" onChange="document.worbiter.submit();"');
-	
-	return $out;
+	return $devicesArray;
 }
 
 // retrieve device data for a device in a multidimensional array
@@ -118,81 +48,48 @@ function get_device_data($deviceID,$dbADO){
 	return $ddArray;
 }
 
-// main function who display screen and handle buttons
-function get_web_orbiter_screen($deviceID,$dbADO){
-	
-	$out='';
-	
-	// get proxy orbiter IP address 
+function get_web_orbiter_info($deviceID, $dbADO)
+{
 	$ProxyOrbiterInfo=getFieldsAsArray('Device','Device.FK_Device_ControlledVia,DD.IK_DeviceData AS Port,Parent.IPAddress',$dbADO,'INNER JOIN Device_DeviceData DD ON DD.FK_Device=Device.PK_Device AND DD.FK_DeviceData='.$GLOBALS['ListenPort'].' LEFT JOIN Device Parent ON Device.FK_Device_ControlledVia=Parent.PK_Device WHERE Device.FK_DeviceTemplate='.$GLOBALS['ProxyOrbiter'].' AND Parent.PK_Device IS NOT NULL AND Device.FK_Device_ControlledVia='.$deviceID);
+	return $ProxyOrbiterInfo;
+}
 
-	if(count($ProxyOrbiterInfo)!=0){
-		$address=$ProxyOrbiterInfo['IPAddress'][0];
-		if($address=='' || is_null($address)){
-			$address=getDeviceIP($ProxyOrbiterInfo['FK_Device_ControlledVia'][0],$dbADO);
-
-			if(is_null($address)){
-				$address=getCoreIP($dbADO);
-				write_log("\n\nGeneric Web Device does not have IP address\n");
-			}
-		}
-		$port=$ProxyOrbiterInfo['Port'][0];
-	}else{
-		write_log("\n\nOrbiter proxy not found as child of Generic Web Device #$deviceID\n");
-		return 'Orbiter proxy not found.';
-	}
-
-	// attempt to create socket
-	$socket=web_socket_create($address,$port, AF_INET, SOCK_STREAM, SOL_TCP);
-	if($socket===false){
-		return socket_failed(1);
+function openSocket($address, $port)
+{
+	$socket = web_socket_create($address,$port, AF_INET, SOCK_STREAM, SOL_TCP);
+	if($socket === false){
+		return false;
 	}
 	
 	// connect on socket to proxy orbiter
-	$result=web_proxy_connect($socket, $address, $port);
-	if($result===false){
+	$result = web_proxy_connect($socket, $address, $port);
+	if($result === false){
 		web_socket_close($socket);
-		return socket_failed(1);
+		return false;
 	}
-	
-	write_log("Received parameters ".$_SERVER['QUERY_STRING']."\n");
-	$command=(isset($_REQUEST['command']))?$_REQUEST['command']:'PLUTO_KEY 10';
-	
-	// get image
-	if($command=='IMAGE'){
-		$out=getImage($deviceID,$socket,$refresh);
-	}
-	
-	// send touch command
-	if(strpos($command,'TOUCH')!==false){
-		$out=sendCommand($deviceID,$socket,$command,$refresh);
-	}	
 
-	// send PLUTO KEY command
-	if(strpos($command,'PLUTO_KEY')!==false){
-		$out=sendCommand($deviceID,$socket,$command,$refresh);
-	}
-	
-	web_socket_close($socket);
-	
-	return $out;
+	return $socket;
 }
 
-
+function closeSocket($socket)
+{
+	web_socket_close($socket);
+}
 
 // old proxyOrbiter functions
-function getImage($deviceID,$socket,$refresh=''){
+function getImage($deviceID,$socket,$refresh=0){
 	$in = "IMAGE ".rand(10000,11000)."\n";
-	$out='Trying to connect ...';
 
 	$written=web_socket_write($socket, $in);
 	$outResponse= web_socket_read($socket, 2048,PHP_NORMAL_READ);
 
 	$imageSize=(int)trim(str_replace('IMAGE ','',$outResponse));
+	$filename = false;
 	if($imageSize>0){
 		$remaining=$imageSize;
 		$outImage='';
-		while($remaining>0){
+		while($remaining>0)
+		{
 			$linesize=($remaining<2048)?$remaining:2048;
 			$chunk=@socket_read($socket, $linesize,PHP_BINARY_READ);
 			$outImage.= $chunk;
@@ -200,26 +97,15 @@ function getImage($deviceID,$socket,$refresh=''){
 			write_log("Retrieved image chunk ".strlen($chunk).", remaining $remaining \n");
 		}
 		
-		if(isset($outImage)){
-			$isSaved=writeFile(getcwd().'/security_images/'.$deviceID.'_web.png',$outImage);
+		if(isset($outImage))
+		{
+			$filename = getcwd().'/security_images/'.$deviceID.'_web.png';
+			$isSaved = writeFile($filename, $outImage);
 			write_log("Received image size $imageSize \n");
-		}else{
-			$out=socket_failed(1);
 		}
 	}
-	if(file_exists(getcwd().'/security_images/'.$deviceID.'_web.png')){
-		// header image=1 just return the png
-		if(isset($GLOBALS['headerImage']) && $GLOBALS['headerImage']==1){
-			$filepath=getcwd().'/security_images/'.$deviceID.'_web.png';
-			
-			header( "Content-type: image/png" );
-			readfile( $filepath );
-			exit();
-		}
-		$out=jsFunctions().'<img id="screen" src="include/image.php?imagepath='.getcwd().'/security_images/'.$deviceID.'_web.png&randno='.rand(10000,99999).'" onClick="sendTouch();"><br>'.buttons_bar();	
-	}
-	
-	return $out;
+
+	return $filename;
 }
 
 function getXML($socket){
@@ -253,16 +139,11 @@ function getXML($socket){
 
 
 
-function sendCommand($deviceID,$socket,$command,$refresh){
+function sendCommand($deviceID,$socket,$command,$refresh=''){
 	$in = $command."\n";
-
-	$out='';
 
 	$written=web_socket_write($socket, $in);
 	$outResponse= web_socket_read($socket, 2048,PHP_NORMAL_READ);
-	$out=getImage($deviceID,$socket,$refresh);
-	
-	return $out;
 }
 
 function write_log($log){
@@ -353,72 +234,6 @@ function socket_failed($flag){
 	return $out;
 }
 
-function jsFunctions(){
-	$url=clean_path();	
-	
-	$out='
-		<script src="scripts/connectionWizard/connectionWizard.js" type="text/javascript" language="JavaScript"></script>
-		<script>
-		function findPosX(obj)
-		{
-			var curleft = 0;
-			if (obj.offsetParent)
-			{
-				while (obj.offsetParent)
-				{
-					curleft += obj.offsetLeft
-					obj = obj.offsetParent;
-				}
-			}
-			else if (obj.x)
-				curleft += obj.x;
-			return curleft;
-		}
-		
-		function findPosY(obj)
-		{
-			var curtop = 0;
-			if (obj.offsetParent)
-			{
-				while (obj.offsetParent)
-				{
-					curtop += obj.offsetTop
-					obj = obj.offsetParent;
-				}
-			}
-			else if (obj.y)
-				curtop += obj.y;
-			return curtop;
-		}
-				
-		function sendTouch()
-		{
-			if(touch_disabled==0){
-				xRelative=xMousePos-findPosX(document.getElementById("screen"));
-				yRelative=yMousePos-findPosY(document.getElementById("screen"));
-
-				self.location="'.$url.'&command=TOUCH "+xRelative+"x"+yRelative;
-			}
-		}
-
-		</script>';
-	return $out;
-}
-
-function buttons_bar(){
-	$url=clean_path();
-	
-	$out='
-
-	<input type="button" class="button" name="go" value="Home" onClick="self.location=\''.$url.'&command=PLUTO_KEY 10\';"> 
-	<input type="button" class="button" name="go" value="Back" onClick="self.location=\''.$url.'&command=PLUTO_KEY 11\';">
-	<input type="button" class="button" name="go" value="Refresh" onClick="self.location=\''.$url.'&command=IMAGE\';">
-	<input type="button" class="button" name="go" value="Exit" onClick="self.close();">
-	';
-	
-	return $out;
-}
-
 function clean_path(){
 	$path=parse_str($_SERVER['QUERY_STRING']);
 	$url="weborbiter.php?userID=".@$userID."&pass=".@$pass."&installationID=".@$installationID."&deviceID=".@$deviceID;
@@ -448,71 +263,5 @@ function get_keyboard_codes_id($dbADO){
 	}
 
 	return $key_codes_ids;
-}
-
-function output_html($content,$dbADO,$refresh=0){
-	$url=clean_path();
-	
-	$refresh_tag=($refresh!=0)?'<META HTTP-EQUIV=Refresh CONTENT="'.$refresh.'; URL='.$url.'&command=IMAGE">':'';
-	$keyboard_codes=get_keyboard_codes_id($dbADO);
-	$js_case='';
-	
-	// hard-coded: add up/down/left/right/enter commands
-	$keyboard_codes[38]=1;	// up
-	$keyboard_codes[40]=2;	// down
-	$keyboard_codes[37]=3;	// left
-	$keyboard_codes[39]=4;	// right
-	$keyboard_codes[13]=5;	// enter
-	
-	foreach ($keyboard_codes AS $code=>$command_key){
-		$js_case.='
-			case '.$code.':
-				command_to_send='.$command_key.';
-			break;
-		';
-	}
-	
-	$out='
-	<html>
-	<head>
-	'.$refresh_tag.'
-	<script>
-	touch_disabled=1;
-	
-	function sendKey(event){
-		if (event.which){
-			key_code=event.which;
-		}else if(event.keyCode){
-			key_code=event.keyCode;
-		}
-
-	';
-	if($refresh!=0){
-	$out.='
-		if(key_code>58){
-			key_code+=32;
-		}
-		switch(key_code){
-			'.$js_case.'
-			default:
-				command_to_send=0;
-			break
-		}
-		if(command_to_send!=0){
-			self.location="'.$url.'&command=PLUTO_KEY "+command_to_send;
-		}';
-	}
-	$out.='
-	}	
-	</script>
-	
-	<title>LinuxMCE Web device</title>		
-	<head>		
-	<body onLoad="touch_disabled=0;" ONKEYDOWN="sendKey(event);">
-	'.$content.'
-	</body>
-	</html>';
-	
-	print $out;
 }
 ?>
