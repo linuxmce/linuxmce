@@ -68,9 +68,12 @@ TransferCommand::handleStartup() {
 	m_token.setKey(TOKEN_ACTION, ACTION_REDIRECT);
 	m_token.setKey(TOKEN_CHANNEL, channel1 );
 	m_token.setKey(TOKEN_EXTRACHANNEL, channel2 );
-	m_token.setKey(TOKEN_EXTEN, extennum);
 	m_token.setKey(TOKEN_CONTEXT, "trusted");
-	m_token.setKey("Priority", "1");
+	m_token.setKey(TOKEN_EXTRACHANCONTEXT, "trusted");
+	m_token.setKey(TOKEN_EXTEN, extennum);
+	m_token.setKey(TOKEN_EXTRAEXTEN, extennum);
+	m_token.setKey(TOKEN_PRIORITY, "1");
+	m_token.setKey(TOKEN_EXTRAPRIORITY, "1");
 };
 
 bool 
