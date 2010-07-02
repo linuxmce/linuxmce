@@ -4657,7 +4657,7 @@ void Media_Plugin::CMD_Set_Media_Private(string sPK_EntertainArea,bool bTrueFals
 	EntertainArea *pEntertainArea = m_mapEntertainAreas_Find( atoi(sPK_EntertainArea.c_str()) );
 	if( !pEntertainArea )
 	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Tried to set private flag on non-existant ea (%s)%i",sPK_EntertainArea,bTrueFalse);
+		//LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Tried to set private flag on non-existant ea (%s)%i",sPK_EntertainArea,bTrueFalse);
 		return;
 	}
 	pEntertainArea->m_bMediaIsPrivate=!bTrueFalse;
