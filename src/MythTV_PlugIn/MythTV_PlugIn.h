@@ -38,6 +38,21 @@ class DBHelper;
 #define CONFIRM_MASTER_BACKEND_OK	5
 #define SYNC_PROVIDERS_AND_CARDS	6
 
+#define TVDB_API_KEY	"04DC09B9310D9216"
+
+// MythTV Recording Constants
+#define MYTHTV_SCHEDULE_NOT_RECORDING				0
+#define MYTHTV_SCHEDULE_RECORD_ONCE				1
+#define MYTHTV_SCHEDULE_RECORD_SAME_TIME_EACH_DAY		2
+#define MYTHTV_SCHEDULE_RECORD_ANY_TIME_ON_THIS_CHANNEL		3
+#define MYTHTV_SCHEDULE_RECORD_ANY_TIME_ON_ANY_CHANNEL		4
+#define MYTHTV_SCHEDULE_RECORD_SAME_TIME_EACH_WEEK		5
+#define MYTHTV_SCHEDULE_RECORD_FIND_ONE_RECORDING		6
+#define MYTHTV_SCHEDULE_RECORD_OVERRIDE				7
+#define MYTHTV_SCHEDULE_RECORD_OVERRIDE_DONT_RECORD		8
+#define MYTHTV_SCHEDULE_RECORD_ONE_SHOWING_DAILY		9
+#define MYTHTV_SCHEDULE_RECORD_ONE_SHOWING_WEEKLY		10
+
 namespace DCE
 {
     using namespace std;
@@ -211,6 +226,9 @@ public:
 	map<string, int> m_mapCategoryColors;	// Colors to Categories
 	int mapCategoryColor_Find(string sCategory) { map<string, int>::iterator it = m_mapCategoryColors.find(sCategory); return it==m_mapCategoryColors.end() ? 3165768 : (*it).second; }
 	vector<int> m_vectRowToChannels;
+
+	/** Recording Options Funtions */
+	string GetRecordingStatusFor(string sProgramID); // "channelid,starttime,stoptime"
 
         /** The interceptor for the MediaInfoChangedEvent from the playing device */
     	bool MediaInfoChanged( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );

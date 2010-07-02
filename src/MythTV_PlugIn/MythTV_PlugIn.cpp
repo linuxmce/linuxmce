@@ -29,6 +29,7 @@ using namespace DCE;
 #include "../pluto_main/Define_Event.h"
 #include "../pluto_main/Define_DeviceData.h"
 #include "../pluto_main/Define_DeviceTemplate.h"
+#include "../pluto_main/Define_Variable.h"
 #include "../pluto_main/Table_EventParameter.h"
 #include "../pluto_main/Table_Users.h"
 #include "../pluto_media/Table_LongAttribute.h"
@@ -898,7 +899,7 @@ class DataGridTable *MythTV_PlugIn::PVREPGGrid(string GridID, string Parms, void
 	  string sEndTime = row[2];
 	  string sShowTitle = row[3]; // FIXME: come back and handle show subtitles.
 	  string sCategory = row[6];
-	  string sShowID = sChannelID + "|" + sStartTime + "|" + sEndTime;
+	  string sShowID = sChannelID + "," + sStartTime + "," + sEndTime;
 	  int iTargetRow = FindTargetRowForChanID(sChannelID);
 	  int iTargetColumn = FindTargetColForStartTime(sStartTime, sEndTime);
 	  int iColSpan = FindColSpanForEndTime(sStartTime, sEndTime);
@@ -1225,10 +1226,27 @@ void MythTV_PlugIn::CMD_Schedule_Recording(string sType,string sOptions,string s
 		return;
 	}
 
-	if( sType=="O" )
+	// This bit of code is a bit odd. It has to do with legacy values for 
+	// setting a scheduling option. Initially, two values, "O" and "C" were 
+	// used for "Record Once" and "Record all on channel." I have to deal
+	// with this, as well as with the new values which map directly to 
+	// the constants in MythTV. -tschak
+	if ( sType=="O" ) 
+	{
 		sType="1";
-	else
+	} 
+	else if (sType=="C")
+	{
 		sType="3";
+	}
+	else if (atoi(sType.c_str()) == 0) // Handle 0 or any random letters.
+	{
+		sType="0";	// Set to Do not record.
+	}
+	else 
+	{
+		// sType is a number, and is already set at this point.
+	}
 
 	string sSQL = "INSERT INTO record(type,chanid,startdate,starttime,enddate,endtime,title,subtitle,description,category,"
 		"station,seriesid,programid,autocommflag,autoexpire,autouserjob1) "
@@ -1254,6 +1272,11 @@ void MythTV_PlugIn::CMD_Schedule_Recording(string sType,string sOptions,string s
 	{
 		m_mapScheduledRecordings[mythRecording.key()] =
 			make_pair<char,int> ('C',iID);
+	}
+	else
+	{
+		m_mapScheduledRecordings[mythRecording.key()] = 
+			make_pair<char,int>(sType[0],iID);
 	}
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "MythTV_PlugIn::CMD_Schedule_Recording key " UINT64_PRINTF " %d=%s m_mapScheduledRecordings size %d", 
@@ -1298,6 +1321,44 @@ class DataGridTable *MythTV_PlugIn::TvProviders(string GridID,string Parms,void 
 
 	return pDataGrid;
 }
+string MythTV_PlugIn::GetRecordingStatusFor(string sProgramID)
+{
+/*
+	// sProgramID = chanid,startdatetime,enddatetime
+        string::size_type pos=0;
+        string sChanId = StringUtils::Tokenize(sProgramID,",",pos);
+        time_t tStart = atoi(StringUtils::Tokenize(sProgramID,",",pos).c_str());
+        time_t tStop = atoi(StringUtils::Tokenize(sProgramID,",",pos).c_str());
+        string sStart = StringUtils::SQLDateTime(tStart);
+        string sStop = StringUtils::SQLDateTime(tStop);
+        string::size_type pos_start = sStart.find(' ');
+        string::size_type pos_stop = sStop.find(' ');
+        if( pos_start==string::npos || pos_stop==string::npos )
+        {
+                LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MythTV_PlugIn::GetRecordingStatusFor sProgramID %s is malformed", sProgramID.c_str());
+                return "There was an Error Getting Recording Status";
+        }
+	
+
+
+	DB_ROW row;
+	PlutoSqlResult result_set;
+
+	string sSQL = "SELECT type from record WHERE chanid = '"+sChanID+"' " +
+			"AND startdate = '"+sStartDate+"' AND starttime = '"+sStartTime+"' " +
+			"AND enddate = '"+sEndDate+"' AND endtime = '"+sEndTime+"' ";
+
+	if ( (result_set.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL)) )
+	{
+		while ((row = db_wrapper_fetch_row(result_set.r)))
+		{
+			
+		}
+	}
+
+*/
+	return "None";
+}
 
 //<-dceag-c698-b->
 
@@ -1311,6 +1372,85 @@ class DataGridTable *MythTV_PlugIn::TvProviders(string GridID,string Parms,void 
 void MythTV_PlugIn::CMD_Get_Extended_Media_Data(string sPK_DesignObj,string sProgramID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c698-e->
 {
+	// This is intended to be called from Orbiter devices.
+	PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
+	int dwPK_Orbiter = pMessage->m_dwPK_Device_From;
+
+	// Parse the parameters: 
+	string::size_type tokenPos = 0;
+	string sChanID = StringUtils::Tokenize(sProgramID,",",tokenPos);
+	string sStartTime = StringUtils::Tokenize(sProgramID,",",tokenPos);
+	string sEndTime = StringUtils::Tokenize(sProgramID,",",tokenPos);
+
+	PlutoSqlResult result;
+	DB_ROW row;
+
+	string sSQL = "SELECT * from program WHERE chanid = '"+sChanID+"' AND starttime = '"+sStartTime+"' AND endtime = '"+sEndTime+"'";
+
+	if ( (result.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL ) 
+	{
+		while((row = db_wrapper_fetch_row(result.r)))
+		{
+			string sTitle = row[3];
+			string sSubTitle = row[4];
+			string sDescription = row[5];
+			string sProgramFullName;
+			string sProgramFullTime = sStartTime + "\n" + sEndTime;
+
+			// Construct the title string with subtitle in Quotes, if present.
+			if (!sSubTitle.empty())
+			{
+				sProgramFullName = sTitle + "\n \"" + sSubTitle  + "\"";
+			}
+			else
+			{
+				sProgramFullName = sTitle;
+			}
+
+			// FIXME: grab test graphic
+			size_t length;
+			char *data = FileUtils::ReadURL("http://www.thetvdb.com/banners/posters/79334-3.jpg",
+							length, true);
+
+			// Create messages to set orbiter variables...
+
+			DCE::CMD_Set_Variable CMD_Set_Variable1(m_dwPK_Device, dwPK_Orbiter, 
+							VARIABLE_Misc_Data_1_CONST,
+							sProgramFullName);
+
+			DCE::CMD_Set_Variable CMD_Set_Variable2(m_dwPK_Device, dwPK_Orbiter,
+							VARIABLE_Misc_Data_2_CONST,
+							sProgramFullTime);
+
+			DCE::CMD_Set_Variable CMD_Set_Variable3(m_dwPK_Device, dwPK_Orbiter,
+							VARIABLE_Misc_Data_3_CONST,
+							sDescription);
+
+			DCE::CMD_Set_Variable CMD_Set_Variable4(m_dwPK_Device, dwPK_Orbiter, 
+							VARIABLE_Misc_Data_4_CONST,
+							GetRecordingStatusFor(sProgramID));
+
+			DCE::CMD_Update_Object_Image CMD_Update_Object_Image(m_dwPK_Device, dwPK_Orbiter, 
+							StringUtils::itos(DESIGNOBJ_objCDCover_CONST),
+							"1",data,(int) length,"0");
+
+			DCE::CMD_Refresh CMD_Refresh(m_dwPK_Device, dwPK_Orbiter, "");
+
+			// Shove the 2 and 3 messages into extramessages for 1, so that
+			// only one message gets sent. More efficient.
+
+			CMD_Set_Variable1.m_pMessage->m_vectExtraMessages.push_back( CMD_Set_Variable2.m_pMessage );
+                	CMD_Set_Variable1.m_pMessage->m_vectExtraMessages.push_back( CMD_Set_Variable3.m_pMessage );
+			CMD_Set_Variable1.m_pMessage->m_vectExtraMessages.push_back( CMD_Set_Variable4.m_pMessage );
+			CMD_Set_Variable1.m_pMessage->m_vectExtraMessages.push_back( CMD_Refresh.m_pMessage );
+
+			// And finally, send the message.
+			SendCommand(CMD_Set_Variable1);
+			SendCommand(CMD_Update_Object_Image);
+
+		}	
+	}
+
 }
 
 //<-dceag-c764-b->
