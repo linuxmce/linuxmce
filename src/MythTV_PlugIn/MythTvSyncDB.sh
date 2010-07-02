@@ -102,4 +102,5 @@ elif [ x"$1" = x"slave" ] ; then
 	UpdateMythSetting "MasterServerPort"    "6543"  $NAME
 	UpdateMythSetting "BackendServerPort"   "6543"  $NAME
 	UpdateMythSetting "BackendServerStatus" "6544"  $NAME
+	UpdateMythSetting "AlwaysStreamFiles" 	"1" 	$NAME
 fi
