@@ -1,5 +1,18 @@
 var touch_enabled = false;
 
+function cursorWait() {
+	var waiting = document.getElementById("waiting");
+	waiting.style.position = 'absolute';
+	waiting.style.left = '100';
+	waiting.style.top = '100';
+	waiting.style.display = 'block';
+}
+
+function cursorDone() {
+	var waiting = document.getElementById("waiting");
+	waiting.style.display = "none";
+}
+
 function findPosX(obj)
 {
 	var curleft = 0;
@@ -36,6 +49,7 @@ function sendTouch(event, DeviceNumber)
 {
 	if (touch_enabled)
 	{
+		cursorWait();
 		var xRelative = event.pageX - $("#screen").position().left;
 		var yRelative = event.pageY - $("#screen").position().top;
 
@@ -57,7 +71,6 @@ function DoCmd(Cmd, DeviceNumber)
 function PageLoaded(DeviceNumber)
 {
 	touch_enabled = true;
-
 	$(window).oneTime(1000, "RefreshImage", function() {RefreshImage(DeviceNumber)});
 }
 
@@ -75,4 +88,5 @@ function RefreshImage(DeviceNumber)
 		}
 	);
 	$(window).oneTime(1000, "RefreshImage", function() {RefreshImage(DeviceNumber)});
+	cursorDone();
 }
