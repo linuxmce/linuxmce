@@ -79,9 +79,8 @@ function LoadImage(DeviceNumber)
 	var Img = new Image();
 	$(Img).load(
 		function() {
-			$("#screen").attr("src", Img.src);
-			cursorDone();
-			delete Img;
+			$("#screen").attr("src", Img.src)
+				.load(function() { cursorDone(); delete Img; });
 		}
 	);
 	Img.src = "weborbiter_image.php?device_id=" + encodeURIComponent(DeviceNumber)
