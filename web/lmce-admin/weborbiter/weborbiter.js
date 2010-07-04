@@ -1,16 +1,13 @@
 var touch_enabled = false;
+var waiting_offset = {top: 100, left: 100};
 
 function cursorWait() {
-	var waiting = document.getElementById("waiting");
-	waiting.style.position = 'absolute';
-	waiting.style.left = '100';
-	waiting.style.top = '100';
-	waiting.style.display = 'block';
+	$("#waiting").show();
+	$("#waiting").offset(waiting_offset);
 }
 
 function cursorDone() {
-	var waiting = document.getElementById("waiting");
-	waiting.style.display = "none";
+	$("#waiting").hide();
 }
 
 function findPosX(obj)
@@ -49,7 +46,6 @@ function sendTouch(event, DeviceNumber)
 {
 	if (touch_enabled)
 	{
-		cursorWait();
 		var xRelative = event.pageX - $("#screen").position().left;
 		var yRelative = event.pageY - $("#screen").position().top;
 
@@ -59,7 +55,9 @@ function sendTouch(event, DeviceNumber)
 
 function DoCmd(Cmd, DeviceNumber)
 {
+	cursorWait();
 	var Img = new Image();
+	$(Img).load(function() { cursorDone(); });
 	Img.src = "weborbiter_image.php?device_id=" + encodeURIComponent(DeviceNumber) + "&action=cmd&cmd=" + encodeURIComponent(Cmd)
 		+ "&rand=" + Math.floor(Math.random() * 90000 + 10000);
 
@@ -71,6 +69,9 @@ function DoCmd(Cmd, DeviceNumber)
 function PageLoaded(DeviceNumber)
 {
 	touch_enabled = true;
+	offset_top = ($(window).height() - $("#waiting").height()) / 2;
+	offset_left = ($(window).width() - $("#waiting").width()) / 2;
+	waiting_offset = { top: offset_top, left: offset_left };
 	$(window).oneTime(1000, "RefreshImage", function() {RefreshImage(DeviceNumber)});
 }
 
@@ -88,5 +89,4 @@ function RefreshImage(DeviceNumber)
 		}
 	);
 	$(window).oneTime(1000, "RefreshImage", function() {RefreshImage(DeviceNumber)});
-	cursorDone();
 }
