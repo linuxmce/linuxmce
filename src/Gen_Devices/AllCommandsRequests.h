@@ -7470,10 +7470,11 @@ namespace DCE
 	};
 	class CMD_Send_Audio_To_Device : public PreformedCommand {
 	public:
-		CMD_Send_Audio_To_Device(long DeviceIDFrom, long DeviceIDTo,string sText,string sList_PK_Device,bool bBypass_Event,bool bDont_Setup_AV,string sVoice) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+		CMD_Send_Audio_To_Device(long DeviceIDFrom, long DeviceIDTo,string sText,string sPhoneNumber,string sList_PK_Device,bool bBypass_Event,bool bDont_Setup_AV,string sVoice) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
 			COMMAND_Send_Audio_To_Device_CONST,
-			5 /* number of parameters */,
+			6 /* number of parameters */,
 			COMMANDPARAMETER_Text_CONST, sText.c_str(),
+			COMMANDPARAMETER_PhoneNumber_CONST, sPhoneNumber.c_str(),
 			COMMANDPARAMETER_List_PK_Device_CONST, sList_PK_Device.c_str(),
 			COMMANDPARAMETER_Bypass_Event_CONST, (bBypass_Event ? "1" : "0"),
 			COMMANDPARAMETER_Dont_Setup_AV_CONST, (bDont_Setup_AV ? "1" : "0"),
@@ -7481,10 +7482,11 @@ namespace DCE
 	};
 	class CMD_Send_Audio_To_Device_DL : public PreformedCommand {
 	public:
-		CMD_Send_Audio_To_Device_DL(long DeviceIDFrom, string DeviceIDTo,string sText,string sList_PK_Device,bool bBypass_Event,bool bDont_Setup_AV,string sVoice) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+		CMD_Send_Audio_To_Device_DL(long DeviceIDFrom, string DeviceIDTo,string sText,string sPhoneNumber,string sList_PK_Device,bool bBypass_Event,bool bDont_Setup_AV,string sVoice) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
 			COMMAND_Send_Audio_To_Device_CONST,
-			5 /* number of parameters */,
+			6 /* number of parameters */,
 			COMMANDPARAMETER_Text_CONST, sText.c_str(),
+			COMMANDPARAMETER_PhoneNumber_CONST, sPhoneNumber.c_str(),
 			COMMANDPARAMETER_List_PK_Device_CONST, sList_PK_Device.c_str(),
 			COMMANDPARAMETER_Bypass_Event_CONST, (bBypass_Event ? "1" : "0"),
 			COMMANDPARAMETER_Dont_Setup_AV_CONST, (bDont_Setup_AV ? "1" : "0"),
@@ -7492,10 +7494,11 @@ namespace DCE
 	};
 	class CMD_Send_Audio_To_Device_DT : public PreformedCommand {
 	public:
-		CMD_Send_Audio_To_Device_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sText,string sList_PK_Device,bool bBypass_Event,bool bDont_Setup_AV,string sVoice) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+		CMD_Send_Audio_To_Device_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sText,string sPhoneNumber,string sList_PK_Device,bool bBypass_Event,bool bDont_Setup_AV,string sVoice) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
 			COMMAND_Send_Audio_To_Device_CONST,
-			5 /* number of parameters */,
+			6 /* number of parameters */,
 			COMMANDPARAMETER_Text_CONST, sText.c_str(),
+			COMMANDPARAMETER_PhoneNumber_CONST, sPhoneNumber.c_str(),
 			COMMANDPARAMETER_List_PK_Device_CONST, sList_PK_Device.c_str(),
 			COMMANDPARAMETER_Bypass_Event_CONST, (bBypass_Event ? "1" : "0"),
 			COMMANDPARAMETER_Dont_Setup_AV_CONST, (bDont_Setup_AV ? "1" : "0"),
@@ -7503,10 +7506,11 @@ namespace DCE
 	};
 	class CMD_Send_Audio_To_Device_Cat : public PreformedCommand {
 	public:
-		CMD_Send_Audio_To_Device_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sText,string sList_PK_Device,bool bBypass_Event,bool bDont_Setup_AV,string sVoice) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+		CMD_Send_Audio_To_Device_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sText,string sPhoneNumber,string sList_PK_Device,bool bBypass_Event,bool bDont_Setup_AV,string sVoice) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
 			COMMAND_Send_Audio_To_Device_CONST,
-			5 /* number of parameters */,
+			6 /* number of parameters */,
 			COMMANDPARAMETER_Text_CONST, sText.c_str(),
+			COMMANDPARAMETER_PhoneNumber_CONST, sPhoneNumber.c_str(),
 			COMMANDPARAMETER_List_PK_Device_CONST, sList_PK_Device.c_str(),
 			COMMANDPARAMETER_Bypass_Event_CONST, (bBypass_Event ? "1" : "0"),
 			COMMANDPARAMETER_Dont_Setup_AV_CONST, (bDont_Setup_AV ? "1" : "0"),
@@ -29215,6 +29219,42 @@ namespace DCE
 			2 /* number of parameters */,
 			COMMANDPARAMETER_Filename_CONST, sFilename.c_str(),
 			COMMANDPARAMETER_Path_CONST, sPath.c_str()); }
+	};
+	class CMD_PBX_Application : public PreformedCommand {
+	public:
+		CMD_PBX_Application(long DeviceIDFrom, long DeviceIDTo,string sPhoneExtension,string sData_String,string sApplication) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+			COMMAND_PBX_Application_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_PhoneExtension_CONST, sPhoneExtension.c_str(),
+			COMMANDPARAMETER_Data_String_CONST, sData_String.c_str(),
+			COMMANDPARAMETER_Application_CONST, sApplication.c_str()); }
+	};
+	class CMD_PBX_Application_DL : public PreformedCommand {
+	public:
+		CMD_PBX_Application_DL(long DeviceIDFrom, string DeviceIDTo,string sPhoneExtension,string sData_String,string sApplication) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_PBX_Application_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_PhoneExtension_CONST, sPhoneExtension.c_str(),
+			COMMANDPARAMETER_Data_String_CONST, sData_String.c_str(),
+			COMMANDPARAMETER_Application_CONST, sApplication.c_str()); }
+	};
+	class CMD_PBX_Application_DT : public PreformedCommand {
+	public:
+		CMD_PBX_Application_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sPhoneExtension,string sData_String,string sApplication) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_PBX_Application_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_PhoneExtension_CONST, sPhoneExtension.c_str(),
+			COMMANDPARAMETER_Data_String_CONST, sData_String.c_str(),
+			COMMANDPARAMETER_Application_CONST, sApplication.c_str()); }
+	};
+	class CMD_PBX_Application_Cat : public PreformedCommand {
+	public:
+		CMD_PBX_Application_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sPhoneExtension,string sData_String,string sApplication) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_PBX_Application_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_PhoneExtension_CONST, sPhoneExtension.c_str(),
+			COMMANDPARAMETER_Data_String_CONST, sData_String.c_str(),
+			COMMANDPARAMETER_Application_CONST, sApplication.c_str()); }
 	};
 }
 #endif
