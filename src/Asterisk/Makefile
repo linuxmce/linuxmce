@@ -38,6 +38,7 @@ sources += \
 	tokenpool.cpp \
 	logincommand.cpp \
 	originatecommand.cpp \
+	applicationcommand.cpp \
 	hangupcommand.cpp \
 	transfercommand.cpp \
 	iaxextensionsstatuscommand.cpp \

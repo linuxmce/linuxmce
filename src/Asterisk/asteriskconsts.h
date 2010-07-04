@@ -32,7 +32,7 @@
 #define TOKEN_MESSAGE		"Message"
 #define TOKEN_CALLERID		"CallerID"
 #define TOKEN_APPLICATION	"Application"
-#define TOKEN_APPDATA		"AppData"
+#define TOKEN_APPDATA		"Data"
 #define TOKEN_ACTION		"Action"
 #define TOKEN_EXTEN		"Exten"
 #define TOKEN_EXTRAEXTEN	"ExtraExten"
