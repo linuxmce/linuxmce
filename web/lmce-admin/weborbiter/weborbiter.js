@@ -61,14 +61,31 @@ function sendTouch(event, DeviceNumber)
 function DoCmd(Cmd, DeviceNumber)
 {
 	cursorWait();
+
+	var url = 'weborbiter_command.php';
+	var data = 'device_id=' + encodeURIComponent(DeviceNumber) + "&cmd=" + encodeURIComponent(Cmd);
+
+	$.get(url, data,
+		function(data) {
+			LoadImage(DeviceNumber);
+		}
+	);
+}
+
+function LoadImage(DeviceNumber)
+{
+	cursorWait();
+
 	var Img = new Image();
-	$(Img).load(function() { cursorDone(); });
-	Img.src = "weborbiter_image.php?device_id=" + encodeURIComponent(DeviceNumber) + "&action=cmd&cmd=" + encodeURIComponent(Cmd)
+	$(Img).load(
+		function() {
+			$("#screen").attr("src", Img.src);
+			cursorDone();
+			delete Img;
+		}
+	);
+	Img.src = "weborbiter_image.php?device_id=" + encodeURIComponent(DeviceNumber)
 		+ "&rand=" + Math.floor(Math.random() * 90000 + 10000);
-
-	$("#screen").attr("src", Img.src);
-
-	delete Img;
 }
 
 function PageLoaded(DeviceNumber)
@@ -89,7 +106,7 @@ function RefreshImage(DeviceNumber)
 		{
 			if (data == "yes")
 			{
-				DoCmd("IMAGE", DeviceNumber);
+				LoadImage(DeviceNumber);
 			}
 		}
 	);
