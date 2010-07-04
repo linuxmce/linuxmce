@@ -208,6 +208,13 @@ void Text_To_Speech::CMD_Send_Audio_To_Device(string sText,string sPhoneNumber,s
 	}
 	system(sCmd.c_str());
 
+	// Resample and create file for phones
+	//string sFile2 = "/var/lib/asterisk/sounds/pluto/ivrcategories";
+	string sFile1 = "/var/lib/asterisk/sounds/pluto/" + StringUtils::itos(iTempID);
+	string sFile2 = sFile1+".gsm";
+	string sCmd2 = "/usr/bin/sox "+sFile+" -r 8000 -c 1 "+sFile2+" resample -ql";
+	system(sCmd2.c_str());
+
 	if( FileUtils::FileExists(sFile) )
 	{
 		vector<string> vectBufferDevices;
@@ -243,7 +250,7 @@ void Text_To_Speech::CMD_Send_Audio_To_Device(string sText,string sPhoneNumber,s
 
 			//LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"sPhone: %s",sPhone.c_str());
 
-			DCE::CMD_PBX_Application CMD_PBX_Application(m_dwPK_Device,m_nDevice_pbx,sPhone,sFile,"Playback");
+			DCE::CMD_PBX_Application CMD_PBX_Application(m_dwPK_Device,m_nDevice_pbx,sPhone,sFile1,"Playback");
 			SendCommand(CMD_PBX_Application);
 		}
 
