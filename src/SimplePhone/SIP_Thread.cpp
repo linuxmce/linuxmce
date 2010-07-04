@@ -145,7 +145,7 @@ static void LS_InitProxy()
 static void LS_SetupAuth()
 {
 	PLUTO_SAFETY_LOCK(sl, LS_linphone_mutex);
-	string sPassword = LS_pSimplePhone->GetExtension();
+	string sPassword = LS_pSimplePhone->GetPassword();
 	linphone_auth_info_set_passwd(LS_pLinphoneAuthInfo, sPassword.c_str());
 	linphone_core_add_auth_info(&LS_LinphoneCore, LS_pLinphoneAuthInfo);
 	LS_Auth_Received = 0;
