@@ -1,12 +1,17 @@
 var touch_enabled = false;
 var waiting_offset = {top: 100, left: 100};
+var use_wait_cursor = true;
 
 function cursorWait() {
+	if (!use_wait_cursor)
+		return;
 	$("#waiting").show();
 	$("#waiting").offset(waiting_offset);
 }
 
 function cursorDone() {
+	if (!use_wait_cursor)
+		return;
 	$("#waiting").hide();
 }
 
