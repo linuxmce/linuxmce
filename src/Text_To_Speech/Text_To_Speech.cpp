@@ -24,6 +24,7 @@
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
 
+#include <sstream>
 #include <iostream>
 using namespace std;
 using namespace DCE;
@@ -40,6 +41,8 @@ Text_To_Speech::Text_To_Speech(int DeviceID, string ServerAddress,bool bConnectE
 	m_TTSMutex.Init(NULL);
 	m_dwID=0;
 	m_dwPK_Device_MediaPlugin=0;
+	m_pDevice_pbx=NULL;
+	m_nDevice_pbx=0;
 }
 
 //<-dceag-getconfig-b->
@@ -60,6 +63,10 @@ bool Text_To_Speech::GetConfig()
 			m_dwPK_Device_MediaPlugin=pDeviceData_Base->m_dwPK_Device;
 			break;
 		}
+
+	m_pDevice_pbx = m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Asterisk_CONST);
+	m_nDevice_pbx = m_pDevice_pbx->m_dwPK_Device;
+
 	}
 	return true;
 }
@@ -70,7 +77,7 @@ bool Text_To_Speech::GetConfig()
 Text_To_Speech::~Text_To_Speech()
 //<-dceag-dest-e->
 {
-	
+
 }
 
 //<-dceag-reg-b->
@@ -163,6 +170,8 @@ char *Text_To_Speech::CreateWAV(string sText,string sVoice,int &Size)
 	/** Will convert the text to an audio file, and send it to the device with the "Play Media" Command. */
 		/** @param #9 Text */
 			/** What to say */
+		/** @param #75 PhoneNumber */
+			/** A comma delimited list of phone extensions to send it to, prepend a 9 for outside lines */
 		/** @param #103 List PK Device */
 			/** A comma delimited list of the devices to send it to */
 		/** @param #254 Bypass Event */
@@ -172,7 +181,7 @@ char *Text_To_Speech::CreateWAV(string sText,string sVoice,int &Size)
 		/** @param #278 Voice */
 			/** Installed voice to use (blank for default voice) */
 
-void Text_To_Speech::CMD_Send_Audio_To_Device(string sText,string sList_PK_Device,bool bBypass_Event,bool bDont_Setup_AV,string sVoice,string &sCMD_Result,Message *pMessage)
+void Text_To_Speech::CMD_Send_Audio_To_Device(string sText,string sPhoneNumber,string sList_PK_Device,bool bBypass_Event,bool bDont_Setup_AV,string sVoice,string &sCMD_Result,Message *pMessage)
 //<-dceag-c253-e->
 {
 	PLUTO_SAFETY_LOCK(tm,m_TTSMutex);
@@ -198,18 +207,46 @@ void Text_To_Speech::CMD_Send_Audio_To_Device(string sText,string sList_PK_Devic
 		sCmd += " -eval \"("+DATA_Get_default_voice()+")\"";
 	}
 	system(sCmd.c_str());
+
 	if( FileUtils::FileExists(sFile) )
 	{
-		string::size_type pos=0;
-		while( pos<sList_PK_Device.size() && pos!=string::npos )
-		{
-			int PK_Device = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
-			if( PK_Device )
-			{
-				DCE::CMD_MH_Play_Media CMD_MH_Play_Media(m_dwPK_Device,m_dwPK_Device_MediaPlugin,PK_Device,sFile,0/*iPK_MediaType*/,0/*iPK_DeviceTemplate*/,""/*sPK_EntertainArea*/,true/*bResume*/,0/*iRepeat*/,0 /* bQueue */,bBypass_Event /* bBypass_Event */, bDont_Setup_AV /* bDont_Setup_AV */);
-				SendCommand(CMD_MH_Play_Media);
-			}
+		vector<string> vectBufferDevices;
+		sList_PK_Device=StringUtils::TrimSpaces(sList_PK_Device);
+		StringUtils::Tokenize(sList_PK_Device,",",vectBufferDevices);
+		int size = vectBufferDevices.size();
+
+		for (int i=0; i < size; i++) {
+
+        		string sDevice = vectBufferDevices[i];
+
+        		// Convert the device number to an integer.
+        		int PK_Device;
+        		istringstream tmpStream;
+        		tmpStream.str(sDevice);
+        		tmpStream >> PK_Device;
+
+			//LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"PK_Device: %i",PK_Device);
+
+			DCE::CMD_MH_Play_Media CMD_MH_Play_Media(m_dwPK_Device,m_dwPK_Device_MediaPlugin,PK_Device,sFile,0/*iPK_MediaType*/,0/*iPK_DeviceTemplate*/,""/*sPK_EntertainArea*/,true/*bResume*/,0/*iRepeat*/,0 /* bQueue */,bBypass_Event /* bBypass_Event */, bDont_Setup_AV /* bDont_Setup_AV */);
+			SendCommand(CMD_MH_Play_Media);
 		}
+
+		//LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"sPhoneNumber: %s m_nDevice_pbx: %i",sPhoneNumber.c_str(), m_nDevice_pbx);
+
+		vector<string> vectBufferPhones;
+		sPhoneNumber=StringUtils::TrimSpaces(sPhoneNumber);		
+		StringUtils::Tokenize(sPhoneNumber,",",vectBufferPhones);
+                size = vectBufferPhones.size();
+
+                for (int i=0; i < size; i++) {
+			string sPhone = vectBufferPhones[i];
+
+			//LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"sPhone: %s",sPhone.c_str());
+
+			DCE::CMD_PBX_Application CMD_PBX_Application(m_dwPK_Device,m_nDevice_pbx,sPhone,sFile,"Playback");
+			SendCommand(CMD_PBX_Application);
+		}
+
 		m_mapOutstandingFiles[time(NULL)]=sFile;
 		m_mapOutstandingFiles[time(NULL)]=sTextFile;
 	}

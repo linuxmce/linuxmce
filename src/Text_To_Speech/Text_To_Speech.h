@@ -24,6 +24,7 @@
 
 #include "Gen_Devices/Text_To_SpeechBase.h"
 //<-dceag-d-e->
+
 #define FILE_PATH "/home/public/data/tts"
 
 //<-dceag-decl-b->
@@ -51,6 +52,8 @@ public:
 
 		pluto_pthread_mutex_t m_TTSMutex; //this will protect needredraw vectors
 		int m_dwPK_Device_MediaPlugin;
+		DeviceData_Base* m_pDevice_pbx;
+		int m_nDevice_pbx;
 		int m_dwID;  // A numeric ID for the request
 		map<time_t,string> m_mapOutstandingFiles; // So we can delete files more than 5 minutes old
 
@@ -78,6 +81,8 @@ private:
 	/** Will convert the text to an audio file, and send it to the device with the "Play Media" Command. */
 		/** @param #9 Text */
 			/** What to say */
+		/** @param #75 PhoneNumber */
+			/** A comma delimited list of phone extensions to send it to, prepend a 9 for outside lines */
 		/** @param #103 List PK Device */
 			/** A comma delimited list of the devices to send it to */
 		/** @param #254 Bypass Event */
@@ -87,8 +92,8 @@ private:
 		/** @param #278 Voice */
 			/** Installed voice to use (blank for default voice) */
 
-	virtual void CMD_Send_Audio_To_Device(string sText,string sList_PK_Device,bool bBypass_Event,bool bDont_Setup_AV,string sVoice) { string sCMD_Result; CMD_Send_Audio_To_Device(sText.c_str(),sList_PK_Device.c_str(),bBypass_Event,bDont_Setup_AV,sVoice.c_str(),sCMD_Result,NULL);};
-	virtual void CMD_Send_Audio_To_Device(string sText,string sList_PK_Device,bool bBypass_Event,bool bDont_Setup_AV,string sVoice,string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Send_Audio_To_Device(string sText,string sPhoneNumber,string sList_PK_Device,bool bBypass_Event,bool bDont_Setup_AV,string sVoice) { string sCMD_Result; CMD_Send_Audio_To_Device(sText.c_str(),sPhoneNumber.c_str(),sList_PK_Device.c_str(),bBypass_Event,bDont_Setup_AV,sVoice.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Send_Audio_To_Device(string sText,string sPhoneNumber,string sList_PK_Device,bool bBypass_Event,bool bDont_Setup_AV,string sVoice,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #256 - Text To Wave */
