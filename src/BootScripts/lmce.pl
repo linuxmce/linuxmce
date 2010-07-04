@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 # lmce.pl
 # 
 # Contains helper function to access LinuxMCE infrastructure
