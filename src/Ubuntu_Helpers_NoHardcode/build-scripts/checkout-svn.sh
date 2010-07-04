@@ -70,6 +70,7 @@ function Update_Svn {
 		popd
 	fi
 	rm -R ${svn_dir}/${svn_branch_name}
+	DisplayMessage "Copying checkout to work"
 	cp -R ${svn_dir}/${svn_branch_name}-last ${svn_dir}/${svn_branch_name}
 }
 
