@@ -257,7 +257,7 @@ void Asterisk::SomeFunction()
 		/** @param #82 PhoneType */
 			/** Phone type from which to place the call */
 		/** @param #83 PhoneExtension */
-			/** Extention to dial */
+			/** Extension to dial */
 		/** @param #84 PhoneCallerID */
 			/** Caller id */
 
@@ -489,3 +489,16 @@ void Asterisk::CMD_Send_Asterisk_Status(string &sCMD_Result,Message *pMessage)
 	AsteriskManager::getInstance()->GetExtensionsStatus();
 	AsteriskManager::getInstance()->GetCallsStatus();
 }
+//<-dceag-c1084-b->
+
+	/** @brief COMMAND: #1084 - PBX_Application */
+	/** Link an extension to a dialplan application.  (Ex. call an extension and playback a sound file using the playback application) */
+		/** @param #83 PhoneExtension */
+			/** Extension to dial */
+		/** @param #109 Data String */
+			/** Application data */
+		/** @param #285 Application */
+			/** Application to connect with */
+
+void Asterisk::CMD_PBX_Application(string sPhoneExtension,string sData_String,string sApplication,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1084-e->

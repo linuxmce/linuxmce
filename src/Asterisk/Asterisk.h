@@ -69,7 +69,7 @@ public:
 	void EVENT_PBX_CommandResult(int iCommandID,int iResult,string sMessage);
 	void EVENT_PBX_Ring(string sSource_Channel,string sDestination_Channel,string sSource_Caller_ID,string sDestination_Caller_ID);
 	void EVENT_Incoming_Call(string sPhoneCallerID);
-	void EVENT_Voice_Mail_Changed(string sValue,int iPK_Users);
+	void EVENT_Voice_Mail_Changed(int iValue,int iPK_Users);
 	void EVENT_PBX_Hangup(string sChannel_ID,string sReason);
 	void EVENT_Extensions_Status(string sText);
 	void EVENT_Calls_Status(string sText);
@@ -86,7 +86,7 @@ public:
 		/** @param #82 PhoneType */
 			/** Phone type from which to place the call */
 		/** @param #83 PhoneExtension */
-			/** Extention to dial */
+			/** Extension to dial */
 		/** @param #84 PhoneCallerID */
 			/** Caller id */
 
@@ -122,6 +122,18 @@ public:
 	virtual void CMD_Send_Asterisk_Status() { string sCMD_Result; CMD_Send_Asterisk_Status(sCMD_Result,NULL);};
 	virtual void CMD_Send_Asterisk_Status(string &sCMD_Result,Message *pMessage);
 
+
+	/** @brief COMMAND: #1084 - PBX_Application */
+	/** Link an extension to a dialplan application.  (Ex. call an extension and playback a sound file using the playback application) */
+		/** @param #83 PhoneExtension */
+			/** Extension to dial */
+		/** @param #109 Data String */
+			/** Application data */
+		/** @param #285 Application */
+			/** Application to connect with */
+
+	virtual void CMD_PBX_Application(string sPhoneExtension,string sData_String,string sApplication) { string sCMD_Result; CMD_PBX_Application(sPhoneExtension.c_str(),sData_String.c_str(),sApplication.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_PBX_Application(string sPhoneExtension,string sData_String,string sApplication,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
 	};
