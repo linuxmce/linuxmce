@@ -90,8 +90,8 @@ function LoadImage(DeviceNumber)
 function PageLoaded(DeviceNumber)
 {
 	touch_enabled = true;
-	offset_top = ($(window).height() - $("#waiting").height()) / 2;
-	offset_left = ($(window).width() - $("#waiting").width()) / 2;
+	offset_top = ($("#screen").height() - $("#waiting").height()) / 2;
+	offset_left = ($("#screen").width() - $("#waiting").width()) / 2;
 	waiting_offset = { top: offset_top, left: offset_left };
 	$(window).oneTime(1000, "RefreshImage", function() {RefreshImage(DeviceNumber)});
 }
