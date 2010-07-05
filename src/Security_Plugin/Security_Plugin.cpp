@@ -951,11 +951,12 @@ void Security_Plugin::ProcessCountdown(int id,Row_Alert *pRow_Alert)
 
 void Security_Plugin::SayToDevices(string sText,DeviceData_Router *pDeviceData_Router)
 {
+	string sPhones = "";
 	bool bBypass_Event = 0; // TODO aaronspecial
 	bool bDont_Setup_AV = 0;
 	string sVoice = ""; //TODO: Once we get some decent voices, set this to one of them!
 
-	DCE::CMD_Send_Audio_To_Device CMD_Send_Audio_To_Device(m_dwPK_Device,m_PK_Device_TextToSpeach,sText,DATA_Get_PK_Device(),bBypass_Event, bDont_Setup_AV, sVoice);
+	DCE::CMD_Send_Audio_To_Device CMD_Send_Audio_To_Device(m_dwPK_Device,m_PK_Device_TextToSpeach,sText,sPhones,DATA_Get_PK_Device(),bBypass_Event, bDont_Setup_AV, sVoice);
 	SendCommand(CMD_Send_Audio_To_Device);
 }
 
