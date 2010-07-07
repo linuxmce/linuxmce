@@ -17,6 +17,6 @@ Pin-Priority: 1001
 # If our local package uses the same version as elsewhere, we take the one we have locally.
 Package: *
 Pin: origin
-Pin-Priority: 600
+Pin-Priority: 500
 ' > /etc/apt/preferences
 fi
