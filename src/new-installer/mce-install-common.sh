@@ -110,7 +110,7 @@ Pin-Priority: 1001
 
 Package: *
 Pin: origin
-Pin-Priority: 600
+Pin-Priority: 500
 '
 	echo -n "$pluto_apt_preferences" >/etc/apt/preferences
 
