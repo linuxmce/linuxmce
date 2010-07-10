@@ -10,7 +10,7 @@ bash -x /usr/pluto/bin/Start_OrbiterGen.sh >> /var/log/pluto/StartCoreServices.l
 
 /usr/pluto/bin/UpdateMediaDaemonControl.sh -enable
 
-Q="SELECT PK_Device FROM Device"
+Q="SELECT PK_Device FROM pluto_main.Device LEFT JOIN pluto_main.Device_DeviceData ON pluto_main.Device.PK_Device = pluto_main.Device_DeviceData.FK_Device where pluto_main.Device_DeviceData.FK_DeviceData in (31,29) group by PK_Device"
 Devices=$(RunSQL "$Q")
 /usr/pluto/bin/sync_pluto2amp.pl $Devices
 
