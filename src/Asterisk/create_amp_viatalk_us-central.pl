@@ -63,46 +63,29 @@ $TRUNK_VARS{'autopop'}="";
 $TRUNK_VARS{'dialoutprefix'}="";
 $TRUNK_VARS{'channelid'}="viatalk_us-central";
 
-$TRUNK_VARS{'peerdetails'} ="allow=alaw&alaw&ulaw\n";
-$TRUNK_VARS{'peerdetails'}.="context=from-trunk\n";
-#$TRUNK_VARS{'peerdetails'}.="disallow=all\n";
+$TRUNK_VARS{'peerdetails'}="context=from-pstn\n";
 $TRUNK_VARS{'peerdetails'}.="host=$DECLARED_HOST\n";
 $TRUNK_VARS{'peerdetails'}.="username=$DECLARED_USERNAME\n";
-$TRUNK_VARS{'peerdetails'}.="callerid=$DECLARED_USERNAME\n";
-$TRUNK_VARS{'peerdetails'}.="user=$DECLARED_USERNAME\n";
 $TRUNK_VARS{'peerdetails'}.="fromuser=$DECLARED_USERNAME\n";
 $TRUNK_VARS{'peerdetails'}.="authuser=$DECLARED_USERNAME\n";
 $TRUNK_VARS{'peerdetails'}.="secret=$DECLARED_USERPASSWD\n";
 $TRUNK_VARS{'peerdetails'}.="fromdomain=$DECLARED_HOST\n";
-$TRUNK_VARS{'peerdetails'}.="dtmfmode=rfc2833\n";
+$TRUNK_VARS{'peerdetails'}.="dtmf=inband\n";
+$TRUNK_VARS{'peerdetails'}.="dtmfmode=inband\n";
 $TRUNK_VARS{'peerdetails'}.="nat=yes\n";
 $TRUNK_VARS{'peerdetails'}.="qualify=yes\n";
 $TRUNK_VARS{'peerdetails'}.="type=peer\n";
-$TRUNK_VARS{'peerdetails'}.="tos=0x18\n";
-$TRUNK_VARS{'peerdetails'}.="canreinvite=no\n";
-$TRUNK_VARS{'peerdetails'}.="insecure=port,invite\n";
+$TRUNK_VARS{'peerdetails'}.="canreinvite=yes\n";
+$TRUNK_VARS{'peerdetails'}.="insecure=very\n";
 
 $TRUNK_VARS{'usercontext'}=$DECLARED_NUMBER;
-$TRUNK_VARS{'userconfig'}=
-$TRUNK_VARS{'userconfig'} ="allow=alaw&alaw&ulaw\n";
-$TRUNK_VARS{'userconfig'}.="context=from-trunk\n";
-#$TRUNK_VARS{'userconfig'}.="disallow=all\n";
-$TRUNK_VARS{'userconfig'}.="host=$DECLARED_HOST\n";
-$TRUNK_VARS{'userconfig'}.="username=$DECLARED_USERNAME\n";
-$TRUNK_VARS{'userconfig'}.="callerid=$DECLARED_USERNAME\n";
-$TRUNK_VARS{'userconfig'}.="user=$DECLARED_USERNAME\n";
-$TRUNK_VARS{'userconfig'}.="fromuser=$DECLARED_USERNAME\n";
-$TRUNK_VARS{'userconfig'}.="authuser=$DECLARED_USERNAME\n";
+
+$TRUNK_VARS{'userconfig'}="context=from-pstn\n";
 $TRUNK_VARS{'userconfig'}.="secret=$DECLARED_USERPASSWD\n";;
-$TRUNK_VARS{'userconfig'}.="fromdomain=$DECLARED_HOST\n";
-$TRUNK_VARS{'userconfig'}.="dtmfmode=inband\n";
-$TRUNK_VARS{'userconfig'}.="nat=yes\n";
-$TRUNK_VARS{'userconfig'}.="qualify=yes\n";
 $TRUNK_VARS{'userconfig'}.="type=user\n";
-$TRUNK_VARS{'userconfig'}.="canreinvite=no\n";
 $TRUNK_VARS{'userconfig'}.="insecure=port,invite\n";
 
-$TRUNK_VARS{'register'}="$DECLARED_USERNAME@$DECLARED_HOST/viatalk";
+$TRUNK_VARS{'register'}="$DECLARED_USERNAME:$DECLARED_USERPASSWD\@$DECLARED_HOST/$DECLARED_NUMBER";
 
 foreach my $var (keys %TRUNK_VARS)
 {
