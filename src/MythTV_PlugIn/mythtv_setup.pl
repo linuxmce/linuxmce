@@ -207,52 +207,14 @@ foreach $row (@results) {
   push(@hostNames,"moon" . $row->{"PK_Device"});
 }
 
-# Check for and remove extra or invalid storage group entries
-foreach $thisHost (@hostNames) {
-	$sql="FROM storagegroup WHERE hostname='$thisHost' AND groupname NOT LIKE 'custom:%' AND dirname NOT LIKE '/home/\%/data/pvr\%'";
-  UseDB("mythconverg");
-  @results=RunSQL("SELECT count(hostname) as count " . $sql);
-	if ($results[0] && $results[0]->{"count"}) {
-    $dbh->do("DELETE " . $sql);
-    print "Removed $results[0]->{count} invalid Host entries.\n";
-	}
-}
-
-$sql="FROM storagegroup WHERE hostname not in ('" . join("','",@hostNames) . "')";
-@results=RunSQL("SELECT count(hostname) as count " . $sql);
-if ($results[0] && $results[0]->{"count"}) {
-  $dbh->do("DELETE " . $sql);
-  print "Removed $results[0]->{count} extraneous Host entries.\n";
-}
-
-
-foreach $thisDevice (@Devices) {
-	$Device_Description = addslashes($thisDevice->{"Description"});
-	$sql="FROM storagegroup WHERE dirname LIKE '\%$Device_Description\%' AND groupname NOT LIKE 'custom:%' AND dirname NOT LIKE '/home/\%/data/pvr/$Device_Description \[$thisDevice->{PK_Device}\]\%' ";
-	@results=RunSQL("SELECT count(id) as count " . $sql);
-	if ($results[0] && $results[0]->{"count"}) {
-    $dbh->do("DELETE " . $sql);
-    print "Removed $results[0]->{count} invalid Device entries.\n";
-	}
-}
-
-$sql = "FROM storagegroup where dirname NOT LIKE '%pvr' AND dirname NOT LIKE '%livetv' AND groupname NOT LIKE 'custom:%'";
-foreach $thisDevice (@Devices) {
-	$Device_Description = addslashes($thisDevice->{"Description"});
-	$sql .= " AND dirname NOT LIKE '%$Device_Description \[$thisDevice->{PK_Device}\]\%'";
-}
+#Clean up all entries except custom ones, they will get recreated below
+UseDB('mythconverg');
+$sql = "FROM storagegroup where groupname NOT LIKE 'custom:%'";
 
 @results=RunSQL("SELECT count(id) as count " . $sql);
 if ($results[0] && $results[0]->{"count"}) {
   $dbh->do("DELETE " . $sql);
-  print "Removed $results[0]->{count} extraneous Device entries.\n";
-}
-
-$sql="FROM storagegroup where groupname='LiveTV' and dirname not like '%livetv'";
-@results=RunSQL("SELECT count(hostname) as count " . $sql);
-if ($results[0] && $results[0]->{"count"}) {
-  $dbh->do("DELETE " . $sql);
-  print "Removed $results[0]->{count} extraneous Host entries.\n";
+  print "Cleaned $results[0]->{count} Device entries.\n";
 }
 
 
@@ -264,7 +226,7 @@ foreach my $hostName (@hostNames) {
 	##lets handle the /home/public paths....
 	CheckMythTVStorageGroup("/home/public/data/pvr","Default","$hostName");     #Put the special "Default" storage group in. 
 	CheckMythTVStorageGroup("/home/public/data/pvr/livetv","LiveTV","$hostName");    #Put the special "LiveTV" storage group into the moons root pvr* directory	
-	CheckMythTVStorageGroup("/home/public/data/pvr","public","$hostName");	
+	CheckMythTVStorageGroup("/home/public/data/pvr","Default: [core]","$hostName");	
 
 
 	## For every user
@@ -275,6 +237,7 @@ foreach my $hostName (@hostNames) {
 		$User_UnixUsername =~ s/[^a-z0-9-]//;
 		$User_UnixUname="pluto_$User_UnixUname";
 		CheckMythTVStorageGroup("/home/user_$User_ID/data/pvr","$User_Uname","$hostName");
+		CheckMythTVStorageGroup("/home/user_$User_ID/data/pvr","$User_Uname: [core]","$hostName");
 	}
 
 
@@ -292,10 +255,12 @@ foreach my $hostName (@hostNames) {
 		        next; 
 		} 
 
+		#all devices should be in the "Default" and "LiveTV" special storage groups
+		CheckMythTVStorageGroup("/home/public/data/pvr/$Device_Description [$Device_ID]","Default","$hostName"); 
+		CheckMythTVStorageGroup("/home/public/data/pvr/$Device_Description [$Device_ID]/livetv","LiveTV","$hostName");
+
 		#public storage groups
 		CheckMythTVStorageGroup("/home/public/data/pvr/$Device_Description [$Device_ID]","Default: $Device_Description [$Device_ID]","$hostName");      #Put the special "Default" storage group in. 
-		CheckMythTVStorageGroup("/home/public/data/pvr/$Device_Description [$Device_ID]/livetv","LiveTV: $Device_Description [$Device_ID]","$hostName");       #Put the special "LiveTV" storage group into the moons root pvr* directory	
-		CheckMythTVStorageGroup("/home/public/data/pvr/$Device_Description [$Device_ID]","public: $Device_Description [$Device_ID]","$hostName");
 
 
 		## For every user
@@ -305,7 +270,7 @@ foreach my $hostName (@hostNames) {
 		  my $User_UnixUname=lc($User_Uname);
 		  $User_UnixUsername =~ s/[^a-z0-9-]//;
 		  $User_UnixUname="pluto_$User_UnixUname";
-		
+		        CheckMythTVStorageGroup("/home/user_$User_ID/data/pvr/$Device_Description [$Device_ID]","$User_Uname","$hostName");
 			CheckMythTVStorageGroup("/home/user_$User_ID/data/pvr/$Device_Description [$Device_ID]","$User_Uname: $Device_Description [$Device_ID]","$hostName");
 
 		}
