@@ -60,6 +60,7 @@ function sendTouch(event, DeviceNumber)
 
 function DoCmd(Cmd, DeviceNumber)
 {
+	StopRefreshTimer();
 	cursorWait();
 
 	var url = 'weborbiter_command.php';
@@ -72,19 +73,28 @@ function DoCmd(Cmd, DeviceNumber)
 	);
 }
 
+function StartRefreshTimer(DeviceNumber)
+{
+	StopRefreshTimer();
+	$(window).oneTime(1000, "RefreshImage", function() {RefreshImage(DeviceNumber)});
+}
+
+function StopRefreshTimer()
+{
+	$(window).stopTime("RefreshImage");
+}
+
 function LoadImage(DeviceNumber)
 {
+	StopRefreshTimer();
 	cursorWait();
 
-	var Img = new Image();
-	$(Img).load(
-		function() {
-			$("#screen").attr("src", Img.src)
-				.load(function() { cursorDone(); delete Img; });
-		}
-	);
-	Img.src = "weborbiter_image.php?device_id=" + encodeURIComponent(DeviceNumber)
-		+ "&rand=" + Math.floor(Math.random() * 90000 + 10000);
+	var url = "weborbiter_image.php?device_id=" + encodeURIComponent(DeviceNumber) + "&rand=" + Math.floor(Math.random() * 90000 + 10000);
+	$("#screen").attr("src", url)
+		.load(function() {
+				cursorDone();
+				StartRefreshTimer(DeviceNumber);
+		});
 }
 
 function PageLoaded(DeviceNumber)
@@ -93,7 +103,7 @@ function PageLoaded(DeviceNumber)
 	offset_top = ($("#screen").height() - $("#waiting").height()) / 2;
 	offset_left = ($("#screen").width() - $("#waiting").width()) / 2;
 	waiting_offset = { top: offset_top, left: offset_left };
-	$(window).oneTime(1000, "RefreshImage", function() {RefreshImage(DeviceNumber)});
+	StartRefreshTimer(DeviceNumber);
 }
 
 function RefreshImage(DeviceNumber)
@@ -104,10 +114,9 @@ function RefreshImage(DeviceNumber)
 		function(data)
 		{
 			if (data == "yes")
-			{
 				LoadImage(DeviceNumber);
-			}
+			else
+				StartRefreshTimer(DeviceNumber);
 		}
 	);
-	$(window).oneTime(1000, "RefreshImage", function() {RefreshImage(DeviceNumber)});
 }
