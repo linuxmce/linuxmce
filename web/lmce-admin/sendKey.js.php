@@ -30,7 +30,7 @@ foreach ($keyboard_codes as $code => $command_key)
 	$js_case .= "case $code: command_to_send = $command_key; break;";
 
 $sendKeyJs='
-function sendKey(event)
+function sendKey(event, DeviceNumber)
 {
 	if (event.which)
 		key_code = event.which;
@@ -48,7 +48,7 @@ function sendKey(event)
 	}
 
 	if (command_to_send != 0)
-		DoCmd("PLUTO_KEY " + command_to_send);
+		DoCmd("PLUTO_KEY " + command_to_send, DeviceNumber);
 }
 ';
 
