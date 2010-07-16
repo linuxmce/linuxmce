@@ -110,7 +110,7 @@ function getImage($deviceID,$socket,$refresh=0){
 
 function getXML($socket){
 	$in = "XML ".rand(10000,11000)."\n";
-	$out='';
+	$outXML = '';
 	
 	$written=web_socket_write($socket, $in);
 	$outResponse= web_socket_read($socket, 2048,PHP_NORMAL_READ);
@@ -131,12 +131,40 @@ function getXML($socket){
 			write_log("Received xml size $xmlSize \n");
 		}
 	}
-	$out.=@$outXML;
 	
+	return $outXML;
+}
+
+function getNews($socket)
+{
+	$in = "ANYNEWS? ".rand(10000,11000)."\n";
+	$out = '';
+	
+	$written=web_socket_write($socket, $in);
+	$outResponse= web_socket_read($socket, 2048,PHP_NORMAL_READ);
+
+	$Size = (int)trim(str_replace('NEWS ', '', $outResponse));
+	if ($Size > 0)
+	{
+		$remaining = $Size;
+		$out = '';
+		while ($remaining > 0)
+		{
+			$linesize = ($remaining < 2048) ? $remaining : 2048;
+			$chunk = @socket_read($socket, $linesize, PHP_BINARY_READ);
+			$out .= $chunk;
+			$remaining -= strlen($chunk);
+			write_log("Retrieved news chunk ".strlen($chunk).", remaining $remaining \n");
+		}
+		
+		if(isset($out))
+		{
+			write_log("Received news size $Size\n");
+		}
+	}
 	
 	return $out;
 }
-
 
 
 function sendCommand($deviceID,$socket,$command,$refresh=''){
