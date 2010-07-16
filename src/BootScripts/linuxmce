@@ -1,17 +1,16 @@
-#!/bin/bash -x
+#!/bin/bash
 #
 # This script is the entry point to start the LinuxMCE core
 # It starts a couple of needed services and daemons, loads X (if running with AutoStartMedia)
 # and executes LMCE_Launch_Manager to start devices and taking care of the rest.
 #
-
 if [ "$1" == "status" ]; then
 	if pidof DCERouter &>/dev/null ; then
-        	echo "* DCERouter is running"
+		echo "* DCERouter is running"
 	fi
 	exit 0
+	read
 fi
-                                                
 
 Message() {
     echo -en "\033[1m# $*"
@@ -105,9 +104,6 @@ mkdir -p /usr/pluto/locks                # clean up locks
 rm -f /usr/pluto/locks/*                 # clean up locks
 rm -f /var/run/plutoX*.pid		 # clean up x11 locks
 rm -f /mnt/optical/*.checksum
-if [ -f /etc/logrotate.d/linuxmce ]; then
-	rm -f /etc/logrotate.d/pluto*     # make sure there are not leftover logrotate configuration files
-fi
 rm -f /etc/rc{0,6}.d/S*{umountnfs.sh,portmap,networking}
 invoke-rc.d nis start
 
@@ -156,10 +152,6 @@ if [ "$AutostartCore" -eq "1" ] ; then
 	StartDaemon  "Starting Dhcp Plugin" "/usr/pluto/bin/Dhcpd-Plugin.sh" "DhcpdPlugin"
 	StartDaemon  "Start PNP MD Plugin" "/usr/pluto/bin/Start_NewMD_interactor.sh" "NewMDinteractor"
 	StartDaemon  "Start Voicemail Monitor" "/usr/pluto/bin/VoiceMailMonitor.sh" "VoiceMailMonitor"
-	
-	# Verify zaptel-modules is installed, and install it otherwise.
-	dpkg -l zaptel-modules-`uname -r` || apt-get install zaptel-modules-`uname -r` || echo "***ERROR*** INSTALLING ZAPTEL MODULE - TELECOM TRANSFER/MEETME/CONFERENCING NOT WORKING****">>/var/lib/pluto/DCERouter.log
-	modprobe ztdummy
 fi
 StartService "Loading Kernel Modules" "/usr/pluto/bin/LoadModules.sh"
 StartService "Reporting Machine Status" "/usr/pluto/bin/Report_Machine_Status.sh" "&"
@@ -179,15 +171,12 @@ StartService "Detecting Timezone" "/usr/pluto/bin/Timezone_Detect.sh" "&"
 StartService "Status Radar" "/usr/pluto/bin/StorageDevices_StatusRadar.sh"
 StartService "Samba Radar" "/usr/pluto/bin/StorageDevices_SambaRadar.sh"
 StartService "PVR-250 tuner restore" "/usr/pluto/bin/CaptureCards_BootConfig_PVR-250.sh"
-StartService "Enable wake-on-LAN" "/usr/pluto/bin/enable_wol.sh"
-
 ## Setup ALSA mixers
 #amixer sset Capture 90%
 #amixer sset 'Mic Boost (+20dB)' unmute
 #alsactl store
 
 export DISPLAY=":${Display}"
-
 #StartService "Configure Device Changes" "/usr/pluto/bin/Config_Device_Changes.sh"
 
 # hack: cleaning lockfile on M/D start to allow
@@ -273,36 +262,17 @@ if [ "$AutostartMedia" -eq "1" ] ; then
 	fi
 
 fi
-# If we are using VDR as our PVR, make sure the video dir is available, and restart VDR
+# If we are using VDR as our PVR, make sure the video dir is available, and restart VDR 
 # if needed.
 if VDRInstalled ; then
-	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Loading VDR defaults"
 	. /etc/default/vdr
 	cd $VIDEO_DIR
-	sleep 1s
-	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Check if VDR is running"
 	if ! pidof vdr ; then
-		Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Starting VDR again"
 		service vdr restart
 	fi
 fi
-                                                                                
 
+StartDaemon  "Starting LinuxMCE Launch Manager" "/usr/pluto/bin/LaunchManagerDaemon.sh" "LMCE_Launch_Manager"
 
-if ! Lock "Launch_Manager" "LM"; then
-	# LM is running
-	echo "LM already running"
-	wmctrl -a "Linux MCE Launch Manager"
-	exit
-fi
-trap 'Unlock "Launch_Manager" "LM"' EXIT
-KDE_DEBUG=1
-LM_BINARY=/usr/pluto/bin/LMCE_Launch_Manager
-LM_EXIT_CODE=-1
-
-while [[ "$LM_EXIT_CODE" != "0" ]] ;do
-	/usr/bin/screen -d -m -S LMCE_Launch_Manager $LM_BINARY --nofork --nocrashhandler
-	LM_EXIT_CODE=$?
-done
 exit 0
 
