@@ -90,11 +90,14 @@ function LoadImage(DeviceNumber)
 	cursorWait();
 
 	var url = "weborbiter_image.php?device_id=" + encodeURIComponent(DeviceNumber) + "&rand=" + Math.floor(Math.random() * 90000 + 10000);
-	$("#screen").attr("src", url)
-		.load(function() {
-				cursorDone();
-				StartRefreshTimer(DeviceNumber);
-		});
+	$("#screen").load(function() {
+			cursorDone();
+			StartRefreshTimer(DeviceNumber);
+	});
+	$("#screen").error(function() {
+			StartRefreshTimer(DeviceNumber);
+	});
+	$("#screen").attr("src", url);
 }
 
 function PageLoaded(DeviceNumber)
@@ -110,13 +113,20 @@ function RefreshImage(DeviceNumber)
 {
 	var url = 'weborbiter.php';
 	var data = 'device_id=' + encodeURIComponent(DeviceNumber) + "&action=anynews";
-	$.get(url, data,
-		function(data)
+	$.ajax({
+		url: url,
+		data: data,
+		cache: false,
+		success: function(data)
 		{
 			if (data == "yes")
 				LoadImage(DeviceNumber);
 			else
 				StartRefreshTimer(DeviceNumber);
+		},
+		error: function()
+		{
+			StartRefreshTimer(DeviceNumber);
 		}
-	);
+	});
 }
