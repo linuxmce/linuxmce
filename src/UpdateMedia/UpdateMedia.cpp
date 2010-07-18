@@ -789,8 +789,14 @@ bool UpdateMedia::AnyReasonToSkip(string sDirectory, string sFile)
 	if(StringUtils::ToLower(FileUtils::FindExtension(sFile)) == "id3" || StringUtils::ToLower(FileUtils::FindExtension(sFile)) == "lock")
 		return true;
 
-	//ignore vdr's index and info files
-	if(sFile == "info.vdr" || sFile == "index.vdr")
+	// We ignore the index and marks files of VDR, but not the info file. We want to have the info file only
+	// in our database
+//	if(sFile == "info.vdr" || sFile == "index.vdr")
+	if (sFile == "index.vdr" || sFile == "index" || sFile == "marks.vdr" || sFile == "marks" ) 
+		return true;
+
+	// We skip all of the individual VDR segments.
+	if (sFile == "001.vdr" || sFile == "002.vdr" || sFile == "003.vdr" || sFile == "004.vdr" || sFile == "005.vdr" || sFile == "006.vdr" || sFile == "007.vdr")
 		return true;
 
 	if(!FileUtils::FileExists(sDirectory + "/" + sFile)) //the file was just being deleted
