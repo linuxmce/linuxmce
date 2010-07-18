@@ -131,7 +131,16 @@ bool VDRInfoFileHandler::FileAttributeExists()
 //-----------------------------------------------------------------------------------------------------
 string VDRInfoFileHandler::GetFileAttribute()
 {
-	return m_sDirectory + "/info.vdr";
+	// Newer VDR version let go of the vdr extension, and use plain file names
+	string sInfofile;
+	sInfofile = "/info";
+	
+	if ( FileUtils::FileExists(m_sDirectory + "/info.vdr" )
+	{
+		sInfofile = "/info.vdr";
+	} 
+	
+	return m_sDirectory + sInfofile;
 }
 //-----------------------------------------------------------------------------------------------------
 string VDRInfoFileHandler::GetFileSourceForDB()
