@@ -799,6 +799,10 @@ bool UpdateMedia::AnyReasonToSkip(string sDirectory, string sFile)
 	if (sFile == "001.vdr" || sFile == "002.vdr" || sFile == "003.vdr" || sFile == "004.vdr" || sFile == "005.vdr" || sFile == "006.vdr" || sFile == "007.vdr")
 		return true;
 
+	// We skip all of the newer individual VDR segments.
+	if (sFile == "00001.ts" || sFile == "00002.ts" || sFile == "00003.ts" || sFile == "00004.ts" || sFile == "00005.ts" || sFile == "00006.ts" || sFile == "00007.ts")
+		return true;
+
 	if(!FileUtils::FileExists(sDirectory + "/" + sFile)) //the file was just being deleted
 	{
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "The file %s/%s was just being deleted. We'll skip it!",
