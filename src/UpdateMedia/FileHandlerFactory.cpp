@@ -89,7 +89,7 @@ FileHandlerFactory::~FileHandlerFactory(void)
 //-----------------------------------------------------------------------------------------------------
 /*static*/ bool FileHandlerFactory::IsValidVDRFile(string sDirectory, string sFile)
 {
-	return sFile == "001.vdr" && FileUtils::FileExists(sDirectory + "/info.vdr");
+	return ( sFile == "info.vdr" || sFile == "info" ) && FileUtils::FileExists(sDirectory + "/001.vdr");
 }
 //-----------------------------------------------------------------------------------------------------
 /*static*/ bool FileHandlerFactory::IsValidTagFile(string sDirectory, string sFile)
