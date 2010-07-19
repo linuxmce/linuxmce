@@ -135,7 +135,7 @@ string VDRInfoFileHandler::GetFileAttribute()
 	string sInfofile;
 	sInfofile = "/info";
 	
-	if ( FileUtils::FileExists(m_sDirectory + "/info.vdr" )
+	if ( FileUtils::FileExists(m_sDirectory + "/info.vdr" ) )
 	{
 		sInfofile = "/info.vdr";
 	} 
