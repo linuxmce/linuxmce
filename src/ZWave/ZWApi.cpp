@@ -1240,6 +1240,9 @@ void *ZWApi::ZWApi::receiveFunction() {
 				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "We have been idle for %i seconds, polling device states", idletimer / 10);
 				zwRequestBasicReport(NODE_BROADCAST);
 				zwRequestMultilevelSensorReport(NODE_BROADCAST);
+
+				// hack for dianemo
+				// multiInstanceGetAllCCsForNode(16);
 			}
 
 		}
@@ -1380,7 +1383,7 @@ std::string ZWApi::ZWApi::getDeviceList() {
 	return deviceList;
 }
 
-bool ZWApi::ZWApi::zwBasicSet(int node_id, int level) {
+bool ZWApi::ZWApi::zwBasicSet(int node_id, int level, int instance) {
 	char mybuf[1024];
 
 	ZWNodeMapIt = ZWNodeMap.find(node_id);
@@ -1392,15 +1395,29 @@ bool ZWApi::ZWApi::zwBasicSet(int node_id, int level) {
 			(*ZWNodeMapIt).second->stateBasic = level == 0 ? 0 : 0xff;
 
 		} else {
+			if (instance == 0) {
+				mybuf[0] = FUNC_ID_ZW_SEND_DATA;
+				mybuf[1] = node_id;
+				mybuf[2] = 3;
+				mybuf[3] = COMMAND_CLASS_BASIC;
+				mybuf[4] = BASIC_SET;
+				mybuf[5] = level;
+				mybuf[6] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+				sendFunction( mybuf , 7, REQUEST, 1);
+			} else {
+				mybuf[0] = FUNC_ID_ZW_SEND_DATA;
+				mybuf[1] = node_id;
+				mybuf[2] = 6;
+				mybuf[3] = COMMAND_CLASS_MULTI_INSTANCE;
+				mybuf[4] = MULTI_INSTANCE_CMD_ENCAP;
+				mybuf[5] = instance;
+				mybuf[6] = COMMAND_CLASS_BASIC;
+				mybuf[7] = BASIC_SET;
+				mybuf[8] = level;
+				mybuf[9] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+				sendFunction( mybuf , 10, REQUEST, 1);
 
-			mybuf[0] = FUNC_ID_ZW_SEND_DATA;
-			mybuf[1] = node_id;
-			mybuf[2] = 3;
-			mybuf[3] = COMMAND_CLASS_BASIC;
-			mybuf[4] = BASIC_SET;
-			mybuf[5] = level;
-			mybuf[6] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
-			sendFunction( mybuf , 7, REQUEST, 1);
+			}
 
 		}
 	}

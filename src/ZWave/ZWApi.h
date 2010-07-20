@@ -456,7 +456,7 @@ namespace ZWApi {
 	 std::string getDeviceList();
 
 	// used by the ZWave DCE device to call BASIC SET class command
-	bool zwBasicSet(int node_id, int level);
+	bool zwBasicSet(int node_id, int level, int instance);
 
 	// get the association list for a specific group from a device
 	bool zwAssociationGet(int node_id, int group);
