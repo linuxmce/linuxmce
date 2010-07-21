@@ -62,7 +62,7 @@ bool PictureCanvas::SetScreenSize(int width, int height)
         m_iScreenWidth = width;
 	m_iScreenHeight = height;
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "PictureCanvas::SetScreenSize() Changing to %d x %d", width, height);
-	int flags = SDL_RESIZABLE;
+	int flags = SDL_RESIZABLE | SDL_DOUBLEBUF;
 	screen = SDL_SetVideoMode(m_iScreenWidth, m_iScreenHeight, 0, flags);
 	if (screen == NULL) {
 	        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "PictureCanvas::SetScreenSize() Unable to set screen size : %s", SDL_GetError());
@@ -133,6 +133,7 @@ void PictureCanvas::PaintPicture(Picture *pPicture)
         SDL_Surface *picture = pPicture->GetSurface();
 	if (!picture)
 	        return;
+	SDL_SetAlpha(picture, 0, SDL_ALPHA_OPAQUE);
 	// get the zoomed picture and display it in the center of the screen
 	SDL_Rect rect;
 	rect.w = m_iScreenWidth;

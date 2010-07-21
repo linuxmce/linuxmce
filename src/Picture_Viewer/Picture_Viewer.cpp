@@ -361,7 +361,7 @@ void Picture_Viewer::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message
 //<-dceag-c40-e->
 {
         // Assume user have looked enough at image as s/he have just been paused at it
-        EVENT_Playback_Completed("", m_iStreamID, false);
+        EVENT_Playback_Completed("", iStreamID, false);
 	m_iStreamID = 0;
 }
 
@@ -379,10 +379,13 @@ void Picture_Viewer::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message
 void Picture_Viewer::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed,bool bReport,string &sCMD_Result,Message *pMessage)
 //<-dceag-c41-e->
 {
-	cout << "Need to implement command #41 - Change Playback Speed" << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
-	cout << "Parm #43 - MediaPlaybackSpeed=" << iMediaPlaybackSpeed << endl;
-	cout << "Parm #220 - Report=" << bReport << endl;
+  LoggerWrapper::GetInstance()->Write(LV_STATUS, "Picture_Viewer::CMD_Change_Playback_Speed() speed %d ", iMediaPlaybackSpeed);
+        if (iMediaPlaybackSpeed == 0) {
+	        CMD_Pause_Media(iStreamID, sCMD_Result, pMessage);
+	} else if (iMediaPlaybackSpeed == 1000) {
+	        CMD_Restart_Media(iStreamID, sCMD_Result, pMessage);
+	}
+
 }
 
 //<-dceag-c42-b->
@@ -457,8 +460,7 @@ void Picture_Viewer::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int i
 void Picture_Viewer::CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c92-e->
 {
-	cout << "Need to implement command #92 - Pause" << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+        CMD_Pause_Media(iStreamID, sCMD_Result, pMessage);
 }
 
 //<-dceag-c95-b->
