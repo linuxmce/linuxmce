@@ -26,21 +26,35 @@ $keyboard_codes[37]=3;  // left
 $keyboard_codes[39]=4;  // right
 $keyboard_codes[13]=5;  // enter
 
+$keyboard_codes[27]=11; // escape
+
+
 foreach ($keyboard_codes as $code => $command_key)
 	$js_case .= "case $code: command_to_send = $command_key; break;";
 
 $sendKeyJs='
 function sendKey(event, DeviceNumber)
 {
+	var command_to_send = 0;
+
 	if (event.which)
 		key_code = event.which;
 	else if (event.keyCode)
 		key_code = event.keyCode;
 
+
+	// Num Block 1-9
+	if (key_code>=97 && key_code<=105)
+		key_code=key_code-48;
+
+	// Num Block 0	
+	if (key_code==96 ) 
+		key_code=48;
+
 	if (key_code > 58)
 		key_code += 32;
 
-	var command_to_send = 0;
+		
 	switch(key_code)
 	{
 		'.$js_case.'
