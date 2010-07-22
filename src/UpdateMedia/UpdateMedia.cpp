@@ -796,11 +796,12 @@ bool UpdateMedia::AnyReasonToSkip(string sDirectory, string sFile)
 		return true;
 
 	// We skip all of the individual VDR segments.
-	if (sFile == "001.vdr" || sFile == "002.vdr" || sFile == "003.vdr" || sFile == "004.vdr" || sFile == "005.vdr" || sFile == "006.vdr" || sFile == "007.vdr")
+	// TODO - Please change this to a loop from 1 to 100
+	if (sFile == "001.vdr" || sFile == "002.vdr" || sFile == "003.vdr" || sFile == "004.vdr" || sFile == "005.vdr" || sFile == "006.vdr" || sFile == "007.vdr" || sFile == "008.vdr" || sFile == "009.vdr")
 		return true;
 
 	// We skip all of the newer individual VDR segments.
-	if (sFile == "00001.ts" || sFile == "00002.ts" || sFile == "00003.ts" || sFile == "00004.ts" || sFile == "00005.ts" || sFile == "00006.ts" || sFile == "00007.ts")
+	if (sFile == "00001.ts" || sFile == "00002.ts" || sFile == "00003.ts" || sFile == "00004.ts" || sFile == "00005.ts" || sFile == "00006.ts" || sFile == "00007.ts"|| sFile == "00008.ts"|| sFile == "00009.ts")
 		return true;
 
 	if(!FileUtils::FileExists(sDirectory + "/" + sFile)) //the file was just being deleted
