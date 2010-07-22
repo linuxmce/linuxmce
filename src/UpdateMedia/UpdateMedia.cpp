@@ -792,7 +792,7 @@ bool UpdateMedia::AnyReasonToSkip(string sDirectory, string sFile)
 	// We ignore the index and marks files of VDR, but not the info file. We want to have the info file only
 	// in our database
 //	if(sFile == "info.vdr" || sFile == "index.vdr")
-	if (sFile == "index.vdr" || sFile == "index" || sFile == "marks.vdr" || sFile == "marks" ) 
+	if (sFile == "index.vdr" || sFile == "index" || sFile == "marks.vdr" || sFile == "marks" || sFile == "summary" || sFile == "summary.vdr" ) 
 		return true;
 
 	// We skip all of the individual VDR segments.
