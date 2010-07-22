@@ -472,7 +472,7 @@ namespace ZWApi {
 	bool zwRequestNodeNeighborUpdate(int node_id);
 
 	// request a basic report
-	void zwRequestBasicReport(int node_id);
+	void zwRequestBasicReport(int node_id, int instance);
 
 	// called by download configuration to replicate the z-wave network information
 	bool zwReplicateController(int mode);

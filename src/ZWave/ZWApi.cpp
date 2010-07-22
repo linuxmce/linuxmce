@@ -573,7 +573,16 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 												    (unsigned int)frame[13],
 												    (unsigned int)frame[14],
 												    (unsigned int)frame[15]);
-						        }
+						        } else if ((frame[8] == COMMAND_CLASS_BASIC) && (frame[9] == BASIC_REPORT)) {
+								// 41	07/22/10 12:05:17.485		0x1 0xc 0x0 0x4 0x0 0x7 0x6 0x60 0x6 0x1 0x20 0x3 0x0 0xb2 (#######`## ###) <0xb795fb90>
+								// 36	07/22/10 12:05:17.485		FUNC_ID_APPLICATION_COMMAND_HANDLER: <0xb795fb90>
+								// 36	07/22/10 12:05:17.485		COMMAND_CLASS_MULTI_INSTANCE <0xb795fb90>
+								// 36	07/22/10 12:05:17.485		Got MULTI_INSTANCE_CMD_ENCAP from node 7: instance 1 Command Class 0x20 type 0x3 <0xb795fb90>
+
+								DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got basic report from node %i, instance %i, value: %i",(unsigned char)frame[3],(unsigned char)frame[7], (unsigned char) frame[10]);
+								DCEcallback->SendLightChangedEvents ((unsigned char)frame[3], (unsigned char)frame[7], (unsigned char) frame[10]);
+
+							}
 						}
 						break;
 					;;	
@@ -789,7 +798,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 									const char *tmp_str = (*ZWNodeMapIt).second->associationList[1].c_str();
 									char *pch = strtok((char*)tmp_str,",");
 									while (pch != NULL) {
-										zwRequestBasicReport(atoi(pch));
+										zwRequestBasicReport(atoi(pch),0);
 										pch = strtok (NULL, ",");
 									}
 										
@@ -1007,7 +1016,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 												const char *tmp_str = (*ZWNodeMapIt).second->associationList[0].c_str();
 												char *pch = strtok((char*)tmp_str,",");
 												while (pch != NULL) {
-													zwRequestBasicReport(atoi(pch));
+													zwRequestBasicReport(atoi(pch),0);
 													pch = strtok (NULL, ",");
 												}
 													
@@ -1238,7 +1247,8 @@ void *ZWApi::ZWApi::receiveFunction() {
 			// we have been idle for 30 seconds, let's poll the devices
 			if ((idletimer > 300) && poll_state) {
 				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "We have been idle for %i seconds, polling device states", idletimer / 10);
-				zwRequestBasicReport(NODE_BROADCAST);
+				zwRequestBasicReport(NODE_BROADCAST,0);
+				zwRequestBasicReport(NODE_BROADCAST,2);
 				zwRequestMultilevelSensorReport(NODE_BROADCAST);
 
 				// hack for dianemo
@@ -2090,16 +2100,30 @@ void ZWApi::ZWApi::zwSoftReset() {
 }
 
 
-void ZWApi::ZWApi::zwRequestBasicReport(int node_id) {
+void ZWApi::ZWApi::zwRequestBasicReport(int node_id, int instance) {
 	char mybuf[1024];
 
-	mybuf[0] = FUNC_ID_ZW_SEND_DATA;
-	mybuf[1] = node_id;
-	mybuf[2] = 0x02;
-	mybuf[3] = COMMAND_CLASS_BASIC;
-	mybuf[4] = BASIC_GET;
-	mybuf[5] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
-	sendFunction (mybuf,6,REQUEST,1);
+	if (instance == 0) {
+		mybuf[0] = FUNC_ID_ZW_SEND_DATA;
+		mybuf[1] = node_id;
+		mybuf[2] = 0x02;
+		mybuf[3] = COMMAND_CLASS_BASIC;
+		mybuf[4] = BASIC_GET;
+		mybuf[5] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+		sendFunction (mybuf,6,REQUEST,1);
+	} else {
+
+		mybuf[0] = FUNC_ID_ZW_SEND_DATA;
+		mybuf[1] = node_id;
+		mybuf[2] = 5;
+		mybuf[3] = COMMAND_CLASS_MULTI_INSTANCE;
+		mybuf[4] = MULTI_INSTANCE_CMD_ENCAP;
+		mybuf[5] = instance;
+		mybuf[6] = COMMAND_CLASS_BASIC;
+		mybuf[7] = BASIC_GET;
+		mybuf[8] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+		sendFunction( mybuf , 9, REQUEST, 1);
+	}
 }
 void ZWApi::ZWApi::zwRequestManufacturerSpecificReport(int node_id) {
 	char mybuf[1024];
@@ -2151,7 +2175,6 @@ void ZWApi::ZWApi::zwStatusReport() {
 //	for (int i=0;i<512;i++) {
 //		zwReadMemory(64*i);
 //	}
-//	zwRequestBasicReport(NODE_BROADCAST);
 //
 	zwMultiInstanceGet(13, COMMAND_CLASS_SENSOR_MULTILEVEL);
 	zwRequestMultilevelSensorReportInstance(13,1);

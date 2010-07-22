@@ -612,29 +612,21 @@ void ZWave::SendLightChangedEvents(unsigned short node_id, int instance_id, int 
 {
 	char svalue[32];
 	sprintf(svalue, "%d", value==99?100:value);
-        DeviceData_Impl *pChildDevice = NULL;
-        for( VectDeviceData_Impl::const_iterator it = m_pData->m_vectDeviceData_Impl_Children.begin();
-                        it != m_pData->m_vectDeviceData_Impl_Children.end(); ++it )
-        {
-                pChildDevice = (*it);
-                if( pChildDevice != NULL )
+	char tmp_node_id[16];
+	sprintf(tmp_node_id,"%i",node_id);
+        DeviceData_Impl *pChildDevice = InternalIDToDevice(tmp_node_id, instance_id);
+	if( pChildDevice != NULL )
                 {
-			int tmp_node_id = atoi(pChildDevice->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST).c_str());
-			// passing 0 as device node affects all Lighting Devices, used for ALL ON and ALL OFF
-			if ( (tmp_node_id == node_id) || ((node_id == 0) && (pChildDevice->m_dwPK_DeviceCategory == DEVICECATEGORY_Lighting_Device_CONST)) ) {
-				LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWave::SendLightChangedEvents sending commands/events");
-				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending EVENT_State_Changed_CONST event from node %d, level %s",tmp_node_id,svalue);
-				m_pEvent->SendMessage( new Message(pChildDevice->m_dwPK_Device,
-					DEVICEID_EVENTMANAGER,
-					PRIORITY_NORMAL,
-					MESSAGETYPE_EVENT,
-					EVENT_State_Changed_CONST,
-					1,
-					EVENTPARAMETER_State_CONST,
-					svalue)
-				);
-			}
-		}
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending EVENT_State_Changed_CONST event from node %s/%d, level %s",tmp_node_id,instance_id,svalue);
+		m_pEvent->SendMessage( new Message(pChildDevice->m_dwPK_Device,
+			DEVICEID_EVENTMANAGER,
+			PRIORITY_NORMAL,
+			MESSAGETYPE_EVENT,
+			EVENT_State_Changed_CONST,
+			1,
+			EVENTPARAMETER_State_CONST,
+			svalue)
+		);
 	}
 }
 
