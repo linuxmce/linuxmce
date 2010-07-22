@@ -1,0 +1,2200 @@
+2010-07-18 17:22  paddockd
+
+	* [r172] ChangeLog, src/slimaudio/slimaudio_output.c,
+	  src/squeezeslave/squeezeslave.c: Display latency low/high in
+	  device using same scale as -y/--latency option.
+	  Increased version to 172.
+
+2010-07-18 13:11  paddockd
+
+	* [r171] ChangeLog, makefile.linux26-alsa-display,
+	  makefile.linux26-i64-alsa-display,
+	  makefile.linux26-ppc-alsa-display, makefile.osxintel-display,
+	  makefile.osxppc-display, src/slimaudio/slimaudio_output.c,
+	  src/squeezeslave/help.c, src/squeezeslave/squeezeslave.c,
+	  src/squeezeslave/squeezeslave.h: Added -y/--latency option.
+	  Fixed default device identification in -L option.
+	  Updated remaining makefiles to use PADEV r1526
+	  Increased version to 171.
+
+2010-07-17 20:29  paddockd
+
+	* [r170] ChangeLog, TODO, src/slimaudio/slimaudio_output.c,
+	  src/squeezeslave/help.c, src/squeezeslave/squeezeslave.c: Added
+	  -X/--noexclusive option for WASAPI devices. AKA Shared Mode.
+	  Added display of low/high latency info in device listing.
+	  Rewrote copyright notice.
+	  Increased version to 170.
+
+2010-07-17 18:44  paddockd
+
+	* [r169] ChangeLog, src/slimaudio/slimaudio.h,
+	  src/slimaudio/slimaudio_http.c, src/squeezeslave/squeezeslave.c:
+	  Fixed autostart_threshold calculation in slimaudio_http.c.
+	  Increased version to 169.
+
+2010-07-17 18:36  paddockd
+
+	* [r168] ChangeLog, TODO, src/slimaudio/slimaudio_output.c,
+	  src/squeezeslave/squeezeslave.c: Added portaudio hostapi name to
+	  output device listings.
+	  Increases version to 168.
+
+2010-07-17 17:13  paddockd
+
+	* [r167] ChangeLog, TODO, makefile.linux24-alsa-display,
+	  makefile.mingw32-asio-display, makefile.mingw32-display,
+	  makefile.mingw32-wasapi-display, sources/portaudio-r1526.tar.gz,
+	  src/slimaudio/slimaudio_output.c,
+	  src/squeezeslave/squeezeslave.c: Updated windows and linux 2.4
+	  makefiles to use PADEV r1526.
+	  Use define for framesPerBuffer parameter in Pa_OpenStream call.
+	  Increased version to 167.
+
+2010-07-03 11:59  paddockd
+
+	* [r166] ChangeLog, TODO, makefile.linux26-mips-oss,
+	  makefile.linux26-mipsel-oss: Renamed makefile.linux26-mips-oss to
+	  makefile.linux26-mipsel-oss.
+
+2010-07-03 11:51  paddockd
+
+	* [r165] ChangeLog, TODO, src/slimaudio/slimaudio.c,
+	  src/slimaudio/slimaudio_buffer.c,
+	  src/slimaudio/slimaudio_decoder.c,
+	  src/slimaudio/slimaudio_http.c, src/slimaudio/slimaudio_output.c,
+	  src/slimproto/slimproto.c, src/squeezeslave/squeezeslave.c:
+	  Renabled pthread_join call in slimproto_destroy for windows
+	  builds. Disabled in 0.7.5 after testing revealed it was causing
+	  the application to crash on exit.
+	  Changed all mutex lock->broadcast->unlock code to
+	  lock->unlock->broadcast.
+	  Debug messages cleanup.
+	  Increased version to 165.
+
+2010-06-07 13:37  paddockd
+
+	* [r164] ChangeLog, src/slimaudio/slimaudio_buffer.c,
+	  src/squeezeslave/squeezeslave.c: Reapplied r157 datarace fixes.
+	  Increased version to 164.
+
+2010-06-04 12:39  paddockd
+
+	* [r163] ChangeLog, TODO, src/slimaudio/slimaudio_buffer.c,
+	  src/squeezeslave/squeezeslave.c: Reverted r157 datarace fixes in
+	  slimaudio_buffer.c after strange behaviour when stopping and
+	  starting playback twice in succession. Further investigation
+	  required.
+	  Increased version to 163.
+
+2010-06-04 11:28  paddockd
+
+	* [r162] ChangeLog, makefile.linux24-alsa-display,
+	  makefile.linux24-display, makefile.linux26-alsa-display,
+	  makefile.linux26-display, makefile.linux26-i64-alsa-display,
+	  makefile.linux26-mips-oss, makefile.linux26-ppc-alsa-display,
+	  makefile.mingw32-asio-display, makefile.mingw32-display,
+	  makefile.mingw32-wasapi-display, makefile.osxintel-display,
+	  makefile.osxppc-display, makefile.s10intel-display,
+	  makefile.s10sparc-display, makefile.s9sparc-display,
+	  sources/libogg-1.2.0.tar.bz2, sources/libvorbis-1.3.1.tar.bz2,
+	  sources/portaudio-r1508.tar.gz, src/squeezeslave/squeezeslave.c:
+	  Upgraded libogg to v1.2.0.
+	  Upgraded libvorbis to v1.3.1.
+	  Upgraded PADEV to r1508.
+	  Increased version to 162.
+
+2010-05-27 11:43  paddockd
+
+	* [r161] ChangeLog, TODO, makefile.s10sparc-display,
+	  src/squeezeslave/squeezeslave.c: Reverted r135
+	  makefile.s10sparc-display as change caused compile of libvorbis
+	  example directory to fail.
+	  Increased version to 161.
+
+2010-05-22 12:40  paddockd
+
+	* [r160] ChangeLog, scripts/buildall-win32,
+	  sources/portaudio-r1485.tar.gz: Deleted obsolete portaudio
+	  source.
+	  Fixed windows build script.
+
+2010-05-20 12:52  paddockd
+
+	* [r159] ChangeLog, TODO, makefile.linux24-alsa-display,
+	  makefile.linux26-alsa-display, makefile.linux26-i64-alsa-display,
+	  makefile.linux26-ppc-alsa-display, makefile.mingw32-asio-display,
+	  makefile.mingw32-display, makefile.mingw32-wasapi-display,
+	  makefile.osxintel-display, makefile.osxppc-display,
+	  sources/portaudio-r1495.tar.gz, sources/portaudio-r1496.tar.gz,
+	  sources/portaudio-r1500.tar.gz, src/squeezeslave/squeezeslave.c:
+	  Deleted obsolete portaudio sources.
+	  Updated all makefiles to use latest PADEV r1500.
+	  Increased version to 159.
+
+2010-05-16 19:54  paddockd
+
+	* [r158] ChangeLog, makefile.linux24-alsa-display,
+	  makefile.linux26-alsa-display, makefile.linux26-i64-alsa-display,
+	  makefile.linux26-ppc-alsa-display, makefile.mingw32-asio-display,
+	  makefile.mingw32-display, makefile.mingw32-wasapi-display,
+	  makefile.osxintel-display, makefile.osxppc-display,
+	  sources/portaudio-r1496.tar.gz, src/squeezeslave/squeezeslave.c:
+	  First win builds to use latest cygwin 2.697 toolchain.
+	  Updated all makefiles to use latest PADEV r1496.
+	  Increased version to 158.
+
+2010-05-09 20:04  paddockd
+
+	* [r157] lib/portaudio/pa_common/pa_convert.c,
+	  lib/portaudio/pa_common/pa_host.h,
+	  lib/portaudio/pa_common/pa_lib.c,
+	  lib/portaudio/pa_common/pa_trace.h,
+	  lib/portaudio/pa_common/portaudio.h,
+	  lib/portaudio/pa_unix_oss/pa_unix.c,
+	  lib/portaudio/pa_unix_oss/pa_unix.h,
+	  lib/portaudio/pa_unix_oss/pa_unix_solaris.c,
+	  lib/portaudio/pablio/ringbuffer.c,
+	  lib/portaudio/pablio/ringbuffer.h,
+	  src/slimaudio/slimaudio_buffer.c,
+	  src/squeezeslave/squeezeslave.c: Fixed datarace in
+	  slimaudio_buffer_set_readopt and slimaudio_buffer_available
+	  functions.
+	  Changed portaudio v18.1 files from dos to unix format.
+	  Increased version to 157.
+
+2010-05-04 14:12  paddockd
+
+	* [r156] ChangeLog, logs/downloads.log, scripts/buildall-win32,
+	  sources/pa_snapshot-20090724.tar.gz: Cleaned up obsolete files.
+	  Fixed windows build script.
+
+2010-04-30 12:49  paddockd
+
+	* [r155] ChangeLog, src/squeezeslave/help.c,
+	  src/squeezeslave/squeezeslave.c: Added option to increase the
+	  process priority class to high for windows using
+	  -H/--highpriority. Thanks to Uri Savoray for the enhancement.
+	  Increased version to 155.
+
+2010-04-29 17:43  paddockd
+
+	* [r154] ChangeLog, makefile.mingw32-asio-display,
+	  patches/build-portaudio-asio-gcc34.patch,
+	  src/squeezeslave/squeezeslave.c: Added patch to windows asio
+	  build to revert portaudio r1488 gcc 4.x changes which causes
+	  CALL_THISCALL_1_DOUBLE to return 0 instead of the expected
+	  floating point values. First discovered on WinXP Pro SP3 32-bit.
+	  Increased version to 154.
+
+2010-04-26 10:52  paddockd
+
+	* [r153] ChangeLog, logs/downloads.log,
+	  src/slimaudio/slimaudio_output.c,
+	  src/squeezeslave/squeezeslave.c: Changed portaudio latency to
+	  high for WASAPI, as several users have reported "ticks" in the
+	  audio stream.
+	  Increased version to 153.
+
+2010-04-25 19:29  paddockd
+
+	* [r152] ChangeLog, TODO, lib/libportaudio/linux24,
+	  lib/popt/build-popt-linux24, lib/popt/build-popt-s9,
+	  lib/popt/linux24, lib/popt/s9sparc,
+	  sources/portaudio-r1493.tar.gz: Cleaned up obsolete files and
+	  directories.
+
+2010-04-25 16:20  paddockd
+
+	* [r151] ChangeLog, makefile.linux24-alsa-display,
+	  makefile.linux26-alsa-display, makefile.linux26-i64-alsa-display,
+	  makefile.linux26-ppc-alsa-display, makefile.mingw32-asio-display,
+	  makefile.mingw32-display, makefile.mingw32-wasapi-display,
+	  src/slimaudio/slimaudio.c, src/slimaudio/slimaudio.h,
+	  src/slimaudio/slimaudio_output.c, src/squeezeslave/help.c,
+	  src/squeezeslave/squeezeslave.c, src/squeezeslave/squeezeslave.h,
+	  wiki/SqueezeSlave.wiki, wiki/SupportThread.wiki: Replaced list
+	  output audio device code.
+	  Removed obsolete functions slimaudio_get_output_devices,
+	  slimaudio_set_output_device and listAudioDevices and associated
+	  variables from slimaudio_t structure.
+	  Moved Pa_Initialize/Pa_Terminate inside output_thread to remove
+	  the need to call CoInitializeEx/CoUninitialize for WASAPI.
+	  Added PaDeviceIndex typedef for portaudio stable library to make
+	  code a bit easier to read.
+	  Updated all PortAudio development makefile to use r1495.
+	  Increased version to 151.
+
+2010-04-24 17:06  paddockd
+
+	* [r150] makefile.osxintel-display, makefile.osxppc-display,
+	  src/squeezeslave/help.c, src/squeezeslave/interactive.c,
+	  src/squeezeslave/squeezeslave.c: Fix to workaround an OSX 10.6.3
+	  curses library arrow keys bug when running in Interactive (-D)
+	  mode.
+	  Updated portaudio library to r1495.
+	  Increased version to 150.
+
+2010-04-24 15:55  paddockd
+
+	* [r149] ChangeLog, TODO, logs/downloads.log,
+	  makefile.linux26-mips-oss, sources/portaudio-r1495.tar.gz: Added
+	  Xtreamer Mips OSS makefile contributed by arztde. Requires
+	  Xtreamer cross platform development tools.
+	  Added portaudio development r1495 library source.
+
+2010-04-16 13:13  paddockd
+
+	* [r147] ChangeLog, makefile.mingw32-asio-display,
+	  makefile.mingw32-display, makefile.mingw32-wasapi-display,
+	  scripts/buildall-win32, sources/portaudio-r1493.tar.gz,
+	  src/slimaudio/slimaudio_output.c, src/squeezeslave/help.c,
+	  src/squeezeslave/squeezeslave.c, wiki/SqueezeSlave.wiki: Updated
+	  all win32 makefiles to portaudio dev r1493.
+	  Portaudio WASAPI support added for win32.
+	  Increased version to 147.
+
+2010-04-09 23:01  paddockd
+
+	* [r146] ChangeLog, ReleaseNotes, makefile.mingw32-asio-display,
+	  makefile.mingw32-display, makefile.mingw32-wasapi-display,
+	  src/squeezeslave/squeezeslave.c: Mingw32 makefiles updated to
+	  build a static version of libpthreadGC2.a to remove the
+	  pthreadGC2.dll dependency.
+	  Increased version to 146.
+
+2010-04-09 11:23  paddockd
+
+	* [r145] ChangeLog, src/slimaudio/slimaudio.c,
+	  src/slimaudio/slimaudio.h, src/slimaudio/slimaudio_output.c,
+	  src/slimproto/slimproto.c, src/slimproto/slimproto.h,
+	  src/squeezeslave/squeezeslave.c: Replaced remaining SqueezeCenter
+	  references with Squeezebox Server.
+	  Increased version to 145.
+
+2010-04-08 21:17  paddockd
+
+	* [r144] ChangeLog, TODO, logs/downloads.log,
+	  src/squeezeslave/help.c, src/squeezeslave/squeezeslave.c,
+	  wiki/SqueezeSlave.wiki: Replaced SqueezeCenter references with
+	  Squeezebox Server on help screens.
+	  Increased version to 144.
+
+2010-04-02 11:06  paddockd
+
+	* [r143] ChangeLog, TODO, makefile.linux24-alsa-display,
+	  makefile.linux24-display, makefile.linux26-alsa-display,
+	  makefile.linux26-display, makefile.linux26-i64-alsa-display,
+	  makefile.linux26-ppc-alsa-display, makefile.mingw32-asio-display,
+	  makefile.mingw32-display, makefile.mingw32-wasapi-display,
+	  makefile.osxintel-display, makefile.osxppc-display,
+	  makefile.s10intel-display, makefile.s10sparc-display,
+	  makefile.s9sparc-display, src/squeezeslave/squeezeslave.c: Fixed
+	  libvorbis build to use our libogg.a instead of system ogg
+	  library.
+	  Increased version to 143.
+
+2010-04-02 10:19  paddockd
+
+	* [r142] ChangeLog, deprecated/makefile.linux24,
+	  deprecated/makefile.linux24-alsa,
+	  deprecated/makefile.linux24-i586, deprecated/makefile.linux26,
+	  deprecated/makefile.linux26-alsa,
+	  deprecated/makefile.linux26-i64-alsa,
+	  deprecated/makefile.linux26-ppc-alsa, makefile.linux24,
+	  makefile.linux24-alsa, makefile.linux24-alsa-display,
+	  makefile.linux24-i586, makefile.linux26, makefile.linux26-alsa,
+	  makefile.linux26-alsa-display, makefile.linux26-i64-alsa,
+	  makefile.linux26-i64-alsa-display, makefile.linux26-ppc-alsa,
+	  makefile.linux26-ppc-alsa-display,
+	  patches/build-portaudio-oldalsa.patch,
+	  src/squeezeslave/squeezeslave.c: Updated Linux ALSA makefiles to
+	  use PADEV r1485.
+	  Added patch to fix ALSA builds for library versions older than
+	  1.0.16.
+	  Deprecated non-interactive Linux makefiles.
+	  Increased version to 142.
+
+2010-04-01 13:34  paddockd
+
+	* [r141] ChangeLog, deprecated/makefile.osxintel,
+	  deprecated/makefile.osxintel-padev, deprecated/makefile.osxppc,
+	  deprecated/makefile.osxppc-padev, deprecated/makefile.s10intel,
+	  deprecated/makefile.s10sparc, deprecated/makefile.s9sparc,
+	  makefile.osxintel, makefile.osxintel-display,
+	  makefile.osxintel-padev, makefile.osxppc,
+	  makefile.osxppc-display, makefile.osxppc-padev,
+	  makefile.s10intel, makefile.s10sparc, makefile.s9sparc,
+	  patches/build-portaudio-osxppc.patch,
+	  src/squeezeslave/squeezeslave.c: Updated OSX makefiles to use
+	  PADEV r1485.
+	  Deprecated non-interactive OSX makefiles.
+	  Deprecated non-interactive Solaris makefiles.
+	  Increased version to 141.
+
+2010-03-27 20:36  paddockd
+
+	* [r140] ChangeLog, TODO, makefile.mingw32-asio-display,
+	  makefile.mingw32-wasapi-display, src/squeezeslave/squeezeslave.c,
+	  src/squeezeslave/squeezeslave.h: Added DEFINES for common values.
+	  Increased version to 140.
+
+2010-03-27 13:49  paddockd
+
+	* [r139] TODO, deprecated, deprecated/makefile.mingw32,
+	  deprecated/makefile.mingw32-asio,
+	  deprecated/makefile.mingw32-padev, makefile.mingw32,
+	  makefile.mingw32-asio, makefile.mingw32-asio-display,
+	  makefile.mingw32-display, makefile.mingw32-padev,
+	  makefile.mingw32-wasapi-display,
+	  patches/build-portaudio-interlockedincrement.patch,
+	  patches/build-portaudio-time_kill_synchronous.patch, sources,
+	  sources/portaudio-r1483.tar.gz, sources/portaudio-r1485.tar.gz,
+	  src/squeezeslave/squeezeslave.c: Initial WASAPI win32 makefile
+	  added. Binary crashes on audio device open. Inquiry on portaudio
+	  mailing list posted March 21, 2010.
+	  First win32 builds to use latest cygwin 2.693 toolchain and
+	  latest PADEV r1485.
+	  Deprecated non-interactive win32 makefiles.
+	  Updated portaudio sources.
+	  Increased version to 139.
+
+2010-03-26 11:04  paddockd
+
+	* [r138] ChangeLog, TODO, makefile.mingw32,
+	  makefile.mingw32-display, makefile.mingw32-padev,
+	  sources/flac-1.2.1-devel-win.zip, sources/libogg-1.1.3.tar.bz2,
+	  sources/libvorbis-1.1.2.tar.bz2,
+	  sources/pa_snapshot-20081026.tar.gz,
+	  sources/pa_snapshot-20090419.tar.gz,
+	  sources/pthreads-w32-2-8-0-release.tar.gz: File cleanup. Deleted
+	  obsolete source tarballs.
+
+2010-03-25 21:23  paddockd
+
+	* [r137] ChangeLog, logs/downloads.log,
+	  makefile.mingw32-wasapi-display, src/slimaudio/slimaudio.h,
+	  src/slimaudio/slimaudio_output.c, src/squeezeslave/help.c,
+	  src/squeezeslave/squeezeslave.c, wiki/SqueezeSlave.wiki,
+	  wiki/SupportThread.wiki: Initial WASAPI win32 build support
+	  added.
+	  Updated Cygwin build environment using setup.exe version 2.693.
+	  Capture wiki updates.
+	  Increased version to 137.
+
+2010-03-24 14:42  paddockd
+
+	* [r135] ChangeLog, TODO, makefile.s10intel-display,
+	  makefile.s10sparc-display: Removed PORTAUDIO_DEV usage in Solaris
+	  10 display makefiles.
+
+2010-03-18 14:21  paddockd
+
+	* [r134] ChangeLog, TODO, logs/downloads.log,
+	  patches/httpsocketclose.patch,
+	  patches/revert-28009-http-pm.patch,
+	  sources/portaudio-r1483.tar.gz: Removed r28009 reversion patch.
+	  Added Adrian's proposed server side fix to close the http socket.
+
+2010-03-15 01:54  paddockd
+
+	* [r133] patches/squeezebox-close-http-socket.patch,
+	  src/slimaudio/slimaudio_http.c, src/squeezeslave/squeezeslave.c:
+	  Applied patch provided by Adrian Smith in bug 14740 to fix
+	  squeezeslave hanging on remote streams using 7.4 r28009 and
+	  above.
+	  Added proposed server side fix as a patch for completeness.
+	  Increased version to 133.
+
+2010-03-14 16:50  paddockd
+
+	* [r132] ChangeLog, TODO, patches/SqueezeSlave.pm-20100313.patch,
+	  patches/revert-28009-http-pm.patch, scripts/wmadec.sh: Created
+	  patch to bring SqueezeSlave.pm in line with changes to
+	  Squeezebox2.pm.
+	  Created patch to revert r28009 checkin which broke remote
+	  streaming in 7.4. Currently trying to work with the developers to
+	  find a proper fix but reverting the r28009 change means we can
+	  use squeezeslave with 7.4 again.
+
+2010-03-13 21:59  paddockd
+
+	* [r131] src/slimaudio/slimaudio.c, src/slimaudio/slimaudio_http.c,
+	  src/squeezeslave/squeezeslave.c: Added STMc, STMh, STMl and STMe
+	  slimprotocol status messages.
+	  Increased firmware version to 2.
+	  Increased version to 131.
+
+2010-03-11 12:59  paddockd
+
+	* [r130] ChangeLog, makefile.s10intel-display,
+	  wiki/SqueezeSlave.wiki, wiki/SupportThread.wiki: Fixed
+	  makefile.s10intel-display compile error.
+	  Captured wiki updates.
+
+2010-02-09 13:02  paddockd
+
+	* [r129] ChangeLog, lib/lirc/osxintel, lib/lirc/osxintel/build,
+	  lib/lirc/osxintel/include, lib/lirc/osxintel/include/lirc,
+	  lib/lirc/osxintel/lib, lib/lirc/osxppc, lib/lirc/osxppc/build,
+	  lib/lirc/osxppc/include, lib/lirc/osxppc/include/lirc,
+	  lib/lirc/osxppc/lib, makefile.osxintel-display,
+	  makefile.osxppc-display, scripts/buildall-osx,
+	  src/squeezeslave/squeezeslave.c: Added INTERACTIVE support to OSX
+	  PPC and Intel builds.
+	  Increased version to 129.
+
+2010-02-09 12:01  paddockd
+
+	* [r128] ChangeLog, scripts/buildall-win32,
+	  src/slimproto/slimproto.c, src/squeezeslave/squeezeslave.c:
+	  Reverted signal strength STAT value to match SB3.
+	  Increased version to 128.
+
+2010-01-31 16:31  paddockd
+
+	* [r127] ChangeLog, src/slimproto/slimproto.c,
+	  src/squeezeslave/squeezeslave.c: Fixed STAT packet length.
+	  Fixed STAT signal strength value.
+	  Increased version to 127.
+
+2010-01-24 16:00  paddockd
+
+	* [r126] ChangeLog, src/squeezeslave/squeezeslave.c: Removed
+	  debugging statement.
+	  Increased version to 126.
+
+2010-01-24 15:21  paddockd
+
+	* [r125] src/squeezeslave/squeezeslave.c: Fixed segmentation fault
+	  in getopt_options.
+	  Increased version to 125.
+
+2010-01-23 18:55  paddockd
+
+	* [r124] ChangeLog, TODO, makefile.linux24-alsa-display,
+	  makefile.linux24-display, makefile.linux24-i586-display,
+	  makefile.linux26-alsa-display, makefile.linux26-display,
+	  makefile.linux26-i64-alsa-display,
+	  makefile.linux26-ppc-alsa-display, makefile.mingw32-asio-display,
+	  makefile.mingw32-display, makefile.s10intel-display,
+	  makefile.s10sparc-display, makefile.s9sparc-display,
+	  scripts/buildall-osx, scripts/buildall-win32,
+	  src/squeezeslave/help.c, src/squeezeslave/interactive.c,
+	  src/squeezeslave/squeezeslave.c, src/squeezeslave/squeezeslave.h:
+	  Merged DAEMONIZE and INTERACTIVE options to remove the need to
+	  build a separate binary for display.
+	  Fixed the '2' key in display, it was being identified as a '1'.
+	  Added BSD to compile options information.
+	  Increased version to 124.
+
+2010-01-23 14:06  paddockd
+
+	* [r123] ChangeLog, lib/lirc/s10intel, lib/lirc/s10intel/build,
+	  lib/lirc/s10intel/include, lib/lirc/s10intel/include/lirc,
+	  lib/lirc/s10intel/lib, lib/lirc/s10sparc,
+	  lib/lirc/s10sparc/build, lib/lirc/s10sparc/include,
+	  lib/lirc/s10sparc/include/lirc, lib/lirc/s10sparc/lib,
+	  makefile.mingw32-asio, makefile.mingw32-asio-display,
+	  makefile.s10intel-display, makefile.s10sparc-display,
+	  src/squeezeslave/squeezeslave.c: Added makefile.s10intel-display
+	  and makefile.s10sparc-display.
+	  Added makefile.mingw32-asio-display.
+	  Removed INTERACTIVE from makefile.mingw32-asio.
+	  Only add vfdc callback and set display width via SETD if one of
+	  the interactive modes are enabled.
+	  Increased version to 123.
+
+2010-01-21 18:59  paddockd
+
+	* [r122] ChangeLog, lib/lirc/s9sparc, lib/lirc/s9sparc/build,
+	  lib/lirc/s9sparc/include, lib/lirc/s9sparc/include/lirc,
+	  lib/lirc/s9sparc/lib, makefile.mingw32-asio,
+	  makefile.mingw32-display, makefile.netbsd,
+	  makefile.s9sparc-display, src/squeezeslave/squeezeslave.c: Added
+	  makefile.netbsd, thanks to Jean-Yves Moulin.
+	  Added makefile.s9sparc-display.
+	  Fixed hard coded gcc reference in win32 makefiles.
+	  Increased version to 122.
+
+2010-01-15 13:47  paddockd
+
+	* [r121] ChangeLog, src/slimaudio/slimaudio.h,
+	  src/slimaudio/slimaudio_decoder.c,
+	  src/slimaudio/slimaudio_decoder_flac.c,
+	  src/slimaudio/slimaudio_decoder_mad.c,
+	  src/slimaudio/slimaudio_decoder_pcm.c,
+	  src/slimaudio/slimaudio_decoder_vorbis.c,
+	  src/squeezeslave/help.c, src/squeezeslave/squeezeslave.c: Moved
+	  recoverable decoder error messages to slimaudio_decoder_r debug
+	  option.
+	  Added squeezebox server --port/-P option.
+	  Removed obsolete --playerid/-e option.
+	  Increased version to 121.
+
+2010-01-10 21:50  paddockd
+
+	* [r120] ChangeLog, makefile.mingw32-asio,
+	  makefile.mingw32-display, src/slimaudio/slimaudio.c,
+	  src/slimaudio/slimaudio.h,
+	  src/slimaudio/slimaudio_decoder_flac.c,
+	  src/slimaudio/slimaudio_decoder_mad.c,
+	  src/slimaudio/slimaudio_decoder_vorbis.c,
+	  src/slimproto/slimproto.c, src/squeezeslave/squeezeslave.c: Fixed
+	  OV_CALLBACKS not defined warnings.
+	  Increased slimproto.c recv timeout to 30 seconds since
+	  disconnects are still happening once in a while.
+	  Fixed MONO stream playback for WAV, MP3 and FLAC which I broke at
+	  r56. OGG still has "chipmunk" effect as there's no easy way to
+	  determine the stream is only 1 channel in
+	  slimaudio_decoder_vorbis.c
+	  Added STOP acknowledgement via STMf status notification to
+	  strm.q.
+	  Added INTERACTIVE support to win32 asio makefile.
+	  Increased version to 120.
+
+2010-01-03 22:22  paddockd
+
+	* [r119] ChangeLog, TODO, makefile.linux24-alsa,
+	  makefile.linux24-alsa-display, makefile.linux26-alsa,
+	  makefile.linux26-alsa-display, makefile.linux26-i64-alsa,
+	  makefile.linux26-i64-alsa-display, makefile.linux26-ppc-alsa,
+	  makefile.linux26-ppc-alsa-display, makefile.mingw32,
+	  makefile.mingw32-asio, makefile.mingw32-display,
+	  makefile.mingw32-padev, sources, src/slimaudio/slimaudio_http.c,
+	  src/slimproto/slimproto.c, src/squeezeslave/help.c,
+	  src/squeezeslave/squeezeslave.c, wiki/SqueezeSlave.wiki: Initial
+	  INTERACTIVE support for win32 directx builds released.
+	  First win32 binary releases using updated Cygwin build
+	  environment setup.exe version 2.674.
+	  Rolled back all linux makefiles to use libportaudio 20091022
+	  snapshot after several reports of no audio devices using the
+	  20091205 snapshot.
+	  Increased version to 119.
+
+2009-12-30 12:24  paddockd
+
+	* [r118] src/squeezeslave/help.c, src/squeezeslave/interactive.c,
+	  src/squeezeslave/squeezeslave.c: Fixed delay between keypresses
+	  for win32 interactive builds.
+	  Disabled lirc and lcdd support for win32 interactive builds.
+	  Increased version to 118.
+
+2009-12-25 17:54  paddockd
+
+	* [r117] TODO, bin, lib/curses, lib/curses/mingw32,
+	  lib/curses/mingw32/build, lib/curses/mingw32/include,
+	  lib/curses/mingw32/lib, lib/lirc, lib/lirc/mingw32,
+	  lib/lirc/mingw32/build, lib/lirc/mingw32/include,
+	  lib/lirc/mingw32/include/lirc, lib/lirc/mingw32/lib,
+	  makefile.mingw32-display, patches/lirc_client.patch,
+	  patches/pdcurses.patch, sources, sources/PDCurses-3.4.tar.gz,
+	  sources/lirc-0.8.6.tar.bz2, src/squeezeslave/help.c,
+	  src/squeezeslave/interactive.c, src/squeezeslave/squeezeslave.c,
+	  src/squeezeslave/squeezeslave.h: Initial INTERACTIVE version for
+	  win32.
+	  Increased version to 117.
+
+2009-12-22 21:40  paddockd
+
+	* [r116] ChangeLog, src/slimaudio/slimaudio_output.c,
+	  src/squeezeslave/squeezeslave.c: Fixed debug message.
+	  Increased version to 116.
+
+2009-12-20 16:11  paddockd
+
+	* [r115] ChangeLog, src/slimaudio/slimaudio.h,
+	  src/slimaudio/slimaudio_output.c,
+	  src/squeezeslave/squeezeslave.c: Reverted pa_callback code to
+	  r95.
+	  Reverted slimaudio_output PLAYING state code to r95 except for
+	  the addition of the STOP state change in STMu.
+	  Increased version to 115.
+
+2009-12-20 15:37  paddockd
+
+	* [r114] ChangeLog, src/slimaudio/slimaudio.c,
+	  src/slimaudio/slimaudio_decoder_mad.c,
+	  src/slimaudio/slimaudio_http.c, src/slimaudio/slimaudio_output.c,
+	  src/slimproto/slimproto.c, src/squeezeslave/squeezeslave.c:
+	  Disabled socket timeouts in slimaudio_http.c.
+	  Fixed DEBUG printf un/signed proto_stat info.
+	  Added STMf acknowledge to strm f message.
+	  Fixed non-zeroing of elapsed times in STMt message after stopped.
+	  Added STOP state change to STMu-PLAYING.
+	  Added stream state tracking to pa_callback.
+	  Increased version to 114.
+
+2009-12-18 12:35  paddockd
+
+	* [r113] ChangeLog, src/slimaudio/slimaudio_http.c,
+	  src/slimproto/slimproto.c, src/squeezeslave/squeezeslave.c:
+	  Increased slimaudio_http.c timeout from 45 to 60 seconds.
+	  Decreased slimproto.c timeout from 30 to 20 seconds.
+	  Increased version to 113.
+
+2009-12-18 00:15  paddockd
+
+	* [r112] ChangeLog, src/squeezeslave/squeezeslave.c: Updated
+	  ChangeLog
+	  Increased version to 112.
+
+2009-12-18 00:13  paddockd
+
+	* [r111] ChangeLog, makefile.mingw32-asio, makefile.mingw32-padev,
+	  src/slimaudio/slimaudio_http.c, src/slimaudio/slimaudio_output.c,
+	  src/slimproto/slimproto.c, src/slimproto/slimproto.h,
+	  src/squeezeslave/squeezeslave.c: Increased slimaudio_http.c
+	  timeout from 15 to 45 seconds.
+	  Increased slimproto.c timeout from 15 to 30 seconds.
+	  Rolled back libportaudio to 20091022 for makefile.mingw32-asio
+	  and makefile.mingw32-asio
+	  Increased version to 111.
+
+2009-12-15 14:07  paddockd
+
+	* [r110] config/sccmd, src/slimaudio/slimaudio_output.c,
+	  src/squeezeslave/squeezeslave.c: Added config/sccmd bash script.
+	  sccmd can be mapped to multimedia keys to control for example;
+	  volume, play/pause, skip, etc. Script comments contain an example
+	  key mapping for fvwm.
+	  Updated audio_output PLAYING state to only handle STMu or STMd
+	  instead of the both.
+	  Restored original clearing of any remaining buffer when a decoder
+	  error occurs so we don't hear it played out.
+	  Increased version to 110.
+
+2009-12-13 20:21  paddockd
+
+	* [r109] ChangeLog: Updated ChangeLog.
+
+2009-12-13 14:40  paddockd
+
+	* [r108] src/slimaudio/slimaudio.h,
+	  src/slimaudio/slimaudio_output.c, src/slimproto/slimproto.c,
+	  src/squeezeslave/squeezeslave.c: Removed verbose debugging from
+	  slimproto.c.
+	  Removed unused variables from slimaudio.
+	  Refactored slimaudio_output pa_callback decoder buffer underflow
+	  handling.
+	  Increased version to 108.
+
+2009-12-13 14:05  paddockd
+
+	* [r107] makefile.linux24-alsa, makefile.linux24-alsa-display,
+	  makefile.linux26-alsa, makefile.linux26-alsa-display,
+	  makefile.linux26-i64-alsa, makefile.linux26-i64-alsa-display,
+	  makefile.linux26-ppc-alsa, makefile.linux26-ppc-alsa-display,
+	  patches/badstate-pa_linux_alsa.patch,
+	  src/slimaudio/slimaudio_output.c,
+	  src/squeezeslave/squeezeslave.c: Added libportaudio badstate
+	  patch for linux ALSA builds. Thanks to Jan Niehusmann for
+	  providing the patch.
+	  Additional slimaudio_output pa_callback changes for buffer issue
+	  testing.
+	  Added STMo status message to BUFFERING audio state.
+	  Removed memset in data_len is 0.
+	  Increased version to 107.
+
+2009-12-10 13:37  paddockd
+
+	* [r106] config/custom-convert.conf.441,
+	  src/slimaudio/slimaudio_output.c, src/squeezeslave/help.c,
+	  src/squeezeslave/squeezeslave.c: Added compile display option for
+	  BSD_THREAD_LOCKING.
+	  Slimaudio_output pa_callback changes for buffer issue testing.
+	  Reverted r105 patch from Jan Niehusmann to fix squeezeslave
+	  stopping to play after an output buffer underrun.
+	  Increased version to 106.
+
+2009-12-09 12:40  paddockd
+
+	* [r105] makefile.freebsd, makefile.linux24-alsa,
+	  makefile.linux24-alsa-display, makefile.linux26-alsa,
+	  makefile.linux26-alsa-display, makefile.linux26-i64-alsa,
+	  makefile.linux26-i64-alsa-display, makefile.linux26-ppc-alsa,
+	  makefile.linux26-ppc-alsa-display, makefile.mingw32-asio,
+	  makefile.mingw32-padev, makefile.osxintel,
+	  makefile.osxintel-padev, makefile.osxppc, makefile.osxppc-padev,
+	  makefile.s9sparc, src/slimaudio/slimaudio_decoder.c,
+	  src/slimaudio/slimaudio_http.c, src/slimaudio/slimaudio_output.c,
+	  src/squeezeslave/squeezeslave.c: Update makefiles to use 20091205
+	  pa_snapshot.
+	  Updated FREEBSD patch to use the more generic BSD_THREAD_LOCKING
+	  definition.
+	  Applied patch from Jan Niehusmann to fix squeezeslave stopping to
+	  play after an
+	  output buffer underrun.
+	  Enabled USE_SIGNALS_FOR_RESTART define for all OSX makefiles.
+	  Increased version to 105.
+
+2009-12-06 14:58  paddockd
+
+	* [r104] src/slimproto/slimproto.c,
+	  src/squeezeslave/squeezeslave.c: Increased send/recv socket
+	  timeout to 15 seconds.
+	  Increased version to 104.
+
+2009-12-05 14:15  paddockd
+
+	* [r103] makefile.osxintel-padev,
+	  sources/pa_snapshot-20091205.tar.gz,
+	  src/squeezeslave/squeezeslave.c: Added portaudio r1428 snapshot
+	  contains OSX 10.6 updates.
+	  Modified makefile.osxintel-padev to use pa_snapshot-20091205.
+	  Increased version to 103.
+
+2009-12-04 12:21  paddockd
+
+	* [r102] makefile.s9sparc, src/slimproto/slimproto.c,
+	  src/squeezeslave/squeezeslave.c: Added conditional compile block
+	  to disable unsupported socket timeouts for solaris.
+	  Enabled alternate locking __FREEBSD__ in makefile.s9sparc.
+	  Increased version to 102.
+
+2009-12-03 16:42  paddockd
+
+	* [r101] src/slimaudio/slimaudio_http.c,
+	  src/squeezeslave/squeezeslave.c: Added errno.h include to
+	  slimaudio_http.c.
+	  Increased version to 101.
+
+2009-12-03 16:23  paddockd
+
+	* [r100] TODO, makefile.mingw32-padev,
+	  src/slimaudio/slimaudio_http.c, src/slimproto/slimproto.c,
+	  src/slimproto/slimproto.h, src/squeezeslave/squeezeslave.c: Added
+	  SO_SNDTIMEO socket option to proto thread.
+	  Added SO_SNDTIMEO and SO_RCVTIMEO socket options to http thread.
+	  Added WSAGetLastError reporting for WIN32 builds as errno not
+	  populated in mingw.
+	  Renamed slimproto_configure_socket function to
+	  slimproto_configure_socket_sigpipe.
+	  Added slimproto_configure_socket function to setup socket options
+	  for both proto and http thread.
+	  Enabled alternate locking __FREEBSD__ in makefile.mingw32-padev.
+	  Increased version to 100.
+
+2009-12-01 12:23  paddockd
+
+	* [r99] TODO, lib/portmixer/px_unix_oss/px_unix_oss.c,
+	  makefile.freebsd, makefile.osxintel-padev, patches/freebsd.patch,
+	  src/slimaudio/slimaudio_decoder.c,
+	  src/slimaudio/slimaudio_http.c, src/slimaudio/slimaudio_output.c,
+	  src/slimproto/slimproto.c, src/squeezeslave/squeezeslave.c: Added
+	  freebsd patch provided by Gummy35.
+	  http://forums.slimdevices.com/showpost.php?p=476422&postcount=19
+	  Added timeout to slimprotocol socket send/recv calls to fix
+	  lockup after suspend/resume and when the server machine is
+	  powered off.
+	  Updated makefile.osxintel-padev to use the freebsd placement of
+	  thread locking.
+	  Added a lot of DEBUG messages to slimproto.c, most will be
+	  removed once the send/recv lockup issue has been resolved.
+	  Increased version to 99.
+
+2009-11-22 14:51  paddockd
+
+	* [r98] makefile.osxintel-padev, makefile.osxppc-padev,
+	  wiki/InstallSVNTrunkAsService.wiki, wiki/SqueezeSlave.wiki: Added
+	  USE_SIGNALS_FOR_RESTART define to osx padev makefiles.
+	  Wiki updates.
+
+2009-11-13 19:28  paddockd
+
+	* [r96] ChangeLog, ReleaseNotes, makefile.linux24-i586,
+	  makefile.linux24-i586-display, scripts, scripts/buildall-lnx24,
+	  scripts/buildall-lnx24mmx, scripts/buildall-lnx26,
+	  scripts/buildall-lnx26-i64, scripts/buildall-osx,
+	  scripts/buildall-win32: Added scripts used to create binary
+	  releases.
+	  Updated ReleaseNotes from
+	  http://forums.slimdevices.com/showpost.php?p=428346&postcount=1
+	  Updated Pentium MMX makefiles CFLAGS.
+
+2009-11-06 23:48  paddockd
+
+	* [r95] ChangeLog, src/slimaudio/slimaudio_decoder_mad.c,
+	  src/squeezeslave/help.c, src/squeezeslave/squeezeslave.c,
+	  src/squeezeslave/squeezeslave.h: PORTAUDIO_DEV Additional fix for
+	  -L not selecting device 0 when specified from the command line.
+	  Added slim_audio_debug displaying actual output device opened by
+	  libportaudio.
+	  Fixed segmentation fault in mad_output when mp3 stream sample
+	  rate is not 44100 and channels are not 2. Advances to the next
+	  track. A long standing bug in the buffering code prevents
+	  squeezeslave from stopping so you have to stop it manually. It's
+	  better than crashing. See the TODO file for more details.
+	  Increased version to 95.
+
+2009-10-31 18:58  paddockd
+
+	* [r94] ChangeLog, src/slimaudio/slimaudio.h,
+	  src/slimaudio/slimaudio_output.c, src/squeezeslave/help.c,
+	  src/squeezeslave/squeezeslave.c: Fixed -o option overriding padev
+	  device default.
+	  Fixed -L option display of * next to default device.
+	  Increased version to 94.
+
+2009-10-31 16:16  paddockd
+
+	* [r93] ChangeLog, src/slimaudio/slimaudio_output.c,
+	  src/squeezeslave/squeezeslave.c: Added audio format supported
+	  check to default device and if not change the default to be the
+	  first available device that does.
+	  Increased version to 93.
+
+2009-10-31 13:19  paddockd
+
+	* [r92] src/slimaudio/slimaudio_output.c, src/squeezeslave/help.c,
+	  src/squeezeslave/squeezeslave.c: Added pre-check to audio device
+	  listing -L option to confirm device supports 44.1KHz, 16-bit, 2
+	  channel audio. If not, the device is not listed in Output
+	  Devices. The -o<device> option still allows you to select any
+	  device number, but the subsequent audio device open call will
+	  most likely fail.
+	  Increased version to 92.
+
+2009-10-29 12:09  paddockd
+
+	* [r91] ChangeLog, makefile.linux24-alsa,
+	  makefile.linux24-alsa-display, makefile.linux26-alsa,
+	  makefile.linux26-alsa-display, makefile.linux26-ppc-alsa,
+	  makefile.linux26-ppc-alsa-display, makefile.mingw32-asio,
+	  makefile.mingw32-padev, src/squeezeslave/squeezeslave.c: Updated
+	  all padev makefiles to use current 20091022 snapshot.
+	  Increased version to 91.
+
+2009-10-29 11:16  paddockd
+
+	* [r90] makefile.linux24-alsa, makefile.linux24-alsa-display,
+	  makefile.linux26-alsa, makefile.linux26-alsa-display,
+	  makefile.linux26-i64-alsa, makefile.linux26-i64-alsa-display,
+	  makefile.linux26-ppc-alsa, makefile.linux26-ppc-alsa-display,
+	  makefile.mingw32-asio, makefile.mingw32-padev,
+	  makefile.osxintel-padev, makefile.osxppc-padev,
+	  src/slimaudio/slimaudio.h, src/slimaudio/slimaudio_output.c,
+	  src/squeezeslave/help.c, src/squeezeslave/squeezeslave.c:
+	  Replaced all occurances of PORTAUDIO_ALSA with PORTAUDIO_DEV to
+	  remove the Linux specific reference to ALSA.
+
+2009-10-29 10:58  paddockd
+
+	* [r89] lib/libportaudio/osxppc, lib/libportaudio/osxppc/build,
+	  lib/libportaudio/osxppc/include, lib/libportaudio/osxppc/lib,
+	  makefile.osx, makefile.osxppc, makefile.osxppc-padev,
+	  patches/build-portaudio-osxppc.patch: Updated OSX makefiles to
+	  include padev build support.
+	  Renamed makefile.osx to makefile.osxppc.
+	  Added osxppc libportaudio build directories.
+
+2009-10-28 16:41  paddockd
+
+	* [r88] makefile.osxintel, makefile.osxintel-padev: Fixed
+	  differences in osxintel makefiles between pastable and padev.
+
+2009-10-26 01:16  paddockd
+
+	* [r87] makefile.osx, makefile.osxintel, makefile.osxintel-padev,
+	  patches/build-portaudio-osxintel.patch,
+	  patches/libmad-i486.patch, src/slimaudio/slimaudio.h,
+	  src/slimaudio/slimaudio_output.c, src/squeezeslave/help.c,
+	  src/squeezeslave/squeezeslave.c: Added patches needed to build
+	  development libportaudio.
+	  Added pa-dev OSX intel makefile.
+	  Added conditional compile to remove portmixer code if compiling
+	  against pa-dev library.
+	  Updates to OSX makefiles.
+
+2009-10-25 19:46  paddockd
+
+	* [r86] ChangeLog, lib/flac/osxintel, lib/flac/osxintel/build,
+	  lib/flac/osxintel/include, lib/flac/osxintel/include/FLAC,
+	  lib/flac/osxintel/lib, lib/libmad/osxintel,
+	  lib/libmad/osxintel/build, lib/libmad/osxintel/include,
+	  lib/libmad/osxintel/lib, lib/libportaudio/osxintel,
+	  lib/libportaudio/osxintel/build,
+	  lib/libportaudio/osxintel/include, lib/libportaudio/osxintel/lib,
+	  lib/vorbis/osxintel, lib/vorbis/osxintel/build,
+	  lib/vorbis/osxintel/include, lib/vorbis/osxintel/include/ogg,
+	  lib/vorbis/osxintel/include/vorbis, lib/vorbis/osxintel/lib,
+	  makefile.linux26-i64-alsa, makefile.linux26-i64-alsa-display,
+	  makefile.osxintel, sources/pa_snapshot-20091022.tar.gz: Added
+	  latest libportaudio snapshot r1420.
+	  Removed MacPorts libogg, libvorbis, libmad and flac dependancy.
+	  Added build directories for osxintel support libraries.
+	  Updated linux26 64-bit makefiles to use libportaudio r1420 which
+	  fixes dither for 64-bit targets.
+
+2009-10-07 20:04  paddockd
+
+	* [r85] InstallSVNTrunkAsService.wiki, SqueezeSlave.wiki, wiki,
+	  wiki/InstallSVNTrunkAsService.wiki, wiki/SqueezeSlave.wiki:
+	  Rearranged wiki content files.
+
+2009-10-07 20:03  paddockd
+
+	* [r84] ChangeLog, InstallSVNTrunkAsService.wiki,
+	  makefile.mingw32-asio, makefile.mingw32-padev,
+	  patches/build-portaudio-asio.patch,
+	  patches/build-portaudio-asiosdk2.patch,
+	  src/slimaudio/slimaudio_output.c, src/squeezeslave/help.c,
+	  src/squeezeslave/squeezeslave.c: Added mingw32 portaudio asio
+	  compile patches.
+	  Copied makefile.mingw32-asio as makefile.mingw32-padev to reflect
+	  correct makefile type.
+	  Modified makefile.mingw32-asio to build an asio only version of
+	  libportaudio.
+	  Added libportaudio function call return value checking to
+	  slimaudio_output.c
+	  Added asio compile info to -V output.
+	  Updated ChangeLog
+	  Increased version to 84.
+
+2009-09-19 11:21  paddockd
+
+	* [r83] ChangeLog, makefile.linux24, makefile.linux24-alsa,
+	  makefile.linux24-display, makefile.linux26,
+	  makefile.linux26-alsa, makefile.linux26-alsa-display,
+	  makefile.linux26-display, makefile.linux26-i64-alsa,
+	  makefile.linux26-i64-alsa-display, makefile.linux26-ppc-alsa,
+	  makefile.linux26-ppc-alsa-display, makefile.s10intel,
+	  makefile.s10sparc, makefile.s9sparc: Updated makefiles with bash
+	  specific file specs in copy commands to use /bin/bash for the
+	  shell.
+
+2009-09-03 11:41  paddockd
+
+	* [r82] ChangeLog, src/slimaudio/slimaudio_output.c,
+	  src/squeezeslave/squeezeslave.c: Reverted rebuffering changes
+	  committed at rev 81.
+	  Increased version to 82.
+
+2009-08-22 20:22  paddockd
+
+	* [r81] ChangeLog, TODO, lib/flac/lnx24, lib/flac/lnx24/build,
+	  lib/flac/lnx24/include, lib/flac/lnx24/include/FLAC,
+	  lib/flac/lnx24/lib, lib/libmad/lnx24, lib/libmad/lnx24/build,
+	  lib/libmad/lnx24/include, lib/libmad/lnx24/lib,
+	  lib/libportaudio/lnx24, lib/libportaudio/lnx24/build,
+	  lib/libportaudio/lnx24/include, lib/libportaudio/lnx24/lib,
+	  lib/vorbis/lnx24, lib/vorbis/lnx24/build,
+	  lib/vorbis/lnx24/include, lib/vorbis/lnx24/include/ogg,
+	  lib/vorbis/lnx24/include/vorbis, lib/vorbis/lnx24/lib,
+	  makefile.linux24, makefile.linux24-alsa,
+	  makefile.linux24-alsa-display, makefile.linux24-debug,
+	  makefile.linux24-display, makefile.linux24-i586,
+	  makefile.linux24-i586-display,
+	  src/slimaudio/slimaudio_decoder_mad.c,
+	  src/slimaudio/slimaudio_output.c,
+	  src/squeezeslave/squeezeslave.c: Updated linux 2.4 makefiles to
+	  build all support libraries.
+	  Added lnx24 build directories for libraries.
+	  Removed linux 2.4 debug makefile as all makefiles now include
+	  DEBUG support.
+	  Added initial support for rebuffering. Currently the percentage
+	  never increases about 0, but player does advance to the next
+	  track with last.fm and mp3 tracks less than 20 seconds in
+	  duration.
+	  Increased version to 81.
+
+2009-07-26 20:49  paddockd
+
+	* [r80] ChangeLog, TODO, config/audiobyname.sh, lib/flac/lnx26i64,
+	  lib/flac/lnx26i64/build, lib/flac/lnx26i64/include,
+	  lib/flac/lnx26i64/include/FLAC, lib/flac/lnx26i64/lib,
+	  lib/flac/lnx26ppc, lib/flac/lnx26ppc/build,
+	  lib/flac/lnx26ppc/include, lib/flac/lnx26ppc/include/FLAC,
+	  lib/flac/lnx26ppc/lib, lib/libmad/lnx26i64,
+	  lib/libmad/lnx26i64/build, lib/libmad/lnx26i64/include,
+	  lib/libmad/lnx26i64/lib, lib/libmad/lnx26ppc,
+	  lib/libmad/lnx26ppc/build, lib/libmad/lnx26ppc/include,
+	  lib/libmad/lnx26ppc/lib, lib/libportaudio/linux26-amd64,
+	  lib/libportaudio/linux26-ppc, lib/libportaudio/lnx26i64,
+	  lib/libportaudio/lnx26i64/build,
+	  lib/libportaudio/lnx26i64/include, lib/libportaudio/lnx26i64/lib,
+	  lib/libportaudio/lnx26ppc, lib/libportaudio/lnx26ppc/build,
+	  lib/libportaudio/lnx26ppc/include, lib/libportaudio/lnx26ppc/lib,
+	  lib/vorbis/lnx26i64, lib/vorbis/lnx26i64/build,
+	  lib/vorbis/lnx26i64/include, lib/vorbis/lnx26i64/include/ogg,
+	  lib/vorbis/lnx26i64/include/vorbis, lib/vorbis/lnx26i64/lib,
+	  lib/vorbis/lnx26ppc, lib/vorbis/lnx26ppc/build,
+	  lib/vorbis/lnx26ppc/include, lib/vorbis/lnx26ppc/include/ogg,
+	  lib/vorbis/lnx26ppc/include/vorbis, lib/vorbis/lnx26ppc/lib,
+	  makefile.linux26, makefile.linux26-alsa,
+	  makefile.linux26-alsa-display, makefile.linux26-amd64,
+	  makefile.linux26-amd64-alsa, makefile.linux26-debug,
+	  makefile.linux26-display, makefile.linux26-i64-alsa,
+	  makefile.linux26-i64-alsa-display, makefile.linux26-ppc-alsa,
+	  makefile.linux26-ppc-alsa-display, makefile.linux26-ppc-display,
+	  makefile.mingw32-asio, patches/libmad-forcemem.patch: Completed
+	  conversion of linux 2.6 makefiles to build all support libraries.
+	  Removed static support libraries and header files.
+	  Added script to find output device index using the device name.
+	  Added patch for libmad to remove -fforce-mem obsolete gcc 4.3+
+	  compile option from configure.
+	  Renamed amd64 makefiles to i64.
+	  Removed OSS makefiles for ppc and i64.
+
+2009-07-24 20:26  paddockd
+
+	* [r79] ChangeLog, TODO, lib/flac/lnx26, lib/flac/lnx26/build,
+	  lib/flac/lnx26/include, lib/flac/lnx26/include/FLAC,
+	  lib/flac/lnx26/lib, lib/libmad/lnx26, lib/libmad/lnx26/build,
+	  lib/libmad/lnx26/include, lib/libmad/lnx26/lib,
+	  lib/libportaudio/linux26, lib/libportaudio/lnx26,
+	  lib/libportaudio/lnx26/build, lib/libportaudio/lnx26/include,
+	  lib/libportaudio/lnx26/lib, lib/vorbis/lnx26,
+	  lib/vorbis/lnx26/build, lib/vorbis/lnx26/include,
+	  lib/vorbis/lnx26/include/ogg, lib/vorbis/lnx26/include/vorbis,
+	  lib/vorbis/lnx26/lib, makefile.linux26-alsa,
+	  makefile.linux26-alsa-display, sources,
+	  sources/pa_snapshot-20090724.tar.gz,
+	  src/squeezeslave/squeezeslave.c: Added new libportaudio snapshot
+	  source with ALSA pulseaudio support.
+	  Removed connected message from interactive mode.
+	  Removed linux 2.6 precompile libportaudio library and header
+	  files.
+	  Modified linux 2.6 ALSA makefiles to build all support libraries.
+	  Increased version to 79.
+
+2009-07-20 22:23  paddockd
+
+	* [r78] ChangeLog, TODO, lib/libportaudio/mingw32,
+	  lib/libportaudio/mingw32/build, lib/libportaudio/mingw32/include,
+	  lib/libportaudio/mingw32/lib, lib/libportaudio/win32,
+	  makefile.mingw32-asio, makefile.mingw32pav19-debug,
+	  src/slimaudio/slimaudio_decoder_mad.c,
+	  src/squeezeslave/squeezeslave.c: Added error status handling in
+	  slimaudio_decoder_mad.c to not display MAD_ERROR_LOSTSYNC
+	  (0x0101) errors unless debug has been enabled. The decoders
+	  recovers gracefully from the error.
+	  Moved mad remainder available debug to verbose option as it is
+	  very noisy.
+	  Renamed makefile.mingw32pav19-debug to makefile.mingw32-asio to
+	  reflect it's original intent.
+	  Removed old prebuilt libportaudio library and header files for
+	  mingw32 as all support libraries are now built in the makefile.
+	  Increased version to 78.
+
+2009-07-19 22:27  paddockd
+
+	* [r77] makefile.mingw32, sources,
+	  sources/pthreads-w32-2-8-0-release.tar.bz2: Fixed
+	  LPDIRECTSOUNDFULLDUPLEX redefinition in dsound.h after 7z
+	  extraction.
+	  Changed pthreads extract to use 7z instead of custom created
+	  pthreads-w32-2-8-0-release.tar.bz2.
+
+2009-07-19 20:45  paddockd
+
+	* [r76] ChangeLog, lib/7z, lib/7z/mingw32, lib/7z/mingw32/build,
+	  lib/dx, lib/dxsdk, lib/dxsdk/mingw32, lib/dxsdk/mingw32/build,
+	  lib/dxsdk/mingw32/include, lib/dxsdk/mingw32/lib,
+	  lib/flac/mingw32, lib/flac/mingw32/build,
+	  lib/flac/mingw32/include, lib/flac/mingw32/include/FLAC,
+	  lib/flac/mingw32/lib, lib/flac/win32, lib/libmad/build-mad-win32,
+	  lib/libmad/mingw32, lib/libmad/mingw32/build,
+	  lib/libmad/mingw32/include, lib/libmad/mingw32/lib,
+	  lib/libmad/win32, lib/pthread/mingw32, lib/pthread/mingw32/build,
+	  lib/pthread/mingw32/include, lib/pthread/mingw32/lib,
+	  lib/pthread/win32, lib/vorbis/mingw32, lib/vorbis/mingw32/build,
+	  lib/vorbis/mingw32/include, lib/vorbis/mingw32/include/ogg,
+	  lib/vorbis/mingw32/include/vorbis, lib/vorbis/mingw32/lib,
+	  lib/vorbis/win32, makefile.mingw32, makefile.mingw32-debug,
+	  patches/Pthreads-w32-2-8-0.diff, sources,
+	  sources/dxsdk200512.tar.bz2, sources/dxsdk200704.tar.bz2,
+	  sources/p7zip_4.65_src_all.tar.bz2,
+	  sources/pthreads-w32-2-8-0-release.exe,
+	  sources/pthreads-w32-2-8-0-release.tar.bz2,
+	  sources/pthreads-w32-2-8-0-release.tar.gz: Modified mingw32
+	  (win32) makefile to build all support libraries. New binary
+	  requires pthreadGC2.dll v2.8.0.0 only, libFLAC.dll is now
+	  included statically in squeezeslave.exe.
+	  Builds 7z.exe to extract files from Microsoft DirectX SDK Nov
+	  2008, without the need to install SDK on build system. The file
+	  DXSDK_Nov08.exe must be downloaded separately and placed in the
+	  sources/ directory.
+	  Added missing sources for win32 pthreads library.
+	  Added p7zip 4.65 source.
+	  Deleted files/directories no longer required to build mingw2
+	  (win32) release.
+
+2009-07-18 18:57  paddockd
+
+	* [r75] ChangeLog, lib/portaudio/pa_unix_oss/pa_unix_solaris.c,
+	  makefile.cygwin, src/squeezeslave/squeezeslave.c: Fixed solaris
+	  segmentation fault in Pa_QueryDevice audioctl device name
+	  creation.
+	  Increased version to 75.
+	  Removed obsolete cygwin makefile.
+
+2009-07-18 17:57  paddockd
+
+	* [r74] lib/flac/s10sparc, lib/flac/s10sparc/build,
+	  lib/flac/s10sparc/include, lib/flac/s10sparc/include/FLAC,
+	  lib/flac/s10sparc/lib, lib/libmad/build-mad-solaris,
+	  lib/libmad/s10sparc, lib/libmad/s10sparc/build,
+	  lib/libmad/s10sparc/include,
+	  lib/libmad/s10sparc/include/stdbool.h, lib/libmad/s10sparc/lib,
+	  lib/vorbis/s10sparc, lib/vorbis/s10sparc/build,
+	  lib/vorbis/s10sparc/include, lib/vorbis/s10sparc/include/ogg,
+	  lib/vorbis/s10sparc/include/vorbis, lib/vorbis/s10sparc/lib,
+	  makefile.osx, makefile.s10intel, makefile.s10sparc,
+	  makefile.s9sparc: Added Solaris 10 SPARC 64-bit makefile and
+	  support directories.
+	  Fixed CC macro to use make variable instead of shell variable.
+
+2009-07-18 12:01  paddockd
+
+	* [r73] ChangeLog, makefile.s10intel: Fixed makefile.s10intel
+	  support library builds to use cc instead of gcc default.
+
+2009-07-18 11:24  paddockd
+
+	* [r72] lib/flac/build-flac-solaris10, lib/flac/s10intel,
+	  lib/flac/s10intel/build, lib/flac/s10intel/include,
+	  lib/flac/s10intel/include/FLAC, lib/flac/s10intel/lib,
+	  lib/flac/solaris, lib/libmad/s10intel, lib/libmad/s10intel/build,
+	  lib/libmad/s10intel/include,
+	  lib/libmad/s10intel/include/stdbool.h, lib/libmad/s10intel/lib,
+	  lib/libmad/solaris, lib/vorbis/build-ogg-solaris,
+	  lib/vorbis/build-vorbis-solaris, lib/vorbis/s10intel,
+	  lib/vorbis/s10intel/build, lib/vorbis/s10intel/include,
+	  lib/vorbis/s10intel/include/ogg,
+	  lib/vorbis/s10intel/include/vorbis, lib/vorbis/s10intel/lib,
+	  lib/vorbis/solaris, makefile.s10intel, makefile.s10intel-debug:
+	  Removed solaris 10 intel precompiled libraries and header files.
+	  Modified makefile.s10intel to build all required decoder support
+	  libraries.
+	  Removed makefile.s10intel-debug as all binaries will include
+	  debug feature.
+	  Removed old precompiled library build scripts.
+
+2009-07-18 10:12  paddockd
+
+	* [r71] lib/flac/build-flac-cygwin, lib/flac/cygwin,
+	  lib/flac/s9sparc/build, lib/flac/s9sparc/include/FLAC/all.h,
+	  lib/flac/s9sparc/include/FLAC/callback.h,
+	  lib/flac/s9sparc/include/FLAC/export.h,
+	  lib/flac/s9sparc/include/FLAC/format.h,
+	  lib/flac/s9sparc/include/FLAC/metadata.h,
+	  lib/flac/s9sparc/include/FLAC/ordinals.h,
+	  lib/flac/s9sparc/include/FLAC/stream_decoder.h,
+	  lib/flac/s9sparc/include/FLAC/stream_encoder.h,
+	  lib/flac/s9sparc/lib/libFLAC.a, lib/libmad/build-mad-cygwin,
+	  lib/libmad/cygwin, lib/libmad/s9sparc/build,
+	  lib/libmad/s9sparc/include, lib/libmad/s9sparc/include/stdbool.h,
+	  lib/libmad/s9sparc/lib, lib/libmad/s9sparc/libmad-sparc.a,
+	  lib/libmad/s9sparc/libmad.a, lib/libmad/s9sparc/libmads9.a,
+	  lib/libmad/s9sparc/mad.h, lib/libmad/s9sparc/stdbool.h,
+	  lib/vorbis/build-ogg-cygwin, lib/vorbis/build-vorbis-cygwin,
+	  lib/vorbis/cygwin, lib/vorbis/s9sparc/build,
+	  lib/vorbis/s9sparc/include/ogg/config_types.h,
+	  lib/vorbis/s9sparc/include/ogg/ogg.h,
+	  lib/vorbis/s9sparc/include/ogg/os_types.h,
+	  lib/vorbis/s9sparc/include/vorbis/codec.h,
+	  lib/vorbis/s9sparc/include/vorbis/vorbisenc.h,
+	  lib/vorbis/s9sparc/include/vorbis/vorbisfile.h,
+	  lib/vorbis/s9sparc/lib/libogg.a,
+	  lib/vorbis/s9sparc/lib/libvorbis.a,
+	  lib/vorbis/s9sparc/lib/libvorbisenc.a,
+	  lib/vorbis/s9sparc/lib/libvorbisfile.a, makefile.osx,
+	  makefile.s9sparc, makefile.s9sparc-debug: Removed all files
+	  related to building cygwin version as only Windows Multimedia
+	  extensions are supported and we only use the Direct Sound
+	  interface.
+	  Removed precompiled support libraries and related header files
+	  for Solaris 9 SPARC.
+	  Revised Solaris 9 SPARC makefile to build all support libraries.
+	  Removed Solaris 9 SPARC debug makefile as all revised makefiles
+	  will include debug support.
+
+2009-07-15 19:01  paddockd
+
+	* [r70] lib/flac/osxppc, lib/flac/osxppc/build,
+	  lib/flac/osxppc/include, lib/flac/osxppc/include/FLAC,
+	  lib/flac/osxppc/lib, lib/libmad/osxppc, lib/libmad/osxppc/build,
+	  lib/libmad/osxppc/include, lib/libmad/osxppc/lib,
+	  lib/vorbis/osxppc, lib/vorbis/osxppc/build,
+	  lib/vorbis/osxppc/include, lib/vorbis/osxppc/include/ogg,
+	  lib/vorbis/osxppc/include/vorbis, lib/vorbis/osxppc/lib,
+	  makefile.osx, makefile.osxintel, sources/libogg-1.1.4.tar.bz2,
+	  sources/libvorbis-1.2.3.tar.bz2: Modified makefile.osx to build
+	  ppc version using cross compiler on intel based macs. The
+	  makefile.osx builds all support libraries used by squeezeslave.
+	  This will be used as model to upgrade other platform makefiles to
+	  build all libraries.
+	  Fixed missing cleanup for port mixer files on osx intel.
+	  Added new sources for libogg and libvorbis.
+	  Added directories required to build osxppc binary using
+	  makefile.osx.
+
+2009-07-04 10:58  paddockd
+
+	* [r69] ChangeLog, TODO, lib/libportaudio/linux26-amd64,
+	  lib/libportaudio/linux26-amd64/build,
+	  lib/libportaudio/linux26-amd64/include,
+	  lib/libportaudio/linux26-amd64/lib, lib/libportaudio/linux26-ppc,
+	  lib/libportaudio/linux26-ppc/build,
+	  lib/libportaudio/linux26-ppc/include,
+	  lib/libportaudio/linux26-ppc/lib, makefile.linux26-amd64,
+	  makefile.linux26-amd64-alsa, makefile.linux26-ppc-alsa-display:
+	  Added new makefiles and directories for PowerPC and intel/amd
+	  64-bit.
+
+2009-06-26 11:24  paddockd
+
+	* [r68] ChangeLog, makefile.linux26-ppc-display: Fixed compile
+	  error in ppc makefile.
+
+2009-06-18 11:11  paddockd
+
+	* [r67] ChangeLog, ReleaseNotes, ReleaseNotes-0.8,
+	  makefile.linux26-ppc-display, src/squeezeslave/squeezeslave.c:
+	  Added cast to shortopt compare to fix gcc 4.3. Thanks to pukekawa
+	  for the fix.
+	  Added linux power pc makefile.
+	  Created new release notes.
+
+2009-05-31 22:16  paddockd
+
+	* [r65] ChangeLog, SqueezeSlave.wiki, TODO,
+	  config/custom-convert.conf.hdcd, config/hdcdwrapper.pl,
+	  patches/squeezecenter_squeezeslave_player3-7.2.patch,
+	  patches/squeezecenter_squeezeslave_player3-7.3.patch,
+	  patches/squeezecenter_squeezeslave_player4-7.4.patch,
+	  src/squeezeslave/help.c, src/squeezeslave/squeezeslave.c: Added
+	  new patch files with replay gain fix.
+	  Updated legal notice.
+	  Increased version to 0.9-65.
+
+2009-05-17 13:48  paddockd
+
+	* [r64] src/slimaudio/slimaudio.c, src/slimaudio/slimaudio.h,
+	  src/slimaudio/slimaudio_output.c, src/squeezeslave/help.c,
+	  src/squeezeslave/squeezeslave.c: Increased player firmware
+	  version to 1 to identify replay gain capability.
+	  Moved applying replay gain to stream start as it uses volume
+	  adjust which applies the changes immediately.
+	  Separated out revision number in version string.
+	  Increased revision to 64.
+
+2009-05-16 10:55  paddockd
+
+	* [r63] src/slimaudio/slimaudio_output.c,
+	  src/squeezeslave/squeezeslave.c: First release to pass replay
+	  gain tests without anomolies in the audio.
+	  Increased version to 63.
+
+2009-05-15 11:46  paddockd
+
+	* [r62] config/custom-convert.conf.441, config/mplayer.sh,
+	  makefile.s9sparc, patches/SqueezeSlave.pm-20090514.patch,
+	  src/slimaudio/slimaudio.c, src/slimaudio/slimaudio.h,
+	  src/slimaudio/slimaudio_buffer.c,
+	  src/slimaudio/slimaudio_decoder_flac.c,
+	  src/slimaudio/slimaudio_decoder_mad.c,
+	  src/slimaudio/slimaudio_decoder_pcm.c,
+	  src/slimaudio/slimaudio_decoder_vorbis.c,
+	  src/slimaudio/slimaudio_output.c,
+	  src/squeezeslave/squeezeslave.c: Added patch 3 submitted to bug
+	  11330.
+	  Added config files for SC to resample streams to 44.1KHz for
+	  squeezeslave.
+	  Fixed replay_gain being applied too early.
+	  Increased version to 62.
+
+2009-05-14 11:49  paddockd
+
+	* [r61] src/slimaudio/slimaudio.c, src/slimaudio/slimaudio.h,
+	  src/slimaudio/slimaudio_buffer.c,
+	  src/slimaudio/slimaudio_decoder.c,
+	  src/slimaudio/slimaudio_decoder_mad.c,
+	  src/slimaudio/slimaudio_output.c, src/slimproto/slimproto.c,
+	  src/slimproto/slimproto.h, src/squeezeslave/squeezeslave.c:
+	  Cleaned up STMt handling, removed spurious stat replies from
+	  squeezeslave. Only replies now when status requested by server.
+	  Additional DEBUG logging cleanup.
+	  Second cut of replay gain handling.
+	  Fixed STMt replies to send back server_timestamp from replay_gain
+	  field.
+	  Additional pause/unpause status cleanup.
+
+2009-05-08 14:55  paddockd
+
+	* [r60] src/squeezeslave/squeezeslave.c: Increased version to 60 to
+	  differentiate from 59 test release.
+
+2009-05-08 14:53  paddockd
+
+	* [r59] ChangeLog, TODO, lib/libportaudio/win32/lib/libportaudio.a,
+	  makefile.linux26-alsa-display, src/slimaudio/slimaudio_buffer.c,
+	  src/slimaudio/slimaudio_decoder_mad.c,
+	  src/slimaudio/slimaudio_output.c,
+	  src/squeezeslave/squeezeslave.c: Removed initial fix for decoder
+	  blocking.
+	  Changed order of read_buffer == NULL in zero byte read_buffer to
+	  before NONBLOCKING in while loop.
+	  Removed debug build from makefile.linux26-alsa-display.
+	  Increased version to 59.
+
+2009-05-05 15:04  paddockd
+
+	* [r58] ChangeLog, logs, logs/sb3take6somuch2say.log,
+	  src/slimaudio/slimaudio.c, src/slimaudio/slimaudio.h,
+	  src/slimaudio/slimaudio_buffer.c,
+	  src/slimaudio/slimaudio_buffer.h,
+	  src/slimaudio/slimaudio_decoder.c,
+	  src/slimaudio/slimaudio_decoder_flac.c,
+	  src/slimaudio/slimaudio_decoder_mad.c,
+	  src/slimaudio/slimaudio_decoder_pcm.c,
+	  src/slimaudio/slimaudio_decoder_vorbis.c,
+	  src/slimaudio/slimaudio_http.c, src/slimaudio/slimaudio_output.c,
+	  src/slimproto/slimproto.c, src/slimproto/slimproto.h,
+	  src/squeezeslave/interactive.c, src/squeezeslave/squeezeslave.c:
+	  Exploratory changes to determine cause of decoder blocking at end
+	  of data instead of advancing to next track via STMd.
+	  Initial testing shows read_buffer return not flagged eof when no
+	  more data is available.
+	  Additional DEBUG statements added to help track this down.
+	  Added -dall option to turn on all debug messages.
+	  Increased version to 58.
+
+2009-05-02 14:44  paddockd
+
+	* [r57] src/slimaudio/slimaudio.c, src/slimaudio/slimaudio.h,
+	  src/slimaudio/slimaudio_decoder_flac.c,
+	  src/slimaudio/slimaudio_decoder_mad.c,
+	  src/slimaudio/slimaudio_decoder_pcm.c,
+	  src/slimaudio/slimaudio_http.c, src/slimaudio/slimaudio_output.c,
+	  src/squeezeslave/help.c, src/squeezeslave/squeezeslave.c: Removed
+	  stream time calculation dependency on libportaudio.
+	  Added copyright notice to version display.
+	  Added set replaygain = 1.0 if replaygain <= 0.0.
+	  Increased version to 57.
+
+2009-05-02 11:20  paddockd
+
+	* [r56] makefile.linux24-display, src/slimaudio/slimaudio.c,
+	  src/slimaudio/slimaudio.h, src/slimaudio/slimaudio_buffer.c,
+	  src/slimaudio/slimaudio_decoder.c,
+	  src/slimaudio/slimaudio_decoder_flac.c,
+	  src/slimaudio/slimaudio_decoder_mad.c,
+	  src/slimaudio/slimaudio_decoder_pcm.c,
+	  src/slimaudio/slimaudio_decoder_vorbis.c,
+	  src/slimaudio/slimaudio_http.c, src/slimaudio/slimaudio_output.c,
+	  src/slimproto/slimproto.c, src/slimproto/slimproto.h,
+	  src/squeezeslave/help.c, src/squeezeslave/squeezeslave.c: Added
+	  first cut of replaygain handling.
+	  Limited keepalive generation to >= 6.5.0 and < 7.2.0.
+	  Modified volume gain to include right channel.
+	  Removed --oldplayer/-O option.
+
+2009-04-26 16:32  paddockd
+
+	* [r55] bin, lib/libportaudio/linux26/lib/libportaudio-debug.a,
+	  lib/libportaudio/linux26/lib/libportaudio-old.a,
+	  lib/libportaudio/win32, lib/libportaudio/win32/build,
+	  lib/libportaudio/win32/include,
+	  lib/libportaudio/win32/include/portaudio.h,
+	  lib/libportaudio/win32/lib,
+	  lib/libportaudio/win32/lib/libportaudio.a,
+	  makefile.mingw32pav19-debug, patches/build-portaudio.patch,
+	  src/squeezeslave/help.c, src/squeezeslave/squeezeslave.c: Added
+	  compile flags display to version flag -V.
+	  Added libportaudio v19 makefile for mingw (win32).
+	  Increased version to 55.
+
+2009-04-23 21:19  paddockd
+
+	* [r54] ChangeLog, src/squeezeslave/squeezeslave.c: Increased
+	  version to 54.
+	  Updated ChangeLog with final changes before beta release.
+
+2009-04-23 21:14  paddockd
+
+	* [r53] ChangeLog, src/slimaudio/slimaudio.c,
+	  src/slimaudio/slimaudio.h, src/slimaudio/slimaudio_http.c,
+	  src/slimaudio/slimaudio_output.c, src/slimproto/slimproto.c,
+	  src/slimproto/slimproto.h, src/squeezeslave/squeezeslave.c: Added
+	  output_threshold to audio structure and bytes calculation to
+	  slimaudio_http.c. Not currently used in decoder start.
+	  Commented out strm flush routines. Need more information on
+	  expected behaviour.
+	  Fixed missing VDEBUGF definition in slimaudio_output.c.
+	  Disabled SLIMAUDIO_BUFFER_STREAM_CONTINUE handling in pa_callback
+	  until I can determine how to rebuffer in http.
+	  Increased version to 53a.
+
+2009-04-22 11:52  paddockd
+
+	* [r52] ChangeLog, lib/libportaudio/linux26/lib/libportaudio.a,
+	  lib/portaudio/pa_win_ds/dsound_wrapper.c, makefile.mingw32,
+	  makefile.mingw32-debug, src/slimaudio/slimaudio.c,
+	  src/slimaudio/slimaudio.h, src/slimaudio/slimaudio_buffer.c,
+	  src/slimaudio/slimaudio_decoder.c,
+	  src/slimaudio/slimaudio_decoder_flac.c,
+	  src/slimaudio/slimaudio_decoder_mad.c,
+	  src/slimaudio/slimaudio_decoder_pcm.c,
+	  src/slimaudio/slimaudio_decoder_vorbis.c,
+	  src/slimaudio/slimaudio_http.c, src/slimaudio/slimaudio_output.c,
+	  src/slimproto/slimproto.c, src/squeezeslave/help.c,
+	  src/squeezeslave/squeezeslave.c: Moved debug variabled
+	  definitions inside SLIMPROTO_DEBUG definition.
+	  Fixed dsw_FramesPlayed being reset to 0 on StartOutput in
+	  lib/portaudio/pa_win_ds/dsound_wrapper.c by moving initialization
+	  into InitOutputBuffer. Status bar should track correctly now.
+	  Added slimaudio_output_v debugging flag.
+	  Increased version to 0.8-52.
+
+2009-04-19 22:26  paddockd
+
+	* [r51] ChangeLog,
+	  lib/libportaudio/linux24/build-portaudio-lnx24-alsa,
+	  lib/libportaudio/linux24/include/portaudio-old.h,
+	  lib/libportaudio/linux24/lib/libportaudio-debug-old.a,
+	  lib/libportaudio/linux24/lib/libportaudio-debug.a,
+	  lib/libportaudio/linux24/lib/libportaudio-old.a,
+	  lib/libportaudio/linux24/lib/libportaudio.a,
+	  makefile.linux24-alsa-display,
+	  sources/pa_snapshot-20081026.tar.gz,
+	  sources/pa_snapshot-20090419.tar.gz, sources/pa_snapshot.tar.gz,
+	  src/squeezeslave/squeezeslave.c, src/squeezeslave/squeezeslave.h:
+	  Updated libportaudio to 20090419 snapshot for linux 2.4.
+	  Added linux24-alsa-display makefile.
+	  ALSA libportaudio Pa_GetStreamTime timeProgressed continues to
+	  increment when paused. This in turn causes the stream time
+	  counter to increment when paused. Only affects ALSA versions.
+	  Windows, OSX and OSS work as expected. Investigating.
+
+2009-04-18 22:00  paddockd
+
+	* [r50] ChangeLog, makefile.cygwin, makefile.linux24,
+	  makefile.linux24-alsa, makefile.linux24-debug,
+	  makefile.linux24-display, makefile.linux24-i586,
+	  makefile.linux24-i586-display, makefile.linux26,
+	  makefile.linux26-alsa, makefile.linux26-alsa-display,
+	  makefile.linux26-debug, makefile.linux26-display,
+	  makefile.mingw32, makefile.mingw32-debug, makefile.osx,
+	  makefile.osxintel, makefile.s10intel, makefile.s10intel-debug,
+	  makefile.s9sparc, makefile.s9sparc-debug,
+	  src/slimaudio/slimaudio.c, src/slimaudio/slimaudio.h,
+	  src/slimaudio/slimaudio_buffer.c,
+	  src/slimaudio/slimaudio_decoder.c,
+	  src/slimaudio/slimaudio_http.c, src/slimaudio/slimaudio_output.c,
+	  src/slimproto/slimproto.c, src/squeezeslave/daemonize.c,
+	  src/squeezeslave/help.c, src/squeezeslave/interactive.c,
+	  src/squeezeslave/squeezeslave.c, src/squeezeslave/squeezeslave.h:
+	  Refactored DEBUGL into DEBUGF. -Y option now redirects stderr to
+	  filename specified.
+	  Moved Daemonize code into separate file
+	  src/squeezeslave/daemonize.c
+	  Moved Interactive code into separate file
+	  src/squeezeslave/interactive.c
+	  Moved support functions into src/squeezeslave/help.c
+	  Added STMo output buffer underflow status.
+	  Removed previous fix for audio buffer flush leaving a bit behind.
+	  Progress bar status reset to zero after pause fixed. This applies
+	  to squeezeslave on screen and lcd display as well. The
+	  squeezecenter_squeezeslave_player3-7.4.patch code changes have
+	  been applied to svn 7.4r25816. Please test if you have an
+	  external LCD display and the on screen as well.
+
+2009-04-13 20:39  paddockd
+
+	* [r49] src/slimaudio/slimaudio.c, src/slimaudio/slimaudio.h,
+	  src/slimaudio/slimaudio_buffer.c,
+	  src/slimaudio/slimaudio_output.c,
+	  src/squeezeslave/squeezeslave.c: Increased decoder buffer size
+	  from 1M to 3M.
+	  Changed various DEBUGL statements for better debug info.
+
+2009-04-13 12:07  paddockd
+
+	* [r48] ChangeLog, src/slimaudio/slimaudio.c,
+	  src/slimaudio/slimaudio_buffer.c,
+	  src/slimaudio/slimaudio_buffer.h,
+	  src/slimaudio/slimaudio_decoder.c,
+	  src/slimaudio/slimaudio_http.c, src/slimaudio/slimaudio_output.c,
+	  src/slimproto/slimproto.c, src/squeezeslave/squeezeslave.c: Added
+	  logging to file instead of stderr -Y option.
+	  Added BUFFER_BLOCKING to audio output thread STOPPED state.
+
+2009-04-10 21:20  paddockd
+
+	* [r47] ChangeLog, TODO, lib/getopt/getopt.c,
+	  lib/portaudio/pa_win_ds/pa_dsound.c, src/slimaudio/slimaudio.c,
+	  src/slimaudio/slimaudio.h, src/slimaudio/slimaudio_output.c,
+	  src/squeezeslave/squeezeslave.c: Removed STAT debugging code.
+	  Fixed several compiler warnings for WIN32.
+	  Changed returned msec in slimaudio_output_streamtime from int to
+	  u32_t.
+
+2009-04-10 19:56  paddockd
+
+	* [r46] makefile.linux24-display, src/slimaudio/slimaudio.c,
+	  src/slimaudio/slimaudio.h, src/slimproto/slimproto.c,
+	  src/slimproto/slimproto.h: Fixed high/low received bytes counters
+	  for STAT.
+	  Added server_timestamp reporting to STAT.
+	  Modified slimproto_set_jiffies to return timestamp.
+
+2009-04-09 19:54  paddockd
+
+	* [r45] ChangeLog, TODO, makefile.linux24-display,
+	  patches/squeezecenter_squeezeslave_player3-7.4.patch,
+	  src/slimaudio/slimaudio.c, src/slimaudio/slimaudio.h,
+	  src/slimaudio/slimaudio_decoder_mad.c,
+	  src/slimaudio/slimaudio_output.c, src/slimproto/slimproto.c,
+	  src/slimproto/slimproto.h, src/squeezeslave/squeezeslave.c:
+	  Initial fix for controller/website play bar status resettings if
+	  stream paused/unpaused.
+	  Initial fix for squeezeslave not stopping at end of last track.
+	  Needs more testing.
+	  Added decoder tracks played to status message. Need to test if
+	  this fixes scrobbling with lastfm only submitting first track.
+
+2009-03-25 12:24  paddockd
+
+	* [r41] ChangeLog, SqueezeSlave.wiki, TODO,
+	  patches/squeezecenter_squeezeslave_player2-7.2.patch,
+	  src/squeezeslave/squeezeslave.c: Added 7.2 version of
+	  squeezecenter player patch.
+	  Updates to slimdevices wiki.
+	  Increased version to 41.
+
+2009-03-14 11:14  paddockd
+
+	* [r38] ChangeLog, SqueezeSlave.wiki, makefile.linux26-display,
+	  patches/squeezecenter_squeezeslave_player-7.3.patch,
+	  patches/squeezecenter_squeezeslave_player2-7.3.patch,
+	  src/squeezeslave/squeezeslave.c: New linux26 OSS and display
+	  makefile.
+	  Added Slim Devices Wiki content for SqueezeSlave.
+	  Added patches submitted with BUG-11330 to support player changes;
+	  display, bit rate limit bug and replay gain fix.
+
+2009-03-11 11:57  paddockd
+
+	* [r33] ChangeLog, src/squeezeslave/squeezeslave.c: Bring
+	  squeezeslave version in line with playertype changes.
+
+2009-03-07 22:06  paddockd
+
+	* [r29] ChangeLog, ReleaseNotes, makefile.linux24-debug,
+	  makefile.s9sparc-debug, src/squeezeslave/squeezeslave.c: Updated
+	  damonize feature to pass logfile on command line. No longer
+	  writes to /var/log by default. Changed to allow non-root users to
+	  run in daemon mode.
+	  Fixed Solaris compile of daemonize option.
+
+2009-03-01 13:30  paddockd
+
+	* [r28] ChangeLog, ReleaseNotes, TODO, config/squeezeslave.plist,
+	  makefile.osx, makefile.osxintel, src/squeezeslave/squeezeslave.c:
+	  Integrated Ivor Bosloper's support to startup as a daemon by
+	  defining DAEMONIZE at compile time.
+	  Added compile time checks to fail if DAEMONIZE is defined with
+	  INTERACTIVE or __WIN32__.
+	  Added makefile.osxintel with build comments inline. Thanks to
+	  Luke Redpath.
+	  Added squeezeslave.plist for OSX to install squeezeslave as a
+	  service at startup. Thanks to Luke Redpath.
+	  Added TODO list containing outstanding issues to be addressed.
+
+2009-02-05 18:47  paddockd
+
+	* [r26] .lircrc, ChangeLog, ReleaseNotes, config/.lircrc,
+	  config/dot-asoundrc, config/dot-lircrc,
+	  config/squeezeslave.init.rh52, patches/daemonize.patch,
+	  src/squeezeslave/squeezeslave.c: Added -e/--playerid options.
+	  Daemonize patch NOT applied.
+
+2009-01-17 12:44  paddockd
+
+	* [r25] ChangeLog, lib/portaudio/pa_unix_oss/pa_unix_oss.c,
+	  src/slimaudio/slimaudio_output.c,
+	  src/squeezeslave/squeezeslave.c: Added fix from ivy for portaudio
+	  v19 (alsa) Pa_GetStreamTime.
+	  Added fix for Pa_StreamTime for portaudio v18.1 (unix_oss).
+	  Added obsolete comment to help for SIGNAL option.
+	  Increased version to 25.
+
+2008-12-21 15:18  paddockd
+
+	* [r24] ChangeLog,
+	  lib/libportaudio/linux24/lib/libportaudio-debug.a,
+	  lib/portaudio/pa_win_ds/pa_dsound.c, makefile.linux24-alsa,
+	  makefile.linux24-display, makefile.linux24-i586-display,
+	  src/squeezeslave/squeezeslave.c: Removed
+	  -DUSE_SIGNALS_FOR_RESTART from linux24 makefiles.
+	  Redirected more messages to stderr.
+	  Added 5 second timeout to INTERACTIVE select to fix retry logic
+	  stall until a key was pressed.
+	  Removed PortAudio message output for pa_dsound.c.
+	  Removed libpopt references in makefiles.
+	  Added debug version of libportaudio for linux24 alsa builds.
+	  Increased version to 24.
+
+2008-12-02 12:11  paddockd
+
+	* [r23] ChangeLog, makefile.linux24-display,
+	  makefile.linux24-i586-display, src/squeezeslave/squeezeslave.c:
+	  Added , key for rewind.
+	  Added . key for forward to remove need for shift key use.
+	  Added linux24 display makefile without alsa.
+	  Increased version to 23.
+
+2008-11-19 13:28  paddockd
+
+	* [r22] .lircrc, ChangeLog, ReleaseNotes, config, config/.lircrc,
+	  makefile.linux26-alsa-display,
+	  patches/squeezecenter_var_size_display.patch,
+	  patches/squeezeslave-display.patch, src/slimproto/slimproto.c,
+	  src/squeezeslave/squeezeslave.c: Added Graham's display changes
+	  to repository.
+
+2008-11-19 12:17  paddockd
+
+	* [r21] ChangeLog, lib/popt, lib/popt/build-popt-linux24,
+	  lib/popt/build-popt-s9, lib/popt/linux24,
+	  lib/popt/linux24/include, lib/popt/linux24/include/popt.h,
+	  lib/popt/linux24/lib, lib/popt/linux24/lib/libpopt.a,
+	  lib/popt/s9sparc, lib/popt/s9sparc/include,
+	  lib/popt/s9sparc/include/popt.h, lib/popt/s9sparc/lib,
+	  lib/popt/s9sparc/lib/libpopt.a, makefile.linux24,
+	  makefile.linux24-alsa, sources/pa_snapshot.tar.gz,
+	  sources/popt-1.14.tar.gz, src/slimaudio/slimaudio_output.c,
+	  src/squeezeslave/squeezeslave.c: Initial setup for popt command
+	  line processing. Library build testing only.
+	  Changed portaudio v19 latency from low to high for alsa version
+	  only.
+	  Removed unknown option case '?' from args process. Made it worse.
+	  Increased version to 21.
+
+2008-11-03 12:49  paddockd
+
+	* [r20] ChangeLog, makefile.linux26-alsa, makefile.linux26-debug,
+	  src/slimaudio/slimaudio.h, src/squeezeslave/squeezeslave.c:
+	  Increased decoder and audio buffers by ~50%.
+	  Help message updates.
+	  First beta linux alsa version.
+	  Increased version to 20.
+
+2008-10-30 20:20  paddockd
+
+	* [r19] ChangeLog, makefile.linux26-alsa,
+	  src/squeezeslave/squeezeslave.c: Fixed retry option command line
+	  parsing.
+	  Added use of local getopt library.
+	  Increased version to 19.
+
+2008-10-30 01:25  paddockd
+
+	* [r18] makefile.linux26-alsa, src/slimaudio/slimaudio.h,
+	  src/slimaudio/slimaudio_output.c,
+	  src/squeezeslave/squeezeslave.c: Increased both the decoder and
+	  audio buffer sizes for portaudio v19.
+	  Flac, Ogg and Pcm appear to be working.
+	  getopt functionality is still broken.
+
+2008-10-28 11:31  paddockd
+
+	* [r17] ChangeLog, lib/libportaudio, lib/libportaudio/linux24,
+	  lib/libportaudio/linux24/include,
+	  lib/libportaudio/linux24/include/portaudio.h,
+	  lib/libportaudio/linux24/lib,
+	  lib/libportaudio/linux24/lib/libportaudio.a,
+	  lib/libportaudio/linux26,
+	  lib/libportaudio/linux26/build-portaudio-lnx26-alsa,
+	  lib/libportaudio/linux26/include,
+	  lib/libportaudio/linux26/include/portaudio.h,
+	  lib/libportaudio/linux26/lib,
+	  lib/libportaudio/linux26/lib/libportaudio.a,
+	  lib/portmixer/px_none/px_none.c, makefile.linux24-alsa,
+	  makefile.linux26-alsa, src/slimaudio/slimaudio.h,
+	  src/slimaudio/slimaudio_output.c,
+	  src/squeezeslave/squeezeslave.c: First cut of alsa support for
+	  linux using portaudio v19 snapshot 20080513.
+	  Added linux 2.4 and 2.6 static libraries and new makefiles.
+	  mp3 playback works, all other formats transition from play to
+	  stop.
+	  Appears to be related to buffering. Investigating.
+	  Revision 17.
+
+2008-10-26 09:10  paddockd
+
+	* [r16] makefile.linux26, makefile.linux26-debug,
+	  src/squeezeslave/squeezeslave.c: Removed
+	  -DGETOPT_SUPPORTS_OPTIONAL build option from linux26 makefiles.
+	  Added missing octet in mac address example in help message, only
+	  had 5.
+	  Changed --retry/-r <sec> help message. Interval NOT optional with
+	  -r.
+	  Increased version to 16.
+
+2008-10-25 13:43  paddockd
+
+	* [r15] ChangeLog, ReleaseNotes, lib/flac/build-flac-cygwin,
+	  lib/libmad/build-mad-cygwin, lib/libmad/build-mad-win32,
+	  lib/vorbis/build-ogg-cygwin, lib/vorbis/build-vorbis-cygwin,
+	  patches/gettimeofday.patch, patches/portaudioV19_3.patch,
+	  patches/px_none.patch, patches/slimaudio_http_open.patch,
+	  patches/squeezeslave-solaris.patch,
+	  patches/squeezeslave-win32.patch, patches/volumedefaultoff.patch,
+	  sources, sources/dxsdk200512.tar.bz2,
+	  sources/dxsdk200704.tar.bz2, sources/flac-1.2.1-devel-win.zip,
+	  sources/flac-1.2.1.tar.bz2, sources/libmad-0.15.1b.tar.bz2,
+	  sources/libogg-1.1.3.tar.bz2, sources/libvorbis-1.1.2.tar.bz2,
+	  sources/portaudio_v18_1.zip: Added source files for libraries
+	  used.
+	  Added library build scripts.
+	  Added more obsolete patches.
+
+2008-10-23 21:14  paddockd
+
+	* [r12] ChangeLog, makefile.linux24, makefile.linux24-debug,
+	  makefile.linux24-i586, makefile.linux26-debug, makefile.s10intel,
+	  patches, patches/flaac.patch, patches/pa19segfault.patch,
+	  patches/portaudiov19.patch, patches/retry.patch,
+	  patches/sc7.patch, patches/version.patch,
+	  src/squeezeslave/squeezeslave.c: Updated version to 12.
+	  Added old patches against svn.slimdevices.com so they don't get
+	  lost.
+	  Added debug makefiles for linux.
+	  Added pentium MMX makefile for linux 2.4.
+
+2008-10-23 12:36  paddockd
+
+	* [r11] ChangeLog, lib/flac/build-flac-solaris10, lib/flac/solaris,
+	  lib/flac/solaris/include, lib/flac/solaris/include/FLAC,
+	  lib/flac/solaris/include/FLAC/all.h,
+	  lib/flac/solaris/include/FLAC/assert.h,
+	  lib/flac/solaris/include/FLAC/callback.h,
+	  lib/flac/solaris/include/FLAC/export.h,
+	  lib/flac/solaris/include/FLAC/format.h,
+	  lib/flac/solaris/include/FLAC/metadata.h,
+	  lib/flac/solaris/include/FLAC/ordinals.h,
+	  lib/flac/solaris/include/FLAC/stream_decoder.h,
+	  lib/flac/solaris/include/FLAC/stream_encoder.h,
+	  lib/flac/solaris/lib, lib/flac/solaris/lib/libFLAC.a,
+	  lib/libmad/build-mad-solaris, lib/libmad/solaris,
+	  lib/libmad/solaris/libmad.a, lib/libmad/solaris/mad.h,
+	  lib/libmad/solaris/stdbool.h, lib/vorbis/build-ogg-solaris,
+	  lib/vorbis/build-vorbis-solaris, lib/vorbis/solaris,
+	  lib/vorbis/solaris/include, lib/vorbis/solaris/include/ogg,
+	  lib/vorbis/solaris/include/ogg/config_types.h,
+	  lib/vorbis/solaris/include/ogg/ogg.h,
+	  lib/vorbis/solaris/include/ogg/os_types.h,
+	  lib/vorbis/solaris/include/vorbis,
+	  lib/vorbis/solaris/include/vorbis/codec.h,
+	  lib/vorbis/solaris/include/vorbis/vorbisenc.h,
+	  lib/vorbis/solaris/include/vorbis/vorbisfile.h,
+	  lib/vorbis/solaris/lib, lib/vorbis/solaris/lib/libogg.a,
+	  lib/vorbis/solaris/lib/libvorbis.a,
+	  lib/vorbis/solaris/lib/libvorbisfile.a, makefile.linux24,
+	  makefile.linux26, makefile.s10intel, makefile.s10intel-debug,
+	  makefile.s9sparc, makefile.s9sparc-debug,
+	  src/squeezeslave/squeezeslave.c: Added Solaris 10 intel build
+	  files.
+	  Increased version to 11.
+	  Added -s -g flags to binary build lines in makefiles.
+
+2008-10-22 13:12  paddockd
+
+	* [r10] src/squeezeslave/squeezeslave.c: Used #define for default
+	  retry connection value.
+
+2008-10-22 12:07  paddockd
+
+	* [r9] makefile.cygwin, makefile.osx,
+	  src/squeezeslave/squeezeslave.c: Added OSX makefile. Not tested,
+	  no MAC.
+	  Added less than 1 check to retry interval and reset to default of
+	  5.
+	  Increased version to 9
+
+2008-10-22 11:29  paddockd
+
+	* [r8] src/slimaudio/slimaudio_decoder_mad.c,
+	  src/slimaudio/slimaudio_decoder_vorbis.c,
+	  src/squeezeslave/squeezeslave.c: Fixed endian problem with
+	  ogg/vorbis decoding for Solaris SPARC and MacOSX.
+	  Fixed various typos in comments and error messages.
+	  Changed default volume driver to software as this was the
+	  effective default due to the volume_control variable initially
+	  defined as bool and the value of the VOLUME_DRIVER enum being 2,
+	  so volume_control was being set to 1 which is the actual value of
+	  the VOLUME_SOFTWARE enumerated type.
+
+2008-10-17 18:04  paddockd
+
+	* [r7] makefile.mingw32, src/squeezeslave/squeezeslave.c: Updated
+	  version.
+	  Reverted mingw32 makefile to use external dlls
+
+2008-10-17 17:40  paddockd
+
+	* [r6] bin/pthreadGC2.dll, makefile.cygwin, makefile.linux24,
+	  makefile.mingw32, src/slimaudio/slimaudio_decoder_flac.c,
+	  src/slimaudio/slimaudio_decoder_mad.c,
+	  src/slimaudio/slimaudio_output.c: Modified libmad and libflac
+	  decoder error routines to include errno in message.
+	  Removed dll from bin directory.
+	  Updated makefiles.
+
+2008-10-16 21:51  paddockd
+
+	* [r5] bin/pthreadGC2.dll, lib/dx, lib/dx/include,
+	  lib/dx/include/D3D10.h, lib/dx/include/D3D10effect.h,
+	  lib/dx/include/D3D10shader.h, lib/dx/include/D3DX10.h,
+	  lib/dx/include/D3DX10core.h, lib/dx/include/D3DX10math.h,
+	  lib/dx/include/D3DX10math.inl, lib/dx/include/D3DX10mesh.h,
+	  lib/dx/include/D3DX10tex.h, lib/dx/include/DXGI.h,
+	  lib/dx/include/DXGIType.h, lib/dx/include/DxErr.h,
+	  lib/dx/include/PIXPlugin.h, lib/dx/include/X3DAudio.h,
+	  lib/dx/include/XInput.h, lib/dx/include/comdecl.h,
+	  lib/dx/include/d3d.h, lib/dx/include/d3d10misc.h,
+	  lib/dx/include/d3d10sdklayers.h, lib/dx/include/d3d8.h,
+	  lib/dx/include/d3d8caps.h, lib/dx/include/d3d8types.h,
+	  lib/dx/include/d3d9.h, lib/dx/include/d3d9caps.h,
+	  lib/dx/include/d3d9types.h, lib/dx/include/d3dcaps.h,
+	  lib/dx/include/d3drm.h, lib/dx/include/d3drmdef.h,
+	  lib/dx/include/d3drmobj.h, lib/dx/include/d3drmwin.h,
+	  lib/dx/include/d3dtypes.h, lib/dx/include/d3dvec.inl,
+	  lib/dx/include/d3dx10async.h, lib/dx/include/d3dx9.h,
+	  lib/dx/include/d3dx9anim.h, lib/dx/include/d3dx9core.h,
+	  lib/dx/include/d3dx9effect.h, lib/dx/include/d3dx9math.h,
+	  lib/dx/include/d3dx9math.inl, lib/dx/include/d3dx9mesh.h,
+	  lib/dx/include/d3dx9shader.h, lib/dx/include/d3dx9shape.h,
+	  lib/dx/include/d3dx9tex.h, lib/dx/include/d3dx9xof.h,
+	  lib/dx/include/ddraw.h, lib/dx/include/dinput.h,
+	  lib/dx/include/dinputd.h, lib/dx/include/dls1.h,
+	  lib/dx/include/dls2.h, lib/dx/include/dmdls.h,
+	  lib/dx/include/dmerror.h, lib/dx/include/dmksctrl.h,
+	  lib/dx/include/dmplugin.h, lib/dx/include/dmusbuff.h,
+	  lib/dx/include/dmusicc.h, lib/dx/include/dmusicf.h,
+	  lib/dx/include/dmusici.h, lib/dx/include/dmusics.h,
+	  lib/dx/include/dpaddr.h, lib/dx/include/dplay.h,
+	  lib/dx/include/dplay8.h, lib/dx/include/dplobby.h,
+	  lib/dx/include/dplobby8.h, lib/dx/include/dpnathlp.h,
+	  lib/dx/include/dsconf.h, lib/dx/include/dsetup.h,
+	  lib/dx/include/dsound.h, lib/dx/include/dvoice.h,
+	  lib/dx/include/dvp.h, lib/dx/include/dx7todx8.h,
+	  lib/dx/include/dxdiag.h, lib/dx/include/dxerr8.h,
+	  lib/dx/include/dxerr9.h, lib/dx/include/dxfile.h,
+	  lib/dx/include/dxsdkver.h, lib/dx/include/dxtrans.h,
+	  lib/dx/include/gameux.h, lib/dx/include/multimon.h,
+	  lib/dx/include/rmxfguid.h, lib/dx/include/rmxftmpl.h,
+	  lib/dx/include/rpcsal.h, lib/dx/include/strsafe.h,
+	  lib/dx/include/xact.h, lib/dx/include/xact2wb.h,
+	  lib/dx/include/xact3d.h, lib/dx/lib, lib/dx/lib/DxErr.lib,
+	  lib/dx/lib/DxErr8.lib, lib/dx/lib/DxErr9.lib,
+	  lib/dx/lib/X3DAudio.lib, lib/dx/lib/XInput.lib,
+	  lib/dx/lib/d3d10.lib, lib/dx/lib/d3d8.lib, lib/dx/lib/d3d9.lib,
+	  lib/dx/lib/d3dx10.lib, lib/dx/lib/d3dx10d.lib,
+	  lib/dx/lib/d3dx9.lib, lib/dx/lib/d3dx9d.lib,
+	  lib/dx/lib/d3dxof.lib, lib/dx/lib/ddraw.lib,
+	  lib/dx/lib/dinput.lib, lib/dx/lib/dinput8.lib,
+	  lib/dx/lib/dplayx.lib, lib/dx/lib/dsetup.lib,
+	  lib/dx/lib/dsound.lib, lib/dx/lib/dxgi.lib,
+	  lib/dx/lib/dxguid.lib, lib/dx/lib/dxtrans.lib, lib/flac,
+	  lib/flac/cygwin, lib/flac/cygwin/include,
+	  lib/flac/cygwin/include/FLAC, lib/flac/cygwin/include/FLAC/all.h,
+	  lib/flac/cygwin/include/FLAC/assert.h,
+	  lib/flac/cygwin/include/FLAC/callback.h,
+	  lib/flac/cygwin/include/FLAC/export.h,
+	  lib/flac/cygwin/include/FLAC/format.h,
+	  lib/flac/cygwin/include/FLAC/metadata.h,
+	  lib/flac/cygwin/include/FLAC/ordinals.h,
+	  lib/flac/cygwin/include/FLAC/stream_decoder.h,
+	  lib/flac/cygwin/include/FLAC/stream_encoder.h,
+	  lib/flac/cygwin/lib, lib/flac/cygwin/lib/libFLAC-debug.a,
+	  lib/flac/cygwin/lib/libFLAC-ndebug.a,
+	  lib/flac/cygwin/lib/libFLAC.a, lib/flac/s9sparc,
+	  lib/flac/s9sparc/include, lib/flac/s9sparc/include/FLAC,
+	  lib/flac/s9sparc/include/FLAC/all.h,
+	  lib/flac/s9sparc/include/FLAC/callback.h,
+	  lib/flac/s9sparc/include/FLAC/export.h,
+	  lib/flac/s9sparc/include/FLAC/format.h,
+	  lib/flac/s9sparc/include/FLAC/metadata.h,
+	  lib/flac/s9sparc/include/FLAC/ordinals.h,
+	  lib/flac/s9sparc/include/FLAC/stream_decoder.h,
+	  lib/flac/s9sparc/include/FLAC/stream_encoder.h,
+	  lib/flac/s9sparc/lib, lib/flac/s9sparc/lib/libFLAC.a,
+	  lib/flac/win32, lib/flac/win32/include,
+	  lib/flac/win32/include/FLAC, lib/flac/win32/include/FLAC++,
+	  lib/flac/win32/include/FLAC++/all.h,
+	  lib/flac/win32/include/FLAC++/decoder.h,
+	  lib/flac/win32/include/FLAC++/encoder.h,
+	  lib/flac/win32/include/FLAC++/export.h,
+	  lib/flac/win32/include/FLAC++/metadata.h,
+	  lib/flac/win32/include/FLAC/all.h,
+	  lib/flac/win32/include/FLAC/assert.h,
+	  lib/flac/win32/include/FLAC/callback.h,
+	  lib/flac/win32/include/FLAC/export.h,
+	  lib/flac/win32/include/FLAC/format.h,
+	  lib/flac/win32/include/FLAC/metadata.h,
+	  lib/flac/win32/include/FLAC/ordinals.h,
+	  lib/flac/win32/include/FLAC/stream_decoder.h,
+	  lib/flac/win32/include/FLAC/stream_encoder.h,
+	  lib/flac/win32/include/ogg, lib/flac/win32/include/ogg/ogg.h,
+	  lib/flac/win32/include/ogg/os_types.h, lib/flac/win32/lib,
+	  lib/flac/win32/lib/libFLAC++.dll,
+	  lib/flac/win32/lib/libFLAC++.exp,
+	  lib/flac/win32/lib/libFLAC++.lib,
+	  lib/flac/win32/lib/libFLAC++_static.lib,
+	  lib/flac/win32/lib/libFLAC.dll, lib/flac/win32/lib/libFLAC.exp,
+	  lib/flac/win32/lib/libFLAC.lib,
+	  lib/flac/win32/lib/libFLAC_static.lib,
+	  lib/flac/win32/lib/ogg_static.lib, lib/libmad, lib/libmad/cygwin,
+	  lib/libmad/cygwin/libmad-debug.a,
+	  lib/libmad/cygwin/libmad-ndebug.a, lib/libmad/cygwin/libmad.a,
+	  lib/libmad/cygwin/mad.h, lib/libmad/s9sparc,
+	  lib/libmad/s9sparc/libmad-sparc.a, lib/libmad/s9sparc/libmad.a,
+	  lib/libmad/s9sparc/libmads9.a, lib/libmad/s9sparc/mad.h,
+	  lib/libmad/s9sparc/stdbool.h, lib/libmad/win32,
+	  lib/libmad/win32/libmad-intel.a, lib/libmad/win32/libmad.a,
+	  lib/libmad/win32/mad.h, lib/portaudio/pa_win_ds/pa_dsound.c,
+	  lib/pthread, lib/pthread/win32, lib/pthread/win32/include,
+	  lib/pthread/win32/include/pthread.h,
+	  lib/pthread/win32/include/sched.h,
+	  lib/pthread/win32/include/semaphore.h, lib/pthread/win32/lib,
+	  lib/pthread/win32/lib/pthreadGC2.dll,
+	  lib/pthread/win32/lib/static-libpthreadGC2.a, lib/vorbis,
+	  lib/vorbis/cygwin, lib/vorbis/cygwin/include,
+	  lib/vorbis/cygwin/include/ogg,
+	  lib/vorbis/cygwin/include/ogg/config_types.h,
+	  lib/vorbis/cygwin/include/ogg/ogg.h,
+	  lib/vorbis/cygwin/include/ogg/os_types.h,
+	  lib/vorbis/cygwin/include/vorbis,
+	  lib/vorbis/cygwin/include/vorbis/codec.h,
+	  lib/vorbis/cygwin/include/vorbis/vorbisenc.h,
+	  lib/vorbis/cygwin/include/vorbis/vorbisfile.h,
+	  lib/vorbis/cygwin/lib, lib/vorbis/cygwin/lib/libogg-debug.a,
+	  lib/vorbis/cygwin/lib/libogg-ndebug.a,
+	  lib/vorbis/cygwin/lib/libogg.a,
+	  lib/vorbis/cygwin/lib/libvorbis-debug.a,
+	  lib/vorbis/cygwin/lib/libvorbis-ndebug.a,
+	  lib/vorbis/cygwin/lib/libvorbis.a,
+	  lib/vorbis/cygwin/lib/libvorbisfile-debug.a,
+	  lib/vorbis/cygwin/lib/libvorbisfile-ndebug.a,
+	  lib/vorbis/cygwin/lib/libvorbisfile.a, lib/vorbis/s9sparc,
+	  lib/vorbis/s9sparc/include, lib/vorbis/s9sparc/include/ogg,
+	  lib/vorbis/s9sparc/include/ogg/config_types.h,
+	  lib/vorbis/s9sparc/include/ogg/ogg.h,
+	  lib/vorbis/s9sparc/include/ogg/os_types.h,
+	  lib/vorbis/s9sparc/include/vorbis,
+	  lib/vorbis/s9sparc/include/vorbis/codec.h,
+	  lib/vorbis/s9sparc/include/vorbis/vorbisenc.h,
+	  lib/vorbis/s9sparc/include/vorbis/vorbisfile.h,
+	  lib/vorbis/s9sparc/lib, lib/vorbis/s9sparc/lib/libogg.a,
+	  lib/vorbis/s9sparc/lib/libvorbis.a,
+	  lib/vorbis/s9sparc/lib/libvorbisenc.a,
+	  lib/vorbis/s9sparc/lib/libvorbisfile.a, lib/vorbis/win32,
+	  lib/vorbis/win32/include, lib/vorbis/win32/include/ogg,
+	  lib/vorbis/win32/include/ogg/config_types.h,
+	  lib/vorbis/win32/include/ogg/ogg.h,
+	  lib/vorbis/win32/include/ogg/os_types.h,
+	  lib/vorbis/win32/include/vorbis,
+	  lib/vorbis/win32/include/vorbis/codec.h,
+	  lib/vorbis/win32/include/vorbis/vorbisenc.h,
+	  lib/vorbis/win32/include/vorbis/vorbisfile.h,
+	  lib/vorbis/win32/lib, lib/vorbis/win32/lib/libogg.a,
+	  lib/vorbis/win32/lib/libvorbis.a,
+	  lib/vorbis/win32/lib/libvorbisfile.a, makefile.cygwin,
+	  makefile.linux24, makefile.linux26, makefile.mingw32,
+	  makefile.s9sparc, src/slimaudio/slimaudio_output.c,
+	  src/slimproto/slimproto.c, src/squeezeslave/squeezeslave.c: Added
+	  Solaris 9 SPARC files.
+	  Added Windows MINGW32 files.
+	  Added Windows CYGWIN files.
+	  CYGWIN version not complete. slimaudio_output thread spins.
+	  Added define GETOPT_SUPPORTS_OPTIONAL to workaround bug in older
+	  getopts.
+	  Fixed spelling errors.
+
+2008-10-08 16:21  paddockd
+
+	* [r4] bin: Added bin directory.
+
+2008-10-08 12:29  paddockd
+
+	* [r3] lib, lib/getopt, lib/getopt/getopt.c, lib/getopt/getopt.h,
+	  lib/getopt/getopt1.c, lib/portaudio, lib/portaudio/LICENSE.txt,
+	  lib/portaudio/Makefile.in, lib/portaudio/Makefile.linux,
+	  lib/portaudio/Makefile.mingw, lib/portaudio/Makefile.solaris,
+	  lib/portaudio/README.txt, lib/portaudio/VERSION.txt,
+	  lib/portaudio/config.guess, lib/portaudio/config.sub,
+	  lib/portaudio/configure, lib/portaudio/configure.in,
+	  lib/portaudio/docs, lib/portaudio/docs/index.html,
+	  lib/portaudio/docs/latency.html,
+	  lib/portaudio/docs/pa_drivermodel.c.txt,
+	  lib/portaudio/docs/pa_drivermodel.h.txt,
+	  lib/portaudio/docs/pa_impl_guide.html,
+	  lib/portaudio/docs/pa_impl_startstop.html,
+	  lib/portaudio/docs/pa_tut_asio.html,
+	  lib/portaudio/docs/pa_tut_callback.html,
+	  lib/portaudio/docs/pa_tut_devs.html,
+	  lib/portaudio/docs/pa_tut_explore.html,
+	  lib/portaudio/docs/pa_tut_init.html,
+	  lib/portaudio/docs/pa_tut_mac.html,
+	  lib/portaudio/docs/pa_tut_mac_osx.html,
+	  lib/portaudio/docs/pa_tut_open.html,
+	  lib/portaudio/docs/pa_tut_oss.html,
+	  lib/portaudio/docs/pa_tut_over.html,
+	  lib/portaudio/docs/pa_tut_pc.html,
+	  lib/portaudio/docs/pa_tut_run.html,
+	  lib/portaudio/docs/pa_tut_rw.html,
+	  lib/portaudio/docs/pa_tut_term.html,
+	  lib/portaudio/docs/pa_tut_util.html,
+	  lib/portaudio/docs/pa_tutorial.html,
+	  lib/portaudio/docs/portaudio_h.txt,
+	  lib/portaudio/docs/portaudio_icmc2001.pdf,
+	  lib/portaudio/docs/proposals.html,
+	  lib/portaudio/docs/releases.html, lib/portaudio/fixdir.bat,
+	  lib/portaudio/fixfile.bat, lib/portaudio/index.html,
+	  lib/portaudio/install-sh, lib/portaudio/pa_asio,
+	  lib/portaudio/pa_asio/Callback_adaptation_.pdf,
+	  lib/portaudio/pa_asio/Pa_ASIO.pdf,
+	  lib/portaudio/pa_asio/pa_asio.cpp,
+	  lib/portaudio/pa_asio/readme_asio_sdk_patch.txt,
+	  lib/portaudio/pa_beos, lib/portaudio/pa_beos/PlaybackNode.cc,
+	  lib/portaudio/pa_beos/PlaybackNode.h,
+	  lib/portaudio/pa_beos/pa_beos_mk.cc, lib/portaudio/pa_common,
+	  lib/portaudio/pa_common/pa_convert.c,
+	  lib/portaudio/pa_common/pa_host.h,
+	  lib/portaudio/pa_common/pa_lib.c,
+	  lib/portaudio/pa_common/pa_trace.c,
+	  lib/portaudio/pa_common/pa_trace.h,
+	  lib/portaudio/pa_common/portaudio.h, lib/portaudio/pa_dll_switch,
+	  lib/portaudio/pa_dll_switch/PaDllEntry.h,
+	  lib/portaudio/pa_dll_switch/letter_from_tim_010817.txt,
+	  lib/portaudio/pa_dll_switch/loadPA_DLL.cpp,
+	  lib/portaudio/pa_dll_switch/pa_lib.c,
+	  lib/portaudio/pa_dll_switch/portaudio.h, lib/portaudio/pa_mac,
+	  lib/portaudio/pa_mac/pa_mac.c, lib/portaudio/pa_mac_core,
+	  lib/portaudio/pa_mac_core/notes.txt,
+	  lib/portaudio/pa_mac_core/pa_mac_core.c, lib/portaudio/pa_sgi,
+	  lib/portaudio/pa_sgi/Makefile, lib/portaudio/pa_sgi/pa_sgi.c,
+	  lib/portaudio/pa_sgi/pthread-Makefile,
+	  lib/portaudio/pa_sgi/pthread-pa_sgi.c, lib/portaudio/pa_tests,
+	  lib/portaudio/pa_tests/debug_convert.c,
+	  lib/portaudio/pa_tests/debug_dither_calc.c,
+	  lib/portaudio/pa_tests/debug_dual.c,
+	  lib/portaudio/pa_tests/debug_multi_in.c,
+	  lib/portaudio/pa_tests/debug_multi_out.c,
+	  lib/portaudio/pa_tests/debug_record.c,
+	  lib/portaudio/pa_tests/debug_record_reuse.c,
+	  lib/portaudio/pa_tests/debug_sine.c,
+	  lib/portaudio/pa_tests/debug_sine_amp.c,
+	  lib/portaudio/pa_tests/debug_sine_formats.c,
+	  lib/portaudio/pa_tests/debug_sine_getchar.c,
+	  lib/portaudio/pa_tests/debug_srate.c,
+	  lib/portaudio/pa_tests/debug_test1.c,
+	  lib/portaudio/pa_tests/pa_devs.c,
+	  lib/portaudio/pa_tests/pa_fuzz.c,
+	  lib/portaudio/pa_tests/pa_minlat.c,
+	  lib/portaudio/pa_tests/paqa_devs.c,
+	  lib/portaudio/pa_tests/paqa_errs.c,
+	  lib/portaudio/pa_tests/patest1.c,
+	  lib/portaudio/pa_tests/patest_buffer.c,
+	  lib/portaudio/pa_tests/patest_clip.c,
+	  lib/portaudio/pa_tests/patest_dither.c,
+	  lib/portaudio/pa_tests/patest_hang.c,
+	  lib/portaudio/pa_tests/patest_latency.c,
+	  lib/portaudio/pa_tests/patest_leftright.c,
+	  lib/portaudio/pa_tests/patest_longsine.c,
+	  lib/portaudio/pa_tests/patest_many.c,
+	  lib/portaudio/pa_tests/patest_maxsines.c,
+	  lib/portaudio/pa_tests/patest_mono.c,
+	  lib/portaudio/pa_tests/patest_multi_sine.c,
+	  lib/portaudio/pa_tests/patest_pink.c,
+	  lib/portaudio/pa_tests/patest_record.c,
+	  lib/portaudio/pa_tests/patest_ringmix.c,
+	  lib/portaudio/pa_tests/patest_saw.c,
+	  lib/portaudio/pa_tests/patest_sine.c,
+	  lib/portaudio/pa_tests/patest_sine8.c,
+	  lib/portaudio/pa_tests/patest_sine_formats.c,
+	  lib/portaudio/pa_tests/patest_sine_time.c,
+	  lib/portaudio/pa_tests/patest_stop.c,
+	  lib/portaudio/pa_tests/patest_sync.c,
+	  lib/portaudio/pa_tests/patest_toomanysines.c,
+	  lib/portaudio/pa_tests/patest_two_rates.c,
+	  lib/portaudio/pa_tests/patest_underflow.c,
+	  lib/portaudio/pa_tests/patest_wire.c, lib/portaudio/pa_unix_oss,
+	  lib/portaudio/pa_unix_oss/Makefile,
+	  lib/portaudio/pa_unix_oss/Makefile_freebsd,
+	  lib/portaudio/pa_unix_oss/low_latency_tip.txt,
+	  lib/portaudio/pa_unix_oss/pa_unix.c,
+	  lib/portaudio/pa_unix_oss/pa_unix.h,
+	  lib/portaudio/pa_unix_oss/pa_unix_oss.c,
+	  lib/portaudio/pa_unix_oss/pa_unix_solaris.c,
+	  lib/portaudio/pa_unix_oss/recplay.c, lib/portaudio/pa_win_ds,
+	  lib/portaudio/pa_win_ds/dsound_wrapper.c,
+	  lib/portaudio/pa_win_ds/dsound_wrapper.h,
+	  lib/portaudio/pa_win_ds/pa_dsound.c,
+	  lib/portaudio/pa_win_ds/portaudio.def, lib/portaudio/pa_win_wmme,
+	  lib/portaudio/pa_win_wmme/Makefile.cygwin,
+	  lib/portaudio/pa_win_wmme/pa_win_wmme.c, lib/portaudio/pablio,
+	  lib/portaudio/pablio/README.txt, lib/portaudio/pablio/pablio.c,
+	  lib/portaudio/pablio/pablio.def, lib/portaudio/pablio/pablio.h,
+	  lib/portaudio/pablio/ringbuffer.c,
+	  lib/portaudio/pablio/ringbuffer.h,
+	  lib/portaudio/pablio/test_rw.c,
+	  lib/portaudio/pablio/test_rw_echo.c,
+	  lib/portaudio/pablio/test_w_saw.c,
+	  lib/portaudio/pablio/test_w_saw8.c, lib/portaudio/testcvs,
+	  lib/portaudio/testcvs/changeme.txt, lib/portmixer,
+	  lib/portmixer/LICENSE.txt, lib/portmixer/macproj,
+	  lib/portmixer/macproj/portmixer.mcp, lib/portmixer/px_common,
+	  lib/portmixer/px_common/portmixer.h, lib/portmixer/px_mac,
+	  lib/portmixer/px_mac/px_mac.c, lib/portmixer/px_mac_core,
+	  lib/portmixer/px_mac_core/Makefile,
+	  lib/portmixer/px_mac_core/px_mac_core.c, lib/portmixer/px_none,
+	  lib/portmixer/px_none/Makefile, lib/portmixer/px_none/px_none.c,
+	  lib/portmixer/px_tests, lib/portmixer/px_tests/Makefile,
+	  lib/portmixer/px_tests/Makefile.MacOSX,
+	  lib/portmixer/px_tests/px_test.c, lib/portmixer/px_unix_oss,
+	  lib/portmixer/px_unix_oss/Makefile,
+	  lib/portmixer/px_unix_oss/px_unix_oss.c, lib/portmixer/px_win_ds,
+	  lib/portmixer/px_win_ds/px_win_ds.c, lib/portmixer/px_win_wmme,
+	  lib/portmixer/px_win_wmme/Makefile,
+	  lib/portmixer/px_win_wmme/px_win_wmme.c, lib/portmixer/winproj,
+	  lib/portmixer/winproj/portmixer.dsp,
+	  lib/portmixer/winproj/portmixer.vcproj, makefile.linux24,
+	  makefile.linux26, src/slimaudio/slimaudio_decoder.c,
+	  src/slimaudio/slimaudio_decoder_flac.c,
+	  src/squeezeslave/squeezeslave.c: Added linux makefiles.
+	  Added lib/getopt.
+	  Added lib/portaudio (Version 18.1).
+	  Added lib/portmixer.
+	  Applied flaac.patch to slimaudio_decoder_flac.c to allow 64-bit
+	  linux compiles.
+	  Applied sc7.patch to slimaudio_decoder.c to fix skipping issue
+	  with SC 7+.
+	  Removed automatic define of USE_SIGNALS_FOR_RESTART if not WIN32
+	  in squeezeslave.c, must add define to appropriate Makefile.
+	  Modified version string to reflect export from slimdevices svn.
+	  Modified volume_control define from bool to use the enumerated
+	  type slimaudio_volume_t. Fixes issue with VOLUME_DRIVER always
+	  being disabled regardless of command line option.
+
+2008-10-06 14:42  paddockd
+
+	* [r2] ., LICENSE.txt, src, src/slimaudio,
+	  src/slimaudio/slimaudio.c, src/slimaudio/slimaudio.h,
+	  src/slimaudio/slimaudio_buffer.c,
+	  src/slimaudio/slimaudio_buffer.h,
+	  src/slimaudio/slimaudio_decoder.c,
+	  src/slimaudio/slimaudio_decoder_flac.c,
+	  src/slimaudio/slimaudio_decoder_mad.c,
+	  src/slimaudio/slimaudio_decoder_pcm.c,
+	  src/slimaudio/slimaudio_decoder_vorbis.c,
+	  src/slimaudio/slimaudio_http.c, src/slimaudio/slimaudio_output.c,
+	  src/slimproto, src/slimproto/slimproto.c,
+	  src/slimproto/slimproto.h, src/squeezeslave,
+	  src/squeezeslave/squeezeslave.c: Initial squeezeslave import
+	  r23425
+
