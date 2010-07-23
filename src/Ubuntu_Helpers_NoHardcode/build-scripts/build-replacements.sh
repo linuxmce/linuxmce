@@ -248,6 +248,9 @@ function Build_Replacements_Intrepid
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/libxine*.deb ${replacements_dir}
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/xineliboutput-*.deb ${replacements_dir}
 
+	# SqueezeSlave
+	Build_Replacement_Package squeezeslave ubuntu/squeezeslave
+
 
 	#Package: zaptel-modules
 	DisplayMessage "Building zaptel-modules"
