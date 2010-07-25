@@ -3,6 +3,8 @@ xine-lib (1.1.16.4-0ubuntu6-lmce) intrepid; urgency=low
   * vdpau extensions as of rev285
   * Backport of Matroska container support from xine-lib 1.1.18.1
   
+ -- LinuxMCE Developer <developers@linuxmce.org>  Sun, 25 Jul 2010 17:11:00 +0200
+
 xine-lib (1.1.16.4-0ubuntu6) karmic; urgency=low
 
   * Release for freeVDR (>=2.0e)
