@@ -1,4 +1,4 @@
-xine-lib (1.1.16.4-0ubuntu6-lmce) intrepid; urgency=low
+xine-lib (1.1.16.4-0ubuntu6-lmce-1) intrepid; urgency=low
   * Release for LinuxMCE0810
   * vdpau extensions as of rev285
   * Backport of Matroska container support from xine-lib 1.1.18.1
