@@ -272,6 +272,10 @@ function cellphoneNotifications($output,$dbADO) {
 		$ECDeviceData=join(',',$ECDeviceDataArray);
 		$dbADO->Execute('UPDATE Device_DeviceData SET IK_DeviceData=? WHERE FK_Device=? AND FK_DeviceData=?',array($ECDeviceData,$deviceID,$GLOBALS['EmergencyCalls']));
 		
+		# Run generate_users_voicemenu.pl so we update the phone system with the changes
+		$commandToSend='sudo -u root /usr/pluto/bin/generate_users_voicemenu.pl';
+		exec_batch_command($commandToSend);
+
 		header("Location: index.php?section=cellphoneNotifications&msg=$TEXT_CELLPHONE_NOTIFICATION_UPDATED_CONST");	
 		exit();	
 	}
