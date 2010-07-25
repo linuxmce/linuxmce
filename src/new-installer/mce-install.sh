@@ -3,10 +3,14 @@
 #echo > /var/log/messages
 #echo > /var/log/syslog
 #dhclient eth0
+
+
 ntpdate ntp.ubuntu.com
 
 . ./mce-install-common.sh
 
+# Find out, what nic configuration we have. This is needed for later on to fill the database
+# correctly.
 if [ ! -e /tmp/mce_wizard_data.sh ]
 then
 	if  [[ `ifconfig -s -a  | awk '$1 != "Iface" && $1 != "lo" && $1 != "pan0" { print $1 }' | wc -l` > 1 ]]
@@ -100,31 +104,81 @@ if [[ "$c_netExtKeep" != "true" ]] ;then
 	Setup_Network_Intefaces
 fi
 
+# Temporary NIS setup, disabling NIS server and client.
 Setup_NIS
 
 #trap 'RemoveOfflineSource' EXIT
 #Setup_Apt_Conffiles
 
+# Setup apt.conf.d for pluto, which allows unauthenticated packages and 
+# make sure to keep the old configuration file (without asking)
 Setup_Pluto_Apt_Conf
+
+# Pre-seed some answers into the dpkg database, like accepting the Java 
+# license, the ivtv license, and telling debconf to stay out of our way.
 ./mce-install-preseed.sh
 apt-get update
 
 #FakeUpdates
 
+# Define the default /etc/pluto.conf, with Mysql details, router port etc.
 Setup_Pluto_Conf
+
+# Setup the dcerouter package. Before that, mysql-server needs to installed, configuration
+# for mysql needs to be amended, the pluto-sample media package is being installed
+# as well as the video-wizard-videos (Sarah..)
+#
+# Installing the pluto-dcerouter package will autoinstall all the other requirements for 
+# the router, like:
+#  Depends: pluto-sample-media = contains some sample media, not really needed
+#           pluto-confirm-dependencies = installs needed packages for devices
+#           pluto-createdevice == creates devices based on device templates
+#           pluto-dcecommon == contains the DCE library
+#           pluto-dhcpd-plugin == contains engine which monitors the DHCP log for network pnp
+#           pluto-install-scripts == scripts for installing pluto (are they still needed)?
+#           pluto-local-database == sqlCVS dump coontaining alterations for the local pluto_main database
+#           pluto-messagesend == command line messagesend utility.
+#           pluto-newmdinteractor == needed to setup files for a new MediaDirector
+#           pluto-orbitergen == creates the bitmap files for the Orbiter
+#           pluto-orbiterinstaller == Contains the installer files for Window orbiters
+#           pluto-plutodhcp == Creates DHCP configuration file
+#           pluto-plutoutils == Helper libs for lots of pluto progs.
+#           pluto-pluto-main-db == pluto_main database dump from sqlCVS
+#           pluto-qos == Perl script setting up the firewall
+#           pluto-remoteassistance == Remote assistance package (not working atm)
+#           pluto-serializeclass == lib to serialize data
+#           pluto-skins-basic == bitmaps for the basic skin
+#           pluto-std-plugins == contains all the default plugins running in the dcerouter mem space (datagrid,event,infrared,plug'n'play,file_grid,security,climate,orbiter,media,telecom,lighting and general info plugin
+#           pluto-system-database == sqlCVS dumps of the dce,designer,constants,ir,website repos, as well as the city dump containing location information.
+#           pluto-updateentarea == creates default scenarios for entertainment areas
+#           pluto-website-admin == web site, and web orbiter scripts
+#           pluto-windowsce-libraries == DLLs needed for the old windows ce tools (?)
+#           pluto-boot-scripts == all the scripts pertaining to the bootprocess of LinuxMCE. Lots of those scripts are probably no longer in use.
+#           mce-diskless-tools == Diskless image blue print, as well as script files to create new default images
+#           lmce-skins-titanium == bitmaps of the titanium skin
+#           lmce-skins-slate == bitmaps of the slate skin
 
 Install_DCERouter
 
+# Create the initial core device using CreateDevice, and the MD for the core in case we create a Hybrid (the default).
 Create_And_Config_Devices
 
+# Updating hosts file and the Device_Data for the core with the internal and external network
+# addresses - uses Initial_DHCP_Config.sh from the pluto-install-scripts package.
 Configure_Network_Options
 
+# Setup skeleton files for users, as well as enabling window tweaks for the local Xorg. Only needed for Hybrid
 Setup_XOrg
 
+# We do not have any users yet, so only createing an initial smbpasswd map, and creating backups of group and passwd files.
 /usr/pluto/bin/SetupUsers.sh
 
+# Trying to use geoip scripts running on www.linuxmce.org/geoip/detect_timezone.php to get our local timezone
+# If that fails, use the old system timezone already specified during base system install.
 /usr/pluto/bin/Timezone_Detect.sh
 
+# Creating /etc/network/interfaces file bsed on the details found out during
+# the initial install steps.
 /usr/pluto/bin/Network_Setup.sh
 
 # NOTE: Fix for initramfs-tools
@@ -135,12 +189,18 @@ StatsMessage "Building a disk image for your Diskless Media Directors"
 
 #mkdir -p /usr/pluto/deb-cache
 
-MangleStartupFiles
+# This is no longer done.
+# MangleStartupFiles
 
+# Do some cleanup to remove the installer icons from the user desktops.
 RemoveInstallerIcons
 
+# We now set the installation number to 1, update the description of the install with todays date, and 
+# reset all the country and address information, which is kinda stupid after first filling the information uding
+# timezone detect...
 ClearInstallationTable
 
+##
 apt-get -y -f --force-yes dist-upgrade
 VerifyExitCode "dist-upgrade"
 
