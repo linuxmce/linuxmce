@@ -116,6 +116,9 @@ Telecom_Plugin::Telecom_Plugin(int DeviceID, string ServerAddress,bool bConnectE
 	m_nPBXDevice = 0;
 	m_displayThread = (pthread_t)0;
 	TelecomTask::SetTelecom(this);
+
+	m_sDestChannel = "";
+	m_bReplacedChannel = false;
 }
 
 //<-dceag-getconfig-b->
@@ -880,7 +883,7 @@ Telecom_Plugin::Link( class Socket *pSocket, class Message *pMessage, class Devi
 	string sSource_Caller_ID = pMessage->m_mapParameters[EVENTPARAMETER_Source_Caller_ID_CONST];
 	string sDestination_Caller_ID = pMessage->m_mapParameters[EVENTPARAMETER_Destination_Caller_ID_CONST];
 
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Link event received from PBX: src channel %s, dest channel %s",
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Link event received from PBX: src channel %s, dest channel %s",
 	sSource_Channel.c_str(), sDestination_Channel.c_str());
 
 	PLUTO_SAFETY_LOCK(vm, m_TelecomMutex);
@@ -891,6 +894,9 @@ Telecom_Plugin::Link( class Socket *pSocket, class Message *pMessage, class Devi
 	ParseChannel(sSource_Channel, &sSrcExtension);
 	string sDestExtension;
 	ParseChannel(sDestination_Channel, &sDestExtension);
+
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "sSrcExtension: %s sDestExtension: %s",sSrcExtension.c_str(), sDestExtension.c_str());
+
 	if( !sSrcExtension.empty() && sSrcExtension == sDestExtension )
 	{
 		ReplaceChannels(sSource_Channel, sDestination_Channel, sDestination_Caller_ID);
@@ -962,13 +968,29 @@ Telecom_Plugin::Link( class Socket *pSocket, class Message *pMessage, class Devi
 		{
 			string sDestOrbiters = m_pOrbiter_Plugin->PK_Device_Orbiters_In_Room_get(pOH_Orbiter->m_dwPK_Room, false);
 	
-			SCREEN_DevCallInProgress_DL screen_DevCallInProgress_DL(
-				m_dwPK_Device, sDestOrbiters, 
-				GetCallerName(sDestination_Channel, sDestination_Caller_ID),
-				sCallID,
-				sDestination_Channel
-			);
-			SendCommand(screen_DevCallInProgress_DL);
+			// Los93soL - Override the link event with replaced channel if necessary
+			// this is needed because we dial using local channels
+			if (!m_bReplacedChannel) {
+				SCREEN_DevCallInProgress_DL screen_DevCallInProgress_DL(
+					m_dwPK_Device, sDestOrbiters, 
+					GetCallerName(sDestination_Channel, sDestination_Caller_ID),
+					sCallID,
+					sDestination_Channel
+				);
+
+				SendCommand(screen_DevCallInProgress_DL);
+			} else {
+				SCREEN_DevCallInProgress_DL screen_DevCallInProgress_DL(
+                                        m_dwPK_Device, sDestOrbiters,
+                                        GetCallerName(sDestination_Channel, sDestination_Caller_ID),
+                                        sCallID,
+                                        m_sDestChannel
+				);
+
+				SendCommand(screen_DevCallInProgress_DL);
+
+				m_bReplacedChannel = false;
+			}
 		}
 	}
 	
@@ -1287,6 +1309,7 @@ CallStatus * Telecom_Plugin::LinkChannels(const string & sSrcChannel, const stri
 	}
 	
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "======== After LinkChannels");
+
 	DumpActiveCalls();
 	
 	return pCallStatus;
@@ -1313,6 +1336,11 @@ void Telecom_Plugin::ReplaceChannels(const string & sSrcChannel, const string & 
 			}
 		}
 	}
+
+	// Los93soL - Flag store the original channel because asterisk will send
+	// an invalid link event to us next because we dial using local channels
+	m_sDestChannel = sDestChannel;
+	m_bReplacedChannel = true;
 }
 
 bool Telecom_Plugin::RemoveChannel(const string & sChannel)

@@ -65,6 +65,9 @@ namespace DCE
 	DeviceData_Router* m_pDevice_pbx;
 	int m_nPBXDevice;
 
+	string m_sDestChannel;
+	bool m_bReplacedChannel;
+
 	// Private methods
 public:
 	// Public member variables
