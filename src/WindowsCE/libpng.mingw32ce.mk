@@ -40,9 +40,9 @@ DESTDIR=
 
 # If you're using a cross-compiler, add the appropriate prefix (e.g.,
 # "i386-mingw32msvc-") to the following three commands:
-CC=arm-mingw32ce-gcc
-AR=arm-mingw32ce-ar
-RANLIB=arm-mingw32ce-ranlib
+CC=$(CROSS)gcc
+AR=$(CROSS)ar
+RANLIB=$(CROSS)ranlib
 
 MKDIR_P=/bin/mkdir -pv
 

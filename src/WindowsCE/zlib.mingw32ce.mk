@@ -35,7 +35,7 @@ SHARED_MODE=1
 #LOC = -DASMV
 #LOC = -DDEBUG -g
 
-PREFIX = arm-mingw32ce-
+PREFIX = $(CROSS)
 CC = $(PREFIX)gcc
 CFLAGS = $(LOC) -O3 -Wall
 EXTRA_CFLAGS = -DNO_VIZ
