@@ -214,6 +214,7 @@ bool DataLogger_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessa
 		// pRow_Datapoints->Delete();
 		//
 		// TODO: FIXME: I'm sure i need to free something here
+		delete pRow_Datapoints;
 	}
 
 	return false;
