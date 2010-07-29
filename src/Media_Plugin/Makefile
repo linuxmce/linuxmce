@@ -1,7 +1,7 @@
 #<-dceag-mh-b->!
 GENDEV=../Gen_Devices
 
-SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
+SNR_CPPFLAGS ?= <-mkr_t_compile_defines->
 
 ROOT = ..
 CXX = g++
@@ -16,7 +16,9 @@ CPPFLAGS += -I/usr/include/mysql
 LDFLAGS += -lmysqlclient_r
 #<-mkr_B_use_mysql_wrapper_e->
 
-#
+#<-mkr_b_use_mysql_wrapper_b->
+CPPFLAGS += -DUSE_MYSQL_WRAPPER
+#<-mkr_b_use_mysql_wrapper_e->
 
 MYNAME = Media_Plugin
 VERSION = 2.0.0
