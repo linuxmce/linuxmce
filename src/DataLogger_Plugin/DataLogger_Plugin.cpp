@@ -189,6 +189,13 @@ bool DataLogger_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessa
                         sscanf(sValue.c_str(),"%f",&fValue);
                         ;;
 			break;
+		case EVENT_Sensor_Tripped_CONST:
+			unit = 9;
+			sValue = pMessage->m_mapParameters[EVENTPARAMETER_Tripped_CONST];
+			sscanf(sValue.c_str(),"%i",&iValue);
+			fValue = iValue;
+			;;
+			break;
 		default:
 			handled=false;
 			;;
@@ -214,7 +221,7 @@ bool DataLogger_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessa
 		// pRow_Datapoints->Delete();
 		//
 		// TODO: FIXME: I'm sure i need to free something here
-		delete pRow_Datapoints;
+		//delete pRow_Datapoints;
 	}
 
 	return false;
