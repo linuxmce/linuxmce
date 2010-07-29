@@ -359,9 +359,9 @@ void Media_Plugin::AttributesBrowser( MediaListGrid *pMediaListGrid,int PK_Media
 	string sSQL_Where_MediaType;
 
 	if( PK_MediaType==MEDIATYPE_pluto_StoredAudio_CONST )
-		sSQL_Where_MediaType = " EK_MediaType IN (" TOSTRING(MEDIATYPE_pluto_StoredAudio_CONST) "," TOSTRING(MEDIATYPE_pluto_CD_CONST) ")";
+		sSQL_Where_MediaType = " EK_MediaType IN (" TOSTRING(MEDIATYPE_pluto_StoredAudio_CONST) "," TOSTRING(MEDIATYPE_pluto_CD_CONST) "," TOSTRING(MEDIATYPE_lmce_StreamedAudio_CONST)")";
 	else if( PK_MediaType==MEDIATYPE_pluto_StoredVideo_CONST )
-		sSQL_Where_MediaType = " EK_MediaType IN (" TOSTRING(MEDIATYPE_pluto_StoredVideo_CONST) "," TOSTRING(MEDIATYPE_pluto_DVD_CONST) "," TOSTRING(MEDIATYPE_pluto_HDDVD_CONST) "," TOSTRING(MEDIATYPE_pluto_BD_CONST) ")";
+		sSQL_Where_MediaType = " EK_MediaType IN (" TOSTRING(MEDIATYPE_pluto_StoredVideo_CONST) "," TOSTRING(MEDIATYPE_pluto_DVD_CONST) "," TOSTRING(MEDIATYPE_pluto_HDDVD_CONST) "," TOSTRING(MEDIATYPE_pluto_BD_CONST) "," TOSTRING(MEDIATYPE_lmce_StreamedVideo_CONST)")";
 	else 
 		sSQL_Where_MediaType = " EK_MediaType=" + StringUtils::itos(PK_MediaType);
 
