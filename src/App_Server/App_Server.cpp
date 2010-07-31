@@ -401,9 +401,20 @@ void App_Server::SendMessageList(string messageList)
 void App_Server::CMD_Halt_Device(int iPK_Device,string sForce,string &sCMD_Result,Message *pMessage)
 //<-dceag-c323-e->
 {
-	if( sForce=="" )
-		sForce = "H"; // HACK - todo: figure out how to determine if we have suspend capabilities
-
+        if ( sForce=="" ) {
+	        int ret = system("/usr/bin/pm-is-supported --suspend");
+		if (ret < 0) {
+		        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Error checking if suspend is supported (running /usr/bin/pm-is_supported --suspend)");
+		}
+		if ( ret ) {
+		        LoggerWrapper::GetInstance()->Write(LV_WARNING,"Suspend not supported - halting instead");
+		        sForce = "H"; // halt if we don't have suspend capabilities
+		} else {
+		        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Suspend supported - suspending");
+		        sForce = "S";
+		}
+	}
+	
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"CMD_Halt_Device %s",sForce.c_str());
 
 	switch( sForce[0] )
