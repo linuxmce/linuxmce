@@ -405,13 +405,14 @@ void App_Server::CMD_Halt_Device(int iPK_Device,string sForce,string &sCMD_Resul
 	        int ret = system("/usr/bin/pm-is-supported --suspend");
 		if (ret < 0) {
 		        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Error checking if suspend is supported (running /usr/bin/pm-is_supported --suspend)");
-		}
-		if ( ret ) {
-		        LoggerWrapper::GetInstance()->Write(LV_WARNING,"Suspend not supported - halting instead");
-		        sForce = "H"; // halt if we don't have suspend capabilities
 		} else {
-		        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Suspend supported - suspending");
-		        sForce = "S";
+		        if ( ret ) {
+			        LoggerWrapper::GetInstance()->Write(LV_WARNING,"Suspend not supported - halting instead");
+				sForce = "H"; // halt if we don't have suspend capabilities
+			} else {
+			        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Suspend supported - suspending");
+				sForce = "S";
+			}
 		}
 	}
 	
