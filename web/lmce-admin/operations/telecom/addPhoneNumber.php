@@ -100,7 +100,7 @@ function phoneNumberForm($telecomADO,$userID,$addContact){
 			cc=document.addPhoneNumber.CountryCode.value;
 			ac=document.addPhoneNumber.AreaCode.value;
 			pn=document.addPhoneNumber.PhoneNumber.value;
-			dialAs=((cc=="1")?"91":"9011"+cc)+ac+pn;
+			dialAs=((cc=="1")?"91":"9"+cc)+ac+pn;
 			document.addPhoneNumber.DialAs.value=dialAs;
 		}
 	</script>

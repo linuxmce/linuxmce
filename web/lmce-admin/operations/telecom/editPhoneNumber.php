@@ -88,7 +88,7 @@ function phoneNumberForm($telecomADO,$userID){
 			cc=document.editPhoneNumber.CountryCode.value;
 			ac=document.editPhoneNumber.AreaCode.value;
 			pn=document.editPhoneNumber.PhoneNumber.value;
-			dialAs=((cc=="1")?"91":"9011"+cc)+ac+pn;
+			dialAs=((cc=="1")?"91":"9"+cc)+ac+pn;
 			document.editPhoneNumber.DialAs.value=dialAs;
 		}
 	</script>	
