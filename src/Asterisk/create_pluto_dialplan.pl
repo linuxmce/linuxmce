@@ -33,7 +33,7 @@ print "TIMEOUT:${TIMEOUT}\n";
 
 $EXT_BUFFER .= "\n;Lines\n";
 $EXT_BUFFER .= "exten => 100,1,VoiceMail(100)\n";
-$EXT_BUFFER .= "exten => 100,2,Hangup\n";
+$EXT_BUFFER .= "exten => 100,n,Hangup\n";
 
 $DB_SQL = "select ID,EK_HouseMode,Routing from Line_HouseMode order by ID,EK_HouseMode";
 $DB_STATEMENT = $DB_TC_HANDLE->prepare($DB_SQL) or die "Couldn't prepare query '$DB_SQL': $DBI::errstr\n";
@@ -46,9 +46,10 @@ while($DB_ROW = $DB_STATEMENT->fetchrow_hashref())
 
     if($tmp ne $line)
     {
-        $EXT_BUFFER .= "exten => $line,1,AGI(pluto-gethousemode.agi)\n";
-        $EXT_BUFFER .= "exten => $line,2,Goto($line-hm\${HOUSEMODE},1)\n";
-        $EXT_BUFFER .= "exten => $line,3,Hangup\n";
+	$EXT_BUFFER .= "exten => $line,1,AGI(linuxmce-phonebook-lookup.agi)\n";
+        $EXT_BUFFER .= "exten => $line,n,AGI(pluto-gethousemode.agi)\n";
+        $EXT_BUFFER .= "exten => $line,n,Goto($line-hm\${HOUSEMODE},1)\n";
+        $EXT_BUFFER .= "exten => $line,n,Hangup\n";
     }
 
     my $action = "NoOp(\"Do nothing\")";
@@ -88,8 +89,8 @@ while($DB_ROW = $DB_STATEMENT->fetchrow_hashref())
     }
 
     $EXT_BUFFER .= "exten => $line-hm$hm,1,$action\n";
-    $EXT_BUFFER .= "exten => $line-hm$hm,2,Goto($line-hm$hm-\${DIALSTATUS},1)\n";
-    $EXT_BUFFER .= "exten => $line-hm$hm,3,Hangup\n";
+    $EXT_BUFFER .= "exten => $line-hm$hm,n,Goto($line-hm$hm-\${DIALSTATUS},1)\n";
+    $EXT_BUFFER .= "exten => $line-hm$hm,n,Hangup\n";
     $EXT_BUFFER .= "exten => $line-hm$hm-BUSY,1,Goto(100,1)\n";
     $EXT_BUFFER .= "exten => $line-hm$hm-NOANSWER,1,Goto(voice-menu-pluto-custom,s,1)\n";
     $EXT_BUFFER .= "exten => $line-hm$hm-CONGESTION,1,Goto(100,1)\n";
@@ -116,8 +117,8 @@ while($DB_ROW = $DB_STATEMENT->fetchrow_hashref())
     unless($tmp =~ /^$user[-]/)
     {
         $EXT_BUFFER .= "exten => $user,1,AGI(pluto-getusermode.agi)\n";
-        $EXT_BUFFER .= "exten => $user,2,Goto($user-um\${USERMODE}-pri\${PRIORITYCALLER},1)\n";
-        $EXT_BUFFER .= "exten => $user,3,Hangup\n";
+        $EXT_BUFFER .= "exten => $user,n,Goto($user-um\${USERMODE}-pri\${PRIORITYCALLER},1)\n";
+        $EXT_BUFFER .= "exten => $user,n,Hangup\n";
     }
 
     my $action = "NoOp(\"Do nothing\")";
@@ -177,20 +178,20 @@ while($DB_ROW = $DB_STATEMENT->fetchrow_hashref())
     }
 
     $EXT_BUFFER .= "exten => $user-um$um-pri$pri-try$try,1,$action\n";
-    $EXT_BUFFER .= "exten => $user-um$um-pri$pri-try$try,2,Goto($user-um$um-pri$pri-try$try-\${DIALSTATUS},1)\n";
-    $EXT_BUFFER .= "exten => $user-um$um-pri$pri-try$try,3,Hangup\n";
+    $EXT_BUFFER .= "exten => $user-um$um-pri$pri-try$try,n,Goto($user-um$um-pri$pri-try$try-\${DIALSTATUS},1)\n";
+    $EXT_BUFFER .= "exten => $user-um$um-pri$pri-try$try,n,Hangup\n";
     $EXT_BUFFER .= "exten => $user-um$um-pri$pri-try$try-BUSY,1,Goto($user-um$um-pri$pri-try".($try+1).",1)\n";
     $EXT_BUFFER .= "exten => $user-um$um-pri$pri-try$try-NOANSWER,1,Goto($user-um$um-pri$pri-try".($try+1).",1)\n";
     $EXT_BUFFER .= "exten => $user-um$um-pri$pri-try$try-CONGESTION,1,Goto($user-um$um-pri$pri-try".($try+1).",1)\n";
     $EXT_BUFFER .= "exten => $user-um$um-pri$pri-try$try-CHANUNAVAIL,1,Goto($user-um$um-pri$pri-try".($try+1).",1)\n";
     $EXT_BUFFER .= "exten => $user-um$um-pri$pri-try".($try+1).",1,Macro(vm,$user,DIRECTDIAL)\n";
-    $EXT_BUFFER .= "exten => $user-um$um-pri$pri-try".($try+1).",2,Hangup\n";
+    $EXT_BUFFER .= "exten => $user-um$um-pri$pri-try".($try+1).",n,Hangup\n";
     $tmp = $user."-".$pri."-".$um;
 }}
 
 $EXT_BUFFER .= "\n;Conference rooms\n";
 $EXT_BUFFER .= "exten => _000.,1,Meetme(\${EXTEN}|q)\n";
-$EXT_BUFFER .= "exten => _000.,2,Hangup\n";
+$EXT_BUFFER .= "exten => _000.,n,Hangup\n";
 
 $EXT_BUFFER .= "\n\n[voice-menu-pluto-custom]\n\n";
 $EXT_BUFFER .= "exten => s,1,Answer\n";
@@ -220,7 +221,7 @@ foreach my $user (sort (values(%USERS)))
 }
 
 $EXT_BUFFER .= "exten => #,1,VoiceMail(100)\n";
-$EXT_BUFFER .= "exten => #,2,Hangup\n";
+$EXT_BUFFER .= "exten => #,n,Hangup\n";
 $EXT_BUFFER .= "exten => _XXX,1,Dial(Local/\${EXTEN}\@trusted)\n";
 $EXT_BUFFER .= "exten => _XXX,n,Hangup\n";
 $EXT_BUFFER .= "exten => i,1,Background(pluto/invalid-entry)\n";
