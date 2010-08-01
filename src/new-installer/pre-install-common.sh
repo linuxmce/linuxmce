@@ -37,8 +37,11 @@ function InstallNeededPackages
 	apt-get update
 	apt-get -y --force-yes install dpkg-dev
 	VerifyExitCode "dpkg-dev"
-	
+
 	mkdir -pv "${LOCAL_REPO_BASE}/${LOCAL_REPO_DIR}"
+
+	wget http://fpdownload.adobe.com/get/flashplayer/current/install_flash_player_10_linux.deb
+	dpkg -i install_flash_player_10_linux.deb
 
 }
 
