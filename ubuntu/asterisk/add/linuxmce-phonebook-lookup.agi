@@ -1,0 +1,113 @@
+#!/usr/bin/perl
+
+use strict;
+use diagnostics;
+use DBI;
+
+$|=1;
+
+# Setup some variables
+my %AGI;
+my %HASH_U2E;
+my %HASH_E2U;
+
+my $PRIORITYCALLERID = "";
+my $line;
+my $contact = "";
+my $name = "";
+
+my $CONF_HOST="localhost";
+my $CONF_USER="root";
+my $CONF_PASSWD="";
+my $DB_PL_HANDLE;
+my $DB_TC_HANDLE;
+my $DB_STATEMENT;
+my $DB_SQL;
+my $DB_ROW;
+
+while(<STDIN>) {
+    chomp;
+    last unless length($_);
+    if (/^agi_(\w+)\:\s+(.*)$/) {
+        $AGI{$1} = $2;
+    }
+}
+
+print STDERR "AGI Environment Dump:\n";
+foreach my $i (sort keys %AGI) {
+    print STDERR " -- $i = $AGI{$i}\n";
+}
+
+$DB_PL_HANDLE = DBI->connect("dbi:mysql:database=pluto_main;host=".$CONF_HOST.";user=".$CONF_USER.";password=".$CONF_PASSWD.";") or die "Could not connect to MySQL";
+$DB_TC_HANDLE = DBI->connect("dbi:mysql:database=pluto_telecom;host=".$CONF_HOST.";user=".$CONF_USER.";password=".$CONF_PASSWD.";") or die "Could not connect to MySQL";
+
+# &get_all_users_extensions();
+
+$PRIORITYCALLERID = $AGI{'callerid'};
+
+#print "EXEC NoOp \"Finding if ".$PRIORITYCALLERID." is a caller for somebody\"\n";
+print "EXEC NoOp \"Checking if name exists for ".$PRIORITYCALLERID." in phone book and attempting to add caller name\"\n";
+$line=<STDIN>;
+&checkresult($line);
+
+$DB_SQL = "select FK_Contact from PhoneNumber where CONCAT(AreaCode, PhoneNumber)='".$PRIORITYCALLERID."'";
+$DB_STATEMENT = $DB_TC_HANDLE->prepare($DB_SQL) or die "Couldn't prepare query '$DB_SQL': $DBI::errstr\n";
+$DB_STATEMENT->execute() or die "Couldn't execute query '$DB_SQL': $DBI::errstr\n";
+if($DB_ROW = $DB_STATEMENT->fetchrow_hashref())
+{
+    $contact = $DB_ROW->{'FK_Contact'};
+
+    $DB_STATEMENT->finish();
+
+    print "EXEC NoOp \"Number found in phone book, PK_CONTACT is ".$contact."\"\n";
+    $line=<STDIN>;
+    &checkresult($line);
+
+    $DB_SQL = "select Name from Contact where PK_Contact='".$contact."'";
+    $DB_STATEMENT = $DB_TC_HANDLE->prepare($DB_SQL) or die "Couldn't prepare query '$DB_SQL': $DBI::errstr\n";
+    $DB_STATEMENT->execute() or die "Couldn't execute query '$DB_SQL': $DBI::errstr\n";
+
+    if($DB_ROW = $DB_STATEMENT->fetchrow_hashref())
+    {
+	$name = $DB_ROW->{'Name'};
+	    
+	$DB_STATEMENT->finish();
+
+	print "EXEC NoOp \"Name for ".$PRIORITYCALLERID." is ".$name."\"\n";
+	$line=<STDIN>;
+	&checkresult($line);
+
+	# TODO: Set the channel variables
+	print "EXEC Set CALLERID(name)=\"".$name."\"\n";
+    }
+    else
+    {
+	print "EXEC NoOp \"Name not found in phone book\"\n";
+	$line=<STDIN>;
+	&checkresult($line);
+    }
+}
+else
+{
+    print "EXEC NoOp \"Number not found in phone book\"\n";
+    $line=<STDIN>;
+    &checkresult($line);
+
+    $DB_STATEMENT->finish();
+}
+
+sub checkresult {
+    my ($res) = @_;
+    my $retval;
+    chomp $res;
+    if ($res =~ /^200/) {
+        $res =~ /result=(-?\d+)/;
+        if (!length($1)) {
+            print STDERR "FAIL ($res)\n";
+        } else {
+            print STDERR "PASS ($1)\n";
+        }
+    } else {
+        print STDERR "FAIL (unexpected result '$res')\n";
+    }
+}
