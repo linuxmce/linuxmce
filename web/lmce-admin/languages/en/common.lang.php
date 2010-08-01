@@ -175,4 +175,3 @@ $TEXT_UP_CONST='Up';
 $TEXT_DOWN_CONST='Down';
 $TEXT_SORT_SCENARIOS_CONST='Sort scenarios';
 ?>
-
