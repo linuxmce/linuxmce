@@ -40,6 +40,8 @@
 #define MEDIATYPE_np_Tivo3_CONST 40
 #define MEDIATYPE_np_Tivo2_CONST 41
 #define MEDIATYPE_lmce_Hulu_CONST 42
+#define MEDIATYPE_lmce_StreamedAudio_CONST 43
+#define MEDIATYPE_lmce_StreamedVideo_CONST 44
 
 #define MEDIATYPE_TABLE "MediaType"
 #define MEDIATYPE_PK_MEDIATYPE_FIELD "PK_MediaType"
