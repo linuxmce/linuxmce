@@ -317,7 +317,7 @@ function delete_directory_from_db($directoryPath,$mediadbADO){
 }
 
 function delete_missingfiles_from_db($directoryPath,$mediadbADO){
-	$res=$mediadbADO->_Execute("SELECT * FROM File WHERE Path LIKE '".addslashes($directoryPath)."/%' OR Path='".addslashes($directoryPath)."' AND Missing=1");
+	$res=$mediadbADO->_Execute("SELECT * FROM File WHERE (Path LIKE '".addslashes($directoryPath)."/%' OR Path='".addslashes($directoryPath)."') AND Missing=1");
 	$newline = "<br />";
 	
 	while($row=$res->FetchRow()){
