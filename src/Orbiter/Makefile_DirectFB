@@ -1,8 +1,8 @@
 #<-dceag-mh-b->
 GENDEV=../Gen_Devices
 
-SNR_CPPFLAGS ?= <-mkr_t_compile_defines->
-SNR_LDFLAGS ?= <-mkr_t_compile_libs->
+SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
+SNR_LDFLAGS ?= 
 
 ROOT = ..
 CXX = g++
@@ -27,9 +27,7 @@ CPPFLAGS += -I/usr/include/mysql
 LDFLAGS += -lmysqlclient_r
 #<-mkr_B_use_mysql_wrapper_e->
 
-#<-mkr_b_use_mysql_wrapper_b->
-#CPPFLAGS += -DUSE_MYSQL_WRAPPER
-#<-mkr_b_use_mysql_wrapper_e->
+#
 
 CXXFLAGS += -g -O0
 CPPFLAGS += -I/usr/include/SDL -DMAEMO_NOKIA770 -DDIRECTFB -DORBITER -DCACHE_IMAGES -DENABLE_MOUSE_BEHAVIOR -I$(ROOT)/Splitter -I$(ROOT)/OrbiterGen -I$(ROOT)/SDL_Helpers

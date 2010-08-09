@@ -1,8 +1,6 @@
 #!/bin/bash
 
-#<-mkr_b_via_b->
-exit
-#<-mkr_b_via_e->
+#
 
 . /usr/pluto/bin/Config_Ops.sh
 XDisplay=":$(($Display+1))"

@@ -821,11 +821,7 @@ void Xine_Stream_Factory::IdentifyXineStuff()
 	
 	LoggerWrapper::GetInstance()->Write( LV_WARNING, "Custom xine functions status:  xine_seek=%p, xine_start_trick_play=%p, xine_stop_trick_play=%p. Trickplay and seeking support: %s", 
 		custom_xine_seek, custom_xine_start_trick_play, custom_xine_stop_trick_play, g_bXINE_HAS_TRICKPLAY_SUPPORT?"present":"absent");
-//<-mkr_b_via_b->
-#ifdef VIA
-	LoggerWrapper::GetInstance()->Write( LV_WARNING, "Compiled for VIA extended xine-lib");
-#endif
-//<-mkr_b_via_e->
+//
 }
 
 void Xine_Stream_Factory::SendMessageToOrbiter(string sMessage)

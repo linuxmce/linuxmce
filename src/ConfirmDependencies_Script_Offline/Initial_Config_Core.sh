@@ -30,8 +30,8 @@ if ! BlacklistConfFiles '/etc/apt/sources.list' ;then
 		cp /etc/apt/sources.list /etc/apt/sources.list.pbackup
 	fi
 	AptSrc_AddSource "deb file:/usr/pluto/deb-cache/ sarge main"
-	AptSrc_AddSource "deb http://deb.plutohome.com/debian/ <-mkr_t_maindeb_debian-> main"
-	AptSrc_AddSource "deb http://deb.plutohome.com/debian/ <-mkr_t_replacementsdeb_debian-> main"
+	AptSrc_AddSource "deb http://deb.plutohome.com/debian/ 20dev_debian main"
+	AptSrc_AddSource "deb http://deb.plutohome.com/debian/ replacements_debian main"
 	AptSrc_AddSource "deb http://deb.plutohome.com/debian/ sarge main non-free contrib"
 	AptSrc_AddSource "deb http://deb.plutohome.com/debian/ unstable mythtv"
 	AptSrc_AddSource "deb http://www.yttron.as.ro/ sarge main"
@@ -112,9 +112,7 @@ if [[ $UpgradeMode == "false" ]]; then
 #<-mkr_B_via_b->
 	DefaultNetwork="192.168.80"
 #<-mkr_B_via_e->
-#<-mkr_b_via_b->
-	DefaultNetwork="192.168.81"
-#<-mkr_b_via_e->
+#
 	
 	clear
 	echo ""
@@ -165,9 +163,7 @@ if [[ $UpgradeMode == "false" ]]; then
 #<-mkr_B_via_b->
 		DHCP=$(Ask "Run a DHCP server? [Y/n]")
 #<-mkr_B_via_e->
-#<-mkr_b_via_b->
-		DHCP=$(Ask "Run a DHCP server? [y/N]")
-#<-mkr_b_via_e->
+#
 		if [[ -z "$DHCP" || "$DHCP" == y || "$DHCP" == Y || "$DHCP" == n || "$DHCP" == N ]]; then
 			break
 		else
@@ -226,7 +222,7 @@ DCERouterPort = 3450
 #<-mkr_b_videowizard_b->
 UseVideoWizard = 1
 #<-mkr_b_videowizard_e->
-TestInstallation = <-mkr_t_test_installation->
+TestInstallation = 0
 PK_Device = 1
 Activation_Code = $Activation_Code
 PK_Installation = 1
@@ -330,111 +326,7 @@ if [[ "$UpgradeMode" == "false" ]] ;then
 #<-mkr_B_via_b->
 	[[ "$DHCP" != n && "$DHCP" != N ]]
 #<-mkr_B_via_e->
-#<-mkr_b_via_b->
-	[[ "$DHCP" == y && "$DHCP" == Y ]]
-#<-mkr_b_via_b->
-	if [[ $? -eq 0 ]]; then
-		Q="REPLACE INTO Device_DeviceData(FK_Device, FK_DeviceData, IK_DeviceData)
-			VALUES($CoreDev, 28, '$DHCPsetting')"
-		RunSQL "$Q"
-	fi
-
-	# "DCERouter postinstall"
-	devices=$(echo "SELECT PK_Device FROM Device;" | /usr/bin/mysql pluto_main | tail +2 | tr '\n' ' ')
-
-	for i in $devices; do
-		echo "Running device $i"
-	
-		#run the following with the device
-		# Add missing data by template
-		Q1="INSERT INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData)
-		SELECT PK_Device,DeviceTemplate_DeviceData.FK_DeviceData,DeviceTemplate_DeviceData.IK_DeviceData
-		FROM Device
-		JOIN DeviceTemplate ON Device.FK_DeviceTemplate=PK_DeviceTemplate
-		JOIN DeviceTemplate_DeviceData on DeviceTemplate_DeviceData.FK_DeviceTemplate=PK_DeviceTemplate
-		LEFT JOIN Device_DeviceData ON FK_Device=PK_Device AND Device_DeviceData.FK_DeviceData=DeviceTemplate_DeviceData.FK_DeviceData
-		WHERE Device_DeviceData.FK_Device IS NULL AND PK_Device=$i;"
-	
-		# Add for the category
-		Q2="INSERT INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData)
-		SELECT PK_Device,DeviceCategory_DeviceData.FK_DeviceData,DeviceCategory_DeviceData.IK_DeviceData
-		FROM Device
-		JOIN DeviceTemplate ON Device.FK_DeviceTemplate=PK_DeviceTemplate
-		JOIN DeviceCategory_DeviceData on DeviceCategory_DeviceData.FK_DeviceCategory=DeviceTemplate.FK_DeviceCategory
-		LEFT JOIN Device_DeviceData ON FK_Device=PK_Device AND Device_DeviceData.FK_DeviceData=DeviceCategory_DeviceData.FK_DeviceData
-		WHERE Device_DeviceData.FK_Device IS NULL AND PK_Device=$i;"
-	
-		# Add for parent's category
-		Q3="INSERT INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData)
-		SELECT PK_Device,DeviceCategory_DeviceData.FK_DeviceData,DeviceCategory_DeviceData.IK_DeviceData
-		FROM Device
-		JOIN DeviceTemplate ON Device.FK_DeviceTemplate=PK_DeviceTemplate
-		JOIN DeviceCategory ON DeviceTemplate.FK_DeviceCategory=PK_DeviceCategory
-		JOIN DeviceCategory_DeviceData on DeviceCategory_DeviceData.FK_DeviceCategory=DeviceCategory.FK_DeviceCategory_Parent
-		LEFT JOIN Device_DeviceData ON FK_Device=PK_Device AND Device_DeviceData.FK_DeviceData=DeviceCategory_DeviceData.FK_DeviceData
-		WHERE Device_DeviceData.FK_Device IS NULL AND PK_Device=$i;"
-	
-		(echo "$Q1"; echo "$Q2"; echo "$Q3";) | /usr/bin/mysql pluto_main
-	done
-	
-	echo "$Q4" | /usr/bin/mysql pluto_main
-else
-	# Reconfigure all devices after install
-	Q="UPDATE Device SET NeedConfigure=1, Status='**RUN_CONFIG**'"
-	echo "$Q" | /usr/bin/mysql pluto_main
-
-	# Install the software again for the devices
-	Q="DELETE FROM Package_Device"
-	echo "$Q" | /usr/bin/mysql pluto_main;
-
-	/usr/pluto/bin/DHCP_config.sh
-
-fi
-
-## Update startup scripts
-/usr/pluto/bin/Update_StartupScrips.sh
-
-## Remove installation incomplete flag
-rm /usr/pluto/install/.notdone
-
-## Setup /etc/hosts
-selectedInterface=$(grep 'iface..*eth' /etc/network/interfaces | awk '{print $2}')
-dcerouterIP=$(ifconfig $selectedInterface | awk 'NR==2' | cut -d: -f2 | cut -d' ' -f1)
-
-hosts="
-127.0.0.1       localhost.localdomain   localhost
-$dcerouterIP    dcerouter $(/bin/hostname)
-
-# The following lines are desirable for IPv6 capable hosts
-::1     ip6-localhost ip6-loopback
-fe00::0 ip6-localnet
-ff00::0 ip6-mcastprefix
-ff02::1 ip6-allnodes
-ff02::2 ip6-allrouters
-ff02::3 ip6-allhosts
-"
-echo "$hosts" >/etc/hosts
-
-clear
-
-/usr/pluto/bin/Network_Setup.sh
-/usr/pluto/bin/DHCP_config.sh
-
-if [[ "$UpgradeMode" == "true" ]]; then
-
-	/usr/pluto/bin/Diskless_Setup.sh
-	/usr/pluto/bin/Diskless_ExportsNFS.sh
-
-fi
-
-clear
-
-## Install autoinstall packages from Bonus CD if needed
-. /usr/pluto/install/BonusCdAutoInst.sh
-
-#<-mkr_b_via_b->
-bash -x /home/via/ApplyViaPatch.sh
-#<-mkr_b_via_e->
+#
 
 ## Install extra packages
 sleep 0.5

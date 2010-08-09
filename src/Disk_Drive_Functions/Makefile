@@ -1,5 +1,5 @@
 ROOT = ..
-SNR_CPPFLAGS ?= <-mkr_t_compile_defines->
+SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
 
 CXX = g++
 CXXFLAGS = -W -Wall -fPIC -ggdb3
@@ -13,9 +13,7 @@ CPPFLAGS += -I/usr/include/mysql
 LDFLAGS += -lmysqlclient_r
 #<-mkr_B_use_mysql_wrapper_e->
 
-#<-mkr_b_use_mysql_wrapper_b->
-#CPPFLAGS += -DUSE_MYSQL_WRAPPER
-#<-mkr_b_use_mysql_wrapper_e->
+#
 
 sources = Disk_Drive_Functions.cpp \
 	RipTask.cpp RipJob.cpp IdentifyJob.cpp \

@@ -10,9 +10,7 @@ CPPFLAGS += -I/usr/include/mysql
 LDFLAGS += -lmysqlclient_r
 #<-mkr_B_use_mysql_wrapper_e->
 
-#<-mkr_b_use_mysql_wrapper_b->
-CPPFLAGS += -DUSE_MYSQL_WRAPPER
-#<-mkr_b_use_mysql_wrapper_e->
+#
 
 APPNAME = IRBase
 VERSION = 2.0.0

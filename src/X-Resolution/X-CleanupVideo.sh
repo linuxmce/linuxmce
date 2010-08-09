@@ -9,26 +9,7 @@ DEVICETEMPLATE_GeForce_or_TNT2=1736
 DEVICETEMPLATE_Radeon_8500_or_newer=1721
 DEVICETEMPLATE_Unichrome=1814
 
-#<-mkr_b_via_b->
-Install_VIA_pkgs()
-{
-	local Pkgs_VIA
-	Pkgs_VIA=(via-alsa-2.6.16.20-pluto-2-686 via-xorg)
-
-	echo "$(date -R) --> Finding installed VIA (ALSA, X) packages"
-	VIA_inst="$(InstalledPackages "${Pkgs_VIA[@]}")"
-	echo "$(date -R) <-- Finding installed VIA (ALSA, X) packages"
-
-	if [[ -z "$VIA_inst" ]]; then
-		apt-get -y -f install "${Pkgs_VIA[@]}"
-	fi
-
-	#cp -af /usr/pluto/via-xorg/* /
-	depmod -a
-	rmmod via || :
-	modprobe via || :
-}
-#<-mkr_b_via_e->
+#
 
 # Clean up video driver packages
 # When a video card is removed/replaced, remove its packages
@@ -113,15 +94,7 @@ CleanupVideo()
 				ATI_dev=$(/usr/pluto/bin/CreateDevice -d "$NewDeviceTemplate" -R "$PK_Device")
 			fi
 		;;
-#<-mkr_b_via_b->
-		viaprop) # Proprietary VIA drivers
-			if [[ -z "$VIA_dev" ]]; then
-				Install_VIA_pkgs
-				NewDeviceTemplate=$DEVICETEMPLATE_Unichrome
-				VIA_dev=$(/usr/pluto/bin/CreateDevice -d "$NewDeviceTemplate" -R "$PK_Device")
-			fi
-		;;
-#<-mkr_b_via_e->
+#
 	esac
 	echo "$(date -R) <-- Auto-create video card device"
 

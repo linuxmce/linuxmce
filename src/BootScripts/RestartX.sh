@@ -17,9 +17,7 @@ orbiterID=$1
 computerIP=$2
 
 /usr/pluto/bin/LaunchRemoteCmd.sh "$computerIP" "
-#<-mkr_b_via_b->
-exit
-#<-mkr_b_via_e->
+#
 	. /usr/pluto/bin/Utils.sh;
 
 	bash -x /usr/pluto/bin/Xconfigure.sh --keep-resolution | tee-pluto /var/log/pluto/Xconfigure.log

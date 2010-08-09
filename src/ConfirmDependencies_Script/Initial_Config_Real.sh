@@ -258,7 +258,7 @@ DCERouterPort = 3450
 #<-mkr_b_videowizard_b->
 UseVideoWizard = 1
 #<-mkr_b_videowizard_e->
-TestInstallation = <-mkr_t_test_installation->
+TestInstallation = 0
 PK_Device = $Device
 Activation_Code = $Code"
 	[ -f /etc/pluto.conf ] || echo "$pluto_conf" >/etc/pluto.conf

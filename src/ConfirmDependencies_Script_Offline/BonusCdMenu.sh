@@ -3,12 +3,12 @@
 . /usr/pluto/install/Common.sh
 
 # XXX: Setup Extras CD
-echo "The <-mkr_t_name_mixed-> Extras CD version 1 has some extras, such as a video setup"
-echo "wizard to help get you up and running. If you have the <-mkr_t_name_mixed-> Extras CD"
+echo "The LinuxMCE Extras CD version 1 has some extras, such as a video setup"
+echo "wizard to help get you up and running. If you have the LinuxMCE Extras CD"
 echo "version 1, please insert it into your drive now and choose Y after it is in."
 echo "Otherwise, choose N."
 echo ""
-BonusCD=$(Ask "Did you insert the \"<-mkr_t_name_mixed-> Extras CD version 1\" in drive ? [Y/n]")
+BonusCD=$(Ask "Did you insert the \"LinuxMCE Extras CD version 1\" in drive ? [Y/n]")
 if [[ "$BonusCD" != N && "$BonusCD" != n ]]; then
 	if [[ ! -d /media/cdrom ]]; then
 		mkdir -p /media/cdrom
@@ -18,7 +18,7 @@ if [[ "$BonusCD" != N && "$BonusCD" != n ]]; then
 	count=0
 	until [[ -d "/media/cdrom/bonuscd1" || "$counter" -eq 5 ]]; do
 		((counter++))
-		echo "This in not a valid \"<-mkr_t_name_mixed-> Extras CD version 1\". Please insert the correct CD and try again."
+		echo "This in not a valid \"LinuxMCE Extras CD version 1\". Please insert the correct CD and try again."
 		/usr/bin/eject /media/cdrom &>/dev/null
 		echo "Press any key when you inserted the correct CD in drive."
 		read
@@ -28,7 +28,7 @@ if [[ "$BonusCD" != N && "$BonusCD" != n ]]; then
 		echo "Skipping BonusCD due to invalid data"
 		/usr/bin/eject /media/cdrom &>/dev/null
 	fi
-	echo "Processing \"<-mkr_t_name_mixed-> Extras CD version 1\""
+	echo "Processing \"LinuxMCE Extras CD version 1\""
 	echo "... PLEASE WAIT ..."
 
 	BonusWorkDir="/usr/pluto/deb-cache/dists/sarge/main/binary-i386"
@@ -46,18 +46,14 @@ if [[ "$BonusCD" != N && "$BonusCD" != n ]]; then
 		read
 	fi
 
-#<-mkr_b_via_b->
-	cd /media/cdrom/via
-	mkdir /home/via
-	cp * /home/via
-#<-mkr_b_via_e->
+#
 
 	sleep 1
 	cd 
 	/bin/umount /media/cdrom &>/dev/null
 	/usr/bin/eject /dev/cdrom &>/dev/null
 	echo ""
-	echo "Finished processing \"<-mkr_t_name_mixed-> Extras CD version 1\""
+	echo "Finished processing \"LinuxMCE Extras CD version 1\""
 	echo ""
 	cd "$BonusWorkDir"
 	# install dependencies for dpkg-scanpackages on offline installation
@@ -91,5 +87,5 @@ if [[ "$BonusCD" != N && "$BonusCD" != n ]]; then
 	echo "Command not found : dpkg-scanpackages. Packages.gz regeneration skipped."
 	fi
 else
-	echo "Skipping \"<-mkr_t_name_mixed-> Extras CD version 1\"..."
+	echo "Skipping \"LinuxMCE Extras CD version 1\"..."
 fi

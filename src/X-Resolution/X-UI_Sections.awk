@@ -20,13 +20,7 @@ BEGIN {
 # output the part that interests us in the Screen/Device section
 function outputScreenOrDevice()
 {
-#<-mkr_b_via_b->
-	# http://wiki.openchrome.org/tikiwiki/tiki-index.php?page=EXAAcceleration
-	print "\tOption \"AccelMethod\" \"exa\"";
-	print "\tOption \"ExaScratchSize\" \"8192\"";
-	print "\tOption \"MaxDRIMem\" \"16384\"";
-	print "\tOption \"MigrationHeuristic\" \"always\"";
-#<-mkr_b_via_e->
+#
 
 	print "\tOption \"XvmcUsesTextures\" \"true\"";
 	print "\tOption \"renderAccel\" \"true\"";
@@ -58,9 +52,7 @@ function outputExtensions()
 		print "\tOption \"Composite\" \"false\"";
 	}
 #<-mkr_B_via_e->
-#<-mkr_b_via_b->
-	print "\tOption \"Composite\" \"false\"";
-#<-mkr_b_via_e->
+#
 	print "\tOption \"RENDER\" \"true\"";
 	print "EndSection";
 

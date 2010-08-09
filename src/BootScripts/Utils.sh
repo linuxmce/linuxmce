@@ -422,9 +422,7 @@ GetVideoDriver()
 	fi
 	
 	local VideoDriver
-#<-mkr_b_via_b->
-	VideoDriver=viaprop
-#<-mkr_b_via_e->
+#
 #<-mkr_B_via_b->
 	VideoDriver=$(lshwd | grep ' VGA ' | head -1 | sed 's/^.*(\([^()]*\)).*$/\1/')
 	# If we only detect a vesa based system, lets see if we can find out what else it might be

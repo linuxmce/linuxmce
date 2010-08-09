@@ -1,5 +1,5 @@
-SNR_CPPFLAGS ?= <-mkr_t_compile_defines->
-SNR_LDFLAGS ?= <-mkr_t_compile_libs->
+SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
+SNR_LDFLAGS ?= 
 
 ROOT = ..
 VIP = ../VIPShared

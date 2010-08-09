@@ -320,10 +320,7 @@ int main( int argc, char *argv[] )
 	makefile_out << "LDFLAGS += -lmysqlclient_r" << endl;
 	makefile_out << "#<-mkr_B_use_mysql_wrapper_e->" << endl;
 	makefile_out << endl;
-	makefile_out << "#<-mkr_b_use_mysql_wrapper_b->" << endl;
-	makefile_out << "CPPFLAGS += -DUSE_MYSQL_WRAPPER" << endl;
-	makefile_out << "sources += ../db_wrapper/db_wrapper.cpp ../db_wrapper/ClientSocket.cpp ../db_wrapper/Socket.cpp" << endl;
-	makefile_out << "#<-mkr_b_use_mysql_wrapper_e->" << endl;
+	makefile_out << "#" << endl;
 	makefile_out << endl;
 	makefile_out << "sources += ";
 

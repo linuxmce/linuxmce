@@ -9,30 +9,4 @@ DEVICETEMPLATE_Generic_PC_as_Core=7
 
 DEVICEDATA_DisklessBoot=9
 
-#<-mkr_b_via_b->
-Q="
-	SELECT PK_Device
-	FROM Device
-	WHERE FK_DeviceTemplate='$DEVICETEMPLATE_Generic_PC_as_Core'
-"
-CoreID=$(RunSQL "$Q")
-if [[ -z "$CoreID" ]]; then
-	exit 1
-fi
-
-DisklessBoot=$(GetDeviceData "$PK_Device" "$DEVICEDATA_DisklessBoot")
-
-if [[ "$DisklessBoot" != 1 ]]; then
-	/usr/sbin/grub-set-default 2
-else
-	AppServerID=$(FindDevice_Template "$CoreID" "$DEVICETEMPLATE_App_Server")
-	if [[ -z "$AppServerID" ]]; then
-		exit 1
-	fi
-
-	Tab=$'\t'
-	/usr/pluto/bin/MessageSend $DCERouter 0 "$AppServerID" 1 67 13 "/usr/pluto/bin/Diskless_ChangeDisklessBootImage.sh" 51 "${PK_Device}${Tab}debian" 241 1
-fi
-
-reboot
-#<-mkr_b_via_e->
+#

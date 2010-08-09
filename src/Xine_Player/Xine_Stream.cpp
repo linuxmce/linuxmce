@@ -3004,11 +3004,7 @@ void Xine_Stream::frameOutputCallback( void *data, int video_width, int video_he
 																						int *dest_x, int *dest_y, int *dest_width, int *dest_height,
 																						double *dest_pixel_aspect,
 																						int *win_x, int *win_y 
-//<-mkr_b_via_b->
-#ifdef VIA
-		, int *dispay_no
-#endif
-//<-mkr_b_via_e->
+//
 																						)
 {
 	Xine_Stream * pStream = ( Xine_Stream* ) data;

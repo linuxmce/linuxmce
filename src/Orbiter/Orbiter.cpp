@@ -6643,16 +6643,7 @@ void Orbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,s
 	if(NULL != m_pMouseBehavior && iStreamID == 0)
 		m_pMouseBehavior->MediaStopped();
 #endif
-//<-mkr_b_aj_b->
-//	this->CMD_Show_Object("5666.0.0.5670",0,"","",iPK_MediaType==0 ? "0" : "1");
-//	this->CMD_Show_Object("5666.0.0.5588",0,"","",iPK_MediaType==0 ? "0" : "1");
-//	this->CMD_Show_Object("5666.0.0.5668",0,"","",iPK_MediaType!=0 ? "0" : "1");
-//	this->CMD_Show_Object("5667.0.0.5670",0,"","",iPK_MediaType==0 ? "0" : "1");
-//	this->CMD_Show_Object("5667.0.0.5588",0,"","",iPK_MediaType==0 ? "0" : "1");
-//	this->CMD_Show_Object("5667.0.0.5668",0,"","",iPK_MediaType!=0 ? "0" : "1");
-//	DCE::CMD_Refresh CMD_Refresh(m_dwPK_Device,m_dwPK_Device,"");  // send ourselves a refresh since the nbc logo may not show/hide
-//	SendCommand(CMD_Refresh);
-//<-mkr_b_aj_e->
+//
 
 	m_iStreamID=iStreamID;
 	m_iPK_MediaType=iPK_MediaType;

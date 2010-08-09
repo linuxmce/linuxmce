@@ -48,11 +48,7 @@ Xine_Player::Xine_Player(int DeviceID, string ServerAddress,bool bConnectEventHa
 	
 	m_pNotificationSocket = new XineNotification_SocketListener(string("m_pNotificationSocket"));
 	m_pNotificationSocket->m_bSendOnlySocket = true; // one second
-//<-mkr_b_via_b->
-#ifdef VIA
-        m_bCodecIsOK = false;
-#endif
-//<-mkr_b_via_e->
+//
 }
 
 //<-dceag-const2-b->
@@ -235,16 +231,9 @@ void Xine_Player::CMD_Simulate_Mouse_Click(int iPosition_X,int iPosition_Y,int i
 void Xine_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string &sCMD_Result,Message *pMessage)
 //<-dceag-c37-e->
 {
-//<-mkr_b_aj_b->
-	ProcessUtils::ResetMsTime();
-//<-mkr_b_aj_e->
+//
 
-//<-mkr_b_via_b->
-#ifdef VIA
-    if (!m_bCodecIsOK)
-        checkCodec();
-#endif
-//<-mkr_b_via_e->
+//
     
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Xine_Player::CMD_Play_Media() called for id %d filename: %s (%s)", iStreamID, sMediaURL.c_str(),sMediaPosition.c_str());
 	
@@ -1324,9 +1313,7 @@ void Xine_Player::ReportTimecodeViaIP(int iStreamID, int Speed)
         mediaInfo.m_sFileName = pStream->m_sCurrentFile;
         mediaInfo.m_sMediaType = pStream->m_sMediaType;
         mediaInfo.m_iMediaID = pStream->m_iMediaID;
-//<-mkr_b_aj_b->
-		 mediaInfo.m_iPositionInMilliseconds = ProcessUtils::GetMsTime();
-//<-mkr_b_aj_e->
+//
 	
         string sIPTimeCodeInfo = mediaInfo.ToString();
 
@@ -1388,12 +1375,7 @@ string Xine_Player::Get_MD_AudioSettings()
 void Xine_Player::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string sStreamingTargets,string &sCMD_Result,Message *pMessage)
 //<-dceag-c249-e->
 {
-//<-mkr_b_via_b->
-#ifdef VIA
-    if (!m_bCodecIsOK)
-        checkCodec();
-#endif
-//<-mkr_b_via_e->
+//
 
 	if (iStreamID==0)
 		iStreamID=1;
@@ -1704,50 +1686,5 @@ void Xine_Player::CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,
         LoggerWrapper::GetInstance()->Write(LV_STATUS,"No stream found"); 
 }
 
-//<-mkr_b_via_b->
-#ifdef VIA
-void Xine_Player::checkCodec()
-{
-    m_bCodecIsOK = false;
-
-    // checking codec
-    LoggerWrapper::GetInstance()->Write(LV_STATUS, "Checking Fiire codec");
-    int iRet = system("/sbin/modprobe via-fiire-codec");
-    if (iRet != 0)
-    {
-        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Updating Fiire codec");
-            
-        string sCmd = "/usr/pluto/bin/UpdateCodec.sh ";
-        
-        DeviceData_Base *pDevice = m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_Orbiter_CONST);
-        
-        if (pDevice)
-        {
-            sCmd += StringUtils::itos(m_pData->m_dwPK_Device_ControlledVia);
-            LoggerWrapper::GetInstance()->Write(LV_STATUS, "Xine is controlled via #%i", pDevice->m_dwPK_Device);
-        }
-        else
-            LoggerWrapper::GetInstance()->Write(LV_WARNING, "Cannot find device controlling Xine");
-
-        iRet = system(sCmd.c_str());
-        if (iRet == 0)
-        {
-            LoggerWrapper::GetInstance()->Write(LV_STATUS, "Re-checking Fiire codec");
-            iRet = system("/sbin/modprobe via-fiire-codec");
-        }
-        else
-            LoggerWrapper::GetInstance()->Write(LV_STATUS, "Update script returned %i", iRet);
-                                
-        if (iRet != 0)
-        {
-            LoggerWrapper::GetInstance()->Write(LV_WARNING, "Failed to initialize , exiting");
-            m_bReload=false;
-            OnQuit();
-        }
-        else
-            m_bCodecIsOK = true;
-    }
-}
-#endif
-//<-mkr_b_via_e->
+//
 

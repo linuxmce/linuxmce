@@ -10,9 +10,7 @@ CPPFLAGS += -I/usr/include/mysql
 LDFLAGS += -lmysqlclient_r
 #<-mkr_B_use_mysql_wrapper_e->
 
-#<-mkr_b_use_mysql_wrapper_b->
-CPPFLAGS += -DUSE_MYSQL_WRAPPER
-#<-mkr_b_use_mysql_wrapper_e->
+#
 
 sources = CommonFunctions.cpp Tribunerequests.cpp R_GetLineups.cpp \
 	R_GetChannels.cpp R_GetDiffs.cpp ClientFunctions.cpp \

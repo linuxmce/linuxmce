@@ -1,4 +1,4 @@
-SNR_CPPFLAGS ?= <-mkr_t_compile_defines->
+SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
 
 ROOT = ../..
 CXX = g++

@@ -106,18 +106,7 @@ if [[ "$ForceUpdatesStamp" == "$UpdatesOkStamp" ]]; then
 fi
 
 ## If we get till here than we should start upgrading
-#<-mkr_B_ubuntu_b->
-echo "- Previewing dist-upgrade"
-InstPkgs="$(apt-get -s -f dist-upgrade | grep "^Conf " | cut -d' ' -f2 | tr '\n' ' ')"
-RebootPkg="pluto-kernel-upgrade"
-for Pkg in $RebootPkg; do
-	if [[ "$InstPkgs" == *"$Pkg"* ]]; then
-		echo "- A reboot will be performed after the updates are applied"
-        	DoReboot=y
-        	break
-	fi
-done
-#<-mkr_B_ubuntu_e->
+#
 
 Count=$(apt-get -f -y -s dist-upgrade | egrep -c '^Inst |^Conf ')
 
@@ -127,12 +116,7 @@ apt-get -V -f -y dist-upgrade || exit 1
 if [[ "$Count" != "0" ]]; then
 	Q="UPDATE Device SET NeedConfigure=1"
 	RunSQL "$Q"
-#<-mkr_B_ubuntu_b->
-	if [[ "$DoReboot" == y ]]; then
-		echo "New kernel installed. Rebooting"
-		reboot
-	fi
-#<-mkr_B_ubuntu_e->
+#
 fi
 
 echo "- Copying kernel package(s) for later use"

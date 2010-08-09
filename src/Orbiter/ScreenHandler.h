@@ -481,14 +481,7 @@ public:
 	//data
 	map<string,string> m_mapNetworkSettings;
 
-//<-mkr_b_aj_b->
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-// 
-//    aJ project temporary prototype screens
 //
-	void SCREEN_aJAd(long PK_Screen, string sFilename, string sURL);
-	bool Aj_ObjectSelected(CallBackData *pData);
-//<-mkr_b_aj_e->
 
 };
 //-----------------------------------------------------------------------------------------------------
