@@ -267,10 +267,15 @@ Framework_ConnectDevice()
 				Log "ConnectDevice: Serial connection type with incomplete settings"
 				exit 1
 			fi
+			if [[ ! -e "$DeviceConnection_SerialPort" || -d "$DeviceConnection_SerialPort" ]]; then
+				Log "ConnectDevice: Invalid serial port"
+			fi
+			exec 5<>"$DeviceConnection_SerialPort"
 			Log "ConnectDevice: Parameters: Baud=$DeviceConnection_BaudRate Parity=$DeviceConnection_Parity Port=$DeviceConnection_SerialPort"
-			/usr/pluto/bin/TestSerialPort -p "$DeviceConnection_SerialPort" -b "$DeviceConnection_BaudRate" -P "$DeviceConnection_Parity"
-			socat PTY,link="$Framework_PipeDir/ttyDevice",echo=0,icanon=0,raw "$DeviceConnection_SerialPort" &
+			/usr/pluto/bin/TestSerialPort -p /dev/fd/5 -b "$DeviceConnection_BaudRate" -P "$DeviceConnection_Parity"
+			socat PTY,link="$Framework_PipeDir/ttyDevice",echo=0,icanon=0,raw /dev/fd/5 &
 			Framework_PIDofDevConn=$!
+			exec 5>&-
 		;;
 		inet)
 			Log "ConnectDevice: Parameters: Protocol=$DeviceConnection_Protocol Endpoint: $DeviceConnection_Endpoint"
