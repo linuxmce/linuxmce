@@ -402,18 +402,25 @@ void App_Server::CMD_Halt_Device(int iPK_Device,string sForce,string &sCMD_Resul
 //<-dceag-c323-e->
 {
         if ( sForce=="" ) {
-	        int ret = system("/usr/bin/pm-is-supported --suspend");
-		if (ret < 0) {
-		        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Error checking if suspend is supported (running /usr/bin/pm-is_supported --suspend)");
-			sForce = "H"; // halt, as we don't know what is supported
-		} else {
-		        if ( ret ) {
-			        LoggerWrapper::GetInstance()->Write(LV_WARNING,"Suspend not supported - halting instead");
-				sForce = "H"; // halt if we don't have suspend capabilities
+	        // Get device data and check power off mode
+	        string powerOffMode = m_pData->m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device_MD,DEVICEDATA_PowerOff_mode_CONST);
+		if (powerOffMode == "") {
+		        int ret = system("/usr/bin/pm-is-supported --suspend");
+			if (ret < 0) {
+		                LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Error checking if suspend is supported (running /usr/bin/pm-is_supported --suspend)");
+				sForce = "H"; // halt, as we don't know what is supported
 			} else {
-			        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Suspend supported - suspending");
-				sForce = "S";
+			        if ( ret ) {
+				        LoggerWrapper::GetInstance()->Write(LV_WARNING,"Suspend not supported - halting instead");
+					sForce = "H"; // halt if we don't have suspend capabilities
+				} else {
+				        LoggerWrapper::GetInstance()->Write(LV_WARNING,"Suspend supported - suspending");
+					sForce = "S";
+				}
 			}
+		} else {
+		        sForce = powerOffMode;
+			LoggerWrapper::GetInstance()->Write(LV_WARNING,"PowerOff mode overridden from MD device data: %s", sForce.c_str());
 		}
 	}
 	
