@@ -1,6 +1,7 @@
 var touch_enabled = false;
 var waiting_offset = {top: 100, left: 100};
 var use_wait_cursor = true;
+var DeviceNumer = undefined;
 
 function cursorWait() {
 	if (!use_wait_cursor)
@@ -47,18 +48,18 @@ function findPosY(obj)
 	return curtop;
 }
 
-function sendTouch(event, DeviceNumber)
+function sendTouch(event)
 {
 	if (touch_enabled)
 	{
 		var xRelative = event.pageX - $("#screen").position().left;
 		var yRelative = event.pageY - $("#screen").position().top;
 
-		DoCmd("TOUCH " + xRelative + "x" + yRelative, DeviceNumber);
+		DoCmd("TOUCH " + xRelative + "x" + yRelative);
 	}
 }
 
-function DoCmd(Cmd, DeviceNumber)
+function DoCmd(Cmd)
 {
 	StopRefreshTimer();
 	cursorWait();
@@ -66,17 +67,13 @@ function DoCmd(Cmd, DeviceNumber)
 	var url = 'weborbiter_command.php';
 	var data = 'device_id=' + encodeURIComponent(DeviceNumber) + "&cmd=" + encodeURIComponent(Cmd);
 
-	$.get(url, data,
-		function(data) {
-			LoadImage(DeviceNumber);
-		}
-	);
+	$.get(url, data, LoadImage);
 }
 
-function StartRefreshTimer(DeviceNumber)
+function StartRefreshTimer()
 {
 	StopRefreshTimer();
-	$(window).oneTime(1000, "RefreshImage", function() {RefreshImage(DeviceNumber)});
+	$(window).oneTime(1000, "RefreshImage", RefreshImage);
 }
 
 function StopRefreshTimer()
@@ -84,32 +81,34 @@ function StopRefreshTimer()
 	$(window).stopTime("RefreshImage");
 }
 
-function LoadImage(DeviceNumber)
+function LoadImage()
 {
 	StopRefreshTimer();
 	cursorWait();
 
 	var url = "weborbiter_image.php?device_id=" + encodeURIComponent(DeviceNumber) + "&rand=" + Math.floor(Math.random() * 90000 + 10000);
-	$("#screen").load(function() {
-			cursorDone();
-			StartRefreshTimer(DeviceNumber);
-	});
-	$("#screen").error(function() {
-			StartRefreshTimer(DeviceNumber);
-	});
 	$("#screen").attr("src", url);
 }
 
-function PageLoaded(DeviceNumber)
+function PageLoaded(theDeviceNumber)
 {
 	var offset_top = ($("#screen").height() - $("#waiting").height()) / 2;
 	var offset_left = ($("#screen").width() - $("#waiting").width()) / 2;
 	waiting_offset = { top: offset_top, left: offset_left };
 	touch_enabled = true;
-	StartRefreshTimer(DeviceNumber);
+	DeviceNumber = theDeviceNumber;
+	StartRefreshTimer();
+
+	$("#screen").load(function() {
+			cursorDone();
+			StartRefreshTimer();
+	});
+	$("#screen").error(function() {
+			StartRefreshTimer();
+	});
 }
 
-function RefreshImage(DeviceNumber)
+function RefreshImage()
 {
 	var url = 'weborbiter.php';
 	var data = 'device_id=' + encodeURIComponent(DeviceNumber) + "&action=anynews";
@@ -120,13 +119,13 @@ function RefreshImage(DeviceNumber)
 		success: function(data)
 		{
 			if (data == "yes")
-				LoadImage(DeviceNumber);
+				LoadImage();
 			else
-				StartRefreshTimer(DeviceNumber);
+				StartRefreshTimer();
 		},
 		error: function()
 		{
-			StartRefreshTimer(DeviceNumber);
+			StartRefreshTimer();
 		}
 	});
 }
