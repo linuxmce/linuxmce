@@ -68,6 +68,9 @@ namespace DCE
 	string m_sDestChannel;
 	bool m_bReplacedChannel;
 
+	// Los93soL
+	std::map<string,string> m_mapChannel2CallerID;
+
 	// Private methods
 public:
 	// Public member variables

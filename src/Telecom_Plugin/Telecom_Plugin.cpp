@@ -526,7 +526,7 @@ Telecom_Plugin::CallsStatusChanged(class Socket *pSocket,class Message *pMessage
 	
 	MAP_CHANNELS mapChannels; //call id (conference number or 1st channel) <-> (channel, callerid)
 	MAP_CALLS mapCalls; //call id <-> is conference ?
-	
+
 	PLUTO_SAFETY_LOCK(vm, m_TelecomMutex);  // Protect the call data
 	
 	vector<string> vectLines;
@@ -731,6 +731,15 @@ Telecom_Plugin::Ring( class Socket *pSocket, class Message *pMessage, class Devi
 	string sSource_Caller_ID = pMessage->m_mapParameters[EVENTPARAMETER_Source_Caller_ID_CONST];
 	string sDestination_Caller_ID = pMessage->m_mapParameters[EVENTPARAMETER_Destination_Caller_ID_CONST];
 
+        // Los93soL
+        // Store the channel and callerid in a map to it can be called up easily
+	if(sSource_Caller_ID != "") {
+        	m_mapChannel2CallerID[sSource_Channel] = sSource_Caller_ID;
+	}
+	if(sDestination_Caller_ID != "") {
+	        m_mapChannel2CallerID[sDestination_Channel] = sDestination_Caller_ID;
+	}
+
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Ring event received from PBX: src channel %s, dest channel %s",
 		sSource_Channel.c_str(), sDestination_Channel.c_str());
 
@@ -878,13 +887,25 @@ Telecom_Plugin::Ring( class Socket *pSocket, class Message *pMessage, class Devi
 bool
 Telecom_Plugin::Link( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo ) 
 {
+	// Los93soL
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Telecom_Plugin::Link Begin");
+
 	string sSource_Channel = pMessage->m_mapParameters[EVENTPARAMETER_Source_Channel_CONST];
 	string sDestination_Channel = pMessage->m_mapParameters[EVENTPARAMETER_Destination_Channel_CONST];
 	string sSource_Caller_ID = pMessage->m_mapParameters[EVENTPARAMETER_Source_Caller_ID_CONST];
 	string sDestination_Caller_ID = pMessage->m_mapParameters[EVENTPARAMETER_Destination_Caller_ID_CONST];
 
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Link event received from PBX: src channel %s, dest channel %s",
-	sSource_Channel.c_str(), sDestination_Channel.c_str());
+        // Los93soL
+        // Store the channel and callerid in a map to it can be called up easily
+        if(sSource_Caller_ID != "") {
+                m_mapChannel2CallerID[sSource_Channel] = sSource_Caller_ID;
+        }
+        if(sDestination_Caller_ID != "") {
+                m_mapChannel2CallerID[sDestination_Channel] = sDestination_Caller_ID;
+        }
+
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Link event received from PBX: src channel %s, dest channel %s, src caller id %s, dest caller id %s",
+	sSource_Channel.c_str(), sDestination_Channel.c_str(), sSource_Caller_ID.c_str(), sDestination_Caller_ID.c_str());
 
 	PLUTO_SAFETY_LOCK(vm, m_TelecomMutex);
 
@@ -947,7 +968,7 @@ Telecom_Plugin::Link( class Socket *pSocket, class Message *pMessage, class Devi
 			}
 			
 			string sOrbiters = m_pOrbiter_Plugin->PK_Device_Orbiters_In_Room_get(pOH_Orbiter->m_dwPK_Room, false);
-			
+
 			SCREEN_DevCallInProgress_DL screen_DevCallInProgress_DL(
 				m_dwPK_Device, sOrbiters, 
 				GetCallerName(sSource_Channel, sSource_Caller_ID),
@@ -982,7 +1003,9 @@ Telecom_Plugin::Link( class Socket *pSocket, class Message *pMessage, class Devi
 			} else {
 				SCREEN_DevCallInProgress_DL screen_DevCallInProgress_DL(
                                         m_dwPK_Device, sDestOrbiters,
-                                        GetCallerName(sDestination_Channel, sDestination_Caller_ID),
+					// Los93soL
+					GetCallerName(m_sDestChannel, sDestination_Caller_ID),
+					//GetCallerName(sDestination_Channel, sDestination_Caller_ID),
                                         sCallID,
                                         m_sDestChannel
 				);
@@ -1012,6 +1035,9 @@ Telecom_Plugin::Link( class Socket *pSocket, class Message *pMessage, class Devi
 		}
 	}
 	
+	// Los93soL
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Telecom_Plugin::Link Complete");
+
 	return false;
 }
 
@@ -1026,6 +1052,10 @@ bool Telecom_Plugin::Hangup( class Socket *pSocket, class Message *pMessage, cla
 {
 	string sChannel_ID = pMessage->m_mapParameters[EVENTPARAMETER_Channel_ID_CONST];
 	string sReason = pMessage->m_mapParameters[EVENTPARAMETER_Reason_CONST];
+
+	// Los93soL
+	// Remove the channel from our channel caller ID map
+	m_mapChannel2CallerID.erase(sChannel_ID);
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "WWW Hangup the channel %s", sChannel_ID.c_str());
 	
@@ -3917,15 +3947,23 @@ void Telecom_Plugin::CMD_Add_Extensions_To_Call(string sPhoneCallID,string sExte
 void Telecom_Plugin::CMD_Get_Associated_Picture_For_Channel(string sChannel,char **pData,int *iData_Size,string &sCMD_Result,Message *pMessage)
 //<-dceag-c928-e->
 {
+	// Los93soL
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Telecom_Plugin::CMD_Get_Associated_Picture_For_Channel Begin");
+
 	if(NULL != pData && NULL != iData_Size)
 	{
 		//default path for unknown user
 		string sPath = "/usr/pluto/orbiter/skins/Basic/Users/UnknownUser.png";
 
+		// Los93sol
+		string sCallerID = m_mapChannel2CallerID[sChannel];
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "CMD_Get_Associated_Picture_For_Channel : sCallerID: %s", sCallerID.c_str());
+
 		string sExten;
 		if(!ParseChannel(sChannel, &sExten) || sExten.empty() )
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "CMD_Get_Associated_Picture_For_Channel : no extension from channel %s", sChannel.c_str());
-	
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "CMD_Get_Associated_Picture_For_Channel : no extension from channel %s", sChannel.c_str());
+
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "CMD_Get_Associated_Picture_For_Channel : sExten: %s", sExten.c_str());
 		int nEmbeddedDeviceID = FindValueInMap(map_ext2device, sExten, 0); 
 
 		if(0 != nEmbeddedDeviceID)
@@ -3948,9 +3986,12 @@ void Telecom_Plugin::CMD_Get_Associated_Picture_For_Channel(string sChannel,char
 		
 		// Attempt to get image for contact in contacts database.
 		vector<Row_PhoneNumber *> vectRow_PhoneNumber;
-		string sWhere = "DialAs LIKE '%"+sExten+"%'";
+		//string sWhere = "DialAs LIKE '%"+sExten+"%'";
 
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"BLARG sWhere is %s",sWhere.c_str());
+		// Los93soL
+		string sWhere = "Extension = '" + sExten + "' OR CONCAT(AreaCode, PhoneNumber) = '" + sCallerID + "' OR PhoneNumber = '" + sCallerID + "'";
+
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CMD_Get_Associated_Picture_For_Channel: sWhere is %s",sWhere.c_str());
 
 		m_pDatabase_pluto_telecom->PhoneNumber_get()->GetRows(sWhere,&vectRow_PhoneNumber);
 		if (vectRow_PhoneNumber.size())
@@ -3971,6 +4012,10 @@ void Telecom_Plugin::CMD_Get_Associated_Picture_For_Channel(string sChannel,char
 		*pData = FileUtils::ReadFileIntoBuffer(sPath, ulSize);
 		*iData_Size = static_cast<int>(ulSize);
 	}
+
+	// Los93soL
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Telecom_Plugin::CMD_Get_Associated_Picture_For_Channel End");
+
 }
 
 string Telecom_Plugin::DebugPendingCalls() const
@@ -4049,6 +4094,15 @@ void Telecom_Plugin::CMD_Add_To_Speed_Dial(int iPK_Device,string sCallerID,strin
 
 string Telecom_Plugin::GetCallerName(string sChannel, string sCallerID)
 {
+	// Los93soL
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "GetCallerName : sChannel: %s sCallerID: %s", sChannel.c_str(), sCallerID.c_str());
+	if(sCallerID=="") {
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "GetCallerName: Pulling caller ID from map");
+		sCallerID = m_mapChannel2CallerID[sChannel];
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "GetCallerName: Map returned caller ID: %s", sCallerID.c_str());
+	}
+
+
 	string sCallerName;
 	string sExten;
 
@@ -4056,7 +4110,7 @@ string Telecom_Plugin::GetCallerName(string sChannel, string sCallerID)
 	if(!ParseChannel(sChannel, &sExten))
 	{
 		//failed to extract extension
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "GetCallerName : Failed to extension from channel %s", sChannel.c_str());
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "GetCallerName : Failed to get extension from channel %s", sChannel.c_str());
 	}
 	else
 	{
@@ -4090,26 +4144,36 @@ string Telecom_Plugin::GetCallerName(string sChannel, string sCallerID)
 		//do we have an entry in phone book?
 		//NOTE : if it's a device, the entry from phone book will override the caller name which uses the device name
 		vector<Row_PhoneNumber *> vectRows;
-		m_pDatabase_pluto_telecom->PhoneNumber_get()->GetRows(
-			"Extension = '" + sExten + "' OR PhoneNumber LIKE '%" + sExten + "%' OR DialAs LIKE '%" + sExten + "%'", 
-			&vectRows);
+		// Los93soL
+                m_pDatabase_pluto_telecom->PhoneNumber_get()->GetRows(
+                        "Extension = '" + sExten + "' OR CONCAT(AreaCode, PhoneNumber) = '" + sCallerID + "' OR PhoneNumber = '" + sCallerID + "'", &vectRows);
+
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Extension = %s OR CONCAT(AreaCode, PhoneNumber) = %s OR PhoneNumber = %s",
+                                sCallerID.c_str(), sCallerID.c_str(), sCallerID.c_str());
+
 
 		if(!vectRows.empty())
 		{
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "GetCallerName: found %d records in PhoneNumber for channel %s, extension %s",
-				vectRows.size(), sChannel.c_str(), sExten.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "GetCallerName: found %d records in PhoneNumber for channel %s, caller ID %s, extensions %s",
+				vectRows.size(), sChannel.c_str(), sCallerID.c_str(), sExten.c_str());
 
 			Row_PhoneNumber *pRow_PhoneNumber = *(vectRows.begin());
 			Row_Contact *pRow_Contact = pRow_PhoneNumber->FK_Contact_getrow();
 			if(NULL != pRow_Contact)
 			{
 				sCallerName = pRow_Contact->Name_get();
+
+				Row_PhoneType *pRow_PhoneType = pRow_PhoneNumber->FK_PhoneType_getrow();
+				if( pRow_PhoneType ) {
+                        		string sPhoneType = pRow_PhoneType->Description_get();
+					sCallerName = pRow_Contact->Name_get() + " (" + sPhoneType + ")";
+				}
 			}
 		}
 		else
 		{
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "GetCallerName: NO records found in PhoneNumber for channel %s, extension %s",
-				sChannel.c_str(), sExten.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "GetCallerName: NO records found in PhoneNumber for channel %s, caller ID %s, extension %s",
+				sChannel.c_str(), sCallerID.c_str(), sExten.c_str());
 		}
 	}
 
@@ -4128,8 +4192,8 @@ string Telecom_Plugin::GetCallerName(string sChannel, string sCallerID)
 		}
 	}
 
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "GetCallerName: found caller name '%s' for channel %s, extension %s",
-		sCallerName.c_str(), sChannel.c_str(), sExten.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "GetCallerName: found caller name '%s' for channel %s, caller ID %s, extension %s",
+		sCallerName.c_str(), sChannel.c_str(), sCallerID.c_str(), sExten.c_str());
 
 	return sCallerName;
 }
