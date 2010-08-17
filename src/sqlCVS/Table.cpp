@@ -2250,7 +2250,19 @@ bool Table::ShowChanges(bool bAllUsers)
 				else if( pChangedRow->m_eTypeOfChange==toc_Delete )
 					iDel++;
 			}
-			cout << setw( 6 ) << iNew << setw( 6 ) << iMod << setw( 6 ) << iDel << endl;
+			if (iNew != 0)
+				cout << setw(6) << iNew;
+			else
+				cout << setw(6) << "-";
+			if (iMod != 0)
+				cout << setw(6) << iMod;
+			else
+				cout << setw(6) << "-";
+			if (iDel != 0)
+				cout << setw(6) << iDel;
+			else
+				cout << setw(6) << "-";
+			cout << endl;
 		}
 		if( bAllUsers )
 			return true;
