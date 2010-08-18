@@ -99,13 +99,19 @@ function PageLoaded(theDeviceNumber)
 	DeviceNumber = theDeviceNumber;
 	StartRefreshTimer();
 
-	$("#screen").load(function() {
-			cursorDone();
-			StartRefreshTimer();
-	});
-	$("#screen").error(function() {
-			StartRefreshTimer();
-	});
+	$("#screen").load(OnPageLoaded);
+	$("#screen").error(OnPageLoadError);
+}
+
+function OnPageLoaded()
+{
+	cursorDone();
+	StartRefreshTimer();
+}
+
+function OnPageLoadError()
+{
+	StartRefreshTimer();
 }
 
 function RefreshImage()
@@ -116,16 +122,20 @@ function RefreshImage()
 		url: url,
 		data: data,
 		cache: false,
-		success: function(data)
-		{
-			if (data == "yes")
-				LoadImage();
-			else
-				StartRefreshTimer();
-		},
-		error: function()
-		{
-			StartRefreshTimer();
-		}
+		success: OnRefreshSuccess,
+		error: OnRefreshError
 	});
+}
+
+function OnRefreshSuccess(data)
+{
+	if (data == "yes")
+		LoadImage();
+	else
+		StartRefreshTimer();
+}
+
+function OnRefreshError()
+{
+	StartRefreshTimer();
 }
