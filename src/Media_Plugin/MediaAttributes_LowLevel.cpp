@@ -141,9 +141,10 @@ string MediaAttributes_LowLevel::GetFilePathFromFileID( int PK_File, int *PK_Med
         string strFile = row[1];
 		if( PK_MediaType && row[2] )
 			*PK_MediaType = atoi(row[2]);
-	if (*PK_MediaType == MEDIATYPE_lmce_StreamedAudio_CONST || *PK_MediaType == MEDIATYPE_lmce_StreamedVideo_CONST) // Check if it is a A/V stream. If so do not change anything in its filename
-	    return strFile;
-	else
+// Why do this make DCErouter crash?
+//	if (*PK_MediaType == MEDIATYPE_lmce_StreamedAudio_CONST || *PK_MediaType == MEDIATYPE_lmce_StreamedVideo_CONST) // Check if it is a A/V stream. If so do not change anything in its filename
+//	    return strFile;
+//	else
     	    return strPath + "/" + strFile;
     }
 
