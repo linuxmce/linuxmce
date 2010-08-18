@@ -2,6 +2,7 @@ alsa-source
 asterisk-dev
 autoconf
 automake
+automake1.9
 build-essential
 ccache
 cdbs

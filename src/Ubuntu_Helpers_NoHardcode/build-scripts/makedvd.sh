@@ -180,9 +180,6 @@ echo '
 Package: mythtv mythtv-frontend mythtv-backend mythtv-common mythtv-database mythtv-transcode-utils mythweb libmythtv-perl libmyth python-myth mythtv-themes mythplugins mytharchive mytharchive-data mythbrowser mythgallery mythgame mythmovies mythmusic mythnetvison mythnetvision-data mythnews mythvideo mythweather mythzoneminder myth-doc
 Pin: origin deb.linuxmce.org
 Pin-Priority: 1001
-Package: *
-Pin: origin
-Pin-Priority: 600
 ' >edit/etc/apt/preferences
         
 echo Creating Desktop button
