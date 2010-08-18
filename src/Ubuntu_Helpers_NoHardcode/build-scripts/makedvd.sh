@@ -17,7 +17,11 @@
 SourceIso=kubuntu-8.10-dvd-i386.iso
 SourceIso=kubuntu-8.10-desktop-i386.iso
 # SourceIso=karmic-desktop-i386.iso
-BUILDER_ROOT=/opt/builder386
+if [[ "x$1" -eq "x" ]]; then
+	BUILDER_ROOT=/opt/builder386
+else
+	BUILDER_ROOT=$1
+fi
 SVNrevision=$(svn info "$BUILDER_ROOT/var/lmce-build/svn/branches/LinuxMCE-0810/src" |grep ^Revision | cut -d" " -f2)
 
 echo Aktuell svn Revision $SVNrevision
@@ -203,6 +207,6 @@ umount squashfs
 umount mnt
 umount edit
 echo "Done. Please run finalizedvd.sh $SVNrevision"
-~/finalizedvd.sh $SVNrevision
-# mv ~/live/L*.iso /var/www/rsync/snapshots
+~/finalizedvd.sh $SVNrevision 
+mv ~/live/L*.iso /var/www/rsync/snapshots
 exit 0
