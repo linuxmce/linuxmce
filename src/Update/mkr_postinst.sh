@@ -13,10 +13,5 @@ if [[ "$KEEPOLD" -eq "0" ]]; then
 Package: mythtv mythtv-frontend mythtv-backend mythtv-common mythtv-database mythtv-transcode-utils mythweb libmythtv-perl libmyth python-myth mythtv-themes mythplugins mytharchive mytharchive-data mythbrowser mythgallery mythgame mythmovies mythmusic mythnetvison mythnetvision-data mythnews mythvideo mythweather mythzoneminder myth-doc 
 Pin: origin deb.linuxmce.org
 Pin-Priority: 1001
-
-# If our local package uses the same version as elsewhere, we take the one we have locally.
-Package: *
-Pin: origin
-Pin-Priority: 500
 ' > /etc/apt/preferences
 fi
