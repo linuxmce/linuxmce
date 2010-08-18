@@ -29,7 +29,7 @@ CREATE TABLE `Datapoints` (
   `EK_Device` int(11) NOT NULL default '0',
   `timestamp` timestamp NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY  (`PK_Datapoints`)
-) ENGINE=MyISAM AUTO_INCREMENT=63827 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=63827 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -54,7 +54,7 @@ CREATE TABLE `Unit` (
   `Unit` varchar(30) NOT NULL,
   `Precision` int(11) NOT NULL,
   PRIMARY KEY  (`PK_Unit`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 --
