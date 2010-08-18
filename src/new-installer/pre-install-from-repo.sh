@@ -13,7 +13,7 @@ CreatePackagesFiles
 # Make sure sources.conf has EOL at EOF
 echo>>/etc/apt/sources.conf
 
-AddRepoToSources "file:${LOCAL_REPO_BASE} ${LOCAL_REPO_DIR}"
+AddRepoToSourcesTop "file:${LOCAL_REPO_BASE} ${LOCAL_REPO_DIR}"
 AddRepoToSources "http://deb.linuxmce.org/ubuntu/ ${DISTRO}  ${COMPOS}"
 AddRepoToSources "http://debian.slimdevices.com/ stable  main"
 

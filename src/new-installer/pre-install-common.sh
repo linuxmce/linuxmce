@@ -103,6 +103,26 @@ function CreatePackagesFiles
 
 
 
+function AddRepoToSourcesTop
+{
+        local repository="$1"
+        local changed
+
+
+        if ! grep -q "^[^#]*${repository}" /etc/apt/sources.list
+        then
+                sed -e "1ideb ${repository}" -i /etc/apt/sources.list
+                changed=0
+        else
+                sed -e "/${repository}/d" -i /etc/apt/sources.list
+                sed -e "1ideb ${repository}" -i /etc/apt/sources.list
+                echo "Repository ${repository} already active, moved to top"
+                changed=1
+        fi
+}
+
+
+
 function AddRepoToSources
 {
 	local repository="$1"

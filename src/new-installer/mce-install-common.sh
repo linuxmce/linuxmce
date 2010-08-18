@@ -107,10 +107,6 @@ fi
 Package: mythtv mythtv-frontend mythtv-backend mythtv-common mythtv-database mythtv-transcode-utils mythweb libmythtv-perl libmyth python-myth mythtv-themes mythplugins mytharchive mytharchive-data mythbrowser mythgallery mythgame mythmovies mythmusic mythnetvison mythnetvision-data mythnews mythvideo mythweather mythzoneminder myth-doc 
 Pin: origin deb.linuxmce.org
 Pin-Priority: 1001
-
-Package: *
-Pin: origin
-Pin-Priority: 500
 '
 	echo -n "$pluto_apt_preferences" >/etc/apt/preferences
 
@@ -135,6 +131,17 @@ APT::Get::AllowUnauthenticated "true";
 //APT::Get::force-yes "yes";
 EOF
 
+#HACK: ensure the local repo is the first in sources.list
+#Because Ubiquity doesn't seem to allow us to control the order in sources.list
+sed -e "/deb-cache/d" -i /etc/apt/sources.list
+sed -e "1ideb file:/usr/pluto/deb-cache ./" -i /etc/apt/sources.list
+
+	pluto_apt_preferences='
+Package: mythtv mythtv-frontend mythtv-backend mythtv-common mythtv-database mythtv-transcode-utils mythweb libmythtv-perl libmyth python-myth mythtv-themes mythplugins mytharchive mytharchive-data mythbrowser mythgallery mythgame mythmovies mythmusic mythnetvison mythnetvision-data mythnews mythvideo mythweather mythzoneminder myth-doc 
+Pin: origin deb.linuxmce.org
+Pin-Priority: 1001
+'
+	echo -n "$pluto_apt_preferences" >/etc/apt/preferences
 }
 
 
