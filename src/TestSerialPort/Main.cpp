@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
 			<< "Usage: TestSerialPort [-p port] [-P N81|E81|O81] [-t transmit string]" << endl
 			<< "[-s Search String] [-m message to log] [-i Timeout] [-b baud] [-h]" << endl
 			<< "strings can include: \\xx (xx is a hex char), \\r and \\n, and to delay x ms, \\sxm" << endl
-			<< "\\b means send a break" << endl
+			<< "\\~ means send a break" << endl
 			<< "-M puts it in monitor mode where it just reports the state" << endl
 			<< "  of hardware flow control until ctrl+c is pressed" << endl;
 
@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
 		for(vector<string>::iterator it=vectSearchString.begin();it!=vectSearchString.end();++it)
 		{
 			string sSearchString = *it;
-			int Length = sSearchString.size();
+			size_t Length = sSearchString.size();
 			if( Length>sReceived )
 				continue;
 
@@ -260,7 +260,7 @@ bool GetBlockToSend(string &sBlock,string &sTransmitString,string::size_type &po
 		pos++;
 		return GetBlockToSend(sBlock,sTransmitString,pos);
 	}
-	else if( sTransmitString.size()-pos>1 && sTransmitString[pos]=='\\' && sTransmitString[pos+1]=='b' )
+	else if( sTransmitString.size()-pos>1 && sTransmitString[pos]=='\\' && sTransmitString[pos+1]=='~' )
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"sending break");
 		p_serialPort->SendBreak();
@@ -268,7 +268,7 @@ bool GetBlockToSend(string &sBlock,string &sTransmitString,string::size_type &po
 		return GetBlockToSend(sBlock,sTransmitString,pos);
 	}
 
-	string::size_type pos_delay=sTransmitString.find("\\s",pos),pos_break=sTransmitString.find("\\b",pos);
+	string::size_type pos_delay=sTransmitString.find("\\s",pos),pos_break=sTransmitString.find("\\~",pos);
 	string::size_type pos_lesser = pos_delay!=string::npos && (pos_break==string::npos || pos_delay<pos_break) ? pos_delay : pos_break;
 	if( pos_lesser!=string::npos && pos_lesser>0 && sTransmitString[pos_lesser-1]=='\\' )
 	{
