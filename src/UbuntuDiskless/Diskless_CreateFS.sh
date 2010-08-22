@@ -77,11 +77,24 @@ function is_image_upgradable {
 	fi
 }
 
+function create_diskless_conf {
+	## Create /etc/diskless.conf
+	local R=$(RunSQL "SELECT IPaddress,MACaddress FROM Device WHERE PK_Device='$Moon_DeviceID'")
+	local IP=$(Field 1 "$R")
+	local MAC=$(Field 2 "$R")
+	conf="IP=$IP
+MAC=$MAC
+Device=$Moon_DeviceID
+Code="
+	echo "$conf" >${Moon_RootLocation}/etc/diskless.conf
+
+}
+
 if [[ ! -f $Moon_RootArchive ]] ;then
 	exit 1
 #	/usr/pluto/bin/Diskless_CreateTBZ.sh
 #	unpack_filesystem
 else
 	unpack_filesystem
-	
+	create_diskless_conf	
 fi
