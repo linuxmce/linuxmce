@@ -99,8 +99,8 @@ case "$Template" in
 			fi
 		
 			## Do the mount
-			#echo "$NFS_MOUNT_OPTS $IPaddress:/mnt/device/$StorageDevice"
-			echo "-fstype=$CIFS_FileSystem,credentials=/usr/pluto/var/sambaCredentials.secret,dir_mode=0777,file_mode=0777$CIFS_ExtraOpts ://$IPaddress/Storage$StorageDevice\\\$"
+			echo "$NFS_MOUNT_OPTS $IPaddress:/mnt/device/$StorageDevice"
+			#echo "-fstype=$CIFS_FileSystem,credentials=/usr/pluto/var/sambaCredentials.secret,dir_mode=0777,file_mode=0777$CIFS_ExtraOpts ://$IPaddress/Storage$StorageDevice\\\$"
 		fi
 
 		;;
@@ -169,8 +169,8 @@ case "$Template" in
 			fi
 		
 			## Do the mount
-			#echo "$NFS_MOUNT_OPTS $IPaddress:/mnt/device/$StorageDevice"
-			echo "-fstype=$CIFS_FileSystem,credentials=/usr/pluto/var/sambaCredentials.secret,dir_mode=0777,file_mode=0777$CIFS_ExtraOpts ://$IPaddress/Storage$StorageDevice\\\$"
+			echo "$NFS_MOUNT_OPTS $IPaddress:/mnt/device/$StorageDevice"
+			#echo "-fstype=$CIFS_FileSystem,credentials=/usr/pluto/var/sambaCredentials.secret,dir_mode=0777,file_mode=0777$CIFS_ExtraOpts ://$IPaddress/Storage$StorageDevice\\\$"
 		fi
 		;;
 	
