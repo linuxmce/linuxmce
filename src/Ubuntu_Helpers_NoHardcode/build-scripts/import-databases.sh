@@ -63,7 +63,7 @@ function import_databases () {
 
 
 	## Import pluto_main, pluto_media, pluto_security, pluto_telecom
-	get_dbdump main_sqlcvs "$dbdump_main_sqlcvs"
+	get_dbdump main_sqlcvs_utf8 "$dbdump_main_sqlcvs"
 	get_dbdump myth_sqlcvs "$dbdump_myth_sqlcvs"
 	get_dbdump pluto_media "$dbdump_pluto_media"
 	get_dbdump pluto_security "$dbdump_pluto_security"

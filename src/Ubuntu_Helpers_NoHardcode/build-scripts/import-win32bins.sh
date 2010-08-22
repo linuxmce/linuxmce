@@ -41,8 +41,8 @@ function fake_win32bins() {
 	touch PlutoBaSInstaller.msi
 	touch PlutoRebootSetup.msi
 
-	wget -q http://hob.dyndns.org/javamo/JavaMO.jar
-	wget -q http://hob.dyndns.org/javamo/JavaMO.jad
+#	wget -q http://hob.dyndns.org/javamo/JavaMO.jar
+#	wget -q http://hob.dyndns.org/javamo/JavaMO.jad
 	
 	touch JavaMO.jar
 	touch JavaMO.jad

@@ -50,10 +50,10 @@ function build_main_debs() {
 	# Perform Search&Replace on the sources
 	DisplayMessage "Performing search'n'replace on the sources"
 	echo "\"${mkr_dir}/MakeRelease_PrepFiles\" -p \"${svn_dir}/${svn_branch_name}\" -e \"*.prep,*.cpp,*.h,Makefile*,*.php,*.sh,*.pl,*.awk\" -c \"/etc/lmce-build/${flavor}.conf\""
-	"${mkr_dir}/MakeRelease_PrepFiles" -p "${svn_dir}/${svn_branch_name}" \
-		-e "*.prep,*.cpp,*.h,Makefile*,*.php,*.sh,*.pl,*.awk" \
-		-c "/etc/lmce-build/${flavor}.conf" || Error "MakeRelease_PrepFiles failed"
-
+#	"${mkr_dir}/MakeRelease_PrepFiles" -p "${svn_dir}/${svn_branch_name}" \
+#		-e "*.prep,*.cpp,*.h,Makefile*,*.php,*.sh,*.pl,*.awk" \
+#		-c "/etc/lmce-build/${flavor}.conf" || Error "MakeRelease_PrepFiles failed"
+#
 	# Clear the debs output directory
 	DisplayMessage "Cleaning MakeRelease debs output directory"
 	rm -rf "${out_dir}" || Error "Cannot clean MakeRelease debs output directory"
