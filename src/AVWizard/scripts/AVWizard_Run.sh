@@ -320,9 +320,8 @@ SetupViaXine()
 
 VerifyAlsaModuleInstall()
 {
-	local Installed, DriverPackage
-	Installed="0"
-	DriverPackage="alsa-modules-`uname -r`"
+	local Installed="0"
+	local DriverPackage="alsa-modules-`uname -r`"
 	dpkg -l $DriverPackage && Installed="1"
 	if [[ "$Installed" == "0" ]]; then
 		apt-get install $DriverPackage && shutdown -r now
