@@ -22,11 +22,29 @@ FileHandlerFactory::~FileHandlerFactory(void)
 	switch(GetFileHandlerType(sDirectory, sFile))
 	{
 		case fhtRom:
-			if (sDirectory.find("MAME") == string::npos)
-				pFileHandler = new RomFileHandler(sDirectory, sFile, ROMTYPE_COWERING);
+			if (sDirectory.find("/other/") != string::npos)
+			{
+				// The file is in a public or user only share.
+				if (sFile.find(".zip") != string::npos)
+				{
+					// for now, zip files are assumed to be mame roms here.
+					pFileHandler = new RomFileHandler(sDirectory, sFile, ROMTYPE_DEFAULT);
+				}
+				else
+				{
+					pFileHandler = new RomFileHandler(sDirectory, sFile, ROMTYPE_COWERING);
+				}
+			}
 			else
-				// Assume that this should be handled by the MAME/Default handler.
-				pFileHandler = new RomFileHandler(sDirectory, sFile, ROMTYPE_DEFAULT);
+			{
+				// This is probably on a LinuxMCE File Structure disk, in the games/MAME 
+				// folder.
+				if (sDirectory.find("MAME") == string::npos)
+					pFileHandler = new RomFileHandler(sDirectory, sFile, ROMTYPE_COWERING);
+				else
+					// Assume that this should be handled by the MAME/Default handler.
+					pFileHandler = new RomFileHandler(sDirectory, sFile, ROMTYPE_DEFAULT);
+			}
 			break;
 
 		case fhtVdr:
@@ -82,7 +100,8 @@ FileHandlerFactory::~FileHandlerFactory(void)
 			   (sExtension == "a52") ||
 			   (sExtension == "a78") ||
 			   (sExtension == "col") ||
-			   (sExtension == "int");
+			   (sExtension == "int") ||
+			   (sExtension == "nes");
 
 	return bHasRomExtension;	// do we do more tests here?
 }
