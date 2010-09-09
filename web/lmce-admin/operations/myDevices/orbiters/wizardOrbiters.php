@@ -65,7 +65,60 @@ function wizardOrbiters($output,$dbADO) {
 					<input type="submit" class="button" name="FullRegenAll" value="'.$TEXT_FULL_REGEN_ALL_CONST.'"> 
 					<input type="checkbox" name="reset_all" value="1"> '.$TEXT_RESET_ROUTER_WHEN_DONE_REGENERATING_CONST.'</td>
 			</tr>';
+
+
+
+		// Media Sort Option - Golgoj4
+		$vArray=array("Recently Used" => -1, "Filename" => "0", "Title" => 13, "Performer"=>2, "Genre"=>8, "Director"=>1);
+		$sortHandle=$dbADO->Execute('select EK_AttributeType_DefaultSort from MediaType WHERE PK_MediaType=5');
+		if ($sortHandle) {
+			$sortRow=$sortHandle->FetchRow();
+			$curOption=$sortRow['EK_AttributeType_DefaultSort'];
+		}
+		$out.='
+		<tr colspan="2">
+		<td  align="left"><legend><b>Video</b></legend>
+		<select name ="VideosortOption">';
+		foreach ($vArray as $Option => $val )
+		{
+			$out.='
+                        <option value="'.$val.'"';
+                        if ($val == $curOption) {
+                                $out .= " selected";
+                        }
+                        $out .= '>'.$Option.'</option>';
+		};
+
+		$out.='
+		<input type="submit" class="button" name="setDefaultSortVideo" value="'.$DEFAULT_SORT.'">
+		</td>';
+ 	
+		$asortArray = array("Recently Used" => -1, "Filename" => "0", "Title" => 13, "Performer"=>2, "Genre"=>8, "Album"=> 3);
+		$sortHandle=$dbADO->Execute('select EK_AttributeType_DefaultSort from MediaType WHERE PK_MediaType=5');
+                if ($sortHandle) {
+                        $sortRow=$sortHandle->FetchRow();
+                        $curOption=$sortRow['EK_AttributeType_DefaultSort'];
+                }
+		$out.='
+		<td  align="right"><legend><b>Audio</b></legend>
+		<select name ="AudiosortOption">';
+
+		foreach ($asortArray as $aOption => $aval )
+		{
+			$out.='
+                        <option value="'.$aval.'"';
+                        if ($aval == $curOption) {
+                                $out .= " selected";
+                        }
+                        $out .= '>'.$aOption.'</option>';
+		};
+
+		$out.='
+		<input type="submit" class="button" name="setDefaultSortAudio" value="'.$DEFAULT_SORT.'">
+		</td>
+		</tr>';
 		
+
 		
 			$displayedDevices=array();
 			$DeviceDataToDisplay=array();
@@ -318,6 +371,43 @@ function wizardOrbiters($output,$dbADO) {
 			exec($commandToSend);
 			$regen='F_ALL';
 		}		
+
+
+
+		// Added in query to change default sort - Golgoj4
+		if(isset($_POST['setDefaultSortVideo']))
+		{
+			if ($_POST['VideosortOption'] == 0)
+			{
+				$sortVal = 'null';;
+			}
+			else
+			{
+				$sortVal =$_POST['VideosortOption'];
+			}
+			$dbADO->Execute('UPDATE MediaType SET EK_AttributeType_DefaultSort=? WHERE PK_MediaType=5 OR PK_MediaType=3',$sortVal);
+			header("Location: index.php?section=wizardOrbiters&msg='Please Regen and Reload for changes to take effect'");
+			die;
+		}
+
+		if(isset($_POST['setDefaultSortAudio']))
+		{
+			if ($_POST['AudiosortOption'] == 0)
+			{
+				$AudiosortVal = 'null';;
+			}
+			else
+			{
+				$AudiosortVal =$_POST['AudiosortOption'];
+			}
+
+			$dbADO->Execute('UPDATE MediaType SET EK_AttributeType_DefaultSort=? WHERE PK_MediaType=4 or PK_MediaType=2',$AudiosortVal);
+
+			header("Location: index.php?section=wizardOrbiters&msg='Please Regen and Reload for changes to take effect'");
+			die;
+		}
+
+
 
 		// only devices on page are used
 		$displayedDevicesArray=explode(',',$_POST['devicesOnPage']);
