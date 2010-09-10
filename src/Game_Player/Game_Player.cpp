@@ -106,7 +106,7 @@ bool Game_Player::GetConfig()
 	  }
 	else
 	  {
-	      if (!m_pData->m_bDisabled)
+	      if (!m_pDevice_Joystick->m_bDisabled)
 	      {
 		m_sJoystick_Configuration = m_pData->m_pEvent_Impl->GetDeviceDataFromDatabase(m_pDevice_Joystick->m_dwPK_Device,DEVICEDATA_Configuration_CONST);
 	      }
