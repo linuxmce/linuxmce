@@ -42,6 +42,8 @@ NetworkIOConnection::Open() {
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Host ADDRESS was not specified.");
 		return false;
 	}
+
+	Close();
 	
 	struct hostent *hent;
 	if ((hent = gethostbyname(host_.c_str())) == 0) {
@@ -70,10 +72,13 @@ NetworkIOConnection::Open() {
 
 void 
 NetworkIOConnection::Close() {
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Closing connection to %s", host_.c_str());
-	shutdown(sockfd_, SHUT_RDWR);
-	close(sockfd_);
-	sockfd_ = -1;
+	if (sockfd_ > -1)
+	{
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Closing connection to %s", host_.c_str());
+		shutdown(sockfd_, SHUT_RDWR);
+		close(sockfd_);
+		sockfd_ = -1;
+	}
 }
 	
 int 
