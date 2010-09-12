@@ -155,16 +155,16 @@ function processDoSearch($fileData,$mediadbADO){
 	// hardcoded first search parameter to "Keywords"
 	$Keyword1Type='Keywords';
 	$Keyword1Search=cleanString($_POST['Keyword1Search_'.$id]);
-	$searchParms.=($Keyword1Search!='')?'&Keyword1Type='.$Keyword1Type.'&Keyword1Search='.urlencode($Keyword1Search):'';
+	$searchParms.=($Keyword1Search!='')?'&Keyword1Type='.$Keyword1Type.'&Keyword1Search='.urlencode(utf8_decode($Keyword1Search)):'';
 
 	$Keyword2Type=$_POST['Keyword2Type_'.$id];
 	$Keyword2Search=cleanString($_POST['Keyword2Search_'.$id]);
-	$searchParms.=($Keyword2Type!='0' && $Keyword2Search!='')?'&Keyword2Type='.$Keyword2Type.'&Keyword2Search='.urlencode($Keyword2Search):'';
+	$searchParms.=($Keyword2Type!='0' && $Keyword2Search!='')?'&Keyword2Type='.$Keyword2Type.'&Keyword2Search='.urlencode(utf8_decode($Keyword2Search)):'';
 
 	$Keyword3Type=$_POST['Keyword3Type_'.$id];
 	$Keyword3Search=cleanString($_POST['Keyword3Search_'.$id]);
 
-	$searchParms.=($Keyword3Type!='0' && $Keyword3Search!='')?'&Keyword3Type='.$Keyword3Type.'&Keyword3Search='.urlencode($Keyword3Search):'';
+	$searchParms.=($Keyword3Type!='0' && $Keyword3Search!='')?'&Keyword3Type='.$Keyword3Type.'&Keyword3Search='.urlencode(utf8_decode($Keyword3Search)):'';
 	if($Keyword1Search=='' && $Keyword2Search=='' && $Keyword3Search==''){
 		return '<span class="err">Search parameters not specified</span>';
 	}
