@@ -94,6 +94,15 @@ SaveSettings()
 	done >"$SettingsFile"
 }
 
+EnableDigitalOutputs()
+{
+	# Added this to correctly unmute channels for setup wizard, and to 
+	# inject necessary unmuting commands for later bootup.
+	amixer sset "IEC958" unmute
+	amixer sset "IEC958 1" unmute
+	alsactl store
+}
+
 Setup_AsoundConf()
 {
 	local AudioSetting="$1"
@@ -110,10 +119,12 @@ Setup_AsoundConf()
 		*[CO]*)
 			# audio setting is Coaxial or Optical, i.e. S/PDIF
 			echo 'pcm.!default asym_spdif' >>/etc/asound.conf
+			EnableDigitalOutputs
 		;;
 		*H*)
 			# audio setting is HDMI
 			echo 'pcm.!default asym_hdmi' >>/etc/asound.conf
+			EnableDigitalOutputs
 		;;
 		*)
 			# audio setting is Stereo or something unknown
