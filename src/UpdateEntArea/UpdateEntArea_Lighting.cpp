@@ -225,7 +225,7 @@ void UpdateEntArea::AddDefaultLightingScenarios(Row_Room *pRow_Room)
 				if( IsLight(it->second) )
 					pCommandGroup->AddCommand(it->first,COMMAND_Generic_Off_CONST,iOrder++,0);
 				else if( it->second==FLOORPLANOBJECTTYPE_LIGHT_BLINDS_CONST || it->second==FLOORPLANOBJECTTYPE_LIGHTS_DRAPES_CONST )
-					pCommandGroup->AddCommand(it->first,COMMAND_Generic_Off_CONST,iOrder++,0);
+					pCommandGroup->AddCommand(it->first,COMMAND_Generic_On_CONST,iOrder++,0); // Must be ON as that means it is closed (drapes are 100% out)
 			}
 			pCommandGroup->AddCommand(m_dwPK_Device_MediaPlugIn,COMMAND_MH_Stop_Media_CONST,iOrder++,1,
 				COMMANDPARAMETER_Bypass_Event_CONST,"1");
@@ -245,7 +245,7 @@ void UpdateEntArea::AddDefaultLightingScenarios(Row_Room *pRow_Room)
 				if( IsLight(it->second) )
 					pCommandGroup->AddCommand(it->first,COMMAND_Set_Level_CONST,iOrder++,1,COMMANDPARAMETER_Level_CONST,"30");
 				else if( it->second==FLOORPLANOBJECTTYPE_LIGHT_BLINDS_CONST || it->second==FLOORPLANOBJECTTYPE_LIGHTS_DRAPES_CONST )
-					pCommandGroup->AddCommand(it->first,COMMAND_Generic_On_CONST,iOrder++,0);
+					pCommandGroup->AddCommand(it->first,COMMAND_Generic_Off_CONST,iOrder++,0);  // Must be OFF as that means it is open (drapes are 0% out)
 			}
 			pCommandGroup->AddCommand(m_dwPK_Device_TelecomPlugIn,COMMAND_Set_User_Mode_CONST,iOrder++,1,
 				COMMANDPARAMETER_PK_UserMode_CONST,StringUtils::itos(USERMODE_At_Home_CONST).c_str());
