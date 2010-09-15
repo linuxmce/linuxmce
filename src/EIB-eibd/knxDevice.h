@@ -145,6 +145,8 @@ namespace knx
 		DEVICEHEADER( Drapes_Switch , 2 , "\0\2" ) ;
 		virtual Telegram *Command_Open(){return createsTelegramFromAddress(1,2);};
 		virtual Telegram *Command_Close(){return createsTelegramFromAddress(0,2);};
+		virtual Telegram *Command_On(){return createsTelegramFromAddress(1,2);};
+		virtual Telegram *Command_Off(){return createsTelegramFromAddress(0,2);};
 		virtual Telegram *Command_Stop(){return createsTelegramFromAddress(1,3);};
 		virtual Telegram *Command_Set_Level(int level){return createcharTelegramFromAddress(level,0);};
 	};
@@ -154,6 +156,8 @@ namespace knx
 		DEVICEHEADER( Blinds_Switch , 2 , "\0\1" ) ;
 		virtual Telegram *Command_Open(){return createsTelegramFromAddress(1,4);};
 		virtual Telegram *Command_Close(){return createsTelegramFromAddress(0,4);};
+		virtual Telegram *Command_On(){return createsTelegramFromAddress(1,4);};
+		virtual Telegram *Command_Off(){return createsTelegramFromAddress(0,4);};
 		virtual Telegram *Command_Stop(){return createsTelegramFromAddress(1,5);};
 		virtual Telegram *Command_Set_Level(int level){return createcharTelegramFromAddress(level,0);};
 		virtual Telegram *Command_Set_Angle_Percent(int angle){return createcharTelegramFromAddress(angle,1);};
