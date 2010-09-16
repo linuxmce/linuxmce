@@ -348,8 +348,8 @@ while [[ "$Done" -eq 0 ]]; do
 	"$BaseDir"/AVWizard-XineDefaultConfig.sh
 	SetDefaults
 	"$BaseDir"/AVWizardWrapper.sh
-	mv "$WMTweaksFile"{.orig,}
 	Ret="$?"
+	mv "$WMTweaksFile"{.orig,}
 	echo "$(date -R) $(basename "$0"): AVWizard Main loop ret code $Ret"
 	case "$Ret" in
 		0) Done=1 ;;
