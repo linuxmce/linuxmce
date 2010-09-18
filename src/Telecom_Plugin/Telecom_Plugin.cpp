@@ -2793,15 +2793,29 @@ class DataGridTable *Telecom_Plugin::UserVoiceMailGrid(string GridID,string Parm
 				ProcessUtils::GetCommandOutput(args[0], args, URL_Parm, StdErr);
 			}
 
-                        string url= VOICEMAIL_URL + StringUtils::Replace(URL_Parm, "\n", "");
+                        // string url= VOICEMAIL_URL + StringUtils::Replace(URL_Parm, "\n", "");
 
-                        pCell = new DataGridCell(text,file_path);
+			// Date Cell
+			pCell = new DataGridCell(mapVMData["vmTimestamp"],file_path);
+			pDataGrid->SetData(0, Row, pCell);
+
+			// Duration Cell
+			pCell = new DataGridCell(mapVMData["vmDuration"],file_path);
+			pDataGrid->SetData(1, Row, pCell);
+
+			// Caller ID Cell
+			pCell = new DataGridCell(mapVMData["vmCallerID"],file_path);
+			pCell->m_Colspan = 8;
+			pDataGrid->SetData(2, Row, pCell);
+
+/*                        pCell = new DataGridCell(text,file_path);
 
                         pCell->m_mapAttributes["vmTimestamp"] = mapVMData["vmTimestamp"];
                         pCell->m_mapAttributes["vmDuration"] = mapVMData["vmDuration"];
                         pCell->m_mapAttributes["vmCallerID"] = mapVMData["vmCallerID"];
 
                         pDataGrid->SetData(0,Row,pCell);
+*/
                         Row++;			
 		}
 
@@ -2842,13 +2856,22 @@ class DataGridTable *Telecom_Plugin::UserVoiceMailGrid(string GridID,string Parm
 
                         string url= VOICEMAIL_URL + StringUtils::Replace(URL_Parm, "\n", "");
 
-                        pCell = new DataGridCell(text,file_path);
+                       // Date Cell
+                        pCell = new DataGridCell(mapVMData["vmTimestamp"],file_path);
+			pCell->m_AltColor = 7829367;
+                        pDataGrid->SetData(0, Row, pCell);
 
-                        pCell->m_mapAttributes["vmTimestamp"] = mapVMData["vmTimestamp"];
-                        pCell->m_mapAttributes["vmDuration"] = mapVMData["vmDuration"];
-                        pCell->m_mapAttributes["vmCallerID"] = mapVMData["vmCallerID"];
+                        // Duration Cell
+                        pCell = new DataGridCell(mapVMData["vmDuration"],file_path);
+                        pCell->m_AltColor = 7829367;
+                        pDataGrid->SetData(1, Row, pCell);
 
-                        pDataGrid->SetData(0,Row,pCell);
+                        // Caller ID Cell
+                        pCell = new DataGridCell(mapVMData["vmCallerID"],file_path);
+                        pCell->m_Colspan = 8;
+                        pCell->m_AltColor = 7829367;
+                        pDataGrid->SetData(2, Row, pCell);
+
                         Row++;
                 }
 
