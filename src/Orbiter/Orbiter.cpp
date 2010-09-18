@@ -4275,7 +4275,19 @@ string Orbiter::SubstituteVariables( string Input,  DesignObj_Orbiter *pObj,  in
 		else if(  Variable=="MD" )
 		{
 			if( m_bIsOSD )
-				Output += StringUtils::itos( m_pData->m_dwPK_Device_ControlledVia );
+			{
+				// Fixes #458 - tschak
+				if ( m_pLocationInfo && m_pLocationInfo->m_dwPK_Device_MediaDirector!=-1 )
+				{
+					// Are we in a different room? if so, grab the device from Location
+					Output += StringUtils::itos( m_pLocationInfo->m_dwPK_Device_MediaDirector );
+				}
+				else
+				{
+					// Get the Media Director's Device ID Directly.
+					Output += StringUtils::itos( m_pData->m_dwPK_Device_ControlledVia );
+				}
+			}
 			else if( m_pLocationInfo && m_pLocationInfo->m_dwPK_Device_MediaDirector!=-1 )
 				Output += StringUtils::itos( m_pLocationInfo->m_dwPK_Device_MediaDirector );
 		}
