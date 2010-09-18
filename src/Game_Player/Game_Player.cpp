@@ -269,7 +269,7 @@ bool Game_Player::UpdateMESSConfig(string sMediaURL)
 		"#\r\n"
 		"# CORE INPUT AUTOMATIC ENABLE OPTIONS\r\n"
 		"#\r\n"
-		"paddle_device             keyboard\r\n"
+		"paddle_device             mouse\r\n"
 		"adstick_device            keyboard\r\n"
 		"pedal_device              keyboard\r\n"
 		"dial_device               keyboard\r\n"
@@ -592,7 +592,7 @@ bool Game_Player::UpdateMAMEConfig(string sMediaURL)
 		"# CORE VECTOR OPTIONS\r\n"
 		"#\r\n"
 		"antialias                 1\r\n"
-		"beam                      1.0\r\n"
+		"beam                      1.8\r\n"
 		"flicker                   0\r\n"
 		"\r\n"
 		"#\r\n"
@@ -607,11 +607,11 @@ bool Game_Player::UpdateMAMEConfig(string sMediaURL)
 		"# CORE INPUT OPTIONS\r\n"
 		"#\r\n"
 		"ctrlr		           ##CTRLR##\r\n"                     
-		"mouse                     1\r\n"
-		"joystick                  1\r\n" 
+		"mouse                     0\r\n"
+		"joystick                  0\r\n" 
 		"lightgun                  0\r\n"
-		"multikeyboard             0\r\n"
-		"multimouse                0\r\n"
+		"multikeyboard             1\r\n"
+		"multimouse                1\r\n"
 		"steadykey                 0\r\n"
 		"offscreen_reload          0\r\n"
 		"joystick_map              auto\r\n"
@@ -621,13 +621,13 @@ bool Game_Player::UpdateMAMEConfig(string sMediaURL)
 		"#\r\n"
 		"# CORE INPUT AUTOMATIC ENABLE OPTIONS\r\n"
 		"#\r\n"
-		"paddle_device             keyboard\r\n"
-		"adstick_device            keyboard\r\n"
+		"paddle_device             mouse\r\n"
+		"adstick_device            joystick\r\n"
 		"pedal_device              keyboard\r\n"
 		"dial_device               keyboard\r\n"
 		"trackball_device          mouse\r\n"
 		"lightgun_device           keyboard\r\n"
-		"positional_device         keyboard\r\n"
+		"positional_device         mouse\r\n"
 		"mouse_device              mouse\r\n"
 		"\r\n"
 		"#\r\n"
@@ -805,17 +805,27 @@ string Game_Player::GetMessParametersFor(string sMediaURL)
   
   string sMachineType = vect_Path[vect_Path.size()-1]; // Get the last element.
 
-  if ((sFileName.find(".bin") != string::npos) || (sFileName.find(".a26") != string::npos) || 
+  if (            (sFileName.find(".bin") != string::npos) || 
+		  (sFileName.find(".BIN") != string::npos) ||
+                  (sFileName.find(".a26") != string::npos) || 
+		  (sFileName.find(".A26") != string::npos) ||
 		  (sFileName.find(".a52") != string::npos) ||
+		  (sFileName.find(".A52") != string::npos) ||
 		  (sFileName.find(".a78") != string::npos) ||
+		  (sFileName.find(".A78") != string::npos) ||
 		  (sFileName.find(".col") != string::npos) ||
+		  (sFileName.find(".COL") != string::npos) ||
 		  (sFileName.find(".int") != string::npos) ||
+		  (sFileName.find(".INT") != string::npos) ||
 		  (sFileName.find(".itv") != string::npos) ||
+		  (sFileName.find(".ITV") != string::npos) ||
 		  (sFileName.find(".sg") != string::npos) ||
-		  (sFileName.find(".sms") != string::npos))
+	          (sFileName.find(".SG") != string::npos) ||
+		  (sFileName.find(".sms") != string::npos) ||
+		  (sFileName.find(".SMS") != string::npos))
 
     {
-      sPeripheralType = "-cartridge";
+      sPeripheralType = "-cart";
     }
 
   sParameters = sMachineType + "\t" + sPeripheralType + "\t" + sMediaURL;
@@ -1172,6 +1182,9 @@ void Game_Player::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string s
 		break;	
 	case BUTTON_Back_CONST:
 		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_Escape,m_iEventSerialNum++);
+		break;
+	case BUTTON_tab_CONST:
+		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_Tab,m_iEventSerialNum++);
 		break;
 	case BUTTON_Asterisk_CONST:
 		ProcessAsteriskForMediaType(m_iPK_MediaType);
