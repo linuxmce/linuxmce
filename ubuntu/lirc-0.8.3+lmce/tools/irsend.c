@@ -473,7 +473,7 @@ int main(int argc,char **argv)
 		
 			if(strlen(directive)+strlen(remote)+strlen(code)+3<PACKET_SIZE)
 			{
-				if(strcasecmp(directive,"SEND_ONCE")==0 && count>1)
+			        if((strcasecmp(directive,"SEND_ONCE")==0 || strcasecmp(directive, "SEND_PRONTO") == 0) && count>1)
 				{
 					sprintf(buffer,"%s %s %s %lu\n",
 						directive,remote,code,count);
