@@ -21,7 +21,7 @@ sources = Main.cpp LIRC_DCE.cpp $(Gen_Dev_Files)
 CXXFLAGS +=
 CPPFLAGS += -I/usr/include/mysql
 LDFLAGS +=
-XTRALDLIBS = -llirc_client -lmysqlclient_r
+XTRALDLIBS = -llirc_client -lmysqlclient_r -lMessageTranslation -lIRBase
 
 Gen_Dev_Files +=
 sources += IRReceiverBase.cpp

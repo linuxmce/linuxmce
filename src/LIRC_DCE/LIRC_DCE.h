@@ -23,6 +23,7 @@
 //<-dceag-d-e->
 
 #include "IRReceiverBase.h"
+#include "IRBase/IRBase.h"
 #include "DCE/DeviceData_Router.h"
 #ifndef WIN32
 #include <lirc/lirc_client.h>
@@ -33,7 +34,7 @@ class Database_pluto_main;
 //<-dceag-decl-b->!
 namespace DCE
 {
-	class LIRC_DCE : public LIRC_DCE_Command, IRReceiverBase
+        class LIRC_DCE : public LIRC_DCE_Command, IRReceiverBase, IRBase
 	{
 //<-dceag-decl-e->
 		// Private member variables
@@ -53,7 +54,9 @@ public:
 		virtual bool Register();
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
-//<-dceag-const-e->
+		void CreateChildren();
+		virtual void SendIR(string Port, string IRCode, int iRepeat); // Required from IRBase
+		//<-dceag-const-e->
 
 		Router *pRoute;
 		int m_DeviceID;

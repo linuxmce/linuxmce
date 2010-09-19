@@ -70,6 +70,8 @@ bool LIRC_DCE::GetConfig()
 	if( !m_Virtual_Device_Translator.GetConfig(m_pData) )
 		return false;
 	
+	IRBase::setCommandImpl(this);
+	IRBase::setAllDevices(&(GetData()->m_AllDevices));
 	IRReceiverBase::GetConfig(m_pData);
 
 	system("killall -9 lircd");
@@ -226,6 +228,12 @@ bool LIRC_DCE::Register()
 	return Connect(PK_DeviceTemplate_get()); 
 }
 
+// Must override so we can call IRBase::Start() after creating children
+void LIRC_DCE::CreateChildren()
+{
+        LIRC_DCE_Command::CreateChildren();
+        Start();
+}
 //<-dceag-createinst-b->!
 
 /*
@@ -240,9 +248,18 @@ bool LIRC_DCE::Register()
 void LIRC_DCE::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
-	if (pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND && pMessage->m_dwID == COMMAND_Send_Code_CONST)
-		CMD_Send_Code(pMessage->m_mapParameters[COMMANDPARAMETER_Text_CONST], sCMD_Result, pMessage);
-	else
+        if (pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND) 
+	{
+	        if (pMessage->m_dwID == COMMAND_Send_Code_CONST)
+		        CMD_Send_Code(pMessage->m_mapParameters[COMMANDPARAMETER_Text_CONST], sCMD_Result, pMessage);
+		else
+		{
+		  if (IRBase::ProcessMessage(pMessage)) 
+		  {
+		    sCMD_Result = "OK";
+		  }
+		}
+        } else
 		sCMD_Result = "UNHANDLED CHILD";
 }
 
@@ -354,6 +371,25 @@ void LIRC_DCE::CMD_Set_Screen_Type(int iValue,string &sCMD_Result,Message *pMess
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Screen type now %c",m_cCurrentScreen);
 }
 
+void LIRC_DCE::SendIR(string Port, string sIRCode,int iRepeat)
+{
+ 	string sTextWoSpaces;
+	size_t sTextSize = sIRCode.size();
+	for (size_t i = 0; i < sTextSize; ++i)
+	{
+		if (sIRCode[i] != ' ')
+			sTextWoSpaces += sIRCode[i];
+	}
+	cout << "Sending code: " << sIRCode << endl;
+	cout << "Without spaces: " << sTextWoSpaces << endl;
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sending code: %s", sIRCode.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Without spaces: %s", sTextWoSpaces.c_str());
+	string sCount = "--count=" + StringUtils::itos(iRepeat);
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Repeats: %s", sCount.c_str());
+	char * args[] = {"/usr/bin/irsend", (char*) sCount.c_str(), "SEND_PRONTO", (char*) sTextWoSpaces.c_str(), "", NULL};
+	ProcessUtils::SpawnDaemon(args[0], args, false);
+}
+
 //<-dceag-c191-b->
 
 	/** @brief COMMAND: #191 - Send Code */
@@ -364,19 +400,7 @@ void LIRC_DCE::CMD_Set_Screen_Type(int iValue,string &sCMD_Result,Message *pMess
 void LIRC_DCE::CMD_Send_Code(string sText,string &sCMD_Result,Message *pMessage)
 //<-dceag-c191-e->
 {
-	string sTextWoSpaces;
-	size_t sTextSize = sText.size();
-	for (size_t i = 0; i < sTextSize; ++i)
-	{
-		if (sText[i] != ' ')
-			sTextWoSpaces += sText[i];
-	}
-	cout << "Sending code: " << sText << endl;
-	cout << "Without spaces: " << sTextWoSpaces << endl;
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sending code: %s", sText.c_str());
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Without spaces: %s", sTextWoSpaces.c_str());
-	char * args[] = {"/usr/bin/irsend", "SEND_PRONTO", (char*) sTextWoSpaces.c_str(), "", NULL};
-	ProcessUtils::SpawnDaemon(args[0], args, false);
+        SendIR("0", sText, 1);
 	sCMD_Result = "OK";
 }
 
