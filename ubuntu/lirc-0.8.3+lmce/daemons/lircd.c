@@ -1036,7 +1036,7 @@ static struct ir_remote *ProntoIRSenderPseudoRemote()
 		ProntoRemote->flags=RAW_CODES;
 		ProntoRemote->eps=30;
 		ProntoRemote->aeps=100;
-		ProntoRemote->gap=34937;
+		ProntoRemote->gap=54937;
 		ProntoRemote->min_repeat=2;
 	}
 
