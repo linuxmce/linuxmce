@@ -151,8 +151,8 @@ function Build_Replacements_Intrepid
 		DisplayMessage "Building lirc"
 		pushd "$dir_"
 		echo "dpkg-buildpackage -rfakeroot -us -uc -b"
-#		dpkg-buildpackage -rfakeroot -us -uc -b
-#		cp -r ../*lirc*.deb "${replacements_dir}"
+		dpkg-buildpackage -rfakeroot -us -uc -b
+		cp -r ../*lirc*.deb "${replacements_dir}"
 		popd
 	fi
 
