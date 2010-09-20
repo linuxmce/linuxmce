@@ -177,10 +177,10 @@ function Build_Replacements_Intrepid
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/libxine1_*.deb ${svn_dir}/${svn_branch_name}/ubuntu/libxine-dev_*.deb 
 	# alsa lib needs older libtool package
         if [ "$MACHTYPE" = "x86_64-pc-linux-gnu" ]; then
-        	wget http://ftp.sjtu.edu.cn/ubuntu/pool/main/libt/libtool/libtool_1.5.26-1ubuntu1_amd64.deb
+        	wget -r http://ftp.sjtu.edu.cn/ubuntu/pool/main/libt/libtool/libtool_1.5.26-1ubuntu1_amd64.deb
                 dpkg -i libtool_1.5.26-1ubuntu1_amd64.deb
         else
-        	wget http://ftp.sjtu.edu.cn/ubuntu/pool/main/libt/libtool/libtool_1.5.26-1ubuntu1_i386.deb
+        	wget -r http://ftp.sjtu.edu.cn/ubuntu/pool/main/libt/libtool/libtool_1.5.26-1ubuntu1_i386.deb 
                 dpkg -i libtool_1.5.26-1ubuntu1_i386.deb
         fi
                                                                                         
@@ -411,7 +411,7 @@ trap 'Error "Undefined error in $0" ; apt-get install libtool -y' EXIT
 
 DisplayMessage "*** STEP: Building replacement debs"
 # make sure the headers are there
-apt-get -y install linux-headers-$KVER
+apt-get --force-yes -y install linux-headers-$KVER 
 case "${build_name}" in
 	"gutsy")
 		Build_Replacements_Gutsy
