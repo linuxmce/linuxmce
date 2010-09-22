@@ -242,8 +242,8 @@ function cleanArray($array2Parse) {
 
 
 function getChildsNo($parentID,$dbADO) {
-	$queryGP = "select * from Device where FK_Device_ControlledVia = $parentID";
-	$resGP = $dbADO->Execute($queryGP);
+	$queryGP = "select * from Device where FK_Device_ControlledVia = ?";
+	$resGP = $dbADO->Execute($queryGP, array($parentID));
 	$childsNo=0;
 	if ($resGP) {
 		while ($row=$resGP->FetchRow()) {
@@ -257,8 +257,8 @@ function getChildsNo($parentID,$dbADO) {
 $GLOBALS['childsArray'] = array();
 
 function getDeviceChildsArray($parentID,$dbADO) {
-	$queryGP = "select * from Device where FK_Device_ControlledVia = $parentID";
-	$resGP = $dbADO->Execute($queryGP);
+	$queryGP = "select * from Device where FK_Device_ControlledVia = ?";
+	$resGP = $dbADO->Execute($queryGP, array($parentID));
 	
 	if ($resGP) {
 		while ($row=$resGP->FetchRow()) {
@@ -272,8 +272,8 @@ function getDeviceChildsArray($parentID,$dbADO) {
 
 $GLOBALS['childsDeviceCategoryNo']=0;
 function getDeviceCategoryChildsNo($parentID,$dbADO) {
-	$queryGP = "select * from DeviceCategory where FK_DeviceCategory_Parent = $parentID";
-	$resGP = $dbADO->Execute($queryGP);
+	$queryGP = "select * from DeviceCategory where FK_DeviceCategory_Parent = ?";
+	$resGP = $dbADO->Execute($queryGP, array($parentID));
 	
 	if ($resGP) {
 		while ($row=$resGP->FetchRow()) {
@@ -286,8 +286,8 @@ function getDeviceCategoryChildsNo($parentID,$dbADO) {
 $GLOBALS['childsDeviceCategoryArray'] = array();
 
 function getDeviceCategoryChildsArray($parentID,$dbADO) {
-	$queryGP = "select * from DeviceCategory where FK_DeviceCategory_Parent = $parentID";
-	$resGP = $dbADO->Execute($queryGP);
+	$queryGP = "select * from DeviceCategory where FK_DeviceCategory_Parent = ?";
+	$resGP = $dbADO->Execute($queryGP, array($parentID));
 	
 	if ($resGP) {
 		while ($row=$resGP->FetchRow()) {
@@ -302,8 +302,8 @@ function getDeviceCategoryChildsOptions($parentID,$parentName,$selectedValue,$no
 	if (strlen($notIn)!='') {
 		$whereNotIn=' and PK_DeviceCategory not in ('.$notIn.')';
 	}
-	$queryGP = "select * from DeviceCategory where FK_DeviceCategory_Parent = $parentID $whereNotIn order by Description Asc";
-	$resGP = $dbADO->Execute($queryGP);
+	$queryGP = "select * from DeviceCategory where FK_DeviceCategory_Parent = ? $whereNotIn order by Description Asc";
+	$resGP = $dbADO->Execute($queryGP, array($parentID));
 	$options='';
 	if ($resGP) {
 		while ($row=$resGP->FetchRow()) {
@@ -318,8 +318,8 @@ function getDeviceCategoryChildsOptions($parentID,$parentName,$selectedValue,$no
 
 
 function getEventCategoryChildsArray($parentID,$parentName,$selectedValue,$dbADO) {
-	$queryGP = "select PK_EventCategory,Description from EventCategory where  FK_EventCategory_Parent = $parentID order by Description Asc";
-	$resGP = $dbADO->Execute($queryGP);
+	$queryGP = "select PK_EventCategory,Description from EventCategory where  FK_EventCategory_Parent = ? order by Description Asc";
+	$resGP = $dbADO->Execute($queryGP, array($parentID));
 	$EventCategoryOptions = '';
 	if ($resGP) {
 		while ($row=$resGP->FetchRow()) {				
@@ -568,8 +568,8 @@ function calculatePIN()
 }
 
 function getTopMenu($website,$dbADO,$package=0) {
-		$selectMenu = "SELECT * FROM PageSetup WHERE FK_PageSetup_Parent IS NULL AND showInTopMenu = 1 AND Website='$website'";
-		$resSelectMenu = $dbADO->Execute($selectMenu);
+		$selectMenu = "SELECT * FROM PageSetup WHERE FK_PageSetup_Parent IS NULL AND showInTopMenu = 1 AND Website=?";
+		$resSelectMenu = $dbADO->Execute($selectMenu, array($website));
 		$menuPages='';	
 /*		$menuPages='
 				AddMenu("1"  ,  "1"   ,  "Wizard"       ,  ""  ,  ""  , "");
@@ -618,7 +618,7 @@ function InheritDeviceData($masterDeviceID,$insertID,$dbADO)
 			INNER JOIN DeviceTemplate_DeviceData on DeviceTemplate_DeviceData.FK_DeviceTemplate=PK_DeviceTemplate
 			LEFT JOIN Device_DeviceData ON FK_Device=PK_Device AND Device_DeviceData.FK_DeviceData=DeviceTemplate_DeviceData.FK_DeviceData
 		WHERE Device_DeviceData.FK_Device IS NULL AND PK_Device=?';
-	$dbADO->Execute($getDeviceTemplateDeviceData,$insertID);
+	$dbADO->Execute($getDeviceTemplateDeviceData,array($insertID));
 
 	$getDeviceCategoryDeviceData='
 	INSERT INTO Device_DeviceData
@@ -630,7 +630,7 @@ function InheritDeviceData($masterDeviceID,$insertID,$dbADO)
 		INNER JOIN DeviceCategory_DeviceData on DeviceCategory_DeviceData.FK_DeviceCategory=DeviceTemplate.FK_DeviceCategory
 		LEFT JOIN Device_DeviceData ON FK_Device=PK_Device AND Device_DeviceData.FK_DeviceData=DeviceCategory_DeviceData.FK_DeviceData
 	WHERE Device_DeviceData.FK_Device IS NULL AND PK_Device=?';
-	$dbADO->Execute($getDeviceCategoryDeviceData,$insertID);
+	$dbADO->Execute($getDeviceCategoryDeviceData,array($insertID));
 
 	$getParentCategoryDeviceData='
 		INSERT INTO Device_DeviceData
@@ -643,7 +643,7 @@ function InheritDeviceData($masterDeviceID,$insertID,$dbADO)
 			INNER JOIN DeviceCategory_DeviceData on DeviceCategory_DeviceData.FK_DeviceCategory=DeviceCategory.FK_DeviceCategory_Parent
 			LEFT JOIN Device_DeviceData ON FK_Device=PK_Device AND Device_DeviceData.FK_DeviceData=DeviceCategory_DeviceData.FK_DeviceData
 		WHERE Device_DeviceData.FK_Device IS NULL AND PK_Device=?';
-	$dbADO->Execute($getParentCategoryDeviceData,$insertID);
+	$dbADO->Execute($getParentCategoryDeviceData,array($insertID));
 }
 
 
@@ -652,12 +652,12 @@ function createChildsForControledViaDeviceTemplate($masterDeviceID,$installation
 	// check if DeviceTemplate controll anything
 	$queryDeviceTemplate_DeviceTemplate_ControlledVia='SELECT * FROM DeviceTemplate_DeviceTemplate_ControlledVia
 				WHERE FK_DeviceTemplate_ControlledVia = ? AND AutoCreateChildren = 1';
-	$resDeviceTemplate_DeviceTemplate_ControlledVia=$dbADO->Execute($queryDeviceTemplate_DeviceTemplate_ControlledVia,$masterDeviceID);
+	$resDeviceTemplate_DeviceTemplate_ControlledVia=$dbADO->Execute($queryDeviceTemplate_DeviceTemplate_ControlledVia,array($masterDeviceID));
 	if($resDeviceTemplate_DeviceTemplate_ControlledVia->RecordCount()>0){
 		// insert the children
 		while($row=$resDeviceTemplate_DeviceTemplate_ControlledVia->FetchRow()){
 			$queryDeviceTemplate='SELECT Description FROM DeviceTemplate WHERE PK_DeviceTemplate=?';
-			$resDeviceTemplate=$dbADO->Execute($queryDeviceTemplate,$row['FK_DeviceTemplate']);
+			$resDeviceTemplate=$dbADO->Execute($queryDeviceTemplate,array($row['FK_DeviceTemplate']));
 			$rowDeviceTemplate=$resDeviceTemplate->FetchRow();
 			$queryInsertDevice = "INSERT INTO Device(FK_Installation, Description, FK_Device_ControlledVia, FK_DeviceTemplate)
 										values(?,?,?,?)";
@@ -673,19 +673,19 @@ function createChildsForControledViaDeviceCategory($masterDeviceID,$installation
 {
 	// get Device Template Category
 	$queryDeviceTemplate='SELECT FK_DeviceCategory FROM DeviceTemplate WHERE PK_DeviceTemplate=?';
-	$resDeviceTemplate=$dbADO->Execute($queryDeviceTemplate,$masterDeviceID);
+	$resDeviceTemplate=$dbADO->Execute($queryDeviceTemplate,array($masterDeviceID));
 	$rowDeviceTemplate=$resDeviceTemplate->FetchRow();
 	$FK_DeviceCategory=$rowDeviceTemplate['FK_DeviceCategory'];
 
 	// query DeviceTemplate_DeviceCategory_ControlledVia if his category controll anything
 	$queryDeviceTemplate_DeviceCategory_ControlledVia='SELECT * FROM DeviceTemplate_DeviceCategory_ControlledVia
 				WHERE FK_DeviceCategory = ? AND AutoCreateChildren = 1';
-	$res=$dbADO->Execute($queryDeviceTemplate_DeviceCategory_ControlledVia,$FK_DeviceCategory);
+	$res=$dbADO->Execute($queryDeviceTemplate_DeviceCategory_ControlledVia,array($FK_DeviceCategory));
 	if($res->RecordCount()>0){
 		
 		while($row=$res->FetchRow()){
 			$queryDeviceTemplate='SELECT Description FROM DeviceTemplate WHERE PK_DeviceTemplate=?';
-			$resDeviceTemplate=$dbADO->Execute($queryDeviceTemplate,$row['FK_DeviceTemplate']);
+			$resDeviceTemplate=$dbADO->Execute($queryDeviceTemplate,array($row['FK_DeviceTemplate']));
 			$rowDeviceTemplate=$resDeviceTemplate->FetchRow();
 			$queryInsertDevice = "INSERT INTO Device(FK_Installation, Description, FK_Device_ControlledVia, FK_DeviceTemplate)
 										values(?,?,?,?)";
@@ -765,7 +765,7 @@ function GetDeviceControlledVia($deviceID, $dbADO)
 function isMediaDirector($deviceID,$dbADO,$mdOnly=0)
 {
 	$getTemplate='SELECT FK_DeviceTemplate,FK_Device_ControlledVia FROM Device WHERE PK_Device=?';
-	$resTemplate=$dbADO->Execute($getTemplate,$deviceID);
+	$resTemplate=$dbADO->Execute($getTemplate,array($deviceID));
 	if($resTemplate->RecordCount()>0){
 		$row=$resTemplate->FetchRow();
 		$DeviceTemplate=$row['FK_DeviceTemplate'];
@@ -790,7 +790,7 @@ function isCore($deviceID,$dbADO)
 		FROM Device 
 		INNEr JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate
 		WHERE PK_Device=?';
-	$resTemplate=$dbADO->Execute($getTemplate,$deviceID);
+	$resTemplate=$dbADO->Execute($getTemplate,array($deviceID));
 	if($resTemplate->RecordCount()>0){
 		$row=$resTemplate->FetchRow();
 		$DeviceCategory=$row['FK_DeviceCategory'];
@@ -819,27 +819,27 @@ function deleteCommandGroup($PK_CommandGroup,$dbADO)
 		FROM CommandGroup_Command_CommandParameter
 		JOIN CommandGroup_Command on FK_CommandGroup_Command=PK_CommandGroup_Command
 		WHERE FK_CommandGroup=?';
-	$dbADO->Execute($deleteParameters,$PK_CommandGroup);
+	$dbADO->Execute($deleteParameters,array($PK_CommandGroup));
 	
 	$deleteCommandGroup_Command='
 		DELETE FROM CommandGroup_Command
 		WHERE FK_CommandGroup=?';
-	$dbADO->Execute($deleteCommandGroup_Command,$PK_CommandGroup);
+	$dbADO->Execute($deleteCommandGroup_Command,array($PK_CommandGroup));
 
 	$deleteCommandGroup_EntArea='
 		DELETE FROM CommandGroup_EntertainArea
 		WHERE FK_CommandGroup=?';
-	$dbADO->Execute($deleteCommandGroup_EntArea,$PK_CommandGroup);
+	$dbADO->Execute($deleteCommandGroup_EntArea,array($PK_CommandGroup));
 
 	$deleteCommandGroup_Room='
 		DELETE FROM CommandGroup_Room
 		WHERE FK_CommandGroup=?';
-	$dbADO->Execute($deleteCommandGroup_Room,$PK_CommandGroup);
+	$dbADO->Execute($deleteCommandGroup_Room,array($PK_CommandGroup));
 	
 	$deleteCommandGroup='
 		DELETE FROM CommandGroup 
 		WHERE PK_CommandGroup=?';
-	$dbADO->Execute($deleteCommandGroup,$PK_CommandGroup);
+	$dbADO->Execute($deleteCommandGroup,array($PK_CommandGroup));
 }
 
 function grabDirectory ($path, $depth) {
@@ -1070,11 +1070,11 @@ function deleteDevice($PK_Device,$dbADO)
 	
 		$arrayFKDeviceTables=array('CommandGroup_Command','Device_Command','Device_CommandGroup','Device_DeviceData','Device_DeviceGroup','Device_Device_Related','Device_EntertainArea','Device_HouseMode','Device_Orbiter','Device_StartupScript','Device_Users');
 		foreach($arrayFKDeviceTables AS $tablename){	
-			$queryDelFromTable='DELETE FROM '.$tablename.' WHERE FK_Device='.$elem;
-			$dbADO->Execute($queryDelFromTable);
+			$queryDelFromTable='DELETE FROM '.$tablename.' WHERE FK_Device=?';
+			$dbADO->Execute($queryDelFromTable, array($elem));
 		}		
-		$queryDelDevice = 'DELETE FROM Device WHERE PK_Device = '.$elem;
-		$dbADO->_Execute($queryDelDevice);
+		$queryDelDevice = 'DELETE FROM Device WHERE PK_Device = ?';
+		$dbADO->Execute($queryDelDevice, array($elem));
 	}
 	writeFile($GLOBALS['WebExecLogFile'],date('d-m-Y H:i:s')."\tDevice deleted: $PK_Device\n",'a+');
 	$dbADO->Execute('COMMIT');
@@ -1102,8 +1102,8 @@ function addDeviceToEntertainArea($deviceID,$entArea,$dbADO)
 
 function getChilds($parentID,$dbADO) {
 	
-	$selectDevicesFromCategories = "SELECT * FROM DeviceCategory WHERE FK_DeviceCategory_Parent = {$parentID} ORDER BY Description";
-		$rs2 = $dbADO->_Execute($selectDevicesFromCategories);
+	$selectDevicesFromCategories = "SELECT * FROM DeviceCategory WHERE FK_DeviceCategory_Parent = ? ORDER BY Description";
+		$rs2 = $dbADO->_Execute($selectDevicesFromCategories, array($parentID));
 		$jsTree='';
 			while ($row2 = $rs2->FetchRow()) {		
 				$jsTree.= '
@@ -1140,9 +1140,9 @@ function builtTopMenu($website,$dbADO)
 		SELECT DISTINCT PageSetup.* FROM PageSetup 
 		LEFT JOIN DeviceTemplate ON PageSetup.FK_Package=DeviceTemplate.FK_Package
 		LEFT JOIN Device ON Device.FK_DeviceTemplate=PK_DeviceTemplate
-		WHERE FK_PageSetup_Parent IS NULL AND showInTopMenu = 1 AND Website='$website' AND (PageSetup.FK_Package IS NULL OR (PK_Device IS NOT NULL AND FK_Installation=?))
+		WHERE FK_PageSetup_Parent IS NULL AND showInTopMenu = 1 AND Website=? AND (PageSetup.FK_Package IS NULL OR (PK_Device IS NOT NULL AND FK_Installation=?))
 		ORDER BY OrderNum";
-	$resSelectMenu = $dbADO->Execute($selectMenu,$_SESSION['installationID']);
+	$resSelectMenu = $dbADO->Execute($selectMenu,array($website,$_SESSION['installationID']));
 
 	$menuPages='';
 	$pos=0;	
@@ -1263,7 +1263,7 @@ function displayCriteria($FK_CriteriaParmNesting,$eventHandlerID,$installationID
 		$cplArray[$rowCPL['PK_CriteriaParmList']]=$rowCPL['Description'];
 	}
 	
-	$resCPN=$dbADO->Execute('SELECT * FROM CriteriaParmNesting WHERE PK_CriteriaParmNesting=?',$FK_CriteriaParmNesting);
+	$resCPN=$dbADO->Execute('SELECT * FROM CriteriaParmNesting WHERE PK_CriteriaParmNesting=?',array($FK_CriteriaParmNesting));
 	$rowCPN=$resCPN->FetchRow();
 	$out.='
 		<table border="0" width="100%">
@@ -1277,7 +1277,7 @@ function displayCriteria($FK_CriteriaParmNesting,$eventHandlerID,$installationID
 			FROM CriteriaParm
 			LEFT JOIN CriteriaParmList ON FK_CriteriaParmList=PK_CriteriaParmList
 			WHERE FK_CriteriaParmNesting=?';
-	$resCP=$dbADO->Execute($queryCP,$FK_CriteriaParmNesting);
+	$resCP=$dbADO->Execute($queryCP,array($FK_CriteriaParmNesting));
 	while($rowCP=$resCP->FetchRow()){
 		$GLOBALS['displayedCriteriaParms'][]=$rowCP['PK_CriteriaParm'];
 		$out.='
@@ -1360,7 +1360,7 @@ function displayCriteria($FK_CriteriaParmNesting,$eventHandlerID,$installationID
 				<td align="center"><a href="#" onClick="if(confirm(\''.$TEXT_DELETE_CRITERIA_CONFIRMATION_CONST.'\'))self.location=\'index.php?section=editCriteria&action=delete&ehID='.$eventHandlerID.'&dcpID='.$rowCP['PK_CriteriaParm'].'\'">'.$TEXT_DELETE_CONST.'</a></td>			
 			</tr>';
 	}
-	$resNestingChilds=$dbADO->Execute('SELECT * FROM CriteriaParmNesting WHERE FK_CriteriaParmNesting_Parent=?',$FK_CriteriaParmNesting);
+	$resNestingChilds=$dbADO->Execute('SELECT * FROM CriteriaParmNesting WHERE FK_CriteriaParmNesting_Parent=?',array($FK_CriteriaParmNesting));
 	if($resNestingChilds->RecordCount()!=0){
 		$out.='<tr>
 				<td colspan="6"><table width="100%" border="0">
@@ -1387,10 +1387,10 @@ function displayCriteria($FK_CriteriaParmNesting,$eventHandlerID,$installationID
 
 function deleteCriteriaParmNesting($cpnID,$dbADO)
 {
-	$dbADO->Execute('DELETE FROM CriteriaParmNesting WHERE PK_CriteriaParmNesting=?',$cpnID);
-	$dbADO->Execute('DELETE FROM CriteriaParm WHERE FK_CriteriaParmNesting=?',$cpnID);
+	$dbADO->Execute('DELETE FROM CriteriaParmNesting WHERE PK_CriteriaParmNesting=?',array($cpnID));
+	$dbADO->Execute('DELETE FROM CriteriaParm WHERE FK_CriteriaParmNesting=?',array($cpnID));
 	
-	$resChilds=$dbADO->Execute('SELECT * FROM CriteriaParmNesting WHERE FK_CriteriaParmNesting_Parent=?',$cpnID);
+	$resChilds=$dbADO->Execute('SELECT * FROM CriteriaParmNesting WHERE FK_CriteriaParmNesting_Parent=?',array($cpnID));
 	while($rowChilds=$resChilds->FetchRow()){
 		deleteCriteriaParmNesting($rowChilds['PK_CriteriaParmNesting'],$dbADO);
 	}
@@ -1400,7 +1400,7 @@ function setOrbitersNeedConfigure($installationID,$dbADO)
 {
 	$orbitersArray=getValidOrbitersArray($installationID,$dbADO);
 	if(count($orbitersArray)!=0){
-		$dbADO->Execute('UPDATE Device SET NeedConfigure=1 WHERE PK_Device IN ('.join(',',$orbitersArray).') AND FK_Installation=?',$installationID);
+		$dbADO->Execute('UPDATE Device SET NeedConfigure=1 WHERE PK_Device IN ('.join(',',$orbitersArray).') AND FK_Installation=?',array($installationID));
 		$dbADO->Execute('UPDATE Orbiter SET Regen=1,Modification_LastGen=0 WHERE PK_Orbiter IN ('.join(',',$orbitersArray).')'); 
 	}
 }
@@ -1413,7 +1413,7 @@ function setDCERouterNeedConfigure($installationID,$dbADO)
 function addScenariosToRoom($roomID, $installationID, $dbADO)
 {
 	$insertTelecomScenario='INSERT INTO CommandGroup (FK_Array, FK_Installation, Description,FK_Template,Hint) SELECT '.$GLOBALS['ArrayIDCommunicationScenarios'].','.$installationID.',\'Phones Scenario\','.$GLOBALS['TelecomScenariosTemplate'].',Description FROM Room WHERE PK_Room=?';
-	$dbADO->Execute($insertTelecomScenario,$roomID);
+	$dbADO->Execute($insertTelecomScenario,array($roomID));
 	$cgID=$dbADO->Insert_ID();
 
 	$insertCG_R='INSERT INTO CommandGroup_Room (FK_Room, FK_CommandGroup,Sort) VALUES (?,?,?)';
@@ -1521,7 +1521,7 @@ function getChildsOfWizard($page,$dbADO)
 		IF(PK_PageSetup=?,1,0) AS pos,
 		PageSetup.*
 		FROM PageSetup
-		ORDER BY pos desc,PK_PageSetup ASC',$page);
+		ORDER BY pos desc,PK_PageSetup ASC',array($page));
 	while($row=$res->FetchRow()){
 		if($row['PK_PageSetup']==$page){
 			$childs[$row['PK_PageSetup']]=$row['pageURL'];
@@ -1534,7 +1534,7 @@ function getChildsOfWizard($page,$dbADO)
 	return $childs;
 	
 	
-	$res=$dbADO->Execute('SELECT * FROM PageSetup WHERE FK_PageSetup_Parent=? ORDER BY OrderNum ASC',$page);
+	$res=$dbADO->Execute('SELECT * FROM PageSetup WHERE FK_PageSetup_Parent=? ORDER BY OrderNum ASC',array($page));
 	while($row=$res->FetchRow()){
 		$GLOBALS['wizardChilds'][$row['PK_PageSetup']]=$row['pageURL'];
 		getChildsOfWizard($row['PK_PageSetup'],$dbADO);
@@ -1591,7 +1591,7 @@ function getDeviceNameForScenarios($deviceID,$dbADO)
 		INNER JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate
 		LEFT JOIN Room ON FK_Room=PK_Room
 		WHERE PK_Device = ? ';
-	$resDevice=$dbADO->Execute($query,$deviceID);
+	$resDevice=$dbADO->Execute($query,array($deviceID));
 							
 	if ($resDevice->RecordCount()>0) {
 		$row = $resDevice->FetchRow();
@@ -1631,7 +1631,7 @@ function getInstallWizardDeviceTemplates($step,$dbADO,$device='',$distro=0,$oper
 	
 	if($distro!=0){
 		$queryDistro='SELECT * FROM Distro WHERE PK_Distro=?';
-		$resDistro=$dbADO->Execute($queryDistro,$distro);
+		$resDistro=$dbADO->Execute($queryDistro,array($distro));
 		if($resDistro->RecordCount()>0){
 			$rowDistro=$resDistro->FetchRow();
 			$distroName=$rowDistro['Description'];
@@ -1642,7 +1642,7 @@ function getInstallWizardDeviceTemplates($step,$dbADO,$device='',$distro=0,$oper
 	
 	if($operatingSystem!=0){
 		$queryOperatingSystem='SELECT * FROM OperatingSystem WHERE PK_OperatingSystem=?';
-		$resOperatingSystem=$dbADO->Execute($queryOperatingSystem,$operatingSystem);
+		$resOperatingSystem=$dbADO->Execute($queryOperatingSystem,array($operatingSystem));
 		if($resOperatingSystem->RecordCount()>0){
 			$rowOperatingSystem=$resOperatingSystem->FetchRow();
 			$operatingSystemName=$rowOperatingSystem['Description'];
@@ -1659,7 +1659,7 @@ function getInstallWizardDeviceTemplates($step,$dbADO,$device='',$distro=0,$oper
 			INNER JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate
 			INNER JOIN DeviceCategory ON FK_DeviceCategory=PK_DeviceCategory
 		WHERE step=?';
-	$resInstallWizard=$dbADO->Execute($queryInstallWizard,$step);
+	$resInstallWizard=$dbADO->Execute($queryInstallWizard,array($step));
 	if($resInstallWizard->RecordCount()==0){
 		$out.='
 			<tr>
@@ -1775,7 +1775,7 @@ function commandPulldownForDevice($deviceID,$dbADO)
 				INNER JOIN DeviceCommandGroup_Command ON DeviceTemplate_DeviceCommandGroup.FK_DeviceCommandGroup = DeviceCommandGroup_Command.FK_DeviceCommandGroup 
 				INNER JOIN Command on DeviceCommandGroup_Command.FK_Command = Command.PK_Command
 				WHERE PK_Device=?";
-			$resNewCommand = $dbADO->Execute($query,$deviceID);
+			$resNewCommand = $dbADO->Execute($query,array($deviceID));
 		}else{
 			$query = "
 				SELECT PK_Command,Command.Description
@@ -1784,7 +1784,7 @@ function commandPulldownForDevice($deviceID,$dbADO)
 				INNER JOIN DeviceTemplate_DeviceCommandGroup ON DeviceTemplate_DeviceCommandGroup.FK_DeviceCommandGroup = DeviceCommandGroup_Command.FK_DeviceCommandGroup 
 				WHERE FK_DeviceTemplate=?
 				ORDER BY Command.Description ASC";
-			$resNewCommand = $dbADO->Execute($query,$GLOBALS['deviceTemplateOrbiter']);
+			$resNewCommand = $dbADO->Execute($query,array($GLOBALS['deviceTemplateOrbiter']));
 		}
 		if ($resNewCommand) {
 			$out.='<select name="addNewDeviceCommand">
@@ -1960,7 +1960,7 @@ function climateDevicesTable($cgID,$dbADO)
 			WHERE PK_Device IN ('.join(',',$climateDevicesArray).') AND FK_DeviceCommandGroup = ?
 			ORDER BY Description ASC';
 	$lineCount=0;
-	$resGetRoomsDevice = $dbADO->Execute($queryGetRoomsDevice,$GLOBALS['ThermostatCommands']);
+	$resGetRoomsDevice = $dbADO->Execute($queryGetRoomsDevice,array($GLOBALS['ThermostatCommands']));
 	if($resGetRoomsDevice->RecordCount()==0){
 		$out.='
 			<tr>
@@ -2051,7 +2051,7 @@ function climateDevicesTable($cgID,$dbADO)
 			WHERE PK_Device IN ('.join(',',$climateDevicesArray).') AND FK_DeviceCommandGroup = ?
 			ORDER BY Description ASC';
 	$lineCount=0;
-	$resGetRoomsDevice = $dbADO->Execute($queryGetRoomsDevice,83);
+	$resGetRoomsDevice = $dbADO->Execute($queryGetRoomsDevice,array(83));
 	if($resGetRoomsDevice->RecordCount()==0){
 		$out.='
 			<tr>
@@ -2328,7 +2328,7 @@ function processAdvancedScenarios($cgID,$section,$dbADO)
 			LEFT JOIN CommandGroup_Command_CommandParameter ON FK_CommandGroup_Command=PK_CommandGroup_Command 
 			WHERE PK_CommandGroup_Command=?';
 
-		$resCommands=$dbADO->Execute($queryCommands,$commandToTest);
+		$resCommands=$dbADO->Execute($queryCommands,array($commandToTest));
 		$commandParmsArray=array();
 		while($rowCommands=$resCommands->FetchRow()){
 			$commandParmsArray[]=$rowCommands['FK_CommandParameter'].' "'.$rowCommands['IK_CommandParameter'].'"';
@@ -2398,8 +2398,8 @@ function CheckValidCode($code,$dbADO)
 	$sql = "SELECT ActivationCode
 			FROM Device
 	 			INNER JOIN Installation ON Device.FK_Installation = Installation.PK_Installation
-			WHERE Device.PK_Device = '$device' LIMIT 1";
-	$res = $dbADO->Execute($sql);
+			WHERE Device.PK_Device = ? LIMIT 1";
+	$res = $dbADO->Execute($sql, array($device));
 	if ($res->RecordCount() == 0)
 		return false;
 	$row = $res->FetchRow();
@@ -2601,7 +2601,7 @@ function getControlledViaDeviceTemplates($deviceID,$dtID,$deviceCategory,$dbADO)
 				LEFT JOIN Room ON FK_Room=PK_Room
 				LEFT JOIN InfraredGroup ON FK_InfraredGroup=PK_InfraredGroup
 			WHERE PK_Device=?';	
-		$resDevice=$dbADO->Execute($queryDevice,$deviceID);
+		$resDevice=$dbADO->Execute($queryDevice,array($deviceID));
 		$rowD=$resDevice->FetchRow();
 
 		$tmpArray=array();
@@ -2799,7 +2799,7 @@ function isInfrared($deviceTemplate,$dbADO)
 	$res=$dbADO->Execute('
 		SELECT DeviceTemplate.FK_CommMethod 
 		FROM DeviceTemplate
-		WHERE PK_DeviceTemplate=? AND FK_CommMethod=1',$deviceTemplate);
+		WHERE PK_DeviceTemplate=? AND FK_CommMethod=1',array($deviceTemplate));
 	if($res->RecordCount()>0){
 		return 1;
 	}else{
@@ -2822,7 +2822,7 @@ function getDeviceInformation($deviceID,$dbADO)
 		INNER JOIN Manufacturer ON FK_Manufacturer=PK_Manufacturer
 		WHERE PK_Device=?
 		';
-	$res=$dbADO->Execute($sql,$deviceID);
+	$res=$dbADO->Execute($sql,array($deviceID));
 	$row=array();
 	if($res){
 		$row=$res->FetchRow();
@@ -2838,7 +2838,7 @@ function getTopLevelParentIP($deviceID,$dbADO)
 			SELECT FK_DeviceCategory,FK_DeviceTemplate,FK_Device_ControlledVia,IPaddress 
 			FROM Device 
 			INNER JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate
-			WHERE PK_Device=?',$deviceID);
+			WHERE PK_Device=?',array($deviceID));
 		$row=$res->FetchRow();
 		if((int)$row['FK_Device_ControlledVia']!=0){
 			$topParent=getTopLevelParentIP($row['FK_Device_ControlledVia'],$dbADO);
@@ -2862,7 +2862,7 @@ function getTopLevelParent($deviceID,$dbADO)
 			SELECT FK_DeviceTemplate,FK_Device_ControlledVia,IPaddress,FK_DeviceCategory 
 			FROM Device 
 			INNER JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate
-			WHERE PK_Device=?',$deviceID);
+			WHERE PK_Device=?',array($deviceID));
 		$row=$res->FetchRow();
 		if((int)$row['FK_Device_ControlledVia']!=0){
 			$topParent=getTopLevelParent($row['FK_Device_ControlledVia'],$dbADO);
@@ -2930,7 +2930,7 @@ function devicesTree($name,$selectedValue,$dbADO,$filter,$extra='')
 
 function getDeviceGroups($installationID, $dbADO)
 {
-	$req=$dbADO->Execute('SELECT PK_DeviceGroup,Description FROM DeviceGroup WHERE FK_Installation=? ORDER BY Description ASC',$installationID);
+	$req=$dbADO->Execute('SELECT PK_DeviceGroup,Description FROM DeviceGroup WHERE FK_Installation=? ORDER BY Description ASC',array($installationID));
 	$dg=array();
 	while($row=$req->Fetchrow()){
 		$dg[$row['PK_DeviceGroup']]=$row['Description'];
@@ -2996,7 +2996,7 @@ function getDeviceTemplatesControlledBy($parentID,$dbADO)
 function getProperties($primaryKey,$table,$properties,$field,$dbADO)
 {
 	$propArray=explode(',',$properties);
-	$res=$dbADO->Execute("SELECT $properties FROM $table WHERE $field='$primaryKey'");
+	$res=$dbADO->Execute("SELECT $properties FROM $table WHERE $field=?", array($primaryKey));
 	if($res->RecordCount()>0){
 		$row=$res->FetchRow();
 		return $row;
@@ -3194,7 +3194,7 @@ function getLogName($dbADO,$deviceID,$dtID,$dtDescription,$parentID=0,$isOrbiter
 			INNER JOIN Device d2 ON d1.FK_Device_ControlledVia=d2.PK_Device
 			INNER JOIN DeviceTemplate dt ON d2.FK_DeviceTemplate=dt.PK_DeviceTemplate
 			WHERE d1.PK_Device=?';
-		$resDevice=$dbADO->Execute($selectDevice,$deviceID);
+		$resDevice=$dbADO->Execute($selectDevice,array($deviceID));
 		$rowDevice=$resDevice->FetchRow();
 		if ($resDevice->RecordCount()>0) {
 			$parentDeviceCategory=$rowDevice['ParentDeviceCategory'];
@@ -3223,7 +3223,7 @@ function getLogName($dbADO,$deviceID,$dtID,$dtDescription,$parentID=0,$isOrbiter
 	if ($MDID > 0) {
 		//omit the Hybrid device (which is the only MD type that does not have a null entry in FK_Device_ControlledVia)
 		$hybridQuery='SELECT PK_Device FROM Device WHERE PK_Device=? AND FK_Device_ControlledVia IS NULL';
-		$resHybridQuery=$dbADO->Execute($hybridQuery,$MDID);
+		$resHybridQuery=$dbADO->Execute($hybridQuery,array($MDID));
 
 		if ($resHybridQuery->RecordCount()>0) {
 	        	$logName='/usr/pluto/diskless/'.$MDID.$logName;
@@ -3438,8 +3438,8 @@ function formatNonEditDeviceData($deviceID,$DeviceDataArray,$dbADO,$isIPBased=0)
 						$filterQuery=" WHERE FK_FloorplanType='".@$specificFloorplanType."'";
 					}
 
-					$queryTable="SELECT * FROM $tableName $filterQuery WHERE ".$rowDDforDevice['dd_Description']."=$ddValue";
-					$resTable=$dbADO->Execute($queryTable);
+					$queryTable="SELECT * FROM $tableName $filterQuery WHERE ".$rowDDforDevice['dd_Description']."=?";
+					$resTable=$dbADO->Execute($queryTable, array($ddValue));
 					if($resTable->RecordCount()>0){
 						$row=$resTable->FetchRow();
 						$ddLabel=$row['Description'];
@@ -3493,7 +3493,7 @@ function getPipes($deviceID,$dbADO){
 		INNER JOIN Device ON FK_Device_To=PK_Device 
 		LEFT JOIN Command Cin ON Device_Device_Pipe.FK_Command_Input=Cin.PK_Command
 		LEFT JOIN Command Cout ON Device_Device_Pipe.FK_Command_Output=Cout.PK_Command
-		WHERE FK_Device_From=?',$deviceID);
+		WHERE FK_Device_From=?',array($deviceID));
 	while($row=$res->FetchRow()){
 		$pipes[$row['FK_Pipe']]['to']=$row['Description'];
 		$pipes[$row['FK_Pipe']]['input']=($row['input']!='')?$row['input']:'none';
@@ -4280,7 +4280,7 @@ function getMediaTypeCheckboxes($dtID,$publicADO,$mediaADO,$deviceID)
 		SELECT MediaType.Description, PK_MediaType, FK_DeviceTemplate 
 		FROM MediaType 
 		LEFT JOIN DeviceTemplate_MediaType ON FK_MediaType=PK_MediaType AND FK_DeviceTemplate=?
-		WHERE DCEaware=0',$dtID);
+		WHERE DCEaware=0',array($dtID));
 	$displayedMT=array();
 	$checkedMT=array();
 	while($rowMT=$resMT->FetchRow()){
@@ -4652,7 +4652,7 @@ function getParentsForControlledVia($deviceID,$dbADO)
 		LEFT JOIN Room ON FK_Room=PK_Room
 		WHERE Device.FK_Installation=? $whereClause order by Device.Description asc";
 
-	$resDeviceTemplate = $dbADO->Execute($queryDeviceTemplate,$installationID);
+	$resDeviceTemplate = $dbADO->Execute($queryDeviceTemplate,array($installationID));
 
 	$optionsArray=array();
 	$optionsArrayLowerCase=array();
@@ -4689,7 +4689,7 @@ function getParentsForControlledVia($deviceID,$dbADO)
 				LEFT JOIN Room ON FK_Room=PK_Room
 				LEFT JOIN InfraredGroup ON FK_InfraredGroup=PK_InfraredGroup
 			WHERE PK_Device=?';	
-		$resDevice=$dbADO->Execute($queryDevice,$deviceID);
+		$resDevice=$dbADO->Execute($queryDevice,array($deviceID));
 		$rowD=$resDevice->FetchRow();
 
 		$tmpArray=array();
@@ -4720,7 +4720,7 @@ function getAncestorsForCategory($categoryID,$dbADO)
 		IF(PK_DeviceCategory=?,1,0) AS pos,
 		DeviceCategory.*
 		FROM DeviceCategory
-		ORDER BY pos desc,FK_DeviceCategory_Parent DESC',$categoryID);
+		ORDER BY pos desc,FK_DeviceCategory_Parent DESC',array($categoryID));
 	while($row=$res->FetchRow()){
 		if($row['PK_DeviceCategory']==$categoryID){
 			$parentsDC[]=$row['PK_DeviceCategory'];
@@ -4743,7 +4743,7 @@ function getDescendantsForCategory($categoryID,$dbADO)
 		IF(PK_DeviceCategory=?,1,0) AS pos,
 		DeviceCategory.*
 		FROM DeviceCategory
-		ORDER BY pos desc,PK_DeviceCategory ASC',$categoryID);
+		ORDER BY pos desc,PK_DeviceCategory ASC',array($categoryID));
 	while($row=$res->FetchRow()){
 		if($row['PK_DeviceCategory']==$categoryID){
 			$childsDC[]=$row['PK_DeviceCategory'];
@@ -4830,7 +4830,7 @@ function getAncestorsForDevice($deviceID,$dbADO)
 		IF(PK_Device=?,1,0) AS pos,
 		Device.*
 		FROM Device
-		ORDER BY pos desc,FK_Device_ControlledVia DESC',$deviceID);
+		ORDER BY pos desc,FK_Device_ControlledVia DESC',array($deviceID));
 	while($row=$res->FetchRow()){
 		if($row['PK_Device']==$deviceID){
 			$parents[]=$row['PK_Device'];
@@ -4881,7 +4881,7 @@ function createEventHandler($description,$eventID,$installationID,$dbADO,$canned
 			INSERT INTO EventHandler 
 				(Description, FK_Criteria, FK_Installation, FK_CommandGroup,FK_CannedEvents,FK_Event)
 			SELECT '$description',$criteriaID,$installationID,$cgID,$cannedEvent,FK_Event FROM CannedEvents WHERE PK_CannedEvents=?";
-		$dbADO->Execute($insertEventHandler,$cannedEvent);
+		$dbADO->Execute($insertEventHandler,array($cannedEvent));
 	}else{
 		$insertEventHandler="
 			INSERT INTO EventHandler 
@@ -5082,7 +5082,7 @@ function irrigationCommandGroupCommandsTable($cgID,$section,$dbADO){
 		LEFT JOIN Room ON FK_Room=PK_Room 
 		INNER JOIN CommandGroup ON FK_CommandGroup=PK_CommandGroup 
 		WHERE PK_CommandGroup=?
-		ORDER BY FK_Device,OrderNum ASC',ar,array($cgID));	
+		ORDER BY FK_Device,OrderNum ASC',array($cgID));	
 	$pos=0;	
 	if($res->RecordCount()!=0){
 		while($row=$res->FetchRow()){
@@ -5256,6 +5256,9 @@ function processIrrigationScenario($cgID,$section,$dbADO){
 }
 
 function delete_command_from_cg($cgID,$device,$commands,$dbADO){
+   foreach ($commands as &$command) {
+	  $command = adodb_addslashes($command);
+   }
 	$deleteParameters='
 		DELETE CommandGroup_Command_CommandParameter 
 		FROM CommandGroup_Command_CommandParameter 
@@ -6362,9 +6365,9 @@ function generateTopMenu($website,$installationID,$dbADO)
 		SELECT DISTINCT PageSetup.* FROM PageSetup 
 		LEFT JOIN DeviceTemplate ON PageSetup.FK_Package=DeviceTemplate.FK_Package
 		LEFT JOIN Device ON Device.FK_DeviceTemplate=PK_DeviceTemplate
-		WHERE showInTopMenu = 1 AND Website='$website' AND (PageSetup.FK_Package IS NULL OR (PK_Device IS NOT NULL AND FK_Installation=?))
+		WHERE showInTopMenu = 1 AND Website=? AND (PageSetup.FK_Package IS NULL OR (PK_Device IS NOT NULL AND FK_Installation=?))
 		ORDER BY OrderNum ASC";
-	$res = $dbADO->Execute($selectMenu,$installationID);
+	$res = $dbADO->Execute($selectMenu,array($website,$installationID));
 
 	$menuItems=array();
 	$GLOBALS['labelArray']=array();
@@ -7035,7 +7038,7 @@ function remove_cover_arts($fileID,$mediadbADO){
 		exec_batch_command('sudo -u root rm '.$GLOBALS['mediaPicsPath'].$key.'.jpg');
 	}
 	
-	$mediadbADO->Execute('DELETE FROM Picture_File WHERE FK_File='.$fileID.' AND FK_Picture IN ('.join(',',array_values($picsArray)).')');
+	$mediadbADO->Execute('DELETE FROM Picture_File WHERE FK_File=? AND FK_Picture IN ('.join(',',array_values($picsArray)).')', array($fileID));
 }
 
 function bash_escape($str){
@@ -7065,11 +7068,11 @@ function getRows($tableName,$fields,$dbADO,$filter='')
 
 function delete_media_pic($picID,$mediadbADO){
 	if($picID!=0){
-		$mediadbADO->Execute('DELETE FROM Picture WHERE PK_Picture=?',$picID);
+		$mediadbADO->Execute('DELETE FROM Picture WHERE PK_Picture=?',array($picID));
 	
-		$mediadbADO->Execute('DELETE FROM Picture_Attribute WHERE FK_Picture=?',$picID);
+		$mediadbADO->Execute('DELETE FROM Picture_Attribute WHERE FK_Picture=?',array($picID));
 	
-		$mediadbADO->Execute('DELETE FROM Picture_File WHERE FK_Picture=?',$picID);
+		$mediadbADO->Execute('DELETE FROM Picture_File WHERE FK_Picture=?',array($picID));
 	
 		@unlink($GLOBALS['mediaPicsPath'].$picID.'.jpg');
 		@unlink($GLOBALS['mediaPicsPath'].$picID.'_tn.jpg');
@@ -7078,16 +7081,16 @@ function delete_media_pic($picID,$mediadbADO){
 
 function delete_media_pic_if_unused($picID,$mediadbADO) {
 	//Is anything else referencing this picture?
-	$pictureReference =         'SELECT * FROM Picture_Attribute WHERE FK_Picture = '.$picID;
-	$pictureReference .= ' UNION SELECT * FROM Picture_Disc WHERE FK_Picture = '.$picID;
-	$pictureReference .= ' UNION SELECT * FROM Picture_Download WHERE FK_Picture = '.$picID;
-	$pictureReference .= ' UNION SELECT * FROM Picture_File WHERE FK_Picture = '.$picID;
-	$numPictureReferences = $mediadbADO->Execute($pictureReference);
+	$pictureReference =         'SELECT * FROM Picture_Attribute WHERE FK_Picture = ?';
+	$pictureReference .= ' UNION SELECT * FROM Picture_Disc WHERE FK_Picture = ?';
+	$pictureReference .= ' UNION SELECT * FROM Picture_Download WHERE FK_Picture = ?';
+	$pictureReference .= ' UNION SELECT * FROM Picture_File WHERE FK_Picture = ?';
+	$numPictureReferences = $mediadbADO->Execute($pictureReference, array($picID,$picID,$picID,$picID));
 
 	//Delete picture from database and file system only if nothing else is referencing it!
 	if($numPictureReferences->RecordCount()==0) {
 		$deletePic='DELETE FROM Picture WHERE PK_Picture=?';
-		$mediadbADO->Execute($deletePic,$picID);
+		$mediadbADO->Execute($deletePic,array($picID));
 		unlink($GLOBALS['mediaPicsPath'].$picID.'.jpg');
 		unlink($GLOBALS['mediaPicsPath'].$picID.'_tn.jpg');
 	}
