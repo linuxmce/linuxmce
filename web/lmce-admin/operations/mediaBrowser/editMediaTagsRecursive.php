@@ -53,8 +53,9 @@ SCRIPT;
 		    $thisfilename = $thisfilearray[count($thisfilearray)-1];
 		    $parsed_tags = ParseFileName($thisfilename,$_REQUEST['tvmode_seasonoffset'],$_REQUEST['tvmode_seasonlength'],$_REQUEST['tvmode_episodeoffset'],$_REQUEST['tvmode_episodelength'],$_REQUEST['tvmode_titleoffset'],$_REQUEST['tvmode_striptext']);
 		    $season = $parsed_tags['season'];
-		    $episode = $parsed_tags['episode'];
+		    $episode_num = $parsed_tags['episode'];
 		    $title = $parsed_tags['title'];
+		    $episode = "$season" . "x" . "$episode_num $title";
 		    SetTVAttributes($file['file'],$mediadbADO,$season,$episode,$title);
 		    $out .= "Season:<B>$season</B>, Episode:<B>$episode</B>, Title:<B>$title</B><BR>";
 		}
@@ -276,7 +277,9 @@ function SetTVAttributes($path,$mediadbADO,$season,$episode,$title)
     
     SetAttributeWithOverride($fileID,$SeasonAttribute,$mediadbADO);
     SetAttributeWithOverride($fileID,$EpisodeAttribute,$mediadbADO);
-    SetAttributeWithOverride($fileID,$TitleAttribute,$mediadbADO);    
+    # Don't over-write the title.  All episodes of the same show should have
+    # the same title (e.g. The Simpsons).
+    #SetAttributeWithOverride($fileID,$TitleAttribute,$mediadbADO);    
 }
 
 function GetAttributeType($desc,$mediadbADO)
