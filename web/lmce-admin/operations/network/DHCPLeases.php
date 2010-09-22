@@ -48,7 +48,7 @@ if (!isset($_GET['error']) && !$test->readLease($accessFile)) {
 				<td>'.$pos.'</td>
 					<td>'.$lease["ip_addr"].'</td>
 					<td>'.$lease["mac"].'</td>
-					<td>'.date("j-M-Y H:i", $lease["ends"]).'</td>
+					<td>'.date("j-M-Y H:i", (int)$lease["ends"]).'</td>
 					<td>'.$lease["status"].'</td>
 					<td>'.$lease["hostname"].'</td><td></TD>';
 				$res=$dbADO->Execute("SELECT * FROM Device where IPaddress='$lease[ip_addr]'");
