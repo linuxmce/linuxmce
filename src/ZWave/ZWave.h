@@ -72,9 +72,10 @@ public:
 		virtual void SendOnOffEvent(unsigned short node_id, int instance_id, int value);
 		virtual void SendOrbiterPopup(const char *message); 
         	virtual int AddDevice(int parent, string sInternalID, int iInstanceID, int PK_DeviceTemplate);
+		virtual int GetPKDevice(int node_id, int instance_id);
         	virtual bool DeleteDevicesForNode(string sInternalID);
-		virtual string GetCapabilities(string sInternalID, int iInstanceID);
-		virtual void SetCapabilities(int PKDevice, string sCapabilities);
+		virtual string GetCapabilities(int iNodeID, int iInstanceID);
+		virtual bool SetCapabilities(int iNodeID, int iInstanceID, string sCapabilities);
 		virtual void AddCapability(int PKDevice, int capability);
 		virtual void SetManufacturerSpecificString(string sManufacturerSpecific);
 		virtual std::map<int, int> FindCCInstanceCountForNode(string sInternalID);

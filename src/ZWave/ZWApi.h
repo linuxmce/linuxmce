@@ -358,6 +358,10 @@ namespace ZWApi {
     };
 
     struct ZWNode {
+	    ZWNode(int node_id) {
+		    id = node_id;
+	    }
+        int id;
 	int typeBasic;
 	int typeGeneric;
 	int typeSpecific;
@@ -416,11 +420,13 @@ namespace ZWApi {
 	bool wakeupHandler(int nodeid);
 
 	void parseNodeInfo(int nodeid, char *nodeinfo, size_t length);
+	std::string commandClassToString(char cclass);
+	void updateNodeCapabilities(ZWNode* node, char *nodeinfo, size_t length);
 
 	int getDeviceTemplate(int basic, int generic, int specific,
 			      char *nodeinfo, size_t len);
 
-	 std::string nodeInfo2String(char *nodeinfo, size_t length);
+	std::string nodeInfo2String(char *nodeinfo, size_t length, bool bInclControlCC);
 
 
       public:

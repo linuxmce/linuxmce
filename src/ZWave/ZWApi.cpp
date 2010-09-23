@@ -251,7 +251,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 				if (frame[6] != 0) {
 					// printf("***FOUND NODE:\n");
 					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"***FOUND NODE: %d",tmp_nodeid);
-					newNode = new ZWNode;
+					newNode = new ZWNode(tmp_nodeid);
 					newNode->plutoDeviceTemplateConst=0;
 					newNode->typeBasic = (unsigned char) frame[5];
 					newNode->typeGeneric = (unsigned char) frame[6];
@@ -351,25 +351,30 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 						DCEcallback->AddDevice(0, tempbuf2, 0, newNode->plutoDeviceTemplateConst);
 					}
 
-					// Is this a MULTI_INSTANCE node?
-					sprintf(tempbuf2, "%d", tmp_nodeid);
-					string capa = DCEcallback->GetCapabilities(tempbuf2, 0);
-					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Device capabilities: %s",capa.c_str());
-					resetNodeInstanceCount(newNode, capa);
-					if (capa.find(StringUtils::itos(COMMAND_CLASS_MULTI_INSTANCE)) != string::npos) {
-					        // load capabilities for instances and store in node
-					        map<int, int> mapCCInstanceCount;
-						mapCCInstanceCount = DCEcallback->FindCCInstanceCountForNode(tempbuf2);
-						map<int, int>::iterator ccIterator;
-						for ( ccIterator=newNode->mapCCInstanceCount.begin() ; ccIterator != newNode->mapCCInstanceCount.end(); ccIterator++ ) {
-						        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Command class: %d (hex: %x)", (*ccIterator).first, (*ccIterator).first);
-							if (mapCCInstanceCount.find((*ccIterator).first) != mapCCInstanceCount.end()) {
-							        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Device data matches: instance count: %d", mapCCInstanceCount[(*ccIterator).first]);
-								newNode->mapCCInstanceCount[(*ccIterator).first] = mapCCInstanceCount[(*ccIterator).first];
+					// check if we have fetched the node's command classes/capabilities
+					string capa = DCEcallback->GetCapabilities(tmp_nodeid, 0);
+					if (!capa.empty()) {
+						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Device capabilities: %s",capa.c_str());
+						resetNodeInstanceCount(newNode, capa);
+						// Is this a MULTI_INSTANCE node?
+						if (capa.find(StringUtils::itos(COMMAND_CLASS_MULTI_INSTANCE)) != string::npos) {
+							// load capabilities for instances and store in node
+							map<int, int> mapCCInstanceCount;
+							mapCCInstanceCount = DCEcallback->FindCCInstanceCountForNode(tempbuf2);
+							map<int, int>::iterator ccIterator;
+							for ( ccIterator=newNode->mapCCInstanceCount.begin() ; ccIterator != newNode->mapCCInstanceCount.end(); ccIterator++ ) {
+								DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Command class: %d (hex: %x)", (*ccIterator).first, (*ccIterator).first);
+								if (mapCCInstanceCount.find((*ccIterator).first) != mapCCInstanceCount.end()) {
+									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Device data matches: instance count: %d", mapCCInstanceCount[(*ccIterator).first]);
+									newNode->mapCCInstanceCount[(*ccIterator).first] = mapCCInstanceCount[(*ccIterator).first];
+								}
 							}
 						}
+					} else {
+						// No capabilities on record, request node info
+						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"No device capabilities for node: %d",newNode->id);
+						zwRequestNodeInfo(newNode->id);
 					}
-
 				} else {
 					sprintf(tempbuf2, "%d", tmp_nodeid);
 					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Invalid generic class (0x%x), ignoring device",(unsigned char)frame[6]);
@@ -976,11 +981,15 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					case UPDATE_STATE_NODE_INFO_RECEIVED:
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"FUNC_ID_ZW_APPLICATION_UPDATE:UPDATE_STATE_NODE_INFO_RECEIVED received from node %d - ",(unsigned int)frame[3]);
 
-						if (zwIsSleepingNode((unsigned char) frame[3])) {
-							wakeupHandler((unsigned char) frame[3]);	
+						ZWNodeMapIt = ZWNodeMap.find((unsigned int)frame[3]);
+						if (ZWNodeMapIt != ZWNodeMap.end()) {
+							ZWNode *node = (*ZWNodeMapIt).second;
+							if (node->sleepingDevice) {
+								wakeupHandler((unsigned char) frame[3]);	
+							}
+							parseNodeInfo((unsigned char)frame[3],&(frame[8]),(unsigned char)frame[4]-3);
+							updateNodeCapabilities(node, &(frame[8]), (unsigned char)frame[4]-3);
 						}
-						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"node %d , len = %d ",(unsigned int)frame[3], (unsigned int)frame[4]);
-						parseNodeInfo((unsigned char)frame[3],&(frame[8]),(unsigned char)frame[4]-3);
 						switch(frame[5]) {
 							case BASIC_TYPE_ROUTING_SLAVE:
 							case BASIC_TYPE_SLAVE:
@@ -1047,7 +1056,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					{
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"** Network change **: ID %d was assigned to a new Z-Wave node",(unsigned char)frame[3]);
 
-						newNode = new ZWNode;
+						newNode = new ZWNode((unsigned char)frame[3]);
 						newNode->plutoDeviceTemplateConst=0;
 						newNode->typeBasic = (unsigned char) frame[5];
 						newNode->typeGeneric = (unsigned char) frame[6];
@@ -1063,21 +1072,14 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 
 						ZWNodeMap.insert(std::map < int, ZWNode * >::value_type((unsigned char)frame[3],newNode));
 						char tmpstr2[1024];
-						string cclasses = nodeInfo2String(&(frame[8]),(unsigned char)frame[4]-3);
-						resetNodeInstanceCount(newNode, cclasses);
 						if (newNode->plutoDeviceTemplateConst != 0) {
 							sprintf(tmpstr2, "%d", (unsigned char)frame[3]);
 							int iPKChildDevice = -1;
 							iPKChildDevice =  DCEcallback->AddDevice(0, tmpstr2, 0, newNode->plutoDeviceTemplateConst);
 							if (iPKChildDevice != -1) {
 								DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"** Network change **: Created LMCE device %d",iPKChildDevice);
-								DCEcallback->SetCapabilities(iPKChildDevice, cclasses);
-								
+								updateNodeCapabilities(newNode, &(frame[8]), (unsigned char)frame[4]-3);
 							}
-						}
-						// Check multi instance
-						if ( cclasses.find(COMMAND_CLASS_MULTI_INSTANCE) != string::npos ) {
-						        multiInstanceGetAllCCsForNode((unsigned char)frame[3]);
 						}
 
 						if (((unsigned int)frame[6] == 8) && ((unsigned int)frame[7] == 3)) {
@@ -1382,9 +1384,7 @@ void ZWApi::ZWApi::resetNodeInstanceCount(ZWNode *node, string capa) {
 }
 
 void ZWApi::ZWApi::multiInstanceGetAllCCsForNode(unsigned int node_id) {
-        char tmpbuf2[1000];
-	sprintf(tmpbuf2, "%d", node_id);
-	string capa = DCEcallback->GetCapabilities(tmpbuf2, 0);
+	string capa = DCEcallback->GetCapabilities(node_id, 0);
 	vector<string> vectCapa;
 	StringUtils::Tokenize(capa, ",", vectCapa);
 	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"MultiInstanceGet, node %d CC : %s ", node_id, capa.c_str());
@@ -1751,6 +1751,171 @@ bool ZWApi::ZWApi::wakeupHandler(int node_id) {
 	return true;
 }	
 
+string ZWApi::ZWApi::commandClassToString(char nodeinfo) {
+	switch(nodeinfo) {
+	case COMMAND_CLASS_WAKE_UP:
+		return "COMMAND_CLASS_WAKE_UP";
+	case COMMAND_CLASS_MANUFACTURER_SPECIFIC:
+		return "COMMAND_CLASS_MANUFACTURER_SPECIFIC";
+	case COMMAND_CLASS_ASSOCIATION:
+		return "COMMAND_CLASS_ASSOCIATION";
+	case COMMAND_CLASS_MULTI_CMD:
+		return "COMMAND_CLASS_MULTI_CMD";
+	case COMMAND_CLASS_MARK:	
+		return "* COMMAND_CLASS_MARK *";
+	case COMMAND_CLASS_ALARM:
+		return "COMMAND_CLASS_ALARM";
+	case COMMAND_CLASS_APPLICATION_STATUS:
+		return "COMMAND_CLASS_APPLICATION_STATUS";
+	case COMMAND_CLASS_ASSOCIATION_COMMAND_CONFIGURATION:
+		return "COMMAND_CLASS_ASSOCIATION_COMMAND_CONFIGURATION";
+	case COMMAND_CLASS_AV_CONTENT_DIRECTORY_MD:
+		return "COMMAND_CLASS_AV_CONTENT_DIRECTORY_MD";
+	case COMMAND_CLASS_AV_CONTENT_SEARCH_MD:
+		return "COMMAND_CLASS_AV_CONTENT_SEARCH_MD";
+	case COMMAND_CLASS_AV_RENDERER_STATUS:
+		return "COMMAND_CLASS_AV_RENDERER_STATUS";
+	case COMMAND_CLASS_AV_TAGGING_MD:
+		return "COMMAND_CLASS_AV_TAGGING_MD";
+	case COMMAND_CLASS_BASIC_WINDOW_COVERING:
+		return "COMMAND_CLASS_BASIC_WINDOW_COVERING";
+	case COMMAND_CLASS_BASIC:
+		return "COMMAND_CLASS_BASIC";
+	case COMMAND_CLASS_BATTERY:
+		return "COMMAND_CLASS_BATTERY";
+	case COMMAND_CLASS_CHIMNEY_FAN:
+		return "COMMAND_CLASS_CHIMNEY_FAN";
+	case COMMAND_CLASS_CLIMATE_CONTROL_SCHEDULE:
+		return "COMMAND_CLASS_CLIMATE_CONTROL_SCHEDULE";
+	case COMMAND_CLASS_CLOCK:
+		return "COMMAND_CLASS_CLOCK";
+	case COMMAND_CLASS_COMPOSITE:
+		return "COMMAND_CLASS_COMPOSITE";
+	case COMMAND_CLASS_CONFIGURATION:
+		return "COMMAND_CLASS_CONFIGURATION";
+	case COMMAND_CLASS_CONTROLLER_REPLICATION:
+		return "COMMAND_CLASS_CONTROLLER_REPLICATION";
+	case COMMAND_CLASS_DOOR_LOCK:
+		return "COMMAND_CLASS_DOOR_LOCK";
+	case COMMAND_CLASS_ENERGY_PRODUCTION:
+		return "COMMAND_CLASS_ENERGY_PRODUCTION";
+	case COMMAND_CLASS_FIRMWARE_UPDATE_MD:
+		return "COMMAND_CLASS_FIRMWARE_UPDATE_MD";
+	case COMMAND_CLASS_GEOGRAPHIC_LOCATION:
+		return "COMMAND_CLASS_GEOGRAPHIC_LOCATION";
+	case COMMAND_CLASS_GROUPING_NAME:
+		return "COMMAND_CLASS_GROUPING_NAME";
+	case COMMAND_CLASS_HAIL:
+		return "COMMAND_CLASS_HAIL";
+	case COMMAND_CLASS_INDICATOR:
+		return "COMMAND_CLASS_INDICATOR";
+	case COMMAND_CLASS_IP_CONFIGURATION:
+		return "COMMAND_CLASS_IP_CONFIGURATION";
+	case COMMAND_CLASS_LANGUAGE:
+		return "COMMAND_CLASS_LANGUAGE";
+	case COMMAND_CLASS_LOCK:
+		return "COMMAND_CLASS_LOCK";
+	case COMMAND_CLASS_MANUFACTURER_PROPRIETARY:
+		return "COMMAND_CLASS_MANUFACTURER_PROPRIETARY";
+	case COMMAND_CLASS_METER_PULSE:
+		return "COMMAND_CLASS_METER_PULSE";
+	case COMMAND_CLASS_METER:
+		return "COMMAND_CLASS_METER";
+	case COMMAND_CLASS_MTP_WINDOW_COVERING:
+		return "COMMAND_CLASS_MTP_WINDOW_COVERING";
+	case COMMAND_CLASS_MULTI_INSTANCE_ASSOCIATION:
+		return "COMMAND_CLASS_MULTI_INSTANCE_ASSOCIATION";
+	case COMMAND_CLASS_MULTI_INSTANCE:
+		return "COMMAND_CLASS_MULTI_INSTANCE";
+	case COMMAND_CLASS_NO_OPERATION:
+		return "COMMAND_CLASS_NO_OPERATION";
+	case COMMAND_CLASS_NODE_NAMING:
+		return "COMMAND_CLASS_NODE_NAMING";
+	case COMMAND_CLASS_NON_INTEROPERABLE:
+		return "COMMAND_CLASS_NON_INTEROPERABLE";
+	case COMMAND_CLASS_POWERLEVEL:
+		return "COMMAND_CLASS_POWERLEVEL";
+	case COMMAND_CLASS_PROPRIETARY:
+		return "COMMAND_CLASS_PROPRIETARY";
+	case COMMAND_CLASS_PROTECTION:
+		return "COMMAND_CLASS_PROTECTION";
+	case COMMAND_CLASS_REMOTE_ASSOCIATION_ACTIVATE:
+		return "COMMAND_CLASS_REMOTE_ASSOCIATION_ACTIVATE";
+	case COMMAND_CLASS_REMOTE_ASSOCIATION:
+		return "COMMAND_CLASS_REMOTE_ASSOCIATION";
+	case COMMAND_CLASS_SCENE_ACTIVATION:
+		return "COMMAND_CLASS_SCENE_ACTIVATION";
+	case COMMAND_CLASS_SCENE_ACTUATOR_CONF:
+		return "COMMAND_CLASS_SCENE_ACTUATOR_CONF";
+	case COMMAND_CLASS_SCENE_CONTROLLER_CONF:
+		return "COMMAND_CLASS_SCENE_CONTROLLER_CONF";
+	case COMMAND_CLASS_SCREEN_ATTRIBUTES:
+		return "COMMAND_CLASS_SCREEN_ATTRIBUTES";
+	case COMMAND_CLASS_SCREEN_MD:
+		return "COMMAND_CLASS_SCREEN_MD";
+	case COMMAND_CLASS_SECURITY:
+		return "COMMAND_CLASS_SECURITY";
+	case COMMAND_CLASS_SENSOR_ALARM:
+		return "COMMAND_CLASS_SENSOR_ALARM";
+	case COMMAND_CLASS_SENSOR_BINARY:
+		return "COMMAND_CLASS_SENSOR_BINARY";
+	case COMMAND_CLASS_SENSOR_CONFIGURATION:
+		return "COMMAND_CLASS_SENSOR_CONFIGURATION";
+	case COMMAND_CLASS_SENSOR_MULTILEVEL:
+		return "COMMAND_CLASS_SENSOR_MULTILEVEL";
+	case COMMAND_CLASS_SILENCE_ALARM:
+		return "COMMAND_CLASS_SILENCE_ALARM";
+	case COMMAND_CLASS_SIMPLE_AV_CONTROL:
+		return "COMMAND_CLASS_SIMPLE_AV_CONTROL";
+	case COMMAND_CLASS_SWITCH_ALL:
+		return "COMMAND_CLASS_SWITCH_ALL";
+	case COMMAND_CLASS_SWITCH_BINARY:
+		return "COMMAND_CLASS_SWITCH_BINARY";
+	case COMMAND_CLASS_SWITCH_MULTILEVEL:
+		return "COMMAND_CLASS_SWITCH_MULTILEVEL";
+	case COMMAND_CLASS_SWITCH_TOGGLE_BINARY:
+		return "COMMAND_CLASS_SWITCH_TOGGLE_BINARY";
+	case COMMAND_CLASS_SWITCH_TOGGLE_MULTILEVEL:
+		return "COMMAND_CLASS_SWITCH_TOGGLE_MULTILEVEL";
+	case COMMAND_CLASS_THERMOSTAT_FAN_MODE:
+		return "COMMAND_CLASS_THERMOSTAT_FAN_MODE";
+	case COMMAND_CLASS_THERMOSTAT_FAN_STATE:
+		return "COMMAND_CLASS_THERMOSTAT_FAN_STATE";
+	case COMMAND_CLASS_THERMOSTAT_HEATING:
+		return "COMMAND_CLASS_THERMOSTAT_HEATING";
+	case COMMAND_CLASS_THERMOSTAT_MODE:
+		return "COMMAND_CLASS_THERMOSTAT_MODE";
+	case COMMAND_CLASS_THERMOSTAT_OPERATING_STATE:
+		return "COMMAND_CLASS_THERMOSTAT_OPERATING_STATE";
+	case COMMAND_CLASS_THERMOSTAT_SETBACK:
+		return "COMMAND_CLASS_THERMOSTAT_SETBACK";
+	case COMMAND_CLASS_THERMOSTAT_SETPOINT:
+		return "COMMAND_CLASS_THERMOSTAT_SETPOINT";
+	case COMMAND_CLASS_TIME_PARAMETERS:
+		return "COMMAND_CLASS_TIME_PARAMETERS";
+	case COMMAND_CLASS_TIME:
+		return "COMMAND_CLASS_TIME";
+	case COMMAND_CLASS_USER_CODE:
+		return "COMMAND_CLASS_USER_CODE";
+	case COMMAND_CLASS_VERSION:
+		return "COMMAND_CLASS_VERSION";
+	case COMMAND_CLASS_ZIP_ADV_CLIENT:
+		return "COMMAND_CLASS_ZIP_ADV_CLIENT";
+	case COMMAND_CLASS_ZIP_ADV_SERVER:
+		return "COMMAND_CLASS_ZIP_ADV_SERVER";
+	case COMMAND_CLASS_ZIP_ADV_SERVICES:
+		return "COMMAND_CLASS_ZIP_ADV_SERVICES";
+	case COMMAND_CLASS_ZIP_CLIENT:
+		return "COMMAND_CLASS_ZIP_CLIENT";
+	case COMMAND_CLASS_ZIP_SERVER:
+		return "COMMAND_CLASS_ZIP_SERVER";
+	case COMMAND_CLASS_ZIP_SERVICES:
+		return "COMMAND_CLASS_ZIP_SERVICES";
+	default:
+		return "<unknown command class>";
+	}
+}
+
 void ZWApi::ZWApi::parseNodeInfo(int nodeid, char *nodeinfo, size_t length) {
 	bool wakeup = false;
 	bool multicommand = false;
@@ -1759,253 +1924,29 @@ void ZWApi::ZWApi::parseNodeInfo(int nodeid, char *nodeinfo, size_t length) {
 	bool manufacturerspecific = false;
 	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Supported command classes:");
 	for (unsigned int i=0;i<length;i++) {
-		switch(nodeinfo[i]) {
-			case COMMAND_CLASS_WAKE_UP:
-				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_WAKE_UP");
-				wakeup = true;
-				break;
-			case COMMAND_CLASS_MANUFACTURER_SPECIFIC:
-				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_MANUFACTURER_SPECIFIC");
-				manufacturerspecific = true;
-				break;
-			case COMMAND_CLASS_ASSOCIATION:
-				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_ASSOCIATION");
-				association = true;
-				break;
-			case COMMAND_CLASS_MULTI_CMD:
-				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_MULTI_CMD");
-				multicommand = true;
-				break;
-			case COMMAND_CLASS_MARK:	
-				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Can control the following command classes:");
-				break;
-                        case COMMAND_CLASS_ALARM:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_ALARM");
-                                break;
-                        case COMMAND_CLASS_APPLICATION_STATUS:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_APPLICATION_STATUS");
-                                break;
-                        case COMMAND_CLASS_ASSOCIATION_COMMAND_CONFIGURATION:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_ASSOCIATION_COMMAND_CONFIGURATION");
-                                break;
-                        case COMMAND_CLASS_AV_CONTENT_DIRECTORY_MD:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_AV_CONTENT_DIRECTORY_MD");
-                                break;
-                        case COMMAND_CLASS_AV_CONTENT_SEARCH_MD:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_AV_CONTENT_SEARCH_MD");
-                                break;
-                        case COMMAND_CLASS_AV_RENDERER_STATUS:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_AV_RENDERER_STATUS");
-                                break;
-                        case COMMAND_CLASS_AV_TAGGING_MD:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_AV_TAGGING_MD");
-                                break;
-                        case COMMAND_CLASS_BASIC_WINDOW_COVERING:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_BASIC_WINDOW_COVERING");
-                                break;
-                        case COMMAND_CLASS_BASIC:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_BASIC");
-                                break;
-                        case COMMAND_CLASS_BATTERY:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_BATTERY");
-                                break;
-                        case COMMAND_CLASS_CHIMNEY_FAN:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_CHIMNEY_FAN");
-                                break;
-                        case COMMAND_CLASS_CLIMATE_CONTROL_SCHEDULE:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_CLIMATE_CONTROL_SCHEDULE");
-                                break;
-                        case COMMAND_CLASS_CLOCK:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_CLOCK");
-                                break;
-                        case COMMAND_CLASS_COMPOSITE:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_COMPOSITE");
-                                break;
-                        case COMMAND_CLASS_CONFIGURATION:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_CONFIGURATION");
-                                break;
-                        case COMMAND_CLASS_CONTROLLER_REPLICATION:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_CONTROLLER_REPLICATION");
-                                break;
-                        case COMMAND_CLASS_DOOR_LOCK:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_DOOR_LOCK");
-                                break;
-                        case COMMAND_CLASS_ENERGY_PRODUCTION:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_ENERGY_PRODUCTION");
-                                break;
-                        case COMMAND_CLASS_FIRMWARE_UPDATE_MD:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_FIRMWARE_UPDATE_MD");
-                                break;
-                        case COMMAND_CLASS_GEOGRAPHIC_LOCATION:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_GEOGRAPHIC_LOCATION");
-                                break;
-                        case COMMAND_CLASS_GROUPING_NAME:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_GROUPING_NAME");
-                                break;
-                        case COMMAND_CLASS_HAIL:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_HAIL");
-                                break;
-                        case COMMAND_CLASS_INDICATOR:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_INDICATOR");
-                                break;
-                        case COMMAND_CLASS_IP_CONFIGURATION:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_IP_CONFIGURATION");
-                                break;
-                        case COMMAND_CLASS_LANGUAGE:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_LANGUAGE");
-                                break;
-                        case COMMAND_CLASS_LOCK:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_LOCK");
-                                break;
-                        case COMMAND_CLASS_MANUFACTURER_PROPRIETARY:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_MANUFACTURER_PROPRIETARY");
-                                break;
-                        case COMMAND_CLASS_METER_PULSE:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_METER_PULSE");
-                                break;
-                        case COMMAND_CLASS_METER:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_METER");
-                                break;
-                        case COMMAND_CLASS_MTP_WINDOW_COVERING:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_MTP_WINDOW_COVERING");
-                                break;
-                        case COMMAND_CLASS_MULTI_INSTANCE_ASSOCIATION:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_MULTI_INSTANCE_ASSOCIATION");
-                                break;
-                        case COMMAND_CLASS_MULTI_INSTANCE:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_MULTI_INSTANCE");
-				multiinstance = true;
-                                break;
-                        case COMMAND_CLASS_NO_OPERATION:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_NO_OPERATION");
-                                break;
-                        case COMMAND_CLASS_NODE_NAMING:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_NODE_NAMING");
-                                break;
-                        case COMMAND_CLASS_NON_INTEROPERABLE:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_NON_INTEROPERABLE");
-                                break;
-                        case COMMAND_CLASS_POWERLEVEL:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_POWERLEVEL");
-                                break;
-                        case COMMAND_CLASS_PROPRIETARY:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_PROPRIETARY");
-                                break;
-                        case COMMAND_CLASS_PROTECTION:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_PROTECTION");
-                                break;
-                        case COMMAND_CLASS_REMOTE_ASSOCIATION_ACTIVATE:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_REMOTE_ASSOCIATION_ACTIVATE");
-                                break;
-                        case COMMAND_CLASS_REMOTE_ASSOCIATION:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_REMOTE_ASSOCIATION");
-                                break;
-                        case COMMAND_CLASS_SCENE_ACTIVATION:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_SCENE_ACTIVATION");
-                                break;
-                        case COMMAND_CLASS_SCENE_ACTUATOR_CONF:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_SCENE_ACTUATOR_CONF");
-                                break;
-                        case COMMAND_CLASS_SCENE_CONTROLLER_CONF:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_SCENE_CONTROLLER_CONF");
-                                break;
-                        case COMMAND_CLASS_SCREEN_ATTRIBUTES:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_SCREEN_ATTRIBUTES");
-                                break;
-                        case COMMAND_CLASS_SCREEN_MD:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_SCREEN_MD");
-                                break;
-                        case COMMAND_CLASS_SECURITY:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_SECURITY");
-                                break;
-                        case COMMAND_CLASS_SENSOR_ALARM:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_SENSOR_ALARM");
-                                break;
-                        case COMMAND_CLASS_SENSOR_BINARY:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_SENSOR_BINARY");
-                                break;
-                        case COMMAND_CLASS_SENSOR_CONFIGURATION:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_SENSOR_CONFIGURATION");
-                                break;
-                        case COMMAND_CLASS_SENSOR_MULTILEVEL:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_SENSOR_MULTILEVEL");
-                                break;
-                        case COMMAND_CLASS_SILENCE_ALARM:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_SILENCE_ALARM");
-                                break;
-                        case COMMAND_CLASS_SIMPLE_AV_CONTROL:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_SIMPLE_AV_CONTROL");
-                                break;
-                        case COMMAND_CLASS_SWITCH_ALL:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_SWITCH_ALL");
-                                break;
-                        case COMMAND_CLASS_SWITCH_BINARY:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_SWITCH_BINARY");
-                                break;
-                        case COMMAND_CLASS_SWITCH_MULTILEVEL:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_SWITCH_MULTILEVEL");
-                                break;
-                        case COMMAND_CLASS_SWITCH_TOGGLE_BINARY:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_SWITCH_TOGGLE_BINARY");
-                                break;
-                        case COMMAND_CLASS_SWITCH_TOGGLE_MULTILEVEL:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_SWITCH_TOGGLE_MULTILEVEL");
-                                break;
-                        case COMMAND_CLASS_THERMOSTAT_FAN_MODE:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_THERMOSTAT_FAN_MODE");
-                                break;
-                        case COMMAND_CLASS_THERMOSTAT_FAN_STATE:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_THERMOSTAT_FAN_STATE");
-                                break;
-                        case COMMAND_CLASS_THERMOSTAT_HEATING:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_THERMOSTAT_HEATING");
-                                break;
-                        case COMMAND_CLASS_THERMOSTAT_MODE:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_THERMOSTAT_MODE");
-                                break;
-                        case COMMAND_CLASS_THERMOSTAT_OPERATING_STATE:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_THERMOSTAT_OPERATING_STATE");
-                                break;
-                        case COMMAND_CLASS_THERMOSTAT_SETBACK:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_THERMOSTAT_SETBACK");
-                                break;
-                        case COMMAND_CLASS_THERMOSTAT_SETPOINT:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_THERMOSTAT_SETPOINT");
-                                break;
-                        case COMMAND_CLASS_TIME_PARAMETERS:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_TIME_PARAMETERS");
-                                break;
-                        case COMMAND_CLASS_TIME:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_TIME");
-                                break;
-                        case COMMAND_CLASS_USER_CODE:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_USER_CODE");
-                                break;
-                        case COMMAND_CLASS_VERSION:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_VERSION");
-                                break;
-                        case COMMAND_CLASS_ZIP_ADV_CLIENT:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_ZIP_ADV_CLIENT");
-                                break;
-                        case COMMAND_CLASS_ZIP_ADV_SERVER:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_ZIP_ADV_SERVER");
-                                break;
-                        case COMMAND_CLASS_ZIP_ADV_SERVICES:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_ZIP_ADV_SERVICES");
-                                break;
-                        case COMMAND_CLASS_ZIP_CLIENT:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_ZIP_CLIENT");
-                                break;
-                        case COMMAND_CLASS_ZIP_SERVER:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_ZIP_SERVER");
-                                break;
-                        case COMMAND_CLASS_ZIP_SERVICES:
-                                DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "COMMAND_CLASS_ZIP_SERVICES");
-                                break;
-			default:
-				break;
+		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, commandClassToString(nodeinfo[i]).c_str());
+		switch (nodeinfo[i]) {
+		case COMMAND_CLASS_WAKE_UP:
+			wakeup = true;
+			break;
+		case COMMAND_CLASS_MANUFACTURER_SPECIFIC:
+			manufacturerspecific = true;
+			break;
+		case COMMAND_CLASS_ASSOCIATION:
+			association = true;
+			break;
+		case COMMAND_CLASS_MULTI_CMD:
+			multicommand = true;
+			break;
+		case COMMAND_CLASS_MULTI_INSTANCE:
+			multiinstance = true;
+			break;
+		case COMMAND_CLASS_MARK:	
+			DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Can control the following command classes:");
+			break;
+		default:
+			break;
 		}
-
 	}
 
 	// TODO: this should really go into a seperate function with device detection
@@ -2157,7 +2098,7 @@ void ZWApi::ZWApi::zwRequestMultilevelSensorReport(int node_id) {
 
 void ZWApi::ZWApi::zwRequestNodeInfo(int node_id) {
 	char mybuf[1024];
-
+	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Requesting node info from node %d", node_id);
 	mybuf[0] = FUNC_ID_ZW_REQUEST_NODE_INFO;
 	mybuf[1] = node_id;
 	sendFunction( mybuf , 2, REQUEST, 0);
@@ -2196,12 +2137,15 @@ void ZWApi::ZWApi::zwPollDevices(bool onoff) {
 	poll_state = onoff;
 }
 
-std::string ZWApi::ZWApi::nodeInfo2String(char *nodeInfo, size_t len) {
+std::string ZWApi::ZWApi::nodeInfo2String(char *nodeInfo, size_t len, bool bInclControlCC) {
 
 	string tmp = "";
 	char tmp2[1000];
 
 	for (unsigned int i=0;i<len;i++) {
+		if ((unsigned char)nodeInfo[i] == COMMAND_CLASS_MARK && !bInclControlCC) {
+			return tmp;
+		}
 		sprintf(tmp2,"%d",(unsigned char)nodeInfo[i]);
 		if (tmp == "") {
 			tmp += tmp2;
@@ -2212,6 +2156,18 @@ std::string ZWApi::ZWApi::nodeInfo2String(char *nodeInfo, size_t len) {
 	}
 
 	return tmp;
+}
+
+void ZWApi::ZWApi::updateNodeCapabilities(ZWNode* node, char *nodeinfo, size_t length) {
+	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Updating node capabilities for node %d",node->id);
+	string cclasses = nodeInfo2String(nodeinfo, length, false);
+	resetNodeInstanceCount(node, cclasses);
+	if (DCEcallback->SetCapabilities(node->id, 0, cclasses)) {
+		// Check multi instance
+		if ( cclasses.find(COMMAND_CLASS_MULTI_INSTANCE) != string::npos ) {
+			multiInstanceGetAllCCsForNode(node->id);
+		}
+	}
 }
 
 bool ZWApi::ZWApi::zwMeterGet(int node_id) {

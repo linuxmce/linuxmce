@@ -666,6 +666,15 @@ void ZWave::SendOrbiterPopup(const char *message) {
 	);
 }
 
+int ZWave::GetPKDevice(int node_id, int iInstanceID) {
+	char tmp_node_id[16];
+	sprintf(tmp_node_id,"%i",node_id);
+	DeviceData_Impl *pDevice = InternalIDToDevice(tmp_node_id, iInstanceID);
+	if (pDevice != NULL)
+		return pDevice->m_dwPK_Device;
+	else
+		return -1;
+}
 
 int ZWave::AddDevice(int parent, string sInternalID, int iInstanceID, int PK_DeviceTemplate) {
 	int iPK_Device = 0;
@@ -731,9 +740,11 @@ bool ZWave::DeleteDevicesForNode(string sInternalID) {
 	}
 }
 
-string ZWave::GetCapabilities(string sInternalID, int iInstanceID) {
+string ZWave::GetCapabilities(int iNodeID, int iInstanceID) {
 	string sCapabilities;
-	DeviceData_Impl* device = InternalIDToDevice(sInternalID, iInstanceID);
+	char tmp_node_id[16];
+	sprintf(tmp_node_id,"%i",iNodeID);
+	DeviceData_Impl* device = InternalIDToDevice(tmp_node_id, iInstanceID);
 	if (device != NULL) {
 	        CMD_Get_Device_Data cmd_Get_Device_Data(m_dwPK_Device, 4,
 							device->m_dwPK_Device, DEVICEDATA_Capabilities_CONST, true,
@@ -744,18 +755,19 @@ string ZWave::GetCapabilities(string sInternalID, int iInstanceID) {
 	return sCapabilities;
 }
 
-void ZWave::SetCapabilities(int PKDevice, string sCapabilities) {
-//void ZWave::SetCapabilities(string sInternalID, string sCapabilities) {
-	//int PKDevice = -1;
-//	LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Setting capabilities device data for ZWave node %d",atoi(sInternalID.c_str()));
-//	DeviceData_Impl *pChildDevice = InternalIDToDevice(sInternalID);
-//	if (pChildDevice != NULL) {
-//		PKDevice = pChildDevice->m_dwPK_Device;
-//	}
-	if (PKDevice != -1) {
-		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Found LMCE Device %d",PKDevice);
+bool ZWave::SetCapabilities(int iNodeID, int iInstanceID, string sCapabilities) {
+	int PKDevice = -1;
+	char tmp_node_id[16];
+	sprintf(tmp_node_id,"%i",iNodeID);
+	DeviceData_Impl *pChildDevice = InternalIDToDevice(tmp_node_id, iInstanceID);
+	if (pChildDevice != NULL) {
+		PKDevice = pChildDevice->m_dwPK_Device;
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Setting capabilities device data for ZWave node %d/%d (device id %i, capabilities: %s)",iNodeID, iInstanceID, PKDevice, sCapabilities.c_str());
 		CMD_Set_Device_Data cmd_Set_Device_Data(m_dwPK_Device, 4, PKDevice, sCapabilities.c_str(), DEVICEDATA_Capabilities_CONST);
 		SendCommand(cmd_Set_Device_Data);
+		return true;
+	} else {
+		return false;
 	}
 }
 
@@ -842,7 +854,7 @@ map<int, int> ZWave::FindCCInstanceCountForNode(string sInternalID) {
 		        sNodeid = nodeInstance;
 		}
 		int nodeid =  atoi(nodeInstance.c_str());
-		string capa = GetCapabilities(sNodeid, instanceid);
+		string capa = GetCapabilities(nodeid, instanceid);
 		vector<string> vectCCs;
 		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Node/instance: %d/%d, capabilities: %s", nodeid, instanceid, capa.c_str());
 		StringUtils::Tokenize(capa, ",", vectCCs);
