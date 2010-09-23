@@ -98,7 +98,6 @@ public:
 	string DATA_Get_COM_Port_on_PC();
 	bool DATA_Get_Only_One_Per_PC();
 	bool DATA_Get_Autoassign_to_parents_room();
-	string DATA_Get_Polling_Settings();
 
 			*****EVENT***** accessors inherited from base class
 	void EVENT_Sensor_Tripped(bool bTripped);
@@ -208,11 +207,10 @@ NOEMON or CANBUS */
 
 
 	/** @brief COMMAND: #966 - Set Polling State */
-	/** Set polling state either for the system, or a  particular node */
+	/** Set the polling State for the Z-Wave interface */
 		/** @param #2 PK_Device */
 			/** The device to set polling info for.  If both this and node id are blank, it sets global polling */
 		/** @param #5 Value To Assign */
-			/** If polling a node, the same as the device data for the node.   If no node is specified, the format is the same as Interface's Polling Settings */
 		/** @param #220 Report */
 			/** If true, the changes will go back to the router to update device data so they persist after a reload */
 		/** @param #225 Always */
@@ -225,7 +223,7 @@ NOEMON or CANBUS */
 
 
 	/** @brief COMMAND: #967 - Add Node */
-	/** Add a node to the ZWave network */
+	/** Adds a new Z-Wave node, must be SIS or Master */
 		/** @param #39 Options */
 			/** A string of letters for each of the following options:
 H = high power */
@@ -241,10 +239,9 @@ H = high power */
 
 
 	/** @brief COMMAND: #968 - Remove Node */
-	/** Remove a node from the ZWave network */
+	/** Removes a Z-Wave node, must be SIS or Master */
 		/** @param #39 Options */
-			/** A string of letters for each of the following options:
-H = high power */
+			/** If true, allow deletion of multiple nodes until timeout occurs or add node is called with node stop. */
 		/** @param #48 Value */
 			/** empty or 1 = Node Any, 2=node controller, 3=node slave, 5=node stop */
 		/** @param #182 Timeout */
@@ -254,6 +251,15 @@ H = high power */
 
 	virtual void CMD_Remove_Node(string sOptions,int iValue,string sTimeout,bool bMultiple) { string sCMD_Result; CMD_Remove_Node(sOptions.c_str(),iValue,sTimeout.c_str(),bMultiple,sCMD_Result,NULL);};
 	virtual void CMD_Remove_Node(string sOptions,int iValue,string sTimeout,bool bMultiple,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #1085 - Resync node */
+	/** Resynchronize device data */
+		/** @param #239 NodeID */
+			/** Node id to resync */
+
+	virtual void CMD_Resync_node(int iNodeID) { string sCMD_Result; CMD_Resync_node(iNodeID,sCMD_Result,NULL);};
+	virtual void CMD_Resync_node(int iNodeID,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
 	};

@@ -390,6 +390,10 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 				}
 				break;
 			;;
+			case FUNC_ID_ZW_REQUEST_NODE_INFO:
+				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got reply to FUNC_ID_ZW_REQUEST_NODE_INFO:");
+				break;
+			;;
 			case FUNC_ID_ZW_SEND_DATA:
 				switch(frame[2]) {
 					case 1:
@@ -975,6 +979,8 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 						if (zwIsSleepingNode((unsigned char) frame[3])) {
 							wakeupHandler((unsigned char) frame[3]);	
 						}
+						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"node %d , len = %d ",(unsigned int)frame[3], (unsigned int)frame[4]);
+						parseNodeInfo((unsigned char)frame[3],&(frame[8]),(unsigned char)frame[4]-3);
 						switch(frame[5]) {
 							case BASIC_TYPE_ROUTING_SLAVE:
 							case BASIC_TYPE_SLAVE:
@@ -1032,7 +1038,6 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							default:
 								break;
 							;;
-
 						}
 						break;
 					case UPDATE_STATE_NODE_INFO_REQ_FAILED:
@@ -2151,6 +2156,11 @@ void ZWApi::ZWApi::zwRequestMultilevelSensorReport(int node_id) {
 }
 
 void ZWApi::ZWApi::zwRequestNodeInfo(int node_id) {
+	char mybuf[1024];
+
+	mybuf[0] = FUNC_ID_ZW_REQUEST_NODE_INFO;
+	mybuf[1] = node_id;
+	sendFunction( mybuf , 2, REQUEST, 0);
 }
 
 void ZWApi::ZWApi::zwRequestVersion(int node_id) {

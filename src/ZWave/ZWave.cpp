@@ -407,11 +407,10 @@ void ZWave::CMD_Set_Association(int iNodeID,int iGroup_ID,string sNodes_List,str
 //<-dceag-c966-b->
 
 	/** @brief COMMAND: #966 - Set Polling State */
-	/** Set polling state either for the system, or a  particular node */
+	/** Set the polling State for the Z-Wave interface */
 		/** @param #2 PK_Device */
 			/** The device to set polling info for.  If both this and node id are blank, it sets global polling */
 		/** @param #5 Value To Assign */
-			/** If polling a node, the same as the device data for the node.   If no node is specified, the format is the same as Interface's Polling Settings */
 		/** @param #220 Report */
 			/** If true, the changes will go back to the router to update device data so they persist after a reload */
 		/** @param #225 Always */
@@ -437,7 +436,7 @@ void ZWave::CMD_Set_Polling_State(int iPK_Device,string sValue_To_Assign,bool bR
 //<-dceag-c967-b->
 
 	/** @brief COMMAND: #967 - Add Node */
-	/** Add a node to the ZWave network */
+	/** Adds a new Z-Wave node, must be SIS or Master */
 		/** @param #39 Options */
 			/** A string of letters for each of the following options:
 H = high power */
@@ -479,10 +478,9 @@ void ZWave::CMD_Add_Node(string sOptions,int iValue,string sTimeout,bool bMultip
 //<-dceag-c968-b->
 
 	/** @brief COMMAND: #968 - Remove Node */
-	/** Remove a node from the ZWave network */
+	/** Removes a Z-Wave node, must be SIS or Master */
 		/** @param #39 Options */
-			/** A string of letters for each of the following options:
-H = high power */
+			/** If true, allow deletion of multiple nodes until timeout occurs or add node is called with node stop. */
 		/** @param #48 Value */
 			/** empty or 1 = Node Any, 2=node controller, 3=node slave, 5=node stop */
 		/** @param #182 Timeout */
@@ -896,4 +894,16 @@ vector<DeviceData_Impl*> ZWave::FindDevicesForNode(string sInternalID) {
 		}
 	}
 	return vecDevices;
+}
+//<-dceag-c1085-b->
+
+	/** @brief COMMAND: #1085 - Resync node */
+	/** Resynchronize device data */
+		/** @param #239 NodeID */
+			/** Node id to resync */
+
+void ZWave::CMD_Resync_node(int iNodeID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1085-e->
+{
+  myZWApi->zwRequestNodeInfo(iNodeID); 
 }

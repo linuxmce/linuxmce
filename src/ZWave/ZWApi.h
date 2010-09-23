@@ -58,6 +58,7 @@
 #define FUNC_ID_ZW_GET_SUC_NODE_ID                      0x56
 #define FUNC_ID_ZW_ADD_NODE_TO_NETWORK			0x4a
 #define FUNC_ID_ZW_REMOVE_NODE_FROM_NETWORK		0x4b
+#define FUNC_ID_ZW_REQUEST_NODE_INFO                    0x60
 #define FUNC_ID_ZW_REMOVE_FAILED_NODE_ID                0x61
 
 #define ADD_NODE_ANY					0x01
