@@ -390,6 +390,7 @@ bool FileUtils::CheckPathSanity(string sPath)
 	return (bIsHome || bIsMntDevice);
 }
 
+#ifndef WIN32
 bool FileUtils::MoveFile(string sSourceFileName, string sDestFileName, bool bOverwrite)
 {
 	bool bRet = false;
@@ -427,6 +428,7 @@ bool FileUtils::MoveFile(string sSourceFileName, string sDestFileName, bool bOve
 	// FIXME implement WIN32
 	return bRet;
 }
+#endif
 
 bool FileUtils::DelFile(string sFileName)
 {
