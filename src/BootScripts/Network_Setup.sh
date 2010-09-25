@@ -266,4 +266,15 @@ if ! BlacklistConfFiles '/etc/defaultdomain' && ! BlacklistConfFiles '/etc/defau
 	cp /usr/pluto/templates/nis-server.template /etc/default/nis
 fi
 
+## Configure mediatomb
+if [ -e /etc/default/mediatomb ] ;then
+	sed -i "s/^INTERFACE=\"*.*\"*/INTERFACE=\"${IntIf}\"/" /etc/default/mediatomb
+fi
+
+## Configure UPnP Internet Gateway Device daemon
+if [ -e /etc/default/linux-igd ] ;then
+	sed -i "s/^INTIFACE=\"*\(.*\)\"*/INTIFACE=${IntIf}/" /etc/default/linux-igd
+	sed -i "s/^EXTIFACE=\"*\(.*\)\"*/EXTIFACE=${ExtIf}/" /etc/default/linux-igd
+fi
+
 /usr/pluto/bin/Network_NIS.sh
