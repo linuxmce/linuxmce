@@ -50,8 +50,10 @@ TimedEvent::TimedEvent(Row_EventHandler *pRow_EventHandler)
 		else if( pRow_CriteriaParm->FK_CriteriaParmList_get()==CRITERIAPARMLIST_Specific_Date_CONST )
 			m_tTime=StringUtils::SQLDateTime(pRow_CriteriaParm->Value_get());
 	}
-	
-	CalcNextTime();
+
+	if (m_tTime == 0)	
+	  CalcNextTime();   // CalcNextTime should not be called if a specific time is set.
+
 }
 
 void TimedEvent::CalcNextTime()
