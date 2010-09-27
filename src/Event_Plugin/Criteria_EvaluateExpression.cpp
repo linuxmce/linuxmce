@@ -128,7 +128,7 @@ bool Criteria::EvaluateExpression(class CriteriaParm *pCriteriaParm,class EventI
 			{
 			        Row_EventParameter* eventParameter = pRouter->GetDatabase()->EventParameter_get()->GetRow(PK_EventParameter);
 				PK_ParameterType = eventParameter->FK_ParameterType_get();
-				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Criteria::EvaluateExpression parameterType %d", PK_ParameterType);
+				LoggerWrapper::GetInstance()->Write(LV_STATUS,"Criteria::EvaluateExpression parameterType %d", PK_ParameterType);
 				if (PK_ParameterType == PARAMETERTYPE_int_CONST || PK_ParameterType == PARAMETERTYPE_bool_CONST)
 				{
 				        iTmp = (unsigned long)atoi(sLValue->c_str());
@@ -142,7 +142,8 @@ bool Criteria::EvaluateExpression(class CriteriaParm *pCriteriaParm,class EventI
 	        throw exception();
 	}
 
-	if( PK_ParameterType==PARAMETERTYPE_int_CONST || PK_ParameterType==PARAMETERTYPE_bool_CONST)
+	bool bCriteriaList = PK_ParameterType==PARAMETERTYPE_int_CONST && pCriteriaParm->m_sValue.find(",") != string::npos;
+	if( !bCriteriaList && (PK_ParameterType==PARAMETERTYPE_int_CONST || PK_ParameterType==PARAMETERTYPE_bool_CONST))
 		iRValue = atoi(pCriteriaParm->m_sValue.c_str());
 	else
 		sRValue = pCriteriaParm->m_sValue;
@@ -161,39 +162,41 @@ bool Criteria::EvaluateExpression(class CriteriaParm *pCriteriaParm,class EventI
 	else if( (PK_ParameterType==PARAMETERTYPE_int_CONST || PK_ParameterType==PARAMETERTYPE_bool_CONST) && iLValue==NULL )
 		throw(string("comparing int, int is null"));
 
-	if( pCriteriaParm->m_Operator==OPERATOR_EQUALS )
-	{
-		if( PK_ParameterType==PARAMETERTYPE_string_CONST )
+	if (PK_ParameterType==PARAMETERTYPE_int_CONST || PK_ParameterType==PARAMETERTYPE_bool_CONST ) {
+		if (bCriteriaList) {
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Criteria::EvaluateExpression criteria is a list of values: %s", sRValue.c_str());
+			vector<string> vecValues;
+			StringUtils::Tokenize(sRValue, ",", vecValues);
+			if (pCriteriaParm->m_Operator == OPERATOR_EQUALS) {
+				int i = 0;
+				bool bValueFound = false;
+				while (i < vecValues.size() && !bValueFound) {
+					bValueFound = *iLValue == atoi(vecValues[i].c_str());
+					i++;
+				}
+				return bValueFound;
+			} else if (pCriteriaParm->m_Operator == OPERATOR_NOTEQUALS) {
+				for (int i = 0; i < vecValues.size(); i++) {
+					if (*iLValue == atoi(vecValues[i].c_str())) {
+						return false;
+					}
+				}
+				return true;
+			}
+		} else {
+			return EvaluateInt(pCriteriaParm->m_Operator, *iLValue, iRValue);
+		}
+	} else if( PK_ParameterType==PARAMETERTYPE_string_CONST ) {
+		if( pCriteriaParm->m_Operator==OPERATOR_EQUALS )
 			return *sLValue==sRValue;
-		else if( PK_ParameterType==PARAMETERTYPE_int_CONST || PK_ParameterType==PARAMETERTYPE_bool_CONST)
-			return *iLValue==iRValue;
-	}
-	if( pCriteriaParm->m_Operator==OPERATOR_NOTEQUALS )
-	{
-		if( PK_ParameterType==PARAMETERTYPE_string_CONST )
+		if( pCriteriaParm->m_Operator==OPERATOR_NOTEQUALS )
 			return *sLValue!=sRValue;
-		else if( PK_ParameterType==PARAMETERTYPE_int_CONST || PK_ParameterType==PARAMETERTYPE_bool_CONST)
-			return *iLValue!=iRValue;
-	}
-	if( pCriteriaParm->m_Operator==OPERATOR_CONTAINS )
-	{
-		if( PK_ParameterType==PARAMETERTYPE_string_CONST )
+		if( pCriteriaParm->m_Operator==OPERATOR_CONTAINS )
 			return StringUtils::ToUpper(*sLValue).find(StringUtils::ToUpper(sRValue))!=string::npos;
-		return false;  // Nothing else can do this
-	}
-	if( pCriteriaParm->m_Operator==OPERATOR_GREATERTHAN )
-	{
-		if( PK_ParameterType==PARAMETERTYPE_string_CONST )
-			return *sLValue>sRValue;
-		else if( PK_ParameterType==PARAMETERTYPE_int_CONST || PK_ParameterType==PARAMETERTYPE_bool_CONST)
-			return *iLValue>iRValue;
-	}
-	if( pCriteriaParm->m_Operator==OPERATOR_LESSTHAN )
-	{
-		if( PK_ParameterType==PARAMETERTYPE_string_CONST )
+		if( pCriteriaParm->m_Operator==OPERATOR_GREATERTHAN )
+       			return *sLValue>sRValue;
+		if( pCriteriaParm->m_Operator==OPERATOR_LESSTHAN )
 			return *sLValue<sRValue;
-		else if( PK_ParameterType==PARAMETERTYPE_int_CONST || PK_ParameterType==PARAMETERTYPE_bool_CONST)
-			return *iLValue<iRValue;
 	}
 
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Criteria::EvaluateExpression unhandled criteria operator %d",pCriteriaParm->m_Operator);
