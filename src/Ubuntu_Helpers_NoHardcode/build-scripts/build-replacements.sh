@@ -177,13 +177,13 @@ function Build_Replacements_Intrepid
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/libxine1_*.deb ${svn_dir}/${svn_branch_name}/ubuntu/libxine-dev_*.deb 
 	# alsa lib needs older libtool package
         if [ "$MACHTYPE" = "x86_64-pc-linux-gnu" ]; then
-        	wget -r http://ftp.sjtu.edu.cn/ubuntu/pool/main/libt/libtool/libtool_1.5.26-1ubuntu1_amd64.deb
+        	wget http://ftp.sjtu.edu.cn/ubuntu/pool/main/libt/libtool/libtool_1.5.26-1ubuntu1_amd64.deb -O libtool_1.5.26-1ubuntu1_amd64.deb
                 dpkg -i libtool_1.5.26-1ubuntu1_amd64.deb
         else
-        	wget -r http://ftp.sjtu.edu.cn/ubuntu/pool/main/libt/libtool/libtool_1.5.26-1ubuntu1_i386.deb 
+        	wget http://ftp.sjtu.edu.cn/ubuntu/pool/main/libt/libtool/libtool_1.5.26-1ubuntu1_i386.deb -O libtool_1.5.26-1ubuntu1_i386.deb
                 dpkg -i libtool_1.5.26-1ubuntu1_i386.deb
         fi
-                                                                                        
+	                                                                                        
         Build_Replacement_Package libasound2 ubuntu/alsa-lib-1.0.18
         # and now we go back to the latest libtool
         apt-get install libtool
