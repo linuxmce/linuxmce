@@ -4323,6 +4323,8 @@ namespace HADesigner
 
 		protected override void OnPaint(System.Windows.Forms.PaintEventArgs e)
 		{
+			if (m_objBitmap == null)
+				return;
 			e.Graphics.DrawImage(m_objBitmap, new Rectangle(0,0,this.Width,this.Height));
 		}
 
