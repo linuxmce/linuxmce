@@ -155,7 +155,7 @@ function editTimedEvent($output,$dbADO) {
 			</tr>	
 			<tr>
 				<td><input type="radio" name="timedEventType" value="2" '.(($timedEventType==2)?'checked':'').' onClick="showOptions(2);"> <B>Day of week based:</B></td>
-				<td>Do something at 7:00 and 9:00 on Monday, Wensday and Friday</td>
+				<td>Do something at 7:00 and 9:00 on Monday, Wednesday and Friday</td>
 			</tr>		
 			<tr>
 				<td><input type="radio" name="timedEventType" value="3" '.(($timedEventType==3)?'checked':'').' onClick="showOptions(3);"> <B>Day of month based:</B></td>
