@@ -246,33 +246,52 @@ foreach my $hostName (@hostNames) {
 	for my $Device (@Devices) {
 		my $Device_ID=$Device->{"PK_Device"};
 		my $Device_Description=$Device->{"Description"};
+		## only configure if "use automatically" flag is set
+		UseDB("pluto_main");
+        	$sql="SELECT
+                	PK_Device,
+                	Description
+        	FROM
+                	Device
+                	JOIN Device_DeviceData ON FK_Device = PK_Device
+        	WHERE
+                	PK_Device = $Device_ID
+                	AND
+                	FK_DeviceData = 134
+                	AND
+                	IK_DeviceData = '1'
+        	";
+        	@results=RunSQL($sql);
+		UseDB('mythconverg');
+        	foreach $row (@results) {
 
-		my $Device_MountPoint="/mnt/device/$Device_ID";
+			my $Device_MountPoint="/mnt/device/$Device_ID";
 
-		my $Device_IsMounted=`cd /mnt/device/$Device_ID && mount | grep "\/mnt\/device\/$Device_ID "`; 
-		unless ($Device_IsMounted) {
-		        print "WARNING: Device $Device_ID is not mounted, skiping ..." ;
-		        next; 
-		} 
+			my $Device_IsMounted=`cd /mnt/device/$Device_ID && mount | grep "\/mnt\/device\/$Device_ID "`; 
+			unless ($Device_IsMounted) {
+		        	print "WARNING: Device $Device_ID is not mounted, skiping ..." ;
+		        	next; 
+			} 
 
-		#all devices should be in the "Default" and "LiveTV" special storage groups
-		CheckMythTVStorageGroup("/home/public/data/pvr/$Device_Description [$Device_ID]","Default","$hostName"); 
-		CheckMythTVStorageGroup("/home/public/data/pvr/$Device_Description [$Device_ID]/livetv","LiveTV","$hostName");
+			#all devices should be in the "Default" and "LiveTV" special storage groups
+			CheckMythTVStorageGroup("/mnt/device/$Device_ID/public/data/pvr","Default","$hostName"); 
+			CheckMythTVStorageGroup("/mnt/device/$Device_ID/public/data/pvr/livetv","LiveTV","$hostName");
 
-		#public storage groups
-		CheckMythTVStorageGroup("/home/public/data/pvr/$Device_Description [$Device_ID]","Default: $Device_Description [$Device_ID]","$hostName");      #Put the special "Default" storage group in. 
+			#public storage groups
+			CheckMythTVStorageGroup("/mnt/device/$Device_Description [$Device_ID]/public/data/pvr","Default: $Device_Description [$Device_ID]","$hostName");      #Put the special "Default" storage group in. 
 
 
-		## For every user
-		foreach my $User (@Users) {
-		  my $User_ID=$User->{"PK_Users"};
-      my $User_Uname=$User->{"UserName"};
-		  my $User_UnixUname=lc($User_Uname);
-		  $User_UnixUsername =~ s/[^a-z0-9-]//;
-		  $User_UnixUname="pluto_$User_UnixUname";
-		        CheckMythTVStorageGroup("/home/user_$User_ID/data/pvr/$Device_Description [$Device_ID]","$User_Uname","$hostName");
-			CheckMythTVStorageGroup("/home/user_$User_ID/data/pvr/$Device_Description [$Device_ID]","$User_Uname: $Device_Description [$Device_ID]","$hostName");
+			## For every user
+			foreach my $User (@Users) {
+		  		my $User_ID=$User->{"PK_Users"};
+		  		my $User_Uname=$User->{"UserName"};
+		  		my $User_UnixUname=lc($User_Uname);
+		  		$User_UnixUsername =~ s/[^a-z0-9-]//;
+		  		$User_UnixUname="pluto_$User_UnixUname";
+		        	CheckMythTVStorageGroup("/mnt/device/$Device_ID/user_$User_ID/data/pvr","$User_Uname","$hostName");
+				CheckMythTVStorageGroup("/mnt/device/$Device_ID/user_$User_ID/data/pvr","$User_Uname: $Device_Description [$Device_ID]","$hostName");
 
+			}
 		}
 	}
 }
