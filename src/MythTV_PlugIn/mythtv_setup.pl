@@ -308,8 +308,9 @@ foreach $row (@results) {
 	push(@md_devices,$row->{"PK_Device"});
 }
 
-# Loop through all of the MD's, and update MythTV DTS/AC3 settings
+# Loop through all of the MD's, and update various settings
 foreach my $thisMD (@md_devices) {
+	# Synchronize AC3/DTS passthru settings
 	$sql="SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device='$thisMD' AND FK_DeviceData=88";
 	UseDB("pluto_main");
 	@results=RunSQL($sql);
@@ -326,6 +327,10 @@ foreach my $thisMD (@md_devices) {
 	}
 	UseDB("mythconverg");
 	$dbh->do($sql); #RunSQL doesn't seem to support results not being returned, so do it this way
+
+	# Disable realtime priority threads due to problems with VDPAU
+	$sql="UPDATE settings SET data=0 WHERE value='RealtimePriority' AND hostname='$host'";
+	$dbh->do($sql);
 }
 
 # no mythbackend restart is required; it will find changes on the fly
