@@ -3,11 +3,11 @@
 # This script looks for NFS servers on the network and trigers a device detected event
 # for every server that it finds.
 
-#if [[ $1 != "background" ]] ;then
-#	echo "Backgrounding ..."
-#	screen -d -m -S "NFSRadar" "$0" "background"
-#	exit 0
-#fi
+if [[ $1 != "background" ]] ;then
+	echo "Backgrounding ..."
+	screen -d -m -S "NFSRadar" "$0" "background"
+	exit 0
+fi
 
 . /usr/pluto/bin/SQL_Ops.sh
 . /usr/pluto/bin/Config_Ops.sh
@@ -19,7 +19,6 @@ CAT_MD=8
 ## Loging function
 function Log() {
 	echo "$(date) $*" >> /var/log/pluto/NFSScanner.log
-	echo "$(date) $*"
 }
 
 ## Transform decimal-dot netmask in decimal netmask
@@ -72,14 +71,18 @@ while : ;do
 	IP_List="_$(RunSQL "$Q" | sed 's/  */_/g')_"
 	
 	for outputLine in $portscan_output ;do
-		sleep 1
+		sleep 10
 		## Get the important info
 		serverIP=$(echo $outputLine | tr '#' ' ' | awk '{print $2}')
 		serverName=$(echo $outputLine | tr '#' ' ' | awk '{print $3}' | tr -d '()')
+		if [[ -z "$serverName" ]] ;then
+			serverName=$(nmblookup -A "$serverIP" | awk '($2 == "<00>") && ($4 != "<GROUP>") {print $1}')
+		fi
+		[[ -z "$serverName" ]] && serverName="$serverIP"
 		serverMAC_ARP=$(arp -n "$serverIP" | tail -n +2 | grep ether | head -n +1 | awk '{print $3}')
 		[[ -n "$serverMAC_ARP" ]] && serverMAC="$serverMAC_ARP"
 		
-		Log "Processing $serverIP (mac: $serverMAC)"
+		Log "Processing $serverIP (mac: $serverMAC name: $serverName)"
 
 		## If the IP is not there already
 		if [[ "$IP_List" != *"_${serverIP}_"* ]] && [[ "$serverIP" != "$IntIP" ]] ;then

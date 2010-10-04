@@ -4,7 +4,7 @@
 # Configuration script for : Device Template 1837 - Windows PC or Network Storage
 #
 # NOTE:
-#  This script will detect all the available samba shares of a nas / computer and triger
+#  This script will detect all the available samba or NFS shares of a nas / computer and triger
 #  a device detected event for all of them
 
 . /usr/pluto/bin/TeeMyOutput.sh --outfile /var/log/pluto/Configure_1794.log --infile /dev/null --stdboth -- "$@"
@@ -65,7 +65,7 @@ Device_Password=$(Field "1" "$R")
 tempMntDir=/tmp/mnt/$pid
 mkdir -p $tempMntDir
 
-## For every share of this samba server
+## For every share if this is a samba server
 AuthPart=" -U guest% "
 if [[ "${Device_Username}" != "" ]] && [[ "$Device_Password" != "" ]] ;then
 	AuthPart=" -U ${Device_Username}%${Device_Password} "
@@ -154,6 +154,30 @@ for share in $(smbclient $AuthPart --list=//$Device_IP  --grepable | grep "^Disk
 		echo "$(date -R) Asking for password for '$share'"
 		/usr/pluto/bin/MessageSend "$DCERouter" $Device_ID -1001 2 65 56 "fileshare" 52 3 53 2 49 1768 55 "182|1|$DD_SHARE|$share" 54 "$pnpUID"
 	fi
+done
+
+## For every share if this is an NFS server
+for share in $( showmount -e $Device_IP | tr ' ' '#') ;do
+	echo
+	echo
+	share=$(echo $share | tr '#' ' ' | awk '{print $1'})
+	pnpUID="${Device_MAC}${share}"
+        mountedOK="false"
+        echo "$(date -R) Checking $pnpUID"
+
+        ## Try to mount it
+        if [[ "$mountedOK" == "false" ]] ;then
+                sleep 0.2
+                mount -t nfs "$Device_IP:$share" "$tempMntDir"
+                success=$?
+                echo "$(date -R) mount -t nfs \"$Device_IP:$share\" \"$tempMntDir\" [$success]"
+
+                if [[ "$success" == "0" ]] ;then
+                        umount -f -l $tempMntDir
+                        /usr/pluto/bin/MessageSend "$DCERouter" $Device_ID -1001 2 65 56 "fileshare" 52 3 53 2 49 1769 55 "182|0|$DD_SHARE|$share" 54 "$pnpUID"
+                        mountedOK="true"
+                fi
+        fi
 done
 
 rmdir $tempMntDir
