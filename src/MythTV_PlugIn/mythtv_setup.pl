@@ -278,7 +278,7 @@ foreach my $hostName (@hostNames) {
 			CheckMythTVStorageGroup("/mnt/device/$Device_ID/public/data/pvr/livetv","LiveTV","$hostName");
 
 			#public storage groups
-			CheckMythTVStorageGroup("/mnt/device/$Device_Description [$Device_ID]/public/data/pvr","Default: $Device_Description [$Device_ID]","$hostName");      #Put the special "Default" storage group in. 
+			CheckMythTVStorageGroup("/mnt/device/$Device_ID/public/data/pvr","Default: $Device_Description [$Device_ID]","$hostName");      #Put the special "Default" storage group in. 
 
 
 			## For every user
@@ -299,7 +299,7 @@ foreach my $hostName (@hostNames) {
 ##############################
 # Synchronize AC3/DTS Settings
 ##############################
-print "Synchronizing MythTV audio settings...\n\n";
+print "Synchronizing MythTV audio settings...\n";
 # Lets build a list of all of the primary keys to the MD's (including the Hybrid if it exists) (note that these settings don't apply to the core device, but its hybrid MD)
 $sql="SELECT PK_Device FROM Device WHERE FK_DeviceTemplate=28";
 UseDB("pluto_main");
@@ -328,9 +328,15 @@ foreach my $thisMD (@md_devices) {
 	UseDB("mythconverg");
 	$dbh->do($sql); #RunSQL doesn't seem to support results not being returned, so do it this way
 
+	print "Disabling realtime priority threads\n";
 	# Disable realtime priority threads due to problems with VDPAU
 	$sql="UPDATE settings SET data=0 WHERE value='RealtimePriority' AND hostname='$host'";
 	$dbh->do($sql);
 }
+UseDB("mythconverg");
+# Set the disk schedular to use free space as the only weighting
+print "Setting the disk scheduler to use free space weighting\n";
+$sql="UPDATE settings SET data='BalancedFreeSpace' WHERE value='StorageScheduler'";
+$dbh->do($sql);
 
 # no mythbackend restart is required; it will find changes on the fly
