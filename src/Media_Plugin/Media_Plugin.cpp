@@ -2477,18 +2477,6 @@ pMediaStream->m_iStreamID_get(),pMediaStream, (int) bDeleteStream, (int) bNoAuto
 
 		if( bSendOff )
 			HandleOnOffs(pMediaStream->m_pMediaHandlerInfo->m_PK_MediaType,0,&mapMediaDevice_Prior,NULL,pMediaStream,pEntertainArea);
-		if( pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_pDevice_MD && bTurnOnOSD )
-		{
-			pEntertainArea->m_bViewingLiveAVPath=false;
-			MediaDevice *pMediaDevice_MD = m_mapMediaDevice_Find(pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_pDevice_MD->m_dwPK_Device);
-			if( pMediaDevice_MD && pMediaDevice_MD->m_bDontSendOffIfOSD_ON )
-			{
-				LoggerWrapper::GetInstance()->Write(LV_STATUS,"Stream ended and m/d is being used as an OSD.  Turning on m/d so it's visible");
-				DCE::CMD_On CMD_On(m_dwPK_Device,pMediaDevice_MD->m_pDeviceData_Router->m_dwPK_Device,0,"");
-				CheckForCustomPipe(pEntertainArea,CMD_On.m_pMessage);
-				SendCommand(CMD_On);
-			}
-		}
 	}
 
 	if( pMediaStream->m_pDevice_CaptureCard )
