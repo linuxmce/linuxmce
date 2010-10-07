@@ -1450,7 +1450,7 @@ void Xine_Player::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sMe
 				if (targetDevice && targetDevice!=m_dwPK_Device)
 				{
 					// if local instance, adding 1000 to streamID
-					DCE::CMD_Play_Media cmd(m_dwPK_Device, targetDevice, iPK_MediaType, pStream->m_iStreamID, sMediaPosition, sSlaveMediaURL);
+					DCE::CMD_Play_Media cmd(m_dwPK_Device, targetDevice, iPK_MediaType, pStream->m_iStreamID, "", sSlaveMediaURL);
 					SendCommandNoResponse(cmd);
 					LoggerWrapper::GetInstance()->Write(LV_WARNING, "Starting playback on device %i %s, stream ID=%i", targetDevice, "[remote]", pStream->m_iStreamID );
 				}
