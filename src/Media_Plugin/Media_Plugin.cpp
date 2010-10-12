@@ -3310,6 +3310,19 @@ LoggerWrapper::GetInstance()->Write(LV_WARNING,"Media_Plugin::CMD_MH_Move_Media 
 		// Preserve the source device so when moving media on generic media devices we keep using the same source
 		// If moving media on software media players, we will find another source that can resume the media
 		int PK_Device = pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device;
+		// Is the source device also a target device
+		int i = 0;
+		MediaDevice* pSourceMediaDevice = NULL;
+		while (pSourceMediaDevice == NULL && i < vectEntertainArea.size())
+		{
+			pSourceMediaDevice = vectEntertainArea[i]->m_mapMediaDevice_Find(PK_Device);
+			i++;
+		}
+		if (pSourceMediaDevice == NULL)
+		{
+			// Source device not in destination, let StartMedia figure out where to play it
+			PK_Device = 0;
+		}
 		StartMedia( pMediaStream->m_iPK_MediaType, pMediaStream->m_iPK_MediaProvider, (pMediaStream->m_pOH_Orbiter_StartedMedia ? pMediaStream->m_pOH_Orbiter_StartedMedia->m_pDeviceData_Router->m_dwPK_Device : 0),
 			vectEntertainArea, PK_Device, 0,
 			&pMediaStream->m_dequeMediaFile, pMediaStream->m_bResume, pMediaStream->m_iRepeat,pMediaStream->m_sLastPosition);
