@@ -29256,5 +29256,33 @@ namespace DCE
 			COMMANDPARAMETER_Data_String_CONST, sData_String.c_str(),
 			COMMANDPARAMETER_Application_CONST, sApplication.c_str()); }
 	};
+	class CMD_Resync_node : public PreformedCommand {
+	public:
+		CMD_Resync_node(long DeviceIDFrom, long DeviceIDTo,int iNodeID) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+			COMMAND_Resync_node_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_NodeID_CONST, StringUtils::itos(iNodeID).c_str()); }
+	};
+	class CMD_Resync_node_DL : public PreformedCommand {
+	public:
+		CMD_Resync_node_DL(long DeviceIDFrom, string DeviceIDTo,int iNodeID) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Resync_node_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_NodeID_CONST, StringUtils::itos(iNodeID).c_str()); }
+	};
+	class CMD_Resync_node_DT : public PreformedCommand {
+	public:
+		CMD_Resync_node_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,int iNodeID) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Resync_node_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_NodeID_CONST, StringUtils::itos(iNodeID).c_str()); }
+	};
+	class CMD_Resync_node_Cat : public PreformedCommand {
+	public:
+		CMD_Resync_node_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,int iNodeID) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Resync_node_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_NodeID_CONST, StringUtils::itos(iNodeID).c_str()); }
+	};
 }
 #endif
