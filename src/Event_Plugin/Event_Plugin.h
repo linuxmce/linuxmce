@@ -62,7 +62,7 @@ namespace DCE
 		map<int,int> m_mapPK_HouseMode;
 
 		// Private methods
-		void GetHouseModes();
+		void GetHouseModes(Message* pMessage);
 		void DeleteMembers();
 		void Initialize();
 public:

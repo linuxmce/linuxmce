@@ -299,7 +299,7 @@ void Event_Plugin::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 	sCMD_Result = "UNKNOWN DEVICE";
 }
 
-void Event_Plugin::GetHouseModes() {
+void Event_Plugin::GetHouseModes(Message* pMessage) {
 
 	PLUTO_SAFETY_LOCK(em,m_EventMutex);
         // find PK_Device of security plugin
@@ -330,6 +330,13 @@ void Event_Plugin::GetHouseModes() {
 	        int PK_DeviceGroup = atoi( StringUtils::Tokenize(sData,",",pos).c_str() );
 		m_mapPK_HouseMode[PK_DeviceGroup]=atoi( StringUtils::Tokenize(sData,",",pos).c_str() );
 	}
+	if (pMessage->m_dwID == EVENT_House_Mode_Changed_CONST)
+	{
+		int iPK_DeviceGroup = atoi(pMessage->m_mapParameters[EVENTPARAMETER_PK_DeviceGroup_CONST].c_str());
+		int iPrevValue = atoi(pMessage->m_mapParameters[EVENTPARAMETER_Previous_Value_CONST].c_str());
+		LoggerWrapper::GetInstance()->Write(LV_WARNING,"House mode changed event, previous house mode = %d", iPrevValue);
+		m_mapPK_HouseMode[iPK_DeviceGroup] = iPrevValue;
+	}
 }
 
 bool Event_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessage,class DeviceData_Base *pDeviceFrom,class DeviceData_Base *pDeviceTo)
@@ -342,7 +349,7 @@ bool Event_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessage,cl
 		return false;
 	}
 
-	GetHouseModes(); // Update house modes
+	GetHouseModes(pMessage); // Update house modes
 	EventInfo *pEventInfo = new EventInfo(pMessage->m_dwID,pMessage,(DeviceData_Router *)pDeviceFrom, m_mapPK_HouseMode[0]);
 //	m_listEventInfo.push_back(pEventInfo);
 
