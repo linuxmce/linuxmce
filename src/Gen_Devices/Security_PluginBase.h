@@ -1,18 +1,3 @@
-/*
-     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
-
-     www.plutohome.com
-
-     Phone: +1 (877) 758-8648
- 
-
-     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
-     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
-     of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
-     See the GNU General Public License for more details.
-
-*/
 #ifndef Security_PluginBase_h
 #define Security_PluginBase_h
 #include "DeviceData_Impl.h"
@@ -106,13 +91,14 @@ public:
 			EVENTPARAMETER_PK_Device_CONST, StringUtils::itos(iPK_Device).c_str()));
 	}
 
-	virtual void House_Mode_Changed(int iPK_DeviceGroup,int iPK_HouseMode)
+	virtual void House_Mode_Changed(int iPK_DeviceGroup,int iPK_HouseMode,string sPrevious_Value)
 	{
 		SendMessage(new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, 
 			EVENT_House_Mode_Changed_CONST,
-			2 /* number of parameter's pairs (id, value) */,
+			3 /* number of parameter's pairs (id, value) */,
 			EVENTPARAMETER_PK_DeviceGroup_CONST, StringUtils::itos(iPK_DeviceGroup).c_str(),
-			EVENTPARAMETER_PK_HouseMode_CONST, StringUtils::itos(iPK_HouseMode).c_str()));
+			EVENTPARAMETER_PK_HouseMode_CONST, StringUtils::itos(iPK_HouseMode).c_str(),
+			EVENTPARAMETER_Previous_Value_CONST, sPrevious_Value.c_str()));
 	}
 
 };
@@ -330,7 +316,7 @@ public:
 	void EVENT_Air_Quality(int iPK_Device) { GetEvents()->Air_Quality(iPK_Device); }
 	void EVENT_Doorbell(int iPK_Device) { GetEvents()->Doorbell(iPK_Device); }
 	void EVENT_Monitor_Mode(int iPK_Device) { GetEvents()->Monitor_Mode(iPK_Device); }
-	void EVENT_House_Mode_Changed(int iPK_DeviceGroup,int iPK_HouseMode) { GetEvents()->House_Mode_Changed(iPK_DeviceGroup,iPK_HouseMode); }
+	void EVENT_House_Mode_Changed(int iPK_DeviceGroup,int iPK_HouseMode,string sPrevious_Value) { GetEvents()->House_Mode_Changed(iPK_DeviceGroup,iPK_HouseMode,sPrevious_Value.c_str()); }
 	//Commands - Override these to handle commands from the server
 	virtual void CMD_Set_House_Mode(string sValue_To_Assign,int iPK_Users,string sPassword,int iPK_DeviceGroup,string sHandling_Instructions,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Verify_PIN(int iPK_Users,string sPassword,bool *bIsSuccessful,string &sCMD_Result,class Message *pMessage) {};

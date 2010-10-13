@@ -1,3 +1,4 @@
+
 /*
  Security_Plugin
  
@@ -465,6 +466,7 @@ void Security_Plugin::CMD_Set_House_Mode(string sValue_To_Assign,int iPK_Users,s
 		return;
 	}
 
+	string sPreviousHouseMode = StringUtils::ltos(m_mapPK_HouseMode[iPK_DeviceGroup]);
 	m_mapPK_HouseMode[iPK_DeviceGroup]=PK_HouseMode;
 	SaveHouseModes();
 	Row_AlertType *pRow_AlertType = m_pDatabase_pluto_security->AlertType_get()->GetRow(ALERTTYPE_Security_CONST);
@@ -564,7 +566,7 @@ void Security_Plugin::CMD_Set_House_Mode(string sValue_To_Assign,int iPK_Users,s
 	DCE::CMD_Remove_Screen_From_History_DL CMD_Remove_Screen_From_History_DL(m_dwPK_Device,m_pOrbiter_Plugin->m_sPK_Device_AllOrbiters,
 		"",SCREEN_SecurityPanel_CONST);
 	SendCommand(CMD_Remove_Screen_From_History_DL);
-	EVENT_House_Mode_Changed(iPK_DeviceGroup,PK_HouseMode);
+	EVENT_House_Mode_Changed(iPK_DeviceGroup,PK_HouseMode,sPreviousHouseMode);
 }
 
 string Security_Plugin::AlertsSinceLastChange(int PK_DeviceGroup,bool &bSecurityOrFire)
@@ -1187,7 +1189,7 @@ void Security_Plugin::SaveHouseModes()
 	for(map<int,int>::iterator it=m_mapPK_HouseMode.begin();it!=m_mapPK_HouseMode.end();++it)
 		sData += StringUtils::itos(it->first) + "," + StringUtils::itos(it->second) + ",";
 
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "XXX: SetHouseMode sData: %s", sData.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Security_Plugin::SaveHouseModes(): SetHouseMode sData: %s", sData.c_str());
 	pRow_Device_DeviceData->IK_DeviceData_set(sData);
 	pRow_Device_DeviceData->Table_Device_DeviceData_get()->Commit();
 }
