@@ -256,4 +256,8 @@ fi
 make -C /var/yp
 
 /usr/pluto/bin/UpdateMediaDaemonControl.sh  -disable
-/usr/pluto/bin/UpdateMediaDaemonControl.sh  -enable
+Q="SELECT Enabled FROM Device_StartupScript WHERE FK_Device=$PK_Device AND FK_StartupScript=61"
+StartUpdateMedia=$(RunSQL "$Q")
+if [ "$StartUpdateMedia" -ne "0" ] ; then
+/usr/pluto/bin/UpdateMediaDaemonControl.sh -enable
+fi
