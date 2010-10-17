@@ -492,7 +492,14 @@ switch ($section) {
 	    include_once('operations/myDevices/orbiters/wizardOrbiters.php');
 	    wizardOrbiters($output,$dbADO);	    
 	break;
-	
+        case 'setupWebOrbiter';
+                $output = new Template($dbADO);
+                $output->setTemplateFileType('large');
+            include_once('operations/myDevices/orbiters/setupWebOrbiter.php');
+            $output->setHelpSrc('/wiki/index.php/Orbiters');
+            setupWebOrbiter($output,$dbADO);
+        break;
+
 	//categories
 	case 'manageCategories':
 		$output = new Template($dbADO);
