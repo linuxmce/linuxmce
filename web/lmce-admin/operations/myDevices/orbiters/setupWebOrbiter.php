@@ -7,48 +7,37 @@ function setupWebOrbiter($output,$dbADO) {
 	$jason->success = false;
 	$jason->error = '';
 	$jason->count = 0;
+
 	// Get the list of rooms
 	if ($command == 'GetRooms') {
 		$query = "SELECT PK_Room, Description FROM Room";
-		if ($rooms = $dbADO->Execute($query)) {
-			$json->success = true;
-			$json->count = $rooms->RecordCount();;
-			while ($row=$rooms->FetchRow()) {
-				$json->data[] = $row;
-			}
-		} else {
-			$json->error = mysql_error();
-		}
+                lookup($query, $dbADO);
 	}
-/*
+
 	// Get the list of users
 	if ($command == 'GetUsers') {
-		$query = "SELECT PK_Users, UserName FROM Users WHERE 1";
-		$users = $dbADO->Execute($query);
-		echo $users;
+		$query = "SELECT PK_Users, UserName FROM Users";
+                lookup($query, $dbADO);
 	}
 
 	// Get the list of skins
 	if ($command == 'GetSkins') {
-		$query = "SELECT PK_Skin, Description FROM Skin WHERE 1";
-		$skins = $dbADO->Execute($query);
-		echo $skins;
+		$query = "SELECT PK_Skin, Description FROM Skin";
+		lookup($query, $dbADO);
 	}
 
 	// Get the available UIs
 	if ($command == 'GetUIs') {
 		$query = "SELECT PK_UI, Description FROM UI WHERE 1";
-		$uis = $dbADO->Execute($query);
-		echo $uis;
+                lookup($query, $dbADO);
 	}
 
 	// Get the available languages
 	if ($command == 'GetLanguages') {
 		$query = "SELECT PK_Language, Description FROM Language WHERE 1";
-		$language = $dbADO->Execute($query);
-		echo $language;
+                lookup($query, $dbADO);
 	}
-
+/*
 	// Generate the orbiter
 	if ($command == 'GenerateOrbiter') {
 		// Check if the resolution is already in our DB
@@ -83,7 +72,23 @@ function setupWebOrbiter($output,$dbADO) {
 		// Get the PK_Key of the orbiter to check
 		// Return the percentage of generation
 	}
+
+	echo json_encode($json);
 */
+}
+
+function lookup($query, $dbADO) {
+	if ($recordset = $dbADO->Execute($query)) {
+		$json->success = true;
+		$json->count = $recordset->RecordCount();;
+		while ($row=$recordset->FetchRow()) {
+			$json->data[] = $row;
+		}
+	} else {
+		$json->error = mysql_error();
+	}
+
 	echo json_encode($json);
 }
+
 ?>
