@@ -2,14 +2,25 @@
 function setupWebOrbiter($output,$dbADO) {
 
 	$command = $_REQUEST['command'];
-
+	$json = new StdClass();
+	$jason->data = array();
+	$jason->success = false;
+	$jason->error = '';
+	$jason->count = 0;
 	// Get the list of rooms
 	if ($command == 'GetRooms') {
-		$query = "SELECT PK_Room, Description FROM Room WHERE 1";
-		$rooms = $dbADO->Execute($query);
-		echo $rooms;
+		$query = "SELECT PK_Room, Description FROM Room";
+		if ($rooms = $dbADO->Execute($query)) {
+			$json->success = true;
+			$json->count = $rooms->RecordCount();;
+			while ($row=$rooms->FetchRow()) {
+				$json->data[] = $row;
+			}
+		} else {
+			$json->error = mysql_error();
+		}
 	}
-
+/*
 	// Get the list of users
 	if ($command == 'GetUsers') {
 		$query = "SELECT PK_Users, UserName FROM Users WHERE 1";
@@ -72,5 +83,7 @@ function setupWebOrbiter($output,$dbADO) {
 		// Get the PK_Key of the orbiter to check
 		// Return the percentage of generation
 	}
+*/
+	echo json_encode($json);
 }
 ?>
