@@ -7,49 +7,56 @@ function setupWebOrbiter($output,$dbADO) {
 	$jason->success = false;
 	$jason->error = '';
 	$jason->count = 0;
-
-	// Get the list of rooms
-	if ($command == 'GetRooms') {
+	
+	switch ($command) {
+	case "GetRooms": // Get the list of rooms
 		$query = "SELECT PK_Room, Description FROM Room";
-                lookup($query, $dbADO);
-	}
-
-	// Get the list of users
-	if ($command == 'GetUsers') {
+		lookup($query, $dbADO, $json);
+	break;
+	case "GetUsers": // Get the list of users
 		$query = "SELECT PK_Users, UserName FROM Users";
-                lookup($query, $dbADO);
-	}
-
-	// Get the list of skins
-	if ($command == 'GetSkins') {
+		lookup($query, $dbADO, $json);
+	break;
+	case "GetSkins": // Get the list of skins
 		$query = "SELECT PK_Skin, Description FROM Skin";
-		lookup($query, $dbADO);
-	}
+		lookup($query, $dbADO, $json);
+	break;
+	case "GetUIs": // Get the available UIs
+		$query = "SELECT PK_UI, Description FROM UI";
+		lookup($query, $dbADO, $json);
+	break;
+	case "GetLanguages": // Get the available languages
+		$query = "SELECT PK_Language, Description FROM Language";
+		lookup($query, $dbADO, $json);
+	break;
+	
 
-	// Get the available UIs
-	if ($command == 'GetUIs') {
-		$query = "SELECT PK_UI, Description FROM UI WHERE 1";
-                lookup($query, $dbADO);
-	}
-
-	// Get the available languages
-	if ($command == 'GetLanguages') {
-		$query = "SELECT PK_Language, Description FROM Language WHERE 1";
-                lookup($query, $dbADO);
-	}
-/*
-	// Generate the orbiter
-	if ($command == 'GenerateOrbiter') {
+	case "GenerateOrbiter":	// Generate the orbiter
 		// Check if the resolution is already in our DB
 		$res = $_REQUEST['resolution'];
 		$resolution = split('x', $res);
 		$resX = $resolution[0];
 		$resY = $resolution[1];
-		//echo $resX;
-		//echo $resY;
 
-		$query = "SELECT PK_Size, Description FROM Size WHERE Width=".$resX." AND Height=".$resY;
-		$size = $dbADO->Execute($query);
+		$query = "SELECT PK_Size, Description FROM Size WHERE Width=? AND Height=?";
+		if ($size = $dbADO->GetRow($query,array($resX,$resY))){
+			//there are results. grab the first one and return the ID
+			$json->success = true;
+			$json->count = 1;
+			$json->data[] = $size;
+		} else { 
+			//no records returned, we need to add this resolution
+			$query = "INSERT into Size(Description,Width,Height) values(?,?,?)";
+			if ($dbADO->Execute($query,array($res,$resX,$resY))) {
+				//now grab the new row
+				$query = "SELECT PK_Size, Description FROM Size WHERE PK_Size=?";
+				if ($row=$dbADO->GetRow($query,array($dbADO->Insert_ID()))){
+					$json->success = true;
+					$json->count = 1;
+					$json->data[] = $row;
+				}
+			}
+		}
 		// Check the existence of the current resolution in the DB and insert it if it doesn't exist
 		// then select the one we just added
 
@@ -61,23 +68,21 @@ function setupWebOrbiter($output,$dbADO) {
 		// default UI
 
 		// Create the orbiter, return the PK_Key for the new orbiter, reload router, and start generating
-		}
-	}
-
-	if ($command == 'UpdateOrbiter') {
-		// Update the orbiter with the new settings, reload router, and start regenerating
-	}
-
-	if ($command == 'GenerationStatus') {
+		//}
+	case "UpdateOrbiter": // Update the orbiter with the new settings, reload router, and start regenerating
+	break;
+	
+	case "GenerationStatus":
 		// Get the PK_Key of the orbiter to check
 		// Return the percentage of generation
-	}
+	break;
 
+	}
 	echo json_encode($json);
-*/
+
 }
 
-function lookup($query, $dbADO) {
+function lookup($query, $dbADO, $json) {
 	if ($recordset = $dbADO->Execute($query)) {
 		$json->success = true;
 		$json->count = $recordset->RecordCount();;
@@ -87,8 +92,6 @@ function lookup($query, $dbADO) {
 	} else {
 		$json->error = mysql_error();
 	}
-
-	echo json_encode($json);
 }
 
 ?>
