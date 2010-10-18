@@ -46,12 +46,22 @@ function setupWebOrbiter($output,$dbADO) {
 			$SizeRow = $size;
 		} else { 
 			//no records returned, we need to add this resolution
-			/* FIXME - need to incorporate this:
-			 * ScaleX = round(X/2128*1000)
-			 * ScaleY = round(Y/1596*1000)
-			 */
-			$query = "INSERT into Size(Description,Width,Height) values(?,?,?)";
-			if ($dbADO->Execute($query,array($res,$resX,$resY))) {
+			//
+			// First, determine the aspect ratio. For now, we ignore aspect ratios which can't be
+			// determined by the resolution.
+			$rest16_9 = abs($resY - ($resX / 16 * 9));
+			$rest4_3 = abs($resY - ($resX / 4 * 3));
+			if ($rest4_3 < $rest16_9) {
+				// We have a 4:3 screen
+				$scaleX = intval($resX / 2.84444444444);
+				$scaleY = intval($resY / 1.6);
+			} else {
+				// We assume a 16:9 screen
+				$scaleX = intval($resX / 2.13333333333);
+				$scaleY = intval($resY / 1.6);
+			}
+			$query = "INSERT into Size(Description,Width,Height,ScaleX,ScaleY) values(?,?,?,?,?)";
+			if ($dbADO->Execute($query,array($res,$resX,$resY,$scaleX,$scaleY))) {
 				//now grab the new row
 				$query = "SELECT PK_Size, Description FROM Size WHERE PK_Size=?";
 				if ($row=$dbADO->GetRow($query,array($dbADO->Insert_ID()))){
