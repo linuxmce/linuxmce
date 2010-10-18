@@ -2,6 +2,7 @@
 function setupWebOrbiter($output,$dbADO) {
 
 	$command = $_REQUEST['command'];
+	$installationID = (int)@$_SESSION['installationID'];
 	$json = new StdClass();
 	$jason->data = array();
 	$jason->success = false;
@@ -75,8 +76,21 @@ function setupWebOrbiter($output,$dbADO) {
 		// width - 100
 		// height - 101
 
+		/* Tentative JSON structure for config data:
+		 * {
+		 *   description : "string",
+		 *   defaultRoom : "int",
+		 *   deviceData : {[
+		 *       id : "string"
+		 *     ],[
+		 *       id : "string"
+		 *     ...
+		 *   ]}
+		 * }
+		 */
+		
 		// Create the orbiter, return the PK_Key for the new orbiter, reload router, and start generating
-		//$orbiterID=createDevice($deviceTemplate,$installationID,0,NULL,$dbADO);
+		//$orbiterID=createDevice('1748',$installationID,0,NULL,$dbADO);
 		// Web orbiter, need to make sure it's related proxy orbiter uses a unique port number
 		//$out=exec_batch_command("/usr/pluto/bin/configure_proxyorbiter.pl -d $orbiterID",0);
 		updateOrbiter($orbiterID,$deviceData);
@@ -87,7 +101,7 @@ function setupWebOrbiter($output,$dbADO) {
 	
 	case "GenerationStatus":
 		// Get the PK_Key of the orbiter to check
-		$orbiterID = $_REQUEST['orbiter-id-param'];
+		$orbiterID = $_REQUEST['orbiter'];
 		// Return the percentage of generation
 		if ($orbiterData=$dbADO->GetRow('SELECT PK_Orbiter,RegenInProgress,RegenStatus,RegenPercent from Orbiter WHERE PK_Orbiter=?',$orbiterID)) {
 			$json->success = true;
