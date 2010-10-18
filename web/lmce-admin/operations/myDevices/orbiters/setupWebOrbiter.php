@@ -38,26 +38,23 @@ function setupWebOrbiter($output,$dbADO) {
 		$resolution = split('x', $res);
 		$resX = $resolution[0];
 		$resY = $resolution[1];
-		$Size = 0; // placeholder for whatever "Size" table row we end up with below
 		
 		$query = "SELECT PK_Size, Description FROM Size WHERE Width=? AND Height=?";
 		if ($size = $dbADO->GetRow($query,array($resX,$resY))){
-			//there are results. grab the first one and return the ID
-			$json->success = true;
-			$json->count = 1;
-			$json->data[] = $size;
-			$Size = $size;
+			//we have an existing Size row
+			$SizeRow = $size;
 		} else { 
 			//no records returned, we need to add this resolution
+			/* FIXME - need to incorporate this:
+			 * ScaleX = round(X/2128*1000)
+			 * ScaleY = round(Y/1596*1000)
+			 */
 			$query = "INSERT into Size(Description,Width,Height) values(?,?,?)";
 			if ($dbADO->Execute($query,array($res,$resX,$resY))) {
 				//now grab the new row
 				$query = "SELECT PK_Size, Description FROM Size WHERE PK_Size=?";
 				if ($row=$dbADO->GetRow($query,array($dbADO->Insert_ID()))){
-					$json->success = true;
-					$json->count = 1;
-					$json->data[] = $row;
-					$Size = $row;
+					$SizeRow = $row;
 				}
 			}
 		}
@@ -67,10 +64,12 @@ function setupWebOrbiter($output,$dbADO) {
 		// Grab the rest of the parameters to create the new orbiter
 		// DeviceTemplate - 1748 web device, 1749 proxy orbiter
 		// Description
+		// default room - FK_Room
+		
+		//The rest are DeviceData values
 		// default size - 25
 		// default language - 26
 		// default user - 3
-		// default room - FK_Room
 		// default skin - 24
 		// default UI - 104
 		// width - 100
@@ -78,8 +77,10 @@ function setupWebOrbiter($output,$dbADO) {
 
 		// Create the orbiter, return the PK_Key for the new orbiter, reload router, and start generating
 		//$orbiterID=createDevice($deviceTemplate,$installationID,0,NULL,$dbADO);
+		// Web orbiter, need to make sure it's related proxy orbiter uses a unique port number
+		//$out=exec_batch_command("/usr/pluto/bin/configure_proxyorbiter.pl -d $orbiterID",0);
 		updateOrbiter($orbiterID,$deviceData);
-		
+	break;
 	case "UpdateOrbiter": // Update the orbiter with the new settings, reload router, and start regenerating
 		updateOrbiter($orbiterID,$deviceData);
 	break;
