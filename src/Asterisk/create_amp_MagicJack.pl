@@ -77,7 +77,7 @@ $TRUNK_VARS{'peerdetails'}.="port=5070\n";
 $TRUNK_VARS{'peerdetails'}.="qualify=2000\n";
 $TRUNK_VARS{'peerdetails'}.="secret=$DECLARED_USERPASSWD\n";
 $TRUNK_VARS{'peerdetails'}.="type=friend\n";
-$TRUNK_VARS{'peerdetails'}.="useragent=MagicJack/1.90.521b (SJ Labs)\n";
+$TRUNK_VARS{'peerdetails'}.="useragent=MagicJack/2.0.554f (SJ Labs)\n";
 $TRUNK_VARS{'peerdetails'}.="username=$DECLARED_USERNAME\n";
 
 $TRUNK_VARS{'register'}="$DECLARED_USERNAME:$DECLARED_USERPASSWD\@127.0.0.1:5070/$DECLARED_NUMBER";
