@@ -42,7 +42,7 @@ function fullLog($output,$dbADO) {
 			
 			$currentPage=$from/$rowsPerPage;
 			for($i=0;$i<$nrPages;$i++){
-				$pagesArray[]=($i==$currentPage)?($i+1):'<a href="fullLog.php?deviceID='.$deviceID.'&from='.($i*$rowsPerPage).'">'.($i+1).'</a>';
+				$pagesArray[]=($i==$currentPage)?($i+1):'<a href="index.php?section=fullLog&deviceID='.$deviceID.'&from='.($i*$rowsPerPage).'">'.($i+1).'</a>';
 			}
 			
 			$aqquireCommand='awk \'NR>='.$from.' && NR<='.($from+$rowsPerPage).'\' '.$logName.' | /usr/pluto/bin/ansi2html';
@@ -68,14 +68,21 @@ function fullLog($output,$dbADO) {
 					<td valign="top" colspan="3"><hr><td>
 				</tr>		
 				<tr>
-					<td valign="top" colspan="3" align="center">'.@$numbersNotice.'<td>
+					<td valign="top" colspan="3" align="left">'.@$numbersNotice.'<td>
 				</tr>		
 				<tr>
-					<td valign="top" colspan="3" align="center">'.join(' ',$pagesArray).'<td>
+					<td valign="top" colspan="3" align="left">'.join(' ',$pagesArray).'<td>
 				</tr>	
 				<tr>
 					<td valign="top" colspan="3" style="background:black;color:white;"><pre>'.$formatedText.'<td>
+				</tr>
+				<tr>
+					<td valign="top" colspan="3" align="left">'.@$numbersNotice.'<td>
 				</tr>		
+				<tr>
+					<td valign="top" colspan="3" align="left">'.join(' ',$pagesArray).'<td>
+				</tr>	
+				<tr>
 			</table>
 			</form>
 		</form>
