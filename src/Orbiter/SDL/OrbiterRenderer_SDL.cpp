@@ -495,8 +495,27 @@ void OrbiterRenderer_SDL::SaveBackgroundForDeselect(DesignObj_Orbiter *pObj, Plu
             pObj->m_rPosition.Width, pObj->m_rPosition.Height, BIT_PER_PIXEL, rmask, gmask, bmask, amask);
 	
     LockDisplay();
+	/*
+	 * Damned if you do, damned if you don't.
+	 * If it's a proxy orbiter, we want to do what GetBackground (below) does
+	 * But if it's an OSD, we want the original behaviour.
+	 * Why: with the original form of this function, the OSD is fine,
+	 *      but the Proxy Orbiter ends up displaying black regions
+	 *      with the new form of this function, the Proxy Orbiter is fine,
+	 *      but the OSD renders a black frame that starts really faint and
+	 *      fades in as you press a button more and more.
+	 * I can't for the life of me understand where the OSD and Proxy Orbiter
+	 * diverge, so here's to the good old Pluto coding spirit. Hear hear!
+	 */
+#ifdef PROXY_ORBITER
+	/* New */
+	SDL_SetAlpha(m_pScreenImage, 0, 0);
+#endif
 	SDL_BlitSurface(m_pScreenImage, &SourceRect, pSDL_Surface, NULL);
+#ifndef PROXY_ORBITER
+	/* Original */
 	SDL_SetAlpha(pSDL_Surface, SDL_RLEACCEL , SDL_ALPHA_OPAQUE);
+#endif
     UnlockDisplay();
     
 	pObj->m_pGraphicToUndoSelect = new SDLGraphic(pSDL_Surface);
