@@ -20,6 +20,8 @@ function wizardOrbiters($output,$dbADO) {
 	$deviceCategory=$GLOBALS['rootOrbiterID'];
 	
 	$orbitersDTArray=getDeviceTemplatesFromCategory($deviceCategory,$dbADO,1);
+	$orbitersDTArray['1748'] = "Web Orbiter"; // Force web orbiter to display in the "add orbiter" dropdown
+
 	$roomsArray=getAssocArray('Room','PK_Room','Description',$dbADO,'WHERE FK_Installation='.$installationID, 'ORDER BY Description ASC');
 
 	if(isset($_REQUEST['lastAdded']) && !isset($_REQUEST['page'])){
@@ -524,7 +526,10 @@ function wizardOrbiters($output,$dbADO) {
 				//$insertID=exec($cmd);
 				$insertID=createDevice($deviceTemplate,$installationID,0,NULL,$dbADO);				
 				$suffix='&lastAdded='.$insertID;
-				
+				if ($_POST['deviceTemplate'] == 1748) {
+					// Web orbiter, need to make sure it's related proxy orbiter uses a unique port number
+					$out=exec_batch_command("/usr/pluto/bin/configure_proxyorbiter.pl -d $insertID",0);
+				}
 				// full regen
 				$regenCmd='/usr/pluto/bin/MessageSend localhost -targetType template '.$insertID.' '.$GLOBALS['OrbiterPlugIn'].' 1 266 2 '.$insertID.' 21 "-r"';
 				exec($regenCmd);
