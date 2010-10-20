@@ -51,7 +51,7 @@
 #include "pluto_main/Define_CommandParameter.h"
 #include "DCEConfig.h"
 
-#define  VERSION "<=version=>"
+#define  VERSION "2.0.0.44.10031922864"
 
 extern DCEConfig dceConfig;
 
@@ -354,7 +354,7 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"CreateDevice::DoIt Found %d rows 
 
 			char cPVR='M'; // Default to MythTV
 			PlutoSqlResult result_pvr;
-			if( ( result_child_dev.r=db_wrapper_query_result( SQL ) ) && (row=db_wrapper_fetch_row( result_child_dev.r )) && row[0] )
+			if( ( result_pvr.r=db_wrapper_query_result( SQL ) ) && (row=db_wrapper_fetch_row( result_pvr.r )) && row[0] )
 				cPVR = row[0][0];
 
 			if( cPVR=='V' )
