@@ -798,9 +798,6 @@ void gc100::Start_seriald()
 	//		vect_sMyPorts.insert(vect_sMyPorts.end(), pssPort);
 	//}
 
-	snprintf(command, 512, "/usr/bin/killall -9 socat");
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "killing all socats: %s", command);
-	system(command);
 	for (serial_iter=module_map.begin(); serial_iter!=module_map.end(); ++serial_iter)
 	{
 		if (serial_iter->second.type == "SERIAL")
