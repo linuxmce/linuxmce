@@ -114,7 +114,7 @@ function setupWebOrbiter($output,$dbADO) {
 	
 	case "GenerationStatus":
 		// Get the PK_Key of the orbiter to check
-		$orbiterID = $_REQUEST['orbiter'];
+		$orbiterID = escapeshellcmd($_REQUEST['orbiter']);
 		/*
 		694 - command GetOrbiterStatus
 		9 - destination device
@@ -130,12 +130,20 @@ function setupWebOrbiter($output,$dbADO) {
 						U=Unknown, 
 						D=Device is not an orbiter
 		*/
-		exec("/usr/pluto/bin/MessageSend localhost -o 0 9 1 694 2 99", $out);
+		exec("/usr/pluto/bin/MessageSend localhost -o 0 9 1 694 2 99", $out, $return);
+		if ($return == 0) {
 		// Return the percentage of generation
 //		if ($orbiterData=$dbADO->GetRow('SELECT PK_Orbiter,RegenInProgress,RegenStatus,RegenPercent from Orbiter WHERE PK_Orbiter=?',$orbiterID)) {
-		$json->success = true;
-		$json->count = 1;
-		$json->data[] = $out;
+			foreach ($out as $item) {
+				$pieces = explode(":",$item);
+				$data[$pieces[0]] = $pieces[1];
+			}
+			$json->success = true;
+			$json->count = 1;
+			$json->data[] = $data;
+		} else {
+			$json->error = "Unable to execute command";
+		}
 	break;
 
 	}
