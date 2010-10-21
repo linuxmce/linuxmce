@@ -40,7 +40,7 @@ function setupWebOrbiter($output,$dbADO) {
 		$resX = $resolution[0];
 		$resY = $resolution[1];
 		
-		$query = "SELECT PK_Size, Description FROM Size WHERE Width=? AND Height=?";
+		$query = "SELECT PK_Size, Description, Width, Height FROM Size WHERE Width=? AND Height=?";
 		if ($size = $dbADO->GetRow($query,array($resX,$resY))){
 			//we have an existing Size row
 			$SizeRow = $size;
@@ -63,14 +63,12 @@ function setupWebOrbiter($output,$dbADO) {
 			$query = "INSERT into Size(Description,Width,Height,ScaleX,ScaleY) values(?,?,?,?,?)";
 			if ($dbADO->Execute($query,array($res,$resX,$resY,$scaleX,$scaleY))) {
 				//now grab the new row
-				$query = "SELECT PK_Size, Description FROM Size WHERE PK_Size=?";
+				$query = "SELECT PK_Size, Description, Width, Height FROM Size WHERE PK_Size=?";
 				if ($row=$dbADO->GetRow($query,array($dbADO->Insert_ID()))){
 					$SizeRow = $row;
 				}
 			}
 		}
-		
-		// then select the one we just added
 		
 		// Grab the rest of the parameters to create the new orbiter
 		// DeviceTemplate - 1748 web device, 1749 proxy orbiter
@@ -85,7 +83,10 @@ function setupWebOrbiter($output,$dbADO) {
 		// default UI - 104
 		// width - 100
 		// height - 101
-
+		
+		$configData = json_decode($_REQUEST['config']);
+		$configData->deviceData['100'] = $SizeRow['Width'];
+		$configData->deviceData['101'] = $SizeRow['Height'];
 		/* Tentative JSON structure for config data:
 		 * {
 		 *   description : "string",
@@ -103,21 +104,38 @@ function setupWebOrbiter($output,$dbADO) {
 		//$orbiterID=createDevice('1748',$installationID,0,NULL,$dbADO);
 		// Web orbiter, need to make sure it's related proxy orbiter uses a unique port number
 		//$out=exec_batch_command("/usr/pluto/bin/configure_proxyorbiter.pl -d $orbiterID",0);
-		updateOrbiter($orbiterID,$deviceData);
+		//updateOrbiter($dbADO, $json, $orbiterID,$configData);
 	break;
 	case "UpdateOrbiter": // Update the orbiter with the new settings, reload router, and start regenerating
-		updateOrbiter($orbiterID,$deviceData);
+		$orbiterID = $_REQUEST['orbiter'];
+		$configData = json_decode($_REQUEST['config']);
+		//updateOrbiter($dbADO, $json, $orbiterID,$configData);
 	break;
 	
 	case "GenerationStatus":
 		// Get the PK_Key of the orbiter to check
 		$orbiterID = $_REQUEST['orbiter'];
+		/*
+		694 - command GetOrbiterStatus
+		9 - destination device
+		2 - orbiter id
+		returns:
+		9 - If a regen is in progress, this is a status.
+		48 - If a regen is in progress, this is a percentage
+		5 - The status: O=OK to load, 
+						N=New, skin generated, need router reset, 
+						n=new, no skins at all, 
+						R=Regenerating skin now, 
+						r=Regenerating skin for new orbiter, 
+						U=Unknown, 
+						D=Device is not an orbiter
+		*/
+		exec("/usr/pluto/bin/MessageSend localhost -o 0 9 1 694 2 99", $out);
 		// Return the percentage of generation
-		if ($orbiterData=$dbADO->GetRow('SELECT PK_Orbiter,RegenInProgress,RegenStatus,RegenPercent from Orbiter WHERE PK_Orbiter=?',$orbiterID)) {
-			$json->success = true;
-			$json->count = 1;
-			$json->data[] = $orbiterData;
-		}
+//		if ($orbiterData=$dbADO->GetRow('SELECT PK_Orbiter,RegenInProgress,RegenStatus,RegenPercent from Orbiter WHERE PK_Orbiter=?',$orbiterID)) {
+		$json->success = true;
+		$json->count = 1;
+		$json->data[] = $out;
 	break;
 
 	}
@@ -125,8 +143,10 @@ function setupWebOrbiter($output,$dbADO) {
 
 }
 
-function updateOrbiter($orbiterID,$deviceData) {
+function updateOrbiter($dbADO, $json, $orbiterID,$configData) {
 	// Update the orbiter with the new settings, reload router, and start regenerating
+	
+	$deviceData = $configData->deviceData;
 	// $deviceData is an array of device data to update. id=>value
 	
 	// Full regen code from the orbiter wizard page. reloads router.
@@ -149,5 +169,31 @@ function lookup($query, $dbADO, $json) {
 		$json->error = mysql_error();
 	}
 }
+/*
+246 - command SetDeviceData
+27 - destination device
+2 - device to change
+52 - deviceData id to change
+5 - value of new deviceData
 
+274 - command SetRoom for Device
+27 - destination device
+2 - device to change
+57 - room (by id)
+
+957 - command UpdateDevice
+27 - destination device
+2 - device to change
+163 - device description
+57 - room (by id)
+109 - device data (pipe delimited)
+
+77 - Set Current Room
+orbiter id - destination device
+57 - room (by id)
+
+58 - Set Current User
+orbiter id - destination device
+17 - user (by id)
+ */
 ?>
