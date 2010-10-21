@@ -108,6 +108,35 @@ function getImage($deviceID,$socket,$refresh=0){
 	return $filename;
 }
 
+function getImageToRAM($deviceID,$socket)
+{
+	$in = "IMAGE " . rand(10000, 11000) . "\n";
+
+	$written = web_socket_write($socket, $in);
+	$outResponse = web_socket_read($socket, 2048, PHP_NORMAL_READ);
+
+	$imageSize = (int)trim(str_replace('IMAGE ', '', $outResponse));
+	$outImage = false;
+
+	if ($imageSize > 0)
+	{
+		$remaining = $imageSize;
+		$outImage = '';
+		while ($remaining > 0)
+		{
+			$linesize = ($remaining < 2048) ? $remaining : 2048;
+			$chunk = @socket_read($socket, $linesize, PHP_BINARY_READ);
+			$outImage .= $chunk;
+			$remaining -= strlen($chunk);
+			write_log("Retrieved image chunk " . strlen($chunk) . ", remaining $remaining \n");
+		}
+		
+		write_log("Received image size $imageSize \n");
+	}
+
+	return $outImage;
+}
+
 function getXML($socket){
 	$in = "XML ".rand(10000,11000)."\n";
 	$outXML = '';

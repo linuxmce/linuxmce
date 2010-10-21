@@ -33,9 +33,9 @@ if ($socket === false)
 	die;
 }
 
-$filename = getImage($deviceID, $socket);
+$imageData = getImageToRAM($deviceID, $socket);
 closeSocket($socket);
-if ($filename === false)
+if ($imageData === false)
 {
 	header("HTTP/1.0 404 Not Found");
 	die;
@@ -47,27 +47,11 @@ header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 
-$imageinfo = getimagesize($filename);
-switch ($imageinfo[2])
-{
-	case 2:
-		$imagetype = "jpg";
-	break;
-	case 3:
-		$imagetype = "png";
-	break;
-	case 6:
-		$imagetype = "bmp";
-	break;	
-	case 15:
-		$imagetype = "wbmp";
-	break;	
-	default:
-		header( "HTTP/1.0 404 Not Found" );
-		exit ;
-	break;
-}
+if (substr($imageData, 0, 8) === "\x89PNG\r\n\0x1A\n")
+	$imagetype = "png";
+else
+	$imagetype = "jpg";
 
 header("Content-type: image/$imagetype");
-readfile($filename);
+echo "$imageData";
 ?>
