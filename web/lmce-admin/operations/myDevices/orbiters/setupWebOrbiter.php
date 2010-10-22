@@ -98,7 +98,8 @@ function setupWebOrbiter($output,$dbADO) {
 		 *   }
 		 * }
 		 */
-		
+		print json_encode($configData);
+		exit;		
 		// Create the orbiter, return the PK_Key for the new orbiter, reload router, and start generating
 		//$orbiterID=createDevice('1748',$installationID,0,NULL,$dbADO);
 		// Web orbiter, need to make sure it's related proxy orbiter uses a unique port number
