@@ -9,7 +9,6 @@ if [ "$1" == "status" ]; then
 		echo "* DCERouter is running"
 	fi
 	exit 0
-	read
 fi
 
 Message() {
@@ -104,6 +103,9 @@ mkdir -p /usr/pluto/locks                # clean up locks
 rm -f /usr/pluto/locks/*                 # clean up locks
 rm -f /var/run/plutoX*.pid		 # clean up x11 locks
 rm -f /mnt/optical/*.checksum
+if [ -f /etc/logrotate.d/linuxmce ]; then 
+        rm -f /etc/logrotate.d/pluto*     # make sure there are not leftover logrotate configuration files 
+fi 
 rm -f /etc/rc{0,6}.d/S*{umountnfs.sh,portmap,networking}
 invoke-rc.d nis start
 
@@ -152,6 +154,10 @@ if [ "$AutostartCore" -eq "1" ] ; then
 	StartDaemon  "Starting Dhcp Plugin" "/usr/pluto/bin/Dhcpd-Plugin.sh" "DhcpdPlugin"
 	StartDaemon  "Start PNP MD Plugin" "/usr/pluto/bin/Start_NewMD_interactor.sh" "NewMDinteractor"
 	StartDaemon  "Start Voicemail Monitor" "/usr/pluto/bin/VoiceMailMonitor.sh" "VoiceMailMonitor"
+         
+	# Verify zaptel-modules is installed, and install it otherwise. 
+	dpkg -l zaptel-modules-`uname -r` || apt-get install zaptel-modules-`uname -r` || echo "***ERROR*** INSTALLING ZAPTEL MODULE - TELECOM TRANSFER/MEETME/CONFERENCING NOT WORKING****">>/var/lib/pluto/DCERouter.log 
+	modprobe ztdummy 
 fi
 StartService "Loading Kernel Modules" "/usr/pluto/bin/LoadModules.sh"
 StartService "Reporting Machine Status" "/usr/pluto/bin/Report_Machine_Status.sh" "&"
