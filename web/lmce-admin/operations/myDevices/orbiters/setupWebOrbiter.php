@@ -130,14 +130,10 @@ function setupWebOrbiter($output,$dbADO) {
 						U=Unknown, 
 						D=Device is not an orbiter
 		*/
-		exec("/usr/pluto/bin/MessageSend localhost -o 0 9 1 694 2 99", $out, $return);
-		if ($return == 0) {
+//		exec("/usr/pluto/bin/MessageSend localhost -o 0 9 1 694 2 $orbiterID", $out, $return);
+		if ($data = dce_command(9,1,694,array(2=>$orbiterID))) {
 		// Return the percentage of generation
 //		if ($orbiterData=$dbADO->GetRow('SELECT PK_Orbiter,RegenInProgress,RegenStatus,RegenPercent from Orbiter WHERE PK_Orbiter=?',$orbiterID)) {
-			foreach ($out as $item) {
-				$pieces = explode(":",$item);
-				$data[$pieces[0]] = $pieces[1];
-			}
 			$json->success = true;
 			$json->count = 1;
 			$json->data[] = $data;
@@ -177,6 +173,24 @@ function lookup($query, $dbADO, $json) {
 		$json->error = mysql_error();
 	}
 }
+
+function dce_command($destination,$type,$command,$deviceData) {
+	$cmd = "/usr/pluto/bin/MessageSend localhost -o 0 $destination $type $command";
+	foreach ($deviceData as $key => $value) {
+		$cmd .= " $key \"$value\"";
+	}
+	exec($cmd, $out, $return);
+	if ($return == 0) { // MessageSend does not give any exit value so this will always pass even if the command fails
+		foreach ($out as $item) {
+			$pieces = explode(":",$item);
+			$data[$pieces[0]] = $pieces[1];
+		}
+		return $data;
+	} else {
+		return false;
+	}
+}
+
 /*
 246 - command SetDeviceData
 27 - destination device
