@@ -91,12 +91,11 @@ function setupWebOrbiter($output,$dbADO) {
 		 * {
 		 *   description : "string",
 		 *   defaultRoom : "int",
-		 *   deviceData : {[
-		 *       id : "string"
-		 *     ],[
+		 *   deviceData : {
+		 *       id : "string",
 		 *       id : "string"
 		 *     ...
-		 *   ]}
+		 *   }
 		 * }
 		 */
 		
