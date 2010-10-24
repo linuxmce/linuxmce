@@ -3,6 +3,7 @@
 DB::DB()
 {
 	m_bConnected = false;
+	m_pConnection = NULL;
 }
 DB::~DB()
 {
@@ -11,6 +12,8 @@ DB::~DB()
 bool DB::connect(string sHost, string sUser, string sPass, string sDatabase)
 {
 	mysql_init(&m_mysqlInit);
+	my_bool reconnect = true;
+	mysql_options(&m_mysqlInit, MYSQL_OPT_RECONNECT, &reconnect);
 	if ( m_pConnection = mysql_real_connect(&m_mysqlInit,sHost.c_str(),sUser.c_str(),sPass.c_str(),sDatabase.c_str(),0,0,0) ) {
 		m_bConnected = true;
 		return true;
@@ -22,14 +25,16 @@ bool DB::connect(string sHost, string sUser, string sPass, string sDatabase)
 }
 void DB::close()
 {
-	mysql_close(m_pConnection);
+	if( m_pConnection )
+		mysql_close(m_pConnection);
 	//mysql_free_result(m_pResult);
 	m_pConnection=NULL;
 	m_bConnected = false;
 }
 bool DB::connected()
 {
-	//TODO: Actually test connection to make sure it is still there	
+	if( m_pConnection && (mysql_ping(m_pConnection) != 0) )
+		close();
 	return m_bConnected;
 }
 DBResult DB::query(string sQuery)
