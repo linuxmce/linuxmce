@@ -104,7 +104,7 @@ function setupWebOrbiter($output,$dbADO) {
 		foreach ($configData->deviceData as $key => $value) {
 			$data[$key] = $value;
 		}
-		$data['3'] = $SizeRow['PK_Size'];
+		$data['25'] = $SizeRow['PK_Size'];
 		$data['100'] = $SizeRow['Width'];
 		$data['101'] = $SizeRow['Height'];
 		$configData->deviceData=$data;
