@@ -4144,6 +4144,39 @@ void General_Info_Plugin::CMD_Get_Devices_To_Start(int iPK_Device,string *sValue
 void General_Info_Plugin::CMD_Update_Device(int iPK_Device,string sMac_address,int iPK_Room,string sIP_Address,string sData_String,string sDescription,string &sCMD_Result,Message *pMessage)
 //<-dceag-c957-e->
 {
+	// Tokenize the device data
+	vector<string> vectDeviceDataBuff;
+        StringUtils::Tokenize(sData_String,"|",vectDeviceDataBuff);
+        
+	// Iterate over the device data tokens in pairs
+	for (int i=0; i<vectDeviceDataBuff.size(); i=i+2) {
+		// Get the device data and convert it to an int
+		string sPK_DeviceData = vectDeviceDataBuff[i];
+		int iPK_DeviceData = atoi(sPK_DeviceData.c_str());
+
+		// Get the value of the device data
+		string sDeviceDataValue = vectDeviceDataBuff[i+1];
+
+		// LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "DeviceData: %s Value: %s", sPK_DeviceData.c_str(), sDeviceDataValue.c_str());
+
+		// Set the device data
+		m_pRouter->SetDeviceDataInDB(iPK_Device,iPK_DeviceData,sDeviceDataValue,false);
+	}
+
+	// Get ready to update the room
+	Row_Device *pRow_Device = m_pDatabase_pluto_main->Device_get()->GetRow(iPK_Device);
+	pRow_Device->Reload();
+
+	// Update the room
+	if(iPK_Room > 0) {
+		pRow_Device->FK_Room_set(iPK_Room);
+	}
+
+	// Update the description
+	if(sDescription.size()) {
+		pRow_Device->Description_set(sDescription);
+		m_pDatabase_pluto_main->Device_get()->Commit();
+	}
 }
 //<-dceag-c1075-b->
 
