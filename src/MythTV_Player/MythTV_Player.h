@@ -37,6 +37,7 @@
 
 #include "DCE/PlainClientSocket.h"
 class RatPoisonWrapper;
+class DBHelper;
 typedef enum  { MYTHSTATUS_DISCONNECTED=0, MYTHSTATUS_STARTUP, MYTHSTATUS_LIVETV, MYTHSTATUS_MENU, MYTHSTATUS_PLAYBACK, MYTHSTATUS_GUIDEGRID } eMythState;
 
 //<-dceag-decl-b->
@@ -61,6 +62,7 @@ namespace DCE
 	Display *m_pDisplay;
 	string m_CurrentMode, m_CurrentProgram;
 	int m_CurTime, m_EndTime;
+	bool UpdateMythSetting(DBHelper *pDBHelper_Myth, string value, string data, string host, bool bOnlyIfNotExisting=false);
 	void selectWindow();
         bool checkWindowName(long unsigned int window, string windowName);
 

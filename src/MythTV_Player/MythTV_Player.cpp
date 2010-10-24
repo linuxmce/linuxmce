@@ -41,6 +41,8 @@ using namespace DCE;
 #include "pluto_main/Define_DesignObj.h"
 #include "pluto_main/Define_Button.h"
 #include "PlutoUtils/ProcessUtils.h"
+#include "PlutoUtils/DatabaseUtils.h"
+#include "DCE/DCEConfig.h"
 #include "Gen_Devices/AllScreens.h"
 
 #include <sstream>
@@ -54,6 +56,7 @@ using namespace DCE;
 // #include "MythMainWindowResizable.h"
 MythTV_Player *g_pMythPlayer = NULL;
 #define MYTH_SOCKET_TIMEOUT	10  // SECONDS
+#define PLUTO_CONFIG "/etc/pluto.conf"
 
 #ifndef WIN32
 
@@ -108,6 +111,25 @@ bool MythTV_Player::GetConfig()
 	if( !MythTV_Player_Command::GetConfig() )
 		return false;
 //<-dceag-getconfig-e->
+	string sHostname = "dcerouter";
+	DCEConfig *pConfig = new DCEConfig(PLUTO_CONFIG);
+	DeviceData_Base *pDevice_Core = m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Generic_PC_as_Core_CONST);
+	string sPK_Device = pConfig->m_mapParameters_Find("PK_Device");
+	if ( sPK_Device != StringUtils::itos(pDevice_Core->m_dwPK_Device) )
+		sHostname = "moon" + sPK_Device;
+
+	DBHelper *pDBHelper_Myth = new DBHelper(
+		pConfig->m_mapParameters_Find("MySqlHost"),
+		pConfig->m_mapParameters_Find("MySqlUser"),
+		pConfig->m_mapParameters_Find("MySqlPassword"),
+		"mythconverg");
+
+	UpdateMythSetting(pDBHelper_Myth, "NetworkControlEnabled", "1",     sHostname);
+	UpdateMythSetting(pDBHelper_Myth, "NetworkControlPort",    "10001", sHostname);
+
+	delete pDBHelper_Myth;
+	delete pConfig;
+
 	m_pDevice_MythTV_Plugin = m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_MythTV_PlugIn_CONST);
 	if( !m_pDevice_MythTV_Plugin )
 	{
@@ -224,6 +246,33 @@ void MythTV_Player::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage
     sCMD_Result = "UNKNOWN DEVICE";
 }
 
+bool MythTV_Player::UpdateMythSetting(DBHelper *pDBHelper_Myth, string value, string data, string hostname, bool bOnlyIfNotExisting)
+{
+        string sSQL = "SELECT data FROM settings WHERE value='" + StringUtils::SQLEscape(value) + "' AND " 
+                " hostname='" + StringUtils::SQLEscape(hostname) + "'";
+        PlutoSqlResult result;
+        if( (result.r = pDBHelper_Myth->db_wrapper_query_result(sSQL))==NULL || result.r->row_count==0 )
+        {
+                sSQL = "INSERT INTO settings(value,hostname,data) VALUES('" + StringUtils::SQLEscape(value) + "',"
+                        + "'" + StringUtils::SQLEscape(hostname) + "',"
+                        + "'" + StringUtils::SQLEscape(data) + "')";
+                pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
+                return true;
+        }
+        else if( bOnlyIfNotExisting )
+                return false;
+
+        DB_ROW row;
+        row = db_wrapper_fetch_row( result.r ) ;
+        if( row[0] && (data==row[0]) )
+                return false;
+
+        sSQL = "UPDATE settings set data='" + StringUtils::SQLEscape(data) + "' WHERE value='" + StringUtils::SQLEscape(value) + "' "
+                " AND hostname='" + StringUtils::SQLEscape(hostname) + "'";
+        pDBHelper_Myth->threaded_db_wrapper_query(sSQL);
+        return true;
+
+}
 
 void MythTV_Player::updateMode(string toMode)
 {
