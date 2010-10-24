@@ -132,12 +132,12 @@ function setupWebOrbiter($output,$dbADO) {
 		$json->orbiter=$orbiterID;
 	break;
 	case "ReloadRouter": // Needed to manually reload the router to get a brand new orbiter to generate then fire the regen command
-		exec("/usr/pluto/bin/MessageSend localhost -o 0 -1000 7 1", $out, $return);
+		exec("/usr/pluto/bin/MessageSend localhost -o 0 -1000 7 6", $out, $return);
 		$json->success = true;
 	break;
 	case "FirstGeneration": // Needed to manually call this after the router reload to successfully generate a brand new orbiter
 		$orbiterID = escapeshellcmd($_REQUEST['orbiter']);
-		$commandToSend='/usr/pluto/bin/MessageSend localhost -targetType template '.$orbiterID.' '.$GLOBALS['OrbiterPlugIn'].' 1 266 2 '.$orbiterID.' 21 "-r" 24 1';
+		$commandToSend='/usr/pluto/bin/MessageSend localhost -targetType template '.$orbiterID.' '.$GLOBALS['OrbiterPlugIn'].' 1 266 2 '.$orbiterID.' 21 "-r"';
         	exec($commandToSend);
 		$json->success = true;
 	break;
@@ -161,7 +161,7 @@ function setupWebOrbiter($output,$dbADO) {
 						N=New, skin generated, need router reset, 
 						n=new, no skins at all, 
 						R=Regenerating skin now, 
-						r=Regenerating skin for new orbiter, 
+						r=Regenerating skin for new orbiter,
 						U=Unknown, 
 						D=Device is not an orbiter
 		*/
