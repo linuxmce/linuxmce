@@ -180,11 +180,7 @@ function updateOrbiter($dbADO, $json, $orbiterID,$configData) {
 	$data['57'] = $configData->defaultRoom;
 	$tempData = array();
 	foreach ($configData->deviceData as $key => $value) {
-		if ($key == 24) {
-			$data['24'] = $value;
-		} else {
-			$tempData[] = "$key|$value";
-		}
+		$tempData[] = "$key|$value";
 	}
 	$data['109'] = implode("|",$tempData);
 	// $deviceData is an array of device data to update. id=>value
@@ -259,5 +255,31 @@ orbiter id - destination device
 58 - Set Current User
 orbiter id - destination device
 17 - user (by id)
- */
+
+         /** @brief COMMAND: #78 - New Orbiter */
+         /** Tells orbiter plugin to add a new orbiter, or update the parameters on an existing one. */
+                 /** @param #2 PK_Device */
+                         /** If 0 is passed in, the new orbiter device is returned.  Otherwise, update this orbiter. */
+                 /** @param #14 Type */
+                         /** CE, Windows, Linux, Symbian60, MsSmartphone */
+                 /** @param #17 PK_Users */
+                         /** The primary user of the phone. */
+                         /** The primary user of the phone. */
+                 /** @param #44 PK_DeviceTemplate */
+                         /** What type of orbiter it is. */
+                /** @param #47 Mac address */
+                         /** The MAC Address of the phone. */
+                 /** @param #57 PK_Room */
+                        /** The default room */
+                 /** @param #60 Width */
+                         /** Screen Width */
+                /** @param #61 Height */
+                        /** Screen Height */
+                 /** @param #141 PK_Skin */
+                         /** The skin, 0=use default */
+                 /** @param #142 PK_Language */
+                         /** The language, 0=use default */
+                /** @param #143 PK_Size */
+                         /** The size, 0=use default */
+// */
 ?>
