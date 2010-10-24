@@ -1,17 +1,26 @@
 <?
+function debug($text) {
+	// temporary debug logging function
+	global $file;
+	if (!$file) $file = fopen ('/tmp/orbiter.log', 'a');
+	fwrite ($file, $text . "\n");
+}
 function setupWebOrbiter($output,$dbADO) {
-
 	$command = $_REQUEST['command'];
-	$installationID = (int)@$_SESSION['installationID'];
 	$json = new StdClass();
 	$jason->data = array();
 	$jason->success = false;
 	$jason->error = '';
 	$jason->count = 0;
 	
+	$query = "SELECT * from Installation limit 1";
+	if ($row=$dbADO->GetRow($query)){
+		$ConfigRow = $row;
+	}
+	$InstallationID = $ConfigRow['PK_Installation'];
 	switch ($command) {
 	case "GetRooms": // Get the list of rooms
-		$query = "SELECT PK_Room, Description FROM Room";
+		$query = "SELECT PK_Room, Description FROM Room where FK_Installation='$InstallationID'";
 		lookup($query, $dbADO, $json);
 	break;
 	case "GetUsers": // Get the list of users
@@ -30,7 +39,12 @@ function setupWebOrbiter($output,$dbADO) {
 		$query = "SELECT PK_Language, Description FROM Language";
 		lookup($query, $dbADO, $json);
 	break;
-	
+	case "GetOrbiters": // Get a list of orbiters
+		$query = "SELECT d.PK_Device AS device,dd.IK_DeviceData AS port FROM Device d INNER JOIN Device_DeviceData dd ON dd.FK_Device=d.PK_Device WHERE FK_Installation=$InstallationID AND FK_DeviceTemplate=1749 AND FK_DeviceData=119";
+		if ($_REQUEST['orbiter']) $query .= " AND PK_Device=" . escapeshellcmd($_REQUEST['orbiter']);
+		$query .= " ORDER BY IK_DeviceData ASC";
+		lookup($query,$dbADO,$json);
+	break;
 
 	case "GenerateOrbiter":	// Generate the orbiter
 		// Check the existence of the current resolution in the DB and insert it if it doesn't exist
@@ -84,10 +98,17 @@ function setupWebOrbiter($output,$dbADO) {
 		// width - 100
 		// height - 101
 		
-		$configData = json_decode($_REQUEST['config']);
-		$configData->deviceData['100'] = $SizeRow['Width'];
-		$configData->deviceData['101'] = $SizeRow['Height'];
-		/* Tentative JSON structure for config data:
+		$configData = json_decode(stripslashes($_REQUEST['config']));
+		debug(json_encode($configData));
+		// php classes cannot have numeric members, need to convert to a hash
+		foreach ($configData->deviceData as $key => $value) {
+			$data[$key] = $value;
+		}
+		$data['3'] = $SizeRow['PK_Size'];
+		$data['100'] = $SizeRow['Width'];
+		$data['101'] = $SizeRow['Height'];
+		$configData->deviceData=$data;
+		/* JSON structure for config data:
 		 * {
 		 *   description : "string",
 		 *   defaultRoom : "int",
@@ -98,18 +119,22 @@ function setupWebOrbiter($output,$dbADO) {
 		 *   }
 		 * }
 		 */
-		print json_encode($configData);
-		exit;		
+		debug(json_encode($configData));
 		// Create the orbiter, return the PK_Key for the new orbiter, reload router, and start generating
-		//$orbiterID=createDevice('1748',$installationID,0,NULL,$dbADO);
+		$orbiterID=createDevice('1748',$installationID,0,NULL,$dbADO);
+		$orbiterID++; // the proxy orbiter is actually created as a child of 1748
+		debug("orbiter created: $orbiterID");
 		// Web orbiter, need to make sure it's related proxy orbiter uses a unique port number
-		//$out=exec_batch_command("/usr/pluto/bin/configure_proxyorbiter.pl -d $orbiterID",0);
-		//updateOrbiter($dbADO, $json, $orbiterID,$configData);
+		$out=exec_batch_command("/usr/pluto/bin/configure_proxyorbiter.pl -d $orbiterID",0);
+		debug("configure_proxyorbiter output: $out");
+		updateOrbiter($dbADO, $json, $orbiterID,$configData);
+		$json->success = true;
+		$json->orbiter=$orbiterID;
 	break;
 	case "UpdateOrbiter": // Update the orbiter with the new settings, reload router, and start regenerating
 		$orbiterID = $_REQUEST['orbiter'];
 		$configData = json_decode($_REQUEST['config']);
-		//updateOrbiter($dbADO, $json, $orbiterID,$configData);
+		updateOrbiter($dbADO, $json, $orbiterID,$configData);
 	break;
 	
 	case "GenerationStatus":
@@ -149,15 +174,30 @@ function setupWebOrbiter($output,$dbADO) {
 
 function updateOrbiter($dbADO, $json, $orbiterID,$configData) {
 	// Update the orbiter with the new settings, reload router, and start regenerating
-	
-	$deviceData = $configData->deviceData;
+	$data = array();
+	$data['2'] = $orbiterID;
+	$data['163'] = $configData->Description;
+	$data['57'] = $configData->defaultRoom;
+	$tempData = array();
+	foreach ($configData->deviceData as $key => $value) {
+		if ($key == 24) {
+			$data['24'] = $value;
+		} else {
+			$tempData[] = "$key|$value";
+		}
+	}
+	$data['109'] = implode("|",$tempData);
 	// $deviceData is an array of device data to update. id=>value
 	
 	// Full regen code from the orbiter wizard page. reloads router.
+	debug(json_encode($data));
+	dce_command(4,1,957,$data);
+	
 	/*
 	$dbADO->Execute('UPDATE Orbiter SET Modification_LastGen=0 WHERE PK_Orbiter=?',$orbiterID); 
 	$dbADO->Execute('UPDATE Device SET NeedConfigure=1 WHERE PK_Device=?',$orbiterID);
-	$commandToSend='/usr/pluto/bin/MessageSend localhost -targetType template '.$orbiterID.' '.$GLOBALS['OrbiterPlugIn'].' 1 266 2 '.$orbiterID.' 21 "-r" 24 1';
+	
+	$commandToSend='/usr/pluto/bin/MessageSend localhost -targetType template '.$orbiterID.' '.$GLOBALS['OrbiterPlugIn'].' 1 266 2 '.$orbiterID.' 21 "-r"';
 	exec($commandToSend);
 	//*/
 }
@@ -179,8 +219,10 @@ function dce_command($destination,$type,$command,$deviceData) {
 	foreach ($deviceData as $key => $value) {
 		$cmd .= " $key \"$value\"";
 	}
+	debug($cmd);
 	exec($cmd, $out, $return);
-	if ($return == 0) { // MessageSend does not give any exit value so this will always pass even if the command fails
+	debug(json_encode($out));
+	if ($out[0] != "0:UNHANDLED") { // MessageSend does not give any exit value so this will always pass even if the command fails
 		foreach ($out as $item) {
 			$pieces = explode(":",$item);
 			$data[$pieces[0]] = $pieces[1];
@@ -203,7 +245,7 @@ function dce_command($destination,$type,$command,$deviceData) {
 2 - device to change
 57 - room (by id)
 
-957 - command UpdateDevice
+957 - command UpdateDevice ** not implemented
 27 - destination device
 2 - device to change
 163 - device description
