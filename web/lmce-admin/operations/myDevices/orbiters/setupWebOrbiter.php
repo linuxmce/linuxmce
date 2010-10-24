@@ -131,6 +131,16 @@ function setupWebOrbiter($output,$dbADO) {
 		$json->success = true;
 		$json->orbiter=$orbiterID;
 	break;
+	case "ReloadRouter": // Needed to manually reload the router to get a brand new orbiter to generate then fire the regen command
+		exec("/usr/pluto/bin/MessageSend localhost -o 0 -1000 7 1", $out, $return);
+		$json->success = true;
+	break;
+	case "FirstGeneration": // Needed to manually call this after the router reload to successfully generate a brand new orbiter
+		$orbiterID = escapeshellcmd($_REQUEST['orbiter']);
+		$commandToSend='/usr/pluto/bin/MessageSend localhost -targetType template '.$orbiterID.' '.$GLOBALS['OrbiterPlugIn'].' 1 266 2 '.$orbiterID.' 21 "-r" 24 1';
+        	exec($commandToSend);
+		$json->success = true;
+	break;
 	case "UpdateOrbiter": // Update the orbiter with the new settings, reload router, and start regenerating
 		$orbiterID = $_REQUEST['orbiter'];
 		$configData = json_decode($_REQUEST['config']);
@@ -193,9 +203,9 @@ function updateOrbiter($dbADO, $json, $orbiterID,$configData) {
 	$dbADO->Execute('UPDATE Orbiter SET Modification_LastGen=0 WHERE PK_Orbiter=?',$orbiterID); 
 	$dbADO->Execute('UPDATE Device SET NeedConfigure=1 WHERE PK_Device=?',$orbiterID);
 	
-	$commandToSend='/usr/pluto/bin/MessageSend localhost -targetType template '.$orbiterID.' '.$GLOBALS['OrbiterPlugIn'].' 1 266 2 '.$orbiterID.' 21 "-r"';
+	$commandToSend='/usr/pluto/bin/MessageSend localhost -targetType template '.$orbiterID.' '.$GLOBALS['OrbiterPlugIn'].' 1 266 2 '.$orbiterID.' 21 "-r" 24 1';
 	exec($commandToSend);
-	//*/
+	*/
 }
 
 function lookup($query, $dbADO, $json) {
