@@ -85,9 +85,21 @@ void UpdateEntArea::AddDefaultMediaScenarios()
 	
 	for(map<int, LevelOfMedia >::iterator it=m_mapEnt_Area_Auto_Media.begin();it!=m_mapEnt_Area_Auto_Media.end();++it)
 	{
-		Row_Room *pRow_Room = m_pDatabase_pluto_main->Room_get()->GetRow(it->first);
 		Row_EntertainArea *pRow_EntertainArea = m_pDatabase_pluto_main->EntertainArea_get()->GetRow(it->first);
-		if( pRow_EntertainArea && pRow_Room->FK_RoomType_get()!= ROOMTYPE_Unmanaged_CONST)
+		if( !pRow_EntertainArea )
+		{
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Cannot find EntertainArea %d!", it->first);
+			continue;
+		}
+
+		Row_Room *pRow_Room = m_pDatabase_pluto_main->Room_get()->GetRow(pRow_EntertainArea->FK_Room_get());
+		if( !pRow_Room )
+		{
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Cannot find Room %d!", pRow_EntertainArea->FK_Room_get());
+			continue;
+		}
+
+		if( pRow_Room->FK_RoomType_get()!= ROOMTYPE_Unmanaged_CONST)
 			AddDefaultMediaScenarios(pRow_EntertainArea);
 		else
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Nothing to do with EntertainArea!");
