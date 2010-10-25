@@ -567,12 +567,12 @@ bool Proxy_Orbiter::ReceivedString( Socket *pSocket, string sLine, int nTimeout 
 	{
 		if (m_bNews)
 		{
-			pSocket->SendString("NEWS " + StringUtils::itos(3));
+			pSocket->SendString("NEWS " + StringUtils::itos(4));
 			pSocket->SendString("yes");
 		}
 		else
 		{
-			pSocket->SendString("NEWS " + StringUtils::itos(2));
+			pSocket->SendString("NEWS " + StringUtils::itos(3));
 			pSocket->SendString("no");
 		}
 		return true;
