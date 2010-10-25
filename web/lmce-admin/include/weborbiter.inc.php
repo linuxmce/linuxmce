@@ -201,6 +201,39 @@ function sendCommand($deviceID,$socket,$command,$refresh=''){
 
 	$written=web_socket_write($socket, $in);
 	$outResponse= web_socket_read($socket, 2048,PHP_NORMAL_READ);
+
+	// ERROR and OK are sent stand-alone
+	if (strpos($outResponse, "ERROR") === 0 || strpos($outResponse, "OK") === 0)
+		return $outResponse;
+
+	// everything else contains a reply size
+	// use it to read the reply
+	$space = strpos($outResponse, " ");
+	if ($space === false)
+		return "ERROR\n"; // something wrong happened
+
+	$Size = (int)trim(substr($outResponse, $space + 1));
+	if ($Size > 0)
+	{
+		$remaining = $Size;
+		$out = '';
+		while ($remaining > 0)
+		{
+			$linesize = ($remaining < 2048) ? $remaining : 2048;
+			$chunk = @socket_read($socket, $linesize, PHP_BINARY_READ);
+			$out .= $chunk;
+			$remaining -= strlen($chunk);
+			write_log("Retrieved news chunk ".strlen($chunk).", remaining $remaining \n");
+		}
+		
+		if(isset($out))
+		{
+			write_log("Received news size $Size\n");
+		}
+	}
+	
+	// send both the result message and its contents
+	return $outResponse.$out;
 }
 
 function write_log($log){

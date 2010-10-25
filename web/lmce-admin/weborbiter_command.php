@@ -40,9 +40,10 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 header("Content-type: text/plain");
 
+/* For IMAGE please use weborbiter_image.php instead */
 if (isset($_REQUEST['cmd']) && !empty($_REQUEST['cmd']) && $_REQUEST['cmd'] !== 'IMAGE')
 {
 	$cmd = $_REQUEST['cmd'];
-	sendCommand($deviceID, $socket, $cmd);
+	echo sendCommand($deviceID, $socket, $cmd);
 }
 ?>
