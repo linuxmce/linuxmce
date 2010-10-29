@@ -401,7 +401,7 @@ bool gc100::ConvertPronto(string ProntoCode, string &gc_code)
 			sscanf(token.c_str(),"%4x",&token_int);
 
 			frequency=(((41450/token_int)+5)/10)*1000;
-			gc_code=gc_code+StringUtils::itos(frequency)+",2"; // (Global Cache's IR test program sets this to 3, but 2 seems to be enough)
+			gc_code=gc_code+StringUtils::itos(frequency)+",1"; // (Global Cache's IR test program sets this to 3, but some devices actually interpret all 3 repetitions)
 
 			// # burst pairs for single sequence
 			token=StringUtils::Tokenize(ProntoCode," ",pos);
