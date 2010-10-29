@@ -1,6 +1,7 @@
 <?
 function debug($text) {
 	// temporary debug logging function
+	return;
 	global $file;
 	if (!$file) $file = fopen ('/tmp/orbiter.log', 'a');
 	fwrite ($file, $text . "\n");
@@ -165,10 +166,8 @@ function setupWebOrbiter($output,$dbADO) {
 						U=Unknown, 
 						D=Device is not an orbiter
 		*/
-//		exec("/usr/pluto/bin/MessageSend localhost -o 0 9 1 694 2 $orbiterID", $out, $return);
 		if ($data = dce_command(9,1,694,array(2=>$orbiterID))) {
 		// Return the percentage of generation
-//		if ($orbiterData=$dbADO->GetRow('SELECT PK_Orbiter,RegenInProgress,RegenStatus,RegenPercent from Orbiter WHERE PK_Orbiter=?',$orbiterID)) {
 			$json->success = true;
 			$json->count = 1;
 			$json->data[] = $data;
@@ -195,17 +194,9 @@ function updateOrbiter($dbADO, $json, $orbiterID,$configData) {
 	$data['109'] = implode("|",$tempData);
 	// $deviceData is an array of device data to update. id=>value
 	
-	// Full regen code from the orbiter wizard page. reloads router.
+	// Full regen code from the orbiter wizard page.
 	debug(json_encode($data));
 	dce_command(4,1,957,$data);
-	
-	/*
-	$dbADO->Execute('UPDATE Orbiter SET Modification_LastGen=0 WHERE PK_Orbiter=?',$orbiterID); 
-	$dbADO->Execute('UPDATE Device SET NeedConfigure=1 WHERE PK_Device=?',$orbiterID);
-	
-	$commandToSend='/usr/pluto/bin/MessageSend localhost -targetType template '.$orbiterID.' '.$GLOBALS['OrbiterPlugIn'].' 1 266 2 '.$orbiterID.' 21 "-r" 24 1';
-	exec($commandToSend);
-	*/
 }
 
 function lookup($query, $dbADO, $json) {
@@ -238,58 +229,4 @@ function dce_command($destination,$type,$command,$deviceData) {
 		return false;
 	}
 }
-
-/*
-246 - command SetDeviceData
-27 - destination device
-2 - device to change
-52 - deviceData id to change
-5 - value of new deviceData
-
-274 - command SetRoom for Device
-27 - destination device
-2 - device to change
-57 - room (by id)
-
-957 - command UpdateDevice ** not implemented
-27 - destination device
-2 - device to change
-163 - device description
-57 - room (by id)
-109 - device data (pipe delimited)
-
-77 - Set Current Room
-orbiter id - destination device
-57 - room (by id)
-
-58 - Set Current User
-orbiter id - destination device
-17 - user (by id)
-
-         /** @brief COMMAND: #78 - New Orbiter */
-         /** Tells orbiter plugin to add a new orbiter, or update the parameters on an existing one. */
-                 /** @param #2 PK_Device */
-                         /** If 0 is passed in, the new orbiter device is returned.  Otherwise, update this orbiter. */
-                 /** @param #14 Type */
-                         /** CE, Windows, Linux, Symbian60, MsSmartphone */
-                 /** @param #17 PK_Users */
-                         /** The primary user of the phone. */
-                         /** The primary user of the phone. */
-                 /** @param #44 PK_DeviceTemplate */
-                         /** What type of orbiter it is. */
-                /** @param #47 Mac address */
-                         /** The MAC Address of the phone. */
-                 /** @param #57 PK_Room */
-                        /** The default room */
-                 /** @param #60 Width */
-                         /** Screen Width */
-                /** @param #61 Height */
-                        /** Screen Height */
-                 /** @param #141 PK_Skin */
-                         /** The skin, 0=use default */
-                 /** @param #142 PK_Language */
-                         /** The language, 0=use default */
-                /** @param #143 PK_Size */
-                         /** The size, 0=use default */
-// */
 ?>
