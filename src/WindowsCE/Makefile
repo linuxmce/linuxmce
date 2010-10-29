@@ -65,7 +65,7 @@ libpng-1.4.3.tar.bz2:
 clean:
 	rm -rf zlib-1.2.5 libpng-1.4.3 jpeg-6b-src
 	make -C OrbiterCE clean
-dist-clean: clean
+distclean: clean
 	rm -rf zlib-1.2.5* libpng-1.4.3* jpeg-6b-src*
 	rm -rf cegcc
 
