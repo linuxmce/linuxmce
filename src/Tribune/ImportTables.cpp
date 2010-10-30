@@ -1167,9 +1167,10 @@ void ImportProgramRecordTable()
 int main(int argc, char *argv[]){
 
 	string hosttribune="localhost",usertribune="root",passwdtribune="",dbtribune="pluto_tribune";
+	my_bool reconnect = true;
 
 	mysqltribune=mysql_init(NULL);
-
+	mysql_options(mysqltribune, MYSQL_OPT_RECONNECT, &reconnect);
 	if(!mysql_real_connect(mysqltribune,hosttribune.c_str(),usertribune.c_str(),passwdtribune.c_str(),dbtribune.c_str(),0,NULL,0)){
 		cerr<<"Error connecting to db:"<<mysql_error(mysqltribune)<<endl;
 		return false;

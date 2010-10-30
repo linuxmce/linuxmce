@@ -81,10 +81,11 @@ int main(int argc, char **argv) {
 	}
 
 	bool isConnected = false;
-	
+	my_bool reconnect = true;
 	MYSQL mysql;
 	mysql_init(&mysql);
-	
+	mysql_options(&mysql, MYSQL_OPT_RECONNECT, &reconnect);
+
 	unsigned long result_id=0;
 	map<unsigned long, MYSQL_RES*> my_results;
 

@@ -13,7 +13,8 @@
 #define DB_RES  MYSQL_RES
 
 // functions
-#define db_wrapper_init				mysql_init
+/*#define db_wrapper_init				mysql_init*/
+DB_LINK* db_wrapper_init(DB_LINK *db_link);
 #define db_wrapper_free_result		mysql_free_result
 #define db_wrapper_close			mysql_close
 #define db_wrapper_real_connect		mysql_real_connect

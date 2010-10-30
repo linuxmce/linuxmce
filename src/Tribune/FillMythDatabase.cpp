@@ -412,9 +412,10 @@ void UpdateProgram(string programid){
 int main(int argc, char *argv[]){
 
 	string hosttribune="localhost",usertribune="root",passwdtribune="",dbtribune="pluto_tribune";
+	my_bool reconnect = true;
 
 	mysqltribune=mysql_init(NULL);
-
+	mysql_options(mysqltribune, MYSQL_OPT_RECONNECT, &reconnect);
 	if(!mysql_real_connect(mysqltribune,hosttribune.c_str(),usertribune.c_str(),passwdtribune.c_str(),dbtribune.c_str(),0,NULL,0)){
 		cerr<<"Error connecting to db:"<<mysql_error(mysqltribune)<<endl;
 		return false;
@@ -423,7 +424,7 @@ int main(int argc, char *argv[]){
 	string hostmyth="localhost",usermyth="root",passwdmyth="",dbmyth="mythconverg";
 
 	mysqlmyth=mysql_init(NULL);
-
+	mysql_options(mysqlmyth, MYSQL_OPT_RECONNECT, &reconnect);
 	if(!mysql_real_connect(mysqlmyth,hostmyth.c_str(),usermyth.c_str(),passwdmyth.c_str(),dbmyth.c_str(),0,NULL,0)){
 		cerr<<"Error connecting to db:"<<mysql_error(mysqlmyth)<<endl;
 		return false;

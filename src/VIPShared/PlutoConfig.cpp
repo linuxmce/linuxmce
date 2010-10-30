@@ -147,12 +147,14 @@ string PlutoConfig::GetSetting(const char *Token,char *Buffer,char *Default)
 #ifdef USE_MYSQL
 bool PlutoConfig::MysqlConnect(bool bReset)
 {
+	my_bool reconnect = true;
 	PLUTO_SAFETY_LOCK(ms,m_MySqlMutex);
 
 	if( bReset )
 		mysql_close(&m_MySQL);
 
 	mysql_init(&m_MySQL);
+	mysql_options(&m_MySQL, MYSQL_OPT_RECONNECT, &reconnect);
 	if(! mysql_real_connect(&m_MySQL, m_sMysqlHost.c_str(), m_sMysqlUser.c_str(), m_sMysqlPass.c_str(), m_sMysqlDatabase.c_str(), 0, NULL,0))
 	{
 		ErrorLog << "Failed to connect to MySQL (2):" << mysql_error(&m_MySQL); }

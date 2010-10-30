@@ -625,9 +625,11 @@ static int myth_scan(const char *pID, const char *pTuner)
 
 static int MySqlConnect(char *ip,char *user,char *password,char *database)
 {
+	my_bool reconnect = true;
 	if( !g_pMySQL )
 		g_pMySQL = mysql_init(NULL);
 
+	mysql_options(g_pMySQL, MYSQL_OPT_RECONNECT, &reconnect);
 	if (mysql_real_connect(g_pMySQL, ip, user, password, database, MYSQL_PORT, NULL, 0) == NULL)
 		return 1; // Failure
 	return 1; // Ok
