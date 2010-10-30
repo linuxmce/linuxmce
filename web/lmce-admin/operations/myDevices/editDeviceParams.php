@@ -185,7 +185,7 @@ $manualyConfigureArray=array(
 	<tr>
 		<td>'.$TEXT_DEVICE_TEMPLATE_CONST.'</td>
 		<td width="230" bgcolor="#B9B9B9"><B>'.$mdlDescription.' #'.$DeviceTemplate.'</B></td>
-		<td><input value="'.$TEXT_VIEW_CONST.'" type="button" class="button" name="controlGoToMDL" onClick="windowOpen(\'index.php?section=editMasterDevice&model='.$DeviceTemplate.'&from=editDeviceParams\',\'width=1024,height=768,toolbar=1,scrollbars=1,resizable=1\');"> <input value="'.$TEXT_HELP_CONST.'" type="button" class="button" name="help" onClick="window.open(\''.$wikiHost.'/index.php/'.$wikiLink.'\');">'.$manufHomeLink.' '.$internalLink.'</td>
+		<td><input value="'.$TEXT_VIEW_CONST.'" type="button" class="button" name="controlGoToMDL" onClick="windowOpen(\'index.php?section=editMasterDevice&model='.$DeviceTemplate.'&from=editDeviceParams&fromDeviceID='.$deviceID.'\',\'width=1024,height=768,toolbar=1,scrollbars=1,resizable=1\');"> <input value="'.$TEXT_HELP_CONST.'" type="button" class="button" name="help" onClick="window.open(\''.$wikiHost.'/index.php/'.$wikiLink.'\');">'.$manufHomeLink.' '.$internalLink.'</td>
 	</tr>
 	<tr>
 		<td>'.$TEXT_DEVICE_TEMPLATE_COMMENTS_CONST.'</td>

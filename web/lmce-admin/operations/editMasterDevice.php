@@ -15,6 +15,7 @@ function editMasterDevice($output,$dbADO) {
 	$deviceID = (int)$_REQUEST['model'];
 	$action = isset($_REQUEST['action'])?cleanString($_REQUEST['action']):'form';
 	$lastAction = isset($_REQUEST['lastAction'])?cleanString($_REQUEST['lastAction']):'';
+	$fromDeviceID = isset($_REQUEST['fromDeviceID'])?'&deviceID='.cleanString($_REQUEST['fromDeviceID']):'';
 	$dtRelatedValues=array('1'=>'Sister device', '2'=>'Install on core', '3'=>'Plugin for the router', '4'=>'Anywhere on same PC', '5'=>'My Child');
 
 	//the form
@@ -219,7 +220,7 @@ function editMasterDevice($output,$dbADO) {
 				<tr>
 					<td valign="top"><a name="isAVDevice_link"></a>'.$TEXT_AUDIO_VIDEO_DEVICE_CONST.'</td>
 					<td>
-						<input type="hidden" value="'.$isAVDevice.'" name="old_isAVDevice"><input type="checkbox" name="isAVDevice" '.($isAVDevice==1?" checked='checked' ":"").' value="1" onClick="javascript:this.form.submit();"><input type="button" class="button" name="isAV"  '.($isAVDevice!=1?'value="'.$TEXT_IS_NOT_AUDIO_VIDEO_CONST.'" disabled="disabled" ':" value=\"".$TEXT_EDIT_AUDIO_VIDEO_PROPERTIES_CONST."\" onClick=\"windowOpen('index.php?section=irCodes&from=editMasterDevice&dtID={$deviceID}','status=0,resizable=1,width=800,height=600,toolbar=1,scrollbars=1,resizable=1');\"").'>
+						<input type="hidden" value="'.$isAVDevice.'" name="old_isAVDevice"><input type="checkbox" name="isAVDevice" '.($isAVDevice==1?" checked='checked' ":"").' value="1" onClick="javascript:this.form.submit();"><input type="button" class="button" name="isAV"  '.($isAVDevice!=1?'value="'.$TEXT_IS_NOT_AUDIO_VIDEO_CONST.'" disabled="disabled" ':" value=\"".$TEXT_EDIT_AUDIO_VIDEO_PROPERTIES_CONST."\" onClick=\"windowOpen('index.php?section=irCodes&from=editMasterDevice&dtID={$deviceID}${fromDeviceID}','status=0,resizable=1,width=800,height=600,toolbar=1,scrollbars=1,resizable=1');\"").'>
 					</td>
 				</tr>
 				<tr>
