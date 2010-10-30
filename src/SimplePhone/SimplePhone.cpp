@@ -102,8 +102,11 @@ bool SimplePhone::GetConfig()
 			case 'L':
 				sAlsaDevice = "asym_analog";
 				break;
-			case 'H':
+			case 'M':
 				sAlsaDevice = "plughw:1";
+				break;
+			case 'H':
+				sAlsaDevice = "asym_hdmi";
 			default:
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Flag unprocessed: '%c'", sAudioSettings[i]);
 		}
@@ -486,7 +489,7 @@ string SimplePhone::Get_MD_AudioSettings()
 		return m_pData->m_pEvent_Impl->GetDeviceDataFromDatabase(PK_MD,DEVICEDATA_Audio_settings_CONST);
 	} else
 	{
-		return "H";
+		return "M"; // Mic found
 	}
 
 }
