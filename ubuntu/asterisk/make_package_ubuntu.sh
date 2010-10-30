@@ -54,6 +54,8 @@ TheRest()
 	ln -nsf /var/lib/asterisk/sounds/pluto ${PKGFOLDER}/usr/share/asterisk/sounds/
 
 	#copy AGI scripts
+	cp -R ${ADDFOLDER}/linuxmce-validate-user-pin.agi ${PKGFOLDER}/usr/share/asterisk/agi-bin/
+	cp -R ${ADDFOLDER}/linuxmce-phonebook-lookup.agi ${PKGFOLDER}/usr/share/asterisk/agi-bin/
 	cp -R ${ADDFOLDER}/pluto-sos.agi ${PKGFOLDER}/usr/share/asterisk/agi-bin/
 	cp -R ${ADDFOLDER}/pluto-sos-gen.pl ${PKGFOLDER}/usr/pluto/bin/
 	cp -R ${ADDFOLDER}/pluto-sos-neighbor.pl ${PKGFOLDER}/usr/pluto/bin/
