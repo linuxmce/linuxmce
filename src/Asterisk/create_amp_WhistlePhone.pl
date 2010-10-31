@@ -74,11 +74,12 @@ $TRUNK_VARS{'peerdetails'}.="host=$DECLARED_HOST\n";
 $TRUNK_VARS{'peerdetails'}.="insecure=very\n";
 $TRUNK_VARS{'peerdetails'}.="nat=no\n";
 $TRUNK_VARS{'peerdetails'}.="secret=$DECLARED_USERPASSWD\n";
-$TRUNK_VARS{'peerdetails'}.="type=peer\n";
+$TRUNK_VARS{'peerdetails'}.="type=friend\n";
 $TRUNK_VARS{'peerdetails'}.="user=$DECLARED_USERNAME\n";
 $TRUNK_VARS{'peerdetails'}.="username=$DECLARED_USERNAME\n";
+$TRUNK_VARS{'peerdetails'}.="port=5060\n";
 
-$TRUNK_VARS{'register'}="$DECLARED_NUMBER:$DECLARED_USERPASSWD\@$DECLARED_HOST:5060/$DECLARED_NUMBER";
+$TRUNK_VARS{'register'}="$DECLARED_NUMBER:$DECLARED_USERPASSWD\@WhistlePhone/$DECLARED_NUMBER";
 
 foreach my $var (keys %TRUNK_VARS)
 {
