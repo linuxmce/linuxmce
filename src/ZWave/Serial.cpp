@@ -92,7 +92,7 @@ int WriteSerialStringEx (int dev,char pnt[],int len)
                         exit (-1);
                 return (ERR_TIMEOUT);
         }
-        tcflush(dev, TCIOFLUSH);
+        tcdrain(dev);
 
         return (0);
 }

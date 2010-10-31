@@ -68,7 +68,10 @@ void *ZWApi::ZWApi::init(const char *device) {
         mybuf[0]=NAK;
         WriteSerialStringEx(serialPort,mybuf,1);
 
-	pthread_mutex_init(&mutexSendQueue, NULL);
+	pthread_mutexattr_t mutexAttrRecursive;
+	pthread_mutexattr_init(&mutexAttrRecursive);
+	pthread_mutexattr_settype(&mutexAttrRecursive, PTHREAD_MUTEX_RECURSIVE);
+	pthread_mutex_init(&mutexSendQueue, &mutexAttrRecursive);
 
 	static pthread_t readThread;
 	pthread_create(&readThread, NULL, start, (void*)this);
@@ -437,7 +440,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							if (ZWSendQueue.front()->sendcount > 3) {
 								// can't deliver frame, abort
 								DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Error: ZW_SEND failed, removing job after three tries");
-								ZWSendQueue.pop_front();
+								dropSendQueueJob();
 							} else {
 								DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Error: ZW_SEND failed, retrying");
 								// trigger resend
@@ -453,6 +456,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							ZWSendQueue.pop_front();
 							pthread_mutex_unlock (&mutexSendQueue);
 							await_callback = 0;
+							dropped_jobs = 0;
 							
 							break;
 						default:
@@ -1119,6 +1123,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 				ZWSendQueue.pop_front();
 				pthread_mutex_unlock (&mutexSendQueue);
 				await_callback = 0;
+				dropped_jobs = 0;
 			} else {
 				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Generic callback handling for command %i, ERROR: wrong callback type: %i",(unsigned char)frame[1],callback_type);
 
@@ -1198,6 +1203,7 @@ void *ZWApi::ZWApi::receiveFunction() {
 						pthread_mutex_lock (&mutexSendQueue);
 						ZWSendQueue.pop_front();
 						pthread_mutex_unlock (&mutexSendQueue);
+						dropped_jobs = 0;
 					}
 					break;
 				;;
@@ -1232,8 +1238,8 @@ void *ZWApi::ZWApi::receiveFunction() {
 						await_ack = 0;	
 						await_callback = 0;
 						if (ZWSendQueue.front()->sendcount > 2) {
-							ZWSendQueue.pop_front();
 							DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "ERROR: Dropping command, no callback received after three resends");
+							dropSendQueueJob();
 
 						}
 					}
@@ -2281,4 +2287,18 @@ void ZWApi::ZWApi::zwThermostatSetpointGet(int node_id,int type) {
         mybuf[6] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
         sendFunction( mybuf , 7, REQUEST, 1);
 
+}
+
+void ZWApi::ZWApi::dropSendQueueJob() {
+	pthread_mutex_lock (&mutexSendQueue);
+	ZWSendQueue.pop_front();
+	pthread_mutex_unlock (&mutexSendQueue);
+	await_callback = 0;
+	dropped_jobs++;
+	if( dropped_jobs >= 3 ) {
+		// If you get this error, take a look at Trac ticket #874
+		DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "ERROR: Three dropped commands in a row, soft-resetting controller");
+		zwSoftReset();
+		dropped_jobs = 0;
+	}
 }

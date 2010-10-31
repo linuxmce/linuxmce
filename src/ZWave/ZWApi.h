@@ -411,6 +411,10 @@ namespace ZWApi {
 	// callback type temp var for state handling
 	int callback_type;
 
+	// Number of consecutive dropped jobs
+	int dropped_jobs;
+	void dropSendQueueJob();
+
 	// polling state
 	bool poll_state;
 
@@ -543,7 +547,7 @@ namespace ZWApi {
 	void resetNodeInstanceCount(ZWNode *node, std::string capa);
 	void multiInstanceGetAllCCsForNode(unsigned int node_id);
 	void handleCommandSensorMultilevelReport(int nodeid, int instance_id, int sensortype, int metadata,
-						 int val1, int val2, int val3, int val4); 
+						 int val1, int val2, int val3, int val4);
     };
 
 
