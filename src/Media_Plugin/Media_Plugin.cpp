@@ -5705,7 +5705,7 @@ void Media_Plugin::CMD_Shuffle(string sPK_EntertainArea,string &sCMD_Result,Mess
     PLUTO_SAFETY_LOCK( mm, m_MediaMutex );
 
 	vector<EntertainArea *> vectEntertainArea;
-    DetermineEntArea( pMessage->m_dwPK_Device_From, 0, (sPK_EntertainArea.empty() ? sPK_EntertainArea : ""), vectEntertainArea );
+    DetermineEntArea( pMessage->m_dwPK_Device_From, 0, (sPK_EntertainArea.empty() ? "" : sPK_EntertainArea), vectEntertainArea );
 	for(size_t s=0;s<vectEntertainArea.size();++s)
 	{
 		EntertainArea *pEntertainArea = vectEntertainArea[s];
