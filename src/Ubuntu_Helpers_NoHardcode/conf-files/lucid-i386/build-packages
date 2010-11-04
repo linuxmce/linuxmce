@@ -94,8 +94,8 @@ libkonq5-dev
 liblinphone2-dev
 liblircclient-dev
 libmad0-dev
-libmagick++9-dev
-libmagick9-dev
+libmagick++-dev
+libmagickcore-dev
 libmediastreamer0-dev
 libmodplug-dev
 libmp3lame-dev
