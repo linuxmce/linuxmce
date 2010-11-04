@@ -101,7 +101,7 @@ libmodplug-dev
 libmp3lame-dev
 libmp4v2-dev
 libmpcdec-dev
-libmysqlclient15-dev
+libmysqlclient16-dev
 libncursesw5-dev
 libpanel-applet2-dev
 libpcre3-dev
@@ -146,10 +146,10 @@ libxv-dev
 libxvmc-dev
 libxxf86vm-dev
 libzvbi-dev
-linux-headers-2.6.27-16-generic
-linux-image-2.6.27-16-generic
-linux-restricted-modules-2.6.27-16-generic
-linux-source-2.6.27
+linux-headers-2.6.32-22-generic
+linux-image-2.6.32-22-generic
+linux-restricted-modules-2.6.32-22-generic
+linux-source-2.6.32
 lirc-modules-source
 module-assistant
 mysql-client
