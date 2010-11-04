@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <iostream>
+#include <stdio.h>
 
 namespace DB_Wrapper
 {
