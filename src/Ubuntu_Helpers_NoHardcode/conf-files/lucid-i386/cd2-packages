@@ -123,7 +123,7 @@ libavahi-common-data
 libavahi-common3
 libavahi-qt3-1
 libavc1394-0
-libavcodec51
+libavcodec52
 libavformat52
 libavutil49
 libbind9-40
@@ -329,7 +329,7 @@ liblzo-dev
 liblzo1
 libmad0
 libmagic1
-libmagick++10
+libmagick++2
 libmailtools-perl
 libmediastreamer0
 libmime-lite-perl
@@ -585,7 +585,7 @@ mtools
 mysql-client
 mysql-common
 mysql-server
-mysql-server-5.0
+mysql-server-5.1
 nbd-client
 nbd-server
 nbtscan

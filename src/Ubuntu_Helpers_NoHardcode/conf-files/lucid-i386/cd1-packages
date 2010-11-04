@@ -11,7 +11,7 @@ kdelibs-data
 libalgorithm-c3-perl
 libapache2-mod-php5
 libasound2-plugins
-libavcodec51
+libavcodec52
 libc6
 libc6-dev
 libcaca0
@@ -37,11 +37,10 @@ libflite1
 libgtk2.0-0
 libgtk2.0-dev
 libmad0
-libmagick10
+libmagickcore2-extra
 libmodule-find-perl
 libmp4-info-perl
-libmysqlclient15-dev
-libmysqlclient15off
+libmysqlclient16-dev
 libncurses5-dev
 libnumber-compare-perl
 libparams-validate-perl
@@ -69,7 +68,7 @@ libyaml-syck-perl
 linphone-common
 locales
 mplayer
-mysql-client-5.0
+mysql-client-5.1
 nvidia-glx-new
 openssl
 perl
