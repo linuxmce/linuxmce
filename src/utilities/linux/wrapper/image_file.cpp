@@ -9,6 +9,7 @@
 #endif
 
 #include "image_file.h"
+#include <stdio.h>
 
 bool Xbm_WriteFile(const string &sPath, const char *pRawData, unsigned int width, unsigned int height, int x_hot/*=-1*/, int y_hot/*=-1*/)
 {
