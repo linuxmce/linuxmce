@@ -13,6 +13,7 @@
 */
 
 #include "IOUtils.h"
+#include <stdio.h>
 
 namespace DCE {
 
