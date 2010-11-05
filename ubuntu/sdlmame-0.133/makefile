@@ -338,7 +338,8 @@ CCOMFLAGS += -O$(OPTIMIZE)
 ifneq ($(OPTIMIZE),0)
 ifneq ($(TARGETOS),os2)
 ifndef IA64
-CCOMFLAGS += -Werror -fno-strict-aliasing $(ARCHOPTS)
+# CCOMFLAGS += -Werror
+CCOMFLAGS += -fno-strict-aliasing $(ARCHOPTS)
 else
 endif
 else
