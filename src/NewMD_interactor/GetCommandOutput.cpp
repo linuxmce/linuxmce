@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <cstring>
+#include <stdio.h>
 
 #include "GetCommandOutput.h"
 
