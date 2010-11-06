@@ -2476,24 +2476,20 @@ pMediaStream->m_iStreamID_get(),pMediaStream, (int) bDeleteStream, (int) bNoAuto
 			}
 		}
 
-		if( bSendOff )
-			HandleOnOffs(pMediaStream->m_pMediaHandlerInfo->m_PK_MediaType,0,&mapMediaDevice_Prior,NULL,pMediaStream,pEntertainArea);
-		// Needed to switch inputs back to the OSD orbiter when Live AV completes
-		if( pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_pDevice_MD && 
-			bTurnOnOSD &&
-			pEntertainArea->m_bViewingLiveAVPath ) 
-		{ 
-			pEntertainArea->m_bViewingLiveAVPath=false; 
-			MediaDevice *pMediaDevice_MD = m_mapMediaDevice_Find(pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_pDevice_MD->m_dwPK_Device); 
-			if( pMediaDevice_MD && pMediaDevice_MD->m_bDontSendOffIfOSD_ON ) 
-			{ 
-				LoggerWrapper::GetInstance()->Write(LV_STATUS,"Stream ended and m/d is being used as an OSD.  Turning on m/d so it's visible"); 
-				DCE::CMD_On CMD_On(m_dwPK_Device,pMediaDevice_MD->m_pDeviceData_Router->m_dwPK_Device,0,""); 
-				CheckForCustomPipe(pEntertainArea,CMD_On.m_pMessage); 
-				SendCommand(CMD_On); 
-			} 
-		} 
+		// Need to switch inputs on any pipes back to the orbiter.  Use the MediaType from the device that is
+		// turing off so that if it was an audio only device we only switch the audio pipes to the OSD orbiter
+		// and not any of the video pipes.
+		int iPK_MediaType_Current = 0;
+		map<int,MediaDevice *> mapMediaDevice_Current;
+		if( pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_pDevice_MD && bTurnOnOSD )
+		{
+			int iPK_Device_MD = pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_pDevice_MD->m_dwPK_Device;
+			iPK_MediaType_Current = pMediaStream->m_pMediaHandlerInfo->m_PK_MediaType;
+			mapMediaDevice_Current[iPK_Device_MD] = m_mapMediaDevice_Find(iPK_Device_MD);
+		}
 
+		if( bSendOff )
+			HandleOnOffs(pMediaStream->m_pMediaHandlerInfo->m_PK_MediaType,iPK_MediaType_Current,&mapMediaDevice_Prior,&mapMediaDevice_Current,pMediaStream,pEntertainArea);
 	}
 
 	if( pMediaStream->m_pDevice_CaptureCard )
