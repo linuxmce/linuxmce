@@ -90,6 +90,7 @@ using namespace DCE;
 #include "pluto_media/Table_LongAttribute.h"
 #include "pluto_media/Table_RipStatus.h"
 #include "Gen_Devices/AllScreens.h"
+#include "pluto_main/Define_Pipe.h"
 
 #include "Datagrid_Plugin/Datagrid_Plugin.h"
 #include "pluto_main/Define_DataGrid.h"
@@ -3594,10 +3595,16 @@ void Media_Plugin::HandleOnOffs(int PK_MediaType_Prior,int PK_MediaType_Current,
 			}
 		}
 		// If this is on a media director and it's a child of the OSD, then turn the media director on
+		// Also turn on the media director if this is an audio only device to prevent the media director
+		// from powering on later and switching inputs on pipes away from the device.
 		else if( pMediaDevice->m_pDeviceData_Router->m_pDevice_MD && 
 				pMediaDevice->m_pDeviceData_Router!=pMediaDevice->m_pDeviceData_Router->m_pDevice_MD &&
-				pMediaDevice->m_pDeviceData_Router->m_pDevice_ControlledVia && 
-				pMediaDevice->m_pDeviceData_Router->m_pDevice_ControlledVia->m_dwPK_DeviceTemplate==DEVICETEMPLATE_OnScreen_Orbiter_CONST )
+				( (
+				     pMediaDevice->m_pDeviceData_Router->m_pDevice_ControlledVia && 
+				     pMediaDevice->m_pDeviceData_Router->m_pDevice_ControlledVia->m_dwPK_DeviceTemplate==DEVICETEMPLATE_OnScreen_Orbiter_CONST
+                                  ) || PK_Pipe_Current == PIPE_Audio_CONST
+				) 
+		       )
 		{
 #ifdef DEBUG
 			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Also turning on MD and OSD");
@@ -3627,8 +3634,9 @@ void Media_Plugin::HandleOnOffs(int PK_MediaType_Prior,int PK_MediaType_Current,
 			CheckForCustomPipe(pEntertainArea,CMD_On2.m_pMessage);
 			SendCommand(CMD_On2);
 		}
+
 		// See if it's a generic media stream, and it's using it's own pipes
-		else if( pMediaStream->m_pMediaHandlerInfo==m_pGenericMediaHandlerInfo && pMediaDevice->m_pDeviceData_Router->m_mapPipe_Available.size() )
+		if( pMediaStream->m_pMediaHandlerInfo==m_pGenericMediaHandlerInfo && pMediaDevice->m_pDeviceData_Router->m_mapPipe_Available.size() )
 			pEntertainArea->m_bViewingLiveAVPath=true;
 		
 		DCE::CMD_On CMD_On(m_dwPK_Device,pMediaDevice->m_pDeviceData_Router->m_dwPK_Device,PK_Pipe_Current,"");
