@@ -23,6 +23,7 @@
 */
 #include "message.h"
 #include <cstdlib>
+#include <stdio.h>
 
 namespace CM15ADEV {
 
