@@ -1,3 +1,10 @@
+asterisk-pluto (1.4.10-5) unstable; urgency=low
+
+  * Added phone number lookup from linuxmce phone book
+  * Fixed various call transfer issues
+
+ -- Adam Shortland <los93sol@plutohome.com>  Sat, 6 Nov 2010 10:57:02 -0500
+
 asterisk-pluto (1.4.10-4) unstable; urgency=low
 
   * Added dependency of chan-sccp
