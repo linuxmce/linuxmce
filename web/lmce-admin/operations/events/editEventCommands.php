@@ -62,9 +62,8 @@ function editEventCommands($output,$dbADO) {
 		<table border="0" align="center">
 		';
 		$out.='
-			<tr bgcolor="#E7E7E7">
-				<td><B>'.$TEXT_DESCRIPTION_CONST.'</B></td>
-				<td>'.$rowEH['Description'].'</td>
+			<tr>
+				<td><B><a href="index.php?section=editCriteria&ehID='.$eventHandlerID.'">'.$TEXT_EDIT_EVENT_CCRITERIA_CONST.'</a></B></td>
 			</tr>
 			<tr>
 				<td colspan="2">'.editCommandGroupCommands($commandGroupID,$dbADO).'</td>
@@ -93,8 +92,8 @@ function editEventCommands($output,$dbADO) {
 	}
 
 	$output->setMenuTitle($TEXT_ADVANCED_CONST.' |');
-	$output->setPageTitle($TEXT_EDIT_EVENT_COMMANDS_CONST);	
-	$output->setNavigationMenu(array($TEXT_ADVANCED_EVENTS_DEVICE_CONST=>'index.php?section=advancedEvents'));
+	$output->setPageTitle($TEXT_EDIT_EVENT_COMMANDS_CONST.' #'.$eventHandlerID.' '.$rowEH['Description']);	
+	$output->setNavigationMenu(array($TEXT_ADVANCED_EVENTS_DEVICE_CONST=>'index.php?section=advancedEvents&highligh='.$eventHandlerID));
 	$output->setBody($out);
 	$output->setTitle(APPLICATION_NAME.' :: '.$TEXT_EDIT_EVENT_COMMANDS_CONST);
 	$output->output();

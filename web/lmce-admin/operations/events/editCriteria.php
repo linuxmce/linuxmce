@@ -44,6 +44,9 @@ function editCriteria($output,$dbADO) {
 		<table border="0" align="center">';
 		$out.='
 			<tr>
+				<td><B><a href="index.php?section=editEventCommands&ehID='.$eventHandlerID.'">'.$TEXT_EDIT_EVENT_COMMANDS_CONST.'</a></B></td>
+			</tr>
+			<tr>
 				<td align="right"><B>'.$TEXT_CRITERIA_CONST.'</B></td>
 				<td><input type="text" name="criteriaDescription" value="'.$rowEH['CriteriaDescription'].'"></td>
 				<td><B>'.$TEXT_TEMPLATE_CONST.'</B></td>
@@ -142,8 +145,8 @@ function editCriteria($output,$dbADO) {
 	}
 	
 	$output->setMenuTitle($TEXT_ADVANCED_CONST.' |');
-	$output->setPageTitle($TEXT_EDIT_CRITERIA_CONST);	
-	$output->setNavigationMenu(array($TEXT_ADVANCED_EVENTS_CONST=>'index.php?section=advancedEvents'));
+	$output->setPageTitle($TEXT_EDIT_CRITERIA_CONST.' #'.$eventHandlerID.' '.$rowEH['Description']);	
+	$output->setNavigationMenu(array($TEXT_ADVANCED_EVENTS_CONST=>'index.php?section=advancedEvents&highligh='.$eventHandlerID));
 	$output->setBody($out);
 	$output->setTitle(APPLICATION_NAME.' :: '.$TEXT_EDIT_CRITERIA_CONST);	
 	$output->output();
