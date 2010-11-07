@@ -174,5 +174,4 @@ $TEXT_TEST_COMMAND_CONST='Test command';
 $TEXT_UP_CONST='Up';
 $TEXT_DOWN_CONST='Down';
 $TEXT_SORT_SCENARIOS_CONST='Sort scenarios';
-$DEFAULT_SORT ='Set Default Sort';
 ?>

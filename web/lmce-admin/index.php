@@ -432,12 +432,6 @@ switch ($section) {
 	    deleteRoomFromEntertainArea($output,$dbADO);	    
 	break;	 
 	//users_settings
-        case 'emailSetup':
-                $output = new Template($dbADO);
-                $output->setTemplateFileType('large');
-            include_once('operations/users_settings/emailSetup.php');
-            emailSetup($output,$dbADO);
-        break;
 	case 'installationSettings':
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('large');
@@ -492,14 +486,7 @@ switch ($section) {
 	    include_once('operations/myDevices/orbiters/wizardOrbiters.php');
 	    wizardOrbiters($output,$dbADO);	    
 	break;
-        case 'setupWebOrbiter';
-                $output = new Template($dbADO);
-                $output->setTemplateFileType('large');
-            include_once('operations/myDevices/orbiters/setupWebOrbiter.php');
-            $output->setHelpSrc('/wiki/index.php/Orbiters');
-            setupWebOrbiter($output,$dbADO);
-        break;
-
+	
 	//categories
 	case 'manageCategories':
 		$output = new Template($dbADO);
@@ -1026,13 +1013,6 @@ switch ($section) {
             $output->setHelpSrc('/wiki/index.php/DataLogger');
             viewDatalog($output,$dbADO);
         break;
-        case 'energyMonitor';
-                $output = new Template($dbADO);
-                $output->setTemplateFileType('large');
-            include_once('operations/datalog/energyMonitor.php');
-            $output->setHelpSrc('/wiki/index.php/energyMonitor');
-            energyMonitor($output,$dbADO);
-        break;
 	case 'pickScenario';
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('small');
@@ -1256,7 +1236,7 @@ switch ($section) {
 	case 'wapSettings';
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('large');
-		$output->setHelpSrc('http://wiki.linuxmce.org/index.php/WAP/GPRS_Settings');
+		$output->setHelpSrc('http://plutohome.com/support/phpbb2/viewtopic.php?t=212');
 	    include_once('operations/network/wapSettings.php');
 	    wapSettings($output,$dbADO);
 	break;	
@@ -1539,6 +1519,7 @@ switch ($section) {
 	    include_once('operations/mediaBrowser/checkAmazon.php');
 	    checkAmazon($output,$mediadbADO,$dbADO);	    
 	break;
+	
 	case 'searchAmazon':
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('small');
@@ -1556,6 +1537,48 @@ switch ($section) {
 		$output->setTemplateFileType('large');
 	    include_once('operations/mediaBrowser/checkIMDB.php');
 	    checkIMDB($output,$mediadbADO,$dbADO);	
+	break;
+	case 'checkTVDB':
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('large');
+	    include_once('operations/mediaBrowser/checkTVDB.php');
+	    initialSetup($fileID,$mediadbADO,$dbADO,$output);	    
+	break;		
+	case 'searchtvDB':
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('large');
+	    include_once('operations/mediaBrowser/searchTVDB.php');
+	    searchTVDB($output,$mediadbADO,$dbADO);	    
+	break;
+	case 'tvdbAttributes':
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('large');
+	    include_once('operations/mediaBrowser/tvdbAttributes.php');
+	    tvdbAttributes($output,$mediadbADO,$dbADO, $fileID, $episodeInfo);	    
+	break;			
+	case 'tvdbSeries':
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('large');
+	    include_once('operations/mediaBrowser/tvdbUtils.php');
+	    tvdbSeries($output,$mediadbADO,$dbADO);	    
+	break;
+	case 'tvdbBatch':
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('large');
+	    include_once('operations/mediaBrowser/tvdbbatch.php');
+	    tvdbBatch($output,$mediadbADO,$dbADO);	    
+	break;
+	case 'tvdbBatchResult':
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('large');
+	    include_once('operations/mediaBrowser/tvdbbatch.php');
+	    tvdbBatchResult($output,$mediadbADO,$dbADO);	    
+	break;
+	case 'tvdbSpecSave':
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('large');
+	    include_once('operations/mediaBrowser/tvdbUtils.php');
+	    tvdbSpecSave($output,$mediadbADO,$dbADO);    
 	break;
 	case 'backup':
 		$output = new Template($dbADO);

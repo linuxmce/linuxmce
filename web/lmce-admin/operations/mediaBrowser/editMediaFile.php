@@ -1,4 +1,6 @@
 <?
+
+
 function editMediaFile($output,$mediadbADO,$dbADO) {
 	// include language files
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
@@ -11,7 +13,8 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 	$fileID=$_REQUEST['fileID'];
 	$picsPerLine=6;	
 	
-	$scriptInHead='
+	$scriptInHead='	<script src="javascript/prototype.js" type="text/javascript" language="JavaScript"></script>
+ 					<script src="javascript/scriptaculous.js" type="text/javascript" language="JavaScript"></script>	
 	<script>
 	function windowOpen(locationA,attributes) 
 	{
@@ -40,8 +43,8 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 	
 	function syncPath(path)
 	{
-		top.treeframe.location=\'index.php?section=leftMediaFilesSync&startPath=\'+encodeURIComponent(path);
-		self.location=\'index.php?section=mainMediaFilesSync&path=\'+encodeURIComponent(path);
+		top.treeframe.location=\'index.php?section=leftMediaFilesSync&startPath=\'+escape(path);
+		self.location=\'index.php?section=mainMediaFilesSync&path=\'+escape(path);
 	}
 
 	function setAll(bylink){
@@ -63,8 +66,7 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 	';
 	if($action=='form'){
 		$resFile=$mediadbADO->Execute('SELECT * FROM File WHERE PK_File=?',$fileID);
-		$rowFile=$resFile->FetchRow();
-		
+		$rowFile=$resFile->FetchRow();		
 		$out.='
 			<div align="center" class="err">'.stripslashes(@$_REQUEST['error']).'</div>
 			<div align="center" class="confirm"><B>'.stripslashes(@$_REQUEST['msg']).'</B></div>
@@ -81,7 +83,6 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 				<input type="hidden" name="action" value="update">
 				<input type="hidden" name="fileID" value="'.$fileID.'">
 		';
-
 		$queryAttrTypes='
 			SELECT * 
 			FROM AttributeType 
@@ -95,9 +96,10 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 		}
 
 		$externalAttributesBtn='';
-		if(in_array($rowFile['EK_MediaType'],array(3,4,5,28))){
+		if(in_array($rowFile['EK_MediaType'],array(3,4,5,28))){			
 			$externalAttributesBtn='<select name="metadata_section"><option value="checkAmazon">'.$OPTION_CHECK_AMAZON.'</option>';
-			$externalAttributesBtn.='<option value="checkIMDB">'.$OPTION_CHECK_IMDB.'</option></selection>';
+			$externalAttributesBtn.='<option value="checkIMDB">'.$OPTION_CHECK_IMDB.'</option>';
+			$externalAttributesBtn.='<option value="checkTVDB">'.$OPTION_CHECK_TVDB.'</option></selection>';
 			
 			$externalAttributesBtn.='<input type="button" class="button_fixed" value="'.$BUTTON_GET_METADATA.'"
 			onClick="self.location=\'index.php?section=\'+document.editMediaFile.metadata_section.options[document.editMediaFile.metadata_section.selectedIndex].value+\'&fileID='.$fileID.'\'">';
@@ -106,7 +108,7 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 		$mediaSubTypes=getAssocArray('MediaSubType','PK_MediaSubType','Description',$mediadbADO,'ORDER BY Description ASC');
 		$fileFormat=getAssocArray('FileFormat','PK_FileFormat','Description',$mediadbADO,'ORDER BY Description ASC');
 		
-		$out.='
+		$out.='		
 		<table border="0" cellspacing="0" cellpadding="3">		
 		';
 		if($rowFile['IsDirectory']==1){
@@ -161,8 +163,10 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 				</td>
 			</tr>			
 			<tr bgcolor="#EBEFF9">
-				<td valign="top"><B>'.$TEXT_ATTRIBUTES_CONST.':</B></td>
-				<td><table width="100%">';
+				<td valign="top"><B>'.$TEXT_ATTRIBUTES_CONST.':</B>
+				</td>
+				<td>				
+				<table width="100%">';
 			$queryAttributes='
 				SELECT Attribute.*, AttributeType.Description 
 				FROM Attribute
@@ -175,6 +179,7 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 			while($rowAttributes=$resAttributes->FetchRow()){
 				$pos++;
 				$out.='
+				
 						<tr bgcolor="'.(($pos%2==0)?'#EEEEEE':'#FFFFFF').'">
 							<td width="20"><input type="checkbox" value="1" name="attribute_'.$rowAttributes['PK_Attribute'].'"></td>
 							<td width="100"><b>'.$rowAttributes['Description'].'</b></td>
