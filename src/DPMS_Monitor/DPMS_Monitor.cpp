@@ -26,6 +26,8 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
+#include <sstream>
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 DPMS_Monitor::DPMS_Monitor(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
@@ -48,6 +50,44 @@ DPMS_Monitor::~DPMS_Monitor()
 //<-dceag-dest-e->
 {
 	
+}
+
+bool DPMS_Monitor::getOffTimeFromOrbiter(int& iOff)
+{
+	DeviceData_Base *pOrbiter = m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_Standard_Orbiter_CONST);
+	if (!pOrbiter)
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Unable to find Orbiter device to grab timeout values.");
+		return false;
+	}
+	else
+	{
+		string sTimeout = m_pData->m_pEvent_Impl->GetDeviceDataFromDatabase(pOrbiter->m_dwPK_Device,DEVICEDATA_Timeout_CONST);
+		string sToken;
+		unsigned int iTokenPos = 0;
+		int iTimeScreensaver = 0;
+		int iTimeOff = 0;
+
+		if ((sToken = StringUtils::Tokenize(sTimeout,",",iTokenPos)) != "")
+		{
+			istringstream tmpStream;
+			tmpStream.str(sToken);
+			tmpStream >> iTimeScreensaver;
+		}
+
+		if ((sToken = StringUtils::Tokenize(sTimeout,",",iTokenPos)) != "")
+		{
+			istringstream tmpStream;
+			tmpStream.str(sToken);
+			tmpStream >> iTimeOff;
+		}
+
+		iOff = iTimeScreensaver + iTimeOff;
+
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"DPMS Timeout calculated to be %d seconds.",iOff);
+	}
+
+	return true;
 }
 
 //<-dceag-getconfig-b->
@@ -73,6 +113,21 @@ bool DPMS_Monitor::GetConfig()
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"X Server is not DPMS Capable");
 		return false;
 	}
+
+	// Explicitly set timeouts. These are gathered from the Orbiter's Timeout device data.
+	// Note that standby and suspend are set to 0, so that the natural screensaver runs.
+	// Off is set to the second timeout value.
+	
+//	if (!getOffTimeFromOrbiter(m_iOff))
+//	{
+//		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Unable to get Screen Off time from nearby Orbiter.");
+//		return false;
+//	}
+
+	// Finally, enable DPMS, and set timeouts.
+	DPMSEnable(m_pDisplay);
+	DPMSSetTimeouts(m_pDisplay, 0, 0, 0); // yeah yeah, wound up not using it. 
+	XFlush(m_pDisplay);
 
 	return true;
 }
@@ -228,6 +283,7 @@ void DPMS_Monitor::CMD_On(int iPK_Pipe,string sPK_Device_Pipes,string &sCMD_Resu
 	cout << "Parm #98 - PK_Device_Pipes=" << sPK_Device_Pipes << endl;
 
 	DPMSForceLevel(m_pDisplay,DPMSModeOn);
+	XFlush(m_pDisplay);
 }
 
 //<-dceag-c193-b->
@@ -244,6 +300,7 @@ void DPMS_Monitor::CMD_Off(int iPK_Pipe,string &sCMD_Result,Message *pMessage)
 	cout << "Parm #97 - PK_Pipe=" << iPK_Pipe << endl;
 
 	DPMSForceLevel(m_pDisplay,DPMSModeOff);
+	XFlush(m_pDisplay);
 }
 
 

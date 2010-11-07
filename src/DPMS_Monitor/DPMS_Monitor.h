@@ -39,6 +39,8 @@ namespace DCE
 public:
 		// Public member variables
 		Display *m_pDisplay;
+		int m_iOff; // Off time in seconds.
+		bool getOffTimeFromOrbiter(int& iOff);
 
 //<-dceag-const-b->
 public:
