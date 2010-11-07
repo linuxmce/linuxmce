@@ -432,6 +432,12 @@ switch ($section) {
 	    deleteRoomFromEntertainArea($output,$dbADO);	    
 	break;	 
 	//users_settings
+        case 'emailSetup':
+                $output = new Template($dbADO);
+                $output->setTemplateFileType('large');
+            include_once('operations/users_settings/emailSetup.php');
+            emailSetup($output,$dbADO);
+        break;
 	case 'installationSettings':
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('large');
@@ -486,7 +492,14 @@ switch ($section) {
 	    include_once('operations/myDevices/orbiters/wizardOrbiters.php');
 	    wizardOrbiters($output,$dbADO);	    
 	break;
-	
+        case 'setupWebOrbiter';
+                $output = new Template($dbADO);
+                $output->setTemplateFileType('large');
+            include_once('operations/myDevices/orbiters/setupWebOrbiter.php');
+            $output->setHelpSrc('/wiki/index.php/Orbiters');
+            setupWebOrbiter($output,$dbADO);
+        break;
+
 	//categories
 	case 'manageCategories':
 		$output = new Template($dbADO);
@@ -1013,6 +1026,13 @@ switch ($section) {
             $output->setHelpSrc('/wiki/index.php/DataLogger');
             viewDatalog($output,$dbADO);
         break;
+        case 'energyMonitor';
+                $output = new Template($dbADO);
+                $output->setTemplateFileType('large');
+            include_once('operations/datalog/energyMonitor.php');
+            $output->setHelpSrc('/wiki/index.php/energyMonitor');
+            energyMonitor($output,$dbADO);
+        break;
 	case 'pickScenario';
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('small');
@@ -1236,7 +1256,7 @@ switch ($section) {
 	case 'wapSettings';
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('large');
-		$output->setHelpSrc('http://plutohome.com/support/phpbb2/viewtopic.php?t=212');
+		$output->setHelpSrc('http://wiki.linuxmce.org/index.php/WAP/GPRS_Settings');
 	    include_once('operations/network/wapSettings.php');
 	    wapSettings($output,$dbADO);
 	break;	
