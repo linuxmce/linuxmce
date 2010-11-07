@@ -37,7 +37,7 @@ $Graph->add(
         Image_Graph::vertical(
             $Plotarea = Image_Graph::factory('plotarea'),
             $Legend = Image_Graph::factory('legend'),
-            90
+            80
         ),
         5
     )
@@ -120,13 +120,20 @@ $Plot =& $Plotarea->addNew('bar', array($Dataset,'stacked' ));
 $Plot->setLineColor('gray');
     
 $Fill =& Image_Graph::factory('Image_Graph_Fill_Array');
-$Fill->addColor('blue@0.2');
-$Fill->addColor('orange@0.2');
-$Fill->addColor('pink@0.2');
-$Fill->addColor('green@0.2');
-$Fill->addColor('red@0.2');
-$Fill->addColor('yellow@0.2');
-$Fill->addColor('purple@0.2');
+$Fill->addColor('blue@0.3');
+$Fill->addColor('orange@0.3');
+$Fill->addColor('pink@0.3');
+$Fill->addColor('green@0.3');
+$Fill->addColor('red@0.3');
+$Fill->addColor('yellow@0.3');
+$Fill->addColor('darkmagenta@0.3');
+$Fill->addColor('blue@0.7');
+$Fill->addColor('orange@0.7');
+$Fill->addColor('pink@0.7');
+$Fill->addColor('green@0.7');
+$Fill->addColor('red@0.7');
+$Fill->addColor('yellow@0.7');
+$Fill->addColor('brown@0.7');
 $Plot->setFillStyle($Fill);
 
 // output the Graph
