@@ -2194,17 +2194,36 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"It's a valid command");
 			else
 			{
 				LoggerWrapper::GetInstance()->Write(LV_STATUS,"Just send it to the media device");
+				// Just send it to the media device.  We don't know what it is
+				pMessage->m_dwPK_Device_To = pEntertainArea->m_pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device;
+
 				// Look for special cases
-				if( pMessage->m_dwMessage_Type == MESSAGETYPE_COMMAND && pEntertainArea->m_pMediaStream->m_pMediaHandlerInfo==m_pGenericMediaHandlerInfo &&
-					pEntertainArea->m_pMediaStream->m_pDevice_CaptureCard && pMessage->m_dwID==COMMAND_Set_Zoom_CONST )
+				if( pMessage->m_dwMessage_Type == MESSAGETYPE_COMMAND && pEntertainArea->m_pMediaStream->m_pMediaHandlerInfo==m_pGenericMediaHandlerInfo )
 				{
+					Command *pCommand = m_pRouter->m_mapCommand_Find(pMessage->m_dwID);
+					if( !pCommand )
+						LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Got a command in media plugin that we can't identify");
+					else if( pEntertainArea->m_pMediaStream->m_pDevice_CaptureCard && pCommand->m_dwPK_Command==COMMAND_Set_Zoom_CONST )
+					{
 						DeviceData_Router *pDevice_MediaPlayer = (DeviceData_Router *) ((DeviceData_Router *) pEntertainArea->m_pMediaStream->m_pMediaDevice_Source->m_pDevice_CaptureCard)->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_Xine_Player_CONST);
 						if( pDevice_MediaPlayer )
 							pMessage->m_dwPK_Device_To = pDevice_MediaPlayer->m_dwPK_Device;
+					}
+					else if( ( pCommand->m_dwPK_Command==COMMAND_Vol_Up_CONST ||
+						   pCommand->m_dwPK_Command==COMMAND_Vol_Down_CONST ||
+						   pCommand->m_dwPK_Command==COMMAND_Set_Volume_CONST ||
+						   pCommand->m_dwPK_Command==COMMAND_Mute_CONST 
+						 ) && !pEntertainArea->m_bViewingLiveAVPath
+                                               ) // It's a volume command and we're not on the LiveAV path
+					{
+						// See if we can send the volume request to a MD
+						if( pEntertainArea->m_pMediaDevice_MD && pEntertainArea->m_pMediaDevice_MD->m_pDevice_Audio )
+                                                        pMessage->m_dwPK_Device_To = pEntertainArea->m_pMediaDevice_MD->m_pDevice_Audio->m_dwPK_Device;
+						else
+							LoggerWrapper::GetInstance()->Write(LV_WARNING, "Cannot find media director or audio device missing for volume commands %p", pEntertainArea->m_pMediaDevice_MD);
+
+					}
 				}
-				else
-					// Just send it to the media device.  We don't know what it is
-		            pMessage->m_dwPK_Device_To = pEntertainArea->m_pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device;
 
 	            Message *pNewMessage = new Message( pMessage );
 				QueueMessageToRouter( pNewMessage );
@@ -3632,7 +3651,10 @@ void Media_Plugin::HandleOnOffs(int PK_MediaType_Prior,int PK_MediaType_Current,
 		}
 
 		// See if it's a generic media stream, and it's using it's own pipes
-		if( pMediaStream->m_pMediaHandlerInfo==m_pGenericMediaHandlerInfo && pMediaDevice->m_pDeviceData_Router->m_mapPipe_Available.size() )
+		if( pMediaStream->m_pMediaHandlerInfo==m_pGenericMediaHandlerInfo && 
+		    pMediaDevice->m_pDeviceData_Router->m_mapPipe_Available.size() &&
+		    pEntertainArea->m_pMediaDevice_MD->m_pDeviceData_Router->m_dwPK_Device != pMediaDevice->m_pDeviceData_Router->m_dwPK_Device // It isn't LiveAV if the MediaDevice is the MD
+		  )
 			pEntertainArea->m_bViewingLiveAVPath=true;
 		
 		DCE::CMD_On CMD_On(m_dwPK_Device,pMediaDevice->m_pDeviceData_Router->m_dwPK_Device,PK_Pipe_Current,"");
