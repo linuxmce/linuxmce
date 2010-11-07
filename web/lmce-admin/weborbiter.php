@@ -135,7 +135,8 @@ function ShowOrbiterSelectionPage()
 			{
 				$IT->setCurrentBlock("DeviceOption");
 				$IT->setVariable("DeviceNumber", $devID);
-				$IT->setVariable("DeviceDescription", $Description);
+				$ProxyOrbiterInfo = get_web_orbiter_info($devID, $dbADO);
+				$IT->setVariable("DeviceDescription", $ProxyOrbiterInfo['PK_Device'][0] . " " . $ProxyOrbiterInfo['Description'][0]);
 				$IT->parseCurrentBlock();
 			}
 		}

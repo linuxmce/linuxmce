@@ -50,7 +50,7 @@ function get_device_data($deviceID,$dbADO){
 
 function get_web_orbiter_info($deviceID, $dbADO)
 {
-	$ProxyOrbiterInfo=getFieldsAsArray('Device','Device.FK_Device_ControlledVia,DD.IK_DeviceData AS Port,Parent.IPAddress',$dbADO,'INNER JOIN Device_DeviceData DD ON DD.FK_Device=Device.PK_Device AND DD.FK_DeviceData='.$GLOBALS['ListenPort'].' LEFT JOIN Device Parent ON Device.FK_Device_ControlledVia=Parent.PK_Device WHERE Device.FK_DeviceTemplate='.$GLOBALS['ProxyOrbiter'].' AND Parent.PK_Device IS NOT NULL AND Device.FK_Device_ControlledVia='.$deviceID);
+	$ProxyOrbiterInfo=getFieldsAsArray('Device','Device.PK_Device,Device.FK_Device_ControlledVia,DD.IK_DeviceData AS Port,Parent.IPAddress,Device.Description',$dbADO,'INNER JOIN Device_DeviceData DD ON DD.FK_Device=Device.PK_Device AND DD.FK_DeviceData='.$GLOBALS['ListenPort'].' LEFT JOIN Device Parent ON Device.FK_Device_ControlledVia=Parent.PK_Device WHERE Device.FK_DeviceTemplate='.$GLOBALS['ProxyOrbiter'].' AND Parent.PK_Device IS NOT NULL AND Device.FK_Device_ControlledVia='.$deviceID);
 	return $ProxyOrbiterInfo;
 }
 
