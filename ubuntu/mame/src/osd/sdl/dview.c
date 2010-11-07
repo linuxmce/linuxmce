@@ -228,7 +228,7 @@ static void dview_size_allocate(GtkWidget *wdv, GtkAllocation *allocation)
 	dv->view->set_visible_size(vsize);
 
 #ifdef GTK_WIDGET_REALIZED
-	if(GTK_WIDGET_REALIZED(wdv))
+	if(gtk_widget_get_realized(wdv))
 #else
 	if(gtk_widget_get_realized(wdv))
 #endif

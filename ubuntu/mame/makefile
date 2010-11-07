@@ -197,7 +197,7 @@ endif
 #-------------------------------------------------
 
 # uncomment next line if you are building for a 64-bit target
-# PTR64 = 1
+PTR64 = 0
 
 # uncomment next line if you are building for a big-endian target
 # BIGENDIAN = 1
