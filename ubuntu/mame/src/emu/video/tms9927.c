@@ -129,6 +129,8 @@ WRITE8_DEVICE_HANDLER( tms9927_w )
 {
 	tms9927_state *tms = get_safe_token(device);
 
+	offset &= 0x0f;
+
 	switch (offset)
 	{
 		case 0x00:	/* HORIZONTAL CHARACTER COUNT */
