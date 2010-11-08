@@ -48,4 +48,5 @@ $TEXT_REPLACE_ATTRIBUTES_CONST='Replace existing attributes of this type?';
 $BUTTON_GET_METADATA='Get Metadata';
 $OPTION_CHECK_AMAZON='Check Amazon';
 $OPTION_CHECK_IMDB='Check IMDB';
+$OPTION_CHECK_TVDB='Check TVDB';
 ?>
