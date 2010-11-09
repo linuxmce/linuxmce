@@ -43,8 +43,8 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 	
 	function syncPath(path)
 	{
-		top.treeframe.location=\'index.php?section=leftMediaFilesSync&startPath=\'+escape(path);
-		self.location=\'index.php?section=mainMediaFilesSync&path=\'+escape(path);
+		top.treeframe.location=\'index.php?section=leftMediaFilesSync&startPath=\'+encodeURIComponent(path);
+		self.location=\'index.php?section=mainMediaFilesSync&path=\'+encodeURIComponent(path);
 	}
 
 	function setAll(bylink){
