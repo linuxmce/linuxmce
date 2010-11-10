@@ -9,40 +9,62 @@
  # under the terms of the GNU General Public License (see doc/LICENSE)       #
  #############################################################################
 
- /* $Id: imdb_request.class.php 150 2008-06-08 18:15:43Z izzy $ */
+ /* $Id: mdb_request.class.php 422 2010-10-16 23:56:12Z izzy $ */
 
-if ( $PEAR ) { // Use the HTTP_Request class from the PEAR project.
+if ( isset($PEAR) && $PEAR ) { // Use the HTTP_Request class from the PEAR project.
   require_once("HTTP/Request.php");
-  class IMDB_Request extends HTTP_Request{
-    function IMDB_Request($url){
+  class MDB_Request extends HTTP_Request{
+    function __construct($url){
       $this->HTTP_Request($url);
       if ( PROXY != ""){
         $this->setProxy(PROXY, PROXY_PORT);
       }
       $this->_allowRedirects = false;
-      $this->addHeader("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)");
-    }	
+      if ( in_array('HTTP_USER_AGENT',array_keys($_SERVER)) ) $user_agent = $_SERVER['HTTP_USER_AGENT'];
+      else $user_agent = 'Mozilla/5.0 (X11; U; Linux i686; de; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3';
+      $this->addHeader("User-Agent", $user_agent);
+    }
+    function getLastResponseHeaders($url) {
+      $head = $this->head($url);
+      return array($head["response"],$head["Date"],$head["Server"],"",$head["Connection"],$head["Content-Type"]);
+    }
   }
 } else { // Use the browseremu class
   require_once (dirname(__FILE__)."/browseremulator.class.php");
+  require_once (dirname(__FILE__)."/mdb_config.class.php");
 
   /** The request class
    *  Here we emulate a browser accessing the IMDB site. You don't need to
    *  call any of its method directly - they are rather used by the IMDB classes.
-   * @package Api
-   * @class IMDB_Request
+   * @package MDBApi
+   * @class MDB_Request
    */
-  class IMDB_Request extends BrowserEmulator{
+  class MDB_Request extends BrowserEmulator{
     var $maxsize = 100000;
     /** Constructor: Initialize the BrowserEmulator
      *  No need to call this.
-     * @constructor IMDB_Request
+     * @constructor MDB_Request
+     * @param string url URL to open
+     * @param optional string force_agent user agent string to use. Defaults to the one set in mdb_config.
+     * @param optional string trigger_referer whether to trigger the referer. 'TRUE' = yes, 'FALSE' = no, '' = take value from mdb_config (default)
      */
-    function IMDB_Request($url){
-      $this->BrowserEmulator();
+    function __construct($url,$force_agent='',$trigger_referer=''){
+      if (isset($GLOBALS['PEAR']) && $GLOBALS['PEAR']) parent::__construct();
+      else $this->BrowserEmulator();
       $this->urltoopen = $url;
+      $iconf = new mdb_config;
+      if (!empty($force_agent)) $iconf->force_agent = $force_agent;
+      switch (strtolower($trigger_referer)) {
+        case 'true' : $iconf->trigger_referer = TRUE; break;
+        case 'false': $iconf->trigger_referer = FALSE; break;
+      }
+      if ($iconf->trigger_referer) {
+        if ( substr(get_class($this),0,4)=="imdb" ) $this->addHeaderLine('Referer','http://' . $this->imdbsite . '/');
+        elseif ( in_array('HTTP_REFERER',array_keys($_SERVER)) ) $this->addHeaderLine('Referer',$_SERVER['HTTP_REFERER']);
+      }
+      if ($iconf->force_agent) $this->addHeaderLine('User-Agent', $iconf->force_agent);
     }
-    /** Send a request to the IMDB site
+    /** Send a request to the movie site
      * @method sendRequest
      * @return boolean success
      */
@@ -57,6 +79,7 @@ if ( $PEAR ) { // Use the HTTP_Request class from the PEAR project.
      */
     function getResponseBody(){
       $page = "";
+      if ($this->fpopened===FALSE) return $page;
       while (!feof ($this->fpopened)) {
         $page .= fread ($this->fpopened, 1024);
       }
@@ -84,6 +107,6 @@ if ( $PEAR ) { // Use the HTTP_Request class from the PEAR project.
       }
     }
   }
-}		
+}
 
 ?>

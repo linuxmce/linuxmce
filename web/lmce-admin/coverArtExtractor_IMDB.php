@@ -2,6 +2,7 @@
 require('include/config/config.inc.php');
 require('include/utils.inc.php');
 require_once("include/imdb/imdb.class.php");
+require_once("include/imdb/imdbsearch.class.php");
 
 /* @var $mediadbADO ADOConnection */
 /* @var $rs ADORecordSet */
