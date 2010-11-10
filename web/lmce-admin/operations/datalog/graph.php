@@ -10,7 +10,8 @@ $device = mysql_real_escape_string($_GET['device']);
 $days = mysql_real_escape_string($_GET['days']);
 $color = mysql_real_escape_string($_GET['color']);
 $name = mysql_real_escape_string($_GET['name']);
-$unit = mysql_real_escape_string($_GET['unit']);
+$unit = mysql_real_escape_string($_GET['unit']); 
+$keepValue = array(5,9); // Units that have the same value until new value i reported
 
 if (empty($days)) {
      $days=1;
@@ -83,12 +84,11 @@ while ($datapoint = mysql_fetch_array($query)){
 	       //$out.='$datapointLast = '.$datapointLast[1].' - '.$prevDatapoint.'<br>';
 	  }
           $Dataset->addPoint(strtotime('-'.$days.'days'), $datapointLast[1]);
-//          $prevDatapoint=$datapoint['Datapoint'];
      }
      // If the device is reporting "state change" asume the device will have the same state until new state is reported
-     if ($unit==5){
-     $Dataset->addPoint((strtotime($datapoint[1])-1), $prevDatapoint);
-     $prevDatapoint=$datapoint['Datapoint'];
+     if (in_array($unit, $keepValue)){
+      $Dataset->addPoint((strtotime($datapoint[1])-1), $prevDatapoint);
+      $prevDatapoint=$datapoint['Datapoint'];
      }
      $Dataset->addPoint(strtotime($datapoint[1]), $datapoint[2]);
      ++$t;
