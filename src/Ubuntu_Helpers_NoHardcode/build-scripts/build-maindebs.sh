@@ -90,6 +90,7 @@ function build_main_debs() {
 		"lucid")
 			Distro_ID="18"
 			exclude_list=$exclude_list,$mkr_tira
+			exclude_list=$exclude_list,$mkr_simplephone
 			;;
 	esac
 
