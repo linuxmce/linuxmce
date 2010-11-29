@@ -68,7 +68,8 @@ function Build_Replacements_Common
 	Build_Replacement_Package freepbx ubuntu/asterisk/freepbx
 
         #Package: chan-sccp
-	Build_Replacement_Package chan-sccp ubuntu/asterisk/chan_sccp
+	DisplayMessage "NOT building chan-sccp atm"
+#	Build_Replacement_Package chan-sccp ubuntu/asterisk/chan_sccp
 
 	#Package: pluto-asterisk
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu/asterisk"
@@ -97,8 +98,8 @@ function Build_Replacements_Common
 	Build_Replacement_Package mtx-pluto ubuntu/mtx-1.3.11
 
 	#Package: parted
-	Build_Replacement_Package parted ubuntu/parted-1.8.8
-	cp ${svn_dir}/${svn_branch_name}/ubuntu/libparted*.deb ${replacements_dir}
+#	Build_Replacement_Package parted ubuntu/parted-1.8.8
+#	cp ${svn_dir}/${svn_branch_name}/ubuntu/libparted*.deb ${replacements_dir}
 
 	# TODO Fix this package so it builds against target kernel not running kernel
 	#Package: linux-image-diskless
@@ -133,6 +134,139 @@ function Build_Replacements_Common
 	#Package: vdr-plugin-control
 #	Build_Replacement_Package vdr-plugin-control ubuntu/vdr-plugin-control-0.0.2a+lmce
 
+}
+
+function Build_Replacements_Lucid
+{
+	mkdir -pv "$replacements_dir"
+
+#	#Package: lirc
+#	Build_Replacement_Package lirc ubuntu/lirc-0.8.3+lmce
+#	cp ${svn_dir}/${svn_branch_name}/ubuntu/lirc-x*.deb ${replacements_dir}
+#	cp ${svn_dir}/${svn_branch_name}/ubuntu/liblircclient{0,-dev}_*.deb ${replacements_dir}
+
+	#Package: lirc
+# NOTE: using "dpkg-buildpackage ... -tc" makes building lirc fail randomly
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu/lirc-0.8.3+lmce"
+	DisplayMessage "Not Building LIRC atm"
+#	if Changed_Since_Last_Build "$dir_" ;then
+#		DisplayMessage "Building lirc"
+#		pushd "$dir_"
+#		echo "dpkg-buildpackage -rfakeroot -us -uc -b"
+#		dpkg-buildpackage -rfakeroot -us -uc -b
+#		cp -r ../*lirc*.deb "${replacements_dir}"
+#		popd
+#	fi
+
+        #Package: libxine 	
+	# Latest xine version
+#	Build_Replacement_Package libxine ubuntu/xine-lib-1.1.17
+	# niz version
+#	Build_Replacement_Package libxine ubuntu/xine-lib-1.1.16.3-0ubuntu2~xine 
+#	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/libxine1_*.deb \
+#			    ${svn_dir}/${svn_branch_name}/ubuntu/libxine1-plugins_*.deb \
+#			    ${svn_dir}/${svn_branch_name}/ubuntu/libxine1-x_*.deb \
+#			    ${svn_dir}/${svn_branch_name}/ubuntu/libxine1-console_*.deb \
+#			    ${svn_dir}/${svn_branch_name}/ubuntu/libxine1-bin_*.deb \
+#			    ${svn_dir}/${svn_branch_name}/ubuntu/libxine1-misc-plugins_*.deb \
+#			    ${svn_dir}/${svn_branch_name}/ubuntu/libxine1-ffmpeg_*.deb \
+#			    ${svn_dir}/${svn_branch_name}/ubuntu/libxine-dev_*.deb \
+#			    ${svn_dir}/${svn_branch_name}/ubuntu/libxine1-plugins_*.deb
+#
+
+	# Original version
+#	Build_Replacement_Package libxine1 ubuntu/xine-lib-1.1.16.4
+#	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/libxine1_*.deb ${svn_dir}/${svn_branch_name}/ubuntu/libxine-dev_*.deb 
+#	# alsa lib needs older libtool package
+#        if [ "$MACHTYPE" = "x86_64-pc-linux-gnu" ]; then
+#        	wget http://ftp.sjtu.edu.cn/ubuntu/pool/main/libt/libtool/libtool_1.5.26-1ubuntu1_amd64.deb -O libtool_1.5.26-1ubuntu1_amd64.deb
+#                dpkg -i libtool_1.5.26-1ubuntu1_amd64.deb
+#        else
+#        	wget http://ftp.sjtu.edu.cn/ubuntu/pool/main/libt/libtool/libtool_1.5.26-1ubuntu1_i386.deb -O libtool_1.5.26-1ubuntu1_i386.deb
+#                dpkg -i libtool_1.5.26-1ubuntu1_i386.deb
+#        fi
+#	                                                                                        
+#        Build_Replacement_Package libasound2 ubuntu/alsa-lib-1.0.18
+        # and now we go back to the latest libtool
+#        apt-get install libtool
+#	dpkg --force-all -i ${svn_dir}/${svn_branch_name}/ubuntu/libasound2_*deb ${svn_dir}/${svn_branch_name}/ubuntu/lib64asound2_*deb ${svn_dir}/${svn_branch_name}/ubuntu/libasound2-dev_*deb ${svn_dir}/${svn_branch_name}/ubuntu/lib64asound2-dev_*deb
+#	Build_Replacement_Package libasound2-plugins ubuntu/alsa-plugins-1.0.18
+#	Build_Replacement_Package alsa-utils ubuntu/alsa-utils-1.0.18
+#	cp ${svn_dir}/${svn_branch_name}/ubuntu/*asound*deb ${replacements_dir}
+#	cp ${svn_dir}/${svn_branch_name}/ubuntu/alsa*deb ${replacements_dir}
+
+	#v4l-modules-source
+#	Build_Replacement_Package v4l2 ubuntu/v4l-modules-source
+
+	#Package: mythtv
+	# Remove packages that conflict with mythtv .23 build
+ #       apt-get remove -y libmyth-dev qt3-dev-tools libqt3-mt-dev libartsc0-dev 
+ #       Build_Replacement_Package mythtv ubuntu/mythtv-0.23
+	# The dev package needs to be installed to build mythtv plugins.
+#	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/libmyth-0.23-0*.deb
+#	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/libmyth-dev_0.23-0*.deb
+#	Build_Replacement_Package mythplugins ubuntu/mythplugins-0.23
+#	Build_Replacement_Package mythtv-themes ubuntu/myththemes-0.23
+        # Reinstall package needed for SimplePhone (package 498,499)
+        apt-get install -y liblinphone2-dev 
+#	cp ${svn_dir}/${svn_branch_name}/ubuntu/{libmyth,myth,python}*.deb ${replacements_dir}
+
+	# VDR Packages
+	# When adding new VDR versions, and there is a need to modify the patches,
+	# these are the steps to be taken:
+	# 1) copy debian/patches/00list (or 00list.extensions) to debian/patches.00list.mypatchvariant
+	# 2) enable the patches you would like to use in debian/patches.00list.mypatchvariant by uncommenting/commenting them (keep in mind, that some patches depend on each other and therefore some combination might lead to rejects, that you have to resolve yourself)
+	# 3) PATCHVARIANT=mypatchvariant debian/rules accept-patches
+	# 4) PATCHVARIANT=mypatchvariant dpkg-buildpackage -tc -uc -us -rfakeroot
+	#   or
+	# 4) export PATCHVARIANT=mypatchvariant and dpkg-buildpackge
+	# 5) install vdr-dev (this is done in this script)
+	# 6) build ALL the plug-ins you would like to use (this is done in this script)
+	
+	DisplayMessage "Building VDR packages and plugins"
+	export PATCHVARIANT=multipatch
+	Build_Replacement_Package vdr ubuntu/vdr-1.7.15
+	# To build the plugins, we need to have the current -dev package installed
+	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/vdr-dev_*.deb
+	
+	Build_Replacement_Package vdr-plugin-control ubuntu/vdr-plugin-control-0.0.2a
+	Build_Replacement_Package vdr-plugin-svdrpservice ubuntu/vdr-plugin-svdrpservice-0.0.4
+	# Before installing svdrservce-dev vdr needs to be installed
+	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/vdr_*.deb
+	/etc/init.d/vdr stop
+	# The dev package needs to be installed to build the remote timers plugin.
+	
+        dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/svdrpservice-dev_*.deb
+	Build_Replacement_Package vdr-plugin-remotetimers ubuntu/vdr-plugin-remotetimers-0.1.3
+	Build_Replacement_Package vdr-plugin-streamdev ubuntu/vdr-plugin-streamdev-0.5.0~pre20090706+cvs20091108.2341
+#	Build_Replacement_Package vdr-plugin-streamdev ubuntu/vdr-plugin-streamdev-0.5.0~pre20090706+cvs20100307.2102
+	Build_Replacement_Package vdr-plugin-vompserver ubuntu/vdr-plugin-vompserver-0.3.1
+	Build_Replacement_Package vdr-addon-noad ubuntu/vdr-addon-noad-0.7.2
+#	Build_Replacement_Package vdr-plugin-xineliboutput ubuntu/vdr-plugin-xineliboutput-1.0.4+cvs20091215.2049
+	Build_Replacement_Package vdr-plugin-xineliboutput ubuntu/vdr-plugin-xineliboutput-1.0.6+cvs20100608.2009
+	Build_Replacement_Package vdr-plugin-wirbelscan ubuntu/vdr-plugin-wirbelscan-0.0.5~pre12a
+	Build_Replacement_Package vdr-plugin-iptv ubuntu/vdr-plugin-iptv-0.4.2
+
+	cp ${svn_dir}/${svn_branch_name}/ubuntu/libxine*.deb ${replacements_dir}
+	cp ${svn_dir}/${svn_branch_name}/ubuntu/xineliboutput-*.deb ${replacements_dir}
+
+	# SqueezeSlave
+	Build_Replacement_Package squeezeslave ubuntu/squeezeslave
+
+
+	#Package: zaptel-modules
+	DisplayMessage "NOT Building zaptel-modules"
+#	m-a --non-inter -ft -l $KVER a-b zaptel
+#	cp /usr/src/zaptel-modules*.deb "${replacements_dir}"
+
+	#Package: alsa-modules
+	if [[ -f alsa-driver.tar.bz2 ]]; then
+		DisplayMessage "Building alsa-modules from existing drivers archive"
+		m-a --non-inter -t -l $KVER a-b alsa
+		cp /usr/src/alsa-modules*.deb "${replacements_dir}"
+	else
+		DisplayMessage "Not building alsa-modules, as the drivers archive does not exist"
+	fi
 }
 
 function Build_Replacements_Intrepid
@@ -421,6 +555,9 @@ case "${build_name}" in
 		;;
 	"intrepid")
 		Build_Replacements_Intrepid
+		;;
+	"lucid")
+		Build_Replacements_Lucid
 		;;
 esac
 Build_Replacements_Common

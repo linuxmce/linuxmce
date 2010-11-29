@@ -87,7 +87,12 @@ function build_main_debs() {
 #			exclude_list=$exclude_list,$mkr_launch_manager_package
 #			exclude_list=$exclude_list,$mkr_irtrans_package
 			;;
+		"lucid")
+			Distro_ID="18"
+			exclude_list=$exclude_list,$mkr_tira
+			;;
 	esac
+
 
 	# Set version of packages to todays date, plus 00:19 as time
 	Q="Update Version Set VersionName= concat('2.0.0.44.',substr(now()+0,3,6),'$SVNrevision') Where PK_Version = 1;"

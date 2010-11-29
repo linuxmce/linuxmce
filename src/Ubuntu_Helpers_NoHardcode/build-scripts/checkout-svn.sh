@@ -4,6 +4,8 @@
 
 #set -x
 
+#svn_branch_name=LinuxMCE-0810
+
 function Checkout_Svn {
 	DisplayMessage "**** STEP : SVN CHECKOUT"
 
