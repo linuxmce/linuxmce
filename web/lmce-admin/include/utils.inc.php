@@ -1082,7 +1082,7 @@ function deleteDevice($PK_Device,$dbADO)
 		$queryDelFromTable='DELETE FROM '.$tablename.' WHERE FK_Orbiter='.$PK_Device;
 		$dbADO->Execute($queryDelFromTable);
 	}
-	$queryDelDevice = 'DELETE FROM Orbiter WHERE PK_Device = '.$PK_Device;
+	$queryDelDevice = 'DELETE FROM Orbiter WHERE PK_Orbiter = '.$PK_Device;
 	$dbADO->Execute($queryDelDevice);
 
 	writeFile($GLOBALS['WebExecLogFile'],date('d-m-Y H:i:s')."\tDevice deleted: $PK_Device\n",'a+');
