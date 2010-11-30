@@ -1076,6 +1076,15 @@ function deleteDevice($PK_Device,$dbADO)
 		$queryDelDevice = 'DELETE FROM Device WHERE PK_Device = ?';
 		$dbADO->Execute($queryDelDevice, array($elem));
 	}
+	//Delete extra Orbiter-related data
+	$arrayFKDeviceTables=array('Device_Orbiter','Orbiter_Users_PasswordReq','Orbiter_Variable');
+	foreach($arrayFKDeviceTables AS $tablename){
+		$queryDelFromTable='DELETE FROM '.$tablename.' WHERE FK_Orbiter='.$PK_Device;
+		$dbADO->Execute($queryDelFromTable);
+	}
+	$queryDelDevice = 'DELETE FROM Orbiter WHERE PK_Device = '.$PK_Device;
+	$dbADO->Execute($queryDelDevice);
+
 	writeFile($GLOBALS['WebExecLogFile'],date('d-m-Y H:i:s')."\tDevice deleted: $PK_Device\n",'a+');
 	$dbADO->Execute('COMMIT');
 }
