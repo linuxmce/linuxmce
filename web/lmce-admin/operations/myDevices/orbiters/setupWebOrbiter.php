@@ -47,12 +47,16 @@ function setupWebOrbiter($output,$dbADO) {
 		lookup($query,$dbADO,$json);
 	break;
 	case "GetDeviceData": // Get all device data for a given device
-		$query = "SELECT dd.FK_DeviceData as DeviceData,dd.IK_DeviceData as Value FROM Device d INNER JOIN Device_DeviceData dd ON dd.FK_Device=d.PK_Device WHERE PK_Device=" . escapeshellcmd($_REQUEST['orbiter']);
-		if ($recordset = $dbADO->Execute($query)) {
+		$query = "SELECT dd.FK_DeviceData as DeviceData,dd.IK_DeviceData as Value FROM Device d INNER JOIN Device_DeviceData dd ON dd.FK_Device=d.PK_Device WHERE PK_Device=?";
+		if ($recordset = $dbADO->Execute($query,array($_REQUEST['orbiter']))) {
 			$json->success = true;
 			$json->count = $recordset->RecordCount();;
 			while ($row=$recordset->FetchRow()) {
 				$json->data[$row['DeviceData']] = $row['Value'];
+			}
+			$query = "SELECT FK_Room from Device where PK_Device=?";
+			if ($room = $dbADO->GetRow($query,array($_REQUEST['orbiter']))){
+				$json->data['Room'] = $room['FK_Room'];
 			}
 		} else {
 			$json->error = mysql_error();
