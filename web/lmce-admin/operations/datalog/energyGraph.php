@@ -58,7 +58,7 @@ $i=0;
 while ($device=mysql_fetch_array($deviceQuery)){
 	
 	$query = mysql_query('SELECT Datapoint, timestamp FROM Datapoints 
-	WHERE EK_Device = '.$device['EK_Device'].' AND timestamp > DATE_SUB(NOW(), INTERVAL '.$days.' DAY)');
+	WHERE EK_Device = '.$device['EK_Device'].' AND timestamp > DATE_SUB(NOW(), INTERVAL '.$days.' DAY) ORDER BY timestamp' );
 	$num=mysql_numrows($query);
 	// create the dataset
 	$Dataset[$i]=& Image_Graph::factory('dataset'); 
