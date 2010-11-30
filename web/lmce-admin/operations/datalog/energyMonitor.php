@@ -108,7 +108,7 @@ function energyMonitor($output,$dbADO){
 function getEnergyConsumption($device,$days){
 
      $query = mysql_query('SELECT PK_Datapoints, Datapoint, timestamp FROM Datapoints 
-          WHERE EK_Device = '.$device.' AND timestamp > DATE_SUB(NOW(), INTERVAL '.$days.' DAY)');
+          WHERE EK_Device = '.$device.' AND timestamp > DATE_SUB(NOW(), INTERVAL '.$days.' DAY) ORDER BY timestamp');
      $prevON = strtotime('-'.$days.' day'); //Find time x days ago
      $ONtime = 0; // Initaiate Variable
      $t = 0;
