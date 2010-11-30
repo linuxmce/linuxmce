@@ -41,12 +41,23 @@ function setupWebOrbiter($output,$dbADO) {
 		lookup($query, $dbADO, $json);
 	break;
 	case "GetOrbiters": // Get a list of orbiters
-		$query = "SELECT d.PK_Device AS device,dd.IK_DeviceData AS port FROM Device d INNER JOIN Device_DeviceData dd ON dd.FK_Device=d.PK_Device WHERE FK_Installation=$InstallationID AND FK_DeviceTemplate=1749 AND FK_DeviceData=119";
+		$query = "SELECT d.PK_Device AS device,d.Description FROM Device d INNER JOIN Device_DeviceData dd ON dd.FK_Device=d.PK_Device WHERE FK_Installation=$InstallationID AND FK_DeviceTemplate=1749 AND FK_DeviceData=119";
 		if ($_REQUEST['orbiter']) $query .= " AND PK_Device=" . escapeshellcmd($_REQUEST['orbiter']);
 		$query .= " ORDER BY IK_DeviceData ASC";
 		lookup($query,$dbADO,$json);
 	break;
-
+	case "GetDeviceData": // Get all device data for a given device
+		$query = "SELECT dd.FK_DeviceData as DeviceData,dd.IK_DeviceData as Value FROM Device d INNER JOIN Device_DeviceData dd ON dd.FK_Device=d.PK_Device WHERE PK_Device=" . escapeshellcmd($_REQUEST['orbiter']);
+		if ($recordset = $dbADO->Execute($query)) {
+			$json->success = true;
+			$json->count = $recordset->RecordCount();;
+			while ($row=$recordset->FetchRow()) {
+				$json->data[$row['DeviceData']] = $row['Value'];
+			}
+		} else {
+			$json->error = mysql_error();
+		}
+	break;
 	case "GenerateOrbiter":	// Generate the orbiter
 		// Check the existence of the current resolution in the DB and insert it if it doesn't exist
 		// Check if the resolution is already in our DB
