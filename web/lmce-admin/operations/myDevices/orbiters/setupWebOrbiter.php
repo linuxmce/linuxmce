@@ -70,36 +70,8 @@ function setupWebOrbiter($output,$dbADO) {
 		$resX = $resolution[0];
 		$resY = $resolution[1];
 		
-		$query = "SELECT PK_Size, Description, Width, Height FROM Size WHERE Width=? AND Height=?";
-		if ($size = $dbADO->GetRow($query,array($resX,$resY))){
-			//we have an existing Size row
-			$SizeRow = $size;
-		} else { 
-			//no records returned, we need to add this resolution
-			//
-			// First, determine the aspect ratio. For now, we ignore aspect ratios which can't be
-			// determined by the resolution.
-			$rest16_9 = abs($resY - ($resX / 16 * 9));
-			$rest4_3 = abs($resY - ($resX / 4 * 3));
-			if ($rest4_3 < $rest16_9) {
-				// We have a 4:3 screen
-				$scaleX = intval($resX / 2.84444444444);
-				$scaleY = intval($resY / 1.6);
-			} else {
-				// We assume a 16:9 screen
-				$scaleX = intval($resX / 2.13333333333);
-				$scaleY = intval($resY / 1.6);
-			}
-			$query = "INSERT into Size(Description,Width,Height,ScaleX,ScaleY) values(?,?,?,?,?)";
-			if ($dbADO->Execute($query,array($res,$resX,$resY,$scaleX,$scaleY))) {
-				//now grab the new row
-				$query = "SELECT PK_Size, Description, Width, Height FROM Size WHERE PK_Size=?";
-				if ($row=$dbADO->GetRow($query,array($dbADO->Insert_ID()))){
-					$SizeRow = $row;
-				}
-			}
-		}
-		
+		$sizeRow = getSize($resX,$resY,$dbADO);
+
 		// Grab the rest of the parameters to create the new orbiter
 		// DeviceTemplate - 1748 web device, 1749 proxy orbiter
 		// Description
@@ -160,6 +132,14 @@ function setupWebOrbiter($output,$dbADO) {
 	case "UpdateOrbiter": // Update the orbiter with the new settings, reload router, and start regenerating
 		$orbiterID = $_REQUEST['orbiter'];
 		$configData = json_decode($_REQUEST['config']);
+		$res = $_REQUEST['resolution'];
+		$resolution = split('x', $res);
+		$resX = $resolution[0];
+		$resY = $resolution[1];
+                $sizeRow = getSize($resX,$resY,$dbADO);
+		$configData->deviceData['25'] = $SizeRow['PK_Size'];
+		$configData->deviceData['100'] = $SizeRow['Width'];
+		$configData->deviceData['101'] = $SizeRow['Height'];
 		updateOrbiter($dbADO, $json, $orbiterID,$configData);
 	break;
 	
@@ -244,4 +224,37 @@ function dce_command($destination,$type,$command,$deviceData) {
 		return false;
 	}
 }
+
+function getSize ($resX,$resY,$dbADO) {
+	$query = "SELECT PK_Size, Description, Width, Height FROM Size WHERE Width=? AND Height=?";
+	if ($size = $dbADO->GetRow($query,array($resX,$resY))){
+		//we have an existing Size row
+		return $size;
+	} else { 
+		//no records returned, we need to add this resolution
+		//
+		// First, determine the aspect ratio. For now, we ignore aspect ratios which can't be
+		// determined by the resolution.
+		$rest16_9 = abs($resY - ($resX / 16 * 9));
+		$rest4_3 = abs($resY - ($resX / 4 * 3));
+		if ($rest4_3 < $rest16_9) {
+			// We have a 4:3 screen
+			$scaleX = intval($resX / 2.84444444444);
+			$scaleY = intval($resY / 1.6);
+		} else {
+			// We assume a 16:9 screen
+			$scaleX = intval($resX / 2.13333333333);
+			$scaleY = intval($resY / 1.6);
+		}
+		$query = "INSERT into Size(Description,Width,Height,ScaleX,ScaleY) values(?,?,?,?,?)";
+		if ($dbADO->Execute($query,array($res,$resX,$resY,$scaleX,$scaleY))) {
+			//now grab the new row
+			$query = "SELECT PK_Size, Description, Width, Height FROM Size WHERE PK_Size=?";
+			if ($row=$dbADO->GetRow($query,array($dbADO->Insert_ID()))){
+				return $row;
+			}
+		}
+	}
+}
+
 ?>
