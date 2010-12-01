@@ -120,6 +120,10 @@ function build_main_debs() {
 			exclude_list=$exclude_list,722
 			# LinuxMCE Hulu PlugIn#: 743			
 			exclude_list=$exclude_list,743
+			# LinuxMCE HAI Omni RS232 Panel Support#: 749
+			exclude_list=$exclude_list,749
+			# LinuxMCE Pandora Plugin#: 759
+			exclude_list=$exclude_list,759
 			;;
 	esac
 
