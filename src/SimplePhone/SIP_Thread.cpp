@@ -128,7 +128,7 @@ static void LS_InitProxy()
 	"LS_InitProxy -- Proxy: %s; Extension: %s; Identity: %s",
 	sProxy.c_str(), sExtension.c_str(), sIdentity.c_str());
 	
-	LS_pLinphoneProxyConfig = linphone_proxy_config_new(sProxy.c_str());
+	LS_pLinphoneProxyConfig = linphone_proxy_config_new();
 	if (! LS_pLinphoneProxyConfig)
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "LS_InitProxy: Failed to initialize proxy");
