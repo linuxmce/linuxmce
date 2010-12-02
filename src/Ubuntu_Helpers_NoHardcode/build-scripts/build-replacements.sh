@@ -61,9 +61,6 @@ function Build_Replacements_Common
 	#Package: pluto-ffmpeg
 	Build_Replacement_Package pluto-ffmpeg ubuntu/ffmpeg-svn12476
 
-	#Package: djmount
-	Build_Replacement_Package djmount ubuntu/djmount-0.71
-
 	#Package: freepbx
 	Build_Replacement_Package freepbx ubuntu/asterisk/freepbx
 
@@ -273,6 +270,11 @@ function Build_Replacements_Intrepid
 {
 	mkdir -pv "$replacements_dir"
 
+
+	#Package: djmount
+	Build_Replacement_Package djmount ubuntu/djmount-0.71
+
+
 #	#Package: lirc
 #	Build_Replacement_Package lirc ubuntu/lirc-0.8.3+lmce
 #	cp ${svn_dir}/${svn_branch_name}/ubuntu/lirc-x*.deb ${replacements_dir}
@@ -409,6 +411,10 @@ function Build_Replacements_Hardy
 	Build_Replacement_Package mythtv ubuntu/mythtv-0.20.2+fixes14472
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/{libmyth,ubuntu-mythtv}*.deb ${replacements_dir}
 
+	#Package: djmount
+	Build_Replacement_Package djmount ubuntu/djmount-0.71
+
+
 	#Package: spcp8x5
 	Build_Replacement_Package spcp8x5 ubuntu/spcp8x5
 	# Included in Intrepid's linux-image.
@@ -442,6 +448,10 @@ function Build_Replacements_Gutsy
 	#Package: mythtv
 	Build_Replacement_Package mythtv ubuntu/mythtv-0.20.2+fixes14472
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/{libmyth,ubuntu-mythtv}*.deb ${replacements_dir}
+
+	#Package: djmount
+	Build_Replacement_Package djmount ubuntu/djmount-0.71
+
 
 	#Package: libsdl
 	Build_Replacement_Package libsdl1.2debian-pluto ubuntu/libsdl1.2-1.2.12
