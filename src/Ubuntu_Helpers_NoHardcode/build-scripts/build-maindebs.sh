@@ -90,7 +90,6 @@ function build_main_debs() {
 		"lucid")
 			Distro_ID="18"
 			exclude_list=$exclude_list,$mkr_tira
-			exclude_list=$exclude_list,$mkr_simplephone
 			exclude_list=$exclude_list,$mkr_usb_uirt_0038_package
 			exclude_list=$exclude_list,$mkr_vloopback_driver_package
 			exclude_list=$exclude_list,672,674 #
