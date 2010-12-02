@@ -93,37 +93,13 @@ function build_main_debs() {
 			exclude_list=$exclude_list,$mkr_simplephone
 			exclude_list=$exclude_list,$mkr_usb_uirt_0038_package
 			exclude_list=$exclude_list,$mkr_vloopback_driver_package
-			exclude_list=$exclude_list,672,674  # game
-			# LinuxMCE WindowUtils Library
-			exclude_list=$exclude_list,678
-			# MAME
+			exclude_list=$exclude_list,672,674 #
+			# 674  # game
+#			# does not compile atm
 			exclude_list=$exclude_list,683
-			# EnOcean_TCM120#: 685
-			exclude_list=$exclude_list,685
-			# DataLogger Plugin#: 687
-			exclude_list=$exclude_list,687
-			# LinuxMCE Screen Capture Camera#: 696
-			exclude_list=$exclude_list,696
-			# LinuxMCE Shoutcast Radio Plugin#: 704
-			exclude_list=$exclude_list,704
-			# LinuxMCE Activate Orbiter Plasmoid#: 708
-			exclude_list=$exclude_list,708
-			# IRTrans Ethernet#: 710
-			exclude_list=$exclude_list,710
-			# Chromoflex LED Stripe#: 712
-			exclude_list=$exclude_list,712
-			# LinuxMCE VistaICM2 Support
-			exclude_list=$exclude_list,714
-			# SDLMESS
+			# SDLMESS 
+			# does not compile atm
 			exclude_list=$exclude_list,717
-			# LinuxMCE DPMS Monitor
-			exclude_list=$exclude_list,722
-			# LinuxMCE Hulu PlugIn#: 743			
-			exclude_list=$exclude_list,743
-			# LinuxMCE HAI Omni RS232 Panel Support#: 749
-			exclude_list=$exclude_list,749
-			# LinuxMCE Pandora Plugin#: 759
-			exclude_list=$exclude_list,759
 			;;
 	esac
 
