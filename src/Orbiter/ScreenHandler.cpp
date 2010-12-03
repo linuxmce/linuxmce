@@ -315,8 +315,9 @@ bool ScreenHandler::MediaBrowsre_Intercepted(CallBackData *pData)
 				if( pCell->m_Value[0]!=0 && (pCell->m_Value[0]!='!' || pCell->m_Value[1]!='A') )
 				{
 					mediaFileBrowserOptions.m_sSelectedFile = pCell->m_Value;
+					bool bQueue = m_pOrbiter->GetData()->Get_Queue_Instead_of_Instant_Play();
 					DCE::CMD_MH_Play_Media CMD_MH_Play_Media(m_pOrbiter->m_dwPK_Device,m_pOrbiter->m_dwPK_Device_MediaPlugIn,
-						0,mediaFileBrowserOptions.m_sSelectedFile,0,0,StringUtils::itos( m_pOrbiter->m_pLocationInfo->PK_EntertainArea ),false,0,0 /* bQueue */, 0 /* bBypass_Event */, 0 /* bDont_Setup_AV */ );
+						0,mediaFileBrowserOptions.m_sSelectedFile,0,0,StringUtils::itos( m_pOrbiter->m_pLocationInfo->PK_EntertainArea ),false,0,bQueue, 0 /* bBypass_Event */, 0 /* bDont_Setup_AV */ );
 					m_pOrbiter->SendCommand(CMD_MH_Play_Media);
 				}
 			}
@@ -532,8 +533,9 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"ScreenHandler::MediaBrowser_Objec
 			m_pOrbiter->m_pMouseBehavior->ConstrainMouse();
 #endif
 			*/
+		bool bQueue = m_pOrbiter->GetData()->Get_Queue_Instead_of_Instant_Play();
 		DCE::CMD_MH_Play_Media CMD_MH_Play_Media(m_pOrbiter->m_dwPK_Device,m_pOrbiter->m_dwPK_Device_MediaPlugIn,
-			0,mediaFileBrowserOptions.m_sSelectedFile,0,0,StringUtils::itos( m_pOrbiter->m_pLocationInfo->PK_EntertainArea ),false,0,0 /* bQueue */, 0 /* bBypass_Event */, 0 /* bDont_Setup_AV */);
+			0,mediaFileBrowserOptions.m_sSelectedFile,0,0,StringUtils::itos( m_pOrbiter->m_pLocationInfo->PK_EntertainArea ),false,0, bQueue , 0 /* bBypass_Event */, 0 /* bDont_Setup_AV */);
 		m_pOrbiter->SendCommand(CMD_MH_Play_Media);
 	}
 	else if( pObjectInfoData->m_PK_DesignObj_SelectedObject == DESIGNOBJ_butFBSF_Delete_CONST )
