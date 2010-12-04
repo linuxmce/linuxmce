@@ -17,14 +17,17 @@ CreatePackagesFiles
 AddRepoToSourcesTop "file:${LOCAL_REPO_BASE} ${LOCAL_REPO_DIR}"
 AddRepoToSources "http://deb.linuxmce.org/ubuntu/ ${DISTRO}  ${COMPOS}"
 AddRepoToSources "http://debian.slimdevices.com/ stable  main"
-AddRepoToSources "http://old-releases.ubuntu.com/ubuntu ${DISTRO}-security main restricted universe multiverse"
-AddRepoToSources "http://old-releases.ubuntu.com/ubuntu ${DISTRO} main restricted universe multiverse"
+# Check where our distro is hosted
+DISTRO_HOST=
+wget http://archive.ubuntu.com/ubuntu/dists/$DISTRO/main/binary-i386/Packages.gz && DISTRO_HOST=archive
+wget http://old-releases.ubuntu.com/ubuntu/dists/$DISTRO/main/binary-i386/Packages.gz && DISTRO_HOST=old-releases
+
+AddRepoToSources "http://${DISTRO-HOST}.ubuntu.com/ubuntu ${DISTRO} main restricted universe multiverse"
+AddRepoToSources "http://${DISTRO-HOST}.ubuntu.com/ubuntu ${DISTRO}-security main restricted universe multiverse"
 
 #AddRepoToSources "http://packages.medibuntu.org/ ${DISTRO}  free non-free"
 AddGpgKeyToKeyring http://packages.medibuntu.org/medibuntu-key.gpg
 
-# AddRepoToSources "http://www.avenard.org/files/ubuntu-repos intrepid release"
-# AddGpgKeyToKeyring  http://www.avenard.org/files/ubuntu-repos/ubuntu-repos.key
 apt-get update
 
 # We add all the deb's here, that can be pre-installed without causing problems
