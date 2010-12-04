@@ -128,11 +128,12 @@ static void LS_InitProxy()
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,
 	"LS_InitProxy -- Proxy: %s; Extension: %s; Identity: %s",
 	sProxy.c_str(), sExtension.c_str(), sIdentity.c_str());
-	
-#ifdef LINPHONE_VERSION==2.1.1
-	LS_pLinphoneProxyConfig = linphone_proxy_config_new(sProxy.c_str());
-#else
+
+/* Later releases of linphone contain sipsetup.h - upto intrepid they do not */
+#ifdef sipsetup_h
 	LS_pLinphoneProxyConfig = linphone_proxy_config_new();
+#else
+	LS_pLinphoneProxyConfig = linphone_proxy_config_new(sProxy.c_str());
 #endif
 	if (! LS_pLinphoneProxyConfig)
 	{
