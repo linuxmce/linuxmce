@@ -18,6 +18,7 @@
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/CommonIncludes.h"
+#include "PlutoUtils/HttpUtils.h"
 
 #include <unistd.h>
 #include <stdio.h>
@@ -55,10 +56,10 @@ void PlaylistParser::load() {
 bool PlaylistParser::ReadURLIntoVector(string sUrl, vector<string> &vectLines)
 {
         size_t size;
-	char* data = FileUtils::ReadURL(sUrl, size, true);
-	if( data )
+	string sBuffer;
+	HttpGet(sUrl, &sBuffer);
+	if( sBuffer.size() > 0 )
 	{
-		string sBuffer(data);
 		StringUtils::Tokenize(sBuffer,"\n",vectLines);
 	} else {
 	        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"PlaylistParser::ReadURLIntoVector() no data returned");
@@ -67,8 +68,6 @@ bool PlaylistParser::ReadURLIntoVector(string sUrl, vector<string> &vectLines)
 	// Strip any \r that will be in a Windows file
 	for(uint s=0;s<vectLines.size();++s)
 		vectLines[s] = StringUtils::Replace(&vectLines[s],"\r","");
-
-	delete[] data;
 
 	return true;
 }
