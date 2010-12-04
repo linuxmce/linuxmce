@@ -10,6 +10,7 @@
  or FITNESS FOR A PARTICULAR PURPOSE. See the Pluto Public License for more details.
  */
 #include "SIP_Thread.h"
+#include <linphone/config.h>
 #include <linphonecore.h>
 #include "DCE/Logger.h"
 #include "DCE/DCEConfig.h"
@@ -128,7 +129,11 @@ static void LS_InitProxy()
 	"LS_InitProxy -- Proxy: %s; Extension: %s; Identity: %s",
 	sProxy.c_str(), sExtension.c_str(), sIdentity.c_str());
 	
+#ifdef LINPHONE_VERSION==2.1.1
+	LS_pLinphoneProxyConfig = linphone_proxy_config_new(sProxy.c_str());
+#else
 	LS_pLinphoneProxyConfig = linphone_proxy_config_new();
+#endif
 	if (! LS_pLinphoneProxyConfig)
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "LS_InitProxy: Failed to initialize proxy");
