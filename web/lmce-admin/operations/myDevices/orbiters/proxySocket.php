@@ -86,6 +86,11 @@ function proxySocket($output,$dbADO){
 		$out.=sendCommand($deviceID,$socket,$dbADO,$command,$refresh);
 	}
 	
+	// send key
+	if(strpos($command,'PLUTO_KEY')!==false){
+		$out.=sendCommand($deviceID,$socket,$dbADO,$command,$refresh);
+	}
+
 	// send XML command
 	if(strpos($command,'XML')!==false){
 		
