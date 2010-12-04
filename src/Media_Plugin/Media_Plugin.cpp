@@ -1390,7 +1390,8 @@ dequeMediaFile->size() ? (*dequeMediaFile)[0]->m_sPath.c_str() : "NO",
 		// If we want to queue and there already was items in the deque, return here
 		// Load stream attributes for new files
 		m_pMediaAttributes->LoadStreamAttributes(pMediaStream);
-
+		// Update playlist datagrid
+		MediaInfoChanged(pMediaStream,true);
 		return pMediaStream;
 	}
 	if( !pOH_Orbiter )
