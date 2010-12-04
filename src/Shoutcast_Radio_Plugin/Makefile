@@ -9,20 +9,20 @@ CXX = g++
 CXXFLAGS = -Wall -fPIC -ggdb3
 CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
-BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
+BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread 
 
 MYNAME = Shoutcast_Radio_Plugin
 VERSION = 2.0.0
 MYDEVTEMPLATEID = 1929mplateID
 
 Gen_Dev_Files = $(GENDEV)/Shoutcast_Radio_PluginBase.cpp
-sources = Main.cpp Shoutcast_Radio_Plugin.cpp $(Gen_Dev_Files)
+sources = Main.cpp Shoutcast_Radio_Plugin.cpp $(Gen_Dev_Files) ../PlutoUtils/HttpUtils.cpp
 #<-dceag-mh-e->
 
 CXXFLAGS +=
 CPPFLAGS += -I/usr/include/libxml2
 LDFLAGS +=
-XTRALDLIBS =
+XTRALDLIBS = -lcurl
 
 Gen_Dev_Files +=
 sources +=

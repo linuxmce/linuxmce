@@ -17,6 +17,7 @@
 #include "Shoutcast_Radio_Plugin.h"
 #include "DCE/Logger.h"
 #include "PlutoUtils/FileUtils.h"
+#include "PlutoUtils/HttpUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include <libxml/xmlreader.h>
 
@@ -48,14 +49,15 @@ Shoutcast_Radio_Plugin::Shoutcast_Radio_Plugin(Command_Impl *pPrimaryDeviceComma
 	: Shoutcast_Radio_Plugin_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
 //<-dceag-const2-e->
 {
-        delete m_pAlarmManager;
-	m_pAlarmManager = NULL;
 }
 
 //<-dceag-dest-b->
 Shoutcast_Radio_Plugin::~Shoutcast_Radio_Plugin()
 //<-dceag-dest-e->
 {
+	m_pAlarmManager->Stop();
+        delete m_pAlarmManager;
+	m_pAlarmManager = NULL;
         if (m_pUpdate != NULL) {
                 delete m_pUpdate;
 	}
@@ -396,12 +398,16 @@ void Shoutcast_Radio_Plugin::getStationById(vector<int> vectID, vector<Station> 
 void Shoutcast_Radio_Plugin::updateGenres() {
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "Shoutcast_Radio_Plugin::updateGenres() start");
 
-	size_t size;
-	char *data = FileUtils::ReadURL(m_sBaseUrl + m_sXMLUrl, size, true);
+	string data;
+	string res = HttpGet(m_sBaseUrl + m_sXMLUrl, &data);
+	if (res.compare("OK") != 0) {
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Shoutcast_Radio_Plugin::updateGenres() Http GET FAILED!");
+		return;
+	}
 	xmlTextReaderPtr reader;
 	int ret;
 	
-	reader = xmlReaderForMemory(data, size, "", NULL, 0);
+	reader = xmlReaderForMemory(data.c_str(), data.size(), "", NULL, 0);
 	if (reader != NULL) {
 	        // go to next node
 	        ret = xmlTextReaderRead(reader);
@@ -418,14 +424,12 @@ void Shoutcast_Radio_Plugin::updateGenres() {
 		}
 		xmlFreeTextReader(reader);
 		if (ret != 0) {
-		        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Shoutcast_Radio_Plugin::updateGenres() failed to parse");
+		        LoggerWrapper::GetInstance()->Write(LV_WARNING, "Shoutcast_Radio_Plugin::updateGenres() failed to parse");
 		}
 	} else {
-		        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Shoutcast_Radio_Plugin::updateGenres() unable to open");
+		        LoggerWrapper::GetInstance()->Write(LV_WARNING, "Shoutcast_Radio_Plugin::updateGenres() unable to open");
 	}
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Shoutcast_Radio_Plugin::updateGenres() end, genres = %d", m_vectGenres.size());
-
-	delete[] data;
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Shoutcast_Radio_Plugin::updateGenres() end, genres = %d", m_vectGenres.size());
 }
 
 bool Shoutcast_Radio_Plugin::parseStation(xmlTextReaderPtr reader,Station& station) {
@@ -471,12 +475,16 @@ void Shoutcast_Radio_Plugin::updateStationsForGenre(string genre) {
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "Shoutcast_Radio_Plugin::updateStationsForGenre() start, genre = %s", genre.c_str());
 
         string url = m_sBaseUrl + m_sXMLUrl + "?genre=" + genre + getLimitURL();
-	size_t size;
-	char* data = FileUtils::ReadURL(url, size, false);
+	string data;
+	string res = HttpGet(url, &data);
+	if (res.compare("OK") != 0) {
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Shoutcast_Radio_Plugin::updateStationsForGenres() Http GET FAILED!");
+		return;
+	}
 	xmlTextReaderPtr reader;
 	int ret;
 
-	reader = xmlReaderForMemory(data, size, "", NULL, 0);
+	reader = xmlReaderForMemory(data.c_str(), data.size(), "", NULL, 0);
 	if (reader != NULL) {
 	        // go to next node
 	        ret = xmlTextReaderRead(reader);
@@ -503,7 +511,7 @@ void Shoutcast_Radio_Plugin::updateStationsForGenre(string genre) {
 		  }
 		  ret = xmlTextReaderRead(reader);
 		}
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Shoutcast_Radio_Plugin::updateStationsForGenre() vectGenreIDs.size = %d", vectGenreIDs.size());
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Shoutcast_Radio_Plugin::updateStationsForGenre() genre = %s, vectGenreIDs.size = %d", genre.c_str(),  vectGenreIDs.size());
 
 		m_mapGenreID[genre] = vectGenreIDs;
 		xmlFreeTextReader(reader);
@@ -514,7 +522,6 @@ void Shoutcast_Radio_Plugin::updateStationsForGenre(string genre) {
 	        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Shoutcast_Radio_Plugin::updateStationsForGenre() unable to create xml reader");
 	}
 
-	delete[] data;
 }
 
 void Shoutcast_Radio_Plugin::AlarmCallback(int id, void* param) {
