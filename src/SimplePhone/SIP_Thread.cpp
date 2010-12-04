@@ -136,6 +136,7 @@ static void LS_InitProxy()
 		return;
 	}
 	
+	linphone_proxy_config_set_server_addr(LS_pLinphoneProxyConfig, sProxy.c_str());
 	linphone_proxy_config_set_identity(LS_pLinphoneProxyConfig, sIdentity.c_str());
 	linphone_proxy_config_enableregister(LS_pLinphoneProxyConfig, TRUE);
 	linphone_proxy_config_expires(LS_pLinphoneProxyConfig, 600);
