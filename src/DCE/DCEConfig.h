@@ -54,8 +54,27 @@ public:
 	string m_mapParameters_Find(string Token) {	map<string,string>::iterator it = m_mapParameters.find( Token ); return it == m_mapParameters.end() ? string() : (*it).second; }
 	bool m_mapParameters_Exists(string Token) {	map<string,string>::iterator it = m_mapParameters.find( Token ); return it != m_mapParameters.end(); }
 
-	inline int ReadInteger(string sToken, int iDefaultValue = 0);
-	inline string ReadString(string sToken, string sDefaultValue = "");
+	inline int ReadInteger(string sToken, int iDefaultValue = 0)
+	{
+		int iValue = iDefaultValue;
+		
+		if( m_mapParameters_Exists(sToken) )
+		{
+			iValue = atoi(m_mapParameters_Find(sToken).c_str());
+		}
+		
+		return iValue;
+	}
+
+	inline string ReadString(string sToken, string sDefaultValue = "")
+	{
+		string sValue = sDefaultValue;
+		
+		if( m_mapParameters_Exists(sToken) )
+			sValue = m_mapParameters_Find(sToken);
+		
+		return sValue;
+	}
 
 	const map<string, string>& Parameters() const;
 

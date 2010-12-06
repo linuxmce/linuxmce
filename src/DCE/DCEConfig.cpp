@@ -92,28 +92,6 @@ void DCEConfig::ParseFile(vector<string> &vectString)
 	m_mapModifiedParameters.clear();
 }
 //------------------------------------------------------------------------------------------------------
-/*inline*/ int DCEConfig::ReadInteger(string sToken, int iDefaultValue/* = 0*/)
-{
-    int iValue = iDefaultValue;
-
-    if( m_mapParameters_Exists(sToken) )
-    {
-		iValue = atoi(m_mapParameters_Find(sToken).c_str());
-    }
-
-    return iValue;
-}
-//------------------------------------------------------------------------------------------------------
-/*inline*/ string DCEConfig::ReadString(string sToken, string sDefaultValue/* = ""*/)
-{
-    string sValue = sDefaultValue;
-
-    if( m_mapParameters_Exists(sToken) )
-        sValue = m_mapParameters_Find(sToken);
-
-    return sValue;
-}
-//------------------------------------------------------------------------------------------------------
 bool DCEConfig::WriteSettings()
 {
 	vector<string> vectString;
