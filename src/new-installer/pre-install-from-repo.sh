@@ -23,6 +23,7 @@ wget http://archive.ubuntu.com/ubuntu/dists/${DISTRO}/main/binary-i386/Packages.
 wget http://old-releases.ubuntu.com/ubuntu/dists/${DISTRO}/main/binary-i386/Packages.gz && DISTRO_HOST=old-releases
 AddRepoToSources "http://${DISTRO_HOST}.ubuntu.com/ubuntu ${DISTRO} main restricted universe multiverse"
 AddRepoToSources "http://${DISTRO_HOST}.ubuntu.com/ubuntu ${DISTRO}-security main restricted universe multiverse"
+AddRepoToSources "http://deb http://archive.canonical.com/ubuntu ${DISTRO} partner"
 
 if AddRepoToSources "http://packages.medibuntu.org/ ${DISTRO}  free non-free"
 then
