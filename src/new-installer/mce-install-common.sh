@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source pre-install-common.sh
+
 DT_MEDIA_DIRECTOR=3
 DT_CORE=1
 DT_HYBRID=2
@@ -71,7 +73,7 @@ deb http://linuxmce.com/ubuntu ./
 # Choosed mirror - end
 #deb http://10.0.0.82/ ./
 # Pluto sources - end"
-
+	
 	local SourcesOffline="# Pluto sources offline - start
 deb file:/usr/pluto/deb-cache/ ./
 # Pluto sources offline - end"
@@ -359,6 +361,19 @@ function Setup_Pluto_Conf {
 		AutostartCore=0
 		AutostartMedia=0
 	fi
+
+	case "$distro" in
+	"intrepid")
+		# select UI1
+		PK_DISTRO=17
+		;;
+	"lucid")
+		# select UI2 without alpha blending
+		PK_DISTRO=18
+		;;
+	esac
+
+	
 	StatsMessage "Generating Default Config File"
 	PlutoConf="# Pluto config file
 MySqlHost = localhost
@@ -372,7 +387,7 @@ PK_Device = 1
 Activation_Code = 1111
 PK_Installation = 1
 PK_Users = 1
-PK_Distro = 17
+PK_Distro = $PK_DISTRO
 Display = 0
 SharedDesktop = 1
 OfflineMode = false
