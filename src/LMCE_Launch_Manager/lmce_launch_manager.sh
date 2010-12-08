@@ -17,7 +17,7 @@ fi
 if ! Lock "Launch_Manager" "LM"; then
 	# LM is running
 	echo "LM already running"
-	wmctrl -a "Linux MCE Launch Manager"
+#	wmctrl -a "Linux MCE Launch Manager"
 	exit
 fi
 
