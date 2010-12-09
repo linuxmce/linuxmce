@@ -128,8 +128,6 @@ void CurlInit()
 	if (!bCurlInited)
 	{
 		bCurlInited = true;
-#ifdef USE_CURL		
 		curl_global_init(CURL_GLOBAL_ALL);
-#endif
-}
+	}
 }
