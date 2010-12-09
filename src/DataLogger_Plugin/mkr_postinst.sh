@@ -1,3 +1,3 @@
 #!/bin/bash
 
-/usr/bin/pear install Image_Color
+/usr/bin/pear install --onlyreqdeps Image_Graph
