@@ -385,6 +385,8 @@
 	function orbiterDoVariation($link, $mainDesignObj, $currentRoom, $currentEntertainArea, $PK_UI = NULL, $isParent = false) {
 		// Get the description for the current variation, and the variation designobj containing all other
 		// objects of the page.
+		$mainDesignObjVariation = NULL;
+		$title = NULL;
 		if (Is_Null($PK_UI)) {
 			$UI = "FK_UI IS NULL";
 			$header = "Standard Variation";
@@ -394,7 +396,9 @@
 		}
 		// print "<h1>$header</h1>";
 		$query = "SELECT PK_DesignObjVariation FROM DesignObjVariation Where FK_DesignObj = $mainDesignObj AND $UI";
-		$mainDesignObjVariation = getMyValue($link,$query);
+		if (!is_null($mainDesignObj) and !is_null($UI)) {
+			$mainDesignObjVariation = getMyValue($link,$query);
+		}
 		//print "<pre>$UI mainDesignObjVariation $mainDesignObjVariation</pre>\n";
 		//print "<pre>mainDesignObj $mainDesignObj</pre>\n";
 		// If we can't find the main DesignObjVariation, we use the supplied designobj direct.
@@ -405,15 +409,19 @@
 		// Try to get a title for the current screen
 		$query = "SELECT Screen.Description From Screen Where Screen.PK_Screen = (Select FK_Screen From Screen_DesignObj Where FK_DesignObj = $mainDesignObj);";
 		//print "<pre>$query</pre>";
-		$title = getMyValue($link,$query);
+		if (!is_null($mainDesignObj)) {
+			$title = getMyValue($link,$query);
+		} 
 		print "<ul id='$title'>\n";
 		// Each of the objects on the main menu needs to be fetched.
 		$query = "SELECT FK_DesignObj_Child FROM DesignObjVariation_DesignObj D Where FK_DesignObjVariation_Parent = $mainDesignObjVariation";
 		//print "<pre>$query</pre>";
-		$array = getMyArray($link,$query);
-		// print_r($array);
-		// Get all screens objects for the current variation.
-		orbiterTakeCareOfObjects($link, $array, $currentRoom, $currentEntertainArea,$UI);
+		if (!is_null($mainDesignObjVariation)) {
+			$array = getMyArray($link,$query);
+			// print_r($array);
+			// Get all screens objects for the current variation.
+			orbiterTakeCareOfObjects($link, $array, $currentRoom, $currentEntertainArea,$UI);
+		}
 		print "</ul>\n";
 	}
 	
@@ -449,7 +457,7 @@
 		} else {
 			$query = "SELECT Description FROM Array Where PK_Array = $PK_Array";
 			$buttonDescription = getMyValue($link,$query);
-			$buttonDescription = ereg_replace(" ","-",$buttonDescription);
+			$buttonDescription = preg_replace("/ /","-",$buttonDescription);
 			print "<ul id='$buttonDescription'>\n";
 			// $buttonDescription = "Lighting Scenario";
 			If (in_array($PK_Array,array(1,2,3,4))) {
