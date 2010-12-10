@@ -11,7 +11,9 @@ Version=$(dpkg -s pluto-boot-scripts | grep '^Version:' | sed  's/Version: //')
 ConfSet "PlutoVersion" "$Version"
 
 if [ ! -e /etc/apt/apt.conf.d/30pluto.pbackup ] ;then
-	cp /etc/apt/apt.conf.d/30pluto /etc/apt/apt.conf.d/30pluto.pbackup || :
+	if [ -e /etc/apt/apt.conf.d/30pluto ] ; then
+		cp /etc/apt/apt.conf.d/30pluto /etc/apt/apt.conf.d/30pluto.pbackup || :
+	fi
 fi
 
 rm -f /etc/logrotate.d/plut*
@@ -26,15 +28,15 @@ fi
 
 ## Generate the /etc/apt/apt.conf.d/30pluto file
 if ! BlacklistConfFiles '/etc/apt/apt.conf.d/30pluto' ;then
-rm -rf /var/cache/polipo/*
-pluto_apt_conf='// Pluto apt conf add-on
+	rm -rf /var/cache/polipo/*
+	pluto_apt_conf='// Pluto apt conf add-on
 APT::Cache-Limit "33554432";
 Dpkg::Options { "--force-confold"; };
 Acquire::http::timeout "10";
 Acquire::ftp::timeout "10";
 APT::Get::AllowUnauthenticated "true";
 '
-echo -n "$pluto_apt_conf" >/etc/apt/apt.conf.d/30pluto
+	echo -n "$pluto_apt_conf" >/etc/apt/apt.conf.d/30pluto
 fi
 
 ## Ouch 
