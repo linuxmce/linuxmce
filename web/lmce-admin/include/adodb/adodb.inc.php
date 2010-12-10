@@ -32,6 +32,8 @@
 	Manual is at http://php.weblogs.com/adodb_manual
 	  
  */
+
+error_reporting(E_NONE);
  
  if (!defined('_ADODB_LAYER')) {
  	define('_ADODB_LAYER',1);
@@ -855,13 +857,15 @@
 		} 
 		
 		if ($this->_queryID === true) { // return simplified recordset for inserts/updates/deletes with lower overhead
-			$rs =& new ADORecordSet_empty();
+			unset($rs);
+			$rs = new ADORecordSet_empty();
 			return $rs;
 		}
 		
 		// return real recordset from select statement
 		$rsclass = $this->rsPrefix.$this->databaseType;
-		$rs =& new $rsclass($this->_queryID,$this->fetchMode);
+		unset($rs);
+		$rs = new $rsclass($this->_queryID,$this->fetchMode);
 		$rs->connection = &$this; // Pablo suggestion
 		$rs->Init();
 		if (is_array($sql)) $rs->sql = $sql[0];
@@ -1167,8 +1171,9 @@
 		if ($close) $rs->Close();
 		
 		$arrayClass = $this->arrayClass;
-		
-		$rs2 =& new $arrayClass();
+
+		unset($rs2);		
+		$rs2 = new $arrayClass();
 		$rs2->connection = &$this;
 		$rs2->sql = $rs->sql;
 		$rs2->dataProvider = $this->dataProvider;
@@ -1930,7 +1935,8 @@
 
 			$retarr = array();
 			while (!$rs->EOF) { //print_r($rs->fields);
-				$fld =& new ADOFieldObject();
+				unset($fld);
+				$fld = new ADOFieldObject();
 				$fld->name = $rs->fields[0];
 				$fld->type = $rs->fields[1];
 				if (isset($rs->fields[3]) && $rs->fields[3]) {
@@ -2992,7 +2998,8 @@
 	function &FetchObject($isupper=true)
 	{
 		if (empty($this->_obj)) {
-			$this->_obj =& new ADOFetchObj();
+			unset($this->_obj);
+			$this->_obj = new ADOFetchObj();
 			$this->_names = array();
 			for ($i=0; $i <$this->_numOfFields; $i++) {
 				$f = $this->FetchField($i);
@@ -3000,7 +3007,8 @@
 			}
 		}
 		$i = 0;
-		$o = &$this->_obj;
+		unset($o);
+		$o = $this->_obj;
 		for ($i=0; $i <$this->_numOfFields; $i++) {
 			$name = $this->_names[$i];
 			if ($isupper) $n = strtoupper($name);
@@ -3556,7 +3564,8 @@
 				return false;
 			}
 			
-			$obj =& new $cls();
+			unset($obj);
+			$obj = new $cls();
 		}
 		
 		# constructor should not fail
@@ -3630,7 +3639,8 @@
 		@include_once(ADODB_DIR."/perf/perf-$drivername.inc.php");
 		$class = "Perf_$drivername";
 		if (!class_exists($class)) return false;
-		$perf =& new $class($conn);
+		unset($perf);
+		$perf = new $class($conn);
 		
 		return $perf;
 	}
@@ -3649,7 +3659,8 @@
 		}
 		include_once($path);
 		$class = "ADODB2_$drivername";
-		$dict =& new $class();
+		unset($dict);
+		$dict = new $class();
 		$dict->dataProvider = $conn->dataProvider;
 		$dict->connection = &$conn;
 		$dict->upperName = strtoupper($drivername);
