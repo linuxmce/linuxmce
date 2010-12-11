@@ -19,11 +19,15 @@ fi
 rm -f /etc/logrotate.d/plut*
 
 if [ ! -e /etc/asound.conf.pbackup ] ;then
-	cp /etc/asound.conf /etc/asound.conf.pbackup || :
+	if [ -e /etc/asound.conf ]; then
+		cp /etc/asound.conf /etc/asound.conf.pbackup || :
+	fi
 fi
 
 if [ ! -e /etc/updatedb.conf.pbackup ] ;then
-	cp /etc/updatedb.conf /etc/updatedb.conf.pbackup || :
+	if [ -e /etc/updatedb.conf ]; then
+		cp /etc/updatedb.conf /etc/updatedb.conf.pbackup || :
+	fi
 fi
 
 ## Generate the /etc/apt/apt.conf.d/30pluto file
