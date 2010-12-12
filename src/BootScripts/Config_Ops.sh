@@ -27,25 +27,25 @@ ConfLogError()
 
 ConfValidValue()
 {
-	local Value="$1" WhatItIs="$2" Forbidden="$3"
-	local i j
-	local ValueChar ForbiddenChar
-
-	for ((i = 0; i < "${#Value}"; i++)); do
-		ValueChar="${Value:$i:1}"
-		if [[ "$ValueChar" < " " || "$ValueChar" > "~" ]]; then
-				ConfLogError "$Value" "$WhatItIs"
-				return 1
-		fi
-		for ((j = 0; j < "${#Forbidden}"; j++)); do
-			ForbiddenChar="${Forbidden:$j:1}"
-			if [[ "$ValueChar" == "$ForbiddenChar" ]]; then
-				ConfLogError "$Value" "$WhatItIs"
-				return 1
-			fi
-		done
-	done
-
+#	local Value="$1" WhatItIs="$2" Forbidden="$3"
+#	local i j
+#	local ValueChar ForbiddenChar
+#
+#	for ((i = 0; i < "${#Value}"; i++)); do
+#		ValueChar="${Value:$i:1}"
+#		if [[ "$ValueChar" < " " || "$ValueChar" > "~" ]]; then
+#				ConfLogError "$Value" "$WhatItIs"
+#				return 1
+#		fi
+#		for ((j = 0; j < "${#Forbidden}"; j++)); do
+#			ForbiddenChar="${Forbidden:$j:1}"
+#			if [[ "$ValueChar" == "$ForbiddenChar" ]]; then
+#				ConfLogError "$Value" "$WhatItIs"
+#				return 1
+#			fi
+#		done
+#	done
+#
 	return 0
 }
 
