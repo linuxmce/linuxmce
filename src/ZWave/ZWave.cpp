@@ -307,11 +307,15 @@ void ZWave::CMD_StatusReport(string sArguments,string &sCMD_Result,Message *pMes
 //<-dceag-c788-e->
 {
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Received command #788 - StatusReport");
-	cout << "Need to implement command #788 - StatusReport" << endl;
-	cout << "Parm #51 - Arguments=" << sArguments << endl;
-	myZWApi->zwSoftReset();
-	sleep(2);
-	myZWApi->zwStatusReport();
+	if (sArguments.find('B') != std::string::npos) {
+		myZWApi->zwControllerBackup();
+	} else if (sArguments.find('R') != std::string::npos) {
+		myZWApi->zwControllerRestore();
+	} else {
+		myZWApi->zwSoftReset();
+		sleep(2);
+		myZWApi->zwStatusReport();
+	}
 }
 
 //<-dceag-c820-b->
