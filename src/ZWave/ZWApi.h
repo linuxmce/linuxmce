@@ -24,6 +24,8 @@
 
 #define ZW_GET_VERSION			0x15
 #define ZW_MEMORY_GET_ID		0x20	// response: 4byte home id, node id
+#define ZW_MEM_GET_BUFFER		0x23
+#define ZW_MEM_PUT_BUFFER		0x24
 #define ZW_CLOCK_SET			0x30
 
 #define TRANSMIT_OPTION_ACK         	0x01
@@ -404,6 +406,13 @@ namespace ZWApi {
 	// the node id of our dongle
 	int ournodeid;
 
+	// controller dump
+	int memory_dump_offset;
+	int memory_dump_len;
+	int memory_dump_counter;
+	unsigned char memory_dump[16384];
+
+
 	// set true when we await an ACK from the dongle, influences state machine
 	bool await_ack;
 	// same for callback
@@ -511,7 +520,12 @@ namespace ZWApi {
 	void zwStatusReport();
 
 	// test functions
-	void zwReadMemory(int offset);
+	void zwReadMemory(int offset, int len);
+	void zwWriteMemory(int offset, int len, unsigned char *data);
+	void zwControllerBackup();
+	void zwControllerRestore();
+
+
 	void zwRequestManufacturerSpecificReport(int node_id);
 
 	// request multilevel sensor report

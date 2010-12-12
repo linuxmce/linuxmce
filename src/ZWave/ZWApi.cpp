@@ -62,6 +62,10 @@ void *ZWApi::ZWApi::init(const char *device) {
         ournodeid = -1;
         await_ack = 0;
 	poll_state = 1;
+	memory_dump_offset = -1;
+	memory_dump_counter = 0;
+	memory_dump_len = -1;
+
 
  	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Open serial port %s",device);
 	OpenSerialPortEx(device,&serialPort);
@@ -220,6 +224,57 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 			case ZW_MEMORY_GET_ID:
 				DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"Got reply to ZW_MEMORY_GET_ID, Home id: 0x%02x%02x%02x%02x, our node id: %d",(unsigned char) frame[2],(unsigned char) frame[3],(unsigned char)frame[4],(unsigned char)frame[5],(unsigned char)frame[6]);
 				ournodeid = frame[6];
+				break;
+			;;
+			case ZW_MEM_GET_BUFFER:
+				DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"Got reply to ZW_MEM_GET_BUFFER");
+				for (int i=2;i<length;i++) {
+					// printf("MEM:%x",(unsigned char)frame[i]);
+					memory_dump[memory_dump_offset+i-2]=(unsigned char)frame[i];
+					memory_dump_counter++;
+				}
+				if ((memory_dump_offset > -1) && (memory_dump_offset < 16320)) {
+					// we are dumping the complete memory
+					memory_dump_offset+=60;
+					zwReadMemory(memory_dump_offset,60);
+				} else if ((memory_dump_offset == 16320)) {
+					// last frame
+					memory_dump_offset+=60;
+					DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"Memory dump fetch last 4 bytes");
+					zwReadMemory(memory_dump_offset,4);
+				} else if (memory_dump_offset > 16320) {
+					int fd, writesize;
+					DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"Memory dump complete");
+					for (int i=0;i<16384;i++) {
+						if (i%32==0) { printf("\n"); }
+						printf("%2x ",memory_dump[i]);
+					}
+					printf("\n");
+					fd = open("/tmp/zwave-controller-backup.dump",O_WRONLY|O_CREAT);
+					writesize = write(fd, memory_dump, 16384);
+					close(fd);
+					DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"dumped %i bytes, offset %i. written %i bytes",memory_dump_counter, memory_dump_offset, writesize);
+					poll_state=1;
+
+				}
+				break;
+			;;
+			case ZW_MEM_PUT_BUFFER:
+				DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"Got reply to ZW_MEM_PUT_BUFFER");
+				if (memory_dump_offset < 16380) {
+					memory_dump_offset+=60;
+					zwWriteMemory(memory_dump_offset, memory_dump_len, memory_dump+memory_dump_offset);
+				} else if (memory_dump_offset == 16380) {
+					memory_dump_len=4;	
+					zwWriteMemory(memory_dump_offset, memory_dump_len, memory_dump+memory_dump_offset);
+					memory_dump_offset+=4;
+				} else {
+					DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"Memory restore complete %i",memory_dump_offset);
+					memory_dump_offset=65535;
+					
+				}
+
+				
 				break;
 			;;
 			case FUNC_ID_SERIAL_API_GET_INIT_DATA:
@@ -405,13 +460,13 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 			case FUNC_ID_ZW_SEND_DATA:
 				switch(frame[2]) {
 					case 1:
-						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZW_SEND delivered to Z-Wave stack");
+						DCE::LoggerWrapper::GetInstance()->Write(LV_DEBUG,"ZW_SEND delivered to Z-Wave stack");
 						break;
 					case 0:
-						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ERROR: ZW_SEND could not be delivered to Z-Wave stack");
+						DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"ERROR: ZW_SEND could not be delivered to Z-Wave stack");
 						break;
 					default:
-						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ERROR: ZW_SEND Response is invalid!");
+						DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"ERROR: ZW_SEND Response is invalid!");
 				}
 
 				break;
@@ -426,10 +481,10 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 
 		switch (frame[1]) {
 			case FUNC_ID_ZW_SEND_DATA:
-				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZW_SEND Response with callback %i received",(unsigned char)frame[2]);
+				DCE::LoggerWrapper::GetInstance()->Write(LV_DEBUG,"ZW_SEND Response with callback %i received",(unsigned char)frame[2]);
 				if ((unsigned char)frame[2] != await_callback) {
 					// wrong callback id
-					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ERROR: callback id is invalid!");
+					DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"ERROR: callback id is invalid!");
 
 				} else {
 					// callback id matches our expectation
@@ -439,10 +494,10 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							pthread_mutex_lock (&mutexSendQueue);
 							if (ZWSendQueue.front()->sendcount > 3) {
 								// can't deliver frame, abort
-								DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Error: ZW_SEND failed, removing job after three tries");
+								DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"Error: ZW_SEND failed, removing job after three tries");
 								dropSendQueueJob();
 							} else {
-								DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Error: ZW_SEND failed, retrying");
+								DCE::LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Error: ZW_SEND failed, retrying");
 								// trigger resend
 								await_ack = 0;
 							}
@@ -451,7 +506,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							break;
 						case 0:
 							// command reception acknowledged by node
-							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZW_SEND was successful, removing job");
+							DCE::LoggerWrapper::GetInstance()->Write(LV_DEBUG,"ZW_SEND was successful, removing job");
 							pthread_mutex_lock (&mutexSendQueue);
 							ZWSendQueue.pop_front();
 							pthread_mutex_unlock (&mutexSendQueue);
@@ -460,7 +515,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							
 							break;
 						default:
-							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ERROR: ZW_SEND Response is invalid!");
+							DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"ERROR: ZW_SEND Response is invalid!");
 
 					}
 				}
@@ -541,7 +596,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 
 			case FUNC_ID_APPLICATION_COMMAND_HANDLER:
 				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"FUNC_ID_APPLICATION_COMMAND_HANDLER:");
-				switch (frame[5]) {
+				switch ((unsigned char)frame[5]) {
 					case COMMAND_CLASS_CONTROLLER_REPLICATION:
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_CONTROLLER_REPLICATION");
 						// 0x1 0xb 0x0 0x4 0x2 0xef 0x5 0x21 0x31 0x7 0x1 0x1 0xf (#######!1####)
@@ -686,14 +741,14 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							if (frame[2] & RECEIVE_STATUS_TYPE_BROAD ) { 
 								DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got broadcast wakeup from node %i, doing WAKE_UP_INTERVAL_SET",frame[3]);
 								if (ournodeid != -1) { 
-									// we assume an ACT PIR for now, no other known devices show that behavior
-									zwAssociationSet((unsigned char)frame[3], 1, ournodeid); // receive group 1 events (motion)
-									zwAssociationSet((unsigned char)frame[3], 2, ournodeid); // receive group 2 events (casing opened)
-									zwAssociationSet((unsigned char)frame[3], 3, ournodeid); // receive group 3 events (battery reports)
-									zwConfigurationSet((unsigned char)frame[3],17,2); // sensor mode
-									zwConfigurationSet((unsigned char)frame[3],18,0); // no delay
-									zwConfigurationSet((unsigned char)frame[3],19,1); // send unsolicited events
-									zwConfigurationSet((unsigned char)frame[3],22,30); // wakeup duration
+									// we assume an ACT PIR for now, no other known devices show that behavior - UPDATE, cannot assume any more, more devices send broadcast wakeups
+									// zwAssociationSet((unsigned char)frame[3], 1, ournodeid); // receive group 1 events (motion)
+									// zwAssociationSet((unsigned char)frame[3], 2, ournodeid); // receive group 2 events (casing opened)
+									// zwAssociationSet((unsigned char)frame[3], 3, ournodeid); // receive group 3 events (battery reports)
+									// zwConfigurationSet((unsigned char)frame[3],17,2); // sensor mode
+									// zwConfigurationSet((unsigned char)frame[3],18,0); // no delay
+									// zwConfigurationSet((unsigned char)frame[3],19,1); // send unsolicited events
+									// zwConfigurationSet((unsigned char)frame[3],22,30); // wakeup duration
 									zwWakeupSet((unsigned char)frame[3],60,false); // wakeup interval
 									wakeupHandler((unsigned char) frame[3]); // fire commands, device is awake
 								}
@@ -902,7 +957,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							offset = 8;	
 							for (int i=0; i<frame[7]; i++) {
 								DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND LENGTH: %d, CLASS: %x",frame[offset],(unsigned char) frame[offset+1]);
-								switch (frame[offset+1]) {
+								switch ((unsigned char)frame[offset+1]) {
 									case COMMAND_CLASS_BATTERY:
 										if (BATTERY_REPORT == (unsigned char) frame[offset+2]) {
 											DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_BATTERY:BATTERY_REPORT: Battery level: %d",frame[offset+3]);
@@ -972,7 +1027,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 						}
 						break;
 					default:
-						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Function not implemented - unhandled command class");
+						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Function not implemented - unhandled command class: %x",(unsigned char)frame[5]);
 						break;
 					;;
 
@@ -981,7 +1036,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 				break;
 			;;
 			case FUNC_ID_ZW_APPLICATION_UPDATE:
-				switch(frame[2]) {
+				switch((unsigned char)frame[2]) {
 					case UPDATE_STATE_NODE_INFO_RECEIVED:
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"FUNC_ID_ZW_APPLICATION_UPDATE:UPDATE_STATE_NODE_INFO_RECEIVED received from node %d - ",(unsigned int)frame[3]);
 
@@ -994,7 +1049,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							parseNodeInfo((unsigned char)frame[3],&(frame[8]),(unsigned char)frame[4]-3);
 							updateNodeCapabilities(node, &(frame[8]), (unsigned char)frame[4]-3);
 						}
-						switch(frame[5]) {
+						switch((unsigned char)frame[5]) {
 							case BASIC_TYPE_ROUTING_SLAVE:
 							case BASIC_TYPE_SLAVE:
 								//DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"BASIC_TYPE_SLAVE:");
@@ -1043,6 +1098,10 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 											}
 										}
 										break;
+									case GENERIC_TYPE_SENSOR_MULTILEVEL:
+										DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"GENERIC_TYPE_SENSOR_MULTILEVEL");
+										break;
+									;;
 									default:
 										DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"unhandled class");
 										break;
@@ -1758,7 +1817,7 @@ bool ZWApi::ZWApi::wakeupHandler(int node_id) {
 }	
 
 string ZWApi::ZWApi::commandClassToString(char nodeinfo) {
-	switch(nodeinfo) {
+	switch((unsigned char)nodeinfo) {
 	case COMMAND_CLASS_WAKE_UP:
 		return "COMMAND_CLASS_WAKE_UP";
 	case COMMAND_CLASS_MANUFACTURER_SPECIFIC:
@@ -1931,7 +1990,7 @@ void ZWApi::ZWApi::parseNodeInfo(int nodeid, char *nodeinfo, size_t length) {
 	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Supported command classes:");
 	for (unsigned int i=0;i<length;i++) {
 		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, commandClassToString(nodeinfo[i]).c_str());
-		switch (nodeinfo[i]) {
+		switch ((unsigned char)nodeinfo[i]) {
 		case COMMAND_CLASS_WAKE_UP:
 			wakeup = true;
 			break;
@@ -2033,16 +2092,69 @@ bool  ZWApi::ZWApi::zwAssignReturnRoute(int node_id, int target_node_id){
 	return true;
 }
 
-void ZWApi::ZWApi::zwReadMemory(int offset) {
+void ZWApi::ZWApi::zwReadMemory(int offset, int len) {
 	char mybuf[1024];
 
 	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Reading eeprom at offset %i",offset);
 	mybuf[0] = 0x23;
 	mybuf[1] = (offset >> 8) & 0xff;
 	mybuf[2] = offset & 0xff;;
-	mybuf[3] = 64;
+	mybuf[3] = len & 0xff;
 	sendFunction( mybuf , 4, REQUEST, 0);
 }
+
+void ZWApi::ZWApi::zwWriteMemory(int offset, int len, unsigned char *data) {
+	char mybuf[1024];
+
+	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Writing eeprom at offset %i",offset);
+	mybuf[0] = 0x24; // MemoryPutBuffer
+	mybuf[1] = (offset >> 8) & 0xff;
+	mybuf[2] = offset & 0xff;;
+	mybuf[3] = (len >> 8) & 0xff;
+	mybuf[4] = len & 0xff;
+	if (len > 100) {
+		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "length too long");
+	} else {
+		for (int i=0;i<len;i++) {
+			mybuf[5+i]=data[i];
+		}
+	}	
+	sendFunction( mybuf , 5+len, REQUEST, 0);
+}
+
+void ZWApi::ZWApi::zwControllerBackup() {
+	// we need to dump everything from 0-16383
+
+	//for (int i=0;i<273;i++) {
+	//	zwReadMemory(60*i,60);
+	// }
+	// zwReadMemory(16380,3);
+	memory_dump_offset = 0;
+	memory_dump_len = 60;
+	zwReadMemory(memory_dump_offset,memory_dump_len);
+	poll_state=0;
+}
+void ZWApi::ZWApi::zwControllerRestore() {
+	int fd,readsize;
+	fd = open("/tmp/zwave-controller-backup.dump",O_RDONLY);
+	readsize = read(fd, memory_dump, 16384);
+	close(fd);
+	if (readsize == 16384) {
+		poll_state=0;
+		DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"reading memory dump from file");
+		for (int i=0;i<16384;i++) {
+			if (i%32==0) { printf("\n"); }
+			printf("%2x ",memory_dump[i]);
+		}
+		printf("\n");
+		memory_dump_offset = 0;
+		memory_dump_len = 60;
+		zwWriteMemory(memory_dump_offset, memory_dump_len, memory_dump);
+	}
+
+}
+
+
 void ZWApi::ZWApi::zwSoftReset() {
 	char mybuf[1024];
 
