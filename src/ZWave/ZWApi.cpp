@@ -943,16 +943,26 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							}
 						}
 						break;
+					case COMMAND_CLASS_BATTERY:
+						if ((unsigned char)frame[6] == BATTERY_REPORT) {
+							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_BATTERY:BATTERY_REPORT: Battery level: %d",(unsigned char)frame[7]);
+	
+							if ((unsigned char)frame[7] == 0xff) {
+								DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"Battery low warning from node %d",(unsigned char)frame[3]);
+							}
+						}
+						break;
+						;;
 					case COMMAND_CLASS_MULTI_CMD:
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_MULTI_CMD - ");
-						if (frame[6] == MULTI_CMD_ENCAP) {
+						if ((unsigned char)frame[6] == MULTI_CMD_ENCAP) {
 							time_t timestamp;
 							struct tm *timestruct;
 							int offset = 0;
 							// int cmd_length = 0;
 							// int cmd_count = 0;
 
-							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got encapsulated multi command from node %i",frame[3]);
+							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got encapsulated multi command from node %i",(unsigned char)frame[3]);
 							timestamp = time(NULL);
 							timestruct = localtime(&timestamp);
 							// printf("Time: %i %i %i\n",timestruct->tm_wday, timestruct->tm_hour, timestruct->tm_min);
@@ -963,7 +973,11 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 								switch ((unsigned char)frame[offset+1]) {
 									case COMMAND_CLASS_BATTERY:
 										if (BATTERY_REPORT == (unsigned char) frame[offset+2]) {
-											DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_BATTERY:BATTERY_REPORT: Battery level: %d",frame[offset+3]);
+											DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_BATTERY:BATTERY_REPORT: Battery level: %d",(unsigned char)frame[offset+3]);
+											if ((unsigned char)frame[offset+3] == 0xff) {
+												DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"Battery low warning from node %d",(unsigned char)frame[3]);
+
+											}
 										}
 										break;
 									case COMMAND_CLASS_CLIMATE_CONTROL_SCHEDULE:
