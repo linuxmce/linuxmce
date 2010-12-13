@@ -734,6 +734,9 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 								}
 							}
 
+							// read battery level
+							zwGetBatteryLevel((unsigned char) frame[3]);
+
 							// inject commands from the sleeping queue for this nodeid
 							wakeupHandler((unsigned char) frame[3]);	
 
@@ -2413,4 +2416,25 @@ void ZWApi::ZWApi::dropSendQueueJob() {
 		zwSoftReset();
 		dropped_jobs = 0;
 	}
+}
+
+void ZWApi::ZWApi::zwGetBatteryLevel(int node_id){
+        char mybuf[1024];
+
+        mybuf[0] = FUNC_ID_ZW_SEND_DATA;
+	mybuf[1] = node_id;
+	mybuf[2] = 2;
+	mybuf[3] = COMMAND_CLASS_BATTERY;
+	mybuf[4] = BATTERY_GET;
+	mybuf[7] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+
+	if (zwIsSleepingNode(node_id)) {
+		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Postpone readout of battery level - device is not always listening");
+		sendFunctionSleeping(node_id, mybuf , 6, REQUEST, 1);
+	} else {
+		sendFunction( mybuf , 6, REQUEST, 1);
+
+	}
+	return true;
+
 }

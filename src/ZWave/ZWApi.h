@@ -130,6 +130,7 @@
 #define VERSION_REPORT					0x12
 
 #define COMMAND_CLASS_BATTERY				0x80
+#define BATTERY_GET					0x02
 #define BATTERY_REPORT					0x03
 
 #define COMMAND_CLASS_WAKE_UP                         	0x84
@@ -518,6 +519,10 @@ namespace ZWApi {
 
 	// we hijack this dce command for now to do some z-wave tests
 	void zwStatusReport();
+
+	// battery functions
+	void zwGetBatteryLevel(int node_id);
+
 
 	// test functions
 	void zwReadMemory(int offset, int len);
