@@ -2435,6 +2435,4 @@ void ZWApi::ZWApi::zwGetBatteryLevel(int node_id){
 		sendFunction( mybuf , 6, REQUEST, 1);
 
 	}
-	return true;
-
 }
