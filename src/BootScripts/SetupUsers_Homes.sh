@@ -252,7 +252,7 @@ if [[ -r /usr/pluto/var/sambaCredentials.secret ]] ;then
 fi
 
 ## Rebuild NIS cache
-/usr/pluto/bin/BootMessage.sh "Rebuiling NIS cache"
+/usr/pluto/bin/BootMessage.sh "Rebuilding NIS cache"
 make -C /var/yp
 
 /usr/pluto/bin/UpdateMediaDaemonControl.sh  -disable
@@ -261,3 +261,4 @@ StartUpdateMedia=$(RunSQL "$Q")
 if [ "$StartUpdateMedia" -ne "0" ] ; then
 /usr/pluto/bin/UpdateMediaDaemonControl.sh -enable
 fi
+/usr/pluto/bin/BootMessage.sh "Done Rebuilding NIS cache" 
