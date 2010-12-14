@@ -10,6 +10,8 @@ IsDiskless=$(GetDeviceData "$PK_Device" "$DEVICEDATA_Diskless_Boot")
 
 if [[ "$IsDiskless" == 1 ]]; then
 	TheChosenOne=root
+	# FIXME: Should be read from NIS/passwd
+	homedir="/root"
 else
 	Old_IFS="$IFS"
 	IFS=:
@@ -18,6 +20,8 @@ else
 			continue
 		fi
 		TheChosenOne="$user"
+		# FIXME: Should be read from NIS/passwd
+		homedir="/home/$user"
 		break
 	done </etc/passwd
 	IFS="$Old_IFS"
@@ -29,13 +33,13 @@ if su - "$TheChosenOne" -c "DISPLAY=:$Display kcheckrunning"; then
 fi
 
 # Disable the KDE Screensaver
-mkdir -p ~/.kde/share/config/
+mkdir -p $homedir/.kde/share/config/
 echo "[ScreenSaver]
 Enabled=false
 Lock=false
 LockGrace=60000
 Saver=kblank.desktop
-Timeout=900" > ~/.kde/share/config/kscreensaverrc
+Timeout=900" > $homedir/.kde/share/config/kscreensaverrc
 
 
 su - "$TheChosenOne" -c "DISPLAY=:$Display /usr/pluto/bin/startkde-keepdcop" &>/dev/null </dev/null &
