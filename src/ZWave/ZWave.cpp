@@ -530,6 +530,44 @@ void ZWave::SendSensorTrippedEvents(unsigned short node_id, int instance_id, boo
 	}
 }
 
+void ZWave::SendFireAlarmEvent(unsigned short node_id, int instance_id)
+{
+	char tmp_node_id[16];
+	sprintf(tmp_node_id,"%i",node_id);
+        DeviceData_Impl *pChildDevice = InternalIDToDevice(tmp_node_id, instance_id);
+	if (pChildDevice != NULL) {		
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending fire alarm event from node %d",node_id);
+		m_pEvent->SendMessage( new Message(pChildDevice->m_dwPK_Device,
+			DEVICEID_EVENTMANAGER,
+			PRIORITY_NORMAL,
+			MESSAGETYPE_EVENT,
+			EVENT_Fire_Alarm_CONST,
+			1,
+			EVENTPARAMETER_PK_Device_CONST,
+			tmp_node_id)
+		);
+	}
+}
+
+void ZWave::SendAirQualityEvent(unsigned short node_id, int instance_id)
+{
+	char tmp_node_id[16];
+	sprintf(tmp_node_id,"%i",node_id);
+        DeviceData_Impl *pChildDevice = InternalIDToDevice(tmp_node_id, instance_id);
+	if (pChildDevice != NULL) {		
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending air quality event from node %d",node_id);
+		m_pEvent->SendMessage( new Message(pChildDevice->m_dwPK_Device,
+			DEVICEID_EVENTMANAGER,
+			PRIORITY_NORMAL,
+			MESSAGETYPE_EVENT,
+			EVENT_Sensor_Tripped_CONST,
+			1,
+			EVENTPARAMETER_PK_Device_CONST,
+			tmp_node_id)
+		);
+	}
+}
+
 void ZWave::SendCO2LevelChangedEvent(unsigned short node_id, int instance_id, int value)
 {
 	char tmp_node_id[16];

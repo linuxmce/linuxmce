@@ -803,7 +803,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					;;
 					case COMMAND_CLASS_SENSOR_ALARM:
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_SENSOR_ALARM - ");
-						if (frame[6] == SENSOR_ALARM_REPORT) {
+						if ((unsigned char)frame[6] == SENSOR_ALARM_REPORT) {
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got sensor report from node %i, source node ID: %i, sensor type: %i, sensor state: %i",(unsigned char)frame[3],(unsigned char)frame[7],(unsigned char)frame[8],(unsigned char)frame[9]);
 							if ((unsigned char)frame[9]!=0) { // ALARM!!!
 								/* if ((unsigned char)frame[0]==0xff) {
@@ -815,12 +815,16 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 									case 0x0: // general purpose
 										break;
 									case 0x1: // smoke alarm
+										DCEcallback->SendFireAlarmEvent (frame[3], -1);
 										break;
 									case 0x2: // co alarm
+										DCEcallback->SendAirQualityEvent (frame[3], -1);
 										break;
 									case 0x3: // co2 alarm
+										DCEcallback->SendAirQualityEvent (frame[3], -1);
 										break;
 									case 0x4: // heat alarm
+										DCEcallback->SendFireAlarmEvent (frame[3], -1);
 										break;
 									case 0x5: // water leak alarm
 										break;

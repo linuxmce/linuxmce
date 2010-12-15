@@ -64,6 +64,8 @@ public:
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
 		virtual void SendSensorTrippedEvents(unsigned short node_id, int instance_id, bool value);
+		virtual void SendFireAlarmEvent(unsigned short node_id, int instance_id);
+		virtual void SendAirQualityEvent(unsigned short node_id, int instance_id);
 		virtual void SendCO2LevelChangedEvent(unsigned short node_id, int instance_id, int value);
 		virtual void SendLightChangedEvents(unsigned short node_id, int instance_id, int value);
 		virtual void SendTemperatureChangedEvent(unsigned short node_id, int instance_id, float value);
