@@ -394,6 +394,11 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 						case GENERIC_TYPE_SENSOR_MULTILEVEL:
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"GENERIC TYPE: Sensor Multilevel");
 							break;
+						;;
+						case GENERIC_TYPE_SENSOR_ALARM:
+							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"GENERIC TYPE: Sensor Alarm");
+							break;
+						;;
 						default:
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"GENERIC TYPE: 0x%x",frame[6]);
 							break;
@@ -2083,6 +2088,16 @@ int ZWApi::ZWApi::getDeviceTemplate(int basic, int generic, int specific, char *
 			devicetemplate = DEVICETEMPLATE_Generic_Sensor_CONST;
 #endif
 			break;
+		case GENERIC_TYPE_SENSOR_ALARM:
+			switch(specific) {
+				case SPECIFIC_TYPE_BASIC_ROUTING_SMOKE_SENSOR:
+				case SPECIFIC_TYPE_ROUTING_SMOKE_SENSOR:
+				case SPECIFIC_TYPE_BASIC_ZENSOR_NET_SMOKE_SENSOR:
+				case SPECIFIC_TYPE_ZENSOR_NET_SMOKE_SENSOR:
+				case SPECIFIC_TYPE_ADV_ZENSOR_NET_SMOKE_SENSOR:
+					devicetemplate = DEVICETEMPLATE_Smoke_Detector_CONST;
+				break;
+			}
 	}
 	return devicetemplate;
 
