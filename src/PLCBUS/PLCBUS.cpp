@@ -165,23 +165,31 @@ void PLCBUS::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &s
 //<-dceag-cmdch-e->
 {
 	string addr = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+	int house = addr.substr(0,1).c_str()[0]-65;
+	int unit = atoi(addr.substr(1,2).c_str());
+
 	PLCBUSJob *myjob = new PLCBUSJob;
 	myjob->sendcount=0;
+	myjob->homeunit=(house <<4) + unit;
+	myjob->usercode=0;
 
 	switch (pMessage->m_dwID) {
 		case COMMAND_Generic_On_CONST:
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"COMMAND_Generic_On_CONST received for child %s",addr.c_str());
+			myjob->command=192;
 			sCMD_Result = "OK";
 			break;
 		;;
 		case COMMAND_Generic_Off_CONST:
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"COMMAND_Generic_Off_CONST received for child %s",addr.c_str());
+			myjob->command=193;
 			sCMD_Result = "OK";
 			break;
 		;;
 		case COMMAND_Set_Level_CONST:
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"COMMAND_Set_Level_CONST received for child %s",addr.c_str()); 
-			// myjob->value = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST].c_str());
+			myjob->command=184;
+			myjob->data1 = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST].c_str());
 			sCMD_Result = "OK";
 			break;
 		;;
@@ -241,11 +249,51 @@ void PLCBUS::receiveFunction() {
 		if (bufr[i] == 0x2) {
 			// SOF found
 			i++;
+			if (bufr[i] == 6) { // found plcbus frame
+				int tmpusercode = bufr[i+1];	
+				int tmphomeunit = bufr[i+2];	
+				int tmpcommand = bufr[i+3];	
+				int tmpdata1 = bufr[i+4];	
+				int tmpdata2 = bufr[i+5];	
+				int rxtxswitch = bufr[i+6];
+				if (rxtxswitch & 32) { // received ack
+					pthread_mutex_lock (&mutexSendQueue);
+					if (PLCBUSSendQueue.front()->homeunit == tmphomeunit) {
+						LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Response from same id as command on send queue, removing command (sendcount: %i)",PLCBUSSendQueue.front()->sendcount);
+						PLCBUSSendQueue.pop_front();
+					}
+					pthread_mutex_unlock (&mutexSendQueue);
+				}
+	
+			}
 		} //...
 
 		pthread_mutex_lock (&mutexSendQueue);
 		if (PLCBUSSendQueue.size() > 0 ) {
-			int commandlength = 0;
+			int commandlength = 8;
+			int reprq=0;
+			buf[0]=0x2; // STX
+			buf[1]=5; // LEN
+			buf[2]=PLCBUSSendQueue.front()->usercode; // USERCODE
+			buf[3]=PLCBUSSendQueue.front()->homeunit;
+			buf[6]=0;
+			switch(PLCBUSSendQueue.front()->command) {
+				case 192:
+					buf[4]=0x02 | 32 | reprq; // ON + ACK_PULSE
+					break;
+				case 193:
+					buf[4]=0x03 | 32 | reprq; // OFF + ACK_PULSE
+					break;
+				case 184:
+					buf[4]=0x0c | 32 | reprq; // PRESETDIM + ACK_PULSE
+					buf[6]=0x20; // dim rate
+					break;
+				default:
+					buf[4]=0x02 | 32 | reprq;
+			}
+			buf[5]=PLCBUSSendQueue.front()->data1;
+			buf[7]=0x03; // ETX
+
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Send Queue Size: %i",PLCBUSSendQueue.size());
 
 
