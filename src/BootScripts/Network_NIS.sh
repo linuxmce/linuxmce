@@ -33,6 +33,6 @@ if ! BlacklistConfFiles '/etc/ypserv.securenets' ;then
 fi
 sed -i 's/master|slave|\[Yy\]/slave|[Yy]/g' /etc/init.d/nis
 
-invoke-rc.d nis stop
+service nis stop
 echo | /usr/lib/yp/ypinit -m
-invoke-rc.d nis start
+service nis start

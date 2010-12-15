@@ -61,8 +61,8 @@ Q="GRANT ALL PRIVILEGES ON *.* TO '$MySqlUser'@$IntIP"
 RunSQL "$Q"
 echo "Writing network configuration with one in database"
 
-invoke-rc.d networking stop
-invoke-rc.d dhcp3-server stop
+service networking stop
+service dhcp3-server stop
 
 if ! BlacklistConfFiles '/etc/network/interfaces' ;then
 	if [ ! -e /etc/network/interfaces.backup ] ;then
@@ -124,8 +124,8 @@ fi
 
 /usr/pluto/bin/DHCP_config.sh
 
-invoke-rc.d networking start
-invoke-rc.d dhcp3-server start
+service networking start
+service dhcp3-server start
 
 if ! BlacklistConfFiles '/etc/bind/named.conf.forwarders' && ! BlacklistConfFiles '/etc/bind/named.conf.options';then
 if [ ! -e /etc/bind/named.conf.forwarders.pbackup ] && [ -e /etc/bind/named.conf.forwarders ] ;then
@@ -248,7 +248,7 @@ SambaDomainHost="
 PopulateSection "/etc/samba/smb.conf" "Domain and Hostname" "$SambaDomainHost"
 
 if [[ "$(pidof smbd)" != "" ]] ;then
-	invoke-rc.d samba reload
+	service samba reload
 fi
 
 if ! BlacklistConfFiles '/etc/defaultdomain' && ! BlacklistConfFiles '/etc/default/nis' ;then
