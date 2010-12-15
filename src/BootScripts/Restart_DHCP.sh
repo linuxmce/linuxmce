@@ -19,7 +19,7 @@ while :; do
 		if ! BlacklistConfFiles '/etc/dhcp3/dhcpd.conf' ;then
 			Logging "$TYPE" "$SEVERITY_CRITICAL" "DHCP_Restart" "DHCP not found running; restarting it"
 			/usr/pluto/bin/PlutoDHCP >/etc/dhcp3/dhcpd.conf
-			invoke-rc.d dhcp3-server restart
+			service dhcp3-server restart
 		fi
 	fi
 	Unlock "PlutoDHCP" "DHCP_Restart" nolog

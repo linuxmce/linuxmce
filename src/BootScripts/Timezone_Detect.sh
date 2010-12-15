@@ -79,4 +79,4 @@ RunSQL "$Query"
 
 /usr/pluto/bin/SetTimeZone.sh "$TimeZone"
 ConfSet TimeZoneSet 1
-invoke-rc.d ntp restart
+service ntp restart

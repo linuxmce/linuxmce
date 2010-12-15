@@ -213,7 +213,7 @@ if [[ "$MakeUsers" == yes ]]; then
 	done
 
 	if [[ "$(pidof smbd)" != "" ]] ;then
-		invoke-rc.d samba reload
+		service samba reload
 	fi
 fi
 
@@ -247,7 +247,7 @@ if [[ -r /usr/pluto/var/sambaCredentials.secret ]] ;then
 	fi
 
 	if [[ "$NeedToRestart" == "true" &&  "$(pidof smbd)" != "" ]] ;then
-		invoke-rc.d samba restart
+		service samba restart
 	fi
 fi
 

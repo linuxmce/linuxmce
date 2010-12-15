@@ -61,12 +61,12 @@ rm -f /usr/pluto/locks/*                 # clean up locks
 rm -f /var/run/plutoX*.pid		 # clean up x11 locks
 rm -f /mnt/optical/*.checksum
 rm -f /etc/rc{0,6}.d/S*{umountnfs.sh,portmap,networking}
-invoke-rc.d nis start
+service nis start
 
 ## workaround for gutsy bug #139155
 if [[ ! -f /var/cache/hald/fdi-cache ]] ;then
 	/usr/lib/hal/hald-generate-fdi-cache
-	invoke-rc.d hal restart
+	service hal restart
 fi
 
 if [[ -f /usr/pluto/bin/Config_Ops.sh ]]; then

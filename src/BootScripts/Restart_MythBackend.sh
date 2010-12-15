@@ -24,7 +24,7 @@ if Lock "Restart_MythBackend" "Restart_MythBackend"; then
 		if [[ -z "$MythSetup" && -z "$Backend" && -x /etc/init.d/mythtv-backend ]]; then
 			Logging "$TYPE" "$SEVERITY_CRITICAL" "MythBackend_Restart" "MythBackend not found running; restarting it"
 			echo "LOCK TABLE schemalock WRITE;" | $MysqlCommand  # Be sure we're not in the middle of a schema upgrade -- myth doesn't check this
-			invoke-rc.d mythtv-backend restart
+			service mythtv-backend restart
 			Logging "$TYPE" "$SEVERITY_CRITICAL" "MythBackend_Restart" "MythBackend restarted"
 		fi
 		Unlock "MythBackend" "MythBackend_Restart" nolog

@@ -21,7 +21,7 @@ function refresh_all {
 WaitLock "PlutoDHCP" "PlutoDHCP_config"
 if [[ -z "$DHCPsetting" ]]; then
 	rm -f /etc/dhcp3/dhcpd.conf
-	invoke-rc.d dhcp3-server stop
+	service dhcp3-server stop
 	exit
 fi
 
@@ -34,6 +34,6 @@ if ! BlacklistConfFiles '/etc/dhcp3/dhcpd.conf' ;then
 		cp /etc/dhcp3/dhcpd.conf /etc/dhcp3/dhcpd.conf.pbackup
 	fi
 	/usr/pluto/bin/PlutoDHCP >/etc/dhcp3/dhcpd.conf
-	invoke-rc.d dhcp3-server restart
+	service dhcp3-server restart
 fi
 Unlock "PlutoDHCP" "PlutoDHCP_config"

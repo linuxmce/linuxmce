@@ -1,6 +1,6 @@
 #!/bin/bash
 
-invoke-rc.d mysql start
+service mysql start
 
 . /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/Utils.sh
