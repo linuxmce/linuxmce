@@ -355,7 +355,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							break;
 						;;
 					}
-					switch (frame[6]) {
+					switch ((unsigned char)frame[6]) {
 						case GENERIC_TYPE_GENERIC_CONTROLLER:
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"GENERIC TYPE: Generic Controller");
 							break;
@@ -801,6 +801,33 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 						}
 						break;
 					;;
+					case COMMAND_CLASS_SENSOR_ALARM:
+						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_SENSOR_ALARM - ");
+						if (frame[6] == SENSOR_ALARM_REPORT) {
+							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got sensor report from node %i, source node ID: %i, sensor type: %i, sensor state: %i",(unsigned char)frame[3],(unsigned char)frame[7],(unsigned char)frame[8],(unsigned char)frame[9]);
+							if ((unsigned char)frame[9]!=0) { // ALARM!!!
+								/* if ((unsigned char)frame[0]==0xff) {
+
+								} else { // percentage of severity
+
+								} */
+								switch ((unsigned char)frame[8]) {
+									case 0x0: // general purpose
+										break;
+									case 0x1: // smoke alarm
+										break;
+									case 0x2: // co alarm
+										break;
+									case 0x3: // co2 alarm
+										break;
+									case 0x4: // heat alarm
+										break;
+									case 0x5: // water leak alarm
+										break;
+								}
+							}
+							
+						}
 					case COMMAND_CLASS_SWITCH_MULTILEVEL:
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_SWITCH_MULTILEVEL - ");
 						if (frame[6] == SWITCH_MULTILEVEL_REPORT) {
