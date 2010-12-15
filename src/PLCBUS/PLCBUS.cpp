@@ -112,6 +112,9 @@ bool PLCBUS::GetConfig()
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
 
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Open port: %s", TranslateSerialUSB(DATA_Get_COM_Port_on_PC()).c_str());
+	fd = open(TranslateSerialUSB(DATA_Get_COM_Port_on_PC()).c_str(), O_RDWR);
+
 	// B9600 8n1
 	struct termios tio;
 	tcgetattr(fd, &tio);
