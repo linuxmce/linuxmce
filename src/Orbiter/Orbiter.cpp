@@ -4615,6 +4615,11 @@ string Orbiter::SubstituteVariables( string Input,  DesignObj_Orbiter *pObj,  in
 			TranslateVirtualDevice(VirtDev,VirtDev);
 			Output += StringUtils::itos(VirtDev);
 		}
+		else if ( Variable.length() > 2 && Variable[0] =='D' && Variable[1] == 'D') 
+		{
+			int PK_DeviceData=atoi(Variable.substr(2).c_str());
+			Output += m_pData->m_mapParameters_Find(PK_DeviceData);
+		}
 		else if( Variable.length()>1 && Variable[0]=='D'  )
 		{
 			int PK_Variable=atoi(Variable.substr(1).c_str());
