@@ -7,7 +7,6 @@ Standards-Version: 3.6.1
 
 Package: asterisk-pluto
 Architecture: any
-Depends: asterisk (>= 1:1.4.10~dfsg), asterisk-perl, tcpdump, traceroute, freepbx,
-zaptel-modules|dahdi-dkms, asterisk-mysql, chan-sccp|chan-sccp-b
+Depends: asterisk (>= 1:1.4.10~dfsg), asterisk-perl, tcpdump, traceroute, freepbx, zaptel-modules | dahdi-dkms, asterisk-mysql, chan-sccp | chan-sccp-b
 Description: Pluto addons for Asterisk
  Pluto addons for Asterisk
