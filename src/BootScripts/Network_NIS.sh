@@ -10,9 +10,10 @@ echo "Setting NIS, with domain '$NIS_Domain'"
 domainname "$NIS_Domain"
 
 IntNetIP=""
+IntNetmaskClean=$(echo $IntNetmask | cut -d' ' -f1) #remove the adapter name first
 for i in 1 2 3 4 ;do
 	[[ "$IntNetIP" != "" ]] && IntNetIP="${IntNetIP}."
-	maskPart=$(echo $IntNetmask | cut -d'.' -f$i)
+	maskPart=$(echo $IntNetmaskClean | cut -d'.' -f$i)
 	ipPart=$(echo $IntIP | cut -d'.' -f$i)
 	IntNetIP="${IntNetIP}$(($ipPart&$maskPart))"
 done

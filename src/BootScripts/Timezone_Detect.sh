@@ -70,10 +70,10 @@ PK_Country=$(echo "$Info" | cut -f5)
 if [[ -z "$PK_City" || -z "$PK_City" || -z "$City" || -z "$Region" || -z "$PK_Country" ]]; then
 	GetTimezoneFromSystem
 fi
-if [ "$PK_Country" = "" ]; then
-	$PK_Country = 1
+if [[ "$PK_Country" = "" ]]; then
+	PK_Country = "1"
 fi
-Query="UPDATE Installation SET FK_City=$PK_City, City=\"$City\", State=\"$Region\", FK_Country=$PK_Country"
+Query="UPDATE Installation SET FK_City='$PK_City', City=\"$City\", State=\"$Region\", FK_Country='$PK_Country'"
 
 RunSQL "$Query"
 
