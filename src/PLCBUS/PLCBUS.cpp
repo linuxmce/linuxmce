@@ -169,12 +169,15 @@ void PLCBUS::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &s
 {
 	string addr = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 	int house = addr.substr(0,1).c_str()[0]-65;
-	int unit = atoi(addr.substr(1,2).c_str());
+	int unit = atoi(addr.substr(1,2).c_str())-1;
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"home %i unit %i",house, unit);
 
 	PLCBUSJob *myjob = new PLCBUSJob;
 	myjob->sendcount=0;
 	myjob->homeunit=(house <<4) + unit;
 	myjob->usercode=0;
+	myjob->data1=0;
+	myjob->data2=0;
 
 	switch (pMessage->m_dwID) {
 		case COMMAND_Generic_On_CONST:
