@@ -34,6 +34,7 @@ if ! BlacklistConfFiles '/etc/dhcp3/dhcpd.conf' ;then
 		cp /etc/dhcp3/dhcpd.conf /etc/dhcp3/dhcpd.conf.pbackup
 	fi
 	/usr/pluto/bin/PlutoDHCP >/etc/dhcp3/dhcpd.conf
+	touch /etc/dhcp3/dhcpd-extra.conf
 	service dhcp3-server restart
 fi
 Unlock "PlutoDHCP" "PlutoDHCP_config"
