@@ -406,7 +406,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 
 					}
 					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SPECIFIC TYPE: 0x%x",frame[7]);
-					newNode->plutoDeviceTemplateConst = getDeviceTemplate(0,(unsigned char)frame[6],0,NULL,0);
+					newNode->plutoDeviceTemplateConst = getDeviceTemplate((unsigned char)frame[5],(unsigned char)frame[6],(unsigned char)frame[7],NULL,0);
 
 					ZWNodeMap.insert(std::map < int, ZWNode * >::value_type(tmp_nodeid,newNode));
 					if (newNode->plutoDeviceTemplateConst != 0) {
@@ -2120,6 +2120,7 @@ int ZWApi::ZWApi::getDeviceTemplate(int basic, int generic, int specific, char *
 #endif
 			break;
 		case GENERIC_TYPE_SENSOR_ALARM:
+			// DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "alarm sensor found, specific: %i",specific);
 			switch(specific) {
 				case SPECIFIC_TYPE_BASIC_ROUTING_SMOKE_SENSOR:
 				case SPECIFIC_TYPE_ROUTING_SMOKE_SENSOR:
@@ -2127,6 +2128,7 @@ int ZWApi::ZWApi::getDeviceTemplate(int basic, int generic, int specific, char *
 				case SPECIFIC_TYPE_ZENSOR_NET_SMOKE_SENSOR:
 				case SPECIFIC_TYPE_ADV_ZENSOR_NET_SMOKE_SENSOR:
 					devicetemplate = DEVICETEMPLATE_Smoke_Detector_CONST;
+					// DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "smoke detector found");
 				break;
 			}
 	}
