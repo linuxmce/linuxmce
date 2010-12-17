@@ -52,7 +52,7 @@
 
 #include "BD/PhoneDevice.h"
 
-#define  VERSION "<=version=>"
+#define  VERSION "2.0.0.44.10120723484"
 
 using namespace std;
 using namespace DCE;
@@ -259,7 +259,7 @@ string PlutoDHCP::GetDHCPConfig()
 		{
 			// Use cerr since cout is going into the dhcp file
 			cerr << "Device " << pRow_Device->PK_Device_get() << " has bad mac address " << pRow_Device->MACaddress_get() << endl;
-			sNoMacEntries += "\n# " + pRow_Device->Description_get() + " (" + StringUtils::itos(pRow_Device->PK_Device_get()) + ") has bad mac address: " + pRow_Device->MACaddress_get();
+			sNoMacEntries += "# \t" + pRow_Device->Description_get() + " (" + StringUtils::itos(pRow_Device->PK_Device_get()) + ") has bad mac address: " + pRow_Device->MACaddress_get() + "\n";
 			continue;
 		}
 
@@ -289,7 +289,7 @@ string PlutoDHCP::GetDHCPConfig()
 	if (ipAddressDhcpStart.AsInt() != 0)
 	{
 		sDynamicPool =
-		"\tpool {"																					"\n"
+		"pool {"																					"\n"
 		"\t\t allow unknown-clients;"																"\n";
 		if (i_NoOfIpAdresses > 0) {
 			if (ipAddressDhcpStart.AsInt() <= p_iIpAddress[0] - 1) {
@@ -310,54 +310,28 @@ string PlutoDHCP::GetDHCPConfig()
 		}
 		sDynamicPool += "\t}\n";
 	}
-	string sResult = string("") +
-		"# option definitions common to all supported networks..."									"\n"
-		"#option domain-name \"fugue.com\";"														"\n"
-		"#option domain-name-servers toccata.fugue.com;"											"\n"
-		"option domain-name-servers " + sCoreInternalAddress + ";"									"\n"
-		"authoritative;"																			"\n"
-		""																							"\n"
-		"option routers " + sCoreInternalAddress + ";"												"\n"
-		"option subnet-mask " + sInternalSubnetMask + ";"											"\n"
-		""																							"\n"
-		"# lease IPs for 1 day, maximum 1 week"														"\n"
-		"default-lease-time 86400;"																	"\n"
-		"max-lease-time 604800;"																	"\n"
-		""																							"\n"
-		"allow booting;"																			"\n"
-		"allow bootp;"																				"\n"
-		""																							"\n"
-		"option space pxelinux;"																	"\n"
-		"option pxelinux.magic code 208 = string;"													"\n"
-		"option pxelinux.configfile code 209 = text;"												"\n"
-		"option pxelinux.pathprefix code 210 = text;"												"\n"
-		"option pxelinux.reboottime code 211 = unsigned integer 32;"								"\n"
-		""																							"\n"
-		"subnet " + sInternalSubnet + " netmask " + sInternalSubnetMask + " {"						"\n"
-		"\tnext-server " + sCoreInternalAddress + ";"												"\n"
-		"\tfilename \"/tftpboot/pxelinux.0\";"														"\n"
-		"\toption pxelinux.reboottime = 30;"														"\n"
-		""																							"\n"
-		"\tdefault-lease-time 86400;"																"\n"
-		"\tmax-lease-time 604800;"																	"\n"
-		+ sDynamicPool +
-		"}"																							"\n"
-		""																							"\n"
-		"# PXE booting machines"																	"\n"
-		"group {"																					"\n"
-		"\tnext-server " + sCoreInternalAddress + ";"												"\n"
-		"\tfilename \"/tftpboot/pxelinux.0\";"														"\n"
-		"\toption pxelinux.reboottime = 30;"														"\n"
-		"" + sMoonEntries + ""																		"\n"
-		"}"																							"\n"
-		""																							"\n"
-		"# regular machines"																		"\n"
-		"group {" + sNoBootEntries + ""																"\n"
-		"}"																							"\n"
-		"" + sNoMacEntries + ""																		"\n"
-	;
 
-	return sResult;
+	// Load and use the dhcpd.conf template file
+	string sTemplate = "/usr/pluto/templates/dhcpd.conf.tmpl";
+	size_t size;
+	char *pBuffer = FileUtils::ReadFileIntoBuffer(sTemplate,size);
+
+	// Convert char buffer into a string
+	string sConfigData;
+	sConfigData += pBuffer;
+	delete pBuffer;
+ 
+	// Replace the template tags
+	sConfigData=StringUtils::Replace(sConfigData,"%CORE_INTERNAL_ADDRESS%",sCoreInternalAddress);
+	sConfigData=StringUtils::Replace(sConfigData,"%INTERNAL_SUBNET_MASK%",sInternalSubnetMask);
+	sConfigData=StringUtils::Replace(sConfigData,"%INTERNAL_SUBNET%",sInternalSubnet);
+	sConfigData=StringUtils::Replace(sConfigData,"%DYNAMIC_IP_RANGE%",sDynamicPool);
+	sConfigData=StringUtils::Replace(sConfigData,"%MOON_ENTRIES%",sMoonEntries);
+	sConfigData=StringUtils::Replace(sConfigData,"%NOBOOT_ENTRIES%",sNoBootEntries);
+	sConfigData=StringUtils::Replace(sConfigData,"%NOMAC_ENTRIES%",sNoMacEntries);
+
+
+	return sConfigData;
 }
 
 bool PlutoDHCP::bIsMediaDirector(Row_Device *pRow_Device)
