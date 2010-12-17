@@ -107,12 +107,12 @@ if [ -f /etc/logrotate.d/linuxmce ]; then
         rm -f /etc/logrotate.d/pluto*     # make sure there are not leftover logrotate configuration files 
 fi 
 rm -f /etc/rc{0,6}.d/S*{umountnfs.sh,portmap,networking}
-invoke-rc.d nis start
+service nis start
 
 ## workaround for gutsy bug #139155
 if [[ ! -f /var/cache/hald/fdi-cache ]] ;then
 	/usr/lib/hal/hald-generate-fdi-cache
-	invoke-rc.d hal restart
+	service hal restart
 fi
 
 if [[ -f /usr/pluto/bin/Config_Ops.sh ]]; then
@@ -133,7 +133,7 @@ ConfEval
 
 # Start core services
 if [ "$AutostartCore" -eq "1" ] ; then
-	StartService "Starting MySQL Server" "/etc/init.d/mysql start"
+	StartService "Starting MySQL Server" "service mysql start"
 
 	if [[ -f /usr/pluto/bin/SQL_Ops.sh  && -f /usr/pluto/bin/Config_Ops.sh ]] ;then
 		Q="SELECT FK_Installation FROM Device WHERE PK_Device='$PK_Device'"
@@ -147,8 +147,8 @@ if [ "$AutostartCore" -eq "1" ] ; then
 
 	RunSQL "UPDATE Orbiter set Regen=2,RegenInProgress=0 where RegenInProgress=1"
 
-	StartService "Starting DHCP Server" "/etc/init.d/dhcp3-server start"
-	StartService "Starting DNS Server" "/etc/init.d/bind9 start"
+	StartService "Starting DHCP Server" "service dhcp3-server start"
+	StartService "Starting DNS Server" "service bind9 start"
 	StartService "Configuring Network Firewall" "/usr/pluto/bin/Network_Firewall.sh"
 	StartService "Confirm Installation" "/usr/pluto/bin/ConfirmInstallation.sh"
 	StartDaemon  "Starting Dhcp Plugin" "/usr/pluto/bin/Dhcpd-Plugin.sh" "DhcpdPlugin"
