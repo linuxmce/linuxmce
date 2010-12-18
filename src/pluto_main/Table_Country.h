@@ -116,14 +116,10 @@ void UsePostalCode_set(short int val);
 void country_code_set(string val);
 
 		
-		bool Description_isNull();
-bool Define_isNull();
-bool country_code_isNull();
+		bool country_code_isNull();
 
 			
-		void Description_setNull(bool val);
-void Define_setNull(bool val);
-void country_code_setNull(bool val);
+		void country_code_setNull(bool val);
 	
 	
 		void Delete();
