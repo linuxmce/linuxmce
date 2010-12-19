@@ -250,7 +250,10 @@ void PLCBUS::receiveFunction() {
 		}
 		int len = serial_read(fd, bufr, 9, 6);
 				// search for SOF
-		if (len > 0) DCE::LoggerWrapper::GetInstance()->Write(LV_RECEIVE_DATA, DCE::IOUtils::FormatHexAsciiBuffer((const char*)bufr, len,"33").c_str());
+		if (len > 0) {
+			DCE::LoggerWrapper::GetInstance()->Write(LV_RECEIVE_DATA, DCE::IOUtils::FormatHexAsciiBuffer((const char*)bufr, len,"33").c_str());
+			if (len!=9) continue;
+		}
 		// for (int i=0;i<len;i++) printf("%x\n",bufr[i]);
 
 		int i=0;
