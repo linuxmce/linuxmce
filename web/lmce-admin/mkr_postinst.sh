@@ -185,8 +185,6 @@ if ! BlacklistConfFiles "$PHP_CONFIG_FILE" ;then
 		sed -i 's/^session.gc_maxlifetime = 1440$/session.gc_maxlifetime = 144000/' $PHP_CONFIG_FILE
 fi
 
-/etc/init.d/apache2 reload
-
 [[ -f /etc/wap.conf ]] || : >/etc/wap.conf
 chown www-data.root /etc/wap.conf
 chmod 664 /etc/wap.conf
@@ -206,3 +204,67 @@ if ! BlacklistConfFiles "$PHP_CONFIG_FILE" ;then
 	#adjust PHP maximum upload filesize
 	sed -i 's/upload_max_filesize =.*/upload_max_filesize = 16M ;/g' $PHP_CONFIG_FILE
 fi
+
+# (re)enable SSL support in apache using a self-signed cert
+
+# test for existing cert before doing anything
+if [ ! -e /etc/ssl/certs/server.crt ]; then
+
+cd /tmp
+cat > config <<EOF
+[ req ]
+default_bits           = 1024
+default_keyfile        = server.csr
+distinguished_name     = req_distinguished_name
+prompt                 = no
+output_password        = password
+
+[ req_distinguished_name ]
+OU                     = Web Admin
+CN                     = LinuxMCE
+EOF
+
+#create cert encryption key
+openssl genrsa -des3 -passout pass:password -out server.key.enc 1024 
+openssl rsa -in server.key.enc -passin pass:password -out server.key
+
+#create cert request
+openssl req -new -config config -out server.csr
+
+#create and sign the cert
+openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt
+
+#install the key and cert
+cp server.crt /etc/ssl/certs/
+cp server.key /etc/ssl/private/
+
+#do some cleanup
+rm config
+rm server.key
+rm server.key.enc
+rm server.crt
+rm server.csr
+fi
+
+#update apache config files if necessary
+cd /etc/apache2/sites-available/
+if [[ ! $(grep "NameVirtualHost _default_:443" default-ssl) ]]; then
+sed -i -e "s,<\(VirtualHost\s*_default_:443>\),NameVirtualHost _default_:443\n<\1,g" default-ssl
+fi
+sed -i -e "s,\(SSLCertificateFile\s*\).*$,\1/etc/ssl/certs/server.crt,g" default-ssl
+sed -i -e "s,\(SSLCertificateKeyFile\s*\).*$,\1/etc/ssl/private/server.key,g" default-ssl
+sed -i -e "s,#\(SSLOptions\),\1,g" default-ssl
+sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ {/<\/Directory>/i\
+                RedirectMatch ^/$ /lmce-admin/
+}' default-ssl
+sed -i -e "s,\(VirtualHost\s*\*\),VirtualHost _default_:80,g" pluto
+
+#enable the default ssl site
+a2ensite default-ssl
+if [[ ! $(grep "Listen 443" /etc/apache2/ports.conf) ]]; then
+echo "Listen 443" >> /etc/apache2/ports.conf
+fi
+
+#enable ssl
+a2enmod ssl
+/etc/init.d/apache2 force-reload
