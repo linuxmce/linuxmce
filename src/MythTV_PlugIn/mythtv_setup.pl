@@ -265,12 +265,13 @@ foreach my $hostName (@hostNames) {
 		UseDB('mythconverg');
         	foreach $row (@results) {
 
+			# MythTV will ignore any shares that are offline temporarily, so we should always add them even if they are offline right now.
+
 			my $Device_MountPoint="/mnt/device/$Device_ID";
 
 			my $Device_IsMounted=`cd /mnt/device/$Device_ID && mount | grep "\/mnt\/device\/$Device_ID "`; 
 			unless ($Device_IsMounted) {
-		        	print "WARNING: Device $Device_ID is not mounted, skiping ..." ;
-		        	next; 
+		        	print "WARNING: Device $Device_Description [$Device_ID] is not mountable. If this device no longer exists, it should be removed from the device tree." ;
 			} 
 
 			#all devices should be in the "Default" and "LiveTV" special storage groups
