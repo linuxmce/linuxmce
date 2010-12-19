@@ -277,8 +277,8 @@ void PLCBUS::receiveFunction() {
 							LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Response from same id as command on send queue, removing command (sendcount: %i)",PLCBUSSendQueue.front()->sendcount);
 							PLCBUSSendQueue.pop_front();
 						}
-					pthread_mutex_unlock (&mutexSendQueue);
 					}
+					pthread_mutex_unlock (&mutexSendQueue);
 				} else if (rxtxswitch & 0x1c) {
 					// received bus copy
 					LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"frame seen on bus");
