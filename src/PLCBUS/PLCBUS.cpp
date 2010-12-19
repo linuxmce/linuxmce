@@ -23,6 +23,8 @@ using namespace DCE;
 //<-dceag-d-e->
 
 #include "PlutoUtils/LinuxSerialUSB.h"
+#include "Generic_Serial_Device/IOUtils.h"
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -246,8 +248,11 @@ void PLCBUS::receiveFunction() {
 		for (int i=0;i<1020;i++) {
 			bufr[i]=0;
 		}
-		int len = serial_read(fd, bufr, 1020, 6);
+		int len = serial_read(fd, bufr, 9, 6);
 				// search for SOF
+		if (len > 0) DCE::LoggerWrapper::GetInstance()->Write(LV_RECEIVE_DATA, DCE::IOUtils::FormatHexAsciiBuffer((const char*)bufr, len,"33").c_str());
+		// for (int i=0;i<len;i++) printf("%x\n",bufr[i]);
+
 		int i=0;
 		while ((bufr[i] != 0x2) && (i < len)) { 
 			i++;
@@ -264,11 +269,17 @@ void PLCBUS::receiveFunction() {
 				int rxtxswitch = bufr[i+6];
 				if (rxtxswitch & 32) { // received ack
 					pthread_mutex_lock (&mutexSendQueue);
-					if (PLCBUSSendQueue.front()->homeunit == tmphomeunit) {
-						LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Response from same id as command on send queue, removing command (sendcount: %i)",PLCBUSSendQueue.front()->sendcount);
-						PLCBUSSendQueue.pop_front();
-					}
+					if (PLCBUSSendQueue.size() > 0 ) {
+						if (PLCBUSSendQueue.front()->homeunit == tmphomeunit) {
+							LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Response from same id as command on send queue, removing command (sendcount: %i)",PLCBUSSendQueue.front()->sendcount);
+							PLCBUSSendQueue.pop_front();
+						}
 					pthread_mutex_unlock (&mutexSendQueue);
+					}
+				} else if (rxtxswitch & 0x1c) {
+					// received bus copy
+					LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"frame seen on bus");
+					continue;
 				}
 	
 			}
@@ -301,9 +312,8 @@ void PLCBUS::receiveFunction() {
 			buf[7]=0x03; // ETX
 
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Send Queue Size: %i",PLCBUSSendQueue.size());
+			DCE::LoggerWrapper::GetInstance()->Write(LV_SEND_DATA, "Sending job %p - %s",DCE::IOUtils::FormatHexAsciiBuffer((const char*)buf, 8,"31").c_str());
 
-
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Sending buffer...");
 			PLCBUSSendQueue.front()->sendcount++;
 			serial_write(fd,(uint8_t*)buf,commandlength);
 
@@ -311,10 +321,10 @@ void PLCBUS::receiveFunction() {
 				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Sendcount exceeded, this was the last sent attempt, removing job...");
 				PLCBUSSendQueue.pop_front();
 			}
-			for(int i=0;i<commandlength;i++) {
-		 		printf("0x%x ",(unsigned char) buf[i]);
-		 	}
-		 	printf("\n");
+			// for(int i=0;i<commandlength;i++) {
+		 //		printf("0x%x ",(unsigned char) buf[i]);
+		 //	}
+		 //	printf("\n");
 		}
 		pthread_mutex_unlock (&mutexSendQueue);
 
