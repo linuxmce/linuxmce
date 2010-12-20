@@ -129,14 +129,15 @@ SetResolution()
 	
 
 	awk -v"ResX=$ResX" -v"ResY=$ResY" -v"Refresh=$Refresh" -v"Modeline=$Modeline" -v"nvHD=$TVStandard" -v"ConnectedMonitor=$ConnectedMonitor" -v"TVOutFormat=$TVOutFormat" -f/usr/pluto/bin/X-ChangeResolution.awk "$ConfigFile" >"$ConfigFile.$$"
-	mv "$ConfigFile"{.$$,}
+#	mv "$ConfigFile"{.$$,}
 
 	# TODO: Use python-Xkit for all xorg.conf manipulations
 	# 
 	if [ -f /usr/pluto/bin/X-ChangeResolution.py ] ; then
 		python /usr/pluto/bin/X-ChangeResolution.py $ResX $ResY $Configfile
-		mv "$ConfigFile"{.$$,}
+#		mv "$ConfigFile"{.$$,}
 	fi
+	mv "$ConfigFile"{.$$,}
 }
 
 XvMC_Lib()

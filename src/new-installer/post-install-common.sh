@@ -140,7 +140,7 @@ function CleanCoreSetup
 #	fi
 
 	createIninttabConfig
-	createDefaultEventFile
+#	createDefaultEventFile
 
 }
 
