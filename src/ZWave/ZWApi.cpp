@@ -163,6 +163,7 @@ void ZWApi::ZWApi::handleCommandSensorMultilevelReport(int nodeid, int instance_
 	        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"MULTILEVEL DEBUG: precision: %i scale: %i size: %i value: %i",precision,scale,size,value);
 		if (scale == 0) {
 		        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Power level measurement received: %d W",value);
+			DCEcallback->SendPowerUsageChangedEvent((unsigned char)nodeid, instance_id, value);
 		} else {
 		        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Power level measurement received: %d",value);
 		}
@@ -695,12 +696,13 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							}
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"METER DEBUG: precision: %i scale: %i size: %i value: %i",precision,scale,size,value);
 							if (precision > 0) { value = value / pow(10 , precision) ; }  // we only take the integer part for now
-							switch(frame[7]) { // meter type
+							switch((unsigned char)frame[7]) { // meter type
 								case METER_REPORT_ELECTRIC_METER:
 									if (scale == 0) {
 										DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Electric meter measurement received: %d kWh",value);
 									} 
 								default:
+									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"unknown METER_REPORT received: %i",(unsigned char)frame[7]);
 									break;
 							}
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"METER DEBUG: precision: %i scale: %i size: %i value: %i",precision,scale,size,value);

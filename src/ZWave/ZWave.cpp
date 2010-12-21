@@ -675,6 +675,28 @@ void ZWave::SendLightChangedEvents(unsigned short node_id, int instance_id, int 
 	}
 }
 
+void ZWave::SendPowerUsageChangedEvent(unsigned short node_id, int instance_id, int value)
+{
+	char svalue[32];
+	sprintf(svalue, "%d", value);
+	char tmp_node_id[16];
+	sprintf(tmp_node_id,"%i",node_id);
+        DeviceData_Impl *pChildDevice = InternalIDToDevice(tmp_node_id, instance_id);
+	if( pChildDevice != NULL )
+                {
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending EVENT_Power_Usage_Changed_CONST event from node %s/%d, value %s W",tmp_node_id,instance_id,svalue);
+		m_pEvent->SendMessage( new Message(pChildDevice->m_dwPK_Device,
+			DEVICEID_EVENTMANAGER,
+			PRIORITY_NORMAL,
+			MESSAGETYPE_EVENT,
+			EVENT_Power_Usage_Changed_CONST,
+			1,
+			EVENTPARAMETER_Watts_CONST,
+			svalue)
+		);
+	}
+}
+
 void ZWave::SendOnOffEvent(unsigned short node_id, int instance_id, int value) {
         DeviceData_Impl *pChildDevice = NULL;	
 	if ( (pChildDevice = InternalIDToDevice(StringUtils::itos(node_id), instance_id) ) != NULL) {
