@@ -522,7 +522,7 @@ namespace ZWApi {
 	bool zwRemoveFailedNodeId(int nodeid);
 
 	// configuration_set
-	bool zwConfigurationSet(int node_id, int parameter, int value);
+	bool zwConfigurationSet(int node_id, int parameter, int value, int size);
 
 	// wakeup set
 	bool zwWakeupSet(int node_id, int value, bool multi);

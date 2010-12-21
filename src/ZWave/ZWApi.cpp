@@ -1716,7 +1716,7 @@ bool ZWApi::ZWApi::zwRemoveFailedNodeId(int nodeid) {
 	return true;
 }
 
-bool ZWApi::ZWApi::zwConfigurationSet(int node_id,int parameter,int value) {
+bool ZWApi::ZWApi::zwConfigurationSet(int node_id,int parameter,int value, int size) {
 	char mybuf[1024];
 	int len = 0;
 
@@ -1725,25 +1725,23 @@ bool ZWApi::ZWApi::zwConfigurationSet(int node_id,int parameter,int value) {
 	mybuf[3] = COMMAND_CLASS_CONFIGURATION;
 	mybuf[4] = CONFIGURATION_SET;
 	mybuf[5] = parameter; // parameter number
-	if (value <= 0xff) {
-		// one byte value
-		mybuf[6] = 1;
-		mybuf[7] = value;
-		mybuf[8] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
-		mybuf[2] = 5;
-		len = 9;
-	} else {
-		 if (value <= 0xffff) {
-			// two byte value
+	switch (size) {
+		case 1:
+			mybuf[6] = 1;
+			mybuf[7] = value;
+			mybuf[8] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+			mybuf[2] = 5;
+			len = 9;
+			break;
+		case 2:	
 			mybuf[6] = 2;
 			mybuf[7] = ( (value >> 8 ) & 0xff);
 			mybuf[8] = (value & 0xff);
 			mybuf[9] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
 			mybuf[2] = 6;
 			len = 10;
-
-		} else {
-			// four byte value
+			break;
+		case 4:
 			mybuf[6] = 4;
 			mybuf[7] = ( (value >> 24) & 0xff );
 			mybuf[8] = ( (value >> 16) & 0xff );
@@ -1752,8 +1750,40 @@ bool ZWApi::ZWApi::zwConfigurationSet(int node_id,int parameter,int value) {
 			mybuf[11] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
 			mybuf[2] = 8;
 			len = 12;
+			break;
+		case 0: // no size specified, try to auto-detect
+		default:
+			if (value <= 0xff) {
+				// one byte value
+				mybuf[6] = 1;
+				mybuf[7] = value;
+				mybuf[8] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+				mybuf[2] = 5;
+				len = 9;
+			} else {
+				 if (value <= 0xffff) {
+					// two byte value
+					mybuf[6] = 2;
+					mybuf[7] = ( (value >> 8 ) & 0xff);
+					mybuf[8] = (value & 0xff);
+					mybuf[9] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+					mybuf[2] = 6;
+					len = 10;
 
-		}
+				} else {
+					// four byte value
+					mybuf[6] = 4;
+					mybuf[7] = ( (value >> 24) & 0xff );
+					mybuf[8] = ( (value >> 16) & 0xff );
+					mybuf[9] = ( (value >> 8) & 0xff );
+					mybuf[10] = (value & 0xff);
+					mybuf[11] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+					mybuf[2] = 8;
+					len = 12;
+
+				}
+			}
+			break;
 	}
 
 	if (zwIsSleepingNode(node_id)) {
