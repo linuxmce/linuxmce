@@ -187,13 +187,15 @@ NOEMON or CANBUS */
 	/** Set the configuration parameters for Z-Wave devices (PIR) */
 		/** @param #48 Value */
 			/** The value of parameter. */
+		/** @param #222 Size */
+			/** Size of the parameter (1, 2 or 4; 0/empty==autodetect) */
 		/** @param #239 NodeID */
 			/** Z-Wave node id */
 		/** @param #248 Parameter ID */
 			/** The configuration parameter ID. */
 
-	virtual void CMD_Set_Config_Param(int iValue,int iNodeID,int iParameter_ID) { string sCMD_Result; CMD_Set_Config_Param(iValue,iNodeID,iParameter_ID,sCMD_Result,NULL);};
-	virtual void CMD_Set_Config_Param(int iValue,int iNodeID,int iParameter_ID,string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Set_Config_Param(int iValue,int iSize,int iNodeID,int iParameter_ID) { string sCMD_Result; CMD_Set_Config_Param(iValue,iSize,iNodeID,iParameter_ID,sCMD_Result,NULL);};
+	virtual void CMD_Set_Config_Param(int iValue,int iSize,int iNodeID,int iParameter_ID,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #842 - Set Association */

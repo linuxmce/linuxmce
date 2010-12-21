@@ -356,12 +356,14 @@ void ZWave::CMD_SetWakeUp(int iValue,int iNodeID,string &sCMD_Result,Message *pM
 	/** Set the configuration parameters for Z-Wave devices (PIR) */
 		/** @param #48 Value */
 			/** The value of parameter. */
+		/** @param #222 Size */
+			/** Size of the parameter (1, 2 or 4; 0/empty==autodetect) */
 		/** @param #239 NodeID */
 			/** Z-Wave node id */
 		/** @param #248 Parameter ID */
 			/** The configuration parameter ID. */
 
-void ZWave::CMD_Set_Config_Param(int iValue,int iNodeID,int iParameter_ID,string &sCMD_Result,Message *pMessage)
+void ZWave::CMD_Set_Config_Param(int iValue,int iSize,int iNodeID,int iParameter_ID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c841-e->
 {
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWave::CMD_Set_Config_Param: Nodeid: %d Parameter: %d Value: %d",iNodeID,iParameter_ID,iValue);

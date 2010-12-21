@@ -254,7 +254,7 @@ public:
 	virtual void CMD_StatusReport(string sArguments,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Assign_Return_Route(int iNodeID,int iDestNodeID,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_SetWakeUp(int iValue,int iNodeID,string &sCMD_Result,class Message *pMessage) {};
-	virtual void CMD_Set_Config_Param(int iValue,int iNodeID,int iParameter_ID,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Set_Config_Param(int iValue,int iSize,int iNodeID,int iParameter_ID,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Set_Association(int iNodeID,int iGroup_ID,string sNodes_List,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Set_Polling_State(int iPK_Device,string sValue_To_Assign,bool bReport,bool bAlways,int iNodeID,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Add_Node(string sOptions,int iValue,string sTimeout,bool bMultiple,string &sCMD_Result,class Message *pMessage) {};
@@ -481,9 +481,10 @@ public:
 					{
 						string sCMD_Result="OK";
 						int iValue=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Value_CONST].c_str());
+						int iSize=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Size_CONST].c_str());
 						int iNodeID=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_NodeID_CONST].c_str());
 						int iParameter_ID=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Parameter_ID_CONST].c_str());
-						CMD_Set_Config_Param(iValue,iNodeID,iParameter_ID,sCMD_Result,pMessage);
+						CMD_Set_Config_Param(iValue,iSize,iNodeID,iParameter_ID,sCMD_Result,pMessage);
 						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
 						{
 							pMessage->m_bRespondedToMessage=true;
@@ -500,7 +501,7 @@ public:
 						{
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
-								CMD_Set_Config_Param(iValue,iNodeID,iParameter_ID,sCMD_Result,pMessage);
+								CMD_Set_Config_Param(iValue,iSize,iNodeID,iParameter_ID,sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;
