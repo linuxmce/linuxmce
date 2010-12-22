@@ -696,16 +696,56 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							}
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"METER DEBUG: precision: %i scale: %i size: %i value: %i",precision,scale,size,value);
 							if (precision > 0) { value = value / pow(10 , precision) ; }  // we only take the integer part for now
-							switch((unsigned char)frame[7]) { // meter type
+							switch(((unsigned char)frame[7]) & 0x1f) { // meter type
 								case METER_REPORT_ELECTRIC_METER:
-									if (scale == 0) {
-										DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Electric meter measurement received: %d kWh",value);
+									switch (scale) {
+										case 0:
+											DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Electric meter measurement received: %d kWh",value);
+											break;
+										case 1:
+											DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Electric meter measurement received: %d kVAh",value);
+											break;
+										case 2:
+											DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Electric meter measurement received: %d W",value);
+											break;
+										case 3:
+											DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Electric meter measurement received: %d pulses",value);
+											break;
 									} 
+									break;
+								case METER_REPORT_GAS_METER:
+									switch (scale) {
+										case 0:
+											DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Gas meter measurement received: %d m2",value);
+											break;
+										case 1:
+											DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Gas meter measurement received: %d cubic feet",value);
+											break;
+										case 3:
+											DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Gas meter measurement received: %d pulses",value);
+											break;
+									} 
+									break;
+								case METER_REPORT_WATER_METER:
+									switch (scale) {
+										case 0:
+											DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Water meter measurement received: %d m2",value);
+											break;
+										case 1:
+											DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Water meter measurement received: %d cubic feet",value);
+											break;
+										case 2:
+											DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Water meter measurement received: %d US gallons",value);
+											break;
+										case 3:
+											DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Water meter measurement received: %d pulses",value);
+											break;
+									} 
+									break;
 								default:
 									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"unknown METER_REPORT received: %i",(unsigned char)frame[7]);
 									break;
 							}
-							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"METER DEBUG: precision: %i scale: %i size: %i value: %i",precision,scale,size,value);
 						}
 						break;
 					;;
