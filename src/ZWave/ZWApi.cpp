@@ -707,6 +707,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 											break;
 										case 2:
 											DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Electric meter measurement received: %d W",value);
+											DCEcallback->SendPowerUsageChangedEvent((unsigned char)frame[3], -1, value);
 											break;
 										case 3:
 											DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Electric meter measurement received: %d pulses",value);
