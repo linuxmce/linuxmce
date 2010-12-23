@@ -168,6 +168,7 @@ Create_And_Config_Devices
 Configure_Network_Options
 
 # Setup skeleton files for users, as well as enabling window tweaks for the local Xorg. Only needed for Hybrid
+DisableKMS
 Setup_XOrg
 
 # We do not have any users yet, so only createing an initial smbpasswd map, and creating backups of group and passwd files.

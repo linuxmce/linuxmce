@@ -27,6 +27,6 @@ GenModeline()
 TestXConfig()
 {
 	local Display="${1:-0}" ConfigFile="${2:-/etc/X11/xorg.conf}"
-	X :$((Display+2)) -ignoreABI -probeonly -config "$ConfigFile" -logverbose 9 &>/dev/null
+	X :$((Display+2)) -ignoreABI -configure -config "$ConfigFile" -logverbose 9 &>/dev/null
 	return $?
 }

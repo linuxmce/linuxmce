@@ -176,6 +176,27 @@ function wmtweaks_default()
 }
 
 
+function DisableKMS {
+
+	cardtype=none
+
+	lspci -nn |grep nVidia|grep "VGA compatible controller" -q && cardtype=nvidia
+	  if [[ $cardtype == nvidia ]]; then
+	    echo options nouveau modeset=0 > /etc/modprobe.d/nouveau-kms.conf
+	  fi
+
+	lspci -nn |grep ATI|grep "VGA compatible controller" -q && cardtype=ati
+	  if [[ $cardtype == ati ]]; then
+	    echo options radeon modeset=0 > /etc/modprobe.d/radeon-kms.conf
+	  fi
+
+	lspci -nn |grep Intel|grep "VGA compatible controller" -q && cardtype=intel
+	  if [[ $cardtype == intel ]]; then
+	    echo options i915 modeset=0 > /etc/modprobe.d/i915-kms.conf
+	  fi
+}
+
+
 
 function Setup_XOrg {
 	## Make X accessible by Pluto software, for all existing and new users
@@ -223,6 +244,24 @@ function Setup_XOrg {
 	mkdir -p "$(dirname "$WMTweaksFile")"
 	wmtweaks_default >"$WMTweaksFile"
 	
+	## Generate xorg.conf if missing
+	if [[ ! -e /etc/X11/xorg.conf ]];then
+	X :2 -ignoreABI -configure
+	mv /root/xorg.conf.new /etc/X11/xorg.conf
+	fi
+	
+	## Get keyboard input event number
+	#cat /proc/bus/input/devices | grep -i "serio.|/input|/input.|kbd"
+	#Kbdeventid=$kbdID
+
+	## Add evdev keyboard driver if missing
+	if grep -q ".*Driver.*\"evdev\"" /etc/X11/xorg.conf ;then
+		echo "Found Driver , skiping ..."
+	else
+		sed -i 's/kbd/evdev/' /etc/X11/xorg.conf
+		sed -i 's/.*Driver.*\"evdev\"/Driver "evdev"\n Option "Device" "\/dev\/input\/event3"/g' /etc/X11/xorg.conf
+	fi
+
 	## Add xrecord extention if missing
 	if grep -q ".*Load.*\"record\"" /etc/X11/xorg.conf ;then
 		echo "Found xrecord , skiping ..."
