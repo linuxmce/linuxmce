@@ -195,7 +195,10 @@ function Create_XOrg {
 	  if [[ $cardtype == intel ]]; then
 	    echo options i915 modeset=0 > /etc/modprobe.d/i915-kms.conf
 	  fi
-
+	
+	## Check for VirtualBox Drivers
+	lspci -nn |grep InnoTek|grep "VGA compatible controller" -q && cardtype=InnoTek
+	
 	## Generate xorg.conf if missing
 	if [[ ! -e /etc/X11/xorg.conf ]];then
 	X :2 -ignoreABI -configure
@@ -205,7 +208,13 @@ function Create_XOrg {
 	## Get keyboard input event number
 	#cat /proc/bus/input/devices | grep -i "serio.|/input|/input.|kbd"
 	#Kbdeventid=$kbdID
-
+	
+	## Replace VirtualBox video drivers to vesa
+	if [[ $cardtype == InnoTek ]]; then
+		sed -i 's/vboxvideo/vesa/' /etc/X11/xorg.conf # Nvidia based host
+		sed -i 's/fbdev/vesa/' /etc/X11/xorg.conf # ATI based host
+	fi
+	
 	## Add evdev keyboard driver if missing
 	if grep -q ".*Driver.*\"evdev\"" /etc/X11/xorg.conf ;then
 		echo "Found Driver , skiping ..."
