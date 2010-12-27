@@ -10,7 +10,11 @@ CleanCoreSetup
 
 FixAsteriskConfig
 
-# addAdditionalTTYStart
+if [[ "$distro" = "lucid" ]] ; then
+	echo "NOT adding additonal Terminals on lucid"	
+else
+	addAdditionalTTYStart
+fi
 
 #To please the "PlutoRestorePoint.sh" script.
 mkdir -p /home/backup/upload
