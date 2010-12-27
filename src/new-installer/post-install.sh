@@ -19,7 +19,11 @@ mkdir -p /home/backup/upload
 apt-get install -y --force-yes kubuntu-desktop
 
 # make sure to install latest alsa drivers
-apt-get install -y --force-yes alsa-modules-`uname -r`
+if [[ "$distro" = "lucid" ]] ; then
+	echo "NOT installing alsa modules on lucid"	
+else
+	apt-get install -y --force-yes alsa-modules-`uname -r`
+fi
 
 # update-rc.d -f kdm remove
 
@@ -30,8 +34,12 @@ apt-get install -y --force-yes alsa-modules-`uname -r`
 rm -f /usr/share/initramfs-tools/conf.d/compcache && update-initramfs -u
 echo Installing the latest v4l2 modules 
 # get the latest v4l modules
-apt-get install -y --force-yes v4l2-modules
-apt-get install -y --force-yes v4l2-firmware
+if [[ "$distro" = "lucid" ]] ; then
+	echo "NOT installing v4l modules and firmware on lucid"
+else
+	apt-get install -y --force-yes v4l2-modules
+	apt-get install -y --force-yes v4l2-firmware
+fi
 
 # Remove KDM startup
 echo "Remove softlink to start KDM"

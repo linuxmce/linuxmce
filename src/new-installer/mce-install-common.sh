@@ -467,6 +467,11 @@ AutostartCore=$AutostartCore
 AutostartMedia=$AutostartMedia
 "
 	echo "$PlutoConf" > /etc/pluto.conf
+	# on lucid we don't want to run the AV Wizard
+	if [[ "$distro" = "lucid" ]]; then
+		echo "AVWizardOverride = 0" >> /etc/pluto.conf
+		echo "AVWizardDone = 1" >> /etc/pluto.conf
+	fi
 	chmod 777 /etc/pluto.conf &>/dev/null
 }
 
