@@ -16,6 +16,9 @@ case "${build_name}" in
 	"intrepid")
 		Distro_ID="17"
 		;;
+	"lucid")
+		Distro_ID="18"
+		;;
 esac
 
 
