@@ -110,7 +110,9 @@ Package: mythtv mythtv-frontend mythtv-backend mythtv-common mythtv-database myt
 Pin: origin deb.linuxmce.org
 Pin-Priority: 1001
 '
-	echo -n "$pluto_apt_preferences" >/etc/apt/preferences
+	if [[ "$distro" = "intrepid" ]] ; then
+		echo -n "$pluto_apt_preferences" >/etc/apt/preferences
+	fi
 
 	ln -s /usr/pluto/var/apt.conf.offline /etc/apt/apt.conf.d/99offline
 
@@ -143,7 +145,9 @@ Package: mythtv mythtv-frontend mythtv-backend mythtv-common mythtv-database myt
 Pin: origin deb.linuxmce.org
 Pin-Priority: 1001
 '
-	echo -n "$pluto_apt_preferences" >/etc/apt/preferences
+	if [[ "$distro" = "intrepid" ]] ; then   
+        	echo -n "$pluto_apt_preferences" >/etc/apt/preferences
+        fi
 }
 
 
