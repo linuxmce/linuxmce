@@ -33,7 +33,6 @@ kdebase-workspace
 kdebase-workspace-dev
 kdegraphics
 kdelibs
-kdemultimedia
 kdenetwork
 kdepimlibs5-dev
 kdeutils
@@ -181,8 +180,6 @@ libxvidcore-dev
 libfftw3-dev 
 xmlto
 doxygen 
-libc6-dev-amd64 
-lib64gcc1 
 gcc-multilib 
 python-dev
 yasm
@@ -192,7 +189,6 @@ liba52-0.7.4-dev
 libcdaudio1 
 libcdaudio-dev  
 libvisual-0.4-dev
-
 libmng-dev
 libtalloc-dev
 chrpath
