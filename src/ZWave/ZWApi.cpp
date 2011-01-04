@@ -284,7 +284,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					for (int i=5;i<5+MAGIC_LEN;i++) {
 						for (int j=0;j<8;j++) {
 							// printf("test node %d\n",(i-5)*8+j+1);
-							if (frame[i] & (0x01 << j)) {
+							if ((unsigned char)frame[i] & (0x01 << j)) {
 								// DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"found node %d",(i-5)*8+j+1);
 								// requesting node protocol information
 								// tempbuf[0]=0x60; // req. node info frame - test
@@ -294,6 +294,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 								sendFunction( tempbuf , 2, REQUEST, 0); 
 							} else {
 								sprintf(tempbuf,"%i",(i-5)*8+j+1);
+								DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Node id %i not in node mask, deleting",(i-5)*8+j+1);
 								DCEcallback->DeleteDevicesForNode(tempbuf);
 							}
 						}
@@ -441,7 +442,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					}
 				} else {
 					sprintf(tempbuf2, "%d", tmp_nodeid);
-					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Invalid generic class (0x%x), ignoring device",(unsigned char)frame[6]);
+					DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Invalid generic class (0x%x), ignoring device",(unsigned char)frame[6]);
 					DCEcallback->DeleteDevicesForNode(tempbuf2);
 				}
 				if (getIntentSize() == 0) {
