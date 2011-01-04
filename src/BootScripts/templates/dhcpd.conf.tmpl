@@ -21,6 +21,10 @@ allow booting;
 allow bootp;
 
 subnet %INTERNAL_SUBNET% netmask %INTERNAL_SUBNET_MASK% {
+	next-server %CORE_INTERNAL_ADDRESS%;
+	filename "/tftpboot/pxelinux.0";
+	option pxelinux.reboottime = 30;
+
 	default-lease-time 86400;
 	max-lease-time 604800;
 	%DYNAMIC_IP_RANGE%
