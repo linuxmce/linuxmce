@@ -64,7 +64,7 @@ if ! grep -q nullglob /root/.profile; then
 fi
 
 if ! grep -qF "$bash_flag" /root/.bashrc; then
-	awk '/PS1=/ {next} {print}' /root/.bashrc >/root/.bashrc.$$
+	awk '/PS1=/ {print ":"; next} {print}' /root/.bashrc >/root/.bashrc.$$
 	echo "$bash_prompt" >>/root/.bashrc.$$
 	mv -f /root/.bashrc.$$ /root/.bashrc
 fi
