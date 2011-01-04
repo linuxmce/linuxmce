@@ -306,7 +306,7 @@ void PLCBUS::receiveFunction() {
 					break;
 				case 184:
 					buf[4]=0x0c | 32 | reprq; // PRESETDIM + ACK_PULSE
-					buf[6]=0x20; // dim rate
+					buf[6]=0x3; // dim rate
 					break;
 				default:
 					buf[4]=0x02 | 32 | reprq;
