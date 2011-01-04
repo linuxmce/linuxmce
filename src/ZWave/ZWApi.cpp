@@ -2296,7 +2296,7 @@ void ZWApi::ZWApi::zwControllerRestore() {
 void ZWApi::ZWApi::zwSoftReset() {
 	char mybuf[1024];
 
-	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Soft-resetting the Z-Wave chip");
+	DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Soft-resetting the Z-Wave chip");
 	mybuf[0] = FUNC_ID_SERIAL_API_SOFT_RESET;
 	sendFunction( mybuf , 1, REQUEST, 0);
 }
@@ -2540,15 +2540,17 @@ void ZWApi::ZWApi::zwThermostatSetpointGet(int node_id,int type) {
 }
 
 void ZWApi::ZWApi::dropSendQueueJob() {
-	pthread_mutex_lock (&mutexSendQueue);
+	// pthread_mutex_lock (&mutexSendQueue);
 	ZWSendQueue.pop_front();
-	pthread_mutex_unlock (&mutexSendQueue);
-	await_callback = 0;
+	// pthread_mutex_unlock (&mutexSendQueue);
+	// await_callback = 0;
 	dropped_jobs++;
-	if( dropped_jobs >= 3 ) {
+	if( dropped_jobs >= 6 ) {
 		// If you get this error, take a look at Trac ticket #874
 		DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "ERROR: Three dropped commands in a row, soft-resetting controller");
+		pthread_mutex_unlock (&mutexSendQueue);
 		zwSoftReset();
+		pthread_mutex_lock (&mutexSendQueue);
 		dropped_jobs = 0;
 	}
 }
