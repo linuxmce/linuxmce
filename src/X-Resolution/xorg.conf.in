@@ -96,7 +96,6 @@ EndSection
 
 Section "ServerFlags"
 	Option	"AllowMouseOpenFail"	"true"
-	Option  "AutoAddDevices" 	"false"
 	Option	"BlankTime"		"0"
 	Option	"StandbyTime"	"0"
 	Option	"SuspendTime"	"0"

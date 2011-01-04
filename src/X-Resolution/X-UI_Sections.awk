@@ -55,11 +55,6 @@ function outputExtensions()
 #
 	print "\tOption \"RENDER\" \"true\"";
 	print "EndSection";
-
-	print "Section \"ServerFlags\"";
-	print "\tOption \"AutoAddDevices\" \"False\"";
-	print "EndSection";
-
 }
 
 # update Screen and Device sections
