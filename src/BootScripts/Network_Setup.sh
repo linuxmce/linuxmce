@@ -248,7 +248,7 @@ SambaDomainHost="
 PopulateSection "/etc/samba/smb.conf" "Domain and Hostname" "$SambaDomainHost"
 
 if [[ "$(pidof smbd)" != "" ]] ;then
-	service samba reload
+	service samba reload || service smbd reload
 fi
 
 if ! BlacklistConfFiles '/etc/defaultdomain' && ! BlacklistConfFiles '/etc/default/nis' ;then
