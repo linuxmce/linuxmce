@@ -72,7 +72,7 @@ getPreferredNvidiaDriver() {
 	PCI_ID=$(getPCI_ID)
 
 	case " $DRIVER_260_SUPPORTED " in *" $PCI_ID "*) 
-		echo "nvidia-glx"
+		echo "nvidia-glx-260"
 		return 1
 	esac
 	
