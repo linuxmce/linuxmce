@@ -3,6 +3,7 @@
 . /usr/pluto/bin/SQL_Ops.sh
 
 ## Misc variables
+DISTRO="$(lsb_release -c -s)"
 DEVICEDATA_Architecture=112
 Architecture=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g')
 
@@ -163,7 +164,9 @@ LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y install locales
 echo "Installing kernel"
 LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y install linux-image-diskless 
 #LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y install linux-image-diskless-${KVER} 
-LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y install linux-restricted-modules-${KVER}
+if [[ "$distro" = "intrepid" ]] ; then
+  LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y install linux-restricted-modules-${KVER}
+fi
 #LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y install linux-ubuntu-modules-${KVER}
 
 
