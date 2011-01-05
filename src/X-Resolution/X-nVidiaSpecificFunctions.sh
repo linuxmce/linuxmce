@@ -36,6 +36,7 @@ SetResolution()
 		echo 'nvidia-settings -a "SyncToVBlank=1"'
 		echo 'nvidia-settings -a "XVideoTextureSyncToVBlank=1"'
 		echo 'nvidia-settings -a "XVideoBlitterSyncToVBlank=1"'
+		echo "xrandr -r '$Refresh'"
 	) >/etc/pluto/X-PostStart.sh
 	chmod +x /etc/pluto/X-PostStart.sh
 }
