@@ -1,8 +1,23 @@
 #!/bin/sh
 
+PREREQ=""
+
+# Output pre-requisites
+prereqs()
+{
+	echo "$PREREQ"
+}
+
+case "$1" in
+    prereqs)
+	prereqs
+	exit 0
+	;;
+esac
+
 exec 1>&2
 
-DT=$(/scripts/DeviceTemplate.sh)
+DT=$(/scripts/DeviceTemplate)
 
 MyIP=`ifconfig eth0 | grep "inet addr" | sed -r 's/^.* inet addr:([0-9.]*).*/\1/g'`
 MyMAC=`ifconfig eth0 | grep "HWaddr "  | sed -r 's/^.* HWaddr ([a-zA-Z0-9:]*)/\1/g'`

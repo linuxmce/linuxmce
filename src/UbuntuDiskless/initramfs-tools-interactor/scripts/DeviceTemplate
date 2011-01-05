@@ -1,5 +1,20 @@
 #!/bin/sh
 
+PREREQ=""
+
+# Output pre-requisites
+prereqs()
+{
+	echo "$PREREQ"
+}
+
+case "$1" in
+    prereqs)
+	prereqs
+	exit 0
+	;;
+esac
+
 DT=
 #for d in /sys/bus/pci/devices/*; do
 #	if [[ ! -f "$d/vendor" ]]; then
