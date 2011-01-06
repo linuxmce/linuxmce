@@ -25,6 +25,10 @@ esac
 export PATH=$PATH:${svn_dir}/${svn_branch_name}/src/bin
 export LD_LIBRARY_PATH="$mkr_dir:${svn_dir}/${svn_branch_name}/src/lib"
 
+set | grep arch
+read
+
+
 PLUTO_BUILD_CRED=""
 if [ "$sql_build_host" ] ; then PLUTO_BUILD_CRED="$PLUTO_BUILD_CRED -h $sql_build_host"; fi
 if [ "$sql_build_port" ] ; then PLUTO_BUILD_CRED="$PLUTO_BUILD_CRED -P $sql_build_port"; fi
@@ -43,6 +47,6 @@ export MYSQL_BUILD_CRED
 SVNrevision=$(svn info "$svn_dir/$svn_branch_name/src" |grep ^Revision | cut -d" " -f2)
 
 # Compile the packages
-"${mkr_dir}/MakeRelease" -R "$SVNrevision" $PLUTO_BUILD_CRED -O "$out_dir" -D 'pluto_main_build' -o "$Distro_ID" -r 21 -m 1 -k "$1" -s "${svn_dir}/${svn_branch_name}" -n / -d
-"${mkr_dir}/MakeRelease" -R "$SVNrevision" $PLUTO_BUILD_CRED -O "$out_dir" -D 'pluto_main_build' -o "$Distro_ID" -r 21 -m 1108 -k "$1" -s "${svn_dir}/${svn_branch_name}" -n / -d
+arch=$arch "${mkr_dir}/MakeRelease" -R "$SVNrevision" $PLUTO_BUILD_CRED -O "$out_dir" -D 'pluto_main_build' -o "$Distro_ID" -r 21 -m 1 -k "$1" -s "${svn_dir}/${svn_branch_name}" -n / -d
+arch=$arch "${mkr_dir}/MakeRelease" -R "$SVNrevision" $PLUTO_BUILD_CRED -O "$out_dir" -D 'pluto_main_build' -o "$Distro_ID" -r 21 -m 1108 -k "$1" -s "${svn_dir}/${svn_branch_name}" -n / -d
 

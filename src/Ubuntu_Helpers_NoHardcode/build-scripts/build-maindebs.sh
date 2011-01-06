@@ -3,6 +3,7 @@
 . /etc/lmce-build/builder.conf
 . /usr/local/lmce-build/common/logging.sh
 . /usr/local/lmce-build/build-scripts/name-packages.sh
+. /etc/lmce-build/ubuntu.conf
 
 set -e
 #set -x
@@ -21,6 +22,7 @@ if [ "$sql_build_user" ] ; then MYSQL_BUILD_CRED="$MYSQL_BUILD_CRED -u$sql_build
 if [ "$sql_build_pass" ] ; then MYSQL_BUILD_CRED="$MYSQL_BUILD_CRED -p$sql_build_pass"; fi
 export MYSQL_BUILD_CRED
 
+#  export SNR_CPPFLAGS="$compile_defines"
 
 function build_main_debs() {
 	export PATH=$PATH:${svn_dir}/${svn_branch_name}/src/bin
@@ -99,6 +101,10 @@ function build_main_debs() {
 			# SDLMESS 
 			# does not compile atm
 			exclude_list=$exclude_list,717
+                        # MAME SNAPS and metadata
+                        exclude_list=$exclude_list,680,681
+			# 721 LinuxMCE DPMS Monitor Source
+			exclude_list=$exclude_list,721,722
 			;;
 	esac
 
@@ -109,13 +115,13 @@ function build_main_debs() {
 
 	# Compile the packages
 	echo "\"${mkr_dir}/MakeRelease\" -a -R \"$SVNrevision\" $PLUTO_BUILD_CRED -O \"$out_dir\" -D 'pluto_main_build' -o \"$Distro_ID\" -r 21 -m 1 -K \"$exclude_list\" -s \"${svn_dir}/${svn_branch_name}\" -n / -d"
-	"${mkr_dir}/MakeRelease" -a -R "$SVNrevision" $PLUTO_BUILD_CRED -O "$out_dir" -D 'pluto_main_build' -o "$Distro_ID" -r 21 -m 1 -K "$exclude_list" -s "${svn_dir}/${svn_branch_name}" -n / -d || Error "MakeRelease failed"
+	arch=$arch "${mkr_dir}/MakeRelease" -a -R "$SVNrevision" $PLUTO_BUILD_CRED -O "$out_dir" -D 'pluto_main_build' -o "$Distro_ID" -r 21 -m 1 -K "$exclude_list" -s "${svn_dir}/${svn_branch_name}" -n / -d || Error "MakeRelease failed"
 
 	# Compile the private packages
 	if [ "$svn_private_url" -a "$svn_private_user" -a "$svn_private_pass" ]
 	then
 		echo "\"${mkr_dir}/MakeRelease\" -a -R \"$SVNrevision\" $PLUTO_BUILD_CRED -O \"$out_dir\" -D 'pluto_main_build' -o \"$Distro_ID\" -r 21 -m 1108 -K \"$exclude_list\" -s \"${svn_dir}/${svn_branch_name}\" -n / -d"
-		"${mkr_dir}/MakeRelease" -a -R "$SVNrevision" $PLUTO_BUILD_CRED -O "$out_dir" -D 'pluto_main_build' -o "$Distro_ID" -r 21 -m 1108 -K "$exclude_list" -s "${svn_dir}/${svn_branch_name}" -n / -d || Error "MakeRelease failed on private packages"
+		arch=$arch "${mkr_dir}/MakeRelease" -a -R "$SVNrevision" $PLUTO_BUILD_CRED -O "$out_dir" -D 'pluto_main_build' -o "$Distro_ID" -r 21 -m 1108 -K "$exclude_list" -s "${svn_dir}/${svn_branch_name}" -n / -d || Error "MakeRelease failed on private packages"
 	fi
 }
 
