@@ -23,7 +23,7 @@ CPPFLAGS += -I$(ROOT)/MessageTranslation
 LDFLAGS +=
 XTRALDLIBS = -lruby1.8 -lSerial -lrt -lMessageTranslation
 
-ifneq (,$(findstring -DARCH64, $(CPPFLAGS)))
+ifneq (,$(findstring amd64, $(arch))) 
         CPPFLAGS += -I/usr/lib/ruby/1.8/x86_64-linux
 else
         CPPFLAGS += -I/usr/lib/ruby/1.8/i386-linux -I/usr/lib/ruby/1.8/i486-linux

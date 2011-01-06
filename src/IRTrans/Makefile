@@ -30,7 +30,7 @@ Gen_Dev_Files +=
 sources += ../LIRC_DCE/IRReceiverBase.cpp ../VFD_LCD/VFD_LCD_Base.cpp ../VFD_LCD/CoreMenuStructure.cpp ../VFD_LCD/MenuNode.cpp
 Csources += fileio.c linuxserio.c lowlevel.c server.c errormessage.c flashrom.c webserver.c xap.c
 
-ifneq (,$(findstring -DARCH64, $(CPPFLAGS)))
+ifneq (,$(findstring amd64, $(arch))) 
 	ccf-o = ccf-amd64.o
 else
 	ccf-o = ccf-i386.o
