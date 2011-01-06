@@ -24,7 +24,7 @@ CPPFLAGS += -I/usr/lib/glib-2.0/include -I/usr/include/glib-2.0 -DDEBUG -DTHREAD
 LDFLAGS += -L/usr/X11R6/lib  -L$(ROOT)/Xine_Player
 XTRALDLIBS = -ljpeg -lxine -lXtst -lX11 -lglib-2.0 -lXmu -lcdda_interface 
 
-ifneq (,$(findstring -DARCH64, $(CPPFLAGS)))
+ifneq (,$(findstring amd64, $(arch)))
 	XTRALDLIBS += -ldvdnav_xine_custom_64b
 else
 	XTRALDLIBS += -ldvdnav_xine_custom
