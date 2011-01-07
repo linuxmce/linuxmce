@@ -1,5 +1,7 @@
 #!/bin/bash
 
+DISTRO="$(lsb_release -c -s)"
+
 function CopySkeletonToFirstUser
 {
 	# The first user in a kubuntu 810 install has the ID 1000

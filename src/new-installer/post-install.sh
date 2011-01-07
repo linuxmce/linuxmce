@@ -10,7 +10,7 @@ CleanCoreSetup
 
 FixAsteriskConfig
 
-if [[ "$distro" = "lucid" ]] ; then
+if [[ "$DISTRO" = "lucid" ]] ; then
 	echo "NOT adding additonal Terminals on lucid"	
 else
 	addAdditionalTTYStart
@@ -23,7 +23,7 @@ mkdir -p /home/backup/upload
 apt-get install -y --force-yes kubuntu-desktop
 
 # make sure to install latest alsa drivers
-if [[ "$distro" = "lucid" ]] ; then
+if [[ "$DISTRO" = "lucid" ]] ; then
 	echo "NOT installing alsa modules on lucid"	
 else
 	apt-get install -y --force-yes alsa-modules-`uname -r`
@@ -38,7 +38,7 @@ fi
 rm -f /usr/share/initramfs-tools/conf.d/compcache && update-initramfs -u
 echo Installing the latest v4l2 modules 
 # get the latest v4l modules
-if [[ "$distro" = "lucid" ]] ; then
+if [[ "$DISTRO" = "lucid" ]] ; then
 	echo "NOT installing v4l modules and firmware on lucid"
 else
 	apt-get install -y --force-yes v4l2-modules

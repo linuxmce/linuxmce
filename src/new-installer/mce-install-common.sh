@@ -110,7 +110,7 @@ Package: mythtv mythtv-frontend mythtv-backend mythtv-common mythtv-database myt
 Pin: origin deb.linuxmce.org
 Pin-Priority: 1001
 '
-	if [[ "$distro" = "intrepid" ]] ; then
+	if [[ "$DISTRO" = "intrepid" ]] ; then
 		echo -n "$pluto_apt_preferences" >/etc/apt/preferences
 	fi
 
@@ -145,7 +145,7 @@ Package: mythtv mythtv-frontend mythtv-backend mythtv-common mythtv-database myt
 Pin: origin deb.linuxmce.org
 Pin-Priority: 1001
 '
-	if [[ "$distro" = "intrepid" ]] ; then   
+	if [[ "$DISTRO" = "intrepid" ]] ; then   
         	echo -n "$pluto_apt_preferences" >/etc/apt/preferences
         fi
 }
@@ -433,7 +433,7 @@ function Setup_Pluto_Conf {
 		AutostartMedia=0
 	fi
 
-	case "$distro" in
+	case "$DISTRO" in
 	"intrepid")
 		# select UI1
 		PK_DISTRO=17
@@ -472,7 +472,7 @@ AutostartMedia=$AutostartMedia
 "
 	echo "$PlutoConf" > /etc/pluto.conf
 	# on lucid we don't want to run the AV Wizard
-	if [[ "$distro" = "lucid" ]]; then
+	if [[ "$DISTRO" = "lucid" ]]; then
 		echo "AVWizardOverride = 0" >> /etc/pluto.conf
 		echo "AVWizardDone = 1" >> /etc/pluto.conf
 	fi
