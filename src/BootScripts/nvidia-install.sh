@@ -70,9 +70,15 @@ getInstalledNvidiaDriver() {
 # returns the preferred driver to install for the currently installed nVidia card.
 getPreferredNvidiaDriver() {
 	PCI_ID=$(getPCI_ID)
+	DISTRO="$(lsb_release -c -s)"
 
 	case " $DRIVER_260_SUPPORTED " in *" $PCI_ID "*) 
-		echo "nvidia-glx-260"
+		if [[ $distro = "intrepid" ]] ; then
+			# there is no 260 for intrepid; use 195 instead
+			echo "nvidia-glx-195"
+		else
+			echo "nvidia-glx-260"
+		fi
 		return 1
 	esac
 	
