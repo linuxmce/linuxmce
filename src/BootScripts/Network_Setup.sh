@@ -11,6 +11,25 @@
 
 Vars="CORE_INTERNAL_ADDRESS"
 
+if [[ ! -f /etc/network/interfaces ]]; then
+	NPflagReconfNetwork=yes
+	cat >/etc/network/interfaces <<END
+auto lo
+iface lo inet loopback
+	
+auto eth0
+iface eth0 inet dhcp
+END
+	if [[ "$NCards" -eq 2 ]]; then
+		cat >>/etc/network/interfaces <<END
+auto eth1
+iface eth1 inet static
+	address 192.168.80.1
+	netmask 255.255.255.0
+END
+	fi
+fi
+
 if [[ "$NetIfConf" == 0 || "$NPflagReconfNetwork" == yes ]]; then
 	if [[ "$NetIfConf" == 0 ]]; then
 		echo "First network config"
@@ -28,7 +47,12 @@ if [[ "$NetIfConf" == 0 || "$NPflagReconfNetwork" == yes ]]; then
 		else
 			NetIfConf="$ExtIf,$ExtIP,$ExtNetmask,$Gateway,$DNS|"
 		fi
-		IntIf="$ExtIf:0"
+		if [[ "$NCards" -eq 1 ]]; then
+			IntIf="eth0:0"
+		else
+			[[ "$ExtIf" == "eth0" ]] && IntIf="eth1" || IntIf="eth0"
+		fi
+
 		Q="SELECT IPaddress FROM Device WHERE FK_DeviceTemplate = 7"
 	        IntIP=$(RunSQL "$Q")
 		if [[ "$IntIP" == "" ]] ;then
@@ -43,7 +67,6 @@ if [[ "$NetIfConf" == 0 || "$NPflagReconfNetwork" == yes ]]; then
 		IntIP="$(echo "$DHCPsetting" | cut -d. -f-3).1"
 		if [[ "$NCards" -eq 1 ]]; then
 			IntIf="eth0:0"
-#		elif [[ "$NCards" -eq 2 ]]; then
 		else
 			[[ "$ExtIf" == "eth0" ]] && IntIf="eth1" || IntIf="eth0"
 		fi

@@ -151,7 +151,13 @@ fi
 if PackageStatus pluto-dcerouter | grep -q '^Status: install '; then
 	# Core always has an internal interface, even if it's an alias
 	if [[ -z "$IntIf" ]]; then
-		IntIf="$ExtIf:0"
+		if [[ "$NCards" -eq 1 ]]; then
+			IntIf="$ExtIf:0"
+		elif [[ "$ExtIf" == eth0 ]]; then
+			IntIf="eth1"
+		else
+			IntIf="eth0"
+		fi
 		Q="SELECT IPaddress FROM Device WHERE FK_DeviceTemplate = 7"
                 IntIP=$(RunSQL "$Q")
 		if [[ "$IntIP" == "" ]] ;then
