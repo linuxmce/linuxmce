@@ -73,7 +73,7 @@ getPreferredNvidiaDriver() {
 	DISTRO="$(lsb_release -c -s)"
 
 	case " $DRIVER_260_SUPPORTED " in *" $PCI_ID "*) 
-		if [[ $distro = "intrepid" ]] ; then
+		if [[ $DISTRO = "intrepid" ]] ; then
 			# there is no 260 for intrepid; use 195 instead
 			echo "nvidia-glx-195"
 		else
