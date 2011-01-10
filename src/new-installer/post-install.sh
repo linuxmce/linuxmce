@@ -46,9 +46,17 @@ else
 fi
 
 # Remove KDM startup
-echo "Remove softlink to start KDM"
-# an alternative would be to disable it in runlevel 5 only
-dpkg-divert --add --rename --divert /etc/init.d/kdm.wraped /etc/init.d/kdm
+echo "Prevent KDM from starting"
+echo "/bin/false" >/etc/X11/default-display-manager
+
+cp firstboot /etc/rc5.d/S90firstboot
+
+## Disable KMS
+(
+echo options nouveau modeset=0
+echo options radeon modeset=0
+echo options i915 modeset=0
+) > /etc/modprobe.d/disable-kms.conf
 
 #
 echo 

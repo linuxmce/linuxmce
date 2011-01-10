@@ -19,42 +19,6 @@ function VerifyExitCode
 }
                                                 
 
-function Replace_Mirror {
-	local mirror=$1
-	local flag='0'
-	if [[ "$mirror" == "(null)" ]] ;then
-		echo "WARNING: Replace_Mirror called with (null) mirror"
-	fi
-
-	local newlines="
-deb file:/usr/pluto/deb-cache/ ./
-deb $mirror hardy main restricted universe multiverse
-deb $mirror hardy-security main restricted universe multiverse
-deb $mirror hardy-updates  main restricted universe multiverse
-"
-
-	while read line ;do
-		if [[ "$line" == '# Choosed mirror - start' ]] ;then
-			flag='1'
-			echo "# Choosed mirror - start
-$newlines
-# Choosed mirror - end" >> /etc/apt/sources.list.$$
-		fi
-
-		if [[ "$flag" == '0' ]] ;then
-			echo "$line" >> /etc/apt/sources.list.$$
-		fi
-                
-		if [[ "$line" == '# Choosed mirror - end' ]] ;then
-			flag='0'
-		fi
-
-	done < /etc/apt/sources.list
-
-	mv -f /etc/apt/sources.list.$$ /etc/apt/sources.list
-}
-
-
 function Setup_Apt_Conffiles {	
 	## Backup initial apt sources.list
 	if [ ! -e /etc/apt/sources.list.pbackup ] ;then
@@ -64,43 +28,10 @@ function Setup_Apt_Conffiles {
 
 	## Setup apt sources.list
 	local Sources="# Pluto sources - start
-# Choosed mirror - start
-deb file:/usr/pluto/deb-cache/ ./
-deb $c_installMirror hardy main restricted multiverse universe
-deb $c_installMirror hardy-security main restricted multiverse universe
-deb $c_installMirror hardy-updates main restricted multiverse universe
 deb http://linuxmce.com/ubuntu ./
-# Choosed mirror - end
-#deb http://10.0.0.82/ ./
 # Pluto sources - end"
 	
-	local SourcesOffline="# Pluto sources offline - start
-deb file:/usr/pluto/deb-cache/ ./
-# Pluto sources offline - end"
-
-if [[ ! -z "$c_deviceType" ]] && [[ "$c_deviceType" != "3" ]] ;then
-	if ! grep -qF '# Pluto sources - start' /etc/apt/sources.list ;then
-		echo "$Sources" > /etc/apt/sources.list.$$
-		cat /etc/apt/sources.list.$$ /etc/apt/sources.list > /etc/apt/sources.list.$$.all
-		mv -f /etc/apt/sources.list.$$.all /etc/apt/sources.list
-		rm -f /etc/apt/sources.list.$$
-	else
-		Replace_Mirror "$c_installMirror"
-	fi
-else
-	echo "$SourcesOffline" > /etc/apt/sources.list.$$
-	cat /etc/apt/sources.list.$$ /etc/apt/sources.list > /etc/apt/sources.list.$$.all
-	mv -f /etc/apt/sources.list.$$.all /etc/apt/sources.list
-	rm -f /etc/apt/sources.list.$$
-fi
-
-	echo "$SourcesOffline" >/etc/apt/sources.list.offline
-
-#	if [[ "$c_ubuntuExtraCdFrom" != "3" ]] && [[ ! -z "$c_ubuntuExtraCdFrom" ]] ;then
-		#echo "Dir::Etc::sourcelist sources.list.offline;" >/etc/apt/apt.conf.d/00ubuntu_offline
-		cp /etc/apt/sources.list /etc/apt/sources.list.original
-		mv /etc/apt/sources.list.offline /etc/apt/sources.list
-#	fi
+	echo "$Sources" >/etc/apt/sources.list.d/pluto.list
 
 	Setup_Pluto_Apt_Conf
 
@@ -180,183 +111,6 @@ function wmtweaks_default()
 }
 
 
-function Create_XOrg {
-
-	cardtype=none
-
-	 ## Disable KMS based on cardtype
-	lspci -nn |grep nVidia|grep "VGA compatible controller" -q && cardtype=nvidia
-	  if [[ $cardtype == nvidia ]]; then
-	    echo options nouveau modeset=0 > /etc/modprobe.d/nouveau-kms.conf
-	  fi
-
-	lspci -nn |grep ATI|grep "VGA compatible controller" -q && cardtype=ati
-	  if [[ $cardtype == ati ]]; then
-	    echo options radeon modeset=0 > /etc/modprobe.d/radeon-kms.conf
-	  fi
-
-	lspci -nn |grep Intel|grep "VGA compatible controller" -q && cardtype=intel
-	  if [[ $cardtype == intel ]]; then
-	    echo options i915 modeset=0 > /etc/modprobe.d/i915-kms.conf
-	  fi
-	
-	## Check for VirtualBox Drivers
-	lspci -nn |grep InnoTek|grep "VGA compatible controller" -q && cardtype=InnoTek
-	
-	## Generate xorg.conf if missing
-	if [[ ! -e /etc/X11/xorg.conf ]];then
-	X :2 -ignoreABI -configure
-	mv /root/xorg.conf.new /etc/X11/xorg.conf
-	fi
-	
-	## Get keyboard input event number
-	#cat /proc/bus/input/devices | grep -i "serio.|/input|/input.|kbd"
-	#Kbdeventid=$kbdID
-	
-	## Replace VirtualBox video drivers to vesa
-	if [[ $cardtype == InnoTek ]]; then
-		sed -i 's/vboxvideo/vesa/' /etc/X11/xorg.conf # Nvidia based host
-		sed -i 's/fbdev/vesa/' /etc/X11/xorg.conf # ATI based host
-	fi
-	
-	## Add evdev keyboard driver if missing
-	if grep -q ".*Driver.*\"evdev\"" /etc/X11/xorg.conf ;then
-		echo "Found Driver , skiping ..."
-	else
-		sed -i 's/kbd/evdev/' /etc/X11/xorg.conf
-		sed -i 's/.*Driver.*\"evdev\"/Driver "evdev"\n Option "Device" "\/dev\/input\/event3"/g' /etc/X11/xorg.conf
-	fi
-}
-
-
-
-function Setup_XOrg {
-	## Make X accessible by Pluto software, for all existing and new users
-	KDExhost="#!/bin/bash
-	xhost +
-	"
-
-	for user in /home/*; do
-		if [[ ! -d "$user" ]]; then
-			continue
-		fi
-		owner=$(stat -c '%u:%g' "$user")
-
-		Dir="$user/.kde/Autostart"
-		mkdir -p "$Dir"
-		echo "$KDExhost" >"$Dir/xhost"
-		chown "$owner" "$Dir/xhost"
-		chmod +x "$Dir/xhost"
-
-		## Configure window manager trasparancy manager
-		WMTweaksFile="$user/.config/xfce4/mcs_settings/wmtweaks.xml"
-		mkdir -p "$(dirname "$WMTweaksFile")"
-
-		if [[ -f "$WMTweaksFile" ]]; then
-			sed -i '/Xfwm\/UseCompositing/ s/value="."/value="1"/g' "$WMTweaksFile"
-		else
-			wmtweaks_default >"$WMTweaksFile"
-		fi
-		
-		chown -R "$owner" "$user"/.kde
-		chown -R "$owner" "$user"/.config
-	done
-
-	Dir="/etc/skel/.kde/Autostart"
-	mkdir -p "$Dir"
-	echo "$KDExhost" >"$Dir/xhost"
-	chmod +x "$Dir/xhost"
-	
-	File="/etc/profile"
-	if ! grep -q "export KDEWM=/usr/bin/xfwm4" "$File" 2>/dev/null; then
-		echo "export KDEWM=/usr/bin/xfwm4" >>"$File"
-	fi
-
-	WMTweaksFile="/etc/skel/.config/xfce4/mcs_settings/wmtweaks.xml"
-	mkdir -p "$(dirname "$WMTweaksFile")"
-	wmtweaks_default >"$WMTweaksFile"
-	
-	## Generate xorg.conf if missing
-	if [[ ! -e /etc/X11/xorg.conf ]];then
-	X :2 -ignoreABI -configure
-	mv /root/xorg.conf.new /etc/X11/xorg.conf
-	fi
-	
-	## Get keyboard input event number
-	#cat /proc/bus/input/devices | grep -i "serio.|/input|/input.|kbd"
-	#Kbdeventid=$kbdID
-
-	## Add evdev keyboard driver if missing
-	if grep -q ".*Driver.*\"evdev\"" /etc/X11/xorg.conf ;then
-		echo "Found Driver , skiping ..."
-	else
-		sed -i 's/kbd/evdev/' /etc/X11/xorg.conf
-		sed -i 's/.*Driver.*\"evdev\"/Driver "evdev"\n Option "Device" "\/dev\/input\/event3"/g' /etc/X11/xorg.conf
-	fi
-
-	## Add xrecord extention if missing
-	if grep -q ".*Load.*\"record\"" /etc/X11/xorg.conf ;then
-		echo "Found xrecord , skiping ..."
-	else 
-		sed -i 's/.*Section.*\"Module\"/Section "Module"\n Load "record"/g' /etc/X11/xorg.conf
-	fi
-}
-
-
-
-function UI_SetOptions {
-	local OrbiterDev="$1"
-	local OpenGLeffects="$2"
-	local AlphaBlending="$3"
-	local UI_Version="$4"
-
-	DEVICEDATA_Use_OpenGL_effects=172
-	DEVICEDATA_Use_alpha_blended_UI=169
-	DEVICEDATA_PK_UI=104
-
-	# disable OpenGL effects
-	Q="REPLACE INTO Device_DeviceData(FK_Device, FK_DeviceData, IK_DeviceData)
-	     VALUES ('$OrbiterDev', '$DEVICEDATA_Use_OpenGL_effects', '$OpenGLeffects')"
-	RunSQL "$Q"
-
-	# disable alpha blending
-	Q="REPLACE INTO Device_DeviceData(FK_Device, FK_DeviceData, IK_DeviceData)
-	     VALUES ('$OrbiterDev', '$DEVICEDATA_Use_alpha_blended_UI', '$AlphaBlending')"
-	RunSQL "$Q"
-
-	# set UI	
-	Q="REPLACE INTO Device_DeviceData(FK_Device, FK_DeviceData, IK_DeviceData)
-	     VALUES ('$OrbiterDev', '$DEVICEDATA_PK_UI', '$UI_Version')"
-	RunSQL "$Q"
-
-
-	local xorg_file="/etc/X11/xorg.conf"
-	local composite_value="true"
-	if [[ "$AlphaBlending" == "0" ]] ;then
-		composite_value="false"
-	fi
-
-	if grep -qi "Section.*\"Extensions\"" "$xorg_file" ;then
-		echo 'Found `Section "Extensions"` in xorg.conf'
-
-		if grep -qi "Option \"Composite\"" "$xorg_file" ;then
-			echo 'Found `Option "Composite"` in xorg.conf'
-
-			sed -i "s/Option.*\"Composite\".*/Option \"Composite\" \"$composite_value\"/ig" "$xorg_file"
-		else
-			echo 'Not Found `Option "Composite"` in xorg.conf'
-
-			sed -i "s/Section.*\"Extensions\"/Section \"Extensions\"\\nOption \"Composite\" \"$composite_value\"/ig" "$xorg_file"
-		fi
-	else
-		echo 'Not Found `Section "Extenstions"` or `Option "Composite"`'
-		echo 'Section "Extensions"' >> "$xorg_file"
-		echo "    Option \"Composite\" \"$composite_value\"" >> "$xorg_file"
-		echo 'EndSection' >> "$xorg_file"
-	fi
-}
-
-
 
 function FakeUpdates {
 	mkdir -p /home/update
@@ -384,54 +138,9 @@ function StatsMessage {
 
 
 
-function Setup_Network_Intefaces {
-	StatsMessage "Seting Up Networking"
-	# If user is was using dhcp and now wants static ip is safe to kill this here
-	killall dhclient  &>/dev/null
-	killall dhclient3 &>/dev/null
-
-	if [[ $c_netExtUseDhcp  == "1" ]] ;then
-		echo "iface $c_netExtName inet dhcp" > /etc/network/interfaces
-		dhclient $c_netExtName || ExitInstaller "Failed to get an IP address for the external nic via DHCP."
-	else
-		echo > /etc/network/interfaces
-		echo "auto lo" >> /etc/network/interfaces
-		echo "iface lo inet loopback" >> /etc/network/interfaces
-
-		if [[ "$c_netExtIP" != "" ]] && [[ "$c_netExtName" != "" ]] &&
-		   [[ "$c_netExtMask" != "" ]] && [[ "$c_netExtGateway" != "" ]] ;then
-			echo "" >> /etc/network/interfaces
-			echo "auto $c_netExtName" >> /etc/network/interfaces
-			echo "iface $c_netExtName inet static" >> /etc/network/interfaces
-			echo "address $c_netExtIP" >> /etc/network/interfaces
-			echo "netmask $c_netExtMask" >> /etc/network/interfaces
-			echo "gateway $c_netExtGateway" >> /etc/network/interfaces
-		fi
-
-		echo > /etc/resolv.conf
-		echo "nameserver $c_netExtDNS1" >> /etc/resolv.conf
-
-
-		ifconfig $c_netIntName down
-		ifconfig $c_netExtName down
-		ifconfig $c_netExtName $c_netExtIP netmask $c_netExtMask up || ExitInstaller "Cannot set an IP address to '$c_netExtName'."
-
-		route del default gw 2>/dev/null
-		route add default gw $c_netExtGateway 2>/dev/null || ExitInstaller "Cannot setup default gateway to '$c_netExtGateway'."
-	fi
-
-}
-
-
-
 function Setup_Pluto_Conf {
-	if [[ "$c_startupType" == 1 ]]; then
-		AutostartCore=1
-		AutostartMedia=1
-	else
-		AutostartCore=0
-		AutostartMedia=0
-	fi
+	AutostartCore=1
+	AutostartMedia=1
 
 	case "$DISTRO" in
 	"intrepid")
@@ -472,10 +181,10 @@ AutostartMedia=$AutostartMedia
 "
 	echo "$PlutoConf" > /etc/pluto.conf
 	# on lucid we don't want to run the AV Wizard
-	if [[ "$DISTRO" = "lucid" ]]; then
-		echo "AVWizardOverride = 0" >> /etc/pluto.conf
-		echo "AVWizardDone = 1" >> /etc/pluto.conf
-	fi
+#	if [[ "$DISTRO" = "lucid" ]]; then
+#		echo "AVWizardOverride = 0" >> /etc/pluto.conf
+#		echo "AVWizardDone = 1" >> /etc/pluto.conf
+#	fi
 	chmod 777 /etc/pluto.conf &>/dev/null
 }
 
@@ -542,7 +251,7 @@ function Create_And_Config_Devices {
 	RunSQL "$Q"
 
 	## Create a hybrid if needed
-	if [[ "$c_deviceType" == "2" ]] ;then
+#	if [[ "$c_deviceType" == "2" ]] ;then
 		StatsMessage "Setting up your computer to act as a 'Media Director'"
 		/usr/pluto/bin/CreateDevice -d $DEVICE_TEMPLATE_MediaDirector -C "$Core_PK_Device"
 		Hybrid_DT=$(RunSQL "SELECT PK_Device FROM Device WHERE FK_DeviceTemplate='$DEVICE_TEMPLATE_MediaDirector' LIMIT 1")
@@ -554,24 +263,24 @@ function Create_And_Config_Devices {
 		Q="SELECT PK_Device FROM Device WHERE FK_Device_ControlledVia='$Hybrid_DT' AND FK_DeviceTemplate=62"
 		OrbiterDevice=$(RunSQL "$Q")
 
-		case "$c_installUI" in
-			"0")
-				# select UI1
-				UI_SetOptions "$OrbiterDevice" 0 0 1
-			;;
-			"1")
-				# select UI2 without alpha blending
-				UI_SetOptions "$OrbiterDevice" 1 0 4
-			;;
-			"2")
-				# select UI2 with alpha blending
-				UI_SetOptions "$OrbiterDevice" 1 1 4
-			;;
-			*)
-				echo "Unknown UI version: $c_installUI"
-			;;
-		esac
-	fi
+#		case "$c_installUI" in
+#			"0")
+#				# select UI1
+#				UI_SetOptions "$OrbiterDevice" 0 0 1
+#			;;
+#			"1")
+#				# select UI2 without alpha blending
+#				UI_SetOptions "$OrbiterDevice" 1 0 4
+#			;;
+#			"2")
+#				# select UI2 with alpha blending
+#				UI_SetOptions "$OrbiterDevice" 1 1 4
+#			;;
+#			*)
+#				echo "Unknown UI version: $c_installUI"
+#			;;
+#		esac
+#	fi
 
 	StatsMessage "Configuring the LinuxMCE devices"
         # "DCERouter postinstall"
@@ -579,119 +288,42 @@ function Create_And_Config_Devices {
         #       It now worked (thanks to tail -2 instead of tail +2), and returns the last two device IDs.
         devices=$(echo "SELECT PK_Device FROM Device;" | /usr/bin/mysql pluto_main | tail -2 | tr '\n' ' ')
 
-	for i in $devices; do
-		echo "Running device $i"
-
-		#run the following with the device
-		# Add missing data by template
-		Q1="INSERT INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData)
-		SELECT PK_Device,DeviceTemplate_DeviceData.FK_DeviceData,DeviceTemplate_DeviceData.IK_DeviceData
-		FROM Device
-		JOIN DeviceTemplate ON Device.FK_DeviceTemplate=PK_DeviceTemplate
-		JOIN DeviceTemplate_DeviceData on DeviceTemplate_DeviceData.FK_DeviceTemplate=PK_DeviceTemplate
-		LEFT JOIN Device_DeviceData ON FK_Device=PK_Device AND Device_DeviceData.FK_DeviceData=DeviceTemplate_DeviceData.FK_DeviceData
-		WHERE Device_DeviceData.FK_Device IS NULL AND PK_Device=$i;"
-
-		# Add for the category
-		Q2="INSERT INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData)
-		SELECT PK_Device,DeviceCategory_DeviceData.FK_DeviceData,DeviceCategory_DeviceData.IK_DeviceData
-		FROM Device
-		JOIN DeviceTemplate ON Device.FK_DeviceTemplate=PK_DeviceTemplate
-		JOIN DeviceCategory_DeviceData on DeviceCategory_DeviceData.FK_DeviceCategory=DeviceTemplate.FK_DeviceCategory
-		LEFT JOIN Device_DeviceData ON FK_Device=PK_Device AND Device_DeviceData.FK_DeviceData=DeviceCategory_DeviceData.FK_DeviceData
-		WHERE Device_DeviceData.FK_Device IS NULL AND PK_Device=$i;"
-
-		# Add for parent's category
-		Q3="INSERT INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData)
-		SELECT PK_Device,DeviceCategory_DeviceData.FK_DeviceData,DeviceCategory_DeviceData.IK_DeviceData
-		FROM Device
-		JOIN DeviceTemplate ON Device.FK_DeviceTemplate=PK_DeviceTemplate
-		JOIN DeviceCategory ON DeviceTemplate.FK_DeviceCategory=PK_DeviceCategory
-		JOIN DeviceCategory_DeviceData on DeviceCategory_DeviceData.FK_DeviceCategory=DeviceCategory.FK_DeviceCategory_Parent
-		LEFT JOIN Device_DeviceData ON FK_Device=PK_Device AND Device_DeviceData.FK_DeviceData=DeviceCategory_DeviceData.FK_DeviceData
-		WHERE Device_DeviceData.FK_Device IS NULL AND PK_Device=$i;"
-
-		(echo "$Q1"; echo "$Q2"; echo "$Q3";) | /usr/bin/mysql pluto_main
-	done
+#	for i in $devices; do
+#		echo "Running device $i"
+#
+#		#run the following with the device
+#		# Add missing data by template
+#		Q1="INSERT INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData)
+#		SELECT PK_Device,DeviceTemplate_DeviceData.FK_DeviceData,DeviceTemplate_DeviceData.IK_DeviceData
+#		FROM Device
+#		JOIN DeviceTemplate ON Device.FK_DeviceTemplate=PK_DeviceTemplate
+#		JOIN DeviceTemplate_DeviceData on DeviceTemplate_DeviceData.FK_DeviceTemplate=PK_DeviceTemplate
+#		LEFT JOIN Device_DeviceData ON FK_Device=PK_Device AND Device_DeviceData.FK_DeviceData=DeviceTemplate_DeviceData.FK_DeviceData
+#		WHERE Device_DeviceData.FK_Device IS NULL AND PK_Device=$i;"
+#
+#		# Add for the category
+#		Q2="INSERT INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData)
+#		SELECT PK_Device,DeviceCategory_DeviceData.FK_DeviceData,DeviceCategory_DeviceData.IK_DeviceData
+#		FROM Device
+#		JOIN DeviceTemplate ON Device.FK_DeviceTemplate=PK_DeviceTemplate
+#		JOIN DeviceCategory_DeviceData on DeviceCategory_DeviceData.FK_DeviceCategory=DeviceTemplate.FK_DeviceCategory
+#		LEFT JOIN Device_DeviceData ON FK_Device=PK_Device AND Device_DeviceData.FK_DeviceData=DeviceCategory_DeviceData.FK_DeviceData
+#		WHERE Device_DeviceData.FK_Device IS NULL AND PK_Device=$i;"
+#
+#		# Add for parent's category
+#		Q3="INSERT INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData)
+#		SELECT PK_Device,DeviceCategory_DeviceData.FK_DeviceData,DeviceCategory_DeviceData.IK_DeviceData
+#		FROM Device
+#		JOIN DeviceTemplate ON Device.FK_DeviceTemplate=PK_DeviceTemplate
+#		JOIN DeviceCategory ON DeviceTemplate.FK_DeviceCategory=PK_DeviceCategory
+#		JOIN DeviceCategory_DeviceData on DeviceCategory_DeviceData.FK_DeviceCategory=DeviceCategory.FK_DeviceCategory_Parent
+#		LEFT JOIN Device_DeviceData ON FK_Device=PK_Device AND Device_DeviceData.FK_DeviceData=DeviceCategory_DeviceData.FK_DeviceData
+#		WHERE Device_DeviceData.FK_Device IS NULL AND PK_Device=$i;"
+#
+#		(echo "$Q1"; echo "$Q2"; echo "$Q3";) | /usr/bin/mysql pluto_main
+#	done
 
 	/usr/pluto/bin/Update_StartupScrips.sh
-}
-
-
-
-function Configure_Network_Options {
-	StatsMessage "Configuring your internal network"
-	. /usr/pluto/bin/SQL_Ops.sh
-
-	## Setup /etc/hosts
-	echo > /etc/hosts
-	echo "127.0.0.1 localhost.localdomain localhost" >> /etc/hosts
-	echo "$c_netExtIP dcerouter $(/bin/hostname)"    >> /etc/hosts
-
-	error=false
-	Network=""
-	Digits_Count=0
-
-	for Digits in $(echo "$c_netIntIPN" | tr '.' ' ') ;do
-		[[ "$Digits" == *[^0-9]* ]]            && error=true
-		[[ $Digits -lt 0 || $Digits -gt 255 ]] && error=true
-
-		if [[ "$Network" == "" ]] ;then
-			Network="$Digits"
-		else
-			Network="${Network}.${Digits}"
-		fi
-
-		Digits_Count=$(( $Digits_Count + 1 ))
-	done
-	[[ $Digits_Count -lt 1 || $Digits_Count -gt 3 ]] && error=true
-
-	if [[ "$error" == "true" ]] ;then
-		Network="192.168.80"
-		Digits_Count="3"
-	fi
-
-	IntIP="$Network"
-	IntNetmask=""
-	for i in `seq 1 $Digits_Count` ;do
-		if [[ "$IntNetmask" == "" ]] ;then
-			IntNetmask="255"
-		else
-			IntNetmask="${IntNetmask}.255"
-		fi
-	done
-	for i in `seq $Digits_Count 3` ;do
-		if [[ $i == "3" ]] ;then
-			IntIP="${IntIP}.1"
-		else
-			IntIP="${IntIP}.0"
-		fi
-
-		IntNetmask="${IntNetmask}.0"
-	done
-
-	if [[ "$c_netIntName" == "" ]] ;then
-		IntIf="$c_netExtName:0"
-	else
-		IntIf="$c_netIntName"
-	fi
-
-	if [[ "$c_netExtUseDhcp" == "0" ]] ;then
-		NETsetting="$c_netExtName,$c_netExtIP,$c_netExtMask,$c_netExtGateway,$c_netExtDNS1|$IntIf,$IntIP,$IntNetmask"
-	else
-		NETsetting="$c_netExtName,dhcp|$IntIf,$IntIP,$IntNetmask"
-	fi
-	
-	DHCPsetting=$(/usr/pluto/install/Initial_DHCP_Config.sh "$Network" "$Digits_Count")
-
-	Q="REPLACE INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData) VALUES('$Core_PK_Device',32,'$NETsetting')"
-	RunSQL "$Q"
-	if [[ "$c_runDhcpServer" == "1" ]]; then
-		Q="REPLACE INTO Device_DeviceData(FK_Device, FK_DeviceData, IK_DeviceData)
-			VALUES($Core_PK_Device, 28, '$DHCPsetting')"
-		RunSQL "$Q"
-	fi
-
 }
 
 
