@@ -100,7 +100,7 @@ SetupX()
 			whiptail --msgbox "Failed to setup X" 0 0 --title "AVWizard" --clear </dev/tty8 &>/dev/tty8
 		fi
 	fi
-	sed -ir '/Option.*"Composite"/d' "$XF86Config"
+	sed -ri '/Option.*"Composite"/d' "$XF86Config"
 	WMTweaksFile="/root/.config/xfce4/mcs_settings/wmtweaks.xml"
 	cp "$WMTweaksFile"{,.orig}
 	sed -i '/Xfwm\/UseCompositing/ s/value="."/value="1"/g' "$WMTweaksFile"
@@ -317,21 +317,6 @@ SetupViaXine()
 	local Q OrbiterDev XineDev
 #
 }
-
-VerifyAlsaModuleInstall()
-{
-	local Installed="0"
-	local DriverPackage="alsa-modules-`uname -r`"
-	dpkg -l $DriverPackage && Installed="1"
-	if [[ "$Installed" == "0" ]]; then
-		apt-get install $DriverPackage && shutdown -r now
-	fi
-	apt-get install alsa-utils libasound2 lib64asound2 libasound2-plugins
-	
-}
-
-# Before doing anything else, we make sure that Alsa is installed.
-VerifyAlsaModuleInstall
 
 ConfSet AVWizardOverride 0
 rm -f /tmp/AVWizard_Started
