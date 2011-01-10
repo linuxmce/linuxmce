@@ -23,19 +23,19 @@ from XKit import xorgparser
 from XKit.xorgparser import *
 import sys
 import os
+import shutil
 
 def main(argv=sys.argv):
+    DollarDollar = str(os.getpid()); # equivalent to $$ in Bash
     '''
     Replace the first line of this example with a source and a destination file
     '''
     ResolutionString = ' '.join([argv[1], argv[2]])
-    #source = argv[3]
-    source = '/etc/X11/xorg.conf'
-    destination = '.'.join([source,'$$'])
-    #destination = os.path.join(os.path.expanduser('~'), 'xorgnew.txt')
-    #destination = '/etc/X11/xorg.conf.$$'
-    #source = '/etc/X11/xorg.conf'
-    # source = None
+    if (len(argv) > 3):
+      source = argv[3]
+    else:
+      source = '/etc/X11/xorg.conf'
+    destination = '.'.join([source,DollarDollar])
     a = Parser(source)
 
     '''
@@ -190,5 +190,6 @@ def main(argv=sys.argv):
     Write the changes to the destination file
     '''
     a.writeFile(destination)
+    shutil.move(source, destination);
 
 if __name__ == '__main__': main()
