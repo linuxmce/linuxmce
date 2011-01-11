@@ -1228,6 +1228,10 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 						newNode->associationList[3]="";
 						newNode->plutoDeviceTemplateConst = getDeviceTemplate((unsigned char)frame[5],(unsigned char)frame[6],(unsigned char)frame[7],NULL,0);
 
+
+						if ((unsigned char)frame[5] == BASIC_TYPE_ROUTING_SLAVE) {
+							zwAssignSUCReturnRoute((unsigned char)frame[3]);
+						}
 						parseNodeInfo((unsigned char)frame[3],&(frame[8]),(unsigned char)frame[4]-3);
 
 						ZWNodeMap.insert(std::map < int, ZWNode * >::value_type((unsigned char)frame[3],newNode));
@@ -2574,3 +2578,15 @@ void ZWApi::ZWApi::zwGetBatteryLevel(int node_id){
 
 	}
 }
+
+bool ZWApi::ZWApi::zwAssignSUCReturnRoute(int node_id){
+
+	char mybuf[1024];
+
+	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Assigning SUC return route for node %i",node_id);
+	mybuf[0] = FUNC_ID_ZW_ASSIGN_SUC_RETURN_ROUTE;
+	mybuf[1] = node_id;
+	sendFunction( mybuf , 2, REQUEST, 1);
+	return true;
+}
+

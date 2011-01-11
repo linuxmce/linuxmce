@@ -55,6 +55,7 @@
 #define FUNC_ID_ZW_REQUEST_NODE_NEIGHBOR_UPDATE         0x48
 #define FUNC_ID_ZW_SEND_DATA                            0x13
 #define FUNC_ID_ZW_SET_LEARN_MODE                       0x50
+#define FUNC_ID_ZW_ASSIGN_SUC_RETURN_ROUTE		0x51
 #define FUNC_ID_ZW_ENABLE_SUC                           0x52
 #define FUNC_ID_ZW_SET_SUC_NODE_ID                      0x54
 #define FUNC_ID_ZW_GET_SUC_NODE_ID                      0x56
@@ -575,6 +576,8 @@ namespace ZWApi {
 	void zwRequestMultilevelSensorReportInstance(int node_id,int instance);
 	
 	void zwSoftReset();
+
+	bool zwAssignSUCReturnRoute(int node_id);
 
 	void resetNodeInstanceCount(ZWNode *node, std::string capa);
 	void multiInstanceGetAllCCsForNode(unsigned int node_id);
