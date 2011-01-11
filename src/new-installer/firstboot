@@ -27,6 +27,7 @@ if [[ "$NCards" -gt 1 ]] && dhclient -1 eth1; then
 	ExtIf=eth1
 	IntIf=eth0
 fi
+killall dhclient
 
 cat >/etc/network/interfaces <<END
 auto lo
