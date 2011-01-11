@@ -294,7 +294,6 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 								sendFunction( tempbuf , 2, REQUEST, 0); 
 							} else {
 								sprintf(tempbuf,"%i",(i-5)*8+j+1);
-								DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Node id %i not in node mask, deleting",(i-5)*8+j+1);
 								DCEcallback->DeleteDevicesForNode(tempbuf);
 							}
 						}

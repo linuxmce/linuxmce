@@ -801,6 +801,8 @@ bool ZWave::DeleteDevicesForNode(string sInternalID) {
 		{
 		        pTargetChildDevice = (*it);
 			CMD_Delete_Device del_command(m_dwPK_Device,4,pTargetChildDevice->m_dwPK_Device);
+			DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Deleting DCE child %i",pTargetChildDevice->m_dwPK_Device);
+
 			SendCommand(del_command);
 		}
 		return true;
