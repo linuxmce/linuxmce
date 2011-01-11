@@ -190,6 +190,6 @@ def main(argv=sys.argv):
     Write the changes to the destination file
     '''
     a.writeFile(destination)
-    shutil.move(source, destination);
+    shutil.move(destination, source);
 
 if __name__ == '__main__': main()
