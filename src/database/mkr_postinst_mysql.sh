@@ -26,6 +26,7 @@ if ! BlacklistConfFiles "$MyCnf" ;then
 	collation-server=utf8_general_ci
 	skip-character-set-client-handshake  # Tells to server to ignore client's charset for connetion
 	skip-name-resolve
+	innodb-flush-log-at-trx-commit = 2
 	"> /etc/mysql/conf.d/lmce-my.cnf
 
 	Q="GRANT ALL PRIVILEGES ON pluto_main.* to 'root'@'127.0.0.1';"
