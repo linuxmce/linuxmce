@@ -11,25 +11,6 @@
 
 Vars="CORE_INTERNAL_ADDRESS"
 
-if [[ ! -f /etc/network/interfaces ]]; then
-	NPflagReconfNetwork=yes
-	cat >/etc/network/interfaces <<END
-auto lo
-iface lo inet loopback
-	
-auto eth0
-iface eth0 inet dhcp
-END
-	if [[ "$NCards" -eq 2 ]]; then
-		cat >>/etc/network/interfaces <<END
-auto eth1
-iface eth1 inet static
-	address 192.168.80.1
-	netmask 255.255.255.0
-END
-	fi
-fi
-
 if [[ "$NetIfConf" == 0 || "$NPflagReconfNetwork" == yes ]]; then
 	if [[ "$NetIfConf" == 0 ]]; then
 		echo "First network config"
