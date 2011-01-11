@@ -801,7 +801,7 @@ bool ZWave::DeleteDevicesForNode(string sInternalID) {
 		{
 		        pTargetChildDevice = (*it);
 			CMD_Delete_Device del_command(m_dwPK_Device,4,pTargetChildDevice->m_dwPK_Device);
-			DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Deleting DCE child %i",pTargetChildDevice->m_dwPK_Device);
+			DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Deleting DCE child %i, z-wave node id %s",pTargetChildDevice->m_dwPK_Device,sInternalID.c_str());
 
 			SendCommand(del_command);
 		}
@@ -955,7 +955,8 @@ vector<DeviceData_Impl*> ZWave::FindDevicesForNode(string sInternalID) {
                 {
 		        string tmp_node_id = pChildDevice->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 			// check if child exists
-			if ( StringUtils::StartsWith(tmp_node_id, sInternalIDInst) ) {
+			if ( tmp_node_id.compare(sInternalIDInst) == 0) {
+			// if ( StringUtils::StartsWith(tmp_node_id, sInternalIDInst) ) {
 			      vecDevices.push_back(pChildDevice);
 			}
 
@@ -968,7 +969,8 @@ vector<DeviceData_Impl*> ZWave::FindDevicesForNode(string sInternalID) {
 				if( pChildDevice1 != NULL )
 				{
 					string tmp_node_id = pChildDevice1->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
-					if ( StringUtils::StartsWith(tmp_node_id, sInternalIDInst) ) {
+					if ( tmp_node_id.compare(sInternalIDInst) == 0) {
+					// if ( StringUtils::StartsWith(tmp_node_id, sInternalIDInst) ) {
 					         vecDevices.push_back(pChildDevice1);
 					}
 				}
