@@ -979,7 +979,7 @@ vector<DeviceData_Impl*> ZWave::FindDevicesForNode(string sInternalID) {
 						StringUtils::Tokenize(tmp_node_id, "/", parts);
 						tmp_node_id = parts[0];
 					} 
-					if ( StringUtils::StartsWith(tmp_node_id, sInternalIDInst) ) {
+					if ( tmp_node_id.compare(sInternalIDInst) == 0) {
 					         vecDevices.push_back(pChildDevice1);
 					}
 				}
