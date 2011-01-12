@@ -7,7 +7,9 @@ update-rc.d LMCEUpdate start 98 2 . > /dev/null
 KEEPOLD=0
 grep -q "^# Dont overwrite" /etc/apt/preferences 2>/dev/null && KEEPOLD=1
 
-if [[ "$KEEPOLD" -eq "0" ]]; then
+DISTRO=$(lsb_release -c|awk '{print $2}')
+
+if [[ "$KEEPOLD" -eq "0" && "$DISTRO" == intrepid ]]; then
 	echo '
 # We take MythTV from our repo always
 Package: mythtv mythtv-frontend mythtv-backend mythtv-common mythtv-database mythtv-transcode-utils mythweb libmythtv-perl libmyth python-myth mythtv-themes mythplugins mytharchive mytharchive-data mythbrowser mythgallery mythgame mythmovies mythmusic mythnetvison mythnetvision-data mythnews mythvideo mythweather mythzoneminder myth-doc 
