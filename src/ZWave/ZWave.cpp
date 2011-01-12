@@ -311,6 +311,10 @@ void ZWave::CMD_StatusReport(string sArguments,string &sCMD_Result,Message *pMes
 		myZWApi->zwControllerBackup();
 	} else if (sArguments.find('R') != std::string::npos) {
 		myZWApi->zwControllerRestore();
+	} else if (sArguments.find('S') != std::string::npos) {
+		myZWApi->zwRequestMultilevelSensorReport(11);
+	} else if (sArguments.find('P') != std::string::npos) {
+		myZWApi->zwSetPromiscMode(1);
 	} else {
 		myZWApi->zwSoftReset();
 		sleep(2);

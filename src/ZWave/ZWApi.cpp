@@ -206,7 +206,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 		switch (frame[1]) {
 			case FUNC_ID_ZW_GET_SUC_NODE_ID:
 				DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"Got reply to GET_SUC_NODE_ID, node: %d",frame[2]);
-				if (frame[2] == 0) {
+				if ((unsigned char)frame[2] == 0) {
 					DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"No SUC, we become SUC");
 					tempbuf[0]=FUNC_ID_ZW_ENABLE_SUC;
 					tempbuf[1]=1; // 0=SUC,1=SIS
@@ -219,6 +219,11 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					tempbuf[3]=0; // no low power
 					tempbuf[4]=ZW_SUC_FUNC_NODEID_SERVER;
 					sendFunction( tempbuf , 5, REQUEST, 1); 
+				} else {
+					DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"requesting network update from SUC");
+					tempbuf[0]=FUNC_ID_ZW_REQUEST_NETWORK_UPDATE;
+					sendFunction(tempbuf, 1, REQUEST, 1);
+
 				}
 				break;
 			;;
@@ -2380,7 +2385,10 @@ void ZWApi::ZWApi::zwRequestVersion(int node_id) {
 void ZWApi::ZWApi::zwStatusReport() {
 	ZWNodeMapIt = ZWNodeMap.begin();
 	while (ZWNodeMapIt!=ZWNodeMap.end()) {
-		zwRequestNodeNeighborUpdate((*ZWNodeMapIt).first);
+		ZWNode *node = (*ZWNodeMapIt).second;
+		if (!(node->sleepingDevice)) {
+			zwRequestNodeNeighborUpdate((*ZWNodeMapIt).first);
+		}
 //		zwRequestManufacturerSpecificReport((*ZWNodeMapIt).first);
 		ZWNodeMapIt++;
 	}
@@ -2388,10 +2396,6 @@ void ZWApi::ZWApi::zwStatusReport() {
 //		zwReadMemory(64*i);
 //	}
 //
-	zwMultiInstanceGet(13, COMMAND_CLASS_SENSOR_MULTILEVEL);
-	zwRequestMultilevelSensorReportInstance(13,1);
-	zwRequestMultilevelSensorReportInstance(13,2);
-	zwRequestMultilevelSensorReportInstance(13,3);
 }
 
 void ZWApi::ZWApi::zwPollDevices(bool onoff) {
@@ -2590,3 +2594,12 @@ bool ZWApi::ZWApi::zwAssignSUCReturnRoute(int node_id){
 	return true;
 }
 
+bool ZWApi::ZWApi::zwSetPromiscMode(bool promisc){
+	char mybuf[1024];
+
+	DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Setting promisc mode");
+	mybuf[0] = 0xd0;
+	mybuf[1] = promisc;
+	sendFunction( mybuf , 2, REQUEST, 0);
+	return true;
+}

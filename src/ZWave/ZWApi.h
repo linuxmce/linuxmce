@@ -57,6 +57,7 @@
 #define FUNC_ID_ZW_SET_LEARN_MODE                       0x50
 #define FUNC_ID_ZW_ASSIGN_SUC_RETURN_ROUTE		0x51
 #define FUNC_ID_ZW_ENABLE_SUC                           0x52
+#define FUNC_ID_ZW_REQUEST_NETWORK_UPDATE		0x53
 #define FUNC_ID_ZW_SET_SUC_NODE_ID                      0x54
 #define FUNC_ID_ZW_GET_SUC_NODE_ID                      0x56
 #define FUNC_ID_ZW_ADD_NODE_TO_NETWORK			0x4a
@@ -578,6 +579,7 @@ namespace ZWApi {
 	void zwSoftReset();
 
 	bool zwAssignSUCReturnRoute(int node_id);
+	bool zwSetPromiscMode(bool promisc);
 
 	void resetNodeInstanceCount(ZWNode *node, std::string capa);
 	void multiInstanceGetAllCCsForNode(unsigned int node_id);
