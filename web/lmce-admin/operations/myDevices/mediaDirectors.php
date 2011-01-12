@@ -32,6 +32,7 @@ function mediaDirectors($output,$dbADO) {
 		"High" => "tvtime:method=Greedy,enabled=1,pulldown=none,framerate_mode=half_top,judder_correction=0,use_progressive_frame_flag=1,chroma_filter=0,cheap_mode=0",
 		"Higher" => "tvtime:method=Greedy2Frame,enabled=1,pulldown=vektor,framerate_mode=full,judder_correction=0,use_progressive_frame_flag=1,chroma_filter=0,cheap_mode=0",
 		"Highest" => "tvtime:method=Greedy2Frame,enabled=1,pulldown=vektor,framerate_mode=full,judder_correction=1,use_progressive_frame_flag=1,chroma_filter=1,cheap_mode=0",
+		"vdpau" => "tvtime:method=use_vo_driver",
 		"Custom"=>"*"));
 	$uiArray=array(
 		'001'=>'UI1',
