@@ -954,6 +954,11 @@ vector<DeviceData_Impl*> ZWave::FindDevicesForNode(string sInternalID) {
                 if( pChildDevice != NULL )
                 {
 		        string tmp_node_id = pChildDevice->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+			if (tmp_node_id.find("/") != string::npos) {
+ 	                        vector<string> parts;
+ 	                        StringUtils::Tokenize(tmp_node_id, "/", parts);
+ 	                        tmp_node_id = parts[0];
+ 	                } 
 			// check if child exists
 			if ( tmp_node_id.compare(sInternalIDInst) == 0) {
 			// if ( StringUtils::StartsWith(tmp_node_id, sInternalIDInst) ) {
@@ -969,8 +974,12 @@ vector<DeviceData_Impl*> ZWave::FindDevicesForNode(string sInternalID) {
 				if( pChildDevice1 != NULL )
 				{
 					string tmp_node_id = pChildDevice1->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
-					if ( tmp_node_id.compare(sInternalIDInst) == 0) {
-					// if ( StringUtils::StartsWith(tmp_node_id, sInternalIDInst) ) {
+					if (tmp_node_id.find("/") != string::npos) {
+						vector<string> parts;
+						StringUtils::Tokenize(tmp_node_id, "/", parts);
+						tmp_node_id = parts[0];
+					} 
+					if ( StringUtils::StartsWith(tmp_node_id, sInternalIDInst) ) {
 					         vecDevices.push_back(pChildDevice1);
 					}
 				}
