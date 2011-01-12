@@ -256,8 +256,7 @@ if [[ -d /usr/share/doc/libdvdcss2 ]] ;then
 fi
 
 LC_ALL=C chroot $TEMP_DIR apt-get -y install kubuntu-desktop
-mv "$TEMP_DIR"/etc/init.d/kdm{,.save}
-mv "$TEMP_DIR"/etc/rc2.d/*kdm "$TEMP_DIR"/etc/rc2.d/S99kdm
+echo '/bin/false' >"$TEMP_DIR/etc/X11/default-display-manager"
 # Remove whatever 
 LC_ALL=C chroot $TEMP_DIR update-rc.d -f kdm remove
 LC_ALL=C chroot $TEMP_DIR update-rc.d -f NetworkManager remove
