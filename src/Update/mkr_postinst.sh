@@ -7,7 +7,7 @@ update-rc.d LMCEUpdate start 98 2 . > /dev/null
 KEEPOLD=0
 grep -q "^# Dont overwrite" /etc/apt/preferences 2>/dev/null && KEEPOLD=1
 
-DISTRO=$(lsb_release -c|awk '{print $2}')
+DISTRO=$(lsb_release -cs)
 
 if [[ "$KEEPOLD" -eq "0" && "$DISTRO" == intrepid ]]; then
 	echo '
