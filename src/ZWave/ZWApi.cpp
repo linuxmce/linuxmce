@@ -219,7 +219,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					tempbuf[3]=0; // no low power
 					tempbuf[4]=ZW_SUC_FUNC_NODEID_SERVER;
 					sendFunction( tempbuf , 5, REQUEST, 1); 
-				} else {
+				} else if ((unsigned char)frame[2] != ournodeid) {
 					DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"requesting network update from SUC");
 					tempbuf[0]=FUNC_ID_ZW_REQUEST_NETWORK_UPDATE;
 					sendFunction(tempbuf, 1, REQUEST, 1);
@@ -228,8 +228,9 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 				break;
 			;;
 			case ZW_MEMORY_GET_ID:
-				DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"Got reply to ZW_MEMORY_GET_ID, Home id: 0x%02x%02x%02x%02x, our node id: %d",(unsigned char) frame[2],(unsigned char) frame[3],(unsigned char)frame[4],(unsigned char)frame[5],(unsigned char)frame[6]);
-				ournodeid = frame[6];
+				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got reply to ZW_MEMORY_GET_ID:");
+				DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Home id: 0x%02x%02x%02x%02x, our node id: %d",(unsigned char) frame[2],(unsigned char) frame[3],(unsigned char)frame[4],(unsigned char)frame[5],(unsigned char)frame[6]);
+				ournodeid = (unsigned char)frame[6];
 				break;
 			;;
 			case ZW_MEM_GET_BUFFER:
@@ -482,7 +483,14 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 				}
 
 				break;
-
+			case FUNC_ID_SERIAL_API_GET_CAPABILITIES:
+				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got reply to FUNC_ID_SERIAL_API_GET_CAPABILITIES:");
+				DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"SerAppV:%i,r%i,Manf %i,Typ %i,Prod %i",(unsigned char)frame[2],(unsigned char)frame[3], ((unsigned char)frame[4]<<8) + (unsigned char)frame[5],((unsigned char)frame[6]<<8) + (unsigned char)frame[7],((unsigned char)frame[8]<<8) + (unsigned char)frame[9]);	
+				break;
+			case ZW_GET_VERSION:
+				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got reply to ZW_VERSION:");
+				DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ZWave Version: %c.%c%c",(unsigned char)frame[9],(unsigned char)frame[11],(unsigned char)frame[12]);	
+				break;
 			default:
 				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"TODO: handle response for 0x%x ",(unsigned char)frame[1]);
 				break;
@@ -759,8 +767,20 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					case COMMAND_CLASS_MANUFACTURER_SPECIFIC:
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_MANUFACTURER_SPECIFIC");
 						if (frame[6] == MANUFACTURER_SPECIFIC_REPORT) {
-							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"REPORT: Manuf ID1: 0x%x ID2: 0x%x, Prod Typ1: 0x%x Typ2: 0x%x, Prod ID1: 0x%x ID2: 0x%x",
-								(unsigned char)frame[7], (unsigned char)frame[8], (unsigned char)frame[9], (unsigned char)frame[10], (unsigned char)frame[11], (unsigned char)frame[12]);
+							int manuf=0;int prod=0; int type=0;
+
+							manuf = ((unsigned char)frame[7]<<8) + (unsigned char)frame[8];
+							type = ((unsigned char)frame[9]<<8) + (unsigned char)frame[10];
+							prod = ((unsigned char)frame[11]<<8) + (unsigned char)frame[12];
+
+							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"REPORT: Manuf: 0x%x, Prod Typ: 0x%x, Prod 0x%x", manuf,type,prod);
+
+							/* switch ( manuf ) {
+								case 0x64: printf("Popp\n");
+								break;;
+								default: printf("none\n");
+							}	*/ 
+							
 						}
 
 						break;
@@ -2388,14 +2408,10 @@ void ZWApi::ZWApi::zwStatusReport() {
 		ZWNode *node = (*ZWNodeMapIt).second;
 		if (!(node->sleepingDevice)) {
 			zwRequestNodeNeighborUpdate((*ZWNodeMapIt).first);
+		//	zwRequestManufacturerSpecificReport((*ZWNodeMapIt).first);
 		}
-//		zwRequestManufacturerSpecificReport((*ZWNodeMapIt).first);
 		ZWNodeMapIt++;
 	}
-//	for (int i=0;i<512;i++) {
-//		zwReadMemory(64*i);
-//	}
-//
 }
 
 void ZWApi::ZWApi::zwPollDevices(bool onoff) {
