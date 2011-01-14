@@ -17,3 +17,4 @@ sipgate (try for free, pay as you go)	http://www.sipgate.co.uk/	sipgate	SIP
 teliax (US number, pay incoming)	http://www.teliax.com/	teliax-out	IAX
 voipwa (AU)	http://www.voipwa.net.au	voipwa	IAX
 WhistlePhone (US, free ad-supported)	http://whistlephone.com	WhistlePhone	SIP
+Visual Online (Luxembourg)      http://www.vo.lu        visualonline    SIP
