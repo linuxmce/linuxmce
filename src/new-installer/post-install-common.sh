@@ -71,10 +71,15 @@ EOF
 
 function addAdditionalTTYStart
 {
-	echo "start on runlevel 5">>/etc/event.d/tty2
-	echo "start on runlevel 5">>/etc/event.d/tty3
-	echo "start on runlevel 5">>/etc/event.d/tty4
-	
+	if [[ "$DISTRO" = "lucid" ]] ; then
+		sed -i 's/23/235/' /etc/init/tty2.conf
+		sed -i 's/23/235/' /etc/init/tty3.conf
+		sed -i 's/23/235/' /etc/init/tty4.conf
+	else
+        	echo "start on runlevel 5">>/etc/event.d/tty2
+        	echo "start on runlevel 5">>/etc/event.d/tty3
+        	echo "start on runlevel 5">>/etc/event.d/tty4
+	fi
 }
 
 
