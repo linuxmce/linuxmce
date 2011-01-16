@@ -75,6 +75,9 @@ function addAdditionalTTYStart
 		sed -i 's/23/235/' /etc/init/tty2.conf
 		sed -i 's/23/235/' /etc/init/tty3.conf
 		sed -i 's/23/235/' /etc/init/tty4.conf
+		# disable plymouth splash for now. Could be replaced by own LMCE splash later
+		sed -i 's/ splash//' /etc/default/grub
+                /usr/sbin/update-grub
 	else
         	echo "start on runlevel 5">>/etc/event.d/tty2
         	echo "start on runlevel 5">>/etc/event.d/tty3
