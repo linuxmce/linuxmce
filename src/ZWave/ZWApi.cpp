@@ -65,7 +65,7 @@ void *ZWApi::ZWApi::init(const char *device) {
 	memory_dump_offset = -1;
 	memory_dump_counter = 0;
 	memory_dump_len = -1;
-
+	maxnodeid = 0;
 
  	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Open serial port %s",device);
 	OpenSerialPortEx(device,&serialPort);
@@ -203,7 +203,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 	char tempbuf[512];
 	char tempbuf2[512];
 	if (frame[0] == RESPONSE) {
-		switch (frame[1]) {
+		switch ((unsigned char)frame[1]) {
 			case FUNC_ID_ZW_GET_SUC_NODE_ID:
 				DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"Got reply to GET_SUC_NODE_ID, node: %d",frame[2]);
 				if ((unsigned char)frame[2] == 0) {
@@ -225,6 +225,17 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					sendFunction(tempbuf, 1, REQUEST, 1);
 
 				}
+				break;
+			;;
+			case ZW_GET_ROUTING_INFO:
+				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got reply to ZW_GET_ROUTING_INFO:");
+				printf("RINFO:");
+				for (int i=1; i<=maxnodeid; i++) {
+					bool nodebit;
+					nodebit = (unsigned char)frame[2+i/8] & (1<<((i%8)-1));
+					printf("%c", nodebit ? 'Y' : 'N'); 
+				}
+				printf("\n");
 				break;
 			;;
 			case ZW_MEMORY_GET_ID:
@@ -317,6 +328,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 				if (frame[6] != 0) {
 					// printf("***FOUND NODE:\n");
 					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"***FOUND NODE: %d",tmp_nodeid);
+					if (tmp_nodeid > maxnodeid) { maxnodeid = tmp_nodeid; }
 					newNode = new ZWNode(tmp_nodeid);
 					newNode->plutoDeviceTemplateConst=0;
 					newNode->typeBasic = (unsigned char) frame[5];
@@ -457,10 +469,11 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					ZWNodeMapIt = ZWNodeMap.begin();
 					while (ZWNodeMapIt!=ZWNodeMap.end()) {
 					        DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"Node: %i basic: 0x%x generic: 0x%x specific: 0x%x pluto: %i",(*ZWNodeMapIt).first,(*ZWNodeMapIt).second->typeBasic,(*ZWNodeMapIt).second->typeGeneric,(*ZWNodeMapIt).second->typeSpecific,(*ZWNodeMapIt).second->plutoDeviceTemplateConst);
+						zwGetRoutingInfo((*ZWNodeMapIt).first);
 						ZWNodeMapIt++;
 		
 					}
-				
+						
 					// DCEcallback->CMD_Report_Child_Devices();
 					
 				}
@@ -2619,3 +2632,17 @@ bool ZWApi::ZWApi::zwSetPromiscMode(bool promisc){
 	sendFunction( mybuf , 2, REQUEST, 0);
 	return true;
 }
+
+void ZWApi::ZWApi::zwGetRoutingInfo(int node_id){
+	char mybuf[1024];
+
+        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Fetching neighbor list from node %i",node_id);
+	mybuf[0] = ZW_GET_ROUTING_INFO;
+	mybuf[1] = node_id;
+	mybuf[2] = 0;
+	mybuf[3] = 0;
+	sendFunction( mybuf , 4, REQUEST, 0);
+
+
+}
+

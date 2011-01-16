@@ -64,6 +64,7 @@
 #define FUNC_ID_ZW_REMOVE_NODE_FROM_NETWORK		0x4b
 #define FUNC_ID_ZW_REQUEST_NODE_INFO                    0x60
 #define FUNC_ID_ZW_REMOVE_FAILED_NODE_ID                0x61
+#define ZW_GET_ROUTING_INFO			0x80
 
 #define ADD_NODE_ANY					0x01
 #define ADD_NODE_STOP					0x05
@@ -422,6 +423,8 @@ namespace ZWApi {
 	// the node id of our dongle
 	int ournodeid;
 
+	int maxnodeid;
+
 	// controller dump
 	int memory_dump_offset;
 	int memory_dump_len;
@@ -580,6 +583,7 @@ namespace ZWApi {
 
 	bool zwAssignSUCReturnRoute(int node_id);
 	bool zwSetPromiscMode(bool promisc);
+	void zwGetRoutingInfo(int node_id);
 
 	void resetNodeInstanceCount(ZWNode *node, std::string capa);
 	void multiInstanceGetAllCCsForNode(unsigned int node_id);
