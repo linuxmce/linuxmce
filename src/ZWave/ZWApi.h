@@ -353,6 +353,7 @@
 #define COMMAND_CLASS_ZIP_SERVER			0x24
 #define COMMAND_CLASS_ZIP_SERVICES			0x23
 
+#include <string>
 #include <deque>
 #include <map>
 #include <iostream>
@@ -424,6 +425,10 @@ namespace ZWApi {
 	int ournodeid;
 
 	int maxnodeid;
+
+
+	// string to hold the routing table
+	std::string routingtable;
 
 	// controller dump
 	int memory_dump_offset;

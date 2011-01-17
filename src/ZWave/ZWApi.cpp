@@ -200,6 +200,7 @@ void ZWApi::ZWApi::handleCommandSensorMultilevelReport(int nodeid, int instance_
 
 void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 	ZWNode *newNode = NULL;
+	int k; // int helper
 	char tempbuf[512];
 	char tempbuf2[512];
 	if (frame[0] == RESPONSE) {
@@ -229,13 +230,26 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 			;;
 			case ZW_GET_ROUTING_INFO:
 				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got reply to ZW_GET_ROUTING_INFO:");
-				printf("RINFO:");
+				k = getIntent(2);
+				sprintf(tempbuf,"Node %3i: ",k);
+				routingtable.append(tempbuf);
+				// printf("RINFO: %i",getIntent(2));
 				for (int i=1; i<=maxnodeid; i++) {
 					bool nodebit;
 					nodebit = (unsigned char)frame[2+i/8] & (1<<((i%8)-1));
-					printf("%c", nodebit ? 'Y' : 'N'); 
+					// printf("%c", nodebit ? 'Y' : 'N'); 
+					if (nodebit) {
+						routingtable.append("Y");
+					} else {
+						routingtable.append("N");
+					}
 				}
-				printf("\n");
+				// printf("\n");
+				routingtable.append("\n");
+				if (k==maxnodeid) {
+
+					DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"\n%s\n",routingtable.c_str());
+				}
 				break;
 			;;
 			case ZW_MEMORY_GET_ID:
@@ -470,6 +484,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					while (ZWNodeMapIt!=ZWNodeMap.end()) {
 					        DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"Node: %i basic: 0x%x generic: 0x%x specific: 0x%x pluto: %i",(*ZWNodeMapIt).first,(*ZWNodeMapIt).second->typeBasic,(*ZWNodeMapIt).second->typeGeneric,(*ZWNodeMapIt).second->typeSpecific,(*ZWNodeMapIt).second->plutoDeviceTemplateConst);
 						zwGetRoutingInfo((*ZWNodeMapIt).first);
+						addIntent((*ZWNodeMapIt).first,2);
 						ZWNodeMapIt++;
 		
 					}
