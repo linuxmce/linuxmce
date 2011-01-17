@@ -74,7 +74,7 @@ while ($datapoint = mysql_fetch_array($query)){
      if ($t==0){
           $firstDate=date ("Y-m-d H:i:s", strtotime('-'.$days.'days'));
           $queryLast = mysql_query('SELECT PK_Datapoints, Datapoint, timestamp FROM Datapoints 
-	       WHERE EK_Device = '.$device.' AND timestamp < DATE_SUB(NOW(), INTERVAL '.$days.' DAY) ORDER BY timestamp DESC LIMIT 1');
+	       WHERE EK_Device = '.$device.' AND timestamp < DATE_SUB(NOW(), INTERVAL '.$days.' DAY) AND `FK_Unit` = '.$unit.' ORDER BY timestamp DESC LIMIT 1');
 	  if (mysql_numrows($queryLast)==0){
 	       $prevDatapoint=0;
 	  }
@@ -147,6 +147,13 @@ $Plot->setFillColor($color);
 // Add grid
 $Grid =& Image_Graph::factory('line_grid');
 $Plotarea->add($Grid);
+
+// Add marker
+$Marker =& Image_Graph::factory('Image_Graph_Marker_Box');
+$Marker->setFillColor('blue@0.4');
+$Marker->setLineColor('black');
+$Marker->setSize(3);
+$Plot->setMarker($Marker);
 
 $Graph->done(); 
 ?>
