@@ -11,12 +11,12 @@ CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
 BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
-MYNAME = 1Wire
+MYNAME = OneWire
 VERSION = 2.0.0
 MYDEVTEMPLATEID = 2161mplateID
 
-Gen_Dev_Files = $(GENDEV)/1WireBase.cpp
-sources = Main.cpp 1Wire.cpp $(Gen_Dev_Files)
+Gen_Dev_Files = $(GENDEV)/OneWireBase.cpp
+sources = Main.cpp OneWire.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=
@@ -35,23 +35,23 @@ whattodo:
 
 all: bin so
 
-bin: 1Wire
+bin: OneWire
 
-so: 1Wire.so
+so: OneWire.so
 
-1Wire.so: $(sources:.cpp=.o)
+OneWire.so: $(sources:.cpp=.o)
 	$(CXX) -shared -o $(MYNAME).so $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	cp $@ ../bin
 	chmod +x post_make.sh
 	./post_make.sh $@
 		
-1Wire: $(sources:.cpp=.o)
+OneWire: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	cp $@ ../bin
 	./post_make.sh $@
 
 clean: clean-recursive
-	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) 1Wire.bin 1Wire.so >/dev/null
+	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) OneWire.bin OneWire.so >/dev/null
 
 package:
 	chmod +x make_package.sh

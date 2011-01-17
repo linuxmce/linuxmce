@@ -1,5 +1,5 @@
-#ifndef 1WireBase_h
-#define 1WireBase_h
+#ifndef OneWireBase_h
+#define OneWireBase_h
 #include "DeviceData_Impl.h"
 #include "Message.h"
 #include "Command_Impl.h"
@@ -24,16 +24,16 @@ namespace DCE
 * @brief OUR EVENT CLASS
 */
 
-class 1Wire_Event : public Event_Impl
+class OneWire_Event : public Event_Impl
 {
 public:
 
 	/**
 	* @brief Constructors
 	*/
-	1Wire_Event(int DeviceID, string ServerAddress, bool bConnectEventHandler=true) :
+	OneWire_Event(int DeviceID, string ServerAddress, bool bConnectEventHandler=true) :
 		Event_Impl(DeviceID, DEVICETEMPLATE_1Wire_CONST, ServerAddress, bConnectEventHandler, SOCKET_TIMEOUT) {};
-	1Wire_Event(class ClientSocket *pOCClientSocket, int DeviceID) : Event_Impl(pOCClientSocket, DeviceID) {};
+	OneWire_Event(class ClientSocket *pOCClientSocket, int DeviceID) : Event_Impl(pOCClientSocket, DeviceID) {};
 
 	/**
 	* @brief Events builder method
@@ -51,14 +51,14 @@ public:
 * @brief OUR DATA CLASS
 */
 
-class 1Wire_Data : public DeviceData_Impl
+class OneWire_Data : public DeviceData_Impl
 {
 public:
 
 	/**
 	* @brief No-op destructor
 	*/
-	virtual ~1Wire_Data() {};
+	virtual ~OneWire_Data() {};
 
 	/**
 	* @brief Builder data method
@@ -74,7 +74,7 @@ public:
 	/**
 	* @brief Returns the description of the device
 	*/
-	virtual const char *GetDeviceDescription() { return "1Wire"; } ;
+	virtual const char *GetDeviceDescription() { return "OneWire"; } ;
 
 	/**
 	* @brief Device data access methods:
@@ -91,17 +91,17 @@ public:
 
 //   OUR COMMAND CLASS 
 
-class 1Wire_Command : public Command_Impl
+class OneWire_Command : public Command_Impl
 {
 public:
-	1Wire_Command(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL)
+	OneWire_Command(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL)
 	: Command_Impl(DeviceID, ServerAddress, bLocalMode, pRouter)
 	{
 	}
 	virtual bool GetConfig()
 	{
 		m_pData=NULL;
-		m_pEvent = new 1Wire_Event(m_dwPK_Device, m_sHostName, !m_bLocalMode);
+		m_pEvent = new OneWire_Event(m_dwPK_Device, m_sHostName, !m_bLocalMode);
 		if( m_pEvent->m_dwPK_Device )
 			m_dwPK_Device = m_pEvent->m_dwPK_Device;
 		if( m_sIPAddress!=m_pEvent->m_pClientSocket->m_sIPAddress )	
@@ -114,7 +114,7 @@ public:
 				while( m_pEvent->m_pClientSocket->m_eLastError==cs_err_BadDevice && (m_dwPK_Device = DeviceIdInvalid())!=0 )
 				{
 					delete m_pEvent;
-					m_pEvent = new 1Wire_Event(m_dwPK_Device, m_sHostName, !m_bLocalMode);
+					m_pEvent = new OneWire_Event(m_dwPK_Device, m_sHostName, !m_bLocalMode);
 					if( m_pEvent->m_dwPK_Device )
 						m_dwPK_Device = m_pEvent->m_dwPK_Device;
 				}
@@ -138,7 +138,7 @@ public:
 		
 		if( m_bLocalMode )
 		{
-			m_pData = new 1Wire_Data();
+			m_pData = new OneWire_Data();
 			return true;
 		}
 		if( (m_pEvent->m_pClientSocket->m_eLastError!=cs_err_None && m_pEvent->m_pClientSocket->m_eLastError!=cs_err_NeedReload) || m_pEvent->m_pClientSocket->m_Socket==INVALID_SOCKET )
@@ -147,7 +147,7 @@ public:
 		int Size; char *pConfig = m_pEvent->GetConfig(Size);
 		if( !pConfig )
 			return false;
-		m_pData = new 1Wire_Data();
+		m_pData = new OneWire_Data();
 		if( Size )
 		{
 			if( m_pData->SerializeRead(Size,pConfig)==false )
@@ -178,11 +178,11 @@ public:
 		PostConfigCleanup();
 		return true;
 	};
-	1Wire_Command(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter) : Command_Impl(pPrimaryDeviceCommand, pData, pEvent, pRouter) {};
-	virtual ~1Wire_Command() {};
-	1Wire_Event *GetEvents() { return (1Wire_Event *) m_pEvent; };
-	1Wire_Data *GetData() { return (1Wire_Data *) m_pData; };
-	const char *GetClassName() { return "1Wire_Command"; };
+	OneWire_Command(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter) : Command_Impl(pPrimaryDeviceCommand, pData, pEvent, pRouter) {};
+	virtual ~OneWire_Command() {};
+	OneWire_Event *GetEvents() { return (OneWire_Event *) m_pEvent; };
+	OneWire_Data *GetData() { return (OneWire_Data *) m_pData; };
+	const char *GetClassName() { return "OneWire_Command"; };
 	virtual int PK_DeviceTemplate_get() { return DEVICETEMPLATE_1Wire_CONST; };
 	static int PK_DeviceTemplate_get_static() { return DEVICETEMPLATE_1Wire_CONST; };
 	virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage) { };
@@ -192,6 +192,10 @@ public:
 	string DATA_Get_COM_Port_on_PC() { return GetData()->Get_COM_Port_on_PC(); }
 	//Event accessors
 	//Commands - Override these to handle commands from the server
+	virtual void CMD_Report_Child_Devices(string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Send_Command_To_Child(string sID,int iPK_Command,string sParameters,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Reset(string sArguments,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_StatusReport(string sArguments,string &sCMD_Result,class Message *pMessage) {};
 
 	//This distributes a received message to your handler.
 	virtual ReceivedMessageResult ReceivedMessage(class Message *pMessageOriginal)
@@ -217,7 +221,122 @@ public:
 		for(int s=-1;s<(int) pMessageOriginal->m_vectExtraMessages.size(); ++s)
 		{
 			Message *pMessage = s>=0 ? pMessageOriginal->m_vectExtraMessages[s] : pMessageOriginal;
-			 if( pMessage->m_dwMessage_Type == MESSAGETYPE_COMMAND )
+			if (pMessage->m_dwPK_Device_To==m_dwPK_Device && pMessage->m_dwMessage_Type == MESSAGETYPE_COMMAND)
+			{
+				// Only buffer single messages, otherwise the caller won't know which messages were buffered and which weren't
+				if( m_pMessageBuffer && pMessage->m_bCanBuffer && pMessageOriginal->m_vectExtraMessages.size()==1 && m_pMessageBuffer->BufferMessage(pMessage) )
+					return rmr_Buffered;
+				switch(pMessage->m_dwID)
+				{
+				case COMMAND_Report_Child_Devices_CONST:
+					{
+						string sCMD_Result="OK";
+						CMD_Report_Child_Devices(sCMD_Result,pMessage);
+						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
+							pMessageOut->m_mapParameters[0]=sCMD_Result;
+							SendMessage(pMessageOut);
+						}
+						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							SendString(sCMD_Result);
+						}
+						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
+						{
+							int iRepeat=atoi(itRepeat->second.c_str());
+							for(int i=2;i<=iRepeat;++i)
+								CMD_Report_Child_Devices(sCMD_Result,pMessage);
+						}
+					};
+					iHandled++;
+					continue;
+				case COMMAND_Send_Command_To_Child_CONST:
+					{
+						string sCMD_Result="OK";
+						string sID=pMessage->m_mapParameters[COMMANDPARAMETER_ID_CONST];
+						int iPK_Command=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_PK_Command_CONST].c_str());
+						string sParameters=pMessage->m_mapParameters[COMMANDPARAMETER_Parameters_CONST];
+						CMD_Send_Command_To_Child(sID.c_str(),iPK_Command,sParameters.c_str(),sCMD_Result,pMessage);
+						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
+							pMessageOut->m_mapParameters[0]=sCMD_Result;
+							SendMessage(pMessageOut);
+						}
+						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							SendString(sCMD_Result);
+						}
+						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
+						{
+							int iRepeat=atoi(itRepeat->second.c_str());
+							for(int i=2;i<=iRepeat;++i)
+								CMD_Send_Command_To_Child(sID.c_str(),iPK_Command,sParameters.c_str(),sCMD_Result,pMessage);
+						}
+					};
+					iHandled++;
+					continue;
+				case COMMAND_Reset_CONST:
+					{
+						string sCMD_Result="OK";
+						string sArguments=pMessage->m_mapParameters[COMMANDPARAMETER_Arguments_CONST];
+						CMD_Reset(sArguments.c_str(),sCMD_Result,pMessage);
+						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
+							pMessageOut->m_mapParameters[0]=sCMD_Result;
+							SendMessage(pMessageOut);
+						}
+						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							SendString(sCMD_Result);
+						}
+						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
+						{
+							int iRepeat=atoi(itRepeat->second.c_str());
+							for(int i=2;i<=iRepeat;++i)
+								CMD_Reset(sArguments.c_str(),sCMD_Result,pMessage);
+						}
+					};
+					iHandled++;
+					continue;
+				case COMMAND_StatusReport_CONST:
+					{
+						string sCMD_Result="OK";
+						string sArguments=pMessage->m_mapParameters[COMMANDPARAMETER_Arguments_CONST];
+						CMD_StatusReport(sArguments.c_str(),sCMD_Result,pMessage);
+						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
+							pMessageOut->m_mapParameters[0]=sCMD_Result;
+							SendMessage(pMessageOut);
+						}
+						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							SendString(sCMD_Result);
+						}
+						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
+						{
+							int iRepeat=atoi(itRepeat->second.c_str());
+							for(int i=2;i<=iRepeat;++i)
+								CMD_StatusReport(sArguments.c_str(),sCMD_Result,pMessage);
+						}
+					};
+					iHandled++;
+					continue;
+				}
+				iHandled += (Command_Impl::ReceivedMessage(pMessage)==rmr_NotProcessed ? 0 : 1);
+			}
+			else if( pMessage->m_dwMessage_Type == MESSAGETYPE_COMMAND )
 			{
 				MapCommand_Impl::iterator it = m_mapCommandImpl_Children.find(pMessage->m_dwPK_Device_To);
 				if( it!=m_mapCommandImpl_Children.end() && !(*it).second->m_bGeneric )

@@ -14,7 +14,7 @@
 
 */
 //<-dceag-d-b->
-#include "1Wire.h"
+#include "OneWire.h"
 #include "DCE/Logger.h"
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
@@ -29,31 +29,31 @@ using namespace DCE;
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
-1Wire::1Wire(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
-	: 1Wire_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
+OneWire::OneWire(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
+	: OneWire_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
 }
 
 //<-dceag-const2-b->
 // The constructor when the class is created as an embedded instance within another stand-alone device
-1Wire::1Wire(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
-	: 1Wire_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
+OneWire::OneWire(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
+	: OneWire_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
 //<-dceag-const2-e->
 {
 }
 
 //<-dceag-dest-b->
-1Wire::~1Wire()
+OneWire::~OneWire()
 //<-dceag-dest-e->
 {
 	
 }
 
 //<-dceag-getconfig-b->
-bool 1Wire::GetConfig()
+bool OneWire::GetConfig()
 {
-	if( !1Wire_Command::GetConfig() )
+	if( !OneWire_Command::GetConfig() )
 		return false;
 //<-dceag-getconfig-e->
 
@@ -64,7 +64,7 @@ bool 1Wire::GetConfig()
 
 //<-dceag-reg-b->
 // This function will only be used if this device is loaded into the DCE Router's memory space as a plug-in.  Otherwise Connect() will be called from the main()
-bool 1Wire::Register()
+bool OneWire::Register()
 //<-dceag-reg-e->
 {
 	return Connect(PK_DeviceTemplate_get()); 
@@ -74,9 +74,9 @@ bool 1Wire::Register()
 	cannot include the actual implementation.  Instead there's an extern function declared, and the actual new exists here.  You 
 	can safely remove this block (put a ! after the dceag-createinst-b block) if this device is not embedded within other devices. */
 //<-dceag-createinst-b->
-1Wire_Command *Create_1Wire(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
+OneWire_Command *Create_OneWire(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
 {
-	return new 1Wire(pPrimaryDeviceCommand, pData, pEvent, pRouter);
+	return new OneWire(pPrimaryDeviceCommand, pData, pEvent, pRouter);
 }
 //<-dceag-createinst-e->
 
@@ -89,7 +89,7 @@ bool 1Wire::Register()
 	should change the sCMD_Result to OK
 */
 //<-dceag-cmdch-b->
-void 1Wire::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
+void OneWire::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
 	sCMD_Result = "UNHANDLED CHILD";
@@ -101,7 +101,7 @@ void 1Wire::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 	should change the sCMD_Result to OK
 */
 //<-dceag-cmduk-b->
-void 1Wire::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
+void OneWire::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 //<-dceag-cmduk-e->
 {
 	sCMD_Result = "UNKNOWN COMMAND";
@@ -116,7 +116,7 @@ Without the !, everything between <=dceag-sometag-b-> and <=dceag-sometag-e->
 will be replaced by DCEGenerator each time it is run with the normal merge selection.
 The above blocks are actually <- not <=.  We don't want a substitution here
 
-void 1Wire::SomeFunction()
+void OneWire::SomeFunction()
 {
 	// If this is going to be loaded into the router as a plug-in, you can implement: 	virtual bool Register();
 	// to do all your registration, such as creating message interceptors
@@ -195,5 +195,66 @@ void 1Wire::SomeFunction()
 	COMMANDS TO IMPLEMENT
 
 */
+
+//<-dceag-c756-b->
+
+	/** @brief COMMAND: #756 - Report Child Devices */
+	/** Report all the child sensors this has by firing an event 'Reporting Child Devices' */
+
+void OneWire::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMessage)
+//<-dceag-c756-e->
+{
+	cout << "Need to implement command #756 - Report Child Devices" << endl;
+}
+
+//<-dceag-c760-b->
+
+	/** @brief COMMAND: #760 - Send Command To Child */
+	/** After reporting new child devices, there may be children we want to test, but we haven't done a quick reload router and can't send them messages directly.  This way we can send 'live' messages to children */
+		/** @param #10 ID */
+			/** The internal ID used for this device--not the Pluto device ID. */
+		/** @param #154 PK_Command */
+			/** The command to send */
+		/** @param #202 Parameters */
+			/** Parameters for the command in the format:
+PK_CommandParameter|Value|... */
+
+void OneWire::CMD_Send_Command_To_Child(string sID,int iPK_Command,string sParameters,string &sCMD_Result,Message *pMessage)
+//<-dceag-c760-e->
+{
+	cout << "Need to implement command #760 - Send Command To Child" << endl;
+	cout << "Parm #10 - ID=" << sID << endl;
+	cout << "Parm #154 - PK_Command=" << iPK_Command << endl;
+	cout << "Parm #202 - Parameters=" << sParameters << endl;
+}
+
+//<-dceag-c776-b->
+
+	/** @brief COMMAND: #776 - Reset */
+	/** Reset device. */
+		/** @param #51 Arguments */
+			/** Argument string
+NOEMON or CANBUS */
+
+void OneWire::CMD_Reset(string sArguments,string &sCMD_Result,Message *pMessage)
+//<-dceag-c776-e->
+{
+	cout << "Need to implement command #776 - Reset" << endl;
+	cout << "Parm #51 - Arguments=" << sArguments << endl;
+}
+
+//<-dceag-c788-b->
+
+	/** @brief COMMAND: #788 - StatusReport */
+	/** Test comand. Asq a report */
+		/** @param #51 Arguments */
+			/** Argument string */
+
+void OneWire::CMD_StatusReport(string sArguments,string &sCMD_Result,Message *pMessage)
+//<-dceag-c788-e->
+{
+	cout << "Need to implement command #788 - StatusReport" << endl;
+	cout << "Parm #51 - Arguments=" << sArguments << endl;
+}
 
 

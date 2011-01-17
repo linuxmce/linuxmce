@@ -1,11 +1,11 @@
-#include "1WireBase.h"
+#include "OneWireBase.h"
 #include "DeviceData_Impl.h"
 #include "Logger.h"
 
 using namespace DCE;
-#include "1WireBase.h"
-extern 1Wire_Command *Create_1Wire(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
-DeviceData_Impl *1Wire_Data::CreateData(DeviceData_Impl *Parent,char *pDataBlock,unsigned long AllocatedSize,char *CurrentPosition)
+#include "OneWireBase.h"
+extern OneWire_Command *Create_OneWire(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
+DeviceData_Impl *OneWire_Data::CreateData(DeviceData_Impl *Parent,char *pDataBlock,unsigned long AllocatedSize,char *CurrentPosition)
 {
 	// Peek ahead in the stream.  We're going to pass in the above pointers anyway so it won't affect the position
 	SerializeClass b;
@@ -15,22 +15,22 @@ DeviceData_Impl *1Wire_Data::CreateData(DeviceData_Impl *Parent,char *pDataBlock
 	int iPK_DeviceTemplate = b.Read_unsigned_long();
 	switch(iPK_DeviceTemplate) {
 		case 2161:
-			return new 1Wire_Data();
+			return new OneWire_Data();
 	};
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got CreateData for unknown type %d.", iPK_DeviceTemplate);
 	return NULL;
 }
 
-Event_Impl *1Wire_Event::CreateEvent( unsigned long dwPK_DeviceTemplate, ClientSocket *pOCClientSocket, unsigned long dwDevice )
+Event_Impl *OneWire_Event::CreateEvent( unsigned long dwPK_DeviceTemplate, ClientSocket *pOCClientSocket, unsigned long dwDevice )
 {
 	switch(dwPK_DeviceTemplate) {
 		case 2161:
-			return (Event_Impl *) new 1Wire_Event(pOCClientSocket, dwDevice);
+			return (Event_Impl *) new OneWire_Event(pOCClientSocket, dwDevice);
 	};
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got CreateEvent for unknown type %d.", dwPK_DeviceTemplate);
 	return NULL;
 }
-Command_Impl  *1Wire_Command::CreateCommand(int PK_DeviceTemplate, Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent)
+Command_Impl  *OneWire_Command::CreateCommand(int PK_DeviceTemplate, Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent)
 {
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got CreateCommand for unknown type %d.", PK_DeviceTemplate);
 	return NULL;
