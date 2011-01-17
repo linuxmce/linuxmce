@@ -256,6 +256,8 @@ void OneWire::readDevices() {
 			// OW_get("/28.B37956020000/temperature",&buf,&s) ;
 			OW_get(tmp,&buf,&s);
 			sscanf(buf,"%f",&temp);
+			// strip whitespace on buf
+			sprintf(buf, "%.2f",temp);
 			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Temperature for %s: %.2f",id.c_str(),temp);
 		
 			mapIt = sensorValueMap.find(id);
