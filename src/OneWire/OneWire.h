@@ -1,10 +1,5 @@
 /*
-     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
-
-     www.plutohome.com
-
-     Phone: +1 (877) 758-8648
- 
+     Copyright (C) 2011 Harald Klein <hari@vt100.at>
 
      This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
      This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
@@ -22,6 +17,9 @@
 #include "Gen_Devices/OneWireBase.h"
 //<-dceag-d-e->
 
+#include "PlutoUtils/LinuxSerialUSB.h"
+#include <vector>
+
 //<-dceag-decl-b->
 namespace DCE
 {
@@ -29,6 +27,7 @@ namespace DCE
 	{
 //<-dceag-decl-e->
 		// Private member variables
+		static pthread_t readThread;
 
 		// Private methods
 public:
@@ -44,7 +43,9 @@ public:
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
-
+		virtual DeviceData_Impl *InternalIDToDevice(string sInternalID);
+                virtual void receiveFunction();
+                virtual void readDevices();
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
 		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file

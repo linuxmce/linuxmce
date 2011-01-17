@@ -5,15 +5,15 @@ SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
 SNR_LDFLAGS ?= 
 
 ROOT = ..
-CXX = g++
-CXXFLAGS = -Wall -fPIC -ggdb3
-CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
-LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
-BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
+CXX ?= g++
+CXXFLAGS += -Wall -fPIC -ggdb3
+CPPFLAGS += -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS) -I/opt/owfs/include
+LDFLAGS += $(SNR_LDFLAGS) -L$(ROOT)/lib -L/usr/lib/mysql -L/opt/owfs/lib
+BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread -lowcapi
 
 MYNAME = OneWire
 VERSION = 2.0.0
-MYDEVTEMPLATEID = 2161mplateID
+MYDEVTEMPLATEID = 2161
 
 Gen_Dev_Files = $(GENDEV)/OneWireBase.cpp
 sources = Main.cpp OneWire.cpp $(Gen_Dev_Files)
