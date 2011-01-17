@@ -19,6 +19,7 @@
 
 #include "PlutoUtils/LinuxSerialUSB.h"
 #include <vector>
+#include <map>
 
 //<-dceag-decl-b->
 namespace DCE
@@ -28,7 +29,7 @@ namespace DCE
 //<-dceag-decl-e->
 		// Private member variables
 		static pthread_t readThread;
-
+		std::map < string, float >sensorValueMap;
 		// Private methods
 public:
 		// Public member variables
