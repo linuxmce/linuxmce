@@ -802,6 +802,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							prod = ((unsigned char)frame[11]<<8) + (unsigned char)frame[12];
 
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"REPORT: Manuf: 0x%x, Prod Typ: 0x%x, Prod 0x%x", manuf,type,prod);
+							parseManufacturerSpecific((unsigned char)frame[3],manuf,type,prod);
 
 							/* switch ( manuf ) {
 								case 0x64: printf("Popp\n");
@@ -846,14 +847,6 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							if (frame[2] & RECEIVE_STATUS_TYPE_BROAD ) { 
 								DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got broadcast wakeup from node %i, doing WAKE_UP_INTERVAL_SET",frame[3]);
 								if (ournodeid != -1) { 
-									// we assume an ACT PIR for now, no other known devices show that behavior - UPDATE, cannot assume any more, more devices send broadcast wakeups
-									// zwAssociationSet((unsigned char)frame[3], 1, ournodeid); // receive group 1 events (motion)
-									// zwAssociationSet((unsigned char)frame[3], 2, ournodeid); // receive group 2 events (casing opened)
-									// zwAssociationSet((unsigned char)frame[3], 3, ournodeid); // receive group 3 events (battery reports)
-									// zwConfigurationSet((unsigned char)frame[3],17,2); // sensor mode
-									// zwConfigurationSet((unsigned char)frame[3],18,0); // no delay
-									// zwConfigurationSet((unsigned char)frame[3],19,1); // send unsolicited events
-									// zwConfigurationSet((unsigned char)frame[3],22,30); // wakeup duration
 									zwWakeupSet((unsigned char)frame[3],60,false); // wakeup interval
 									wakeupHandler((unsigned char) frame[3]); // fire commands, device is awake
 								}
@@ -2273,7 +2266,7 @@ bool ZWApi::ZWApi::zwRequestNodeNeighborUpdate(int node_id) {
 	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Requesting Neighbour Update for node %i",node_id);
 	mybuf[0] = FUNC_ID_ZW_REQUEST_NODE_NEIGHBOR_UPDATE;
 	mybuf[1] = node_id;
-	sendFunction( mybuf , 2, REQUEST, 1);
+	sendFunction( mybuf , 2, REQUEST, 0);
 	return true;
 }
 
@@ -2388,13 +2381,14 @@ void ZWApi::ZWApi::zwRequestBasicReport(int node_id, int instance) {
 void ZWApi::ZWApi::zwRequestManufacturerSpecificReport(int node_id) {
 	char mybuf[1024];
 
+	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Requesting manufacturer specific information from node %d", node_id);
 	mybuf[0] = FUNC_ID_ZW_SEND_DATA;
 	mybuf[1] = node_id;
 	mybuf[2] = 2; // length of command
 	mybuf[3] = COMMAND_CLASS_MANUFACTURER_SPECIFIC;
 	mybuf[4] = MANUFACTURER_SPECIFIC_GET;
 	mybuf[5] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
-	sendFunction( mybuf , 6, REQUEST, 0);
+	sendFunction( mybuf , 6, REQUEST, 1);
 
 }
 
@@ -2634,7 +2628,7 @@ bool ZWApi::ZWApi::zwAssignSUCReturnRoute(int node_id){
 	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Assigning SUC return route for node %i",node_id);
 	mybuf[0] = FUNC_ID_ZW_ASSIGN_SUC_RETURN_ROUTE;
 	mybuf[1] = node_id;
-	sendFunction( mybuf , 2, REQUEST, 1);
+	sendFunction( mybuf , 2, REQUEST, 0);
 	return true;
 }
 
@@ -2659,5 +2653,288 @@ void ZWApi::ZWApi::zwGetRoutingInfo(int node_id){
 	sendFunction( mybuf , 4, REQUEST, 0);
 
 
+}
+
+void ZWApi::ZWApi::parseManufacturerSpecific(int nodeid, int manuf, int type, int prod){
+	string sManufacturer;
+	string sProduct;
+
+	switch(manuf) {
+		case 0x1: sManufacturer = "ACT";
+			switch (type) {
+				case 0x4952: switch(prod) {
+						case 0x3030: sProduct = "ZIR000 PIR Motion Sensor";
+							// zwAssociationSet(nodeid, 1, ournodeid); // receive group 1 events (motion)
+							zwAssociationSet(nodeid, 2, ournodeid); // receive group 2 events (casing opened)
+							zwAssociationSet(nodeid, 3, ournodeid); // receive group 3 events (battery reports)
+							zwConfigurationSet(nodeid,17,2,0); // sensor mode
+							zwConfigurationSet(nodeid,18,0,0); // no delay
+							zwConfigurationSet(nodeid,19,1,0); // send unsolicited events
+							zwConfigurationSet(nodeid,22,30,0); // wakeup duration
+							break;
+						case 0x3330: sProduct = "ZIR010 PIR Motion Sensor";
+							zwAssociationSet(nodeid, 1, ournodeid); // receive group 1 events (motion)
+							zwAssociationSet(nodeid, 2, ournodeid); // receive group 2 events (casing opened)
+							zwAssociationSet(nodeid, 3, ournodeid); // receive group 3 events (battery reports)
+							zwConfigurationSet(nodeid,17,2,0); // sensor mode
+							zwConfigurationSet(nodeid,18,0,0); // no delay
+							zwConfigurationSet(nodeid,19,1,0); // send unsolicited events
+							zwConfigurationSet(nodeid,22,30,0); // wakeup duration
+							break;
+					}
+					break;
+				case 0x4450: switch(prod) {
+						case 0x3030: sProduct = "ZDP100 Plugin Lamp Module";
+							break;
+						case 0x3330: sProduct = "ZDP200 Plugin Lamp Module";
+                                                        break;
+					}
+					break;
+				case 0x4457: switch(prod) {
+						case 0x3330: sProduct = "ZDW230 Wall Dimmer Module";
+							break;
+						case 0x3332: sProduct = "ZDW232 Wall Dimmer Module";
+							break;
+					}
+					break;
+				case 0x5250: switch(prod) {
+						case 0x3030: sProduct = "ZRP100 Plugin Appliance Module";
+							break;
+						case 0x3330: sProduct = "ZRP200 Plugin Appliance Module";
+							break;
+					}
+					break;
+				case 0x5457: switch(prod) {
+						case 0x3330: sProduct = "ZTW230 Wall Transmitter Module";
+							break;
+					}
+					break;
+				case 0x544d: switch(prod) {
+						case 0x3330: sProduct = "ZTM230 Wall Transmitter Module";
+							break;
+					}
+					break;
+			}
+			break;
+		case 0x2: sManufacturer = "Danfoss";
+			switch (type) {
+				case 0x64: switch(prod) {
+						case 0x1: sProduct = "RA PLUS-w Radiator Thermostat";
+							break;
+					}
+					break;
+			}
+			break;
+		case 0x5: sManufacturer = "Intermatic";
+			switch (type) {
+				case 0x3: switch(prod) {
+						case 0x3: sProduct = "HA-03WD Lamp Module";
+							break;
+					}
+					break;
+			}
+			break;
+		case 0x8: sManufacturer = "Wayne Dalton";
+			switch (type) {
+				case 0x7: switch(prod) {
+						case 0x20: sProduct = "WDTC-20 Thermostat";
+							break;
+					}
+					break;
+			}
+			break;
+		case 0x12: sManufacturer = "E Housekeeper";
+			switch (type) {
+				case 0x1: switch(prod) {
+						case 0x1: sProduct = "Switchkeeper Plug-in Appliance Module";
+							break;
+					}
+					break;
+			}
+			break;
+		case 0x1a: sManufacturer = "Cooper";
+			switch (type) {
+				case 0x4449: switch(prod) {
+						case 0x2: sProduct = "RF9534DS Wall Dimmer Module";
+							break;
+					}
+					break;
+			}
+			break;
+		case 0x1d: sManufacturer = "Leviton";
+			break;
+		case 0x1e: sManufacturer = "Homeseer";
+			switch (type) {
+				case 0x2: switch(prod) {
+						case 0x1: sProduct = "HSM100 Wireless Multi-Sensor";
+							break;
+					}
+					break;
+			}
+			break;
+		case 0x33: sManufacturer = "Electronic Solutions Inc";
+			switch (type) {
+				case 0x5250: switch(prod) {
+						case 0x2: sProduct = "DBMZ Motor Control";
+							break;
+					}
+					break;
+			}
+			break;
+		case 0x40: sManufacturer = "MK Honeywell Astral";
+			switch (type) {
+				case 0x5: switch(prod) {
+						case 0x102: sProduct = "LSM12U C 2 GANG 10AX SWITCH MODULE";
+							break;
+					}
+					break;
+			}
+			break;
+		case 0x59: sManufacturer = "Horstmann";
+			switch (type) {
+				case 0x1: switch(prod) {
+						case 0x1: sProduct = "ASR-RF Thermostat Receiver";
+							break;
+						case 0x2: sProduct = "AS2-RF Thermostat Transmitter";
+							break;
+					}
+					break;
+			}
+			break;
+		case 0x60: sManufacturer = "Everspring";
+			switch (type) {
+				case 0x1: switch(prod) {
+						case 0x1: sProduct = "SP103 PIR Motion Sensor";
+							break;
+					}
+					break;
+				case 0x2: switch(prod) {
+						case 0x1: sProduct = "SM103 Door/Window Magnetic Sensor";
+							break;
+					}
+					break;
+			}
+			break;
+		case 0x63: sManufacturer = "GE";
+			switch (type) {
+				case 0x5250: switch(prod) {
+						case 0x3030: sProduct = "GE 45603 Plugin Appliance Module";
+							break;
+					}
+					break;
+			}
+			break;
+		case 0x64: sManufacturer = "Popp/Duewi";
+			switch (type) {
+				case 0x1: switch(prod) {
+						case 0x0: sProduct = "DUW_064336 Dimmer insert";
+							break;
+					}
+					break;
+			}
+			break;
+		case 0x69: sManufacturer = "Seluxit";
+			switch (type) {
+				case 0x3: switch(prod) {
+						case 0x2: sProduct = "Multisensor";
+							zwAssociationSet(nodeid, 3, ournodeid); 
+							zwAssociationSet(nodeid, 6, ournodeid); 
+							zwAssociationSet(nodeid, 9, ournodeid); 
+							zwAssociationSet(nodeid, 14, ournodeid); 
+							break;
+					}
+					break;
+			}
+			break;
+		case 0x6f: sManufacturer = "Home Manageables";
+			switch (type) {
+				case 0x102: switch(prod) {
+						case 0x1: sProduct = "Door/Window Sensor";
+							break;
+					}
+					break;
+			}
+			break;
+		case 0x77: sManufacturer = "Innovus";
+			switch (type) {
+				case 0x1: switch(prod) {
+						case 0x1: sProduct = "RAone SmartDimmer Wall Dimmer Module";
+							break;
+						case 0x2: sProduct = "RAone SmartPower Wall Appliance Module";
+							break;
+					}
+					break;
+			}
+			break;
+		case 0x7a: sManufacturer = "Merten";
+			switch (type) {
+				case 0x1: switch(prod) {
+						case 0x2: sProduct = "Transmitter 1-Gang Switch";
+							break;
+						case 0x4: sProduct = "Transmitter 2-Gang Switch";
+							break;
+					}
+					break;
+				case 0x2: switch(prod) {
+						case 0x2: sProduct = "Transmitter Move";
+							break;
+					}
+					break;
+				case 0x3: switch(prod) {
+						case 0x4: sProduct = "Transmitter Flush-Mounted 4-Gang Switch";
+							break;
+					}
+					break;
+				case 0x4002: switch(prod) {
+						case 0x1: sProduct = "Wall Appliance Module";
+							break;
+					}
+					break;
+				case 0x4003: switch(prod) {
+						case 0x1: sProduct = "Wall Dimmer Module";
+							break;
+					}
+					break;
+				case 0x4004: switch(prod) {
+						case 0x1: sProduct = "Wall Roller Shutter Module";
+							break;
+					}
+					break;
+				case 0x8001: switch(prod) {
+						case 0x1: sProduct = "Plug-In Appliance Module";
+							break;
+						case 0x8001: sProduct = "Receiver Flush-Mounted 1-Gang Switch";
+							break;
+					}
+					break;
+				case 0x8002: switch(prod) {
+						case 0x1: sProduct = "Plug-In Dimmer Module";
+							break;
+					}
+					break;
+			}
+			break;
+		case 0x86: sManufacturer = "Aeon Labs";
+			switch (type) {
+				case 0x1: switch(prod) {
+						case 0x3: sProduct = "Minimote";
+							break;
+					}
+					break;
+				case 0x2: switch(prod) {
+						case 0x9: sProduct = "Home Energy Meter";
+							zwConfigurationSet(nodeid,101,2,4); // send multilevel sensor report for group 1
+							zwConfigurationSet(nodeid,111,120,4); // every 2 minutes 
+							zwConfigurationSet(nodeid,102,1,4); // send battery report for group 2
+							zwConfigurationSet(nodeid,112,86400,4); // every day
+							zwAssociationSet(nodeid, 2, ournodeid); 
+							break;
+					}
+					break;
+			}
+			break;
+		default: sManufacturer = "unknown";
+	}
+        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Manufacturer Specific: Node %i is a %s %s",nodeid,sManufacturer.c_str(),sProduct.c_str());
 }
 

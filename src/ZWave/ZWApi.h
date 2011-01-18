@@ -457,6 +457,7 @@ namespace ZWApi {
 	bool wakeupHandler(int nodeid);
 
 	void parseNodeInfo(int nodeid, char *nodeinfo, size_t length);
+	void parseManufacturerSpecific(int nodeid, int manuf, int type, int prod);
 	std::string commandClassToString(char cclass);
 	void updateNodeCapabilities(ZWNode* node, char *nodeinfo, size_t length);
 
