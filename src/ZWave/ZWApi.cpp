@@ -2763,10 +2763,10 @@ void ZWApi::ZWApi::parseManufacturerSpecific(int nodeid, int manuf, int type, in
 			break;
 		case 0x1d: sManufacturer = "Leviton";
 			break;
-		case 0x1e: sManufacturer = "Homeseer";
+		case 0x1e: sManufacturer = "Express Controls";
 			switch (type) {
 				case 0x2: switch(prod) {
-						case 0x1: sProduct = "HSM100 Wireless Multi-Sensor";
+						case 0x1: sProduct = "EZMotion Wireless Multi-Sensor (aka Homeseer HSM100)";
 							break;
 					}
 					break;
