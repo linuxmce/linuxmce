@@ -54,6 +54,19 @@ echo options radeon modeset=0
 echo options i915 modeset=0
 ) > /etc/modprobe.d/disable-kms.conf
 
+## Put a temporary nis config file that will prevent ypbind to start
+echo "
+NISSERVER=false
+NISCLIENT=false
+YPPWDDIR=/etc
+YPCHANGEOK=chsh
+NISMASTER=
+YPSERVARGS=
+YPBINDARGS=
+YPPASSWDDARGS=
+YPXFRDARGS=
+" > /etc/default/nis
+
 #
 echo 
 echo The first phase of the install process is completed
