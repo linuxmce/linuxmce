@@ -113,7 +113,8 @@ function viewDatalog($output,$dbADO){
 		    $q = "SELECT `Description` FROM `Device` where `PK_Device` = ".$conf[$i][0];
               $resGP = $dbADO->Execute($q);
               $row=$resGP->FetchRow();
-		    $out = $out.'<IMG SRC="operations/datalog/graph.php?device='.$conf[$i][0].'&days='.$conf[$i][1].'&color='.$conf[$i][2].'&unit='.$conf[$i][3].'&name='.$row['Description'].'">';
+                    $deviceURL = 'device='.$conf[$i][0].'&days='.$conf[$i][1].'&color='.$conf[$i][2].'&unit='.$conf[$i][3].'&name='.$row['Description'];
+		    $out = $out.'<a href="index.php?section=datalogDetails&'.$deviceURL.'"><img style="border-style: none;" src="operations/datalog/graph.php?'.$deviceURL.'" /></a>';
 		    $out = $out.'<input type="submit" class="button" name="remove" onclick="document.datalogGraph.removeDevice.value='.$i.'" value="Remove"/><br>';
 	    	}
 	} 
