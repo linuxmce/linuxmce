@@ -2,9 +2,21 @@
 
 case "$1" in
 	start)
-		usplash_write TEXT "Starting Linux MCE Update"
+        	if [ -x /bin/plymouth ]; then
+                	/bin/plymouth update --status="Starting LinuxMCE update"
+        	fi
+                if [ -x /sbin/usplash_write ]; then
+			usplash_write TEXT "Starting Linux MCE Update"
+		fi
+
 		/usr/pluto/bin/LMCEUpdate_Apply.sh
-		usplash_write TEXT "Finished Linux MCE Update"
+
+                if [ -x /bin/plymouth ]; then
+                        /bin/plymouth update --status="Finished LinuxMCE update"
+                fi
+                if [ -x /sbin/usplash_write ]; then
+			usplash_write TEXT "Finished Linux MCE Update"
+		fi
 		;;
 	
 	stop|restart|reload|force-reload)

@@ -22,6 +22,9 @@ StartService() {
 	ServiceBkg=$3
 
 	if [[ -x $(echo $ServiceCmd | cut -d ' ' -f1) ]] ;then
+                if [ -x /bin/plymouth ]; then
+                        /bin/plymouth update --status="$ServiceDescription ... "
+                fi
 		echo -n "$ServiceDescription ... "
 		if [[ "$ServiceBkg" == "&" ]] ;then
 			$ServiceCmd 1>/dev/null 2>/dev/null &
@@ -46,6 +49,9 @@ StartDaemon() {
 	ServiceScreen=$3
 
 	if [[ -x $(echo $ServiceCmd | cut -d ' ' -f1) ]] ;then
+                if [ -x /bin/plymouth ]; then
+                        /bin/plymouth update --status="$ServiceDescription ... "
+                fi
 		echo -n "$ServiceDescription ... "
 		screen -d -m -S "$ServiceScreen" $ServiceCmd 
 		err=$?
@@ -278,8 +284,8 @@ if VDRInstalled ; then
 		service vdr restart
 	fi
 fi
-
 StartDaemon  "Starting LinuxMCE Launch Manager" "/usr/pluto/bin/LaunchManagerDaemon.sh" "LMCE_Launch_Manager"
+/bin/plymouth --hide-splash
 
 exit 0
 
