@@ -12,6 +12,8 @@ $color = mysql_real_escape_string($_GET['color']);
 $name = mysql_real_escape_string($_GET['name']);
 $unit = mysql_real_escape_string($_GET['unit']); 
 $keepValue = array(5,9); // Units that have the same value until new value i reported
+$startTime = mysql_real_escape_string($_GET['startTime']);
+$endTime = mysql_real_escape_string($_GET['endTime']);
 
 if (empty($days)) {
      $days=1;
@@ -24,13 +26,30 @@ if (empty($color)) {
 if (empty($unit)) {
      $unit='\'%\'';
 }
+if (empty($startTime)) {
+    // No start time set, use days to give us the last days of data
+    $startTime = date('Y-m-d H:i:s', time() - $days*24*60*60);
+}
+if (empty($endTime)) {
+    if (empty($days)) {
+        $endTime = date('Y-m-d H:i:s', time());
+    } else {
+       $endTime = date('Y-m-d H:i:s',strtotime($startTime) + $days*24*60*60);
+    }
+}
 
 $connection=mysql_connect($mysqlhost, $mysqluser, $mysqlpwd) or die ("ERROR: could not connect to the database!");
 mysql_select_db($mysqldb, $connection) or die("ERROR: could not select database!");
 
-$query = mysql_query("select Description,timestamp,Datapoint,Unit from Datapoints,Unit 
-     WHERE FK_Unit=PK_unit AND PK_unit LIKE ".$unit." and EK_Device= ".$device." 
-     AND timestamp > DATE_SUB(NOW(), INTERVAL ".$days." DAY) order by timestamp");
+$sql = "select Description,timestamp,Datapoint,Unit from Datapoints,Unit
+     WHERE FK_Unit=PK_unit AND PK_unit LIKE ".$unit." and EK_Device= ".$device." ";
+$sql.="AND timestamp > '".$startTime."' ";
+
+if (isset($endTime)) {
+     $sql.="AND timestamp < '".$endTime."' ";
+}
+$sql.=" order by timestamp";
+$query=mysql_query($sql);
 
 $num = mysql_numrows($query); //find number off datapoints for the graph
 
@@ -83,7 +102,7 @@ while ($datapoint = mysql_fetch_array($query)){
 	       $prevDatapoint=$datapointLast[1];
 	       //$out.='$datapointLast = '.$datapointLast[1].' - '.$prevDatapoint.'<br>';
 	  }
-          $Dataset->addPoint(strtotime('-'.$days.'days'), $datapointLast[1]);
+	  $Dataset->addPoint(strtotime($startTime)/*strtotime('-'.$days.'days')*/, $datapointLast[1]);
      }
      // If the device is reporting "state change" asume the device will have the same state until new state is reported
      if (in_array($unit, $keepValue)){
@@ -94,18 +113,18 @@ while ($datapoint = mysql_fetch_array($query)){
      ++$t;
      if ($t==$num){
           $last=strtotime($datapoint[1]);
-          $Dataset->addPoint(strtotime(now), $datapoint[2]);
+	  $Dataset->addPoint(strtotime($endTime), $datapoint[2]);
      }
 }
 
 
 // Set info in the title
-$graphName .= $device.' - '.$name .' '.$days.' day(s) ';
+$graphName .= $device.' - '.$name .' '.$startTime.' - '.$endTime;
 
 // Create arrays for x-axis lables
-$firstFixed=substr_replace($firstDate, '00:00', -5);
-
-for ($fullHour= strtotime($firstFixed)+3600, $i=0 ; $fullHour<$last ; $fullHour=$fullHour+(7200*$days), ++$i){
+$firstFixed=substr_replace($startTime, '00:00', -5);
+$step = (strtotime($endTime)-strtotime($startTime))/12;
+for ($fullHour= strtotime($firstFixed)+$step, $i=0 ; $fullHour<$last ; $fullHour=$fullHour+$step, ++$i){
      $array1[$i]=$fullHour;
      $array2[0][$fullHour]=date('jS-H:i', $fullHour);
 }
