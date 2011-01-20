@@ -165,7 +165,22 @@ installCorrectNvidiaDriver() {
 		echo "installing NEW driver $preferred_driver!"
 		Log "$LogFile" "installing NEW driver $preferred_driver!"
 		INSTALLED="1"
-		apt-get install -y $preferred_driver
+		tmpfile=$( /bin/mktemp -t )
+		apt-get install -y $preferred_driver 2> >(tee $tmpfile)
+		if [[ $? > 0 ]] ; then
+			ERROR=$( cat $tmpfile )
+			INSTALLED="0"
+			echo ""
+			echo -e "\e[1;31mUnable to install $preferred_driver!\e[0m"
+			echo -e "\e[1;31mRefer to the above message, which is also logged to $LogFile.\e[0m"
+			echo ""
+			Log "$LogFile" "Unable to install driver:"
+			Log "$LogFile" "$ERROR"
+			beep -l 100 -f 500 -d 50 -r 3
+			sleep 10
+		fi
+		rm $tmpfile
+
 	else
 		echo "Preferred driver $preferred_driver already installed."
 		Log "$LogFile" "Preferred driver $preferred_driver already installed."
