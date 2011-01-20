@@ -162,7 +162,7 @@ if [ "$AutostartCore" -eq "1" ] ; then
 	StartDaemon  "Start Voicemail Monitor" "/usr/pluto/bin/VoiceMailMonitor.sh" "VoiceMailMonitor"
          
 	# Verify zaptel-modules is installed, and install it otherwise. 
-	dpkg -l zaptel-modules-`uname -r` || apt-get install zaptel-modules-`uname -r` || echo "***ERROR*** INSTALLING ZAPTEL MODULE - TELECOM TRANSFER/MEETME/CONFERENCING NOT WORKING****">>/var/lib/pluto/DCERouter.log 
+	dpkg -l zaptel-modules-`uname -r` || apt-get install zaptel-modules-`uname -r` || echo "***ERROR*** INSTALLING ZAPTEL MODULE - TELECOM TRANSFER/MEETME/CONFERENCING NOT WORKING****">>/var/log/pluto/DCERouter.log 
 	modprobe ztdummy 
 fi
 StartService "Loading Kernel Modules" "/usr/pluto/bin/LoadModules.sh"
