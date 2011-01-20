@@ -33,7 +33,6 @@ if(!isset($_SESSION['userLoggedIn']) && $section!='' && $section!='login' && $se
 		die('<script>top.location="index.php?section=login"</script>');
 	}
 }
-
 // if installation ID is 1 (offline installation), check if it doesn't changed
 validate_installation((int)@$_SESSION['installationID'],$dbADO);
 
@@ -1004,7 +1003,7 @@ switch ($section) {
 	    include_once('operations/commands/editCommandCategory.php');
 	    editCommandCategory($output,$dbADO);
 	break;
-
+	//Automation
 	case 'deviceStatus';
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('large');
@@ -1033,6 +1032,13 @@ switch ($section) {
             $output->setHelpSrc('/wiki/index.php/energyMonitor');
             energyMonitor($output,$dbADO);
         break;
+	case 'thermostatSchedules';
+		$output = new Template($dbADO);
+               	$output->setTemplateFileType('large');
+            include_once('operations/thermostat/editSchedules.php');
+            $output->setHelpSrc('/wiki/index.php/thermostat_schedules');
+            editSchedules($output,$dbADO);
+	break;
 	case 'pickScenario';
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('small');
