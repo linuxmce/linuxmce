@@ -99,6 +99,9 @@ function assureXorgSane()
 	fi
 }
 
+if [ -x /bin/plymouth ]; then
+        /bin/plymouth message --text="Starting up LinuxMCE..."
+fi
 
 setterm -blank >/dev/console             # disable console blanking
 chmod 777 /etc/pluto.conf 2>/dev/null    # ensure access rights on pluto.conf
