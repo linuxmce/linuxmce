@@ -15,5 +15,4 @@ update-alternatives --install /lib/plymouth/themes/default.plymouth default.plym
 update-alternatives --config default.plymouth
 
 # trigger initrams update to include new theme
-update-initramfs -u
-
+dpkg-trigger update-initramfs
