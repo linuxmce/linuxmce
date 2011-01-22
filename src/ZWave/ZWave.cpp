@@ -869,8 +869,8 @@ void ZWave::AddCapability(int PKDevice, int iCC) {
 }
 
 void ZWave::SetManufacturerSpecificString(int iPKDevice, string sManufacturerSpecific) {
-	
-	CMD_Update_Device cmd_Update_Device(m_dwPK_Device, 4, iPKDevice, NULL,0,NULL,NULL, sManufacturerSpecific.c_str());
+	string a,b,c;	
+	CMD_Update_Device cmd_Update_Device(m_dwPK_Device, 4, iPKDevice, a,0,b,c, sManufacturerSpecific);
 	SendCommand(cmd_Update_Device);
 }
 
