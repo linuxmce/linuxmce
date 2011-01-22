@@ -136,7 +136,7 @@ function editSchedules($output,$dbADO){
  	$output->setBody($out);
 	$output->setMenuTitle($TEXT_AUTOMATION_CONST.' |');
 	$output->setPageTitle("Thermostat schedules");
-	$output->setNavigationMenu(array('Thermostat schedules','index.php?section=thermostatSchedules'));	
+	$output->setNavigationMenu(array('Thermostat schedules'=>'index.php?section=thermostatSchedules'));	
 	$output->setTitle(APPLICATION_NAME);			
 	$output->output();  		
 }
