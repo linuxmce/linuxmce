@@ -10,11 +10,6 @@ using namespace DCE;
 
 #include <tag.h>
 #include <fileref.h>
-
-
-#include "FLAC/metadata.h"
-#include "FLAC/assert.h"
-
 using namespace TagLib;
 //-----------------------------------------------------------------------------------------------------
 namespace UpdateMediaVars
@@ -42,9 +37,9 @@ bool TagFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 
 	//get common tag attributes
 	map<int, string> mapAttributes;
-	GetTagInfo(sFileWithAttributes, mapAttributes, listPicturesForTags);
+	GetTagInfo(sFileWithAttributes, mapAttributes, listPicturesForTags);	
 
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# LoadPlutoAttributes: tag attributes loaded (from tag file - common tags) %d",
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# LoadPlutoAttributes: tag attributes loaded (from tag file - common tags) %d", 
 		mapAttributes.size());
 
 	//merge attributes
@@ -57,7 +52,7 @@ bool TagFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 		if(itm == pPlutoMediaAttributes->m_mapAttributes.end())
 			pPlutoMediaAttributes->m_mapAttributes.insert(
 				std::make_pair(
-					nType,
+					nType, 
 					new PlutoMediaAttribute(0,nType, sValue)
 				)
 			);
@@ -77,7 +72,7 @@ bool TagFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
 
 	//Temporary map with attributes for common tags
 	map<int, string> mapAttributes;
-	for(MapPlutoMediaAttributes::iterator it = pPlutoMediaAttributes->m_mapAttributes.begin(),
+	for(MapPlutoMediaAttributes::iterator it = pPlutoMediaAttributes->m_mapAttributes.begin(), 
 		end = pPlutoMediaAttributes->m_mapAttributes.end(); it != end; ++it)
 	{
 		mapAttributes[it->first] = it->second->m_sName;
@@ -138,20 +133,19 @@ string TagFileHandler::GetFileSourceForDB()
 {
 	if(!UpdateMediaVars::sUPnPMountPoint.empty() && StringUtils::StartsWith(m_sDirectory, UpdateMediaVars::sUPnPMountPoint))
 		return "U";
-	else
+	else 
 		return "F";
 }
 //-----------------------------------------------------------------------------------------------------
 void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes, list<pair<char *, size_t> >& listPictures)
 {
 	FileRef *f = new FileRef(m_sFullFilename.c_str());
-
 	if(NULL != f)
 	{
-		mapAttributes[ATTRIBUTETYPE_Performer_CONST] = f->tag()->artist().to8Bit(true);
-		mapAttributes[ATTRIBUTETYPE_Title_CONST] = f->tag()->title().to8Bit(true);
-		mapAttributes[ATTRIBUTETYPE_Genre_CONST] = f->tag()->genre().to8Bit(true);
-		mapAttributes[ATTRIBUTETYPE_Album_CONST] = f->tag()->album().to8Bit(true);
+		mapAttributes[ATTRIBUTETYPE_Performer_CONST] = f->tag()->artist().to8Bit();
+		mapAttributes[ATTRIBUTETYPE_Title_CONST] = f->tag()->title().to8Bit();
+		mapAttributes[ATTRIBUTETYPE_Genre_CONST] = f->tag()->genre().to8Bit();
+		mapAttributes[ATTRIBUTETYPE_Album_CONST] = f->tag()->album().to8Bit();
 
 		if(f->tag()->track() > 0)
 			mapAttributes[ATTRIBUTETYPE_Track_CONST] = StringUtils::ltos(f->tag()->track());
@@ -163,23 +157,6 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 		//if (FileExists(BasePath(m_sFullFilename) + "/cover.jpg")) {
 		//}
 
-		/*FLAC__StreamMetadata *meta = new FLAC__StreamMetadata();
-		FLAC__ASSERT(0 != meta);
-
-		if(FLAC__metadata_get_picture(m_sFullFilename.c_str(), &meta, (FLAC__StreamMetadata_Picture_Type)0, 0, 0,(unsigned)(-1), (unsigned)(-1), (unsigned)(-1), (unsigned)(-1)))
-		{
-			cout << "FLAC__metadata_get_picture" << endl;
-			char *pPictureData = NULL;
-			size_t nBinSize = meta->data.picture.data_length;
-			pPictureData = new char[nBinSize];
-			memcpy(pPictureData, meta->data.picture.data, nBinSize);
-			listPictures.push_back(make_pair(pPictureData, nBinSize));
-		}
-
-		FLAC__metadata_object_delete(meta);
-
-		cout << "FLAC__metadata_object_delete" << endl;*/
-
 		string coverfilename = m_sFullFilename.substr(0,m_sFullFilename.find_last_of("/\\")) + "/cover.jpg";
 		cout << "fetching cover: "<< coverfilename << "\n";
 		FILE *coverart = fopen(coverfilename.c_str(), "rb");
@@ -189,7 +166,7 @@ void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes
 			if (nBinSize > 0) {
 				rewind(coverart);
 				char *pPictureData = new char[nBinSize];
-				fread(pPictureData, 1,nBinSize,coverart);
+				fread(pPictureData, 1,nBinSize,coverart);	
 				listPictures.push_back(make_pair(pPictureData, nBinSize));
 			}
 		}

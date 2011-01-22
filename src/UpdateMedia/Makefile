@@ -3,9 +3,9 @@ ROOT=..
 CXX=g++
 CC=$(CXX)
 CPPFLAGS=-W -Wall -pipe -ggdb3 -DUPDATE_MEDIA
-CXXFLAGS=-I. -I.. -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/taglib -I/usr/include
+CXXFLAGS=-I. -I.. -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/taglib
 LDFLAGS=-L$(ROOT)/lib -L/usr/local/lib
-LDLIBS= -lpluto_media -lpluto_main -lDCECommon -lSerializeClass -lPlutoUtils -lpthread -lid3 -ltag -lFLAC
+LDLIBS= -lpluto_media -lpluto_main -lDCECommon -lSerializeClass -lPlutoUtils -lpthread -lid3 -ltag
 
 #<-mkr_B_use_mysql_wrapper_b->
 CPPFLAGS += -I/usr/include/mysql

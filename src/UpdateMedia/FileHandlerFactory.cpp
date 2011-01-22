@@ -77,25 +77,25 @@ FileHandlerFactory::~FileHandlerFactory(void)
 		type = fhtTag;
 	else if(IsValidRomFile(sDirectory, sFile))
 		type = fhtRom;
-	else
+	else 
 		type = fhtId3;
 
 	return type;
-}
+}	
 //-----------------------------------------------------------------------------------------------------
 /*static*/ bool FileHandlerFactory::IsValidRomFile(string sDirectory, string sFile)
 {
 	// With the advent of MESS support, the entire ROM code needed revamping.
 	// It's not perfect. But if you have a better way to hand off to the RomFileHandler,
 	// then please, help and do a patch. -tschak
-
+	
 	// The Point here is merely to do a series of quick checks, and if ANY of them pass, then
 	// set a file handler type, which will be passed further up the factory line and more
 	// detailed checks will be done, to pass parameters to the FileHandler to do the final work.
 
 	string sExtension = FileUtils::FindExtension(sFile);
 	bool bHasRomExtension = (sExtension == "zip") ||
-			   (sExtension == "bin") ||
+			   (sExtension == "bin") || 
 			   (sExtension == "a26") ||
 			   (sExtension == "a52") ||
 			   (sExtension == "a78") ||
