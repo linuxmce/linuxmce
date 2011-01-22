@@ -45,9 +45,12 @@ function editSchedules($output,$dbADO){
 	}
  
  	// Query for thermostat device list with schedule capabilities
-	$device_query = mysql_query('SELECT Device.PK_Device, Device.Description AS DeviceName,Room.Description AS RoomName
-				FROM Device, Room WHERE ((Device.FK_DeviceTemplate = 4) AND (Device.FK_Room = Room.PK_Room))
-	      		ORDER BY Device.FK_Room') or die('ERROR: Invalid query: ' . mysql_error());
+	$device_query = mysql_query("SELECT Device.PK_Device, Device.Description AS DeviceName,Room.Description AS RoomName
+				FROM Device, Room, Device_DeviceData
+				WHERE ((Device.FK_DeviceTemplate = 4) 
+				AND (Device.FK_Room = Room.PK_Room) AND (Device_DeviceData.FK_Device = Device.PK_Device)
+				AND (Device_DeviceData.FK_DeviceData = 207) AND (Device_DeviceData.IK_DeviceData LIKE '%71%') )
+				ORDER BY Device.FK_Room, Device.Description") or die('ERROR: Invalid query: ' . mysql_error());
 		
 	// Create device selection HTML form
 	$out.='<form action="index.php" method="POST" name="deviceSelect">
@@ -127,12 +130,9 @@ function editSchedules($output,$dbADO){
 		$out.='</tr>';
 	}
 	
-  $out.='</table><br /><input type="submit" class="button" name="save" value="'.$TEXT_SAVE_CONST.' schedule" />';
-  $out.='</form>';
+	$out.='</table><br /><input type="submit" class="button" name="save" value="'.$TEXT_SAVE_CONST.' schedule" />';
+	$out.='</form>';
   
-  // debug
-  //$out.=print_array($_REQUEST);
- 	//$out.=print_array($schedulecache);
  	$output->setBody($out);
 	$output->setMenuTitle($TEXT_AUTOMATION_CONST.' |');
 	$output->setPageTitle("Thermostat schedules");
