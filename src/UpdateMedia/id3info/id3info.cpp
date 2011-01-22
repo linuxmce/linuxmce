@@ -4,7 +4,7 @@
  Copyright (C) 2004 Pluto, Inc., a Florida Corporation
 
  www.plutohome.com
- 
+
 
  Phone: +1 (877) 758-8648
 
@@ -22,11 +22,7 @@
 
 #include "id3info.h"
 
-#include <id3/tag.h>
-#include <id3/utils.h>
-#include <id3/misc_support.h>
-#include <id3/readers.h>
-#include <id3/globals.h>
+#include <string.h>
 
 #include "../../pluto_media/Define_AttributeType.h"
 
@@ -34,629 +30,561 @@
 	#include "PlutoUtils/FileUtils.h"
 #endif
 
-using namespace dami;
-using std::cout;
-using std::endl;
-
 #include <map>
 using namespace std;
 
+#include <tbytevector.h>
+
+#include <mpegfile.h>
+
+#include <id3v2tag.h>
+#include <id3v2frame.h>
+#include <id3v2header.h>
+#include <taglib/textidentificationframe.h>
+#include <taglib/generalencapsulatedobjectframe.h>
+#include <taglib/attachedpictureframe.h>
+#include <id3v1tag.h>
+#include <sstream>
+#include "PlutoUtils/FileUtils.h"
+
+#include <apetag.h>
+using namespace TagLib;
+
+
 #define MAX_TAG_SIZE_ALLOWED 10 * 1024 * 1024 //10MB
 
+/**
+	void GetUserDefinedInformation(string sFilename, char *&pData, size_t& Size)
+
+	@brief 			Read user defined information from id3 tag
+
+	@param[in]  	sFilename 		Filename of mp3 file to read id3 tag from
+	@param[out] 	pData 			Pointer on a data structure receiving the user information
+	@param[out] 	Size 			Size of user defined data
+*/
 void GetUserDefinedInformation(string sFilename, char *&pData, size_t& Size)
 {
  	pData = NULL;
 	Size = 0;
 
-	ID3_Tag tag; 
-	tag.Link(sFilename.c_str());
 
-	ID3_Frame* frame = tag.Find(ID3FID_GENERALOBJECT);
-	if(NULL != frame)
+	string sExtension = FileUtils::FindExtension(sFilename.c_str());
+
+	if(sExtension == "mp3")
 	{
-		ID3_Field* fld = frame->GetField(ID3FN_DATA);
-		if(NULL != fld)
+		// Open mp3 file for reading
+		MPEG::File file(sFilename.c_str());
+
+		if (!file.isOpen())
+			return;
+
+		// Extract id3 tag
+		ID3v2::Tag *id3v2tag = file.ID3v2Tag();
+
+		if(id3v2tag)
 		{
-			Size = fld->Size();
-			if(Size > MAX_TAG_SIZE_ALLOWED)
-			{
-				cout << "ERROR! Field size too big: " << int(Size) << endl;
-				tag.RemoveFrame(frame);
-				tag.Update(ID3TT_ID3); 
+			// If a valid tag is found, extract all frames with user defined data (GEOB)
+			TagLib::ID3v2::FrameList geoblist = id3v2tag->frameListMap()["GEOB"];
+
+			// The function can be left, if there are no GEOB frames present
+			if(geoblist.isEmpty())
 				return;
-			}
 
+			// Extract the first data frame. If none was found, leave this function
+			TagLib::ID3v2::GeneralEncapsulatedObjectFrame *geobframe = static_cast<TagLib::ID3v2::GeneralEncapsulatedObjectFrame *>(geoblist.front());
+			if(!geobframe)
+				return;
 
+			if(geobframe->object().isEmpty())
+				return;
+
+			// Extract data size from frames information and create a data structure with the given size. At least frame data is copied to this structure.
+			Size = geobframe->object().size();
 			pData = new char[Size];
-			memcpy(pData, fld->GetRawBinary(), Size);
+			memcpy(pData, geobframe->object().data(), Size);
 		}
 	}
 }
 
+/**
+	void SetUserDefinedInformation(string sFilename, char *pData, size_t& Size)
+
+	@brief 			Write user defined information to ID3 tag
+
+	@param[in]  	sFilename 		Filename of mp3 file to add user data
+	@param[in] 		pData 			Pointer on a data structure with data to be written
+	@param[in] 		Size 			Size of user defined data
+*/
 void SetUserDefinedInformation(string sFilename, char *pData, size_t& Size)
 {
-	ID3_Tag tag; 
-	tag.Link(sFilename.c_str());
+	string sExtension = FileUtils::FindExtension(sFilename.c_str());
 
-	ID3_Frame* frame = tag.Find(ID3FID_GENERALOBJECT);
-	if(NULL == frame)
+	if(sExtension == "mp3")
 	{
-		frame = new ID3_Frame(ID3FID_GENERALOBJECT);
-		tag.AttachFrame(frame);
-	}
+		// Open mp3 file for writing
+		MPEG::File file(sFilename.c_str());
 
-	if(NULL != frame)
-	{
-		ID3_Field* fld = frame->GetField(ID3FN_DATA);
-		uchar *pFieldData = new uchar[Size];
-		memcpy(pFieldData, pData, Size);
-		fld->Set(pFieldData, Size);
-		delete []pFieldData;
-	}
+		if (!file.isOpen())
+			return;
 
-    tag.Update(ID3TT_ID3); 
+		// Extract id3 tag
+		ID3v2::Tag *id3v2tag = file.ID3v2Tag();
+		if(id3v2tag)
+		{
+			// Create a new object frame with given data and size
+			TagLib::ID3v2::GeneralEncapsulatedObjectFrame *geobframe = new TagLib::ID3v2::GeneralEncapsulatedObjectFrame;
+			geobframe->setObject(TagLib::ByteVector(pData, Size));
+			file.ID3v2Tag()->addFrame(geobframe);
+
+			file.save();
+			return;
+		}
+	}
 }
 
-void GetInformation(const ID3_Tag &myTag, map<int,string>& mapAttributes,
+/**
+	void GetInformationV2(const ID3v2::Tag *id3v2tag, map<int,string>& mapAttributes,
+					list<pair<char *, size_t> >& listPictures)
+
+	@brief 			Read data from ID3 tag version 2
+
+	@param[in]  	id3v2tag 		Pointer on tag to read from
+	@param[out] 	mapAttributes 	Map to write tag information
+	@param[out] 	listPictures 	List of system known pictures
+
+	@warning 		ID3 tag version 1 is not handled yet
+*/
+void GetInformationV2(const ID3v2::Tag *id3v2tag, map<int,string>& mapAttributes,
 					list<pair<char *, size_t> >& listPictures)
 {
-  ID3_Tag::ConstIterator* iter = myTag.CreateIterator();
-  const ID3_Frame* frame = NULL;
+	// Extract all frames from id3 tag and check each frame for usable information
+	  ID3v2::FrameList::ConstIterator it = id3v2tag->frameList().begin();
+	  for(; it != id3v2tag->frameList().end(); it++)
+	  {
+		int PK_Attr = 0;
 
-  while (NULL != (frame = iter->GetNext()))
-  {
-    const char* desc = frame->GetDescription();
-	string id = frame->GetTextID();
-	
-    if (!desc) desc = "";
+		// Read the frame data
+		string value = (*it)->toString().to8Bit(true);
 
-	cout << "=== " << id << " (" << desc << "): ";
+		// We know the frame type, lets see if we have an applicable database attribute
+		if((*it)->frameID() == "TALB")
+			PK_Attr = ATTRIBUTETYPE_Album_CONST;
+		else if((*it)->frameID() == "TIT2")
+			PK_Attr = ATTRIBUTETYPE_Title_CONST;
+		else if((*it)->frameID() == "TPE1")
+			PK_Attr = ATTRIBUTETYPE_Performer_CONST;
+		else if((*it)->frameID() == "TCON")
+			PK_Attr = ATTRIBUTETYPE_Genre_CONST;
+		else if((*it)->frameID() == "TRCK")
+			PK_Attr = ATTRIBUTETYPE_Track_CONST;
+		else if(((*it)->frameID() == "TYER") || ((*it)->frameID() == "TDRC"))
+			PK_Attr = ATTRIBUTETYPE_Release_Date_CONST;
+		else if((*it)->frameID() == "COMM") //comments
+			PK_Attr = -2; // todo ask
+		else if((*it)->frameID() == "TMED") //media
+			PK_Attr = -3; // todo ask
+		else if((*it)->frameID() == "TLEN") //length
+			PK_Attr = -4; // todo ask;
+	    else if((*it)->frameID() == "WXXX")
+		    PK_Attr = ATTRIBUTETYPE_Website_CONST;
+		else if((*it)->frameID() == "TCOM")
+		    PK_Attr = ATTRIBUTETYPE_ComposerWriter_CONST;
+		else if((*it)->frameID() == "TENC") //encoded by
+	        PK_Attr = -5; // todo ask
+	    else if((*it)->frameID() == "TCOP") //copyright
+	        PK_Attr = -6; // todo ask
+	    else if((*it)->frameID() == "TOPE") //Original artist(s)/performer(s)
+	        PK_Attr = -7; // todo ask;
+		else
+			PK_Attr = -1000;
 
-	int PK_Attr = 0;
-	if(id == "TALB")
-		PK_Attr = ATTRIBUTETYPE_Album_CONST;
-	else if(id == "TIT2")
-		PK_Attr = ATTRIBUTETYPE_Title_CONST;
-	else if(id == "TIT3")
-		PK_Attr = ATTRIBUTETYPE_Episode_CONST;
-	else if(id == "TPE1")
-		PK_Attr = ATTRIBUTETYPE_Performer_CONST;
-	else if(id == "TCON")
-		PK_Attr = ATTRIBUTETYPE_Genre_CONST;
-	else if(id == "TRCK")
-		PK_Attr = ATTRIBUTETYPE_Track_CONST;
-	else if(id == "TYER")
-		PK_Attr = ATTRIBUTETYPE_Release_Date_CONST;
-	else if(id == "COMM") //comments
-		PK_Attr = -2; // todo ask
-	else if(id == "TMED") //media
-		PK_Attr = -3; // todo ask
-	else if(id == "TLEN") //length
-		PK_Attr = -4; // todo ask;
-    else if(id == "WXXX")
-	    PK_Attr = ATTRIBUTETYPE_Website_CONST; 
-	else if(id == "TCOM")
-	    PK_Attr = ATTRIBUTETYPE_ComposerWriter_CONST;
-	else if(id == "TENC") //encoded by
-        PK_Attr = -5; // todo ask
-    else if(id == "TCOP") //copyright
-        PK_Attr = -6; // todo ask
-    else if(id == "TOPE") //Original artist(s)/performer(s)
-        PK_Attr = -7; // todo ask;
-	else
-		PK_Attr = -1000;
-
-	string value;
-	
-    ID3_FrameID eFrameID = frame->GetID();
-    switch (eFrameID)
-    {
-      case ID3FID_ALBUM:
-      case ID3FID_BPM:
-      case ID3FID_COMPOSER:
-      case ID3FID_CONTENTTYPE:
-      case ID3FID_COPYRIGHT:
-      case ID3FID_DATE:
-      case ID3FID_PLAYLISTDELAY:
-      case ID3FID_ENCODEDBY:
-      case ID3FID_LYRICIST:
-      case ID3FID_FILETYPE:
-      case ID3FID_TIME:
-      case ID3FID_CONTENTGROUP:
-      case ID3FID_TITLE:
-      case ID3FID_SUBTITLE:
-      case ID3FID_INITIALKEY:
-      case ID3FID_LANGUAGE:
-      case ID3FID_SONGLEN:
-      case ID3FID_MEDIATYPE:
-      case ID3FID_ORIGALBUM:
-      case ID3FID_ORIGFILENAME:
-      case ID3FID_ORIGLYRICIST:
-      case ID3FID_ORIGARTIST:
-      case ID3FID_ORIGYEAR:
-      case ID3FID_FILEOWNER:
-      case ID3FID_LEADARTIST:
-      case ID3FID_BAND:
-      case ID3FID_CONDUCTOR:
-      case ID3FID_MIXARTIST:
-      case ID3FID_PARTINSET:
-      case ID3FID_PUBLISHER:
-      case ID3FID_TRACKNUM:
-      case ID3FID_RECORDINGDATES:
-      case ID3FID_NETRADIOSTATION:
-      case ID3FID_NETRADIOOWNER:
-      case ID3FID_SIZE:
-      case ID3FID_ISRC:
-      case ID3FID_ENCODERSETTINGS:
-      case ID3FID_YEAR:
-      {
-        char *sText = ID3_GetString(frame, ID3FN_TEXT);
-        cout << sText << endl;
-		value = sText;
-        delete [] sText;
-        break;
-      }
-      case ID3FID_USERTEXT:
-      {
-        char 
-        *sText = ID3_GetString(frame, ID3FN_TEXT), 
-        *sDesc = ID3_GetString(frame, ID3FN_DESCRIPTION);
-        cout << "(" << sDesc << "): " << sText << endl;
-		value = sText; //ignoring Description
-        delete [] sText;
-        delete [] sDesc;
-        break;
-      }
-      case ID3FID_COMMENT:
-      case ID3FID_UNSYNCEDLYRICS:
-      {
-        char 
-        *sText = ID3_GetString(frame, ID3FN_TEXT), 
-        *sDesc = ID3_GetString(frame, ID3FN_DESCRIPTION), 
-        *sLang = ID3_GetString(frame, ID3FN_LANGUAGE);
-        cout << "(" << sDesc << ")[" << sLang << "]: "
-             << sText << endl;
-
-		value = string("(") + sDesc + ")[" + sLang + "]: " + sText;
-		
-        delete [] sText;
-        delete [] sDesc;
-        delete [] sLang;
-        break;
-      }
-      case ID3FID_WWWAUDIOFILE:
-      case ID3FID_WWWARTIST:
-      case ID3FID_WWWAUDIOSOURCE:
-      case ID3FID_WWWCOMMERCIALINFO:
-      case ID3FID_WWWCOPYRIGHT:
-      case ID3FID_WWWPUBLISHER:
-      case ID3FID_WWWPAYMENT:
-      case ID3FID_WWWRADIOPAGE:
-      {
-        char *sURL = ID3_GetString(frame, ID3FN_URL);
-        cout << sURL << endl;
-		value = sURL;
-        delete [] sURL;
-        break;
-      }
-      case ID3FID_WWWUSER:
-      {
-        char 
-        *sURL = ID3_GetString(frame, ID3FN_URL),
-        *sDesc = ID3_GetString(frame, ID3FN_DESCRIPTION);
-        cout << "(" << sDesc << "): " << sURL << endl;
-		value = sURL;
-        delete [] sURL;
-        delete [] sDesc;
-        break;
-      }
-      case ID3FID_INVOLVEDPEOPLE:
-      {
-        size_t nItems = frame->GetField(ID3FN_TEXT)->GetNumTextItems();
-        for (size_t nIndex = 0; nIndex < nItems; nIndex++)
-        {
-          char *sPeople = ID3_GetString(frame, ID3FN_TEXT, nIndex);
-          cout << sPeople;
-		  value += sPeople;
-          delete [] sPeople;
-          if (nIndex + 1 < nItems)
-          {
-            cout << ", ";
-			value += ", ";
-          }
-        }
-        cout << endl;
-        break;
-      }
-      case ID3FID_PICTURE:
-      {
-        char
-        *sMimeType = ID3_GetString(frame, ID3FN_MIMETYPE),
-        *sDesc     = ID3_GetString(frame, ID3FN_DESCRIPTION),
-        *sFormat   = ID3_GetString(frame, ID3FN_IMAGEFORMAT);
-        size_t
-        nPicType   = frame->GetField(ID3FN_PICTURETYPE)->Get(),
-        nDataSize  = frame->GetField(ID3FN_DATA)->Size();
-
-		char *pPictureData = NULL;
-
-        ID3_Field* fld = frame->GetField(ID3FN_DATA);
-        if (fld)
-        {
-			size_t nBinSize = fld->BinSize();
-			pPictureData = new char[nBinSize];
-			memcpy(pPictureData, fld->GetRawBinary(), nBinSize);
-			listPictures.push_back(make_pair(pPictureData, nBinSize));
-		}
-
-        cout << "(" << sDesc << ")[" << sFormat << ", "
-             << int(nPicType) << "]: " << sMimeType << ", " << int(nDataSize)
-             << " bytes" << endl;
-
-		value = string("(") + sDesc + ")[" + sFormat + "]: " + sMimeType;
-        delete [] sMimeType;
-        delete [] sDesc;
-        delete [] sFormat;
-        break;
-      }
-      case ID3FID_GENERALOBJECT:
-      {
-        char 
-        *sMimeType = ID3_GetString(frame, ID3FN_MIMETYPE), 
-        *sDesc = ID3_GetString(frame, ID3FN_DESCRIPTION), 
-        *sFileName = ID3_GetString(frame, ID3FN_FILENAME);
-        size_t 
-        nDataSize = frame->GetField(ID3FN_DATA)->Size();
-        cout << "(" << sDesc << ")[" 
-             << sFileName << "]: " << sMimeType << ", " << int(nDataSize)
-             << " bytes" << endl;
-		value = string("(") + sDesc + ")[" + sFileName + "]: " + sMimeType;
-        delete [] sMimeType;
-        delete [] sDesc;
-        delete [] sFileName;
-        break;
-      }
-      case ID3FID_UNIQUEFILEID:
-      {
-        char *sOwner = ID3_GetString(frame, ID3FN_OWNER);
-        size_t nDataSize = frame->GetField(ID3FN_DATA)->Size();
-        cout << sOwner << ", " << int(nDataSize)
-             << " bytes" << endl;
-		value = sOwner;
-        delete [] sOwner;
-        break;
-      }
-      case ID3FID_PLAYCOUNTER:
-      {
-        size_t nCounter = frame->GetField(ID3FN_COUNTER)->Get();
-        cout << int(nCounter) << endl;
-        break;
-      }
-      case ID3FID_POPULARIMETER:
-      {
-        char *sEmail = ID3_GetString(frame, ID3FN_EMAIL);
-        size_t
-        nCounter = frame->GetField(ID3FN_COUNTER)->Get(),
-        nRating = frame->GetField(ID3FN_RATING)->Get();
-        cout << sEmail << ", counter=" 
-             << int(nCounter) << " rating=" << int(nRating) << endl;
-		value = sEmail;
-        delete [] sEmail;
-        break;
-      }
-      case ID3FID_CRYPTOREG:
-      case ID3FID_GROUPINGREG:
-      {
-        char *sOwner = ID3_GetString(frame, ID3FN_OWNER);
-        size_t 
-        nSymbol = frame->GetField(ID3FN_ID)->Get(),
-        nDataSize = frame->GetField(ID3FN_DATA)->Size();
-        cout << "(" << int(nSymbol) << "): " << sOwner
-             << ", " << int(nDataSize) << " bytes" << endl;
-        break;
-      }
-      case ID3FID_AUDIOCRYPTO:
-      case ID3FID_EQUALIZATION:
-      case ID3FID_EVENTTIMING:
-      case ID3FID_CDID:
-      case ID3FID_MPEGLOOKUP:
-      case ID3FID_OWNERSHIP:
-      case ID3FID_PRIVATE:
-      case ID3FID_POSITIONSYNC:
-      case ID3FID_BUFFERSIZE:
-      case ID3FID_VOLUMEADJ:
-      case ID3FID_REVERB:
-      case ID3FID_SYNCEDTEMPO:
-      case ID3FID_METACRYPTO:
-      {
-        cout << " (unimplemented)" << endl;
-        break;
-      }
-      default:
-      {
-        cout << " frame" << endl;
-        break;
-      }
-    }
-
-	if(PK_Attr == ATTRIBUTETYPE_Genre_CONST)
-	{
-		string genre;
-		for(string::iterator it = value.begin(); it != value.end(); ++it)
+		// If tag has a picture attached, insert it into system wide picture list
+		if((*it)->frameID() == "APIC")
 		{
-			char c = *it;
-			if(c >= '0' && c <= '9')
-				genre += c;
+			TagLib::ID3v2::AttachedPictureFrame *pictureframe = static_cast<TagLib::ID3v2::AttachedPictureFrame *>(*it);
+
+			if(pictureframe)
+			{
+				char *pPictureData = NULL;
+				size_t nBinSize = pictureframe->picture().size();
+				pPictureData = new char[nBinSize];
+				memcpy(pPictureData, pictureframe->picture().data(), nBinSize);
+
+				listPictures.push_back(make_pair(pPictureData, nBinSize));
+
+				value = string("(") + pictureframe->description().to8Bit(true) + ")[]: " + pictureframe->mimeType().to8Bit(true);
+			}
 		}
 
-		if(value == genre || value == "(" + genre + ")")
-		{
-			int nGenre = atoi(genre.c_str());
-			if(nGenre < ID3_NR_OF_V1_GENRES)
-				value = ID3_v1_genre_description[nGenre];
-		}
-	}
+		mapAttributes[PK_Attr] = value;
 
-	mapAttributes[PK_Attr] = value;
-  }
-  delete iter;
+	  }
 }
 
+/**
+	void GetInformationV1(const ID3v2::Tag *id3v1tag, map<int,string>& mapAttributes
+
+	@brief 			Read data from ID3 tag version 1
+
+	@param[in]  	id3v1tag 		Pointer on tag to read from
+	@param[out] 	mapAttributes 	Map to write tag information
+*/
+void GetInformationV1(const ID3v1::Tag *id3v1tag, map<int,string>& mapAttributes)
+{
+
+	if(!id3v1tag->title().isEmpty())
+		mapAttributes[ATTRIBUTETYPE_Title_CONST] = id3v1tag->title().to8Bit(true);
+
+	if(!id3v1tag->artist().isEmpty())
+		mapAttributes[ATTRIBUTETYPE_Performer_CONST] = id3v1tag->artist().to8Bit(true);
+
+	if(!id3v1tag->album().isEmpty())
+		mapAttributes[ATTRIBUTETYPE_Album_CONST] = id3v1tag->album().to8Bit(true);
+
+	if(!id3v1tag->genre().isEmpty())
+		mapAttributes[ATTRIBUTETYPE_Genre_CONST] = id3v1tag->genre().to8Bit(true);
+
+	if(id3v1tag->year() != 0)
+	{
+		ostringstream s;
+		if(s << id3v1tag->year())
+			mapAttributes[ATTRIBUTETYPE_Release_Date_CONST] = s.str();
+	}
+
+	if(id3v1tag->track() != 0)
+	{
+		ostringstream s;
+		if(s << id3v1tag->track())
+			mapAttributes[ATTRIBUTETYPE_Track_CONST] = s.str();
+	}
+}
+
+/**
+	void GetInformationAPE(const ID3v2::Tag *id3v1tag, map<int,string>& mapAttributes)
+
+	@brief 			Read data from ape tag version 2
+
+	@param[in]  	id3v1tag 		Pointer on tag to read from
+	@param[out] 	mapAttributes 	Map to write tag information
+*/
+void GetInformationAPE(const APE::Tag *apetag, map<int,string>& mapAttributes)
+{
+
+	if(!apetag->title().isEmpty())
+		mapAttributes[ATTRIBUTETYPE_Title_CONST] = apetag->title().to8Bit(true);
+
+	if(!apetag->artist().isEmpty())
+		mapAttributes[ATTRIBUTETYPE_Performer_CONST] = apetag->artist().to8Bit(true);
+
+	if(!apetag->album().isEmpty())
+		mapAttributes[ATTRIBUTETYPE_Album_CONST] = apetag->album().to8Bit(true);
+
+	if(!apetag->genre().isEmpty())
+		mapAttributes[ATTRIBUTETYPE_Genre_CONST] = apetag->genre().to8Bit(true);
+
+	if(apetag->year() != 0)
+	{
+		ostringstream s;
+		if(s << apetag->year())
+			mapAttributes[ATTRIBUTETYPE_Release_Date_CONST] = s.str();
+	}
+
+	if(apetag->track() != 0)
+	{
+		ostringstream s;
+		if(s << apetag->track())
+			mapAttributes[ATTRIBUTETYPE_Track_CONST] = s.str();
+	}
+}
+
+/**
+	void GetId3Info(string sFilename, map<int,string>& mapAttributes,
+					list<pair<char *, size_t> >& listPictures)
+
+	@brief 			Open file and read tag depending on tag version
+
+	@param[in]  	sFilename 		Filename of mp3 file to be read
+	@param[out] 	mapAttributes 	Map to write tag information
+	@param[out] 	listPictures 	List of system known pictures
+*/
 void GetId3Info(string sFilename, map<int,string>& mapAttributes,
 				list<pair<char *, size_t> >& listPictures)
 {
-	ID3_Tag myTag; 
-	myTag.Link(sFilename.c_str(), ID3TT_ALL);
-	myTag.GetMp3HeaderInfo();
-    GetInformation(myTag, mapAttributes, listPictures);
+	string sExtension = FileUtils::FindExtension(sFilename.c_str());
+
+	if(sExtension == "mp3")
+	{
+		MPEG::File file(sFilename.c_str());
+
+		if (!file.isOpen())
+			return;
+
+		ID3v2::Tag *id3v2tag = file.ID3v2Tag();
+
+		if((id3v2tag != NULL) && (!id3v2tag->isEmpty()))
+		{
+			GetInformationV2(id3v2tag, mapAttributes, listPictures);
+			return;
+		}
+
+		ID3v1::Tag *id3v1tag = file.ID3v1Tag();
+
+		if((id3v1tag != NULL) && (!id3v1tag->isEmpty()))
+		{
+			GetInformationV1(id3v1tag, mapAttributes);
+			return;
+		}
+
+		APE::Tag *apetag = file.APETag();
+
+		if((apetag != NULL) && (!apetag->isEmpty()))
+		{
+			GetInformationAPE(apetag, mapAttributes);
+			return;
+		}
+	}
 }
 
-size_t ID3_RemoveComposers(ID3_Tag *tag)
+/**
+	void AddID3PictureTag(const string sFilename, const char *pData, size_t nSize)
+
+	@brief 			Append a picture to the given file
+
+	@param[in]  	sFilename 		Filename of mp3 file to be written
+	@param[in] 		pData 			Pointer on picture data
+	@param[in] 		nSize 			Size of picture
+*/
+void AddID3PictureTag(const string sFilename, const char *pData, size_t nSize)
 {
-    size_t num_removed = 0;
-    ID3_Frame *frame = NULL;
+	string sExtension = FileUtils::FindExtension(sFilename.c_str());
 
-    if (NULL == tag)
-    {
-        return num_removed;
-    }
-
-    while ((frame = tag->Find(ID3FID_COMPOSER)))
-    {
-        frame = tag->RemoveFrame(frame);
-        delete frame;
-        num_removed++;
-    }
-
-    return num_removed;
-} 
-
-ID3_Frame* ID3_AddComposer(ID3_Tag *tag, const char *text, bool replace = true)
-{
-    ID3_Frame* frame = NULL;
-    if (NULL != tag && NULL != text && strlen(text) > 0)
-    {
-		cout << "replace: " << replace << endl;
-        if (replace)
-        {
-            ID3_RemoveComposers(tag);
-        }
-        if (replace || tag->Find(ID3FID_COMPOSER) == NULL)
-        {
-            frame = new ID3_Frame(ID3FID_COMPOSER);
-            if (frame)
-            {
-                frame->GetField(ID3FN_TEXT)->Set(text);
-                tag->AttachFrame(frame);
-            }
-        }
-    }
-
-    return frame;
-} 
-
-size_t ID3_RemoveUserDefinedText(ID3_Tag *tag)
-{
-	size_t num_removed = 0;
-	ID3_Frame *frame = NULL;
-
-	if (NULL == tag)
+	if(sExtension == "mp3")
 	{
-		return num_removed;
+		MPEG::File file(sFilename.c_str());
+
+		if (!file.isOpen())
+			return;
+
+		if(!file.ID3v2Tag())
+			return;
+
+		TagLib::ID3v2::AttachedPictureFrame *pictureframe = new TagLib::ID3v2::AttachedPictureFrame;
+		pictureframe->setMimeType(TagLib::String("image/jpg", TagLib::String::Latin1));
+		pictureframe->setPicture(TagLib::ByteVector(pData, nSize));
+		pictureframe->setType(TagLib::ID3v2::AttachedPictureFrame::FrontCover);
+		file.ID3v2Tag()->addFrame(pictureframe);
+
+		file.save();
 	}
+}
 
-	while ((frame = tag->Find(ID3FID_USERTEXT)))
-	{
-		frame = tag->RemoveFrame(frame);
-		delete frame;
-		num_removed++;
-	}
+/**
+	void SetId3Value(const string sFilename, const string sAttribute, const string Value)
 
-	return num_removed;
-} 
+	@brief 			Write string data to file
 
-ID3_Frame* ID3_AddUserDefinedText(ID3_Tag *tag, const char *text, bool replace = true)
+	@param[in]  	sFilename 		Filename of mp3 file to be written
+	@param[in] 		sAttribute 		Frame type
+	@param[in] 		Value 			Data to be written
+*/
+void SetId3Value(const string sFilename, const string sAttribute, const string Value)
 {
-	ID3_Frame* frame = NULL;
-	if (NULL != tag && NULL != text && strlen(text) > 0)
+	ID3v2::FrameFactory::instance()->setDefaultTextEncoding(TagLib::String::UTF16);
+
+	string sExtension = FileUtils::FindExtension(sFilename.c_str());
+
+	if(sExtension == "mp3")
 	{
-		cout << "replace: " << replace << endl;
-		if (replace)
+		MPEG::File file(sFilename.c_str());
+
+		if (!file.isOpen())
+			return;
+
+		if(!file.ID3v2Tag())
+			return;
+
+		// Get frames depending on given attribute
+		TagLib::ID3v2::FrameList framelist = file.ID3v2Tag()->frameListMap()[sAttribute.c_str()];
+
+		// If there is no such frame yet, create a new one
+		if(framelist.isEmpty())
 		{
-			ID3_RemoveUserDefinedText(tag);
+			TagLib::ID3v2::TextIdentificationFrame *tpeframe = new TagLib::ID3v2::TextIdentificationFrame(sAttribute.c_str(), TagLib::ID3v2::FrameFactory::instance()->defaultTextEncoding());
+			file.ID3v2Tag()->addFrame(tpeframe);
+
+			tpeframe->setText(Value.c_str());
 		}
-		if (replace || tag->Find(ID3FID_USERTEXT) == NULL)
+		else
 		{
-			frame = new ID3_Frame(ID3FID_USERTEXT);
-			if (frame)
+			TagLib::ID3v2::TextIdentificationFrame *frame = (TagLib::ID3v2::TextIdentificationFrame *)framelist.front();
+			if (!frame)
 			{
-				frame->GetField(ID3FN_TEXT)->Set(text);
-				tag->AttachFrame(frame);
+				TagLib::ID3v2::TextIdentificationFrame *frame = new TagLib::ID3v2::TextIdentificationFrame(sAttribute.c_str(), TagLib::ID3v2::FrameFactory::instance()->defaultTextEncoding());
+				file.ID3v2Tag()->addFrame(frame);
 			}
+			frame->setTextEncoding(TagLib::String::UTF16);
+			frame->fieldList().append(Value.c_str());
 		}
+
+		file.save();
 	}
-
-	return frame;
-} 
-
-void RemoveId3PictureTag(ID3_Tag *tag)
-{
-    size_t num_removed = 0;
-    ID3_Frame *frame = NULL;
-
-    while ((frame = tag->Find(ID3FID_PICTURE)))
-    {
-        frame = tag->RemoveFrame(frame);
-        delete frame;
-        num_removed++;
-    }
 }
 
-ID3_Frame* AddID3PictureTag(ID3_Tag *tag, const char *pData, size_t nSize)
-{
-	ID3_Frame* frame = NULL;
-	if (NULL != tag && NULL != pData && nSize > 0)
-	{
-		frame = new ID3_Frame(ID3FID_PICTURE);
-		if (frame)
-		{
-			frame->GetField(ID3FN_DATA)->Set(reinterpret_cast<const uchar *>(pData), nSize);
-			tag->AttachFrame(frame);
-		}
-	}
 
-	return frame;
-} 
+/**
+	void SetId3Info(string sFilename, const map<int,string>& mapAttributes,
+					const list<pair<char *, size_t> >& listPictures)
 
-void SetId3Info(string sFilename, const map<int,string>& mapAttributes, 
+	@brief 			Transform from database attribute to frame type
+
+	@param[in]  	sFilename 		Filename of mp3 file to be written
+	@param[in] 		mapAttributes 	Map of attributes from database
+	@param[in] 		listPictures 	List of pictures
+
+*/
+void SetId3Info(string sFilename, const map<int,string>& mapAttributes,
 				const list<pair<char *, size_t> >& listPictures)
 {
-    ID3_Tag myTag; 
-    myTag.Link(sFilename.c_str());
+	// Cycle through the given attributes and insert data accordingly
+	for(map<int,string>::const_iterator it = mapAttributes.begin(); it != mapAttributes.end(); it++)
+	{
+		cout << "Writing: PK_Attr = " << (*it).first << "\t\t" << (*it).second << endl;
 
-    for(map<int,string>::const_iterator it = mapAttributes.begin(); it != mapAttributes.end(); it++)
-    {
-        cout << "Writing: PK_Attr = " << (*it).first << "\t\t" << (*it).second << endl;
+		int PK_Attr = (*it).first;
+		string sValue = (*it).second;
 
-        int PK_Attr = (*it).first;
-        string sValue = (*it).second;
-
-        switch(PK_Attr)
-        {
-            case ATTRIBUTETYPE_Performer_CONST:
-                ID3_AddArtist(&myTag, sValue.c_str(), true); 
-                break;
-
-            case ATTRIBUTETYPE_Album_CONST:
-                ID3_AddAlbum(&myTag, sValue.c_str(), true);
-                break;
-
-            case ATTRIBUTETYPE_Title_CONST:
-                ID3_AddTitle(&myTag, sValue.c_str(), true); 
-                break;
-
-            case ATTRIBUTETYPE_Release_Date_CONST:
-                ID3_AddYear(&myTag, sValue.c_str(), true);
-                break;
-
-            case ATTRIBUTETYPE_Genre_CONST:
-                ID3_AddGenre(&myTag, sValue.c_str(), true); 
-                break;
-
-            case ATTRIBUTETYPE_Track_CONST:
-                ID3_AddTrack(&myTag, atoi(sValue.c_str()), 0, true); 
-                break;
-
-            case ATTRIBUTETYPE_ComposerWriter_CONST:
-                ID3_AddComposer(&myTag, sValue.c_str(), true);
+		switch(PK_Attr)
+		{
+			case ATTRIBUTETYPE_Performer_CONST:
+				SetId3Value(sFilename.c_str(), "TPE1", sValue.c_str());
 				break;
-			
-            default:
-                cout << "Don't know yet how to save tag with PK_Attr = " << PK_Attr << " and value " << sValue << endl;
-        }
-    }
 
-	RemoveId3PictureTag(&myTag);
+			case ATTRIBUTETYPE_Album_CONST:
+				SetId3Value(sFilename.c_str(), "TALB", sValue.c_str());
+				break;
+
+			case ATTRIBUTETYPE_Title_CONST:
+				SetId3Value(sFilename.c_str(), "TIT2", sValue.c_str());
+				break;
+
+			case ATTRIBUTETYPE_Release_Date_CONST:
+				SetId3Value(sFilename.c_str(), "TDRC", sValue.c_str());
+				break;
+
+			case ATTRIBUTETYPE_Genre_CONST:
+				SetId3Value(sFilename.c_str(), "TCON", sValue.c_str());
+				break;
+
+			case ATTRIBUTETYPE_Track_CONST:
+				SetId3Value(sFilename.c_str(), "TRCK", sValue.c_str());
+				break;
+
+			case ATTRIBUTETYPE_ComposerWriter_CONST:
+				SetId3Value(sFilename.c_str(), "TCOM", sValue.c_str());
+				break;
+
+			case ATTRIBUTETYPE_Website_CONST:
+				SetId3Value(sFilename.c_str(), "WXXX", sValue.c_str());
+				break;
+
+			default:
+				cout << "Don't know yet how to save tag with PK_Attr = " << PK_Attr << " and value " << sValue << endl;
+		}
+	}
+
+	RemoveId3Tag(sFilename, -5000, "");
+
 	for(list<pair<char *, size_t> >::const_iterator itp = listPictures.begin(); itp != listPictures.end(); itp++)
-		AddID3PictureTag(&myTag, itp->first, itp->second);
-    
-    myTag.Update(ID3TT_ID3); 
+			AddID3PictureTag(sFilename, itp->first, itp->second);
 }
 
+/**
+	void RemoveId3Tag(string sFilename, int nTagType, string sValue)
+
+	@brief 			Remove every frame with the given type from ID3 V1 and V2 tags
+
+	@param[in]  	sFilename 		Filename of mp3 file to be written
+	@param[in] 		nTagType 		Map of attributes from database
+	@param[in] 		sValue 			List of pictures
+
+*/
 void RemoveId3Tag(string sFilename, int nTagType, string sValue)
 {
-	ID3_Tag myTag; 
-	myTag.Link(sFilename.c_str());
+	string sExtension = FileUtils::FindExtension(sFilename.c_str());
 
-	switch(nTagType)
+	if(sExtension == "mp3")
 	{
-		case ATTRIBUTETYPE_Performer_CONST:
-			ID3_RemoveArtists(&myTag); 
-			break;
+		TagLib::MPEG::File file(sFilename.c_str());
 
-		case ATTRIBUTETYPE_Album_CONST:
-			ID3_RemoveAlbums(&myTag);
-			break;
+		if (!file.isOpen())
+			return;
 
-		case ATTRIBUTETYPE_Title_CONST:
-			ID3_RemoveTitles(&myTag); 
-			break;
+		// Get frame type depending on attribute type and remove both ID3 version 1 and 2 tags.
+		// Both have to be removed to avoid frame reconstruction from other tag version
+		switch(nTagType)
+		{
+			case ATTRIBUTETYPE_Performer_CONST:
+				if(file.ID3v2Tag())
+					file.ID3v2Tag()->removeFrames("TPE1");
+				if(file.ID3v1Tag())
+					file.ID3v1Tag()->setArtist(String::null);
+				break;
 
-		case ATTRIBUTETYPE_Release_Date_CONST:
-			ID3_RemoveYears(&myTag);
-			break;
+			case ATTRIBUTETYPE_Album_CONST:
+				if(file.ID3v2Tag())
+					file.ID3v2Tag()->removeFrames("TALB");
+				if(file.ID3v1Tag())
+					file.ID3v1Tag()->setAlbum(String::null);
+				break;
 
-		case ATTRIBUTETYPE_Genre_CONST:
-			ID3_RemoveGenres(&myTag); 
-			break;
+			case ATTRIBUTETYPE_Title_CONST:
+				if(file.ID3v2Tag())
+					file.ID3v2Tag()->removeFrames("TIT2");
+				if(file.ID3v1Tag())
+					file.ID3v1Tag()->setTitle(String::null);
+				break;
 
-		case ATTRIBUTETYPE_Track_CONST:
-			ID3_RemoveTracks(&myTag); 
-			break;
+			case ATTRIBUTETYPE_Release_Date_CONST:
+				if(file.ID3v2Tag())
+					file.ID3v2Tag()->removeFrames("TDRC");
+				if(file.ID3v1Tag())
+					file.ID3v1Tag()->setYear(0);
+				break;
 
-		case ATTRIBUTETYPE_ComposerWriter_CONST:
-			ID3_RemoveComposers(&myTag);
-			break;
+			case ATTRIBUTETYPE_Genre_CONST:
+				if(file.ID3v2Tag())
+					file.ID3v2Tag()->removeFrames("TCON");
+				if(file.ID3v1Tag())
+					file.ID3v1Tag()->setGenre(String::null);
+				break;
 
-		default:
-			cout << "Don't know yet how to remove tags with PK_Attr = " << nTagType << " and value " << sValue << endl;
+			case ATTRIBUTETYPE_Track_CONST:
+				if(file.ID3v2Tag())
+					file.ID3v2Tag()->removeFrames("TRCK");
+				if(file.ID3v1Tag())
+					file.ID3v1Tag()->setTrack(0);
+				break;
+
+			case ATTRIBUTETYPE_ComposerWriter_CONST:
+				if(file.ID3v2Tag())
+					file.ID3v2Tag()->removeFrames("TCOM");
+				break;
+
+			case ATTRIBUTETYPE_Website_CONST:
+				if(file.ID3v2Tag())
+					file.ID3v2Tag()->removeFrames("WXXX");
+				break;
+
+			case -5000:
+				if(file.ID3v2Tag())
+					file.ID3v2Tag()->removeFrames("APIC");
+				break;
+
+			default:
+				cout << "Don't know yet how to remove tags with PK_Attr = " << nTagType << endl;
+		}
+
+		file.save();
 	}
-
-    myTag.Update(ID3TT_ID3); 
 }
-
-#ifdef ENABLE_TEST_UNIT
-
-void DisplayInfo(const map<int,string>& mapAttributes, const list<pair<char *, size_t> >& listPictures)
-{
-    cout << endl << "Size: " << int(mapAttributes.size()) << endl;
-    for(map<int,string>::const_iterator it = mapAttributes.begin(); it != mapAttributes.end(); it++)
-	    cout << "PK_Attr = " << (*it).first << "\t\t" << (*it).second << endl;
-
-	for(list<pair<char *, size_t> >::const_iterator itp = listPictures.begin(); itp != listPictures.end(); itp++)
-	{
-		size_t nSize = itp->second;
-		cout << "Picture size " << static_cast<unsigned long>(nSize) << endl;
-	}
-}
-
-int main( unsigned int argc, char * const argv[])
-{
-    if(argc != 2)
-    {
-	    cout << "Usage: id3info file" << endl;
-	    return 1;
-    }
-
-    map<int,string> mapAttributes;
-	list<pair<char *, size_t> > listPictures;
-
-    //reading attr
-    GetId3Info(argv[1], mapAttributes, listPictures);
-
-	//display info
-	DisplayInfo(mapAttributes, listPictures);
-    return 0;
-}
-#endif
 

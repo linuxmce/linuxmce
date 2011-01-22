@@ -41,14 +41,14 @@ bool ID3FileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 		pData = NULL;
 	}
 
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# LoadPlutoAttributes: pluto attributes loaded (from id3 file - general object tag) %d", 
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# LoadPlutoAttributes: pluto attributes loaded (from id3 file - general object tag) %d",
 		pPlutoMediaAttributes->m_mapAttributes.size());
 
 	//get common id3 attributes
 	map<int, string> mapAttributes;
-	GetId3Info(sFileWithAttributes, mapAttributes, listPicturesForTags);	
+	GetId3Info(sFileWithAttributes, mapAttributes, listPicturesForTags);
 
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# LoadPlutoAttributes: id3 attributes loaded (from id3 file - common tags) %d", 
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# LoadPlutoAttributes: id3 attributes loaded (from id3 file - common tags) %d",
 		mapAttributes.size());
 
 	//merge attributes
@@ -61,7 +61,7 @@ bool ID3FileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 		if(itm == pPlutoMediaAttributes->m_mapAttributes.end())
 			pPlutoMediaAttributes->m_mapAttributes.insert(
 				std::make_pair(
-					nType, 
+					nType,
 					new PlutoMediaAttribute(0,nType, sValue)
 				)
 			);
@@ -81,7 +81,7 @@ bool ID3FileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
 
 	//Temporary map with attributes for common tags
 	map<int, string> mapAttributes;
-	for(MapPlutoMediaAttributes::iterator it = pPlutoMediaAttributes->m_mapAttributes.begin(), 
+	for(MapPlutoMediaAttributes::iterator it = pPlutoMediaAttributes->m_mapAttributes.begin(),
 		end = pPlutoMediaAttributes->m_mapAttributes.end(); it != end; ++it)
 	{
 		mapAttributes[it->first] = it->second->m_sName;
@@ -126,11 +126,11 @@ bool ID3FileHandler::RemoveAttribute(int nTagType, string sValue, PlutoMediaAttr
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# ID3FileHandler::RemoveAttribute: removing %s type %d attribute from the attribute file %s",
 		sValue.c_str(), nTagType, sFileWithAttributes.c_str());
 
-	RemoveId3Tag(sFileWithAttributes, nTagType, sValue);
+	RemoveId3Tag(sFileWithAttributes.c_str(), nTagType, sValue);
 	return true;
 }
 //-----------------------------------------------------------------------------------------------------
-string ID3FileHandler::FileWithAttributes(PlutoMediaAttributes *pPlutoMediaAttributes, 
+string ID3FileHandler::FileWithAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 										  bool bCreateId3File)
 {
 	//no id3 file if the media file doesn't exist anymore.
@@ -156,8 +156,8 @@ string ID3FileHandler::FileWithAttributes(PlutoMediaAttributes *pPlutoMediaAttri
 
 		if(
 			NULL != pPlutoMediaAttributes &&
-			pPlutoMediaAttributes->m_mapAttributes.size() == 0 && 
-			pPlutoMediaAttributes->m_mapLongAttributes.size() == 0 && 
+			pPlutoMediaAttributes->m_mapAttributes.size() == 0 &&
+			pPlutoMediaAttributes->m_mapLongAttributes.size() == 0 &&
 			pPlutoMediaAttributes->m_mapCoverarts.size() == 0 &&
 			pPlutoMediaAttributes->m_listBookmarks.size() == 0 &&
 			pPlutoMediaAttributes->m_sStartPosition == ""
@@ -199,7 +199,7 @@ string ID3FileHandler::GetFileSourceForDB()
 {
 	if(!UpdateMediaVars::sUPnPMountPoint.empty() && StringUtils::StartsWith(m_sDirectory, UpdateMediaVars::sUPnPMountPoint))
 		return "U";
-	else 
+	else
 		return "F";
 }
 //-----------------------------------------------------------------------------------------------------
