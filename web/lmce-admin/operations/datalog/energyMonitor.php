@@ -98,7 +98,7 @@ function energyMonitor($output,$dbADO){
 
 
 	$output->setBody($out);
-	$output->setMenuTitle($TEXT_ADVANCED_CONST.' |');
+	$output->setMenuTitle($TEXT_AUTOMATION_CONST.' |');
 	$output->setPageTitle("Energy Monitor");
 	$output->setNavigationMenu(array('Energy Monitor'=>'index.php?section=energyMonitor'));	
 	$output->setTitle(APPLICATION_NAME);			

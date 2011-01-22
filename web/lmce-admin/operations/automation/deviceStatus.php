@@ -72,7 +72,7 @@ function deviceStatus($output,$dbADO) {
 		header('Location: index.php?section=deviceStatus');
 	}
 
-	$output->setMenuTitle($TEXT_ADVANCED_CONST.' |');
+	$output->setMenuTitle($TEXT_AUTOMATION_CONST.' |');
 	$output->setPageTitle($TEXT_DEVICE_STATUS_CONST);
 	$output->setNavigationMenu(array($TEXT_DEVICE_STATUS_CONST=>'index.php?section=deviceStatus'));	
 	$output->setScriptCalendar('null');

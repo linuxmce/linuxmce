@@ -149,7 +149,7 @@ function executeScenarios($output,$dbADO) {
 		header('Location: index.php?section=executeScenarios');
 	}
 
-	$output->setMenuTitle($TEXT_ADVANCED_CONST.' |');
+	$output->setMenuTitle($TEXT_AUTOMATION_CONST.' |');
 	$output->setPageTitle($TEXT_EXECUTE_SCENARIOS_CONST);
 	$output->setNavigationMenu(array($TEXT_EXECUTE_SCENARIOS_CONST=>'index.php?section=executeScenarios'));	
 	$output->setScriptCalendar('null');

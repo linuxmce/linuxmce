@@ -125,7 +125,7 @@ function viewDatalog($output,$dbADO){
      $out.='</form>';
 
 	$output->setBody($out);
-	$output->setMenuTitle($TEXT_ADVANCED_CONST.' |');
+	$output->setMenuTitle($TEXT_AUTOMATION_CONST.' |');
 	$output->setPageTitle("Data Logger");
 	$output->setNavigationMenu(array('Data Logger'=>'index.php?section=viewDatalog'));	
 	$output->setTitle(APPLICATION_NAME);			
