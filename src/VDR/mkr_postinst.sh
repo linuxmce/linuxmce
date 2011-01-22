@@ -12,8 +12,8 @@ VIDEO_DIR="/home/public/data/pvr"
 # If the user already overwrote the default, get it.
 . /etc/default/vdr
 
-# If we have an entry for remotetimer already, we don't touch the setup.conf
-if grep -q "^remotetimers" /var/lib/vdr/setup.conf; then
+# If we have an entry for svdrpservice already, we don't touch the setup.conf
+if grep -q "^svdrpservice" /var/lib/vdr/setup.conf; then
 	exit 0
 fi
 
