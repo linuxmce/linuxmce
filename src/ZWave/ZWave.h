@@ -80,7 +80,7 @@ public:
 		virtual string GetCapabilities(int iNodeID, int iInstanceID);
 		virtual bool SetCapabilities(int iNodeID, int iInstanceID, string sCapabilities);
 		virtual void AddCapability(int PKDevice, int capability);
-		virtual void SetManufacturerSpecificString(string sManufacturerSpecific);
+		virtual void SetManufacturerSpecificString(int iPKDevice,string sManufacturerSpecific);
 		virtual std::map<int, int> FindCCInstanceCountForNode(string sInternalID);
 
 

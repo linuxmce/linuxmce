@@ -382,6 +382,7 @@ namespace ZWApi {
 		    id = node_id;
 	    }
         int id;
+	int iPKDevice;
 	int typeBasic;
 	int typeGeneric;
 	int typeSpecific;

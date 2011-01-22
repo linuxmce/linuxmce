@@ -445,7 +445,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					ZWNodeMap.insert(std::map < int, ZWNode * >::value_type(tmp_nodeid,newNode));
 					if (newNode->plutoDeviceTemplateConst != 0) {
 						sprintf(tempbuf2, "%d", tmp_nodeid);
-						DCEcallback->AddDevice(0, tempbuf2, 0, newNode->plutoDeviceTemplateConst);
+						newNode->iPKDevice = DCEcallback->AddDevice(0, tempbuf2, 0, newNode->plutoDeviceTemplateConst);
 					}
 
 					// check if we have fetched the node's command classes/capabilities
@@ -676,6 +676,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 								for (int i = 2; i <= instanceCount; i++) {
 								        int PKDevice = DCEcallback->AddDevice(0, tmpstr, i, (*ZWNodeMapIt).second->plutoDeviceTemplateConst);
 									DCEcallback->AddCapability(PKDevice, (unsigned char)frame[7]);
+									newNode->iPKDevice = PKDevice;
 								}
 							}					
 						} else if (frame[6] == MULTI_INSTANCE_CMD_ENCAP) {
@@ -2936,5 +2937,14 @@ void ZWApi::ZWApi::parseManufacturerSpecific(int nodeid, int manuf, int type, in
 		default: sManufacturer = "unknown";
 	}
         DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Manufacturer Specific: Node %i is a %s %s",nodeid,sManufacturer.c_str(),sProduct.c_str());
+	sManufacturer.append(" ");
+	sManufacturer.append(sProduct);
+	ZWNodeMapIt = ZWNodeMap.find(nodeid);
+
+	int iPKDevice = 0;
+	if (ZWNodeMapIt != ZWNodeMap.end()) {
+		iPKDevice = (*ZWNodeMapIt).second->iPKDevice;
+	}
+	DCEcallback->SetManufacturerSpecificString(iPKDevice,sManufacturer);
 }
 
