@@ -11,7 +11,7 @@ function datalogDetails($output,$dbADO){
 	var color = document.getElementById('color_'+graphNo).value;
 	var unit = document.getElementById('unit_'+graphNo).value;
 	var name = document.getElementById('name').value;
-	var graphURL = 'operations/datalog/graph.php?device='+device+'&startTime='+startTime+'&endTime='+endTime+'&color='+color+'&unit='+unit+'&name='+name;
+	var graphURL = 'operations/datalog/detailsGraph.php?device='+device+'&startTime='+startTime+'&endTime='+endTime+'&color='+color+'&unit='+unit+'&name='+name;
 	document.getElementById('graph_'+graphNo).src = graphURL;
     }
 
@@ -48,8 +48,8 @@ function datalogDetails($output,$dbADO){
 
      $out.='<a href="index.php?section=viewDatalog">Back</a>';
 
-// show graphs
-     $out.='<form action="index.php" method="POST" name="datalogDetails">
+     // show graphs
+     $out.='<form method="POST" name="datalogDetails">
 	    <input type="hidden" name="section" value="datalogDetails">';
 
 
@@ -66,21 +66,16 @@ function datalogDetails($output,$dbADO){
         $out.='<input type="hidden" id="color_'.$graphNo.'" name="color_'.$graphNo.'" value="'.$color.'">';
         $out.='<input type="hidden" id="unit_'.$graphNo.'" name="unit_'.$graphNo.'" value="'.$unit.'">';
 
-	$out = $out.'<img id="graph_'.$graphNo.'" src="operations/datalog/graph.php?device='.$device.'&days='.$days.'&color='.$color.'&unit='.$unit.'&name='.$row['Description'].'">';
+	$out = $out.'<img id="graph_'.$graphNo.'" src="operations/datalog/detailsGraph.php?device='.$device.'&days='.$days.'&unit='.$unit.'&name='.$row['Description'].'">';
 
 	// Date fields
 	$endTime = date('Y-m-d H:i', time());
 	$startTime = date('Y-m-d H:i', time() - $days*24*60*60);
 	$out.='<p><label for="startTime_'.$graphNo.'">Start time</label> <input id="startTime_'.$graphNo.'" name="startTime_'.$graphNo.'" length="16" value="'.$startTime.'"/>';
 	$out.='&nbsp;-&nbsp;<label for="endTime_'.$graphNo.'">End time</label> <input id="endTime_'.$graphNo.'" name="endTime_'.$graphNo.'" length="16" value="'.$endTime.'"/>';
-	$out = $out.' <input type="button" class="button" name="update" onclick="updateGraph(1);" value="Update"/><br>';
+	$out = $out.' <input type="button" class="button" name="update" onclick="updateGraph(1);" value="Update"/>';
+	$out = $out.' <input type="button" class="button" name="update" onclick="location.reload();" value="Reload"/><br>';
 
-	$queryLast = mysql_query('SELECT PK_Datapoints, Datapoint, timestamp FROM Datapoints 
-	       WHERE EK_Device = '.$device.' AND timestamp < "'.$endTime.'" AND `FK_Unit` = '.$unit.' ORDER BY timestamp DESC LIMIT 1');
-        $datapointLast = mysql_fetch_row($queryLast);
-        $lastValue=$datapointLast[1];
-	$out .='Last value : '.$lastValue.' (at '.$datapointLast[2].')';
-	
     } else {
 	$out = $out.'<p>No devices selected for graph display</p>';
     }
