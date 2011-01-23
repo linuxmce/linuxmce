@@ -1,6 +1,9 @@
 <?php
-function saveSchedule($deviceid, $MAX_TIMES_PER_DAY){
+function saveSchedule($deviceid, $version, $MAX_TIMES_PER_DAY){
+	//increment version number so thermostat will request update
+	$version++;
 	// build array out of form fields
+	$schedule[]="version,".$version;
 	for($day = 1; $day <= 7; $day++) {
 		for($time = 1; $time <= $MAX_TIMES_PER_DAY; $time++) {
 			$timeFieldName='time_'.$day.'_'.$time;
@@ -41,7 +44,8 @@ function editSchedules($output,$dbADO){
 	mysql_select_db($mysqllmcedb, $connection) or die("ERROR: could not select LinuxMCE main database!");
 	
 	if($action == 'saveSchedule') {
-		saveSchedule($deviceid, $MAX_TIMES_PER_DAY);
+		$version=$_REQUEST['version'];
+		saveSchedule($deviceid, $version, $MAX_TIMES_PER_DAY);
 	}
  
  	// Query for thermostat device list with schedule capabilities
@@ -77,7 +81,8 @@ function editSchedules($output,$dbADO){
 	for($i = 0; $i < count($scheduleData); $i++) {
 		if($scheduleData[$i] != "") {
 			$schedule=explode(",",$scheduleData[$i]);
-			$scheduleCache[$schedule[0]][$schedule[1]]=$schedule[2];
+			if($schedule[0]=='version') $version=$schedule[1];
+			else $scheduleCache[$schedule[0]][$schedule[1]]=$schedule[2];
 		}
 	}
 	
@@ -85,7 +90,8 @@ function editSchedules($output,$dbADO){
 	$out.='<form action="index.php" method="POST" name="editSchedules">
 					<input type="hidden" name="section" value="thermostatSchedules">
 					<input type="hidden" name="action" value="saveSchedule"> 
-					<input type="hidden" name="device" value="'.$deviceid.'">'; 
+					<input type="hidden" name="device" value="'.$deviceid.'"> 
+					<input type="hidden" name="version" value="'.$version.'">'; 
 					
  	$out.='<table cellpadding="4" cellspacing="1" border="0">';
  	$out.='<tr class="tablehead"><td align="center"><B>'.$TEXT_DAY_CONST.'</B></td>';
