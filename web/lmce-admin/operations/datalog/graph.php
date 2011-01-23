@@ -6,6 +6,9 @@ $mysqluser="root"; // MySQL-User
 $mysqlpwd=""; // Password
 $mysqldb="lmce_datalog";
 
+$connection=mysql_connect($mysqlhost, $mysqluser, $mysqlpwd) or die ("ERROR: could not connect to the database!");
+mysql_select_db($mysqldb, $connection) or die("ERROR: could not select database!");
+
 $device = mysql_real_escape_string($_GET['device']);
 $days = mysql_real_escape_string($_GET['days']);
 $color = mysql_real_escape_string($_GET['color']);
@@ -38,8 +41,7 @@ if (empty($endTime)) {
     }
 }
 
-$connection=mysql_connect($mysqlhost, $mysqluser, $mysqlpwd) or die ("ERROR: could not connect to the database!");
-mysql_select_db($mysqldb, $connection) or die("ERROR: could not select database!");
+
 
 $sql = "select Description,timestamp,Datapoint,Unit from Datapoints,Unit
      WHERE FK_Unit=PK_unit AND PK_unit LIKE ".$unit." and EK_Device= ".$device." ";
