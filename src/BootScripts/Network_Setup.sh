@@ -144,7 +144,7 @@ if [[ "$IPv6Active" == "on" ]]; then
 	local $IntIP
 	endpoint $IPv6Endpoint
 	# Automatically setup resp. remove routing for ipv6 through tunnel
-	up ip -6 route add $IPv6Prefix/$IPv6PrefixNetmask eth0
+	up ip -6 route add $IPv6Prefix/$IPv6PrefixNetmask $IntIf
 	down ip -6 route flush dev $IPv6If
 	mtu 1480"
 	echo "$IfConf" >>"$File"
