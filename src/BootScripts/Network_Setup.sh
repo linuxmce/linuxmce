@@ -61,6 +61,26 @@ if [[ "$NetIfConf" == 0 || "$NPflagReconfNetwork" == yes ]]; then
 	RunSQL "$Q"
 fi
 
+Q="SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=1 AND FK_DeviceData=292"
+IPv6TunnelSettings=$(RunSQL "$Q")
+echo "Tunnel settings: $IPv6TunnelSettings"
+IPv6Active=`echo $IPv6TunnelSettings | cut -d"," -f 10`
+# check if IPv6 tunnel settings enabled
+if [[ "$IPv6Active" == "on" ]]; then
+	IPv6TunnelBroker=`echo $IPv6TunnelSettings | cut -d"," -f 1`
+	echo "IPv6 tunnel activated ($IPv6TunnelBroker), fetching settings from core data"
+	IPv6If=ipv6tunnel
+	IPv6TunnelID=`echo $IPv6TunnelSettings | cut -d"," -f 2`
+	IPv6Endpoint=`echo $IPv6TunnelSettings | cut -d"," -f 3`
+	IPv6IP=`echo $IPv6TunnelSettings | cut -d"," -f 4`
+	IPv6Netmask=`echo $IPv6TunnelSettings | cut -d"," -f 5`
+	IPv6Prefix=`echo $IPv6TunnelSettings | cut -d"," -f 6`
+	IPv6PrefixNetmask=`echo $IPv6TunnelSettings | cut -d"," -f 7`
+	IPv6Username=`echo $IPv6TunnelSettings | cut -d"," -f 8`
+	IPv6Password=`echo $IPv6TunnelSettings | cut -d"," -f 9`
+fi
+
+
 Q="GRANT ALL PRIVILEGES ON *.* TO '$MySqlUser'@$IntIP"
 RunSQL "$Q"
 echo "Writing network configuration with one in database"
@@ -111,6 +131,21 @@ iface $IntIf inet static
 	address $IntIP
 	netmask $IntNetmask"
 echo "$IfConf" >>"$File"
+
+if [[ "$IPv6Active" == "on" ]]; then
+	# Config IPv6 tunnel if enabled in advanced network setup
+	echo "IPv6 tunnel activated ($IPv6TunnelBroker), configuring interface"
+	IfConf="auto $IPv6If
+	iface $IPv6If inet6 v4tunnel
+	address $IPv6IP
+	netmask $IPv6Netmask
+	local $IntIP
+	endpoint $IPv6Endpoint
+	up ip -6 route add default dev $IPv6If
+	down ip -6 route flush dev $IPv6If
+	mtu 1480"
+	echo "$IfConf" >>"$File"
+fi
 
 if ! BlacklistConfFiles '/etc/default/dhcp3-server' ;then
 	if [ ! -e /etc/default/dhcp3-server.pbackup ] && [ -e /etc/default/dhcp3-server ] ;then
