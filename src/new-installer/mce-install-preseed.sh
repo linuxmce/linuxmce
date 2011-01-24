@@ -33,3 +33,6 @@ db_fset "shared/present-sun-dlj-v1-1" seen true
 db_fset "shared/error-sun-dlj-v1-1" seen true
 db_fset "shared/accepted-sun-dlj-v1-1" seen true
 
+## Prevent mythweb from taking over web admin
+db_set "mythweb/only" 'false'
+db_fset "mythweb/only" seen true
