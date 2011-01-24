@@ -440,6 +440,9 @@ function Configure_Network_Options {
 			VALUES($Core_PK_Device, 28, '$DHCPsetting')"
 		RunSQL "$Q"
 	fi
+	# create empty IPv6 tunnel settings field
+        Q="REPLACE INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData) VALUES('$Core_PK_Device',292,'')"
+        RunSQL "$Q"
 
 }
 
