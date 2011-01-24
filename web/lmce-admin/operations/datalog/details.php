@@ -4,17 +4,71 @@
 
 function datalogDetails($output,$dbADO){
     $out = "<script>
+    var graphs = 1;
     function updateGraph(graphNo) {
     	var device = document.getElementById('device').value;
-        var startTime = document.getElementById('startTime_'+graphNo).value;
-        var endTime = document.getElementById('endTime_'+graphNo).value;
-	var color = document.getElementById('color_'+graphNo).value;
-	var unit = document.getElementById('unit_'+graphNo).value;
+	var startTime = new Array();
+        startTime[0] = document.getElementById('startTime_0').value;
+        var endTime = document.getElementById('endTime_0').value;
+	var color = document.getElementById('color_0').value;
+	var unit = document.getElementById('unit_0').value;
 	var name = document.getElementById('name').value;
+
 	var graphURL = 'operations/datalog/detailsGraph.php?device='+device+'&startTime='+startTime+'&endTime='+endTime+'&color='+color+'&unit='+unit+'&name='+name;
-	document.getElementById('graph_'+graphNo).src = graphURL;
+
+	var i = 1;
+	while (document.getElementById('startTime_'+i) != null) {
+	    startTime[i] = document.getElementById('startTime_'+i).value;
+	    graphURL += '&startTime'+i+'='+startTime[i];
+	    i++;
+        }
+
+	document.getElementById('graph').src = graphURL;
     }
 
+    function addGraph() {
+
+        var div = document.getElementById('graphDiv');
+        var newDiv = document.createElement('div');
+	newDiv.id = 'graphDiv_'+graphs;
+        div.appendChild(newDiv);
+        var text = document.createElement('span');
+	text.appendChild(document.createTextNode('Graph '+(graphs+1)+' : '));
+	text.id = 'graph_id_'+graphs;
+	newDiv.appendChild(text);
+	var label = document.createElement('label');
+	
+	newDiv.appendChild(label);
+
+	var startTime = document.getElementById('startTime_0').value;
+	var field = document.createElement('input');
+	field.id = 'startTime_'+graphs;
+	field.length = 12;
+	field.value = startTime;
+	newDiv.appendChild(field);
+	newDiv.appendChild(document.createTextNode(' '));
+
+	var button = document.createElement('input');
+	button.type='button';
+	button.className='button';
+        button.onclick=new Function('removeGraph('+graphs+');');
+        button.value='Remove';
+	newDiv.appendChild(button);
+	graphs++;
+    }
+
+    function removeGraph(graphNo) {
+        var i = graphNo;
+        while (document.getElementById('graphDiv_'+(i+1)) != null) {
+	    var startTimeEl = document.getElementById('startTime_'+i);
+	    startTimeEl.value = document.getElementById('startTime_'+(i+1)).value;
+	    i++;
+	}
+        var graphDiv = document.getElementById('graphDiv_'+i);
+	var parent = graphDiv.parentNode;
+	parent.removeChild(graphDiv);
+	graphs--;
+    }
     </script>";
 
 	// include language files
@@ -59,22 +113,31 @@ function datalogDetails($output,$dbADO){
        	$resGP = $dbADO->Execute($q);
     	$row=$resGP->FetchRow();
 	$out.='<p>'.$row['Description'].'</p>';
-	$graphNo = 1;
+	$graphNo = 0;
 
         $out.='<input type="hidden" name="device" id="device" value="'.$device.'">';
         $out.='<input type="hidden" name="name" id="name" value="'.$row['Description'].'">';
         $out.='<input type="hidden" id="color_'.$graphNo.'" name="color_'.$graphNo.'" value="'.$color.'">';
         $out.='<input type="hidden" id="unit_'.$graphNo.'" name="unit_'.$graphNo.'" value="'.$unit.'">';
 
-	$out = $out.'<img id="graph_'.$graphNo.'" src="operations/datalog/detailsGraph.php?device='.$device.'&days='.$days.'&unit='.$unit.'&name='.$row['Description'].'">';
+	$out = $out.'<img id="graph" src="operations/datalog/detailsGraph.php?device='.$device.'&days='.$days.'&unit='.$unit.'&name='.$row['Description'].'">';
+
+	$out .= '<p>';
+	$out = $out.' <input type="button" class="button" name="update" onclick="updateGraph(0);" value="Update"/>';
+	$out = $out.' <input type="button" class="button" name="update" onclick="location.reload();" value="Reload"/><br>';
+	$out .= '</p>';
 
 	// Date fields
 	$endTime = date('Y-m-d H:i', time());
 	$startTime = date('Y-m-d H:i', time() - $days*24*60*60);
-	$out.='<p><label for="startTime_'.$graphNo.'">Start time</label> <input id="startTime_'.$graphNo.'" name="startTime_'.$graphNo.'" length="16" value="'.$startTime.'"/>';
-	$out.='&nbsp;-&nbsp;<label for="endTime_'.$graphNo.'">End time</label> <input id="endTime_'.$graphNo.'" name="endTime_'.$graphNo.'" length="16" value="'.$endTime.'"/>';
-	$out = $out.' <input type="button" class="button" name="update" onclick="updateGraph(1);" value="Update"/>';
-	$out = $out.' <input type="button" class="button" name="update" onclick="location.reload();" value="Reload"/><br>';
+	$out.='<p><label for="startTime_'.$graphNo.'">Graph 1: Start time</label> <input id="startTime_'.$graphNo.'" name="startTime_'.$graphNo.'" length="12" value="'.$startTime.'"/>';
+	$out.='&nbsp;-&nbsp;<label for="endTime_'.$graphNo.'">End time</label> <input id="endTime_'.$graphNo.'" name="endTime_'.$graphNo.'" length="12" value="'.$endTime.'"/>';
+	
+	$out .= '<div id="graphDiv">';
+	$out .= '</div>';
+
+	$out .= '<p>Add new time period to graph : ';
+	$out .= '<input type="button" class="button" name="update" onclick="addGraph();" value="Add"/>';
 
     } else {
 	$out = $out.'<p>No devices selected for graph display</p>';

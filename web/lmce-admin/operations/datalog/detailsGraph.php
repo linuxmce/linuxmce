@@ -52,10 +52,11 @@ function createDataSet($device, $startTime, $endTime, $points, $unit, $keepValue
          if ($t==$num){
              $last=strtotime($datapoint[1]);
 	     $Dataset->addPoint(floor($t*$adjustFactor)/*strtotime($endTime)*/, $datapoint[2]);
+	     $UnitName=$datapoint[3];
         }
     }
     $avgValue = round($avgValue / (strtotime($endTime)-strtotime($startTime)));
-    $Dataset->setName($startTime[0].' - '.$endTime.', Max: '.$Dataset->maximumY().' '.$AxisYName.', Min: '.$Dataset->minimumY().' '.$AxisYName.', Avg: '.$avgValue.' '.$AxisYName);
+    $Dataset->setName($startTime.' - '.$endTime.', Max: '.$Dataset->maximumY().' '.$UnitName.', Min: '.$Dataset->minimumY().' '.$UnitName.', Avg: '.$avgValue.' '.$UnitName);
     
     return $Dataset;
 }
@@ -134,7 +135,7 @@ if ($num<=1) {
      exit;
 }
 // Create the graph and set the size
-$Graph =& Image_Graph::factory('graph', array(800, 250+40*$numGraphs)); 
+$Graph =& Image_Graph::factory('graph', array(875, 250+12*$numGraphs)); 
 
 // add a TrueType font
 $Font =& $Graph->addNew('font', '/usr/share/fonts/truetype/msttcorefonts/verdana.ttf'); 
@@ -187,13 +188,16 @@ $Dataset->setName($startTime[0].' - '.$endTime.', Max: '.$Dataset->maximumY().' 
 $graphName .= $device.' - '.$name;
 
 // Create arrays for x-axis lables
-$firstFixed=substr_replace($startTime[0], '00:00', -5);
-$stepTime = (strtotime($endTime)-strtotime($startTime[0]))/12;
-$step = $num / 12;
+$stepTime = (strtotime($endTime)-strtotime($startTime[0]))/24;
+$firstFixed=$startTime[0];//substr_replace($startTime[0], '00', -2);
+$step = $num / 24;
 //TODO: does not work properly for datapoints with different intervals
-for ($fullHour= strtotime($firstFixed)+$stepTime, $i=0, $item=$step ; $item < $num ; $fullHour=$fullHour+$stepTime, ++$i, $item = $item + $step){
-     $array1[$i]=$item;
-     $array2[0][$item]=date('jS-H:i', $fullHour);
+// possible fix: convert the timestamp of the datapoint to a number which is proportional to the time
+// use this number when adding points to the dataset
+// Note: the problem here, is how to add timestamps to the graph when the different graph datasets have completely different time/days
+for ($fullHour= strtotime($firstFixed), $i=0, $item ; $item < $num ; $fullHour=$fullHour+$stepTime, ++$i, $item = $item + $step){
+    $array1[$i]=$item;
+    $array2[0][$item]=date('H:i', $fullHour);
 }
 
 // setup the plotarea
@@ -205,7 +209,7 @@ $Graph->add(
       5
    ),
       $Legend = Image_Graph::factory('legend', array()),
-(90-6*$numGraphs))
+(90-3*$numGraphs))
 );   
 
 $Legend->setPlotArea($Plotarea);
