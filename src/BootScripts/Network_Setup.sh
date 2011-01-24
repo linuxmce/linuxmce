@@ -85,6 +85,8 @@ Q="GRANT ALL PRIVILEGES ON *.* TO '$MySqlUser'@$IntIP"
 RunSQL "$Q"
 echo "Writing network configuration with one in database"
 
+
+service radvd stop
 service networking stop
 service dhcp3-server stop
 
@@ -141,10 +143,23 @@ if [[ "$IPv6Active" == "on" ]]; then
 	netmask $IPv6Netmask
 	local $IntIP
 	endpoint $IPv6Endpoint
-	up ip -6 route add default dev $IPv6If
+	# Automatically setup resp. remove routing for ipv6 through tunnel
+	up ip -6 route add $IPv6Prefix/$IPv6PrefixNetmask eth0
 	down ip -6 route flush dev $IPv6If
 	mtu 1480"
 	echo "$IfConf" >>"$File"
+	# Configure RA daemon
+	RAConf="interface $IntIf {
+	AdvSendAdvert on;
+	MinRtrAdvInterval 3;
+	MaxRtrAdvInterval 10;
+	prefix $IPv6Prefix/$IPv6PrefixNetmask {
+		AdvOnLink on;
+		AdvAutonomous on;
+		AdvRouterAddr off;
+	};
+	};"
+	echo "$RAConf">"/etc/radvd.conf"	
 fi
 
 if ! BlacklistConfFiles '/etc/default/dhcp3-server' ;then
@@ -165,6 +180,10 @@ fi
 
 service networking start
 service dhcp3-server start
+if [[ "$IPv6Active" == "on" ]]; then
+	# start RA daemon to hand out IPv6 addresses to local network
+	service radvd start
+fi
 
 if ! BlacklistConfFiles '/etc/bind/named.conf.forwarders' && ! BlacklistConfFiles '/etc/bind/named.conf.options';then
 if [ ! -e /etc/bind/named.conf.forwarders.pbackup ] && [ -e /etc/bind/named.conf.forwarders ] ;then
