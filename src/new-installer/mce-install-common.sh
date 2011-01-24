@@ -326,7 +326,122 @@ function Create_And_Config_Devices {
 	/usr/pluto/bin/Update_StartupScrips.sh
 }
 
+function Setup_NIS {
+	## Put a temporary nis config file that will prevent ypbind to start
+	echo "
+NISSERVER=false
+NISCLIENT=false
+YPPWDDIR=/etc
+YPCHANGEOK=chsh
+NISMASTER=
+YPSERVARGS=
+YPBINDARGS=
+YPPASSWDDARGS=
+YPXFRDARGS=
+" > /etc/default/nis
+}
 
+function Setup_Network_Intefaces {
+	StatsMessage "Seting Up Networking"
+
+  echo > /etc/network/interfaces
+	echo "auto lo" >> /etc/network/interfaces
+	echo "iface lo inet loopback" >> /etc/network/interfaces
+	echo >> /etc/network/interfaces
+	echo "auto $c_netExtName" >> /etc/network/interfaces
+	if [[ $c_netExtUseDhcp  == "1" ]] ;then
+		echo "    iface $c_netExtName inet dhcp" >> /etc/network/interfaces
+	else
+		if [[ "$c_netExtIP" != "" ]] && [[ "$c_netExtName" != "" ]] &&
+		   [[ "$c_netExtMask" != "" ]] && [[ "$c_netExtGateway" != "" ]] ;then
+			echo "" >> /etc/network/interfaces
+			echo "    iface $c_netExtName inet static" >> /etc/network/interfaces
+			echo "    address $c_netExtIP" >> /etc/network/interfaces
+			echo "    netmask $c_netExtMask" >> /etc/network/interfaces
+			echo "    gateway $c_netExtGateway" >> /etc/network/interfaces
+		fi
+  fi
+  echo "" >> /etc/network/interfaces
+	echo "auto $c_netIntName" >> /etc/network/interfaces
+	echo "    iface $c_netInttName inet static" >> /etc/network/interfaces
+	echo "    address $c_netIntIPN" >> /etc/network/interfaces
+	echo "    netmask 255.255.255.0" >> /etc/network/interfaces
+}
+
+function Configure_Network_Options {
+	StatsMessage "Configuring your internal network"
+	. /usr/pluto/bin/SQL_Ops.sh
+
+	## Setup /etc/hosts
+	echo > /etc/hosts
+	echo "127.0.0.1 localhost.localdomain localhost" >> /etc/hosts
+	echo "$c_netExtIP dcerouter $(/bin/hostname)"    >> /etc/hosts
+
+	error=false
+	Network=""
+	Digits_Count=0
+
+	for Digits in $(echo "$c_netIntIPN" | tr '.' ' ') ;do
+		[[ "$Digits" == *[^0-9]* ]]            && error=true
+		[[ $Digits -lt 0 || $Digits -gt 255 ]] && error=true
+
+		if [[ "$Network" == "" ]] ;then
+			Network="$Digits"
+		else
+			Network="${Network}.${Digits}"
+		fi
+
+		Digits_Count=$(( $Digits_Count + 1 ))
+	done
+	[[ $Digits_Count -lt 1 || $Digits_Count -gt 3 ]] && error=true
+
+	if [[ "$error" == "true" ]] ;then
+		Network="192.168.80"
+		Digits_Count="3"
+	fi
+
+	IntIP="$Network"
+	IntNetmask=""
+	for i in `seq 1 $Digits_Count` ;do
+		if [[ "$IntNetmask" == "" ]] ;then
+			IntNetmask="255"
+		else
+			IntNetmask="${IntNetmask}.255"
+		fi
+	done
+	for i in `seq $Digits_Count 3` ;do
+		if [[ $i == "3" ]] ;then
+			IntIP="${IntIP}.1"
+		else
+			IntIP="${IntIP}.0"
+		fi
+
+		IntNetmask="${IntNetmask}.0"
+	done
+
+	if [[ "$c_netIntName" == "" ]] ;then
+		IntIf="$c_netExtName:0"
+	else
+		IntIf="$c_netIntName"
+	fi
+
+	if [[ "$c_netExtUseDhcp" == "0" ]] ;then
+		NETsetting="$c_netExtName,$c_netExtIP,$c_netExtMask,$c_netExtGateway,$c_netExtDNS1|$IntIf,$IntIP,$IntNetmask"
+	else
+		NETsetting="$c_netExtName,dhcp|$IntIf,$IntIP,$IntNetmask"
+	fi
+	
+	DHCPsetting=$(/usr/pluto/install/Initial_DHCP_Config.sh "$Network" "$Digits_Count")
+
+	Q="REPLACE INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData) VALUES('$Core_PK_Device',32,'$NETsetting')"
+	RunSQL "$Q"
+	if [[ "$c_runDhcpServer" == "1" ]]; then
+		Q="REPLACE INTO Device_DeviceData(FK_Device, FK_DeviceData, IK_DeviceData)
+			VALUES($Core_PK_Device, 28, '$DHCPsetting')"
+		RunSQL "$Q"
+	fi
+
+}
 
 function RemoveOfflineSource {
 

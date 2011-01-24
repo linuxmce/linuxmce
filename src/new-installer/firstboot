@@ -14,36 +14,8 @@ trap 'rm -f /etc/rc5.d/S90firstboot' EXIT
 rm -f /etc/X11/xorg.conf
 rm -f /etc/network/interfaces
 
-## Detect which address has the Internet
-NPflagReconfNetwork=yes
-NCards=$(ip addr | grep "^[0-9]*:" | grep -v "^[0-9]*: lo" | grep -v "^[0-9]*: pan" | grep -c ".")
-ExtIf=eth0
-if [[ "$NCards" -eq 1 ]]; then
-	IntIf=eth0:0
-else
-	IntIf=eth1
-fi
-if [[ "$NCards" -gt 1 ]] && dhclient -1 eth1; then
-	ExtIf=eth1
-	IntIf=eth0
-fi
-killall dhclient
-
-cat >/etc/network/interfaces <<END
-auto lo
-iface lo inet loopback
-	
-auto $ExtIf
-iface $ExtIf inet dhcp
-
-auto $IntIf
-iface $IntIf inet static
-	address 192.168.80.1
-	netmask 255.255.255.0
-END
-
 ## Reconfigure networking
-export NPflagReconfNetwork=yes
+#export NPflagReconfNetwork=yes
 /usr/pluto/bin/Network_Setup.sh
 /etc/init.d/networking restart
 /usr/pluto/bin/DHCP_config.sh
