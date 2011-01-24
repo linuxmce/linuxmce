@@ -160,6 +160,9 @@ if [[ "$IPv6Active" == "on" ]]; then
 	};
 	};"
 	echo "$RAConf">"/etc/radvd.conf"	
+	if [[ ! $(grep "net.ipv6.conf.default.forwarding=1" /etc/sysctl.conf) ]]; then
+		echo "net.ipv6.conf.default.forwarding=1">>"/etc/sysctl.conf"
+	fi
 fi
 
 if ! BlacklistConfFiles '/etc/default/dhcp3-server' ;then
