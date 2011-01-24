@@ -935,6 +935,13 @@ switch ($section) {
 	    $output->setHelpSrc('/wiki/index.php/Network_Settings');
 	    networkSettings($output,$dbADO);
 	break;
+        case 'advancedSettings';
+            $output = new Template($dbADO);
+            $output->setTemplateFileType('large');
+            include_once('operations/network/advancedSettings.php');
+            $output->setHelpSrc('/wiki/index.php/Advanced_Settings');
+            advancedSettings($output,$dbADO);
+        break;
 	case 'DHCPLeases';
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('large');
