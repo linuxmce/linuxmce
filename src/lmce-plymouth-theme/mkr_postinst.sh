@@ -2,9 +2,6 @@
 #
 # LinuxMCE plymouth theme postinstall script
 
-# don't do anything yet until package has matured
-exit 0
-
 # Prevent delayed loading of our splash
 if [[ ! $(grep "FRAMEBUFFER=y" /etc/initramfs-tools/conf.d/splash) ]]; then
 	echo "FRAMEBUFFER=y" >>/etc/initramfs-tools/conf.d/splash
