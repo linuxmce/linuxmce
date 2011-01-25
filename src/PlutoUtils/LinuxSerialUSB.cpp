@@ -15,7 +15,8 @@
 */
 
 #include "PlutoUtils/LinuxSerialUSB.h"	 
-
+#include "PlutoUtils/ProcessUtils.h"
+#include "PlutoUtils/StringUtils.h"
 
 string TranslateSerialUSB(string sInput,string sIPAddress)
 {
@@ -27,57 +28,18 @@ string TranslateSerialUSB(string sInput,string sIPAddress)
 		return sInput;
 	}
 
-	size_t pos = 0;
-	string sPciId = StringUtils::Tokenize(sInput, "+", pos);
-	string sUsbId = StringUtils::Tokenize(sInput, "+", pos);
-	sUsbId = StringUtils::Replace(sUsbId,".","\\.");
-
-	char tmpFile[40] = "/tmp/devusbXXXXXX";
-	mktemp(tmpFile);
 	string sCmd;
-
 	if( sIPAddress.empty()==false )
 		sCmd = "ssh " + sIPAddress + " ";
+	sCmd += "/usr/pluto/bin/TranslateSerialPort.sh";
+	const char *args[] = {sCmd.c_str(), sInput.c_str(), NULL};
 
-	sCmd += "find /sys/devices -name '*tty*' | egrep '/tty[:/]' | grep usb | grep '" + sPciId + ".*-" + sUsbId + ".*' | sed -r 's,tty[:/],,g' >" + tmpFile; 
+	string sOutput, sStdErr;
 
-	system(sCmd.c_str());
-
-	vector<string> vectStr;
-	FileUtils::ReadFileIntoVector(tmpFile,vectStr);
-#ifdef DEBUG
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"TranslateSerialUSB Cmd %s size %d",sCmd.c_str(),(int) vectStr.size());
-#endif
-	for(vector<string>::iterator it=vectStr.begin();it!=vectStr.end();++it)
-	{
-		if( (*it).find(sPciId)!=string::npos )
-		{
-			LoggerWrapper::GetInstance()->Write(LV_STATUS,"TranslateSerialUSB found %s, returning %s",
-				(*it).c_str(),("/dev/" + FileUtils::FilenameWithoutPath(*it)).c_str());
-			return "/dev/" + FileUtils::FilenameWithoutPath(*it);
-		}
-	}
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TranslateSerialUSB %s couldn't find a match",sInput.c_str());
-	
-/*
-	char tmpFile[40] = "/tmp/devusbXXXXXX";
-	mktemp(tmpFile);
-	system(("ls -l /sys/bus/usb-serial/devices/ > " + string(tmpFile)).c_str());
-	
-	vector<string> vectStr;
-	FileUtils::ReadFileIntoVector(tmpFile,vectStr);
-	for(vector<string>::iterator it=vectStr.begin();it!=vectStr.end();++it)
-	{
-		if( (*it).find(sInput)!=string::npos )
-		{
-			LoggerWrapper::GetInstance()->Write(LV_STATUS,"TranslateSerialUSB found %s, returning %s",
-				(*it).c_str(),("/dev/" + FileUtils::FilenameWithoutPath(*it)).c_str());
-			return "/dev/" + FileUtils::FilenameWithoutPath(*it);
-		}
-	}
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"TranslateSerialUSB %s couldn't find a match",sInput.c_str());
-*/
+	ProcessUtils::GetCommandOutput(args[0], args, sOutput, sStdErr);
+	StringUtils::TrimSpaces(sOutput);
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TranslateSerialUSB %s result %s", sInput.c_str(), sOutput.c_str());
 #endif
 
-	return sInput;
+	return sOutput;
 }
