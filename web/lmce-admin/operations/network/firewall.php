@@ -62,8 +62,9 @@ function firewall($output,$dbADO) {
 		<tr>
 			<td colspan="7" align="center"><input type="checkbox" name="change_firewall_status" value="1" '.((@$DisableFirewall!=1)?'':'checked').' onClick="confirmDisableFirewall();"> '.$TEXT_FIREWALL_DISABLED_CONST.'</td>
 		</tr>
-		<tr bgcolor="#EEEEEE">
+		<tr class="tablehead">
 			<td align="center"><B>'.$TEXT_PROTOCOL_CONST.'</B></td>
+			<td align="center"><B>IP version</B></td>
 			<td align="center"><B>'.$TEXT_SOURCE_PORT_CONST.'</B></td>
 			<td align="center"><B>'.$TEXT_DESTINATION_PORT_CONST.'</B></td>
 			<td align="center"><B>'.$TEXT_DESTINATION_IP_CONST.'</B></td>
@@ -72,10 +73,14 @@ function firewall($output,$dbADO) {
 			<td>&nbsp;</td>
 		</tr>';
 		$res=$dbADO->Execute('SELECT * FROM Firewall');
+		$pos=0;
 		while($row=$res->FetchRow()){
+			++$pos;
+			$protocol=explode("-",$row['Protocol']);
 			$out.='
-				<tr>
-					<td align="center">'.$row['Protocol'].'</td>
+				<tr class="'.(($pos%2==0)?'alternate_back':'').'">
+					<td align="center">'.$protocol[0].'</td>
+					<td align="center">'.$protocol[1].'</td>
 					<td align="center">'.$row['SourcePort'].' to '.$row['SourcePortEnd'].'</B></td>
 					<td align="center">'.$row['DestinationPort'].'</td>
 					<td align="center">'.$row['DestinationIP'].'</td>
@@ -91,8 +96,9 @@ function firewall($output,$dbADO) {
 		<tr>
 			<td colspan="7" align="center" bgcolor="#EEEEEE"><B>'.$TEXT_ADD_NEW_FIREWALL_RULE_CONST.'</B></td>
 		</tr>
-		<tr bgcolor="#EEEEEE">
+		<tr class="tablehead">
 			<td align="center"><B>'.$TEXT_PROTOCOL_CONST.'</B></td>
+			<td align="center"><B>IP version</B></td>
 			<td align="center"><B>'.$TEXT_SOURCE_PORT_CONST.'</B></td>
 			<td align="center"><B>'.$TEXT_DESTINATION_PORT_CONST.'</B></td>
 			<td align="center"><B>'.$TEXT_DESTINATION_IP_CONST.'</B></td>
@@ -101,9 +107,14 @@ function firewall($output,$dbADO) {
 			<td>&nbsp;</td>
 		</tr>				
 		<tr>
-			<td align="center"><select name="protocol">
+			<td align="center"><select name="protocol" STYLE="width:70px">
 				<option value="tcp">tcp</option>
 				<option value="udp">udp</option>
+			</select></td>
+			<td align="center"><select name="IPVersion" STYLE="width:70px">
+				<option value="ipv4">IPv4</option>
+				<option value="ipv6">IPv6</option>
+				<option value="both">both</option>
 			</select></td>
 			<td align="center"><input type="text" name="SourcePort" size="2"> to <input type="text" name="SourcePortEnd" size="2"></td>
 			<td align="center"><input type="text" name="DestinationPort" size="2" disabled></td>
@@ -136,7 +147,7 @@ function firewall($output,$dbADO) {
 			exit(0);
 		}
 		if(isset($_POST['add'])){
-			$Protocol=@$_POST['protocol'];
+			$Protocol=@$_POST['protocol'].'-'.@$_POST['IPVersion'];
 			$SourcePort=@$_POST['SourcePort'];
 			$SourcePortEnd=@$_POST['SourcePortEnd'];
 			$DestinationPort=isset($_POST['DestinationPort'])?$_POST['DestinationPort']:0;

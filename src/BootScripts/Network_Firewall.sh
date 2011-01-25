@@ -13,8 +13,9 @@ OpenPort()
 	local PortBegin PortEnd
 	
 	Protocol="$1"
-	Port="$2"
-	FilterIP="${3:-0.0.0.0/0}"
+	IPversion="$2"
+	Port="$3"
+	FilterIP="${4:-0.0.0.0/0}"
 
 	if [[ "$Port" == *:* ]]; then
 		PortBegin="${Port%:*}"
@@ -26,12 +27,21 @@ OpenPort()
 
 	[[ "$FilterIP" != "0.0.0.0/0" ]] && FilterMsg="; Limited to: $FilterIP"
 
-	echo "  Port: $Port/$Protocol$FilterMsg"
+	echo "  Port: $Port/$Protocol-$IPversion$FilterMsg"
 
 	if [[ -n "$Port" && ( "$Port" == *:* || "$Port" -ne 0 ) ]]; then
 		parmPort="--dport $Port"
 	fi
-	iptables -A INPUT -p "$Protocol" -s "$FilterIP" $parmPort -j ACCEPT
+
+  # apply rule to IPv4 chain if needed
+  if [ "$IPversion" == ipv4 ] || [ "$IPversion" == both ]; then
+    iptables -A INPUT -p "$Protocol" -s "$FilterIP" $parmPort -j ACCEPT
+  fi
+
+  # apply rule to IPv6 chain if needed
+  if [ "$IPversion" == ipv6 ] || [ "$IPversion" == both ]; then
+    echo IPv6 firewall needs to be implemented
+  fi
 
 	# samba 139/tcp ports come paired with explicit rejects on 445/tcp
 	# reason: to avoid timeout connecting to 445/tcp in smbclient
@@ -46,26 +56,37 @@ ForwardPort()
 	local FilterMsg
 
 	Protocol="$1"
-	ExtIP="$2"
-	SrcPort="$3"
-	DestIP="$4"
-	DestPort="$5"
-	FilterIP="${6:-0.0.0.0/0}"
+	IPversion="$2"
+	ExtIP="$3"
+	SrcPort="$4"
+	DestIP="$5"
+	DestPort="$6"
+	FilterIP="${7:-0.0.0.0/0}"
 
 	[[ "$DestPort" -eq 0 ]] && DestPort="$SrcPort"
 	[[ "$FilterIP" != "0.0.0.0/0" ]] && FilterMsg="; Limited to: $FilterIP"
 	[[ "$ExtIP" == dhcp ]] && ExtIP="0.0.0.0/0"
 	
 	echo "  Source port: $SrcPort/$Protocol; Destination: $DestIP:$DestPort$FilterMsg"
-	case "$DestIP" in
-		127.0.0.1|0.0.0.0)
-			iptables -t mangle -A PREROUTING -p "$Protocol" -s "$FilterIP" -d "$ExtIP" --dport "$SrcPort" -j MARK --set-mark "$AllowMark"
-			iptables -t nat -A PREROUTING -p "$Protocol" -s "$FilterIP" -d "$ExtIP" --dport "$SrcPort" -j REDIRECT --to-ports "$DestPort"
-		;;
-		*)
-			iptables -t nat -A PREROUTING -p "$Protocol" -s "$FilterIP" -i "$ExtIf" --dport "$SrcPort" -j DNAT --to-destination "$DestIP:$DestPort"
-		;;
-	esac
+
+  # apply rule to IPv4 chain if needed
+  if [ "$IPversion" == ipv4 ] || [ "$IPversion" == both ]; then
+    case "$DestIP" in
+      127.0.0.1|0.0.0.0)
+        iptables -t mangle -A PREROUTING -p "$Protocol" -s "$FilterIP" -d "$ExtIP" --dport "$SrcPort" -j MARK --set-mark "$AllowMark"
+        iptables -t nat -A PREROUTING -p "$Protocol" -s "$FilterIP" -d "$ExtIP" --dport "$SrcPort" -j REDIRECT --to-ports "$DestPort"
+      ;;
+      *)
+        iptables -t nat -A PREROUTING -p "$Protocol" -s "$FilterIP" -i "$ExtIf" --dport "$SrcPort" -j DNAT --to-destination "$DestIP:$DestPort"
+      ;;
+    esac
+  fi
+
+  # apply rule to IPv6 chain if needed
+  if [ "$IPversion" == ipv6 ] || [ "$IPversion" == both ]; then
+    echo IPv6 firewall needs to be implemented
+  fi
+ 
 }
 
 ClearFirewall()
@@ -89,6 +110,7 @@ ClearFirewall
 
 echo "Enabling packet forwarding"
 echo 1 >/proc/sys/net/ipv4/ip_forward
+echo 1 >/proc/sys/net/ipv6/conf/all/forwarding
 
 DefaultPolicy=DROP
 if [[ "$DisableFirewall" == 1 ]]; then
@@ -125,7 +147,15 @@ Q="SELECT Protocol,SourcePort,SourcePortEnd,DestinationPort,DestinationIP,Source
 R=$(RunSQL "$Q")
 
 for Port in $R; do
-	Protocol=$(Field 1 "$Port")
+	tmp=$(Field 1 "$Port")
+	echo $tmp | grep -q '-'
+	if [ $? -eq 0 ]; then
+    Protocol="$(echo $tmp | cut -d"-" -f 1)"
+    IPversion="$(echo $tmp | cut -d"-" -f 2)"
+	else
+    Protocol=$(Field 1 "$Port")
+    IPversion="ipv4"
+	fi
 	SrcPort=$(Field 2 "$Port")
 	SrcPortEnd=$(Field 3 "$Port")
 	DestPort=$(Field 4 "$Port")
@@ -133,11 +163,11 @@ for Port in $R; do
 	SrcIP=$(Field 6 "$Port")
 
 	if [[ "$SrcPortEnd" -eq 0 ]]; then
-		ForwardPort "$Protocol" "$ExtIP" "$SrcPort" "$DestIP" "$DestPort" "$SrcIP"
+		ForwardPort "$Protocol" "$IPversion" "$ExtIP" "$SrcPort" "$DestIP" "$DestPort" "$SrcIP"
 	else
 		DPort="$DestPort"
 		for ((SPort=SrcPort; SPort<=SrcPortEnd; SPort++)); do
-			ForwardPort "$Protocol" "$ExtIP" "$SPort" "$DestIP" "$DPort" "$SrcIP"
+			ForwardPort "$Protocol" "$IPversion" "$ExtIP" "$SPort" "$DestIP" "$DPort" "$SrcIP"
 			[[ "$DPort" -ne 0 ]] && ((++DPort))
 		done
 	fi
@@ -148,13 +178,21 @@ Q="SELECT Protocol,SourcePort,SourcePortEnd,SourceIP FROM Firewall WHERE RuleTyp
 R=$(RunSQL "$Q")
 
 for Port in $R; do
-	Protocol=$(Field 1 "$Port")
+	tmp=$(Field 1 "$Port")
+	echo $tmp | grep -q '-'
+	if [ $? -eq 0 ]; then
+    Protocol="$(echo $tmp | cut -d"-" -f 1)"
+    IPversion="$(echo $tmp | cut -d"-" -f 2)"
+	else
+    Protocol=$(Field 1 "$Port")
+    IPversion="ipv4"
+	fi
 	Port1=$(Field 2 "$Port")
 	Port2=$(Field 3 "$Port")
 	SrcIP=$(Field 4 "$Port")
 
 	[[ "$Port2" -eq 0 ]] && Port2="$Port1"
-	OpenPort "$Protocol" "$Port1:$Port2" "$SrcIP"
+	OpenPort "$Protocol" "$IPversion" "$Port1:$Port2" "$SrcIP"
 done
 
 iptables --append FORWARD -o ppp+ --protocol tcp --tcp-flags SYN,RST SYN --jump TCPMSS --clamp-mss-to-pmtu
