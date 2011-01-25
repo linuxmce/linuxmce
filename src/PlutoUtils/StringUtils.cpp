@@ -252,15 +252,15 @@ string StringUtils::RepeatChar(char c,int count)
     return cBuffer;
 }
 
-string StringUtils::TrimSpaces( string &sInput )
+string StringUtils::TrimSpaces(string &sInput)
 {
-    while( sInput.length() && sInput[0] == ' ' ) // eliminate spaces from the begining
-        sInput = sInput.substr(1);
+	while (sInput.length() && isspace(sInput[0])) // eliminate spaces from the begining
+		sInput = sInput.substr(1);
 
-    while( sInput.length() && sInput[ sInput.length()-1 ] == ' ' ) // eliminate spaces from the end
-        sInput = sInput.substr( 0, sInput.length()-1 );
+	while (sInput.length() && isspace(sInput[sInput.length() - 1])) // eliminate spaces from the end
+		sInput = sInput.substr(0, sInput.length() - 1);
 
-    return sInput;
+	return sInput;
 }
 
 int StringUtils::CompareNoCase( string sFirst, string sSecond )
