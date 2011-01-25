@@ -64,14 +64,24 @@ function DelBookmark {
 
 TranslateSerialPort()
 {
-	local SerialPort="$1"
+	local SearchFor="$1"
 	local PCI USB
 
-	if [[ "$SerialPort" == pci* ]]; then
-		PCI="${SerialPort%+*}"
-		USB="${SerialPort#*+}"
-		SerialPort=$(find /sys/devices -name '*tty*' | grep '/tty:' | grep usb | grep "$PCI.*-$USB:.*"|sed 's/tty://'|head -1)
-		SerialPort="/dev/"$(basename "$SerialPort")
+	SerialPort=
+	if [[ "$SearchFor" == pci* ]]; then
+		if [[ -d /sys/class/tty ]]; then
+			pushd /sys/class/tty &>/dev/null
+			for dev in ttyUSB*/device ttyACM*/device; do
+				id=$(readlink -f "$dev" | sed -r 's,^.*(pci.*)/usb[0-9]*/[0-9./-]*/[0-9]*-([0-9.]*):[0-9.]*(/ttyUSB[0-9]*)?$,\1+\2,g')
+				if [[ "$id" == "$SearchFor" ]]; then
+					SerialPort="/dev/$(dirname "$dev")"
+					break;
+				fi
+			done
+			popd &>/dev/null
+		fi
+	else
+		SerialPort="$SearchFor"
 	fi
 
 	builtin echo "$SerialPort"
