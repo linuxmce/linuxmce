@@ -1,3 +1,3 @@
 #!/bin/bash
 
-/usr/bin/pear install Image_Canvas-0.3.3 Image_Graph-0.8.0 Image_Color
+/usr/bin/pear install pear.php.net/Image_Canvas-0.3.3 pear.php.net/Image_Graph-0.8.0 pear.php.net/Image_Color
