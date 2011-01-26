@@ -19,6 +19,9 @@ for ((i = 1; i <= "$#"; i++)); do
 	esac
 done
 
+## If plymouth isn't stopped, DRM can't be initialized and KMS fails to be set up, preventing X from starting
+stop plymouth
+
 timestampStart=$(date +%s)
 #xinit /usr/pluto/bin/XWM_Wrapper.sh "$XClient" "${XClientParm[@]}" -- "$XDisplay" -ignoreABI -ac -allowMouseOpenFail "$VT" "${XServerParm[@]}"
 xinit /usr/pluto/bin/XWM_Wrapper.sh "${Parms_Client[@]}" -- "${Parms_Server[@]}"
