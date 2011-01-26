@@ -111,7 +111,7 @@ function advancedSettings($output, $dbADO) {
 				
 				<tr><td>&nbsp;</td><td><input type="submit" class="button" name="Save" value="Save"></td></tr>
 				<tr><td colspan="2">&nbsp;</td></tr>
-				<tr><td colspan="2"> * ALTHOUGH IPv6 ALREADY WORKS IT IS NOT YET FIREWALLED !!!</td></tr>
+				<tr><td colspan="2"> * IPv6 IS TO BE CONSIDERED AS EARLY BETA !!!</td></tr>
 				<tr><td colspan="2">** We regularly send our local tunnel endpoint IP to provider</td></tr>
 			</table>
 		</form>
