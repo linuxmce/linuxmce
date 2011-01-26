@@ -48,11 +48,11 @@ echo "/bin/false" >/etc/X11/default-display-manager
 cp firstboot /etc/rc5.d/S90firstboot
 
 ## Disable KMS
-(
-echo options nouveau modeset=0
-echo options radeon modeset=0
-echo options i915 modeset=0
-) > /etc/modprobe.d/disable-kms.conf
+#(
+#echo options nouveau modeset=0
+#echo options radeon modeset=0
+#echo options i915 modeset=0
+#) > /etc/modprobe.d/disable-kms.conf
 
 ## Put a temporary nis config file that will prevent ypbind to start
 echo "
