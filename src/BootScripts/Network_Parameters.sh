@@ -4,6 +4,8 @@
 . /usr/pluto/bin/Utils.sh
 
 DEVICEDATA_Network_Interfaces=32
+DEVICEDATA_Network_Interfaces_IPv6=292
+
 
 CommaField()
 {
@@ -37,6 +39,28 @@ ExtractData()
 			fi
 		fi
 		NetIfConf=1
+	fi
+}
+
+ExtractIPv6Data()
+{
+	local R IntPart ExtPart
+	R="$*"
+	if [ -n "$R" ]; then
+		# format:
+		# <Tunnelbroker>,<TunnelID>,<Endpoint>,<IPv6>,<IPv6 netmask>,<LAN prefix>,<LAN netmask>,<UserID>,<Password>,<Activate>,<Dynamic IPv4>
+		
+		IPv6TunnelBroker=$(CommaField 5 "$R")
+		IPv6TunnelID=$(CommaField 5 "$R")
+		IPv6Endpoint=$(CommaField 5 "$R")
+		IPv6=$(CommaField 4 "$R")
+		IPv6Netmask=$(CommaField 5 "$R")
+		IPv6Net=$(CommaField 6 "$R")
+		IPv6NetNetmask=$(CommaField 7 "$R")
+		IPv6UserID=$(CommaField 8 "$R")
+		IPv6Password=$(CommaField 8 "$R")
+		IPv6Active=$(CommaField 10 "$R")
+		IPv6DynamicIPv4=$(CommaField 11 "$R")
 	fi
 }
 
@@ -122,6 +146,20 @@ ExtNetmask=
 Gateway=
 DNS=
 NetIfConf=0
+
+IPv6If=ipv6tunnel
+IPv6TunnelBroker=
+IPv6TunnelID=
+IPv6Endpoint=
+IPv6=
+IPv6Netmask=
+IPv6Net=
+IPv6NetNetmask=
+IPv6UserID=
+IPv6Password=
+IPv6Active=0
+IPv6DynamicIPv4=0
+
 NCards=$(ip addr | grep "^[0-9]*:" | grep -v "^[0-9]*: lo" | grep -v "^[0-9]*: pan" | grep -c ".")
 
 Q="SELECT IK_DeviceData
@@ -130,6 +168,13 @@ WHERE FK_DeviceData=$DEVICEDATA_Network_Interfaces"
 R=$(RunSQL "$Q")
 
 ExtractData "$R"
+
+Q="SELECT IK_DeviceData
+FROM Device_DeviceData
+WHERE FK_DeviceData=$DEVICEDATA_Network_Interfaces_IPv6"
+R=$(RunSQL "$Q")
+
+ExtractIPv6Data "$R"
 
 Q="SELECT IK_DeviceData
 FROM Device_DeviceData

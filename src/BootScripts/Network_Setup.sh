@@ -63,7 +63,6 @@ fi
 
 Q="SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=1 AND FK_DeviceData=292"
 IPv6TunnelSettings=$(RunSQL "$Q")
-echo "Tunnel settings: $IPv6TunnelSettings"
 IPv6Active=`echo $IPv6TunnelSettings | cut -d"," -f 10`
 # check if IPv6 tunnel settings enabled
 if [[ "$IPv6Active" == "on" ]]; then
