@@ -123,6 +123,8 @@ void ZWApi::ZWApi::handleCommandSensorMultilevelReport(int nodeid, int instance_
 	int size = (unsigned char)metadata & SENSOR_MULTILEVEL_REPORT_SIZE_MASK;
 	int value;
 	short tmpval;
+	float fValue;
+
 	switch(size) {
 	case 1:
 	        value = (signed char)val1;
@@ -140,8 +142,17 @@ void ZWApi::ZWApi::handleCommandSensorMultilevelReport(int nodeid, int instance_
 		break;
 	}
 	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"MULTILEVEL DEBUG: precision: %i scale: %i size: %i value: %i",precision,scale,size,value);
+
+	if (precision > 0) {
+		fValue = value / pow(10,precision);
+		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"MULTILEVEL DEBUG: float value: %2f",fValue);
+	}  else {
+		fValue = value;
+	}
 	if (precision > 0) { value = value / pow(10 , precision) ; }  // we only take the integer part for now
+
 	switch(sensortype) { // sensor type
+
 	case SENSOR_MULTILEVEL_REPORT_GENERAL_PURPOSE_VALUE:
 	        if (scale == 0) {
 		        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"General purpose measurement value received: %d %",value);
@@ -176,18 +187,18 @@ void ZWApi::ZWApi::handleCommandSensorMultilevelReport(int nodeid, int instance_
 		;;
 		break;
 	case SENSOR_MULTILEVEL_REPORT_RELATIVE_HUMIDITY:
-	        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Relative humidity measurement received: %d percent",value);
-		DCEcallback->SendHumidityChangedEvent ((unsigned char)nodeid, instance_id, value);
+	        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Relative humidity measurement received: %.2f percent",fValue);
+		DCEcallback->SendHumidityChangedEvent ((unsigned char)nodeid, instance_id, fValue);
 
 		;;
 		break;
 	case SENSOR_MULTILEVEL_REPORT_TEMPERATURE:
 	        if (scale == 0) {
-		        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Temperature level measurement received: %d C",value);
-			DCEcallback->SendTemperatureChangedEvent ((unsigned char)nodeid, instance_id, value);
+		        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Temperature level measurement received: %.2f C",fValue);
+			DCEcallback->SendTemperatureChangedEvent ((unsigned char)nodeid, instance_id, fValue);
 		} else {
-		        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Temperature level measurement received: %d F",value);
-			DCEcallback->SendTemperatureChangedEvent ((unsigned char)nodeid, instance_id, (value-32) *5 / 9);
+		        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Temperature level measurement received: %.2f F",fValue);
+			DCEcallback->SendTemperatureChangedEvent ((unsigned char)nodeid, instance_id, (fValue-32) *5 / 9);
 		}
 		;;
 		break;

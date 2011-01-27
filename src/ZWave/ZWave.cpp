@@ -602,7 +602,7 @@ void ZWave::SendCO2LevelChangedEvent(unsigned short node_id, int instance_id, in
 void ZWave::SendTemperatureChangedEvent(unsigned short node_id, int instance_id, float value)
 {
 	char tempstr[512];
-	sprintf(tempstr, "%.1f", value);
+	sprintf(tempstr, "%.2f", value);
 	char tmp_node_id[16];
 	sprintf(tmp_node_id,"%i",node_id);
         DeviceData_Impl *pChildDevice = InternalIDToDevice(tmp_node_id, instance_id);
@@ -618,10 +618,10 @@ void ZWave::SendTemperatureChangedEvent(unsigned short node_id, int instance_id,
 	}
 
 }
-void ZWave::SendHumidityChangedEvent(unsigned short node_id, int instance_id, int value)
+void ZWave::SendHumidityChangedEvent(unsigned short node_id, int instance_id, float value)
 {
 	char tempstr[512];
-	sprintf(tempstr, "%i", value);
+	sprintf(tempstr, "%.2f", value);
 	char tmp_node_id[16];
 	sprintf(tmp_node_id,"%i",node_id);
         DeviceData_Impl *pChildDevice = InternalIDToDevice(tmp_node_id, instance_id);

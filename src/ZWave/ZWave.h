@@ -71,7 +71,7 @@ public:
 		virtual void SendPowerUsageChangedEvent(unsigned short node_id, int instance_id, int value);
 		virtual void SendTemperatureChangedEvent(unsigned short node_id, int instance_id, float value);
 		virtual void SendBrightnessChangedEvent(unsigned short node_id, int instance_id, int value);
-		virtual void SendHumidityChangedEvent(unsigned short node_id, int instance_id, int value);
+		virtual void SendHumidityChangedEvent(unsigned short node_id, int instance_id, float value);
 		virtual void SendOnOffEvent(unsigned short node_id, int instance_id, int value);
 		virtual void SendOrbiterPopup(const char *message); 
         	virtual int AddDevice(int parent, string sInternalID, int iInstanceID, int PK_DeviceTemplate);
