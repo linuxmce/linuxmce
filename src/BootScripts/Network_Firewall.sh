@@ -125,10 +125,15 @@ echo 1 >/proc/sys/net/ipv4/ip_forward
 echo 1 >/proc/sys/net/ipv6/conf/all/forwarding
 
 DefaultPolicy=DROP
+DefaultIPv6Policy=DROP
+
 if [[ "$DisableFirewall" == 1 ]]; then
 	DefaultPolicy=ACCEPT
 fi
 
+if [[ "$DisableIPv6Firewall" == 1 ]]; then
+	DefaultIPv6Policy=ACCEPT
+fi
 echo "Setting up firewall"
 iptables -P INPUT "$DefaultPolicy"
 iptables -F INPUT
@@ -138,7 +143,7 @@ iptables -A INPUT -i lo -j ACCEPT
 iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 iptables -A INPUT -m mark --mark "$AllowMark" -j ACCEPT
 
-ip6tables -P INPUT "$DefaultPolicy"
+ip6tables -P INPUT "$DefaultIPv6Policy"
 ip6tables -F INPUT
 ip6tables -A INPUT -i lo -j ACCEPT
 ip6tables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
