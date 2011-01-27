@@ -36,13 +36,15 @@ function firewall($output,$dbADO) {
 		}
 	}
 		
-	function confirmDisableFirewall()
+	function confirmDisableFirewall(ver)
 	{
-		if(document.firewall.change_firewall_status.checked){
-			if(confirm("'.$TEXT_DISABLE_FIREWALL_CONFIRMATION_CONST.'")){
+		if((document.firewall.change_ipv4_firewall_status.checked && ver=="ipv4")
+			|| (document.firewall.change_ipv6_firewall_status.checked && ver=="ipv6")){
+			if(confirm("("+ver+") '.$TEXT_DISABLE_FIREWALL_CONFIRMATION_CONST.'")){
 				document.firewall.submit();
 			}else{
-				document.firewall.change_firewall_status.checked=false;
+				if(ver=="ipv4") document.firewall.change_ipv4_firewall_status.checked=false;
+				else if(ver=="ipv6") document.firewall.change_ipv6_firewall_status.checked=false;
 			}
 		}else{
 			document.firewall.submit();
@@ -57,14 +59,15 @@ function firewall($output,$dbADO) {
 		
 	<table border="0" align="center">
 		<tr>
-			<td colspan="7" align="center">'.((@$DisableFirewall!=1)?'':'<h3 class="err">'.$TEXT_FIREWALL_DISABLED_WARNING_CONST.'</h3>').'</td>
+			<td colspan="7" align="center"><h3 class="err">'.((@$DisableFirewall!=1)?'':'- '.$TEXT_FIREWALL_DISABLED_WARNING_CONST.' - ')
+					.((@$DisableIPv6Firewall!=1)?'':' - '.$TEXT_IPV6_FIREWALL_DISABLED_WARNING_CONST.' -').'</h3></td>
 		</tr>
 		<tr>
-			<td colspan="7" align="center"><input type="checkbox" name="change_firewall_status" value="1" '.((@$DisableFirewall!=1)?'':'checked').' onClick="confirmDisableFirewall();"> '.$TEXT_FIREWALL_DISABLED_CONST.'</td>
+			<td colspan="7" align="center"><input type="checkbox" name="change_ipv4_firewall_status" value="1" '.((@$DisableFirewall!=1)?'':'checked').' onClick="confirmDisableFirewall(\'ipv4\');"> IPv4 '.$TEXT_FIREWALL_DISABLED_CONST.'    <input type="checkbox" name="change_ipv6_firewall_status" value="1" '.((@$DisableIPv6Firewall!=1)?'':'checked').' onClick="confirmDisableFirewall(\'ipv6\');"> IPv6 '.$TEXT_FIREWALL_DISABLED_CONST.'</td>
 		</tr>
 		<tr class="tablehead">
 			<td align="center"><B>'.$TEXT_PROTOCOL_CONST.'</B></td>
-			<td align="center"><B>IP version</B></td>
+			<td align="center"><B>'.$TEXT_IPVERSION_CONST.'</B></td>
 			<td align="center"><B>'.$TEXT_SOURCE_PORT_CONST.'</B></td>
 			<td align="center"><B>'.$TEXT_DESTINATION_PORT_CONST.'</B></td>
 			<td align="center"><B>'.$TEXT_DESTINATION_IP_CONST.'</B></td>
@@ -163,11 +166,16 @@ function firewall($output,$dbADO) {
 			$delid=$_REQUEST['delid'];
 			$dbADO->Execute('DELETE FROM Firewall WHERE PK_Firewall=?',$delid);
 		}else{
-			if(@$_REQUEST['change_firewall_status']==1){
+			if(@$_REQUEST['change_ipv4_firewall_status']==1) 
 				writeConf($accessFile, 'DisableFirewall',@$DisableFirewall,1);
-			}else{
+			else 
 				writeConf($accessFile, 'DisableFirewall',@$DisableFirewall,0);
-			}
+			
+			if(@$_REQUEST['change_ipv6_firewall_status']==1) 
+				writeConf($accessFile, 'DisableIPv6Firewall',@$DisableIPv6Firewall,1);
+			else 
+				writeConf($accessFile, 'DisableIPv6Firewall',@$DisableIPv6Firewall,0);
+
 		}
 				
 		exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh');
@@ -186,6 +194,9 @@ function firewall($output,$dbADO) {
 
 function writeConf($accessFile, $variable,$oldValue,$newValue)
 {
+		//header("Location: index.php?section=firewall&error=".$variable.$newValue." $accessFile");
+		//exit();
+
 	// include language files
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/firewall.lang.php');
