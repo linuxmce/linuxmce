@@ -97,7 +97,10 @@ function viewDatalog($output,$dbADO){
      }
 
      $out.='</select><select id="days" name="days"><option value="">-Days-</option><option value="1">1-day</option><option value="3">3-days</option>
-     <option value="7">7-days</option></select>
+     <option value="7">7-days</option>
+     <option value="14">14-days</option>
+     <option value="30">30-days</option>
+        </select>
     	<select id="color" name="color"><option value="">-Color-</option><option value="red@0.4">red</option><option value="blue@0.4">blue</option>
     	<option value="yellow@0.4">yellow</option><option value="green@0.4">green</option></select>
     	<input type="submit" value="Add" name="add" class="button"></form>';
