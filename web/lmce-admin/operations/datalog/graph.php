@@ -84,7 +84,8 @@ $Graph->setFont($Font);
 $Dataset =& Image_Graph::factory('dataset'); 
 
 
-
+// minimum value
+$Yminvalue = 100000000;
 
 // Create the datapoints for the Dataset and the lables ofr x-axis
 $t=0; //Counter
@@ -102,6 +103,7 @@ while ($datapoint = mysql_fetch_array($query)){
 	  else {     
 	       $datapointLast = mysql_fetch_row($queryLast);
 	       $prevDatapoint=$datapointLast[1];
+
 	       //$out.='$datapointLast = '.$datapointLast[1].' - '.$prevDatapoint.'<br>';
 	  }
 	  $Dataset->addPoint(strtotime($startTime)/*strtotime('-'.$days.'days')*/, $datapointLast[1]);
@@ -112,6 +114,7 @@ while ($datapoint = mysql_fetch_array($query)){
       $prevDatapoint=$datapoint['Datapoint'];
      }
      $Dataset->addPoint(strtotime($datapoint[1]), $datapoint[2]);
+  if ($Yminvalue > $datapoint[2]) { $Yminvalue = $datapoint[2]; }
      ++$t;
      if ($t==$num){
           $last=strtotime($datapoint[1]);
@@ -145,7 +148,7 @@ $AxisY =& $Plotarea->getAxis(IMAGE_GRAPH_AXIS_Y);
 $AxisY->setTitle($AxisYName, "vertical");
 
 // Set minimum value on Y-axis
-//$AxisY->forceMinimum(10); 
+$AxisY->forceMinimum($Yminvalue); 
 
 // x-axis Name
 $AxisX =& $Plotarea->getAxis(IMAGE_GRAPH_AXIS_X);
