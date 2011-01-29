@@ -6,7 +6,8 @@ function ipv6_save() {
       .",".$_REQUEST['ipv6_localaddr'].",".$_REQUEST['ipv6_localaddrNetmask']
       .",".$_REQUEST['ipv6_localnet'].",".$_REQUEST['ipv6_localnetNetmask']
       .",".$_REQUEST['ipv6_userid'].",".$_REQUEST['ipv6_password']
-      .",".$_REQUEST['ipv6_active'].",".$_REQUEST['ipv6_dynamicIPv4'];
+      .",".$_REQUEST['ipv6_active'].",".$_REQUEST['ipv6_dynamicIPv4']
+      .",".$_REQUEST['ipv6_RAenabled'];
  	mysql_query("UPDATE Device_DeviceData SET IK_DeviceData='".$token."' WHERE FK_Device=1 AND FK_DeviceData=292") 
  		or die('ERROR: Invalid query: '.mysql_error());
 	$_REQUEST['msg']="IPv6 Settings saved";
@@ -59,6 +60,7 @@ function advancedSettings($output, $dbADO) {
 	$ipv6_password = $ipv6_data[8];
 	$ipv6_active = $ipv6_data[9];
 	$ipv6_dynamicIPv4 = $ipv6_data[10];
+	$ipv6_RAenabled = $ipv6_data[11];
 
 	$IPv6TunnelProviders=array(
         "- None -"                => "",
@@ -76,6 +78,7 @@ function advancedSettings($output, $dbADO) {
 		<form action="index.php" method="POST" name="advancedSettings">
 			<input type="hidden" name="section" value="advancedSettings">
 			<input type="hidden" name="action" value="ipv6_save">
+			<input type="hidden" name="ipv6_RAenabled" value="'.$ipv6_RAenabled.'">
 			<div class="confirm"><B>'.(isset($_REQUEST['msg'])?strip_tags($_REQUEST['msg']):'').'</B></div>
 			<table border="0">
 				<tr><td colspan="2" class="tablehead"><b>'.$TEXT_IPV6TUNNEL_SETTINGS_CONST.'</b></td></tr>

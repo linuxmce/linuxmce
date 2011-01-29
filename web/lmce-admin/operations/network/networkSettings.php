@@ -46,6 +46,14 @@ function networkSettings($output,$dbADO) {
 		$coreDHCPArray=explode('.',str_replace('-','.',$oldCoreDHCP));
 	}
 
+	// extract radvd and public prefix from IPv6 tunnel settings for now
+	$resRA=$dbADO->Execute('SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=1 AND FK_DeviceData=292');
+	$rowRA=$resRA->FetchRow();
+	$ipv6_data=explode(",", $rowRA['IK_DeviceData']);
+	$IPv6PrefixArray=explode(':',$ipv6_data[5]);
+	$IPv6Netmask = $ipv6_data[6];
+	$enableRA = ($ipv6_data[11]=='on')?1:0;
+
 	$queryNC='SELECT * FROM Device_DeviceData WHERE FK_Device=? AND FK_DeviceData=?';
 	$resNC=$dbADO->Execute($queryNC,array($coreID,$GLOBALS['NetworkInterfaces']));
 	if($resNC->RecordCount()>0){
@@ -138,6 +146,18 @@ function networkSettings($output,$dbADO) {
 		document.getElementById("provide").style.color=newColor;
 		ipFromDHCP();
 	}
+	
+	function setIPv6Range()
+	{
+		newVal=(!document.networkSettings.enableRA.checked)?true:false;
+		newColor=(document.networkSettings.enableRA.checked)?"#4E6CA6":"#CCCCCC";
+
+		for(i=1;i<9;i++){
+			eval("document.networkSettings.IPv6Prefix_"+i+".disabled="+newVal+";");
+		}
+		eval("document.networkSettings.IPv6Netmask.disabled="+newVal+";");
+		document.getElementById("IPv6Prefix").style.color=newColor;
+	}
 		
 	function setStaticIP(newVal)
 	{
@@ -163,42 +183,51 @@ function networkSettings($output,$dbADO) {
 	<div align="center" class="confirm"><B>'.(isset($_GET['msg'])?strip_tags($_GET['msg']):'').'</B></div>
 	<table border="0">
 		<tr>
-			<td colspan="4" class="alternate_back">'.get_network_settings().'</td>
-		</tr>	
-		<tr>
-			<td colspan="4"><B>Domain</B> &nbsp; <input type="text" name="domain" value="'.$domain.'"> &nbsp; <B>Computer name</B> &nbsp; <input type="text" name="cname" value="'.$cname.'"></td>
-		</tr>
-	
-		<tr>
-			<td colspan="3">DHCP server on Core:</td>
+			<td colspan="3" class="tablehead"><B>Core identification on local network:</B></td>
 		</tr>
 		<tr>
-			<td width="20"><input type="checkbox" name="enableDHCP" value="1" '.(($enableDHCP==1)?'checked':'').' onclick="setIPRange();"></td>
-			<td align="left" colspan="2">Enable DHCP server</td>
+			<td colspan="4"><B>Computer name</B> &nbsp; <input type="text" name="cname" value="'.$cname.'"> &nbsp; <B>Domain</B> &nbsp; <input type="text" name="domain" value="'.$domain.'"></td>
+		</tr>
+		<tr><td>&nbsp;</td></tr>	
+		<tr>
+			<td colspan="3" class="tablehead"><B>DHCP and RA servers on local network:</B></td>
 		</tr>
 		<tr>
-			<td>&nbsp;</td>
-			<td colspan="2"><span id="range" style="color:'.(($enableDHCP!=1)?'#CCCCCC':'').'">Range of IP addresses for Pluto devices: <input type="text" maxlength="3" name="coreDHCP_1" size="3" value="'.@$coreDHCPArray[0].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_2" size="3" value="'.@$coreDHCPArray[1].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_3" size="3" value="'.@$coreDHCPArray[2].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_4" size="3" value="'.@$coreDHCPArray[3].'" '.(($enableDHCP!=1)?'disabled':'').'> - <input type="text" maxlength="3" name="coreDHCP_5" size="3" value="'.@$coreDHCPArray[4].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_6" size="3" value="'.@$coreDHCPArray[5].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_7" size="3" value="'.@$coreDHCPArray[6].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_8" size="3" value="'.@$coreDHCPArray[7].'" '.(($enableDHCP!=1)?'disabled':'').'></td>
+			<td colspan="3"><input type="checkbox" name="enableDHCP" value="1" '
+				.(($enableDHCP==1)?'checked':'').' onclick="setIPRange();"> IPv4 DHCP server enabled</td>
 		</tr>
 		<tr>
 			<td>&nbsp;</td>
-			<td colspan="2"><input type="checkbox" name="ipForAnonymousDevices" value="1" '.((@$nonPlutoIP==1)?'checked':'').' onClick="ipFromDHCP()" '.(($enableDHCP==1)?'':'disabled').'><span id="provide" style="color:'.(($enableDHCP!=1)?'#CCCCCC':'').'"> Provide IP addresses for anonymous devices not in Pluto\'s database.</span></td>
+			<td colspan="2"><span id="range" style="color:'.(($enableDHCP!=1)?'#CCCCCC':'').'">Range for LinuxMCE devices: <input type="text" maxlength="3" name="coreDHCP_1" size="3" value="'.@$coreDHCPArray[0].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_2" size="3" value="'.@$coreDHCPArray[1].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_3" size="3" value="'.@$coreDHCPArray[2].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_4" size="3" value="'.@$coreDHCPArray[3].'" '.(($enableDHCP!=1)?'disabled':'').'> - <input type="text" maxlength="3" name="coreDHCP_5" size="3" value="'.@$coreDHCPArray[4].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_6" size="3" value="'.@$coreDHCPArray[5].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_7" size="3" value="'.@$coreDHCPArray[6].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_8" size="3" value="'.@$coreDHCPArray[7].'" '.(($enableDHCP!=1)?'disabled':'').'></td>
 		</tr>
 		<tr>
 			<td>&nbsp;</td>
-			<td colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="nonPluto" style="color:'.(($enableDHCP!=1)?'#CCCCCC':'').'">Range of IP addresses for non-Pluto devices: </span><input type="text" maxlength="3" name="nonPlutoIP_1" size="3" value="'.@$nonPlutoIPArray[0].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_2" size="3" value="'.@$nonPlutoIPArray[1].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_3" size="3" value="'.@$nonPlutoIPArray[2].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_4" size="3" value="'.@$nonPlutoIPArray[3].'" '.(($enableDHCP==1)?'':'disabled').'> - <input type="text" maxlength="3" name="nonPlutoIP_5" size="3" value="'.@$nonPlutoIPArray[4].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_6" size="3" value="'.@$nonPlutoIPArray[5].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_7" size="3" value="'.@$nonPlutoIPArray[6].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_8" size="3" value="'.@$nonPlutoIPArray[7].'" '.(($enableDHCP==1)?'':'disabled').'></td>
+			<td colspan="2"><input type="checkbox" name="ipForAnonymousDevices" value="1" '.((@$nonPlutoIP==1)?'checked':'').' onClick="ipFromDHCP()" '.(($enableDHCP==1)?'':'disabled').'><span id="provide" style="color:'.(($enableDHCP!=1)?'#CCCCCC':'').'"> Provide IP addresses for anonymous devices not in LinuxMCE\'s database.</span></td>
+		</tr>
+		<tr><td>&nbsp;</td><td colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="nonPluto" style="color:'
+			.(($enableDHCP!=1)?'#CCCCCC':'').'">Range for non-LinuxMCE devices: </span>
+			<input type="text" maxlength="3" name="nonPlutoIP_1" size="3" value="'.@$nonPlutoIPArray[0].'" '.(($enableDHCP==1)?'':'disabled').'>			.<input type="text" maxlength="3" name="nonPlutoIP_2" size="3" value="'.@$nonPlutoIPArray[1].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_3" size="3" value="'.@$nonPlutoIPArray[2].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_4" size="3" value="'.@$nonPlutoIPArray[3].'" '.(($enableDHCP==1)?'':'disabled').'> - <input type="text" maxlength="3" name="nonPlutoIP_5" size="3" value="'.@$nonPlutoIPArray[4].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_6" size="3" value="'.@$nonPlutoIPArray[5].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_7" size="3" value="'.@$nonPlutoIPArray[6].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_8" size="3" value="'.@$nonPlutoIPArray[7].'" '.(($enableDHCP==1)?'':'disabled').'>
+		</td></tr>
+		<tr>
+		<td colspan="3"><input type="checkbox" name="enableRA" '
+			.(($enableRA==1)?'checked':'').' onclick="setIPv6Range();"> IPv6 Router Advertisement daemon enabled (radvd)</td>
+		</tr>
+		<tr><td>&nbsp;</td><td colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="IPv6Prefix" style="color:'
+			.(($enableRA!=1)?'#CCCCCC':'').'">IPv6 public prefix: </span>
+			<input type="text" maxlength="3" name="IPv6Prefix_1" size="3" value="'.@$IPv6PrefixArray[0].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="3" name="IPv6Prefix_2" size="3" value="'.@$IPv6PrefixArray[1].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="3" name="IPv6Prefix_3" size="3" value="'.@$IPv6PrefixArray[2].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="3" name="IPv6Prefix_4" size="3" value="'.@$IPv6PrefixArray[3].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="3" name="IPv6Prefix_5" size="3" value="'.@$IPv6PrefixArray[4].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="3" name="IPv6Prefix_6" size="3" value="'.@$IPv6PrefixArray[5].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="3" name="IPv6Prefix_7" size="3" value="'.@$IPv6PrefixArray[6].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="3" name="IPv6Prefix_8" size="3" value="'.@$IPv6PrefixArray[7].'" '.(($enableRA==1)?'':'disabled').'> / <input type="text" maxlength="3" name="IPv6Netmask" size="3" value="'.@$IPv6Netmask.'" '.(($enableRA==1)?'':'disabled').'>
+		</td></tr>
+
+		<tr><td>&nbsp;</td></tr>
+		<tr>
+			<td colspan="3" class="tablehead"><B>Your core has '.$number_of_cards.' network adapter(s):</B></td>
 		</tr>
 		<tr>
-			<td colspan="3"><b>Number of network adapters</b>: '.$number_of_cards.'</td>
+			<td colspan="3"><B>1. External network card '.@$externalInterfaceArray[0].'</B> </td>
 		</tr>
 		<tr>
-			<td colspan="3"><p>Your core has the following network adapters:<br><B>1. External network card '.@$externalInterfaceArray[0].'</B> </td>
-		</tr>
-		<tr>
-			<td colspan="3"><input type="radio" name="ipFrom" value="DHCP" onclick="setStaticIP(true);"'.(($ipFromDHCP==1)?'checked':'').'> Obtain an IP address from DHCP</td>
-		</tr>
-		<tr>
-			<td colspan="3"><input type="radio" name="ipFrom" value="static" onclick="setStaticIP(false);" '.(($ipFromDHCP==0)?'checked':'').'> Use a static IP address</td>
+			<td colspan="3"><input type="radio" name="ipFrom" value="DHCP" onclick="setStaticIP(true);"'.(($ipFromDHCP==1)?'checked':'')
+				.'> Obtain an IP address from DHCP <input type="radio" name="ipFrom" value="static" onclick="setStaticIP(false);" '
+				.(($ipFromDHCP==0)?'checked':'').'> Use a static IP address</td>
 		</tr>
 		<tr>
 			<td>&nbsp;</td>
@@ -248,8 +277,10 @@ function networkSettings($output,$dbADO) {
 		<tr>
 			<td colspan="3" align="center" bgcolor="#EEEEEE"><input type="button" class="button" name="update" value="Update" onClick="validateForm()"> <input type="reset" class="button" name="reset" value="Reset"></td>
 		</tr>		
+	<tr><td colspan="3">You may need to open up ports in the firewall for some programs that run on your internal computers, like video conferencing, file sharing, etc.  To do this, visit the Advanced, <a href="index.php?section=firewall">Firewall</a> page.</td></tr>	
+	<tr><td colspan="3" class="tablehead">Current settings:</td></tr>
+	<tr><td colspan="3" class="alternate_back">'.get_network_settings().'</td></tr>
 	</table>
-	You may need to open up ports in the firewall for some programs that run on your internal computers, like video conferencing, file sharing, etc.  To do this, visit the Advanced, <a href="index.php?section=firewall">Firewall</a> page.		
 	</form>
 		<script>
 		 	var frmvalidator = new formValidator("networkSettings");
@@ -328,6 +359,18 @@ function networkSettings($output,$dbADO) {
 			}
 		}
 
+		// tokenize IPv6 values to put in CORE device data
+		$resRA=$dbADO->Execute('SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=1 AND FK_DeviceData=292');
+		$rowRA=$resRA->FetchRow();
+		$ipv6_data=explode(",", $rowRA['IK_DeviceData']);
+		$ipv6_data[5]= getIPv6FromParts('IPv6Prefix_'); 
+		$ipv6_data[6]= $_POST['IPv6Netmask'];
+		$ipv6_data[11]= $_POST['enableRA'];
+		$token = join(',',$ipv6_data);
+	 	$dbADO->Execute("UPDATE Device_DeviceData SET IK_DeviceData='".$token."' WHERE FK_Device=1 AND FK_DeviceData=292") 
+	 		or die('ERROR: Invalid query: '.mysql_error());
+
+
 		// NOTE: Please don't reboot the computer before these commands have completed, OK?
 		// NOTE: Well, unless you like breaking /etc/network/interfaces randomly because the mysql server shutdown was faster than the scripts
 		$commands = array('Network_Setup.sh', 'Network_Firewall.sh');
@@ -398,6 +441,17 @@ function getIpFromParts($partName,$startIndex=1)
 		$ipArray[] = $part;
 	}
 	return join('.',$ipArray);
+}
+
+function getIPv6FromParts($partName,$startIndex=1)
+{
+	$ipArray=array();
+	for($i=$startIndex;$i<($startIndex+8);$i++)
+	{
+		$part = @$_POST[$partName.$i];
+		$ipArray[] = $part;
+	}
+	return join(':',$ipArray);
 }
 
 function get_network_settings(){
