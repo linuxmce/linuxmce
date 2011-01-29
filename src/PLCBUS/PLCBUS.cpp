@@ -32,6 +32,8 @@ using namespace DCE;
 #include <termios.h>
 #include <stdio.h>
 
+int reprq = 0;
+
 extern "C" void *start( void* );
 void *start( void *p ) {
 	PLCBUS::PLCBUS *base = static_cast<PLCBUS::PLCBUS*>(p);
@@ -114,6 +116,11 @@ bool PLCBUS::GetConfig()
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
 
+
+	if (DATA_Get_3_Phase()) {
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"3phase enabled");
+		reprq = 64;
+	}
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Open port: %s", TranslateSerialUSB(DATA_Get_COM_Port_on_PC()).c_str());
 	fd = open(TranslateSerialUSB(DATA_Get_COM_Port_on_PC()).c_str(), O_RDWR);
 
@@ -291,7 +298,6 @@ void PLCBUS::receiveFunction() {
 		pthread_mutex_lock (&mutexSendQueue);
 		if (PLCBUSSendQueue.size() > 0 ) {
 			int commandlength = 8;
-			int reprq=0;
 			buf[0]=0x2; // STX
 			buf[1]=5; // LEN
 			buf[2]=PLCBUSSendQueue.front()->usercode; // USERCODE
