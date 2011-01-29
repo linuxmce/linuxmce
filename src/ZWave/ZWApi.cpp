@@ -1014,7 +1014,8 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 									
 								} else if (((*ZWNodeMapIt).second->typeGeneric == GENERIC_TYPE_SENSOR_BINARY)||((*ZWNodeMapIt).second->typeGeneric == GENERIC_TYPE_SENSOR_MULTILEVEL)) {
 									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"This is a binary sensor, so we send sensor tripped events");
-									if ((unsigned char)frame[7] == 0xff) {
+									// if ((unsigned char)frame[7] == 0xff) {
+									if ((unsigned char)frame[7] > 0) {
 									        DCEcallback->SendSensorTrippedEvents ((unsigned char)frame[3],-1,true);
 									} else {
 									        DCEcallback->SendSensorTrippedEvents ((unsigned char)frame[3],-1,false);
