@@ -38,5 +38,7 @@ db_set "mythweb/only" 'false'
 db_fset "mythweb/only" seen true
 
 ## Set the ttf-mscorefonts-installer EULA as 'accepted'
-db_set "msttcorefonts/accepted-mscorefonts-eula" true
+db_set "msttcorefonts/accepted-mscorefonts-eula" 'true'
 db_fset "msttcorefonts/accepted-mscorefonts-eula" seen true
+db_set "msttcorefonts/present-mscorefonts-eula" 'false'
+db fset "msttcorefonts/present-mscorefonts-eula" seen true
