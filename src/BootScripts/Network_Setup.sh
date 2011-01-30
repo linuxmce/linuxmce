@@ -133,7 +133,9 @@ iface $IntIf inet static
 	netmask $IntNetmask"
 echo "$IfConf" >>"$File"
 
-if [[ "$IPv6Active" == "on" ]]; then
+echo "">"/etc/radvd.conf"
+
+if [[ "$IPv6RAenabled" == "on" ]]; then
 	# Config IPv6 tunnel if enabled in advanced network setup
 	echo "IPv6 tunnel activated ($IPv6TunnelBroker), configuring interface"
 	IfConf="auto $IPv6If
@@ -181,8 +183,8 @@ fi
 
 service networking start
 service dhcp3-server start
-if [[ "$IPv6Active" == "on" ]]; then
-	# start RA daemon to hand out IPv6 addresses to local network
+if [[ "$IPv6RAenabled" == "on" ]]; then
+	echo "starting RA daemon to hand out IPv6 addresses to local network"
 	service radvd start
 fi
 

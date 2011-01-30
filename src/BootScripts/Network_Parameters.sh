@@ -61,6 +61,7 @@ ExtractIPv6Data()
 		IPv6Password=$(CommaField 8 "$R")
 		IPv6Active=$(CommaField 10 "$R")
 		IPv6DynamicIPv4=$(CommaField 11 "$R")
+		IPv6RAenabled=$(CommaField 12 "$R")
 	fi
 }
 
@@ -159,6 +160,7 @@ IPv6UserID=
 IPv6Password=
 IPv6Active=0
 IPv6DynamicIPv4=0
+IPv6RAenabled=0
 
 NCards=$(ip addr | grep "^[0-9]*:" | grep -v "^[0-9]*: lo" | grep -v "^[0-9]*: pan" | grep -c ".")
 
