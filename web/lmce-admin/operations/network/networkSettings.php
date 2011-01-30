@@ -449,9 +449,11 @@ function getIPv6FromParts($partName,$startIndex=1)
 	for($i=$startIndex;$i<($startIndex+8);$i++)
 	{
 		$part = @$_POST[$partName.$i];
-		$ipArray[] = $part;
+		if ($part != "") $ipArray[] = $part;
 	}
-	return join(':',$ipArray);
+	$tmp=join(':',$ipArray);
+	if(count($ipArray) < 8) $tmp.='::'; 
+	return $tmp;
 }
 
 function get_network_settings(){
