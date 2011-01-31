@@ -229,7 +229,7 @@ string PlutoDHCP::AssignIP(int PK_Device)
 
 string PlutoDHCP::GetDHCPConfig()
 {
-	string sCoreInternalAddress, sInternalSubnet, sInternalSubnetMask;
+	string sCoreInternalAddress, sInternalSubnet, sInternalSubnetMask, sReverseInternalSubnet;
 	IPAddress ipAddressDhcpStart, ipAddressDhcpStop, ipAddressPlutoStart, ipAddressPlutoStop;
 
 	GetNetParams(sCoreInternalAddress, sInternalSubnet, sInternalSubnetMask);
@@ -311,6 +311,9 @@ string PlutoDHCP::GetDHCPConfig()
 		sDynamicPool += "\t}\n";
 	}
 
+	// Make a reverse DNS zone compatible string
+	sReverseInternalSubnet = ipAddressDhcpStart.GetOctet(3) + "." + ipAddressDhcpStart.GetOctet(2) + "." + ipAddressDhcpStart.GetOctet(1);
+
 	// Load and use the dhcpd.conf template file
 	string sTemplate = "/usr/pluto/templates/dhcpd.conf.tmpl";
 	size_t size;
@@ -329,7 +332,7 @@ string PlutoDHCP::GetDHCPConfig()
 	sConfigData=StringUtils::Replace(sConfigData,"%MOON_ENTRIES%",sMoonEntries);
 	sConfigData=StringUtils::Replace(sConfigData,"%NOBOOT_ENTRIES%",sNoBootEntries);
 	sConfigData=StringUtils::Replace(sConfigData,"%NOMAC_ENTRIES%",sNoMacEntries);
-
+	sConfigData=StringUtils::Replace(sConfigData,"%DYNAMIC_REVERSE_RANGE%",sReverseInternalSubnet);
 
 	return sConfigData;
 }

@@ -10,6 +10,19 @@
 option domain-name-servers %CORE_INTERNAL_ADDRESS%;
 authoritative;
 
+ddns-update-style interim;
+
+include "/etc/bind/rndc.key";
+
+# Use what key in what zone
+zone linuxmce.local. {
+	primary 127.0.0.1;
+	key "rndc-key";
+}
+
+option domain-name "linuxmce.local";
+
+
 option routers %CORE_INTERNAL_ADDRESS%;
 option subnet-mask %INTERNAL_SUBNET_MASK%;
 
@@ -34,6 +47,15 @@ subnet %INTERNAL_SUBNET% netmask %INTERNAL_SUBNET_MASK% {
 	default-lease-time 86400;
 	max-lease-time 604800;
 	%DYNAMIC_IP_RANGE%
+	zone   %DYNAMIC_REVERSE_RANGE%.in-addr.arpa. {
+		primary localhost;
+		key	"rndc-key";
+	}
+	zone    linuxmce.local. {
+		primary localhost;
+		key	"rndc-key";
+	}
+
 }
 
 # PXE booting machines

@@ -59,6 +59,14 @@ public:
 		return !m_bBadIP;
 	}
 
+  string GetOctet(int pos)
+  {
+    string sResult;
+    unsigned char *pByte = ((unsigned char *) &m_IPAddress) + 4;
+    pByte-=pos;
+    sResult = StringUtils::itos(*pByte);
+    return sResult;
+  }
 	IPAddress() { m_bBadIP=true; }
 	IPAddress(unsigned long IPAddress) { m_IPAddress=IPAddress; }
 	unsigned long AsInt() { return m_IPAddress; }
