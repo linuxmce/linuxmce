@@ -15,8 +15,8 @@ addAdditionalTTYStart
 #To please the "PlutoRestorePoint.sh" script.
 mkdir -p /home/backup/upload
 
-# Force ttf-mscorefonts to reinstall
-apt-get install --reinstall ttf-mscorefonts-installer
+# Manually install mscorefonts
+InstallMSCoreFonts
 
 # make sure the kubuntu desktop environment is installed
 apt-get install -y --force-yes kubuntu-desktop

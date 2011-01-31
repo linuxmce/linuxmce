@@ -181,4 +181,79 @@ function FixAsteriskConfig
 
 }
 
+function InstallMSCoreFonts
+{
 
+#Version: 1.0
+#Info: Bash script to install mscorefonts without using
+#currently broken ttf-mscorefonts-installer (3.0) for
+#Ubuntu 9.10 Karmic Koala (date: 03/11/09)
+
+#Author: Jonathan K.
+#Website: http://www.friendlytechninja.com
+#Email: friendlytechninja@gmail.com
+
+#License: This is free to use and distribute (for free only) as long as
+#credit is given to original author.
+
+# Prepare the system
+apt-get remove ttf-mscorefonts-installer -y
+apt-get install cabextract -y
+
+#Create temp and mscorefonts dir
+sudo mkdir /usr/share/fonts/truetype/mscorefonts
+mkdir /tmp/mscorefonts
+cd /tmp/mscorefonts
+
+#Download links
+wget http://sourceforge.net/projects/corefonts/files/the%20fonts/final/andale32.exe/download
+wget http://sourceforge.net/projects/corefonts/files/the%20fonts/final/arial32.exe/download
+wget http://sourceforge.net/projects/corefonts/files/the%20fonts/final/arialb32.exe/download
+wget http://sourceforge.net/projects/corefonts/files/the%20fonts/final/comic32.exe/download
+wget http://sourceforge.net/projects/corefonts/files/the%20fonts/final/courie32.exe/download
+wget http://sourceforge.net/projects/corefonts/files/the%20fonts/final/georgi32.exe/download
+wget http://sourceforge.net/projects/corefonts/files/the%20fonts/final/impact32.exe/download
+wget http://sourceforge.net/projects/corefonts/files/the%20fonts/final/times32.exe/download
+wget http://sourceforge.net/projects/corefonts/files/the%20fonts/final/trebuc32.exe/download
+wget http://sourceforge.net/projects/corefonts/files/the%20fonts/final/verdan32.exe/download
+wget http://sourceforge.net/projects/corefonts/files/the%20fonts/final/webdin32.exe/download
+
+#Extract all .tff files
+cabextract *.exe -F*.ttf -L
+
+#Rename files and move files
+cp andalemo.ttf /usr/share/fonts/truetype/mscorefonts/Andale_Mono.ttf
+cp ariali.ttf /usr/share/fonts/truetype/mscorefonts/Arial_Italic.ttf
+cp arialbd.ttf /usr/share/fonts/truetype/mscorefonts/Arial_Bold.ttf
+cp arialbi.ttf /usr/share/fonts/truetype/mscorefonts/Arial_Bold_Italic.ttf
+cp arial.ttf /usr/share/fonts/truetype/mscorefonts/Arial.ttf
+cp ariblk.ttf /usr/share/fonts/truetype/mscorefonts/Arial_Black.ttf
+cp comicbd.ttf /usr/share/fonts/truetype/mscorefonts/Comic_Sans_MS_Bold.ttf
+cp comic.ttf /usr/share/fonts/truetype/mscorefonts/Comic_Sans_MS.ttf
+cp cour.ttf /usr/share/fonts/truetype/mscorefonts/Courier_New.ttf
+cp courbd.ttf /usr/share/fonts/truetype/mscorefonts/Courier_New_Bold.ttf
+cp courbi.ttf /usr/share/fonts/truetype/mscorefonts/Courier_New_Bold_Italic.ttf
+cp couri.ttf /usr/share/fonts/truetype/mscorefonts/Courier_New_Italic.ttf
+cp georgiaz.ttf /usr/share/fonts/truetype/mscorefonts/Georgia_Bold_Italic.ttf
+cp georgiab.ttf /usr/share/fonts/truetype/mscorefonts/Georgia_Bold.ttf
+cp georgiai.ttf /usr/share/fonts/truetype/mscorefonts/Georgia_Italic.ttf
+cp georgia.ttf /usr/share/fonts/truetype/mscorefonts/Georgia.ttf
+cp impact.ttf /usr/share/fonts/truetype/mscorefonts/Impact.ttf
+cp times.ttf /usr/share/fonts/truetype/mscorefonts/Times_New_Roman.ttf
+cp timesbd.ttf /usr/share/fonts/truetype/mscorefonts/Times_New_Roman_Bold.ttf
+cp timesbi.ttf /usr/share/fonts/truetype/mscorefonts/Times_New_Roman_Bold_Italic.ttf
+cp timesi.ttf /usr/share/fonts/truetype/mscorefonts/Times_New_Roman_Italic.ttf
+cp trebuc.ttf /usr/share/fonts/truetype/mscorefonts/Trebuchet_MS.ttf
+cp trebucbd.ttf /usr/share/fonts/truetype/mscorefonts/Trebuchet_MS_Bold.ttf
+cp trebucbi.ttf /usr/share/fonts/truetype/mscorefonts/Trebuchet_MS_Bold_Italic.ttf
+cp trebucit.ttf /usr/share/fonts/truetype/mscorefonts/Trebuchet_MS_Italic.ttf
+cp verdanab.ttf /usr/share/fonts/truetype/mscorefonts/Verdana_Bold.ttf
+cp verdanai.ttf /usr/share/fonts/truetype/mscorefonts/Verdana_Italic.ttf
+cp verdanaz.ttf /usr/share/fonts/truetype/mscorefonts/Verdana_Bold_Italic.ttf
+cp verdana.ttf /usr/share/fonts/truetype/mscorefonts/Verdana.ttf
+cp webdings.ttf /usr/share/fonts/truetype/mscorefonts/Webdings.ttf
+
+#Clean up
+cd ~
+rm -r /tmp/mscorefonts
+}
