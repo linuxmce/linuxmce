@@ -333,7 +333,9 @@ if [ -e /etc/default/mediatomb ] ;then
 fi
 
 ## Configure UPnP Internet Gateway Device daemon
-if [ -e /etc/default/linux-igd ] ;then
+if [ -n "$IntIf" ] && [ -z "$( echo $IntIf | grep : )"  ] && [ -e /etc/default/linux-igd ] ;then
+	sed -i "s/^#INTIFACE/INTIFACE/" /etc/default/linux-igd
+	sed -i "s/^#EXTIFACE/EXTIFACE/" /etc/default/linux-igd
 	sed -i "s/^INTIFACE=\"*\(.*\)\"*/INTIFACE=${IntIf}/" /etc/default/linux-igd
 	sed -i "s/^EXTIFACE=\"*\(.*\)\"*/EXTIFACE=${ExtIf}/" /etc/default/linux-igd
 fi
