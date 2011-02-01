@@ -83,23 +83,6 @@ Pin-Priority: 1001
 
 
 
-function Setup_NIS {
-	## Put a temporary nis config file that will prevent ypbind to start
-	echo "
-NISSERVER=false
-NISCLIENT=false
-YPPWDDIR=/etc
-YPCHANGEOK=chsh
-NISMASTER=
-YPSERVARGS=
-YPBINDARGS=
-YPPASSWDDARGS=
-YPXFRDARGS=
-" > /etc/default/nis
-}
-
-
-
 function wmtweaks_default()
 {
 	echo '<?xml version="1.0" encoding="UTF-8"?>
@@ -341,6 +324,7 @@ YPXFRDARGS=
 " > /etc/default/nis
 }
 
+
 function Setup_Network_Intefaces {
 	StatsMessage "Seting Up Networking"
 
@@ -421,6 +405,10 @@ function Configure_Network_Options {
 
 	if [[ "$c_netIntName" == "" ]] ;then
 		IntIf="$c_netExtName:0"
+		#Disable firewalls on single NIC operation, refs #396
+		echo "We are in single NIC mode -> internal firewalls disabled"
+		echo "DisableFirewall=1" >>/etc/pluto.conf
+		echo "DisableIPv6Firewall=1" >>/etc/pluto.conf		
 	else
 		IntIf="$c_netIntName"
 	fi
