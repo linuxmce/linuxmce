@@ -7,6 +7,16 @@ if [[ ! $(grep "FRAMEBUFFER=y" /etc/initramfs-tools/conf.d/splash) ]]; then
 	echo "FRAMEBUFFER=y" >>/etc/initramfs-tools/conf.d/splash
 fi
 
+# nVidia proprietary drivers lack fb support, use uvesafb instead
+if [[ ! $(grep "uvesafb mode_option=1024x768-24 mtrr=3 scroll=ywrap" /etc/initramfs-tools/modules) ]]; then
+	echo "uvesafb mode_option=1024x768-24 mtrr=3 scroll=ywrap" >>/etc/initramfs-tools/modules
+fi
+
+# blacklist vga16fb fallback to be sure uvesafb is used
+if [[ ! $(grep "blacklist vga16fb" /etc/modprobe.d/blacklist-framebuffer.conf) ]]; then
+        echo "blacklist vga16fb" >>/etc/modprobe.d/blacklist-framebuffer.conf
+fi
+
 # register our theme with plymouth
 update-alternatives --install /lib/plymouth/themes/default.plymouth default.plymouth /lib/plymouth/themes/LinuxMCE/LinuxMCE.plymouth 900
 update-alternatives --auto default.plymouth
