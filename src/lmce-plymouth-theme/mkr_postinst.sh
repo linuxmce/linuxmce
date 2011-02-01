@@ -17,6 +17,10 @@ if [[ ! $(grep "blacklist vga16fb" /etc/modprobe.d/blacklist-framebuffer.conf) ]
         echo "blacklist vga16fb" >>/etc/modprobe.d/blacklist-framebuffer.conf
 fi
 
+# hook into funtions to show boot log messages
+sed -i '/Begin:/ a\
+	/bin/plymouth update --status="Begin: $@"' /usr/share/initramfs-tools/scripts/functions
+
 # register our theme with plymouth
 update-alternatives --install /lib/plymouth/themes/default.plymouth default.plymouth /lib/plymouth/themes/LinuxMCE/LinuxMCE.plymouth 900
 update-alternatives --auto default.plymouth
