@@ -200,6 +200,9 @@ LC_ALL=C chroot "$TEMP_DIR" apt-get -y install discover
 cp "$TEMP_DIR"/sbin/discover "$TEMP_DIR"/sbin/discover.disabled
 echo > "$TEMP_DIR"/sbin/discover
 
+## temp fix for the script to work until dependency problem is solved
+LC_ALL=C chroot $TEMP_DIR apt-get -y install pluto-boot-scripts
+
 ## Begin installing the packages needed for the pluto devices
 echo "do_initrd = Yes" > $TEMP_DIR/etc/kernel-img.conf
 LC_ALL=C chroot "$TEMP_DIR" invoke-rc.d exim4 force-stop
