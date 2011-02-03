@@ -162,10 +162,13 @@ LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y install locales
 #chroot "$TEMP_DIR" locale-gen
 
 echo "Installing kernel"
-LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y install linux-image-diskless 
+#LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y install linux-image-diskless 
 #LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y install linux-image-diskless-${KVER} 
+#MDKVER=C apt-cache show linux-image-diskless | grep Version | cut -d " " -f 2|sort -r|head -1|cut -d "-" -f 1-3
+LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y --no-install-recommends install linux-image-generic
+
 if [[ "$distro" = "intrepid" ]] ; then
-  LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y install linux-restricted-modules-${KVER}
+  LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y install linux-restricted-modules
 fi
 #LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y install linux-ubuntu-modules-${KVER}
 

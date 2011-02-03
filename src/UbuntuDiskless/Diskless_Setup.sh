@@ -45,11 +45,30 @@ function setup_tftp_boot
 		
 		echo -e "$BootConf" > "$Moon_BootConfFile"
 
-		mkdir -p /tftpboot/${Moon_DeviceID}
-		rm -f /tftpboot/${Moon_DeviceID}/vmlinuz
-		ln -s ${Moon_RootLocation}/boot/vmlinuz /tftpboot/${Moon_DeviceID}/vmlinuz
-		rm -f /tftpboot/${Moon_DeviceID}/initrd.img
-		ln -s ${Moon_RootLocation}/boot/initrd.img /tftpboot/${Moon_DeviceID}/initrd.img
+		#mkdir -p /tftpboot/${Moon_DeviceID}
+		#rm -f /tftpboot/${Moon_DeviceID}/vmlinuz
+		#ln -s ${Moon_RootLocation}/boot/vmlinuz /tftpboot/${Moon_DeviceID}/vmlinuz
+		#rm -f /tftpboot/${Moon_DeviceID}/initrd.img
+		#ln -s ${Moon_RootLocation}/boot/initrd.img /tftpboot/${Moon_DeviceID}/initrd.img
+      		
+		## Find kernel and initrd
+        	Kernel=
+        	Initrd=
+        	for File in /usr/pluto/diskless/${Moon_DeviceID}/boot/vmlinuz-*; do
+                	Kernel="$File"
+        	done
+        	for File in /usr/pluto/diskless/${Moon_DeviceID}/boot/initrd.img-*; do
+                	Initrd="$File"
+        	done
+
+        	if [[ -z "$Kernel" || -z "$Initrd" ]]; then
+                	echo "WARNING: Missing kernel or initrd file. Cannot set for PXE boot."
+                	continue
+        	fi
+
+        	mkdir -p /tftpboot/${Moon_DeviceID}
+        	ln -sf "$Kernel" /tftpboot/${Moon_DeviceID}/vmlinuz
+        	ln -sf "$Initrd" /tftpboot/${Moon_DeviceID}/initrd.img
 	else
 		for line in $Moon_DisklessImages; do
 			NameKernel="${line%%=*}"
