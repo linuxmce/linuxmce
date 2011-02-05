@@ -3,8 +3,12 @@
 # LinuxMCE plymouth theme postinstall script
 
 # Prevent delayed loading of our splash
-if [[ ! $(grep "FRAMEBUFFER=y" /etc/initramfs-tools/conf.d/splash) ]]; then
-	echo "FRAMEBUFFER=y" >>/etc/initramfs-tools/conf.d/splash
+if [ -f /etc/initramfs-tools/conf.d/splash ]; then
+	if [[ ! $(grep "FRAMEBUFFER=y" /etc/initramfs-tools/conf.d/splash) ]]; then
+		echo "FRAMEBUFFER=y" >>/etc/initramfs-tools/conf.d/splash
+	fi
+else
+	echo "FRAMEBUFFER=y" >/etc/initramfs-tools/conf.d/splash
 fi
 
 # nVidia proprietary drivers lack fb support, use uvesafb instead
@@ -18,8 +22,10 @@ if [[ ! $(grep "blacklist vga16fb" /etc/modprobe.d/blacklist-framebuffer.conf) ]
 fi
 
 # hook into funtions to show boot log messages
-sed -i '/Begin:/ a\
+if [[ ! $(grep '/bin/plymouth update --status="Begin: $@"' /usr/share/initramfs-tools/scripts/functions) ]]; then
+	sed -i '/Begin:/ a\
 	/bin/plymouth update --status="Begin: $@"' /usr/share/initramfs-tools/scripts/functions
+fi
 
 # register our theme with plymouth
 update-alternatives --install /lib/plymouth/themes/default.plymouth default.plymouth /lib/plymouth/themes/LinuxMCE/LinuxMCE.plymouth 900
