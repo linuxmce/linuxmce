@@ -78,6 +78,7 @@ public:
 		virtual int GetPKDevice(int node_id, int instance_id);
         	virtual bool DeleteDevicesForNode(string sInternalID);
 		virtual string GetCapabilities(int iNodeID, int iInstanceID);
+		virtual string GetSchedule(int iNodeID);
 		virtual bool SetCapabilities(int iNodeID, int iInstanceID, string sCapabilities);
 		virtual void AddCapability(int PKDevice, int capability);
 		virtual void SetManufacturerSpecificString(int iPKDevice,string sManufacturerSpecific);

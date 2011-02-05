@@ -1040,17 +1040,19 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 						if (frame[6] == SCHEDULE_GET) {
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got SCHEDULE_GET from node %i for day: %i",frame[3],frame[7]);
 							// report no schedules for the given day
+							// format; version,2;1,15:00,1;1,22:00,0;2,15:00,1;2,22:00,0;3,11:00,1;3,22:00,0;4,11:00,1;4,22:00,0;5,11:00,1;5,23:00,0;6,07:00,1;6,23:00,0;7,07:00,1;7,22:00,0
 							tempbuf[0]=FUNC_ID_ZW_SEND_DATA;
 							// node id
 							tempbuf[1]=frame[3];
 							tempbuf[2]=5;
 							tempbuf[3]=COMMAND_CLASS_CLIMATE_CONTROL_SCHEDULE;
 							tempbuf[4]=SCHEDULE_SET;
-							tempbuf[5]=frame[7];
+							tempbuf[5]=frame[7]; // weekday, 1==mon, 7==sun
 							tempbuf[6]=0;
-							tempbuf[7]=0x7f; // unused state, end setpoints
-							tempbuf[8]=TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
-							sendFunction( tempbuf , 9, REQUEST, 1); 
+							tempbuf[7]=0;
+							tempbuf[8]=0x7f; // unused state, end setpoints
+							tempbuf[9]=TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+							sendFunction( tempbuf , 10, REQUEST, 1); 
 
 						}
 						break;
@@ -1122,6 +1124,8 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 									case COMMAND_CLASS_CLIMATE_CONTROL_SCHEDULE:
 										if (SCHEDULE_CHANGED_GET == (unsigned char) frame[offset+2]) {
 											DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_CLIMATE_CONTROL_SCHEDULE:SCHEDULE_CHANGED_GET");
+
+											
 										}
 										if (SCHEDULE_OVERRIDE_GET == (unsigned char) frame[offset+2]) {
 											DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_CLIMATE_CONTROL_SCHEDULE:SCHEDULE_OVERRIDE_GET");
@@ -1164,7 +1168,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							tempbuf[11]=3; // length of next command
 							tempbuf[12]=COMMAND_CLASS_CLIMATE_CONTROL_SCHEDULE;
 							tempbuf[13]=SCHEDULE_CHANGED_REPORT;
-							tempbuf[14]=17; // dummy schedule version for now
+							tempbuf[14]=18; // dummy schedule version for now
 							tempbuf[15]=3; // length of next command
 							tempbuf[16]=COMMAND_CLASS_BASIC;
 							tempbuf[17]=BASIC_SET;

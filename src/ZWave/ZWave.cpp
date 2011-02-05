@@ -815,6 +815,21 @@ bool ZWave::DeleteDevicesForNode(string sInternalID) {
 	}
 }
 
+string ZWave::GetSchedule(int iNodeID) {
+	string sSchedule;
+	char tmp_node_id[16];
+	sprintf(tmp_node_id,"%i",iNodeID);
+	DeviceData_Impl* device = InternalIDToDevice(tmp_node_id, -1);
+	if (device != NULL) {
+	        CMD_Get_Device_Data cmd_Get_Device_Data(m_dwPK_Device, 4,
+							device->m_dwPK_Device, DEVICEDATA_Schedule_CONST, true,
+							&sSchedule
+							);
+		SendCommand(cmd_Get_Device_Data);
+	}
+	return sSchedule;
+}
+
 string ZWave::GetCapabilities(int iNodeID, int iInstanceID) {
 	string sCapabilities;
 	char tmp_node_id[16];
