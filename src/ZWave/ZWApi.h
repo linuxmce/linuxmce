@@ -110,7 +110,11 @@
 #define GENERIC_TYPE_WINDOW_COVERING                    0x09
 #define GENERIC_TYPE_REPEATER_SLAVE                     0x0F
 #define GENERIC_TYPE_SWITCH_BINARY                      0x10
+
 #define GENERIC_TYPE_SWITCH_MULTILEVEL                  0x11
+#define SPECIFIC_TYPE_NOT_USED				0x00
+#define SPECIFIC_TYPE_MOTOR_MULTIPOSITION		0x03
+
 #define GENERIC_TYPE_SWITCH_REMOTE                      0x12
 #define GENERIC_TYPE_SWITCH_TOGGLE                      0x13
 #define GENERIC_TYPE_SENSOR_BINARY                      0x20

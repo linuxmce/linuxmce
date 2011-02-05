@@ -2229,7 +2229,15 @@ int ZWApi::ZWApi::getDeviceTemplate(int basic, int generic, int specific, char *
 			devicetemplate = DEVICETEMPLATE_Standard_Thermostat_CONST;
 			break;
 		case GENERIC_TYPE_SWITCH_MULTILEVEL:
-			devicetemplate = DEVICETEMPLATE_Light_Switch_dimmable_CONST;
+			switch (specific) {
+				case SPECIFIC_TYPE_MOTOR_MULTIPOSITION:
+					devicetemplate = DEVICETEMPLATE_Drapes_Switch_CONST;
+					break;
+				case SPECIFIC_TYPE_NOT_USED:
+					devicetemplate = DEVICETEMPLATE_Light_Switch_dimmable_CONST;
+					break;
+			}
+				
 			break;
 		case GENERIC_TYPE_SWITCH_REMOTE:
 #ifdef DEVICETEMPLATE_Remote_Switch_CONST
