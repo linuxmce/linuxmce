@@ -21,4 +21,4 @@ c_ubuntuExtraCdFrom=1
 c_ubuntuExtraCdPath=''
 c_ubuntuLiveCdFrom=1
 c_ubuntuLiveCdPath=''
-
+c_singleNIC=1

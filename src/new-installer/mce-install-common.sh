@@ -405,12 +405,15 @@ function Configure_Network_Options {
 
 	if [[ "$c_netIntName" == "" ]] ;then
 		IntIf="$c_netExtName:0"
-		#Disable firewalls on single NIC operation, refs #396
-		echo "We are in single NIC mode -> internal firewalls disabled"
-		echo "DisableFirewall=1" >>/etc/pluto.conf
-		echo "DisableIPv6Firewall=1" >>/etc/pluto.conf		
 	else
 		IntIf="$c_netIntName"
+	fi
+
+	if [[ "$c_singleNIC" == "1" ]] ;then
+                #Disable firewalls on single NIC operation, refs #396
+                echo "We are in single NIC mode -> internal firewalls disabled"
+                echo "DisableFirewall=1" >>/etc/pluto.conf
+                echo "DisableIPv6Firewall=1" >>/etc/pluto.conf
 	fi
 
 	if [[ "$c_netExtUseDhcp" == "0" ]] ;then
