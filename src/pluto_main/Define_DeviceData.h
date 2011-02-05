@@ -241,6 +241,8 @@
 #define DEVICEDATA_Sound_Card_CONST 288
 #define DEVICEDATA_Energy_Consumption_CONST 289
 #define DEVICEDATA_PowerOff_mode_CONST 290
+#define DEVICEDATA_Schedule_CONST 291
+#define DEVICEDATA_IPv6TunnelSettings_CONST 292
 
 #define DEVICEDATA_TABLE "DeviceData"
 #define DEVICEDATA_PK_DEVICEDATA_FIELD "PK_DeviceData"
