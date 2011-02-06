@@ -482,7 +482,7 @@ function getSIPState(){
         $lines=explode("\n",$response);
         $last=count($lines);
         for($i=0;$i<$last;$i++){
-                if(strpos($lines[$i],'Host')!==false || strpos($lines[$i],'Verbosity')!==false || strpos($lines[$i],'Core debug')!==false || strpos($lines[$i],'UNIX')!==false)
+                if(strpos($lines[$i],'Host')!==false || strpos($lines[$i],'SIP registrations')!==false || strpos($lines[$i],'Core debug')!==false || strpos($lines[$i],'UNIX')!==false)
                 unset($lines[$i]);
         }
 
@@ -495,11 +495,11 @@ function getSIPState(){
                                 $parsed[]=$value;
                         }
                 }
-
-                $dataArray=array_slice($parsed,4);
+echo "DEBUG: ".$line."<br/>";
+                $dataArray=array_slice($parsed,5);
                 $ampersand=strpos(@$parsed[1],'@');
                 $nr=($ampersand===false)?@$parsed[1]:substr(@$parsed[1],0,$ampersand);
-                $state[$nr]=(!isset($parsed[4]))?@$parsed[3]:$parsed[3].' '.join(' ',$dataArray);
+                $state[$nr]=(!isset($parsed[5]))?@$parsed[4]:$parsed[4].' '.join(' ',$dataArray);
         }
 
         return @$state[@$nr];
