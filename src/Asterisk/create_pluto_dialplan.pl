@@ -349,4 +349,9 @@ sub get_timeout()
 
 # Make sure all files are correctly owned by the asterisk user.
 `chown asterisk:asterisk /etc/asterisk/*`;
+
+# restart gracefully works in -1.4
+`asterisk -rx "restart gracefully"`;
+
+# core restart gracefully works in 1.6+
 `asterisk -rx "core restart gracefully"`;
