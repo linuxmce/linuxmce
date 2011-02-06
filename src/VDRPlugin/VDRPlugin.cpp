@@ -472,7 +472,7 @@ class DataGridTable *VDRPlugin::CurrentShows(string GridID, string Parms, void *
 	int iRow=0;
 
 	PLUTO_SAFETY_LOCK(mm, m_pMedia_Plugin->m_MediaMutex);
-    LoggerWrapper::GetInstance()->Write(LV_STATUS, "VDRV_PlugIn::CurrentShows A datagrid for all the shows was requested %s params %s", GridID.c_str(), Parms.c_str());
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, "VDR_PlugIn::CurrentShows A datagrid for all the shows was requested %s params %s", GridID.c_str(), Parms.c_str());
   
   VDRRecording vdrRecording;
 	vdrRecording.data.time.channel_id = atoi(sChanId.c_str());
