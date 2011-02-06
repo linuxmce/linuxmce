@@ -27,6 +27,14 @@ if [[ ! $(grep '/bin/plymouth update --status="Begin: $@"' /usr/share/initramfs-
 	/bin/plymouth update --status="Begin: $@"' /usr/share/initramfs-tools/scripts/functions
 fi
 
+# if using GRUB2 (on 1004 core / hybrid) add kernel command line
+if [ -f /etc/default/grub ]; then
+        if [[ $(grep 'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"' /etc/default/grub) ]]; then
+                sed -i 's/splash"/splash uvesafb mode_option=1024x768-24 mtrr=3 scroll=ywrap"/' /etc/default/grub
+        fi
+	update-grub
+fi
+
 # register our theme with plymouth
 update-alternatives --install /lib/plymouth/themes/default.plymouth default.plymouth /lib/plymouth/themes/LinuxMCE/LinuxMCE.plymouth 900
 update-alternatives --auto default.plymouth
