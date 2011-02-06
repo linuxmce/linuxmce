@@ -80,6 +80,9 @@ a2enmod rewrite || /bin/true
 # disable default site that ships with apache
 a2dissite default || /bin/true
 
+# make sure that mythweb hasn't taken over web admin
+a2dissite default-mythbuntu || /bin/true
+
 #Index=$(grep DirectoryIndex /etc/apache/httpd.conf | sed 's/DirectoryIndex//g; s/^ *//g; s/ *$//g' | grep -v '^#')
 #[ -n "$Index" ] || exit 0
 
