@@ -387,7 +387,8 @@ void VDR::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pMessage)
 	string sCommand;
 	string sVDRResponse;
 	sCommand = "MESG restartmedia";
-//	bool bResult = SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
+	sCommand = "HITK Play";
+	bool bResult = SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
 }
 
 //<-dceag-c41-b->
@@ -1762,7 +1763,7 @@ void VDR::CMD_Mute(string &sCMD_Result,Message *pMessage)
 //<-dceag-c97-e->
 {
 	string sVDRResponse;
-	SendVDRCommand(m_sVDRIp,"HITK Subtitles",sVDRResponse);
+	SendVDRCommand(m_sVDRIp,"HITK Mute",sVDRResponse);
 }
 
 //<-dceag-c139-b->
