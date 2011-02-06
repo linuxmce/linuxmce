@@ -164,4 +164,4 @@ foreach my $var (keys %IN_VARS)
 `/usr/pluto/bin/create_telecom_defaults.pl`;
 
 # Reload asterisk
-`asterisk -r -x reload`;
+`asterisk -rx "sip reload"`;

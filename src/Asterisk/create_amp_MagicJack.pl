@@ -162,7 +162,7 @@ chmod(0777, "/etc/init.d/StartMjProxy.sh");
 `update-rc.d StartMjProxy.sh defaults`;
 
 # Reload asterisk
-`asterisk -r -x reload`;
+`asterisk -rx "sip reload"`;
 
 sub open_firewallports()
 {
