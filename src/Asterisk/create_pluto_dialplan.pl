@@ -349,4 +349,4 @@ sub get_timeout()
 
 # Make sure all files are correctly owned by the asterisk user.
 `chown asterisk:asterisk /etc/asterisk/*`;
-`asterisk -r -x reload`;
+`asterisk -rx "core restart gracefully"`;
