@@ -495,7 +495,6 @@ function getSIPState(){
                                 $parsed[]=$value;
                         }
                 }
-echo "DEBUG: ".$line."<br/>";
                 $dataArray=array_slice($parsed,5);
                 $ampersand=strpos(@$parsed[1],'@');
                 $nr=($ampersand===false)?@$parsed[1]:substr(@$parsed[1],0,$ampersand);
