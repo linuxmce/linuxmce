@@ -468,37 +468,51 @@ function getSIPState(){
         $cmd='sudo -u root /usr/sbin/asterisk -rx "sip show registry"';
         $response=exec_batch_command($cmd,1);
 
-        // response look like this
         /*
+        // response look like this for older asterisk
            -- Remote UNIX connection
         Host                            Username       Refresh State
         sip.inphonex.com:5060           7588648             50 Registered
         sip.inphonex.com:5060           123456             100 Unregistered
         Verbosity is at least 3
+
+        // response look like this for newer asterisk
+           -- Remote UNIX connection
+	Host                           dnsmgr Username       Refresh State                Reg.Time                 
+	tel.lu:5060                    N      20403987           105 Registered           Sun, 06 Feb 2011 16:48:47
+	1 SIP registrations.
+
         */
+
 
         $state=array();
 
         $lines=explode("\n",$response);
         $last=count($lines);
         for($i=0;$i<$last;$i++){
-                if(strpos($lines[$i],'Host')!==false || strpos($lines[$i],'SIP registrations')!==false || strpos($lines[$i],'Core debug')!==false || strpos($lines[$i],'UNIX')!==false)
+		// reduce multiple spaces to single space
+		$lines[$i]= preg_replace('/\s\s+/',' ', $lines[$i]);
+		// detect column index by parsing header line
+		if(strpos($lines[$i],'Host')!==false && strpos($lines[$i],'Host')!==false) {
+			$header=explode(" ", $lines[$i]);
+			
+			for($j=0; $j < count($header); $j++) {
+				if($header[$j]=="Host") $index_host=$j;
+				if($header[$j]=="State") $index_state=$j;
+			}
+		}
+		// remove all lines that don't contain a registry
+                if(strpos($lines[$i],'Host')!==false || strpos($lines[$i],'SIP registrations')!==false || strpos($lines[$i],'Verbosity')!==false
+			|| strpos($lines[$i],'Core debug')!==false || strpos($lines[$i],'UNIX')!==false)
                 unset($lines[$i]);
         }
 
         foreach ($lines AS $line){
-                $parsed=array();
                 $parts=explode(" ",$line);
-
-                foreach ($parts AS $pos=>$value){
-                        if(trim($value)!=''){
-                                $parsed[]=$value;
-                        }
-                }
-                $dataArray=array_slice($parsed,5);
-                $ampersand=strpos(@$parsed[1],'@');
-                $nr=($ampersand===false)?@$parsed[1]:substr(@$parsed[1],0,$ampersand);
-                $state[$nr]=(!isset($parsed[5]))?@$parsed[4]:$parsed[4].' '.join(' ',$dataArray);
+                $dataArray=array_slice($parts,$index_state+1);
+                $ampersand=strpos(@$parts[$index_host],'@');
+                $nr=($ampersand===false)?@$parts[$index_host]:substr(@$parts[$index_host],0,$ampersand);
+                $state[$nr]=(!isset($parts[$index_state+1]))?@$parts[$index_state]:$parts[$index_state].' '.join(' ',$dataArray);
         }
 
         return @$state[@$nr];
