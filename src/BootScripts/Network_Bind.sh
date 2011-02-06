@@ -104,6 +104,6 @@ chmod 664 /etc/bind/rndc.key
 if [[ -e /etc/apparmor.d/usr.sbin.dhcpd3 && $( grep '/etc/bind' /etc/apparmor.d/usr.sbin.dhcpd3 ) == "" ]] ;then
 	sed -i "s,\},\n  # Let dhcpd read bind's config files\n  /etc/bind/\*\* r\,\n\},g" /etc/apparmor.d/usr.sbin.dhcpd3
 	invoke-rc.d apparmor restart
-	invoke-rc.d dhcpd restart
+	invoke-rc.d dhcp3-server restart
 fi
 invoke-rc.d bind9 start 

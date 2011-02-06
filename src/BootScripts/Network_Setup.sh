@@ -213,6 +213,8 @@ Replace != 0 { Replace-- }
 mv /etc/bind/named.conf.options.$$ /etc/bind/named.conf.options
 fi
 
+/usr/pluto/bin/Network_Bind.sh
+
 rndc reload
 
 AskPort80="
