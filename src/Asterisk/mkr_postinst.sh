@@ -10,12 +10,12 @@ sed -r -i "s/[#]RUNASTSAFE=yes/RUNASTSAFE=yes/" /etc/default/asterisk
 touch /etc/asterisk/manager_custom.conf
 touch /etc/asterisk/queues_custom.conf
 touch /etc/asterisk/sip_custom.conf
+touch /etc/asterisk/sip_registrations.conf
 touch /etc/asterisk/sip_registrations_custom.conf
 touch /etc/asterisk/sip_nat.conf
 touch /etc/asterisk/sip_general_custom.conf
 touch /etc/asterisk/sip_general_additional.conf
-touch /etc/asterisk/sip_nat.conf
-touch /etc/asterisk/sip_registrations_custom.conf
+touch /etc/asterisk/sip_additional.conf
 
 
 ########### DO NOTHING ###########
