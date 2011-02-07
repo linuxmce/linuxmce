@@ -1168,6 +1168,20 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							tempbuf[11]=3; // length of next command
 							tempbuf[12]=COMMAND_CLASS_CLIMATE_CONTROL_SCHEDULE;
 							tempbuf[13]=SCHEDULE_CHANGED_REPORT;
+							string sSchedule = DCEcallback->GetSchedule((unsigned char) frame[3]);
+							int iScheduleVersion = 0;
+							if (sSchedule.find(";") != string::npos) {
+								vector<string> vectSchedule;
+								StringUtils::Tokenize(sSchedule, ";", vectSchedule);
+								if (vectSchedule[0].find(",") !=string::npos) {
+									vector<string> vectScheduleVersion;
+									StringUtils::Tokenize(vectSchedule[0], ",", vectScheduleVersion);
+									iScheduleVersion = atoi(vectScheduleVersion[1].c_str());
+									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Schedule Version: %i",iScheduleVersion);
+								}
+							}
+
+
 							tempbuf[14]=18; // dummy schedule version for now
 							tempbuf[15]=3; // length of next command
 							tempbuf[16]=COMMAND_CLASS_BASIC;
