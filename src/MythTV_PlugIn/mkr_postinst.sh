@@ -6,7 +6,8 @@
 AddBookmark "http://dcerouter/mythweb/" "MythWeb"
 
 adduser mythtv public || :
-mkdir -p /root/.mythtv && touch /root/.mythtv/ignoregroup || :
+rm -rf /root/.mythtv || :
+ln -s /etc/mythtv /root/.mythtv && touch /root/.mythtv/ignoregroup || :
 
 #Alter mythconverg.storagegroup - the default VARCHAR(32) is too short for some LMCE drive names to fully be displayed
 Q="ALTER TABLE storagegroup MODIFY groupname VARCHAR(64)"
