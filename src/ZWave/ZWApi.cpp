@@ -1041,18 +1041,53 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Got SCHEDULE_GET from node %i for day: %i",frame[3],frame[7]);
 							// report no schedules for the given day
 							// format; version,2;1,15:00,1;1,22:00,0;2,15:00,1;2,22:00,0;3,11:00,1;3,22:00,0;4,11:00,1;4,22:00,0;5,11:00,1;5,23:00,0;6,07:00,1;6,23:00,0;7,07:00,1;7,22:00,0
-							tempbuf[0]=FUNC_ID_ZW_SEND_DATA;
+							string sSchedule = DCEcallback->GetSchedule((unsigned char) frame[3]);
+							int iScheduleVersion = 0;
+							int i=0;
+							tempbuf[i++]=FUNC_ID_ZW_SEND_DATA;
 							// node id
-							tempbuf[1]=frame[3];
-							tempbuf[2]=5;
-							tempbuf[3]=COMMAND_CLASS_CLIMATE_CONTROL_SCHEDULE;
-							tempbuf[4]=SCHEDULE_SET;
-							tempbuf[5]=frame[7]; // weekday, 1==mon, 7==sun
-							tempbuf[6]=0;
-							tempbuf[7]=0;
-							tempbuf[8]=0x7f; // unused state, end setpoints
-							tempbuf[9]=TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
-							sendFunction( tempbuf , 10, REQUEST, 1); 
+							tempbuf[i++]=frame[3];
+							tempbuf[i++]=5;
+							tempbuf[i++]=COMMAND_CLASS_CLIMATE_CONTROL_SCHEDULE;
+							tempbuf[i++]=SCHEDULE_SET;
+							tempbuf[i++]=frame[7]; // weekday, 1==mon, 7==sun
+							if (sSchedule.find(";") != string::npos) {
+								vector<string> vectSchedule;
+								vector<string>::const_iterator vectScheduleIt;
+								StringUtils::Tokenize(sSchedule, ";", vectSchedule);
+								for (vectScheduleIt = vectSchedule.begin() ; vectScheduleIt != vectSchedule.end() ; vectScheduleIt++ ) { 
+									string sSchedElem = *vectScheduleIt;
+									if (sSchedElem.find(",") !=string::npos) {
+										vector<string> vectScheduleElem;
+										StringUtils::Tokenize(sSchedElem, ",", vectScheduleElem);
+										if ((unsigned char)frame[7] == atoi(vectScheduleElem[0].c_str())) {
+
+											DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Schedule for day: %s",sSchedElem.c_str());
+											vector<string> vectHourMin;
+											if (vectScheduleElem[1].find(":") !=string::npos) {
+												StringUtils::Tokenize(vectScheduleElem[1], ":", vectHourMin);
+												tempbuf[i++] = atoi(vectHourMin[0].c_str());
+												tempbuf[i++] = atoi(vectHourMin[1].c_str());
+											} else {
+												tempbuf[i++] = 0;
+												tempbuf[i++] = 0;
+											}
+											if (atoi(vectScheduleElem[2].c_str()) == 1)  {
+												tempbuf[i++] = 0;
+											} else {
+												tempbuf[i++] = 0x7a;
+
+											}
+											
+										}
+									}
+								}
+							}
+							tempbuf[i++]=0;
+							tempbuf[i++]=0;
+							tempbuf[i++]=0x7f; // unused state, end setpoints
+							tempbuf[i++]=TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+							sendFunction( tempbuf , i, REQUEST, 1); 
 
 						}
 						break;
@@ -1182,7 +1217,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							}
 
 
-							tempbuf[14]=18; // dummy schedule version for now
+							tempbuf[14]=iScheduleVersion; // dummy schedule version for now
 							tempbuf[15]=3; // length of next command
 							tempbuf[16]=COMMAND_CLASS_BASIC;
 							tempbuf[17]=BASIC_SET;
