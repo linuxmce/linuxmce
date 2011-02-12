@@ -307,6 +307,7 @@ SambaDomainHost="
 	workgroup = $DomainName
 	server string =	$ComputerName
 	netbios name = $ComputerName
+	passdb backend = smbpasswd
 "
 PopulateSection "/etc/samba/smb.conf" "Domain and Hostname" "$SambaDomainHost"
 
