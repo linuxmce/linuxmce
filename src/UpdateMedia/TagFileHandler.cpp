@@ -70,29 +70,35 @@ bool TagFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttributes)
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SaveAttributes: saving %d attributes in the attribute file %s",
 		pPlutoMediaAttributes->m_mapAttributes.size(), sFileWithAttributes.c_str());
 
-	//Temporary map with attributes for common tags
-	map<int, string> mapAttributes;
-	for(MapPlutoMediaAttributes::iterator it = pPlutoMediaAttributes->m_mapAttributes.begin(), 
-		end = pPlutoMediaAttributes->m_mapAttributes.end(); it != end; ++it)
+	if (pPlutoMediaAttributes->m_mapAttributes.size() != 0)
 	{
-		mapAttributes[it->first] = it->second->m_sName;
+		//Temporary map with attributes for common tags
+		map<int, string> mapAttributes;
+		for(MapPlutoMediaAttributes::iterator it = pPlutoMediaAttributes->m_mapAttributes.begin(), 
+			end = pPlutoMediaAttributes->m_mapAttributes.end(); it != end; ++it)
+		{
+			mapAttributes[it->first] = it->second->m_sName;
+		}
+
+
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::SaveAttributes: saving %d pictures into APIC tags to %s",
+			pPlutoMediaAttributes->m_mapCoverarts.size(), sFileWithAttributes.c_str());
+
+		list<pair<char *, size_t> > listPictures;
+		for(MapPictures::iterator itc = pPlutoMediaAttributes->m_mapCoverarts.begin();
+			itc != pPlutoMediaAttributes->m_mapCoverarts.end(); ++itc)
+		{
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SaveAttributes: saving into APIC picture size %d", itc->first);
+			listPictures.push_back(make_pair(itc->second, itc->first));
+		}
+
+		//Save common tag tags
+		SetTagInfo(sFileWithAttributes, mapAttributes, listPictures);
+		listPictures.clear();
 	}
+	else
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SaveAttributes: No attributes to save");
 
-
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "# TagFileHandler::SaveAttributes: saving %d pictures into APIC tags to %s",
-		pPlutoMediaAttributes->m_mapCoverarts.size(), sFileWithAttributes.c_str());
-
-	list<pair<char *, size_t> > listPictures;
-	for(MapPictures::iterator itc = pPlutoMediaAttributes->m_mapCoverarts.begin();
-		itc != pPlutoMediaAttributes->m_mapCoverarts.end(); ++itc)
-	{
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::SaveAttributes: saving into APIC picture size %d", itc->first);
-		listPictures.push_back(make_pair(itc->second, itc->first));
-	}
-
-	//Save common tag tags
-	SetTagInfo(sFileWithAttributes, mapAttributes, listPictures);
-	listPictures.clear();
 
 	return true;
 }
@@ -140,8 +146,10 @@ string TagFileHandler::GetFileSourceForDB()
 void TagFileHandler::GetTagInfo(string sFilename, map<int,string>& mapAttributes, list<pair<char *, size_t> >& listPictures)
 {
 	FileRef *f = new FileRef(m_sFullFilename.c_str());
-	if(NULL != f)
+	if(!f->isNull()) //ensure tag is present before trying to read and data.
 	{
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "# TagFileHandler::GetTagInfo: tags present");
+			
 		mapAttributes[ATTRIBUTETYPE_Performer_CONST] = f->tag()->artist().to8Bit();
 		mapAttributes[ATTRIBUTETYPE_Title_CONST] = f->tag()->title().to8Bit();
 		mapAttributes[ATTRIBUTETYPE_Genre_CONST] = f->tag()->genre().to8Bit();
