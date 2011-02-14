@@ -54,7 +54,7 @@ function setup_tftp_boot
 		## Find kernel and initrd
 		Kernel=
 		Initrd=
-		for File in /usr/pluto/diskless/"$DeviceID"/boot/vmlinuz-*; do
+		for File in /usr/pluto/diskless/"$Moon_DeviceID"/boot/vmlinuz-*; do
 			Kernel="$File"
 		done
 		if [[ -z "$Kernel" ]]; then
@@ -63,7 +63,7 @@ function setup_tftp_boot
 		fi
 		Kver=$(basename "$Kernel")
 		Kver="${Kver#vmlinuz-}"
-		Initrd=/usr/pluto/diskless/"$DeviceID"/boot/initrd.img-"$Kver"
+		Initrd=/usr/pluto/diskless/"$Moon_DeviceID"/boot/initrd.img-"$Kver"
 
 		if [[ -z "$Kernel" || ! -f "$Kernel" || -z "$Initrd" || ! -f "$Initrd" ]]; then
 			echo "WARNING: Missing kernel or initrd file. Cannot set for PXE boot."
@@ -76,8 +76,8 @@ function setup_tftp_boot
 
 		## these are needed because by default they see the kernel running on the core,
 		## which may be different from the one installed on the MD, thus not doing what we want by default
-		chroot /usr/pluto/diskless/"$DeviceID" depmod "$Kver"
-		chroot /usr/pluto/diskless/"$DeviceID" update-initramfs -k "$Kver" -u
+		chroot /usr/pluto/diskless/"$Moon_DeviceID" depmod "$Kver"
+		chroot /usr/pluto/diskless/"$Moon_DeviceID" update-initramfs -k "$Kver" -u
 	else
 		for line in $Moon_DisklessImages; do
 			NameKernel="${line%%=*}"
