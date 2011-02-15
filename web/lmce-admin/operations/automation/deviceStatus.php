@@ -28,16 +28,19 @@ function deviceStatus($output,$dbADO) {
 				<td align="center"><B>'.$TEXT_DEVICE_CONST.'</B></td>
 				<td align="center"><B>'.$TEXT_STATE_CONST.'</B></td>
 				<td align="center"><B>'.$TEXT_STATUS_CONST.'</B></td>
+				<td align="center"><B>'.$TEXT_DEVICE_BATTERY_STATE_CONST.'</B></td>
 				<td align="center"><B>'.$TEXT_IP_ADDRESS_CONST.'</B></td>
 				<td align="center"><B>'.$TEXT_MAC_ADDRESS_CONST.'</B></td>
 			</tr>';
 		$queryDevices='
 			SELECT PK_Device, Device.Description AS DeviceName, State,Status, IPaddress,MACaddress,Room.Description AS RoomName, 
-			Manufacturer.Description AS ManufName, DeviceTemplate.Description AS TemplateName, DeviceCategory.Description AS CategoryName
+			Manufacturer.Description AS ManufName, DeviceTemplate.Description AS TemplateName, DeviceCategory.Description AS CategoryName, 
+			IK_DeviceData AS BatteryState
 			FROM Device
 			INNER JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate
 			INNER JOIN Manufacturer ON FK_Manufacturer=PK_Manufacturer
 			INNER JOIN DeviceCategory ON FK_DeviceCategory=PK_DeviceCategory
+			LEFT JOIN Device_DeviceData ON (PK_Device=FK_Device AND FK_DeviceData=293)
 			LEFT JOIN Room ON FK_Room=PK_Room
 			WHERE Device.FK_Installation=?
 			ORDER BY RoomName ASC, DeviceName ASC';
@@ -49,15 +52,20 @@ function deviceStatus($output,$dbADO) {
 			if($rowDevices['RoomName']!=$initRoom){
 				$out.='
 				<tr class="tablehead">
-					<td colspan="5"><B>'.(($rowDevices['RoomName']=='')?$TEXT_UNASSIGNED_T_A_ROOM_CONST:$rowDevices['RoomName']).'</B></td>
+					<td colspan="6"><B>'.(($rowDevices['RoomName']=='')?$TEXT_UNASSIGNED_T_A_ROOM_CONST:$rowDevices['RoomName']).'</B></td>
 				</tr>';
 				$initRoom=$rowDevices['RoomName'];
 			}
+			if($rowDevices['BatteryState'] != '') {
+				$batteryState='<img src="operations/automation/batterystates/battery100.png" align="middle"/> '.$rowDevices['BatteryState'].'%';
+			}
+			else $batteryState='';
 			$out.='
 				<tr class="'.(($pos%2==0)?'alternate_back':'').'">
 					<td title="'.$TEXT_DEVICE_TEMPLATE_CONST.': '.$rowDevices['TemplateName'].' '.$TEXT_MANUFACTURER_CONST.': '.$rowDevices['ManufName'].' Device Category: '.$rowDevices['CategoryName'].'"><a href="index.php?section=editDeviceParams&deviceID='.$rowDevices['PK_Device'].'">'.$rowDevices['DeviceName'].'</a></td>
 					<td>'.$rowDevices['State'].'</td>
 					<td>'.$rowDevices['Status'].'</td>
+					<td>'.$batteryState.'</td>
 					<td>'.$rowDevices['IPaddress'].'</td>
 					<td>'.$rowDevices['MACaddress'].'</td>
 				</tr>
