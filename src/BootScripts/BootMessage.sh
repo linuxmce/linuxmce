@@ -33,6 +33,12 @@ if [[ -e "/tmp/.X11-unix/X0" ]]; then
 		OSD_Message " "
 	fi
 else
-	usplash_write TEXT-URGENT "$*"
+        if [ -x /sbin/usplash_write ]; then
+	        usplash_write TEXT-URGENT "$*"
+	fi
+        if [ -x /bin/plymouth ]; then
+                /bin/plymouth update --status="$*"
+        fi
+ 
 fi
 
