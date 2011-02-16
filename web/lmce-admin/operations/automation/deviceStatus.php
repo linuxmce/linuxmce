@@ -57,7 +57,8 @@ function deviceStatus($output,$dbADO) {
 				$initRoom=$rowDevices['RoomName'];
 			}
 			if($rowDevices['BatteryState'] != '') {
-				if($rowDevices['BatteryState'] > 76) $batteryImage = 'battery100.png';
+				if  ($rowDevices['BatteryState'] == 255) $batteryImage = 'battery0.png';
+				else if ($rowDevices['BatteryState'] > 76) $batteryImage = 'battery100.png';
  				else if ($rowDevices['BatteryState'] > 51) $batteryImage = 'battery75.png';
                                 else if ($rowDevices['BatteryState'] > 26) $batteryImage = 'battery50.png';
                                 else if ($rowDevices['BatteryState'] > 10) $batteryImage = 'battery25.png';
