@@ -44,8 +44,9 @@ function Update_Svn {
 	DisplayMessage "**** STEP : SVN UPDATE"
 
 	pushd ${svn_dir}/${svn_branch_name}-last
-		LASTVERSION=`svnversion`
-		DisplayMessage "Updating from ${svn_url}"
+		LASTVERSION=$(svn info src |grep ^Revision | cut -d" " -f2)
+#		LASTVERSION=`svnversion`
+		DisplayMessage "Updating SVN $LASTVERSION from ${svn_url} to latest"
 		svn update ||  Error "Failed to update ${svn_url}"
 	popd
 
