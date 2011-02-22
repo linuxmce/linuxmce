@@ -41,4 +41,4 @@ db_fset "mythweb/only" seen true
 db_set "msttcorefonts/accepted-mscorefonts-eula" 'true'
 db_fset "msttcorefonts/accepted-mscorefonts-eula" seen true
 db_set "msttcorefonts/present-mscorefonts-eula" 'false'
-db fset "msttcorefonts/present-mscorefonts-eula" seen true
+db_fset "msttcorefonts/present-mscorefonts-eula" seen true
