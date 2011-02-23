@@ -86,7 +86,8 @@ else
 fi
 
 pushd ${svn_dir}/${svn_branch_name}
-	VERSION=`svnversion`
+	VERSION=$(svn info src |grep ^Revision | cut -d" " -f2)
+#	VERSION=`svnversion`
 popd
 
 DisplayMessage "Old version was $LASTVERSION, new version is $VERSION"
