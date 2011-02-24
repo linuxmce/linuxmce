@@ -7,7 +7,7 @@
       </accounts>
     </ui>
 
-    <port>49152</port>
+    <port>49153</port>
     <name>LinuxMCE via MediaTomb</name>
     <udn>uuid:915f7219-1615-4f30-af6d-4c526315c691</udn>
     <home>/var/lib/mediatomb</home>
