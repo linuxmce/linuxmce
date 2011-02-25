@@ -266,6 +266,10 @@ LC_ALL=C chroot $TEMP_DIR update-rc.d -f NetworkManager remove
 LC_ALL=C chroot $TEMP_DIR apt-get -y install xserver-xorg-video-all
 LC_ALL=C chroot $TEMP_DIR apt-get -y install linux-firmware
 
+# Install flash on MD
+LC_ALL=C chroot $TEMP_DIR wget http://fpdownload.adobe.com/get/flashplayer/current/install_flash_player_10_linux.deb
+LC_ALL=C chroot $TEMP_DIR dpkg -i install_flash_player_10_linux.deb
+
 umount $TEMP_DIR/var/cache/apt
 umount $TEMP_DIR/usr/pluto/deb-cache
 umount $TEMP_DIR/sys
