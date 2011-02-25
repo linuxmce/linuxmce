@@ -20,3 +20,4 @@ for moon in $moons; do
 		chroot /usr/pluto/diskless/$moon apt-get dist-upgrade -y
 	fi
 done
+exit 0
