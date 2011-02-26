@@ -16,5 +16,5 @@ do
 	echo Spawning socat for device $PK_Device - $IPaddress : $Port
 	Device="/dev/ttyS_"${PK_Device}
 
-	/usr/pluto/bin/gc100-serial-bridge.sh $IPaddress $Port $Device
+	/usr/pluto/bin/gc100-serial-bridge.sh $IPaddress $Port $Device &
 done
