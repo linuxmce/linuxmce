@@ -17,7 +17,7 @@ if [[ "$PK_Device" -eq "1" ]]; then
 	invoke-rc.d vdr start
 else
 	# We are running on a MD, and don't want VDR running after the user closes the TV app.
-	trap 'killall -KILL vdr-sxfe && invoke-rc.de vdr stop' EXIT
+	trap 'killall -KILL vdr-sxfe ; invoke-rc.d vdr stop' EXIT
 	invoke-rc.d vdr restart
 	sleep 5
 fi
