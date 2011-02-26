@@ -71,12 +71,16 @@ bool OneWire::GetConfig()
 
 	string port = TranslateSerialUSB(DATA_Get_COM_Port_on_PC());
 
-	OW_init(port.c_str());
+	if (port.length()) {
+		OW_init(port.c_str());
 
-	static pthread_t readThread;
-	pthread_create(&readThread, NULL, start, (void*)this);
+		static pthread_t readThread;
+		pthread_create(&readThread, NULL, start, (void*)this);
 
-	return true;
+		return true;
+	} else {
+		return false;
+	}
 }
 
 //<-dceag-reg-b->
