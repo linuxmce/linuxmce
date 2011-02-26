@@ -284,7 +284,10 @@ if VDRInstalled ; then
 	. /etc/default/vdr
 	cd $VIDEO_DIR
 	if ! pidof vdr ; then
-		service vdr restart
+		# If we are running on the cure, we need to restart VDR after mounting the relevant devices
+		if [ "$AutostartCore" -eq "1" ] ; then
+			service vdr restart
+		fi
 	fi
 fi
 StartDaemon  "Starting LinuxMCE Launch Manager" "/usr/pluto/bin/LaunchManagerDaemon.sh" "LMCE_Launch_Manager"
