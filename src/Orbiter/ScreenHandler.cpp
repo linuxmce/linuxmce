@@ -917,8 +917,8 @@ void ScreenHandler::SelectedMediaFile(string sFile,char cActionItem)
 	NeedToRender render2( m_pOrbiter, "ScreenHandler::MediaBrowser_DatagridSelected" );
 	m_pOrbiter->CMD_Goto_DesignObj(0,pObj_Play->m_pParentObject->m_ObjectID,"","",false,true);
 
-	string sPicture = mediaFileBrowserOptions.m_PK_MediaType==MEDIATYPE_pluto_Pictures_CONST ? sFile : m_mapKeywords_Find("PICTURE");
-	pObj_Play->m_bHidden = mediaFileBrowserOptions.m_PK_MediaType==MEDIATYPE_pluto_Pictures_CONST || cActionItem=='o';  // No play if it's downloadable or a picture
+	string sPicture = m_mapKeywords_Find("PICTURE");
+	pObj_Play->m_bHidden = cActionItem=='o';  // No play if it's downloadable
 
 	// If this is external content there's no delete or move, and download is only for downloadable
 	if( pObj_Delete && pObj_Move )
@@ -947,10 +947,10 @@ void ScreenHandler::SelectedMediaFile(string sFile,char cActionItem)
 	if(NULL != pParentObject)
 		m_pOrbiter->Renderer()->RenderObjectAsync(pParentObject);
 
-	m_pOrbiter->m_pObj_Highlighted_set(mediaFileBrowserOptions.m_PK_MediaType==MEDIATYPE_pluto_Pictures_CONST ? pObj_Close : pObj_Play);
+	m_pOrbiter->m_pObj_Highlighted_set(pObj_Play);
 #ifdef ENABLE_MOUSE_BEHAVIOR
 	if( m_pOrbiter->m_pMouseBehavior )
-		m_pOrbiter->m_pMouseBehavior->SetMousePosition(mediaFileBrowserOptions.m_PK_MediaType==MEDIATYPE_pluto_Pictures_CONST ? pObj_Close : pObj_Play);
+		m_pOrbiter->m_pMouseBehavior->SetMousePosition(pObj_Play);
 #endif
 }
 //-----------------------------------------------------------------------------------------------------
