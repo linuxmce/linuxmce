@@ -89,7 +89,7 @@ void MediaListGrid::ToData(string GridID,int &Size, char* &Data, int *ColStart, 
 			string PictureFile_Full;
 
 			if( m_iPK_MediaType==MEDIATYPE_pluto_Pictures_CONST && !pFileBrowserInfo->m_bIsDirectory && !pFileBrowserInfo->m_bIsBack )
-				pCell->SetImagePath((pFileBrowserInfo->m_sMRL + ".tnj").c_str());
+				pCell->SetImagePath(pFileBrowserInfo->m_sPictureThumb.c_str());
 			else if(pFileBrowserInfo->m_PK_Picture > 0)
 			{
 				PictureFile_Full = "/home/mediapics/" + StringUtils::itos(pFileBrowserInfo->m_PK_Picture) + "_tn.jpg";

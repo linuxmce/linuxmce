@@ -623,10 +623,13 @@ void Media_Plugin::PopulateFileBrowserInfoForFile(MediaListGrid *pMediaListGrid,
 				pFileBrowserInfo = new FileBrowserInfo(row[2] ? row[2] : row[5],string("!F") + row[0],PK_File,row[4] ? atoi(row[4]) : 0,
 					row[5] && strstr(row[5],".dvd")!=NULL ? 'D' : 'F', false,false);
 #else
-				if( pMediaListGrid->m_iPK_MediaType==MEDIATYPE_pluto_Pictures_CONST )
-					pFileBrowserInfo = new FileBrowserInfo(row[2] ? row[2] : row[5],string(row[1]) + "/" + row[2],PK_File,row[4] ? atoi(row[4]) : 0,row[6],'F',false,false);
-				else
-					{
+			if( pMediaListGrid->m_iPK_MediaType==MEDIATYPE_pluto_Pictures_CONST )
+			{
+				pFileBrowserInfo = new FileBrowserInfo(row[2] ? row[2] : row[5],string("!F")+row[0],PK_File,row[4] ? atoi(row[4]) : 0,row[6],'F',false,false);
+				pFileBrowserInfo->m_sPictureThumb = string(row[1]) + "/" + row[2]+".tnj";
+			}
+			else
+			{
 					// I have to fix the case where lack of title attribute no longer returns null.
 
 					LoggerWrapper::GetInstance()->Write(LV_STATUS,"row[2] = %s",row[2]);

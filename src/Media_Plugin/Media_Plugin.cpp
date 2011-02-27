@@ -6120,9 +6120,15 @@ void Media_Plugin::CMD_Get_Attributes_For_Media(string sFilename,string sPK_Ente
 		sExtension = m_pMediaAttributes->m_pMediaAttributes_LowLevel->GetPictureFromFileID(pMediaFile->m_dwPK_File, &PK_Picture);
 	}
 
-	if( PK_Picture )
-		*sValue_To_Assign += "PICTURE\t/home/mediapics/" + StringUtils::itos(PK_Picture) + "." + (sExtension.empty() ? "jpg" : sExtension) + "\t";
-	
+	if (pMediaFile->m_dwPK_MediaType == MEDIATYPE_pluto_Pictures_CONST)
+	{
+		*sValue_To_Assign += "PICTURE\t"+pMediaFile->FullyQualifiedFile()+ "\t";
+	}
+	else
+	{
+		if( PK_Picture )
+			*sValue_To_Assign += "PICTURE\t/home/mediapics/" + StringUtils::itos(PK_Picture) + "." + (sExtension.empty() ? "jpg" : sExtension) + "\t";
+	}
 	// cleanup
 	for (deque<MediaFile *>::iterator it = dequeMediaFile.begin(); it != dequeMediaFile.end(); ++it)
 		delete *it;

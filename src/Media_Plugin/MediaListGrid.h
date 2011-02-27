@@ -41,7 +41,7 @@ public:
 
 	bool m_bIsDirectory,m_bIsBack;  // Keep track of whether this is a 'go back' or not
 	string m_sDisplayGroup,m_sDisplayName;
-	string m_sMRL;
+	string m_sMRL,m_sPictureThumb;
 	int m_PK_File,m_PK_Disc,m_PK_Picture,m_PK_Attribute,m_PK_Bookmark,m_PK_FileFormat;
 	char m_cMediaSource; // F=File, D=Disc, L=Download, A=Attribute
 	enumTypeOfMedia m_enumTypeOfMedia;
