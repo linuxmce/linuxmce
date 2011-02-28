@@ -51,14 +51,11 @@ TimedEvent::TimedEvent(Row_EventHandler *pRow_EventHandler)
 			m_tTime=StringUtils::SQLDateTime(pRow_CriteriaParm->Value_get());
 	}
 
-	if (m_tTime == 0)	
-	  CalcNextTime();   // CalcNextTime should not be called if a specific time is set.
-
+	CalcNextTime();
 }
 
 void TimedEvent::CalcNextTime()
 {
-	m_tTime=0;
 	switch(m_iTimedEventType)
 	{
 	case INTERVAL_EVENT:
@@ -78,6 +75,7 @@ void TimedEvent::CalcNextTime()
 			{
 				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Interval timer %s has no time: %s",
 					m_pRow_EventHandler->Description_get().c_str(),m_sTimes.c_str());
+				m_tTime=0;
 				return;
 			}
 LoggerWrapper::GetInstance()->Write(LV_STATUS,"Added interval timer %s at %d now %d seconds %d",
@@ -86,6 +84,7 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"Added interval timer %s at %d now
 		break;
 	case DAY_OF_WEEK:
 		{
+			m_tTime=0;
 			time_t t=time(NULL);
 			struct tm tm_Now;
 			localtime_r(&t,&tm_Now);
@@ -135,6 +134,7 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"TimedEvent::CalcNextTime dow done
 		break;
 	case DAY_OF_MONTH:
 		{
+			m_tTime=0;
 			time_t t=time(NULL);
 			struct tm tm_Now;
 			localtime_r(&t,&tm_Now);
