@@ -846,6 +846,11 @@ bool StringUtils::EndsWith( const string &sSearchIn, const string &sSearchFor, b
         return sSearchIn.length()>=sSearchFor.length() && sSearchIn.substr(sSearchIn.length()-sSearchFor.length())==sSearchFor;
 }
 
+string StringUtils::RemoveStringFromEnd( const string &sBig, int iCutChars)
+{
+    return sBig.substr(0,sBig.length()-iCutChars);
+}
+
 bool StringUtils::OnlyWhiteSpace( const char *pInput )
 {
 	const char *pPtr = pInput;

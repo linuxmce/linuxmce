@@ -136,6 +136,11 @@ namespace StringUtils
     bool EndsWith( const string &sSearchIn, const string &sSearchFor, bool bIgnoreCase=false );
 
 	/**
+     * @brief returns string with characters removed at the end
+     */
+    string RemoveStringFromEnd( const string &sBig, int iCutChars);
+
+	/**
      * @brief returns true if sInput contains only white space
      */
     bool OnlyWhiteSpace( const char *pInput );
