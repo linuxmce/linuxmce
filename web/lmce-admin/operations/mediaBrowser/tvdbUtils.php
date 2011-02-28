@@ -818,7 +818,7 @@ function addDirectors($directorArray, $fileID, $mediadbADO, $dbADO, $output, $co
 function addEpTitle($episodeData, $con ,$fileID, $mediadbADO, $dbADO, $output)
 {	//print_r($episodeData);
 	$epTitle=mysql_real_escape_string($episodeData['title']);
-	$sql = "SELECT * FROM `Attribute` WHERE `Name` =\"$epTitle\" AND FK_AttributeType = 11"; 
+	$sql = "SELECT * FROM `Attribute` WHERE `Name` =\"$epTitle\" AND FK_AttributeType = 13";
 	$result = mysql_query($sql);
 	$count = mysql_num_rows($result);	 
 	$row = mysql_fetch_assoc($result);	
@@ -827,7 +827,7 @@ function addEpTitle($episodeData, $con ,$fileID, $mediadbADO, $dbADO, $output)
 	if ($count < 1)
 	{
 	$out.= 'Show title not found...' ;
-			$iQuery = "INSERT INTO Attribute VALUES (\"\" , 11 , \"$epTitle\" , NULL, NULL, NULL, 0 ,CURTIME() ,NULL )" ;  	
+			$iQuery = "INSERT INTO Attribute VALUES (\"\" , 13 , \"$epTitle\" , NULL, NULL, NULL, 0 ,CURTIME() ,NULL )" ;  	
 			mysql_query($iQuery) or die (mysql_error());	
 			$insertRes= (int)mysql_insert_id()  or die (mysql_error());
 			//echo $insertRes;
@@ -948,10 +948,11 @@ mysql_query("UPDATE File SET FK_MediaSubType=1 WHERE `PK_File`=\"$fileIdent\" ")
 mysql_query("UPDATE File SET FK_FileFormat=\"$format\" WHERE `PK_File`=\"$fileIdent\" ")or die (mysql_error());
 
 }
+//=================program title================================================================================ 
 function addProgTitle ($episodeData, $con ,$fileID, $mediadbADO, $dbADO, $output)
 {		
 	$program=mysql_real_escape_string($episodeData['series']['series']);
-	$sql = "SELECT * FROM `Attribute` WHERE `Name` =\"$program\" AND FK_AttributeType = 13"; 
+	$sql = "SELECT * FROM `Attribute` WHERE `Name` =\"$program\" AND FK_AttributeType = 12";
 	$result = mysql_query($sql);		 
 	$row = mysql_fetch_assoc($result);	
 	$attrib = $row['PK_Attribute'];		
@@ -960,7 +961,7 @@ function addProgTitle ($episodeData, $con ,$fileID, $mediadbADO, $dbADO, $output
 	$fileIdent = $_POST['fileID'];
 	if ($count < 1)
 	{			
-			$iQuery = "INSERT INTO Attribute VALUES (\"\" , 13 , \"$program\" , NULL, NULL, NULL, 0 ,CURTIME() ,NULL )" ;  	
+			$iQuery = "INSERT INTO Attribute VALUES (\"\" , 12 , \"$program\" , NULL, NULL, NULL, 0 ,CURTIME() ,NULL )" ;  	
 			mysql_query($iQuery) or die (mysql_error());	
 			$insertRes= (int)mysql_insert_id()  or die (mysql_error());
 			//echo $insertRes;
