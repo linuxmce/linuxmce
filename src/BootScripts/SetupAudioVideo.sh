@@ -108,7 +108,7 @@ Setup_AsoundConf()
 	local AudioSetting="$1"
 	local SoundCard
 
-	SoundCard=$(GetDeviceData "$PK_Device" "$DEVICEDATA_Sound_Card")
+	SoundCard=$(GetDeviceData "$PK_Device" "$DEVICEDATA_Sound_Card"|cut -f2 -d";")
 	SoundCard=$(TranslateSoundCard "$SoundCard")
 	if [[ -z "$SoundCard" ]]; then
 		SoundCard=0

@@ -11,7 +11,8 @@ if [[ -d /sys/class/sound ]]; then
 		else
 			id=$(readlink -f "$dev" | sed -r 's,^.*(pci.*),\1,g')
 		fi
-		Ports="$Ports $id"
+		manufacturer=$(cat $path/id)
+		Ports="$Ports $manufacturer;$id"
 	done
 	echo "${Ports# }" | tr ' ' '\n'
 	popd &>/dev/null
