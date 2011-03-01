@@ -304,20 +304,6 @@ bool Xine_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
 	// hack: VDR recordings are detected by the info.vdr or info in the recording dir. T
 	bool bVDRRecording = ( StringUtils::EndsWith(mediaURL,"INFO.VDR", true) || StringUtils::EndsWith(mediaURL,"INFO",true) );
 
-	if (bVDRRecording)
-	{
-		if ( StringUtils::EndsWith(mediaURL,"INFO.VDR",true) ) {
-			mediaURL = StringUtils::RemoveStringFromEnd(mediaURL,8);
-			mediaURL += "0*.vdr";
-		}
-		if ( StringUtils::EndsWith(mediaURL,"INFO",true) ) {
-			mediaURL = StringUtils::RemoveStringFromEnd(mediaURL,4);
-			mediaURL += "0*.ts";
-		}
-	}	
-		
-		
-	
 	// hack: redirect MythTV recordings to MythTV_Player
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Doing MythTV redirection check...");
 
@@ -503,6 +489,73 @@ bool Xine_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
 			else
 			{
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Not appending extra items to list");
+			}
+		}
+
+		if ( bVDRRecording )
+		{
+			// need this for bookmarking to work
+			int iPK_File = pMediaFile->m_dwPK_File;
+				
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Appending extra items to list: ");
+			string sFolder = sFileToPlay;
+			string sExt = "";
+			
+			if ( StringUtils::EndsWith(mediaURL,"INFO.VDR",true) ) {
+                        	sFolder = StringUtils::RemoveStringFromEnd(mediaURL,9);
+				sFileToPlay = sFolder;
+                 		sExt = "0*.vdr";
+                 		mediaURL = sFolder + "/001.vdr";
+			}
+                        if ( StringUtils::EndsWith(mediaURL,"INFO",true) ) {
+                        	sFolder = StringUtils::RemoveStringFromEnd(mediaURL,5);
+                        	sFileToPlay = sFolder;
+                                sExt = "0*.ts";
+                 		mediaURL = sFolder + "/00001.ts";
+			}
+
+			list<string> vItems;
+			FileUtils::FindFiles(vItems, sFolder, sExt);
+			vItems.sort();
+			
+			pMediaStream->m_dequeMediaFile.clear();
+			
+			string sStartPosition = pMediaFile && pMediaFile->m_sStartPosition.size() ? pMediaFile->m_sStartPosition : pXineMediaStream->m_sStartPosition;
+			string sStartFile;
+			string::size_type sPos = sStartPosition.find("FILE:");
+			if (sPos != string::npos)
+			{
+				sStartFile = sStartPosition.substr(sPos+5);					
+			}
+			else
+			{
+				long int iMaxSize = -1;
+				for (list<string>::iterator li=vItems.begin(); li!=vItems.end(); ++li)
+				{
+					string sFullName = sFolder+"/"+ *li;
+					long int iFileSize = FileUtils::FileSize(sFullName);
+					if ( iFileSize > iMaxSize )
+					{
+						iMaxSize = iFileSize;
+						sStartFile = *li;
+					}
+				}
+
+			}
+			
+			int iQueuePos = 0;
+			
+			for (list<string>::iterator li=vItems.begin(); li!=vItems.end(); ++li)
+			{
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "Item: %s [ripped file %i]", li->c_str(), iPK_File);
+				MediaFile *pItem = new MediaFile(sFolder+"/"+*li);
+				pItem->m_dwPK_File = iPK_File;
+				long long iFileSize = FileUtils::FileSize64(sFolder+"/"+*li) / 1024 / 1024;					
+				pItem->m_sDescription = *li + ", " +StringUtils::itos(iFileSize) + "Mb";
+				pMediaStream->m_dequeMediaFile.push_back(pItem);
+				if (sStartFile == *li)
+					pMediaStream->m_iDequeMediaFile_Pos = iQueuePos;
+				iQueuePos++;
 			}
 		}
 		
