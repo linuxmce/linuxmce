@@ -123,6 +123,10 @@ cp {,"$TEMP_DIR"}/etc/apt/sources.list
 [[ -f /etc/apt/preferences ]] && cp {,"$TEMP_DIR"}/etc/apt/preferences
 [[ -f /etc/apt/apt.conf ]] && cp {,"$TEMP_DIR"}/etc/apt/apt.conf
 
+## Setup initial ssh access    
+echo 'Allow ssh access using our key'
+[[ -f /usr/pluto/keys/id_dsa_pluto.pub ]] && cat /usr/pluto/keys/id_dsa_pluto.pub >> "$TEMP_DIR"/root/.ssh/authorized_keys
+
 
 
 ## Update the chrooted system (needed when created from archive)
