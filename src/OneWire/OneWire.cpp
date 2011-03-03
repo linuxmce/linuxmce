@@ -76,7 +76,6 @@ bool OneWire::GetConfig()
 		return false;
 	}
 	if (OW_init(port.c_str())==0) {
-
 		static pthread_t readThread;
 		pthread_create(&readThread, NULL, start, (void*)this);
 
@@ -311,5 +310,9 @@ void OneWire::readDevices() {
 		}
 	} else {
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"OW_get error: %i", errno);
+		// got an error, let's enable debug
+		OW_set_error_level("5");
+		OW_set_error_print("2");
+
 	}
 }
