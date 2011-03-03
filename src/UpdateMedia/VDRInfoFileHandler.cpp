@@ -31,10 +31,13 @@ bool VDRInfoFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttribu
 	for(vector<string>::iterator it = vectLines.begin(), end = vectLines.end(); it != end; ++it)
 	{
 		string sLine = *it;
-		int nAttributeType = 0;
 
+		int nAttributeType = 0;
+		int iStart = 2;
+		
 		if(sLine.size() >= 2)
 		{
+
 			switch(sLine[0])
 			{
 				case 'C':
@@ -50,7 +53,13 @@ bool VDRInfoFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttribu
 					break;
 
 				case 'X':
-					nAttributeType = ATTRIBUTETYPE_Audio_Encoding_CONST;
+					// TODO: Do a proper check of the video format and assign aspect ratio information as well.
+					if (sLine[2] == '1') 
+						nAttributeType = ATTRIBUTETYPE_Format_CONST;
+					else
+						nAttributeType = ATTRIBUTETYPE_Audio_Encoding_CONST;
+						
+					// iStart = 4;
 					break;
 
 				default:
@@ -58,7 +67,7 @@ bool VDRInfoFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttribu
 					break;
 			}
 
-			string sValue = sLine.substr(2, sLine.length() - 2);
+			string sValue = sLine.substr(iStart, sLine.length() - iStart);
 			PlutoMediaAttribute *pma = new PlutoMediaAttribute(0, nAttributeType, sValue);
 
 			if(nAttributeType == ATTRIBUTETYPE_Synopsis_CONST)
