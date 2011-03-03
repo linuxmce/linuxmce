@@ -81,7 +81,7 @@ bool OneWire::GetConfig()
 
 		return true;
 	} else {
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"OW_init error: %i", errno);
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"OW_init error: %i, %s", errno, strerror(errno));
 		return false;
 	}
 }
@@ -309,7 +309,7 @@ void OneWire::readDevices() {
 			}
 		}
 	} else {
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"OW_get error: %i", errno);
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"OW_get error: %i, %s", errno, strerror(errno));
 		// got an error, let's enable debug
 		OW_set_error_level("5");
 		OW_set_error_print("2");
