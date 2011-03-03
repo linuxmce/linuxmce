@@ -72,14 +72,17 @@ bool OneWire::GetConfig()
 	string port = TranslateSerialUSB(DATA_Get_COM_Port_on_PC());
 
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Opening port: %s", port.c_str());
-	if (port.length()) {
-		OW_init(port.c_str());
+	if (!port.length()) {
+		return false;
+	}
+	if (OW_init(port.c_str())==0) {
 
 		static pthread_t readThread;
 		pthread_create(&readThread, NULL, start, (void*)this);
 
 		return true;
 	} else {
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"OW_init error: %i", errno);
 		return false;
 	}
 }
@@ -247,11 +250,13 @@ void OneWire::readDevices() {
 
 	if (OW_get("/",&buf,&s) != -1) {
 		tmpstr.append(buf);	
+		free(buf);
 		StringUtils::Tokenize(tmpstr, ",", OW_directories);
 		for (OW_dir_it=OW_directories.begin(); OW_dir_it != OW_directories.end() ; OW_dir_it++) {
 			// get temperature sensors
 			if (OW_dir_it->find("28.")!=string::npos) {
 				char tmp[1024];
+				char tmpbuf[1024];
 				string id;
 				std::map<string,float>::iterator mapIt;
 				bool bSendEvent = false;
@@ -259,45 +264,46 @@ void OneWire::readDevices() {
 				id = OW_dir_it->substr(0,OW_dir_it->size()-2);
 				sprintf(tmp,"/%stemperature",OW_dir_it->c_str());
 				// OW_get("/28.B37956020000/temperature",&buf,&s) ;
-				OW_get(tmp,&buf,&s);
-				sscanf(buf,"%f",&temp);
-				// strip whitespace on buf
-				sprintf(buf, "%.2f",temp);
-				LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Temperature for %s: %.2f",id.c_str(),temp);
-			
-				mapIt = sensorValueMap.find(id);
-				if (mapIt != sensorValueMap.end() ) {
-					// found sensor
-					LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Old temperature for %s: %.2f",id.c_str(),mapIt->second);
-					if (mapIt->second != temp) {
-						// new temp value, need to send event
-						bSendEvent = true;
-						// store new value in map
-						sensorValueMap.erase(mapIt);
-						sensorValueMap.insert(pair<string, float>(id,temp));
+				if (OW_get(tmp,&buf,&s)!= -1) {
+					sscanf(buf,"%f",&temp);
+					free(buf);
+					// strip whitespace
+					sprintf(tmpbuf, "%.2f",temp);
+					LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Temperature for %s: %.2f",id.c_str(),temp);
+				
+					mapIt = sensorValueMap.find(id);
+					if (mapIt != sensorValueMap.end() ) {
+						// found sensor
+						LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Old temperature for %s: %.2f",id.c_str(),mapIt->second);
+						if (mapIt->second != temp) {
+							// new temp value, need to send event
+							bSendEvent = true;
+							// store new value in map
+							sensorValueMap.erase(mapIt);
+							sensorValueMap.insert(pair<string, float>(id,temp));
 
+						} else {
+							bSendEvent = false;
+						}
 					} else {
-						bSendEvent = false;
+						// no value in map, first reading	
+						sensorValueMap.insert(pair<string, float>(id,temp));
+						bSendEvent = true;
 					}
-				} else {
-					// no value in map, first reading	
-					sensorValueMap.insert(pair<string, float>(id,temp));
-					bSendEvent = true;
-				}
-				if (bSendEvent) {
-					DeviceData_Impl *pChildDevice = InternalIDToDevice(id);
-					if (pChildDevice != NULL) {		
+					if (bSendEvent) {
+						DeviceData_Impl *pChildDevice = InternalIDToDevice(id);
+						if (pChildDevice != NULL) {		
 
 						(static_cast<OneWire::OneWire*>(myself))->m_pEvent->SendMessage( new Message(pChildDevice->m_dwPK_Device,
 							DEVICEID_EVENTMANAGER,
 							PRIORITY_NORMAL,
 							MESSAGETYPE_EVENT,
 							EVENT_Temperature_Changed_CONST, 1, 
-							EVENTPARAMETER_Value_CONST, buf)
+							EVENTPARAMETER_Value_CONST, tmpbuf)
 						);
+						}
 					}
 				}
-
 			} else {
 				// directory
 				// LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Directory: %s",OW_dir_it->c_str());
