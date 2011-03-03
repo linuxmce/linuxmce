@@ -1,9 +1,16 @@
 #!/bin/bash
-#
-# This script is the entry point to start the LinuxMCE core
-# It starts a couple of needed services and daemons, loads X (if running with AutoStartMedia)
-# and executes LMCE_Launch_Manager to start devices and taking care of the rest.
-#
+### BEGIN INIT INFO 
+# Provides:          linuxmce
+# Required-Start:    $remote_fs $syslog 
+# Required-Stop:     $remote_fs $syslog 
+# Should-Start:      $named 
+# Default-Start:     2 
+# Default-Stop:      1 
+# Short-Description: LinuxMCE 
+# Description:       This script is the entry point to start the LinuxMCE core
+#                    It starts a couple of needed services and daemons, loads X (if running with AutoStartMedia)
+#                    and executes LMCE_Launch_Manager to start devices and taking care of the rest.
+### END INIT INFO #
 if [ "$1" == "status" ]; then
 	if pidof DCERouter &>/dev/null ; then
 		echo "* DCERouter is running"
