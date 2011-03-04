@@ -28,8 +28,19 @@ if su - "$TheChosenOne" -c "DISPLAY=:$Display kcheckrunning"; then
 	exit
 fi
 
-# Disable the KDE Screensaver
 homedir=`getent passwd "$TheChosenOne" | cut -d : -f 6`
+
+# Create a Desktop icon to activate orbiter 
+mkdir -p "$homedir/Desktop" 
+echo "[Desktop Entry] 
+Encoding=UTF-8 
+Version=8.10 
+Type=Application 
+Exec=/usr/pluto/bin/ActivateOrbiterFromKDE.sh 
+Path=/usr/pluto/bin 
+Name=Activate Orbiter" > "$homedir/Desktop/LinuxMCE.desktop"
+
+# Disable the KDE Screensaver
 mkdir -p "$homedir/.kde/share/config/"
 echo "[ScreenSaver]
 Enabled=false
