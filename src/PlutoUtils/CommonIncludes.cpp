@@ -32,11 +32,17 @@ bool AskYNQuestion(string Question,bool bDefault,int Timeout)
 		cout << Question << (bDefault ? " [Y/n] " : " [N/y] ");
 		while (true)
 		{
-#ifndef WIN32
-			char c = Timeout ? getch_timeout(Timeout) : getch();
-#else
-			char c = getch();
-#endif
+
+			#ifdef __APPLE_CC__
+				char c;
+				std::cin.get(c);
+			#else
+				#ifndef WIN32
+					char c = Timeout ? getch_timeout(Timeout) : getch();
+				#else
+					char c = getch();
+				#endif
+			#endif
 			cout << endl;
 			if( c==3 )
 				exit(1);
@@ -59,12 +65,17 @@ string GetPrompt(int Timeout)
 	char c=0;
 	while (true)
 	{
-#ifndef WIN32
-		c = Timeout ? getch_timeout(Timeout) : getch();
+		
+#ifdef __APPLE_CC__
+		std::cin.get(c);
 #else
+		
+	#ifndef WIN32
+		c = Timeout ? getch_timeout(Timeout) : getch();
+	#else
 		c = getch();
+	#endif
 #endif
-
 		if( c=='\n' || c=='\r' || c==3 || c==0 )
 			return sResponse;
 
@@ -91,12 +102,18 @@ char AskMCQuestion(string Question,string Prompts,int Timeout)
 			bFirst=false;
 		}
 		cout << "] ";
-#ifndef WIN32
-			char c = Timeout ? getch_timeout(Timeout) : getch();
+		
+#ifdef __APPLE_CC__
+		char c;
+		std::cin.get(c);
 #else
+		
+	#ifndef WIN32
+			char c = Timeout ? getch_timeout(Timeout) : getch();
+	#else
 			char c = getch();
+	#endif
 #endif
-
 //#pragma warning("need something unbuffered && need to clear the buffer, otherwise it uses old keystrokes")
 //		cin.read( &c[0], 1 );
 		if( c==3 )
@@ -116,9 +133,13 @@ char AskMCQuestion(string Question,string Prompts,int Timeout)
 
 void Sleep(int miliseconds)
 {
+#ifdef __APPLE_CC__
+	usleep(miliseconds * 1000); // For xcode this uses sleep time in useconds
+#else
 	struct timeval t;
 	t.tv_sec = (miliseconds / 1000);
 	t.tv_usec = (miliseconds % 1000) * 1000;
 	while (t.tv_sec > 0 || t.tv_usec > 0)
 		select(0, NULL, NULL, NULL, &t);
+#endif
 }
