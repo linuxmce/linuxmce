@@ -985,6 +985,7 @@
 #define COMMAND_Move_File_CONST 1083
 #define COMMAND_PBX_Application_CONST 1084
 #define COMMAND_Resync_node_CONST 1085
+#define COMMAND_Component_3_CONST 1086
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"

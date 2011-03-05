@@ -19,6 +19,8 @@
 #define FIREWALL_DESTINATIONIP_TABLE_FIELD "Firewall.DestinationIP"
 #define FIREWALL_RULETYPE_FIELD "RuleType"
 #define FIREWALL_RULETYPE_TABLE_FIELD "Firewall.RuleType"
+#define FIREWALL_IPVERSION_FIELD "IPVersion"
+#define FIREWALL_IPVERSION_TABLE_FIELD "Firewall.IPVersion"
 #define FIREWALL_PSC_ID_FIELD "psc_id"
 #define FIREWALL_PSC_ID_TABLE_FIELD "Firewall.psc_id"
 #define FIREWALL_PSC_BATCH_FIELD "psc_batch"

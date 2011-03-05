@@ -138,10 +138,8 @@ void Row_PostalCode::SetDefaultValues()
 {
 	m_PK_PostalCode = 0;
 is_null[0] = false;
-m_PostalCode = "";
-is_null[1] = false;
-m_Long = "";
-is_null[2] = false;
+is_null[1] = true;
+is_null[2] = true;
 is_null[3] = true;
 is_null[4] = true;
 is_null[5] = true;
@@ -215,6 +213,12 @@ void Row_PostalCode::FK_Country_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(s
 m_FK_Country = val; is_modified=true; is_null[8]=false;}
 
 		
+bool Row_PostalCode::PostalCode_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[1];}
+bool Row_PostalCode::Long_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[2];}
 bool Row_PostalCode::Lat_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[3];}
@@ -232,6 +236,14 @@ bool Row_PostalCode::FK_City_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->da
 return is_null[7];}
 
 			
+void Row_PostalCode::PostalCode_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[1]=val;
+is_modified=true;
+}
+void Row_PostalCode::Long_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[2]=val;
+is_modified=true;
+}
 void Row_PostalCode::Lat_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[3]=val;
 is_modified=true;
