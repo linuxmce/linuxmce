@@ -171,7 +171,7 @@ echo "Installing kernel"
 #MDKVER=C apt-cache show linux-image-diskless | grep Version | cut -d " " -f 2|sort -r|head -1|cut -d "-" -f 1-3
 LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y --no-install-recommends install linux-image-generic
 
-if [[ "$distro" = "intrepid" ]] ; then
+if [[ "$DISTRO" = "intrepid" ]] ; then
   LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y install linux-restricted-modules
 fi
 #LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y install linux-ubuntu-modules-${KVER}
@@ -273,6 +273,11 @@ LC_ALL=C chroot $TEMP_DIR apt-get -y install linux-firmware
 # Install flash on MD
 LC_ALL=C chroot $TEMP_DIR wget http://fpdownload.adobe.com/get/flashplayer/current/install_flash_player_10_linux.deb
 LC_ALL=C chroot $TEMP_DIR dpkg -i install_flash_player_10_linux.deb
+
+# Install plymouth theme on MD in Lucid
+if [[ "$DISTRO" = "lucid" ]] ; then
+	LC_ALL=C chroot $TEMP_DIR apt-get -y install lmce-plymouth-theme
+fi
 
 umount $TEMP_DIR/var/cache/apt
 umount $TEMP_DIR/usr/pluto/deb-cache
