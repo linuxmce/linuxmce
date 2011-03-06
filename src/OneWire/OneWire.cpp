@@ -300,6 +300,12 @@ void OneWire::readDevices() {
 							EVENT_Temperature_Changed_CONST, 1, 
 							EVENTPARAMETER_Value_CONST, tmpbuf)
 						);
+						} else {
+							// child not found, let's ask the GI plugin to create one
+							int iPK_Device = 0;
+							CMD_Create_Device add_command(m_dwPK_Device,4, 1946,"",0,"", id, 0,m_dwPK_Device,"",0,0,&iPK_Device) ;
+							SendCommand(add_command);
+
 						}
 					}
 				}
