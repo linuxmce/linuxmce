@@ -66,8 +66,8 @@ $TRUNK_VARS{'channelid'}="voiceeclipse";
 $TRUNK_VARS{'peerdetails'} ="authname=$DECLARED_USERNAME\n";
 $TRUNK_VARS{'peerdetails'}.="canreinvite=no\n";
 $TRUNK_VARS{'peerdetails'}.="context=from-pstn\n";
-$TRUNK_VARS{'peerdetails'}.="dtmf=inband\n";
-$TRUNK_VARS{'peerdetails'}.="dtmfmode=inband\n";
+$TRUNK_VARS{'peerdetails'}.="dtmf=RFC2833\n";
+$TRUNK_VARS{'peerdetails'}.="dtmfmode=RFC2833\n";
 $TRUNK_VARS{'peerdetails'}.="fromdomain=$DECLARED_HOST\n";
 $TRUNK_VARS{'peerdetails'}.="fromuser=$DECLARED_USERNAME\n";
 $TRUNK_VARS{'peerdetails'}.="host=$DECLARED_HOST\n";
@@ -80,8 +80,8 @@ $TRUNK_VARS{'peerdetails'}.="username=$DECLARED_USERNAME\n";
 
 $TRUNK_VARS{'usercontext'}="$DECLARED_HOST";
 $TRUNK_VARS{'userconfig'} ="context=from-pstn\n";
-$TRUNK_VARS{'userconfig'} .="dtmf=inband\n";
-$TRUNK_VARS{'userconfig'} .="dtmfmode=inband\n";
+$TRUNK_VARS{'userconfig'} .="dtmf=RFC2833\n";
+$TRUNK_VARS{'userconfig'} .="dtmfmode=RFC2833\n";
 $TRUNK_VARS{'userconfig'} .="fromdomain=$DECLARED_HOST\n";
 $TRUNK_VARS{'userconfig'} .="host=$DECLARED_HOST\n";
 $TRUNK_VARS{'userconfig'} .="insecure=very\n";
@@ -91,7 +91,7 @@ $TRUNK_VARS{'userconfig'} .="type=user\n";
 $TRUNK_VARS{'userconfig'} .="user=$DECLARED_USERNAME\n";
 $TRUNK_VARS{'userconfig'} .="username=$DECLARED_USERNAME\n";
 
-$TRUNK_VARS{'register'}="$DECLARED_USERNAME\@$DECLARED_HOST:$DECLARED_USERPASSWD:$DECLARED_USERNAME\@$DECLARED_HOST";
+$TRUNK_VARS{'register'}="$DECLARED_USERNAME:$DECLARED_USERPASSWD\@$DECLARED_HOST/$DECLARED_NUMBER";
 
 foreach my $var (keys %TRUNK_VARS)
 {
