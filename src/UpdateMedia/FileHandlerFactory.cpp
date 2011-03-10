@@ -1,4 +1,5 @@
 #include "FileHandlerFactory.h"
+#include "Logger.h"
 
 #include "VDRInfoFileHandler.h"
 #include "ID3FileHandler.h"
@@ -18,7 +19,8 @@ FileHandlerFactory::~FileHandlerFactory(void)
 /*static*/ GenericFileHandler *FileHandlerFactory::CreateFileHandler(string sDirectory, string sFile)
 {
 	GenericFileHandler *pFileHandler = NULL;
-
+        string sExtension = FileUtils::FindExtension(sFile);
+        
 	switch(GetFileHandlerType(sDirectory, sFile))
 	{
 		case fhtRom:
@@ -48,6 +50,11 @@ FileHandlerFactory::~FileHandlerFactory(void)
 			break;
 
 		case fhtVdr:
+		        if ( sExtension == "rec" ) 
+		        {
+                                sDirectory += "/" + sFile;
+                                sFile = "info";
+                        }
 			pFileHandler = new VDRInfoFileHandler(sDirectory, sFile);
 			break;
 
@@ -71,15 +78,19 @@ FileHandlerFactory::~FileHandlerFactory(void)
 {
 	FileHandlerType type = fhtGeneric;
 
-	if(IsValidVDRFile(sDirectory, sFile))
+	if(IsValidVDRFile(sDirectory, sFile)) {
+	        LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Filehandler::GetFileHandlerType: The directory %s is VDR file!", sDirectory.c_str());
 		type = fhtVdr;
-	else if(IsValidTagFile(sDirectory, sFile))
+ 	} else if(IsValidTagFile(sDirectory, sFile)) {
+	        LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Filehandler::GetFileHandlerType: File %s in %s is tag file!", sFile.c_str(),  sDirectory.c_str());
 		type = fhtTag;
-	else if(IsValidRomFile(sDirectory, sFile))
+	} else if(IsValidRomFile(sDirectory, sFile)) {
+	        LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Filehandler::GetFileHandlerType: File %s in %s is ROM file!", sFile.c_str(),  sDirectory.c_str());
 		type = fhtRom;
-	else 
+	} else { 
+	        LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Filehandler::GetFileHandlerType: File %s in %s is id3 file!", sFile.c_str(),  sDirectory.c_str());
 		type = fhtId3;
-
+        }     
 	return type;
 }	
 //-----------------------------------------------------------------------------------------------------
@@ -108,7 +119,12 @@ FileHandlerFactory::~FileHandlerFactory(void)
 //-----------------------------------------------------------------------------------------------------
 /*static*/ bool FileHandlerFactory::IsValidVDRFile(string sDirectory, string sFile)
 {
-	return ( (sFile == "info.vdr" && FileUtils::FileExists(sDirectory + "/001.vdr")) || (sFile == "info"  && FileUtils::FileExists(sDirectory + "/00001.ts")) );
+        string sExtension = FileUtils::FindExtension(sFile);
+
+	return ( (sFile == "info.vdr" && FileUtils::FileExists(sDirectory + "/001.vdr")) 
+	           || (sFile == "info"  && FileUtils::FileExists(sDirectory + "/00001.ts")) 
+	           || (sExtension == "rec"  && FileUtils::FileExists(sDirectory + "/" + sFile + "/00001.ts")) 
+               );
 }
 //-----------------------------------------------------------------------------------------------------
 /*static*/ bool FileHandlerFactory::IsValidTagFile(string sDirectory, string sFile)

@@ -222,6 +222,14 @@ int PlutoMediaFile::HandleFileNotInDatabase(int PK_MediaType)
         PK_MediaType = PlutoMediaIdentifier::Identify(m_sDirectory + "/" + m_sFile);
 		m_nPK_MediaType = PK_MediaType;
 	}
+	
+	// HACKOMAT - The VDR information files do not have an extension (since 1.7.4)
+	if ( m_sFile.c_str() == "info")
+	{
+        	LoggerWrapper::GetInstance()->Write(LV_DEBUG, "VDR file %s/%s is now defined as video file", m_sDirectory.c_str(), m_sFile.c_str());
+	        m_nPK_MediaType = 5;
+	        PK_MediaType = 5;
+        }
 
 	if(PK_MediaType == 0)
 	{
@@ -233,6 +241,8 @@ int PlutoMediaFile::HandleFileNotInDatabase(int PK_MediaType)
 				PK_MediaType = MEDIATYPE_pluto_StoredVideo_CONST;
 			else if(sFullPath.find(sBasePath + "audio") == 0)
 				PK_MediaType = MEDIATYPE_pluto_StoredAudio_CONST;
+			else if(sFullPath.find(sBasePath + "VDRTV") == 0)
+				PK_MediaType = MEDIATYPE_pluto_StoredVideo_CONST;
 			else if(sFullPath.find(sBasePath + "pictures") == 0)
 				PK_MediaType = MEDIATYPE_pluto_Pictures_CONST;
 			else if(sFullPath.find(sBasePath + "documents") == 0)
@@ -1690,7 +1700,7 @@ map<string,int> PlutoMediaIdentifier::m_mapExtensions;
     //if we don't find any extention to match it, we'll use MediaIdentifier which uses the magic from files
 	string sExtension = FileUtils::FindExtension(sFilename);
 
-	if(sExtension.empty())
+	if(sExtension.empty() && (sFilename != "info") )
 		return 0;
 
     map<string, int>::iterator it = m_mapExtensions.find(StringUtils::ToLower(sExtension));
