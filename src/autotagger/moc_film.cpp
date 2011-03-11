@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'film.h'
 **
-** Created: Tue Mar 8 17:19:02 2011
+** Created: Thu Mar 10 11:05:11 2011
 **      by: The Qt Meta Object Compiler version 59 (Qt 4.4.3)
 **
 ** WARNING! All changes made in this file will be lost!

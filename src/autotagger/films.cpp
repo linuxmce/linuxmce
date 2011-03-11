@@ -37,7 +37,27 @@ void film::setIdent(QString &n)                                         //this f
    movieFileName.replace(TitleGuess2, " ");
    mTitle = movieFileName.simplified ();
    cout << "Guessed Title:" << qPrintable(mTitle) << endl;
-  }
+
+   QRegExp rez;
+   rez.setPattern("(720|1080)p|(720|1080)");
+   int tv_rez = rez.indexIn(n);
+   QString temp_rez = rez.cap (0);
+   temp_rez.remove ("p");
+
+   if (temp_rez.isEmpty ())
+       {
+       this->m_rez ="3";
+       }
+   else if (temp_rez == "720")
+       {
+       m_rez="4";
+       }
+   else if (temp_rez == "1080")
+       {
+       m_rez = "5";
+       };
+
+   }
 
 void film::searchMovie()                                                                                  //execute search for movie id
 {
@@ -74,10 +94,14 @@ void film::searchReply(QNetworkReply *)                                         
    QDomElement root = searchResult.documentElement();
 
    //extracts movie id, release year, imdb and rating from 1st match.
+
+   qDebug () << root.text ();
    QDomElement title = root.firstChildElement("movies").firstChildElement("movie").firstChildElement("name");
 
    mTitle = title.text();
    movieID = root.firstChildElement("movies").firstChild().firstChildElement("id").toElement().text();
+
+   cout << qPrintable(mTitle) << "--" << "id: " << qPrintable(movieID) << endl;
    releaseYear= root.firstChildElement("movies").firstChild().firstChildElement("released").toElement().text();
    synopsis =root.firstChildElement("movies").firstChild().firstChildElement("overview").toElement().text();
    mIMDB=root.firstChildElement("movies").firstChild().firstChildElement("imdb_id").toElement().text();

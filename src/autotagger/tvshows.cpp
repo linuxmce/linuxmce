@@ -104,20 +104,22 @@ QString tvshow::setShow(QString filename)
     workingFile.replace(" ", ".");
     QRegExp newSeries(".([1-9]\\d\\d\\d).");
 
-    rez.setPattern("720|1080|720p|1080p");
+    rez.setPattern("(720|1080)p|(720|1080)");
     int tv_rez = rez.indexIn(workingFile);
+    QString temp_rez = rez.cap (0);
+    temp_rez.remove ("p");
 
-    if (tv_rez == 0)
+    if (temp_rez.isEmpty ())
 	{
-	this->t_rez ="";
+	this->t_rez ="3";
 	}
-    else if (tv_rez == 1)
+    else if (temp_rez == "720")
 	{
-	t_rez="5";
+	t_rez="4";
 	}
-    else
+    else if (temp_rez == "1080")
 	{
-	t_rez = "3";
+	t_rez = "5";
 	};
 
     titleGrab.setPattern("s[1-9]\\d|s([1-9])|s(0[1-9])|ep\\d|pt([1-9])|pt([1-9]\\d)|.([1-9])(?=\\d[1-9])|.([0-9][1-9])|([1-9])(?=of\\d\\d)|(_)(?=\\d)|(\\dof\\d)|(\\[\\dx\\d)|pt(?=.[a-z])|(?=\\d\\d)(?!\\d\\d)|([1-9]x)|\\s0\\d\\d\\d");

@@ -20,6 +20,7 @@ int videoMedia:: videoMediaType (QString incfileName) //here to determine if the
     QRegExp i_tvFilter("pt|s[0-9]|s[0-9][0-9]|e[0-9]|e[0-9][0-9]|[1-9][0-9][0-9](?!\\d)|[0-9]x[0-9]|ep[0-9]|ep[0-9]|BBC|PBS|[0-9]dof[0-9]|_[0-9]|\\s[0-9]|(?=.\\d\\d\\d\\d.)\\d\\d\\d(?!\\d)");    //setup tv reg expression filter
     i_tvFilter.setCaseSensitivity(Qt::CaseInsensitive);
     incfileName.chop(4);
+    incfileName.remove (QRegExp ("720|1080"));
 
     cout << "------------------Identifying Data" << "-----------------" << endl;
     i_movieFilter.indexIn(incfileName.simplified ());                     // find the index of the match
@@ -30,7 +31,26 @@ int videoMedia:: videoMediaType (QString incfileName) //here to determine if the
     tvCap = i_tvFilter.cap(0);
     cout << "-------Tv Filter Hits::" << qPrintable(i_tvFilter.capturedTexts().join(" | ")) << endl;
 
-    if ((mCap.length() > tvCap.length()))
+    if ((i_tvFilter.numCaptures () == i_movieFilter.numCaptures ()))
+       {
+
+	QString dblchk =  i_tvFilter.capturedTexts ().join ("");
+	QRegExp regchk(dblchk);
+	//qDebug () << dblchk << endl;
+	int f = regchk.indexIn (i_movieFilter.capturedTexts ().join (""));
+	//qDebug() << f << endl;
+	if (f == -1)
+	    {
+	    cout << "Tv" << endl;
+	    return 2;
+	    }
+	else
+	    {
+	    cout << "Movie!!!!!!!!!!!!!!!!!!!!" << endl;
+       return 1;
+	    }
+       }
+   else if ((mCap.length() > tvCap.length()))
 	{
 	return 1;
 	}
@@ -38,6 +58,7 @@ int videoMedia:: videoMediaType (QString incfileName) //here to determine if the
 	{
 	return 2;
 	}
+
     else
 	{
 	return 1;

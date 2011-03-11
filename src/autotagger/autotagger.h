@@ -62,8 +62,15 @@ TVSERIESID = 43,
 SEASON_NUMBER = 50,
 EPISODE_NUMBER = 51,
 TVSEASONID = 52,
-
         };
+
+enum mediaTypes{
+    HD10810 = 5,
+    HD720 = 4,
+    STD_DEF = 3,
+};
+
+
 
 class videoMedia : public QObject
 {

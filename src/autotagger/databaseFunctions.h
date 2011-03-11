@@ -48,7 +48,7 @@ public:
     void setMediaTypes (QString file_format, QString sub_Type, QString File_Num);
     QFile logFile;
     QTextStream logThis;
-    int logData(QString logData);
+
 
 private:
     QString databaseName;

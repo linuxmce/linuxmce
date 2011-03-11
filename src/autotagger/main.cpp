@@ -13,33 +13,28 @@
 #include <QTextStream>
 void filterFile(QString nFile);
 void sendData();
-QString logString;
-QProcess app;
+
 
 int main(int argc, char *argv[])        //main loop
 {
+
+    freopen ("/var/log/linuxmcetag.log","a+",stdout);
+
+
     QTime scanStart = QTime::currentTime ();
-
     using namespace std;
-
     QCoreApplication a(argc, argv);
-    QFile logFile;
-    logFile.setFileName ("/var/log/linuxmce.log");
     QString startingDirectory;
     databaseFunctions metaDataDB;      //connecting database right away
-    metaDataDB.logFile.setFileName ("/var/log/linuxmcetag.log");
-
-
 
     if (!metaDataDB.connectDB())
 	{
-	metaDataDB.logData ("Database Connection error!");
+	cout << "Database Connection error!" << endl;
 	return 1;
 	}
 
     metaDataDB.appPath=argv[0];
-
-    metaDataDB.logData("Media Autotagger v1.5 - " + scanStart.toString ());
+    cout << "Media Autotagger v1.5 - Scan Start" << qPrintable(scanStart.toString ()) << endl;
     if(argc == 1)                                                                //no arguments, setting to hardcoded default and looking up file id.
 	{
 	startingDirectory = metaDataDB.findHome("/home/public/data/videos");
@@ -47,24 +42,21 @@ int main(int argc, char *argv[])        //main loop
 	if ( startingDirectory == "Not Found")
 	    {
 	    cout << " '/home/public/data/videos' - Was Not Found in DB" << endl;
-	   metaDataDB.logData (" '/home/public/data/videos' - Was Not Found in DB");
 	    return 1;
 	    }
 	else
 	    {
 	    cout << "This is default scan directory: " << qPrintable(startingDirectory) << endl;
-	    metaDataDB.logData ("This is default scan directory: " + startingDirectory );
+
 	    QString status = metaDataDB.feedMe(startingDirectory);
 	    if (status.isNull())
 		{
 		cout << "Could Not get filelist, internal error" << endl;
-		metaDataDB.logData("Could Not get filelist, internal error");
 		return 1;
 		}
 	    else
 		{
 		cout << "Got File List for Directory, Going to Work" << endl;
-		metaDataDB.logData("Got File List for Directory, Going to Work");
 		}
 	    }
 	}
@@ -85,22 +77,22 @@ int main(int argc, char *argv[])        //main loop
 
 	    startingDirectory = metaDataDB.findHome(userPath);
 	    cout << "User Path Entered: " << qPrintable(userPath) << endl;
-	    metaDataDB.logData("User Path Entered");
+
 	    if ( startingDirectory == "Not Found")
 		{
 		cout << qPrintable(userPath) <<" - Was Not Found in DB" << endl;
-		metaDataDB.logData(userPath +" - Was Not Found in DB");
+
 		return 1;
 		}
 	    else if (startingDirectory =="single file")
 		{
 		cout << "Processed File, Starting" << endl;
-		metaDataDB.logData("Processed File, Starting");
+
 		}
 	    else
 		{
 		cout << "Directory Submitted" << endl;
-		metaDataDB.logData("Directory Submitted");
+
 		metaDataDB.feedMe(startingDirectory);
 		}
 	    }
@@ -113,25 +105,25 @@ int main(int argc, char *argv[])        //main loop
 	    if (!startingDirectory.isNull())
 		{
 		cout << "User Path Entered: " << qPrintable(startingDirectory) << endl;
-		metaDataDB.logData("User Path Entered: " + startingDirectory);
+
 		status = metaDataDB.feedMe(startingDirectory);
 		}
 	    else if (startingDirectory =="single file")
 		{
 		cout << "Processed File, Starting" << endl;
-		metaDataDB.logData("Processed File, Starting");
+
 		}
 	    else
 		{
-		cout << "Invalid Directory Number!" ;                                       //could be modified to see if its a file and just take that
-		metaDataDB.logData("Invalid Directory Number! Exiting" );
+		cout << "Invalid Directory Number, exiting!" ;                                       //could be modified to see if its a file and just take that
+
 		return 1;
 		}
 
 	    if (status.isNull())                                              //errors
 		{
 		cout << "Could Not get filelist, internal error getting directory number from mysql" << endl;
-		metaDataDB.logData("Could Not get filelist, internal error getting directory number from mysql" +startingDirectory);
+
 		return 1;
 		}
 		else if (status =="sub")                                                      //detected subdirectory
@@ -146,7 +138,7 @@ int main(int argc, char *argv[])        //main loop
 			if (chk == "Ready")
 			    {
 			    cout << qPrintable(subDirPath) << " Added to list" << endl;
-			metaDataDB.logData(subDirPath + " Added to list");
+
 			    }
 		    }
 
@@ -154,7 +146,7 @@ int main(int argc, char *argv[])        //main loop
 	    else if (status == "Ready")                                                      //no subdirectories starting to tag
 		{
 		cout << "Got File List for Directory, Going to Work" << endl;
-		 metaDataDB.logData("Got File List for Directory, Going to Work");
+
 		}
 		else
 		{
@@ -164,8 +156,8 @@ int main(int argc, char *argv[])        //main loop
 
 	    }
 	    cout << "Found " << metaDataDB.directoryFiles.size() << " File(s) and " << metaDataDB.subDirectoryFiles.size() << " SubDirectories" << endl;
-	    logString = "Found " + QString::number (metaDataDB.directoryFiles.size()) + " File(s) and " + QString::number (metaDataDB.subDirectoryFiles.size()) + " SubDirectories";
-	    metaDataDB.logData(logString);
+//	    logString = "Found " + QString::number (metaDataDB.directoryFiles.size()) + " File(s) and " + QString::number (metaDataDB.subDirectoryFiles.size()) + " SubDirectories";
+
 	    }
 
 
@@ -177,9 +169,9 @@ int main(int argc, char *argv[])        //main loop
 	QString currScan = metaDataDB.directoryFiles.at(fileIterator);
 	QString db_File_ID = metaDataDB.directoryFiles_ID.at(fileIterator);
 
-	metaDataDB.logData("============================| New File |==============================");
-	metaDataDB.logData(".....................Scanned:"+ currScan);
-	metaDataDB.logData("....................PK_File: "+db_File_ID);
+	cout << "============================| New File |==============================" << endl;
+	cout << ".....................Scanned:"<< qPrintable(currScan) << endl;
+	cout << "....................PK_File: " << qPrintable(db_File_ID) << endl;
 
 
 	videoMedia currentFile;                 //creating new class
@@ -190,7 +182,7 @@ int main(int argc, char *argv[])        //main loop
 	int mType = currentFile.videoMediaType(currScan);
 	if (mType == 1)
 	    {
-	   metaDataDB.logData("-----------Open MovieDB.com Filter--------------");
+	   cout << "-----------Open MovieDB.com Filter--------------" << endl;
 	    currentFile.mediaType="film";
 	    film workingPrint;
 	    workingPrint.setIdent(currentFile.incfileName);
@@ -198,12 +190,12 @@ int main(int argc, char *argv[])        //main loop
 
 	    if (workingPrint.mTitle.isNull())
 		{
-		metaDataDB.logData("------------No MoveDB Match----------");
+		cout << "------------No MoveDB Match----------"<< endl;
 		}
 	    else
 		{
 		//begins sql portion
-		metaDataDB.logData("-----------------------------Mysql Interaction-------------------");
+		cout << "-----------------------------Mysql Interaction-------------------" << endl;
 
 		QString mfileID = db_File_ID;   //find file id in system for initial processing in db
 		//cout << "Found File ID :" << qPrintable(mfileID)  << endl;
@@ -223,8 +215,8 @@ int main(int argc, char *argv[])        //main loop
 		metaDataDB.checkAttribute(workingPrint.releaseYear, mfileID, RELEASEDATE);
 		metaDataDB.updateSynopsis(workingPrint.synopsis, mfileID, SYNOPSIS);
 
-		metaDataDB.logData (workingPrint.mTitle +":("+ workingPrint.releaseYear+ "), IMDB:" + workingPrint.mIMDB);
-		metaDataDB.logData ("Identified resolution:" + workingPrint.m_rez);
+		cout << qPrintable(workingPrint.mTitle) << ":("<< qPrintable(workingPrint.releaseYear) << "), IMDB:" << qPrintable(workingPrint.mIMDB);
+		cout << "Identified resolution:" << qPrintable(workingPrint.m_rez) << endl;
 
 		// mutiple values in a string. seperated into an array and loop through each
 
@@ -259,78 +251,79 @@ int main(int argc, char *argv[])        //main loop
 
 		  if(workingPrint.picUrl.count () == 0)
 		      {
-		     metaDataDB.logData("no backdrops availible!");
+		     cout << "no backdrops availible!" << endl;
 		      }
 		  else
 		      {
-		      metaDataDB.logData("Checking File Picture");
+		      cout << "Checking File Picture" << endl;
 
 		      if (metaDataDB.savePic(workingPrint.picUrl.at (0), m_Attribute, mfileID) == 1)
 			  {
-			 metaDataDB.logData("---------------File Picture Done with Sucess!");
+			 cout << "---------------File Picture Done with Sucess!" << endl;
 			  }
 		      else
 			  {
-			  metaDataDB.logData("!! ------------File Picture was not saved");
+			  cout << "!! ------------File Picture was not saved" << endl;
 			  }
 		      }
 
 		  if (workingPrint.bgUrl.count () == 0)
 		      {
-		      metaDataDB.logData("no backdrops availible!");
+		      cout << "no backdrops availible!" << endl;
 		      }
 		else
 		    {
-		    metaDataDB.logData("checking backdrop");
+		    cout << "checking backdrop" << endl;
 		    if (metaDataDB.saveAttributePic(workingPrint.bgUrl.at (0), imdb_attribute) == 1)
 			{
-			metaDataDB.logData("--------------BG Saved Pic!");
+			cout << "--------------BG Saved Pic!" << endl;
 			}
 		    else
 			{
-			metaDataDB.logData("!! -----------Background Pic not saved");
+			cout << "!! -----------Background Pic not saved" << endl;
 			}
 		    }
 
-		    metaDataDB.setMediaTypes("3", "2", mfileID);                             //set mediatypes for our movies
+		    metaDataDB.setMediaTypes(workingPrint.m_rez, "2", mfileID);                             //set mediatypes for our movies
+		   cout << "Media Type Movie Set, Resolution set to:" <<  qPrintable(workingPrint.m_rez) << endl;
 		  }
 	    }
 	else if (mType == 2)
 	    {
-	   metaDataDB.logData("------------------TVDB.com Filter--------------");
+	   cout << "------------------TVDB.com Filter--------------" << endl;
 	    currentFile.mediaType="tv";
 	    tvshow pilot;                                                                   //tvShow determination. We set the object variables as we recieve them.
 	    QString tVar = currentFile.incfileName;
 	    pilot.showTitle = pilot.setShow(tVar);
 	    pilot.season = pilot.setSeason(tVar);
-	    metaDataDB.logData("Guessed TV Show:"+ pilot.showTitle);
+	    cout << "Guessed TV Show:" << qPrintable(pilot.showTitle) << endl;
 	    pilot.episodeNum=pilot.setEpisode(tVar);
-	    metaDataDB.logData("Guessed Season: " + pilot.season +"...");
-	    metaDataDB.logData("Guessed Episode Number: " + pilot.episodeNum);
+	   cout << "Guessed Season: " << qPrintable(pilot.season) <<"..."<<endl;
+	   cout << "Guessed Episode Number: " << qPrintable(pilot.episodeNum) << endl;
 	    pilot.createRequest();                                                         //initial thetvdb.com request
 
 	    QString fileID = db_File_ID;
-	  //  cout << "File ID :" << qPrintable(fileID) << endl;
+	    cout << "File ID :" << qPrintable(fileID) << endl;
 	    if (pilot.progID.isNull())
 		{
-		metaDataDB.logData("No Match, Moving On");
+		cout << "No Match, Moving On" << endl;
 		}
 		else if
 			(fileID.isNull())
 		    {
-		    metaDataDB.logData("Cannot Locate File ID:");
+		    cout << "Cannot Locate File ID:" << endl;
 		    }
 	    else
 		{
 		//begins sql portion
-		metaDataDB.logData("-----------------------------Mysql Interaction-------------------");
+		cout << "-----------------------------Mysql Interaction-------------------" << endl;
 		 /*this block checks for the episode title  in the db, then checks to see if its part of the file
 	       if its in the db, its associated to the file, otherwise its inserted AND associated.
 		this process could be done more elegantly with a list pair setup maybe
 		but im new here and this works just fine. so far.*/
 
 		QString titlePic = metaDataDB.checkAttribute(pilot.episodeTitle, fileID, EPISODE);
-		metaDataDB.logData("Guessed Episode: " + pilot.episodeTitle +"...");
+		cout << "Guessed Episode: " << qPrintable(pilot.episodeTitle) << "..." << endl;
 		QString cleanEpNum = pilot.episodeNum.remove("");
 		metaDataDB.checkAttribute(cleanEpNum, fileID,EPISODE_NUMBER);
 		metaDataDB.checkAttribute(pilot.season, fileID, SEASON_NUMBER);
@@ -344,9 +337,7 @@ int main(int argc, char *argv[])        //main loop
 		QString attribute_progID = metaDataDB.checkAttribute(pilot.progID, fileID, TVPROGRAMID);              //using this as global for entire series
 		QString attribute_seriesID = metaDataDB.checkAttribute(pilot.seriesID, fileID, TVSERIESID);             //using this for specific episode identifier
 
-		metaDataDB.logData ("Identified:");
-		metaDataDB.logData ("Show:" + pilot.showTitle + ", Season: " + pilot.season + "Episode: (" +pilot.episodeNum+") " + pilot.episodeTitle );
-
+		cout << "Identified:"<< "Show:" << qPrintable(pilot.showTitle) << ", Season: " << qPrintable(pilot.season) << "Episode: (" << qPrintable(pilot.episodeNum) << ") " << qPrintable(pilot.episodeTitle) << endl;
 
 		metaDataDB.updateSynopsis(pilot.synopsis, fileID, SYNOPSIS);
 		/*
@@ -388,34 +379,34 @@ int main(int argc, char *argv[])        //main loop
 		//episode picture atatches to pk_fike
 		if (pilot.epImage.isNull ())
 		    {
-		    metaDataDB.logData("No Episode Pic Availible!");
+		    cout << "No Episode Pic Availible!" << endl;
 
 		    }
 		else
 		    {
-		   metaDataDB.logData("Checking File Picture-------");
+		   cout << "Checking File Picture-------" << endl;
 		    int epImgChk = metaDataDB.savePic(pilot.epImage, attribute_progID, fileID);
 		    if (epImgChk == 1)
 			{
-			metaDataDB.logData("------------Saved Episode Pic!");
+			cout << "------------Saved Episode Pic!" << endl;
 			}
 		    else if (epImgChk == 2)
 			{
-			metaDataDB.logData("!!----------Episode Has Pic");
+			cout << "!!----------Episode Has Pic" << endl;
 			}
 		    else
 			{
-			metaDataDB.logData("!!----------Episode Pic not saved");
+			cout << "!!----------Episode Pic not saved" << endl;
 			}
 		    }
 		//series image atatches to series id
 		if (pilot.seriesImg.isEmpty ())
 		    {
-		   metaDataDB.logData("No Series Pic Availible!");
+		   cout << "No Series Pic Availible!" << endl;
 		    }
 		else
 		    {
-		    metaDataDB.logData("Checking Series Picture");
+		    cout << "Checking Series Picture" << endl;
 		    QString best_series_img;
 		    if (pilot.txtVig.isEmpty ())
 			{
@@ -428,65 +419,65 @@ int main(int argc, char *argv[])        //main loop
 		    int seriesImgChk = metaDataDB.saveAttributePic(best_series_img, title_Attribute);
 		    if (seriesImgChk == 1)
 			{
-			metaDataDB.logData("------------Saved Series Pic!");
+			cout << "------------Saved Series Pic!" << endl;
 			}
 		    else if (seriesImgChk == 2)
 			{
-			metaDataDB.logData("!!----------Series Has Picture");
+			cout << "!!----------Series Has Picture" << endl;
 			}
 		    else
 			{
-			metaDataDB.logData("!!----------Series Pic not saved");
+			cout << "!!----------Series Pic not saved" << endl;
 			}
 		    }
 		// adding viginettes to imdb
 		if (pilot.viginettes.isEmpty ())
 		    {
-		   metaDataDB.logData("No viginettes Availible!");
+		   cout << "No viginettes Availible!" << endl;
 		    }
 		else
 		    {
-		    metaDataDB.logData("Checking viginette");
+		   cout << "Checking viginette" <<endl;
 		    int viginettesImgChk = metaDataDB.saveAttributePic(pilot.viginettes.at(0), imdb_attribute);
 		    if (viginettesImgChk == 1)
 			{
-			metaDataDB.logData("------------Saved viginette!");
+			cout <<"------------Saved viginette!" << endl;
 			}
 		    else if (viginettesImgChk == 2)
 			{
-			metaDataDB.logData("!!----------viginette exists");
+			cout << "!!----------viginette exists" << endl;
 			}
 		    else
 			{
-			metaDataDB.logData("!!----------viginette not saved");
+			cout << "!!----------viginette not saved" << endl;
 			}
 		    }
 
 		// adding season img to season id
 		if (pilot.seasonImg.isEmpty ())
 		    {
-		   metaDataDB.logData("No season image Availible!");
+		   cout << "No season image Availible!" << endl;
 		    }
 		else
 		    {
-		    metaDataDB.logData("Checking season image");
+		    cout << "Checking season image" << endl;
 		    int seasonImgChk = metaDataDB.saveAttributePic(pilot.seasonImg.at(0), attribute_seasonID);
 		    if (seasonImgChk == 1)
 			{
-			metaDataDB.logData("------------Saved season image!");
+			cout << "------------Saved season image!" << endl;
 			}
 		    else if (seasonImgChk == 2)
 			{
-			metaDataDB.logData("!!----------season image exists");
+			cout << "!!----------season image exists" << endl;
 			}
 		    else
 			{
-			metaDataDB.logData("!!----------seson image not saved");
+			cout << "!!----------seson image not saved" << endl;
 			}
 		    }
 
 		    metaDataDB.setMediaTypes(pilot.t_rez,"1", fileID);                                     //set media type and media subtype
-
+		   cout << "TV Shows media type set, Resolution set to:" << qPrintable(pilot.t_rez) << endl;
 		    //season image code -commented out because the proper db table doesnt exist yet
 		  /*  if (metaDataDB.saveAttributePic(pilot.seasonImg.at (0), attribute_progID) == 1)
 			{
@@ -495,15 +486,18 @@ int main(int argc, char *argv[])        //main loop
 		    else
 			{
 		    //    cout << "!!-------Prog Id pic not saved" << endl;
-			}
-		    cout << "Database Updated, file complete" << endl;
-		    */
+			}*/
+		   cout << "***************Database Updated, file complete*************" << endl;
+
 		}
 	    };
 	cout << "===========================End====File=============================" << endl;
 	};
 
     metaDataDB.closeDB();
+    cout << "Finished with batch" << endl;
+   // fclose (stdout);
+
  //   return a.exec(); //maintains loop
-    return 1;           //exits script
+    return 0;           //exits script
 }
