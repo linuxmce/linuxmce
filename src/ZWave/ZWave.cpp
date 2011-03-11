@@ -334,8 +334,13 @@ void ZWave::CMD_StatusReport(string sArguments,string &sCMD_Result,Message *pMes
 void ZWave::CMD_Assign_Return_Route(int iNodeID,int iDestNodeID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c820-e->
 {
-	LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWave::CMD_Assign_Return_Route %d -> %d",iNodeID,iDestNodeID);
-	myZWApi->zwAssignReturnRoute(iNodeID,iDestNodeID);
+	if (iDestNodeID == 0) {
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Assigning SUC return route");
+		myZWApi->zwAssignSUCReturnRoute(iNodeID);
+	} else {
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWave::CMD_Assign_Return_Route %d -> %d",iNodeID,iDestNodeID);
+		myZWApi->zwAssignReturnRoute(iNodeID,iDestNodeID);
+	}
 }
 
 //<-dceag-c840-b->
@@ -885,8 +890,8 @@ void ZWave::AddCapability(int PKDevice, int iCC) {
 
 void ZWave::SetManufacturerSpecificString(int iPKDevice, string sManufacturerSpecific) {
 	string a,b,c;	
-	CMD_Update_Device cmd_Update_Device(m_dwPK_Device, 4, iPKDevice, a,0,b,c, sManufacturerSpecific);
-	SendCommand(cmd_Update_Device);
+	// CMD_Update_Device cmd_Update_Device(m_dwPK_Device, 4, iPKDevice, a,0,b,c, sManufacturerSpecific);
+	// SendCommand(cmd_Update_Device);
 }
 
 DeviceData_Impl *ZWave::InternalIDToDevice(string sInternalID, int iInstanceID) {

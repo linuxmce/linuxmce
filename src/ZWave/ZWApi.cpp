@@ -2702,7 +2702,8 @@ bool ZWApi::ZWApi::zwAssignSUCReturnRoute(int node_id){
 	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Assigning SUC return route for node %i",node_id);
 	mybuf[0] = FUNC_ID_ZW_ASSIGN_SUC_RETURN_ROUTE;
 	mybuf[1] = node_id;
-	sendFunction( mybuf , 2, REQUEST, 0);
+	mybuf[2] = 0;
+	sendFunction( mybuf , 2, REQUEST, 1);
 	return true;
 }
 
@@ -2882,6 +2883,7 @@ void ZWApi::ZWApi::parseManufacturerSpecific(int nodeid, int manuf, int type, in
 							break;
 					}
 					break;
+				case 0x202:
 				case 0x2: switch(prod) {
 						case 0x1: sProduct = "SM103 Door/Window Magnetic Sensor";
 							break;
