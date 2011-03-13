@@ -18,13 +18,14 @@ void sendData();
 int main(int argc, char *argv[])        //main loop
 {
 
-    freopen ("/var/log/linuxmcetag.log","a+",stdout);
+    freopen ("/var/log/pluto/linuxmcetag.log","a+",stdout);
 
 
     QTime scanStart = QTime::currentTime ();
     using namespace std;
     QCoreApplication a(argc, argv);
     QString startingDirectory;
+    QString status;
     databaseFunctions metaDataDB;      //connecting database right away
 
     if (!metaDataDB.connectDB())
@@ -92,75 +93,104 @@ int main(int argc, char *argv[])        //main loop
 	    else
 		{
 		cout << "Directory Submitted" << endl;
+		   status = metaDataDB.feedMe(startingDirectory);
+		   // cout << "Status: " << qPrintable(status) << endl;
+		    if (status.isNull())                                              //errors
+			{
+			cout << "Could Not get filelist, internal error getting directory number from mysql" << endl;
+			return 1;
+			}
+		    else if (status == "sub")                                                      //detected subdirectory
+			{
+			    cout << "Subdirectories Found" << endl;
+			    cout << "Processing Subdirectories, this may impact system load" << endl;
+			    int subSize = metaDataDB.subDirectoryFiles.size();
 
-		metaDataDB.feedMe(startingDirectory);
+			    for (int sub_list_length = 0; sub_list_length < subSize ; sub_list_length++)
+			    {
+				QString subDirPath = startingDirectory+"/"+metaDataDB.subDirectoryFiles.at(sub_list_length);
+				QString chk = metaDataDB.feedMe(subDirPath);
+				if (chk == "Ready")
+				    {
+				    cout << qPrintable(subDirPath) << " Added to list" << endl;
+				    }
+			    }
+			}
+		    else if (status == "Ready")                                                      //no subdirectories starting to tag
+			{
+			cout << "Got File List for Directory, Going to Work" << endl;
+
+			}
+			else
+			{
+			qDebug () << status ;
+			return 1;
+			}
 		}
 	    }
 
 	else                                                                               //didnt find home, assuming its a filenumber
 	    {
 	    QString userPath = argv[1];
-	    QString status;
+
 	    startingDirectory = metaDataDB.findHome_int(userPath);
 	    if (!startingDirectory.isNull())
 		{
 		cout << "User Path Entered: " << qPrintable(startingDirectory) << endl;
 
 		status = metaDataDB.feedMe(startingDirectory);
+		cout << "Status: " << qPrintable(status) << endl;
+		if (status.isNull())                                              //errors
+		    {
+		    cout << "Could Not get filelist, internal error getting directory number from mysql" << endl;
+		    return 1;
+		    }
+		else if (status == "Sub")                                                      //detected subdirectory
+		    {
+			cout << "Subdirectories Found" << endl;
+			cout << "Processing Subdirectories, this may impact system load" << endl;
+			int subSize = metaDataDB.subDirectoryFiles.size();
+
+			for (int sub_list_length = 0; sub_list_length < subSize ; sub_list_length++)
+			{
+			    QString subDirPath = startingDirectory+"/"+metaDataDB.subDirectoryFiles.at(sub_list_length);
+			    QString chk = metaDataDB.feedMe(subDirPath);
+			    if (chk == "Ready")
+				{
+				cout << qPrintable(subDirPath) << " Added to list" << endl;
+				}
+			}
+		    }
+		else if (status == "Ready")                                                      //no subdirectories starting to tag
+		    {
+		    cout << "Got File List for Directory, Going to Work" << endl;
+
+		    }
+		    else
+		    {
+		    qDebug () << status ;
+		    return 1;
+		    }
+
 		}
 	    else if (startingDirectory =="single file")
 		{
-		cout << "Processed File, Starting" << endl;
-
+		cout << "Processed Single File, Starting" << endl;
+		status = metaDataDB.feedMe (startingDirectory);
 		}
 	    else
 		{
 		cout << "Invalid Directory Number, exiting!" ;                                       //could be modified to see if its a file and just take that
-
 		return 1;
-		}
+		};
+	    cout << "Checking Status" << endl;
 
-	    if (status.isNull())                                              //errors
-		{
-		cout << "Could Not get filelist, internal error getting directory number from mysql" << endl;
 
-		return 1;
-		}
-		else if (status =="sub")                                                      //detected subdirectory
-		{
-		    cout << "Processing Subdirectories, this may impact system load" << endl;
-		    int subSize = metaDataDB.subDirectoryFiles.size();
-
-		    for (int sub_list_length = 0; sub_list_length < subSize ; sub_list_length++)
-		    {
-			QString subDirPath = startingDirectory+"/"+metaDataDB.subDirectoryFiles.at(sub_list_length);
-			QString chk = metaDataDB.feedMe(subDirPath);
-			if (chk == "Ready")
-			    {
-			    cout << qPrintable(subDirPath) << " Added to list" << endl;
-
-			    }
-		    }
-
-		}
-	    else if (status == "Ready")                                                      //no subdirectories starting to tag
-		{
-		cout << "Got File List for Directory, Going to Work" << endl;
-
-		}
-		else
-		{
-		//qDebug () << status ;
-		return 1;
-		}
 
 	    }
-	    cout << "Found " << metaDataDB.directoryFiles.size() << " File(s) and " << metaDataDB.subDirectoryFiles.size() << " SubDirectories" << endl;
+	cout << "Found " << metaDataDB.directoryFiles.size() << " File(s) and " << metaDataDB.subDirectoryFiles.size() << " SubDirectories" << endl;
 //	    logString = "Found " + QString::number (metaDataDB.directoryFiles.size()) + " File(s) and " + QString::number (metaDataDB.subDirectoryFiles.size()) + " SubDirectories";
-
-	    }
-
-
+	};
 													  //via updatemedia at some point, this is a development workaround.
 													  //getting list of files from directory to iterate over
     for (int fileIterator = 0; fileIterator < metaDataDB.directoryFiles.size(); fileIterator++)           //begin a per file loop
@@ -170,8 +200,8 @@ int main(int argc, char *argv[])        //main loop
 	QString db_File_ID = metaDataDB.directoryFiles_ID.at(fileIterator);
 
 	cout << "============================| New File |==============================" << endl;
-	cout << ".....................Scanned:"<< qPrintable(currScan) << endl;
-	cout << "....................PK_File: " << qPrintable(db_File_ID) << endl;
+	cout << "*************Scanned:"<< qPrintable(currScan) << endl;
+	cout << "*************PK_File: " << qPrintable(db_File_ID) << endl;
 
 
 	videoMedia currentFile;                 //creating new class
@@ -487,16 +517,17 @@ int main(int argc, char *argv[])        //main loop
 			{
 		    //    cout << "!!-------Prog Id pic not saved" << endl;
 			}*/
-		   cout << "***************Database Updated, file complete*************" << endl;
-
+		     cout << "***************************************************************" << endl;
+		     cout << "***************Database Updated, file complete*****************" << endl;
+		     cout << "***************************************************************" << endl;
 		}
 	    };
-	cout << "===========================End====File=============================" << endl;
+		     cout << "**************************End File*****************************" << endl;
 	};
 
     metaDataDB.closeDB();
-    cout << "Finished with batch" << endl;
-   // fclose (stdout);
+		    cout << "                    Finished with batch" << endl;
+   fclose (stdout);
 
  //   return a.exec(); //maintains loop
     return 0;           //exits script

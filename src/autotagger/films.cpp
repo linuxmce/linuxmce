@@ -95,7 +95,7 @@ void film::searchReply(QNetworkReply *)                                         
 
    //extracts movie id, release year, imdb and rating from 1st match.
 
-   qDebug () << root.text ();
+   //qDebug () << root.text ();
    QDomElement title = root.firstChildElement("movies").firstChildElement("movie").firstChildElement("name");
 
    mTitle = title.text();
