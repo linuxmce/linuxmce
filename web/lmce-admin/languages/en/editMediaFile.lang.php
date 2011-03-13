@@ -49,4 +49,6 @@ $BUTTON_GET_METADATA='Get Metadata';
 $OPTION_CHECK_AMAZON='Check Amazon';
 $OPTION_CHECK_IMDB='Check IMDB';
 $OPTION_CHECK_TVDB='Check TVDB';
+$TEXT_CLEAN_FILES_CONST="Clean Attributes";
+$TEXT_CLEANED_FILES_CONST="Cleaned All Attributes";
 ?>

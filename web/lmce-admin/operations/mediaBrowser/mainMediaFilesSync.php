@@ -84,7 +84,8 @@ function mainMediaFilesSync($output,$mediadbADO,$dbADO) {
 			function doTag()
 			{
 			self.location="index.php?section=mainMediaFilesSync&path=\'+encodeURIComponent(path)&action=autoTag&path='.urlencode($path).'";
-			}
+			windowOpen("operations/logs/taillog.php?log=/var/log/pluto/linuxmcetag.log" ,  "width=800,height=768,scrollbars=1,resizable=1,fullscreen=1");
+		}
 			</script>
 
 
@@ -269,7 +270,7 @@ function mainMediaFilesSync($output,$mediadbADO,$dbADO) {
 //===autotag
 		if($action=='autoTag'){
 			header('Location: index.php?section=mainMediaFilesSync&path='.urlencode($path).'&msg='.$TEXT_AUTOTAG_STARTED);
-			exec('/usr/pluto/bin/linuxmceTag "'.$path.'"');
+			exec('/usr/pluto/bin/linuxmceTag "'.$path.'"');			
 			exit();
 		}
 
