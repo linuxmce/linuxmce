@@ -9,7 +9,7 @@ set -e
 
 function Changed_Since_Last_Build
 {
-	return 0 #Zaerc HACK
+	return $(/bin/true) #Zaerc HACK
 
 	local fs_path="$1"
 	DisplayMessage "Checking for changes '$fs_path'"
@@ -19,14 +19,14 @@ function Changed_Since_Last_Build
 	local revision_old=$(cat "$cache_file" | grep "^${url_id}" | cut -d'|' -f2)
 	
 	if [ "$revision_new" = "$revision_old" ] ; then
-		return 1
+		return $(/bin/false)
 	fi
 
 	grep -v "$url_id" "$cache_file" > "${cache_file}.tmp"
 	echo "$url_id|$revision_new" >> "${cache_file}.tmp"
 	mv "${cache_file}.tmp" "$cache_file"
 
-	return 0
+	return $(/bin/true)
 }
 
 
@@ -93,6 +93,9 @@ function Build_Replacements_Common
 
 	#Package: mtx-pluto
 	Build_Replacement_Package mtx-pluto ubuntu/mtx-1.3.11
+
+	#Package: libowfs
+	Build_Replacement_Package libowfs external/owfs-2.8p5
 
 	#Package: parted
 #	Build_Replacement_Package parted ubuntu/parted-1.8.8
