@@ -2889,6 +2889,11 @@ void ZWApi::ZWApi::parseManufacturerSpecific(int nodeid, int manuf, int type, in
 							break;
 					}
 					break;
+				case 0xd: switch(prod) {
+						case 0x1: sProduct = "SF812 Smoke Detector";
+							break;
+					}
+					break;
 			}
 			break;
 		case 0x63: sManufacturer = "GE";
