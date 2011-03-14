@@ -2,7 +2,7 @@ Source: owfs
 Section: misc
 Priority: extra
 Maintainer: Matthias Urlichs <smurf@debian.org>
-Build-Depends: debhelper (>= 5.0.38), autotools-dev, automake1.10, autoconf, libtool, swig (>= 1.3.29), libfuse-dev (>= 2.5), libusb-dev
+Build-Depends: debhelper (>= 5.0.38), autotools-dev, automake, autoconf, libtool, swig (>= 1.3.29), libfuse-dev (>= 2.5), libusb-dev
 Build-Conflicts: autoconf2.13
 Standards-Version: 3.7.2
 XS-Python-Version: >= 2.4
