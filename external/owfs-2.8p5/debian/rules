@@ -29,7 +29,7 @@ configure:
 	aclocal-1.10
 	autoheader
 	autoconf
-	automake-1.10
+	automake
 
 config.status: configure
 	@dh_testdir
