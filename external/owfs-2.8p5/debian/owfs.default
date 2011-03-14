@@ -1,0 +1,9 @@
+# Defaults for 1-Wire ("owfs") initscript
+# sourced by /etc/init.d/owfs
+# installed at /etc/default/owfs by the maintainer scripts
+
+# This is a POSIX shell fragment
+
+# Additional options that are passed to the daemon(s).
+SERVER_OPTS="--usb=all"
+CLIENT_OPTS="-s localhost:4304"

@@ -1,0 +1,9 @@
+$ID:$
+1wire / owfs for Debian
+-----------------------
+
+The source is split into way too many Debian packages. I know. :-/
+Unfortunately, there's a reason for it: each part pulls in a different
+dependency chain. Especially on small systems, you don't want that.
+
+ -- Matthias Urlichs <smurf@debian.org>  Tue, 15 May 2007 11:59:13 +0200

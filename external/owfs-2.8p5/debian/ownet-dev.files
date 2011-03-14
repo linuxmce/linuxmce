@@ -1,0 +1,4 @@
+/usr/lib/libownet*.so
+/usr/lib/libownet*.a
+/usr/lib/libownet*.la
+/usr/include/ownet*.h
