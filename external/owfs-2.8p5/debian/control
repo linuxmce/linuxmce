@@ -21,7 +21,7 @@ Description: Dallas 1-wire support
  This is the base package. It includes a server which can multiplex
  access to the 1-Wire bus between multiple clients.
 
-Package: libowfs
+Package: libowfs27
 Architecture: any
 Section: libs
 Depends: ${shlibs:Depends}, ${misc:Depends}
@@ -32,7 +32,7 @@ Description: Dallas 1-wire support: libraries
  .
  This package contains the shared libraries.
 
-Package: libownet
+Package: libownet27
 Architecture: any
 Section: libs
 Depends: ${shlibs:Depends}, ${misc:Depends}

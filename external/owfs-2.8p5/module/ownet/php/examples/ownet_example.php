@@ -39,8 +39,8 @@ device 10.67C6697351FF will be available at port 1234.
 
 //check to make sure the file exists
 if(!function_exists('bcadd'))  {
-  if(file_exists("/opt/owfs/bin/bcadd.php"))  {
-    require "/opt/owfs/bin/bcadd.php";
+  if(file_exists("/usr/bin/bcadd.php"))  {
+    require "/usr/bin/bcadd.php";
   } else if(file_exists("bcadd.php"))  {
     require "bcadd.php";
   } else  {
@@ -49,8 +49,8 @@ if(!function_exists('bcadd'))  {
 }
 
 //check to make sure the file exists
-if(file_exists("/opt/owfs/bin/ownet.php"))  {
-  require "/opt/owfs/bin/ownet.php";
+if(file_exists("/usr/bin/ownet.php"))  {
+  require "/usr/bin/ownet.php";
 } else if(file_exists("ownet.php"))  {
   require "ownet.php";
 } else {

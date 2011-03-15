@@ -1,7 +1,7 @@
 # Makefile for ownet example program -- invoked separately from this directory
 # $Id: Makefile.in,v 1.3 2009/03/24 17:20:09 alfille Exp $
 
-CFLAGS = -g -I/opt/owfs/include
+CFLAGS = -g -I/usr/include
 
 EXAMPLEA = ownetexample
 EXAMPLEA_OBJS = ownetexample.o
@@ -13,7 +13,7 @@ all:	$(EXAMPLEA) $(EXAMPLEB)
 ifeq "$(shell uname)" "Darwin"
 
 # Compile-flags for MacOSX
-DARWINLDFLAGS = -L/opt/owfs/lib -lownet -low -L/usr/lib -lusb
+DARWINLDFLAGS = -L/usr/lib -lownet -low -L/usr/lib -lusb
 
 $(EXAMPLEA): $(EXAMPLEA_OBJS)
 	gcc $(CFLAGS) -o $@ $(EXAMPLEA_OBJS) $(DARWINLDFLAGS)
@@ -24,7 +24,7 @@ $(EXAMPLEB): $(EXAMPLEB_OBJS)
 else
 
 # Compile-flags for Linux and Cygwin
-LDFLAGS = -L/opt/owfs/lib -Wl,--rpath -Wl,/opt/owfs/lib -lownet
+LDFLAGS = -L/usr/lib -Wl,--rpath -Wl,/usr/lib -lownet
 
 $(EXAMPLEA): $(EXAMPLEA_OBJS)
 	gcc $(CFLAGS) -o $@ $(EXAMPLEA_OBJS) $(LDFLAGS)
@@ -35,7 +35,7 @@ $(EXAMPLEB): $(EXAMPLEB_OBJS)
 endif
 
 %.o: %.c
-	gcc $(CFLAGS) -c -o $@ $<
+	i486-linux-gnu-gcc $(CFLAGS) -c -o $@ $<
 
 clean:
 	$(RM) -f $(EXAMPLEA) $(EXAMPLEB) *.o *~ .~ Makefile

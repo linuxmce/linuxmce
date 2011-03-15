@@ -45,7 +45,7 @@ DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(top_srcdir)/module/swig/perl5/OW/Makefile.osx.in \
 	$(top_srcdir)/module/swig/php/example/load_php_OW.php.in \
 	AUTHORS COPYING COPYING.LIB ChangeLog INSTALL NEWS TODO \
-	src/scripts/install/config.guess \
+	config.guess config.sub src/scripts/install/config.guess \
 	src/scripts/install/config.sub src/scripts/install/depcomp \
 	src/scripts/install/install-sh src/scripts/install/ltmain.sh \
 	src/scripts/install/missing src/scripts/install/mkinstalldirs
