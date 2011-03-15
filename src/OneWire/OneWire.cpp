@@ -304,7 +304,7 @@ void OneWire::readDevices() {
 							// child not found, let's ask the GI plugin to create one
 							LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"No Child found for %s, trying to create",id.c_str());
 							int iPK_Device = 0;
-							CMD_Create_Device add_command(m_dwPK_Device,4, 1946,"",0,"", id, 0,m_dwPK_Device,"",0,0,&iPK_Device) ;
+							CMD_Create_Device add_command(m_dwPK_Device,4, 1946,"",0,"", StringUtils::itos(DEVICEDATA_PortChannel_Number_CONST) + "|" + id, 0,m_dwPK_Device,"",0,0,&iPK_Device) ;
 							SendCommand(add_command);
 							LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Please quick reload the DCERouter");
 							sleep(3600);
