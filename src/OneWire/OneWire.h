@@ -30,6 +30,7 @@ namespace DCE
 		// Private member variables
 		static pthread_t readThread;
 		std::map < string, float >sensorValueMap;
+		std::map < string, int >alreadyCreatedMap;
 		// Private methods
 public:
 		// Public member variables
