@@ -6,7 +6,7 @@
 	GPLv2 Licensed
 	Single file confirmation page.
 */
-
+//error_reporting(0);
 
 function tvdbAttributes($output,$mediadbADO,$dbADO) {	
 	require_once(APPROOT.'operations/mediaBrowser/tvdbUtils.php');		
@@ -19,7 +19,8 @@ function tvdbAttributes($output,$mediadbADO,$dbADO) {
 	$sID = $_POST['seriesID'];
 	$lang= $_POST['lang']; 
 	$fileID=$_POST['fileID'];
-	
+	$episodeData['rez'] = $_POST['rezOver'];
+	//print_r($_POST['rezOver']);
 	//$seriesDataRequest = 'http://www.thetvdb.com/api/'.$apiKey.'/series/'.$sID.'/all/'.$lang.'.zip ';
 	//$dataFile = file_get_contents(APPROOT.$xmlPath.'/'.$sID.'/'.$sID.'.'.$lang.'.zip');
 	$episodeData = getSeriesData($sID, $lang, $xmlPath, $mediadbADO, $dbADO, $output, $fileID, $seasonNo, $episodeNo);  	
@@ -92,10 +93,6 @@ function tvdbAttributes($output,$mediadbADO,$dbADO) {
 				$output->setBody($out);
 				$output->setTitle(APPLICATION_NAME);			
 				$output->output();				
-			cleanup($unlinkString);
-}	
-	
-
-
-		
+				cleanup($unlinkString);
+}			
 ?>
