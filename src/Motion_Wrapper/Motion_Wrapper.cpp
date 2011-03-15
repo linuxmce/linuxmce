@@ -121,6 +121,7 @@ Motion_Wrapper::~Motion_Wrapper()
 //<-dceag-dest-e->
 {
 	if(motionpid_) {
+		signal(SIGCHLD, SIG_DFL);
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Killing motion process: %d...", motionpid_);
 		my_motion_pid = NULL;
 		kill(motionpid_, SIGKILL);
