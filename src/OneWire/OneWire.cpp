@@ -258,6 +258,7 @@ void OneWire::readDevices() {
 				char tmpbuf[1024];
 				string id;
 				std::map<string,float>::iterator mapIt;
+				std::map<string,int>::iterator createdMapIt;
 				bool bSendEvent = false;
 
 				id = OW_dir_it->substr(0,OW_dir_it->size()-2);
@@ -301,13 +302,18 @@ void OneWire::readDevices() {
 							EVENTPARAMETER_Value_CONST, tmpbuf)
 						);
 						} else {
-							// child not found, let's ask the GI plugin to create one
-							LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"No Child found for %s, trying to create",id.c_str());
-							int iPK_Device = 0;
-							CMD_Create_Device add_command(m_dwPK_Device,4, 1946,"",0,"", StringUtils::itos(DEVICEDATA_PortChannel_Number_CONST) + "|" + id, 0,m_dwPK_Device,"",0,0,&iPK_Device) ;
-							SendCommand(add_command);
-							LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Please quick reload the DCERouter");
-							sleep(3600);
+							createdMapIt = alreadyCreatedMap.find(id);
+							if (createdMapIt != alreadyCreatedMap.end() ) {
+								// child not found and not yet created, let's ask the GI plugin to create one
+								LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"No Child found for %s, trying to create",id.c_str());
+								int iPK_Device = 0;
+								CMD_Create_Device add_command(m_dwPK_Device,4, 1946,"",0,"", StringUtils::itos(DEVICEDATA_PortChannel_Number_CONST) + "|" + id, 0,m_dwPK_Device,"",0,0,&iPK_Device) ;
+								SendCommand(add_command);
+								if (iPK_Device != 0) {
+									LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Child %i created",iPK_Device);
+								}
+								alreadyCreatedMap.insert(pair<string, int>(id,iPK_Device));
+							}
 
 						}
 					}
