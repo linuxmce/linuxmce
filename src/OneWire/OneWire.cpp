@@ -303,7 +303,7 @@ void OneWire::readDevices() {
 						);
 						} else {
 							createdMapIt = alreadyCreatedMap.find(id);
-							if (createdMapIt != alreadyCreatedMap.end() ) {
+							if (createdMapIt == alreadyCreatedMap.end() ) {
 								// child not found and not yet created, let's ask the GI plugin to create one
 								LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"No Child found for %s, trying to create",id.c_str());
 								int iPK_Device = 0;
