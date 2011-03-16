@@ -86,6 +86,13 @@ bool UpdateEntArea::IsLight(int PK_FloorplanType)
 		PK_FloorplanType==0;  // Assume it's a light if the user didn't specify the type
 }
 
+bool UpdateEntArea::IsBlind(int PK_FloorplanType)
+// Determines whether a specific device is a controlling a shading device like blinds or drapes.
+{
+	return PK_FloorplanType==FLOORPLANOBJECTTYPE_LIGHT_BLINDS_CONST ||
+		PK_FloorplanType==FLOORPLANOBJECTTYPE_LIGHTS_DRAPES_CONST;
+}
+
 bool UpdateEntArea::IsPublicInteriorRoom(int PK_RoomType)
 {
 	return PK_RoomType==ROOMTYPE_Living_RoomFamily_Room_CONST ||

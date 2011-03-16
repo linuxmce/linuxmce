@@ -129,6 +129,7 @@ public:
 
 	// Misc helper functions for determining types of lights and rooms
 	bool IsLight(int PK_FloorplanType);
+	bool IsBlind(int PK_FloorplanType);
 	bool IsPublicInteriorRoom(int PK_RoomType);
 	bool IsInteriorRoom(int PK_RoomType);
 	bool IsExterior(int PK_RoomType);
