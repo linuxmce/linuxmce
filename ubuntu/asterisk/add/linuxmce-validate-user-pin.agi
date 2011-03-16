@@ -64,13 +64,13 @@ if($DB_ROW = $DB_STATEMENT->fetchrow_hashref())
 
 if($PINCode == $RealPINCode)
 {
-    print "EXEC Goto pluto-security-custom|s|1\n";
+    print "EXEC Goto pluto-security-custom,s,1\n";
     $line=<STDIN>;
     &checkresult($line);
 }
 else
 {
-    print "EXEC Goto linuxmce-userpin|i|1\n";
+    print "EXEC Goto linuxmce-userpin,i,1\n";
     $line=<STDIN>;
     &checkresult($line);
 }
