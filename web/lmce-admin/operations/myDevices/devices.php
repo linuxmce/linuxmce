@@ -397,6 +397,7 @@ function device_test_buttons($type,$deviceID,$dbADO){
 	define('STANDARD_THERMOSTAT', 4);
 	define('LIGHT_SWITCH', 37);
 	define('LIGHT_SWITCH_DIMMABLE', 38);
+	define('LIGHT_DRAPES_SWITCH', 68);
 	define('STANDARD_SPRINKLER', 1637);
 	define('STANDARD_IRRIGATION_SPRINKLER', 1780);
 
@@ -428,12 +429,19 @@ function device_test_buttons($type,$deviceID,$dbADO){
 			$out.='<input type="submit" class="button" name="on_'.$deviceID.'" value="ON"> 
 			<input type="submit" class="button" name="off_'.$deviceID.'" value="OFF">
 			<input type="submit" class="button" name="50_'.$deviceID.'" value="50%"><br>';
+
+		}
+		else if($deviceTemplate==LIGHT_DRAPES_SWITCH) {
+			$out.='<input type="submit" class="button" name="on_'.$deviceID.'" value="CLOSE"> 
+			<input type="submit" class="button" name="off_'.$deviceID.'" value="OPEN">
+			<input type="submit" class="button" name="50_'.$deviceID.'" value="50%"><br>';
 		} else {
 			$out.='No test commands supported for this lighting device';
 		}
 
 		return $out;
-	} else if($type=='climate') {
+	} 
+	else if($type=='climate') {
 		$out.='
 		<input type="hidden" name="device_test" value="1">';
 		
