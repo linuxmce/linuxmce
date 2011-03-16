@@ -63,6 +63,9 @@ $EXT_BUFFER .= "; All custom context should contain the string 'custom' in it's 
 $EXT_BUFFER .= "; Extensions in AMP have access to the 'from-internal' context.\n";
 $EXT_BUFFER .= "; The context 'from-internal-custom' is included in 'from-internal' by default\n\n";
 
+$EXT_BUFFER .= "[trusted]\n";
+$EXT_BUFFER .= "include => from-internal\n";
+
 $EXT_BUFFER .= "[from-internal-custom]\n";
 $EXT_BUFFER .= "exten => 997,1,Answer\n";
 $EXT_BUFFER .= "exten => 997,n,Wait(1)\n";
