@@ -67,7 +67,7 @@ $EXT_BUFFER .= "[from-internal-custom]\n";
 $EXT_BUFFER .= "exten => 997,1,Answer\n";
 $EXT_BUFFER .= "exten => 997,n,Wait(1)\n";
 $EXT_BUFFER .= "exten => 997,n,Set(TIMEOUT(absolute)=150)\n";
-$EXT_BUFFER .= "exten => 997,n,MeetMe(997|q)\n";
+$EXT_BUFFER .= "exten => 997,n,MeetMe(997,q)\n";
 $EXT_BUFFER .= "exten => 997,n,Hangup\n\n";
 
 $EXT_BUFFER .= "exten => 998,1,Goto(pluto-console-custom,s,1)\n";
