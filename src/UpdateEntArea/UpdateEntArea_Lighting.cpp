@@ -195,6 +195,38 @@ void UpdateEntArea::AddDefaultLightingScenarios(Row_Room *pRow_Room)
 		}
 	}
 
+	// If there are blinds, we create some open/close/shade scenario buttons
+	if( bRoomHasBlinds )
+	{
+		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"Open",ICON_Lights_On_CONST,8,0,NULL,4);
+		if( pCommandGroup )
+		{
+			AddShortcut(pRow_Room->PK_Room_get(),'0',pCommandGroup->m_pRow_CommandGroup->PK_CommandGroup_get());
+			for(map<int,int>::iterator it=map_Device_Type.begin();it!=map_Device_Type.end();++it)
+				if( IsBlind(it->second) )
+					pCommandGroup->AddCommand(it->first,COMMAND_Set_Level_CONST,1,1,COMMANDPARAMETER_Level_CONST,"0");
+					                                        
+		}
+
+		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"Shade",ICON_Lights_On_CONST,9,0,NULL,5);
+		if( pCommandGroup )
+		{
+			AddShortcut(pRow_Room->PK_Room_get(),'0',pCommandGroup->m_pRow_CommandGroup->PK_CommandGroup_get());
+			for(map<int,int>::iterator it=map_Device_Type.begin();it!=map_Device_Type.end();++it)
+				if( IsBlind(it->second) )
+					pCommandGroup->AddCommand(it->first,COMMAND_Set_Level_CONST,1,1,COMMANDPARAMETER_Level_CONST,"30");
+		}
+
+		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"Close",ICON_Lights_Off_CONST,10,0,NULL,6);
+		if( pCommandGroup )
+		{
+			AddShortcut(pRow_Room->PK_Room_get(),'0',pCommandGroup->m_pRow_CommandGroup->PK_CommandGroup_get());
+			for(map<int,int>::iterator it=map_Device_Type.begin();it!=map_Device_Type.end();++it)
+				if( IsBlind(it->second) )
+					pCommandGroup->AddCommand(it->first,COMMAND_Generic_On_CONST,2,0);
+		}
+	}
+
 	// If there are any lights or blinds at all, we'll create a ShowTime scenario if there's also a TV
 	if( map_Device_Type.size() )
 	{
@@ -225,6 +257,7 @@ void UpdateEntArea::AddDefaultLightingScenarios(Row_Room *pRow_Room)
 		}
 	}
 
+	// For all bedrooms add Sleep, Wakeup etc scenarios, which turn on/off the lights and open/closes the blinds as well as turning off any media.
 	if( pRow_Room->FK_RoomType_get()==ROOMTYPE_Bedroom_Other_CONST || pRow_Room->FK_RoomType_get()==ROOMTYPE_Bedroom_Master_CONST )
 	{
 		iOrder=1;
@@ -264,6 +297,7 @@ void UpdateEntArea::AddDefaultLightingScenarios(Row_Room *pRow_Room)
 		}
 	}
 
+	// The master bed room has an automatic scenario setup to bring the whole house into sleep mode. This means, all lights are off, and all AV devices are turned off.
 	if( pRow_Room->FK_RoomType_get()==ROOMTYPE_Bedroom_Master_CONST )
 	{
 		iOrder=1;
