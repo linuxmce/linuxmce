@@ -151,6 +151,11 @@ void UpdateEntArea::AddDefaultLightingScenarios(Row_Room *pRow_Room)
 		if( IsLight(it->second) )
 			bRoomHasLights=true;
 
+	bool bRoomHasBlinds=false;
+	for(map<int,int>::iterator it=map_Device_Type.begin();it!=map_Device_Type.end();++it)
+		if( IsBlind(it->second) )
+			bRoomHasBlinds=true;
+
 	map<int,int> map_Device_Type_MD; // Where type is a floorplan type
 	GetDevicesTypes(DEVICECATEGORY_Media_Director_CONST,pRow_Room->PK_Room_get(),
 		&map_Device_Type_MD,NULL);
