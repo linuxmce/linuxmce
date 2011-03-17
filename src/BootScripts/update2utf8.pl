@@ -31,7 +31,7 @@ foreach $dbname (@databases) {
 
         # Select all columns that have a specific character set, and reset them to default
 	$sql_column = "SELECT TABLE_NAME,COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COLUMN_DEFAULT, COLUMN_KEY FROM information_schema.COLUMNS where TABLE_SCHEMA = '$dbname' ";
-	$sql_column .= " AND (DATA_TYPE = 'varchar' OR DATA_TYPE = 'text' OR DATA_TYPE = 'char') ";
+	$sql_column .= " AND (DATA_TYPE = 'varchar' OR DATA_TYPE = 'text' OR DATA_TYPE = 'char' OR DATA_TYPE = 'longtext') ";
 	$sql_column .= " AND CHARACTER_SET_NAME IS NOT NULL";
 	$sql_column .= " AND CHARACTER_SET_NAME != 'utf8';";
 	$st_column = $db->prepare($sql_column);
