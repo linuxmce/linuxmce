@@ -173,12 +173,12 @@ $Grid =& Image_Graph::factory('line_grid');
 $Plotarea->add($Grid);
 
 // Add marker
-$Marker =& Image_Graph::factory('Image_Graph_Marker_Box');
+/*$Marker =& Image_Graph::factory('Image_Graph_Marker_Box');
 $Marker->setFillColor('blue@0.4');
 $Marker->setLineColor('black');
 $Marker->setSize(3);
 $Plot->setMarker($Marker);
-
+*/
 $Graph->done(); 
 ?>
 
