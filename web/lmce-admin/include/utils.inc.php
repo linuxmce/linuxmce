@@ -2679,7 +2679,7 @@ function SerialPortInfo($parent,$name,$dbADO)
 		$ip=getFieldsAsArray('Device','IPaddress',$dbADO,'WHERE PK_Device='.$parent);
 		$ipAddress=$ip['IPaddress'][0];
 
-		$cmd = "ssh ".$IPaddress." ";
+		$cmd = "ssh ".$ipAddress." ";
 	}
 
 	//Un-condense the stored serial port string
