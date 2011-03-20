@@ -39,6 +39,7 @@ config.status: configure
 		--mandir=\$${prefix}/share/man \
 		--infodir=\$${prefix}/share/info \
 		--disable-owphp --disable-owperl --disable-owpython \
+		--enable-owcapi \
 		--disable-owtcl \
 		--enable-debian \
 		--enable-owftpd --enable-owfs \
