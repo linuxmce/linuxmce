@@ -198,7 +198,7 @@ void UpdateEntArea::AddDefaultLightingScenarios(Row_Room *pRow_Room)
 	// If there are blinds, we create some open/close/shade scenario buttons
 	if( bRoomHasBlinds )
 	{
-		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"Open",ICON_Lights_On_CONST,8,0,NULL,4);
+		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"Open",ICON_Lights_On_CONST,8,0,NULL,8);
 		if( pCommandGroup )
 		{
 			AddShortcut(pRow_Room->PK_Room_get(),'0',pCommandGroup->m_pRow_CommandGroup->PK_CommandGroup_get());
@@ -208,7 +208,7 @@ void UpdateEntArea::AddDefaultLightingScenarios(Row_Room *pRow_Room)
 					                                        
 		}
 
-		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"Shade",ICON_Lights_On_CONST,9,0,NULL,5);
+		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"Shade",ICON_Lights_On_CONST,9,0,NULL,10);
 		if( pCommandGroup )
 		{
 			AddShortcut(pRow_Room->PK_Room_get(),'0',pCommandGroup->m_pRow_CommandGroup->PK_CommandGroup_get());
@@ -217,7 +217,7 @@ void UpdateEntArea::AddDefaultLightingScenarios(Row_Room *pRow_Room)
 					pCommandGroup->AddCommand(it->first,COMMAND_Set_Level_CONST,1,1,COMMANDPARAMETER_Level_CONST,"30");
 		}
 
-		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"Close",ICON_Lights_Off_CONST,10,0,NULL,6);
+		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"Close",ICON_Lights_Off_CONST,10,0,NULL,10);
 		if( pCommandGroup )
 		{
 			AddShortcut(pRow_Room->PK_Room_get(),'0',pCommandGroup->m_pRow_CommandGroup->PK_CommandGroup_get());
