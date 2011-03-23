@@ -1077,7 +1077,7 @@ function deleteDevice($PK_Device,$dbADO)
 		$dbADO->Execute($queryDelDevice, array($elem));
 	}
 	//Delete extra Orbiter-related data
-	$arrayFKDeviceTables=array('Device_Orbiter','Orbiter_Users_PasswordReq','Orbiter_Variable');
+	$arrayFKDeviceTables=array('Device_Orbiter','Orbiter_Users_PasswordReq','Orbiter_Variable', 'CachedScreens', 'RemoteControl', 'Room_Users');
 	foreach($arrayFKDeviceTables AS $tablename){
 		$queryDelFromTable='DELETE FROM '.$tablename.' WHERE FK_Orbiter='.$PK_Device;
 		$dbADO->Execute($queryDelFromTable);
