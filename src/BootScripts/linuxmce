@@ -298,7 +298,9 @@ if VDRInstalled ; then
 	fi
 fi
 StartDaemon  "Starting LinuxMCE Launch Manager" "/usr/pluto/bin/LaunchManagerDaemon.sh" "LMCE_Launch_Manager"
-/bin/plymouth --hide-splash
+if [ -x /bin/plymouth ]; then 
+        /bin/plymouth --hide-splash
+fi
 
 exit 0
 
