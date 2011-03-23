@@ -15,19 +15,21 @@ OpenPort()
 	Protocol="$1"
 	IPversion="$2"
 	Port="$3"
-  FilterIP="$4"
+	FilterIP="$4"
 	
-	if [[ "$FilterIP" == "" ]]; then
-    if [[ "$IPversion" == ipv4 ]]; then 
-      FilterIP="0.0.0.0/0" 
-    fi
-    if [[ "$IPversion" == ipv6 ]]; then 
-      FilterIP="::/0" 
-    fi
-    FilterMsg="; Not limited to specific IP"
-  else
-    FilterMsg="; Limited to: $FilterIP"
-  fi
+	if [[ "$FilterIP" == "" ]] || [[ "$FilterIP" == "NULL" ]]; then
+	    if [[ "$IPversion" == ipv4 ]] || [[ "$IPversion" == both ]]; then 
+		FilterIP4="0.0.0.0/0" 
+	    fi
+	    if [[ "$IPversion" == ipv6 ]] || [[ "$IPversion" == both ]]; then 
+		FilterIP6="::/0" 
+	    fi
+	    FilterMsg="; Not limited to specific IP"
+	else
+	    FilterMsg="; Limited to: $FilterIP"
+	    FilterIP4="$FilterIP"
+	    FilterIP6="$FilterIP"
+	fi
   
 	if [[ "$Port" == *:* ]]; then
 		PortBegin="${Port%:*}"
@@ -45,19 +47,19 @@ OpenPort()
 
   # apply rule to IPv4 chain if needed
   if [[ "$IPversion" == ipv4 ]] || [[ "$IPversion" == both ]]; then
-    iptables -A INPUT -p "$Protocol" -s "$FilterIP" $parmPort -j ACCEPT
+    iptables -A INPUT -p "$Protocol" -s "$FilterIP4" $parmPort -j ACCEPT
   fi
 
   # apply rule to IPv6 chain if needed
   if [[ "$IPversion" == ipv6 ]] || [[ "$IPversion" == both ]]; then
-    ip6tables -A INPUT -p "$Protocol" -s "$FilterIP" $parmPort -j ACCEPT
+    ip6tables -A INPUT -p "$Protocol" -s "$FilterIP6" $parmPort -j ACCEPT
   fi
 
 	# samba 139/tcp ports come paired with explicit rejects on 445/tcp
 	# reason: to avoid timeout connecting to 445/tcp in smbclient
 	if [[ "$Protocol" == tcp && ( "$PortBegin" -le 139 && "$PortEnd" -ge 139 ) ]]; then
-		iptables -A INPUT -p tcp -s "$FilterIP" --dport 445 -j REJECT
-		ip6tables -A INPUT -p tcp -s "$FilterIP" --dport 445 -j REJECT
+		iptables -A INPUT -p tcp -s "$FilterIP4" --dport 445 -j REJECT
+		ip6tables -A INPUT -p tcp -s "$FilterIP6" --dport 445 -j REJECT
 	fi
 }
 
