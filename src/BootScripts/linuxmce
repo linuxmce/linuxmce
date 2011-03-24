@@ -175,7 +175,10 @@ if [ "$AutostartCore" -eq "1" ] ; then
 	dpkg -l zaptel-modules-`uname -r` || apt-get install zaptel-modules-`uname -r` || echo "***ERROR*** INSTALLING ZAPTEL MODULE - TELECOM TRANSFER/MEETME/CONFERENCING NOT WORKING****">>/var/log/pluto/DCERouter.log 
 	modprobe ztdummy 
 fi
-StartService "Loading Kernel Modules" "/usr/pluto/bin/LoadModules.sh"
+if [ "$AutostartMedia" -eq "1" ] ; then
+        # Load MD modules early in case they are needed for something to work later on
+        StartService "Loading Kernel Modules" "/usr/pluto/bin/LoadMDModules.sh"
+fi
 StartService "Reporting Machine Status" "/usr/pluto/bin/Report_Machine_Status.sh" "&"
 
 if [[ "$FirstBoot" != "false" && ! -f /usr/pluto/install/.notdone ]] ;then
