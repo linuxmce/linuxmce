@@ -456,6 +456,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					ZWNodeMap.insert(std::map < int, ZWNode * >::value_type(tmp_nodeid,newNode));
 					if (newNode->plutoDeviceTemplateConst != 0) {
 						sprintf(tempbuf2, "%d", tmp_nodeid);
+						// DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Trying to create device: %i %i",tmp_nodeid, newNode->plutoDeviceTemplateConst);
 						newNode->iPKDevice = DCEcallback->AddDevice(0, tempbuf2, 0, newNode->plutoDeviceTemplateConst);
 					}
 
@@ -2284,9 +2285,14 @@ int ZWApi::ZWApi::getDeviceTemplate(int basic, int generic, int specific, char *
 		case GENERIC_TYPE_SWITCH_MULTILEVEL:
 			switch (specific) {
 				case SPECIFIC_TYPE_MOTOR_MULTIPOSITION:
+				case SPECIFIC_TYPE_CLASS_A_MOTOR_CONTROL:
+				case SPECIFIC_TYPE_CLASS_B_MOTOR_CONTROL:
+				case SPECIFIC_TYPE_CLASS_C_MOTOR_CONTROL:
 					devicetemplate = DEVICETEMPLATE_Drapes_Switch_CONST;
 					break;
 				case SPECIFIC_TYPE_NOT_USED:
+				case SPECIFIC_TYPE_POWER_SWITCH_MULTILEVEL:
+				case SPECIFIC_TYPE_SCENE_SWITCH_MULTILEVEL:
 					devicetemplate = DEVICETEMPLATE_Light_Switch_dimmable_CONST;
 					break;
 			}
