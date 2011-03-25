@@ -770,6 +770,7 @@ int ZWave::AddDevice(int parent, string sInternalID, int iInstanceID, int PK_Dev
 		        sInternalIDInst = sInternalIDInst + "/" + StringUtils::itos(iInstanceID);
 		}
 		// does not exist, create child
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Adding device for node: %s",sInternalIDInst);
 		/*
 		m_pEvent->SendMessage( new Message(m_dwPK_Device,4,
 		// m_pEvent->SendMessage( new Message(m_dwPK_Device,DEVICETEMPLATE_VirtDev_General_Info_Plugin_CONST,
@@ -1026,4 +1027,16 @@ void ZWave::CMD_Resync_node(int iNodeID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c1085-e->
 {
   myZWApi->zwRequestNodeInfo(iNodeID); 
+}
+
+void ZWave::ReportBatteryStatus(int iNode, int status)
+{
+	int PKDevice = GetPKDevice(iNode, -1);
+	if (PKDevice > 0)
+	{
+		CMD_Set_Device_Data cmd_Set_Device_Data(m_dwPK_Device, 4, PKDevice, StringUtils::itos(status), DEVICEDATA_Battery_state_CONST);
+		SendCommand(cmd_Set_Device_Data);
+	} else {
+		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Unknown node: %d", iNode);
+	}
 }

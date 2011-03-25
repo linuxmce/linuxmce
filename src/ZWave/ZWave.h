@@ -83,7 +83,7 @@ public:
 		virtual void AddCapability(int PKDevice, int capability);
 		virtual void SetManufacturerSpecificString(int iPKDevice,string sManufacturerSpecific);
 		virtual std::map<int, int> FindCCInstanceCountForNode(string sInternalID);
-
+		virtual void ReportBatteryStatus(int iNode, int status);
 
 
 //<-dceag-const2-b->

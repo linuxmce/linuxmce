@@ -1127,6 +1127,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 							if ((unsigned char)frame[7] == 0xff) {
 								DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"Battery low warning from node %d",(unsigned char)frame[3]);
 							}
+							DCEcallback->ReportBatteryStatus((unsigned char) frame[3], (unsigned char) frame[7]);
 						}
 						break;
 						;;
@@ -1155,6 +1156,7 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 												DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"Battery low warning from node %d",(unsigned char)frame[3]);
 
 											}
+											DCEcallback->ReportBatteryStatus((unsigned char) frame[3], (unsigned char) frame[offset+3]);
 										}
 										break;
 									case COMMAND_CLASS_CLIMATE_CONTROL_SCHEDULE:
