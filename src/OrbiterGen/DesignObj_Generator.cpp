@@ -962,13 +962,17 @@ int k=2;
 								m_alChildDesignObjs.push_back(pDesignObj_Generator);
 								pDesignObj_Generator->m_rBackgroundPosition.X=X;
 								pDesignObj_Generator->m_rBackgroundPosition.Y=Y;
+								// Keep original X,Y values, we need them to calculate the childrens offset below
+								int orgX = pDesignObj_Generator->m_rPosition.X;
+								int orgY = pDesignObj_Generator->m_rPosition.Y;
 								pDesignObj_Generator->m_rPosition.X=X;
 								pDesignObj_Generator->m_rPosition.Y=Y;
 								for(size_t s=0;s<pDesignObj_Generator->m_vectDesignObjText.size();++s)
 								{
 									CGText *ot = (CGText *) pDesignObj_Generator->m_vectDesignObjText[s];
-									ot->m_rPosition.X=X;
-									ot->m_rPosition.Y=Y;
+									// Set to parents position(x,y) + the childs original offset (calculated from its current value - the parents current value)
+									ot->m_rPosition.X=X+(ot->m_rPosition.X-orgX);
+									ot->m_rPosition.Y=Y+(ot->m_rPosition.Y-orgY);
 								}
 
 								pDesignObj_Generator->m_pFloorplanFillPoint = new PlutoPoint(pRow_FloorplanObjectType->FillX_get() * ScaleFactor / 1000,pRow_FloorplanObjectType->FillY_get() * ScaleFactor / 1000);
@@ -2120,14 +2124,15 @@ void DesignObj_Generator::ScaleAllValues(int FactorX_Input,int FactorY_Input,cla
 		// Floorplans were scaled already, but they need to be offset by the parent floorplan object
 		// and they are to be centered on the point, rather than upper/left like the others
 		m_rBackgroundPosition.X += m_ocoParent->m_rBackgroundPosition.X - m_rBackgroundPosition.Width/2;
-		m_rBackgroundPosition.Y += m_ocoParent->m_rBackgroundPosition.Y - m_rBackgroundPosition.Width/2;
+		m_rBackgroundPosition.Y += m_ocoParent->m_rBackgroundPosition.Y - m_rBackgroundPosition.Height/2;
 		m_rPosition.X += m_ocoParent->m_rPosition.X - m_rPosition.Width/2;
-		m_rPosition.Y += m_ocoParent->m_rPosition.Y - m_rPosition.Width/2;
-        for(size_t s=0;s<m_vectDesignObjText.size();++s)
-        {
-            CGText *ot = (CGText *) m_vectDesignObjText[s];
+		m_rPosition.Y += m_ocoParent->m_rPosition.Y - m_rPosition.Height/2;
+
+		for(size_t s=0;s<m_vectDesignObjText.size();++s)
+		{
+			CGText *ot = (CGText *) m_vectDesignObjText[s];
 			ot->m_rPosition.X += m_ocoParent->m_rPosition.X - m_rPosition.Width/2;
-			ot->m_rPosition.Y += m_ocoParent->m_rPosition.Y - m_rPosition.Width/2;
+			ot->m_rPosition.Y += m_ocoParent->m_rPosition.Y - m_rPosition.Height/2;
 		}
 	}
 
