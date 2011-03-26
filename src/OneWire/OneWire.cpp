@@ -253,7 +253,7 @@ void OneWire::readDevices() {
 		StringUtils::Tokenize(tmpstr, ",", OW_directories);
 		for (OW_dir_it=OW_directories.begin(); OW_dir_it != OW_directories.end() ; OW_dir_it++) {
 			// get temperature sensors
-			if (OW_dir_it->find("28.")!=string::npos) {
+			if ((OW_dir_it->find("28.")!=string::npos)||(OW_dir_it->find("10.")!=string::npos)) {
 				char tmp[1024];
 				char tmpbuf[1024];
 				string id;
