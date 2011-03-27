@@ -1,11 +1,9 @@
 //
-//  main.m
-//  orbiter
-//
 //  Created by Serge Wagener on 10/08/10.
-//  Copyright __MyCompanyName__ 2010. All rights reserved.
+//  Copyright 2010. All rights reserved.
 //
-
+//  http://www.linuxmce.org
+//
 #import <UIKit/UIKit.h>
 
 int main(int argc, char *argv[]) {

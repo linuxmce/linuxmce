@@ -11,10 +11,8 @@
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
-		280E754E0DD40C5E005A515E /* MainView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 280E754B0DD40C5E005A515E /* MainView.xib */; };
-		280E754F0DD40C5E005A515E /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 280E754C0DD40C5E005A515E /* MainWindow.xib */; };
 		288765590DF743DE002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765580DF743DE002DB57D /* CoreGraphics.framework */; };
-		289233AE0DB2D0DB0083E9F9 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 289233A90DB2D0DB0083E9F9 /* MainViewController.m */; };
+		289233AE0DB2D0DB0083E9F9 /* OrbiterView.m in Sources */ = {isa = PBXBuildFile; fileRef = 289233A90DB2D0DB0083E9F9 /* OrbiterView.m */; };
 		B42F901812158B6C00FF5801 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = B42F901712158B6C00FF5801 /* Settings.bundle */; };
 		B43D20DE12113E36008F303D /* proxy-orbiter-client.m in Sources */ = {isa = PBXBuildFile; fileRef = B43D20DD12113E36008F303D /* proxy-orbiter-client.m */; };
 		B43FC66712182274003FA5DD /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = B43FC66612182274003FA5DD /* icon.png */; };
@@ -30,11 +28,9 @@
 		1D3623250D0F684500981E51 /* orbiterAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = orbiterAppDelegate.m; sourceTree = "<group>"; };
 		1D6058910D05DD3D006BFB54 /* orbiter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = orbiter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
-		280E754B0DD40C5E005A515E /* MainView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MainView.xib; sourceTree = "<group>"; };
-		280E754C0DD40C5E005A515E /* MainWindow.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MainWindow.xib; sourceTree = "<group>"; };
 		288765580DF743DE002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		289233A80DB2D0DB0083E9F9 /* MainViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MainViewController.h; path = Classes/MainViewController.h; sourceTree = "<group>"; };
-		289233A90DB2D0DB0083E9F9 /* MainViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MainViewController.m; path = Classes/MainViewController.m; sourceTree = "<group>"; };
+		289233A80DB2D0DB0083E9F9 /* OrbiterView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OrbiterView.h; path = Classes/OrbiterView.h; sourceTree = "<group>"; };
+		289233A90DB2D0DB0083E9F9 /* OrbiterView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OrbiterView.m; path = Classes/OrbiterView.m; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* orbiter_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = orbiter_Prefix.pch; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* orbiter-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "orbiter-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
@@ -86,8 +82,8 @@
 		289233A00DB2D0730083E9F9 /* Main View */ = {
 			isa = PBXGroup;
 			children = (
-				289233A80DB2D0DB0083E9F9 /* MainViewController.h */,
-				289233A90DB2D0DB0083E9F9 /* MainViewController.m */,
+				289233A80DB2D0DB0083E9F9 /* OrbiterView.h */,
+				289233A90DB2D0DB0083E9F9 /* OrbiterView.m */,
 			);
 			name = "Main View";
 			sourceTree = "<group>";
@@ -124,8 +120,6 @@
 			children = (
 				B43FC6641218225D003FA5DD /* Icons */,
 				B42F901712158B6C00FF5801 /* Settings.bundle */,
-				280E754B0DD40C5E005A515E /* MainView.xib */,
-				280E754C0DD40C5E005A515E /* MainWindow.xib */,
 				8D1107310486CEB800E47090 /* orbiter-Info.plist */,
 			);
 			name = Resources;
@@ -216,8 +210,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				280E754E0DD40C5E005A515E /* MainView.xib in Resources */,
-				280E754F0DD40C5E005A515E /* MainWindow.xib in Resources */,
 				B42F901812158B6C00FF5801 /* Settings.bundle in Resources */,
 				B43FC66712182274003FA5DD /* icon.png in Resources */,
 				B43FC70812183DC3003FA5DD /* back.png in Resources */,
@@ -233,7 +225,7 @@
 			files = (
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				1D3623260D0F684500981E51 /* orbiterAppDelegate.m in Sources */,
-				289233AE0DB2D0DB0083E9F9 /* MainViewController.m in Sources */,
+				289233AE0DB2D0DB0083E9F9 /* OrbiterView.m in Sources */,
 				B43D20DE12113E36008F303D /* proxy-orbiter-client.m in Sources */,
 				B43FC795121915B3003FA5DD /* Reachability.m in Sources */,
 			);
@@ -282,7 +274,8 @@
 				PREBINDING = NO;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "C220756D-84E0-4868-B60B-F754D0F569F5";
-				SDKROOT = iphoneos4.0;
+				SDKROOT = iphoneos3.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -296,7 +289,8 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				PREBINDING = NO;
-				SDKROOT = iphoneos4.0;
+				SDKROOT = iphoneos3.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};

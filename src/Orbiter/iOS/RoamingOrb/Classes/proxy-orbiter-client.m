@@ -7,7 +7,6 @@
 
 #import "proxy-orbiter-client.h"
 
-
 @implementation proxy_orbiter_client
 
 @synthesize orbiterImage;
@@ -45,11 +44,12 @@ id _delegate;
 
 	// create input and output network streams
 	CFStreamCreatePairWithSocketToHost(kCFAllocatorDefault, (CFStringRef) serverAddress, serverPort, &readStream, &writeStream);
-    
     if (readStream && writeStream) {
         // set properties
-		CFReadStreamSetProperty(readStream, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanTrue);
-        CFWriteStreamSetProperty(writeStream, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanTrue);
+		
+		//Does not work in iOS 3.2 :-( Hopefully iPad will upgrade soon ...
+		//CFReadStreamSetProperty(readStream, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanTrue);
+        //CFWriteStreamSetProperty(writeStream, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanTrue);
         
         // open input strem
 		iStream = (NSInputStream *)readStream;
@@ -110,9 +110,9 @@ id _delegate;
 }
 
 -(void) writeToServer:(NSString *) str {
-	NSLog(@"Sending %@", str);
+	NSLog(@"Sending (%.0fMB free memory) %@", [UIDevice currentDevice].availableMemory, str);
 	const uint8_t *buf = (uint8_t *) [str cStringUsingEncoding:NSASCIIStringEncoding];	
-	[oStream write:buf maxLength:strlen((char*)buf)];    
+	[oStream write:buf maxLength:strlen((char*)buf)];  
 }
 
 - (void) sendTouch:(NSInteger) x y:(NSInteger) y {
@@ -132,7 +132,7 @@ id _delegate;
 }
 
 -(void) downloadImage {
-	//NSLog(@"Downloading image");
+	NSLog(@"Downloading image");
 	[self writeToServer:@"IMAGE\n"];
 }
 
@@ -160,7 +160,7 @@ char *append(const char *oldstring, const char c)
 		// IMAGE information with the imagesize the binary part of the image can start in the same received
 		// buffer data. You really have to filter parts out manually .... pffff .....
 			
-		// 2nd problem is all that didn't work with cocoa's NSString. I had to rewrite everything to
+		// 2nd problem is that all this didn't work with cocoa's NSString. I had to rewrite everything to
 		// work with plain C char
 		case NSStreamEventHasBytesAvailable:
         {

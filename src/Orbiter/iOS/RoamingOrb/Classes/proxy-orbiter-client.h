@@ -6,9 +6,11 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "UIDeviceAdditions.h"
 
-
+// reactivate this as soon as iPad will be iOS4
 @interface proxy_orbiter_client : NSObject <NSStreamDelegate> {
+//@interface proxy_orbiter_client : NSObject  {
 	UIImage *orbiterImage;
 	NSTimer *pollTimer;
 }

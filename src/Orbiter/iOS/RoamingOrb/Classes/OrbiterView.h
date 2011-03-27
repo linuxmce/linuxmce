@@ -8,20 +8,20 @@
 #import <UIKit/UIKit.h>
 #import <AudioToolbox/AudioToolbox.h>
 
-@interface MainViewController : UIViewController <UIAccelerometerDelegate>{
-	IBOutlet UIImageView *orbiterView;
-	IBOutlet UILabel *connectingLabel;
-	IBOutlet UIActivityIndicatorView *activityIndicator;
+@interface OrbiterView : UIViewController <UIAccelerometerDelegate>{
 	NSTimer *pollTimer, *connectTimer;
+	UIImageView *orbiterImageView;
+	
 }
  
-@property (nonatomic, retain) UIImageView *orbiterView;
-
 - (void)didReceiveNewImage:(UIImage*)orbiterImage;
 - (void)didReceiveConnectionError:(NSString *)errorMessage;
 - (void)didConnect;
 - (void)connectToServer:(id)sender ;
 - (void)vibrate;
 - (void)accelerometer:(UIAccelerometer *)accelerometer didAccelerate:(UIAcceleration *)acceleration;
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation;
+- (CGFloat) mainScreenScale;
+- (BOOL) isIPad;
 
 @end
