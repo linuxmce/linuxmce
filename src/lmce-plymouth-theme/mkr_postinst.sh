@@ -32,7 +32,9 @@ if [ -f /etc/default/grub ]; then
         if [[ $(grep 'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"' /etc/default/grub) ]]; then
                 sed -i 's/splash"/splash uvesafb mode_option=1024x768-24 mtrr=3 scroll=ywrap"/' /etc/default/grub
         fi
-	update-grub
+	if [[ ! $(hostname|grep moon) ]]; then
+		update-grub
+	fi
 fi
 
 # register our theme with plymouth
