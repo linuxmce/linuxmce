@@ -8,9 +8,9 @@ QT       += core
 QT       += network
 QT       += xml
 QT       += sql
-QT       += gui
 
-TARGET = linuxmceTag
+INCLUDEPATH = /usr/include/mysql/
+TARGET = ../bin/linuxmceTag
 CONFIG   +=sharedlib
 CONFIG   += console
 CONFIG   -= app_bundle
@@ -33,4 +33,5 @@ HEADERS += \
     databaseFunctions.h
 
 OTHER_FILES += \
-    Makefile
+    Makefile \
+    Readme.txt

@@ -17,6 +17,8 @@ class tvshow : public QObject
 {
     Q_OBJECT
 public:
+    //file operation to determine .iso , video_ts or .dvd
+    int isDisc(QString fname);
     //reg ex variables
     QRegExp seasonGrab;
     QRegExp titleGrab;
@@ -34,6 +36,8 @@ public:
     QNetworkReply *Dreply;
     QString resp;                       //text dump output of xml
     QFile *cZip;
+    int isDvd;
+    int video_ts;
 
     //xml parsing
     QDomDocument seachResult;
@@ -70,10 +74,12 @@ public:
 
 					  //show poster itself
     QString seasonPoster;                 // url to poster for season linke to season id
-    QStringList seriesImg;                //url to series overall image
-    QStringList viginettes;               //url of vignettes
-    QStringList seasonImg;                // season image: redundant
-    QStringList txtVig;
+
+    QStringList seriesBanner;             //banner
+    QStringList seriesImg;                //series image, wide format with series name on it
+    QStringList viginettes;               //vignettes for future use
+    QStringList seasonImg;                // season image
+    QStringList seriesGraphic;             //for series ID
 
     QString IMDB;                         //imdb identifier
     QString tvNetwork;

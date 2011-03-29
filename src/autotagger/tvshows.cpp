@@ -12,6 +12,17 @@
 #include <autotagger.h>
 #include <pilot.h>
 
+int tvshow::isDisc (QString fname)
+{
+    QRegExp diskCheck(".iso|.dvd");                   //regex match for dvd disc images
+
+    QRegExp discSetter("s\\dd\\d");
+
+    /* -if its an iso, dvd
+       or a directory with video_ts - db check to see if it has a subdir video_ts
+
+    */
+}
 
 QString tvshow::setEpisode(QString filename)
 {
@@ -69,7 +80,7 @@ QString tvshow::setEpisode(QString filename)
 
 QString tvshow::setSeason(QString filename)
 {
-    seasonGrab.setPattern("s([0-9][0-9])|s([1-9])|s0([1-9])|pt([1-9])|pt([0-9][0-9])|([1-9])(?=\\d[1-9])|([1-9])(?=of[0-9][0-9])|([1-9])(?=x[0-9])(?!\\d\\d)");
+    seasonGrab.setPattern("s([0-9][0-9])|s([1-9])|s0([1-9])|pt([1-9])|pt([0-9][0-9])|([1-9])(?=\\d[1-9])|([1-9])(?=of[0-9][0-9])|([1-9])(?=x[0-9])(?!\\d\\d)|(s\\d)*(?=D\\d)");
     seasonGrab.setCaseSensitivity(Qt::CaseInsensitive);
                                                                              //this block deals with extracting the season
     QString tmp_filename = filename;
@@ -122,7 +133,7 @@ QString tvshow::setShow(QString filename)
 	t_rez = "5";
 	};
 
-    titleGrab.setPattern("s[1-9]\\d|s([1-9])|s(0[1-9])|ep\\d|pt([1-9])|pt([1-9]\\d)|.([1-9])(?=\\d[1-9])|.([0-9][1-9])|([1-9])(?=of\\d\\d)|(_)(?=\\d)|(\\dof\\d)|(\\[\\dx\\d)|pt(?=.[a-z])|(?=\\d\\d)(?!\\d\\d)|([1-9]x)|\\s0\\d\\d\\d");
+    titleGrab.setPattern("s[1-9]\\d|s([1-9])|s(0[1-9])|ep\\d|pt([1-9])|pt([1-9]\\d)|.([1-9])(?=\\d[1-9])|.([0-9][1-9])|([1-9])(?=of\\d\\d)|(_)(?=\\d)|(\\dof\\d)|(\\[\\dx\\d)|pt(?=.[a-z])|(?=\\d\\d)(?!\\d\\d)|([1-9]x)|\\s0\\d\\d\\d|ep\\d|episode*\\d");
     titleGrab.setCaseSensitivity(Qt::CaseInsensitive);
     int thisTitle = titleGrab.indexIn(workingFile);
    //qDebug () << "Title Matches" << titleGrab.capturedTexts ().join ("|");
@@ -378,7 +389,7 @@ void tvshow::setAttributes()                                                    
        else
 	   {
 	   bannerXml.close ();
-	   cout << "Now Searching for images...";
+	   cout << "Now Searching for images..." <<endl;
 
 	   QDomElement bannerRoot = Banners.documentElement ();
 	   //qDebug () << bannerRoot.childNodes ().length ();
@@ -392,36 +403,34 @@ void tvshow::setAttributes()                                                    
 	       if (currentBanner.toElement ().elementsByTagName ("Season").at (0).toElement ().text ()== this->season ) //identifying season banner
 		   {
 		   seasonImg.append ("http://www.thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("BannerPath").at (0).toElement ().text ());
-
+		   }
+	       else if (currentBanner.toElement ().elementsByTagName ("BannerType").at (0).toElement ().text ()== "series" && currentBanner.toElement ().elementsByTagName ("BannerType2").item (0).toElement ().text ()== "graphical")
+		   {
+		    seriesBanner.append ("http://www.thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("BannerPath").at (0).toElement ().text ());
 
 		   }
-	       else if (currentBanner.toElement ().elementsByTagName ("BannerType").at (0).toElement ().text ()== "fanart" && currentBanner.toElement ().elementsByTagName ("SeriesName").at (0).toElement ().text ()== "true") //identifying show vignette banner}
-		   {
-		   seriesImg.append ("http://www.thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("BannerPath").at (0).toElement ().text ());
 
-		      }
 	       else if
-		       (currentBanner.toElement ().elementsByTagName ("BannerType").at (0).toElement ().text ()== "poster")
+		       ( currentBanner.toElement ().elementsByTagName ("BannerType").at (0).toElement ().text ()== "fanart")
 		   {
-
-		   //seriesImg.append("http://www.thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("BannerPath").at (0).toElement ().text ());
-		   }
-	       else if
-		       (currentBanner.toElement ().elementsByTagName ("BannerType").at (0).toElement ().text ()== "fanart")
-		   {
-		   int picRating = (currentBanner.toElement ().elementsByTagName ("Rating").at (0).toElement ().text ()).toInt ();
-		   if (picRating < 5)
+		       //cout << "Chosen Vigniette has rating of:" << picRating << endl;
+		       if (currentBanner.toElement ().elementsByTagName ("SeriesName").at (0).toElement ().text ()== "true")
 		       {
-		       viginettes.append ("http://www.thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("BannerPath").at (0).toElement ().text ());
-
-		       }
+			   seriesImg.append ("http://www.thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("BannerPath").at (0).toElement ().text ());
+			   }
+		       else
+			   {
+		    seriesGraphic.append ("http://www.thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("BannerPath").at (0).toElement ().text ());
+		    viginettes.append("http://www.thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("VignettePath").at (0).toElement ().text ());
+			   }
 		   }
 	       }
 	   }
-       cout << endl << "Found ("<< seriesImg.count ()<< ") Series Poster(s)" <<endl;
+       cout << endl << "Found ("<< seriesImg.count ()<< ") Series Poster(s) with text" <<endl;
        cout << "Found (" << seasonImg.count () << ") Season "<< qPrintable(this->season) << " banner(s) with text" << endl;
-       cout << "Found ("<< seriesImg.count () << ")  Fanart banner(s) with text" << endl;
-       cout <<  "found show vignettes" << endl;
+
+       cout <<  "found ("<< viginettes.count () << ") Show Viginette(s)" << endl;
+       cout <<  "found ("<< seriesGraphic.count () << ") blank series graphic(s)" << endl;
      // qDebug () << txtVig.join (",");
        }
 
@@ -489,10 +498,11 @@ void tvshow::setAttributes()                                                    
 		   cout <<  "Program ID:" << qPrintable(progID)<< "||  Show ID: " << qPrintable(progID) << endl;
 		   cout << "Genre(s): " << qPrintable(genre) << endl;
 		   cout << "Tv Network: " << qPrintable(tvNetwork) << endl;
-		   cout << "Dvd Info========" << endl;
-		   cout << "Dvd seaon:" << qPrintable(dvdSeason) << ", Dvd Episode: " << qPrintable(dvdEpisode) << ", Dvd Chapter:" << qPrintable(dvdChapter) <<  endl;
+		   cout << "Dvd Info********************" << endl;
+		   cout << "Dvd season:" << qPrintable(dvdSeason) << ", Dvd Episode: " << qPrintable(dvdEpisode) << ", Dvd Chapter:" << qPrintable(dvdChapter) <<  endl;
 		   cout << "Dvd Disc ID:" << qPrintable(dvdDiscID) << endl;
-		   cout << "|======End========|" << endl;
+		   cout << "End DVD Info****************" << endl;
+		   cout << "|======End xml extraction========================|" << endl;
 		   return;
 		   }
 	       epCounter++;

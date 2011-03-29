@@ -18,7 +18,7 @@ void sendData();
 int main(int argc, char *argv[])        //main loop
 {
 
-    freopen ("/var/log/pluto/linuxmcetag.log","a+",stdout);
+   freopen ("/var/log/pluto/linuxmcetag.log","a+",stdout); //open the log
 
 
     QTime scanStart = QTime::currentTime ();
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])        //main loop
 		    cout << "Could Not get filelist, internal error getting directory number from mysql" << endl;
 		    return 1;
 		    }
-		else if (status == "Sub")                                                      //detected subdirectory
+		else if (status == "sub")                                                      //detected subdirectory
 		    {
 			cout << "Subdirectories Found" << endl;
 			cout << "Processing Subdirectories, this may impact system load" << endl;
@@ -168,7 +168,7 @@ int main(int argc, char *argv[])        //main loop
 		    }
 		    else
 		    {
-		    qDebug () << status ;
+		    qDebug () << "Find Home Int status:" << status ;
 		    return 1;
 		    }
 
@@ -241,6 +241,7 @@ int main(int argc, char *argv[])        //main loop
 
 		QString m_Attribute = metaDataDB.checkAttribute(workingPrint.mTitle , mfileID, TITLE);
 		QString imdb_attribute=metaDataDB.checkAttribute(workingPrint.mIMDB, mfileID, IMDB);
+
 		metaDataDB.checkAttribute(workingPrint.rating, mfileID, RATING);
 		metaDataDB.checkAttribute(workingPrint.releaseYear, mfileID, RELEASEDATE);
 		metaDataDB.updateSynopsis(workingPrint.synopsis, mfileID, SYNOPSIS);
@@ -324,12 +325,13 @@ int main(int argc, char *argv[])        //main loop
 	    currentFile.mediaType="tv";
 	    tvshow pilot;                                                                   //tvShow determination. We set the object variables as we recieve them.
 	    QString tVar = currentFile.incfileName;
+
 	    pilot.showTitle = pilot.setShow(tVar);
 	    pilot.season = pilot.setSeason(tVar);
 	    cout << "Guessed TV Show:" << qPrintable(pilot.showTitle) << endl;
 	    pilot.episodeNum=pilot.setEpisode(tVar);
-	   cout << "Guessed Season: " << qPrintable(pilot.season) <<"..."<<endl;
-	   cout << "Guessed Episode Number: " << qPrintable(pilot.episodeNum) << endl;
+	    cout << "Guessed Season: " << qPrintable(pilot.season) <<"..."<<endl;
+	    cout << "Guessed Episode Number: " << qPrintable(pilot.episodeNum) << endl;
 	    pilot.createRequest();                                                         //initial thetvdb.com request
 
 	    QString fileID = db_File_ID;
@@ -364,8 +366,8 @@ int main(int argc, char *argv[])        //main loop
 		metaDataDB.checkAttribute(pilot.tvNetwork, fileID, CHANNEL);
 		metaDataDB.checkAttribute(pilot.tvRating, fileID, RATING);
 		metaDataDB.checkAttribute(pilot.airdate, fileID, RELEASEDATE);
-		QString attribute_progID = metaDataDB.checkAttribute(pilot.progID, fileID, TVPROGRAMID);              //using this as global for entire series
-		QString attribute_seriesID = metaDataDB.checkAttribute(pilot.seriesID, fileID, TVSERIESID);             //using this for specific episode identifier
+		QString attribute_progID = metaDataDB.checkAttribute(pilot.progID, fileID, TVPROGRAMID);              //using this as global for entire series -will be phased out when datagrids change
+		QString attribute_seriesID = metaDataDB.checkAttribute(pilot.seriesID, fileID, TVSERIESID);             //using this for seried identifier to prepare for datagrid change.
 
 		cout << "Identified:"<< "Show:" << qPrintable(pilot.showTitle) << ", Season: " << qPrintable(pilot.season) << "Episode: (" << qPrintable(pilot.episodeNum) << ") " << qPrintable(pilot.episodeTitle) << endl;
 
@@ -422,7 +424,7 @@ int main(int argc, char *argv[])        //main loop
 			}
 		    else if (epImgChk == 2)
 			{
-			cout << "!!----------Episode Has Pic" << endl;
+			cout << "!----------Episode Has Pic,skipping" << endl;
 			}
 		    else
 			{
@@ -438,14 +440,9 @@ int main(int argc, char *argv[])        //main loop
 		    {
 		    cout << "Checking Series Picture" << endl;
 		    QString best_series_img;
-		    if (pilot.txtVig.isEmpty ())
-			{
+
 			best_series_img = pilot.seriesImg.at (0);
-			}
-		    else
-			{
-			best_series_img = pilot.txtVig.at (0);
-			}
+
 		    int seriesImgChk = metaDataDB.saveAttributePic(best_series_img, title_Attribute);
 		    if (seriesImgChk == 1)
 			{
@@ -453,7 +450,7 @@ int main(int argc, char *argv[])        //main loop
 			}
 		    else if (seriesImgChk == 2)
 			{
-			cout << "!!----------Series Has Picture" << endl;
+			cout << "!----------Series Has Picture, skipping" << endl;
 			}
 		    else
 			{
@@ -463,23 +460,23 @@ int main(int argc, char *argv[])        //main loop
 		// adding viginettes to imdb
 		if (pilot.viginettes.isEmpty ())
 		    {
-		   cout << "No viginettes Availible!" << endl;
+		   cout << "No banners Availible!" << endl;
 		    }
 		else
 		    {
-		   cout << "Checking viginette" <<endl;
+		   cout << "Checking imdb  - banner" <<endl;
 		    int viginettesImgChk = metaDataDB.saveAttributePic(pilot.viginettes.at(0), imdb_attribute);
 		    if (viginettesImgChk == 1)
 			{
-			cout <<"------------Saved viginette!" << endl;
+			cout <<"------------Saved banner!" << endl;
 			}
 		    else if (viginettesImgChk == 2)
 			{
-			cout << "!!----------viginette exists" << endl;
+			cout << "!!----------Banner exist(s), skipping" << endl;
 			}
 		    else
 			{
-			cout << "!!----------viginette not saved" << endl;
+			cout << "!!----------banner not saved" << endl;
 			}
 		    }
 
@@ -490,7 +487,7 @@ int main(int argc, char *argv[])        //main loop
 		    }
 		else
 		    {
-		    cout << "Checking season image" << endl;
+		    cout << "Checking season image poster" << endl;
 		    int seasonImgChk = metaDataDB.saveAttributePic(pilot.seasonImg.at(0), attribute_seasonID);
 		    if (seasonImgChk == 1)
 			{
@@ -498,25 +495,61 @@ int main(int argc, char *argv[])        //main loop
 			}
 		    else if (seasonImgChk == 2)
 			{
-			cout << "!!----------season image exists" << endl;
+			cout << "!----------season image exists, skipping" << endl;
 			}
 		    else
 			{
-			cout << "!!----------seson image not saved" << endl;
+			cout << "!!----------season image not saved" << endl;
 			}
 		    }
 
-		    metaDataDB.setMediaTypes(pilot.t_rez,"1", fileID);                                     //set media type and media subtype
-		   cout << "TV Shows media type set, Resolution set to:" << qPrintable(pilot.t_rez) << endl;
-		    //season image code -commented out because the proper db table doesnt exist yet
-		  /*  if (metaDataDB.saveAttributePic(pilot.seasonImg.at (0), attribute_progID) == 1)
+		if (pilot.seriesImg.isEmpty ())
+		    {
+		   cout << "No Series ID  image Availible!" << endl;
+		    }
+		else
+		    {
+		    cout << "Checking Series ID Viginette" << endl;
+		    int seriesIDmgChk = metaDataDB.saveAttributePic(pilot.seriesGraphic.at(0), attribute_seriesID);
+		    if (seriesIDmgChk == 1)
 			{
-		    //    cout << "---------Prog ID Saved Pic!" << endl;
+			cout << "------------Series ID Image Saved!" << endl;
+			}
+		    else if (seriesIDmgChk == 2)
+			{
+			cout << "!----------Series ID Image exists, skipping." << endl;
 			}
 		    else
 			{
-		    //    cout << "!!-------Prog Id pic not saved" << endl;
-			}*/
+			cout << "!!----------Series ID Image not saved!" << endl;
+			}
+		    }
+		if (pilot.seriesImg.isEmpty ())
+		    {
+		   cout << "No Program image Availible!" << endl;
+		    }
+		else
+		    {
+		    cout << "Checking Program  Viginette" << endl;
+		    int seriesIDmgChk = metaDataDB.saveAttributePic(pilot.seriesImg.at(0), title_Attribute_p);
+		    if (seriesIDmgChk == 1)
+			{
+			cout << "------------No Program image Saved!" << endl;
+			}
+		    else if (seriesIDmgChk == 2)
+			{
+			cout << "!----------Program image Exists, skipping" << endl;
+			}
+		    else
+			{
+			cout << "!!----------Program image Not saved!!" << endl;
+			}
+		    }
+
+
+		    metaDataDB.setMediaTypes(pilot.t_rez,"1", fileID);                                     //set media type and media subtype
+		   cout << "TV Shows media type set, Resolution set to:" << qPrintable(pilot.t_rez) << endl;
+
 		     cout << "***************************************************************" << endl;
 		     cout << "***************Database Updated, file complete*****************" << endl;
 		     cout << "***************************************************************" << endl;
@@ -527,8 +560,8 @@ int main(int argc, char *argv[])        //main loop
 
     metaDataDB.closeDB();
 		    cout << "                    Finished with batch" << endl;
-   fclose (stdout);
+fclose (stdout); //close the log
 
- //   return a.exec(); //maintains loop
+  //return a.exec(); //maintains loop
     return 0;           //exits script
 }

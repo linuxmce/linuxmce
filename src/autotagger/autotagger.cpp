@@ -17,7 +17,7 @@ int videoMedia:: videoMediaType (QString incfileName) //here to determine if the
 
     QRegExp i_movieFilter( ".[1-9]\\d\\d\\d.(?!.S)| \\d\\d\\d\\d(?!.\\d)|[1-9][0-9][0-9][0-9](?!.S)" );                   //setup movie reg expression filter
     i_movieFilter.setCaseSensitivity(Qt::CaseInsensitive);
-    QRegExp i_tvFilter("pt|s[0-9]|s[0-9][0-9]|e[0-9]|e[0-9][0-9]|[1-9][0-9][0-9](?!\\d)|[0-9]x[0-9]|ep[0-9]|ep[0-9]|BBC|PBS|[0-9]dof[0-9]|_[0-9]|\\s[0-9]|(?=.\\d\\d\\d\\d.)\\d\\d\\d(?!\\d)");    //setup tv reg expression filter
+    QRegExp i_tvFilter("pt|s[0-9]|s[0-9][0-9]|e[0-9]|e[0-9][0-9]|[1-9][0-9][0-9](?!\\d)|[0-9]x[0-9]|ep[0-9]|ep[0-9]|BBC|PBS|[0-9]dof[0-9]|_[0-9]|\\s[0-9]|(?=.\\d\\d\\d\\d.)\\d\\d\\d(?!\\d)|(s\\dD\\d)");    //setup tv reg expression filter
     i_tvFilter.setCaseSensitivity(Qt::CaseInsensitive);
     incfileName.chop(4);
     incfileName.remove (QRegExp ("720|1080"));

@@ -343,7 +343,7 @@ int databaseFunctions::savePic(QString picUrl, QString pic_Attribute, QString fi
 		tn_Pic.scaledToWidth (256).save("/var/www/lmce-admin/mediapics/"+n_picID+"_tn.jpg");
 		if (!tn_Pic.isNull())
 		    {
-		    //cout << "Thumb created..";
+		    cout << "Thumb created..";
 		    QSqlQuery pfile_attribute;
 		    pfile_attribute.prepare("INSERT INTO Picture_File (FK_Picture, FK_File) VALUES (:fk_picture, :fk_fileNo)");
 		    pfile_attribute.bindValue("(:fk_picture)", n_picID);
@@ -487,44 +487,53 @@ QString databaseFunctions::findHome(QString arg)
  findVideos.prepare("SELECT * FROM File WHERE PATH = (:argument) ");
  findVideos.bindValue("(:argument)",arg);
  findVideos.exec();
- findVideos.next();
+ findVideos.first();
+ int num_Rows = findVideos.size ();
+ int rowInc = 0;
+ QSqlRecord find_video_rec;
 
- QSqlRecord find_video_rec = findVideos.record();
- if (find_video_rec.field("Path").isNull())
+  for (rowInc = 0; rowInc < findVideos.size (); rowInc++)
      {
-     //return "Not Found";
-     return "null";
-     }
- else if (find_video_rec.field("isDirectory").value ()==0)
-     {
-     while (findVideos.next ())
-	 {
-	 cout << "Single File Detected" << endl;
-	 int filePos = findVideos.record().indexOf("Filename");
-	 int idPos = findVideos.record().indexOf("PK_File");
-	 int subDir = findVideos.record().indexOf("isDirectory");
-	 int db_mediaType = findVideos.record().indexOf("EK_MediaType");
+      find_video_rec = findVideos.record ();
 
-	 if (findVideos.record().field(db_mediaType).value().toString() =="5" || "3" && findVideos.record().field(subDir).value().toString() =="0")
-	     {
-	     directoryFiles.append(findVideos.record().field(filePos).value().toString());
-	     directoryFiles_ID.append(findVideos.record().field(idPos).value().toString());
-	     }
-	 }
-     return "single file";
-     }
- else
-     return find_video_rec.field("Path").value().toString();
- }
+      if (find_video_rec.field("Path").isNull())
+	  {
+	  //return "Not Found";
+	  return "null";
+	  }
+      else if (find_video_rec.field("isDirectory").value ()==0)
+	  {
+	  cout << "Single File Detected --";
+	  int filePos = findVideos.record().indexOf("Filename");
+	  int idPos = findVideos.record().indexOf("PK_File");
+	  int subDir = findVideos.record().indexOf("isDirectory");
+	  int db_mediaType = findVideos.record().indexOf("EK_MediaType");
+	  cout << qPrintable(findVideos.record ().field (filePos).value ().toString ()) << "**"  <<endl;
+	  if (findVideos.record().field(db_mediaType).value().toString() =="5" || "3" && findVideos.record().field(subDir).value().toString() =="0")
+	      {
+	      directoryFiles.append(findVideos.record().field(filePos).value().toString());
+	      directoryFiles_ID.append(findVideos.record().field(idPos).value().toString());
+	      }
+	  }
+      else
+	  {
+	  return find_video_rec.field("Path").value().toString();
+	  }
+      findVideos.next();
+      }
+  return "ready";
+  }
+
 
 //this function provides a list with the filename to parse in the regexp functions and a file number as a reference for adding attributes
 QString databaseFunctions::feedMe(QString directoryPath)
 {
-
+    //cout << qPrintable(directoryPath) << endl;
 	QSqlQuery find_files_in_path;
 	find_files_in_path.prepare("SELECT * FROM File WHERE PATH = (:argument) ");
 	find_files_in_path.bindValue("(:argument)", directoryPath);
 	find_files_in_path.exec();
+	//find_files_in_path.nextResult ();
 	//QSqlRecord file_path_info = find_files_in_path.record();
 
 	while (find_files_in_path.next())
@@ -543,6 +552,7 @@ QString databaseFunctions::feedMe(QString directoryPath)
 		{
 		directoryFiles.append(find_files_in_path.record().field(filePos).value().toString());
 		directoryFiles_ID.append(find_files_in_path.record().field(idPos).value().toString());
+		//return "single file";
 		}
 	    }
 	if (subDirectoryFiles.size() == 0)
