@@ -18,7 +18,17 @@ function editDirectoryAttributes($output,$mediadbADO,$dbADO) {
 	
 	$scriptInHead='
 	<script>
-
+function confirmation() 
+{
+	var answer = confirm("Confirm Cleaning Files?");	
+	if (answer){
+		alert("Cleaning");								
+			document.forms[1].submit();
+	}
+	else{
+		alert("Aborting Process");
+	}
+}
 	function setAll(bylink){
 		if(bylink==1){
 			editDirectoryAttributes.all.checked=(editDirectoryAttributes.all.checked)?false:true;
@@ -114,7 +124,12 @@ function editDirectoryAttributes($output,$mediadbADO,$dbADO) {
 					</tr>				
 					<tr>
 						<td colspan="4"><hr width="60%" align="left"></td>
-					</tr>					
+					</tr>	
+					<tr>	
+			<td>
+			<input type="checkbox" name="cleanFiles" onChange="confirmation()" >'.$TEXT_CLEAN_FILES_CONST.'<br>							
+			</td>
+			</tr>				
 					<tr>
 						<td colspan="4"><fieldset><legend><B>'.$TEXT_ADD_ATTRIBUTE_CONST.'</B></legend>			
 						<table>
@@ -127,6 +142,7 @@ function editDirectoryAttributes($output,$mediadbADO,$dbADO) {
 							<td><B>'.$TEXT_ADD_ATTRIBUTE_CONST.':</B><br>
 							'.pulldownFromArray($attributeTypes,'newAttributeType',(int)@$_POST['newAttributeType'],'onChange="document.editDirectoryAttributes.action.value=\'form\';document.editDirectoryAttributes.submit();"').'
 							<br><input type="checkbox" name="replace_attributes" value="1"> '.$TEXT_REPLACE_ATTRIBUTES_CONST.'
+							
 							</td>
 							<td><B>'.$TEXT_ATTRIBUTE_NAME_CONST.' *</B><br><input type="text" id="newAttributeName" name="newAttributeName" value="" onKeyPress="document.editDirectoryAttributes.existingAttributes.selectedIndex=-1;"></td>
 						</tr>';
@@ -155,7 +171,8 @@ function editDirectoryAttributes($output,$mediadbADO,$dbADO) {
 						</table>
 						</fieldset></td>
 					</tr>
-				<tr>
+					
+				<tr>				
 						<td colspan="4">																							
 						<fieldset><legend><B>'.$TEXT_FILE_FORMAT_CONST.'</B></legend>
 							<table>
@@ -183,7 +200,8 @@ function editDirectoryAttributes($output,$mediadbADO,$dbADO) {
 							<tr>
 								<td></td>
 								<td><input type="submit" class="button" name="MediaSubTypes" value="Update"></td>
-							</tr>							
+							</tr>	
+												
 						</table>
 						</fieldset>
 															
@@ -289,6 +307,14 @@ function editDirectoryAttributes($output,$mediadbADO,$dbADO) {
 		updateMediaType($subType, $fileFormat, $filesArray, $mediadbADO);
 		}
 		
+		if (isset($_POST['cleanFiles']))
+		{
+		cleanFiles($filesArray, $mediadbADO);
+			
+			header('Location: index.php?section=editDirectoryAttributes&fileID='.$fileID.'&msg='.$TEXT_CLEANED_FILES_CONST);			
+		exit();
+		}
+		
 		header('Location: index.php?section=editDirectoryAttributes&fileID='.$fileID.'&msg='.$TEXT_MEDIA_FILE_UPDATED_CONST);			
 		exit();
 	}
@@ -369,5 +395,19 @@ function updateMediaType($subType, $fileFormat, $filesArray, $mediadbADO)
 		$mediadbADO->Execute("UPDATE File SET FK_MediaSubType=? WHERE PK_File = $id $where",array($subType));
 		$mediadbADO->Execute("UPDATE File SET FK_FileFormat=? WHERE PK_File = $id $where",array($fileFormat));
 		}
+}
+
+function cleanFiles($filesArray, $mediadbADO)
+{
+
+	foreach ($filesArray AS $id=>$filename)
+		{
+			//$mediadbADO->Execute('UPDATE File SET (FK_MediaSubType, FK_FileFormat) VALUES (?,?) where PK_File = `'.$id.'`',array($subType,$fileFormat));
+		//$mediadbADO->Execute('Update File Set Field = FK_MediaSubType Where Search = ?',array($subType,$id));
+		$mediadbADO->Execute("DELETE FROM File_Attribute WHERE FK_File = ".$id."");
+        $mediadbADO->Execute("DELETE FROM LongAttribute WHERE FK_File = ".$id." and FK_AttributeType = 37");
+        $mediadbADO->Execute("DELETE FROM Picture_File WHERE FK_File = ".$id."");
+		}
+		return true;
 }
 ?>
