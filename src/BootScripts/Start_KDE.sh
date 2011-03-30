@@ -50,5 +50,10 @@ Saver=kblank.desktop
 Timeout=900" > "$homedir/.kde/share/config/kscreensaverrc"
 
 
-su - "$TheChosenOne" -c "DISPLAY=:$Display /usr/pluto/bin/startkde-keepdcop" &>/dev/null </dev/null &
+DISTRO="$(lsb_release -c -s)"
+if [[ $DISTRO = "intrepid" ]] ; then
+    su - "$TheChosenOne" -c "DISPLAY=:$Display /usr/pluto/bin/startkde-keepdcop" &>/dev/null </dev/null &
+else
+    su - "$TheChosenOne" -c "DISPLAY=:$Display /usr/bin/startkde" &>/dev/null </dev/null &
+fi
 disown -a
