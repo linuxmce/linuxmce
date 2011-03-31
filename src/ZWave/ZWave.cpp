@@ -770,7 +770,7 @@ int ZWave::AddDevice(int parent, string sInternalID, int iInstanceID, int PK_Dev
 		        sInternalIDInst = sInternalIDInst + "/" + StringUtils::itos(iInstanceID);
 		}
 		// does not exist, create child
-		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Adding device for node: %s",sInternalIDInst);
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Adding device for node: %s",sInternalIDInst.c_str());
 		/*
 		m_pEvent->SendMessage( new Message(m_dwPK_Device,4,
 		// m_pEvent->SendMessage( new Message(m_dwPK_Device,DEVICETEMPLATE_VirtDev_General_Info_Plugin_CONST,
