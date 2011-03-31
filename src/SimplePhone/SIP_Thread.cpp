@@ -264,7 +264,7 @@ static void auth_requested(LinphoneCore *linphoneCore, const char *realm, const 
 	LS_Auth_Realm = realm;
 	LS_Auth_Received = 1;
 	
-	LS_pLinphoneAuthInfo = linphone_auth_info_new(username, NULL, NULL, NULL, realm);
+	LS_pLinphoneAuthInfo = linphone_auth_info_new(username, NULL, LS_pSimplePhone->GetPassword().c_str(), NULL, realm);
 	func_exit("callback: auth_requested");
 }
 static void display_something(LinphoneCore * linphoneCore, LINPHONE_CONST char *something)
