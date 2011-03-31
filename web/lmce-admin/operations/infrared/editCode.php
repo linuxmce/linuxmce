@@ -99,7 +99,7 @@ function editCode($output,$dbADO) {
 		}
 		
 
-		$irData=cleanString($_POST['irdata']);
+		$irData=$_POST['irdata'];
 
 		
 		$dbADO->Execute('UPDATE InfraredGroup_Command SET IRData=? WHERE PK_InfraredGroup_Command=?',array(trim($irData),$irgcID));
