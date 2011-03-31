@@ -232,6 +232,11 @@ void* SocketClientCallBack(void* SocketClientCallBackPtr)
 		Event.key.state = SDL_RELEASED;
 		Event.key.keysym.sym = SDLK_w;
 	}
+	if(Message == "a" || Message == "A") {
+		Event.type = SDL_KEYUP;
+		Event.key.state = SDL_RELEASED;
+		Event.key.keysym.sym = SDLK_a;
+	}
 	if(Message == "l" || Message == "L") {
 		Event.type = SDL_KEYUP;
 		Event.key.state = SDL_RELEASED;

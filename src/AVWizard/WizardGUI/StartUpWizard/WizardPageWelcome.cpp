@@ -94,6 +94,10 @@ WizardPageWelcome::WizardPageWelcome(GenericBackEnd* FrontEnd, std::string Name)
 			Command = CommandXConfigure + "640x480 --output DVI-2";
 			DoBeep();
 			break;
+		case SDLK_a:
+			Command = CommandXConfigure + "640x480 --output HDMI-0";
+			DoBeep();
+			break;
 		case SDLK_2:
 			Command = CommandXConfigure + "640x480 --output VGA";
 			DoBeep();

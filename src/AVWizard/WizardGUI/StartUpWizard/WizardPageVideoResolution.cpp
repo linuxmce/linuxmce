@@ -83,6 +83,7 @@ WizardPageVideoResolution::~WizardPageVideoResolution(void)
 	List->AddItem("VGA 2", "VGA-2");
 	List->AddItem("DVI/HDMI", "DVI");
 	List->AddItem("DVI/HDMI 2", "DVI-2");
+	List->AddItem("HDMI", "HDMI-0");
 	List->AddItem("LVDS", "LVDS");
 	List->AddItem("Component", "Component");
 	List->AddItem("Composite", "Composite");
@@ -136,7 +137,8 @@ void WizardPageVideoResolution::FillResolutionStandard(WizardWidgetScrollList* L
 		case 1: // VGA 2
 		case 2: // DVI
 		case 3: // DVI 2
-		case 4: // LVDS
+		case 4: // HDMI-0
+		case 5: // LVDS
 		{
 			ResolutionConf ResCnf("/usr/pluto/share/Resolutions.conf");
 			ResResolutionVector ResolutionVector;
@@ -155,7 +157,7 @@ void WizardPageVideoResolution::FillResolutionStandard(WizardWidgetScrollList* L
 			}
 		}
 			break;
-		case 5: // Component
+		case 6: // Component
 			List->AddItem("HD480p", "480p");
 			List->AddItem("HD720p", "720p");
 #if 0
@@ -163,8 +165,8 @@ void WizardPageVideoResolution::FillResolutionStandard(WizardWidgetScrollList* L
 			List->AddItem("HD1080p", "1080p");
 #endif
 			break;
-		case 6: // Composite
-		case 7:	// S-Video
+		case 7: // Composite
+		case 8:	// S-Video
 			List->AddItem("PAL-B", "640x480");
 			List->AddItem("PAL-D", "640x480");
 			List->AddItem("PAL-G", "640x480");
@@ -191,6 +193,7 @@ void WizardPageVideoResolution::FillRefresh(WizardWidgetScrollList* List, const 
 		case 1: // VGA 2
 		case 2: // DVI
 		case 3: // DVI 2
+		case 4: // HDMI-0
 			List->AddItem("24 Hz", "24");
 			List->AddItem("50 Hz", "50");
 			List->AddItem("60 Hz", "60");
@@ -201,10 +204,10 @@ void WizardPageVideoResolution::FillRefresh(WizardWidgetScrollList* List, const 
 			List->AddItem("85 Hz", "85");
 			List->SetItemIndex(1);
 			break;
-		case 4: // LVDS
-		case 5: // Component
-		case 6: // Composite
-		case 7:	// S-Video
+		case 5: // LVDS
+		case 6: // Component
+		case 7: // Composite
+		case 8:	// S-Video
 			break;
 	}
 }
