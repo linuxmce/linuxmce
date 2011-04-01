@@ -13,6 +13,11 @@ rm -rf /tmp/mce_installer_error
 InstallerLogFile="/var/log/mce-installer-$(date +%Y%m%d_%H%M%S).log"
 exec &> >(tee $InstallerLogFile)
 
+# Fix a problem with the /initrd.img and /vmlinuz links pointing to a different kernel than the 
+# newest (and currently running) one
+ln -s -f /boot/initrd.img-`uname -r` /initrd.img
+ln -s -f /boot/vmlinuz-`uname -r` /vmlinuz
+
 # Find out, what nic configuration we have. This is needed for later on to fill the database
 # correctly.
 #if [ ! -e /tmp/mce_wizard_data.sh ]
