@@ -39,7 +39,7 @@ fi
 echo "Dolphin's Places updated"
 
 repoclean() {
-	release=`lsb_release -c`
+	release=`lsb_release -c|cut -f2`
 	oldrelease="intrepid"
 	if [[ "$release" != "$oldrelease" ]]; then
 		return
