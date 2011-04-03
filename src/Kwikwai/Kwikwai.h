@@ -17,10 +17,14 @@
 #include "Gen_Devices/KwikwaiBase.h"
 //<-dceag-d-e->
 
-//<-dceag-decl-b->
+#include "../LIRC_DCE/IRReceiverBase.h"
+#include "../VFD_LCD/VFD_LCD_Base.h"
+#include "IRBase/IRBase.h"
+
+//<-dceag-decl-b->!
 namespace DCE
 {
-	class Kwikwai : public Kwikwai_Command
+	class Kwikwai : public Kwikwai_Command,public IRReceiverBase, public IRBase
 	{
 //<-dceag-decl-e->
 		// Private member variables
@@ -28,6 +32,8 @@ namespace DCE
 		// Private methods
 public:
 		// Public member variables
+		virtual void SendIR(string Port, string IRCode,int iRepeat); // Required from IRBase
+		virtual void CreateChildren(); // Must override so we can call IRBase::Start() after creating children
 
 //<-dceag-const-b->
 public:

@@ -22,10 +22,10 @@ sources = Main.cpp Kwikwai.cpp $(Gen_Dev_Files)
 CXXFLAGS +=
 CPPFLAGS +=
 LDFLAGS +=
-XTRALDLIBS = -lmysqlclient_r
+XTRALDLIBS = -lmysqlclient_r  -lIRBase -lSerial -lMessageTranslation
 
 Gen_Dev_Files +=
-sources +=
+sources += ../LIRC_DCE/IRReceiverBase.cpp  
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
