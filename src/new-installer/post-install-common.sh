@@ -5,7 +5,7 @@ DISTRO="$(lsb_release -c -s)"
 function CopySkeletonToFirstUser
 {
 	# The first user in a kubuntu 810 install has the ID 1000
-	cp -r /etc/skel/* `grep 1000 /etc/passwd|head -1|cut -d: -f6`
+	cp -r /etc/skel/* /etc/skel/.[!.]** `grep 1000 /etc/passwd|head -1|cut -d: -f6`
 }
 
 function setupRunlevel3
