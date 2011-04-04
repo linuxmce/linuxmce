@@ -3,3 +3,4 @@
 # NOTE: reference: ubuntu/linux-image-dummy/makepackage.sh
 sky2
 atl1
+atl1c
