@@ -220,7 +220,7 @@ int main(int argc, char *argv[])        //main loop
 
 	    if (workingPrint.mTitle.isNull())
 		{
-		cout << "------------No MoveDB Match----------"<< endl;
+                cout << "------------No MovieDB Match----------"<< endl;
 		}
 	    else
 		{

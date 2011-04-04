@@ -33,7 +33,7 @@ QString tvshow::setEpisode(QString filename)
     //season, episode and show title in their respective functions
     //also, QT has nice pre-built regex app that tests different regex's against strings in real time, very helpfull.
 
-    episodeGrab.setPattern("e[1-9]|e([1-9][0-9])|e0([1-9])|ep([1-9]|\\d\\d)|ep([0-9][1-9])|pt([1-9])|pt([0-9][0-9])|(?:[1-9]of)([1-9]|[1-9])|\\dof([0-9][0-9])|(\\d\\dx\\d\\d)|pt.(I)|pt.(II)|pt.(III)|pt.(IV)|pt.(V)|pt.(VI)|pt.(VII)|pt.(VIII)|pt.(IX)|pt.(X)|(?:[1-9])[1-9]([1-9])(?!\\d)|\\b[0-9][0-9](?!\\d\\d)|\\b\\d([0-9][0-9])\\b|\\_([0-9][0-9])(?!e|[0-9])|(?:0[1-9])\\d\\d|[1-9]x[0-9]([0-9])");
+    episodeGrab.setPattern("e[1-9]|e([1-9][0-9])|e0([1-9])|ep([1-9]|\\d\\d)|ep([0-9][1-9])|pt([1-9])|pt([0-9][0-9])|(?:[1-9]of)([1-9]|[1-9])|\\dof([0-9][0-9])|\\dx[1-9]\\d|pt.(I)|pt.(II)|pt.(III)|pt.(IV)|pt.(V)|pt.(VI)|pt.(VII)|pt.(VIII)|pt.(IX)|pt.(X)|(?:[1-9])[1-9]([1-9])(?!\\d)|\\b[0-9][0-9]\\b|\\b\\d([0-9][0-9])\\b|\\_([0-9][0-9])(?!e|[0-9])|(?:0[1-9])\\d\\d|(\\dx)([1-9])|\\dx0[1-9]");
     episodeGrab.setCaseSensitivity(Qt::CaseInsensitive);
     QStringList RomanNum;
     RomanNum << "bump" <<"I" << "II" << "III" << "IV" << "V" << "VI" << "VII" << "VIII" << "IX" << "X" ;
@@ -55,7 +55,7 @@ QString tvshow::setEpisode(QString filename)
     int eBack =tmp_filename.size()-emPos;                           //calculating the amount of characters to remove AFTER our matched string
     tmp_filename.remove(emPos, eBack);                              //removing characters from our matched index+the lengtch of the match to the end of the string.
     QRegExp eClean;
-    eClean.setPattern("[1-9]0(?=[1-9])|[1-9](?=[1-9]\\d)|(e)|(e0)|(ep)|(_)(?=\\d)|\\dx|\\dx|pt.|x0|\\s|(0)(?=\\d)|x|\\dof");                         //removing any bogies from our airspace
+    eClean.setPattern("[1-9]0(?=[1-9])|[1-9](?=[1-9]\\d)|(e)|(e0)|(ep)|(_)(?=\\d)|\\dx|\\dx0|pt.|\\s|\\dof");                         //removing any bogies from our airspace
     eClean.setCaseSensitivity(Qt::CaseInsensitive);
     tmp_filename.replace(eClean, "");
 
