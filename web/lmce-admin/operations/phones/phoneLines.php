@@ -31,7 +31,7 @@ function phoneLines($output,$astADO,$dbADO) {
 
 	$editedID=@$_REQUEST['eid'];
 
-	if($editedID!=0 && $editedID!=''){
+	if(isset($_REQUEST['eid'])){
 		$phoneData=getPLDetails($editedID,$_REQUEST['type'],$astADO);
 		$provider=$keywords[$phoneData['Data']];
 	}
@@ -116,7 +116,7 @@ function phoneLines($output,$astADO,$dbADO) {
 			
 			<h3 align="center">'.$TEXT_PHONE_LINES_CONST.'</h3>
 			'.(($manualConfiguration===true)?$manualConfigNote:phoneLinesTable($astADO));
-		if(isset($GLOBALS['count']) && $GLOBALS['count']==0 || $editedID!=0){
+		if(isset($GLOBALS['count']) && $GLOBALS['count']==0 || isset($_REQUEST['eid'])){
 			$out.='
 			<table align="center">
 				<tr>
@@ -151,7 +151,7 @@ function phoneLines($output,$astADO,$dbADO) {
 		// process area
 		if(isset($_POST['Add'])){
 			$editedID=$_REQUEST['editedID'];
-			if($editedID!=''){
+			if(isset($_REQUEST['editedID'])){
 				$phoneData=getPLDetails($editedID,$_REQUEST['edited_type'],$astADO);
 				deletePhoneLine(str_replace('9999','',$editedID),$phoneData['Data'],$phoneData['PhoneNumber']);
 			}
@@ -291,7 +291,7 @@ function phoneLinesTable($astADO){
 			<td>'.$row['pdata'].'</td>
 			<td>'.$row['hdata'].'</td>
 			<td>'.$phoneNumber.'</td>
-			<td>'.getSIPState().'</td>
+			<td>'.getSIPState($GLOBALS[count]-1).'</td>
 			<td align="center">
 				<a href="index.php?section=phoneLines&type=SIP&eid='.$row['id'].'">'.$TEXT_EDIT_CONST.'</a> 
 				<a href="index.php?section=incomingCallsSettings&type=SIP&data='.$row['data'].'&id='.$row['id'].'">'.$TEXT_SETTINGS_CONST.'</a> 
@@ -463,10 +463,27 @@ function getPhonesState(){
 	return $state;
 }
 
-function getSIPState(){
+function parseLines($lines) {
+	// Parse fixed field length data (with header line) into a two-dimensional array
+        $header = rtrim(array_shift($lines));
+        $chars = preg_split('/\s+/', $header, -1, PREG_SPLIT_OFFSET_CAPTURE);
+        $column_count = count($chars);
+        for ($i=0;$i<$column_count;$i++) {
+                $name = rtrim($chars[$i][0]);
+                $start = $chars[$i][1];
+                $line_count = count($lines);
+                for ($j=0;$j<$line_count;$j++) {
+                        $end = @$chars[$i+1]?$chars[$i+1][1]-1:strlen($lines[$j]);
+                        $value = rtrim(ltrim(substr($lines[$j],$start,$end-$start)));
+                        $data[$j][$name] = $value;
+                }
+        }
+        return $data;
+}
+
+
+function getSIPState($index){
         // SIP get state command
-        $cmd='sudo -u root /usr/sbin/asterisk -rx "sip show registry"';
-        $response=exec_batch_command($cmd,1);
 
         /*
         // response look like this for older asterisk
@@ -484,38 +501,26 @@ function getSIPState(){
 
         */
 
+        // SIP get state command
+        $cmd='sudo -u root /usr/sbin/asterisk -rx "sip show registry" | sed "s/\x1B\[[0-9;]*m//g"';
+        $response=exec_batch_command($cmd,1);
 
         $state=array();
-
+        $line_length=0;
         $lines=explode("\n",$response);
-        $last=count($lines);
-        for($i=0;$i<$last;$i++){
-		// reduce multiple spaces to single space
-		$lines[$i]= preg_replace('/\s\s+/',' ', $lines[$i]);
-		// detect column index by parsing header line
-		if(strpos($lines[$i],'Host')!==false && strpos($lines[$i],'Host')!==false) {
-			$header=explode(" ", $lines[$i]);
-			
-			for($j=0; $j < count($header); $j++) {
-				if($header[$j]=="Host") $index_host=$j;
-				if($header[$j]=="State") $index_state=$j;
-			}
-		}
-		// remove all lines that don't contain a registry
-                if(strpos($lines[$i],'Host')!==false || strpos($lines[$i],'SIP registrations')!==false || strpos($lines[$i],'Verbosity')!==false
-			|| strpos($lines[$i],'Core debug')!==false || strpos($lines[$i],'UNIX')!==false)
-                unset($lines[$i]);
+        foreach ($lines as $line) {
+                // remove all lines that we dont need
+                if(strlen(rtrim($line))==0||strpos($line,'SIP registrations')!==false || strpos($line,'Verbosity')!==false
+                        || strpos($line,'Core debug')!==false || strpos($line,'UNIX')!==false) {
+                        continue;
+                }
+                $status[] = $line;
         }
-
-        foreach ($lines AS $line){
-                $parts=explode(" ",$line);
-                $dataArray=array_slice($parts,$index_state+1);
-                $ampersand=strpos(@$parts[$index_host],'@');
-                $nr=($ampersand===false)?@$parts[$index_host]:substr(@$parts[$index_host],0,$ampersand);
-                $state[$nr]=(!isset($parts[$index_state+1]))?@$parts[$index_state]:$parts[$index_state].' '.join(' ',$dataArray);
-        }
-
-        return @$state[@$nr];
+        $data = parseLines($status);
+	$state = $data[$index]['State'];
+	$date = $data[$index]['Reg.Time'];
+	
+        return "$state, $date";
 }
 
 function getIAXState(){
