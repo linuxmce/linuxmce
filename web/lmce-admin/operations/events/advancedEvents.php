@@ -25,22 +25,28 @@ function advancedEvents($output,$dbADO) {
 		$queryEventsHandler='
 			SELECT EventHandler.*, Criteria.FK_CriteriaParmNesting 
 			FROM EventHandler 
-				INNER JOIN Criteria ON FK_Criteria=PK_Criteria
+				LEFT JOIN Criteria ON FK_Criteria=PK_Criteria
 			WHERE PK_EventHandler=?';
 		$resEH=$dbADO->Execute($queryEventsHandler,$eventHandlerID);
 		if($resEH->RecordCount()!=0){
 			$rowEH=$resEH->FetchRow();
 			deleteCommandGroup($rowEH['FK_CommandGroup'],$dbADO);
 			
-			$deleteCriteriaParmNesting='DELETE FROM CriteriaParmNesting WHERE PK_CriteriaParmNesting=?';
-			$dbADO->Execute($deleteCriteriaParmNesting,$rowEH['FK_CriteriaParmNesting']);
-			
-			$deleteCriteria='DELETE FROM Criteria WHERE PK_Criteria=?';
-			$dbADO->Execute($deleteCriteria,$rowEH['FK_Criteria']);
-			
-			$deleteCriteriaParms='DELETE FROM CriteriaParm WHERE FK_CriteriaParmNesting=?';
-			$dbADO->Execute($deleteCriteriaParms,$rowEH['FK_CriteriaParmNesting']);
-			
+			if ($rowEH['FK_CriteriaParmNesting'] != '') {
+				$deleteCriteriaParmNesting='DELETE FROM CriteriaParmNesting WHERE PK_CriteriaParmNesting=?';
+				$dbADO->Execute($deleteCriteriaParmNesting,$rowEH['FK_CriteriaParmNesting']);
+			}
+
+			if ($rowEH['FK_Criteria'] != '') {
+				$deleteCriteria='DELETE FROM Criteria WHERE PK_Criteria=?';
+				$dbADO->Execute($deleteCriteria,$rowEH['FK_Criteria']);
+			}
+
+			if ($rowEH['FK_CriteriaParmNesting'] != '') {
+				$deleteCriteriaParms='DELETE FROM CriteriaParm WHERE FK_CriteriaParmNesting=?';
+				$dbADO->Execute($deleteCriteriaParms,$rowEH['FK_CriteriaParmNesting']);
+			}
+
 			$deleteEventHandler='DELETE FROM EventHandler WHERE PK_EventHandler=?';
 			$dbADO->Execute($deleteEventHandler,$eventHandlerID);
 
