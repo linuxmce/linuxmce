@@ -36,6 +36,9 @@ ZWave::ZWave(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool b
 	myZWApi=new ZWApi::ZWApi(this);
 	myDeviceID=DeviceID;
 
+	m_pAlarmManager = new AlarmManager();
+	m_pAlarmManager->Start(1);
+
 }
 
 //<-dceag-const2-b->
@@ -51,6 +54,9 @@ ZWave::~ZWave()
 //<-dceag-dest-e->
 {
 	
+	m_pAlarmManager->Stop();
+	delete m_pAlarmManager;
+	m_pAlarmManager = NULL;
 }
 
 //<-dceag-getconfig-b->
@@ -234,11 +240,19 @@ void ZWave::CMD_Download_Configuration(string sText,string &sCMD_Result,Message 
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Received command #757 - Download Configuration");
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Download configuration start");
 	myZWApi->zwReplicateController(1);
-	sleep(60);
-	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Download configuration end");
-	myZWApi->zwReplicateController(0);
-        EVENT_Download_Config_Done("");
+	sCMD_Result = "OK";
 
+	m_pAlarmManager->AddRelativeAlarm(60, this, 1, NULL);
+}
+
+void ZWave::AlarmCallback(int id, void* param)
+{
+	if (id == 1)
+	{
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Download configuration end");
+		myZWApi->zwReplicateController(0);
+		EVENT_Download_Config_Done("");
+	}
 }
 
 //<-dceag-c760-b->

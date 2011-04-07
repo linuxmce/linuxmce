@@ -35,20 +35,23 @@
 
 #include "Gen_Devices/ZWaveBase.h"
 //<-dceag-d-e->
+#include "../DCE/AlarmManager.h"
 
 //<-dceag-decl-b->
 namespace DCE
 {
-	class ZWave : public ZWave_Command
+	class ZWave : public ZWave_Command, public AlarmEvent
 	{
 //<-dceag-decl-e->
 		// Private member variables
 		ZWApi::ZWApi *myZWApi;
 		int myDeviceID;
+		AlarmManager* m_pAlarmManager;
 
 		// Private methods
 		virtual DeviceData_Impl *InternalIDToDevice(string sInternalID, int instance_id);
 		virtual vector<DeviceData_Impl*> FindDevicesForNode(string sInternalID);
+		void AlarmCallback(int id, void* param);
 		
 public:
 		// Public member variables
