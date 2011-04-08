@@ -108,7 +108,8 @@ function DownloadIfNeeded
 			else
 				echo "WARNING: Downloaded file: http://$host/build/${filename} does not match md5sum."
 				rm -f "${filename}.md5.txt"
-				rm -f "${filename}"
+				echo "${filename} does not match its md5 checksum. Press enter to continue, ctrl+c(break) to abort."
+				read -p "Press enter:"
 
 				# restore old file
 				if [ -e "${filename}.last" ]
