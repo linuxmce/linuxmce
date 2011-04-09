@@ -147,7 +147,7 @@ void SmartQ_Media_Player::ReceivedUnknownCommand(string &sCMD_Result,Message *pM
  */
 void SmartQ_Media_Player::CreateChildren()
 {
-	system("screen -d -m -h 3000 -S vlcSession /usr/pluto/bin/LinuxMCE.launchVLC.sh");
+	system("screen -d -m -h 3000 -S vlcSession vlc -I rc --lua-config \"rc={host='localhost:4212'}\"");
 }
 
 bool SmartQ_Media_Player::Connect(int iPK_DeviceTemplate )
@@ -368,7 +368,7 @@ void SmartQ_Media_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string 
 
 	sendCommand("clear\r");
 	sendCommand(sAddString.c_str());
-	sendCommand("fullscreen\r");
+//	sendCommand("fullscreen\r");
 
 	setVolume(iNewVolume);	
 }
