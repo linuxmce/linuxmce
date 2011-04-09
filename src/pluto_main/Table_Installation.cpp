@@ -188,7 +188,8 @@ is_null[20] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
 is_null[21] = false;
-is_null[22] = true;
+m_psc_mod = "0000-00-00 00:00:00";
+is_null[22] = false;
 is_null[23] = true;
 m_psc_restrict = 0;
 
@@ -403,9 +404,6 @@ return is_null[20];}
 bool Row_Installation::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[21];}
-bool Row_Installation::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[22];}
 bool Row_Installation::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[23];}
@@ -485,10 +483,6 @@ is_modified=true;
 }
 void Row_Installation::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[21]=val;
-is_modified=true;
-}
-void Row_Installation::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[22]=val;
 is_modified=true;
 }
 void Row_Installation::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);

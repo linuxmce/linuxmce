@@ -128,18 +128,14 @@ void FK_City_set(long int val);
 void FK_Country_set(long int val);
 
 		
-		bool PostalCode_isNull();
-bool Long_isNull();
-bool Lat_isNull();
+		bool Lat_isNull();
 bool City_isNull();
 bool State_isNull();
 bool County_isNull();
 bool FK_City_isNull();
 
 			
-		void PostalCode_setNull(bool val);
-void Long_setNull(bool val);
-void Lat_setNull(bool val);
+		void Lat_setNull(bool val);
 void City_setNull(bool val);
 void State_setNull(bool val);
 void County_setNull(bool val);

@@ -140,8 +140,10 @@ void Row_Country::SetDefaultValues()
 {
 	m_PK_Country = 0;
 is_null[0] = false;
-is_null[1] = true;
-is_null[2] = true;
+m_Description = "";
+is_null[1] = false;
+m_Define = "";
+is_null[2] = false;
 m_UsePostalCode = 0;
 is_null[3] = false;
 is_null[4] = true;
@@ -186,25 +188,11 @@ void Row_Country::country_code_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,t
 m_country_code = val; is_modified=true; is_null[4]=false;}
 
 		
-bool Row_Country::Description_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[1];}
-bool Row_Country::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[2];}
 bool Row_Country::country_code_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[4];}
 
 			
-void Row_Country::Description_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[1]=val;
-is_modified=true;
-}
-void Row_Country::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[2]=val;
-is_modified=true;
-}
 void Row_Country::country_code_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[4]=val;
 is_modified=true;

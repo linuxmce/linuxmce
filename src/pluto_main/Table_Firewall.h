@@ -101,7 +101,6 @@ long int m_DestinationPort;
 string m_SourceIP;
 string m_DestinationIP;
 string m_RuleType;
-string m_IPVersion;
 long int m_psc_id;
 long int m_psc_batch;
 long int m_psc_user;
@@ -109,7 +108,7 @@ short int m_psc_frozen;
 string m_psc_mod;
 long int m_psc_restrict;
 
-		bool is_null[15];
+		bool is_null[14];
 	
 	public:
 		long int PK_Firewall_get();
@@ -120,7 +119,6 @@ long int DestinationPort_get();
 string SourceIP_get();
 string DestinationIP_get();
 string RuleType_get();
-string IPVersion_get();
 long int psc_id_get();
 long int psc_batch_get();
 long int psc_user_get();
@@ -137,7 +135,6 @@ void DestinationPort_set(long int val);
 void SourceIP_set(string val);
 void DestinationIP_set(string val);
 void RuleType_set(string val);
-void IPVersion_set(string val);
 void psc_id_set(long int val);
 void psc_batch_set(long int val);
 void psc_user_set(long int val);
@@ -150,7 +147,6 @@ void psc_restrict_set(long int val);
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
-bool psc_mod_isNull();
 bool psc_restrict_isNull();
 
 			
@@ -158,7 +154,6 @@ bool psc_restrict_isNull();
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
-void psc_mod_setNull(bool val);
 void psc_restrict_setNull(bool val);
 	
 	
@@ -179,7 +174,7 @@ void psc_restrict_setNull(bool val);
 
 		// Setup binary serialization
 		void SetupSerialization(int iSC_Version) {
-			StartSerializeList() + m_PK_Firewall+ m_Protocol+ m_SourcePort+ m_SourcePortEnd+ m_DestinationPort+ m_SourceIP+ m_DestinationIP+ m_RuleType+ m_IPVersion+ m_psc_id+ m_psc_batch+ m_psc_user+ m_psc_frozen+ m_psc_mod+ m_psc_restrict;
+			StartSerializeList() + m_PK_Firewall+ m_Protocol+ m_SourcePort+ m_SourcePortEnd+ m_DestinationPort+ m_SourceIP+ m_DestinationIP+ m_RuleType+ m_psc_id+ m_psc_batch+ m_psc_user+ m_psc_frozen+ m_psc_mod+ m_psc_restrict;
 		}
 	private:
 		void SetDefaultValues();
@@ -192,7 +187,6 @@ string DestinationPort_asSQL();
 string SourceIP_asSQL();
 string DestinationIP_asSQL();
 string RuleType_asSQL();
-string IPVersion_asSQL();
 string psc_id_asSQL();
 string psc_batch_asSQL();
 string psc_user_asSQL();

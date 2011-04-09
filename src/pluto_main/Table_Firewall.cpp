@@ -149,18 +149,17 @@ m_DestinationIP = "";
 is_null[6] = false;
 m_RuleType = "";
 is_null[7] = false;
-m_IPVersion = "";
-is_null[8] = false;
-is_null[9] = true;
+is_null[8] = true;
 m_psc_id = 0;
-is_null[10] = true;
+is_null[9] = true;
 m_psc_batch = 0;
-is_null[11] = true;
+is_null[10] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
+is_null[11] = false;
+m_psc_mod = "0000-00-00 00:00:00";
 is_null[12] = false;
 is_null[13] = true;
-is_null[14] = true;
 m_psc_restrict = 0;
 
 
@@ -193,9 +192,6 @@ return m_DestinationIP;}
 string Row_Firewall::RuleType_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return m_RuleType;}
-string Row_Firewall::IPVersion_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return m_IPVersion;}
 long int Row_Firewall::psc_id_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return m_psc_id;}
@@ -240,71 +236,61 @@ m_DestinationIP = val; is_modified=true; is_null[6]=false;}
 void Row_Firewall::RuleType_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 m_RuleType = val; is_modified=true; is_null[7]=false;}
-void Row_Firewall::IPVersion_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-m_IPVersion = val; is_modified=true; is_null[8]=false;}
 void Row_Firewall::psc_id_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_psc_id = val; is_modified=true; is_null[9]=false;}
+m_psc_id = val; is_modified=true; is_null[8]=false;}
 void Row_Firewall::psc_batch_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_psc_batch = val; is_modified=true; is_null[10]=false;}
+m_psc_batch = val; is_modified=true; is_null[9]=false;}
 void Row_Firewall::psc_user_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_psc_user = val; is_modified=true; is_null[11]=false;}
+m_psc_user = val; is_modified=true; is_null[10]=false;}
 void Row_Firewall::psc_frozen_set(short int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_psc_frozen = val; is_modified=true; is_null[12]=false;}
+m_psc_frozen = val; is_modified=true; is_null[11]=false;}
 void Row_Firewall::psc_mod_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_psc_mod = val; is_modified=true; is_null[13]=false;}
+m_psc_mod = val; is_modified=true; is_null[12]=false;}
 void Row_Firewall::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_psc_restrict = val; is_modified=true; is_null[14]=false;}
+m_psc_restrict = val; is_modified=true; is_null[13]=false;}
 
 		
 bool Row_Firewall::psc_id_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-return is_null[9];}
+return is_null[8];}
 bool Row_Firewall::psc_batch_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-return is_null[10];}
+return is_null[9];}
 bool Row_Firewall::psc_user_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-return is_null[11];}
+return is_null[10];}
 bool Row_Firewall::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-return is_null[12];}
-bool Row_Firewall::psc_mod_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-return is_null[13];}
+return is_null[11];}
 bool Row_Firewall::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-return is_null[14];}
+return is_null[13];}
 
 			
 void Row_Firewall::psc_id_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[9]=val;
+is_null[8]=val;
 is_modified=true;
 }
 void Row_Firewall::psc_batch_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[10]=val;
+is_null[9]=val;
 is_modified=true;
 }
 void Row_Firewall::psc_user_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[11]=val;
+is_null[10]=val;
 is_modified=true;
 }
 void Row_Firewall::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[12]=val;
-is_modified=true;
-}
-void Row_Firewall::psc_mod_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[13]=val;
+is_null[11]=val;
 is_modified=true;
 }
 void Row_Firewall::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[14]=val;
+is_null[13]=val;
 is_modified=true;
 }
 	
@@ -417,25 +403,11 @@ delete[] buf;
 return s;
 }
 
-string Row_Firewall::IPVersion_asSQL()
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-if (is_null[8])
-return "NULL";
-
-char *buf = new char[31];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_IPVersion.c_str(), (unsigned long) min((size_t)15,m_IPVersion.size()));
-string s=string()+"\""+buf+"\"";
-delete[] buf;
-return s;
-}
-
 string Row_Firewall::psc_id_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-if (is_null[9])
+if (is_null[8])
 return "NULL";
 
 char buf[32];
@@ -448,7 +420,7 @@ string Row_Firewall::psc_batch_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-if (is_null[10])
+if (is_null[9])
 return "NULL";
 
 char buf[32];
@@ -461,7 +433,7 @@ string Row_Firewall::psc_user_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-if (is_null[11])
+if (is_null[10])
 return "NULL";
 
 char buf[32];
@@ -474,7 +446,7 @@ string Row_Firewall::psc_frozen_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-if (is_null[12])
+if (is_null[11])
 return "NULL";
 
 char buf[32];
@@ -487,7 +459,7 @@ string Row_Firewall::psc_mod_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-if (is_null[13])
+if (is_null[12])
 return "NULL";
 
 char *buf = new char[39];
@@ -501,7 +473,7 @@ string Row_Firewall::psc_restrict_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-if (is_null[14])
+if (is_null[13])
 return "NULL";
 
 char buf[32];
@@ -549,10 +521,10 @@ bool Table_Firewall::Commit(bool bDeleteFailedModifiedRow,bool bDeleteFailedInse
 	
 		
 string values_list_comma_separated;
-values_list_comma_separated = values_list_comma_separated + pRow->PK_Firewall_asSQL()+", "+pRow->Protocol_asSQL()+", "+pRow->SourcePort_asSQL()+", "+pRow->SourcePortEnd_asSQL()+", "+pRow->DestinationPort_asSQL()+", "+pRow->SourceIP_asSQL()+", "+pRow->DestinationIP_asSQL()+", "+pRow->RuleType_asSQL()+", "+pRow->IPVersion_asSQL()+", "+pRow->psc_id_asSQL()+", "+pRow->psc_batch_asSQL()+", "+pRow->psc_user_asSQL()+", "+pRow->psc_frozen_asSQL()+", "+pRow->psc_restrict_asSQL();
+values_list_comma_separated = values_list_comma_separated + pRow->PK_Firewall_asSQL()+", "+pRow->Protocol_asSQL()+", "+pRow->SourcePort_asSQL()+", "+pRow->SourcePortEnd_asSQL()+", "+pRow->DestinationPort_asSQL()+", "+pRow->SourceIP_asSQL()+", "+pRow->DestinationIP_asSQL()+", "+pRow->RuleType_asSQL()+", "+pRow->psc_id_asSQL()+", "+pRow->psc_batch_asSQL()+", "+pRow->psc_user_asSQL()+", "+pRow->psc_frozen_asSQL()+", "+pRow->psc_restrict_asSQL();
 
 	
-		string query = "insert into Firewall (`PK_Firewall`, `Protocol`, `SourcePort`, `SourcePortEnd`, `DestinationPort`, `SourceIP`, `DestinationIP`, `RuleType`, `IPVersion`, `psc_id`, `psc_batch`, `psc_user`, `psc_frozen`, `psc_restrict`) values ("+
+		string query = "insert into Firewall (`PK_Firewall`, `Protocol`, `SourcePort`, `SourcePortEnd`, `DestinationPort`, `SourceIP`, `DestinationIP`, `RuleType`, `psc_id`, `psc_batch`, `psc_user`, `psc_frozen`, `psc_restrict`) values ("+
 			values_list_comma_separated+")";
 			
 		if (db_wrapper_query(database->m_pDB, query.c_str()))
@@ -618,7 +590,7 @@ condition = condition + "`PK_Firewall`=" + tmp_PK_Firewall;
 			
 		
 string update_values_list;
-update_values_list = update_values_list + "`PK_Firewall`="+pRow->PK_Firewall_asSQL()+", `Protocol`="+pRow->Protocol_asSQL()+", `SourcePort`="+pRow->SourcePort_asSQL()+", `SourcePortEnd`="+pRow->SourcePortEnd_asSQL()+", `DestinationPort`="+pRow->DestinationPort_asSQL()+", `SourceIP`="+pRow->SourceIP_asSQL()+", `DestinationIP`="+pRow->DestinationIP_asSQL()+", `RuleType`="+pRow->RuleType_asSQL()+", `IPVersion`="+pRow->IPVersion_asSQL()+", `psc_id`="+pRow->psc_id_asSQL()+", `psc_batch`="+pRow->psc_batch_asSQL()+", `psc_user`="+pRow->psc_user_asSQL()+", `psc_frozen`="+pRow->psc_frozen_asSQL()+", `psc_restrict`="+pRow->psc_restrict_asSQL();
+update_values_list = update_values_list + "`PK_Firewall`="+pRow->PK_Firewall_asSQL()+", `Protocol`="+pRow->Protocol_asSQL()+", `SourcePort`="+pRow->SourcePort_asSQL()+", `SourcePortEnd`="+pRow->SourcePortEnd_asSQL()+", `DestinationPort`="+pRow->DestinationPort_asSQL()+", `SourceIP`="+pRow->SourceIP_asSQL()+", `DestinationIP`="+pRow->DestinationIP_asSQL()+", `RuleType`="+pRow->RuleType_asSQL()+", `psc_id`="+pRow->psc_id_asSQL()+", `psc_batch`="+pRow->psc_batch_asSQL()+", `psc_user`="+pRow->psc_user_asSQL()+", `psc_frozen`="+pRow->psc_frozen_asSQL()+", `psc_restrict`="+pRow->psc_restrict_asSQL();
 
 	
 		string query = "update Firewall set " + update_values_list + " where " + condition;
@@ -842,78 +814,67 @@ pRow->m_RuleType = string(row[7],lengths[7]);
 if (row[8] == NULL)
 {
 pRow->is_null[8]=true;
-pRow->m_IPVersion = "";
+pRow->m_psc_id = 0;
 }
 else
 {
 pRow->is_null[8]=false;
-pRow->m_IPVersion = string(row[8],lengths[8]);
+sscanf(row[8], "%li", &(pRow->m_psc_id));
 }
 
 if (row[9] == NULL)
 {
 pRow->is_null[9]=true;
-pRow->m_psc_id = 0;
+pRow->m_psc_batch = 0;
 }
 else
 {
 pRow->is_null[9]=false;
-sscanf(row[9], "%li", &(pRow->m_psc_id));
+sscanf(row[9], "%li", &(pRow->m_psc_batch));
 }
 
 if (row[10] == NULL)
 {
 pRow->is_null[10]=true;
-pRow->m_psc_batch = 0;
+pRow->m_psc_user = 0;
 }
 else
 {
 pRow->is_null[10]=false;
-sscanf(row[10], "%li", &(pRow->m_psc_batch));
+sscanf(row[10], "%li", &(pRow->m_psc_user));
 }
 
 if (row[11] == NULL)
 {
 pRow->is_null[11]=true;
-pRow->m_psc_user = 0;
+pRow->m_psc_frozen = 0;
 }
 else
 {
 pRow->is_null[11]=false;
-sscanf(row[11], "%li", &(pRow->m_psc_user));
+sscanf(row[11], "%hi", &(pRow->m_psc_frozen));
 }
 
 if (row[12] == NULL)
 {
 pRow->is_null[12]=true;
-pRow->m_psc_frozen = 0;
+pRow->m_psc_mod = "";
 }
 else
 {
 pRow->is_null[12]=false;
-sscanf(row[12], "%hi", &(pRow->m_psc_frozen));
+pRow->m_psc_mod = string(row[12],lengths[12]);
 }
 
 if (row[13] == NULL)
 {
 pRow->is_null[13]=true;
-pRow->m_psc_mod = "";
-}
-else
-{
-pRow->is_null[13]=false;
-pRow->m_psc_mod = string(row[13],lengths[13]);
-}
-
-if (row[14] == NULL)
-{
-pRow->is_null[14]=true;
 pRow->m_psc_restrict = 0;
 }
 else
 {
-pRow->is_null[14]=false;
-sscanf(row[14], "%li", &(pRow->m_psc_restrict));
+pRow->is_null[13]=false;
+sscanf(row[13], "%li", &(pRow->m_psc_restrict));
 }
 
 
@@ -1123,78 +1084,67 @@ pRow->m_RuleType = string(row[7],lengths[7]);
 if (row[8] == NULL)
 {
 pRow->is_null[8]=true;
-pRow->m_IPVersion = "";
+pRow->m_psc_id = 0;
 }
 else
 {
 pRow->is_null[8]=false;
-pRow->m_IPVersion = string(row[8],lengths[8]);
+sscanf(row[8], "%li", &(pRow->m_psc_id));
 }
 
 if (row[9] == NULL)
 {
 pRow->is_null[9]=true;
-pRow->m_psc_id = 0;
+pRow->m_psc_batch = 0;
 }
 else
 {
 pRow->is_null[9]=false;
-sscanf(row[9], "%li", &(pRow->m_psc_id));
+sscanf(row[9], "%li", &(pRow->m_psc_batch));
 }
 
 if (row[10] == NULL)
 {
 pRow->is_null[10]=true;
-pRow->m_psc_batch = 0;
+pRow->m_psc_user = 0;
 }
 else
 {
 pRow->is_null[10]=false;
-sscanf(row[10], "%li", &(pRow->m_psc_batch));
+sscanf(row[10], "%li", &(pRow->m_psc_user));
 }
 
 if (row[11] == NULL)
 {
 pRow->is_null[11]=true;
-pRow->m_psc_user = 0;
+pRow->m_psc_frozen = 0;
 }
 else
 {
 pRow->is_null[11]=false;
-sscanf(row[11], "%li", &(pRow->m_psc_user));
+sscanf(row[11], "%hi", &(pRow->m_psc_frozen));
 }
 
 if (row[12] == NULL)
 {
 pRow->is_null[12]=true;
-pRow->m_psc_frozen = 0;
+pRow->m_psc_mod = "";
 }
 else
 {
 pRow->is_null[12]=false;
-sscanf(row[12], "%hi", &(pRow->m_psc_frozen));
+pRow->m_psc_mod = string(row[12],lengths[12]);
 }
 
 if (row[13] == NULL)
 {
 pRow->is_null[13]=true;
-pRow->m_psc_mod = "";
-}
-else
-{
-pRow->is_null[13]=false;
-pRow->m_psc_mod = string(row[13],lengths[13]);
-}
-
-if (row[14] == NULL)
-{
-pRow->is_null[14]=true;
 pRow->m_psc_restrict = 0;
 }
 else
 {
-pRow->is_null[14]=false;
-sscanf(row[14], "%li", &(pRow->m_psc_restrict));
+pRow->is_null[13]=false;
+sscanf(row[13], "%li", &(pRow->m_psc_restrict));
 }
 
 
