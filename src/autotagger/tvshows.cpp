@@ -213,7 +213,7 @@ void tvshow::replyFinished(QNetworkReply *)
 void tvshow::createRequest()
 {
      QNetworkAccessManager *n =  new QNetworkAccessManager(this);
-     QUrl url("http://www.thetvdb.com/api/GetSeries.php?seriesname="+showTitle);
+     QUrl url("http://cache.thetvdb.com/api/GetSeries.php?seriesname="+showTitle);
      QNetworkRequest req(url);
     cout << "Finding Series ID:" << qPrintable(url.toString ()) << endl;
 
@@ -402,11 +402,11 @@ void tvshow::setAttributes()                                                    
 
 	       if (currentBanner.toElement ().elementsByTagName ("Season").at (0).toElement ().text ()== this->season ) //identifying season banner
 		   {
-		   seasonImg.append ("http://www.thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("BannerPath").at (0).toElement ().text ());
+                   seasonImg.append ("http://cache.thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("BannerPath").at (0).toElement ().text ());
 		   }
 	       else if (currentBanner.toElement ().elementsByTagName ("BannerType").at (0).toElement ().text ()== "series" && currentBanner.toElement ().elementsByTagName ("BannerType2").item (0).toElement ().text ()== "graphical")
 		   {
-		    seriesBanner.append ("http://www.thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("BannerPath").at (0).toElement ().text ());
+                    seriesBanner.append ("http://cache.thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("BannerPath").at (0).toElement ().text ());
 
 		   }
 
@@ -416,12 +416,12 @@ void tvshow::setAttributes()                                                    
 		       //cout << "Chosen Vigniette has rating of:" << picRating << endl;
 		       if (currentBanner.toElement ().elementsByTagName ("SeriesName").at (0).toElement ().text ()== "true")
 		       {
-			   seriesImg.append ("http://www.thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("BannerPath").at (0).toElement ().text ());
+                           seriesImg.append ("http://cache.thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("BannerPath").at (0).toElement ().text ());
 			   }
 		       else
 			   {
-		    seriesGraphic.append ("http://www.thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("BannerPath").at (0).toElement ().text ());
-		    viginettes.append("http://www.thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("VignettePath").at (0).toElement ().text ());
+                    seriesGraphic.append ("http://cache.thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("BannerPath").at (0).toElement ().text ());
+                    viginettes.append("http://cache.thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("VignettePath").at (0).toElement ().text ());
 			   }
 		   }
 	       }
@@ -477,7 +477,7 @@ void tvshow::setAttributes()                                                    
 		   tvDirector = episode.firstChildElement("Director").toElement().text().replace("|" , episode.firstChildElement("Director").toElement().text());
 		   guestStars = episode.firstChildElement("GuestStars").toElement().text();
 		   airdate = episode.firstChildElement("FirstAired").toElement().text();
-		   epImage ="http://www.thetvdb.com/banners/"+episode.firstChildElement("filename").toElement().text();
+                   epImage ="http://cache.thetvdb.com/banners/"+episode.firstChildElement("filename").toElement().text();
 		   dvdSeason= episode.firstChildElement("DVD_season").toElement().text();
 		   dvdChapter= episode.firstChildElement("DVD_chapter").toElement().text();
 		   dvdEpisode= episode.firstChildElement("DVD_episode").toElement().text();
