@@ -35,7 +35,7 @@ function respondToEvents($output,$dbADO) {
 			}
 
 			if ($rowEH['FK_Criteria'] != '') {
-¨				$deleteCriteria='DELETE FROM Criteria WHERE PK_Criteria=?';
+			   	$deleteCriteria='DELETE FROM Criteria WHERE PK_Criteria=?';
 				$dbADO->Execute($deleteCriteria,$rowEH['FK_Criteria']);
 			}
 
