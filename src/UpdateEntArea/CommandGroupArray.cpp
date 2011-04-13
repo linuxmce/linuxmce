@@ -194,7 +194,7 @@ CommandGroup *CommandGroupArray::FindCommandGroupByTemplate(Row_Room *pRow_Room,
 		Row_CommandGroup_Room *pRow_CommandGroup_Room = m_pDatabase_pluto_main->CommandGroup_Room_get()->AddRow();
 		pRow_CommandGroup_Room->FK_CommandGroup_set(pRow_CommandGroup->PK_CommandGroup_get());
 		pRow_CommandGroup_Room->FK_Room_set(pRow_Room->PK_Room_get());
-		pRow_CommandGroup_Room->Sort_set(Sort ? Sort : pRow_CommandGroup->PK_CommandGroup_get());
+		pRow_CommandGroup_Room->Sort_set(Sort ? GetUnusedSortNo(Sort) : pRow_CommandGroup->PK_CommandGroup_get());
 		m_pDatabase_pluto_main->CommandGroup_Room_get()->Commit();
 	}
 	
@@ -279,7 +279,7 @@ CommandGroup *CommandGroupArray::FindCommandGroupByTemplate(Row_EntertainArea *p
 		Row_CommandGroup_EntertainArea *pRow_CommandGroup_EntertainArea = m_pDatabase_pluto_main->CommandGroup_EntertainArea_get()->AddRow();
 		pRow_CommandGroup_EntertainArea->FK_CommandGroup_set(pRow_CommandGroup->PK_CommandGroup_get());
 		pRow_CommandGroup_EntertainArea->FK_EntertainArea_set(pRow_EntertainArea->PK_EntertainArea_get());
-		pRow_CommandGroup_EntertainArea->Sort_set(Sort ? Sort : pRow_CommandGroup->PK_CommandGroup_get());
+		pRow_CommandGroup_EntertainArea->Sort_set(Sort ? GetUnusedSortNo(Sort) : pRow_CommandGroup->PK_CommandGroup_get());
 		m_pDatabase_pluto_main->CommandGroup_EntertainArea_get()->Commit();
 	}
 
@@ -566,4 +566,34 @@ bool CommandGroupArray::CommandGroupIsModified(Row_CommandGroup *pRow_CommandGro
 		return true;
 
 	return false;
+}
+
+int CommandGroupArray::GetUnusedSortNo(int preferedOrder)
+{
+
+	string SQL = "";
+	if ( m_pRow_Room )
+	{
+		SQL = "JOIN CommandGroup_Room ON FK_CommandGroup=PK_CommandGroup WHERE FK_Room=" + StringUtils::itos(m_pRow_Room->PK_Room_get());
+	}
+	else if ( m_pRow_EntertainArea ) 
+	{
+		SQL = "JOIN CommandGroup_EntertainArea ON FK_CommandGroup=PK_CommandGroup WHERE FK_EntertainArea=" + StringUtils::itos(m_pRow_EntertainArea->PK_EntertainArea_get());		
+	}
+	else 
+	{
+		// no room and no area, just return prefered order number
+		return preferedOrder;
+	}
+	SQL += " AND Sort = " + StringUtils::itos(preferedOrder);
+	vector<Row_CommandGroup *> vectRow_CommandGroup;
+	m_pDatabase_pluto_main->CommandGroup_get()->GetRows(SQL,&vectRow_CommandGroup);
+	if( vectRow_CommandGroup.size() )
+	{
+		return GetUnusedSortNo(preferedOrder+1);
+	}
+	else
+	{
+		return preferedOrder;
+	}
 }

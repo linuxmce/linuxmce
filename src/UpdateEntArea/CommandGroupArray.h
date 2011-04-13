@@ -133,6 +133,8 @@ public:
 	bool CommandGroupIsModified(Row_CommandGroup *pRow_CommandGroup);
 
 	void DeleteCommandGroup_Command(Row_CommandGroup_Command *pRow_CommandGroup_Command);
+
+	int GetUnusedSortNo(int preferedOrder);
 };
 
 };
