@@ -2115,6 +2115,59 @@ class DataGridTable *Media_Plugin::BookmarksByMediaType( string GridID, string P
 	return pDataGrid;
 }
 
+class DataGridTable *Media_Plugin::CaptureCardAudioPorts( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage )
+{
+	DataGridTable *pDataGrid = new DataGridTable();
+	DataGridCell *pCell;
+
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Media_Plugin::CaptureCardAudioPorts");
+
+	PLUTO_SAFETY_LOCK(mm, m_MediaMutex);	// Just to be safe.
+	
+	// See what computer we're scanning for ports on.
+	int PK_Device_Topmost = DatabaseUtils::GetTopMostDevice(m_pDatabase_pluto_main, pMessage->m_dwPK_Device_From);
+	if ( PK_Device_Topmost == 0)
+		return pDataGrid;	// Empty table, because we couldn't figure out which computer.
+
+	vector <Row_Device *> vectRow_Device;
+	m_pDatabase_pluto_main->Device_get()->GetRows("JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE FK_DeviceCategory = " TOSTRING(DEVICECATEGORY_Capture_Card_Audio_Ports_CONST),&vectRow_Device);
+	int iRow=0;
+	for (vector<Row_Device *>::iterator it=vectRow_Device.begin();it!=vectRow_Device.end();++it)
+	{
+		Row_Device *pRow_Device = *it;
+		int PK_Device_Topmost_Comp = DatabaseUtils::GetTopMostDevice(m_pDatabase_pluto_main,pRow_Device->PK_Device_get());
+		if ( PK_Device_Topmost_Comp!=PK_Device_Topmost )
+			continue;	// This device is on another computer.
+		
+		vector<Row_Device_DeviceData *> vectRow_Device_DeviceData;
+		m_pDatabase_pluto_main->Device_DeviceData_get()->GetRows("IK_DeviceData=" + StringUtils::itos(pRow_Device->PK_Device_get()) + " AND FK_DeviceData=" TOSTRING(DEVICEDATA_FK_Device_Capture_Card_Audio_Port_CONST),&vectRow_Device_DeviceData);
+		
+		string sDescription = pRow_Device->Description_get();
+		Row_Device *pRow_Device_Parent = pRow_Device->FK_Device_ControlledVia_getrow();
+		while( pRow_Device_Parent )
+		  {
+		    sDescription += " / " + pRow_Device_Parent->Description_get();
+		    pRow_Device_Parent = pRow_Device_Parent->FK_Device_ControlledVia_getrow();
+		  }
+
+		pCell = new DataGridCell(sDescription,StringUtils::itos(pRow_Device->PK_Device_get()));
+		if ( vectRow_Device_DeviceData.size() )
+		  {
+		    Row_Device_DeviceData *pRow_Device_DeviceData = (*vectRow_Device_DeviceData.begin());
+		    Row_Device *pRow_Device = pRow_Device_DeviceData->FK_Device_getrow();
+		    if ( pRow_Device )
+		      {
+			pCell->m_mapAttributes["InUse_PK_Device"] = StringUtils::itos(pRow_Device->PK_Device_get());
+			pCell->m_mapAttributes["InUse_Device_Description"] = pRow_Device->Description_get();
+		      }
+		  }
+		pDataGrid->SetData(0,iRow++,pCell);
+	}
+
+	return pDataGrid;
+
+}
+
 class DataGridTable *Media_Plugin::CaptureCardPorts( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage )
 {
 	DataGridTable *pDataGrid = new DataGridTable();

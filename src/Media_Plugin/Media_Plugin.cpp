@@ -665,6 +665,10 @@ bool Media_Plugin::Register()
         , DATAGRID_Capture_Card_Ports_CONST,PK_DeviceTemplate_get() );
 
     m_pDatagrid_Plugin->RegisterDatagridGenerator(
+	new DataGridGeneratorCallBack( this, ( DCEDataGridGeneratorFn )( &Media_Plugin::CaptureCardAudioPorts ))
+	, DATAGRID_Capture_Card_Audio_Ports_CONST,PK_DeviceTemplate_get() );
+
+    m_pDatagrid_Plugin->RegisterDatagridGenerator(
         new DataGridGeneratorCallBack( this, ( DCEDataGridGeneratorFn )( &Media_Plugin::DevicesForCaptureCardPort ))
         , DATAGRID_Capture_Card_Port_Devices_CONST,PK_DeviceTemplate_get() );
 
