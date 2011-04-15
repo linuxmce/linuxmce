@@ -960,6 +960,10 @@ bool OSDScreenHandler::TV_Manufacturer_ObjectSelected(CallBackData *pData)
 					m_pOrbiter->DATA_Set_Ignore_First_Event(true,true);  // We have a TV, so the first click/key/etc. should be ignored since the TV is off and it will just turn it on
 				}
 			}
+			else if(DESIGNOBJ_butModelNotListed2_CONST == pObjectInfoData->m_PK_DesignObj_SelectedObject)
+			{
+				m_pOrbiter->CMD_Goto_Screen("",SCREEN_Receiver_CONST);
+			}
 		}
 		break;
 
@@ -1256,6 +1260,10 @@ bool OSDScreenHandler::Receiver_ObjectSelected(CallBackData *pData)
 					m_pWizardLogic->m_nPK_Device_Receiver = m_pWizardLogic->AddDevice(atoi(sModel.c_str()));
 				}
 			}
+			else if(DESIGNOBJ_butModelNotListed2_CONST == pObjectInfoData->m_PK_DesignObj_SelectedObject)
+			{
+				m_pOrbiter->CMD_Goto_Screen("",SCREEN_AV_Devices_CONST);
+			}
 		}
 		break;
 
@@ -1382,6 +1390,10 @@ bool OSDScreenHandler::AV_Devices_ObjectSelected(CallBackData *pData)
 				//we have the AV Device Manufacturer and AV Device Model!
 				m_pWizardLogic->m_nPK_Device_Last_AV = m_pWizardLogic->AddDevice(atoi(sModel.c_str()));
 				m_pOrbiter->CMD_Set_Variable(VARIABLE_Misc_Data_1_CONST,StringUtils::itos(m_pWizardLogic->m_nPK_Device_Last_AV));
+			}
+			else if(DESIGNOBJ_butModelNotListed2_CONST == pObjectInfoData->m_PK_DesignObj_SelectedObject)
+			{
+				m_pOrbiter->CMD_Goto_Screen("",SCREEN_Get_Capture_Card_Port_CONST);
 			}
 		}
 		break;
