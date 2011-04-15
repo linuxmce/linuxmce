@@ -125,7 +125,7 @@ cp {,"$TEMP_DIR"}/etc/apt/sources.list
 
 ## Setup initial ssh access    
 echo 'Allow ssh access using our key'
-[[ -f /usr/pluto/keys/id_dsa_pluto.pub ]] && cat /usr/pluto/keys/id_dsa_pluto.pub >> "$TEMP_DIR"/root/.ssh/authorized_keys
+[[ -f /usr/pluto/keys/id_dsa_pluto.pub ]] && mkdir -p "$TEMP_DIR"/root/.ssh && cat /usr/pluto/keys/id_dsa_pluto.pub >> "$TEMP_DIR"/root/.ssh/authorized_keys
 
 
 
