@@ -987,6 +987,7 @@
 #define COMMAND_Resync_node_CONST 1085
 #define COMMAND_Component_3_CONST 1086
 #define COMMAND_HDP_CONST 1087
+#define COMMAND_Specify_Capture_Card_Audio_Port_CONST 1088
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"

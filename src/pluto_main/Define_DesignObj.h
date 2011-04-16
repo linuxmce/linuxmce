@@ -1748,7 +1748,6 @@
 #define DESIGNOBJ_butDiscreteCodesDSPModes_CONST 4945
 #define DESIGNOBJ_butToggleCodesDSPModes_CONST 4946
 #define DESIGNOBJ_appTVDSPModesOrder_CONST 4947
-#define DESIGNOBJ_butModelNotListed2_CONST 4948
 #define DESIGNOBJ_dgFileList2_CONST 4949
 #define DESIGNOBJ_grpOther_CONST 4951
 #define DESIGNOBJ_butFloorplans_CONST 4952
