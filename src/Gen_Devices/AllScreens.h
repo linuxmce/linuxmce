@@ -8670,10 +8670,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_Hulu_Menu_Onscreen : public PreformedCommand
+	class SCREEN_Get_Capture_Card_Audio_Port : public PreformedCommand
 	{
 	public:
-		SCREEN_Hulu_Menu_Onscreen(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Get_Capture_Card_Audio_Port(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "165" /* screen ID */
@@ -8683,10 +8683,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_Hulu_Menu_Onscreen_DL : public PreformedCommand
+	class SCREEN_Get_Capture_Card_Audio_Port_DL : public PreformedCommand
 	{
 	public:
-		SCREEN_Hulu_Menu_Onscreen_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Get_Capture_Card_Audio_Port_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "165" /* screen ID */
@@ -8696,10 +8696,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_Hulu_Menu_Onscreen_DT : public PreformedCommand
+	class SCREEN_Get_Capture_Card_Audio_Port_DT : public PreformedCommand
 	{
 	public:
-		SCREEN_Hulu_Menu_Onscreen_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Get_Capture_Card_Audio_Port_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "165" /* screen ID */
@@ -8709,10 +8709,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_Hulu_Menu_Onscreen_Cat : public PreformedCommand
+	class SCREEN_Get_Capture_Card_Audio_Port_Cat : public PreformedCommand
 	{
 	public:
-		SCREEN_Hulu_Menu_Onscreen_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Get_Capture_Card_Audio_Port_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "165" /* screen ID */
@@ -15470,7 +15470,7 @@ PK_DeviceData .... */, sOptions.c_str(), 224 /* PK_PnpQueue */, StringUtils::lto
 		virtual void SCREEN_Hulu_Remote(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_Hulu_OSD(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_Hulu_OSD_Options(long PK_Screen){ GotoScreen(PK_Screen); }
-		virtual void SCREEN_Hulu_Menu_Onscreen(long PK_Screen){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_Get_Capture_Card_Audio_Port(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_AudiCar(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_AudiSetup(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_AudiLighting(long PK_Screen){ GotoScreen(PK_Screen); }
@@ -16630,7 +16630,7 @@ PK_DeviceData .... */, sOptions.c_str(), 224 /* PK_PnpQueue */, StringUtils::lto
 				case 165:
 				{
 					ResetCallBacks();
-					SCREEN_Hulu_Menu_Onscreen(nPK_Screen);
+					SCREEN_Get_Capture_Card_Audio_Port(nPK_Screen);
 					break;
 				}
 				case 166:
