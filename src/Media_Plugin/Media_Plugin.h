@@ -1202,6 +1202,17 @@ VI=Video Input */
 	virtual void CMD_Move_File(string sFilename,string sPath) { string sCMD_Result; CMD_Move_File(sFilename.c_str(),sPath.c_str(),sCMD_Result,NULL);};
 	virtual void CMD_Move_File(string sFilename,string sPath,string &sCMD_Result,Message *pMessage);
 
+
+	/** @brief COMMAND: #1088 - Specify Capture Card Audio Port */
+	/** Specify the capture card audio port for a device */
+		/** @param #2 PK_Device */
+			/** The Device to set the capture card audio port */
+		/** @param #201 PK_Device_Related */
+			/** The Device to set the capture card audio port to */
+
+	virtual void CMD_Specify_Capture_Card_Audio_Port(int iPK_Device,int iPK_Device_Related) { string sCMD_Result; CMD_Specify_Capture_Card_Audio_Port(iPK_Device,iPK_Device_Related,sCMD_Result,NULL);};
+	virtual void CMD_Specify_Capture_Card_Audio_Port(int iPK_Device,int iPK_Device_Related,string &sCMD_Result,Message *pMessage);
+
 //<-dceag-h-e->
 };
 

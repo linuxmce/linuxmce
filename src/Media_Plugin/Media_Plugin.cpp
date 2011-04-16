@@ -7353,3 +7353,20 @@ void Media_Plugin::CMD_Move_File(string sFilename,string sPath,string &sCMD_Resu
 //<-dceag-c1083-e->
 {
 }
+//<-dceag-c1088-b->
+
+	/** @brief COMMAND: #1088 - Specify Capture Card Audio Port */
+	/** Specify the capture card audio port for a device */
+		/** @param #2 PK_Device */
+			/** The Device to set the capture card audio port */
+		/** @param #201 PK_Device_Related */
+			/** The Device to set the capture card audio port to */
+
+void Media_Plugin::CMD_Specify_Capture_Card_Audio_Port(int iPK_Device,int iPK_Device_Related,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1088-e->
+{
+  // Don't allow 2 devices to use the same capture card audio port
+  string sSQL = "UPDATE Device_DeviceData SET IK_DeviceData=NULL WHERE IK_DeviceData=" + StringUtils::itos(iPK_Device_Related) + " AND FK_DeviceData=" TOSTRING(DEVICEDATA_FK_Device_Capture_Card_Audio_P_CONST);
+  m_pDatabase_pluto_main->threaded_db_wrapper_query(sSQL);
+  DatabaseUtils::SetDeviceData(m_pDatabase_pluto_main,iPK_Device,DEVICEDATA_FK_Device_Capture_Card_Audio_P_CONST,StringUtils::itos(iPK_Device_Related));
+}
