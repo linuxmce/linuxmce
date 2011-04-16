@@ -960,7 +960,7 @@ bool OSDScreenHandler::TV_Manufacturer_ObjectSelected(CallBackData *pData)
 					m_pOrbiter->DATA_Set_Ignore_First_Event(true,true);  // We have a TV, so the first click/key/etc. should be ignored since the TV is off and it will just turn it on
 				}
 			}
-			else if(DESIGNOBJ_butModelNotListed2_CONST == pObjectInfoData->m_PK_DesignObj_SelectedObject)
+			else if(4948 == pObjectInfoData->m_PK_DesignObj_SelectedObject)
 			{
 				m_pOrbiter->CMD_Goto_Screen("",SCREEN_Receiver_CONST);
 			}
@@ -1260,7 +1260,7 @@ bool OSDScreenHandler::Receiver_ObjectSelected(CallBackData *pData)
 					m_pWizardLogic->m_nPK_Device_Receiver = m_pWizardLogic->AddDevice(atoi(sModel.c_str()));
 				}
 			}
-			else if(DESIGNOBJ_butModelNotListed2_CONST == pObjectInfoData->m_PK_DesignObj_SelectedObject)
+			else if(4948 == pObjectInfoData->m_PK_DesignObj_SelectedObject)
 			{
 				m_pOrbiter->CMD_Goto_Screen("",SCREEN_AV_Devices_CONST);
 			}
@@ -1391,7 +1391,7 @@ bool OSDScreenHandler::AV_Devices_ObjectSelected(CallBackData *pData)
 				m_pWizardLogic->m_nPK_Device_Last_AV = m_pWizardLogic->AddDevice(atoi(sModel.c_str()));
 				m_pOrbiter->CMD_Set_Variable(VARIABLE_Misc_Data_1_CONST,StringUtils::itos(m_pWizardLogic->m_nPK_Device_Last_AV));
 			}
-			else if(DESIGNOBJ_butModelNotListed2_CONST == pObjectInfoData->m_PK_DesignObj_SelectedObject)
+			else if(4948 == pObjectInfoData->m_PK_DesignObj_SelectedObject)
 			{
 				m_pOrbiter->CMD_Goto_Screen("",SCREEN_Get_Capture_Card_Port_CONST);
 			}
@@ -2781,6 +2781,76 @@ bool OSDScreenHandler::CaptureCardPort_DatagridSelected(CallBackData *pData)
 	}
 
 	return false;
+}
+//-----------------------------------------------------------------------------------------------------
+void OSDScreenHandler::SCREEN_Get_Capture_Card_Audio_Port(long PK_Screen)
+{
+  PrepForWizard();
+  m_pOrbiter->CMD_Set_Variable(VARIABLE_PK_DesignObj_CurrentSecti_CONST, TOSTRING(DESIGNOBJ_butInputs_CONST));
+  m_pOrbiter->CMD_Set_Variable(VARIABLE_PK_Device_1_CONST,"");
+  m_pOrbiter->CMD_Set_Variable(VARIABLE_Misc_Data_1_CONST,"");
+  m_pOrbiter->CMD_Set_Variable(VARIABLE_Datagrid_Input_CONST,"");
+  RegisterCallBack(cbObjectSelected, (ScreenHandlerCallBack) &OSDScreenHandler::CaptureCardAudioPort_ObjectSelected, new ObjectInfoBackData());
+  RegisterCallBack(cbDataGridSelected, (ScreenHandlerCallBack) &OSDScreenHandler::CaptureCardAudioPort_DatagridSelected, new DatagridCellBackData());
+  RegisterCallBack(cbDataGridRendering, (ScreenHandlerCallBack) &OSDScreenHandler::CaptureCardAudioPort_GridRendering, new DatagridAcquiredBackData());
+  ScreenHandlerBase::SCREEN_Get_Capture_Card_Audio_Port(PK_Screen);
+}
+//-----------------------------------------------------------------------------------------------------
+bool OSDScreenHandler::CaptureCardAudioPort_ObjectSelected(CallBackData *pData)
+{
+  ObjectInfoBackData *pObjectInfoData = (ObjectInfoBackData *)pData;
+
+  PLUTO_SAFETY_LOCK(vm, m_pOrbiter->m_ScreenMutex);
+  // FIXME: Come back here and implement what we need.
+  return false;
+}
+//-----------------------------------------------------------------------------------------------------
+bool OSDScreenHandler::CaptureCardAudioPort_GridRendering(CallBackData *pData)
+{
+  // This is actually called to deal with hiding/showing check to show already configured ports.
+  DatagridAcquiredBackData *pDatagridAcquiredBackData = (DatagridAcquiredBackData *) pData;
+  
+  if ( pDatagridAcquiredBackData->m_pObj->m_iPK_Datagrid==DATAGRID_Capture_Card_Audio_Ports_CONST )
+    {
+      for (MemoryDataTable::iterator it=pDatagridAcquiredBackData->m_pDataGridTable->m_MemoryDataTable.begin();it!=pDatagridAcquiredBackData->m_pDataGridTable->m_MemoryDataTable.end();++it)
+	{
+	  DataGridCell *pCell = it->second;
+	  pair<int, int> colRow = DataGridTable::CovertColRowType(it->first);
+	  colRow.first  -= pDatagridAcquiredBackData->m_pObj->m_GridCurCol;
+	  colRow.second -= pDatagridAcquiredBackData->m_pObj->m_GridCurRow;
+	  
+	  map< pair<int, int>, DesignObj_Orbiter *>::iterator itobj = pDatagridAcquiredBackData->m_pObj->m_mapChildDgObjects.find( colRow );
+	  if ( itobj != pDatagridAcquiredBackData->m_pObj->m_mapChildDgObjects.end() )
+	    {
+	      DesignObj_Orbiter *pObj = itobj->second; // cell's object
+	      DesignObj_DataList::iterator iHao;
+
+	      for ( iHao=pObj->m_ChildObjects.begin();iHao!=pObj->m_ChildObjects.end();++iHao)
+		{
+		  DesignObj_Orbiter *pDesignObj_Orbiter = (DesignObj_Orbiter *)(*iHao);
+		  if (pDesignObj_Orbiter->m_iBaseObjectID==DESIGNOBJ_iconCheckMark_CONST)
+		    pDesignObj_Orbiter->m_bHidden = pCell->m_mapAttributes_Find("InUse_PK_Device").empty()==true;
+		}
+	    }
+	}
+    }
+  return false;
+}
+//-----------------------------------------------------------------------------------------------------
+bool OSDScreenHandler::CaptureCardAudioPort_DatagridSelected(CallBackData *pData)
+{
+  DatagridCellBackData *pCellInfoData = (DatagridCellBackData *)pData;
+  if ( pCellInfoData->m_nPK_Datagrid==DATAGRID_Capture_Card_Audio_Ports_CONST )
+    {
+      DCE::CMD_Specify_Capture_Card_Port CMD_Specify_Capture_Card_Audio_Port(m_pOrbiter->m_dwPK_Device,m_pOrbiter->m_dwPK_Device_MediaPlugIn, atoi(pCellInfoData->m_sValue.c_str()),atoi(m_pOrbiter->m_mapVariable_Find(VARIABLE_Datagrid_Input_CONST).c_str()));
+      string sResponse;
+      m_pOrbiter->SendCommand(CMD_Specify_Capture_Card_Audio_Port,&sResponse);
+      
+      // FIXME: Come back here and add a Goto DesignObj to the next screen!
+      // FIXME: Come back here and add a Set Variable, as needed for the next screen!
+      return true; // we did a goto screen.
+    }
+  return false; // FIXME: Do we need this?
 }
 //-----------------------------------------------------------------------------------------------------
 // Create some 'choose provider stages' to keep track of where we are
