@@ -538,6 +538,16 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"ScreenHandler::MediaBrowser_Objec
 			0,mediaFileBrowserOptions.m_sSelectedFile,0,0,StringUtils::itos( m_pOrbiter->m_pLocationInfo->PK_EntertainArea ),false,0, bQueue , 0 /* bBypass_Event */, 0 /* bDont_Setup_AV */);
 		m_pOrbiter->SendCommand(CMD_MH_Play_Media);
 	}
+	else if( pObjectInfoData->m_PK_DesignObj_SelectedObject == DESIGNOBJ_butFBSF_Move_CONST )
+	  {
+	    // Move File button selected.
+	    Reset_SaveFile_Info();
+	    string sCommand = "";
+	    string sTitle = "Choose a location to move the file. You can also change the file name here.";
+	    
+	    DCE::SCREEN_FileSave screen_FileSave(m_pOrbiter->m_dwPK_Device,m_pOrbiter->m_dwPK_Device,mediaFileBrowserOptions.m_PK_MediaType,-998,sTitle,sCommand,true);
+	    m_pOrbiter->SendCommand(screen_FileSave);
+	  }
 	else if( pObjectInfoData->m_PK_DesignObj_SelectedObject == DESIGNOBJ_butFBSF_Delete_CONST )
 	{
 		string sMessage = m_pOrbiter->m_mapTextString[TEXT_confirm_file_delete_CONST];
@@ -2459,6 +2469,13 @@ bool ScreenHandler::AddSoftware_GridSelected(CallBackData *pData)
 	return false; // Keep processing it
 }
 //-----------------------------------------------------------------------------------------------------
+bool ScreenHandler::FileSave_Get_Filename(string sFileID, string& sFileName, string& sPath)
+{
+  // Given a !F specification, return the path and the filename, by asking the media plugin.
+
+  return true;
+}
+//-----------------------------------------------------------------------------------------------------
 void ScreenHandler::SCREEN_FileSave(long PK_Screen, int iPK_MediaType, int iEK_Disc, string sCaption, string sCommand, bool bAdvanced_options)
 {
 	//the command to execute with the selected file
@@ -2507,6 +2524,12 @@ void ScreenHandler::SCREEN_FileSave(long PK_Screen, int iPK_MediaType, int iEK_D
 		//maybe it would be better instead to send "spawn_application" command to app_server with confirmation?
 		Sleep(200); 
 	}
+
+	if ( iEK_Disc==-998 )  // Special to fill filename with selected MediaBrowser file.
+	  {
+	    string sSelectedFile, sSelectedPath;
+	    m_sSaveFile_FileName = FileSave_Get_Filename(mediaFileBrowserOptions.m_sSelectedFile, sSelectedFile, sSelectedPath);
+	  }
 
 	//setup variables
 	m_pOrbiter->CMD_Set_Variable(VARIABLE_Misc_Data_3_CONST, m_sSaveFile_Drive);
