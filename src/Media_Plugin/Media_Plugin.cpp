@@ -6111,6 +6111,8 @@ void Media_Plugin::CMD_Get_Attributes_For_Media(string sFilename,string sPK_Ente
 	else
 	{
 		*sValue_To_Assign = "FILE\t" + pMediaFile->HumanReadableFullyQualifiedFile() +
+		  "\tPATH\t" + pMediaFile->m_sPath + 
+		  "\tFILENAME\t" + pMediaFile->m_sFilename +
 			"\tTITLE\t" + m_pMediaAttributes->m_pMediaAttributes_LowLevel->GetDefaultDescriptionForMediaFile(pMediaFile) +
 			"\t";
 		vector<Row_LongAttribute *> vectRow_LongAttribute;
