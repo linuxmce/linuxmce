@@ -15,7 +15,7 @@ if [[ $DriverInstalled -eq 0 ]]; then
 		driverLine = ""
 	fi
 	if [[ $driverConfig == none ]]; then
-		lshwd|grep ATI|grep -v Non-VGA|grep VGA -q && driverConfig=aticonfig
+		lspci|grep ATI|grep -vi Non-VGA|grep VGA -q && driverConfig=aticonfig
 	fi
 	if [[ $driverConfig == aticonfig ]]; then
 		driverLine="--initial"
