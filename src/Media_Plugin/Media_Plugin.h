@@ -59,6 +59,9 @@
 #include "Orbiter/OrbiterFileBrowser.h"
 #include "Orbiter_Plugin/OH_Orbiter.h"
 #include "Gen_Devices/AllScreens.h"
+#include "JobHandler/JobHandler.h"
+
+using namespace nsJobHandler;
 
 class Database_pluto_main;
 class Database_pluto_media;
@@ -96,6 +99,7 @@ public:
 	class Generic_NonPluto_Media *m_pGeneric_NonPluto_Media;
     class MediaHandlerInfo *m_pGenericMediaHandlerInfo;
 	class AlarmManager *m_pAlarmManager;
+	class JobHandler *m_pJobHandler;
 
     friend class MediaHandlerInfo;
     pluto_pthread_mutex_t m_MediaMutex; // Other classes may need this

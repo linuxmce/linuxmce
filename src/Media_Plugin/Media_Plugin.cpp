@@ -21,6 +21,7 @@
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
+#include "JobHandler/Job.h"
 
 #include <iostream>
 using namespace std;
@@ -111,6 +112,8 @@ using namespace DCE;
 #define UPDATE_SEARCH_TOKENS					5
 
 #define TIMEOUT_JUKEBOX							60
+
+using namespace nsJobHandler;
 
 int UniqueColors[MAX_MEDIA_COLORS];
 
@@ -276,6 +279,7 @@ Media_Plugin::Media_Plugin( int DeviceID, string ServerAddress, bool bConnectEve
 	UniqueColors[3] = PlutoColor(0,128,128).m_Value;
 	UniqueColors[4] = PlutoColor(128,128,0).m_Value;
 	m_pAlarmManager=NULL;
+	m_pJobHandler = new JobHandler();
 }
 
 //<-dceag-getconfig-b->
@@ -460,6 +464,9 @@ continue;
 	m_pAlarmManager->AddRelativeAlarm(15,this,CHECK_FOR_NEW_FILES,NULL);
 	m_pAlarmManager->AddRelativeAlarm(600,this,UPDATE_SEARCH_TOKENS,NULL);
 
+	// and finally, start the Job Handler thread.
+	bool bResult = m_pJobHandler->StartThread();
+
 	return true;
 }
 
@@ -470,6 +477,10 @@ continue;
 Media_Plugin::~Media_Plugin()
 //<-dceag-dest-e->
 {
+
+	delete m_pJobHandler;  // Delete this first since it can reference the others
+	m_pJobHandler = NULL;
+
 	{
 		PLUTO_SAFETY_LOCK( mm, m_MediaMutex );
 
@@ -7354,6 +7365,82 @@ void Media_Plugin::CMD_Specify_Repeat_Options(string sPK_EntertainArea,int iRepe
 void Media_Plugin::CMD_Move_File(string sFilename,string sPath,string &sCMD_Result,Message *pMessage)
 //<-dceag-c1083-e->
 {
+  
+  // Check that filename is a media reference. We do not deal with anything else!
+  if( sFilename.size()>2 && sFilename[0]=='!' && sFilename[1]=='F' )
+    {
+      int PK_File = atoi( sFilename.substr(2).c_str() );
+      Row_File *pRow_File = m_pDatabase_pluto_media->File_get()->GetRow(PK_File);
+      if( !pRow_File )
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Media_Plugin::CMD_Move_File cannot find %s decoded to %d",sFilename.c_str(),PK_File);
+      else
+	{
+	  pRow_File->Reload();
+	  sFilename = pRow_File->Path_get() + "/" + pRow_File->Filename_get();
+	  string sDestinationFileName = sPath;
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXX Moving file %s to %s ",sFilename.c_str(),sDestinationFileName.c_str());
+	  if( FileUtils::MoveFile(sFilename,sDestinationFileName,true) )
+	    {
+	      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::CMD_Move_File moved Row_File id %d %s ",
+						  pRow_File->PK_File_get(),sFilename.c_str());
+
+	      string sDestinationPath = FileUtils::BasePath(sDestinationFileName);
+	      string sDestinationBaseName = FileUtils::FilenameWithoutPath(sDestinationFileName);
+
+	      pRow_File->Path_set(sDestinationPath);
+	      pRow_File->Filename_set(sDestinationBaseName);
+	      m_pDatabase_pluto_media->File_get()->Commit();
+
+	      // Beginning the snippet
+	      // Move the .id3 file, if it exists.
+	      string sID3File = sFilename + ".id3";
+	      string sDestinationID3File = sDestinationFileName + ".id3";
+	      if ( FileUtils::FileExists(sID3File) )
+		{
+		  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::CMD_Move_File moving existing ID3 file%s",sID3File.c_str());
+		  if ( FileUtils::MoveFile(sID3File,sDestinationID3File,true) )
+		    {
+		      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::CMD_Move_File moved ID3 file %s to %s",sID3File.c_str(),sDestinationID3File.c_str());
+		    }
+		  else
+		    {
+		      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Media_Plugin::CMD_Move_File Could not move existing ID3 file %s to %s",sID3File.c_str(),sDestinationID3File.c_str());
+		    }
+		}
+	      else
+		{
+		  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::CMD_Move_File no ID3 File found.");
+		}
+	      
+	      // Move the .dvd.keys.tar.gz if it exists.
+	      string sDVDFile = sFilename + ".keys.tar.gz";
+	      string sDestinationDVDFile = sDestinationFileName + ".keys.tar.gz";
+	      if ( FileUtils::FileExists(sDVDFile) )
+		{
+		  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::CMD_Move_File moving existing DVD Keys file%s",sDVDFile.c_str());
+		  if ( FileUtils::MoveFile(sDVDFile,sDestinationDVDFile,true) )
+		    {
+		      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::CMD_Move_File moved DVD Keys file %s to %s",sDVDFile.c_str(),sDestinationDVDFile.c_str());
+		    }
+		  else
+		    {
+		      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Media_Plugin::CMD_Move_File Could not move existing DVD Keys file %s to %s",sDVDFile.c_str(),sDestinationDVDFile.c_str());
+		    }
+		}
+	      else
+		{
+		  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::CMD_Move_File no DVD Keys File found.");
+		}
+	      // Ending the snippet
+	      
+	    }
+	  else
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Media_Plugin::CMD_Move_File cannot move %d %s %s/%s",
+						pRow_File->PK_File_get(),sFilename.c_str(),pRow_File->Path_get().c_str(),pRow_File->Filename_get().c_str());
+	  	  
+	}
+    }
+  
 }
 //<-dceag-c1088-b->
 
