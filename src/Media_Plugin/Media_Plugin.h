@@ -60,22 +60,86 @@
 #include "Orbiter_Plugin/OH_Orbiter.h"
 #include "Gen_Devices/AllScreens.h"
 #include "JobHandler/JobHandler.h"
+#include "JobHandler/Job.h"
+#include "JobHandler/Task.h"
 
 using namespace nsJobHandler;
 
 class Database_pluto_main;
 class Database_pluto_media;
 class Row_EntertainArea;
+class Row_File;
 class MediaFile;
 class MediaListGrid;
 class DatabaseInfoOnPath;
+class PendingTaskList;
 
 #define NUM_UI_VERSIONS	2
 #define MAX_MEDIA_COLORS    5 // We need some unique colors to color-code the media streams
 
-namespace DCE
+namespace nsJobHandler
 {
 
+  class MoveJob : public Job
+  {
+    friend class MoveTask;
+  public:
+    bool m_bReportResult;
+    string m_sFileName;
+    string m_sDestinationFileName;
+    Row_File *m_pRow_File;
+    Database_pluto_media *m_pDatabase_pluto_media;
+  public:
+    MoveJob(Database_pluto_media *pDatabase_pluto_media,
+	    class JobHandler *pJobHandler,
+	    int iPK_Orbiter,
+	    Row_File *pRow_File,
+	    string sFileName,
+	    string sDestinationFileName,
+	    bool bReportResult,
+	   Command_Impl *pCommand_Impl);
+    virtual ~MoveJob();
+
+    virtual bool ReadyToRun();
+    void AddMoveTasks(TasklistPosition position=position_TasklistEnd);
+
+    virtual bool ReportPendingTasks(DCE::PendingTaskList *pPendingTaskList);
+    virtual string ToString();
+
+    virtual string GetType() { return "MoveJob"; }
+
+    int Get_PK_Orbiter();
+
+  };
+
+  class MoveTask : public Task
+  {
+  public:
+    class MoveJob *m_pMoveJob;
+    bool m_bReportResult;
+    Row_File *m_pRow_File;
+    string m_sFileName;
+    string m_sDestinationFileName;
+
+    MoveTask(class MoveJob *pMoveJob, 
+	     string sName, 
+	     bool bReportResult,
+	     string sFileName, 
+	     string sDestinationFileName);
+    virtual ~MoveTask();
+    virtual string GetType() { return "MoveTask"; }
+    
+    virtual int Run();
+    virtual bool Abort();
+    int RunAlreadySpawned();
+    void ReportFailure();
+    void ReportSuccess();
+  };
+
+}
+
+namespace DCE
+{
 
 //<-dceag-decl-b->!
 class Media_Plugin : public Media_Plugin_Command, public DataGridGeneratorPlugIn, public FloorplanInfoProvider, public FollowMe_Device, public AlarmEvent

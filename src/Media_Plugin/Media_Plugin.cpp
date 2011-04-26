@@ -117,6 +117,117 @@ using namespace nsJobHandler;
 
 int UniqueColors[MAX_MEDIA_COLORS];
 
+// Job Handlers /////////////////////////////////////////////////////////////////////////////
+
+MoveJob::MoveJob(Database_pluto_media *pDatabase_pluto_media,
+		 class JobHandler *pJobHandler,
+		 int iPK_Orbiter,
+		 Row_File *pRow_File,
+		 string sFileName,
+		 string sDestinationFileName,
+		 bool bReportResult,
+		 Command_Impl *pCommand_Impl)
+  : Job(pJobHandler, "MoveJob", iPK_Orbiter, pCommand_Impl)
+{
+  m_bReportResult=bReportResult;
+  m_pDatabase_pluto_media=pDatabase_pluto_media;
+  m_pRow_File=pRow_File;
+  m_sFileName=sFileName;
+  m_sDestinationFileName=sDestinationFileName;
+
+  LoggerWrapper::GetInstance()->Write(LV_STATUS, "MoveJob::MoveJob constructor - %s to %s ",m_sFileName.c_str(),m_sDestinationFileName.c_str());
+}
+
+MoveJob::~MoveJob()
+{
+  SCREEN_PopupMessage SCREEN_PopupMessage(m_pCommand_Impl->m_dwPK_Device,
+					  m_iPK_Orbiter,
+					  "Move Done!",        // Message to display
+					  "",              // Command Line
+					  "move_complete", // Description
+					  "0",             // do not prompt to reset router.
+					  "0",             // no timeout
+					  "1");            // Can't Go back.
+  m_pCommand_Impl->SendCommand(SCREEN_PopupMessage);
+}
+
+bool MoveJob::ReadyToRun()
+{
+  AddMoveTasks();
+  return true;
+}
+
+void MoveJob::AddMoveTasks(TasklistPosition position)
+{
+  // Move original filename.
+  if (FileUtils::FileExists(m_sFileName) && !FileUtils::FileExists(m_sDestinationFileName))
+    {
+      AddTask(new MoveTask(this, "Move Media",m_bReportResult,m_sFileName,m_sDestinationFileName),position);
+    }
+  if (FileUtils::FileExists(m_sFileName+".id3") && !FileUtils::FileExists(m_sDestinationFileName + ".id3"))
+    {
+      AddTask(new MoveTask(this, "Move ID3",m_bReportResult,m_sFileName+".id3",m_sDestinationFileName+".id3"),position);
+    }
+  if (FileUtils::FileExists(m_sFileName+".dvd.keys.tar.gz") && !FileUtils::FileExists(m_sDestinationFileName+".dvd.keys.tar.gz"))
+    {
+      AddTask(new MoveTask(this, "Move DVD Keys",m_bReportResult,m_sFileName+".dvd.keys.tar.gz",m_sDestinationFileName+".dvd.keys.tar.gz"),position);
+    }
+}
+
+string MoveJob::ToString()
+{
+  return "Moving Media file "+m_sFileName+" to "+m_sDestinationFileName;
+}
+
+int MoveJob::Get_PK_Orbiter()
+{
+  return m_iPK_Orbiter; // From the superclass.
+}
+
+// MoveTask /////////////////////////////////////////////////////////////////////////////////
+
+MoveTask::MoveTask(class MoveJob *pMoveJob,
+		   string sName,
+		   bool bReportResult,
+		   string sFileName,
+		   string sDestinationFileName) : Task(pMoveJob,sName)
+{
+  m_pMoveJob=pMoveJob;
+  m_bReportResult=bReportResult;
+  m_sFileName=sFileName;
+  m_sDestinationFileName=sDestinationFileName;
+}
+
+MoveTask::~MoveTask()
+{
+  // Just here because...
+}
+
+int MoveTask::Run()
+{
+
+  DeviceData_Base *pDevice_App_Server = m_pMoveJob->m_pCommand_Impl->m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_App_Server_CONST, m_pMoveJob->m_pCommand_Impl);
+  
+  if (m_sName == "Move Media")
+    {
+      // Set the database location appropriately.
+      string sDestinationPath = FileUtils::BasePath(m_sDestinationFileName);
+      string sDestinationBaseName = FileUtils::FilenameWithoutPath(m_sDestinationFileName);
+      
+      m_pMoveJob->m_pRow_File->Path_set(sDestinationPath);
+      m_pMoveJob->m_pRow_File->Path_set(sDestinationBaseName);
+      m_pMoveJob->m_pDatabase_pluto_media->File_get()->Commit();
+    }
+}
+
+bool MoveTask::Abort()
+{
+  // Implement Abort()
+}
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////
 
 static bool MediaFileComparer(MediaFile *a, MediaFile *b)
 {

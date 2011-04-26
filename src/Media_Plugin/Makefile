@@ -43,7 +43,10 @@ sources += \
 	Generic_NonPluto_Media.cpp \
 	MediaHandlerBase.cpp \
 	PlaylistParser.cpp \
-	../PlutoUtils/HttpUtils.cpp
+	../PlutoUtils/HttpUtils.cpp \
+	../JobHandler/JobHandler.cpp \
+	../JobHandler/Job.cpp \
+	../JobHandler/Task.cpp
 
 #<-dceag-mf-b->!
 LDLIBS_NAMES = $(INTERNAL_LIBS_NAMES) $(EXTERNAL_LIBS_NAMES)
