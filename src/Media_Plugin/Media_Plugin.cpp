@@ -21,7 +21,6 @@
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
-#include "JobHandler/Job.h"
 
 #include <iostream>
 using namespace std;
@@ -206,26 +205,102 @@ MoveTask::~MoveTask()
 int MoveTask::Run()
 {
 
+  if (m_bAlreadySpawned)
+    {
+      return RunAlreadySpawned();
+    }
+
   DeviceData_Base *pDevice_App_Server = m_pMoveJob->m_pCommand_Impl->m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_App_Server_CONST, m_pMoveJob->m_pCommand_Impl);
   
-  if (m_sName == "Move Media")
+  if (!pDevice_App_Server)
     {
-      // Set the database location appropriately.
-      string sDestinationPath = FileUtils::BasePath(m_sDestinationFileName);
-      string sDestinationBaseName = FileUtils::FilenameWithoutPath(m_sDestinationFileName);
-      
-      m_pMoveJob->m_pRow_File->Path_set(sDestinationPath);
-      m_pMoveJob->m_pRow_File->Path_set(sDestinationBaseName);
-      m_pMoveJob->m_pDatabase_pluto_media->File_get()->Commit();
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MoveTask::Run() - Cannot move, no App Server found.");
+      return 0;
     }
+  else
+    {
+      m_pDevice_App_Server=pDevice_App_Server;
+    }
+
+  // Pass these parameters to the MoveWrapper.sh
+  string strParameters = 
+    StringUtils::itos(m_pJob->m_iID_get()) + "\t" +
+    StringUtils::itos(m_iID_get()) + "\t" + 
+    m_sFileName + "\t" + 
+    m_sDestinationFileName;
+ 
+  string sResultMessage = 
+    StringUtils::itos(m_pMoveJob->m_pCommand_Impl->m_dwPK_Device) + " " +   // From device
+    StringUtils::itos(pDevice_App_Server->m_dwPK_Device) + " " +            // To Device
+    StringUtils::itos(MESSAGETYPE_COMMAND) + " " +                          // 1 = COMMAND
+    StringUtils::itos(COMMAND_Update_Move_Status_CONST) + " " +             // CMD_Update_Move_Status
+    StringUtils::itos(COMMANDPARAMETER_Task_CONST) + " " +                  //
+    StringUtils::itos(m_iID) + " " +                                  // Task ID
+    StringUtils::itos(COMMANDPARAMETER_Job_CONST) + " " +                   //
+    StringUtils::itos(m_pJob->m_iID_get()) + " " +                          // Job ID
+    StringUtils::itos(COMMANDPARAMETER_Status_CONST) + " ";  // The Rest will be filled in below.
+
+  // Passed to the App Server as a unique name that can be killed later.
+  m_sSpawnName = "move_job_" +
+    StringUtils::itos(m_pJob->m_iID_get()) +
+    "_task_" + 
+    StringUtils::itos(m_iID);
+
+  DCE::CMD_Spawn_Application CMD_Spawn_Application(m_pMoveJob->m_pCommand_Impl->m_dwPK_Device,
+						   pDevice_App_Server->m_dwPK_Device,
+						   "/usr/pluto/bin/moveWrapper.sh",
+						   m_sSpawnName,
+						   strParameters,
+						   sResultMessage + "e",
+						   sResultMessage + "s",
+						   false, false, false, false);
+
+  string sResponse;
+
+  if (!m_pMoveJob->m_pCommand_Impl->SendCommand(CMD_Spawn_Application,&sResponse) || sResponse != "OK")
+    {
+      // App server failed somehow.
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MoveTask::Run() - Trying to move - App Server returned %s",sResponse.c_str());
+      return 0; // This is done. Do not trigger the run again.
+    }
+
+  m_bAlreadySpawned=true;
+  return 1000;  // Check again in 1 second.
+
+  // if (m_sName == "Move Media")
+  //   {
+  //     // Set the database location appropriately.
+  //     string sDestinationPath = FileUtils::BasePath(m_sDestinationFileName);
+  //     string sDestinationBaseName = FileUtils::FilenameWithoutPath(m_sDestinationFileName);
+      
+  //     m_pMoveJob->m_pRow_File->Path_set(sDestinationPath);
+  //     m_pMoveJob->m_pRow_File->Path_set(sDestinationBaseName);
+  //     m_pMoveJob->m_pDatabase_pluto_media->File_get()->Commit();
+  //   }
 }
 
 bool MoveTask::Abort()
 {
-  // Implement Abort()
+  DCE::CMD_Kill_Application CMD_Kill_Application
+    (m_pMoveJob->m_pCommand_Impl->m_dwPK_Device,
+     m_pDevice_App_Server->m_dwPK_Device,
+     m_sSpawnName,
+     false);
+  m_pMoveJob->m_pCommand_Impl->SendCommand(CMD_Kill_Application); 
+
+  return Task::Abort(); // superclass
+
 }
 
+int MoveTask::RunAlreadySpawned()
+{
+  return 1000; // Re-check in 1 second...
+}
 
+void MoveTask::UpdateProgress(string sStatus)
+{
+  // Implement this later.
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -7569,4 +7644,30 @@ void Media_Plugin::CMD_Specify_Capture_Card_Audio_Port(int iPK_Device,int iPK_De
   string sSQL = "UPDATE Device_DeviceData SET IK_DeviceData=NULL WHERE IK_DeviceData=" + StringUtils::itos(iPK_Device_Related) + " AND FK_DeviceData=" TOSTRING(DEVICEDATA_FK_Device_Capture_Card_Audio_P_CONST);
   m_pDatabase_pluto_main->threaded_db_wrapper_query(sSQL);
   DatabaseUtils::SetDeviceData(m_pDatabase_pluto_main,iPK_Device,DEVICEDATA_FK_Device_Capture_Card_Audio_P_CONST,StringUtils::itos(iPK_Device_Related));
+}
+//<-dceag-c1089-b->
+
+	/** @brief COMMAND: #1089 - Update Move Status */
+	/** Update the Status of a Move Task */
+		/** @param #199 Status */
+			/** Status to Update */
+		/** @param #257 Task */
+			/** Task ID to update */
+		/** @param #258 Job */
+			/** Job ID to update */
+
+void Media_Plugin::CMD_Update_Move_Status(string sStatus,string sTask,string sJob,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1089-e->
+{
+  PLUTO_SAFETY_LOCK(jm,*m_pJobHandler->m_ThreadMutex_get());
+  Task *pTask = m_pJobHandler->FindTask(atoi(sJob.c_str()),atoi(sTask.c_str()));
+  if (!pTask)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Media_Plugin::CMD_Update_Move_Status invalid job %s task %s",sJob.c_str(),sTask.c_str());
+      return;
+    }
+
+  MoveTask *pMoveTask = (MoveTask *) pTask;
+  pMoveTask->UpdateProgress(sStatus);
+
 }

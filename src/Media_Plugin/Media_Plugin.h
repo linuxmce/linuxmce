@@ -120,6 +120,9 @@ namespace nsJobHandler
     Row_File *m_pRow_File;
     string m_sFileName;
     string m_sDestinationFileName;
+    bool m_bAlreadySpawned; 
+    string m_sSpawnName;
+    DeviceData_Base *m_pDevice_App_Server;
 
     MoveTask(class MoveJob *pMoveJob, 
 	     string sName, 
@@ -134,6 +137,7 @@ namespace nsJobHandler
     int RunAlreadySpawned();
     void ReportFailure();
     void ReportSuccess();
+    void UpdateProgress(string sStatus);
   };
 
 }
@@ -1280,6 +1284,19 @@ VI=Video Input */
 
 	virtual void CMD_Specify_Capture_Card_Audio_Port(int iPK_Device,int iPK_Device_Related) { string sCMD_Result; CMD_Specify_Capture_Card_Audio_Port(iPK_Device,iPK_Device_Related,sCMD_Result,NULL);};
 	virtual void CMD_Specify_Capture_Card_Audio_Port(int iPK_Device,int iPK_Device_Related,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #1089 - Update Move Status */
+	/** Update the Status of a Move Task */
+		/** @param #199 Status */
+			/** Status to Update */
+		/** @param #257 Task */
+			/** Task ID to update */
+		/** @param #258 Job */
+			/** Job ID to update */
+
+	virtual void CMD_Update_Move_Status(string sStatus,string sTask,string sJob) { string sCMD_Result; CMD_Update_Move_Status(sStatus.c_str(),sTask.c_str(),sJob.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Update_Move_Status(string sStatus,string sTask,string sJob,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
 };
