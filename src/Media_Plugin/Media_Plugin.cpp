@@ -183,6 +183,12 @@ int MoveJob::Get_PK_Orbiter()
   return m_iPK_Orbiter; // From the superclass.
 }
 
+bool MoveJob::ReportPendingTasks(DCE::PendingTaskList *pPendingTaskList)
+{
+  // To be implemented
+  return false;
+}
+
 // MoveTask /////////////////////////////////////////////////////////////////////////////////
 
 MoveTask::MoveTask(class MoveJob *pMoveJob,
