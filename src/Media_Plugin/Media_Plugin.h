@@ -103,7 +103,7 @@ namespace nsJobHandler
     virtual bool ReadyToRun();
     void AddMoveTasks(TasklistPosition position=position_TasklistEnd);
 
-    virtual bool ReportPendingTasks(DCE::PendingTaskList *pPendingTaskList);
+    // virtual bool ReportPendingTasks(DCE::PendingTaskList *pPendingTaskList);
     virtual string ToString();
 
     virtual string GetType() { return "MoveJob"; }
