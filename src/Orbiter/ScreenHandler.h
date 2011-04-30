@@ -451,9 +451,6 @@ public:
 	//helper methods
 	void SaveFile_GotoChooseFolderDesignObj();
 	void SaveFile_SendCommand(int PK_Users);
-	
-	//special method used for 'move file'
-	bool FileSave_Get_Filename(string sFileID, string& sFileName, string& sPath);
 
 	//savefile data
 	string m_sSaveFile_MountedFolder;

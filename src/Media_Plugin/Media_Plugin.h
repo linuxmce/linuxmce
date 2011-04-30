@@ -104,8 +104,9 @@ namespace nsJobHandler
     void AddMoveTasks(TasklistPosition position=position_TasklistEnd);
 
     virtual bool ReportPendingTasks(DCE::PendingTaskList *pPendingTaskList);
+    virtual int SecondsRemaining();
     virtual string ToString();
-
+    virtual int PercentComplete();
     virtual string GetType() { return "MoveJob"; }
 
     int Get_PK_Orbiter();
@@ -118,6 +119,8 @@ namespace nsJobHandler
     class MoveJob *m_pMoveJob;
     bool m_bReportResult;
     Row_File *m_pRow_File;
+    string m_sText;
+    int m_iTime;
     string m_sFileName;
     string m_sDestinationFileName;
     bool m_bAlreadySpawned; 
@@ -137,7 +140,8 @@ namespace nsJobHandler
     int RunAlreadySpawned();
     void ReportFailure();
     void ReportSuccess();
-    void UpdateProgress(string sStatus);
+    void ReportProgress();
+    void UpdateProgress(string sStatus, int iPercent, int iTime, string sText);
   };
 
 }
@@ -1288,15 +1292,21 @@ VI=Video Input */
 
 	/** @brief COMMAND: #1089 - Update Move Status */
 	/** Update the Status of a Move Task */
+		/** @param #9 Text */
+			/** A Text message to return to the Task. */
+		/** @param #102 Time */
+			/** Time in Seconds remaining. */
 		/** @param #199 Status */
-			/** Status to Update */
+			/** The status: [p] in progress, [e]rror, [s]uccess */
+		/** @param #256 Percent */
+			/** The Percentage to update. */
 		/** @param #257 Task */
 			/** Task ID to update */
 		/** @param #258 Job */
 			/** Job ID to update */
 
-	virtual void CMD_Update_Move_Status(string sStatus,string sTask,string sJob) { string sCMD_Result; CMD_Update_Move_Status(sStatus.c_str(),sTask.c_str(),sJob.c_str(),sCMD_Result,NULL);};
-	virtual void CMD_Update_Move_Status(string sStatus,string sTask,string sJob,string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Update_Move_Status(string sText,string sTime,string sStatus,int iPercent,string sTask,string sJob) { string sCMD_Result; CMD_Update_Move_Status(sText.c_str(),sTime.c_str(),sStatus.c_str(),iPercent,sTask.c_str(),sJob.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Update_Move_Status(string sText,string sTime,string sStatus,int iPercent,string sTask,string sJob,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
 };

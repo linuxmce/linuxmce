@@ -545,8 +545,9 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"ScreenHandler::MediaBrowser_Objec
 	    string sCommand = "";
 	    string sTitle = "Choose a location to move the file. You can also change the file name here.";
 	    
-	    DCE::SCREEN_FileSave screen_FileSave(m_pOrbiter->m_dwPK_Device,m_pOrbiter->m_dwPK_Device,mediaFileBrowserOptions.m_PK_MediaType,-998,sTitle,sCommand,true);
+	    DCE::SCREEN_FileSave screen_FileSave(m_pOrbiter->m_dwPK_Device,m_pOrbiter->m_dwPK_Device,mediaFileBrowserOptions.m_PK_MediaType,-998,sTitle,sCommand,true); // true allows us to see the destination disk
 	    m_pOrbiter->SendCommand(screen_FileSave);
+
 	  }
 	else if( pObjectInfoData->m_PK_DesignObj_SelectedObject == DESIGNOBJ_butFBSF_Delete_CONST )
 	{
@@ -2469,13 +2470,6 @@ bool ScreenHandler::AddSoftware_GridSelected(CallBackData *pData)
 	return false; // Keep processing it
 }
 //-----------------------------------------------------------------------------------------------------
-bool ScreenHandler::FileSave_Get_Filename(string sFileID, string& sFileName, string& sPath)
-{
-  // Given a !F specification, return the path and the filename, by asking the media plugin.
-
-  return true;
-}
-//-----------------------------------------------------------------------------------------------------
 void ScreenHandler::SCREEN_FileSave(long PK_Screen, int iPK_MediaType, int iEK_Disc, string sCaption, string sCommand, bool bAdvanced_options)
 {
 	//the command to execute with the selected file
@@ -2511,9 +2505,11 @@ void ScreenHandler::SCREEN_FileSave(long PK_Screen, int iPK_MediaType, int iEK_D
 
 		if( sFolder.empty() )  // It's possible a valid disk wasn't passed in, but we at least know the type
 		{
-			if( iPK_MediaType==MEDIATYPE_pluto_CD_CONST )
+			if( iPK_MediaType==MEDIATYPE_pluto_CD_CONST || 
+			    iPK_MediaType==MEDIATYPE_pluto_StoredAudio_CONST )
 				sFolder = "audio";
-			else if( iPK_MediaType==MEDIATYPE_pluto_DVD_CONST )
+			else if( iPK_MediaType==MEDIATYPE_pluto_DVD_CONST ||
+				 iPK_MediaType==MEDIATYPE_pluto_StoredVideo_CONST )
 				sFolder = "videos";
 		}
 	}
@@ -2528,7 +2524,7 @@ void ScreenHandler::SCREEN_FileSave(long PK_Screen, int iPK_MediaType, int iEK_D
 	if ( iEK_Disc==-998 )  // Special to fill filename with selected MediaBrowser file.
 	  {
 	    string sSelectedFile, sSelectedPath;
-	    m_sSaveFile_FileName = FileSave_Get_Filename(mediaFileBrowserOptions.m_sSelectedFile, sSelectedFile, sSelectedPath);
+	    m_sSaveFile_FileName = m_mapKeywords["FILENAME"];
 	  }
 
 	//setup variables

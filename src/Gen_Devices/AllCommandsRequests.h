@@ -29370,37 +29370,49 @@ namespace DCE
 	};
 	class CMD_Update_Move_Status : public PreformedCommand {
 	public:
-		CMD_Update_Move_Status(long DeviceIDFrom, long DeviceIDTo,string sStatus,string sTask,string sJob) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+		CMD_Update_Move_Status(long DeviceIDFrom, long DeviceIDTo,string sText,string sTime,string sStatus,int iPercent,string sTask,string sJob) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
 			COMMAND_Update_Move_Status_CONST,
-			3 /* number of parameters */,
+			6 /* number of parameters */,
+			COMMANDPARAMETER_Text_CONST, sText.c_str(),
+			COMMANDPARAMETER_Time_CONST, sTime.c_str(),
 			COMMANDPARAMETER_Status_CONST, sStatus.c_str(),
+			COMMANDPARAMETER_Percent_CONST, StringUtils::itos(iPercent).c_str(),
 			COMMANDPARAMETER_Task_CONST, sTask.c_str(),
 			COMMANDPARAMETER_Job_CONST, sJob.c_str()); }
 	};
 	class CMD_Update_Move_Status_DL : public PreformedCommand {
 	public:
-		CMD_Update_Move_Status_DL(long DeviceIDFrom, string DeviceIDTo,string sStatus,string sTask,string sJob) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+		CMD_Update_Move_Status_DL(long DeviceIDFrom, string DeviceIDTo,string sText,string sTime,string sStatus,int iPercent,string sTask,string sJob) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
 			COMMAND_Update_Move_Status_CONST,
-			3 /* number of parameters */,
+			6 /* number of parameters */,
+			COMMANDPARAMETER_Text_CONST, sText.c_str(),
+			COMMANDPARAMETER_Time_CONST, sTime.c_str(),
 			COMMANDPARAMETER_Status_CONST, sStatus.c_str(),
+			COMMANDPARAMETER_Percent_CONST, StringUtils::itos(iPercent).c_str(),
 			COMMANDPARAMETER_Task_CONST, sTask.c_str(),
 			COMMANDPARAMETER_Job_CONST, sJob.c_str()); }
 	};
 	class CMD_Update_Move_Status_DT : public PreformedCommand {
 	public:
-		CMD_Update_Move_Status_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sStatus,string sTask,string sJob) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+		CMD_Update_Move_Status_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sText,string sTime,string sStatus,int iPercent,string sTask,string sJob) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
 			COMMAND_Update_Move_Status_CONST,
-			3 /* number of parameters */,
+			6 /* number of parameters */,
+			COMMANDPARAMETER_Text_CONST, sText.c_str(),
+			COMMANDPARAMETER_Time_CONST, sTime.c_str(),
 			COMMANDPARAMETER_Status_CONST, sStatus.c_str(),
+			COMMANDPARAMETER_Percent_CONST, StringUtils::itos(iPercent).c_str(),
 			COMMANDPARAMETER_Task_CONST, sTask.c_str(),
 			COMMANDPARAMETER_Job_CONST, sJob.c_str()); }
 	};
 	class CMD_Update_Move_Status_Cat : public PreformedCommand {
 	public:
-		CMD_Update_Move_Status_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sStatus,string sTask,string sJob) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+		CMD_Update_Move_Status_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sText,string sTime,string sStatus,int iPercent,string sTask,string sJob) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
 			COMMAND_Update_Move_Status_CONST,
-			3 /* number of parameters */,
+			6 /* number of parameters */,
+			COMMANDPARAMETER_Text_CONST, sText.c_str(),
+			COMMANDPARAMETER_Time_CONST, sTime.c_str(),
 			COMMANDPARAMETER_Status_CONST, sStatus.c_str(),
+			COMMANDPARAMETER_Percent_CONST, StringUtils::itos(iPercent).c_str(),
 			COMMANDPARAMETER_Task_CONST, sTask.c_str(),
 			COMMANDPARAMETER_Job_CONST, sJob.c_str()); }
 	};

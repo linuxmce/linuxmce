@@ -173,20 +173,84 @@ void MoveJob::AddMoveTasks(TasklistPosition position)
     }
 }
 
+bool MoveJob::ReportPendingTasks(DCE::PendingTaskList *pPendingTaskList)
+{
+  // am totally guessing here. hopefully this will work.
+  PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
+  if (m_eJobStatus==job_WaitingToStart || m_eJobStatus==job_InProgress)
+    {
+      if (pPendingTaskList)
+	{
+	  pPendingTaskList->m_listPendingTask.push_back(new PendingTask(m_iID,
+									m_pCommand_Impl->m_dwPK_Device,
+									m_pCommand_Impl->m_dwPK_Device,
+									"move",ToString(),
+									(char)PercentComplete(),
+									SecondsRemaining(),
+									true));
+	}
+      return true;
+    }
+  else
+    return false;
+}
+
+int MoveJob::PercentComplete()
+{
+  int iTaskNum=0;
+  Task *pTask_Current=NULL;
+  for (list<class Task *>::iterator it=m_listTask.begin();it!=m_listTask.end();++it)
+    {
+      Task *pTask = *it;
+      if ( pTask->m_eTaskStatus_get()==TASK_NOT_STARTED )
+	break;
+      pTask_Current=pTask;
+      iTaskNum++;
+    }
+
+  if ( pTask_Current==NULL || iTaskNum==0 )
+    return 0; // hasn't started yet.
+
+  int RangeThisTask = 100 / m_listTask.size(); 
+  int ScaledPercent = pTask_Current->PercentComplete()*RangeThisTask / 100;
+  
+  return (RangeThisTask * (iTaskNum-1)) + ScaledPercent;;
+
+}
+
+int MoveJob::SecondsRemaining()
+{
+  return 0;
+}
+
 string MoveJob::ToString()
 {
-  return "Moving Media file "+m_sFileName+" to "+m_sDestinationFileName;
+  PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
+  int iTaskNum=0;
+  Task *pTask_Current=NULL;
+  for (list<class Task *>::iterator it=m_listTask.begin();it!=m_listTask.end();++it)
+    {
+      Task *pTask = *it;
+      if (pTask->m_eTaskStatus_get() == TASK_NOT_STARTED )
+	break;
+      pTask_Current=pTask;
+      iTaskNum++;
+    }
+
+  string sTimeLeft;
+  
+  if ( pTask_Current )
+    sTimeLeft = "(" + StringUtils::SecondsAsTime(pTask_Current->SecondsRemaining()) + ")";
+
+  string sTxt = "Moving " + m_sFileName + " to " + m_sDestinationFileName + " " + sTimeLeft;
+
+  return sTxt;
+
 }
 
 int MoveJob::Get_PK_Orbiter()
 {
   return m_iPK_Orbiter; // From the superclass.
-}
-
-bool MoveJob::ReportPendingTasks(DCE::PendingTaskList *pPendingTaskList)
-{
-  // To be implemented
-  return false;
 }
 
 // MoveTask /////////////////////////////////////////////////////////////////////////////////
@@ -303,9 +367,57 @@ int MoveTask::RunAlreadySpawned()
   return 1000; // Re-check in 1 second...
 }
 
-void MoveTask::UpdateProgress(string sStatus)
+void MoveTask::UpdateProgress(string sStatus, int iPercent, int iTime, string sText)
 {
-  // Implement this later.
+  if( m_eTaskStatus_get()==TASK_COMPLETED )
+    {
+      LoggerWrapper::GetInstance()->Write(LV_STATUS, "MoveTask::UpdateProgress ignoring because we're done status %s", sStatus.c_str());
+      return;
+    }
+  
+  m_sText=sText; // expose new status text to task so other parts can use it.
+
+  LoggerWrapper::GetInstance()->Write(LV_WARNING,"MoveTask::UpdateProgress id %d m_eTaskStatus get %d status %s message %s sFilename %s sDestinationFileName %s", 
+				    m_pMoveJob->m_iID_get(), 
+				    m_eTaskStatus_get(),
+				    sStatus.c_str(),
+				    sText.c_str(),
+				    m_sFileName.c_str(),
+				    m_sDestinationFileName.c_str());
+  
+  if ( sStatus=="p" )
+    {
+      m_iPercent=iPercent;
+      m_iTime=iTime;
+      ReportProgress();
+    }
+  else if ( sStatus=="e" )
+    {
+      if ( m_bReportResult )
+	ReportFailure();
+      m_eTaskStatus_set(TASK_FAILED_ABORT); // mark it failed so the job will be aborted.
+    }
+  else if ( sStatus=="s" )
+    {
+      if (m_bReportResult)
+	ReportSuccess();
+      m_eTaskStatus_set(TASK_COMPLETED);
+    }
+}
+
+void MoveTask::ReportFailure()
+{
+    // It's here in case we need to report on a task by task basis.
+}
+
+void MoveTask::ReportSuccess()
+{
+  // It's here in case we need to report on a task by task basis.
+}
+
+void MoveTask::ReportProgress()
+{
+  // It's here in case we need to do something.
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -7655,14 +7767,20 @@ void Media_Plugin::CMD_Specify_Capture_Card_Audio_Port(int iPK_Device,int iPK_De
 
 	/** @brief COMMAND: #1089 - Update Move Status */
 	/** Update the Status of a Move Task */
+		/** @param #9 Text */
+			/** A Text message to return to the Task. */
+		/** @param #102 Time */
+			/** Time in Seconds remaining. */
 		/** @param #199 Status */
-			/** Status to Update */
+			/** The status: [p] in progress, [e]rror, [s]uccess */
+		/** @param #256 Percent */
+			/** The Percentage to update. */
 		/** @param #257 Task */
 			/** Task ID to update */
 		/** @param #258 Job */
 			/** Job ID to update */
 
-void Media_Plugin::CMD_Update_Move_Status(string sStatus,string sTask,string sJob,string &sCMD_Result,Message *pMessage)
+void Media_Plugin::CMD_Update_Move_Status(string sText,string sTime,string sStatus,int iPercent,string sTask,string sJob,string &sCMD_Result,Message *pMessage)
 //<-dceag-c1089-e->
 {
   PLUTO_SAFETY_LOCK(jm,*m_pJobHandler->m_ThreadMutex_get());
@@ -7674,6 +7792,6 @@ void Media_Plugin::CMD_Update_Move_Status(string sStatus,string sTask,string sJo
     }
 
   MoveTask *pMoveTask = (MoveTask *) pTask;
-  pMoveTask->UpdateProgress(sStatus);
+  pMoveTask->UpdateProgress(sStatus, iPercent, atoi(sTime.c_str()), sText);
 
 }
