@@ -290,12 +290,9 @@ int MoveTask::Run()
 
   if (m_bAlreadySpawned)
     {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MoveTask::RunAlreadySpawned() - wait 1 second.");
       return RunAlreadySpawned();
     }
   
-  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MoveTask::Run - Grabbing an app server to do my bidding.");
-
   DeviceData_Base *pDevice_App_Server = m_pMoveJob->m_pCommand_Impl->m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_App_Server_CONST, m_pMoveJob->m_pCommand_Impl);
   
   if (!pDevice_App_Server)
@@ -308,10 +305,9 @@ int MoveTask::Run()
       m_pDevice_App_Server=pDevice_App_Server;
     }
 
-  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXX FOOBY App Server Device is %d",pDevice_App_Server->m_dwPK_Device); 
-
   // Pass these parameters to the MoveWrapper.sh
   string strParameters = 
+    StringUtils::itos(m_pCommand_Impl->m_dwPK_Device) + "\t" +
     StringUtils::itos(m_pJob->m_iID_get()) + "\t" +
     StringUtils::itos(m_iID_get()) + "\t" + 
     m_sFileName + "\t" + 
