@@ -133,6 +133,7 @@ MoveJob::MoveJob(Database_pluto_media *pDatabase_pluto_media,
   m_pRow_File=pRow_File;
   m_sFileName=sFileName;
   m_sDestinationFileName=sDestinationFileName;
+  m_iPK_Orbiter=iPK_Orbiter;
 
   LoggerWrapper::GetInstance()->Write(LV_STATUS, "MoveJob::MoveJob constructor - %s to %s ",m_sFileName.c_str(),m_sDestinationFileName.c_str());
 }
@@ -152,28 +153,33 @@ MoveJob::~MoveJob()
 
 bool MoveJob::ReadyToRun()
 {
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MoveJob::ReadyToRun - Ready - Adding Move Tasks");
   AddMoveTasks();
   return true;
 }
 
 void MoveJob::AddMoveTasks(TasklistPosition position)
 {
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXX AddMoveTasks");
   // Move original filename.
   if (FileUtils::FileExists(m_sFileName) && !FileUtils::FileExists(m_sDestinationFileName))
     {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXX Adding Move Task for Main File");
       AddTask(new MoveTask(this, "Move Media",m_bReportResult,m_sFileName,m_sDestinationFileName),position);
     }
   if (FileUtils::FileExists(m_sFileName+".id3") && !FileUtils::FileExists(m_sDestinationFileName + ".id3"))
     {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXX Adding Move Task for ID3 File");
       AddTask(new MoveTask(this, "Move ID3",m_bReportResult,m_sFileName+".id3",m_sDestinationFileName+".id3"),position);
     }
   if (FileUtils::FileExists(m_sFileName+".dvd.keys.tar.gz") && !FileUtils::FileExists(m_sDestinationFileName+".dvd.keys.tar.gz"))
     {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXX Adding Move Task for DVD Keys");
       AddTask(new MoveTask(this, "Move DVD Keys",m_bReportResult,m_sFileName+".dvd.keys.tar.gz",m_sDestinationFileName+".dvd.keys.tar.gz"),position);
     }
 }
 
-bool MoveJob::ReportPendingTasks(DCE::PendingTaskList *pPendingTaskList)
+bool MoveJob::ReportPendingTasks(PendingTaskList *pPendingTaskList)
 {
   // am totally guessing here. hopefully this will work.
   PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
@@ -182,7 +188,7 @@ bool MoveJob::ReportPendingTasks(DCE::PendingTaskList *pPendingTaskList)
       if (pPendingTaskList)
 	{
 	  pPendingTaskList->m_listPendingTask.push_back(new PendingTask(m_iID,
-									m_pCommand_Impl->m_dwPK_Device,
+									m_iPK_Orbiter,
 									m_pCommand_Impl->m_dwPK_Device,
 									"move",ToString(),
 									(char)PercentComplete(),
@@ -214,7 +220,7 @@ int MoveJob::PercentComplete()
   int RangeThisTask = 100 / m_listTask.size(); 
   int ScaledPercent = pTask_Current->PercentComplete()*RangeThisTask / 100;
   
-  return (RangeThisTask * (iTaskNum-1)) + ScaledPercent;;
+  return (RangeThisTask * (iTaskNum-1)) + ScaledPercent;
 
 }
 
@@ -261,24 +267,34 @@ MoveTask::MoveTask(class MoveJob *pMoveJob,
 		   string sFileName,
 		   string sDestinationFileName) : Task(pMoveJob,sName)
 {
+  m_bAlreadySpawned=false;
   m_pMoveJob=pMoveJob;
   m_bReportResult=bReportResult;
   m_sFileName=sFileName;
   m_sDestinationFileName=sDestinationFileName;
+
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MoveTask::MoveTask constructor");
+
 }
 
 MoveTask::~MoveTask()
 {
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MoveTask::MoveTask destructor");
   // Just here because...
 }
 
 int MoveTask::Run()
 {
 
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MoveTask::Run() Top of RunLoop.");
+
   if (m_bAlreadySpawned)
     {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MoveTask::RunAlreadySpawned() - wait 1 second.");
       return RunAlreadySpawned();
     }
+  
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MoveTask::Run - Grabbing an app server to do my bidding.");
 
   DeviceData_Base *pDevice_App_Server = m_pMoveJob->m_pCommand_Impl->m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_App_Server_CONST, m_pMoveJob->m_pCommand_Impl);
   
@@ -292,6 +308,8 @@ int MoveTask::Run()
       m_pDevice_App_Server=pDevice_App_Server;
     }
 
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXX FOOBY App Server Device is %d",pDevice_App_Server->m_dwPK_Device); 
+
   // Pass these parameters to the MoveWrapper.sh
   string strParameters = 
     StringUtils::itos(m_pJob->m_iID_get()) + "\t" +
@@ -301,7 +319,7 @@ int MoveTask::Run()
  
   string sResultMessage = 
     StringUtils::itos(m_pMoveJob->m_pCommand_Impl->m_dwPK_Device) + " " +   // From device
-    StringUtils::itos(pDevice_App_Server->m_dwPK_Device) + " " +            // To Device
+    StringUtils::itos(m_pMoveJob->m_pCommand_Impl->m_dwPK_Device) + " " +   // To Device
     StringUtils::itos(MESSAGETYPE_COMMAND) + " " +                          // 1 = COMMAND
     StringUtils::itos(COMMAND_Update_Move_Status_CONST) + " " +             // CMD_Update_Move_Status
     StringUtils::itos(COMMANDPARAMETER_Task_CONST) + " " +                  //
@@ -4700,7 +4718,7 @@ bool Media_Plugin::DiskDriveIsRipping(int iPK_Device)
 
 bool Media_Plugin::ReportPendingTasks(PendingTaskList *pPendingTaskList)
 {
-	return false;
+  return m_pJobHandler->ReportPendingTasks(pPendingTaskList);
 }
 
 void Media_Plugin::AddOtherDevicesInPipesToRenderDevices(int PK_Pipe, map<int,MediaDevice *> *pmapMediaDevice,EntertainArea *pEntertainArea)

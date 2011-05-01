@@ -64,6 +64,7 @@
 #include "JobHandler/Task.h"
 
 using namespace nsJobHandler;
+using namespace DCE;
 
 class Database_pluto_main;
 class Database_pluto_media;
@@ -72,10 +73,14 @@ class Row_File;
 class MediaFile;
 class MediaListGrid;
 class DatabaseInfoOnPath;
-class PendingTaskList;
 
 #define NUM_UI_VERSIONS	2
 #define MAX_MEDIA_COLORS    5 // We need some unique colors to color-code the media streams
+
+namespace DCE
+{
+  class PendingTaskList;
+}
 
 namespace nsJobHandler
 {
@@ -89,6 +94,7 @@ namespace nsJobHandler
     string m_sDestinationFileName;
     Row_File *m_pRow_File;
     Database_pluto_media *m_pDatabase_pluto_media;
+    int m_iPK_Orbiter;
   public:
     MoveJob(Database_pluto_media *pDatabase_pluto_media,
 	    class JobHandler *pJobHandler,
@@ -103,7 +109,7 @@ namespace nsJobHandler
     virtual bool ReadyToRun();
     void AddMoveTasks(TasklistPosition position=position_TasklistEnd);
 
-    virtual bool ReportPendingTasks(DCE::PendingTaskList *pPendingTaskList);
+    virtual bool ReportPendingTasks(PendingTaskList *pPendingTaskList);
     virtual int SecondsRemaining();
     virtual string ToString();
     virtual int PercentComplete();
