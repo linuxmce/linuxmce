@@ -148,6 +148,7 @@ namespace nsJobHandler
     void ReportSuccess();
     void ReportProgress();
     void UpdateProgress(string sStatus, int iPercent, int iTime, string sText);
+    virtual int SecondsRemaining();
   };
 
   class MoveDBTask : public Task

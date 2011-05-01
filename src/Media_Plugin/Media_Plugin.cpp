@@ -160,23 +160,26 @@ bool MoveJob::ReadyToRun()
 
 void MoveJob::AddMoveTasks(TasklistPosition position)
 {
+  vector <Task *> vTasks;
   LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXX AddMoveTasks");
   // Move original filename.
   if (FileUtils::FileExists(m_sFileName) && !FileUtils::FileExists(m_sDestinationFileName))
     {
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXX Adding Move Task for Main File");
-      AddTask(new MoveTask(this, "Move Media",m_bReportResult,m_sFileName,m_sDestinationFileName),position);
+      vTasks.push_back(new MoveTask(this, "Move Media",m_bReportResult,m_sFileName,m_sDestinationFileName));
+      vTasks.push_back(new MoveDBTask(this, "Move Media Entry in DB",m_bReportResult));
     }
   if (FileUtils::FileExists(m_sFileName+".id3") && !FileUtils::FileExists(m_sDestinationFileName + ".id3"))
     {
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXX Adding Move Task for ID3 File");
-      AddTask(new MoveTask(this, "Move ID3",m_bReportResult,m_sFileName+".id3",m_sDestinationFileName+".id3"),position);
+      vTasks.push_back(new MoveTask(this, "Move ID3",m_bReportResult,m_sFileName+".id3",m_sDestinationFileName+".id3"));
     }
   if (FileUtils::FileExists(m_sFileName+".dvd.keys.tar.gz") && !FileUtils::FileExists(m_sDestinationFileName+".dvd.keys.tar.gz"))
     {
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXX Adding Move Task for DVD Keys");
-      AddTask(new MoveTask(this, "Move DVD Keys",m_bReportResult,m_sFileName+".dvd.keys.tar.gz",m_sDestinationFileName+".dvd.keys.tar.gz"),position);
+      vTasks.push_back(new MoveTask(this, "Move DVD Keys",m_bReportResult,m_sFileName+".dvd.keys.tar.gz",m_sDestinationFileName+".dvd.keys.tar.gz"));
     }
+  AddTasks(vTasks, position);
 }
 
 bool MoveJob::ReportPendingTasks(PendingTaskList *pPendingTaskList)
@@ -430,6 +433,15 @@ void MoveTask::ReportSuccess()
 void MoveTask::ReportProgress()
 {
   // It's here in case we need to do something.
+}
+
+int MoveTask::SecondsRemaining()
+{
+  if ( m_iTime )
+    return m_iTime;
+  
+  return Task::SecondsRemaining();
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
