@@ -286,9 +286,7 @@ MoveTask::~MoveTask()
 int MoveTask::Run()
 {
 
-  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MoveTask::Run() Top of RunLoop.");
-
-  if (m_bAlreadySpawned)
+   if (m_bAlreadySpawned)
     {
       return RunAlreadySpawned();
     }
@@ -307,7 +305,7 @@ int MoveTask::Run()
 
   // Pass these parameters to the MoveWrapper.sh
   string strParameters = 
-    StringUtils::itos(m_pCommand_Impl->m_dwPK_Device) + "\t" +
+    StringUtils::itos(m_pMoveJob->m_pCommand_Impl->m_dwPK_Device) + "\t" +
     StringUtils::itos(m_pJob->m_iID_get()) + "\t" +
     StringUtils::itos(m_iID_get()) + "\t" + 
     m_sFileName + "\t" + 
@@ -436,6 +434,46 @@ void MoveTask::ReportProgress()
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
+MoveDBTask::MoveDBTask(class MoveJob *pMoveJob,
+		       string sName,
+		       bool bReportResult) : Task(pMoveJob,sName)
+{
+  m_bAlreadySpawned=false;
+  m_pMoveJob=pMoveJob;
+  m_bReportResult=bReportResult;
+}
+
+MoveDBTask::~MoveDBTask()
+{
+  // destructor.
+}
+
+int MoveDBTask::Run()
+{
+
+  string sDestinationPath = FileUtils::BasePath(m_pMoveJob->m_sDestinationFileName);
+  string sDestinationBaseName = FileUtils::FilenameWithoutPath(m_pMoveJob->m_sDestinationFileName);
+
+  if (FileUtils::FileExists(m_pMoveJob->m_sDestinationFileName))
+    {
+      m_pMoveJob->m_pRow_File->Path_set(sDestinationPath);
+      m_pMoveJob->m_pRow_File->Filename_set(sDestinationBaseName);
+      m_pMoveJob->m_pDatabase_pluto_media->File_get()->Commit();
+      m_eTaskStatus_set(TASK_COMPLETED);
+    }
+  else
+    m_eTaskStatus_set(TASK_FAILED_ABORT);  // If this didn't work, no point in doing other tasks.
+ 
+  return 0; // Done.
+}
+
+bool MoveDBTask::Abort()
+{
+  // Might be implemented later, but honestly, this will happen so fast...
+  return false;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
 static bool MediaFileComparer(MediaFile *a, MediaFile *b)
 {
 	if(a->m_sAlbum != b->m_sAlbum)

@@ -150,6 +150,27 @@ namespace nsJobHandler
     void UpdateProgress(string sStatus, int iPercent, int iTime, string sText);
   };
 
+  class MoveDBTask : public Task
+  {
+  public:
+    class MoveJob *m_pMoveJob;
+    bool m_bReportResult;
+    Row_File *m_pRow_File;
+    string m_sText;
+    bool m_bAlreadySpawned;
+    
+    MoveDBTask(class MoveJob *pMoveJob,
+	       string sName,
+	       bool bReportResult);
+    virtual ~MoveDBTask();
+    virtual string GetType() { return "MoveDBTask"; }
+    
+    virtual int Run();
+    virtual bool Abort();
+    int RunAlreadySpawned();
+
+  };
+
 }
 
 namespace DCE
