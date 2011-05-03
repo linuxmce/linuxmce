@@ -40,6 +40,8 @@ string TranslateSerialUSB(string sInput,string sIPAddress)
 	StringUtils::TrimSpaces(sOutput);
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TranslateSerialUSB %s result %s", sInput.c_str(), sOutput.c_str());
 #endif
-
+#ifdef WIN32
+	string sOutput = "";  // fix so win32 will compile.
+#endif
 	return sOutput;
 }
