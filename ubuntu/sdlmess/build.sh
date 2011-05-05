@@ -13,5 +13,5 @@ then
 	MKOPTS="PTR64=1"	
 fi
 
-NOWERROR=1 TARGET=mess make $MKOPTS
+make NOWERROR=1 TARGET=mess $MKOPTS all
 
