@@ -12,5 +12,5 @@ then
 	MKOPTS="PTR64=1"	
 fi
 
-make $MKOPTS
+NOWERROR=1 make $MKOPTS
 
