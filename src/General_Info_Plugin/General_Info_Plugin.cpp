@@ -3390,9 +3390,10 @@ void General_Info_Plugin::CMD_Set_Enable_Status(int iPK_Device,bool bEnable,stri
 		pRow_Device->Disabled_set(bEnable ? 0 : 1);
 		pRow_Device->Table_Device_get()->Commit();
 
-		// If it's a serial device, remove the com port
-		string sSQL = "UPDATE Device_DeviceData SET IK_DeviceData=NULL WHERE FK_Device=" + StringUtils::itos(iPK_Device) + " AND FK_DeviceData=" TOSTRING(DEVICEDATA_COM_Port_on_PC_CONST);
-		m_pDatabase_pluto_main->threaded_db_wrapper_query(sSQL,true);
+		// This has been commented out on the grounds that I think it is RETARDED. -tschak
+//		// If it's a serial device, remove the com port
+//		string sSQL = "UPDATE Device_DeviceData SET IK_DeviceData=NULL WHERE FK_Device=" + StringUtils::itos(iPK_Device) + " AND FK_DeviceData=" TOSTRING(DEVICEDATA_COM_Port_on_PC_CONST);
+//		m_pDatabase_pluto_main->threaded_db_wrapper_query(sSQL,true);
 	}
 	else
 	{
