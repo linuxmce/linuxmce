@@ -291,7 +291,9 @@ fi
 # If we are using VDR as our PVR, make sure the video dir is available, and restart VDR 
 # if needed.
 if VDRInstalled ; then
-	. /etc/default/vdr
+	if [[ -f /etc/default/vdr ]]; then
+		. /etc/default/vdr
+	fi
 	cd $VIDEO_DIR
 	if ! pidof vdr ; then
 		# If we are running on the cure, we need to restart VDR after mounting the relevant devices
