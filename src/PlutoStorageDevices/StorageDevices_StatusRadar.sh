@@ -311,7 +311,7 @@ while : ;do
 		## then we translate the block device to uuid
 		if [[ "$IDrive_Parent" == "$PK_Device" ]] ;then
 		if [[ "$IDrive_UUID" == "" || "$IDrive_UUID" == "NULL" ]] && [[ "$IDrive_BlockDev" != "NULL" ]] ;then
-			IDrive_UUID=$(udevinfo --query=all --name="$IDrive_BlockDev" |  grep 'ID_FS_UUID=' | cut -d'=' -f2)
+			IDrive_UUID=$(udevadm info --query=all --name="$IDrive_BlockDev" |  grep 'ID_FS_UUID=' | cut -d'=' -f2)
 
 			if [[ "$IDrive_UUID" != "" ]] ;then
 				RunSQL "UPDATE Device_DeviceData SET IK_DeviceData = '$IDrive_UUID' WHERE FK_Device = '$IDrive_ID' AND FK_DeviceData = '$DD_UUID'"
