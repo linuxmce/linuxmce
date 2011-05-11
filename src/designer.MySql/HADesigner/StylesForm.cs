@@ -531,11 +531,11 @@ namespace HADesigner
 
 			if(this.spCriteria.intID == -1)
 			{
-				strSelect += " and FK_Criteria is null";
+				strSelect += " and FK_UI is null";
 			}
 			else
 			{
-				strSelect += " and FK_Criteria="+this.spCriteria.ID;
+				strSelect += " and FK_UI="+this.spCriteria.ID;
 			}
 
 			if(this.spSkin.intID == -1)
