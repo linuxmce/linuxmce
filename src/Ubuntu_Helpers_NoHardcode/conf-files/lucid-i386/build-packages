@@ -196,3 +196,4 @@ libvisual-0.4-dev
 libmng-dev
 libtalloc-dev
 chrpath
+libxml++2.6-dev
