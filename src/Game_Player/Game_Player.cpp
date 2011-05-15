@@ -41,7 +41,6 @@ using namespace DCE;
 #include <sstream>
 #include <pthread.h>
 
-
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 Game_Player::Game_Player(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
@@ -412,6 +411,7 @@ bool Game_Player::UpdateMESSConfig(string sMediaURL)
 	  // Custom Controller Information found, specify and update controller file.
 	  s_ConfigFile = StringUtils::Replace(s_ConfigFile,"##CTRLR##","GamePlayer");
 	  UpdateControllerFile();
+	  ParseControllerFile();
 	}
 
 	if (!FileUtils::DirExists(s_OutputDir)) 
@@ -438,6 +438,120 @@ bool Game_Player::UpdateMESSConfig(string sMediaURL)
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Wrote %s",s_OutputFile.c_str());
 		return true;	
 	}
+
+}
+
+xmlXPathObjectPtr Game_Player::getnodeset (xmlDocPtr doc, xmlChar *xpath)
+{
+
+        xmlXPathContextPtr context;
+        xmlXPathObjectPtr result;
+
+        context = xmlXPathNewContext(doc);
+        if (context == NULL) {
+                return NULL;
+        }
+        result = xmlXPathEvalExpression(xpath, context);
+        xmlXPathFreeContext(context);
+        if (result == NULL) {
+                return NULL;
+        }
+        if(xmlXPathNodeSetIsEmpty(result->nodesetval)){
+                xmlXPathFreeObject(result);
+                return NULL;
+        }
+        return result;
+}
+
+
+/**
+ * ParseControllerEntry(sEntryName, sKeyCode) - parses a key code, and shoves it into the
+ * Controller map for use elsewhere in this code.
+ */
+void Game_Player::ParseControllerEntry(string sEntryName, string sKeyCode)
+{
+	// for now, this is super ($#@%@# simple. It 
+}
+
+/**
+ * ParseControllerFile() - If a controller file is updated, parse it and grab the relevant 
+ * controller information into a Controller class so we can map keys appropriately for Orbiter.
+ */
+void Game_Player::ParseControllerFile()
+{
+
+        xmlDocPtr doc;
+        doc = xmlParseFile("/home/mamedata/ctrlr/GamePlayer.cfg");
+
+        if (doc == NULL ) {
+                return;
+        }
+
+	
+
+	xmlNodeSetPtr nodeset;
+	xmlXPathObjectPtr result;
+	xmlChar *resultText;
+
+	if (doc == NULL)
+		return;
+	
+	// now evaluate specific xpath expressions to grab needed mappings
+	// for orbiter commands. This is hardcoded, yes.. we can do it better
+	// but that comes later. 
+	
+	// Grab/Parse P1 Start Key if there.
+	result = getnodeset(doc,(xmlChar *)"//mameconfig/system[@name='default']/input/port[@type='START1']/*");
+	if (result)
+	{
+		nodeset = result->nodesetval;
+		resultText = xmlNodeListGetString(doc, nodeset->nodeTab[0]->xmlChildrenNode, 1);
+		string resultString = (char *)resultText;
+		ParseControllerEntry("P1",resultString);
+		xmlFree(resultText);
+		xmlXPathFreeObject(result);
+	}
+	
+        // Grab/Parse P2 Start Key if there.
+        result = getnodeset(doc,(xmlChar *)"//mameconfig/system[@name='default']/input/port[@type='START2']/*");
+        if (result)
+        {
+                nodeset = result->nodesetval;
+                resultText = xmlNodeListGetString(doc, nodeset->nodeTab[0]->xmlChildrenNode, 1);
+                string resultString = (char *)resultText;
+                ParseControllerEntry("P2",resultString);
+                xmlFree(resultText);
+                xmlXPathFreeObject(result);
+        }
+
+        // Grab/Parse Coin 1 key if there.
+        result = getnodeset(doc,(xmlChar *)"//mameconfig/system[@name='default']/input/port[@type='COIN1']/*");
+        if (result)
+        {
+                nodeset = result->nodesetval;
+                resultText = xmlNodeListGetString(doc, nodeset->nodeTab[0]->xmlChildrenNode, 1);
+                string resultString = (char *)resultText;
+                ParseControllerEntry("C1",resultString);
+                xmlFree(resultText);
+                xmlXPathFreeObject(result);
+        }
+
+        // Grab/Parse Coin 2 Key if there.
+        result = getnodeset(doc,(xmlChar *)"//mameconfig/system[@name='default']/input/port[@type='COIN2']/*");
+        if (result)
+        {
+                nodeset = result->nodesetval;
+                resultText = xmlNodeListGetString(doc, nodeset->nodeTab[0]->xmlChildrenNode, 1);
+                string resultString = (char *)resultText;
+                ParseControllerEntry("C2",resultString);
+                xmlFree(resultText);
+                xmlXPathFreeObject(result);
+        }
+
+	// Done.
+
+	xmlFreeDoc(doc);
+	return;
 
 }
 

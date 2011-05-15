@@ -42,6 +42,9 @@
 #include "DCE/PlainClientSocket.h"
 #include "AlarmManager.h"
 
+#include <libxml/parser.h>
+#include <libxml/xpath.h>
+
 //<-dceag-decl-b->
 namespace DCE
 {
@@ -80,6 +83,9 @@ public:
 
 protected:
 		bool UpdateControllerFile();
+		void ParseControllerFile();
+		void ParseControllerEntry(string sEntryName, string sKeyCode);
+		xmlXPathObjectPtr getnodeset (xmlDocPtr doc, xmlChar *xpath);
 		string GetMessParametersFor(string sMediaURL);
 		bool UpdateMESSConfig(string sMediaURL);
 		bool LaunchMESS(string sMediaURL);

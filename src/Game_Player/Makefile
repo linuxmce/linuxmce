@@ -19,9 +19,9 @@ Gen_Dev_Files = $(GENDEV)/Game_PlayerBase.cpp
 sources = Main.cpp Game_Player.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
-CXXFLAGS +=
-CPPFLAGS +=
-LDFLAGS +=  -lX11 -lXmu -lXtst -lWindowUtils -lmysqlclient_r -lpthread
+CXXFLAGS += 
+CPPFLAGS += `pkg-config libxml-2.0 --cflags`
+LDFLAGS +=  -lX11 -lXmu -lXtst -lWindowUtils -lmysqlclient_r -lpthread `pkg-config libxml-2.0 --libs`
 XTRALDLIBS =
 
 Gen_Dev_Files +=
