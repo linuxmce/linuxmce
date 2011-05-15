@@ -191,3 +191,4 @@ x11proto-xext-dev
 x11proto-xf86vidmode-dev
 xorg-dev
 zaptel-source
+libxml++-2.6-dev
