@@ -34,7 +34,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="pthreadVC.lib wsock32.lib libmySQL.lib DCE.lib"
 				OutputFile="../Debug/pluto_main.dll"
-				AdditionalLibraryDirectories="C:\mysql\lib\Debug;../../libs/Libraries/pthreads-win32/lib;../lib"
+				AdditionalLibraryDirectories="/mysql/lib/Debug;../../libs/Libraries/pthreads-win32/lib;../lib"
 				ModuleDefinitionFile="pluto_main.def"
 				ImportLibrary="../lib/pluto_main.lib"/>				
 			<Tool
