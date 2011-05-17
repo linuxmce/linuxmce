@@ -30,3 +30,6 @@ qtcAddDeployment()
 
 RESOURCES += \
     Light_Switch_Graphics.qrc
+
+OTHER_FILES += \
+    qml/Light_Switch/SwitchButton.qml
