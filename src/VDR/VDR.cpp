@@ -792,6 +792,16 @@ void VDR::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName,str
 	  }
 		
 	string sVDRResponse;
+        if (m_VDRStatus_get() == VDRSTATUS_PLAYBACK) {
+        	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VDRSTATUS_PLAYBACK");
+	} else if (m_VDRStatus_get() == VDRSTATUS_MENU) {
+        	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VDRSTATUS_MENU");
+	} else if (m_VDRStatus_get() == VDRSTATUS_LIVETV) {
+        	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VDRSTATUS_LIVETV");
+	} else {
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"other VDRSTATUS");		
+	}
+		
 	SendVDRCommand(m_sVDRIp,"HITK " + convkey,sVDRResponse);
 	sVDRResponse="";
 	SendVDRCommand(m_sVDRIp,"CHAN",sVDRResponse);
