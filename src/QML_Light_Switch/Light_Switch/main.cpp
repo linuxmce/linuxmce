@@ -1,5 +1,6 @@
 #include <QtGui/QApplication>
 #include "qmlapplicationviewer.h"
+#include "../QML_Light_Switch.h"
 
 int main(int argc, char *argv[])
 {

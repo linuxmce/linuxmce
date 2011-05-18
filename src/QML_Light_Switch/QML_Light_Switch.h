@@ -19,7 +19,7 @@
 
 //	DCE Implemenation for #2181 QML Light Switch
 
-#include "Gen_Devices/QML_Light_SwitchBase.h"
+#include "../Gen_Devices/QML_Light_SwitchBase.h"
 //<-dceag-d-e->
 
 //<-dceag-decl-b->
