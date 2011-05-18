@@ -2667,6 +2667,8 @@
 #define DESIGNOBJ_mnuPVRProgramDetails_CONST 6058
 #define DESIGNOBJ_butShowRecOptions_CONST 6059
 #define DESIGNOBJ_butPVRShowMoreDetail_CONST 6060
+#define DESIGNOBJ_Specify_Audio_Inputs_CONST 6063
+#define DESIGNOBJ_dgCaptureCardAudioPorts_CONST 6064
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"

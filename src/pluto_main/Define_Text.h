@@ -1170,6 +1170,7 @@
 #define TEXT_Saturday_CONST 2113
 #define TEXT_Sunday_CONST 2114
 #define TEXT_PVR_EPG_Recording_Options_CONST 2115
+#define TEXT_Explain_Audio_Inputs_CONST 2116
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"
