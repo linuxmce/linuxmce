@@ -1,9 +1,9 @@
 #ifndef QML_Light_SwitchBase_h
 #define QML_Light_SwitchBase_h
-#include "DeviceData_Impl.h"
-#include "Message.h"
-#include "Command_Impl.h"
-#include "Logger.h"
+#include "../DCE/DeviceData_Impl.h"
+#include "../DCE/Message.h"
+#include "../DCE/Command_Impl.h"
+#include "../DCE/Logger.h"
 #include "../pluto_main/Define_Command.h"
 #include "../pluto_main/Define_CommandParameter.h"
 #include "../pluto_main/Define_DeviceTemplate.h"
