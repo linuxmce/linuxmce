@@ -2,6 +2,7 @@
 #define SWITCHWIDGET_H
 
 #include <QMainWindow>
+#include <QtDeclarative>
 
 class switchWidget : public QMainWindow
 {
