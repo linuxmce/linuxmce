@@ -5,6 +5,7 @@ Rectangle {
     width: 360
     height: 360
     color: "black"
+    opacity: 0.75
     SwitchButton {}
     Text {
         id: switchpanel

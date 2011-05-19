@@ -8,4 +8,8 @@
     <qresource prefix="/security"/>
     <qresource prefix="/ceiling"/>
     <qresource prefix="/design"/>
+    <qresource prefix="/QML">
+        <file>qml/Light_Switch/SwitchButton.qml</file>
+        <file>qml/Light_Switch/main.qml</file>
+    </qresource>
 </RCC>

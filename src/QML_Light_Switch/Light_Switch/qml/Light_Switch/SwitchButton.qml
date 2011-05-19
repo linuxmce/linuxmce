@@ -15,15 +15,18 @@ Rectangle {
     MouseArea {
         height: 100; width: 100
         anchors.fill: parent
-        onClicked: {console.log(switchbutton.state)
+        onClicked: {
 
             if (switchbutton.state =="ON")
                 switchbutton.state = "OFF"
+
             else
                 switchbutton.state ="ON"
 
                  }
+        onExited: {console.log(switchbutton.state)
               }
+    }
 
     Text {
         id: lightLabel
@@ -37,6 +40,7 @@ Rectangle {
             PropertyChanges {target:switchbutton; color: "green"}
             PropertyChanges {target: lightLabel; text: "On!"}
             PropertyChanges {target: lt_on; source:"qrc:/sconces/on.png"}
+
             },
 
         State {

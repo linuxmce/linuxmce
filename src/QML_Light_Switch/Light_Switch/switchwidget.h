@@ -4,15 +4,25 @@
 #include <QMainWindow>
 #include <QtDeclarative>
 
-class switchWidget : public QMainWindow
+#include "../QML_Light_Switch.h"
+#include "Gen_Devices/QML_Light_SwitchBase.h"
+
+namespace DCE
+{
+class QML_Light_Switch;
+}
+
+class switchWidget : public DCE::QML_Light_Switch
 {
     Q_OBJECT
+
 public:
-    explicit switchWidget(QWidget *parent = 0);
+    switchWidget(QWidget* parent = 0); //constructor
 
 signals:
 
 public slots:
+
 
 };
 
