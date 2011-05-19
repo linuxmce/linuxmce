@@ -2184,6 +2184,15 @@ void Media_Plugin::StartCaptureCard(MediaStream *pMediaStream)
 		return; // Shouldn't happen
 	}
 
+	// Since this is only used here, I am not changing the MediaDevice/MediaStream structures
+	// to accomodate an audio port for the capture card. There is no point. -TSCHAK
+
+	DeviceData_Router *pDevice_CaptureCard_AudioPort = m_pRouter->m_mapDeviceData_Router_Find( atoi(pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_mapParameters_Find(DEVICEDATA_FK_Device_Capture_Card_Audio_P_CONST).c_str()));
+
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"StartCaptureCard(): Audio Port Device is %d",pDevice_CaptureCard_AudioPort->m_dwPK_Device);
+
+	// We check this later.
+
 	// Find the media player to play this capture card
 	DeviceData_Router *pDevice_MediaPlayer = (DeviceData_Router *) ((DeviceData_Router *) pMediaStream->m_pMediaDevice_Source->m_pDevice_CaptureCard)->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_Xine_Player_CONST);
 
@@ -2213,7 +2222,15 @@ void Media_Plugin::StartCaptureCard(MediaStream *pMediaStream)
 		if( pDevice_App_Server )
 		{
 			string sArguments = pMediaStream->m_pMediaDevice_Source->m_pDevice_CaptureCard->m_mapParameters_Find(DEVICEDATA_Extra_Parameters_CONST);
+			string sArguments2;
 
+			if (pDevice_CaptureCard_AudioPort) // look above for this pointer.
+			{
+				sArguments2 = pDevice_CaptureCard_AudioPort->m_mapParameters_Find(DEVICEDATA_Extra_Parameters_CONST);
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"StartCaptureCard(): Arguments2 is %s",sArguments2.c_str());
+			}
+
+			sArguments = sArguments + " " + sArguments2;
 			StringUtils::Replace(&sArguments,"<%=BLOCK%>",sDevice);
 			StringUtils::Replace(&sArguments," ","\t");  // The database uses spaces to separate the arguments, we need tabs
 			DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,

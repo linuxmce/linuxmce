@@ -78,8 +78,7 @@
       <Name>System.XML</Name>
     </Reference>
     <Reference Include="MySql.Data, Version=6.1.3.0, Culture=neutral, PublicKeyToken=20449f9ba87f7ae2">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\usr\lib\cli\MySql.Data-6.1\MySql.Data.dll</HintPath>
+      <Package>mysql-connector-net</Package>
     </Reference>
   </ItemGroup>
   <ItemGroup>

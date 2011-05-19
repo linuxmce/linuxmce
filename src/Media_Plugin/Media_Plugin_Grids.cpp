@@ -2140,7 +2140,7 @@ class DataGridTable *Media_Plugin::CaptureCardAudioPorts( string GridID, string 
 			continue;	// This device is on another computer.
 		
 		vector<Row_Device_DeviceData *> vectRow_Device_DeviceData;
-		m_pDatabase_pluto_main->Device_DeviceData_get()->GetRows("IK_DeviceData=" + StringUtils::itos(pRow_Device->PK_Device_get()) + " AND FK_DeviceData=" TOSTRING(DEVICEDATA_FK_Device_Capture_Card_Audio_Port_CONST),&vectRow_Device_DeviceData);
+		m_pDatabase_pluto_main->Device_DeviceData_get()->GetRows("IK_DeviceData=" + StringUtils::itos(pRow_Device->PK_Device_get()) + " AND FK_DeviceData=" TOSTRING(DEVICEDATA_FK_Device_Capture_Card_Audio_P_CONST),&vectRow_Device_DeviceData);
 		
 		string sDescription = pRow_Device->Description_get();
 		Row_Device *pRow_Device_Parent = pRow_Device->FK_Device_ControlledVia_getrow();

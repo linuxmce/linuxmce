@@ -2768,6 +2768,20 @@ bool OSDScreenHandler::CaptureCardPort_GridRendering(CallBackData *pData)
 bool OSDScreenHandler::CaptureCardPort_DatagridSelected(CallBackData *pData)
 {
 	DatagridCellBackData *pCellInfoData = (DatagridCellBackData *)pData;
+	if( pCellInfoData->m_nPK_Datagrid==DATAGRID_Capture_Card_Audio_Ports_CONST )
+	  {
+	    DCE::CMD_Specify_Capture_Card_Audio_Port CMD_Specify_Capture_Card_Audio_Port(
+						     m_pOrbiter->m_dwPK_Device,
+						     m_pOrbiter->m_dwPK_Device_MediaPlugIn,
+						     atoi(m_pOrbiter->m_mapVariable_Find(VARIABLE_PK_Device_1_CONST).c_str()),
+						     atoi(pCellInfoData->m_sValue.c_str()));
+	    string sResponse; // Send with response so the grid does not refresh.
+	    m_pOrbiter->SendCommand(CMD_Specify_Capture_Card_Audio_Port,&sResponse);
+	    
+	    m_pOrbiter->CMD_Goto_DesignObj(0,TOSTRING(DESIGNOBJ_RoomsForExternalDevice_CONST),"","",false,true);
+	    // Note: VARIABLE_PK_Device_1 is still set from the datagrid below, so we are okay.
+	    return true; // We did a goto screen.
+	  }
 	if( pCellInfoData->m_nPK_Datagrid==DATAGRID_Capture_Card_Port_Devices_CONST )
 	{
 		DCE::CMD_Specify_Capture_Card_Port CMD_Specify_Capture_Card_Port(m_pOrbiter->m_dwPK_Device,m_pOrbiter->m_dwPK_Device_MediaPlugIn,
@@ -2775,7 +2789,8 @@ bool OSDScreenHandler::CaptureCardPort_DatagridSelected(CallBackData *pData)
 		string sResponse;  // Send with return confirmation so the grid doesn't refresh until this command is done
 		m_pOrbiter->SendCommand(CMD_Specify_Capture_Card_Port,&sResponse);
 
-		m_pOrbiter->CMD_Goto_DesignObj(0,TOSTRING(DESIGNOBJ_RoomsForExternalDevice_CONST),"","",false,true);
+		m_pOrbiter->CMD_Goto_DesignObj(0,TOSTRING(DESIGNOBJ_Specify_Audio_Inputs_CONST),"","",false,true);
+		//m_pOrbiter->CMD_Goto_DesignObj(0,TOSTRING(DESIGNOBJ_RoomsForExternalDevice_CONST),"","",false,true);
 		m_pOrbiter->CMD_Set_Variable(VARIABLE_PK_Device_1_CONST, pCellInfoData->m_sValue);
 		return true; // We did a goto screen
 	}
