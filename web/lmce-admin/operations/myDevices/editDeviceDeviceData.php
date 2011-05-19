@@ -102,7 +102,7 @@ function editDeviceDeviceData($output,$dbADO) {
 			exit(0);
 		}
 
-		$IK_DeviceData=addslashes($_POST['IK_DeviceData']);
+		$IK_DeviceData=$_POST['IK_DeviceData'];
 		$dbADO->Execute('UPDATE Device_DeviceData SET IK_DeviceData=? WHERE FK_Device=? AND FK_DeviceData=?',array($IK_DeviceData,$deviceID,$dd));
 		
 		

@@ -204,13 +204,8 @@ $output = "";
 } 
 
 function cleanString($str,$len=10000) {
-	if (!get_magic_quotes_gpc()) {
-		$cleanStr = addslashes($str);
-	} else {
-   		$cleanStr= stripslashes($str);
-	}
-	
-	return $cleanStr;
+	//magic quotes is always off now; this is deprecated
+	return $str;
 }
 
 function cleanStringWithTags2Show($string,$len=100000) {
