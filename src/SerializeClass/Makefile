@@ -22,5 +22,8 @@ libSerializeClass.a: $(sources:.cpp=.o)
 clean:
 	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) libSerializeClass.so libSerializeClass.a >/dev/null
 
+Sample: Sample.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $+ -L../lib -lSerializeClass -lPlutoUtils -lDCECommon
+
 include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)
