@@ -20,6 +20,7 @@ GTKPromptUser::GTKPromptUser(string sPrompt, int iTimeoutSeconds, map<int, strin
   m_pMapPrompts = pMapPrompts;
   m_pWindow = NULL;
   m_iUserOption = 0; // Nothing has been selected by default.
+  m_tTimeout = iTimeoutSeconds ? time(NULL) + iTimeoutSeconds : 0;
 }
 
 GTKPromptUser::~GTKPromptUser()
@@ -45,6 +46,13 @@ void GTKPromptUser::buttonClickedCallback(GtkWidget *pWidget)
   gtk_main_quit();
 }
 
+void GTKPromptUser::wrapped_label_size_allocate_callback(GtkWidget *label,
+							  GtkAllocation *allocation,                       
+							  gpointer data) 
+{
+  gtk_widget_set_size_request(label, allocation->width, -1);
+} 
+
 void GTKPromptUser::Init()
 {
 
@@ -57,9 +65,12 @@ void GTKPromptUser::Init()
   LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"+++ GTK: Calling gtk_init()");
   gtk_init(NULL, NULL);
 
+  // Parse the gtkrc
+  gtk_rc_parse("/usr/pluto/share/orbiter-gtkrc");
+
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"+++ GTK: Loading Built GTKOrbiter Glade");
   pBuilder = gtk_builder_new();
-  gtk_builder_add_from_file(pBuilder, "/usr/pluto/bin/GTKOrbiter.glade", NULL);
+  gtk_builder_add_from_file(pBuilder, "/usr/pluto/share/GTKOrbiter.glade", NULL);
 
   pWindow = GTK_WIDGET(gtk_builder_get_object(pBuilder, "promptWindow"));
   m_pWindow = pWindow;
@@ -70,14 +81,19 @@ void GTKPromptUser::Init()
 
   pPrompt = GTK_WIDGET(gtk_builder_get_object(pBuilder, "promptLabel"));
 
-  sFinalPrompt = "<span size=\"xx-large\"><b>" + m_sPrompt + "</b></span>";
+  sFinalPrompt = "<span size=\"x-large\"><b>" + m_sPrompt + "</b></span>";
   gtk_label_set_markup(GTK_LABEL(pPrompt),sFinalPrompt.c_str());
 
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"+++ GTK: Connecting Signals");
   gtk_builder_connect_signals(pBuilder, NULL);
 
   pScrollContainer = GTK_WIDGET (gtk_builder_get_object (pBuilder, 
-                                                         "promptScrollArea"));
+							 "promptScrollArea"));
+
+  // Hack-o-rama to resize the label properly.
+  //g_signal_connect(G_OBJECT(pPrompt), "size-allocate",
+  //		   G_CALLBACK(&wrapped_label_size_allocate_callback), this);
+
   LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"+++ GTK: Show Window");
   gtk_widget_show(pWindow);
 
@@ -103,7 +119,8 @@ void GTKPromptUser::Init()
     while (it != m_pMapPrompts->end())
     {
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"+++ GTK: Adding Button: %s",it->second.c_str());
-      GtkWidget *pCurrButton = gtk_button_new_with_label(it->second.c_str());
+      string sButtonPrompt = ""+it->second+"";
+      GtkWidget *pCurrButton = gtk_button_new_with_label(sButtonPrompt.c_str());
       stringstream ssNum;
       ssNum << it->first;
       string sNum = ssNum.str();
@@ -137,10 +154,34 @@ int GTKPromptUser::RunModal()
 {
   // run the runloop. This is okay, because we only have one of these up at any given time in a process.
   LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"+++ GTK: gtk_main(): Run Modal Runloop");
-  gtk_main();
+  //gtk_main();
+  EventLoop(); // our custom little event loop with a timeout instead of gtk_main();
 
   return getSelected();   // This is set in a callback above.
 
+}
+
+bool GTKPromptUser::EventLoop()
+{
+  // Pretty much a manual GTK+ event loop, with a timeout.
+  while (true)
+    {
+      // no draw window here, we're not updating anything, just accepting events.
+      if (gtk_events_pending())
+	{
+	  gtk_main_iteration();
+	}
+
+      if (m_tTimeout && m_tTimeout<time(NULL))
+	{
+	  // we timed out waiting for things to finish.
+	  gtk_main_quit();
+	  return true;
+	}
+
+      usleep(250000); // sleep for a bit to keep from spinning the CPU.
+
+    }
 }
 
 void GTKPromptUser::SetButtonPlacement(BtnPlacement placement)

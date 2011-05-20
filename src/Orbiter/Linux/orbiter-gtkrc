@@ -1,0 +1,7 @@
+style "font"
+{
+  GtkProgressBar ::min-horizontal-bar-height = 60
+  font_name = "Sans 32"
+}
+widget_class "*" style "font"
+gtk-font-name = "Sans 32"

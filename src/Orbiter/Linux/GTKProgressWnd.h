@@ -51,6 +51,10 @@ namespace DCE
     bool IsCancelled(){ return m_bCanceled; };
     bool Destroy(){ return m_bDestroy; }
 
+    static void wrapped_label_size_allocate_callback(GtkWidget *label,
+                                          GtkAllocation *allocation,
+                                          gpointer data);  // Part of the hack-o-rama.
+
     virtual bool EventLoop();
     virtual pthread_t Run();
     virtual void Terminate();

@@ -31,6 +31,7 @@ namespace DCE
     map<int, string> *m_pMapPrompts;
     int m_iUserOption;
     GtkWidget *m_pWindow;
+    time_t m_tTimeout;
    
   ///////////////////////////////////////////////////////////////
   // Public methods
@@ -43,6 +44,11 @@ namespace DCE
     void Init();
     int RunModal();
     void DeInit();
+    bool EventLoop();
+
+    static void wrapped_label_size_allocate_callback(GtkWidget *label,
+						     GtkAllocation *allocation,
+						     gpointer data);  // Part of the hack-o-rama.
 
     // This is not used, but here for the API.
     void SetButtonPlacement(BtnPlacement placement);

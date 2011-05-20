@@ -65,6 +65,7 @@ pthread_t GTKProgressWnd::Run()
     m_bDone = false;
 
     gtk_init(NULL, NULL);
+    gtk_rc_parse("/usr/pluto/share/orbiter-gtkrc");
 
     CreateWindow();
     ShowWindow();
@@ -90,7 +91,14 @@ void GTKProgressWnd::Terminate()
 	m_bDestroy = true;
 	m_bDone = true;
 
-    pthread_join(m_thisThread, NULL);
+	pthread_join(m_thisThread, NULL);
+}
+
+void GTKProgressWnd::wrapped_label_size_allocate_callback(GtkWidget *label,
+					  GtkAllocation *allocation,
+					  gpointer data) {
+     
+     gtk_widget_set_size_request(label, allocation->width, -1);
 }
 
 void GTKProgressWnd::CreateWindow()
@@ -101,7 +109,7 @@ void GTKProgressWnd::CreateWindow()
   GtkWidget		*pProgressBar;
 
   pBuilder = gtk_builder_new();
-  gtk_builder_add_from_file(pBuilder, "/usr/pluto/bin/GTKOrbiter.glade", NULL);
+  gtk_builder_add_from_file(pBuilder, "/usr/pluto/share/GTKOrbiter.glade", NULL);
 
   pWindow = GTK_WIDGET(gtk_builder_get_object(pBuilder, "progressWindow"));
   gtk_window_set_wmclass(GTK_WINDOW(pWindow),m_wndName.c_str(),m_wndName.c_str());
@@ -116,6 +124,13 @@ void GTKProgressWnd::CreateWindow()
   gtk_builder_connect_signals(pBuilder, NULL);
 
   g_object_unref(G_OBJECT(pBuilder));	// done with the builder.
+
+  // Hack-o-rama, All this because the #@($#@( GTK developers refuse to fix
+  // their shitty GtkLabel code.
+
+  g_signal_connect(G_OBJECT(m_pPrompt), "size-allocate",
+		      G_CALLBACK(&wrapped_label_size_allocate_callback), this);
+
 
 }
 
@@ -136,7 +151,7 @@ bool GTKProgressWnd::DrawWindow()
   gdouble gdPerc;
   gdouble gdPercentage;
 
-  sFinalPrompt = "<span size=\"xx-large\"><b>" + m_sText + "</b></span>";
+  sFinalPrompt = "<span font=\"60\"><b>" + m_sText + "</b></span>";
   gtk_label_set_markup(GTK_LABEL(m_pPrompt),sFinalPrompt.c_str());
 
   gdPerc = (gdouble)m_nProgress;
@@ -145,7 +160,7 @@ bool GTKProgressWnd::DrawWindow()
   gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(m_pProgressBar),gdPercentage);
 
   ssPercentage << m_nProgress;
-  sPercentageText = ssPercentage.str() + "%";
+  sPercentageText = "" + ssPercentage.str() + "%";
   gtk_progress_bar_set_text(GTK_PROGRESS_BAR(m_pProgressBar), sPercentageText.c_str());
 
   return true;
@@ -155,6 +170,7 @@ bool GTKProgressWnd::DrawWindow()
 void GTKProgressWnd::DestroyWindow()
 {
   gtk_widget_hide_all(m_pWindow);
+  gtk_main_quit();
 }
 
 bool GTKProgressWnd::EventLoop()
