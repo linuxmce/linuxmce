@@ -15,12 +15,12 @@
 */
 //<-dceag-incl-b->
 #include "QML_Light_Switch.h"
-#include "DCE/Logger.h"
-#include "ServerLogger.h"
-#include "PlutoUtils/FileUtils.h"
-#include "PlutoUtils/StringUtils.h"
-#include "PlutoUtils/Other.h"
-#include "DCERouter.h"
+#include "/DCE/Logger.h"
+#include "/DCE/ServerLogger.h"
+#include "/PlutoUtils/FileUtils.h"
+#include "/PlutoUtils/StringUtils.h"
+#include "/ PlutoUtils/Other.h"
+#include "/DCE/DCERouter.h"
 
 // In source files stored in archives and packages, these 2 lines will have the release version (build)
 // and the svn revision as a global variable that can be inspected within a core dump
@@ -198,7 +198,8 @@ int main(int argc, char* argv[])
 	bool bAppError=false;
 	bool bReload=false;
 	try
-	{
+        {
+
 		QML_Light_Switch *pQML_Light_Switch = new QML_Light_Switch(PK_Device, sRouter_IP,true,bLocalMode);
 		if ( pQML_Light_Switch->GetConfig() && pQML_Light_Switch->Connect(pQML_Light_Switch->PK_DeviceTemplate_get()) ) 
 		{

@@ -21,6 +21,7 @@
 
 #include "../Gen_Devices/QML_Light_SwitchBase.h"
 //<-dceag-d-e->
+class switchManager;
 
 //<-dceag-decl-b->
 namespace DCE
@@ -33,6 +34,7 @@ namespace DCE
 		// Private methods
 public:
 		// Public member variables
+                switchManager *dceLightSwitch;
 
 //<-dceag-const-b->
 public:

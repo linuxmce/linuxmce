@@ -28,6 +28,8 @@ SOURCES += main.cpp \
 
 INCLUDEPATH += ../../
 
+LIBS += -L/usr/pluto/lib/ -lDCECommon -lSerializeClass -lPlutoUtils -lpluto_main -lSerial
+
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
 qtcAddDeployment()
@@ -39,4 +41,5 @@ OTHER_FILES += \
     qml/Light_Switch/SwitchButton.qml
 
 HEADERS += \
-    switchmanager.h
+    switchmanager.h \
+    ../QML_Light_Switch.h
