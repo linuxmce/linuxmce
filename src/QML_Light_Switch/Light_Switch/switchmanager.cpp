@@ -20,7 +20,6 @@ setAttribute(Qt::WA_TranslucentBackground);         //sets translucent bg
 setStyleSheet("background:transparent;");         //set a stylesheet. required still possible
 /* turn off window decorations */
 setWindowFlags(Qt::FramelessWindowHint);
-m_qsMySQLPort = "3306";
 
 initialize_Connections();
 initialize_LMdevice(true);
@@ -40,56 +39,6 @@ void switchManager::loadUI()
        //QObject::connect(qml_view,SIGNAL(writeLog(QString)), this, SLOT(writeLog(QString)));
 }
 
-
- bool switchManager::checkMySQL(bool showMessageBox)
- {
-    writeLog("Checking Mysql");
-    openDB();
-    closeDB();
- }
-
- bool switchManager::closeDB()
- {
-     writeLog("Closing Database");
-     pPlutoDatabase.close();
- }
-
- bool switchManager::openDB()
- {
-     if (pPlutoDatabase.isOpen())
-     {
-            writeLog("Attempted to reopen already opened DB, closing current connection first");
-             closeDB();
-     }
-
-    writeLog("Opening DB connection..");
-     pPlutoDatabase =QSqlDatabase::addDatabase("QMYSQL");
-     QStringList drivers(pPlutoDatabase.drivers());
-     writeLog("Availible Drivers" + drivers.join(" | "));
-
-     //pPlutoDatabase.addDatabase( "QMYSQL" );
-     QString driver = pPlutoDatabase.driverName();
-     writeLog("Current Driver" + driver);
-     pPlutoDatabase.setDatabaseName( "pluto_main" );
-     pPlutoDatabase.setUserName( "root" );
-     pPlutoDatabase.setPassword( "" );
-     pPlutoDatabase.setHostName( "dcerouter" );
-   //  pPlutoDatabase->setPort(3306);
-
-     if (pPlutoDatabase.open())
-     {
-             writeLog("Successful db connect");
-             return true;
-     }
-     else
-     {
-          //   writeLog("Error: " + pPlutoDatabase->lastError().text(), true, LV_WARNING);
-            // QSqlDatabase::removeDatabase(pPlutoDatabase);
-            writeLog("db connect fail");
-             pPlutoDatabase.close();
-             return false;
-     }
- }
 
  bool switchManager::initialize_LMdevice(bool bRetryForever)
  {
@@ -121,7 +70,6 @@ void switchManager::loadUI()
 
  void switchManager::initialize_Connections()
  {
-     checkMySQL(false);
      loadUI();
 
      if (check_log() == false)
@@ -138,7 +86,6 @@ void switchManager::loadUI()
  void switchManager::close_app()
  {
 
-     closeDB();
      writeLog("Closing DB, exiting app");
      fclose (stdout);
      this->close();

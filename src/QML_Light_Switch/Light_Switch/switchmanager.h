@@ -7,11 +7,6 @@
 #include <QStringList>
 #include <QFile>
 
-//#include <QMYSQLDriver>
-#include <QtSql/QSqlDatabase>
-#include <QtSql/qsql_mysql.h>
-#include "/usr/include/mysql/mysql.h"
-
 #include <Gen_Devices/QML_Light_SwitchBase.h>
 #include <QML_Light_Switch/QML_Light_Switch.h>
 
@@ -69,17 +64,6 @@ private:
      bool checkCore(QString coreIP);
      QString m_qsDCERouterPort;
      QString m_qsCoreDeviceID;
-
-     //mysql and core connections
-     bool checkMySQL(bool showMessageBox=false);
-     QString m_qsMySQLPort;
-     QString queryDB(QString query);
-     QStringList queryDB_array(QString query);
-     bool openDB();
-     bool closeDB();
-     QSqlDatabase pPlutoDatabase;
-     bool performQueryDB(QString query, QSqlQuery &queryResult);
-     void printSQLerror(QSqlError &err);
 
 };
 

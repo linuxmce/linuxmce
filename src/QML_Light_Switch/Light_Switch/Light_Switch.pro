@@ -24,9 +24,11 @@ symbian:TARGET.CAPABILITY += NetworkServices
 
 # The .cpp file which was generated for your project. Feel free to hack it.
 SOURCES += main.cpp \
-    switchmanager.cpp
+    switchmanager.cpp \
+    ../QML_Light_Switch.cpp \ 
+    ../../Gen_Devices/QML_Light_SwitchBase.cpp
 
-INCLUDEPATH += ../../ \ /source/src/DCE/
+INCLUDEPATH += ../../ ../../DCE/ 
 
 LIBS += -L/usr/pluto/lib/ -lDCECommon -lSerializeClass -lPlutoUtils -lpluto_main -lSerial
 
