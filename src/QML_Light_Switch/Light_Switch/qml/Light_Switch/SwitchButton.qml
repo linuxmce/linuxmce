@@ -26,7 +26,7 @@ Rectangle {
 
                  }
         onExited: {console.log(switchbutton.state)
-                switchbutton.writelog (switchbutton.state)
+                switchbutton.writeLog (switchbutton.state)
               }
     }
 

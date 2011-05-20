@@ -7,6 +7,7 @@ Rectangle {
     opacity: 0.75
     id: playfield
     signal close_app()
+
     SwitchButton {}
     Text {
         id: switchpanel

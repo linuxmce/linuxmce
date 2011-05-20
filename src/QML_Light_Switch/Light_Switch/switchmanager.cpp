@@ -36,7 +36,7 @@ void switchManager::loadUI()
        QObject *qml_view = dynamic_cast<QObject *>(ui->rootObject());
 
        QObject::connect(qml_view,SIGNAL(close_app()), this, SLOT(close_app()));
-       //QObject::connect(qml_view,SIGNAL(writeLog(QString)), this, SLOT(writeLog(QString)));
+       QObject::connect(qml_view,SIGNAL(writeLog(QString)), this, SLOT(writeLog(QString)));
 }
 
 
@@ -52,20 +52,23 @@ void switchManager::loadUI()
     /* problem block which returns "error: undefined reference to
     DCE::QML_Light_Switch::QML_Light_Switch(int, std::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, bool, DCE::Router*)"*/
 
-    qDebug() << "Connecting to router" << endl;
+    writeLog("Connecting to router");
      m_pLightSwitch = new DCE::QML_Light_Switch(m_TdeviceID, sHost, true, false);
-    //bool bConnected = m_pLightSwitch->GetConfig();
+
+    if (m_pLightSwitch)
+    {
+
     m_pLightSwitch->dceLightSwitch=this;
+   //  bConnected = m_pLightSwitch->GetConfig();
 
      if(bConnected == true)
-     {qDebug() << "Connected to router!" << endl;}
+         {writeLog("Connected to router!");}
      else
-     {
-         qDebug() << "Couldnt Connect!" << endl;
+         {
+         writeLog("Couldnt Connect! Intialization failed!");
+         }
+
      }
-
-     writeLog("Skipped DCERouter Device initilization");
-
  }
 
  void switchManager::initialize_Connections()
@@ -93,7 +96,7 @@ void switchManager::loadUI()
 
  void switchManager::writeLog(QString msg)
  {
-     qDebug() << msg << endl;
+
      std::cout << msg.toStdString() << endl;
  }
 
