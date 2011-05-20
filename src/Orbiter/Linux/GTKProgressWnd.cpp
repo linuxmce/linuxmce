@@ -185,7 +185,7 @@ bool GTKProgressWnd::EventLoop()
       gtk_main_iteration(); // do the GTK event loop iteration.
     }
 
-    usleep(250000);
+    usleep(20000);
 
   }
 

@@ -179,7 +179,7 @@ bool GTKPromptUser::EventLoop()
 	  return true;
 	}
 
-      usleep(250000); // sleep for a bit to keep from spinning the CPU.
+      usleep(100000); // sleep for a bit to keep from spinning the CPU.
 
     }
 }
