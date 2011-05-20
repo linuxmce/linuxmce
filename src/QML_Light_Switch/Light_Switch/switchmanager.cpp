@@ -29,23 +29,28 @@ initialize_LMdevice(true);
 
 void switchManager::loadUI()
  {
+    writeLog("Loading Ui");
        ui = new QDeclarativeView;                        //declarative view deals with Qgraphicsscene and qgraphics view functions.
        ui->setSource(QUrl("qrc:/QML/qml/Light_Switch/main.qml"));
        setCentralWidget(ui);                           //it also has been subclassed from qwidget, allowing it to be the central widget for this window
 
        QObject *qml_view = dynamic_cast<QObject *>(ui->rootObject());
+
        QObject::connect(qml_view,SIGNAL(close_app()), this, SLOT(close_app()));
+       //QObject::connect(qml_view,SIGNAL(writeLog(QString)), this, SLOT(writeLog(QString)));
 }
 
 
  bool switchManager::checkMySQL(bool showMessageBox)
  {
+    writeLog("Checking Mysql");
     openDB();
     closeDB();
  }
 
  bool switchManager::closeDB()
  {
+     writeLog("Closing Database");
      pPlutoDatabase.close();
  }
 
@@ -53,15 +58,18 @@ void switchManager::loadUI()
  {
      if (pPlutoDatabase.isOpen())
      {
-            // writeLog("Attempted to reopen already opened DB, closing current connection first", false, LV_WARNING);
+            writeLog("Attempted to reopen already opened DB, closing current connection first");
              closeDB();
      }
 
-    // writeLog("Opening DB connection..", true);
+    writeLog("Opening DB connection..");
      pPlutoDatabase =QSqlDatabase::addDatabase("QMYSQL");
-     qDebug() << "Availible Drivers" << pPlutoDatabase.drivers();
+     QStringList drivers(pPlutoDatabase.drivers());
+     writeLog("Availible Drivers" + drivers.join(" | "));
+
      //pPlutoDatabase.addDatabase( "QMYSQL" );
-     qDebug() << "Current Driver" << pPlutoDatabase.driver() << endl;
+     QString driver = pPlutoDatabase.driverName();
+     writeLog("Current Driver" + driver);
      pPlutoDatabase.setDatabaseName( "pluto_main" );
      pPlutoDatabase.setUserName( "root" );
      pPlutoDatabase.setPassword( "" );
@@ -70,16 +78,14 @@ void switchManager::loadUI()
 
      if (pPlutoDatabase.open())
      {
-             //writeLog("Successful", true);
-         qDebug() << "db connect success"<< endl;
-
+             writeLog("Successful db connect");
              return true;
      }
      else
      {
           //   writeLog("Error: " + pPlutoDatabase->lastError().text(), true, LV_WARNING);
             // QSqlDatabase::removeDatabase(pPlutoDatabase);
-             qDebug() << "db connect fail"<< endl;
+            writeLog("db connect fail");
              pPlutoDatabase.close();
              return false;
      }
@@ -95,7 +101,7 @@ void switchManager::loadUI()
 
 
     /* problem block which returns "error: undefined reference to
-    `DCE::QML_Light_Switch::QML_Light_Switch(int, std::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, bool, DCE::Router*)"
+    DCE::QML_Light_Switch::QML_Light_Switch(int, std::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, bool, DCE::Router*)"*/
 
     qDebug() << "Connecting to router" << endl;
      m_pLightSwitch = new DCE::QML_Light_Switch(m_TdeviceID, sHost, true, false);
@@ -108,8 +114,8 @@ void switchManager::loadUI()
      {
          qDebug() << "Couldnt Connect!" << endl;
      }
-    */
-     qDebug() << "Skipped DCERouter Device initilization" << endl;
+
+     writeLog("Skipped DCERouter Device initilization");
 
  }
 
@@ -118,10 +124,44 @@ void switchManager::loadUI()
      checkMySQL(false);
      loadUI();
 
+     if (check_log() == false)
+     {
+         writeLog("Logging unavailible, file error");
+     }
+     else
+     {
+         writeLog("Logfile Check!");
+     }
+
  }
 
  void switchManager::close_app()
  {
+
      closeDB();
+     writeLog("Closing DB, exiting app");
+     fclose (stdout);
      this->close();
+ }
+
+ void switchManager::writeLog(QString msg)
+ {
+     qDebug() << msg << endl;
+     std::cout << msg.toStdString() << endl;
+ }
+
+ bool switchManager::check_log()
+ {
+    QFile logFile("/var/log/QML_Light_Switch.log");
+
+    if (logFile.open(QFile::WriteOnly) == true)
+    {
+    logFile.close();
+    freopen ("/var/log/QML_Light_Switch.log","a+",stdout); //open the log
+    return true;
+    }
+    else
+    {
+        return false;
+    }
  }

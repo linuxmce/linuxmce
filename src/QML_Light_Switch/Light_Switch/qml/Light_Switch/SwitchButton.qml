@@ -2,6 +2,7 @@
 import QtQuick 1.0
 
 Rectangle {
+    signal writeLog(string msg)
     id: switchbutton
     width: 100; height: 100;
     color: "yellow"
@@ -25,6 +26,7 @@ Rectangle {
 
                  }
         onExited: {console.log(switchbutton.state)
+                switchbutton.writelog (switchbutton.state)
               }
     }
 

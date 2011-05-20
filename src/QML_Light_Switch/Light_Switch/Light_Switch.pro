@@ -26,7 +26,7 @@ symbian:TARGET.CAPABILITY += NetworkServices
 SOURCES += main.cpp \
     switchmanager.cpp
 
-INCLUDEPATH += ../../
+INCLUDEPATH += ../../ \ /source/src/DCE/
 
 LIBS += -L/usr/pluto/lib/ -lDCECommon -lSerializeClass -lPlutoUtils -lpluto_main -lSerial
 
@@ -41,5 +41,4 @@ OTHER_FILES += \
     qml/Light_Switch/SwitchButton.qml
 
 HEADERS += \
-    switchmanager.h \
-    ../QML_Light_Switch.h
+    switchmanager.h

@@ -5,6 +5,7 @@
 #include <QtDeclarative>
 #include <QDebug>
 #include <QStringList>
+#include <QFile>
 
 //#include <QMYSQLDriver>
 #include <QtSql/QSqlDatabase>
@@ -38,12 +39,17 @@ signals:
 
 public slots:
     void close_app();
+Q_INVOKABLE void writeLog(QString msg);
 
 private:
      void loadUI();
 
+
+
      //connections for configuration data
      void initialize_Connections();
+     bool check_log();
+     QFile *logFile;
      QString m_qsDeviceID;
      QString m_qsOrbiterID;
      QString m_qsOrbiterPluginID;
