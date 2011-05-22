@@ -398,8 +398,19 @@ bool OSDScreenHandler::UsersWizard_ObjectSelected(CallBackData *pData)
 			if(pObjectInfoData->m_PK_DesignObj_SelectedObject == DESIGNOBJ_butFamilyMembers_CONST)
 			{
 				string sUsername = m_pOrbiter->m_mapVariable_Find(VARIABLE_Seek_Value_CONST);
-				HandleAddUser(naDisplayUserInfo);
-				return true;
+				if (sUsername.empty())
+				{
+					// Go back to the same screen again. 
+					m_pOrbiter->CMD_Goto_DesignObj(0, 
+						StringUtils::ltos(DESIGNOBJ_YourName_CONST),
+						"", "", false, false );
+					return true;	// screen changed.	
+				}
+				else
+				{
+					HandleAddUser(naDisplayUserInfo);
+					return true;
+				}
 			}
 		}
 		break;
