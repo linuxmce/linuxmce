@@ -6,8 +6,8 @@
 
 int main(int argc, char *argv[])
 {
-    //g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
-  //  g_sBinaryPath = FileUtils::BasePath(argv[0]);
+  string  g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
+    string  g_sBinaryPath = FileUtils::BasePath(argv[0]);
 
     cout << "QML_Light_Switch, v." << "1.1" << endl
             << "Visit www.plutohome.com for source code and license information" << endl << endl;
@@ -58,8 +58,15 @@ int main(int argc, char *argv[])
     }
     QApplication app(argc, argv);
 
-   switchManager *dceLightSwitch = new switchManager;
+
+   switchManager *dceLightSwitch = new switchManager(PK_Device);
+   dceLightSwitch->initialize_Start();
+   dceLightSwitch->initialize_LMdevice(true);
+   dceLightSwitch->loadUI();
+
    dceLightSwitch->show();
+
+
 
 
     return app.exec();

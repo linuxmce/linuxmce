@@ -4,6 +4,13 @@ import QtQuick 1.0
 Rectangle {
     signal writeLog(string msg)
     id: switchbutton
+
+   /* Connections {
+    target:switchManager
+    onDCEon:  switchbutton.state = "ON"
+    onDCEoff: switchbutton.state = "Off"
+    } */
+
     width: 100; height: 100;
     color: "yellow"
     state: "OFF"
@@ -19,10 +26,12 @@ Rectangle {
         onClicked: {
 
             if (switchbutton.state =="ON")
-                switchbutton.state = "OFF"
+                {switchbutton.state = "OFF"
+                switchManager.writeLog("Hello From QML- Switch turned off")}
 
             else
-                switchbutton.state ="ON"
+                {switchbutton.state ="ON"
+                switchManager.writeLog("Hello From QML- Switch turned On")}
 
                  }
         onExited: {console.log(switchbutton.state)

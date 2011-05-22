@@ -10,7 +10,7 @@ class QML_Light_Switch ;
 }
 
 
-switchManager::switchManager(QWidget *parent) :
+switchManager::switchManager(int pk_DeviceID, QWidget *parent) :
     QMainWindow(parent)
 {
 
@@ -20,21 +20,23 @@ setAttribute(Qt::WA_TranslucentBackground);         //sets translucent bg
 setStyleSheet("background:transparent;");         //set a stylesheet. required still possible
 /* turn off window decorations */
 setWindowFlags(Qt::FramelessWindowHint);
-
-initialize_Connections();
-initialize_LMdevice(true);
+m_qsDeviceID = pk_DeviceID;
 
 }
 
 void switchManager::loadUI()
  {
-    writeLog("Loading Ui");
-       ui = new QDeclarativeView;                        //declarative view deals with Qgraphicsscene and qgraphics view functions.
+       writeLog("Loading Ui");
+       ui = new QDeclarativeView;
+       //declarative view deals with Qgraphicsscene and qgraphics view functions.
+
        ui->setSource(QUrl("qrc:/QML/qml/Light_Switch/main.qml"));
-       setCentralWidget(ui);                           //it also has been subclassed from qwidget, allowing it to be the central widget for this window
 
+       //it also has been subclassed from qwidget, allowing it to be the central widget for this window
        QObject *qml_view = dynamic_cast<QObject *>(ui->rootObject());
+       ui->rootContext()->setContextProperty("switchManager", new switchManager(m_qsDeviceID));
 
+       setCentralWidget(ui);
        QObject::connect(qml_view,SIGNAL(close_app()), this, SLOT(close_app()));
        QObject::connect(qml_view,SIGNAL(writeLog(QString)), this, SLOT(writeLog(QString)));
 }
@@ -43,37 +45,40 @@ void switchManager::loadUI()
  bool switchManager::initialize_LMdevice(bool bRetryForever)
  {
      bConnected = false;
+     bReconnect = true;
 
      std::string sHost = "127.0.0.1";
-     int m_TdeviceID = 0;
+
    //  class Router *pRouter = 0;
-
-
-    /* problem block which returns "error: undefined reference to
-    DCE::QML_Light_Switch::QML_Light_Switch(int, std::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, bool, DCE::Router*)"*/
-
-    writeLog("Connecting to router");
-     m_pLightSwitch = new DCE::QML_Light_Switch(m_TdeviceID, sHost, true, false);
+    writeLog("Connecting to router with Device ID:" + m_qsDeviceID );
+     m_pLightSwitch = new DCE::QML_Light_Switch(m_qsDeviceID, sHost, true, false);
 
     if (m_pLightSwitch)
     {
+        bConnected = m_pLightSwitch->GetConfig();
 
-    m_pLightSwitch->dceLightSwitch=this;
-   //  bConnected = m_pLightSwitch->GetConfig();
+      QString * r_lightLevel = new QString(QString::fromStdString(m_pLightSwitch->GetStatus(m_qsDeviceID)));
 
+        writeLog("connected state:" + bConnected);
+        m_pLightSwitch->Register();
+        m_pLightSwitch->dceLightSwitch=this;
+
+        QTimer::singleShot(5000,this,SLOT(LMdeviceKeepAlive()));
      if(bConnected == true)
-         {writeLog("Connected to router!");}
+         {
+             writeLog("Connected to router with Device ID:" + QString::number(m_qsDeviceID));
+             writeLog("at " + QTime::currentTime().toString());
+         }
      else
          {
          writeLog("Couldnt Connect! Intialization failed!");
-         }
-
-     }
+         }      
+     }    
  }
 
  void switchManager::initialize_Connections()
  {
-     loadUI();
+
 
      if (check_log() == false)
      {
@@ -96,12 +101,17 @@ void switchManager::loadUI()
 
  void switchManager::writeLog(QString msg)
  {
+     QString timestamp = QDateTime::currentDateTime().toString();
+     std::cout << qPrintable(timestamp) << ": " << msg.toStdString() << endl;
+     qDebug() << qPrintable(msg) << endl;
+     //DCE::LoggerWrapper::GetInstance()->Write(1, &msg);
 
-     std::cout << msg.toStdString() << endl;
  }
 
  bool switchManager::check_log()
  {
+
+     //local qt log
     QFile logFile("/var/log/QML_Light_Switch.log");
 
     if (logFile.open(QFile::WriteOnly) == true)
@@ -114,4 +124,94 @@ void switchManager::loadUI()
     {
         return false;
     }
+    //dce logging
+
+
+ }
+
+ QString switchManager::light_on()
+ {
+    writeLog("Got DCE Command to turn on");
+    QDeclarativeProperty::write(ui,"state","ON");
+ }
+
+ QString switchManager::light_off()
+ {
+    writeLog("Got DCE command to turn off");
+ }
+
+ QString switchManager::set_level()
+ {
+    writeLog("Got DCE Command to set level to :");
+ }
+
+ void switchManager::LMdeviceKeepAlive()
+ {  writeLog("Keeping Alive..");
+
+     QString state = QString::fromStdString(m_pLightSwitch->GetStatus(m_qsDeviceID));
+   //  qDebug() << "DCE State response:" <<  state;
+    // qDebug() << "Running State: " <<  m_pLightSwitch->m_bRunning;
+     if (m_pLightSwitch)
+     {
+             // if device is finishing
+             if (m_pLightSwitch->m_bTerminate)
+             {
+                     writeLog("Connection to DCERouter terminated");
+                     bool bReload = m_pLightSwitch->m_bReload;
+                     deinitialize_LMdevice();
+                     if (bReload)
+                     {
+                             writeLog("Reconnecting to DCERouter as requested");
+                             if (!initialize_LMdevice())
+                             {
+                                     writeLog("Will retry later..");
+                                     QTimer::singleShot(5000, this, SLOT(LMdeviceKeepAlive()));
+                             }
+                     }
+             }
+             else
+             {
+                 QTimer::singleShot(5000, this, SLOT(LMdeviceKeepAlive()));
+            }
+     }
+ }
+
+ void switchManager::deinitialize_LMdevice()
+ {
+     if (m_pLightSwitch)
+     {
+             m_pLightSwitch->OnQuit();
+             delete m_pLightSwitch;
+             m_pLightSwitch = NULL;
+
+     }
+        writeLog("DCE Lost connection at:" + QTime::currentTime().toString());
+     if (this->window()->isActiveWindow())
+     {
+        this->initialize_LMdevice(TRUE);
+     }
+
+ }
+
+ void switchManager::initialize_Start()
+ {
+     initialize_Connections();
+     initialize_LMdevice(true);
+ }
+
+ void switchManager::r_Off()
+{
+ writeLog("Recieved OFF from DCE!");
+ emit onDCEoff();
+ }
+
+ void switchManager::r_On()
+ {
+     writeLog("Recieved ON from DCE!");
+        emit onDCEon();
+ }
+
+ void switchManager::r_setLevel(int rLevel)
+ {
+  writeLog("Recived message to set level to " + QString::number(rLevel) + " from DCE!");
  }
