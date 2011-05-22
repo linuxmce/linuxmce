@@ -23,7 +23,6 @@ Rectangle {
 
                     }
 
-
               }
     Rectangle {
         signal writeLog(string msg)

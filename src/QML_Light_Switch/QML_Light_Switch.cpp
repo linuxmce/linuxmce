@@ -57,8 +57,10 @@ bool QML_Light_Switch::GetConfig()
 		return false;
 //<-dceag-getconfig-e->
 
+
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
+
 	return true;
 }
 
@@ -225,6 +227,7 @@ void QML_Light_Switch::CMD_On(int iPK_Pipe,string sPK_Device_Pipes,string &sCMD_
 	cout << "Need to implement command #192 - On" << endl;
 	cout << "Parm #97 - PK_Pipe=" << iPK_Pipe << endl;
 	cout << "Parm #98 - PK_Device_Pipes=" << sPK_Device_Pipes << endl;
+        this->dceLightSwitch->r_On();
 }
 
 //<-dceag-c193-b->
@@ -239,6 +242,7 @@ void QML_Light_Switch::CMD_Off(int iPK_Pipe,string &sCMD_Result,Message *pMessag
 {
 	cout << "Need to implement command #193 - Off" << endl;
 	cout << "Parm #97 - PK_Pipe=" << iPK_Pipe << endl;
+        this->dceLightSwitch->r_Off();
 }
 
 

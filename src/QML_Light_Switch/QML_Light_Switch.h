@@ -20,6 +20,7 @@
 //	DCE Implemenation for #2181 QML Light Switch
 
 #include "../Gen_Devices/QML_Light_SwitchBase.h"
+#include <switchmanager.h>
 //<-dceag-d-e->
 class switchManager;
 
