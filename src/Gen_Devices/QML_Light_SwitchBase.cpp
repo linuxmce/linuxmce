@@ -5,6 +5,7 @@
 using namespace DCE;
 #include "QML_Light_SwitchBase.h"
 extern QML_Light_Switch_Command *Create_QML_Light_Switch(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
+
 DeviceData_Impl *QML_Light_Switch_Data::CreateData(DeviceData_Impl *Parent,char *pDataBlock,unsigned long AllocatedSize,char *CurrentPosition)
 {
 	// Peek ahead in the stream.  We're going to pass in the above pointers anyway so it won't affect the position
