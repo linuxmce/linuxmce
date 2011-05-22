@@ -936,7 +936,9 @@ string Game_Player::GetMessParametersFor(string sMediaURL)
 		  (sFileName.find(".sg") != string::npos) ||
 	          (sFileName.find(".SG") != string::npos) ||
 		  (sFileName.find(".sms") != string::npos) ||
-		  (sFileName.find(".SMS") != string::npos))
+		  (sFileName.find(".SMS") != string::npos) ||
+		  (sFileName.find(".nes") != string::npos) ||
+		  (sFileName.find(".NES") != string::npos)) 
 
     {
       sPeripheralType = "-cart";
@@ -974,6 +976,8 @@ bool Game_Player::LaunchMESS(string sMediaURL)
 	} // Make sure stella's configuration is correct. 
       
       string sParameters = GetMessParametersFor(sMediaURL);
+
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"sParameters is: %s",sParameters.c_str());
 
       DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
 			"mess", "mess", sParameters,
@@ -1752,8 +1756,16 @@ void Game_Player::CMD_Goto_Media_Menu(int iStreamID,int iMenuType,string &sCMD_R
 			EVENT_Menu_Onscreen(iStreamID,false);
 			break;
 		case SHOW_OSD:
-			m_bOSDIsVisible = true;
-			EVENT_Menu_Onscreen(iStreamID,true);
+			m_bOSDIsVisible = !m_bOSDIsVisible; // Toggle.
+			CMD_Simulate_Keypress(StringUtils::itos(BUTTON_tab_CONST),iStreamID,""); // also a toggle.
+			if (m_bOSDIsVisible)
+			{
+				EVENT_Menu_Onscreen(iStreamID,true);
+			}
+			else
+			{
+				EVENT_Menu_Onscreen(iStreamID,false);
+			}
 			break;
 		default:
 			m_bOSDIsVisible = false;
@@ -2411,7 +2423,15 @@ void Game_Player::CMD_Game_Start(string &sCMD_Result,Message *pMessage)
 //<-dceag-c949-e->
 {
 	cout << "Need to implement command #949 - Game Start" << endl;
-	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_1,m_iEventSerialNum++);
+	switch (m_iPK_MediaType)
+	{
+		case MEDIATYPE_Game_nes_CONST:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_2,m_iEventSerialNum++);
+			break;
+		default:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_1,m_iEventSerialNum++);
+			break;
+	}
 }
 
 //<-dceag-c950-b->
@@ -2433,6 +2453,9 @@ void Game_Player::CMD_Game_Select(string &sCMD_Result,Message *pMessage)
     case MEDIATYPE_lmce_Game_a7800_CONST:
       iKey = XK_s;
       break;
+    case MEDIATYPE_lmce_Game_nes_CONST:
+	iKey = XK_6;
+	break;
     }
 
   WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,iKey,m_iEventSerialNum++);
