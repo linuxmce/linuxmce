@@ -101,7 +101,8 @@ bool SmartQ_Media_Plugin::Register()
   
   LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Registered device %d",DEVICETEMPLATE_SmartQ_Media_Player_CONST);
   
-  RegisterMsgInterceptor(( MessageInterceptorFn )( &SmartQ_Media_Plugin::MenuOnScreen ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Menu_Onscreen_CONST );
+	// Implement later.
+//  RegisterMsgInterceptor(( MessageInterceptorFn )( &SmartQ_Media_Plugin::MenuOnScreen ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Menu_Onscreen_CONST );
    
   return Connect(PK_DeviceTemplate_get()); 
 
@@ -339,6 +340,7 @@ SmartQMediaStream *SmartQ_Media_Plugin::ConvertToSmartQMediaStream(MediaStream *
 /* Grabbed almost verbatim from Xine Player */
 bool SmartQ_Media_Plugin::MenuOnScreen( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo )
 {
+	// An uninitialized lock here. Gotta fix this later!
 	PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
 
 	/** Confirm this is from one of ours */
