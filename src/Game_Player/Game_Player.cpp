@@ -2373,7 +2373,7 @@ void Game_Player::CMD_Game_1P_Start(string &sCMD_Result,Message *pMessage)
 	    break;
 	  case MEDIATYPE_lmce_Game_coleco_CONST:
 	  case MEDIATYPE_lmce_Game_intv_CONST:
-	    iKey = XK_KP1;
+	    iKey = XK_KP_1;
 	    break;
 	  }
 	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,iKey,m_iEventSerialNum++);
