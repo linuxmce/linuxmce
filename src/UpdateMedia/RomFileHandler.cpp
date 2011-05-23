@@ -256,31 +256,31 @@ void RomFileHandler::GetRomInfo(string sFilename, map<int,string>& mapAttributes
   if (m_iRomType == ROMTYPE_COWERING)
   {
   	if (sFilename.find("/a2600") != string::npos)
-		sSnapFilename = "/home/snap/a2600/" + sROMName + ".jpg";
+		sSnapFilename = "/home/snap/a2600/" + sROMTitle + ".jpg";
 
 	if (sFilename.find("/a5200") != string::npos)
-		sSnapFilename = "/home/snap/a5200/" + sROMName + ".jpg";
+		sSnapFilename = "/home/snap/a5200/" + sROMTitle + ".jpg";
 
 	if (sFilename.find("/a7800") != string::npos)
-		sSnapFilename = "/home/snap/a7800/" + sROMName + ".jpg";
+		sSnapFilename = "/home/snap/a7800/" + sROMTitle + ".jpg";
 
 	if (sFilename.find("/intv") != string::npos)
-		sSnapFilename = "/home/snap/intv/" + sROMName + ".jpg";
+		sSnapFilename = "/home/snap/intv/" + sROMTitle + ".jpg";
 	
 	if (sFilename.find("/coleco") != string::npos)
-		sSnapFilename = "/home/snap/coleco/" + sROMName + ".jpg";
+		sSnapFilename = "/home/snap/coleco/" + sROMTitle + ".jpg";
 
 	if (sFilename.find("/sg1000") != string::npos)
-		sSnapFilename = "/home/snap/sg1000/" + sROMName + ".jpg";
+		sSnapFilename = "/home/snap/sg1000/" + sROMTitle + ".jpg";
 
 	if (sFilename.find("/sms") != string::npos)
-	       sSnapFilename = "/home/snap/sms/" + sROMName + ".jpg";
+	       sSnapFilename = "/home/snap/sms/" + sROMTitle + ".jpg";
 
 	if (sFilename.find("/nes") != string::npos)
-		sSnapFilename = "/home/snap/nes/" + sROMName + ".jpg";
+		sSnapFilename = "/home/snap/nes/" + sROMTitle + ".jpg";
 
 	if (sFilename.find("/famicom") != string::npos)
-		sSnapFilename = "/home/snap/famicom/" + sROMName + ".jpg";
+		sSnapFilename = "/home/snap/famicom/" + sROMTitle + ".jpg";
 
   }
 
