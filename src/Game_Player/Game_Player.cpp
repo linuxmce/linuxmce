@@ -194,6 +194,7 @@ bool Game_Player::UpdateMESSConfig(string sMediaURL)
 		"autosave                  0\r\n"
 		"playback\r\n"
 		"record\r\n"                    
+		"aviwrite                  /tmp/movie.avi\r\n"
 		"mngwrite\r\n"                 
 		"wavwrite\r\n"                  
 		"\r\n"
@@ -661,6 +662,7 @@ bool Game_Player::UpdateMAMEConfig(string sMediaURL)
 		"autosave                  0\r\n"
 		"playback\r\n"
 		"record\r\n"                    
+		"aviwrite		   /tmp/movie.avi\r\n"
 		"mngwrite\r\n"                 
 		"wavwrite\r\n"                  
 		"\r\n"
@@ -1748,10 +1750,18 @@ void Game_Player::CMD_Goto_Media_Menu(int iStreamID,int iMenuType,string &sCMD_R
 
 	switch(iMenuType) {
 		case SHOW_GAME_VIEW:
+			if (m_bOSDIsVisible)
+			{
+				CMD_Simulate_Keypress(StringUtils::itos(BUTTON_tab_CONST),iStreamID,""); // toggle off
+			}
 			m_bOSDIsVisible = false;
 			EVENT_Menu_Onscreen(iStreamID,true);
 			break;
 		case SHOW_REMOTE:
+			if (m_bOSDIsVisible)
+			{
+				CMD_Simulate_Keypress(StringUtils::itos(BUTTON_tab_CONST),iStreamID,""); // toggle off
+			}
 			m_bOSDIsVisible = false;
 			EVENT_Menu_Onscreen(iStreamID,false);
 			break;
@@ -1965,6 +1975,8 @@ void Game_Player::CMD_1(string &sCMD_Result,Message *pMessage)
 	switch(m_iPK_MediaType)
 	{
 		case MEDIATYPE_lmce_Game_a5200_CONST:
+		case MEDIATYPE_lmce_Game_coleco_CONST:
+		case MEDIATYPE_lmce_Game_intv_CONST:
 			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_1,m_iEventSerialNum++);
 			break;
 		default:
@@ -1986,6 +1998,8 @@ void Game_Player::CMD_2(string &sCMD_Result,Message *pMessage)
 	switch(m_iPK_MediaType)
 	{	
 		case MEDIATYPE_lmce_Game_a5200_CONST:
+		case MEDIATYPE_lmce_Game_coleco_CONST:
+                case MEDIATYPE_lmce_Game_intv_CONST:
 			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_2,m_iEventSerialNum++);
 			break;
 		default:
@@ -2007,6 +2021,8 @@ void Game_Player::CMD_3(string &sCMD_Result,Message *pMessage)
 	switch(m_iPK_MediaType)
 	{
 		case MEDIATYPE_lmce_Game_a5200_CONST:
+                case MEDIATYPE_lmce_Game_coleco_CONST:
+                case MEDIATYPE_lmce_Game_intv_CONST:
 			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_3,m_iEventSerialNum++);
 		default:
 			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_3,m_iEventSerialNum++);
@@ -2028,6 +2044,8 @@ void Game_Player::CMD_4(string &sCMD_Result,Message *pMessage)
 	switch(m_iPK_MediaType)
 	{	
 		case MEDIATYPE_lmce_Game_a5200_CONST:
+                case MEDIATYPE_lmce_Game_coleco_CONST:
+                case MEDIATYPE_lmce_Game_intv_CONST:
 			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_4,m_iEventSerialNum++);
 			break;
 		default:
@@ -2049,6 +2067,8 @@ void Game_Player::CMD_5(string &sCMD_Result,Message *pMessage)
 	switch(m_iPK_MediaType)
 	{
 		case MEDIATYPE_lmce_Game_a5200_CONST:
+                case MEDIATYPE_lmce_Game_coleco_CONST:
+                case MEDIATYPE_lmce_Game_intv_CONST:
 			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_5,m_iEventSerialNum++);
 			break;
 		default:
@@ -2071,6 +2091,8 @@ void Game_Player::CMD_6(string &sCMD_Result,Message *pMessage)
 	switch(m_iPK_MediaType)
 	{
 		case MEDIATYPE_lmce_Game_a5200_CONST:
+                case MEDIATYPE_lmce_Game_coleco_CONST:
+                case MEDIATYPE_lmce_Game_intv_CONST:
 			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_6,m_iEventSerialNum++);
 			break;
 		default:
@@ -2092,6 +2114,8 @@ void Game_Player::CMD_7(string &sCMD_Result,Message *pMessage)
 	switch(m_iPK_MediaType)
 	{
 		case MEDIATYPE_lmce_Game_a5200_CONST:
+                case MEDIATYPE_lmce_Game_coleco_CONST:
+                case MEDIATYPE_lmce_Game_intv_CONST:
 			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_7,m_iEventSerialNum++);
 		default:
 			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_7,m_iEventSerialNum++);
@@ -2112,6 +2136,8 @@ void Game_Player::CMD_8(string &sCMD_Result,Message *pMessage)
 	switch(m_iPK_MediaType)
 	{	
 		case MEDIATYPE_lmce_Game_a5200_CONST:
+                case MEDIATYPE_lmce_Game_coleco_CONST:
+                case MEDIATYPE_lmce_Game_intv_CONST:
 			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_8,m_iEventSerialNum++);
 			break;
 		default:
@@ -2136,6 +2162,8 @@ void Game_Player::CMD_9(string &sCMD_Result,Message *pMessage)
 			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_9,m_iEventSerialNum++);
 			break;
 		case MEDIATYPE_lmce_Game_a5200_CONST:
+                case MEDIATYPE_lmce_Game_coleco_CONST:
+                case MEDIATYPE_lmce_Game_intv_CONST:
 			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_9,m_iEventSerialNum++);
 			break;
 	}
@@ -2255,7 +2283,7 @@ void Game_Player::CMD_Application_Exited(int iPID,int iExit_Code,string &sCMD_Re
 #ifndef WIN32
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Process exited %d %d", iPID, iExit_Code);
 
-	void *data;
+	// void *data;
 
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Send go back to the caller!");
@@ -2334,6 +2362,7 @@ void Game_Player::CMD_Game_1P_Start(string &sCMD_Result,Message *pMessage)
 	    iKey = XK_1;
 	    break;
 	  case MEDIATYPE_lmce_Game_a2600_CONST:
+	  case MEDIATYPE_lmce_Game_nes_CONST:
 	    iKey = XK_2;
 	    break;
 	  case MEDIATYPE_lmce_Game_a5200_CONST:
@@ -2343,7 +2372,8 @@ void Game_Player::CMD_Game_1P_Start(string &sCMD_Result,Message *pMessage)
 	    iKey = XK_r;
 	    break;
 	  case MEDIATYPE_lmce_Game_coleco_CONST:
-	    iKey = XK_1;
+	  case MEDIATYPE_lmce_Game_intv_CONST:
+	    iKey = XK_KP1;
 	    break;
 	  }
 	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,iKey,m_iEventSerialNum++);
@@ -2425,7 +2455,7 @@ void Game_Player::CMD_Game_Start(string &sCMD_Result,Message *pMessage)
 	cout << "Need to implement command #949 - Game Start" << endl;
 	switch (m_iPK_MediaType)
 	{
-		case MEDIATYPE_Game_nes_CONST:
+		case MEDIATYPE_lmce_Game_nes_CONST:
 			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_2,m_iEventSerialNum++);
 			break;
 		default:
@@ -2525,11 +2555,11 @@ void Game_Player::CMD_Game_Reset(string &sCMD_Result,Message *pMessage)
 		case MEDIATYPE_lmce_Game_a2600_CONST:
 			iKey = XK_1;
 			break;
-		case MEDIATYPE_lmce_Game_a5200_CONST:
-			iKey = XK_F3;
-			break;
 		case MEDIATYPE_lmce_Game_a7800_CONST:
 			iKey = XK_R;
+			break;
+		default:
+			iKey = XK_F3;
 			break;
 	}
 
