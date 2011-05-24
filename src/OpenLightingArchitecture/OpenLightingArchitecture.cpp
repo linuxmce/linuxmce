@@ -61,6 +61,7 @@ bool OpenLightingArchitecture::GetConfig()
 		return false;
 	}
 	olaClient = olaClientWrapper.GetClient();
+	dmxBuffer.Blackout();
 
 	return true;
 }
@@ -100,17 +101,22 @@ void OpenLightingArchitecture::ReceivedCommandForChild(DeviceData_Impl *pDeviceD
 	int channel = 0;
 	int value = 0; 
 	int valueR = 0,valueG = 0,valueB = 0;
+	int channelR = 0,channelG=0,channelB=0;
 
 	if (portChannel.find("|") != string::npos) {
 		vector<string> vect;
 		StringUtils::Tokenize(portChannel, "|", vect);
 		universe = atoi(vect[0].c_str());
 		channel = atoi(vect[1].c_str());
+		if (vect.size()==4){
+			channelR=atoi(vect[1].c_str());
+			channelG=atoi(vect[2].c_str());
+			channelB=atoi(vect[3].c_str());
+		}
 	} else {
 		universe =1;
 		channel = atoi(portChannel.c_str());
 	}
-	dmxBuffer.Blackout();
 
 	sCMD_Result = "UNHANDLED CHILD";
 	switch (pMessage->m_dwID) {
@@ -124,6 +130,35 @@ void OpenLightingArchitecture::ReceivedCommandForChild(DeviceData_Impl *pDeviceD
 		case COMMAND_Generic_Off_CONST:
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"OFF RECEIVED FOR universe/channel %d/%d",universe,channel);
 			dmxBuffer.SetChannel(channel, 0);
+			olaClient->SendDmx(universe,dmxBuffer);
+			sCMD_Result = "OK";
+			break;
+			;;
+		case COMMAND_Set_Level_CONST:
+			value = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST].c_str());
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"LEVEL RECEIVED FOR universe/channel %d/%d, %d",universe,channel,value);
+			if (value <0) { value = 0;};
+			if (value >255) { value = 255;};
+
+			dmxBuffer.SetChannel(channel, value);
+			olaClient->SendDmx(universe,dmxBuffer);
+			sCMD_Result = "OK";
+			break;
+			;;
+		case COMMAND_Set_Color_RGB_CONST:
+			valueR = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Red_Level_CONST].c_str());
+			valueG = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Green_Level_CONST].c_str());
+			valueB = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Blue_Level_CONST].c_str());
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"RGB LEVEL RECEIVED FOR universe/channel %d/%d, %d %d %d",universe,channel,valueR,valueG,valueB);
+			if (valueR >255) { valueR = 255;};
+			if (valueR <0) { valueR = 0;};
+			if (valueG >255) { valueG = 255;};
+			if (valueG <0) { valueG = 0;};
+			if (valueB >255) { valueB = 255;};
+			if (valueB <0) { valueB = 0;};
+			dmxBuffer.SetChannel(channelR, valueR);
+			dmxBuffer.SetChannel(channelG, valueG);
+			dmxBuffer.SetChannel(channelB, valueB);
 			olaClient->SendDmx(universe,dmxBuffer);
 			sCMD_Result = "OK";
 			break;
