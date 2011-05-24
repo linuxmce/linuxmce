@@ -16,6 +16,10 @@
 
 #include "Gen_Devices/OpenLightingArchitectureBase.h"
 //<-dceag-d-e->
+
+// fix collision with definition from mysql ( /usr/include/ola/network/Socket.h:103: error: expected unqualified-id before '-' token )
+#undef INVALID_SOCKET
+
 #include <ola/DmxBuffer.h>
 #include <ola/Logging.h>
 #include <ola/OlaClientWrapper.h>
