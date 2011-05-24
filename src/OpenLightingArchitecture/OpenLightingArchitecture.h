@@ -45,7 +45,7 @@ public:
 //<-dceag-const-e->
 		ola::DmxBuffer dmxBuffer;
 		ola::OlaClientWrapper olaClientWrapper;
-		ola::olaClient *olaClient;
+		ola::OlaClient *olaClient;
 
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router

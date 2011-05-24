@@ -115,12 +115,14 @@ void OpenLightingArchitecture::ReceivedCommandForChild(DeviceData_Impl *pDeviceD
 	sCMD_Result = "UNHANDLED CHILD";
 	switch (pMessage->m_dwID) {
 		case COMMAND_Generic_On_CONST:
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ON RECEIVED FOR universe/channel %d/%d",universe,channel);
 			dmxBuffer.SetChannel(channel, 255);
 			olaClient->SendDmx(universe,dmxBuffer);
 			sCMD_Result = "OK";
 			break;
 			;;
 		case COMMAND_Generic_Off_CONST:
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"OFF RECEIVED FOR universe/channel %d/%d",universe,channel);
 			dmxBuffer.SetChannel(channel, 0);
 			olaClient->SendDmx(universe,dmxBuffer);
 			sCMD_Result = "OK";

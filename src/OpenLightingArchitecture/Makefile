@@ -22,7 +22,7 @@ sources = Main.cpp OpenLightingArchitecture.cpp $(Gen_Dev_Files)
 CXXFLAGS +=
 CPPFLAGS +=
 LDFLAGS +=
-XTRALDLIBS = -lmysqlclient_r
+XTRALDLIBS = -lmysqlclient_r -lola -lolacommon -lprotobuf
 
 Gen_Dev_Files +=
 sources +=
