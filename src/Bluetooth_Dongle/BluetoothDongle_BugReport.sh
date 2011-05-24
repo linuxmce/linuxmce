@@ -1,7 +1,7 @@
 #!/bin/bash
 
 REPORT_FILE=/tmp/BluetoothDongle_BugReport	# The file to save the report in
-TIME_INTERVAL=2 				# No of hours between sending reports
+TIME_INTERVAL=1 				# No of hours between sending reports
 MAIL_ADDRESS="bugs@monsternet.us"		# Mail address to send bugs to
 
 ## Check to see if $TIME_INTERVAL hours passed since last report
@@ -25,6 +25,9 @@ echo -e "\n\n\n"			>> $REPORT_FILE
 echo "*ifconfig*"			>> $REPORT_FILE
 ifconfig				>> $REPORT_FILE
 echo -e "\n\n\n"			>> $REPORT_FILE
+
+echo "*hciconfig*"			>> $REPORT_FILE
+hciconfig				>> $REPORT_FILE
 
 echo "*cat /etc/pluto.conf*"		>> $REPORT_FILE
 cat /etc/pluto.conf			>> $REPORT_FILE
