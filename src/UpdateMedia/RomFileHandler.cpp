@@ -257,31 +257,32 @@ void RomFileHandler::GetRomInfo(string sFilename, map<int,string>& mapAttributes
 
   if (m_iRomType == ROMTYPE_COWERING)
   {
-  	if (m_sFullFilename.find("/a2600") != string::npos)
+	string sTmpFile = StringUtils::ToLower(sFilename);
+  	if (m_sFullFilename.find("/a2600") != string::npos || sTmpFile.find(".a26") != string::npos)
 		sSnapFilename = "/home/snap/a2600/" + sROMTitle + ".jpg";
 
-	if (m_sFullFilename.find("/a5200") != string::npos)
+	if (m_sFullFilename.find("/a5200") != string::npos || sTmpFile.find(".a52") != string::npos)
 		sSnapFilename = "/home/snap/a5200/" + sROMTitle + ".jpg";
 
-	if (m_sFullFilename.find("/a7800") != string::npos)
+	if (m_sFullFilename.find("/a7800") != string::npos || sTmpFile.find(".a78") != string::npos)
 		sSnapFilename = "/home/snap/a7800/" + sROMTitle + ".jpg";
 
-	if (m_sFullFilename.find("/intv") != string::npos)
+	if (m_sFullFilename.find("/intv") != string::npos || sTmpFile.find(".int") != string::npos)
 		sSnapFilename = "/home/snap/intv/" + sROMTitle + ".jpg";
 	
-	if (m_sFullFilename.find("/coleco") != string::npos)
+	if (m_sFullFilename.find("/coleco") != string::npos || sTmpFile.find(".col") != string::npos)
 		sSnapFilename = "/home/snap/coleco/" + sROMTitle + ".jpg";
 
-	if (m_sFullFilename.find("/sg1000") != string::npos)
+	if (m_sFullFilename.find("/sg1000") != string::npos || sTmpFile.find(".sg") != string::npos)
 		sSnapFilename = "/home/snap/sg1000/" + sROMTitle + ".jpg";
 
-	if (m_sFullFilename.find("/sms") != string::npos)
+	if (m_sFullFilename.find("/sms") != string::npos || sTmpFile.find(".sms") != string::npos)
 	       sSnapFilename = "/home/snap/sms/" + sROMTitle + ".jpg";
 
-	if (m_sFullFilename.find("/nes") != string::npos)
+	if (m_sFullFilename.find("/nes") != string::npos || sTmpFile.find(".nes") != string::npos)
 		sSnapFilename = "/home/snap/nes/" + sROMTitle + ".jpg";
 
-	if (m_sFullFilename.find("/famicom") != string::npos)
+	if (m_sFullFilename.find("/famicom") != string::npos || sTmpFile.find(".fam") != string::npos)
 		sSnapFilename = "/home/snap/famicom/" + sROMTitle + ".jpg";
 
   }
