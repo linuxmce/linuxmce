@@ -5,6 +5,7 @@
 #include "GenericFileHandler.h"
 #include "GAMEROM.h"
 #include <map>
+#include <algorithm>
 using namespace std;
 //-- Rom Type Defines ---------------------------------------------------------------------------------
 #define ROMTYPE_DEFAULT 0
@@ -39,6 +40,26 @@ private:
 	void SetTagInfo(string sFilename, const map<int,string>& mapAttributes, const list<pair<char *, size_t> >& listPictures);
 	void RemoveTag(string sFilename, int nTagType, string sValue);
 	string ExtractAttribute(const map<int,string>& mapAttributes, int key);
+
+	// trim from both ends
+	static inline std::string &trim(std::string &s) 
+	{
+	        return ltrim(rtrim(s));
+	}
+
+	// trim from start
+	static inline std::string &ltrim(std::string &s) 
+	{
+        	s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+        	return s;
+	}
+
+	// trim from end
+	static inline std::string &rtrim(std::string &s) 
+	{
+        	s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+        	return s;
+	}
 
 	//tag utils
 private:

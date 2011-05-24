@@ -119,12 +119,12 @@ void RomFileHandler::getCoweringData(string sRomName)
 
 	if (iTitleEnd == string::npos) 
 	{
-	  //cout << "Rom does not appear to have any cowering codes." << endl;
 	  m_sROMTitle = sRomName;
 	} 
 	else 
 	{
 	    m_sROMTitle = sRomName.substr(0,iTitleEnd);
+	    m_sROMTitle = trim(m_sROMTitle);
 	}
 
 
@@ -204,6 +204,8 @@ void RomFileHandler::getSystem(string sFilename)
 	if (sFilename.find("/famicom") != string::npos )
 		m_sROMSystem = "Nintendo Famicom";
 
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"RomFileHandler::getSystem(%s) = %s",sFilename.c_str(),m_sROMSystem.c_str());
+
 }
 //-----------------------------------------------------------------------------------------------------
 void RomFileHandler::GetRomInfo(string sFilename, map<int,string>& mapAttributes, list<pair<char *, size_t> >& listPictures)
@@ -221,7 +223,7 @@ void RomFileHandler::GetRomInfo(string sFilename, map<int,string>& mapAttributes
 		break;
 	case ROMTYPE_COWERING:
 		getCoweringData(sROMName);
-		getSystem(sFilename); // The system is part of the path. 
+		getSystem(m_sFullFilename); // The system is part of the path. 
 		break;
   }
 
@@ -255,36 +257,36 @@ void RomFileHandler::GetRomInfo(string sFilename, map<int,string>& mapAttributes
 
   if (m_iRomType == ROMTYPE_COWERING)
   {
-  	if (sFilename.find("/a2600") != string::npos)
+  	if (m_sFullFilename.find("/a2600") != string::npos)
 		sSnapFilename = "/home/snap/a2600/" + sROMTitle + ".jpg";
 
-	if (sFilename.find("/a5200") != string::npos)
+	if (m_sFullFilename.find("/a5200") != string::npos)
 		sSnapFilename = "/home/snap/a5200/" + sROMTitle + ".jpg";
 
-	if (sFilename.find("/a7800") != string::npos)
+	if (m_sFullFilename.find("/a7800") != string::npos)
 		sSnapFilename = "/home/snap/a7800/" + sROMTitle + ".jpg";
 
-	if (sFilename.find("/intv") != string::npos)
+	if (m_sFullFilename.find("/intv") != string::npos)
 		sSnapFilename = "/home/snap/intv/" + sROMTitle + ".jpg";
 	
-	if (sFilename.find("/coleco") != string::npos)
+	if (m_sFullFilename.find("/coleco") != string::npos)
 		sSnapFilename = "/home/snap/coleco/" + sROMTitle + ".jpg";
 
-	if (sFilename.find("/sg1000") != string::npos)
+	if (m_sFullFilename.find("/sg1000") != string::npos)
 		sSnapFilename = "/home/snap/sg1000/" + sROMTitle + ".jpg";
 
-	if (sFilename.find("/sms") != string::npos)
+	if (m_sFullFilename.find("/sms") != string::npos)
 	       sSnapFilename = "/home/snap/sms/" + sROMTitle + ".jpg";
 
-	if (sFilename.find("/nes") != string::npos)
+	if (m_sFullFilename.find("/nes") != string::npos)
 		sSnapFilename = "/home/snap/nes/" + sROMTitle + ".jpg";
 
-	if (sFilename.find("/famicom") != string::npos)
+	if (m_sFullFilename.find("/famicom") != string::npos)
 		sSnapFilename = "/home/snap/famicom/" + sROMTitle + ".jpg";
 
   }
 
-  LoggerWrapper::GetInstance()->Write(LV_STATUS, "# RomFileHandler: Adding ROM Picture: %s",sSnapFilename.c_str());
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "# RomFileHandler: Adding ROM Picture: %s",sSnapFilename.c_str());
 
   size_t nSnapSize = 0;
   char *pSnapData;
