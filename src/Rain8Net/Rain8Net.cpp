@@ -26,6 +26,7 @@ using namespace DCE;
 
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
+#include "PlutoUtils/LinuxSerialUSB.h"
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -59,6 +60,19 @@ bool Rain8Net::GetConfig()
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
+
+	string port = TranslateSerialUSB(DATA_Get_COM_Port_on_PC());
+	if (rain8.init(port.c_str()) != 0) {
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Cannot initialize serial port %s",port.c_str());
+		return false;
+	}
+
+	if (rain8.comCheck() != 0) {
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not detect Rain8Net device, aborting");
+		return false;
+
+	}
+
 	return true;
 }
 
@@ -92,7 +106,31 @@ Rain8Net_Command *Create_Rain8Net(Command_Impl *pPrimaryDeviceCommand, DeviceDat
 void Rain8Net::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
-	sCMD_Result = "UNHANDLED CHILD";
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Received command for child");
+	string portChannel = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+	int valve = atoi(portChannel.c_str());
+	if ((valve > 0) && (valve < 25) ) {
+		sCMD_Result = "OK";
+		switch (pMessage->m_dwID) {
+			case COMMAND_Generic_On_CONST:
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ON RECEIVED FOR VALVE %d",valve);
+				rain8.zoneOn(0,valve);
+				break;
+				;;
+			case COMMAND_Generic_Off_CONST:
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"OFF RECEIVED FOR VALVE %d",valve);
+				rain8.zoneOff(0,valve);
+				break;
+				;;
+			default:
+				sCMD_Result = "INVALID COMMAND";
+				break;
+				;;
+		}
+
+	} else {
+		sCMD_Result = "BAD CHANNEL";
+	}
 }
 
 /*

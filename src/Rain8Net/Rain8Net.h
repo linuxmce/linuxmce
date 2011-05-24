@@ -21,6 +21,7 @@
 
 #include "Gen_Devices/Rain8NetBase.h"
 //<-dceag-d-e->
+#include "rain8.h"
 
 //<-dceag-decl-b->
 namespace DCE
@@ -44,6 +45,7 @@ public:
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
+		rain8net rain8;
 
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
