@@ -1,0 +1,182 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+# Sample debian/rules that uses debhelper.
+#
+# This file was originally written by Joey Hess and Craig Small.
+# As a special exception, when this file is copied by dh-make into a
+# dh-make output file, you may use that output file without restriction.
+# This special exception was added by Craig Small in version 0.37 of dh-make.
+#
+# Modified to make a template file for a multi-binary package with separated
+# build-arch and build-indep targets  by Bill Allombert 2001
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+# This has to be exported to make some magic below work.
+export DH_OPTIONS
+
+# DEB_BUILD_OPTIONS handling - is this really needed since dpkg-dev 1.14.17?
+# note that the strip option is handled directly by dh_strip
+CFLAGS = -Wall -g
+
+ifneq (,$(filter noopt,$(DEB_BUILD_OPTIONS)))
+    CFLAGS += -O0
+else
+    CFLAGS += -O2
+endif
+
+# Renesas SH(sh4) need -mieee option.
+# If this option is not effective, NaN test failed.
+ifeq (sh4,$(shell dpkg-architecture -qDEB_HOST_ARCH))
+  CFLAGS += -mieee
+  CXXFLAGS += -mieee
+endif
+
+#ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+#    NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+#    MAKEFLAGS += -j$(NUMJOBS)
+#endif
+# end DEB_BUILD_OPTIONS
+
+version=0.0.0
+major=0
+
+configure: configure-stamp
+configure-stamp:
+	dh_testdir
+	# Add here commands to configure the package.
+	dh_auto_configure
+	touch configure-stamp
+
+
+#Architecture
+build: build-arch
+
+build-arch: build-arch-stamp
+build-arch-stamp: configure-stamp
+
+	# Add here commands to compile the arch part of the package.
+	$(MAKE)
+
+	# run the test suite
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	$(MAKE) check
+endif
+
+	# build the protoc manpage
+	xmlto man debian/protoc.xml
+
+	touch $@
+
+build-indep: build-indep-stamp
+build-indep-stamp: build-arch-stamp
+
+	# python bindings
+	cd python && python setup.py build
+
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	cd python && python setup.py test
+endif
+
+	# java bindings
+	# this code mimics mvn package. This should be changed when maven is supported by debian.
+	$(SHELL) ./debian/ant-wrapper -f debian/java-build.xml jar
+
+	touch $@
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-arch-stamp build-indep-stamp configure-stamp
+
+	# Add here commands to clean up after the build process.
+	[ ! -f Makefile ] || $(MAKE) distclean
+
+	# remove the built manpage
+	rm -f protoc.1
+
+	if [ -f python/protobuf.egg-info ]; then \
+		( cd python && \
+		  python setup.py clean --all && \
+		  rm -rf protobuf.egg-info ) \
+	fi
+
+	# remove java builds
+	$(SHELL) ./debian/ant-wrapper -f debian/java-build.xml clean || true
+
+	dh_clean
+
+install: install-indep install-arch
+install-indep: build-indep
+	dh_testdir
+	dh_testroot
+	dh_prep -i
+	dh_installdirs -i
+
+	# python bindings
+	cd python && \
+		python setup.py install --no-compile \
+			--root=$(CURDIR)/debian/python-protobuf ; \
+		find $(CURDIR)/debian/python-protobuf -name 'protobuf-*-nspkg.pth' -print0 | \
+			xargs -r0 rm -f
+
+	dh_install -i
+
+
+install-arch: build-arch
+	dh_testdir
+	dh_testroot
+	dh_prep -s
+	dh_installdirs -s
+
+	# Add here commands to install the arch part of the package into
+	# debian/tmp.
+	$(MAKE) DESTDIR=$(CURDIR)/debian/tmp install
+
+	dh_install --sourcedir=debian/tmp -s
+
+	# convert doc dir to symlink for the dev packages
+	rm -rf $(CURDIR)/debian/libprotobuf-dev/usr/share/doc/libprotobuf-dev
+	ln -s libprotobuf6 $(CURDIR)/debian/libprotobuf-dev/usr/share/doc/libprotobuf-dev
+	rm -rf $(CURDIR)/debian/libprotoc-dev/usr/share/doc/libprotoc-dev
+	ln -s libprotoc6 $(CURDIR)/debian/libprotoc-dev/usr/share/doc/libprotoc-dev
+
+	# remove compiler headers from libprotobuf-dev
+	rm -rf $(CURDIR)/debian/libprotobuf-dev/usr/include/google/protobuf/compiler
+
+
+# Must not depend on anything. This is to be called by
+# binary-arch/binary-indep
+# in another 'make' thread.
+binary-common:
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs CHANGES.txt
+	dh_installdocs
+	dh_installexamples
+	dh_installman
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+ifeq ($(DH_OPTIONS),-i)
+	dh_pysupport
+endif
+	dh_makeshlibs
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+# Build architecture independant packages using the common target.
+binary-indep: install-indep
+	$(MAKE) -f debian/rules DH_OPTIONS=-i binary-common
+
+# Build architecture dependant packages using the common target.
+binary-arch: install-arch
+	$(MAKE) -f debian/rules DH_OPTIONS=-s binary-common
+
+binary: binary-arch binary-indep
+.PHONY: build clean binary-indep binary-arch binary install install-indep install-arch configure
