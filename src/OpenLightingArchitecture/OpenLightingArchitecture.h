@@ -1,10 +1,5 @@
 /*
-     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
-
-     www.plutohome.com
-
-     Phone: +1 (877) 758-8648
- 
+     Copyright (C) 2011 Harald Klein <hari@vt100.at>
 
      This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
      This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
@@ -21,6 +16,10 @@
 
 #include "Gen_Devices/OpenLightingArchitectureBase.h"
 //<-dceag-d-e->
+#include <ola/DmxBuffer.h>
+#include <ola/Logging.h>
+#include <ola/OlaClientWrapper.h>
+#include <ola/OlaClient.h>
 
 //<-dceag-decl-b->
 namespace DCE
@@ -44,6 +43,9 @@ public:
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
+		ola::DmxBuffer dmxBuffer;
+		ola::OlaClientWrapper olaClientWrapper;
+		ola::olaClient *olaClient;
 
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
