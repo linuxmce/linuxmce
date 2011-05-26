@@ -19,7 +19,15 @@ else
 	# We are running on a MD, and don't want VDR running after the user closes the TV app.
 	trap 'killall -KILL vdr-sxfe ; invoke-rc.d vdr stop' EXIT
 	invoke-rc.d vdr restart
-	sleep 5
-fi
 
+	if  [ -x /usr/bin/nmap ] ; then
+		VDRRUNNING=0
+		while [[ "$VDRRUNNING" = "0" ]]; do
+			nmap 127.0.0.1 -p 22 --open | grep open -iq && VDRRUNNING=1
+			sleep 1
+		done
+	else
+		sleep 5
+	fi
+fi
 /usr/bin/vdr-sxfe --reconnect xvdr://127.0.0.1 --post tvtime:method=use_vo_driver --tcp --syslog --verbose
