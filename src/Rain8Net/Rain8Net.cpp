@@ -72,6 +72,7 @@ bool Rain8Net::GetConfig()
 		return false;
 
 	}
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Connected to Rain8Net device on port %s",port.c_str());
 
 	return true;
 }
@@ -106,20 +107,40 @@ Rain8Net_Command *Create_Rain8Net(Command_Impl *pPrimaryDeviceCommand, DeviceDat
 void Rain8Net::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
-	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Received command for child");
+	// LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Received command for child");
 	string portChannel = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 	int valve = atoi(portChannel.c_str());
-	if ((valve > 0) && (valve < 25) ) {
+	if ((valve > 0) && (valve < 9) ) {
 		sCMD_Result = "OK";
+		unsigned char status;
 		switch (pMessage->m_dwID) {
 			case COMMAND_Generic_On_CONST:
-				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ON RECEIVED FOR VALVE %d",valve);
-				rain8.zoneOn(0,valve);
-				break;
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ON received for zone %d",valve);
+				if (rain8.zoneOn(1,valve) != 0) {
+					LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ERROR: Zone %d did not respond",valve);
+					sCMD_Result = "ERROR";
+
+				}
+				if (rain8.getStatus(1,status) == 0) {
+					LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Zone status: 8:%d 7:%d 6:%d 5:%d 4:%d 3:%d 2:%d 1:%d", (status & 128)?1:0, (status & 64)?1:0, (status &32)?1:0,(status&16)?1:0,(status&8)?1:0,(status&4)?1:0,(status&2)?1:0,(status&1)?1:0);
+				} else {
+					LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ERROR: could not fetch zone status");
+				}
+				break;	
+				
 				;;
 			case COMMAND_Generic_Off_CONST:
-				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"OFF RECEIVED FOR VALVE %d",valve);
-				rain8.zoneOff(0,valve);
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"OFF received for zone %d",valve);
+				if (rain8.zoneOff(1,valve) != 0) {
+					LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ERROR: Zone %d did not respond",valve);
+					sCMD_Result = "ERROR";
+
+				}
+				if (rain8.getStatus(1,status) == 0) {
+					LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Zone status: 8:%d 7:%d 6:%d 5:%d 4:%d 3:%d 2:%d 1:%d", (status & 128)?1:0, (status & 64)?1:0, (status &32)?1:0,(status&16)?1:0,(status&8)?1:0,(status&4)?1:0,(status&2)?1:0,(status&1)?1:0);
+				} else {
+					LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ERROR: could not fetch zone status");
+				}
 				break;
 				;;
 			default:
