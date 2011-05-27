@@ -167,7 +167,8 @@ qmake:  FORCE
 dist: 
 	@$(CHK_DIR_EXISTS) .tmp/linuxmceTag1.0.0 || $(MKDIR) .tmp/linuxmceTag1.0.0 
 	$(COPY_FILE) --parents $(SOURCES) $(DIST) .tmp/linuxmceTag1.0.0/ && $(COPY_FILE) --parents autotagger.h pilot.h film.h databaseFunctions.h .tmp/linuxmceTag1.0.0/ && $(COPY_FILE) --parents main.cpp autotagger.cpp tvshows.cpp films.cpp databaseFunctions.cpp .tmp/linuxmceTag1.0.0/ && (cd `dirname .tmp/linuxmceTag1.0.0` && $(TAR) linuxmceTag1.0.0.tar linuxmceTag1.0.0 && $(COMPRESS) linuxmceTag1.0.0.tar) && $(MOVE) `dirname .tmp/linuxmceTag1.0.0`/linuxmceTag1.0.0.tar.gz . && $(DEL_FILE) -r .tmp/linuxmceTag1.0.0
-
+	cp $@ ../bin
+        
 
 clean:compiler_clean 
 	-$(DEL_FILE) $(OBJECTS)
