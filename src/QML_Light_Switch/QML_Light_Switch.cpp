@@ -228,6 +228,7 @@ void QML_Light_Switch::CMD_On(int iPK_Pipe,string sPK_Device_Pipes,string &sCMD_
 	cout << "Parm #97 - PK_Pipe=" << iPK_Pipe << endl;
 	cout << "Parm #98 - PK_Device_Pipes=" << sPK_Device_Pipes << endl;
         this->dceLightSwitch->r_On();
+
 }
 
 //<-dceag-c193-b->
