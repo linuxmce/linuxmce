@@ -27,18 +27,26 @@ m_qsDeviceID = pk_DeviceID;
 void switchManager::loadUI()
  {
        writeLog("Loading Ui");
-       ui = new QDeclarativeView;
-       //declarative view deals with Qgraphicsscene and qgraphics view functions.
+       QTlightSwitch switchInstance;
+      // QDeclarativeEngine *engine = new QDeclarativeEngine(this);
+      // QDeclarativeComponent interFace(engine, QUrl::fromLocalFile("qrc:../../qml/Light_Switch/main.qml"));
 
+     //  qDebug() << interFace.errors();
+     //  qml_view = interFace.create();
+
+       ui = new QDeclarativeView;
+
+       ui->rootContext()->setContextProperty("switch1" ,&switchInstance);
+       //declarative view deals with Qgraphicsscene and qgraphics view functions.
        ui->setSource(QUrl("qrc:/QML/qml/Light_Switch/main.qml"));
 
-       //it also has been subclassed from qwidget, allowing it to be the central widget for this window
+
        QObject *qml_view = dynamic_cast<QObject *>(ui->rootObject());
-       ui->rootContext()->setContextProperty("switchManager", new switchManager(m_qsDeviceID));
+
+      QObject::connect(qml_view,SIGNAL(l_state(QString)), this, SLOT(writeLog(QString)));
+       QObject::connect(qml_view,SIGNAL(close_app()), this, SLOT(close_app()));
 
        setCentralWidget(ui);
-       QObject::connect(qml_view,SIGNAL(close_app()), this, SLOT(close_app()));
-       QObject::connect(qml_view,SIGNAL(writeLog(QString)), this, SLOT(writeLog(QString)));
 }
 
 
@@ -129,18 +137,18 @@ void switchManager::loadUI()
 
  }
 
- QString switchManager::light_on()
+ void switchManager::light_on()
  {
-    writeLog("Got DCE Command to turn on");
-    QDeclarativeProperty::write(ui,"state","ON");
+
+
  }
 
- QString switchManager::light_off()
+ void switchManager::light_off()
  {
-    writeLog("Got DCE command to turn off");
- }
 
- QString switchManager::set_level()
+    }
+
+ void switchManager::set_level()
  {
     writeLog("Got DCE Command to set level to :");
  }
@@ -202,16 +210,34 @@ void switchManager::loadUI()
  void switchManager::r_Off()
 {
  writeLog("Recieved OFF from DCE!");
- emit onDCEoff();
+ QVariant returnedValue;
+  QVariant msg = "OFF";
+  QVariant val = "0";
+  writeLog("Invoking Method");
+ QMetaObject::invokeMethod(ui->rootObject(), "dceCommand", Qt::DirectConnection, Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, msg), Q_ARG(QVariant, val));
+qDebug() << returnedValue;
+// this->switchInstance.dce_off();
  }
 
  void switchManager::r_On()
  {
      writeLog("Recieved ON from DCE!");
-        emit onDCEon();
+     QVariant returnedValue;
+      QVariant msg = "ON";
+      QVariant val = "100";
+      writeLog("Invoking Method");
+    QMetaObject::invokeMethod(ui->rootObject(), "dceCommand", Qt::DirectConnection, Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, msg), Q_ARG(QVariant, val));
+  qDebug() << returnedValue;
+    // this->switchInstance.dce_on();
  }
 
  void switchManager::r_setLevel(int rLevel)
  {
   writeLog("Recived message to set level to " + QString::number(rLevel) + " from DCE!");
+  QVariant returnedValue;
+   QVariant msg = "ON";
+   QVariant val = rLevel;
+   writeLog("Invoking Method");
+ QMetaObject::invokeMethod(ui->rootObject(), "dceCommand", Qt::DirectConnection, Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, msg), Q_ARG(QVariant, val));
+qDebug() << returnedValue;
  }

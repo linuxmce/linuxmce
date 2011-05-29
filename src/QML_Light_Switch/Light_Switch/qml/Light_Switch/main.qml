@@ -7,41 +7,56 @@ Rectangle {
     opacity: 0.75
     id: playfield
     signal close_app()
+    signal l_state( string light_state)
 
     Text {
         id: switchpanel
 
-        text: "DCE / QML Light Switch Panel"
+        text: "DCE / QML Light Switch "
         color: "white"
         anchors.centerIn: parent
          }
     MouseArea {
         height: 50; width: 360;
         anchors.bottom: switchpanel.bottom
-        onClicked: {  playfield.close_app()
-            console.log("GoodBye")
-
-                    }
+        onClicked: {  playfield.close_app()   }
 
               }
-    Rectangle {
-        signal writeLog(string msg)
-        id: switchbutton
 
-        Connections {
-        target:switchManager
-        onDCEon:  switchbutton.state = "ON"
-        onDCEoff: switchbutton.state = "Off"
+    function dceCommand(msg,val)
+    { console.log("Recieved command in function, parsing: ")
+        if (msg =="ON")
+            {
+            switchbutton.state="ON"
+            console.log("Recieved DCE ON in qml")
         }
+        else if (msg=="OFF"){
+            switchbutton.state="OFF"
+            console.log("Recieved DCE OFF in qml")
+        }
+            else if (msg =="SETLEVEL")
+            {
+                (console.log("Setting light to: " + val))
+        }
+        return true;
+    }
 
+
+    //defining the button itself
+    Rectangle {
+
+        signal switchState( bool l_status)
+        id: switchbutton
         width: 100; height: 100;
         color: "yellow"
-        state: "OFF"
+        state: "ON"
+
         Image {
             height: 100
             width: 100
         id: lt_on
-             }
+             }        
+
 
         MouseArea {
             height: 100; width: 100
@@ -50,16 +65,21 @@ Rectangle {
 
                 if (switchbutton.state =="ON")
                     {switchbutton.state = "OFF"
-                    switchManager.writeLog("Hello From QML- Switch turned off")}
+                    l_state("Light State: " + switchbutton.state)
+
+                    }
 
                 else
-                    {switchbutton.state ="ON"
-                    switchManager.writeLog("Hello From QML- Switch turned On")}
+                    {switchbutton.state =="OFF"
+                    switchbutton.state = "ON"
+                     l_state("Light State: " + switchbutton.state)
+                    }
 
                      }
-            onExited: {console.log(switchbutton.state)
-                    switchbutton.writeLog (switchbutton.state)
-                  }
+            onExited: {
+                //switchManager.writeLog (switchbutton.state)
+            }
+
         }
 
         Text {

@@ -2,23 +2,20 @@
 import QtQuick 1.0
 
 Rectangle {
-    signal writeLog(string msg)
+
+    signal switchState( bool l_status)
     id: switchbutton
-
-   /* Connections {
-    target:switchManager
-    onDCEon:  switchbutton.state = "ON"
-    onDCEoff: switchbutton.state = "Off"
-    } */
-
     width: 100; height: 100;
     color: "yellow"
     state: "OFF"
+
     Image {
         height: 100
         width: 100
     id: lt_on
          }
+
+
 
     MouseArea {
         height: 100; width: 100
@@ -27,16 +24,19 @@ Rectangle {
 
             if (switchbutton.state =="ON")
                 {switchbutton.state = "OFF"
-                switchManager.writeLog("Hello From QML- Switch turned off")}
+                switchState(false)
+                }
 
             else
                 {switchbutton.state ="ON"
-                switchManager.writeLog("Hello From QML- Switch turned On")}
+                 switchState(true)
+                }
 
                  }
-        onExited: {console.log(switchbutton.state)
-                switchbutton.writeLog (switchbutton.state)
-              }
+        onExited: {
+            //switchManager.writeLog (switchbutton.state)
+        }
+
     }
 
     Text {

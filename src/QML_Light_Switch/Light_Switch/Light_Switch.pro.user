@@ -156,7 +156,7 @@
     </valuelist>
     <value key="Qt4ProjectManager.Qt4RunConfiguration.ProFile" type="QString">Light_Switch.pro</value>
     <value key="Qt4ProjectManager.Qt4RunConfiguration.UseDyldImageSuffix" type="bool">false</value>
-    <value key="Qt4ProjectManager.Qt4RunConfiguration.UseTerminal" type="bool">true</value>
+    <value key="Qt4ProjectManager.Qt4RunConfiguration.UseTerminal" type="bool">false</value>
     <valuelist key="Qt4ProjectManager.Qt4RunConfiguration.UserEnvironmentChanges" type="QVariantList"/>
     <value key="Qt4ProjectManager.Qt4RunConfiguration.UserSetWorkingDirectory" type="bool">false</value>
     <value key="Qt4ProjectManager.Qt4RunConfiguration.UserWorkingDirectory" type="QString"></value>

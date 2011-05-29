@@ -26,7 +26,8 @@ symbian:TARGET.CAPABILITY += NetworkServices
 SOURCES += main.cpp \
     switchmanager.cpp \
     ../QML_Light_Switch.cpp \ 
-    ../../Gen_Devices/QML_Light_SwitchBase.cpp
+    ../../Gen_Devices/QML_Light_SwitchBase.cpp \
+    qtlightswitch.cpp
 
 INCLUDEPATH += ../../ ../../DCE/ 
 
@@ -43,4 +44,5 @@ OTHER_FILES += \
     qml/Light_Switch/SwitchButton.qml
 
 HEADERS += \
-    switchmanager.h
+    switchmanager.h \
+    qtlightswitch.h

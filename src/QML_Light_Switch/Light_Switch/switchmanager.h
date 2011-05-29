@@ -1,14 +1,19 @@
-#ifndef SWITCHMANAGER_H
+    #ifndef SWITCHMANAGER_H
 #define SWITCHMANAGER_H
 
 #include <QMainWindow>
+#include <qtlightswitch.h>
 #include <QtDeclarative>
 #include <QDebug>
 #include <QStringList>
 #include <QFile>
 
+
+
+#include <Gen_Devices/AllCommandsRequests.h>
 #include <Gen_Devices/QML_Light_SwitchBase.h>
 #include <QML_Light_Switch/QML_Light_Switch.h>
+
 
 namespace DCE
 {
@@ -23,7 +28,11 @@ public:
      switchManager( int pk_deviceID, QWidget *parent = 0);
 
      //ui area
+     QDeclarativeEngine engine;
+     QDeclarativeComponent interFace;
      QDeclarativeView *ui;
+     QTlightSwitch  switchInstance;
+     QObject qml_view;
 
      //dce configuration and startup
      //runs through intilizations of variables
@@ -35,17 +44,11 @@ public:
      QString m_pFloorplanObjType;
      QString r_lightLevel;
      QVariant gVar;
-
-
      //qt device command slots
-    Q_INVOKABLE QString light_on();
-    Q_INVOKABLE QString light_off();
-    Q_INVOKABLE QString set_level();
-
 signals:
      QString light_status(QString);
-     void onDCEon();
-     void onDCEoff();
+     void DCEon();
+     void DCEoff();
 
 public slots:
     void close_app();
@@ -54,8 +57,10 @@ public slots:
     void r_Off();
     void r_setLevel(int rLevel);
 
-Q_INVOKABLE void writeLog(QString msg);
-
+    Q_INVOKABLE void writeLog(QString msg);
+    Q_INVOKABLE void  light_on();
+    Q_INVOKABLE void  light_off();
+    Q_INVOKABLE void  set_level();
 
 
 
