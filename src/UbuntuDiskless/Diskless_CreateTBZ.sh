@@ -96,13 +96,12 @@ fi
 touch "$TEMP_DIR"/etc/chroot-install
 
 ## Disable invoke-rc.d scripts
-mv "$TEMP_DIR"/usr/sbin/invoke-rc.d{,.pluto-install}
 mv "$TEMP_DIR"/sbin/start-stop-daemon{,.pluto-install}
 mv "$TEMP_DIR"/sbin/initctl{,.pluto-install}
-echo -en '#!/bin/bash\necho "WARNING: fake invoke-rc.d called"\n' >"$TEMP_DIR"/usr/sbin/invoke-rc.d
+echo -en '#!/bin/bash\necho "WARNING: we dont want invoke-rc.d to run right now"\nexit 101\n' >"$TEMP_DIR"/usr/sbin/policy-rc.d
 echo -en '#!/bin/bash\necho "WARNING: fake start-stop-daemon called"\n' >"$TEMP_DIR"/sbin/start-stop-daemon
 echo -en '#!/bin/bash\necho "WARNING: fake initctl called"\n' >"$TEMP_DIR"/sbin/initctl
-chmod +x "$TEMP_DIR"/usr/sbin/invoke-rc.d
+chmod +x "$TEMP_DIR"/usr/sbin/policy-rc.d
 chmod +x "$TEMP_DIR"/sbin/start-stop-daemon
 chmod +x "$TEMP_DIR"/sbin/initctl
 
@@ -290,7 +289,7 @@ umount $TEMP_DIR/lib/modules/${KVER}/volatile
 
 mv -f "$TEMP_DIR"/sbin/start-stop-daemon{.pluto-install,}
 mv -f "$TEMP_DIR"/sbin/initctl{.pluto-install,}
-mv -f "$TEMP_DIR"/usr/sbin/invoke-rc.d{.pluto-install,}
+rm -f "$TEMP_DIR"/usr/sbin/policy-rc.d
 
 rm -f "$TEMP_DIR"/etc/chroot-install
 rm -f "$TEMP_DIR"/etc/X11/xorg.conf || :
