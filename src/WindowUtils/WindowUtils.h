@@ -79,7 +79,7 @@ namespace WindowUtils
 	/**
 	 * SendKeyToWindow - Send a Keypress to the specified window.	
 	 */
-	void SendKeyToWindow(Display *disp, unsigned long win, int iXKeySym, int serial_num);
+	void SendKeyToWindow(Display *disp, unsigned long win, int iXKeySym, int serial_num, int iXKeySymModifer=0);
 
 }
 

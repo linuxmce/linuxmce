@@ -254,17 +254,21 @@ namespace WindowUtils
 	/**
 	 * SendKeyToWindow - Send a Key to the specified Window
 	 */
-	void WindowUtils::SendKeyToWindow(Display *disp, unsigned long win, int iXKeySym, int serial_num) 
+	void WindowUtils::SendKeyToWindow(Display *disp, unsigned long win, int iXKeySym, int serial_num, int iXKeySymModifier) 
 	{
 		XKeyEvent *event_press;
 		XKeyEvent *event_release;
+		XKeyEvent *event_modifier_press;
+		XKeyEvent *event_modifier_release;
     		//Window oldWindow;
     		//int oldRevertBehaviour;
 
-		event_press   = (XKeyEvent *)malloc(sizeof(XKeyEvent));
-		event_release = (XKeyEvent *)malloc(sizeof(XKeyEvent));
+		event_press   		= (XKeyEvent *)malloc(sizeof(XKeyEvent));
+		event_release 		= (XKeyEvent *)malloc(sizeof(XKeyEvent));
+		event_modifier_press 	= (XKeyEvent *)malloc(sizeof(XKeyEvent)); 
+		event_modifier_release	= (XKeyEvent *)malloc(sizeof(XKeyEvent));
 
-		XSync(disp,true);	
+		XSync(disp,true);
 
     		//XGetInputFocus( m_pDisplay, &oldWindow, &oldRevertBehaviour);
     		//XSetInputFocus( m_pDisplay, (Window)m_iMAMEWindowId, RevertToParent, CurrentTime );
@@ -283,6 +287,19 @@ namespace WindowUtils
   		event_press->keycode = XKeysymToKeycode(disp, iXKeySym);
   		event_press->state = None; 
 
+                event_modifier_press->root = DefaultRootWindow(disp);
+                //event_press->serial = 5000;
+                event_modifier_press->subwindow = None;
+                event_modifier_press->time = CurrentTime;
+                event_modifier_press->x = 1;
+                event_modifier_press->y = 1;
+                event_modifier_press->x_root = 1;
+                event_modifier_press->y_root = 1;
+                event_modifier_press->same_screen = True;
+
+                event_modifier_press->type = KeyPress;
+                event_modifier_press->keycode = XKeysymToKeycode(disp, iXKeySymModifier);
+                event_modifier_press->state = None;
 
 
   		event_release->root = DefaultRootWindow(disp);
@@ -299,10 +316,44 @@ namespace WindowUtils
   		event_release->keycode = XKeysymToKeycode(disp, iXKeySym);
   		event_release->state = NoEventMask;
 
+                event_modifier_release->root = DefaultRootWindow(disp);
+                //event_release->serial = 5000;
+                event_modifier_release->subwindow = None;
+                event_modifier_release->time = CurrentTime;
+                event_modifier_release->x = 1;
+                event_modifier_release->y = 1;
+                event_modifier_release->x_root = 1;
+                event_modifier_release->y_root = 1;
+                event_modifier_release->same_screen = True;
+
+                event_modifier_release->type = KeyRelease;
+                event_modifier_release->keycode = XKeysymToKeycode(disp, iXKeySymModifier);
+                event_modifier_release->state = NoEventMask;
+
+		if (iXKeySymModifier != 0)
+		{
+			if (iXKeySymModifier == XK_Shift_L || iXKeySymModifier == XK_Shift_R)
+			{
+				event_modifier_press->state = ShiftMask;
+			}
+			if (iXKeySymModifier == XK_Control_L || iXKeySymModifier == XK_Control_R)
+			{
+				event_modifier_press->state = ControlMask;
+			}
+			XSendEvent(disp, win, False, KeyPressMask, (XEvent *)event_modifier_press);
+			XSync(disp,true);
+			Sleep(50);
+		}
   		XSendEvent(disp, win, False, KeyPressMask, (XEvent *)event_press);
 		XSync(disp,true);
 		Sleep(50);
 
+		if (iXKeySymModifier != 0)
+		{
+			XSendEvent(disp, win, False, KeyPressMask, (XEvent *)event_modifier_release);
+			XSync(disp,true);
+			Sleep(50);
+		}
 		XSendEvent(disp, win, False, KeyPressMask, (XEvent *)event_release); 
 		XSync(disp,true);
 
@@ -314,6 +365,8 @@ namespace WindowUtils
 
 		free(event_press);
 		free(event_release);
+		free(event_modifier_press);
+		free(event_modifier_release);
 
 
     //XTestFakeKeyEvent( m_pDisplay, XKeysymToKeycode(m_pDisplay, iXKeySym), True, 0 );
