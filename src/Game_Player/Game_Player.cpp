@@ -53,7 +53,7 @@ Game_Player::Game_Player(int DeviceID, string ServerAddress,bool bConnectEventHa
 	m_pAlarmManager = NULL;
 	m_pDevice_App_Server = NULL;
 	m_iPK_MediaType = 0;
-
+	m_iStreamID = 0;
 }
 
 //<-dceag-const2-b->!
@@ -194,7 +194,7 @@ bool Game_Player::UpdateMESSConfig(string sMediaURL)
 		"autosave                  0\r\n"
 		"playback\r\n"
 		"record\r\n"                    
-		"aviwrite                  /tmp/movie.avi\r\n"
+		"aviwrite                  \r\n"
 		"mngwrite\r\n"                 
 		"wavwrite\r\n"                  
 		"\r\n"
@@ -662,7 +662,7 @@ bool Game_Player::UpdateMAMEConfig(string sMediaURL)
 		"autosave                  0\r\n"
 		"playback\r\n"
 		"record\r\n"                    
-		"aviwrite		   /tmp/movie.avi\r\n"
+		"aviwrite		   \r\n"
 		"mngwrite\r\n"                 
 		"wavwrite\r\n"                  
 		"\r\n"
@@ -920,6 +920,14 @@ string Game_Player::GetMessParametersFor(string sMediaURL)
   StringUtils::Tokenize(sTmpPath,sToken,vect_Path);  // split it up
   
   string sMachineType = vect_Path[vect_Path.size()-1]; // Get the last element.
+  m_sMachineType = sMachineType;
+
+  if (		(sFileName.find(StringUtils::ToLower(".dsk"))) || 
+		(sFileName.find(StringUtils::ToLower(".atr"))) || 
+		(sFileName.find(StringUtils::ToLower(".fds"))))
+	{
+		sPeripheralType = "-flop";
+	}
 
   if (            (sFileName.find(".bin") != string::npos) || 
 		  (sFileName.find(".BIN") != string::npos) ||
@@ -940,13 +948,17 @@ string Game_Player::GetMessParametersFor(string sMediaURL)
 		  (sFileName.find(".sms") != string::npos) ||
 		  (sFileName.find(".SMS") != string::npos) ||
 		  (sFileName.find(".nes") != string::npos) ||
-		  (sFileName.find(".NES") != string::npos)) 
-
+		  (sFileName.find(".NES") != string::npos) ||
+		  (sFileName.find(".zip") != string::npos) ||
+		  (sFileName.find(".ZIP") != string::npos))
     {
       sPeripheralType = "-cart";
     }
 
-  sParameters = sMachineType + "\t" + sPeripheralType + "\t" + sMediaURL;
+  // If Peripheral type is still unset here, it may be a zip file. 
+  // come back here and write this when we need it.
+
+  sParameters = sMachineType + "\t" + sPeripheralType + "\t" + sMediaURL + "";
 
   return sParameters;
 }
@@ -1027,7 +1039,7 @@ bool Game_Player::LaunchMAME(string sMediaURL)
 		} // Make sure MAME's configuration is correct. 
 
 		DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
-			"mame", "mame", sMediaURL,
+			"mame", "mame", sMediaURL+ "",
 			sMessage + "1",sMessage + "0",false,false,true,false);
 		if( SendCommand(CMD_Spawn_Application) ) {
 			m_bMAMEIsRunning = true;
@@ -1326,6 +1338,9 @@ void Game_Player::ProcessPoundForMediaType(int iPK_MediaType)
 		case MEDIATYPE_lmce_Game_coleco_CONST:
 			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_minus,m_iEventSerialNum++);
 			break;
+		case MEDIATYPE_lmce_Game_intv_CONST:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_Add,m_iEventSerialNum++);
+			break;
 		default:
 			// Do we need a default?
 			break;
@@ -1341,6 +1356,9 @@ void Game_Player::ProcessAsteriskForMediaType(int iPK_MediaType)
 			break;
 		case MEDIATYPE_lmce_Game_coleco_CONST:
 			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_equal,m_iEventSerialNum++);
+			break;
+		case MEDIATYPE_lmce_Game_intv_CONST:
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_KP_Subtract,m_iEventSerialNum++);
 			break;
 		default:
 			// Do we need a default?
@@ -1414,6 +1432,7 @@ void Game_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
 	cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
 
 	m_iPK_MediaType = iPK_MediaType;
+	m_iStreamID = iStreamID;
 
 	switch(iPK_MediaType)
 	{
@@ -1452,6 +1471,30 @@ void Game_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sC
 	cout << "Need to implement command #38 - Stop Media" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+
+        // First, send a command to save to slot 1.
+        WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_F7,m_iEventSerialNum++,XK_Shift_L);
+        Sleep(100);
+        WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_1,m_iEventSerialNum++);
+
+        string sPath = GetSaveGamePath();
+        char *cName;
+
+        if (m_iPK_MediaType == MEDIATYPE_lmce_Game_CONST)
+          {
+            cName = tempnam(sPath.c_str(),m_sROMName.c_str());
+          }
+        else
+          {
+            cName = tempnam(sPath.c_str(),m_sMachineType.c_str());
+          }
+
+        string sName = cName;
+        string sMoveCmd = "mv "+sPath+"/1.sta "+sName;
+
+        system(sMoveCmd.c_str());
+
+	*sMediaPosition = sName;
 
 	switch( m_iPK_MediaType)
 	  {
@@ -1588,6 +1631,20 @@ void Game_Player::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStr
 	cout << "Need to implement command #65 - Jump Position In Playlist" << endl;
 	cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+	// Ironically, this is here to implement the save game stuff.
+	if (sValue_To_Assign == "0")
+	{
+		// This is the original game, just send a reset. 
+		CMD_Game_Reset();
+		return;
+	}
+	else
+	{
+		// This is a save point, call Set Media Position.
+		CMD_Set_Media_Position(m_iStreamID,sValue_To_Assign);
+	}
+
 }
 
 //<-dceag-c81-b->
@@ -2210,6 +2267,55 @@ void Game_Player::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sMe
 	cout << "Parm #105 - StreamingTargets=" << sStreamingTargets << endl;
 }
 
+/**
+ * Get Save Game Path for a given media type.
+ */
+string Game_Player::GetSaveGamePath()
+{
+
+  string sPath;
+
+  switch(m_iPK_MediaType)
+    {
+    case MEDIATYPE_lmce_Game_CONST:
+      sPath = "/home/mamedata/sta/" + m_sROMName + "";
+      break;
+    case MEDIATYPE_lmce_Game_a2600_CONST:
+      sPath = "/home/mamedata/sta/a2600";
+      break;
+    case MEDIATYPE_lmce_Game_a5200_CONST:
+      sPath = "/home/mamedata/sta/a5200";
+      break;
+    case MEDIATYPE_lmce_Game_a7800_CONST:
+      sPath = "/home/mamedata/sta/a7800";
+      break;
+    case MEDIATYPE_lmce_Game_coleco_CONST:
+      sPath = "/home/mamedata/sta/coleco";
+      break;
+    case MEDIATYPE_lmce_Game_intv_CONST:
+      sPath = "/home/mamedata/sta/intv";
+      break;
+    case MEDIATYPE_lmce_Game_sg1000_CONST:
+      sPath = "/home/mamedata/sta/sg1000";
+      break;
+    case MEDIATYPE_lmce_Game_sms_CONST:
+      sPath = "/home/mamedata/sta/sms";
+      break;
+    case MEDIATYPE_lmce_Game_famicom_CONST:
+      sPath = "/home/mamedata/sta/famicom";
+      break;
+    case MEDIATYPE_lmce_Game_nes_CONST:
+      sPath = "/home/mamedata/sta/nes";
+      break;
+    default:
+      sPath = "";
+      break;
+    }
+
+  return sPath;
+  
+}
+
 //<-dceag-c259-b->
 
 	/** @brief COMMAND: #259 - Report Playback Position */
@@ -2228,6 +2334,32 @@ void Game_Player::CMD_Report_Playback_Position(int iStreamID,string *sText,strin
 	cout << "Parm #9 - Text=" << sText << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+
+	// First, send a command to save to slot 1.
+	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_F7,m_iEventSerialNum++,XK_Shift_L);
+	Sleep(100);
+	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_9,m_iEventSerialNum++);
+
+	string sPath = GetSaveGamePath();
+	char *cName;
+	
+	if (m_iPK_MediaType == MEDIATYPE_lmce_Game_CONST)
+	  {
+	    cName = tempnam(sPath.c_str(),m_sROMName.c_str());
+	  }
+	else
+	  {
+	    cName = tempnam(sPath.c_str(),m_sMachineType.c_str());
+	  }
+
+	string sName = cName; 
+	string sMoveCmd = "mv "+sPath+"/9.sta "+sName;
+	
+	system(sMoveCmd.c_str());
+
+	*sMediaPosition = sName;
+	*sText = "Save Game";
+	
 }
 
 //<-dceag-c412-b->
@@ -2245,6 +2377,16 @@ void Game_Player::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,str
 	cout << "Need to implement command #412 - Set Media Position" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+	
+	string sPath = GetSaveGamePath();
+	string sCopyCmd = "cp "+sMediaPosition+" "+sPath+"/9.sta";
+	system(sCopyCmd.c_str());	
+	// Send a command to load the game back.
+	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_F7,m_iEventSerialNum++);
+	Sleep(100);
+	WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_9,m_iEventSerialNum++);
+	Sleep(1000);
+	CMD_Pause(iStreamID);	// because the game will just start up from that point.
 }
 
 //<-dceag-c548-b->

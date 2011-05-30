@@ -60,6 +60,7 @@ public:
 private:
 		pluto_pthread_mutex_t m_GameMutex;
 		unsigned long m_iMAMEWindowId;
+		int m_iStreamID;
 		string m_sMAMEWindowId;
 		DeviceData_Base *m_pDevice_Game_Plugin;
 		DeviceData_Base *m_pDevice_App_Server;
@@ -73,9 +74,11 @@ private:
 		string m_sJoystick_Configuration; // If a joystick configuration devicedata is found, it is put here.
 
 		// Private methods
+		string GetSaveGamePath();	// Get save game path for mediatype
 public:
 		virtual void PrepareToDelete();
 		string m_sROMName;
+		string m_sMachineType;
 		string m_sFilename;
 		int m_iPK_MediaType;    // Used by the stop media method.
 
