@@ -373,55 +373,55 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 // -tschak
 ///////////////////////////////////////////////////////////////////////
 
-	if (mediaURL.find("/a2600") != string::npos )
+	if (mediaURL.find("/a2600") != string::npos || StringUtils::ToLower(mediaURL).find(".a26") != string::npos)
 	{
 		pGameMediaStream->m_sAppName = "mess.mess";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_a2600_CONST;
 	}
 
-	if (mediaURL.find("/a5200") != string::npos )
+	if (mediaURL.find("/a5200") != string::npos || StringUtils::ToLower(mediaURL).find(".a52") != string::npos)
 	{
 		pGameMediaStream->m_sAppName = "mess.mess";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_a5200_CONST;
 	}
 
-	if (mediaURL.find("/a7800") != string::npos )
+	if (mediaURL.find("/a7800") != string::npos || StringUtils::ToLower(mediaURL).find(".a78") != string::npos)
 	{
 		pGameMediaStream->m_sAppName = "mess.mess";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_a7800_CONST;
 	}
 
-	if (mediaURL.find("/coleco") != string::npos )
+	if (mediaURL.find("/coleco") != string::npos || StringUtils::ToLower(mediaURL).find(".col") != string::npos)
 	{
 		pGameMediaStream->m_sAppName = "mess.mess";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_coleco_CONST;
 	}
 
-	if (mediaURL.find("/intv") != string::npos )
+	if (mediaURL.find("/intv") != string::npos || StringUtils::ToLower(mediaURL).find(".int") != string::npos)
 	{
 		pGameMediaStream->m_sAppName = "mess.mess";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_intv_CONST;
 	}
 
-	if (mediaURL.find("/sg1000") != string::npos )
+	if (mediaURL.find("/sg1000") != string::npos || StringUtils::ToLower(mediaURL).find(".sg") != string::npos)
 	{
 		pGameMediaStream->m_sAppName = "mess.mess";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_sg1000_CONST;
 	}
 
-	if (mediaURL.find("/sms") != string::npos)
+	if (mediaURL.find("/sms") != string::npos || StringUtils::ToLower(mediaURL).find(".sms") != string::npos)
 	{
 		pGameMediaStream->m_sAppName = "mess.mess";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_sms_CONST;
 	}
 
-	if (mediaURL.find("/nes") != string::npos)
+	if (mediaURL.find("/nes") != string::npos || StringUtils::ToLower(mediaURL).find(".nes") != string::npos)
 	{
 		pGameMediaStream->m_sAppName = "mess.mess";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_nes_CONST;
 	}
 
-	if (mediaURL.find("/famicom") != string::npos)
+	if (mediaURL.find("/famicom") != string::npos || StringUtils::ToLower(mediaURL).find(".fam") != string::npos)
 	{
 		pGameMediaStream->m_sAppName = "mess.mess";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_famicom_CONST;
