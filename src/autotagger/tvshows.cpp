@@ -15,13 +15,14 @@
 int tvshow::isDisc (QString fname)
 {
     QRegExp diskCheck(".iso|.dvd");                   //regex match for dvd disc images
-
+    fname= "null";
     QRegExp discSetter("s\\dd\\d");
 
     /* -if its an iso, dvd
        or a directory with video_ts - db check to see if it has a subdir video_ts
 
     */
+    return 0;
 }
 
 QString tvshow::setEpisode(QString filename)
@@ -137,7 +138,7 @@ QString tvshow::setShow(QString filename)
     titleGrab.setCaseSensitivity(Qt::CaseInsensitive);
     int thisTitle = titleGrab.indexIn(workingFile);
    //qDebug () << "Title Matches" << titleGrab.capturedTexts ().join ("|");
-    int fileLen = workingFile.length();
+    int fileLen = workingFile.count();
     int matchLen = titleGrab.matchedLength();
     int ChopPoint = fileLen - thisTitle;
     //qDebug () << titleGrab.capturedTexts ().join ("|");
@@ -193,12 +194,12 @@ void tvshow::replyFinished(QNetworkReply *)
 	return;
         }
     int nodeLen;
-    nodeLen = s.childNodes().length();
+    nodeLen = s.childNodes().count();
 
     QDomNodeList rList = root.elementsByTagName("Series");
     showTitle = s.firstChildElement("SeriesName").text();               //sets object show title
     seriesID = s.firstChildElement("id").text();                          //sets object series id - unique per show
-    if (seriesID.length() > 0)
+    if (seriesID.count() > 0)
 	{
 	cout << "Processing Identifiers..." << endl;
 	//cout << "Extended Data for: " << qPrintable(showTitle) << "--Season:" << qPrintable(season) << "|| Episode: " << qPrintable(episodeNum) << endl;

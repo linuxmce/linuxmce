@@ -64,7 +64,7 @@ void film::searchMovie()                                                        
     QNetworkRequest iRequest(searchUrl);
     QNetworkAccessManager *iManager = new QNetworkAccessManager(this);
     mTitle.replace("_", "");
-    if(releaseYear.length() == 0)
+    if(releaseYear.count() == 0)
 	{
 	searchUrl = apiUrl+mTitle;
 	}

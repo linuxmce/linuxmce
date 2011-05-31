@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'autotagger.h'
 **
-** Created: Sun Apr 10 01:08:53 2011
+** Created: Fri May 27 00:21:15 2011
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.6.2)
 **
 ** WARNING! All changes made in this file will be lost!

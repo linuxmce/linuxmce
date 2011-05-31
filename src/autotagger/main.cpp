@@ -13,12 +13,12 @@
 #include <QTextStream>
 void filterFile(QString nFile);
 void sendData();
-
+int isLogging;
 
 int main(int argc, char *argv[])        //main loop
 {
 
-   freopen ("/var/log/pluto/linuxmcetag.log","a+",stdout); //open the log
+  freopen ("/var/log/pluto/linuxmcetag.log","a+",stdout); //open the log
 
 
     QTime scanStart = QTime::currentTime ();
@@ -235,7 +235,7 @@ int main(int argc, char *argv[])        //main loop
 		   this process could be done more elegantly with a list pair setup maybe
 		   but im new here and this works just fine. so far.*/
 		  /* QVariant tmTitle = workingPrint.mTitle.toLatin1();
-		   int lenG = workingPrint.mTitle.length();
+		   int lenG = workingPrint.mTitle.count();
 		   cout << lenG << endl;
 		   QString tf = tmTitle.toString();*/
 

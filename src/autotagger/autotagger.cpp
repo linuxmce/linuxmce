@@ -93,7 +93,7 @@ if (!i_tvFilter_4.cap(0).isNull())
     cout << qPrintable(matches.join("|-|")) << endl;
     }
 
-    if (matches.length() >= filmMatches.length())
+    if (matches.count() >= filmMatches.count())
     {
         cout << "tux determines television show - The Open Movie Database"  << endl;
         return 2;
@@ -132,11 +132,11 @@ if (!i_tvFilter_4.cap(0).isNull())
        return 1;
 	    }
        }
-   else if ((mCap.length() > tvCap.length()))
+   else if ((mCap.count() > tvCap.count()))
 	{
 	return 1;
 	}
-    else if ((tvCap.length() > mCap.length() ))
+    else if ((tvCap.count() > mCap.count() ))
 	{
 	return 2;
 	}
