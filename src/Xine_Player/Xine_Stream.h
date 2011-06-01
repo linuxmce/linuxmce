@@ -134,6 +134,7 @@ namespace DCE
 			bool getRealStreamPosition(int &positionTime, int &totalTime);
 			int m_iCachedStreamPosition;
 			int m_iCachedStreamLength;
+			string m_sSubtitlesSuffix; // temporary for that stupid hack.
 		public:
 			int m_iMenuButtons;
 			void FireMenuOnScreen(int iButtons);

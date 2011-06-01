@@ -615,7 +615,8 @@ bool Xine_Stream::OpenMedia(string fileName, string &sMediaInfo, string sMediaPo
 		// NOTE: seek doesn't work with subtitles... or file:// url
 		// HACK BEGIN
 		tmp = "";
-		sSubtitlesSuffix = "";
+		m_sSubtitlesSuffix = sSubtitlesSuffix; // Store it temporarily. 
+		// sSubtitlesSuffix = "";
 		// HACK END
 
 		tmp = tmp + fileName + sURLsuffix + sSubtitlesSuffix;
