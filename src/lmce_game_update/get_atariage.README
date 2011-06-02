@@ -1,0 +1,9 @@
+The AtariAGE scripts are designed to grab image data from Atari Age for snapshots to be placed in the Snapshot package.
+
+It is intended to be run as part of a pipe. In a directory of ROMs (as many as possible), do 
+
+ls | get_rom_names | get_atariage_info_a2600 
+
+get_rom_names tries to parse rom names and get just the game name, which can be passed to get_atariage_info_a2600. If matched, a JPEG picture will be downloaded to the current directory.
+
+--TSCHAK
