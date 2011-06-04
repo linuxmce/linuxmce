@@ -2,10 +2,8 @@
 #include "DeviceData_Impl.h"
 #include "Logger.h"
 
-
 using namespace DCE;
-
-
+#include "DCE_BrowserBase.h"
 extern DCE_Browser_Command *Create_DCE_Browser(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
 DeviceData_Impl *DCE_Browser_Data::CreateData(DeviceData_Impl *Parent,char *pDataBlock,unsigned long AllocatedSize,char *CurrentPosition)
 {

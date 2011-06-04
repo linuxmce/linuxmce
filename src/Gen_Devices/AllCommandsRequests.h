@@ -29418,27 +29418,31 @@ namespace DCE
 	};
 	class CMD_Goto_Url : public PreformedCommand {
 	public:
-		CMD_Goto_Url(long DeviceIDFrom, long DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+		CMD_Goto_Url(long DeviceIDFrom, long DeviceIDTo,string sURL) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
 			COMMAND_Goto_Url_CONST,
-			0 /* number of parameters */); }
+			1 /* number of parameters */,
+			COMMANDPARAMETER_URL_CONST, sURL.c_str()); }
 	};
 	class CMD_Goto_Url_DL : public PreformedCommand {
 	public:
-		CMD_Goto_Url_DL(long DeviceIDFrom, string DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+		CMD_Goto_Url_DL(long DeviceIDFrom, string DeviceIDTo,string sURL) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
 			COMMAND_Goto_Url_CONST,
-			0 /* number of parameters */); }
+			1 /* number of parameters */,
+			COMMANDPARAMETER_URL_CONST, sURL.c_str()); }
 	};
 	class CMD_Goto_Url_DT : public PreformedCommand {
 	public:
-		CMD_Goto_Url_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+		CMD_Goto_Url_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sURL) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
 			COMMAND_Goto_Url_CONST,
-			0 /* number of parameters */); }
+			1 /* number of parameters */,
+			COMMANDPARAMETER_URL_CONST, sURL.c_str()); }
 	};
 	class CMD_Goto_Url_Cat : public PreformedCommand {
 	public:
-		CMD_Goto_Url_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+		CMD_Goto_Url_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sURL) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
 			COMMAND_Goto_Url_CONST,
-			0 /* number of parameters */); }
+			1 /* number of parameters */,
+			COMMANDPARAMETER_URL_CONST, sURL.c_str()); }
 	};
 	class CMD_Navigate_Forward : public PreformedCommand {
 	public:

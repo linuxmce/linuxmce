@@ -1,9 +1,9 @@
 #ifndef DCE_BrowserBase_h
 #define DCE_BrowserBase_h
-#include "../DCE/DeviceData_Impl.h"
-#include "../DCE/Message.h"
-#include "../DCE/Command_Impl.h"
-#include "../DCE/Logger.h"
+#include "DeviceData_Impl.h"
+#include "Message.h"
+#include "Command_Impl.h"
+#include "Logger.h"
 #include "../pluto_main/Define_Command.h"
 #include "../pluto_main/Define_CommandParameter.h"
 #include "../pluto_main/Define_DeviceTemplate.h"
@@ -43,6 +43,29 @@ public:
 	/**
 	* @brief Events methods for our device
 	*/
+
+	virtual void Watching_Media(int iPK_Room)
+	{
+		SendMessage(new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, 
+			EVENT_Watching_Media_CONST,
+			1 /* number of parameter's pairs (id, value) */,
+			EVENTPARAMETER_PK_Room_CONST, StringUtils::itos(iPK_Room).c_str()));
+	}
+
+	virtual void Stopped_Watching_Media(int iPK_Room)
+	{
+		SendMessage(new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, 
+			EVENT_Stopped_Watching_Media_CONST,
+			1 /* number of parameter's pairs (id, value) */,
+			EVENTPARAMETER_PK_Room_CONST, StringUtils::itos(iPK_Room).c_str()));
+	}
+
+	virtual void Url_Loaded()
+	{
+		SendMessage(new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, 
+			EVENT_Url_Loaded_CONST,
+			0 /* number of parameter's pairs (id, value) */));
+	}
 
 };
 
@@ -194,9 +217,12 @@ public:
 	//Data accessors
 	string DATA_Get_Username() { return GetData()->Get_Username(); }
 	//Event accessors
+	void EVENT_Watching_Media(int iPK_Room) { GetEvents()->Watching_Media(iPK_Room); }
+	void EVENT_Stopped_Watching_Media(int iPK_Room) { GetEvents()->Stopped_Watching_Media(iPK_Room); }
+	void EVENT_Url_Loaded() { GetEvents()->Url_Loaded(); }
 	//Commands - Override these to handle commands from the server
 	virtual void CMD_Reload(string &sCMD_Result,class Message *pMessage) {};
-	virtual void CMD_Goto_Url(string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Goto_Url(string sURL,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Navigate_Forward(string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Navigate_Back(string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Bookmark_Website(string &sCMD_Result,class Message *pMessage) {};
@@ -262,7 +288,8 @@ public:
 				case COMMAND_Goto_Url_CONST:
 					{
 						string sCMD_Result="OK";
-						CMD_Goto_Url(sCMD_Result,pMessage);
+						string sURL=pMessage->m_mapParameters[COMMANDPARAMETER_URL_CONST];
+						CMD_Goto_Url(sURL.c_str(),sCMD_Result,pMessage);
 						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
 						{
 							pMessage->m_bRespondedToMessage=true;
@@ -279,7 +306,7 @@ public:
 						{
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
-								CMD_Goto_Url(sCMD_Result,pMessage);
+								CMD_Goto_Url(sURL.c_str(),sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;

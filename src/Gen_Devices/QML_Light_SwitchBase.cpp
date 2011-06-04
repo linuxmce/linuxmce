@@ -4,6 +4,7 @@
 
 using namespace DCE;
 #include "QML_Light_SwitchBase.h"
+
 extern QML_Light_Switch_Command *Create_QML_Light_Switch(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
 
 DeviceData_Impl *QML_Light_Switch_Data::CreateData(DeviceData_Impl *Parent,char *pDataBlock,unsigned long AllocatedSize,char *CurrentPosition)
