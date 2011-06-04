@@ -85,6 +85,7 @@
 #define EVENT_Voltage_Changed_CONST 84
 #define EVENT_Power_Usage_Changed_CONST 85
 #define EVENT_Energy_Cost_Changed_CONST 86
+#define EVENT_Url_Loaded_CONST 87
 
 #define EVENT_TABLE "Event"
 #define EVENT_PK_EVENT_FIELD "PK_Event"
