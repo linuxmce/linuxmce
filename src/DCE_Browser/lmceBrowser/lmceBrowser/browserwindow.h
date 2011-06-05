@@ -20,6 +20,7 @@ class browserWindow : public QMainWindow
 public:
     browserWindow(QWidget *parent = 0);
     ~browserWindow();
+
     DCE::DCE_Browser *m_pBrowser;
     void gotoUrl(QUrl lm_url);
     bool setupLMCE(int);

@@ -11,12 +11,12 @@ browserWindow::browserWindow(QWidget *parent)
          file.open(QIODevice::ReadOnly);
          jQuery = file.readAll();
          file.close();
-
+        QWebSettings *defaultSettings = QWebSettings::globalSettings(); defaultSettings->setAttribute(QWebSettings::JavascriptEnabled, true); defaultSettings->setAttribute(QWebSettings::PluginsEnabled, true);
          view = new QWebView(this);
          bool bLocalMode = false;
          string sRouter_IP = "dcerouter";
          int PK_Device = 35 ;
-
+         QWebSettings::PluginsEnabled;
          m_pBrowser = new DCE::DCE_Browser(PK_Device, sRouter_IP,true,bLocalMode);
 
          view->load(QUrl("http://www.linuxmce.org"));
