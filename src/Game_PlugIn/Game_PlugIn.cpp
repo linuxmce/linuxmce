@@ -343,6 +343,9 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
  
 	string sFileToPlay;
 	MediaFile *pMediaFile = NULL;
+
+	if (pGameMediaStream->m_dequeMediaFile.size()>pGameMediaStream->m_iDequeMediaFile_Pos)
+	  pMediaFile = pGameMediaStream->m_dequeMediaFile[pGameMediaStream->m_iDequeMediaFile_Pos];
  
 	sFileToPlay = pGameMediaStream->GetFilenameToPlay("Empty file name");
  
@@ -428,11 +431,16 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 	}
 
 	DCE::CMD_Play_Media CMD_Play_Media(m_dwPK_Device,
-						pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
-						pGameMediaStream->m_iPK_MediaType,
-						pGameMediaStream->m_iStreamID_get( ),
-						"00:00:00",mediaURL);
+					   pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
+					   pGameMediaStream->m_iPK_MediaType,
+					   pGameMediaStream->m_iStreamID_get( ),
+					   pMediaFile && pMediaFile->m_sStartPosition.size() ? pMediaFile->m_sStartPosition : pGameMediaStream->m_sStartPosition,
+					   mediaURL);
+
 	SendCommand(CMD_Play_Media);
+
+	if (pMediaFile && pGameMediaStream->m_iPK_Playlist==0)
+	  pMediaFile->m_sStartPosition="";
  
 	/** We're going to send a message to all the orbiters in this area so they know what the remote is,
 	and we will send all bound remotes to the new screen */
@@ -471,6 +479,14 @@ bool Game_PlugIn::StopMedia( class MediaStream *pMediaStream )
 	if ((pGameMediaStream = ConvertToGameMediaStream(pMediaStream,"Game_Plugin::StopMedia():")) == NULL )
 		return false;
  
+	if (!pGameMediaStream->m_pMediaDevice_Source)
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Stopping media in Game_Plugin but MediaDevice_Source is NULL");
+	    return false;
+	  }
+
+	int PK_Device = pGameMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device;
+	int iStreamID = pGameMediaStream->m_iStreamID_get();
 	string savedPosition;
  
 	DCE::CMD_Stop_Media CMD_Stop_Media(m_dwPK_Device,
@@ -478,9 +494,24 @@ bool Game_PlugIn::StopMedia( class MediaStream *pMediaStream )
 						pGameMediaStream->m_iStreamID_get(),
 						&savedPosition);
  
-	SendCommand(CMD_Stop_Media);
+	string sResponse;
+	if (!SendCommand(CMD_Stop_Media))
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"The Target device %d didn't respond to stop media command!", PK_Device);
+	  }
+	else
+	  {
+	    pGameMediaStream->m_sLastPosition=savedPosition;
+	    if (pGameMediaStream->m_iDequeMediaFile_Pos>=0 && pGameMediaStream->m_iDequeMediaFile_Pos<pGameMediaStream->m_dequeMediaFile.size())
+	      {
+		pGameMediaStream->m_dequeMediaFile[pGameMediaStream->m_iDequeMediaFile_Pos]->m_sStartPosition = savedPosition;
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media Stopped at %s",savedPosition.c_str());
+	      }
+	    LoggerWrapper::GetInstance()->Write(LV_STATUS,"The target device %d responded to stop media comman", pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device);
+	  }
  
 	return MediaHandlerBase::StopMedia(pMediaStream);
+
 }
 
 MediaDevice *Game_PlugIn::FindMediaDeviceForEntertainArea(EntertainArea *pEntertainArea)
