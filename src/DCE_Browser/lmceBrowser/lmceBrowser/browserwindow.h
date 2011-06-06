@@ -18,7 +18,7 @@ class browserWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    browserWindow(QWidget *parent = 0);
+    browserWindow(int p_pkDevice, QWidget *parent = 0);
     ~browserWindow();
 
     DCE::DCE_Browser *m_pBrowser;

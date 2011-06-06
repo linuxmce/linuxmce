@@ -1,7 +1,7 @@
 
 #include "browserwindow.h"
 
-browserWindow::browserWindow(QWidget *parent)
+browserWindow::browserWindow(int p_pkDevice, QWidget *parent)
     : QMainWindow(parent)
 {
     progress = 0;
@@ -13,9 +13,10 @@ browserWindow::browserWindow(QWidget *parent)
          file.close();
         QWebSettings *defaultSettings = QWebSettings::globalSettings(); defaultSettings->setAttribute(QWebSettings::JavascriptEnabled, true); defaultSettings->setAttribute(QWebSettings::PluginsEnabled, true);
          view = new QWebView(this);
+
          bool bLocalMode = false;
          string sRouter_IP = "dcerouter";
-         int PK_Device = 35 ;
+         int PK_Device = p_pkDevice ;
          QWebSettings::PluginsEnabled;
          m_pBrowser = new DCE::DCE_Browser(PK_Device, sRouter_IP,true,bLocalMode);
 

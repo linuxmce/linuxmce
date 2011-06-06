@@ -116,8 +116,7 @@ extern "C" {
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    browserWindow *qWebBrowser = new browserWindow();
-    qWebBrowser->show();
+
 
     string g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
     string g_sBinaryPath = FileUtils::BasePath(argv[0]);
@@ -169,7 +168,8 @@ int main(int argc, char *argv[])
                     << "-l -- Where to save the log files.  Specify 'dcerouter' to have the messages logged to the DCE Router.  Defaults to stdout." << endl;
             exit(1);
     }
-
+    browserWindow *qWebBrowser = new browserWindow(PK_Device);
+    qWebBrowser->show();
 
 #ifdef WIN32
     WORD    wVersion;
