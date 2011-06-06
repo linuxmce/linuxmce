@@ -59,11 +59,11 @@ browserWindow::~browserWindow()
 
 }
 
-bool browserWindow::setupLMCE(int)
+bool browserWindow::setupLMCE(int p_pkDevice)
 {
     bool bLocalMode = false;
     string sRouter_IP = "dcerouter";
-    int PK_Device = 35 ;
+    int PK_Device = p_pkDevice ;
 
     m_pBrowser = new DCE::DCE_Browser(PK_Device, sRouter_IP,true,bLocalMode);
 
