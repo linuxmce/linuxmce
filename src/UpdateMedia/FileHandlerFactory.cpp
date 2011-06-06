@@ -105,6 +105,7 @@ FileHandlerFactory::~FileHandlerFactory(void)
 	// detailed checks will be done, to pass parameters to the FileHandler to do the final work.
 
 	string sExtension = FileUtils::FindExtension(sFile);
+	sExtension = StringUtils::ToLower(sExtension);
 	bool bHasRomExtension = (sExtension == "zip") ||
 			   (sExtension == "bin") || 
 			   (sExtension == "a26") ||
@@ -112,7 +113,11 @@ FileHandlerFactory::~FileHandlerFactory(void)
 			   (sExtension == "a78") ||
 			   (sExtension == "col") ||
 			   (sExtension == "int") ||
-			   (sExtension == "nes");
+			   (sExtension == "sms") ||
+			   (sExtension == "sg") ||
+			   (sExtension == "nes") || 
+			   (sExtension == "fam") ||
+			   (sExtension == "fds");
 
 	return bHasRomExtension;	// do we do more tests here?
 }

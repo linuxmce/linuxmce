@@ -273,7 +273,7 @@ void RomFileHandler::GetRomInfo(string sFilename, map<int,string>& mapAttributes
 	if (m_sFullFilename.find("/coleco") != string::npos || sTmpFile.find(".col") != string::npos)
 		sSnapFilename = "/home/snap/coleco/" + sROMTitle + ".jpg";
 
-	if (m_sFullFilename.find("/sg1000") != string::npos || sTmpFile.find(".sg") != string::npos)
+	if (m_sFullFilename.find("/sg1000") != string::npos || sTmpFile.find(".SG") != string::npos)
 		sSnapFilename = "/home/snap/sg1000/" + sROMTitle + ".jpg";
 
 	if (m_sFullFilename.find("/sms") != string::npos || sTmpFile.find(".sms") != string::npos)
@@ -282,7 +282,8 @@ void RomFileHandler::GetRomInfo(string sFilename, map<int,string>& mapAttributes
 	if (m_sFullFilename.find("/nes") != string::npos || sTmpFile.find(".nes") != string::npos)
 		sSnapFilename = "/home/snap/nes/" + sROMTitle + ".jpg";
 
-	if (m_sFullFilename.find("/famicom") != string::npos || sTmpFile.find(".fam") != string::npos)
+	if (m_sFullFilename.find("/famicom") != string::npos || sTmpFile.find(".fam") != string::npos
+							     || sTmpFile.find(StringUtils::ToLower(".fds")) != string::npos)
 		sSnapFilename = "/home/snap/famicom/" + sROMTitle + ".jpg";
 
   }
