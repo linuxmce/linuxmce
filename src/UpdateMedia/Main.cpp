@@ -49,7 +49,6 @@
 
 #include "inotify/FileNotifier.h"
 #include "PlutoMediaFile.h"
-#include "PlutoMediaFile.h"
 #include "pluto_media/Define_AttributeType.h"
 
 #include "DCE/Message.h"
