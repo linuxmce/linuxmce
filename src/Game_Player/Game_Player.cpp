@@ -54,6 +54,7 @@ Game_Player::Game_Player(int DeviceID, string ServerAddress,bool bConnectEventHa
 	m_pDevice_App_Server = NULL;
 	m_iPK_MediaType = 0;
 	m_iStreamID = 0;
+	m_bLoadSavedGame = 0;
 }
 
 //<-dceag-const2-b->!
@@ -973,6 +974,7 @@ string Game_Player::CreateWindowIDString(long unsigned int window)
 
 bool Game_Player::LaunchMESS(string sMediaURL)
 {
+  string sState = "";
   size_t iROMNameSize = FileUtils::FilenameWithoutPath(sMediaURL).size();
   m_sROMName = FileUtils::FilenameWithoutPath(sMediaURL).substr(0,iROMNameSize-4);
   m_sFilename = FileUtils::FilenameWithoutPath(sMediaURL);
@@ -991,10 +993,15 @@ bool Game_Player::LaunchMESS(string sMediaURL)
       
       string sParameters = GetMessParametersFor(sMediaURL);
 
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"sParameters is: %s",sParameters.c_str());
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"sParameters is: %s%s",sParameters.c_str(),sState.c_str());
+
+	if (m_bLoadSavedGame) // m_bLoadSavedGame is set in CMD_Play_Media
+	{
+		sState = "\t-state\t9";
+	}
 
       DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
-			"mess", "mess", sParameters,
+			"mess", "mess", sParameters+sState,
 						       sMessage + "1",sMessage + "0",false,false,true,false);
       if( SendCommand(CMD_Spawn_Application) ) {
 	m_bMAMEIsRunning = true;
@@ -1023,6 +1030,8 @@ bool Game_Player::LaunchMESS(string sMediaURL)
 bool Game_Player::LaunchMAME(string sMediaURL) 
 {
 
+	string sState = "";
+
 	size_t iROMNameSize = FileUtils::FilenameWithoutPath(sMediaURL).size();
 	m_sROMName = FileUtils::FilenameWithoutPath(sMediaURL).substr(0,iROMNameSize-4);
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"ROM is: %s",m_sROMName.c_str());
@@ -1038,8 +1047,14 @@ bool Game_Player::LaunchMAME(string sMediaURL)
 			return false;
 		} // Make sure MAME's configuration is correct. 
 
+		// m_bLoadSavedGame is set in CMD_Play_Media
+		if (m_bLoadSavedGame)
+		{
+			sState = "\t-state\t9"; // load saved state from slot 9
+		}
+
 		DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
-			"mame", "mame", sMediaURL+ "",
+			"mame", "mame", sMediaURL+ sState,
 			sMessage + "1",sMessage + "0",false,false,true,false);
 		if( SendCommand(CMD_Spawn_Application) ) {
 			m_bMAMEIsRunning = true;
@@ -1433,6 +1448,18 @@ void Game_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
 
 	m_iPK_MediaType = iPK_MediaType;
 	m_iStreamID = iStreamID;
+
+	if (!sMediaPosition.empty())
+	{
+		m_bLoadSavedGame = true;
+	        string sPath = GetSaveGamePath();
+        	string sCopyCmd = "cp "+sMediaPosition+" "+sPath+"/9.sta";
+        	system(sCopyCmd.c_str());
+	}
+	else
+	{
+		m_bLoadSavedGame = false;
+	}
 
 	switch(iPK_MediaType)
 	{

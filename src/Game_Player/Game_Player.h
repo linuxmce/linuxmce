@@ -81,7 +81,7 @@ public:
 		string m_sMachineType;
 		string m_sFilename;
 		int m_iPK_MediaType;    // Used by the stop media method.
-
+		bool m_bLoadSavedGame;
 		// Public member variables
 
 protected:
