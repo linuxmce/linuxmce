@@ -51,4 +51,6 @@ $OPTION_CHECK_IMDB='Check IMDB';
 $OPTION_CHECK_TVDB='Check TVDB';
 $TEXT_CLEAN_FILES_CONST="Clean Attributes";
 $TEXT_CLEANED_FILES_CONST="Cleaned All Attributes";
+$TEXT_SET_FILE_FORMAT_CONST="Please Set File Format";
+$TEXT_SET_TYPE_CONST="Please Set Type";
 ?>

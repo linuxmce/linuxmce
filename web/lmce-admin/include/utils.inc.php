@@ -1501,18 +1501,40 @@ function getMediaPluginID($installationID,$dbADO)
 
 function pulldownFromArray($valuesArray,$name,$selectedValue,$extra='',$valueKey='key',$zeroValueDescription='- Please select -',$highlightValue=-1)
 {
+	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/editMediaFile.lang.php');
 //	if(count($valuesArray)==0)
 //		return null;
 	$out='<select name="'.$name.'" '.$extra.'>';
+	//print_r($selectedValue);
 	if($zeroValueDescription!='')
-		$out.='<option value="0">'.$zeroValueDescription.'</option>';
-	foreach ($valuesArray AS $key=>$value){
+	{
+		
+	$out.='<option value="0">'.$zeroValueDescription.'</option>';
+	
+	foreach ($valuesArray AS $key=>$value)
+		{
 		$optionValue=($valueKey=='key')?$key:$value;
 		$out.='<option value="'.$optionValue.'" '.(($optionValue==$selectedValue)?'selected':'').' '.((in_array($optionValue,explode(',',$highlightValue)))?'style="background:lightgreen;"':'').' title="'.$value.'">'.$value.'</option>
-		';
+		';}
+		if($selectedValue <= 0)
+			{
+				if ($name =='subtype')
+				{
+					$out.='</select> '.$TEXT_SET_MEDIA_TYPE_CONST;
+				}
+				else if ($name=='fileFormat')
+				{
+					$out.='</select> '.$TEXT_SET_FILE_FORMAT_CONST;
+				}
+			
+			}
+		else
+			{
+			$out.='</select>';	
+			}	
+	
 	}
-	$out.='</select>';
-	return $out;
+		return $out;
 }
 
 //$GLOBALS['wizardChilds']=array();

@@ -35,7 +35,8 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 		}
 	
 	}
-
+	
+	
 	function setAttributeName()
 	{
 		document.editMediaFile.newAttributeName.value=document.editMediaFile.existingAttributes[document.editMediaFile.existingAttributes.selectedIndex].text
@@ -71,7 +72,7 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 			<div align="center" class="err">'.stripslashes(@$_REQUEST['error']).'</div>
 			<div align="center" class="confirm"><B>'.stripslashes(@$_REQUEST['msg']).'</B></div>
 			
-		<table width="100%">
+		<table width="100%" >
 			<tr>
 				<td><a href="javascript:syncPath(\''.$rowFile['Path'].'\')">Back</a></td>
 				<td align="right">'.quick_search_box().'</td>
@@ -145,16 +146,17 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 			while($rowType=$resType->FetchRow()){
 				$out.='<option value="'.$rowType['PK_MediaType'].'" '.(($rowType['PK_MediaType']==$rowFile['EK_MediaType'])?'selected':'').'>'.$rowType['Description'].'</option>';
 			}
+			
 			$out.='
 				</select> '.$externalAttributesBtn.'</td>
 			</tr>
 			<tr bgcolor="#EEEEEE">
 				<td><B>'.$TEXT_SUB_TYPE_CONST.':</B></td>
-				<td>'.pulldownFromArray($mediaSubTypes,'subtype',$rowFile['FK_MediaSubType']).'</td>
+				<td id="subtype" >'.pulldownFromArray($mediaSubTypes,'subtype',$rowFile['FK_MediaSubType']).'</td>
 			</tr>			
 			<tr bgcolor="#EEEEEE">
 				<td><B>'.$TEXT_FILE_FORMAT_CONST.':</B></td>
-				<td>'.pulldownFromArray($fileFormat,'fileFormat',$rowFile['FK_FileFormat']).'</td>
+				<td "id="fileformat">'.pulldownFromArray($fileFormat,'fileFormat',$rowFile['FK_FileFormat']).'</td>
 			</tr>				
 			<tr>
 				<td colspan="2"><input type="submit" class="button" name="update" value="'.$TEXT_UPDATE_CONST.'"> <input type="reset" class="button" name="cancelBtn" value="'.$TEXT_CANCEL_CONST.'">
