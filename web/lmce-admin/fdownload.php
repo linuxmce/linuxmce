@@ -7,6 +7,7 @@ $allowedFiles=array(
 	'installers/mysql2outlooksetup.msi',
 	'installers/ImportContacts.zip',
 	'installers/OutlookSync.msi',
+	'installers/fremantle.install',
 	'binaries/AYGSHELL.DLL',
 	'binaries/PthreadsCE.dll',
 	'binaries/logo.gif',
@@ -43,9 +44,14 @@ if($allowed==1){
 		$filepath=$Path.@$_GET['filepath'];
 		$filename = substr($_GET['filepath'],strrpos ($_GET['filepath'],'/')+1);
 	}
+	$content_type='application/force-download';
+	if ($filename == 'fremantle.install') {
+		$content_type='application/x-install-instructions';
+	}
 	
 	if(file_exists($filepath)){
-		header('Content-type: application/force-download');
+	
+		header('Content-type: ' . $content_type);
 		header('Content-Transfer-Encoding: Binary');
 		header('Content-disposition: attachment; filename='.$filename);
 		readfile($filepath);
