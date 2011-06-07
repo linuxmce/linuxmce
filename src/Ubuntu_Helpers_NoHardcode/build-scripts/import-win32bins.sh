@@ -56,6 +56,8 @@ function import_win32bins() {
 	wget --ftp-user="$win32_ftp_user" --ftp-password="$win32_ftp_password" \
 		"$win32_ftp_url"/bin/*
 
+	cp ${svn_dir}/${svn_branch_name}/src/Orbiter/Maemo/fremantle.install .
+
 	wget -q http://hob.dyndns.org/javamo/JavaMO.jar
 	wget -q http://hob.dyndns.org/javamo/JavaMO.jad
 	
