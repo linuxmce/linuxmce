@@ -1547,6 +1547,12 @@ switch ($section) {
 	    include_once('operations/users_settings/setTimezone.php');
 	    setTimezone($output,$dbADO);	    
 	break;	
+	case 'setLoglevels':
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('small');
+	    include_once('operations/users_settings/setLoglevels.php');
+	    setLoglevels($output,$dbADO);            
+	break;
 	case 'deviceCategoryDeviceData':
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('large');

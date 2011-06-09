@@ -26,4 +26,8 @@ $TEXT_NO_OPTIONS_AVAILABLE_CONST='No options available.';
 $TEXT_ERROR_IMPORT_FAILED_CONST='ERROR: database import failed.';
 $TEXT_SET_TIMEZONE_CONST='Set timezone';
 $TEXT_TIMEZONE_UPDATED_CONST='Timezone updated';
+$TEXT_SET_LOGLEVELS_CONST = "Set Logging Levels";
+$TEXT_CURRENT_LOGLEVELS_CONST = "Current Logging Levels";
+$TEXT_LOGLEVELS_UPDATED_CONST='Logging Levels updated. You will need to perform a router quick reload in order to apply.';
+$TEXT_SYSTEM_CONST = "System";
 ?>
