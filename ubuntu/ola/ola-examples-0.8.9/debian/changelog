@@ -1,0 +1,12 @@
+ola-examples (0.8.9-1) unstable; urgency=low
+
+  * Initial packaging for LinuxMCE
+
+ -- Peer Oliver Schmidt <peer.oliver.schmidt@linuxmce.org>  Tue, 24 May 2011 14:23:33 +0100
+
+ola-examples (0.7.3-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Simon Newton <nomis52@gmail.com>  Sun, 16 May 2010 04:03:33 +0000
+
