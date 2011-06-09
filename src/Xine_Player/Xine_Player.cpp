@@ -321,7 +321,11 @@ void Xine_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
 		pStream->playStream( sMediaPosition);
 		return;
 	}
-        
+
+	// -  Process sMediaURL slightly, turn # to %23, so that xine does not complain.
+	sMediaURL = StringUtils::Replace(sMediaURL,"#","%23");
+	// - end 
+ 
 	pStream->m_sCurrentFile=sMediaURL;
         
         pStream->m_sMediaType = "N";
