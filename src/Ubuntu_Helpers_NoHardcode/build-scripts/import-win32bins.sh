@@ -43,7 +43,8 @@ function fake_win32bins() {
 
 #	wget -q http://hob.dyndns.org/javamo/JavaMO.jar
 #	wget -q http://hob.dyndns.org/javamo/JavaMO.jad
-	
+        cp ${svn_dir}/${svn_branch_name}/src/Orbiter/Maemo/fremantle.install .
+        
 	touch JavaMO.jar
 	touch JavaMO.jad
 	popd
