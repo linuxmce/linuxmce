@@ -108,16 +108,16 @@ void OpenLightingArchitecture::ReceivedCommandForChild(DeviceData_Impl *pDeviceD
 		vector<string> vect;
 		StringUtils::Tokenize(portChannel, "|", vect);
 		universe = atoi(vect[0].c_str());
-		channel = atoi(vect[1].c_str());
+		channel = atoi(vect[1].c_str())-1;
 		if (vect.size()==4){
-			channelR=atoi(vect[1].c_str());
-			channelG=atoi(vect[2].c_str());
-			channelB=atoi(vect[3].c_str());
+			channelR=atoi(vect[1].c_str())-1;
+			channelG=atoi(vect[2].c_str())-1;
+			channelB=atoi(vect[3].c_str())-1;
 			isrgb = 1;
 		}
 	} else {
 		universe =1;
-		channel = atoi(portChannel.c_str());
+		channel = atoi(portChannel.c_str())-1;
 	}
 
 	sCMD_Result = "UNHANDLED CHILD";
