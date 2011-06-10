@@ -201,3 +201,15 @@ libcdaudio1
 libcdaudio-dev  
 libvisual-0.4-dev
 libxml++2.6-dev
+libtonezone-dev 
+unixodbc-dev 
+libpri-dev 
+libvpb-dev 
+libnewt-dev
+libspeexdsp-dev 
+libopenh323-dev 
+libiksemel-dev 
+libradiusclient-ng-dev
+freetds-dev 
+libsnmp-dev 
+libc-client2007b-dev
