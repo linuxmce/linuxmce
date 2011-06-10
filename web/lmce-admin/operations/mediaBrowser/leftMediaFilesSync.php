@@ -19,6 +19,11 @@ function leftMediaFilesSync($output,$mediadbADO,$dbADO) {
 			top.basefrm.location=\'index.php?section=mainMediaFilesSync&path=\'+encodeURIComponent(path);
 			self.location=\'index.php?section=leftMediaFilesSync&startPath=\'+encodeURIComponent(path);
 		}
+		function handleDBWipe() {
+			var wipeDBMsg = "WARNING!\nThis will completely clear the media database of all entries and attributes as well as removing all playlists, bookmarks, and channel favorites. Media entries and attributes will be restored as they are read in by UpdateMedia but nothing else will be recovered. Only use this option as a last resort if nothing else is able to fix your issue.";
+			if (confirm(wipeDBMsg) && confirm("Are you sure? This process is irreversible!")) return true;
+			return false;
+		}
 		</script>
 		<form action="index.php" method="POST" name="leftMediaFilesSync">
 		<input type="hidden" name="section" value="leftMediaFilesSync">
@@ -79,6 +84,9 @@ function leftMediaFilesSync($output,$mediadbADO,$dbADO) {
 			<tr>
 				<td colspan="2" align="center" class="left_menu"><input type="submit" class="button_fixed" name="searchTokens" value="Search tokens"></td>
 			</tr>			
+                        <tr>
+                                <td colspan="2" align="center" class="left_menu"><input type="submit" class="button_fixed" name="wipeDatabase" value="Wipe media database" onClick="return handleDBWipe();"></td>
+                        </tr>
 			</table>
 		</form>';
 	}else{
@@ -95,7 +103,22 @@ function leftMediaFilesSync($output,$mediadbADO,$dbADO) {
 			exec_batch_command($cmd);
 		}
 		
-		
+		if(isset($_POST['wipeDatabase'])){
+			// stop UpdateMedia if running
+			$UpdateMediaRunning = get_update_media_daemon_status($dbADO);
+			if ($UpdateMediaRunning) {
+				exec_batch_command('sudo -u root /usr/pluto/bin/UpdateMediaDaemonControl.sh -disable');
+			}
+			// drop pluto_media
+			exec_batch_command("sudo -u root mysqladmin -h $dbPlutoMediaServer -u $dbPlutoMediaUser -p$dbPlutoMediaPass drop pluto_main");
+			// reinitialize pluto_media
+			exec_batch_command('sudo -u root cd /usr/pluto/database && /usr/pluto/bin/sqlCVS -D pluto_media -r media import');
+			// restart UpdateMedia if it was running
+			if ($UpdateMediaRunning) {
+				exec_batch_command('sudo -u root /usr/pluto/bin/UpdateMediaDaemonControl.sh -enable');
+			}
+                }
+
 		header('Location: index.php?section=leftMediaFilesSync&startPath='.htmlentities($_REQUEST['startPath']));
 		exit();
 	}	
