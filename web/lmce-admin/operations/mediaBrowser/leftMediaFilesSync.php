@@ -3,6 +3,8 @@ function leftMediaFilesSync($output,$mediadbADO,$dbADO) {
 	// include language files
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
 	
+	global $dbPlutoMediaServer, $dbPlutoMediaDatabase, $dbPlutoMediaUser, $dbPlutoMediaPass;
+
 	/* @var $mediadbADO ADOConnection */
 	/* @var $rs ADORecordSet */
 	
@@ -110,9 +112,9 @@ function leftMediaFilesSync($output,$mediadbADO,$dbADO) {
 				exec_batch_command('sudo -u root /usr/pluto/bin/UpdateMediaDaemonControl.sh -disable');
 			}
 			// drop pluto_media
-			exec_batch_command("sudo -u root mysqladmin -h $dbPlutoMediaServer -u $dbPlutoMediaUser -p$dbPlutoMediaPass drop pluto_media");
+			exec_batch_command("sudo -u root mysqladmin -f -h $dbPlutoMediaServer -u $dbPlutoMediaUser".(($dbPlutoMediaPass)?" -p$dbPlutoMediaPass":"")." drop $dbPlutoMediaDatabase");
 			// reinitialize pluto_media
-			exec_batch_command('sudo -u root cd /usr/pluto/database && /usr/pluto/bin/sqlCVS -D pluto_media -r media import');
+			exec_batch_command('cd /usr/pluto/database && sudo -u root /usr/pluto/bin/sqlCVS -D pluto_media -r media import');
 			// restart UpdateMedia if it was running
 			if ($UpdateMediaRunning) {
 				exec_batch_command('sudo -u root /usr/pluto/bin/UpdateMediaDaemonControl.sh -enable');
