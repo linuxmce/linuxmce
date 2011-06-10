@@ -86,9 +86,10 @@ function leftMediaFilesSync($output,$mediadbADO,$dbADO) {
 			<tr>
 				<td colspan="2" align="center" class="left_menu"><input type="submit" class="button_fixed" name="searchTokens" value="Search tokens"></td>
 			</tr>			
-                        <tr>
+<!--                        <tr>
                                 <td colspan="2" align="center" class="left_menu"><input type="submit" class="button_fixed" name="wipeDatabase" value="Wipe media database" onClick="return handleDBWipe();"></td>
                         </tr>
+-->
 			</table>
 		</form>';
 	}else{
