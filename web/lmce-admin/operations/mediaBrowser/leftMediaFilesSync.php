@@ -110,7 +110,7 @@ function leftMediaFilesSync($output,$mediadbADO,$dbADO) {
 				exec_batch_command('sudo -u root /usr/pluto/bin/UpdateMediaDaemonControl.sh -disable');
 			}
 			// drop pluto_media
-			exec_batch_command("sudo -u root mysqladmin -h $dbPlutoMediaServer -u $dbPlutoMediaUser -p$dbPlutoMediaPass drop pluto_main");
+			exec_batch_command("sudo -u root mysqladmin -h $dbPlutoMediaServer -u $dbPlutoMediaUser -p$dbPlutoMediaPass drop pluto_media");
 			// reinitialize pluto_media
 			exec_batch_command('sudo -u root cd /usr/pluto/database && /usr/pluto/bin/sqlCVS -D pluto_media -r media import');
 			// restart UpdateMedia if it was running
