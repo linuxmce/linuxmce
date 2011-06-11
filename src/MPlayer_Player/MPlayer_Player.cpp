@@ -1158,7 +1158,6 @@ void *DCE::PlayerEnginePoll(void *pInstance)
 					// querying this only if it is unknown, to minimize delay
 					if (pThis->m_fCurrentFileLength == 0.0)
 						pThis->m_fCurrentFileLength = pThis->m_pPlayerEngine->GetFileLength();
-					}
 					LoggerWrapper::GetInstance()->Write(LV_STATUS, "PlayerEnginePoll - time %.1f of %.1f", pThis->m_fCurrentFileTime, pThis->m_fCurrentFileLength);
 				}
 			}
