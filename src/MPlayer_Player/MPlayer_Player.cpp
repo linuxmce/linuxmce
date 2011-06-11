@@ -1150,14 +1150,17 @@ void *DCE::PlayerEnginePoll(void *pInstance)
 					pThis->m_iCurrentAudioTrack = 0;
 					pThis->UpdateTracksInfo();
 				}
+
+				if ( ! pThis->m_bMediaPaused ) {					
+					// Only query position when NOT pausing. Otherwise MPlayer un-pauses
+					pThis->m_fCurrentFileTime = pThis->m_pPlayerEngine->GetCurrentPosition();
 					
-				pThis->m_fCurrentFileTime = pThis->m_pPlayerEngine->GetCurrentPosition();
-				
-				// querying this only if it is unknown, to minimize delay
-				if (pThis->m_fCurrentFileLength == 0.0)
-					pThis->m_fCurrentFileLength = pThis->m_pPlayerEngine->GetFileLength();
-				
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "PlayerEnginePoll - time %.1f of %.1f", pThis->m_fCurrentFileTime, pThis->m_fCurrentFileLength);
+					// querying this only if it is unknown, to minimize delay
+					if (pThis->m_fCurrentFileLength == 0.0)
+						pThis->m_fCurrentFileLength = pThis->m_pPlayerEngine->GetFileLength();
+					}
+					LoggerWrapper::GetInstance()->Write(LV_STATUS, "PlayerEnginePoll - time %.1f of %.1f", pThis->m_fCurrentFileTime, pThis->m_fCurrentFileLength);
+				}
 			}
 			
 			
