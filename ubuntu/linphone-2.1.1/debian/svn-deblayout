@@ -1,0 +1,3 @@
+origDir=../tarballs
+origUrl=svn+ssh://svn.alioth.debian.org/svn/pkg-voip/linphone/tarballs
+tagsUrl=svn+ssh://svn.alioth.debian.org/svn/pkg-voip/linphone/tags

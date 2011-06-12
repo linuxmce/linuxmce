@@ -1,0 +1,153 @@
+Source: linphone
+Section: sound
+Priority: optional
+Maintainer: Debian VoIP Team <pkg-voip-maintainers@lists.alioth.debian.org>
+Uploaders: Samuel Mimram <smimram@debian.org>, Kilian Krause <kilian@debian.org>, Faidon Liambotis <paravoid@debian.org>
+Build-Depends: debhelper (>= 4.0.0), dpkg-dev (>= 1.13.19), autoconf, automake1.9, autotools-dev, libtool, pkg-config, libglib2.0-dev, libosip2-dev (>= 3.0.3-2), libexosip2-dev (>= 3.0.3-2), libasound2-dev, libjack0.100.0-dev, libspeex-dev (>= 1.1.12), libspeexdsp-dev, libsamplerate0-dev, libxml-parser-perl, gtk-doc-tools, docbook-utils, libgnomeui-dev, libgnome2-dev, gnome-applets, libpanel-applet2-dev, dpatch, libavcodec-dev, libvorbis-dev, libreadline5-dev, libsdl1.2-dev, libartsc0-dev, libswscale-dev, doxygen
+Standards-Version: 3.7.3
+Homepage: http://www.linphone.org/
+Vcs-Svn: svn://svn.debian.org/pkg-voip/linphone/trunk/
+Vcs-Browser: http://svn.debian.org/wsvn/pkg-voip/linphone/?op=log
+
+Package: linphone
+Architecture: any
+Depends: ${shlibs:Depends}, linphone-nox (=${binary:Version})
+Suggests: yelp
+Description: SIP softphone - graphical client
+ Linphone is a web phone: it lets you phone to your friends anywhere in the
+ whole world, freely, simply by using the internet. It is compatible with the
+ well known SIP protocol.
+ .
+ The main features of linphone are:
+   - a nice graphical interface;
+   - it includes a large variety of codecs with different quality / bandwidths;
+   - it uses the well-known and standardised SIP protocol.
+
+Package: linphone-nox
+Architecture: any
+Depends: ${shlibs:Depends}, linphone-common (=${source:Version})
+Description: SIP softphone - console-only client
+ Linphone is a web phone: it lets you phone to your friends anywhere in the
+ whole world, freely, simply by using the internet. It is compatible with the
+ well known SIP protocol.
+ .
+ The main features of linphone are:
+   - a nice graphical interface;
+   - it includes a large variety of codecs with different quality / bandwidths;
+   - it uses the well-known and standardised SIP protocol.
+ .
+ This package contains the console version of linphone.
+
+Package: linphone-common
+Architecture: all
+Replaces: linphone-nox (<= 0.12.2-2)
+Description: Shared components of the linphone SIP softphone
+ Linphone is a web phone: it lets you phone to your friends anywhere in the
+ whole world, freely, simply by using the internet. It is compatible with the
+ well known SIP protocol.
+ .
+ The main features of linphone are:
+   - a nice graphical interface;
+   - it includes a large variety of codecs with different quality / bandwidths;
+   - it uses the well-known and standardised SIP protocol.
+ .
+ This package contains the resource files of linphone (the rings).
+
+Package: liblinphone2
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, libortp7
+Description: linphone's shared library part (supporting the SIP protocol)
+ Linphone is a web phone: it lets you phone to your friends anywhere in the
+ whole world, freely, simply by using the internet. It is compatible with the
+ well known SIP protocol.
+ .
+ The main features of linphone are:
+   - a nice graphical interface;
+   - it includes a large variety of codecs with different quality / bandwidths;
+   - it uses the well-known and standardised SIP protocol.
+ .
+ This package contains only the shared runtime libraries.
+
+Package: liblinphone2-dev
+Section: libdevel
+Architecture: any
+Depends: liblinphone2 (=${binary:Version}), libmediastreamer0-dev, libortp7-dev, libosip2-dev (>= 2.2.0), libjack0.100.0-dev, libspeex-dev, libsamplerate0-dev, libasound2-dev
+Conflicts: liblinphone0-dev, liblinphone1-dev
+Description: linphone web phone's library (supporting the SIP protocol)
+ Linphone is a web phone: it lets you phone to your friends anywhere in the
+ whole world, freely, simply by using the internet. It is compatible with the
+ well known SIP protocol.
+ .
+ The main features of linphone are:
+   - a nice graphical interface;
+   - it includes a large variety of codecs with different quality / bandwidths;
+   - it uses the well-known and standardised SIP protocol.
+ .
+ This package contains the files needed to use the linphone's library in your
+ programs.
+
+Package: libmediastreamer0
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: linphone web phone's media library
+ Linphone is a web phone: it lets you phone to your friends anywhere in the
+ whole world, freely, simply by using the internet. It is compatible with the
+ well known SIP protocol.
+ .
+ The main features of linphone are:
+   - a nice graphical interface;
+   - it includes a large variety of codecs with different quality / bandwidths;
+   - it uses the well-known and standardised SIP protocol.
+ .
+ This package contains the shared runtime libraries for handling media
+ operations.
+
+Package: libmediastreamer0-dev
+Section: libdevel
+Architecture: any
+Depends: libmediastreamer0 (=${binary:Version}), libartsc0-dev, libasound2-dev, libortp7-dev, libspeex-dev
+Description: linphone web phone's media library
+ Linphone is a web phone: it lets you phone to your friends anywhere in the
+ whole world, freely, simply by using the internet. It is compatible with the
+ well known SIP protocol.
+ .
+ The main features of linphone are:
+   - a nice graphical interface;
+   - it includes a large variety of codecs with different quality / bandwidths;
+   - it uses the well-known and standardised SIP protocol.
+ .
+ This package contains the shared runtime libraries for handling media
+ operations.
+
+Package: libortp7
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: Real-time Transport Protocol stack
+ This library implements the RFC1889 (RTP) with a easy to use API with high
+ and low level access.
+ .
+ It main features are:
+   - support for multiples profiles, AV profile (RFC1890) being the default one;
+   - an optional packet scheduler for synchronizing rtp recv and send;
+   - implements blocking and non blocking IO for RTP sessions;
+   - supports mutiplexing IO;
+   - supports part of RFC2833 for telephone events over RTP.
+
+Package: libortp7-dev
+Section: libdevel
+Architecture: any
+Depends: libortp7 (=${binary:Version}), libglib2.0-dev
+Conflicts: libortp0-dev, libortp2-dev, libortp4-dev, libortp5-dev
+Description: Real-time Transport Protocol stack
+ This library implements the RFC1889 (RTP) with a easy to use API with high
+ and low level access.
+ .
+ It main features are:
+   - support for multiples profiles, AV profile (RFC1890) being the default one;
+   - an optional packet scheduler for synchronizing rtp recv and send;
+   - implements blocking and non blocking IO for RTP sessions;
+   - supports mutiplexing IO;
+   - supports part of RFC2833 for telephone events over RTP.

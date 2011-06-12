@@ -1,0 +1,4 @@
+usr/include/linphone/*.h
+usr/lib/liblinphone.la
+usr/lib/liblinphone.so
+usr/lib/pkgconfig/linphone.pc
