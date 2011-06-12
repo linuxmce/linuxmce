@@ -1,3 +1,9 @@
+linphone (2.1.1-2lmce) intrepid; urgency=low
+
+  * fixes for SIP audio problems
+
+ -- LinuxMCE Developer sambuca <developer@linuxmce.org>  Sun, 12 Jun 2011 18:30:19 +0200
+
 linphone (2.1.1-1build1) intrepid; urgency=low
 
   * rebuild to pick up ffmpeg's new shlibs.
