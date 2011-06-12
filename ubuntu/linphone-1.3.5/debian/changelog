@@ -1,3 +1,9 @@
+linphone-lmce (2.1.1-1build1) unstable; urgency=low
+
+  * Contains fixes for audio startup problems
+
+ -- LinuxMCE Developers sambuca <developer@linuxmce.org>  Sun, 12 Jun 2011 17:27:15 +0200
+
 linphone-lmce (1.3.5-1build1) unstable; urgency=low
 
   * Forward ported linphone from Edgy to use its alsadev option.
