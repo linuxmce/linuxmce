@@ -56,7 +56,7 @@ QString tvshow::setEpisode(QString filename)
     int eBack =tmp_filename.size()-emPos;                           //calculating the amount of characters to remove AFTER our matched string
     tmp_filename.remove(emPos, eBack);                              //removing characters from our matched index+the lengtch of the match to the end of the string.
     QRegExp eClean;
-    eClean.setPattern("[1-9]0(?=[1-9])|[1-9](?=[1-9]\\d)|(e)|(e0)|(ep)|(_)(?=\\d)|\\dx|\\dx0|pt.|\\s|\\dof");                         //removing any bogies from our airspace
+    eClean.setPattern("[1-9]0(?=[1-9])|[1-9](?=[1-9]\\d)|(e)|(e0)|(ep)|(_)(?=\\d)|\\dx|\\dx0|pt.|\\s|\\dof|0(?=[1-9])");                         //removing any bogies from our airspace
     eClean.setCaseSensitivity(Qt::CaseInsensitive);
     tmp_filename.replace(eClean, "");
 
@@ -81,7 +81,7 @@ QString tvshow::setEpisode(QString filename)
 
 QString tvshow::setSeason(QString filename)
 {
-    seasonGrab.setPattern("s([0-9][0-9])|s([1-9])|s0([1-9])|pt([1-9])|pt([0-9][0-9])|([1-9])(?=\\d[1-9])|([1-9])(?=of[0-9][0-9])|([1-9])(?=x[0-9])(?!\\d\\d)|(s\\d)*(?=D\\d)");
+    seasonGrab.setPattern("s([0-9][0-9])|s([1-9])|s0([1-9])|pt([1-9])|pt([0-9][0-9])|([1-9])(?=\\d[1-9])|([1-9])(?=of[0-9][0-9])|([1-9])(?=x[0-9])(?!\\d\\d)|(s\\d)*(?=D\\d)|season\\s([1-9])|season\\s[1-9][0-9]");
     seasonGrab.setCaseSensitivity(Qt::CaseInsensitive);
                                                                              //this block deals with extracting the season
     QString tmp_filename = filename;
@@ -92,7 +92,7 @@ QString tvshow::setSeason(QString filename)
     int sBack = tmp_filename.size()-sPos;
     tmp_filename.remove(sPos, sBack);
     QRegExp sClean;
-    sClean.setPattern("(s)|(s0)|(pt)|(x\\d)|(x\\d)|(\\s)");
+    sClean.setPattern("season|(s)|(s0)|(pt)|(x\\d)|(x\\d)|(\\s)");
     sClean.setCaseSensitivity(Qt::CaseInsensitive);
     tmp_filename.replace(sClean, "");
     QString sNum = tmp_filename;
@@ -134,7 +134,7 @@ QString tvshow::setShow(QString filename)
 	t_rez = "5";
 	};
 
-    titleGrab.setPattern("s[1-9]\\d|s([1-9])|s(0[1-9])|ep\\d|pt([1-9])|pt([1-9]\\d)|.([1-9])(?=\\d[1-9])|.([0-9][1-9])|([1-9])(?=of\\d\\d)|(_)(?=\\d)|(\\dof\\d)|(\\[\\dx\\d)|pt(?=.[a-z])|(?=\\d\\d)(?!\\d\\d)|([1-9]x)|\\s0\\d\\d\\d|ep\\d|episode*\\d");
+    titleGrab.setPattern("s[1-9]\\d|s([1-9])|s(0[1-9])|ep\\d|pt([1-9])|pt([1-9]\\d)|.([1-9])(?=\\d[1-9])|.([0-9][1-9])|([1-9])(?=of\\d\\d)|(_)(?=\\d)|(\\dof\\d)|(\\[\\dx\\d)|pt(?=.[a-z])|(?=\\d\\d)(?!\\d\\d)|([1-9]x)|\\s0\\d\\d\\d|ep\\d|episode*\\d|episode|season");
     titleGrab.setCaseSensitivity(Qt::CaseInsensitive);
     int thisTitle = titleGrab.indexIn(workingFile);
    //qDebug () << "Title Matches" << titleGrab.capturedTexts ().join ("|");
@@ -214,7 +214,7 @@ void tvshow::replyFinished(QNetworkReply *)
 void tvshow::createRequest()
 {
      QNetworkAccessManager *n =  new QNetworkAccessManager(this);
-     QUrl url("http://cache.thetvdb.com/api/GetSeries.php?seriesname="+showTitle);
+     QUrl url("http://thetvdb.com/api/GetSeries.php?seriesname="+showTitle);
      QNetworkRequest req(url);
     cout << "Finding Series ID:" << qPrintable(url.toString ()) << endl;
 
@@ -403,11 +403,11 @@ void tvshow::setAttributes()                                                    
 
 	       if (currentBanner.toElement ().elementsByTagName ("Season").at (0).toElement ().text ()== this->season ) //identifying season banner
 		   {
-                   seasonImg.append ("http://cache.thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("BannerPath").at (0).toElement ().text ());
+                   seasonImg.append ("http://thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("BannerPath").at (0).toElement ().text ());
 		   }
 	       else if (currentBanner.toElement ().elementsByTagName ("BannerType").at (0).toElement ().text ()== "series" && currentBanner.toElement ().elementsByTagName ("BannerType2").item (0).toElement ().text ()== "graphical")
 		   {
-                    seriesBanner.append ("http://cache.thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("BannerPath").at (0).toElement ().text ());
+                    seriesBanner.append ("http://thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("BannerPath").at (0).toElement ().text ());
 
 		   }
 
@@ -417,12 +417,12 @@ void tvshow::setAttributes()                                                    
 		       //cout << "Chosen Vigniette has rating of:" << picRating << endl;
 		       if (currentBanner.toElement ().elementsByTagName ("SeriesName").at (0).toElement ().text ()== "true")
 		       {
-                           seriesImg.append ("http://cache.thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("BannerPath").at (0).toElement ().text ());
+                           seriesImg.append ("http://thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("BannerPath").at (0).toElement ().text ());
 			   }
 		       else
 			   {
-                    seriesGraphic.append ("http://cache.thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("BannerPath").at (0).toElement ().text ());
-                    viginettes.append("http://cache.thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("VignettePath").at (0).toElement ().text ());
+                    seriesGraphic.append ("http://thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("BannerPath").at (0).toElement ().text ());
+                    viginettes.append("http://thetvdb.com/banners/"+currentBanner.toElement ().elementsByTagName ("VignettePath").at (0).toElement ().text ());
 			   }
 		   }
 	       }
@@ -478,7 +478,7 @@ void tvshow::setAttributes()                                                    
 		   tvDirector = episode.firstChildElement("Director").toElement().text().replace("|" , episode.firstChildElement("Director").toElement().text());
 		   guestStars = episode.firstChildElement("GuestStars").toElement().text();
 		   airdate = episode.firstChildElement("FirstAired").toElement().text();
-                   epImage ="http://cache.thetvdb.com/banners/"+episode.firstChildElement("filename").toElement().text();
+                   epImage ="http://thetvdb.com/banners/"+episode.firstChildElement("filename").toElement().text();
 		   dvdSeason= episode.firstChildElement("DVD_season").toElement().text();
 		   dvdChapter= episode.firstChildElement("DVD_chapter").toElement().text();
 		   dvdEpisode= episode.firstChildElement("DVD_episode").toElement().text();

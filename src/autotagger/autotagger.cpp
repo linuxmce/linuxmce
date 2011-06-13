@@ -21,9 +21,9 @@ int videoMedia:: videoMediaType (QString incfileName) //here to determine if the
     QRegExp i_movieFilter( ".[1-9]\\d\\d\\d.(?!.S)| \\d\\d\\d\\d(?!.\\d)|[1-9][0-9][0-9][0-9](?!.S)" );                   //setup movie reg expression filter
     i_movieFilter.setCaseSensitivity(Qt::CaseInsensitive);
 
-    QRegExp i_tvFilter("pt|s[0-9]|s[0-9][0-9]");                                                                     //catch season markers
+    QRegExp i_tvFilter("pt|s[0-9]|s[0-9][0-9]|season\\s\\d");                                                                     //catch season markers
 
-    QRegExp i_tvFilter_2("e[0-9]|e[0-9][0-9]|ep[0-9]|ep[0-9]");                                                                      //catch episode markers
+    QRegExp i_tvFilter_2("e[0-9]|e[0-9][0-9]|ep[0-9]|ep[0-9]|episode_\\D");                                                                      //catch episode markers
 
     QRegExp i_tvFilter_3("[0-9]x[0-9]| \\b\\d\\d\\d\\b");                                     // digit based tv shows
 
@@ -95,7 +95,7 @@ if (!i_tvFilter_4.cap(0).isNull())
 
     if (matches.count() >= filmMatches.count())
     {
-        cout << "tux determines television show - The Open Movie Database"  << endl;
+        cout << "tux determines television show - The TVDB.com"  << endl;
         return 2;
 
     }

@@ -35,6 +35,7 @@ int main(int argc, char *argv[])        //main loop
 	}
 
     metaDataDB.appPath=argv[0];
+
     cout << "Media Autotagger v1.5 - Scan Start" << qPrintable(scanStart.toString ()) << endl;
     if(argc == 1)                                                                //no arguments, setting to hardcoded default and looking up file id.
 	{
