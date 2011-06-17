@@ -165,6 +165,7 @@ bool Game_Player::UpdateMESSConfig(string sMediaURL)
 		"# CORE SEARCH PATH OPTIONS\r\n"
 		"#\r\n"
 		"rompath                   ##ROMPATH##\r\n"
+		"hashpath		   /home/mamedata/hash\r\n"
 		"samplepath                /home/mamedata/samples\r\n"
 		"artpath                   /home/mamedata/artwork\r\n"
 		"ctrlrpath                 /home/mamedata/ctrlr\r\n"
@@ -1446,6 +1447,7 @@ void Game_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 	cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
 
+	m_bOSDIsVisible = false;
 	m_iPK_MediaType = iPK_MediaType;
 	m_iStreamID = iStreamID;
 
@@ -1540,6 +1542,7 @@ void Game_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sC
 	    StopMESS();
 	    break;
 	  }
+	m_bOSDIsVisible=false;
 }
 
 //<-dceag-c39-b->
@@ -1732,16 +1735,26 @@ void Game_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,
 
 	PLUTO_SAFETY_LOCK(mm,m_GameMutex);
 
-	string sPath, screenName; 
+	string sPath, screenName, sGeometry;
+	stringstream ssWidth, ssHeight;
+
+	ssWidth << iWidth;
+	ssHeight << iHeight;
+	sGeometry = ssWidth.str()+"x"+ssHeight.str();
 
 	if (m_bOSDIsVisible)
 	{
 		// Use alternate code to display OSD
 		sPath = "/tmp/";
 		screenName = "OSD";
-	
-		string cmd = "import -window " + m_sMAMEWindowId + " "+sPath+screenName+".png";
+
+		// use ImageMagick. Awfully slow!
+		// string cmd = "import -window " + m_sMAMEWindowId + " "+sPath+screenName+".png";
+		string cmd = "scrot -u -t "+sGeometry+" "+sPath+screenName+".jpg";
 		system(cmd.c_str());
+		cmd = "mv "+sPath+screenName+"-thumb.jpg "+sPath+screenName+".jpg";
+		system(cmd.c_str());
+		*sFormat="2"; // JPEG.
 	}
 	else
 	{
@@ -1797,12 +1810,24 @@ void Game_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,
 		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_F12,m_iEventSerialNum++); // hehe, hack++
 	}
 
-	Sleep(50);
-	string s_OutputString = "convert -sample 800x800 " + sPath + screenName + ".png "+sPath+screenName+".jpg";	
-	system(s_OutputString.c_str());
+	// Only run Imagemagick to downsize if OSD isn't visible. Let's make this faster too later.
+	if (!m_bOSDIsVisible)
+	{
+		Sleep(50);
+		string s_OutputString = "convert -sample 800x800 " + sPath + screenName + ".png "+sPath+screenName+".jpg";	
+		system(s_OutputString.c_str());
+	}
+
 	size_t size;
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "MAME_Player::CMD_Get_Video_Frame got %d",size);
-	*pData = FileUtils::ReadFileIntoBuffer(sPath+screenName+".png",size);
+	if (!m_bOSDIsVisible)
+	{
+		*pData = FileUtils::ReadFileIntoBuffer(sPath+screenName+".png",size);
+	}
+	else
+	{
+		*pData = FileUtils::ReadFileIntoBuffer(sPath+screenName+".jpg",size);
+	}
 	*iData_Size = size;
 
 	FileUtils::DelFile(sPath+screenName+".png");
