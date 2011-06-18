@@ -226,10 +226,11 @@ void qOrbiterWindow::sendMessage(QString Qmsg)
 
 bool qOrbiterWindow::OrbiterGen()
 {
-    CMD_Orbiter_Registered CMD_Orbiter_Registered(iPK_Device, iOrbiterPluginID, "1" ,iPK_User, StringUtils::itos(1), iFK_Room, pData, iSize);
+    pData = "null";
+    iSize = 0;
 
     // CMD_Orbiter_Registered_Cat(iPK_Device, m_pOrbiterCat ,true, BL_DirectSiblings , string ("1"), iPK_User, sEntertainArea, (int)1, pData, iSize);
-  Command_Impl::SendCommand(CMD_Orbiter_Registered);
+  pqOrbiter->initialize();
 
 
 }

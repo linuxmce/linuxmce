@@ -27,7 +27,7 @@ public:
 
     //class objects
     DCE::qOrbiter * pqOrbiter;
-    DCE::CMD_Orbiter_Registered *registration;
+
 
     //QT Functions to initialize lmce data
     bool initialize(int dev_id);
@@ -41,8 +41,8 @@ public:
     bool m_bStartingUp;
     string m_sLocalDirectory;
     int m_pOrbiterCat;
-    char **pData;                   //config size, pointer to pointer
-    int *iSize;                     //size of pData aka the config
+    char *pData;                   //config size, pointer to pointer
+    int iSize;                     //size of pData aka the config
     bool bAppError;                 //error flagging
     bool bReload;                   //reload flag
 
