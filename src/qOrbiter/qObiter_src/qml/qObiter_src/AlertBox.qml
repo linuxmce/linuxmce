@@ -4,7 +4,7 @@ Rectangle {
     id:alert_rect
     width: 150
     height: 25
-    color: "darkorange"
+
     Text {
         id: alert_text
         text: ""

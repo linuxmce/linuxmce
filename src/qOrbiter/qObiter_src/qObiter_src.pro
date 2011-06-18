@@ -41,3 +41,7 @@ HEADERS += \
     qmlapplicationviewer/qorbiterwindow.h \
     ../qOrbiter.h \
     ../../Gen_Devices/qOrbiterBase.h
+
+OTHER_FILES += \
+    qml/skins/scheme/classic/Classic.qml \
+    qml/skins/scheme/classic/Main.qml

@@ -1,11 +1,18 @@
 #include "qorbiterwindow.h"
+#include "OrbiterData.h"
 #include <QDebug>
+#include <Gen_Devices/AllCommandsRequests.h>
+#include <Command_Impl.h>
+
 #include "DCE/Logger.h"
 #include "ServerLogger.h"
+#include "SerializeClass/SerializeClass.h"
+#include "PlutoUtils/ProcessUtils.h"
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
 #include "DCERouter.h"
+
 
 using namespace DCE;
 
@@ -99,10 +106,17 @@ qOrbiterWindow::qOrbiterWindow(QWidget *parent) :
     and we the can pass DCE objects too it.
      */
 
-    QDeclarativeView *qorbiterUI = new QDeclarativeView(this);
-    qorbiterUI->setSource(QUrl::fromLocalFile("../qObiter_src/qml/qObiter_src/main.qml"));
+    QDeclarativeView *qorbiterUI= new QDeclarativeView(this);
+    qorbiterUI->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
+
+    qorbiterUI->setSource(QUrl::fromLocalFile("qml/skins/scheme/classic/Main.qml"));
     qorbiterUI->height();
+
+
     this->setCentralWidget(qorbiterUI);
+    s_RouterIP="dcerouter";
+
+
     qorbiterUI->show();
 
 
@@ -121,25 +135,47 @@ bool qOrbiterWindow::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoca
 
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
     {
-            qDebug() << "Created Device";
+            qDebug() << "Device Connect";
             g_pCommand_Impl=pqOrbiter;
             g_pDeadlockHandler=DeadlockHandler;
             g_pSocketCrashHandler=SocketCrashHandler;
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
-            /* we get various variable here that we will need later. I store them in the qt object so it
+            /*
+              we get various variable here that we will need later. I store them in the qt object so it
               can pass them along without extra issues and so they can easily be passed to qml objects that
-              are templated in */
+              are templated in
+             */
 
             pqOrbiter->CreateChildren();
-            //this line ties the class variable in the dceGenerated code to the qt ui code
-
+            /*
+              this line ties the class variable in the dceGenerated code to the qt ui code
+              this is how the two threads (dce and qt) communicate with each other and make it possible to connect
+              qt GUI (qml or qobject based) signals to DCE slots and vice versa!
+            */
             pqOrbiter->UI = this;
 
-            //this is how the two threads (dce and qt) communicate with each other and make it possible to connect
-            //qt GUI (qml or qobject based) signals to DCE slots and vice versa!
+            /*
+              here is where we setup orbiter variables that are going to be used.
+             */
+            if ( getConf(PK_Device))
+            {
+                qDebug () << "Config Recieved, starting";
+                if (refreshUI())
+                 {
+                 return true;
+                 }
+                else
+                 {
+                     qDebug() << "Gui could not setup!" ;
+                     return false;
+                 }
+            }
+           else
+            {
+                return 0;
+            }
 
-           iPK_Device = long(PK_Device);
-           iOrbiterPluginID = 0;
+
 
           /*  i dont know what this does, but since orbter should not be local, it is commented out but not removed.
             if( bLocalMode )
@@ -152,15 +188,8 @@ bool qOrbiterWindow::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoca
             }
             g_pDeadlockHandler=NULL;
             g_pSocketCrashHandler=NULL; */
-            if (refreshUI())
-            {
-            return true;
-            }
-           else
-            {
-                qDebug() << "Gui could not setup!" ;
-                return false;
-            }
+
+
     }
     else
     {
@@ -186,19 +215,54 @@ bool qOrbiterWindow::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoca
 
 bool qOrbiterWindow::refreshUI()
 {
-    pData = "null";
-    iSize = 0;
 
 
-    //CMD_Orbiter_Registered_Cat(iPK_Device, iOrbiterPluginID, sCurr_user, i_EA, pData, iSize);
-
-
-
-return true;
+   return true;
 }
 
 void qOrbiterWindow::sendMessage(QString Qmsg)
 {
 
 }
+
+bool qOrbiterWindow::OrbiterGen()
+{
+    DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(iPK_Device, iOrbiterPluginID, "1" ,iPK_User, StringUtils::itos(1), iFK_Room, pData, iSize);
+    // CMD_Orbiter_Registered_Cat(iPK_Device, m_pOrbiterCat ,true, BL_DirectSiblings , string ("1"), iPK_User, sEntertainArea, (int)1, pData, iSize);
+ /*
+    if (!SendCommand (CMD_Orbiter_Registered))
+    {
+
+        return false;
+    }
+    else
+    {
+ return true;
+    }
+    */
+
+}
+
+bool qOrbiterWindow::getConf(int pPK_Device)
+{
+    qDebug() << "Getting Configuration" ;
+    iPK_Device = long(pPK_Device);
+    iOrbiterPluginID = 9;
+    iSize = 0;
+    m_pOrbiterCat = 5;
+    iFK_Room=1;
+    sEntertainArea = "1";
+   iPK_User= pqOrbiter->GetConfig();
+   s_onOFF = "1";
+   qDebug() << "PK_Device No:" << iPK_Device;
+    qDebug() << "User: " << iPK_User;
+    //qDebug() << "EA: " << QString::fromStdString(sEntertainArea);
+    qDebug() << "Room: " << iFK_Room;
+    //qDebug() << "On/OFF:" << qPrintable(s_onOFF);
+
+    return true;
+
+    }
+
+
 

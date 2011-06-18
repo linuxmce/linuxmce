@@ -5,6 +5,12 @@ Rectangle {
     width: parent - 5
     height: 25
     anchors.top: parent.top
+
+    Connections {
+        target: clock
+
+    }
+
     Text {
         id: mnuTitle
         text: "qOrbiter"
@@ -19,8 +25,9 @@ Rectangle {
     }
 
     Text {
+
         id: clock
-        text: "clock goes here"
+        text: currentDateTime
         font.pointSize: 12
         anchors.right: parent.right
     }

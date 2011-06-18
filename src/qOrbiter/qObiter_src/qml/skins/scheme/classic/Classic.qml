@@ -1,4 +1,5 @@
 import QtQuick 1.0
+
 //sample style file for a qml ui
 /*
   color scheme
@@ -19,7 +20,7 @@ QtObject {
     //textStyles
 
     property int title_size: 16
-    property color tile_color: "white"
+    property color tile_color: "blue"
 
     property int t_but_size: 12
     property color t_but_color: "white"
@@ -29,11 +30,11 @@ QtObject {
     //button styling
     property int buttonH:75
     property int buttonW: 75
-    property color button_system_color: "sienna"
-    property color button_system_color_hover: "saddlebrown"
+    property color button_system_color: "blue"
+    property color button_system_color_hover: "steelblue"
 
-    property color button_action_color: "sienna"
-    property color button_action_color_hover: "saddlebrown"
+    property color button_action_color: "blue"
+    property color button_action_color_hover: "steelblue"
 
     property variant bgImg: "null"
     property string b_title: "null"
@@ -44,15 +45,17 @@ QtObject {
     //row container styling
     property int rowWidth: orbiterW - 5
     property int rowH: buttonH + 10
-    property color bgColor: "saddlebrown"
+    property color bgColor: "blue"
 
     //Notifications bar
     property int width: orbiterW - 5
-    property color not_color: "sienna"
+    property color not_color: "lightblue"
     property string not_pos: "anchors: parent.top"
 
-    //special
-    property color alert_bg: "sienna"
-    property color alert_bg_text: "Orange"
+    property color alert_bg: "blue"
+    property color alert_bg_text: "white"
 
+    //advanced panel
+    property color advanced_bg: "lightblue"
+    property color advanced_bg_text: "White"
 }

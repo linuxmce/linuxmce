@@ -1,9 +1,9 @@
 import QtQuick 1.0
-
+import "../../../qObiter_src"
 Rectangle {
 
     id:stage
-    Style1 {id:style}
+    Classic {id:style}
 
     width: style.orbiterW
     height: style.orbiterH
