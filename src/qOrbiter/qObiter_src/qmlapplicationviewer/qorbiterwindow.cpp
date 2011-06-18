@@ -2,8 +2,8 @@
 #include "OrbiterData.h"
 #include <QDebug>
 #include <Gen_Devices/AllCommandsRequests.h>
-#include <Command_Impl.h>
 
+#include <Command_Impl.h>
 #include "DCE/Logger.h"
 #include "ServerLogger.h"
 #include "SerializeClass/SerializeClass.h"
@@ -105,19 +105,17 @@ qOrbiterWindow::qOrbiterWindow(QWidget *parent) :
     effectively making it the ui window. The main window then takes on the characteristics of the qml app/ ui
     and we the can pass DCE objects too it.
      */
+    QDeclarativeView *qorbiterUIwin= new QDeclarativeView(this);
+    qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
+    qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/qObiter_src/main.qml"));
 
-    QDeclarativeView *qorbiterUI= new QDeclarativeView(this);
-    qorbiterUI->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
+    QObject * item = qorbiterUIwin->rootObject();
+   // QObject::connect(item, SIGNAL(swapStyle()), this, SLOT(swapSkins()));
 
-    qorbiterUI->setSource(QUrl::fromLocalFile("qml/skins/scheme/classic/Main.qml"));
-    qorbiterUI->height();
-
-
-    this->setCentralWidget(qorbiterUI);
+    this->setCentralWidget(qorbiterUIwin);
+    qorbiterUIwin->show();
+    currentSkin = "default";
     s_RouterIP="dcerouter";
-
-
-    qorbiterUI->show();
 
 
 }
@@ -162,6 +160,7 @@ bool qOrbiterWindow::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoca
                 qDebug () << "Config Recieved, starting";
                 if (refreshUI())
                  {
+                     OrbiterGen();
                  return true;
                  }
                 else
@@ -227,19 +226,11 @@ void qOrbiterWindow::sendMessage(QString Qmsg)
 
 bool qOrbiterWindow::OrbiterGen()
 {
-    DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(iPK_Device, iOrbiterPluginID, "1" ,iPK_User, StringUtils::itos(1), iFK_Room, pData, iSize);
-    // CMD_Orbiter_Registered_Cat(iPK_Device, m_pOrbiterCat ,true, BL_DirectSiblings , string ("1"), iPK_User, sEntertainArea, (int)1, pData, iSize);
- /*
-    if (!SendCommand (CMD_Orbiter_Registered))
-    {
+    CMD_Orbiter_Registered CMD_Orbiter_Registered(iPK_Device, iOrbiterPluginID, "1" ,iPK_User, StringUtils::itos(1), iFK_Room, pData, iSize);
 
-        return false;
-    }
-    else
-    {
- return true;
-    }
-    */
+    // CMD_Orbiter_Registered_Cat(iPK_Device, m_pOrbiterCat ,true, BL_DirectSiblings , string ("1"), iPK_User, sEntertainArea, (int)1, pData, iSize);
+  Command_Impl::SendCommand(CMD_Orbiter_Registered);
+
 
 }
 
@@ -262,7 +253,26 @@ bool qOrbiterWindow::getConf(int pPK_Device)
 
     return true;
 
+}
+
+void qOrbiterWindow::swapSkins()
+{
+    if (currentSkin == "default")
+    {
+    setUpdatesEnabled(true);
+
+    qorbiterUIwin->hide();
+  // qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/skins/scheme/classic/Main.qml"));
+    //qorbiterUIwin->show();
+    currentSkin="classic";
     }
+    else
+    {
+        qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/qObiter_src/main.qml"));
+        currentSkin="default";
+    }
+    qDebug() << "Yes! Switched to: " << qPrintable(currentSkin);
+}
 
 
 

@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'qorbiterwindow.h'
 **
-** Created: Fri Jun 17 19:47:41 2011
+** Created: Sat Jun 18 09:03:23 2011
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.7.2)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -23,7 +23,7 @@ static const uint qt_meta_data_qOrbiterWindow[] = {
        5,       // revision
        0,       // classname
        0,    0, // classinfo
-       3,   14, // methods
+       4,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -35,17 +35,18 @@ static const uint qt_meta_data_qOrbiterWindow[] = {
 
  // slots: signature, parameters, type, tag, flags
       36,   31,   15,   15, 0x0a,
+      57,   15,   15,   15, 0x0a,
 
  // methods: signature, parameters, type, tag, flags
-      67,   15,   57,   15, 0x02,
+      79,   15,   69,   15, 0x02,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_qOrbiterWindow[] = {
     "qOrbiterWindow\0\0orbiterReady()\0Qmsg\0"
-    "sendMessage(QString)\0QDateTime\0"
-    "getCurrentDateTime()\0"
+    "sendMessage(QString)\0swapSkins()\0"
+    "QDateTime\0getCurrentDateTime()\0"
 };
 
 const QMetaObject qOrbiterWindow::staticMetaObject = {
@@ -79,11 +80,12 @@ int qOrbiterWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         switch (_id) {
         case 0: orbiterReady(); break;
         case 1: sendMessage((*reinterpret_cast< QString(*)>(_a[1]))); break;
-        case 2: { QDateTime _r = getCurrentDateTime();
+        case 2: swapSkins(); break;
+        case 3: { QDateTime _r = getCurrentDateTime();
             if (_a[0]) *reinterpret_cast< QDateTime*>(_a[0]) = _r; }  break;
         default: ;
         }
-        _id -= 3;
+        _id -= 4;
     }
     return _id;
 }

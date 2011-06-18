@@ -55,4 +55,11 @@ QtObject {
     property color alert_bg: "sienna"
     property color alert_bg_text: "Orange"
 
+    //advanced panel
+    property color advanced_bg: "sienna"
+    property color advanced_bg_text: "orange"
+
+    //stage
+    property color stage_bg: "burlywood"
+
 }

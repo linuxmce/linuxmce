@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/default">
+        <file>qml/qObiter_src/main.qml</file>
+    </qresource>
+    <qresource prefix="/skins">
+        <file>qml/skins/scheme/classic/Main.qml</file>
+    </qresource>
+</RCC>

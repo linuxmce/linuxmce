@@ -27,7 +27,7 @@ Rectangle {
     Text {
 
         id: clock
-        text: currentDateTime
+        text: "time"
         font.pointSize: 12
         anchors.right: parent.right
     }

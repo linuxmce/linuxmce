@@ -5,7 +5,9 @@
 #include <QDeclarativeView>
 #include <qdeclarativecontext.h>
 #include <qOrbiter/qOrbiter.h>
-
+#include <uiclasses/uicontroller.h>
+#include <Command_Impl.h>
+#include <Gen_Devices/AllCommandsRequests.h>
 
 
 namespace DCE
@@ -19,10 +21,13 @@ class qOrbiterWindow : public QMainWindow
 public:
     explicit qOrbiterWindow(QWidget *parent = 0);
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}
+    QDeclarativeView  *qorbiterUIwin;  //Qml declarativeview
 
+    QString currentSkin;
 
     //class objects
     DCE::qOrbiter * pqOrbiter;
+    DCE::CMD_Orbiter_Registered *registration;
 
     //QT Functions to initialize lmce data
     bool initialize(int dev_id);
@@ -61,11 +66,13 @@ public:
 signals:
     void orbiterReady();
 
+
 public slots:
     void sendMessage(QString Qmsg);
+     void swapSkins();
 
 private:
-    QDeclarativeView  qorbiterUI;  //Qml declarativeview
+
     bool refreshUI();
 
 };

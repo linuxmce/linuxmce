@@ -31,7 +31,9 @@ symbian:TARGET.CAPABILITY += NetworkServices
 SOURCES += main.cpp \
     qmlapplicationviewer/qorbiterwindow.cpp \
         ../../Gen_Devices/qOrbiterBase.cpp \
-    ../qOrbiter.cpp
+    ../qOrbiter.cpp \
+    uiclasses/lightingui.cpp \
+    uiclasses/uicontroller.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -40,8 +42,13 @@ qtcAddDeployment()
 HEADERS += \
     qmlapplicationviewer/qorbiterwindow.h \
     ../qOrbiter.h \
-    ../../Gen_Devices/qOrbiterBase.h
+    ../../Gen_Devices/qOrbiterBase.h \
+    uiclasses/lightingui.h \
+    uiclasses/uicontroller.h
 
 OTHER_FILES += \
     qml/skins/scheme/classic/Classic.qml \
     qml/skins/scheme/classic/Main.qml
+
+RESOURCES += \
+    skinData.qrc

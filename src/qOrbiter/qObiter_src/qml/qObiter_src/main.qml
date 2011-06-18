@@ -1,12 +1,16 @@
 import QtQuick 1.0
 
+
+
 Rectangle {
 
     id:stage
     Style1 {id:style}
+    signal swapStyle()
 
     width: style.orbiterW
     height: style.orbiterH
+    color: style.stage_bg
 
     AlertBox {
         id:startup
@@ -26,9 +30,11 @@ Rectangle {
     BottomPanel{id: advanced; color:style.advanced_bg; bottomPanelTextColor: style.advanced_bg_text; anchors.bottom: parent.bottom}
 
     MouseArea {
-        anchors.fill: mnu
+        anchors.fill: stage
         onClicked: {
-            Qt.quit();
+           swapStyle();
+            console.log("Ui Swap?")
         }
     }
 }
+

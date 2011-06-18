@@ -58,4 +58,8 @@ QtObject {
     //advanced panel
     property color advanced_bg: "lightblue"
     property color advanced_bg_text: "White"
+
+    //stage
+    property color stage_bg: "burlywood"
 }
+
