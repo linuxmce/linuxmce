@@ -1,4 +1,15 @@
 #!/bin/bash
+### BEGIN INIT INFO 
+# Provides:          check_avwizard
+# Required-Start:    
+# Required-Stop:     
+# Should-Start:      
+# Default-Start:     2 
+# Default-Stop:      1 
+# Short-Description: CheckAVWizard
+# Description:       This script starts the AV Wizard IF the SHIFT-KEY is pressed during startup.
+# 
+### END INIT INFO #
 
 if [ "$1" == "status" ] ; then
 	exit 0
