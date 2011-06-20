@@ -2,6 +2,7 @@
 #include "OrbiterData.h"
 #include <QDebug>
 #include <Gen_Devices/AllCommandsRequests.h>
+#include <QDeclarativeEngine>
 
 #include <Command_Impl.h>
 #include "DCE/Logger.h"
@@ -104,17 +105,19 @@ qOrbiterWindow::qOrbiterWindow(QWidget *parent) :
     qOrbiterWindow is based on QMainWindow, we then load a child object, our UI into it and set it as the central widget,
     effectively making it the ui window. The main window then takes on the characteristics of the qml app/ ui
     and we the can pass DCE objects too it.
-     */
-    QDeclarativeView *qorbiterUIwin= new QDeclarativeView(this);
-    qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
-    qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/qObiter_src/main.qml"));
 
-    QObject * item = qorbiterUIwin->rootObject();
-   // QObject::connect(item, SIGNAL(swapStyle()), this, SLOT(swapSkins()));
+    */
 
-    this->setCentralWidget(qorbiterUIwin);
-    qorbiterUIwin->show();
+    QDeclarativeView qorbiterUIwin;
+    qorbiterUIwin.rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
+    qorbiterUIwin.setSource(QUrl::fromLocalFile("qml/qObiter_src/main.qml"));
+    QObject *item= qorbiterUIwin.rootObject();
+
+    //QObject::connect(item,SIGNAL(swapStyle()), this,SLOT(swapSkins()));
+
+    qorbiterUIwin.show();
     currentSkin = "default";
+    currentSkinURL="qml/qObiter_src/main.qml";
     s_RouterIP="dcerouter";
 
 
@@ -215,7 +218,7 @@ bool qOrbiterWindow::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoca
 bool qOrbiterWindow::refreshUI()
 {
 
-
+    qDebug() << "Launching UI";
    return true;
 }
 
@@ -228,10 +231,22 @@ bool qOrbiterWindow::OrbiterGen()
 {
     pData = "null";
     iSize = 0;
+    QString scr = "Screen_Home.qml";
+//    item->setProperty("current_screen", scr);
 
-    // CMD_Orbiter_Registered_Cat(iPK_Device, m_pOrbiterCat ,true, BL_DirectSiblings , string ("1"), iPK_User, sEntertainArea, (int)1, pData, iSize);
-  pqOrbiter->initialize();
-
+        if ( pqOrbiter->initialize())
+    {
+        qDebug() << "Setting Home Screen";
+        QString home = "Screen_Home.qml";
+       // gotoQScreen( home);
+        return true;
+    }
+    else
+    {
+        qDebug() <<"DCE Error!";
+        bAppError = true;
+        return false;
+    }
 
 }
 
@@ -260,20 +275,36 @@ void qOrbiterWindow::swapSkins()
 {
     if (currentSkin == "default")
     {
-    setUpdatesEnabled(true);
 
-    qorbiterUIwin->hide();
-  // qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/skins/scheme/classic/Main.qml"));
-    //qorbiterUIwin->show();
+
+
+//  qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/skins/scheme/classic/Main.qml"));
+
     currentSkin="classic";
     }
     else
     {
-        qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/qObiter_src/main.qml"));
+       // qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/qObiter_src/main.qml"));
         currentSkin="default";
     }
     qDebug() << "Yes! Switched to: " << qPrintable(currentSkin);
 }
 
+ qOrbiterWindow::~qOrbiterWindow()
+{
+     pqOrbiter->~qOrbiter();
+ }
 
+ bool qOrbiterWindow::gotoQScreen(QString s)
+ {
+     QVariant screenname= s;
+     QVariant returnedValue ="null";
+   QObject *item = qorbiterUIwin->rootObject();
+     if (QMetaObject::invokeMethod(item, "screenchange", Q_RETURN_ARG(QVariant, returnedValue), Q_ARG(QVariant, screenname)))
+        { qDebug() << returnedValue; return true;}
+                     else
+         {qDebug () << "Failure!" << qPrintable(s) <<": " << returnedValue; return false;}
+
+
+ }
 

@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QDeclarativeView>
 #include <qdeclarativecontext.h>
+#include <QDeclarativeItem>
 #include <qOrbiter/qOrbiter.h>
 #include <uiclasses/uicontroller.h>
 #include <Command_Impl.h>
@@ -20,10 +21,14 @@ class qOrbiterWindow : public QMainWindow
     Q_OBJECT
 public:
     explicit qOrbiterWindow(QWidget *parent = 0);
+    ~qOrbiterWindow();
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}
     QDeclarativeView  *qorbiterUIwin;  //Qml declarativeview
+    QObject *item;
+    bool gotoQScreen(QString s) ;
 
     QString currentSkin;
+    QString currentSkinURL;
 
     //class objects
     DCE::qOrbiter * pqOrbiter;

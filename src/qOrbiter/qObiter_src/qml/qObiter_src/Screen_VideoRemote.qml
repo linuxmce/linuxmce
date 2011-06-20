@@ -7,19 +7,25 @@ Rectangle {
     height: 600
     radius: 0
     opacity: 1
-    color: "brown"
+    color: Style1.bgColor
 
     Rectangle {
         id:video_playlist
         height: remoteControl.height -10
         width: 200
-        color: "darkseagreen"
+        color: Style1.stage_bg
         anchors.left: parent.left;
 
         anchors.margins: 10
 
         Flickable {
             id: flickable1
+            x: -6
+            y: 5
+            anchors.rightMargin: 6
+            anchors.bottomMargin: -5
+            anchors.leftMargin: -6
+            anchors.topMargin: 5
             anchors.fill: parent
 
             Repeater{model: 50;
@@ -37,7 +43,7 @@ Rectangle {
         anchors.left: video_playlist.right
         anchors.leftMargin: 10
 
-        color: "sienna"
+        color: Style1.button_system_color
         Text {
             id: video_title
             text: "text"
@@ -53,36 +59,6 @@ Rectangle {
                 id: now_playing_label
                 text: "Now Playing"
                 anchors.top: parent.top
-            }
-        }
-    }
-
-    Rectangle{
-        id:media_control_grp
-        x: 425
-        y: 200
-        width: 375
-        height: 328
-        anchors.rightMargin: -430
-        anchors.right: remote_lighting_controls1.left
-
-        Roundbuttonbase{id:play_button; rnd_but_label: "Play!"; height: 50; anchors.horizontalCenter: parent.horizontalCenter; anchors.verticalCenter: parent.verticalCenter; width: 50; }
-        Arrow{id:ff; x: 227; y: 152; width: 50; height: 25; arrow_label: "Fast Forward"; color: "green"; anchors.verticalCenterOffset: 1; anchors.verticalCenter: play_button.verticalCenter }
-        Arrow{id:rw; x: 104; y: 152; height: 25; arrow_label: "Rewind"; color: "yellow"; anchors.verticalCenterOffset: 1; anchors.verticalCenter: parent.verticalCenter }
-
-        ButtonSq { // not im using different base elements to accomplish the same goal
-            id: stop
-            x: 163
-            y: 97
-            width: 52
-            height: 25
-
-            Text {
-                id: txt_stop
-                x: 12
-                y: 5
-                text: "Stop"
-                font.pixelSize: 12
             }
         }
     }
@@ -113,5 +89,11 @@ Rectangle {
             anchors.topMargin: 0
             anchors.fill: parent
         }
+    }
+
+    VideoControls {
+        id: videocontrols1
+        x: 492
+        y: 300
     }
 }

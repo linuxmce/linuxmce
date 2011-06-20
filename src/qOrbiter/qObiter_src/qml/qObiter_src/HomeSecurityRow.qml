@@ -2,16 +2,18 @@ import QtQuick 1.0
 
 Rectangle {
     property alias rowlabel: rowheader.buttontext
-
-    color: "orange"
+    radius: 1
+    border.color: "#000000"
     height: 80
-    width: parent -5
-
+    width: parent.width
+    color: "orange"
     Row {
         id: guide
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
+        anchors.left: parent.left
         spacing:5
+
 
         ButtonSq {
             id: rowheader
@@ -19,8 +21,19 @@ Rectangle {
             width: style.buttonW
             color: style.button_action_color
             radius: style.but_smooth
-            buttontext: rowHD
+            buttontext: "Security"
 
             }
+
+        ButtonSq {
+            id: status
+            height: style.buttonH
+            width: style.buttonW
+            color: style.button_action_color
+            radius: style.but_smooth
+            buttontext: "Status"
+
+            }
+
     }
 }

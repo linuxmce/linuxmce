@@ -2,18 +2,18 @@ import QtQuick 1.0
 //sample style file for a qml ui
 /*
   color scheme
-  Buttons
-  Rows
-  Grids
-  Button Text
-  Title Text
+  Button sienna
+  Rows   lightbrwn
+  Grids  ltgrn
+  Button Text white
+  Title Text white
 
   */
 
 QtObject {
     //main stage styles
-    property int orbiterH: 600
-    property int orbiterW: 800
+    property int orbiterH: 480
+    property int orbiterW: 640
     property color stageBG: "olivedrab"
 
     //textStyles
@@ -27,8 +27,8 @@ QtObject {
     //title and other misc windo accents
 
     //button styling
-    property int buttonH:75
-    property int buttonW: 75
+    property int buttonH:60
+    property int buttonW: 60
     property color button_system_color: "sienna"
     property color button_system_color_hover: "saddlebrown"
 
@@ -44,7 +44,7 @@ QtObject {
     //row container styling
     property int rowWidth: orbiterW - 5
     property int rowH: buttonH + 10
-    property color bgColor: "saddlebrown"
+    property color bgColor: "olivedrab"
 
     //Notifications bar
     property int width: orbiterW - 5

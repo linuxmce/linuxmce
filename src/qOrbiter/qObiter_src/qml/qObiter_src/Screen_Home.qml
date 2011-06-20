@@ -1,6 +1,6 @@
 import QtQuick 1.0
 
-item
+Item
 {
 
 Rectangle {

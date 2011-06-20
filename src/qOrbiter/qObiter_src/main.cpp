@@ -206,12 +206,12 @@ int main(int argc, char* argv[])
         {
             //qt orbiter ui intialization
                QApplication a(argc, argv);
-               qOrbiterWindow qorbiterUI;
+               qOrbiterWindow *qorbiterUI= new qOrbiterWindow();
                bool bLocalMode = false;
-              \
-               qorbiterUI.bAppError = qorbiterUI.setupLmce(PK_Device, sRouter_IP, true, bLocalMode);
 
-                qorbiterUI.show();
+              qorbiterUI->bAppError = qorbiterUI->setupLmce(PK_Device, sRouter_IP, true, bLocalMode);
+
+                qorbiterUI->show();
                a.exec();
              // intialziation end
 

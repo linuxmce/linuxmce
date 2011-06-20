@@ -1,19 +1,24 @@
 import QtQuick 1.0
 
-Grid {
-    columns: 1
-    rows: 5
-    spacing: 0
-    x:60
-    //anchors.left: parent.left
+Item {
+    id: column_layout
+    width: parent.width
+    height: parent-5
+Column {
 
-    Repeater{
-        model: ["Lights", "Media", "Climate", "Telecom", "Security"]
-        ControlRow {id: index; rowlabel: modelData}
-        }
+    spacing: 10
 
-    }
+    HomeLightingRow{id:lighting}
 
+
+       HomeMediaRow{id:media}
+
+Rectangle{
+    height: 100
+    color: "black"; anchors.centerIn: parent}
+}
+
+}
 
 
 

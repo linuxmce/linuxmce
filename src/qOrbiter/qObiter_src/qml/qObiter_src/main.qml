@@ -1,40 +1,22 @@
 import QtQuick 1.0
 
+ Item {
+     id: item
+
+     function screenchange(screenname)
+     {
+         pageLoader.source = screenname
+         console.log("Command to change to:" + screenname)
+         return "success!"
+     }
+     width: 640; height: 480
+     Loader {
+         id:pageLoader
+         objectName: "loadbot"
+         source: "Splash.qml"
+         onLoaded: console.log("Screen Changed:" + pageLoader.source)
+
+     }
 
 
-Rectangle {
-
-    id:stage
-    Style1 {id:style}
-    signal swapStyle()
-
-    width: style.orbiterW
-    height: style.orbiterH
-    color: style.stage_bg
-
-    AlertBox {
-        id:startup
-        anchors.centerIn: parent
-        color: style.alert_bg
-        Text {
-            id: starting
-            text: "Welcome To Linuxmce"
-            anchors.centerIn: parent
-            color: style.alert_bg_text
-        }
-    }
-    NotificationBar {id:mnu;  color: style.not_color}
-
-    ControlGrid {id: orbiter_stage; anchors.top: mnu.bottom}
-
-    BottomPanel{id: advanced; color:style.advanced_bg; bottomPanelTextColor: style.advanced_bg_text; anchors.bottom: parent.bottom}
-
-    MouseArea {
-        anchors.fill: stage
-        onClicked: {
-           swapStyle();
-            console.log("Ui Swap?")
-        }
-    }
-}
-
+ }
