@@ -2,13 +2,11 @@
 #define QORBITERWINDOW_H
 
 #include <QMainWindow>
-#include <QDeclarativeView>
-#include <qdeclarativecontext.h>
-#include <QDeclarativeItem>
 #include <qOrbiter/qOrbiter.h>
 #include <uiclasses/uicontroller.h>
 #include <Command_Impl.h>
 #include <Gen_Devices/AllCommandsRequests.h>
+#include <qorbitermanager.h>
 
 
 namespace DCE
@@ -23,15 +21,13 @@ public:
     explicit qOrbiterWindow(QWidget *parent = 0);
     ~qOrbiterWindow();
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}
-    QDeclarativeView  *qorbiterUIwin;  //Qml declarativeview
-    QObject *item;
-    bool gotoQScreen(QString s) ;
 
     QString currentSkin;
     QString currentSkinURL;
 
     //class objects
     DCE::qOrbiter * pqOrbiter;
+    qorbiterManager *qmlManager;
 
 
     //QT Functions to initialize lmce data

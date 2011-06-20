@@ -33,7 +33,8 @@ SOURCES += main.cpp \
         ../../Gen_Devices/qOrbiterBase.cpp \
     ../qOrbiter.cpp \
     uiclasses/lightingui.cpp \
-    uiclasses/uicontroller.cpp
+    uiclasses/uicontroller.cpp \
+    ../../qorbitermanager.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -44,7 +45,8 @@ HEADERS += \
     ../qOrbiter.h \
     ../../Gen_Devices/qOrbiterBase.h \
     uiclasses/lightingui.h \
-    uiclasses/uicontroller.h
+    uiclasses/uicontroller.h \
+    ../../qorbitermanager.h
 
 OTHER_FILES += \
     qml/skins/scheme/classic/Classic.qml \

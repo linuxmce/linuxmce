@@ -2,37 +2,23 @@ import QtQuick 1.0
 
 Rectangle {
     id: remoteControl
+    Style1{id:style}
 
     width: 800
     height: 600
     radius: 0
     opacity: 1
-    color: Style1.bgColor
+    color: style.bgColor
 
     Rectangle {
         id:video_playlist
         height: remoteControl.height -10
         width: 200
-        color: Style1.stage_bg
+        color: style.stage_bg
         anchors.left: parent.left;
 
         anchors.margins: 10
 
-        Flickable {
-            id: flickable1
-            x: -6
-            y: 5
-            anchors.rightMargin: 6
-            anchors.bottomMargin: -5
-            anchors.leftMargin: -6
-            anchors.topMargin: 5
-            anchors.fill: parent
-
-            Repeater{model: 50;
-                ButtonSq{id:index; buttontext:index}
-                   }
-
-              }
     }
 
     //main 'now playing rect containing all the other items
@@ -43,7 +29,7 @@ Rectangle {
         anchors.left: video_playlist.right
         anchors.leftMargin: 10
 
-        color: Style1.button_system_color
+        color: style.button_system_color
         Text {
             id: video_title
             text: "text"

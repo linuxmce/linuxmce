@@ -3,7 +3,7 @@ import QtQuick 1.0
 Rectangle {
     width: 300
     height: 300
-    color: Style1.advanced_bg
+    color: style.advanced_bg
 
     MediaButton {id:play ; x: 125; y: 125;media_but_txt: "Play" }
 
