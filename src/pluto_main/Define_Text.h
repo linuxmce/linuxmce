@@ -1171,6 +1171,14 @@
 #define TEXT_Sunday_CONST 2114
 #define TEXT_PVR_EPG_Recording_Options_CONST 2115
 #define TEXT_Explain_Audio_Inputs_CONST 2116
+#define TEXT_BracketLeft_CONST 2117
+#define TEXT_BracketRight_CONST 2118
+#define TEXT_Backslash_CONST 2119
+#define TEXT_Ctrl_CONST 2120
+#define TEXT_CommaGT_CONST 2121
+#define TEXT_PeriodGT_CONST 2122
+#define TEXT_QuestionSlash_CONST 2123
+#define TEXT_TildeBacktick_CONST 2124
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"

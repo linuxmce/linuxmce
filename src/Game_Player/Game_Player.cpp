@@ -924,35 +924,34 @@ string Game_Player::GetMessParametersFor(string sMediaURL)
   string sMachineType = vect_Path[vect_Path.size()-1]; // Get the last element.
   m_sMachineType = sMachineType;
 
-  if (		(sFileName.find(StringUtils::ToLower(".dsk"))) || 
-		(sFileName.find(StringUtils::ToLower(".atr"))) || 
-		(sFileName.find(StringUtils::ToLower(".fds"))))
+  if (		(sFileName.find(StringUtils::ToLower(".dsk")) != string::npos) || 
+		(sFileName.find(StringUtils::ToLower(".atr")) != string::npos) || 
+		(sFileName.find(StringUtils::ToLower(".fds")) != string::npos))
 	{
 		sPeripheralType = "-flop";
 	}
+	
+	string sLFileName = StringUtils::ToLower(sFileName);
 
-  if (            (sFileName.find(".bin") != string::npos) || 
-		  (sFileName.find(".BIN") != string::npos) ||
-                  (sFileName.find(".a26") != string::npos) || 
-		  (sFileName.find(".A26") != string::npos) ||
-		  (sFileName.find(".a52") != string::npos) ||
-		  (sFileName.find(".A52") != string::npos) ||
-		  (sFileName.find(".a78") != string::npos) ||
-		  (sFileName.find(".A78") != string::npos) ||
-		  (sFileName.find(".col") != string::npos) ||
-		  (sFileName.find(".COL") != string::npos) ||
-		  (sFileName.find(".int") != string::npos) ||
-		  (sFileName.find(".INT") != string::npos) ||
-		  (sFileName.find(".itv") != string::npos) ||
-		  (sFileName.find(".ITV") != string::npos) ||
-		  (sFileName.find(".sg") != string::npos) ||
-	          (sFileName.find(".SG") != string::npos) ||
-		  (sFileName.find(".sms") != string::npos) ||
-		  (sFileName.find(".SMS") != string::npos) ||
-		  (sFileName.find(".nes") != string::npos) ||
-		  (sFileName.find(".NES") != string::npos) ||
-		  (sFileName.find(".zip") != string::npos) ||
-		  (sFileName.find(".ZIP") != string::npos))
+  if (            (sLFileName.find(".bin") != string::npos) || 
+                  (sLFileName.find(".a26") != string::npos) || 
+		  (sLFileName.find(".a52") != string::npos) ||
+		  (sLFileName.find(".a78") != string::npos) ||
+		  (sLFileName.find(".col") != string::npos) ||
+		  (sLFileName.find(".int") != string::npos) ||
+		  (sLFileName.find(".itv") != string::npos) ||
+		  (sLFileName.find(".sg") != string::npos) ||
+		  (sLFileName.find(".sms") != string::npos) ||
+		  (sLFileName.find(".nes") != string::npos) ||
+		  (sLFileName.find(".zip") != string::npos) ||
+		  (sLFileName.find(".smc") != string::npos) ||
+		  (sLFileName.find(".sfc") != string::npos) || 
+		  (sLFileName.find(".fig") != string::npos) ||
+		  (sLFileName.find(".swc") != string::npos) ||
+		  (sLFileName.find(".gen") != string::npos) ||
+		  (sLFileName.find(".smd") != string::npos) ||
+		  (sLFileName.find(".md") != string::npos) ||
+		  (sLFileName.find(".pce") != string::npos))
     {
       sPeripheralType = "-cart";
     }
@@ -1477,6 +1476,12 @@ void Game_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
 		case MEDIATYPE_lmce_Game_sms_CONST:
 		case MEDIATYPE_lmce_Game_nes_CONST:
 		case MEDIATYPE_lmce_Game_famicom_CONST:
+		case MEDIATYPE_lmce_Game_snes_CONST:
+		case MEDIATYPE_lmce_Game_genesis_CONST:
+		case MEDIATYPE_lmce_Game_megadriv_CONST:
+		case MEDIATYPE_lmce_Game_tg16_CONST:
+		case MEDIATYPE_lmce_Game_pce_CONST:
+		case MEDIATYPE_lmce_Game_sgx_CONST:
 			LaunchMESS(sMediaURL);
 			break;
 		default:
@@ -1539,6 +1544,12 @@ void Game_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sC
 	  case MEDIATYPE_lmce_Game_sms_CONST:
 	  case MEDIATYPE_lmce_Game_famicom_CONST:
 	  case MEDIATYPE_lmce_Game_nes_CONST:
+	  case MEDIATYPE_lmce_Game_snes_CONST:
+          case MEDIATYPE_lmce_Game_genesis_CONST:
+          case MEDIATYPE_lmce_Game_megadriv_CONST:
+	  case MEDIATYPE_lmce_Game_pce_CONST:
+	  case MEDIATYPE_lmce_Game_sgx_CONST:
+	  case MEDIATYPE_lmce_Game_tg16_CONST:
 	    StopMESS();
 	    break;
 	  }
@@ -1800,6 +1811,25 @@ void Game_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,
 		  case MEDIATYPE_lmce_Game_nes_CONST:
 		    sPath = "/home/mamedata/shots/nes";
 		    screenName = "/0000";
+		    break;
+		  case MEDIATYPE_lmce_Game_snes_CONST:
+		    sPath = "/home/mamedata/shots/snes";
+		    screenName = "/0000";
+		    break;
+		  case MEDIATYPE_lmce_Game_genesis_CONST:
+		    sPath = "/home/mamedata/shots/genesis";
+		    break;
+		  case MEDIATYPE_lmce_Game_megadriv_CONST:
+		    sPath = "/home/mamedata/shots/megadriv";
+		    break;
+		  case MEDIATYPE_lmce_Game_tg16_CONST:
+		    sPath = "/home/mamedata/shots/tg16";
+		    break;
+		  case MEDIATYPE_lmce_Game_pce_CONST:
+		    sPath = "/home/mamedata/shots/pce";
+		    break;
+		  case MEDIATYPE_lmce_Game_sgx_CONST:
+		    sPath = "/home/mamedata/shots/sgx";
 		    break;
 		  }
 	
@@ -2359,6 +2389,24 @@ string Game_Player::GetSaveGamePath()
     case MEDIATYPE_lmce_Game_nes_CONST:
       sPath = "/home/mamedata/sta/nes";
       break;
+    case MEDIATYPE_lmce_Game_snes_CONST:
+      sPath = "/home/mamedata/sta/snes";
+      break;
+    case MEDIATYPE_lmce_Game_genesis_CONST:
+      sPath = "/home/mamedata/sta/genesis";
+      break;
+    case MEDIATYPE_lmce_Game_megadriv_CONST:
+      sPath = "/home/mamedata/sta/megadriv";
+      break;
+    case MEDIATYPE_lmce_Game_tg16_CONST:
+      sPath = "/home/mamedata/sta/tg16";
+      break;
+    case MEDIATYPE_lmce_Game_pce_CONST:
+      sPath = "/home/mamedata/sta/pce";
+      break;
+    case MEDIATYPE_lmce_Game_sgx_CONST:
+      sPath = "/home/mamedata/sta/sgx";
+      break;
     default:
       sPath = "";
       break;
@@ -2553,6 +2601,9 @@ void Game_Player::CMD_Game_1P_Start(string &sCMD_Result,Message *pMessage)
 	switch(m_iPK_MediaType)
 	  {
 	  case MEDIATYPE_lmce_Game_CONST:
+	  case MEDIATYPE_lmce_Game_snes_CONST:
+	  case MEDIATYPE_lmce_Game_genesis_CONST:
+          case MEDIATYPE_lmce_Game_megadriv_CONST:
 	    iKey = XK_1;
 	    break;
 	  case MEDIATYPE_lmce_Game_a2600_CONST:

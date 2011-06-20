@@ -42,6 +42,14 @@
 #define MEDIATYPE_lmce_Hulu_CONST 42
 #define MEDIATYPE_lmce_StreamedAudio_CONST 43
 #define MEDIATYPE_lmce_StreamedVideo_CONST 44
+#define MEDIATYPE_lmce_Game_vectrex_CONST 45
+#define MEDIATYPE_lmce_Game_tg16_CONST 46
+#define MEDIATYPE_lmce_Game_genesis_CONST 47
+#define MEDIATYPE_lmce_Game_snes_CONST 48
+#define MEDIATYPE_lmce_Game_megadriv_CONST 49
+#define MEDIATYPE_lmce_Game_snespal_CONST 50
+#define MEDIATYPE_lmce_Game_sgx_CONST 51
+#define MEDIATYPE_lmce_Game_pce_CONST 52
 
 #define MEDIATYPE_TABLE "MediaType"
 #define MEDIATYPE_PK_MEDIATYPE_FIELD "PK_MediaType"

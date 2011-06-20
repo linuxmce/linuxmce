@@ -2672,6 +2672,23 @@
 #define DESIGNOBJ_Specify_Audio_Inputs_CONST 6063
 #define DESIGNOBJ_dgCaptureCardAudioPorts_CONST 6064
 #define DESIGNOBJ_butAltGameOptions_CONST 6065
+#define DESIGNOBJ_grpApple2Keyboard_CONST 6066
+#define DESIGNOBJ_butEmuKB_Delete_CONST 6067
+#define DESIGNOBJ_butEmuWkb_BracketL_CONST 6068
+#define DESIGNOBJ_butEmuWkb_BracketR_CONST 6069
+#define DESIGNOBJ_butEmuWkb_Backslash_CONST 6071
+#define DESIGNOBJ_butEmuWkb_Ctrl_CONST 6072
+#define DESIGNOBJ_butEmuWkb_commaGT_CONST 6073
+#define DESIGNOBJ_butEmuWkb_periodGT_CONST 6074
+#define DESIGNOBJ_butEmuWkb_QSlash_CONST 6075
+#define DESIGNOBJ_butEmuWkb_TildeTick_CONST 6076
+#define DESIGNOBJ_butEmuWkb_OpenApple_CONST 6077
+#define DESIGNOBJ_graOpenApple_CONST 6078
+#define DESIGNOBJ_graClosedApple_CONST 6079
+#define DESIGNOBJ_butEmuWkb_ClosedApple_CONST 6080
+#define DESIGNOBJ_butEmuWkb_Reset_CONST 6081
+#define DESIGNOBJ_mnuApple2Remote_CONST 6082
+#define DESIGNOBJ_grpComputerTop_CONST 6083
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"

@@ -20,7 +20,6 @@
 //	DCE Implemenation for #2185 DCE Browser
 
 #include "Gen_Devices/DCE_BrowserBase.h"
-#include "browserwindow.h"
 //<-dceag-d-e->
 class browserWindow;
 //<-dceag-decl-b->
@@ -77,50 +76,6 @@ public:
 
 	virtual void CMD_Reload() { string sCMD_Result; CMD_Reload(sCMD_Result,NULL);};
 	virtual void CMD_Reload(string &sCMD_Result,Message *pMessage);
-
-
-	/** @brief COMMAND: #1090 - Goto Url */
-	/** goto provided url */
-		/** @param #193 URL */
-			/** the url to go to */
-
-	virtual void CMD_Goto_Url(string sURL) { string sCMD_Result; CMD_Goto_Url(sURL.c_str(),sCMD_Result,NULL);};
-	virtual void CMD_Goto_Url(string sURL,string &sCMD_Result,Message *pMessage);
-
-
-	/** @brief COMMAND: #1091 - Navigate Forward */
-	/** Navigate Forward */
-
-	virtual void CMD_Navigate_Forward() { string sCMD_Result; CMD_Navigate_Forward(sCMD_Result,NULL);};
-	virtual void CMD_Navigate_Forward(string &sCMD_Result,Message *pMessage);
-
-
-	/** @brief COMMAND: #1092 - Navigate Back */
-	/** Navigate Back */
-
-	virtual void CMD_Navigate_Back() { string sCMD_Result; CMD_Navigate_Back(sCMD_Result,NULL);};
-	virtual void CMD_Navigate_Back(string &sCMD_Result,Message *pMessage);
-
-
-	/** @brief COMMAND: #1093 - Bookmark Website */
-	/** Creates bookmark for user */
-
-	virtual void CMD_Bookmark_Website() { string sCMD_Result; CMD_Bookmark_Website(sCMD_Result,NULL);};
-	virtual void CMD_Bookmark_Website(string &sCMD_Result,Message *pMessage);
-
-
-	/** @brief COMMAND: #1094 - Increase DPI */
-	/** Increase font size */
-
-	virtual void CMD_Increase_DPI() { string sCMD_Result; CMD_Increase_DPI(sCMD_Result,NULL);};
-	virtual void CMD_Increase_DPI(string &sCMD_Result,Message *pMessage);
-
-
-	/** @brief COMMAND: #1095 - Reduce DPI */
-	/** Decrease Font Size */
-
-	virtual void CMD_Reduce_DPI() { string sCMD_Result; CMD_Reduce_DPI(sCMD_Result,NULL);};
-	virtual void CMD_Reduce_DPI(string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
 	};

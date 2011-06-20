@@ -989,12 +989,6 @@
 #define COMMAND_HDP_CONST 1087
 #define COMMAND_Specify_Capture_Card_Audio_Port_CONST 1088
 #define COMMAND_Update_Move_Status_CONST 1089
-#define COMMAND_Goto_Url_CONST 1090
-#define COMMAND_Navigate_Forward_CONST 1091
-#define COMMAND_Navigate_Back_CONST 1092
-#define COMMAND_Bookmark_Website_CONST 1093
-#define COMMAND_Increase_DPI_CONST 1094
-#define COMMAND_Reduce_DPI_CONST 1095
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"

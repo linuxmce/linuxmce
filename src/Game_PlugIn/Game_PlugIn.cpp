@@ -430,6 +430,50 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_famicom_CONST;
 	}
 
+	if (mediaURL.find("/snespal") != string::npos)
+	{
+		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_snespal_CONST;
+	}
+        if (mediaURL.find("/snes") != string::npos || StringUtils::ToLower(mediaURL).find(".smc") != string::npos
+		|| StringUtils::ToLower(mediaURL).find(".sfc") != string::npos
+		|| StringUtils::ToLower(mediaURL).find(".fig") != string::npos
+		|| StringUtils::ToLower(mediaURL).find(".swc") != string::npos)
+        {
+                pGameMediaStream->m_sAppName = "mess.mess";
+                pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_snes_CONST; 
+        }
+
+	if (mediaURL.find("/genesis") != string::npos || 
+		StringUtils::ToLower(mediaURL).find(".smd") != string::npos || 
+		StringUtils::ToLower(mediaURL).find(".md") != string::npos ||
+		StringUtils::ToLower(mediaURL).find(".gen") != string::npos)
+	{
+		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_genesis_CONST; 
+	}
+
+	if (mediaURL.find("/tg16") != string::npos 
+		&& StringUtils::ToLower(mediaURL).find(".pce") != string::npos)
+	{
+		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_tg16_CONST;
+	}
+
+        if (mediaURL.find("/pce") != string::npos
+                && StringUtils::ToLower(mediaURL).find(".pce") != string::npos)
+        {
+                pGameMediaStream->m_sAppName = "mess.mess";
+                pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_pce_CONST;
+        }
+
+        if (mediaURL.find("/sgx") != string::npos
+                && StringUtils::ToLower(mediaURL).find(".pce") != string::npos)
+        {
+                pGameMediaStream->m_sAppName = "mess.mess";
+                pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_sgx_CONST;
+        }
+
 	DCE::CMD_Play_Media CMD_Play_Media(m_dwPK_Device,
 					   pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
 					   pGameMediaStream->m_iPK_MediaType,

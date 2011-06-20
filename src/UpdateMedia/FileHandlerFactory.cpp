@@ -117,6 +117,14 @@ FileHandlerFactory::~FileHandlerFactory(void)
 			   (sExtension == "sg") ||
 			   (sExtension == "nes") || 
 			   (sExtension == "fam") ||
+			   (sExtension == "smc") ||
+			   (sExtension == "sfc") ||
+			   (sExtension == "fig") ||
+			   (sExtension == "swc") ||
+			   (sExtension == "smd") ||
+		           (sExtension == "md") ||
+			   (sExtension == "gen") ||
+			   (sExtension == "pce") ||
 			   (sExtension == "fds");
 
 	return bHasRomExtension;	// do we do more tests here?

@@ -203,6 +203,20 @@ void RomFileHandler::getSystem(string sFilename)
 		m_sROMSystem = "Nintendo Entertainment System";
 	if (sFilename.find("/famicom") != string::npos )
 		m_sROMSystem = "Nintendo Famicom";
+	if (sFilename.find("/snes") != string::npos )
+		m_sROMSystem = "Super Nintendo Entertainment System";
+	if (sFilename.find("/genesis") != string::npos )
+		m_sROMSystem = "Sega Genesis";
+	if (sFilename.find("/megadriv") != string::npos )
+		m_sROMSystem = "Sega MegaDrive";
+	if (sFilename.find("/vectrex") != string::npos )
+		m_sROMSystem = "GCE Vectrex";
+	if (sFilename.find("/tg16") != string::npos )
+		m_sROMSystem = "TurboGrafx-16";
+	if (sFilename.find("/pce") != string::npos )
+		m_sROMSystem = "PC Engine";
+	if (sFilename.find("/sgx") != string::npos )
+		m_sROMSystem = "SuperGrafx";
 
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"RomFileHandler::getSystem(%s) = %s",sFilename.c_str(),m_sROMSystem.c_str());
 
@@ -286,6 +300,33 @@ void RomFileHandler::GetRomInfo(string sFilename, map<int,string>& mapAttributes
 							     || sTmpFile.find(StringUtils::ToLower(".fds")) != string::npos)
 		sSnapFilename = "/home/snap/famicom/" + sROMTitle + ".jpg";
 
+
+        if (m_sFullFilename.find("/snes") != string::npos || sTmpFile.find(".smc") != string::npos
+							  || sTmpFile.find(".sfc") != string::npos
+							  || sTmpFile.find(".fig") != string::npos
+							  || sTmpFile.find(".swc") != string::npos)
+                sSnapFilename = "/home/snap/snes/" + sROMTitle + ".jpg";
+
+	if (m_sFullFilename.find("/genesis") != string::npos
+		|| sTmpFile.find(".gen") != string::npos)
+		sSnapFilename = "/home/snap/genesis/" +sROMTitle+".jpg";
+
+	if (m_sFullFilename.find("/megadriv") != string::npos 
+		|| sTmpFile.find(".smd") != string::npos
+		|| sTmpFile.find(".md") != string::npos)
+		sSnapFilename = "/home/snap/megadriv/"+sROMTitle+".jpg";
+
+	if (m_sFullFilename.find("/tg16") != string::npos
+		|| sTmpFile.find(".pce") != string::npos)
+		sSnapFilename = "/home/snap/tg16/"+sROMTitle+".jpg";
+
+	if (m_sFullFilename.find("/pce") != string::npos
+		|| sTmpFile.find(".pce") != string::npos)
+		sSnapFilename = "/home/snap/pce/"+sROMTitle+".jpg";
+
+	if (m_sFullFilename.find("/sgx") != string::npos
+		|| sTmpFile.find(".pce") != string::npos)
+		sSnapFilename = "/home/snap/sgx/"+sROMTitle+".jpg";
   }
 
   LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "# RomFileHandler: Adding ROM Picture: %s",sSnapFilename.c_str());
