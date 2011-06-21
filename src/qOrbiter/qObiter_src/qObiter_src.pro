@@ -34,7 +34,8 @@ SOURCES += main.cpp \
     ../qOrbiter.cpp \
     uiclasses/lightingui.cpp \
     uiclasses/uicontroller.cpp \
-    ../../qorbitermanager.cpp
+    ../../qorbitermanager.cpp \
+    ../../pluto_main/Table_Screen.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -46,11 +47,14 @@ HEADERS += \
     ../../Gen_Devices/qOrbiterBase.h \
     uiclasses/lightingui.h \
     uiclasses/uicontroller.h \
-    ../../qorbitermanager.h
+    ../../qorbitermanager.h \
+    ../../pluto_main/Table_Screen.h
 
 OTHER_FILES += \
-    qml/skins/scheme/classic/Classic.qml \
-    qml/skins/scheme/classic/Main.qml
+    qml/skins/scheme/classic/Main.qml \
+    img/lmcesplash.jpg \
+    qml/skins/scheme/classic/StyleClassic.qml \
+    qml/skins/scheme/brown/StyleBrown.qml
 
 RESOURCES += \
     skinData.qrc

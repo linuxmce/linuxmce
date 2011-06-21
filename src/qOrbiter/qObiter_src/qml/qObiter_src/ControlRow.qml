@@ -3,7 +3,6 @@ import QtQuick 1.0
 Rectangle {
     property alias rowlabel: rowheader.buttontext
 
-    color: "orange"
     height: 80
     width: parent -5
 

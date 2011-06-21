@@ -2,12 +2,9 @@ import QtQuick 1.0
 
 Rectangle {
     property alias rowlabel: rowheader.buttontext
-
-    radius: 1
-    border.color: "#000000"
     height: 80
     width: parent.width
-    color: "orange"
+color:style.rowbgColor
     Row {
         id: guide
         anchors.horizontalCenter: parent.horizontalCenter

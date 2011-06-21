@@ -10,6 +10,9 @@ import QtQuick 1.0
   Title Text
 
   */
+Component{
+    id: classicStyle
+
 
 QtObject {
     //main stage styles
@@ -63,3 +66,4 @@ QtObject {
     property color stage_bg: "burlywood"
 }
 
+}

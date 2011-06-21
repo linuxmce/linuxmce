@@ -1,22 +1,17 @@
 import QtQuick 1.0
 
 Rectangle {
+    id: rectangle1
 
     width: 75
     height: 200
-    color: "darkseagreen"
+    color: style.advanced_bg
 
-    Column {
-        id: column1
-        anchors.fill: parent
-        spacing: 5
+    Arrow{id: down; x: 13; y: 146; arrow_label: "Down Arrow"}
 
-        Arrow{id: down; arrow_label: "Down Arrow";anchors.centerIn: parent.top}
+    Arrow{id: up; x: 13; y: 40; arrow_label: "Up Arrow" }
 
-        Roundbuttonbase{id: floorplan; rnd_but_label: "f" }
-
-        Arrow{id: up; arrow_label: "Up Arrow" }
-    }
+    Roundbuttonbase{id: floorplan; x: 25; y: 88; rnd_but_label: "f" }
 
 
 }

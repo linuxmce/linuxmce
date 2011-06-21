@@ -3,18 +3,12 @@ import QtQuick 1.0
 Rectangle {
     width: 100
     height: 200
-    color: "darkseagreen"
+    color: style.advanced_bg
 
-    Column {
-        id: column1
-        anchors.fill: parent
-        spacing: 5
+    Arrow{id: down; x: 26; y: 142; arrow_label: "Vol Up "}
 
-        Arrow{id: down; arrow_label: "Vol Up ";anchors.centerIn: parent.top}
+    Roundbuttonbase{id: floorplan; x: 38; y: 88; rnd_but_label: "Mute" }
 
-        Roundbuttonbase{id: floorplan; rnd_but_label: "Mute" }
-
-        Arrow{id: up; arrow_label: "Vol Dwn" }
-    }
+    Arrow{id: up; x: 26; y: 36; arrow_label: "Vol Dwn" }
 
 }

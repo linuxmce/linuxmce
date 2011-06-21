@@ -18,7 +18,7 @@ Rectangle {
 
     Image {
         id: media_button_image
-        source: "file"
+        source: ""
         anchors.centerIn: parent
     }
 

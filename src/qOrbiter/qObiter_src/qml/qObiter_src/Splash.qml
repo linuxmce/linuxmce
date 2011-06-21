@@ -14,4 +14,8 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         font.pixelSize: 30
     }
+    Image {
+        id: splash
+        source: "../../img/lmcesplash.jpg"
+    }
 }

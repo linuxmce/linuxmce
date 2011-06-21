@@ -2,11 +2,9 @@ import QtQuick 1.0
 
 Rectangle {
     property alias rowlabel: rowheader.buttontext
-    radius: 1
-    border.color: "#000000"
     height: 80
     width: parent.width
-    color: "orange"
+    color:style.rowbgColor
     Row {
         id: telecomRow
         anchors.horizontalCenter: parent.horizontalCenter
@@ -22,6 +20,12 @@ Rectangle {
             color: style.button_action_color
             radius: style.but_smooth
             buttontext: "Telecom"
+
+            MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+
+            }
 
             }
 
