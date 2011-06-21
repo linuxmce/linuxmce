@@ -16,11 +16,11 @@ Rectangle {
     Rectangle{
         id:video_now_playing
         x: 224
-        y: 0
+        y: 2
         height: 179
         width: 200
         anchors.left: pvrRemote.right
-        anchors.leftMargin: 14
+        anchors.leftMargin: -416
 
         color: style.button_system_color
         Text {
@@ -36,7 +36,10 @@ Rectangle {
             anchors.top: parent.top
             Text {
                 id: now_playing_label
+                x: 52
+                y: 76
                 text: "Now Playing"
+                anchors.topMargin: 76
                 wrapMode: Text.WordWrap
                 anchors.top: parent.top
             }
@@ -99,7 +102,14 @@ Rectangle {
         clip: true
 
         Flickable{
-            Repeater { model: 50
+            height: parent.height
+            width: parent.width
+            contentHeight: childrenRect.width
+            contentWidth: childrenRect.width
+            clip: true
+
+            Repeater { model: 50               
+
                 Rectangle {
                     width:200
                     height: 50

@@ -5,6 +5,16 @@ Rectangle {
     height: 80
     width: parent.width
 color:style.rowbgColor
+
+Flickable{
+    id:mediaflick
+    interactive: true
+    height: 80
+    width: parent.width
+    contentHeight: 80
+    contentWidth: childrenRect * 2
+    clip: true
+
     Row {
         id: guide
         anchors.horizontalCenter: parent.horizontalCenter
@@ -62,5 +72,59 @@ color:style.rowbgColor
             buttontext: "Audio"
 
             }
+        ButtonSq {
+            id: games
+            height: style.buttonH
+            width: style.buttonW
+            color: style.button_action_color
+            radius: style.but_smooth
+            buttontext: "LinuxMCE Games"
+
+            }
+        ButtonSq {
+            id: hulu
+            height: style.buttonH
+            width: style.buttonW
+            color: style.button_action_color
+            radius: style.but_smooth
+            buttontext: "Hulu Dekstop"
+
+            }
+
+        ButtonSq {
+            id: playlists
+            height: style.buttonH
+            width: style.buttonW
+            color: style.button_action_color
+            radius: style.but_smooth
+            buttontext: "Playlists"
+
+            }
+        ButtonSq {
+            id: drives
+            height: style.buttonH
+            width: style.buttonW
+            color: style.button_action_color
+            radius: style.but_smooth
+            buttontext: "Manage Drives"
+            }
+        ButtonSq {
+            id: tv
+            height: style.buttonH
+            width: style.buttonW
+            color: style.button_action_color
+            radius: style.but_smooth
+            buttontext: "DirecTv"
+
+            }
+        ButtonSq {
+            id: ps3
+            height: style.buttonH
+            width: style.buttonW
+            color: style.button_action_color
+            radius: style.but_smooth
+            buttontext: "PlayStation 3"
+            }
+         }
     }
 }
