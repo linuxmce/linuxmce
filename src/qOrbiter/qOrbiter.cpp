@@ -47,7 +47,13 @@ qOrbiter::qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, 
 qOrbiter::~qOrbiter()
 //<-dceag-dest-e->
 {
-	
+    /*
+    char *pData; int iSize;
+    pData= "NULL"; iSize = 0;
+
+    CMD_Orbiter_Registered CMD_Orbiter_Registered(UI->iPK_Device, UI->iOrbiterPluginID, "0" ,UI->iPK_User, StringUtils::itos(1), UI->iFK_Room, &pData, &iSize);
+    Command_Impl::SendMessage (&CMD_Orbiter_Registered);
+    */
 }
 
 //<-dceag-getconfig-b->
@@ -60,6 +66,7 @@ bool qOrbiter::GetConfig()
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
 	return true;
+        UI->iPK_User = 2;
 }
 
 //<-dceag-reg-b->
@@ -1379,6 +1386,10 @@ void qOrbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool 
 	cout << "Parm #251 - Interruption=" << iInterruption << endl;
 	cout << "Parm #252 - Turn_On=" << bTurn_On << endl;
 	cout << "Parm #253 - Queue=" << bQueue << endl;
+
+        QString str = QString::number(iPK_Screen);
+        this->UI->qmlManager->gotoQScreen("Screen_"+str+".qml");
+
 }
 
 //<-dceag-c795-b->
@@ -1547,6 +1558,17 @@ void qOrbiter::CMD_Assisted_Make_Call(int iPK_Users,string sPhoneExtension,strin
 	cout << "Parm #83 - PhoneExtension=" << sPhoneExtension << endl;
 	cout << "Parm #184 - PK_Device_From=" << sPK_Device_From << endl;
 	cout << "Parm #263 - PK_Device_To=" << iPK_Device_To << endl;
+}
+
+bool DCE::qOrbiter::initialize()
+{
+    char *pData;
+    int iSize;
+    pData = "NULL";
+    iSize = 0;
+    DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(UI->iPK_Device, UI->iOrbiterPluginID, "1" ,UI->iPK_User, StringUtils::itos(1), UI->iFK_Room, &pData, &iSize);
+    if (SendCommand(CMD_Orbiter_Registered))
+    { return true;} else {return false;}
 }
 
 

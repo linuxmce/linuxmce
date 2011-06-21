@@ -10,7 +10,7 @@ symbian:TARGET.UID3 = 0xE0D07D4D
 
 INCLUDEPATH += ../../ ../../DCE/
 
-LIBS += -L/usr/pluto/lib/ -lDCECommon -lSerializeClass -lPlutoUtils -lpluto_main -lSerial
+LIBS += -L/usr/pluto/lib/ -lDCECommon -lSerializeClass -lPlutoUtils
 
 # Smart Installer package's UID
 # This UID is from the protected range and therefore the package will
@@ -34,8 +34,7 @@ SOURCES += main.cpp \
     ../qOrbiter.cpp \
     uiclasses/lightingui.cpp \
     uiclasses/uicontroller.cpp \
-    ../../qorbitermanager.cpp \
-    ../../pluto_main/Table_Screen.cpp
+    ../../qorbitermanager.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -47,8 +46,7 @@ HEADERS += \
     ../../Gen_Devices/qOrbiterBase.h \
     uiclasses/lightingui.h \
     uiclasses/uicontroller.h \
-    ../../qorbitermanager.h \
-    ../../pluto_main/Table_Screen.h
+    ../../qorbitermanager.h
 
 OTHER_FILES += \
     qml/skins/scheme/classic/Main.qml \

@@ -21,6 +21,7 @@
 
 #include "Gen_Devices/qOrbiterBase.h"
 #include <qorbiterwindow.h>
+#include <QStringList>
 //<-dceag-d-e->
 class qOrbiterWindow;
 //<-dceag-decl-b->
@@ -35,6 +36,7 @@ namespace DCE
 public:
 		// Public member variables
 qOrbiterWindow * UI;
+
 //<-dceag-const-b->
 public:
 		// Constructors/Destructor
@@ -44,6 +46,7 @@ public:
 		virtual bool Register();
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
+                bool initialize();
 //<-dceag-const-e->
 
 //<-dceag-const2-b->

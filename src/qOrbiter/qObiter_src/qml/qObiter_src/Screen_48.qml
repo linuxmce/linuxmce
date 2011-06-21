@@ -95,10 +95,9 @@ Rectangle {
 
     Column {
         id: channelgrid
-        x: 0
-        y: 0
+
         width: 200
-        height: 400
+        height: 500
         clip: true
 
         Flickable{

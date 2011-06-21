@@ -209,7 +209,7 @@ int main(int argc, char* argv[])
                qOrbiterWindow w;
                bool bLocalMode = false;
                w.bAppError = w.setupLmce(PK_Device, sRouter_IP, true, bLocalMode);
-               w.show();
+
                a.exec();
              // intialziation end
 
