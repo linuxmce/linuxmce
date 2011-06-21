@@ -206,6 +206,7 @@ int main(int argc, char* argv[])
         {
             //qt orbiter ui intialization
                QApplication a(argc, argv);
+               QApplication::setGraphicsSystem("opengl");
                qOrbiterWindow w;
                bool bLocalMode = false;
                w.bAppError = w.setupLmce(PK_Device, sRouter_IP, true, bLocalMode);
