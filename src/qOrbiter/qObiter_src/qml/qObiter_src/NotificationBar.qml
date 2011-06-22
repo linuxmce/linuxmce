@@ -3,7 +3,7 @@ import QtQuick 1.0
 Rectangle {
     property alias clocktime : clock.text
     color: "lightblue"
-    width: parent - 5
+    width: 640
     height: 25
     anchors.top: parent.top
 
@@ -31,6 +31,14 @@ Rectangle {
         text: currentDateTime
         font.pointSize: 12
         anchors.right: parent.right
+    }
+
+    Text {
+        id: text1
+        x: 452
+        y: 5
+        text:currentuser
+        font.pixelSize: 12
     }
 
 }

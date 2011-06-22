@@ -1,6 +1,9 @@
 import QtQuick 1.0
 
 Rectangle {
+    signal showDatagrid( string msg)
+    signal gotoScreen( string screen)
+
     property alias rowlabel: rowheader.buttontext
     height: 80
     width: parent.width
@@ -60,6 +63,11 @@ Flickable{
             color: style.button_action_color
             radius: style.but_smooth
             buttontext: "Videos"
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked: console.log("populate Datagrid")
+            }
 
 
             }

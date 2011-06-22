@@ -3,7 +3,11 @@ import QtQuick 1.0
 Rectangle {
     id:buttonBase
      property alias buttontext: buttonLabel.text
+     property alias buttontextcolor: buttonLabel.color
 
+
+        height: 25
+        width: 25
     Text {
         id: buttonLabel
         x: 51
@@ -22,10 +26,4 @@ Rectangle {
         wrapMode: Text.WordWrap
          }
 
-
-    MouseArea
-    {   anchors.fill: parent
-        onClicked: console.log(buttonLabel.text + " Clicked. MessageSend that!")
-
-    }
 }

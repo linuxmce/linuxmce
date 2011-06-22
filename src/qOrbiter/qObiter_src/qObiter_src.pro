@@ -29,7 +29,6 @@ symbian:TARGET.CAPABILITY += NetworkServices
 
 # The .cpp file which was generated for your project. Feel free to hack it.
 SOURCES += main.cpp \
-    qmlapplicationviewer/qorbiterwindow.cpp \
         ../../Gen_Devices/qOrbiterBase.cpp \
     ../qOrbiter.cpp \
     uiclasses/lightingui.cpp \
@@ -41,7 +40,6 @@ include(qmlapplicationviewer/qmlapplicationviewer.pri)
 qtcAddDeployment()
 
 HEADERS += \
-    qmlapplicationviewer/qorbiterwindow.h \
     ../qOrbiter.h \
     ../../Gen_Devices/qOrbiterBase.h \
     uiclasses/lightingui.h \

@@ -16,7 +16,7 @@
 //<-dceag-incl-b->
 #include <QApplication>
 #include <qOrbiter/qOrbiter.h>
-#include <qorbiterwindow.h>
+
 #include "DCE/Logger.h"
 #include "ServerLogger.h"
 #include "PlutoUtils/FileUtils.h"
@@ -207,7 +207,8 @@ int main(int argc, char* argv[])
             //qt orbiter ui intialization
                QApplication a(argc, argv);
                QApplication::setGraphicsSystem("opengl");
-               qOrbiterWindow w;
+               qorbiterManager w;
+
                bool bLocalMode = false;
                w.bAppError = w.setupLmce(PK_Device, sRouter_IP, true, bLocalMode);
 
