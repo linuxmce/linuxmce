@@ -37,7 +37,7 @@ Rectangle {
         id: text1
         x: 452
         y: 5
-        text:currentuser
+        text:"dceObject.iPk_User"
         font.pixelSize: 12
     }
 

@@ -66,7 +66,7 @@ Flickable{
 
             MouseArea{
                 anchors.fill: parent
-                onClicked: console.log("populate Datagrid")
+                onClicked: dceObject.swapStyle();
             }
 
 

@@ -2,7 +2,7 @@ import QtQuick 1.0
 
  Item {
      id: item
-
+     signal close()
      function screenchange(screenname)
      {
          pageLoader.source = screenname

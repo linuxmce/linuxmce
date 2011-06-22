@@ -23,13 +23,6 @@ Rectangle {
 
     BottomPanel{id: advanced; color:style.advanced_bg; bottomPanelTextColor: style.advanced_bg_text; anchors.bottom: parent.bottom}
 
-    MouseArea {
-        anchors.fill: advanced
-        onClicked: {
-           swapStyle();
-            console.log("Ui Swap?")
-        }
     }
-}
 }
 

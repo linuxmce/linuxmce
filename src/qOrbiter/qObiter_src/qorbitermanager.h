@@ -22,7 +22,7 @@ class qorbiterManager : public QWidget
     Q_OBJECT
 public:
      qorbiterManager(QWidget *parent = 0);  //constructor
-
+     virtual ~qorbiterManager();
 
     //ui variables
     QString currentSkin;
@@ -78,6 +78,7 @@ public:
 
 signals:
       void orbiterReady();
+      void orbiterClosing();
 
 public slots:
       //ui related slots
@@ -85,7 +86,7 @@ public slots:
         //qt c++ related slots
 
     //dce related slots
-    void closeOrbiter();
+    Q_INVOKABLE void closeOrbiter();
 };
 
 #endif // QORBITERMANAGER_H

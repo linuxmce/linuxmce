@@ -104,18 +104,19 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
 
     qorbiterUIwin = new QDeclarativeView;
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
-
+    qorbiterUIwin->rootContext()->setContextProperty("dceObject", this);
 
     qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/qObiter_src/main.qml"));
     QObject *item= qorbiterUIwin->rootObject();
 
     //initial signal and slot connection
     //QObject::connect(item,SIGNAL(swapStyle()), this,SLOT(swapSkins()));
-    QObject::connect(item, SIGNAL(destroyed()), this, SLOT(closeOrbiter()));
-    QObject::connect(this,SIGNAL(destroyed()), this, SLOT(closeOrbiter()));
-    qorbiterUIwin->rootContext()->setContextProperty("dceObject", this);
+    QObject::connect(item, SIGNAL(close()), this, SLOT(closeOrbiter()));
+   // QObject::connect(this,SIGNAL(destroyed()), this, SLOT(closeOrbiter()));
+
+
     gotoQScreen("Screen_1.qml");
-    qorbiterUIwin->show();
+    qorbiterUIwin->showFullScreen();
 }
 
 
@@ -166,6 +167,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
                 if (refreshUI())
                  {
                      OrbiterGen();
+
                  return true;
                  }
                 else
@@ -279,11 +281,43 @@ void qorbiterManager::swapSkins()
 
 void qorbiterManager::closeOrbiter()
 {
-    pqOrbiter->~qOrbiter();
+
     qDebug() << "Shutting Down";
-                this->close();
+
+    if(pqOrbiter->deinitialize())
+    {
+    pqOrbiter->~qOrbiter();
+
+    qorbiterUIwin->close();
+    }
+    else
+    {
+        qDebug() << "Shutdown Error, Orbiter Still Registered!";
+        pqOrbiter->~qOrbiter();
+      orbiterClosing();
+      qorbiterUIwin->close();
+    }
 }
 
 
 
 
+qorbiterManager::~qorbiterManager()
+{
+    qDebug() << "Shutting Down";
+
+    if(pqOrbiter->deinitialize())
+    {
+    pqOrbiter->~qOrbiter();
+
+
+    qorbiterUIwin->close();
+    }
+    else
+    {
+        qDebug() << "Shutdown Error, Orbiter Still Registered!";
+        pqOrbiter->~qOrbiter();
+
+        qorbiterUIwin->close();
+    }
+}
