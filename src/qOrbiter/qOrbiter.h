@@ -20,10 +20,12 @@
 //	DCE Implemenation for #2186 qOrbiter
 
 #include "Gen_Devices/qOrbiterBase.h"
-#include <qorbiterwindow.h>
+#include <qOrbiter/qObiter_src/qorbitermanager.h>
 #include <QStringList>
 //<-dceag-d-e->
-class qOrbiterWindow;
+
+class qorbiterManager;
+
 //<-dceag-decl-b->
 namespace DCE
 {
@@ -35,7 +37,7 @@ namespace DCE
 		// Private methods
 public:
 		// Public member variables
-qOrbiterWindow * UI;
+qorbiterManager * qmlUI;
 
 //<-dceag-const-b->
 public:
@@ -47,6 +49,7 @@ public:
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
                 bool initialize();
+                bool deinitialize();
 //<-dceag-const-e->
 
 //<-dceag-const2-b->

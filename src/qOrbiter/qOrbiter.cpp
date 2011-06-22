@@ -66,7 +66,7 @@ bool qOrbiter::GetConfig()
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
 	return true;
-        UI->iPK_User = 2;
+        qmlUI->iPK_User = 1;
 }
 
 //<-dceag-reg-b->
@@ -1388,7 +1388,7 @@ void qOrbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool 
 	cout << "Parm #253 - Queue=" << bQueue << endl;
 
         QString str = QString::number(iPK_Screen);
-        this->UI->qmlManager->gotoQScreen("Screen_"+str+".qml");
+        this->qmlUI->gotoQScreen("Screen_"+str+".qml");
 
 }
 
@@ -1566,9 +1566,19 @@ bool DCE::qOrbiter::initialize()
     int iSize;
     pData = "NULL";
     iSize = 0;
-    DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(UI->iPK_Device, UI->iOrbiterPluginID, "1" ,UI->iPK_User, StringUtils::itos(1), UI->iFK_Room, &pData, &iSize);
+    DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(qmlUI->iPK_Device, qmlUI->iOrbiterPluginID, "1" ,qmlUI->iPK_User, StringUtils::itos(1), qmlUI->iFK_Room, &pData, &iSize);
     if (SendCommand(CMD_Orbiter_Registered))
     { return true;} else {return false;}
+}
+
+bool DCE::qOrbiter::deinitialize()
+{
+    char *pData;
+    int iSize;
+    pData = "NULL";
+    iSize = 0;
+    DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(qmlUI->iPK_Device, qmlUI->iOrbiterPluginID, "0" ,qmlUI->iPK_User, StringUtils::itos(1), qmlUI->iFK_Room, &pData, &iSize);
+    SendCommand(CMD_Orbiter_Registered);
 }
 
 
