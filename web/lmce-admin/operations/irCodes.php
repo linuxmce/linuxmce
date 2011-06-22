@@ -284,7 +284,7 @@ function irCodes($output,$dbADO,$mediaADO) {
 			$customCodesNoArray=explode(',',@$_POST['displayedIRGC']);
 			foreach ($customCodesNoArray as $ig_c){
 				if(isset($_POST['irData_'.$ig_c])){
-					$irData=stripslashes($_POST['irData_'.$ig_c]);
+					$irData=$_POST['irData_'.$ig_c];
 					$dbADO->Execute('UPDATE InfraredGroup_Command SET IRData=? WHERE PK_InfraredGroup_Command=?',array($irData,$ig_c));
 				}
 			}
