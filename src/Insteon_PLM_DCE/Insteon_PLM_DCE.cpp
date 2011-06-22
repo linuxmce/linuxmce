@@ -129,14 +129,14 @@ void Insteon_PLM_DCE::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,
 	
 	if( pMessage->m_dwID == COMMAND_Generic_On_CONST )
 	{
-		//	LoggerWrapper::GetInstance()->Write(LV_INSTEON, "Sending ON - %s", NodeID);
+			LoggerWrapper::GetInstance()->Write(LV_INSTEON, "Sending ON - %s", NodeID);
 		myInsteonAPI->setLightOn((char*)NodeID, 0xFF);
 		sCMD_Result = "OK";
 	}
 	
 	else if( pMessage->m_dwID == COMMAND_Generic_Off_CONST )
 	{
-		//	LoggerWrapper::GetInstance()->Write(LV_INSTEON, "Sending OFF - %s", NodeID);
+			LoggerWrapper::GetInstance()->Write(LV_INSTEON, "Sending OFF - %s", NodeID);
 		myInsteonAPI->setLightOff((char*)NodeID);
 		sCMD_Result = "OK";
 	}
@@ -146,7 +146,7 @@ void Insteon_PLM_DCE::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,
 	
 		int req_level = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST].c_str());
 		unsigned char level = ((float)req_level) * 2.55;
-		//	LoggerWrapper::GetInstance()->Write(LV_Insteon, "Sending LEVEL - %d || %d", level, NodeID);
+			LoggerWrapper::GetInstance()->Write(LV_INSTEON, "Sending LEVEL - %d || %d", level, NodeID);
 		myInsteonAPI->setLightOn( (char*)NodeID, req_level > 99 ? 0xFF : level);
 		sCMD_Result = "OK";
 	}
@@ -263,7 +263,8 @@ void Insteon_PLM_DCE::SomeFunction()
 void Insteon_PLM_DCE::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMessage)
 //<-dceag-c756-e->
 {
-	cout << "Need to implement command #756 - Report Child Devices" << endl;
+	cout << "Received command #756 - Report Child Devices" << endl;
+	myInsteonAPI->getDatabase();
 }
 
 //<-dceag-c757-b->
@@ -312,8 +313,8 @@ NOEMON or CANBUS */
 void Insteon_PLM_DCE::CMD_Reset(string sArguments,string &sCMD_Result,Message *pMessage)
 //<-dceag-c776-e->
 {
-	cout << "Need to implement command #776 - Reset" << endl;
-	cout << "Parm #51 - Arguments=" << sArguments << endl;
+	cout << "Received command #776 - Reset" << endl;
+	myInsteonAPI->getDatabase();
 }
 
 //<-dceag-c788-b->
