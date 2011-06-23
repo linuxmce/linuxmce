@@ -26,6 +26,7 @@
 
 //<-dceag-d-b->
 #include "App_Server.h"
+#include "DCE/DCEConfig.h"
 #include "DCE/Logger.h"
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
@@ -447,8 +448,17 @@ void App_Server::CMD_Halt_Device(int iPK_Device,string sForce,string &sCMD_Resul
 	case 'R':
 	case 'N':
 	case 'V':
-		if( sForce[0]=='R' )
+	case 'A':
+		if( sForce[0]=='R')
 			SetStatus("REBOOTING",m_dwPK_Device_MD);
+		else if ( sForce[0]=='A' )
+		{
+			SetStatus("REBOOTING",m_dwPK_Device_MD);
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Rebooting with AVWizard");
+			DCEConfig dceconfig;
+			dceconfig.AddString("AVWizardOverride","1");
+			dceconfig.WriteSettings();
+		}
 		else if( sForce[0]=='N' )
 			SetStatus("MD_REBOOTING",m_dwPK_Device_MD);
 		else if( sForce[0]=='V' )
