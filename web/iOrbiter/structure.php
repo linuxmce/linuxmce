@@ -24,7 +24,8 @@
           return $background;
         }
         
-        print "<table>";
+        print "<ul>";
+
         
         function getDesignObj($FK_DesignObj,$level=0) {
           global $link;
@@ -41,23 +42,23 @@
           if (count($arr)==0) {
             $arr = getMyArray($link,$queryStandard);
           }
-          print "Level: $level - Background for $FK_DesignObj: " . getBackground($FK_DesignObj) . "<br>\n";
+          print "<ul><li>";
+          print "Level: $level - Background for $FK_DesignObj: " . getBackground($FK_DesignObj) . "</li>\n";
           if (is_array($arr)) {
 
             foreach ($arr as $designobj) {
               $currentFK_DesignObj = $designobj["FK_DesignObj_Child"];              
-              print "DesignObj:  ". $designobj["FK_DesignObj_Child"] . "<br>\n";          
-              print "Position: " . $designobj["X"] . " x " . $designobj["Y"] . "<br>\n";
-              print "Size: " . $designobj["Width"] . " x " . $designobj["Height"] . "<br>\n";
+              print "<li>DesignObj:  ". $designobj["FK_DesignObj_Child"] . "</li>\n";          
+              print "<li>Position: " . $designobj["X"] . " x " . $designobj["Y"] . "</li>\n";
+              print "<li>Size: " . $designobj["Width"] . " x " . $designobj["Height"] . "</li>\n";
                             
               getDesignObj($currentFK_DesignObj,$level+1);
             }
-            print "-----<br>\n";
           }  
-            
+          print "</li></ul>";            
           return $arr; 
         }          
-          
+        print "</ul>";  
 	connectDB();
 	global $currentUser, $currentScreen, $currentRoom, $currentEntertainArea, $link, $mediaLink;
 
