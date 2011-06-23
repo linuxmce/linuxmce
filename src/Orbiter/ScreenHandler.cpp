@@ -3806,11 +3806,12 @@ bool ScreenHandler::AdvancedOptions_ObjectSelected(CallBackData *pData)
 	if( pObjectInfoData->m_pObj->m_iBaseObjectID==DESIGNOBJ_butStartAVwizard_CONST )
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"ScreenHandler::AdvancedOptions_ObjectSelected");
-		DCEConfig dceconfig;
-		dceconfig.AddString("AVWizardOverride","1");
-		dceconfig.WriteSettings();
+		int dwPK_Device = m_pOrbiter->m_dwPK_Device;
+		// Check what room the orbiter is controlling at the moment
+		if ( m_pOrbiter->m_pLocationInfo && m_pOrbiter->m_pLocationInfo->m_dwPK_Device_MediaDirector!=-1 )
+			dwPK_Device = m_pOrbiter->m_pLocationInfo->m_dwPK_Device_MediaDirector;
 		DCE::CMD_Halt_Device CMD_Halt_Device(m_pOrbiter->m_dwPK_Device, m_pOrbiter->m_dwPK_Device_GeneralInfoPlugIn,
-			m_pOrbiter->m_dwPK_Device,"R","");
+			dwPK_Device,"A","");
 		m_pOrbiter->SendCommand(CMD_Halt_Device);
 		return true;
 	}
