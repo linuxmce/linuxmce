@@ -77,14 +77,7 @@
         // Now that we have the basic background, let's try and find all the objects on this screen.
         $arr = getDesignObj($FK_DesignObj);
         
-        
-    /*
-        foreach ($arrParameter as $key => $value) {
-          echo "<br> Key $key => Value  $value";
-          echo "<br>print_r ";
-          print_r($value);
-        }  */
-	mysql_close($mediaLink);
+        mysql_close($mediaLink);
 	mysql_close($link);
 		
 ?>
