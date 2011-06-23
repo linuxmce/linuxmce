@@ -2,7 +2,7 @@ function tellemCommand(command,remotetype,pkfile)
 {
 	var self = this;
 	var tellemRequest = new self.XMLHttpRequest();
-	var postParameter = "command="+command+"&remotetype="+remotetype+"&pkfile"+pkfile;
+	var postParameter = "command="+command+"&remotetype="+remotetype+"&pk_file="+pkfile;
 	tellemRequest.open("POST", "service.php", true);
 	tellemRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 	tellemRequest.setRequestHeader("Content-length", postParameter.length);

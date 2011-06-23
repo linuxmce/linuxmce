@@ -8,6 +8,7 @@
 	 * identified by PK_File
 	 */
  	include_once("lib.inc.php");
+ 	include_once("libVDR.php");
 	error_reporting(E_ALL);
 	connectDB();
 /*	$currentUser = 1;
@@ -18,6 +19,8 @@
 	if (isset($_COOKIE["currentUser"])) {	$currentUser = $_COOKIE["currentUser"]; }
 	if (isset($_COOKIE["currentRoom"])) {	$currentRoom = $_COOKIE["currentRoom"]; }
 	$remotetype = "";
+
+	
 	
 
 	if (isset($_POST["room"])) {
@@ -48,9 +51,19 @@
 
 	$file=fopen("/tmp/test.txt","w+");
 	fwrite($file,"command= $command");
+	fwrite($file,"xpkfile= $PK_File");
+        fwrite($file,"currentuser = $currentUser");
+        fwrite($file,"currentroom = $currentRoom");	
+	foreach($_POST as $key => $value) {
+	  fwrite($file,"$key=$value ");
+        }
 	fclose($file);
 	if ($command == 'play') {
-          playFile($mediaLink,$PK_File);
+	  if ($remoteType == 'TV') {
+	    playRecording($currentRoom,$PK_File);
+          } else {
+            playFile($mediaLink,$PK_File);
+          };
         } elseif ($command == 'stop') {
           sendPlayerCommand($currentRoom,44);  // MH_Stop_Media          
         } elseif ($command == 'skipfwd') {

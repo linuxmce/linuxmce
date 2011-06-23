@@ -8,6 +8,17 @@
 	 * identified by PK_File
 	 */
  	include_once("lib.inc.php");
+ 	include_once("libVDR.php");
+
+ 	// Small Example
+ 	$a = new SVDRP($server ="192.168.80.1");
+ 	$a->Connect();
+// 	print_r($a->Help());
+ 	$recordings = $a->ListRecords();
+// 	$a->GetKeys();
+// 	print_r($a->GetVolume());
+// 	print_r($a->GetDiskStat());
+
 	error_reporting(E_ALL);
 	connectDB();
 /*	$currentUser = 1;
@@ -56,6 +67,13 @@
 		print "<li class='group'>TV Remote</li>\n";
 		print "<li onClick='tellemCommand(\"skipfwd\",\"$remoteType\",$PK_File);'>Next Program</li>\n";
 		print "<li onClick='tellemCommand(\"skipback\",\"$remoteType\",$PK_File);'>Prev Program</li>\n";
+		print "<li class='group'>Recordings</li>\n";
+//		print "<li>";
+//		print_r($recordings);
+//		print  "</li>";
+		foreach($recordings as $recording) {		        
+			print "<li onClick='tellemCommand(\"play\",\"$remoteType\",\"$recording[1]\");'>$recording[7]</li>\n";
+		}
 	}
 	print "<li class='group'>Other Control</li>\n";
 	print "<li onClick='tellemCommand(\"louder\",$PK_File);'>Volume+</li>\n";
@@ -66,4 +84,6 @@
 		print "<li onClick='tellemCommand(\"darker\",$PK_File);'>Darker</li>\n";
 	}
 	print "</ul>\n";
+// 	$a->Disconnect();
+
 ?>

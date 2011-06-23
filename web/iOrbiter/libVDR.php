@@ -1,3 +1,4 @@
+<?php 
 /*
 
 	SVDRP for PHP - From vdr-wiki - Could not find any copyright information.
@@ -394,7 +395,7 @@ class SVDRP
 		foreach($lines as $l)
 		{
 		
-			if(!preg_match("/^(\\d)\s(\\d*)\\.(\\d*)\\.(\\d*) (\\d*)\\:(\\d*).\s(.*)$/", $l, $m)) continue;
+			if(!preg_match("/^(\\d*)\s(\\d*)\\.(\\d*)\\.(\\d*) (\\d*)\\:(\\d*).\s(.*)$/", $l, $m)) continue;
 			$id = $m[1];
 			$m["id"] 		= $m[1];
 			$m["day"] 		= $m[2];
@@ -432,3 +433,4 @@ class SVDRP
  
 	*/
 }
+?>

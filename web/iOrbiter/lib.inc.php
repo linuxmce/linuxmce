@@ -17,7 +17,7 @@
 	$limit = "";
 
 	include_once("libMessageSend.php");
-
+	include_once("libVDR.php");
 
 	function lightinroom() {
 	// Returns an array of light devices in the current room
@@ -77,6 +77,7 @@
 		$errorString = "";
 		$timeout = 3;
 		// We check if a mythfrontend process is running. If it is, we assume, MythTV is running
+		$currentMediaPlayer = "";
 		if (($ipAddress == "192.168.80.1") or ($ipAddress == "127.0.0.1")) {
 			// Checking if mythtv is running on the core
 			$retVal = exec("ps ax|grep mythfrontend|grep -v grep",&$output,&$exitCode);
@@ -121,6 +122,7 @@
 			$fp = fsockopen($ipAddress, $port, &$errorNumber, &$errorString, $timeout);
 			error_reporting($oldStatus);
 			if ($errorString <> "") {
+				
 				return "";
 			}
 			$currentMediaPlayer = "TV";
@@ -305,9 +307,19 @@
 		commEnd($socket);
 	}
 
+	function playRecording($recordedFile) {
+		global $currentRoom,$link,$currentEntertainArea,$possyDeviceFromID;
+	
+		$vdrServer = getMDIP();
+/*		$svdrp = new SVDRP($server = $vdrServer);
+		$svdrp->Command("LSTR");
+		$svdrp->Command("PLAY $recordedFile");
+*/		exec("/usr/bin/svdrpsend -p 2001 -d " . $vdrServer . " PLAY " . $recordedFile . " >> /tmp/t");
+	}
 	
 	function playFile($mediaLink, $pk_file) {
 		global $currentRoom,$link,$currentEntertainArea,$possyDeviceFromID;
+		
 /*		print "entertain: $currentEntertainArea\n";
 		print "current room: $currentRoom\n";*/
 		$currentEntertainArea = getEntertainArea($link,$currentRoom);
@@ -682,21 +694,21 @@
 		{
 			$query = "SELECT PK_File,Filename,concat('detail.php?currentUser=$currentUser&currentRoom=$currentRoom&PK_File=',PK_File) as Target,Substr(Filename,1,1) ";
 			$query .= "FROM pluto_media.File ";
-			$query .= "WHERE EK_MediaType in (3,5) AND EK_Users_Private IS NULL And IsDirectory = 0 And Missing = 0 ";
+			$query .= "WHERE EK_MediaType in (3,5) AND EK_Users_Private IS NULL And EK_Device IS NOT NULL And  IsDirectory = 0 And Missing = 0 ";
 			$query .= "ORDER By Filename ";
 			$query .= $limit;
 		} elseif ($pk_mediatype == 4) // Audio -> Sort by artist
 		{
 			$query = "SELECT PK_File,Filename,concat('detail.php?currentUser=$currentUser&currentRoom=$currentRoom&PK_File=',PK_File) as Target,Substr(Filename,1,1) ";
 			$query .= "FROM pluto_media.File ";
-			$query .= "WHERE EK_MediaType = $pk_mediatype AND EK_Users_Private IS NULL And IsDirectory = 0 And Missing = 0 ";
+			$query .= "WHERE EK_MediaType = $pk_mediatype AND EK_Users_Private IS NULL And EK_Device IS NOT NULL And IsDirectory = 0 And Missing = 0 ";
 			$query .= "ORDER By Filename ";
 			$query .= $limit;
 		} elseif ($pk_mediatype == 7) // Audio -> Sort by artist
 		{
 			$query = "SELECT PK_File,Filename,concat('detail.php?currentUser=$currentUser&currentRoom=$currentRoom&PK_File=',PK_File) as Target,Substr(Filename,1,1) ";
 			$query .= "FROM pluto_media.File ";
-			$query .= "WHERE EK_MediaType = $pk_mediatype AND EK_Users_Private IS NULL And IsDirectory = 0 And Missing = 0 ";
+			$query .= "WHERE EK_MediaType = $pk_mediatype AND EK_Users_Private IS NULL And EK_Device IS NOT NULL And IsDirectory = 0 And Missing = 0 ";
 			$query .= "ORDER By Filename ";
 			$query .= $limit;
 		} elseif ($pk_mediatype == 21) // Playlist
