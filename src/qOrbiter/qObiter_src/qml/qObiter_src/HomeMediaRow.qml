@@ -2,9 +2,10 @@ import QtQuick 1.0
 
 Rectangle {
     signal showDatagrid( string msg)
-    signal gotoScreen( string screen)
-
+    signal gotoScreen( string screen)    
+    property alias nowplayingtext:now_playing.buttontext
     property alias rowlabel: rowheader.buttontext
+
     height: 80
     width: parent.width
 color:style.rowbgColor
@@ -66,7 +67,7 @@ Flickable{
 
             MouseArea{
                 anchors.fill: parent
-                onClicked: dceObject.swapStyle();
+                onClicked: dceObject.requestDataGrid("boo")
             }
 
 

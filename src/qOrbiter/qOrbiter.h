@@ -21,6 +21,7 @@
 
 #include "Gen_Devices/qOrbiterBase.h"
 #include <qOrbiter/qObiter_src/qorbitermanager.h>
+#include "DCE/Virtual_Device_Translator.h"
 #include <QStringList>
 //<-dceag-d-e->
 
@@ -38,7 +39,7 @@ namespace DCE
 public:
 		// Public member variables
 qorbiterManager * qmlUI;
-
+Virtual_Device_Translator coreDevices;
 //<-dceag-const-b->
 public:
 		// Constructors/Destructor
@@ -49,7 +50,9 @@ public:
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
                 bool initialize();
+
                 bool deinitialize();
+                bool dataGridRequest();
 //<-dceag-const-e->
 
 //<-dceag-const2-b->

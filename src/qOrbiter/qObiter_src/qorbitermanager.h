@@ -22,7 +22,7 @@ class qorbiterManager : public QWidget
     Q_OBJECT
 public:
      qorbiterManager(QWidget *parent = 0);  //constructor
-     virtual ~qorbiterManager();
+
 
     //ui variables
     QString currentSkin;
@@ -47,6 +47,12 @@ public:
       */
     bool getConf(int pPK_Device);
     bool OrbiterGen();              //prelim orbter generation
+
+    //virtual devices
+    int iPK_Device_DatagridPlugIn;
+    int m_pDevice_ScreenSaver;
+    int m_dwIDataGridRequestCounter;
+
 
     /*
       DCE variables
@@ -84,7 +90,7 @@ public slots:
       //ui related slots
     bool gotoQScreen(QString s) ;
         //qt c++ related slots
-
+    bool requestDataGrid(QString s);
     //dce related slots
     Q_INVOKABLE void closeOrbiter();
 };

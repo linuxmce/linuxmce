@@ -114,6 +114,8 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     QObject::connect(item, SIGNAL(close()), this, SLOT(closeOrbiter()));
    // QObject::connect(this,SIGNAL(destroyed()), this, SLOT(closeOrbiter()));
 
+     iPK_Device_DatagridPlugIn = new long(6);
+
 
     gotoQScreen("Screen_1.qml");
     qorbiterUIwin->showFullScreen();
@@ -281,43 +283,19 @@ void qorbiterManager::swapSkins()
 
 void qorbiterManager::closeOrbiter()
 {
-
     qDebug() << "Shutting Down";
-
-    if(pqOrbiter->deinitialize())
-    {
+    pqOrbiter->deinitialize();
     pqOrbiter->~qOrbiter();
-
-    qorbiterUIwin->close();
-    }
-    else
-    {
-        qDebug() << "Shutdown Error, Orbiter Still Registered!";
-        pqOrbiter->~qOrbiter();
-      orbiterClosing();
-      qorbiterUIwin->close();
-    }
+    this->~qorbiterManager();
+    this->destroy(true, true);
 }
 
-
-
-
-qorbiterManager::~qorbiterManager()
+bool qorbiterManager::requestDataGrid(QString s)
 {
-    qDebug() << "Shutting Down";
-
-    if(pqOrbiter->deinitialize())
-    {
-    pqOrbiter->~qOrbiter();
-
-
-    qorbiterUIwin->close();
-    }
-    else
-    {
-        qDebug() << "Shutdown Error, Orbiter Still Registered!";
-        pqOrbiter->~qOrbiter();
-
-        qorbiterUIwin->close();
-    }
+    qDebug() << qPrintable(s);
 }
+
+
+
+
+

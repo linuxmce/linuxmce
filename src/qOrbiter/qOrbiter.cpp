@@ -19,6 +19,7 @@
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
+#include "QDebug"
 
 #include <iostream>
 using namespace std;
@@ -47,13 +48,13 @@ qOrbiter::qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, 
 qOrbiter::~qOrbiter()
 //<-dceag-dest-e->
 {
-    /*
-    char *pData; int iSize;
+
+  /*  char *pData; int iSize;
     pData= "NULL"; iSize = 0;
 
-    CMD_Orbiter_Registered CMD_Orbiter_Registered(UI->iPK_Device, UI->iOrbiterPluginID, "0" ,UI->iPK_User, StringUtils::itos(1), UI->iFK_Room, &pData, &iSize);
-    Command_Impl::SendMessage (&CMD_Orbiter_Registered);
-    */
+    CMD_Orbiter_Registered CMD_Orbiter_unRegistered(qmlUI->iPK_Device, qmlUI->iOrbiterPluginID, "0" ,qmlUI->iPK_User, StringUtils::itos(1), qmlUI->iFK_Room, &pData, &iSize);
+    SendMessage (CMD_Orbiter_unRegistered);
+*/
 }
 
 //<-dceag-getconfig-b->
@@ -65,8 +66,20 @@ bool qOrbiter::GetConfig()
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
+
+        if( !coreDevices.GetConfig(m_pData) )
+        {
+                RouterNeedsReload();
+                return false;
+        }
+
+
+
+        // qmlUI->iPK_User = 1;
+       // qDebug() << qmlUI->iPK_Device_DatagridPlugIn;
 	return true;
-        qmlUI->iPK_User = 1;
+
+
 }
 
 //<-dceag-reg-b->
@@ -1579,6 +1592,54 @@ bool DCE::qOrbiter::deinitialize()
     iSize = 0;
     DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(qmlUI->iPK_Device, qmlUI->iOrbiterPluginID, "0" ,qmlUI->iPK_User, StringUtils::itos(1), qmlUI->iFK_Room, &pData, &iSize);
     SendCommand(CMD_Orbiter_Registered);
+}
+
+bool DCE::qOrbiter::dataGridRequest()
+{
+
+
+    DCE::CMD_Populate_Datagrid populateDataGrid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, string("test"), string("01"), 63, string("5||||1,2|0|13|0 | 2 |"), 0, 1, 20 );
+/*
+
+    DCE::CMD_Request_Datagrid_Contents CMD_Request_Datagrid_Contents( qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), m_sGridID,
+            5, 5, false, m_bKeepColHeader, true, m_sSeek, m_iSeekColumn, &data, &size, &GridCurRow, &GridCurCol );
+*/
+    /*
+      Datagrid params
+      # 4 PK_Variable (int) (Out)  The populate grid can optionally return a variable number
+                                    to assign a value into. For example, the current path in
+                                    the file grid.
+
+      # 5 Value To Assign (string) (Out) The value to assign into the variable.
+
+      # 10 ID (string)              For debugging purposes if problems arise with a request
+                                    not being filled, or a grid not populated when it should be.
+                                    If the Orbiter specified an ID when requesting the grid or populating it,
+                                     the Datagrid plug-in will log the ID and status so the develope
+
+      # 15 DataGrid ID (string)     A unique ID for this instance of the grid that will be passed with the
+                                    Request Datagrid Contents command.
+
+      # 38 PK_DataGrid (int)        Which grid should be populated
+
+      # 39 Options (string)         The options are specific the type of grid (PK_Datagrid). These are not
+                                    pre-defined. The grid generator and orbiter must both pass the options
+                                    in the correct format for the type of grid.
+
+     # 40 IsSuccessful (bool) (Out) Returns false if the grid could not be populated. Perhaps there was no
+                                    registered datagrid generator.
+
+     # 44 PK_DeviceTemplate (int)   If more than 1 plugin registered to handle this grid, this parameter
+                                     will be used to match teh right one
+
+     # 60 Width (int) (Out)         The width of the grid, in columns, if the width is determined at
+                                    populate time, such as a file grid. If the whole size of the grid is unknown,
+                                    such as the EPG grid, this should be 0.
+
+    # 61 Height (int) (Out)         The height of the grid, in rows, if the heightis determined at populate time,
+                                    such as a file grid. If the whole size of the grid is unknown, such as the EPG grid,
+                                     this should be 0.
+*/
 }
 
 

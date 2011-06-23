@@ -205,9 +205,11 @@ int main(int argc, char* argv[])
         try
         {
             //qt orbiter ui intialization
+            QApplication::setGraphicsSystem("raster");
                QApplication a(argc, argv);
-               QApplication::setGraphicsSystem("opengl");
+
                qorbiterManager w;
+
 
                bool bLocalMode = false;
                w.bAppError = w.setupLmce(PK_Device, sRouter_IP, true, bLocalMode);
