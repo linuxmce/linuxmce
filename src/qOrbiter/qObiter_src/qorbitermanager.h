@@ -88,7 +88,7 @@ signals:
 
 public slots:
       //ui related slots
-    bool gotoQScreen(QString s) ;
+   Q_INVOKABLE bool gotoQScreen(QString s) ;
         //qt c++ related slots
     bool requestDataGrid(QString s);
     //dce related slots

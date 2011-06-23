@@ -5,7 +5,18 @@ Rectangle {
     height: 80
     width: parent.width
 color:style.rowbgColor
-    Row {
+Flickable
+{
+    id:mediaflick
+    interactive: true
+    height: 80
+    width: parent.width
+    contentHeight: 80
+    contentWidth: childrenRect * 1
+    clip: true
+
+
+Row {
         id: guide
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
@@ -34,4 +45,5 @@ color:style.rowbgColor
             }
 
     }
+}
 }

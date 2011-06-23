@@ -1,18 +1,32 @@
 import QtQuick 1.0
 
 Rectangle {
-    signal gotoScreen (String screen)
+
     width: 640
     height: 480
 
     Style1{id:style}
 
+
     GridView {
         id: grid_view1
         x: 10
         y: 7
+        model:SampleListModel{}
+        delegate: Column
+                {
+        spacing:5
+        id:layoutcol
+        Text {text: name; anchors.horizontalCenter: parent.horizontalCenter; font.pointSize: 12 }
+        Image {source: img; height: 100; width: 75; anchors.horizontalCenter: parent.horizontalCenter
+        }
+
+    }
+
         width: 620
         height: 395
+        contentItem.pos.x: 2
+        contentHeight: -6
     }
 
    Row{
@@ -42,7 +56,8 @@ Rectangle {
            color: "lightblue"
 
            MouseArea{
-               onClicked: gotoScreen("1")
+               anchors.fill: parent
+               onClicked: dceObject.gotoQScreen("Screen_1.qml")
                 }
    }
 

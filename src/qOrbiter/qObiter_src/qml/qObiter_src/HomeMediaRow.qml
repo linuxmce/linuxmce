@@ -16,7 +16,7 @@ Flickable{
     height: 80
     width: parent.width
     contentHeight: 80
-    contentWidth: childrenRect * 2
+    contentWidth: childrenRect * 1
     clip: true
 
     Row {

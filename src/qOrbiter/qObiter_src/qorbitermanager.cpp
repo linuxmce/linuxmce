@@ -114,7 +114,7 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     QObject::connect(item, SIGNAL(close()), this, SLOT(closeOrbiter()));
    // QObject::connect(this,SIGNAL(destroyed()), this, SLOT(closeOrbiter()));
 
-     iPK_Device_DatagridPlugIn = new long(6);
+     iPK_Device_DatagridPlugIn =  long(6);
 
 
     gotoQScreen("Screen_1.qml");
@@ -293,6 +293,7 @@ void qorbiterManager::closeOrbiter()
 bool qorbiterManager::requestDataGrid(QString s)
 {
     qDebug() << qPrintable(s);
+    pqOrbiter->dataGridRequest();
 }
 
 
