@@ -1596,9 +1596,16 @@ bool DCE::qOrbiter::deinitialize()
 
 bool DCE::qOrbiter::dataGridRequest()
 {
-    qmlUI->gotoQScreen("Screen_47.qml");
 
-    //DCE::CMD_Populate_Datagrid populateDataGrid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, string("test"), string("01"), 63, string("5||||1,2|0|13|0 | 2 |"), 0, 1, 20 );
+    qmlUI->gotoQScreen("Screen_47.qml");
+    long l_pkDevice = qmlUI->iPK_Device;
+    int gHeight = 0;
+    int gWidth = 0;
+    int pkVar = 0;
+    string valassign ="null";
+    bool isSuccessfull = "false";
+
+    CMD_Populate_Datagrid populateDataGrid(l_pkDevice, qmlUI->iPK_Device_DatagridPlugIn, string("test"), string("01"), 63, string("5||||1,2|0|13|0 | 2 |"), DEVICETEMPLATE_qOrbiter_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 /*
 
     DCE::CMD_Request_Datagrid_Contents CMD_Request_Datagrid_Contents( qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), m_sGridID,

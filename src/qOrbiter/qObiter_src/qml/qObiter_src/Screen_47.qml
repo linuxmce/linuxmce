@@ -11,12 +11,12 @@ Rectangle {
              id: contactDelegate
              Item {
 
-                 width: grid.cellWidth; height: grid.cellHeight
+                 width: 75; height: 75
                  Column {
                      anchors.fill: parent
 
                      Image { source: img; anchors.horizontalCenter: parent.horizontalCenter; height: 45; width: 35}
-                     Text { text: name; anchors.horizontalCenter: parent.horizontalCenter; wrapMode:  "WrapAtWordBoundaryOrAnywhere" }
+                     Text { text: name; anchors.horizontalCenter: parent.horizontalCenter; wrapMode:  "WrapAnywhere" }
                  }
              }
          }
@@ -29,17 +29,15 @@ Rectangle {
         y: 7
         model:SampleListModel{}
         delegate: contactDelegate
-        highlight: Rectangle { color: "red"; radius: 5 }
+        highlight: Rectangle { color: "lightblue"; radius: 5 }
+        highlightFollowsCurrentItem: true
         focus: true
-
         width: 454
         height: 395
         cellWidth: 80
         cellHeight: 80
-        contentHeight: 80
-        contentWidth: 80
 
-        contentItem.clip: false
+    }
 
         Rectangle {
             id: rectangle1
@@ -66,7 +64,7 @@ Rectangle {
                 font.pixelSize: 12
             }
         }
-    }
+
 
    Row{
        id:options

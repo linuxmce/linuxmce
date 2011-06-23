@@ -49,10 +49,10 @@ public:
     bool OrbiterGen();              //prelim orbter generation
 
     //virtual devices
-    int iPK_Device_DatagridPlugIn;
+    long iPK_Device_DatagridPlugIn;
     int m_pDevice_ScreenSaver;
     int m_dwIDataGridRequestCounter;
-
+     long iPK_Device;                   //this orbiters device number, passed in from command line
 
     /*
       DCE variables
@@ -69,7 +69,7 @@ public:
     bool dceBool;                   //
     bool bLocalMode;                //local running flag, for running without router.
 
-    long iPK_Device;                //this orbiters device number, passed in from command line
+
     string sEntertainArea;          //current entertain area int
     int iPK_User;                    //current user
     int iFK_Room;                    //current room
