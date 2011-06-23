@@ -50,7 +50,8 @@ OTHER_FILES += \
     qml/skins/scheme/classic/Main.qml \
     img/lmcesplash.jpg \
     qml/skins/scheme/classic/StyleClassic.qml \
-    qml/skins/scheme/brown/StyleBrown.qml
+    qml/skins/scheme/brown/StyleBrown.qml \
+    img/UnknownUser.png
 
 RESOURCES += \
     skinData.qrc

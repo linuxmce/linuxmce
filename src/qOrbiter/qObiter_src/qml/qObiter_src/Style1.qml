@@ -13,7 +13,7 @@ import QtQuick 1.0
 QtObject {
     //main stage styles
     property int orbiterH: 480
-    property int orbiterW: 640
+    property int orbiterW: 720
     property color stageBG: "aliceblue"
 
     //textStyles

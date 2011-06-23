@@ -7,26 +7,65 @@ Rectangle {
 
     Style1{id:style}
 
+    Component {
+             id: contactDelegate
+             Item {
+
+                 width: grid.cellWidth; height: grid.cellHeight
+                 Column {
+                     anchors.fill: parent
+
+                     Image { source: img; anchors.horizontalCenter: parent.horizontalCenter; height: 45; width: 35}
+                     Text { text: name; anchors.horizontalCenter: parent.horizontalCenter; wrapMode:  "WrapAtWordBoundaryOrAnywhere" }
+                 }
+             }
+         }
+
+
 
     GridView {
         id: grid_view1
         x: 10
         y: 7
         model:SampleListModel{}
-        delegate: Column
-                {
-        spacing:5
-        id:layoutcol
-        Text {text: name; anchors.horizontalCenter: parent.horizontalCenter; font.pointSize: 12 }
-        Image {source: img; height: 100; width: 75; anchors.horizontalCenter: parent.horizontalCenter
+        delegate: contactDelegate
+        highlight: Rectangle { color: "red"; radius: 5 }
+        focus: true
+
+        width: 454
+        height: 395
+        cellWidth: 80
+        cellHeight: 80
+        contentHeight: 80
+        contentWidth: 80
+
+        contentItem.clip: false
+
+        Rectangle {
+            id: rectangle1
+            x: 453
+            y: 0
+            width: 166
+            height: 395
+            color: "#98b5c0"
         }
 
-    }
+        Rectangle {
+            id: rectangle2
+            x: 453
+            y: 0
+            width: 166
+            height: 16
+            color: "#ffffff"
 
-        width: 620
-        height: 395
-        contentItem.pos.x: 2
-        contentHeight: -6
+            Text {
+                id: text1
+                x: 35
+                y: 1
+                text: "Options"
+                font.pixelSize: 12
+            }
+        }
     }
 
    Row{

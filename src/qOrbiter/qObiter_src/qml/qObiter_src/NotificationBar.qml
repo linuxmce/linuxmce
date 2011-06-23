@@ -3,7 +3,7 @@ import QtQuick 1.0
 Rectangle {
     property alias clocktime : clock.text
     color: "lightblue"
-    width: 640
+    width: style.orbiterW
     height: 25
     anchors.top: parent.top
 
@@ -33,12 +33,5 @@ Rectangle {
         anchors.right: parent.right
     }
 
-    Text {
-        id: text1
-        x: 452
-        y: 5
-        text:"dceObject.iPk_User"
-        font.pixelSize: 12
-    }
 
 }
