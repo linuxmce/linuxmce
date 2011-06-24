@@ -1642,22 +1642,26 @@ bool DCE::qOrbiter::dataGridRequest(string s)
          //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
         DCE::CMD_Request_Datagrid_Contents req_data_grid( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID),    int(gHeight),     int(gWidth),      false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
         if(SendCommand(req_data_grid))
-                {                   
-                   DCE::DataGridTable pDataGridTable( iData_Size,  pData, false );
-                   int cellsToRender= pDataGridTable.GetRows();
+                {                   bool barrows = false;
+
+                   DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
+                   int cellsToRender= pDataGridTable->GetRows();
                    ListModel *model = new ListModel(new gridItem, qmlUI);
+
+                   qmlUI->qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
+
                    qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
                   ;
                    string testdata;
 
                    for (int i=0; cellsToRender  > i ; i++)
                    {
-                       //qDebug() << cellsToRender;
-                       model->appendRow(new gridItem(pDataGridTable.GetData(i,0)->m_Text, "medium", model));
+                        model->appendRow(new gridItem(pDataGridTable->GetData(0,0)->m_Text, "medium", model));
+
                     }
 
-                     qmlUI->qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
 
+ qDebug() << pDataGridTable->GetData(0,0)->m_Text;
                    qDebug() << "Response: " << cellsToRender << " cells to render";
 
                 }
