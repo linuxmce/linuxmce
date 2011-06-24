@@ -18,7 +18,7 @@ int isLogging;
 int main(int argc, char *argv[])        //main loop
 {
 
-  freopen ("/var/log/pluto/linuxmcetag.log","a+",stdout); //open the log
+  bool loggerPresent = freopen ("/var/log/pluto/linuxmcetag.log","a+",stdout); //open the log
 
 
     QTime scanStart = QTime::currentTime ();

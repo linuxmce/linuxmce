@@ -16,7 +16,7 @@ CXXFLAGS      = -pipe -O2 -Wall -W -D_REENTRANT $(DEFINES)
 INCPATH       = -I/usr/share/qt4/mkspecs/linux-g++ -I. -I/usr/include/qt4/QtCore -I/usr/include/qt4/QtNetwork -I/usr/include/qt4/QtGui -I/usr/include/qt4/QtXml -I/usr/include/qt4/QtSql -I/usr/include/qt4 -I/usr/include/mysql -I.
 LINK          = g++
 LFLAGS        = -Wl,-O1
-LIBS          = $(SUBLIBS)  -L/usr/lib -lQtSql -lQtXml -lQtGui -lQtNetwork -lQtCore -lpthread 
+LIBS          = $(SUBLIBS)  -L/usr/lib -lQtSql -lQtXml -lQtNetwork -lQtCore -lpthread
 AR            = ar cqs
 RANLIB        = 
 QMAKE         = /usr/bin/qmake
@@ -82,7 +82,7 @@ DIST          = /usr/share/qt4/mkspecs/common/g++.conf \
 		autotagger.pro
 QMAKE_TARGET  = linuxmceTag
 DESTDIR       = ../bin/
-TARGET        = ../bin/linuxmceTag
+TARGET        = linuxmceTag
 
 first: all
 ####### Implicit rules

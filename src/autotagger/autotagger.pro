@@ -33,5 +33,4 @@ HEADERS += \
     databaseFunctions.h
 
 OTHER_FILES += \
-    Makefile \
     Readme.txt
