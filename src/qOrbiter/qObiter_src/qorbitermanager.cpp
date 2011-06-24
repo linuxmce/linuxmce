@@ -13,6 +13,8 @@
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
 #include "DCERouter.h"
+#include "listModel.h"
+#include "gridItem.h"
 
 using namespace DCE;
 
@@ -115,6 +117,7 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
    // QObject::connect(this,SIGNAL(destroyed()), this, SLOT(closeOrbiter()));
 
      iPK_Device_DatagridPlugIn =  long(6);
+     m_dwIDataGridRequestCounter = 0;
 
 
     gotoQScreen("Screen_1.qml");
@@ -292,8 +295,17 @@ void qorbiterManager::closeOrbiter()
 
 bool qorbiterManager::requestDataGrid(QString s)
 {
+    ListModel *model = new ListModel(new gridItem, this);
+      model->appendRow(new gridItem("Apple", "medium", model));
+      model->appendRow(new gridItem("PineApple", "big", model));
+      model->appendRow(new gridItem("Grape", "small", model));
+      qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
+
     qDebug() << qPrintable(s);
-    pqOrbiter->dataGridRequest();
+    m_dwIDataGridRequestCounter++;
+    qDebug() << " Datagrid Request Counter: " << m_dwIDataGridRequestCounter;
+    pqOrbiter->dataGridRequest( s.toStdString());
+
 }
 
 

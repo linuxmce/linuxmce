@@ -67,7 +67,7 @@ Flickable{
 
             MouseArea{
                 anchors.fill: parent
-                onClicked: dceObject.requestDataGrid("boo")
+                onClicked: dceObject.requestDataGrid("5||||1,2|0|13|0 | 2 |")
             }
 
 
@@ -79,6 +79,11 @@ Flickable{
             color: style.button_action_color
             radius: style.but_smooth
             buttontext: "Audio"
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: dceObject.requestDataGrid("4||||1,2|0|2|0 | 2 |")
+            }
 
             }
         ButtonSq {

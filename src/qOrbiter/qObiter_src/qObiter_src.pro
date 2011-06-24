@@ -33,7 +33,9 @@ SOURCES += main.cpp \
     ../qOrbiter.cpp \
     uiclasses/lightingui.cpp \
     uiclasses/uicontroller.cpp \
-    qorbitermanager.cpp
+    qorbitermanager.cpp \
+    listModel.cpp \
+    gridItem.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -44,14 +46,25 @@ HEADERS += \
     ../../Gen_Devices/qOrbiterBase.h \
     uiclasses/lightingui.h \
     uiclasses/uicontroller.h \
-    qorbitermanager.h
+    qorbitermanager.h \
+    listModel.h \
+    gridItem.h
 
 OTHER_FILES += \
     qml/skins/scheme/classic/Main.qml \
     img/lmcesplash.jpg \
     qml/skins/scheme/classic/StyleClassic.qml \
     qml/skins/scheme/brown/StyleBrown.qml \
-    img/UnknownUser.png
+    img/UnknownUser.png \
+    qml/thom/screentest.qml \
+    qml/thom/screentest_images/new_layer.png \
+    qml/thom/screentest_images/new_layer__2.png \
+    qml/thom/screentest_images/new_layer__1.png \
+    qml/thom/screentest_images/lightingmediaclimate.png \
+    qml/thom/screentest_images/glow.png \
+    qml/thom/screentest_images/foo.png \
+    qml/thom/screentest_images/bar.png \
+    qml/thom/screentest_images/background.png
 
 RESOURCES += \
     skinData.qrc

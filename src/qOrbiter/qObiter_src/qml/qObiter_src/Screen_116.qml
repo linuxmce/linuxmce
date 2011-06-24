@@ -23,5 +23,9 @@ Rectangle {
         width: 50
         x: 574
         y: 25
+        MouseArea{
+            anchors.fill: parent
+            onClicked: dceObject.gotoQScreen("Screen_1.qml")
+        }
     }
 }

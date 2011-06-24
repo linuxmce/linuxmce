@@ -15,7 +15,7 @@ Rectangle {
                  Column {
                      anchors.fill: parent
 
-                     Image { source: img; anchors.horizontalCenter: parent.horizontalCenter; height: 45; width: 35}
+                     Image { source: "../../img/UnknownUser.png"; anchors.horizontalCenter: parent.horizontalCenter; height: 45; width: 35}
                      Text { text: name; anchors.horizontalCenter: parent.horizontalCenter; wrapMode:  "WrapAnywhere" }
                  }
              }
@@ -27,7 +27,7 @@ Rectangle {
         id: grid_view1
         x: 10
         y: 7
-        model:SampleListModel{}
+        model:dataModel
         delegate: contactDelegate
         highlight: Rectangle { color: "lightblue"; radius: 5 }
         highlightFollowsCurrentItem: true
