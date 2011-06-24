@@ -14,11 +14,14 @@
 
 */
 //<-dceag-d-b->
+
 #include "qOrbiter.h"
+#include "gridItem.h"
 #include "DCE/Logger.h"
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
+#include "listModel.h"
 #include "QDebug"
 
 #include <iostream>
@@ -1594,23 +1597,69 @@ bool DCE::qOrbiter::deinitialize()
     SendCommand(CMD_Orbiter_Registered);
 }
 
-bool DCE::qOrbiter::dataGridRequest()
+bool DCE::qOrbiter::dataGridRequest(string s)
 {
 
+    qDebug() << "DCE recieved Datagrid Population Request from QML";
     qmlUI->gotoQScreen("Screen_47.qml");
     long l_pkDevice = qmlUI->iPK_Device;
-    int gHeight = 0;
-    int gWidth = 0;
+    int gHeight = 5;
+    int gWidth = 5;
     int pkVar = 0;
     string valassign ="null";
     bool isSuccessfull = "false";
 
-    CMD_Populate_Datagrid populateDataGrid(l_pkDevice, qmlUI->iPK_Device_DatagridPlugIn, string("test"), string("01"), 63, string("5||||1,2|0|13|0 | 2 |"), DEVICETEMPLATE_qOrbiter_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
-/*
+    string m_sGridID ="MediaFile_"+StringUtils::itos(qmlUI->iPK_Device);
+    int iRow_count=5;
+    int iColumn_count = 5;
+    bool m_bKeep_Row_Header = false;
+    bool m_bKeepColHeader = false;
+    bool m_bAdd_UpDown_Arrows = true;
 
-    DCE::CMD_Request_Datagrid_Contents CMD_Request_Datagrid_Contents( qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), m_sGridID,
-            5, 5, false, m_bKeepColHeader, true, m_sSeek, m_iSeekColumn, &data, &size, &GridCurRow, &GridCurCol );
-*/
+    string m_sSeek;
+    string m_sDataGrid_ID = "1";
+
+    int iOffset;
+
+    int iColumn = 1;
+    int iRowCount= 5;
+    int iRowColums = 5;
+    int m_iSeekColumn = 1;
+    int iData_Size=0;
+    int GridCurRow = 0;
+    int GridCurCol= 0;
+
+    char *pData;
+    pData = "NULL";
+    int iRow;
+
+    CMD_Populate_Datagrid populateDataGrid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 63, string(s), DEVICETEMPLATE_qOrbiter_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
+
+    if (SendCommand(populateDataGrid))
+    {
+        qDebug()<< "Command to Populate Datagrid Sent";
+
+         //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
+        DCE::CMD_Request_Datagrid_Contents req_data_grid( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID),    int(gHeight),     int(gWidth),      false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+        if(SendCommand(req_data_grid))
+                {                   
+                   DCE::DataGridTable pDataGridTable( iData_Size,  pData, false );
+                   int cellsToRender= pDataGridTable.GetRows();
+
+                   DataGridCell *it = pDataGridTable.GetData(0,0);
+
+                   ListModel *model = new ListModel(new gridItem, qmlUI);
+                     model->appendRow(new gridItem(it->m_Text, "medium", model));
+                     qmlUI->qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
+
+                   qDebug() << "Response: " << cellsToRender << " cells to render";
+
+                }
+    }
+
+
+
+
     /*
       Datagrid params
       # 4 PK_Variable (int) (Out)  The populate grid can optionally return a variable number

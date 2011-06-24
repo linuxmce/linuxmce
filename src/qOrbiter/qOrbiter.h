@@ -19,9 +19,11 @@
 
 //	DCE Implemenation for #2186 qOrbiter
 
+#include "DataGrid.h"
 #include "Gen_Devices/qOrbiterBase.h"
 #include <qOrbiter/qObiter_src/qorbitermanager.h>
 #include "DCE/Virtual_Device_Translator.h"
+#include "Orbiter/DesignObj_DataGrid.h"
 #include <QStringList>
 //<-dceag-d-e->
 
@@ -40,6 +42,8 @@ public:
 		// Public member variables
 qorbiterManager * qmlUI;
 Virtual_Device_Translator coreDevices;
+DataGridTable pDataGridTable;
+
 //<-dceag-const-b->
 public:
 		// Constructors/Destructor
@@ -52,7 +56,7 @@ public:
                 bool initialize();
 
                 bool deinitialize();
-                bool dataGridRequest();
+                bool dataGridRequest(string s);
 //<-dceag-const-e->
 
 //<-dceag-const2-b->
