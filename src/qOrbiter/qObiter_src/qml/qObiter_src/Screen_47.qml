@@ -10,13 +10,21 @@ Rectangle {
     Component {
              id: contactDelegate
              Item {
-
-                 width: 75; height: 75
-                 Column {
+                id:mainItem
+                 width: 80; height: 80
+                 Rectangle {
+                     id:colItem
                      anchors.fill: parent
 
                      Image { source: "../../img/UnknownUser.png"; anchors.horizontalCenter: parent.horizontalCenter; height: 45; width: 35}
-                     Text { text: name; anchors.horizontalCenter: parent.horizontalCenter; wrapMode:  "WrapAnywhere" }
+                     Flow{
+                         anchors.fill: colItem
+                         anchors.margins: 5
+                         spacing: 5
+                          Text { text: name;  }
+                     }
+
+
                  }
              }
          }
@@ -32,7 +40,7 @@ Rectangle {
         highlight: Rectangle { color: "lightblue"; radius: 5 }
         highlightFollowsCurrentItem: true
         focus: true
-        width: 454
+        width: 443
         height: 395
         cellWidth: 80
         cellHeight: 80

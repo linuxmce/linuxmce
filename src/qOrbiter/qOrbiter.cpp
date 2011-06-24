@@ -1645,11 +1645,17 @@ bool DCE::qOrbiter::dataGridRequest(string s)
                 {                   
                    DCE::DataGridTable pDataGridTable( iData_Size,  pData, false );
                    int cellsToRender= pDataGridTable.GetRows();
-
-                   DataGridCell *it = pDataGridTable.GetData(0,0);
-
                    ListModel *model = new ListModel(new gridItem, qmlUI);
-                     model->appendRow(new gridItem(it->m_Text, "medium", model));
+                   qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
+                  ;
+                   string testdata;
+
+                   for (int i=0; cellsToRender  > i ; i++)
+                   {
+                       //qDebug() << cellsToRender;
+                       model->appendRow(new gridItem(pDataGridTable.GetData(i,0)->m_Text, "medium", model));
+                    }
+
                      qmlUI->qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
 
                    qDebug() << "Response: " << cellsToRender << " cells to render";
