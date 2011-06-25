@@ -1643,26 +1643,33 @@ bool DCE::qOrbiter::dataGridRequest(string s)
         DCE::CMD_Request_Datagrid_Contents req_data_grid( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID),    int(gHeight),     int(gWidth),      false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
         if(SendCommand(req_data_grid))
                 {                   bool barrows = false;
-
+/*
+    NameRole = Qt::UserRole+1,
+    SizeRole,
+    PriceRole,
+    TitleRole,
+    ImageRole
+    */
                    DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
-                   int cellsToRender= pDataGridTable->GetRows();
-                   ListModel *model = new ListModel(new gridItem, qmlUI);
 
-                   qmlUI->qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
+                   int cellsToRender= pDataGridTable->GetRows();
 
                    qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
-                  ;
+                   qDebug() << "Response: " << cellsToRender << " cells to render";
                    string testdata;
+                   QImage cellImg;
 
                    for (int i=0; cellsToRender  > i ; i++)
                    {
-                        model->appendRow(new gridItem(pDataGridTable->GetData(0,0)->m_Text, "medium", model));
+
+                      DataGridCell *cell =  pDataGridTable->GetData(i,0);
+                       qDebug() << "Creating Cell: " << i;
+                       qDebug() << cell->m_Text;
+
+                        qmlUI->model->appendRow(new gridItem(QString::number(i), "medium", cellImg , qmlUI->model));
 
                     }
 
-
- qDebug() << pDataGridTable->GetData(0,0)->m_Text;
-                   qDebug() << "Response: " << cellsToRender << " cells to render";
 
                 }
     }

@@ -2,6 +2,7 @@
 #define QORBITERMANAGER_H
 
 #include <QWidget>
+#include <listModel.h>
 #include <QDeclarativeView>
 #include <qdeclarativecontext.h>
 #include <QDeclarativeItem>
@@ -31,7 +32,7 @@ public:
     QObject *item;                                  //qObject reference to UI
     bool refreshUI();
     void swapSkins();
-
+    ListModel *model;
 
     //ui functions
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}

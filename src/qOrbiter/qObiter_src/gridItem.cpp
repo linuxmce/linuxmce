@@ -1,7 +1,7 @@
 #include "gridItem.h"
 
-gridItem::gridItem(const QString &name, const QString &size, QObject *parent) :
-  ListItem(parent), m_name(name), m_size(size), m_price(-1)
+gridItem::gridItem(const QString &name, const QString &size, const QImage &img, QObject *parent) :
+    ListItem(parent), m_name(name), m_size(size), m_price(-1), m_image(img)
 {
 }
 
@@ -20,7 +20,7 @@ QHash<int, QByteArray> gridItem::roleNames() const
   names[SizeRole] = "size";
   names[PriceRole] = "price";
   names[TitleRole] = "Title";
-  names[ImageRole] = "Image";
+  names[ImageRole] = "image";
 
   return names;
 }
@@ -35,7 +35,7 @@ QVariant gridItem::data(int role) const
   case TitleRole:
     return size();
   case ImageRole:
-    return size();
+    return image();
   case PriceRole:
     return price();
   default:

@@ -10,7 +10,9 @@ import QtQuick 1.0
 
   */
 
-QtObject {
+
+    QtObject{
+        id:classicstyle
     //main stage styles
     property int orbiterH: 480
     property int orbiterW: 720

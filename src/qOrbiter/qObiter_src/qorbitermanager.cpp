@@ -295,12 +295,8 @@ void qorbiterManager::closeOrbiter()
 
 bool qorbiterManager::requestDataGrid(QString s)
 {
-    ListModel *model = new ListModel(new gridItem, this);
-      model->appendRow(new gridItem("Apple", "medium", model));
-      model->appendRow(new gridItem("PineApple", "big", model));
-      model->appendRow(new gridItem("Grape", "small", model));
-      qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
-
+   model = new ListModel(new gridItem, this);
+   qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
     qDebug() << qPrintable(s);
     m_dwIDataGridRequestCounter++;
     qDebug() << " Datagrid Request Counter: " << m_dwIDataGridRequestCounter;
