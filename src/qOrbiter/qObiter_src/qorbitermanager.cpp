@@ -234,7 +234,7 @@ bool qorbiterManager::refreshUI()
 
 bool qorbiterManager::OrbiterGen()
 {
-    pData = "null";
+    pData = NULL;
     iSize = 0;
     QString scr = "Screen_Home.qml";
 //    item->setProperty("current_screen", scr);
@@ -287,6 +287,7 @@ void qorbiterManager::swapSkins()
 void qorbiterManager::closeOrbiter()
 {
     qDebug() << "Shutting Down";
+     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Exiting, Unregistering 1st");
     pqOrbiter->deinitialize();
     pqOrbiter->~qOrbiter();
     this->~qorbiterManager();
@@ -295,8 +296,9 @@ void qorbiterManager::closeOrbiter()
 
 bool qorbiterManager::requestDataGrid(QString s)
 {
-   model = new ListModel(new gridItem, this);
+   model = new ListModel(new gridItem, qorbiterUIwin);
    qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
+
     qDebug() << qPrintable(s);
     m_dwIDataGridRequestCounter++;
     qDebug() << " Datagrid Request Counter: " << m_dwIDataGridRequestCounter;

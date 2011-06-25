@@ -20,7 +20,7 @@ QHash<int, QByteArray> gridItem::roleNames() const
   names[SizeRole] = "size";
   names[PriceRole] = "price";
   names[TitleRole] = "Title";
-  names[ImageRole] = "image";
+  names[ImageRole] = "cellImage";
 
   return names;
 }
@@ -35,7 +35,7 @@ QVariant gridItem::data(int role) const
   case TitleRole:
     return size();
   case ImageRole:
-    return image();
+    return cellImage();
   case PriceRole:
     return price();
   default:

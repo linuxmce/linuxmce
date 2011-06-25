@@ -7,6 +7,7 @@
 class gridItem : public ListItem
 {
   Q_OBJECT
+ Q_PROPERTY(QImage cellImage READ cellImage NOTIFY imageChanged)
 
 public:
   enum Roles {
@@ -27,7 +28,7 @@ public:
   inline QString id() const { return m_name; }
   inline QString name() const { return m_name; }
   inline QString size() const { return m_size; }
-  inline QImage image() const {return m_image; }
+  inline QImage cellImage() const {return m_image; }
   inline qreal price() const { return m_price; }
 
 private:
@@ -35,5 +36,8 @@ private:
   QString m_size;
   qreal m_price;
   QImage m_image;
+
+signals:
+  void imageChanged();
 };
 #endif // GRIDITEM_H
