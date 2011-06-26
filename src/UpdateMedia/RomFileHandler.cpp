@@ -217,6 +217,10 @@ void RomFileHandler::getSystem(string sFilename)
 		m_sROMSystem = "PC Engine";
 	if (sFilename.find("/sgx") != string::npos )
 		m_sROMSystem = "SuperGrafx";
+	if (sFilename.find("/vectrex") != string::npos )
+		m_sROMSystem = "Vectrex";
+	if (sFilename.find("/apple2") != string::npos )
+		m_sROMSystem = "Apple ][";
 
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"RomFileHandler::getSystem(%s) = %s",sFilename.c_str(),m_sROMSystem.c_str());
 
@@ -272,6 +276,14 @@ void RomFileHandler::GetRomInfo(string sFilename, map<int,string>& mapAttributes
   if (m_iRomType == ROMTYPE_COWERING)
   {
 	string sTmpFile = StringUtils::ToLower(sFilename);
+
+	if (m_sFullFilename.find("/apple2") != string::npos)
+		sSnapFilename = "/home/snap/apple2/" + sROMTitle + ".jpg";
+
+	if (sTmpFile.find(".dsk") != string::npos || sTmpFile.find(".do") != string::npos
+		|| sTmpFile.find(".po") != string::npos || sTmpFile.find(".nib") != string::npos)
+		sSnapFilename = "/home/snap/apple2/" + sROMTitle + ".jpg";
+
   	if (m_sFullFilename.find("/a2600") != string::npos || sTmpFile.find(".a26") != string::npos)
 		sSnapFilename = "/home/snap/a2600/" + sROMTitle + ".jpg";
 
@@ -327,6 +339,12 @@ void RomFileHandler::GetRomInfo(string sFilename, map<int,string>& mapAttributes
 	if (m_sFullFilename.find("/sgx") != string::npos
 		|| sTmpFile.find(".pce") != string::npos)
 		sSnapFilename = "/home/snap/sgx/"+sROMTitle+".jpg";
+
+	if (m_sFullFilename.find("/vectrex") != string::npos
+		|| sTmpFile.find(".vec") != string::npos
+		|| sTmpFile.find(".gam") != string::npos)
+		sSnapFilename = "/home/snap/vectrex/"+sROMTitle+".jpg";
+
   }
 
   LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "# RomFileHandler: Adding ROM Picture: %s",sSnapFilename.c_str());

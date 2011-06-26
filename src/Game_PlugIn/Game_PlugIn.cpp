@@ -474,6 +474,25 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
                 pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_sgx_CONST;
         }
 
+	if (mediaURL.find("/vectrex") != string::npos
+		|| StringUtils::ToLower(mediaURL).find(".vec") != string::npos 
+		|| StringUtils::ToLower(mediaURL).find(".gam") != string::npos)
+	{
+		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_vectrex_CONST;
+	}
+
+        if (mediaURL.find("/apple2") != string::npos
+                || StringUtils::ToLower(mediaURL).find(".dsk") != string::npos
+                || StringUtils::ToLower(mediaURL).find(".nib") != string::npos
+		|| StringUtils::ToLower(mediaURL).find(".po") != string::npos
+		|| StringUtils::ToLower(mediaURL).find(".do") != string::npos)
+        {
+                pGameMediaStream->m_sAppName = "mess.mess";
+                pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_apple2_CONST;
+        }
+
+
 	DCE::CMD_Play_Media CMD_Play_Media(m_dwPK_Device,
 					   pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
 					   pGameMediaStream->m_iPK_MediaType,

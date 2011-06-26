@@ -8722,10 +8722,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiCar : public PreformedCommand
+	class SCREEN_Apple_2_Remote : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiCar(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Apple_2_Remote(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "166" /* screen ID */
@@ -8735,10 +8735,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiCar_DL : public PreformedCommand
+	class SCREEN_Apple_2_Remote_DL : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiCar_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Apple_2_Remote_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "166" /* screen ID */
@@ -8748,10 +8748,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiCar_DT : public PreformedCommand
+	class SCREEN_Apple_2_Remote_DT : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiCar_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Apple_2_Remote_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "166" /* screen ID */
@@ -8761,10 +8761,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiCar_Cat : public PreformedCommand
+	class SCREEN_Apple_2_Remote_Cat : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiCar_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Apple_2_Remote_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "166" /* screen ID */
@@ -8774,10 +8774,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiSetup : public PreformedCommand
+	class SCREEN_Apple_2_FS : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiSetup(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Apple_2_FS(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "167" /* screen ID */
@@ -8787,10 +8787,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiSetup_DL : public PreformedCommand
+	class SCREEN_Apple_2_FS_DL : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiSetup_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Apple_2_FS_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "167" /* screen ID */
@@ -8800,10 +8800,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiSetup_DT : public PreformedCommand
+	class SCREEN_Apple_2_FS_DT : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiSetup_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Apple_2_FS_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "167" /* screen ID */
@@ -8813,10 +8813,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiSetup_Cat : public PreformedCommand
+	class SCREEN_Apple_2_FS_Cat : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiSetup_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Apple_2_FS_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "167" /* screen ID */
@@ -15471,8 +15471,8 @@ PK_DeviceData .... */, sOptions.c_str(), 224 /* PK_PnpQueue */, StringUtils::lto
 		virtual void SCREEN_Hulu_OSD(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_Hulu_OSD_Options(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_Get_Capture_Card_Audio_Port(long PK_Screen){ GotoScreen(PK_Screen); }
-		virtual void SCREEN_AudiCar(long PK_Screen){ GotoScreen(PK_Screen); }
-		virtual void SCREEN_AudiSetup(long PK_Screen){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_Apple_2_Remote(long PK_Screen){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_Apple_2_FS(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_AudiLighting(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_AudiClimate(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_AudiSecurity(long PK_Screen){ GotoScreen(PK_Screen); }
@@ -16636,13 +16636,13 @@ PK_DeviceData .... */, sOptions.c_str(), 224 /* PK_PnpQueue */, StringUtils::lto
 				case 166:
 				{
 					ResetCallBacks();
-					SCREEN_AudiCar(nPK_Screen);
+					SCREEN_Apple_2_Remote(nPK_Screen);
 					break;
 				}
 				case 167:
 				{
 					ResetCallBacks();
-					SCREEN_AudiSetup(nPK_Screen);
+					SCREEN_Apple_2_FS(nPK_Screen);
 					break;
 				}
 				case 168:

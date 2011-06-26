@@ -215,7 +215,7 @@ void UpdateEntArea::AddDefaultMediaScenarios(Row_EntertainArea *pRow_EntertainAr
 			"JOIN Device ON FK_Device=PK_Device "
 			"JOIN DeviceTemplate_MediaType ON Device.FK_DeviceTemplate=DeviceTemplate_MediaType.FK_DeviceTemplate "
 			"JOIN MediaType ON FK_MediaType=PK_MediaType "
-			"WHERE FK_EntertainArea=" + StringUtils::itos(pRow_EntertainArea->PK_EntertainArea_get()) + " AND FK_MediaType NOT IN (1,2,3,4,5,6,7,20,21,22,23,24,27,28,29,30,32,33,34,35,36,37,38,39,43,44,45,46,47,48,49,50,51,52) ORDER BY PK_Device";
+			"WHERE FK_EntertainArea=" + StringUtils::itos(pRow_EntertainArea->PK_EntertainArea_get()) + " AND FK_MediaType NOT IN (1,2,3,4,5,6,7,20,21,22,23,24,27,28,29,30,32,33,34,35,36,37,38,39,43,44,45,46,47,48,49,50,51,52,53) ORDER BY PK_Device";
 
 		iOrder=1;
 		PlutoSqlResult result_set;

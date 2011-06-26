@@ -2689,6 +2689,7 @@
 #define DESIGNOBJ_butEmuWkb_Reset_CONST 6081
 #define DESIGNOBJ_mnuApple2Remote_CONST 6082
 #define DESIGNOBJ_grpComputerTop_CONST 6083
+#define DESIGNOBJ_Apple_2_FS_CONST 6084
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"

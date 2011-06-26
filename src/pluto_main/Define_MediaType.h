@@ -50,6 +50,7 @@
 #define MEDIATYPE_lmce_Game_snespal_CONST 50
 #define MEDIATYPE_lmce_Game_sgx_CONST 51
 #define MEDIATYPE_lmce_Game_pce_CONST 52
+#define MEDIATYPE_lmce_Game_apple2_CONST 53
 
 #define MEDIATYPE_TABLE "MediaType"
 #define MEDIATYPE_PK_MEDIATYPE_FIELD "PK_MediaType"

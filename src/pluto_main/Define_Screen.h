@@ -164,8 +164,8 @@
 #define SCREEN_Hulu_OSD_CONST 163
 #define SCREEN_Hulu_OSD_Options_CONST 164
 #define SCREEN_Get_Capture_Card_Audio_Port_CONST 165
-#define SCREEN_AudiCar_CONST 166
-#define SCREEN_AudiSetup_CONST 167
+#define SCREEN_Apple_2_Remote_CONST 166
+#define SCREEN_Apple_2_FS_CONST 167
 #define SCREEN_AudiLighting_CONST 168
 #define SCREEN_AudiClimate_CONST 169
 #define SCREEN_AudiSecurity_CONST 170

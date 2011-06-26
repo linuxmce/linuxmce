@@ -125,6 +125,12 @@ FileHandlerFactory::~FileHandlerFactory(void)
 		           (sExtension == "md") ||
 			   (sExtension == "gen") ||
 			   (sExtension == "pce") ||
+			   (sExtension == "vec") ||
+			   (sExtension == "pce") ||
+			   (sExtension == "dsk") ||
+			   (sExtension == "nib") ||
+			   (sExtension == "po") ||
+			   (sExtension == "do") ||
 			   (sExtension == "fds");
 
 	return bHasRomExtension;	// do we do more tests here?

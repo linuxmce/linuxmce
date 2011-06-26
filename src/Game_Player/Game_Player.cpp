@@ -913,7 +913,7 @@ bool Game_Player::UpdateMAMEConfig(string sMediaURL)
 // Attempt to figure out what to pass to MESS.
 string Game_Player::GetMessParametersFor(string sMediaURL)
 {
-  string sParameters, sPeripheralType;     // The final parameters to send.
+  string sParameters, sPeripheralType, sExtra;     // The final parameters to send.
   string sTmpPath = FileUtils::BasePath(sMediaURL);
   string sFileName = FileUtils::FilenameWithoutPath(sMediaURL);
   string sToken = "/";
@@ -924,6 +924,15 @@ string Game_Player::GetMessParametersFor(string sMediaURL)
   string sMachineType = vect_Path[vect_Path.size()-1]; // Get the last element.
   m_sMachineType = sMachineType;
 
+	string sLFileName = StringUtils::ToLower(sFileName);
+
+	// Apple 2 disk types
+	if (m_iPK_MediaType == MEDIATYPE_lmce_Game_apple2_CONST)
+	{
+		sPeripheralType = "-flop1";	// TODO: support 2 floppies?
+		m_bOSDIsVisible=true;		// apple 2 hack for now
+	}
+
   if (		(sFileName.find(StringUtils::ToLower(".dsk")) != string::npos) || 
 		(sFileName.find(StringUtils::ToLower(".atr")) != string::npos) || 
 		(sFileName.find(StringUtils::ToLower(".fds")) != string::npos))
@@ -931,8 +940,6 @@ string Game_Player::GetMessParametersFor(string sMediaURL)
 		sPeripheralType = "-flop";
 	}
 	
-	string sLFileName = StringUtils::ToLower(sFileName);
-
   if (            (sLFileName.find(".bin") != string::npos) || 
                   (sLFileName.find(".a26") != string::npos) || 
 		  (sLFileName.find(".a52") != string::npos) ||
@@ -951,7 +958,8 @@ string Game_Player::GetMessParametersFor(string sMediaURL)
 		  (sLFileName.find(".gen") != string::npos) ||
 		  (sLFileName.find(".smd") != string::npos) ||
 		  (sLFileName.find(".md") != string::npos) ||
-		  (sLFileName.find(".pce") != string::npos))
+		  (sLFileName.find(".pce") != string::npos) ||
+		  (sLFileName.find(".vec") != string::npos))
     {
       sPeripheralType = "-cart";
     }
@@ -959,7 +967,18 @@ string Game_Player::GetMessParametersFor(string sMediaURL)
   // If Peripheral type is still unset here, it may be a zip file. 
   // come back here and write this when we need it.
 
-  sParameters = sMachineType + "\t" + sPeripheralType + "\t" + sMediaURL + "";
+	// Hack to add overlays for the Vectrex.
+	if (m_sMachineType == "vectrex")
+	{
+		string sTmp = sLFileName.substr(0,sLFileName.length()-4);
+		if (sTmp.find("(") != string::npos)
+		{
+			sTmp = sTmp.substr(0,sTmp.find("(")); // get only the name
+			sExtra = "-view\t"+sTmp+"";
+		} 
+	}
+
+  sParameters = sMachineType + "\t" + sPeripheralType + "\t" + sMediaURL + "\t" +sExtra+"";
 
   return sParameters;
 }
@@ -1482,6 +1501,8 @@ void Game_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
 		case MEDIATYPE_lmce_Game_tg16_CONST:
 		case MEDIATYPE_lmce_Game_pce_CONST:
 		case MEDIATYPE_lmce_Game_sgx_CONST:
+		case MEDIATYPE_lmce_Game_vectrex_CONST:
+		case MEDIATYPE_lmce_Game_apple2_CONST:
 			LaunchMESS(sMediaURL);
 			break;
 		default:
@@ -1550,6 +1571,8 @@ void Game_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sC
 	  case MEDIATYPE_lmce_Game_pce_CONST:
 	  case MEDIATYPE_lmce_Game_sgx_CONST:
 	  case MEDIATYPE_lmce_Game_tg16_CONST:
+	  case MEDIATYPE_lmce_Game_vectrex_CONST:
+	  case MEDIATYPE_lmce_Game_apple2_CONST:
 	    StopMESS();
 	    break;
 	  }
@@ -1818,19 +1841,31 @@ void Game_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,
 		    break;
 		  case MEDIATYPE_lmce_Game_genesis_CONST:
 		    sPath = "/home/mamedata/shots/genesis";
+		    screenName = "/0000";
 		    break;
 		  case MEDIATYPE_lmce_Game_megadriv_CONST:
 		    sPath = "/home/mamedata/shots/megadriv";
+		    screenName = "/0000";
 		    break;
 		  case MEDIATYPE_lmce_Game_tg16_CONST:
 		    sPath = "/home/mamedata/shots/tg16";
+		    screenName = "/0000";
 		    break;
 		  case MEDIATYPE_lmce_Game_pce_CONST:
 		    sPath = "/home/mamedata/shots/pce";
+		    screenName = "/0000";
 		    break;
 		  case MEDIATYPE_lmce_Game_sgx_CONST:
 		    sPath = "/home/mamedata/shots/sgx";
+                    screenName = "/0000";
 		    break;
+		  case MEDIATYPE_lmce_Game_vectrex_CONST:
+		    sPath = "/home/mamedata/shots/vectrex";
+		    screenName = "/0000";
+		    break;
+		  case MEDIATYPE_lmce_Game_apple2_CONST:
+		    sPath = "/home/mamedata/shots/apple2cp";
+		    screenName = "/0000";
 		  }
 	
 		string snapPath = sPath + m_sROMName + "/";
@@ -2407,6 +2442,11 @@ string Game_Player::GetSaveGamePath()
     case MEDIATYPE_lmce_Game_sgx_CONST:
       sPath = "/home/mamedata/sta/sgx";
       break;
+    case MEDIATYPE_lmce_Game_vectrex_CONST:
+      sPath = "/home/mamedata/sta/vectrex";
+      break;
+    case MEDIATYPE_lmce_Game_apple2_CONST:
+      sPath = "/home/mamedata/sta/apple2cp";
     default:
       sPath = "";
       break;
