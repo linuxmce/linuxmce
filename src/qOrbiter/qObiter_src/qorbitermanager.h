@@ -1,7 +1,7 @@
 #ifndef QORBITERMANAGER_H
 #define QORBITERMANAGER_H
 
-#include <gridimageprovider.h>
+
 #include <QWidget>
 #include <listModel.h>
 #include <QDeclarativeView>
@@ -12,6 +12,8 @@
 #include <Command_Impl.h>
 #include <Gen_Devices/AllCommandsRequests.h>
 #include <QStringList>
+#include <basicImageProvider.h>
+#include <gridimageprovider.h>
 
 
 namespace DCE
@@ -34,7 +36,9 @@ public:
     bool refreshUI();
     void swapSkins();
     ListModel *model;
-    GridIndexProvider *gridImageHandler;
+    basicImageProvider *basicProvider;
+    GridIndexProvider *advancedProvider;
+
 
     //ui functions
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}

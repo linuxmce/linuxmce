@@ -1,7 +1,7 @@
 #include "gridimageprovider.h"
 #include <QDebug>
 
-GridIndexProvider::GridIndexProvider(QAbstractItemModel& model,
+GridIndexProvider::GridIndexProvider(ListModel model,
     int pathRole, int pixmapRole,
     QObject* parent) :
     QObject(parent),

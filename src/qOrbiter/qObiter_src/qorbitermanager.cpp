@@ -15,6 +15,7 @@
 #include "DCERouter.h"
 #include "listModel.h"
 #include "gridItem.h"
+#include "gridimageprovider.h"
 
 using namespace DCE;
 
@@ -104,9 +105,13 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     currentSkinURL="qml/qObiter_src/main.qml";
     s_RouterIP="dcerouter";
 
+
+
     qorbiterUIwin = new QDeclarativeView;
+    qorbiterUIwin->engine()->addImageProvider("datagridimg", new basicImageProvider);
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
     qorbiterUIwin->rootContext()->setContextProperty("dceObject", this);
+
 
     qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/qObiter_src/main.qml"));
     QObject *item= qorbiterUIwin->rootObject();
@@ -296,12 +301,19 @@ void qorbiterManager::closeOrbiter()
 
 bool qorbiterManager::requestDataGrid(QString s)
 {
-   model = new ListModel(new gridItem, qorbiterUIwin);
 
-   qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
-   QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)), gridImageHandler,SLOT(dataUpdated(QModelIndex,QModelIndex)));
+   model = new ListModel(new gridItem, this);
+    qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
 
-   qorbiterUIwin->engine()->addImageProvider(QString("datagridimg"), gridImageHandler);
+    /*
+      the questionable custom provider that kinda worked once...*/
+
+   // qorbiterUIwin->engine()->addImageProvider(QString("datagridimg"),  new GridIndexProvider(&model, 0, 0, parent));
+
+    //notice this commented out code as well. it 'worked' to crash things. thats about it
+   //QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)), gridImageHandler,SLOT(dataUpdated(QModelIndex,QModelIndex)));
+
+
 
     qDebug() << qPrintable(s);
     m_dwIDataGridRequestCounter++;

@@ -11,20 +11,40 @@ Rectangle {
              id: contactDelegate
              Item {
                 id:mainItem
-                 width: 80; height: 80
+                 width: 180; height: 100
+
                  Rectangle {
-                     id:colItem
-                     anchors.fill: parent
+                     id:frame
+                     width: mainItem.width
+                     height: mainItem.height
+                     anchors.centerIn: mainItem
+                     border.width: 1
+                     color: "lightgrey"
+                     border.color: "black"
 
-                     Image { source:"image://model/"+index ; anchors.horizontalCenter: parent.horizontalCenter; height: 45; width: 35}
-                     Flow{
-                         anchors.fill: colItem
-                         anchors.margins: 5
-                         spacing: 5
-                          Text { text: name;  }
-                     }
+                     Image { source:"image://datagridimg/"+index ; height: 90; width: 160; anchors.centerIn: frame}
 
+                        Rectangle{
+                            id: layer
+                            anchors.centerIn: frame
+                            color: "navajowhite"
+                            opacity: .2
+                            width: 160
+                            height: 90
 
+                        }
+                        Flow
+                        {
+                            anchors.fill: frame
+                            anchors.margins: 4
+                            spacing: 10
+                        Text { text: name;
+                            opacity: 1;
+                            font.pointSize:
+                                12; color:
+                                "black" ;
+                        }
+                        }
                  }
              }
          }
@@ -40,38 +60,14 @@ Rectangle {
         highlight: Rectangle { color: "lightblue"; radius: 5 }
         highlightFollowsCurrentItem: true
         focus: true
-        width: 443
+        width: 618
         height: 395
-        cellWidth: 80
-        cellHeight: 80
+        contentItem.clip: true
+        cellWidth: 180
+        cellHeight: 100
+
 
     }
-
-        Rectangle {
-            id: rectangle1
-            x: 453
-            y: 0
-            width: 166
-            height: 395
-            color: "#98b5c0"
-        }
-
-        Rectangle {
-            id: rectangle2
-            x: 453
-            y: 0
-            width: 166
-            height: 16
-            color: "#ffffff"
-
-            Text {
-                id: text1
-                x: 35
-                y: 1
-                text: "Options"
-                font.pixelSize: 12
-            }
-        }
 
 
    Row{

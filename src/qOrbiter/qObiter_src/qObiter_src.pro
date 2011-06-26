@@ -50,7 +50,8 @@ HEADERS += \
     qorbitermanager.h \
     listModel.h \
     gridItem.h \
-    gridimageprovider.h
+    gridimageprovider.h \
+    basicImageProvider.h
 
 OTHER_FILES += \
     qml/skins/scheme/classic/Main.qml \
