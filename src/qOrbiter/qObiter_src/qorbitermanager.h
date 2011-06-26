@@ -1,6 +1,7 @@
 #ifndef QORBITERMANAGER_H
 #define QORBITERMANAGER_H
 
+#include <gridimageprovider.h>
 #include <QWidget>
 #include <listModel.h>
 #include <QDeclarativeView>
@@ -33,6 +34,7 @@ public:
     bool refreshUI();
     void swapSkins();
     ListModel *model;
+    GridIndexProvider *gridImageHandler;
 
     //ui functions
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}

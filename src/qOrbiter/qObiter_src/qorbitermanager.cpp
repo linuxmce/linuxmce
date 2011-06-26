@@ -297,7 +297,11 @@ void qorbiterManager::closeOrbiter()
 bool qorbiterManager::requestDataGrid(QString s)
 {
    model = new ListModel(new gridItem, qorbiterUIwin);
+
    qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
+   QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)), gridImageHandler,SLOT(dataUpdated(QModelIndex,QModelIndex)));
+
+   qorbiterUIwin->engine()->addImageProvider(QString("datagridimg"), gridImageHandler);
 
     qDebug() << qPrintable(s);
     m_dwIDataGridRequestCounter++;

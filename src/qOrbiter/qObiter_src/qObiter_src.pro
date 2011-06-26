@@ -35,7 +35,8 @@ SOURCES += main.cpp \
     uiclasses/uicontroller.cpp \
     qorbitermanager.cpp \
     listModel.cpp \
-    gridItem.cpp
+    gridItem.cpp \
+    gridimageprovider.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -48,7 +49,8 @@ HEADERS += \
     uiclasses/uicontroller.h \
     qorbitermanager.h \
     listModel.h \
-    gridItem.h
+    gridItem.h \
+    gridimageprovider.h
 
 OTHER_FILES += \
     qml/skins/scheme/classic/Main.qml \

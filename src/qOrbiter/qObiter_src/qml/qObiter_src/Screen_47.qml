@@ -16,7 +16,7 @@ Rectangle {
                      id:colItem
                      anchors.fill: parent
 
-                     Image { source: dataModel.cellImage; anchors.horizontalCenter: parent.horizontalCenter; height: 45; width: 35}
+                     Image { source:"image://model/"+index ; anchors.horizontalCenter: parent.horizontalCenter; height: 45; width: 35}
                      Flow{
                          anchors.fill: colItem
                          anchors.margins: 5
