@@ -25,7 +25,7 @@ LDFLAGS +=
 XTRALDLIBS = -lmysqlclient_r
 
 Gen_Dev_Files +=
-sources +=
+sources += ../Generic_Serial_Device/IOUtils.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
