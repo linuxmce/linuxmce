@@ -2,8 +2,8 @@ import QtQuick 1.0
 
 Rectangle {
 
-    width: 720
-    height: 480
+    width: parent.width
+    height: parent.height
     color: "lightsteelblue"
     Text {
         id: orbiter_status

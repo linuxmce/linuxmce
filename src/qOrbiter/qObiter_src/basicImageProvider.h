@@ -16,7 +16,7 @@ public:
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize)
     {
     QImage cellimage;
-    cellimage.load(":/img/splash.jpg");
+    cellimage.load(":/icons/video-blank.png");
     cellimage.scaledToWidth(200);
    return cellimage;
     }

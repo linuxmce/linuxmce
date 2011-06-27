@@ -4,6 +4,10 @@ Rectangle {
     id:buttonBase
      property alias buttontext: buttonLabel.text
      property alias buttontextcolor: buttonLabel.color
+     property alias buttontextfontsize: buttonLabel.font.pointSize
+     property alias buttontextbold: buttonLabel.font.bold
+     property alias buttontextitalic: buttonLabel.font.italic
+
 
 
         height: 25

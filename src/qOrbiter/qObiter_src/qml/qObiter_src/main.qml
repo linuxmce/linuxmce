@@ -11,13 +11,10 @@ import QtQuick 1.0
          console.log("Command to change to:" + screenname)
          return "success!"
      }
-     width: 640; height: 480
+     Style1 {id:style}
+     width: style.orbiterW; height: style.orbiterH;
 
-     Loader{
-         id:styleLoader
-         objectName: "style_loader"
-         sourceComponent: Style1 {id: style}
-     }
+
 
      Loader {
          id:pageLoader

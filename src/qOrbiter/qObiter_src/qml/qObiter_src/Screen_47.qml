@@ -19,31 +19,23 @@ Rectangle {
                      height: mainItem.height
                      anchors.centerIn: mainItem
                      border.width: 1
-                     color: "lightgrey"
+                     color: "floralwhite"
                      border.color: "black"
 
                      Image { source:"image://datagridimg/"+index ; height: 90; width: 160; anchors.centerIn: frame}
 
-                        Rectangle{
-                            id: layer
-                            anchors.centerIn: frame
-                            color: "navajowhite"
-                            opacity: .2
-                            width: 160
-                            height: 90
-
-                        }
                         Flow
                         {
                             anchors.fill: frame
                             anchors.margins: 4
                             spacing: 10
-                        Text { text: name;
+                        Text {
+                            text: name;
                             opacity: 1;
-                            font.pointSize:
-                                12; color:
-                                "black" ;
-                        }
+                            font.pointSize: 12;
+                            color: "black" ;
+                            wrapMode: "WrapAnywhere"
+                            }
                         }
                  }
              }

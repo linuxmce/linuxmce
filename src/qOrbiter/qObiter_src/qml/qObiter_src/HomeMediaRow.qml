@@ -33,7 +33,20 @@ Flickable{
             width: style.buttonW
             color: style.button_action_color
             radius: style.but_smooth
+
+            Image {
+                id: mHeaderImg
+                source: "../../img/icons/kmix.png"
+                height: style.iconHeight
+                width: style.iconWidth
+                anchors.centerIn: parent
+                opacity: .5
+                }
+
             buttontext: "Media"
+            buttontextbold: true
+            buttontextfontsize: 12
+            buttontextcolor: "white"
 
             }
 
@@ -52,7 +65,15 @@ Flickable{
             width: style.buttonW
             color: style.button_action_color
             radius: style.but_smooth
-            buttontext: "MythTV"
+            Image {
+                id: mythIcon
+                source: "../../img/icons/Mythtv.png"
+                height: style.iconHeight
+                width: style.iconWidth
+                anchors.centerIn: parent
+
+            }
+            buttontext:""
 
 
             }
@@ -63,8 +84,20 @@ Flickable{
             width: style.buttonW
             color: style.button_action_color
             radius: style.but_smooth
-            buttontext: "Videos"
 
+            Image {
+                id: videosIcon
+                source: "../../img/icons/xine.png"
+                height: style.iconHeight
+                width: style.iconWidth
+                anchors.centerIn: parent
+
+            }
+
+            buttontext: "Videos"
+            buttontextbold: true
+            buttontextfontsize: 12
+            buttontextcolor: "white"
             MouseArea{
                 anchors.fill: parent
                 onClicked: dceObject.requestDataGrid("5||||1,2|0|13|0 | 2 |")
@@ -78,7 +111,22 @@ Flickable{
             width: style.buttonW
             color: style.button_action_color
             radius: style.but_smooth
+
             buttontext: "Audio"
+            buttontextbold: true
+            buttontextfontsize: 12
+            buttontextcolor: "white"
+
+            Image {
+                id: audioimg
+                source: "../../img/icons/agt_mp3.png"
+                height: style.iconHeight
+                width: style.iconWidth
+                anchors.centerIn: parent
+
+            }
+
+
 
             MouseArea {
                 anchors.fill: parent
@@ -92,9 +140,23 @@ Flickable{
             width: style.buttonW
             color: style.button_action_color
             radius: style.but_smooth
-            buttontext: "LinuxMCE Games"
+
+            Image {
+                id: gameimg
+                source: "../../img/icons/package_games.png"
+                height: style.iconHeight
+                width: style.iconWidth
+                anchors.centerIn: parent
 
             }
+
+            buttontext: "LinuxMCE Games"
+            buttontextbold: true
+            buttontextfontsize: 10
+            buttontextcolor: "black"
+
+            }
+
         ButtonSq {
             id: hulu
             height: style.buttonH

@@ -15,8 +15,12 @@ import QtQuick 1.0
         id:classicstyle
     //main stage styles
     property int orbiterH: 480
-    property int orbiterW: 720
+    property int orbiterW: 800
     property color stageBG: "aliceblue"
+
+    //icon sizes
+    property int iconHeight: 50
+    property int iconWidth: 50
 
     //textStyles
 
@@ -31,15 +35,16 @@ import QtQuick 1.0
     //button styling
     property int buttonH:60
     property int buttonW: 60
-    property color button_system_color: "lightgrey"
+    property color button_system_color: "steelblue"
     property color button_system_color_hover: "lightblue"
 
-    property color button_action_color: "lightgrey"
+    property color button_action_color: "steelblue"
     property color button_action_color_hover: "lightblue"
 
     property variant bgImg: "null"
     property string b_title: "null"
     property int but_smooth: 10
+
     //navigations
     property color arrow_color_nav: "aliceblue"
     property color arrow_text_nav: "black"
@@ -48,7 +53,7 @@ import QtQuick 1.0
     //row container styling
     property int rowWidth: orbiterW - 5
     property int rowH: buttonH + 10
-    property color rowbgColor: "transparent"
+        property color rowbgColor: "lightsteelblue"
 
     //Notifications bar
     property int width: orbiterW - 5
@@ -60,7 +65,7 @@ import QtQuick 1.0
     property color alert_bg_text: "white"
 
     //advanced panel
-    property color advanced_bg: "lightblue"
+    property color advanced_bg: "slategrey"
     property color advanced_bg_text: "black"
 
     //stage
