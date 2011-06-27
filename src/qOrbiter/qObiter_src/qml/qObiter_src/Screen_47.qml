@@ -22,7 +22,7 @@ Rectangle {
                      color: "floralwhite"
                      border.color: "black"
 
-                     Image { source:"image://datagridimg/"+index ; height: 90; width: 160; anchors.centerIn: frame}
+                     Image { source:"image://datagridimg/"+size ; height: 90; width: 160; anchors.centerIn: frame}
 
                         Flow
                         {
@@ -53,7 +53,7 @@ Rectangle {
         highlightFollowsCurrentItem: true
         focus: true
         width: 618
-        height: 395
+        height: 390
         contentItem.clip: true
         cellWidth: 180
         cellHeight: 100

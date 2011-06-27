@@ -38,6 +38,7 @@ public:
     ListModel *model;
     basicImageProvider *basicProvider;
     GridIndexProvider *advancedProvider;
+    QString *gridReqType;
 
 
     //ui functions
@@ -95,9 +96,9 @@ signals:
 
 public slots:
       //ui related slots
-   Q_INVOKABLE bool gotoQScreen(QString s) ;
+   Q_INVOKABLE bool gotoQScreen(QString ) ;
         //qt c++ related slots
-    bool requestDataGrid(QString s);
+    bool requestDataGrid(QString s, QString sType);
     //dce related slots
     Q_INVOKABLE void closeOrbiter();
 };

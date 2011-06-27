@@ -299,11 +299,12 @@ void qorbiterManager::closeOrbiter()
     this->destroy(true, true);
 }
 
-bool qorbiterManager::requestDataGrid(QString s)
+bool qorbiterManager::requestDataGrid(QString s, QString sType)
 {
-
+   gridReqType = &sType;
    model = new ListModel(new gridItem, this);
     qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
+    qDebug() << qPrintable(sType);
 
     /*
       the questionable custom provider that kinda worked once...*/

@@ -2,7 +2,7 @@ import QtQuick 1.0
 
 Rectangle {
     signal showDatagrid( string msg)
-    signal gotoScreen( string screen)    
+    signal gotoScreen( string screen, string type)
     property alias nowplayingtext:now_playing.buttontext
     property alias rowlabel: rowheader.buttontext
 
@@ -100,7 +100,7 @@ Flickable{
             buttontextcolor: "white"
             MouseArea{
                 anchors.fill: parent
-                onClicked: dceObject.requestDataGrid("5||||1,2|0|13|0 | 2 |")
+                onClicked: dceObject.requestDataGrid("5||||1,2|0|13|0 | 2 |", "videos")
             }
 
 
@@ -125,12 +125,9 @@ Flickable{
                 anchors.centerIn: parent
 
             }
-
-
-
             MouseArea {
                 anchors.fill: parent
-                onClicked: dceObject.requestDataGrid("4||||1,2|0|13|0 | 2 |")
+                onClicked: dceObject.requestDataGrid("4||||1,2|0|13|0 | 2 |", "music")
             }
 
             }
@@ -149,11 +146,7 @@ Flickable{
                 anchors.centerIn: parent
 
             }
-
-            buttontext: "LinuxMCE Games"
-            buttontextbold: true
-            buttontextfontsize: 10
-            buttontextcolor: "black"
+            buttontext: ""
 
             }
 
@@ -173,7 +166,15 @@ Flickable{
             width: style.buttonW
             color: style.button_action_color
             radius: style.but_smooth
-            buttontext: "Playlists"
+            buttontext: ""
+            Image {
+                id: pls
+                source: "../../img/icons/kedit.png"
+                height: style.iconHeight
+                width: style.iconWidth
+                anchors.centerIn: parent
+
+            }
 
             }
         ButtonSq {
@@ -182,15 +183,34 @@ Flickable{
             width: style.buttonW
             color: style.button_action_color
             radius: style.but_smooth
-            buttontext: "Manage Drives"
+            buttontext: ""
+            Image {
+                id: drvimg
+                source: "../../img/icons/harddrive2.png"
+                height: style.iconHeight
+                width: style.iconWidth
+                anchors.centerIn: parent
+
             }
+            }
+
+
         ButtonSq {
             id: tv
             height: style.buttonH
             width: style.buttonW
             color: style.button_action_color
             radius: style.but_smooth
-            buttontext: "DirecTv"
+            buttontext: ""
+
+            Image {
+                id: livetv
+                source: "../../img/icons/tv.png"
+                height: style.iconHeight
+                width: style.iconWidth
+                anchors.centerIn: parent
+
+            }
 
             }
         ButtonSq {

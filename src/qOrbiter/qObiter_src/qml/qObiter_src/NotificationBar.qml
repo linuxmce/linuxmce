@@ -2,9 +2,9 @@ import QtQuick 1.0
 
 Rectangle {
     property alias clocktime : clock.text
-    color: "lightblue"
+    color: "skyblue"
     width: style.orbiterW
-    height: 25
+    height: 45
     anchors.top: parent.top
 
     Connections {
@@ -21,7 +21,13 @@ Rectangle {
 
     Text {
         id: weather
-        text: "Weather"
+        Image {
+            id: weatherimg
+            source: "../../img/icons/kweather.png"
+            height:45
+            width: 45
+            anchors.top: parent.top
+        }
         anchors.centerIn: parent
     }
 

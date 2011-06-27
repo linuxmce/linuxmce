@@ -28,8 +28,15 @@ Row {
             width: style.buttonW
             color: style.button_action_color
             radius: style.but_smooth
-            buttontext: "Lighting"
+            buttontext: ""
+            Image {
+                id: onimg
+                source: "../../img/icons/jabber_protocol.png"
+                height: style.iconHeight
+                width: style.iconWidth
+                anchors.centerIn: parent
 
+            }
 
             }
 
@@ -40,6 +47,7 @@ Row {
             color: style.button_action_color
             radius: style.but_smooth
             buttontext: "On"
+
 
             }
 

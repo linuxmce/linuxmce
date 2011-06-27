@@ -34,14 +34,16 @@ Rectangle {
             anchors.centerIn: parent
             height: 50
             width: 50
-            color: "navajowhite"
+            color: "slategrey"
+
             Image {
                 id: bg
-                source: "../../img/UnknownUser.png"
+                source: "../../img/icons/personal.png"
                 opacity: 5
                 height:50
-                width: 35
+                width: 50
                 anchors.centerIn: parent
+
             }
             Text {
                 id: user_text
