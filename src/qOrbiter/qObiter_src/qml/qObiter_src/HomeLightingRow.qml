@@ -4,16 +4,15 @@ Rectangle {
     property alias rowlabel: rowheader.buttontext
     height: 80
     width: parent.width
-color:style.rowbgColor
-  Flickable{
-      height: parent.height
-      width: parent.width -5
-      id:lightflick
-      contentHeight: 80
-      contentWidth: 800
-      interactive: true
-      clip: true
-      anchors.fill: parent
+    color:style.rowbgColor
+
+    Flickable{
+        interactive: true
+        height: 80
+        width: parent.width
+        contentHeight: 80
+        contentWidth: childrenRect * 1
+        clip: true
 
 Row {
         id: guide
@@ -60,6 +59,6 @@ Row {
             buttontext: "Off"
 
             }
-    }
+        }
   }
 }

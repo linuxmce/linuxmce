@@ -2,7 +2,7 @@ import QtQuick 1.0
 
 Rectangle {
     id: rectangle1
-    width: 640
+    width: 800
     height: 480
 
     Text {
@@ -17,5 +17,7 @@ Rectangle {
     Image {
         id: splash
         source: "../../img/lmcesplash.jpg"
+
     }
+
 }

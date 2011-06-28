@@ -2,8 +2,10 @@ import QtQuick 1.0
 
 Rectangle {
 
-    width: 640
+    width: 800
     height: 480
+    color: "slategrey"
+    clip: true
 
     Style1{id:style}
 
@@ -11,7 +13,8 @@ Rectangle {
              id: contactDelegate
              Item {
                 id:mainItem
-                 width: 180; height: 100
+                 width: 156;
+                 height: 100
 
                  Rectangle {
                      id:frame
@@ -22,7 +25,7 @@ Rectangle {
                      color: "floralwhite"
                      border.color: "black"
 
-                     Image { source:"image://datagridimg/"+size ; height: 90; width: 160; anchors.centerIn: frame}
+                     Image { source:"image://datagridimg/"+size ; height: 100; width: 156; anchors.centerIn: frame}
 
                         Flow
                         {
@@ -52,21 +55,25 @@ Rectangle {
         highlight: Rectangle { color: "lightblue"; radius: 5 }
         highlightFollowsCurrentItem: true
         focus: true
-        width: 618
+        width: 785
         height: 390
+
         contentItem.clip: true
-        cellWidth: 180
+        cellWidth: 156
         cellHeight: 100
-
-
     }
 
-
+    Rectangle{
+        width: childrenRect.width
+        height: parent.height
+        color: "floralwhite"
+        anchors.top: grid_view1.bottom
    Row{
        id:options
        height:80
        width: parent.width - 5
-       anchors.top: grid_view1.bottom
+
+
 
        ButtonSq{
            height: 45
@@ -91,8 +98,9 @@ Rectangle {
            MouseArea{
                anchors.fill: parent
                onClicked: dceObject.gotoQScreen("Screen_1.qml")
-                }
-   }
+                     }
+             }
 
-}
+        }
+     }
 }

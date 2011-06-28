@@ -36,7 +36,10 @@ SOURCES += main.cpp \
     qorbitermanager.cpp \
     listModel.cpp \
     gridItem.cpp \
-    gridimageprovider.cpp
+    gridimageprovider.cpp \
+    qorbitergenerator.cpp \
+    orbitermodel.cpp \
+    orbiteritem.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -51,7 +54,10 @@ HEADERS += \
     listModel.h \
     gridItem.h \
     gridimageprovider.h \
-    basicImageProvider.h
+    basicImageProvider.h \
+    qorbitergenerator.h \
+    orbitermodel.h \
+    orbiteritem.h
 
 OTHER_FILES += \
     qml/skins/scheme/classic/Main.qml \

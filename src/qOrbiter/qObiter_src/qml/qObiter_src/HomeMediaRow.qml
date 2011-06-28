@@ -33,21 +33,15 @@ Flickable{
             width: style.buttonW
             color: style.button_action_color
             radius: style.but_smooth
+            buttontext: ""
 
             Image {
                 id: mHeaderImg
                 source: "../../img/icons/kmix.png"
                 height: style.iconHeight
                 width: style.iconWidth
-                anchors.centerIn: parent
-                opacity: .5
-                }
-
-            buttontext: "Media"
-            buttontextbold: true
-            buttontextfontsize: 12
-            buttontextcolor: "white"
-
+                anchors.centerIn: parent                
+                }           
             }
 
         ButtonSq {
@@ -111,15 +105,10 @@ Flickable{
             width: style.buttonW
             color: style.button_action_color
             radius: style.but_smooth
-
-            buttontext: "Audio"
-            buttontextbold: true
-            buttontextfontsize: 12
-            buttontextcolor: "white"
-
+            buttontext: ""
             Image {
                 id: audioimg
-                source: "../../img/icons/agt_mp3.png"
+                source: "../../img/icons/lsongs.png"
                 height: style.iconHeight
                 width: style.iconWidth
                 anchors.centerIn: parent
@@ -147,7 +136,10 @@ Flickable{
 
             }
             buttontext: ""
-
+            MouseArea {
+                anchors.fill: parent
+                onClicked: dceObject.requestDataGrid("4||||1,2|0|12|0 | 2 |", "games")
+            }
             }
 
         ButtonSq {

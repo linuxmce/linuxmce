@@ -12,6 +12,7 @@
 #include <Command_Impl.h>
 #include <Gen_Devices/AllCommandsRequests.h>
 #include <QStringList>
+#include <qorbitergenerator.h>
 #include <basicImageProvider.h>
 #include <gridimageprovider.h>
 
@@ -39,6 +40,7 @@ public:
     basicImageProvider *basicProvider;
     GridIndexProvider *advancedProvider;
     QString *gridReqType;
+    qOrbiterGenerator * orbiterConf;
 
 
     //ui functions
@@ -72,6 +74,7 @@ public:
     int iSize;                     //size of pData aka the config
     bool bAppError;                 //error flagging
     bool bReload;                   //reload flag
+    bool needRegen;                 //regen flag
 
     string s_RouterIP;               // string of the router ip
     bool dceBool;                   //
@@ -101,6 +104,7 @@ public slots:
     bool requestDataGrid(QString s, QString sType);
     //dce related slots
     Q_INVOKABLE void closeOrbiter();
+    //void orbiterStart();
 };
 
 #endif // QORBITERMANAGER_H

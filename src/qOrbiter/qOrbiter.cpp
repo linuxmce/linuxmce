@@ -1663,37 +1663,6 @@ bool DCE::qOrbiter::dataGridRequest(string s)
                    string testdata;
                    QImage cellImg;
                    QString cellTitle;
-           /*        for (int i=0; cellsToRender  > i ; i++)
-                   {
-
-                       DataGridCell *cell =  new DataGridCell (pDataGridTable->GetData(0,i));
-                       if (cell)
-                       {
-                       qDebug() << "Creating Cell: " << i;
-                       //we prepare to get data from our current cell
-
-                       cellTitle = (QString)cell->m_Text;
-                       string cellImgPath = cell->GetImagePath();
-
-
-                       if (cellImg.isNull())
-                       {
-                           qDebug() << "No Valid Image";
-                           qDebug() <<"Cell Image Path: " << cell->m_ImagePath;
-
-
-                       }
-
-                       LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Getting Cell Number: %i", i);
-
-                       qmlUI->model->appendRow(new gridItem(QString::fromStdString(cell->m_Text), "medium", cellImg , qmlUI->model));
-                       }
-                       else
-                       {
-                           qDebug() << "Blame golgoj4";
-                       }
-
-                    } */
 
                    //experimental block
                    for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
@@ -1703,19 +1672,18 @@ bool DCE::qOrbiter::dataGridRequest(string s)
 
                            if (pPath && !pCell->m_pGraphicData && !pCell->m_pGraphic)
                            {
-#ifdef DEBUG
-                                   LoggerWrapper::GetInstance()->Write(LV_EVENT,"DataGridRenderer::RenderCell loading %s in bg for %d,%d",pPath,pDataGridTable->CovertColRowType(it->first).first,pDataGridTable->CovertColRowType(it->first).second);
-#endif
+
                                            size_t s=0;
-                                          cellImg = QImage(pPath);
+                                           qDebug () << pPath;
+                                           cellImg = QImage(pPath);
                                            pCell->m_GraphicLength = (unsigned long) s;
                                            pCell->m_GraphicFormat = GR_JPG;
 
                            }
+                         //  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"DataGridRenderer::RenderCell loading %s in bg for %d,%d", pPath,pDataGridTable->CovertColRowType(it->first).first,pDataGridTable->CovertColRowType(it->first).second);
+
                            qmlUI->model->appendRow(new gridItem(QString::fromStdString(pCell->m_Text), temp, cellImg , qmlUI->model));
                    }
-
-
                 }
     }
 

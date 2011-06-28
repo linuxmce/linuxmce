@@ -105,16 +105,17 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     currentSkinURL="qml/qObiter_src/main.qml";
     s_RouterIP="dcerouter";
 
-
-
     qorbiterUIwin = new QDeclarativeView;
     qorbiterUIwin->engine()->addImageProvider("datagridimg", new basicImageProvider);
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
     qorbiterUIwin->rootContext()->setContextProperty("dceObject", this);
-
-
     qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/qObiter_src/main.qml"));
     QObject *item= qorbiterUIwin->rootObject();
+
+    gotoQScreen("Splash.qml");
+    qDebug() << "Showing Splash";
+   qorbiterUIwin->showFullScreen();
+
 
     //initial signal and slot connection
     //QObject::connect(item,SIGNAL(swapStyle()), this,SLOT(swapSkins()));
@@ -125,8 +126,6 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
      m_dwIDataGridRequestCounter = 0;
 
 
-    gotoQScreen("Screen_1.qml");
-    qorbiterUIwin->showFullScreen();
 }
 
 
@@ -149,6 +148,9 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
     {
+
+
+
             qDebug() << "Device Connect";
             g_pCommand_Impl=pqOrbiter;
             g_pDeadlockHandler=DeadlockHandler;
@@ -171,18 +173,24 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             /*
               here is where we setup orbiter variables that are going to be used.
              */
-            if ( getConf(PK_Device))
+            if ( OrbiterGen() )
             {
                 qDebug () << "Config Recieved, starting";
-                if (refreshUI())
+                if (getConf(PK_Device))
                  {
-                     OrbiterGen();
 
+                     if (pqOrbiter->initialize())
+                     {
+
+                     gotoQScreen("Screen_1.qml");
                  return true;
+                     }
+                     else
+                     {return false;}
                  }
                 else
                  {
-                     qDebug() << "Gui could not setup!" ;
+                     qDebug() << "Orbiter Could Not setup!" ;
                      return false;
                  }
             }
@@ -239,13 +247,20 @@ bool qorbiterManager::refreshUI()
 
 bool qorbiterManager::OrbiterGen()
 {
-    pData = NULL;
-    iSize = 0;
-    QString scr = "Screen_Home.qml";
-//    item->setProperty("current_screen", scr);
-    pqOrbiter->initialize();
+
+//setup the orbiter blob if the data has changed or by manual selection
+    qOrbiterGenerator *orbiterConf = new qOrbiterGenerator(iPK_Device);
+
+    if (orbiterConf->initializeRegen())
+    {
+        return true;
+    }
+
+
+
 }
 
+//temporary get conf method until qorbitergen does its purpose
 bool qorbiterManager::getConf(int pPK_Device)
 {
     qDebug() << "Getting Configuration" ;
@@ -262,11 +277,16 @@ bool qorbiterManager::getConf(int pPK_Device)
     //qDebug() << "EA: " << QString::fromStdString(sEntertainArea);
     qDebug() << "Room: " << iFK_Room;
     //qDebug() << "On/OFF:" << qPrintable(s_onOFF);
+
     qorbiterUIwin->rootContext()->setContextProperty("currentuser", iPK_User);
 
     return true;
 
 }
+//experimental skin swappping method. what should happen here is a call to qDeclarative engine to change
+//source import directory, thereby changing the effective skin. This is why the base compnents need to be
+//seperate from the screens them selves. the screen can and will refer to base standard object and if people
+//want to create their own, the can and simple change the component import directory, all without compiling.
 
 void qorbiterManager::swapSkins()
 {
@@ -288,7 +308,7 @@ void qorbiterManager::swapSkins()
 }
 
 
-
+//takes care of un-registering the orbiter from the DCERouter and then shutting down
 void qorbiterManager::closeOrbiter()
 {
     qDebug() << "Shutting Down";
@@ -296,9 +316,16 @@ void qorbiterManager::closeOrbiter()
     pqOrbiter->deinitialize();
     pqOrbiter->~qOrbiter();
     this->~qorbiterManager();
-    this->destroy(true, true);
+    exit(0);
 }
 
+/*
+  Requesting a datagrid of media files:
+ 's' is the filter string which will more than likely be refined
+  'sType' refers to the grid type, a temporay hack im employing to show contextual images.
+  model refers to the datamodel for the grid that is created as opposed to manually creating each cell item
+  its added as a context property and the variables are availible to the ui with callback automatically registerd.
+  */
 bool qorbiterManager::requestDataGrid(QString s, QString sType)
 {
    gridReqType = &sType;
@@ -313,8 +340,6 @@ bool qorbiterManager::requestDataGrid(QString s, QString sType)
 
     //notice this commented out code as well. it 'worked' to crash things. thats about it
    //QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)), gridImageHandler,SLOT(dataUpdated(QModelIndex,QModelIndex)));
-
-
 
     qDebug() << qPrintable(s);
     m_dwIDataGridRequestCounter++;
