@@ -933,7 +933,7 @@ string Game_Player::GetMessParametersFor(string sMediaURL)
 		m_bOSDIsVisible=true;		// apple 2 hack for now
 	}
 
-  if (		(sFileName.find(StringUtils::ToLower(".dsk")) != string::npos) || 
+  if (
 		(sFileName.find(StringUtils::ToLower(".atr")) != string::npos) || 
 		(sFileName.find(StringUtils::ToLower(".fds")) != string::npos))
 	{
@@ -1138,6 +1138,121 @@ bool Game_Player::StopMAME() {
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "Game_Player::StopMAME %p %s", pDevice_App_Server,sResponse.c_str());
         return false;
 
+}
+
+bool Game_Player::LaunchPCSX(string sMediaURL) 
+{
+
+	DeviceData_Base *pDevice_App_Server = m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_App_Server_CONST,this);
+	if( pDevice_App_Server )
+	{
+		string sMessage = StringUtils::itos(m_dwPK_Device) + " " + StringUtils::itos(m_dwPK_Device) + " 1 " 
+			TOSTRING(COMMAND_Application_Exited_CONST) " " 
+			TOSTRING(COMMANDPARAMETER_Exit_Code_CONST) " ";
+
+		DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
+			"pcsx", "pcsx", "-nogui\t-psxout\t-cdfile\t" + sMediaURL,
+			sMessage + "1",sMessage + "0",false,false,true,false);
+		if( SendCommand(CMD_Spawn_Application) ) {
+			m_bMAMEIsRunning = true;
+
+	Sleep(5000); // FIXME !!!!
+
+	if (!WindowUtils::FindWindowMatching(m_pDisplay, "PCSX", m_iMAMEWindowId))
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Couldn't find PCSX Window");	
+	}
+	else
+	{
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"PCSX window found: Window ID %d",m_iMAMEWindowId);
+	 	m_sMAMEWindowId = CreateWindowIDString(m_iMAMEWindowId);	
+	}
+
+		 	return true; }
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::LaunchMAME - failed to launch");
+	}
+	else
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::LaunchMAME - no app server");
+	return false;
+
+}
+
+bool Game_Player::StopPCSX() 
+{
+  DeviceData_Base *pDevice_App_Server = NULL;
+  string sResponse;
+  if(!m_bRouterReloading)
+    {
+      pDevice_App_Server = m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_App_Server_CONST,this);
+      if( pDevice_App_Server )
+	{
+	  DCE::CMD_Kill_Application CMD_Kill_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
+							 "pcsx", false);
+	  m_iMAMEWindowId = 0;
+	  return SendCommand(CMD_Kill_Application,&sResponse);  // Get return confirmation so we know it's gone before we continue
+	}
+    }
+  
+  LoggerWrapper::GetInstance()->Write(LV_STATUS, "Game_Player::StopMESS %p %s", pDevice_App_Server,sResponse.c_str());
+  return false;
+}
+
+// come back here
+bool Game_Player::LaunchPCSX2(string sMediaURL) 
+{
+
+	DeviceData_Base *pDevice_App_Server = m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_App_Server_CONST,this);
+	if( pDevice_App_Server )
+	{
+		string sMessage = StringUtils::itos(m_dwPK_Device) + " " + StringUtils::itos(m_dwPK_Device) + " 1 " 
+			TOSTRING(COMMAND_Application_Exited_CONST) " " 
+			TOSTRING(COMMANDPARAMETER_Exit_Code_CONST) " ";
+
+		DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
+			"/usr/pcsx2/bin/pcsx2-dev", "pcsx2", "--nogui\t" + sMediaURL,
+			sMessage + "1",sMessage + "0",false,false,true,false);
+		if( SendCommand(CMD_Spawn_Application) ) {
+			m_bMAMEIsRunning = true;
+
+	Sleep(5000); // FIXME !!!!
+
+	if (!WindowUtils::FindWindowMatching(m_pDisplay, "PCSX2", m_iMAMEWindowId))
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Couldn't find PCSX Window");	
+	}
+	else
+	{
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"PCSX window found: Window ID %d",m_iMAMEWindowId);
+	 	m_sMAMEWindowId = CreateWindowIDString(m_iMAMEWindowId);	
+	}
+
+		 	return true; }
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::LaunchMAME - failed to launch");
+	}
+	else
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::LaunchMAME - no app server");
+	return false;
+
+}
+
+bool Game_Player::StopPCSX2() 
+{
+  DeviceData_Base *pDevice_App_Server = NULL;
+  string sResponse;
+  if(!m_bRouterReloading)
+    {
+      pDevice_App_Server = m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_App_Server_CONST,this);
+      if( pDevice_App_Server )
+	{
+	  DCE::CMD_Kill_Application CMD_Kill_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
+							 "pcsx2", false);
+	  m_iMAMEWindowId = 0;
+	  return SendCommand(CMD_Kill_Application,&sResponse);  // Get return confirmation so we know it's gone before we continue
+	}
+    }
+  
+  LoggerWrapper::GetInstance()->Write(LV_STATUS, "Game_Player::StopMESS %p %s", pDevice_App_Server,sResponse.c_str());
+  return false;
 }
 
 void Game_Player::CheckMAME() 
@@ -1505,6 +1620,12 @@ void Game_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
 		case MEDIATYPE_lmce_Game_apple2_CONST:
 			LaunchMESS(sMediaURL);
 			break;
+		case MEDIATYPE_lmce_Game_ps1_CONST:
+			LaunchPCSX(sMediaURL);
+			break;
+		case MEDIATYPE_lmce_Game_ps2_CONST:
+			LaunchPCSX2(sMediaURL);
+			break;
 		default:
 			LaunchMAME(sMediaURL);
 			break;
@@ -1534,6 +1655,8 @@ void Game_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sC
 
         string sPath = GetSaveGamePath();
         char *cName;
+
+	// FIXME: come back here and handle case for PCSX.
 
         if (m_iPK_MediaType == MEDIATYPE_lmce_Game_CONST)
           {
@@ -1575,6 +1698,12 @@ void Game_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sC
 	  case MEDIATYPE_lmce_Game_apple2_CONST:
 	    StopMESS();
 	    break;
+	  case MEDIATYPE_lmce_Game_ps1_CONST:
+	    StopPCSX();
+	    break;
+	  case MEDIATYPE_lmce_Game_ps2_CONST:
+	    StopPCSX2();
+		break;
 	  }
 	m_bOSDIsVisible=false;
 }

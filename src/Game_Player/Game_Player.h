@@ -93,6 +93,10 @@ protected:
 		bool UpdateMESSConfig(string sMediaURL);
 		bool LaunchMESS(string sMediaURL);
 		bool StopMESS();
+		bool LaunchPCSX(string sMediaURL);
+		bool StopPCSX();
+		bool LaunchPCSX2(string sMediaURL);
+		bool StopPCSX2();
 		bool UpdateMAMEConfig(string sMediaURL);
 		bool LaunchMAME(string sMediaURL);
 		bool StopMAME();

@@ -492,7 +492,18 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
                 pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_apple2_CONST;
         }
 
+	if (mediaURL.find("/ps1") != string::npos)
+	{
+		pGameMediaStream->m_sAppName = "pcsx.pcsx";
+		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_ps1_CONST;
+	}
 
+	if (mediaURL.find("/ps2") != string::npos)
+	{
+                pGameMediaStream->m_sAppName = "pcsx2.pcsx2";
+                pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_ps2_CONST;
+	}
+	
 	DCE::CMD_Play_Media CMD_Play_Media(m_dwPK_Device,
 					   pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
 					   pGameMediaStream->m_iPK_MediaType,
