@@ -16,12 +16,12 @@
 //<-dceag-d-b->
 
 #include "qOrbiter.h"
-#include "gridItem.h"
+#include "datamodels/gridItem.h"
 #include "DCE/Logger.h"
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
-#include "listModel.h"
+#include "datamodels/listModel.h"
 #include "QDebug"
 
 #include <iostream>

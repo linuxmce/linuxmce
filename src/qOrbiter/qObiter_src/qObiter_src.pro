@@ -10,7 +10,7 @@ symbian:TARGET.UID3 = 0xE0D07D4D
 
 INCLUDEPATH += ../../ ../../DCE/
 
-LIBS += -L/usr/pluto/lib/ -lDCECommon -lSerializeClass -lPlutoUtils
+LIBS += -L/usr/pluto/lib/ -lDCECommon -lSerializeClass -lPlutoUtils -lpluto_main -lpluto_media
 
 # Smart Installer package's UID
 # This UID is from the protected range and therefore the package will
@@ -33,13 +33,12 @@ SOURCES += main.cpp \
     ../qOrbiter.cpp \
     uiclasses/lightingui.cpp \
     uiclasses/uicontroller.cpp \
-    qorbitermanager.cpp \
-    listModel.cpp \
-    gridItem.cpp \
-    gridimageprovider.cpp \
-    qorbitergenerator.cpp \
-    orbitermodel.cpp \
-    orbiteritem.cpp
+    qorbitermanager.cpp \    
+    qOrbiterGen/qorbitergenerator.cpp \
+    datamodels/orbitermodel.cpp \
+    datamodels/orbiteritem.cpp \
+    datamodels/listModel.cpp \
+    datamodels/gridItem.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -57,7 +56,13 @@ HEADERS += \
     basicImageProvider.h \
     qorbitergenerator.h \
     orbitermodel.h \
-    orbiteritem.h
+    orbiteritem.h \
+    qOrbiterData.h \
+    qOrbiterGen/qorbitergenerator.h \
+    datamodels/orbitermodel.h \
+    datamodels/orbiteritem.h \
+    datamodels/listModel.h \
+    datamodels/gridItem.h
 
 OTHER_FILES += \
     qml/skins/scheme/classic/Main.qml \
@@ -73,7 +78,46 @@ OTHER_FILES += \
     qml/thom/screentest_images/glow.png \
     qml/thom/screentest_images/foo.png \
     qml/thom/screentest_images/bar.png \
-    qml/thom/screentest_images/background.png
+    qml/thom/screentest_images/background.png \
+    img/icons/xine.png \
+    img/icons/tv.png \
+    img/icons/sms_protocol.png \
+    img/icons/scifi.png \
+    img/icons/player-end.png \
+    img/icons/player_stop.png \
+    img/icons/player_start.png \
+    img/icons/player_rew.png \
+    img/icons/player_play.png \
+    img/icons/player_pause.png \
+    img/icons/player_fwd.png \
+    img/icons/player_end1.png \
+    img/icons/player_end.png \
+    img/icons/player_eject.png \
+    img/icons/personal.png \
+    img/icons/password.png \
+    img/icons/package_games.png \
+    img/icons/package_games_arcade.png \
+    img/icons/package_editors.png \
+    img/icons/Mythtv.png \
+    img/icons/lsongs.png \
+    img/icons/lphoto.png \
+    img/icons/linphone.png \
+    img/icons/kweather.png \
+    img/icons/ktip.png \
+    img/icons/kservices.png \
+    img/icons/kmix.png \
+    img/icons/kfm_home.png \
+    img/icons/kedit.png \
+    img/icons/jabber_protocol.png \
+    img/icons/harddrive2.png \
+    img/icons/gpgsm.png \
+    img/icons/fortress.png \
+    img/icons/audio&video.png \
+    img/icons/aktion.png \
+    img/icons/agt_multimedia.png \
+    img/icons/agt_mp3.png \
+    img/icons/agt_home.png \
+    img/icons/agt_games.png
 
 RESOURCES += \
     skinData.qrc

@@ -3,6 +3,7 @@
 #include <QDebug>
 
 //#include "OrbiterData.h"
+#include <QDeclarativeEngine>
 #include <Gen_Devices/AllCommandsRequests.h>
 #include <Command_Impl.h>
 #include "DCE/Logger.h"
@@ -13,9 +14,7 @@
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
 #include "DCERouter.h"
-#include "listModel.h"
-#include "gridItem.h"
-#include "gridimageprovider.h"
+
 
 using namespace DCE;
 
@@ -109,7 +108,8 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     qorbiterUIwin->engine()->addImageProvider("datagridimg", new basicImageProvider);
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
     qorbiterUIwin->rootContext()->setContextProperty("dceObject", this);
-    qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/qObiter_src/main.qml"));
+    qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/main.qml"));
+    qorbiterUIwin->engine()->addImportPath("qml/components");
     QObject *item= qorbiterUIwin->rootObject();
 
     gotoQScreen("Splash.qml");
@@ -249,7 +249,7 @@ bool qorbiterManager::OrbiterGen()
 {
 
 //setup the orbiter blob if the data has changed or by manual selection
-    qOrbiterGenerator *orbiterConf = new qOrbiterGenerator(iPK_Device);
+    qOrbiterGenerator *orbiterConf = new qOrbiterGenerator(iPK_Device, "dcerouter","root", "", "pluto_main", 3306, this);
 
     if (orbiterConf->initializeRegen())
     {
@@ -329,7 +329,7 @@ void qorbiterManager::closeOrbiter()
 bool qorbiterManager::requestDataGrid(QString s, QString sType)
 {
    gridReqType = &sType;
-   model = new ListModel(new gridItem, this);
+    model = new ListModel(new gridItem, this);
     qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
     qDebug() << qPrintable(sType);
 

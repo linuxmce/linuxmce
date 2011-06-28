@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/default">
-        <file>qml/qObiter_src/main.qml</file>
+        <file>qml/main.qml</file>
     </qresource>
     <qresource prefix="/skins">
         <file>qml/skins/scheme/classic/Main.qml</file>
@@ -44,7 +44,7 @@
         <file alias="media-rew.png">img/icons/player_rew.png</file>
         <file alias="media-start.png">img/icons/player_start.png</file>
         <file alias="media-stop.png">img/icons/player_stop.png</file>
-        <file alias="media-end.png">img/icons/player-end.png</file>
+        <file alias="media-end-bar.png">img/icons/player-end.png</file>
         <file alias="video-blank.png">img/icons/scifi.png</file>
         <file>img/icons/sms_protocol.png</file>
         <file alias="livetv.png">img/icons/tv.png</file>

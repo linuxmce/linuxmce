@@ -1,20 +1,28 @@
 #ifndef QORBITERMANAGER_H
 #define QORBITERMANAGER_H
 
-
+/*---qt includes----*/
 #include <QWidget>
-#include <listModel.h>
 #include <QDeclarativeView>
 #include <qdeclarativecontext.h>
 #include <QDeclarativeItem>
-#include <qOrbiter/qOrbiter.h>
-#include <uiclasses/uicontroller.h>
+#include <QStringList>
+
+/*----custom classes-------*/
+#include <qOrbiterData.h>                       //own version of OrbiterData.h
+#include <datamodels/listModel.h>                          //custom item model
+#include <datamodels/gridItem.h>
+#include <uiclasses/uicontroller.h>               //experimental
+#include <qOrbiterGen/qorbitergenerator.h>                   //data blob generator
+#include <imageProviders/basicImageProvider.h>                 //qml image provider
+#include <imageProviders/gridimageprovider.h>                  //qml image provider for grids !not implemented!
+
+/*-------Dce Includes----*/
+
 #include <Command_Impl.h>
 #include <Gen_Devices/AllCommandsRequests.h>
-#include <QStringList>
-#include <qorbitergenerator.h>
-#include <basicImageProvider.h>
-#include <gridimageprovider.h>
+#include <qOrbiter/qOrbiter.h>
+
 
 
 namespace DCE
