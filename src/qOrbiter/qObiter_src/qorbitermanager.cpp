@@ -144,7 +144,7 @@ bool qorbiterManager::gotoQScreen(QString s)
 bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode)
 {
     pqOrbiter = new DCE::qOrbiter(PK_Device, sRouterIP, true,bLocalMode);
-
+    iPK_Device = long(PK_Device);
 
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
     {
@@ -253,7 +253,7 @@ bool qorbiterManager::OrbiterGen()
 
     if (orbiterConf->initializeRegen())
     {
-        return true;
+       iPK_User = orbiterConf->get_users();
     }
 
 
@@ -270,7 +270,7 @@ bool qorbiterManager::getConf(int pPK_Device)
     m_pOrbiterCat = 5;
     iFK_Room=1;
     sEntertainArea = "1";
-   iPK_User= pqOrbiter->GetConfig();
+
    s_onOFF = "1";
    qDebug() << "PK_Device No:" << iPK_Device;
     qDebug() << "User: " << iPK_User;

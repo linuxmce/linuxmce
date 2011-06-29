@@ -8,6 +8,55 @@
 #include <QTimer>
 #include <QDeclarativeView>
 #include <qOrbiterData.h>
+#include <QDebug>
+
+#include "pluto_main/Database_pluto_main.h"
+#include "pluto_main/Table_Screen.h"
+#include "pluto_main/Table_Screen_DesignObj.h"
+#include "pluto_main/Table_Text_LS.h"
+#include "pluto_main/Table_Image.h"
+#include "pluto_main/Table_CachedScreens.h"
+#include "pluto_main/Table_Criteria.h"
+
+#include "pluto_main/Table_Size.h"
+#include "pluto_main/Table_Skin.h"
+#include "pluto_main/Table_EffectType_Effect_Skin.h"
+#include "pluto_main/Table_Language.h"
+#include "pluto_main/Table_UI.h"
+#include "pluto_main/Table_Text.h"
+#include "pluto_main/Table_Style.h"
+#include "pluto_main/Table_Room_Users.h"
+#include "pluto_main/Table_Variable.h"
+#include "pluto_main/Table_StyleVariation.h"
+#include "pluto_main/Table_Device.h"
+#include "pluto_main/Table_DeviceCategory.h"
+#include "pluto_main/Table_Device_DeviceData.h"
+#include "pluto_main/Table_Device_EntertainArea.h"
+#include "pluto_main/Table_DeviceTemplate.h"
+#include "pluto_main/Table_Orbiter.h"
+#include "pluto_main/Table_Orbiter_Variable.h"
+#include "pluto_main/Table_Users.h"
+#include "pluto_main/Table_Room.h"
+#include "pluto_main/Table_Text_LS_AltVersions.h"
+#include "pluto_main/Table_CommandGroup.h"
+#include "pluto_main/Table_EntertainArea.h"
+#include "pluto_main/Table_Icon.h"
+#include "pluto_main/Table_CommandParameter.h"
+#include "pluto_main/Table_DeviceData.h"
+#include "pluto_main/Table_DesignObjParameter.h"
+#include "pluto_main/Table_Installation_Users.h"
+#include "pluto_main/Table_DesignObjType.h"
+#include "pluto_main/Table_Command.h"
+#include "pluto_main/Table_Variable.h"
+#include "pluto_main/Table_DeviceTemplate.h"
+#include "pluto_main/Table_Event.h"
+#include "pluto_main/Table_EventHandler.h"
+#include "pluto_main/Table_CommandGroup_Command_CommandParameter.h"
+#include "pluto_main/Table_CommandGroup_Command.h"
+#include "pluto_main/Table_MediaType.h"
+#include "pluto_media/Table_AttributeType.h"
+#include "PlutoUtils/DatabaseUtils.h"
+#include "DCE/DCEConfig.h"
 
 
 #include "pluto_main/Database_pluto_main.h"
@@ -89,6 +138,7 @@ public:
         //m_sGraphicsBasePath=sGraphicsFiles;
 
         m_iPK_Orbiter=PK_Orbiter;
+        qDebug() << "Orbiter:" << m_iPK_Orbiter;
         m_pRegenMonitor = NULL;
 /*		m_sMySQLHost=DBHost;
         m_sMySQLUser=DBUser;
@@ -134,11 +184,13 @@ public slots:
     bool initializeRegen();
 
 
+    int get_users();
+
+
 private:
-    void get_virtual_devices();
-    void get_locations();
-    void get_users();
-    void get_entertain_areas();
+void get_entertain_areas();
+  void get_virtual_devices();
+   void get_locations();
 
     map<int,string> htDevicePages;
     long Counter;
@@ -149,7 +201,7 @@ private:
     void OutputCriteriaNest(class Row_CriteriaParmNesting *row);
     void SearchForGotos(class DesignObj_Data *pDesignObj_Data);
     //void SearchForGotos(class DesignObj_Data *pDesignObj_Data,DesignObjCommandList *alCommands);
-    //void MatchChildDevicesToLocation(qLocationInfo *li,Row_Device *pRow_Device,bool bStartWithTopMost=true);
+    void MatchChildDevicesToLocation(qLocationInfo *li,Row_Device *pRow_Device,bool bStartWithTopMost=true);
     void FixupSpecialOrbiters(list<qLocationInfo *> &listLocationInfo);
     bool connectDB();
 

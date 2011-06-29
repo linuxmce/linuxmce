@@ -9,72 +9,31 @@
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
+#include "qorbitermanager.h"
 
-#include "pluto_main/Database_pluto_main.h"
-#include "pluto_main/Table_Screen.h"
-#include "pluto_main/Table_Screen_DesignObj.h"
-#include "pluto_main/Table_Text_LS.h"
-#include "pluto_main/Table_Image.h"
-#include "pluto_main/Table_CachedScreens.h"
-#include "pluto_main/Table_Criteria.h"
 
-#include "pluto_main/Table_Size.h"
-#include "pluto_main/Table_Skin.h"
-#include "pluto_main/Table_EffectType_Effect_Skin.h"
-#include "pluto_main/Table_Language.h"
-#include "pluto_main/Table_UI.h"
-#include "pluto_main/Table_Text.h"
-#include "pluto_main/Table_Style.h"
-#include "pluto_main/Table_Room_Users.h"
-#include "pluto_main/Table_Variable.h"
-#include "pluto_main/Table_StyleVariation.h"
-#include "pluto_main/Table_Device.h"
-#include "pluto_main/Table_DeviceCategory.h"
-#include "pluto_main/Table_Device_DeviceData.h"
-#include "pluto_main/Table_Device_EntertainArea.h"
-#include "pluto_main/Table_DeviceTemplate.h"
-#include "pluto_main/Table_Orbiter.h"
-#include "pluto_main/Table_Orbiter_Variable.h"
-#include "pluto_main/Table_Users.h"
-#include "pluto_main/Table_Room.h"
-#include "pluto_main/Table_Text_LS_AltVersions.h"
-#include "pluto_main/Table_CommandGroup.h"
-#include "pluto_main/Table_EntertainArea.h"
-#include "pluto_main/Table_Icon.h"
-#include "pluto_main/Table_CommandParameter.h"
-#include "pluto_main/Table_DeviceData.h"
-#include "pluto_main/Table_DesignObjParameter.h"
-#include "pluto_main/Table_Installation_Users.h"
-#include "pluto_main/Table_DesignObjType.h"
-#include "pluto_main/Table_Command.h"
-#include "pluto_main/Table_Variable.h"
-#include "pluto_main/Table_DeviceTemplate.h"
-#include "pluto_main/Table_Event.h"
-#include "pluto_main/Table_EventHandler.h"
-#include "pluto_main/Table_CommandGroup_Command_CommandParameter.h"
-#include "pluto_main/Table_CommandGroup_Command.h"
-#include "pluto_main/Table_MediaType.h"
-#include "pluto_media/Table_AttributeType.h"
-#include "PlutoUtils/DatabaseUtils.h"
-#include "DCE/DCEConfig.h"
 
 
 bool qOrbiterGenerator::initializeRegen()
 {
 
-    if (!connectDB())
+    if (connectDB())
     {
-    QTime dieTime = QTime::currentTime().addSecs(5);
-    while( QTime::currentTime() < dieTime )
-        {
-        //qDebug() << "Waiting for:" << QTime::currentTime() ; just a timer to test things
+        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"qOrbiter Generator Version .000001 Starting. Yes, that new");
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Generating: #%d %s",m_pRow_Device->PK_Device_get(),m_pRow_Device->Description_get().c_str());
+    if (get_users())
+    {
+        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Regen Success for qOrbiter %d, starting!", m_iPK_Orbiter);
+            return true;
+    }
 
-        }
+    }
+    else
+    {
+        return false;
     }
 
 
-
-    return true;
 }
 
 bool qOrbiterGenerator::connectDB()
@@ -86,7 +45,7 @@ bool qOrbiterGenerator::connectDB()
     }
     else
     {
-        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Connected to Database");
+        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Connected to Pluto Main Database");
 
     }
 
@@ -102,6 +61,7 @@ bool qOrbiterGenerator::connectDB()
        }
 
 
+
     m_pRow_Device = m_spDatabase_pluto_main->Device_get()->GetRow(m_iPK_Orbiter);
     if( !m_pRow_Device )
     {
@@ -113,5 +73,56 @@ bool qOrbiterGenerator::connectDB()
         LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Device %d Found!", m_iPK_Orbiter);
 
     }
+    m_pRow_Orbiter = m_spDatabase_pluto_main->Orbiter_get()->GetRow(m_iPK_Orbiter);
+
     return true;
+}
+
+int qOrbiterGenerator::get_users()
+{
+    Row_Users *drUsers_Default = NULL;
+    Row_Device_DeviceData *drD_C_DP_DefaultUser = m_spDatabase_pluto_main->Device_DeviceData_get()->GetRow(m_pRow_Orbiter->PK_Orbiter_get(),DEVICEDATA_PK_Users_CONST);
+
+
+    if( drD_C_DP_DefaultUser )
+    {
+            Row_Installation_Users *pRow_Installation_Users=m_spDatabase_pluto_main->Installation_Users_get()->GetRow(m_pRow_Device->FK_Installation_get(),atoi(drD_C_DP_DefaultUser->IK_DeviceData_get().c_str()));
+            if( pRow_Installation_Users )
+                    drUsers_Default = pRow_Installation_Users->FK_Users_getrow();
+    }
+
+    if( !drUsers_Default )
+    {
+            vector<Row_Installation_Users *> vectRow_Installation_Users;
+            m_spDatabase_pluto_main->Installation_Users_get()->GetRows(INSTALLATION_USERS_FK_INSTALLATION_FIELD "=" + StringUtils::itos(m_pRow_Device->FK_Installation_get()),&vectRow_Installation_Users);
+            if( vectRow_Installation_Users.size() )
+            {
+                    LoggerWrapper::GetInstance()->Write(LV_WARNING,"***Warning*** No default user specified.  Picking first one: %d",vectRow_Installation_Users[0]->FK_Users_get());
+                    drUsers_Default = vectRow_Installation_Users[0]->FK_Users_getrow();
+                    if( !drUsers_Default )
+                            LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database problem -- There is a user in Installation_Users that is not a valid user");
+            }
+            else
+            {
+                    vector<Row_Users *> vectRow_Users;
+                    m_spDatabase_pluto_main->Users_get()->GetRows("1=1",&vectRow_Users); // Just find any user
+                    if( vectRow_Users.size()>0 )
+                    {
+                            LoggerWrapper::GetInstance()->Write(LV_WARNING,"***Warning*** No users at all in this installation.  Picking one");
+                            drUsers_Default = vectRow_Users[0];
+                    }
+                    else
+                    {
+                            LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"***Error*** The users table is completely empty.");
+                    }
+            }
+    }
+
+    if( drUsers_Default )
+            m_dwPK_Users_Default = drUsers_Default->PK_Users_get();
+
+
+
+    return true;
+
 }

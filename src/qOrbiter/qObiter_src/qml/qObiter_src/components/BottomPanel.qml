@@ -47,7 +47,7 @@ Rectangle {
             }
             Text {
                 id: user_text
-                text: "user"
+                text: currentuser
                 font.bold: true
                 font.pointSize: 12
                 color:"White"
