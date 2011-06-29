@@ -291,7 +291,7 @@ bool qorbiterManager::getConf(int pPK_Device)
     //qDebug() << "On/OFF:" << qPrintable(s_onOFF);
 
     qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
-  qorbiterUIwin->rootContext()->setContextProperty("room", sPK_Room);
+  qorbiterUIwin->rootContext()->setContextProperty("dceObject", this);
     return true;
 
 }

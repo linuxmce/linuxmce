@@ -29,11 +29,28 @@ class OrbiterModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
-    explicit OrbiterModel(QObject *parent = 0);
+  explicit OrbiterModel(OrbiterListItem* prototype, QObject* parent = 0);
+  ~OrbiterModel();
+  int rowCount(const QModelIndex &parent = QModelIndex()) const;
+  QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+  void appendRow(OrbiterListItem* item);
+  void appendRows(const QList<OrbiterListItem*> &items);
+  void insertRow(int row, OrbiterListItem* item);
+  bool removeRow(int row, const QModelIndex &parent = QModelIndex());
+  bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
+  OrbiterListItem* takeRow(int row);
+  OrbiterListItem* find(const QString &id) const;
+  QModelIndex indexFromItem( const OrbiterListItem* item) const;
+  void clear();
 
-signals:
+private slots:
+  void handleItemChange();
 
-public slots:
+private:
+  OrbiterListItem* m_prototype;
+  QList<OrbiterListItem*> m_list;
+
+
 
 };
 

@@ -94,7 +94,7 @@ Rectangle {
             height: 50
             border.width: 2
             buttontextitalic: true
-            buttontext: room
+            buttontext: "room"
         }
 
 
