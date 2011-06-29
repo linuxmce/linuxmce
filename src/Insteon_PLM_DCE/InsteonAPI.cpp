@@ -151,55 +151,74 @@ void InsteonAPI::InsteonAPI::receiveFunction()
 				mybuf[2] = mybuf2[5];
 				mybuf[3] = mybuf2[6];
 				mybuf[4] = 0x0f;
-				mybuf[5] = 0x19;
+				mybuf[5] = 0x0d;
 				mybuf[6] = 0x00;
-				sendFunction( mybuf , 7, 0, 0);
-				//mybuf[4] = 0x1F;
-				//mybuf[5] = 0x03;
-				//mybuf[6] = 0x00;
-				//mybuf[7] = 0x00;
-				//mybuf[8] = 0x00;
-				//mybuf[9] = 0x00;
-				//mybuf[10] = 0x00;
-				//mybuf[11] = 0x00;
-				//mybuf[12] = 0x00;
-				//mybuf[13] = 0x00;
-				//mybuf[14] = 0x00;
-				//mybuf[15] = 0x00;
-				//mybuf[16] = 0x00;
-				//mybuf[17] = 0x00;
-				//mybuf[18] = 0x00;
-				//mybuf[19] = 0x00;
-				//mybuf[20] = 0x00;
-				//sendFunction( mybuf , 21, 0, 0);
+				sendFunction( mybuf , 7, 0, 0); 
+/*				mybuf[4] = 0x1F;
+				mybuf[5] = 0x03;
+				mybuf[6] = 0x00;
+				mybuf[7] = 0x00;
+				mybuf[8] = 0x00;
+				mybuf[9] = 0x00;
+				mybuf[10] = 0x00;
+				mybuf[11] = 0x00;
+				mybuf[12] = 0x00;
+				mybuf[13] = 0x00;
+				mybuf[14] = 0x00;
+				mybuf[15] = 0x00;
+				mybuf[16] = 0x00;
+				mybuf[17] = 0x00;
+				mybuf[18] = 0x00;
+				mybuf[19] = 0x00;
+				mybuf[20] = 0x00;
+				sendFunction( mybuf , 21, 0, 0); */
 				//sendNextCommand();
 				break;
-				case 0x69:
+				case CMD_69_GET_FIRST_ALL_LINK_RECORD:
 					len2 += ReadSerialStringEx(serialPort,mybuf2+2, 1, 100);
-					DCE::LoggerWrapper::GetInstance()->Write(LV_INSTEON,"Received CMD %X response: %s",mybuf2[1],DCE::IOUtils::FormatHexBuffer(mybuf2,3).c_str());
+					DCE::LoggerWrapper::GetInstance()->Write(LV_INSTEON,"->Received CMD %X response: %s",mybuf2[1],DCE::IOUtils::FormatHexBuffer(mybuf2,3).c_str());
 					sendNextCommand();
 				break;
 				case CMD_51_ED_MSG_RECV:
-					len2 += ReadSerialStringEx(serialPort,mybuf2+1, 1, 100);
-					DCE::LoggerWrapper::GetInstance()->Write(LV_INSTEON,"Received extended message: %x",mybuf2[2]);
+					len2 += ReadSerialStringEx(serialPort,mybuf2+2, 22, 100);
+					DCE::LoggerWrapper::GetInstance()->Write(LV_INSTEON,"Received extended message: %x (%s) %d",mybuf2[2],DCE::IOUtils::FormatHexBuffer(mybuf2,len2).c_str(),len2);
 					switch(mybuf2[2]){
 
 					}
+//					sendNextCommand();
 //				mybuf[1] = CMD_GET_NEXT_ALL_LINK_RECORD;
 //				sendFunction( mybuf , 2, 0, 0);
 				break;
 				case CMD_50_SD_MSG_RECV:
-				len2 +=ReadSerialStringEx(serialPort,mybuf2+2,7,100);
-				DCE::LoggerWrapper::GetInstance()->Write(LV_INSTEON,"Received SD command - From: %X.%X.%X To: %X.%X.%X Flags: %X Cmd1: %X Cmd2: %X (%s)",mybuf2[2],mybuf2[3],mybuf2[4],mybuf2[5],mybuf2[6],mybuf2[7],mybuf2[8],mybuf2[9],mybuf2[10],DCE::IOUtils::FormatHexBuffer(mybuf2,11).c_str());
+				len2 +=ReadSerialStringEx(serialPort,mybuf2+2,9,100);
+				DCE::LoggerWrapper::GetInstance()->Write(LV_INSTEON,"Received SD command - From: %X.%X.%X To: %X.%X.%X Flags: %X Cmd1: %X Cmd2: %X (%s) (read %d bytes)",mybuf2[2],mybuf2[3],mybuf2[4],mybuf2[5],mybuf2[6],mybuf2[7],mybuf2[8],mybuf2[9],mybuf2[10],DCE::IOUtils::FormatHexBuffer(mybuf2,11).c_str(),len2);
 				switch(mybuf2[9]){
-				case 0x3b:
-				break;
+				case CMD_0D_SD_GET_VERSION:
+					if (mybuf2[10] & 1) {
+						DCE::LoggerWrapper::GetInstance()->Write(LV_INSTEON,"  Device is i2 ");
+					} else {
+						DCE::LoggerWrapper::GetInstance()->Write(LV_INSTEON,"  Device is i1");
+					}
+					mybuf[0] = CMD_62_SEND_SD_ED_MSG;
+                                mybuf[1] = mybuf2[4];
+                                mybuf[2] = mybuf2[5];
+                                mybuf[3] = mybuf2[6];
+                                mybuf[4] = 0x0f;
+                                mybuf[5] = 0x10;
+                                mybuf[6] = 0x00;
+                                sendFunction( mybuf , 7, 0, 0);
+					sendNextCommand();
+					break;
 				}
 				break;
 				case CMD_62_SEND_SD_ED_MSG:
 				len2 +=ReadSerialStringEx(serialPort,mybuf2+2,7,100);
 				//DCE::LoggerWrapper::GetInstance()->Write(LV_INSTEON,"Previous command status: %X",mybuf2[8]);
-				DCE::LoggerWrapper::GetInstance()->Write(LV_INSTEON,"Received CMD %1X Response. Address: %X.%X.%X (%s)",mybuf2[6],mybuf2[2],mybuf2[3],mybuf2[4],DCE::IOUtils::FormatHexBuffer(mybuf2,9).c_str());
+				if (mybuf2[5] & 16) {
+					// extended message
+					len2 +=ReadSerialStringEx(serialPort,mybuf2+9,14,100);
+				}
+				DCE::LoggerWrapper::GetInstance()->Write(LV_INSTEON,"->Received CMD %1X Response. Address: %X.%X.%X (%s) (read %d bytes)",mybuf2[6],mybuf2[2],mybuf2[3],mybuf2[4],DCE::IOUtils::FormatHexBuffer(mybuf2,len2).c_str(),len2);
 				//if (mybuf2[8] == 0x15) {
 				//	DCE::LoggerWrapper::GetInstance()->Write(LV_INSTEON,"Previous command failed");
 				//}
@@ -222,7 +241,7 @@ void InsteonAPI::InsteonAPI::receiveFunction()
 				if ( await_ack != 1 && await_callback == 0) {
 					await_callback = (unsigned int) InsteonSendQueue.front()->callbackid;
 
-DCE::LoggerWrapper::GetInstance()->Write(LV_INSTEON, "Sending job %p (cb %i) - %s (%d jobs in queue)",InsteonSendQueue.front(),await_callback,DCE::IOUtils::FormatHexAsciiBuffer(InsteonSendQueue.front()->buffer, InsteonSendQueue.front()->len,"31").c_str(),InsteonSendQueue.size());
+DCE::LoggerWrapper::GetInstance()->Write(LV_INSTEON, "<-Sending job %p (cb %i) - %s (%d jobs in queue)",InsteonSendQueue.front(),await_callback,DCE::IOUtils::FormatHexAsciiBuffer(InsteonSendQueue.front()->buffer, InsteonSendQueue.front()->len,"31").c_str(),InsteonSendQueue.size());
 					callback_type = (unsigned int) InsteonSendQueue.front()->callback_type;
 //					DCE::LoggerWrapper::GetInstance()->Write(LV_INSTEON,"Sending command: %x", InsteonSendQueue.front()->buffer[1]);
 					//Send Job
