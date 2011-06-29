@@ -33,6 +33,7 @@ class qOrbiter;
 class qorbiterManager : public QWidget
 {
     Q_OBJECT
+
 public:
      qorbiterManager(QWidget *parent = 0);  //constructor
 
@@ -91,7 +92,13 @@ public:
 
     string sEntertainArea;          //current entertain area int
     int iPK_User;                    //current user
+    QString sPK_User;
+    QMap <QString, int> mp_Users;
+
     int iFK_Room;                    //current room
+    QString sPK_Room;
+    QMap <QString, int> mp_rooms;
+
     QString s_onOFF;
 
     long iOrbiterPluginID;           //the orbiter plugin id for future use

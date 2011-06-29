@@ -1,4 +1,5 @@
 import QtQuick 1.0
+import "components"
 
 Rectangle {
     property alias videoTitle: video_title.text
@@ -6,7 +7,7 @@ Rectangle {
     id: pvrRemote
     Style1{id:style}
 
-    width: 640
+    width: 800
     height: 480
     radius: 0
     opacity: 1
@@ -15,12 +16,12 @@ Rectangle {
     //main 'now playing rect containing all the other items
     Rectangle{
         id:video_now_playing
-        x: 224
+        x: 200
         y: 2
         height: 179
-        width: 200
+        width: 224
         anchors.left: pvrRemote.right
-        anchors.leftMargin: -416
+        anchors.leftMargin: -600
 
         color: style.button_system_color
         Text {
@@ -36,18 +37,18 @@ Rectangle {
             anchors.top: parent.top
             Text {
                 id: now_playing_label
-                x: 52
-                y: 76
+                x: 0
+                y: 0
                 text: "Now Playing"
-                anchors.topMargin: 76
+                anchors.topMargin: 0
                 wrapMode: Text.WordWrap
                 anchors.top: parent.top
             }
 
             Text {
                 id: text2
-                x: 58
-                y: 94
+                x: 139
+                y: 139
                 text: "whats playing"
                 clip: true
                 horizontalAlignment: Text.AlignLeft
@@ -56,41 +57,38 @@ Rectangle {
             }
         }
     }
-    Remote_lighting_controls{ id: remote_lighting_controls1; x: 331; y: 181; width: 93; height: 219; anchors.topMargin: 181;anchors.top: video_now_playing.baseline}
-    Remote_Audio_controls{y: 200; width: 107; height: 219; anchors.topMargin: 2; x: 224; anchors.top: video_now_playing.bottom}
+    Remote_lighting_controls{ id: remote_lighting_controls1; x: 331; y: 181; width: 93; height: 219; anchors.topMargin: 179;anchors.top: video_now_playing.baseline}
+    Remote_Audio_controls{ id: remote1; x: 321; y: 194; z: 45; anchors.right: remote_lighting_controls1.left}
 
     ButtonSq {
         id: buttonsq1
         x: 752
         y: 0
-        width: 48
-        height: 25
+        width: 50
+        height: 50
 
-        Text {
-            id: text1
-            x: 6
-            y: 5
-            text: "Home"
-            font.pixelSize: 12
+        buttontext: "Home"
+
+        Image {
+            id: homeimg
+            height: parent.height
+            width: parent.width
+            source: "../../img/icons/agt_home.png"
+
         }
-
         MouseArea {
             id: mouse_area1
-
-            anchors.rightMargin: 0
-            anchors.bottomMargin: 0
-            anchors.leftMargin: 0
-            anchors.topMargin: 0
             anchors.fill: parent
+            onClicked: changeScreen("Screen_1.qml")
         }
     }
 
     VideoControls {
         id: videocontrols1
-        x: 424
-        y: 179
-        width: 216
-        height: 221
+        x: 537
+        y: 231
+        width: 263
+        height: 249
     }
 
     Column {

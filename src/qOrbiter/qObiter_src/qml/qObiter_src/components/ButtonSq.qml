@@ -7,6 +7,7 @@ Rectangle {
      property alias buttontextfontsize: buttonLabel.font.pointSize
      property alias buttontextbold: buttonLabel.font.bold
      property alias buttontextitalic: buttonLabel.font.italic
+     property alias buttontextzindex: buttonLabel.z
 
 
 

@@ -107,12 +107,12 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     qorbiterUIwin = new QDeclarativeView;
     qorbiterUIwin->engine()->addImageProvider("datagridimg", new basicImageProvider);
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
-    qorbiterUIwin->rootContext()->setContextProperty("dceObject", this);
+
     qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/main.qml"));
     qorbiterUIwin->engine()->addImportPath("qml/components");
     QObject *item= qorbiterUIwin->rootObject();
 
-    gotoQScreen("Splash.qml");
+//    gotoQScreen("Splash.qml");
     qDebug() << "Showing Splash";
    qorbiterUIwin->showFullScreen();
 
@@ -253,10 +253,22 @@ bool qorbiterManager::OrbiterGen()
 
     if (orbiterConf->initializeRegen())
     {
-       iPK_User = orbiterConf->get_users();
+
+
+        iPK_User = 1;
+
+       QHash<QString, int > room_hash;
+       room_hash = orbiterConf->get_locations();
+
+       QHash<QString, int>::const_iterator i = room_hash.constBegin();
+        while (i != room_hash.constEnd()) {
+           sPK_Room = room_hash.key(iPK_User);
+            ++i;
+        }
+            qDebug() << sPK_Room;
     }
 
-
+return true;
 
 }
 
@@ -278,8 +290,8 @@ bool qorbiterManager::getConf(int pPK_Device)
     qDebug() << "Room: " << iFK_Room;
     //qDebug() << "On/OFF:" << qPrintable(s_onOFF);
 
-    qorbiterUIwin->rootContext()->setContextProperty("currentuser", iPK_User);
-
+    qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
+  qorbiterUIwin->rootContext()->setContextProperty("room", sPK_Room);
     return true;
 
 }

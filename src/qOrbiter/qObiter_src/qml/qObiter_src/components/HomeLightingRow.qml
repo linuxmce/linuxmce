@@ -34,31 +34,29 @@ Row {
                 height: style.iconHeight
                 width: style.iconWidth
                 anchors.centerIn: parent
+                    }
+              }
 
-            }
-
-            }
-
-        ButtonSq {
-            id: lt_on
-            height: style.buttonH
-            width: style.buttonW
-            color: style.button_action_color
-            radius: style.but_smooth
-            buttontext: "On"
-
-
-            }
-
-        ButtonSq {
-            id: lt_off
-            height: style.buttonH
-            width: style.buttonW
-            color: style.button_action_color
-            radius: style.but_smooth
-            buttontext: "Off"
-
+        ListView{
+            id: lightingScenarios
+            width: parent.width
+            height: parent.height
+            model: lightingModel
+            delegate: ButtonSq {
+                id: but
+                height: style.buttonH
+                width: style.buttonW
+                color: style.button_action_color
+                radius: style.but_smooth
+                buttontext: "on"
+                Image {
+                    source: "../../../img/icons/jabber_protocol.png"
+                    height: style.iconHeight
+                    width: style.iconWidth
+                    anchors.centerIn: parent
+                        }
+                    }
+                }
             }
         }
-  }
 }

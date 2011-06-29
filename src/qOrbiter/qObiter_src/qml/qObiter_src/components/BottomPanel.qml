@@ -1,25 +1,22 @@
 import QtQuick 1.0
 
 Rectangle {
-    property alias bottomPanelTextColor:adv_but_text.color
 
 
-    width: style.orbiterW
+
+    width: 800
     height: 50
+    color: "#9e9d9d"
     id:advanced_panel
-            Text {
-            id: adv_but_text
-            text: "Advanced"
-            font.pointSize: 14
-            anchors.left: parent.left
-                 }
 
     ButtonSq{
         id:exit
+        x: 732
+        y: 0
         buttontext: "Exit Orbiter"
         buttontextcolor: style.button_system_color
         anchors.left: user.right
-        anchors.leftMargin: 15
+        anchors.leftMargin: 307
         height: 50
         width: 50
 
@@ -41,6 +38,7 @@ Rectangle {
                 source: "../../../img/icons/personal.png"
                 opacity: 5
                 height:50
+                smooth: false
                 width: 50
                 anchors.centerIn: parent
 
@@ -55,6 +53,48 @@ Rectangle {
 
             }
 
+        }
+
+        ButtonSq {
+            id: buttonsq1
+            x: 1
+            y: 1
+            width: 60
+            height: 50
+            buttontextfontsize: 9
+            border.width: 2
+            buttontext: "Advanced"
+        }
+
+        ButtonSq {
+            id: buttonsq2
+            x: 63
+            y: 1
+            width: 60
+            height: 50
+            border.width: 2
+            buttontext: "Power"
+        }
+
+        ButtonSq {
+            id: buttonsq3
+            x: 125
+            y: 1
+            width: 60
+            height: 50
+            border.width: 2
+            buttontext: "Sleeping Menu"
+        }
+
+        ButtonSq {
+            id: buttonsq4
+            x: 425
+            y: 0
+            width: 60
+            height: 50
+            border.width: 2
+            buttontextitalic: true
+            buttontext: room
         }
 
 

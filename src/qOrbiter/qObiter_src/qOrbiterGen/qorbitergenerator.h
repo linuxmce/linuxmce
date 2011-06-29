@@ -182,15 +182,13 @@ signals:
 
 public slots:
     bool initializeRegen();
-
-
-    int get_users();
-
+    QHash <QString, int> get_users();
+    QHash  <QString, int> get_locations();
 
 private:
 void get_entertain_areas();
   void get_virtual_devices();
-   void get_locations();
+
 
     map<int,string> htDevicePages;
     long Counter;

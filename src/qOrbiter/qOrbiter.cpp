@@ -1584,7 +1584,7 @@ bool DCE::qOrbiter::initialize()
     iSize = 0;
     DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(qmlUI->iPK_Device, qmlUI->iOrbiterPluginID, "1" ,qmlUI->iPK_User, StringUtils::itos(1), qmlUI->iFK_Room, &pData, &iSize);
     if (SendCommand(CMD_Orbiter_Registered))
-    { return true;} else {return false;}
+    {qDebug () << "initialized!"; return true; } else {return false;}
 }
 
 bool DCE::qOrbiter::deinitialize()
