@@ -9,6 +9,7 @@
 #include <QDeclarativeView>
 #include <qOrbiterData.h>
 #include <QDebug>
+#include <datamodels/usermodel.h>
 
 
 
@@ -76,15 +77,17 @@ public:
     std::auto_ptr<Database_pluto_main> m_spDatabase_pluto_main;
     std::auto_ptr<Database_pluto_media> m_spDatabase_pluto_media;
 
-    class Row_Orbiter * m_pRow_Orbiter;
-    class Row_Device * m_pRow_Device;
-    class Row_Room * m_pRow_Room;
-    class Row_EntertainArea * m_pRow_EntertainArea;
-    class Row_Screen *m_pRow_Screen_MainMenu,*m_pRow_Screen_Sleeping,*m_pRow_Screen_ScreenSaver;
-    class Row_DesignObj *m_pRow_DesignObj_MainMenu,*m_pRow_DesignObj_Sleeping,*m_pRow_DesignObj_ScreenSaver;
-    class Row_Skin *m_pRow_Skin;
-    class Row_Language *m_pRow_Language;
+    Row_Orbiter * m_pRow_Orbiter;
+     Row_Device * m_pRow_Device;
+    Row_Room * m_pRow_Room;
+     Row_EntertainArea * m_pRow_EntertainArea;
+   Row_Screen *m_pRow_Screen_MainMenu,*m_pRow_Screen_Sleeping,*m_pRow_Screen_ScreenSaver;
+     class Row_DesignObj *m_pRow_DesignObj_MainMenu,*m_pRow_DesignObj_Sleeping,*m_pRow_DesignObj_ScreenSaver;
+     Row_Skin *m_pRow_Skin;
+     Row_Language *m_pRow_Language;
+     Row_Users * userList;
     class RegenMonitor *m_pRegenMonitor;
+
     bool m_bNoEffects,m_bUseOCG;
     bool m_bIgnoreSelected, m_bIgnoreHighlighted, m_bIgnoreAlt;
 
@@ -113,10 +116,10 @@ public:
     //PlutoSize m_sScale,m_sScale_Orig;  // orig is the value without reduction for the borders in case the object has DESIGNOBJPARAMETER_Dont_Scale_CONST==1
     bool m_bDontAutoRegenArrays;
     string m_sDesc_Array;
-    class Row_Icon * m_pRow_Icon;
-    class PlutoSize *m_sizeScreen;
-    class Row_Size * m_pRow_Size;
-    class Row_UI * m_pRow_UI;
+    Row_Icon * m_pRow_Icon;
+     PlutoSize *m_sizeScreen;
+     Row_Size * m_pRow_Size;
+     Row_UI * m_pRow_UI;
     string m_sFloorPlanData;
     int m_iNumFloorplanItems;
 
@@ -185,7 +188,7 @@ signals:
 
 public slots:
     bool initializeRegen();
-    QHash <QString, int> get_users();
+    UserModel* get_users();
     QHash  <QString, int> get_locations();
 
 private:

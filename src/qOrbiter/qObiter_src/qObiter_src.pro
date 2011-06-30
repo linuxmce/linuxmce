@@ -41,7 +41,9 @@ SOURCES += main.cpp \
     imageProviders/basicImageProvider.cpp \
     datamodels/orbiterbuttonitem.cpp \
     datamodels/locationmodel.cpp \
-    datamodels/locationitem.cpp
+    datamodels/locationitem.cpp \
+    datamodels/usermodel.cpp \
+    datamodels/useritem.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -68,7 +70,9 @@ HEADERS += \
     imageProviders/basicImageProvider.h \
     datamodels/orbiterbuttonitem.h \
     datamodels/locationmodel.h \
-    datamodels/locationitem.h
+    datamodels/locationitem.h \
+    datamodels/usermodel.h \
+    datamodels/useritem.h
 
 OTHER_FILES += \
     qml/skins/scheme/classic/Main.qml \

@@ -255,7 +255,9 @@ bool qorbiterManager::OrbiterGen()
     if (orbiterConf->initializeRegen())
     {
       iPK_User = 1;
-
+ /*
+   this block is responsible for setting up the list of rooms in the home and setting the initial location
+   */
       QHash<QString, int > room_hash;
       room_hash = orbiterConf->get_locations();
       m_lRooms = new LocationModel(new LocationItem, this);
@@ -276,28 +278,24 @@ bool qorbiterManager::OrbiterGen()
        m_lRooms->appendRow(new LocationItem("rooms list" ,0, roomdesc, roomint));
             ++i;
         }
+
+
+
        sPK_Room = 1;
-       this->qorbiterUIwin->rootContext()->setContextProperty("roomlist", m_lRooms);
+       this->qorbiterUIwin->rootContext()->setContextProperty("roomlist", m_lRooms); //custom room list item provided
 
-       QHash <QString, int> userMap;
-       userMap = orbiterConf->get_users();
-       if (userMap.size())
-       {
-           qDebug () << userMap.values();
-       }
-       else
-       {qDebug () << "User Map not returned";}
+       /*
+         this block sets up users and orbiter authorized users
+         */
 
-            return true;
-        }
+       UserModel *userList = new UserModel( new UserItem, this);
+       userList = orbiterConf->get_users();
 
-    else
-    {
-        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Could not Get Regen Data!");
-        return false;
+       this->qorbiterUIwin->rootContext()->setContextProperty("userList", userList); //custom list item provided
+
     }
 
-
+ return true;
 }
 
 //temporary get conf method until qorbitergen does its purpose
@@ -313,9 +311,9 @@ bool qorbiterManager::getConf(int pPK_Device)
 
    s_onOFF = "1";
    qDebug() << "PK_Device No:" << iPK_Device;
-    qDebug() << "User: " << iPK_User;
+  //  qDebug() << "User: " << iPK_User;
     //qDebug() << "EA: " << QString::fromStdString(sEntertainArea);
-    qDebug() << "Room: " << iFK_Room;
+    //qDebug() << "Room: " << iFK_Room;
     //qDebug() << "On/OFF:" << qPrintable(s_onOFF);
 
     qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);

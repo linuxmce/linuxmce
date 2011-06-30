@@ -76,38 +76,54 @@ bool qOrbiterGenerator::connectDB()
 
     }
     m_pRow_Orbiter = m_spDatabase_pluto_main->Orbiter_get()->GetRow(m_iPK_Orbiter);
-
-
     return true;
 }
 
-QHash <QString, int> qOrbiterGenerator::get_users()
+UserModel* qOrbiterGenerator::get_users()
 {
+    UserModel *userModelList = new UserModel(new UserItem, this);
+
     Row_Users *drUsers_Default = NULL;
     Row_Device_DeviceData *drD_C_DP_DefaultUser = m_spDatabase_pluto_main->Device_DeviceData_get()->GetRow(m_pRow_Orbiter->PK_Orbiter_get(),DEVICEDATA_PK_Users_CONST);
 
-    QHash <QString, int> userHash;
     if( drD_C_DP_DefaultUser )
     {
             Row_Installation_Users *pRow_Installation_Users=m_spDatabase_pluto_main->Installation_Users_get()->GetRow(m_pRow_Device->FK_Installation_get(),atoi(drD_C_DP_DefaultUser->IK_DeviceData_get().c_str()));
             if( pRow_Installation_Users )
                     drUsers_Default = pRow_Installation_Users->FK_Users_getrow();
+
+            vector<Row_Installation_Users *> vectRow_Installation_Users;
+            m_spDatabase_pluto_main->Installation_Users_get()->GetRows(INSTALLATION_USERS_FK_INSTALLATION_FIELD "=" + StringUtils::itos(m_pRow_Device->FK_Installation_get()),&vectRow_Installation_Users);
+
+            for (int i =0 ; vectRow_Installation_Users.size() > i ; i++)
+            {
+                Row_Users * ul = vectRow_Installation_Users[i]->FK_Users_getrow();
+                //annoying type juggling
+
+                QString userName =  QString(QString::fromStdString(ul->UserName_get()));
+                QString firstName = QString(QString::fromStdString(ul->FirstName_get()));
+                QString lastName = QString(QString::fromStdString(ul->LastName_get()));
+                QString nickName = QString(QString::fromStdString(ul->Nickname_get()));
+                int pkuser =(int) ul->PK_Users_get();
+                int usermode = (int)ul->FK_UserMode_get();
+                int phextension = (int)ul->Extension_get();
+                int requirepin = (int)ul->RequirePinToSelect_get();
+                int defaultuser = (int)drUsers_Default->PK_Users_get();
+                QImage image = QImage("qrc:icons/user.png");
+               userModelList->appendRow(new UserItem(userName, firstName, lastName, nickName, pkuser,usermode , requirepin, phextension ,image, defaultuser, userModelList));
+
+            }
+
+
+
     }
 
-
-
+    if( !drUsers_Default )
+    {
             vector<Row_Installation_Users *> vectRow_Installation_Users;
             m_spDatabase_pluto_main->Installation_Users_get()->GetRows(INSTALLATION_USERS_FK_INSTALLATION_FIELD "=" + StringUtils::itos(m_pRow_Device->FK_Installation_get()),&vectRow_Installation_Users);
             if( vectRow_Installation_Users.size() )
             {
-                for(size_t s=0;s<vectRow_Installation_Users.size();++s)
-                {
-                  //  qDebug () << "Installation users " << vectRow_Installation_Users[s];
-                     Row_Users *userRow =vectRow_Installation_Users[s]->FK_Users_getrow();
-
-                       userHash.insert(QString::fromStdString(userRow->UserName_get()), userRow->PK_Users_get() );
-                                       }
-
                     LoggerWrapper::GetInstance()->Write(LV_WARNING,"***Warning*** No default user specified.  Picking first one: %d",vectRow_Installation_Users[0]->FK_Users_get());
                     drUsers_Default = vectRow_Installation_Users[0]->FK_Users_getrow();
                     if( !drUsers_Default )
@@ -132,8 +148,11 @@ QHash <QString, int> qOrbiterGenerator::get_users()
     if( drUsers_Default )
             m_dwPK_Users_Default = drUsers_Default->PK_Users_get();
 
-   return userHash;
+    //userList = m_spDatabase_pluto_main->
 
+            }
+
+  return userModelList;
 }
 
 QHash <QString, int> qOrbiterGenerator::get_locations()

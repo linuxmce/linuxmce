@@ -11,49 +11,30 @@ Rectangle {
 
     ButtonSq{
         id:exit
-        x: 732
+        x: 655
         y: 0
         buttontext: "Exit Orbiter"
         buttontextcolor: style.button_system_color
         anchors.left: user.right
-        anchors.leftMargin: 307
+        anchors.leftMargin: 331
         height: 50
         width: 50
 
         MouseArea{
-            anchors.fill: parent
+            x: 0
+            y: 0
+            anchors.rightMargin: 0
+            anchors.bottomMargin: 0
+            anchors.leftMargin: 0
+            anchors.topMargin: 0
+            anchors.fill: exit
             onClicked: close()
                 }
              }
 
-        Rectangle{
-            id:user
-            anchors.centerIn: parent
-            height: 50
-            width: 50
-            color: "slategrey"
 
-            Image {
-                id: bg
-                source: "../../../img/icons/personal.png"
-                opacity: 5
-                height:50
-                smooth: false
-                width: 50
-                anchors.centerIn: parent
+           UserListComponent {id:user ;x: 258;y: 0}
 
-            }
-            Text {
-                id: user_text
-                text: currentuser
-                font.bold: true
-                font.pointSize: 12
-                color:"White"
-                anchors.centerIn: parent
-
-            }
-
-        }
 
         ButtonSq {
             id: buttonsq1

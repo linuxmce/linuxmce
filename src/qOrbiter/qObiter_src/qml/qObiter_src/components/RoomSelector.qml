@@ -52,7 +52,7 @@ Rectangle {
 
                      Text {
                              id: somshit
-                             text: Title + " " +index
+                             text: Title
                             }
                      MouseArea{
                          id:listMouseArea
@@ -61,6 +61,7 @@ Rectangle {
                          {
                             rooms.state = "Default"
                              console.log(index)
+                             roombutton.buttontext = Title
                          }
                         }
                     }
