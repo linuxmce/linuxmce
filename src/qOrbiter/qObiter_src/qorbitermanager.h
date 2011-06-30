@@ -7,6 +7,7 @@
 #include <qdeclarativecontext.h>
 #include <QDeclarativeItem>
 #include <QStringList>
+#include <datamodels/locationmodel.h>
 
 /*----custom classes-------*/
 #include <qOrbiterData.h>                       //own version of OrbiterData.h
@@ -51,6 +52,7 @@ public:
     GridIndexProvider *advancedProvider;
     QString *gridReqType;
     qOrbiterGenerator * orbiterConf;
+    LocationModel *m_lRooms;
 
 
     //ui functions
@@ -97,7 +99,7 @@ public:
     QMap <QString, int> mp_Users;
 
     int iFK_Room;                    //current room
-    QString sPK_Room;
+   QString sPK_Room;
     QMap <QString, int> mp_rooms;
 
     QString s_onOFF;

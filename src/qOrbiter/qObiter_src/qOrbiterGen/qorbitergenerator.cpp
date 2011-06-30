@@ -77,6 +77,7 @@ bool qOrbiterGenerator::connectDB()
     }
     m_pRow_Orbiter = m_spDatabase_pluto_main->Orbiter_get()->GetRow(m_iPK_Orbiter);
 
+
     return true;
 }
 
@@ -99,6 +100,14 @@ QHash <QString, int> qOrbiterGenerator::get_users()
             m_spDatabase_pluto_main->Installation_Users_get()->GetRows(INSTALLATION_USERS_FK_INSTALLATION_FIELD "=" + StringUtils::itos(m_pRow_Device->FK_Installation_get()),&vectRow_Installation_Users);
             if( vectRow_Installation_Users.size() )
             {
+                for(size_t s=0;s<vectRow_Installation_Users.size();++s)
+                {
+                  //  qDebug () << "Installation users " << vectRow_Installation_Users[s];
+                     Row_Users *userRow =vectRow_Installation_Users[s]->FK_Users_getrow();
+
+                       userHash.insert(QString::fromStdString(userRow->UserName_get()), userRow->PK_Users_get() );
+                                       }
+
                     LoggerWrapper::GetInstance()->Write(LV_WARNING,"***Warning*** No default user specified.  Picking first one: %d",vectRow_Installation_Users[0]->FK_Users_get());
                     drUsers_Default = vectRow_Installation_Users[0]->FK_Users_getrow();
                     if( !drUsers_Default )

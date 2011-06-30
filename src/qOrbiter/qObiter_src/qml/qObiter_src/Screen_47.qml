@@ -17,6 +17,11 @@ Rectangle {
                  width: 156;
                  height: 100
 
+                 MouseArea{
+                     anchors.fill: parent
+                     onClicked: console.log(grid_view1.currentIndex.toString)
+                 }
+
                  Rectangle {
                      id:frame
                      width: mainItem.width
@@ -98,7 +103,7 @@ Rectangle {
 
            MouseArea{
                anchors.fill: parent
-               onClicked: dceObject.gotoQScreen("Screen_1.qml")
+               onClicked: gotoQScreen("Screen_1.qml")
                      }
              }
 

@@ -86,16 +86,7 @@ Rectangle {
             buttontext: "Sleeping Menu"
         }
 
-        ButtonSq {
-            id: buttonsq4
-            x: 425
-            y: 0
-            width: 60
-            height: 50
-            border.width: 2
-            buttontextitalic: true
-            buttontext: "room"
-        }
+        RoomSelector{id: intalledrooms ;x: 425;y: 0 ;height: 50 }
 
 
 

@@ -2,9 +2,17 @@ import QtQuick 1.0
 
 Rectangle {
     property alias rowlabel: rowheader.buttontext
-    height: 80
+    height: 65
     width: parent.width
     color:style.rowbgColor
+    Flickable{
+        id:securityflick
+        interactive: true
+        height: 65
+        width: parent.width
+        contentHeight: 65
+        contentWidth: childrenRect * 1
+        clip: true
     Row {
         id: telecomRow
         anchors.horizontalCenter: parent.horizontalCenter
@@ -15,6 +23,7 @@ Rectangle {
 
         ButtonSq {
             id: rowheader
+
             height: style.buttonH
             width: style.buttonW
             color: style.button_action_color
@@ -84,5 +93,6 @@ Rectangle {
             buttontext: "Mailbox"
             }
 
+    }
     }
 }

@@ -24,6 +24,7 @@ public:
 
 signals:
   void dataChanged();
+
 };
 
 class ListModel : public QAbstractListModel

@@ -6,16 +6,16 @@ Rectangle {
     property alias nowplayingtext:now_playing.buttontext
     property alias rowlabel: rowheader.buttontext
 
-    height: 80
+    height: 65
     width: parent.width
 color:style.rowbgColor
 
 Flickable{
     id:mediaflick
     interactive: true
-    height: 80
+    height: 65
     width: parent.width
-    contentHeight: 80
+    contentHeight: 65
     contentWidth: childrenRect * 1
     clip: true
 
@@ -94,7 +94,7 @@ Flickable{
             buttontextcolor: "white"
             MouseArea{
                 anchors.fill: parent
-                onClicked: dceObject.requestDataGrid("5||||1,2|0|13|0 | 2 |", "videos")
+                onClicked: requestDataGrid("5||||1,2|0|13|0 | 2 |", "videos")
             }
 
 
@@ -116,7 +116,7 @@ Flickable{
             }
             MouseArea {
                 anchors.fill: parent
-                onClicked: dceObject.requestDataGrid("4||||1,2|0|13|0 | 2 |", "music")
+                onClicked: requestDataGrid("4||||1,2|0|13|0 | 2 |", "music")
             }
 
             }
@@ -138,7 +138,7 @@ Flickable{
             buttontext: ""
             MouseArea {
                 anchors.fill: parent
-                onClicked: dceObject.requestDataGrid("4||||1,2|0|12|0 | 2 |", "games")
+                onClicked: requestDataGrid("4||||1,2|0|12|0 | 2 |", "games")
             }
             }
 

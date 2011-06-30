@@ -2,15 +2,15 @@ import QtQuick 1.0
 
 Rectangle {
     property alias rowlabel: rowheader.buttontext
-    height: 80
+    height: 65
     width: parent.width
     color:style.rowbgColor
 
     Flickable{
         interactive: true
-        height: 80
+        height: 65
         width: parent.width
-        contentHeight: 80
+        contentHeight: 65
         contentWidth: childrenRect * 1
         clip: true
 

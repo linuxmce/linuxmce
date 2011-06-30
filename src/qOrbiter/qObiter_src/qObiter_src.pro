@@ -39,7 +39,9 @@ SOURCES += main.cpp \
     datamodels/gridItem.cpp \
     imageProviders/gridimageprovider.cpp \
     imageProviders/basicImageProvider.cpp \
-    datamodels/orbiterbuttonitem.cpp
+    datamodels/orbiterbuttonitem.cpp \
+    datamodels/locationmodel.cpp \
+    datamodels/locationitem.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -64,7 +66,9 @@ HEADERS += \
     datamodels/gridItem.h \
     imageProviders/gridimageprovider.h \
     imageProviders/basicImageProvider.h \
-    datamodels/orbiterbuttonitem.h
+    datamodels/orbiterbuttonitem.h \
+    datamodels/locationmodel.h \
+    datamodels/locationitem.h
 
 OTHER_FILES += \
     qml/skins/scheme/classic/Main.qml \

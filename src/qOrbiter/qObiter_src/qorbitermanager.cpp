@@ -255,17 +255,42 @@ bool qorbiterManager::OrbiterGen()
     if (orbiterConf->initializeRegen())
     {
       iPK_User = 1;
-       QHash<QString, int > room_hash;
-       room_hash = orbiterConf->get_locations();
-       QHash<QString, int>::const_iterator i = room_hash.constBegin();
 
-       while (i != room_hash.constEnd()) {
-           sPK_Room = room_hash.key(iPK_User);
+      QHash<QString, int > room_hash;
+      room_hash = orbiterConf->get_locations();
+      m_lRooms = new LocationModel(new LocationItem, this);
+
+       /*
+      EaRole,
+      intRole,  cheat sheet
+      TitleRole
+      */
+
+       QHash<QString, int>::const_iterator i = room_hash.constBegin();
+       while (i != room_hash.constEnd())
+       {
+           int eaz = 0;
+           QString roomdesc; roomdesc = i.key();
+            int roomint; roomint = i.value();
+
+       m_lRooms->appendRow(new LocationItem("rooms list" ,0, roomdesc, roomint));
             ++i;
         }
-            qDebug() << sPK_Room;
+       sPK_Room = 1;
+       this->qorbiterUIwin->rootContext()->setContextProperty("roomlist", m_lRooms);
+
+       QHash <QString, int> userMap;
+       userMap = orbiterConf->get_users();
+       if (userMap.size())
+       {
+           qDebug () << userMap.values();
+       }
+       else
+       {qDebug () << "User Map not returned";}
+
             return true;
         }
+
     else
     {
         LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Could not Get Regen Data!");
@@ -283,8 +308,8 @@ bool qorbiterManager::getConf(int pPK_Device)
     iOrbiterPluginID = 9;
     iSize = 0;
     m_pOrbiterCat = 5;
-    iFK_Room=1;
-    sEntertainArea = "1";
+
+
 
    s_onOFF = "1";
    qDebug() << "PK_Device No:" << iPK_Device;
@@ -294,7 +319,7 @@ bool qorbiterManager::getConf(int pPK_Device)
     //qDebug() << "On/OFF:" << qPrintable(s_onOFF);
 
     qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
-  qorbiterUIwin->rootContext()->setContextProperty("dceObject", this);
+  qorbiterUIwin->rootContext()->setContextObject(this);
     return true;
 
 }

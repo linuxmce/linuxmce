@@ -16,7 +16,8 @@ Rectangle {
 
 
 Column{
-    spacing: 5
+    spacing: 0
+
     height: childrenRect.height
     width: childrenRect.width
     NotificationBar {id:mnu;  color: style.not_color}

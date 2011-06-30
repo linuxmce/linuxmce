@@ -11,8 +11,8 @@ Rectangle {
 
 
 
-        height: 25
-        width: 25
+        height: 35
+        width: 35
     Text {
         id: buttonLabel
         x: 51
