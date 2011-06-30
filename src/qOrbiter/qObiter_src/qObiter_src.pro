@@ -35,14 +35,10 @@ SOURCES += main.cpp \
     uiclasses/uicontroller.cpp \
     qorbitermanager.cpp \    
     qOrbiterGen/qorbitergenerator.cpp \
-    datamodels/orbitermodel.cpp \
-    datamodels/orbiteritem.cpp \
     datamodels/listModel.cpp \
     datamodels/gridItem.cpp \
     imageProviders/gridimageprovider.cpp \
     imageProviders/basicImageProvider.cpp \
-    datamodels/orbiterroommodel.cpp \
-    datamodels/orbiterrowmodel.cpp \
     datamodels/orbiterbuttonitem.cpp
 
 # Please do not modify the following two lines. Required for deployment.
@@ -64,14 +60,10 @@ HEADERS += \
     orbiteritem.h \
     qOrbiterData.h \
     qOrbiterGen/qorbitergenerator.h \
-    datamodels/orbitermodel.h \
-    datamodels/orbiteritem.h \
     datamodels/listModel.h \
     datamodels/gridItem.h \
     imageProviders/gridimageprovider.h \
     imageProviders/basicImageProvider.h \
-    datamodels/orbiterroommodel.h \
-    datamodels/orbiterrowmodel.h \
     datamodels/orbiterbuttonitem.h
 
 OTHER_FILES += \

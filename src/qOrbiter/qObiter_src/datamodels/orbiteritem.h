@@ -1,12 +1,12 @@
 #ifndef ORBITERITEM_H
 #define ORBITERITEM_H
 
-#include <datamodels/orbitermodel.h>
+#include <datamodels/listModel.h>
 #include <QImage>
 #include <QVariant>
 
 
-class OrbiterItem : public OrbiterListItem
+class OrbiterItem : public ListItem
 {
    Q_OBJECT
    Q_PROPERTY(QImage image READ image NOTIFY imageChanged)
@@ -24,7 +24,7 @@ class OrbiterItem : public OrbiterListItem
 public:
     OrbiterItem();
   public:
-    OrbiterItem(QObject *parent = 0): OrbiterListItem(parent) {}
+    OrbiterItem(QObject *parent = 0): ListItem(parent) {}
     explicit OrbiterItem(const QString &name, const QString &size, const QImage &img, QObject *parent = 0);
     QVariant data(int role) const;
     QHash<int, QByteArray> roleNames() const;

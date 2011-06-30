@@ -112,7 +112,7 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     qorbiterUIwin->engine()->addImportPath("qml/components");
     QObject *item= qorbiterUIwin->rootObject();
 
-//    gotoQScreen("Splash.qml");
+    gotoQScreen("Splash.qml");
     qDebug() << "Showing Splash";
    qorbiterUIwin->showFullScreen();
 
@@ -251,24 +251,27 @@ bool qorbiterManager::OrbiterGen()
 //setup the orbiter blob if the data has changed or by manual selection
     qOrbiterGenerator *orbiterConf = new qOrbiterGenerator(iPK_Device, "dcerouter","root", "", "pluto_main", 3306, this);
 
+
     if (orbiterConf->initializeRegen())
     {
-
-
-        iPK_User = 1;
-
+      iPK_User = 1;
        QHash<QString, int > room_hash;
        room_hash = orbiterConf->get_locations();
-
        QHash<QString, int>::const_iterator i = room_hash.constBegin();
-        while (i != room_hash.constEnd()) {
+
+       while (i != room_hash.constEnd()) {
            sPK_Room = room_hash.key(iPK_User);
             ++i;
         }
             qDebug() << sPK_Room;
+            return true;
+        }
+    else
+    {
+        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Could not Get Regen Data!");
+        return false;
     }
 
-return true;
 
 }
 

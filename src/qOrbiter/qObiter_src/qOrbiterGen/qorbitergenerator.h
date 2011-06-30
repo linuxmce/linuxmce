@@ -10,6 +10,8 @@
 #include <qOrbiterData.h>
 #include <QDebug>
 
+#include <datamodels/orbiterroommodel.h>
+
 #include "pluto_main/Database_pluto_main.h"
 #include "pluto_main/Table_Screen.h"
 #include "pluto_main/Table_Screen_DesignObj.h"
@@ -121,6 +123,7 @@ public:
     string m_sDBHost,m_sDBUser,m_sDBPass,m_sDBDBName;
     int m_iDBPort;
     string m_sOutputPath,m_sGraphicsBasePath,m_sFontPath;
+
     //PlutoSize m_sScaledSize;
 
     qOrbiterGenerator( int PK_Orbiter,string DBHost,string DBUser,string DBPassword,string DBName,int DBPort, QWidget *parent=0)

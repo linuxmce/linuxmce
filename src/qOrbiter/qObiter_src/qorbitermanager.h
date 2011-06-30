@@ -16,6 +16,7 @@
 #include <qOrbiterGen/qorbitergenerator.h>                   //data blob generator
 #include <imageProviders/basicImageProvider.h>                 //qml image provider
 #include <imageProviders/gridimageprovider.h>                  //qml image provider for grids !not implemented!
+#include <datamodels/orbiterroommodel.h>
 
 /*-------Dce Includes----*/
 
@@ -50,7 +51,7 @@ public:
     GridIndexProvider *advancedProvider;
     QString *gridReqType;
     qOrbiterGenerator * orbiterConf;
-
+    map<int, OrbiterRoomModel *> room_models;
 
     //ui functions
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}

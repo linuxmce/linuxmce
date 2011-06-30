@@ -1,15 +1,16 @@
 #ifndef ORBITERROOMMODEL_H
 #define ORBITERROOMMODEL_H
 
-
-#include <QAbstractListModel>
+#include <datamodels/listModel.h>
 #include <datamodels/orbiterrowmodel.h>
 #include <QList>
 #include <QVariant>
 
 
-class OrbiterRoomModel : public QAbstractListModel
-{
+class OrbiterRoomModel : public ListModel{
+
+    Q_OBJECT
+
 public:
   explicit OrbiterRoomModel(OrbiterRowModel* prototype, QObject* parent = 0);
   ~OrbiterRoomModel();
@@ -30,7 +31,7 @@ private slots:
 
 private:
   OrbiterRowModel* m_prototype;
-  QList<OrbiterRowModel*> m_list;
+  QList <OrbiterRowModel* > m_list;
 
 };
 

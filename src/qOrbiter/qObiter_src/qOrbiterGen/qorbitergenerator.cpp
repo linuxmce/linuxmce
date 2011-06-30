@@ -17,13 +17,16 @@
 bool qOrbiterGenerator::initializeRegen()
 {
 
+
     if (connectDB())
     {
+
         LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"qOrbiter Generator Version .000001 Starting. Yes, that new");
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Generating: #%d %s",m_pRow_Device->PK_Device_get(),m_pRow_Device->Description_get().c_str());
 
         LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Regen Success for qOrbiter %d, starting!", m_iPK_Orbiter);
-            return true;
+
+        return true;
 
 
     }

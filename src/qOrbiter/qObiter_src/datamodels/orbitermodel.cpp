@@ -1,6 +1,6 @@
 #include "orbitermodel.h"
 
-OrbiterModel::OrbiterModel(OrbiterListItem* prototype, QObject *parent) :
+OrbiterModel::OrbiterModel(OrbiterRoomModel* prototype, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype)
 {
   setRoleNames(m_prototype->roleNames());
@@ -24,22 +24,22 @@ OrbiterModel::~OrbiterModel() {
   clear();
 }
 
-void OrbiterModel::appendRow(OrbiterListItem *item)
+void OrbiterModel::appendRow(OrbiterRoomModel *item)
 {
-  appendRows(QList<OrbiterListItem*>() << item);
+  appendRows(QList<OrbiterRoomModel*>() << item);
 }
 
-void OrbiterModel::appendRows(const QList<OrbiterListItem *> &items)
+void OrbiterModel::appendRows(const QList<OrbiterRoomModel *> &items)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
-  foreach(OrbiterListItem *item, items) {
+  foreach(OrbiterRoomModel *item, items) {
     connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
     m_list.append(item);
   }
   endInsertRows();
 }
 
-void OrbiterModel::insertRow(int row, OrbiterListItem *item)
+void OrbiterModel::insertRow(int row, OrbiterRoomModel *item)
 {
   beginInsertRows(QModelIndex(), row, row);
   connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
@@ -49,21 +49,21 @@ void OrbiterModel::insertRow(int row, OrbiterListItem *item)
 
 void OrbiterModel::handleItemChange()
 {
-  OrbiterListItem* item = static_cast<OrbiterListItem*>(sender());
+  OrbiterRoomModel* item = static_cast<OrbiterRoomModel*>(sender());
   QModelIndex index = indexFromItem(item);
   if(index.isValid())
     emit dataChanged(index, index);
 }
 
-OrbiterListItem *OrbiterModel ::find(const QString &id) const
+OrbiterRoomModel *OrbiterModel ::find(const QString &id) const
 {
-  foreach(OrbiterListItem* item, m_list) {
+  foreach(OrbiterRoomModel* item, m_list) {
     if(item->id() == id) return item;
   }
   return 0;
 }
 
-QModelIndex OrbiterModel::indexFromItem(const OrbiterListItem *item) const
+QModelIndex OrbiterModel::indexFromItem(const OrbiterRoomModel *item) const
 {
   Q_ASSERT(item);
   for(int row=0; row<m_list.size(); ++row) {
@@ -100,7 +100,7 @@ bool OrbiterModel::removeRows(int row, int count, const QModelIndex &parent)
   return true;
 }
 
-OrbiterListItem *OrbiterModel ::takeRow(int row)
+OrbiterRoomModel *OrbiterModel ::takeRow(int row)
 {
   beginRemoveRows(QModelIndex(), row, row);
   OrbiterListItem* item = m_list.takeAt(row);

@@ -1,8 +1,7 @@
 #include "orbiterroommodel.h"
 
 
-OrbiterRoomModel::OrbiterRoomModel(OrbiterRowModel* prototype, QObject *parent) :
-    QAbstractListModel(parent), m_prototype(prototype)
+OrbiterRoomModel(OrbiterRowModel* prototype, QObject* parent = 0);
 {
   setRoleNames(m_prototype->roleNames());
 }
