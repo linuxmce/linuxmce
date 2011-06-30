@@ -2,7 +2,7 @@
 #define ORBITERROOMMODEL_H
 
 #include <datamodels/listModel.h>
-#include <datamodels/orbiterrowmodel.h>
+
 #include <QList>
 #include <QVariant>
 
