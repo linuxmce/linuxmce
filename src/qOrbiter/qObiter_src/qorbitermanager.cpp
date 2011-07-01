@@ -280,7 +280,6 @@ bool qorbiterManager::OrbiterGen()
         }
 
 
-
        sPK_Room = 1;
        this->qorbiterUIwin->rootContext()->setContextProperty("roomlist", m_lRooms); //custom room list item provided
 
@@ -290,8 +289,13 @@ bool qorbiterManager::OrbiterGen()
 
        UserModel *userList = new UserModel( new UserItem, this);
        userList = orbiterConf->get_users();
+       QString sDefaultUser;
+       sDefaultUser =  userList->findDefault(userList->defaultUser);
 
        this->qorbiterUIwin->rootContext()->setContextProperty("userList", userList); //custom list item provided
+       qorbiterUIwin->setProperty("currentusers", QString::number(userList->defaultUser));
+
+       qDebug()<< userList->defaultUser;
 
     }
 

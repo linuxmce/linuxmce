@@ -34,7 +34,7 @@ Rectangle {
         id:roombutton
         width: 50
         height: 50
-        buttontext:sPK_Room
+        buttontext:"currentroom"
             }
 
            ListView {

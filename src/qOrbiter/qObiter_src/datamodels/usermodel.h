@@ -21,9 +21,11 @@ public:
     bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
     UserItem* takeRow(int row);
     UserItem* find(const QString &id) const;
+    QString  findDefault(int &defaultUser) const;
     QModelIndex indexFromItem( const UserItem* item) const;
     void clear();
 
+    int defaultUser;
   private slots:
     void handleItemChange();
 

@@ -17,11 +17,6 @@ Rectangle {
                  width: 156;
                  height: 100
 
-                 MouseArea{
-                     anchors.fill: parent
-                     onClicked: console.log(grid_view1.currentIndex.toString)
-                 }
-
                  Rectangle {
                      id:frame
                      width: mainItem.width
@@ -31,7 +26,12 @@ Rectangle {
                      color: "floralwhite"
                      border.color: "black"
 
-                     Image { source:"image://datagridimg/"+size ; height: 100; width: 156; anchors.centerIn: frame}
+                     MouseArea{
+                         anchors.fill: frame
+                         onClicked: console.log(index + ":"+ name)
+                     }
+
+                         Image { source:"image://datagridimg/"+size ; height: 100; width: 156; anchors.centerIn: parent}
 
                         Flow
                         {
@@ -49,6 +49,7 @@ Rectangle {
                  }
              }
          }
+
 
 
 

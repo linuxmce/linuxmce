@@ -5,6 +5,10 @@ import QtQuick 1.0
      signal close()
      signal changeScreen(string s)
 
+     property string currentuser: "lang"
+     property string currentroom: ""
+     property string currentusers:currentuserz
+
      function screenchange(screenname)
      {
          pageLoader.source = screenname

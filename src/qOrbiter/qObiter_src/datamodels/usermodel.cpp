@@ -1,4 +1,5 @@
 #include "usermodel.h"
+#include <QDebug>
 
 UserModel::UserModel(UserItem* prototype, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype)
@@ -106,4 +107,14 @@ UserItem * UserModel::takeRow(int row)
   UserItem* item = m_list.takeAt(row);
   endRemoveRows();
   return item;
+}
+
+QString UserModel::findDefault( int &defaultUser) const
+{
+    for (int cnt = 0; cnt > m_list.size(); cnt++)
+    {
+        if(m_list.at(cnt)->pk_user_get() == defaultUser) return m_list.at(cnt)->id();
+
+    }
+    return 0;
 }
