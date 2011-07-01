@@ -1,6 +1,12 @@
 import QtQuick 1.0
 
+Component{
+    id:homescreenDelegate
+
 Rectangle {
-    width: 100
-    height: 62
+    width: 480
+    height: 350
+    HomeLightingRow {id:lightingRowDelegate}
+
+    }
 }

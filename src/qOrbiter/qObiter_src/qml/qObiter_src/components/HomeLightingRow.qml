@@ -1,10 +1,34 @@
 import QtQuick 1.0
 
+
+
+
 Rectangle {
     property alias rowlabel: rowheader.buttontext
     height: 65
     width: parent.width
     color:style.rowbgColor
+
+    ListModel{
+        id:lightingmodel
+
+
+        ListElement{
+            name:"On"
+            device: "qml light switch"
+            msgsnd: "/usr/pluto/bin/MessageSend localhost 0 34 1 192 97 "
+            img: "../../../img/icons/ktip.png"
+
+        }
+
+        ListElement{
+            name:"Off"
+            device: "qml light switch"
+            msgsnd: "/usr/pluto/bin/MessageSend localhost 0 34 1 192 97 "
+            img: "../../../img/icons/jabber_protocol.png"
+            }
+        }
+
 
     Flickable{
         interactive: true
@@ -39,18 +63,24 @@ Row {
 
         ListView{
             id: lightingScenarios
-            width: parent.width
-            height: parent.height
-            model: lightingModel
+            width: 300
+            height: 50
+            model: lightingmodel
+            orientation:ListView.Horizontal
             delegate: ButtonSq {
                 id: but
                 height: style.buttonH
                 width: style.buttonW
                 color: style.button_action_color
                 radius: style.but_smooth
-                buttontext: "on"
+                buttontext: name
+                buttontextfontsize: 12
+                buttontextbold: true
+                buttontextzindex: 30
+
+
                 Image {
-                    source: "../../../img/icons/jabber_protocol.png"
+                    source: img
                     height: style.iconHeight
                     width: style.iconWidth
                     anchors.centerIn: parent

@@ -11,11 +11,14 @@ Rectangle {
 
 
 
-        height: 35
-        width: 35
+       height: 50
+        width: 50
+
+        border.width: 1
+        border.color: style.button_action_color_hover
     Text {
         id: buttonLabel
-        x: 51
+        x: 50
         y: 50
         width: -1
         height: 0
@@ -23,10 +26,10 @@ Rectangle {
         font.pointSize: 11
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
-        anchors.verticalCenterOffset: 0
-        anchors.horizontalCenterOffset: 1
+
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
+        anchors.margins: 5
         font.family: "Bitstream Charter"
         wrapMode: Text.WordWrap
          }
