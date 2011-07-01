@@ -181,3 +181,7 @@ for share in $( showmount -e $Device_IP | tr ' ' '#') ;do
 done
 
 rmdir $tempMntDir
+
+/usr/pluto/bin/StorageDevices_PlutoDirStructure.sh -d $Device_ID
+/usr/pluto/bin/StorageDevices_Setup.sh --cascade
+
