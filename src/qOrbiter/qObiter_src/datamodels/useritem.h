@@ -4,6 +4,11 @@
 #include <datamodels/listModel.h>
 #include <QImage>
 
+/*
+  This is the Model item that accompanies the UserModel. As you can see, the roles here represent the
+  data that we will be presenting to the user interface. All of this information must be provided in th
+  constructor during qOrbitergen
+  */
 class UserItem : public ListItem
 {
     Q_OBJECT
@@ -56,7 +61,7 @@ private:
 
 
 signals:
-  void imageChanged();
+  void imageChanged();  //signal to let us know something happened
 
 };
 

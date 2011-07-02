@@ -5,7 +5,12 @@
 #include <datamodels/useritem.h>
 #include <QList>
 #include <QVariant>
-
+/*
+  The function of this class is to provide a list of users to the user interface. Ita based on QAsbstractItem
+  model as well as a custom class. The way it works is two parts.
+  The Model Class is essentially a container class for Items in the model. So, in the instance of users,
+  there is a Model (UserModel) which takes items (UserItem) which is where the actual data is stored.
+  */
 class UserModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -25,7 +30,7 @@ public:
     QModelIndex indexFromItem( const UserItem* item) const;
     void clear();
 
-    int defaultUser;
+    int defaultUser;           //when properly set, it will contain the default user for this orbiter / location
   private slots:
     void handleItemChange();
 

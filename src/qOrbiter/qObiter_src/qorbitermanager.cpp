@@ -15,6 +15,11 @@
 #include "PlutoUtils/Other.h"
 #include "DCERouter.h"
 
+/*
+  this file is responsible for the main connection between the dce thread and the qt thread.
+   pqOrbiter->qmlUI = this; inside of setupLMCE initializes the dce thread, while other functions are
+   responsible for signals and slots between dce and qml.
+  */
 
 using namespace DCE;
 
@@ -111,10 +116,10 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/main.qml"));
     qorbiterUIwin->engine()->addImportPath("qml/components");
     QObject *item= qorbiterUIwin->rootObject();
-
+    qorbiterUIwin->showFullScreen();
     gotoQScreen("Splash.qml");
     qDebug() << "Showing Splash";
-   qorbiterUIwin->showFullScreen();
+
 
 
     //initial signal and slot connection
@@ -254,12 +259,16 @@ bool qorbiterManager::OrbiterGen()
 
     if (orbiterConf->initializeRegen())
     {
-      iPK_User = 1;
+        if (!orbiterConf->get_virtual_devices())
+        {
+            qDebug() << "Couldnt Get virtutal Devices!";
+        }
  /*
    this block is responsible for setting up the list of rooms in the home and setting the initial location
    */
       QHash<QString, int > room_hash;
       room_hash = orbiterConf->get_locations();
+      orbiterConf->get_lighting_scenarios();
       m_lRooms = new LocationModel(new LocationItem, this);
 
        /*
@@ -273,14 +282,11 @@ bool qorbiterManager::OrbiterGen()
        {
            int eaz = 0;
            QString roomdesc; roomdesc = i.key();
-            int roomint; roomint = i.value();
-
-       m_lRooms->appendRow(new LocationItem("rooms list" ,0, roomdesc, roomint));
-            ++i;
+           int roomint; roomint = i.value();
+           m_lRooms->appendRow(new LocationItem("rooms list" ,0, roomdesc, roomint));
+           ++i;
         }
 
-
-       sPK_Room = 1;
        this->qorbiterUIwin->rootContext()->setContextProperty("roomlist", m_lRooms); //custom room list item provided
 
        /*
@@ -310,9 +316,6 @@ bool qorbiterManager::getConf(int pPK_Device)
     iOrbiterPluginID = 9;
     iSize = 0;
     m_pOrbiterCat = 5;
-
-
-
    s_onOFF = "1";
    qDebug() << "PK_Device No:" << iPK_Device;
   //  qDebug() << "User: " << iPK_User;
