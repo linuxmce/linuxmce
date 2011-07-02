@@ -181,28 +181,26 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             if ( OrbiterGen() )
             {
                 qDebug () << "Config Recieved, starting";
+                pqOrbiter->initialize();
                 if (getConf(PK_Device))
                  {
 
-                     if (pqOrbiter->initialize())
-                     {
-
                      gotoQScreen("Screen_1.qml");
-                 return true;
+                 return true;} else {
+
+
+                      qDebug() << "Orbiter Conf Hiccup!";
+
+                         LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Device Failed to get configuration!");
+
+                        return false;
                      }
-                     else
-                     {return false;}
                  }
                 else
                  {
                      qDebug() << "Orbiter Could Not setup!" ;
                      return false;
                  }
-            }
-           else
-            {
-                return 0;
-            }
 
 
 
@@ -303,18 +301,19 @@ bool qorbiterManager::OrbiterGen()
        QString *sPK_User = new QString(userList->defaultUzer);
 
        this->qorbiterUIwin->rootContext()->setContextProperty("userList", userList); //custom list item provided
-       //qorbiterUIwin->setProperty("currentuser", QVariant::fromValue(&sPK_User));
+      // qorbiterUIwin->setProperty("currentuser", QVariant::fromValue(&sPK_User));
 
        qDebug()<< userList->defaultUser;
 
        /*
          Lighting Scenarios
          */
-       LightingScenarioModel *myRoom = new LightingScenarioModel(new LightingScenarioItem, this);
-      myRoom = orbiterConf->get_lighting_scenarios();
-      this->qorbiterUIwin->rootContext()->setContextProperty("lightingModel", myRoom); //custom list item provided
+      LightingScenarioModel *roomLights = new LightingScenarioModel(new LightingScenarioItem, this);
+      roomLights = orbiterConf->get_lighting_scenarios();
+     this->qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights); //custom list item provided
 
     }
+
 
  return true;
 }
@@ -329,16 +328,13 @@ bool qorbiterManager::getConf(int pPK_Device)
     m_pOrbiterCat = 5;
    s_onOFF = "1";
    qDebug() << "PK_Device No:" << iPK_Device;
-  //  qDebug() << "User: " << iPK_User;
-    //qDebug() << "EA: " << QString::fromStdString(sEntertainArea);
-    //qDebug() << "Room: " << iFK_Room;
-    //qDebug() << "On/OFF:" << qPrintable(s_onOFF);
 
 
   qorbiterUIwin->rootContext()->setContextObject(this);
-    return true;
+ return true;
 
 }
+
 //experimental skin swappping method. what should happen here is a call to qDeclarative engine to change
 //source import directory, thereby changing the effective skin. This is why the base compnents need to be
 //seperate from the screens them selves. the screen can and will refer to base standard object and if people
@@ -402,6 +398,20 @@ bool qorbiterManager::requestDataGrid(QString s, QString sType)
     qDebug() << " Datagrid Request Counter: " << m_dwIDataGridRequestCounter;
     pqOrbiter->dataGridRequest( s.toStdString());
 
+}
+
+void qorbiterManager::setActiveRoom()
+{
+    LightingScenarioModel *dummy = new LightingScenarioModel(new LightingScenarioItem, this);
+    QImage img = QImage("qrc:icons/user.png");
+    QString buttonLabel = QString("Test Button1");
+    dummy->appendRow(new LightingScenarioItem( buttonLabel ,QString("stuff1"), QString("params"), QString("command"), QString("gotoscreen?"), img, dummy));
+    qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", dummy );
+    qDebug() << "lights CHanged";
+}
+
+void qorbiterManager::setCurrentUser()
+{
 }
 
 

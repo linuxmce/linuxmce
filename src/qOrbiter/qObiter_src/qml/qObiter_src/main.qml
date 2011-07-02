@@ -8,6 +8,7 @@ import QtQuick 1.0
      property string currentuser: "lang"
      property string currentroom: ""
      property string currentusers:currentuserz
+     property string currentRoomLights: lightingModel
 
      function screenchange(screenname)
      {

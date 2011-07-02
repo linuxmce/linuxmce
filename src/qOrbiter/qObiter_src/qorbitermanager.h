@@ -8,6 +8,7 @@
 #include <QDeclarativeItem>
 #include <QStringList>
 #include <datamodels/locationmodel.h>
+#include <datamodels/lightingscenariomodel.h>
 
 /*----custom classes-------*/
 #include <qOrbiterData.h>                       //own version of OrbiterData.h
@@ -48,17 +49,22 @@ public:
     QObject *item;                                  //qObject reference to UI
     bool refreshUI();
     void swapSkins();
-    ListModel *model;
+
     basicImageProvider *basicProvider;
     GridIndexProvider *advancedProvider;
     QString *gridReqType;
     qOrbiterGenerator * orbiterConf;
-    LocationModel *m_lRooms;
 
+    //listmodels
+    LocationModel *m_lRooms;
+    ListModel *model;
+    UserModel *userList;
+    LightingScenarioModel *roomLights;
 
     //ui functions
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}
-
+    Q_INVOKABLE void setActiveRoom();
+    Q_INVOKABLE void setCurrentUser();
     //class objects
     DCE::qOrbiter * pqOrbiter;                  //reference to forward declared dce object
 
@@ -94,11 +100,11 @@ public:
     string s_RouterIP;               // string of the router ip
     bool dceBool;                   //
     bool bLocalMode;                //local running flag, for running without router.
-
+    //LightingScenarioModel *dummy;
 
     string sEntertainArea;          //current entertain area int
     int iPK_User;                    //current user
-    UserModel *userList;
+
 
     QMap <QString, int> mp_Users;
 

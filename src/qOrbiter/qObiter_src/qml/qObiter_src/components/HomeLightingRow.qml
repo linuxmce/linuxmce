@@ -1,8 +1,4 @@
 import QtQuick 1.0
-
-
-
-
 Rectangle {
     property alias rowlabel: rowheader.buttontext
     height: 65
@@ -65,7 +61,7 @@ Row {
             id: lightingScenarios
             width: 300
             height: 50
-            model: lightingModel
+            model: currentRoomLights
             orientation:ListView.Horizontal
             delegate: ButtonSq {
                 id: but

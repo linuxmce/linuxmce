@@ -59,9 +59,11 @@ Rectangle {
                          anchors.fill: parent
                          onClicked:
                          {
+                            setActiveRoom()
                             rooms.state = "Default"
                              console.log(index)
                              roombutton.buttontext = Title
+
                          }
                         }
                     }

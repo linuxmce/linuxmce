@@ -7,7 +7,7 @@
 class LightingScenarioItem: public ListItem
 {
          Q_OBJECT
-         Q_PROPERTY(QImage buttonImage READ buttonImage NOTIFY imageChanged)
+        // Q_PROPERTY(QImage buttonImage READ buttonImage NOTIFY imageChanged)
 
         public:
           enum Roles {
@@ -20,13 +20,15 @@ class LightingScenarioItem: public ListItem
           };
 
         public:
+
           LightingScenarioItem(QObject *parent = 0): ListItem(parent) {}
-          explicit LightingScenarioItem( QString name,  QString label,  QString parameter,  QString scommand,  QString gotoScreen , QImage img, QObject *parent);
+          explicit LightingScenarioItem( const QString &name,  const QString &label, const  QString &parameter, const QString &scommand, const  QString &gotoScreen , QImage img, QObject *parent=0);
+
           QVariant data(int role) const;
           QHash<int, QByteArray> roleNames() const;
-          void setPrice(qreal price);
+
+
           inline QString id() const { return m_name; }
-          inline QString name() const { return m_name; }            //name role
           inline QString label() const { return m_label; }
           inline QString params() const { return m_param; }
           inline QString command() const { return m_command; }

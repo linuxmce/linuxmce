@@ -21,9 +21,11 @@ Q_OBJECT
   public:
     LocationItem(QObject *parent = 0): ListItem(parent) {}
     explicit LocationItem(const QString &name, const int &iRoom, const QString &sTitle, const int &ea, QObject *parent = 0);
+
     QVariant data(int role) const;
     QHash<int, QByteArray> roleNames() const;
-    void setPrice(qreal price);
+
+
     inline QString id() const { return m_name; }
     inline int roomVal() const { return m_val; }
     inline QString title() const { return m_title; }

@@ -7,10 +7,15 @@
 #include <QList>
 #include <QVariant>
 
+
+  class LightingScenarioItem;
+
+
 class LightingScenarioModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
+
     explicit LightingScenarioModel(LightingScenarioItem *prototype, QObject* parent = 0);
     ~LightingScenarioModel();
 
