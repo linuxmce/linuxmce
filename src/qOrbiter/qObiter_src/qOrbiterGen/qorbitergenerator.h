@@ -10,6 +10,7 @@
 #include <qOrbiterData.h>
 #include <QDebug>
 #include <datamodels/usermodel.h>
+#include <datamodels/lightingscenariomodel.h>
 
 #include "PlutoUtils/DatabaseUtils.h"
 #include "DCE/DCEConfig.h"
@@ -146,7 +147,7 @@ public slots:
     UserModel* get_users();                 //returns custom list model of users
     QHash  <QString, int> get_locations();  //returns locations in hash map
     bool get_virtual_devices();             //returns virtual devices (plugins)
-    bool get_lighting_scenarios();          //lighting scenarios
+    LightingScenarioModel* get_lighting_scenarios();          //lighting scenarios
 
 
 private:

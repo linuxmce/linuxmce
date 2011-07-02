@@ -2,7 +2,7 @@ import QtQuick 1.0
 
 
 Rectangle {
-    property string currentuser: ""
+
     id: rectangle1
     width: 65
     height: 50
@@ -14,7 +14,7 @@ Rectangle {
     }
     Text {
         id: nameLabel
-        text: currentuser
+        text: sDefaultUser
         font.bold:true
 
     }
@@ -65,7 +65,7 @@ Rectangle {
         id: text1
         x: 76
         y: 4
-        text: "text"
+        text: currentuser
         visible: false
         font.pixelSize: 12
         opacity: 0

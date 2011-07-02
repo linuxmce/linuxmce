@@ -39,6 +39,7 @@ class qorbiterManager : public QWidget
 public:
      qorbiterManager(QWidget *parent = 0);  //constructor
 
+    QString *sPK_User;
 
     //ui variables
     QString currentSkin;
@@ -70,6 +71,8 @@ public:
     bool getConf(int pPK_Device);
     bool OrbiterGen();              //prelim orbter generation
 
+
+
     //virtual devices
     long iPK_Device_DatagridPlugIn;
     int m_pDevice_ScreenSaver;
@@ -95,12 +98,14 @@ public:
 
     string sEntertainArea;          //current entertain area int
     int iPK_User;                    //current user
-    QString sPK_User;
+    UserModel *userList;
+
     QMap <QString, int> mp_Users;
 
     int iFK_Room;                    //current room
    QString sPK_Room;
     QMap <QString, int> mp_rooms;
+
 
     QString s_onOFF;
 
@@ -115,8 +120,10 @@ signals:
       void orbiterReady();
       void orbiterClosing();
 
+
 public slots:
       //ui related slots
+
    Q_INVOKABLE bool gotoQScreen(QString ) ;
         //qt c++ related slots
     bool requestDataGrid(QString s, QString sType);

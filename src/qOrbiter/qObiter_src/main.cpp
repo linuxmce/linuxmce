@@ -206,13 +206,13 @@ int main(int argc, char* argv[])
         {
             //qt orbiter ui intialization
             QApplication::setGraphicsSystem("raster");
-               QApplication a(argc, argv);
+            QApplication a(argc, argv);
 
-               qorbiterManager * w = new qorbiterManager;
-               bool bLocalMode = false;
-               w->setupLmce(PK_Device, sRouter_IP, true, bLocalMode);
+            qorbiterManager * w = new qorbiterManager;
+            bool bLocalMode = false;
+            w->setupLmce(PK_Device, sRouter_IP, true, bLocalMode);
 
-               a.exec();
+            a.exec();
              // intialziation end
 
         }

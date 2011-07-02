@@ -12,6 +12,7 @@
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
 #include "qorbitermanager.h"
+#include <datamodels/lightingscenariomodel.h>
 
 #include "pluto_main/Database_pluto_main.h"
 #include "pluto_main/Table_Screen.h"
@@ -374,19 +375,20 @@ bool qOrbiterGenerator::CommonControlledVia(Row_Device *pRow_Device1,Row_Device 
         return false;
 }
 
-     bool qOrbiterGenerator::get_lighting_scenarios()
-     {
-         Row_CommandGroup *lightingArray;
-vector<Row_CommandGroup *> lightArrays;
-m_spDatabase_pluto_main->CommandGroup_get()->GetRows(" FK_Array = "+ StringUtils::itos(ARRAY_Lighting_Scenarios_CONST), &lightArrays);
-
-
-for (int cnt =0; cnt < lightArrays.size(); cnt++)
+LightingScenarioModel* qOrbiterGenerator::get_lighting_scenarios()
 {
+    LightingScenarioModel *testroom = new LightingScenarioModel(new LightingScenarioItem, this);
+    Row_CommandGroup *lightingArray;
+    vector<Row_CommandGroup *> lightArrays;
+    m_spDatabase_pluto_main->CommandGroup_get()->GetRows(" FK_Array = "+ StringUtils::itos(ARRAY_Lighting_Scenarios_CONST), &lightArrays);
 
-    Row_CommandGroup *tRow = lightArrays.at(cnt);
-    qDebug() << tRow->Description_get().c_str();
+    for (int cnt =0; cnt < lightArrays.size(); cnt++)
+        {
+             QImage img = QImage("qrc:icons/user.png");
+            Row_CommandGroup *tRow = lightArrays.at(cnt);
+            testroom->appendRow(new LightingScenarioItem(QString::fromStdString(tRow->Description_get()), QString::fromStdString(tRow->Description_get()), QString("params"), QString("command"), QString("gotoscreen?"), img, testroom));
+
+            }
+
+             return testroom;
 }
-
-    return true;
-     }

@@ -249,7 +249,9 @@ bool qorbiterManager::refreshUI()
    return true;
 }
 
-
+/* This function serves to create the data needed to run orbiter. Its currently set to run automatically
+  when it connect, but that will change
+  */
 bool qorbiterManager::OrbiterGen()
 {
 
@@ -268,7 +270,7 @@ bool qorbiterManager::OrbiterGen()
    */
       QHash<QString, int > room_hash;
       room_hash = orbiterConf->get_locations();
-      orbiterConf->get_lighting_scenarios();
+
       m_lRooms = new LocationModel(new LocationItem, this);
 
        /*
@@ -294,14 +296,23 @@ bool qorbiterManager::OrbiterGen()
          */
 
        UserModel *userList = new UserModel( new UserItem, this);
+
        userList = orbiterConf->get_users();
-       QString sDefaultUser;
-       sDefaultUser =  userList->findDefault(userList->defaultUser);
+       userList->findDefault();
+
+       QString *sPK_User = new QString(userList->defaultUzer);
 
        this->qorbiterUIwin->rootContext()->setContextProperty("userList", userList); //custom list item provided
-       qorbiterUIwin->setProperty("currentusers", QString::number(userList->defaultUser));
+       //qorbiterUIwin->setProperty("currentuser", QVariant::fromValue(&sPK_User));
 
        qDebug()<< userList->defaultUser;
+
+       /*
+         Lighting Scenarios
+         */
+       LightingScenarioModel *myRoom = new LightingScenarioModel(new LightingScenarioItem, this);
+      myRoom = orbiterConf->get_lighting_scenarios();
+      this->qorbiterUIwin->rootContext()->setContextProperty("lightingModel", myRoom); //custom list item provided
 
     }
 
@@ -323,7 +334,7 @@ bool qorbiterManager::getConf(int pPK_Device)
     //qDebug() << "Room: " << iFK_Room;
     //qDebug() << "On/OFF:" << qPrintable(s_onOFF);
 
-    qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
+
   qorbiterUIwin->rootContext()->setContextObject(this);
     return true;
 
@@ -392,8 +403,5 @@ bool qorbiterManager::requestDataGrid(QString s, QString sType)
     pqOrbiter->dataGridRequest( s.toStdString());
 
 }
-
-
-
 
 

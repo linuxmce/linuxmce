@@ -34,7 +34,7 @@ Rectangle {
         id:roombutton
         width: 50
         height: 50
-        buttontext:"currentroom"
+        buttontext:currentroom
             }
 
            ListView {

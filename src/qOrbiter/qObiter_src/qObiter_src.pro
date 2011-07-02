@@ -43,7 +43,9 @@ SOURCES += main.cpp \
     datamodels/locationmodel.cpp \
     datamodels/locationitem.cpp \
     datamodels/usermodel.cpp \
-    datamodels/useritem.cpp
+    datamodels/useritem.cpp \
+    datamodels/lightingscenariomodel.cpp \
+    datamodels/lightingscenarioitem.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -72,7 +74,9 @@ HEADERS += \
     datamodels/locationmodel.h \
     datamodels/locationitem.h \
     datamodels/usermodel.h \
-    datamodels/useritem.h
+    datamodels/useritem.h \
+    datamodels/lightingscenariomodel.h \
+    datamodels/lightingscenarioitem.h
 
 OTHER_FILES += \
     qml/skins/scheme/classic/Main.qml \
@@ -127,7 +131,9 @@ OTHER_FILES += \
     img/icons/agt_multimedia.png \
     img/icons/agt_mp3.png \
     img/icons/agt_home.png \
-    img/icons/agt_games.png
+    img/icons/agt_games.png \
+    img/icons/On.png \
+    img/icons/Off.png
 
 RESOURCES += \
     skinData.qrc

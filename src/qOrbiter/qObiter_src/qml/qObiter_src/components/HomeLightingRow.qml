@@ -65,7 +65,7 @@ Row {
             id: lightingScenarios
             width: 300
             height: 50
-            model: lightingmodel
+            model: lightingModel
             orientation:ListView.Horizontal
             delegate: ButtonSq {
                 id: but
@@ -73,14 +73,18 @@ Row {
                 width: style.buttonW
                 color: style.button_action_color
                 radius: style.but_smooth
-                buttontext: name
+                buttontext: label
                 buttontextfontsize: 12
                 buttontextbold: true
                 buttontextzindex: 30
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: console.log ("I am button:" + index + ". My Name is:"+ label+". My Params:" + params +". And my Command:" + command)
+                }
 
 
                 Image {
-                    source: img
+                    source: "../../../img/icons/"+label+".png"
                     height: style.iconHeight
                     width: style.iconWidth
                     anchors.centerIn: parent

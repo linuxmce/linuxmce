@@ -76,12 +76,7 @@ bool qOrbiter::GetConfig()
                 return false;
         }
 
-
-
-        // qmlUI->iPK_User = 1;
-       // qDebug() << qmlUI->iPK_Device_DatagridPlugIn;
 	return true;
-
 
 }
 

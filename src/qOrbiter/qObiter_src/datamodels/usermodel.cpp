@@ -5,6 +5,7 @@ UserModel::UserModel(UserItem* prototype, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype)
 {
   setRoleNames(m_prototype->roleNames());
+
 }
 
 int UserModel::rowCount(const QModelIndex &parent) const
@@ -109,12 +110,16 @@ UserItem * UserModel::takeRow(int row)
   return item;
 }
 
-QString UserModel::findDefault( int &defaultUser) const
+void UserModel::findDefault( )
 {
-    for (int cnt = 0; cnt > m_list.size(); cnt++)
-    {
-        if(m_list.at(cnt)->pk_user_get() == defaultUser) return m_list.at(cnt)->id();
+    defaultUser = m_list.at(0)->default_user();
 
+    for (int cnt = 0; cnt < m_list.length(); cnt++)
+    {
+
+        if (m_list.at(cnt)->pk_user_get() == defaultUser)
+        {
+         defaultUzer = m_list.at(cnt)->id();
+        }
     }
-    return 0;
 }

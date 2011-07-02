@@ -26,12 +26,13 @@ public:
     bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
     UserItem* takeRow(int row);
     UserItem* find(const QString &id) const;
-    QString  findDefault(int &defaultUser) const;
+    void  findDefault() ;
     QModelIndex indexFromItem( const UserItem* item) const;
     void clear();
 
     int defaultUser;           //when properly set, it will contain the default user for this orbiter / location
-  private slots:
+    QString defaultUzer;
+private slots:
     void handleItemChange();
 
   private:
