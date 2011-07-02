@@ -30,7 +30,7 @@ while ($romName = <STDIN>)
 	$imgType=0;
 	chomp($romName);
 	## Get page, open stream to its contents in prep for scrape
-	$agent->get("http://www.mobygames.com/search/quick?q=".uri_escape($romName)."&p=29&search=Go");
+	$agent->get("http://www.mobygames.com/search/quick?q=".uri_escape($romName)."&p=27&search=Go");
 	my $stream = HTML::TokeParser->new(\$agent->{content});
 	
 	while (my $token = $stream->get_tag("a"))
