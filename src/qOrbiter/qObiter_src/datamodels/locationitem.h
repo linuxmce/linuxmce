@@ -14,13 +14,14 @@ Q_OBJECT
       NameRole = Qt::UserRole+1,
       EaRole,
       intRole,
-      TitleRole
+      TitleRole,
+        TypeRole
 
     };
 
   public:
     LocationItem(QObject *parent = 0): ListItem(parent) {}
-    explicit LocationItem(const QString &name, const int &iRoom, const QString &sTitle, const int &ea, QObject *parent = 0);
+    explicit LocationItem(const QString &name, const int &iRoom, const QString &sTitle, const int &ea, const int &roomType, QObject *parent = 0);
 
     QVariant data(int role) const;
     QHash<int, QByteArray> roleNames() const;
@@ -30,11 +31,13 @@ Q_OBJECT
     inline int roomVal() const { return m_val; }
     inline QString title() const { return m_title; }
     inline int entertain_area() const { return m_iEA; }
+    inline int room_type() const {return m_iType;}
 
   private:
     QString m_name;
     int m_val;
     int m_iEA;
+    int m_iType;
     QString m_title;
 
 

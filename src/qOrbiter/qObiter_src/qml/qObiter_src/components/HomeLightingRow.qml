@@ -64,6 +64,7 @@ Row {
             model: currentRoomLights
             orientation:ListView.Horizontal
             delegate: ButtonSq {
+
                 id: but
                 height: style.buttonH
                 width: style.buttonW
@@ -73,6 +74,9 @@ Row {
                 buttontextfontsize: 12
                 buttontextbold: true
                 buttontextzindex: 30
+
+
+
                 MouseArea{
                     anchors.fill: parent
                     onClicked: console.log ("I am button:" + index + ". My Name is:"+ label+". My Params:" + params +". And my Command:" + command)
@@ -85,8 +89,15 @@ Row {
                     width: style.iconWidth
                     anchors.centerIn: parent
                         }
+                ListView.onRemove: SequentialAnimation {
+                            PropertyAction { target: lightingScenarios; property: "ListView.delayRemove"; value: true }
+                            NumberAnimation { target: lightingScenarios; property: "scale"; to: 0; duration: 250; easing.type: Easing.InOutQuad }
+                            PropertyAction { target: lightingScenarios; property: "ListView.delayRemove"; value: false }
+                        }
+                    }
+
                     }
                 }
             }
         }
-}
+

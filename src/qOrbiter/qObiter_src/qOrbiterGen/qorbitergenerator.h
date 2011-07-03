@@ -11,6 +11,8 @@
 #include <QDebug>
 #include <datamodels/usermodel.h>
 #include <datamodels/lightingscenariomodel.h>
+#include <datamodels/locationmodel.h>
+
 
 #include "PlutoUtils/DatabaseUtils.h"
 #include "DCE/DCEConfig.h"
@@ -50,6 +52,8 @@ public:
    class Row_Language *m_pRow_Language;
    class Row_Users * userList;
    class RegenMonitor *m_pRegenMonitor;
+   class Row_CommandGroup_Room *m_pRowCommandGroup_Room;
+
 
     /* Orbiter Specific Variables */
 
@@ -97,7 +101,12 @@ public:
      int m_iRoom;
      int m_iUser;
 
+     QString *tempstring;
      QMap <QString, int> devices;
+     QMap <QString, int> eaList;
+     QMap <QString, int> roomList;
+     QMap <int, int> restrictedUser;
+
 
     qOrbiterGenerator( int PK_Orbiter,string DBHost,string DBUser,string DBPassword,string DBName,int DBPort, QWidget *parent=0)
 {
@@ -145,9 +154,9 @@ signals:
 public slots:
     bool initializeRegen();                 //manages connection to database
     UserModel* get_users();                 //returns custom list model of users
-    QHash  <QString, int> get_locations();  //returns locations in hash map
+    LocationModel* get_locations(int defEA);  //returns locations in hash map
     bool get_virtual_devices();             //returns virtual devices (plugins)
-    LightingScenarioModel* get_lighting_scenarios();          //lighting scenarios
+    QMap <int , LightingScenarioModel*> get_lighting_scenarios();          //lighting scenarios
 
 
 private:

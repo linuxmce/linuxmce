@@ -63,7 +63,7 @@ public:
 
     //ui functions
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}
-    Q_INVOKABLE void setActiveRoom();
+    Q_INVOKABLE void setActiveRoom(int room,int ea);
     Q_INVOKABLE void setCurrentUser();
     //class objects
     DCE::qOrbiter * pqOrbiter;                  //reference to forward declared dce object
@@ -109,8 +109,10 @@ public:
     QMap <QString, int> mp_Users;
 
     int iFK_Room;                    //current room
+    int iea_area;
    QString sPK_Room;
     QMap <QString, int> mp_rooms;
+    QMap <int, LightingScenarioModel*> roomLightingScenarios;
 
 
     QString s_onOFF;

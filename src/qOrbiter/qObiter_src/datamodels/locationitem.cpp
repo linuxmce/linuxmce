@@ -1,7 +1,7 @@
 #include <datamodels/locationmodel.h>
 
-LocationItem::LocationItem(const QString &name, const int &iRoom, const QString &sTitle, const int &ea, QObject *parent) :
-    ListItem(parent), m_name(name), m_val(iRoom), m_title(sTitle)
+LocationItem::LocationItem(const QString &name, const int &iRoom, const QString &sTitle, const int &ea,const int &roomType, QObject *parent) :
+    ListItem(parent), m_name(name), m_val(iRoom), m_title(sTitle), m_iEA(ea), m_iType(roomType)
 {
 }
 
@@ -13,6 +13,7 @@ QHash<int, QByteArray> LocationItem::roleNames() const
   names[EaRole] = "entertain_area";
   names[intRole] = "intRoom";
   names[TitleRole] = "Title";
+  names[TypeRole] = "room_type";
 
 
   return names;
@@ -29,6 +30,8 @@ QVariant LocationItem::data(int role) const
     return title();
   case intRole:
     return roomVal();
+  case TypeRole:
+      return room_type();
   default:
     return QVariant();
   }

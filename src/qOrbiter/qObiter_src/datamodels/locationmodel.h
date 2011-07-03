@@ -27,6 +27,8 @@ public:
   QModelIndex indexFromItem( const LocationItem* item) const;
   void clear();
 
+  QString default_Ea;
+
 private slots:
   void handleItemChange();
 

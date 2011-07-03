@@ -1,9 +1,18 @@
 import QtQuick 1.0
 
 Rectangle {
+
+
     id: rooms
     width: 50
     height: 50
+
+    transitions: Transition {
+            NumberAnimation { properties: "x,y"; easing.type: Easing.InOutQuad }
+             NumberAnimation { easing.amplitude: 0.5; properties: "height,width"; easing.type: Easing.InOutQuart }
+            ColorAnimation { duration: 300 }
+        }
+
 
     Component {
         id: highlight1
@@ -42,28 +51,30 @@ Rectangle {
                 visible: false
                 model: roomlist
                 highlightFollowsCurrentItem:true
+                height: 5
+                width: 0
 
                 delegate:
                     Rectangle
                  {
                      id: delrect
                      height:20
-                      width: 100
+                      width: 250
 
                      Text {
                              id: somshit
-                             text: Title
+                             text: Title + ":" + intRoom + ", In EA: " + entertain_area
                             }
+
                      MouseArea{
                          id:listMouseArea
                          anchors.fill: parent
                          onClicked:
                          {
-                            setActiveRoom()
+                            setActiveRoom(intRoom, entertain_area)
                             rooms.state = "Default"
-                             console.log(index)
-                             roombutton.buttontext = Title
 
+                             roombutton.buttontext = Title
                          }
                         }
                     }
@@ -85,20 +96,24 @@ Rectangle {
                         visible: false
                     }
 
+
+
                     PropertyChanges {
                         target: rooms
-                        width: 100
+                        width: 250
                         height: 200                       
-                        color: "#eae8c0"
+                        color: "#d1d0be"
                         y: -200
+
+
                     }
 
                     PropertyChanges {
                         target: roomListModel
                         x: 0
                         y: 19
-                        width: 100
-                        height: 181
+                        height: 100
+                        width:250
                         visible: true
 
                     }
@@ -117,12 +132,17 @@ Rectangle {
 
                     PropertyChanges {
                         target: mouse_area1
+                        x: 0
+                        y: 0
+                        width: 250
+                        height: 200
+                        anchors.topMargin: 0
                         visible: false
                     }
 
                     PropertyChanges {
                         target: roomListModel
-                        width: 100
+                        width: 250
                         height: childrenRect.height
                         clip:true
 

@@ -4,11 +4,15 @@ import QtQuick 1.0
      id: item
      signal close()
      signal changeScreen(string s)
+     property string locationinfo: "standby"
 
-     property string currentuser: "lang"
-     property string currentroom: ""
-     property string currentusers:currentuserz
-     property string currentRoomLights: lightingModel
+
+
+      property string currentRoomLights: lightingModel
+    //  property string currentRoomMedia: mediaModel
+    //  property string currentRoomClimate: climateModel
+    //  property string currentRoomTelecom: telecomModel
+    //  property string currentRoomSecurity: lightingModel
 
      function screenchange(screenname)
      {

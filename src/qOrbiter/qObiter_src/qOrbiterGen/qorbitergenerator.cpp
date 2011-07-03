@@ -125,6 +125,8 @@ bool qOrbiterGenerator::connectDB()
 
     }
     m_pRow_Orbiter = m_spDatabase_pluto_main->Orbiter_get()->GetRow(m_iPK_Orbiter);
+    Row_DeviceData * m_pRowDeviceData = m_spDatabase_pluto_main->DeviceData_get()->GetRow(m_iPK_Orbiter);
+
     return true;
 }
 
@@ -162,9 +164,6 @@ UserModel* qOrbiterGenerator::get_users()
                userModelList->appendRow(new UserItem(userName, firstName, lastName, nickName, pkuser,usermode , requirepin, phextension ,image, defaultuser, userModelList));
 
             }
-
-
-
     }
 
     if( !drUsers_Default )
@@ -204,10 +203,21 @@ UserModel* qOrbiterGenerator::get_users()
   return userModelList;
 }
 
-QHash <QString, int> qOrbiterGenerator::get_locations()
+LocationModel* qOrbiterGenerator::get_locations( int defEA)
 {
+    LocationModel *install_locations = new LocationModel(new LocationItem, this);
     int i=0;
     QHash <QString, int> returnHash;
+
+    //setting the default ea
+
+    m_pRow_EntertainArea = m_spDatabase_pluto_main->EntertainArea_get()->GetRow(defEA);
+    //Row_EntertainArea *pRow_Entertain_Area;
+
+    install_locations->default_Ea = QString::fromStdString(m_pRow_EntertainArea->Description_get());
+    eaList[install_locations->default_Ea] = defEA;
+
+
 
     /*  This is tricky with Mysql since there are no full joins or sub-queries.  We have to do it in multiple passes
     string sql = string("SELECT PK_Room,Room.Description AS RoomDescription,") \
@@ -231,15 +241,49 @@ QHash <QString, int> qOrbiterGenerator::get_locations()
     for(size_t s=0;s<vectRow_Users.size();++s)
             m_vectPK_Users_RequiringPIN.push_back( vectRow_Users[s]->PK_Users_get() );
 
+    vector <Row_EntertainArea* > pRow_Entertain_Area;
+
+
     vector<Row_Room *> vectRow_Room;
     m_spDatabase_pluto_main->Room_get()->GetRows("HideFromOrbiter=0 AND FK_Installation=" + StringUtils::itos(m_pRow_Device->FK_Installation_get()),&vectRow_Room);
-    for(size_t s=0;s<vectRow_Room.size();++s)
+    for(size_t s=0;s<vectRow_Room.size();s++)
     {
             Row_Room *pRow_Room = vectRow_Room[s];
             vector<Row_Room_Users *> vectRow_Room_Users;
             pRow_Room->Room_Users_FK_Room_getrows(&vectRow_Room_Users);
 
-            returnHash.insert(QString::fromStdString(pRow_Room->Description_get()), (int)pRow_Room->PK_Room_get());
+
+            //room names
+            QString roomName = QString::fromStdString( pRow_Room->Description_get());
+            int iRoomNumber = pRow_Room->PK_Room_get();
+            int iRoomType = pRow_Room->FK_FloorplanObjectType_get();
+            roomList.insert(roomName, iRoomNumber);
+
+            //getting  ea's for room
+            QMap <QStringList*, int> room_entertain_areas;
+            pRow_Room->EntertainArea_FK_Room_getrows(&pRow_Entertain_Area);
+            QString tempstring = NULL;
+            for (size_t s = 0; s < pRow_Entertain_Area.size(); s++)
+            {
+               Row_EntertainArea *aEntertainRow = pRow_Entertain_Area[s];
+                tempstring = QString::fromStdString(aEntertainRow->Description_get());
+
+
+               if (eaList.contains(tempstring))
+               {
+                  // qDebug () << "Dupe";
+               }
+               else
+               {
+                 // qDebug () << aEntertainRow->Description_get().c_str();
+                  eaList[tempstring]= (int) aEntertainRow->PK_EntertainArea_get();
+               }
+
+            }
+
+            //add it all to a data model
+             install_locations->appendRow(new LocationItem(roomName ,iRoomNumber, roomName, eaList[roomName], iRoomType ));
+              //also adding a map for later reference
 
             // If there are records in Room_Users for this room, then this room has restrictions.  There must be a
             // record in the database with FK_Orbiter=this to explicitly allow this orbiter, or with
@@ -259,6 +303,7 @@ QHash <QString, int> qOrbiterGenerator::get_locations()
             }
 
             qLocationInfo *li = new qLocationInfo();
+
             li->Description = pRow_Room->Description_get();
             li->PK_EntertainArea = 0;
             li->PK_Room = pRow_Room->PK_Room_get();
@@ -277,7 +322,7 @@ QHash <QString, int> qOrbiterGenerator::get_locations()
 
             listLocationInfo.push_back(li);
     }
-return returnHash;
+return install_locations;
 
 }
 
@@ -375,20 +420,48 @@ bool qOrbiterGenerator::CommonControlledVia(Row_Device *pRow_Device1,Row_Device 
         return false;
 }
 
-LightingScenarioModel* qOrbiterGenerator::get_lighting_scenarios()
+/*
+  getting the lighting scenarios by
+  -getting command groups in rooms
+  -parsing that minding the order into the listmodel 1st
+
+  doing a second pass for entertain areas
+
+  */
+QMap <int, LightingScenarioModel*> qOrbiterGenerator::get_lighting_scenarios()
 {
-    LightingScenarioModel *testroom = new LightingScenarioModel(new LightingScenarioItem, this);
+    QMap< int ,LightingScenarioModel*> roomLightMap;
+
     Row_CommandGroup *lightingArray;
-    vector<Row_CommandGroup *> lightArrays;
-    m_spDatabase_pluto_main->CommandGroup_get()->GetRows(" FK_Array = "+ StringUtils::itos(ARRAY_Lighting_Scenarios_CONST), &lightArrays);
 
-    for (int cnt =0; cnt < lightArrays.size(); cnt++)
-        {
-             QImage img = QImage("qrc:icons/user.png");
-            Row_CommandGroup *tRow = lightArrays.at(cnt);
-            testroom->appendRow(new LightingScenarioItem(QString::fromStdString(tRow->Description_get()), QString::fromStdString(tRow->Description_get()), QString("params"), QString("command"), QString("gotoscreen?"), img, testroom));
 
-            }
 
-             return testroom;
+
+    QMap<QString, int>::const_iterator i = roomList.constBegin();
+     while (i != roomList.constEnd())
+     {
+         qDebug() <<"Processing Lighting Scenarios for:" << i.key() << ": " << i.value();
+
+         int ival = i.value();
+         string sql = "LEFT JOIN CommandGroup_Room ON PK_CommandGroup=FK_CommandGroup where FK_Array = ";
+         sql+= StringUtils::itos(ARRAY_Lighting_Scenarios_CONST);
+         sql+= " AND FK_Room= " + StringUtils::itos(ival)  ;
+
+         vector<Row_CommandGroup *> lightArrays;
+         m_spDatabase_pluto_main->CommandGroup_get()->GetRows(sql, &lightArrays);
+
+         LightingScenarioModel *testroom = new LightingScenarioModel(new LightingScenarioItem, this);
+
+         for (int cnt =0; cnt < lightArrays.size(); cnt++)
+                  {
+                    QImage img = QImage("qrc:icons/user.png");
+                    Row_CommandGroup *tRow = lightArrays.at(cnt);
+
+                    testroom->appendRow(new LightingScenarioItem(QString::fromStdString(tRow->Description_get()), QString::fromStdString(tRow->Description_get()), QString("params"), QString("command"), QString("gotoscreen?"), img, testroom));
+
+                  }
+                      roomLightMap.insert(i.value(), testroom );                      ++i;
+        }
+
+ return roomLightMap;
 }

@@ -2,8 +2,9 @@ import QtQuick 1.0
 
 Rectangle {
     property alias clocktime : clock.text
+
     color: "skyblue"
-    width: style.orbiterW
+    width: 800
     height: 45
     anchors.top: parent.top
 
@@ -41,6 +42,8 @@ Rectangle {
         font.pointSize: 12
         anchors.right: parent.right
     }
+
+
 
 
 }

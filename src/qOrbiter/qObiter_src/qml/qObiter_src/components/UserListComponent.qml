@@ -7,6 +7,13 @@ Rectangle {
     width: 65
     height: 50
 
+    transitions: Transition {
+            NumberAnimation { properties: "x,y"; easing.type: Easing.InOutQuad }
+            NumberAnimation { easing.amplitude: 0.5; properties: "height,width"; easing.type: Easing.InOutQuart }
+            ColorAnimation { duration: 300 }
+            reversible: true
+        }
+
     MouseArea{
         id:basemouse
         anchors.fill:parent
@@ -14,7 +21,7 @@ Rectangle {
     }
     Text {
         id: nameLabel
-        text: sDefaultUser
+        text: currentuser
         font.bold:true
 
     }

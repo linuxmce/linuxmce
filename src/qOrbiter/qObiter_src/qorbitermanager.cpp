@@ -266,28 +266,14 @@ bool qorbiterManager::OrbiterGen()
  /*
    this block is responsible for setting up the list of rooms in the home and setting the initial location
    */
-      QHash<QString, int > room_hash;
-      room_hash = orbiterConf->get_locations();
+     QString fk_ea = QString::fromStdString(pqOrbiter->DATA_Get_FK_EntertainArea());
 
-      m_lRooms = new LocationModel(new LocationItem, this);
-
-       /*
-      EaRole,
-      intRole,  cheat sheet
-      TitleRole
-      */
-
-       QHash<QString, int>::const_iterator i = room_hash.constBegin();
-       while (i != room_hash.constEnd())
-       {
-           int eaz = 0;
-           QString roomdesc; roomdesc = i.key();
-           int roomint; roomint = i.value();
-           m_lRooms->appendRow(new LocationItem("rooms list" ,0, roomdesc, roomint));
-           ++i;
-        }
+        iFK_Room = fk_ea.toInt();
+     m_lRooms = new LocationModel(new LocationItem, this);
+     m_lRooms  = orbiterConf->get_locations(iFK_Room);
 
        this->qorbiterUIwin->rootContext()->setContextProperty("roomlist", m_lRooms); //custom room list item provided
+     this->qorbiterUIwin->rootContext()->setContextProperty("currentroom", m_lRooms->default_Ea); //custom room list item provided
 
        /*
          this block sets up users and orbiter authorized users
@@ -298,19 +284,22 @@ bool qorbiterManager::OrbiterGen()
        userList = orbiterConf->get_users();
        userList->findDefault();
 
-       QString *sPK_User = new QString(userList->defaultUzer);
+       QString sPK_User = userList->defaultUzer;
 
        this->qorbiterUIwin->rootContext()->setContextProperty("userList", userList); //custom list item provided
-      // qorbiterUIwin->setProperty("currentuser", QVariant::fromValue(&sPK_User));
+      qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
 
-       qDebug()<< userList->defaultUser;
+      // qDebug()<< userList->defaultUser;
 
        /*
          Lighting Scenarios
          */
+      roomLightingScenarios = orbiterConf->get_lighting_scenarios();
+
       LightingScenarioModel *roomLights = new LightingScenarioModel(new LightingScenarioItem, this);
-      roomLights = orbiterConf->get_lighting_scenarios();
-     this->qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights); //custom list item provided
+
+      roomLights = roomLightingScenarios.value(iFK_Room);
+     qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights); //custom list item provided
 
     }
 
@@ -400,14 +389,11 @@ bool qorbiterManager::requestDataGrid(QString s, QString sType)
 
 }
 
-void qorbiterManager::setActiveRoom()
+void qorbiterManager::setActiveRoom(int room,int ea)
 {
-    LightingScenarioModel *dummy = new LightingScenarioModel(new LightingScenarioItem, this);
-    QImage img = QImage("qrc:icons/user.png");
-    QString buttonLabel = QString("Test Button1");
-    dummy->appendRow(new LightingScenarioItem( buttonLabel ,QString("stuff1"), QString("params"), QString("command"), QString("gotoscreen?"), img, dummy));
-    qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", dummy );
-    qDebug() << "lights CHanged";
+    roomLights = roomLightingScenarios.value(room);
+    qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights);
+    qDebug() << "lights CHanged to room" << room;
 }
 
 void qorbiterManager::setCurrentUser()
