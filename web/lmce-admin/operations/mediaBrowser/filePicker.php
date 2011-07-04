@@ -21,7 +21,7 @@ function filePicker($output,$mediadbADO,$dbADO) {
 
 		<script>
 		function setFile(value){
-			opener.document.forms[0].CommandParameterValue_'.$cgcID.'_'.$cp.'.value=value;
+			opener.document.forms[0].CommandParameterValue_'.$cgcID.'_'.$cp.'.value="!F"+value;
 			opener.focus();
 			self.close();
 		}
