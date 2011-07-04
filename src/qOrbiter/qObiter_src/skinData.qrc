@@ -1,5 +1,7 @@
 <RCC>
-    <qresource prefix="/default"/>
+    <qresource prefix="/default">
+        <file>qml/qObiter_src/main.qml</file>
+    </qresource>
     <qresource prefix="/skins"/>
     <qresource prefix="/img">
         <file alias="splash.jpg">img/lmcesplash.jpg</file>

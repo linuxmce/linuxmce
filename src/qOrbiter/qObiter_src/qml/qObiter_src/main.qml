@@ -5,10 +5,7 @@ import QtQuick 1.0
      signal close()
      signal changeScreen(string s)
      property string locationinfo: "standby"
-
-
-
-      property string currentRoomLights: lightingModel
+     //property string currentRoomLights: lightingModel
     //  property string currentRoomMedia: mediaModel
     //  property string currentRoomClimate: climateModel
     //  property string currentRoomTelecom: telecomModel

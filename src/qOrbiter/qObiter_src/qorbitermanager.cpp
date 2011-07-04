@@ -113,8 +113,8 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     qorbiterUIwin->engine()->addImageProvider("datagridimg", new basicImageProvider);
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
 
-    qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/main.qml"));
-    qorbiterUIwin->engine()->addImportPath("qml/components");
+    qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/qObiter_src/main.qml"));
+    //qorbiterUIwin->engine()->addImportPath("qml/qObiter_src/components");
     QObject *item= qorbiterUIwin->rootObject();
     qorbiterUIwin->showFullScreen();
     gotoQScreen("Splash.qml");

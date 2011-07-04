@@ -57,13 +57,6 @@ HEADERS += \
     uiclasses/lightingui.h \
     uiclasses/uicontroller.h \
     qorbitermanager.h \
-    listModel.h \
-    gridItem.h \
-    gridimageprovider.h \
-    basicImageProvider.h \
-    qorbitergenerator.h \
-    orbitermodel.h \
-    orbiteritem.h \
     qOrbiterData.h \
     qOrbiterGen/qorbitergenerator.h \
     datamodels/listModel.h \
