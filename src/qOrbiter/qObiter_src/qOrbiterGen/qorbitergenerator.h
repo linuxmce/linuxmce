@@ -154,7 +154,7 @@ signals:
 public slots:
     bool initializeRegen();                 //manages connection to database
     UserModel* get_users();                 //returns custom list model of users
-    LocationModel* get_locations(int defEA);  //returns locations in hash map
+    LocationModel* get_locations(QString defEA);  //returns locations in hash map
     bool get_virtual_devices();             //returns virtual devices (plugins)
     QMap <int , LightingScenarioModel*> get_lighting_scenarios();          //lighting scenarios
 

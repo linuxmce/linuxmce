@@ -267,20 +267,17 @@ bool qorbiterManager::OrbiterGen()
    this block is responsible for setting up the list of rooms in the home and setting the initial location
    */
      QString fk_ea = QString::fromStdString(pqOrbiter->DATA_Get_FK_EntertainArea());
-
-        iFK_Room = fk_ea.toInt();
      m_lRooms = new LocationModel(new LocationItem, this);
-     m_lRooms  = orbiterConf->get_locations(iFK_Room);
+     m_lRooms  = orbiterConf->get_locations(fk_ea);
 
        this->qorbiterUIwin->rootContext()->setContextProperty("roomlist", m_lRooms); //custom room list item provided
-     this->qorbiterUIwin->rootContext()->setContextProperty("currentroom", m_lRooms->default_Ea); //custom room list item provided
+     this->qorbiterUIwin->rootContext()->setContextProperty("currentroom", m_lRooms->sdefault_Ea); //custom room list item provided
 
        /*
          this block sets up users and orbiter authorized users
          */
 
        UserModel *userList = new UserModel( new UserItem, this);
-
        userList = orbiterConf->get_users();
        userList->findDefault();
 
@@ -298,7 +295,8 @@ bool qorbiterManager::OrbiterGen()
 
       LightingScenarioModel *roomLights = new LightingScenarioModel(new LightingScenarioItem, this);
 
-      roomLights = roomLightingScenarios.value(iFK_Room);
+      roomLights = roomLightingScenarios.value(m_lRooms->rdefault_Ea);
+
      qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights); //custom list item provided
 
     }

@@ -124,8 +124,10 @@ bool qOrbiterGenerator::connectDB()
         LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Device %d Found!", m_iPK_Orbiter);
 
     }
+
     m_pRow_Orbiter = m_spDatabase_pluto_main->Orbiter_get()->GetRow(m_iPK_Orbiter);
     Row_DeviceData * m_pRowDeviceData = m_spDatabase_pluto_main->DeviceData_get()->GetRow(m_iPK_Orbiter);
+
 
     return true;
 }
@@ -203,7 +205,7 @@ UserModel* qOrbiterGenerator::get_users()
   return userModelList;
 }
 
-LocationModel* qOrbiterGenerator::get_locations( int defEA)
+LocationModel* qOrbiterGenerator::get_locations( QString defEA)
 {
     LocationModel *install_locations = new LocationModel(new LocationItem, this);
     int i=0;
@@ -211,11 +213,11 @@ LocationModel* qOrbiterGenerator::get_locations( int defEA)
 
     //setting the default ea
 
-    m_pRow_EntertainArea = m_spDatabase_pluto_main->EntertainArea_get()->GetRow(defEA);
+    //m_pRow_EntertainArea = m_spDatabase_pluto_main->EntertainArea_get()->GetRow(1);
     //Row_EntertainArea *pRow_Entertain_Area;
 
-    install_locations->default_Ea = QString::fromStdString(m_pRow_EntertainArea->Description_get());
-    eaList[install_locations->default_Ea] = defEA;
+    //install_locations->default_Ea = (int) m_pRow_EntertainArea->PK_EntertainArea_get();
+  //  eaList[QString::fromStdString(m_pRow_EntertainArea->Description_get())] = install_locations->default_Ea;
 
 
 
@@ -259,6 +261,7 @@ LocationModel* qOrbiterGenerator::get_locations( int defEA)
             int iRoomType = pRow_Room->FK_FloorplanObjectType_get();
             roomList.insert(roomName, iRoomNumber);
 
+
             //getting  ea's for room
             QMap <QStringList*, int> room_entertain_areas;
             pRow_Room->EntertainArea_FK_Room_getrows(&pRow_Entertain_Area);
@@ -275,8 +278,18 @@ LocationModel* qOrbiterGenerator::get_locations( int defEA)
                }
                else
                {
-                 // qDebug () << aEntertainRow->Description_get().c_str();
+
                   eaList[tempstring]= (int) aEntertainRow->PK_EntertainArea_get();
+                  QString currentEA = QString::number(aEntertainRow->PK_EntertainArea_get());
+
+                  if ( currentEA == defEA)
+                  {
+                      qDebug() << tempstring;
+                      install_locations->sdefault_Ea= roomName;
+                      install_locations->idefault_Ea= aEntertainRow->PK_EntertainArea_get();
+                      install_locations->rdefault_Ea = aEntertainRow->FK_Room_get();
+
+                  }
                }
 
             }
@@ -288,7 +301,8 @@ LocationModel* qOrbiterGenerator::get_locations( int defEA)
             // If there are records in Room_Users for this room, then this room has restrictions.  There must be a
             // record in the database with FK_Orbiter=this to explicitly allow this orbiter, or with
             // FK_Orbiter=NULL to allow all orbiters
-            if(vectRow_Room_Users.size())
+           /*
+             if(vectRow_Room_Users.size())
             {
                     size_t s;
                     for(s=0;s<vectRow_Room_Users.size();++s)
@@ -321,6 +335,7 @@ LocationModel* qOrbiterGenerator::get_locations( int defEA)
             }
 
             listLocationInfo.push_back(li);
+                    */
     }
 return install_locations;
 
@@ -434,9 +449,6 @@ QMap <int, LightingScenarioModel*> qOrbiterGenerator::get_lighting_scenarios()
 
     Row_CommandGroup *lightingArray;
 
-
-
-
     QMap<QString, int>::const_iterator i = roomList.constBegin();
      while (i != roomList.constEnd())
      {
@@ -460,7 +472,7 @@ QMap <int, LightingScenarioModel*> qOrbiterGenerator::get_lighting_scenarios()
                     testroom->appendRow(new LightingScenarioItem(QString::fromStdString(tRow->Description_get()), QString::fromStdString(tRow->Description_get()), QString("params"), QString("command"), QString("gotoscreen?"), img, testroom));
 
                   }
-                      roomLightMap.insert(i.value(), testroom );                      ++i;
+                      roomLightMap.insert(i.value(), testroom );   ++i;
         }
 
  return roomLightMap;

@@ -1,10 +1,6 @@
 <RCC>
-    <qresource prefix="/default">
-        <file>qml/main.qml</file>
-    </qresource>
-    <qresource prefix="/skins">
-        <file>qml/skins/scheme/classic/Main.qml</file>
-    </qresource>
+    <qresource prefix="/default"/>
+    <qresource prefix="/skins"/>
     <qresource prefix="/img">
         <file alias="splash.jpg">img/lmcesplash.jpg</file>
     </qresource>

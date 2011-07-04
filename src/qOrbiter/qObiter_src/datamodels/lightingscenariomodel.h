@@ -31,6 +31,8 @@ public:
     QModelIndex indexFromItem( const LightingScenarioItem* item) const;
     void clear();
 
+    int *default_ea;
+
   private slots:
     void handleItemChange();
 
