@@ -166,7 +166,7 @@
 #define SCREEN_Get_Capture_Card_Audio_Port_CONST 165
 #define SCREEN_Apple_2_Remote_CONST 166
 #define SCREEN_Apple_2_FS_CONST 167
-#define SCREEN_AudiLighting_CONST 168
+#define SCREEN_Commodore_Remote_CONST 168
 #define SCREEN_AudiClimate_CONST 169
 #define SCREEN_AudiSecurity_CONST 170
 #define SCREEN_AudiTelecom_CONST 171

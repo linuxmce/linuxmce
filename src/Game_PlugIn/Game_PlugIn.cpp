@@ -492,6 +492,36 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
                 pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_apple2_CONST;
         }
 
+	if (mediaURL.find("/vic20") != string::npos
+		|| StringUtils::ToLower(mediaURL).find(".20") != string::npos
+		|| StringUtils::ToLower(mediaURL).find(".40") != string::npos
+		|| StringUtils::ToLower(mediaURL).find(".60") != string::npos
+		|| StringUtils::ToLower(mediaURL).find(".70") != string::npos
+		|| StringUtils::ToLower(mediaURL).find(".a0") != string::npos
+		|| StringUtils::ToLower(mediaURL).find(".b0") != string::npos)
+	{
+		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_vic20_CONST;
+	}
+
+	if (mediaURL.find("/c64") != string::npos 
+		|| StringUtils::ToLower(mediaURL).find(".p00") != string::npos 
+		|| StringUtils::ToLower(mediaURL).find(".prg") != string::npos
+		|| StringUtils::ToLower(mediaURL).find(".t64") != string::npos
+		|| StringUtils::ToLower(mediaURL).find(".g64") != string::npos
+		|| StringUtils::ToLower(mediaURL).find(".d64") != string::npos
+		|| StringUtils::ToLower(mediaURL).find(".crt") != string::npos)
+	{
+		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_c64_CONST;
+	}
+
+	if (mediaURL.find(".j64") != string::npos)
+	{
+		pGameMediaStream->m_sAppName = "mess.mess";
+		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_jaguar_CONST;
+	}
+
 	if (mediaURL.find("/ps1") != string::npos)
 	{
 		pGameMediaStream->m_sAppName = "pcsx.pcsx";

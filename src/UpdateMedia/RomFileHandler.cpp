@@ -221,6 +221,12 @@ void RomFileHandler::getSystem(string sFilename)
 		m_sROMSystem = "Vectrex";
 	if (sFilename.find("/apple2") != string::npos )
 		m_sROMSystem = "Apple ][";
+	if (sFilename.find("/jaguar") != string::npos )
+		m_sROMSystem = "Atari Jaguar";
+	if (sFilename.find("/vic20") != string::npos)
+		m_sROMSystem = "Commodore VIC-20";
+	if (sFilename.find("/c64") != string::npos)
+		m_sROMSystem = "Commodore 64";
 
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"RomFileHandler::getSystem(%s) = %s",sFilename.c_str(),m_sROMSystem.c_str());
 
@@ -276,6 +282,28 @@ void RomFileHandler::GetRomInfo(string sFilename, map<int,string>& mapAttributes
   if (m_iRomType == ROMTYPE_COWERING)
   {
 	string sTmpFile = StringUtils::ToLower(sFilename);
+
+	if (sTmpFile.find(".j64") != string::npos)
+		sSnapFilename = "/home/snap/jaguar/"+sROMTitle+".jpg";
+
+	if (m_sFullFilename.find("/vic20") != string::npos ||
+		sTmpFile.find(".20") != string::npos || 
+		sTmpFile.find(".40") != string::npos || 
+		sTmpFile.find(".60") != string::npos ||
+		sTmpFile.find(".70") != string::npos ||
+		sTmpFile.find(".80") != string::npos || 
+		sTmpFile.find(".a0") != string::npos ||
+		sTmpFile.find(".b0") != string::npos)
+		sSnapFilename = "/home/snap/vic20/"+sROMTitle+".jpg";
+
+	if (m_sFullFilename.find("/c64") != string::npos || 
+		sTmpFile.find(".prg") != string::npos ||
+		sTmpFile.find(".p00") != string::npos ||
+		sTmpFile.find(".t64") != string::npos ||
+		sTmpFile.find(".g64") != string::npos ||
+		sTmpFile.find(".d64") != string::npos ||
+		sTmpFile.find(".crt") != string::npos)
+		sSnapFilename = "/home/snap/c64/"+sROMTitle+".jpg";
 
 	if (m_sFullFilename.find("/apple2") != string::npos)
 		sSnapFilename = "/home/snap/apple2/" + sROMTitle + ".jpg";

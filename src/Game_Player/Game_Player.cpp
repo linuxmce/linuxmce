@@ -1739,7 +1739,13 @@ void Game_Player::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string s
 	    ProcessAlphanumeric(XK_minus);
 	  break;
 	case BUTTON_equals_sign_CONST:
-	  ProcessAlphanumeric(XK_equal);
+	  if (m_iPK_MediaType==MEDIATYPE_lmce_Game_vic20_CONST ||
+	      m_iPK_MediaType==MEDIATYPE_lmce_Game_c64_CONST)
+	    {
+	      ProcessAlphanumeric(XK_backslash);
+	    }
+	  else
+	    ProcessAlphanumeric(XK_equal);
 	  break;
 	case BUTTON_Bracket_Left_CONST:
 	  ProcessAlphanumeric(XK_bracketleft);
@@ -1750,8 +1756,17 @@ void Game_Player::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string s
 	case BUTTON_Backslash_CONST:
 	  ProcessAlphanumeric(XK_backslash);
 	  break;
-	case BUTTON_semicolumn_CONST:
+	case BUTTON_colon_CONST:
 	  ProcessAlphanumeric(XK_semicolon);
+	  break;
+	case BUTTON_semicolumn_CONST:
+	  if (m_iPK_MediaType == MEDIATYPE_lmce_Game_vic20_CONST ||
+	      m_iPK_MediaType == MEDIATYPE_lmce_Game_c64_CONST)
+	    {
+	      ProcessAlphanumeric(XK_apostrophe);
+	    }
+	  else
+	    ProcessAlphanumeric(XK_semicolon);
 	  break;
 	case BUTTON_single_quote_CONST:
 	  ProcessAlphanumeric(XK_apostrophe);
@@ -1775,6 +1790,39 @@ void Game_Player::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string s
 	case BUTTON_sterling_CONST:
           // FIXME: DEADKEY. NO KNOWN KEYCODE.
 	  // ProcessAlphanumeric(XK_asciicircum);
+	  break;
+	case BUTTON_commoClrHome_CONST:
+	  ProcessAlphanumeric(XK_Insert);
+	  break;
+	case BUTTON_commoInsDel_CONST:
+	  ProcessAlphanumeric(XK_BackSpace);
+	  break;
+	case BUTTON_Restore_CONST:
+	  ProcessAlphanumeric(XK_Print); // is this right??
+	    break;
+	case BUTTON_at_CONST:
+	  ProcessAlphanumeric(XK_bracketleft);
+	  break;
+	case BUTTON_asterisk_CONST:
+	  ProcessAlphanumeric(XK_bracketright);
+	  break;
+	case BUTTON_commoUp_CONST:
+	  ProcessAlphanumeric(XK_Delete);
+	  break;
+	case BUTTON_commoLeft_CONST:
+	  ProcessAlphanumeric(XK_asciitilde);
+	  break;
+	case BUTTON_Run_Stop_CONST:
+	  ProcessAlphanumeric(XK_Home);
+	  break;
+	case BUTTON_commoKey_CONST:
+	  // FIXME is this a meta? Talk to a c64 user.
+	  break;
+	case BUTTON_commoCRSRLR_CONST:
+	  ProcessAlphanumeric(XK_Control_R);
+	  break;
+	case BUTTON_commoCRSRUD_CONST:
+	  ProcessAlphanumeric(XK_Meta_R);
 	  break;
 	}
 

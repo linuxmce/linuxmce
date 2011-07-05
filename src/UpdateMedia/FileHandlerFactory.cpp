@@ -131,6 +131,20 @@ FileHandlerFactory::~FileHandlerFactory(void)
 			   (sExtension == "nib") ||
 			   (sExtension == "po") ||
 			   (sExtension == "do") ||
+			   (sExtension == "j64") ||
+			   (sExtension == "20") ||
+			   (sExtension == "40") ||
+		           (sExtension == "60") ||
+			   (sExtension == "70") ||
+			   (sExtension == "80") ||
+		 	   (sExtension == "a0") ||
+			   (sExtension == "b0") ||
+			   (sExtension == "prg") ||
+			   (sExtension == "p00") ||
+			   (sExtension == "t64") ||
+			   (sExtension == "g64") ||
+			   (sExtension == "d64") ||
+			   (sExtension == "crt") ||
 			   (sExtension == "fds");
 
 	return bHasRomExtension;	// do we do more tests here?

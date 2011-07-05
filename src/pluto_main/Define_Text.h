@@ -1179,6 +1179,25 @@
 #define TEXT_PeriodGT_CONST 2122
 #define TEXT_QuestionSlash_CONST 2123
 #define TEXT_TildeBacktick_CONST 2124
+#define TEXT_Two_Quote_CONST 2125
+#define TEXT_Sterling_CONST 2126
+#define TEXT_Clr_Home_CONST 2127
+#define TEXT_Ins_Del_CONST 2128
+#define TEXT_at_CONST 2129
+#define TEXT_Restore_CONST 2130
+#define TEXT_Run_Stop_CONST 2131
+#define TEXT_colon_bracket_CONST 2132
+#define TEXT_semicolon_bracket_CONST 2133
+#define TEXT_Equals_CONST 2134
+#define TEXT_F1F2_CONST 2135
+#define TEXT_F3F4_CONST 2136
+#define TEXT_F5F6_CONST 2137
+#define TEXT_F7F8_CONST 2138
+#define TEXT_SixAmp_CONST 2139
+#define TEXT_7Apo_CONST 2140
+#define TEXT_8Par_CONST 2141
+#define TEXT_9par_CONST 2142
+#define TEXT_eZero_CONST 2143
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"
