@@ -55,6 +55,9 @@ Game_Player::Game_Player(int DeviceID, string ServerAddress,bool bConnectEventHa
 	m_iPK_MediaType = 0;
 	m_iStreamID = 0;
 	m_bLoadSavedGame = 0;
+	m_sMachineType = "";
+	m_sPeripheralType = "";
+	m_iModifier = 0;
 }
 
 //<-dceag-const2-b->!
@@ -257,7 +260,7 @@ bool Game_Player::UpdateMESSConfig(string sMediaURL)
 		"# CORE INPUT OPTIONS\r\n"
 		"#\r\n"
 		"ctrlr			   ##CTRLR##\r\n"                     
-		"mouse                     1\r\n"
+		"mouse                     0\r\n"
 		"joystick                  1\r\n" 
 		"lightgun                  0\r\n"
 		"multikeyboard             0\r\n"
@@ -933,6 +936,39 @@ string Game_Player::GetMessParametersFor(string sMediaURL)
 		m_bOSDIsVisible=true;		// apple 2 hack for now
 	}
 
+	if (m_iPK_MediaType == MEDIATYPE_lmce_Game_jaguar_CONST)
+	{
+		sPeripheralType = "-cart";
+	}
+
+	if (m_iPK_MediaType == MEDIATYPE_lmce_Game_vic20_CONST)
+	{
+		m_bOSDIsVisible=true;
+		sPeripheralType = "-cart";  // usually cart, unless...
+		if (sFileName.find(StringUtils::ToLower(".prg")) != string::npos ||
+	            sFileName.find(StringUtils::ToLower(".p00")) != string::npos)
+		{
+			sPeripheralType = "-quik";  // quicklaunch. TODO: Add case in Game Plugin
+		}
+	}
+
+	if (m_iPK_MediaType == MEDIATYPE_lmce_Game_c64_CONST)
+	{
+		sPeripheralType = "-flop"; // Usually floppy, unless...
+		m_bOSDIsVisible=true;
+		if (sFileName.find(StringUtils::ToLower(".crt")) != string::npos ||
+		    sFileName.find(StringUtils::ToLower(".80")) != string::npos)
+		{
+			sPeripheralType = "-cart1"; // cartridge
+		}
+		if (sFileName.find(StringUtils::ToLower(".prg")) != string::npos ||
+		    sFileName.find(StringUtils::ToLower(".p00")) != string::npos ||
+		    sFileName.find(StringUtils::ToLower(".t64")) != string::npos)
+		{
+			sPeripheralType = "-quik"; // quicklaunch.
+		}
+	}
+
   if (
 		(sFileName.find(StringUtils::ToLower(".atr")) != string::npos) || 
 		(sFileName.find(StringUtils::ToLower(".fds")) != string::npos))
@@ -977,6 +1013,8 @@ string Game_Player::GetMessParametersFor(string sMediaURL)
 			sExtra = "-view\t"+sTmp+"";
 		} 
 	}
+
+  m_sPeripheralType = sPeripheralType; // used by PostLaunchMESS()
 
   sParameters = sMachineType + "\t" + sPeripheralType + "\t" + sMediaURL + "\t" +sExtra+"";
 
@@ -1036,6 +1074,8 @@ bool Game_Player::LaunchMESS(string sMediaURL)
 	    LoggerWrapper::GetInstance()->Write(LV_STATUS,"MESS window found: Window ID %d",m_iMAMEWindowId);
 	    m_sMAMEWindowId = CreateWindowIDString(m_iMAMEWindowId); 
 	  }
+
+	PostLaunchMESS();
 	
 	return true; }
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::LaunchMESS - failed to launch");
@@ -1044,6 +1084,73 @@ bool Game_Player::LaunchMESS(string sMediaURL)
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::LaunchMESS - no app server");
   return false;
   
+}
+
+/**
+ * This is used, in some emulators to send keypresses to the emulated window
+ * after launch, eg. to facilitate -quik loaded images in vic20/c64
+ */
+void Game_Player::PostLaunchMESS()
+{
+
+	Sleep(4000); // Hackorama.
+
+	if (m_iPK_MediaType == MEDIATYPE_lmce_Game_c64_CONST)
+	{
+		if (m_sPeripheralType == "-quik")
+		{
+			// Quik Launch. type RUN<enter>
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_R,m_iEventSerialNum++);
+			Sleep(100);
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_U,m_iEventSerialNum++);
+			Sleep(100);
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_N,m_iEventSerialNum++);
+			Sleep(100);
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_Return,m_iEventSerialNum++);
+			Sleep(100);
+		 	return;	
+		}
+
+		if (m_sPeripheralType == "-flop")
+		{
+			// A disk was loaded, type LOAD"*",8,1
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_L,m_iEventSerialNum++);
+			Sleep(100);
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_O,m_iEventSerialNum++);
+                        Sleep(100);
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_A,m_iEventSerialNum++);
+                        Sleep(100);
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_D,m_iEventSerialNum++);
+                        Sleep(100);
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_2,m_iEventSerialNum++,XK_Shift_L);
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_bracketright,m_iEventSerialNum++);
+                        Sleep(100);
+
+                        Sleep(100);
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_2,m_iEventSerialNum++,XK_Shift_L);
+                        Sleep(100);
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_comma,m_iEventSerialNum++);
+                        Sleep(100);
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_8,m_iEventSerialNum++);
+                        Sleep(100);
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_comma,m_iEventSerialNum++);
+                        Sleep(100);
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_1,m_iEventSerialNum++);
+                        Sleep(100);
+                        WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_semicolon,m_iEventSerialNum++);
+                        Sleep(100);
+                        WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_R,m_iEventSerialNum++);
+                        Sleep(100);
+                        WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_U,m_iEventSerialNum++);
+                        Sleep(100);
+                        WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_N,m_iEventSerialNum++);
+                        Sleep(100);
+
+			WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_Return,m_iEventSerialNum++);
+                        Sleep(100);
+			return;
+		}
+	}
 }
 
 bool Game_Player::LaunchMAME(string sMediaURL) 
@@ -1389,6 +1496,41 @@ void Game_Player::SomeFunction()
 
 */
 
+/**
+ * Process modifier. If Shift/Ctrl/etc are pressed. Set flags. 
+ */
+void Game_Player::ProcessModifier(int iPK_Button)
+{
+	m_iModifier = iPK_Button;
+}
+
+/**
+ * Process alphanumeric keys.
+ */
+void Game_Player::ProcessAlphanumeric(int iXKeySym)
+{
+	if (m_iModifier == BUTTON_Shift_Left_CONST)
+	{
+		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,iXKeySym,m_iEventSerialNum++,XK_Shift_L);
+		m_iModifier = 0;
+	}
+	else if (m_iModifier == BUTTON_Shift_Right_CONST)
+	{
+		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,iXKeySym,m_iEventSerialNum++,XK_Shift_R);
+		m_iModifier = 0;
+	}
+	else if (m_iModifier == BUTTON_Control_CONST)
+	{
+		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,iXKeySym,m_iEventSerialNum++,XK_Control_L);
+		m_iModifier = 0;
+	}
+	else 
+	{
+		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,iXKeySym,m_iEventSerialNum++);
+	}
+}
+
+
 //<-dceag-c28-b->
 
 	/** @brief COMMAND: #28 - Simulate Keypress */
@@ -1408,71 +1550,232 @@ void Game_Player::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string s
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #50 - Name=" << sName << endl;
 
-	switch(atoi(sPK_Button.c_str()))
+	// Basic alphanumeric processing.
+	int iPK_Button = atoi(sPK_Button.c_str());
+	
+	// Shift and control key processing.
+	switch (iPK_Button)
 	{
-		case BUTTON_Up_Arrow_CONST:
-		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_Up,m_iEventSerialNum++);
-		break;		
-	case BUTTON_Down_Arrow_CONST:
-		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_Down,m_iEventSerialNum++);
-		break;	
-	case BUTTON_Left_Arrow_CONST:
-		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_Left,m_iEventSerialNum++);
-		break;	
-	case BUTTON_Right_Arrow_CONST:
-		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_Right,m_iEventSerialNum++);
-		break;	
-	case BUTTON_Scroll_Up_CONST:
-		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_Up,m_iEventSerialNum++);
+		case BUTTON_Shift_Left_CONST:
+			ProcessModifier(BUTTON_Shift_Left_CONST);
 		break;
-	case BUTTON_Scroll_Down_CONST:
-		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_Down,m_iEventSerialNum++);
+		case BUTTON_Shift_Right_CONST:
+			ProcessModifier(BUTTON_Shift_Right_CONST);
 		break;
-	case BUTTON_Enter_CONST:
-		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_Return,m_iEventSerialNum++);
-		break;	
-	case BUTTON_0_CONST:
-		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_0,m_iEventSerialNum++);
-		break;	
-	case BUTTON_1_CONST:
-		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_1,m_iEventSerialNum++);
-		break;	
-	case BUTTON_2_CONST:
-		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_2,m_iEventSerialNum++);
-		break;	
-	case BUTTON_3_CONST:
-		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_3,m_iEventSerialNum++);
-		break;	
-	case BUTTON_4_CONST:
-		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_4,m_iEventSerialNum++);
-		break;	
-	case BUTTON_5_CONST:
-		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_5,m_iEventSerialNum++);
-		break;	
-	case BUTTON_6_CONST:
-		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_6,m_iEventSerialNum++);
-		break;	
-	case BUTTON_7_CONST:
-		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_7,m_iEventSerialNum++);
-		break;	
-	case BUTTON_8_CONST:
-		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_8,m_iEventSerialNum++);
-		break;	
-	case BUTTON_9_CONST:
-		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_9,m_iEventSerialNum++);
-		break;	
-	case BUTTON_Back_CONST:
-		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_Escape,m_iEventSerialNum++);
+		case BUTTON_Control_CONST:
+			ProcessModifier(BUTTON_Control_CONST);
 		break;
+	}
+	
+	// Function keys
+	switch (iPK_Button)
+	{
+		case BUTTON_F1_CONST:
+			ProcessAlphanumeric(XK_F1);
+		break;
+               case BUTTON_F2_CONST:
+                        ProcessAlphanumeric(XK_F2);
+                break;
+               case BUTTON_F3_CONST:
+                        ProcessAlphanumeric(XK_F3);
+                break;
+               case BUTTON_F4_CONST:
+                        ProcessAlphanumeric(XK_F4);
+                break;
+               case BUTTON_F5_CONST:
+                        ProcessAlphanumeric(XK_F5);
+                break;
+               case BUTTON_F6_CONST:
+                        ProcessAlphanumeric(XK_F6);
+                break;
+               case BUTTON_F7_CONST:
+                        ProcessAlphanumeric(XK_F7);
+                break;
+               case BUTTON_F8_CONST:
+                        ProcessAlphanumeric(XK_F8);
+                break;
+               case BUTTON_F9_CONST:
+                        ProcessAlphanumeric(XK_F9);
+                break;
+               case BUTTON_F10_CONST:
+                        ProcessAlphanumeric(XK_F10);
+                break;
+
+	}
+
+	// Standard Alphanumeric Processing.
+	switch (iPK_Button)
+	{
+		case BUTTON_1_CONST:
+			ProcessAlphanumeric(XK_1);
+		break;
+                case BUTTON_2_CONST:
+                        ProcessAlphanumeric(XK_2);
+                break;
+                case BUTTON_3_CONST:
+                        ProcessAlphanumeric(XK_3);
+                break;
+                case BUTTON_4_CONST:
+                        ProcessAlphanumeric(XK_4);
+                break;
+                case BUTTON_5_CONST:
+                        ProcessAlphanumeric(XK_5);
+                break;
+                case BUTTON_6_CONST:
+                        ProcessAlphanumeric(XK_6);
+                break;
+                case BUTTON_7_CONST:
+                        ProcessAlphanumeric(XK_7);
+                break;
+                case BUTTON_8_CONST:
+                        ProcessAlphanumeric(XK_8);
+                break;
+                case BUTTON_9_CONST:
+                        ProcessAlphanumeric(XK_9);
+                break;
+                case BUTTON_0_CONST:
+                        ProcessAlphanumeric(XK_0);
+                break;
+                case BUTTON_q_CONST:
+                        ProcessAlphanumeric(XK_q);
+                break;
+                case BUTTON_w_CONST:
+                        ProcessAlphanumeric(XK_w);
+                break;
+                case BUTTON_e_CONST:
+                        ProcessAlphanumeric(XK_e);
+                break;
+                case BUTTON_r_CONST:
+                        ProcessAlphanumeric(XK_r);
+                break;
+                case BUTTON_t_CONST:
+                        ProcessAlphanumeric(XK_t);
+                break;
+                case BUTTON_y_CONST:
+                        ProcessAlphanumeric(XK_y);
+                break;
+                case BUTTON_u_CONST:
+                        ProcessAlphanumeric(XK_u);
+                break;
+                case BUTTON_i_CONST:
+                        ProcessAlphanumeric(XK_i);
+                break;
+                case BUTTON_o_CONST:
+                        ProcessAlphanumeric(XK_o);
+                break;
+                case BUTTON_p_CONST:
+                        ProcessAlphanumeric(XK_p);
+                break;
+                case BUTTON_a_CONST:
+                        ProcessAlphanumeric(XK_a);
+                break;
+                case BUTTON_s_CONST:
+                        ProcessAlphanumeric(XK_s);
+                break;
+                case BUTTON_d_CONST:
+                        ProcessAlphanumeric(XK_d);
+                break;
+                case BUTTON_f_CONST:
+                        ProcessAlphanumeric(XK_f);
+                break;
+                case BUTTON_g_CONST:
+                        ProcessAlphanumeric(XK_g);
+                break;
+                case BUTTON_h_CONST:
+                        ProcessAlphanumeric(XK_h);
+                break;
+                case BUTTON_j_CONST:
+                        ProcessAlphanumeric(XK_j);
+                break;
+                case BUTTON_k_CONST:
+                        ProcessAlphanumeric(XK_k);
+                break;
+                case BUTTON_l_CONST:
+                        ProcessAlphanumeric(XK_l);
+                break;
+                case BUTTON_z_CONST:
+                        ProcessAlphanumeric(XK_z);
+                break;
+                case BUTTON_x_CONST:
+                        ProcessAlphanumeric(XK_x);
+                break;
+                case BUTTON_c_CONST:
+                        ProcessAlphanumeric(XK_c);
+                break;
+                case BUTTON_v_CONST:
+                        ProcessAlphanumeric(XK_v);
+                break;
+                case BUTTON_b_CONST:
+                        ProcessAlphanumeric(XK_b);
+                break;
+                case BUTTON_n_CONST:
+                        ProcessAlphanumeric(XK_n);
+                break;
+                case BUTTON_m_CONST:
+                        ProcessAlphanumeric(XK_m);
+                break;
+		case BUTTON_Enter_CONST:
+			ProcessAlphanumeric(XK_Return);
+		break;
+		case BUTTON_Back_CONST:
+			ProcessAlphanumeric(XK_BackSpace);
+		break;
+	case BUTTON_space_CONST:
+	  ProcessAlphanumeric(XK_space);
+	  break;
 	case BUTTON_tab_CONST:
-		WindowUtils::SendKeyToWindow(m_pDisplay,m_iMAMEWindowId,XK_Tab,m_iEventSerialNum++);
-		break;
-	case BUTTON_Asterisk_CONST:
-		ProcessAsteriskForMediaType(m_iPK_MediaType);
-		break;
-	case BUTTON_Pound_CONST:
-		ProcessPoundForMediaType(m_iPK_MediaType);
-		break;
+	  ProcessAlphanumeric(XK_Tab);
+	  break;
+	case BUTTON_escape_CONST:
+	  ProcessAlphanumeric(XK_Escape);
+	  break;
+	case BUTTON_dash_CONST:
+	  if (m_iPK_MediaType == MEDIATYPE_lmce_Game_vic20_CONST ||
+	      m_iPK_MediaType == MEDIATYPE_lmce_Game_c64_CONST)
+	    {
+	      ProcessAlphanumeric(XK_equal);
+	    }
+	  else
+	    ProcessAlphanumeric(XK_minus);
+	  break;
+	case BUTTON_equals_sign_CONST:
+	  ProcessAlphanumeric(XK_equal);
+	  break;
+	case BUTTON_Bracket_Left_CONST:
+	  ProcessAlphanumeric(XK_bracketleft);
+	  break;
+	case BUTTON_Bracket_Right_CONST:
+	  ProcessAlphanumeric(XK_bracketright);
+	  break;
+	case BUTTON_Backslash_CONST:
+	  ProcessAlphanumeric(XK_backslash);
+	  break;
+	case BUTTON_semicolumn_CONST:
+	  ProcessAlphanumeric(XK_semicolon);
+	  break;
+	case BUTTON_single_quote_CONST:
+	  ProcessAlphanumeric(XK_apostrophe);
+	  break;
+	case BUTTON_comma_CONST:
+	  ProcessAlphanumeric(XK_comma);
+	  break;
+	case BUTTON_period_CONST:
+	  ProcessAlphanumeric(XK_period);
+	  break;
+	case BUTTON_slash_CONST:
+	  ProcessAlphanumeric(XK_slash);
+	  break;
+	case BUTTON_plus_CONST:
+	  if (m_iPK_MediaType == MEDIATYPE_lmce_Game_vic20_CONST || 
+	      m_iPK_MediaType == MEDIATYPE_lmce_Game_c64_CONST)
+	    {
+	      ProcessAlphanumeric(XK_minus);
+	    }
+	  break;
+	case BUTTON_sterling_CONST:
+          // FIXME: DEADKEY. NO KNOWN KEYCODE.
+	  // ProcessAlphanumeric(XK_asciicircum);
+	  break;
 	}
 
 }
@@ -1618,6 +1921,9 @@ void Game_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
 		case MEDIATYPE_lmce_Game_sgx_CONST:
 		case MEDIATYPE_lmce_Game_vectrex_CONST:
 		case MEDIATYPE_lmce_Game_apple2_CONST:
+		case MEDIATYPE_lmce_Game_jaguar_CONST:
+		case MEDIATYPE_lmce_Game_vic20_CONST:
+		case MEDIATYPE_lmce_Game_c64_CONST:
 			LaunchMESS(sMediaURL);
 			break;
 		case MEDIATYPE_lmce_Game_ps1_CONST:
@@ -1696,6 +2002,9 @@ void Game_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sC
 	  case MEDIATYPE_lmce_Game_tg16_CONST:
 	  case MEDIATYPE_lmce_Game_vectrex_CONST:
 	  case MEDIATYPE_lmce_Game_apple2_CONST:
+	  case MEDIATYPE_lmce_Game_jaguar_CONST:
+	  case MEDIATYPE_lmce_Game_vic20_CONST:
+	  case MEDIATYPE_lmce_Game_c64_CONST:
 	    StopMESS();
 	    break;
 	  case MEDIATYPE_lmce_Game_ps1_CONST:
@@ -1995,6 +2304,19 @@ void Game_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,
 		  case MEDIATYPE_lmce_Game_apple2_CONST:
 		    sPath = "/home/mamedata/shots/apple2cp";
 		    screenName = "/0000";
+		    break;
+		  case MEDIATYPE_lmce_Game_jaguar_CONST:
+		    sPath = "/home/mamedata/shots/jaguar";
+		    screenName = "/0000";
+		    break;
+		  case MEDIATYPE_lmce_Game_vic20_CONST:
+		    sPath = "/home/mamedata/shots/vic20";
+	            screenName = "/0000";
+		    break;
+		  case MEDIATYPE_lmce_Game_c64_CONST:
+                    sPath = "/home/mamedata/shots/c64";
+                    screenName = "/0000";
+		    break;
 		  }
 	
 		string snapPath = sPath + m_sROMName + "/";
@@ -2576,6 +2898,16 @@ string Game_Player::GetSaveGamePath()
       break;
     case MEDIATYPE_lmce_Game_apple2_CONST:
       sPath = "/home/mamedata/sta/apple2cp";
+      break;
+    case MEDIATYPE_lmce_Game_jaguar_CONST:
+      sPath = "/home/mamedata/sta/jaguar";
+      break;
+    case MEDIATYPE_lmce_Game_vic20_CONST:
+      sPath = "/home/mamedata/sta/vic20";
+      break;
+    case MEDIATYPE_lmce_Game_c64_CONST:
+      sPath = "/home/mamedata/sta/c64";
+      break;
     default:
       sPath = "";
       break;

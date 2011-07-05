@@ -79,8 +79,10 @@ public:
 		virtual void PrepareToDelete();
 		string m_sROMName;
 		string m_sMachineType;
+		string m_sPeripheralType;
 		string m_sFilename;
 		int m_iPK_MediaType;    // Used by the stop media method.
+		int m_iModifier;	// The current button modifier.
 		bool m_bLoadSavedGame;
 		// Public member variables
 
@@ -92,6 +94,7 @@ protected:
 		string GetMessParametersFor(string sMediaURL);
 		bool UpdateMESSConfig(string sMediaURL);
 		bool LaunchMESS(string sMediaURL);
+		void PostLaunchMESS();
 		bool StopMESS();
 		bool LaunchPCSX(string sMediaURL);
 		bool StopPCSX();
@@ -109,6 +112,8 @@ protected:
 		string CreateWindowIDString(long unsigned int window); // used by alternate OSD grabber
 		void ProcessPoundForMediaType(int iPK_MediaType);	// Key remapping for (*)
 		void ProcessAsteriskForMediaType(int iPK_MediaType);	// key remapping for (#), thanks a lot MESS.
+		void ProcessModifier(int iPK_Button);
+		void ProcessAlphanumeric(int iXKeySym);
 
 //<-dceag-const-b->
 public:
