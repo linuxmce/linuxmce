@@ -1,3 +1,9 @@
+dce-whisperer (3.0.10) unstable; urgency=low
+
+  * Depend on php5-cli.
+
+ -- Radu C <radu.cx@gmail.com>  Wed, 22 Jun 2011 23:51:53 +0100
+
 dce-whisperer (3.0.9) unstable; urgency=low
 
   * Open the serial port once and use this file descriptor with the rest of

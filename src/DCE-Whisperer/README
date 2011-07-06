@@ -1,4 +1,1 @@
 DCE whisperer: it talks to "the other side" :)
-
-There's an occasional memory corruption going on. I can't figure out why, or how to reproduce it reliably, but a restart of the whisperer usually fixes it, and it doesn't show up if the application started up properly.
-Workaround: FD 0 isn't mangled, and socat uses ptmx to create a bidirectional communication path, so we're abusing stdin for both input and output. And it works too.
