@@ -12,3 +12,4 @@ if ! BlacklistConfFiles '/etc/bluetooth/hcid.conf' ;then
 	sed -i 's!\<pin_helper.*$!pin_helper /usr/pluto/bin/pluto-pinhelper.sh;!' /etc/bluetooth/hcid.conf
 	invoke-rc.d bluez-utils restart
 fi
+mkdir -p /usr/pluto/orbiter/bits
