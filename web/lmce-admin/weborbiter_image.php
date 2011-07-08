@@ -26,15 +26,40 @@ if (is_null($address))
 	$address = getCoreIP($dbADO);
 $port = $ProxyOrbiterInfo['Port'][0];
 
-$socket = openSocket($address, $port);
-if ($socket === false)
+$imageData = false;
+if (!isset($_REQUEST['file']))
 {
-	header("HTTP/1.0 404 Not Found");
-	die;
+	$socket = openSocket($address, $port);
+	if ($socket === false)
+	{
+		header("HTTP/1.0 404 Not Found");
+		die;
+	}
+
+	$imageData = getImageToRAM($deviceID, $socket);
+	closeSocket($socket);
+}
+elseif (is_file($_REQUEST['file']))
+{
+	$FilePath = realpath($_REQUEST['file']);
+	$AllowedPaths = array("/usr/pluto/orbiter/", "/home/mediapics/");
+	$Allowed = false;
+	foreach ($AllowedPaths as $Path)
+	{
+		if (substr($FilePath, 0, strlen($Path)) === $Path)
+		{
+			$Allowed = true;
+			break;
+		}
+	}
+	if (!$Allowed)
+	{
+		header("HTTP/1.0 404 Not Found");
+		die;
+	}
+	$imageData = file_get_contents($FilePath);
 }
 
-$imageData = getImageToRAM($deviceID, $socket);
-closeSocket($socket);
 if ($imageData === false)
 {
 	header("HTTP/1.0 404 Not Found");
