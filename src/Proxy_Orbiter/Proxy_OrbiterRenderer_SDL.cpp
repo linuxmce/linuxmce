@@ -73,6 +73,7 @@ void Proxy_OrbiterRenderer_SDL::DisplayImageOnScreen(SDL_Surface *pScreenImage)
 			SDL_SaveJPG(pScreenImage, sDevicePng.c_str(), pProxy_Orbiter->ImageQuality());
 
 		pProxy_Orbiter->SaveXML(sDeviceXml);
+		pProxy_Orbiter->SaveBits();
 		rm.Release();
 
 		pProxy_Orbiter->ImageGenerated();

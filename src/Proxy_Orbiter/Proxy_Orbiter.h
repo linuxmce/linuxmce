@@ -74,6 +74,7 @@ namespace DCE
 		pluto_pthread_mutex_t m_ResourcesMutex;
 
 		bool m_bNews;
+		string m_sBitsDirectory;
 
 	public:
 		Proxy_Orbiter(int DeviceID, 
@@ -94,6 +95,8 @@ namespace DCE
 
 		virtual void Run();
 		virtual void SaveXML(string sFileName);
+		virtual void SaveBits(DesignObj_Orbiter *Data = NULL);
+		virtual void SaveDataGrid(DesignObj_DataGrid *pDesignObj_DataGrid);
 		virtual void GenerateXMLItems(DesignObj_Orbiter *pObj); //recursive
 		virtual string GenerateSoftKeys(DesignObj_Orbiter *pObj);
 

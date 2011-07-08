@@ -30,11 +30,15 @@
 #include "Proxy_Orbiter.h"
 #include "SerializeClass/ShapesColors.h"
 #include "pluto_main/Define_Button.h"
+#include "pluto_main/Define_DesignObjParameter.h"
 #include "Orbiter/ScreenHistory.h"
 #include "pluto_main/Define_DesignObj.h"
 #include "../Orbiter/SDL/OrbiterRenderer_SDL.h"
 
 #include "DataGrid.h"
+#include "Gen_Devices/AllCommandsRequests.h"
+
+#include <fcntl.h>
 
 using namespace DCE;
 #if defined(WIN32) 
@@ -47,6 +51,32 @@ void WriteStatusOutput(const char *) {} //do nothing
 #define CISCO_FAILURE_WATCHDOG_INTERVAL 1000
 #define MINIMUM_PUSH_INTERVAL 6000
 #define XML_MAX_TOUCH_ZONES 32
+
+static string XMLEntities(const string &input)
+{
+	string result;
+	for (size_t i = 0; i < input.length(); i++)
+	{
+		switch (input[i])
+		{
+			case '<': result += "&lt;"; break;
+			case '>': result += "&gt;"; break;
+			case '"': result += "&quot;"; break;
+			case '\'': result += "&apos;"; break;
+			case '&': result += "&amp;"; break;
+			default: result += input[i];
+		}
+	}
+
+	return result;
+}
+
+static string XMLEntities(const char *input)
+{
+	if (input == NULL)
+		return "(null)";
+	return XMLEntities(string(input));
+}
 
 /* release the mutex when calling Orbiter methods to avoid deadlock, and relock after call
  * sequence:
@@ -88,6 +118,9 @@ Proxy_Orbiter::Proxy_Orbiter(int DeviceID, int PK_DeviceTemplate, string ServerA
 	pthread_cond_init( &m_ActionCond, NULL );
 	m_ActionMutex.Init(NULL, &m_ActionCond);
 	m_ResourcesMutex.Init(NULL);
+
+	m_sBitsDirectory = "/usr/pluto/orbiter/bits/" + StringUtils::itos(m_dwPK_Device);
+	mkdir(m_sBitsDirectory.c_str(), 0600);
 }
 //-----------------------------------------------------------------------------------------------------
 /*virtual*/ bool Proxy_Orbiter::GetConfig()
@@ -244,7 +277,7 @@ void Proxy_Orbiter::StopProcessingRequest(void *p)
 //-----------------------------------------------------------------------------------------------------
 /*virtual*/ void Proxy_Orbiter::SaveXML(string sFileName)
 {
-	if(m_iListenPort >= CISCO_LISTEN_PORT_START && m_iListenPort < CISCO_LISTEN_PORT_START + 10) //only cisco orbiters
+	//if(m_iListenPort >= CISCO_LISTEN_PORT_START && m_iListenPort < CISCO_LISTEN_PORT_START + 10) //only cisco orbiters
 	{
 		m_dequeXMLItems.clear();
 		GenerateXMLItems(m_pScreenHistory_Current->GetObj());
@@ -397,6 +430,197 @@ void Proxy_Orbiter::StopProcessingRequest(void *p)
 		sAllSoftKeysXml += sXmlSoftKey;
 	}
 }
+//-----------------------------------------------------------------------------------------------------
+// copied from database - NULL fills the gaps
+const char *ObjType[] = { NULL, "Bitmap", "Rectangle", "Array", "Broadcast Video", "App Desktop", "Datagrid", "Rectangle", "Web Browser", "Floorplan", "Pronto File",
+	"wxWidgets Applet", "Scrolling Frame" };
+const char *ObjParm[] = { NULL, "Graphic Filename", "X Position", "Y Position", NULL, NULL, NULL, "# of Columns", "# of Rows", "Fixed Row Height?", "Fixed Column Width", "PK_Array", "Down then Across", "Row Spacing", "Column Spacing", "More button / fwd", "More button / back", "PK_Device", "Width", "Height", NULL, NULL, NULL, NULL, NULL, NULL, "First Row Height", "First Column Width", "Keep Row Header?", "Keep Column Header", NULL, "Initial Row Number", "Initial Column Numb", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, "Is Multi Select", "PK_Variable", "Data grid ID", "Cycle Grid", NULL, NULL, "Source", NULL, "Options", "Selected Graphic Fil", "Alt Graphic File", NULL, "Persist XY Position", NULL, "Extra Info", "Page", "Type", "Pronto File", "Highlighted Graphic", "PK_Datagrid", "PK_Style", "PK_Style_FirstRow", "PK_Style_FirstColumn", "PK_Style_Selected", "PK_Style_Alt", "PK_Style_Highlighted", "PK_DeviceTemplate", "Seek Value", "Seek Column", "Auto Invalidate Time", "Crop X", "Crop Y", "PK_Effect_On_Screen", "PK_Effect_Off_Screen", "Custom Render", "In Background", "Alpha channel", "PK_DesignObj_Row1", "PK_DesignObj_Coll1", "PK_DesignObj_Cell", "Dont Scale", "Adjustments" };
+
+static map<string, DataGridTable *> mapDatagridID_DataGridTable;
+static map<string, DesignObj_DataGrid *> mapDatagridID_DesignObjDataGrid;
+
+/*virtual*/ void Proxy_Orbiter::SaveBits(DesignObj_Orbiter *Data)
+{
+	DesignObj_Orbiter *DataRef = Data;
+	static FILE *f = NULL;
+	static int Level = 0;
+
+	if (Data == NULL)
+	{
+		system(("rm -f " + m_sBitsDirectory + "/*").c_str());
+		DataRef = m_pScreenHistory_Current->GetObj();
+		f = fopen((m_sBitsDirectory + "/screen.xml").c_str(), "w");
+		fprintf(f, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+		fprintf(f, "<screen>\n");
+	}
+
+	++Level;
+#if 0
+	fprintf(f, "> "
+		"L=%d ObjID: objId=%s baseId=%d type=%d hidden=%d pos=%dx%d area=%dx%d"
+		"\n", Level,
+		DataRef->m_ObjectID.c_str(), DataRef->m_iBaseObjectID, DataRef->m_ObjectType, DataRef->IsHidden(),
+		DataRef->m_rPosition.X, DataRef->m_rPosition.Y, DataRef->m_rPosition.Width, DataRef->m_rPosition.Height
+	);
+#endif
+	if (!DataRef->IsHidden())
+	{
+		fprintf(f,
+			"<object id=\"%s\" base=\"%d\" type=\"%s\" x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\">\n",
+			DataRef->m_ObjectID.c_str(), DataRef->m_iBaseObjectID, ObjType[DataRef->m_ObjectType],
+			DataRef->m_rPosition.X, DataRef->m_rPosition.Y, DataRef->m_rPosition.Width, DataRef->m_rPosition.Height
+		);
+
+		// save image
+		if (DataRef->m_pvectCurrentGraphic != NULL && DataRef->m_pvectCurrentGraphic->size() > 0)
+		{
+			unsigned int CurrentFrame = DataRef->m_iCurrentFrame;
+			if (CurrentFrame >= DataRef->m_pvectCurrentGraphic->size())
+				CurrentFrame = 0;
+			PlutoGraphic *pPlutoGraphic = (*DataRef->m_pvectCurrentGraphic)[CurrentFrame];
+			string srcfn = "/usr/pluto/orbiter/C" + StringUtils::itos(m_dwPK_Device) + "/" + pPlutoGraphic->m_Filename;
+			string dstfn = m_sBitsDirectory + "/" + DataRef->m_ObjectID + ".img";
+			int fsrc = open(srcfn.c_str(), O_RDONLY);
+			int fdst = open(dstfn.c_str(), O_WRONLY | O_CREAT, 0666);
+			char buffer[4096];
+			int bytes = 0;
+			while ((bytes = read(fsrc, buffer, 4096)) > 0)
+				write(fdst, buffer, bytes);
+			close(fdst);
+			close(fsrc);
+
+			fprintf(f, "<image src=\"%s\"/>\n", srcfn.c_str());
+		}
+
+		fprintf(f, "<parameters>\n");
+		map<int, string>::iterator ParmIt;
+		for (ParmIt = DataRef->m_mapObjParms.begin(); ParmIt != DataRef->m_mapObjParms.end(); ParmIt++)
+		{
+			const char *ObjParmName = ObjParm[(*ParmIt).first];
+			string S = StringUtils::itos((*ParmIt).first);
+			if (ObjParmName == NULL)
+				ObjParmName = S.c_str();
+			if (strcmp(ObjParmName, "Page") == 0) // contains binary data (looks like a char value inside a string)
+				continue;
+			fprintf(f, "<parameter id=\"%s\" value=\"%s\" />\n", ObjParmName, SubstituteVariables((*ParmIt).second, DataRef, 0, 0).c_str());
+		}
+		fprintf(f, "</parameters>\n");
+
+		fprintf(f, "<children>\n");
+		DesignObj_DataList::iterator DataIt;
+		for (DataIt = DataRef->m_ChildObjects.begin(); DataIt != DataRef->m_ChildObjects.end(); DataIt++)
+		{
+			DesignObj_Orbiter *Child = (DesignObj_Orbiter *) (*DataIt);
+			SaveBits(Child);
+		}
+		fprintf(f, "</children>\n");
+
+		fprintf(f, "</object>\n");
+
+		if (DataRef->m_ObjectType == DESIGNOBJTYPE_Datagrid_CONST)
+			SaveDataGrid(dynamic_cast<DesignObj_DataGrid *>(DataRef));
+	}
+
+	--Level;
+#if 0
+	fprintf(f, "< "
+		"L=%d ObjID: objId=%s baseId=%d type=%d hidden=%d pos=%dx%d area=%dx%d"
+		"\n", Level,
+		DataRef->m_ObjectID.c_str(), DataRef->m_iBaseObjectID, DataRef->m_ObjectType, DataRef->IsHidden(),
+		DataRef->m_rPosition.X, DataRef->m_rPosition.Y, DataRef->m_rPosition.Width, DataRef->m_rPosition.Height
+	);
+#endif
+
+	if (Data == NULL)
+	{
+		fprintf(f, "</screen>\n");
+		fclose(f);
+	}
+}
+//-----------------------------------------------------------------------------------------------------
+/*virtual*/ void Proxy_Orbiter::SaveDataGrid(DesignObj_DataGrid *pDesignObj_DataGrid)
+{
+	if (pDesignObj_DataGrid == NULL)
+		return;
+
+	if (pDesignObj_DataGrid->m_mapObjParms.find(DESIGNOBJPARAMETER_Data_grid_ID_CONST) == pDesignObj_DataGrid->m_mapObjParms.end())
+		return;
+
+	string sGridID = pDesignObj_DataGrid->m_mapObjParms[DESIGNOBJPARAMETER_Data_grid_ID_CONST];
+
+	int data_size = 0;
+	char *data = NULL;
+
+	int MaxRow = 1000000 /* one million entries should be enough for everybody */, MaxCol = pDesignObj_DataGrid->m_MaxCol;
+	int StartRow = 0, StartCol = 0;
+	bool bKeepRowHeader = false, bKeepColHeader = false;
+	bool bAdd_UpDown_Arrows = false;
+	string sSeek = "";
+	int iSeekColumn = 0;
+
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "iOS: Saving datagrid: %s", sGridID.c_str());
+	DCE::CMD_Request_Datagrid_Contents CMD_Request_Datagrid_Contents(m_dwPK_Device, m_dwPK_Device_DatagridPlugIn,
+			StringUtils::itos(m_dwIDataGridRequestCounter), sGridID,
+			MaxRow, MaxCol, bKeepRowHeader, bKeepColHeader, bAdd_UpDown_Arrows, sSeek, iSeekColumn, &data, &data_size, &StartRow, &StartCol);
+
+	DataGridTable *pDataGridTable = NULL;
+	if (SendCommand(CMD_Request_Datagrid_Contents) && data_size > 0 && data != NULL)
+	{
+		pDataGridTable = new DataGridTable(data_size, data);
+		delete[] data;
+		data = NULL;
+	}
+	else
+	{
+		pDataGridTable = new DataGridTable();
+	}
+
+	if (mapDatagridID_DataGridTable.find(sGridID) != mapDatagridID_DataGridTable.end())
+		delete mapDatagridID_DataGridTable[sGridID];
+	mapDatagridID_DataGridTable[sGridID] = pDataGridTable;
+	mapDatagridID_DesignObjDataGrid[sGridID] = pDesignObj_DataGrid;
+
+	string fname = m_sBitsDirectory + "/datagrid-" + sGridID + ".xml";
+	FILE *f = fopen(fname.c_str(), "w");
+	fprintf(f, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+	fprintf(f, "<datagrid id=\"%s\" rows=\"%d\" cols=\"%d\">\n", sGridID.c_str(), pDataGridTable->GetRows(), pDataGridTable->GetCols());
+	for (int row = 0; row < pDataGridTable->GetRows(); row++)
+	{
+		fprintf(f, "<row>\n");
+		for (int col = 0; col < pDataGridTable->GetCols(); col++)
+		{
+			DataGridCell *pCell = pDataGridTable->GetData(col, row);
+			if (pCell != NULL)
+			{
+				fprintf(f, "<column>\n");
+				fprintf(f, "<text>%s</text>\n", XMLEntities(pCell->m_Text).c_str());
+				fprintf(f, "<value>%s</value>\n", XMLEntities(pCell->m_Value).c_str());
+				if (pCell->m_pGraphic != NULL)
+					fprintf(f, "<has_graphic/>\n");
+				if (pCell->m_ImagePath != NULL)
+					fprintf(f, "<image src=\"%s\" />\n", XMLEntities(pCell->m_ImagePath).c_str());
+				fprintf(f, "<parameters>\n");
+				for (map<string, string>::iterator AttrIt = pCell->m_mapAttributes.begin(); AttrIt != pCell->m_mapAttributes.end(); AttrIt++)
+				{
+					string ParmName = (*AttrIt).first;
+					string ParmValue = (*AttrIt).second;
+					fprintf(f, "<parameter name=\"%s\" value=\"%s\" />\n", XMLEntities(ParmName).c_str(), XMLEntities(ParmValue).c_str());
+				}
+				fprintf(f, "</parameters>\n");
+				fprintf(f, "</column>\n");
+			}
+			else
+			{
+				fprintf(f, "<column empty=\"empty\"/>\n");
+			}
+		}
+		fprintf(f, "</row>\n");
+	}
+	fprintf(f, "</datagrid>\n");
+	fclose(f);
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "iOS: Saved datagrid: %s", sGridID.c_str());
+}
+
 //-----------------------------------------------------------------------------------------------------
 /*virtual*/ void Proxy_Orbiter::FireImageQualityChanged(unsigned long nImageQuality)
 {
@@ -575,6 +799,106 @@ bool Proxy_Orbiter::ReceivedString( Socket *pSocket, string sLine, int nTimeout 
 			pSocket->SendString("NEWS " + StringUtils::itos(3));
 			pSocket->SendString("no");
 		}
+		return true;
+	}
+	else if (sLine.substr(0, 10) == "SCREEN_XML")
+	{
+		PLUTO_SAFETY_LOCK(rm, m_ResourcesMutex);
+        
+		size_t size;
+		char *pBuffer = FileUtils::ReadFileIntoBuffer(m_sBitsDirectory + "/screen.xml", size);
+		if (!pBuffer)
+		{
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Sent: ERROR");
+			pSocket->SendString("ERROR"); // Shouldn't happen
+			return true;
+		}
+
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Sent: SCREEN_XML %d\\n\\n<SCREEN_XML>", size);
+		pSocket->SendString("SCREEN_XML " + StringUtils::itos(int(size)));
+		pSocket->SendData(int(size), pBuffer);
+		delete[] pBuffer;
+
+		m_bNews = false;
+		return true;
+	}
+	else if (sLine.substr(0, 12) == "DATAGRID_XML")
+	{
+		// DATAGRID_XML <GridID>
+		vector<string> vect_parameters;
+		StringUtils::Tokenize(sLine, " ", vect_parameters);
+		if (vect_parameters.size() != 2)
+		{
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Sent: ERROR Wrong parameter count");
+			pSocket->SendString("ERROR Wrong parameter count");
+			return true;
+		}
+		string &sGridID = vect_parameters[1];
+
+		size_t size;
+		char *pBuffer = FileUtils::ReadFileIntoBuffer(m_sBitsDirectory + "/datagrid-" + sGridID + ".xml", size);
+		if (!pBuffer)
+		{
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Sent: ERROR");
+			pSocket->SendString("ERROR"); // Shouldn't happen
+			return true;
+		}
+
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Sent: SCREEN_XML %d\\n\\n<SCREEN_XML>", size);
+		pSocket->SendString("DATAGRID_XML " + StringUtils::itos(int(size)));
+		pSocket->SendData(int(size), pBuffer);
+		delete[] pBuffer;
+
+		return true;
+	}
+	else if (sLine.substr(0, 14) == "DATAGRID_TOUCH")
+	{
+		// DATAGRID_TOUCH <GridID> <Row> <Col>
+		vector<string> vect_parameters;
+		StringUtils::Tokenize(sLine, " ", vect_parameters);
+		if (vect_parameters.size() != 4)
+		{
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Sent: ERROR Wrong parameter count");
+			pSocket->SendString("ERROR Wrong parameter count");
+			return true;
+		}
+		string &sGridID = vect_parameters[1];
+		int Row = atoi(vect_parameters[2].c_str());
+		int Col = atoi(vect_parameters[3].c_str());
+		
+		if (mapDatagridID_DataGridTable.find(sGridID) == mapDatagridID_DataGridTable.end())
+		{
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Sent: ERROR Grid %s not found", sGridID.c_str());
+			pSocket->SendString(StringUtils::Format("ERROR Grid %s not found", sGridID.c_str()));
+			return true;
+		}
+		DataGridTable *pDataGridTable = mapDatagridID_DataGridTable[sGridID];
+		DesignObj_DataGrid *pDesignObj_DataGrid = mapDatagridID_DesignObjDataGrid[sGridID];
+		DataGridCell *pCell = pDataGridTable->GetData(Col, Row);
+		if (pCell == NULL)
+		{
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Sent: ERROR Unknown location row=%d,col=%d in grid %s", Row, Col, sGridID.c_str());
+			pSocket->SendString(StringUtils::Format("ERROR Unknown location row=%d,col=%d in grid %s", Row, Col, sGridID.c_str()));
+			return true;
+		}
+
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Calling SelectedGrid");
+		PROXY_ORBITER_MUTEX_SUSPEND(SelectedGrid(pDesignObj_DataGrid, pCell, smCommand, Row, Col));
+
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Executing Commands in ZoneList: %d commands", pDesignObj_DataGrid->m_ZoneList.size());
+		PROXY_ORBITER_MUTEX_SUSPEND(
+		DesignObjZoneList::iterator iZone;
+		for (iZone = pDesignObj_DataGrid->m_ZoneList.begin(); iZone != pDesignObj_DataGrid->m_ZoneList.end(); ++iZone)
+		{
+			DesignObjZone *pDesignObjZone = *iZone;
+			ExecuteCommandsInList(&pDesignObjZone->m_Commands, pDesignObj_DataGrid, smCommand);
+		}
+		);
+
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Finished DATAGRID_TOUCH");
+
+		pSocket->SendString("OK");
+
 		return true;
 	}
 	else
