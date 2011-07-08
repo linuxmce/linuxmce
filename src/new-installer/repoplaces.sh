@@ -3,41 +3,6 @@
 # Replace sources to point to old-releases instead of archive.
 #
 #
-env 
-sad=$SUDO_USER
-if ! grep -q LMCE_Data /home/$(sad)/.kde/share/apps/kfileplaces/bookmarks.xml; then  #Checks to see if instance exists and if not creates
-	wget http://www.linuxmce.org/kde-folderimages/128x128/places/folder-lmce.png -nc -O /usr/share/icons/oxygen/128x128/places/folder-lmce.png
-	wget http://www.linuxmce.org/kde-folderimages/64x64/places/folder-lmce.png -nc -O /usr/share/icons/oxygen/64x64/places/folder-lmce.png
-	wget http://www.linuxmce.org/kde-folderimages/48x48/places/folder-lmce.png -nc -O /usr/share/icons/oxygen/48x48/places/folder-lmce.png
-	wget http://www.linuxmce.org/kde-folderimages/32x32/places/folder-lmce.png -nc -O /usr/share/icons/oxygen/32x32/places/folder-lmce.png
-	wget http://www.linuxmce.org/kde-folderimages/22x22/places/folder-lmce.png -nc -O /usr/share/icons/oxygen/22x22/places/folder-lmce.png
-	wget http://www.linuxmce.org/kde-folderimages/16x16/places/folder-lmce.png -nc -O /usr/share/icons/oxygen/16x16/places/folder-lmce.png
- 	n=$(grep \<ID /home/$sad/.kde/share/apps/kfileplaces/bookmarks.xml | wc -l)   #Counts instances of ID
-	cat /home/$sad/.kde/share/apps/kfileplaces/bookmarks.xml > /home/$sad/.kde/share/apps/kfileplaces/oldbookmarks.xml  #Makes a backup copy
-	sed -i '/<[\/]xbel>/d' /home/$sad/.kde/share/apps/kfileplaces/bookmarks.xml  #Removes the close tag at the end of xml file
-	while IFS='<>' read _ starttag value endtag; do	 #Seeks out the ID number
-   		case "$starttag" in 
-		       ID) Ids+=("$value") ;      
-			e=$(echo $Ids | sed 's/\(.\)/\1 /g') ; 	#Makes a variable to be separated by char
-			a=($e)
-		esac
-	done < /home/$sad/.kde/share/apps/kfileplaces/bookmarks.xml  
-	echo '<bookmark href="file:///home/public/data" > 
- <title>LMCE_Data</title>
- <info>
-  <metadata owner="http://freedesktop.org" >
-   <bookmark:icon name="folder-lmce"/>
-  </metadata>
-  <metadata owner="http://www.kde.org" >
-   <ID>'"${a[0]}${a[1]}${a[2]}${a[3]}${a[4]}${a[5]}${a[6]}${a[7]}${a[8]}${a[9]}${a[10]}${n}"'</ID>
-   <isSystemItem>true</isSystemItem>
-  </metadata>
- </info> 
-</bookmark> 
-</xbel>' >> /home/$sad/.kde/share/apps/kfileplaces/bookmarks.xml  #Appends entry into the file replacing end tag.
-fi
-echo "Dolphin's Places updated"
-
 repoclean() {
 	release=`lsb_release -c|cut -f2`
 	oldrelease="intrepid"
