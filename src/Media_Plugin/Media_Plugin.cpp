@@ -2189,7 +2189,8 @@ void Media_Plugin::StartCaptureCard(MediaStream *pMediaStream)
 
 	DeviceData_Router *pDevice_CaptureCard_AudioPort = m_pRouter->m_mapDeviceData_Router_Find( atoi(pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_mapParameters_Find(DEVICEDATA_FK_Device_Capture_Card_Audio_P_CONST).c_str()));
 
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"StartCaptureCard(): Audio Port Device is %d",pDevice_CaptureCard_AudioPort->m_dwPK_Device);
+	if (pDevice_CaptureCard_AudioPort)
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"StartCaptureCard(): Audio Port Device is %d",pDevice_CaptureCard_AudioPort->m_dwPK_Device);
 
 	// We check this later.
 
