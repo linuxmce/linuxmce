@@ -80,6 +80,14 @@ public:
 	* @brief Device data access methods:
 	*/
 
+	int Get_PK_Users()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_PK_Users_CONST).c_str());
+		else
+			return atoi(m_mapParameters[DEVICEDATA_PK_Users_CONST].c_str());
+	}
+
 	int Get_PK_Distro()
 	{
 		if( m_bRunningWithoutDeviceData )
@@ -380,6 +388,7 @@ public:
 	virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage) { };
 	Command_Impl *CreateCommand(int PK_DeviceTemplate, Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent);
 	//Data accessors
+	int DATA_Get_PK_Users() { return GetData()->Get_PK_Users(); }
 	int DATA_Get_PK_Distro() { return GetData()->Get_PK_Distro(); }
 	bool DATA_Get_Development() { return GetData()->Get_Development(); }
 	bool DATA_Get_No_Effects() { return GetData()->Get_No_Effects(); }
