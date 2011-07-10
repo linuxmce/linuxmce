@@ -174,7 +174,7 @@
         <widget class="QCheckBox" name="UseProxy">
          <property name="geometry">
           <rect>
-           <x>10</x>
+           <x>130</x>
            <y>20</y>
            <width>151</width>
            <height>22</height>
@@ -204,7 +204,7 @@
           <x>440</x>
           <y>20</y>
           <width>144</width>
-          <height>109</height>
+          <height>141</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -226,6 +226,13 @@
           </widget>
          </item>
          <item>
+          <widget class="QCheckBox" name="EnhancedUI">
+           <property name="text">
+            <string>Enhanced UI</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="Connect">
            <property name="text">
             <string>Connect</string>
@@ -233,6 +240,19 @@
           </widget>
          </item>
         </layout>
+       </widget>
+       <widget class="QCheckBox" name="ServerUseSSL">
+        <property name="geometry">
+         <rect>
+          <x>130</x>
+          <y>110</y>
+          <width>93</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Use SSL</string>
+        </property>
        </widget>
       </widget>
       <widget class="QWidget" name="orbiter">
