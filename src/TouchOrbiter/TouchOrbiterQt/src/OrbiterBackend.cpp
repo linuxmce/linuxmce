@@ -1,5 +1,6 @@
 #include "OrbiterBackend.h"
 #include "AppData.h"
+#include "OrbiterScreen.h"
 
 #include <QPixmap>
 #include <QSettings>
@@ -8,6 +9,11 @@
 #include <QNetworkProxy>
 #include <QAuthenticator>
 #include <QTimer>
+#include <QSslError>
+#include <QtXml>
+#include <QMetaObject>
+
+OrbiterBackend *OrbiterBackend::Instance = NULL;
 
 OrbiterBackend::OrbiterBackend(QObject* parent)
 	: QObject(parent)
@@ -16,6 +22,14 @@ OrbiterBackend::OrbiterBackend(QObject* parent)
 	RefreshTimer = new QTimer;
 	RefreshTimer->setInterval(1000);
 	NetworkManager = NULL;
+	Screen = NULL;
+}
+
+OrbiterBackend *OrbiterBackend::GetInstance()
+{
+	if (Instance == NULL)
+		Instance = new OrbiterBackend;
+	return Instance;
 }
 
 OrbiterBackend::~OrbiterBackend()
@@ -39,12 +53,18 @@ void OrbiterBackend::Start()
 	connect(NetworkManager, SIGNAL(finished(QNetworkReply *)), this, SLOT(RequestFinished(QNetworkReply *)));
 	connect(NetworkManager, SIGNAL(authenticationRequired(QNetworkReply *, QAuthenticator *)),
 		this, SLOT(AuthenticateHTTP(QNetworkReply *, QAuthenticator *)));
+	connect(NetworkManager, SIGNAL(sslErrors(QNetworkReply *, const QList<QSslError> &)),
+		this, SLOT(SslErrors(QNetworkReply *, const QList<QSslError> &)));
 	/* _AUTH_CACHE_WORKAROUND_ */
 
 	bAuthenticationAttempted = false;
 	bConnectionError = false;
 
 	QNetworkProxy Proxy;
+
+	Protocol = "http://";
+	if (Settings->value("Server/UseSSL").toBool())
+		Protocol = "https://";
 
 	if (Settings->value("Proxy/Use").toBool())
 	{
@@ -76,7 +96,8 @@ void OrbiterBackend::Start()
 
 	NetworkManager->setProxy(Proxy);
 
-	GetImage();
+	Screen = new OrbiterScreen;
+	GetScreen();
 	RefreshTimer->start();
 }
 
@@ -93,6 +114,8 @@ void OrbiterBackend::Stop()
 	/* _AUTH_CACHE_WORKAROUND_ */
 
 	RefreshTimer->stop();
+	delete Screen;
+	Screen = NULL;
 }
 
 void OrbiterBackend::Touch(int X, int Y)
@@ -100,10 +123,38 @@ void OrbiterBackend::Touch(int X, int Y)
 	DoCmd(QString("TOUCH %1x%2").arg(X).arg(Y));
 }
 
+void OrbiterBackend::TouchDatagrid(const QString &GridID, int Row, int Col)
+{
+	DoCmd(QString("DATAGRID_TOUCH %1 %2 %3").arg(GridID).arg(Row).arg(Col));
+}
+
+void OrbiterBackend::GetImage()
+{
+	QUrl Url;
+	Url.setUrl(Protocol + Settings->value("Server/Address").toString() + "/pluto-admin/weborbiter_image.php");
+	Url.addQueryItem("device_id", Settings->value("Device/ID").toString());
+	QNetworkRequest Request(Url);
+
+	GetRequest(Request);
+}
+
+void OrbiterBackend::GetImage(const QString &FilePath, QObject *Receiver)
+{
+	QUrl Url;
+	Url.setUrl(Protocol + Settings->value("Server/Address").toString() + "/pluto-admin/weborbiter_image.php");
+	Url.addQueryItem("device_id", Settings->value("Device/ID").toString());
+	Url.addQueryItem("file", FilePath);
+
+	QNetworkRequest Request(Url);
+	Request.setOriginatingObject(Receiver);
+
+	GetRequest(Request);
+}
+
 void OrbiterBackend::DoCmd(const QString &Cmd)
 {
 	QUrl Url;
-	Url.setUrl(QString("http://") + Settings->value("Server/Address").toString() + "/lmce-admin/weborbiter_command.php");
+	Url.setUrl(Protocol + Settings->value("Server/Address").toString() + "/pluto-admin/weborbiter_command.php");
 	Url.addQueryItem("device_id", Settings->value("Device/ID").toString());
 	Url.addQueryItem("cmd", Cmd);
 	QNetworkRequest Request(Url);
@@ -111,14 +162,21 @@ void OrbiterBackend::DoCmd(const QString &Cmd)
 	GetRequest(Request);
 }
 
-void OrbiterBackend::GetImage()
+void OrbiterBackend::GetScreen()
 {
-	QUrl Url;
-	Url.setUrl(QString("http://") + Settings->value("Server/Address").toString() + "/lmce-admin/weborbiter_image.php");
-	Url.addQueryItem("device_id", Settings->value("Device/ID").toString());
-	QNetworkRequest Request(Url);
+	if (Screen->getInProgress())
+		return;
+	Screen->setInProgress(true);
+	GetImage();
+	if (Settings->value("Device/EnhancedUI").toBool())
+	{
+		DoCmd("SCREEN_XML");
+	}
+}
 
-	GetRequest(Request);
+void OrbiterBackend::GetDatagrid(const QString &GridID)
+{
+	DoCmd(QString("DATAGRID_XML %1").arg(GridID));
 }
 
 void OrbiterBackend::GetRequest(const QNetworkRequest &Request)
@@ -162,6 +220,26 @@ void OrbiterBackend::RequestFinished(QNetworkReply *Reply)
 			ProcessCommandReply(Reply);
 		else if (ContentType.startsWith("image/"))
 			ProcessImageReply(Reply);
+		else
+			return;
+
+		bool bComplete = Screen->getFlatImage() != NULL;
+		if (Settings->value("Device/EnhancedUI").toBool())
+		{
+			bComplete = bComplete && Screen->getScreenXml() != NULL;
+			QList<QString> DatagridList = Screen->getDatagridNames();
+			for (QList<QString>::iterator It = DatagridList.begin(); It != DatagridList.end(); It++)
+				bComplete = bComplete && Screen->getDatagridXml(*It) != NULL;
+		}
+
+		if (bComplete)
+		{
+			emit ScreenReady(Screen);
+			delete Screen;
+			Screen = new OrbiterScreen;
+			
+			RefreshTimer->start();
+		}
 
 		bConnectionError = false;
 	}
@@ -179,7 +257,7 @@ void OrbiterBackend::ProcessCommandReply(QNetworkReply *Reply)
 	QByteArray FirstLine = Reply->readLine();
 	if (FirstLine == "OK\n")
 	{
-		GetImage();
+		//GetScreen();
 		return;
 	}
 
@@ -190,18 +268,87 @@ void OrbiterBackend::ProcessCommandReply(QNetworkReply *Reply)
 	if (SpacePos == -1)
 		return;
 
-	int Length = FirstLine.mid(SpacePos + 1).trimmed().toInt(); 
-	if (FirstLine.startsWith("NEWS "))
+	QList<QByteArray> Words = FirstLine.split(' ');
+	QString ReplyType = Words[0];
+	int Length = Words[1].trimmed().toInt();
+
+	if (ReplyType == "NEWS")
 	{
 		QByteArray AnyNews = Reply->read(Length);
 		if (AnyNews.startsWith("yes") || bConnectionError)
-			GetImage();
+		{
+			RefreshTimer->stop();
+			GetScreen();
+		}
+	}
+	else if (ReplyType == "DATAGRID_XML" || ReplyType == "SCREEN_XML")
+	{
+		QByteArray XMLData = Reply->read(Length);
+		ProcessXML(XMLData);
 	}
 }
 
 void OrbiterBackend::ProcessImageReply(QNetworkReply *Reply)
 {
-	QPixmap OrbiterImage;
-	OrbiterImage.loadFromData(Reply->readAll());
-	emit ImageReady(OrbiterImage);
+	QPixmap *Image = new QPixmap;
+	Image->loadFromData(Reply->readAll());
+	
+	QObject * Receiver = Reply->request().originatingObject();
+	if (Receiver == NULL)
+		Screen->setFlatImage(Image);
+	else
+		QMetaObject::invokeMethod(Receiver, "ImageDownloadComplete", Q_ARG(QPixmap *, Image)); 
+}
+
+void OrbiterBackend::ProcessXML(const QByteArray &XMLData)
+{
+	QDomDocument *XmlDoc = new QDomDocument;
+	XmlDoc->setContent(XMLData);
+	QDomElement XmlRoot = XmlDoc->documentElement();
+	if (XmlRoot.tagName() == "screen")
+	{
+		QList<QString> ListOfGrids;
+		QDomNodeList ObjectList = XmlRoot.elementsByTagName("object");
+		for (size_t i = 0; i < ObjectList.length(); i++)
+		{
+			QDomElement Object = ObjectList.item(i).toElement();
+			QString ObjectType = Object.attribute("type");
+			if (ObjectType != "Datagrid")
+				continue;
+			QDomNodeList ParameterList = Object.elementsByTagName("parameter");
+			for (size_t j = 0; j < ParameterList.length(); j++)
+			{
+				QDomElement Parameter = ParameterList.item(j).toElement();
+				QString AttrId = Parameter.attribute("id");
+				if (AttrId != "Data grid ID")
+					continue;
+				QString AttrValue = Parameter.attribute("value");
+				if (AttrValue == "")
+					continue;
+				ListOfGrids.append(AttrValue);
+			}
+		}
+		
+		Screen->setScreenXml(XmlDoc);
+		for (QList<QString>::iterator It = ListOfGrids.begin(); It != ListOfGrids.end(); It++)
+		{
+			Screen->setDatagridXml(*It, NULL);
+			GetDatagrid(*It);
+		}
+	}
+	else if (XmlRoot.tagName() == "datagrid")
+	{
+		QString GridID = XmlRoot.attribute("id");
+		Screen->setDatagridXml(GridID, XmlDoc);
+	}
+	else
+	{
+		delete XmlDoc;
+	}
+}
+
+void OrbiterBackend::SslErrors(QNetworkReply *Reply, const QList<QSslError> &SslErrors)
+{
+	(void) SslErrors;
+	Reply->ignoreSslErrors();
 }
