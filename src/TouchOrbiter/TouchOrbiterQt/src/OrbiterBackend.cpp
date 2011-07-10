@@ -131,7 +131,7 @@ void OrbiterBackend::TouchDatagrid(const QString &GridID, int Row, int Col)
 void OrbiterBackend::GetImage()
 {
 	QUrl Url;
-	Url.setUrl(Protocol + Settings->value("Server/Address").toString() + "/pluto-admin/weborbiter_image.php");
+	Url.setUrl(Protocol + Settings->value("Server/Address").toString() + "/lmce-admin/weborbiter_image.php");
 	Url.addQueryItem("device_id", Settings->value("Device/ID").toString());
 	QNetworkRequest Request(Url);
 
@@ -141,7 +141,7 @@ void OrbiterBackend::GetImage()
 void OrbiterBackend::GetImage(const QString &FilePath, QObject *Receiver)
 {
 	QUrl Url;
-	Url.setUrl(Protocol + Settings->value("Server/Address").toString() + "/pluto-admin/weborbiter_image.php");
+	Url.setUrl(Protocol + Settings->value("Server/Address").toString() + "/lmce-admin/weborbiter_image.php");
 	Url.addQueryItem("device_id", Settings->value("Device/ID").toString());
 	Url.addQueryItem("file", FilePath);
 
@@ -154,7 +154,7 @@ void OrbiterBackend::GetImage(const QString &FilePath, QObject *Receiver)
 void OrbiterBackend::DoCmd(const QString &Cmd)
 {
 	QUrl Url;
-	Url.setUrl(Protocol + Settings->value("Server/Address").toString() + "/pluto-admin/weborbiter_command.php");
+	Url.setUrl(Protocol + Settings->value("Server/Address").toString() + "/lmce-admin/weborbiter_command.php");
 	Url.addQueryItem("device_id", Settings->value("Device/ID").toString());
 	Url.addQueryItem("cmd", Cmd);
 	QNetworkRequest Request(Url);
