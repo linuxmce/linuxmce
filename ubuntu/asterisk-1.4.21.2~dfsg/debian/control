@@ -13,7 +13,7 @@ Vcs-Browser: http://svn.debian.org/wsvn/pkg-voip/asterisk/?op=log
 Package: asterisk
 Architecture: any
 Section: comm
-Depends: ${shlibs:Depends}, asterisk-config (= ${source:Version}) | asterisk-config-custom, adduser, asterisk-sounds-main, lsb-base (>= 3.2-14)
+Depends: ${shlibs:Depends}, adduser, asterisk-sounds-main, lsb-base (>= 3.2-14)
 Conflicts: asterisk-classic, asterisk-bristuff, asterisk-chan-capi (<< 1.1.1-1~)
 Replaces: asterisk-classic, asterisk-bristuff
 Provides: asterisk-1.4
