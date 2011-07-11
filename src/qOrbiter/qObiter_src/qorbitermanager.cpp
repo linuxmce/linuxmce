@@ -1,6 +1,7 @@
 #include "qorbitermanager.h"
 #include <QDeclarativeEngine>
 #include <QDebug>
+#include <QFile>
 
 //#include "OrbiterData.h"
 #include <QDeclarativeEngine>
@@ -130,6 +131,7 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
      iPK_Device_DatagridPlugIn =  long(6);
      m_dwIDataGridRequestCounter = 0;
 
+     binaryConfig = new QFile;
 
 }
 
@@ -178,31 +180,21 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             /*
               here is where we setup orbiter variables that are going to be used.
              */
-            if ( OrbiterGen() )
-            {
-                qDebug () << "Config Recieved, starting";
+
+
                 pqOrbiter->initialize();
                 if (getConf(PK_Device))
                  {
-
+                     qDebug () << "Config Recieved, starting";
                      gotoQScreen("Screen_1.qml");
-                 return true;} else {
-
-
+                          return true;
+                 } else {
                       qDebug() << "Orbiter Conf Hiccup!";
 
                          LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Device Failed to get configuration!");
 
                         return false;
                      }
-                 }
-                else
-                 {
-                     qDebug() << "Orbiter Could Not setup!" ;
-                     return false;
-                 }
-
-
 
           /*  i dont know what this does, but since orbter should not be local, it is commented out but not removed.
             if( bLocalMode )
@@ -247,67 +239,11 @@ bool qorbiterManager::refreshUI()
    return true;
 }
 
-/* This function serves to create the data needed to run orbiter. Its currently set to run automatically
-  when it connect, but that will change
-  */
-bool qorbiterManager::OrbiterGen()
-{
 
-//setup the orbiter blob if the data has changed or by manual selection
-    qOrbiterGenerator *orbiterConf = new qOrbiterGenerator(iPK_Device, "dcerouter","root", "", "pluto_main", 3306, this);
-
-
-    if (orbiterConf->initializeRegen())
-    {
-        if (!orbiterConf->get_virtual_devices())
-        {
-            qDebug() << "Couldnt Get virtutal Devices!";
-        }
- /*
-   this block is responsible for setting up the list of rooms in the home and setting the initial location
-   */
-     QString fk_ea = QString::fromStdString(pqOrbiter->DATA_Get_FK_EntertainArea());
-     m_lRooms = new LocationModel(new LocationItem, this);
-     m_lRooms  = orbiterConf->get_locations(fk_ea);
-
-       this->qorbiterUIwin->rootContext()->setContextProperty("roomlist", m_lRooms); //custom room list item provided
-     this->qorbiterUIwin->rootContext()->setContextProperty("currentroom", m_lRooms->sdefault_Ea); //custom room list item provided
-
-       /*
-         this block sets up users and orbiter authorized users
-         */
-
-       UserModel *userList = new UserModel( new UserItem, this);
-       userList = orbiterConf->get_users();
-       userList->findDefault();
-
-       QString sPK_User = userList->defaultUzer;
-
-       this->qorbiterUIwin->rootContext()->setContextProperty("userList", userList); //custom list item provided
-      qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
-
-      // qDebug()<< userList->defaultUser;
-
-       /*
-         Lighting Scenarios
-         */
-      roomLightingScenarios = orbiterConf->get_lighting_scenarios();
-
-      LightingScenarioModel *roomLights = new LightingScenarioModel(new LightingScenarioItem, this);
-
-      roomLights = roomLightingScenarios.value(m_lRooms->rdefault_Ea);
-
-     qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights); //custom list item provided
-
-    }
-
-
- return true;
-}
-
-//temporary get conf method until qorbitergen does its purpose
+// get conf method that reads config file
 bool qorbiterManager::getConf(int pPK_Device)
 {
+
     qDebug() << "Getting Configuration" ;
     iPK_Device = long(pPK_Device);
     iOrbiterPluginID = 9;
@@ -318,6 +254,9 @@ bool qorbiterManager::getConf(int pPK_Device)
 
 
   qorbiterUIwin->rootContext()->setContextObject(this);
+  //qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights); //custom list item provided
+  //qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
+  // this->qorbiterUIwin->rootContext()->setContextProperty("currentroom", m_lRooms->sdefault_Ea); //custom room list item provided
  return true;
 
 }

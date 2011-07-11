@@ -197,7 +197,7 @@ UserModel* qOrbiterGenerator::get_users()
 
     if( drUsers_Default )
             m_dwPK_Users_Default = drUsers_Default->PK_Users_get();
-            userModelList->defaultUser = m_dwPK_Users_Default;
+          //  userModelList->defaultUser = m_dwPK_Users_Default;
     //userList = m_spDatabase_pluto_main->
 
             }

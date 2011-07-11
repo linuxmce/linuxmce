@@ -76,7 +76,11 @@ bool qOrbiter::GetConfig()
                 return false;
         }
 
-	return true;
+
+
+    return true;
+
+
 
 }
 
@@ -1577,9 +1581,39 @@ bool DCE::qOrbiter::initialize()
     int iSize;
     pData = "NULL";
     iSize = 0;
-    DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(qmlUI->iPK_Device, qmlUI->iOrbiterPluginID, "1" ,qmlUI->iPK_User, StringUtils::itos(1), qmlUI->iFK_Room, &pData, &iSize);
-    if (SendCommand(CMD_Orbiter_Registered))
-    {qDebug () << "initialized!"; return true; } else {return false;}
+    DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(qmlUI->iPK_Device, qmlUI->iOrbiterPluginID, "1" ,qmlUI->iPK_User, StringUtils::itos(1), 1, &pData, &iSize);
+    if (!SendCommand(CMD_Orbiter_Registered))
+    {
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbitier Initialized, requesting configuration");
+
+    char *oData;
+    oData = NULL;
+    int iData_Size;
+    iData_Size = 0;
+    string *p_sResponse;
+    p_sResponse = NULL;
+    qDebug() << "Idata StartSize:" << iData_Size;
+
+    string filePath = "/var/tmp/"+QString::number(qmlUI->iPK_Device).toStdString()+"conf.xml";
+   // qDebug() << filePath.c_str();
+
+     CMD_Request_File configFileRequest((long)35, (long)4 , (string)filePath, &oData, &iData_Size);
+
+     if (!SendCommand(configFileRequest, p_sResponse))
+     {
+         qDebug() << "File request sent";
+     }
+     else
+     { qDebug() <<"I data recieved: " << iData_Size ;   }
+
+     uint  &dataLen = (uint)&iData_Size;
+
+     qmlUI->binaryConfig = QDataStream::readBytes(oData, dataLen);
+
+     return true;
+
+    }
+
 }
 
 bool DCE::qOrbiter::deinitialize()
@@ -1665,6 +1699,7 @@ bool DCE::qOrbiter::dataGridRequest(string s)
                            DataGridCell *pCell = it->second;
                            const char *pPath = pCell->GetImagePath();
 
+
                            if (pPath && !pCell->m_pGraphicData && !pCell->m_pGraphic)
                            {
 
@@ -1724,3 +1759,7 @@ bool DCE::qOrbiter::dataGridRequest(string s)
 }
 
 
+bool qOrbiter::getConfiguration()
+{
+
+}

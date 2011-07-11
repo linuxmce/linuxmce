@@ -211,7 +211,6 @@ int main(int argc, char* argv[])
             qorbiterManager * w = new qorbiterManager;
             bool bLocalMode = false;
             w->setupLmce(PK_Device, sRouter_IP, true, bLocalMode);
-
             a.exec();
              // intialziation end
 

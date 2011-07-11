@@ -57,6 +57,7 @@ public:
 
                 bool deinitialize();
                 bool dataGridRequest(string s);
+                bool getConfiguration();
 //<-dceag-const-e->
 
 //<-dceag-const2-b->

@@ -108,7 +108,7 @@ Flickable{
             buttontext: ""
             Image {
                 id: audioimg
-                source: "../../../img/icons/lsongs.png"
+                source: "/src/1004/src/qOrbiter/qObiter_src/img/icons/lsongs.png"
                 height: style.iconHeight
                 width: style.iconWidth
                 anchors.centerIn: parent

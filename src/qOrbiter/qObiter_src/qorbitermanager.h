@@ -9,6 +9,8 @@
 #include <QStringList>
 #include <datamodels/locationmodel.h>
 #include <datamodels/lightingscenariomodel.h>
+#include <QFile>
+#include <QDataStream>
 
 /*----custom classes-------*/
 #include <qOrbiterData.h>                       //own version of OrbiterData.h
@@ -56,6 +58,7 @@ public:
     qOrbiterGenerator * orbiterConf;
 
     //listmodels
+    QFile *binaryConfig;
     LocationModel *m_lRooms;
     ListModel *model;
     UserModel *userList;
@@ -81,6 +84,9 @@ public:
 
     //virtual devices
     long iPK_Device_DatagridPlugIn;
+    long iPK_Device_OrbiterPlugin;
+    long iPK_Device_GeneralInfoPlugin;
+
     int m_pDevice_ScreenSaver;
     int m_dwIDataGridRequestCounter;
      long iPK_Device;                   //this orbiters device number, passed in from command line
