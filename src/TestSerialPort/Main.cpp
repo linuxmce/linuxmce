@@ -20,6 +20,7 @@
 #include "DCEConfig.h"
 #include "Logger.h"
 #include "Serial/SerialPort.h"
+#include "PlutoUtils/LinuxSerialUSB.h"
 
 #include <iostream>
 #include <sstream>
@@ -73,7 +74,7 @@ int main(int argc, char *argv[])
 		switch (c)
 		{
 		case 'p':
-			sPort = argv[++optnum];
+			sPort = TranslateSerialUSB(argv[++optnum]);
 			break;
 		case 'P':
 			{
