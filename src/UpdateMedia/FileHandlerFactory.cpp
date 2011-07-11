@@ -145,6 +145,9 @@ FileHandlerFactory::~FileHandlerFactory(void)
 			   (sExtension == "g64") ||
 			   (sExtension == "d64") ||
 			   (sExtension == "crt") ||
+	  (sExtension == "atr") ||
+	  (sExtension == "xfd") ||
+	  (sExtension == "rom") ||
 			   (sExtension == "fds");
 
 	return bHasRomExtension;	// do we do more tests here?

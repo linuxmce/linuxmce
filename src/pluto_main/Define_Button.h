@@ -185,6 +185,18 @@
 #define BUTTON_commoKey_CONST 241
 #define BUTTON_commoCRSRLR_CONST 242
 #define BUTTON_commoCRSRUD_CONST 243
+#define BUTTON_atariltclr_CONST 244
+#define BUTTON_atarigtins_CONST 245
+#define BUTTON_break_CONST 246
+#define BUTTON_a8dash_CONST 247
+#define BUTTON_a8equals_CONST 248
+#define BUTTON_a8plus_CONST 249
+#define BUTTON_a8ast_CONST 250
+#define BUTTON_a8logo_CONST 251
+#define BUTTON_a8reset_CONST 252
+#define BUTTON_a8option_CONST 253
+#define BUTTON_a8select_CONST 254
+#define BUTTON_a8start_CONST 255
 
 #define BUTTON_TABLE "Button"
 #define BUTTON_PK_BUTTON_FIELD "PK_Button"

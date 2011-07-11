@@ -1198,6 +1198,19 @@
 #define TEXT_8Par_CONST 2141
 #define TEXT_9par_CONST 2142
 #define TEXT_eZero_CONST 2143
+#define TEXT_8ast_CONST 2144
+#define TEXT_CLR_CONST 2145
+#define TEXT_INS_CONST 2146
+#define TEXT_Del_CONST 2147
+#define TEXT_Break_CONST 2148
+#define TEXT_a8dash_CONST 2149
+#define TEXT_a8equals_CONST 2150
+#define TEXT_a8plus_CONST 2151
+#define TEXT_a8ast_CONST 2152
+#define TEXT_a8comma_CONST 2153
+#define TEXT_a8period_CONST 2154
+#define TEXT_Option_CONST 2155
+#define TEXT_Start_CONST 2156
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"

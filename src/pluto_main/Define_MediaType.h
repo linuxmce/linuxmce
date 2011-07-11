@@ -56,6 +56,7 @@
 #define MEDIATYPE_lmce_Game_jaguar_CONST 56
 #define MEDIATYPE_lmce_Game_vic20_CONST 57
 #define MEDIATYPE_lmce_Game_c64_CONST 58
+#define MEDIATYPE_lmce_Game_Atari800_CONST 59
 
 #define MEDIATYPE_TABLE "MediaType"
 #define MEDIATYPE_PK_MEDIATYPE_FIELD "PK_MediaType"

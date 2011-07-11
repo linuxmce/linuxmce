@@ -227,6 +227,9 @@ void RomFileHandler::getSystem(string sFilename)
 		m_sROMSystem = "Commodore VIC-20";
 	if (sFilename.find("/c64") != string::npos)
 		m_sROMSystem = "Commodore 64";
+	if (sFilename.find("/a800") != string::npos || 
+	    sFilename.find("/a130xe") != string::npos)
+	  m_sROMSystem = "Atari 800";
 
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"RomFileHandler::getSystem(%s) = %s",sFilename.c_str(),m_sROMSystem.c_str());
 
@@ -304,6 +307,12 @@ void RomFileHandler::GetRomInfo(string sFilename, map<int,string>& mapAttributes
 		sTmpFile.find(".d64") != string::npos ||
 		sTmpFile.find(".crt") != string::npos)
 		sSnapFilename = "/home/snap/c64/"+sROMTitle+".jpg";
+	
+	if (m_sFullFilename.find("/a800") != string::npos ||
+            sTmpFile.find(".atr") != string::npos ||
+	    sTmpFile.find(".xfd") != string::npos ||
+	    sTmpFile.find(".rom") != string::npos)
+	  sSnapFilename = "/home/snap/a800/"+sROMTitle+".jpg";
 
 	if (m_sFullFilename.find("/apple2") != string::npos)
 		sSnapFilename = "/home/snap/apple2/" + sROMTitle + ".jpg";
