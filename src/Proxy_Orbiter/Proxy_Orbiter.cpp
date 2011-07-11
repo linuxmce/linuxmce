@@ -844,7 +844,7 @@ bool Proxy_Orbiter::ReceivedString( Socket *pSocket, string sLine, int nTimeout 
 			return true;
 		}
 
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Sent: SCREEN_XML %d\\n\\n<SCREEN_XML>", size);
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Sent: DATAGRID_XML %d\\n\\n<DATAGRID_XML>", size);
 		pSocket->SendString("DATAGRID_XML " + StringUtils::itos(int(size)));
 		pSocket->SendData(int(size), pBuffer);
 		delete[] pBuffer;
