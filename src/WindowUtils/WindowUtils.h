@@ -81,6 +81,16 @@ namespace WindowUtils
 	 */
 	void SendKeyToWindow(Display *disp, unsigned long win, int iXKeySym, int serial_num, int iXKeySymModifer=0);
 
+	/**
+	 * Click at a specific window coordinate
+	 */
+	void SendClickToWindow(Display *disp, unsigned long win, int button, int x=0, int y=0);
+
+	/**
+         * Get the geometry of a window
+	 */
+	bool GetWindowGeometry(Display *disp, unsigned long win, int& x, int& y, int& w, int& h);
+
 }
 
 

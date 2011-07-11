@@ -118,7 +118,7 @@ namespace WindowUtils
 	}
 
 	/**
-	 * GetClientList - Get the list of clients attached to display.
+	 * GetClientList - Get the list of clients attached to disp.
 	 */
 	bool WindowUtils::GetClientList(Display *disp,vector<Window>& v_wClientList)
 	{
@@ -374,4 +374,67 @@ namespace WindowUtils
 
 
 	}	
+
+	/**
+	 * Send a mouse click to window with the specified coordinates
+	 */
+	void WindowUtils::SendClickToWindow(Display *disp, unsigned long win, int button, int x, int y)
+	{
+		XWarpPointer(disp, None, win, 0, 0, 0, 0, x, y); // let's experiment here.
+		XSync(disp, true);
+		
+		XEvent event;
 	
+		memset(&event, 0x00, sizeof(event));
+	
+		event.type = ButtonPress;
+		event.xbutton.button = button;
+		event.xbutton.same_screen = True;
+	
+		XQueryPointer(disp, RootWindow(disp, DefaultScreen(disp)), &event.xbutton.root, &event.xbutton.window, &event.xbutton.x_root, &event.xbutton.y_root, &event.xbutton.x, &event.xbutton.y, &event.xbutton.state);
+	
+		event.xbutton.subwindow = event.xbutton.window;
+	
+		while(event.xbutton.subwindow)
+		{
+			event.xbutton.window = event.xbutton.subwindow;
+			
+			XQueryPointer(disp, event.xbutton.window, &event.xbutton.root, &event.xbutton.subwindow, &event.xbutton.x_root, &event.xbutton.y_root, &event.xbutton.x, &event.xbutton.y, &event.xbutton.state);
+		}
+		
+		if(XSendEvent(disp, PointerWindow, True, 0xfff, &event) == 0)
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not send press event.");
+	
+		XSync(disp,true);
+	
+		usleep(100000);
+	
+		event.type = ButtonRelease;
+		event.xbutton.state = 0x100;
+	
+		if(XSendEvent(disp, PointerWindow, True, 0xfff, &event) == 0)
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not send release event."); 
+	
+		XSync(disp,true);
+
+	}
+
+	bool WindowUtils::GetWindowGeometry(Display* disp, unsigned long win, int& x, int& y, int& w, int& h)
+	{
+		x=y=w=h=0;	// Zero them out in case this fails. 
+		XWindowAttributes attr;
+		if (XGetWindowAttributes(disp, win, &attr) != 0)
+		{
+			x=attr.x;
+			y=attr.y;
+			w=attr.width;
+			h=attr.height;
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+
+	}
+
