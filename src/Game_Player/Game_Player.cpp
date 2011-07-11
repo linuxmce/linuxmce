@@ -1089,7 +1089,7 @@ bool Game_Player::LaunchMESS(string sMediaURL)
 
 	if (m_bLoadSavedGame) // m_bLoadSavedGame is set in CMD_Play_Media
 	{
-		sState = "\t-state\t9";
+		//sState = "\t-state\t9";
 	}
 
       DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
@@ -1211,7 +1211,7 @@ bool Game_Player::LaunchMAME(string sMediaURL)
 		// m_bLoadSavedGame is set in CMD_Play_Media
 		if (m_bLoadSavedGame)
 		{
-			sState = "\t-state\t9"; // load saved state from slot 9
+			//sState = "\t-state\t9"; // load saved state from slot 9
 		}
 
 		DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
