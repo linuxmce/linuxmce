@@ -44,11 +44,24 @@
 
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
+#include <map>
 
 //<-dceag-decl-b->
 namespace DCE
 {
-	class Game_Player : public Game_Player_Command
+
+        class VideoFrameGeometry
+        {
+
+                public:
+                int m_iWidth;
+                int m_iHeight;
+
+                VideoFrameGeometry(int iWidth, int iHeight);
+                virtual ~VideoFrameGeometry();
+        };
+
+	class Game_Player : public Game_Player_Command, public AlarmEvent
 	{
 //<-dceag-decl-e->
 		// Private member variables
@@ -84,6 +97,8 @@ public:
 		int m_iPK_MediaType;    // Used by the stop media method.
 		int m_iModifier;	// The current button modifier.
 		bool m_bLoadSavedGame;
+		map<int, VideoFrameGeometry *> m_mapVideoFrameGeometry; 
+		int m_iNowPlayingX, m_iNowPlayingY, m_iNowPlayingW, m_iNowPlayingH;
 		// Public member variables
 
 protected:

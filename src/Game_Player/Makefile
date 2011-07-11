@@ -22,7 +22,7 @@ sources = Main.cpp Game_Player.cpp $(Gen_Dev_Files)
 CXXFLAGS += 
 CPPFLAGS += `pkg-config libxml-2.0 --cflags`
 LDFLAGS +=  -lX11 -lXmu -lXtst -lWindowUtils -lmysqlclient_r -lpthread `pkg-config libxml-2.0 --libs`
-XTRALDLIBS =
+XTRALDLIBS = -lm
 
 Gen_Dev_Files +=
 sources +=

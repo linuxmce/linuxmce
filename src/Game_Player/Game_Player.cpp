@@ -40,6 +40,19 @@ using namespace DCE;
 
 #include <sstream>
 #include <pthread.h>
+#include <math.h>
+
+/* VideoFrameGeometry Stuff */
+VideoFrameGeometry::VideoFrameGeometry(int iWidth, int iHeight)
+{
+	m_iWidth = iWidth;
+	m_iHeight = iHeight;
+}
+
+VideoFrameGeometry::~VideoFrameGeometry()
+{
+	// Does nothing.
+}
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -66,7 +79,16 @@ Game_Player::Game_Player(int DeviceID, string ServerAddress,bool bConnectEventHa
 Game_Player::~Game_Player()
 //<-dceag-dest-e->
 {
-	
+	{
+		PLUTO_SAFETY_LOCK(gm, m_GameMutex);
+		// Delete the VideoFrameGeometry map
+		for (map<int, VideoFrameGeometry *>::iterator it=m_mapVideoFrameGeometry.begin(); 
+		                                              it!=m_mapVideoFrameGeometry.end();
+							      it++)
+		{
+			delete (*it).second;
+		}
+	}
 }
 
 void Game_Player::PrepareToDelete()
@@ -87,6 +109,9 @@ bool Game_Player::GetConfig()
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
+
+	m_pAlarmManager = new AlarmManager();
+        m_pAlarmManager->Start(2);      //4 = number of worker threads
 
 	m_pDevice_Game_Plugin = m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Game_PlugIn_CONST);
 	if( !m_pDevice_Game_Plugin )
@@ -969,8 +994,18 @@ string Game_Player::GetMessParametersFor(string sMediaURL)
 		}
 	}
 
+	if (m_iPK_MediaType == MEDIATYPE_lmce_Game_Atari800_CONST)
+	  {
+	    m_bOSDIsVisible=true;
+	    sPeripheralType = "-flop1"; // usually floppy, unless...
+	    if (sFileName.find(StringUtils::ToLower(".rom")) != string::npos ||
+		sFileName.find(StringUtils::ToLower(".bin")) != string::npos)
+	      {
+		sPeripheralType = "-cart1";
+	      }
+	  }
+
   if (
-		(sFileName.find(StringUtils::ToLower(".atr")) != string::npos) || 
 		(sFileName.find(StringUtils::ToLower(".fds")) != string::npos))
 	{
 		sPeripheralType = "-flop";
@@ -1074,7 +1109,7 @@ bool Game_Player::LaunchMESS(string sMediaURL)
 	    LoggerWrapper::GetInstance()->Write(LV_STATUS,"MESS window found: Window ID %d",m_iMAMEWindowId);
 	    m_sMAMEWindowId = CreateWindowIDString(m_iMAMEWindowId); 
 	  }
-
+	m_pAlarmManager->AddRelativeAlarm(5,this,CHECK_MAME,NULL);
 	PostLaunchMESS();
 	
 	return true; }
@@ -1196,7 +1231,7 @@ bool Game_Player::LaunchMAME(string sMediaURL)
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"MAME window found: Window ID %d",m_iMAMEWindowId);
 	 	m_sMAMEWindowId = CreateWindowIDString(m_iMAMEWindowId);	
 	}
-
+			m_pAlarmManager->AddRelativeAlarm(5,this,CHECK_MAME,NULL);	
 		 	return true; }
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::LaunchMAME - failed to launch");
 	}
@@ -1212,6 +1247,7 @@ bool Game_Player::StopMESS()
   string sResponse;
   if(!m_bRouterReloading)
     {
+      m_pAlarmManager->CancelAlarmByType(CHECK_MAME);
       pDevice_App_Server = m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_App_Server_CONST,this);
       if( pDevice_App_Server )
 	{
@@ -1232,6 +1268,7 @@ bool Game_Player::StopMAME() {
         string sResponse;
         if(!m_bRouterReloading)
         {
+		m_pAlarmManager->CancelAlarmByType(CHECK_MAME);
                 pDevice_App_Server = m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_App_Server_CONST,this);
                 if( pDevice_App_Server )
                 {
@@ -1362,18 +1399,45 @@ bool Game_Player::StopPCSX2()
   return false;
 }
 
+/**
+ * Periodically check the game player's window geometry.
+ */
 void Game_Player::CheckMAME() 
 {
 
+	int x,y,w,h;
+	if (WindowUtils::GetWindowGeometry(m_pDisplay,m_iMAMEWindowId,x,y,w,h))
+	{
+
+#ifdef DEBUG
+		LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Game_Player::CheckMAME() - Current Window Geometry is x:%d y:%d w:%dpx h:%dpx",x,y,w,h);
+#endif
+
+		m_iNowPlayingX = x;
+		m_iNowPlayingY = y;
+		m_iNowPlayingW = w;
+		m_iNowPlayingH = h;
+
+	}
+	else
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::CheckMAME() - Called and could not get Window Geometry, is Emulator running?");
+	}
+
 	// reset the alarm thread
-	//m_pAlarmManager->CancelAlarmByType(CHECK_MAME);
-	//m_pAlarmManager->AddRelativeAlarm(5,this,CHECK_MAME,NULL);
+	m_pAlarmManager->CancelAlarmByType(CHECK_MAME);
+	m_pAlarmManager->AddRelativeAlarm(5,this,CHECK_MAME,NULL);
 
 }
 
 void Game_Player::AlarmCallback(int id, void* param) 
 {
-
+	switch (id)
+	{
+		case CHECK_MAME:
+			CheckMAME();
+			break;	
+	}
 }
 
 //<-dceag-createinst-b->!
@@ -1884,6 +1948,20 @@ void Game_Player::CMD_Simulate_Mouse_Click(int iPosition_X,int iPosition_Y,int i
 	cout << "Parm #11 - Position_X=" << iPosition_X << endl;
 	cout << "Parm #12 - Position_Y=" << iPosition_Y << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+	VideoFrameGeometry* vfg = m_mapVideoFrameGeometry[pMessage->m_dwPK_Device_From];
+	double iScaleW = (double)m_iNowPlayingW / (double)vfg->m_iWidth;
+	double iScaleH = (double)m_iNowPlayingH / (double)vfg->m_iHeight;
+	int iScaledX = floor((double)iPosition_X * iScaleW);
+	int iScaledY = floor((double)iPosition_Y * iScaleH);
+	
+	cout << "iScaleW = " << iScaleW << " : iScaleH = " << iScaleH << endl;
+	cout << "iScaledX = " << iScaledX << " : iScaledY = " << iScaledY << endl;
+
+	// Send a double click, due to MAME's assumption that it is a mouse.
+	WindowUtils::SendClickToWindow(m_pDisplay, m_iMAMEWindowId, 1, iScaledX, iScaledY);
+	Sleep(100);
+	WindowUtils::SendClickToWindow(m_pDisplay, m_iMAMEWindowId, 1, iScaledX, iScaledY);
 }
 
 //<-dceag-c32-b->
@@ -1972,6 +2050,7 @@ void Game_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
 		case MEDIATYPE_lmce_Game_jaguar_CONST:
 		case MEDIATYPE_lmce_Game_vic20_CONST:
 		case MEDIATYPE_lmce_Game_c64_CONST:
+	case MEDIATYPE_lmce_Game_Atari800_CONST:
 			LaunchMESS(sMediaURL);
 			break;
 		case MEDIATYPE_lmce_Game_ps1_CONST:
@@ -2053,6 +2132,7 @@ void Game_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sC
 	  case MEDIATYPE_lmce_Game_jaguar_CONST:
 	  case MEDIATYPE_lmce_Game_vic20_CONST:
 	  case MEDIATYPE_lmce_Game_c64_CONST:
+	  case MEDIATYPE_lmce_Game_Atari800_CONST:
 	    StopMESS();
 	    break;
 	  case MEDIATYPE_lmce_Game_ps1_CONST:
@@ -2262,6 +2342,8 @@ void Game_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,
 	ssHeight << iHeight;
 	sGeometry = ssWidth.str()+"x"+ssHeight.str();
 
+	m_mapVideoFrameGeometry[pMessage->m_dwPK_Device_From] = new VideoFrameGeometry(iWidth,iHeight);
+
 	if (m_bOSDIsVisible)
 	{
 		// Use alternate code to display OSD
@@ -2365,6 +2447,9 @@ void Game_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,
                     sPath = "/home/mamedata/shots/c64";
                     screenName = "/0000";
 		    break;
+		  case MEDIATYPE_lmce_Game_Atari800_CONST:
+		    sPath = "/home/mamedata/shots/a800";
+		    screenName = "/0000";
 		  }
 	
 		string snapPath = sPath + m_sROMName + "/";
@@ -2956,6 +3041,8 @@ string Game_Player::GetSaveGamePath()
     case MEDIATYPE_lmce_Game_c64_CONST:
       sPath = "/home/mamedata/sta/c64";
       break;
+    case MEDIATYPE_lmce_Game_Atari800_CONST:
+      sPath = "/home/mamedata/sta/a800";
     default:
       sPath = "";
       break;
