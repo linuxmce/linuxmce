@@ -21,7 +21,6 @@ import QtQuick 1.0
      width: style.orbiterW; height: style.orbiterH;
 
 
-
      Loader {
          id:pageLoader
          objectName: "loadbot"

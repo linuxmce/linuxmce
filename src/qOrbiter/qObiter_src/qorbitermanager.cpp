@@ -304,7 +304,7 @@ bool qorbiterManager::getConf(int pPK_Device)
    m_lRooms->sdefault_Ea = "irc";
 
   qorbiterUIwin->rootContext()->setContextObject(this);
-  qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights); //custom list item provided
+ // qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights); //custom list item provided
   qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
 
   this->qorbiterUIwin->rootContext()->setContextProperty("currentroom", m_lRooms->sdefault_Ea); //custom room list item provided
