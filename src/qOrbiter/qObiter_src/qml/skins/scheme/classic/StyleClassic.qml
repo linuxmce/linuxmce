@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import Qt 4.7
 
 //sample style file for a qml ui
 /*

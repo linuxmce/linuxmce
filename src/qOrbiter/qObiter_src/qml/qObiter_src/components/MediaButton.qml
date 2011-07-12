@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import Qt 4.7
 
 Rectangle {
     property alias media_but_img: media_button_image.source

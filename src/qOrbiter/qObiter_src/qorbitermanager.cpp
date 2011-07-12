@@ -252,6 +252,10 @@ bool qorbiterManager::getConf(int pPK_Device)
     QDomElement root = configData.documentElement();        //orbiterXX
    // qDebug () << root.tagName();
 
+    QDomElement defaults = root.firstChildElement("Default");
+    QString sPK_User = defaults.attribute("sPK_User");
+
+
     QDomElement userXml = root.firstChildElement("Users"); //users
     //qDebug () << userXml.tagName();
 
@@ -276,7 +280,8 @@ bool qorbiterManager::getConf(int pPK_Device)
     QDomElement roomXml = root.firstChildElement("Rooms");  //rooms
 
     m_lRooms = new LocationModel(new LocationItem, this);
-    int uzr = pqOrbiter->DATA_Get_PK_Users(); //requesting default ea from dce router for reference
+
+    QMap <QString, int> roomMapping;
 
     QDomNodeList roomListXml = roomXml.childNodes();
 
@@ -287,13 +292,41 @@ bool qorbiterManager::getConf(int pPK_Device)
         int m_iEA = roomListXml.at(index).attributes().namedItem("PK_EntertainArea").nodeValue().toInt();
         int m_iType = roomListXml.at(index).attributes().namedItem("FK_RoomType").nodeValue().toInt();
         QString m_title = roomListXml.at(index).attributes().namedItem("Description").nodeValue();
+
+        roomMapping.insert(m_name, m_val);
         m_lRooms->appendRow(new LocationItem(m_name, m_val, m_title, m_iEA, m_iType, m_lRooms));
     }
-
+        m_lRooms->sdefault_Ea = defaults.attribute("DefaultLocation");
 
     //-----lighting scenarios
 
     QDomElement lScenarios = root.firstChildElement("LightingScenarios");
+    QDomNodeList lScenarioList = lScenarios.childNodes();
+
+    for (int index = 0; index < lScenarioList.count(); index++)
+    {
+        QDomNodeList lScenarioRoom = lScenarioList.at(index).childNodes();
+        LightingScenarioModel *lightModelHolder = new LightingScenarioModel(new LightingScenarioItem, this);
+
+        int roomMapNo = lScenarioList.at(index).attributes().namedItem("int").nodeValue().toInt();
+        for (int innerIndex = 0; innerIndex < lScenarioRoom.count(); innerIndex++)
+        {
+                    QString m_name = lScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+                    QString m_label = lScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+                    QString m_param =lScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue() ;
+                    QString m_command = lScenarioRoom.at(innerIndex).attributes().namedItem("eaDescription").nodeValue();
+                    QString m_goto = lScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
+                    QString imgName = lScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+                    QImage m_image = QImage("Qrc:/icons/"+imgName);
+
+                    qDebug() << "Item Processed :" << m_name;
+
+            lightModelHolder->appendRow(new LightingScenarioItem(m_name,m_label, m_param, m_command, m_goto, m_image, lightModelHolder));
+        }
+
+        roomLightingScenarios.insert(roomMapNo, lightModelHolder);
+    }
+
 
    iPK_Device = long(pPK_Device);
    iOrbiterPluginID = 9;
@@ -303,11 +336,13 @@ bool qorbiterManager::getConf(int pPK_Device)
    qDebug() << "PK_Device No:" << iPK_Device;
 
     //TODO fix DEFAULTS!
-   QString sPK_User = "Tux";
-   m_lRooms->sdefault_Ea = "irc";
+
+
 
   qorbiterUIwin->rootContext()->setContextObject(this);
- // qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights); //custom list item provided
+
+  setActiveRoom(roomMapping.value(m_lRooms->sdefault_Ea), 0);
+  //qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights); //custom list item provided
   qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
 
   this->qorbiterUIwin->rootContext()->setContextProperty("currentroom", m_lRooms->sdefault_Ea); //custom room list item provided

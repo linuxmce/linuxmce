@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import Qt 4.7
 
 
 Rectangle {
@@ -41,11 +41,14 @@ Rectangle {
         height: 0
         visible: false
         model: userList
+
+
         delegate:  Rectangle
         {
             id: delrect
             height:20
              width: 100
+
 
             Text {
                     id: somshit
