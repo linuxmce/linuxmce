@@ -122,8 +122,6 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     gotoQScreen("Splash.qml");
     qDebug() << "Showing Splash";
 
-
-
     //initial signal and slot connection
     //QObject::connect(item,SIGNAL(swapStyle()), this,SLOT(swapSkins()));
     QObject::connect(item, SIGNAL(close()), this, SLOT(closeOrbiter()));
@@ -291,6 +289,11 @@ bool qorbiterManager::getConf(int pPK_Device)
         QString m_title = roomListXml.at(index).attributes().namedItem("Description").nodeValue();
         m_lRooms->appendRow(new LocationItem(m_name, m_val, m_title, m_iEA, m_iType, m_lRooms));
     }
+
+
+    //-----lighting scenarios
+
+    QDomElement lScenarios = root.firstChildElement("LightingScenarios");
 
    iPK_Device = long(pPK_Device);
    iOrbiterPluginID = 9;

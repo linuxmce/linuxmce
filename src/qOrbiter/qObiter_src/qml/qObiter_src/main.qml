@@ -1,5 +1,6 @@
 import QtQuick 1.0
-import "../qObiter_src"
+import Qt 4.7
+
 
  Item {
      id: item
