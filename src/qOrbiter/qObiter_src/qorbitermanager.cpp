@@ -2,6 +2,7 @@
 #include <QDeclarativeEngine>
 #include <QDebug>
 #include <QFile>
+#include <QtXml/QtXml>
 
 //#include "OrbiterData.h"
 #include <QDeclarativeEngine>
@@ -131,7 +132,7 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
      iPK_Device_DatagridPlugIn =  long(6);
      m_dwIDataGridRequestCounter = 0;
 
-     binaryConfig = new QFile;
+
 
 }
 
@@ -245,19 +246,72 @@ bool qorbiterManager::getConf(int pPK_Device)
 {
 
     qDebug() << "Getting Configuration" ;
-    iPK_Device = long(pPK_Device);
-    iOrbiterPluginID = 9;
-    iSize = 0;
-    m_pOrbiterCat = 5;
+
+    QDomDocument configData;
+    const QByteArray tConf = binaryConfig.data();
+    configData.setContent(tConf,false);
+
+    QDomElement root = configData.documentElement();        //orbiterXX
+   // qDebug () << root.tagName();
+
+    QDomElement userXml = root.firstChildElement("Users"); //users
+    //qDebug () << userXml.tagName();
+
+    userList = new UserModel( new UserItem, this);
+    QDomNodeList userXmlList = userXml.childNodes();
+//-----users
+    for(int index = 0; index < userXmlList.count(); index++)
+    {
+        QString m_userName = userXmlList.at(index).nodeName();      //username
+        QString m_firstName= userXmlList.at(index).attributes().namedItem("FirstName").nodeValue();
+        QString m_lastName= userXmlList.at(index).attributes().namedItem("LastName").nodeValue();
+        QString m_nickName= userXmlList.at(index).attributes().namedItem("NickName").nodeValue();
+        int m_pk_user= userXmlList.at(index).attributes().namedItem("PK_User").nodeValue().toInt();
+        int m_userMode= userXmlList.at(index).attributes().namedItem("UserMode").nodeValue().toInt();
+        int m_requirePin= userXmlList.at(index).attributes().namedItem("RequirePin").nodeValue().toInt();
+        int m_phoneExtension= userXmlList.at(index).attributes().namedItem("PhoneExtension").nodeValue().toInt();
+        int m_defaultUser= userXmlList.at(index).attributes().namedItem("isDefault").nodeValue().toInt();
+        QImage m_image;
+        userList->appendRow(new UserItem(m_userName,m_firstName, m_lastName, m_nickName, m_pk_user, m_userMode, m_requirePin, m_phoneExtension, m_image, m_defaultUser , userList));
+    }
+//---------rooms
+    QDomElement roomXml = root.firstChildElement("Rooms");  //rooms
+
+    m_lRooms = new LocationModel(new LocationItem, this);
+    int uzr = pqOrbiter->DATA_Get_PK_Users(); //requesting default ea from dce router for reference
+
+    QDomNodeList roomListXml = roomXml.childNodes();
+
+    for(int index = 0; index < roomListXml.count(); index++)
+    {
+        QString m_name = roomListXml.at(index).attributes().namedItem("Description").nodeValue();
+        int m_val = roomListXml.at(index).attributes().namedItem("PK_Room").nodeValue().toInt();
+        int m_iEA = roomListXml.at(index).attributes().namedItem("PK_EntertainArea").nodeValue().toInt();
+        int m_iType = roomListXml.at(index).attributes().namedItem("FK_RoomType").nodeValue().toInt();
+        QString m_title = roomListXml.at(index).attributes().namedItem("Description").nodeValue();
+        m_lRooms->appendRow(new LocationItem(m_name, m_val, m_title, m_iEA, m_iType, m_lRooms));
+    }
+
+   iPK_Device = long(pPK_Device);
+   iOrbiterPluginID = 9;
+   iSize = 0;
+   m_pOrbiterCat = 5;
    s_onOFF = "1";
    qDebug() << "PK_Device No:" << iPK_Device;
 
+    //TODO fix DEFAULTS!
+   QString sPK_User = "Tux";
+   m_lRooms->sdefault_Ea = "irc";
 
   qorbiterUIwin->rootContext()->setContextObject(this);
-  //qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights); //custom list item provided
-  //qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
-  // this->qorbiterUIwin->rootContext()->setContextProperty("currentroom", m_lRooms->sdefault_Ea); //custom room list item provided
- return true;
+  qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights); //custom list item provided
+  qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
+
+  this->qorbiterUIwin->rootContext()->setContextProperty("currentroom", m_lRooms->sdefault_Ea); //custom room list item provided
+  this->qorbiterUIwin->rootContext()->setContextProperty("userList", userList); //custom user list provided
+  this->qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms); //custom room list  provided
+
+  return true;
 
 }
 

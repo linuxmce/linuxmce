@@ -58,7 +58,7 @@ public:
     qOrbiterGenerator * orbiterConf;
 
     //listmodels
-    QFile *binaryConfig;
+    QByteArray binaryConfig;
     LocationModel *m_lRooms;
     ListModel *model;
     UserModel *userList;

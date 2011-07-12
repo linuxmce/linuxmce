@@ -8,9 +8,10 @@ QML_IMPORT_PATH =
 
 symbian:TARGET.UID3 = 0xE0D07D4D
 
+
 INCLUDEPATH += ../../ ../../DCE/
 
-LIBS += -L/usr/pluto/lib/ -lDCECommon -lSerializeClass -lPlutoUtils -lpluto_main -lpluto_media
+LIBS += -L/usr/pluto/lib/ -lDCECommon -lSerializeClass -lPlutoUtils -lpluto_main -lpluto_media -lQtXml
 
 # Smart Installer package's UID
 # This UID is from the protected range and therefore the package will

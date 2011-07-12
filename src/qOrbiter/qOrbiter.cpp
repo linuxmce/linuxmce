@@ -1604,16 +1604,19 @@ bool DCE::qOrbiter::initialize()
          qDebug() << "File request sent";
      }
      else
-     { qDebug() <<"I data recieved: " << iData_Size ;   }
+     {
+         qDebug() <<"I data recieved: " << iData_Size ;
+     }
 
-     uint  &dataLen = (uint)&iData_Size;
+    QByteArray configData;
+    configData = oData;
 
-     qmlUI->binaryConfig = QDataStream::readBytes(oData, dataLen);
+     uint dataLen;
+     dataLen = (uint)&iData_Size;
+     qmlUI->binaryConfig = configData;
 
      return true;
-
     }
-
 }
 
 bool DCE::qOrbiter::deinitialize()

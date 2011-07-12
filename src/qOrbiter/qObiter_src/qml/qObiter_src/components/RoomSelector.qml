@@ -49,7 +49,7 @@ Rectangle {
            ListView {
                 id: roomListModel
                 visible: false
-                model: roomlist
+                model: roomList
                 highlightFollowsCurrentItem:true
                 height: 5
                 width: 0
