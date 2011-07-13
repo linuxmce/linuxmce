@@ -17,7 +17,7 @@ Component
     Item {
         id: delegateitem
         height: 65
-        width: childrenRect.width
+        width: childrenRect.width + 5
 
     ButtonSq
     {
@@ -105,7 +105,7 @@ Flickable{
             }
         ListView{
             id: mediaScenarios
-            width: 300
+            width: childrenRect.width
             height: 50
             model: currentRoomMedia
             orientation:ListView.Horizontal
