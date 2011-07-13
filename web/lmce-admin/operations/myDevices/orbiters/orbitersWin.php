@@ -43,6 +43,11 @@ function orbitersWin($output,$dbADO) {
 			<td> Windows CE.NET</td>
 			<td><a href="fdownload.php?filepath=installers/Orbiter_CeNet4_x86.CAB" target="_blank">('.$TEXT_DOWNLOAD_CONST.')</a></td>
 		</tr>
+		<tr bgcolor="#F0F3F8">
+			<td>Nokia n900</td>
+			<td> Maemo Fremantle</td>
+			<td><a href="fdownload.php?filepath=installers/fremantle.install" target="_blank">('.$TEXT_DOWNLOAD_CONST.')</a></td>
+		</tr>
 		<tr>
 			<td>Import Outlook Contacts</td>
 			<td>Windows 98/ME/XP</td>
