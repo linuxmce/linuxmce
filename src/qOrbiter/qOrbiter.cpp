@@ -1584,7 +1584,7 @@ bool DCE::qOrbiter::initialize()
     DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(qmlUI->iPK_Device, qmlUI->iOrbiterPluginID, "1" ,qmlUI->iPK_User, StringUtils::itos(1), 1, &pData, &iSize);
     if (!SendCommand(CMD_Orbiter_Registered))
     {
-    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbitier Initialized, requesting configuration");
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbitier Initialized, requesting configuration for device %d", qmlUI->iPK_Device);
 
     char *oData;
     oData = NULL;
@@ -1605,7 +1605,7 @@ bool DCE::qOrbiter::initialize()
      }
      else
      {
-         qDebug() <<"I data recieved: " << iData_Size ;
+         qDebug() <<"Idata recieved: " << iData_Size ;
      }
 
     QByteArray configData;
@@ -1678,13 +1678,7 @@ bool DCE::qOrbiter::dataGridRequest(string s)
         DCE::CMD_Request_Datagrid_Contents req_data_grid( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
         if(SendCommand(req_data_grid))
                 {                   bool barrows = false;
-/*
-    NameRole = Qt::UserRole+1,
-    SizeRole,
-    PriceRole,
-    TitleRole,
-    ImageRole
-    */
+
                    DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
 
                    int cellsToRender= pDataGridTable->GetRows();
@@ -1696,27 +1690,30 @@ bool DCE::qOrbiter::dataGridRequest(string s)
                    QImage cellImg;
                    QString cellTitle;
 
+                  DataGridCell *pCell= new DataGridCell(pDataGridTable->GetData(0,1));
+                   qDebug () <<"File Path:" << pCell->m_ImagePathLength;
+
+
                    //experimental block
-                   for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
+                 /*  for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
                    {
+
                            DataGridCell *pCell = it->second;
                            const char *pPath = pCell->GetImagePath();
 
 
                            if (pPath && !pCell->m_pGraphicData && !pCell->m_pGraphic)
                            {
-
                                            size_t s=0;
-                                           qDebug () << pPath;
                                            cellImg = QImage(pPath);
                                            pCell->m_GraphicLength = (unsigned long) s;
-                                           pCell->m_GraphicFormat = GR_JPG;
-
+                                          pCell->m_GraphicFormat = GR_JPG;
                            }
+
                          //  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"DataGridRenderer::RenderCell loading %s in bg for %d,%d", pPath,pDataGridTable->CovertColRowType(it->first).first,pDataGridTable->CovertColRowType(it->first).second);
 
                            qmlUI->model->appendRow(new gridItem(QString::fromStdString(pCell->m_Text), temp, cellImg , qmlUI->model));
-                   }
+                   } */
                 }
     }
 

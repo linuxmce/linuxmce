@@ -9,6 +9,10 @@
 #include <QStringList>
 #include <datamodels/locationmodel.h>
 #include <datamodels/lightingscenariomodel.h>
+#include <datamodels/mediascenariomodel.h>
+#include <datamodels/climatescenariomodel.h>
+#include <datamodels/telecomscenariomodel.h>
+#include <datamodels/securityscenariomodel.h>
 #include <QFile>
 #include <QDataStream>
 
@@ -55,14 +59,19 @@ public:
     basicImageProvider *basicProvider;
     GridIndexProvider *advancedProvider;
     QString *gridReqType;
-    qOrbiterGenerator * orbiterConf;
+   // qOrbiterGenerator * orbiterConf;
 
     //listmodels
     QByteArray binaryConfig;
     LocationModel *m_lRooms;
     ListModel *model;
     UserModel *userList;
+
     LightingScenarioModel *roomLights;
+    MediaScenarioModel *roomMedia;
+    ClimateScenarioModel *roomClimate;
+    TelecomScenarioModel *roomTelecom;
+    SecurityScenarioModel *roomSecurity;
 
     //ui functions
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}
@@ -119,6 +128,10 @@ public:
    QString sPK_Room;
     QMap <QString, int> mp_rooms;
     QMap <int, LightingScenarioModel*> roomLightingScenarios;
+    QMap <int, MediaScenarioModel*> roomMediaScenarios;
+    QMap <int, ClimateScenarioModel*> roomClimateScenarios;
+   QMap <int, TelecomScenarioModel*> roomTelecomScenarios;
+    QMap <int, SecurityScenarioModel*> roomSecurityScenarios;
 
 
     QString s_onOFF;

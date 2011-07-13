@@ -46,7 +46,15 @@ SOURCES += main.cpp \
     datamodels/usermodel.cpp \
     datamodels/useritem.cpp \
     datamodels/lightingscenariomodel.cpp \
-    datamodels/lightingscenarioitem.cpp
+    datamodels/lightingscenarioitem.cpp \
+    datamodels/mediascenariomodel.cpp \
+    datamodels/mediascenarioitem.cpp \
+    datamodels/telecomscenariomodel.cpp \
+    datamodels/climatescenariomodel.cpp \
+    datamodels/securityscenariomodel.cpp \
+    datamodels/climatescenarioitem.cpp \
+    datamodels/securityscenarioitem.cpp \
+    datamodels/telecomscenarioitem.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -70,7 +78,15 @@ HEADERS += \
     datamodels/usermodel.h \
     datamodels/useritem.h \
     datamodels/lightingscenariomodel.h \
-    datamodels/lightingscenarioitem.h
+    datamodels/lightingscenarioitem.h \
+    datamodels/mediascenariomodel.h \
+    datamodels/mediascenarioitem.h \
+    datamodels/telecomscenariomodel.h \
+    datamodels/climatescenariomodel.h \
+    datamodels/securityscenariomodel.h \
+    datamodels/climatescenarioitem.h \
+    datamodels/securityscenarioitem.h \
+    datamodels/telecomscenarioitem.h
 
 OTHER_FILES += \
     qml/skins/scheme/classic/Main.qml \

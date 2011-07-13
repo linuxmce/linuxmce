@@ -1,10 +1,47 @@
 import Qt 4.7
 
 Rectangle {
-    property alias rowlabel: rowheader.buttontext
+
     height: 65
     width: parent.width
 color:style.rowbgColor
+
+Component
+{
+    id:securityDelegate
+
+    Item {
+        id: delegateitem
+        height: 65
+        width: childrenRect.width
+
+    ButtonSq
+    {
+            height: style.buttonH
+            width: style.buttonW
+            color: style.button_action_color
+            radius: style.but_smooth
+            buttontext: label
+            buttontextfontsize: 12
+            buttontextbold: true
+            buttontextzindex: 30
+
+             MouseArea{
+                 anchors.fill: parent
+                 onClicked: console.log ("I am button:" + index + ". My Name is:"+ label+". My Params:" + params +". And my Command:" + command)
+                       }
+
+              Image {
+                    id:buttonimage
+                    source: "../../../img/icons/"+label+".png"
+                    height: style.iconHeight
+                    width: style.iconWidth
+                     anchors.centerIn: parent
+                     }
+            }
+        }
+   }
+
 Flickable
 {
     id:securityflick
@@ -24,25 +61,15 @@ Row {
         spacing:5
 
 
-        ButtonSq {
-            id: rowheader
-            height: style.buttonH
-            width: style.buttonW
-            color: style.button_action_color
-            radius: style.but_smooth
-            buttontext: "Security"
+        ListView{
+            id: securityScenarios
+            width: 300
+            height: 50
+            model: currentRoomSecurity
+            orientation:ListView.Horizontal
 
-            }
-
-        ButtonSq {
-            id: status
-            height: style.buttonH
-            width: style.buttonW
-            color: style.button_action_color
-            radius: style.but_smooth
-            buttontext: "Status"
-
-            }
+            delegate: securityDelegate
+                 }
 
     }
 }

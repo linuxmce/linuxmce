@@ -88,6 +88,10 @@ public:
 			return atoi(m_mapParameters[DEVICEDATA_PK_Users_CONST].c_str());
 	}
 
+	void Set_PK_Users(int Value)
+	{
+		SetParm(DEVICEDATA_PK_Users_CONST,StringUtils::itos(Value).c_str());
+	}
 	int Get_PK_Distro()
 	{
 		if( m_bRunningWithoutDeviceData )
@@ -104,6 +108,18 @@ public:
 			return (m_mapParameters[DEVICEDATA_Development_CONST]=="1" ? true : false);
 	}
 
+	int Get_PK_FloorplanObjectType()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_PK_FloorplanObjectType_CONST).c_str());
+		else
+			return atoi(m_mapParameters[DEVICEDATA_PK_FloorplanObjectType_CONST].c_str());
+	}
+
+	void Set_PK_FloorplanObjectType(int Value)
+	{
+		SetParm(DEVICEDATA_PK_FloorplanObjectType_CONST,StringUtils::itos(Value).c_str());
+	}
 	bool Get_No_Effects()
 	{
 		if( m_bRunningWithoutDeviceData )
@@ -144,6 +160,10 @@ public:
 			return m_mapParameters[DEVICEDATA_FK_EntertainArea_CONST];
 	}
 
+	void Set_FK_EntertainArea(string Value)
+	{
+		SetParm(DEVICEDATA_FK_EntertainArea_CONST,Value.c_str());
+	}
 	string Get_Timeout()
 	{
 		if( m_bRunningWithoutDeviceData )
@@ -389,13 +409,17 @@ public:
 	Command_Impl *CreateCommand(int PK_DeviceTemplate, Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent);
 	//Data accessors
 	int DATA_Get_PK_Users() { return GetData()->Get_PK_Users(); }
+	void DATA_Set_PK_Users(int Value,bool bUpdateDatabase=false) { GetData()->Set_PK_Users(Value); if( bUpdateDatabase ) SetDeviceDataInDB(m_dwPK_Device,3,Value); }
 	int DATA_Get_PK_Distro() { return GetData()->Get_PK_Distro(); }
 	bool DATA_Get_Development() { return GetData()->Get_Development(); }
+	int DATA_Get_PK_FloorplanObjectType() { return GetData()->Get_PK_FloorplanObjectType(); }
+	void DATA_Set_PK_FloorplanObjectType(int Value,bool bUpdateDatabase=false) { GetData()->Set_PK_FloorplanObjectType(Value); if( bUpdateDatabase ) SetDeviceDataInDB(m_dwPK_Device,11,Value); }
 	bool DATA_Get_No_Effects() { return GetData()->Get_No_Effects(); }
 	int DATA_Get_PK_Skin() { return GetData()->Get_PK_Skin(); }
 	int DATA_Get_PK_Size() { return GetData()->Get_PK_Size(); }
 	int DATA_Get_PK_Language() { return GetData()->Get_PK_Language(); }
 	string DATA_Get_FK_EntertainArea() { return GetData()->Get_FK_EntertainArea(); }
+	void DATA_Set_FK_EntertainArea(string Value,bool bUpdateDatabase=false) { GetData()->Set_FK_EntertainArea(Value); if( bUpdateDatabase ) SetDeviceDataInDB(m_dwPK_Device,27,Value); }
 	string DATA_Get_Timeout() { return GetData()->Get_Timeout(); }
 	string DATA_Get_CacheFolder() { return GetData()->Get_CacheFolder(); }
 	int DATA_Get_CacheSize() { return GetData()->Get_CacheSize(); }

@@ -5,26 +5,55 @@ Rectangle {
     width: parent.width
     color:style.rowbgColor
 
-    ListModel{
-        id:lightingmodel
+    Component
+    {
+        id:lightingdelegate
 
+        Item {
+            id: delegateitem
+            height: 65
+            width: childrenRect.width
 
-        ListElement{
-            name:"On"
-            device: "qml light switch"
-            msgsnd: "/usr/pluto/bin/MessageSend localhost 0 34 1 192 97 "
-            img: "../../../img/icons/ktip.png"
+        ButtonSq
+        {
+                height: style.buttonH
+                width: style.buttonW
+                color: style.button_action_color
+                radius: style.but_smooth
+                buttontext: label
+                buttontextfontsize: 12
+                buttontextbold: true
+                buttontextzindex: 30
 
-        }
+                 MouseArea{
+                     anchors.fill: parent
+                     onClicked: console.log ("I am button:" + index + ". My Name is:"+ label+". My Params:" + params +". And my Command:" + command)
+                           }
 
-        ListElement{
-            name:"Off"
-            device: "qml light switch"
-            msgsnd: "/usr/pluto/bin/MessageSend localhost 0 34 1 192 97 "
-            img: "../../../img/icons/jabber_protocol.png"
+                  Image {
+                        id:buttonimage
+                        source: "../../../img/icons/"+label+".png"
+                        height: style.iconHeight
+                        width: style.iconWidth
+                         anchors.centerIn: parent
+                         }
+                }
             }
-        }
+       }
+    ListView.onAdd: SequentialAnimation {
+          PropertyAction { target: lightingdelegate; property: "height"; value: 0 }
+          NumberAnimation { target: lightingdelegate; property: "height"; to: 65; duration: 500; easing.type: Easing.InOutQuad }
 
+      }
+
+      ListView.onRemove: SequentialAnimation {
+          PropertyAction { target: lightingdelegate; property: "ListView.delayRemove"; value: true }
+          NumberAnimation { target: lightingdelegate; property: "height"; to: 0; duration: 500; easing.type: Easing.InOutQuad }
+
+          // Make sure delayRemove is set back to false so that the item can be destroyed
+          PropertyAction { target: lightingdelegate; property: "ListView.delayRemove"; value: false }
+
+           }
 
     Flickable{
         interactive: true
@@ -63,41 +92,10 @@ Row {
             height: 50
             model: currentRoomLights
             orientation:ListView.Horizontal
-            delegate: ButtonSq {
 
-                id: but
-                height: style.buttonH
-                width: style.buttonW
-                color: style.button_action_color
-                radius: style.but_smooth
-                buttontext: label
-                buttontextfontsize: 12
-                buttontextbold: true
-                buttontextzindex: 30
-
-
-
-                MouseArea{
-                    anchors.fill: parent
-                    onClicked: console.log ("I am button:" + index + ". My Name is:"+ label+". My Params:" + params +". And my Command:" + command)
-                }
-
-
-                Image {
-                    source: "../../../img/icons/"+label+".png"
-                    height: style.iconHeight
-                    width: style.iconWidth
-                    anchors.centerIn: parent
-                        }
-                ListView.onRemove: SequentialAnimation {
-                            PropertyAction { target: lightingScenarios; property: "ListView.delayRemove"; value: true }
-                            NumberAnimation { target: lightingScenarios; property: "scale"; to: 0; duration: 250; easing.type: Easing.InOutQuad }
-                            PropertyAction { target: lightingScenarios; property: "ListView.delayRemove"; value: false }
-                        }
-                    }
-
-                    }
-                }
-            }
+            delegate:  lightingdelegate
+                 }
         }
+    }
+}
 

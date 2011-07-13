@@ -15,7 +15,7 @@ public:
 
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize)
     {
-   QString key = QString("image://datagridimageprovider/%1").arg(id);
+   QString key = QString("image://datagridimageprovider/%l").arg(id);
     QString verify(id);
     QImage cellimage;
 

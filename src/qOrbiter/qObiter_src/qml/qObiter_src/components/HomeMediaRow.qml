@@ -10,6 +10,56 @@ Rectangle {
     width: parent.width
 color:style.rowbgColor
 
+Component
+{
+    id:mediaDelegate
+
+    Item {
+        id: delegateitem
+        height: 65
+        width: childrenRect.width
+
+    ButtonSq
+    {
+            height: style.buttonH
+            width: style.buttonW
+            color: style.button_action_color
+            radius: style.but_smooth
+            buttontext: label
+            buttontextfontsize: 12
+            buttontextbold: true
+            buttontextzindex: 30
+
+             MouseArea{
+                 anchors.fill: parent
+                 onClicked: console.log ("I am button:" + index + ". My Name is:"+ label+". My Params:" + params +". And my Command:" + command)
+                       }
+
+              Image {
+                    id:buttonimage
+                    source: "../../../img/icons/"+label+".png"
+                    height: style.iconHeight
+                    width: style.iconWidth
+                     anchors.centerIn: parent
+                     }
+            }
+        }
+   }
+ListView.onAdd: SequentialAnimation {
+      PropertyAction { target: mediaDelegate; property: "height"; value: 0 }
+      NumberAnimation { target: mediaDelegate; property: "height"; to: 65; duration: 500; easing.type: Easing.InOutQuad }
+
+  }
+
+  ListView.onRemove: SequentialAnimation {
+      PropertyAction { target: mediaDelegate; property: "ListView.delayRemove"; value: true }
+      NumberAnimation { target: mediaDelegate; property: "height"; to: 0; duration: 500; easing.type: Easing.InOutQuad }
+
+      // Make sure delayRemove is set back to false so that the item can be destroyed
+      PropertyAction { target: mediaDelegate; property: "ListView.delayRemove"; value: false }
+
+       }
+
 Flickable{
     id:mediaflick
     interactive: true
@@ -53,166 +103,17 @@ Flickable{
             buttontext: ""
 
             }
-        ButtonSq {
-            id: mythTV
-            height: style.buttonH
-            width: style.buttonW
-            color: style.button_action_color
-            radius: style.but_smooth
-            Image {
-                id: mythIcon
-                source: "../../../img/icons/Mythtv.png"
-                height: style.iconHeight
-                width: style.iconWidth
-                anchors.centerIn: parent
+        ListView{
+            id: mediaScenarios
+            width: 300
+            height: 50
+            model: currentRoomMedia
+            orientation:ListView.Horizontal
 
-            }
-            buttontext:""
+            delegate: mediaDelegate
+                 }
 
 
-            }
-
-        ButtonSq {
-            id: videos
-            height: style.buttonH
-            width: style.buttonW
-            color: style.button_action_color
-            radius: style.but_smooth
-
-            Image {
-                id: videosIcon
-                source: "../../../img/icons/xine.png"
-                height: style.iconHeight
-                width: style.iconWidth
-                anchors.centerIn: parent
-
-            }
-
-            buttontext: "Videos"
-            buttontextbold: true
-            buttontextfontsize: 12
-            buttontextcolor: "white"
-            MouseArea{
-                anchors.fill: parent
-                onClicked: requestDataGrid("5||||1,2|0|13|0 | 2 |", "videos")
-            }
-
-
-            }
-        ButtonSq {
-            id: audio
-            height: style.buttonH
-            width: style.buttonW
-            color: style.button_action_color
-            radius: style.but_smooth
-            buttontext: ""
-            Image {
-                id: audioimg
-                source: "/src/1004/src/qOrbiter/qObiter_src/img/icons/lsongs.png"
-                height: style.iconHeight
-                width: style.iconWidth
-                anchors.centerIn: parent
-
-            }
-            MouseArea {
-                anchors.fill: parent
-                onClicked: requestDataGrid("4||||1,2|0|13|0 | 2 |", "music")
-            }
-
-            }
-        ButtonSq {
-            id: games
-            height: style.buttonH
-            width: style.buttonW
-            color: style.button_action_color
-            radius: style.but_smooth
-
-            Image {
-                id: gameimg
-                source: "../../../img/icons/package_games.png"
-                height: style.iconHeight
-                width: style.iconWidth
-                anchors.centerIn: parent
-
-            }
-            buttontext: ""
-            MouseArea {
-                anchors.fill: parent
-                onClicked: requestDataGrid("4||||1,2|0|12|0 | 2 |", "games")
-            }
-            }
-
-        ButtonSq {
-            id: hulu
-            height: style.buttonH
-            width: style.buttonW
-            color: style.button_action_color
-            radius: style.but_smooth
-            buttontext: "Hulu Dekstop"
-
-            }
-
-        ButtonSq {
-            id: playlists
-            height: style.buttonH
-            width: style.buttonW
-            color: style.button_action_color
-            radius: style.but_smooth
-            buttontext: ""
-            Image {
-                id: pls
-                source: "../../../img/icons/kedit.png"
-                height: style.iconHeight
-                width: style.iconWidth
-                anchors.centerIn: parent
-
-            }
-
-            }
-        ButtonSq {
-            id: drives
-            height: style.buttonH
-            width: style.buttonW
-            color: style.button_action_color
-            radius: style.but_smooth
-            buttontext: ""
-            Image {
-                id: drvimg
-                source: "../../../img/icons/harddrive2.png"
-                height: style.iconHeight
-                width: style.iconWidth
-                anchors.centerIn: parent
-
-            }
-            }
-
-
-        ButtonSq {
-            id: tv
-            height: style.buttonH
-            width: style.buttonW
-            color: style.button_action_color
-            radius: style.but_smooth
-            buttontext: ""
-
-            Image {
-                id: livetv
-                source: "../../../img/icons/tv.png"
-                height: style.iconHeight
-                width: style.iconWidth
-                anchors.centerIn: parent
-
-            }
-
-            }
-        ButtonSq {
-            id: ps3
-            height: style.buttonH
-            width: style.buttonW
-            color: style.button_action_color
-            radius: style.but_smooth
-            buttontext: "PlayStation 3"
-            }
          }
     }
 }

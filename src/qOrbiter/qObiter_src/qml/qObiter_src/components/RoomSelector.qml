@@ -71,6 +71,7 @@ Rectangle {
                          anchors.fill: parent
                          onClicked:
                          {
+
                             setActiveRoom(intRoom, entertain_area)
                             rooms.state = "Default"
 

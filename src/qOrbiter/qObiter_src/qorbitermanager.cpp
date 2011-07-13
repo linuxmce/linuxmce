@@ -157,7 +157,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
 
 
-            qDebug() << "Device Connect";
+        qDebug() << "Device: " << PK_Device <<" Connect";
             g_pCommand_Impl=pqOrbiter;
             g_pDeadlockHandler=DeadlockHandler;
             g_pSocketCrashHandler=SocketCrashHandler;
@@ -243,9 +243,16 @@ bool qorbiterManager::refreshUI()
 bool qorbiterManager::getConf(int pPK_Device)
 {
 
-    qDebug() << "Getting Configuration" ;
+    qDebug() << "Reading Config" ;
+    iPK_Device = long(pPK_Device);
+    iOrbiterPluginID = 9;
+    iSize = 0;
+    m_pOrbiterCat = 5;
+    s_onOFF = "1";
+    qDebug() << "PK_Device No:" << iPK_Device;
 
     QDomDocument configData;
+
     const QByteArray tConf = binaryConfig.data();
     configData.setContent(tConf,false);
 
@@ -281,8 +288,7 @@ bool qorbiterManager::getConf(int pPK_Device)
 
     m_lRooms = new LocationModel(new LocationItem, this);
 
-    QMap <QString, int> roomMapping;
-
+    QMap <QString, int> RroomMapping;
     QDomNodeList roomListXml = roomXml.childNodes();
 
     for(int index = 0; index < roomListXml.count(); index++)
@@ -293,10 +299,12 @@ bool qorbiterManager::getConf(int pPK_Device)
         int m_iType = roomListXml.at(index).attributes().namedItem("FK_RoomType").nodeValue().toInt();
         QString m_title = roomListXml.at(index).attributes().namedItem("Description").nodeValue();
 
-        roomMapping.insert(m_name, m_val);
+        RroomMapping.insert(m_name, m_val);
         m_lRooms->appendRow(new LocationItem(m_name, m_val, m_title, m_iEA, m_iType, m_lRooms));
     }
         m_lRooms->sdefault_Ea = defaults.attribute("DefaultLocation");
+        m_lRooms->idefault_Ea = RroomMapping.value(m_lRooms->sdefault_Ea);
+        //m_lRooms->idefault_Ea = defaults.attribute("");
 
     //-----lighting scenarios
 
@@ -308,7 +316,7 @@ bool qorbiterManager::getConf(int pPK_Device)
         QDomNodeList lScenarioRoom = lScenarioList.at(index).childNodes();
         LightingScenarioModel *lightModelHolder = new LightingScenarioModel(new LightingScenarioItem, this);
 
-        int roomMapNo = lScenarioList.at(index).attributes().namedItem("int").nodeValue().toInt();
+        int LroomMapNo = lScenarioList.at(index).attributes().namedItem("int").nodeValue().toInt();
         for (int innerIndex = 0; innerIndex < lScenarioRoom.count(); innerIndex++)
         {
                     QString m_name = lScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
@@ -319,30 +327,127 @@ bool qorbiterManager::getConf(int pPK_Device)
                     QString imgName = lScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
                     QImage m_image = QImage("Qrc:/icons/"+imgName);
 
-                    qDebug() << "Item Processed :" << m_name;
-
             lightModelHolder->appendRow(new LightingScenarioItem(m_name,m_label, m_param, m_command, m_goto, m_image, lightModelHolder));
         }
+        roomLightingScenarios.insert(LroomMapNo, lightModelHolder);
+       roomLights = roomLightingScenarios.value(m_lRooms->idefault_Ea);
+    }
+    //-----media scenarios
 
-        roomLightingScenarios.insert(roomMapNo, lightModelHolder);
+    QDomElement mScenarios = root.firstChildElement("MediaScenarios");
+    QDomNodeList mScenarioList = mScenarios.childNodes();
+
+    for (int index = 0; index < mScenarioList.count(); index++)
+    {
+        QDomNodeList mScenarioRoom = mScenarioList.at(index).childNodes();
+        MediaScenarioModel *mediaModelHolder = new MediaScenarioModel(new MediaScenarioItem, this);
+
+        int MroomMapNo = mScenarioList.at(index).attributes().namedItem("int").nodeValue().toInt();
+        for (int innerIndex = 0; innerIndex < mScenarioRoom.count(); innerIndex++)
+        {
+                    QString m_name = mScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+                    QString m_label = mScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+                    QString m_param =mScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue() ;
+                    QString m_command = mScenarioRoom.at(innerIndex).attributes().namedItem("eaDescription").nodeValue();
+                    QString m_goto = mScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
+                    QString imgName = mScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+                    QImage m_image = QImage("Qrc:/icons/"+imgName);
+
+            mediaModelHolder->appendRow(new MediaScenarioItem(m_name,m_label, m_param, m_command, m_goto, m_image, mediaModelHolder));
+        }
+        roomMediaScenarios.insert(MroomMapNo, mediaModelHolder);
+       roomMedia = roomMediaScenarios.value(m_lRooms->idefault_Ea);
     }
 
 
-   iPK_Device = long(pPK_Device);
-   iOrbiterPluginID = 9;
-   iSize = 0;
-   m_pOrbiterCat = 5;
-   s_onOFF = "1";
-   qDebug() << "PK_Device No:" << iPK_Device;
+    //climate---------------------
 
-    //TODO fix DEFAULTS!
+    QDomElement cScenarios = root.firstChildElement("ClimateScenarios");
+    QDomNodeList cScenarioList = cScenarios.childNodes();
 
+    for (int index = 0; index < cScenarioList.count(); index++)
+    {
+        QDomNodeList cScenarioRoom = cScenarioList.at(index).childNodes();
+        ClimateScenarioModel *climateModelHolder = new ClimateScenarioModel(new ClimateScenarioItem, this);
+
+        int roomMapNo = cScenarioList.at(index).attributes().namedItem("int").nodeValue().toInt();
+        for (int innerIndex = 0; innerIndex < cScenarioRoom.count(); innerIndex++)
+        {
+                    QString m_name = cScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+                    QString m_label = cScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+                    QString m_param =cScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue() ;
+                    QString m_command = cScenarioRoom.at(innerIndex).attributes().namedItem("eaDescription").nodeValue();
+                    QString m_goto = cScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
+                    QString imgName = cScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+                    QImage m_image = QImage("Qrc:/icons/"+imgName);
+
+            climateModelHolder->appendRow(new ClimateScenarioItem(m_name,m_label, m_param, m_command, m_goto, m_image, climateModelHolder));
+        }
+        roomClimateScenarios.insert(roomMapNo, climateModelHolder);
+       roomClimate = roomClimateScenarios.value(m_lRooms->idefault_Ea);
+    }
+    //telecom---------------------
+
+    QDomElement tScenarios = root.firstChildElement("TelecomScenarios");
+    QDomNodeList tScenarioList = tScenarios.childNodes();
+
+    for (int index = 0; index < tScenarioList.count(); index++)
+    {
+        QDomNodeList tScenarioRoom = tScenarioList.at(index).childNodes();
+        TelecomScenarioModel *telecomModelHolder = new TelecomScenarioModel(new TelecomScenarioItem, this);
+
+        int troomMapNo = tScenarioList.at(index).attributes().namedItem("int").nodeValue().toInt();
+        for (int innerIndex = 0; innerIndex < tScenarioRoom.count(); innerIndex++)
+        {
+                    QString m_name = tScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+                    QString m_label = tScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+                    QString m_param =tScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue() ;
+                    QString m_command = tScenarioRoom.at(innerIndex).attributes().namedItem("eaDescription").nodeValue();
+                    QString m_goto = tScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
+                    QString imgName = tScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+                    QImage m_image = QImage("Qrc:/icons/"+imgName);
+
+            telecomModelHolder->appendRow(new TelecomScenarioItem(m_name,m_label, m_param, m_command, m_goto, m_image, telecomModelHolder));
+        }
+        roomTelecomScenarios.insert(troomMapNo, telecomModelHolder);
+       roomTelecom = roomTelecomScenarios.value(m_lRooms->idefault_Ea);
+    }
+    //security---------------------
+
+    QDomElement secScenarios = root.firstChildElement("SecurityScenarios");
+    QDomNodeList secScenarioList = secScenarios.childNodes();
+
+    for (int index = 0; index < secScenarioList.count(); index++)
+    {
+        QDomNodeList secScenarioRoom = secScenarioList.at(index).childNodes();
+        SecurityScenarioModel *securityModelHolder = new SecurityScenarioModel(new SecurityScenarioItem, this);
+
+        int secroomMapNo = secScenarioList.at(index).attributes().namedItem("int").nodeValue().toInt();
+        for (int innerIndex = 0; innerIndex < secScenarioRoom.count(); innerIndex++)
+        {
+                    QString m_name = secScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+                    QString m_label = secScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+                    QString m_param =secScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue() ;
+                    QString m_command = secScenarioRoom.at(innerIndex).attributes().namedItem("eaDescription").nodeValue();
+                    QString m_goto = secScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
+                    QString imgName = secScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+                    QImage m_image = QImage("Qrc:/icons/"+imgName);
+
+            securityModelHolder->appendRow(new SecurityScenarioItem(m_name,m_label, m_param, m_command, m_goto, m_image, securityModelHolder));
+        }
+        roomSecurityScenarios.insert(secroomMapNo, securityModelHolder);
+       roomSecurity = roomSecurityScenarios.value(m_lRooms->idefault_Ea);
+    }
 
 
   qorbiterUIwin->rootContext()->setContextObject(this);
 
-  setActiveRoom(roomMapping.value(m_lRooms->sdefault_Ea), 0);
-  //qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights); //custom list item provided
+ // setActiveRoom(RroomMapping.value(QString::fromStdString(pqOrbiter->DATA_Get_FK_EntertainArea())), 0);
+  qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights); //custom list item provided
+  qorbiterUIwin->rootContext()->setContextProperty("currentRoomMedia", roomMedia);
+  qorbiterUIwin->rootContext()->setContextProperty("currentRoomClimate", roomClimate);
+  qorbiterUIwin->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);
+   qorbiterUIwin->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);
   qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
 
   this->qorbiterUIwin->rootContext()->setContextProperty("currentroom", m_lRooms->sdefault_Ea); //custom room list item provided
@@ -421,8 +526,14 @@ bool qorbiterManager::requestDataGrid(QString s, QString sType)
 void qorbiterManager::setActiveRoom(int room,int ea)
 {
     roomLights = roomLightingScenarios.value(room);
+    roomMedia = roomMediaScenarios.value(room);
+    roomClimate = roomClimateScenarios.value(room);
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights);
-    qDebug() << "lights CHanged to room" << room;
+    qorbiterUIwin->rootContext()->setContextProperty("currentRoomMedia", roomMedia);
+    qorbiterUIwin->rootContext()->setContextProperty("currentRoomClimate", roomClimate);
+    qorbiterUIwin->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);
+    qorbiterUIwin->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);
+    qDebug() << "CHanged to room" << room;
 }
 
 void qorbiterManager::setCurrentUser()

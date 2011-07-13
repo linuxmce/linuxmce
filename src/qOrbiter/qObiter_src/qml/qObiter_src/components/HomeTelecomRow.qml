@@ -5,6 +5,43 @@ Rectangle {
     height: 65
     width: parent.width
     color:style.rowbgColor
+
+    Component
+    {
+        id:telecomDelegate
+
+        Item {
+            id: delegateitem
+            height: 65
+            width: childrenRect.width
+
+        ButtonSq
+        {
+                height: style.buttonH
+                width: style.buttonW
+                color: style.button_action_color
+                radius: style.but_smooth
+                buttontext: label
+                buttontextfontsize: 12
+                buttontextbold: true
+                buttontextzindex: 30
+
+                 MouseArea{
+                     anchors.fill: parent
+                     onClicked: console.log ("I am button:" + index + ". My Name is:"+ label+". My Params:" + params +". And my Command:" + command)
+                           }
+
+                  Image {
+                        id:buttonimage
+                        source: "../../../img/icons/"+label+".png"
+                        height: style.iconHeight
+                        width: style.iconWidth
+                         anchors.centerIn: parent
+                         }
+                }
+            }
+       }
+
     Flickable{
         id:securityflick
         interactive: true
@@ -37,61 +74,15 @@ Rectangle {
             }
 
             }
+        ListView{
+            id: climateScenarios
+            width: 300
+            height: 50
+            model: currentRoomTelecom
+            orientation:ListView.Horizontal
 
-        ButtonSq {
-            id: activeCalls
-            height: style.buttonH
-            width: style.buttonW
-            color: style.button_action_color
-            radius: style.but_smooth
-            buttontext: "Active Calls"
-
-            }
-
-        ButtonSq {
-            id:speedDial
-            height: style.buttonH
-            width: style.buttonW
-            color: style.button_action_color
-            radius: style.but_smooth
-            buttontext: "Speed Dial"
-            }
-
-        ButtonSq {
-            id:directDial
-            height: style.buttonH
-            width: style.buttonW
-            color: style.button_action_color
-            radius: style.but_smooth
-            buttontext: "Direct Dial"
-            }
-
-        ButtonSq {
-            id:phoneBook
-            height: style.buttonH
-            width: style.buttonW
-            color: style.button_action_color
-            radius: style.but_smooth
-            buttontext: "Phone Book"
-            }
-
-        ButtonSq {
-            id:intercom
-            height: style.buttonH
-            width: style.buttonW
-            color: style.button_action_color
-            radius: style.but_smooth
-            buttontext: "Intercom"
-            }
-
-        ButtonSq {
-            id:floorplan
-            height: style.buttonH
-            width: style.buttonW
-            color: style.button_action_color
-            radius: style.but_smooth
-            buttontext: "Mailbox"
-            }
+            delegate: telecomDelegate
+                 }
 
     }
     }
