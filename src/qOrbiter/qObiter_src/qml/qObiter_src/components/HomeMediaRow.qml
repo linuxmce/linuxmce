@@ -1,14 +1,14 @@
 import Qt 4.7
 
-Rectangle {
+Item {
     signal showDatagrid( string msg)
     signal gotoScreen( string screen, string type)
     property alias nowplayingtext:now_playing.buttontext
     property alias rowlabel: rowheader.buttontext
 
-    height: 65
+    height: style.homescreenrowheight
     width: parent.width
-color:style.rowbgColor
+
 
 Component
 {
@@ -16,8 +16,8 @@ Component
 
     Item {
         id: delegateitem
-        height: 65
-        width: childrenRect.width + 5
+        height: 80
+        width: childrenRect.width
 
     ButtonSq
     {
@@ -32,8 +32,9 @@ Component
 
              MouseArea{
                  anchors.fill: parent
-                 onClicked: console.log ("I am button:" + index + ". My Name is:"+ label+". My Params:" + params +". And my Command:" + command)
-                       }
+                 onClicked: execGrp(params);
+
+                        }
 
               Image {
                     id:buttonimage
@@ -63,9 +64,9 @@ ListView.onAdd: SequentialAnimation {
 Flickable{
     id:mediaflick
     interactive: true
-    height: 65
+    height: 80
     width: parent.width
-    contentHeight: 65
+    contentHeight: 80
     contentWidth: childrenRect * 1
     clip: true
 
@@ -90,8 +91,8 @@ Flickable{
                 source: "../../../img/icons/kmix.png"
                 height: style.iconHeight
                 width: style.iconWidth
-                anchors.centerIn: parent                
-                }           
+                anchors.centerIn: parent
+                }
             }
 
         ButtonSq {
@@ -105,11 +106,11 @@ Flickable{
             }
         ListView{
             id: mediaScenarios
-            width: childrenRect.width
+            width: stage.width
             height: 50
             model: currentRoomMedia
             orientation:ListView.Horizontal
-
+            spacing: 5
             delegate: mediaDelegate
                  }
 
