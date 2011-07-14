@@ -38,7 +38,7 @@ echo "Curr dir is `pwd`" ...
 echo "Buiding the Orbiter ..."
 
 cd Orbiter
-make clean && make bin
+make -f Makefile_Nokia770 clean && make -f Makefile_Nokia770 bin
 if [ $? -ne 0 ] ; then
 	echo "Failed building of Maemo wrapper: ${?}!"
 	exit 1
@@ -52,6 +52,9 @@ mkdir $DEST/usr/lib
 cp ../../lib/*.so ${DEST}/usr/lib
 mkdir $DEST/usr/bin
 cp ../../bin/Orbiter ${DEST}/usr/bin
+mkdir -p $DEST/usr/pluto/share
+cp ../Linux/GTKOrbiter.glade ${DEST}/usr/pluto/share
+
 
 export SNR_CPPFLAGS="-DOS2008"
 
