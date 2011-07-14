@@ -3,7 +3,7 @@ Version: %%VERSION%%-%%PACKAGE_VERSION%%
 Section: user/extra
 Priority: optional
 Architecture: armel
-Depends: libsdl-gfx1.2-4, libsdl-image1.2, libsdl-sge, libsdl1.2, libxmu6, mysql-common, libmysqlclient12, libhttpfetcher1, libice6, libsm6, libxt6, libsdl-ttf2.0-0
+Depends: libsdl-gfx1.2-4, libsdl-image1.2, libsdl-sge, libsdl1.2, libxmu6, mysql-common, libmysqlclient12, libhttpfetcher1, libice6, libsm6, libxt6, libsdl-ttf2.0-0, libmysqlclient15off
 Installed-Size: %%SIZE%%
 Maintainer: Michael Stepanov <stepanov.michael@gmail.com>
 Description: LinuxMCE Orbiter is an application which allows to control your home automation system LinuxMCE
