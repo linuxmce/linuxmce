@@ -43,6 +43,7 @@ protected:
 
 	std::vector<std::string> ItemNames;
 	std::vector<std::string> ItemValues;
+	std::vector<std::string> ItemRatios;
 
 	void WriteItem(std::string Name, bool Selected,
 		int Index, int TopItemIndex, int BottomItemIndex, 
@@ -63,6 +64,7 @@ public:
 
 	std::string GetSelectedValue();
 	std::string GetSelectedName();
+	std::string GetSelectedRatio();
 
 	/**
 	 *	Paints the control and the children of the curent component
@@ -75,7 +77,7 @@ public:
 
 	/**
 	 */
-	virtual void AddItem(std::string ItemName, std::string ItemValue);
+	virtual void AddItem(std::string ItemName, std::string ItemValue, std::string ItemRatio);
 	
 	/**
 	 */
