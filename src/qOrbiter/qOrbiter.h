@@ -58,6 +58,7 @@ public:
                 bool deinitialize();
                 bool dataGridRequest(string s);
                 bool getConfiguration();
+                bool executeCommandGroup(int cmdGrp);
 //<-dceag-const-e->
 
 //<-dceag-const2-b->

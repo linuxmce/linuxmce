@@ -871,6 +871,10 @@ void qOrbiter::CMD_Set_Current_Room(int iPK_Room,string &sCMD_Result,Message *pM
 {
 	cout << "Need to implement command #77 - Set Current Room" << endl;
 	cout << "Parm #57 - PK_Room=" << iPK_Room << endl;
+
+       // CMD_Set_Current_Room_DL setRoom((long)qmlUI->iPK_Device, "9", iPK_Room);
+      //  SendCommand(setRoom);
+
 }
 
 //<-dceag-c85-b->
@@ -1205,6 +1209,140 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 {
 	cout << "Need to implement command #401 - Show File List" << endl;
 	cout << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
+
+qDebug() << "DCE recieved Datagrid Population Request from QML";
+
+
+        qmlUI->gotoQScreen("Screen_47.qml");
+
+        long l_pkDevice = qmlUI->iPK_Device;
+        int gHeight = 5;
+        int gWidth = 5;
+        int pkVar = 0;
+        string valassign ="null";
+        bool isSuccessfull = "false";
+
+        string m_sGridID ="MediaFile_"+StringUtils::itos(qmlUI->iPK_Device);
+        int iRow_count=5;
+        int iColumn_count = 5;
+        bool m_bKeep_Row_Header = false;
+        bool m_bKeepColHeader = false;
+        bool m_bAdd_UpDown_Arrows = true;
+
+        string m_sSeek;
+        string m_sDataGrid_ID = "1";
+
+
+
+        int iOffset;
+
+        int iColumn = 1;
+        int iRowCount= 5;
+        int iRowColums = 5;
+        int m_iSeekColumn = 1;
+        int iData_Size=0;
+        int GridCurRow = 0;
+        int GridCurCol= 0;
+
+        char *pData;
+        pData = "NULL";
+        int iRow;
+        QString temp;
+      qmlUI->m_dwIDataGridRequestCounter++;
+        //temp =  QString::fromStdString(qmlUI->gridReqType->toStdString());
+        QString s = QString::number(iPK_MediaType) + "||||1,2|0|13|0 | 2 |";
+
+        qDebug() << s;
+        CMD_Populate_Datagrid populateDataGrid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 63, s.toStdString(), DEVICETEMPLATE_qOrbiter_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
+
+        if (SendCommand(populateDataGrid))
+        {
+            qDebug()<< "Command to Populate Datagrid Sent";
+
+
+             //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
+            DCE::CMD_Request_Datagrid_Contents req_data_grid( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+            if(SendCommand(req_data_grid))
+                    {                   bool barrows = false;
+
+                       DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
+
+                       int cellsToRender= pDataGridTable->GetRows();
+
+                       qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
+                       qDebug() << "Response: " << cellsToRender << " cells to render";
+                        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
+                       string testdata;
+                       QImage cellImg;
+                       QString cellTitle;
+
+
+
+
+                       //experimental block
+                       for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
+                       {
+
+                               DataGridCell *pCell = it->second;
+                               const char *pPath = pCell->GetImagePath();
+
+
+                               if (pPath && !pCell->m_pGraphicData && !pCell->m_pGraphic)
+                               {
+                                               size_t s=0;
+                                               cellImg = QImage(pPath);
+                                               pCell->m_GraphicLength = (unsigned long) s;
+                                              pCell->m_GraphicFormat = GR_JPG;
+                               }
+
+                             //  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"DataGridRenderer::RenderCell loading %s in bg for %d,%d", pPath,pDataGridTable->CovertColRowType(it->first).first,pDataGridTable->CovertColRowType(it->first).second);
+
+                               qmlUI->model->appendRow(new gridItem(QString::fromStdString(pCell->m_Text), temp, cellImg , qmlUI->model));
+                       }
+                    }
+        }
+
+
+
+
+        /*
+          Datagrid params
+          # 4 PK_Variable (int) (Out)  The populate grid can optionally return a variable number
+                                        to assign a value into. For example, the current path in
+                                        the file grid.
+
+          # 5 Value To Assign (string) (Out) The value to assign into the variable.
+
+          # 10 ID (string)              For debugging purposes if problems arise with a request
+                                        not being filled, or a grid not populated when it should be.
+                                        If the Orbiter specified an ID when requesting the grid or populating it,
+                                         the Datagrid plug-in will log the ID and status so the develope
+
+          # 15 DataGrid ID (string)     A unique ID for this instance of the grid that will be passed with the
+                                        Request Datagrid Contents command.
+
+          # 38 PK_DataGrid (int)        Which grid should be populated
+
+          # 39 Options (string)         The options are specific the type of grid (PK_Datagrid). These are not
+                                        pre-defined. The grid generator and orbiter must both pass the options
+                                        in the correct format for the type of grid.
+
+         # 40 IsSuccessful (bool) (Out) Returns false if the grid could not be populated. Perhaps there was no
+                                        registered datagrid generator.
+
+         # 44 PK_DeviceTemplate (int)   If more than 1 plugin registered to handle this grid, this parameter
+                                         will be used to match teh right one
+
+         # 60 Width (int) (Out)         The width of the grid, in columns, if the width is determined at
+                                        populate time, such as a file grid. If the whole size of the grid is unknown,
+                                        such as the EPG grid, this should be 0.
+
+        # 61 Height (int) (Out)         The height of the grid, in rows, if the heightis determined at populate time,
+                                        such as a file grid. If the whole size of the grid is unknown, such as the EPG grid,
+                                         this should be 0.
+    */
+
+
 }
 
 //<-dceag-c402-b->
@@ -1761,5 +1899,19 @@ bool DCE::qOrbiter::dataGridRequest(string s)
 
 bool qOrbiter::getConfiguration()
 {
+
+}
+
+bool DCE::qOrbiter::executeCommandGroup(int cmdGrp)
+{
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Executing Command Group %d", cmdGrp);
+    string *pResponse;
+    CMD_Execute_Command_Group execCommandGroup((long)qmlUI->iPK_Device, (long)2, cmdGrp);
+    if (!SendCommandNoResponse(execCommandGroup))
+    {
+        qDebug () << "Sent?";
+    }
+
+
 
 }

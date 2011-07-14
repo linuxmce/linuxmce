@@ -1,10 +1,10 @@
 import Qt 4.7
 
-Rectangle {
+Item {
     property alias rowlabel: rowheader.buttontext
-    height: 65
+    height: style.homescreenrowheight
     width: parent.width
-    color:style.rowbgColor
+
 
     Component
     {
@@ -12,8 +12,8 @@ Rectangle {
 
         Item {
             id: delegateitem
-            height: 65
-            width: childrenRect.width
+            height: 75
+            width: 75
 
         ButtonSq
         {
@@ -25,6 +25,7 @@ Rectangle {
                 buttontextfontsize: 12
                 buttontextbold: true
                 buttontextzindex: 30
+                anchors.centerIn: parent
 
                  MouseArea{
                      anchors.fill: parent
@@ -45,9 +46,9 @@ Rectangle {
     Flickable{
         id:securityflick
         interactive: true
-        height: 65
+        height: 80
         width: parent.width
-        contentHeight: 65
+        contentHeight: 80
         contentWidth: childrenRect * 1
         clip: true
     Row {
@@ -76,14 +77,14 @@ Rectangle {
             }
         ListView{
             id: climateScenarios
-            width: 300
+            width: stage.width
             height: 50
             model: currentRoomTelecom
+            spacing: 5
             orientation:ListView.Horizontal
-
             delegate: telecomDelegate
                  }
 
-    }
+          }
     }
 }

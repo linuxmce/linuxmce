@@ -1,9 +1,9 @@
 import Qt 4.7
-Rectangle {
+Item {
     property alias rowlabel: rowheader.buttontext
-    height: 65
+    height: style.homescreenrowheight
     width: parent.width
-    color:style.rowbgColor
+
 
     Component
     {
@@ -11,7 +11,7 @@ Rectangle {
 
         Item {
             id: delegateitem
-            height: 65
+            height: 80
             width: childrenRect.width
 
         ButtonSq
@@ -57,10 +57,10 @@ Rectangle {
 
     Flickable{
         interactive: true
-        height: 65
+        height: 80
         width: parent.width
-        contentHeight: 65
-        contentWidth: childrenRect * 1
+        contentHeight: 80
+        contentWidth: childrenRect.width
         clip: true
 
 Row {
@@ -88,9 +88,10 @@ Row {
 
         ListView{
             id: lightingScenarios
-            width: 300
+            width: stage.width
             height: 50
             model: currentRoomLights
+            spacing: 5
             orientation:ListView.Horizontal
 
             delegate:  lightingdelegate

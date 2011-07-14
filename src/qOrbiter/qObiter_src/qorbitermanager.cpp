@@ -181,10 +181,13 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
              */
 
 
-                pqOrbiter->initialize();
+            if ( pqOrbiter->initialize())
+            {
+
                 if (getConf(PK_Device))
                  {
                      qDebug () << "Config Recieved, starting";
+
                      gotoQScreen("Screen_1.qml");
                           return true;
                  } else {
@@ -206,6 +209,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             }
             g_pDeadlockHandler=NULL;
             g_pSocketCrashHandler=NULL; */
+            }
 
 
     }
@@ -448,11 +452,17 @@ bool qorbiterManager::getConf(int pPK_Device)
   qorbiterUIwin->rootContext()->setContextProperty("currentRoomClimate", roomClimate);
   qorbiterUIwin->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);
    qorbiterUIwin->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);
-  qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
+   qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
+    pqOrbiter->CMD_Set_Current_Room(m_lRooms->idefault_Ea);
+  pqOrbiter->CMD_Set_Entertainment_Area(m_lRooms->sdefault_Ea.toStdString());
+
 
   this->qorbiterUIwin->rootContext()->setContextProperty("currentroom", m_lRooms->sdefault_Ea); //custom room list item provided
   this->qorbiterUIwin->rootContext()->setContextProperty("userList", userList); //custom user list provided
   this->qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms); //custom room list  provided
+
+  model = new ListModel(new gridItem, this);
+  qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
 
   return true;
 
@@ -501,12 +511,11 @@ void qorbiterManager::closeOrbiter()
   model refers to the datamodel for the grid that is created as opposed to manually creating each cell item
   its added as a context property and the variables are availible to the ui with callback automatically registerd.
   */
-bool qorbiterManager::requestDataGrid(QString s, QString sType)
+bool qorbiterManager::requestDataGrid()
 {
-   gridReqType = &sType;
-    model = new ListModel(new gridItem, this);
-    qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
-    qDebug() << qPrintable(sType);
+
+
+
 
     /*
       the questionable custom provider that kinda worked once...*/
@@ -516,10 +525,12 @@ bool qorbiterManager::requestDataGrid(QString s, QString sType)
     //notice this commented out code as well. it 'worked' to crash things. thats about it
    //QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)), gridImageHandler,SLOT(dataUpdated(QModelIndex,QModelIndex)));
 
-    qDebug() << qPrintable(s);
+
     m_dwIDataGridRequestCounter++;
-    qDebug() << " Datagrid Request Counter: " << m_dwIDataGridRequestCounter;
-    pqOrbiter->dataGridRequest( s.toStdString());
+  //  qDebug() << " Datagrid Request Counter: " << m_dwIDataGridRequestCounter;
+  //  pqOrbiter->dataGridRequest( s.toStdString());
+
+    return true;
 
 }
 
@@ -538,6 +549,11 @@ void qorbiterManager::setActiveRoom(int room,int ea)
 
 void qorbiterManager::setCurrentUser()
 {
+}
+
+void qorbiterManager::execGrp(int grp)
+{
+    pqOrbiter->executeCommandGroup(grp);
 }
 
 

@@ -1,10 +1,10 @@
 import Qt 4.7
 
-Rectangle {
+Item {
 
-    height: 65
+    height: style.homescreenrowheight
     width: parent.width
-color:style.rowbgColor
+
 
 Component
 {
@@ -12,7 +12,7 @@ Component
 
     Item {
         id: delegateitem
-        height: 65
+        height: 80
         width: childrenRect.width
 
     ButtonSq
@@ -46,31 +46,39 @@ Flickable
 {
     id:securityflick
     interactive: true
-    height: 65
+    height: 80
     width: parent.width
-    contentHeight: 65
+    contentHeight: 80
     contentWidth: childrenRect * 1
     clip: true
 
+        ButtonSq {
+            id: rowheader
 
-Row {
-        id: guide
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.left: parent.left
-        spacing:5
+            height: style.buttonH
+            width: style.buttonW
+            color: style.button_action_color
+            radius: style.but_smooth
+            buttontext: "Security Floorplan"
 
+            MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+
+            }
+        }
 
         ListView{
             id: securityScenarios
-            width: 300
+            width: stage.width
             height: 50
             model: currentRoomSecurity
             orientation:ListView.Horizontal
-
+            spacing: 5
+            anchors.left: rowheader.right
+            anchors.margins: 5
             delegate: securityDelegate
                  }
+           }
+       }
 
-    }
-}
-}

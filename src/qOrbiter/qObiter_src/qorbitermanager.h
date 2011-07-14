@@ -150,10 +150,10 @@ signals:
 
 public slots:
       //ui related slots
-
+      Q_INVOKABLE void execGrp(int grp);
    Q_INVOKABLE bool gotoQScreen(QString ) ;
         //qt c++ related slots
-    bool requestDataGrid(QString s, QString sType);
+    bool requestDataGrid();
     //dce related slots
     Q_INVOKABLE void closeOrbiter();
     //void orbiterStart();

@@ -32,8 +32,7 @@ Rectangle {
         y: 11
         width: 50
         height: 50
-        paintedHeight: 50
-        paintedWidth: 50
+
         rotation: -90
         smooth: true
         source: "../../../img/icons/player_fwd.png"

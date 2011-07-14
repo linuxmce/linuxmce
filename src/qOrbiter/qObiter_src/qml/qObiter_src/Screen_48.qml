@@ -57,8 +57,8 @@ Rectangle {
             }
         }
     }
-    Remote_lighting_controls{ id: remote_lighting_controls1; x: 331; y: 181; width: 93; height: 219; anchors.topMargin: 179;anchors.top: video_now_playing.baseline}
-    Remote_Audio_controls{ id: remote1; x: 321; y: 194; z: 45; anchors.right: remote_lighting_controls1.left}
+    Remote_lighting_controls{ id: remote_lighting_controls1; x: 331; y: 181; width: 65; height: 219; anchors.topMargin: 179;anchors.top: video_now_playing.baseline}
+    Remote_Audio_controls{ id: remote1; x: 277; y: 181; width: 60; height: 219; anchors.rightMargin: -6; z: 45; anchors.right: remote_lighting_controls1.left}
 
     ButtonSq {
         id: buttonsq1
@@ -79,7 +79,7 @@ Rectangle {
         MouseArea {
             id: mouse_area1
             anchors.fill: parent
-            onClicked: changeScreen("Screen_1.qml")
+            onClicked: gotoQScreen("Screen_1.qml")
         }
     }
 
@@ -89,6 +89,7 @@ Rectangle {
         y: 231
         width: 263
         height: 249
+        color: "#e1e9f1"
     }
 
     Column {
@@ -101,7 +102,7 @@ Rectangle {
         Flickable{
             height: parent.height
             width: parent.width
-            contentHeight: childrenRect.width
+            contentHeight: childrenRect.height
             contentWidth: childrenRect.width
             clip: true
 

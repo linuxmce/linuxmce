@@ -17,7 +17,10 @@ import Qt 4.7
     //main stage styles
     property int orbiterH: 480
     property int orbiterW: 800
-    property color stageBG: "aliceblue"
+    property color stageBG: "slategray"
+    property int homescreenrowheight:80
+    property int homescreenbuttonheight: 75
+    property int homesreenbuttonwidth: 75
 
     //icon sizes
     property int iconHeight: 50
@@ -34,12 +37,12 @@ import Qt 4.7
     //title and other misc windo accents
 
     //button styling
-    property int buttonH:60
-    property int buttonW: 60
+    property int buttonH:75
+    property int buttonW: 75
     property color button_system_color: "steelblue"
     property color button_system_color_hover: "lightblue"
 
-    property color button_action_color: "steelblue"
+    property color button_action_color: "whitesmoke"
     property color button_action_color_hover: "lightblue"
 
     property variant bgImg: "null"
@@ -54,7 +57,7 @@ import Qt 4.7
     //row container styling
     property int rowWidth: orbiterW - 5
     property int rowH: buttonH + 10
-        property color rowbgColor: "lightsteelblue"
+    property color rowbgColor: "transparent"
 
     //Notifications bar
     property int width: orbiterW - 5
@@ -70,6 +73,7 @@ import Qt 4.7
     property color advanced_bg_text: "black"
 
     //stage
-    property color stage_bg: "steelblue"
+    property color stage_bg: "slategrey"
+        property color bgcolor: "slategrey"
 
 }

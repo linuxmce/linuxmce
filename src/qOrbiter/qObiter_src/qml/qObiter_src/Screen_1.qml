@@ -16,19 +16,16 @@ Rectangle {
 
 
 Column{
-    spacing: 0
-
-    height: childrenRect.height
-    width: childrenRect.width
-    NotificationBar {id:mnu;  color: style.not_color}
+    anchors.fill: parent
+    spacing: 5
     HomeLightingRow{id:lightRow }
     HomeMediaRow{id: mediaRow}
     HomeClimateRow{id: climateRow}
     HomeTelecomRow{id: telecomRow}
     HomeSecurityRow{id: securityRom}
-    BottomPanel{id: advanced; color:style.advanced_bg}
-}
 
+}
+BottomPanel{id: advanced; color:style.advanced_bg; anchors.bottom: stage.bottom}
     }
 }
 
