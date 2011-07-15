@@ -1,6 +1,6 @@
 import QtQuick 1.0
 Item {
-    property alias rowlabel: rowheader.buttontext
+
     height: style.homescreenrowheight
     width: parent.width
 
@@ -14,32 +14,45 @@ Item {
             height: 80
             width: childrenRect.width
 
-
-
         ButtonSq
-        {
+        {       id:delegateButton
                 height: style.buttonH
                 width: style.buttonW
-                color: style.button_action_color
+                color: style.bgcolor
                 radius: style.but_smooth
-                buttontext: label
+                buttontext: ""
                 buttontextfontsize: 12
                 buttontextbold: true
                 buttontextzindex: 30
-
+                opacity: .5
                  MouseArea{
                      anchors.fill: parent
-                     onClicked: console.log ("I am button:" + index + ". My Name is:"+ label+". My Params:" + params +". And my Command:" + command)
+                     onClicked: dceObject.execGrp(params);
                            }
-
+                        }
                   Image {
                         id:buttonimage
                         source: "../../../img/icons/"+label+".png"
                         height: style.iconHeight
                         width: style.iconWidth
-                         anchors.centerIn: parent
+                         anchors.centerIn: delegateButton
                          }
-                }
+
+                  Text {
+                      id: daslabel
+                      text: label
+                      font.pointSize: 12
+                      font.bold: true
+                      wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                      anchors.centerIn: delegateButton
+                      width: delegateButton.width
+                      height: delegateButton.height
+                      z:2
+                      horizontalAlignment: Text.AlignHCenter
+                      verticalAlignment: Text.AlignVCenter
+
+                  }
+
             }
        }
 
@@ -61,6 +74,7 @@ Item {
            }
 
     Flickable{
+
         interactive: true
         height: 80
         width: parent.width
@@ -68,30 +82,14 @@ Item {
         contentWidth: childrenRect.width
         clip: true
 
+        Floorplan{id:lightingfloorplan; anchors.left: parent.left}
 Row {
         id: guide
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.left: parent.left
+
+        anchors.left: lightingfloorplan.right
         spacing:5
 
 
-
-        ButtonSq {
-            id: rowheader
-            height: style.buttonH
-            width: style.buttonW
-            color: style.button_action_color
-            radius: style.but_smooth
-            buttontext: ""
-            Image {
-                id: onimg
-                source: "../../../img/icons/jabber_protocol.png"
-                height: style.iconHeight
-                width: style.iconWidth
-                anchors.centerIn: parent
-                    }
-              }
 
         ListView{
             id: lightingScenarios

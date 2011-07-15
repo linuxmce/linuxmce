@@ -88,7 +88,7 @@ Rectangle {
     Rectangle {
         id:attributeDelegate
         border.width: 1
-        border.color: black
+        border.color: "black"
         width: parent.width
         height: 75
 

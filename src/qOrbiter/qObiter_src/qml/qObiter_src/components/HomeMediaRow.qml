@@ -31,7 +31,7 @@ Component
 
              MouseArea{
                  anchors.fill: parent
-                 onClicked: execGrp(params);
+                 onClicked: dceObject.execGrp(params);
                         }
 
               Image {
@@ -88,6 +88,10 @@ Flickable{
             radius: style.but_smooth
             buttontext: ""
 
+            MouseArea{
+                anchors.fill: parent
+                onClicked: dceObject.gotoQScreen("Screen_48.qml")
+            }
             }
         ListView{
             id: listView

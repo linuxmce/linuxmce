@@ -28,7 +28,7 @@ Component
 
              MouseArea{
                  anchors.fill: parent
-                 onClicked: console.log ("I am button:" + index + ". My Name is:"+ label+". My Params:" + params +". And my Command:" + command)
+                 onClicked: dceObject.execGrp(params);
                        }
 
               Image {

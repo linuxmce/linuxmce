@@ -15,13 +15,6 @@ Rectangle {
         anchors.fill: parent
         z:0
         color: "whitesmoke"
-        Image {
-            id: name
-            fillMode: Image.PreserveAspectCrop
-            source: "../../img/lmcesplash.jpg"
-            anchors.fill: parent
-            smooth: true
-        }
 
         SequentialAnimation on color
         {
@@ -42,6 +35,7 @@ Rectangle {
     opacity: 1
 
 Column{
+    id:maindisplay
     anchors.fill: parent
     spacing: 5
     HomeLightingRow{id:lightRow }
