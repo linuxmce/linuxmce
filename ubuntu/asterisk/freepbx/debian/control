@@ -9,7 +9,6 @@ Package: freepbx
 Architecture: any
 Pre-Depends: asterisk (>= 1:1.4.10~dfsg)
 Depends: php-db, pluto-boot-scripts
-Provides: asterisk-config-custom
-Replaces: asterisk-config
+Depends: asterisk-config
 Description: FreePBX
  FreePBX
