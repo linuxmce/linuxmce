@@ -1,4 +1,4 @@
-import Qt 4.7
+import QtQuick 1.0
 //sample style file for a qml ui
 /*
   color scheme

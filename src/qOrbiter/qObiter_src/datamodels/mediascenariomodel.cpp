@@ -52,7 +52,7 @@ void MediaScenarioModel::handleItemChange()
   MediaScenarioItem* item = static_cast<MediaScenarioItem*>(sender());
   QModelIndex index = indexFromItem(item);
   if(index.isValid())
-    emit dataChanged(index, index);
+    emit DataChanged(index, index);
 }
 
 MediaScenarioItem * MediaScenarioModel::find(const QString &id) const

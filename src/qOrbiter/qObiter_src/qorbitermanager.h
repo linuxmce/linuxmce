@@ -7,6 +7,7 @@
 #include <qdeclarativecontext.h>
 #include <QDeclarativeItem>
 #include <QStringList>
+#include <datamodels/usermodel.h>
 #include <datamodels/locationmodel.h>
 #include <datamodels/lightingscenariomodel.h>
 #include <datamodels/mediascenariomodel.h>
@@ -21,10 +22,11 @@
 #include <datamodels/listModel.h>                          //custom item model
 #include <datamodels/gridItem.h>
 #include <uiclasses/uicontroller.h>               //experimental
-#include <qOrbiterGen/qorbitergenerator.h>                   //data blob generator
+
 #include <imageProviders/basicImageProvider.h>                 //qml image provider
 #include <imageProviders/gridimageprovider.h>                  //qml image provider for grids !not implemented!
 
+#include <screensaver/screensavermodule.h>
 
 /*-------Dce Includes----*/
 
@@ -42,11 +44,13 @@ class qOrbiter;
 class qorbiterManager : public QWidget
 {
     Q_OBJECT
+    Q_PROPERTY (int getLocation READ getlocation NOTIFY locationChanged )
 
 public:
      qorbiterManager(QWidget *parent = 0);  //constructor
 
     QString *sPK_User;
+    ScreenSaverModule *ScreenSaver;
 
     //ui variables
     QString currentSkin;
@@ -59,7 +63,7 @@ public:
     basicImageProvider *basicProvider;
     GridIndexProvider *advancedProvider;
     QString *gridReqType;
-   // qOrbiterGenerator * orbiterConf;
+
 
     //listmodels
     QByteArray binaryConfig;
@@ -146,12 +150,20 @@ public:
 signals:
       void orbiterReady();
       void orbiterClosing();
+      void locationChanged(int cRoom, int cEA);
 
 
 public slots:
+
+      int getlocation() const ;
+      void setLocation(const int& , const int& ) ;
+
+      void clearMediaModel();
+      bool addMediaItem(QString mText, QString temp, QImage cell);
+      void updateModel();
       //ui related slots
       Q_INVOKABLE void execGrp(int grp);
-   Q_INVOKABLE bool gotoQScreen(QString ) ;
+    Q_INVOKABLE bool gotoQScreen(QString ) ;
         //qt c++ related slots
     bool requestDataGrid();
     //dce related slots

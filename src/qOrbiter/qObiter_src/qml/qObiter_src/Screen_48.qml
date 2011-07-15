@@ -1,4 +1,4 @@
-import Qt 4.7
+import QtQuick 1.0
 import "components"
 
 Rectangle {
@@ -79,7 +79,7 @@ Rectangle {
         MouseArea {
             id: mouse_area1
             anchors.fill: parent
-            onClicked: gotoQScreen("Screen_1.qml")
+            onClicked: dceObject.gotoQScreen("Screen_1.qml")
         }
     }
 

@@ -1,4 +1,4 @@
-import Qt 4.7
+import QtQuick 1.0
 import "components"
 
 Rectangle {
@@ -62,8 +62,9 @@ Rectangle {
         highlight: Rectangle { color: "lightblue"; radius: 5 }
         highlightFollowsCurrentItem: true
         focus: true
-        width: 785
-        height: 390
+        width: 609
+        height: 400
+        clip: true
 
         contentItem.clip: true
         cellWidth: 156
@@ -104,10 +105,18 @@ Rectangle {
 
            MouseArea{
                anchors.fill: parent
-               onClicked: gotoQScreen("Screen_1.qml")
+               onClicked: dceObject.gotoQScreen("Screen_1.qml")
                      }
              }
 
         }
+     }
+
+     AttributeSelector {
+         id: attributeselector1
+         x: 619
+         y: 7
+         width: 125
+         height: 400
      }
 }

@@ -1,4 +1,4 @@
-import Qt 4.7
+import QtQuick 1.0
 Item {
     property alias rowlabel: rowheader.buttontext
     height: style.homescreenrowheight
@@ -13,6 +13,8 @@ Item {
             id: delegateitem
             height: 80
             width: childrenRect.width
+
+
 
         ButtonSq
         {
@@ -40,6 +42,9 @@ Item {
                 }
             }
        }
+
+
+
     ListView.onAdd: SequentialAnimation {
           PropertyAction { target: lightingdelegate; property: "height"; value: 0 }
           NumberAnimation { target: lightingdelegate; property: "height"; to: 65; duration: 500; easing.type: Easing.InOutQuad }
@@ -69,6 +74,8 @@ Row {
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
         spacing:5
+
+
 
         ButtonSq {
             id: rowheader

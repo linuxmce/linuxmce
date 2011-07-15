@@ -12,6 +12,7 @@ class MediaScenarioItem;
 class MediaScenarioModel : public QAbstractListModel
 {
   Q_OBJECT
+    Q_PROPERTY (QVariant data NOTIFY DataChanged)
 public:
 
   explicit MediaScenarioModel(MediaScenarioItem *prototype, QObject* parent = 0);
@@ -35,6 +36,9 @@ private slots:
 private:
   MediaScenarioItem* m_prototype;
   QList<MediaScenarioItem*> m_list;
+
+signals:
+void  DataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
 
 };
 

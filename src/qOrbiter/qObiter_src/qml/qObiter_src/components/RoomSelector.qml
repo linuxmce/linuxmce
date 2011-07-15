@@ -1,4 +1,4 @@
-import Qt 4.7
+import QtQuick 1.0
 
 Rectangle {
 
@@ -72,7 +72,7 @@ Rectangle {
                          onClicked:
                          {
 
-                            setActiveRoom(intRoom, entertain_area)
+                            dceObject.setActiveRoom(intRoom, entertain_area)
                             rooms.state = "Default"
 
                              roombutton.buttontext = Title

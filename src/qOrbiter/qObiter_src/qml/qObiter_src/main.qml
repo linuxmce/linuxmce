@@ -1,4 +1,4 @@
-import Qt 4.7
+import QtQuick 1.0
 
 
  Item {
@@ -6,6 +6,10 @@ import Qt 4.7
      signal close()
      signal changeScreen(string s)
      property string locationinfo: "standby"
+
+
+
+
      //property string currentRoomLights: lightingModel
     //  property string currentRoomMedia: mediaModel
     //  property string currentRoomClimate: climateModel
@@ -22,26 +26,33 @@ import Qt 4.7
      width: style.orbiterW; height: style.orbiterH;
 
 
+
+
      Loader {
          id:pageLoader
          objectName: "loadbot"
          source: "Splash.qml"
          onSourceChanged:  loadin
-         onLoaded: console.log("Screen Changed:" + pageLoader.source)
+         onLoaded: {
 
-     }
+             console.log("Screen Changed:" + pageLoader.source)
+
+            }
+         }
 
      SequentialAnimation{
          id:loadin
+
          PropertyAnimation{
              id:fadeout
              target:pageLoader
-             properties: "opacity"; to: "0"; duration: 100
+             properties: "opacity"; to: "0"; duration: 5000
+
          }
          PropertyAnimation{
              id: fadein
              target:pageLoader
-             properties: "opacity"; to: "1"; duration: 100
+             properties: "opacity"; to: "1"; duration: 5000
          }
 
      }

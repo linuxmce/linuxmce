@@ -13,7 +13,7 @@ Item {
         }
         MouseArea{
             anchors.fill: parent
-            onClicked: gotoQScreen("Screen_1.qml")
+            onClicked: dceObject.gotoQScreen("Screen_1.qml")
         }
     }
 }

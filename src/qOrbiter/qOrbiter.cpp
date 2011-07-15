@@ -1210,8 +1210,9 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 	cout << "Need to implement command #401 - Show File List" << endl;
 	cout << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
 
-qDebug() << "DCE recieved Datagrid Population Request from QML";
+        qDebug() << "DCE recieved Datagrid Population Request from QML";
 
+        qmlUI->model->clear();
 
         qmlUI->gotoQScreen("Screen_47.qml");
 
@@ -1275,9 +1276,7 @@ qDebug() << "DCE recieved Datagrid Population Request from QML";
                        string testdata;
                        QImage cellImg;
                        QString cellTitle;
-
-
-
+                     //  qmlUI->model->clear();
 
                        //experimental block
                        for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
@@ -1296,9 +1295,14 @@ qDebug() << "DCE recieved Datagrid Population Request from QML";
                                }
 
                              //  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"DataGridRenderer::RenderCell loading %s in bg for %d,%d", pPath,pDataGridTable->CovertColRowType(it->first).first,pDataGridTable->CovertColRowType(it->first).second);
+                               qDebug() << "Error here";
+                               if (qmlUI->addMediaItem(QString::fromStdString(pCell->m_Text), temp, cellImg ))
+                               {
 
-                               qmlUI->model->appendRow(new gridItem(QString::fromStdString(pCell->m_Text), temp, cellImg , qmlUI->model));
+                               }
+
                        }
+
                     }
         }
 

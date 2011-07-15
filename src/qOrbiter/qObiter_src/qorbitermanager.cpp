@@ -1,5 +1,5 @@
 #include "qorbitermanager.h"
-#include <QDeclarativeEngine>
+#include <QDeclarativeProperty>
 #include <QDebug>
 #include <QFile>
 #include <QtXml/QtXml>
@@ -111,12 +111,23 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     currentSkinURL="qml/qObiter_src/main.qml";
     s_RouterIP="dcerouter";
 
+
+
+
+
+
     qorbiterUIwin = new QDeclarativeView;
+    qmlRegisterType<ScreenSaverModule>("ScreenSaverModule",1,0,"ScreenSaverModule");
+
+    ScreenSaverModule ScreenSaver;
+    ScreenSaver.setImage(QUrl("../../img/lmcesplash.jpg"));
+
     qorbiterUIwin->engine()->addImageProvider("datagridimg", new basicImageProvider);
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
-
     qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/qObiter_src/main.qml"));
-    //qorbiterUIwin->engine()->addImportPath("qml/qObiter_src/components");
+    qorbiterUIwin->engine()->addImportPath("qml/qObiter_src/components");
+    qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", &ScreenSaver);
+
     QObject *item= qorbiterUIwin->rootObject();
     qorbiterUIwin->showFullScreen();
     gotoQScreen("Splash.qml");
@@ -128,6 +139,7 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
    // QObject::connect(this,SIGNAL(destroyed()), this, SLOT(closeOrbiter()));
 
      iPK_Device_DatagridPlugIn =  long(6);
+
      m_dwIDataGridRequestCounter = 0;
 
 
@@ -444,7 +456,7 @@ bool qorbiterManager::getConf(int pPK_Device)
     }
 
 
-  qorbiterUIwin->rootContext()->setContextObject(this);
+  qorbiterUIwin->rootContext()->setContextProperty("dceObject", this);
 
  // setActiveRoom(RroomMapping.value(QString::fromStdString(pqOrbiter->DATA_Get_FK_EntertainArea())), 0);
   qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights); //custom list item provided
@@ -539,12 +551,19 @@ void qorbiterManager::setActiveRoom(int room,int ea)
     roomLights = roomLightingScenarios.value(room);
     roomMedia = roomMediaScenarios.value(room);
     roomClimate = roomClimateScenarios.value(room);
+    roomTelecom = roomTelecomScenarios.value(room);
+    roomSecurity = roomSecurityScenarios.value(room);
+
+
+
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights);
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomMedia", roomMedia);
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomClimate", roomClimate);
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);
+ /* */
     qDebug() << "CHanged to room" << room;
+    setLocation(room, ea);
 }
 
 void qorbiterManager::setCurrentUser()
@@ -554,6 +573,38 @@ void qorbiterManager::setCurrentUser()
 void qorbiterManager::execGrp(int grp)
 {
     pqOrbiter->executeCommandGroup(grp);
+}
+
+
+bool qorbiterManager::addMediaItem(QString mText, QString temp, QImage cell)
+{
+    this->model->appendRow(new gridItem(mText, temp, cell , model));
+    qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
+}
+
+void qorbiterManager::updateModel()
+{
+
+}
+
+void qorbiterManager::clearMediaModel()
+{
+    model->clear();
+
+}
+
+void qorbiterManager:: setLocation(const int &room, const int &ea)
+{
+
+    iFK_Room = room;
+    iea_area = ea;
+
+   emit locationChanged(room, ea);
+}
+
+int qorbiterManager::getlocation() const
+{
+    return iFK_Room;
 }
 
 

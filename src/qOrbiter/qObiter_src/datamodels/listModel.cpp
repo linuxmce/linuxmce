@@ -83,6 +83,7 @@ void ListModel::clear()
 {
   qDeleteAll(m_list);
   m_list.clear();
+
 }
 
 bool ListModel::removeRow(int row, const QModelIndex &parent)

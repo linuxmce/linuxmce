@@ -35,7 +35,6 @@ SOURCES += main.cpp \
     uiclasses/lightingui.cpp \
     uiclasses/uicontroller.cpp \
     qorbitermanager.cpp \    
-    qOrbiterGen/qorbitergenerator.cpp \
     datamodels/listModel.cpp \
     datamodels/gridItem.cpp \
     imageProviders/gridimageprovider.cpp \
@@ -54,7 +53,8 @@ SOURCES += main.cpp \
     datamodels/securityscenariomodel.cpp \
     datamodels/climatescenarioitem.cpp \
     datamodels/securityscenarioitem.cpp \
-    datamodels/telecomscenarioitem.cpp
+    datamodels/telecomscenarioitem.cpp \
+    screensaver/screensavermodule.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -67,7 +67,6 @@ HEADERS += \
     uiclasses/uicontroller.h \
     qorbitermanager.h \
     qOrbiterData.h \
-    qOrbiterGen/qorbitergenerator.h \
     datamodels/listModel.h \
     datamodels/gridItem.h \
     imageProviders/gridimageprovider.h \
@@ -86,7 +85,8 @@ HEADERS += \
     datamodels/securityscenariomodel.h \
     datamodels/climatescenarioitem.h \
     datamodels/securityscenarioitem.h \
-    datamodels/telecomscenarioitem.h
+    datamodels/telecomscenarioitem.h \
+    screensaver/screensavermodule.h
 
 OTHER_FILES += \
     qml/skins/scheme/classic/Main.qml \
@@ -143,7 +143,26 @@ OTHER_FILES += \
     img/icons/agt_home.png \
     img/icons/agt_games.png \
     img/icons/On.png \
-    img/icons/Off.png
+    img/icons/Off.png \
+    android/res/values/libs.xml \
+    android/res/values/strings.xml \
+    android/res/drawable-hdpi/icon.png \
+    android/res/drawable-mdpi/icon.png \
+    android/res/drawable-ldpi/icon.png \
+    android/src/eu/licentia/necessitas/industrius/QtActivity.java \
+    android/src/eu/licentia/necessitas/industrius/QtApplication.java \
+    android/src/eu/licentia/necessitas/industrius/QtSurface.java \
+    android/src/eu/licentia/necessitas/industrius/QtLayout.java \
+    android/src/eu/licentia/necessitas/ministro/IMinistroCallback.aidl \
+    android/src/eu/licentia/necessitas/ministro/IMinistro.aidl \
+    android/src/eu/licentia/necessitas/mobile/QtAndroidContacts.java \
+    android/src/eu/licentia/necessitas/mobile/QtSystemInfo.java \
+    android/src/eu/licentia/necessitas/mobile/QtFeedback.java \
+    android/src/eu/licentia/necessitas/mobile/QtSensors.java \
+    android/src/eu/licentia/necessitas/mobile/QtCamera.java \
+    android/src/eu/licentia/necessitas/mobile/QtMediaPlayer.java \
+    android/src/eu/licentia/necessitas/mobile/QtLocation.java \
+    android/AndroidManifest.xml
 
 RESOURCES += \
     skinData.qrc
