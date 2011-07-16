@@ -58,7 +58,7 @@ bool LMCE_Game_Update::GetMetadataForRom(string sRomName, string& sMetaData)
   string sOutput, sStdErr;
   char csRomName[100];
   strcpy(csRomName,sRomName.c_str());
-  char * const args[] = {"./get_rom_info.pl",csRomName,NULL};
+  char * const args[] = {"./get_mame_info.pl",csRomName,NULL};
   if (ProcessUtils::GetCommandOutput(args[0], args, sOutput, sStdErr) == 0)
     {
       vector<string> vectTmp;  // used for a basic sanity check.
