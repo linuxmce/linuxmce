@@ -29,7 +29,7 @@ Item {
 
                  MouseArea{
                      anchors.fill: parent
-                     onClicked: dceOnject.execGrp(params);
+                     onClicked: dceObject.execGrp(params);
                         }
 
                   Image {
