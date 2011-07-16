@@ -22,7 +22,7 @@ import QtQuick 1.0
          console.log("Command to change to:" + screenname)
          return "success!"
      }
-     Style1 {id:style}
+     Style {id:style}
      width: style.orbiterW; height: style.orbiterH;
 
 

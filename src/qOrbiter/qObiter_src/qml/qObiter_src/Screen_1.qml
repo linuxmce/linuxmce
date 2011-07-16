@@ -7,7 +7,7 @@ Item
 
 Rectangle {
     id:stage
-    Style1{id: style}
+    Style{id: style}
     signal swapStyle()
 
     Rectangle{

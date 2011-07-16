@@ -92,7 +92,6 @@ OTHER_FILES += \
     qml/skins/scheme/classic/Main.qml \
     img/lmcesplash.jpg \
     qml/skins/scheme/classic/StyleClassic.qml \
-    qml/skins/scheme/brown/StyleBrown.qml \
     img/UnknownUser.png \
     qml/thom/screentest.qml \
     qml/thom/screentest_images/new_layer.png \
@@ -162,7 +161,9 @@ OTHER_FILES += \
     android/src/eu/licentia/necessitas/mobile/QtCamera.java \
     android/src/eu/licentia/necessitas/mobile/QtMediaPlayer.java \
     android/src/eu/licentia/necessitas/mobile/QtLocation.java \
-    android/AndroidManifest.xml
+    android/AndroidManifest.xml \
+    qml/skins/scheme/brown/Style.qml \
+    qml/Main.qml
 
 RESOURCES += \
     skinData.qrc

@@ -82,8 +82,30 @@ Item {
         contentWidth: childrenRect.width
         clip: true
 
-        Floorplan{id:lightingfloorplan; anchors.left: parent.left}
-Row {
+        ButtonSq {
+            id: lightingfloorplan
+            height: style.buttonH
+            width: style.buttonW
+            color: style.button_action_color
+            radius: style.but_smooth
+            buttontext: ""
+
+            Image {
+                id: onimg
+                source: "../../../img/icons/jabber_protocol.png"
+                height: style.iconHeight
+                width: style.iconWidth
+                anchors.centerIn: parent
+
+                    }
+            MouseArea{
+                id: mousearea1
+                anchors.fill: parent
+                onClicked: dceObject.gotoQScreen("Screen_2.qml")
+              }
+
+        }
+        Row {
         id: guide
 
         anchors.left: lightingfloorplan.right

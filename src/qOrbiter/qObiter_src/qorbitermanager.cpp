@@ -108,13 +108,8 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     QWidget(parent)
 {
     currentSkin = "default";
-    currentSkinURL="qml/qObiter_src/main.qml";
+    currentSkinURL="qml/qObiter_src/Style.qml";
     s_RouterIP="dcerouter";
-
-
-
-
-
 
     qorbiterUIwin = new QDeclarativeView;
     qmlRegisterType<ScreenSaverModule>("ScreenSaverModule",1,0,"ScreenSaverModule");
@@ -122,11 +117,15 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     ScreenSaverModule ScreenSaver;
     ScreenSaver.setImage(QUrl("../../img/lmcesplash.jpg"));
 
+
     qorbiterUIwin->engine()->addImageProvider("datagridimg", new basicImageProvider);
+
+    qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", &ScreenSaver);
+
+    qorbiterUIwin->rootContext()->setContextProperty("currentSkinUrl" , currentSkinURL);
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
     qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/qObiter_src/main.qml"));
-    qorbiterUIwin->engine()->addImportPath("qml/qObiter_src/components");
-    qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", &ScreenSaver);
+
 
     QObject *item= qorbiterUIwin->rootObject();
     qorbiterUIwin->showFullScreen();

@@ -1,7 +1,7 @@
 import QtQuick 1.0
 
 Rectangle {
-    Style1{id:style}
+    Style{id:style}
     property alias arrow_label: arrow_type.text
     width: 50
     height: 25

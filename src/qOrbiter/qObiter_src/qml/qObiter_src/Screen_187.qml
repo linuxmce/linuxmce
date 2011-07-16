@@ -8,7 +8,7 @@ import QtQuick 1.0
             Rectangle {
             id:containerrect
             anchors.fill:parent
-            color: Style1.bgcolor
+            color: Style.bgcolor
             opacity: 0.5
              }
 

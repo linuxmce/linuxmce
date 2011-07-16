@@ -14,23 +14,6 @@ ButtonSq {
         width: style.iconWidth
         anchors.centerIn: parent
 
-        Rectangle {
-            id: rectangle1
-            x: 28
-            y: 28
-            width: 0
-            height: 0
-            color: "#ffffff"
-            visible: false
-            opacity: 0
-
-            HomeButton {
-                id: homebutton1
-                x: 200
-                y: 30
-                opacity: 0
-            }
-        }
             }
     MouseArea{
         id: mousearea1

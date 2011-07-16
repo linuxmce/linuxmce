@@ -1,9 +1,28 @@
 import QtQuick 1.0
+import "components"
+import "screens"
+import "qObiter_src"
+
 
  Item {
      id: item
      signal close()
      signal changeScreen(string s)
+     property string locationinfo: "standby"
+
+     function loadStyle(style)
+     {
+         styleLoader.sourceComponent = "/qObiter_src/Style.qml"
+     }
+
+
+
+
+     //property string currentRoomLights: lightingModel
+    //  property string currentRoomMedia: mediaModel
+    //  property string currentRoomClimate: climateModel
+    //  property string currentRoomTelecom: telecomModel
+    //  property string currentRoomSecurity: lightingModel
 
      function screenchange(screenname)
      {
@@ -16,26 +35,32 @@ import QtQuick 1.0
 
 
 
+
      Loader {
          id:pageLoader
          objectName: "loadbot"
          source: "Splash.qml"
          onSourceChanged:  loadin
-         onLoaded: console.log("Screen Changed:" + pageLoader.source)
+         onLoaded: {
 
-     }
+             console.log("Screen Changed:" + pageLoader.source)
+
+            }
+         }
 
      SequentialAnimation{
          id:loadin
+
          PropertyAnimation{
              id:fadeout
              target:pageLoader
-             properties: "opacity"; to: "0"; duration: 100
+             properties: "opacity"; to: "0"; duration: 5000
+
          }
          PropertyAnimation{
              id: fadein
              target:pageLoader
-             properties: "opacity"; to: "1"; duration: 100
+             properties: "opacity"; to: "1"; duration: 5000
          }
 
      }

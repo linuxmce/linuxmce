@@ -5,7 +5,7 @@ Rectangle {
     property alias videoTitle: video_title.text
    // property alias synText:
     id: pvrRemote
-    Style1{id:style}
+    Style{id:style}
 
     width: 800
     height: 480

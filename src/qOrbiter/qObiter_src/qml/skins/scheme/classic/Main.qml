@@ -6,7 +6,7 @@ item
 Rectangle {
 
     id:stage
-    Style1 {id:style}
+    Style {id:style}
     signal swapStyle()
 
     width: style.orbiterW

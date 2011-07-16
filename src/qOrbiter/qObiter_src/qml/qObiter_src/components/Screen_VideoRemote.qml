@@ -2,7 +2,7 @@ import QtQuick 1.0
 
 Rectangle {
     id: remoteControl
-    Style1{id:style}
+    Style{id:style}
 
     width: 800
     height: 600

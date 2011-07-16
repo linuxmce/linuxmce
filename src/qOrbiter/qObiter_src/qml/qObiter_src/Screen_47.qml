@@ -8,7 +8,7 @@ Rectangle {
     color: "slategrey"
     clip: true
 
-    Style1{id:style}
+    Style{id:style}
 
     Component {
              id: contactDelegate

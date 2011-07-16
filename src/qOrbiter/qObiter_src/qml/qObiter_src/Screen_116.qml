@@ -1,7 +1,7 @@
 import QtQuick 1.0
 
 Rectangle {
-    Style1{id:style}
+    Style{id:style}
     width: 640
     height: 480
     color: style.advanced_bg
