@@ -9,50 +9,16 @@ Item {
     height: style.homescreenrowheight
     width: parent.width
 
-Component
-{
-    id:mediaDelegate
-    Item {
-        id: listDelegate
-        width: listView.width
-        height: childrenRect.height
-
-
-    ButtonSq
-    {       id:buttondelegate
-            height: style.buttonH
-            width: style.buttonW
-            color: style.button_action_color
-            radius: style.but_smooth
-            buttontext: label
-            buttontextfontsize: 12
-            buttontextbold: true
-            buttontextzindex: 30
-
-             MouseArea{
-                 anchors.fill: parent
-                 onClicked: dceObject.execGrp(params);
-                        }
-
-              Image {
-                    id:buttonimage
-                    source: "../../../img/icons/"+label+".png"
-                    height: style.iconHeight
-                    width: style.iconWidth
-                     anchors.centerIn: parent
-                     }
-                  }
-         }
-   }
+HomeButtonDelegate{id:mediaDelegate}
 
 
 Flickable{
     id:mediaflick
-    interactive: true
+
     height: 80
     width: parent.width
     contentHeight: 80
-    contentWidth: childrenRect * 1
+    contentWidth: childrenRect.width * 2
     clip: true
 
     Row {
@@ -67,7 +33,7 @@ Flickable{
             id: rowheader
             height: style.buttonH
             width: style.buttonW
-            color: style.button_action_color
+            color: style.homescreenfloorplanbuttoncolor
             radius: style.but_smooth
             buttontext: ""
 
@@ -78,13 +44,18 @@ Flickable{
                 width: style.iconWidth
                 anchors.centerIn: parent
                 }
+            MouseArea{
+                id: mousearea1
+                anchors.fill: parent
+                onClicked: dceObject.gotoQScreen("Screen_3.qml")
+              }
             }
 
         ButtonSq {
             id: now_playing
             height: style.buttonH
             width: style.buttonW
-            color: style.button_action_color
+            color: style.homeScreenNowPlayingColorInActive
             radius: style.but_smooth
             buttontext: ""
 
@@ -101,32 +72,8 @@ Flickable{
 
             orientation:ListView.Horizontal
             spacing: 5
-            delegate:
-                ButtonSq
-                    {
-                    id:buttondelegate
-                    height: style.buttonH
-                    width: style.buttonW
-                    color: style.button_action_color
-                    radius: style.but_smooth
-                    buttontext: label
-                    buttontextfontsize: 12
-                    buttontextbold: true
-                    buttontextzindex: 30
-
-                     MouseArea{
-                         anchors.fill: parent
-                         onClicked: dceObject.execGrp(params);
-                                }
-
-                      Image {
-                            id:buttonimage
-                            source: "../../../img/icons/"+label+".png"
-                            height: style.iconHeight
-                            width: style.iconWidth
-                             anchors.centerIn: parent
-                             }
-                         }
+            delegate: mediaDelegate
+            interactive: false
 
               }
          }

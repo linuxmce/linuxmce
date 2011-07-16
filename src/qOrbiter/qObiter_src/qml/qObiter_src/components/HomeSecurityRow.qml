@@ -6,50 +6,16 @@ Item {
     width: parent.width
 
 
-Component
-{
-    id:securityDelegate
-
-    Item {
-        id: delegateitem
-        height: 80
-        width: childrenRect.width
-
-    ButtonSq
-    {
-            height: style.buttonH
-            width: style.buttonW
-            color: style.button_action_color
-            radius: style.but_smooth
-            buttontext: label
-            buttontextfontsize: 12
-            buttontextbold: true
-            buttontextzindex: 30
-
-             MouseArea{
-                 anchors.fill: parent
-                 onClicked: dceObject.execGrp(params);
-                       }
-
-              Image {
-                    id:buttonimage
-                    source: "../../../img/icons/"+label+".png"
-                    height: style.iconHeight
-                    width: style.iconWidth
-                     anchors.centerIn: parent
-                     }
-            }
-        }
-   }
+HomeButtonDelegate{id:securityDelegate}
 
 Flickable
 {
     id:securityflick
-    interactive: true
+
     height: 80
     width: parent.width
     contentHeight: 80
-    contentWidth: childrenRect * 1
+    contentWidth: childrenRect.width * 2
     clip: true
 
         ButtonSq {
@@ -57,15 +23,14 @@ Flickable
 
             height: style.buttonH
             width: style.buttonW
-            color: style.button_action_color
+            color: style.homescreenfloorplanbuttoncolor
             radius: style.but_smooth
             buttontext: "Security Floorplan"
-
-            MouseArea {
+            MouseArea{
+                id: mousearea1
                 anchors.fill: parent
-                hoverEnabled: true
-
-            }
+                onClicked: dceObject.gotoQScreen("Screen_5.qml")
+              }
         }
 
         ListView{
@@ -78,6 +43,7 @@ Flickable
             anchors.left: rowheader.right
             anchors.margins: 5
             delegate: securityDelegate
+            interactive: false
                  }
            }
        }

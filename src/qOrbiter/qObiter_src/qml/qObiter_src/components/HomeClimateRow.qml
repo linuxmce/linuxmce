@@ -5,52 +5,17 @@ Item {
     height: style.homescreenrowheight
     width: parent.width
 
-    Component
-    {
-        id:climateDelegate
-
-        Item {
-            id: delegateitem
-            height: 80
-            width: childrenRect.width
-
-        ButtonSq
-        {
-                height: style.buttonH
-                width: style.buttonW
-                color: style.button_action_color
-                radius: style.but_smooth
-                buttontext: label
-                buttontextfontsize: 12
-                buttontextbold: true
-                buttontextzindex: 30
-
-                 MouseArea{
-                     anchors.fill: parent
-                     onClicked: console.log ("I am button:" + index + ". My Name is:"+ label+". My Params:" + params +". And my Command:" + command)
-                           }
-
-                  Image {
-                        id:buttonimage
-                        source: "../../../img/icons/"+label+".png"
-                        height: style.iconHeight
-                        width: style.iconWidth
-                         anchors.centerIn: parent
-                         }
-                }
-            }
-       }
-
-
+   HomeButtonDelegate{id:climateDelegate}
     Flickable{
+
         id:climateRow
-        interactive: true
-        height:65
+        height:80
         width: parent.width
         contentHeight: 80
-        contentWidth: childrenRect * 1
+        contentWidth: childrenRect.width * 2
         clip: true
-    }
+
+
 
     Row {
         id: guide
@@ -59,16 +24,22 @@ Item {
         anchors.left: parent.left
         spacing:5
 
-
         ButtonSq {
             id: rowheader
             height: style.buttonH
             width: style.buttonW
-            color: style.button_action_color
+            color: style.homescreenfloorplanbuttoncolor
             radius: style.but_smooth
             buttontext: "Climate"
 
+            MouseArea{
+                id: mousearea1
+                anchors.fill: parent
+                onClicked: dceObject.gotoQScreen("Screen_4.qml")
+             z:5 }
             }
+
+
         ListView{
             id: climateScenarios
             width: 300
@@ -76,9 +47,10 @@ Item {
             model: currentRoomClimate
             spacing: 5
             orientation:ListView.Horizontal
-
+            interactive:false
             delegate: climateDelegate
                  }
 
     }
+}
 }

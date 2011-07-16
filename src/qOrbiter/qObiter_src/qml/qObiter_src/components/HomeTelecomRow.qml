@@ -6,50 +6,15 @@ Item {
     width: parent.width
 
 
-    Component
-    {
-        id:telecomDelegate
-
-        Item {
-            id: delegateitem
-            height: 75
-            width: 75
-
-        ButtonSq
-        {
-                height: style.buttonH
-                width: style.buttonW
-                color: style.button_action_color
-                radius: style.but_smooth
-                buttontext: label
-                buttontextfontsize: 12
-                buttontextbold: true
-                buttontextzindex: 30
-                anchors.centerIn: parent
-
-                 MouseArea{
-                     anchors.fill: parent
-                     onClicked: dceObject.execGrp(params);
-                        }
-
-                  Image {
-                        id:buttonimage
-                        source: "../../../img/icons/"+label+".png"
-                        height: style.iconHeight
-                        width: style.iconWidth
-                         anchors.centerIn: parent
-                         }
-                }
-            }
-       }
+    HomeButtonDelegate{id:telecomDelegate}
 
     Flickable{
         id:securityflick
-        interactive: true
+
         height: 80
         width: parent.width
         contentHeight: 80
-        contentWidth: childrenRect * 1
+        contentWidth: childrenRect.width * 2
         clip: true
     Row {
         id: telecomRow
@@ -64,15 +29,14 @@ Item {
 
             height: style.buttonH
             width: style.buttonW
-            color: style.button_action_color
+            color: style.homescreenfloorplanbuttoncolor
             radius: style.but_smooth
             buttontext: "Telecom"
-
-            MouseArea {
+            MouseArea{
+                id: mousearea1
                 anchors.fill: parent
-                hoverEnabled: true
-
-            }
+                onClicked: dceObject.gotoQScreen("Screen_6.qml")
+              }
 
             }
         ListView{
@@ -81,6 +45,7 @@ Item {
             height: 50
             model: currentRoomTelecom
             spacing: 5
+            interactive: false
             orientation:ListView.Horizontal
             delegate: telecomDelegate
                  }

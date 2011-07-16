@@ -23,14 +23,14 @@ Rectangle {
         width: -1
         height: 0
         text:"null ipsum delorium"
-        font.pointSize: 11
+        font.pointSize: 10
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
-
+        anchors.fill: parent
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
         anchors.margins: 5
-        font.family: "Bitstream Charter"
+        font.family: "Droid Sans"
         wrapMode: Text.WordWrap
          }
 

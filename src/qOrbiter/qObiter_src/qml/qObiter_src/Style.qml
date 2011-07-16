@@ -21,6 +21,10 @@ import QtQuick 1.0
     property int homescreenrowheight:80
     property int homescreenbuttonheight: 75
     property int homesreenbuttonwidth: 75
+        property color homescreenscenariobuttoncolor: "whitesmoke"
+        property color homescreenfloorplanbuttoncolor: "aliceblue"
+        property color homeScreenNowPlayingColorInActive: "indianred"
+        property color homeScreenNowPlayingColorActive: "lightcyan"
 
     //icon sizes
     property int iconHeight: 50
