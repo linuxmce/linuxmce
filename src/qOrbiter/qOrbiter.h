@@ -34,6 +34,7 @@ namespace DCE
 {
 	class qOrbiter : public qOrbiter_Command
 	{
+
 //<-dceag-decl-e->
 		// Private member variables
 

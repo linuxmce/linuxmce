@@ -17,7 +17,7 @@ Item {
 
         Row {
         id: guide
-        anchors.left: lightingfloorplan.right
+        //anchors.left: lightingfloorplan.right
         spacing:5
 
         ButtonSq {

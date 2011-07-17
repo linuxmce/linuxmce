@@ -8,16 +8,11 @@
     </qresource>
     <qresource prefix="/icons">
         <file alias="mythIcon.jpg">img/icons/Mythtv.png</file>
-        <file alias="security.png">img/icons/aktion.png</file>
         <file alias="videos.png">img/icons/xine.png</file>
         <file alias="playlist.png">img/icons/kedit.png</file>
         <file alias="user.png">img/icons/personal.png</file>
         <file alias="telecom.png">img/icons/linphone.png</file>
         <file>img/icons/audio&amp;video.png</file>
-        <file>img/icons/agt_games.png</file>
-        <file>img/icons/agt_home.png</file>
-        <file>img/icons/agt_mp3.png</file>
-        <file>img/icons/agt_multimedia.png</file>
         <file>img/icons/fortress.png</file>
         <file>img/icons/gpgsm.png</file>
         <file>img/icons/harddrive2.png</file>
