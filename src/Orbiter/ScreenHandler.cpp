@@ -1056,6 +1056,9 @@ void ScreenHandler::SelectedAttributeCell(DataGridCell *pCell)
 		case ATTRIBUTETYPE_Performer_CONST:
 		case ATTRIBUTETYPE_Album_CONST:
 		case ATTRIBUTETYPE_Title_CONST:
+		case ATTRIBUTETYPE_System_CONST:
+		case ATTRIBUTETYPE_Year_CONST:
+		case ATTRIBUTETYPE_Manufacturer_CONST:
 			mediaFileBrowserOptions.m_PK_AttributeType_Sort = ATTRIBUTETYPE_Title_CONST;
 			break;
 
