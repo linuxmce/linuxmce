@@ -114,21 +114,22 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     s_RouterIP="dcerouter";
 
     qorbiterUIwin = new QDeclarativeView;
-    qmlRegisterType<ScreenSaverModule>("ScreenSaverModule",1,0,"ScreenSaverModule");
 
     ScreenSaverModule ScreenSaver;
+    qmlRegisterType<ScreenSaverModule>("ScreenSaverModule",1,0,"ScreenSaverModule");    
     ScreenSaver.setImage(QUrl("../../img/lmcesplash.jpg"));
+    qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", &ScreenSaver);
+
 
     model = new ListModel(new gridItem, this);
     qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
 
     qorbiterUIwin->engine()->addImageProvider("datagridimg", new basicImageProvider);
-
-    qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", &ScreenSaver);
-
     qorbiterUIwin->rootContext()->setContextProperty("currentSkinUrl" , currentSkinURL);
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
     qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/qObiter_src/main.qml"));
+
+
 
 
     QObject *item= qorbiterUIwin->rootObject();
@@ -142,7 +143,7 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
    // QObject::connect(this,SIGNAL(destroyed()), this, SLOT(closeOrbiter()));
 
      iPK_Device_DatagridPlugIn =  long(6);
-
+     iPK_Device_OrbiterPlugin = long(9);
      m_dwIDataGridRequestCounter = 0;
 
 
@@ -159,7 +160,7 @@ bool qorbiterManager::gotoQScreen(QString s)
     if (QMetaObject::invokeMethod(item, "screenchange",  Q_ARG(QVariant, screenname)))
        { qDebug() << returnedValue; return true;}
                     else
-        {qDebug () << "Failure!" << qPrintable(s) <<": " << returnedValue; return false;}
+        {qDebug () << "Failure!" << qPrintable(s) <<": " << returnedValue.toString(); return false;}
 
 }
 

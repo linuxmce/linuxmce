@@ -1,14 +1,11 @@
 import QtQuick 1.0
-
+import "components"
 
  Item {
      id: item
      signal close()
      signal changeScreen(string s)
      property string locationinfo: "standby"
-
-
-
 
      //property string currentRoomLights: lightingModel
     //  property string currentRoomMedia: mediaModel
@@ -25,8 +22,6 @@ import QtQuick 1.0
 
      Style {id:style}
      width: style.orbiterW; height: style.orbiterH;
-
-
 
 
      Loader {
