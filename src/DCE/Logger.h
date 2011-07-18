@@ -28,8 +28,8 @@
 #endif
 
 #include <pthread.h>
-#ifndef WIN32
-#include <features.h>
+#if !defined(WIN32) && !defined(__APPLE_CC__) 
+	#include <features.h>
 #endif
 #include <string>
 #include <set>
