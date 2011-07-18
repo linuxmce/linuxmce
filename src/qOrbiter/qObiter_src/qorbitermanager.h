@@ -45,12 +45,13 @@ class qorbiterManager : public QWidget
 {
     Q_OBJECT
     Q_PROPERTY (int getLocation READ getlocation NOTIFY locationChanged )
+    Q_PROPERTY (bool addMediaItem NOTIFY modelChanged)
 
 public:
      qorbiterManager(QWidget *parent = 0);  //constructor
 
     QString *sPK_User;
-    ScreenSaverModule *ScreenSaver;
+
 
     //ui variables
     QString currentSkin;
@@ -151,6 +152,7 @@ signals:
       void orbiterReady();
       void orbiterClosing();
       void locationChanged(int cRoom, int cEA);
+      void modelChanged();
 
 
 public slots:

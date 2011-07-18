@@ -7,7 +7,7 @@
 class gridItem : public ListItem
 {
   Q_OBJECT
- Q_PROPERTY(QImage cellImage READ cellImage NOTIFY imageChanged)
+ Q_PROPERTY(QImage cellImage READ cellImage NOTIFY dataChanged)
 
 public:
   enum Roles {
@@ -39,5 +39,6 @@ private:
 
 signals:
   void imageChanged();
+  void dataChanged();
 };
 #endif // GRIDITEM_H

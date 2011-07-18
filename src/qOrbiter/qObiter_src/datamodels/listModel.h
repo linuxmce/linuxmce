@@ -30,6 +30,7 @@ signals:
 class ListModel : public QAbstractListModel
 {
   Q_OBJECT
+    Q_PROPERTY (QVariant data NOTIFY DataChanged )
 
 public:
   explicit ListModel(ListItem* prototype, QObject* parent = 0);
@@ -45,6 +46,10 @@ public:
   ListItem* find(const QString &id) const;
   QModelIndex indexFromItem( const ListItem* item) const;
   void clear();
+
+signals:
+  void ItemAdded();
+  void DataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
 
 private slots:
   void handleItemChange();

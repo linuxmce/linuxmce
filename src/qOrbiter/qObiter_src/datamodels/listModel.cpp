@@ -11,6 +11,7 @@ ListModel::ListModel(ListItem* prototype, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype)
 {
   setRoleNames(m_prototype->roleNames());
+   qRegisterMetaType<QModelIndex>("QModelIndex");
 }
 
 int ListModel::rowCount(const QModelIndex &parent) const
@@ -40,7 +41,8 @@ void ListModel::appendRows(const QList<ListItem *> &items)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
   foreach(ListItem *item, items) {
-    connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
+
+    QObject::connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
     m_list.append(item);
   }
   endInsertRows();
@@ -49,7 +51,7 @@ void ListModel::appendRows(const QList<ListItem *> &items)
 void ListModel::insertRow(int row, ListItem *item)
 {
   beginInsertRows(QModelIndex(), row, row);
-  connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
+  connect(item, SIGNAL(DataChanged()), SLOT(handleItemChange()), Qt::BlockingQueuedConnection);
   m_list.insert(row, item);
   endInsertRows();
 }
@@ -59,7 +61,7 @@ void ListModel::handleItemChange()
   ListItem* item = static_cast<ListItem*>(sender());
   QModelIndex index = indexFromItem(item);
   if(index.isValid())
-    emit dataChanged(index, index);
+    emit DataChanged(index, index);
 }
 
 ListItem * ListModel::find(const QString &id) const

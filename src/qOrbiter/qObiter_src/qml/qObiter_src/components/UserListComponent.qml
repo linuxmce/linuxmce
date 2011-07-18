@@ -4,8 +4,8 @@ import QtQuick 1.0
 Rectangle {
 
     id: rectangle1
-    width: 65
-    height: 50
+    width: 60
+    height: 60
 
     transitions: Transition {
             NumberAnimation { properties: "x,y"; easing.type: Easing.InOutQuad }
@@ -22,15 +22,18 @@ Rectangle {
     Text {
         id: nameLabel
         text: currentuser
-        font.bold:true
+
+        font.bold: true
+        z:5
 
     }
 
     Image {
         id: userImage
         source: "../../../img/icons/personal.png"
-        height: 50
-        width: 50
+        height: 60
+        width: 60
+        anchors.centerIn: parent
     }
 
 
@@ -53,6 +56,9 @@ Rectangle {
             Text {
                     id: somshit
                     text: username
+                    anchors.centerIn: parent
+                    font.bold: true
+                    z:5
 
                    }
             MouseArea{

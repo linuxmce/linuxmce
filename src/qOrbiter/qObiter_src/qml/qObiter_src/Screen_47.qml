@@ -32,21 +32,18 @@ Rectangle {
                      }
 
                          Image { source:"image://datagridimg/"+size ; height: 100; width: 156; anchors.centerIn: parent}
+                     }
 
-                        Flow
-                        {
-                            anchors.fill: frame
-                            anchors.margins: 4
-                            spacing: 10
-                        Text {
-                            text: name;
-                            opacity: 1;
-                            font.pointSize: 12;
-                            color: "black" ;
-                            wrapMode: "WrapAnywhere"
-                            }
-                        }
-                 }
+                 Text {
+                     text: name;
+                     opacity: 1;
+                     font.pointSize: 12;
+                     color: "black" ;
+                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                     anchors.fill: frame
+
+                     }
+
              }
          }
 
@@ -69,7 +66,14 @@ Rectangle {
         contentItem.clip: true
         cellWidth: 156
         cellHeight: 100
+
+     Connections{
+         target:dataModel
+         onDataChanged:console.log("something changed: ")
+     }
+
     }
+
 
     Rectangle{
         width: childrenRect.width

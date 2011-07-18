@@ -3,22 +3,70 @@ import QtQuick 1.0
 Rectangle {
 
 
-
     width: 800
-    height: 50
+    height: 75
     color: "#9e9d9d"
     id:advanced_panel
 
+    Row{
+        id:advancedrow
+        height:childrenRect.height
+        anchors.centerIn: parent
+        width: parent.width
+        spacing:10
+        clip: false
+
+        ButtonSq {
+            id: buttonsq1
+            x: 1
+            y: 1
+            width: 60
+            height: 60
+            buttontextfontsize: 9
+            border.width: 2
+            buttontext: "Advanced"
+            radius: 5
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked: dceObject.gotoQScreen("Screen_44.qml")
+            }
+        }
+
+        ButtonSq {
+            id: buttonsq2
+            x: 63
+            y: 1
+            width: 60
+            height: 60
+            border.width: 2
+            buttontext: "Power"
+            radius: 5
+        }
+
+        ButtonSq {
+            id: buttonsq3
+            x: 125
+            y: 1
+            width: 60
+            height: 60
+            border.width: 2
+            buttontext: "Sleeping Menu"
+            radius: 5
+        }
+
+
+
+    RoomSelector{id: installedrooms }
+    UserListComponent {id:user}
+
     ButtonSq{
         id:exit
-        x: 655
-        y: 0
         buttontext: "Exit Orbiter"
         buttontextcolor: style.button_system_color
-        anchors.left: user.right
-        anchors.leftMargin: 331
-        height: 50
-        width: 50
+
+        height: 60
+        width: 60
 
         MouseArea{
             x: 0
@@ -32,43 +80,5 @@ Rectangle {
                 }
              }
 
-
-           UserListComponent {id:user ;x: 258;y: 0}
-
-
-        ButtonSq {
-            id: buttonsq1
-            x: 1
-            y: 1
-            width: 60
-            height: 50
-            buttontextfontsize: 9
-            border.width: 2
-            buttontext: "Advanced"
-        }
-
-        ButtonSq {
-            id: buttonsq2
-            x: 63
-            y: 1
-            width: 60
-            height: 50
-            border.width: 2
-            buttontext: "Power"
-        }
-
-        ButtonSq {
-            id: buttonsq3
-            x: 125
-            y: 1
-            width: 60
-            height: 50
-            border.width: 2
-            buttontext: "Sleeping Menu"
-        }
-
-        RoomSelector{id: intalledrooms ;x: 425;y: 0 ;height: 50 }
-
-
-
+    }
 }

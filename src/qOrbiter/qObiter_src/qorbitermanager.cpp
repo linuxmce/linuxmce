@@ -107,6 +107,8 @@ extern "C" {
 qorbiterManager::qorbiterManager(QWidget *parent) :
     QWidget(parent)
 {
+
+
     currentSkin = "default";
     currentSkinURL="qml/qObiter_src/Style.qml";
     s_RouterIP="dcerouter";
@@ -117,6 +119,8 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     ScreenSaverModule ScreenSaver;
     ScreenSaver.setImage(QUrl("../../img/lmcesplash.jpg"));
 
+    model = new ListModel(new gridItem, this);
+    qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
 
     qorbiterUIwin->engine()->addImageProvider("datagridimg", new basicImageProvider);
 
@@ -148,6 +152,7 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
 
 bool qorbiterManager::gotoQScreen(QString s)
 {
+
     QVariant screenname= s;
     QVariant returnedValue ="null";
   QObject *item = qorbiterUIwin->rootObject();
@@ -472,8 +477,7 @@ bool qorbiterManager::getConf(int pPK_Device)
   this->qorbiterUIwin->rootContext()->setContextProperty("userList", userList); //custom user list provided
   this->qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms); //custom room list  provided
 
-  model = new ListModel(new gridItem, this);
-  qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
+
 
   return true;
 
@@ -571,6 +575,7 @@ void qorbiterManager::setCurrentUser()
 
 void qorbiterManager::execGrp(int grp)
 {
+    model->clear();
     pqOrbiter->executeCommandGroup(grp);
 }
 
@@ -578,7 +583,8 @@ void qorbiterManager::execGrp(int grp)
 bool qorbiterManager::addMediaItem(QString mText, QString temp, QImage cell)
 {
     this->model->appendRow(new gridItem(mText, temp, cell , model));
-    qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
+    emit modelChanged();
+    //qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
 }
 
 void qorbiterManager::updateModel()

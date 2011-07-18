@@ -4,8 +4,8 @@ Rectangle {
 
 
     id: rooms
-    width: 50
-    height: 50
+    width: 60
+    height: 60
 
     transitions: Transition {
             NumberAnimation { properties: "x,y"; easing.type: Easing.InOutQuad }
@@ -41,8 +41,8 @@ Rectangle {
 
     ButtonSq {
         id:roombutton
-        width: 50
-        height: 50
+        width: 60
+        height: 60
         buttontext:currentroom
             }
 
@@ -58,8 +58,8 @@ Rectangle {
                     Rectangle
                  {
                      id: delrect
-                     height:20
-                      width: 250
+                     height:35
+                     width: roomListModel.width
 
                      Text {
                              id: somshit
@@ -101,7 +101,7 @@ Rectangle {
 
                     PropertyChanges {
                         target: rooms
-                        width: 250
+                        width: 300
                         height: 200                       
                         color: "#d1d0be"
                         y: -200

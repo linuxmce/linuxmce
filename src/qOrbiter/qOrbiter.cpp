@@ -1837,7 +1837,7 @@ bool DCE::qOrbiter::dataGridRequest(string s)
 
 
                    //experimental block
-                 /*  for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
+                 for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
                    {
 
                            DataGridCell *pCell = it->second;
@@ -1855,7 +1855,7 @@ bool DCE::qOrbiter::dataGridRequest(string s)
                          //  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"DataGridRenderer::RenderCell loading %s in bg for %d,%d", pPath,pDataGridTable->CovertColRowType(it->first).first,pDataGridTable->CovertColRowType(it->first).second);
 
                            qmlUI->model->appendRow(new gridItem(QString::fromStdString(pCell->m_Text), temp, cellImg , qmlUI->model));
-                   } */
+                   }
                 }
     }
 
