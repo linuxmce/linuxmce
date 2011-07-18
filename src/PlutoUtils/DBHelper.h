@@ -24,6 +24,10 @@
 #include "DCE/Logger.h"
 #include "PlutoUtils/MultiThreadIncludes.h"
 
+#ifdef __APPLE_CC__
+#define PTHREAD_MUTEX_RECURSIVE_NP PTHREAD_MUTEX_RECURSIVE
+#endif
+
 using namespace DCE;
 
 
