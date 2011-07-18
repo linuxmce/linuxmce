@@ -119,8 +119,8 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     ScreenSaverModule ScreenSaver;
     qmlRegisterType<ScreenSaverModule>("ScreenSaverModule",1,0,"ScreenSaverModule");    
     ScreenSaver.setImage(QUrl("../../img/lmcesplash.jpg"));
-    qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", &ScreenSaver);
 
+    qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", &ScreenSaver);
 
     model = new ListModel(new gridItem, this);
     qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
@@ -129,9 +129,6 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     qorbiterUIwin->rootContext()->setContextProperty("currentSkinUrl" , currentSkinURL);
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
     qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/qObiter_src/main.qml"));
-
-
-
 
     QObject *item= qorbiterUIwin->rootObject();
     qorbiterUIwin->showFullScreen();
@@ -146,23 +143,22 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
      iPK_Device_DatagridPlugIn =  long(6);
      iPK_Device_OrbiterPlugin = long(9);
      m_dwIDataGridRequestCounter = 0;
-
-
-
 }
 
 
 bool qorbiterManager::gotoQScreen(QString s)
 {
-
     QVariant screenname= s;
     QVariant returnedValue ="null";
-  QObject *item = qorbiterUIwin->rootObject();
+    QObject *item = qorbiterUIwin->rootObject();
     if (QMetaObject::invokeMethod(item, "screenchange",  Q_ARG(QVariant, screenname)))
-       { qDebug() << returnedValue; return true;}
+       {
+           qDebug() << returnedValue; return true;
+       }
                     else
-        {qDebug () << "Failure!" << qPrintable(s) <<": " << returnedValue.toString(); return false;}
-
+       {
+            qDebug () << "Failure!" << qPrintable(s) <<": " << returnedValue.toString(); return false;
+       }
 }
 
 bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode)
@@ -172,21 +168,18 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
     {
-
-
-
         qDebug() << "Device: " << PK_Device <<" Connect";
-            g_pCommand_Impl=pqOrbiter;
-            g_pDeadlockHandler=DeadlockHandler;
-            g_pSocketCrashHandler=SocketCrashHandler;
-            LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
+        g_pCommand_Impl=pqOrbiter;
+        g_pDeadlockHandler=DeadlockHandler;
+        g_pSocketCrashHandler=SocketCrashHandler;
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
             /*
               we get various variable here that we will need later. I store them in the qt object so it
               can pass them along without extra issues and so they can easily be passed to qml objects that
               are templated in
              */
 
-            pqOrbiter->CreateChildren();
+        pqOrbiter->CreateChildren();
             /*
               this line ties the class variable in the dceGenerated code to the qt ui code
               this is how the two threads (dce and qt) communicate with each other and make it possible to connect
@@ -199,22 +192,21 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
              */
 
 
-            if ( pqOrbiter->initialize())
+         if ( pqOrbiter->initialize())
             {
 
                 if (getConf(PK_Device))
                  {
                      qDebug () << "Config Recieved, starting";
-
                      gotoQScreen("Screen_1.qml");
-                          return true;
-                 } else {
-                      qDebug() << "Orbiter Conf Hiccup!";
-
-                         LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Device Failed to get configuration!");
-
-                        return false;
-                     }
+                     return true;
+                 }
+                else
+                {
+                     qDebug() << "Orbiter Conf Hiccup!";
+                     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Device Failed to get configuration!");
+                     return false;
+                 }
 
           /*  i dont know what this does, but since orbter should not be local, it is commented out but not removed.
             if( bLocalMode )
@@ -228,8 +220,6 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             g_pDeadlockHandler=NULL;
             g_pSocketCrashHandler=NULL; */
             }
-
-
     }
     else
     {
@@ -243,8 +233,10 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
                     return false;
             }
             else
-                    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
+            {
+            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
             qDebug() << "Connect Failed";
+            }
     }
 
     if( pqOrbiter->m_bReload )
@@ -256,7 +248,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 bool qorbiterManager::refreshUI()
 {
 
-    qDebug() << "Launching UI";
+   qDebug() << "Launching UI";
    return true;
 }
 
@@ -305,12 +297,12 @@ bool qorbiterManager::getConf(int pPK_Device)
         QImage m_image;
         userList->appendRow(new UserItem(m_userName,m_firstName, m_lastName, m_nickName, m_pk_user, m_userMode, m_requirePin, m_phoneExtension, m_image, m_defaultUser , userList));
     }
-//---------rooms
+
+    //---------rooms
     QDomElement roomXml = root.firstChildElement("Rooms");  //rooms
+    m_lRooms = new LocationModel(new LocationItem, this);   //roomlistmodel
 
-    m_lRooms = new LocationModel(new LocationItem, this);
-
-    QMap <QString, int> RroomMapping;
+    QMap <QString, int> RroomMapping;                       //map for later reference
     QDomNodeList roomListXml = roomXml.childNodes();
 
     for(int index = 0; index < roomListXml.count(); index++)
@@ -326,7 +318,7 @@ bool qorbiterManager::getConf(int pPK_Device)
     }
         m_lRooms->sdefault_Ea = defaults.attribute("DefaultLocation");
         m_lRooms->idefault_Ea = RroomMapping.value(m_lRooms->sdefault_Ea);
-        //m_lRooms->idefault_Ea = defaults.attribute("");
+
 
     //-----lighting scenarios
 
@@ -462,7 +454,7 @@ bool qorbiterManager::getConf(int pPK_Device)
     }
 
 
-  qorbiterUIwin->rootContext()->setContextProperty("dceObject", this);
+  qorbiterUIwin->rootContext()->setContextObject(this);
 
  // setActiveRoom(RroomMapping.value(QString::fromStdString(pqOrbiter->DATA_Get_FK_EntertainArea())), 0);
   qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights); //custom list item provided
@@ -481,6 +473,10 @@ bool qorbiterManager::getConf(int pPK_Device)
   this->qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms); //custom room list  provided
 
 
+    binaryConfig.clear();
+   configData.clear();
+
+   qDebug() << "Cleanup config - tconf:" << tConf.size() << "|| binaryConfig:" << binaryConfig.size() << "|| configData:" << configData.childNodes().size();
 
   return true;
 
@@ -531,10 +527,6 @@ void qorbiterManager::closeOrbiter()
   */
 bool qorbiterManager::requestDataGrid()
 {
-
-
-
-
     /*
       the questionable custom provider that kinda worked once...*/
 
@@ -559,8 +551,6 @@ void qorbiterManager::setActiveRoom(int room,int ea)
     roomClimate = roomClimateScenarios.value(room);
     roomTelecom = roomTelecomScenarios.value(room);
     roomSecurity = roomSecurityScenarios.value(room);
-
-
 
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights);
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomMedia", roomMedia);

@@ -39,14 +39,11 @@ Item {
             MouseArea{
                 id: mousearea1
                 anchors.fill: parent
-                onClicked: dceObject.gotoQScreen("Screen_2.qml")
+                onClicked: gotoQScreen("Screen_2.qml")
 
               }
 
         }
-
-
-
 
         ListView{
             id: lightingScenarios

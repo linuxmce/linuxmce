@@ -26,12 +26,17 @@ public:
     }
     else if (verify=="5")
     {
-    cellimage.load(":/icons/video-blank.png");
+    cellimage.load(":/icons/videos.png");
     cellimage.scaledToWidth(200);
     }
     else if (verify == "29")
     {
         cellimage.load(":/icons/media-games.png");
+        cellimage.scaledToWidth(200);
+    }
+    else if (verify == "7")
+    {
+        cellimage.load(":/icons/photos.png");
         cellimage.scaledToWidth(200);
     }
    return cellimage;

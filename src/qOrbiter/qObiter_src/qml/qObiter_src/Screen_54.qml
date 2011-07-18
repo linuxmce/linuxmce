@@ -1,5 +1,5 @@
 import QtQuick 1.0
-import "../components"
+import "components"
 
 Rectangle {
     property alias videoTitle: video_title.text

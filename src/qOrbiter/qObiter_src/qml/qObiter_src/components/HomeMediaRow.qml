@@ -47,7 +47,7 @@ Flickable{
             MouseArea{
                 id: mousearea1
                 anchors.fill: parent
-                onClicked: dceObject.gotoQScreen("Screen_3.qml")
+                onClicked:gotoQScreen("Screen_3.qml")
               }
             }
 
@@ -61,7 +61,7 @@ Flickable{
 
             MouseArea{
                 anchors.fill: parent
-                onClicked: dceObject.gotoQScreen("Screen_48.qml")
+                onClicked:gotoQScreen("Screen_48.qml")
             }
             }
         ListView{

@@ -72,7 +72,7 @@ Rectangle {
                          onClicked:
                          {
 
-                            dceObject.setActiveRoom(intRoom, entertain_area)
+                            setActiveRoom(intRoom, entertain_area)
                             rooms.state = "Default"
 
                              roombutton.buttontext = Title
@@ -86,6 +86,7 @@ Rectangle {
                 id: mouse_area1
                 anchors.fill: parent
                 onClicked: rooms.state = "State1"
+                z:5
             }
 
             states: [

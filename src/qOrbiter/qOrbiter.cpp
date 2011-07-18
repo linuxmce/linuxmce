@@ -1728,38 +1728,35 @@ bool DCE::qOrbiter::initialize()
     DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(qmlUI->iPK_Device, qmlUI->iOrbiterPluginID, "1" ,qmlUI->iPK_User, StringUtils::itos(1), 1, &pData, &iSize);
     if (!SendCommand(CMD_Orbiter_Registered))
     {
-    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbitier Initialized, requesting configuration for device %d", qmlUI->iPK_Device);
+        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbitier Initialized, requesting configuration for device %d", qmlUI->iPK_Device);
 
-    char *oData;
-    oData = NULL;
-    int iData_Size;
-    iData_Size = 0;
-    string *p_sResponse;
-    p_sResponse = NULL;
-    qDebug() << "Idata StartSize:" << iData_Size;
+        char *oData;
+        oData = NULL;
+        int iData_Size;
+        iData_Size = 0;
+        string *p_sResponse;
+        p_sResponse = NULL;
+        qDebug() << "Idata StartSize:" << iData_Size;
 
-    string filePath = "/var/tmp/"+QString::number(qmlUI->iPK_Device).toStdString()+"conf.xml";
+        string filePath = "/var/tmp/"+QString::number(qmlUI->iPK_Device).toStdString()+"conf.xml";
    // qDebug() << filePath.c_str();
 
-     CMD_Request_File configFileRequest((long)35, (long)4 , (string)filePath, &oData, &iData_Size);
+        CMD_Request_File configFileRequest((long)35, (long)4 , (string)filePath, &oData, &iData_Size);
 
-     if (!SendCommand(configFileRequest, p_sResponse))
-     {
-         qDebug() << "File request sent";
-     }
-     else
-     {
-         qDebug() <<"Idata recieved: " << iData_Size ;
-     }
+        if (!SendCommand(configFileRequest, p_sResponse))
+            {
+            qDebug() << "File request sent";
+            }
+            else
+            {
+            qDebug() <<"Idata recieved: " << iData_Size ; // size of xml file
+            }
 
-    QByteArray configData;
+    QByteArray configData;              //config file put into qbytearray for processing
     configData = oData;
-
-     uint dataLen;
-     dataLen = (uint)&iData_Size;
-     qmlUI->binaryConfig = configData;
-
-     return true;
+    qmlUI->binaryConfig = configData;
+    delete oData;
+    return true;
     }
 }
 
@@ -1861,9 +1858,6 @@ bool DCE::qOrbiter::dataGridRequest(string s)
                 }
     }
 
-
-
-
     /*
       Datagrid params
       # 4 PK_Variable (int) (Out)  The populate grid can optionally return a variable number
@@ -1913,10 +1907,8 @@ bool DCE::qOrbiter::executeCommandGroup(int cmdGrp)
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Executing Command Group %d", cmdGrp);
     string *pResponse;
     CMD_Execute_Command_Group execCommandGroup((long)qmlUI->iPK_Device, (long)2, cmdGrp);
-    if (!SendCommandNoResponse(execCommandGroup))
-    {
-        qDebug () << "Sent?";
-    }
+
+   SendCommandNoResponse(execCommandGroup);
 
 
 

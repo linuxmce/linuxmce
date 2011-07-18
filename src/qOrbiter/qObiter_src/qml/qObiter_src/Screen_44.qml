@@ -23,7 +23,7 @@ Rectangle {
             MouseArea{
                 anchors.fill:parent
                 z:5
-                onClicked: dceObject.regenOrbiter(35)
+                onClicked: regenOrbiter(35)
             }
         }
 

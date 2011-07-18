@@ -1,5 +1,5 @@
 import QtQuick 1.0
-import "../components"
+import "components"
 
 Rectangle {
 
@@ -36,7 +36,7 @@ Rectangle {
             anchors.right: parent.right
             MouseArea{
                  anchors.fill: parent
-                onClicked: dceObject.gotoQScreen("Screen_1.qml")
+                onClicked:gotoQScreen("Screen_1.qml")
             }
         }
     }

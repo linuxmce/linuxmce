@@ -79,7 +79,7 @@ Rectangle {
         MouseArea {
             id: mouse_area1
             anchors.fill: parent
-            onClicked: dceObject.gotoQScreen("Screen_1.qml")
+            onClicked:gotoQScreen("Screen_1.qml")
         }
     }
 

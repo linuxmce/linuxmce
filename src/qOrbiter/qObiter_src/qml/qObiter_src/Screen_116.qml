@@ -1,5 +1,5 @@
 import QtQuick 1.0
-
+import "components"
 Rectangle {
     Style{id:style}
     width: 640
@@ -25,7 +25,7 @@ Rectangle {
         y: 25
         MouseArea{
             anchors.fill: parent
-            onClicked: dceObject.gotoQScreen("Screen_1.qml")
+            onClicked:gotoQScreen("Screen_1.qml")
         }
     }
 }

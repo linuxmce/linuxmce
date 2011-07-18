@@ -15,12 +15,11 @@ ButtonSq
         radius: style.but_smooth
         buttontext: ""
         buttontextfontsize: 10
-
-        buttontextzindex: 10
+        buttontextzindex: 4
         opacity: .5
          MouseArea{
              anchors.fill: parent
-             onClicked: dceObject.execGrp(params);
+             onClicked: execGrp(params);
                z:5    }
 
 

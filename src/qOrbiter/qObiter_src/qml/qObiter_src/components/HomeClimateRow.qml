@@ -35,7 +35,7 @@ Item {
             MouseArea{
                 id: mousearea1
                 anchors.fill: parent
-                onClicked: dceObject.gotoQScreen("Screen_4.qml")
+                onClicked:gotoQScreen("Screen_4.qml")
              z:5 }
             }
 
