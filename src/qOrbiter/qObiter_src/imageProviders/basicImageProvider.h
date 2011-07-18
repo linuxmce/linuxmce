@@ -19,18 +19,24 @@ public:
     QString verify(id);
     QImage cellimage;
 
-    if ( verify == "music")
+    if ( verify == "4")
     {
         cellimage.load(":/icons/song-item.png");
-        cellimage.scaledToWidth(180);
+        cellimage.scaledToWidth(200);
     }
-    else
+    else if (verify=="5")
     {
     cellimage.load(":/icons/video-blank.png");
     cellimage.scaledToWidth(200);
     }
+    else if (verify == "29")
+    {
+        cellimage.load(":/icons/media-games.png");
+        cellimage.scaledToWidth(200);
+    }
    return cellimage;
     }
+
 
 signals:
 

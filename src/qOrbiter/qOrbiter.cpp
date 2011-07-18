@@ -1240,7 +1240,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
         int iColumn = 1;
         int iRowCount= 5;
         int iRowColums = 5;
-        int m_iSeekColumn = 1;
+        int m_iSeekColumn = 0;
         int iData_Size=0;
         int GridCurRow = 0;
         int GridCurCol= 0;
@@ -1254,6 +1254,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
         QString s = QString::number(iPK_MediaType) + "||||1,2|0|13|0 | 2 |";
 
         qDebug() << s;
+
         CMD_Populate_Datagrid populateDataGrid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 63, s.toStdString(), DEVICETEMPLATE_qOrbiter_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
         if (SendCommand(populateDataGrid))
@@ -1284,6 +1285,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 
                                DataGridCell *pCell = it->second;
                                const char *pPath = pCell->GetImagePath();
+                               qDebug() << pCell->GetValue() << pCell->GetImagePath();
 
 
                                if (pPath && !pCell->m_pGraphicData && !pCell->m_pGraphic)
@@ -1296,7 +1298,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 
                              //  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"DataGridRenderer::RenderCell loading %s in bg for %d,%d", pPath,pDataGridTable->CovertColRowType(it->first).first,pDataGridTable->CovertColRowType(it->first).second);
                                qDebug() << "Error here";
-                               if (qmlUI->addMediaItem(QString::fromStdString(pCell->m_Text), temp, cellImg ))
+                               if (qmlUI->addMediaItem(QString::fromStdString(pCell->m_Text), QString::number(iPK_MediaType), cellImg ))
                                {
 
                                }

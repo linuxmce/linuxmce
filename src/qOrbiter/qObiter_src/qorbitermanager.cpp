@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QtXml/QtXml>
+#include <QProcess>
 
 //#include "OrbiterData.h"
 #include <QDeclarativeEngine>
@@ -470,6 +471,7 @@ bool qorbiterManager::getConf(int pPK_Device)
   qorbiterUIwin->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);
    qorbiterUIwin->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);
    qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
+    qorbiterUIwin->rootContext()->setContextProperty("iPK_Device", QVariant::fromValue(iPK_Device));
     pqOrbiter->CMD_Set_Current_Room(m_lRooms->idefault_Ea);
   pqOrbiter->CMD_Set_Entertainment_Area(m_lRooms->sdefault_Ea.toStdString());
 
@@ -613,4 +615,37 @@ int qorbiterManager::getlocation() const
     return iFK_Room;
 }
 
+void qorbiterManager::regenOrbiter(int deviceNo)
+{
+    qorbiterUIwin->hide();
+   // qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/qObiter_src/Splash.qml"));
+
+    qDebug() << "Regenerating..";
+    QProcess *regen = new QProcess(this);
+    regen->start("sudo /var/www/lmce-admin/qOrbiterGen.php?d="+QString::number(iPK_Device), QIODevice::ReadOnly);
+    qDebug() <<"status code:" << regen->error();
+
+    QObject::connect(regen,SIGNAL(finished(int)), this, SLOT(regenComplete(int)));
+
+}
+
+void qorbiterManager::regenComplete(int i)
+{
+    if (i == 0)
+    {
+
+
+    if (getConf(iPK_Device))
+    {   qDebug() << "Regen Complete!";
+       // qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/qObiter_src/main.qml"));
+        gotoQScreen("Screen_1.qml");
+        qorbiterUIwin->showFullScreen();
+    }
+}
+    else
+    {
+        gotoQScreen("LoadError.qml");
+        qorbiterUIwin->showFullScreen();
+    }
+}
 

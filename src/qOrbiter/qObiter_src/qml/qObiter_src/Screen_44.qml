@@ -19,6 +19,12 @@ Rectangle {
             height: 60
             width: 60
             buttontext: "Regen Orbiter"
+
+            MouseArea{
+                anchors.fill:parent
+                z:5
+                onClicked: dceObject.regenOrbiter(35)
+            }
         }
 
         ButtonSq{

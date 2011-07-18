@@ -159,6 +159,8 @@ public slots:
 
       int getlocation() const ;
       void setLocation(const int& , const int& ) ;
+      void regenOrbiter(int deviceNo);
+      void regenComplete(int i);
 
       void clearMediaModel();
       bool addMediaItem(QString mText, QString temp, QImage cell);
