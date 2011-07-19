@@ -1,3 +1,9 @@
+dce-whisperer (3.0.11) unstable; urgency=low
+
+  * Fix file descriptor leaks.
+
+ -- Radu C <radu.cx@gmail.com>  Wed, 20 Jul 2011 00:38:08 +0100
+
 dce-whisperer (3.0.10) unstable; urgency=low
 
   * Depend on php5-cli.

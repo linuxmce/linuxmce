@@ -187,6 +187,8 @@ Framework_MainLoop()
 			else
 				Log "fd $FD: no command; doing nothing"
 			fi
+			## http://lists.gnu.org/archive/html/bug-bash/2010-04/msg00080.html
+			(:) # <--- This acts like a garbage collector for leaked file descriptors
 		done
 	done
 }
