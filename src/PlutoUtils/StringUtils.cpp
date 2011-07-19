@@ -610,7 +610,7 @@ string StringUtils::URLDecode( string sInput )
                     *outBuffer = *inBuffer - '0';
                 else if ('A' <= *inBuffer && *inBuffer <= 'F')
                     *outBuffer = *inBuffer - ('A' - 10);
-                else if ('A' <= *inBuffer && *inBuffer <= 'F')
+                else if ('a' <= *inBuffer && *inBuffer <= 'f')
                     *outBuffer = *inBuffer - ('a' - 10);
                 *outBuffer <<= 4;
 
@@ -619,7 +619,7 @@ string StringUtils::URLDecode( string sInput )
                     *outBuffer |= (*inBuffer - '0');
                 else if ('A' <= *inBuffer && *inBuffer <= 'F')
                     *outBuffer |= (*inBuffer - ('A' - 10));
-                else if ('A' <= *inBuffer && *inBuffer <= 'F')
+                else if ('a' <= *inBuffer && *inBuffer <= 'f')
                     *outBuffer |= (*inBuffer - ('a' - 10));
             }
 #ifndef WINCE
