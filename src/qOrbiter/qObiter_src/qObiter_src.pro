@@ -163,7 +163,13 @@ OTHER_FILES += \
     android/src/eu/licentia/necessitas/mobile/QtLocation.java \
     android/AndroidManifest.xml \
     qml/skins/scheme/brown/Style.qml \
-    qml/Main.qml
+    qml/Main.qml \
+    qtc_packaging/debian_harmattan/rules \
+    qtc_packaging/debian_harmattan/README \
+    qtc_packaging/debian_harmattan/copyright \
+    qtc_packaging/debian_harmattan/control \
+    qtc_packaging/debian_harmattan/compat \
+    qtc_packaging/debian_harmattan/changelog
 
 RESOURCES += \
     skinData.qrc

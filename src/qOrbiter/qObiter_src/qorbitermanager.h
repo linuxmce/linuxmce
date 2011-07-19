@@ -66,6 +66,14 @@ public:
     QString *gridReqType;
 
 
+    //datagrid variables
+    QString q_mediaType;
+    QString q_publicUsers;
+    QString q_fileFormat;
+    QString q_subType;
+    QString q_attribute;
+
+
     //listmodels
     QByteArray binaryConfig;
     LocationModel *m_lRooms;

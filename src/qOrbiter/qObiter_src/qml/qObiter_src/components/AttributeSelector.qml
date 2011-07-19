@@ -13,11 +13,11 @@ Rectangle {
 
 
     ListModel {
-        id: attributeList
+        id: mediatype5
 
         ListElement {
             name: "Title"
-            pk: 1
+            pk: 12
         }
         ListElement {
             name: "Performer"
@@ -25,87 +25,94 @@ Rectangle {
         }
         ListElement {
             name: "Director"
-            pk: 1.95
+            pk: 1
         }
         ListElement {
             name: "Channel"
-            pk: 1.95
+            pk: 10
         }
         ListElement {
             name: "Studio"
-            pk: 1.95
+            pk: 17
         }
         ListElement {
             name: "Year"
-            pk: 1.95
+            pk: 19
         }
         ListElement {
             name: "Rating"
-            pk: 1.95
+            pk: 18
         }
+        ListElement {
+            name: "Program"
+            pk: 12
+        }
+        ListElement {
+            name: "Rating"
+            pk: 18
+        }
+        ListElement {
+            name: "Series"
+            pk: 43
+        }
+
 
     }
 
     ListModel {
-        id: filterlist
+        id: mediatype4
 
         ListElement {
-            name: "stuff"
-            pk: 1
-        }
-        ListElement {
-            name: "stuff"
+            name: "Performer"
             pk: 2
         }
         ListElement {
-            name: "stuff"
-            pk: 1.95
+            name: "Album"
+            pk: 3
         }
         ListElement {
-            name: "stuff"
-            pk: 1.95
+            name: "Track"
+            pk: 5
         }
         ListElement {
-            name: "stuff"
-            pk: 1.95
+            name: "Genre"
+            pk: 8
         }
         ListElement {
-            name: "stuff"
-            pk: 1.95
-        }
-        ListElement {
-            name: "stuff"
-            pk: 1.95
-        }
+            name: "Title"
+            pk: 13
+        }      
 
     }
 
-    Component
+  Component
     {
-    id:attributeComponent
+        id:attributeComponent
 
+            Rectangle
+            {
+                     id:attributeDelegate
+                     border.width: 1
+                     border.color: "black"
+                     width: parent.width
+                      height: 75
 
-    Rectangle {
-        id:attributeDelegate
-        border.width: 1
-        border.color: "black"
-        width: parent.width
-        height: 75
+            Text {
+                   id: attributeName
+                   text: name
+                   font.pointSize: 14
+                   anchors.centerIn: parent
+                  }
 
-        Text {
-            id: attributeName
-            text: name
-            font.pointSize: 14
-            anchors.centerIn: parent
-              }
-
-        }
+             }
     }
 
-    Text {
-        id: label
-        text: "Please Select Sort"
-    }
+
+            Text
+                 {
+                  id: label
+                  text: "Please Select Sort"
+                 }
 
     ListView
     {
@@ -113,7 +120,7 @@ Rectangle {
         anchors.fill: parent
         clip: true
         orientation: ListView.Vertical
-        model: attributeList
+        model: "mediatype"+q_mediaType
         delegate: attributeComponent
 
         MouseArea{
@@ -123,12 +130,15 @@ Rectangle {
                 listview.model = filterlist   }
              }
 
-    }
-    states: [
-        State {
+
+    states:
+     [
+        State
+        {
             name: "State1"
 
-            PropertyChanges {
+            PropertyChanges
+            {
                 target: rectbox
                 width: 250
                 height: 480
@@ -136,5 +146,7 @@ Rectangle {
         }
     ]
 
+}
 
 }
+

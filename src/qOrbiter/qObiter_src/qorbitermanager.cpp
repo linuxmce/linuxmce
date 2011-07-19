@@ -143,6 +143,12 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
      iPK_Device_DatagridPlugIn =  long(6);
      iPK_Device_OrbiterPlugin = long(9);
      m_dwIDataGridRequestCounter = 0;
+
+     QString *q_mediaType = new QString("");
+     QString *q_publicUsers = NULL;
+     QString *q_fileFormat=NULL;
+     QString *q_subType=NULL;
+     QString *q_attribute = NULL;
 }
 
 
@@ -421,6 +427,7 @@ bool qorbiterManager::getConf(int pPK_Device)
                     QString imgName = tScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
                     QImage m_image = QImage("Qrc:/icons/"+imgName);
 
+
             telecomModelHolder->appendRow(new TelecomScenarioItem(m_name,m_label, m_param, m_command, m_goto, m_image, telecomModelHolder));
         }
         roomTelecomScenarios.insert(troomMapNo, telecomModelHolder);
@@ -440,7 +447,7 @@ bool qorbiterManager::getConf(int pPK_Device)
         for (int innerIndex = 0; innerIndex < secScenarioRoom.count(); innerIndex++)
         {
                     QString m_name = secScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
-                    QString m_label = secScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+                    QString m_label =  secScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
                     QString m_param =secScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue() ;
                     QString m_command = secScenarioRoom.at(innerIndex).attributes().namedItem("eaDescription").nodeValue();
                     QString m_goto = secScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
@@ -472,9 +479,10 @@ bool qorbiterManager::getConf(int pPK_Device)
   this->qorbiterUIwin->rootContext()->setContextProperty("userList", userList); //custom user list provided
   this->qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms); //custom room list  provided
 
-
-    binaryConfig.clear();
-   configData.clear();
+  this->qorbiterUIwin->rootContext()->setContextProperty("q_mediaType", q_mediaType);
+  //item->setProperty("q_mediaType", QVariant::fromValue(q_mediaType));
+   // binaryConfig.clear();
+   //configData.clear();
 
    qDebug() << "Cleanup config - tconf:" << tConf.size() << "|| binaryConfig:" << binaryConfig.size() << "|| configData:" << configData.childNodes().size();
 
@@ -577,7 +585,7 @@ bool qorbiterManager::addMediaItem(QString mText, QString temp, QImage cell)
 {
     this->model->appendRow(new gridItem(mText, temp, cell , model));
     emit modelChanged();
-    //qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
+   // qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
 }
 
 void qorbiterManager::updateModel()

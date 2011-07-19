@@ -60,28 +60,8 @@ Rectangle {
     Remote_lighting_controls{ id: remote_lighting_controls1; x: 331; y: 181; width: 65; height: 219; anchors.topMargin: 179;anchors.top: video_now_playing.baseline}
     Remote_Audio_controls{ id: remote1; x: 277; y: 181; width: 60; height: 219; anchors.rightMargin: -6; z: 45; anchors.right: remote_lighting_controls1.left}
 
-    ButtonSq {
-        id: buttonsq1
-        x: 752
-        y: 0
-        width: 50
-        height: 50
+    HomeButton{}
 
-        buttontext: "Home"
-
-        Image {
-            id: homeimg
-            height: parent.height
-            width: parent.width
-            source: "../../img/icons/agt_home.png"
-
-        }
-        MouseArea {
-            id: mouse_area1
-            anchors.fill: parent
-            onClicked:gotoQScreen("Screen_1.qml")
-        }
-    }
 
     VideoControls {
         id: videocontrols1
