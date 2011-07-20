@@ -8,10 +8,11 @@ QML_IMPORT_PATH =
 
 symbian:TARGET.UID3 = 0xE0D07D4D
 
+QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 
 INCLUDEPATH += ../../ ../../DCE/
 
-LIBS += -L/usr/pluto/lib/ -lDCECommon -lSerializeClass -lPlutoUtils -lpluto_main -lpluto_media -lQtXml
+LIBS += -lQtXml
 
 # Smart Installer package's UID
 # This UID is from the protected range and therefore the package will
@@ -54,7 +55,37 @@ SOURCES += main.cpp \
     datamodels/climatescenarioitem.cpp \
     datamodels/securityscenarioitem.cpp \
     datamodels/telecomscenarioitem.cpp \
-    screensaver/screensavermodule.cpp
+    screensaver/screensavermodule.cpp \
+    ../../PlutoUtils/uuencode.cpp \
+    ../../PlutoUtils/ThreadedClass.cpp \
+    ../../PlutoUtils/ProcessUtils.cpp \
+    ../../PlutoUtils/Other.cpp \
+    ../../PlutoUtils/MultiThreadIncludes.cpp \
+    ../../PlutoUtils/minilzo.cpp \
+    ../../PlutoUtils/md5c.cpp \
+    ../../PlutoUtils/LinuxSerialUSB.cpp \
+    ../../PlutoUtils/getch.cpp \
+    ../../PlutoUtils/FileUtils.cpp \
+    ../../PlutoUtils/CommonIncludes.cpp \
+    ../../SerializeClass/SerializeClass.cpp \
+    ../../DCE/Virtual_Device_Translator.cpp \
+    ../../DCE/Socket.cpp \
+    ../../DCE/ServerLogger.cpp \
+    ../../DCE/PlainClientSocket.cpp \
+    ../../DCE/MessageBuffer.cpp \
+    ../../DCE/Message.cpp \
+    ../../DCE/HandleRequestSocket.cpp \
+    ../../DCE/Logger.cpp \
+    ../../DCE/Event_Impl.cpp \
+    ../../DCE/DeviceData_Router.cpp \
+    ../../DCE/DeviceData_Impl.cpp \
+    ../../DCE/DeviceData_Base.cpp \
+    ../../DCE/DCEConfig.cpp \
+    ../../DCE/DataGrid.cpp \
+    ../../DCE/Command_Impl.cpp \
+    ../../DCE/AlarmManager.cpp \
+    ../../PlutoUtils/StringUtils.cpp \
+    ../../DCE/ClientSocket.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)

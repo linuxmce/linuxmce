@@ -22,7 +22,7 @@
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
-#include "DCERouter.h"
+//#include "DCERouter.h"
 #include <QDebug>
 
 // In source files stored in archives and packages, these 2 lines will have the release version (build)

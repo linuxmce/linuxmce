@@ -12,7 +12,7 @@ class ScreenSaverModule : public QObject
                 NOTIFY imageChanged)
 public:
     explicit ScreenSaverModule(QObject *parent = 0);
-
+    QStringList *pictureList;
 
 signals:
     void imageChanged();
@@ -31,8 +31,12 @@ public slots:
                         emit imageChanged();
                                  }
 
+  void setImages (QStringList picList) {  }
+
+
 private:
     QUrl *m_imgUrl;
+
 };
 
 #endif // SCREENSAVERMODULE_H

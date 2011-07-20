@@ -1,6 +1,9 @@
 import QtQuick 1.0
+import ScreenSaverModule 1.0
 
 Rectangle {
-    width: 100
-    height: 62
+    width: style.orbiterW
+    height: style.orbiterH
+
+    ScreenSaverModule{}
 }
