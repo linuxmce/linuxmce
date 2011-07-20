@@ -5,6 +5,7 @@
 #include <QtXml/QtXml>
 #include <QProcess>
 #include <QDeclarativeEngine>
+#include <QApplication>
 //#include "OrbiterData.h"
 //#include "DCERouter.h"
 
@@ -104,10 +105,11 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
 
     currentSkin = "default";
     currentSkinURL="qml/qObiter_src/Style.qml";
-    s_RouterIP="dcerouter";
+    s_RouterIP="192.168.80.1";
+
+
 
     qorbiterUIwin = new QDeclarativeView;
-
     ScreenSaverModule ScreenSaver;
     qmlRegisterType<ScreenSaverModule>("ScreenSaverModule",1,0,"ScreenSaverModule");    
     ScreenSaver.setImage(QUrl("../../img/lmcesplash.jpg"));
@@ -120,7 +122,12 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     qorbiterUIwin->engine()->addImageProvider("datagridimg", new basicImageProvider);
     qorbiterUIwin->rootContext()->setContextProperty("currentSkinUrl" , currentSkinURL);
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
-    qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/qObiter_src/main.qml"));
+
+    QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin")) +"/qml/qObiter_src/";
+
+    qDebug () << "QML import path for build: " << qmlPath;
+    qorbiterUIwin->engine()->setBaseUrl(qmlPath);
+    qorbiterUIwin->setSource(QUrl::fromLocalFile(qmlPath+"main.qml"));
 
     QObject *item= qorbiterUIwin->rootObject();
     qorbiterUIwin->showFullScreen();
@@ -637,5 +644,26 @@ void qorbiterManager::regenComplete(int i)
         gotoQScreen("LoadError.qml");
         qorbiterUIwin->showFullScreen();
     }
+}
+
+QString qorbiterManager::adjustPath(const QString &path)
+{
+
+#ifdef Q_OS_UNIX
+#ifdef Q_OS_MAC
+   if (!QDir::isAbsolutePath(path))
+         return QCoreApplication::applicationDirPath()
+                 + QLatin1String("/../Resources/") + path;
+ #else
+     const QString pathInShareDir = QCoreApplication::applicationDirPath()
+        + QLatin1String("/../share/")
+       + QFileInfo(QCoreApplication::applicationFilePath()).fileName()
+        + QLatin1Char('/') + path;
+   if (QFileInfo(pathInShareDir).exists())
+    return pathInShareDir;
+#endif
+#endif
+     return path;
+
 }
 

@@ -163,6 +163,7 @@ signals:
 
 public slots:
 
+      QString adjustPath(const QString&);
       int getlocation() const ;
       void setLocation(const int& , const int& ) ;
       void regenOrbiter(int deviceNo);

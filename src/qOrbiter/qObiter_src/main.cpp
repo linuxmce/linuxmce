@@ -124,8 +124,8 @@ int main(int argc, char* argv[])
         cout << "qOrbiter, v." << VERSION << endl
                 << "Visit www.plutohome.com for source code and license information" << endl << endl;
 
-        string sRouter_IP="dcerouter";
-        int PK_Device=0;
+        string sRouter_IP="192.168.80.1";
+        int PK_Device=35;
         string sLogger="stdout";
 
         bool bLocalMode=false,bError=false; // An error parsing the command line
