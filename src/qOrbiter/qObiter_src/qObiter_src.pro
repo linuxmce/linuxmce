@@ -10,7 +10,7 @@ symbian:TARGET.UID3 = 0xE0D07D4D
 
 QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 
-INCLUDEPATH += ../../ ../../DCE/
+INCLUDEPATH += ../../ ../../DCE/ /usr/include/mysql/
 
 LIBS += -lQtXml
 
@@ -77,15 +77,14 @@ SOURCES += main.cpp \
     ../../DCE/HandleRequestSocket.cpp \
     ../../DCE/Logger.cpp \
     ../../DCE/Event_Impl.cpp \
-    ../../DCE/DeviceData_Router.cpp \
-    ../../DCE/DeviceData_Impl.cpp \
-    ../../DCE/DeviceData_Base.cpp \
     ../../DCE/DCEConfig.cpp \
     ../../DCE/DataGrid.cpp \
     ../../DCE/Command_Impl.cpp \
     ../../DCE/AlarmManager.cpp \
     ../../PlutoUtils/StringUtils.cpp \
-    ../../DCE/ClientSocket.cpp
+    ../../DCE/ClientSocket.cpp \
+    ../../DCE/DeviceData_Base.cpp \
+    ../../DCE/DeviceData_Impl.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)

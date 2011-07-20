@@ -18,7 +18,7 @@
 #include <QDataStream>
 
 /*----custom classes-------*/
-#include <qOrbiterData.h>                       //own version of OrbiterData.h
+                     //own version of OrbiterData.h
 #include <datamodels/listModel.h>                          //custom item model
 #include <datamodels/gridItem.h>
 #include <uiclasses/uicontroller.h>               //experimental
@@ -30,8 +30,6 @@
 
 /*-------Dce Includes----*/
 
-#include <Command_Impl.h>
-#include <Gen_Devices/AllCommandsRequests.h>
 #include <qOrbiter/qOrbiter.h>
 
 

@@ -4,19 +4,9 @@
 #include <QFile>
 #include <QtXml/QtXml>
 #include <QProcess>
-
-//#include "OrbiterData.h"
 #include <QDeclarativeEngine>
-#include <Gen_Devices/AllCommandsRequests.h>
-#include <Command_Impl.h>
-#include "DCE/Logger.h"
-#include "ServerLogger.h"
-#include "SerializeClass/SerializeClass.h"
-#include "PlutoUtils/ProcessUtils.h"
-#include "PlutoUtils/FileUtils.h"
-#include "PlutoUtils/StringUtils.h"
-#include "PlutoUtils/Other.h"
-#include "DCERouter.h"
+//#include "OrbiterData.h"
+//#include "DCERouter.h"
 
 /*
   this file is responsible for the main connection between the dce thread and the qt thread.
@@ -26,6 +16,7 @@
 
 using namespace DCE;
 
+/*
 // You can override this block if you don't want the app to reload in the event of a problem
 extern void (*g_pDeadlockHandler)(PlutoLock *pPlutoLock);
 extern void (*g_pSocketCrashHandler)(Socket *pSocket);
@@ -103,6 +94,7 @@ extern "C" {
                 return pqOrbiter;
         }
 }
+*/
 //<-dceag-plug-e->
 
 qorbiterManager::qorbiterManager(QWidget *parent) :
@@ -175,9 +167,9 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
     {
         qDebug() << "Device: " << PK_Device <<" Connect";
-        g_pCommand_Impl=pqOrbiter;
-        g_pDeadlockHandler=DeadlockHandler;
-        g_pSocketCrashHandler=SocketCrashHandler;
+        //g_pCommand_Impl=pqOrbiter;
+        //g_pDeadlockHandler=DeadlockHandler;
+       // g_pSocketCrashHandler=SocketCrashHandler;
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
             /*
               we get various variable here that we will need later. I store them in the qt object so it
