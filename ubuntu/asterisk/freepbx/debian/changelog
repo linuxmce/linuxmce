@@ -1,3 +1,9 @@
+freepbx (0+2.3.1-5) unstable; urgency=low
+
+  * Add asterisk.conf so we do not need additional config packages.
+
+ -- Peer Oliver Schmidt <peer.oliver.schmidt@linuxmce.org>  Thu, 21 Jul 2011 17:58:26 +0200
+
 freepbx (0+2.3.1-4) unstable; urgency=low
 
   * Add a Provides: to the control file, as it provides

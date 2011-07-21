@@ -7,7 +7,7 @@ Standards-Version: 3.6.1
 
 Package: freepbx
 Architecture: any
-Pre-Depends: asterisk (>= 1:1.4.10~dfsg), asterisk-config
+Pre-Depends: asterisk (>= 1:1.4.10~dfsg)
 Depends: php-db, pluto-boot-scripts
 Description: FreePBX
  FreePBX
