@@ -10,10 +10,10 @@ Rectangle {
     height: 450
     color: "whitesmoke"
     clip: true
-
+    Component.onCompleted: listview.model = attributeModel
 
     ListModel {
-        id: mediatype5
+        id: attributeModel
 
         ListElement {
             name: "Title"
@@ -57,11 +57,6 @@ Rectangle {
         }
 
 
-    }
-
-    ListModel {
-        id: mediatype4
-
         ListElement {
             name: "Performer"
             pk: 2
@@ -104,7 +99,14 @@ Rectangle {
                    anchors.centerIn: parent
                   }
 
+            MouseArea{
+                   anchors.fill: parent
+                   z:5
+                   onClicked: {
+                       console.log("Item " + name + "Attribute" + pk)
+                   }
              }
+    }
     }
 
 
@@ -120,16 +122,7 @@ Rectangle {
         anchors.fill: parent
         clip: true
         orientation: ListView.Vertical
-        model: "mediatype"+q_mediaType
         delegate: attributeComponent
-
-        MouseArea{
-            anchors.fill: parent
-            onClicked: {
-                rectbox.state = "State1"
-                listview.model = filterlist   }
-             }
-
 
     states:
      [
@@ -145,8 +138,7 @@ Rectangle {
             }
         }
     ]
-
-}
+  }
 
 }
 

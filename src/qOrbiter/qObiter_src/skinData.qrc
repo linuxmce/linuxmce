@@ -40,6 +40,5 @@
         <file alias="media-end-bar.png">img/icons/player-end.png</file>
         <file alias="video-blank.png">img/icons/scifi.png</file>
         <file>img/icons/sms_protocol.png</file>
-        <file alias="livetv.png">img/icons/tv.png</file>
     </qresource>
 </RCC>

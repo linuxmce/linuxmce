@@ -141,7 +141,7 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
      iPK_Device_OrbiterPlugin = long(9);
      m_dwIDataGridRequestCounter = 0;
 
-     QString *q_mediaType = new QString("");
+     QString *q_mediaType = new QString("5");
      QString *q_publicUsers = NULL;
      QString *q_fileFormat=NULL;
      QString *q_subType=NULL;
@@ -476,8 +476,8 @@ bool qorbiterManager::getConf(int pPK_Device)
   this->qorbiterUIwin->rootContext()->setContextProperty("userList", userList); //custom user list provided
   this->qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms); //custom room list  provided
 
-  this->qorbiterUIwin->rootContext()->setContextProperty("q_mediaType", q_mediaType);
-  //item->setProperty("q_mediaType", QVariant::fromValue(q_mediaType));
+  this->qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
+
    // binaryConfig.clear();
    //configData.clear();
 
@@ -661,7 +661,15 @@ QString qorbiterManager::adjustPath(const QString &path)
     return pathInShareDir;
 #endif
 #endif
-     return path;
+   return path;
 
+}
+
+void qorbiterManager::setSorting(int i)
+{
+    qDebug() << "Setting grid mediatype to :" << i;
+    q_mediaType = "videomodel";
+    this->qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
+    emit gridTypeChanged();
 }
 

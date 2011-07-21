@@ -44,7 +44,7 @@ class qorbiterManager : public QWidget
     Q_OBJECT
     Q_PROPERTY (int getLocation READ getlocation NOTIFY locationChanged )
     Q_PROPERTY (bool addMediaItem NOTIFY modelChanged)
-
+    Q_PROPERTY (QString q_mediaType READ getSorting NOTIFY gridTypeChanged)
 public:
      qorbiterManager(QWidget *parent = 0);  //constructor
 
@@ -159,27 +159,35 @@ signals:
       void orbiterClosing();
       void locationChanged(int cRoom, int cEA);
       void modelChanged();
+      void gridTypeChanged();
 
 
-public slots:
+public slots: //note: Q_INVOKABLE means it can be called directly from qml
 
-      QString adjustPath(const QString&);
-      int getlocation() const ;
-      void setLocation(const int& , const int& ) ;
-      void regenOrbiter(int deviceNo);
-      void regenComplete(int i);
-
+      //datagrid related
+      void setSorting(int i);
+      QString getSorting() {return q_mediaType;}
       void clearMediaModel();
       bool addMediaItem(QString mText, QString temp, QImage cell);
       void updateModel();
-      //ui related slots
-      Q_INVOKABLE void execGrp(int grp);
-    Q_INVOKABLE bool gotoQScreen(QString ) ;
-        //qt c++ related slots
-    bool requestDataGrid();
-    //dce related slots
-    Q_INVOKABLE void closeOrbiter();
-    //void orbiterStart();
+
+      //ui related
+      int getlocation() const ;
+      void setLocation(const int& , const int& ) ;
+      Q_INVOKABLE bool gotoQScreen(QString ) ;
+
+      //initialization related
+      void regenOrbiter(int deviceNo);
+      void regenComplete(int i);
+      QString adjustPath(const QString&);
+
+      //dce related slots
+      Q_INVOKABLE void execGrp(int grp);        //for command groups
+       Q_INVOKABLE void closeOrbiter();
+
+      //random c++ related slots
+      bool requestDataGrid();
+   \
 };
 
 #endif // QORBITERMANAGER_H
