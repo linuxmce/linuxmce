@@ -104,10 +104,8 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
 
 
     currentSkin = "default";
-    currentSkinURL="qml/qObiter_src/Style.qml";
+    currentSkinURL="/qml/qObiter_src/";
     s_RouterIP="192.168.80.1";
-
-
 
     qorbiterUIwin = new QDeclarativeView;
     ScreenSaverModule ScreenSaver;
@@ -123,7 +121,7 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     qorbiterUIwin->rootContext()->setContextProperty("currentSkinUrl" , currentSkinURL);
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
 
-    QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin")) +"/qml/qObiter_src/";
+    QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin")) +currentSkinURL;
 
     qDebug () << "QML import path for build: " << qmlPath;
     qorbiterUIwin->engine()->setBaseUrl(qmlPath);

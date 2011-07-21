@@ -199,7 +199,10 @@ OTHER_FILES += \
     qtc_packaging/debian_harmattan/copyright \
     qtc_packaging/debian_harmattan/control \
     qtc_packaging/debian_harmattan/compat \
-    qtc_packaging/debian_harmattan/changelog
+    qtc_packaging/debian_harmattan/changelog \
+    qml/default/n950/Style.qml \
+    qml/default/viewsonic/Style.qml \
+    qml/default/desktop/Style.qml
 
 RESOURCES += \
     skinData.qrc
