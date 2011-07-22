@@ -13,7 +13,7 @@ This program requires the installation of additional mysql development packages
 to link against at compile time.
 
 Steps
-(1)Install neccesary mysql headers 'libmysqld-dev'
+(1)Install neccesary mysql headers 'libmysqlclient15-dev'
 
 Usage:
 
