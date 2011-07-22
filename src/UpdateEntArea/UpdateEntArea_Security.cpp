@@ -65,6 +65,7 @@
 #include "pluto_main/Table_Users.h"
 #include "pluto_main/Define_Screen.h"
 #include "pluto_main/Define_RoomType.h"
+#include "pluto_main/Define_Text.h"
 
 #include "CommandGroupArray.h"
 
@@ -91,7 +92,7 @@ void UpdateEntArea::AddDefaultSecurityScenarios(Row_Room *pRow_Room)
 	CommandGroup *pCommandGroup;
 	CommandGroupArray commandGroupArray(pRow_Room,ARRAY_Security_Scenarios_CONST,true);
 
-	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Security_Arm_Disarm_CONST,"Security",0,1,0);
+	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Security_Arm_Disarm_CONST,"Secu.",0,1,0,0,0,TEXT_Security_CONST);
 	if( pCommandGroup )
 	{
 		pCommandGroup->AddCommand(DEVICETEMPLATE_This_Orbiter_CONST,COMMAND_Goto_Screen_CONST,1,1,
