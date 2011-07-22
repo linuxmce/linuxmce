@@ -76,9 +76,16 @@ using namespace DefaultScenarios;
 
 void UpdateEntArea::AddDefaultTelecomScenarios()
 {
+        LoggerWrapper::GetInstance()->Write(LV_STATUS,"Staring to update telecom areas ...");
+	
 	for(map<int, pair<LevelOfMedia, bool> >::iterator it=m_mapRoom_Media.begin();it!=m_mapRoom_Media.end();++it)
 	{
 		Row_Room *pRow_Room = m_pDatabase_pluto_main->Room_get()->GetRow(it->first);
+               	if( !pRow_Room )
+                {
+                        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Cannot find Room %d!", it->first);
+                        continue;
+                }
 		if( pRow_Room && pRow_Room->FK_RoomType_get()!=ROOMTYPE_Unmanaged_CONST)
 			AddDefaultTelecomScenarios(pRow_Room);
 	}
@@ -88,6 +95,8 @@ void UpdateEntArea::AddDefaultTelecomScenarios(Row_Room *pRow_Room)
 {
 	CommandGroup *pCommandGroup;
 	CommandGroupArray commandGroupArray(pRow_Room,ARRAY_Communication_Scenarios_CONST,true);
+
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Starting to add telecom scenarios ...");
 
 	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,"Active Calls",ICON_Phone_CONST,1,0,0,0,TEXT_Active_Calls_CONST);
 	if( pCommandGroup )
@@ -99,12 +108,12 @@ void UpdateEntArea::AddDefaultTelecomScenarios(Row_Room *pRow_Room)
 		pCommandGroup->AddCommand(DEVICETEMPLATE_This_Orbiter_CONST,COMMAND_Goto_Screen_CONST,1,1,
 			COMMANDPARAMETER_PK_Screen_CONST,StringUtils::itos(SCREEN_MakeCallFavorites_CONST).c_str());
 
-	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,"Dial Direct",ICON_Phone_CONST,3,0,0,0,0);
+	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,"Dial Direct",ICON_Phone_CONST,3,0,0,0,TEXT_CALL_DNUM_CONST);
 	if( pCommandGroup )
 		pCommandGroup->AddCommand(DEVICETEMPLATE_This_Orbiter_CONST,COMMAND_Goto_Screen_CONST,1,1,
 			COMMANDPARAMETER_PK_Screen_CONST,StringUtils::itos(SCREEN_MakeCallDialNumber_CONST).c_str());
 
-	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,"Phone Book",ICON_Phone_CONST,4,0,0,0,0);
+	pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Telecom_Scenarios_CONST,"Phone Book",ICON_Phone_CONST,4,0,0,0,TEXT_CALL_PB_CONST);
 	if( pCommandGroup )
 		pCommandGroup->AddCommand(DEVICETEMPLATE_This_Orbiter_CONST,COMMAND_Goto_Screen_CONST,1,1,
 			COMMANDPARAMETER_PK_Screen_CONST,StringUtils::itos(SCREEN_MakeCallPhonebook_CONST).c_str());
