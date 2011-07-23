@@ -1,13 +1,8 @@
 #include "gridimageprovider.h"
 #include <QDebug>
 
-GridIndexProvider::GridIndexProvider(ListModel model,
-    int pathRole, int pixmapRole,
-    QObject* parent) :
-    QObject(parent),
-    QDeclarativeImageProvider(QDeclarativeImageProvider::Pixmap),
-    mModel(model),
-    mPathRole(pathRole),
+GridIndexProvider::GridIndexProvider(ListModel*& model  , int pathRole, int pixmapRole) :
+    QDeclarativeImageProvider(QDeclarativeImageProvider::Pixmap), mModel(model),  mPathRole(pathRole),
     mPixmapRole(pixmapRole)
 {
     // For each pixmap already in the model, get a mapping between the name and the index
@@ -66,6 +61,7 @@ void GridIndexProvider::dataDeleted(const QModelIndex&, int start, int end)
         QModelIndex index = mModel.index(row, 0);
         QString path = mModel.data(index, mPathRole).value<QString>();
         mPixmapIndex[path] = index;
+
     }
 }
 

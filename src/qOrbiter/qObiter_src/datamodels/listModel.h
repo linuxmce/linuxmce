@@ -45,6 +45,7 @@ public:
   ListItem* takeRow(int row);
   ListItem* find(const QString &id) const;
   QModelIndex indexFromItem( const ListItem* item) const;
+  ListItem* currentRow();
   void clear();
 
 signals:

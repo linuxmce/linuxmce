@@ -117,3 +117,9 @@ ListItem * ListModel::takeRow(int row)
   endRemoveRows();
   return item;
 }
+
+ListItem * ListModel::currentRow()
+{
+    ListItem* item = m_list.at(0);
+    return item;
+}

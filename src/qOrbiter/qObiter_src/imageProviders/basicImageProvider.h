@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QDeclarativeImageProvider>
+#include <QDebug>
 
 class basicImageProvider : public QDeclarativeImageProvider
 {
@@ -15,31 +16,20 @@ public:
 
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize)
     {
-   QString key = QString("image://datagridimageprovider/%l").arg(id);
-    QString verify(id);
-    QImage cellimage;
+       // QImage key= QImage(QByteArray::fromRawData(id.toStdString().c_str(), id.size()));
 
-    if ( verify == "4")
-    {
-        cellimage.load(":/icons/song-item.png");
-        cellimage.scaledToWidth(200);
-    }
-    else if (verify=="5")
-    {
-    cellimage.load(":/icons/videos.png");
-    cellimage.scaledToWidth(200);
-    }
-    else if (verify == "29")
-    {
-        cellimage.load(":/icons/media-games.png");
-        cellimage.scaledToWidth(200);
-    }
-    else if (verify == "7")
-    {
-        cellimage.load(":/icons/photos.png");
-        cellimage.scaledToWidth(200);
-    }
-   return cellimage;
+        QString rsrcid = ":/" + id;
+            QImage image(rsrcid);
+            qDebug() << image.isNull();
+            QImage result;
+
+            if (requestedSize.isValid()) {
+                result = image.scaled(requestedSize, Qt::KeepAspectRatio);
+            } else {
+                result = image;
+            }
+            *size = result.size();
+            return result;
     }
 
 

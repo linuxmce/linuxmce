@@ -115,9 +115,13 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", &ScreenSaver);
 
     model = new ListModel(new gridItem, this);
+
+    //basicProvider = new basicImageProvider();
+    //advancedProvider = new GridIndexProvider(model, 1, 4);
+
     qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
 
-    qorbiterUIwin->engine()->addImageProvider("datagridimg", new basicImageProvider);
+    qorbiterUIwin->engine()->addImageProvider("datagridimg",  new GridIndexProvider(model, 1,4 ));
     qorbiterUIwin->rootContext()->setContextProperty("currentSkinUrl" , currentSkinURL);
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
 
@@ -128,7 +132,14 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     qorbiterUIwin->setSource(QUrl::fromLocalFile(qmlPath+"main.qml"));
 
     QObject *item= qorbiterUIwin->rootObject();
+#ifdef Q_OS_SYMBIAN
     qorbiterUIwin->showFullScreen();
+#elif defined(Q_WS_MAEMO_5)
+    qorbiterUIwin->showMaximized();
+#else
+   qorbiterUIwin->show();
+#endif
+   // qorbiterUIwin->showFullScreen();
     gotoQScreen("Splash.qml");
     qDebug() << "Showing Splash";
 
@@ -634,13 +645,25 @@ void qorbiterManager::regenComplete(int i)
     {   qDebug() << "Regen Complete!";
        // qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/qObiter_src/main.qml"));
         gotoQScreen("Screen_1.qml");
-        qorbiterUIwin->showFullScreen();
+#ifdef Q_OS_SYMBIAN
+    qorbiterUIwin->showFullScreen();
+#elif defined(Q_WS_MAEMO_5)
+    qorbiterUIwin->showMaximized();
+#else
+   qorbiterUIwin->show();
+#endif
     }
 }
     else
     {
         gotoQScreen("LoadError.qml");
-        qorbiterUIwin->showFullScreen();
+#ifdef Q_OS_SYMBIAN
+    qorbiterUIwin->showFullScreen();
+#elif defined(Q_WS_MAEMO_5)
+    qorbiterUIwin->showMaximized();
+#else
+   qorbiterUIwin->show();
+#endif
     }
 }
 

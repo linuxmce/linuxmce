@@ -9,12 +9,11 @@
 
 
 
-class GridIndexProvider : public QObject, public QDeclarativeImageProvider
+class GridIndexProvider :public QObject , public QDeclarativeImageProvider
 {
     Q_OBJECT
 public:
-    GridIndexProvider(ListModel model, int pathRole, int pixmapRole,
-        QObject* parent = 0);
+    GridIndexProvider( ListModel*& model, int pathRole, int pixmapRole);
    virtual ~GridIndexProvider();
     QPixmap requestPixmap(const QString& id, QSize* size, const QSize& requestedSize);
 

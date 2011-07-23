@@ -1208,20 +1208,18 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 //<-dceag-c401-e->
 {
 	cout << "Need to implement command #401 - Show File List" << endl;
-	cout << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
-
-        qDebug() << "DCE recieved Datagrid Population Request from QML";
+        cout << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
 
         qmlUI->model->clear();
-
         qmlUI->gotoQScreen("Screen_47.qml");
 
+        qmlUI->setSorting(iPK_MediaType);
         long l_pkDevice = qmlUI->iPK_Device;
         int gHeight = 5;
         int gWidth = 5;
         int pkVar = 0;
-        string valassign ="null";
-        bool isSuccessfull = "false";
+        string valassign ="";
+        bool isSuccessfull;// = "false";
 
         string m_sGridID ="MediaFile_"+StringUtils::itos(qmlUI->iPK_Device);
         int iRow_count=5;
@@ -1232,9 +1230,6 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 
         string m_sSeek;
         string m_sDataGrid_ID = "1";
-
-
-
         int iOffset;
 
         int iColumn = 1;
@@ -1249,21 +1244,21 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
         pData = "NULL";
         int iRow;
         QString temp;
-      qmlUI->m_dwIDataGridRequestCounter++;
+        qmlUI->m_dwIDataGridRequestCounter++;
+
         //temp =  QString::fromStdString(qmlUI->gridReqType->toStdString());
-        QString s = QString::number(iPK_MediaType) + "||||1,2|0|13|0 | 2 |";
+        QString s = QString::number(iPK_MediaType) + "||||1,2||13||2|";
 
-        qDebug() << s;
-
-        CMD_Populate_Datagrid populateDataGrid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 63, s.toStdString(), DEVICETEMPLATE_qOrbiter_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
+        CMD_Populate_Datagrid populateDataGrid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 63, s.toStdString(), DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
         if (SendCommand(populateDataGrid))
         {
-            qDebug()<< "Command to Populate Datagrid Sent";
+            //**TODO add function to check both datagrids?
 
+            string imgDG = "_"+m_sGridID; //correcting the grid id string for images
 
              //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
-            DCE::CMD_Request_Datagrid_Contents req_data_grid( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+            DCE::CMD_Request_Datagrid_Contents req_data_grid( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(imgDG),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
             if(SendCommand(req_data_grid))
                     {                   bool barrows = false;
 
@@ -1273,20 +1268,18 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 
                        qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
                        qDebug() << "Response: " << cellsToRender << " cells to render";
-                        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
-                       string testdata;
+                       LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
                        QImage cellImg;
-                       QString cellTitle;
+
                      //  qmlUI->model->clear();
 
                        //experimental block
                        for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
                        {
-
                                DataGridCell *pCell = it->second;
                                const char *pPath = pCell->GetImagePath();
-                               qDebug() << pCell->GetValue() << pCell->GetImagePath();
-
+                               QString filePath = QString::fromAscii(pPath);
+                               LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"DataGridRenderer::RenderCell loading %s in bg for %d,%d", pPath,pDataGridTable->CovertColRowType(it->first).first,pDataGridTable->CovertColRowType(it->first).second);
 
                                if (pPath && !pCell->m_pGraphicData && !pCell->m_pGraphic)
                                {
@@ -1294,22 +1287,14 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                                                cellImg = QImage(pPath);
                                                pCell->m_GraphicLength = (unsigned long) s;
                                               pCell->m_GraphicFormat = GR_JPG;
-                               }
 
-                             //  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"DataGridRenderer::RenderCell loading %s in bg for %d,%d", pPath,pDataGridTable->CovertColRowType(it->first).first,pDataGridTable->CovertColRowType(it->first).second);
-                               qDebug() << "Error here";
-                               if (qmlUI->addMediaItem(QString::fromStdString(pCell->m_Text), QString::number(iPK_MediaType), cellImg ))
-                               {
+                               }                              
+                               qmlUI->addMediaItem(QString::fromStdString(pCell->m_Text), filePath, cellImg );
 
-                               }
-
-                       }
+                        }
 
                     }
         }
-
-
-
 
         /*
           Datagrid params
@@ -1808,6 +1793,7 @@ bool DCE::qOrbiter::dataGridRequest(string s)
     QString temp;
     temp =  QString::fromStdString(qmlUI->gridReqType->toStdString());
 
+
     CMD_Populate_Datagrid populateDataGrid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 63, string(s), DEVICETEMPLATE_qOrbiter_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
     if (SendCommand(populateDataGrid))
@@ -1909,7 +1895,5 @@ bool DCE::qOrbiter::executeCommandGroup(int cmdGrp)
     CMD_Execute_Command_Group execCommandGroup((long)qmlUI->iPK_Device, (long)2, cmdGrp);
 
    SendCommandNoResponse(execCommandGroup);
-
-
 
 }
