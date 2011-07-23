@@ -48,8 +48,6 @@ Rectangle {
          }
 
 
-
-
     GridView {
         id: grid_view1
         x: 10

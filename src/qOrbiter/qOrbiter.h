@@ -25,9 +25,12 @@
 #include "DCE/Virtual_Device_Translator.h"
 #include "Orbiter/DesignObj_DataGrid.h"
 #include <QStringList>
+
 //<-dceag-d-e->
 
 class qorbiterManager;
+class basicImageProvider;
+
 
 //<-dceag-decl-b->
 namespace DCE
@@ -60,6 +63,7 @@ public:
                 bool dataGridRequest(string s);
                 bool getConfiguration();
                 bool executeCommandGroup(int cmdGrp);
+                QImage getfileForDG(string filename);
 //<-dceag-const-e->
 
 //<-dceag-const2-b->

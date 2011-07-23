@@ -32,7 +32,7 @@
 
 #include <qOrbiter/qOrbiter.h>
 
-
+class basicImageProvider;
 
 namespace DCE
 {
@@ -168,7 +168,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
       void setSorting(int i);
       QString getSorting() {return q_mediaType;}
       void clearMediaModel();
-      bool addMediaItem(QString mText, QString temp, QImage cell);
+      bool addMediaItem(QString mText, QString temp, QPixmap cell);
       void updateModel();
 
       //ui related

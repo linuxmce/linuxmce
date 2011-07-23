@@ -13,6 +13,7 @@ QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 INCLUDEPATH += ../../ ../../DCE/ /usr/include/mysql/
 
 LIBS += -lQtXml
+CONFIG +=warn_off
 
 # Smart Installer package's UID
 # This UID is from the protected range and therefore the package will

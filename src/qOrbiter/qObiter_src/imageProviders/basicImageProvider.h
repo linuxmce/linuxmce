@@ -4,8 +4,10 @@
 #include <QObject>
 #include <QDeclarativeImageProvider>
 #include <QDebug>
+#include <QVariant>
+#include <qorbitermanager.h>
 
-class basicImageProvider : public QDeclarativeImageProvider
+class basicImageProvider : public QDeclarativeImageProvider, public QObject
 {
 
 public:
@@ -13,22 +15,36 @@ public:
     {
     }
 
-
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize)
     {
-       // QImage key= QImage(QByteArray::fromRawData(id.toStdString().c_str(), id.size()));
 
-        QString rsrcid = ":/" + id;
-            QImage image(rsrcid);
-            qDebug() << image.isNull();
-            QImage result;
 
-            if (requestedSize.isValid()) {
-                result = image.scaled(requestedSize, Qt::KeepAspectRatio);
+/*
+        ref->pqOrbiter->getfileForDG("mediapics");
+        const char* pData;
+        int pSize;
+        pData= id.toStdString().data();
+        pSize = id.toStdString().size();
+        qDebug() << pData << "- " << pSize;
+        QByteArray t;
+        t.setRawData(pData, pSize);
+
+
+        key.loadFromData(t, "GIF");
+        //key.scaled(&requestedSize);
+
+        qDebug() << key.isNull();
+        */
+        QImage key;
+        QImage result;
+
+         if (requestedSize.isValid()) {
+                result = key.scaled(requestedSize, Qt::KeepAspectRatio);
             } else {
-                result = image;
+                result = key;
             }
             *size = result.size();
+
             return result;
     }
 

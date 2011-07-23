@@ -116,12 +116,12 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
 
     model = new ListModel(new gridItem, this);
 
-    //basicProvider = new basicImageProvider();
+    basicProvider = new basicImageProvider();
     //advancedProvider = new GridIndexProvider(model, 1, 4);
 
     qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
 
-    qorbiterUIwin->engine()->addImageProvider("datagridimg",  new GridIndexProvider(model, 1,4 ));
+    qorbiterUIwin->engine()->addImageProvider("datagridimg",   new GridIndexProvider(new ListModel(new gridItem,this), 1, 3));
     qorbiterUIwin->rootContext()->setContextProperty("currentSkinUrl" , currentSkinURL);
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
 
@@ -589,8 +589,11 @@ void qorbiterManager::execGrp(int grp)
 }
 
 
-bool qorbiterManager::addMediaItem(QString mText, QString temp, QImage cell)
+bool qorbiterManager::addMediaItem(QString mText, QString temp, QPixmap cell)
 {
+
+    //const char *tcell = reinterpret_cast<char*>(cell.bits());
+
     this->model->appendRow(new gridItem(mText, temp, cell , model));
     emit modelChanged();
    // qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
