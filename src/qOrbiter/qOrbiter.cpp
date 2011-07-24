@@ -1816,17 +1816,20 @@ bool DCE::qOrbiter::dataGridRequest(string s)
                    qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
                    qDebug() << "Response: " << cellsToRender << " cells to render";
                     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
-                   string testdata;
+
                    QImage cellImg;
                    QString cellTitle;
+                   int cellIndex;
+                   QString filePath;
                    //experimental block
                  for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
                    {
 
                            DataGridCell *pCell = it->second;
                            const char *pPath = pCell->GetImagePath();
-                           string filePath = (string)pPath;
-
+                           cellTitle = QString::fromStdString(pCell->m_Text);
+                            filePath= QString::fromStdString(pPath);
+                            cellIndex = 1;
 
                            if (pPath && !pCell->m_pGraphicData && !pCell->m_pGraphic)
                            {
@@ -1841,7 +1844,7 @@ bool DCE::qOrbiter::dataGridRequest(string s)
 
                          //  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"DataGridRenderer::RenderCell loading %s in bg for %d,%d", pPath,pDataGridTable->CovertColRowType(it->first).first,pDataGridTable->CovertColRowType(it->first).second);
 
-                           qmlUI->model->appendRow(new gridItem(QString::fromStdString(pCell->m_Text), temp, cellImg , qmlUI->model));
+                           qmlUI->model->appendRow(new gridItem(cellTitle, filePath, cellIndex, cellImg , qmlUI->model));
                    }
                 }
     }

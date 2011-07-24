@@ -117,7 +117,7 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     model = new ListModel(new gridItem, this);
 
     basicProvider = new basicImageProvider();
-    advancedProvider = new GridIndexProvider(new ListModel(new gridItem,this), 4, 5);
+    advancedProvider = new GridIndexProvider(new ListModel(new gridItem,this), 1, 5);
 
     qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
 
@@ -597,7 +597,7 @@ bool qorbiterManager::addMediaItem(QString mText, QString temp, QImage cell)
     //const char *tcell = reinterpret_cast<char*>(cell.bits());
     if (cell.isNull())
     {qDebug() << mText << " is null img";}
-    this->model->appendRow(new gridItem(mText, temp, cell , model));
+    //this->model->appendRow(new gridItem(mText, temp, cell , model));
     emit modelChanged();
   // qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
 }

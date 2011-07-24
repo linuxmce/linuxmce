@@ -1,17 +1,9 @@
 #include <datamodels/gridItem.h>
 
-gridItem::gridItem(const QString &name, const QString &size, const QImage &img, QObject *parent) :
-    m_name(name), m_size(size), m_price(-1), m_image(img)
+gridItem::gridItem( QString &name,  QString &path,  int &index,  QImage &img, QObject *parent) :
+    m_name(name), m_path(path), m_index(index), m_image(img)
 {
 
-}
-
-void gridItem::setPrice(qreal price)
-{
-  if(m_price != price) {
-    m_price = price;
-
-  }
 }
 
 QHash<int, QByteArray> gridItem::roleNames() const
@@ -19,9 +11,9 @@ QHash<int, QByteArray> gridItem::roleNames() const
 
   QHash<int, QByteArray> names;
   names[NameRole] = "name";
-  names[SizeRole] = "size";
-  names[PriceRole] = "price";
-  names[TitleRole] = "Title";
+  names[IndexRole] = "index";
+  names[PathRole] = "path";
+  names[AttributeRole] = "attributes";
   names[ImageRole] = "cellImage";
   return names;
 
@@ -32,14 +24,12 @@ QVariant gridItem::data(int role) const
   switch(role) {
   case NameRole:
     return name();
-  case SizeRole:
-    return size();
-  case TitleRole:
-    return size();
+  case IndexRole:
+    return index();
   case ImageRole:
     return cellImage();
-  case PriceRole:
-    return price();
+  case PathRole:
+    return path();
   default:
     return QVariant();
   }
