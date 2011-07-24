@@ -1,3 +1,9 @@
+freepbx (0+2.3.1-8) unstable; urgency=low
+
+  * Provide voicemail.conf, asterisk.adsi and users.conf files
+
+ -- Peer Oliver Schmidt <peer.oliver.schmidt@linuxmce.org>  Sun, 24 Jul 2011 06:24:26 +0200
+
 freepbx (0+2.3.1-7) unstable; urgency=low
 
   * Typo fix
