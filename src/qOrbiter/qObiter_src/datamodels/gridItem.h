@@ -1,13 +1,14 @@
 #ifndef GRIDITEM_H
 #define GRIDITEM_H
 
-#include <datamodels/listModel.h>
+#include <QAbstractListModel>
+#include <QVariant>
 #include <QImage>
 
-class gridItem : public ListItem
+class gridItem: public QObject
 {
-  Q_OBJECT
- Q_PROPERTY(QImage cellImage READ cellImage NOTIFY dataChanged)
+ Q_OBJECT
+
 
 public:
   enum Roles {
@@ -16,16 +17,15 @@ public:
     PriceRole,
     TitleRole,
     ImageRole
-
   };
 
 public:
-  gridItem(QObject *parent = 0): ListItem(parent) {}
+  gridItem(QObject *parent = 0) {}
   explicit gridItem(const QString &name, const QString &size, const QImage &img, QObject *parent = 0);
   QVariant data(int role) const;
   QHash<int, QByteArray> roleNames() const;
   void setPrice(qreal price);
-  inline QString id() const { return m_name; }
+  inline QString id() const {  return m_name; }
   inline QString name() const { return m_name; }
   inline QString size() const { return m_size; }
   inline QImage cellImage() const {return m_image; }

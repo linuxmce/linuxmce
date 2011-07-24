@@ -6,8 +6,9 @@
  */
 
 #include "datamodels/listModel.h"
+#include <QDebug>
 
-ListModel::ListModel(ListItem* prototype, QObject *parent) :
+ListModel::ListModel(gridItem* prototype, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype)
 {
   setRoleNames(m_prototype->roleNames());
@@ -32,52 +33,60 @@ ListModel::~ListModel() {
   clear();
 }
 
-void ListModel::appendRow(ListItem *item)
+void ListModel::appendRow(gridItem *item)
 {
-  appendRows(QList<ListItem*>() << item);
+  appendRows(QList<gridItem*>() << item);
 }
 
-void ListModel::appendRows(const QList<ListItem *> &items)
+void ListModel::appendRows(const QList<gridItem *> &items)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
-  foreach(ListItem *item, items) {
-
+  foreach(gridItem *item, items) {
+ qDebug() << "Item added!";
     QObject::connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
     m_list.append(item);
   }
   endInsertRows();
+
 }
 
-void ListModel::insertRow(int row, ListItem *item)
+void ListModel::insertRow(int row, gridItem *item)
 {
   beginInsertRows(QModelIndex(), row, row);
-  connect(item, SIGNAL(DataChanged()), SLOT(handleItemChange()), Qt::BlockingQueuedConnection);
+  connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
   m_list.insert(row, item);
   endInsertRows();
 }
 
 void ListModel::handleItemChange()
 {
-  ListItem* item = static_cast<ListItem*>(sender());
+  gridItem* item = static_cast<gridItem*>(sender());
   QModelIndex index = indexFromItem(item);
+
   if(index.isValid())
-    emit DataChanged(index, index);
+  {
+
+    emit dataChanged(index, index);
+  }
 }
 
-ListItem * ListModel::find(const QString &id) const
+gridItem * ListModel::find(const QString &id) const
 {
-  foreach(ListItem* item, m_list) {
+  foreach(gridItem* item, m_list) {
     if(item->id() == id) return item;
   }
   return 0;
 }
 
-QModelIndex ListModel::indexFromItem(const ListItem *item) const
+QModelIndex ListModel::indexFromItem(const gridItem *item) const
 {
   Q_ASSERT(item);
   for(int row=0; row<m_list.size(); ++row) {
+
     if(m_list.at(row) == item) return index(row);
+
   }
+
   return QModelIndex();
 }
 
@@ -110,16 +119,16 @@ bool ListModel::removeRows(int row, int count, const QModelIndex &parent)
   return true;
 }
 
-ListItem * ListModel::takeRow(int row)
+gridItem * ListModel::takeRow(int row)
 {
   beginRemoveRows(QModelIndex(), row, row);
-  ListItem* item = m_list.takeAt(row);
+  gridItem* item = m_list.takeAt(row);
   endRemoveRows();
   return item;
 }
 
-ListItem * ListModel::currentRow()
+gridItem * ListModel::currentRow()
 {
-    ListItem* item = m_list.at(0);
+    gridItem* item = m_list.at(0);
     return item;
 }

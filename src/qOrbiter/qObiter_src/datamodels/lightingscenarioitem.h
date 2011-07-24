@@ -4,7 +4,7 @@
 #include <datamodels/listModel.h>
 #include <QImage>
 
-class LightingScenarioItem: public ListItem
+class LightingScenarioItem: public QObject
 {
          Q_OBJECT
         // Q_PROPERTY(QImage buttonImage READ buttonImage NOTIFY imageChanged)
@@ -21,7 +21,7 @@ class LightingScenarioItem: public ListItem
 
         public:
 
-          LightingScenarioItem(QObject *parent = 0): ListItem(parent) {}
+          LightingScenarioItem(QObject *parent = 0) {}
           explicit LightingScenarioItem( const QString &name,  const QString &label, const  QString &parameter, const QString &scommand, const  QString &gotoScreen , QImage img, QObject *parent=0);
 
           QVariant data(int role) const;

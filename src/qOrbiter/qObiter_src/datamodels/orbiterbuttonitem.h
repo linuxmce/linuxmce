@@ -4,7 +4,7 @@
 #include  <datamodels/listModel.h>
 #include <QImage>
 
-class OrbiterButtonItem : public ListItem {
+class OrbiterButtonItem : public QObject {
     Q_OBJECT
 
     Q_PROPERTY(QImage cellImage READ cellImage NOTIFY imageChanged)
@@ -22,7 +22,7 @@ class OrbiterButtonItem : public ListItem {
      };
 
    public:
-     OrbiterButtonItem(QObject *parent = 0): ListItem(parent) {}
+     OrbiterButtonItem(QObject *parent = 0) {}
      OrbiterButtonItem(const QString &name, const QString &size,  const QString &goto_screen, const QImage &img, QObject *parent = 0);
      QVariant data(int role) const;
      QHash<int, QByteArray> roleNames() const;

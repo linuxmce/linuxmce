@@ -4,7 +4,7 @@
 #include <datamodels/listModel.h>
 #include <QImage>
 
-class SecurityScenarioItem: public ListItem
+class SecurityScenarioItem: public QObject
 {
          Q_OBJECT
         // Q_PROPERTY(QImage buttonImage READ buttonImage NOTIFY imageChanged)
@@ -21,7 +21,7 @@ class SecurityScenarioItem: public ListItem
 
         public:
 
-          SecurityScenarioItem(QObject *parent = 0): ListItem(parent) {}
+          SecurityScenarioItem(QObject *parent = 0) {}
           explicit SecurityScenarioItem( const QString &name,  const QString &label, const  QString &parameter, const QString &scommand, const  QString &gotoScreen , QImage img, QObject *parent=0);
 
           QVariant data(int role) const;

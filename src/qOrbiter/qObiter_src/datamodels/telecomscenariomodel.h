@@ -31,6 +31,7 @@ public:
 
 
 private slots:
+
   void handleItemChange();
 
 private:

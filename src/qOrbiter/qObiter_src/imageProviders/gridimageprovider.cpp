@@ -2,7 +2,7 @@
 #include <QDebug>
 
 GridIndexProvider::GridIndexProvider(ListModel *model  , int pathRole, int pixmapRole) :
-    QDeclarativeImageProvider(QDeclarativeImageProvider::Pixmap), mModel(*model),  mPathRole(pathRole),
+    QDeclarativeImageProvider(QDeclarativeImageProvider::Image), mModel(*model),  mPathRole(pathRole),
     mPixmapRole(pixmapRole)
 {
     // For each pixmap already in the model, get a mapping between the name and the index
@@ -25,15 +25,19 @@ GridIndexProvider::GridIndexProvider(ListModel *model  , int pathRole, int pixma
 }
 
 
-QPixmap GridIndexProvider::requestPixmap(const QString &id, QSize *size, const QSize &requestedSize)
+QImage GridIndexProvider::requestImage(const QString &id, QSize *size, const QSize &requestedSize)
 {
 
         QString key = QString("image://model/%1").arg(id);
-        qDebug() << "Recieved Pixmap Request" << key;
         QModelIndex index = mPixmapIndex.value(key);
-        QPixmap image = mModel.data(index, mPixmapRole).value<QPixmap>();
-        qDebug() << image.isNull();
-        QPixmap result;
+        QImage image = mModel.data(index, mPixmapRole).value<QImage>();
+
+        if(image.isNull())
+        {
+            qDebug()<< "couldnt find image in model +" << index;
+            image.load("qrc:/icons/xine.png");
+        }
+        QImage result;
 
         if (requestedSize.isValid()) {
             result = image.scaled(requestedSize, Qt::KeepAspectRatio);
@@ -49,6 +53,7 @@ void GridIndexProvider::dataUpdated(const QModelIndex& topLeft, const QModelInde
 {
     // For each pixmap already in the model, get a mapping between the name and the index
     for(int row = 0; row < mModel.rowCount(); row++) {
+        qDebug() << "Data Updated!" << row;
         QModelIndex index = mModel.index(row, 0);
         QString path = mModel.data(index, mPathRole).value<QString>();
         mPixmapIndex[path] = index;

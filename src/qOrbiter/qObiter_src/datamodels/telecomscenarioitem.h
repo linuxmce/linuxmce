@@ -1,10 +1,11 @@
 #ifndef TELECOMSCENARIOITEM_H
 #define TELECOMSCENARIOITEM_H
 
-#include <datamodels/listModel.h>
+#include <QAbstractListModel>
+#include <QVariant>
 #include <QImage>
 
-class TelecomScenarioItem: public ListItem
+class TelecomScenarioItem: public QObject
 {
          Q_OBJECT
         // Q_PROPERTY(QImage buttonImage READ buttonImage NOTIFY imageChanged)
@@ -21,7 +22,7 @@ class TelecomScenarioItem: public ListItem
 
         public:
 
-          TelecomScenarioItem(QObject *parent = 0): ListItem(parent) {}
+          TelecomScenarioItem(QObject *parent = 0) {}
           explicit TelecomScenarioItem( const QString &name,  const QString &label, const  QString &parameter, const QString &scommand, const  QString &gotoScreen , QImage img, QObject *parent=0);
 
           QVariant data(int role) const;

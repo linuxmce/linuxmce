@@ -1,7 +1,7 @@
 #include <datamodels/locationmodel.h>
 
 LocationItem::LocationItem(const QString &name, const int &iRoom, const QString &sTitle, const int &ea,const int &roomType, QObject *parent) :
-    ListItem(parent), m_name(name), m_val(iRoom), m_title(sTitle), m_iEA(ea), m_iType(roomType)
+    m_name(name), m_val(iRoom), m_title(sTitle), m_iEA(ea), m_iType(roomType)
 {
 }
 

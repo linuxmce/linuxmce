@@ -6,6 +6,7 @@
 #include <QModelIndex>
 #include <QDeclarativeImageProvider>
 #include <datamodels/listModel.h>
+#include <QImage>
 
 
 
@@ -15,7 +16,7 @@ class GridIndexProvider :public QObject , public QDeclarativeImageProvider
 public:
     GridIndexProvider( ListModel* model, int pathRole, int pixmapRole);
    virtual ~GridIndexProvider();
-    QPixmap requestPixmap(const QString& id, QSize* size, const QSize& requestedSize);
+    QImage requestImage(const QString& id, QSize* size, const QSize& requestedSize);
 
 public slots:
     void dataUpdated(const QModelIndex & topLeft, const QModelIndex & bottomRight);

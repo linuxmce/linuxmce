@@ -1,7 +1,7 @@
 #include "orbiterbuttonitem.h"
 
 OrbiterButtonItem::OrbiterButtonItem(const QString &name, const QString &size, const QString &goto_screen, const QImage &img, QObject *parent) :
-    ListItem(parent), m_name(name), m_size(size), m_goto(goto_screen), m_image(img)
+     m_name(name), m_size(size), m_goto(goto_screen), m_image(img)
 {
 }
 

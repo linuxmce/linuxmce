@@ -1,10 +1,11 @@
 #ifndef CLIMATESCENARIOITEM_H
 #define CLIMATESCENARIOITEM_H
-#include <datamodels/listModel.h>
+
+#include <QAbstractListModel>
+#include <QVariant>
 #include <QImage>
 
-class ClimateScenarioItem: public ListItem
-{
+class ClimateScenarioItem: public QObject{
          Q_OBJECT
         // Q_PROPERTY(QImage buttonImage READ buttonImage NOTIFY imageChanged)
 
@@ -20,7 +21,7 @@ class ClimateScenarioItem: public ListItem
 
         public:
 
-          ClimateScenarioItem(QObject *parent = 0): ListItem(parent) {}
+          ClimateScenarioItem(QObject *parent = 0) {}
           explicit ClimateScenarioItem( const QString &name,  const QString &label, const  QString &parameter, const QString &scommand, const  QString &gotoScreen , QImage img, QObject *parent=0);
 
           QVariant data(int role) const;

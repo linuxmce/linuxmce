@@ -60,7 +60,7 @@ public:
     void swapSkins();
 
     basicImageProvider *basicProvider;
-    //GridIndexProvider advancedProvider;
+    GridIndexProvider *advancedProvider;
     QString *gridReqType;
 
 

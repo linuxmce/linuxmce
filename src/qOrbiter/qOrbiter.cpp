@@ -1281,29 +1281,22 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                                QString filePath = QString::fromAscii(pPath);
                                LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"DataGridRenderer::RenderCell loading %s in bg for %d,%d", pPath,pDataGridTable->CovertColRowType(it->first).first,pDataGridTable->CovertColRowType(it->first).second);
 
-				if (pPath)
-				{
-					string sPath = pPath;
-					char *oData = NULL;
-					int iData_Size = 0;
-					CMD_Request_File imgFileRequest(m_dwPK_Device, (long)4 , sPath, &oData, &iData_Size);
-					string sResponse;
-					if (!SendCommand(imgFileRequest, &sResponse))
-            				{
-            					qDebug() << "Image request sent";
-            				}
-            				else
-            				{
-            					qDebug() <<"Idata recieved: " << iData_Size ; // size of xml file
-            				}
 
-					if (iData_Size > 0)
-					{
-						// We can haz image.
-						QByteArray imageData = QByteArray(oData,iData_Size);
-						cellImg = QImage::fromData(imageData,"JPEG");
-					}
-				}
+                               cellImg = getfileForDG(pCell->GetImagePath());
+                               qDebug() << cellImg.isNull();
+                               if (pPath && !pCell->m_pGraphicData && !pCell->m_pGraphic)
+                               {
+                                   const char *pPath = pCell->GetImagePath();
+
+
+
+                                              size_t s=0;
+                                              pCell->m_GraphicLength = (unsigned long) s;
+                                              pCell->m_GraphicFormat = GR_JPG;
+
+
+                               }
+
                                qmlUI->addMediaItem(QString::fromStdString(pCell->m_Text), filePath, cellImg );
 
                         }
@@ -1837,6 +1830,7 @@ bool DCE::qOrbiter::dataGridRequest(string s)
 
                            DataGridCell *pCell = it->second;
                            const char *pPath = pCell->GetImagePath();
+                           string filePath = (string)pPath;
 
 
                            if (pPath && !pCell->m_pGraphicData && !pCell->m_pGraphic)
@@ -1911,30 +1905,41 @@ bool DCE::qOrbiter::executeCommandGroup(int cmdGrp)
 
 }
 
-QImage DCE::qOrbiter::getfileForDG(std::string filePath)
+QImage DCE::qOrbiter::getfileForDG(string filePath)
 {
-   char *pData;
-   int iData_Size;
-   CMD_Request_File reqFile((long)35, (long)4 , (string)filePath, &pData, &iData_Size);
+   char *picData = NULL;
+   int picData_Size;
+   picData_Size = 0;
+
+
+   CMD_Request_File reqFile((long)35, (long)4 , (string)filePath, &picData, &picData_Size);
    string p_sResponse;
 
-   SendCommand(reqFile);
+
+
+
            if (!SendCommand(reqFile))
                {
                qDebug() << "File request sent";
                }
                else
                {
-               qDebug() <<"Idata recieved: " << iData_Size ; // size of pic
+               qDebug() <<"Idata recieved: " << picData_Size ; // size of pic
                }
 
-       QByteArray configData;              //config file put into qbytearray for processing
-       configData = pData;
+           QByteArray configData;              //config file put into qbytearray for processing
+       configData.setRawData(picData, picData_Size);
        QImage returnImage;
-       returnImage.loadFromData(configData);
 
-       LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Sending back image for %s", filePath);
-        delete pData;
+       if (!returnImage.loadFromData(configData, "JPEG"))
+       {
+           qDebug() << "Couldnt get image, defaulting";
+           returnImage.load("qrc:/img/icons/xine.png");
+       }
+
+      // LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Sending back image for %s", filePath);
+     //   delete picData;
+
        return returnImage;
 
 }

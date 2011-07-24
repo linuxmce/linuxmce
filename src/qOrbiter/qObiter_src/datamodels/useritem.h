@@ -1,15 +1,15 @@
 #ifndef USERITEM_H
 #define USERITEM_H
 
-#include <datamodels/listModel.h>
+#include <QAbstractListModel>
+#include <QVariant>
 #include <QImage>
-
 /*
   This is the Model item that accompanies the UserModel. As you can see, the roles here represent the
   data that we will be presenting to the user interface. All of this information must be provided in th
   constructor during qOrbitergen
   */
-class UserItem : public ListItem
+class UserItem: public QObject
 {
     Q_OBJECT
 
@@ -29,7 +29,7 @@ public:
   };
 
 public:
-  UserItem(QObject *parent = 0): ListItem(parent) {}
+  UserItem(QObject *parent = 0) {}
   explicit UserItem( QString &userName ,  QString &firstName,  QString &lastName,  QString &nickName,   int &iPK_User,  int &sUserMode,  int &pinRequired,  int &phoneExtension ,  QImage &img,  int &defaultUser, QObject *parent);
 
   QVariant data(int role) const;

@@ -11,53 +11,39 @@
 #include <QAbstractListModel>
 #include <QList>
 #include <QVariant>
+#include <datamodels/gridItem.h>
 
-class ListItem: public QObject {
-  Q_OBJECT
-
-public:
-  ListItem(QObject* parent = 0) : QObject(parent) {}
-  virtual ~ListItem() {}
-  virtual QString id() const = 0;
-  virtual QVariant data(int role) const = 0;
-  virtual QHash<int, QByteArray> roleNames() const = 0;
-
-signals:
-  void dataChanged();
-
-};
 
 class ListModel : public QAbstractListModel
 {
   Q_OBJECT
-    Q_PROPERTY (QVariant data NOTIFY DataChanged )
 
 public:
-  explicit ListModel(ListItem* prototype, QObject* parent = 0);
+  explicit ListModel(gridItem* prototype, QObject* parent = 0);
   ~ListModel();
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-  void appendRow(ListItem* item);
-  void appendRows(const QList<ListItem*> &items);
-  void insertRow(int row, ListItem* item);
+  void appendRow(gridItem* item);
+  void appendRows(const QList<gridItem*> &items);
+  void insertRow(int row, gridItem* item);
   bool removeRow(int row, const QModelIndex &parent = QModelIndex());
   bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
-  ListItem* takeRow(int row);
-  ListItem* find(const QString &id) const;
-  QModelIndex indexFromItem( const ListItem* item) const;
-  ListItem* currentRow();
+  gridItem* takeRow(int row);
+  gridItem* find(const QString &id) const;
+  QModelIndex indexFromItem( const gridItem* item) const;
+  gridItem* currentRow();
   void clear();
 
 signals:
   void ItemAdded();
-  void DataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+  void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
 
 private slots:
   void handleItemChange();
 
 private:
-  ListItem* m_prototype;
-  QList<ListItem*> m_list;
+  gridItem* m_prototype;
+  QList<gridItem*> m_list;
 };
 
 #endif // LISTMODEL_H

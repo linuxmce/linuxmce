@@ -1,10 +1,10 @@
 #ifndef MEDIASCENARIOITEM_H
 #define MEDIASCENARIOITEM_H
-
-#include <datamodels/listModel.h>
+#include <QAbstractListModel>
+#include <QVariant>
 #include <QImage>
 
-class MediaScenarioItem: public ListItem
+class MediaScenarioItem: public QObject
 {
          Q_OBJECT
         // Q_PROPERTY(QImage buttonImage READ buttonImage NOTIFY imageChanged)
@@ -21,7 +21,7 @@ class MediaScenarioItem: public ListItem
 
         public:
 
-          MediaScenarioItem(QObject *parent = 0): ListItem(parent) {}
+          MediaScenarioItem(QObject *parent = 0) {}
           explicit MediaScenarioItem( const QString &name,  const QString &label, const  QString &parameter, const QString &scommand, const  QString &gotoScreen , QImage img, QObject *parent=0);
 
           QVariant data(int role) const;

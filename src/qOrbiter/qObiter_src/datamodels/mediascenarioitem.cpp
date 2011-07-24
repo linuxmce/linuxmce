@@ -1,7 +1,7 @@
 #include "mediascenarioitem.h"
 
 MediaScenarioItem:: MediaScenarioItem( const QString &name, const QString &label, const QString &parameter, const QString &scommand,  const QString &gotoScreen , QImage img, QObject *parent):
-    ListItem(parent),m_name(name), m_label(label), m_param(parameter), m_command(scommand), m_goto(gotoScreen), m_image(img)
+  m_name(name), m_label(label), m_param(parameter), m_command(scommand), m_goto(gotoScreen), m_image(img)
 {
 
 }

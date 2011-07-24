@@ -117,15 +117,17 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     model = new ListModel(new gridItem, this);
 
     basicProvider = new basicImageProvider();
-    //advancedProvider = new GridIndexProvider(model, 1, 4);
+    advancedProvider = new GridIndexProvider(new ListModel(new gridItem,this), 4, 5);
 
     qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
 
-    qorbiterUIwin->engine()->addImageProvider("datagridimg",   new GridIndexProvider(new ListModel(new gridItem,this), 1, 3));
+    qorbiterUIwin->engine()->addImageProvider("datagridimg", advancedProvider);
     qorbiterUIwin->rootContext()->setContextProperty("currentSkinUrl" , currentSkinURL);
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
 
     QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin")) +currentSkinURL;
+
+    //QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex)));
 
     qDebug () << "QML import path for build: " << qmlPath;
     qorbiterUIwin->engine()->setBaseUrl(qmlPath);
@@ -584,7 +586,7 @@ void qorbiterManager::setCurrentUser()
 
 void qorbiterManager::execGrp(int grp)
 {
-    model->clear();
+
     pqOrbiter->executeCommandGroup(grp);
 }
 
@@ -593,10 +595,11 @@ bool qorbiterManager::addMediaItem(QString mText, QString temp, QImage cell)
 {
 
     //const char *tcell = reinterpret_cast<char*>(cell.bits());
-
+    if (cell.isNull())
+    {qDebug() << mText << " is null img";}
     this->model->appendRow(new gridItem(mText, temp, cell , model));
     emit modelChanged();
-   // qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
+  // qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
 }
 
 void qorbiterManager::updateModel()
@@ -606,7 +609,7 @@ void qorbiterManager::updateModel()
 
 void qorbiterManager::clearMediaModel()
 {
-    model->clear();
+
 
 }
 

@@ -1,7 +1,7 @@
 #include "useritem.h"
 
 UserItem::UserItem( QString &userName ,  QString &firstName,  QString &lastName,  QString &nickName,   int &iPK_User,  int &sUserMode,  int &pinRequired,  int &phoneExtension ,  QImage &img,  int &defaultUser ,QObject *parent = 0):
-    ListItem(parent), m_userName(userName), m_firstName(firstName), m_lastName(lastName), m_nickName(nickName), m_pk_user(iPK_User), m_userMode(sUserMode), m_requirePin(pinRequired), m_phoneExtension(phoneExtension), m_image(img), m_defaultUser(defaultUser)
+    m_userName(userName), m_firstName(firstName), m_lastName(lastName), m_nickName(nickName), m_pk_user(iPK_User), m_userMode(sUserMode), m_requirePin(pinRequired), m_phoneExtension(phoneExtension), m_image(img), m_defaultUser(defaultUser)
 {
 }
 

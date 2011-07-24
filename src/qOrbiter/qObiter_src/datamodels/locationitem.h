@@ -2,10 +2,11 @@
 #define LOCATIONITEM_H
 
 
-#include <datamodels/listModel.h>
+#include <QAbstractListModel>
+#include <QVariant>
 #include <QImage>
 
-class LocationItem: public ListItem {
+class LocationItem: public QObject{
 Q_OBJECT
 
 
@@ -20,7 +21,7 @@ Q_OBJECT
     };
 
   public:
-    LocationItem(QObject *parent = 0): ListItem(parent) {}
+    LocationItem(QObject *parent = 0) {}
     explicit LocationItem(const QString &name, const int &iRoom, const QString &sTitle, const int &ea, const int &roomType, QObject *parent = 0);
 
     QVariant data(int role) const;
