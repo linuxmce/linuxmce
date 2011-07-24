@@ -1261,46 +1261,41 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
             DCE::CMD_Request_Datagrid_Contents req_data_grid( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(imgDG),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
             if(SendCommand(req_data_grid))
                     {                   bool barrows = false;
-
+                        if (iData_Size == 0)
+                        {
+                            return; //exit the loop because there is no grid?
+                        }
                        DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
 
                        int cellsToRender= pDataGridTable->GetRows();
-
                        qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
-                       qDebug() << "Response: " << cellsToRender << " cells to render";
+                       qDebug() << "Response: " << cellsToRender << " cells to render";                       
                        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
                        QImage cellImg;
 
-                     //  qmlUI->model->clear();
-
-                       //experimental block
                        for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
                        {
                                DataGridCell *pCell = it->second;
                                const char *pPath = pCell->GetImagePath();
                                QString filePath = QString::fromAscii(pPath);
                                LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"DataGridRenderer::RenderCell loading %s in bg for %d,%d", pPath,pDataGridTable->CovertColRowType(it->first).first,pDataGridTable->CovertColRowType(it->first).second);
-
-
-                               cellImg = getfileForDG(pCell->GetImagePath());
-                               qDebug() << cellImg.isNull();
-                               if (pPath && !pCell->m_pGraphicData && !pCell->m_pGraphic)
+                               if (pPath)
                                {
-                                   const char *pPath = pCell->GetImagePath();
-
-
-
-                                              size_t s=0;
-                                              pCell->m_GraphicLength = (unsigned long) s;
-                                              pCell->m_GraphicFormat = GR_JPG;
-
 
                                }
 
+
+                               if (pPath && !pCell->m_pGraphicData && !pCell->m_pGraphic)
+                               {
+
+                                              cellImg = getfileForDG(pCell->GetImagePath());
+                                              size_t s=0;
+                                              pCell->m_GraphicLength = (unsigned long) s;
+                                              pCell->m_GraphicFormat = GR_JPG;
+                               }
+
                                qmlUI->addMediaItem(QString::fromStdString(pCell->m_Text), filePath, cellImg );
-
-                        }
-
+                            }
                     }
         }
 
