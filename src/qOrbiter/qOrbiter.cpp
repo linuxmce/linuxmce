@@ -1281,25 +1281,29 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                                QString filePath = QString::fromAscii(pPath);
                                LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"DataGridRenderer::RenderCell loading %s in bg for %d,%d", pPath,pDataGridTable->CovertColRowType(it->first).first,pDataGridTable->CovertColRowType(it->first).second);
 
-                               if (pPath && !pCell->m_pGraphicData && !pCell->m_pGraphic)
-                               {
-                                               size_t s=0;
+				if (pPath)
+				{
+					string sPath = pPath;
+					char *oData = NULL;
+					int iData_Size = 0;
+					CMD_Request_File imgFileRequest(m_dwPK_Device, (long)4 , sPath, &oData, &iData_Size);
+					string sResponse;
+					if (!SendCommand(imgFileRequest, &sResponse))
+            				{
+            					qDebug() << "Image request sent";
+            				}
+            				else
+            				{
+            					qDebug() <<"Idata recieved: " << iData_Size ; // size of xml file
+            				}
 
-                                              pCell->m_GraphicLength = (unsigned long) s;
-                                              pCell->m_GraphicFormat = GR_JPG;
-
-
-                               }
-                               else
-                               {
-                                   pCell->m_pGraphic->LoadGraphicFile(pPath);
-                                   int pd = (int)pCell->m_pGraphic->m_GraphicLength;
-                                   QByteArray pixData = QByteArray(QByteArray::fromRawData(pCell->m_pGraphic->m_pGraphicData, pd));
-                                   int pixLen = pCell->m_GraphicLength;
-
-
-                                   cellImg = QImage::fromData(pixData,"JPEG");
-                               }
+					if (iData_Size > 0)
+					{
+						// We can haz image.
+						QByteArray imageData = QByteArray(oData,iData_Size);
+						cellImg = QImage::fromData(imageData,"JPEG");
+					}
+				}
                                qmlUI->addMediaItem(QString::fromStdString(pCell->m_Text), filePath, cellImg );
 
                         }
