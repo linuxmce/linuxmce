@@ -1,6 +1,6 @@
 #include "gridItem.h"
 
-gridItem::gridItem(const QString &name, const QString &size, const QPixmap &img, QObject *parent) :
+gridItem::gridItem(const QString &name, const QString &size, const QImage &img, QObject *parent) :
     ListItem(parent), m_name(name), m_size(size), m_price(-1), m_image(img)
 {
 }

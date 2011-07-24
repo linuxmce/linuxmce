@@ -1269,7 +1269,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                        qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
                        qDebug() << "Response: " << cellsToRender << " cells to render";
                        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
-                       QPixmap cellImg;
+                       QImage cellImg;
 
                      //  qmlUI->model->clear();
 
@@ -1294,11 +1294,11 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                                {
                                    pCell->m_pGraphic->LoadGraphicFile(pPath);
                                    int pd = (int)pCell->m_pGraphic->m_GraphicLength;
-                                   const QByteArray pixData = QByteArray(QByteArray::fromRawData(pCell->m_pGraphic->m_pGraphicData, pd));
+                                   QByteArray pixData = QByteArray(QByteArray::fromRawData(pCell->m_pGraphic->m_pGraphicData, pd));
                                    int pixLen = pCell->m_GraphicLength;
 
 
-                                   cellImg = QPixmap::loadFromData(pixData,"JPEG");
+                                   cellImg = QImage::fromData(pixData,"JPEG");
                                }
                                qmlUI->addMediaItem(QString::fromStdString(pCell->m_Text), filePath, cellImg );
 
@@ -1825,7 +1825,7 @@ bool DCE::qOrbiter::dataGridRequest(string s)
                    qDebug() << "Response: " << cellsToRender << " cells to render";
                     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
                    string testdata;
-                   QPixmap cellImg;
+                   QImage cellImg;
                    QString cellTitle;
                    //experimental block
                  for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)

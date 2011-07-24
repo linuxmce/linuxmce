@@ -589,7 +589,7 @@ void qorbiterManager::execGrp(int grp)
 }
 
 
-bool qorbiterManager::addMediaItem(QString mText, QString temp, QPixmap cell)
+bool qorbiterManager::addMediaItem(QString mText, QString temp, QImage cell)
 {
 
     //const char *tcell = reinterpret_cast<char*>(cell.bits());

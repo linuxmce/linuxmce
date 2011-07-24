@@ -59,12 +59,10 @@ SOURCES += main.cpp \
     screensaver/screensavermodule.cpp \
     ../../PlutoUtils/uuencode.cpp \
     ../../PlutoUtils/ThreadedClass.cpp \
-    ../../PlutoUtils/ProcessUtils.cpp \
     ../../PlutoUtils/Other.cpp \
     ../../PlutoUtils/MultiThreadIncludes.cpp \
     ../../PlutoUtils/minilzo.cpp \
     ../../PlutoUtils/md5c.cpp \
-    ../../PlutoUtils/LinuxSerialUSB.cpp \
     ../../PlutoUtils/getch.cpp \
     ../../PlutoUtils/FileUtils.cpp \
     ../../PlutoUtils/CommonIncludes.cpp \
