@@ -33,7 +33,7 @@ void LocationModel::appendRows(const QList<LocationItem *> &items)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
   foreach(LocationItem *item, items) {
-    connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
+    //connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
     m_list.append(item);
   }
   endInsertRows();
@@ -43,7 +43,7 @@ void LocationModel::insertRow(int row, LocationItem *item)
 {
   beginInsertRows(QModelIndex(), row, row);
   connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
-  m_list.insert(row, item);
+ // m_list.insert(row, item);
   endInsertRows();
 }
 

@@ -1249,7 +1249,9 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
         qmlUI->m_dwIDataGridRequestCounter++;
 
         //temp =  QString::fromStdString(qmlUI->gridReqType->toStdString());
-        QString s = QString::number(iPK_MediaType) + "||||1,2||13||2|";
+        QString params;
+        params = "||||1,2||13||2|";
+        QString s = QString::number(iPK_MediaType) + params;
 
         CMD_Populate_Datagrid populateDataGrid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 63, s.toStdString(), DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
@@ -1300,6 +1302,14 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                                               size_t s=0;
                                               pCell->m_GraphicLength = (unsigned long) s;
                                               pCell->m_GraphicFormat = GR_JPG;
+                               }
+                               else if (!pPath)
+                               {
+                                   cellImg.load(":/icons/videos.png");
+                               }
+                               else if (cellImg.isNull())
+                               {
+                                   cellImg.load(":/icons/videos.png");
                                }
 
                                qmlUI->model->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg,  qmlUI->model));

@@ -35,7 +35,7 @@ void LightingScenarioModel::appendRows(const QList<LightingScenarioItem *> &item
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
   foreach(LightingScenarioItem *item, items) {
-    connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
+    //connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
     m_list.append(item);
   }
   endInsertRows();
@@ -44,7 +44,7 @@ void LightingScenarioModel::appendRows(const QList<LightingScenarioItem *> &item
 void LightingScenarioModel::insertRow(int row, LightingScenarioItem *item)
 {
   beginInsertRows(QModelIndex(), row, row);
-  connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
+ // connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
   m_list.insert(row, item);
   endInsertRows();
 }

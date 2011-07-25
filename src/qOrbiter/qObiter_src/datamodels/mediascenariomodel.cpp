@@ -33,7 +33,7 @@ void MediaScenarioModel::appendRows(const QList<MediaScenarioItem *> &items)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
   foreach(MediaScenarioItem *item, items) {
-    connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
+  //  connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
     m_list.append(item);
   }
   endInsertRows();
@@ -42,7 +42,7 @@ void MediaScenarioModel::appendRows(const QList<MediaScenarioItem *> &items)
 void MediaScenarioModel::insertRow(int row, MediaScenarioItem *item)
 {
   beginInsertRows(QModelIndex(), row, row);
-  connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
+//  connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
   m_list.insert(row, item);
   endInsertRows();
 }

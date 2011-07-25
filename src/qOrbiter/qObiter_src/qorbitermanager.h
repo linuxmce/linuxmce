@@ -196,7 +196,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
       //ui related
       int getlocation() const ;
       void setLocation(const int& , const int& ) ;
-      Q_INVOKABLE bool gotoQScreen(QString ) ;
+      Q_INVOKABLE void gotoQScreen(QString ) ;
       void setNowPlayingIcon(bool b);
 
       //initialization related

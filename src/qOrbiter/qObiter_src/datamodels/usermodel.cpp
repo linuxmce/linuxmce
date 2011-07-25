@@ -35,7 +35,7 @@ void UserModel::appendRows(const QList<UserItem *> &items)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
   foreach(UserItem *item, items) {
-    connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
+    //connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
     m_list.append(item);
   }
   endInsertRows();
@@ -44,7 +44,7 @@ void UserModel::appendRows(const QList<UserItem *> &items)
 void UserModel::insertRow(int row, UserItem *item)
 {
   beginInsertRows(QModelIndex(), row, row);
-  connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
+  //connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
   m_list.insert(row, item);
   endInsertRows();
 }

@@ -33,7 +33,7 @@ void ClimateScenarioModel::appendRows(const QList<ClimateScenarioItem *> &items)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
   foreach(ClimateScenarioItem *item, items) {
-    connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
+    //connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
     m_list.append(item);
   }
   endInsertRows();
@@ -42,7 +42,7 @@ void ClimateScenarioModel::appendRows(const QList<ClimateScenarioItem *> &items)
 void ClimateScenarioModel::insertRow(int row, ClimateScenarioItem *item)
 {
   beginInsertRows(QModelIndex(), row, row);
-  connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
+//  connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
   m_list.insert(row, item);
   endInsertRows();
 }

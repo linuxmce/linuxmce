@@ -14,11 +14,16 @@ import "components"
     //  property string currentRoomTelecom: telecomModel
     //  property string currentRoomSecurity: lightingModel
 
-     function screenchange(screenname)
+     function screenchange(screenname )
      {
-         pageLoader.source = screenname
-         console.log("Command to change to:" + screenname)
-         return "success!"
+         if(pageLoader.source = screenname)
+         {
+             console.log("Command to change to:" + screenname+ " was successfull")
+         }
+         else
+         {
+             console.log("Command to change to:" + screename + " failed!")
+         }
      }
 
      Style {id:style}

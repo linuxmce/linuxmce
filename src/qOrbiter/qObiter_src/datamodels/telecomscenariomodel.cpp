@@ -33,7 +33,7 @@ void TelecomScenarioModel::appendRows(const QList<TelecomScenarioItem *> &items)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
   foreach(TelecomScenarioItem *item, items) {
-    connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
+ //   connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
     m_list.append(item);
   }
   endInsertRows();
@@ -42,7 +42,7 @@ void TelecomScenarioModel::appendRows(const QList<TelecomScenarioItem *> &items)
 void TelecomScenarioModel::insertRow(int row, TelecomScenarioItem *item)
 {
   beginInsertRows(QModelIndex(), row, row);
-  connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
+ // connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
   m_list.insert(row, item);
   endInsertRows();
 }

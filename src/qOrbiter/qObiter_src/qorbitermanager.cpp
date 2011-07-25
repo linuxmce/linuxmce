@@ -124,7 +124,7 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     qorbiterUIwin->rootContext()->setContextProperty("currentSkinUrl" , currentSkinURL);
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
 
-
+    //adjusting path for devices
     QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin")) +currentSkinURL;
 
     QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex)));
@@ -163,19 +163,13 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
 }
 
 
-bool qorbiterManager::gotoQScreen(QString s)
+void qorbiterManager::gotoQScreen(QString s)
 {
     QVariant screenname= s;
-    QVariant returnedValue ="null";
+    QVariant returnedValue;
     QObject *item = qorbiterUIwin->rootObject();
-    if (QMetaObject::invokeMethod(item, "screenchange",  Q_ARG(QVariant, screenname)))
-       {
-           qDebug() << returnedValue; return true;
-       }
-                    else
-       {
-            qDebug () << "Failure!" << qPrintable(s) <<": " << returnedValue.toString(); return false;
-       }
+    QMetaObject::invokeMethod(item, "screenchange",  Q_ARG(QVariant, screenname));
+
 }
 
 bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode)
