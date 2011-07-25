@@ -28,10 +28,10 @@ Rectangle {
 
                      MouseArea{
                          anchors.fill: frame
-                         onClicked: console.log(index + ":"+ name)
+                         onClicked: console.log(index + ":"+ name+ id)
                      }
 
-                         Image { source:"image://datagridimg/"+path ; height: 100; width: 156; anchors.centerIn: parent}
+                         Image { source:"image://datagridimg/"+id ; height: 100; width: 156; anchors.centerIn: parent}
                      }
 
                  Text {

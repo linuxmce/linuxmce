@@ -1275,6 +1275,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
 
                        QString cellTitle;
+                       QString fk_file;
                        QString filePath;
                        int index;
                        QImage cellImg;
@@ -1285,10 +1286,11 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                                DataGridCell *pCell = it->second;
                                const char *pPath = pCell->GetImagePath();
                                filePath = QString::fromLatin1(pPath);
-
+                               fk_file = pCell->GetValue();
                                cellTitle = QString::fromStdString(pCell->m_Text);
                                index = pDataGridTable->CovertColRowType(it->first).first;
                               // LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"DataGridRenderer::RenderCell loading %s in bg for %d,%d", pPath,pDataGridTable->CovertColRowType(it->first).first,pDataGridTable->CovertColRowType(it->first).second);
+
 
 
                                if (pPath && !pCell->m_pGraphicData && !pCell->m_pGraphic)
@@ -1300,7 +1302,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                                               pCell->m_GraphicFormat = GR_JPG;
                                }
 
-                               qmlUI->model->appendRow(new gridItem(cellTitle, filePath, index, cellImg,  qmlUI->model));
+                               qmlUI->model->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg,  qmlUI->model));
                             }
                     }
         }
@@ -1833,9 +1835,10 @@ bool DCE::qOrbiter::dataGridRequest(string s)
 
                            DataGridCell *pCell = it->second;
                            const char *pPath = pCell->GetImagePath();
+
                            cellTitle = QString::fromStdString(pCell->m_Text);
-                            filePath= QString::fromStdString(pPath);
-                            cellIndex = 1;
+                           filePath= QString::fromStdString(pPath);
+                           cellIndex = 1;
 
                            if (pPath && !pCell->m_pGraphicData && !pCell->m_pGraphic)
                            {
@@ -1850,7 +1853,7 @@ bool DCE::qOrbiter::dataGridRequest(string s)
 
                          //  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"DataGridRenderer::RenderCell loading %s in bg for %d,%d", pPath,pDataGridTable->CovertColRowType(it->first).first,pDataGridTable->CovertColRowType(it->first).second);
 
-                           qmlUI->model->appendRow(new gridItem(cellTitle, filePath, cellIndex, cellImg , qmlUI->model));
+                         //  qmlUI->model->appendRow(new gridItem(cellTitle, filePath, cellIndex, cellImg , qmlUI->model));
                    }
                 }
     }
@@ -1938,7 +1941,7 @@ QImage DCE::qOrbiter::getfileForDG(string filePath)
        if (!returnImage.loadFromData(configData, "JPEG"))
        {
            qDebug() << "Couldnt get image, defaulting";
-           returnImage.load("qrc:/img/icons/xine.png");
+           returnImage.load(":/icons/videos.png");
        }
 
       // LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Sending back image for %s", filePath);

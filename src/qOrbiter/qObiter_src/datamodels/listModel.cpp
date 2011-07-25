@@ -42,18 +42,17 @@ void ListModel::appendRows(const QList<gridItem *> &items)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
   foreach(gridItem *item, items) {
- qDebug() << "Item added!";
+
     QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
     m_list.append(item);
-
-    QModelIndex index = indexFromItem(m_list.last());
-    QModelIndex index2 = indexFromItem(m_list.first());
-    //qDebug() << "new item index" << index;
-emit dataChanged(index2, index);
-
   }
 
   endInsertRows();
+  QModelIndex index = indexFromItem(m_list.last());
+  QModelIndex index2 = indexFromItem(m_list.first());
+
+emit dataChanged(index2, index);
+
 }
 
 void ListModel::insertRow(int row, gridItem *item)

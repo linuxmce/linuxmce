@@ -117,7 +117,7 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     model = new ListModel(new gridItem, this);
 
     basicProvider = new basicImageProvider();
-    advancedProvider = new GridIndexProvider(model , 3, 4);
+    advancedProvider = new GridIndexProvider(model , 6, 4);
 
     qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
     qorbiterUIwin->engine()->addImageProvider("datagridimg", advancedProvider);

@@ -1,7 +1,7 @@
 #include <datamodels/gridItem.h>
 
-gridItem::gridItem( QString &name,  QString &path,  int &index,  QImage &img, QObject *parent) :
-    m_name(name), m_path(path), m_index(index), m_image(img)
+gridItem::gridItem( QString &ident, QString &name,  QString &path,  int &index,  QImage &img, QObject *parent) :
+    m_fk_file(ident), m_name(name), m_path(path), m_index(index), m_image(img)
 {
 
 }
@@ -15,6 +15,7 @@ QHash<int, QByteArray> gridItem::roleNames() const
   names[PathRole] = "path";
   names[AttributeRole] = "attributes";
   names[ImageRole] = "cellImage";
+  names[FKRole]= "id";
   return names;
 
 
@@ -31,6 +32,8 @@ QVariant gridItem::data(int role) const
     return cellImage();
   case PathRole:
     return path();
+  case FKRole:
+    return id();
   default:
     return QVariant();
   }

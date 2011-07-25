@@ -32,15 +32,14 @@ QImage GridIndexProvider::requestImage(const QString &id, QSize *size, const QSi
 
         QString key = QString("image://datagridimg/%1").arg(id);
 
-        qDebug() << key << "::" << id ;
+       qDebug()  << id ;
         QModelIndex index = mPixmapIndex.value(id);
-
         QImage image = mModel.data(index, mPixmapRole).value<QImage>();
 
 
         if(image.isNull())
         {
-           // qDebug()<< "couldnt find " << key << "in model at" << index;
+            qDebug()<< "couldnt find " << id << "in model at" << index;
             if (!image.load(":/icons/videos.png"))
             {
                 qDebug() << "Placeholder failed to load" << image.isNull();
@@ -63,13 +62,11 @@ void GridIndexProvider::dataUpdated(const QModelIndex& topLeft, const QModelInde
 {
     // For each pixmap already in the model, get a mapping between the name and the index
 
-
     for(int row = 0; row < mModel.rowCount(); row++) {     
         QModelIndex index = mModel.index(row, 0);
         QString path = mModel.data(index, mPathRole).value<QString>();
 
         mPixmapIndex[path] = index;
-
     }
 
 }
@@ -82,6 +79,7 @@ void GridIndexProvider::dataDeleted(const QModelIndex&, int start, int end)
         QString path = mModel.data(index, mPathRole).value<QString>();
         mPixmapIndex[path] = index;
     }
+
 }
 
 void GridIndexProvider::dataReset()
