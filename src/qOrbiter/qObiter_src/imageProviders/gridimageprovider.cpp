@@ -6,12 +6,14 @@ GridIndexProvider::GridIndexProvider(ListModel *model  , int pathRole, int pixma
     mPixmapRole(pixmapRole)
 {
     // For each pixmap already in the model, get a mapping between the name and the index
+ qRegisterMetaType<QModelIndex>("QModelIndex");
 
     for(int row = 0; row < mModel.rowCount(); row++) {
 
         QModelIndex index = mModel.index(row, 0);
 
         QString path = mModel.data(index, mPathRole).value<QString>();
+
 
         mPixmapIndex[path] = index;
     }
@@ -28,13 +30,16 @@ GridIndexProvider::GridIndexProvider(ListModel *model  , int pathRole, int pixma
 QImage GridIndexProvider::requestImage(const QString &id, QSize *size, const QSize &requestedSize)
 {
 
-        QString key = QString("image://model/%1").arg(id);
-        QModelIndex index = mPixmapIndex.value(key);
+        QString key = QString("image://datagridimg/%1").arg(id);
+
+        QModelIndex index = mPixmapIndex.value(id);
+        qDebug() << index;
         QImage image = mModel.data(index, mPixmapRole).value<QImage>();
+
 
         if(image.isNull())
         {
-            qDebug()<< "couldnt find image in model +" << index;
+            qDebug()<< "couldnt find " << id << "in model at" << index;
             image.load("qrc:/icons/xine.png");
         }
         QImage result;
@@ -52,12 +57,14 @@ QImage GridIndexProvider::requestImage(const QString &id, QSize *size, const QSi
 void GridIndexProvider::dataUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight)
 {
     // For each pixmap already in the model, get a mapping between the name and the index
-    for(int row = 0; row < mModel.rowCount(); row++) {
-        qDebug() << "Data Updated!" << row;
+
+
+    for(int row = 0; row < mModel.rowCount(); row++) {     
         QModelIndex index = mModel.index(row, 0);
         QString path = mModel.data(index, mPathRole).value<QString>();
         mPixmapIndex[path] = index;
     }
+
 }
 
 void GridIndexProvider::dataDeleted(const QModelIndex&, int start, int end)
@@ -67,7 +74,6 @@ void GridIndexProvider::dataDeleted(const QModelIndex&, int start, int end)
         QModelIndex index = mModel.index(row, 0);
         QString path = mModel.data(index, mPathRole).value<QString>();
         mPixmapIndex[path] = index;
-
     }
 }
 

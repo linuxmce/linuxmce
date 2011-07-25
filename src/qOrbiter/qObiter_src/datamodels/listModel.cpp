@@ -43,17 +43,24 @@ void ListModel::appendRows(const QList<gridItem *> &items)
   beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
   foreach(gridItem *item, items) {
  qDebug() << "Item added!";
-    QObject::connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
+    QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
     m_list.append(item);
-  }
-  endInsertRows();
 
+    QModelIndex index = indexFromItem(m_list.last());
+    QModelIndex index2 = indexFromItem(m_list.first());
+    //qDebug() << "new item index" << index;
+emit dataChanged(index2, index);
+
+  }
+
+  endInsertRows();
 }
 
 void ListModel::insertRow(int row, gridItem *item)
 {
   beginInsertRows(QModelIndex(), row, row);
-  connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
+  connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
+  qDebug() << "Inserting at:" << row;
   m_list.insert(row, item);
   endInsertRows();
 }
@@ -62,10 +69,9 @@ void ListModel::handleItemChange()
 {
   gridItem* item = static_cast<gridItem*>(sender());
   QModelIndex index = indexFromItem(item);
-
+  qDebug() << "Handling item change for:" << index;
   if(index.isValid())
   {
-
     emit dataChanged(index, index);
   }
 }

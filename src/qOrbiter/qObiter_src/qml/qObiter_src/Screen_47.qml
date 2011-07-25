@@ -31,7 +31,7 @@ Rectangle {
                          onClicked: console.log(index + ":"+ name)
                      }
 
-                         Image { source:"image://datagridimg/"+index ; height: 100; width: 156; anchors.centerIn: parent}
+                         Image { source:"image://datagridimg/"+path ; height: 100; width: 156; anchors.centerIn: parent}
                      }
 
                  Text {
@@ -67,7 +67,7 @@ Rectangle {
 
      Connections{
          target:dataModel
-         onDataChanged:console.log("something changed: ")
+         onDataChanged:console.log("Model Changed!")
      }
 
     }

@@ -6,6 +6,7 @@ Item {
     property alias nowplayingtext:now_playing.buttontext
     property alias rowlabel: rowheader.buttontext
 
+
     height: style.homescreenrowheight
     width: parent.width
 
@@ -55,7 +56,7 @@ Flickable{
             id: now_playing
             height: style.buttonH
             width: style.buttonW
-            color: style.homeScreenNowPlayingColorInActive
+            color: nowPlayingColor
             radius: style.but_smooth
             buttontext: ""
 

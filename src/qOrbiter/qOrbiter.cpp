@@ -986,6 +986,8 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
 	cout << "Parm #50 - Name=" << sName << endl;
 	cout << "Parm #103 - List_PK_Device=" << sList_PK_Device << endl;
 	cout << "Parm #120 - Retransmit=" << bRetransmit << endl;
+
+        qmlUI->setNowPlayingIcon(true);
 }
 
 //<-dceag-c254-b->
@@ -1271,18 +1273,22 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                        qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
                        qDebug() << "Response: " << cellsToRender << " cells to render";                       
                        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
+
+                       QString cellTitle;
+                       QString filePath;
+                       int index;
                        QImage cellImg;
+
 
                        for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
                        {
                                DataGridCell *pCell = it->second;
                                const char *pPath = pCell->GetImagePath();
-                               QString filePath = QString::fromAscii(pPath);
-                               LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"DataGridRenderer::RenderCell loading %s in bg for %d,%d", pPath,pDataGridTable->CovertColRowType(it->first).first,pDataGridTable->CovertColRowType(it->first).second);
-                               if (pPath)
-                               {
+                               filePath = QString::fromLatin1(pPath);
 
-                               }
+                               cellTitle = QString::fromStdString(pCell->m_Text);
+                               index = pDataGridTable->CovertColRowType(it->first).first;
+                              // LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"DataGridRenderer::RenderCell loading %s in bg for %d,%d", pPath,pDataGridTable->CovertColRowType(it->first).first,pDataGridTable->CovertColRowType(it->first).second);
 
 
                                if (pPath && !pCell->m_pGraphicData && !pCell->m_pGraphic)
@@ -1294,7 +1300,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                                               pCell->m_GraphicFormat = GR_JPG;
                                }
 
-                               qmlUI->addMediaItem(QString::fromStdString(pCell->m_Text), filePath, cellImg );
+                               qmlUI->model->appendRow(new gridItem(cellTitle, filePath, index, cellImg,  qmlUI->model));
                             }
                     }
         }

@@ -63,14 +63,35 @@ public:
     GridIndexProvider *advancedProvider;
     QString *gridReqType;
 
-
-    //datagrid variables
-    QString q_mediaType;
-    QString q_publicUsers;
-    QString q_fileFormat;
-    QString q_subType;
-    QString q_attribute;
-
+    /*
+datagrid variables
+these correlate to the variable string sent to the datagrid.
+param #'s                                               1 2 3 4  5  6  7 8 9 10
+the sorting parameters are always sent as a string like 5| | | |1,2| |13| |2|
+where
+MediaBrowser parms: ,  ,   , 13, 0,  2, pk_attribute
+Param 1 - media type -cannot be blank
+Param 2 - submediatype can be blank for video, audio, images
+Param 3 - fileformat -??
+Param 4 - attribute_genres - can be blank for video, audio, pictures??
+Param 5 - sources 1,2, -cannot be blank!
+Param 6 - users_private - ??
+Param 7 - attributetype_sort
+Param 8 - ?? users
+Param 9 - ??last_viewed
+Param 10 - pk_attribute
+      */
+    QString q_mediaType;           //1
+    QString q_subType;             //2
+    QString q_fileFormat;          //3
+    QString q_attribute_genres;    //4
+    QString q_mediaSources;         //5
+    QString q_usersPrivate;        //6
+    QString q_attributetype_sort;  //7
+    QString q_pk_users;             //8
+    QString q_last_viewed;        //9
+    QString q_pk_attribute;        //10
+    QString *datagridVariableString;
 
     //listmodels
     QByteArray binaryConfig;
@@ -90,6 +111,7 @@ public:
     Q_INVOKABLE void setCurrentUser();
     //class objects
     DCE::qOrbiter * pqOrbiter;                  //reference to forward declared dce object
+    bool mediaPlaying;
 
     //QT Functions to initialize lmce data
     bool initialize(int dev_id);
@@ -175,6 +197,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
       int getlocation() const ;
       void setLocation(const int& , const int& ) ;
       Q_INVOKABLE bool gotoQScreen(QString ) ;
+      void setNowPlayingIcon(bool b);
 
       //initialization related
       void regenOrbiter(int deviceNo);

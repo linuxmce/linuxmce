@@ -14,11 +14,10 @@ class gridItem: public QObject
 public:
   enum Roles {
     NameRole = Qt::UserRole+1,
-    IndexRole,
-    PathRole,
-    ImageRole,
-    AttributeRole
-
+    IndexRole =Qt::UserRole+2,
+    PathRole= Qt::UserRole+3,
+    ImageRole = Qt::UserRole+4,
+    AttributeRole = Qt::UserRole+5
   };
 
 public:
@@ -31,7 +30,7 @@ public:
   inline QString name() const { return m_name; }
   inline int index() const { return m_index; }
   inline QString path() const { return m_path; }
-  inline QImage cellImage() const {return m_image; }
+  inline QImage cellImage() const {  return m_image; }
   inline QMap <QString*, int> attributes() const {return m_mapAttrib;}
 
 

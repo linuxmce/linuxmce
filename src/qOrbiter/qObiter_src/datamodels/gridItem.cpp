@@ -11,11 +11,12 @@ QHash<int, QByteArray> gridItem::roleNames() const
 
   QHash<int, QByteArray> names;
   names[NameRole] = "name";
-  names[IndexRole] = "index";
+  names[IndexRole] = "dceindex";
   names[PathRole] = "path";
   names[AttributeRole] = "attributes";
   names[ImageRole] = "cellImage";
   return names;
+
 
 }
 

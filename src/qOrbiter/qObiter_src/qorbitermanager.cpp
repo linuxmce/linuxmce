@@ -117,17 +117,17 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     model = new ListModel(new gridItem, this);
 
     basicProvider = new basicImageProvider();
-    advancedProvider = new GridIndexProvider(new ListModel(new gridItem,this), 1, 5);
+    advancedProvider = new GridIndexProvider(model , 3, 4);
 
     qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
-
     qorbiterUIwin->engine()->addImageProvider("datagridimg", advancedProvider);
     qorbiterUIwin->rootContext()->setContextProperty("currentSkinUrl" , currentSkinURL);
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
 
+
     QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin")) +currentSkinURL;
 
-    //QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex)));
+    QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex)));
 
     qDebug () << "QML import path for build: " << qmlPath;
     qorbiterUIwin->engine()->setBaseUrl(qmlPath);
@@ -159,6 +159,7 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
      QString *q_fileFormat=NULL;
      QString *q_subType=NULL;
      QString *q_attribute = NULL;
+
 }
 
 
@@ -272,6 +273,10 @@ bool qorbiterManager::refreshUI()
 // get conf method that reads config file
 bool qorbiterManager::getConf(int pPK_Device)
 {
+    if(!pqOrbiter->DATA_Get_Get_Time_Code_for_Media())
+    {
+        setNowPlayingIcon(false);
+    }
 
     qDebug() << "Reading Config" ;
     iPK_Device = long(pPK_Device);
@@ -700,5 +705,13 @@ void qorbiterManager::setSorting(int i)
     q_mediaType = "videomodel";
     this->qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
     emit gridTypeChanged();
+}
+
+void qorbiterManager::setNowPlayingIcon(bool b)
+{
+    QColor color;
+    color.fromRgb(255, 255, 215);
+    qorbiterUIwin->rootContext()->setContextProperty("nowPlayingColor", color);
+    item->setProperty("nowplayingtext", "null");
 }
 
