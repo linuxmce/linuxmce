@@ -1,4 +1,5 @@
 # Add more folders to ship with the application, here
+
 for_desktop{
 folder_01.source = qml/desktop
 folder_01.target = qml
@@ -17,8 +18,18 @@ folder_02.target=     #left blank so it will appear in the root
 DEFINES += for_freemantle
 }
 
+for_harmattan{
+folder_01.source = qml/harmattan
+folder_01.target = qml
+
+folder_02.source= img
+folder_02.target=     #left blank so it will appear in the root
+DEFINES += for_harmattan
+}
+
 
 DEPLOYMENTFOLDERS = folder_01 folder_02
+
 # Additional import path used to resolve QML modules in Creator's code model
 QML_IMPORT_PATH =
 
@@ -155,6 +166,7 @@ OTHER_FILES+=\
     android/src/eu/licentia/necessitas/mobile/QtCamera.java \
     android/src/eu/licentia/necessitas/mobile/QtMediaPlayer.java \
     android/src/eu/licentia/necessitas/mobile/QtLocation.java \
+    android/AndroidManifest.xml \
     android/AndroidManifest.xml \   
     qtc_packaging/debian_harmattan/rules \
     qtc_packaging/debian_harmattan/README \
