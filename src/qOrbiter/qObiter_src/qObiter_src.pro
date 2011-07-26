@@ -27,6 +27,13 @@ folder_02.target=     #left blank so it will appear in the root
 DEFINES += for_harmattan
 }
 
+macosx{
+folder_01.source = qml/desktop
+folder_01.target = qml
+
+folder_02.source= img
+folder_02.target=     #left blank so it will appear in the root
+}
 
 DEPLOYMENTFOLDERS = folder_01 folder_02
 
@@ -147,7 +154,7 @@ HEADERS += \
 OTHER_FILES += Readme.txt
 
 android{
-OTHER_FILES+=\
+OTHER_FILES=\
     android/res/values/libs.xml \
     android/res/values/strings.xml \
     android/res/drawable-hdpi/icon.png \
@@ -167,7 +174,10 @@ OTHER_FILES+=\
     android/src/eu/licentia/necessitas/mobile/QtMediaPlayer.java \
     android/src/eu/licentia/necessitas/mobile/QtLocation.java \
     android/AndroidManifest.xml \
-    android/AndroidManifest.xml \   
+    android/AndroidManifest.xml \
+}
+for_harmattan{
+OTHER_FILES= \
     qtc_packaging/debian_harmattan/rules \
     qtc_packaging/debian_harmattan/README \
     qtc_packaging/debian_harmattan/copyright \
