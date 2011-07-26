@@ -17,8 +17,6 @@ QHash<int, QByteArray> gridItem::roleNames() const
   names[ImageRole] = "cellImage";
   names[FKRole]= "id";
   return names;
-
-
 }
 
 QVariant gridItem::data(int role) const
@@ -37,5 +35,4 @@ QVariant gridItem::data(int role) const
   default:
     return QVariant();
   }
-
 }

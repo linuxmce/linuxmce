@@ -19,6 +19,7 @@ Rectangle {
 
                  Rectangle {
                      id:frame
+                     opacity: 1
                      width: mainItem.width
                      height: mainItem.height
                      anchors.centerIn: mainItem
@@ -31,7 +32,7 @@ Rectangle {
                          onClicked: console.log(index + ":"+ name+ id)
                      }
 
-                         Image { source:"image://datagridimg/"+id ; height: 100; width: 156; anchors.centerIn: parent}
+                         Image { id: imagerect; source:"image://datagridimg/"+id ; height: 100; width: 156; anchors.centerIn: parent}
                      }
 
                  Text {
@@ -60,15 +61,15 @@ Rectangle {
         width: 609
         height: 400
         clip: true
-
         contentItem.clip: true
         cellWidth: 156
         cellHeight: 100
 
         onModelChanged: {console.log("Grid Item Added!")}
+
+
      Connections{
          target:dataModel
-         onDataChanged:console.log("Item Added!")
 
      }
 

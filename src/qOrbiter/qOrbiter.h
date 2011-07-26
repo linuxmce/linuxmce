@@ -60,9 +60,9 @@ public:
                 bool initialize();
 
                 bool deinitialize();
-                bool dataGridRequest(string s);
+
                 bool getConfiguration();
-                bool executeCommandGroup(int cmdGrp);
+                void executeCommandGroup(int cmdGrp);
                 QImage getfileForDG(string filename);
 //<-dceag-const-e->
 

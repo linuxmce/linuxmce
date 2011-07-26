@@ -33,14 +33,15 @@ QImage GridIndexProvider::requestImage(const QString &id, QSize *size, const QSi
         QString key = QString("image://datagridimg/%1").arg(id);
         QModelIndex index = mPixmapIndex.value(id);
         QImage image = mModel.data(index, mPixmapRole).value<QImage>();
+
         QImage result;
 
         if (requestedSize.isValid()) {
-            result = image.scaled(requestedSize, Qt::KeepAspectRatio);
+            result = image.scaled(requestedSize);
         } else {
             result = image;
         }
-        *size = result.size();
+       // *size = result.size();
         return result;
 
 }

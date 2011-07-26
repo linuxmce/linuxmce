@@ -544,18 +544,8 @@ void qorbiterManager::closeOrbiter()
   */
 bool qorbiterManager::requestDataGrid()
 {
-    /*
-      the questionable custom provider that kinda worked once...*/
-
-   // qorbiterUIwin->engine()->addImageProvider(QString("datagridimg"),  new GridIndexProvider(&model, 0, 0, parent));
-
-    //notice this commented out code as well. it 'worked' to crash things. thats about it
-   //QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)), gridImageHandler,SLOT(dataUpdated(QModelIndex,QModelIndex)));
-
 
     m_dwIDataGridRequestCounter++;
-  //  qDebug() << " Datagrid Request Counter: " << m_dwIDataGridRequestCounter;
-  //  pqOrbiter->dataGridRequest( s.toStdString());
 
     return true;
 
@@ -585,7 +575,6 @@ void qorbiterManager::setCurrentUser()
 
 void qorbiterManager::execGrp(int grp)
 {
-
     pqOrbiter->executeCommandGroup(grp);
 }
 
@@ -614,10 +603,8 @@ void qorbiterManager::clearMediaModel()
 
 void qorbiterManager:: setLocation(const int &room, const int &ea)
 {
-
     iFK_Room = room;
     iea_area = ea;
-
    emit locationChanged(room, ea);
 }
 
@@ -629,13 +616,10 @@ int qorbiterManager::getlocation() const
 void qorbiterManager::regenOrbiter(int deviceNo)
 {
     qorbiterUIwin->hide();
-   // qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/qObiter_src/Splash.qml"));
-
     qDebug() << "Regenerating..";
     QProcess *regen = new QProcess(this);
     regen->start("sudo /var/www/lmce-admin/qOrbiterGen.php?d="+QString::number(iPK_Device), QIODevice::ReadOnly);
     qDebug() <<"status code:" << regen->error();
-
     QObject::connect(regen,SIGNAL(finished(int)), this, SLOT(regenComplete(int)));
 
 }

@@ -49,7 +49,7 @@ Rectangle {
         delegate:  Rectangle
         {
             id: delrect
-            height:20
+            height:50
              width: 100
 
 
@@ -92,8 +92,8 @@ Rectangle {
 
             PropertyChanges {
                 target: rectangle1
-                width: 300
-                height: 125
+                width: 400
+                height: 200
                 color: "#d9e9ee"
                 radius: 24
 
@@ -102,15 +102,14 @@ Rectangle {
 
             PropertyChanges {
                 target: listview1
-                x: 25
-                y: 19
-                width: 261
-                height: 106
+
+                width: 400
+                height: 2000
                 clip: true
                 smooth: true
                 visible: true
-                anchors.rightMargin: 11
-                anchors.bottomMargin: 21
+
+
             }
 
             PropertyChanges {

@@ -58,12 +58,13 @@ Rectangle {
                     Rectangle
                  {
                      id: delrect
-                     height:35
-                     width: roomListModel.width
+                     height:50
+                     width: parent.width
 
                      Text {
                              id: somshit
                              text: Title + ":" + intRoom + ", In EA: " + entertain_area
+                             font.pointSize: 12
                             }
 
                      MouseArea{
@@ -114,8 +115,8 @@ Rectangle {
                         target: roomListModel
                         x: 0
                         y: 19
-                        height: 100
-                        width:250
+                        height: 181
+                        width:300
                         visible: true
 
                     }

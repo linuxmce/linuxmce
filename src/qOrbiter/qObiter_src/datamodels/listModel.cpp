@@ -97,8 +97,10 @@ QModelIndex ListModel::indexFromItem(const gridItem *item) const
 
 void ListModel::clear()
 {
+
   qDeleteAll(m_list);
   m_list.clear();
+  this->reset();
 
 }
 
