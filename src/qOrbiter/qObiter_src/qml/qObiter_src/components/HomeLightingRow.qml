@@ -30,7 +30,7 @@ Item {
 
             Image {
                 id: onimg
-                source: "../../../img/icons/jabber_protocol.png"
+                source: "../../../../img/icons/jabber_protocol.png"
                 height: style.iconHeight
                 width: style.iconWidth
                 anchors.centerIn: parent
