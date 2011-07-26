@@ -30,7 +30,7 @@ Rectangle {
 
     Image {
         id: userImage
-        source: "../../../img/icons/personal.png"
+        source: "../../../../img/icons/personal.png"
         height: 60
         width: 60
         anchors.centerIn: parent
