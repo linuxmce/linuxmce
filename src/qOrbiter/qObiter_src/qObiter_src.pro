@@ -8,6 +8,15 @@ folder_02.target=     #left blank so it will appear in the root
 DEFINES += for_desktop
 }
 
+for_freemantle{
+folder_01.source = qml/freemantle
+folder_01.target = qml
+
+folder_02.source= img
+folder_02.target=     #left blank so it will appear in the root
+DEFINES += for_freemantle
+}
+
 
 DEPLOYMENTFOLDERS = folder_01 folder_02
 # Additional import path used to resolve QML modules in Creator's code model

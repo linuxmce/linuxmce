@@ -107,6 +107,14 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     buildType = "/qml/desktop/";
 #endif
 
+#ifdef for_freemantle
+    buildType = "/qml/freemantle/";
+#endif
+
+#ifdef for_harmattan
+    buildType="/qml/harmattan"
+        #endif
+
 
 
     currentSkin = "default";
