@@ -102,6 +102,12 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     QWidget(parent)
 {
 
+    QString buildType;
+#ifdef for_desktop
+    buildType = "/qml/desktop/";
+#endif
+
+
 
     currentSkin = "default";
     currentSkinURL="/qml/qObiter_src/";
@@ -125,13 +131,14 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
 
     //adjusting path for devices
-    QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin")) +currentSkinURL;
+    QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
+    QString finalPath = qmlPath+buildType+currentSkin;
 
     QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex)));
 
     qDebug () << "QML import path for build: " << qmlPath;
     qorbiterUIwin->engine()->setBaseUrl(qmlPath);
-    qorbiterUIwin->setSource(QUrl::fromLocalFile(qmlPath+"main.qml"));
+    qorbiterUIwin->setSource(QUrl::fromLocalFile(finalPath+"/main.qml"));
 
     QObject *item= qorbiterUIwin->rootObject();
 #ifdef Q_OS_SYMBIAN
@@ -660,6 +667,7 @@ QString qorbiterManager::adjustPath(const QString &path)
 {
 
 #ifdef Q_OS_UNIX
+
 #ifdef Q_OS_MAC
    if (!QDir::isAbsolutePath(path))
          return QCoreApplication::applicationDirPath()

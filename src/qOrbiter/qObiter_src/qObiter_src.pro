@@ -1,8 +1,15 @@
 # Add more folders to ship with the application, here
-folder_01.source = qml/qObiter_src
+for_desktop{
+folder_01.source = qml/desktop
 folder_01.target = qml
-DEPLOYMENTFOLDERS = folder_01
 
+folder_02.source= img
+folder_02.target=     #left blank so it will appear in the root
+DEFINES += for_desktop
+}
+
+
+DEPLOYMENTFOLDERS = folder_01 folder_02
 # Additional import path used to resolve QML modules in Creator's code model
 QML_IMPORT_PATH =
 
@@ -117,61 +124,10 @@ HEADERS += \
     datamodels/telecomscenarioitem.h \
     screensaver/screensavermodule.h
 
-OTHER_FILES += \
-    qml/skins/scheme/classic/Main.qml \
-    img/lmcesplash.jpg \
-    qml/skins/scheme/classic/StyleClassic.qml \
-    img/UnknownUser.png \
-    qml/thom/screentest.qml \
-    qml/thom/screentest_images/new_layer.png \
-    qml/thom/screentest_images/new_layer__2.png \
-    qml/thom/screentest_images/new_layer__1.png \
-    qml/thom/screentest_images/lightingmediaclimate.png \
-    qml/thom/screentest_images/glow.png \
-    qml/thom/screentest_images/foo.png \
-    qml/thom/screentest_images/bar.png \
-    qml/thom/screentest_images/background.png \
-    img/icons/xine.png \
-    img/icons/tv.png \
-    img/icons/sms_protocol.png \
-    img/icons/scifi.png \
-    img/icons/player-end.png \
-    img/icons/player_stop.png \
-    img/icons/player_start.png \
-    img/icons/player_rew.png \
-    img/icons/player_play.png \
-    img/icons/player_pause.png \
-    img/icons/player_fwd.png \
-    img/icons/player_end1.png \
-    img/icons/player_end.png \
-    img/icons/player_eject.png \
-    img/icons/personal.png \
-    img/icons/password.png \
-    img/icons/package_games.png \
-    img/icons/package_games_arcade.png \
-    img/icons/package_editors.png \
-    img/icons/Mythtv.png \
-    img/icons/lsongs.png \
-    img/icons/lphoto.png \
-    img/icons/linphone.png \
-    img/icons/kweather.png \
-    img/icons/ktip.png \
-    img/icons/kservices.png \
-    img/icons/kmix.png \
-    img/icons/kfm_home.png \
-    img/icons/kedit.png \
-    img/icons/jabber_protocol.png \
-    img/icons/harddrive2.png \
-    img/icons/gpgsm.png \
-    img/icons/fortress.png \
-    img/icons/audio&video.png \
-    img/icons/aktion.png \
-    img/icons/agt_multimedia.png \
-    img/icons/agt_mp3.png \
-    img/icons/agt_home.png \
-    img/icons/agt_games.png \
-    img/icons/On.png \
-    img/icons/Off.png \
+OTHER_FILES += Readme.txt
+
+android{
+OTHER_FILES+=\
     android/res/values/libs.xml \
     android/res/values/strings.xml \
     android/res/drawable-hdpi/icon.png \
@@ -190,18 +146,15 @@ OTHER_FILES += \
     android/src/eu/licentia/necessitas/mobile/QtCamera.java \
     android/src/eu/licentia/necessitas/mobile/QtMediaPlayer.java \
     android/src/eu/licentia/necessitas/mobile/QtLocation.java \
-    android/AndroidManifest.xml \
-    qml/skins/scheme/brown/Style.qml \
-    qml/Main.qml \
+    android/AndroidManifest.xml \   
     qtc_packaging/debian_harmattan/rules \
     qtc_packaging/debian_harmattan/README \
     qtc_packaging/debian_harmattan/copyright \
     qtc_packaging/debian_harmattan/control \
     qtc_packaging/debian_harmattan/compat \
     qtc_packaging/debian_harmattan/changelog \
-    qml/default/n950/Style.qml \
-    qml/default/viewsonic/Style.qml \
-    qml/default/desktop/Style.qml
+}
+
 
 RESOURCES += \
     skinData.qrc

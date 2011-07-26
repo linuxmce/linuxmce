@@ -49,7 +49,7 @@ public:
      qorbiterManager(QWidget *parent = 0);  //constructor
 
     QString *sPK_User;
-
+    QString *buildType;
 
     //ui variables
     QString currentSkin;
