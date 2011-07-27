@@ -8,15 +8,16 @@
 # Should-Stop:
 # Default-Start:     2
 # Default-Stop:      0 1 3 4 5 6
-# Short-Description: <Enter a short description of the sortware>
-# Description:       <Enter a long description of the software>
-#                    <...>
-#                    <...>
+# Short-Description: Turns LMCE MD into Airplay remote speakers
+# Description:       This packages the shairport package for debian / (k)ubuntu use.
+#                    It can be installed on LinuxMCE Media Director to turn it into.
+#                    an Airplay v1 remote speaker. It emulates Airport Express.
+#		     beheavior.
 ### END INIT INFO
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
-DAEMON=/usr/bin/shairport  # Introduce the server's location here
+DAEMON=/usr/bin/shairport.pl  # Introduce the server's location here
 NAME="LinuxMCE_$HOSTNAME"  # Introduce the short server's name here
 DESC=shairport             # Introduce a short description here
 LOGDIR=/var/log/pluto  	   # Log directory to use
@@ -29,14 +30,14 @@ test -x $DAEMON || exit 0
 
 # Default options, these can be overriden by the information
 # at /etc/default/$NAME
-DAEMON_OPTS="--apname=$NAME -q -d"  # Additional options given to the server
+DAEMON_OPTS="-d --apname=$NAME --writepid=$PIDFILE"  # Additional options given to the server
 
 DIETIME=10              # Time to wait for the server to die, in seconds
                         # If this value is set too low you might not
                         # let some servers to die gracefully and
                         # 'restart' will not work
 
-#STARTTIME=5             # Time to wait for the server to start, in seconds
+STARTTIME=2             # Time to wait for the server to start, in seconds
                         # If this value is set each time the server is
                         # started (on start or restart) the script will
                         # stall to try to determine if it is running
@@ -46,8 +47,6 @@ DIETIME=10              # Time to wait for the server to die, in seconds
                         # when it actually did)
 
 LOGFILE=$LOGDIR/shairport_$HOSTNAME.log  # Server logfile
-#DAEMONUSER=shairport   # Users to run the daemons as. If this value
-                        # is set start-stop-daemon will chuid the server
 
 # Include defaults if available
 if [ -f /etc/default/shairport ] ; then
@@ -62,20 +61,6 @@ if [ "x$RUN" != "xyes" ] ; then
     exit 0
 fi
 
-# Check that the user exists (if we set a user)
-# Does the user exist?
-if [ -n "$DAEMONUSER" ] ; then
-    if getent passwd | grep -q "^$DAEMONUSER:"; then
-        # Obtain the uid and gid
-        DAEMONUID=`getent passwd |grep "^$DAEMONUSER:" | awk -F : '{print $3}'`
-        DAEMONGID=`getent passwd |grep "^$DAEMONUSER:" | awk -F : '{print $4}'`
-    else
-        log_failure_msg "The user $DAEMONUSER, required to run $NAME does not exist."
-        exit 0
-    fi
-fi
-
-
 set -e
 
 running_pid() {
@@ -84,7 +69,7 @@ running_pid() {
     name=$2
     [ -z "$pid" ] && return 1
     [ ! -d /proc/$pid ] &&  return 1
-    cmd=`cat /proc/$pid/cmdline | tr "\000" "\n"|head -n 1 |cut -d : -f 1`
+    cmd=`cat /proc/$pid/cmdline | tr "\000" "\n"|head -n 2 |tail -n 1|cut -d : -f 1`
     # Is this the expected server
     [ "$cmd" != "$name" ] &&  return 1
     return 0
@@ -103,17 +88,14 @@ running() {
 
 start_server() {
     	start-stop-daemon --start --quiet --pidfile "$PIDFILE" \
-                      --exec "$DAEMON" --oknodo -- $DAEMON_OPTS
+                      --exec "$DAEMON" -- $DAEMON_OPTS
         errcode=$?
         return $errcode
 }
 
 stop_server() {
-            start-stop-daemon --stop --quiet --pidfile $PIDFILE \
-                        --user $DAEMONUSER \
-                	--retry 1 --oknodo \
-                        --exec $DAEMON
-            errcode=$?
+        start-stop-daemon --stop --quiet --pidfile $PIDFILE
+	errcode=$?
 
         return $errcode
 }
