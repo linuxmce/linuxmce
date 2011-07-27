@@ -16,7 +16,7 @@ import QtQuick 1.0
         id:noir
     //main stage styles
     property int orbiterH: 800
-    property int orbiterW: 800
+    property int orbiterW: 480
     property color stageBG: "black"
     property int homescreenrowheight:80
     property int homescreenbuttonheight: 75

@@ -36,7 +36,7 @@ public:
 
 signals:
   void ItemAdded();
-  void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+  void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const int &sRow);
 
 private slots:
   void handleItemChange();

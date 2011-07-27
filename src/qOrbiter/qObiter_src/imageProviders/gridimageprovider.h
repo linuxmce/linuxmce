@@ -19,7 +19,7 @@ public:
     QImage requestImage(const QString& id, QSize* size, const QSize& requestedSize);
 
 public slots:
-    void dataUpdated(const QModelIndex & topLeft, const QModelIndex & bottomRight);
+    void dataUpdated(const QModelIndex & topLeft, const QModelIndex & bottomRight, const int & cRow);
     void dataDeleted(const QModelIndex & parent, int start, int end);
     void dataReset();
 

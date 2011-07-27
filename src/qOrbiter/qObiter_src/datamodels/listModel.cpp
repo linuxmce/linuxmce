@@ -43,15 +43,15 @@ void ListModel::appendRows(const QList<gridItem *> &items)
   beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
   foreach(gridItem *item, items) {
 
-    QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
+   QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
     m_list.append(item);
   }
 
   endInsertRows();
   QModelIndex index = indexFromItem(m_list.last());
   QModelIndex index2 = indexFromItem(m_list.first());
-
-emit dataChanged(index2, index);
+  int currentRows= m_list.count() - 1;
+  emit dataChanged(index2, index, currentRows);
 
 }
 
@@ -71,7 +71,7 @@ void ListModel::handleItemChange()
   qDebug() << "Handling item change for:" << index;
   if(index.isValid())
   {
-    emit dataChanged(index, index);
+    //emit dataChanged(index, index);
   }
 }
 

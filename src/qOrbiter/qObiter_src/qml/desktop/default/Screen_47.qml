@@ -3,8 +3,8 @@ import "components"
 
 Rectangle {
 
-    width: 800
-    height: 480
+    width: style.orbiterW
+    height: style.orbiterH
     color: "slategrey"
     clip: true
 

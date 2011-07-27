@@ -159,7 +159,7 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     model = new ListModel(new gridItem, this);
     basicProvider = new basicImageProvider();
     advancedProvider = new GridIndexProvider(model , 6, 4);
-    QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex)));
+  //  QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex, )), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex)), Qt::QueuedConnection);
 
     //adding important data and objects to qml now that they have been setup
     qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);

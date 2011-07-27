@@ -18,12 +18,9 @@ GridIndexProvider::GridIndexProvider(ListModel *model  , int pathRole, int pixma
         mPixmapIndex[path] = index;
     }
 
-    connect(&mModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
-            this, SLOT(dataUpdated(QModelIndex,QModelIndex)));
-    connect(&mModel, SIGNAL(rowsRemoved(QModelIndex,int,int)),
-            this, SLOT(dataDeleted(QModelIndex,int,int)));
-    connect(&mModel, SIGNAL(modelReset()),
-            this, SLOT(dataReset()));
+    connect(&mModel, SIGNAL(dataChanged(QModelIndex,QModelIndex, int)), this, SLOT(dataUpdated(QModelIndex,QModelIndex, int)), Qt::DirectConnection);
+    connect(&mModel, SIGNAL(rowsRemoved(QModelIndex,int,int)), this, SLOT(dataDeleted(QModelIndex,int,int)));
+    connect(&mModel, SIGNAL(modelReset()), this, SLOT(dataReset()));
 }
 
 
@@ -46,10 +43,10 @@ QImage GridIndexProvider::requestImage(const QString &id, QSize *size, const QSi
 
 }
 
-void GridIndexProvider::dataUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight)
+void GridIndexProvider::dataUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight, const int &cRow)
 {
-    // For each pixmap already in the model, get a mapping between the name and the index
 
+    // For each pixmap already in the model, get a mapping between the name and the index
     for(int row = 0; row < mModel.rowCount(); row++) {     
         QModelIndex index = mModel.index(row, 0);
         QString path = mModel.data(index, mPathRole).value<QString>();
@@ -60,12 +57,14 @@ void GridIndexProvider::dataUpdated(const QModelIndex& topLeft, const QModelInde
 
 void GridIndexProvider::dataDeleted(const QModelIndex&, int start, int end)
 {
+
+
     // For each pixmap already in the model, get a mapping between the name and the index
     for(int row = 0; row < mModel.rowCount(); row++) {
         QModelIndex index = mModel.index(row, 0);
         QString path = mModel.data(index, mPathRole).value<QString>();
         mPixmapIndex[path] = index;
-    }
+             }
 
 }
 
