@@ -1,0 +1,13 @@
+Source: shairport
+Section: net
+Priority: extra
+Maintainer: Serge Wagener <serge@swa.lu>
+Build-Depends: debhelper (>= 7), libssl-dev, libcrypt-openssl-rsa-perl, libao2, libao-dev, libio-socket-inet6-perl, libwww-perl, pkg-config
+Standards-Version: 3.8.4
+Homepage: https://github.com/albertz/shairport
+
+Package: shairport
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, avahi-utils
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>

@@ -1,0 +1,5 @@
+# Compulsory line, this is a version 3 file
+version=3
+
+# search for upstream on Github
+http://githubredir.debian.net/github/albertz/shairport/will_paginage (.*)\.tar\.gz
