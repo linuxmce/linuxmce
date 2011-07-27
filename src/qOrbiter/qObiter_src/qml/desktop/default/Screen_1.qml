@@ -8,7 +8,7 @@ Item
 Rectangle {
     id:stage
 
-    Style{id: style}
+
     signal swapStyle()
     height: style.orbiterH
     width: style.orbiterW

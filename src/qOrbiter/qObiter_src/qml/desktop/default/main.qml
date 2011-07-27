@@ -7,7 +7,7 @@ import "components"
      signal changeScreen(string s)
      property string locationinfo: "standby"
 
-     Style {id:style}
+    // Style {id:style}
     width: style.orbiterW;
     height: style.orbiterH;
 

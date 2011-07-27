@@ -16,11 +16,12 @@ HomeButtonDelegate{id:mediaDelegate}
 Flickable{
     id:mediaflick
 
-    height: 80
+    height: style.buttonH
     width: parent.width
-    contentHeight: 80
+    contentHeight: style.buttonH
     contentWidth: childrenRect.width * 2
     clip: true
+    flickableDirection: "HorizontalFlick"
 
     Row {
         id: guide
@@ -68,7 +69,7 @@ Flickable{
         ListView{
             id: listView
             width: stage.width
-            height: 50
+            height: style.buttonH
             model: currentRoomMedia
 
             orientation:ListView.Horizontal

@@ -11,9 +11,9 @@ Item {
     Flickable{
         id:securityflick
 
-        height: 80
+        height: style.rowH
         width: parent.width
-        contentHeight: 80
+        contentHeight: style.buttonH + 10
         contentWidth: childrenRect.width * 2
         clip: true
     Row {
@@ -42,7 +42,7 @@ Item {
         ListView{
             id: climateScenarios
             width: stage.width
-            height: 50
+            height: style.rowH
             model: currentRoomTelecom
             spacing: 5
             interactive: false

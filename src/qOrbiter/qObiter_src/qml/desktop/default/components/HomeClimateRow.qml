@@ -9,9 +9,9 @@ Item {
     Flickable{
 
         id:climateRow
-        height:80
+        height:style.buttonH +5
         width: parent.width
-        contentHeight: 80
+        contentHeight: style.buttonH
         contentWidth: childrenRect.width * 2
         clip: true
 
@@ -43,7 +43,7 @@ Item {
         ListView{
             id: climateScenarios
             width: 300
-            height: 50
+            height: style.buttonH
             model: currentRoomClimate
             spacing: 5
             orientation:ListView.Horizontal

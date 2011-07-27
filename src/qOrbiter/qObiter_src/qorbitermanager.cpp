@@ -114,67 +114,84 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
 #ifdef for_harmattan
     buildType="/qml/harmattan";
         #endif
+        qorbiterUIwin = new QDeclarativeView; //initialize the declarative view to act upon its context
 
-    currentSkin = "default";
+   currentSkin = "default";
    currentSkinURL="/qml/qObiter_src/";
-    s_RouterIP="192.168.80.1";
+   s_RouterIP="192.168.80.1";
 
     QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
     QString finalPath = qmlPath+buildType+currentSkin;
-     qDebug () << "QML import path for build: " << qmlPath;
-
-     /*
-    QFile tSkin(finalPath+"/Style.qml");
-    QByteArray skin;
-
-     if (!tSkin.open(QIODevice::ReadOnly | QIODevice::Text))
-     {
-         qDebug() << tSkin.errorString();   return;
-     }
-     else
-     {
-         qDebug() << "Loaded skin:" << currentSkin << ". Reading..";
-              skin = tSkin.readAll();
-     }
-     */
-
     QString skinPath= finalPath+"/Style.qml";
- //  QDeclarativeEngine engine;
- //  QDeclarativeComponent skinData;
-  //  skinData.loadUrl(QUrl::fromLocalFile(skinPath));
+    qDebug () << "QML import path for build: " << qmlPath;
 
-  //  QDeclarativeItem *skinItem = qobject_cast<QDeclarativeItem *>(skinData.create());
 
-    qorbiterUIwin = new QDeclarativeView;
+    //loading the style from the current set skin directory
+    QDeclarativeComponent skinData(qorbiterUIwin->engine(),QUrl::fromLocalFile(finalPath+"/Style.qml"));
 
+    //turning it into a qObject - this part actually loads it - the error should connect to a slot and not an exit
+    QObject *styleObject = skinData.create(qorbiterUIwin->rootContext());
+
+    //wait for it to load up
+    while (!skinData.isReady())
+    {
+        if(skinData.isError())
+        {
+            qDebug() << skinData.errors();
+            exit(0);
+        }
+        qDebug() << " loading";
+    }
+
+    if(skinData.isReady())
+    {
+    //set it as a context property so the qml can read it. if we need to changed it,we just reset the context property
+    qorbiterUIwin->engine()->rootContext()->setContextProperty("style", styleObject);
+
+
+  //non functioning screen saver module
     ScreenSaverModule ScreenSaver;
-    qmlRegisterType<ScreenSaverModule>("ScreenSaverModule",1,0,"ScreenSaverModule");    
+    qmlRegisterType<ScreenSaverModule>("ScreenSaverModule",1,0,"ScreenSaverModule");
     ScreenSaver.setImage(QUrl("../../img/lmcesplash.jpg"));
-
-   // qorbiterUIwin->engine()->rootContext()->setContextProperty("Style", &skinData);
-
     qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", &ScreenSaver);
 
+    //datagrid model setup with image provider for grid
     model = new ListModel(new gridItem, this);
-
     basicProvider = new basicImageProvider();
     advancedProvider = new GridIndexProvider(model , 6, 4);
+    QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex)));
 
+    //adding important data and objects to qml now that they have been setup
     qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
     qorbiterUIwin->engine()->addImageProvider("datagridimg", advancedProvider);
     qorbiterUIwin->rootContext()->setContextProperty("currentSkinUrl" , currentSkinURL);
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
 
-    //adjusting path for devices
-
-
-    QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex)));
-
-
+    //setting engine import path
     qorbiterUIwin->engine()->setBaseUrl(qmlPath);
     qorbiterUIwin->setSource(QUrl::fromLocalFile(finalPath+"/main.qml"));
 
+    //reference to the object for later use?
     QObject *item= qorbiterUIwin->rootObject();
+
+    //device variables
+    iPK_Device_DatagridPlugIn =  long(6);
+    iPK_Device_OrbiterPlugin = long(9);
+    m_dwIDataGridRequestCounter = 0;
+
+    //datagrid option variables
+    QString *q_mediaType = new QString("5");
+    QString *q_publicUsers = NULL;
+    QString *q_fileFormat=NULL;
+    QString *q_subType=NULL;
+    QString *q_attribute = NULL;
+
+   //initial signal and slot connections
+   //QObject::connect(item,SIGNAL(swapStyle()), this,SLOT(swapSkins()));
+    QObject::connect(item, SIGNAL(close()), this, SLOT(closeOrbiter()));
+   // QObject::connect(this,SIGNAL(destroyed()), this, SLOT(closeOrbiter()));
+
+    //showing the qml screen depending on device / platform / etc
 #ifdef Q_OS_SYMBIAN
     qorbiterUIwin->showFullScreen();
 #elif defined(Q_WS_MAEMO_5)
@@ -187,32 +204,22 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     qorbiterUIwin->show();
 #endif
 
-
-
    // qorbiterUIwin->showFullScreen();
     gotoQScreen("Splash.qml");
     qDebug() << "Showing Splash";
-
-    //initial signal and slot connection
-    //QObject::connect(item,SIGNAL(swapStyle()), this,SLOT(swapSkins()));
-    QObject::connect(item, SIGNAL(close()), this, SLOT(closeOrbiter()));
-   // QObject::connect(this,SIGNAL(destroyed()), this, SLOT(closeOrbiter()));
-
-     iPK_Device_DatagridPlugIn =  long(6);
-     iPK_Device_OrbiterPlugin = long(9);
-     m_dwIDataGridRequestCounter = 0;
-
-     QString *q_mediaType = new QString("5");
-     QString *q_publicUsers = NULL;
-     QString *q_fileFormat=NULL;
-     QString *q_subType=NULL;
-     QString *q_attribute = NULL;
-
+    }
+    else
+    {
+        qDebug() << "Couldnt get skin data!";
+        exit(0);
+    }
 }
 
 
 void qorbiterManager::gotoQScreen(QString s)
 {
+    //send the qmlview a request to go to a screen, needs error handling
+
     QVariant screenname= s;
     QVariant returnedValue;
     QObject *item = qorbiterUIwin->rootObject();
@@ -245,10 +252,6 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
               qt GUI (qml or qobject based) signals to DCE slots and vice versa!
             */
             pqOrbiter->qmlUI = this;
-
-            /*
-              here is where we setup orbiter variables that are going to be used.
-             */
 
 
          if ( pqOrbiter->initialize())

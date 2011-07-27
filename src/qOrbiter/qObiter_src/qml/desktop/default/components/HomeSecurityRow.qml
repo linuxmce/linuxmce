@@ -11,10 +11,10 @@ HomeButtonDelegate{id:securityDelegate}
 Flickable
 {
     id:securityflick
-
-    height: 80
+    flickableDirection: "HorizontalFlick"
+    height: style.rowH
     width: parent.width
-    contentHeight: 80
+    contentHeight: childrenRect.height
     contentWidth: childrenRect.width * 2
     clip: true
 

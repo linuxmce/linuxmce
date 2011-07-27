@@ -7,11 +7,9 @@ Item {
 
     HomeButtonDelegate{id:lightingdelegate}
     Flickable{
-
-
-        height: 80
+        height: style.buttonH
         width: parent.width
-        contentHeight: 80
+        contentHeight: style.buttonH
         contentWidth: childrenRect.width*2
         clip: true
 
@@ -30,7 +28,7 @@ Item {
 
             Image {
                 id: onimg
-                source: "../../../img/icons/jabber_protocol.png"
+                source: "../../../../img/icons/jabber_protocol.png"
                 height: style.iconHeight
                 width: style.iconWidth
                 anchors.centerIn: parent
@@ -48,7 +46,7 @@ Item {
         ListView{
             id: lightingScenarios
             width: stage.width
-            height: 50
+            height: style.buttonH
             model: currentRoomLights
             spacing: 5
             orientation:ListView.Horizontal
