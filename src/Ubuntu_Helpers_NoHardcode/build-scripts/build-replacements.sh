@@ -95,7 +95,9 @@ function Build_Replacements_Common
 	Build_Replacement_Package mtx-pluto ubuntu/mtx-1.3.11
 
 	#Package: libowfs
-	Build_Replacement_Package libowfs external/owfs-2.8p5
+	Build_Replacement_Package libowfs27 external/owfs-2.8p5
+        dir_="${svn_dir}/${svn_branch_name}/external"
+        cp $dir_/*ow*.deb "${replacements_dir}"
 
 	#Package: parted
 #	Build_Replacement_Package parted ubuntu/parted-1.8.8
@@ -252,6 +254,9 @@ function Build_Replacements_Lucid
 
 	# SqueezeSlave
 	Build_Replacement_Package squeezeslave ubuntu/squeezeslave
+
+	# shairport (AirPlay Audio)
+	Build_Replacement_Package shairport ubuntu/shairport-0.05
 
 
 	#Package: zaptel-modules
