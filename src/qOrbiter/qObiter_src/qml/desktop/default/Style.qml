@@ -15,16 +15,16 @@ import QtQuick 1.0
     QtObject{
         id:classicstyle
     //main stage styles
-    property int orbiterH: 480
+    property int orbiterH: 600
     property int orbiterW: 800
     property color stageBG: "slategray"
     property int homescreenrowheight:80
     property int homescreenbuttonheight: 75
     property int homesreenbuttonwidth: 75
-        property color homescreenscenariobuttoncolor: "whitesmoke"
-        property color homescreenfloorplanbuttoncolor: "aliceblue"
-        property color homeScreenNowPlayingColorInActive: "indianred"
-        property color homeScreenNowPlayingColorActive: "lightcyan"
+    property color homescreenscenariobuttoncolor: "cornsilk"
+    property color homescreenfloorplanbuttoncolor: "darkgrey"
+    property color homeScreenNowPlayingColorInActive: "indianred"
+    property color homeScreenNowPlayingColorActive: "lightcyan"
 
     //icon sizes
     property int iconHeight: 50
@@ -74,10 +74,10 @@ import QtQuick 1.0
 
     //advanced panel
     property color advanced_bg: "slategrey"
-    property color advanced_bg_text: "black"
+    property color advanced_bg_text: "White"
 
     //stage
     property color stage_bg: "slategrey"
-        property color bgcolor: "slategrey"
+    property color bgcolor: "slategrey"
 
 }

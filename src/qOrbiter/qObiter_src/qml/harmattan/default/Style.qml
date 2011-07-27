@@ -15,8 +15,8 @@ import QtQuick 1.0
     QtObject{
         id:classicstyle
     //main stage styles
-    property int orbiterH: 480
-    property int orbiterW: 800
+    property int orbiterH: 854
+    property int orbiterW: 480
     property color stageBG: "slategray"
     property int homescreenrowheight:80
     property int homescreenbuttonheight: 75

@@ -112,19 +112,46 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
 #endif
 
 #ifdef for_harmattan
-    buildType="/qml/harmattan"
+    buildType="/qml/harmattan";
         #endif
 
-
-
     currentSkin = "default";
-    currentSkinURL="/qml/qObiter_src/";
+   currentSkinURL="/qml/qObiter_src/";
     s_RouterIP="192.168.80.1";
 
+    QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
+    QString finalPath = qmlPath+buildType+currentSkin;
+     qDebug () << "QML import path for build: " << qmlPath;
+
+     /*
+    QFile tSkin(finalPath+"/Style.qml");
+    QByteArray skin;
+
+     if (!tSkin.open(QIODevice::ReadOnly | QIODevice::Text))
+     {
+         qDebug() << tSkin.errorString();   return;
+     }
+     else
+     {
+         qDebug() << "Loaded skin:" << currentSkin << ". Reading..";
+              skin = tSkin.readAll();
+     }
+     */
+
+    QString skinPath= finalPath+"/Style.qml";
+ //  QDeclarativeEngine engine;
+ //  QDeclarativeComponent skinData;
+  //  skinData.loadUrl(QUrl::fromLocalFile(skinPath));
+
+  //  QDeclarativeItem *skinItem = qobject_cast<QDeclarativeItem *>(skinData.create());
+
     qorbiterUIwin = new QDeclarativeView;
+
     ScreenSaverModule ScreenSaver;
     qmlRegisterType<ScreenSaverModule>("ScreenSaverModule",1,0,"ScreenSaverModule");    
     ScreenSaver.setImage(QUrl("../../img/lmcesplash.jpg"));
+
+   // qorbiterUIwin->engine()->rootContext()->setContextProperty("Style", &skinData);
 
     qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", &ScreenSaver);
 
@@ -139,12 +166,11 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
 
     //adjusting path for devices
-    QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
-    QString finalPath = qmlPath+buildType+currentSkin;
+
 
     QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex)), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex)));
 
-    qDebug () << "QML import path for build: " << qmlPath;
+
     qorbiterUIwin->engine()->setBaseUrl(qmlPath);
     qorbiterUIwin->setSource(QUrl::fromLocalFile(finalPath+"/main.qml"));
 
@@ -153,9 +179,16 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     qorbiterUIwin->showFullScreen();
 #elif defined(Q_WS_MAEMO_5)
     qorbiterUIwin->showMaximized();
+#elif defined(for_harmattan)
+    qorbiterUIwin->showFullScreen();
+#elif defined(for_desktop)
+    qorbiterUIwin->show();
 #else
-   qorbiterUIwin->show();
+    qorbiterUIwin->show();
 #endif
+
+
+
    // qorbiterUIwin->showFullScreen();
     gotoQScreen("Splash.qml");
     qDebug() << "Showing Splash";
@@ -284,7 +317,7 @@ bool qorbiterManager::getConf(int pPK_Device)
 {
     if(!pqOrbiter->DATA_Get_Get_Time_Code_for_Media())
     {
-        setNowPlayingIcon(false);
+       // setNowPlayingIcon(false);
     }
 
     qDebug() << "Reading Config" ;

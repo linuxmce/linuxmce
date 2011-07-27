@@ -37,7 +37,7 @@ Rectangle {
 Column{
     id:maindisplay
     anchors.fill: parent
-    spacing: 1
+    spacing: 0
     HomeLightingRow{id:lightRow }
     HomeMediaRow{id: mediaRow}
     HomeClimateRow{id: climateRow}

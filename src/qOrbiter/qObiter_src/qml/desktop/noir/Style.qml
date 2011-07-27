@@ -1,6 +1,6 @@
 import QtQuick 1.0
 
-//sample style file for a qml ui
+//sample style file for a qml ui 'noir'
 /*
   color scheme
   Button sienna
@@ -13,18 +13,18 @@ import QtQuick 1.0
 
 
     QtObject{
-        id:classicstyle
+        id:noir
     //main stage styles
-    property int orbiterH: 480
+    property int orbiterH: 800
     property int orbiterW: 800
-    property color stageBG: "slategray"
+    property color stageBG: "black"
     property int homescreenrowheight:80
     property int homescreenbuttonheight: 75
     property int homesreenbuttonwidth: 75
-        property color homescreenscenariobuttoncolor: "whitesmoke"
-        property color homescreenfloorplanbuttoncolor: "aliceblue"
-        property color homeScreenNowPlayingColorInActive: "indianred"
-        property color homeScreenNowPlayingColorActive: "lightcyan"
+    property color homescreenscenariobuttoncolor: "gainsboro"
+    property color homescreenfloorplanbuttoncolor: "dimgrey"
+    property color homeScreenNowPlayingColorInActive: "indianred"
+    property color homeScreenNowPlayingColorActive: "lightcyan"
 
     //icon sizes
     property int iconHeight: 50

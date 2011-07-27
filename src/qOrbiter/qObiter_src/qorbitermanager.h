@@ -50,6 +50,7 @@ public:
 
     QString *sPK_User;
     QString *buildType;
+    //QByteArray *skin;
 
     //ui variables
     QString currentSkin;
