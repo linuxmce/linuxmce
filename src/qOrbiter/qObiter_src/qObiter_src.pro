@@ -49,6 +49,16 @@ INCLUDEPATH += ../../ ../../DCE/ /usr/include/mysql/
 
 macosx{
 QT += xml
+CONFIG -= app_bundle
+# Add qml files in application bundle (OSX)
+#APP_QML_FILES.files = qml/qObiter_src/main.qml
+#APP_QML_FILES.path = Contents/MacOS/qml/qObiter_src
+#QMAKE_BUNDLE_DATA += APP_QML_FILES
+
+#APP_COMPONENTS_FILES.files = qml/qObiter_src/components/Splash.qml
+#APP_COMPONENTS_FILES.path = Contents/MacOS/qml/qObiter_src/components
+#QMAKE_BUNDLE_DATA += APP_COMPONENTS_FILES
+
 }
 
 !macosx{
