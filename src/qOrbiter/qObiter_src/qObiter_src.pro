@@ -33,6 +33,7 @@ folder_01.target = qml
 
 folder_02.source= img
 folder_02.target=     #left blank so it will appear in the root
+
 }
 
 DEPLOYMENTFOLDERS = folder_01 folder_02
@@ -46,7 +47,14 @@ QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 
 INCLUDEPATH += ../../ ../../DCE/ /usr/include/mysql/
 
+macosx{
+QT += xml
+}
+
+!macosx{
 LIBS += -lQtXml
+}
+
 CONFIG +=warn_off
 
 # Smart Installer package's UID
