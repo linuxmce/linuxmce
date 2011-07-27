@@ -1,6 +1,6 @@
 import QtQuick 1.0
 import "../components"
-import "../screens"
+import "../js" as MyJs
 
  Item {
      id: item
@@ -14,7 +14,7 @@ import "../screens"
 
      function screenchange(screenname )
      {
-         if(pageLoader.source = screenname)
+         if(pageLoader.source = "../screens/"+screenname)
          {
              console.log("Command to change to:" + screenname+ " was successfull")
          }

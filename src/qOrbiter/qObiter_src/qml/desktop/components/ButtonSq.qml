@@ -8,6 +8,7 @@ Rectangle {
      property alias buttontextbold: buttonLabel.font.bold
      property alias buttontextitalic: buttonLabel.font.italic
      property alias buttontextzindex: buttonLabel.z
+    property alias buttonsqradius:  buttonBase.radius
 
 
 
@@ -16,6 +17,7 @@ Rectangle {
 
         border.width: 1
         border.color: style.button_action_color_hover
+        radius: 1
     Text {
         id: buttonLabel
         x: 50
@@ -32,6 +34,7 @@ Rectangle {
         anchors.margins: 5
         font.family: "Droid Sans"
         wrapMode: Text.WordWrap
+
          }
 
 }

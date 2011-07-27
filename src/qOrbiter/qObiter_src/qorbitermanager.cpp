@@ -116,7 +116,7 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
         #endif
    qorbiterUIwin = new QDeclarativeView; //initialize the declarative view to act upon its context
 
-   currentSkin = "default";
+   currentSkin = "noir";
    currentSkinURL="/qml/qObiter_src/";
    s_RouterIP="192.168.80.1";
 
@@ -190,6 +190,8 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
    //QObject::connect(item,SIGNAL(swapStyle()), this,SLOT(swapSkins()));
     QObject::connect(item, SIGNAL(close()), this, SLOT(closeOrbiter()));
    // QObject::connect(this,SIGNAL(destroyed()), this, SLOT(closeOrbiter()));
+
+
 
     //showing the qml screen depending on device / platform / etc
 #ifdef Q_OS_SYMBIAN

@@ -35,7 +35,7 @@ folder_02.source= img
 folder_02.target=     #left blank so it will appear in the root
 
 }
-
+QML_IMPORT_TRACE=1;
 DEPLOYMENTFOLDERS = folder_01 folder_02
 
 # Additional import path used to resolve QML modules in Creator's code model
