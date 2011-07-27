@@ -27,7 +27,7 @@ folder_02.target=     #left blank so it will appear in the root
 DEFINES += for_harmattan
 }
 
-macosx{
+macx{
 folder_01.source = qml/desktop
 folder_01.target = qml
 
@@ -47,7 +47,7 @@ QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 
 INCLUDEPATH += ../../ ../../DCE/ /usr/include/mysql/
 
-macosx{
+macx{
 QT += xml
 CONFIG -= app_bundle
 # Add qml files in application bundle (OSX)
@@ -61,7 +61,7 @@ CONFIG -= app_bundle
 
 }
 
-!macosx{
+!macx{
 LIBS += -lQtXml
 }
 
