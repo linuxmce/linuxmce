@@ -16,12 +16,12 @@
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
-DAEMON=/usr/bin/shairport # Introduce the server's location here
-NAME=shairport             # Introduce the short server's name here
+DAEMON=/usr/bin/shairport  # Introduce the server's location here
+NAME="LinuxMCE_$HOSTNAME"  # Introduce the short server's name here
 DESC=shairport             # Introduce a short description here
-LOGDIR=/var/log/shairport  # Log directory to use
+LOGDIR=/var/log/pluto  	   # Log directory to use
 
-PIDFILE=/var/run/$NAME.pid
+PIDFILE=/var/run/shairport.pid
 
 test -x $DAEMON || exit 0
 
@@ -29,14 +29,14 @@ test -x $DAEMON || exit 0
 
 # Default options, these can be overriden by the information
 # at /etc/default/$NAME
-DAEMON_OPTS=""          # Additional options given to the server
+DAEMON_OPTS="--apname=$NAME -q -d"  # Additional options given to the server
 
 DIETIME=10              # Time to wait for the server to die, in seconds
                         # If this value is set too low you might not
                         # let some servers to die gracefully and
                         # 'restart' will not work
 
-#STARTTIME=2             # Time to wait for the server to start, in seconds
+#STARTTIME=5             # Time to wait for the server to start, in seconds
                         # If this value is set each time the server is
                         # started (on start or restart) the script will
                         # stall to try to determine if it is running
@@ -45,22 +45,22 @@ DIETIME=10              # Time to wait for the server to die, in seconds
                         # be a false positive (says it did not start
                         # when it actually did)
 
-LOGFILE=$LOGDIR/$NAME.log  # Server logfile
+LOGFILE=$LOGDIR/shairport_$HOSTNAME.log  # Server logfile
 #DAEMONUSER=shairport   # Users to run the daemons as. If this value
                         # is set start-stop-daemon will chuid the server
 
 # Include defaults if available
-if [ -f /etc/default/$NAME ] ; then
-    . /etc/default/$NAME
+if [ -f /etc/default/shairport ] ; then
+    . /etc/default/shairport
 fi
 
 # Use this if you want the user to explicitly set 'RUN' in
 # /etc/default/
-#if [ "x$RUN" != "xyes" ] ; then
-#    log_failure_msg "$NAME disabled, please adjust the configuration to your needs "
-#    log_failure_msg "and then set RUN to 'yes' in /etc/default/$NAME to enable it."
-#    exit 0
-#fi
+if [ "x$RUN" != "xyes" ] ; then
+    log_failure_msg "shairport '$NAME' disabled, please adjust the configuration to your needs "
+    log_failure_msg "and then set RUN to 'yes' in /etc/default/shairport to enable it."
+    exit 0
+fi
 
 # Check that the user exists (if we set a user)
 # Does the user exist?
@@ -102,32 +102,18 @@ running() {
 }
 
 start_server() {
-# Start the process using the wrapper
-        if [ -z "$DAEMONUSER" ] ; then
-            start_daemon -p $PIDFILE $DAEMON $DAEMON_OPTS
-            errcode=$?
-        else
-# if we are using a daemonuser then change the user id
-            start-stop-daemon --start --quiet --pidfile $PIDFILE \
-                        --chuid $DAEMONUSER \
-                        --exec $DAEMON -- $DAEMON_OPTS
-            errcode=$?
-        fi
+    	start-stop-daemon --start --quiet --pidfile "$PIDFILE" \
+                      --exec "$DAEMON" --oknodo -- $DAEMON_OPTS
+        errcode=$?
         return $errcode
 }
 
 stop_server() {
-# Stop the process using the wrapper
-        if [ -z "$DAEMONUSER" ] ; then
-            killproc -p $PIDFILE $DAEMON
-            errcode=$?
-        else
-# if we are using a daemonuser then look for process that match
             start-stop-daemon --stop --quiet --pidfile $PIDFILE \
                         --user $DAEMONUSER \
+                	--retry 1 --oknodo \
                         --exec $DAEMON
             errcode=$?
-        fi
 
         return $errcode
 }
