@@ -114,7 +114,7 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
 #ifdef for_harmattan
     buildType="/qml/harmattan";
         #endif
-        qorbiterUIwin = new QDeclarativeView; //initialize the declarative view to act upon its context
+   qorbiterUIwin = new QDeclarativeView; //initialize the declarative view to act upon its context
 
    currentSkin = "default";
    currentSkinURL="/qml/qObiter_src/";
@@ -168,7 +168,7 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
 
     //setting engine import path
-    qorbiterUIwin->engine()->setBaseUrl(qmlPath);
+    qorbiterUIwin->engine()->setBaseUrl(qmlPath+buildType);
     qorbiterUIwin->setSource(QUrl::fromLocalFile(finalPath+"/main.qml"));
 
     //reference to the object for later use?

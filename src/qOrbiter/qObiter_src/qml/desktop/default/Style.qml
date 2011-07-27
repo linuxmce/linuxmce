@@ -22,8 +22,8 @@ import QtQuick 1.0
     property int homescreenrowheight:100
     property int homescreenbuttonheight: 90
     property int homesreenbuttonwidth: 90
-    property color homescreenscenariobuttoncolor: "cornsilk"
-    property color homescreenfloorplanbuttoncolor: "darkgrey"
+    property color homescreenscenariobuttoncolor: "lightsteelblue"
+    property color homescreenfloorplanbuttoncolor: "slategrey"
     property color homeScreenNowPlayingColorInActive: "indianred"
     property color homeScreenNowPlayingColorActive: "lightcyan"
 
@@ -34,7 +34,7 @@ import QtQuick 1.0
     //textStyles
 
     property int title_size: 18
-    property color tile_color: "lightgrey"
+    property color tile_color: "steelblue"
 
     property int t_but_size: 16
     property color t_but_color: "darkgrey"

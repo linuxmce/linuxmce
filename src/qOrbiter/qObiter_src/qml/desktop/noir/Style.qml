@@ -1,6 +1,6 @@
 import QtQuick 1.0
 
-//sample style file for a qml ui 'noir'
+//sample style file for a qml ui
 /*
   color scheme
   Button sienna
@@ -13,36 +13,37 @@ import QtQuick 1.0
 
 
     QtObject{
-        id:noir
+        id:classicstyle
+        objectName: "orbiter_style"
     //main stage styles
-    property int orbiterH: 800
-    property int orbiterW: 480
-    property color stageBG: "black"
-    property int homescreenrowheight:80
-    property int homescreenbuttonheight: 75
-    property int homesreenbuttonwidth: 75
-    property color homescreenscenariobuttoncolor: "gainsboro"
-    property color homescreenfloorplanbuttoncolor: "dimgrey"
+    property int orbiterH: 600
+    property int orbiterW: 800
+    property color stageBG: "slategray"
+    property int homescreenrowheight:100
+    property int homescreenbuttonheight: 90
+    property int homesreenbuttonwidth: 90
+    property color homescreenscenariobuttoncolor: "cornsilk"
+    property color homescreenfloorplanbuttoncolor: "darkgrey"
     property color homeScreenNowPlayingColorInActive: "indianred"
     property color homeScreenNowPlayingColorActive: "lightcyan"
 
     //icon sizes
-    property int iconHeight: 50
-    property int iconWidth: 50
+    property int iconHeight: 90
+    property int iconWidth: 90
 
     //textStyles
 
-    property int title_size: 16
+    property int title_size: 18
     property color tile_color: "lightgrey"
 
-    property int t_but_size: 12
+    property int t_but_size: 16
     property color t_but_color: "darkgrey"
 
     //title and other misc windo accents
 
     //button styling
-    property int buttonH:75
-    property int buttonW: 75
+    property int buttonH:95
+    property int buttonW: 95
     property color button_system_color: "steelblue"
     property color button_system_color_hover: "lightblue"
 
@@ -74,10 +75,10 @@ import QtQuick 1.0
 
     //advanced panel
     property color advanced_bg: "slategrey"
-    property color advanced_bg_text: "black"
+    property color advanced_bg_text: "White"
 
     //stage
     property color stage_bg: "slategrey"
-        property color bgcolor: "slategrey"
+    property color bgcolor: "slategrey"
 
 }

@@ -45,18 +45,18 @@ symbian:TARGET.UID3 = 0xE0D07D4D
 
 QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 
-INCLUDEPATH += ../../ ../../DCE/ /usr/include/mysql/
+INCLUDEPATH += ../../ ../../DCE/
 
 macx{
 QT += xml
 CONFIG -= app_bundle
 # Add qml files in application bundle (OSX)
-#APP_QML_FILES.files = qml/qObiter_src/main.qml
-#APP_QML_FILES.path = Contents/MacOS/qml/qObiter_src
+#APP_QML_FILES.files = qml/desktop/*
+#APP_QML_FILES.path = Contents/MacOS/qml/desktop
 #QMAKE_BUNDLE_DATA += APP_QML_FILES
 
-#APP_COMPONENTS_FILES.files = qml/qObiter_src/components/Splash.qml
-#APP_COMPONENTS_FILES.path = Contents/MacOS/qml/qObiter_src/components
+#APP_COMPONENTS_FILES.files = qml/desktop/components/*
+#APP_COMPONENTS_FILES.path = Contents/MacOS/qml/desktop/components
 #QMAKE_BUNDLE_DATA += APP_COMPONENTS_FILES
 
 }
