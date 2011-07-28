@@ -15,9 +15,14 @@ import QtQuick 1.0
     QtObject{
         id:classicstyle
         objectName: "orbiter_style"
-    //main stage styles
+        //skin description
+        property string skincreator: "Langston Ball (aka golgoj4)"
+        property string skinname: "Noir"
+        property string skindescription: "A Skin based in black with glossy highlights"
+        //main stage styles
     property int orbiterH: 600
     property int orbiterW: 800
+
     property color stageBG: "slategray"
     property int homescreenrowheight:100
     property int homescreenbuttonheight: 90

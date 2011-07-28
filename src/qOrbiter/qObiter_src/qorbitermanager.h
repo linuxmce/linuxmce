@@ -51,6 +51,10 @@ public:
     QString *sPK_User;
     QString *buildType;
     //QByteArray *skin;
+    QMap <QString*, QString*> availibleSkins;
+    QString qmlPath;
+    const QString *skinsPath;
+
 
     //ui variables
     QString currentSkin;
@@ -186,6 +190,7 @@ signals:
 
 
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
+      Q_INVOKABLE QMap <QString, QString> getcurrentSkins(QString path);
 
       //datagrid related
       void setSorting(int i);

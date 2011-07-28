@@ -102,18 +102,17 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     QWidget(parent)
 {
 
-    QString buildType;
+   QString buildType;
 #ifdef for_desktop
     buildType = "/qml/desktop/";
-#endif
-
-#ifdef for_freemantle
+#elif for_freemantle
     buildType = "/qml/freemantle/";
-#endif
-
-#ifdef for_harmattan
+#elif for_harmattan
     buildType="/qml/harmattan";
+     #elif Q_OS_MACX
+    buildType="/qml/desktop";
         #endif
+
    qorbiterUIwin = new QDeclarativeView; //initialize the declarative view to act upon its context
 
    currentSkin = "noir";
@@ -121,10 +120,14 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
    s_RouterIP="192.168.80.1";
 
     QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
+    const QString test = buildType;
     QString finalPath = qmlPath+buildType+currentSkin;
     QString skinPath= finalPath+"/Style.qml";
-    qDebug () << "QML import path for build: " << qmlPath;
 
+   const QString skinsPath = qmlPath+test;
+     qDebug() << "Skin import path" << skinsPath;
+    qDebug () << "QML import path for build: " << qmlPath;
+    getcurrentSkins(skinsPath);
 
     //loading the style from the current set skin directory
     QDeclarativeComponent skinData(qorbiterUIwin->engine(),QUrl::fromLocalFile(finalPath+"/Style.qml"));
@@ -745,5 +748,24 @@ void qorbiterManager::setNowPlayingIcon(bool b)
     color.fromRgb(255, 255, 215);
     qorbiterUIwin->rootContext()->setContextProperty("nowPlayingColor", color);
     item->setProperty("nowplayingtext", "null");
+}
+
+QMap<QString , QString > qorbiterManager::getcurrentSkins(QString path)
+{
+
+   QDir directoryMap(path);
+
+
+   QStringList filters;
+   filters << ".cpp" << ".o";
+   QStringList skinList = directoryMap.entryList();
+   qDebug() << "Current Path:" << directoryMap.currentPath();
+
+
+   QMap <QString, QString> tSkinArray;
+   tSkinArray.insert("Default", "Default");
+   return tSkinArray;
+
+
 }
 
