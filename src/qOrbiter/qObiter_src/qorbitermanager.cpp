@@ -127,11 +127,9 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     QString skinsPath = qmlPath+test;
 
     qDebug () << "QML import path for build: " << qmlPath;
-
+    QString *m_SkinsDirectoryPath = new QString(qmlPath+buildType.toLatin1().constData());
     QDir directoryMap(skinsPath);
     directoryMap.setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
-    QStringList filters;
-    filters << "components" << "screens" << "js";
     QStringList skinList = directoryMap.entryList();
 
     getcurrentSkins(skinList);
@@ -567,23 +565,53 @@ bool qorbiterManager::getConf(int pPK_Device)
 //seperate from the screens them selves. the screen can and will refer to base standard object and if people
 //want to create their own, the can and simple change the component import directory, all without compiling.
 
-void qorbiterManager::swapSkins()
+void qorbiterManager::swapSkins(QString incSkin)
 {
-    if (currentSkin == "default")
-    {
+    QDir skinsDir(QApplication::applicationDirPath().remove("bin"));
 
 
+    if(skinsDir.cd("qml/"))
+     {
+         qDebug() << skinsDir.path();
 
-//  qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/skins/scheme/classic/Main.qml"));
+         QStringList platform = skinsDir.entryList();
 
-    currentSkin="classic";
+         qDebug() << "Switching to:" << platform.last();
+
+
+         if(platform.isEmpty())
+         {
+             qDebug() << "couldnt locate platform";
+         }
+         else
+         {
+
+        if(skinsDir.cd(platform.last()))
+        {
+        incSkin.toLower() = skinsDir.path();
+        qDebug() << "Looking for skins in " + skinsDir.path() ;
+       QDeclarativeComponent skinData(qorbiterUIwin->engine(),QUrl::fromLocalFile(skinsDir.path()+"/"+incSkin.toLower()+"/Style.qml"));
+       qDebug() << skinsDir.path()+"/"+incSkin.toLower()+"/Style.qml" ;
+       //turning it into a qObject - this part actually loads it - the error should connect to a slot and not an exit
+       QObject *styleObject = skinData.create(qorbiterUIwin->rootContext());
+      //wait for it to load up
+         while (!skinData.isReady())
+            {
+              if(skinData.isError())
+                 {
+               qDebug() << skinData.errors();
+                 break;
+                 }
+
+                 qDebug() << skinData.status();
+             }
+
+                qorbiterUIwin->engine()->rootContext()->setContextProperty("style", styleObject);
+         }
+
+
     }
-    else
-    {
-       // qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/qObiter_src/main.qml"));
-        currentSkin="default";
-    }
-    qDebug() << "Yes! Switched to: " << qPrintable(currentSkin);
+}
 }
 
 
@@ -788,6 +816,7 @@ qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
 
            skins = skinsDir.path();
             qDebug() << "Looking for skins in " + skins ;
+
        }
 
     }
@@ -822,8 +851,12 @@ for (constIterator = skinPaths.constBegin(); constIterator != skinPaths.constEnd
                    QString s_description = styleObject->property("skindescription").toString();
                    QString s_version = styleObject->property("skinversion").toString();
                    QString s_target = styleObject->property("skinvariation").toString();
+                   QString s_path = styleObject->property("skindir").toString();
+                   QString s_mainc = styleObject->property("maincolor").toString();
+                   QString s_accentc = styleObject->property("accentcolor").toString();
+
                    qDebug() << "Adding skin to list" << s_title;
-                  tskinModel->appendRow(new SkinDataItem(s_title, s_creator, s_description, s_version, s_target, skinPic, tskinModel ));
+                  tskinModel->appendRow(new SkinDataItem(s_title, s_creator, s_description, s_version, s_target, skinPic, s_path, s_mainc, s_accentc, tskinModel ));
 
         }
 

@@ -16,6 +16,7 @@
 #include <datamodels/securityscenariomodel.h>
 #include <datamodels/skindatamodel.h>
 #include <QFile>
+#include <QDir>
 #include <QDataStream>
 
 /*----custom classes-------*/
@@ -55,6 +56,8 @@ public:
     QMap <QString*, QString*> availibleSkins;
     QString qmlPath;
    QString skinsPath;
+   QDir skinsDir;
+   QString *m_SkinsDirectoryPath;
 
 
     //ui variables
@@ -63,7 +66,7 @@ public:
     QDeclarativeView  *qorbiterUIwin;               //Qml declarativeview
     QObject *item;                                  //qObject reference to UI
     bool refreshUI();
-    void swapSkins();
+    Q_INVOKABLE void swapSkins(QString incSkin);
 
     basicImageProvider *basicProvider;
     GridIndexProvider *advancedProvider;

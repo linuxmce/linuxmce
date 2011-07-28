@@ -3,7 +3,7 @@ import QtQuick 1.0
 Component{
         Item {
     id: skindelegate
-    anchors.centerIn: parent
+
     height: 100
     width: 350
     Row{
@@ -15,7 +15,15 @@ Component{
             id:rectDelegate
             height: 75
             width: skindelegate.width
-            color: style.button_system_color
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked:{
+                    swapSkins(path)
+                console.log("Switching to:" + name)
+                    gotoQScreen("Screen_1.qml")
+                }
+            }
 
 
 

@@ -24,6 +24,7 @@ Rectangle {
         width: parent.width
         model:skinsList
         delegate: skinchooserdelegate
+
     }
 }
 

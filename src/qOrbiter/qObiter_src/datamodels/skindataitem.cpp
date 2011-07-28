@@ -1,7 +1,7 @@
 #include "skindataitem.h"
 
-SkinDataItem:: SkinDataItem(const QString &name,  const QString &creator, const  QString &description, const QString &version, const  QString &variant, QImage img, QObject *parent):
-   m_name(name), m_creator(creator), m_description(description), m_version(version), m_variant(variant), m_image(img)
+SkinDataItem:: SkinDataItem(const QString &name,  const QString &creator, const  QString &description, const QString &version, const  QString &variant, QImage img, QString &path, QString &mainc, QString &accentc,QObject *parent):
+    m_name(name), m_creator(creator), m_description(description), m_version(version), m_variant(variant), m_image(img), m_path(path), m_maincolor(mainc), m_accentcolor(accentc)
 {
 
 }
@@ -13,6 +13,10 @@ QHash<int, QByteArray> SkinDataItem::roleNames() const
   names[CreatorRole] = "creator";
   names[DescriptionRole] = "description";
   names[VersionRole] = "version";
+  names[VariantRole] = "variation";
+ names[MainColorRole] = "maincolor";
+ names[AccentColorRole] = "accentcolor";
+ names[PathRole] = "path";
   names[VariantRole] = "variation";
   names[ImageRole] = "image";
 
@@ -35,6 +39,12 @@ QVariant SkinDataItem::data(int role) const
     return variant();
   case ImageRole:
     return image();
+    case MainColorRole:
+      return maincolor();
+  case AccentColorRole:
+      return accentcolor();
+  case PathRole:
+      return path();
   default:
     return QVariant();
   }

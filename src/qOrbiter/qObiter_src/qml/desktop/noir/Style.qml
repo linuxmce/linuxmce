@@ -17,10 +17,13 @@ import QtQuick 1.0
         objectName: "orbiter_style"
         //skin description
         property string skincreator: "Langston Ball (aka golgoj4)"
-        property string skinname: "Pluto Classic"
-        property string skindescription: "A modern interpretation of the Classic Pluto Skin"
+        property string skinname: "Noir"
+        property string skindir: "noir"
+        property string skindescription: "Dark Skin with glossy highlights"
         property string skinversion: "1.0"
         property string skinvariation: "Desktop 800x600"
+        property string maincolor: "Black"
+        property string accentcolor: "white"
     //main stage styles
     property int orbiterH: 600
     property int orbiterW: 800
@@ -28,8 +31,8 @@ import QtQuick 1.0
     property int homescreenrowheight:100
     property int homescreenbuttonheight: 90
     property int homesreenbuttonwidth: 90
-    property color homescreenscenariobuttoncolor: "lightblue"
-    property color homescreenfloorplanbuttoncolor: "lightsteelblue"
+    property color homescreenscenariobuttoncolor: "darkgrey"
+    property color homescreenfloorplanbuttoncolor: "lightgrey"
     property color homeScreenNowPlayingColorInActive: "indianred"
     property color homeScreenNowPlayingColorActive: "lightcyan"
 
@@ -45,17 +48,17 @@ import QtQuick 1.0
     property color tile_color: "whitesmoke"
 
     property int t_but_size: 16
-    property color t_but_color: "lightsteelblue"
+    property color t_but_color: "darkgrey"
 
     //title and other misc windo accents
 
     //button styling
     property int buttonH:95
     property int buttonW: 95
-    property color button_system_color: "steelblue"
+    property color button_system_color: "chocolate"
     property color button_system_color_hover: "lightblue"
 
-    property color button_action_color: "whitesmoke"
+    property color button_action_color: "maroon"
     property color button_action_color_hover: "lightblue"
 
     property variant bgImg: "null"
@@ -63,8 +66,8 @@ import QtQuick 1.0
     property int but_smooth: 10
 
     //navigations
-    property color arrow_color_nav: "aliceblue"
-    property color arrow_text_nav: "black"
+    property color arrow_color_nav: "maroon"
+    property color arrow_text_nav: "white"
 
 
     //row container styling
@@ -74,19 +77,19 @@ import QtQuick 1.0
 
     //Notifications bar
     property int width: orbiterW - 5
-    property color not_color: "aliceblue"
+    property color not_color: "chocolate"
     property string not_pos: "anchors: parent.top"
 
     //special
-    property color alert_bg: "blue"
+    property color alert_bg: "black"
     property color alert_bg_text: "white"
 
     //advanced panel
-    property color advanced_bg: "slategrey"
-    property color advanced_bg_text: "White"
+    property color advanced_bg: "black"
+    property color advanced_bg_text: "white"
 
     //stage
-    property color stage_bg: "aliceblue"
-    property color bgcolor: "aliceblue"
+    property color stage_bg: "grey"
+    property color bgcolor: "black"
 
 }

@@ -17,13 +17,16 @@ class SkinDataItem: public QObject
             DescriptionRole,
             VersionRole,
             VariantRole,
+            MainColorRole,
+            AccentColorRole,
+            PathRole,
             ImageRole
           };
 
         public:
 
           SkinDataItem(QObject *parent = 0) {}
-          explicit SkinDataItem( const QString &name,  const QString &creator, const  QString &description, const QString &version, const  QString &variant , QImage img, QObject *parent=0);
+          explicit SkinDataItem( const QString &name,  const QString &creator, const  QString &description, const QString &version, const  QString &variant , QImage img, QString &path, QString &mainc, QString &accentc, QObject *parent=0);
 
           QVariant data(int role) const;
           QHash<int, QByteArray> roleNames() const;
@@ -35,6 +38,9 @@ class SkinDataItem: public QObject
           inline QString version() const { return m_version; }
           inline QString variant() const { return m_variant; }
           inline QImage image() const {return m_image; }
+          inline QString path() const {return m_path;}
+          inline QString maincolor() const {return m_maincolor;}
+          inline QString accentcolor() const {return m_accentcolor;}
 
 
         private:
@@ -43,6 +49,9 @@ class SkinDataItem: public QObject
           QString m_description;
           QString m_version;
           QString m_variant;
+          QString m_path;
+          QString m_maincolor;
+          QString m_accentcolor;
           QImage m_image;
 
         signals:
