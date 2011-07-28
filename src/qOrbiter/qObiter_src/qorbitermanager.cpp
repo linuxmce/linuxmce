@@ -610,12 +610,9 @@ void qorbiterManager::swapSkins(QString incSkin)
 
                 qorbiterUIwin->setSource(skinsDir.path()+"/"+incSkin.toLower()+"/main.qml");
                 gotoQScreen("Screen_1.qml");
-
          }
-
-
     }
-}
+  }
 }
 
 
