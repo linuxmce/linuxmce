@@ -1,5 +1,6 @@
 import QtQuick 1.0
-import "components"
+import "../components"
+import "../js" as MyJs
 
  Item {
      id: item
@@ -7,16 +8,13 @@ import "components"
      signal changeScreen(string s)
      property string locationinfo: "standby"
 
-
-     //property string currentRoomLights: lightingModel
-    //  property string currentRoomMedia: mediaModel
-    //  property string currentRoomClimate: climateModel
-    //  property string currentRoomTelecom: telecomModel
-    //  property string currentRoomSecurity: lightingModel
+    // Style {id:style}
+    width: style.orbiterW;
+    height: style.orbiterH;
 
      function screenchange(screenname )
      {
-         if(pageLoader.source = screenname)
+         if(pageLoader.source = "../screens/"+screenname)
          {
              console.log("Command to change to:" + screenname+ " was successfull")
          }
@@ -25,10 +23,6 @@ import "components"
              console.log("Command to change to:" + screename + " failed!")
          }
      }
-
-     Style {id:style}
-     width: style.orbiterW; height: style.orbiterH;
-
 
      Loader {
          id:pageLoader
