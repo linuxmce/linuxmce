@@ -5,6 +5,7 @@
 SkinDataModel::SkinDataModel(SkinDataItem* prototype, QObject* parent): QAbstractListModel(parent), m_prototype(prototype)
 {
     setRoleNames(m_prototype->roleNames());
+     qRegisterMetaType<QModelIndex>("QModelIndex");
 }
 
 
@@ -35,7 +36,7 @@ void SkinDataModel::appendRows(const QList<SkinDataItem *> &items)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
   foreach(SkinDataItem *item, items) {
-    //connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
+    connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
     m_list.append(item);
   }
   endInsertRows();
@@ -44,7 +45,7 @@ void SkinDataModel::appendRows(const QList<SkinDataItem *> &items)
 void SkinDataModel::insertRow(int row, SkinDataItem *item)
 {
   beginInsertRows(QModelIndex(), row, row);
- // connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
+connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
   m_list.insert(row, item);
   endInsertRows();
 }

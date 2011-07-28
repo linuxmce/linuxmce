@@ -4,7 +4,7 @@ Component{
         Item {
     id: skindelegate
     anchors.centerIn: parent
-    height: 350
+    height: 100
     width: 350
     Row{
 
@@ -13,15 +13,20 @@ Component{
 
         Rectangle{
             id:rectDelegate
-            height: 100
+            height: 75
             width: skindelegate.width
             color: style.button_system_color
 
+
+
         Text {
-            anchors.top: rectDelegate.top
+            anchors.top: parent.top
             id: nameskin
+
             text: "Name:" + name + ". Version:" + version
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
+            font.pointSize: 14
+
             }
         Text {
             anchors.top: nameskin.bottom
@@ -30,25 +35,25 @@ Component{
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             }
 
-        Rectangle
-        {
-            anchors.right: rectDelegate.right
-            width: 150
-            height: rectDelegate.height
+
             Text {
-                anchors.centerIn: parent
+                anchors.top: skinDescription.bottom
                 id: skincreator
                 text: "Created By:" + creator
+                wrapMode: "WrapAnywhere"
             }
             Text {
                 anchors.top: skincreator.bottom
                 id: skinvariant
                 text: "Variation for: " + variation
+                wrapMode: "WrapAnywhere"
             }
-          }
+
         }
 
     }
-
   }
 }
+
+
+

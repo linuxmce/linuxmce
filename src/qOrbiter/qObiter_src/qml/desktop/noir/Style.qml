@@ -19,6 +19,8 @@ import QtQuick 1.0
         property string skincreator: "Langston Ball (aka golgoj4)"
         property string skinname: "Noir"
         property string skindescription: "A Skin based in black with glossy highlights"
+        property string skinversion: "1.0"
+        property string skinvariation: "Desktop 800x600"
         //main stage styles
     property int orbiterH: 600
     property int orbiterW: 800

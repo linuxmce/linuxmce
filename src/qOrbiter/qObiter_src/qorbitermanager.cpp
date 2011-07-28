@@ -124,7 +124,7 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     QString finalPath = qmlPath+buildType+currentSkin;
     QString skinPath= finalPath+"/Style.qml";
 
-    const QString skinsPath = qmlPath+test;
+    QString skinsPath = qmlPath+test;
 
     qDebug () << "QML import path for build: " << qmlPath;
 
@@ -760,12 +760,76 @@ void qorbiterManager::setNowPlayingIcon(bool b)
 void qorbiterManager::getcurrentSkins(QStringList skinPaths)
 {
    QImage skinPic(":/icons/Skin-Data.png");
-   skinModel = new SkinDataModel(new SkinDataItem, this);
+  SkinDataModel* tskinModel = new SkinDataModel(new SkinDataItem, this);
+qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
+   QString skins;
 
-   skinModel->appendRow(new SkinDataItem("Classic", "Pluto", "The Old Pluto Skin", "1.0", "desktop", skinPic, skinModel ));
+   QDir skinsDir(QApplication::applicationDirPath().remove("bin"));
 
-   qorbiterUIwin->rootContext()->setContextProperty("skinsList", skinModel);
 
+   if(skinsDir.cd("qml/"))
+    {
+        qDebug() << skinsDir.path();
+
+        QStringList platform = skinsDir.entryList();
+
+        qDebug() << "Switching to:" << platform.last();
+
+
+        if(platform.isEmpty())
+        {
+
+        }
+        else
+        {
+
+       if(skinsDir.cd(platform.last()))
+       {
+
+           skins = skinsDir.path();
+            qDebug() << "Looking for skins in " + skins ;
+       }
+
+    }
+
+QStringList::const_iterator constIterator;
+for (constIterator = skinPaths.constBegin(); constIterator != skinPaths.constEnd(); ++constIterator)
+   {
+
+       if ((*constIterator) == "js"||(*constIterator)=="components"||(*constIterator) =="screens")
+       {
+           qDebug() << "System Path" << (*constIterator);
+       }
+       else
+       {    skins.append("/");
+           QDeclarativeComponent skinData(qorbiterUIwin->engine(),QUrl::fromLocalFile(skins+(*constIterator)+"/Style.qml"));
+            //turning it into a qObject - this part actually loads it - the error should connect to a slot and not an exit
+          QObject *styleObject = skinData.create(qorbiterUIwin->rootContext());
+         //wait for it to load up
+            while (!skinData.isReady())
+               {
+                 if(skinData.isError())
+                    {
+                  qDebug() << skinData.errors();
+                    break;
+                    }
+
+                    qDebug() << " loading";
+                }
+
+                   QString s_title = styleObject->property("skinname").toString();
+                   QString s_creator = styleObject->property("skincreator").toString();
+                   QString s_description = styleObject->property("skindescription").toString();
+                   QString s_version = styleObject->property("skinversion").toString();
+                   QString s_target = styleObject->property("skinvariation").toString();
+                   qDebug() << "Adding skin to list" << s_title;
+                  tskinModel->appendRow(new SkinDataItem(s_title, s_creator, s_description, s_version, s_target, skinPic, tskinModel ));
+
+        }
+
+   }
+
+}
 
 }
 

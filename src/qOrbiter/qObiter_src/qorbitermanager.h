@@ -54,7 +54,7 @@ public:
     //QByteArray *skin;
     QMap <QString*, QString*> availibleSkins;
     QString qmlPath;
-    const QString *skinsPath;
+   QString skinsPath;
 
 
     //ui variables

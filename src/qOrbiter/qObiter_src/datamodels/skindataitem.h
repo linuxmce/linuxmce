@@ -1,7 +1,8 @@
 #ifndef SKINDATAITEM_H
 #define SKINDATAITEM_H
 
-#include <datamodels/listModel.h>
+#include <QAbstractListModel>
+#include <QVariant>
 #include <QImage>
 
 class SkinDataItem: public QObject
@@ -45,6 +46,7 @@ class SkinDataItem: public QObject
           QImage m_image;
 
         signals:
+          void dataChanged();
           void imageChanged();
 
 };
