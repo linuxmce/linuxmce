@@ -606,7 +606,11 @@ void qorbiterManager::swapSkins(QString incSkin)
                  qDebug() << skinData.status();
              }
 
-                qorbiterUIwin->engine()->rootContext()->setContextProperty("style", styleObject);
+         qorbiterUIwin->engine()->rootContext()->setContextProperty("style", styleObject);
+
+                qorbiterUIwin->setSource(skinsDir.path()+"/"+incSkin.toLower()+"/main.qml");
+                gotoQScreen("Screen_1.qml");
+
          }
 
 

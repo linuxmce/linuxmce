@@ -19,9 +19,10 @@ Component{
             MouseArea{
                 anchors.fill: parent
                 onClicked:{
+                    console.log("Switching to:" + name)
                     swapSkins(path)
-                console.log("Switching to:" + name)
-                    gotoQScreen("Screen_1.qml")
+
+
                 }
             }
 
