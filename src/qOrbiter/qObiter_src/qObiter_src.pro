@@ -136,7 +136,9 @@ SOURCES += main.cpp \
     ../../PlutoUtils/StringUtils.cpp \
     ../../DCE/ClientSocket.cpp \
     ../../DCE/DeviceData_Base.cpp \
-    ../../DCE/DeviceData_Impl.cpp
+    ../../DCE/DeviceData_Impl.cpp \
+    datamodels/skindatamodel.cpp \
+    datamodels/skindataitem.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -168,7 +170,9 @@ HEADERS += \
     datamodels/climatescenarioitem.h \
     datamodels/securityscenarioitem.h \
     datamodels/telecomscenarioitem.h \
-    screensaver/screensavermodule.h
+    screensaver/screensavermodule.h \
+    datamodels/skindatamodel.h \
+    datamodels/skindataitem.h
 
 OTHER_FILES += Readme.txt
 

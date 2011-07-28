@@ -4,9 +4,8 @@ Rectangle {
 
 
     id: rooms
-    width: 60
-    height: 60
-
+    width: style.stdbuttonw
+    height: style.stdbuttonh
     transitions: Transition {
             NumberAnimation { properties: "x,y"; easing.type: Easing.InOutQuad }
              NumberAnimation { easing.amplitude: 0.5; properties: "height,width"; easing.type: Easing.InOutQuart }

@@ -19,7 +19,7 @@
         <file alias="light-off.png">img/icons/jabber_protocol.png</file>
         <file alias="home.png">img/icons/kfm_home.png</file>
         <file>img/icons/kmix.png</file>
-        <file>img/icons/kservices.png</file>
+        <file alias="Skin-Data.png">img/icons/kservices.png</file>
         <file alias="light-on.png">img/icons/ktip.png</file>
         <file alias="weather.png">img/icons/kweather.png</file>
         <file alias="photos.png">img/icons/lphoto.png</file>

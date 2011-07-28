@@ -15,22 +15,15 @@ Rectangle {
         id: labelforview
         text: "Please Choose a skin"
     }
-
+    SkinListDelegate{id:skinchooserdelegate}
     ListView
-    {
-        id:skinlist
+    {   anchors.top: labelforview.bottom
+        clip: true
+        id:skinsListView
         height: parent.height
         width: parent.width
-        delegate: Rectangle{
-            Text {
-                id: skinname
-                text: "text"
-            }
-            Text {
-                id: skindescription
-                text: "text"
-            }
-        }
+        model:skinsList
+        delegate: skinchooserdelegate
     }
 }
 

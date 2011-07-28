@@ -105,17 +105,17 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
    QString buildType;
 #ifdef for_desktop
     buildType = "/qml/desktop/";
-#elif for_freemantle
+#elif defined (for_freemantle)
     buildType = "/qml/freemantle/";
-#elif for_harmattan
+#elif defined (for_harmattan)
     buildType="/qml/harmattan";
-     #elif Q_OS_MACX
+     #elif defined (Q_OS_MACX)
     buildType="/qml/desktop";
         #endif
 
    qorbiterUIwin = new QDeclarativeView; //initialize the declarative view to act upon its context
 
-   currentSkin = "noir";
+   currentSkin = "default";
    currentSkinURL="/qml/qObiter_src/";
    s_RouterIP="192.168.80.1";
 
@@ -124,10 +124,17 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     QString finalPath = qmlPath+buildType+currentSkin;
     QString skinPath= finalPath+"/Style.qml";
 
-   const QString skinsPath = qmlPath+test;
-     qDebug() << "Skin import path" << skinsPath;
+    const QString skinsPath = qmlPath+test;
+
     qDebug () << "QML import path for build: " << qmlPath;
-    getcurrentSkins(skinsPath);
+
+    QDir directoryMap(skinsPath);
+    directoryMap.setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
+    QStringList filters;
+    filters << "components" << "screens" << "js";
+    QStringList skinList = directoryMap.entryList();
+
+    getcurrentSkins(skinList);
 
     //loading the style from the current set skin directory
     QDeclarativeComponent skinData(qorbiterUIwin->engine(),QUrl::fromLocalFile(finalPath+"/Style.qml"));
@@ -750,21 +757,14 @@ void qorbiterManager::setNowPlayingIcon(bool b)
     item->setProperty("nowplayingtext", "null");
 }
 
-QMap<QString , QString > qorbiterManager::getcurrentSkins(QString path)
+void qorbiterManager::getcurrentSkins(QStringList skinPaths)
 {
+   QImage skinPic(":/icons/Skin-Data.png");
+   skinModel = new SkinDataModel(new SkinDataItem, this);
 
-   QDir directoryMap(path);
+   skinModel->appendRow(new SkinDataItem("Classic", "Pluto", "The Old Pluto Skin", "1.0", "desktop", skinPic, skinModel ));
 
-
-   QStringList filters;
-   filters << ".cpp" << ".o";
-   QStringList skinList = directoryMap.entryList();
-   qDebug() << "Current Path:" << directoryMap.currentPath();
-
-
-   QMap <QString, QString> tSkinArray;
-   tSkinArray.insert("Default", "Default");
-   return tSkinArray;
+   qorbiterUIwin->rootContext()->setContextProperty("skinsList", skinModel);
 
 
 }

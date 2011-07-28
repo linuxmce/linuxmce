@@ -35,7 +35,8 @@ import QtQuick 1.0
     //icon sizes
     property int iconHeight: 90
     property int iconWidth: 90
-
+        property int  stdbuttonh: 90
+        property int  stdbuttonw: 90
     //textStyles
 
     property int title_size: 18

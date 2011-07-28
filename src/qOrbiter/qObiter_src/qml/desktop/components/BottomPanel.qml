@@ -3,8 +3,8 @@ import QtQuick 1.0
 Rectangle {
 
 
-    width: 800
-    height: 75
+    width: style.orbiterW
+    height: 100
     color: "#9e9d9d"
     id:advanced_panel
 
@@ -12,7 +12,9 @@ Rectangle {
         id:advancedrow
         height:childrenRect.height
         anchors.centerIn: parent
-        width: parent.width
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: childrenRect.width
+
         spacing:10
         clip: false
 
@@ -20,8 +22,9 @@ Rectangle {
             id: buttonsq1
             x: 1
             y: 1
-            width: 60
-            height: 60
+            width: 90
+            height: 90
+            color: style.homescreenfloorplanbuttoncolor
             buttontextfontsize: 9
             border.width: 2
             buttontext: "Advanced"
@@ -37,10 +40,12 @@ Rectangle {
             id: buttonsq2
             x: 63
             y: 1
-            width: 60
-            height: 60
+            width: 90
+            height: 90
+            color: style.homescreenfloorplanbuttoncolor
             border.width: 2
             buttontext: "Power"
+
             radius: 5
         }
 
@@ -48,8 +53,9 @@ Rectangle {
             id: buttonsq3
             x: 125
             y: 1
-            width: 60
-            height: 60
+            width: style.stdbuttonw
+            height: style.stdbuttonh
+            color: style.homescreenfloorplanbuttoncolor
             border.width: 2
             buttontext: "Sleeping Menu"
             radius: 5
@@ -63,11 +69,9 @@ Rectangle {
     ButtonSq{
         id:exit
         buttontext: "Exit Orbiter"
-        buttontextcolor: style.button_system_color
-
-        height: 60
-        width: 60
-
+        width: 90
+        height: 90
+        color: style.homescreenfloorplanbuttoncolor
         MouseArea{
             x: 0
             y: 0

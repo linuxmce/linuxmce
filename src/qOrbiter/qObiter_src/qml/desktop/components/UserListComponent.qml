@@ -4,8 +4,8 @@ import QtQuick 1.0
 Rectangle {
 
     id: rectangle1
-    width: 60
-    height: 60
+    width: style.stdbuttonw
+    height: style.stdbuttonh
 
     transitions: Transition {
             NumberAnimation { properties: "x,y"; easing.type: Easing.InOutQuad }

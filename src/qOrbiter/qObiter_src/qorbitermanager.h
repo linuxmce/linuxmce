@@ -14,6 +14,7 @@
 #include <datamodels/climatescenariomodel.h>
 #include <datamodels/telecomscenariomodel.h>
 #include <datamodels/securityscenariomodel.h>
+#include <datamodels/skindatamodel.h>
 #include <QFile>
 #include <QDataStream>
 
@@ -103,6 +104,7 @@ Param 10 - pk_attribute
     LocationModel *m_lRooms;
     ListModel *model;
     UserModel *userList;
+    SkinDataModel *skinModel;
 
     LightingScenarioModel *roomLights;
     MediaScenarioModel *roomMedia;
@@ -190,7 +192,7 @@ signals:
 
 
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
-      Q_INVOKABLE QMap <QString, QString> getcurrentSkins(QString path);
+      Q_INVOKABLE  void getcurrentSkins(QStringList skinPaths);
 
       //datagrid related
       void setSorting(int i);
