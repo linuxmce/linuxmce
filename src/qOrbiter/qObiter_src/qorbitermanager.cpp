@@ -237,6 +237,7 @@ void qorbiterManager::gotoQScreen(QString s)
 
 }
 
+//this block sets up the connection to linuxmce
 bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode)
 {
     pqOrbiter = new DCE::qOrbiter(PK_Device, sRouterIP, true,bLocalMode);
@@ -314,6 +315,8 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
     if( pqOrbiter->m_bReload )
             bReload=true;
     delete pqOrbiter;
+    sleep(10);
+    setupLmce(iPK_Device, sRouterIP, false, false);
 
 }
 
@@ -495,6 +498,7 @@ bool qorbiterManager::getConf(int pPK_Device)
                     QString m_command = tScenarioRoom.at(innerIndex).attributes().namedItem("eaDescription").nodeValue();
                     QString m_goto = tScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
                     QString imgName = tScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+
                     QImage m_image = QImage("Qrc:/icons/"+imgName);
 
 
@@ -541,6 +545,7 @@ bool qorbiterManager::getConf(int pPK_Device)
    qorbiterUIwin->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);
    qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
     qorbiterUIwin->rootContext()->setContextProperty("iPK_Device", QVariant::fromValue(iPK_Device));
+
     pqOrbiter->CMD_Set_Current_Room(m_lRooms->idefault_Ea);
   pqOrbiter->CMD_Set_Entertainment_Area(m_lRooms->sdefault_Ea.toStdString());
 
@@ -855,15 +860,31 @@ for (constIterator = skinPaths.constBegin(); constIterator != skinPaths.constEnd
                    QString s_path = styleObject->property("skindir").toString();
                    QString s_mainc = styleObject->property("maincolor").toString();
                    QString s_accentc = styleObject->property("accentcolor").toString();
-
                    qDebug() << "Adding skin to list" << s_title;
                   tskinModel->appendRow(new SkinDataItem(s_title, s_creator, s_description, s_version, s_target, skinPic, s_path, s_mainc, s_accentc, tskinModel ));
+             }
+          }
+    }
+}
+
+void qorbiterManager::quickReload()
+{
+
+    gotoQScreen("Splash.qml");
+    bool connected = pqOrbiter->m_bRouterReloading;
+
+    if(setupLmce(iPK_Device, s_RouterIP, false, false))
+    {
+        qDebug() << "Reload complete, starting";
 
         }
-
-   }
-
+        else
+        {
+            qDebug() << "Router not up, waiting";
+            sleep(5);
+            quickReload();
+        }
 }
 
-}
+
 

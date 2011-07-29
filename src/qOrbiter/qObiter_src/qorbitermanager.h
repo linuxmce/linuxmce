@@ -131,7 +131,7 @@ Param 10 - pk_attribute
       */
     bool getConf(int pPK_Device);
     bool OrbiterGen();              //prelim orbter generation
-
+    Q_INVOKABLE void quickReload();
 
 
     //virtual devices
