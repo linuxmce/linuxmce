@@ -67,6 +67,7 @@ libexiv2-dev
 libextractor-dev
 libfaad-dev
 libflac-dev
+libftdi-dev
 libfuse-dev
 libgl1-mesa-dev
 libglade2-dev
@@ -193,3 +194,5 @@ libmng-dev
 libtalloc-dev
 chrpath
 libxml++2.6-dev
+libao2
+libao-dev
