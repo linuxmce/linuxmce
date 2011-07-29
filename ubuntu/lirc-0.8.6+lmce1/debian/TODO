@@ -1,0 +1,26 @@
+Apply sed-segfaults patch from CVS.
+
+Improve package descriptions.
+
+Improbe --version and --help messages for help2man generation.
+
+use MAKEDEV when a mayor number is officialy assigned to LIRC.
+
+Make sure that lircd daemonizes properly.
+
+Find out what to do with sample configuration files.
+	probably move them to /usr/share/lirc
+
+lirc-modules-source: needs lirc to be configured for automagical configuration.
+			but a Pre-Depends sounds as too much, as it doesn't
+			even Depend on lirc.
+			Apt seams to do it right.
+
+Ask lirc/install_devices only if they are not there?
+
+use install instead of cp in debian/rules.
+	Should I realy? debhelper takes care of permisions anyway.
+	How about dh_install?
+
+Make lirc_sir type runtime selectable, so module binary packages can be
+included in debian mirrors.

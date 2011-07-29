@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<deviceinfo version="0.2">
+  <device>
+     <match key="info.product" contains_ncase="saa7134 ir">
+        <merge key="info.ignore" type="bool">true</merge>
+     </match>
+     <match key="info.product" contains_ncase="IR-Receiver">
+        <merge key="info.ignore" type="bool">true</merge>
+     </match>
+     <match key="info.product" contains_ncase="cx88 IR">
+        <merge key="info.ignore" type="bool">true</merge>
+     </match>
+     <match key="info.product" contains_ncase="bttv IR">
+        <merge key="info.ignore" type="bool">true</merge>
+     </match>
+     <match key="info.product" contains_ncase="Budget-CI dvb ir receiver saa7146">
+        <merge key="info.ignore" type="bool">true</merge>
+     </match>
+  </device>
+</deviceinfo>

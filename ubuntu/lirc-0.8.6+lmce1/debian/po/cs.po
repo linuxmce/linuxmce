@@ -1,0 +1,390 @@
+#
+#    Translators, if you are not familiar with the PO format, gettext
+#    documentation is worth reading, especially sections dedicated to
+#    this format, e.g. by running:
+#         info -n '(gettext)PO Files'
+#         info -n '(gettext)Header Entry'
+#
+#    Some information specific to po-debconf are available at
+#            /usr/share/doc/po-debconf/README-trans
+#         or http://www.debian.org/intl/l10n/po-debconf/README-trans
+#
+#    Developers do not need to manually edit POT or PO files.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: lirc\n"
+"Report-Msgid-Bugs-To: lirc@packages.debian.org\n"
+"POT-Creation-Date: 2009-10-09 20:56-0500\n"
+"PO-Revision-Date: 2006-09-26 11:34+0200\n"
+"Last-Translator: Miroslav Jezbera <jezz@hkfree.org>\n"
+"Language-Team: Czech <debian-l10n-czech@lists.debian.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:2001
+msgid "Create LIRC device nodes if they are not there?"
+msgstr "Vytvořit soubory LIRC zařízení, pokud ještě neexistují?"
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:2001
+msgid "LIRC needs the /dev/lirc, /dev/lircd and /dev/lircm files in /dev."
+msgstr ""
+"LIRC potřebuje soubory /dev/lirc, /dev/lircd a /dev/lircm v adresáři /dev."
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:3001
+msgid "Do you want to reconfigure LIRC?"
+msgstr "Chcete přenastavit LIRC?"
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:3001
+msgid ""
+"LIRC is already configured, reconfiguring it may overwrite the existing "
+"configuration in /etc/lirc/hardware.conf."
+msgstr ""
+"LIRC je již nastaveno. Přenastavení může přepsat vaše současné nastavení v "
+"souboru /etc/lirc/hardware.conf."
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:3001
+msgid "However, comments, LIRC_ARGS and other unknown code will be preserved."
+msgstr "Avšak komentáře, LIRC_ARGS a jiný neznámý kód bude zachován."
+
+#. Type: note
+#. Description
+#: ../lirc.templates:4001
+msgid "Old configuration files found"
+msgstr "Nalezeny soubory s dřívějším nastavením"
+
+#. Type: note
+#. Description
+#: ../lirc.templates:4001
+msgid ""
+"Previous versions of this package didn't include any configuration file and "
+"expected users to create their own /etc/lircd.conf and /etc/lircmd.conf."
+msgstr ""
+"Předchozí verze tohoto balíku neobsahovaly žádný konfigurační soubor a "
+"očekávaly, že uživatel vytvoří vlastní /etc/lircd.conf a /etc/lircmd.conf."
+
+#. Type: note
+#. Description
+#: ../lirc.templates:4001
+msgid "The new location for these files is /etc/lirc/."
+msgstr "Nové umístění pro tyto soubory je /etc/lirc/."
+
+#. Type: note
+#. Description
+#: ../lirc.templates:4001
+msgid ""
+"File locations will be corrected but you should check that none of LIRC "
+"configuration files are left directly under /etc/."
+msgstr ""
+"Umístnění souborů bude opraveno, ale stejně byste měli zkontrolovat, že "
+"žádný z konfiguračních souborů LIRC nezůstal přímo v /etc/."
+
+#. Type: note
+#. Description
+#: ../lirc.templates:19001
+msgid "IntelliMouse protocol preferred over IMPS/2"
+msgstr "Upřednostňovat protokol IntelliMouse namísto IMPS/2"
+
+#. Type: note
+#. Description
+#: ../lirc.templates:19001
+msgid ""
+"You are currently using lircmd with the IMPS/2 protocol. This is not "
+"compatible with the method lircmd uses to simulate a mouse, so IntelliMouse "
+"support has been added and is now the preferred protocol."
+msgstr ""
+"V současnosti používáte lircmd s protokolem IMPS/2. Ten není kompatibilní s "
+"metodou, kterou lircmd používá, aby simuloval myš. Proto byla přidána "
+"podpora pro protokol IntelliMouse, který je nyní upřednostňovaný."
+
+#. Type: note
+#. Description
+#: ../lirc.templates:19001
+msgid ""
+"You should update /etc/lirc/lircmd.conf and the configuration of any program "
+"which uses lircmd as a mouse to use the IntelliMouse protocol instead."
+msgstr ""
+"Měli byste aktualizovat /etc/lirc/lircmd.conf a konfiguraci každého programu,"
+"který používá lircmd jako myš, aby používal protokol IntelliMouse."
+
+#. Type: note
+#. Description
+#: ../lirc.templates:19001
+msgid "NOTE: gpm will refuse to use lircmd as a mouse with IMPS/2 protocol."
+msgstr "POZNÁMKA: gpm odmítne používat lircmd jako myš s protokolem IMPS/2."
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:20001
+msgid "Delete /var/log/lircd?"
+msgstr "Smazat /var/log/lircd?"
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:20001
+msgid ""
+"LIRC now uses syslog as a logging mechanism, so /var/log/lircd is no longer "
+"relevant."
+msgstr ""
+"LIRC nyní používá syslog pro zaznamenávání událostí, takže /var/log/lircd je "
+"zastaralý."
+
+#. Type: select
+#. Description
+#: ../lirc.templates:21001
+msgid "Remote control configuration:"
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:21001
+msgid ""
+"If you choose a remote or transmitter, but already have a configuration file "
+"in /etc/lirc/lircd.conf, the existing file will be renamed to /etc/lirc/"
+"lircd.conf.dpkg-old and the community configurations loaded into /etc/lirc/"
+"lircd.conf.  If you have a /etc/lirc/lircd.conf.dpkg-old file already, it "
+"will not be overwritten and your current /etc/lirc/lircd.conf will be lost."
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:22001
+msgid "IR transmitter, if present:"
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:22001
+msgid ""
+"IR transmitters can be used for controlling external devices.  Some devices "
+"are considered transceivers, with the ability to both send and receive.  "
+"Other devices require separate hardware to accomplish these tasks."
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:23001
+msgid "Custom event interface for your dev/input device:"
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:23001
+msgid ""
+"Many remotes that were previously supported by the lirc_gpio interface now "
+"need to be set up via the dev/input interface.  You will need to custom "
+"select your remote's event character device.  This can be determined by "
+"'cat /proc/bus/input/devices'."
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:25001
+#, fuzzy
+#| msgid "Please choose the supported serial device type:"
+msgid "Port your serial device is attached to:"
+msgstr "Vyberte prosím typ podporovaného sérového zařízení:"
+
+#. Type: select
+#. Description
+#: ../lirc.templates:25001
+msgid ""
+"The UART (serial) driver is a low level driver that takes advantage of bit "
+"banging a character device.  This means that you can only use it with "
+"hardware serial devices.  It unfortunately does not work with USB serial "
+"devices."
+msgstr ""
+
+#~ msgid "Drivers to build:"
+#~ msgstr "Přeložit ovladače:"
+
+#~ msgid ""
+#~ " atiusb:      ATI/NVidia/X10 I & II RF Remote\n"
+#~ " bt829:       Tekram M230 Mach64\n"
+#~ " cmdir:       COMMANDIR USB Transceiver\n"
+#~ " gpio:        TV cards from FlyVideo98, Avermedia, MiRO and many others\n"
+#~ " i2c:         TV cards from Hauppauge and PixelView\n"
+#~ " igorplugusb: Igor Cesko's USB IR Receiver\n"
+#~ " imon:        Soundgraph iMON MultiMedian IR/VFD\n"
+#~ " it87:        ITE IT8705/12 CIR ports (ECS K7S5A, Asus DigiMatrix...)\n"
+#~ " mceusb:      Windows Media Center Remotes (old version, MicroSoft USB "
+#~ "ID)\n"
+#~ " mceusb2:     Windows Media Center Remotes (new version, Philips et al.)\n"
+#~ " parallel:    Home-brew parallel-port receiver\n"
+#~ " sasem:       Dign HV5 HTPC IR/VFD Module\n"
+#~ " serial:      Home-brew serial-port driver\n"
+#~ " sir:         Serial InfraRed (IRDA)\n"
+#~ " streamzap:   Streamzap PC Remote"
+#~ msgstr ""
+#~ " atiusb:      Dálkové ovládání ATI/NVidia/X10 I & II RF\n"
+#~ " bt829:       Tekram M230 Mach64\n"
+#~ " cmdir:       COMMANDIR USB vysílač\n"
+#~ " gpio:        TV karty FlyVideo98, Avermedia, MiRO a mnoho dalších\n"
+#~ " i2c:         TV karty Hauppauge a PixelView\n"
+#~ " igorplugusb: USB IR přijímač od Igora Ceska\n"
+#~ " imon:        Soundgraph iMON MultiMedian IR/VFD\n"
+#~ " it87:        ITE IT8705/12 CIR porty (např. na desce ECS K7S5A, Asus "
+#~ "DigiMatrix...)\n"
+#~ " mceusb:      Dálkové ovládání pro Windows Media Center (starší verze, "
+#~ "MicroSoft USB ID)\n"
+#~ " mceusb2:     Dálkové ovládání pro Windows Media Center (novější verze, "
+#~ "Philips aj.)\n"
+#~ " parallel:    Podomácku vyrobený IR přijímač připojený na paralelní port\n"
+#~ " sasem:       Dign HV5 HTPC IR/VFD Modul\n"
+#~ " serial:      Podomácku vyrobený IR přijímač připojený na sériový port\n"
+#~ " sir:         Infračervený port (IRDA)\n"
+#~ " streamzap:   Dálkové ovládání Streamzap PC"
+
+#~ msgid "Try to automatically select hardware support options?"
+#~ msgstr "Pokusit se automaticky nastavit podporu pro váš hardware?"
+
+#~ msgid ""
+#~ "Your previous answers can be used as a basis for guessing the list of "
+#~ "kernel modules that should be built, along with their parameters."
+#~ msgstr ""
+#~ "Vaše předchozí odpovědi mohou být použity jako základ pro odhad seznamu "
+#~ "jaderných modulů, které by se měly přeložit, a jejich parametrů."
+
+#~ msgid "Please choose whether this should happen."
+#~ msgstr "Určete prosím, zda-li toto může nastat."
+
+#~ msgid "Additional kernel modules not needed"
+#~ msgstr "Další jaderné moduly nejsou potřeba"
+
+#~ msgid ""
+#~ "Unless you want to build LIRC kernel modules for another system, this "
+#~ "package is useless on this system."
+#~ msgstr ""
+#~ "Pokud nechcete vytvářet jaderné moduly LIRC pro jiný systém, pak je tento "
+#~ "balík na tomto systému již nepotřebný."
+
+#~ msgid "Binary modules package build instructions"
+#~ msgstr "Návod na vytvoření balíku s binárními moduly"
+
+#~ msgid ""
+#~ "For instructions on how to build the binary modules package, please read "
+#~ "the /usr/share/doc/lirc-modules-source/README.Debian file."
+#~ msgstr ""
+#~ "Pro návod jak vytvořit debianí balík s binárními moduly si prosím "
+#~ "přečtěte soubor /usr/share/doc/lirc-modules-source/README.Debian"
+
+#~ msgid "Standard"
+#~ msgstr "Standard"
+
+#~ msgid "Type of ITE8705/12 CIR port to support:"
+#~ msgstr "Podporovat následující typ ITE8705/12 CIR portu:"
+
+#~ msgid "Please choose the supported ITE8705/12 CIR port chip:"
+#~ msgstr "Vyberte prosím podporovaný typ čipu pro ITE8705/12 CIR port:"
+
+#~ msgid ""
+#~ " Standard:   Standard setup chip;\n"
+#~ " DigiMatrix: Setup for Asus DigiMatrix onboard chip."
+#~ msgstr ""
+#~ " Standard:   Standardní nastavení čipu\n"
+#~ " DigiMatrix: Nastavení pro integrovaný čip Asus DigiMatrix."
+
+#~ msgid "Other"
+#~ msgstr "Ostatní"
+
+#~ msgid "Serial device to support:"
+#~ msgstr "Podporovat sériové zařízení:"
+
+#~ msgid ""
+#~ " ANIMAX: Anir Multimedia Magic;\n"
+#~ " IRDEO:  IRdeo;\n"
+#~ " Other:  Any other supported device."
+#~ msgstr ""
+#~ " ANIMAX: Anir Multimedia Magic\n"
+#~ " IRDEO:  IRdeo\n"
+#~ " Other:  Zbylá podporovaná zařízení."
+
+#~ msgid "Is the serial IR device a transmitter?"
+#~ msgstr "Je vaše sériové infračervené zařízení vysílač?"
+
+#~ msgid "Should the carrier signal be generated by software?"
+#~ msgstr "Má být nosný signál generován softwarem?"
+
+#~ msgid "IR serial device I/O port:"
+#~ msgstr "I/O port vašeho sériového infračerveného zařízení:"
+
+#~ msgid "IR serial device IRQ:"
+#~ msgstr "Přerušení přiřazené vašemu infračervenému zařízení:"
+
+#~ msgid "Type of supported SIR device:"
+#~ msgstr "Typ podporovaného SIR zařízení:"
+
+#~ msgid "Please choose the supported SIR device type:"
+#~ msgstr "Zvolte prosím podporovaný typ SIR zařízení:"
+
+#~ msgid ""
+#~ " ACTISYS_ACT200L: Actisys Act200L dongle;\n"
+#~ " TEKRAM:          Tekram Irmate 210 (16x50 UART compatible serial port);\n"
+#~ " Other:           Any other supported device."
+#~ msgstr ""
+#~ " ACTISYS_ACT200L: Actisys Act200L dongle\n"
+#~ " TEKRAM:          Tekram Irmate 210 (16x50 UART kompatibilní seriový "
+#~ "port)\n"
+#~ " Other:           Zbylá podporovaná zařízen."
+
+#~ msgid "SIR device I/O port:"
+#~ msgstr "I/O port SIR zařízení:"
+
+#~ msgid "SIR device IRQ:"
+#~ msgstr "Přerušení přiřazené SIR zařízení:"
+
+#~ msgid "Parallel IR device I/O port:"
+#~ msgstr "I/O port vašeho paralelního infračerveného zařízení:"
+
+#~ msgid "Parallel IR device IRQ:"
+#~ msgstr "Přerušení přiřazené vašemu paralelnímu infračervenému zařízení:"
+
+#~ msgid "Parallel IR device timer:"
+#~ msgstr "Časovač vašeho paralelního infračerveného zařízení:"
+
+#~ msgid "Automatically build the modules?"
+#~ msgstr "Přeložit automaticky moduly?"
+
+#~ msgid ""
+#~ "New LIRC kernel modules can be built and installed if the source and "
+#~ "build environment for the current kernel are present locally."
+#~ msgstr ""
+#~ "Nové jaderné moduly LIRC mohou být přeloženy a nainstalovány, pouze pokud "
+#~ "zdrojové kódy a prostředí pro překlad modulů pro současné jádro jsou "
+#~ "dostupné na tomto systému."
+
+#~ msgid ""
+#~ "Even if you choose this option, you should build and install a binary "
+#~ "'kernel modules' package so that the package manager can keep track of "
+#~ "the files."
+#~ msgstr ""
+#~ "I když zvolíte tuto možnost, měli byste vytvářet a instalovat balík s "
+#~ "binárními 'jadernými moduly', tak aby správce balíků měl přehled nad "
+#~ "soubory."
+
+#~ msgid "Kernel source location:"
+#~ msgstr "Umístnění zdrojových kódů jádra:"
+
+#~ msgid ""
+#~ "Please enter the location of the kernel source tree, to build the lirc "
+#~ "kernel modules."
+#~ msgstr ""
+#~ "Uveďte prosím umístnění zdrojových kódů jádra, aby bylo možné přeložit "
+#~ "jaderné moduly lirc."
+
+#~ msgid "${ksrc}: invalid kernel source tree"
+#~ msgstr "${ksrc}: špatná cesta ke zdrojovým kódům jádra"
+
+#~ msgid "Quick walkthrough:"
+#~ msgstr "Rychlý přehled:"
