@@ -143,14 +143,16 @@ function Build_Replacements_Lucid
 	mkdir -pv "$replacements_dir"
 
 #	#Package: lirc
-#	Build_Replacement_Package lirc ubuntu/lirc-0.8.3+lmce
-#	cp ${svn_dir}/${svn_branch_name}/ubuntu/lirc-x*.deb ${replacements_dir}
+	Build_Replacement_Package lirc ubuntu/lirc-0.8.6+lmce1
+	cp ${svn_dir}/${svn_branch_name}/ubuntu/lirc-x*.deb ${replacements_dir}
+	cp ${svn_dir}/${svn_branch_name}/ubuntu/lirc-modules*.deb ${replacements_dir}
+	
 #	cp ${svn_dir}/${svn_branch_name}/ubuntu/liblircclient{0,-dev}_*.deb ${replacements_dir}
 
 	#Package: lirc
 # NOTE: using "dpkg-buildpackage ... -tc" makes building lirc fail randomly
-	dir_="${svn_dir}/${svn_branch_name}/ubuntu/lirc-0.8.3+lmce"
-	DisplayMessage "Not Building LIRC atm"
+#	dir_="${svn_dir}/${svn_branch_name}/ubuntu/lirc-0.8.3+lmce"
+#	DisplayMessage "Not Building LIRC atm"
 #	if Changed_Since_Last_Build "$dir_" ;then
 #		DisplayMessage "Building lirc"
 #		pushd "$dir_"
