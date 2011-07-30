@@ -77,8 +77,9 @@ Rectangle {
 
         ButtonSq {
             id: buttonsq1
-            height: 25
-            width: 25
+            height: 43
+            buttonsqradius: 5
+            width: 78
             buttontext: "Connect"
             x: 433
             y: 391

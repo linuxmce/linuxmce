@@ -1840,7 +1840,7 @@ QImage DCE::qOrbiter::getfileForDG(string filePath)
    int picData_Size;
    picData_Size = 0;
 
-   CMD_Request_File reqFile((long)35, (long)4 , (string)filePath, &picData, &picData_Size);
+   CMD_Request_File reqFile((long)qmlUI->iPK_Device, (long)4 , (string)filePath, &picData, &picData_Size);
    string p_sResponse;
 
            if (!SendCommand(reqFile))

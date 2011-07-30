@@ -48,7 +48,7 @@ class qorbiterManager : public QWidget
     Q_PROPERTY (bool addMediaItem NOTIFY modelChanged)
     Q_PROPERTY (QString q_mediaType READ getSorting NOTIFY gridTypeChanged)
 public:
-     qorbiterManager(QWidget *parent = 0);  //constructor
+     qorbiterManager(int deviceno, QString routerip, QWidget *parent = 0);  //constructor
 
     QString *sPK_User;
     QString *buildType;
@@ -125,7 +125,7 @@ Param 10 - pk_attribute
 
     //QT Functions to initialize lmce data
     bool initialize(int dev_id);
-    bool setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode);     //init's dce object
+   Q_INVOKABLE bool setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode);     //init's dce object
     /*
       getConf() is the part of the equation that should read the orbiter conf. not implemented fully
       */
@@ -156,6 +156,7 @@ Param 10 - pk_attribute
     bool needRegen;                 //regen flag
 
     string s_RouterIP;               // string of the router ip
+    QString qs_routerip;
     bool dceBool;                   //
     bool bLocalMode;                //local running flag, for running without router.
     //LightingScenarioModel *dummy;
@@ -196,7 +197,7 @@ signals:
 
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
       Q_INVOKABLE  void getcurrentSkins(QStringList skinPaths);
-
+      void qmlSetupLmce(int incdeviceid, QString incrouterip);
       //datagrid related
       void setSorting(int i);
       QString getSorting() {return q_mediaType;}

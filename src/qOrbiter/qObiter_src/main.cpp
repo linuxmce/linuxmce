@@ -209,9 +209,10 @@ int main(int argc, char* argv[])
             QApplication::setGraphicsSystem("raster");
             QApplication a(argc, argv);
 
-            qorbiterManager * w = new qorbiterManager;
+            qorbiterManager * w = new qorbiterManager(PK_Device,QString::fromStdString(sRouter_IP.c_str()));
+            w->iPK_Device = PK_Device;
             bool bLocalMode = false;
-            w->setupLmce(PK_Device, sRouter_IP, true, bLocalMode);
+            //w->setupLmce(PK_Device, sRouter_IP, true, bLocalMode);
             a.exec();
              // intialziation end
 

@@ -6,6 +6,7 @@ import "../js" as MyJs
      id: item
      signal close()
      signal changeScreen(string s)
+     signal setupStart(int x, string y)
      property string locationinfo: "standby"
 
     // Style {id:style}

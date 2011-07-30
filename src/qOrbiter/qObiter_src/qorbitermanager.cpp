@@ -98,8 +98,8 @@ extern "C" {
 */
 //<-dceag-plug-e->
 
-qorbiterManager::qorbiterManager(QWidget *parent) :
-    QWidget(parent)
+qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent) :
+    QWidget(parent), iPK_Device(deviceno), qs_routerip(routerip)
 {
 
    QString buildType;
@@ -126,7 +126,7 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
 
     QString skinsPath = qmlPath+test;
 
-    qDebug () << "QML import path for build: " << qmlPath;
+    //qDebug () << "QML import path for build: " << qmlPath;
     QString *m_SkinsDirectoryPath = new QString(qmlPath+buildType.toLatin1().constData());
     QDir directoryMap(skinsPath);
     directoryMap.setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
@@ -155,6 +155,8 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     {
     //set it as a context property so the qml can read it. if we need to changed it,we just reset the context property
     qorbiterUIwin->engine()->rootContext()->setContextProperty("style", styleObject);
+    qorbiterUIwin->rootContext()->setContextProperty("srouterip", QString(qs_routerip) );
+    qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
 
 
   //non functioning screen saver module
@@ -174,6 +176,7 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     qorbiterUIwin->engine()->addImageProvider("datagridimg", advancedProvider);
     qorbiterUIwin->rootContext()->setContextProperty("currentSkinUrl" , currentSkinURL);
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
+    qorbiterUIwin->rootContext()->setContextObject(this);
 
     //setting engine import path
     qorbiterUIwin->engine()->setBaseUrl(qmlPath+buildType);
@@ -195,7 +198,7 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     QString *q_attribute = NULL;
 
    //initial signal and slot connections
-   //QObject::connect(item,SIGNAL(swapStyle()), this,SLOT(swapSkins()));
+
     QObject::connect(item, SIGNAL(close()), this, SLOT(closeOrbiter()));
    // QObject::connect(this,SIGNAL(destroyed()), this, SLOT(closeOrbiter()));
 
@@ -217,6 +220,8 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
    // qorbiterUIwin->showFullScreen();
     gotoQScreen("Splash.qml");
     qDebug() << "Showing Splash";
+       QObject::connect(item,SIGNAL(setupStart(int, QString)), this,SLOT(qmlSetupLmce(int,QString)));
+
     }
     else
     {
@@ -819,7 +824,7 @@ qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
 
         QStringList platform = skinsDir.entryList();
 
-        qDebug() << "Switching to:" << platform.last();
+      //  qDebug() << "Switching to:" << platform.last();
 
 
         if(platform.isEmpty())
@@ -833,7 +838,7 @@ qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
        {
 
            skins = skinsDir.path();
-            qDebug() << "Looking for skins in " + skins ;
+          //  qDebug() << "Looking for skins in " + skins ;
 
        }
 
@@ -845,7 +850,7 @@ for (constIterator = skinPaths.constBegin(); constIterator != skinPaths.constEnd
 
        if ((*constIterator) == "js"||(*constIterator)=="components"||(*constIterator) =="screens")
        {
-           qDebug() << "System Path" << (*constIterator);
+          // qDebug() << "System Path" << (*constIterator);
        }
        else
        {    skins.append("/");
@@ -872,7 +877,7 @@ for (constIterator = skinPaths.constBegin(); constIterator != skinPaths.constEnd
                    QString s_path = styleObject->property("skindir").toString();
                    QString s_mainc = styleObject->property("maincolor").toString();
                    QString s_accentc = styleObject->property("accentcolor").toString();
-                   qDebug() << "Adding skin to list" << s_title;
+                  // qDebug() << "Adding skin to list" << s_title;
                   tskinModel->appendRow(new SkinDataItem(s_title, s_creator, s_description, s_version, s_target, skinPic, s_path, s_mainc, s_accentc, tskinModel ));
              }
           }
@@ -896,6 +901,13 @@ void qorbiterManager::quickReload()
             sleep(5);
             quickReload();
         }
+}
+
+void qorbiterManager::qmlSetupLmce(int incdeviceid, QString incrouterip)
+{
+
+    setupLmce(incdeviceid, incrouterip.toStdString(), false, false);
+
 }
 
 
