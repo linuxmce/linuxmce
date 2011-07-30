@@ -45,17 +45,18 @@ import QtQuick 1.0
     //textStyles
 
     property int title_size: 18
-    property color tile_color: "whitesmoke"
+    property color tile_color: "chocolate"
 
     property int t_but_size: 16
     property color t_but_color: "darkgrey"
 
     //title and other misc windo accents
+        property color titletextcolor: "darkgrey"
 
     //button styling
     property int buttonH:95
     property int buttonW: 95
-    property color button_system_color: "chocolate"
+    property color button_system_color: "darkgrey"
     property color button_system_color_hover: "lightblue"
 
     property color button_action_color: "maroon"
@@ -73,11 +74,11 @@ import QtQuick 1.0
     //row container styling
     property int rowWidth: orbiterW - 5
     property int rowH: buttonH + 10
-    property color rowbgColor: "transparent"
+    property color rowbgColor: "darkgrey"
 
     //Notifications bar
     property int width: orbiterW - 5
-    property color not_color: "chocolate"
+    property color not_color: "darkgrey"
     property string not_pos: "anchors: parent.top"
 
     //special
@@ -89,7 +90,7 @@ import QtQuick 1.0
     property color advanced_bg_text: "white"
 
     //stage
-    property color stage_bg: "grey"
+    property color stage_bg: "darkgrey"
     property color bgcolor: "black"
 
 }
