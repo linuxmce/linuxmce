@@ -354,7 +354,7 @@ bool qorbiterManager::getConf(int pPK_Device)
 
     const QByteArray tConf = binaryConfig.data();
     configData.setContent(tConf,false);
-    if(!configData.isDocument())
+    if(configData.isDocument() == false)
     {
         qDebug() << "Invalid config for device: " << iPK_Device;
         qDebug() << "Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d="<<iPK_Device ;

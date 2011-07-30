@@ -1781,7 +1781,7 @@ bool DCE::qOrbiter::initialize()
         string filePath = "/var/tmp/"+QString::number(qmlUI->iPK_Device).toStdString()+"conf.xml";
    // qDebug() << filePath.c_str();
 
-        CMD_Request_File configFileRequest((long)35, (long)4 , (string)filePath, &oData, &iData_Size);
+        CMD_Request_File configFileRequest((long)qmlUI->iPK_Device, (long)4 , (string)filePath, &oData, &iData_Size);
 
         if (!SendCommand(configFileRequest, p_sResponse))
             {
@@ -1794,6 +1794,12 @@ bool DCE::qOrbiter::initialize()
 
     QByteArray configData;              //config file put into qbytearray for processing
     configData = oData;
+    if (configData.size() == 0)
+    {
+        qDebug() << "Invalid config for device: " << qmlUI->iPK_Device;
+        qDebug() << "Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d="<<qmlUI->iPK_Device ;
+        exit(20);
+    }
     qmlUI->binaryConfig = configData;
     delete oData;
     return true;
