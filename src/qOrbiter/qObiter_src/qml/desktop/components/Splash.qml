@@ -57,7 +57,7 @@ Rectangle {
 
         TextEdit {
             id: routerip
-            x: 112
+            x: 241
             y: 402
             width: 80
             height: 20
@@ -73,6 +73,15 @@ Rectangle {
             height: 20
             text: "Device Number"
             font.pixelSize: 12
+        }
+
+        ButtonSq {
+            id: buttonsq1
+            height: 25
+            width: 25
+            buttontext: "Connect"
+            x: 433
+            y: 391
         }
 
 

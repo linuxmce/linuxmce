@@ -174,7 +174,8 @@ HEADERS += \
     datamodels/skindatamodel.h \
     datamodels/skindataitem.h
 
-OTHER_FILES += Readme.txt
+OTHER_FILES += Readme.txt \
+    config.xml
 
 android{
 OTHER_FILES=\

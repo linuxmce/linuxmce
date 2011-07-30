@@ -308,13 +308,19 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             else
             {
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
-            qDebug() << "Connect Failed";
+            qDebug() << "Connect Failed";            
+            gotoQScreen("Splash.qml");
+
+            /*
+              code to read data from file add it as context object goes here.
+              also function to wrap back around to setup lmce
+              */
             }
     }
 
     if( pqOrbiter->m_bReload )
             bReload=true;
-    delete pqOrbiter;
+    gotoQScreen("Splash.qml");
     sleep(10);
     setupLmce(iPK_Device, sRouterIP, false, false);
 
