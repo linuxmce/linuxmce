@@ -196,6 +196,9 @@ signals:
 
 
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
+      Q_INVOKABLE void setDeviceNo(QString i);
+      Q_INVOKABLE void setRouterIp(QString s);
+
       Q_INVOKABLE  void getcurrentSkins(QStringList skinPaths);
       void qmlSetupLmce(int incdeviceid, QString incrouterip);
       //datagrid related

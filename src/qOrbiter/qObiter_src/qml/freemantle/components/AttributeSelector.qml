@@ -1,144 +1,68 @@
 import QtQuick 1.0
-
-
+import "../js/ComponentLoader.js" as MyJs
 
 Rectangle {
+            id: attributeitem
+            height: childrenRect.height
+            width: childrenRect.width
+            color: "transparent"
+            Row{
+                id:attributerow
+                height: style.buttonH +10
+                width: childrenRect.width
+                spacing: 5
 
-    id:rectbox
+                HomeButton{id:home}
 
-    width: 150
-    height: 450
-    color: "whitesmoke"
-    clip: true
-    Component.onCompleted: listview.model = attributeModel
+                ButtonSq{
 
-    ListModel {
-        id: attributeModel
+                    buttontext: "Attribute Sort"
+                    buttonsqradius: 7
+                    height: style.buttonH
+                    width:  style.buttonW
+                         }
 
-        ListElement {
-            name: "Title"
-            pk: 12
-        }
-        ListElement {
-            name: "Performer"
-            pk: 2
-        }
-        ListElement {
-            name: "Director"
-            pk: 1
-        }
-        ListElement {
-            name: "Channel"
-            pk: 10
-        }
-        ListElement {
-            name: "Studio"
-            pk: 17
-        }
-        ListElement {
-            name: "Year"
-            pk: 19
-        }
-        ListElement {
-            name: "Rating"
-            pk: 18
-        }
-        ListElement {
-            name: "Program"
-            pk: 12
-        }
-        ListElement {
-            name: "Rating"
-            pk: 18
-        }
-        ListElement {
-            name: "Series"
-            pk: 43
-        }
+                ButtonSq{
+                    buttontext: "Genre"
+                    buttonsqradius: 7
+                    height: style.buttonH
+                    width:  style.buttonW
+                         }
+
+                ButtonSq{
+                    buttontext: "Sources"
+                    buttonsqradius: 7
+                    height: style.buttonH
+                    width:  style.buttonW
+                         }
 
 
-        ListElement {
-            name: "Performer"
-            pk: 2
-        }
-        ListElement {
-            name: "Album"
-            pk: 3
-        }
-        ListElement {
-            name: "Track"
-            pk: 5
-        }
-        ListElement {
-            name: "Genre"
-            pk: 8
-        }
-        ListElement {
-            name: "Title"
-            pk: 13
-        }      
 
-    }
-
-  Component
-    {
-        id:attributeComponent
-
-            Rectangle
-            {
-                     id:attributeDelegate
-                     border.width: 1
-                     border.color: "black"
-                     width: parent.width
-                      height: 75
-
-            Text {
-                   id: attributeName
-                   text: name
-                   font.pointSize: 14
-                   anchors.centerIn: parent
-                  }
-
-            MouseArea{
-                   anchors.fill: parent
-                   z:5
-                   onClicked: {
-                       console.log("Item " + name + "Attribute" + pk)
-                   }
-             }
-    }
-    }
-
-
-            Text
-                 {
-                  id: label
-                  text: "Please Select Sort"
-                 }
-
-    ListView
-    {
-        id:listview
-        anchors.fill: parent
-        clip: true
-        orientation: ListView.Vertical
-        delegate: attributeComponent
-
-    states:
-     [
-        State
-        {
-            name: "State1"
-
-            PropertyChanges
-            {
-                target: rectbox
-                width: 250
-                height: 480
+            ButtonSq{
+                buttontext: "Resolution"
+                buttonsqradius: 7
+                height: style.buttonH
+                width:  style.buttonW
+                MouseArea{
+                    anchors.fill:parent
+                    onClicked: MyJs.createFilterObjects("../components/FileFormat.qml")
+                }
             }
-        }
-    ]
-  }
+
+
+                ButtonSq{
+                 buttontext: "Mediatypes"
+                buttonsqradius: 7
+                height: style.buttonH
+                width:  style.buttonW
+
+         }
+
 
 }
+}
+
+
+
+
 

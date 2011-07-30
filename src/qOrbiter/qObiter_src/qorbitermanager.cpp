@@ -906,8 +906,20 @@ void qorbiterManager::quickReload()
 void qorbiterManager::qmlSetupLmce(int incdeviceid, QString incrouterip)
 {
 
-    setupLmce(incdeviceid, incrouterip.toStdString(), false, false);
+    setupLmce(iPK_Device, qs_routerip.toStdString(), false, false);
 
+}
+
+void qorbiterManager::setRouterIp(QString s)
+{
+    qs_routerip = s;
+    qDebug()<< qs_routerip;
+}
+
+void qorbiterManager::setDeviceNo(QString i)
+{
+    iPK_Device = i.toInt();
+    qDebug() << iPK_Device;
 }
 
 

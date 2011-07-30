@@ -5,26 +5,16 @@ Rectangle {
     id: rectangle1
     width: 800
     height: 800
+
    // signal setupStart(int x, string y)
-    Text {
-        id: text2
-        x: 160
-        y: 404
-        text: "text"
-        font.pixelSize: 12
 
         Text {
             id: welcome
-            x: 50
-            y: -396
             text: "Welcome To Linux MCE!"
-            anchors.verticalCenterOffset: -386
-            anchors.horizontalCenterOffset: 216
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
             font.pixelSize: 30
+            z:5
         }
-    }
+
 
     Image {
         id: splash
@@ -67,6 +57,8 @@ Rectangle {
             text: srouterip
             cursorVisible: true
             font.pixelSize: 12
+            onTextChanged: setRouterIp(routerip.text)
+
         }
 
         TextEdit {
@@ -78,6 +70,9 @@ Rectangle {
             text: deviceid
             cursorVisible: true
             font.pixelSize: 12
+            onTextChanged: setDeviceNo(devicenumber.text)
+
+
         }
 
         ButtonSq {

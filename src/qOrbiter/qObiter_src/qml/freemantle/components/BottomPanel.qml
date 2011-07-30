@@ -80,7 +80,7 @@ Rectangle {
             anchors.leftMargin: 0
             anchors.topMargin: 0
             anchors.fill: exit
-            onClicked: close()
+            onClicked: closeOrbiter()
                 }
              }
 
