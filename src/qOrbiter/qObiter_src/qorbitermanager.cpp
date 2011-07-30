@@ -221,7 +221,7 @@ qorbiterManager::qorbiterManager(QWidget *parent) :
     else
     {
         qDebug() << "Couldnt get skin data!";
-        exit(0);
+        exit(15);
     }
 }
 
@@ -354,6 +354,12 @@ bool qorbiterManager::getConf(int pPK_Device)
 
     const QByteArray tConf = binaryConfig.data();
     configData.setContent(tConf,false);
+    if(!configData.isDocument())
+    {
+        qDebug() << "Invalid config for device: " << iPK_Device;
+        qDebug() << "Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d="<<iPK_Device ;
+        exit(20);
+    }
 
     QDomElement root = configData.documentElement();        //orbiterXX
    // qDebug () << root.tagName();
