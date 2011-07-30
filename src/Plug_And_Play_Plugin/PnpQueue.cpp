@@ -1499,7 +1499,15 @@ bool PnpQueue::Process_Detect_Stage_Running_Detction_Scripts(PnpQueueEntry *pPnp
 				{
 					int PK_Device_Topmost = DatabaseUtils::GetTopMostDevice(m_pPlug_And_Play_Plugin->m_pDatabase_pluto_main,pPnpQueueEntry->m_pRow_Device_Reported->PK_Device_get());
 					string sIPAddress = DatabaseUtils::GetIpOfDevice(m_pPlug_And_Play_Plugin->m_pDatabase_pluto_main,PK_Device_Topmost);
-					sPath = TranslateSerialUSB(pPnpQueueEntry->m_mapPK_DeviceData[DEVICEDATA_COM_Port_on_PC_CONST],sIPAddress);
+					if (PK_Device_Topmost == 1)
+					{
+						// Device is on core.
+						sPath = TranslateSerialUSB(pPnpQueueEntry->m_mapPK_DeviceData[DEVICEDATA_COM_Port_on_PC_CONST]);
+					}
+					else
+					{
+						sPath = TranslateSerialUSB(pPnpQueueEntry->m_mapPK_DeviceData[DEVICEDATA_COM_Port_on_PC_CONST],sIPAddress);
+					}
 					LoggerWrapper::GetInstance()->Write(LV_STATUS,"PnpQueue::Process_Detect_Stage_Running_Detction_Scripts queue %d topmost %d ip %s port %s",
 						pPnpQueueEntry->m_pRow_PnpQueue->PK_PnpQueue_get(),PK_Device_Topmost,
 						sIPAddress.c_str(),sPath.c_str());
