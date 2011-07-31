@@ -28,7 +28,7 @@ void GAMEROM::InitDatabase()
 void GAMEROM::CloseDatabase()
 {
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"GAMEROM::CloseDatabase()");
-	m_pMyDatabase->Disconnect();
+//	m_pMyDatabase->Disconnect();
 	delete(m_pMyDatabase);
 }
 
