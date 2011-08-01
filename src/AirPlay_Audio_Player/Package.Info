@@ -1,0 +1,9 @@
+<-dceag-p-b->
+Package = DCE_Destination_Package
+Dir = 
+desc = DCE Implemenation for #2189 AirPlay Audio Player
+Maintainer = SergeName
+Email = serge@swa.lu
+Depend = DCE_Dependencies
+<-dceag-p-e->
+
