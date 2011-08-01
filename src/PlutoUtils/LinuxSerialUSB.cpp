@@ -28,16 +28,20 @@ string TranslateSerialUSB(string sInput,string sIPAddress)
 		return sInput;
 	}
 
-	string sCmd;
-	if( sIPAddress.empty()==false )
-		sCmd = "ssh " + sIPAddress + " ";
-	sCmd += "/usr/pluto/bin/TranslateSerialPort.sh";
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TranslateSerialUSB sCmd %s",sCmd.c_str());;
-	const char *args[] = {sCmd.c_str(), sInput.c_str(), NULL};
+	string sCmd, sOutput, sStdErr;
+	if ( sIPAddress.empty()==false )
+	{
+		// Remote address, use ssh.
+		const char *args[] = {"ssh",sIPAddress.c_str(),"/usr/pluto/bin/TranslateSerialPort.sh",sInput.c_str(),NULL};
+		ProcessUtils::GetCommandOutput(args[0],args,sOutput,sStdErr);
+	}
+	else
+	{
+		// This is local, just execute it.
+		const char *args[] = {"/usr/pluto/bin/TranslateSerialPort.sh",sInput.c_str(),NULL};
+		ProcessUtils::GetCommandOutput(args[0],args,sOutput,sStdErr);
+	}
 
-	string sOutput, sStdErr;
-
-	ProcessUtils::GetCommandOutput(args[0], args, sOutput, sStdErr);
 	StringUtils::TrimSpaces(sOutput);
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TranslateSerialUSB %s result %s", sInput.c_str(), sOutput.c_str());
 #endif
