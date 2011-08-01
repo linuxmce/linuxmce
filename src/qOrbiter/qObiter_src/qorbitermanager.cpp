@@ -559,6 +559,18 @@ bool qorbiterManager::getConf(int pPK_Device)
 
   this->qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
 
+  QImage attrimg(":/icons/Skin-Data.png");
+  uiFileFilter = new FilterModel(new FilterModelItem, this);
+  uiFileFilter->appendRow(new FilterModelItem("Low Res", "1", attrimg, false, uiFileFilter));
+  uiFileFilter->appendRow(new FilterModelItem("DVD", "2", attrimg, false, uiFileFilter));
+  uiFileFilter->appendRow(new FilterModelItem("Standard Def", "3", attrimg, false, uiFileFilter));
+  uiFileFilter->appendRow(new FilterModelItem("HD720", "4", attrimg, false, uiFileFilter));
+  uiFileFilter->appendRow(new FilterModelItem("HD1080", "5", attrimg, false, uiFileFilter));
+  uiFileFilter->appendRow(new FilterModelItem("Low Quality", "6", attrimg, false, uiFileFilter));
+
+  this->qorbiterUIwin->rootContext()->setContextProperty("fileformatmodel", uiFileFilter); //custom room list  provided
+
+
    // binaryConfig.clear();
    //configData.clear();
 
@@ -963,10 +975,19 @@ void qorbiterManager::setStringParam(int paramType, QString param)
        q_subType = param;
         break;
     case 2:
-       q_fileFormat = param;
+        if(q_fileFormat.isEmpty())
+        {
+            q_fileFormat = param;
+        }
+        else
+        {
+           q_fileFormat.append(","+ param);
+        }
+
+
         break;
     case 3:
-       q_attribute_genres = param;
+        q_attribute_genres.append("," + param);
         break;
     case 4:
        q_mediaSources = param;
@@ -995,8 +1016,10 @@ void qorbiterManager::setStringParam(int paramType, QString param)
     longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
 
     QString datagridVariableString = longassstring.join("|");
-    qDebug() << datagridVariableString;
 
+
+    qDebug() << datagridVariableString;
+initializeSortString();
 }
 
 void qorbiterManager::initializeSortString()
@@ -1016,6 +1039,7 @@ void qorbiterManager::initializeSortString()
 
 
      datagridVariableString = "";
+     qDebug() << "Dg Variables Reset";
 }
 
 void qorbiterManager::initializeContexts()

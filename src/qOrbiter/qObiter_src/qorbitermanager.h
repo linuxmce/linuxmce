@@ -15,6 +15,8 @@
 #include <datamodels/telecomscenariomodel.h>
 #include <datamodels/securityscenariomodel.h>
 #include <datamodels/skindatamodel.h>
+#include <datamodels/filtermodel.h>
+
 #include <QFile>
 #include <QDir>
 #include <QDataStream>
@@ -109,11 +111,15 @@ Param 10 - pk_attribute
     UserModel *userList;
     SkinDataModel *skinModel;
 
+
+
     LightingScenarioModel *roomLights;
     MediaScenarioModel *roomMedia;
     ClimateScenarioModel *roomClimate;
     TelecomScenarioModel *roomTelecom;
     SecurityScenarioModel *roomSecurity;
+
+    FilterModel *uiFileFilter;
 
     //ui functions
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}

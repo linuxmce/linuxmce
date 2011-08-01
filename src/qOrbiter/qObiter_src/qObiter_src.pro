@@ -141,7 +141,11 @@ SOURCES += main.cpp \
     ../../DCE/DeviceData_Base.cpp \
     ../../DCE/DeviceData_Impl.cpp \
     datamodels/skindatamodel.cpp \
-    datamodels/skindataitem.cpp
+    datamodels/skindataitem.cpp \
+    datamodels/filtermodel.cpp \
+    datamodels/genremodel.cpp \
+    datamodels/attributemodel.cpp \
+    datamodels/DataModelItems/filtermodelitem.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -176,7 +180,11 @@ HEADERS += \
     screensaver/screensavermodule.h \
     datamodels/skindatamodel.h \
     datamodels/skindataitem.h \
-    ../../PlutoUtils/MultiThreadIncludes.h
+    ../../PlutoUtils/MultiThreadIncludes.h \
+    datamodels/filtermodel.h \
+    datamodels/genremodel.h \
+    datamodels/attributemodel.h \
+    datamodels/DataModelItems/filtermodelitem.h
 
 OTHER_FILES += Readme.txt \
     config.xml

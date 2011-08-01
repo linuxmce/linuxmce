@@ -10,113 +10,57 @@ Rectangle {
            border.width: 1
            clip: true
 
-           ListModel{
-               id:fileformatmodel
 
-               ListElement{
-                   name:"Low Resolution"
-                   pk: 1
-
-               }
-
-               ListElement{
-                   name:"DVD"
-                   pk: 2
-
-               }
-
-               ListElement{
-                   name:"Standard Definition"
-                   pk: 3
-
-               }
-
-               ListElement{
-                   name:"HD 720"
-                   pk: 4
-
-               }
-
-               ListElement{
-                   name:"HD 1080"
-                   pk: 5
-
-               }
-
-               ListElement{
-                   name:"Low Quality"
-                   pk: 6
-
-               }
-
-               ListElement{
-                   name:"MP3"
-                   pk: 7
-
-               }
-
-               ListElement{
-                   name:"CD Quality"
-                   pk: 8
-
-               }
-               ListElement{
-                   name:"High Def audio"
-                   pk: 9
-
-               }
-
-               ListElement{
-                   name:"Rom"
-                   pk: 10
-
-               }
-
-               ListElement{
-                   name:"Disc"
-                   pk: 11
-
-               }
-           }
-
-           Component{
+         Component{
                id:fileformatdelegate
                Item {
                    id: fileformatitem
                    height: 50
                    width: parent.width
-                   MouseArea{
-                       anchors.fill: parent
-                       onClicked:{ setStringParam(2, pk)
-                                   rect.destroy()
-                       }
-                   }
-
 
                    Rectangle{
+                       id: formatrect
                        height: 50
-                       width: parent.width
-                       color: style.alert_bg
+                       width: parent.width                     
                        border.color: "white"
                        border.width: 1
+                       color: status ? "green" : style.alert_bg
 
+                       MouseArea{
+                           anchors.fill: parent
+                           onPressAndHold: {rect.destroy()
+                           }
+
+                           onClicked:{
+                               fileformatmodel.setSelectionStatus(name)
+                              // fileformatlist.currentIndex = index
+                                     }
+                       }
                        Text {
                            id: fileformatcell
                            text: name
                            font.pointSize: 14
-
                        }
+
+
                    }
                }
            }
 
 
         ListView{
-            id:mediatypeslist
+            id:fileformatlist
             height: parent.height
             width: parent.width
             model: fileformatmodel
             delegate: fileformatdelegate
+            Connections{
+                target: fileformatmodel
+                onDataChanged:{
+                   // fileformatlist.color =  "green"
+                    console.log(fileformatmodel.lastrow + fileformatmodel.ident)
+                                }
+            }
 
         }
 
