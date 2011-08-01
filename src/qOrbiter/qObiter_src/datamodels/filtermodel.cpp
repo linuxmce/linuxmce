@@ -61,13 +61,13 @@ void FilterModel::handleItemChange()
 {
   FilterModelItem* item = static_cast<FilterModelItem*>(sender());
   QModelIndex index = indexFromItem(item);
-  qDebug() << "Handling item change for:" << index;
+ // qDebug() << "Handling item change for:" << index;
   if(index.isValid())
   {
      QModelIndex lastrow;
      ident = item->fileformat();
      lastrow = index;
-    emit dataChanged(index, index , 1);
+    emit dataChanged(index, index ,1);
   }
 }
 

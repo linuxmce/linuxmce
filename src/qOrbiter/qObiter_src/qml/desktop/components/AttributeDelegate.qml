@@ -10,7 +10,7 @@ Item {
 Rectangle {
 
     width: parent.width
-    height: 75
+    height: parent.height
 
     Text {
         id: attributeName

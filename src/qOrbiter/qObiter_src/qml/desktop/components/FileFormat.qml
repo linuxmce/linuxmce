@@ -33,7 +33,7 @@ Rectangle {
 
                            onClicked:{
                                fileformatmodel.setSelectionStatus(name)
-                              // fileformatlist.currentIndex = index
+
                                      }
                        }
                        Text {
@@ -53,14 +53,7 @@ Rectangle {
             height: parent.height
             width: parent.width
             model: fileformatmodel
-            delegate: fileformatdelegate
-            Connections{
-                target: fileformatmodel
-                onDataChanged:{
-                   // fileformatlist.color =  "green"
-                    console.log(fileformatmodel.lastrow + fileformatmodel.ident)
-                                }
-            }
+            delegate: fileformatdelegate            
 
         }
 

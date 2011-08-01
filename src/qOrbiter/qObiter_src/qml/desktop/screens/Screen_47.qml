@@ -66,7 +66,9 @@ Rectangle {
         cellWidth: 156
         cellHeight: 100
 
-        onModelChanged: {console.log("Grid Item Added!")}
+        onModelChanged:
+        {console.log("Grid Item Added!")
+        }
          Connections{
          target:dataModel
                     }

@@ -10,7 +10,7 @@
 class FilterModelItem: public QObject
 {
  Q_OBJECT
-
+    Q_PROPERTY (bool m_isSelected READ selectedStatus NOTIFY filterChanged)
 
 public:
   enum Roles {

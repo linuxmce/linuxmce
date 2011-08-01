@@ -6,10 +6,11 @@ Rectangle {
 
     id:rectbox
 
-    width: 150
-    height: 450
+    width: childrenRect.width
+    height: childrenRect.height
     color: "whitesmoke"
     clip: true
+    anchors.centerIn: parent
     //Component.onCompleted: listview.model = attributeModel
 
     ListModel {
@@ -79,4 +80,67 @@ Rectangle {
         }
 
     }
+
+
+    Rectangle {
+               id:rect
+               width: 200
+               height: 200
+               color: style.bgcolor
+               anchors.centerIn: parent
+               border.color: style.button_system_color
+               border.width: 1
+               clip: true
+
+
+             Component{
+                   id:attributetypedelegate
+                   Item {
+                       id:attributetypeitem
+                       height: 50
+                       width: parent.width
+
+                       Rectangle{
+                           id: attributetyperect
+                           height: 50
+                           width: parent.width
+                           border.color: "white"
+                           border.width: 1
+                           color: status ? "green" : style.alert_bg
+
+                           MouseArea{
+                               anchors.fill: parent
+                               onPressAndHold: {rectbox.destroy()
+                               }
+
+                               onClicked:{
+                                  // attributetypemodel.setSelectionStatus(name)
+
+                                         }
+                           }
+                           Text {
+                               id: attributetypecell
+                               text: name
+                               font.pointSize: 14
+                           }
+
+
+                       }
+                   }
+               }
+
+
+            ListView{
+                id:attributetypelist
+                height: parent.height
+                width: parent.width
+                model: attributeModel
+                delegate: attributetypedelegate
+
+            }
+
+       }
+
+
+
 }

@@ -12,14 +12,14 @@ Rectangle {
 
 
          Component{
-               id:genredelegate
+               id:mediatypedelegate
                Item {
-                   id:genreitem
+                   id:mediatypeitem
                    height: 50
                    width: parent.width
 
                    Rectangle{
-                       id: genrerect
+                       id: mediatyperect
                        height: 50
                        width: parent.width
                        border.color: "white"
@@ -32,12 +32,12 @@ Rectangle {
                            }
 
                            onClicked:{
-                               genremodel.setSelectionStatus(name)
+                               mediatypemodel.setSelectionStatus(name)
 
                                      }
                        }
                        Text {
-                           id: genrecell
+                           id: mediatypecell
                            text: name
                            font.pointSize: 14
                        }
@@ -49,11 +49,11 @@ Rectangle {
 
 
         ListView{
-            id:genrelist
+            id:mediatypelist
             height: parent.height
             width: parent.width
-            model: genremodel
-            delegate: genredelegate
+            model: mediatypemodel
+            delegate: mediatypedelegate
 
         }
 

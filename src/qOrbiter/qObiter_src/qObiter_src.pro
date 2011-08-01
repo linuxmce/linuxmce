@@ -85,6 +85,9 @@ symbian:TARGET.CAPABILITY += NetworkServices
 # lines and add the respective components to the MOBILITY variable.
 # CONFIG += mobility
 # MOBILITY +=
+message(Qt version: $$[QT_VERSION])
+ message(Qt is installed in $$[QT_INSTALL_PREFIX])
+message (Build Type: $$DEFINES)
 
 # The .cpp file which was generated for your project. Feel free to hack it.
 SOURCES += main.cpp \
@@ -145,7 +148,8 @@ SOURCES += main.cpp \
     datamodels/filtermodel.cpp \
     datamodels/genremodel.cpp \
     datamodels/attributemodel.cpp \
-    datamodels/DataModelItems/filtermodelitem.cpp
+    datamodels/DataModelItems/filtermodelitem.cpp \
+    datamodels/DataModelItems/genreitem.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -184,7 +188,8 @@ HEADERS += \
     datamodels/filtermodel.h \
     datamodels/genremodel.h \
     datamodels/attributemodel.h \
-    datamodels/DataModelItems/filtermodelitem.h
+    datamodels/DataModelItems/filtermodelitem.h \
+    datamodels/DataModelItems/genreitem.h
 
 OTHER_FILES += Readme.txt \
     config.xml

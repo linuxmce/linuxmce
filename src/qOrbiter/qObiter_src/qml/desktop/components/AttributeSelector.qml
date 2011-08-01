@@ -20,14 +20,24 @@ Rectangle {
                     buttonsqradius: 7
                     height: style.buttonH
                     width:  style.buttonW
-                         }
+                    MouseArea{
+                        anchors.fill:parent
+                        onClicked: MyJs.createFilterObjects("../components/AttributeTypes.qml")
+                        }
+                }
+
 
                 ButtonSq{
                     buttontext: "Genre"
                     buttonsqradius: 7
                     height: style.buttonH
                     width:  style.buttonW
-                         }
+                    MouseArea{
+                        anchors.fill:parent
+                        onClicked: MyJs.createFilterObjects("../components/GenreSelector.qml")
+                    }
+                }
+
 
                 ButtonSq{
                     buttontext: "Sources"
