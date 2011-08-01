@@ -1187,7 +1187,7 @@ bool PnpQueue::LocateDevice(PnpQueueEntry *pPnpQueueEntry)
 		// See if this is a USB->Serial
 		string sSqlUSB = "SELECT DeviceTemplate.FK_DeviceCategory FROM DHCPDevice "
 			"JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate "
-			"WHERE VendorModelId like '" + sVendorModelId + "%'";
+			"WHERE VendorModelId like '" + sVendorModelId + "%' OR Parm = 'CAT:serial'";
 
 		PlutoSqlResult result_set;
 		DB_ROW row=NULL;
