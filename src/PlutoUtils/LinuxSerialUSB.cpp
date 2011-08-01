@@ -32,7 +32,7 @@ string TranslateSerialUSB(string sInput,string sIPAddress)
 	if ( sIPAddress.empty()==false )
 	{
 		// Remote address, use ssh.
-		const char *args[] = {"ssh",sIPAddress.c_str(),"/usr/pluto/bin/TranslateSerialPort.sh",sInput.c_str(),NULL};
+		const char *args[] = {"/usr/pluto/bin/TranslateRemoteSerialPort.sh",sIPAddress.c_str(),sInput.c_str(),NULL};
 		ProcessUtils::GetCommandOutput(args[0],args,sOutput,sStdErr);
 	}
 	else
