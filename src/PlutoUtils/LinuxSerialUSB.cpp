@@ -32,6 +32,7 @@ string TranslateSerialUSB(string sInput,string sIPAddress)
 	if( sIPAddress.empty()==false )
 		sCmd = "ssh " + sIPAddress + " ";
 	sCmd += "/usr/pluto/bin/TranslateSerialPort.sh";
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TranslateSerialUSB sCmd %s",sCmd.c_str());;
 	const char *args[] = {sCmd.c_str(), sInput.c_str(), NULL};
 
 	string sOutput, sStdErr;
