@@ -37,7 +37,9 @@ folder_02.target=     #left blank so it will appear in the root
 
 }
 
-DEPLOYMENTFOLDERS = folder_01 folder_02
+folder_03.source = config.xml
+folfer_03.TARGET =
+DEPLOYMENTFOLDERS = folder_01 folder_02 folder_03
 
 # Additional import path used to resolve QML modules in Creator's code model
 QML_IMPORT_PATH =
@@ -173,7 +175,8 @@ HEADERS += \
     datamodels/telecomscenarioitem.h \
     screensaver/screensavermodule.h \
     datamodels/skindatamodel.h \
-    datamodels/skindataitem.h
+    datamodels/skindataitem.h \
+    ../../PlutoUtils/MultiThreadIncludes.h
 
 OTHER_FILES += Readme.txt \
     config.xml

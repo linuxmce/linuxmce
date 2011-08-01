@@ -198,21 +198,28 @@ signals:
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
       Q_INVOKABLE void setDeviceNo(QString i);
       Q_INVOKABLE void setRouterIp(QString s);
+      Q_INVOKABLE void writeConfig();
+      bool readLocalConfig();
 
       Q_INVOKABLE  void getcurrentSkins(QStringList skinPaths);
       void qmlSetupLmce(int incdeviceid, QString incrouterip);
+
       //datagrid related
       void setSorting(int i);
       QString getSorting() {return q_mediaType;}
+      void initializeSortString();
       void clearMediaModel();
       bool addMediaItem(QString mText, QString temp, QImage cell);
       void updateModel();
+      Q_INVOKABLE void setStringParam(int paramType, QString param);
 
       //ui related
       int getlocation() const ;
       void setLocation(const int& , const int& ) ;
       Q_INVOKABLE void gotoQScreen(QString ) ;
       void setNowPlayingIcon(bool b);
+      void initializeContexts();
+      void initializeGridModel();
 
       //initialization related
       void regenOrbiter(int deviceNo);

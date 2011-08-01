@@ -85,6 +85,12 @@ Rectangle {
                    id: fileformatitem
                    height: 50
                    width: parent.width
+                   MouseArea{
+                       anchors.fill: parent
+                       onClicked:{ setStringParam(2, pk)
+                                   rect.destroy()
+                       }
+                   }
 
 
                    Rectangle{
@@ -111,12 +117,9 @@ Rectangle {
             width: parent.width
             model: fileformatmodel
             delegate: fileformatdelegate
-            MouseArea{
-                anchors.fill:parent
-                onClicked: rect.destroy()
 
-               }
         }
 
    }
+
 

@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <orbiter>
-    <routerip id="192.168.0.1"\>
-    <deviceid id="35"\>
-    <routeraddress id="dcerouter"\>
+    <routerip id="routerip" ip="192.168.80.1"\>
+    <orbiterdata id="device" attribute="35"\>
+    <orbiterdata id="routeraddress" attribute="dcerouter"\>
+    <orbiterdata id="skin" attribute="noir"\>
 </orbiter>

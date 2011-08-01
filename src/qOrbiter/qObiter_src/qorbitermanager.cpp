@@ -115,6 +115,11 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
 
    qorbiterUIwin = new QDeclarativeView; //initialize the declarative view to act upon its context
 
+   if (readLocalConfig())
+   {
+       qDebug () << "Local confing processing";
+   }
+
    currentSkin = "default";
    currentSkinURL="/qml/qObiter_src/";
    s_RouterIP="192.168.80.1";
@@ -123,7 +128,6 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
     const QString test = buildType;
     QString finalPath = qmlPath+buildType+currentSkin;
     QString skinPath= finalPath+"/Style.qml";
-
     QString skinsPath = qmlPath+test;
 
     //qDebug () << "QML import path for build: " << qmlPath;
@@ -131,7 +135,6 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
     QDir directoryMap(skinsPath);
     directoryMap.setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
     QStringList skinList = directoryMap.entryList();
-
     getcurrentSkins(skinList);
 
     //loading the style from the current set skin directory
@@ -159,23 +162,14 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
     qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
 
 
+    initializeGridModel();
+     initializeSortString();
+
   //non functioning screen saver module
     ScreenSaverModule ScreenSaver;
     qmlRegisterType<ScreenSaverModule>("ScreenSaverModule",1,0,"ScreenSaverModule");
     ScreenSaver.setImage(QUrl("../../img/lmcesplash.jpg"));
-    qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", &ScreenSaver);
-
-    //datagrid model setup with image provider for grid
-    model = new ListModel(new gridItem, this);
-    basicProvider = new basicImageProvider();
-    advancedProvider = new GridIndexProvider(model , 6, 4);
-  //  QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex, )), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex)), Qt::QueuedConnection);
-
-    //adding important data and objects to qml now that they have been setup
-    qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
-    qorbiterUIwin->engine()->addImageProvider("datagridimg", advancedProvider);
-    qorbiterUIwin->rootContext()->setContextProperty("currentSkinUrl" , currentSkinURL);
-    qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
+    qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", &ScreenSaver);    
     qorbiterUIwin->rootContext()->setContextObject(this);
 
     //setting engine import path
@@ -190,15 +184,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
     iPK_Device_OrbiterPlugin = long(9);
     m_dwIDataGridRequestCounter = 0;
 
-    //datagrid option variables
-    QString *q_mediaType = new QString("5");
-    QString *q_publicUsers = NULL;
-    QString *q_fileFormat=NULL;
-    QString *q_subType=NULL;
-    QString *q_attribute = NULL;
-
    //initial signal and slot connections
-
     QObject::connect(item, SIGNAL(close()), this, SLOT(closeOrbiter()));
    // QObject::connect(this,SIGNAL(destroyed()), this, SLOT(closeOrbiter()));
 
@@ -795,7 +781,7 @@ QString qorbiterManager::adjustPath(const QString &path)
 void qorbiterManager::setSorting(int i)
 {
     qDebug() << "Setting grid mediatype to :" << i;
-    q_mediaType = "videomodel";
+    q_mediaType = QString::number(i);
     this->qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
     emit gridTypeChanged();
 }
@@ -920,6 +906,136 @@ void qorbiterManager::setDeviceNo(QString i)
 {
     iPK_Device = i.toInt();
     qDebug() << iPK_Device;
+}
+
+bool qorbiterManager::readLocalConfig()
+{
+    QDomDocument localConfig("config.xml");
+
+    if (localConfig.toElement().text().size() == 0)
+    {
+        qDebug() << "Local Config Missing!";
+        qDebug() <<"Enter information to continue, press connect when ready.";
+    return false;
+    }
+    else
+    {
+        qs_routerip = localConfig.childNodes().at(0).toElement().tagName();
+        if(!qs_routerip.isNull())
+        {
+            qDebug()<< "Reading local config";
+        }
+        else
+        {
+            qDebug() << "Could not read local, setting defaults.";
+            qDebug() << localConfig.toString();
+             qs_routerip = "192.168.80.1";
+             return false;
+        }
+     }
+    return true;
+}
+
+void qorbiterManager::writeConfig()
+{
+}
+
+void qorbiterManager::setStringParam(int paramType, QString param)
+{
+    /*
+    QString q_mediaType;           //1 passed in inital dg request
+    QString q_subType;             //2
+    QString q_fileFormat;          //3
+    QString q_attribute_genres;    //4
+    QString q_mediaSources;         //5 needs comma seperator
+
+    QString q_usersPrivate;        //6
+    QString q_attributetype_sort;  //7
+    QString q_pk_users;             //8
+    QString q_last_viewed;        //9
+    QString q_pk_attribute;        //10
+    QString *datagridVariableString;
+    */
+
+    switch (paramType)
+    {
+    case 1:
+       q_subType = param;
+        break;
+    case 2:
+       q_fileFormat = param;
+        break;
+    case 3:
+       q_attribute_genres = param;
+        break;
+    case 4:
+       q_mediaSources = param;
+        break;
+    case 5:
+       q_usersPrivate = param;
+        break;
+    case 6:
+       q_attributetype_sort = param;
+        break;
+    case 7:
+       q_pk_users = param;
+        break;
+    case 8:
+       q_last_viewed = param;
+        break;
+    case 9:
+       q_pk_attribute = param;
+        break;
+    default:
+        cout << "no type";
+
+    }
+
+    QStringList longassstring;
+    longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
+
+    QString datagridVariableString = longassstring.join("|");
+    qDebug() << datagridVariableString;
+
+}
+
+void qorbiterManager::initializeSortString()
+{
+    QString datagridVariableString ;
+    //datagrid option variables
+  //  QString q_mediaType;           //1
+    QString q_subType="";             //2
+    QString q_fileFormat="";          //3
+    QString q_attribute_genres="";    //4
+    QString q_mediaSources="";         //5 need comma delineation
+    QString q_usersPrivate = "0";        //6
+    QString q_attributetype_sort="";  //7
+    QString q_pk_users="";             //8
+    QString q_last_viewed="";        //9
+    QString q_pk_attribute="";        //10
+
+
+     datagridVariableString = "";
+}
+
+void qorbiterManager::initializeContexts()
+{
+
+}
+
+void qorbiterManager::initializeGridModel()
+{
+    //datagrid model setup with image provider for grid
+    model = new ListModel(new gridItem, this);
+    basicProvider = new basicImageProvider();
+    advancedProvider = new GridIndexProvider(model , 6, 4);
+  //  QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex, )), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex)), Qt::QueuedConnection);
+
+    //adding important data and objects to qml now that they have been setup
+    qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
+    qorbiterUIwin->engine()->addImageProvider("datagridimg", advancedProvider);
+    qorbiterUIwin->rootContext()->setContextProperty("currentSkinUrl" , currentSkinURL);
+    qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
 }
 
 
