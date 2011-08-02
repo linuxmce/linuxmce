@@ -14,8 +14,8 @@ Rectangle {
              id: contactDelegate
              Item {
                 id:mainItem
-                 width: 156;
-                 height: 100
+                 width: 179;
+                 height: 109
 
                  Rectangle {
                      id:frame
@@ -23,8 +23,6 @@ Rectangle {
                      width: mainItem.width
                      height: mainItem.height
                      anchors.centerIn: mainItem
-
-
                      color: "floralwhite"
                      border.color: "black"
                      border.width: 2

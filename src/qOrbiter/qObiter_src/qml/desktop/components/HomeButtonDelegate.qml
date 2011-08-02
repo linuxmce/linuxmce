@@ -22,6 +22,14 @@ ButtonSq
              onClicked: execGrp(params);
                z:5    }
 
+         Image {
+             id: buttonsqimg
+             height: style.iconHeight + 5
+             width: style.iconHeight + 5
+             anchors.fill: parent
+             source: style.stylebuttonimage
+         }
+
 
           Image {
                 id:buttonimage
@@ -30,6 +38,8 @@ ButtonSq
                 width: style.iconWidth
                  anchors.centerIn: delegateButton
                  }
+
+
         }
 
           Text {

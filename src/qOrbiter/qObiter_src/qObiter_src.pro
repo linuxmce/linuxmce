@@ -37,6 +37,15 @@ folder_02.target=     #left blank so it will appear in the root
 
 }
 
+android{
+folder_01.source = qml/desktop
+folder_01.target = qml
+
+folder_02.source= img
+folder_02.target=     #left blank so it will appear in the root
+DEFINES +=ANDROID
+}
+
 folder_03.source = config.xml
 folfer_03.TARGET =
 DEPLOYMENTFOLDERS = folder_01 folder_02 folder_03
@@ -122,7 +131,6 @@ SOURCES += main.cpp \
     ../../PlutoUtils/MultiThreadIncludes.cpp \
     ../../PlutoUtils/minilzo.cpp \
     ../../PlutoUtils/md5c.cpp \
-    ../../PlutoUtils/getch.cpp \
     ../../PlutoUtils/FileUtils.cpp \
     ../../PlutoUtils/CommonIncludes.cpp \
     ../../SerializeClass/SerializeClass.cpp \
@@ -149,7 +157,8 @@ SOURCES += main.cpp \
     datamodels/genremodel.cpp \
     datamodels/attributemodel.cpp \
     datamodels/DataModelItems/filtermodelitem.cpp \
-    datamodels/DataModelItems/genreitem.cpp
+    datamodels/DataModelItems/genreitem.cpp \
+    ../../PlutoUtils/getch.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -192,7 +201,26 @@ HEADERS += \
     datamodels/DataModelItems/genreitem.h
 
 OTHER_FILES += Readme.txt \
-    config.xml
+    config.xml \
+    android/res/values/libs.xml \
+    android/res/values/strings.xml \
+    android/res/drawable-hdpi/icon.png \
+    android/res/drawable-mdpi/icon.png \
+    android/res/drawable-ldpi/icon.png \
+    android/src/eu/licentia/necessitas/industrius/QtActivity.java \
+    android/src/eu/licentia/necessitas/industrius/QtApplication.java \
+    android/src/eu/licentia/necessitas/industrius/QtSurface.java \
+    android/src/eu/licentia/necessitas/industrius/QtLayout.java \
+    android/src/eu/licentia/necessitas/ministro/IMinistroCallback.aidl \
+    android/src/eu/licentia/necessitas/ministro/IMinistro.aidl \
+    android/src/eu/licentia/necessitas/mobile/QtAndroidContacts.java \
+    android/src/eu/licentia/necessitas/mobile/QtSystemInfo.java \
+    android/src/eu/licentia/necessitas/mobile/QtFeedback.java \
+    android/src/eu/licentia/necessitas/mobile/QtSensors.java \
+    android/src/eu/licentia/necessitas/mobile/QtCamera.java \
+    android/src/eu/licentia/necessitas/mobile/QtMediaPlayer.java \
+    android/src/eu/licentia/necessitas/mobile/QtLocation.java \
+    android/AndroidManifest.xml
 
 android{
 OTHER_FILES=\

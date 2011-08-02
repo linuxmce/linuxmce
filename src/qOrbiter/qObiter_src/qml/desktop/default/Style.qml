@@ -43,7 +43,7 @@ import QtQuick 1.0
         property int  stdbuttonw: 90
 
     //textStyles
-
+     property string stylebuttonimage: ""
     property int title_size: 18
     property color tile_color: "whitesmoke"
 

@@ -18,6 +18,9 @@ Rectangle {
         border.width: 1
         border.color: style.button_action_color_hover
         radius: 1
+
+
+
     Text {
         id: buttonLabel
         x: 50
@@ -36,5 +39,6 @@ Rectangle {
         wrapMode: Text.WordWrap
 
          }
+
 
 }

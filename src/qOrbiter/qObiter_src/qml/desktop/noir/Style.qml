@@ -53,6 +53,9 @@ import QtQuick 1.0
     //title and other misc windo accents
         property color titletextcolor: "darkgrey"
 
+        //icons
+        property string stylebuttonimage: "../../../img/icons/noir/sqtransp.png"
+
     //button styling
     property int buttonH:95
     property int buttonW: 95

@@ -26,6 +26,7 @@ Item {
             radius: style.but_smooth
             buttontext: ""
 
+
             Image {
                 id: onimg
                 source: "../../../img/icons/jabber_protocol.png"

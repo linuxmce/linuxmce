@@ -17,7 +17,7 @@ skins is provided at runtime. current scopes are
 CONFIG+=for_desktop    :: windows*, mac,linux desktop
 CONFIG+=for_freemantle :: maemeo5 devices
 CONFIG+=for_harmattan  :: harmattan based meego
-
+CONFIG+=ANDROID        :: android
 *windows builds not availible
 
 When you compile and run, the device should connect and the proper skins should be included.

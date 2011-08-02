@@ -12,16 +12,19 @@ Rectangle {
 
     Component {
              id: contactDelegate
-             Item {
+             Rectangle {
                 id:mainItem
-                 width: 156;
-                 height: 100
+                 width: 175;
+                 height: 109
+                 color: "transparent"
+                 border.color: "black"
+                 border.width: 1
 
                  Rectangle {
                      id:frame
                      opacity: 1
-                     width: mainItem.width
-                     height: mainItem.height
+                     width: 156
+                     height: 100
                      anchors.centerIn: mainItem
 
 
@@ -44,6 +47,7 @@ Rectangle {
                      color: "black" ;
                      wrapMode: "WrapAtWordBoundaryOrAnywhere"
                      anchors.fill: frame
+                     font.bold: true
 
                      }
              }
@@ -52,19 +56,22 @@ Rectangle {
 
     GridView {
         id: grid_view1
-        x: 6
-        y: 7
+        x:20
+        anchors.horizontalCenter: fileviewscreen.horizontalCenter
         model:dataModel
         delegate: contactDelegate
         highlight: Rectangle { color: "lightblue"; radius: 5 }
         highlightFollowsCurrentItem: true
         focus: true
-        width: 750
+        width: parent.width - 10
         height: 500
+
         clip: true
         contentItem.clip: true
-        cellWidth: 156
-        cellHeight: 100
+        cellWidth: 175
+        cellHeight: 109
+
+
 
         onModelChanged:
         {console.log("Grid Item Added!")
@@ -84,12 +91,5 @@ Rectangle {
         AttributeSelector {}
 
     }
-
-
-
-
-
-
-
 
 }
