@@ -1178,7 +1178,8 @@ string FileUtils::GetMidFileChecksum( string sFileName, int Bytes )
 
 string FileUtils::GetLastModifiedDateStr(string sFile)
 {
-	struct stat buf;
+#ifndef ANDROID
+        struct stat buf;
 	memset(&buf, 0, sizeof(buf));
 
 	string sItemWithoutTrailingSlash = FileUtils::ExcludeTrailingSlash(sFile);
@@ -1193,7 +1194,7 @@ string FileUtils::GetLastModifiedDateStr(string sFile)
 
 		return acDateTime;
 	}
-
+#endif
 	return "";
 }
 

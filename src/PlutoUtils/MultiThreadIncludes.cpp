@@ -461,7 +461,9 @@ void PlutoLock::DumpOutstandingLocks()
 		{
 			pthread_t thread = (*itKilledThreads);
 #ifndef UNDER_CE
+#ifndef ANDROID
 			pthread_cancel(thread);
+#endif
 #endif
 		}
 
