@@ -81,7 +81,9 @@ void HandleRequestSocket::DisconnectAndWait()
 		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Requesthandler %p (device: %d) runThread won't die!", this, m_dwPK_Device );
 
 #ifndef WINCE //not defined under ce :(
+#ifndef ANDROID
 		pthread_cancel(m_RequestHandlerThread);
+#endif
 #endif
 	}
 
