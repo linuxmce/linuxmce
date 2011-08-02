@@ -7,5 +7,5 @@ echo "It's NOT a JVC D-ILA Projector"
 /usr/pluto/bin/MessageSend dcerouter -r 0 $1 1 806 224 $2 13 "$4" 44 0
 else
 echo "It's a JVC D-ILA Projector"
-/usr/pluto/bin/MessageSend dcerouter -r 0 $1 1 806 224 $2 13 "$4" 44 71
+/usr/pluto/bin/MessageSend dcerouter -r 0 $1 1 806 224 $2 13 "$4" 44 2162
 fi
