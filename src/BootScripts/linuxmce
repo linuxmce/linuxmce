@@ -146,6 +146,8 @@ fi
 
 ConfEval
 
+# We still need hal for device detection
+StartService "Starting HAL daemon" "/usr/sbin/hald --daemon=yes --use-syslog"
 
 # Start core services
 if [ "$AutostartCore" -eq "1" ] ; then
