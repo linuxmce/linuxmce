@@ -68,6 +68,8 @@ YPXFRDARGS=
 " > /etc/default/nis
 
 #
+
+echo >> /etc/apt/sources.list
 echo 
 echo The first phase of the install process is completed
 echo Reboot the system to start the final process.

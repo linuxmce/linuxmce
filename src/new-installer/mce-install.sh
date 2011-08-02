@@ -14,7 +14,7 @@ InstallerLogFile="/var/log/mce-installer-$(date +%Y%m%d_%H%M%S).log"
 exec &> >(tee $InstallerLogFile)
 # Fix repository URL for intrepid
 ./repoplaces.sh
-
+echo >> /etc/apt/sources.list
 # Fix a problem with the /initrd.img and /vmlinuz links pointing to a different kernel than the 
 # newest (and currently running) one
 ln -s -f /boot/initrd.img-`uname -r` /initrd.img
