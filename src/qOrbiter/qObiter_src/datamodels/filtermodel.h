@@ -26,7 +26,7 @@ public:
   FilterModelItem* find(const QString &id) const;
   QModelIndex indexFromItem( const FilterModelItem* item) const;
   FilterModelItem* currentRow();
-  Q_INVOKABLE void setSelectionStatus(QString format);
+  Q_INVOKABLE bool setSelectionStatus(QString format);
   void clear();
 
   QModelIndex lastrow;
@@ -34,7 +34,7 @@ public:
 
 signals:
   void ItemAdded();
-  void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const int &sRow);
+  void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const bool &state);
 
 private slots:
   void handleItemChange();

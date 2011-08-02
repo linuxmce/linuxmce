@@ -21,31 +21,53 @@ Rectangle {
                    Rectangle{
                        id: formatrect
                        height: 50
-                       width: parent.width                     
-                       border.color: "white"
+                       width: parent.width
+                       border.color: "black"
                        border.width: 1
-                       color: status ? "green" : style.alert_bg
+                       color: style.bgcolor
 
-                       MouseArea{
-                           anchors.fill: parent
-                           onPressAndHold: {rect.destroy()
-                           }
+                       Row{
+                           height: childrenRect.height
+                           width: childrenRect.width
+                           spacing: 85
 
-                           onClicked:{
-                               fileformatmodel.setSelectionStatus(name)
+                           Text {
+                               width: 75
+                               id: fileformatcell
+                               text: name
+                               font.pointSize: 14
+                               onFocusChanged: {rect.destroy()}
+                               MouseArea{
+                                         anchors.fill: fileformatcell
+                                         onPressAndHold:
+                                         {
+                                             rect.destroy()
+                                         }
+                                    }
+                                }
 
-                                     }
+                           Rectangle{
+                               height: 25
+                               width: 25
+                               border.color: "black"
+                               border.width: 1
+                               color: status ? "green" : "red"
+                                MouseArea{
+                                    anchors.fill: parent
+                                    onClicked:{
+                                        console.log(fileformatmodel.setSelectionStatus(name))
+                                        fileformatlist.currentIndex=index
+                                              }
+                                        }
+                                    }
+
+                             }
+
+
                        }
-                       Text {
-                           id: fileformatcell
-                           text: name
-                           font.pointSize: 14
-                       }
-
-
                    }
                }
-           }
+
 
 
         ListView{
@@ -53,8 +75,13 @@ Rectangle {
             height: parent.height
             width: parent.width
             model: fileformatmodel
-            delegate: fileformatdelegate            
+            delegate: fileformatdelegate
+            focus:true
 
+           onCurrentIndexChanged: {
+               console.log("Model Changed " + currentIndex + "highlighted")
+
+           }
         }
 
    }

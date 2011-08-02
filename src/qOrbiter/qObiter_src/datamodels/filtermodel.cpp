@@ -67,7 +67,7 @@ void FilterModel::handleItemChange()
      QModelIndex lastrow;
      ident = item->fileformat();
      lastrow = index;
-    emit dataChanged(index, index ,1);
+    emit dataChanged(index, index ,item->selectedStatus());
   }
 }
 
@@ -136,8 +136,9 @@ FilterModelItem * FilterModel::currentRow()
     return item;
 }
 
-void FilterModel::setSelectionStatus(QString format)
+bool FilterModel::setSelectionStatus(QString format)
 {
     FilterModelItem* item = find(format);
-    item->updateSelection();
+   bool state =  item->updateSelection();
+   return state;
 }

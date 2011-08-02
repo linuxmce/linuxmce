@@ -10,7 +10,7 @@
 class FilterModelItem: public QObject
 {
  Q_OBJECT
-    Q_PROPERTY (bool m_isSelected READ selectedStatus NOTIFY filterChanged)
+    Q_PROPERTY (bool m_isSelected READ updateSelection NOTIFY filterChanged)
 
 public:
   enum Roles {
@@ -32,7 +32,8 @@ public:
   inline QString fileformat() const { return m_fk_fileformat; }
   inline QImage cellImage() const {  return m_image; }
   inline bool selectedStatus() const {return m_isSelected; }
-  void updateSelection();
+  inline bool setStatus(bool b) { m_isSelected = b; }
+  bool updateSelection ();
 
 
 private:
@@ -46,6 +47,6 @@ private:
 signals:
   void imageChanged();
   void dataChanged();
-  void filterChanged();
+  void filterChanged(bool);
 };
 #endif // FILTERMODELITEM_H

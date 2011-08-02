@@ -39,20 +39,20 @@ QVariant FilterModelItem::data(int role) const
   }
 }
 
-void FilterModelItem::updateSelection()
+bool FilterModelItem::updateSelection()
 {
     if (m_isSelected == true)
     {
         m_isSelected = false;
         qDebug () << this->id() << "Button state is " << m_isSelected;
-        emit filterChanged();
-        return;
+        emit filterChanged(m_isSelected);
+        return m_isSelected;
     }
     else
     {
         m_isSelected = true;
         qDebug () << this->id() << "Button state is " << m_isSelected;
-        emit filterChanged();
-        return;
+       emit filterChanged(m_isSelected);
+       return m_isSelected;
     }
 }
