@@ -11,48 +11,78 @@ Rectangle {
            clip: true
 
 
-         Component{
-               id:mediatypedelegate
-               Item {
-                   id:mediatypeitem
-                   height: 50
-                   width: parent.width
+           Component{
+                 id:mediatypedelegate
+                 Item {
+                     id: fileformatitem
+                     height: 50
+                     width: parent.width
 
-                   Rectangle{
-                       id: mediatyperect
-                       height: 50
-                       width: parent.width
-                       border.color: "white"
-                       border.width: 1
-                       color: status ? "green" : style.alert_bg
+                     Rectangle{
+                         id: formatrect
+                         height: 50
+                         width: parent.width
+                         border.color: "black"
+                         border.width: 1
+                         color: style.bgcolor
 
-                       MouseArea{
-                           anchors.fill: parent
-                           onPressAndHold: {rect.destroy()
-                           }
-
-                           onClicked:{
-                               mediatypemodel.setSelectionStatus(name)
-
-                                     }
-                       }
-                       Text {
-                           id: mediatypecell
-                           text: name
-                           font.pointSize: 14
-                       }
+                         MouseArea{
+                                   anchors.fill: parent
+                                   z:0
+                                   onClicked:
+                                   {
+                                       rect.destroy()
+                                   }
+                              }
 
 
-                   }
-               }
-           }
+                         Row{
+                             height: childrenRect.height
+                             width: childrenRect.width
+                             spacing: 85
+
+
+                             Text {
+                                 width: 75
+                                 height: parent.height
+                                 id: fileformatcell
+                                 text: name
+                                 font.pointSize: 14
+                                 onFocusChanged: {rect.destroy()}
+
+                                  }
+
+                             Rectangle{
+                                 height: 25
+                                 width: 25
+                                 border.color: "black"
+                                 border.width: 1
+                                 color: status ? "green" : "red"
+                                 z:10
+                                  MouseArea{
+                                      anchors.fill: parent
+                                      onClicked:{
+
+                                          mediatypefilter.setSelectionStatus(name)
+                                          fileformatcell.color = status ? "green" : "red"
+
+                                                }
+                                          }
+                                      }
+
+                               }
+
+
+                         }
+                     }
+                 }
 
 
         ListView{
             id:mediatypelist
             height: parent.height
             width: parent.width
-            model: mediatypemodel
+            model: mediatypefilter
             delegate: mediatypedelegate
 
         }

@@ -16,6 +16,9 @@
 #include <datamodels/securityscenariomodel.h>
 #include <datamodels/skindatamodel.h>
 #include <datamodels/filtermodel.h>
+#include <datamodels/genremodel.h>
+#include <datamodels/attributesortmodel.h>
+#include <datamodels/mediatypemodel.h>
 
 #include <QFile>
 #include <QDir>
@@ -110,6 +113,8 @@ Param 10 - pk_attribute
     ListModel *model;
     UserModel *userList;
     SkinDataModel *skinModel;
+
+    MediaTypeModel *mediaTypeFilter;
 
 
 

@@ -160,7 +160,9 @@ SOURCES += main.cpp \
     datamodels/DataModelItems/genreitem.cpp \
     ../../PlutoUtils/getch.cpp \
     datamodels/DataModelItems/attributesortitem.cpp \
-    datamodels/attributesortmodel.cpp
+    datamodels/attributesortmodel.cpp \
+    datamodels/mediatypemodel.cpp \
+    datamodels/DataModelItems/mediatypeitem.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -202,7 +204,9 @@ HEADERS += \
     datamodels/DataModelItems/filtermodelitem.h \
     datamodels/DataModelItems/genreitem.h \
     datamodels/DataModelItems/attributesortitem.h \
-    datamodels/attributesortmodel.h
+    datamodels/attributesortmodel.h \
+    datamodels/mediatypemodel.h \
+    datamodels/DataModelItems/mediatypeitem.h
 
 OTHER_FILES += Readme.txt \
     config.xml \

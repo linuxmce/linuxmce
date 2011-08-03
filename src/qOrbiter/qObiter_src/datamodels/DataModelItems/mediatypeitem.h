@@ -1,6 +1,5 @@
 #ifndef MEDIATYPEITEM_H
 #define MEDIATYPEITEM_H
-
 #include <QAbstractListModel>
 #include <QVariant>
 #include <QImage>

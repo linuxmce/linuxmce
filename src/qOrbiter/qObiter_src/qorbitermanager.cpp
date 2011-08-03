@@ -559,6 +559,7 @@ bool qorbiterManager::getConf(int pPK_Device)
 
   this->qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
 
+  //setting up the fileformat model
   QImage attrimg(":/icons/Skin-Data.png");
   uiFileFilter = new FilterModel(new FilterModelItem, this);
   uiFileFilter->appendRow(new FilterModelItem("Low Res", "1", attrimg, false, uiFileFilter));
@@ -567,9 +568,22 @@ bool qorbiterManager::getConf(int pPK_Device)
   uiFileFilter->appendRow(new FilterModelItem("HD720", "4", attrimg, false, uiFileFilter));
   uiFileFilter->appendRow(new FilterModelItem("HD1080", "5", attrimg, false, uiFileFilter));
   uiFileFilter->appendRow(new FilterModelItem("Low Quality", "6", attrimg, false, uiFileFilter));
+  this->qorbiterUIwin->rootContext()->setContextProperty("fileformatmodel", uiFileFilter); //custom fileformatmodel for selection filter item
 
-  this->qorbiterUIwin->rootContext()->setContextProperty("fileformatmodel", uiFileFilter); //custom room list  provided
-
+  mediaTypeFilter = new MediaTypeModel(new MediaTypeItem, this);
+  mediaTypeFilter->appendRow(new MediaTypeItem("Tv Shows","1",attrimg , false, mediaTypeFilter));
+  mediaTypeFilter->appendRow(new MediaTypeItem("Movies","2",attrimg , false, mediaTypeFilter));
+  mediaTypeFilter->appendRow(new MediaTypeItem("Home Videos","3",attrimg , false, mediaTypeFilter));
+  mediaTypeFilter->appendRow(new MediaTypeItem("Sports","4",attrimg , false, mediaTypeFilter));
+  mediaTypeFilter->appendRow(new MediaTypeItem("Music Videos","5",attrimg , false, mediaTypeFilter));
+  mediaTypeFilter->appendRow(new MediaTypeItem("Alternative","6",attrimg , false, mediaTypeFilter));
+  mediaTypeFilter->appendRow(new MediaTypeItem("Popular Music","7",attrimg , false, mediaTypeFilter));
+  mediaTypeFilter->appendRow(new MediaTypeItem("Classical Music","8",attrimg , false, mediaTypeFilter));
+  mediaTypeFilter->appendRow(new MediaTypeItem("Learning","9",attrimg , false, mediaTypeFilter));
+  mediaTypeFilter->appendRow(new MediaTypeItem("Audio Books","10",attrimg , false, mediaTypeFilter));
+  mediaTypeFilter->appendRow(new MediaTypeItem("Arcade","11",attrimg , false, mediaTypeFilter));
+  mediaTypeFilter->appendRow(new MediaTypeItem("Console","12",attrimg , false, mediaTypeFilter));
+  this->qorbiterUIwin->rootContext()->setContextProperty("mediatypefilter", mediaTypeFilter); //custom mediatype selection model
 
    // binaryConfig.clear();
    //configData.clear();

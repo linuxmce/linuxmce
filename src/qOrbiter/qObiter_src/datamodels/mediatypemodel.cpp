@@ -1,12 +1,13 @@
 #include "mediatypemodel.h"
-#include <QDebug>
 
+#include <QDebug>
 
 MediaTypeModel::MediaTypeModel(MediaTypeItem* prototype, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype)
 {
   setRoleNames(m_prototype->roleNames());
    qRegisterMetaType<QModelIndex>("QModelIndex");
+
 }
 
 int MediaTypeModel::rowCount(const QModelIndex &parent) const
