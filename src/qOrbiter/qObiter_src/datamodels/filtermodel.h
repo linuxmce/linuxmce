@@ -11,7 +11,7 @@ class FilterModelItem;
 class FilterModel: public QAbstractListModel
 {
   Q_OBJECT
-    Q_PROPERTY (QModelIndex lastrow NOTIFY dataChanged)
+
 public:
   explicit FilterModel(FilterModelItem* prototype, QObject* parent = 0);
   ~FilterModel();
@@ -26,11 +26,15 @@ public:
   FilterModelItem* find(const QString &id) const;
   QModelIndex indexFromItem( const FilterModelItem* item) const;
   FilterModelItem* currentRow();
-  Q_INVOKABLE bool setSelectionStatus(QString format);
+
+
   void clear();
 
   QModelIndex lastrow;
-  QString ident;
+  QString ident;  
+
+  Q_INVOKABLE void setSelectionStatus(QString format);
+  Q_INVOKABLE bool getSelectionStatus();
 
 signals:
   void ItemAdded();

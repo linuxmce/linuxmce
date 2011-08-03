@@ -1,5 +1,5 @@
-#ifndef FILTERMODELITEM_H
-#define FILTERMODELITEM_H
+#ifndef MEDIATYPEITEM_H
+#define MEDIATYPEITEM_H
 
 #include <QAbstractListModel>
 #include <QVariant>
@@ -7,7 +7,7 @@
 #include <QMap>
 
 //for use with the fileformat table.
-class FilterModelItem: public QObject
+class MediaTypeItem: public QObject
 {
  Q_OBJECT
     Q_PROPERTY (bool m_isSelected READ selectedStatus WRITE updateSelection NOTIFY filterChanged)
@@ -22,8 +22,8 @@ public:
   };
 
 public:
-  FilterModelItem(QObject *parent = 0) {}
-  explicit FilterModelItem( QString name,  QString pk_fileformat,  QImage img, bool selstat, QObject *parent = 0);
+  MediaTypeItem(QObject *parent = 0) {}
+  explicit MediaTypeItem( QString name,  QString pk_fileformat,  QImage img, bool selstat, QObject *parent = 0);
   QVariant data(int role) const;
   QHash<int, QByteArray> roleNames() const;
 
@@ -47,4 +47,4 @@ signals:
   void dataChanged();
   void filterChanged();
 };
-#endif // FILTERMODELITEM_H
+#endif // MEDIATYPEITEM_H

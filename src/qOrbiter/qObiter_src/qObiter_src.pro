@@ -158,7 +158,9 @@ SOURCES += main.cpp \
     datamodels/attributemodel.cpp \
     datamodels/DataModelItems/filtermodelitem.cpp \
     datamodels/DataModelItems/genreitem.cpp \
-    ../../PlutoUtils/getch.cpp
+    ../../PlutoUtils/getch.cpp \
+    datamodels/DataModelItems/attributesortitem.cpp \
+    datamodels/attributesortmodel.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -198,7 +200,9 @@ HEADERS += \
     datamodels/genremodel.h \
     datamodels/attributemodel.h \
     datamodels/DataModelItems/filtermodelitem.h \
-    datamodels/DataModelItems/genreitem.h
+    datamodels/DataModelItems/genreitem.h \
+    datamodels/DataModelItems/attributesortitem.h \
+    datamodels/attributesortmodel.h
 
 OTHER_FILES += Readme.txt \
     config.xml \

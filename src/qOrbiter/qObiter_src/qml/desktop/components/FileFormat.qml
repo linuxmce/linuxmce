@@ -9,6 +9,8 @@ Rectangle {
            border.color: style.button_system_color
            border.width: 1
            clip: true
+           property string cindex
+            property bool fuck
 
 
          Component{
@@ -26,6 +28,8 @@ Rectangle {
                        border.width: 1
                        color: style.bgcolor
 
+
+
                        Row{
                            height: childrenRect.height
                            width: childrenRect.width
@@ -33,14 +37,16 @@ Rectangle {
 
                            Text {
                                width: 75
+                               height: parent.height
                                id: fileformatcell
                                text: name
                                font.pointSize: 14
                                onFocusChanged: {rect.destroy()}
                                MouseArea{
                                          anchors.fill: fileformatcell
+                                         z:5
                                          onPressAndHold:
-                                         {
+                                         {                                             
                                              rect.destroy()
                                          }
                                     }
@@ -55,8 +61,10 @@ Rectangle {
                                 MouseArea{
                                     anchors.fill: parent
                                     onClicked:{
-                                        console.log(fileformatmodel.setSelectionStatus(name))
-                                        fileformatlist.currentIndex=index
+                                        cindex=desc
+                                        fileformatmodel.setSelectionStatus(name)
+                                        fileformatcell.color = status ? "green" : "red"
+
                                               }
                                         }
                                     }
@@ -69,7 +77,6 @@ Rectangle {
                }
 
 
-
         ListView{
             id:fileformatlist
             height: parent.height
@@ -78,12 +85,18 @@ Rectangle {
             delegate: fileformatdelegate
             focus:true
 
-           onCurrentIndexChanged: {
-               console.log("Model Changed " + currentIndex + "highlighted")
+            Connections{
+                target: fileformatmodel
+                onDataChanged:{
+                    console.log(fileformatmodel.getSelectedStatus(cindex))
 
-           }
+                }
+            }
+
+            }
+
         }
 
-   }
+
 
 

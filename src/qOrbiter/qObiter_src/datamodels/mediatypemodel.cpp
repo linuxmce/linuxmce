@@ -1,40 +1,41 @@
-#include "filtermodel.h"
+#include "mediatypemodel.h"
 #include <QDebug>
 
-FilterModel::FilterModel(FilterModelItem* prototype, QObject *parent) :
+
+MediaTypeModel::MediaTypeModel(MediaTypeItem* prototype, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype)
 {
   setRoleNames(m_prototype->roleNames());
    qRegisterMetaType<QModelIndex>("QModelIndex");
 }
 
-int FilterModel::rowCount(const QModelIndex &parent) const
+int MediaTypeModel::rowCount(const QModelIndex &parent) const
 {
   Q_UNUSED(parent);
   return m_list.size();
 }
 
-QVariant FilterModel::data(const QModelIndex &index, int role) const
+QVariant MediaTypeModel::data(const QModelIndex &index, int role) const
 {
   if(index.row() < 0 || index.row() >= m_list.size())
     return QVariant();
   return m_list.at(index.row())->data(role);
 }
 
-FilterModel::~FilterModel() {
+MediaTypeModel::~MediaTypeModel() {
   delete m_prototype;
   clear();
 }
 
-void FilterModel::appendRow(FilterModelItem *item)
+void MediaTypeModel::appendRow(MediaTypeItem *item)
 {
-  appendRows(QList<FilterModelItem*>() << item);
+  appendRows(QList<MediaTypeItem*>() << item);
 }
 
-void FilterModel::appendRows(const QList<FilterModelItem *> &items)
+void MediaTypeModel::appendRows(const QList<MediaTypeItem *> &items)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
-  foreach(FilterModelItem *item, items) {
+  foreach(MediaTypeItem *item, items) {
 
       QObject::connect(item, SIGNAL(filterChanged()), this, SLOT(handleItemChange()));
     m_list.append(item);
@@ -48,7 +49,7 @@ void FilterModel::appendRows(const QList<FilterModelItem *> &items)
 
 }
 
-void FilterModel::insertRow(int row, FilterModelItem *item)
+void MediaTypeModel::insertRow(int row, MediaTypeItem *item)
 {
   beginInsertRows(QModelIndex(), row, row);
   connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
@@ -57,9 +58,9 @@ void FilterModel::insertRow(int row, FilterModelItem *item)
   endInsertRows();
 }
 
-void FilterModel::handleItemChange()
+void MediaTypeModel::handleItemChange()
 {
-  FilterModelItem* item = static_cast<FilterModelItem*>(sender());
+  MediaTypeItem* item = static_cast<MediaTypeItem*>(sender());
   QModelIndex index = indexFromItem(item);
  // qDebug() << "Handling item change for:" << index;
   if(index.isValid())
@@ -71,15 +72,15 @@ void FilterModel::handleItemChange()
   }
 }
 
-FilterModelItem * FilterModel::find(const QString &id) const
+MediaTypeItem * MediaTypeModel::find(const QString &id) const
 {
-  foreach(FilterModelItem* item, m_list) {
+  foreach(MediaTypeItem* item, m_list) {
     if(item->id() == id) return item;
   }
   return 0;
 }
 
-QModelIndex FilterModel::indexFromItem(const FilterModelItem *item) const
+QModelIndex MediaTypeModel::indexFromItem(const MediaTypeItem *item) const
 {
   Q_ASSERT(item);
   for(int row=0; row<m_list.size(); ++row) {
@@ -91,7 +92,7 @@ QModelIndex FilterModel::indexFromItem(const FilterModelItem *item) const
   return QModelIndex();
 }
 
-void FilterModel::clear()
+void MediaTypeModel::clear()
 {
 
   qDeleteAll(m_list);
@@ -100,7 +101,7 @@ void FilterModel::clear()
 
 }
 
-bool FilterModel::removeRow(int row, const QModelIndex &parent)
+bool MediaTypeModel::removeRow(int row, const QModelIndex &parent)
 {
   Q_UNUSED(parent);
   if(row < 0 || row >= m_list.size()) return false;
@@ -110,7 +111,7 @@ bool FilterModel::removeRow(int row, const QModelIndex &parent)
   return true;
 }
 
-bool FilterModel::removeRows(int row, int count, const QModelIndex &parent)
+bool MediaTypeModel::removeRows(int row, int count, const QModelIndex &parent)
 {
   Q_UNUSED(parent);
   if(row < 0 || (row+count) >= m_list.size()) return false;
@@ -122,32 +123,32 @@ bool FilterModel::removeRows(int row, int count, const QModelIndex &parent)
   return true;
 }
 
-FilterModelItem * FilterModel::takeRow(int row)
+MediaTypeItem * MediaTypeModel::takeRow(int row)
 {
   beginRemoveRows(QModelIndex(), row, row);
-  FilterModelItem* item = m_list.takeAt(row);
+  MediaTypeItem* item = m_list.takeAt(row);
   endRemoveRows();
   return item;
 }
 
-FilterModelItem * FilterModel::currentRow()
+MediaTypeItem * MediaTypeModel::currentRow()
 {
-    FilterModelItem* item = m_list.at(0);
+    MediaTypeItem* item = m_list.at(0);
     return item;
 }
 
-void FilterModel::setSelectionStatus(QString format)
+void MediaTypeModel::setSelectionStatus(QString format)
 {
-    FilterModelItem* item = find(format);
+    MediaTypeItem* item = find(format);
     item->updateSelection(false);
     qDebug() << "Setting State for:" << format;
     //return state;
 }
 
-bool FilterModel::getSelectionStatus()
+bool MediaTypeModel::getSelectionStatus()
 {
     //qDebug() << "Looking for status for" << format;
-    //FilterModelItem* item = find(format);
+    //MediaTypeItem* item = find(format);
 
     bool g;//  = item->selectedStatus();
     return g;

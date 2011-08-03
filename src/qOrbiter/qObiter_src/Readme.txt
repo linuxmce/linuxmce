@@ -39,5 +39,6 @@ In an effor to keep the history of changes broken up
 #1167 - ui update issues, for grids, buttons, anything
 #1162 - connection screen and associated tickets like config.xml it reads
 #1168 - Documentation - if you just note things, please commit against this. and do leave comments!!!!
+#1170 - Android Platform build notes
 
 If something you are working on is not described here, please open a ticket for it so we can track that specific issue.

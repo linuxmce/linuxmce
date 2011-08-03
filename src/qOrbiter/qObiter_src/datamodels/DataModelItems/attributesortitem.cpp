@@ -1,14 +1,16 @@
-#include "filtermodelitem.h"
+#include "attributesortitem.h"
+
+
 #include <QDebug>
 
 
-FilterModelItem::FilterModelItem( QString name,  QString pk_fileformat,  QImage img, bool selstat,  QObject *parent) :
+AttributeSortItem::AttributeSortItem( QString name,  QString pk_fileformat,  QImage img, bool selstat,  QObject *parent) :
     m_description(name), m_fk_fileformat(pk_fileformat), m_image(img), m_isSelected(selstat)
 {
 
 }
 
-QHash<int, QByteArray> FilterModelItem::roleNames() const
+QHash<int, QByteArray> AttributeSortItem::roleNames() const
 {
 
   QHash<int, QByteArray> names;
@@ -21,7 +23,7 @@ QHash<int, QByteArray> FilterModelItem::roleNames() const
   return names;
 }
 
-QVariant FilterModelItem::data(int role) const
+QVariant AttributeSortItem::data(int role) const
 {
   switch(role) {
   case NameRole:
@@ -39,7 +41,7 @@ QVariant FilterModelItem::data(int role) const
   }
 }
 
-void FilterModelItem::updateSelection(bool newbool)
+void AttributeSortItem::updateSelection(bool newbool)
 {
     if (m_isSelected == true)
     {

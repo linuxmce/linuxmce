@@ -1,40 +1,40 @@
-#include "filtermodel.h"
+#include "attributesortmodel.h"
 #include <QDebug>
 
-FilterModel::FilterModel(FilterModelItem* prototype, QObject *parent) :
+AttributeSortModel::AttributeSortModel(AttributeSortItem* prototype, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype)
 {
   setRoleNames(m_prototype->roleNames());
    qRegisterMetaType<QModelIndex>("QModelIndex");
 }
 
-int FilterModel::rowCount(const QModelIndex &parent) const
+int AttributeSortModel::rowCount(const QModelIndex &parent) const
 {
   Q_UNUSED(parent);
   return m_list.size();
 }
 
-QVariant FilterModel::data(const QModelIndex &index, int role) const
+QVariant AttributeSortModel::data(const QModelIndex &index, int role) const
 {
   if(index.row() < 0 || index.row() >= m_list.size())
     return QVariant();
   return m_list.at(index.row())->data(role);
 }
 
-FilterModel::~FilterModel() {
+AttributeSortModel::~AttributeSortModel() {
   delete m_prototype;
   clear();
 }
 
-void FilterModel::appendRow(FilterModelItem *item)
+void AttributeSortModel::appendRow(AttributeSortItem *item)
 {
-  appendRows(QList<FilterModelItem*>() << item);
+  appendRows(QList<AttributeSortItem*>() << item);
 }
 
-void FilterModel::appendRows(const QList<FilterModelItem *> &items)
+void AttributeSortModel::appendRows(const QList<AttributeSortItem *> &items)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
-  foreach(FilterModelItem *item, items) {
+  foreach(AttributeSortItem *item, items) {
 
       QObject::connect(item, SIGNAL(filterChanged()), this, SLOT(handleItemChange()));
     m_list.append(item);
@@ -48,7 +48,7 @@ void FilterModel::appendRows(const QList<FilterModelItem *> &items)
 
 }
 
-void FilterModel::insertRow(int row, FilterModelItem *item)
+void AttributeSortModel::insertRow(int row, AttributeSortItem *item)
 {
   beginInsertRows(QModelIndex(), row, row);
   connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
@@ -57,9 +57,9 @@ void FilterModel::insertRow(int row, FilterModelItem *item)
   endInsertRows();
 }
 
-void FilterModel::handleItemChange()
+void AttributeSortModel::handleItemChange()
 {
-  FilterModelItem* item = static_cast<FilterModelItem*>(sender());
+  AttributeSortItem* item = static_cast<AttributeSortItem*>(sender());
   QModelIndex index = indexFromItem(item);
  // qDebug() << "Handling item change for:" << index;
   if(index.isValid())
@@ -71,15 +71,15 @@ void FilterModel::handleItemChange()
   }
 }
 
-FilterModelItem * FilterModel::find(const QString &id) const
+AttributeSortItem * AttributeSortModel::find(const QString &id) const
 {
-  foreach(FilterModelItem* item, m_list) {
+  foreach(AttributeSortItem* item, m_list) {
     if(item->id() == id) return item;
   }
   return 0;
 }
 
-QModelIndex FilterModel::indexFromItem(const FilterModelItem *item) const
+QModelIndex AttributeSortModel::indexFromItem(const AttributeSortItem *item) const
 {
   Q_ASSERT(item);
   for(int row=0; row<m_list.size(); ++row) {
@@ -91,7 +91,7 @@ QModelIndex FilterModel::indexFromItem(const FilterModelItem *item) const
   return QModelIndex();
 }
 
-void FilterModel::clear()
+void AttributeSortModel::clear()
 {
 
   qDeleteAll(m_list);
@@ -100,7 +100,7 @@ void FilterModel::clear()
 
 }
 
-bool FilterModel::removeRow(int row, const QModelIndex &parent)
+bool AttributeSortModel::removeRow(int row, const QModelIndex &parent)
 {
   Q_UNUSED(parent);
   if(row < 0 || row >= m_list.size()) return false;
@@ -110,7 +110,7 @@ bool FilterModel::removeRow(int row, const QModelIndex &parent)
   return true;
 }
 
-bool FilterModel::removeRows(int row, int count, const QModelIndex &parent)
+bool AttributeSortModel::removeRows(int row, int count, const QModelIndex &parent)
 {
   Q_UNUSED(parent);
   if(row < 0 || (row+count) >= m_list.size()) return false;
@@ -122,32 +122,32 @@ bool FilterModel::removeRows(int row, int count, const QModelIndex &parent)
   return true;
 }
 
-FilterModelItem * FilterModel::takeRow(int row)
+AttributeSortItem * AttributeSortModel::takeRow(int row)
 {
   beginRemoveRows(QModelIndex(), row, row);
-  FilterModelItem* item = m_list.takeAt(row);
+  AttributeSortItem* item = m_list.takeAt(row);
   endRemoveRows();
   return item;
 }
 
-FilterModelItem * FilterModel::currentRow()
+AttributeSortItem * AttributeSortModel::currentRow()
 {
-    FilterModelItem* item = m_list.at(0);
+    AttributeSortItem* item = m_list.at(0);
     return item;
 }
 
-void FilterModel::setSelectionStatus(QString format)
+void AttributeSortModel::setSelectionStatus(QString format)
 {
-    FilterModelItem* item = find(format);
+    AttributeSortItem* item = find(format);
     item->updateSelection(false);
     qDebug() << "Setting State for:" << format;
     //return state;
 }
 
-bool FilterModel::getSelectionStatus()
+bool AttributeSortModel::getSelectionStatus()
 {
     //qDebug() << "Looking for status for" << format;
-    //FilterModelItem* item = find(format);
+    //AttributeSortItem* item = find(format);
 
     bool g;//  = item->selectedStatus();
     return g;
