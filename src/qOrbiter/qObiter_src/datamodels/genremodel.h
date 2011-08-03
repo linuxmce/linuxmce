@@ -27,6 +27,10 @@ public:
   GenreItem* currentRow();
   void clear();
 
+  QModelIndex lastrow;
+  QString ident;
+  Q_INVOKABLE void setSelectionStatus(QString format);
+  Q_INVOKABLE bool getSelectionStatus();
 signals:
   void ItemAdded();
   void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const int &sRow);

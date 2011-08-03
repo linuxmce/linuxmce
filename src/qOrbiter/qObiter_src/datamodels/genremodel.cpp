@@ -133,3 +133,22 @@ GenreItem * GenreModel::currentRow()
     GenreItem* item = m_list.at(0);
     return item;
 }
+
+void GenreModel::setSelectionStatus(QString format)
+{
+    GenreItem* item = find(format);
+    item->updateSelection();
+    qDebug() << "Setting State for:" << format;
+    //return state;
+}
+
+bool GenreModel::getSelectionStatus()
+{
+    //qDebug() << "Looking for status for" << format;
+    //AttributeSortItem* item = find(format);
+
+    bool g;//  = item->selectedStatus();
+    return g;
+
+}
+

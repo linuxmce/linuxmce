@@ -2,30 +2,57 @@ import QtQuick 1.0
 
 Rectangle {
            id:rect
-           width: childrenRect.width
-           height: childrenRect.height
-           color: "transparent"
+           width: 200
+           height: 200
+           color: style.bgcolor
            anchors.centerIn: parent
            border.color: style.button_system_color
            border.width: 1
            clip: true
+           property string cindex
 
+           ListModel{
+               id:mediasourcelist
+
+               ListElement{
+                   name:"Hard Drives"
+                   pk:"1"
+                   isSelected: false
+               }
+
+               ListElement{
+                   name:"Discs & Jukeboxes"
+                   pk:"2"
+                   isSelected: false
+               }
+
+               ListElement{
+                   name:"Bookmarks"
+                   pk:"3"
+                   isSelected: false
+               }
+
+               ListElement{
+                   name:"Downloadable"
+                   pk:"4"
+                   isSelected: false
+               }
+           }
 
            Component{
-                 id:genredelegate
+                 id:fileformatdelegate
                  Item {
                      id: fileformatitem
-                     height: 150
-                     width: 150
+                     height: 50
+                     width: parent.width
 
                      Rectangle{
                          id: formatrect
-                         height: 130
-                         width: 130
+                         height: 50
+                         width: parent.width
                          border.color: "black"
                          border.width: 1
-                         color: status ? style.bgcolor : "cornflowerblue"
-
+                         color: style.bgcolor
 
                          MouseArea{
                                    anchors.fill: parent
@@ -40,7 +67,7 @@ Rectangle {
                          Row{
                              height: childrenRect.height
                              width: childrenRect.width
-                             spacing: 10
+                             spacing: 85
 
 
                              Text {
@@ -48,8 +75,7 @@ Rectangle {
                                  height: parent.height
                                  id: fileformatcell
                                  text: name
-                                 font.pointSize: 12
-                                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                                 font.pointSize: 14
                                  onFocusChanged: {rect.destroy()}
 
                                   }
@@ -59,16 +85,14 @@ Rectangle {
                                  width: 25
                                  border.color: "black"
                                  border.width: 1
-                                 color: status ? "green" : "red"
+                                 color: isSelected ? "green" : "red"
                                  z:10
                                   MouseArea{
                                       anchors.fill: parent
                                       onClicked:{
-                                          formatrect.opacity = 0
 
-                                          genrefilter.setSelectionStatus(name)
-                                          formatrect.color = status ? "green" : "red"
-                                          formatrect.opacity = 1
+                                          mediasourcelist.setProperty(index, "isSelected", !mediasourcelist.get(index).isSelected)
+                                          fileformatcell.color = isSelected ? "green" : "red"
 
                                                 }
                                           }
@@ -82,18 +106,20 @@ Rectangle {
                  }
 
 
-        GridView{
-            id:genrelist
-            height: 400
-            width: 450
-            model: genrefilter
-            cellHeight: 150
-            cellWidth: 150
 
-            delegate: genredelegate
+        ListView{
+            id:mediasources
+            height: parent.height
+            width: parent.width
+            model: mediasourcelist
+            delegate: fileformatdelegate
+            focus:true
+
+
+            }
 
         }
 
-   }
+
 
 
