@@ -25,7 +25,7 @@ Rectangle {
                          border.color: "black"
                          border.width: 1
                          color: status ? style.bgcolor : "cornflowerblue"
-                         opacity: .5
+
 
 
                          MouseArea{
@@ -67,7 +67,7 @@ Rectangle {
                                       onClicked:{
                                           formatrect.opacity = 0
 
-                                          genrefilter.setSelectionStatus(name)
+                                          attribfilter.setSelectionStatus(name)
                                           formatrect.color = status ? "green" : "red"
                                           formatrect.opacity = 1
 
