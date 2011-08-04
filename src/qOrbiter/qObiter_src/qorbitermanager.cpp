@@ -188,8 +188,13 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
     QObject::connect(item, SIGNAL(close()), this, SLOT(closeOrbiter()));
    // QObject::connect(this,SIGNAL(destroyed()), this, SLOT(closeOrbiter()));
 
+    //managing where were are variables
     int i_current_command_grp;
    i_current_command_grp = 0;
+   QStringList goBack;
+   goBack << ("|||1,2|0|13|0|2|");
+    qDebug() << goBack.first();
+    backwards = false;
 
     //showing the qml screen depending on device / platform / etc
 #ifdef Q_OS_SYMBIAN
@@ -1015,7 +1020,20 @@ void qorbiterManager::setStringParam(int paramType, QString param)
         q_attribute_genres = param;
         break;
     case 4:
-       q_mediaSources = param;
+        if (q_mediaSources != param.remove("!D"))
+        {
+            if(param.contains("!F"))
+            {
+
+            }
+
+            else
+            {
+                q_pk_attribute = param.remove("!A");
+                q_attributetype_sort = "13";
+            }
+        }
+
         break;
     case 5:
        q_usersPrivate = param;
@@ -1030,7 +1048,16 @@ void qorbiterManager::setStringParam(int paramType, QString param)
        q_last_viewed = param;
         break;
     case 9:
-       q_pk_attribute = param;
+        if(param.contains("!F"))
+        {
+
+        }
+
+        else
+        {
+            q_pk_attribute = param.remove("!A");
+            q_attributetype_sort = "13";
+        }
         break;
     default:
         cout << "no type";
@@ -1045,7 +1072,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
     execGrp(i_current_command_grp);
 
-        initializeSortString();
+       // initializeSortString();
 }
 
 void qorbiterManager::initializeSortString()
@@ -1053,15 +1080,15 @@ void qorbiterManager::initializeSortString()
     QString datagridVariableString ;
     //datagrid option variables
   //  QString q_mediaType;           //1
-    QString q_subType="";             //2
-    QString q_fileFormat="";          //3
-    QString q_attribute_genres="";    //4
-    QString q_mediaSources="1,2";         //5 need comma delineation
-    QString q_usersPrivate = "0";        //6
-    QString q_attributetype_sort="13";  //7
-    QString q_pk_users="0";             //8
-    QString q_last_viewed="";        //9
-    QString q_pk_attribute="";        //10
+     q_subType="";             //2
+     q_fileFormat="";          //3
+     q_attribute_genres="";    //4
+     q_mediaSources ="1,2";         //5 need comma delineation
+     q_usersPrivate = "0";        //6
+     q_attributetype_sort="13";  //7
+     q_pk_users="0";             //8
+     q_last_viewed="2";        //9
+     q_pk_attribute="";        //10
 
 
      datagridVariableString = "";
@@ -1086,6 +1113,13 @@ void qorbiterManager::initializeGridModel()
     qorbiterUIwin->engine()->addImageProvider("datagridimg", advancedProvider);
     qorbiterUIwin->rootContext()->setContextProperty("currentSkinUrl" , currentSkinURL);
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
+}
+
+void qorbiterManager::goBackGrid()
+{
+    backwards = true;
+    execGrp(i_current_command_grp);
+
 }
 
 

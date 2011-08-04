@@ -172,7 +172,7 @@ void MediaSubTypeModel::ReturnSelectedItems()
     }
     QString qs_sorting_string= t_selected_items.join(",");
 
-    emit SetTypeSort(3, qs_sorting_string);
+    emit SetTypeSort(1, qs_sorting_string);
 }
 
 

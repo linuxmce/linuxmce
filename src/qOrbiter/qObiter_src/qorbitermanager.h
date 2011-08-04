@@ -106,6 +106,8 @@ Param 10 - pk_attribute
     QString q_last_viewed;        //9
     QString q_pk_attribute;        //10
     QString *datagridVariableString;
+    QStringList goBack;
+    bool backwards;
 
     //listmodels
     QByteArray binaryConfig;
@@ -227,7 +229,8 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
       void clearMediaModel();
       bool addMediaItem(QString mText, QString temp, QImage cell);
       void updateModel();
-      void setStringParam(int paramType, QString param);
+      Q_INVOKABLE void setStringParam(int paramType, QString param);
+      Q_INVOKABLE void goBackGrid();
 
 
       //ui related

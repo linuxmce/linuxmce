@@ -39,7 +39,6 @@ ButtonSq
                  anchors.centerIn: delegateButton
                  }
 
-
         }
 
           Text {

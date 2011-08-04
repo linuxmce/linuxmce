@@ -34,7 +34,7 @@ Rectangle {
 
                      MouseArea{
                          anchors.fill: frame
-                         onClicked: console.log(index + ":"+ name+ id)
+                         onClicked: setStringParam(4, id)
                      }
 
                          Image { id: imagerect; source:"image://datagridimg/"+id ; height: 100; width: 156; anchors.centerIn: parent}
@@ -71,15 +71,15 @@ Rectangle {
         cellWidth: 175
         cellHeight: 109
 
-
-
         onModelChanged:
-        {console.log("Grid Item Added!")
+        {
+            console.log("Grid Item Added!")
         }
-         Connections{
+
+        Connections
+        {
          target:dataModel
                     }
-
             }
     Row{
         height: childrenRect.height
@@ -87,6 +87,20 @@ Rectangle {
         width: childrenRect.width
         anchors.top: grid_view1.bottom
         anchors.left: grid_view1.left
+
+        ButtonSq{
+            height: style.iconHeight
+            width: style.iconWidth
+            buttontext: "Go Back"
+
+            buttontextbold: true
+
+            MouseArea{
+                anchors.fill:parent
+                onClicked: goBackGrid()
+            }
+
+        }
 
         AttributeSelector {}
 

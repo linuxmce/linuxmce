@@ -1250,40 +1250,62 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 
         //temp =  QString::fromStdString(qmlUI->gridReqType->toStdString());
          QString params;
-        if(iPK_MediaType == 29 )
-        {
-            params = "||||1,2|0|49|0|2 |";
+         QString s;
+         if(qmlUI->backwards)
+         {
+            qmlUI->initializeSortString();
+            s = qmlUI->goBack.last();
 
-        }
-        else if (iPK_MediaType == 21)
-        {
-            params = "||||1,2|0|0|0|2|";
-        }
-        else
-        {
-           params = "|"+qmlUI->q_subType+"|"+qmlUI->q_fileFormat +"|"+qmlUI->q_attribute_genres+"|1,2||"+qmlUI->q_attributetype_sort+"||2|";
-        }
+            if(qmlUI->goBack.size() > 1)
+            {
 
-        QString s = QString::number(iPK_MediaType) + params;
-        qDebug() << s;
-        CMD_Populate_Datagrid populateDataGrid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 63, s.toStdString(), DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
+                qmlUI->goBack.removeLast();
+            }
 
-        if (SendCommand(populateDataGrid))
-        {
+         }
+         else
+         {
+             if(iPK_MediaType == 29 )
+             {
+                params = "||||1,2|0|49|0|2 |";
+             }
+            else if (iPK_MediaType == 21)
+            {
+                params = "||||1,2|0|0|0|2|";
+            }
+            else
+            {
+                params = "|"+qmlUI->q_subType +"|"+qmlUI->q_fileFormat+"|"+qmlUI->q_attribute_genres+"|"+qmlUI->q_mediaSources+"||"+qmlUI->q_attributetype_sort+"||2|"+qmlUI->q_pk_attribute+"";
+
+            }
+             s = QString::number(iPK_MediaType) + params;
+
+          }
+
+         qDebug() << s;
+         if(!qmlUI->backwards)
+         {
+         qmlUI->goBack << s;
+         }
+
+            qmlUI->backwards = false;
+            CMD_Populate_Datagrid populateDataGrid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 63, s.toStdString(), DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
+
+            if (SendCommand(populateDataGrid))
+                {
             /*
               initial request to populate the text only grid as denoted by the lack of a leading "_" as in _MediaFile_43
               this way, we can safely check empty grids and error gracefully in the case of no matching media
               */
 
-            string imgDG = m_sGridID; //standard text grid with no images. this will not crash the router if requested and its empty, picture grids will
+                    string imgDG = m_sGridID; //standard text grid with no images. this will not crash the router if requested and its empty, picture grids will
 
              //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
-            DCE::CMD_Request_Datagrid_Contents req_data_grid( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(imgDG),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
-            if(SendCommand(req_data_grid))
-                    {
-                        bool barrows = false; //not sure what its for
-
-                        //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
+                    DCE::CMD_Request_Datagrid_Contents req_data_grid( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(imgDG),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+                    if(SendCommand(req_data_grid))
+                      {
+                          bool barrows = false; //not sure what its for
+                            //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
                        DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
                        int cellsToRender= pDataGridTable->GetRows();
                        //qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
@@ -1301,7 +1323,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                         string imgDG = "_"+m_sGridID; //correcting the grid id string for images
 
                         //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
-                       DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(imgDG),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+                          DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(imgDG),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
 
                        if(SendCommand(req_data_grid_pics))
                        {
@@ -1311,45 +1333,44 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                          //  qDebug() << "Picture Datagrid Height:" << gHeight << " , width: " << gWidth;
                          //  qDebug() << "Response: " << cellsToRender << " picture cells to render";
                            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
-                       QString cellTitle;
-                       QString fk_file;
-                       QString filePath;
-                       int index;
-                       QImage cellImg;
-                        qmlUI->gotoQScreen("Screen_47.qml");
+                             QString cellTitle;
+                             QString fk_file;
+                              QString filePath;
+                              int index;
+                             QImage cellImg;
+                             qmlUI->gotoQScreen("Screen_47.qml");
 
-                       for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
-                       {
-                               DataGridCell *pCell = it->second;
-                               const char *pPath = pCell->GetImagePath();
-                               filePath = QString::fromLatin1(pPath);
-                               fk_file = pCell->GetValue();
-                               cellTitle = QString::fromStdString(pCell->m_Text);
-                               index = pDataGridTable->CovertColRowType(it->first).first;
-
-
-                               if (pPath && !pCell->m_pGraphicData && !pCell->m_pGraphic)
-                               {
+                             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
+                                 {
+                                   DataGridCell *pCell = it->second;
+                                  const char *pPath = pCell->GetImagePath();
+                                  filePath = QString::fromLatin1(pPath);
+                                 fk_file = pCell->GetValue();
+                                 cellTitle = QString::fromStdString(pCell->m_Text);
+                                 index = pDataGridTable->CovertColRowType(it->first).first;
+                                   if (pPath )
+                                       {
                                               cellImg = getfileForDG(pCell->GetImagePath());
                                               size_t s=0;
                                               pCell->m_GraphicLength = (unsigned long) s;
                                               pCell->m_GraphicFormat = GR_JPG;
-                               }
-                               else if (!pPath) //making sure we dont provide a null image
-                               {
+                                         }
+                                  else if (!pPath) //making sure we dont provide a null image
+                                      {
+                                       cellImg.load(":/icons/videos.png");
+                                         }
+                                  else if (cellImg.isNull())
+                                      {
                                    cellImg.load(":/icons/videos.png");
-                               }
-                               else if (cellImg.isNull())
-                               {
-                                   cellImg.load(":/icons/videos.png");
-                               }
+                                        }
 
-                               qmlUI->model->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg,  qmlUI->model));
-                                }
+                                    qmlUI->model->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg,  qmlUI->model));
+                                 }
                                 }
                           }
                     }
-        }
+             }
+
 
         /*
           Datagrid params
