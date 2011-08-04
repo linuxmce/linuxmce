@@ -3,13 +3,13 @@
 #include <QDebug>
 
 
-MediaTypeItem::MediaTypeItem( QString name,  QString pk_fileformat,  QImage img, bool selstat,  QObject *parent) :
-    m_description(name), m_fk_fileformat(pk_fileformat), m_image(img), m_isSelected(selstat)
+MediaSubTypeItem::MediaSubTypeItem( QString name,  QString pk_fileformat,  QImage img, bool selstat,  QObject *parent) :
+    m_description(name), m_qs_mediatype(pk_fileformat), m_image(img), m_isSelected(selstat)
 {
 
 }
 
-QHash<int, QByteArray> MediaTypeItem::roleNames() const
+QHash<int, QByteArray> MediaSubTypeItem::roleNames() const
 {
 
   QHash<int, QByteArray> names;
@@ -22,7 +22,7 @@ QHash<int, QByteArray> MediaTypeItem::roleNames() const
   return names;
 }
 
-QVariant MediaTypeItem::data(int role) const
+QVariant MediaSubTypeItem::data(int role) const
 {
   switch(role) {
   case NameRole:
@@ -32,7 +32,7 @@ QVariant MediaTypeItem::data(int role) const
   case ImageRole:
     return cellImage();
   case PKRole:
-    return fileformat();
+    return mediatype();
   case StateRole:
     return selectedStatus();
   default:
@@ -40,7 +40,7 @@ QVariant MediaTypeItem::data(int role) const
   }
 }
 
-void MediaTypeItem::updateSelection(bool newbool)
+void MediaSubTypeItem::updateSelection(bool newbool)
 {
     if (m_isSelected == true)
     {

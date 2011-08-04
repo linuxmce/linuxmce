@@ -114,7 +114,7 @@ Param 10 - pk_attribute
     UserModel *userList;
     SkinDataModel *skinModel;
 
-    MediaTypeModel *mediaTypeFilter;
+    MediaSubTypeModel *mediaTypeFilter;
     FilterModel *uiFileFilter;
     AttributeSortModel *attribFilter;
     GenreModel *genreFilter;
@@ -128,7 +128,8 @@ Param 10 - pk_attribute
     TelecomScenarioModel *roomTelecom;
     SecurityScenarioModel *roomSecurity;
 
-
+    //---------IMPORTAT-1-OFF-VARIABLES!!!!!---------------------------------------------//
+    int i_current_command_grp;
 
     //ui functions
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}
@@ -226,7 +227,8 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
       void clearMediaModel();
       bool addMediaItem(QString mText, QString temp, QImage cell);
       void updateModel();
-      Q_INVOKABLE void setStringParam(int paramType, QString param);
+      void setStringParam(int paramType, QString param);
+
 
       //ui related
       int getlocation() const ;

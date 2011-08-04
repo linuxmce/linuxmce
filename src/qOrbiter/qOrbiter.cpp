@@ -1261,11 +1261,11 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
         }
         else
         {
-           params = "||||1,2||13||2|";
+           params = "|"+qmlUI->q_subType+"|"+qmlUI->q_fileFormat +"|"+qmlUI->q_attribute_genres+"|1,2||"+qmlUI->q_attributetype_sort+"||2|";
         }
 
         QString s = QString::number(iPK_MediaType) + params;
-
+        qDebug() << s;
         CMD_Populate_Datagrid populateDataGrid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 63, s.toStdString(), DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
         if (SendCommand(populateDataGrid))
@@ -1275,7 +1275,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
               this way, we can safely check empty grids and error gracefully in the case of no matching media
               */
 
-            string imgDG = m_sGridID; //standard text grid with no images. this will ne crash the router if requested and its empty, picture grids will
+            string imgDG = m_sGridID; //standard text grid with no images. this will not crash the router if requested and its empty, picture grids will
 
              //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
             DCE::CMD_Request_Datagrid_Contents req_data_grid( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(imgDG),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
@@ -1327,9 +1327,9 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                                cellTitle = QString::fromStdString(pCell->m_Text);
                                index = pDataGridTable->CovertColRowType(it->first).first;
 
+
                                if (pPath && !pCell->m_pGraphicData && !pCell->m_pGraphic)
                                {
-
                                               cellImg = getfileForDG(pCell->GetImagePath());
                                               size_t s=0;
                                               pCell->m_GraphicLength = (unsigned long) s;

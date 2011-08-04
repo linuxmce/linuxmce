@@ -14,6 +14,7 @@
 	See the GNU General Public License for more details.
 */
 
+
 #ifdef WIN32
 #include <conio.h>
 #else
@@ -91,3 +92,4 @@ int getche_timeout(int seconds)
 	return THE_getch(true, &timeout);
 }
 #endif
+

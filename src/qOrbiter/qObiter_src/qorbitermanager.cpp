@@ -188,7 +188,8 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
     QObject::connect(item, SIGNAL(close()), this, SLOT(closeOrbiter()));
    // QObject::connect(this,SIGNAL(destroyed()), this, SLOT(closeOrbiter()));
 
-
+    int i_current_command_grp;
+   i_current_command_grp = 0;
 
     //showing the qml screen depending on device / platform / etc
 #ifdef Q_OS_SYMBIAN
@@ -568,18 +569,20 @@ bool qorbiterManager::getConf(int pPK_Device)
       uiFileFilter->appendRow(new FilterModelItem(name,pk, attrimg,false,uiFileFilter));
   }
   this->qorbiterUIwin->rootContext()->setContextProperty("fileformatmodel", uiFileFilter); //custom fileformatmodel for selection filter item
+  connect(uiFileFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
 
   //-----setting up the MEDIASUBTYPE model------------------------------------------------------------------------
   QDomElement mediaTypeElement = root.firstChildElement("MediaSubTypes");
   QDomNodeList mediaTypeList = mediaTypeElement.childNodes();
-  mediaTypeFilter = new MediaTypeModel(new MediaTypeItem, this);
+  mediaTypeFilter = new MediaSubTypeModel(new MediaSubTypeItem, this);
   for(int index = 0; index < mediaTypeList.count(); index++)
   {
       QString name = mediaTypeList.at(index).attributes().namedItem("Name").nodeValue();
       QString pk= mediaTypeList.at(index).attributes().namedItem("PK_MediaSubType").nodeValue();
-      mediaTypeFilter->appendRow(new MediaTypeItem(name,pk, attrimg,false,mediaTypeFilter));
+      mediaTypeFilter->appendRow(new MediaSubTypeItem(name,pk, attrimg,false,mediaTypeFilter));
   }
   this->qorbiterUIwin->rootContext()->setContextProperty("mediatypefilter", mediaTypeFilter); //custom mediatype selection model
+  connect(mediaTypeFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
 
   //-----setting up the GENRE model------------------------------------------------------------------------
   QDomElement genreElement = root.firstChildElement("GenreList");
@@ -592,6 +595,7 @@ bool qorbiterManager::getConf(int pPK_Device)
       genreFilter->appendRow(new GenreItem(name,pk, attrimg,false,genreFilter));
   }
   this->qorbiterUIwin->rootContext()->setContextProperty("genrefilter", genreFilter); //custom mediatype selection model
+ connect(genreFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
 
   //-----setting up the ATTRIBUTE model------------------------------------------------------------------------
   QDomElement attribElement = root.firstChildElement("AttributeList");
@@ -600,11 +604,11 @@ bool qorbiterManager::getConf(int pPK_Device)
   for(int index = 0; index < attriblist.count(); index++)
   {
       QString name = attriblist.at(index).attributes().namedItem("Name").nodeValue();
-      QString pk= attriblist.at(index).attributes().namedItem("PK_Attribute").nodeValue();
+      QString pk= attriblist.at(index).attributes().namedItem("PK_AttributeType").nodeValue();
       attribFilter->appendRow(new AttributeSortItem(name,pk, attrimg,false,attribFilter));
   }
   this->qorbiterUIwin->rootContext()->setContextProperty("attribfilter", attribFilter); //custom mediatype selection model
-
+connect(attribFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
 
   qDebug() << "Cleanup config - tconf:" << tConf.size() << "|| binaryConfig:" << binaryConfig.size() << "|| configData:" << configData.childNodes().size();
   return true;
@@ -715,6 +719,9 @@ void qorbiterManager::setCurrentUser()
 void qorbiterManager::execGrp(int grp)
 {
     pqOrbiter->executeCommandGroup(grp);
+
+   i_current_command_grp = grp;
+   qorbiterUIwin->rootContext()->setContextProperty("currentcommandgrp", i_current_command_grp);
 }
 
 
@@ -1001,20 +1008,11 @@ void qorbiterManager::setStringParam(int paramType, QString param)
     case 1:
        q_subType = param;
         break;
-    case 2:
-        if(q_fileFormat.isEmpty())
-        {
+    case 2:        
             q_fileFormat = param;
-        }
-        else
-        {
-           q_fileFormat.append(","+ param);
-        }
-
-
         break;
     case 3:
-        q_attribute_genres.append("," + param);
+        q_attribute_genres = param;
         break;
     case 4:
        q_mediaSources = param;
@@ -1043,10 +1041,11 @@ void qorbiterManager::setStringParam(int paramType, QString param)
     longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
 
     QString datagridVariableString = longassstring.join("|");
-
-
     qDebug() << datagridVariableString;
-initializeSortString();
+
+    execGrp(i_current_command_grp);
+
+        initializeSortString();
 }
 
 void qorbiterManager::initializeSortString()
@@ -1057,10 +1056,10 @@ void qorbiterManager::initializeSortString()
     QString q_subType="";             //2
     QString q_fileFormat="";          //3
     QString q_attribute_genres="";    //4
-    QString q_mediaSources="";         //5 need comma delineation
+    QString q_mediaSources="1,2";         //5 need comma delineation
     QString q_usersPrivate = "0";        //6
-    QString q_attributetype_sort="";  //7
-    QString q_pk_users="";             //8
+    QString q_attributetype_sort="13";  //7
+    QString q_pk_users="0";             //8
     QString q_last_viewed="";        //9
     QString q_pk_attribute="";        //10
 

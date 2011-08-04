@@ -57,7 +57,7 @@ Flickable{
             id: now_playing
             height: style.buttonH
             width: style.buttonW
-            color: nowPlayingColor
+            color: "transparent"
             radius: style.but_smooth
             buttontext: ""
 

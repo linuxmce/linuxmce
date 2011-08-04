@@ -5,6 +5,7 @@
 #include <QList>
 #include <QVariant>
 #include <datamodels/DataModelItems/genreitem.h>
+#include <QStringList>
 
 
 class GenreModel : public QAbstractListModel
@@ -26,7 +27,7 @@ public:
   QModelIndex indexFromItem( const GenreItem* item) const;
   GenreItem* currentRow();
   void clear();
-
+  void ReturnSelectedItems();
   QModelIndex lastrow;
   QString ident;
   Q_INVOKABLE void setSelectionStatus(QString format);
@@ -34,7 +35,7 @@ public:
 signals:
   void ItemAdded();
   void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const int &sRow);
-
+   void SetTypeSort(int pos, QString type);
 private slots:
   void handleItemChange();
 

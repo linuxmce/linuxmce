@@ -5,10 +5,10 @@ Rectangle {
     property alias videoTitle: video_title.text
    // property alias synText:
     id: pvrRemote
-    Style{id:style}
+
 
     width: 800
-    height: 480
+    height: 600
     radius: 0
     opacity: 1
     color: style.advanced_bg
@@ -60,7 +60,7 @@ Rectangle {
     Remote_lighting_controls{ id: remote_lighting_controls1; x: 331; y: 181; width: 65; height: 219; anchors.topMargin: 179;anchors.top: video_now_playing.baseline}
     Remote_Audio_controls{ id: remote1; x: 277; y: 181; width: 60; height: 219; anchors.rightMargin: -6; z: 45; anchors.right: remote_lighting_controls1.left}
 
-    HomeButton{}
+    HomeButton{anchors.right: parent.right}
 
 
     VideoControls {

@@ -142,6 +142,7 @@ void AttributeSortModel::setSelectionStatus(QString format)
     item->updateSelection(false);
     qDebug() << "Setting State for:" << format;
     //return state;
+    ReturnSelectedItems();
 }
 
 bool AttributeSortModel::getSelectionStatus()
@@ -152,6 +153,17 @@ bool AttributeSortModel::getSelectionStatus()
     bool g;//  = item->selectedStatus();
     return g;
 
+}
+
+void AttributeSortModel::ReturnSelectedItems()
+{
+    QStringList t_selected_items;
+    foreach(AttributeSortItem* item, m_list) {
+        if(item->selectedStatus() == true) t_selected_items.append(item->fileformat());
+    }
+    QString qs_sorting_string= t_selected_items.join(",");
+    qDebug() << "Attribute Sort updated sorting filter" << qs_sorting_string;
+    emit SetTypeSort(6, qs_sorting_string);
 }
 
 

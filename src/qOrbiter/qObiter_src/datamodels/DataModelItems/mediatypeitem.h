@@ -6,7 +6,7 @@
 #include <QMap>
 
 //for use with the fileformat table.
-class MediaTypeItem: public QObject
+class MediaSubTypeItem: public QObject
 {
  Q_OBJECT
     Q_PROPERTY (bool m_isSelected READ selectedStatus WRITE updateSelection NOTIFY filterChanged)
@@ -21,14 +21,14 @@ public:
   };
 
 public:
-  MediaTypeItem(QObject *parent = 0) {}
-  explicit MediaTypeItem( QString name,  QString pk_fileformat,  QImage img, bool selstat, QObject *parent = 0);
+  MediaSubTypeItem(QObject *parent = 0) {}
+  explicit MediaSubTypeItem( QString name,  QString pk_fileformat,  QImage img, bool selstat, QObject *parent = 0);
   QVariant data(int role) const;
   QHash<int, QByteArray> roleNames() const;
 
   inline QString id() const {  return m_description; }
    inline QString name() const {  return m_description; }
-  inline QString fileformat() const { return m_fk_fileformat; }
+  inline QString mediatype() const { return m_qs_mediatype; }
   inline QImage cellImage() const {  return m_image; }
   inline bool selectedStatus() const { return m_isSelected; }
   inline bool setStatus(bool b) { m_isSelected = b; }
@@ -37,7 +37,7 @@ public:
 private:
 
   bool m_isSelected;
-  QString m_fk_fileformat;
+  QString m_qs_mediatype;
   QString m_description;
    QImage m_image;
 

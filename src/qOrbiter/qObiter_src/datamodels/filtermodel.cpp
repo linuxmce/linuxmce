@@ -140,18 +140,29 @@ void FilterModel::setSelectionStatus(QString format)
 {
     FilterModelItem* item = find(format);
     item->updateSelection(false);
-    qDebug() << "Setting State for:" << format;
+   // qDebug() << "Setting State for:" << format;
     //return state;
+      ReturnSelectedItems();
 }
 
 bool FilterModel::getSelectionStatus()
 {
     //qDebug() << "Looking for status for" << format;
     //FilterModelItem* item = find(format);
-
     bool g;//  = item->selectedStatus();
     return g;
+}
 
+void FilterModel::ReturnSelectedItems()
+{
+    QStringList t_selected_items;
+
+    foreach(FilterModelItem* item, m_list) {
+        if(item->selectedStatus() == true) t_selected_items.append(item->fileformat());
+    }
+    QString qs_sorting_string= t_selected_items.join(",");
+    qDebug() << "File Format updated sorting filter" << qs_sorting_string;
+    emit SetTypeSort(2, qs_sorting_string);
 }
 
 

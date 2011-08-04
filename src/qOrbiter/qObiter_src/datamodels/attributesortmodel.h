@@ -6,6 +6,7 @@
 #include <QList>
 #include <QVariant>
 #include <datamodels/DataModelItems/attributesortitem.h>
+#include <QStringList>
 
 class AttributeSortItem;
 
@@ -28,7 +29,7 @@ public:
   QModelIndex indexFromItem( const AttributeSortItem* item) const;
   AttributeSortItem* currentRow();
 
-
+  void ReturnSelectedItems();
   void clear();
 
   QModelIndex lastrow;
@@ -40,7 +41,7 @@ public:
 signals:
   void ItemAdded();
   void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const bool &state);
-
+   void SetTypeSort(int pos, QString type);
 private slots:
   void handleItemChange();
 

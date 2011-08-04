@@ -5,6 +5,7 @@
 #include <QList>
 #include <QVariant>
 #include <datamodels/DataModelItems/filtermodelitem.h>
+#include <QStringList>
 
 class FilterModelItem;
 
@@ -26,10 +27,8 @@ public:
   FilterModelItem* find(const QString &id) const;
   QModelIndex indexFromItem( const FilterModelItem* item) const;
   FilterModelItem* currentRow();
-
-
   void clear();
-
+  void ReturnSelectedItems();
   QModelIndex lastrow;
   QString ident;  
 
@@ -39,7 +38,7 @@ public:
 signals:
   void ItemAdded();
   void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const bool &state);
-
+  void SetTypeSort(int pos, QString type);
 private slots:
   void handleItemChange();
 

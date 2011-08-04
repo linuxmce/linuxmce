@@ -140,6 +140,7 @@ void GenreModel::setSelectionStatus(QString format)
     item->updateSelection();
     qDebug() << "Setting State for:" << format;
     //return state;
+    ReturnSelectedItems();
 }
 
 bool GenreModel::getSelectionStatus()
@@ -150,5 +151,16 @@ bool GenreModel::getSelectionStatus()
     bool g;//  = item->selectedStatus();
     return g;
 
+}
+void GenreModel::ReturnSelectedItems()
+{
+    QStringList t_selected_items;
+
+    foreach(GenreItem* item, m_list) {
+        if(item->selectedStatus() == true) t_selected_items.append(item->fileformat());
+    }
+    QString qs_sorting_string= t_selected_items.join(",");
+    qDebug() << "File Format updated sorting filter" << qs_sorting_string;
+    emit SetTypeSort(3, qs_sorting_string);
 }
 
