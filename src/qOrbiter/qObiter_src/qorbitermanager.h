@@ -115,6 +115,10 @@ Param 10 - pk_attribute
     SkinDataModel *skinModel;
 
     MediaTypeModel *mediaTypeFilter;
+    FilterModel *uiFileFilter;
+    AttributeSortModel *attribFilter;
+    GenreModel *genreFilter;
+
 
 
 
@@ -124,7 +128,7 @@ Param 10 - pk_attribute
     TelecomScenarioModel *roomTelecom;
     SecurityScenarioModel *roomSecurity;
 
-    FilterModel *uiFileFilter;
+
 
     //ui functions
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}

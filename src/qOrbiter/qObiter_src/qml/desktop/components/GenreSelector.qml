@@ -25,6 +25,7 @@ Rectangle {
                          border.color: "black"
                          border.width: 1
                          color: status ? style.bgcolor : "cornflowerblue"
+                         opacity: .5
 
 
                          MouseArea{
@@ -89,7 +90,6 @@ Rectangle {
             model: genrefilter
             cellHeight: 150
             cellWidth: 150
-
             delegate: genredelegate
 
         }

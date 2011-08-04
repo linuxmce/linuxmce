@@ -352,19 +352,17 @@ bool qorbiterManager::getConf(int pPK_Device)
         exit(20);
     }
 
-    QDomElement root = configData.documentElement();        //orbiterXX
+    QDomElement root = configData.documentElement();        //represent configuration in memeory
    // qDebug () << root.tagName();
-
+//------------DEFAULTS-FOR-ORBITER------------------------------------------------------------
     QDomElement defaults = root.firstChildElement("Default");
     QString sPK_User = defaults.attribute("sPK_User");
 
 
-    QDomElement userXml = root.firstChildElement("Users"); //users
-    //qDebug () << userXml.tagName();
-
+//-USERS-----------------------------------------------------------------------------------------------------
+    QDomElement userXml = root.firstChildElement("Users");
     userList = new UserModel( new UserItem, this);
     QDomNodeList userXmlList = userXml.childNodes();
-//-----users
     for(int index = 0; index < userXmlList.count(); index++)
     {
         QString m_userName = userXmlList.at(index).nodeName();      //username
@@ -380,7 +378,7 @@ bool qorbiterManager::getConf(int pPK_Device)
         userList->appendRow(new UserItem(m_userName,m_firstName, m_lastName, m_nickName, m_pk_user, m_userMode, m_requirePin, m_phoneExtension, m_image, m_defaultUser , userList));
     }
 
-    //---------rooms
+    //-----ROOMS-AND-ENTERTAIN-AREAS-------------------------------------------------------------------
     QDomElement roomXml = root.firstChildElement("Rooms");  //rooms
     m_lRooms = new LocationModel(new LocationItem, this);   //roomlistmodel
 
@@ -402,7 +400,7 @@ bool qorbiterManager::getConf(int pPK_Device)
         m_lRooms->idefault_Ea = RroomMapping.value(m_lRooms->sdefault_Ea);
 
 
-    //-----lighting scenarios
+    //--LIGHTING SCENARIOS----------------------------------------------------------------------------------
 
     QDomElement lScenarios = root.firstChildElement("LightingScenarios");
     QDomNodeList lScenarioList = lScenarios.childNodes();
@@ -428,8 +426,8 @@ bool qorbiterManager::getConf(int pPK_Device)
         roomLightingScenarios.insert(LroomMapNo, lightModelHolder);
        roomLights = roomLightingScenarios.value(m_lRooms->idefault_Ea);
     }
-    //-----media scenarios
 
+    //---MEDIA--------------SCENARIOS----------------------------------------------------------------------------
     QDomElement mScenarios = root.firstChildElement("MediaScenarios");
     QDomNodeList mScenarioList = mScenarios.childNodes();
 
@@ -456,7 +454,7 @@ bool qorbiterManager::getConf(int pPK_Device)
     }
 
 
-    //climate---------------------
+    //CLIMATE-----------SCENARIOS---------------------------------------------------------------------------------
 
     QDomElement cScenarios = root.firstChildElement("ClimateScenarios");
     QDomNodeList cScenarioList = cScenarios.childNodes();
@@ -482,8 +480,8 @@ bool qorbiterManager::getConf(int pPK_Device)
         roomClimateScenarios.insert(roomMapNo, climateModelHolder);
        roomClimate = roomClimateScenarios.value(m_lRooms->idefault_Ea);
     }
-    //telecom---------------------
 
+    //TELECOM------SCENARIOS-------------------------------------------------------------------------------------
     QDomElement tScenarios = root.firstChildElement("TelecomScenarios");
     QDomNodeList tScenarioList = tScenarios.childNodes();
 
@@ -510,8 +508,8 @@ bool qorbiterManager::getConf(int pPK_Device)
         roomTelecomScenarios.insert(troomMapNo, telecomModelHolder);
        roomTelecom = roomTelecomScenarios.value(m_lRooms->idefault_Ea);
     }
-    //security---------------------
 
+    //SECURIY---SCENARIOS-----------------------------------------------------------------------------------------
     QDomElement secScenarios = root.firstChildElement("SecurityScenarios");
     QDomNodeList secScenarioList = secScenarios.childNodes();
 
@@ -537,61 +535,79 @@ bool qorbiterManager::getConf(int pPK_Device)
        roomSecurity = roomSecurityScenarios.value(m_lRooms->idefault_Ea);
     }
 
-
+//------------------------------------------context objects----------------------------------------------------
   qorbiterUIwin->rootContext()->setContextObject(this);
-
  // setActiveRoom(RroomMapping.value(QString::fromStdString(pqOrbiter->DATA_Get_FK_EntertainArea())), 0);
-  qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights); //custom list item provided
-  qorbiterUIwin->rootContext()->setContextProperty("currentRoomMedia", roomMedia);
-  qorbiterUIwin->rootContext()->setContextProperty("currentRoomClimate", roomClimate);
-  qorbiterUIwin->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);
-   qorbiterUIwin->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);
-   qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
-    qorbiterUIwin->rootContext()->setContextProperty("iPK_Device", QVariant::fromValue(iPK_Device));
+  qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights);                 //current room scenarios model
+  qorbiterUIwin->rootContext()->setContextProperty("currentRoomMedia", roomMedia);                   //current room media model
+  qorbiterUIwin->rootContext()->setContextProperty("currentRoomClimate", roomClimate);               //curent room climate model
+  qorbiterUIwin->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);               //curret room telecom model
+  qorbiterUIwin->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);             //current room security model
+  qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
+  qorbiterUIwin->rootContext()->setContextProperty("iPK_Device", QVariant::fromValue(iPK_Device));  //orbiter device number
+  qorbiterUIwin->rootContext()->setContextProperty("currentroom", m_lRooms->sdefault_Ea);           //custom room list item provided
+  qorbiterUIwin->rootContext()->setContextProperty("userList", userList);                           //custom user list provided
+  qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms);                           //custom room list  provided
+  qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);                       //file grids current media type
 
+    //------------not sure if neccesary since it knows where we are.
     pqOrbiter->CMD_Set_Current_Room(m_lRooms->idefault_Ea);
-  pqOrbiter->CMD_Set_Entertainment_Area(m_lRooms->sdefault_Ea.toStdString());
+    pqOrbiter->CMD_Set_Entertainment_Area(m_lRooms->sdefault_Ea.toStdString());
 
 
-  this->qorbiterUIwin->rootContext()->setContextProperty("currentroom", m_lRooms->sdefault_Ea); //custom room list item provided
-  this->qorbiterUIwin->rootContext()->setContextProperty("userList", userList); //custom user list provided
-  this->qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms); //custom room list  provided
-
-  this->qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
-
-  //setting up the fileformat model
+  //-----setting up the FILEFORMAT model------------------------------------------------------------------------
   QImage attrimg(":/icons/Skin-Data.png");
   uiFileFilter = new FilterModel(new FilterModelItem, this);
-  uiFileFilter->appendRow(new FilterModelItem("Low Res", "1", attrimg, false, uiFileFilter));
-  uiFileFilter->appendRow(new FilterModelItem("DVD", "2", attrimg, false, uiFileFilter));
-  uiFileFilter->appendRow(new FilterModelItem("Standard Def", "3", attrimg, false, uiFileFilter));
-  uiFileFilter->appendRow(new FilterModelItem("HD720", "4", attrimg, false, uiFileFilter));
-  uiFileFilter->appendRow(new FilterModelItem("HD1080", "5", attrimg, false, uiFileFilter));
-  uiFileFilter->appendRow(new FilterModelItem("Low Quality", "6", attrimg, false, uiFileFilter));
+  QDomElement fileFormatElement = root.firstChildElement("FileFormats");
+  QDomNodeList fileformatlist = fileFormatElement.childNodes();
+
+  for(int index = 0; index < fileformatlist.count(); index++)
+  {
+      QString name = fileformatlist.at(index).attributes().namedItem("Name").nodeValue();
+      QString pk= fileformatlist.at(index).attributes().namedItem("PK_FileFormat").nodeValue();
+      uiFileFilter->appendRow(new FilterModelItem(name,pk, attrimg,false,uiFileFilter));
+  }
   this->qorbiterUIwin->rootContext()->setContextProperty("fileformatmodel", uiFileFilter); //custom fileformatmodel for selection filter item
 
+  //-----setting up the MEDIASUBTYPE model------------------------------------------------------------------------
+  QDomElement mediaTypeElement = root.firstChildElement("MediaSubTypes");
+  QDomNodeList mediaTypeList = mediaTypeElement.childNodes();
   mediaTypeFilter = new MediaTypeModel(new MediaTypeItem, this);
-  mediaTypeFilter->appendRow(new MediaTypeItem("Tv Shows","1",attrimg , false, mediaTypeFilter));
-  mediaTypeFilter->appendRow(new MediaTypeItem("Movies","2",attrimg , false, mediaTypeFilter));
-  mediaTypeFilter->appendRow(new MediaTypeItem("Home Videos","3",attrimg , false, mediaTypeFilter));
-  mediaTypeFilter->appendRow(new MediaTypeItem("Sports","4",attrimg , false, mediaTypeFilter));
-  mediaTypeFilter->appendRow(new MediaTypeItem("Music Videos","5",attrimg , false, mediaTypeFilter));
-  mediaTypeFilter->appendRow(new MediaTypeItem("Alternative","6",attrimg , false, mediaTypeFilter));
-  mediaTypeFilter->appendRow(new MediaTypeItem("Popular Music","7",attrimg , false, mediaTypeFilter));
-  mediaTypeFilter->appendRow(new MediaTypeItem("Classical Music","8",attrimg , false, mediaTypeFilter));
-  mediaTypeFilter->appendRow(new MediaTypeItem("Learning","9",attrimg , false, mediaTypeFilter));
-  mediaTypeFilter->appendRow(new MediaTypeItem("Audio Books","10",attrimg , false, mediaTypeFilter));
-  mediaTypeFilter->appendRow(new MediaTypeItem("Arcade","11",attrimg , false, mediaTypeFilter));
-  mediaTypeFilter->appendRow(new MediaTypeItem("Console","12",attrimg , false, mediaTypeFilter));
+  for(int index = 0; index < mediaTypeList.count(); index++)
+  {
+      QString name = mediaTypeList.at(index).attributes().namedItem("Name").nodeValue();
+      QString pk= mediaTypeList.at(index).attributes().namedItem("PK_MediaSubType").nodeValue();
+      mediaTypeFilter->appendRow(new MediaTypeItem(name,pk, attrimg,false,mediaTypeFilter));
+  }
   this->qorbiterUIwin->rootContext()->setContextProperty("mediatypefilter", mediaTypeFilter); //custom mediatype selection model
 
-   // binaryConfig.clear();
-   //configData.clear();
+  //-----setting up the GENRE model------------------------------------------------------------------------
+  QDomElement genreElement = root.firstChildElement("GenreList");
+  QDomNodeList genrelist = genreElement.childNodes();
+  genreFilter = new GenreModel(new GenreItem, this);
+  for(int index = 0; index < genrelist.count(); index++)
+  {
+      QString name = genrelist.at(index).attributes().namedItem("Name").nodeValue();
+      QString pk= genrelist.at(index).attributes().namedItem("PK_Attribute").nodeValue();
+      genreFilter->appendRow(new GenreItem(name,pk, attrimg,false,genreFilter));
+  }
+  this->qorbiterUIwin->rootContext()->setContextProperty("genrefilter", genreFilter); //custom mediatype selection model
 
-   qDebug() << "Cleanup config - tconf:" << tConf.size() << "|| binaryConfig:" << binaryConfig.size() << "|| configData:" << configData.childNodes().size();
+  //-----setting up the ATTRIBUTE model------------------------------------------------------------------------
+  QDomElement attribElement = root.firstChildElement("AttributeList");
+  QDomNodeList attriblist = attribElement.childNodes();
+  attribFilter = new AttributeSortModel(new AttributeSortItem, this);
+  for(int index = 0; index < attriblist.count(); index++)
+  {
+      QString name = attriblist.at(index).attributes().namedItem("Name").nodeValue();
+      QString pk= attriblist.at(index).attributes().namedItem("PK_Attribute").nodeValue();
+      attribFilter->appendRow(new AttributeSortItem(name,pk, attrimg,false,attribFilter));
+  }
+  this->qorbiterUIwin->rootContext()->setContextProperty("attribfilter", attribFilter); //custom mediatype selection model
 
+
+  qDebug() << "Cleanup config - tconf:" << tConf.size() << "|| binaryConfig:" << binaryConfig.size() << "|| configData:" << configData.childNodes().size();
   return true;
-
 }
 
 //experimental skin swappping method. what should happen here is a call to qDeclarative engine to change
@@ -670,11 +686,8 @@ void qorbiterManager::closeOrbiter()
   */
 bool qorbiterManager::requestDataGrid()
 {
-
     m_dwIDataGridRequestCounter++;
-
     return true;
-
 }
 
 void qorbiterManager::setActiveRoom(int room,int ea)
