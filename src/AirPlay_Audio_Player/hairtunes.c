@@ -53,7 +53,7 @@ int debug = 0;
 #include "alac.h"
 
 // and how full it needs to be to begin (must be <BUFFER_FRAMES)
-#define START_FILL    282
+#define START_FILL    300
 
 #define MAX_PACKET      2048
 

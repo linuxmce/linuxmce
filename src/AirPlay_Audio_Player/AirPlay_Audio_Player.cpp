@@ -20,6 +20,8 @@
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
 
+#include "DCE/DeviceData_Base.h"
+
 #include <iostream>
 using namespace std;
 using namespace DCE;
@@ -58,9 +60,11 @@ AirPlay_Audio_Player::AirPlay_Audio_Player(int DeviceID, string ServerAddress,bo
   	//int  tSimLevel = 0;
   	int  tUseKnownHWID = FALSE;
   	int  tPort = PORT;
+  	
+  	m_pDevice_MD = NULL;
 
-    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Audio_Player::Player starting up");
-   
+    //LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Audio_Player::Player starting up on %L", m_pData->m_dwPK_Device);
+   	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Audio_Player::Player starting up");
 	srandom ( time(NULL) );
 
   	int tIdx = 0;
@@ -833,7 +837,7 @@ int AirPlay_Audio_Player::parseMessage(struct connection *pConn, unsigned char *
 
       		LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Got %d for CPort and %d for TPort\n", tControlport, tTimingport);
       		char *tRtp = NULL;
-      		char *tPipe = NULL;
+      		char *tPipe = NULL;//(char *)"/var/run/airplay.raw";
       		char *tAoDriver = NULL;
       		char *tAoDeviceName = NULL;
       		char *tAoDeviceId = NULL;

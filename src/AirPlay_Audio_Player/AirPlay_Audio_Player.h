@@ -101,7 +101,8 @@ protected:
 		RSA *loadKey();
 
 		// Private methods
-public:
+private:
+		DeviceData_Base *m_pDevice_MD;
 		// Public member variables
 
 //<-dceag-const-b->
