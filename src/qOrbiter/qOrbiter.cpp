@@ -1212,6 +1212,11 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 	cout << "Need to implement command #401 - Show File List" << endl;
         cout << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
 
+        if (iPK_MediaType != qmlUI->i_current_mediaType)
+        {
+            qmlUI->initializeSortString();
+        }
+
         qmlUI->model->clear();
 
 
@@ -1279,6 +1284,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 
             }
              s = QString::number(iPK_MediaType) + params;
+             qmlUI->i_current_mediaType = iPK_MediaType;
 
           }
 

@@ -120,6 +120,7 @@ Param 10 - pk_attribute
     FilterModel *uiFileFilter;
     AttributeSortModel *attribFilter;
     GenreModel *genreFilter;
+    int i_current_mediaType;
 
 
 
