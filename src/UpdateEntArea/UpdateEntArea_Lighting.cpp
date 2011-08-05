@@ -67,6 +67,7 @@
 #include "pluto_main/Table_Users.h"
 #include "pluto_main/Define_Screen.h"
 #include "pluto_main/Define_RoomType.h"
+#include "pluto_main/Define_Text.h"
 
 #include "CommandGroupArray.h"
 
@@ -175,7 +176,7 @@ void UpdateEntArea::AddDefaultLightingScenarios(Row_Room *pRow_Room)
 	int iOrder=3; // Start with 3 so lights on is always 1, off is always 2
 	if( bRoomHasLights )
 	{
-		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"On",ICON_Lights_On_CONST,1,0,NULL,1);
+		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"On",ICON_Lights_On_CONST,1,0,NULL,1,TEXT_Lights_On_CONST);
 		if( pCommandGroup )
 		{
 			AddShortcut(pRow_Room->PK_Room_get(),'1',pCommandGroup->m_pRow_CommandGroup->PK_CommandGroup_get());
@@ -185,7 +186,7 @@ void UpdateEntArea::AddDefaultLightingScenarios(Row_Room *pRow_Room)
 		}
 
 		iOrder=1;
-		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"Off",ICON_Lights_Off_CONST,0,0,NULL,2);
+		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"Off",ICON_Lights_Off_CONST,0,0,NULL,2,TEXT_Lights_Off_CONST);
 		if( pCommandGroup )
 		{
 			AddShortcut(pRow_Room->PK_Room_get(),'2',pCommandGroup->m_pRow_CommandGroup->PK_CommandGroup_get());
@@ -198,7 +199,7 @@ void UpdateEntArea::AddDefaultLightingScenarios(Row_Room *pRow_Room)
 	// If there are blinds, we create some open/close/shade scenario buttons
 	if( bRoomHasBlinds )
 	{
-		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"Open",ICON_Lights_On_CONST,8,0,NULL,8);
+		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"Open",ICON_Lights_On_CONST,8,0,NULL,8,TEXT_Blinds_Open_CONST);
 		if( pCommandGroup )
 		{
 			AddShortcut(pRow_Room->PK_Room_get(),'0',pCommandGroup->m_pRow_CommandGroup->PK_CommandGroup_get());
@@ -208,7 +209,7 @@ void UpdateEntArea::AddDefaultLightingScenarios(Row_Room *pRow_Room)
 					                                        
 		}
 
-		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"Shade",ICON_Lights_On_CONST,9,0,NULL,10);
+		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"Shade",ICON_Lights_On_CONST,9,0,NULL,10,TEXT_Blinds_Shade_CONST);
 		if( pCommandGroup )
 		{
 			AddShortcut(pRow_Room->PK_Room_get(),'0',pCommandGroup->m_pRow_CommandGroup->PK_CommandGroup_get());
@@ -217,7 +218,7 @@ void UpdateEntArea::AddDefaultLightingScenarios(Row_Room *pRow_Room)
 					pCommandGroup->AddCommand(it->first,COMMAND_Set_Level_CONST,1,1,COMMANDPARAMETER_Level_CONST,"30");
 		}
 
-		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"Close",ICON_Lights_Off_CONST,10,0,NULL,10);
+		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"Close",ICON_Lights_Off_CONST,10,0,NULL,10,TEXT_Blinds_Close_CONST);
 		if( pCommandGroup )
 		{
 			AddShortcut(pRow_Room->PK_Room_get(),'0',pCommandGroup->m_pRow_CommandGroup->PK_CommandGroup_get());
@@ -238,7 +239,7 @@ void UpdateEntArea::AddDefaultLightingScenarios(Row_Room *pRow_Room)
 		if( map_Device_Type_TV.size() )
 		{
 			iOrder=1;
-			pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"Showtime",ICON_Showtime_CONST,2,0,NULL,3);  // Showtime is parm1=2
+			pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"Showtime",ICON_Showtime_CONST,2,0,NULL,3,TEXT_Lights_Showtime_CONST);  // Showtime is parm1=2
 			if( pCommandGroup )
 			{
 				for(map<int,int>::iterator it=map_Device_Type.begin();it!=map_Device_Type.end();++it)
@@ -261,7 +262,7 @@ void UpdateEntArea::AddDefaultLightingScenarios(Row_Room *pRow_Room)
 	if( pRow_Room->FK_RoomType_get()==ROOMTYPE_Bedroom_Other_CONST || pRow_Room->FK_RoomType_get()==ROOMTYPE_Bedroom_Master_CONST )
 	{
 		iOrder=1;
-		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"Sleep",ICON_Sleep_CONST,3,0,NULL,4);  // Bedtime is parm1=3
+		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"Sleep",ICON_Sleep_CONST,3,0,NULL,4,TEXT_Lights_Sleep_CONST);  // Bedtime is parm1=3
 		if( pCommandGroup )
 		{
 			AddShortcut(pRow_Room->PK_Room_get(),'0',pCommandGroup->m_pRow_CommandGroup->PK_CommandGroup_get());
@@ -281,7 +282,7 @@ void UpdateEntArea::AddDefaultLightingScenarios(Row_Room *pRow_Room)
 		}
 
 		iOrder=1;
-		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"Wakeup",ICON_Sleep_CONST,4,0,NULL,5);  // Wakeup is parm1=4  Sort 4
+		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"Wakeup",ICON_Sleep_CONST,4,0,NULL,5,TEXT_Lights_Wakeup_CONST);  // Wakeup is parm1=4  Sort 4
 		if( pCommandGroup )
 		{
 			AddShortcut(pRow_Room->PK_Room_get(),'3',pCommandGroup->m_pRow_CommandGroup->PK_CommandGroup_get());
@@ -301,7 +302,7 @@ void UpdateEntArea::AddDefaultLightingScenarios(Row_Room *pRow_Room)
 	if( pRow_Room->FK_RoomType_get()==ROOMTYPE_Bedroom_Master_CONST )
 	{
 		iOrder=1;
-		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"House to sleep mode",ICON_House_to_Sleep_Mode_CONST,5,0,NULL,6);  // House to sleep mode is parm1=5
+		pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Lighting_Automatic_CONST,"House to sleep mode",ICON_House_to_Sleep_Mode_CONST,5,0,NULL,6,TEXT_Lights_House_Sleep_CONST);  // House to sleep mode is parm1=5
 		if( pCommandGroup )
 		{
 			vector<Row_EntertainArea *> vectRow_EntertainArea;
