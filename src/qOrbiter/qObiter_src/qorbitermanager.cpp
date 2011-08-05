@@ -126,12 +126,15 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
 
     QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
     const QString test = buildType;
+
+
     QString finalPath = qmlPath+buildType+currentSkin;
     QString skinPath= finalPath+"/Style.qml";
     QString skinsPath = qmlPath+test;
 
     //qDebug () << "QML import path for build: " << qmlPath;
     QString *m_SkinsDirectoryPath = new QString(qmlPath+buildType.toLatin1().constData());
+
     QDir directoryMap(skinsPath);
     directoryMap.setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
     QStringList skinList = directoryMap.entryList();
@@ -1007,49 +1010,99 @@ void qorbiterManager::setStringParam(int paramType, QString param)
     QString q_pk_attribute;        //10
     QString *datagridVariableString;
     */
+QStringList longassstring;
+QString datagridVariableString;
 
     switch (paramType)
     {
     case 1:
        q_subType = param;
+
+       longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
+       datagridVariableString = longassstring.join("|");
+       qDebug() << datagridVariableString;
+       execGrp(i_current_command_grp);
+
         break;
     case 2:        
             q_fileFormat = param;
+
+            longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
+            datagridVariableString = longassstring.join("|");
+            qDebug() << datagridVariableString;
+            execGrp(i_current_command_grp);
+
         break;
     case 3:
         q_attribute_genres = param;
+
+        longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
+        datagridVariableString = longassstring.join("|");
+        qDebug() << datagridVariableString;
+        execGrp(i_current_command_grp);
+
         break;
     case 4:
         if (q_mediaSources != param.remove("!D"))
         {
             if(param.contains("!F"))
             {
-
+                ShowFileInfo(param);
             }
 
             else
             {
                 q_pk_attribute = param.remove("!A");
                 q_attributetype_sort = "13";
+
+                longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
+                datagridVariableString = longassstring.join("|");
+                qDebug() << datagridVariableString;
+                execGrp(i_current_command_grp);
             }
+
         }
 
         break;
     case 5:
        q_usersPrivate = param;
+
+       longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
+       datagridVariableString = longassstring.join("|");
+       qDebug() << datagridVariableString;
+       execGrp(i_current_command_grp);
+
         break;
     case 6:
        q_attributetype_sort = param;
+
+       longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
+        datagridVariableString = longassstring.join("|");
+       qDebug() << datagridVariableString;
+       execGrp(i_current_command_grp);
         break;
     case 7:
        q_pk_users = param;
+
+       longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
+        datagridVariableString = longassstring.join("|");
+       qDebug() << datagridVariableString;
+       execGrp(i_current_command_grp);
+
         break;
     case 8:
        q_last_viewed = param;
+
+       longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
+       datagridVariableString = longassstring.join("|");
+       qDebug() << datagridVariableString;
+       execGrp(i_current_command_grp);
+
         break;
     case 9:
         if(param.contains("!F"))
         {
+            ShowFileInfo(param);
 
         }
 
@@ -1057,6 +1110,11 @@ void qorbiterManager::setStringParam(int paramType, QString param)
         {
             q_pk_attribute = param.remove("!A");
             q_attributetype_sort = "13";
+
+            longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
+            datagridVariableString = longassstring.join("|");
+            qDebug() << datagridVariableString;
+            execGrp(i_current_command_grp);
         }
         break;
     default:
@@ -1064,13 +1122,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
     }
 
-    QStringList longassstring;
-    longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
 
-    QString datagridVariableString = longassstring.join("|");
-    qDebug() << datagridVariableString;
-
-    execGrp(i_current_command_grp);
 
        // initializeSortString();
 }
@@ -1119,6 +1171,12 @@ void qorbiterManager::goBackGrid()
 {
     backwards = true;
     execGrp(i_current_command_grp);
+
+}
+
+void qorbiterManager::ShowFileInfo(QString fk_file)
+{
+    qDebug() << fk_file;
 
 }
 
