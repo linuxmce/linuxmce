@@ -1211,6 +1211,15 @@
 #define TEXT_a8period_CONST 2154
 #define TEXT_Option_CONST 2155
 #define TEXT_Start_CONST 2156
+#define TEXT_Lights_On_CONST 2157
+#define TEXT_Lights_Off_CONST 2158
+#define TEXT_Blinds_Open_CONST 2159
+#define TEXT_Blinds_Shade_CONST 2160
+#define TEXT_Blinds_Close_CONST 2161
+#define TEXT_Lights_Showtime_CONST 2162
+#define TEXT_Lights_Sleep_CONST 2163
+#define TEXT_Lights_Wakeup_CONST 2164
+#define TEXT_Lights_House_Sleep_CONST 2165
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"
