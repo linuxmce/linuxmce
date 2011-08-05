@@ -584,6 +584,12 @@ static map<string, DesignObj_DataGrid *> mapDatagridID_DesignObjDataGrid;
 	FILE *f = fopen(fname.c_str(), "w");
 	fprintf(f, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 	fprintf(f, "<datagrid id=\"%s\" rows=\"%d\" cols=\"%d\">\n", sGridID.c_str(), pDataGridTable->GetRows(), pDataGridTable->GetCols());
+	if (!pDesignObj_DataGrid->sSelVariable.empty())
+	{
+		PLUTO_SAFETY_LOCK(vm, pDesignObj_DataGrid->m_pOrbiter->m_VariableMutex)
+		string sSelectedIndex = pDesignObj_DataGrid->m_pOrbiter->m_mapVariable[atoi(pDesignObj_DataGrid->sSelVariable.c_str())];
+		fprintf(f, "<selected_index value=\"%s\"/>\n", sSelectedIndex.c_str());
+	}
 	for (int row = 0; row < pDataGridTable->GetRows(); row++)
 	{
 		fprintf(f, "<row>\n");
@@ -597,6 +603,8 @@ static map<string, DesignObj_DataGrid *> mapDatagridID_DesignObjDataGrid;
 				fprintf(f, "<value>%s</value>\n", XMLEntities(pCell->m_Value).c_str());
 				if (pCell->m_pGraphic != NULL)
 					fprintf(f, "<has_graphic/>\n");
+				PlutoColor Color(pCell->m_AltColor);
+				fprintf(f, "<alt_color value=\"#%02x%02x%02x\"/>\n", Color.R(), Color.G(), Color.B());
 				if (pCell->m_ImagePath != NULL)
 					fprintf(f, "<image src=\"%s\" />\n", XMLEntities(pCell->m_ImagePath).c_str());
 				fprintf(f, "<parameters>\n");
