@@ -347,7 +347,7 @@ function Setup_Network_Intefaces {
   fi
   echo "" >> /etc/network/interfaces
 	echo "auto $c_netIntName" >> /etc/network/interfaces
-	echo "    iface $c_netInttName inet static" >> /etc/network/interfaces
+	echo "    iface $c_netIntName inet static" >> /etc/network/interfaces
 	echo "    address $c_netIntIPN" >> /etc/network/interfaces
 	echo "    netmask 255.255.255.0" >> /etc/network/interfaces
 }
