@@ -13,6 +13,36 @@
      See the GNU General Public License for more details.
 
 */
+
+// Andrew Webster's shairport has been nearly fully integrated in this player, so here are the credits ...
+
+/*
+ * ShairPort Initializer - Network Initializer/Mgr for Hairtunes RAOP
+ * Copyright (c) M. Andrew Webster 2011
+ * All rights reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+
 //<-dceag-d-b->
 #include <pthread.h>
 #include "AirPlay_Audio_Player.h"
@@ -71,26 +101,33 @@ AirPlay_Audio_Player::~AirPlay_Audio_Player()
 //<-dceag-getconfig-b->
 bool AirPlay_Audio_Player::GetConfig()
 {
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::GetConfig()");
 	if( !AirPlay_Audio_Player_Command::GetConfig() )
 		return false;
 //<-dceag-getconfig-e->
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
-	//cout << "TEST:" << m_pData->m_dwPK_Device_MD << endl;
+
 	m_pDevice_MD = m_pData->m_AllDevices.m_mapDeviceData_Base_Find(m_pData->m_dwPK_Device_MD);
+	m_pDevice_PlugIn = m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_AirPlay_PlugIn_CONST);
+	if (!m_pDevice_PlugIn)
+    {
+      	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_Audio_Player::PlugIn on CORE not found !");
+      	return false;
+    } else {
+      	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_Audio_Player::PlugIn device %d found on CORE !", m_pDevice_PlugIn->m_dwPK_Device);    	
+    }
+
 	return true;
 }
 
+// We provide our own connect method that call's parent connect and starts listener thread
 bool AirPlay_Audio_Player::Connect(int iPK_DeviceTemplate) 
 {
-  	pthread_t m_tListenThread;
 
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Connect()");
 	Command_Impl::Connect(iPK_DeviceTemplate);
 	
-   	
    	pthread_create( &m_tListenThread, NULL, listenThread, (void *) this);
 
 	return true;

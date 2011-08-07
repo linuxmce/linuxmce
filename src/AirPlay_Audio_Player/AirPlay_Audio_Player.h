@@ -40,10 +40,11 @@ protected:
 		// Private methods
 private:
 		// Public member variables
+  		pthread_t m_tListenThread;
 
 //<-dceag-const-b->
 public:
-		DeviceData_Base *m_pDevice_MD;
+		DeviceData_Base *m_pDevice_MD, *m_pDevice_PlugIn;
 		// Constructors/Destructor
 		AirPlay_Audio_Player(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
 		virtual ~AirPlay_Audio_Player();
