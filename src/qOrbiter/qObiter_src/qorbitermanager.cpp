@@ -198,6 +198,8 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
    goBack << ("|||1,2|0|13|0|2|");
     qDebug() << goBack.first();
     backwards = false;
+    m_selected_grid_item = new FileDetailsModel(new FileDetailsItem, this);
+    qorbiterUIwin->rootContext()->setContextProperty("filedetails", m_selected_grid_item);
 
     //showing the qml screen depending on device / platform / etc
 #ifdef Q_OS_SYMBIAN
@@ -345,6 +347,7 @@ bool qorbiterManager::getConf(int pPK_Device)
     qDebug() << "Reading Config" ;
     iPK_Device = long(pPK_Device);
     iOrbiterPluginID = 9;
+    iMediaPluginID = 10;
     iSize = 0;
     m_pOrbiterCat = 5;
     s_onOFF = "1";
@@ -560,8 +563,10 @@ bool qorbiterManager::getConf(int pPK_Device)
   qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);                       //file grids current media type
 
     //------------not sure if neccesary since it knows where we are.
-    pqOrbiter->CMD_Set_Current_Room(m_lRooms->idefault_Ea);
-    pqOrbiter->CMD_Set_Entertainment_Area(m_lRooms->sdefault_Ea.toStdString());
+    setActiveRoom(m_lRooms->idefault_Ea,m_lRooms->idefault_Ea);
+
+    //pqOrbiter->CMD_Set_Current_Room(m_lRooms->idefault_Ea);
+    //pqOrbiter->CMD_Set_Entertainment_Area(m_lRooms->sdefault_Ea.toStdString());
 
 
   //-----setting up the FILEFORMAT model------------------------------------------------------------------------
@@ -617,6 +622,7 @@ bool qorbiterManager::getConf(int pPK_Device)
   }
   this->qorbiterUIwin->rootContext()->setContextProperty("attribfilter", attribFilter); //custom mediatype selection model
 connect(attribFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
+
 
   qDebug() << "Cleanup config - tconf:" << tConf.size() << "|| binaryConfig:" << binaryConfig.size() << "|| configData:" << configData.childNodes().size();
   return true;
@@ -1177,6 +1183,7 @@ void qorbiterManager::goBackGrid()
 void qorbiterManager::ShowFileInfo(QString fk_file)
 {
     qDebug() << fk_file;
+    pqOrbiter->GetFileInfoForQml(fk_file);
 
 }
 

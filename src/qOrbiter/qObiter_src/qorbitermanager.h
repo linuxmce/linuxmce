@@ -19,6 +19,7 @@
 #include <datamodels/genremodel.h>
 #include <datamodels/attributesortmodel.h>
 #include <datamodels/mediatypemodel.h>
+#include <datamodels/filedetailsmodel.h>
 
 #include <QFile>
 #include <QDir>
@@ -120,6 +121,7 @@ Param 10 - pk_attribute
     FilterModel *uiFileFilter;
     AttributeSortModel *attribFilter;
     GenreModel *genreFilter;
+    FileDetailsModel *m_selected_grid_item;
     int i_current_mediaType;
 
 
@@ -153,14 +155,6 @@ Param 10 - pk_attribute
     Q_INVOKABLE void quickReload();
 
 
-    //virtual devices
-    long iPK_Device_DatagridPlugIn;
-    long iPK_Device_OrbiterPlugin;
-    long iPK_Device_GeneralInfoPlugin;
-
-    int m_pDevice_ScreenSaver;
-    int m_dwIDataGridRequestCounter;
-     long iPK_Device;                   //this orbiters device number, passed in from command line
 
     /*
       DCE variables
@@ -199,12 +193,22 @@ Param 10 - pk_attribute
 
     QString s_onOFF;
 
-    long iOrbiterPluginID;           //the orbiter plugin id for future use
+
     QStringList *sRoomList;          //Linked list of rooms in house
     QStringList *sUserList;          //linked list of users in house
     QStringList *sCurr_Room_Devices; //linked list of current devices (experimental)
 
     int CurrentScreen();
+
+    //plugin variables
+    long iOrbiterPluginID;           //the orbiter plugin id for future use
+    long iPK_Device_DatagridPlugIn;
+    long iPK_Device_OrbiterPlugin;
+    long iPK_Device_GeneralInfoPlugin;
+    long iMediaPluginID;
+    int m_pDevice_ScreenSaver;
+    int m_dwIDataGridRequestCounter;
+    long iPK_Device;                   //this orbiters device number, passed in from command line
 
 signals:
       void orbiterReady();

@@ -1895,3 +1895,167 @@ QImage DCE::qOrbiter::getfileForDG(string filePath)
        return returnImage;
 
 }
+
+void DCE::qOrbiter::GetFileInfoForQml(QString qs_file_reference)
+{
+    string s_value_assignment;
+   // s_value_assignment = NULL;
+   // qDebug() << qs_file_reference;
+
+    CMD_Get_Attributes_For_Media cmd_file_info(qmlUI->iPK_Device, qmlUI->iMediaPluginID , qs_file_reference.toStdString(), "", &s_value_assignment);
+
+    if (!SendCommand(cmd_file_info))
+    {
+        cout << "No Router";
+    }
+    else
+    {
+GetMediaAttributeGrid(qs_file_reference);
+    }
+
+
+}
+
+void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
+{
+
+qDebug() << "File: " << qs_fk_fileno <<":: getting media attributes";
+   qmlUI->m_selected_grid_item->clear();
+
+     int gHeight = 10;
+    int gWidth = 10;
+    int pkVar = 0;
+    string valassign ="";
+    bool isSuccessfull;// = "false";
+
+    string m_sGridID ="mattrfile_"+StringUtils::itos(qmlUI->iPK_Device);
+
+    int iRow_count=5;
+    int iColumn_count = 5;
+    bool m_bKeep_Row_Header = false;
+    bool m_bKeepColHeader = false;
+    bool m_bAdd_UpDown_Arrows = true;
+
+    string m_sSeek;
+    string m_sDataGrid_ID = "1";
+    int iOffset;
+
+    int iColumn = 1;
+    int iRowCount= 5;
+    int iRowColums = 5;
+    int m_iSeekColumn = 0;
+    int iData_Size=0;
+    int GridCurRow = 0;
+    int GridCurCol= 0;
+
+
+    char *pData;
+    pData = "NULL";
+    int iRow;
+
+    QString temp;
+    qmlUI->m_dwIDataGridRequestCounter++;
+
+
+        CMD_Populate_Datagrid cmd_populate_attribute_grid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 83, qs_fk_fileno.toStdString(), DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
+
+        if (SendCommand(cmd_populate_attribute_grid))
+            {
+        /*
+          initial request to populate the text only grid as denoted by the lack of a leading "_" as in _MediaFile_43
+          this way, we can safely check empty grids and error gracefully in the case of no matching media
+          */
+
+                string imgDG = m_sGridID; //standard text grid with no images. this will not crash the router if requested and its empty, picture grids will
+
+         //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
+                DCE::CMD_Request_Datagrid_Contents req_data_grid( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+                if(SendCommand(req_data_grid))
+                  {
+
+                     bool barrows = false; //not sure what its for
+                     //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
+                     DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
+                     int cellsToRender= pDataGridTable->GetRows();
+                    //qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
+                     //qDebug() << "Response: " << cellsToRender << " cells to render";
+
+                     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
+                     QString cellTitle;
+                     QString cellAttribute;
+                     QString fk_file;
+                     QString filePath;
+                     int index;
+                     QImage cellImg;
+
+
+
+                         for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
+                             {
+                                DataGridCell *pCell = it->second;
+                                const char *pPath = pCell->GetImagePath();
+                                index = pDataGridTable->CovertColRowType(it->first).first;
+                                cellTitle = pCell->m_mapAttributes_Find("Title").c_str();
+                                cellAttribute = pCell->m_mapAttributes_Find("Name").c_str();
+
+                                qDebug() << "Item Attribute::" << cellTitle << "-" << cellAttribute;
+                                        if (pPath )
+                                           {
+                                                  cellImg = getfileForDG(pCell->GetImagePath());
+                                                  size_t s=0;
+                                                  pCell->m_GraphicLength = (unsigned long) s;
+                                                  pCell->m_GraphicFormat = GR_JPG;
+                                             }
+                                      else if (!pPath) //making sure we dont provide a null image
+                                          {
+                                           cellImg.load(":/icons/videos.png");
+                                             }
+                                      else if (cellImg.isNull())
+                                          {
+                                       cellImg.load(":/icons/videos.png");
+                                            }
+                                         qmlUI->m_selected_grid_item->appendRow(new FileDetailsItem(cellTitle, cellAttribute, cellImg, false,  qmlUI->model));
+                                }
+
+                             }
+
+         }
+
+
+    /*
+      Datagrid params
+      # 4 PK_Variable (int) (Out)  The populate grid can optionally return a variable number
+                                    to assign a value into. For example, the current path in
+                                    the file grid.
+
+      # 5 Value To Assign (string) (Out) The value to assign into the variable.
+
+      # 10 ID (string)              For debugging purposes if problems arise with a request
+                                    not being filled, or a grid not populated when it should be.
+                                    If the Orbiter specified an ID when requesting the grid or populating it,
+                                     the Datagrid plug-in will log the ID and status so the develope
+
+      # 15 DataGrid ID (string)     A unique ID for this instance of the grid that will be passed with the
+                                    Request Datagrid Contents command.
+
+      # 38 PK_DataGrid (int)        Which grid should be populated
+
+      # 39 Options (string)         The options are specific the type of grid (PK_Datagrid). These are not
+                                    pre-defined. The grid generator and orbiter must both pass the options
+                                    in the correct format for the type of grid.
+
+     # 40 IsSuccessful (bool) (Out) Returns false if the grid could not be populated. Perhaps there was no
+                                    registered datagrid generator.
+
+     # 44 PK_DeviceTemplate (int)   If more than 1 plugin registered to handle this grid, this parameter
+                                     will be used to match teh right one
+
+     # 60 Width (int) (Out)         The width of the grid, in columns, if the width is determined at
+                                    populate time, such as a file grid. If the whole size of the grid is unknown,
+                                    such as the EPG grid, this should be 0.
+
+    # 61 Height (int) (Out)         The height of the grid, in rows, if the heightis determined at populate time,
+                                    such as a file grid. If the whole size of the grid is unknown, such as the EPG grid,
+                                     this should be 0.
+*/
+}

@@ -162,7 +162,9 @@ SOURCES += main.cpp \
     datamodels/DataModelItems/attributesortitem.cpp \
     datamodels/attributesortmodel.cpp \
     datamodels/mediatypemodel.cpp \
-    datamodels/DataModelItems/mediatypeitem.cpp
+    datamodels/DataModelItems/mediatypeitem.cpp \
+    datamodels/filedetailsmodel.cpp \
+    datamodels/DataModelItems/filedetailsitem.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -206,7 +208,9 @@ HEADERS += \
     datamodels/DataModelItems/attributesortitem.h \
     datamodels/attributesortmodel.h \
     datamodels/mediatypemodel.h \
-    datamodels/DataModelItems/mediatypeitem.h
+    datamodels/DataModelItems/mediatypeitem.h \
+    datamodels/filedetailsmodel.h \
+    datamodels/DataModelItems/filedetailsitem.h
 
 OTHER_FILES += Readme.txt \
     config.xml \

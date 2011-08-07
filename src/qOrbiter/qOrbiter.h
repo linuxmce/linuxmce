@@ -64,6 +64,8 @@ public:
                 bool getConfiguration();
                 void executeCommandGroup(int cmdGrp);
                 QImage getfileForDG(string filename);
+                void GetFileInfoForQml(QString qs_file_reference);
+                void GetMediaAttributeGrid(QString qs_fk_fileno);
 //<-dceag-const-e->
 
 //<-dceag-const2-b->

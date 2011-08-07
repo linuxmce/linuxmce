@@ -19,7 +19,7 @@ Item {
         height: style.buttonH
         width: parent.width
         contentHeight: style.buttonH
-        contentWidth: ((style.buttonW + 5) * (mediaScenarios.count + 2)) - 5
+        contentWidth: (style.buttonW + 5) * (mediaflick.children.width)
         clip: true
         flickableDirection: "HorizontalFlick"
 
