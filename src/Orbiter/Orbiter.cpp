@@ -694,6 +694,7 @@ bool Orbiter::GetConfig()
 	for(VectDeviceData_Impl::iterator it=m_pData->m_vectDeviceData_Impl_Children.begin();it!=m_pData->m_vectDeviceData_Impl_Children.end();++it)
 	{
 		DeviceData_Impl *pDeviceData_Impl = *it;
+#ifdef HID_REMOTE
 		if ( pDeviceData_Impl->WithinCategory(DEVICECATEGORY_Gestural_Remote_CONST) )
 		{
 		  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Orbiter::GetConfig() - Found Gestural Remote. Adding to GenericHIDInterface Bits.");
@@ -726,6 +727,7 @@ bool Orbiter::GetConfig()
 			}
 		    }
 		}
+#endif
 		if( pDeviceData_Impl->WithinCategory(DEVICECATEGORY_Remote_Controls_CONST) )
 		{
 			string s = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_Remote_Layout_CONST);
