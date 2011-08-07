@@ -241,6 +241,7 @@ namespace DCE
 #ifdef HID_REMOTE
 		PlutoHIDInterface *m_pHIDInterface;
 		GenericHIDInterface *m_pGenericHIDInterface;
+		vector <string> m_vectGyroDevices;	// Gyro devices to map to GenericHIDInterface
 		pthread_t m_HidThreadID;
 		pthread_t m_GenericHidThreadID;
 #endif

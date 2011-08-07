@@ -694,6 +694,38 @@ bool Orbiter::GetConfig()
 	for(VectDeviceData_Impl::iterator it=m_pData->m_vectDeviceData_Impl_Children.begin();it!=m_pData->m_vectDeviceData_Impl_Children.end();++it)
 	{
 		DeviceData_Impl *pDeviceData_Impl = *it;
+		if ( pDeviceData_Impl->WithinCategory(DEVICECATEGORY_Gestural_Remote_CONST) )
+		{
+		  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Orbiter::GetConfig() - Found Gestural Remote. Adding to GenericHIDInterface Bits.");
+		  // Special case for Gestural remotes.
+		  string sGyroDeviceToAdd = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_Block_Device_CONST);
+		  if (sGyroDeviceToAdd.size())
+		    {
+		      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Adding Block Devices %s to the GenericHIDInterface map.",sGyroDeviceToAdd.c_str());
+		      if (sGyroDeviceToAdd.find("|") != string::npos)
+			{
+			  // A | separator was found, split directly into the map.
+			  string::size_type pos=0;
+			  while (pos<sGyroDeviceToAdd.size())
+			    {
+			      // get next device, and reset pos.
+			      string sCurrentGyroDevice = StringUtils::Tokenize(sGyroDeviceToAdd,"|",pos);
+			      if (sCurrentGyroDevice.size())
+				{
+				  m_vectGyroDevices.push_back(sCurrentGyroDevice);
+				}
+			    }
+			}
+		      else
+			{
+			  // No separator found, see if it is a single device.
+			  if (sGyroDeviceToAdd.find("/dev/") != string::npos)
+			    {
+			      m_vectGyroDevices.push_back(sGyroDeviceToAdd);
+			    }
+			}
+		    }
+		}
 		if( pDeviceData_Impl->WithinCategory(DEVICECATEGORY_Remote_Controls_CONST) )
 		{
 			string s = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_Remote_Layout_CONST);

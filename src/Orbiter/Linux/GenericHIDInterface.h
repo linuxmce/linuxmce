@@ -19,6 +19,7 @@ class GenericHIDInterface : public AlarmEvent
   time_t m_tLastButtonPress;
   Orbiter *m_pOrbiter;
   vector<int> m_vEventFDs;   // Vector of Event File Descriptors
+  void LogFDs(vector<int> vectFDs); // Log the current file descriptors.
 
  public:
   bool m_bDeviceDead;		// We lost a device.
