@@ -10,74 +10,74 @@ Item {
     height: style.homescreenrowheight
     width: parent.width
 
-HomeButtonDelegate{id:mediaDelegate}
+    HomeButtonDelegate{id:mediaDelegate}
 
 
-Flickable{
-    id:mediaflick
+    Flickable{
+        id:mediaflick
 
-    height: style.buttonH
-    width: parent.width
-    contentHeight: style.buttonH
-    contentWidth: childrenRect.width * 2
-    clip: true
-    flickableDirection: "HorizontalFlick"
+        height: style.buttonH
+        width: parent.width
+        contentHeight: style.buttonH
+        contentWidth: ((style.buttonW + 5) * (mediaScenarios.count + 2)) - 5
+        clip: true
+        flickableDirection: "HorizontalFlick"
 
-    Row {
-        id: guide
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.left: parent.left
-        spacing:5
+        Row {
+            id: guide
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            spacing:5
 
 
-        ButtonSq {
-            id: rowheader
-            height: style.buttonH
-            width: style.buttonW
-            color: style.homescreenfloorplanbuttoncolor
-            radius: style.but_smooth
-            buttontext: ""
+            ButtonSq {
+                id: rowheader
+                height: style.buttonH
+                width: style.buttonW
+                color: style.homescreenfloorplanbuttoncolor
+                radius: style.but_smooth
+                buttontext: ""
 
-            Image {
-                id: mHeaderImg
-                source: "../../../img/icons/kmix.png"
-                height: style.iconHeight
-                width: style.iconWidth
-                anchors.centerIn: parent
+                Image {
+                    id: mHeaderImg
+                    source: "../../../img/icons/kmix.png"
+                    height: style.iconHeight
+                    width: style.iconWidth
+                    anchors.centerIn: parent
                 }
-            MouseArea{
-                id: mousearea1
-                anchors.fill: parent
-                onClicked:gotoQScreen("Screen_3.qml")
-              }
+                MouseArea{
+                    id: mousearea1
+                    anchors.fill: parent
+                    onClicked:gotoQScreen("Screen_3.qml")
+                }
             }
 
-        ButtonSq {
-            id: now_playing
-            height: style.buttonH
-            width: style.buttonW
-            color: "transparent"
-            radius: style.but_smooth
-            buttontext: ""
+            ButtonSq {
+                id: now_playing
+                height: style.buttonH
+                width: style.buttonW
+                color: "transparent"
+                radius: style.but_smooth
+                buttontext: ""
 
-            MouseArea{
-                anchors.fill: parent
-                onClicked:gotoQScreen("Screen_48.qml")
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked:gotoQScreen("Screen_48.qml")
+                }
             }
+            ListView{
+                id: mediaScenarios
+                width: stage.width
+                height: style.buttonH
+                model: currentRoomMedia
+
+                orientation:ListView.Horizontal
+                spacing: 5
+                delegate: mediaDelegate
+                interactive: false
+
             }
-        ListView{
-            id: listView
-            width: stage.width
-            height: style.buttonH
-            model: currentRoomMedia
-
-            orientation:ListView.Horizontal
-            spacing: 5
-            delegate: mediaDelegate
-            interactive: false
-
-              }
-         }
+        }
     }
 }

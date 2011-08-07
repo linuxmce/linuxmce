@@ -15,7 +15,7 @@ Flickable
     height: style.rowH
     width: parent.width
     contentHeight: childrenRect.height
-    contentWidth: childrenRect.width * 2
+    contentWidth: ((style.buttonW + 5) * (securityScenarios.count + 1)) - 5
     clip: true
 
         ButtonSq {

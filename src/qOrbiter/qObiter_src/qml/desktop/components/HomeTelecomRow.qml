@@ -14,7 +14,7 @@ Item {
         height: style.rowH
         width: parent.width
         contentHeight: style.buttonH + 10
-        contentWidth: childrenRect.width * 2
+        contentWidth: ((style.buttonW + 5) * (telecomScenarios.count + 1)) - 5
         clip: true
     Row {
         id: telecomRow
@@ -40,7 +40,7 @@ Item {
 
             }
         ListView{
-            id: climateScenarios
+            id: telecomScenarios
             width: stage.width
             height: style.rowH
             model: currentRoomTelecom

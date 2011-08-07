@@ -12,7 +12,7 @@ Item {
         height:style.buttonH +5
         width: parent.width
         contentHeight: style.buttonH
-        contentWidth: childrenRect.width * 2
+        contentWidth: ((style.buttonW + 5) * (climateScenarios.count + 1)) - 5
         clip: true
         flickableDirection: "HorizontalFlick"
 
