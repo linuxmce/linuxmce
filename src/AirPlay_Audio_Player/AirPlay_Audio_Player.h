@@ -36,81 +36,19 @@ namespace DCE
 //<-dceag-decl-e->
 		// Private member variables
 protected:
-		
-		struct shairbuffer
-		{
-  			char *data;
-  			int   current;
-  			int   maxsize;
-  			int   marker;
-		};
-
-		struct keyring
-		{
-  			char *aeskey;
-  			char *aesiv;
-  			char *fmt;
-		};
-
-		struct comms
-		{
-  			int  in[2];
-  			int  out[2];
-		};
-
-		
-		struct connection
-		{
-  			struct shairbuffer  recv;
-  			struct shairbuffer  resp;
-  			struct keyring      *keys; // Does not point to malloc'd memory.
-  			struct comms        *hairtunes;
-  			int                 clientSocket;
-  			char                *password;
-		};
-
-		int startAvahi(const char *pHWStr, const char *pServerName, int pPort);
-		void handleClient(int pSock, char *pPassword, char *pHWADDR);
-
-		void initBuffer(struct shairbuffer *pBuf, int pNumChars);
-		void cleanupBuffers(struct connection *pConn);
-
-		void initConnection(struct connection *pConn, struct keyring *pKeys, struct comms *pComms, int pSocket, char *pPassword);
-		void closePipe(int *pPipe);
-		void cleanup(struct connection *pConn);
-
-		int readDataFromClient(int pSock, struct shairbuffer *pClientBuffer);
-		int findEnd(char *tReadBuf);
-		void addToShairBuffer(struct shairbuffer *pBuf, char *pNewBuf);
-		void addNToShairBuffer(struct shairbuffer *pBuf, char *pNewBuf, int pNofNewBuf);
-		int getAvailChars(struct shairbuffer *pBuf);
-
-		void writeDataToClient(int pSock, struct shairbuffer *pResponse);
-		
-		int buildAppleResponse(struct connection *pConn, unsigned char *pIpBin, unsigned int pIpBinLen, char *pHWID);
-		int parseMessage(struct connection *pConn, unsigned char *pIpBin, unsigned int pIpBinLen, char *pHWID);
-		void propogateCSeq(struct connection *pConn);
-		char *getTrimmed(char *pChar, int pSize, int pEndStr, int pAddNL, char *pTrimDest);
-		char *getTrimmedMalloc(char *pChar, int pSize, int pEndStr, int pAddNL);
-		char *getFromHeader(char *pHeaderPtr, const char *pField, int *pReturnSize);
-		char *getFromContent(char *pContentPtr, const char* pField, int *pReturnSize);
-		char *getFromSetup(char *pContentPtr, const char* pField, int *pReturnSize);
-		char *getFromBuffer(char *pBufferPtr, const char *pField, int pLenAfterField, int *pReturnSize, char *pDelims);
-
-		void setKeys(struct keyring *pKeys, char *pIV, char* pAESKey, char *pFmtp);
-		RSA *loadKey();
 
 		// Private methods
 private:
-		DeviceData_Base *m_pDevice_MD;
 		// Public member variables
 
 //<-dceag-const-b->
 public:
+		DeviceData_Base *m_pDevice_MD;
 		// Constructors/Destructor
 		AirPlay_Audio_Player(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
 		virtual ~AirPlay_Audio_Player();
 		virtual bool GetConfig();
+		virtual bool Connect(int iPK_DeviceTemplate);
 		virtual bool Register();
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
@@ -143,5 +81,71 @@ public:
 
 //<-dceag-end-b->
 }
+
+		struct shairbuffer
+		{
+  			char *data;
+  			int   current;
+  			int   maxsize;
+  			int   marker;
+		};
+
+		struct keyring
+		{
+  			char *aeskey;
+  			char *aesiv;
+  			char *fmt;
+		};
+
+		struct comms
+		{
+  			int  in[2];
+  			int  out[2];
+		};
+
+		
+		struct connection
+		{
+  			struct shairbuffer  recv;
+  			struct shairbuffer  resp;
+  			struct keyring      *keys; // Does not point to malloc'd memory.
+  			struct comms        *hairtunes;
+  			int                 clientSocket;
+  			char                *password;
+		};
+
+
+void *listenThread(void * pInstance);
+int startAvahi(const char *pHWStr, const char *pServerName, int pPort);
+void handleClient(int pSock, char *pPassword, char *pHWADDR);
+
+void initBuffer(struct shairbuffer *pBuf, int pNumChars);
+void cleanupBuffers(struct connection *pConn);
+
+void initConnection(struct connection *pConn, struct keyring *pKeys, struct comms *pComms, int pSocket, char *pPassword);
+void closePipe(int *pPipe);
+void cleanup(struct connection *pConn);
+
+int readDataFromClient(int pSock, struct shairbuffer *pClientBuffer);
+int findEnd(char *tReadBuf);
+void addToShairBuffer(struct shairbuffer *pBuf, char *pNewBuf);
+void addNToShairBuffer(struct shairbuffer *pBuf, char *pNewBuf, int pNofNewBuf);
+int getAvailChars(struct shairbuffer *pBuf);
+
+void writeDataToClient(int pSock, struct shairbuffer *pResponse);
+		
+int buildAppleResponse(struct connection *pConn, unsigned char *pIpBin, unsigned int pIpBinLen, char *pHWID);
+int parseMessage(struct connection *pConn, unsigned char *pIpBin, unsigned int pIpBinLen, char *pHWID);
+void propogateCSeq(struct connection *pConn);
+char *getTrimmed(char *pChar, int pSize, int pEndStr, int pAddNL, char *pTrimDest);
+char *getTrimmedMalloc(char *pChar, int pSize, int pEndStr, int pAddNL);
+char *getFromHeader(char *pHeaderPtr, const char *pField, int *pReturnSize);
+char *getFromContent(char *pContentPtr, const char* pField, int *pReturnSize);
+char *getFromSetup(char *pContentPtr, const char* pField, int *pReturnSize);
+char *getFromBuffer(char *pBufferPtr, const char *pField, int pLenAfterField, int *pReturnSize, char *pDelims);
+
+void setKeys(struct keyring *pKeys, char *pIV, char* pAESKey, char *pFmtp);
+RSA *loadKey();
+
 #endif
 //<-dceag-end-e->

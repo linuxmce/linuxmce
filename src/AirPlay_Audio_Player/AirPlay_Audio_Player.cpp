@@ -14,6 +14,7 @@
 
 */
 //<-dceag-d-b->
+#include <pthread.h>
 #include "AirPlay_Audio_Player.h"
 #include "DCE/Logger.h"
 #include "PlutoUtils/FileUtils.h"
@@ -49,79 +50,7 @@ AirPlay_Audio_Player::AirPlay_Audio_Player(int DeviceID, string ServerAddress,bo
 	: AirPlay_Audio_Player_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
-  	char tHWID[HWID_SIZE] = {0,51,52,53,54,55};
-  	char tHWID_Hex[HWID_SIZE * 2 + 1];
-  	memset(tHWID_Hex, 0, sizeof(tHWID_Hex));
-
-  	char tServerName[56] = "Media Director";
-  	char tPassword[56] = "";
-
-  	struct addrinfo *tAddrInfo;
-  	//int  tSimLevel = 0;
-  	int  tUseKnownHWID = FALSE;
-  	int  tPort = PORT;
-  	
-  	m_pDevice_MD = NULL;
-
-    //LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Audio_Player::Player starting up on %L", m_pData->m_dwPK_Device);
-   	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Audio_Player::Player starting up");
-	srandom ( time(NULL) );
-
-  	int tIdx = 0;
-  	for(tIdx=0;tIdx<HWID_SIZE;tIdx++)
-  	{
-		if(tIdx > 0)
-    	{
-      		if(!tUseKnownHWID)
-      		{
-        		int tVal = ((random() % 80) + 33);
-        		tHWID[tIdx] = tVal;
-      		}
-    	}
-   		sprintf(tHWID_Hex+(tIdx*2), "%02X",tHWID[tIdx]);
-  	}
-	
-	AirPlay_Audio_Player::startAvahi(tHWID_Hex, tServerName, tPort);
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Starting connection server: specified server port: %d\n", tPort);
-    int tServerSock = setupListenServer(&tAddrInfo, tPort);
-    if(tServerSock < 0)
-    {
-      	//freeaddrinfo(tAddrInfo);
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Audio_Player::Error setting up server socket on port %d, try specifying a different port\n", tPort);
-      	//exit(1);
-   	}
-
-    int tClientSock = 0;
-    while(1)
-    {
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Waiting for clients to connect\n");
-      	tClientSock = acceptClient(tServerSock, tAddrInfo);
-      	if(tClientSock > 0)
-      	{
-        	int tPid = fork();
-        	if(tPid == 0)
-       		{
-          		freeaddrinfo(tAddrInfo);
-          		tAddrInfo = NULL;
-				LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Accepted Client Connection..\n");
-          		close(tServerSock);
-          		handleClient(tClientSock, tPassword, tHWID);
-          		//close(tClientSock);
-          		//return 0;
-        	}
-        	else
-        	{
-				LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Child now busy handling new client\n");
-          		close(tClientSock);
-        	}
-      	}
-      	else
-      	{
-        	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Failed to initialize server socket, retrying...");
-        	sleep(2);
-     	}
-    }
- 
+   	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Audio_Player::Player starting up"); 
 }
 
 //<-dceag-const2-b->
@@ -142,12 +71,28 @@ AirPlay_Audio_Player::~AirPlay_Audio_Player()
 //<-dceag-getconfig-b->
 bool AirPlay_Audio_Player::GetConfig()
 {
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::GetConfig()");
 	if( !AirPlay_Audio_Player_Command::GetConfig() )
 		return false;
 //<-dceag-getconfig-e->
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
+	//cout << "TEST:" << m_pData->m_dwPK_Device_MD << endl;
+	m_pDevice_MD = m_pData->m_AllDevices.m_mapDeviceData_Base_Find(m_pData->m_dwPK_Device_MD);
+	return true;
+}
+
+bool AirPlay_Audio_Player::Connect(int iPK_DeviceTemplate) 
+{
+  	pthread_t m_tListenThread;
+
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Connect()");
+	Command_Impl::Connect(iPK_DeviceTemplate);
+	
+   	
+   	pthread_create( &m_tListenThread, NULL, listenThread, (void *) this);
+
 	return true;
 }
 
@@ -196,87 +141,7 @@ void AirPlay_Audio_Player::ReceivedUnknownCommand(string &sCMD_Result,Message *p
 	sCMD_Result = "UNKNOWN COMMAND";
 }
 
-//<-dceag-sample-b->
-/*		**** SAMPLE ILLUSTRATING HOW TO USE THE BASE CLASSES ****
-
-**** IF YOU DON'T WANT DCEGENERATOR TO KEEP PUTTING THIS AUTO-GENERATED SECTION ****
-**** ADD AN ! AFTER THE BEGINNING OF THE AUTO-GENERATE TAG, LIKE //<=dceag-sample-b->! ****
-Without the !, everything between <=dceag-sometag-b-> and <=dceag-sometag-e->
-will be replaced by DCEGenerator each time it is run with the normal merge selection.
-The above blocks are actually <- not <=.  We don't want a substitution here
-
-void AirPlay_Audio_Player::SomeFunction()
-{
-	// If this is going to be loaded into the router as a plug-in, you can implement: 	virtual bool Register();
-	// to do all your registration, such as creating message interceptors
-
-	// If you use an IDE with auto-complete, after you type DCE:: it should give you a list of all
-	// commands and requests, including the parameters.  See "AllCommandsRequests.h"
-
-	// Examples:
-	
-	// Send a specific the "CMD_Simulate_Mouse_Click" command, which takes an X and Y parameter.  We'll use 55,77 for X and Y.
-	DCE::CMD_Simulate_Mouse_Click CMD_Simulate_Mouse_Click(m_dwPK_Device,OrbiterID,55,77);
-	SendCommand(CMD_Simulate_Mouse_Click);
-
-	// Send the message to orbiters 32898 and 27283 (ie a device list, hence the _DL)
-	// And we want a response, which will be "OK" if the command was successfull
-	string sResponse;
-	DCE::CMD_Simulate_Mouse_Click_DL CMD_Simulate_Mouse_Click_DL(m_dwPK_Device,"32898,27283",55,77)
-	SendCommand(CMD_Simulate_Mouse_Click_DL,&sResponse);
-
-	// Send the message to all orbiters within the house, which is all devices with the category DEVICECATEGORY_Orbiter_CONST (see pluto_main/Define_DeviceCategory.h)
-	// Note the _Cat for category
-	DCE::CMD_Simulate_Mouse_Click_Cat CMD_Simulate_Mouse_Click_Cat(m_dwPK_Device,DEVICECATEGORY_Orbiter_CONST,true,BL_SameHouse,55,77)
-    SendCommand(CMD_Simulate_Mouse_Click_Cat);
-
-	// Send the message to all "DeviceTemplate_Orbiter_CONST" devices within the room (see pluto_main/Define_DeviceTemplate.h)
-	// Note the _DT.
-	DCE::CMD_Simulate_Mouse_Click_DT CMD_Simulate_Mouse_Click_DT(m_dwPK_Device,DeviceTemplate_Orbiter_CONST,true,BL_SameRoom,55,77);
-	SendCommand(CMD_Simulate_Mouse_Click_DT);
-
-	// This command has a normal string parameter, but also an int as an out parameter
-	int iValue;
-	DCE::CMD_Get_Signal_Strength CMD_Get_Signal_Strength(m_dwDeviceID, DestDevice, sMac_address,&iValue);
-	// This send command will wait for the destination device to respond since there is
-	// an out parameter
-	SendCommand(CMD_Get_Signal_Strength);  
-
-	// This time we don't care about the out parameter.  We just want the command to 
-	// get through, and don't want to wait for the round trip.  The out parameter, iValue,
-	// will not get set
-	SendCommandNoResponse(CMD_Get_Signal_Strength);  
-
-	// This command has an out parameter of a data block.  Any parameter that is a binary
-	// data block is a pair of int and char *
-	// We'll also want to see the response, so we'll pass a string for that too
-
-	int iFileSize;
-	char *pFileContents
-	string sResponse;
-	DCE::CMD_Request_File CMD_Request_File(m_dwDeviceID, DestDevice, "filename",&pFileContents,&iFileSize,&sResponse);
-	SendCommand(CMD_Request_File);
-
-	// If the device processed the command (in this case retrieved the file),
-	// sResponse will be "OK", and iFileSize will be the size of the file
-	// and pFileContents will be the file contents.  **NOTE**  We are responsible
-	// free deleting pFileContents.
-
-
-	// To access our data and events below, you can type this-> if your IDE supports auto complete to see all the data and events you can access
-
-	// Get our IP address from our data
-	string sIP = DATA_Get_IP_Address();
-
-	// Set our data "Filename" to "myfile"
-	DATA_Set_Filename("myfile");
-
-	// Fire the "Finished with file" event, which takes no parameters
-	EVENT_Finished_with_file();
-	// Fire the "Touch or click" which takes an X and Y parameter
-	EVENT_Touch_or_click(10,150);
-}
-*/
+//<-dceag-sample-b->!
 //<-dceag-sample-e->
 
 /*
@@ -285,7 +150,90 @@ void AirPlay_Audio_Player::SomeFunction()
 
 */
 
-int AirPlay_Audio_Player::startAvahi(const char *pHWStr, const char *pServerName, int pPort)
+
+// MODIFIED VERSION OF SHAIRPORT IMPLEMENTATION STARTS HERE
+
+void *listenThread(void * pInstance) {
+  	
+  	AirPlay_Audio_Player* pThis = (AirPlay_Audio_Player*) pInstance;
+  	
+  	char tHWID[HWID_SIZE] = {0,51,52,53,54,55};
+  	char tHWID_Hex[HWID_SIZE * 2 + 1];
+  	memset(tHWID_Hex, 0, sizeof(tHWID_Hex));
+
+  	//char tServerName[56] = "Media Director";
+  	char tPassword[56] = "";
+
+  	struct addrinfo *tAddrInfo;
+  	//int  tSimLevel = 0;
+  	int  tUseKnownHWID = FALSE;
+  	int  tPort = PORT;
+  	
+  	srandom ( time(NULL) );
+
+  	int tIdx = 0;
+
+	
+
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Listening thread starting up on MD: '%s'", pThis->m_pDevice_MD->m_sDescription.c_str());
+
+  	for(tIdx=0;tIdx<HWID_SIZE;tIdx++)
+  	{
+		if(tIdx > 0)
+    	{
+      		if(!tUseKnownHWID)
+      		{
+        		int tVal = ((random() % 80) + 33);
+        		tHWID[tIdx] = tVal;
+      		}
+    	}
+   		sprintf(tHWID_Hex+(tIdx*2), "%02X",tHWID[tIdx]);
+  	}
+	
+	startAvahi(tHWID_Hex, pThis->m_pDevice_MD->m_sDescription.c_str(), tPort);
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Starting connection server: specified server port: %d\n", tPort);
+    int tServerSock = setupListenServer(&tAddrInfo, tPort);
+    if(tServerSock < 0)
+    {
+      	//freeaddrinfo(tAddrInfo);
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Audio_Player::Error setting up server socket on port %d, try specifying a different port\n", tPort);
+      	//exit(1);
+   	}
+
+    int tClientSock = 0;
+    while(1)
+    {
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Waiting for clients to connect\n");
+      	tClientSock = acceptClient(tServerSock, tAddrInfo);
+      	if(tClientSock > 0)
+      	{
+        	int tPid = fork();
+        	if(tPid == 0)
+       		{
+          		freeaddrinfo(tAddrInfo);
+          		tAddrInfo = NULL;
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Accepted Client Connection..\n");
+          		close(tServerSock);
+          		handleClient(tClientSock, tPassword, tHWID);
+          		//close(tClientSock);
+          		//return 0;
+        	}
+        	else
+        	{
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Child now busy handling new client\n");
+          		close(tClientSock);
+        	}
+      	}
+      	else
+      	{
+        	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Failed to initialize server socket, retrying...");
+        	sleep(2);
+     	}
+    }
+	return NULL;
+}
+
+int startAvahi(const char *pHWStr, const char *pServerName, int pPort)
 {
   	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Starting avahi registration");
   	unsigned int tMaxServerName = 25; // Something reasonable?  iPad showed 21, iphone 25
@@ -326,7 +274,7 @@ int AirPlay_Audio_Player::startAvahi(const char *pHWStr, const char *pServerName
   	return tPid;
 }
 
-void AirPlay_Audio_Player::handleClient(int pSock, char *pPassword, char *pHWADDR)
+void handleClient(int pSock, char *pPassword, char *pHWADDR)
 {
   	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::In Handle Client\n");
   	fflush(stdout);
@@ -436,7 +384,7 @@ void AirPlay_Audio_Player::handleClient(int pSock, char *pPassword, char *pHWADD
   	fflush(stdout);
 }
 
-void AirPlay_Audio_Player::initConnection(struct connection *pConn, struct keyring *pKeys, struct comms *pComms, int pSocket, char *pPassword)
+void initConnection(struct connection *pConn, struct keyring *pKeys, struct comms *pComms, int pSocket, char *pPassword)
 {
   	pConn->hairtunes = pComms;
   	if(pKeys != NULL)
@@ -459,7 +407,7 @@ void AirPlay_Audio_Player::initConnection(struct connection *pConn, struct keyri
   	}
 }
 
-void AirPlay_Audio_Player::closePipe(int *pPipe)
+void closePipe(int *pPipe)
 {
   	if(*pPipe != -1)
   	{
@@ -468,7 +416,7 @@ void AirPlay_Audio_Player::closePipe(int *pPipe)
   	}
 }
 
-void AirPlay_Audio_Player::cleanup(struct connection *pConn)
+void cleanup(struct connection *pConn)
 {
   	cleanupBuffers(pConn);
   	if(pConn->hairtunes != NULL)
@@ -502,7 +450,7 @@ void AirPlay_Audio_Player::cleanup(struct connection *pConn)
 }
 
 
-void AirPlay_Audio_Player::initBuffer(struct shairbuffer *pBuf, int pNumChars)
+void initBuffer(struct shairbuffer *pBuf, int pNumChars)
 {
   	if(pBuf->data != NULL)
   	{
@@ -518,7 +466,7 @@ void AirPlay_Audio_Player::initBuffer(struct shairbuffer *pBuf, int pNumChars)
 }
 
 
-void AirPlay_Audio_Player::cleanupBuffers(struct connection *pConn)
+void cleanupBuffers(struct connection *pConn)
 {
   	if(pConn->recv.data != NULL)
   	{
@@ -532,7 +480,7 @@ void AirPlay_Audio_Player::cleanupBuffers(struct connection *pConn)
   	}
 }
 
-int AirPlay_Audio_Player::readDataFromClient(int pSock, struct shairbuffer *pClientBuffer)
+int readDataFromClient(int pSock, struct shairbuffer *pClientBuffer)
 {
   	char tReadBuf[MAX_SIZE];
   	tReadBuf[0] = '\0';
@@ -584,7 +532,7 @@ int AirPlay_Audio_Player::readDataFromClient(int pSock, struct shairbuffer *pCli
   	return 0;
 }
 
-int AirPlay_Audio_Player::findEnd(char *tReadBuf)
+int findEnd(char *tReadBuf)
 {
   	// find \n\n, \r\n\r\n, or \r\r is found
   	int tIdx = 0;
@@ -620,12 +568,12 @@ int AirPlay_Audio_Player::findEnd(char *tReadBuf)
   	return -1;
 }
 
-void AirPlay_Audio_Player::addToShairBuffer(struct shairbuffer *pBuf, char *pNewBuf)
+void addToShairBuffer(struct shairbuffer *pBuf, char *pNewBuf)
 {
   	addNToShairBuffer(pBuf, pNewBuf, strlen(pNewBuf));
 }
 
-void AirPlay_Audio_Player::addNToShairBuffer(struct shairbuffer *pBuf, char *pNewBuf, int pNofNewBuf)
+void addNToShairBuffer(struct shairbuffer *pBuf, char *pNewBuf, int pNofNewBuf)
 {
   	int tAvailChars = getAvailChars(pBuf);
   	if(pNofNewBuf > tAvailChars)
@@ -649,12 +597,12 @@ void AirPlay_Audio_Player::addNToShairBuffer(struct shairbuffer *pBuf, char *pNe
   	}
 }
 
-int AirPlay_Audio_Player::getAvailChars(struct shairbuffer *pBuf)
+int getAvailChars(struct shairbuffer *pBuf)
 {
   	return (pBuf->maxsize / sizeof(char)) - pBuf->current;
 }
 
-void AirPlay_Audio_Player::writeDataToClient(int pSock, struct shairbuffer *pResponse)
+void writeDataToClient(int pSock, struct shairbuffer *pResponse)
 {
   	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::\n----Beg Send Response Header----\n%.*s\n", pResponse->current, pResponse->data);
   	send(pSock, pResponse->data, pResponse->current,0);
@@ -663,7 +611,7 @@ void AirPlay_Audio_Player::writeDataToClient(int pSock, struct shairbuffer *pRes
 
 // Handles compiling the Apple-Challenge, HWID, and Server IP Address
 // Into the response the airplay client is expecting.
-int AirPlay_Audio_Player::buildAppleResponse(struct connection *pConn, unsigned char *pIpBin, unsigned int pIpBinLen, char *pHWID)
+int buildAppleResponse(struct connection *pConn, unsigned char *pIpBin, unsigned int pIpBinLen, char *pHWID)
 {
   	// Find Apple-Challenge
  	char *tResponse = NULL;
@@ -728,7 +676,7 @@ int AirPlay_Audio_Player::buildAppleResponse(struct connection *pConn, unsigned 
   	return FALSE;
 }
 
-int AirPlay_Audio_Player::parseMessage(struct connection *pConn, unsigned char *pIpBin, unsigned int pIpBinLen, char *pHWID)
+int parseMessage(struct connection *pConn, unsigned char *pIpBin, unsigned int pIpBinLen, char *pHWID)
 {
   	int tReturn = 0; // 0 = good, 1 = Needs More Data, -1 = close client socket.
   	if(pConn->resp.data == NULL) initBuffer(&(pConn->resp), MAX_SIZE);
@@ -943,7 +891,7 @@ int AirPlay_Audio_Player::parseMessage(struct connection *pConn, unsigned char *
 }
 
 // Copies CSeq value from request, and adds standard header values in.
-void AirPlay_Audio_Player::propogateCSeq(struct connection *pConn) //char *pRecvBuffer, struct shairbuffer *pConn->recp.data)
+void propogateCSeq(struct connection *pConn) //char *pRecvBuffer, struct shairbuffer *pConn->recp.data)
 {
   	int tSize=0;
   	char *tRecPtr = getFromHeader(pConn->recv.data, "CSeq", &tSize);
@@ -953,7 +901,7 @@ void AirPlay_Audio_Player::propogateCSeq(struct connection *pConn) //char *pRecv
   	addToShairBuffer(&(pConn->resp), (char *)"\r\n");
 }	
 
-char *AirPlay_Audio_Player::getTrimmed(char *pChar, int pSize, int pEndStr, int pAddNL, char *pTrimDest)
+char *getTrimmed(char *pChar, int pSize, int pEndStr, int pAddNL, char *pTrimDest)
 {
   	int tSize = pSize;
   	if(pEndStr)tSize++;
@@ -966,7 +914,7 @@ char *AirPlay_Audio_Player::getTrimmed(char *pChar, int pSize, int pEndStr, int 
   	return pTrimDest;
 }
 
-char *AirPlay_Audio_Player::getTrimmedMalloc(char *pChar, int pSize, int pEndStr, int pAddNL)
+char *getTrimmedMalloc(char *pChar, int pSize, int pEndStr, int pAddNL)
 {
   	int tAdditionalSize = 0;
   	if(pEndStr)
@@ -977,22 +925,22 @@ char *AirPlay_Audio_Player::getTrimmedMalloc(char *pChar, int pSize, int pEndStr
   	return getTrimmed(pChar, pSize, pEndStr, pAddNL, tTrimDest);
 }
 
-char *AirPlay_Audio_Player::getFromHeader(char *pHeaderPtr, const char *pField, int *pReturnSize)
+char *getFromHeader(char *pHeaderPtr, const char *pField, int *pReturnSize)
 {
   	return getFromBuffer(pHeaderPtr, pField, 2, pReturnSize, (char *)"\r\n");
 }
 
-char *AirPlay_Audio_Player::getFromContent(char *pContentPtr, const char* pField, int *pReturnSize)
+char *getFromContent(char *pContentPtr, const char* pField, int *pReturnSize)
 {
   	return getFromBuffer(pContentPtr, pField, 1, pReturnSize, (char *)"\r\n");
 }
 
-char *AirPlay_Audio_Player::getFromSetup(char *pContentPtr, const char* pField, int *pReturnSize)
+char *getFromSetup(char *pContentPtr, const char* pField, int *pReturnSize)
 {
   	return getFromBuffer(pContentPtr, pField, 1, pReturnSize, (char *)";\r\n");
 }
 
-char *AirPlay_Audio_Player::getFromBuffer(char *pBufferPtr, const char *pField, int pLenAfterField, int *pReturnSize, char *pDelims)
+char *getFromBuffer(char *pBufferPtr, const char *pField, int pLenAfterField, int *pReturnSize, char *pDelims)
 {
   	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::GettingFromBuffer: %s\n", pField);
   	char* tFound = strstr(pBufferPtr, pField);
@@ -1018,7 +966,7 @@ char *AirPlay_Audio_Player::getFromBuffer(char *pBufferPtr, const char *pField, 
   	return tFound;
 }
 
-void AirPlay_Audio_Player::setKeys(struct keyring *pKeys, char *pIV, char* pAESKey, char *pFmtp)
+void setKeys(struct keyring *pKeys, char *pIV, char* pAESKey, char *pFmtp)
 {
   	if(pKeys->aesiv != NULL) free(pKeys->aesiv);
   	if(pKeys->aeskey != NULL) free(pKeys->aeskey);
@@ -1053,7 +1001,7 @@ void AirPlay_Audio_Player::setKeys(struct keyring *pKeys, char *pIV, char* pAESK
 "2gG0N5hvJpzwwhbhXqFKA4zaaSrw622wDniAK5MlIE0tIAKKP4yxNGjoD2QYjhBGuhvkWKaXTyY=\n" \
 "-----END RSA PRIVATE KEY-----"
 
-RSA *AirPlay_Audio_Player::loadKey()
+RSA *loadKey()
 {
   	BIO *tBio = BIO_new_mem_buf((void *)AIRPORT_PRIVATE_KEY, -1);
   	RSA *rsa = PEM_read_bio_RSAPrivateKey(tBio, NULL, NULL, NULL); //NULL, NULL, NULL);
