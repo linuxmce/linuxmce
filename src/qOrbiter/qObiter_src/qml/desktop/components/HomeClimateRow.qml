@@ -14,6 +14,7 @@ Item {
         contentHeight: style.buttonH
         contentWidth: childrenRect.width * 2
         clip: true
+        flickableDirection: "HorizontalFlick"
 
 
 
