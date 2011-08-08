@@ -199,7 +199,6 @@ HEADERS += \
     screensaver/screensavermodule.h \
     datamodels/skindatamodel.h \
     datamodels/skindataitem.h \
-    ../../PlutoUtils/MultiThreadIncludes.h \
     datamodels/filtermodel.h \
     datamodels/genremodel.h \
     datamodels/attributemodel.h \

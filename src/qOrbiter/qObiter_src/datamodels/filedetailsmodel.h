@@ -12,6 +12,7 @@ class FileDetailsItem;
 class FileDetailsModel: public QAbstractListModel
 {
   Q_OBJECT
+    Q_PROPERTY (bool showDetails READ isVisible WRITE setVisible NOTIFY VisibleChanged)
 
 public:
   explicit FileDetailsModel(FileDetailsItem* prototype, QObject* parent = 0);
@@ -29,8 +30,13 @@ public:
   FileDetailsItem* currentRow();
   void clear();
   void ReturnSelectedItems();
+
   QModelIndex lastrow;
   QString ident;
+
+ bool showDetails;
+ inline bool isVisible () { return showDetails; }
+ inline void setVisible (bool state) { showDetails = state; emit VisibleChanged();}
 
   Q_INVOKABLE void setSelectionStatus(QString format);
   Q_INVOKABLE bool getSelectionStatus();
@@ -39,6 +45,7 @@ signals:
   void ItemAdded();
   void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const bool &state);
   void SetTypeSort(int pos, QString type);
+  void VisibleChanged();
 private slots:
   void handleItemChange();
 

@@ -63,7 +63,7 @@ public:
     QString qmlPath;
    QString skinsPath;
    QDir skinsDir;
-   QString *m_SkinsDirectoryPath;
+   QString m_SkinsDirectoryPath;
 
 
     //ui variables

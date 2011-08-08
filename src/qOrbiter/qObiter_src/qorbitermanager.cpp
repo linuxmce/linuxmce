@@ -133,7 +133,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
     QString skinsPath = qmlPath+test;
 
     //qDebug () << "QML import path for build: " << qmlPath;
-    QString *m_SkinsDirectoryPath = new QString(qmlPath+buildType.toLatin1().constData());
+    m_SkinsDirectoryPath = qmlPath+buildType.toLatin1().constData();
 
     QDir directoryMap(skinsPath);
     directoryMap.setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
@@ -180,7 +180,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
     qorbiterUIwin->setSource(QUrl::fromLocalFile(finalPath+"/main.qml"));
 
     //reference to the object for later use?
-    QObject *item= qorbiterUIwin->rootObject();
+    item= qorbiterUIwin->rootObject();
 
     //device variables
     iPK_Device_DatagridPlugIn =  long(6);
@@ -1054,6 +1054,7 @@ QString datagridVariableString;
             if(param.contains("!F"))
             {
                 ShowFileInfo(param);
+                 m_selected_grid_item->setVisible(true);
             }
 
             else
@@ -1109,7 +1110,7 @@ QString datagridVariableString;
         if(param.contains("!F"))
         {
             ShowFileInfo(param);
-
+             m_selected_grid_item->setVisible(true);
         }
 
         else
@@ -1182,9 +1183,8 @@ void qorbiterManager::goBackGrid()
 
 void qorbiterManager::ShowFileInfo(QString fk_file)
 {
-    qDebug() << fk_file;
-    pqOrbiter->GetFileInfoForQml(fk_file);
 
+    pqOrbiter->GetFileInfoForQml(fk_file);
 }
 
 

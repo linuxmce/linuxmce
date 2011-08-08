@@ -28,7 +28,7 @@ public:
   QHash<int, QByteArray> roleNames() const;
 
   inline QString id() const {  return m_title; }
-   inline QString title() const {  return m_title; }
+   inline QString title() const {  return m_attrib_data; }
   inline QString attribute_data() const { return m_attrib_data; }
   inline QImage cellImage() const {  return m_image; }
   inline bool selectedStatus() const { return m_isSelected; }

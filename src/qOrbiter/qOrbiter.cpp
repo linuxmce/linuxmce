@@ -1988,8 +1988,6 @@ qDebug() << "File: " << qs_fk_fileno <<":: getting media attributes";
                      int index;
                      QImage cellImg;
 
-
-
                          for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
                              {
                                 DataGridCell *pCell = it->second;

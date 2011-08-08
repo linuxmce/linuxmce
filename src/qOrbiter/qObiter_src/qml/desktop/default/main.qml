@@ -1,6 +1,6 @@
 import QtQuick 1.0
 import "../components"
-import "../js" as MyJs
+import "../js/ComponentLoader.js" as MyJs
 
  Item {
      id: item
@@ -25,6 +25,8 @@ import "../js" as MyJs
              console.log("Command to change to:" + screename + " failed!")
          }
      }
+
+
 
      Loader {
          id:pageLoader

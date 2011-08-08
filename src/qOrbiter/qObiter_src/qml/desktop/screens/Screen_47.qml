@@ -1,5 +1,6 @@
 import QtQuick 1.0
 import "../components"
+import "../js/ComponentLoader.js" as MyJs
 
 
 Rectangle {
@@ -9,6 +10,16 @@ Rectangle {
     height: style.orbiterH
     color: style.bgcolor
     clip: true
+
+Connections{
+    target: filedetails
+    onShowDetailsChanged: {
+        console.log("something")
+        MyJs.createFileDetails()
+                     }
+}
+
+
 
     Component {
              id: contactDelegate
@@ -71,15 +82,6 @@ Rectangle {
         cellWidth: 175
         cellHeight: 109
 
-        onModelChanged:
-        {
-            console.log("Grid Item Added!")
-        }
-
-        Connections
-        {
-         target:dataModel
-                    }
             }
     Row{
         height: childrenRect.height
