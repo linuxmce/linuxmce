@@ -1921,7 +1921,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
 
     qDebug() << "File: " << qs_fk_fileno <<":: getting media attributes";
     qmlUI->m_selected_grid_item->clear();
-   // qmlUI->m_selected_grid_item->file = qs_fk_fileno;
+    // qmlUI->m_selected_grid_item->file = qs_fk_fileno;
 
     int gHeight = 10;
     int gWidth = 10;
@@ -1988,17 +1988,16 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
             QString filePath;
             int index;
             QImage cellImg;
-
+            DataGridCell *pCell;
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
 
-                DataGridCell *pCell = it->second;
+                pCell = it->second;
                 string s_val;
                 string emptyEA;
 
-               // fk.remove("!F");
-                CMD_Get_Attributes_For_Media attribute_detail_get(qmlUI->iPK_Device, qmlUI->iMediaPluginID,  pCell->GetValue(), " ",&s_val );
-             SendCommand(attribute_detail_get);
+                // fk.remove("!F");
+
 
                 const char *pPath = pCell->GetImagePath();
                 index = pDataGridTable->CovertColRowType(it->first).first;
@@ -2023,7 +2022,11 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 {
                     cellImg.load(":/icons/videos.png");
                 }
-               qmlUI->m_selected_grid_item->appendRow(new FileDetailsItem(cellTitle, cellAttribute, cellImg, false,  qmlUI->model));
+
+                CMD_Get_Attributes_For_Media attribute_detail_get(qmlUI->iPK_Device, qmlUI->iMediaPluginID,  pCell->GetValue(), " ",&s_val );
+                SendCommand(attribute_detail_get);
+                qDebug() << s_val.c_str();
+                qmlUI->m_selected_grid_item->appendRow(new FileDetailsItem(cellTitle, cellAttribute, cellImg, false,  qmlUI->model));
             }
 
         }
