@@ -1,7 +1,6 @@
 import QtQuick 1.0
 
 
-
 Rectangle {
     id: filedetailrect
     width: 650
@@ -10,16 +9,19 @@ Rectangle {
     color: "slategrey"
     clip: true
     focus: true
+
     MouseArea{
         anchors.fill: parent
     }
 
     Component{
         id:performersheader
+
+
         Rectangle {
                     width: container.width
                     height: childrenRect.height
-                    color: "lightsteelblue"
+                    color: style.button_system_color
 
                     Text {
                         text: section
@@ -108,7 +110,7 @@ Rectangle {
                 }
             }
 
-        }        
+        }
 
 
 

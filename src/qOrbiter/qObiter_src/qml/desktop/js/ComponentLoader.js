@@ -48,9 +48,9 @@ function createFileDetails() {
 
     detailcomponent = Qt.createComponent("../components/FileDetails.qml");
        detailsprite = detailcomponent.createObject(fileviewscreen , {"x": 0, "y": 0});
-    console.log("showing!")
+
        if (detailsprite == null) {
            // Error Handling
-           console.log("Error creating object")
+           console.log("Error File Detail object")
 }
 }

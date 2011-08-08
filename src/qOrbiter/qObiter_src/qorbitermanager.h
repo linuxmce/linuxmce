@@ -124,9 +124,6 @@ Param 10 - pk_attribute
     FileDetailsModel *m_selected_grid_item;
     int i_current_mediaType;
 
-
-
-
     LightingScenarioModel *roomLights;
     MediaScenarioModel *roomMedia;
     ClimateScenarioModel *roomClimate;
@@ -237,7 +234,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
       Q_INVOKABLE void setStringParam(int paramType, QString param);
       Q_INVOKABLE void goBackGrid();
 
-      void ShowFileInfo(QString fk_file);
+      void showFileInfo(QString fk_file);
 
       //ui related
       int getlocation() const ;

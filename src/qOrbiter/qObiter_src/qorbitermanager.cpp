@@ -102,27 +102,27 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
     QWidget(parent), iPK_Device(deviceno), qs_routerip(routerip)
 {
 
-   QString buildType;
+    QString buildType;
 #ifdef for_desktop
     buildType = "/qml/desktop/";
 #elif defined (for_freemantle)
     buildType = "/qml/freemantle/";
 #elif defined (for_harmattan)
     buildType="/qml/harmattan/";
-     #elif defined (Q_OS_MACX)
+#elif defined (Q_OS_MACX)
     buildType="/qml/desktop/";
-        #endif
+#endif
 
-   qorbiterUIwin = new QDeclarativeView; //initialize the declarative view to act upon its context
+    qorbiterUIwin = new QDeclarativeView; //initialize the declarative view to act upon its context
 
-   if (readLocalConfig())
-   {
-       qDebug () << "Local confing processing";
-   }
+    if (readLocalConfig())
+    {
+        qDebug () << "Local confing processing";
+    }
 
-   currentSkin = "default";
-   currentSkinURL="/qml/qObiter_src/";
-   s_RouterIP="192.168.80.1";
+    currentSkin = "default";
+    currentSkinURL="/qml/qObiter_src/";
+    s_RouterIP="192.168.80.1";
 
     QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
     const QString test = buildType;
@@ -159,65 +159,66 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
 
     if(skinData.isReady())
     {
-    //set it as a context property so the qml can read it. if we need to changed it,we just reset the context property
-    qorbiterUIwin->engine()->rootContext()->setContextProperty("style", styleObject);
-    qorbiterUIwin->rootContext()->setContextProperty("srouterip", QString(qs_routerip) );
-    qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
+        //set it as a context property so the qml can read it. if we need to changed it,we just reset the context property
+        qorbiterUIwin->engine()->rootContext()->setContextProperty("style", styleObject);
+        qorbiterUIwin->rootContext()->setContextProperty("srouterip", QString(qs_routerip) );
+        qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
 
 
-    initializeGridModel();
-     initializeSortString();
+        initializeGridModel();
+        initializeSortString();
 
-  //non functioning screen saver module
-    ScreenSaverModule ScreenSaver;
-    qmlRegisterType<ScreenSaverModule>("ScreenSaverModule",1,0,"ScreenSaverModule");
-    ScreenSaver.setImage(QUrl("../../img/lmcesplash.jpg"));
-    qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", &ScreenSaver);    
-    qorbiterUIwin->rootContext()->setContextObject(this);
+        //non functioning screen saver module
+        ScreenSaverModule ScreenSaver;
+        qmlRegisterType<ScreenSaverModule>("ScreenSaverModule",1,0,"ScreenSaverModule");
+        ScreenSaver.setImage(QUrl("../../img/lmcesplash.jpg"));
+        qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", &ScreenSaver);
+        qorbiterUIwin->rootContext()->setContextObject(this);
 
-    //setting engine import path
-    qorbiterUIwin->engine()->setBaseUrl(qmlPath+buildType);
-    qorbiterUIwin->setSource(QUrl::fromLocalFile(finalPath+"/main.qml"));
+        //setting engine import path
+        qorbiterUIwin->engine()->setBaseUrl(qmlPath+buildType);
+        qorbiterUIwin->setSource(QUrl::fromLocalFile(finalPath+"/main.qml"));
 
-    //reference to the object for later use?
-    item= qorbiterUIwin->rootObject();
+        //reference to the object for later use?
+        item= qorbiterUIwin->rootObject();
 
-    //device variables
-    iPK_Device_DatagridPlugIn =  long(6);
-    iPK_Device_OrbiterPlugin = long(9);
-    m_dwIDataGridRequestCounter = 0;
+        //device variables
+        iPK_Device_DatagridPlugIn =  long(6);
+        iPK_Device_OrbiterPlugin = long(9);
+        m_dwIDataGridRequestCounter = 0;
 
-   //initial signal and slot connections
-    QObject::connect(item, SIGNAL(close()), this, SLOT(closeOrbiter()));
-   // QObject::connect(this,SIGNAL(destroyed()), this, SLOT(closeOrbiter()));
+        //initial signal and slot connections
+        QObject::connect(item, SIGNAL(close()), this, SLOT(closeOrbiter()));
+        // QObject::connect(this,SIGNAL(destroyed()), this, SLOT(closeOrbiter()));
 
-    //managing where were are variables
-    int i_current_command_grp;
-   i_current_command_grp = 0;
-   QStringList goBack;
-   goBack << ("|||1,2|0|13|0|2|");
-    qDebug() << goBack.first();
-    backwards = false;
-    m_selected_grid_item = new FileDetailsModel(new FileDetailsItem, this);
-    qorbiterUIwin->rootContext()->setContextProperty("filedetails", m_selected_grid_item);
+        //managing where were are variables
+        int i_current_command_grp;
+        i_current_command_grp = 0;
+        QStringList goBack;
+        goBack << ("|||1,2|0|13|0|2|");
+        qDebug() << goBack.first();
+        backwards = false;
+        m_selected_grid_item = new FileDetailsModel(new FileDetailsItem, this);
+        qorbiterUIwin->rootContext()->setContextProperty("filedetails", m_selected_grid_item);
+        connect(m_selected_grid_item, SIGNAL(FileChanged(QString)), this, SLOT(showFileInfo(QString)), Qt::DirectConnection);
 
-    //showing the qml screen depending on device / platform / etc
+        //showing the qml screen depending on device / platform / etc
 #ifdef Q_OS_SYMBIAN
-    qorbiterUIwin->showFullScreen();
+        qorbiterUIwin->showFullScreen();
 #elif defined(Q_WS_MAEMO_5)
-    qorbiterUIwin->showMaximized();
+        qorbiterUIwin->showMaximized();
 #elif defined(for_harmattan)
-    qorbiterUIwin->showFullScreen();
+        qorbiterUIwin->showFullScreen();
 #elif defined(for_desktop)
-    qorbiterUIwin->show();
+        qorbiterUIwin->show();
 #else
-    qorbiterUIwin->show();
+        qorbiterUIwin->show();
 #endif
 
-   // qorbiterUIwin->showFullScreen();
-    gotoQScreen("Splash.qml");
-    qDebug() << "Showing Splash";
-       QObject::connect(item,SIGNAL(setupStart(int, QString)), this,SLOT(qmlSetupLmce(int,QString)));
+        // qorbiterUIwin->showFullScreen();
+        gotoQScreen("Splash.qml");
+        qDebug() << "Showing Splash";
+        QObject::connect(item,SIGNAL(setupStart(int, QString)), this,SLOT(qmlSetupLmce(int,QString)));
 
     }
     else
@@ -250,40 +251,40 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
         qDebug() << "Device: " << PK_Device <<" Connect";
         //g_pCommand_Impl=pqOrbiter;
         //g_pDeadlockHandler=DeadlockHandler;
-       // g_pSocketCrashHandler=SocketCrashHandler;
+        // g_pSocketCrashHandler=SocketCrashHandler;
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
-            /*
+        /*
               we get various variable here that we will need later. I store them in the qt object so it
               can pass them along without extra issues and so they can easily be passed to qml objects that
               are templated in
              */
 
         pqOrbiter->CreateChildren();
-            /*
+        /*
               this line ties the class variable in the dceGenerated code to the qt ui code
               this is how the two threads (dce and qt) communicate with each other and make it possible to connect
               qt GUI (qml or qobject based) signals to DCE slots and vice versa!
             */
-            pqOrbiter->qmlUI = this;
+        pqOrbiter->qmlUI = this;
 
 
-         if ( pqOrbiter->initialize())
+        if ( pqOrbiter->initialize())
+        {
+
+            if (getConf(PK_Device))
             {
+                qDebug () << "Config Recieved, starting";
+                gotoQScreen("Screen_1.qml");
+                return true;
+            }
+            else
+            {
+                qDebug() << "Orbiter Conf Hiccup!";
+                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Device Failed to get configuration!");
+                return false;
+            }
 
-                if (getConf(PK_Device))
-                 {
-                     qDebug () << "Config Recieved, starting";
-                     gotoQScreen("Screen_1.qml");
-                     return true;
-                 }
-                else
-                {
-                     qDebug() << "Orbiter Conf Hiccup!";
-                     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Device Failed to get configuration!");
-                     return false;
-                 }
-
-          /*  i dont know what this does, but since orbter should not be local, it is commented out but not removed.
+            /*  i dont know what this does, but since orbter should not be local, it is commented out but not removed.
             if( bLocalMode )
                     pqOrbiter->RunLocalMode();
             else
@@ -294,21 +295,21 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             }
             g_pDeadlockHandler=NULL;
             g_pSocketCrashHandler=NULL; */
-            }
+        }
     }
     else
     {
-            bAppError = true;
-            if( pqOrbiter->m_pEvent && pqOrbiter->m_pEvent->m_pClientSocket && pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
-            {
-                    bAppError = false;
-                    bReload = false;
-                    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "No Router.  Will abort");
-                    qDebug() << "No Router, Aborting";
-                    return false;
-            }
-            else
-            {
+        bAppError = true;
+        if( pqOrbiter->m_pEvent && pqOrbiter->m_pEvent->m_pClientSocket && pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
+        {
+            bAppError = false;
+            bReload = false;
+            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "No Router.  Will abort");
+            qDebug() << "No Router, Aborting";
+            return false;
+        }
+        else
+        {
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
             qDebug() << "Connect Failed";            
             gotoQScreen("Splash.qml");
@@ -317,11 +318,11 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
               code to read data from file add it as context object goes here.
               also function to wrap back around to setup lmce
               */
-            }
+        }
     }
 
     if( pqOrbiter->m_bReload )
-            bReload=true;
+        bReload=true;
     gotoQScreen("Splash.qml");
     sleep(10);
     setupLmce(iPK_Device, sRouterIP, false, false);
@@ -331,8 +332,8 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 bool qorbiterManager::refreshUI()
 {
 
-   qDebug() << "Launching UI";
-   return true;
+    qDebug() << "Launching UI";
+    return true;
 }
 
 
@@ -341,7 +342,7 @@ bool qorbiterManager::getConf(int pPK_Device)
 {
     if(!pqOrbiter->DATA_Get_Get_Time_Code_for_Media())
     {
-       // setNowPlayingIcon(false);
+        // setNowPlayingIcon(false);
     }
 
     qDebug() << "Reading Config" ;
@@ -365,13 +366,13 @@ bool qorbiterManager::getConf(int pPK_Device)
     }
 
     QDomElement root = configData.documentElement();        //represent configuration in memeory
-   // qDebug () << root.tagName();
-//------------DEFAULTS-FOR-ORBITER------------------------------------------------------------
+    // qDebug () << root.tagName();
+    //------------DEFAULTS-FOR-ORBITER------------------------------------------------------------
     QDomElement defaults = root.firstChildElement("Default");
     QString sPK_User = defaults.attribute("sPK_User");
 
 
-//-USERS-----------------------------------------------------------------------------------------------------
+    //-USERS-----------------------------------------------------------------------------------------------------
     QDomElement userXml = root.firstChildElement("Users");
     userList = new UserModel( new UserItem, this);
     QDomNodeList userXmlList = userXml.childNodes();
@@ -408,8 +409,8 @@ bool qorbiterManager::getConf(int pPK_Device)
         RroomMapping.insert(m_name, m_val);
         m_lRooms->appendRow(new LocationItem(m_name, m_val, m_title, m_iEA, m_iType, m_lRooms));
     }
-        m_lRooms->sdefault_Ea = defaults.attribute("DefaultLocation");
-        m_lRooms->idefault_Ea = RroomMapping.value(m_lRooms->sdefault_Ea);
+    m_lRooms->sdefault_Ea = defaults.attribute("DefaultLocation");
+    m_lRooms->idefault_Ea = RroomMapping.value(m_lRooms->sdefault_Ea);
 
 
     //--LIGHTING SCENARIOS----------------------------------------------------------------------------------
@@ -425,18 +426,18 @@ bool qorbiterManager::getConf(int pPK_Device)
         int LroomMapNo = lScenarioList.at(index).attributes().namedItem("int").nodeValue().toInt();
         for (int innerIndex = 0; innerIndex < lScenarioRoom.count(); innerIndex++)
         {
-                    QString m_name = lScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
-                    QString m_label = lScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
-                    QString m_param =lScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue() ;
-                    QString m_command = lScenarioRoom.at(innerIndex).attributes().namedItem("eaDescription").nodeValue();
-                    QString m_goto = lScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
-                    QString imgName = lScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
-                    QImage m_image = QImage("Qrc:/icons/"+imgName);
+            QString m_name = lScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QString m_label = lScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QString m_param =lScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue() ;
+            QString m_command = lScenarioRoom.at(innerIndex).attributes().namedItem("eaDescription").nodeValue();
+            QString m_goto = lScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
+            QString imgName = lScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QImage m_image = QImage("Qrc:/icons/"+imgName);
 
             lightModelHolder->appendRow(new LightingScenarioItem(m_name,m_label, m_param, m_command, m_goto, m_image, lightModelHolder));
         }
         roomLightingScenarios.insert(LroomMapNo, lightModelHolder);
-       roomLights = roomLightingScenarios.value(m_lRooms->idefault_Ea);
+        roomLights = roomLightingScenarios.value(m_lRooms->idefault_Ea);
     }
 
     //---MEDIA--------------SCENARIOS----------------------------------------------------------------------------
@@ -451,18 +452,18 @@ bool qorbiterManager::getConf(int pPK_Device)
         int MroomMapNo = mScenarioList.at(index).attributes().namedItem("int").nodeValue().toInt();
         for (int innerIndex = 0; innerIndex < mScenarioRoom.count(); innerIndex++)
         {
-                    QString m_name = mScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
-                    QString m_label = mScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
-                    QString m_param =mScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue() ;
-                    QString m_command = mScenarioRoom.at(innerIndex).attributes().namedItem("eaDescription").nodeValue();
-                    QString m_goto = mScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
-                    QString imgName = mScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
-                    QImage m_image = QImage("Qrc:/icons/"+imgName);
+            QString m_name = mScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QString m_label = mScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QString m_param =mScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue() ;
+            QString m_command = mScenarioRoom.at(innerIndex).attributes().namedItem("eaDescription").nodeValue();
+            QString m_goto = mScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
+            QString imgName = mScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QImage m_image = QImage("Qrc:/icons/"+imgName);
 
             mediaModelHolder->appendRow(new MediaScenarioItem(m_name,m_label, m_param, m_command, m_goto, m_image, mediaModelHolder));
         }
         roomMediaScenarios.insert(MroomMapNo, mediaModelHolder);
-       roomMedia = roomMediaScenarios.value(m_lRooms->idefault_Ea);
+        roomMedia = roomMediaScenarios.value(m_lRooms->idefault_Ea);
     }
 
 
@@ -479,18 +480,18 @@ bool qorbiterManager::getConf(int pPK_Device)
         int roomMapNo = cScenarioList.at(index).attributes().namedItem("int").nodeValue().toInt();
         for (int innerIndex = 0; innerIndex < cScenarioRoom.count(); innerIndex++)
         {
-                    QString m_name = cScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
-                    QString m_label = cScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
-                    QString m_param =cScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue() ;
-                    QString m_command = cScenarioRoom.at(innerIndex).attributes().namedItem("eaDescription").nodeValue();
-                    QString m_goto = cScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
-                    QString imgName = cScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
-                    QImage m_image = QImage("Qrc:/icons/"+imgName);
+            QString m_name = cScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QString m_label = cScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QString m_param =cScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue() ;
+            QString m_command = cScenarioRoom.at(innerIndex).attributes().namedItem("eaDescription").nodeValue();
+            QString m_goto = cScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
+            QString imgName = cScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QImage m_image = QImage("Qrc:/icons/"+imgName);
 
             climateModelHolder->appendRow(new ClimateScenarioItem(m_name,m_label, m_param, m_command, m_goto, m_image, climateModelHolder));
         }
         roomClimateScenarios.insert(roomMapNo, climateModelHolder);
-       roomClimate = roomClimateScenarios.value(m_lRooms->idefault_Ea);
+        roomClimate = roomClimateScenarios.value(m_lRooms->idefault_Ea);
     }
 
     //TELECOM------SCENARIOS-------------------------------------------------------------------------------------
@@ -505,20 +506,20 @@ bool qorbiterManager::getConf(int pPK_Device)
         int troomMapNo = tScenarioList.at(index).attributes().namedItem("int").nodeValue().toInt();
         for (int innerIndex = 0; innerIndex < tScenarioRoom.count(); innerIndex++)
         {
-                    QString m_name = tScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
-                    QString m_label = tScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
-                    QString m_param =tScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue() ;
-                    QString m_command = tScenarioRoom.at(innerIndex).attributes().namedItem("eaDescription").nodeValue();
-                    QString m_goto = tScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
-                    QString imgName = tScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QString m_name = tScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QString m_label = tScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QString m_param =tScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue() ;
+            QString m_command = tScenarioRoom.at(innerIndex).attributes().namedItem("eaDescription").nodeValue();
+            QString m_goto = tScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
+            QString imgName = tScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
 
-                    QImage m_image = QImage("Qrc:/icons/"+imgName);
+            QImage m_image = QImage("Qrc:/icons/"+imgName);
 
 
             telecomModelHolder->appendRow(new TelecomScenarioItem(m_name,m_label, m_param, m_command, m_goto, m_image, telecomModelHolder));
         }
         roomTelecomScenarios.insert(troomMapNo, telecomModelHolder);
-       roomTelecom = roomTelecomScenarios.value(m_lRooms->idefault_Ea);
+        roomTelecom = roomTelecomScenarios.value(m_lRooms->idefault_Ea);
     }
 
     //SECURIY---SCENARIOS-----------------------------------------------------------------------------------------
@@ -533,34 +534,34 @@ bool qorbiterManager::getConf(int pPK_Device)
         int secroomMapNo = secScenarioList.at(index).attributes().namedItem("int").nodeValue().toInt();
         for (int innerIndex = 0; innerIndex < secScenarioRoom.count(); innerIndex++)
         {
-                    QString m_name = secScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
-                    QString m_label =  secScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
-                    QString m_param =secScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue() ;
-                    QString m_command = secScenarioRoom.at(innerIndex).attributes().namedItem("eaDescription").nodeValue();
-                    QString m_goto = secScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
-                    QString imgName = secScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
-                    QImage m_image = QImage("Qrc:/icons/"+imgName);
+            QString m_name = secScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QString m_label =  secScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QString m_param =secScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue() ;
+            QString m_command = secScenarioRoom.at(innerIndex).attributes().namedItem("eaDescription").nodeValue();
+            QString m_goto = secScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
+            QString imgName = secScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
+            QImage m_image = QImage("Qrc:/icons/"+imgName);
 
             securityModelHolder->appendRow(new SecurityScenarioItem(m_name,m_label, m_param, m_command, m_goto, m_image, securityModelHolder));
         }
         roomSecurityScenarios.insert(secroomMapNo, securityModelHolder);
-       roomSecurity = roomSecurityScenarios.value(m_lRooms->idefault_Ea);
+        roomSecurity = roomSecurityScenarios.value(m_lRooms->idefault_Ea);
     }
 
-//------------------------------------------context objects----------------------------------------------------
-  qorbiterUIwin->rootContext()->setContextObject(this);
- // setActiveRoom(RroomMapping.value(QString::fromStdString(pqOrbiter->DATA_Get_FK_EntertainArea())), 0);
-  qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights);                 //current room scenarios model
-  qorbiterUIwin->rootContext()->setContextProperty("currentRoomMedia", roomMedia);                   //current room media model
-  qorbiterUIwin->rootContext()->setContextProperty("currentRoomClimate", roomClimate);               //curent room climate model
-  qorbiterUIwin->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);               //curret room telecom model
-  qorbiterUIwin->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);             //current room security model
-  qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
-  qorbiterUIwin->rootContext()->setContextProperty("iPK_Device", QVariant::fromValue(iPK_Device));  //orbiter device number
-  qorbiterUIwin->rootContext()->setContextProperty("currentroom", m_lRooms->sdefault_Ea);           //custom room list item provided
-  qorbiterUIwin->rootContext()->setContextProperty("userList", userList);                           //custom user list provided
-  qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms);                           //custom room list  provided
-  qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);                       //file grids current media type
+    //------------------------------------------context objects----------------------------------------------------
+    qorbiterUIwin->rootContext()->setContextObject(this);
+    // setActiveRoom(RroomMapping.value(QString::fromStdString(pqOrbiter->DATA_Get_FK_EntertainArea())), 0);
+    qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights);                 //current room scenarios model
+    qorbiterUIwin->rootContext()->setContextProperty("currentRoomMedia", roomMedia);                   //current room media model
+    qorbiterUIwin->rootContext()->setContextProperty("currentRoomClimate", roomClimate);               //curent room climate model
+    qorbiterUIwin->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);               //curret room telecom model
+    qorbiterUIwin->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);             //current room security model
+    qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
+    qorbiterUIwin->rootContext()->setContextProperty("iPK_Device", QVariant::fromValue(iPK_Device));  //orbiter device number
+    qorbiterUIwin->rootContext()->setContextProperty("currentroom", m_lRooms->sdefault_Ea);           //custom room list item provided
+    qorbiterUIwin->rootContext()->setContextProperty("userList", userList);                           //custom user list provided
+    qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms);                           //custom room list  provided
+    qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);                       //file grids current media type
 
     //------------not sure if neccesary since it knows where we are.
     setActiveRoom(m_lRooms->idefault_Ea,m_lRooms->idefault_Ea);
@@ -569,63 +570,63 @@ bool qorbiterManager::getConf(int pPK_Device)
     //pqOrbiter->CMD_Set_Entertainment_Area(m_lRooms->sdefault_Ea.toStdString());
 
 
-  //-----setting up the FILEFORMAT model------------------------------------------------------------------------
-  QImage attrimg(":/icons/Skin-Data.png");
-  uiFileFilter = new FilterModel(new FilterModelItem, this);
-  QDomElement fileFormatElement = root.firstChildElement("FileFormats");
-  QDomNodeList fileformatlist = fileFormatElement.childNodes();
+    //-----setting up the FILEFORMAT model------------------------------------------------------------------------
+    QImage attrimg(":/icons/Skin-Data.png");
+    uiFileFilter = new FilterModel(new FilterModelItem, this);
+    QDomElement fileFormatElement = root.firstChildElement("FileFormats");
+    QDomNodeList fileformatlist = fileFormatElement.childNodes();
 
-  for(int index = 0; index < fileformatlist.count(); index++)
-  {
-      QString name = fileformatlist.at(index).attributes().namedItem("Name").nodeValue();
-      QString pk= fileformatlist.at(index).attributes().namedItem("PK_FileFormat").nodeValue();
-      uiFileFilter->appendRow(new FilterModelItem(name,pk, attrimg,false,uiFileFilter));
-  }
-  this->qorbiterUIwin->rootContext()->setContextProperty("fileformatmodel", uiFileFilter); //custom fileformatmodel for selection filter item
-  connect(uiFileFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
+    for(int index = 0; index < fileformatlist.count(); index++)
+    {
+        QString name = fileformatlist.at(index).attributes().namedItem("Name").nodeValue();
+        QString pk= fileformatlist.at(index).attributes().namedItem("PK_FileFormat").nodeValue();
+        uiFileFilter->appendRow(new FilterModelItem(name,pk, attrimg,false,uiFileFilter));
+    }
+    this->qorbiterUIwin->rootContext()->setContextProperty("fileformatmodel", uiFileFilter); //custom fileformatmodel for selection filter item
+    connect(uiFileFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
 
-  //-----setting up the MEDIASUBTYPE model------------------------------------------------------------------------
-  QDomElement mediaTypeElement = root.firstChildElement("MediaSubTypes");
-  QDomNodeList mediaTypeList = mediaTypeElement.childNodes();
-  mediaTypeFilter = new MediaSubTypeModel(new MediaSubTypeItem, this);
-  for(int index = 0; index < mediaTypeList.count(); index++)
-  {
-      QString name = mediaTypeList.at(index).attributes().namedItem("Name").nodeValue();
-      QString pk= mediaTypeList.at(index).attributes().namedItem("PK_MediaSubType").nodeValue();
-      mediaTypeFilter->appendRow(new MediaSubTypeItem(name,pk, attrimg,false,mediaTypeFilter));
-  }
-  this->qorbiterUIwin->rootContext()->setContextProperty("mediatypefilter", mediaTypeFilter); //custom mediatype selection model
-  connect(mediaTypeFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
+    //-----setting up the MEDIASUBTYPE model------------------------------------------------------------------------
+    QDomElement mediaTypeElement = root.firstChildElement("MediaSubTypes");
+    QDomNodeList mediaTypeList = mediaTypeElement.childNodes();
+    mediaTypeFilter = new MediaSubTypeModel(new MediaSubTypeItem, this);
+    for(int index = 0; index < mediaTypeList.count(); index++)
+    {
+        QString name = mediaTypeList.at(index).attributes().namedItem("Name").nodeValue();
+        QString pk= mediaTypeList.at(index).attributes().namedItem("PK_MediaSubType").nodeValue();
+        mediaTypeFilter->appendRow(new MediaSubTypeItem(name,pk, attrimg,false,mediaTypeFilter));
+    }
+    this->qorbiterUIwin->rootContext()->setContextProperty("mediatypefilter", mediaTypeFilter); //custom mediatype selection model
+    connect(mediaTypeFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
 
-  //-----setting up the GENRE model------------------------------------------------------------------------
-  QDomElement genreElement = root.firstChildElement("GenreList");
-  QDomNodeList genrelist = genreElement.childNodes();
-  genreFilter = new GenreModel(new GenreItem, this);
-  for(int index = 0; index < genrelist.count(); index++)
-  {
-      QString name = genrelist.at(index).attributes().namedItem("Name").nodeValue();
-      QString pk= genrelist.at(index).attributes().namedItem("PK_Attribute").nodeValue();
-      genreFilter->appendRow(new GenreItem(name,pk, attrimg,false,genreFilter));
-  }
-  this->qorbiterUIwin->rootContext()->setContextProperty("genrefilter", genreFilter); //custom mediatype selection model
- connect(genreFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
+    //-----setting up the GENRE model------------------------------------------------------------------------
+    QDomElement genreElement = root.firstChildElement("GenreList");
+    QDomNodeList genrelist = genreElement.childNodes();
+    genreFilter = new GenreModel(new GenreItem, this);
+    for(int index = 0; index < genrelist.count(); index++)
+    {
+        QString name = genrelist.at(index).attributes().namedItem("Name").nodeValue();
+        QString pk= genrelist.at(index).attributes().namedItem("PK_Attribute").nodeValue();
+        genreFilter->appendRow(new GenreItem(name,pk, attrimg,false,genreFilter));
+    }
+    this->qorbiterUIwin->rootContext()->setContextProperty("genrefilter", genreFilter); //custom mediatype selection model
+    connect(genreFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
 
-  //-----setting up the ATTRIBUTE model------------------------------------------------------------------------
-  QDomElement attribElement = root.firstChildElement("AttributeList");
-  QDomNodeList attriblist = attribElement.childNodes();
-  attribFilter = new AttributeSortModel(new AttributeSortItem, this);
-  for(int index = 0; index < attriblist.count(); index++)
-  {
-      QString name = attriblist.at(index).attributes().namedItem("Name").nodeValue();
-      QString pk= attriblist.at(index).attributes().namedItem("PK_AttributeType").nodeValue();
-      attribFilter->appendRow(new AttributeSortItem(name,pk, attrimg,false,attribFilter));
-  }
-  this->qorbiterUIwin->rootContext()->setContextProperty("attribfilter", attribFilter); //custom mediatype selection model
-connect(attribFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
+    //-----setting up the ATTRIBUTE model------------------------------------------------------------------------
+    QDomElement attribElement = root.firstChildElement("AttributeList");
+    QDomNodeList attriblist = attribElement.childNodes();
+    attribFilter = new AttributeSortModel(new AttributeSortItem, this);
+    for(int index = 0; index < attriblist.count(); index++)
+    {
+        QString name = attriblist.at(index).attributes().namedItem("Name").nodeValue();
+        QString pk= attriblist.at(index).attributes().namedItem("PK_AttributeType").nodeValue();
+        attribFilter->appendRow(new AttributeSortItem(name,pk, attrimg,false,attribFilter));
+    }
+    this->qorbiterUIwin->rootContext()->setContextProperty("attribfilter", attribFilter); //custom mediatype selection model
+    connect(attribFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
 
 
-  qDebug() << "Cleanup config - tconf:" << tConf.size() << "|| binaryConfig:" << binaryConfig.size() << "|| configData:" << configData.childNodes().size();
-  return true;
+    qDebug() << "Cleanup config - tconf:" << tConf.size() << "|| binaryConfig:" << binaryConfig.size() << "|| configData:" << configData.childNodes().size();
+    return true;
 }
 
 //experimental skin swappping method. what should happen here is a call to qDeclarative engine to change
@@ -639,48 +640,48 @@ void qorbiterManager::swapSkins(QString incSkin)
 
 
     if(skinsDir.cd("qml/"))
-     {
-         qDebug() << skinsDir.path();
+    {
+        qDebug() << skinsDir.path();
 
-         QStringList platform = skinsDir.entryList();
+        QStringList platform = skinsDir.entryList();
 
-         qDebug() << "Switching to:" << platform.last();
+        qDebug() << "Switching to:" << platform.last();
 
 
-         if(platform.isEmpty())
-         {
-             qDebug() << "couldnt locate platform";
-         }
-         else
-         {
-
-        if(skinsDir.cd(platform.last()))
+        if(platform.isEmpty())
         {
-        incSkin.toLower() = skinsDir.path();
-        qDebug() << "Looking for skins in " + skinsDir.path() ;
-       QDeclarativeComponent skinData(qorbiterUIwin->engine(),QUrl::fromLocalFile(skinsDir.path()+"/"+incSkin.toLower()+"/Style.qml"));
-       qDebug() << skinsDir.path()+"/"+incSkin.toLower()+"/Style.qml" ;
-       //turning it into a qObject - this part actually loads it - the error should connect to a slot and not an exit
-       QObject *styleObject = skinData.create(qorbiterUIwin->rootContext());
-      //wait for it to load up
-         while (!skinData.isReady())
+            qDebug() << "couldnt locate platform";
+        }
+        else
+        {
+
+            if(skinsDir.cd(platform.last()))
             {
-              if(skinData.isError())
-                 {
-               qDebug() << skinData.errors();
-                 break;
-                 }
+                incSkin.toLower() = skinsDir.path();
+                qDebug() << "Looking for skins in " + skinsDir.path() ;
+                QDeclarativeComponent skinData(qorbiterUIwin->engine(),QUrl::fromLocalFile(skinsDir.path()+"/"+incSkin.toLower()+"/Style.qml"));
+                qDebug() << skinsDir.path()+"/"+incSkin.toLower()+"/Style.qml" ;
+                //turning it into a qObject - this part actually loads it - the error should connect to a slot and not an exit
+                QObject *styleObject = skinData.create(qorbiterUIwin->rootContext());
+                //wait for it to load up
+                while (!skinData.isReady())
+                {
+                    if(skinData.isError())
+                    {
+                        qDebug() << skinData.errors();
+                        break;
+                    }
 
-                 qDebug() << skinData.status();
-             }
+                    qDebug() << skinData.status();
+                }
 
-         qorbiterUIwin->engine()->rootContext()->setContextProperty("style", styleObject);
+                qorbiterUIwin->engine()->rootContext()->setContextProperty("style", styleObject);
 
                 qorbiterUIwin->setSource(skinsDir.path()+"/"+incSkin.toLower()+"/main.qml");
                 gotoQScreen("Screen_1.qml");
-         }
+            }
+        }
     }
-  }
 }
 
 
@@ -688,7 +689,7 @@ void qorbiterManager::swapSkins(QString incSkin)
 void qorbiterManager::closeOrbiter()
 {
     qDebug() << "Shutting Down";
-     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Exiting, Unregistering 1st");
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Exiting, Unregistering 1st");
     pqOrbiter->deinitialize();
     pqOrbiter->~qOrbiter();
     this->~qorbiterManager();
@@ -721,7 +722,7 @@ void qorbiterManager::setActiveRoom(int room,int ea)
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomClimate", roomClimate);
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);
- /* */
+    /* */
     qDebug() << "CHanged to room" << room;
     setLocation(room, ea);
 }
@@ -734,8 +735,8 @@ void qorbiterManager::execGrp(int grp)
 {
     pqOrbiter->executeCommandGroup(grp);
 
-   i_current_command_grp = grp;
-   qorbiterUIwin->rootContext()->setContextProperty("currentcommandgrp", i_current_command_grp);
+    i_current_command_grp = grp;
+    qorbiterUIwin->rootContext()->setContextProperty("currentcommandgrp", i_current_command_grp);
 }
 
 
@@ -747,7 +748,7 @@ bool qorbiterManager::addMediaItem(QString mText, QString temp, QImage cell)
     {qDebug() << mText << " is null img";}
     //this->model->appendRow(new gridItem(mText, temp, cell , model));
     emit modelChanged();
-  // qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
+    // qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
 }
 
 void qorbiterManager::updateModel()
@@ -765,7 +766,7 @@ void qorbiterManager:: setLocation(const int &room, const int &ea)
 {
     iFK_Room = room;
     iea_area = ea;
-   emit locationChanged(room, ea);
+    emit locationChanged(room, ea);
 }
 
 int qorbiterManager::getlocation() const
@@ -790,28 +791,28 @@ void qorbiterManager::regenComplete(int i)
     {
 
 
-    if (getConf(iPK_Device))
-    {   qDebug() << "Regen Complete!";
-       // qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/qObiter_src/main.qml"));
-        gotoQScreen("Screen_1.qml");
+        if (getConf(iPK_Device))
+        {   qDebug() << "Regen Complete!";
+            // qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/qObiter_src/main.qml"));
+            gotoQScreen("Screen_1.qml");
 #ifdef Q_OS_SYMBIAN
-    qorbiterUIwin->showFullScreen();
+            qorbiterUIwin->showFullScreen();
 #elif defined(Q_WS_MAEMO_5)
-    qorbiterUIwin->showMaximized();
+            qorbiterUIwin->showMaximized();
 #else
-   qorbiterUIwin->show();
+            qorbiterUIwin->show();
 #endif
+        }
     }
-}
     else
     {
         gotoQScreen("LoadError.qml");
 #ifdef Q_OS_SYMBIAN
-    qorbiterUIwin->showFullScreen();
+        qorbiterUIwin->showFullScreen();
 #elif defined(Q_WS_MAEMO_5)
-    qorbiterUIwin->showMaximized();
+        qorbiterUIwin->showMaximized();
 #else
-   qorbiterUIwin->show();
+        qorbiterUIwin->show();
 #endif
     }
 }
@@ -822,19 +823,19 @@ QString qorbiterManager::adjustPath(const QString &path)
 #ifdef Q_OS_UNIX
 
 #ifdef Q_OS_MAC
-   if (!QDir::isAbsolutePath(path))
-         return QCoreApplication::applicationDirPath()
-                 + QLatin1String("/../Resources/") + path;
- #else
-     const QString pathInShareDir = QCoreApplication::applicationDirPath()
-        + QLatin1String("/../share/")
-       + QFileInfo(QCoreApplication::applicationFilePath()).fileName()
-        + QLatin1Char('/') + path;
-   if (QFileInfo(pathInShareDir).exists())
-    return pathInShareDir;
+    if (!QDir::isAbsolutePath(path))
+        return QCoreApplication::applicationDirPath()
+                + QLatin1String("/../Resources/") + path;
+#else
+    const QString pathInShareDir = QCoreApplication::applicationDirPath()
+            + QLatin1String("/../share/")
+            + QFileInfo(QCoreApplication::applicationFilePath()).fileName()
+            + QLatin1Char('/') + path;
+    if (QFileInfo(pathInShareDir).exists())
+        return pathInShareDir;
 #endif
 #endif
-   return path;
+    return path;
 
 }
 
@@ -856,21 +857,21 @@ void qorbiterManager::setNowPlayingIcon(bool b)
 
 void qorbiterManager::getcurrentSkins(QStringList skinPaths)
 {
-   QImage skinPic(":/icons/Skin-Data.png");
-  SkinDataModel* tskinModel = new SkinDataModel(new SkinDataItem, this);
-qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
-   QString skins;
+    QImage skinPic(":/icons/Skin-Data.png");
+    SkinDataModel* tskinModel = new SkinDataModel(new SkinDataItem, this);
+    qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
+    QString skins;
 
-   QDir skinsDir(QApplication::applicationDirPath().remove("bin"));
+    QDir skinsDir(QApplication::applicationDirPath().remove("bin"));
 
 
-   if(skinsDir.cd("qml/"))
+    if(skinsDir.cd("qml/"))
     {
         qDebug() << skinsDir.path();
 
         QStringList platform = skinsDir.entryList();
 
-      //  qDebug() << "Switching to:" << platform.last();
+        //  qDebug() << "Switching to:" << platform.last();
 
 
         if(platform.isEmpty())
@@ -880,53 +881,53 @@ qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
         else
         {
 
-       if(skinsDir.cd(platform.last()))
-       {
+            if(skinsDir.cd(platform.last()))
+            {
 
-           skins = skinsDir.path();
-          //  qDebug() << "Looking for skins in " + skins ;
+                skins = skinsDir.path();
+                //  qDebug() << "Looking for skins in " + skins ;
 
-       }
+            }
 
-    }
+        }
 
-QStringList::const_iterator constIterator;
-for (constIterator = skinPaths.constBegin(); constIterator != skinPaths.constEnd(); ++constIterator)
-   {
+        QStringList::const_iterator constIterator;
+        for (constIterator = skinPaths.constBegin(); constIterator != skinPaths.constEnd(); ++constIterator)
+        {
 
-       if ((*constIterator) == "js"||(*constIterator)=="components"||(*constIterator) =="screens")
-       {
-          // qDebug() << "System Path" << (*constIterator);
-       }
-       else
-       {    skins.append("/");
-           QDeclarativeComponent skinData(qorbiterUIwin->engine(),QUrl::fromLocalFile(skins+(*constIterator)+"/Style.qml"));
-            //turning it into a qObject - this part actually loads it - the error should connect to a slot and not an exit
-          QObject *styleObject = skinData.create(qorbiterUIwin->rootContext());
-         //wait for it to load up
-            while (!skinData.isReady())
-               {
-                 if(skinData.isError())
+            if ((*constIterator) == "js"||(*constIterator)=="components"||(*constIterator) =="screens")
+            {
+                // qDebug() << "System Path" << (*constIterator);
+            }
+            else
+            {    skins.append("/");
+                QDeclarativeComponent skinData(qorbiterUIwin->engine(),QUrl::fromLocalFile(skins+(*constIterator)+"/Style.qml"));
+                //turning it into a qObject - this part actually loads it - the error should connect to a slot and not an exit
+                QObject *styleObject = skinData.create(qorbiterUIwin->rootContext());
+                //wait for it to load up
+                while (!skinData.isReady())
+                {
+                    if(skinData.isError())
                     {
-                  qDebug() << skinData.errors();
-                    break;
+                        qDebug() << skinData.errors();
+                        break;
                     }
 
                     qDebug() << " loading";
                 }
 
-                   QString s_title = styleObject->property("skinname").toString();
-                   QString s_creator = styleObject->property("skincreator").toString();
-                   QString s_description = styleObject->property("skindescription").toString();
-                   QString s_version = styleObject->property("skinversion").toString();
-                   QString s_target = styleObject->property("skinvariation").toString();
-                   QString s_path = styleObject->property("skindir").toString();
-                   QString s_mainc = styleObject->property("maincolor").toString();
-                   QString s_accentc = styleObject->property("accentcolor").toString();
-                  // qDebug() << "Adding skin to list" << s_title;
-                  tskinModel->appendRow(new SkinDataItem(s_title, s_creator, s_description, s_version, s_target, skinPic, s_path, s_mainc, s_accentc, tskinModel ));
-             }
-          }
+                QString s_title = styleObject->property("skinname").toString();
+                QString s_creator = styleObject->property("skincreator").toString();
+                QString s_description = styleObject->property("skindescription").toString();
+                QString s_version = styleObject->property("skinversion").toString();
+                QString s_target = styleObject->property("skinvariation").toString();
+                QString s_path = styleObject->property("skindir").toString();
+                QString s_mainc = styleObject->property("maincolor").toString();
+                QString s_accentc = styleObject->property("accentcolor").toString();
+                // qDebug() << "Adding skin to list" << s_title;
+                tskinModel->appendRow(new SkinDataItem(s_title, s_creator, s_description, s_version, s_target, skinPic, s_path, s_mainc, s_accentc, tskinModel ));
+            }
+        }
     }
 }
 
@@ -940,13 +941,13 @@ void qorbiterManager::quickReload()
     {
         qDebug() << "Reload complete, starting";
 
-        }
-        else
-        {
-            qDebug() << "Router not up, waiting";
-            sleep(5);
-            quickReload();
-        }
+    }
+    else
+    {
+        qDebug() << "Router not up, waiting";
+        sleep(5);
+        quickReload();
+    }
 }
 
 void qorbiterManager::qmlSetupLmce(int incdeviceid, QString incrouterip)
@@ -976,7 +977,7 @@ bool qorbiterManager::readLocalConfig()
     {
         qDebug() << "Local Config Missing!";
         qDebug() <<"Enter information to continue, press connect when ready.";
-    return false;
+        return false;
     }
     else
     {
@@ -989,10 +990,10 @@ bool qorbiterManager::readLocalConfig()
         {
             qDebug() << "Could not read local, setting defaults.";
             qDebug() << localConfig.toString();
-             qs_routerip = "192.168.80.1";
-             return false;
+            qs_routerip = "192.168.80.1";
+            return false;
         }
-     }
+    }
     return true;
 }
 
@@ -1016,27 +1017,27 @@ void qorbiterManager::setStringParam(int paramType, QString param)
     QString q_pk_attribute;        //10
     QString *datagridVariableString;
     */
-QStringList longassstring;
-QString datagridVariableString;
+    QStringList longassstring;
+    QString datagridVariableString;
 
     switch (paramType)
     {
     case 1:
-       q_subType = param;
+        q_subType = param;
 
-       longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
-       datagridVariableString = longassstring.join("|");
-       qDebug() << datagridVariableString;
-       execGrp(i_current_command_grp);
+        longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
+        datagridVariableString = longassstring.join("|");
+        qDebug() << datagridVariableString;
+        execGrp(i_current_command_grp);
 
         break;
     case 2:        
-            q_fileFormat = param;
+        q_fileFormat = param;
 
-            longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
-            datagridVariableString = longassstring.join("|");
-            qDebug() << datagridVariableString;
-            execGrp(i_current_command_grp);
+        longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
+        datagridVariableString = longassstring.join("|");
+        qDebug() << datagridVariableString;
+        execGrp(i_current_command_grp);
 
         break;
     case 3:
@@ -1053,8 +1054,12 @@ QString datagridVariableString;
         {
             if(param.contains("!F"))
             {
-                ShowFileInfo(param);
-                 m_selected_grid_item->setVisible(true);
+                m_selected_grid_item->setFile(param);
+                m_selected_grid_item->setVisible(true);
+                break;
+
+            //    pqOrbiter->GetMediaAttributeGrid(param);
+
             }
 
             else
@@ -1066,51 +1071,56 @@ QString datagridVariableString;
                 datagridVariableString = longassstring.join("|");
                 qDebug() << datagridVariableString;
                 execGrp(i_current_command_grp);
+
             }
 
         }
 
         break;
     case 5:
-       q_usersPrivate = param;
+        q_usersPrivate = param;
 
-       longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
-       datagridVariableString = longassstring.join("|");
-       qDebug() << datagridVariableString;
-       execGrp(i_current_command_grp);
+        longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
+        datagridVariableString = longassstring.join("|");
+        qDebug() << datagridVariableString;
+        execGrp(i_current_command_grp);
 
         break;
     case 6:
-       q_attributetype_sort = param;
+        q_attributetype_sort = param;
 
-       longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
+        longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-       qDebug() << datagridVariableString;
-       execGrp(i_current_command_grp);
+        qDebug() << datagridVariableString;
+        execGrp(i_current_command_grp);
         break;
     case 7:
-       q_pk_users = param;
+        q_pk_users = param;
 
-       longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
+        longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-       qDebug() << datagridVariableString;
-       execGrp(i_current_command_grp);
+        qDebug() << datagridVariableString;
+        execGrp(i_current_command_grp);
 
         break;
     case 8:
-       q_last_viewed = param;
+        q_last_viewed = param;
 
-       longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
-       datagridVariableString = longassstring.join("|");
-       qDebug() << datagridVariableString;
-       execGrp(i_current_command_grp);
+        longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
+        datagridVariableString = longassstring.join("|");
+        qDebug() << datagridVariableString;
+        execGrp(i_current_command_grp);
 
         break;
     case 9:
         if(param.contains("!F"))
         {
-            ShowFileInfo(param);
-             m_selected_grid_item->setVisible(true);
+
+            m_selected_grid_item->setVisible(true);
+            //m_selected_grid_item->setFile(param);
+            break;
+         //   pqOrbiter->GetMediaAttributeGrid(param);
+
         }
 
         else
@@ -1131,27 +1141,27 @@ QString datagridVariableString;
 
 
 
-       // initializeSortString();
+    // initializeSortString();
 }
 
 void qorbiterManager::initializeSortString()
 {
     QString datagridVariableString ;
     //datagrid option variables
-  //  QString q_mediaType;           //1
-     q_subType="";             //2
-     q_fileFormat="";          //3
-     q_attribute_genres="";    //4
-     q_mediaSources ="1,2";         //5 need comma delineation
-     q_usersPrivate = "0";        //6
-     q_attributetype_sort="13";  //7
-     q_pk_users="0";             //8
-     q_last_viewed="2";        //9
-     q_pk_attribute="";        //10
+    //  QString q_mediaType;           //1
+    q_subType="";             //2
+    q_fileFormat="";          //3
+    q_attribute_genres="";    //4
+    q_mediaSources ="1,2";         //5 need comma delineation
+    q_usersPrivate = "0";        //6
+    q_attributetype_sort="13";  //7
+    q_pk_users="0";             //8
+    q_last_viewed="2";        //9
+    q_pk_attribute="";        //10
 
 
-     datagridVariableString = "";
-     qDebug() << "Dg Variables Reset";
+    datagridVariableString = "";
+    qDebug() << "Dg Variables Reset";
 }
 
 void qorbiterManager::initializeContexts()
@@ -1165,7 +1175,7 @@ void qorbiterManager::initializeGridModel()
     model = new ListModel(new gridItem, this);
     basicProvider = new basicImageProvider();
     advancedProvider = new GridIndexProvider(model , 6, 4);
-  //  QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex, )), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex)), Qt::QueuedConnection);
+    //  QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex, )), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex)), Qt::QueuedConnection);
 
     //adding important data and objects to qml now that they have been setup
     qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
@@ -1181,10 +1191,10 @@ void qorbiterManager::goBackGrid()
 
 }
 
-void qorbiterManager::ShowFileInfo(QString fk_file)
+void qorbiterManager::showFileInfo(QString fk_file)
 {
 
-    pqOrbiter->GetFileInfoForQml(fk_file);
+    pqOrbiter->GetMediaAttributeGrid(fk_file);
 }
 
 

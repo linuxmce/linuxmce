@@ -13,6 +13,7 @@ class FileDetailsModel: public QAbstractListModel
 {
   Q_OBJECT
     Q_PROPERTY (bool showDetails READ isVisible WRITE setVisible NOTIFY VisibleChanged)
+    Q_PROPERTY(QString file READ getFile WRITE setFile NOTIFY FileChanged)
 
 public:
   explicit FileDetailsModel(FileDetailsItem* prototype, QObject* parent = 0);
@@ -34,6 +35,10 @@ public:
   QModelIndex lastrow;
   QString ident;
 
+  QString file;
+  inline QString getFile () {return file;}
+  inline void setFile(QString incFile) { file = incFile; emit FileChanged(file);}
+
  bool showDetails;
  inline bool isVisible () { return showDetails; }
  inline void setVisible (bool state) { showDetails = state; emit VisibleChanged();}
@@ -46,6 +51,7 @@ signals:
   void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const bool &state);
   void SetTypeSort(int pos, QString type);
   void VisibleChanged();
+  void FileChanged(QString f);
 private slots:
   void handleItemChange();
 

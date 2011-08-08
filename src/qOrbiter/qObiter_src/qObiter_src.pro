@@ -209,7 +209,8 @@ HEADERS += \
     datamodels/mediatypemodel.h \
     datamodels/DataModelItems/mediatypeitem.h \
     datamodels/filedetailsmodel.h \
-    datamodels/DataModelItems/filedetailsitem.h
+    datamodels/DataModelItems/filedetailsitem.h \
+    ../../PlutoUtils/ThreadedClass.h
 
 OTHER_FILES += Readme.txt \
     config.xml \
