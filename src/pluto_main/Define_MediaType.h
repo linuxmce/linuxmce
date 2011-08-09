@@ -42,21 +42,7 @@
 #define MEDIATYPE_lmce_Hulu_CONST 42
 #define MEDIATYPE_lmce_StreamedAudio_CONST 43
 #define MEDIATYPE_lmce_StreamedVideo_CONST 44
-#define MEDIATYPE_lmce_Game_vectrex_CONST 45
-#define MEDIATYPE_lmce_Game_tg16_CONST 46
-#define MEDIATYPE_lmce_Game_genesis_CONST 47
-#define MEDIATYPE_lmce_Game_snes_CONST 48
-#define MEDIATYPE_lmce_Game_megadriv_CONST 49
-#define MEDIATYPE_lmce_Game_snespal_CONST 50
-#define MEDIATYPE_lmce_Game_sgx_CONST 51
-#define MEDIATYPE_lmce_Game_pce_CONST 52
-#define MEDIATYPE_lmce_Game_apple2_CONST 53
-#define MEDIATYPE_lmce_Game_ps1_CONST 54
-#define MEDIATYPE_lmce_Game_ps2_CONST 55
-#define MEDIATYPE_lmce_Game_jaguar_CONST 56
-#define MEDIATYPE_lmce_Game_vic20_CONST 57
-#define MEDIATYPE_lmce_Game_c64_CONST 58
-#define MEDIATYPE_lmce_Game_Atari800_CONST 59
+#define MEDIATYPE_lmce_AirPlay_Audio_CONST 45
 
 #define MEDIATYPE_TABLE "MediaType"
 #define MEDIATYPE_PK_MEDIATYPE_FIELD "PK_MediaType"
