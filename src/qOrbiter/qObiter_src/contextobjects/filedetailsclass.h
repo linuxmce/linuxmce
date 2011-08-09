@@ -13,17 +13,39 @@
   */
 
 
-#include <QObject>
+#include <QDeclarativeItem>
 
-class FileDetailsClass : public QObject
+class FileDetailsClass : public QDeclarativeItem
 {
     Q_OBJECT
 public:
-    explicit FileDetailsClass(QObject *parent = 0);
+    explicit FileDetailsClass(QDeclarativeItem *parent = 0);
+    Q_PROPERTY (bool showDetails READ isVisible WRITE setVisible NOTIFY VisibleChanged)
+    Q_PROPERTY(QString file READ getFile WRITE setFile NOTIFY FileChanged)
+    Q_PROPERTY(QString object_title READ getTitle WRITE setTitle NOTIFY object_changed)
+
+    QString object_title;
+
+    QString file;
+    inline QString getFile () {return file;}
+    inline void setFile(QString incFile) { file = incFile; emit FileChanged(file);}
+
+    bool showDetails;
+    inline bool isVisible () { return showDetails; }
+    inline void setVisible (bool state) { showDetails = state; emit VisibleChanged( showDetails);}
+
+   // Q_INVOKABLE void setSelectionStatus(QString format);
+   // Q_INVOKABLE bool getSelectionStatus();
 
 signals:
+    void object_changed();
+    void FileChanged(QString f);
+    void VisibleChanged(bool vis);
 
 public slots:
+    inline QString getTitle() {return object_title;}
+    void setFileMediaType();
+    void setTitle(QString t);
 
 };
 

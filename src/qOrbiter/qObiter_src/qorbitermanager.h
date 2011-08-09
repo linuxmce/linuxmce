@@ -20,13 +20,14 @@
 #include <datamodels/attributesortmodel.h>
 #include <datamodels/mediatypemodel.h>
 #include <datamodels/filedetailsmodel.h>
+#include <contextobjects/filedetailsclass.h>
 
 #include <QFile>
 #include <QDir>
 #include <QDataStream>
 
 /*----custom classes-------*/
-                     //own version of OrbiterData.h
+//own version of OrbiterData.h
 #include <datamodels/listModel.h>                          //custom item model
 #include <datamodels/gridItem.h>
 #include <uiclasses/uicontroller.h>               //experimental
@@ -54,17 +55,19 @@ class qorbiterManager : public QWidget
     Q_PROPERTY (bool addMediaItem NOTIFY modelChanged)
     Q_PROPERTY (QString q_mediaType READ getSorting NOTIFY gridTypeChanged)
 public:
-     qorbiterManager(int deviceno, QString routerip, QWidget *parent = 0);  //constructor
+    qorbiterManager(int deviceno, QString routerip, QWidget *parent = 0);  //constructor
 
     QString *sPK_User;
     QString *buildType;
     //QByteArray *skin;
     QMap <QString*, QString*> availibleSkins;
     QString qmlPath;
-   QString skinsPath;
-   QDir skinsDir;
-   QString m_SkinsDirectoryPath;
+    QString skinsPath;
+    QDir skinsDir;
+    QString m_SkinsDirectoryPath;
 
+    //------CUSTOM QML TYPES------------------------------------------------------------------------------------
+ FileDetailsClass *filedetailsclass;
 
     //ui variables
     QString currentSkin;
@@ -121,7 +124,7 @@ Param 10 - pk_attribute
     FilterModel *uiFileFilter;
     AttributeSortModel *attribFilter;
     GenreModel *genreFilter;
-    FileDetailsModel *m_selected_grid_item;
+
     int i_current_mediaType;
 
     LightingScenarioModel *roomLights;
@@ -130,20 +133,21 @@ Param 10 - pk_attribute
     TelecomScenarioModel *roomTelecom;
     SecurityScenarioModel *roomSecurity;
 
-    //---------IMPORTAT-1-OFF-VARIABLES!!!!!---------------------------------------------//
+    //---------IMPORTANT-1-OFF-VARIABLES!!!!!---------------------------------------------//
     int i_current_command_grp;
 
     //ui functions
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}
     Q_INVOKABLE void setActiveRoom(int room,int ea);
     Q_INVOKABLE void setCurrentUser();
+
     //class objects
     DCE::qOrbiter * pqOrbiter;                  //reference to forward declared dce object
     bool mediaPlaying;
 
     //QT Functions to initialize lmce data
     bool initialize(int dev_id);
-   Q_INVOKABLE bool setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode);     //init's dce object
+    Q_INVOKABLE bool setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode);     //init's dce object
     /*
       getConf() is the part of the equation that should read the orbiter conf. not implemented fully
       */
@@ -179,12 +183,12 @@ Param 10 - pk_attribute
 
     int iFK_Room;                    //current room
     int iea_area;
-   QString sPK_Room;
+    QString sPK_Room;
     QMap <QString, int> mp_rooms;
     QMap <int, LightingScenarioModel*> roomLightingScenarios;
     QMap <int, MediaScenarioModel*> roomMediaScenarios;
     QMap <int, ClimateScenarioModel*> roomClimateScenarios;
-   QMap <int, TelecomScenarioModel*> roomTelecomScenarios;
+    QMap <int, TelecomScenarioModel*> roomTelecomScenarios;
     QMap <int, SecurityScenarioModel*> roomSecurityScenarios;
 
 
@@ -208,54 +212,54 @@ Param 10 - pk_attribute
     long iPK_Device;                   //this orbiters device number, passed in from command line
 
 signals:
-      void orbiterReady();
-      void orbiterClosing();
-      void locationChanged(int cRoom, int cEA);
-      void modelChanged();
-      void gridTypeChanged();
+    void orbiterReady();
+    void orbiterClosing();
+    void locationChanged(int cRoom, int cEA);
+    void modelChanged();
+    void gridTypeChanged();
 
 
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
-      Q_INVOKABLE void setDeviceNo(QString i);
-      Q_INVOKABLE void setRouterIp(QString s);
-      Q_INVOKABLE void writeConfig();
-      bool readLocalConfig();
+    Q_INVOKABLE void setDeviceNo(QString i);
+    Q_INVOKABLE void setRouterIp(QString s);
+    Q_INVOKABLE void writeConfig();
+    bool readLocalConfig();
 
-      Q_INVOKABLE  void getcurrentSkins(QStringList skinPaths);
-      void qmlSetupLmce(int incdeviceid, QString incrouterip);
+    Q_INVOKABLE  void getcurrentSkins(QStringList skinPaths);
+    void qmlSetupLmce(int incdeviceid, QString incrouterip);
 
-      //datagrid related
-      void setSorting(int i);
-      QString getSorting() {return q_mediaType;}
-      void initializeSortString();
-      void clearMediaModel();
-      bool addMediaItem(QString mText, QString temp, QImage cell);
-      void updateModel();
-      Q_INVOKABLE void setStringParam(int paramType, QString param);
-      Q_INVOKABLE void goBackGrid();
+    //datagrid related
+    void setSorting(int i);
+    QString getSorting() {return q_mediaType;}
+    void initializeSortString();
+    void clearMediaModel();
+    bool addMediaItem(QString mText, QString temp, QImage cell);
+    void updateModel();
+    Q_INVOKABLE void setStringParam(int paramType, QString param);
+    Q_INVOKABLE void goBackGrid();
 
-      void showFileInfo(QString fk_file);
+    void showFileInfo(QString fk_file);
 
-      //ui related
-      int getlocation() const ;
-      void setLocation(const int& , const int& ) ;
-      Q_INVOKABLE void gotoQScreen(QString ) ;
-      void setNowPlayingIcon(bool b);
-      void initializeContexts();
-      void initializeGridModel();
+    //ui related
+    int getlocation() const ;
+    void setLocation(const int& , const int& ) ;
+    Q_INVOKABLE void gotoQScreen(QString ) ;
+    void setNowPlayingIcon(bool b);
+    void initializeContexts();
+    void initializeGridModel();
 
-      //initialization related
-      void regenOrbiter(int deviceNo);
-      void regenComplete(int i);
-      QString adjustPath(const QString&);
+    //initialization related
+    void regenOrbiter(int deviceNo);
+    void regenComplete(int i);
+    QString adjustPath(const QString&);
 
-      //dce related slots
-      Q_INVOKABLE void execGrp(int grp);        //for command groups
-       Q_INVOKABLE void closeOrbiter();
+    //dce related slots
+    Q_INVOKABLE void execGrp(int grp);        //for command groups
+    Q_INVOKABLE void closeOrbiter();
 
-      //random c++ related slots
-      bool requestDataGrid();
-   \
+    //random c++ related slots
+    bool requestDataGrid();
+    \
 };
 
 #endif // QORBITERMANAGER_H

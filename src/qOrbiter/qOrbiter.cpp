@@ -1920,7 +1920,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
 {
 
     qDebug() << "File: " << qs_fk_fileno <<":: getting media attributes";
-    qmlUI->m_selected_grid_item->clear();
+   // qmlUI->m_selected_grid_item->clear();
     // qmlUI->m_selected_grid_item->file = qs_fk_fileno;
 
     int gHeight = 10;
@@ -1956,7 +1956,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
 
     QString temp;
     qmlUI->m_dwIDataGridRequestCounter++;
-
+    qmlUI->filedetailsclass->setTitle("Title!");
 
     CMD_Populate_Datagrid cmd_populate_attribute_grid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 83, qs_fk_fileno.toStdString(), DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
@@ -2026,7 +2026,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 CMD_Get_Attributes_For_Media attribute_detail_get(qmlUI->iPK_Device, qmlUI->iMediaPluginID,  pCell->GetValue(), " ",&s_val );
                 SendCommand(attribute_detail_get);
                 qDebug() << s_val.c_str();
-                qmlUI->m_selected_grid_item->appendRow(new FileDetailsItem(cellTitle, cellAttribute, cellImg, false,  qmlUI->model));
+                //qmlUI->m_selected_grid_item->appendRow(new FileDetailsItem(cellTitle, cellAttribute, cellImg, false,  qmlUI->model));
             }
 
         }

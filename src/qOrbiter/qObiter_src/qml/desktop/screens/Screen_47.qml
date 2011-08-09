@@ -14,7 +14,7 @@ Rectangle {
 
     Connections
     {
-        target: filedetails
+        target: filedetailsclass
         onShowDetailsChanged:
         {
             MyJs.createFileDetails()

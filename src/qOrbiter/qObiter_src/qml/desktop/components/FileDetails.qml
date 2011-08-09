@@ -12,6 +12,14 @@ Rectangle {
 
     MouseArea{
         anchors.fill: parent
+
+        Text {
+            id: text2
+            x: 234
+            y: 21
+            text: filedetailsclass.object_title
+            font.pixelSize: 12
+        }
     }
 
     Component{

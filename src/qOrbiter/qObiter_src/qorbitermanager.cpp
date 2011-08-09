@@ -127,7 +127,6 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
     QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
     const QString test = buildType;
 
-
     QString finalPath = qmlPath+buildType+currentSkin;
     QString skinPath= finalPath+"/Style.qml";
     QString skinsPath = qmlPath+test;
@@ -198,9 +197,11 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         goBack << ("|||1,2|0|13|0|2|");
         qDebug() << goBack.first();
         backwards = false;
-        m_selected_grid_item = new FileDetailsModel(new FileDetailsItem, this);
-        qorbiterUIwin->rootContext()->setContextProperty("filedetails", m_selected_grid_item);
-        connect(m_selected_grid_item, SIGNAL(FileChanged(QString)), this, SLOT(showFileInfo(QString)), Qt::DirectConnection);
+
+        filedetailsclass = new FileDetailsClass();
+        //file details object
+        qorbiterUIwin->rootContext()->setContextProperty("filedetailsclass" ,filedetailsclass);
+        connect(filedetailsclass, SIGNAL(FileChanged(QString)), this, SLOT(showFileInfo(QString)));
 
         //showing the qml screen depending on device / platform / etc
 #ifdef Q_OS_SYMBIAN
@@ -1054,8 +1055,8 @@ void qorbiterManager::setStringParam(int paramType, QString param)
         {
             if(param.contains("!F"))
             {
-                m_selected_grid_item->setFile(param);
-                m_selected_grid_item->setVisible(true);
+                filedetailsclass->setFile(param);
+                filedetailsclass->setVisible(true);
                 break;
 
             //    pqOrbiter->GetMediaAttributeGrid(param);
@@ -1116,8 +1117,8 @@ void qorbiterManager::setStringParam(int paramType, QString param)
         if(param.contains("!F"))
         {
 
-            m_selected_grid_item->setVisible(true);
-            //m_selected_grid_item->setFile(param);
+            filedetailsclass->setVisible(true);
+            filedetailsclass->setFile(param);
             break;
          //   pqOrbiter->GetMediaAttributeGrid(param);
 
