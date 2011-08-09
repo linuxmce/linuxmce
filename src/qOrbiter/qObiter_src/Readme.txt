@@ -42,5 +42,6 @@ In an effor to keep the history of changes broken up
 #1170 - Android Platform build notes
 #1173 - Qorbiter datagrid behavior
 #1174 - MacOSX - not finding qml
+#1177 - File Details screen ticket
 
 If something you are working on is not described here, please open a ticket for it so we can track that specific issue.

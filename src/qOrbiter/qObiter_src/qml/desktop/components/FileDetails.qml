@@ -9,15 +9,96 @@ Rectangle {
     color: "slategrey"
     clip: true
     focus: true
+    Component.onCompleted: showFileInfo(filedetailsclass.file)
 
+    Image {
+        id: image1
+        x: 18
+        y: 16
+
+
+        source: filedetailsclass.screenshot
+    }
     MouseArea{
+        x: 0
+        y: 0
+        anchors.rightMargin: 0
+        anchors.bottomMargin: 0
+        anchors.leftMargin: 0
+        anchors.topMargin: 0
         anchors.fill: parent
 
         Text {
             id: text2
             x: 234
             y: 21
-            text: filedetailsclass.object_title
+            text: filedetailsclass.objecttitle
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+        }
+
+        Text {
+            id: text1
+            x: 33
+            y: 320
+            text: "Title"
+            font.pixelSize: 12
+        }
+
+        Text {
+            id: text3
+            x: 34
+            y: 340
+            text: "Location"
+            font.pixelSize: 12
+        }
+
+        Text {
+            id: text4
+            x: 34
+            y: 388
+            text: "Synopsis"
+            font.pixelSize: 12
+        }
+
+        Text {
+            id: titletext
+            x: 107
+            y: 320
+            text: filedetailsclass.objecttitle
+            font.pixelSize: 12
+        }
+
+        Text {
+            id: locationtext
+            x: 107
+            y: 340
+            text: "text"
+            font.pixelSize: 12
+        }
+
+        Text {
+            id: synopsistext
+            x: 107
+            y: 388
+            width: 500
+            wrapMode: "WrapAtWordBoundaryOrAnywhere"
+            text: filedetailsclass.synop
+            font.pixelSize: 12
+        }
+
+        Text {
+            id: fnamelabel
+            x: 34
+            y: 360
+            text: "Filename"
+            font.pixelSize: 12
+        }
+
+        Text {
+            id: fnametext
+            x: 107
+            y: 360
+            text: filedetailsclass.filename
             font.pixelSize: 12
         }
     }
@@ -54,14 +135,7 @@ Rectangle {
 
             }
 
-            Image {
-                id: image1
-                x: 18
-                y: 16
-                width: 199
-                height: 239
-                source: "qrc:/qtquickplugin/images/template_image.png"
-            }
+
 
             ButtonSq {
                 id: buttonsq1
@@ -94,27 +168,6 @@ Rectangle {
                 MouseArea{
                     anchors.fill: parent
                     onClicked: filedetailrect.destroy()
-                }
-            }
-
-            Rectangle {
-                id: rectangle1
-                x: 9
-                y: 266
-                width: 618
-                height: 178
-                color: "#ffffff"
-                radius: 56
-                clip: true
-
-                Text {
-                    id: text1
-                    x: 168
-                    y: 24
-                    width: 500
-                    text: "Synopsis"
-                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                    font.pixelSize: 12
                 }
             }
 

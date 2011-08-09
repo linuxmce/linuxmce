@@ -201,7 +201,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         filedetailsclass = new FileDetailsClass();
         //file details object
         qorbiterUIwin->rootContext()->setContextProperty("filedetailsclass" ,filedetailsclass);
-        connect(filedetailsclass, SIGNAL(FileChanged(QString)), this, SLOT(showFileInfo(QString)));
+       // connect(filedetailsclass, SIGNAL(FileChanged(QString)), this, SLOT(showFileInfo(QString)));
 
         //showing the qml screen depending on device / platform / etc
 #ifdef Q_OS_SYMBIAN
@@ -1057,6 +1057,8 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             {
                 filedetailsclass->setFile(param);
                 filedetailsclass->setVisible(true);
+
+
                 break;
 
             //    pqOrbiter->GetMediaAttributeGrid(param);
@@ -1119,6 +1121,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
             filedetailsclass->setVisible(true);
             filedetailsclass->setFile(param);
+
             break;
          //   pqOrbiter->GetMediaAttributeGrid(param);
 

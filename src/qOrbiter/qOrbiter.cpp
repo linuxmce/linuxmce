@@ -1956,7 +1956,60 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
 
     QString temp;
     qmlUI->m_dwIDataGridRequestCounter++;
-    qmlUI->filedetailsclass->setTitle("Title!");
+
+    string s_val;
+    CMD_Get_Attributes_For_Media attribute_detail_get(qmlUI->iPK_Device, qmlUI->iMediaPluginID,  qs_fk_fileno.toStdString(), " ",&s_val );
+    SendCommand(attribute_detail_get);
+    cout << s_val << endl;
+    QString breaker = s_val.c_str();
+
+
+
+   // qDebug() << breaker;
+
+    //setting object details
+
+  //  QString object_title = breaker.split(QRegExp("Title"));
+  //  qDebug() << object_title;
+  // breaker.replace(QRegExp("\\t"), "\\n");
+
+    /*
+      attribute order - should be consistent
+        0 - full file path
+        1 - path to file dir
+        2 - filename alone
+        3 - Title Attribtues
+        4 - Synopsis (for video media type)
+        5 - picture
+
+      */
+
+
+  QStringList details = breaker.split(QRegExp("\\t"));
+  int placeholder;
+
+  if(placeholder = details.indexOf("TITLE"))
+  {
+ qmlUI->filedetailsclass->setTitle(details.at(placeholder+1));
+  }
+
+  placeholder = details.indexOf("SYNOPSIS");
+  if(placeholder != 0)
+  {
+ qmlUI->filedetailsclass->setSynop(details.at(placeholder+1));
+  }
+
+  if(placeholder = details.indexOf("PICTURE"))
+  {
+ qmlUI->filedetailsclass->setScreenshot(details.at(placeholder+1));
+  }
+
+  placeholder = details.indexOf("FILENAME");
+  if(placeholder != 0)
+  {
+ qmlUI->filedetailsclass->setFilename(details.at(placeholder+1));
+  }
+
 
     CMD_Populate_Datagrid cmd_populate_attribute_grid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 83, qs_fk_fileno.toStdString(), DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
@@ -1993,19 +2046,17 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
             {
 
                 pCell = it->second;
-                string s_val;
+
                 string emptyEA;
 
                 // fk.remove("!F");
-
-
                 const char *pPath = pCell->GetImagePath();
                 index = pDataGridTable->CovertColRowType(it->first).first;
                 cellTitle = pCell->m_mapAttributes_Find("Title").c_str();
                 cellAttribute = pCell->m_mapAttributes_Find("Name").c_str();
-                qDebug() << pCell->m_mapAttributes_Find("Synopsis").c_str();
+              //  qDebug() << pCell->m_mapAttributes_Find("Synopsis").c_str();
 
-                qDebug() << "Item Attribute::" << cellTitle << "-" << cellAttribute;
+               // qDebug() << "Item Attribute::" << cellTitle << "-" << cellAttribute;
                 if (pPath )
                 {
                     cellImg = getfileForDG(pCell->GetImagePath());
@@ -2015,7 +2066,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 }
                 else if (!pPath) //making sure we dont provide a null image
                 {
-                    qDebug() << "No Image";
+           //         qDebug() << "No Image";
                     cellImg.load(":/icons/videos.png");
                 }
                 else if (cellImg.isNull())
@@ -2023,9 +2074,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                     cellImg.load(":/icons/videos.png");
                 }
 
-                CMD_Get_Attributes_For_Media attribute_detail_get(qmlUI->iPK_Device, qmlUI->iMediaPluginID,  pCell->GetValue(), " ",&s_val );
-                SendCommand(attribute_detail_get);
-                qDebug() << s_val.c_str();
+
                 //qmlUI->m_selected_grid_item->appendRow(new FileDetailsItem(cellTitle, cellAttribute, cellImg, false,  qmlUI->model));
             }
 

@@ -18,6 +18,7 @@ Rectangle {
         onShowDetailsChanged:
         {
             MyJs.createFileDetails()
+
         }
     }
 

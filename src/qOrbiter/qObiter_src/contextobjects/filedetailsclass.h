@@ -22,9 +22,12 @@ public:
     explicit FileDetailsClass(QDeclarativeItem *parent = 0);
     Q_PROPERTY (bool showDetails READ isVisible WRITE setVisible NOTIFY VisibleChanged)
     Q_PROPERTY(QString file READ getFile WRITE setFile NOTIFY FileChanged)
-    Q_PROPERTY(QString object_title READ getTitle WRITE setTitle NOTIFY object_changed)
+    Q_PROPERTY(QString objecttitle READ getTitle WRITE setTitle NOTIFY object_changed)
+    Q_PROPERTY(QString synop READ getSynop WRITE setSynop NOTIFY object_changed)
+    Q_PROPERTY(QUrl screenshot READ getScreenShot WRITE setScreenshot NOTIFY ImageChanged)
+    Q_PROPERTY(QString filename READ getFilename WRITE setFilename NOTIFY object_changed)
 
-    QString object_title;
+    QString objecttitle;
 
     QString file;
     inline QString getFile () {return file;}
@@ -37,13 +40,27 @@ public:
    // Q_INVOKABLE void setSelectionStatus(QString format);
    // Q_INVOKABLE bool getSelectionStatus();
 
+    QString synop;
+    inline QString getSynop() {return synop;}
+    inline void setSynop(QString s) { synop = s; emit object_changed(); }
+
+    QUrl screenshot;
+    QUrl bgImage;
+    inline void setScreenshot(QUrl u) {screenshot = u; emit ImageChanged(screenshot);}
+    inline QUrl getScreenShot() {return screenshot;}
+
+    QString filename;
+    inline QString getFilename() {return filename;}
+    inline void setFilename (QString f) {filename = f; emit object_changed();}
+
 signals:
     void object_changed();
     void FileChanged(QString f);
     void VisibleChanged(bool vis);
+    void ImageChanged(QUrl);
 
 public slots:
-    inline QString getTitle() {return object_title;}
+    inline QString getTitle() {return objecttitle;}
     void setFileMediaType();
     void setTitle(QString t);
 
