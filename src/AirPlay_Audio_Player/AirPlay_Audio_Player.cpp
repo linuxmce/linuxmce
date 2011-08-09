@@ -112,7 +112,7 @@ bool AirPlay_Audio_Player::GetConfig()
 	m_pDevice_PlugIn = m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_AirPlay_PlugIn_CONST);
 	if (!m_pDevice_PlugIn)
     {
-      	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_Audio_Player::PlugIn on CORE not found !");
+      	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_Audio_Player::PlugIn with DeviceTemplate %d not found on CORE!", DEVICETEMPLATE_AirPlay_PlugIn_CONST);
       	return false;
     } else {
       	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_Audio_Player::PlugIn device %d found on CORE !", m_pDevice_PlugIn->m_dwPK_Device);    	
@@ -129,7 +129,10 @@ bool AirPlay_Audio_Player::Connect(int iPK_DeviceTemplate)
 	Command_Impl::Connect(iPK_DeviceTemplate);
 	
    	pthread_create( &m_tListenThread, NULL, listenThread, (void *) this);
-
+	
+	EVENT_Playback_Started("",0,"AirPlay stream","RAW","");
+	//EVENT_Playback_Completed("",0,false); 
+	
 	return true;
 }
 
@@ -245,17 +248,20 @@ void *listenThread(void * pInstance) {
       	if(tClientSock > 0)
       	{
         	int tPid = fork();
-        	if(tPid == 0)
+			// child
+			if(tPid == 0)
        		{
           		freeaddrinfo(tAddrInfo);
           		tAddrInfo = NULL;
 				LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Accepted Client Connection..\n");
           		close(tServerSock);
-          		handleClient(tClientSock, tPassword, tHWID);
+          		pThis->EVENT_Playback_Started("",0,"AirPlay stream","RAW","");
+				handleClient(tClientSock, tPassword, tHWID);
           		//close(tClientSock);
           		//return 0;
         	}
-        	else
+        	// parent
+			else
         	{
 				LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Child now busy handling new client\n");
           		close(tClientSock);

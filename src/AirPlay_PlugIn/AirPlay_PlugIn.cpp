@@ -27,8 +27,9 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
-#include "pluto_main/Define_DeviceTemplate.h"
 #include "Orbiter_Plugin/Orbiter_Plugin.h"
+#include "pluto_main/Define_MediaType.h"
+#include "pluto_main/Define_DeviceTemplate.h"
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -72,22 +73,22 @@ bool AirPlay_PlugIn::Register()
 //<-dceag-reg-e->
 {
   	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_PlugIn::Register()");
-	//m_pMedia_Plugin=( Media_Plugin * ) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
+	m_pMedia_Plugin = ( Media_Plugin * ) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
   	//m_pOrbiter_Plugin=( Orbiter_Plugin * ) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Orbiter_Plugin_CONST);
-  	/*if( !m_pMedia_Plugin || !m_pOrbiter_Plugin )
+  	//if( !m_pMedia_Plugin || !m_pOrbiter_Plugin )
+    if( !m_pMedia_Plugin)
     	{
-      		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Cannot find sister plugins to AirPlay_PlugIn");
+      		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_PlugIn::Cannot find sister plugins");
       		return false;
-    	}*/
+    	}
 
-  	//vector<int> vectPK_DeviceTemplate;
-  	//vectPK_DeviceTemplate.push_back(DEVICETEMPLATE_Hulu_Player_CONST);
-  	//m_pMedia_Plugin->RegisterMediaPlugin( this, this, vectPK_DeviceTemplate, true );
+  	vector<int> vectPK_DeviceTemplate;
+  	vectPK_DeviceTemplate.push_back(DEVICETEMPLATE_AirPlay_Audio_Player_CONST);
+  	m_pMedia_Plugin->RegisterMediaPlugin( this, this, vectPK_DeviceTemplate, true );
 
-  	//LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Registered device %d",DEVICETEMPLATE_Hulu_Player_CONST);
+  	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_PlugIn::Registered device %d",DEVICETEMPLATE_AirPlay_Audio_Player_CONST);
 
   	//RegisterMsgInterceptor(( MessageInterceptorFn )( &AirPlay_PlugIn::MenuOnScreen ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Menu_Onscreen_CONST );
-
 
 	return Connect(PK_DeviceTemplate_get()); 
 }
@@ -139,4 +140,63 @@ void AirPlay_PlugIn::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessag
 
 */
 
-
+class MediaStream *AirPlay_PlugIn::CreateMediaStream( class MediaHandlerInfo *pMediaHandlerInfo, int iPK_MediaProvider, vector<class EntertainArea *> &vectEntertainArea, MediaDevice *pMediaDevice, int iPK_Users, deque<MediaFile *> *dequeFilenames, int StreamID )
+{
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_PlugIn::CreateMediaStream Called");
+  
+  AirPlayMediaStream *pAirPlayMediaStream;
+  MediaDevice *pMediaDevice_PassedIn;
+  /*
+  PLUTO_SAFETY_LOCK( xm, m_HuluMediaMutex );
+  
+  if(m_bQuit_get())
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_PlugIn::Hulu_PlugIn::CreateMediaStream with m_bQuit");
+      return NULL;
+    }
+  
+  PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
+  
+  pMediaDevice_PassedIn = NULL;
+  if ( vectEntertainArea.size()==0 && pMediaDevice == NULL )
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_PlugIn::I can't create a media stream without an entertainment area or a media device");
+      return NULL;
+    }
+  
+  if ( pMediaDevice != NULL  && // test the media device only if it set
+       pMediaDevice->m_pDeviceData_Router->m_dwPK_DeviceTemplate != DEVICETEMPLATE_Hulu_Player_CONST )
+    {
+      pMediaDevice_PassedIn = pMediaDevice;
+      pMediaDevice = m_pMedia_Plugin->m_mapMediaDevice_Find(m_pRouter->FindClosestRelative(DEVICETEMPLATE_Hulu_Player_CONST, pMediaDevice->m_pDeviceData_Router->m_dwPK_Device));
+    }
+  
+  if ( !pMediaDevice )
+    {
+      for(size_t s=0;s<vectEntertainArea.size();++s)
+	{
+	  EntertainArea *pEntertainArea = vectEntertainArea[0];
+	  pMediaDevice = FindMediaDeviceForEntertainArea(pEntertainArea);
+	  if( pMediaDevice )
+	    break;
+	}
+      if( !pMediaDevice )
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "I didn't find a device in the target ent area.");
+	  return NULL;
+	}
+    }
+  
+  LoggerWrapper::GetInstance()->Write(LV_STATUS, "Selected device (%d: %s) as playback device!",
+				      pMediaDevice->m_pDeviceData_Router->m_dwPK_Device,
+				      pMediaDevice->m_pDeviceData_Router->m_sDescription.c_str());
+  
+  pHuluMediaStream = new HuluMediaStream( this, pMediaHandlerInfo,iPK_MediaProvider,
+					  pMediaDevice,
+					  iPK_Users, st_RemovableMedia, StreamID );
+  
+  m_mapDevicesToStreams[pMediaDevice->m_pDeviceData_Router->m_dwPK_Device] = StreamID;
+  */
+  return pAirPlayMediaStream;
+  
+}

@@ -22,6 +22,12 @@
 #include "Gen_Devices/AirPlay_PlugInBase.h"
 //<-dceag-d-e->
 
+#include "../Media_Plugin/Media_Plugin.h"
+#include "../Media_Plugin/MediaStream.h"
+#include "../Media_Plugin/MediaHandlerBase.h"
+
+#include "AirPlayMediaStream.h"
+
 //<-dceag-decl-b->
 namespace DCE
 {
@@ -45,6 +51,33 @@ public:
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
+public:
+
+		/**
+		 * @brief
+		 */
+		virtual class MediaStream *CreateMediaStream( class MediaHandlerInfo *pMediaHandlerInfo, int iPK_MediaProvider, vector<class EntertainArea *> &vectEntertainArea, MediaDevice *pMediaDevice, int iPK_Users, deque<MediaFile *> *dequeFilenames, int StreamID );
+		
+		/**
+		 * @brief Start media playback
+		 */
+		//virtual bool StartMedia( class MediaStream *pMediaStream,string &sError );
+		
+		/**
+		 * @brief Stop media playback
+		 */
+		//virtual bool StopMedia( class MediaStream *pMediaStream );
+		
+		//virtual MediaDevice *FindMediaDeviceForEntertainArea(EntertainArea *pEntertainArea);
+		/**
+		 * @brief We need to see all media inserted events so we can start the appropriate media devices
+		 */
+		
+		//HuluMediaStream *ConvertToHuluMediaStream(MediaStream *pMediaStream, string callerIdMessage = "");
+		
+		//bool MenuOnScreen( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
+		
+		//virtual void PrepareToDelete();
 
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
