@@ -31,7 +31,7 @@
 //<-dceag-decl-b->
 namespace DCE
 {
-	class AirPlay_PlugIn : public AirPlay_PlugIn_Command
+	class AirPlay_PlugIn : public AirPlay_PlugIn_Command, public MediaHandlerBase 
 	{
 //<-dceag-decl-e->
 		// Private member variables
@@ -61,7 +61,7 @@ public:
 		/**
 		 * @brief Start media playback
 		 */
-		//virtual bool StartMedia( class MediaStream *pMediaStream,string &sError );
+		virtual bool StartMedia( class MediaStream *pMediaStream,string &sError );
 		
 		/**
 		 * @brief Stop media playback
@@ -73,7 +73,7 @@ public:
 		 * @brief We need to see all media inserted events so we can start the appropriate media devices
 		 */
 		
-		//HuluMediaStream *ConvertToHuluMediaStream(MediaStream *pMediaStream, string callerIdMessage = "");
+		AirPlayMediaStream *ConvertToAirPlayMediaStream(MediaStream *pMediaStream, string callerIdMessage = "");
 		
 		//bool MenuOnScreen( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
 		

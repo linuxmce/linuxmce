@@ -14,7 +14,7 @@
 
 */
 
-// Andrew Webster's shairport has been nearly fully integrated in this player, so here are the credits ...
+// Large parts of Andrew Webster's shairport have been integrated in this player, so here are the credits ...
 
 /*
  * ShairPort Initializer - Network Initializer/Mgr for Hairtunes RAOP
@@ -189,6 +189,19 @@ void AirPlay_Audio_Player::ReceivedUnknownCommand(string &sCMD_Result,Message *p
 	COMMANDS TO IMPLEMENT
 
 */
+
+void AirPlay_Audio_Player::CMD_Play_Media (int iPK_MediaType, int iStreamID,
+			     string sMediaPosition, string sMediaURL,
+			     string & sCMD_Result, Message * pMessage)
+//<-dceag-c37-e->
+{
+  cout << "Need to implement command #37 - Play Media" << endl;
+  cout << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+  cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
+
+}
 
 
 // MODIFIED VERSION OF SHAIRPORT IMPLEMENTATION STARTS HERE

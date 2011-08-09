@@ -31,6 +31,22 @@ using namespace DCE;
 #include "pluto_main/Define_MediaType.h"
 #include "pluto_main/Define_DeviceTemplate.h"
 
+/*#include "Orbiter_Plugin/Orbiter_Plugin.h"
+#include "pluto_main/Define_MediaType.h"
+#include "pluto_main/Define_DeviceCategory.h"
+#include "pluto_main/Define_Event.h"
+#include "pluto_main/Define_EventParameter.h"
+#include "pluto_main/Define_DesignObj.h"
+#include "pluto_main/Define_Variable.h"
+#include "../pluto_main/Define_DataGrid.h"
+#include "../pluto_main/Define_DeviceData.h"
+#include "../pluto_main/Define_Event.h"
+#include "../pluto_main/Define_DeviceData.h"
+#include "../pluto_main/Define_DeviceTemplate.h"
+#include "../pluto_main/Table_Users.h"*/
+
+
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 AirPlay_PlugIn::AirPlay_PlugIn(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
@@ -86,7 +102,7 @@ bool AirPlay_PlugIn::Register()
   	vectPK_DeviceTemplate.push_back(DEVICETEMPLATE_AirPlay_Audio_Player_CONST);
   	m_pMedia_Plugin->RegisterMediaPlugin( this, this, vectPK_DeviceTemplate, true );
 
-  	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_PlugIn::Registered device %d",DEVICETEMPLATE_AirPlay_Audio_Player_CONST);
+  	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_PlugIn::Registered device media player");
 
   	//RegisterMsgInterceptor(( MessageInterceptorFn )( &AirPlay_PlugIn::MenuOnScreen ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Menu_Onscreen_CONST );
 
@@ -199,4 +215,60 @@ class MediaStream *AirPlay_PlugIn::CreateMediaStream( class MediaHandlerInfo *pM
   */
   return pAirPlayMediaStream;
   
+}
+
+bool AirPlay_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
+{
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_PlugIn::StartMedia Called");
+ 
+	PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
+ 
+	LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "AirPlay_PlugIn::StartMedia() Starting media stream playback.");
+ 
+	AirPlayMediaStream *pAirPlayMediaStream = NULL;
+	if ( (pAirPlayMediaStream = ConvertToAirPlayMediaStream(pMediaStream, "AirPlay_PlugIn::StartMedia(): ")) == NULL )
+		return false;
+ 
+	//string sFileToPlay;
+	MediaFile *pMediaFile = NULL;
+ 
+	//sFileToPlay = pHuluMediaStream->GetFilenameToPlay("AirPlay_PlugIn::Empty file name");
+ 
+	LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "AirPlay_PlugIn::StartMedia() Media type %d", pMediaStream->m_iPK_MediaType);
+ 
+	string mediaURL;
+	string Response;
+ 
+	mediaURL = "";//sFileToPlay;
+ 
+	// send the CMD straight through.
+ 
+	pAirPlayMediaStream->m_sMediaDescription = "AirPlay";
+
+	DCE::CMD_Play_Media CMD_Play_Media(m_dwPK_Device,
+						pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
+						pAirPlayMediaStream->m_iPK_MediaType,
+						pAirPlayMediaStream->m_iStreamID_get(),
+						"00:00:00",mediaURL);
+	SendCommand(CMD_Play_Media);
+ 
+	/** We're going to send a message to all the orbiters in this area so they know what the remote is,
+	and we will send all bound remotes to the new screen */
+	for( MapEntertainArea::iterator itEA = pAirPlayMediaStream->m_mapEntertainArea.begin( );itEA != pAirPlayMediaStream->m_mapEntertainArea.end( );++itEA )
+	{
+		EntertainArea *pEntertainArea = ( *itEA ).second;
+		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "AirPlay_PlugIn::Looking into the ent area (%p) with id %d and %d remotes", pEntertainArea, pEntertainArea->m_iPK_EntertainArea, (int) pEntertainArea->m_mapBoundRemote.size() );
+        for(map<int,OH_Orbiter *>::iterator it=m_pOrbiter_Plugin->m_mapOH_Orbiter.begin();it!=m_pOrbiter_Plugin->m_mapOH_Orbiter.end();++it)
+        {
+            OH_Orbiter *pOH_Orbiter = (*it).second;
+			if( pOH_Orbiter->m_pEntertainArea!=pEntertainArea )
+				continue;
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_PlugIn::Processing remote: for orbiter: %d", pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device);
+			bool bBound = pEntertainArea->m_mapBoundRemote.find(pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device)!=pEntertainArea->m_mapBoundRemote.end();
+			pAirPlayMediaStream->SetNowPlaying(pOH_Orbiter,false,bBound);
+		}
+	}
+
+	return MediaHandlerBase::StartMedia(pMediaStream,sError);
+ 
 }

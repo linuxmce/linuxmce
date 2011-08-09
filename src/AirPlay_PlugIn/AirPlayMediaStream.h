@@ -34,7 +34,7 @@ namespace DCE
 			int 	m_iPK_DesignObj_RemoteOSD_After_Menu;
 	        int 	m_iPK_DesignObj_Remote_Popup_After_Menu;
 
-			AirPlayMediaStream(class Hulu_PlugIn *pHuluPlugIn, class MediaHandlerInfo *pMediaHandlerInfo, int iPK_MediaProvider,MediaDevice *pMediaDevice, int PK_Users,enum SourceType sourceType,int iStreamID);
+			AirPlayMediaStream(class AirPlay_PlugIn *pHuluPlugIn, class MediaHandlerInfo *pMediaHandlerInfo, int iPK_MediaProvider,MediaDevice *pMediaDevice, int PK_Users,enum SourceType sourceType,int iStreamID);
 
 			virtual ~AirPlayMediaStream();
 			virtual int GetType();
