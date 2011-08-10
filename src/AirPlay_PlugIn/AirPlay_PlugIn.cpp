@@ -52,17 +52,13 @@ using namespace DCE;
 AirPlay_PlugIn::AirPlay_PlugIn(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
 	: AirPlay_PlugIn_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
+	,m_AirPlayMediaMutex("airplay media mutex")
 {
   	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_PlugIn::Starting up...");
+  	m_AirPlayMediaMutex.Init(NULL);
 }
 
-//<-dceag-const2-b->
-// The constructor when the class is created as an embedded instance within another stand-alone device
-AirPlay_PlugIn::AirPlay_PlugIn(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
-	: AirPlay_PlugIn_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
-//<-dceag-const2-e->
-{
-}
+//<-dceag-const2-b->!
 
 //<-dceag-dest-b->
 AirPlay_PlugIn::~AirPlay_PlugIn()
@@ -158,102 +154,133 @@ void AirPlay_PlugIn::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessag
 
 class MediaStream *AirPlay_PlugIn::CreateMediaStream( class MediaHandlerInfo *pMediaHandlerInfo, int iPK_MediaProvider, vector<class EntertainArea *> &vectEntertainArea, MediaDevice *pMediaDevice, int iPK_Users, deque<MediaFile *> *dequeFilenames, int StreamID )
 {
-  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_PlugIn::CreateMediaStream Called");
+  	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_PlugIn::CreateMediaStream Called");
   
-  AirPlayMediaStream *pAirPlayMediaStream;
-  MediaDevice *pMediaDevice_PassedIn;
-  PLUTO_SAFETY_LOCK( xm, m_HuluMediaMutex );
-  /*
+  	AirPlayMediaStream *pAirPlayMediaStream;
+  	MediaDevice *pMediaDevice_PassedIn;
+  	PLUTO_SAFETY_LOCK( xm, m_AirPlayMediaMutex );
+  
  
-  if(m_bQuit_get())
+  	if(m_bQuit_get())
     {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_PlugIn::Hulu_PlugIn::CreateMediaStream with m_bQuit");
-      return NULL;
+      	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_PlugIn::CreateMediaStream with m_bQuit");
+      	return NULL;
     }
   
-  PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
+  	PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
   
-  pMediaDevice_PassedIn = NULL;
-  if ( vectEntertainArea.size()==0 && pMediaDevice == NULL )
+  	pMediaDevice_PassedIn = NULL;
+  	if ( vectEntertainArea.size()==0 && pMediaDevice == NULL )
     {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_PlugIn::I can't create a media stream without an entertainment area or a media device");
-      return NULL;
+      	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_PlugIn::I can't create a media stream without an entertainment area or a media device");
+      	return NULL;
     }
   
-  if ( pMediaDevice != NULL  && // test the media device only if it set
-       pMediaDevice->m_pDeviceData_Router->m_dwPK_DeviceTemplate != DEVICETEMPLATE_Hulu_Player_CONST )
-    {
-      pMediaDevice_PassedIn = pMediaDevice;
-      pMediaDevice = m_pMedia_Plugin->m_mapMediaDevice_Find(m_pRouter->FindClosestRelative(DEVICETEMPLATE_Hulu_Player_CONST, pMediaDevice->m_pDeviceData_Router->m_dwPK_Device));
+  	if ( pMediaDevice != NULL  && // test the media device only if it set
+       pMediaDevice->m_pDeviceData_Router->m_dwPK_DeviceTemplate != DEVICETEMPLATE_AirPlay_Audio_Player_CONST )
+    {	
+      	pMediaDevice_PassedIn = pMediaDevice;
+      	pMediaDevice = m_pMedia_Plugin->m_mapMediaDevice_Find(m_pRouter->FindClosestRelative(DEVICETEMPLATE_AirPlay_Audio_Player_CONST, pMediaDevice->m_pDeviceData_Router->m_dwPK_Device));
     }
   
-  if ( !pMediaDevice )
+  	if ( !pMediaDevice )
     {
-      for(size_t s=0;s<vectEntertainArea.size();++s)
-	{
-	  EntertainArea *pEntertainArea = vectEntertainArea[0];
-	  pMediaDevice = FindMediaDeviceForEntertainArea(pEntertainArea);
-	  if( pMediaDevice )
-	    break;
-	}
-      if( !pMediaDevice )
-	{
-	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "I didn't find a device in the target ent area.");
-	  return NULL;
-	}
+      	for(size_t s=0;s<vectEntertainArea.size();++s)
+		{
+	  		EntertainArea *pEntertainArea = vectEntertainArea[0];
+	  		pMediaDevice = FindMediaDeviceForEntertainArea(pEntertainArea);
+	  		if( pMediaDevice )
+	    	break;
+		}
+      	if( !pMediaDevice )
+		{
+	  		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_PlugIn::I didn't find a device in the target entertainment area !");
+	  		return NULL;
+		}
     }
   
-  LoggerWrapper::GetInstance()->Write(LV_STATUS, "Selected device (%d: %s) as playback device!",
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_PlugIn::Selected device (%d: %s) as playback device!",
 				      pMediaDevice->m_pDeviceData_Router->m_dwPK_Device,
 				      pMediaDevice->m_pDeviceData_Router->m_sDescription.c_str());
   
-  pHuluMediaStream = new HuluMediaStream( this, pMediaHandlerInfo,iPK_MediaProvider,
+  pAirPlayMediaStream = new AirPlayMediaStream( this, pMediaHandlerInfo,iPK_MediaProvider,
 					  pMediaDevice,
 					  iPK_Users, st_RemovableMedia, StreamID );
   
   m_mapDevicesToStreams[pMediaDevice->m_pDeviceData_Router->m_dwPK_Device] = StreamID;
-  */
+  
   return pAirPlayMediaStream;
   
 }
 
-bool AirPlay_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
+MediaDevice *AirPlay_PlugIn::FindMediaDeviceForEntertainArea(EntertainArea *pEntertainArea)
 {
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_PlugIn::StartMedia Called");
+		PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
  
+		MediaDevice *pMediaDevice;
+		pMediaDevice = GetMediaDeviceForEntertainArea(pEntertainArea, DEVICETEMPLATE_AirPlay_Audio_Player_CONST);
+ 
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_PlugIn::Looking for a proper device in the ent area %d - %s"
+			, pEntertainArea->m_iPK_EntertainArea, pEntertainArea->m_sDescription.c_str());
+		if ( pMediaDevice == NULL ) return NULL;
+
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_PlugIn::Returning device %d - %s"
+			, pMediaDevice->m_pDeviceData_Router->m_dwPK_Device, pMediaDevice->m_pDeviceData_Router->m_sDescription.c_str());
+ 
+		return pMediaDevice;
+}
+
+AirPlayMediaStream *AirPlay_PlugIn::ConvertToAirPlayMediaStream(MediaStream *pMediaStream, string callerIdMessage)
+{
 	PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
  
+	if ( pMediaStream == NULL )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, (callerIdMessage + "AirPlay_PlugIn::Stream is a NULL stream!").c_str());
+		return NULL;
+	}
+ 
+	if ( pMediaStream->GetType() != MEDIASTREAM_TYPE_AIRPLAY_AUDIO )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, (callerIdMessage + "AirPlay_PlugIn::Stream is not an AirPlayMediaStream!").c_str());
+		return NULL;
+	}
+ 
+	return static_cast<AirPlayMediaStream*>(pMediaStream);
+}
+
+bool AirPlay_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
+{
 	LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "AirPlay_PlugIn::StartMedia() Starting media stream playback.");
+
+	PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex ); 
  
 	AirPlayMediaStream *pAirPlayMediaStream = NULL;
 	if ( (pAirPlayMediaStream = ConvertToAirPlayMediaStream(pMediaStream, "AirPlay_PlugIn::StartMedia(): ")) == NULL )
 		return false;
  
-	//string sFileToPlay;
 	MediaFile *pMediaFile = NULL;
- 
-	//sFileToPlay = pHuluMediaStream->GetFilenameToPlay("AirPlay_PlugIn::Empty file name");
  
 	LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "AirPlay_PlugIn::StartMedia() Media type %d", pMediaStream->m_iPK_MediaType);
  
-	string mediaURL;
 	string Response;
- 
-	mediaURL = "";//sFileToPlay;
- 
+  
 	// send the CMD straight through.
  
-	pAirPlayMediaStream->m_sMediaDescription = "AirPlay";
+	pAirPlayMediaStream->m_sMediaDescription = "AirPlay audio";
 
 	DCE::CMD_Play_Media CMD_Play_Media(m_dwPK_Device,
 						pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
 						pAirPlayMediaStream->m_iPK_MediaType,
 						pAirPlayMediaStream->m_iStreamID_get(),
-						"00:00:00",mediaURL);
+						"","");
 	SendCommand(CMD_Play_Media);
  
-	/** We're going to send a message to all the orbiters in this area so they know what the remote is,
+	/* We're going to send a message to all the orbiters in this area so they know what the remote is,
 	and we will send all bound remotes to the new screen */
+	
+	/*
+	
 	for( MapEntertainArea::iterator itEA = pAirPlayMediaStream->m_mapEntertainArea.begin( );itEA != pAirPlayMediaStream->m_mapEntertainArea.end( );++itEA )
 	{
 		EntertainArea *pEntertainArea = ( *itEA ).second;
@@ -267,7 +294,7 @@ bool AirPlay_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 			bool bBound = pEntertainArea->m_mapBoundRemote.find(pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device)!=pEntertainArea->m_mapBoundRemote.end();
 			pAirPlayMediaStream->SetNowPlaying(pOH_Orbiter,false,bBound);
 		}
-	}
+	}*/
 
 	return MediaHandlerBase::StartMedia(pMediaStream,sError);
  

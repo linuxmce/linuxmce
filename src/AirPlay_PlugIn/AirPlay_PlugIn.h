@@ -36,7 +36,9 @@ namespace DCE
 //<-dceag-decl-e->
 		// Private member variables
 
-		// Private methods
+		pluto_pthread_mutex_t m_AirPlayMediaMutex; // protect us from ourselves.
+	  	map<int, int> m_mapDevicesToStreams;
+	  	// Private methods
 		class Orbiter_Plugin *m_pOrbiter_Plugin;
 public:
 		// Public member variables
@@ -57,7 +59,7 @@ public:
 		 * @brief
 		 */
 		virtual class MediaStream *CreateMediaStream( class MediaHandlerInfo *pMediaHandlerInfo, int iPK_MediaProvider, vector<class EntertainArea *> &vectEntertainArea, MediaDevice *pMediaDevice, int iPK_Users, deque<MediaFile *> *dequeFilenames, int StreamID );
-		
+		virtual MediaDevice *FindMediaDeviceForEntertainArea(EntertainArea *pEntertainArea);
 		/**
 		 * @brief Start media playback
 		 */

@@ -24,6 +24,8 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
+#include "pluto_main/Define_MediaType.h"
+
 #define HWID_SIZE 6
 
 //<-dceag-d-e->
@@ -76,7 +78,7 @@ public:
 
 			*****COMMANDS***** we need to implement
 	*/
-void CMD_Play_Media (int iPK_MediaType, int iStreamID,string sMediaPosition, string sMediaURL, string & sCMD_Result, Message * pMessage);
+	void CMD_Play_Media (int iPK_MediaType, int iStreamID,string sMediaPosition, string sMediaURL, string & sCMD_Result, Message * pMessage);
 
 //<-dceag-h-e->
 	};

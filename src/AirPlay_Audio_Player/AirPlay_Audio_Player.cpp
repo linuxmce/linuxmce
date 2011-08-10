@@ -129,19 +129,17 @@ bool AirPlay_Audio_Player::Connect(int iPK_DeviceTemplate)
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Connect()");
 	Command_Impl::Connect(iPK_DeviceTemplate);
 	
-   	//pthread_create( &m_tListenThread, NULL, listenThread, (void *) this);
+   	pthread_create( &m_tListenThread, NULL, listenThread, (void *) this);
 	
 	//EVENT_Playback_Started("",0,"AirPlay stream","RAW","");
 	//EVENT_Playback_Completed("",0,false); 
-	//DCE::CMD_MH_Play_Media CMD_MH_Play_Media(m_pOrbiter->m_dwPK_Device,m_pOrbiter->m_dwPK_Device_MediaPlugIn,
-	//			0,mediaFileBrowserOptions.m_sSelectedFile,0,0,StringUtils::itos( m_pOrbiter->m_pLocationInfo->PK_EntertainArea )
-	//			,false,0,bQueue, 0 /* bBypass_Event */, 0 /* bDont_Setup_AV */ );
+	
 	CMD_MH_Play_Media CMD_MH_Play_Media(
-	58 /* PK Device*/
-	,10 /* PK Device Media Plugin*/
+	m_pData->m_dwPK_Device_ControlledVia /* PK Device, this is our Orbiter*/
+	,m_pDevice_Media_PlugIn->m_dwPK_Device /* PK Device Media Plugin*/
 	,0 /* PK Device */
 	,"" /* sFile*/
-	,60 /* Mediatype*/
+	,MEDIATYPE_lmce_Airplay_audio_CONST /* Mediatype*/
 	,0 /* DeviceTemplate*/
 	,StringUtils::itos(3) /* EA*/
 	,false /* Resume*/
@@ -150,6 +148,7 @@ bool AirPlay_Audio_Player::Connect(int iPK_DeviceTemplate)
 	,0 /* bBypass_Event */
 	,0 /* bDont_Setup_AV */ );
     SendCommand(CMD_MH_Play_Media);
+    
 	return true;
 }
 
@@ -212,11 +211,12 @@ void AirPlay_Audio_Player::CMD_Play_Media (int iPK_MediaType, int iStreamID,
 			     string & sCMD_Result, Message * pMessage)
 //<-dceag-c37-e->
 {
-  cout << "Need to implement command #37 - Play Media" << endl;
-  cout << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
-  cout << "Parm #41 - StreamID=" << iStreamID << endl;
-  cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
-  cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::CMD_Play_Media");
+  	cout << "Need to implement command #37 - Play Media" << endl;
+  	cout << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
+  	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+  	cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
 
 }
 
