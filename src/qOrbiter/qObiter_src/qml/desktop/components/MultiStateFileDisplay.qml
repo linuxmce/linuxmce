@@ -55,11 +55,11 @@ Rectangle {
                  path: Path {
                      startX: 10
                      startY: 50
-                     PathAttribute { name: "iconScale"; value: 0.5 }
-                     PathQuad { x: 200; y: 150; controlX: 50; controlY: 200 }
+                     PathAttribute { name: "iconScale"; value: 0.25 }
+                     PathQuad { x: 350; y: 350; controlX: 50; controlY: 100 }
                      PathAttribute { name: "iconScale"; value: 1.0 }
-                     PathQuad { x: 390; y: 50; controlX: 350; controlY: 200 }
-                     PathAttribute { name: "iconScale"; value: 0.5 }
+                     PathQuad { x: 550; y: 50; controlX: 650; controlY: 200 }
+                     PathAttribute { name: "iconScale"; value: .25 }
                  }
     }
 

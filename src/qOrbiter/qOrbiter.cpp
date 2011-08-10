@@ -1962,6 +1962,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     SendCommand(attribute_detail_get);
 
     QString breaker = s_val.c_str();
+
     /*
       attribute order - should be consistent
         0 - full file path
@@ -1992,8 +1993,6 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     {
         qmlUI->filedetailsclass->setScreenshot(details.at(placeholder+1));
         qmlUI->filedetailsclass->title =  getfileForDG(details.at(placeholder+1).toStdString());
-
-
     }
 
     placeholder = details.indexOf("FILENAME");
@@ -2049,7 +2048,15 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 cellAttribute = pCell->m_mapAttributes_Find("Name").c_str();
                 //  qDebug() << pCell->m_mapAttributes_Find("Synopsis").c_str();
 
-                // qDebug() << "Item Attribute::" << cellTitle << "-" << cellAttribute;
+                if(cellTitle == "Program")
+                {
+                    string a_text;
+                    CMD_Get_Attribute getProgramAttributes(qmlUI->iPK_Device, qmlUI->iMediaPluginID, cellAttribute.remove("!A").toInt(), &a_text);
+                    SendCommand(getProgramAttributes);
+                    qDebug() << a_text.c_str();
+                }
+
+                 qDebug() << "Item Attribute::" << cellTitle << "-" << cellAttribute;
                 if (pPath )
                 {
                     cellImg = getfileForDG(pCell->GetImagePath());

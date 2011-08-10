@@ -6,6 +6,7 @@
 #include <QProcess>
 #include <QDeclarativeEngine>
 #include <QApplication>
+#include <imageProviders/filedetailsimageprovider.h>
 //#include "OrbiterData.h"
 //#include "DCERouter.h"
 
@@ -201,7 +202,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         filedetailsclass = new FileDetailsClass();
         //file details object
         qorbiterUIwin->rootContext()->setContextProperty("filedetailsclass" ,filedetailsclass);
-        contextImageProvider = new FileDetailsImageProvider(filedetailsclass);
+        contextImageProvider = new FileDetailsImageProvider(this);
         qorbiterUIwin->engine()->addImageProvider("filedetailsprovider", contextImageProvider);
         // connect(filedetailsclass, SIGNAL(FileChanged(QString)), this, SLOT(showFileInfo(QString)));
 

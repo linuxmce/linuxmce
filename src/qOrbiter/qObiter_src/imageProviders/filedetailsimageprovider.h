@@ -5,36 +5,35 @@
 #include <QDeclarativeImageProvider>
 #include <QDebug>
 #include <QVariant>
-#include <contextobjects/filedetailsclass.h>
+#include <qOrbiter/qObiter_src/qorbitermanager.h>
 
 class FileDetailsImageProvider: public QObject , public QDeclarativeImageProvider
 {
 public:
-    FileDetailsImageProvider(FileDetailsClass *d);
+    FileDetailsImageProvider(qorbiterManager *manager);
 
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize)
     {
+        QImage result;
+        QImage key= f->pqOrbiter->getfileForDG(id.toStdString());
 
-            QImage result;
-            QImage key = f->title;
-            qDebug() << f->title.size();
 
-            if (requestedSize.isValid()) {
-                result = key.scaled(requestedSize);
-            } else {
-                result = key;
-            }
 
-            return result;
+        if (requestedSize.isValid()) {
+            result = key.scaled(requestedSize);
+        } else {
+            result = key;
+        }
+        return result;
+
     }
-
 
 signals:
 
 public slots:
 
 private:
-    FileDetailsClass * f;
+    qorbiterManager * f;
 
 
 };

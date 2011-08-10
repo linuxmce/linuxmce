@@ -27,17 +27,22 @@ public:
     Q_PROPERTY(QUrl screenshot READ getScreenShot WRITE setScreenshot NOTIFY ImageChanged)
     Q_PROPERTY(QString filename READ getFilename WRITE setFilename NOTIFY object_changed)
 
-    Q_PROPERTY( QImage title READ getTitleImage WRITE setTitleImage NOTIFY object_changed)
+    Q_PROPERTY( QImage title READ getTitleImage WRITE setTitleImage NOTIFY titleImageChanged)
+    Q_PROPERTY(QImage program READ getProgramImage WRITE setProgramImage NOTIFY object_changed)
 
     QString objecttitle;
 
     QString file;
     inline QString getFile () {return file;}
     inline void setFile(QString incFile) { file = incFile; emit FileChanged(file);}
+
     QImage title;
     inline void setTitleImage (QImage inc_t) {title = inc_t; emit object_changed();}
     inline QImage getTitleImage () {return title;}
+
     QImage program;
+    inline void setProgramImage (QImage inc_p) {program = inc_p; emit object_changed();}
+    inline QImage getProgramImage () {return program;}
     QImage Season;
     QImage imdb;
     QImage episode;
@@ -68,6 +73,7 @@ signals:
     void FileChanged(QString f);
     void VisibleChanged(bool vis);
     void ImageChanged(QUrl);
+    void titleImageChanged();
 
 public slots:
     inline QString getTitle() {return objecttitle;}

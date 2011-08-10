@@ -124,7 +124,7 @@ Rectangle {
                         font.pointSize: 12;
                         color: "black" ;
                         wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                        anchors.fill: frame
+                        anchors.fill: parent
                         font.bold: true
                     }
                 }

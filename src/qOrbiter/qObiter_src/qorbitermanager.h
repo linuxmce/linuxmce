@@ -21,7 +21,7 @@
 #include <datamodels/mediatypemodel.h>
 #include <datamodels/filedetailsmodel.h>
 #include <contextobjects/filedetailsclass.h>
-#include <imageProviders/filedetailsimageprovider.h>
+//#include <imageProviders/filedetailsimageprovider.h>
 
 #include <QFile>
 #include <QDir>
@@ -43,6 +43,7 @@
 #include <qOrbiter/qOrbiter.h>
 
 class basicImageProvider;
+class FileDetailsImageProvider;
 
 namespace DCE
 {
