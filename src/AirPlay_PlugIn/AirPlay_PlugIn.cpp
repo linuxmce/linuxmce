@@ -162,9 +162,9 @@ class MediaStream *AirPlay_PlugIn::CreateMediaStream( class MediaHandlerInfo *pM
   
   AirPlayMediaStream *pAirPlayMediaStream;
   MediaDevice *pMediaDevice_PassedIn;
-  /*
   PLUTO_SAFETY_LOCK( xm, m_HuluMediaMutex );
-  
+  /*
+ 
   if(m_bQuit_get())
     {
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_PlugIn::Hulu_PlugIn::CreateMediaStream with m_bQuit");

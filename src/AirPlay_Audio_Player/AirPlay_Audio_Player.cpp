@@ -109,13 +109,14 @@ bool AirPlay_Audio_Player::GetConfig()
 	// The configuration parameters DATA_ are now populated
 
 	m_pDevice_MD = m_pData->m_AllDevices.m_mapDeviceData_Base_Find(m_pData->m_dwPK_Device_MD);
-	m_pDevice_PlugIn = m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_AirPlay_PlugIn_CONST);
-	if (!m_pDevice_PlugIn)
+	m_pDevice_AirPlay_PlugIn = m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_AirPlay_PlugIn_CONST);
+	m_pDevice_Media_PlugIn = m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
+	if (!m_pDevice_AirPlay_PlugIn)
     {
       	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_Audio_Player::PlugIn with DeviceTemplate %d not found on CORE!", DEVICETEMPLATE_AirPlay_PlugIn_CONST);
       	return false;
     } else {
-      	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_Audio_Player::PlugIn device %d found on CORE !", m_pDevice_PlugIn->m_dwPK_Device);    	
+      	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_Audio_Player::PlugIn device %d found on CORE !", m_pDevice_AirPlay_PlugIn->m_dwPK_Device);    	
     }
 
 	return true;
@@ -128,11 +129,27 @@ bool AirPlay_Audio_Player::Connect(int iPK_DeviceTemplate)
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Connect()");
 	Command_Impl::Connect(iPK_DeviceTemplate);
 	
-   	pthread_create( &m_tListenThread, NULL, listenThread, (void *) this);
+   	//pthread_create( &m_tListenThread, NULL, listenThread, (void *) this);
 	
-	EVENT_Playback_Started("",0,"AirPlay stream","RAW","");
+	//EVENT_Playback_Started("",0,"AirPlay stream","RAW","");
 	//EVENT_Playback_Completed("",0,false); 
-	
+	//DCE::CMD_MH_Play_Media CMD_MH_Play_Media(m_pOrbiter->m_dwPK_Device,m_pOrbiter->m_dwPK_Device_MediaPlugIn,
+	//			0,mediaFileBrowserOptions.m_sSelectedFile,0,0,StringUtils::itos( m_pOrbiter->m_pLocationInfo->PK_EntertainArea )
+	//			,false,0,bQueue, 0 /* bBypass_Event */, 0 /* bDont_Setup_AV */ );
+	CMD_MH_Play_Media CMD_MH_Play_Media(
+	58 /* PK Device*/
+	,10 /* PK Device Media Plugin*/
+	,0 /* PK Device */
+	,"" /* sFile*/
+	,60 /* Mediatype*/
+	,0 /* DeviceTemplate*/
+	,StringUtils::itos(3) /* EA*/
+	,false /* Resume*/
+	,0 /* Repeat */
+	,0 /* Queue*/
+	,0 /* bBypass_Event */
+	,0 /* bDont_Setup_AV */ );
+    SendCommand(CMD_MH_Play_Media);
 	return true;
 }
 

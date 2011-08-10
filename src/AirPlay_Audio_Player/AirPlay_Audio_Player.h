@@ -44,7 +44,7 @@ private:
 
 //<-dceag-const-b->
 public:
-		DeviceData_Base *m_pDevice_MD, *m_pDevice_PlugIn;
+		DeviceData_Base *m_pDevice_MD, *m_pDevice_AirPlay_PlugIn, *m_pDevice_Media_PlugIn;
 		// Constructors/Destructor
 		AirPlay_Audio_Player(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
 		virtual ~AirPlay_Audio_Player();
@@ -76,6 +76,7 @@ public:
 
 			*****COMMANDS***** we need to implement
 	*/
+void CMD_Play_Media (int iPK_MediaType, int iStreamID,string sMediaPosition, string sMediaURL, string & sCMD_Result, Message * pMessage);
 
 //<-dceag-h-e->
 	};
