@@ -35,38 +35,64 @@ Rectangle {
 
     PathView {
         id: path_view1
-        x: 218
-        y: 100
-        width: 15
-        height: 15
+        x: 398
+        y: 251
+        width: 33
+        height: 31
         visible: false
         opacity: 0
+        anchors.topMargin: 40
+        anchors.horizontalCenter: fileviewscreen.horizontalCenter
+        model:dataModel
+        focus: true
+        clip: true
+        Keys.enabled: true
+        anchors.fill: parent
+                 highlight: appHighlight
+                 preferredHighlightBegin: 0.5
+                 preferredHighlightEnd: 0.5
+                 delegate: appDelegate
+                 path: Path {
+                     startX: 10
+                     startY: 50
+                     PathAttribute { name: "iconScale"; value: 0.5 }
+                     PathQuad { x: 200; y: 150; controlX: 50; controlY: 200 }
+                     PathAttribute { name: "iconScale"; value: 1.0 }
+                     PathQuad { x: 390; y: 50; controlX: 350; controlY: 200 }
+                     PathAttribute { name: "iconScale"; value: 0.5 }
+                 }
     }
 
     ListView {
+    //Rectangle {
         id: list_view1
-        x: 436
-        y: 385
-        width: 15
-        height: 15
-        visible: false
+        x: 398
+        y: 251
+        width: 33
+        height: 31
+        //visible: false
         opacity: 0
+        model:dataModel
+        delegate: contactDelegateList
+        highlight: Rectangle { color: "lightblue"; radius: 5 }
+        focus: true
+        clip: true
     }
 
     Text {
         id: text1
         x: 15
         y: 10
-        text: "text"
+        text: "Media List"
         font.family: "Droid Sans"
         font.pixelSize: 25
     }
 
     ButtonSq {
         id: buttonsq1
-        x: 382
-        y: 2
-        width: 42
+        x: 389
+        y: 1
+        width: 41
         height: 37
         buttontextitalic: true
         buttontext: "Grid"
@@ -92,8 +118,11 @@ Rectangle {
         buttontextbold: true
         buttontext: "Cover"
         MouseArea{
+            width: 41
+            height: 38
+            anchors.bottomMargin: 0
             anchors.fill: parent
-            onClicked: state ="PATHVIEW"
+            onClicked: gridholder.state ="PATHVIEW"
         }
     }
 
@@ -102,11 +131,15 @@ Rectangle {
         x: 495
         y: 1
         width: 41
-        height: 40
+        height: 37
         buttontextbold: true
         buttontextitalic: true
         buttontext: "List"
         MouseArea{
+            width: 42
+            height: 41
+            anchors.rightMargin: 0
+            anchors.bottomMargin: 0
             anchors.fill: parent
             onClicked: gridholder.state = "LISTVIEW"
 
@@ -119,23 +152,25 @@ Rectangle {
             PropertyChanges {
                 target: gridView
                 visible: false
+                opacity: 0
             }
 
             PropertyChanges {
                 target: path_view1
-                x: 0
+                x:0
                 y: 40
                 width: 790
                 height: 460
                 opacity: 1
+                visible: true
             }
 
             PropertyChanges {
                 target: list_view1
-                x: 436
-                y: 385
-                width: 15
-                height: 15
+                x: 398
+                y: 251
+                width: 33
+                height: 31
                 visible: false
             }
         },
@@ -144,22 +179,23 @@ Rectangle {
             PropertyChanges {
                 target: gridView
                 visible: false
+                opacity: 0
             }
 
             PropertyChanges {
                 target: path_view1
-                x: 0
-                y: 0
-                width: 15
-                height: 15
-                interactive: false
+                x: 398
+                y: 251
+                width: 33
+                height: 31
+                //interactive: false
                 visible: false
                 opacity: 1
             }
 
             PropertyChanges {
                 target: list_view1
-                x: 0
+                x:0
                 y: 40
                 width: 790
                 height: 460

@@ -57,7 +57,13 @@ Rectangle {
 
                 Image
                 {
-                    id: imagerect; source:"image://datagridimg/"+id ; height: 100; width: 156; anchors.centerIn: parent
+                    id: imagerect;
+                    source:"image://datagridimg/"+id ;
+                    height: 100;
+                    width: 156;
+                    anchors.centerIn: parent;
+                    fillMode: Image.PreserveAspectFit;
+                    opacity: .5
                 }
             }
 
@@ -75,10 +81,93 @@ Rectangle {
         }
     }
 
+    Component
+    {
+        id: contactDelegateList
+        Item {
+            width: list_view1.width;
+            height: 120
+            Rectangle {
+                id: background
+                x: 2; y: 2; width: parent.width - x*2; height: parent.height - y*2
+                color: "floralwhite"
+                border.color: "black"
+                radius: 5
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: setStringParam(4, id)
+            }
+            Row {
+                id: topLayout
+                x: 10; y: 10; height: imagerect.height; width: parent.width
+                spacing: 10
+
+
+
+                Image
+                {
+                    id: imagerect;
+                    source:"image://datagridimg/"+id ;
+                    height: 100;
+                    width: 156;
+                    fillMode: Image.PreserveAspectFit;
+                }
+
+                Column {
+                    width: background.width - imagerect.width - 20;
+                    height: imagerect.height
+                    spacing:5
+                    Text {
+                        text: name;
+                        opacity: 1;
+                        font.pointSize: 12;
+                        color: "black" ;
+                        wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                        anchors.fill: frame
+                        font.bold: true
+                    }
+                }
+
+            }
+        }
+    }
+
 
     MultiStateFileDisplay{id:grid_view1}
 
+    Component {
+             id: appDelegate
+             Item {
+                 width: 100; height: 100
+                 scale: PathView.iconScale
 
+                 Image {
+                     id: myIcon
+                     y: 20; anchors.horizontalCenter: parent.horizontalCenter
+                     smooth: true
+                     source:"image://datagridimg/"+id ;
+                     height: 100;
+                     width: 156;
+                     fillMode: Image.PreserveAspectFit;
+                 }
+                 Text {
+                     anchors { top: myIcon.bottom; horizontalCenter: parent.horizontalCenter }
+                     text: name
+                     smooth: true
+                 }
+
+                 MouseArea {
+                     anchors.fill: parent
+                     onClicked: setStringParam(4, id)
+                 }
+             }
+         }
+
+         Component {
+             id: appHighlight
+             Rectangle { width: 80; height: 80; color: "lightsteelblue" }
+         }
 
     Row
     {
@@ -100,8 +189,8 @@ Rectangle {
             {
                 anchors.fill:parent
                 onClicked: goBackGrid()
-            }            
-        }        
-        AttributeSelector {}        
+            }
+        }
+        AttributeSelector {}
     }
 }
