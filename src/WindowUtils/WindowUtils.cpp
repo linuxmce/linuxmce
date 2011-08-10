@@ -133,7 +133,8 @@ WindowUtils::GetProperty (Display * disp, Window win, Atom xa_prop_type,
 	 * GetClientList - Get the list of clients attached to disp.
 	 */
 bool
-WindowUtils::GetClientList (Display * disp, vector < Window > &v_wClientList)
+  WindowUtils::GetClientList (Display * disp,
+			      vector < Window > &v_wClientList)
 {
 
   Window *client_list;
@@ -185,7 +186,7 @@ WindowUtils::GetClientList (Display * disp, vector < Window > &v_wClientList)
 	 * GetWindowTitle - Get Window Title given Window ID
 	 */
 bool
-WindowUtils::GetWindowTitle (Display * disp, Window win, string & s_Title)
+  WindowUtils::GetWindowTitle (Display * disp, Window win, string & s_Title)
 {
   char *wm_name;
   unsigned long int wm_name_size;
@@ -243,8 +244,8 @@ WindowUtils::GetWindowTitle (Display * disp, Window win, string & s_Title)
 	 * FindWindowMatching - Return first Window ID matching a title fragment. 
 	 */
 bool
-WindowUtils::FindWindowMatching (Display * disp, string windowName,
-				 Window & win)
+  WindowUtils::FindWindowMatching (Display * disp, string windowName,
+				   Window & win)
 {
   vector < Window > v_wClientList;
   string title;
@@ -287,8 +288,7 @@ WindowUtils::FindWindowMatching (Display * disp, string windowName,
 #ifdef DEBUG
 	      LoggerWrapper::GetInstance ()->Write (LV_STATUS,
 						    "WindowUtils::FindWindowMatching -- Position: %d, Title Matched %s to Window id 0x%x",
-						    title.
-						    find_first_of
+						    title.find_first_of
 						    (windowName),
 						    title.c_str (), win);
 #endif
@@ -317,126 +317,131 @@ WindowUtils::SendKeyToWindow (Display * disp, unsigned long win, int iXKeySym,
 					iXKeySym, win);
 #endif
 
-  XKeyEvent *event_press;
-  XKeyEvent *event_release;
-  XKeyEvent *event_modifier_press;
-  XKeyEvent *event_modifier_release;
-  //Window oldWindow;
-  //int oldRevertBehaviour;
-
-  event_press = (XKeyEvent *) malloc (sizeof (XKeyEvent));
-  event_release = (XKeyEvent *) malloc (sizeof (XKeyEvent));
-  event_modifier_press = (XKeyEvent *) malloc (sizeof (XKeyEvent));
-  event_modifier_release = (XKeyEvent *) malloc (sizeof (XKeyEvent));
-
-  XSync (disp, true);
-
-  //XGetInputFocus( m_pDisplay, &oldWindow, &oldRevertBehaviour);
-  //XSetInputFocus( m_pDisplay, (Window)m_iMAMEWindowId, RevertToParent, CurrentTime );
-
-  event_press->root = DefaultRootWindow (disp);
-  //event_press->serial = 5000;
-  event_press->subwindow = None;
-  event_press->time = CurrentTime;
-  event_press->x = 1;
-  event_press->y = 1;
-  event_press->x_root = 1;
-  event_press->y_root = 1;
-  event_press->same_screen = True;
-
-  event_press->type = KeyPress;
-  event_press->keycode = XKeysymToKeycode (disp, iXKeySym);
-  event_press->state = None;
-
-  event_modifier_press->root = DefaultRootWindow (disp);
-  //event_press->serial = 5000;
-  event_modifier_press->subwindow = None;
-  event_modifier_press->time = CurrentTime;
-  event_modifier_press->x = 1;
-  event_modifier_press->y = 1;
-  event_modifier_press->x_root = 1;
-  event_modifier_press->y_root = 1;
-  event_modifier_press->same_screen = True;
-
-  event_modifier_press->type = KeyPress;
-  event_modifier_press->keycode = XKeysymToKeycode (disp, iXKeySymModifier);
-  event_modifier_press->state = None;
-
-
-  event_release->root = DefaultRootWindow (disp);
-  //event_release->serial = 5000;
-  event_release->subwindow = None;
-  event_release->time = CurrentTime;
-  event_release->x = 1;
-  event_release->y = 1;
-  event_release->x_root = 1;
-  event_release->y_root = 1;
-  event_release->same_screen = True;
-
-  event_release->type = KeyRelease;
-  event_release->keycode = XKeysymToKeycode (disp, iXKeySym);
-  event_release->state = NoEventMask;
-
-  event_modifier_release->root = DefaultRootWindow (disp);
-  //event_release->serial = 5000;
-  event_modifier_release->subwindow = None;
-  event_modifier_release->time = CurrentTime;
-  event_modifier_release->x = 1;
-  event_modifier_release->y = 1;
-  event_modifier_release->x_root = 1;
-  event_modifier_release->y_root = 1;
-  event_modifier_release->same_screen = True;
-
-  event_modifier_release->type = KeyRelease;
-  event_modifier_release->keycode = XKeysymToKeycode (disp, iXKeySymModifier);
-  event_modifier_release->state = NoEventMask;
-
-  if (iXKeySymModifier != 0)
+  if (win != 0)
     {
-      if (iXKeySymModifier == XK_Shift_L || iXKeySymModifier == XK_Shift_R)
+      XKeyEvent *event_press;
+      XKeyEvent *event_release;
+      XKeyEvent *event_modifier_press;
+      XKeyEvent *event_modifier_release;
+      //Window oldWindow;
+      //int oldRevertBehaviour;
+
+      event_press = (XKeyEvent *) malloc (sizeof (XKeyEvent));
+      event_release = (XKeyEvent *) malloc (sizeof (XKeyEvent));
+      event_modifier_press = (XKeyEvent *) malloc (sizeof (XKeyEvent));
+      event_modifier_release = (XKeyEvent *) malloc (sizeof (XKeyEvent));
+
+      XSync (disp, true);
+
+      //XGetInputFocus( m_pDisplay, &oldWindow, &oldRevertBehaviour);
+      //XSetInputFocus( m_pDisplay, (Window)m_iMAMEWindowId, RevertToParent, CurrentTime );
+
+      event_press->root = DefaultRootWindow (disp);
+      //event_press->serial = 5000;
+      event_press->subwindow = None;
+      event_press->time = CurrentTime;
+      event_press->x = 1;
+      event_press->y = 1;
+      event_press->x_root = 1;
+      event_press->y_root = 1;
+      event_press->same_screen = True;
+
+      event_press->type = KeyPress;
+      event_press->keycode = XKeysymToKeycode (disp, iXKeySym);
+      event_press->state = None;
+
+      event_modifier_press->root = DefaultRootWindow (disp);
+      //event_press->serial = 5000;
+      event_modifier_press->subwindow = None;
+      event_modifier_press->time = CurrentTime;
+      event_modifier_press->x = 1;
+      event_modifier_press->y = 1;
+      event_modifier_press->x_root = 1;
+      event_modifier_press->y_root = 1;
+      event_modifier_press->same_screen = True;
+
+      event_modifier_press->type = KeyPress;
+      event_modifier_press->keycode =
+	XKeysymToKeycode (disp, iXKeySymModifier);
+      event_modifier_press->state = None;
+
+
+      event_release->root = DefaultRootWindow (disp);
+      //event_release->serial = 5000;
+      event_release->subwindow = None;
+      event_release->time = CurrentTime;
+      event_release->x = 1;
+      event_release->y = 1;
+      event_release->x_root = 1;
+      event_release->y_root = 1;
+      event_release->same_screen = True;
+
+      event_release->type = KeyRelease;
+      event_release->keycode = XKeysymToKeycode (disp, iXKeySym);
+      event_release->state = NoEventMask;
+
+      event_modifier_release->root = DefaultRootWindow (disp);
+      //event_release->serial = 5000;
+      event_modifier_release->subwindow = None;
+      event_modifier_release->time = CurrentTime;
+      event_modifier_release->x = 1;
+      event_modifier_release->y = 1;
+      event_modifier_release->x_root = 1;
+      event_modifier_release->y_root = 1;
+      event_modifier_release->same_screen = True;
+
+      event_modifier_release->type = KeyRelease;
+      event_modifier_release->keycode =
+	XKeysymToKeycode (disp, iXKeySymModifier);
+      event_modifier_release->state = NoEventMask;
+
+      if (iXKeySymModifier != 0)
 	{
-	  event_modifier_press->state = ShiftMask;
+	  if (iXKeySymModifier == XK_Shift_L
+	      || iXKeySymModifier == XK_Shift_R)
+	    {
+	      event_modifier_press->state = ShiftMask;
+	    }
+	  if (iXKeySymModifier == XK_Control_L
+	      || iXKeySymModifier == XK_Control_R)
+	    {
+	      event_modifier_press->state = ControlMask;
+	    }
+	  XSendEvent (disp, win, False, KeyPressMask,
+		      (XEvent *) event_modifier_press);
+	  XSync (disp, true);
+	  Sleep (50);
 	}
-      if (iXKeySymModifier == XK_Control_L
-	  || iXKeySymModifier == XK_Control_R)
-	{
-	  event_modifier_press->state = ControlMask;
-	}
-      XSendEvent (disp, win, False, KeyPressMask,
-		  (XEvent *) event_modifier_press);
+      XSendEvent (disp, win, False, KeyPressMask, (XEvent *) event_press);
       XSync (disp, true);
       Sleep (50);
-    }
-  XSendEvent (disp, win, False, KeyPressMask, (XEvent *) event_press);
-  XSync (disp, true);
-  Sleep (50);
 
-  if (iXKeySymModifier != 0)
-    {
-      XSendEvent (disp, win, False, KeyPressMask,
-		  (XEvent *) event_modifier_release);
+      if (iXKeySymModifier != 0)
+	{
+	  XSendEvent (disp, win, False, KeyPressMask,
+		      (XEvent *) event_modifier_release);
+	  XSync (disp, true);
+	  Sleep (50);
+	}
+      XSendEvent (disp, win, False, KeyPressMask, (XEvent *) event_release);
       XSync (disp, true);
-      Sleep (50);
+
+
+      //if ( oldWindow )
+      //      XSetInputFocus( m_pDisplay, oldWindow, oldRevertBehaviour, CurrentTime ); 
+
+
+
+      free (event_press);
+      free (event_release);
+      free (event_modifier_press);
+      free (event_modifier_release);
+
+
+      //XTestFakeKeyEvent( m_pDisplay, XKeysymToKeycode(m_pDisplay, iXKeySym), True, 0 );
+      //XTestFakeKeyEvent( m_pDisplay, XKeysymToKeycode(m_pDisplay, iXKeySym), False, 0 );
+
     }
-  XSendEvent (disp, win, False, KeyPressMask, (XEvent *) event_release);
-  XSync (disp, true);
-
-
-  //if ( oldWindow )
-  //      XSetInputFocus( m_pDisplay, oldWindow, oldRevertBehaviour, CurrentTime ); 
-
-
-
-  free (event_press);
-  free (event_release);
-  free (event_modifier_press);
-  free (event_modifier_release);
-
-
-  //XTestFakeKeyEvent( m_pDisplay, XKeysymToKeycode(m_pDisplay, iXKeySym), True, 0 );
-  //XTestFakeKeyEvent( m_pDisplay, XKeysymToKeycode(m_pDisplay, iXKeySym), False, 0 );
-
-
 }
 
 	/**
@@ -446,56 +451,59 @@ void
 WindowUtils::SendClickToWindow (Display * disp, unsigned long win, int button,
 				int x, int y)
 {
-  XWarpPointer (disp, None, win, 0, 0, 0, 0, x, y);	// let's experiment here.
-  XSync (disp, true);
-
-  XEvent event;
-
-  memset (&event, 0x00, sizeof (event));
-
-  event.type = ButtonPress;
-  event.xbutton.button = button;
-  event.xbutton.same_screen = True;
-
-  XQueryPointer (disp, RootWindow (disp, DefaultScreen (disp)),
-		 &event.xbutton.root, &event.xbutton.window,
-		 &event.xbutton.x_root, &event.xbutton.y_root,
-		 &event.xbutton.x, &event.xbutton.y, &event.xbutton.state);
-
-  event.xbutton.subwindow = event.xbutton.window;
-
-  while (event.xbutton.subwindow)
+  if (win != 0)
     {
-      event.xbutton.window = event.xbutton.subwindow;
+      XWarpPointer (disp, None, win, 0, 0, 0, 0, x, y);	// let's experiment here.
+      XSync (disp, true);
 
-      XQueryPointer (disp, event.xbutton.window, &event.xbutton.root,
-		     &event.xbutton.subwindow, &event.xbutton.x_root,
-		     &event.xbutton.y_root, &event.xbutton.x,
-		     &event.xbutton.y, &event.xbutton.state);
+      XEvent event;
+
+      memset (&event, 0x00, sizeof (event));
+
+      event.type = ButtonPress;
+      event.xbutton.button = button;
+      event.xbutton.same_screen = True;
+
+      XQueryPointer (disp, RootWindow (disp, DefaultScreen (disp)),
+		     &event.xbutton.root, &event.xbutton.window,
+		     &event.xbutton.x_root, &event.xbutton.y_root,
+		     &event.xbutton.x, &event.xbutton.y,
+		     &event.xbutton.state);
+
+      event.xbutton.subwindow = event.xbutton.window;
+
+      while (event.xbutton.subwindow)
+	{
+	  event.xbutton.window = event.xbutton.subwindow;
+
+	  XQueryPointer (disp, event.xbutton.window, &event.xbutton.root,
+			 &event.xbutton.subwindow, &event.xbutton.x_root,
+			 &event.xbutton.y_root, &event.xbutton.x,
+			 &event.xbutton.y, &event.xbutton.state);
+	}
+
+      if (XSendEvent (disp, PointerWindow, True, 0xfff, &event) == 0)
+	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
+					      "Could not send press event.");
+
+      XSync (disp, true);
+
+      usleep (100000);
+
+      event.type = ButtonRelease;
+      event.xbutton.state = 0x100;
+
+      if (XSendEvent (disp, PointerWindow, True, 0xfff, &event) == 0)
+	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
+					      "Could not send release event.");
+
+      XSync (disp, true);
     }
-
-  if (XSendEvent (disp, PointerWindow, True, 0xfff, &event) == 0)
-    LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
-					  "Could not send press event.");
-
-  XSync (disp, true);
-
-  usleep (100000);
-
-  event.type = ButtonRelease;
-  event.xbutton.state = 0x100;
-
-  if (XSendEvent (disp, PointerWindow, True, 0xfff, &event) == 0)
-    LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,
-					  "Could not send release event.");
-
-  XSync (disp, true);
-
 }
 
 bool
-WindowUtils::GetWindowGeometry (Display * disp, unsigned long win, int &x,
-				int &y, int &w, int &h)
+  WindowUtils::GetWindowGeometry (Display * disp, unsigned long win, int &x,
+				  int &y, int &w, int &h)
 {
   x = y = w = h = 0;		// Zero them out in case this fails. 
   XWindowAttributes attr;
@@ -515,8 +523,8 @@ WindowUtils::GetWindowGeometry (Display * disp, unsigned long win, int &x,
 }
 
 bool
-WindowUtils::FindWindowMatchingWMCLASS (Display * disp, char *app_name,
-					int repeat, Window & win)
+  WindowUtils::FindWindowMatchingWMCLASS (Display * disp, char *app_name,
+					  int repeat, Window & win)
 {
   Window root_return, parent_return, *children_return, *chld_tmp, ret_val;
   unsigned int nchildren_return, tmp, i, j;
