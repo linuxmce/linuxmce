@@ -108,15 +108,15 @@ Rectangle {
 
 
         Rectangle {
-                    width: container.width
-                    height: childrenRect.height
-                    color: style.button_system_color
+            width: container.width
+            height: childrenRect.height
+            color: style.button_system_color
 
-                    Text {
-                        text: section
-                        font.bold: true
-                    }
-                }
+            Text {
+                text: section
+                font.bold: true
+            }
+        }
 
     }
 
@@ -129,49 +129,49 @@ Rectangle {
         model: filedetails
 
         delegate: Text {
-                    id: titleof
-                    text:pkattribute
-                }
-
-            }
-
-
-
-            ButtonSq {
-                id: buttonsq1
-                x: 19
-                y: 483
-                width: 143
-                height: 54
-                radius: 10
-                buttontext: "Play"
-            }
-
-            ButtonSq {
-                id: buttonsq2
-                x: 227
-                y: 485
-                width: 149
-                height: 52
-                radius: 10
-                buttontext: "Move"
-            }
-
-            ButtonSq {
-                id: buttonsq3
-                x: 421
-                y: 485
-                width: 135
-                height: 52
-                radius: 10
-                buttontext: "Close"
-                MouseArea{
-                    anchors.fill: parent
-                    onClicked: filedetailrect.destroy()
-                }
-            }
-
+            id: titleof
+            text:pkattribute
         }
+
+    }
+
+
+
+    ButtonSq {
+        id: buttonsq1
+        x: 19
+        y: 483
+        width: 143
+        height: 54
+        radius: 10
+        buttontext: "Play"
+    }
+
+    ButtonSq {
+        id: buttonsq2
+        x: 227
+        y: 485
+        width: 149
+        height: 52
+        radius: 10
+        buttontext: "Move"
+    }
+
+    ButtonSq {
+        id: buttonsq3
+        x: 421
+        y: 485
+        width: 135
+        height: 52
+        radius: 10
+        buttontext: "Close"
+        MouseArea{
+            anchors.fill: parent
+            onClicked: filedetailrect.destroy()
+        }
+    }
+
+}
 
 
 

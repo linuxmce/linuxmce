@@ -67,7 +67,7 @@ public:
     QString m_SkinsDirectoryPath;
 
     //------CUSTOM QML TYPES------------------------------------------------------------------------------------
- FileDetailsClass *filedetailsclass;
+    FileDetailsClass *filedetailsclass;
 
     //ui variables
     QString currentSkin;
