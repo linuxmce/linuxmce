@@ -139,10 +139,12 @@ FilterModelItem * FilterModel::currentRow()
 void FilterModel::setSelectionStatus(QString format)
 {
     FilterModelItem* item = find(format);
-    item->updateSelection(false);
+    item->setStatus("false");
    // qDebug() << "Setting State for:" << format;
     //return state;
+
       ReturnSelectedItems();
+
 }
 
 bool FilterModel::getSelectionStatus()

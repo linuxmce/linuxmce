@@ -65,7 +65,7 @@ Rectangle {
                                           cindex=desc
                                           fileformatmodel.setSelectionStatus(name)
                                           fileformatcell.color = status ? "green" : "red"
-
+                                          console.log(status)
                                                 }
                                           }
                                       }

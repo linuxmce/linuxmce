@@ -9,15 +9,13 @@ Rectangle {
     color: "slategrey"
     clip: true
     focus: true
-    Component.onCompleted: showFileInfo(filedetailsclass.file)
+
 
     Image {
         id: image1
         x: 18
         y: 16
-
-
-        source: filedetailsclass.screenshot
+        source: "image://filedetailsprovider/"+filedetailsclass.screenshot
     }
     MouseArea{
         x: 0

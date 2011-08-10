@@ -21,6 +21,7 @@
 #include <datamodels/mediatypemodel.h>
 #include <datamodels/filedetailsmodel.h>
 #include <contextobjects/filedetailsclass.h>
+#include <imageProviders/filedetailsimageprovider.h>
 
 #include <QFile>
 #include <QDir>
@@ -79,6 +80,7 @@ public:
 
     basicImageProvider *basicProvider;
     GridIndexProvider *advancedProvider;
+    FileDetailsImageProvider *contextImageProvider;
     QString *gridReqType;
 
     /*

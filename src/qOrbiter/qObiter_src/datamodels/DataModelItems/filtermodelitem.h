@@ -5,12 +5,13 @@
 #include <QVariant>
 #include <QImage>
 #include <QMap>
+#include <QDebug>
 
 //for use with the fileformat table.
 class FilterModelItem: public QObject
 {
  Q_OBJECT
-    Q_PROPERTY (bool m_isSelected READ selectedStatus WRITE updateSelection NOTIFY filterChanged)
+    Q_PROPERTY (bool m_isSelected READ getStatus WRITE setStatus NOTIFY filterChanged)
 
 public:
   enum Roles {
@@ -28,19 +29,19 @@ public:
   QHash<int, QByteArray> roleNames() const;
 
   inline QString id() const {  return m_description; }
-   inline QString name() const {  return m_description; }
-  inline QString fileformat() const { return m_fk_fileformat; }
+  inline QString name() const {  return m_description; }
+  inline QString fileformat() const { return m_fk_fileformat; }  
   inline QImage cellImage() const {  return m_image; }
   inline bool selectedStatus() const { return m_isSelected; }
-  inline bool setStatus(bool b) { m_isSelected = b; }
-   void updateSelection (bool newBool) ;
-
-private:
 
   bool m_isSelected;
+  inline void setStatus(bool b) { m_isSelected = !m_isSelected;  emit filterChanged(); }
+  inline bool getStatus () {return m_isSelected;}
+
+private:
   QString m_fk_fileformat;
   QString m_description;
-   QImage m_image;
+  QImage m_image;
 
 signals:
   void imageChanged();

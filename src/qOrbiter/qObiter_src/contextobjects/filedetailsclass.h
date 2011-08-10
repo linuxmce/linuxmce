@@ -27,11 +27,21 @@ public:
     Q_PROPERTY(QUrl screenshot READ getScreenShot WRITE setScreenshot NOTIFY ImageChanged)
     Q_PROPERTY(QString filename READ getFilename WRITE setFilename NOTIFY object_changed)
 
+    Q_PROPERTY( QImage title READ getTitleImage WRITE setTitleImage NOTIFY object_changed)
+
     QString objecttitle;
 
     QString file;
     inline QString getFile () {return file;}
     inline void setFile(QString incFile) { file = incFile; emit FileChanged(file);}
+    QImage title;
+    inline void setTitleImage (QImage inc_t) {title = inc_t; emit object_changed();}
+    inline QImage getTitleImage () {return title;}
+    QImage program;
+    QImage Season;
+    QImage imdb;
+    QImage episode;
+
 
     bool showDetails;
     inline bool isVisible () { return showDetails; }

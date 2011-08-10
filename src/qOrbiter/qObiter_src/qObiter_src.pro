@@ -165,7 +165,8 @@ SOURCES += main.cpp \
     datamodels/DataModelItems/mediatypeitem.cpp \
     datamodels/filedetailsmodel.cpp \
     datamodels/DataModelItems/filedetailsitem.cpp \
-    contextobjects/filedetailsclass.cpp
+    contextobjects/filedetailsclass.cpp \
+    imageProviders/filedetailsimageprovider.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -212,7 +213,8 @@ HEADERS += \
     datamodels/filedetailsmodel.h \
     datamodels/DataModelItems/filedetailsitem.h \
     ../../PlutoUtils/ThreadedClass.h \
-    contextobjects/filedetailsclass.h
+    contextobjects/filedetailsclass.h \
+    imageProviders/filedetailsimageprovider.h
 
 OTHER_FILES += Readme.txt \
     config.xml \
