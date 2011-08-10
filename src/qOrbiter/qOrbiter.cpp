@@ -1961,6 +1961,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     CMD_Get_Attributes_For_Media attribute_detail_get(qmlUI->iPK_Device, qmlUI->iMediaPluginID,  qs_fk_fileno.toStdString(), " ",&s_val );
     SendCommand(attribute_detail_get);
 
+    QString breaker = s_val.c_str();
     /*
       attribute order - should be consistent
         0 - full file path
