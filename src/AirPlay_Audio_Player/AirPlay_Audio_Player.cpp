@@ -6,7 +6,7 @@
      Phone: +1 (877) 758-8648
  
 
-     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+     T§his program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
      This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
      of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
@@ -80,7 +80,7 @@ AirPlay_Audio_Player::AirPlay_Audio_Player(int DeviceID, string ServerAddress,bo
 	: AirPlay_Audio_Player_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
-   	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Audio_Player::Player starting up"); 
+   	LoggerWrapper::GetInstance()->Write(LV_ACTION, "AirPlay_Audio_Player::Player starting up"); 
 }
 
 //<-dceag-const2-b->
@@ -91,11 +91,34 @@ AirPlay_Audio_Player::AirPlay_Audio_Player(Command_Impl *pPrimaryDeviceCommand, 
 {
 }
 
+void AirPlay_Audio_Player::PrepareToDelete ()
+{
+   	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Prepare to Delete"); 	
+  	Command_Impl::PrepareToDelete ();
+}
+
+void AirPlay_Audio_Player::CreateChildren ()
+{
+   	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Create Children");
+   	
+   	if (pthread_create( &m_tListenThread, NULL, listenThread, (void *) this))
+    {
+      m_tListenThread = (pthread_t) NULL;
+      LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"AirPlay_Audio_Player::Failed to create listening Thread. Exiting with error code 1.");
+      m_bQuit_set (true);
+      exit (1);
+    }
+
+}
+
 //<-dceag-dest-b->
 AirPlay_Audio_Player::~AirPlay_Audio_Player()
 //<-dceag-dest-e->
 {
-	
+   	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Destructor called"); 	
+   	b_Terminate = true;
+  	if (m_tListenThread != (pthread_t) NULL)
+  		pthread_join (m_tListenThread, NULL);
 }
 
 //<-dceag-getconfig-b->
@@ -111,6 +134,9 @@ bool AirPlay_Audio_Player::GetConfig()
 	m_pDevice_MD = m_pData->m_AllDevices.m_mapDeviceData_Base_Find(m_pData->m_dwPK_Device_MD);
 	m_pDevice_AirPlay_PlugIn = m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_AirPlay_PlugIn_CONST);
 	m_pDevice_Media_PlugIn = m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
+	
+	b_Terminate = false;
+	
 	if (!m_pDevice_AirPlay_PlugIn)
     {
       	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_Audio_Player::PlugIn with DeviceTemplate %d not found on CORE!", DEVICETEMPLATE_AirPlay_PlugIn_CONST);
@@ -128,9 +154,7 @@ bool AirPlay_Audio_Player::Connect(int iPK_DeviceTemplate)
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Connect()");
 	Command_Impl::Connect(iPK_DeviceTemplate);
-	
-   	pthread_create( &m_tListenThread, NULL, listenThread, (void *) this);
-	
+
 	//EVENT_Playback_Completed("",0,false); 
 	
 	return true;
@@ -490,7 +514,7 @@ void *listenThread(void * pInstance) {
    	}
 
     int tClientSock = 0;
-    while(1)
+    while(!pThis->b_Terminate)
     {
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Waiting for clients to connect\n");
       	tClientSock = acceptClient(tServerSock, tAddrInfo);
@@ -511,8 +535,11 @@ void *listenThread(void * pInstance) {
 				,0 /* bDont_Setup_AV */ );
 			pThis->SendCommand(CMD_MH_Play_Media);
 
-				int tPid = fork();
+			int tPid = fork();
 			// child
+			
+			//while (pThis->iTStreamID == 0);
+			
 			if(tPid == 0)
        		{
           		freeaddrinfo(tAddrInfo);
@@ -520,18 +547,9 @@ void *listenThread(void * pInstance) {
 				LoggerWrapper::GetInstance()->Write(LV_ACTION, "AirPlay_Audio_Player::Accepted Client Connection.\n");
           		close(tServerSock);
           		handleClient(tClientSock, tPassword, tHWID);
-          		close(tClientSock);
-				
-				CMD_MH_Stop_Media CMD_MH_Stop_Media(
-					pThis->m_pData->m_dwPK_Device_ControlledVia /* PK Device, this is our Orbiter*/
-					,pThis->m_pDevice_Media_PlugIn->m_dwPK_Device /* PK Device Media Plugin*/
-					,0 /* PK Device */
-					,0 /* ? */
-					,0 /*MEDIATYPE_lmce_Airplay_audio_CONST */ /* Mediatype*/
-					,StringUtils::itos(3) /* EA*/
-					,false); /* Resume*/
-				pThis->SendCommand(CMD_MH_Stop_Media);
-
+          		close(tClientSock);				
+								
+				pThis->EVENT_Playback_Completed("",0 /*pThis->iTStreamID*/, FALSE);
           		LoggerWrapper::GetInstance()->Write(LV_ACTION, "AirPlay_Audio_Player::Client disconnected.\n");
 				
         		return NULL;
@@ -549,6 +567,7 @@ void *listenThread(void * pInstance) {
         	sleep(2);
      	}
     }
+    LoggerWrapper::GetInstance()->Write(LV_ACTION, "AirPlay_Audio_Player::Exiting ...");    
 	return NULL;
 }
 

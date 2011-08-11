@@ -43,7 +43,10 @@ protected:
 private:
 		// Public member variables
   		pthread_t m_tListenThread;
-
+public:
+	  	virtual void CreateChildren();
+ 	  	virtual void PrepareToDelete();
+		bool b_Terminate;
 //<-dceag-const-b->
 public:
 		DeviceData_Base *m_pDevice_MD, *m_pDevice_AirPlay_PlugIn, *m_pDevice_Media_PlugIn;
