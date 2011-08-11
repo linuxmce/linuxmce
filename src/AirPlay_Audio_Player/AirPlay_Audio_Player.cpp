@@ -257,6 +257,7 @@ void AirPlay_Audio_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,s
 //<-dceag-c38-e->
 {
    	LoggerWrapper::GetInstance()->Write(LV_ACTION,"AirPlay_Audio_Player::CMD_Stop_Media");
+	EVENT_Playback_Completed("",iStreamID, FALSE);
 }
 
 //<-dceag-c39-b->
@@ -518,11 +519,22 @@ void *listenThread(void * pInstance) {
           		tAddrInfo = NULL;
 				LoggerWrapper::GetInstance()->Write(LV_ACTION, "AirPlay_Audio_Player::Accepted Client Connection.\n");
           		close(tServerSock);
-          		//pThis->EVENT_Playback_Started("",0,"AirPlay stream","RAW","");
-				handleClient(tClientSock, tPassword, tHWID);
-          		LoggerWrapper::GetInstance()->Write(LV_ACTION, "AirPlay_Audio_Player::Client disconnected.\n");
+          		handleClient(tClientSock, tPassword, tHWID);
           		close(tClientSock);
-          		//return 0;
+				
+				CMD_MH_Stop_Media CMD_MH_Stop_Media(
+					pThis->m_pData->m_dwPK_Device_ControlledVia /* PK Device, this is our Orbiter*/
+					,pThis->m_pDevice_Media_PlugIn->m_dwPK_Device /* PK Device Media Plugin*/
+					,0 /* PK Device */
+					,0 /* ? */
+					,0 /*MEDIATYPE_lmce_Airplay_audio_CONST */ /* Mediatype*/
+					,StringUtils::itos(3) /* EA*/
+					,false); /* Resume*/
+				pThis->SendCommand(CMD_MH_Stop_Media);
+
+          		LoggerWrapper::GetInstance()->Write(LV_ACTION, "AirPlay_Audio_Player::Client disconnected.\n");
+				
+        		return NULL;
         	}
         	// parent
 			else
@@ -545,7 +557,7 @@ int startAvahi(const char *pHWStr, const char *pServerName, int pPort)
   	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Starting avahi registration");
   	unsigned int tMaxServerName = 25; // Something reasonable?  iPad showed 21, iphone 25
   	int tPid = fork();
-  	if(tPid == 0)
+  	if(tPid == 0) // child
   	{
     	char tName[100 + HWID_SIZE + 3];
     	if(strlen(pServerName) > tMaxServerName)
@@ -567,14 +579,11 @@ int startAvahi(const char *pHWStr, const char *pServerName, int pPort)
     	execlp("dns-sd", "dns-sd", "-R", tName,
          "_raop._tcp", ".", tPort, "tp=UDP","sm=false","sv=false","ek=1","et=0,1",
          "cn=0,1","ch=2","ss=16","sr=44100","pw=false","vn=3","txtvers=1", NULL);
-    	if(errno == -1) 
-    	{
-            perror("error");
-    	}
+    	if(errno == -1) perror("error");
     	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Audio_Player::failed to run avahi-publish-server OR dns-sd");
     	exit(1);
   	}
-  	else
+  	else // parent
   	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Avahi/DNS-SD started on PID: %d\n", tPid);
   	}
