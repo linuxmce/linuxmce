@@ -43,5 +43,9 @@ In an effor to keep the history of changes broken up
 #1173 - Qorbiter datagrid behavior
 #1174 - MacOSX - not finding qml
 #1177 - File Details screen ticket
+#1183 - Now Playing Button
+#1179 - Room List showing all rooms, but not all selectable
+#1180 - Filters for media showing all instead of proper filtering types
+#1181 - Scenario buttons attemping to pull wrong image names.
 
 If something you are working on is not described here, please open a ticket for it so we can track that specific issue.

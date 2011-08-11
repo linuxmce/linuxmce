@@ -21,7 +21,7 @@
 #include <datamodels/mediatypemodel.h>
 #include <datamodels/filedetailsmodel.h>
 #include <contextobjects/filedetailsclass.h>
-//#include <imageProviders/filedetailsimageprovider.h>
+#include <contextobjects/nowplayingclass.h>
 
 #include <QFile>
 #include <QDir>
@@ -70,6 +70,7 @@ public:
 
     //------CUSTOM QML TYPES------------------------------------------------------------------------------------
     FileDetailsClass *filedetailsclass;
+    NowPlayingClass *nowPlayingButton;
 
     //ui variables
     QString currentSkin;

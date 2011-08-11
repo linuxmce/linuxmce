@@ -57,9 +57,9 @@ Item {
                 id: now_playing
                 height: style.buttonH
                 width: style.buttonW
-                color: "transparent"
+                color: dcenowplaying.b_mediaPlaying ? "red" : "green"
                 radius: style.but_smooth
-                buttontext: ""
+                buttontext: dcenowplaying.qs_mainTitle
 
                 MouseArea{
                     anchors.fill: parent

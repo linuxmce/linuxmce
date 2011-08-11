@@ -1,5 +1,6 @@
 import QtQuick 1.0
 
+
 Rectangle {
     id:gridholder
     width: 790
@@ -31,7 +32,8 @@ Rectangle {
         cellHeight: 109
         keyNavigationWraps: true
         Keys.enabled: true
-       KeyNavigation.right: gridView.right
+        Keys.onPressed: console.log(Qt.Key_Right)
+       KeyNavigation.right: gridView.moveCurrentIndexRight
 
     }
 

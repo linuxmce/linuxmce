@@ -987,7 +987,8 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     cout << "Parm #103 - List_PK_Device=" << sList_PK_Device << endl;
     cout << "Parm #120 - Retransmit=" << bRetransmit << endl;
 
-    qmlUI->setNowPlayingIcon(true);
+    qmlUI->nowPlayingButton->setStatus(true);
+    qmlUI->nowPlayingButton->setTitle(QString::fromStdString(sName));
 }
 
 //<-dceag-c254-b->
@@ -1797,7 +1798,7 @@ bool DCE::qOrbiter::initialize()
         iData_Size = 0;
         string *p_sResponse;
         p_sResponse = NULL;
-        qDebug() << "Idata StartSize:" << iData_Size;
+        //qDebug() << "Idata StartSize:" << iData_Size;
 
         string filePath = "/var/tmp/"+QString::number(qmlUI->iPK_Device).toStdString()+"conf.xml";
         // qDebug() << filePath.c_str();
@@ -1806,11 +1807,11 @@ bool DCE::qOrbiter::initialize()
 
         if (!SendCommand(configFileRequest, p_sResponse))
         {
-            qDebug() << "File request sent";
+            //qDebug() << "File request sent";
         }
         else
         {
-            qDebug() <<"Idata recieved: " << iData_Size ; // size of xml file
+            //qDebug() <<"Idata recieved: " << iData_Size ; // size of xml file
         }
 
         QByteArray configData;              //config file put into qbytearray for processing
@@ -1913,7 +1914,7 @@ void DCE::qOrbiter::GetFileInfoForQml(QString qs_file_reference)
 void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
 {
 
-    qDebug() << "File: " << qs_fk_fileno <<":: getting media attributes";
+    //qDebug() << "File: " << qs_fk_fileno <<":: getting media attributes";
     // qmlUI->m_selected_grid_item->clear();
     // qmlUI->m_selected_grid_item->file = qs_fk_fileno;
 
@@ -1942,7 +1943,6 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     int iData_Size=0;
     int GridCurRow = 0;
     int GridCurCol= 0;
-
 
     char *pData;
     pData = "NULL";
@@ -2041,18 +2041,18 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 cellTitle = pCell->m_mapAttributes_Find("Title").c_str();
                 cellAttribute = pCell->m_mapAttributes_Find("Name").c_str();
                 cellfk = pCell->GetValue();
-                qDebug() << pCell->m_mapAttributes.size();
+                //qDebug() << pCell->m_mapAttributes.size();
 
                 if(cellTitle == "Program")
                 {
                     string a_text;
                     CMD_Get_Attribute getProgramAttributes(qmlUI->iPK_Device, qmlUI->iMediaPluginID, cellfk.remove("!A").toInt(), &a_text);
-                    qDebug() << cellfk;
+                    //qDebug() << cellfk;
                     SendCommand(getProgramAttributes);
-                    qDebug() << pCell->m_ImagePathLength;
+                    //qDebug() << pCell->m_ImagePathLength;
                 }
 
-                 qDebug() << "Item Attribute::" << cellTitle << "-" << cellAttribute;
+                 //qDebug() << "Item Attribute::" << cellTitle << "-" << cellAttribute;
                 if (pPath )
                 {
                     cellImg = getfileForDG(pCell->GetImagePath());
