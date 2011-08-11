@@ -76,12 +76,41 @@ bool qOrbiter::GetConfig()
         return false;
     }
 
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbitier Connected, requesting configuration for device %d", qmlUI->iPK_Device);
 
+    char *oData;
+    oData = NULL;
+    int iData_Size;
+    iData_Size = 0;
+    string *p_sResponse;
+    p_sResponse = NULL;
+    //qDebug() << "Idata StartSize:" << iData_Size;
 
+    string filePath = "/var/tmp/"+QString::number(qmlUI->iPK_Device).toStdString()+"conf.xml";
+    // qDebug() << filePath.c_str();
+
+    CMD_Request_File configFileRequest((long)qmlUI->iPK_Device, (long)4 , (string)filePath, &oData, &iData_Size);
+
+    if (!SendCommand(configFileRequest, p_sResponse))
+    {
+        //qDebug() << "File request sent";
+    }
+    else
+    {
+        //qDebug() <<"Idata recieved: " << iData_Size ; // size of xml file
+    }
+
+    QByteArray configData;              //config file put into qbytearray for processing
+    configData = oData;
+    if (configData.size() == 0)
+    {
+        qDebug() << "Invalid config for device: " << qmlUI->iPK_Device;
+        qDebug() << "Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d="<<qmlUI->iPK_Device ;
+        exit(20);
+    }
+    qmlUI->binaryConfig = configData;
+    delete oData;
     return true;
-
-
-
 }
 
 //<-dceag-reg-b->
@@ -987,8 +1016,16 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     cout << "Parm #103 - List_PK_Device=" << sList_PK_Device << endl;
     cout << "Parm #120 - Retransmit=" << bRetransmit << endl;
 
-    qmlUI->nowPlayingButton->setStatus(true);
-    qmlUI->nowPlayingButton->setTitle(QString::fromStdString(sName));
+    if (iValue = 1)
+    {
+       qmlUI->nowPlayingButton->setStatus(true);
+    }
+    else
+    {
+        qmlUI->nowPlayingButton->setStatus(false);
+    }
+
+    qmlUI->nowPlayingButton->setTitle(QString::fromStdString(sValue_To_Assign));
 }
 
 //<-dceag-c254-b->
@@ -1786,45 +1823,16 @@ bool DCE::qOrbiter::initialize()
     char *pData;
     int iSize;
     pData = "NULL";
-    iSize = 0;
-    DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(qmlUI->iPK_Device, qmlUI->iOrbiterPluginID, "1" ,qmlUI->iPK_User, StringUtils::itos(1), 1, &pData, &iSize);
-    if (!SendCommand(CMD_Orbiter_Registered))
+    iSize = 0;                                                               //on-off  PkUsers -int entArea -string  int room
+    DCE::CMD_Orbiter_Registered CMD_Orbiter_Registered(qmlUI->iPK_Device, 9,  "1" ,      qmlUI->iPK_User,           StringUtils::ltos(qmlUI->iea_area),          qmlUI->iFK_Room,           &pData, &iSize);
+    if (SendCommand(CMD_Orbiter_Registered))
     {
-        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbitier Initialized, requesting configuration for device %d", qmlUI->iPK_Device);
 
-        char *oData;
-        oData = NULL;
-        int iData_Size;
-        iData_Size = 0;
-        string *p_sResponse;
-        p_sResponse = NULL;
-        //qDebug() << "Idata StartSize:" << iData_Size;
-
-        string filePath = "/var/tmp/"+QString::number(qmlUI->iPK_Device).toStdString()+"conf.xml";
-        // qDebug() << filePath.c_str();
-
-        CMD_Request_File configFileRequest((long)qmlUI->iPK_Device, (long)4 , (string)filePath, &oData, &iData_Size);
-
-        if (!SendCommand(configFileRequest, p_sResponse))
-        {
-            //qDebug() << "File request sent";
-        }
-        else
-        {
-            //qDebug() <<"Idata recieved: " << iData_Size ; // size of xml file
-        }
-
-        QByteArray configData;              //config file put into qbytearray for processing
-        configData = oData;
-        if (configData.size() == 0)
-        {
-            qDebug() << "Invalid config for device: " << qmlUI->iPK_Device;
-            qDebug() << "Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d="<<qmlUI->iPK_Device ;
-            exit(20);
-        }
-        qmlUI->binaryConfig = configData;
-        delete oData;
         return true;
+    }
+    else
+    {
+        return false;
     }
 }
 

@@ -251,8 +251,9 @@ void qorbiterManager::gotoQScreen(QString s)
 bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode)
 {
     pqOrbiter = new DCE::qOrbiter(PK_Device, sRouterIP, true,bLocalMode);
-    iPK_Device = long(PK_Device);
+   // iPK_Device = long(PK_Device);
 
+    pqOrbiter->qmlUI = this;
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
     {
         qDebug() << "Device: " << PK_Device <<" Connect";
@@ -272,15 +273,15 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
               this is how the two threads (dce and qt) communicate with each other and make it possible to connect
               qt GUI (qml or qobject based) signals to DCE slots and vice versa!
             */
-        pqOrbiter->qmlUI = this;
 
 
-        if ( pqOrbiter->initialize())
+
+        if (getConf(PK_Device) )
         {
 
-            if (getConf(PK_Device))
+            if (pqOrbiter->initialize())
             {
-                qDebug () << "Config Recieved, starting";
+                qDebug () << "Orbiter Registered, starting";
                 gotoQScreen("Screen_1.qml");
                 return true;
             }

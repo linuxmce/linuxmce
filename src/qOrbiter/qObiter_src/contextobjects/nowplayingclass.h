@@ -53,10 +53,10 @@ public slots:
     void setSubTitle (QString inc_subTitle) {qs_subTitle = inc_subTitle;}
     QString getSubTitle () {return qs_subTitle;}
 
-    void setStatus (bool status) {b_mediaPlaying = status; if (b_mediaPlaying == true ) {emit mediaStarted();} else { emit mediaEnded();} }
+    void setStatus (bool status) {b_mediaPlaying = status; emit mediaStatusChanged(); }
     bool getStatus () {return b_mediaPlaying;}
 
-    void setMediaType (int inc_mediaType) {i_mediaType = inc_mediaType; emit mediaStatusChanged();}
+    void setMediaType (int inc_mediaType) {i_mediaType = inc_mediaType; emit mediaTypeChanged();}
     int  getMediaType () {return i_mediaType;}
 
     };

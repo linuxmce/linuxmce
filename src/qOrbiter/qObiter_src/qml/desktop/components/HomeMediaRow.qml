@@ -54,10 +54,12 @@ Item {
             }
 
             ButtonSq {
+
                 id: now_playing
+                visible: dcenowplaying.b_mediaPlaying ? true : false
                 height: style.buttonH
                 width: style.buttonW
-                color: dcenowplaying.b_mediaPlaying ? "red" : "green"
+                color: dcenowplaying.b_mediaPlaying ? "green" : "red"
                 radius: style.but_smooth
                 buttontext: dcenowplaying.qs_mainTitle
 
