@@ -1,0 +1,12 @@
+#!/usr/bin/make -f
+
+DEB_PYTHON_SYSTEM := pycentral
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/python-distutils.mk
+include /usr/share/cdbs/1/rules/simple-patchsys.mk
+include /usr/share/cdbs/1/rules/utils.mk
+
+# No idea whether this is useful
+#DEB_PYTHON_INSTALL_ARGS_ALL += --single-version-externally-managed
+
