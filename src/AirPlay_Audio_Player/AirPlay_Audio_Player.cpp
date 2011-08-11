@@ -116,7 +116,7 @@ bool AirPlay_Audio_Player::GetConfig()
       	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_Audio_Player::PlugIn with DeviceTemplate %d not found on CORE!", DEVICETEMPLATE_AirPlay_PlugIn_CONST);
       	return false;
     } else {
-      	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_Audio_Player::PlugIn device %d found on CORE !", m_pDevice_AirPlay_PlugIn->m_dwPK_Device);    	
+      	LoggerWrapper::GetInstance()->Write(LV_STATUS,"AirPlay_Audio_Player::PlugIn device %d found on CORE !", m_pDevice_AirPlay_PlugIn->m_dwPK_Device);    	
     }
 
 	return true;
@@ -126,29 +126,13 @@ bool AirPlay_Audio_Player::GetConfig()
 bool AirPlay_Audio_Player::Connect(int iPK_DeviceTemplate) 
 {
 
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Connect()");
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Connect()");
 	Command_Impl::Connect(iPK_DeviceTemplate);
 	
    	pthread_create( &m_tListenThread, NULL, listenThread, (void *) this);
 	
-	//EVENT_Playback_Started("",0,"AirPlay stream","RAW","");
 	//EVENT_Playback_Completed("",0,false); 
 	
-	CMD_MH_Play_Media CMD_MH_Play_Media(
-	m_pData->m_dwPK_Device_ControlledVia /* PK Device, this is our Orbiter*/
-	,m_pDevice_Media_PlugIn->m_dwPK_Device /* PK Device Media Plugin*/
-	,0 /* PK Device */
-	,"" /* sFile*/
-	,MEDIATYPE_lmce_Airplay_audio_CONST /* Mediatype*/
-	,0 /* DeviceTemplate*/
-	,StringUtils::itos(3) /* EA*/
-	,false /* Resume*/
-	,0 /* Repeat */
-	,0 /* Queue*/
-	,0 /* bBypass_Event */
-	,0 /* bDont_Setup_AV */ );
-    SendCommand(CMD_MH_Play_Media);
-    
 	return true;
 }
 
@@ -206,20 +190,258 @@ void AirPlay_Audio_Player::ReceivedUnknownCommand(string &sCMD_Result,Message *p
 
 */
 
-void AirPlay_Audio_Player::CMD_Play_Media (int iPK_MediaType, int iStreamID,
-			     string sMediaPosition, string sMediaURL,
-			     string & sCMD_Result, Message * pMessage)
-//<-dceag-c37-e->
-{
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::CMD_Play_Media");
-  	cout << "Need to implement command #37 - Play Media" << endl;
-  	cout << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
-  	cout << "Parm #41 - StreamID=" << iStreamID << endl;
-  	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
-  	cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
+//<-dceag-c28-b->
 
+	/** @brief COMMAND: #28 - Simulate Keypress */
+	/** Send a key to the device's OSD, or simulate keypresses on the device's panel */
+		/** @param #26 PK_Button */
+			/** What key to simulate being pressed.  If 2 numbers are specified, separated by a comma, the second will be used if the Shift key is specified. */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+		/** @param #50 Name */
+			/** The application to send the keypress to. If not specified, it goes to the DCE device. */
+
+void AirPlay_Audio_Player::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName,string &sCMD_Result,Message *pMessage)
+//<-dceag-c28-e->
+{
 }
 
+//<-dceag-c32-b->
+
+	/** @brief COMMAND: #32 - Update Object Image */
+	/** Display an image on the media player */
+		/** @param #3 PK_DesignObj */
+			/** The object in which to put the bitmap */
+		/** @param #14 Type */
+			/** 1=bmp, 2=jpg, 3=png */
+		/** @param #19 Data */
+			/** The contents of the bitmap, like reading from the file into a memory buffer */
+		/** @param #23 Disable Aspect Lock */
+			/** If 1, the image will be stretched to fit the object */
+
+void AirPlay_Audio_Player::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *pData,int iData_Size,string sDisable_Aspect_Lock,string &sCMD_Result,Message *pMessage)
+//<-dceag-c32-e->
+{
+}
+
+//<-dceag-c37-b->
+
+	/** @brief COMMAND: #37 - Play Media */
+	/** This command will instruct a Media Player to play a media stream identified by a media descriptor created by the "Create Media" command. */
+		/** @param #29 PK_MediaType */
+			/** The type of media */
+		/** @param #41 StreamID */
+			/** The media that we need to play. */
+		/** @param #42 MediaPosition */
+			/** The position at which we need to start playing. */
+		/** @param #59 MediaURL */
+			/** The file to play, or other media id.  The format is specific on the media type and the media player. */
+
+void AirPlay_Audio_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string &sCMD_Result,Message *pMessage)
+//<-dceag-c37-e->
+{
+   	LoggerWrapper::GetInstance()->Write(LV_ACTION,"AirPlay_Audio_Player::CMD_Play_Media");
+	EVENT_Playback_Started("",iStreamID,"AirPlay stream","RAW","");
+}
+
+//<-dceag-c38-b->
+
+	/** @brief COMMAND: #38 - Stop Media */
+	/** This will instruct the media player to stop the playback of a media started with the "Play Media" Command */
+		/** @param #41 StreamID */
+			/** The media needing to be stopped. */
+		/** @param #42 MediaPosition */
+			/** The position at which this stream was last played. */
+
+void AirPlay_Audio_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCMD_Result,Message *pMessage)
+//<-dceag-c38-e->
+{
+   	LoggerWrapper::GetInstance()->Write(LV_ACTION,"AirPlay_Audio_Player::CMD_Stop_Media");
+}
+
+//<-dceag-c39-b->
+
+	/** @brief COMMAND: #39 - Pause Media */
+	/** This will stop a media that is currently played. This method should be paired with the "Restart Media" and used when the playback will be stopped and restarted on the same display device. */
+		/** @param #41 StreamID */
+			/** The media stream for which we need to pause playback. */
+
+void AirPlay_Audio_Player::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c39-e->
+{
+}
+
+//<-dceag-c40-b->
+
+	/** @brief COMMAND: #40 - Restart Media */
+	/** This will restart a media was paused with the above command */
+		/** @param #41 StreamID */
+			/** The media stream that we need to restart playback for. */
+
+void AirPlay_Audio_Player::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c40-e->
+{
+}
+
+//<-dceag-c41-b->
+
+	/** @brief COMMAND: #41 - Change Playback Speed */
+	/** Will make the playback to FF with a configurable amount of speed. */
+		/** @param #41 StreamID */
+			/** The media needing the playback speed change. */
+		/** @param #43 MediaPlaybackSpeed */
+			/** The requested media playback speed * 1000.  -1000 = rev, 4000 = 4x fwd, -500 = rev 1/2.  Less than 10 = relative.  +2 = double, -1 = reverse.   See Media_Plugin::ReceivedMessage */
+		/** @param #220 Report */
+			/** If true, report this speed to the user on the OSD */
+
+void AirPlay_Audio_Player::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed,bool bReport,string &sCMD_Result,Message *pMessage)
+//<-dceag-c41-e->
+{
+}
+
+//<-dceag-c42-b->
+
+	/** @brief COMMAND: #42 - Jump to Position in Stream */
+	/** Jump to a position in the stream, specified in seconds. */
+		/** @param #5 Value To Assign */
+			/** The number of seconds.  A number is considered an absolute.  "+2" means forward 2, "-1" means back 1.  A simpler command than Set Media Position */
+		/** @param #41 StreamID */
+			/** The stream */
+
+void AirPlay_Audio_Player::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c42-e->
+{
+}
+
+//<-dceag-c65-b->
+
+	/** @brief COMMAND: #65 - Jump Position In Playlist */
+	/** Jump to a specific position in the playlist, or a track, or a chapter.  Smart media players should also understand the skip fwd/skip back (which non-DCE media players use) to be the same thing as a jump +1 or -1 */
+		/** @param #5 Value To Assign */
+			/** The track to go to.  A number is considered an absolute.  "+2" means forward 2, "-1" means back 1. */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+void AirPlay_Audio_Player::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c65-e->
+{
+}
+
+//<-dceag-c126-b->
+
+	/** @brief COMMAND: #126 - Guide */
+	/** Show guide information.  For a dvd this may be the menu, just like the menu command */
+
+void AirPlay_Audio_Player::CMD_Guide(string &sCMD_Result,Message *pMessage)
+//<-dceag-c126-e->
+{
+}
+
+//<-dceag-c249-b->
+
+	/** @brief COMMAND: #249 - Start Streaming */
+	/** Like play media, but it means the destination device is not the same as the source */
+		/** @param #29 PK_MediaType */
+			/** The type of media */
+		/** @param #41 StreamID */
+			/** Identifier for this streaming session. */
+		/** @param #42 MediaPosition */
+			/** Where to start playing from */
+		/** @param #59 MediaURL */
+			/** The url to use to play this stream. */
+		/** @param #105 StreamingTargets */
+			/** Target destinations for streaming. Semantics dependent on the target device. */
+
+void AirPlay_Audio_Player::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string sStreamingTargets,string &sCMD_Result,Message *pMessage)
+//<-dceag-c249-e->
+{
+}
+
+//<-dceag-c259-b->
+
+	/** @brief COMMAND: #259 - Report Playback Position */
+	/** This will report the playback position of the current stream. */
+		/** @param #9 Text */
+			/** A human readable representation of the current position */
+		/** @param #41 StreamID */
+			/** The stream ID on which to report the position. */
+		/** @param #42 MediaPosition */
+			/** A media player readable representation of the current position including all options */
+
+void AirPlay_Audio_Player::CMD_Report_Playback_Position(int iStreamID,string *sText,string *sMediaPosition,string &sCMD_Result,Message *pMessage)
+//<-dceag-c259-e->
+{
+}
+
+//<-dceag-c412-b->
+
+	/** @brief COMMAND: #412 - Set Media Position */
+	/** Jump to a certain media position */
+		/** @param #41 StreamID */
+			/** The stream to set */
+		/** @param #42 MediaPosition */
+			/** The media position.  When MediaPlugin gets this, it will be a bookmark ID, when a media player gets it, the string */
+
+void AirPlay_Audio_Player::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,string &sCMD_Result,Message *pMessage)
+//<-dceag-c412-e->
+{
+}
+
+//<-dceag-c548-b->
+
+	/** @brief COMMAND: #548 - Menu */
+	/** Show a menu associated with this media */
+		/** @param #9 Text */
+			/** A string indicating which menu should appear.  The parameter is only used for smart media devices */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+void AirPlay_Audio_Player::CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c548-e->
+{
+}
+
+//<-dceag-c916-b->
+
+	/** @brief COMMAND: #916 - Set Aspect Ratio */
+	/** Force aspect ratio */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+		/** @param #260 Aspect Ratio */
+			/** aspect ratio to set: auto, 1:1, 4:3, 16:9, 2.11:1 */
+
+void AirPlay_Audio_Player::CMD_Set_Aspect_Ratio(int iStreamID,string sAspect_Ratio,string &sCMD_Result,Message *pMessage)
+//<-dceag-c916-e->
+{
+}
+
+//<-dceag-c917-b->
+
+	/** @brief COMMAND: #917 - Set Zoom */
+	/** Sets zoom level, relative, absolute or 'auto' */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+		/** @param #261 Zoom Level */
+			/** Zoom level to set */
+
+void AirPlay_Audio_Player::CMD_Set_Zoom(int iStreamID,string sZoom_Level,string &sCMD_Result,Message *pMessage)
+//<-dceag-c917-e->
+{
+}
+
+//<-dceag-c920-b->
+
+	/** @brief COMMAND: #920 - Set Media ID */
+	/** Set Media ID - information about media stream */
+		/** @param #10 ID */
+			/** Media ID (special format) */
+		/** @param #41 StreamID */
+			/** ID of stream to set media information for */
+
+void AirPlay_Audio_Player::CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c920-e->
+{
+}
 
 // MODIFIED VERSION OF SHAIRPORT IMPLEMENTATION STARTS HERE
 
@@ -231,11 +453,9 @@ void *listenThread(void * pInstance) {
   	char tHWID_Hex[HWID_SIZE * 2 + 1];
   	memset(tHWID_Hex, 0, sizeof(tHWID_Hex));
 
-  	//char tServerName[56] = "Media Director";
   	char tPassword[56] = "";
 
   	struct addrinfo *tAddrInfo;
-  	//int  tSimLevel = 0;
   	int  tUseKnownHWID = FALSE;
   	int  tPort = PORT;
   	
@@ -243,9 +463,7 @@ void *listenThread(void * pInstance) {
 
   	int tIdx = 0;
 
-	
-
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Listening thread starting up on MD: '%s'", pThis->m_pDevice_MD->m_sDescription.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Listening thread starting up on MD: '%s'", pThis->m_pDevice_MD->m_sDescription.c_str());
 
   	for(tIdx=0;tIdx<HWID_SIZE;tIdx++)
   	{
@@ -261,7 +479,7 @@ void *listenThread(void * pInstance) {
   	}
 	
 	startAvahi(tHWID_Hex, pThis->m_pDevice_MD->m_sDescription.c_str(), tPort);
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Starting connection server: specified server port: %d\n", tPort);
+	LoggerWrapper::GetInstance()->Write(LV_ACTION, "AirPlay_Audio_Player::Starting connection server: specified server port: %d\n", tPort);
     int tServerSock = setupListenServer(&tAddrInfo, tPort);
     if(tServerSock < 0)
     {
@@ -273,21 +491,37 @@ void *listenThread(void * pInstance) {
     int tClientSock = 0;
     while(1)
     {
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Waiting for clients to connect\n");
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Waiting for clients to connect\n");
       	tClientSock = acceptClient(tServerSock, tAddrInfo);
       	if(tClientSock > 0)
       	{
-        	int tPid = fork();
+			CMD_MH_Play_Media CMD_MH_Play_Media(
+				pThis->m_pData->m_dwPK_Device_ControlledVia /* PK Device, this is our Orbiter*/
+				,pThis->m_pDevice_Media_PlugIn->m_dwPK_Device /* PK Device Media Plugin*/
+				,0 /* PK Device */
+				,"" /* sFile*/
+				,MEDIATYPE_lmce_Airplay_audio_CONST /* Mediatype*/
+				,0 /* DeviceTemplate*/
+				,StringUtils::itos(3) /* EA*/
+				,false /* Resume*/
+				,0 /* Repeat */
+				,0 /* Queue*/
+				,0 /* bBypass_Event */
+				,0 /* bDont_Setup_AV */ );
+			pThis->SendCommand(CMD_MH_Play_Media);
+
+				int tPid = fork();
 			// child
 			if(tPid == 0)
        		{
           		freeaddrinfo(tAddrInfo);
           		tAddrInfo = NULL;
-				LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Accepted Client Connection..\n");
+				LoggerWrapper::GetInstance()->Write(LV_ACTION, "AirPlay_Audio_Player::Accepted Client Connection.\n");
           		close(tServerSock);
-          		pThis->EVENT_Playback_Started("",0,"AirPlay stream","RAW","");
+          		//pThis->EVENT_Playback_Started("",0,"AirPlay stream","RAW","");
 				handleClient(tClientSock, tPassword, tHWID);
-          		//close(tClientSock);
+          		LoggerWrapper::GetInstance()->Write(LV_ACTION, "AirPlay_Audio_Player::Client disconnected.\n");
+          		close(tClientSock);
           		//return 0;
         	}
         	// parent
@@ -299,7 +533,7 @@ void *listenThread(void * pInstance) {
       	}
       	else
       	{
-        	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Failed to initialize server socket, retrying...");
+        	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Audio_Player::Failed to initialize server socket, retrying...");
         	sleep(2);
      	}
     }
@@ -308,7 +542,7 @@ void *listenThread(void * pInstance) {
 
 int startAvahi(const char *pHWStr, const char *pServerName, int pPort)
 {
-  	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Starting avahi registration");
+  	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Starting avahi registration");
   	unsigned int tMaxServerName = 25; // Something reasonable?  iPad showed 21, iphone 25
   	int tPid = fork();
   	if(tPid == 0)
@@ -316,7 +550,7 @@ int startAvahi(const char *pHWStr, const char *pServerName, int pPort)
     	char tName[100 + HWID_SIZE + 3];
     	if(strlen(pServerName) > tMaxServerName)
     	{
-      		LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Servername truncated to %d characters", tMaxServerName);
+      		LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Servername truncated to %d characters", tMaxServerName);
     	}
 
     	tName[0] = '\0';
@@ -325,7 +559,7 @@ int startAvahi(const char *pHWStr, const char *pServerName, int pPort)
     	strcat(tName, pHWStr);
     	strcat(tName, "@");
     	strncat(tName, pServerName, tMaxServerName);
-    	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Registering with Avahi/DNS-SD Name: %s on port %d\n", tName, pPort);
+    	LoggerWrapper::GetInstance()->Write(LV_ACTION, "AirPlay_Audio_Player::Registering with Avahi/DNS-SD Name: %s on port %d\n", tName, pPort);
 
     	execlp("avahi-publish-service", "avahi-publish-service", tName,
          "_raop._tcp", tPort, "tp=UDP","sm=false","sv=false","ek=1","et=0,1",
@@ -342,14 +576,14 @@ int startAvahi(const char *pHWStr, const char *pServerName, int pPort)
   	}
   	else
   	{
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Avahi/DNS-SD started on PID: %d\n", tPid);
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Avahi/DNS-SD started on PID: %d\n", tPid);
   	}
   	return tPid;
 }
 
 void handleClient(int pSock, char *pPassword, char *pHWADDR)
 {
-  	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::In Handle Client\n");
+  	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::In Handle Client\n");
   	fflush(stdout);
 
   	socklen_t len;
@@ -369,7 +603,7 @@ void handleClient(int pSock, char *pPassword, char *pHWADDR)
   	// deal with both IPv4 and IPv6:
   	if (addr.ss_family == AF_INET) 
   	{
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Constructing ipv4 address\n");
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Constructing ipv4 address\n");
       	struct sockaddr_in *s = (struct sockaddr_in *)&addr;
       	port = ntohs(s->sin_port);
       	inet_ntop(AF_INET, &s->sin_addr, ipstr, sizeof ipstr);
@@ -378,7 +612,7 @@ void handleClient(int pSock, char *pPassword, char *pHWADDR)
   	} 
   	else 
   	{ // AF_INET6
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Constructing ipv6 address\n");
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Constructing ipv6 address\n");
       	struct sockaddr_in6 *s = (struct sockaddr_in6 *)&addr;
       	port = ntohs(s->sin6_port);
       	inet_ntop(AF_INET6, &s->sin6_addr, ipstr, sizeof ipstr);
@@ -401,7 +635,7 @@ void handleClient(int pSock, char *pPassword, char *pHWADDR)
         	ipbinlen = 16;
       	}
   	}
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Peer IP %s @ port %ds\n", ipstr, port);
+	LoggerWrapper::GetInstance()->Write(LV_ACTION, "AirPlay_Audio_Player::Peer IP %s @ port %ds\n", ipstr, port);
 
   	int tMoreDataNeeded = 1;
   	struct keyring     tKeys;
@@ -422,7 +656,7 @@ void handleClient(int pSock, char *pPassword, char *pHWADDR)
       		tError = readDataFromClient(pSock, &(tConn.recv));
       		if(!tError && strlen(tConn.recv.data) > 0)
       		{
-        		LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Finished Reading some data from client\n");
+        		LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Finished Reading some data from client\n");
 	
         		// parse client request
         		tMoreDataNeeded = parseMessage(&tConn, ipbin, ipbinlen, pHWADDR);
@@ -432,7 +666,7 @@ void handleClient(int pSock, char *pPassword, char *pHWADDR)
         		}
         		else if(-1 == tMoreDataNeeded) // Forked process down below ended.
         		{
-          			LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Forked Process ended...cleaning up\n");
+          			LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Forked Process ended...cleaning up\n");
           			cleanup(&tConn);
           			// pSock was already closed
           			return;
@@ -447,7 +681,7 @@ void handleClient(int pSock, char *pPassword, char *pHWADDR)
         		return;
       		}
     	}
-    	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Writing: %d chars to socket\n", tConn.resp.current);
+    	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Writing: %d chars to socket\n", tConn.resp.current);
     	//tConn->resp.data[tConn->resp.current-1] = '\0';
     	writeDataToClient(pSock, &(tConn.resp));
    		// Finished reading one message...
@@ -527,9 +761,9 @@ void initBuffer(struct shairbuffer *pBuf, int pNumChars)
 {
   	if(pBuf->data != NULL)
   	{
-    	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Hrm, buffer wasn't cleaned up....trying to free\n");
+    	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Hrm, buffer wasn't cleaned up....trying to free\n");
     	free(pBuf->data);
-    	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Free didn't seem to seg fault....huzzah\n");
+    	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Free didn't seem to seg fault....huzzah\n");
   	}
   	pBuf->current = 0;
   	pBuf->marker = 0;
@@ -563,7 +797,7 @@ int readDataFromClient(int pSock, struct shairbuffer *pClientBuffer)
   	while(tRetval > 0 && tEnd < 0)
   	{
      	// Read from socket until \n\n, \r\n\r\n, or \r\r is found
-      	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Waiting To Read...\n");
+      	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Waiting To Read...\n");
       	fflush(stdout);
       	tRetval = read(pSock, tReadBuf, MAX_SIZE);
       	// if new buffer contains the end of request string, only copy partial buffer?
@@ -574,21 +808,21 @@ int readDataFromClient(int pSock, struct shairbuffer *pClientBuffer)
         	{
           		pClientBuffer->marker = tEnd+1; // Marks start of content
         	}
-        	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Found end of http request at: %d\n", tEnd);
+        	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Found end of http request at: %d\n", tEnd);
         	fflush(stdout);        
       	}
       	else
       	{
         	tEnd = MAX_SIZE;
-        	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Read %d of data so far\n%s\n", tRetval, tReadBuf);
+        	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Read %d of data so far\n%s\n", tRetval, tReadBuf);
         	fflush(stdout);
       	}
       	if(tRetval > 0)
       	{
         	// Copy read data into tReceive;
-        	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Read %d data, using %d of it\n", tRetval, tEnd);
+        	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Read %d data, using %d of it\n", tRetval, tEnd);
         	addNToShairBuffer(pClientBuffer, tReadBuf, tRetval);
-        	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Finished copying data\n");
+        	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Finished copying data\n");
       	}
       	else
       	{
@@ -600,7 +834,7 @@ int readDataFromClient(int pSock, struct shairbuffer *pClientBuffer)
   	{
     	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Read more data after end of http request. %d instead of %d\n", tRetval, tEnd+1);
   	}
-  	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Finished Reading Data:\n%s\nEndOfData\n", pClientBuffer->data);
+  	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Finished Reading Data:\n%s\nEndOfData\n", pClientBuffer->data);
   	fflush(stdout);
   	return 0;
 }
@@ -677,9 +911,9 @@ int getAvailChars(struct shairbuffer *pBuf)
 
 void writeDataToClient(int pSock, struct shairbuffer *pResponse)
 {
-  	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::\n----Beg Send Response Header----\n%.*s\n", pResponse->current, pResponse->data);
+  	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::\n----Beg Send Response Header----\n%.*s\n", pResponse->current, pResponse->data);
   	send(pSock, pResponse->data, pResponse->current,0);
-  	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::----Send Response Header----\n");
+  	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::----Send Response Header----\n");
 }
 
 // Handles compiling the Apple-Challenge, HWID, and Server IP Address
@@ -695,10 +929,10 @@ int buildAppleResponse(struct connection *pConn, unsigned char *pIpBin, unsigned
   	{
     	char tTrim[tFoundSize + 2];
     	getTrimmed(tFound, tFoundSize, TRUE, TRUE, tTrim);
-    	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::HeaderChallenge:  [%s] len: %d  sizeFound: %d\n", tTrim, strlen(tTrim), tFoundSize);
+    	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::HeaderChallenge:  [%s] len: %d  sizeFound: %d\n", tTrim, strlen(tTrim), tFoundSize);
     	int tChallengeDecodeSize = 16;
     	char *tChallenge = decode_base64((unsigned char *)tTrim, tFoundSize, &tChallengeDecodeSize);
-    	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Challenge Decode size: %d  expected 16\n", tChallengeDecodeSize);
+    	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Challenge Decode size: %d  expected 16\n", tChallengeDecodeSize);
 
     	int tCurSize = 0;
     	unsigned char tChalResp[38];
@@ -720,7 +954,7 @@ int buildAppleResponse(struct connection *pConn, unsigned char *pIpBin, unsigned
     	}
 
     	char *tTmp = encode_base64((unsigned char *)tChalResp, tCurSize);
-    	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Full sig: %s\n", tTmp);
+    	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Full sig: %s\n", tTmp);
     	free(tTmp);
 
     	// RSA Encrypt
@@ -760,24 +994,24 @@ int parseMessage(struct connection *pConn, unsigned char *pIpBin, unsigned int p
     	int tContentSize = atoi(tContent);
     	if((unsigned)pConn->recv.marker == 0 || strlen(pConn->recv.data+pConn->recv.marker) != (unsigned)tContentSize)
     	{
-      		LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Content-Length: %s value -> %d\n", tContent, tContentSize);
+      		LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Content-Length: %s value -> %d\n", tContent, tContentSize);
         	if((unsigned)pConn->recv.marker != 0)
         		{
-          			LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::ContentPtr has %d, but needs %d\n", 
+          			LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::ContentPtr has %d, but needs %d\n", 
                   	strlen(pConn->recv.data+pConn->recv.marker), tContentSize);
         		}
       		// check if value in tContent > 2nd read from client.
       		return 1; // means more content-length needed
     	}
     }
-  	else LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::No content, header only\n");
+  	else LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::No content, header only\n");
 
   	// "Creates" a new Response Header for our response message
   	addToShairBuffer(&(pConn->resp), (char *)"RTSP/1.0 200 OK\r\n");
 
   	if(buildAppleResponse(pConn, pIpBin, pIpBinLen, pHWID)) // need to free sig
   	{
-    	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Added AppleResponse to Apple-Challenge request\n");
+    	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Added AppleResponse to Apple-Challenge request\n");
   	}
 
   	// Find option, then based on option, do different actions.
@@ -803,14 +1037,14 @@ int parseMessage(struct connection *pConn, unsigned char *pIpBin, unsigned int p
       		tHeaderVal = getFromContent(tContent, "a=rsaaeskey", &tKeySize);
       		char tEncodedAesKey[tKeySize + 2]; // +1 for nl, +1 for \0
       		getTrimmed(tHeaderVal, tKeySize, TRUE, TRUE, tEncodedAesKey);
-      		LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::AES KEY: [%s] Size: %d  Strlen: %d\n", tEncodedAesKey, tKeySize, strlen(tEncodedAesKey));
+      		LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::AES KEY: [%s] Size: %d  Strlen: %d\n", tEncodedAesKey, tKeySize, strlen(tEncodedAesKey));
      	 	// remove base64 coding from key
       		char *tDecodedAesKey = decode_base64((unsigned char*) tEncodedAesKey,tKeySize, &tKeySize);  // Need to free DecodedAesKey
       		// Grab the formats
       		int tFmtpSize = 0;
       		char *tFmtp = getFromContent(tContent, "a=fmtp", &tFmtpSize);  // Don't need to free
       		tFmtp = getTrimmedMalloc(tFmtp, tFmtpSize, TRUE, FALSE); // will need to free
-      		LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Format: %s\n", tFmtp);
+      		LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Format: %s\n", tFmtp);
 
       		RSA *rsa = loadKey();
       		// Decrypt the binary aes key
@@ -818,7 +1052,7 @@ int parseMessage(struct connection *pConn, unsigned char *pIpBin, unsigned int p
       		//char tDecryptedKey[RSA_size(rsa)];
       		if(RSA_private_decrypt(tKeySize, (unsigned char *)tDecodedAesKey, (unsigned char*) tDecryptedKey, rsa, RSA_PKCS1_OAEP_PADDING) >= 0)
       		{
-        		LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Decrypted AES key from RSA Successfully\n");
+        		LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Decrypted AES key from RSA Successfully\n");
       		}
       		else LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Error Decrypting AES key from RSA\n");
       		free(tDecodedAesKey);
@@ -833,7 +1067,7 @@ int parseMessage(struct connection *pConn, unsigned char *pIpBin, unsigned int p
     	struct comms *tComms = pConn->hairtunes;
     	if (! (pipe(tComms->in) == 0 && pipe(tComms->out) == 0))
     	{
-      		LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Error setting up hairtunes communications...some things probably wont work very well.\n");
+      		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Audio_Player::Error setting up hairtunes communications...some things probably wont work very well.\n");
     	}
     
     	// Setup fork
@@ -852,11 +1086,11 @@ int parseMessage(struct connection *pConn, unsigned char *pIpBin, unsigned int p
       		tFound = getFromSetup(pConn->recv.data, "timing_port", &tSize);
       		getTrimmed(tFound, tSize, 1, 0, tTPortStr);
 
-      		LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::converting %s and %s from str->int\n", tCPortStr, tTPortStr);
+      		LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::converting %s and %s from str->int\n", tCPortStr, tTPortStr);
       		int tControlport = atoi(tCPortStr);
       		int tTimingport = atoi(tTPortStr);
 
-      		LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Got %d for CPort and %d for TPort\n", tControlport, tTimingport);
+      		LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Got %d for CPort and %d for TPort\n", tControlport, tTimingport);
       		char *tRtp = NULL;
       		char *tPipe = NULL;//(char *)"/var/run/airplay.raw";
       		char *tAoDriver = NULL;
@@ -888,7 +1122,7 @@ int parseMessage(struct connection *pConn, unsigned char *pIpBin, unsigned int p
       		hairtunes_init(tKeys->aeskey, tKeys->aesiv, tKeys->fmt, tControlport, tTimingport, tDataport, tRtp, tPipe, tAoDriver, tAoDeviceName, tAoDeviceId);
 
       		// Quit when finished.
-      		LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Returned from hairtunes init....returning -1, should close out this whole side of the fork\n");
+      		LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Returned from hairtunes init....returning -1, should close out this whole side of the fork\n");
       		return -1;
     	}
     	else if(tPid >0)
@@ -923,7 +1157,7 @@ int parseMessage(struct connection *pConn, unsigned char *pIpBin, unsigned int p
       	}
     	else
     	{
-      		LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Error forking process....dere' be errors round here.\n");
+      		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "AirPlay_Audio_Player::Error forking process....dere' be errors round here.\n");
       		return -1;
     	}
   	}
@@ -933,7 +1167,7 @@ int parseMessage(struct connection *pConn, unsigned char *pIpBin, unsigned int p
     	addToShairBuffer(&(pConn->resp), (char *)"Connection: close\r\n");
     	propogateCSeq(pConn);
     	close(pConn->hairtunes->in[1]);
-	    LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Tearing down connection, closing pipes\n");
+	    LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Tearing down connection, closing pipes\n");
 	    //close(pConn->hairtunes->out[0]);
     	tReturn = -1;  // Close client socket, but sends an ACK/OK packet first
   	}
@@ -947,16 +1181,16 @@ int parseMessage(struct connection *pConn, unsigned char *pIpBin, unsigned int p
     	propogateCSeq(pConn);
     	int tSize = 0;
     	char *tVol = getFromHeader(pConn->recv.data, "volume", &tSize);
-    	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::About to write [vol: %.*s] data to hairtunes\n", tSize, tVol);
+    	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::About to write [vol: %.*s] data to hairtunes\n", tSize, tVol);
 
     	write(pConn->hairtunes->in[1], "vol: ", 5);
     	write(pConn->hairtunes->in[1], tVol, tSize);
     	write(pConn->hairtunes->in[1], "\n", 1);
-    	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Finished writing data write data to hairtunes\n");
+    	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Finished writing data write data to hairtunes\n");
   	}
   	else
   	{
-    	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::\n\nUn-Handled recv: %s\n", pConn->recv.data);
+    	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::\n\nUn-Handled recv: %s\n", pConn->recv.data);
     	propogateCSeq(pConn);
   	}
   	addToShairBuffer(&(pConn->resp), (char *)"\r\n");
@@ -1015,7 +1249,7 @@ char *getFromSetup(char *pContentPtr, const char* pField, int *pReturnSize)
 
 char *getFromBuffer(char *pBufferPtr, const char *pField, int pLenAfterField, int *pReturnSize, char *pDelims)
 {
-  	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::GettingFromBuffer: %s\n", pField);
+  	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::GettingFromBuffer: %s\n", pField);
   	char* tFound = strstr(pBufferPtr, pField);
   	int tSize = 0;
   	if(tFound != NULL)
@@ -1032,10 +1266,10 @@ char *getFromBuffer(char *pBufferPtr, const char *pField, int pLenAfterField, in
       		if(tEnd != NULL && (NULL == tShortest || tEnd < tShortest)) tShortest = tEnd;
     	}    
     	tSize = (int) (tShortest - tFound);
-    	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Found %.*s  length: %d\n", tSize, tFound, tSize);
+    	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Found %.*s  length: %d\n", tSize, tFound, tSize);
     	if(pReturnSize != NULL) *pReturnSize = tSize;
   	}
-  	else LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Not Found\n");
+  	else LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Not Found\n");
   	return tFound;
 }
 
@@ -1079,6 +1313,6 @@ RSA *loadKey()
   	BIO *tBio = BIO_new_mem_buf((void *)AIRPORT_PRIVATE_KEY, -1);
   	RSA *rsa = PEM_read_bio_RSAPrivateKey(tBio, NULL, NULL, NULL); //NULL, NULL, NULL);
   	BIO_free(tBio);
-  	LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::RSA Key: %d\n", RSA_check_key(rsa));
+  	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::RSA Key: %d\n", RSA_check_key(rsa));
   	return rsa;
 }
