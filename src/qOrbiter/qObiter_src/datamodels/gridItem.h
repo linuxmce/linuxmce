@@ -15,7 +15,7 @@ public:
   enum Roles {
     NameRole = Qt::UserRole+1,
     IndexRole =Qt::UserRole+2,
-    PathRole= Qt::UserRole+3,
+    PathRole= Qt::DisplayRole+3,
       ImageRole = Qt::DisplayRole+4,
     AttributeRole = Qt::UserRole+5,
     FKRole = Qt::DisplayRole+6

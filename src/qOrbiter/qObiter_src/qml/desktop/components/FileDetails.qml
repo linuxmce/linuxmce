@@ -13,6 +13,7 @@ Rectangle {
         anchors.fill: parent
         fillMode: Image.PreserveAspectFit
         source: "image://filedetailsprovider/"+filedetailsclass.program
+        asynchronous: true
 
     }
     clip: true
@@ -25,6 +26,7 @@ Rectangle {
         y: 5
        scale: .75
         source: "image://filedetailsprovider/"+filedetailsclass.screenshot
+        asynchronous: true
     }
     MouseArea{
         x: 0

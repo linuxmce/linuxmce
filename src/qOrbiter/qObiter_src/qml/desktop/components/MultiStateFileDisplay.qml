@@ -31,6 +31,8 @@ Rectangle {
         cellHeight: 109
         keyNavigationWraps: true
         Keys.enabled: true
+       KeyNavigation.right: gridView.right
+
     }
 
     PathView {
@@ -46,20 +48,30 @@ Rectangle {
         model:dataModel
         focus: true
         clip: true
+
+      interactive: true
         Keys.enabled: true
         anchors.fill: parent
                  highlight: appHighlight
+
                  preferredHighlightBegin: 0.5
                  preferredHighlightEnd: 0.5
                  delegate: appDelegate
                  path: Path {
-                     startX: 10
-                     startY: 50
-                     PathAttribute { name: "iconScale"; value: 0.25 }
-                     PathQuad { x: 350; y: 350; controlX: 50; controlY: 100 }
-                     PathAttribute { name: "iconScale"; value: 1.0 }
-                     PathQuad { x: 550; y: 50; controlX: 650; controlY: 200 }
-                     PathAttribute { name: "iconScale"; value: .25 }
+                     startX: 50
+                     startY: 200
+                     PathLine{x: 200 ; y:250}
+                     PathAttribute { name: "iconScale"; value: 0.5 }
+
+
+                     PathLine{ x: 400; y: 200; }
+                     PathAttribute { name: "iconScale"; value: 2.0 }
+
+
+                     PathLine { x: 750; y: 250; }
+                     PathAttribute { name: "iconScale"; value: 0.5}
+
+
                  }
     }
 
@@ -74,9 +86,11 @@ Rectangle {
         opacity: 0
         model:dataModel
         delegate: contactDelegateList
-        highlight: Rectangle { color: "lightblue"; radius: 5 }
+        highlightFollowsCurrentItem: true
+        highlight: appHighlight
         focus: true
         clip: true
+
     }
 
     Text {

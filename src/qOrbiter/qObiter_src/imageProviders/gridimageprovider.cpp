@@ -1,9 +1,10 @@
 #include "gridimageprovider.h"
+#include "qorbitermanager.h"
 #include <QDebug>
 
-GridIndexProvider::GridIndexProvider(ListModel *model  , int pathRole, int pixmapRole) :
+GridIndexProvider::GridIndexProvider(ListModel *model  , int pathRole, int pixmapRole, qorbiterManager *manager) :
     QDeclarativeImageProvider(QDeclarativeImageProvider::Image), mModel(*model),  mPathRole(pathRole),
-    mPixmapRole(pixmapRole)
+    mPixmapRole(pixmapRole), thismanager(manager)
 {
     // For each pixmap already in the model, get a mapping between the name and the index
  qRegisterMetaType<QModelIndex>("QModelIndex");
@@ -29,7 +30,14 @@ QImage GridIndexProvider::requestImage(const QString &id, QSize *size, const QSi
 
         QString key = QString("image://datagridimg/%1").arg(id);
         QModelIndex index = mPixmapIndex.value(id);
-        QImage image = mModel.data(index, mPixmapRole).value<QImage>();
+      //  QImage image = mModel.data(index, mPixmapRole).value<QImage>();
+        QString t = mModel.data(index, 3).value<QString>();
+        QImage image = thismanager->pqOrbiter->getfileForDG(t.toStdString());
+        if (image.isNull())
+        {
+              image.load(":/icons/videos.png");
+
+        }
 
         QImage result;
 
@@ -38,6 +46,8 @@ QImage GridIndexProvider::requestImage(const QString &id, QSize *size, const QSi
         } else {
             result = image;
         }
+
+
        // *size = result.size();
         return result;
 

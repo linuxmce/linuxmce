@@ -1216,7 +1216,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
     {
         qmlUI->initializeSortString();
     }
-
+qmlUI->gotoQScreen("Screen_47.qml");
     qmlUI->model->clear();
 
 
@@ -1344,7 +1344,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                     QString filePath;
                     int index;
                     QImage cellImg;
-                    qmlUI->gotoQScreen("Screen_47.qml");
+
 
                     for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
                     {
@@ -1352,6 +1352,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                         const char *pPath = pCell->GetImagePath();
                         filePath = QString::fromLatin1(pPath);
                         fk_file = pCell->GetValue();
+
                         cellTitle = QString::fromStdString(pCell->m_Text);
                         index = pDataGridTable->CovertColRowType(it->first).first;
                         if (pPath )
@@ -1361,14 +1362,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                             pCell->m_GraphicLength = (unsigned long) s;
                             pCell->m_GraphicFormat = GR_JPG;
                         }
-                        else if (!pPath) //making sure we dont provide a null image
-                        {
-                            cellImg.load(":/icons/videos.png");
-                        }
-                        else if (cellImg.isNull())
-                        {
-                            cellImg.load(":/icons/videos.png");
-                        }
+
 
                         qmlUI->model->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg,  qmlUI->model));
                     }
@@ -1960,7 +1954,6 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     string s_val;
     CMD_Get_Attributes_For_Media attribute_detail_get(qmlUI->iPK_Device, qmlUI->iMediaPluginID,  qs_fk_fileno.toStdString(), " ",&s_val );
     SendCommand(attribute_detail_get);
-
     QString breaker = s_val.c_str();
 
     /*
@@ -2033,6 +2026,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
             QString filePath;
             int index;
             QImage cellImg;
+            QString cellfk;
             DataGridCell *pCell;
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
@@ -2046,14 +2040,16 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 index = pDataGridTable->CovertColRowType(it->first).first;
                 cellTitle = pCell->m_mapAttributes_Find("Title").c_str();
                 cellAttribute = pCell->m_mapAttributes_Find("Name").c_str();
-                //  qDebug() << pCell->m_mapAttributes_Find("Synopsis").c_str();
+                cellfk = pCell->GetValue();
+                qDebug() << pCell->m_mapAttributes.size();
 
                 if(cellTitle == "Program")
                 {
                     string a_text;
-                    CMD_Get_Attribute getProgramAttributes(qmlUI->iPK_Device, qmlUI->iMediaPluginID, cellAttribute.remove("!A").toInt(), &a_text);
+                    CMD_Get_Attribute getProgramAttributes(qmlUI->iPK_Device, qmlUI->iMediaPluginID, cellfk.remove("!A").toInt(), &a_text);
+                    qDebug() << cellfk;
                     SendCommand(getProgramAttributes);
-                    qDebug() << a_text.c_str();
+                    qDebug() << pCell->m_ImagePathLength;
                 }
 
                  qDebug() << "Item Attribute::" << cellTitle << "-" << cellAttribute;

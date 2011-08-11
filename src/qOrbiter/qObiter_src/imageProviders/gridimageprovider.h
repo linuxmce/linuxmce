@@ -8,13 +8,13 @@
 #include <datamodels/listModel.h>
 #include <QImage>
 
-
+class qorbiterManager;
 
 class GridIndexProvider :public QObject , public QDeclarativeImageProvider
 {
     Q_OBJECT
 public:
-    GridIndexProvider( ListModel* model, int pathRole, int pixmapRole);
+    GridIndexProvider( ListModel* model, int pathRole, int pixmapRole, qorbiterManager *manager);
    virtual ~GridIndexProvider();
     QImage requestImage(const QString& id, QSize* size, const QSize& requestedSize);
 
@@ -24,6 +24,7 @@ public slots:
     void dataReset();
 
 private:
+    qorbiterManager *thismanager;
     ListModel& mModel;
     int mPathRole;
     int mPixmapRole;

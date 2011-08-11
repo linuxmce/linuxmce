@@ -64,6 +64,7 @@ Rectangle {
                     anchors.centerIn: parent;
                     fillMode: Image.PreserveAspectFit;
                     opacity: .5
+                    asynchronous: true
                 }
             }
 
@@ -139,7 +140,7 @@ Rectangle {
     Component {
              id: appDelegate
              Item {
-                 width: 100; height: 100
+                 width: 200; height: 200
                  scale: PathView.iconScale
 
                  Image {
@@ -150,7 +151,10 @@ Rectangle {
                      height: 100;
                      width: 156;
                      fillMode: Image.PreserveAspectFit;
+                     asynchronous: true
+
                  }
+
                  Text {
                      anchors { top: myIcon.bottom; horizontalCenter: parent.horizontalCenter }
                      text: name
