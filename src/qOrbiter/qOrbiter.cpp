@@ -1395,10 +1395,11 @@ qmlUI->gotoQScreen("Screen_47.qml");
                     {
                         DataGridCell *pCell = it->second;
                         const char *pPath = pCell->GetImagePath();
-                        filePath = QString::fromLatin1(pPath);
+                        filePath = QString::fromUtf8(pPath);
                         fk_file = pCell->GetValue();
 
-                        cellTitle = QString::fromStdString(pCell->m_Text);
+                        cellTitle = QString::fromUtf8(pCell->m_Text);
+                        qDebug() << cellTitle.toAscii();
                         index = pDataGridTable->CovertColRowType(it->first).first;
                         if (pPath )
                         {
