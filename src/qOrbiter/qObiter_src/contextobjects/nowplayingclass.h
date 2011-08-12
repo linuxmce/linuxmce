@@ -15,6 +15,7 @@ class NowPlayingClass : public QDeclarativeItem
     Q_OBJECT
     Q_PROPERTY (bool b_mediaPlaying READ getStatus WRITE setStatus NOTIFY mediaStatusChanged)
     Q_PROPERTY (QString qs_mainTitle READ getTitle WRITE setTitle NOTIFY titleChanged)
+    Q_PROPERTY (QString qs_screen READ getScreen WRITE setScreen NOTIFY screenTypeChanged)
 
 public:
     explicit NowPlayingClass(QDeclarativeItem *parent = 0);

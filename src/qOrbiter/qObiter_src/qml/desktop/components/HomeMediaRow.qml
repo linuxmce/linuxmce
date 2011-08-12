@@ -65,7 +65,7 @@ Item {
 
                 MouseArea{
                     anchors.fill: parent
-                    onClicked:gotoQScreen("Screen_48.qml")
+                    onClicked:gotoQScreen(dcenowplaying.qs_screen)
                 }
             }
             ListView{

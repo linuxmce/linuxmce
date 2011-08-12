@@ -1019,12 +1019,19 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     if (iValue = 1)
     {
        qmlUI->nowPlayingButton->setStatus(true);
+
+
     }
     else
     {
         qmlUI->nowPlayingButton->setStatus(false);
     }
 
+    QString scrn = sPK_DesignObj.c_str();
+    int pos1 = scrn.indexOf(",");
+   scrn.remove(pos1, scrn.length());
+   qDebug() << scrn;
+   qmlUI->nowPlayingButton->setScreen("Screen_"+scrn+".qml");
     qmlUI->nowPlayingButton->setTitle(QString::fromStdString(sValue_To_Assign));
 }
 
@@ -1646,7 +1653,8 @@ void qOrbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool 
     cout << "Parm #253 - Queue=" << bQueue << endl;
 
     QString str = QString::number(iPK_Screen);
-    this->qmlUI->gotoQScreen("Screen_"+str+".qml");
+    qmlUI->gotoQScreen("Screen_"+str+".qml");
+
 
 }
 
