@@ -28,8 +28,8 @@ public:
   QVariant data(int role) const;
   QHash<int, QByteArray> roleNames() const;
 
-  inline QString id() const {  return m_fk_file; }
-  inline QString name() const { return m_name; }
+  inline QString id() const {  return m_fk_file.toUtf8(); }
+  inline QString name() const { return m_name.toLatin1(); }
   inline int index() const { return m_index; }
   inline QString path() const { return m_path; }
   inline QImage cellImage() const {  return m_image; } 
