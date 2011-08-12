@@ -378,6 +378,9 @@ bool qorbiterManager::getConf(int pPK_Device)
     //------------DEFAULTS-FOR-ORBITER------------------------------------------------------------
     QDomElement defaults = root.firstChildElement("Default");
     QString sPK_User = defaults.attribute("sPK_User");
+    iFK_Room = defaults.attribute("DefaultRoom").toInt();
+    iea_area = defaults.attribute("DefaultEA").toInt();
+    iPK_User = defaults.attribute("PK_User").toInt();
 
 
     //-USERS-----------------------------------------------------------------------------------------------------
@@ -572,7 +575,7 @@ bool qorbiterManager::getConf(int pPK_Device)
     qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);                       //file grids current media type
 
     //------------not sure if neccesary since it knows where we are.
-    setActiveRoom(m_lRooms->idefault_Ea,m_lRooms->idefault_Ea);
+    setActiveRoom(iFK_Room, iea_area);
 
     //pqOrbiter->CMD_Set_Current_Room(m_lRooms->idefault_Ea);
     //pqOrbiter->CMD_Set_Entertainment_Area(m_lRooms->sdefault_Ea.toStdString());
@@ -775,6 +778,7 @@ void qorbiterManager:: setLocation(const int &room, const int &ea)
     iFK_Room = room;
     iea_area = ea;
     emit locationChanged(room, ea);
+    pqOrbiter->changeLocation(room, ea);
 }
 
 int qorbiterManager::getlocation() const
