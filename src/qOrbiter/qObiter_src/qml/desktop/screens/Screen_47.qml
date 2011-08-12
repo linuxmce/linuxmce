@@ -125,7 +125,7 @@ Rectangle {
                         font.pointSize: 12;
                         color: "black" ;
                         wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                        anchors.fill: parent
+                        //anchors.fill: parent
                         font.bold: true
                     }
                 }
@@ -140,18 +140,25 @@ Rectangle {
     Component {
              id: appDelegate
              Item {
-                 width: 200; height: 200
-                 scale: PathView.iconScale
+                 id: wrapper
+                 width: 300; height: 300
+                 scale: PathView.iconScaling
+                 //opacity: PathView.iconOpacity
 
                  Image {
                      id: myIcon
                      y: 20; anchors.horizontalCenter: parent.horizontalCenter
                      smooth: true
                      source:"image://datagridimg/"+id ;
-                     height: 100;
-                     width: 156;
+                     height: 200;
+                     width: 356;
                      fillMode: Image.PreserveAspectFit;
                      asynchronous: true
+                     transform: Rotation {
+                         origin.x: wrapper.width/2; origin.y: wrapper.height/2
+                         axis.x: 0; axis.y: 1; axis.z: 0     // rotate around y-axis
+                         angle: PathView.iconAngle
+                     }
 
                  }
 
@@ -159,6 +166,7 @@ Rectangle {
                      anchors { top: myIcon.bottom; horizontalCenter: parent.horizontalCenter }
                      text: name
                      smooth: true
+                     //visible: wrapper.PathView.isCurrentItem
                  }
 
                  MouseArea {

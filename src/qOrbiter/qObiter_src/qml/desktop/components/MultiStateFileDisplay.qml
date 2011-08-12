@@ -17,6 +17,7 @@ Rectangle {
         anchors.fill: parent
         x:0
         y: 40
+        //z: 2
         width: 790
         height: 460
         anchors.topMargin: 40
@@ -39,10 +40,11 @@ Rectangle {
 
     PathView {
         id: path_view1
-        x: 398
-        y: 251
-        width: 33
-        height: 31
+        x:0
+        y: 40
+        //z: 1
+        width: 790
+        height: 460
         visible: false
         opacity: 0
         anchors.topMargin: 40
@@ -51,40 +53,61 @@ Rectangle {
         focus: true
         clip: true
 
-      interactive: true
+        interactive: true
         Keys.enabled: true
         anchors.fill: parent
-                 highlight: appHighlight
+        offset: 5
+        pathItemCount: 13;
+        highlight: appHighlight
 
-                 preferredHighlightBegin: 0.5
-                 preferredHighlightEnd: 0.5
-                 delegate: appDelegate
-                 path: Path {
-                     startX: 50
-                     startY: 200
-                     PathLine{x: 200 ; y:250}
-                     PathAttribute { name: "iconScale"; value: 0.5 }
+        preferredHighlightBegin: 0.35
+        preferredHighlightEnd: 0.65
+        highlightRangeMode: PathView.StrictlyEnforceRange
+        highlightMoveDuration: 100
+        dragMargin: parent.height/3
+        delegate: appDelegate
+        path: Path {
+            startX: 10
+            startY: path_view1.height-100
 
+            PathPercent { value: 0.0 }
+            PathAttribute { name: "iconScaling"; value:  0.6 }
+            PathAttribute { name: "iconAngle"; value:  70 }
 
-                     PathLine{ x: 400; y: 200; }
-                     PathAttribute { name: "iconScale"; value: 2.0 }
+            PathLine { x: (path_view1.width*0.25); y: path_view1.height-100 }
+            PathPercent { value: 0.45 }
+            PathAttribute { name: "iconScaling"; value:  0.75 }
+            PathAttribute { name: "iconAngle"; value:  70 }
 
+            PathLine { x: path_view1.width/2; y: path_view1.height-100 }
+            PathPercent { value: 0.5 }
+            PathAttribute { name: "iconScaling"; value:  1.0 }
+            PathAttribute { name: "iconAngle"; value:  0 }
 
-                     PathLine { x: 750; y: 250; }
-                     PathAttribute { name: "iconScale"; value: 0.5}
+            PathLine { x: (path_view1.width*0.75); y: path_view1.height-100 }
+            PathPercent { value: 0.55 }
+            PathAttribute { name: "iconScaling"; value:  0.75 }
+            PathAttribute { name: "iconAngle"; value:  -70 }
 
+            PathLine { x: path_view1.width; y: path_view1.height-100 }
+            PathPercent { value: 1.0 }
+            PathAttribute { name: "iconScaling"; value:  0.6 }
+            PathAttribute { name: "iconAngle"; value:  -70 }
 
-                 }
+        }
+        onCurrentIndexChanged: {
+            //console.log("Current index changed: " + currentIndex);
+        }
     }
 
     ListView {
-    //Rectangle {
         id: list_view1
-        x: 398
-        y: 251
-        width: 33
-        height: 31
-        //visible: false
+        x:0
+        y: 40
+        //z: 1
+        width: 790
+        height: 460
+        visible: false
         opacity: 0
         model:dataModel
         delegate: contactDelegateList
@@ -169,25 +192,29 @@ Rectangle {
                 target: gridView
                 visible: false
                 opacity: 0
+                //z: 2
             }
 
             PropertyChanges {
                 target: path_view1
-                x:0
-                y: 40
-                width: 790
-                height: 460
+                //x:0
+                //y: 40
+                //width: 790
+                //height: 460
                 opacity: 1
                 visible: true
+                //z: 2
             }
 
             PropertyChanges {
                 target: list_view1
-                x: 398
-                y: 251
-                width: 33
-                height: 31
+                //x: 398
+                //y: 251
+                //width: 33
+                //height: 31
                 visible: false
+                opacity: 0
+                //z:1
             }
         },
         State {
@@ -196,27 +223,30 @@ Rectangle {
                 target: gridView
                 visible: false
                 opacity: 0
+                //z: 1
             }
 
             PropertyChanges {
                 target: path_view1
-                x: 398
-                y: 251
-                width: 33
-                height: 31
+                //x: 398
+                //y: 251
+                //width: 33
+                //height: 31
                 //interactive: false
                 visible: false
-                opacity: 1
+                opacity: 0
+                //z: 1
             }
 
             PropertyChanges {
                 target: list_view1
-                x:0
-                y: 40
-                width: 790
-                height: 460
+                //x:0
+                //y: 40
+                //width: 790
+                //height: 460
                 visible: true
                 opacity: 1
+                //z: 2
             }
         }
     ]
