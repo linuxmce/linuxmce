@@ -206,7 +206,9 @@ int main(int argc, char* argv[])
         try
         {
             //qt orbiter ui intialization
+#ifndef for_harmattan
             QApplication::setGraphicsSystem("raster");
+#endif
             QApplication a(argc, argv);
 
             qorbiterManager * w = new qorbiterManager(PK_Device,QString::fromStdString(sRouter_IP.c_str()));
