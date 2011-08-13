@@ -220,33 +220,33 @@ function getDefaults($conn, $doc, $orbiterData)
 {
 echo "Finding default user and room...";
 $dElement = $doc->createElement("Default");
-$orbiterData->appendChild($dElement);
 
 $defaultUserSql = "Select * from Device_DeviceData LEFT JOIN Users on 
 Device_DeviceData.IK_DeviceData = Users.PK_Users
  where FK_DeviceData = 3 and FK_Device =".$_GET['d'];
 $result = mysql_query($defaultUserSql,$conn) or die(mysql_error($conn));
-	while ($row = mysql_fetch_array($result))
+	if ($row = mysql_fetch_array($result))
 	{			
 		$attrib1= $dElement->setAttribute("PK_User", $row['IK_DeviceData']);
 		$attrib3= $dElement->setAttribute("sPK_User", $row['UserName'] );
 		
 	}
 	
-$defaultLocationSql = "Select * from Device_DeviceData where FK_DeviceData = 27 and FK_Device =".$_GET['d'];
+//$defaultLocationSql = "Select * from Device_DeviceData where FK_DeviceData = 27 and FK_Device =".$_GET['d'];
+$defaultLocationSql = "Select * from Device where PK_Device =".$_GET['d'];
 $result = mysql_query($defaultLocationSql,$conn) or die(mysql_error($conn));
-	while ($row = mysql_fetch_array($result))
+	if ($row = mysql_fetch_array($result))
 	{			
-		
-		$subResult = mysql_query("SELECT * from EntertainArea where Description = '".$row['IK_DeviceData']."'", $conn);
+
+		$subResult = mysql_query("SELECT * from EntertainArea where FK_Room = '".$row['FK_Room']."'", $conn);
 		$row2 = mysql_fetch_array($subResult);
 		
-		$attrib2= $dElement->setAttribute("DefaultLocation", $row['IK_DeviceData']);
+		$attrib2= $dElement->setAttribute("DefaultLocation", $row['FK_Room']);
 		$attrib2= $dElement->setAttribute("DefaultEA", $row2['PK_EntertainArea']);
-		$attrib2= $dElement->setAttribute("DefaultRoom", $row2['FK_Room']);
+		$attrib2= $dElement->setAttribute("DefaultRoom", $row['FK_Room']);
 		
 	}
-	
+	$orbiterData->appendChild($dElement);
 			
 	return true;
 
