@@ -9,20 +9,24 @@ import "../js/ComponentLoader.js" as MyJs
      signal setupStart(int x, string y)
 
      property string locationinfo: "standby"
+     property string screenfile
 
     // Style {id:style}
     width: style.orbiterW;
     height: style.orbiterH;
 
      function screenchange(screenname )
-     {
-         if(pageLoader.source = "../screens/"+screenname)
+     { 
+        pageLoader.source = "../screens/"+screenname
+        if (pageLoader.status == 1)
          {
              console.log("Command to change to:" + screenname+ " was successfull")
          }
          else
          {
-             console.log("Command to change to:" + screename + " failed!")
+            console.log("Command to change to:" + screenname + " failed!")
+            screenfile = screenname
+            pageLoader.source = "../screens/Screen_x.qml"
          }
      }
 
