@@ -383,6 +383,7 @@ bool qorbiterManager::getConf(int pPK_Device)
     iPK_User = defaults.attribute("PK_User").toInt();
 
 
+
     //-USERS-----------------------------------------------------------------------------------------------------
     QDomElement userXml = root.firstChildElement("Users");
     userList = new UserModel( new UserItem, this);
