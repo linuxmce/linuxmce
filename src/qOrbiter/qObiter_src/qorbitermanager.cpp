@@ -779,7 +779,7 @@ void qorbiterManager:: setLocation(const int &room, const int &ea)
     iFK_Room = room;
     iea_area = ea;
     emit locationChanged(room, ea);
-    pqOrbiter->changeLocation(room, ea);
+    //pqOrbiter->changeLocation(room, ea);
 }
 
 int qorbiterManager::getlocation() const
@@ -1211,6 +1211,11 @@ void qorbiterManager::showFileInfo(QString fk_file)
 {
 
     pqOrbiter->GetMediaAttributeGrid(fk_file);
+}
+
+void qorbiterManager::requestSecurityPic(int i_pk_camera_device)
+{
+
 }
 
 

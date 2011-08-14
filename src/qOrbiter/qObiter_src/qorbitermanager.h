@@ -29,9 +29,9 @@
 
 /*----custom classes-------*/
 //own version of OrbiterData.h
-#include <datamodels/listModel.h>                          //custom item model
+#include <datamodels/listModel.h>                             //custom item model
 #include <datamodels/gridItem.h>
-#include <uiclasses/uicontroller.h>               //experimental
+#include <uiclasses/uicontroller.h>                           //experimental
 
 #include <imageProviders/basicImageProvider.h>                 //qml image provider
 #include <imageProviders/gridimageprovider.h>                  //qml image provider for grids !not implemented!
@@ -228,6 +228,9 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     Q_INVOKABLE void setRouterIp(QString s);
     Q_INVOKABLE void writeConfig();
     bool readLocalConfig();
+
+    //security related
+    Q_INVOKABLE void requestSecurityPic(int i_pk_camera_device);
 
     Q_INVOKABLE  void getcurrentSkins(QStringList skinPaths);
     void qmlSetupLmce(int incdeviceid, QString incrouterip);
