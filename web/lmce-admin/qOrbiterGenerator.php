@@ -1,7 +1,11 @@
 <?php
 
 //initialization area
-$deviceID = $_GET['d'];
+if (isset($_GET["d"])) {
+  $deviceID = $_GET['d'];
+} else {
+   die("Please specify the device ID with d=xxxx");
+}
 $server = "localhost";
 $mysqlUser = "root";
 $mysqlPass = "";
