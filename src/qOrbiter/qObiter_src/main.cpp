@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
         cout << "qOrbiter, v." << VERSION << endl
                 << "Visit www.plutohome.com for source code and license information" << endl << endl;
 
-        string sRouter_IP="192.168.80.1";
+        string sRouter_IP="DCEROUTER";
         int PK_Device;
         string sLogger="stdout";
 

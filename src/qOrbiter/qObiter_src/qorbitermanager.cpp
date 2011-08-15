@@ -123,7 +123,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
 
     currentSkin = "default";
     currentSkinURL="/qml/qObiter_src/";
-    s_RouterIP="192.168.80.1";
+    s_RouterIP="DCERouter";
 
     QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
     const QString test = buildType;
@@ -965,7 +965,7 @@ void qorbiterManager::quickReload()
 void qorbiterManager::qmlSetupLmce(int incdeviceid, QString incrouterip)
 {
 
-    setupLmce(iPK_Device, qs_routerip.toStdString(), false, false);
+    setupLmce(incdeviceid, incrouterip.toStdString(), false, false);
 
 }
 

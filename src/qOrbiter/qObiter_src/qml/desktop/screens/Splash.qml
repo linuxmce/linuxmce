@@ -71,7 +71,7 @@ Rectangle {
             width: 110
             text: srouterip
             font.pixelSize: 12
-            onTextChanged: setRouterIp(routerip.text)
+          //  onTextChanged: setRouterIp(routerip.text)
             fillColor: style.button_system_color_hover
             anchors.verticalCenter: parent.verticalCenter
 
@@ -85,7 +85,7 @@ Rectangle {
             width: 25
             text: deviceid
             font.pixelSize: 12
-            onTextChanged: setDeviceNo(devicenumber.text)
+            //onTextChanged: setDeviceNo(devicenumber.text)
             fillColor: style.button_system_color_hover
             anchors.verticalCenter: parent.verticalCenter
 
@@ -96,7 +96,7 @@ Rectangle {
             textSize: 12
             text: "Connect"
             radius:  4
-            onClicked: setupStart(deviceid, srouterip)
+            onClicked: setupStart(devicenumber.text, routerip.text)
             anchors.verticalCenter: parent.verticalCenter
         }
     }
