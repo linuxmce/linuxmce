@@ -74,7 +74,7 @@ Rectangle {
 
                             setActiveRoom(intRoom, entertain_area)
                             rooms.state = "Default"
-
+                            currentroom = title
                              roombutton.buttontext = title
                          }
                         }

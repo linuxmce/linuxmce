@@ -121,7 +121,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         qDebug () << "Local confing processing";
     }
 
-    currentSkin = "default";
+    //currentSkin = "default";
     currentSkinURL="/qml/qObiter_src/";
     s_RouterIP="DCERouter";
 
@@ -221,6 +221,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
 #else
         qorbiterUIwin->show();
 #endif
+
 
         // qorbiterUIwin->showFullScreen();
         gotoQScreen("Splash.qml");
@@ -689,7 +690,9 @@ void qorbiterManager::swapSkins(QString incSkin)
                 qorbiterUIwin->engine()->rootContext()->setContextProperty("style", styleObject);
 
                 qorbiterUIwin->setSource(skinsDir.path()+"/"+incSkin.toLower()+"/main.qml");
+                currentSkin = incSkin;
                 gotoQScreen("Screen_1.qml");
+                writeConfig();
             }
         }
     }
@@ -964,7 +967,9 @@ void qorbiterManager::quickReload()
 
 void qorbiterManager::qmlSetupLmce(int incdeviceid, QString incrouterip)
 {
-
+    qs_routerip = incrouterip;
+    iPK_Device = incdeviceid;
+    writeConfig();
     setupLmce(incdeviceid, incrouterip.toStdString(), false, false);
 
 }
@@ -972,56 +977,101 @@ void qorbiterManager::qmlSetupLmce(int incdeviceid, QString incrouterip)
 
 bool qorbiterManager::readLocalConfig()
 {
-
+    QDomDocument localConfig;
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
     QFile localConfigFile;
+
     localConfigFile.setFileName(xmlPath);
-
-    if (localConfigFile.open(QFile::ReadWrite))
+    qDebug() << xmlPath;
+    if (!localConfigFile.open(QFile::ReadWrite))
     {
-        qDebug() << xmlPath;
-        qDebug() << localConfigFile.size();
-
-        QDomDocument localConfig(localConfigFile.readAll());
-
-      if (localConfig.toElement().text().size() == 0)
-      {
-          qDebug() << "Local Config Missing!";
-          qDebug() <<"Enter information to continue, press connect when ready.";
-          return false;
-      }
-      else
-      {
-          qs_routerip = localConfig.childNodes().at(0).toElement().tagName();
-          if(!qs_routerip.isNull())
-          {
-              qDebug()<< "Reading local config";
-          }
-          else
-          {
-              qDebug() << "Could not read local, setting defaults.";
-              qDebug() << localConfig.toString();
-              qs_routerip = "DceRouter";
-              return false;
-          }
-
-      return true;
-    }
-
-
+        return false;
 
     }
     else
     {
-        qDebug() << "Local Config not accesible";
-        return false;
+
+        if (!localConfig.setContent( &localConfigFile))
+        {
+            qDebug() << "Local Config Missing!";
+            qDebug() <<"Enter information to continue, press connect when ready.";
+             localConfigFile.close();
+            return false;
+        }
+        else
+        {
+
+            QDomElement configVariables = localConfig.documentElement().toElement();
+            qDebug() << configVariables.childNodes().length();
+
+            qs_routerip = configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue();
+            currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
+            iPK_Device = configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong();
+
+
+            if(!qs_routerip.isNull())
+            {
+                qDebug()<< "Reading local config";
+            }
+            else
+            {
+                qDebug() << "Could not read local, setting defaults.";
+                qDebug() << localConfig.toString();
+                qs_routerip = "192.168.80.1";
+                 localConfigFile.close();
+                return false;
+            }
+        }
+         localConfigFile.close();
+        return true;
     }
-
-
 }
+
+
 
 void qorbiterManager::writeConfig()
 {
+    QDomDocument localConfig;
+    QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
+    QFile localConfigFile;
+    qDebug() << "Writing Config";
+    qDebug() << xmlPath;
+    localConfigFile.setFileName(xmlPath);
+    if (!localConfigFile.open(QFile::ReadOnly))
+    {
+
+        qDebug() << "Error! Cant Save Config!";
+
+    }
+    else
+    {
+
+        if (!localConfig.setContent( &localConfigFile))
+        {
+            qDebug() << "Local Config XML  ERROR!";
+        }
+        else
+        {
+            localConfigFile.close();
+            QDomElement configVariables = localConfig.documentElement().toElement();
+
+            configVariables.namedItem("routerip").attributes().namedItem("id").setNodeValue(qs_routerip);
+            configVariables.namedItem("skin").attributes().namedItem("id").setNodeValue(currentSkin);
+            configVariables.namedItem("device").attributes().namedItem("id").setNodeValue(QString::number(iPK_Device));
+
+            QByteArray output = localConfig.toByteArray();
+            localConfigFile.open(QFile::WriteOnly);
+            if (!localConfigFile.write(output))
+            {
+                qDebug() << "write failed";
+            }
+            localConfigFile.close();
+
+        }
+
+
+    }
+localConfigFile.close();
 }
 
 void qorbiterManager::setStringParam(int paramType, QString param)
