@@ -139,6 +139,7 @@ Param 10 - pk_attribute
 
     //---------IMPORTANT-1-OFF-VARIABLES!!!!!---------------------------------------------//
     int i_current_command_grp;
+    //int i_stream_id;
 
     //ui functions
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}
@@ -224,13 +225,16 @@ signals:
 
 
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
-    Q_INVOKABLE void setDeviceNo(QString i);
-    Q_INVOKABLE void setRouterIp(QString s);
+
     Q_INVOKABLE void writeConfig();
     bool readLocalConfig();
 
     //security related
     Q_INVOKABLE void requestSecurityPic(int i_pk_camera_device);
+
+
+    //media related
+    Q_INVOKABLE void playMedia(QString FK_Media);
 
     Q_INVOKABLE  void getcurrentSkins(QStringList skinPaths);
     void qmlSetupLmce(int incdeviceid, QString incrouterip);

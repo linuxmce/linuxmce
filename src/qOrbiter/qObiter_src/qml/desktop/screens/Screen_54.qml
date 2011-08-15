@@ -60,7 +60,7 @@ Rectangle {
     Remote_lighting_controls{ id: remote_lighting_controls1; x: 331; y: 181; width: 93; height: 219; anchors.topMargin: 179;anchors.top: video_now_playing.baseline}
     Remote_Audio_controls{ id: remote1; x: 321; y: 194; z: 45; anchors.right: remote_lighting_controls1.left}
 
-    HomeButton{}
+    HomeButton{anchors.right: parent.right; anchors.top:parent.top}
 
     VideoControls {
         id: videocontrols1

@@ -220,6 +220,11 @@ Rectangle {
         x: (parent.width/3)-140
         //anchors.leftMargin: 18
         buttontext: "Play"
+        MouseArea
+        {
+            anchors.fill: parent
+            onClicked: playMedia(filedetailsclass.path+filedetailsclass.filename)  //dce function
+        }
     }
 
     ButtonSq {

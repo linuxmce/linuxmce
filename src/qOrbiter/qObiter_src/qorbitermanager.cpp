@@ -251,7 +251,7 @@ void qorbiterManager::gotoQScreen(QString s)
 bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode)
 {
     pqOrbiter = new DCE::qOrbiter(PK_Device, sRouterIP, true,bLocalMode);
-   // iPK_Device = long(PK_Device);
+    // iPK_Device = long(PK_Device);
 
     pqOrbiter->qmlUI = this;
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
@@ -653,16 +653,16 @@ void qorbiterManager::swapSkins(QString incSkin)
 
     if(skinsDir.cd("qml/"))
     {
-        qDebug() << skinsDir.path();
+        //qDebug() << skinsDir.path();
 
         QStringList platform = skinsDir.entryList();
 
-        qDebug() << "Switching to:" << platform.last();
+        // qDebug() << "Switching to:" << platform.last();
 
 
         if(platform.isEmpty())
         {
-            qDebug() << "couldnt locate platform";
+            //  qDebug() << "couldnt locate platform";
         }
         else
         {
@@ -854,7 +854,7 @@ QString qorbiterManager::adjustPath(const QString &path)
 
 void qorbiterManager::setSorting(int i)
 {
-    qDebug() << "Setting grid mediatype to :" << i;
+    //qDebug() << "Setting grid mediatype to :" << i;
     q_mediaType = QString::number(i);
     this->qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
     emit gridTypeChanged();
@@ -970,45 +970,55 @@ void qorbiterManager::qmlSetupLmce(int incdeviceid, QString incrouterip)
 
 }
 
-void qorbiterManager::setRouterIp(QString s)
-{
-    qs_routerip = s;
-    qDebug()<< qs_routerip;
-}
-
-void qorbiterManager::setDeviceNo(QString i)
-{
-    iPK_Device = i.toInt();
-    qDebug() << iPK_Device;
-}
 
 bool qorbiterManager::readLocalConfig()
 {
-    qDebug() << QApplication::applicationDirPath();
-    QDomDocument localConfig(QApplication::applicationDirPath()+"/config.xml");
 
-    if (localConfig.toElement().text().size() == 0)
+    QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
+    QFile localConfigFile;
+    localConfigFile.setFileName(xmlPath);
+
+    if (localConfigFile.open(QFile::ReadWrite))
     {
-        qDebug() << "Local Config Missing!";
-        qDebug() <<"Enter information to continue, press connect when ready.";
-        return false;
+        qDebug() << xmlPath;
+        qDebug() << localConfigFile.size();
+
+        QDomDocument localConfig(localConfigFile.readAll());
+
+      if (localConfig.toElement().text().size() == 0)
+      {
+          qDebug() << "Local Config Missing!";
+          qDebug() <<"Enter information to continue, press connect when ready.";
+          return false;
+      }
+      else
+      {
+          qs_routerip = localConfig.childNodes().at(0).toElement().tagName();
+          if(!qs_routerip.isNull())
+          {
+              qDebug()<< "Reading local config";
+          }
+          else
+          {
+              qDebug() << "Could not read local, setting defaults.";
+              qDebug() << localConfig.toString();
+              qs_routerip = "192.168.80.1";
+              return false;
+          }
+
+      return true;
+    }
+
+
+
     }
     else
     {
-        qs_routerip = localConfig.childNodes().at(0).toElement().tagName();
-        if(!qs_routerip.isNull())
-        {
-            qDebug()<< "Reading local config";
-        }
-        else
-        {
-            qDebug() << "Could not read local, setting defaults.";
-            qDebug() << localConfig.toString();
-            qs_routerip = "192.168.80.1";
-            return false;
-        }
+        qDebug() << "Local Config not accesible";
+        return false;
     }
-    return true;
+
+
 }
 
 void qorbiterManager::writeConfig()
@@ -1050,7 +1060,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-       // qDebug() << datagridVariableString;
+        // qDebug() << datagridVariableString;
         execGrp(i_current_command_grp);
 
         break;
@@ -1059,7 +1069,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-      //  qDebug() << datagridVariableString;
+        //  qDebug() << datagridVariableString;
         execGrp(i_current_command_grp);
 
         break;
@@ -1084,7 +1094,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
                 longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
                 datagridVariableString = longassstring.join("|");
-             //   qDebug() << datagridVariableString;
+                //   qDebug() << datagridVariableString;
                 execGrp(i_current_command_grp);
 
             }
@@ -1097,7 +1107,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-       // qDebug() << datagridVariableString;
+        // qDebug() << datagridVariableString;
         execGrp(i_current_command_grp);
 
         break;
@@ -1106,7 +1116,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-       // qDebug() << datagridVariableString;
+        // qDebug() << datagridVariableString;
         execGrp(i_current_command_grp);
         break;
     case 7:
@@ -1114,7 +1124,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-      //  qDebug() << datagridVariableString;
+        //  qDebug() << datagridVariableString;
         execGrp(i_current_command_grp);
 
         break;
@@ -1123,7 +1133,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-     //   qDebug() << datagridVariableString;
+        //   qDebug() << datagridVariableString;
         execGrp(i_current_command_grp);
 
         break;
@@ -1146,7 +1156,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
             longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
             datagridVariableString = longassstring.join("|");
-        //    qDebug() << datagridVariableString;
+            //    qDebug() << datagridVariableString;
             execGrp(i_current_command_grp);
         }
         break;
@@ -1191,7 +1201,7 @@ void qorbiterManager::initializeGridModel()
     model = new ListModel(new gridItem, this);
     basicProvider = new basicImageProvider();
     advancedProvider = new GridIndexProvider(model , 6, 4, this);
-      QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex, int )), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex, int)), Qt::QueuedConnection);
+    QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex, int )), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex, int)), Qt::QueuedConnection);
 
     //adding important data and objects to qml now that they have been setup
     qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
@@ -1216,6 +1226,11 @@ void qorbiterManager::showFileInfo(QString fk_file)
 void qorbiterManager::requestSecurityPic(int i_pk_camera_device)
 {
 
+}
+
+void qorbiterManager::playMedia(QString FK_Media)
+{
+    pqOrbiter->StartMedia(FK_Media);
 }
 
 

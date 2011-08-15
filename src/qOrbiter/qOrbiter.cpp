@@ -1019,8 +1019,6 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     if (iValue = 1)
     {
        qmlUI->nowPlayingButton->setStatus(true);
-
-
     }
     else
     {
@@ -1399,7 +1397,7 @@ qmlUI->gotoQScreen("Screen_47.qml");
                         fk_file = pCell->GetValue();
 
                         cellTitle = QString::fromUtf8(pCell->m_Text);
-                        qDebug() << cellTitle.toAscii();
+                        //qDebug() << cellTitle.toAscii();
                         index = pDataGridTable->CovertColRowType(it->first).first;
                         if (pPath )
                         {
@@ -1652,6 +1650,8 @@ void qOrbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool 
     cout << "Parm #251 - Interruption=" << iInterruption << endl;
     cout << "Parm #252 - Turn_On=" << bTurn_On << endl;
     cout << "Parm #253 - Queue=" << bQueue << endl;
+    cout << "scmdresult" << sCMD_Result << endl;
+    //qDebug() << pMessage->ToString().c_str();
 
     QString str = QString::number(iPK_Screen);
     qmlUI->gotoQScreen("Screen_"+str+".qml");
@@ -2005,10 +2005,18 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
         qmlUI->filedetailsclass->title =  getfileForDG(details.at(placeholder+1).toStdString());
     }
 
+    placeholder = details.indexOf("PATH");
+    if(placeholder != 0)
+    {
+        qmlUI->filedetailsclass->setPath(details.at(placeholder+1));
+
+    }
+
     placeholder = details.indexOf("FILENAME");
     if(placeholder != 0)
     {
         qmlUI->filedetailsclass->setFilename(details.at(placeholder+1));
+        qDebug() << qmlUI->filedetailsclass->getFilename();
     }
 
 
@@ -2095,4 +2103,21 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
 
     }
 
+}
+
+void DCE::qOrbiter::GetSecurityCam(int i_inc_pkdevice)
+{
+
+}
+
+void DCE::qOrbiter::StartMedia(QString inc_FKFile)
+{
+
+
+    CMD_MH_Play_Media playMedia(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->iMediaPluginID , inc_FKFile.toStdString(), qmlUI->i_current_mediaType, 5 , "", true, true, true, false, false);
+    cout << "Playing file: " << inc_FKFile.toStdString() << endl;
+    string pos = "";
+    int streamID = NULL;
+  // CMD_Play_Media playMedia(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->i_current_mediaType, 1001 , pos, inc_FKFile.toStdString());
+    SendCommand(playMedia);
 }

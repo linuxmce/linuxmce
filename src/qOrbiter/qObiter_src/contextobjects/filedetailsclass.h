@@ -26,6 +26,7 @@ public:
     Q_PROPERTY(QString synop READ getSynop WRITE setSynop NOTIFY object_changed)
     Q_PROPERTY(QUrl screenshot READ getScreenShot WRITE setScreenshot NOTIFY ImageChanged)
     Q_PROPERTY(QString filename READ getFilename WRITE setFilename NOTIFY object_changed)
+    Q_PROPERTY(QString path READ getPath WRITE setPath NOTIFY object_changed)
 
     Q_PROPERTY( QImage title READ getTitleImage WRITE setTitleImage NOTIFY titleImageChanged)
     Q_PROPERTY(QImage program READ getProgramImage WRITE setProgramImage NOTIFY object_changed)
@@ -67,6 +68,10 @@ public:
     QString filename;
     inline QString getFilename() {return filename;}
     inline void setFilename (QString f) {filename = f; emit object_changed();}
+
+    QString path;
+    inline QString getPath() {return path;}
+    inline void setPath (QString f) {path = f; emit object_changed();}
 
 signals:
     void object_changed();

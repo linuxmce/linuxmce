@@ -16,10 +16,11 @@ class NowPlayingClass : public QDeclarativeItem
     Q_PROPERTY (bool b_mediaPlaying READ getStatus WRITE setStatus NOTIFY mediaStatusChanged)
     Q_PROPERTY (QString qs_mainTitle READ getTitle WRITE setTitle NOTIFY titleChanged)
     Q_PROPERTY (QString qs_screen READ getScreen WRITE setScreen NOTIFY screenTypeChanged)
+    Q_PROPERTY (QString filepath READ getFilePath WRITE setFilePath NOTIFY filePathChanged)
 
 public:
     explicit NowPlayingClass(QDeclarativeItem *parent = 0);
-
+    QString filepath;
     QString qs_screen;
     QString qs_imagePath;
     QString qs_mainTitle;
@@ -38,7 +39,7 @@ signals:
     void titleChanged();
     void mediaTypeChanged();
     void mediaStatusChanged();
-
+    void filePathChanged();
 
 public slots:
 
@@ -59,6 +60,9 @@ public slots:
 
     void setMediaType (int inc_mediaType) {i_mediaType = inc_mediaType; emit mediaTypeChanged();}
     int  getMediaType () {return i_mediaType;}
+
+    void setFilePath (QString inc_fp) {filepath = inc_fp; emit filePathChanged();}
+    QString getFilePath () {return filepath;}
 
     };
 

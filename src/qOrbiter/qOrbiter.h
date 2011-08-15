@@ -66,6 +66,10 @@ public:
                 QImage getfileForDG(string filename);
                 void GetFileInfoForQml(QString qs_file_reference);
                 void GetMediaAttributeGrid(QString qs_fk_fileno);
+                void GetSecurityCam(int i_inc_pkdevice);
+                void StartMedia(QString inc_FKFile);
+
+
 //<-dceag-const-e->
 
 //<-dceag-const2-b->
