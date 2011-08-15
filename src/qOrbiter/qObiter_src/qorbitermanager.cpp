@@ -471,7 +471,6 @@ bool qorbiterManager::getConf(int pPK_Device)
             QString m_goto = mScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
             QString imgName = mScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
             QImage m_image = QImage("Qrc:/icons/"+imgName);
-
             mediaModelHolder->appendRow(new MediaScenarioItem(m_name,m_label, m_param, m_command, m_goto, m_image, mediaModelHolder));
         }
         roomMediaScenarios.insert(MroomMapNo, mediaModelHolder);

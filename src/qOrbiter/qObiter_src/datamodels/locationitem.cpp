@@ -12,7 +12,7 @@ QHash<int, QByteArray> LocationItem::roleNames() const
   names[NameRole] = "name";
   names[EaRole] = "entertain_area";
   names[intRole] = "intRoom";
-  names[TitleRole] = "Title";
+  names[TitleRole] = "title";
   names[TypeRole] = "room_type";
 
 

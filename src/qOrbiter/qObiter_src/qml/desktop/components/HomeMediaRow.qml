@@ -54,9 +54,8 @@ Item {
             }
 
             ButtonSq {
-
                 id: now_playing
-                visible: dcenowplaying.b_mediaPlaying ? true : false
+                visible: dcenowplaying.b_mediaPlaying ? true : false || mediaScenarios.count == 0
                 height: style.buttonH
                 width: style.buttonW
                 color: dcenowplaying.b_mediaPlaying ? "green" : "red"
@@ -68,6 +67,7 @@ Item {
                     onClicked:gotoQScreen(dcenowplaying.qs_screen)
                 }
             }
+
             ListView{
                 id: mediaScenarios
                 width: stage.width

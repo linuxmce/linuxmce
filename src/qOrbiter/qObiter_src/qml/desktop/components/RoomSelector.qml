@@ -62,7 +62,7 @@ Rectangle {
 
                      Text {
                              id: somshit
-                             text: Title + ":" + intRoom + ", In EA: " + entertain_area
+                             text: title + ":" + intRoom + ", In EA: " + entertain_area
                              font.pointSize: 12
                             }
 
@@ -75,7 +75,7 @@ Rectangle {
                             setActiveRoom(intRoom, entertain_area)
                             rooms.state = "Default"
 
-                             roombutton.buttontext = Title
+                             roombutton.buttontext = title
                          }
                         }
                     }
