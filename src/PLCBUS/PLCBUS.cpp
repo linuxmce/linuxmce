@@ -142,6 +142,19 @@ bool PLCBUS::GetConfig()
 	static pthread_t readThread;
 	pthread_create(&readThread, NULL, start, (void*)this);
 
+	for (int i=0;i<5;i++) {
+		PLCBUSJob *myjob = new PLCBUSJob;
+		myjob->sendcount=0;
+		myjob->homeunit=(i <<4);
+		myjob->usercode=0;
+		myjob->data1=0;
+		myjob->data2=0;
+		myjob->command=1;
+		LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Adding get all ID command to queue...");
+		pthread_mutex_lock (&mutexSendQueue);
+		PLCBUSSendQueue.push_back(myjob);
+		pthread_mutex_unlock (&mutexSendQueue);
+	}
 
 	return true;
 }
@@ -179,7 +192,7 @@ void PLCBUS::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &s
 	string addr = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 	int house = addr.substr(0,1).c_str()[0]-65;
 	int unit = atoi(addr.substr(1,2).c_str())-1;
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"home %i unit %i",house, unit);
+	// LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"home %i unit %i",house, unit);
 
 	PLCBUSJob *myjob = new PLCBUSJob;
 	myjob->sendcount=0;
@@ -190,19 +203,19 @@ void PLCBUS::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &s
 
 	switch (pMessage->m_dwID) {
 		case COMMAND_Generic_On_CONST:
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"COMMAND_Generic_On_CONST received for child %s",addr.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"COMMAND_Generic_On_CONST received for child %s",addr.c_str());
 			myjob->command=192;
 			sCMD_Result = "OK";
 			break;
 		;;
 		case COMMAND_Generic_Off_CONST:
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"COMMAND_Generic_Off_CONST received for child %s",addr.c_str());
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"COMMAND_Generic_Off_CONST received for child %s",addr.c_str());
 			myjob->command=193;
 			sCMD_Result = "OK";
 			break;
 		;;
 		case COMMAND_Set_Level_CONST:
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"COMMAND_Set_Level_CONST received for child %s",addr.c_str()); 
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"COMMAND_Set_Level_CONST received for child %s",addr.c_str()); 
 			myjob->command=184;
 			myjob->data1 = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST].c_str());
 			sCMD_Result = "OK";
@@ -214,7 +227,7 @@ void PLCBUS::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &s
 		;;
 	}
 
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Adding command to queue...");
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Adding command to queue...");
 	pthread_mutex_lock (&mutexSendQueue);
 	PLCBUSSendQueue.push_back(myjob);
 	pthread_mutex_unlock (&mutexSendQueue);
@@ -281,14 +294,33 @@ void PLCBUS::receiveFunction() {
 					pthread_mutex_lock (&mutexSendQueue);
 					if (PLCBUSSendQueue.size() > 0 ) {
 						if (PLCBUSSendQueue.front()->homeunit == tmphomeunit) {
-							LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Response from same id as command on send queue, removing command (sendcount: %i)",PLCBUSSendQueue.front()->sendcount);
+							LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Response from same id as command on send queue, removing command (sendcount: %i)",PLCBUSSendQueue.front()->sendcount);
+							PLCBUSJob *myjob = PLCBUSSendQueue.front();
 							PLCBUSSendQueue.pop_front();
+							delete myjob;
 						}
 					}
 					pthread_mutex_unlock (&mutexSendQueue);
+				} else if (rxtxswitch & 64) { // received ID feedback signal
+					pthread_mutex_lock (&mutexSendQueue);
+					LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Received ID feedback signal for home %c, removing command (sendcount: %i)",65+(tmphomeunit >> 4),PLCBUSSendQueue.front()->sendcount);
+					PLCBUSJob *myjob = PLCBUSSendQueue.front();
+					PLCBUSSendQueue.pop_front();
+					delete myjob;
+					pthread_mutex_unlock (&mutexSendQueue);
+					for (int i=0;i<8;i++) {
+						if (tmpdata2 & 1<<i) {
+							LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Found Unit %c%i",65+(tmphomeunit >> 4),i+1);
+						}
+					}
+					for (int i=0;i<8;i++) {
+						if (tmpdata1 & 1<<i) {
+							LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Found Unit %c%i",65+(tmphomeunit >> 4),i+9);
+						}
+					}
 				} else if (rxtxswitch & 0x1c) {
 					// received bus copy
-					LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"frame seen on bus");
+					LoggerWrapper::GetInstance()->Write(LV_DEBUG,"frame seen on bus");
 					continue;
 				}
 	
@@ -314,14 +346,17 @@ void PLCBUS::receiveFunction() {
 					buf[4]=0x0c | 32 | reprq; // PRESETDIM + ACK_PULSE
 					buf[6]=0x3; // dim rate
 					break;
+				case 1:
+					buf[4]=0x1c;
+					break;
 				default:
 					buf[4]=0x02 | 32 | reprq;
 			}
 			buf[5]=PLCBUSSendQueue.front()->data1;
 			buf[7]=0x03; // ETX
 
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Send Queue Size: %i",PLCBUSSendQueue.size());
-			DCE::LoggerWrapper::GetInstance()->Write(LV_SEND_DATA, "Sending job %p - %s",DCE::IOUtils::FormatHexAsciiBuffer((const char*)buf, 8,"31").c_str());
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Send Queue Size: %i",PLCBUSSendQueue.size());
+			DCE::LoggerWrapper::GetInstance()->Write(LV_SEND_DATA, "Sending job %p - %s",PLCBUSSendQueue.front(),DCE::IOUtils::FormatHexAsciiBuffer((const char*)buf, 8,"31").c_str());
 
 			PLCBUSSendQueue.front()->sendcount++;
 			serial_write(fd,(uint8_t*)buf,commandlength);
