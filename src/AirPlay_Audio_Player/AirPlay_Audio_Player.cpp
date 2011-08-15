@@ -6,7 +6,7 @@
      Phone: +1 (877) 758-8648
  
 
-     T§his program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
      This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
      of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
@@ -64,14 +64,6 @@ extern "C" {
 	#include "hairtunes.h"
 }
 
-#ifndef TRUE
-#define TRUE (-1)
-#endif
-#ifndef FALSE
-#define FALSE (0)
-#endif
-
-
 //<-dceag-d-e->
 
 //<-dceag-const-b->
@@ -118,7 +110,10 @@ AirPlay_Audio_Player::~AirPlay_Audio_Player()
    	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Destructor called"); 	
    	b_Terminate = true;
   	if (m_tListenThread != (pthread_t) NULL)
+  	{
+  		pthread_kill(m_tListenThread, SIGABRT);
   		pthread_join (m_tListenThread, NULL);
+  	}
 }
 
 //<-dceag-getconfig-b->
@@ -281,7 +276,7 @@ void AirPlay_Audio_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,s
 //<-dceag-c38-e->
 {
    	LoggerWrapper::GetInstance()->Write(LV_ACTION,"AirPlay_Audio_Player::CMD_Stop_Media");
-	EVENT_Playback_Completed("",iStreamID, FALSE);
+	EVENT_Playback_Completed("",iStreamID, false);
 }
 
 //<-dceag-c39-b->
@@ -481,7 +476,7 @@ void *listenThread(void * pInstance) {
   	char tPassword[56] = "";
 
   	struct addrinfo *tAddrInfo;
-  	int  tUseKnownHWID = FALSE;
+  	int  tUseKnownHWID = false;
   	int  tPort = PORT;
   	
   	srandom ( time(NULL) );
@@ -549,7 +544,7 @@ void *listenThread(void * pInstance) {
           		handleClient(tClientSock, tPassword, tHWID);
           		close(tClientSock);				
 								
-				pThis->EVENT_Playback_Completed("",0 /*pThis->iTStreamID*/, FALSE);
+				pThis->EVENT_Playback_Completed("",0 /*pThis->iTStreamID*/, false);
           		LoggerWrapper::GetInstance()->Write(LV_ACTION, "AirPlay_Audio_Player::Client disconnected.\n");
 				
         		return NULL;
@@ -678,7 +673,7 @@ void handleClient(int pSock, char *pPassword, char *pHWADDR)
     	initBuffer(&tConn.recv, 80); // Just a random, small size to seed the buffer with.
     	initBuffer(&tConn.resp, 80);
 
-    	int tError = FALSE;
+    	int tError = false;
     	while(1 == tMoreDataNeeded)
     	{
       		tError = readDataFromClient(pSock, &(tConn.recv));
@@ -956,7 +951,7 @@ int buildAppleResponse(struct connection *pConn, unsigned char *pIpBin, unsigned
   	if(tFound != NULL)
   	{
     	char tTrim[tFoundSize + 2];
-    	getTrimmed(tFound, tFoundSize, TRUE, TRUE, tTrim);
+    	getTrimmed(tFound, tFoundSize, true, true, tTrim);
     	LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::HeaderChallenge:  [%s] len: %d  sizeFound: %d\n", tTrim, strlen(tTrim), tFoundSize);
     	int tChallengeDecodeSize = 16;
     	char *tChallenge = decode_base64((unsigned char *)tTrim, tFoundSize, &tChallengeDecodeSize);
@@ -1006,9 +1001,9 @@ int buildAppleResponse(struct connection *pConn, unsigned char *pIpBin, unsigned
     	addToShairBuffer(&(pConn->resp), tResponse);
     	addToShairBuffer(&(pConn->resp), (char *)"\r\n");
     	free(tResponse);
-    	return TRUE;
+    	return true;
   	}
-  	return FALSE;
+  	return false;
 }
 
 int parseMessage(struct connection *pConn, unsigned char *pIpBin, unsigned int pIpBinLen, char *pHWID)
@@ -1057,21 +1052,21 @@ int parseMessage(struct connection *pConn, unsigned char *pIpBin, unsigned int p
     	{
       		int tKeySize = 0;
       		char tEncodedAesIV[tSize + 2];
-      		getTrimmed(tHeaderVal, tSize, TRUE, TRUE, tEncodedAesIV);
+      		getTrimmed(tHeaderVal, tSize, true, true, tEncodedAesIV);
       		LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::AESIV: [%.*s] Size: %d  Strlen: %d\n", tSize, tEncodedAesIV, tSize, strlen(tEncodedAesIV));
       		char *tDecodedIV =  decode_base64((unsigned char*) tEncodedAesIV, tSize, &tSize);
 
       		// grab the key, copy it out of the receive buffer
       		tHeaderVal = getFromContent(tContent, "a=rsaaeskey", &tKeySize);
       		char tEncodedAesKey[tKeySize + 2]; // +1 for nl, +1 for \0
-      		getTrimmed(tHeaderVal, tKeySize, TRUE, TRUE, tEncodedAesKey);
+      		getTrimmed(tHeaderVal, tKeySize, true, true, tEncodedAesKey);
       		LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::AES KEY: [%s] Size: %d  Strlen: %d\n", tEncodedAesKey, tKeySize, strlen(tEncodedAesKey));
      	 	// remove base64 coding from key
       		char *tDecodedAesKey = decode_base64((unsigned char*) tEncodedAesKey,tKeySize, &tKeySize);  // Need to free DecodedAesKey
       		// Grab the formats
       		int tFmtpSize = 0;
       		char *tFmtp = getFromContent(tContent, "a=fmtp", &tFmtpSize);  // Don't need to free
-      		tFmtp = getTrimmedMalloc(tFmtp, tFmtpSize, TRUE, FALSE); // will need to free
+      		tFmtp = getTrimmedMalloc(tFmtp, tFmtpSize, true, false); // will need to free
       		LoggerWrapper::GetInstance()->Write(LV_STATUS, "AirPlay_Audio_Player::Format: %s\n", tFmtp);
 
       		RSA *rsa = loadKey();
@@ -1169,7 +1164,7 @@ int parseMessage(struct connection *pConn, unsigned char *pIpBin, unsigned int p
       		{
         		int tSize = 0;
         		char *tPortStr = getFromHeader(tFromHairtunes, "port", &tSize);
-        		if(tPortStr != NULL) getTrimmed(tPortStr, tSize, TRUE, FALSE, tPort);
+        		if(tPortStr != NULL) getTrimmed(tPortStr, tSize, true, false, tPort);
          		else LoggerWrapper::GetInstance()->Write(LV_WARNING, "AirPlay_Audio_Player::Read %d bytes, Error translating %s into a port\n", tRead, tFromHairtunes);
       		}
       		//  READ Ports from here?close(pConn->hairtunes_pipes[0]);
