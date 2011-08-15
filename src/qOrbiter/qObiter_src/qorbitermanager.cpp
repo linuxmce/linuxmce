@@ -1001,7 +1001,7 @@ bool qorbiterManager::readLocalConfig()
           {
               qDebug() << "Could not read local, setting defaults.";
               qDebug() << localConfig.toString();
-              qs_routerip = "192.168.80.1";
+              qs_routerip = "DceRouter";
               return false;
           }
 
