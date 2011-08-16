@@ -1,6 +1,7 @@
 import QtQuick 1.0
 import ScreenSaverModule 1.0
 import "../components"
+import "../js/dateFormat.js" as DateFunctions
 
 Item
 {
@@ -30,10 +31,18 @@ Item
         currentImg.opacity = 0;
     }
 
+    function getDate(){
+        return DateFunctions.dateFormat(new Date(), "dddd, mmmm d, yyyy | h:MM TT");
+    }
+
     Item {
         Timer {
             interval: 30000; running: true; repeat: true
             onTriggered: changeBGimage()
+        }
+        Timer {
+            interval: 5; running: true; repeat: true
+            onTriggered: txtDate.text = getDate()
         }
     }
     Rectangle {
@@ -74,6 +83,31 @@ Item
             }
 
         }
+        // Clock
+        Image {
+            id: imgClockBg
+            anchors.right: parent.right
+            source:  "../img/common/timepanel_mid.png"
+            y: parent.height*.405
+            scale: .67
+            transformOrigin: Item.Right
+            smooth:  true
+        }
+        Text{
+            id: txtDate
+            text: getDate()
+            anchors.rightMargin: 10
+            font.family: "Helvetica";
+            font.pointSize: 16;
+            color: "white";
+            font.letterSpacing: -1;
+            smooth: true
+            font.capitalization: Font.AllUppercase
+            anchors.right: parent.right
+            anchors.verticalCenter: imgClockBg.verticalCenter
+
+        }
+
         //        Rectangle{
         //            width:  parent.width
         //            height: parent.height/9
