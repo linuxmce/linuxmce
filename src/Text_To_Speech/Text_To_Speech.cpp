@@ -198,7 +198,7 @@ void Text_To_Speech::CMD_Send_Audio_To_Device(string sText,string sPhoneNumber,s
 	out << sText;
 	out.close();
 
-	string sCmd = "text2wave " + sTextFile + " -o " + sFile;
+	string sCmd = "text2wave -F 44100 " + sTextFile + " -o " + sFile;
 
 	//Use custom voice
 	if(sVoice!="") {
