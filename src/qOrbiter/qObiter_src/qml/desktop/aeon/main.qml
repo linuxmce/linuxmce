@@ -1,6 +1,7 @@
 import QtQuick 1.0
 import "components"
 //import "../js/ComponentLoader.js" as MyJs
+import "js/dateFormat.js" as DateFunctions
 
  Item {
      id: item

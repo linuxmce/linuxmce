@@ -1,7 +1,6 @@
 import QtQuick 1.0
 import ScreenSaverModule 1.0
 import "../components"
-import "../js/dateFormat.js" as DateFunctions
 
 Item
 {
@@ -32,18 +31,54 @@ Item
     }
 
     function getDate(){
-        return DateFunctions.dateFormat(new Date(), "dddd, mmmm d, yyyy | h:MM TT");
+        var d = new Date();
+        return d.format("dddd, mmmm d, yyyy | h:MM TT");
+    }
+    function mainItemSelected(index){
+        mainmenu.currentIndex = index
+        switch (index) {
+        case 0:
+            submenu.model = currentRoomLights
+            break
+        case 1:
+            submenu.model = currentRoomMedia
+            break
+        case 2:
+            submenu.model = currentRoomClimate
+            break
+        case 3:
+            submenu.model = currentRoomTelecom
+            break
+        case 4:
+            submenu.model = currentRoomSecurity
+            break
+        }
+    }
+    // Load some custom fonts
+    FontLoader {
+        id: scout
+        source: "../fonts/scout.ttf"
+    }
+    FontLoader {
+        id: scoutLight
+        source: "../fonts/scoutlight.ttf"
+    }
+    FontLoader {
+        id: scoutCond
+        source: "../fonts/scoutcond.ttf"
+    }
+    FontLoader {
+        id: aeonRss
+        source: "../fonts/aeon_rss.ttf"
     }
 
-    Item {
-        Timer {
-            interval: 30000; running: true; repeat: true
-            onTriggered: changeBGimage()
-        }
-        Timer {
-            interval: 5; running: true; repeat: true
-            onTriggered: txtDate.text = getDate()
-        }
+    Timer { // Simulate a simple PhotoScreensaver
+        interval: 15000; running: true; repeat: true
+        onTriggered: changeBGimage()
+    }
+    Timer { // Update the clock element periodically
+        interval: 5; running: true; repeat: true
+        onTriggered: txtDate.text = getDate()
     }
     Rectangle {
         id:stage
@@ -67,7 +102,7 @@ Item
                 anchors.fill: parent
                 opacity: 1
                 Behavior on opacity {
-                    PropertyAnimation{duration:5000}
+                    PropertyAnimation{duration:3000}
                 }
             }
             Image {
@@ -78,7 +113,7 @@ Item
                 anchors.fill: parent
                 opacity: 0
                 Behavior on opacity {
-                    PropertyAnimation{duration:5000}
+                    PropertyAnimation{duration:3000}
                 }
             }
 
@@ -97,12 +132,10 @@ Item
             id: txtDate
             text: getDate()
             anchors.rightMargin: 10
-            font.family: "Helvetica";
-            font.pointSize: 16;
+            font.family: "scout";
+            font.pixelSize: imgClockBg.height*.6;
             color: "white";
-            font.letterSpacing: -1;
             smooth: true
-            font.capitalization: Font.AllUppercase
             anchors.right: parent.right
             anchors.verticalCenter: imgClockBg.verticalCenter
 
@@ -135,9 +168,19 @@ Item
             focus: true
             interactive: true
             Keys.enabled: true
-            Keys.onLeftPressed: decrementCurrentIndex()
-            Keys.onRightPressed: incrementCurrentIndex()
+            Keys.onLeftPressed: {
+                decrementCurrentIndex()
+                mainItemSelected(currentIndex)
+            }
+            Keys.onRightPressed: {
+                incrementCurrentIndex()
+                mainItemSelected(currentIndex)
+            }
+            Keys.onDownPressed: {
+                submenu.forceActiveFocus()
+            }
 
+            onMovementEnded: mainItemSelected(currentIndex)
             model: ListModel {
                 ListElement { name: "LIGHTING" }
                 ListElement { name: "MEDIA" }
@@ -149,17 +192,17 @@ Item
                 height: mainmenu.height
                 width: mainmenu.width/5
                 anchors.verticalCenter: mainmenu.verticalCenter
-                opacity:  PathView.isCurrentItem?1:.5
+                opacity:  (mainmenu.activeFocus && PathView.isCurrentItem) ? 1 : .5
                 Rectangle{
                     anchors.fill: parent;
                     color: "transparent"
                     Text{
                         text:name;
                         anchors.centerIn: parent;
-                        font.family: "Helvetica";
-                        font.pointSize: 36;
+                        font.family: "scoutCond";
+                        font.pixelSize: parent.height;
                         color: "white";
-                        font.letterSpacing: -3;
+                        //font.letterSpacing: -3;
                         smooth: true
                         //transform: Scale { // causes an offset relative to the parent
                         //    xScale: .75
@@ -171,30 +214,13 @@ Item
                     anchors.fill: parent
                     onClicked: {
                         console.log("Clicked on:",mainmenu.model.get(index).name)
-                        mainmenu.currentIndex = index
-                        switch (index) {
-                        case 0:
-                            submenu.model = currentRoomLights
-                            break
-                        case 1:
-                            submenu.model = currentRoomMedia
-                            break
-                        case 2:
-                            submenu.model = currentRoomClimate
-                            break
-                        case 3:
-                            submenu.model = currentRoomTelecom
-                            break
-                        case 4:
-                            submenu.model = currentRoomSecurity
-                            break
-                        }
+                        mainItemSelected(index)
                     }
                 }
             }
             path: Path {
-                startX: 0; startY: parent.height/2
-                PathLine { x: mainmenu.width; y: parent.height/2 }
+                startX: 0; startY: mainmenu.height/2
+                PathLine { x: mainmenu.width; y: mainmenu.height/2 }
             }
 
         }
@@ -219,14 +245,17 @@ Item
             //anchors.verticalCenter: imgMenu.verticalCenter
             preferredHighlightBegin: 0.5
             preferredHighlightEnd: 0.5
-            focus: true
+            //focus: true
             clip:  true
             interactive: true
             orientation: ListView.Horizontal
             Keys.enabled: true
             Keys.onLeftPressed: decrementCurrentIndex()
             Keys.onRightPressed: incrementCurrentIndex()
-            //model: currentRoomLights
+            Keys.onUpPressed: {
+                mainmenu.forceActiveFocus()
+            }
+            Keys.onEnterPressed: console.log("Clicked on:",currentIndex)
             model: ListModel{
                 ListElement{label:"FLOORPLAN"}
                 ListElement{label:"ON"}
@@ -238,19 +267,18 @@ Item
                 id: test
                 width: submenu.width/8
                 //anchors.verticalCenter: submenu.verticalCenter
-                opacity:  ListView.isCurrentItem?1:.5
+                opacity:  (submenu.activeFocus && ListView.isCurrentItem) ? 1 : .5
                 Rectangle{
                     anchors.fill: parent;
                     color: "transparent"
                     Text{
                         text:label;
                         anchors.centerIn: parent;
-                        font.family: "Helvetica";
-                        font.pointSize: 18;
+                        font.family: "aeonRss";
+                        font.pixelSize: parent.height/2;
                         color: "white";
-                        font.letterSpacing: -1;
                         smooth: true
-                        font.capitalization: Font.AllUppercase
+                        //font.capitalization: Font.AllUppercase
                         elide: Text.ElideRight
                         //transform: Scale { // causes an offset relative to the parent
                         //    xScale: .75
@@ -263,12 +291,15 @@ Item
                     onClicked: {
                         console.log("Clicked on:",index)
                         submenu.currentIndex = index
-                        console.debug(parent.id)
+                        execGrp(params)
                     }
                 }
             }
         }
     }
-    Component.onCompleted: changeBGimage()
+    Component.onCompleted: {
+        mainmenu.forceActiveFocus()
+        changeBGimage()
+    }
 }
 
