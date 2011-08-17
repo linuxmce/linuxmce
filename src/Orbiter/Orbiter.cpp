@@ -695,7 +695,8 @@ bool Orbiter::GetConfig()
 	{
 		DeviceData_Impl *pDeviceData_Impl = *it;
 #ifdef HID_REMOTE
-		if ( pDeviceData_Impl->WithinCategory(DEVICECATEGORY_Gestural_Remote_CONST) )
+		if ( pDeviceData_Impl->WithinCategory(DEVICECATEGORY_Gestural_Remote_CONST) && 
+		     pDeviceData_Impl->m_dwPK_DeviceTemplate != DEVICETEMPLATE_MCR_Remote_Dongle_CONST)
 		{
 		  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Orbiter::GetConfig() - Found Gestural Remote. Adding to GenericHIDInterface Bits.");
 		  // Special case for Gestural remotes.

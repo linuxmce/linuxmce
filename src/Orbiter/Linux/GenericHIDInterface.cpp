@@ -133,7 +133,7 @@ bool GenericHIDInterface::DecodeEventInFD(int fd)
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "GenericHIDInterface::DecodeEventInFD: Short read from fd %d read only %d bytes",fd,rd);
       // m_pAlarmManager->CancelAlarmByType(ALARM_CHECK_FOR_NEW_DEVICES);
       // m_pAlarmManager->AddRelativeAlarm(4,this,ALARM_CHECK_FOR_NEW_DEVICES,NULL);
-      // Sleep(4000);  // Stupid, i know, but it will keep things quiet for a moment.
+      Sleep(4000);  // Stupid, i know, but it will keep things quiet for a moment.
     } else
     {
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"GenericHIDInterface::DecodeEventInFD() Successful read of %d bytes from fd %d",rd,fd);
