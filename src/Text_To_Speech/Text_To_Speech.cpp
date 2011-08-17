@@ -187,8 +187,9 @@ void Text_To_Speech::CMD_Send_Audio_To_Device(string sText,string sPhoneNumber,s
 	PLUTO_SAFETY_LOCK(tm,m_TTSMutex);
 
 	int iTempID = m_dwID++;
-	string sFile = "/home/public/data/tts/" + StringUtils::itos(iTempID) + ".wav";
-	string sTextFile = "/home/public/data/tts/" + StringUtils::itos(iTempID) + ".txt";
+	string sPath = "/home/public/data/tts/";
+	string sFile = sPath + StringUtils::itos(iTempID) + ".wav";
+	string sTextFile = sPath + StringUtils::itos(iTempID) + ".txt";
 	
 	//text2wave will not take a text string directly, so lets put the text into a temporary file
 	ofstream out(sTextFile.c_str());
@@ -198,7 +199,7 @@ void Text_To_Speech::CMD_Send_Audio_To_Device(string sText,string sPhoneNumber,s
 	out << sText;
 	out.close();
 
-	string sCmd = "text2wave -F 44100 " + sTextFile + " -o " + sFile;
+	string sCmd = "text2wave " + sTextFile + " -f 44100 -o " + sFile;
 
 	//Use custom voice
 	if(sVoice!="") {
@@ -208,12 +209,14 @@ void Text_To_Speech::CMD_Send_Audio_To_Device(string sText,string sPhoneNumber,s
 	}
 	system(sCmd.c_str());
 
-	// Resample and create file for phones
-	//string sFile2 = "/var/lib/asterisk/sounds/pluto/ivrcategories";
-	string sFile1 = "/var/lib/asterisk/sounds/pluto/" + StringUtils::itos(iTempID);
-	string sFile2 = sFile1+".gsm";
-	string sCmd2 = "/usr/bin/sox "+sFile+" -r 8000 -c 1 "+sFile2+" resample -ql";
-	system(sCmd2.c_str());
+	// Convert file to a format played correctly by most devices. 44100Hz 2 channel 16 bit per sample.
+	string sFileFlac = sPath + StringUtils::itos(iTempID) + ".flac";
+	// Workaround for xine cutting last seconds off any file except ogg it seems
+	string sFileOgg = sPath + StringUtils::itos(iTempID) + ".ogg";
+	string sCmd3 = "/usr/bin/sox "+sFile+" -c 2 "+sFileFlac;
+	system(sCmd3.c_str());
+        sCmd3 = "/usr/bin/sox " + sFile + " -c 2 "+ sFileOgg;
+	system(sCmd3.c_str());
 
 	if( FileUtils::FileExists(sFile) )
 	{
@@ -233,28 +236,47 @@ void Text_To_Speech::CMD_Send_Audio_To_Device(string sText,string sPhoneNumber,s
         		tmpStream >> PK_Device;
 
 			//LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"PK_Device: %i",PK_Device);
-
-			DCE::CMD_MH_Play_Media CMD_MH_Play_Media(m_dwPK_Device,m_dwPK_Device_MediaPlugin,PK_Device,sFile,0/*iPK_MediaType*/,0/*iPK_DeviceTemplate*/,""/*sPK_EntertainArea*/,true/*bResume*/,0/*iRepeat*/,0 /* bQueue */,bBypass_Event /* bBypass_Event */, bDont_Setup_AV /* bDont_Setup_AV */);
-			SendCommand(CMD_MH_Play_Media);
+			// Workaround for xine cutting last seconds off any file except ogg it seems
+			DeviceData_Base* pDeviceData = m_pData->m_AllDevices.m_mapDeviceData_Base_Find(PK_Device);
+			if (pDeviceData && pDeviceData->m_dwPK_DeviceTemplate == DEVICETEMPLATE_Xine_Player_CONST)
+			{
+				DCE::CMD_MH_Play_Media CMD_MH_Play_Media(m_dwPK_Device,m_dwPK_Device_MediaPlugin,PK_Device,sFileOgg,0/*iPK_MediaType*/,0/*iPK_DeviceTemplate*/,""/*sPK_EntertainArea*/,true/*bResume*/,0/*iRepeat*/,0 /* bQueue */,bBypass_Event /* bBypass_Event */, bDont_Setup_AV /* bDont_Setup_AV */);
+				SendCommand(CMD_MH_Play_Media);
+			} else {
+				DCE::CMD_MH_Play_Media CMD_MH_Play_Media(m_dwPK_Device,m_dwPK_Device_MediaPlugin,PK_Device,sFileFlac,0/*iPK_MediaType*/,0/*iPK_DeviceTemplate*/,""/*sPK_EntertainArea*/,true/*bResume*/,0/*iRepeat*/,0 /* bQueue */,bBypass_Event /* bBypass_Event */, bDont_Setup_AV /* bDont_Setup_AV */);
+				SendCommand(CMD_MH_Play_Media);
+			}
 		}
 
 		//LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"sPhoneNumber: %s m_nDevice_pbx: %i",sPhoneNumber.c_str(), m_nDevice_pbx);
 
-		vector<string> vectBufferPhones;
-		sPhoneNumber=StringUtils::TrimSpaces(sPhoneNumber);		
-		StringUtils::Tokenize(sPhoneNumber,",",vectBufferPhones);
-                size = vectBufferPhones.size();
+		if (!sPhoneNumber.empty())
+		{
+			// Resample and create file for phones
+			string sFile1 = "/var/lib/asterisk/sounds/pluto/" + StringUtils::itos(iTempID);
+			string sFile2 = sFile1+".gsm";
+			string sCmd2 = "/usr/bin/sox "+sFile+" -r 8000 -c 1 "+sFile2+" resample -ql";
+			system(sCmd2.c_str());
 
-                for (int i=0; i < size; i++) {
-			string sPhone = vectBufferPhones[i];
+			vector<string> vectBufferPhones;
+			sPhoneNumber=StringUtils::TrimSpaces(sPhoneNumber);		
+			StringUtils::Tokenize(sPhoneNumber,",",vectBufferPhones);
+			size = vectBufferPhones.size();
 
-			//LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"sPhone: %s",sPhone.c_str());
+			for (int i=0; i < size; i++) {
+				string sPhone = vectBufferPhones[i];
 
-			DCE::CMD_PBX_Application CMD_PBX_Application(m_dwPK_Device,m_nDevice_pbx,sPhone,sFile1,"Playback");
-			SendCommand(CMD_PBX_Application);
+				//LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"sPhone: %s",sPhone.c_str());
+
+				DCE::CMD_PBX_Application CMD_PBX_Application(m_dwPK_Device,m_nDevice_pbx,sPhone,sFile1,"Playback");
+				SendCommand(CMD_PBX_Application);
+			}
+			m_mapOutstandingFiles[time(NULL)]=sFile2;
 		}
 
 		m_mapOutstandingFiles[time(NULL)]=sFile;
+		m_mapOutstandingFiles[time(NULL)]=sFileOgg;
+		m_mapOutstandingFiles[time(NULL)]=sFileFlac;
 		m_mapOutstandingFiles[time(NULL)]=sTextFile;
 	}
 
