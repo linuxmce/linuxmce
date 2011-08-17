@@ -67,14 +67,14 @@ PlutoHIDInterface::PlutoHIDInterface(Orbiter *pOrbiter) : m_HIDMutex("HID")
  */
 void PlutoHIDInterface::modules_remove()
 {
-	system("rmmod hid_gyration");
-	system("rmmod usbhid");
+//	system("rmmod hid_gyration");
+//	system("rmmod usbhid");
 }
 
 void PlutoHIDInterface::modules_reload()
 {
-	system("modprobe usbhid");
-	system("modprobe hid_gyration");
+//	system("modprobe usbhid");
+//	system("modprobe hid_gyration");
 }
 
 void PlutoHIDInterface::ProcessHIDEvents()
