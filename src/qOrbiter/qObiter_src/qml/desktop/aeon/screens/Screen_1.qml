@@ -4,38 +4,13 @@ import "../components"
 
 Item
 {
-    property int currentBGimg: 0
-    function getBGimage(){
-        var files = ["../img/backdrops/autumn/autumn.png",
-                     "../img/backdrops/winter/winter.png",
-                     "../img/backdrops/spring/spring.png",
-                     "../img/backdrops/summer/summer.png"];
-        var bgfile = files[currentBGimg];
-        if (currentBGimg >= 3) {
-            currentBGimg = 0;
-        } else {
-            currentBGimg++;
-        }
-        return bgfile;
-    }
-    function changeBGimage(){
-        var newSource = getBGimage()
-        var currentImg=imgBg1, newImg=imgBg2;
-        if (imgBg2.opacity == 1) {
-            currentImg = imgBg2;
-            newImg = imgBg1;
-        }
-        newImg.source = newSource;
-        newImg.opacity = 1;
-        currentImg.opacity = 0;
-    }
-
     function getDate(){
         var d = new Date();
         return d.format("dddd, mmmm d, yyyy | h:MM TT");
     }
     function mainItemSelected(index){
         mainmenu.currentIndex = index
+        mainMenuIndex = index
         switch (index) {
         case 0:
             submenu.model = currentRoomLights
@@ -72,10 +47,7 @@ Item
         source: "../fonts/aeon_rss.ttf"
     }
 
-    Timer { // Simulate a simple PhotoScreensaver
-        interval: 15000; running: true; repeat: true
-        onTriggered: changeBGimage()
-    }
+
     Timer { // Update the clock element periodically
         interval: 5; running: true; repeat: true
         onTriggered: txtDate.text = getDate()
@@ -87,37 +59,8 @@ Item
         signal swapStyle()
         height: style.orbiterH
         width: style.orbiterW
-        opacity: 1
+        color: "transparent"
 
-        Rectangle{
-            id:bgrect
-            anchors.fill: parent
-            z:0
-            color: "black"
-            Image {
-                id: imgBg1
-                anchors.centerIn: parent
-                fillMode: Image.Stretch
-                //source: getBGimage()
-                anchors.fill: parent
-                opacity: 1
-                Behavior on opacity {
-                    PropertyAnimation{duration:3000}
-                }
-            }
-            Image {
-                id: imgBg2
-                anchors.centerIn: parent
-                fillMode: Image.Stretch
-                //source: getBGimage()
-                anchors.fill: parent
-                opacity: 0
-                Behavior on opacity {
-                    PropertyAnimation{duration:3000}
-                }
-            }
-
-        }
         // Clock
         Image {
             id: imgClockBg
@@ -299,7 +242,7 @@ Item
     }
     Component.onCompleted: {
         mainmenu.forceActiveFocus()
-        changeBGimage()
+        mainItemSelected(mainMenuIndex)
     }
 }
 

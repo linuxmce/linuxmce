@@ -7,11 +7,18 @@ Rectangle {
     height: style.orbiterH
     color: style.bgcolor
     // signal setupStart(int x, string y)
+
+    Image {
+        id: splash
+        anchors.centerIn: rectangle1
+        fillMode: Image.PreserveAspectFit
+        source: "../../../../img/lmcesplash.jpg"
+        anchors.fill: parent
+    }
     Rectangle {
         width: style.orbiterW
         height: 75
-        opacity: 1
-        color: style.bgcolor
+        color: "transparent"
         Text {
             id: welcome
             text: "Welcome To LinuxMCE!"
@@ -19,13 +26,6 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
         }
-    }
-    Image {
-        id: splash
-        anchors.centerIn: rectangle1
-        fillMode: Image.PreserveAspectFit
-        source: "../../../../img/lmcesplash.jpg"
-        anchors.fill: parent
     }
     Rectangle {
         id: rectangle2

@@ -2,19 +2,25 @@ import QtQuick 1.0
 import "../components"
 Item{
     id:security
-
     Rectangle{
         width: style.orbiterW
         height: style.orbiterH
-        color: style.bgcolor
+        color: "black"
+        opacity:  .8
+    }
+    Rectangle{
+        width: style.orbiterW
+        height: style.orbiterH
+        color: "transparent"
         Text {
             id: unknownscreen
             x: 0
             y: 131
-            text: "Error: Screen file not found: " + screenfile
+            text: "Error, unable to load screen file: " + screenfile
             font.family: "Droid Sans"
             font.bold: false
             font.pointSize: 15
+            color: "white"
         }
         Rectangle{ x: 5; y: 5; width: 75; height: 75; smooth: true; border.width: 1; border.color: "black"
             Text{text: "Home"; anchors.centerIn: parent}
