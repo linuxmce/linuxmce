@@ -68,6 +68,7 @@ public:
                 void GetMediaAttributeGrid(QString qs_fk_fileno);
                 void GetSecurityCam(int i_inc_pkdevice);
                 void StartMedia(QString inc_FKFile);
+                void StopMedia();
 
 
 //<-dceag-const-e->

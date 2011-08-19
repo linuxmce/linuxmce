@@ -7,7 +7,7 @@ Rectangle {
 
     MediaButton {
         id:play ;
-        x: 88; y: 88;
+        x: 75; y: 75
         media_but_txt: "Play"
         Image {
             id: playicon
@@ -19,7 +19,7 @@ Rectangle {
     }
 
     MediaButton {id:ff ;
-        x: 168; y: 88;
+        x: 155; y: 75
         media_but_txt: "FF"
         Image {
             id: fficon
@@ -31,7 +31,7 @@ Rectangle {
     }
 
     MediaButton {id:rw ;
-        x: 10; y: 88;
+        x: -3; y: 75
         media_but_txt: "RW"
         Image {
             id: rwicon
@@ -42,7 +42,7 @@ Rectangle {
     }
 
     MediaButton {id:next ;
-        x: 88; y: 11;
+        x: 75; y: -2
         media_but_txt: "Next";
         Image {
             id: nexticon
@@ -54,8 +54,8 @@ Rectangle {
     }
 
     MediaButton {id:back ;
-        x: 88;
-        y: 169;
+        x: 75
+        y: 156
         media_but_txt: "back"
         Image {
             id: backicon
@@ -64,5 +64,24 @@ Rectangle {
             width: parent.width
          }
 
+    }
+
+    MediaButton {
+        id: mediabutton1
+        x: 0
+        y: 150
+        color: "#c28585"
+        media_but_txt: "stop"
+        Image {
+            id: stopicon
+            source: "../../../img/icons/player_stop.png"
+            height: parent.height
+            width: parent.width
+        }
+        MouseArea
+        {
+            anchors.fill: parent
+            onClicked: stopMedia()
+        }
     }
 }

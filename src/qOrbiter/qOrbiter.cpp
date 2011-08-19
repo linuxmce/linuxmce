@@ -1032,6 +1032,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     qDebug() << scrn;
     qmlUI->nowPlayingButton->setScreen("Screen_"+scrn+".qml");
     qmlUI->nowPlayingButton->setTitle(QString::fromStdString(sValue_To_Assign));
+    qmlUI->nowPlayingButton->i_mediaType = iPK_MediaType;
 }
 
 //<-dceag-c254-b->
@@ -2113,4 +2114,11 @@ void DCE::qOrbiter::StartMedia(QString inc_FKFile)
     int streamID = NULL;
     // CMD_Play_Media playMedia(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->i_current_mediaType, 1001 , pos, inc_FKFile.toStdString());
     SendCommand(playMedia);
+}
+
+void DCE::qOrbiter::StopMedia()
+{
+    CMD_MH_Stop_Media endMedia(qmlUI->iPK_Device, qmlUI->iMediaPluginID,0,qmlUI->nowPlayingButton->i_mediaType,0,QString::number(qmlUI->iFK_Room).toStdString(),false);
+
+    SendCommand(endMedia);
 }

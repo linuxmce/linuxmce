@@ -1292,5 +1292,10 @@ void qorbiterManager::playMedia(QString FK_Media)
     pqOrbiter->StartMedia(FK_Media);
 }
 
+void qorbiterManager::stopMedia()
+{
+    pqOrbiter->StopMedia();
+}
+
 
 
