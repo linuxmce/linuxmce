@@ -1020,8 +1020,9 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     {
         qmlUI->nowPlayingButton->setStatus(true);
     }
-    else
+    else if (sText.empty())
     {
+        qDebug () << "Closing Now Playing";
         qmlUI->nowPlayingButton->setStatus(false);
     }
 
@@ -2106,7 +2107,7 @@ void DCE::qOrbiter::StartMedia(QString inc_FKFile)
 {
 
 
-    CMD_MH_Play_Media playMedia(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->iMediaPluginID , inc_FKFile.toStdString(), qmlUI->i_current_mediaType, 5 , "", true, true, true, false, false);
+    CMD_MH_Play_Media playMedia(qmlUI->iPK_Device, qmlUI->iMediaPluginID, 0 , inc_FKFile.toStdString(), qmlUI->i_current_mediaType, 0, QString::number(qmlUI->iFK_Room).toStdString(), false, false, false, false, false);
     cout << "Playing file: " << inc_FKFile.toStdString() << endl;
     string pos = "";
     int streamID = NULL;
