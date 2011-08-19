@@ -55,7 +55,7 @@ Item {
 
             ButtonSq {
                 id: now_playing
-                visible: dcenowplaying.b_mediaPlaying ? true : false || mediaScenarios.count == 0
+                visible: dcenowplaying.b_mediaPlaying ? true : false
                 height: style.buttonH
                 width: style.buttonW
                 color: dcenowplaying.b_mediaPlaying ? "green" : "red"

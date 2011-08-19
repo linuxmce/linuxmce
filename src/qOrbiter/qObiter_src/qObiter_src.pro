@@ -52,12 +52,8 @@ DEPLOYMENTFOLDERS = folder_01 folder_02 folder_03
 
 # Additional import path used to resolve QML modules in Creator's code model
 QML_IMPORT_PATH =
-
 symbian:TARGET.UID3 = 0xE0D07D4D
-
 QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
-
-
 INCLUDEPATH += ../../ ../../DCE/
 
 macx{

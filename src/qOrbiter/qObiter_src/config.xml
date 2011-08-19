@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <orbiter>
     <routerip id="DceRouter"/>
-    <device id=""/>
+    <device id="35"/>
     <routeraddress id="dcerouter"/>
-    <skin id="noir"/>
+    <skin id="default"/>
 </orbiter>

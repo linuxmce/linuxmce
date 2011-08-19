@@ -1092,7 +1092,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
     */
     QStringList longassstring;
     QString datagridVariableString;
-
+    ;
     switch (paramType)
     {
     case 1:
@@ -1118,7 +1118,8 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-        //  qDebug() << datagridVariableString;
+         qDebug() << datagridVariableString;
+
         execGrp(i_current_command_grp);
 
         break;
@@ -1139,7 +1140,15 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             else
             {
                 q_pk_attribute = param.remove("!A");
-                q_attributetype_sort = "13";
+                if (q_mediaType == "4")
+                {
+                    q_attributetype_sort = "3";
+                }
+                else
+                {
+                   q_attributetype_sort = "13";
+                }
+
 
                 longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
                 datagridVariableString = longassstring.join("|");
@@ -1237,6 +1246,7 @@ void qorbiterManager::initializeSortString()
 
     datagridVariableString = "";
     qDebug() << "Dg Variables Reset";
+
 }
 
 void qorbiterManager::initializeContexts()

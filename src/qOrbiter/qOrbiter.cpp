@@ -1018,7 +1018,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
 
     if (iValue = 1)
     {
-       qmlUI->nowPlayingButton->setStatus(true);
+        qmlUI->nowPlayingButton->setStatus(true);
     }
     else
     {
@@ -1027,9 +1027,9 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
 
     QString scrn = sPK_DesignObj.c_str();
     int pos1 = scrn.indexOf(",");
-   scrn.remove(pos1, scrn.length());
-   qDebug() << scrn;
-   qmlUI->nowPlayingButton->setScreen("Screen_"+scrn+".qml");
+    scrn.remove(pos1, scrn.length());
+    qDebug() << scrn;
+    qmlUI->nowPlayingButton->setScreen("Screen_"+scrn+".qml");
     qmlUI->nowPlayingButton->setTitle(QString::fromStdString(sValue_To_Assign));
 }
 
@@ -1259,7 +1259,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
     {
         qmlUI->initializeSortString();
     }
-qmlUI->gotoQScreen("Screen_47.qml");
+    qmlUI->gotoQScreen("Screen_47.qml");
     qmlUI->model->clear();
 
 
@@ -1278,9 +1278,9 @@ qmlUI->gotoQScreen("Screen_47.qml");
     bool m_bKeepColHeader = false;
     bool m_bAdd_UpDown_Arrows = true;
 
-    string m_sSeek;
+    string m_sSeek="";
     string m_sDataGrid_ID = "1";
-    int iOffset;
+    int iOffset = 5;
 
     int iColumn = 1;
     int iRowCount= 5;
@@ -1299,43 +1299,35 @@ qmlUI->gotoQScreen("Screen_47.qml");
     //temp =  QString::fromStdString(qmlUI->gridReqType->toStdString());
     QString params;
     QString s;
+
     if(qmlUI->backwards)
     {
-        qmlUI->initializeSortString();
-        s = qmlUI->goBack.last();
 
-        if(qmlUI->goBack.size() > 1)
+
+        if(qmlUI->goBack.size() > 0)
         {
-
             qmlUI->goBack.removeLast();
+
+        }
+        else if (qmlUI->goBack.isEmpty())
+        {
+            qmlUI->initializeSortString();
+
         }
 
+        s= qmlUI->goBack.last();
     }
     else
     {
-        if(iPK_MediaType == 29 )
-        {
-            params = "||||1,2|0|49|0|2 |";
-        }
-        else if (iPK_MediaType == 21)
-        {
-            params = "||||1,2|0|0|0|2|";
-        }
-        else
-        {
-            params = "|"+qmlUI->q_subType +"|"+qmlUI->q_fileFormat+"|"+qmlUI->q_attribute_genres+"|"+qmlUI->q_mediaSources+"||"+qmlUI->q_attributetype_sort+"||2|"+qmlUI->q_pk_attribute+"";
 
-        }
+        params = "|"+qmlUI->q_subType +"|"+qmlUI->q_fileFormat+"|"+qmlUI->q_attribute_genres+"|"+qmlUI->q_mediaSources+"||"+qmlUI->q_attributetype_sort+"||2|"+qmlUI->q_pk_attribute+"";
         s = QString::number(iPK_MediaType) + params;
         qmlUI->i_current_mediaType = iPK_MediaType;
-
+        qmlUI-> goBack << s;
     }
+
 
     qDebug() << s;
-    if(!qmlUI->backwards)
-    {
-        qmlUI->goBack << s;
-    }
 
     qmlUI->backwards = false;
     CMD_Populate_Datagrid populateDataGrid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 63, s.toStdString(), DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
@@ -1357,8 +1349,8 @@ qmlUI->gotoQScreen("Screen_47.qml");
             //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             int cellsToRender= pDataGridTable->GetRows();
-            //qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
-            //qDebug() << "Response: " << cellsToRender << " cells to render";
+            qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
+            qDebug() << "Response: " << cellsToRender << " cells to render";
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
 
             if (cellsToRender == 0)
@@ -1371,16 +1363,16 @@ qmlUI->gotoQScreen("Screen_47.qml");
             {
                 string imgDG = "_"+m_sGridID; //correcting the grid id string for images
 
-                //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
-                DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(imgDG),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+                //CMD_Request_Datagrid_Contents(                              long DeviceIDFrom,                long DeviceIDTo,                   string sID,                                string sDataGrid_ID, int iRow_count,int iColumn_count,        bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,       int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
+                DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(imgDG),    50,    int(gHeight),                      false,                 false,                                 true, string(m_sSeek),    20,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
 
                 if(SendCommand(req_data_grid_pics))
                 {
                     DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
                     int cellsToRender= pDataGridTable->GetRows();
 
-                    //  qDebug() << "Picture Datagrid Height:" << gHeight << " , width: " << gWidth;
-                    //  qDebug() << "Response: " << cellsToRender << " picture cells to render";
+                    qDebug() << "Picture Datagrid Height:" << gHeight << " , width: " << gWidth;
+                    qDebug() << "Response: " << cellsToRender << " picture cells to render";
                     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
                     QString cellTitle;
                     QString fk_file;
@@ -2077,7 +2069,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                     //qDebug() << pCell->m_ImagePathLength;
                 }
 
-                 //qDebug() << "Item Attribute::" << cellTitle << "-" << cellAttribute;
+                //qDebug() << "Item Attribute::" << cellTitle << "-" << cellAttribute;
                 if (pPath )
                 {
                     cellImg = getfileForDG(pCell->GetImagePath());
@@ -2118,6 +2110,6 @@ void DCE::qOrbiter::StartMedia(QString inc_FKFile)
     cout << "Playing file: " << inc_FKFile.toStdString() << endl;
     string pos = "";
     int streamID = NULL;
-  // CMD_Play_Media playMedia(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->i_current_mediaType, 1001 , pos, inc_FKFile.toStdString());
+    // CMD_Play_Media playMedia(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->i_current_mediaType, 1001 , pos, inc_FKFile.toStdString());
     SendCommand(playMedia);
 }
