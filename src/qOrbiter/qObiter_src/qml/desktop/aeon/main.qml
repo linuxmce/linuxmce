@@ -18,6 +18,13 @@ Item {
     width: style.orbiterW;
     height: style.orbiterH;
 
+    function scaleX(x){
+        return x/100*style.orbiterW
+    }
+    function scaleY(y){
+        return y/100*style.orbiterH
+    }
+
     function screenchange(screenname )
     {
         pageLoader.source = "screens/"+screenname
@@ -133,5 +140,7 @@ Item {
 
     }
 
-    Component.onCompleted: changeBGimage()
+    Component.onCompleted: {
+        changeBGimage()
+    }
 }

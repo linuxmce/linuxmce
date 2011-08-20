@@ -46,6 +46,10 @@ Item
         id: aeonRss
         source: "../fonts/aeon_rss.ttf"
     }
+    FontLoader {
+        id: aeonNowPlaying
+        source: "../fonts/aeon_player.ttf"
+    }
 
 
     Timer { // Update the clock element periodically
@@ -66,18 +70,20 @@ Item
             id: imgClockBg
             anchors.right: parent.right
             source:  "../img/common/timepanel_mid.png"
-            y: parent.height*.405
-            scale: .67
-            transformOrigin: Item.Right
+            x: scaleX(70.31) // 900
+            y: scaleY(43.89) // 316
+            width: scaleX(35.23) // 451
+            height:  scaleY(3.75) // 27
+            //transformOrigin: Item.Right
             smooth:  true
         }
         Text{
             id: txtDate
             text: getDate()
-            anchors.rightMargin: 10
-            font.family: "scout";
-            font.pixelSize: imgClockBg.height*.6;
-            color: "white";
+            anchors.rightMargin: scaleX(.78)
+            font.family: "aeonRss";
+            font.pixelSize: imgClockBg.height*.8;
+            color: "#e5e5e5";
             smooth: true
             anchors.right: parent.right
             anchors.verticalCenter: imgClockBg.verticalCenter
@@ -94,17 +100,22 @@ Item
         // Main menu strip
         Image {
             id: imgMenu
-            anchors.centerIn:  parent
-            anchors.fill: parent;
+            //anchors.centerIn:  parent
+            //anchors.fill: parent;
+            y: scaleY(41.94) // 302
+            width: parent.width
+            height: scaleY(20.83) // 150
             source: "../img/home/homemenu_back.png"
-            fillMode:  Image.PreserveAspectFit
+            //fillMode:  Image.PreserveAspectFit
             smooth:  true
         }
         PathView{
             id: mainmenu
             width:  parent.width
-            height: imgMenu.height/9
-            anchors.centerIn: parent
+            //height: imgMenu.height/9
+            //anchors.centerIn: parent
+            y: scaleY(47.64) // 343
+            height: scaleY(8.47) // 61
             //anchors.verticalCenter: imgMenu.verticalCenter
             preferredHighlightBegin: 0.5
             preferredHighlightEnd: 0.5
@@ -145,12 +156,7 @@ Item
                         font.family: "scoutCond";
                         font.pixelSize: parent.height;
                         color: "white";
-                        //font.letterSpacing: -3;
                         smooth: true
-                        //transform: Scale { // causes an offset relative to the parent
-                        //    xScale: .75
-                        //    yScale: 1.5
-                        //}
                     }
                 }
                 MouseArea{
@@ -167,25 +173,36 @@ Item
             }
 
         }
+        Image {
+            id: imgMenuGradient
+            anchors.fill: imgMenu;
+            source: "../img/home/homemenu_gradient.png"
+            //fillMode:  Image.PreserveAspectFit
+            smooth:  true
+        }
 
         // Scenarios menu strip
         Image {
             id: imgSubMenu
-            //anchors.centerIn:  parent
-            width: parent.width/9*8;
-            anchors.horizontalCenter: parent.horizontalCenter
-            y: parent.height/9*5-10
+            //width: parent.width/9*8;
+            //anchors.horizontalCenter: parent.horizontalCenter
+            //y: parent.height/9*5-10
+            x: scaleX(6.17) // 79
+            y: scaleY(56.39) // 406
+            width: scaleX(87.73) // 1123
+            height: scaleY(4.58) // 33
             source: "../img/home/submenubar_music.png"
-            fillMode:  Image.PreserveAspectFit
+            //fillMode:  Image.PreserveAspectFit
             smooth:  true
         }
         ListView{
             id: submenu
-            width: parent.width/9*7.6;
-            anchors.horizontalCenter: parent.horizontalCenter
-            y: parent.height/9*5-10
-            height: imgSubMenu.height
+            //width: parent.width/9*7.6;
+            //anchors.horizontalCenter: parent.horizontalCenter
+            //y: parent.height/9*5-10
+            //height: imgSubMenu.height
             //anchors.verticalCenter: imgMenu.verticalCenter
+            anchors.fill:  imgSubMenu
             preferredHighlightBegin: 0.5
             preferredHighlightEnd: 0.5
             //focus: true
@@ -239,6 +256,112 @@ Item
                 }
             }
         }
+
+        // Now Playing
+        Image{
+            id: nowPlaying
+            x: 0
+            y: scaleY(33.33) // 204
+            width:  parent.width // 1280
+            height: scaleY(87.5) // 630
+            //anchors.bottom: parent.bottom
+            source:  "../img/home/nowplaying_shadow.png"
+            //fillMode:  Image.PreserveAspectFit
+            smooth:  true
+
+            Image{
+                x: scaleX(1.4) // 18
+                y: scaleY(28.3) // 446 242
+                height:  scaleY(36.39) // 262 36.39
+                width:  scaleY(36.39) // 262 20.5
+                source: "../img/home/nowplaying_back.png"
+                //fillMode:  Image.PreserveAspectFit
+                smooth:  true
+                Image{
+                    x: scaleY(33.75) // 261 243
+                    y: scaleY(8.333) // 506 60
+                    height:  scaleY(24.4) // 176
+                    width:  scaleY(35.97) // 259
+                    source: "../img/home/nowplaying_info.png"
+                    //fillMode:  Image.PreserveAspectFit
+                    smooth:  true
+                }
+
+                Rectangle{
+                    anchors.centerIn: parent
+                    width:  parent.width*.90
+                    height: parent.height*.91
+                    radius: 6
+                    color: "white"
+                    //                    color: "transparent"
+//                    Image{ // Album art here
+                    // id: nowPlayingArt
+//                        anchors.fill: parent
+//                        source: ""
+//                    fillMode:  Image.PreserveAspectFit
+//                    smooth:  true
+//                    }
+                }
+            }
+
+            Image{
+                x: scaleX(2.2)
+                y: scaleY(29.7)
+                height:  scaleY(33.61)
+                width:  scaleY(33.61)
+                source: "../img/home/nowplaying_overlay.png"
+                //fillMode:  Image.PreserveAspectFit
+                smooth:  true
+            }
+            Text{
+                id: nowPlayingArtist
+                text: "Artist"
+                x: scaleY(41.11)
+                y: scaleY(32.78) // 478 236
+                font.family: "aeonNowPlaying"
+                font.capitalization: Font.AllUppercase
+                smooth: true
+                font.pixelSize: scaleY(2.92) // 21
+                color: "white"
+            }
+            Text{
+                id: nowPlayingAlbum
+                text: "Album"
+                x: scaleY(41.11)
+                y: scaleY(37.22) // 510 268
+                font.family: "aeonNowPlaying"
+                font.capitalization: Font.AllUppercase
+                smooth: true
+                font.pixelSize: scaleY(2.22) // 16
+                opacity:  .7
+                color: "white"
+            }
+            Text{
+                id: nowPlayingStatus
+                text: "NOW PLAYING"
+                x: scaleY(41.11)
+                y: scaleY(54.44) // 634 392
+                font.family: "aeonNowPlaying"
+                smooth: true
+                font.pixelSize: scaleY(2.22) // 16
+                opacity:  .7
+                color:  "#749a9a"
+            }
+            Text{
+                id: nowPlayingTrack
+                text: "Track"
+                x: scaleY(41.11)
+                y: scaleY(56.67) // 650 408
+                font.family: "aeonNowPlaying"
+                font.capitalization: Font.AllUppercase
+                smooth: true
+                font.pixelSize: scaleY(3.06) // 22
+                opacity:  .7
+                color: "white"
+            }
+        }
+
+
     }
     Component.onCompleted: {
         mainmenu.forceActiveFocus()
