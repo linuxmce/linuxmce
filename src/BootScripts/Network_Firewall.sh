@@ -45,15 +45,21 @@ OpenPort()
 		parmPort="--dport $Port"
 	fi
 
-  # apply rule to IPv4 chain if needed
-  if [[ "$IPversion" == ipv4 ]] || [[ "$IPversion" == both ]]; then
-    iptables -A INPUT -p "$Protocol" -s "$FilterIP4" $parmPort -j ACCEPT
-  fi
+	# if protocol = ip then use port number as protocol number
+	if [[ "$Protocol" == "ip" ]]; then
+		parmPort=""
+		Protocol="$(echo $Port | cut -d: -f1)"
+	fi
 
-  # apply rule to IPv6 chain if needed
-  if [[ "$IPversion" == ipv6 ]] || [[ "$IPversion" == both ]]; then
-    ip6tables -A INPUT -p "$Protocol" -s "$FilterIP6" $parmPort -j ACCEPT
-  fi
+	# apply rule to IPv4 chain if needed
+  	if [[ "$IPversion" == ipv4 ]] || [[ "$IPversion" == both ]]; then
+    	iptables -A INPUT -p "$Protocol" -s "$FilterIP4" $parmPort -j ACCEPT
+  	fi
+
+  	# apply rule to IPv6 chain if needed
+  	if [[ "$IPversion" == ipv6 ]] || [[ "$IPversion" == both ]]; then
+    	ip6tables -A INPUT -p "$Protocol" -s "$FilterIP6" $parmPort -j ACCEPT
+  	fi
 
 	# samba 139/tcp ports come paired with explicit rejects on 445/tcp
 	# reason: to avoid timeout connecting to 445/tcp in smbclient
@@ -81,16 +87,26 @@ ForwardPort()
 	[[ "$ExtIP" == dhcp ]] && ExtIP="0.0.0.0/0"
 	
 	echo "  Source port: $SrcPort/$Protocol; Destination: $DestIP:$DestPort$FilterMsg"
+	
+	parmPort="--dport $SrcPort"
+	parmDest="--to-destination "$DestIP:$DestPort""
+	
+	# if protocol = ip then use port number as protocol number
+	if [[ "$Protocol" == "ip" ]]; then
+		parmPort=""
+		parmDest="--to-destination "$DestIP""
+		Protocol="$SrcPort"
+	fi
 
-  case "$DestIP" in
-    127.0.0.1|0.0.0.0)
-      iptables -t mangle -A PREROUTING -p "$Protocol" -s "$FilterIP" -d "$ExtIP" --dport "$SrcPort" -j MARK --set-mark "$AllowMark"
-      iptables -t nat -A PREROUTING -p "$Protocol" -s "$FilterIP" -d "$ExtIP" --dport "$SrcPort" -j REDIRECT --to-ports "$DestPort"
-    ;;
-    *)
-      iptables -t nat -A PREROUTING -p "$Protocol" -s "$FilterIP" -i "$ExtIf" --dport "$SrcPort" -j DNAT --to-destination "$DestIP:$DestPort"
-    ;;
-  esac
+  	case "$DestIP" in
+    	127.0.0.1|0.0.0.0)
+      		iptables -t mangle -A PREROUTING -p "$Protocol" -s "$FilterIP" -d "$ExtIP" $parmPort -j MARK --set-mark "$AllowMark"
+      		iptables -t nat -A PREROUTING -p "$Protocol" -s "$FilterIP" -d "$ExtIP" $parmPort -j REDIRECT --to-ports "$DestPort"
+    	;;
+    	*)
+      		iptables -t nat -A PREROUTING -p "$Protocol" -s "$FilterIP" -i "$ExtIf" $parmPort -j DNAT $parmDest
+    	;;
+  	esac
 }
 
 ClearFirewall()
@@ -214,11 +230,11 @@ for Port in $R; do
 	tmp=$(Field 1 "$Port")
 	echo $tmp | grep -q '-'
 	if [ $? -eq 0 ]; then
-    Protocol="$(echo $tmp | cut -d"-" -f 1)"
-    IPversion="$(echo $tmp | cut -d"-" -f 2)"
+    	Protocol="$(echo $tmp | cut -d"-" -f 1)"
+    	IPversion="$(echo $tmp | cut -d"-" -f 2)"
 	else
-    Protocol=$(Field 1 "$Port")
-    IPversion="ipv4"
+    	Protocol=$(Field 1 "$Port")
+    	IPversion="ipv4"
 	fi
 	Port1=$(Field 2 "$Port")
 	Port2=$(Field 3 "$Port")
