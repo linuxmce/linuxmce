@@ -102,5 +102,5 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
         }
     }
- Component.onCompleted: qmlSetupLmce(deviceid, srouterip)
+ //Component.onCompleted: qmlSetupLmce(deviceid, srouterip)
 }

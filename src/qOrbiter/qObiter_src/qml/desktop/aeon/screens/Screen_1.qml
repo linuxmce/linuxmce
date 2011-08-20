@@ -347,7 +347,7 @@ Item
             }
             Text{
                 id:txtUser
-                text:"Jason"
+                text:"User"
                 font.family: "scout";
                 font.pixelSize: parent.height*.7;
                 color: "#e5e5e5";
