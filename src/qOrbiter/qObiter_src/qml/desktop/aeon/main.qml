@@ -65,6 +65,27 @@ Item {
         newImg.opacity = 1;
         currentImg.opacity = 0;
     }
+    // Load some custom fonts
+    FontLoader {
+        id: scout
+        source: "../aeon/fonts/scout.ttf"
+    }
+    FontLoader {
+        id: scoutLight
+        source: "../aeon/fonts/scoutlight.ttf"
+    }
+    FontLoader {
+        id: scoutCond
+        source: "../aeon/fonts/scoutcond.ttf"
+    }
+    FontLoader {
+        id: aeonRss
+        source: "../aeon/fonts/aeon_rss.ttf"
+    }
+    FontLoader {
+        id: aeonNowPlaying
+        source: "../aeon/fonts/aeon_player.ttf"
+    }
     Timer { // Simulate a simple PhotoScreensaver
         interval: 15000; running: true; repeat: true
         onTriggered: changeBGimage()

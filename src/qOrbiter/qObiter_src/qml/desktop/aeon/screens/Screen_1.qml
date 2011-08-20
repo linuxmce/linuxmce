@@ -4,10 +4,6 @@ import "../components"
 
 Item
 {
-    function getDate(){
-        var d = new Date();
-        return d.format("dddd, mmmm d, yyyy | h:MM TT");
-    }
     function mainItemSelected(index){
         mainmenu.currentIndex = index
         mainMenuIndex = index
@@ -29,33 +25,8 @@ Item
             break
         }
     }
-    // Load some custom fonts
-    FontLoader {
-        id: scout
-        source: "../fonts/scout.ttf"
-    }
-    FontLoader {
-        id: scoutLight
-        source: "../fonts/scoutlight.ttf"
-    }
-    FontLoader {
-        id: scoutCond
-        source: "../fonts/scoutcond.ttf"
-    }
-    FontLoader {
-        id: aeonRss
-        source: "../fonts/aeon_rss.ttf"
-    }
-    FontLoader {
-        id: aeonNowPlaying
-        source: "../fonts/aeon_player.ttf"
-    }
 
 
-    Timer { // Update the clock element periodically
-        interval: 5; running: true; repeat: true
-        onTriggered: txtDate.text = getDate()
-    }
     Rectangle {
         id:stage
 
@@ -65,37 +36,10 @@ Item
         width: style.orbiterW
         color: "transparent"
 
-        // Clock
-        Image {
-            id: imgClockBg
+        Clock{
             anchors.right: parent.right
-            source:  "../img/common/timepanel_mid.png"
-            x: scaleX(70.31) // 900
             y: scaleY(43.89) // 316
-            width: scaleX(35.23) // 451
-            height:  scaleY(3.75) // 27
-            //transformOrigin: Item.Right
-            smooth:  true
         }
-        Text{
-            id: txtDate
-            text: getDate()
-            anchors.rightMargin: scaleX(.78)
-            font.family: "aeonRss";
-            font.pixelSize: imgClockBg.height*.8;
-            color: "#e5e5e5";
-            smooth: true
-            anchors.right: parent.right
-            anchors.verticalCenter: imgClockBg.verticalCenter
-
-        }
-
-        //        Rectangle{
-        //            width:  parent.width
-        //            height: parent.height/9
-        //            anchors.centerIn: parent
-        //            color: "black"
-        //        }
 
         // Main menu strip
         Image {
@@ -292,15 +236,15 @@ Item
                     width:  parent.width*.90
                     height: parent.height*.91
                     radius: 6
-                    color: "white"
-                    //                    color: "transparent"
-//                    Image{ // Album art here
+                    //color: "white"
+                                        color: "transparent"
+                    //                    Image{ // Album art here
                     // id: nowPlayingArt
-//                        anchors.fill: parent
-//                        source: ""
-//                    fillMode:  Image.PreserveAspectFit
-//                    smooth:  true
-//                    }
+                    //                        anchors.fill: parent
+                    //                        source: ""
+                    //                    fillMode:  Image.PreserveAspectFit
+                    //                    smooth:  true
+                    //                    }
                 }
             }
 
@@ -360,7 +304,60 @@ Item
                 color: "white"
             }
         }
+        // Bottom options menu
+        Image {
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            source:  "../img/common/timepanel_mid.png"
+            width: scaleX(35.23) // 451
+            height:  scaleY(3.75) // 27
+            smooth:  true
+            Text{
+                id:lblRoom
+                text:"Room:"
+                font.family: "scout";
+                font.pixelSize: parent.height*.7;
+                color: "white";
+                smooth: true
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.right: txtRoom.left
+                anchors.rightMargin: scaleX(.78)
+            }
+            Text{
+                id:txtRoom
+                text:"Front Room"
+                font.family: "scout";
+                font.pixelSize: parent.height*.7;
+                color: "#e5e5e5";
+                smooth: true
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.right: lblUser.left
+                anchors.rightMargin: scaleX(.78)
+            }
+            Text{
+                id:lblUser
+                text:"User:"
+                font.family: "scout";
+                font.pixelSize: parent.height*.7;
+                color: "white";
+                smooth: true
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.right: txtUser.left
+                anchors.rightMargin: scaleX(.78)
+            }
+            Text{
+                id:txtUser
+                text:"Jason"
+                font.family: "scout";
+                font.pixelSize: parent.height*.7;
+                color: "#e5e5e5";
+                smooth: true
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.right: parent.right
+                anchors.rightMargin: scaleX(.78)
+            }
 
+        }
 
     }
     Component.onCompleted: {
