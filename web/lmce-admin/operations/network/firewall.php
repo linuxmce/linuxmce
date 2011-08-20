@@ -84,9 +84,10 @@ function firewall($output,$dbADO) {
 				<tr class="'.(($pos%2==0)?'alternate_back':'').'">
 					<td align="center">'.$protocol[0].'</td>
 					<td align="center">'.$protocol[1].'</td>
-					<td align="center">'.$row['SourcePort'].' to '.$row['SourcePortEnd'].'</B></td>
-					<td align="center">'.$row['DestinationPort'].'</td>
-					<td align="center">'.$row['DestinationIP'].'</td>
+					<td align="center">'.($protocol[0] == 'ip' ? 'protocol: ' : '').
+					$row['SourcePort'].($row['SourcePortEnd'] > 0 ? ' to '.$row['SourcePortEnd'] : '').'</B></td>
+					<td align="center">'.($row['DestinationPort'] > 0 ? $row['DestinationPort']:'').'</td>
+					<td align="center">'.($row['DestinationIP'] > 0 ? $row['DestinationIP']:'').'</td>
 					<td align="center">'.$row['RuleType'].'</td>
 					<td align="center">'.$row['SourceIP'].'</td>
 					<td align="center"><a href="index.php?section=firewall&action=del&delid='.$row['PK_Firewall'].'">'.$TEXT_DELETE_CONST.'</a></td>
@@ -113,6 +114,7 @@ function firewall($output,$dbADO) {
 			<td align="center"><select name="protocol" STYLE="width:70px">
 				<option value="tcp">tcp</option>
 				<option value="udp">udp</option>
+				<option value="ip">ip</option>
 			</select></td>
 			<td align="center"><select name="IPVersion" STYLE="width:70px">
 				<option value="ipv4">IPv4</option>
