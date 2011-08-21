@@ -163,7 +163,8 @@ SOURCES += main.cpp \
     datamodels/DataModelItems/filedetailsitem.cpp \
     contextobjects/filedetailsclass.cpp \
     imageProviders/filedetailsimageprovider.cpp \
-    contextobjects/nowplayingclass.cpp
+    contextobjects/nowplayingclass.cpp \
+    datamodels/DatagridClasses/datagriditemmodelclass.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -212,7 +213,8 @@ HEADERS += \
     ../../PlutoUtils/ThreadedClass.h \
     contextobjects/filedetailsclass.h \
     imageProviders/filedetailsimageprovider.h \
-    contextobjects/nowplayingclass.h
+    contextobjects/nowplayingclass.h \
+    datamodels/DatagridClasses/datagriditemmodelclass.h
 
 OTHER_FILES += Readme.txt \
     config.xml \
@@ -234,6 +236,25 @@ OTHER_FILES += Readme.txt \
     android/src/eu/licentia/necessitas/mobile/QtCamera.java \
     android/src/eu/licentia/necessitas/mobile/QtMediaPlayer.java \
     android/src/eu/licentia/necessitas/mobile/QtLocation.java \
+    android/AndroidManifest.xml \
+    android/res/drawable-mdpi/icon.png \
+    android/res/values/strings.xml \
+    android/res/values/libs.xml \
+    android/res/drawable-hdpi/icon.png \
+    android/res/drawable-ldpi/icon.png \
+    android/src/eu/licentia/necessitas/mobile/QtSystemInfo.java \
+    android/src/eu/licentia/necessitas/mobile/QtLocation.java \
+    android/src/eu/licentia/necessitas/mobile/QtCamera.java \
+    android/src/eu/licentia/necessitas/mobile/QtAndroidContacts.java \
+    android/src/eu/licentia/necessitas/mobile/QtSensors.java \
+    android/src/eu/licentia/necessitas/mobile/QtFeedback.java \
+    android/src/eu/licentia/necessitas/mobile/QtMediaPlayer.java \
+    android/src/eu/licentia/necessitas/industrius/QtSurface.java \
+    android/src/eu/licentia/necessitas/industrius/QtLayout.java \
+    android/src/eu/licentia/necessitas/industrius/QtApplication.java \
+    android/src/eu/licentia/necessitas/industrius/QtActivity.java \
+    android/src/eu/licentia/necessitas/ministro/IMinistroCallback.aidl \
+    android/src/eu/licentia/necessitas/ministro/IMinistro.aidl \
     android/AndroidManifest.xml
 
 android{

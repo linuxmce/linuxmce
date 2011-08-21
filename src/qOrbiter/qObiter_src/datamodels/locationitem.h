@@ -16,7 +16,7 @@ Q_OBJECT
       EaRole,
       intRole,
       TitleRole,
-        TypeRole
+      TypeRole
 
     };
 
