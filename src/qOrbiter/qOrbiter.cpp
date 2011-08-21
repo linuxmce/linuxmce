@@ -2122,3 +2122,18 @@ void DCE::qOrbiter::StopMedia()
 
     SendCommand(endMedia);
 }
+
+void DCE::qOrbiter::RwMedia()
+{
+    //CMD_Change_Playback_Speed rewind_media()
+}
+
+void DCE::qOrbiter::FfMedia()
+{
+
+}
+
+void DCE::qOrbiter::PauseMedia()
+{
+    //CMD_Pause_Media pause_media(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton)
+}

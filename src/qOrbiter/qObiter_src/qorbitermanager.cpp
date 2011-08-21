@@ -891,7 +891,8 @@ void qorbiterManager::getcurrentSkins(QStringList skinPaths)
 
         if(platform.isEmpty())
         {
-
+            qDebug() << "Could not locate skins for platform!";
+            exit(10);
         }
         else
         {
@@ -930,7 +931,7 @@ void qorbiterManager::getcurrentSkins(QStringList skinPaths)
 
                     qDebug() << " loading";
                 }
-
+                //Importing the document data for the skins themselves
                 QString s_title = styleObject->property("skinname").toString();
                 QString s_creator = styleObject->property("skincreator").toString();
                 QString s_description = styleObject->property("skindescription").toString();
@@ -1017,7 +1018,7 @@ bool qorbiterManager::readLocalConfig()
             {
                 qDebug() << "Could not read local, setting defaults.";
                 qDebug() << localConfig.toString();
-                qs_routerip = "192.168.80.1";
+                qs_routerip = "DCEROUTER";
                  localConfigFile.close();
                 return false;
             }
@@ -1297,5 +1298,18 @@ void qorbiterManager::stopMedia()
     pqOrbiter->StopMedia();
 }
 
+void qorbiterManager::rw_media()
+{
+    { pqOrbiter->RwMedia();}
+}
 
+void qorbiterManager::ff_media()
+{
+    { pqOrbiter->FfMedia();}
+}
+
+void qorbiterManager::pauseMedia()
+{
+    { pqOrbiter->PauseMedia();}
+}
 

@@ -236,6 +236,9 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     //media related
     Q_INVOKABLE void playMedia(QString FK_Media);
     Q_INVOKABLE void stopMedia();
+    Q_INVOKABLE void ff_media();
+    Q_INVOKABLE void rw_media();
+    Q_INVOKABLE void pauseMedia();
 
     Q_INVOKABLE  void getcurrentSkins(QStringList skinPaths);
     void qmlSetupLmce(int incdeviceid, QString incrouterip);

@@ -69,7 +69,9 @@ public:
                 void GetSecurityCam(int i_inc_pkdevice);
                 void StartMedia(QString inc_FKFile);
                 void StopMedia();
-
+                void RwMedia();
+                void FfMedia();
+                void PauseMedia();
 
 //<-dceag-const-e->
 
