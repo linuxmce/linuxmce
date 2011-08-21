@@ -6,6 +6,11 @@ if ! grep -q '^Name: shared/accepted-sun-dlj-v1-1' /var/cache/debconf/config.dat
 	echo 'Template: shared/accepted-sun-dlj-v1-1' >> /var/cache/debconf/config.dat
 	echo 'Owners: sun-java6-bin, sun-java6-jre' >>  /var/cache/debconf/config.dat
 fi
+if ! grep -q '^Name: mythweb/only' /var/cache/debconf/config.dat ;then
+        echo "Name: mythweb/only" >> /var/cache/debconf/config.dat
+        echo "Template: mythweb/only" >> /var/cache/debconf/config.dat
+        echo "Owners: mythweb" >> /var/cache/debconf/config.dat
+fi
 
 . /usr/share/debconf/confmodule
 
