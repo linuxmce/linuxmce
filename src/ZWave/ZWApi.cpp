@@ -2678,7 +2678,7 @@ void ZWApi::ZWApi::dropSendQueueJob() {
 		// If you get this error, take a look at Trac ticket #874
 		DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "ERROR: Three dropped commands in a row, soft-resetting controller");
 		pthread_mutex_unlock (&mutexSendQueue);
-		zwSoftReset();
+		//zwSoftReset();
 		pthread_mutex_lock (&mutexSendQueue);
 		dropped_jobs = 0;
 	}
