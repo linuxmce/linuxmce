@@ -1300,12 +1300,13 @@ void qorbiterManager::stopMedia()
 
 void qorbiterManager::rw_media(int speed)
 {
-
+    nowPlayingButton->setMediaSpeed(speed);
     pqOrbiter->RwMedia();
 }
 
 void qorbiterManager::ff_media(int speed)
 {
+   nowPlayingButton->setMediaSpeed(speed);
    pqOrbiter->FfMedia();
 }
 

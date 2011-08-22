@@ -2113,7 +2113,7 @@ void DCE::qOrbiter::StartMedia(QString inc_FKFile)
 {
 
 
-    CMD_MH_Play_Media playMedia(qmlUI->iPK_Device, qmlUI->iMediaPluginID, 0 , inc_FKFile.toStdString(), qmlUI->i_current_mediaType, 0, QString::number(qmlUI->iFK_Room).toStdString(), false, false, false, false, false);
+    CMD_MH_Play_Media playMedia(qmlUI->iPK_Device, qmlUI->iMediaPluginID, 0 , inc_FKFile.toStdString(), qmlUI->i_current_mediaType, 0, QString::number(qmlUI->iea_area).toStdString(), false, false, false, false, false);
     cout << "Playing file: " << inc_FKFile.toStdString() << endl;
     string pos = "";
     int streamID = NULL;
@@ -2123,14 +2123,15 @@ void DCE::qOrbiter::StartMedia(QString inc_FKFile)
 
 void DCE::qOrbiter::StopMedia()
 {
-    CMD_MH_Stop_Media endMedia(qmlUI->iPK_Device, qmlUI->iMediaPluginID,0,qmlUI->nowPlayingButton->i_mediaType,0,QString::number(qmlUI->iFK_Room).toStdString(),false);
-
+    CMD_MH_Stop_Media endMedia(qmlUI->iPK_Device, qmlUI->iMediaPluginID,0,qmlUI->nowPlayingButton->i_mediaType,0,QString::number(qmlUI->iea_area).toStdString(),false);
+    qDebug() << qmlUI->iFK_Room;
     SendCommand(endMedia);
+    qDebug() << "End command sent";
 }
 
 void DCE::qOrbiter::RwMedia()
 {
-    CMD_Change_Playback_Speed rewind_media(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID, qmlUI->nowPlayingButton->i_playbackSpeed, true);
+    CMD_Change_Playback_Speed rewind_media(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID, qmlUI->nowPlayingButton->i_playbackSpeed, false);
     SendCommand(rewind_media);
 }
 
