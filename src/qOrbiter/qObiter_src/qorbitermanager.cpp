@@ -1298,18 +1298,19 @@ void qorbiterManager::stopMedia()
     pqOrbiter->StopMedia();
 }
 
-void qorbiterManager::rw_media()
+void qorbiterManager::rw_media(int speed)
 {
-    { pqOrbiter->RwMedia();}
+
+    pqOrbiter->RwMedia();
 }
 
-void qorbiterManager::ff_media()
+void qorbiterManager::ff_media(int speed)
 {
-    { pqOrbiter->FfMedia();}
+   pqOrbiter->FfMedia();
 }
 
 void qorbiterManager::pauseMedia()
 {
-    { pqOrbiter->PauseMedia();}
+    pqOrbiter->PauseMedia();
 }
 

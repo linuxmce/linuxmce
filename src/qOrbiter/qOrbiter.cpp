@@ -1016,14 +1016,18 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     cout << "Parm #103 - List_PK_Device=" << sList_PK_Device << endl;
     cout << "Parm #120 - Retransmit=" << bRetransmit << endl;
 
-    if (iValue = 1)
+    if (iPK_MediaType != 0)
     {
         qmlUI->nowPlayingButton->setStatus(true);
+
     }
-    else if (sText.empty())
+    else if (iPK_MediaType == 0)
     {
         qDebug () << "Closing Now Playing";
         qmlUI->nowPlayingButton->setStatus(false);
+        qmlUI->gotoQScreen("Screen_1.qml");
+
+
     }
 
     QString scrn = sPK_DesignObj.c_str();
@@ -1032,6 +1036,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     qDebug() << scrn;
     qmlUI->nowPlayingButton->setScreen("Screen_"+scrn+".qml");
     qmlUI->nowPlayingButton->setTitle(QString::fromStdString(sValue_To_Assign));
+    qmlUI->nowPlayingButton->i_streamID = iStreamID;
     qmlUI->nowPlayingButton->i_mediaType = iPK_MediaType;
 }
 
@@ -2125,15 +2130,18 @@ void DCE::qOrbiter::StopMedia()
 
 void DCE::qOrbiter::RwMedia()
 {
-    //CMD_Change_Playback_Speed rewind_media()
+    CMD_Change_Playback_Speed rewind_media(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID, qmlUI->nowPlayingButton->i_playbackSpeed, true);
+    SendCommand(rewind_media);
 }
 
 void DCE::qOrbiter::FfMedia()
 {
-
+    CMD_Change_Playback_Speed forward_media(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID, qmlUI->nowPlayingButton->i_playbackSpeed, true);
+    SendCommand(forward_media);
 }
 
 void DCE::qOrbiter::PauseMedia()
 {
-    //CMD_Pause_Media pause_media(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton)
+    CMD_Pause_Media pause_media(qmlUI->iPK_Device, qmlUI->iMediaPluginID,qmlUI->nowPlayingButton->i_streamID);
+    SendCommand(pause_media);
 }

@@ -9,6 +9,7 @@
   */
 
 #include <QDeclarativeItem>
+#include <QTime>
 
 class NowPlayingClass : public QDeclarativeItem
 {
@@ -27,6 +28,10 @@ public:
     QString qs_subTitle;
     bool b_mediaPlaying;
     int i_mediaType;
+    int i_streamID;
+    int i_playbackSpeed;
+    QTime *timecode;
+    QString qs_playbackSpeed;
 
 
 signals:
@@ -40,6 +45,7 @@ signals:
     void mediaTypeChanged();
     void mediaStatusChanged();
     void filePathChanged();
+
 
 public slots:
 
@@ -63,6 +69,9 @@ public slots:
 
     void setFilePath (QString inc_fp) {filepath = inc_fp; emit filePathChanged();}
     QString getFilePath () {return filepath;}
+
+    void setMediaSpeed(int speed);
+    int getMediaSpeed() {return i_playbackSpeed;}
 
     };
 

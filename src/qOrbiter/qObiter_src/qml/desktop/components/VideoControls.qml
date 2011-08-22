@@ -16,6 +16,10 @@ Rectangle {
             width: parent.width
 
          }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: pauseMedia()
+        }
     }
 
     MediaButton {id:ff ;
@@ -27,6 +31,10 @@ Rectangle {
             height: parent.height
             width: parent.width
          }
+        MouseArea{
+            anchors.fill: parent
+            onClicked: ff_media(2)
+        }
 
     }
 
@@ -39,6 +47,10 @@ Rectangle {
             height: parent.height
             width: parent.width
          }
+        MouseArea{
+            anchors.fill: parent
+            onClicked: rw_media(-2)
+        }
     }
 
     MediaButton {id:next ;
