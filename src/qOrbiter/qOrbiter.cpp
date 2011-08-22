@@ -2145,3 +2145,102 @@ void DCE::qOrbiter::PauseMedia()
     CMD_Pause_Media pause_media(qmlUI->iPK_Device, qmlUI->iMediaPluginID,qmlUI->nowPlayingButton->i_streamID);
     SendCommand(pause_media);
 }
+
+void DCE::qOrbiter::requestMediaPlaylist()
+{
+
+    int gHeight = 10;
+    int gWidth = 10;
+    int pkVar = 0;
+    string valassign ="";
+    bool isSuccessfull;// = "false";
+
+    string m_sGridID ="plist_"+StringUtils::itos(qmlUI->iPK_Device);
+
+    int iRow_count=5;
+    int iColumn_count = 5;
+    bool m_bKeep_Row_Header = false;
+    bool m_bKeepColHeader = false;
+    bool m_bAdd_UpDown_Arrows = true;
+
+    string m_sSeek;
+    string m_sDataGrid_ID = "1";
+    int iOffset;
+
+    int iColumn = 1;
+    int iRowCount= 5;
+    int iRowColums = 5;
+    int m_iSeekColumn = 0;
+    int iData_Size=0;
+    int GridCurRow = 0;
+    int GridCurCol= 0;
+
+    char *pData;
+    pData = "NULL";
+    int iRow;
+
+    QString temp;
+    qmlUI->m_dwIDataGridRequestCounter++;
+
+    CMD_Populate_Datagrid cmd_populate_nowplaying_grid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 18, "38", DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
+
+    if (SendCommand(cmd_populate_nowplaying_grid))
+    {
+
+            bool barrows = false; //not sure what its for
+            //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
+            DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
+            int cellsToRender= pDataGridTable->GetRows();
+            //qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
+            //qDebug() << "Response: " << cellsToRender << " cells to render";
+
+            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
+            QString cellTitle;
+            QString cellAttribute;
+            QString fk_file;
+            QString filePath;
+            int index;
+            QImage cellImg;
+            QString cellfk;
+            DataGridCell *pCell;
+            for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
+            {
+
+                pCell = it->second;
+
+                string emptyEA;
+
+                // fk.remove("!F");
+                const char *pPath = pCell->GetImagePath();
+                index = pDataGridTable->CovertColRowType(it->first).first;
+                cellTitle = pCell->m_mapAttributes_Find("Title").c_str();
+                cellAttribute = pCell->m_mapAttributes_Find("Name").c_str();
+                cellfk = pCell->GetValue();
+                //qDebug() << pCell->m_mapAttributes.size();
+                //qDebug() << "Item Attribute::" << cellTitle << "-" << cellAttribute;
+                if (pPath )
+                {
+                    cellImg = getfileForDG(pCell->GetImagePath());
+                    size_t s=0;
+                    pCell->m_GraphicLength = (unsigned long) s;
+                    pCell->m_GraphicFormat = GR_JPG;
+                }
+                else if (!pPath) //making sure we dont provide a null image
+                {
+                    //         qDebug() << "No Image";
+                    cellImg.load(":/icons/videos.png");
+                }
+                else if (cellImg.isNull())
+                {
+                    cellImg.load(":/icons/videos.png");
+                }
+
+
+                //qmlUI->m_selected_grid_item->appendRow(new FileDetailsItem(cellTitle, cellAttribute, cellImg, false,  qmlUI->model));
+            }
+
+        }
+
+
+
+}

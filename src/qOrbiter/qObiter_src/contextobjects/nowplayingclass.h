@@ -16,8 +16,11 @@ class NowPlayingClass : public QDeclarativeItem
     Q_OBJECT
     Q_PROPERTY (bool b_mediaPlaying READ getStatus WRITE setStatus NOTIFY mediaStatusChanged)
     Q_PROPERTY (QString qs_mainTitle READ getTitle WRITE setTitle NOTIFY titleChanged)
+    Q_PROPERTY (QString qs_subTitle READ getSubTitle WRITE setSubTitle NOTIFY titleChanged )
     Q_PROPERTY (QString qs_screen READ getScreen WRITE setScreen NOTIFY screenTypeChanged)
+
     Q_PROPERTY (QString filepath READ getFilePath WRITE setFilePath NOTIFY filePathChanged)
+    Q_PROPERTY (QString qs_playbackSpeed READ getMediaSpeed WRITE setStringSpeed NOTIFY mediaSpeedChanged)
 
 public:
     explicit NowPlayingClass(QDeclarativeItem *parent = 0);
@@ -45,6 +48,8 @@ signals:
     void mediaTypeChanged();
     void mediaStatusChanged();
     void filePathChanged();
+    void mediaSpeedChanged();
+
 
 
 public slots:
@@ -58,7 +63,7 @@ public slots:
     void setTitle (QString inc_title) {qs_mainTitle = inc_title; emit titleChanged();}
     QString getTitle () {return qs_mainTitle;}
 
-    void setSubTitle (QString inc_subTitle) {qs_subTitle = inc_subTitle;}
+    void setSubTitle (QString inc_subTitle) {qs_subTitle = inc_subTitle; emit titleChanged();}
     QString getSubTitle () {return qs_subTitle;}
 
     void setStatus (bool status) {b_mediaPlaying = status; emit mediaStatusChanged(); }
@@ -71,7 +76,8 @@ public slots:
     QString getFilePath () {return filepath;}
 
     void setMediaSpeed(int speed);
-    int getMediaSpeed() {return i_playbackSpeed;}
+    void setStringSpeed(QString s) {qs_playbackSpeed = s; qDebug() << qs_playbackSpeed; emit mediaSpeedChanged();}
+    QString getMediaSpeed() {return qs_playbackSpeed;}
 
     };
 

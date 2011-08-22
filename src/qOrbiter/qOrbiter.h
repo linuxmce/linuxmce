@@ -72,6 +72,7 @@ public:
                 void RwMedia();
                 void FfMedia();
                 void PauseMedia();
+                void requestMediaPlaylist();
 
 //<-dceag-const-e->
 
