@@ -838,7 +838,7 @@ QString qorbiterManager::adjustPath(const QString &path)
 {
 
 #ifdef ANDROID
-    return path+"/files/";
+    return path+"droid";
 #endif
 
 #ifdef Q_OS_UNIX
