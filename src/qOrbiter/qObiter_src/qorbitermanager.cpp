@@ -112,7 +112,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
     buildType="/qml/harmattan/";
 #elif defined (Q_OS_MACX)
     buildType="/qml/desktop/";
-#elif defined (android)
+#elif defined (ANDROID)
     buildType = "qml/desktop/";
 #endif
 
@@ -837,7 +837,7 @@ void qorbiterManager::regenComplete(int i)
 QString qorbiterManager::adjustPath(const QString &path)
 {
 
-#ifdef android
+#ifdef ANDROID
     return path+"/files/";
 #endif
 

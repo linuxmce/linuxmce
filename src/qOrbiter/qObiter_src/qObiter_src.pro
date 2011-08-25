@@ -37,7 +37,7 @@ folder_02.target=     #left blank so it will appear in the root
 
 }
 
-android{
+ANDROID{
 folder_01.source = qml/desktop
 folder_01.target = qml
 
@@ -257,7 +257,7 @@ OTHER_FILES += Readme.txt \
     android/src/eu/licentia/necessitas/ministro/IMinistro.aidl \
     android/AndroidManifest.xml
 
-android{
+ANDROID{
 OTHER_FILES=\
     android/res/values/libs.xml \
     android/res/values/strings.xml \
