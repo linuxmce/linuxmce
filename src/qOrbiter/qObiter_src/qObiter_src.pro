@@ -278,7 +278,7 @@ OTHER_FILES=\
     android/src/eu/licentia/necessitas/mobile/QtMediaPlayer.java \
     android/src/eu/licentia/necessitas/mobile/QtLocation.java \
     android/AndroidManifest.xml \
-    android/AndroidManifest.xml \
+
 }
 for_harmattan{
 OTHER_FILES= \
