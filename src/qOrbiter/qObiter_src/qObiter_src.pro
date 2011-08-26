@@ -57,17 +57,8 @@ QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 INCLUDEPATH += ../../ ../../DCE/
 
 macx{
-QT += xml
-CONFIG -= app_bundle
-# Add qml files in application bundle (OSX)
-#APP_QML_FILES.files = qml/desktop/*
-#APP_QML_FILES.path = Contents/MacOS/qml/desktop
-#QMAKE_BUNDLE_DATA += APP_QML_FILES
-
-#APP_COMPONENTS_FILES.files = qml/desktop/components/*
-#APP_COMPONENTS_FILES.path = Contents/MacOS/qml/desktop/components
-#QMAKE_BUNDLE_DATA += APP_COMPONENTS_FILES
-
+    QT += xml
+    TARGET = qOrbiter
 }
 
 !macx{

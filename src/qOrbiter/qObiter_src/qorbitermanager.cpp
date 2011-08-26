@@ -123,7 +123,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         qDebug () << "Local confing processing";
     }
 
-    //currentSkin = "default";
+    currentSkin = "default";
     currentSkinURL="/qml/qObiter_src/";
     s_RouterIP="DCERouter";
 
@@ -844,9 +844,8 @@ QString qorbiterManager::adjustPath(const QString &path)
 #ifdef Q_OS_UNIX
 
 #ifdef Q_OS_MAC
-    if (!QDir::isAbsolutePath(path))
         return QCoreApplication::applicationDirPath()
-                + QLatin1String("/../Resources/") + path;
+                + QLatin1String("/../Resources");
 #else
     const QString pathInShareDir = QCoreApplication::applicationDirPath()
             + QLatin1String("/../share/")
