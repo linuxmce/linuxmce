@@ -650,8 +650,11 @@ bool qorbiterManager::getConf(int pPK_Device)
 
 void qorbiterManager::swapSkins(QString incSkin)
 {
-    QDir skinsDir(QApplication::applicationDirPath().remove("bin"));
-
+    #ifdef Q_OS_MAC
+        QDir skinsDir(QApplication::applicationDirPath().remove("/MacOS").append("/Resources"));
+    #else
+        QDir skinsDir(QApplication::applicationDirPath().remove("bin"));
+    #endif
 
     if(skinsDir.cd("qml/"))
     {
@@ -844,8 +847,7 @@ QString qorbiterManager::adjustPath(const QString &path)
 #ifdef Q_OS_UNIX
 
 #ifdef Q_OS_MAC
-        return QCoreApplication::applicationDirPath()
-                + QLatin1String("/../Resources");
+    return QCoreApplication::applicationDirPath().remove("/MacOS").append("/Resources");
 #else
     const QString pathInShareDir = QCoreApplication::applicationDirPath()
             + QLatin1String("/../share/")
@@ -882,9 +884,11 @@ void qorbiterManager::getcurrentSkins(QStringList skinPaths)
     qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
     QString skins;
 
+#ifdef Q_OS_MAC
+    QDir skinsDir(QApplication::applicationDirPath().remove("/MacOS").append("/Resources"));
+#else
     QDir skinsDir(QApplication::applicationDirPath().remove("bin"));
-
-
+#endif
     if(skinsDir.cd("qml/"))
     {
         qDebug() << skinsDir.path();
