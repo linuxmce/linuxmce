@@ -97,7 +97,7 @@ Item
                     Text{
                         text:name;
                         anchors.centerIn: parent;
-                        font.family: "scoutCond";
+                        font.family: scoutCond.name;
                         font.pixelSize: parent.height;
                         color: "white";
                         smooth: true
@@ -178,7 +178,7 @@ Item
                     Text{
                         text:label;
                         anchors.centerIn: parent;
-                        font.family: "aeonRss";
+                        font.family: aeonRss.name;
                         font.pixelSize: parent.height/2;
                         color: "white";
                         smooth: true
@@ -262,7 +262,7 @@ Item
                 text: "Artist"
                 x: scaleY(41.11)
                 y: scaleY(32.78) // 478 236
-                font.family: "aeonNowPlaying"
+                font.family: aeonNowPlaying.name
                 font.capitalization: Font.AllUppercase
                 smooth: true
                 font.pixelSize: scaleY(2.92) // 21
@@ -273,7 +273,7 @@ Item
                 text: "Album"
                 x: scaleY(41.11)
                 y: scaleY(37.22) // 510 268
-                font.family: "aeonNowPlaying"
+                font.family: aeonNowPlaying.name
                 font.capitalization: Font.AllUppercase
                 smooth: true
                 font.pixelSize: scaleY(2.22) // 16
@@ -285,7 +285,7 @@ Item
                 text: "NOW PLAYING"
                 x: scaleY(41.11)
                 y: scaleY(54.44) // 634 392
-                font.family: "aeonNowPlaying"
+                font.family: aeonNowPlaying.name
                 smooth: true
                 font.pixelSize: scaleY(2.22) // 16
                 opacity:  .7
@@ -296,7 +296,7 @@ Item
                 text: "Track"
                 x: scaleY(41.11)
                 y: scaleY(56.67) // 650 408
-                font.family: "aeonNowPlaying"
+                font.family: aeonNowPlaying.name
                 font.capitalization: Font.AllUppercase
                 smooth: true
                 font.pixelSize: scaleY(3.06) // 22
@@ -315,7 +315,7 @@ Item
             Text{
                 id:lblRoom
                 text:"Room:"
-                font.family: "scout";
+                font.family: scout.name;
                 font.pixelSize: parent.height*.7;
                 color: "white";
                 smooth: true
@@ -326,7 +326,7 @@ Item
             Text{
                 id:txtRoom
                 text:"Front Room"
-                font.family: "scout";
+                font.family: scout.name;
                 font.pixelSize: parent.height*.7;
                 color: "#e5e5e5";
                 smooth: true
@@ -337,7 +337,7 @@ Item
             Text{
                 id:lblUser
                 text:"User:"
-                font.family: "scout";
+                font.family: scout.name;
                 font.pixelSize: parent.height*.7;
                 color: "white";
                 smooth: true
@@ -348,7 +348,7 @@ Item
             Text{
                 id:txtUser
                 text:"User"
-                font.family: "scout";
+                font.family: scout.name;
                 font.pixelSize: parent.height*.7;
                 color: "#e5e5e5";
                 smooth: true
