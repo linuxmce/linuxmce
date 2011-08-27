@@ -21,7 +21,7 @@ property bool verticalMirror: false
         id: txtDate
         text: getDate()
         anchors.rightMargin: scaleX(.78)
-        font.family: "aeonRss";
+        font.family: aeonRss.name;
         font.pixelSize: parent.height*.7;
         color: "#e5e5e5";
         smooth: true

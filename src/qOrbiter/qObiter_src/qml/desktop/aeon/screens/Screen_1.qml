@@ -263,7 +263,7 @@ Item
                 x: scaleY(41.11)
                 y: scaleY(32.78) // 478 236
                 font.family: aeonNowPlaying.name
-                font.capitalization: Font.AllUppercase
+                //font.capitalization: Font.AllUppercase
                 smooth: true
                 font.pixelSize: scaleY(2.92) // 21
                 color: "white"
@@ -274,7 +274,7 @@ Item
                 x: scaleY(41.11)
                 y: scaleY(37.22) // 510 268
                 font.family: aeonNowPlaying.name
-                font.capitalization: Font.AllUppercase
+                //font.capitalization: Font.AllUppercase
                 smooth: true
                 font.pixelSize: scaleY(2.22) // 16
                 opacity:  .7
@@ -297,7 +297,7 @@ Item
                 x: scaleY(41.11)
                 y: scaleY(56.67) // 650 408
                 font.family: aeonNowPlaying.name
-                font.capitalization: Font.AllUppercase
+                //font.capitalization: Font.AllUppercase
                 smooth: true
                 font.pixelSize: scaleY(3.06) // 22
                 opacity:  .7
