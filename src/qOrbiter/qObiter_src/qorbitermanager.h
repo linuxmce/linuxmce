@@ -22,6 +22,7 @@
 #include <datamodels/filedetailsmodel.h>
 #include <contextobjects/filedetailsclass.h>
 #include <contextobjects/nowplayingclass.h>
+#include <contextobjects/screenparamsclass.h>
 
 #include <QFile>
 #include <QDir>
@@ -71,6 +72,7 @@ public:
     //------CUSTOM QML TYPES------------------------------------------------------------------------------------
     FileDetailsClass *filedetailsclass;
     NowPlayingClass *nowPlayingButton;
+    ScreenParamsClass *ScreenParameters;
 
     //ui variables
     QString currentSkin;

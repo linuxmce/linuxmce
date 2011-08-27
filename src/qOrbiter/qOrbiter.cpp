@@ -1036,6 +1036,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     qDebug() << scrn;
     qmlUI->nowPlayingButton->setScreen("Screen_"+scrn+".qml");
     qmlUI->nowPlayingButton->setTitle(QString::fromStdString(sValue_To_Assign));
+    qmlUI->nowPlayingButton->setSubTitle(QString::fromStdString(sText));
     qmlUI->nowPlayingButton->i_streamID = iStreamID;
     qmlUI->nowPlayingButton->i_mediaType = iPK_MediaType;
 }
@@ -1650,7 +1651,10 @@ void qOrbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool 
     cout << "Parm #252 - Turn_On=" << bTurn_On << endl;
     cout << "Parm #253 - Queue=" << bQueue << endl;
     cout << "scmdresult" << sCMD_Result << endl;
-    //qDebug() << pMessage->ToString().c_str();
+   QString params = pMessage->ToString().c_str();
+   QStringList paramList = params.split(" ");
+   qDebug() << paramList;
+
 
     QString str = QString::number(iPK_Screen);
     qmlUI->gotoQScreen("Screen_"+str+".qml");
@@ -2145,6 +2149,7 @@ void DCE::qOrbiter::PauseMedia()
 {
     CMD_Pause_Media pause_media(qmlUI->iPK_Device, qmlUI->iMediaPluginID,qmlUI->nowPlayingButton->i_streamID);
     SendCommand(pause_media);
+    qmlUI->nowPlayingButton->setMediaSpeed(1);
 }
 
 void DCE::qOrbiter::requestMediaPlaylist()

@@ -24,13 +24,12 @@ Rectangle {
         }
 
         Text {
-            id: nowplayingboxtext
-            x: 8
-            y: 5
-            width: 50
-            height: 20
+            id: nowplayingboxtext2
+
+
+           anchors.bottom: parent.bottom
             wrapMode: "NoWrap"
-            text: dcenowplaying.qs_mainTitle
+            text: dcenowplaying.qs_subTitle
             font.bold: true
             smooth: true
             horizontalAlignment: Text.AlignHCenter
@@ -62,5 +61,20 @@ Rectangle {
         width: 350
         height: 88
         color: "#ffffff"
+
+        Text {
+            id: nowplayingboxtext
+
+           anchors.fill: parent
+           anchors.top: parent.top
+            wrapMode: "NoWrap"
+            text: dcenowplaying.qs_mainTitle
+            font.bold: true
+            smooth: true
+            horizontalAlignment: Text.AlignHCenter
+            font.pixelSize: 12
+        }
+
+
     }
 }

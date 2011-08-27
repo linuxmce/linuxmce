@@ -211,6 +211,9 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         nowPlayingButton = new NowPlayingClass();
         qorbiterUIwin->rootContext()->setContextProperty("dcenowplaying" , nowPlayingButton);
 
+        ScreenParameters = new ScreenParamsClass;
+        qorbiterUIwin->rootContext()->setContextProperty("screenparams", ScreenParameters);
+
         //showing the qml screen depending on device / platform / etc
 #ifdef Q_OS_SYMBIAN
         qorbiterUIwin->showFullScreen();

@@ -14,8 +14,8 @@ Rectangle {
     color: style.advanced_bg
 
     //main 'now playing rect containing all the other items
-    Remote_lighting_controls{ id: remote_lighting_controls1; x: 344; y: 351; width: 93; height: 219; anchors.topMargin: 179;anchors.top: nowplayingbox1.baseline}
-    Remote_Audio_controls{ id: remote1; x: 200; y: 351; anchors.rightMargin: 71; z: 45; anchors.right: remote_lighting_controls1.left}
+    Remote_lighting_controls{ id: remote_lighting_controls1; x: 360; y: 352; width: 93; height: 219 }
+    Remote_Audio_controls{ id: remote1; x: 272; y: 361; anchors.rightMargin: 12; z: 45; anchors.right: remote_lighting_controls1.left}
 
     HomeButton{anchors.right: parent.right; anchors.top:parent.top}
 
