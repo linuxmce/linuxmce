@@ -654,7 +654,7 @@ bool qorbiterManager::getConf(int pPK_Device)
 void qorbiterManager::swapSkins(QString incSkin)
 {
     #ifdef Q_OS_MAC
-        QDir skinsDir(QApplication::applicationDirPath().remove("/MacOS").append("/Resources"));
+        QDir skinsDir(QApplication::applicationDirPath().remove("MacOS").append("Resources"));
     #else
         QDir skinsDir(QApplication::applicationDirPath().remove("bin"));
     #endif
@@ -850,7 +850,7 @@ QString qorbiterManager::adjustPath(const QString &path)
 #ifdef Q_OS_UNIX
 
 #ifdef Q_OS_MAC
-    return QCoreApplication::applicationDirPath().remove("/MacOS").append("/Resources");
+    return QCoreApplication::applicationDirPath().remove("MacOS").append("Resources");
 #else
     const QString pathInShareDir = QCoreApplication::applicationDirPath()
             + QLatin1String("/../share/")
@@ -888,7 +888,7 @@ void qorbiterManager::getcurrentSkins(QStringList skinPaths)
     QString skins;
 
 #ifdef Q_OS_MAC
-    QDir skinsDir(QApplication::applicationDirPath().remove("/MacOS").append("/Resources"));
+    QDir skinsDir(QApplication::applicationDirPath().remove("MacOS").append("Resources"));
 #else
     QDir skinsDir(QApplication::applicationDirPath().remove("bin"));
 #endif
