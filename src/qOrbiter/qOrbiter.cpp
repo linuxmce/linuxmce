@@ -2242,7 +2242,7 @@ void DCE::qOrbiter::requestMediaPlaylist()
                 }
 
 
-                //qmlUI->m_selected_grid_item->appendRow(new FileDetailsItem(cellTitle, cellAttribute, cellImg, false,  qmlUI->model));
+                qmlUI->nowPlayingButton->currentPlaylist->appendRow(new PlaylistItemClass(cellTitle, cellAttribute, fk_file  ,index, cellImg, qmlUI->nowPlayingButton->currentPlaylist));
             }
 
         }

@@ -1311,6 +1311,7 @@ void qorbiterManager::requestSecurityPic(int i_pk_camera_device)
 void qorbiterManager::playMedia(QString FK_Media)
 {
     pqOrbiter->StartMedia(FK_Media);
+   // pqOrbiter->requestMediaPlaylist();
 }
 
 void qorbiterManager::stopMedia()

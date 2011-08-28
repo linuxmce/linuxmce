@@ -3,7 +3,7 @@ import "../components"
 
 Rectangle {
 
-   // property alias synText:
+    // property alias synText:
     id: pvrRemote
 
 
@@ -27,33 +27,28 @@ Rectangle {
         height: 249
     }
 
-    Column {
-        id: channelgrid
-
+    ListView{
+        height:500
         width: 200
-        height: 500
+
         clip: true
+        interactive: true
+        flickableDirection: "VerticalFlick"
+        model: dcenowplaying.currentPlaylist
 
-        Flickable{
-            height: parent.height
-            width: parent.width
-            contentHeight: childrenRect.width
-            contentWidth: childrenRect.width
-            clip: true
-
-            Repeater { model: 50
+        delegate:
+            Rectangle {
+            width:200
+            height: 50
+            color: "whitesmoke"
+            Text {
+                text: title
             }
-}
-    }
-
-    Rectangle {
-        width:200
-        height: 50
-        color: "whitesmoke"
-        Text {
-            text: "I am DG item ,Sroll me!"
         }
     }
+
+
+
 
     NowPlayingBox {
         id: nowplayingbox1

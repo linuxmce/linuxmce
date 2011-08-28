@@ -10,6 +10,7 @@
 
 #include <QDeclarativeItem>
 #include <QTime>
+#include <contextobjects/playlistclass.h>
 
 class NowPlayingClass : public QDeclarativeItem
 {
@@ -35,6 +36,8 @@ public:
     int i_playbackSpeed;
     QTime *timecode;
     QString qs_playbackSpeed;
+
+    PlaylistClass * currentPlaylist;
 
 
 signals:
