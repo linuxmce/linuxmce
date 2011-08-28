@@ -59,6 +59,7 @@ INCLUDEPATH += ../../ ../../DCE/
 macx{
     QT += xml
     TARGET = qOrbiter
+    ICON = osxicons.icns
 }
 
 !macx{
