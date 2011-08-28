@@ -1335,3 +1335,9 @@ void qorbiterManager::pauseMedia()
     pqOrbiter->PauseMedia();
 }
 
+void qorbiterManager::showfloorplan(int fptype)
+{
+    pqOrbiter->ShowFloorPlan(fptype);
+}
+
+

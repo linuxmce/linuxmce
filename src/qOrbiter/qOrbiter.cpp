@@ -2250,3 +2250,13 @@ void DCE::qOrbiter::requestMediaPlaylist()
 
 
 }
+
+void DCE::qOrbiter::ShowFloorPlan(int floorplantype)
+{
+    qDebug () << "dce";
+    string *sval;
+    std::string id = "1";
+    CMD_Get_Floorplan_Layout getFloorPlan(qmlUI->iPK_Device, qmlUI->iOrbiterPluginID,sval);
+    SendCommand(getFloorPlan);
+
+}

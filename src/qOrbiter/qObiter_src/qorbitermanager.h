@@ -274,6 +274,8 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     Q_INVOKABLE void execGrp(int grp);        //for command groups
     Q_INVOKABLE void closeOrbiter();
 
+    //floorplans
+    Q_INVOKABLE void showfloorplan(int fptype);
     //random c++ related slots
     bool requestDataGrid();
     \

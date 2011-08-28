@@ -27,7 +27,7 @@ When you compile and run, the device should connect and the proper skins should 
 FLoor plans - both datagrid and graphic type
 Local file that save critical runtime functions like router ip, device number
 Proper functions for reloading the router, trying to reconnect
-Deal with bugs relating to Q_Property and dynamic update of properties in the ui** almost done
+
 Implement floorplans
 Implement security functions
 Implement functions on file details screen

@@ -73,6 +73,7 @@ public:
                 void FfMedia();
                 void PauseMedia();
                 void requestMediaPlaylist();
+                void ShowFloorPlan(int floorplantype);
 
 //<-dceag-const-e->
 
