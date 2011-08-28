@@ -33,6 +33,11 @@ public:
 
     QString objecttitle;
 
+    /*
+      Function declared inline for readability as they are short simple functions. anything besides getters and setters will
+      be located in the .cpp
+      */
+
     QString file;
     inline QString getFile () {return file;}
     inline void setFile(QString incFile) { file = incFile; emit FileChanged(file);}

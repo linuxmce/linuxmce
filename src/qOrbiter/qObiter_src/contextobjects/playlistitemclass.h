@@ -1,6 +1,10 @@
 #ifndef PLAYLISTITEMCLASS_H
 #define PLAYLISTITEMCLASS_H
 
+/* The purpose of this class is to keep a reference to all items in the current playlist, to notify the ui of playlist changes,
+  and to eventually allow the user to change the order of the playlist on the fly. role names subject to change
+  */
+
 #include <QAbstractListModel>
 #include <QVariant>
 #include <QImage>
