@@ -37,4 +37,9 @@
         <file alias="video-blank.png">img/icons/scifi.png</file>
         <file>img/icons/sms_protocol.png</file>
     </qresource>
+    <qresource prefix="/qml">
+        <file alias="Style.qml">qml/desktop/droid/Style.qml</file>
+        <file alias="main.qml">qml/desktop/droid/main.qml</file>
+        <file alias="Splash.qml">qml/desktop/droid/Splash.qml</file>
+    </qresource>
 </RCC>

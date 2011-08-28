@@ -1,6 +1,7 @@
 import QtQuick 1.0
-import "../components"
-import "../js/ComponentLoader.js" as MyJs
+//import "../components"
+//import "../js/ComponentLoader.js" as MyJs
+
 
  Item {
      id: item
@@ -17,7 +18,7 @@ import "../js/ComponentLoader.js" as MyJs
 
      function screenchange(screenname )
      {
-        pageLoader.source = "../screens/"+screenname
+        pageLoader.source = "/qml/"+screenname
         if (pageLoader.status == 1)
          {
              console.log("Command to change to:" + screenname+ " was successfull")
@@ -26,7 +27,7 @@ import "../js/ComponentLoader.js" as MyJs
          {
             console.log("Command to change to:" + screenname + " failed!")
             screenfile = screenname
-            pageLoader.source = "../screens/Screen_x.qml"
+            //pageLoader.source = "../screens/Screen_x.qml"
          }
      }
 

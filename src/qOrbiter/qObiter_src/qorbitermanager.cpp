@@ -143,7 +143,11 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
     getcurrentSkins(skinList);
 
     //loading the style from the current set skin directory
+#ifdef ANDROID
+    QDeclarativeComponent skinData(qorbiterUIwin->engine(),QUrl("qrc:/qml/Style.qml"));
+#else
     QDeclarativeComponent skinData(qorbiterUIwin->engine(),QUrl::fromLocalFile(finalPath+"/Style.qml"));
+#endif
 
     //turning it into a qObject - this part actually loads it - the error should connect to a slot and not an exit
     QObject *styleObject = skinData.create(qorbiterUIwin->rootContext());
@@ -179,7 +183,11 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
 
         //setting engine import path
         qorbiterUIwin->engine()->setBaseUrl(qmlPath+buildType);
+#ifdef ANDROID
+        qorbiterUIwin->setSource(QUrl("qrc:/qml/main.qml"));
+#else
         qorbiterUIwin->setSource(QUrl::fromLocalFile(finalPath+"/main.qml"));
+#endif
 
         //reference to the object for later use?
         item= qorbiterUIwin->rootObject();
