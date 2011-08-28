@@ -143,7 +143,7 @@ Rectangle {
                     }
 
                     PropertyChanges {
-                        target: roomListModel
+                        target: delrect
                         width: 250
                         height: childrenRect.height
                         clip:true

@@ -15,12 +15,12 @@ Rectangle {
                  id:attributedelegate
                  Item {
                      id: fileformatitem
-                     height: 150
+                     height: 50
                      width: 150
 
                      Rectangle{
                          id: formatrect
-                         height: 130
+                         height: 50
                          width: 130
                          border.color: "black"
                          border.width: 1
