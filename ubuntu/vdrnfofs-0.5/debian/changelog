@@ -1,3 +1,8 @@
+vdrnfofs (0.5-2lmce) lucid; urgency=low
+
+  * Add ability to remove recordings
+
+ -- Peer Oliver Schmidt <peer.oliver.schmidt@linuxmce.org>  Mon, 29 Aug 2011 10:35:55 +0200
 vdrnfofs (0.5-1yavdr2) lucid; urgency=low
 
   * Initial release (Tobias Grimm)
