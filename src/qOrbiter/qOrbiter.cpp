@@ -2227,7 +2227,7 @@ qDebug() << "getting playlist";
                 cellTitle = pCell->GetText();
                 cellAttribute = pCell->GetValue();
                 fk_file = pCell->GetValue();
-                qDebug() << index;
+
                 qDebug() << "Item Attribute::" << cellTitle << "-" << cellAttribute;
                 if (pPath )
                 {
@@ -2247,7 +2247,7 @@ qDebug() << "getting playlist";
                 }
 
 
-                qmlUI->nowPlayingButton->currentPlaylist->appendRow(new PlaylistItemClass(cellTitle, cellAttribute, fk_file ,index, qmlUI->nowPlayingButton->currentPlaylist));
+                qmlUI->currentPlaylist->appendRow(new PlaylistItemClass(cellTitle, cellAttribute, fk_file ,index, qmlUI->currentPlaylist));
             }
 
         }

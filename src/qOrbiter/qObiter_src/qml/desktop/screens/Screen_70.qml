@@ -32,31 +32,5 @@ Rectangle {
         height: 249
     }
 
-    Column {
-        id: channelgrid
-
-        width: 200
-        height: 500
-        clip: true
-
-        Flickable{
-            height: parent.height
-            width: parent.width
-            contentHeight: childrenRect.width
-            contentWidth: childrenRect.width
-            clip: true
-
-            Repeater { model: 50
-
-                Rectangle {
-                    width:200
-                    height: 50
-                    color: "whitesmoke"
-                    Text {
-                        text: "I am DG item ,Sroll me!"
-                    }
-                }
-            }
-        }
-    }
+    NonEPGPlaylist{}
 }

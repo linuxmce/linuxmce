@@ -10,7 +10,7 @@
 
 #include <QDeclarativeItem>
 #include <QTime>
-#include <contextobjects/playlistclass.h>
+
 
 class NowPlayingClass : public QDeclarativeItem
 {
@@ -22,6 +22,7 @@ class NowPlayingClass : public QDeclarativeItem
 
     Q_PROPERTY (QString filepath READ getFilePath WRITE setFilePath NOTIFY filePathChanged)
     Q_PROPERTY (QString qs_playbackSpeed READ getMediaSpeed WRITE setStringSpeed NOTIFY mediaSpeedChanged)
+
 
 public:
     explicit NowPlayingClass(QDeclarativeItem *parent = 0);
@@ -37,7 +38,7 @@ public:
     QTime *timecode;
     QString qs_playbackSpeed;
 
-    PlaylistClass * currentPlaylist;
+
 
 
 signals:

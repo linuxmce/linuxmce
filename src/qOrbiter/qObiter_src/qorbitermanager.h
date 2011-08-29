@@ -23,6 +23,7 @@
 #include <contextobjects/filedetailsclass.h>
 #include <contextobjects/nowplayingclass.h>
 #include <contextobjects/screenparamsclass.h>
+#include <contextobjects/playlistclass.h>
 
 #include <QFile>
 #include <QDir>
@@ -73,6 +74,7 @@ public:
     FileDetailsClass *filedetailsclass;
     NowPlayingClass *nowPlayingButton;
     ScreenParamsClass *ScreenParameters;
+    PlaylistClass *currentPlaylist;
 
     //ui variables
     QString currentSkin;

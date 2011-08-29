@@ -54,3 +54,17 @@ function createFileDetails() {
            console.log("Error File Detail object")
 }
 }
+
+var roomcomponent
+var roomsprite
+
+function createRoomSelector() {
+
+    roomcomponent = Qt.createComponent("../components/RoomSelector.qml");
+       roomsprite = roomcomponent.createObject(stage, {"x":200, "y": 200});
+
+       if (roomsprite == null) {
+           // Error Handling
+           console.log("Error File Detail object")
+}
+}

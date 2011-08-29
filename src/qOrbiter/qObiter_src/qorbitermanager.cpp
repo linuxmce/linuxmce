@@ -222,6 +222,9 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         ScreenParameters = new ScreenParamsClass;
         qorbiterUIwin->rootContext()->setContextProperty("screenparams", ScreenParameters);
 
+        currentPlaylist = new PlaylistClass (new PlaylistItemClass, this);
+        qorbiterUIwin->rootContext()->setContextProperty("mediaplaylist", currentPlaylist);
+
         //showing the qml screen depending on device / platform / etc
 #ifdef Q_OS_SYMBIAN
         qorbiterUIwin->showFullScreen();

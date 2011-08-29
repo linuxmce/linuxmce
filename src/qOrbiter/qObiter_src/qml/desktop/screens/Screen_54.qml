@@ -27,26 +27,7 @@ Rectangle {
         height: 249
     }
 
-    ListView{
-        height:500
-        width: 200
-
-        clip: true
-        interactive: true
-        flickableDirection: "VerticalFlick"
-        model: dcenowplaying.currentPlaylist
-
-        delegate:
-
-            Rectangle {
-            width:200
-            height: 50
-            color: "whitesmoke"
-            Text {
-                text: "index"
-            }
-        }
-    }
+   NonEPGPlaylist{}
 
 
 

@@ -1,5 +1,5 @@
 import QtQuick 1.0
-
+import "../js/ComponentLoader.js" as MyJs
 Rectangle {
 
 
@@ -63,7 +63,18 @@ Rectangle {
 
 
 
-    RoomSelector{id: installedrooms }
+
+    ButtonSq{
+        id:roombutton
+        buttontext: "Rooms"
+        width: 90
+        height: 90
+        color: style.homescreenfloorplanbuttoncolor
+        MouseArea{
+            anchors.fill: parent
+            onClicked:MyJs.createRoomSelector()
+                }
+             }
     UserListComponent {id:user}
 
     ButtonSq{
