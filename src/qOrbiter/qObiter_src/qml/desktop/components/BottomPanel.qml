@@ -66,7 +66,7 @@ Rectangle {
 
     ButtonSq{
         id:roombutton
-        buttontext: "Rooms"
+        buttontext: currentroom
         width: 90
         height: 90
         color: style.homescreenfloorplanbuttoncolor

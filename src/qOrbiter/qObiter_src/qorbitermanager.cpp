@@ -1152,13 +1152,22 @@ void qorbiterManager::setStringParam(int paramType, QString param)
         {
             if(param.contains("!F"))
             {
+                filedetailsclass->setVisible(true);
                 filedetailsclass->setFile(param);
                 showFileInfo(param);
-                filedetailsclass->setVisible(true);
+
+                qDebug () << "info tripped";
                 break;
 
                 //    pqOrbiter->GetMediaAttributeGrid(param);
 
+            }
+            else if (param.contains("!P"))
+            {
+                filedetailsclass->setVisible(true);
+                filedetailsclass->setFile(param);
+                  showFileInfo(param);
+                break;
             }
 
             else
@@ -1194,13 +1203,22 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
         break;
     case 6:
-        q_attributetype_sort = param;
 
+        if (param.contains("!P"))
+        {
+            filedetailsclass->setVisible(true);
+            filedetailsclass->setFile(param);
+            break;
+        }
+        else
+        {
+        q_attributetype_sort = param;
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
         // qDebug() << datagridVariableString;
         execGrp(i_current_command_grp);
         break;
+        }
     case 7:
         q_pk_users = param;
 
@@ -1230,6 +1248,12 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             //   pqOrbiter->GetMediaAttributeGrid(param);
 
         }
+        else if (param.contains("!P"))
+        {
+            filedetailsclass->setVisible(true);
+            filedetailsclass->setFile(param);
+            break;
+        }
 
         else
         {
@@ -1240,8 +1264,10 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             datagridVariableString = longassstring.join("|");
             //    qDebug() << datagridVariableString;
             execGrp(i_current_command_grp);
+            break;
         }
-        break;
+
+
     default:
         cout << "no type";
 

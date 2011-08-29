@@ -1652,9 +1652,9 @@ void qOrbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool 
     cout << "Parm #252 - Turn_On=" << bTurn_On << endl;
     cout << "Parm #253 - Queue=" << bQueue << endl;
     cout << "scmdresult" << sCMD_Result << endl;
-   QString params = pMessage->ToString().c_str();
-   QStringList paramList = params.split(" ");
-   qDebug() << paramList;
+    QString params = pMessage->ToString().c_str();
+    QStringList paramList = params.split(" ");
+    qDebug() << paramList;
 
 
     QString str = QString::number(iPK_Screen);
@@ -2117,8 +2117,9 @@ void DCE::qOrbiter::GetSecurityCam(int i_inc_pkdevice)
 void DCE::qOrbiter::StartMedia(QString inc_FKFile)
 {
 
+    //changed to remove media type as that is decided on by the media plugin and passed back
 
-    CMD_MH_Play_Media playMedia(qmlUI->iPK_Device, qmlUI->iMediaPluginID, 0 , inc_FKFile.toStdString(), qmlUI->i_current_mediaType, 0, QString::number(qmlUI->iea_area).toStdString(), false, false, false, false, false);
+    CMD_MH_Play_Media playMedia(qmlUI->iPK_Device, qmlUI->iMediaPluginID, 0 , inc_FKFile.toStdString(), 0, 0, QString::number(qmlUI->iea_area).toStdString(), false, false, false, false, false);
     cout << "Playing file: " << inc_FKFile.toStdString() << endl;
     string pos = "";
     int streamID = NULL;
@@ -2129,7 +2130,7 @@ void DCE::qOrbiter::StartMedia(QString inc_FKFile)
 void DCE::qOrbiter::StopMedia()
 {
     CMD_MH_Stop_Media endMedia(qmlUI->iPK_Device, qmlUI->iMediaPluginID,0,qmlUI->nowPlayingButton->i_mediaType,0,QString::number(qmlUI->iea_area).toStdString(),false);
-    qDebug() << qmlUI->iFK_Room;
+
     SendCommand(endMedia);
     qDebug() << "End command sent";
 }
@@ -2201,11 +2202,11 @@ void DCE::qOrbiter::requestMediaPlaylist()
         {
             bool barrows = false; //not sure what its for
             //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
-qDebug() << "getting playlist";
+            qDebug() << "getting playlist";
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
-           int cellsToRender= pDataGridTable->GetRows();
-          // qDebug() << "Playlist Datagrid Height:" << gHeight << " , width: " << gWidth;
-          // qDebug() << "Response: " << cellsToRender << " cells to render";
+            int cellsToRender= pDataGridTable->GetRows();
+            // qDebug() << "Playlist Datagrid Height:" << gHeight << " , width: " << gWidth;
+            // qDebug() << "Response: " << cellsToRender << " cells to render";
 
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
             QString cellTitle;
@@ -2252,7 +2253,7 @@ qDebug() << "getting playlist";
 
         }
 
-}
+    }
 
 }
 
