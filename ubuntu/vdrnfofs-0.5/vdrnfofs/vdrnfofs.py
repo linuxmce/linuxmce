@@ -25,6 +25,7 @@ import errno
 import sys
 import fuse
 import syslog
+import shutil
 
 from concatenated_file_reader import *
 from vdr import *
@@ -94,6 +95,22 @@ class VdrNfoFs(fuse.Fuse):
             return node.read(offset, size)
         except:
             syslog.syslog('VdrFuseFs: Unexpected error for read(%s)' % path)
+            
+    def unlink(self, path):
+        try:
+            node = self.get_node(path)
+            if not node:
+                return -errno.ENOENT
+                                                    
+            syslog.syslog('VdrFuseFs: Trying to delete %s' % path)
+            syslog.syslog('VdrFuseFs: Trying to delete %s' % node.path)
+            try:
+                shutil.rmtree(node.path)
+                syslog.syslog('VdrFuseFs: File %s deleted' % node.path)
+            except: 
+                return -errno.EACCES
+        except:
+            syslog.syslog('VdrFuseFs: Unexpected error for delete(%s)' % path)
 
 def main():
     usage =  "\nVDR-NFO-FS - access VDR recordings as mpg and nfo files\n"
