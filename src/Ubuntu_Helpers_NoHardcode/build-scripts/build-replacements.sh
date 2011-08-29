@@ -136,6 +136,9 @@ function Build_Replacements_Common
 	#Package: vdr-plugin-control
 #	Build_Replacement_Package vdr-plugin-control ubuntu/vdr-plugin-control-0.0.2a+lmce
 
+	# Yes possy, I am just testing...
+	Build_Replacement_Package pcsxr ubuntu/pcsxr-1.9.93
+
 }
 
 function Build_Replacements_Lucid
@@ -250,6 +253,7 @@ function Build_Replacements_Lucid
 	Build_Replacement_Package vdr-plugin-xineliboutput ubuntu/vdr-plugin-xineliboutput-1.0.6+cvs20100608.2009
 	Build_Replacement_Package vdr-plugin-wirbelscan ubuntu/vdr-plugin-wirbelscan-0.0.5~pre12a
 	Build_Replacement_Package vdr-plugin-iptv ubuntu/vdr-plugin-iptv-0.4.2
+	Build_Replacement_Package vdrnfofs ubuntu/vdrnfofs-0.5
 
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/libxine*.deb ${replacements_dir}
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/xineliboutput-*.deb ${replacements_dir}
