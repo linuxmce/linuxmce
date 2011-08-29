@@ -1019,6 +1019,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     if (iPK_MediaType != 0)
     {
         qmlUI->nowPlayingButton->setStatus(true);
+        requestMediaPlaylist();
 
     }
     else if (iPK_MediaType == 0)
@@ -2193,12 +2194,18 @@ void DCE::qOrbiter::requestMediaPlaylist()
     if (SendCommand(cmd_populate_nowplaying_grid))
     {
 
+
+        //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
+        DCE::CMD_Request_Datagrid_Contents req_data_grid( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+        if(SendCommand(req_data_grid))
+        {
             bool barrows = false; //not sure what its for
             //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
+qDebug() << "getting playlist";
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
-            int cellsToRender= pDataGridTable->GetRows();
-            //qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
-            //qDebug() << "Response: " << cellsToRender << " cells to render";
+           int cellsToRender= pDataGridTable->GetRows();
+          // qDebug() << "Playlist Datagrid Height:" << gHeight << " , width: " << gWidth;
+          // qDebug() << "Response: " << cellsToRender << " cells to render";
 
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
             QString cellTitle;
@@ -2209,21 +2216,19 @@ void DCE::qOrbiter::requestMediaPlaylist()
             QImage cellImg;
             QString cellfk;
             DataGridCell *pCell;
+
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
 
                 pCell = it->second;
 
-                string emptyEA;
-
-                // fk.remove("!F");
                 const char *pPath = pCell->GetImagePath();
                 index = pDataGridTable->CovertColRowType(it->first).first;
-                cellTitle = pCell->m_mapAttributes_Find("Title").c_str();
-                cellAttribute = pCell->m_mapAttributes_Find("Name").c_str();
-                cellfk = pCell->GetValue();
-                //qDebug() << pCell->m_mapAttributes.size();
-                //qDebug() << "Item Attribute::" << cellTitle << "-" << cellAttribute;
+                cellTitle = pCell->GetText();
+                cellAttribute = pCell->GetValue();
+                fk_file = pCell->GetValue();
+                qDebug() << index;
+                qDebug() << "Item Attribute::" << cellTitle << "-" << cellAttribute;
                 if (pPath )
                 {
                     cellImg = getfileForDG(pCell->GetImagePath());
@@ -2242,12 +2247,12 @@ void DCE::qOrbiter::requestMediaPlaylist()
                 }
 
 
-                qmlUI->nowPlayingButton->currentPlaylist->appendRow(new PlaylistItemClass(cellTitle, cellAttribute, fk_file  ,index, cellImg, qmlUI->nowPlayingButton->currentPlaylist));
+                qmlUI->nowPlayingButton->currentPlaylist->appendRow(new PlaylistItemClass(cellTitle, cellAttribute, fk_file ,index, qmlUI->nowPlayingButton->currentPlaylist));
             }
 
         }
 
-
+}
 
 }
 

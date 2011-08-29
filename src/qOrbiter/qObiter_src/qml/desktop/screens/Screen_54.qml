@@ -37,12 +37,13 @@ Rectangle {
         model: dcenowplaying.currentPlaylist
 
         delegate:
+
             Rectangle {
             width:200
             height: 50
             color: "whitesmoke"
             Text {
-                text: title
+                text: "index"
             }
         }
     }

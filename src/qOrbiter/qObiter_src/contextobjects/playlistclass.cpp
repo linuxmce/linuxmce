@@ -7,6 +7,7 @@ PlaylistClass::PlaylistClass(PlaylistItemClass* prototype, QObject *parent) :
 {
   setRoleNames(m_prototype->roleNames());
    qRegisterMetaType<QModelIndex>("QModelIndex");
+
 }
 
 int PlaylistClass::rowCount(const QModelIndex &parent) const
@@ -37,7 +38,7 @@ void PlaylistClass::appendRows(const QList<PlaylistItemClass *> &items)
   beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
   foreach(PlaylistItemClass *item, items) {
 
-   QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
+   //QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
     m_list.append(item);
   }
 

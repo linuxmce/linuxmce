@@ -7,6 +7,8 @@ NowPlayingClass::NowPlayingClass(QDeclarativeItem *parent) :
     b_mediaPlaying = false;
     qs_playbackSpeed = "1x";
     i_playbackSpeed = 1;
+
+    currentPlaylist = new PlaylistClass (new PlaylistItemClass, this);
 }
 
 void NowPlayingClass::setMediaSpeed(int speed)

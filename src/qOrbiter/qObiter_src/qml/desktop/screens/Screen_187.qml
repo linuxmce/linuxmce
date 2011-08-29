@@ -1,4 +1,5 @@
 import QtQuick 1.0
+import "../components"
 
    Item {
     id:asktoresume
@@ -26,5 +27,6 @@ import QtQuick 1.0
                 font.pixelSize: 18
                 anchors.centerIn: containerrect
             }
+            HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
         }
 
