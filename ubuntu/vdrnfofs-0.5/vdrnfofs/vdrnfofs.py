@@ -41,16 +41,22 @@ class VdrNfoFs(fuse.Fuse):
 
     def get_node(self, path):
         virtual_path, virtual_file_extension = os.path.splitext(path)
-        if virtual_file_extension in ['.mpg', '.nfo']:
+        if virtual_file_extension in ['.mpg', '.nfo', '.id3']:
             p = virtual_path.rfind('_')
             if p > 0:
                 video_path = self.video + '/' + virtual_path[0:p] + '/' + virtual_path[p+1:]
+                # for id3 files we need to cut of the mpg stuff as well.
+                if virtual_file_extension == '.id3':
+                    video_path, ignore_extension = os.path.splitext(video_path)
+                    
                 if not os.path.isdir(video_path):
-                   return None
+                    return None
                 elif virtual_file_extension == '.mpg':
                     return MpgNode(video_path)
                 elif virtual_file_extension == '.nfo':
                     return NfoNode(video_path)
+                elif virtual_file_extension == '.id3':
+                    return Id3Node(video_path)
         else:
             if os.path.isdir(self.video + '/' + path):
                 return DirNode(self.video + path)
@@ -95,18 +101,15 @@ class VdrNfoFs(fuse.Fuse):
             return node.read(offset, size)
         except:
             syslog.syslog('VdrFuseFs: Unexpected error for read(%s)' % path)
-            
+
     def unlink(self, path):
         try:
             node = self.get_node(path)
             if not node:
                 return -errno.ENOENT
-                                                    
-            syslog.syslog('VdrFuseFs: Trying to delete %s' % path)
-            syslog.syslog('VdrFuseFs: Trying to delete %s' % node.path)
+
             try:
                 shutil.rmtree(node.path)
-                syslog.syslog('VdrFuseFs: File %s deleted' % node.path)
             except: 
                 return -errno.EACCES
         except:

@@ -1,3 +1,9 @@
+vdrnfofs (0.5-3lmce) lucid; urgency=low
+
+  * Add creation of id3 files along side the mpg files so LinuxMCE reads
+    metadata
+
+ -- Peer Oliver Schmidt <peer.oliver.schmidt@linuxmce.org>  Tue, 30 Aug 2011 10:14:53 +0200
 vdrnfofs (0.5-2lmce) lucid; urgency=low
 
   * Add ability to remove recordings

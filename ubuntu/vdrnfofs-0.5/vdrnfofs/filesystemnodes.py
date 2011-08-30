@@ -4,6 +4,7 @@
 # recording to a single mpg-file and nfo-file containing some meta data.
 #
 # Copyright (C) 2010 by Tobias Grimm
+# Change 2011 by Peer Oliver Schmidt to add id3 files
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -77,7 +78,7 @@ class NfoNode:
             info_vdr = InfoVdr(path + '/info')
         else:
            info_vdr = InfoVdr()
-        self.nfo_content = """<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+        self.nfo_content = """<?xml version="1.2" encoding="UTF-8" standalone="yes" ?>
 <movie>
   <title>%s</title>
   <plot>%s</plot>
@@ -89,6 +90,37 @@ class NfoNode:
 
     def read(self, offset, size):
        return self.nfo_content[offset:offset+size]
+
+    def get_stat(self):
+        attr = NodeAttributes()
+        attr.st_mode = stat.S_IFREG | 644
+        attr.st_nlink = 1
+        attr.st_size = self.size()
+        return attr
+
+class Id3Node:
+    def __init__(self, path):
+        self.path = os.path.normpath(path)
+        self.file_system_name = os.path.basename(os.path.abspath(path + '/..')) + '_' + os.path.basename(path) + '.mpg.id3'
+        if os.path.exists(path + '/info.vdr'):
+            info_vdr = InfoVdr(path + '/info.vdr')
+        elif os.path.exists(path + '/info'):
+            info_vdr = InfoVdr(path + '/info')
+        else:
+           info_vdr = InfoVdr()
+        self.id3_content='TAG'
+        self.id3_content+=info_vdr['T'].ljust(30,chr(0))
+        self.id3_content+="".ljust(30,chr(0))
+        self.id3_content+="".ljust(30,chr(0))
+        self.id3_content+="".ljust(4,chr(0))
+        self.id3_content+=info_vdr['D'].ljust(30,chr(0))
+        self.id3_content+=chr(1)
+        
+    def size(self):
+        return len(self.id3_content)
+
+    def read(self, offset, size):
+       return self.id3_content[offset:offset+size]
 
     def get_stat(self):
         attr = NodeAttributes()
@@ -114,6 +146,7 @@ class DirNode:
                     if os.path.exists(recording + '/info.vdr') or os.path.exists(recording + '/info'):
                         self.cache.append(MpgNode(recording))
                         self.cache.append(NfoNode(recording))
+                        self.cache.append(Id3Node(recording))
         return self.cache
 
     def is_sub_folder(self, dir):
