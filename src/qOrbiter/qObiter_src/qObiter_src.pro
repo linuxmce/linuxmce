@@ -159,7 +159,8 @@ SOURCES += main.cpp \
     datamodels/DatagridClasses/datagriditemmodelclass.cpp \
     contextobjects/screenparamsclass.cpp \
     contextobjects/playlistclass.cpp \
-    contextobjects/playlistitemclass.cpp
+    contextobjects/playlistitemclass.cpp \
+    datamodels/DatagridClasses/datagriditem.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -212,7 +213,8 @@ HEADERS += \
     datamodels/DatagridClasses/datagriditemmodelclass.h \
     contextobjects/screenparamsclass.h \
     contextobjects/playlistclass.h \
-    contextobjects/playlistitemclass.h
+    contextobjects/playlistitemclass.h \
+    datamodels/DatagridClasses/datagriditem.h
 
 OTHER_FILES += Readme.txt \
     config.xml \

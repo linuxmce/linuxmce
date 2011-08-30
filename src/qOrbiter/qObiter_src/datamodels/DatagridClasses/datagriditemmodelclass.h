@@ -9,17 +9,36 @@
   */
 
 #include <QAbstractItemModel>
+#include <datamodels/DatagridClasses/datagriditem.h>
 #include <QModelIndex>
 
 class DataGridItemModelClass : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-    explicit DataGridItemModelClass(QObject *parent = 0);
+    explicit DataGridItemModelClass(DataGridItem *m_prototype, QObject *parent = 0);
+    int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+    void appendRow(DataGridItem* item);
+    void appendRows(const QList<DataGridItem*> &items);
+    void insertRow(int row, DataGridItem* item);
+    bool removeRow(int row, const QModelIndex &parent = QModelIndex());
+    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
+    DataGridItem* takeRow(int row);
+    DataGridItem* find(const QString &id) const;
+    QModelIndex indexFromItem( const DataGridItem* item) const;
+    DataGridItem* currentRow();
+    void handleItemChange();
+    void clear();
+
 
 signals:
 
 public slots:
+
+private:
+    DataGridItem* m_prototype;
+    QList<DataGridItem*> m_list;
 
 };
 
