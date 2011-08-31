@@ -1,5 +1,5 @@
 import QtQuick 1.0
-import ScreenSaverModule 1.0
+
 import "../components"
 
 Item
@@ -282,7 +282,7 @@ Item
             }
             Text{
                 id: nowPlayingStatus
-                text: "NOW PLAYING"
+                text: dcenowplaying.qs_mainTitle
                 x: scaleY(41.11)
                 y: scaleY(54.44) // 634 392
                 font.family: aeonNowPlaying.name
@@ -293,7 +293,7 @@ Item
             }
             Text{
                 id: nowPlayingTrack
-                text: "Track"
+                text: dcenowplaying.qs_subTitle
                 x: scaleY(41.11)
                 y: scaleY(56.67) // 650 408
                 font.family: aeonNowPlaying.name
@@ -325,7 +325,7 @@ Item
             }
             Text{
                 id:txtRoom
-                text:"Front Room"
+                text:currentroom
                 font.family: scout.name;
                 font.pixelSize: parent.height*.7;
                 color: "#e5e5e5";
@@ -336,7 +336,7 @@ Item
             }
             Text{
                 id:lblUser
-                text:"User:"
+                text:"User: "
                 font.family: scout.name;
                 font.pixelSize: parent.height*.7;
                 color: "white";
@@ -347,7 +347,7 @@ Item
             }
             Text{
                 id:txtUser
-                text:"User"
+                text:currentuser
                 font.family: scout.name;
                 font.pixelSize: parent.height*.7;
                 color: "#e5e5e5";
