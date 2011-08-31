@@ -174,11 +174,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         initializeGridModel();
         initializeSortString();
 
-        //non functioning screen saver module
-        ScreenSaverModule ScreenSaver;
-        qmlRegisterType<ScreenSaverModule>("ScreenSaverModule",1,0,"ScreenSaverModule");
-        ScreenSaver.setImage(QUrl("../../img/lmcesplash.jpg"));
-        qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", &ScreenSaver);
+
         qorbiterUIwin->rootContext()->setContextObject(this);
 
         //setting engine import path
@@ -215,6 +211,10 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         contextImageProvider = new FileDetailsImageProvider(this);
         qorbiterUIwin->engine()->addImageProvider("filedetailsprovider", contextImageProvider);
         // connect(filedetailsclass, SIGNAL(FileChanged(QString)), this, SLOT(showFileInfo(QString)));
+
+        //non functioning screen saver module
+        ScreenSaver = new ScreenSaverModule;
+        qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", ScreenSaver);
 
         nowPlayingButton = new NowPlayingClass();
         qorbiterUIwin->rootContext()->setContextProperty("dcenowplaying" , nowPlayingButton);
@@ -298,6 +298,8 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
             if (pqOrbiter->initialize())
             {
+
+
                 qDebug () << "Orbiter Registered, starting";
                 gotoQScreen("Screen_1.qml");
                 return true;

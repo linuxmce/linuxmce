@@ -74,6 +74,7 @@ public:
                 void PauseMedia();
                 void requestMediaPlaylist();
                 void ShowFloorPlan(int floorplantype);
+                void GetScreenSaverImages();
 
 //<-dceag-const-e->
 

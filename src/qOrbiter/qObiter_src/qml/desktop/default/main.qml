@@ -14,7 +14,7 @@ import "../js/ComponentLoader.js" as MyJs
     // Style {id:style}
     width: style.orbiterW;
     height: style.orbiterH;
-
+anchors.centerIn: parent
      function screenchange(screenname )
      { 
         pageLoader.source = "../screens/"+screenname

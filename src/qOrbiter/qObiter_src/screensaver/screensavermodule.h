@@ -1,37 +1,35 @@
 #ifndef SCREENSAVERMODULE_H
 #define SCREENSAVERMODULE_H
 
-#include <QDeclarativeItem>
+#include <QObject>
+#include <QUrl>
+#include <QStringList>
+
 
 class ScreenSaverModule : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY (QUrl image
-                READ image
-                WRITE setImage
-                NOTIFY imageChanged)
+    Q_PROPERTY (QUrl current_image READ getImage WRITE setImage NOTIFY imageChanged)
+    Q_PROPERTY (QString testtext READ getTest)
+
 public:
     explicit ScreenSaverModule(QObject *parent = 0);
-    QStringList *pictureList;
+
+    QUrl current_image;
+    QStringList imageList;
+    QString testtext;
+    QString getTest() {return testtext;}
 
 signals:
     void imageChanged();
     void loadingError();
 
 public slots:
-    QUrl image( ) {
-                    QUrl local2;
-                    local2 = m_imgUrl->toString();
-                    return local2;
-                   }
 
-  void setImage(const QUrl &q)  {
-                        QUrl* local = new QUrl(q);
-                        m_imgUrl = local;
-                        emit imageChanged();
-                                 }
-
-  void setImages (QStringList picList) {  }
+    void nextImage();
+    QUrl getImage( ) {return current_image;}
+    void setImage(const QUrl &q)  { current_image = q; emit imageChanged(); }
+    int getNext();
 
 
 private:

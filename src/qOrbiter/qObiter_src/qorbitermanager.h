@@ -75,6 +75,7 @@ public:
     NowPlayingClass *nowPlayingButton;
     ScreenParamsClass *ScreenParameters;
     PlaylistClass *currentPlaylist;
+    ScreenSaverModule *ScreenSaver;
 
     //ui variables
     QString currentSkin;

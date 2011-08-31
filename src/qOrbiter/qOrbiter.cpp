@@ -2266,3 +2266,12 @@ void DCE::qOrbiter::ShowFloorPlan(int floorplantype)
     SendCommand(getFloorPlan);
 
 }
+
+void DCE::qOrbiter::GetScreenSaverImages()
+{
+    string *sFilename;
+    CMD_Get_Screen_Saver_Files screen_saver_files(qmlUI->iPK_Device, qmlUI->iOrbiterPluginID,qmlUI->iPK_Device, sFilename);
+    //SendCommand(screen_saver_files);
+
+    qDebug() << sFilename;
+}
