@@ -123,7 +123,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         qDebug () << "Local confing processing";
     }
 
-    currentSkin = "default";
+  //  currentSkin = "default";
     currentSkinURL="/qml/qObiter_src/";
     s_RouterIP="DCERouter";
 
@@ -1033,7 +1033,7 @@ bool qorbiterManager::readLocalConfig()
             qs_routerip = configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue();
             currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
             iPK_Device = configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong();
-
+            qDebug() << currentSkin;
 
             if(!qs_routerip.isNull())
             {
