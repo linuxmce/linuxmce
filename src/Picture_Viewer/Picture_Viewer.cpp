@@ -362,7 +362,6 @@ void Picture_Viewer::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message
 {
         // Assume user have looked enough at image as s/he have just been paused at it
         EVENT_Playback_Completed("", iStreamID, false);
-	m_iStreamID = 0;
 }
 
 //<-dceag-c41-b->
@@ -383,7 +382,10 @@ void Picture_Viewer::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackS
         if (iMediaPlaybackSpeed == 0) {
 	        CMD_Pause_Media(iStreamID, sCMD_Result, pMessage);
 	} else if (iMediaPlaybackSpeed == 1000) {
-	        CMD_Restart_Media(iStreamID, sCMD_Result, pMessage);
+		if ( iStreamID == m_iStreamID)
+		{
+			CMD_Restart_Media(iStreamID, sCMD_Result, pMessage);
+		}
 	}
 
 }
