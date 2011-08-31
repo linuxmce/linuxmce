@@ -40,7 +40,7 @@ Rectangle {
                 id:delegateheader
                 height: 20
                 width: roomdelegate.width
-                color: style.bgcolor
+                color: "transparent"
                 anchors.top: parent.top
                 Text {
                     id: celllabel

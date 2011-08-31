@@ -4,7 +4,7 @@ Rectangle {
            id:rect
            width: 200
            height: 200
-           color: style.bgcolor
+           color: "transparent"
            anchors.centerIn: parent
            border.color: style.button_system_color
            border.width: 1
@@ -24,7 +24,7 @@ Rectangle {
                          width: parent.width
                          border.color: "black"
                          border.width: 1
-                         color: style.bgcolor
+                         color: "transparent"
 
                          MouseArea{
                                    anchors.fill: parent

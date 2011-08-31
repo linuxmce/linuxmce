@@ -36,6 +36,7 @@ public:
     void setTInterval (int ms) {transitionInterval = ms; emit transitionSpeedChanged();}
 
     QTimer picChanger;
+    QTimer picChanger2;
 
 signals:
     void imageChanged();
@@ -47,14 +48,17 @@ signals:
 public slots:
 
     void nextImage();
+    void nextTransition();
 
     QUrl getTImage( ) {return transition_image;}
     void setTImage(const QUrl &q)  { transition_image = q; emit transitionChanged(); }
 
     QUrl getImage( ) {return current_image;}
-    void setImage(const QUrl &q)  { current_image = q; setTImage(QUrl(imageList.at(getNext()))); emit imageChanged(); }
+    void setImage(const QUrl &q)  { current_image = q; emit imageChanged(); }
 
     int getNext();
+
+    void startAlternate();
 
 
 private:

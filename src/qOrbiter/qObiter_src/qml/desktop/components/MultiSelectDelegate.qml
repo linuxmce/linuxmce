@@ -13,7 +13,7 @@ Component{
               width: parent.width
               border.color: "black"
               border.width: 1
-              color: style.bgcolor
+              color: "transparent"
 
               MouseArea{
                         anchors.fill: parent

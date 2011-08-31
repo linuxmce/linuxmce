@@ -5,6 +5,7 @@ Rectangle {
     id:gridholder
     width: 790
     height: 500
+    anchors.centerIn: parent
     color: "transparent"
     Image {
         id: name

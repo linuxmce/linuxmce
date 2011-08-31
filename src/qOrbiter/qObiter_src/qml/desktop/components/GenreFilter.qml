@@ -4,7 +4,7 @@ Rectangle {
            id:rect
            width: 200
            height: 200
-           color: style.bgcolor
+           color: "transparent"
            anchors.centerIn: parent
            border.color: style.button_system_color
            border.width: 1

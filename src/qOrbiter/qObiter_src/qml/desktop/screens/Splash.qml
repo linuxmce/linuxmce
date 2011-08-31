@@ -5,13 +5,13 @@ Rectangle {
     id: rectangle1
     width: style.orbiterW
     height: style.orbiterH
-    color: style.bgcolor
+    color: "transparent"
     // signal setupStart(int x, string y)
     Rectangle {
         width: style.orbiterW
         height: 75
         opacity: 1
-        color: style.bgcolor
+        color: "transparent"
         Text {
             id: welcome
             text: "Welcome To LinuxMCE!"
@@ -40,7 +40,7 @@ Rectangle {
         gradient: Gradient {
             GradientStop {
                 position: 0
-                color: style.bgcolor
+                color: "transparent"
             }
             GradientStop {
                 position: 1

@@ -73,7 +73,7 @@ Item{
     Rectangle{
         height: 430
         width: 800
-        color: style.bgcolor
+        color: "transparent"
         Text {
             id: securitypanellabel
             x: 268

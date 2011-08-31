@@ -6,7 +6,7 @@ Item{
     Rectangle{
         width: style.orbiterW
         height: style.orbiterH
-        color: style.bgcolor
+        color: "transparent"
         Text {
             id: unknownscreen
             x: 0

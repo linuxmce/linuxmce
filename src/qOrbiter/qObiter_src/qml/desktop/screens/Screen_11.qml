@@ -6,7 +6,7 @@ Item{
     Rectangle{
         height: style.orbiterH
         width: style.orbiterW
-        color: style.bgcolor
+        color: "transparent"
         Text {
             id: dialcall
             x: 74

@@ -8,7 +8,7 @@ Rectangle {
 
     width: style.orbiterW
     height: style.orbiterH
-    color: style.bgcolor
+    color: "transparent"
     clip: true
 
 
@@ -18,11 +18,8 @@ Rectangle {
         onShowDetailsChanged:
         {
             MyJs.createFileDetails()
-
         }
     }
-
-
 
     Component
     {

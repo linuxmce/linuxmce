@@ -5,7 +5,7 @@ Rectangle {
     id: rectangle1
     width: style.orbiterW
     height: style.orbiterH
-    color: style.bgcolor
+    color: "transparent"
     // signal setupStart(int x, string y)
 
     Image {
@@ -40,7 +40,7 @@ Rectangle {
         gradient: Gradient {
             GradientStop {
                 position: 0
-                color: style.bgcolor
+                color: "transparent"
             }
             GradientStop {
                 position: 1

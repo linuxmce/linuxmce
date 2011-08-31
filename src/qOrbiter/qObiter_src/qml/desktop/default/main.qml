@@ -15,6 +15,8 @@ import "../js/ComponentLoader.js" as MyJs
     width: style.orbiterW;
     height: style.orbiterH;
 
+    ScreenSaver{}
+
      function screenchange(screenname )
      { 
         pageLoader.source = "../screens/"+screenname
