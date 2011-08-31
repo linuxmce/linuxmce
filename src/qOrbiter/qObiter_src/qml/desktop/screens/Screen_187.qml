@@ -9,7 +9,7 @@ import "../components"
             Rectangle {
             id:containerrect
             anchors.fill:parent
-            color: Style.bgcolor
+            color: style.bgcolor
             opacity: 0.5
              }
 

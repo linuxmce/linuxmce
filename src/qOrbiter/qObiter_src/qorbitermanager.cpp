@@ -1372,4 +1372,9 @@ void qorbiterManager::showfloorplan(int fptype)
     pqOrbiter->ShowFloorPlan(fptype);
 }
 
+void qorbiterManager::bindMediaRemote(bool state)
+{
+
+}
+
 

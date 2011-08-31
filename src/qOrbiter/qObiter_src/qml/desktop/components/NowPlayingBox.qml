@@ -51,7 +51,7 @@ Rectangle {
         y: 101
         width: 100
         height: 100
-        source: ""
+        source: "image://datagridimg/"+dcenowplaying.nowplayingimage
     }
 
     Rectangle {

@@ -1020,14 +1020,14 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     {
         qmlUI->nowPlayingButton->setStatus(true);
         requestMediaPlaylist();
-
+// BindMediaRemote(true);
     }
     else if (iPK_MediaType == 0)
     {
         qDebug () << "Closing Now Playing";
         qmlUI->nowPlayingButton->setStatus(false);
         qmlUI->gotoQScreen("Screen_1.qml");
-
+    BindMediaRemote(false);
 
     }
 
@@ -1652,15 +1652,21 @@ void qOrbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool 
     cout << "Parm #252 - Turn_On=" << bTurn_On << endl;
     cout << "Parm #253 - Queue=" << bQueue << endl;
     cout << "scmdresult" << sCMD_Result << endl;
-    QString params = pMessage->ToString().c_str();
+
+    qDebug() << "Message Param Count" << pMessage->m_mapParameters.size();
+    int pCount = pMessage->m_mapParameters.size();
+    for (int mCount = 0; mCount < pCount; mCount++)
+    {
+     //   string fuck = pMessage->m_mapData_Parameters.at(long(mCount));
+     //  qDebug () << "Message Param" << fuck.c_str() ;//at(long(mCount));
+    }
+
+
+    QString params = pMessage->ToString(true).c_str();
     QStringList paramList = params.split(" ");
-    qDebug() << paramList;
-
-
+   // qDebug() << paramList;
     QString str = QString::number(iPK_Screen);
     qmlUI->gotoQScreen("Screen_"+str+".qml");
-
-
 }
 
 //<-dceag-c795-b->
@@ -2125,10 +2131,13 @@ void DCE::qOrbiter::StartMedia(QString inc_FKFile)
     int streamID = NULL;
     // CMD_Play_Media playMedia(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->i_current_mediaType, 1001 , pos, inc_FKFile.toStdString());
     SendCommand(playMedia);
+
+    qmlUI->nowPlayingButton->setImage(qmlUI->filedetailsclass->getScreenShot());
 }
 
 void DCE::qOrbiter::StopMedia()
 {
+
     CMD_MH_Stop_Media endMedia(qmlUI->iPK_Device, qmlUI->iMediaPluginID,0,qmlUI->nowPlayingButton->i_mediaType,0,QString::number(qmlUI->iea_area).toStdString(),false);
 
     SendCommand(endMedia);
@@ -2156,7 +2165,7 @@ void DCE::qOrbiter::PauseMedia()
 
 void DCE::qOrbiter::requestMediaPlaylist()
 {
-
+    qmlUI->currentPlaylist->clear();
     int gHeight = 10;
     int gWidth = 10;
     int pkVar = 0;
@@ -2275,3 +2284,20 @@ void DCE::qOrbiter::GetScreenSaverImages()
 
     qDebug() << sFilename;
 }
+
+void DCE::qOrbiter::BindMediaRemote(bool onoff)
+{
+    string status;
+    if (onoff == true)
+    {
+        status = "1";
+    }
+    else
+    {
+        status = "0";
+    }
+
+    CMD_Bind_to_Media_Remote bind_remote(qmlUI->iPK_Device, qmlUI->iMediaPluginID, 0,string(""), string(status), string(""),QString::number(qmlUI->iea_area).toStdString(), 0, 0);
+    SendCommand(bind_remote);
+}
+

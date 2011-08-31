@@ -10,6 +10,7 @@
 
 #include <QDeclarativeItem>
 #include <QTime>
+#include <QDebug>
 
 
 class NowPlayingClass : public QDeclarativeItem
@@ -22,6 +23,7 @@ class NowPlayingClass : public QDeclarativeItem
 
     Q_PROPERTY (QString filepath READ getFilePath WRITE setFilePath NOTIFY filePathChanged)
     Q_PROPERTY (QString qs_playbackSpeed READ getMediaSpeed WRITE setStringSpeed NOTIFY mediaSpeedChanged)
+    Q_PROPERTY (QUrl nowPlayingImage READ getImage WRITE setImage NOTIFY imageChanged)
 
 
 public:
@@ -37,9 +39,7 @@ public:
     int i_playbackSpeed;
     QTime *timecode;
     QString qs_playbackSpeed;
-
-
-
+    QUrl nowPlayingImage;
 
 signals:
     void playlistChanged();
@@ -57,6 +57,9 @@ signals:
 
 
 public slots:
+
+    void setImage(QUrl incImage) {nowPlayingImage = incImage; emit imageChanged();}
+    QUrl getImage () { return nowPlayingImage;}
 
     void setScreen(QString inc_screen) {qs_screen = inc_screen; emit screenTypeChanged();}
     QString getScreen () {return qs_screen;}

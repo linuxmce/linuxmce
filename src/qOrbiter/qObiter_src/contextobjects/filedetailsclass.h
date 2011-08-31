@@ -28,7 +28,7 @@ public:
     Q_PROPERTY(QString filename READ getFilename WRITE setFilename NOTIFY object_changed)
     Q_PROPERTY(QString path READ getPath WRITE setPath NOTIFY object_changed)
 
-    Q_PROPERTY( QImage title READ getTitleImage WRITE setTitleImage NOTIFY titleImageChanged)
+    Q_PROPERTY(QImage title READ getTitleImage WRITE setTitleImage NOTIFY titleImageChanged)
     Q_PROPERTY(QImage program READ getProgramImage WRITE setProgramImage NOTIFY object_changed)
 
     QString objecttitle;
@@ -49,9 +49,9 @@ public:
     QImage program;
     inline void setProgramImage (QImage inc_p) {program = inc_p; emit object_changed();}
     inline QImage getProgramImage () {return program;}
-    QImage Season;
-    QImage imdb;
-    QImage episode;
+    QUrl Season;
+    QUrl imdb;
+    QUrl episode;
 
 
     bool showDetails;

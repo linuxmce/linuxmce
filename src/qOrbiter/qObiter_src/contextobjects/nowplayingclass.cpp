@@ -49,6 +49,5 @@ void NowPlayingClass::setMediaSpeed(int speed)
          setStringSpeed(QString::number(i_playbackSpeed)+"x");
     }
 
-    qDebug() << i_playbackSpeed;
 }
 

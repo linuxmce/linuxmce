@@ -5,7 +5,7 @@ Rectangle {
 
     // property alias synText:
     id: pvrRemote
-
+    anchors.centerIn: parent
 
     height: style.orbiterH
     width: style.orbiterW
