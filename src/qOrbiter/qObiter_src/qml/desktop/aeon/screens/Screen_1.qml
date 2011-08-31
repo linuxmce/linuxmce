@@ -212,7 +212,7 @@ Item
             source:  "../img/home/nowplaying_shadow.png"
             //fillMode:  Image.PreserveAspectFit
             smooth:  true
-
+            visible: dcenowplaying.b_mediaPlaying
             Image{
                 x: scaleX(1.4) // 18
                 y: scaleY(28.3) // 446 242
@@ -259,7 +259,7 @@ Item
             }
             Text{
                 id: nowPlayingArtist
-                text: "Artist"
+                text: dcenowplaying.qs_mainTitle
                 x: scaleY(41.11)
                 y: scaleY(32.78) // 478 236
                 font.family: aeonNowPlaying.name
@@ -282,7 +282,7 @@ Item
             }
             Text{
                 id: nowPlayingStatus
-                text: dcenowplaying.qs_mainTitle
+                text: "NOW PLAYING"
                 x: scaleY(41.11)
                 y: scaleY(54.44) // 634 392
                 font.family: aeonNowPlaying.name
@@ -312,6 +312,31 @@ Item
             width: scaleX(35.23) // 451
             height:  scaleY(3.75) // 27
             smooth:  true
+
+            Rectangle {
+                id: recAdvanced
+                height:  parent.height*.7
+                width:  txtAdvanced.width
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.right: lblRoom.left
+                anchors.rightMargin: scaleX(.78)
+                color: "transparent"
+                border.width: 0
+                Text {
+                    id: txtAdvanced
+                    anchors.verticalCenter: parent.verticalCenter
+                    text:  "Advanced"
+                    font.family: scout.name;
+                    font.pixelSize: parent.height;
+                    color: "white";
+                    smooth: true
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: gotoQScreen("Screen_44.qml")
+                }
+            }
+
             Text{
                 id:lblRoom
                 text:"Room:"

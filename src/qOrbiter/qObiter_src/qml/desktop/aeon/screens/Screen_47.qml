@@ -15,6 +15,28 @@ Rectangle {
         verticalMirror: true
     }
 
+    // Upper left menu
+    Image {
+        source: "../img/common/timepanel_mid-vh.png"
+        width: scaleX(35.23) // 451
+        height:  scaleY(3.75) // 27
+        smooth:  true
+        Text {
+            text: "Home"
+            anchors.leftMargin: scaleX(.78)
+            font.family: aeonRss.name;
+            font.pixelSize: parent.height*.7;
+            color: "#e5e5e5";
+            smooth: true
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+        }
+        MouseArea {
+            anchors.fill: parent
+            onClicked:  gotoQScreen("Screen_1.qml")
+        }
+    }
+
     // Build the background
     Image{
         y: scaleY(43.75) // 315
