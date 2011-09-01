@@ -71,7 +71,7 @@ void ListModel::handleItemChange()
   qDebug() << "Handling item change for:" << index;
   if(index.isValid())
   {
-    //emit dataChanged(index, index);
+    emit dataChanged(index, index, 0);
   }
 }
 

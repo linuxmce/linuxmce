@@ -2,14 +2,14 @@ import QtQuick 1.0
 
 Item {
     property alias rowlabel: rowheader.buttontext
-    height: style.homescreenrowheight
-    width: parent.width
+    height: scaleY(16)
+    width: scaleX(parent.width)
 
    HomeButtonDelegate{id:climateDelegate}
     Flickable{
 
         id:climateRow
-        height:style.buttonH +5
+        height: parent.height
         width: parent.width
         contentHeight: style.buttonH
         contentWidth: ((style.buttonW + 5) * (climateScenarios.count + 1)) - 5
@@ -20,15 +20,12 @@ Item {
 
     Row {
         id: guide
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.left: parent.left
         spacing:5
 
         ButtonSq {
             id: rowheader
-            height: style.buttonH
-            width: style.buttonW
+            height: scaleY(16)
+            width: scaleX(9)
             color: style.homescreenfloorplanbuttoncolor
             radius: style.but_smooth
             buttontext: "Climate"
@@ -43,8 +40,8 @@ Item {
 
         ListView{
             id: climateScenarios
-            width: 300
-            height: style.buttonH
+            height: scaleY(style.buttonH)
+            width: stage.width
             model: currentRoomClimate
             spacing: 5
             orientation:ListView.Horizontal

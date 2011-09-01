@@ -1,18 +1,17 @@
 import QtQuick 1.0
 Item {
 
-
-    height: style.homescreenrowheight
-    width: parent.width
+    height: scaleY(16)
+    width: scaleX(parent.width)
 
     HomeButtonDelegate{id:lightingdelegate}
     Flickable{
-        height: style.buttonH
+        height: parent.height
         width: parent.width
         contentHeight: style.buttonH
         contentWidth: ((style.buttonW + 5) * (lightingScenarios.count + 1)) - 5
         clip: true
-
+        flickableDirection: "HorizontalFlick"
         Row {
             id: guide
             //anchors.left: lightingfloorplan.right
@@ -20,18 +19,18 @@ Item {
 
             ButtonSq {
                 id: lightingfloorplan
-                height: style.buttonH
-                width: style.buttonW
+                height: scaleY(16)
+                width: scaleX(9)
+
                 color: style.homescreenfloorplanbuttoncolor
                 radius: style.but_smooth
                 buttontext: ""
 
-
                 Image {
                     id: onimg
                     source: "../../../img/icons/jabber_protocol.png"
-                    height: style.iconHeight
-                    width: style.iconWidth
+                    height: scaleY(16)
+                    width: scaleX(9)
                     anchors.centerIn: parent
 
                 }
@@ -47,7 +46,7 @@ Item {
             ListView{
                 id: lightingScenarios
                 width: stage.width
-                height: style.buttonH
+                height: scaleY(style.buttonH)
                 model: currentRoomLights
                 spacing: 5
                 orientation:ListView.Horizontal

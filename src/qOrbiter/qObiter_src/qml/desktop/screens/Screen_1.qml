@@ -23,7 +23,7 @@ Item
         Column{
             id:maindisplay
             anchors.fill: parent
-            spacing: 0
+            spacing: 5
             HomeLightingRow{id:lightRow }
             HomeMediaRow{id: mediaRow}
             HomeClimateRow{id: climateRow}

@@ -76,7 +76,7 @@ Rectangle {
                        Rectangle{
                            height: 20
                            width: 20
-                           color: isChosen ? "red" : "green"
+                           color: status ? "red" : "green"
                        }
 
 

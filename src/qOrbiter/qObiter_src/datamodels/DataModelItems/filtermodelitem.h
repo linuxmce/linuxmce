@@ -1,7 +1,7 @@
 #ifndef FILTERMODELITEM_H
 #define FILTERMODELITEM_H
 
-#include <QAbstractListModel>
+#include <QObject>
 #include <QVariant>
 #include <QImage>
 #include <QMap>

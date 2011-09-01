@@ -11,11 +11,11 @@ QHash<int, QByteArray> DataGridItem::roleNames() const
 
   QHash<int, QByteArray> names;
   names[NameRole] = "name";
-  names[IndexRole] = "dceindex";
+  names[IndexRole] = "modelindex";
   names[PathRole] = "path";
   names[AttributeRole] = "attributes";
   names[ImageRole] = "cellImage";
-  names[FKRole]= "id";
+  names[FKRole]= "fkfile";
   return names;
 }
 

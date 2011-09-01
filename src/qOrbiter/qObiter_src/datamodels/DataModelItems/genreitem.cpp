@@ -38,20 +38,20 @@ QVariant GenreItem::data(int role) const
   }
 }
 
-bool GenreItem::updateSelection()
+void GenreItem::updateSelection()
 {
     if (m_isSelected == true)
     {
         m_isSelected = false;
         qDebug () << this->id() << "Button state is " << m_isSelected;
-        emit filterChanged(m_isSelected);
-        return m_isSelected;
+        //emit filterChanged(m_isSelected);
+        setStatus(m_isSelected);
     }
     else
     {
         m_isSelected = true;
         qDebug () << this->id() << "Button state is " << m_isSelected;
-       emit filterChanged(m_isSelected);
-       return m_isSelected;
+       //emit filterChanged(m_isSelected);
+       setStatus(m_isSelected);
     }
 }

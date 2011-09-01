@@ -16,6 +16,12 @@ import "../js/ComponentLoader.js" as MyJs
     height: style.orbiterH;
 
     ScreenSaver{}
+    function scaleX(x){
+        return x/100*style.orbiterW
+    }
+    function scaleY(y){
+        return y/100*style.orbiterH
+    }
 
      function screenchange(screenname )
      { 

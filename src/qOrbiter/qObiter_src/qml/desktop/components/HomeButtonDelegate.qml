@@ -9,8 +9,8 @@ Item{
 
 ButtonSq
 {       id:delegateButton
-        height: style.buttonH
-        width: style.buttonW
+    height: scaleY(16)
+    width: scaleX(9)
         color: style.homescreenscenariobuttoncolor
         radius: style.but_smooth
         buttontext: ""
@@ -24,8 +24,8 @@ ButtonSq
 
          Image {
              id: buttonsqimg
-             height: style.iconHeight + 5
-             width: style.iconHeight + 5
+             height: scaleY(16)
+             width: scaleX(9)
              anchors.fill: parent
              source: style.stylebuttonimage
          }
@@ -34,8 +34,8 @@ ButtonSq
           Image {
                 id:buttonimage
                 source: "../../../img/icons/"+label+".png"
-                height: style.iconHeight
-                width: style.iconWidth
+                height: scaleY(16)
+                width: scaleX(9)
                  anchors.centerIn: delegateButton
                  }
 

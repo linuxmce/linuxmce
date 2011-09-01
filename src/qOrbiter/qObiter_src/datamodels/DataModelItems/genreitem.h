@@ -10,7 +10,7 @@
 class GenreItem: public QObject
 {
  Q_OBJECT
-    Q_PROPERTY (bool m_isSelected READ updateSelection NOTIFY filterChanged)
+    Q_PROPERTY (bool m_isSelected READ selectedStatus WRITE setStatus NOTIFY filterChanged)
 
 public:
   enum Roles {
@@ -31,9 +31,10 @@ public:
    inline QString name() const {  return m_description; }
   inline QString fileformat() const { return m_fk_fileformat; }
   inline QImage cellImage() const {  return m_image; }
-  inline bool selectedStatus() const {return m_isSelected; }
-  inline bool setStatus(bool b) { m_isSelected = b; }
-  bool updateSelection ();
+
+  bool selectedStatus() const {return m_isSelected; }
+  void setStatus(bool b) { m_isSelected = b; }
+  void updateSelection ();
 
 
 private:

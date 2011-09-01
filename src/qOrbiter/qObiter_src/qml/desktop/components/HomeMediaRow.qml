@@ -1,22 +1,14 @@
 import QtQuick 1.0
 
 Item {
-    signal showDatagrid( string msg)
-    signal gotoScreen( string screen, string type)
-    property alias nowplayingtext:now_playing.buttontext
-    property alias rowlabel: rowheader.buttontext
-
-
-    height: style.homescreenrowheight
-    width: parent.width
+    height: scaleY(16)
+    width: scaleX(parent.width)
 
     HomeButtonDelegate{id:mediaDelegate}
-
-
     Flickable{
         id:mediaflick
 
-        height: style.buttonH
+        height: parent.height
         width: parent.width
         contentHeight: style.buttonH
         contentWidth: (style.buttonW + 5) * (mediaflick.children.width)
@@ -25,16 +17,14 @@ Item {
 
         Row {
             id: guide
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: parent.left
+
             spacing:5
 
 
             ButtonSq {
                 id: rowheader
-                height: style.buttonH
-                width: style.buttonW
+                height: scaleY(16)
+                width: scaleX(9)
                 color: style.homescreenfloorplanbuttoncolor
                 radius: style.but_smooth
                 buttontext: ""
@@ -42,8 +32,8 @@ Item {
                 Image {
                     id: mHeaderImg
                     source: "../../../img/icons/kmix.png"
-                    height: style.iconHeight
-                    width: style.iconWidth
+                    height: scaleY(16)
+                    width: scaleX(9)
                     anchors.centerIn: parent
                 }
                 MouseArea{
@@ -56,8 +46,9 @@ Item {
             ButtonSq {
                 id: now_playing
                 visible: dcenowplaying.b_mediaPlaying ? true : false
-                height: style.buttonH
-                width: style.buttonW
+                height: scaleY(16)
+                width: scaleX(9)
+
                 color: dcenowplaying.b_mediaPlaying ? "green" : "red"
                 radius: style.but_smooth
                 buttontext: dcenowplaying.qs_mainTitle
@@ -70,10 +61,10 @@ Item {
 
             ListView{
                 id: mediaScenarios
+                height: scaleY(style.buttonH)
                 width: stage.width
-                height: style.buttonH
-                model: currentRoomMedia
 
+                model: currentRoomMedia
                 orientation:ListView.Horizontal
                 spacing: 5
                 delegate: mediaDelegate

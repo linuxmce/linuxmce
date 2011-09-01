@@ -13,6 +13,7 @@ class FilterModel: public QAbstractListModel
 {
   Q_OBJECT
 
+
 public:
   explicit FilterModel(FilterModelItem* prototype, QObject* parent = 0);
   ~FilterModel();

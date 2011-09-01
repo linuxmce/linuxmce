@@ -52,24 +52,9 @@ Rectangle {
             y: 291
             width: 622
             height: 173
-            radius: 25
+            radius: 4
             clip:  true
-            gradient: Gradient {
-                GradientStop {
-                    position: 0
-                    color: "#bbb4b4"
-                }
-
-                GradientStop {
-                    position: 0.57
-                    color: "#466ec6"
-                }
-
-                GradientStop {
-                    position: 1
-                    color: "#352b7a"
-                }
-            }
+            color: style.orbiterBG
 
             Flickable {
                 anchors.fill: parent
@@ -142,12 +127,7 @@ Rectangle {
                     text: "Title"
                     font.pixelSize: 12
                 }
-
-
-
             }
-
-
         }
 
         Text {
