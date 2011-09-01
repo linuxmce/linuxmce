@@ -25,8 +25,8 @@ import QtQuick 1.0
         property string maincolor: "aliceblue"
         property string accentcolor: "lightsteelblue"
     //main stage styles
-    property int orbiterH: 400
-    property int orbiterW: 800
+    property int orbiterH: 720
+    property int orbiterW: 1280
     property color stageBG: "slategray"
     property int homescreenrowheight:100
     property int homescreenbuttonheight: 90
