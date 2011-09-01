@@ -249,6 +249,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
     {
         qDebug() << "Couldnt get skin data!";
         exit(15);
+
     }
 }
 
@@ -1375,6 +1376,11 @@ void qorbiterManager::showfloorplan(int fptype)
 void qorbiterManager::bindMediaRemote(bool state)
 {
 
+}
+
+void qorbiterManager::changedPlaylistPosition(int position)
+{
+    pqOrbiter->JumpToPlaylistPosition(position);
 }
 
 

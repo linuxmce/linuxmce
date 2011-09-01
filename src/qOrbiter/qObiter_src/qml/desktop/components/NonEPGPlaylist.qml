@@ -23,6 +23,10 @@ Rectangle {
             Text {
                 text: id + " pos:" + name
             }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: changedPlaylistPosition(name)
+            }
         }
     }
 }

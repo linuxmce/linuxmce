@@ -2301,3 +2301,9 @@ void DCE::qOrbiter::BindMediaRemote(bool onoff)
     SendCommand(bind_remote);
 }
 
+void DCE::qOrbiter::JumpToPlaylistPosition(int pos)
+{
+    CMD_Jump_Position_In_Playlist jump_playlist(qmlUI->iPK_Device, qmlUI->iMediaPluginID, QString::number(pos).toStdString(), qmlUI->nowPlayingButton->i_streamID);
+    SendCommand(jump_playlist);
+}
+

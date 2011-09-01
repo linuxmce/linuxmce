@@ -76,6 +76,7 @@ public:
                 void ShowFloorPlan(int floorplantype);
                 void GetScreenSaverImages();
                 void BindMediaRemote(bool onoff);
+                void JumpToPlaylistPosition(int pos);
 
 //<-dceag-const-e->
 
