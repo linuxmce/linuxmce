@@ -17,10 +17,13 @@ Rectangle {
 
     // Upper left menu
     Image {
+        id: imgLeftMenu
         source: "../img/common/timepanel_mid-vh.png"
         width: scaleX(35.23) // 451
         height:  scaleY(3.75) // 27
         smooth:  true
+        //transform: Rotation { origin.x: imgLeftMenu.width/2; origin.y: imgLeftMenu.height/2; axis { x: 0; y: 1; z: 0 } angle: 180 }
+
         Text {
             text: "Home"
             anchors.leftMargin: scaleX(.78)
@@ -36,6 +39,26 @@ Rectangle {
             onClicked:  gotoQScreen("Screen_1.qml")
         }
     }
+
+//    MenuBar{
+//        y: 50
+//        origin: "top-right"
+//        items: ListModel {
+//            ListElement {
+//                text: "Apple"
+//                cost: 2.45
+//            }
+//            ListElement {
+//                text: "Orange"
+//                cost: 3.25
+//            }
+//            ListElement {
+//                text: "Banana"
+//                cost: 1.95
+//            }
+//        }
+//    }
+
 
     // Build the background
     Image{
@@ -72,11 +95,11 @@ Rectangle {
             height: scaleY(38.2) // 275
             scale: PathView.iconScaling
             z: PathView.iconZ
-//            Rectangle{
+            //            Rectangle{
             Image {
                 anchors.fill: parent
                 clip: true
-//                radius:7
+                //                radius:7
                 smooth: true
                 transform: Rotation {
                     origin.x: wrapper.width/2; origin.y: wrapper.height/2
@@ -84,17 +107,17 @@ Rectangle {
                     angle: PathView.iconAngle
                 }
 
-//                Image {
-                    id: myIcon
-//                    smooth: true
-                    source:"image://datagridimg/"+id ;
-//                    anchors.fill: parent
-                    fillMode: Image.PreserveAspectCrop;
-                    asynchronous: true
+                //                Image {
+                id: myIcon
+                //                    smooth: true
+                source:"image://datagridimg/"+id ;
+                //                    anchors.fill: parent
+                fillMode: Image.PreserveAspectCrop;
+                asynchronous: true
 
 
-                }
-//            }
+            }
+            //            }
 
             Text {
                 anchors { top: myIcon.bottom; horizontalCenter: wrapper.horizontalCenter }
@@ -146,34 +169,34 @@ Rectangle {
             startX: scaleX(4.92)
             startY: path_view1.height/2
 
-                PathPercent { value: 0.0 }
-                PathAttribute { name: "iconScaling"; value:  0.8 }
-                PathAttribute { name: "iconAngle"; value:  50 }
-                PathAttribute { name: "iconZ"; value:  0 }
+            PathPercent { value: 0.0 }
+            PathAttribute { name: "iconScaling"; value:  0.8 }
+            PathAttribute { name: "iconAngle"; value:  50 }
+            PathAttribute { name: "iconZ"; value:  0 }
 
             PathLine { x: (path_view1.width*0.37); y: path_view1.height/2 }
-                PathPercent { value: 0.385 }
-                PathAttribute { name: "iconScaling"; value:  0.8 }
-                PathAttribute { name: "iconAngle"; value:  50 }
-                PathAttribute { name: "iconZ"; value:  10 }
+            PathPercent { value: 0.385 }
+            PathAttribute { name: "iconScaling"; value:  0.8 }
+            PathAttribute { name: "iconAngle"; value:  50 }
+            PathAttribute { name: "iconZ"; value:  10 }
 
             PathLine { x: path_view1.width/2; y: path_view1.height/2 }
-                PathPercent { value: 0.462 }
-                PathAttribute { name: "iconScaling"; value:  1.0 }
-                PathAttribute { name: "iconAngle"; value:  0 }
-                PathAttribute { name: "iconZ"; value:  11 }
+            PathPercent { value: 0.462 }
+            PathAttribute { name: "iconScaling"; value:  1.0 }
+            PathAttribute { name: "iconAngle"; value:  0 }
+            PathAttribute { name: "iconZ"; value:  11 }
 
             PathLine { x: (path_view1.width*0.63); y: path_view1.height/2 }
-                PathPercent { value: 0.538 }
-                PathAttribute { name: "iconScaling"; value:  0.8 }
-                PathAttribute { name: "iconAngle"; value:  -50 }
-                PathAttribute { name: "iconZ"; value:  10 }
+            PathPercent { value: 0.538 }
+            PathAttribute { name: "iconScaling"; value:  0.8 }
+            PathAttribute { name: "iconAngle"; value:  -50 }
+            PathAttribute { name: "iconZ"; value:  10 }
 
             PathLine { x: path_view1.width; y: path_view1.height/2 }
-                PathPercent { value: 1.0 }
-                PathAttribute { name: "iconScaling"; value:  0.8 }
-                PathAttribute { name: "iconAngle"; value:  -50 }
-                PathAttribute { name: "iconZ"; value:  0 }
+            PathPercent { value: 1.0 }
+            PathAttribute { name: "iconScaling"; value:  0.8 }
+            PathAttribute { name: "iconAngle"; value:  -50 }
+            PathAttribute { name: "iconZ"; value:  0 }
 
         }
         onCurrentIndexChanged: {
@@ -181,20 +204,20 @@ Rectangle {
         }
 
     }
-//    Rectangle{
-//        border.color: "black"
-//        color: "transparent"
-//        width: 200
-//        height: stage.height
-//        anchors.horizontalCenter: stage.horizontalCenter
-//    }
-//    Rectangle{
-//        border.color: "black"
-//        color: "transparent"
-//        height: 275
-//        width: scaleX(80)
-//        //anchors.verticalCenter: parent.verticalCenter
-//        anchors.centerIn: parent
-//    }
+    //    Rectangle{
+    //        border.color: "black"
+    //        color: "transparent"
+    //        width: 200
+    //        height: stage.height
+    //        anchors.horizontalCenter: stage.horizontalCenter
+    //    }
+    //    Rectangle{
+    //        border.color: "black"
+    //        color: "transparent"
+    //        height: 275
+    //        width: scaleX(80)
+    //        //anchors.verticalCenter: parent.verticalCenter
+    //        anchors.centerIn: parent
+    //    }
 
 }
