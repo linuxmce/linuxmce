@@ -447,10 +447,13 @@ bool qorbiterManager::getConf(int pPK_Device)
             imagePath = QUrl("../../../img/icons/backgrounds/livingroom.png");
             break;
         case 3:
-            imagePath = QUrl("../../../img/icons/bedroom.png");
+            imagePath = QUrl("../../../img/icons/backgrounds/bedroom.png");
             break;
         case 5:
-            imagePath = QUrl("../../../img/background/kitchen.png");
+            imagePath = QUrl("../../../img/icons/backgrounds/kitchen.png");
+            break;
+        case 11:
+            imagePath = QUrl("../../../img/icons/backgrounds/mstrbedroom.png");
             break;
         default:
             imagePath = QUrl("../../../img/lmcesplash.png");

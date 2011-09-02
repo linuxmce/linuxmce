@@ -24,7 +24,7 @@ Rectangle {
         id: splash
         anchors.centerIn: rectangle1
         fillMode: Image.PreserveAspectFit
-        source: "../../../img/lmcesplash.jpg"
+        source: "../../../img/lmcesplash.png"
         anchors.fill: parent
     }
     Rectangle {

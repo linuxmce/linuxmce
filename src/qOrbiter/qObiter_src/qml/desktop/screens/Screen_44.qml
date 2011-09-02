@@ -5,7 +5,7 @@ import "../js/ComponentLoader.js" as MyJs
 Rectangle {
     height: style.orbiterH
     width: style.orbiterW
-    color: transparent
+    color: "transparent"
     id: advancedscreen
 
     HomeButton{}
@@ -19,8 +19,8 @@ Rectangle {
 
         ButtonSq{
             id:regenorbiter
-            height: style.buttonH
-            width: style.buttonW
+            height: scaleY(style.buttonH)
+            width: scaleX(style.buttonW)
             buttontext: "Regen Orbiter"
             radius: 5
 
@@ -33,40 +33,40 @@ Rectangle {
 
         ButtonSq{
             id:pending
-            height: style.buttonH
-            width: style.buttonW
+            height: scaleY(style.buttonH)
+            width: scaleX(style.buttonW)
             buttontext: "Pending Tasks"
             radius: 5
         }
 
         ButtonSq{
             id:networksettings
-            height: style.buttonH
-            width: style.buttonW
+            height: scaleY(style.buttonH)
+            width: scaleX(style.buttonW)
             buttontext: "Network Settings"
             radius: 5
         }
 
         ButtonSq{
             id:avwizard
-            height: style.buttonH
-            width: style.buttonW
+            height: scaleY(style.buttonH)
+            width: scaleX(style.buttonW)
             buttontext: "Av wizard"
             radius: 5
         }
 
         ButtonSq{
             id:regenorbiters
-            height: style.buttonH
-            width: style.buttonW
+            height: scaleY(style.buttonH)
+            width: scaleX(style.buttonW)
             buttontext: "Regen All Orbiters"
             radius: 5
         }
 
         ButtonSq{
             id:quickreload
-            height: style.buttonH
-            width: style.buttonW
+            height: scaleY(style.buttonH)
+            width: scaleX(style.buttonW)
             buttontext: "Quick Reload"
             radius: 5
             MouseArea{
@@ -78,8 +78,8 @@ Rectangle {
 
         ButtonSq{
             id:changeStyle
-            height: style.buttonH
-            width: style.buttonW
+            height: scaleY(style.buttonH)
+            width: scaleX(style.buttonW)
             buttontext: "Change Styles"
             radius: 5
 

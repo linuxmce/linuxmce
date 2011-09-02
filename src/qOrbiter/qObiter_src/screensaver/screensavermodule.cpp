@@ -3,7 +3,7 @@
 ScreenSaverModule::ScreenSaverModule(QObject *parent) :
     QObject(parent)
 {
-    imageList.append("../../../img/lmcesplash.jpg");
+    imageList.append("../../../img/lmcesplash.png");
     imageList.append("../../../img/icons/bedroom.jpg");
     imageList.append("../../../img/icons/mediatime.png");
 
