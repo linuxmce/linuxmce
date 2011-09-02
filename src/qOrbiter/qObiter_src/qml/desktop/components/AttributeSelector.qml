@@ -8,7 +8,7 @@ Rectangle {
             color: "transparent"
             Row{
                 id:attributerow
-                height: style.buttonH +10
+                height: scaleY(style.buttonH )
                 width: childrenRect.width
                 spacing: 5
 
@@ -18,8 +18,8 @@ Rectangle {
 
                     buttontext: "Attribute Sort"
                     buttonsqradius: 7
-                    height: style.buttonH
-                    width:  style.buttonW
+                    height: scaleY(style.buttonH)
+                    width:  scaleX(style.buttonW)
                     MouseArea{
                         anchors.fill:parent
                         onClicked: MyJs.createFilterObjects("../components/AttributeTypes.qml")
@@ -30,8 +30,8 @@ Rectangle {
                 ButtonSq{
                     buttontext: "Genre"
                     buttonsqradius: 7
-                    height: style.buttonH
-                    width:  style.buttonW
+                    height: scaleY(style.buttonH)
+                    width:  scaleX(style.buttonW)
                     MouseArea{
                         anchors.fill:parent
                         onClicked: MyJs.createFilterObjects("../components/GenreSelector.qml")
@@ -42,8 +42,8 @@ Rectangle {
                 ButtonSq{
                     buttontext: "Sources"
                     buttonsqradius: 7
-                    height: style.buttonH
-                    width:  style.buttonW
+                    height: scaleY(style.buttonH)
+                    width:  scaleX(style.buttonW)
 
                     MouseArea{
                         anchors.fill:parent
@@ -57,8 +57,8 @@ Rectangle {
             ButtonSq{
                 buttontext: "Resolution"
                 buttonsqradius: 7
-                height: style.buttonH
-                width:  style.buttonW
+                height: scaleY(style.buttonH)
+                width:  scaleX(style.buttonW)
                 MouseArea{
                     anchors.fill:parent
                     onClicked: MyJs.createFilterObjects("../components/FileFormat.qml")
@@ -69,8 +69,8 @@ Rectangle {
                 ButtonSq{
                  buttontext: "Mediatypes"
                 buttonsqradius: 7
-                height: style.buttonH
-                width:  style.buttonW
+                height: scaleY(style.buttonH)
+                width:  scaleX(style.buttonW)
                 MouseArea{
                     anchors.fill:parent
                     onClicked: MyJs.createFilterObjects("../components/MediaTypes.qml")

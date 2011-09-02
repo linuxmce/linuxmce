@@ -27,8 +27,8 @@ Rectangle {
         Rectangle
         {
             id:mainItem
-            width: 175;
-            height: 109
+            width: scaleX(20);
+            height: scaleY(20)
             color: "transparent"
             border.color: "black"
             border.width: 1
@@ -37,8 +37,8 @@ Rectangle {
             {
                 id:frame
                 opacity: 1
-                width: 156
-                height: 100
+                width: scaleX(19);
+                height: scaleY(19)
                 anchors.centerIn: mainItem
 
 
@@ -138,7 +138,7 @@ Rectangle {
              id: appDelegate
              Item {
                  id: wrapper
-                 width: 300; height: 300
+                 width: scaleX(75); height: scaleY(75)
                  scale: PathView.iconScaling
                  //opacity: PathView.iconOpacity
 
@@ -147,8 +147,8 @@ Rectangle {
                      y: 20; anchors.horizontalCenter: parent.horizontalCenter
                      smooth: true
                      source:"image://datagridimg/"+id ;
-                     height: 200;
-                     width: 356;
+                     height: scaleX(25);
+                     width: scaleY(25);
                      fillMode: Image.PreserveAspectFit;
                      asynchronous: true
                      transform: Rotation {
@@ -163,6 +163,7 @@ Rectangle {
                      anchors { top: myIcon.bottom; horizontalCenter: parent.horizontalCenter }
                      text: name
                      smooth: true
+                     font.pointSize: 12
                      //visible: wrapper.PathView.isCurrentItem
                  }
 
@@ -175,7 +176,7 @@ Rectangle {
 
          Component {
              id: appHighlight
-             Rectangle { width: 80; height: 80; color: "lightsteelblue" }
+             Rectangle { width: myIcon.width; height: myIcon.height; color: "lightsteelblue" }
          }
 
     Row
@@ -184,16 +185,14 @@ Rectangle {
         anchors.topMargin: 0
         width: childrenRect.width
         anchors.top: grid_view1.bottom
-        anchors.left: grid_view1.left
+        anchors.horizontalCenter: parent.horizontalCenter
 
         ButtonSq
         {
-            height: style.iconHeight
-            width: style.iconWidth
+            height: scaleY(style.iconHeight)
+            width: scaleX(style.iconWidth)
             buttontext: "Go Back"
-
             buttontextbold: true
-
             MouseArea
             {
                 anchors.fill:parent

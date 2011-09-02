@@ -3,9 +3,10 @@ import QtQuick 1.0
 
 Rectangle {
     id:gridholder
-    width: 790
-    height: 500
-    anchors.centerIn: parent
+    width: scaleX(90)
+    height: scaleY(75)
+    anchors.top: parent.top
+    anchors.horizontalCenter: parent.horizontalCenter
     color: "transparent"
     Image {
         id: name
@@ -16,12 +17,11 @@ Rectangle {
     GridView {
         id: gridView
         anchors.fill: parent
-        x:0
-        y: 40
+
         //z: 2
-        width: 790
-        height: 460
-        anchors.topMargin: 40
+        width: scaleX(90)
+        height: scaleY(75)
+anchors.topMargin: scaleX(5)
         anchors.horizontalCenter: fileviewscreen.horizontalCenter
         model:dataModel
         delegate: contactDelegate
@@ -30,8 +30,8 @@ Rectangle {
         focus: true
         clip: true
         contentItem.clip: true
-        cellWidth: 175
-        cellHeight: 109
+        cellWidth: scaleX(20)
+        cellHeight: scaleY(20)
         keyNavigationWraps: true
         Keys.enabled: true
         Keys.onPressed: console.log(Qt.Key_Right)
@@ -41,14 +41,13 @@ Rectangle {
 
     PathView {
         id: path_view1
-        x:0
-        y: 40
+
         //z: 1
-        width: 790
-        height: 460
+        width: scaleX(90)
+        height: scaleY(75)
         visible: false
         opacity: 0
-        anchors.topMargin: 40
+        anchors.topMargin: scaleX(15)
         anchors.horizontalCenter: fileviewscreen.horizontalCenter
         model:dataModel
         focus: true
@@ -106,8 +105,8 @@ Rectangle {
         x:0
         y: 40
         //z: 1
-        width: 790
-        height: 460
+        width: scaleX(90)
+        height: scaleY(75)
         visible: false
         opacity: 0
         model:dataModel
@@ -117,16 +116,7 @@ Rectangle {
         focus: true
         clip: true
 
-    }
-
-    Text {
-        id: text1
-        x: 15
-        y: 10
-        text: "Media List"
-        font.family: "Droid Sans"
-        font.pixelSize: 25
-    }
+    }    
 
     ButtonSq {
         id: buttonsq1

@@ -5,7 +5,7 @@ import "../js/ComponentLoader.js" as MyJs
 Rectangle {
     height: style.orbiterH
     width: style.orbiterW
-    color: style.advanced_bg
+    color: transparent
     id: advancedscreen
 
     HomeButton{}

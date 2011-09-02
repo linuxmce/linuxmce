@@ -1020,14 +1020,14 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     {
         qmlUI->nowPlayingButton->setStatus(true);
         requestMediaPlaylist();
-// BindMediaRemote(true);
+        // BindMediaRemote(true);
     }
     else if (iPK_MediaType == 0)
     {
         qDebug () << "Closing Now Playing";
         qmlUI->nowPlayingButton->setStatus(false);
         qmlUI->gotoQScreen("Screen_1.qml");
-    BindMediaRemote(false);
+        BindMediaRemote(false);
 
     }
 
@@ -1657,14 +1657,14 @@ void qOrbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool 
     int pCount = pMessage->m_mapParameters.size();
     for (int mCount = 0; mCount < pCount; mCount++)
     {
-     //   string fuck = pMessage->m_mapData_Parameters.at(long(mCount));
-     //  qDebug () << "Message Param" << fuck.c_str() ;//at(long(mCount));
+        //   string fuck = pMessage->m_mapData_Parameters.at(long(mCount));
+        //  qDebug () << "Message Param" << fuck.c_str() ;//at(long(mCount));
     }
 
 
     QString params = pMessage->ToString(true).c_str();
     QStringList paramList = params.split(" ");
-   // qDebug() << paramList;
+    // qDebug() << paramList;
     QString str = QString::number(iPK_Screen);
     qmlUI->gotoQScreen("Screen_"+str+".qml");
 }
@@ -1982,7 +1982,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     CMD_Get_Attributes_For_Media attribute_detail_get(qmlUI->iPK_Device, qmlUI->iMediaPluginID,  qs_fk_fileno.toStdString(), " ",&s_val );
     SendCommand(attribute_detail_get);
     QString breaker = s_val.c_str();
-
+    qDebug() << breaker;
     /*
       attribute order - should be consistent
         0 - full file path
@@ -2076,18 +2076,22 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 cellTitle = pCell->m_mapAttributes_Find("Title").c_str();
                 cellAttribute = pCell->m_mapAttributes_Find("Name").c_str();
                 cellfk = pCell->GetValue();
+                //  qDebug() << cellTitle;
                 //qDebug() << pCell->m_mapAttributes.size();
 
-                if(cellTitle == "Program")
+                /*    if(cellTitle == "Program")
                 {
                     string a_text;
                     CMD_Get_Attribute getProgramAttributes(qmlUI->iPK_Device, qmlUI->iMediaPluginID, cellfk.remove("!A").toInt(), &a_text);
-                    //qDebug() << cellfk;
+
                     SendCommand(getProgramAttributes);
+                    qDebug() << "Get Attrib result: " << a_text.c_str();
                     //qDebug() << pCell->m_ImagePathLength;
                 }
+                */
 
-                //qDebug() << "Item Attribute::" << cellTitle << "-" << cellAttribute;
+                qDebug() << "Video Attribute::" << cellTitle << "-" << cellAttribute;
+                qDebug() << "Attribute image?" << pCell->GetImagePath();
                 if (pPath )
                 {
                     cellImg = getfileForDG(pCell->GetImagePath());
@@ -2279,7 +2283,7 @@ void DCE::qOrbiter::ShowFloorPlan(int floorplantype)
 void DCE::qOrbiter::GetScreenSaverImages()
 {
     string *sFilename;
-    CMD_Get_Screen_Saver_Files screen_saver_files(qmlUI->iPK_Device, qmlUI->iOrbiterPluginID,qmlUI->iPK_Device, sFilename);
+    CMD_Get_Screen_Saver_Files screen_saver_files(qmlUI->iPK_Device, qmlUI->iPK_Device_GeneralInfoPlugin,qmlUI->iPK_Device, sFilename);
     //SendCommand(screen_saver_files);
 
     qDebug() << sFilename;

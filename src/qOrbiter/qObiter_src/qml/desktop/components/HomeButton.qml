@@ -2,21 +2,21 @@ import QtQuick 1.0
 
 Item {
     id: homebutton
-    height: style.buttonH
-    width: style.buttonW
+    height: scaleY(style.buttonH)
+    width:  scaleX(style.buttonW)
 
     ButtonSq{
         buttonsqradius: 7
         buttontext: "Home"
         buttontextfontsize: 14
-        height:style.buttonH
-        width: style.buttonW
+        height: scaleY(style.buttonH)
+        width:  scaleX(style.buttonW)
         Image {
             id: homeimage
             source: "/src/1004/src/qOrbiter/qObiter_src/img/icons/kfm_home.png"
             anchors.centerIn: parent
-            height: style.buttonH
-            width: style.buttonW
+            height: scaleY(style.buttonH)
+            width:  scaleX(style.buttonW)
         }
         MouseArea{
             anchors.fill: parent

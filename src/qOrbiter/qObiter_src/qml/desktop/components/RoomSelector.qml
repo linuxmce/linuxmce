@@ -28,10 +28,10 @@ Rectangle {
             id:roomdelegate
             height:90
             width: 160
-            color: style.orbiterBG
+            color: style.not_color
             Image {
                 id: roomimage
-                source: "../../../img/icons/mediatime.png"
+                source: room_image
                 height: 90
                 fillMode: Image.PreserveAspectFit
                 width:160

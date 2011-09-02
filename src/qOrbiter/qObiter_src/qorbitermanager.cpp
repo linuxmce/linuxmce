@@ -123,7 +123,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         qDebug () << "Local confing processing";
     }
 
-  //  currentSkin = "default";
+    //  currentSkin = "default";
     currentSkinURL="/qml/qObiter_src/";
     s_RouterIP="DCERouter";
 
@@ -430,16 +430,36 @@ bool qorbiterManager::getConf(int pPK_Device)
     QMap <QString, int> RroomMapping;                       //map for later reference
     QDomNodeList roomListXml = roomXml.childNodes();
 
+
+
     for(int index = 0; index < roomListXml.count(); index++)
     {
+
         QString m_name = roomListXml.at(index).attributes().namedItem("Description").nodeValue();
         int m_val = roomListXml.at(index).attributes().namedItem("PK_Room").nodeValue().toInt();
         int m_iEA = roomListXml.at(index).attributes().namedItem("PK_EntertainArea").nodeValue().toInt();
         int m_iType = roomListXml.at(index).attributes().namedItem("FK_RoomType").nodeValue().toInt();
         QString m_title = roomListXml.at(index).attributes().namedItem("Description").nodeValue();
+        QUrl imagePath;
+
+        switch (m_iType){
+        case 1:
+            imagePath = QUrl("../../../img/icons/backgrounds/livingroom.png");
+            break;
+        case 3:
+            imagePath = QUrl("../../../img/icons/bedroom.png");
+            break;
+        case 5:
+            imagePath = QUrl("../../../img/background/kitchen.png");
+            break;
+        default:
+            imagePath = QUrl("../../../img/lmcesplash.png");
+            break;
+        }
 
         RroomMapping.insert(m_name, m_val);
-        m_lRooms->appendRow(new LocationItem(m_name, m_val, m_title, m_iEA, m_iType, m_lRooms));
+
+        m_lRooms->appendRow(new LocationItem(m_name, m_val, m_title, m_iEA, m_iType, imagePath, m_lRooms));
     }
     m_lRooms->sdefault_Ea = defaults.attribute("DefaultLocation");
     m_lRooms->idefault_Ea = RroomMapping.value(m_lRooms->sdefault_Ea);
@@ -667,11 +687,11 @@ bool qorbiterManager::getConf(int pPK_Device)
 
 void qorbiterManager::swapSkins(QString incSkin)
 {
-    #ifdef Q_OS_MAC
-        QDir skinsDir(QApplication::applicationDirPath().remove("MacOS").append("Resources"));
-    #else
-        QDir skinsDir(QApplication::applicationDirPath().remove("bin"));
-    #endif
+#ifdef Q_OS_MAC
+    QDir skinsDir(QApplication::applicationDirPath().remove("MacOS").append("Resources"));
+#else
+    QDir skinsDir(QApplication::applicationDirPath().remove("bin"));
+#endif
 
     if(skinsDir.cd("qml/"))
     {
@@ -1022,7 +1042,7 @@ bool qorbiterManager::readLocalConfig()
         {
             qDebug() << "Local Config Missing!";
             qDebug() <<"Enter information to continue, press connect when ready.";
-             localConfigFile.close();
+            localConfigFile.close();
             return false;
         }
         else
@@ -1045,11 +1065,11 @@ bool qorbiterManager::readLocalConfig()
                 qDebug() << "Could not read local, setting defaults.";
                 qDebug() << localConfig.toString();
                 qs_routerip = "DCEROUTER";
-                 localConfigFile.close();
+                localConfigFile.close();
                 return false;
             }
         }
-         localConfigFile.close();
+        localConfigFile.close();
         return true;
     }
 }
@@ -1098,7 +1118,7 @@ void qorbiterManager::writeConfig()
 
 
     }
-localConfigFile.close();
+    localConfigFile.close();
 }
 
 void qorbiterManager::setStringParam(int paramType, QString param)
@@ -1145,7 +1165,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-         qDebug() << datagridVariableString;
+        qDebug() << datagridVariableString;
 
         execGrp(i_current_command_grp);
 
@@ -1169,7 +1189,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             {
                 filedetailsclass->setVisible(true);
                 filedetailsclass->setFile(param);
-                  showFileInfo(param);
+                showFileInfo(param);
                 break;
             }
 
@@ -1182,7 +1202,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
                 }
                 else
                 {
-                   q_attributetype_sort = "13";
+                    q_attributetype_sort = "13";
                 }
 
 
@@ -1215,12 +1235,12 @@ void qorbiterManager::setStringParam(int paramType, QString param)
         }
         else
         {
-        q_attributetype_sort = param;
-        longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
-        datagridVariableString = longassstring.join("|");
-        // qDebug() << datagridVariableString;
-        execGrp(i_current_command_grp);
-        break;
+            q_attributetype_sort = param;
+            longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
+            datagridVariableString = longassstring.join("|");
+            // qDebug() << datagridVariableString;
+            execGrp(i_current_command_grp);
+            break;
         }
     case 7:
         q_pk_users = param;
@@ -1359,8 +1379,8 @@ void qorbiterManager::rw_media(int speed)
 
 void qorbiterManager::ff_media(int speed)
 {
-   nowPlayingButton->setMediaSpeed(speed);
-   pqOrbiter->FfMedia();
+    nowPlayingButton->setMediaSpeed(speed);
+    pqOrbiter->FfMedia();
 }
 
 void qorbiterManager::pauseMedia()

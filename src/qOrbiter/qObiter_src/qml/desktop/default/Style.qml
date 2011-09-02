@@ -29,18 +29,18 @@ import QtQuick 1.0
     property int orbiterW: 1280
     property color stageBG: "slategray"
     property int homescreenrowheight:100
-    property int homescreenbuttonheight: 90
-    property int homesreenbuttonwidth: 90
+    property int homescreenbuttonheight: 9
+    property int homesreenbuttonwidth: 9
     property color homescreenscenariobuttoncolor: "aliceblue"
     property color homescreenfloorplanbuttoncolor: "lightsteelblue"
     property color homeScreenNowPlayingColorInActive: "indianred"
     property color homeScreenNowPlayingColorActive: "lightcyan"
 
     //icon sizes
-    property int iconHeight: 90
-    property int iconWidth: 90
-        property int  stdbuttonh: 90
-        property int  stdbuttonw: 90
+    property int iconHeight: 9
+    property int iconWidth: 9
+        property int  stdbuttonh: 9
+        property int  stdbuttonw: 9
 
     //textStyles
      property string stylebuttonimage: ""
@@ -53,8 +53,8 @@ import QtQuick 1.0
     //title and other misc windo accents
  property color titletextcolor: "black"
     //button styling
-    property int buttonH:95
-    property int buttonW: 95
+    property int buttonH:9
+    property int buttonW: 9
     property color button_system_color: "lightsteelblue"
     property color button_system_color_hover: "lightblue"
 
