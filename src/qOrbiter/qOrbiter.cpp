@@ -1373,7 +1373,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                 string imgDG = "_"+m_sGridID; //correcting the grid id string for images
 
                 //CMD_Request_Datagrid_Contents(                              long DeviceIDFrom,                long DeviceIDTo,                   string sID,                                string sDataGrid_ID, int iRow_count,int iColumn_count,        bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,       int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
-                DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(imgDG),    50,    int(gHeight),                      false,                 false,                                 true, string(m_sSeek),    20,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+                DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(imgDG),    500,    int(gHeight),                      false,                 false,                                 true, string(m_sSeek),    20,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
 
                 if(SendCommand(req_data_grid_pics))
                 {
@@ -1653,13 +1653,24 @@ void qOrbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool 
     cout << "Parm #253 - Queue=" << bQueue << endl;
     cout << "scmdresult" << sCMD_Result << endl;
 
-    qDebug() << "Message Param Count" << pMessage->m_mapParameters.size();
-    int pCount = pMessage->m_mapParameters.size();
-    for (int mCount = 0; mCount < pCount; mCount++)
-    {
-        //   string fuck = pMessage->m_mapData_Parameters.at(long(mCount));
-        //  qDebug () << "Message Param" << fuck.c_str() ;//at(long(mCount));
-    }
+    qDebug() << "Vect msg count" << pMessage->m_vectExtraMessages.size();
+
+    map<long, string >::const_iterator end = pMessage->m_mapParameters.end();
+       for (map<long, string >::const_iterator it = pMessage->m_mapParameters.begin(); it != end; ++it)
+       {
+           long dparam = it->first;
+            string dparam2 = it->second;
+           qDebug() << "Map  Param: " << dparam << " Value: " << dparam2.c_str();
+       }
+
+        qDebug() << "Data params count" << pMessage->m_mapData_Parameters.size();
+       map<long, char* >::const_iterator end2 = pMessage->m_mapData_Parameters.end();
+          for (map<long, char* >::const_iterator it2 = pMessage->m_mapData_Parameters.begin(); it2 != end2; ++it2)
+          {
+              long dparam = it2->first;
+              string dparam2 = it2->second;
+              qDebug() << "Data  Param: " << dparam << " Value: " << dparam2.c_str();
+          }
 
 
     QString params = pMessage->ToString(true).c_str();
@@ -1799,6 +1810,7 @@ void qOrbiter::CMD_Bind_to_Wireless_Keyboard(string &sCMD_Result,Message *pMessa
 {
     cout << "Need to implement command #838 - Bind to Wireless Keyboard" << endl;
 }
+
 
 //<-dceag-c912-b->
 

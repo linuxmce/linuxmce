@@ -1,18 +1,23 @@
 import QtQuick 1.0
 import "../components"
-Rectangle {
-    width: 100
-    height: 62
+Item{
+    id:reloadrouter
 
-    ButtonSq {
-    height: 50
-    width: 50
-    buttontext: "home"
-    MouseArea
-    {
-        anchors.fill:parent
-        onClicked:gotoQScreen("Screen_1.qml")
-    }
+    Rectangle{
+        height: style.orbiterH
+        width: style.orbiterW
+        color: "transparent"
+        Text {
+            id: reloadrouterlabel
+            x: 74
+            y: 101
+            text: "Reload Router"
+            font.family: "Droid Sans"
+            font.bold: false
+            font.pointSize: 15
+            color:style.titletextcolor
+        }
+        HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
     }
 
 }
