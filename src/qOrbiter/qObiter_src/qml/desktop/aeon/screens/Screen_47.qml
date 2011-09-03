@@ -223,6 +223,7 @@ Rectangle {
                 anchors.fill: parent
                 onClicked: {
                     mnuGenre.height=0;
+                    mnuFile.height=0;
                     if (mnuAttr.height) {
                         mnuAttr.height = 0;
                     } else {
@@ -330,6 +331,7 @@ Rectangle {
                 anchors.fill: parent
                 onClicked: {
                     mnuAttr.height=0;
+                    mnuFile.height=0;
                     if (mnuGenre.height) {
                         mnuGenre.height = 0;
                     } else {
@@ -398,6 +400,114 @@ Rectangle {
                             onClicked: {
                                 var newStatus = genrefilter.setSelectionStatus(name)
                                 recCheckGenre.color = newStatus?"white":"transparent"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // File formats
+
+    Rectangle{
+        anchors.left: recGenre.right
+        anchors.bottom: parent.bottom
+        //width: scaleX(35.23) // 451
+        width: recFile.width
+        height:  scaleY(3.75) // 27
+        color: "black"
+        opacity: .7
+    }
+
+    Rectangle{
+        id: recFile
+        anchors.left: recGenre.right
+        anchors.bottom: parent.bottom
+        //width: scaleX(35.23) // 451
+        width: txtFile.width+scaleX(1.5)
+        height:  scaleY(3.75) // 27
+        color: "transparent"
+        Text{
+            id: txtFile
+            text: "Resolution"
+            color: "white"
+            font.family: aeonRss.name;
+            font.pixelSize: parent.height*.6;
+            anchors.centerIn: parent
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    mnuAttr.height=0;
+                    mnuGenre.height=0;
+                    if (mnuFile.height) {
+                        mnuFile.height = 0;
+                    } else {
+                        if ((fileformatmodel.rowCount()*recFile.height)<scaleY(50)) {
+                            mnuFile.height = genrefilter.rowCount()*scaleY(3.75);
+                        } else {
+                            mnuFile.height = scaleY(50);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Rectangle{
+        id: mnuFile
+        height: 0
+        width: recFile.width*2
+        color: "transparent"
+        //opacity: .7
+        anchors.bottom: recFile.top
+        anchors.left: recFile.left
+        //visible: false
+        Behavior on height {
+            NumberAnimation {
+                duration: 100
+                easing.type: Easing.InOutQuad
+            }
+        }
+
+        ListView{
+            anchors.fill: parent
+            clip: true
+            height: scaleY(50)
+            model: fileformatmodel
+            delegate: Rectangle{
+                height:  recFile.height
+                width: mnuFile.width
+                color: "transparent"
+                Rectangle{
+                    anchors.fill: parent
+                    color: "black"
+                    opacity: .7
+                }
+                Row{
+                    anchors.fill: parent
+                    spacing: scaleX(.78)
+                    anchors.leftMargin: scaleX(.78)
+                    Rectangle {
+                        id: recCheckFile
+                        anchors.leftMargin: scaleX(.78)
+                        width: parent.height*.5
+                        height: parent.height*.5
+                        anchors.verticalCenter: parent.verticalCenter
+                        color: status?"white":"transparent"
+                        border.color: "white"
+                    }
+                    Text{
+                        text: name
+                        color: "white"
+                        font.family: aeonRss.name;
+                        font.pixelSize: parent.height*.6;
+                        anchors.verticalCenter: parent.verticalCenter
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked: {
+                                var newStatus = fileformatmodel.setSelectionStatus(name)
+                                recCheckFile.color = newStatus?"white":"transparent"
                             }
                         }
                     }

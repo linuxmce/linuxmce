@@ -136,22 +136,21 @@ FilterModelItem * FilterModel::currentRow()
     return item;
 }
 
-void FilterModel::setSelectionStatus(QString format)
+bool FilterModel::setSelectionStatus(QString format)
 {
     FilterModelItem* item = find(format);
-    item->setStatus("false");
-   // qDebug() << "Setting State for:" << format;
+    bool newStatus = item->updateSelection(false);
+    qDebug() << "Setting State for:" << format;
     //return state;
-
-      ReturnSelectedItems();
-
+    ReturnSelectedItems();
+    return newStatus;
 }
 
-bool FilterModel::getSelectionStatus()
+bool FilterModel::getSelectionStatus(QString format)
 {
     //qDebug() << "Looking for status for" << format;
-    //FilterModelItem* item = find(format);
-    bool g;//  = item->selectedStatus();
+    FilterModelItem* item = find(format);
+    bool g=item->selectedStatus();
     return g;
 }
 

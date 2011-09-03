@@ -17,7 +17,7 @@ class FilterModel: public QAbstractListModel
 public:
   explicit FilterModel(FilterModelItem* prototype, QObject* parent = 0);
   ~FilterModel();
-  int rowCount(const QModelIndex &parent = QModelIndex()) const;
+  Q_INVOKABLE int rowCount(const QModelIndex &parent = QModelIndex()) const;
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
   void appendRow(FilterModelItem* item);
   void appendRows(const QList<FilterModelItem*> &items);
@@ -33,8 +33,8 @@ public:
   QModelIndex lastrow;
   QString ident;  
 
-  Q_INVOKABLE void setSelectionStatus(QString format);
-  Q_INVOKABLE bool getSelectionStatus();
+  Q_INVOKABLE bool setSelectionStatus(QString format);
+  Q_INVOKABLE bool getSelectionStatus(QString format);
 
 signals:
   void ItemAdded();

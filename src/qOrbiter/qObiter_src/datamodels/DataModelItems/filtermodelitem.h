@@ -37,6 +37,7 @@ public:
   bool m_isSelected;
   inline void setStatus(bool b) { m_isSelected = !m_isSelected;  emit filterChanged(); }
   inline bool getStatus () {return m_isSelected;}
+  bool updateSelection (bool newBool) ;
 
 private:
   QString m_fk_fileformat;
