@@ -3,7 +3,7 @@ import QtQuick 1.0
 Item {
     id: menuBar
     property alias items: repeater.model
-    property variant origin
+    property variant origin: 'top-left' // also: top-right, bottom-right, bottom-left
 
     Row {
         Image {
@@ -52,6 +52,10 @@ Item {
                     font.family: aeonRss.name;
                     font.pixelSize: parent.height*.7;
                     anchors.centerIn: parent
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: if (model.action) eval(model.action) // Hate having to use eval(), but there seems to be no other choice
                 }
             }
         }

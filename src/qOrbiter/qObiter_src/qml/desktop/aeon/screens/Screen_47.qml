@@ -16,48 +16,18 @@ Rectangle {
     }
 
     // Upper left menu
-    Image {
-        id: imgLeftMenu
-        source: "../img/common/timepanel_mid-vh.png"
-        width: scaleX(35.23) // 451
-        height:  scaleY(3.75) // 27
-        smooth:  true
-        //transform: Rotation { origin.x: imgLeftMenu.width/2; origin.y: imgLeftMenu.height/2; axis { x: 0; y: 1; z: 0 } angle: 180 }
-
-        Text {
-            text: "Home"
-            anchors.leftMargin: scaleX(.78)
-            font.family: aeonRss.name;
-            font.pixelSize: parent.height*.7;
-            color: "#e5e5e5";
-            smooth: true
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-        }
-        MouseArea {
-            anchors.fill: parent
-            onClicked:  gotoQScreen("Screen_1.qml")
+    MenuBar{
+        origin: "top-left"
+        items: ListModel {
+            ListElement {
+                text: "Home"
+                action: 'gotoQScreen("Screen_1.qml")'
+            }
+            //            ListElement {
+            //                text: "Test"
+            //            }
         }
     }
-
-//    MenuBar{
-//        y: 50
-//        origin: "top-right"
-//        items: ListModel {
-//            ListElement {
-//                text: "Apple"
-//                cost: 2.45
-//            }
-//            ListElement {
-//                text: "Orange"
-//                cost: 3.25
-//            }
-//            ListElement {
-//                text: "Banana"
-//                cost: 1.95
-//            }
-//        }
-//    }
 
 
     // Build the background
@@ -219,5 +189,221 @@ Rectangle {
     //        //anchors.verticalCenter: parent.verticalCenter
     //        anchors.centerIn: parent
     //    }
+
+    // Media filter menus
+
+    // Attributes
+
+    Rectangle{
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+        //width: scaleX(35.23) // 451
+        width: recAttr.width
+        height:  scaleY(3.75) // 27
+        color: "black"
+        opacity: .7
+    }
+
+    Rectangle{
+        id: recAttr
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+        //width: scaleX(35.23) // 451
+        width: txtAttr.width+scaleX(1.5)
+        height:  scaleY(3.75) // 27
+        color: "transparent"
+        Text{
+            id: txtAttr
+            text: "Attributes"
+            color: "white"
+            font.family: aeonRss.name;
+            font.pixelSize: parent.height*.6;
+            anchors.centerIn: parent
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    mnuGenre.height=0;
+                    if (mnuAttr.height) {
+                        mnuAttr.height = 0;
+                    } else {
+                        if ((attribfilter.rowCount()*recAttr.height)<scaleY(50)) {
+                            mnuAttr.height = attribfilter.rowCount()*scaleY(3.75);
+                        } else {
+                            mnuAttr.height = scaleY(50);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Rectangle{
+        id: mnuAttr
+        height: 0
+        width: recAttr.width*2
+        color: "transparent"
+        //opacity: .7
+        anchors.bottom: recAttr.top
+        anchors.left: recAttr.left
+        //visible: false
+        Behavior on height {
+            NumberAnimation {
+                duration: 100
+                easing.type: Easing.InOutQuad
+            }
+        }
+
+        ListView{
+            anchors.fill: parent
+            clip: true
+            height: scaleY(50)
+            model: attribfilter
+            delegate: Rectangle{
+                height:  scaleY(3.75) // 27
+                width: mnuAttr.width
+                color: "transparent"
+                Rectangle{
+                    anchors.fill: parent
+                    color: "black"
+                    opacity: .7
+                }
+                Row{
+                    anchors.fill: parent
+                    spacing: scaleX(.78)
+                    anchors.leftMargin: scaleX(.78)
+                    Rectangle {
+                        id: recCheck
+                        anchors.leftMargin: scaleX(.78)
+                        width: parent.height*.5
+                        height: parent.height*.5
+                        anchors.verticalCenter: parent.verticalCenter
+                        color: status?"white":"transparent"
+                        border.color: "white"
+                    }
+                    Text{
+                        text: name
+                        color: "white"
+                        font.family: aeonRss.name;
+                        font.pixelSize: parent.height*.6;
+                        anchors.verticalCenter: parent.verticalCenter
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked: {
+                                var newStatus = attribfilter.setSelectionStatus(name)
+                                recCheck.color = newStatus?"white":"transparent"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Genres
+
+    Rectangle{
+        anchors.left: recAttr.right
+        anchors.bottom: parent.bottom
+        //width: scaleX(35.23) // 451
+        width: recGenre.width
+        height:  scaleY(3.75) // 27
+        color: "black"
+        opacity: .7
+    }
+
+    Rectangle{
+        id: recGenre
+        anchors.left: recAttr.right
+        anchors.bottom: parent.bottom
+        //width: scaleX(35.23) // 451
+        width: txtGenre.width+scaleX(1.5)
+        height:  scaleY(3.75) // 27
+        color: "transparent"
+        Text{
+            id: txtGenre
+            text: "Genre"
+            color: "white"
+            font.family: aeonRss.name;
+            font.pixelSize: parent.height*.6;
+            anchors.centerIn: parent
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    mnuAttr.height=0;
+                    if (mnuGenre.height) {
+                        mnuGenre.height = 0;
+                    } else {
+                        if ((genrefilter.rowCount()*recGenre.height)<scaleY(50)) {
+                            mnuGenre.height = genrefilter.rowCount()*scaleY(3.75);
+                        } else {
+                            mnuGenre.height = scaleY(50);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Rectangle{
+        id: mnuGenre
+        height: 0
+        width: recGenre.width*2
+        color: "transparent"
+        //opacity: .7
+        anchors.bottom: recGenre.top
+        anchors.left: recGenre.left
+        //visible: false
+        Behavior on height {
+            NumberAnimation {
+                duration: 100
+                easing.type: Easing.InOutQuad
+            }
+        }
+
+        ListView{
+            anchors.fill: parent
+            clip: true
+            height: scaleY(50)
+            model: genrefilter
+            delegate: Rectangle{
+                height:  recGenre.height
+                width: mnuGenre.width
+                color: "transparent"
+                Rectangle{
+                    anchors.fill: parent
+                    color: "black"
+                    opacity: .7
+                }
+                Row{
+                    anchors.fill: parent
+                    spacing: scaleX(.78)
+                    anchors.leftMargin: scaleX(.78)
+                    Rectangle {
+                        id: recCheckGenre
+                        anchors.leftMargin: scaleX(.78)
+                        width: parent.height*.5
+                        height: parent.height*.5
+                        anchors.verticalCenter: parent.verticalCenter
+                        color: status?"white":"transparent"
+                        border.color: "white"
+                    }
+                    Text{
+                        text: name
+                        color: "white"
+                        font.family: aeonRss.name;
+                        font.pixelSize: parent.height*.6;
+                        anchors.verticalCenter: parent.verticalCenter
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked: {
+                                var newStatus = genrefilter.setSelectionStatus(name)
+                                recCheckGenre.color = newStatus?"white":"transparent"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
 }
