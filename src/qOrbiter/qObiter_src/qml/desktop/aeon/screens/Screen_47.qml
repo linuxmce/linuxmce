@@ -89,12 +89,12 @@ Rectangle {
             }
             //            }
 
-            Text {
-                anchors { top: myIcon.bottom; horizontalCenter: wrapper.horizontalCenter }
-                text: name
-                smooth: true
-                visible: wrapper.PathView.isCurrentItem
-            }
+//            Text {
+//                anchors { top: myIcon.bottom; horizontalCenter: wrapper.horizontalCenter }
+//                text: name
+//                smooth: true
+//                visible: wrapper.PathView.isCurrentItem
+//            }
 
             MouseArea {
                 anchors.fill: wrapper
@@ -170,17 +170,21 @@ Rectangle {
 
         }
         onCurrentIndexChanged: {
-            //console.log(dataModel.get(currentIndex));
+            console.log(dataModel.get(currentIndex,"name"));
+            txtName.text = dataModel.get(currentIndex,"name")
         }
 
     }
-    //    Rectangle{
-    //        border.color: "black"
-    //        color: "transparent"
-    //        width: 200
-    //        height: stage.height
-    //        anchors.horizontalCenter: stage.horizontalCenter
-    //    }
+        Text{
+            id: txtName
+            color: "black"
+            //width: 400
+            font.pixelSize: 30
+            font.family: aeonRss.name;
+            opacity: .8
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: scaleY(93)
+        }
     //    Rectangle{
     //        border.color: "black"
     //        color: "transparent"
@@ -515,5 +519,5 @@ Rectangle {
             }
         }
     }
-
+    Component.onCompleted: txtName.text = dataModel.get(0,"name")
 }

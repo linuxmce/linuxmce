@@ -83,6 +83,23 @@ gridItem * ListModel::find(const QString &id) const
   return 0;
 }
 
+QVariant ListModel::get(int index, const QString &name) const
+{
+  if (index>=0 && index<m_list.size()) {
+    gridItem* myItem = m_list.at(index);
+    QHash<int, QByteArray> myHash = myItem->roleNames();
+    QHash<int, QByteArray>::const_iterator i = myHash.constBegin();
+     while (i != myHash.constEnd()) {
+         if (i.value() == name) {
+         return myItem->data(i.key());
+         }
+         ++i;
+     }
+  } else {
+      return "";
+  }
+}
+
 QModelIndex ListModel::indexFromItem(const gridItem *item) const
 {
   Q_ASSERT(item);

@@ -30,6 +30,7 @@ public:
   bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
   gridItem* takeRow(int row);
   gridItem* find(const QString &id) const;
+  Q_INVOKABLE QVariant get(int index, const QString &name) const;
   QModelIndex indexFromItem( const gridItem* item) const;
   gridItem* currentRow();
   void clear();
