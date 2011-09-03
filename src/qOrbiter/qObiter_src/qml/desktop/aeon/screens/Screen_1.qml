@@ -55,15 +55,17 @@ Item
         }
         PathView{
             id: mainmenu
-            width:  parent.width
+            width:  parent.width*1.2
+            anchors.horizontalCenter: parent.horizontalCenter
             //height: imgMenu.height/9
             //anchors.centerIn: parent
-            y: scaleY(47.64) // 343
-            height: scaleY(8.47) // 61
+            y: scaleY(46) // 343 47.64
+            height: scaleY(12.5) // 61 8.47
             //anchors.verticalCenter: imgMenu.verticalCenter
             preferredHighlightBegin: 0.5
             preferredHighlightEnd: 0.5
             focus: true
+            opacity: mainmenu.activeFocus?1:.6
             interactive: true
             Keys.enabled: true
             Keys.onLeftPressed: {
@@ -89,8 +91,8 @@ Item
             delegate: Item{
                 height: mainmenu.height
                 width: mainmenu.width/5
-                anchors.verticalCenter: mainmenu.verticalCenter
-                opacity:  (mainmenu.activeFocus && PathView.isCurrentItem) ? 1 : .5
+                //anchors.verticalCenter: mainmenu.verticalCenter
+                opacity:  PathView.isCurrentItem ? 1 : .6
                 Rectangle{
                     anchors.fill: parent;
                     color: "transparent"
@@ -128,28 +130,21 @@ Item
         // Scenarios menu strip
         Image {
             id: imgSubMenu
-            //width: parent.width/9*8;
-            //anchors.horizontalCenter: parent.horizontalCenter
-            //y: parent.height/9*5-10
             x: scaleX(6.17) // 79
             y: scaleY(56.39) // 406
             width: scaleX(87.73) // 1123
             height: scaleY(4.58) // 33
             source: "../img/home/submenubar_music.png"
-            //fillMode:  Image.PreserveAspectFit
             smooth:  true
         }
         ListView{
             id: submenu
-            //width: parent.width/9*7.6;
-            //anchors.horizontalCenter: parent.horizontalCenter
-            //y: parent.height/9*5-10
-            //height: imgSubMenu.height
-            //anchors.verticalCenter: imgMenu.verticalCenter
-            anchors.fill:  imgSubMenu
+            height: imgSubMenu.height
+            width: imgSubMenu.width*.922
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: imgSubMenu.verticalCenter
             preferredHighlightBegin: 0.5
             preferredHighlightEnd: 0.5
-            //focus: true
             clip:  true
             interactive: true
             orientation: ListView.Horizontal
@@ -170,7 +165,6 @@ Item
                 height: submenu.height
                 id: test
                 width: submenu.width/8
-                //anchors.verticalCenter: submenu.verticalCenter
                 opacity:  (submenu.activeFocus && ListView.isCurrentItem) ? 1 : .5
                 Rectangle{
                     anchors.fill: parent;
@@ -182,12 +176,6 @@ Item
                         font.pixelSize: parent.height/2;
                         color: "white";
                         smooth: true
-                        //font.capitalization: Font.AllUppercase
-                        elide: Text.ElideRight
-                        //transform: Scale { // causes an offset relative to the parent
-                        //    xScale: .75
-                        //    yScale: 1.5
-                        //}
                     }
                 }
                 MouseArea{
@@ -245,6 +233,10 @@ Item
                     //                    fillMode:  Image.PreserveAspectFit
                     //                    smooth:  true
                     //                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked:gotoQScreen(dcenowplaying.qs_screen)
+                    }
                 }
             }
 
