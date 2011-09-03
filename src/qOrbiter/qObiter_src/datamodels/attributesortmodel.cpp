@@ -136,21 +136,22 @@ AttributeSortItem * AttributeSortModel::currentRow()
     return item;
 }
 
-void AttributeSortModel::setSelectionStatus(QString format)
+bool AttributeSortModel::setSelectionStatus(QString format)
 {
     AttributeSortItem* item = find(format);
-    item->updateSelection(false);
+    bool newStatus = item->updateSelection(false);
     qDebug() << "Setting State for:" << format;
     //return state;
     ReturnSelectedItems();
+    return newStatus;
 }
 
-bool AttributeSortModel::getSelectionStatus()
+bool AttributeSortModel::getSelectionStatus(QString format)
 {
-    //qDebug() << "Looking for status for" << format;
-    //AttributeSortItem* item = find(format);
+    qDebug() << "Looking for status for" << format;
+    AttributeSortItem* item = find(format);
 
-    bool g;//  = item->selectedStatus();
+    bool g = item->selectedStatus();
     return g;
 
 }

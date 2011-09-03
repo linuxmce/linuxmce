@@ -33,7 +33,7 @@ public:
   inline QImage cellImage() const {  return m_image; }
   inline bool selectedStatus() const { return m_isSelected; }
   inline bool setStatus(bool b) { m_isSelected = b; }
-   void updateSelection (bool newBool) ;
+   bool updateSelection (bool newBool) ;
 
 private:
 

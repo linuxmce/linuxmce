@@ -34,7 +34,7 @@ public:
 
   bool selectedStatus() const {return m_isSelected; }
   void setStatus(bool b) { m_isSelected = b; }
-  void updateSelection ();
+  bool updateSelection (bool newBool) ;
 
 
 private:

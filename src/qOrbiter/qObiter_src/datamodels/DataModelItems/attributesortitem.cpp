@@ -41,20 +41,20 @@ QVariant AttributeSortItem::data(int role) const
   }
 }
 
-void AttributeSortItem::updateSelection(bool newbool)
+bool AttributeSortItem::updateSelection(bool newbool)
 {
     if (m_isSelected == true)
     {
         m_isSelected = false;
         qDebug () << this->id() << "Button state is " << m_isSelected;
         emit filterChanged();
-       // return m_isSelected;
+       return m_isSelected;
     }
     else
     {
         m_isSelected = true;
         qDebug () << this->id() << "Button state is " << m_isSelected;
        emit filterChanged();
-       //return m_isSelected;
+       return m_isSelected;
     }
 }

@@ -134,21 +134,22 @@ GenreItem * GenreModel::currentRow()
     return item;
 }
 
-void GenreModel::setSelectionStatus(QString format)
+bool GenreModel::setSelectionStatus(QString format)
 {
     GenreItem* item = find(format);
-    item->updateSelection();
+    bool newStatus = item->updateSelection(false);
     qDebug() << "Setting State for:" << format;
     //return state;
     ReturnSelectedItems();
+    return newStatus;
 }
 
-bool GenreModel::getSelectionStatus()
+bool GenreModel::getSelectionStatus(QString format)
 {
-    //qDebug() << "Looking for status for" << format;
-    //AttributeSortItem* item = find(format);
+    qDebug() << "Looking for status for" << format;
+    GenreItem* item = find(format);
 
-    bool g;//  = item->selectedStatus();
+    bool g = item->selectedStatus();
     return g;
 
 }

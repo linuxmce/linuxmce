@@ -15,7 +15,7 @@ class GenreModel : public QAbstractListModel
 public:
   explicit GenreModel(GenreItem* prototype, QObject* parent = 0);
   ~GenreModel();
-  int rowCount(const QModelIndex &parent = QModelIndex()) const;
+  Q_INVOKABLE int rowCount(const QModelIndex &parent = QModelIndex()) const;
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
   void appendRow(GenreItem* item);
   void appendRows(const QList<GenreItem*> &items);
@@ -30,8 +30,8 @@ public:
   void ReturnSelectedItems();
   QModelIndex lastrow;
   QString ident;
-  Q_INVOKABLE void setSelectionStatus(QString format);
-  Q_INVOKABLE bool getSelectionStatus();
+  Q_INVOKABLE bool setSelectionStatus(QString format);
+  Q_INVOKABLE bool getSelectionStatus(QString format);
 signals:
   void ItemAdded();
   void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const int &sRow);

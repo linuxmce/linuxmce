@@ -17,7 +17,7 @@ class AttributeSortModel: public QAbstractListModel
 public:
   explicit AttributeSortModel(AttributeSortItem* prototype, QObject* parent = 0);
   ~AttributeSortModel();
-  int rowCount(const QModelIndex &parent = QModelIndex()) const;
+  Q_INVOKABLE int rowCount(const QModelIndex &parent = QModelIndex()) const;
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
   void appendRow(AttributeSortItem* item);
   void appendRows(const QList<AttributeSortItem*> &items);
@@ -35,8 +35,8 @@ public:
   QModelIndex lastrow;
   QString ident;
 
-  Q_INVOKABLE void setSelectionStatus(QString format);
-  Q_INVOKABLE bool getSelectionStatus();
+  Q_INVOKABLE bool setSelectionStatus(QString format);
+  Q_INVOKABLE bool getSelectionStatus(QString format);
 
 signals:
   void ItemAdded();
