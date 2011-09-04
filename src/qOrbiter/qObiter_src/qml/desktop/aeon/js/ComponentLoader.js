@@ -44,15 +44,22 @@ function deleteFilterObjects(toBeDeleted) {
 var detailcomponent
 var detailsprite
 
-function createFileDetails() {
+function createFileDetails(parent,file) {
 
-    detailcomponent = Qt.createComponent("../components/FileDetails.qml");
-       detailsprite = detailcomponent.createObject(fileviewscreen , {"x": 0, "y": 0});
+    detailcomponent = Qt.createComponent("../components/"+file);
+    if (detailcomponent.status == Component.Ready) {
 
-       if (detailsprite == null) {
-           // Error Handling
-           console.log("Error File Detail object")
-}
+        detailsprite = detailcomponent.createObject(parent , {"x": 0, "y": 0});
+
+        if (detailsprite == null) {
+            // Error Handling
+            console.log("Error File Detail object")
+        }
+    } else if (detailcomponent.status == Component.Error) {
+        // Error Handling
+        console.log("Error loading component:", detailcomponent.errorString());
+    }
+
 }
 
 var roomcomponent

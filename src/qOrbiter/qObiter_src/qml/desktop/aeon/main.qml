@@ -86,6 +86,22 @@ Item {
         id: aeonNowPlaying
         source: "../aeon/fonts/aeon_player.ttf"
     }
+    FontLoader {
+        id: aeonNowPlayingCE
+        source: "../aeon/fonts/aeon_player_ce.ttf"
+    }
+    FontLoader {
+        id: aeonEdit
+        source: "../aeon/fonts/aeon_edit.ttf"
+    }
+    FontLoader {
+        id: aeonEditCE
+        source: "../aeon/fonts/aeon_edit_ce.ttf"
+    }
+    FontLoader {
+        id: aeonSettings
+        source: "../aeon/fonts/aeon_settings.ttf"
+    }
     Timer { // Simulate a simple PhotoScreensaver
         interval: 15000; running: true; repeat: true
         onTriggered: changeBGimage()
