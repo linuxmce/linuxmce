@@ -218,6 +218,8 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
 
         nowPlayingButton = new NowPlayingClass();
         qorbiterUIwin->rootContext()->setContextProperty("dcenowplaying" , nowPlayingButton);
+        nowPlayingProvider = new NowPlayingImageProvider(nowPlayingButton, this);
+        qorbiterUIwin->engine()->addImageProvider("nowplayingprovider", nowPlayingProvider );
 
         ScreenParameters = new ScreenParamsClass;
         qorbiterUIwin->rootContext()->setContextProperty("screenparams", ScreenParameters);

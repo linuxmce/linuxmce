@@ -24,6 +24,7 @@
 #include <contextobjects/nowplayingclass.h>
 #include <contextobjects/screenparamsclass.h>
 #include <contextobjects/playlistclass.h>
+#include <imageProviders/nowplayingimageprovider.h>
 
 #include <QFile>
 #include <QDir>
@@ -46,6 +47,7 @@
 
 class basicImageProvider;
 class FileDetailsImageProvider;
+
 
 namespace DCE
 {
@@ -88,6 +90,7 @@ public:
     basicImageProvider *basicProvider;
     GridIndexProvider *advancedProvider;
     FileDetailsImageProvider *contextImageProvider;
+    NowPlayingImageProvider *nowPlayingProvider;
     QString *gridReqType;
 
     /*

@@ -160,7 +160,8 @@ SOURCES += main.cpp \
     contextobjects/screenparamsclass.cpp \
     contextobjects/playlistclass.cpp \
     contextobjects/playlistitemclass.cpp \
-    datamodels/DatagridClasses/datagriditem.cpp
+    datamodels/DatagridClasses/datagriditem.cpp \
+    imageProviders/nowplayingimageprovider.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -214,7 +215,8 @@ HEADERS += \
     contextobjects/screenparamsclass.h \
     contextobjects/playlistclass.h \
     contextobjects/playlistitemclass.h \
-    datamodels/DatagridClasses/datagriditem.h
+    datamodels/DatagridClasses/datagriditem.h \
+    imageProviders/nowplayingimageprovider.h
 
 OTHER_FILES += Readme.txt \
     config.xml \
@@ -293,3 +295,5 @@ OTHER_FILES= \
 
 RESOURCES += \
     skinData.qrc
+
+
