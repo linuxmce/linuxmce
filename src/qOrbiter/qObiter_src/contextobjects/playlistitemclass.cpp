@@ -25,7 +25,6 @@ QVariant PlaylistItemClass::data(int role) const
     return name();
   case IndexRole:
     return index();
-
   case PathRole:
     return path();
   case FKRole:

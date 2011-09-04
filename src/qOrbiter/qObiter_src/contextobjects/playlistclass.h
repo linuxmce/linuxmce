@@ -22,6 +22,7 @@ public:
   PlaylistItemClass* find(const QString &id) const;
   QModelIndex indexFromItem( const PlaylistItemClass* item) const;
   PlaylistItemClass* currentRow();
+  bool checkDupe(QString name, QString position);
   void setItemStatus(int b);
   void clear();
 

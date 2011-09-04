@@ -9,6 +9,7 @@
 #include <QVariant>
 #include <QImage>
 #include <QMap>
+#include <QDebug>
 
 class PlaylistItemClass: public QObject
 {

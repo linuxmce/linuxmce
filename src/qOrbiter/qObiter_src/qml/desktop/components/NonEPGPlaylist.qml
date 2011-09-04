@@ -44,6 +44,7 @@ onPlayListPositionChanged:nonepgplaylistview.positionViewAtIndex(dcenowplaying.m
             Text {
                 text: id
                 anchors.fill: parent
+                wrapMode: "WrapAnywhere"
             }
 
             MouseArea{

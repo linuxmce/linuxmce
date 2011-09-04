@@ -2279,8 +2279,17 @@ void DCE::qOrbiter::requestMediaPlaylist()
                     cellImg.load(":/icons/videos.png");
                 }
 
+              /*  if(qmlUI->currentPlaylist->checkDupe(cellTitle, cellAttribute) == true)
+                {
+                    qDebug() << cellTitle << " already in playlist";
+                }
+                else
+                {
+                    qDebug() << cellTitle << " not in playlist";
 
-                qmlUI->currentPlaylist->appendRow(new PlaylistItemClass(cellTitle, cellAttribute, fk_file ,index, qmlUI->currentPlaylist));
+                }
+                */
+                 qmlUI->currentPlaylist->appendRow(new PlaylistItemClass(cellTitle, cellAttribute, fk_file ,index, qmlUI->currentPlaylist));
             }
 
         }
