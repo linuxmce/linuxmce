@@ -7,6 +7,7 @@ NowPlayingClass::NowPlayingClass(QDeclarativeItem *parent) :
     b_mediaPlaying = false;
     qs_playbackSpeed = "1x";
     i_playbackSpeed = 1;
+    m_iplaylistPosition = 0;
 
 
 }

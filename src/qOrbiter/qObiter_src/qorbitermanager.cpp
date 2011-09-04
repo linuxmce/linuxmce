@@ -120,7 +120,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
 
     if (readLocalConfig())
     {
-        qDebug () << "Local confing processing";
+        //qDebug () << "Local confing processing";
     }
 
     //  currentSkin = "default";
@@ -160,7 +160,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
             qDebug() << skinData.errors();
             exit(0);
         }
-        qDebug() << " loading";
+       // qDebug() << " loading";
     }
 
     if(skinData.isReady())
@@ -241,7 +241,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
 
         // qorbiterUIwin->showFullScreen();
         gotoQScreen("Splash.qml");
-        qDebug() << "Showing Splash";
+   //     qDebug() << "Showing Splash";
         QObject::connect(item,SIGNAL(setupStart(int, QString)), this,SLOT(qmlSetupLmce(int,QString)));
 
     }
@@ -274,7 +274,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
     pqOrbiter->qmlUI = this;
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
     {
-        qDebug() << "Device: " << PK_Device <<" Connect";
+     //   qDebug() << "Device: " << PK_Device <<" Connect";
         //g_pCommand_Impl=pqOrbiter;
         //g_pDeadlockHandler=DeadlockHandler;
         // g_pSocketCrashHandler=SocketCrashHandler;
@@ -301,7 +301,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             {
 
 
-                qDebug () << "Orbiter Registered, starting";
+        //        qDebug () << "Orbiter Registered, starting";
                 gotoQScreen("Screen_1.qml");
                 return true;
             }
@@ -360,7 +360,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 bool qorbiterManager::refreshUI()
 {
 
-    qDebug() << "Launching UI";
+  //  qDebug() << "Launching UI";
     return true;
 }
 
@@ -373,14 +373,14 @@ bool qorbiterManager::getConf(int pPK_Device)
         // setNowPlayingIcon(false);
     }
 
-    qDebug() << "Reading Config" ;
+   // qDebug() << "Reading Config" ;
     iPK_Device = long(pPK_Device);
     iOrbiterPluginID = 9;
     iMediaPluginID = 10;
     iSize = 0;
     m_pOrbiterCat = 5;
     s_onOFF = "1";
-    qDebug() << "PK_Device No:" << iPK_Device;
+   // qDebug() << "PK_Device No:" << iPK_Device;
 
     QDomDocument configData;
 
@@ -931,7 +931,7 @@ void qorbiterManager::getcurrentSkins(QStringList skinPaths)
 #endif
     if(skinsDir.cd("qml/"))
     {
-        qDebug() << skinsDir.path();
+        //qDebug() << skinsDir.path();
 
         QStringList platform = skinsDir.entryList();
 

@@ -1018,8 +1018,12 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
 
     if (iPK_MediaType != 0)
     {
+
         qmlUI->nowPlayingButton->setStatus(true);
         requestMediaPlaylist();
+
+        qmlUI->nowPlayingButton->setPlaylistPostion(iValue);
+
         // BindMediaRemote(true);
     }
     else if (iPK_MediaType == 0)
@@ -1031,6 +1035,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
 
     }
 
+
     QString scrn = sPK_DesignObj.c_str();
     int pos1 = scrn.indexOf(",");
     scrn.remove(pos1, scrn.length());
@@ -1040,6 +1045,8 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     qmlUI->nowPlayingButton->setSubTitle(QString::fromStdString(sText));
     qmlUI->nowPlayingButton->i_streamID = iStreamID;
     qmlUI->nowPlayingButton->i_mediaType = iPK_MediaType;
+
+    // SetNowPlayingDetails();
 }
 
 //<-dceag-c254-b->
@@ -1656,21 +1663,21 @@ void qOrbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool 
     qDebug() << "Vect msg count" << pMessage->m_vectExtraMessages.size();
 
     map<long, string >::const_iterator end = pMessage->m_mapParameters.end();
-       for (map<long, string >::const_iterator it = pMessage->m_mapParameters.begin(); it != end; ++it)
-       {
-           long dparam = it->first;
-            string dparam2 = it->second;
-           qDebug() << "Map  Param: " << dparam << " Value: " << dparam2.c_str();
-       }
+    for (map<long, string >::const_iterator it = pMessage->m_mapParameters.begin(); it != end; ++it)
+    {
+        long dparam = it->first;
+        string dparam2 = it->second;
+        qDebug() << "Map  Param: " << dparam << " Value: " << dparam2.c_str();
+    }
 
-        qDebug() << "Data params count" << pMessage->m_mapData_Parameters.size();
-       map<long, char* >::const_iterator end2 = pMessage->m_mapData_Parameters.end();
-          for (map<long, char* >::const_iterator it2 = pMessage->m_mapData_Parameters.begin(); it2 != end2; ++it2)
-          {
-              long dparam = it2->first;
-              string dparam2 = it2->second;
-              qDebug() << "Data  Param: " << dparam << " Value: " << dparam2.c_str();
-          }
+    qDebug() << "Data params count" << pMessage->m_mapData_Parameters.size();
+    map<long, char* >::const_iterator end2 = pMessage->m_mapData_Parameters.end();
+    for (map<long, char* >::const_iterator it2 = pMessage->m_mapData_Parameters.begin(); it2 != end2; ++it2)
+    {
+        long dparam = it2->first;
+        string dparam2 = it2->second;
+        qDebug() << "Data  Param: " << dparam << " Value: " << dparam2.c_str();
+    }
 
 
     QString params = pMessage->ToString(true).c_str();
@@ -2148,14 +2155,14 @@ void DCE::qOrbiter::StartMedia(QString inc_FKFile)
     // CMD_Play_Media playMedia(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->i_current_mediaType, 1001 , pos, inc_FKFile.toStdString());
     SendCommand(playMedia);
 
-    qmlUI->nowPlayingButton->setImage(qmlUI->filedetailsclass->getScreenShot());
+
 }
 
 void DCE::qOrbiter::StopMedia()
 {
 
     CMD_MH_Stop_Media endMedia(qmlUI->iPK_Device, qmlUI->iMediaPluginID,0,qmlUI->nowPlayingButton->i_mediaType,0,QString::number(qmlUI->iea_area).toStdString(),false);
-
+    qmlUI->currentPlaylist->clear();
     SendCommand(endMedia);
     qDebug() << "End command sent";
 }
@@ -2321,5 +2328,10 @@ void DCE::qOrbiter::JumpToPlaylistPosition(int pos)
 {
     CMD_Jump_Position_In_Playlist jump_playlist(qmlUI->iPK_Device, qmlUI->iMediaPluginID, QString::number(pos).toStdString(), qmlUI->nowPlayingButton->i_streamID);
     SendCommand(jump_playlist);
+}
+
+void DCE::qOrbiter::SetNowPlayingDetails(QString file)
+{
+
 }
 

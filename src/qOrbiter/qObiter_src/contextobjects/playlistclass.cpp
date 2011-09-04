@@ -16,7 +16,7 @@ int PlaylistClass::rowCount(const QModelIndex &parent) const
   return m_list.size();
 }
 
-QVariant PlaylistClass::data(const QModelIndex &index, int role) const
+ QVariant PlaylistClass::data(const QModelIndex &index, int role) const
 {
   if(index.row() < 0 || index.row() >= m_list.size())
     return QVariant();
@@ -133,4 +133,10 @@ PlaylistItemClass * PlaylistClass::currentRow()
 {
     PlaylistItemClass* item = m_list.at(0);
     return item;
+}
+
+void PlaylistClass::setItemStatus(int pos)
+{
+    PlaylistItemClass * item = find(QString::number(pos));
+    item->setActive(true);
 }

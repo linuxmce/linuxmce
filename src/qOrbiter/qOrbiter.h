@@ -77,6 +77,7 @@ public:
                 void GetScreenSaverImages();
                 void BindMediaRemote(bool onoff);
                 void JumpToPlaylistPosition(int pos);
+                void SetNowPlayingDetails(QString file);
 
 //<-dceag-const-e->
 

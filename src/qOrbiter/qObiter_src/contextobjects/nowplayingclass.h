@@ -24,6 +24,7 @@ class NowPlayingClass : public QDeclarativeItem
     Q_PROPERTY (QString filepath READ getFilePath WRITE setFilePath NOTIFY filePathChanged)
     Q_PROPERTY (QString qs_playbackSpeed READ getMediaSpeed WRITE setStringSpeed NOTIFY mediaSpeedChanged)
     Q_PROPERTY (QUrl nowPlayingImage READ getImage WRITE setImage NOTIFY imageChanged)
+    Q_PROPERTY (int m_iplaylistPosition READ getPlaylistPosition WRITE setPlaylistPostion NOTIFY playListPositionChanged)
 
 
 public:
@@ -40,6 +41,7 @@ public:
     QTime *timecode;
     QString qs_playbackSpeed;
     QUrl nowPlayingImage;
+    int m_iplaylistPosition;
 
 signals:
     void playlistChanged();
@@ -53,10 +55,14 @@ signals:
     void mediaStatusChanged();
     void filePathChanged();
     void mediaSpeedChanged();
+    void playListPositionChanged();
 
 
 
 public slots:
+
+    void setPlaylistPostion(int i_pls) {m_iplaylistPosition = i_pls ; qDebug() << "Playlist Position now" << m_iplaylistPosition ; emit playListPositionChanged();}
+    int getPlaylistPosition() {return m_iplaylistPosition;}
 
     void setImage(QUrl incImage) {nowPlayingImage = incImage; emit imageChanged();}
     QUrl getImage () { return nowPlayingImage;}
@@ -79,7 +85,7 @@ public slots:
     void setMediaType (int inc_mediaType) {i_mediaType = inc_mediaType; emit mediaTypeChanged();}
     int  getMediaType () {return i_mediaType;}
 
-    void setFilePath (QString inc_fp) {filepath = inc_fp; emit filePathChanged();}
+    void setFilePath (QString inc_fp) {filepath = inc_fp; qDebug() <<"FilePath:" << filepath; emit filePathChanged();}
     QString getFilePath () {return filepath;}
 
     void setMediaSpeed(int speed);

@@ -12,45 +12,48 @@
 
 class PlaylistItemClass: public QObject
 {
- Q_OBJECT
+    Q_OBJECT
 
 
 public:
-  enum Roles {
-    NameRole = Qt::UserRole+1,
-    IndexRole =Qt::UserRole+2,
-    PathRole= Qt::DisplayRole+3,
+    enum Roles {
+        NameRole = Qt::UserRole+1,
+        IndexRole =Qt::UserRole+2,
+        PathRole= Qt::DisplayRole+3,
+        AttributeRole = Qt::UserRole+5,
+        FKRole = Qt::DisplayRole+6,
+        StateRole = Qt::DisplayRole+7
 
-    AttributeRole = Qt::UserRole+5,
-    FKRole = Qt::DisplayRole+6
-
-  };
+    };
 
 public:
-  PlaylistItemClass(QObject *parent = 0) {}
-  explicit PlaylistItemClass( QString &ident, QString &name,  QString &path,  int &index,   QObject *parent = 0);
-  QVariant data(int role) const;
-  QHash<int, QByteArray> roleNames() const;
+    PlaylistItemClass(QObject *parent = 0) {}
+    explicit PlaylistItemClass( QString &ident, QString &name,  QString &path,  int &index,   QObject *parent = 0);
+    QVariant data(int role) const;
+    QHash<int, QByteArray> roleNames() const;
 
-  inline QString id() const {  return m_fk_file.toUtf8(); }
-  inline QString name() const { return m_name.toLatin1(); }
-  inline int index() const { return m_index; }
-  inline QString path() const { return m_path; }
+    inline QString id() const {  return m_fk_file.toUtf8(); }
+    inline QString name() const { return m_name.toLatin1(); }
+    inline int index() const { return m_index; }
+    inline QString path() const { return m_path; }
 
-  inline QMap <QString*, int> attributes() const {return m_mapAttrib;}
+    inline QMap <QString*, int> attributes() const {return m_mapAttrib;}
 
+    inline void setActive(bool b) { isActive = b;}
+    Q_INVOKABLE inline bool getActive () {return isActive;}
+    bool isActive;
 
 private:
-  QString m_name;
-  int m_index;
-  QString m_path;
+    QString m_name;
+    int m_index;
+    QString m_path;
+    QString m_fk_file;
+    QMap <QString*, int> m_mapAttrib;
 
-  QString m_fk_file;
-  QMap <QString*, int> m_mapAttrib;
 
 signals:
-  void imageChanged();
-  void dataChanged();
+    void imageChanged();
+    void dataChanged();
 };
 
 #endif // PLAYLISTITEMCLASS_H

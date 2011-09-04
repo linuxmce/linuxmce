@@ -13,19 +13,44 @@ Rectangle {
         font.family: "Droid Sans Fallback"
         font.pointSize: 24
         font.pixelSize: 12
+        anchors.bottom: ignoreonce.top
+        anchors.horizontalCenter: parent.horizontalCenter
     }
 
-    ButtonSq {
-        id: buttonsq1
-        height: 50
-        color: "#85eae9"
-        buttontext: "Home"
-        width: 50
-        x: 574
-        y: 25
-        MouseArea{
-            anchors.fill: parent
-            onClicked:gotoQScreen("Screen_1.qml")
+    Rectangle{
+        id:ignoreonce
+        height:scaleY(10)
+        width: scaleX(10)
+        y:scaleY(15)
+        anchors.centerIn: parent
+        Text {
+            id: screen116label1
+            text: qsTr("Ignore just this time")
         }
     }
+
+    Rectangle{
+        id:ignorealways
+        height:scaleY(10)
+        width: scaleX(10)
+        y:scaleY(15)
+        anchors.left: ignoreonce.left
+        anchors.leftMargin: 20
+        Text {
+            id: screen116label2
+            text: qsTr("Ignore Always")
+        }
+
+        Rectangle{
+            id:optbox
+            height: scaleY(20)
+            width: scaleX(15)
+            color: style.not_color
+            anchors.top: ignoreonce.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+        }
+
+    }
+
+    HomeButton{anchors.right: parent.right}
 }

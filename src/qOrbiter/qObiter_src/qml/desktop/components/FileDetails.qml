@@ -54,7 +54,7 @@ Rectangle {
             height: 173
             radius: 4
             clip:  true
-            color: style.orbiterBG
+            color: style.not_color
 
             Flickable {
                 anchors.fill: parent
