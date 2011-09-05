@@ -21,7 +21,7 @@
 
 #include "DataGrid.h"
 #include "Gen_Devices/qOrbiterBase.h"
-#include <qOrbiter/qObiter_src/qorbitermanager.h>
+#include <qOrbiter/qOrbiter_src/qorbitermanager.h>
 #include "DCE/Virtual_Device_Translator.h"
 #include "Orbiter/DesignObj_DataGrid.h"
 #include <QStringList>

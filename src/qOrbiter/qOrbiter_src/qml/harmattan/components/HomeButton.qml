@@ -13,7 +13,7 @@ Item {
         width: style.buttonW
         Image {
             id: homeimage
-            source: "/src/1004/src/qOrbiter/qObiter_src/img/icons/kfm_home.png"
+            source: "img/icons/kfm_home.png"
             anchors.centerIn: parent
             height: style.buttonH
             width: style.buttonW

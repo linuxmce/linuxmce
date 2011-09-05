@@ -5,7 +5,7 @@
 #include <QDeclarativeImageProvider>
 #include <QDebug>
 #include <QVariant>
-#include <qOrbiter/qObiter_src/qorbitermanager.h>
+#include <qOrbiter/qOrbiter_src/qorbitermanager.h>
 
 class FileDetailsImageProvider: public QObject , public QDeclarativeImageProvider
 {

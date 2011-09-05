@@ -124,7 +124,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
     }
 
     //  currentSkin = "default";
-    currentSkinURL="/qml/qObiter_src/";
+    currentSkinURL="/qml/qOrbiter_src/";
     s_RouterIP="DCERouter";
 
     QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
@@ -855,7 +855,7 @@ void qorbiterManager::regenComplete(int i)
 
         if (getConf(iPK_Device))
         {   qDebug() << "Regen Complete!";
-            // qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/qObiter_src/main.qml"));
+            // qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/qOrbiter_src/main.qml"));
             gotoQScreen("Screen_1.qml");
 #ifdef Q_OS_SYMBIAN
             qorbiterUIwin->showFullScreen();
