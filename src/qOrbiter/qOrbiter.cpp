@@ -781,17 +781,7 @@ void qOrbiter::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *p
     cout << "Parm #19 - Data  (data value)" << endl;
     cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
 
-    QByteArray pictureData;              //config file put into qbytearray for processing
-    pictureData.setRawData(pData, iData_Size);
-    QImage updatedImage;
-
-    if (!updatedImage.loadFromData(pictureData, "JPEG"))
-    {
-        qDebug() << "Couldnt get image, defaulting";
-        updatedImage.load(":/img/lmcesplash.jpg");
-    }
-
-    qmlUI->updatedObjectImage = updatedImage;
+    qmlUI->updatedObjectImage->setRawData(pData, iData_Size);
     qDebug() << "image set!";
 
 }

@@ -224,12 +224,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         nowPlayingProvider = new UpdateObjectImageProvider(this);
         qorbiterUIwin->engine()->addImageProvider("updateobject", nowPlayingProvider );
 
-        updatedObjectImage.load(":/icons/videos.png");
-                if(updatedObjectImage.isNull());
-                {
-                    qDebug() << "Cant Find Default!";
 
-                }
 
         ScreenParameters = new ScreenParamsClass;
         qorbiterUIwin->rootContext()->setContextProperty("screenparams", ScreenParameters);
@@ -384,6 +379,9 @@ bool qorbiterManager::getConf(int pPK_Device)
     {
         // setNowPlayingIcon(false);
     }
+
+    //updatedObjectImage = new QByteArray();
+
 
    // qDebug() << "Reading Config" ;
     iPK_Device = long(pPK_Device);

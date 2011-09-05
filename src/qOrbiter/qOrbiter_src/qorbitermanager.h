@@ -149,7 +149,14 @@ Param 10 - pk_attribute
     //---------IMPORTANT-1-OFF-VARIABLES!!!!!---------------------------------------------//
     int i_current_command_grp;
     //int i_stream_id;
-    QImage updatedObjectImage;
+
+    /*
+    update object image variables. they need a place to be store because they can be sent or updated at any time
+    with this method, the current screen can get its data in an async fashion and multiple components can request the
+    data
+    */
+
+    QByteArray updatedObjectImage;
 
     //ui functions
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}

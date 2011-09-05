@@ -72,14 +72,13 @@ Rectangle {
 
        Image {
            id: image1
-           x: 0
-           y: 38
+
            width: 350
            height: 224
            anchors.topMargin: 38
            anchors.bottomMargin: 88
            fillMode: Image.PreserveAspectFit
-           anchors.fill: parent
+        //   anchors.fill: parent
 
            source: "image://updateobject/"+dcenowplaying.m_iplaylistPosition
        }
@@ -103,7 +102,7 @@ Rectangle {
                y: 10
                width: parent.width
                height: 18
-               text: "Artist: " + dcenowplaying.qs_mainTitle
+               text:  dcenowplaying.qs_mainTitle
                font.family: "Droid Sans"
                anchors.topMargin: 10
                anchors.top: parent.top
@@ -114,22 +113,6 @@ Rectangle {
                font.pixelSize: 12
            }
 
-           Text {
-               id: nowplayingboxtext2
-               x: 0
-               y: 35
-               width: parent.width
-               height: 18
-               text: "Album: " + dcenowplaying.qs_mainTitle2
-               font.family: "Droid Sans"
-               anchors.topMargin: 35
-               anchors.top: parent.top
-               wrapMode: Text.WrapAnywhere
-               font.bold: true
-               smooth: true
-
-               font.pixelSize: 12
-           }
 
            Text {
                id: titlebox
@@ -138,7 +121,7 @@ Rectangle {
 
               anchors.bottom: parent.bottom
                wrapMode: "NoWrap"
-               text: "Title:" + dcenowplaying.qs_subTitle
+               text: dcenowplaying.qs_subTitle
                font.family: "Droid Sans"
                anchors.bottomMargin: 12
                font.bold: true

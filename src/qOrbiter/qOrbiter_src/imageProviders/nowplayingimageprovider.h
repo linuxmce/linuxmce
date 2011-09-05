@@ -16,27 +16,41 @@ public:
 
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize)
     {
-
-        QImage key = managerreference->updatedObjectImage;
-        if(key.isNull())
+        qDebug() << "NOWPLAYINGPROVIDER STARTING";
+        QImage result;
+        QImage key;
+        qDebug() << "CREATED KEY";
+        if (managerreference->updatedObjectImage.isEmpty())
         {
-             key.load(":/img/lmcesplash.jpg");
-
+            qDebug() << "EMPTY UPDATE IMAGE BUFFER, SCHEDULE RELOAD";
+            key.load("qrc:/icons/videos.png");
+            return key;
         }
         else
         {
-        QImage result;
-
-         if (requestedSize.isValid()) {
-                result = key.scaled(requestedSize, Qt::KeepAspectRatio);
-            } else {
-                result = key;
-            }
-            *size = result.size();
-
-            return result;
+            QByteArray localbytes = managerreference->updatedObjectImage;
+            qDebug() << "LOADING DATA FROM QBYTE ARRAY:" << managerreference->updatedObjectImage.size();
+            key.loadFromData(localbytes);
         }
+
+        qDebug() << "KEY IMAGE STATE::" << key.isNull();
+
+        if (requestedSize.isValid())
+        {
+            result = key.scaled(requestedSize);
+            qDebug() << "SCALED to SIZE";
+        }
+        else
+        {
+            qDebug() << "COULD NOT SCALE!!";
+            result = key;
+        }
+
+        qDebug() << "RETURNING IMAGE FROM PROVIDER AND FINISHING";
+        return key;
     }
+
+
 signals:
 
 public slots:
