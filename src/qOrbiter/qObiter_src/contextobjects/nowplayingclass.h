@@ -18,6 +18,7 @@ class NowPlayingClass : public QDeclarativeItem
     Q_OBJECT
     Q_PROPERTY (bool b_mediaPlaying READ getStatus WRITE setStatus NOTIFY mediaStatusChanged)
     Q_PROPERTY (QString qs_mainTitle READ getTitle WRITE setTitle NOTIFY titleChanged)
+     Q_PROPERTY (QString qs_mainTitle2 READ getTitle2 WRITE setTitle2 NOTIFY titleChanged2)
     Q_PROPERTY (QString qs_subTitle READ getSubTitle WRITE setSubTitle NOTIFY titleChanged )
     Q_PROPERTY (QString qs_screen READ getScreen WRITE setScreen NOTIFY screenTypeChanged)
 
@@ -33,6 +34,7 @@ public:
     QString qs_screen;
     QString qs_imagePath;
     QString qs_mainTitle;
+    QString qs_mainTitle2;
     QString qs_subTitle;
     bool b_mediaPlaying;
     int i_mediaType;
@@ -51,6 +53,7 @@ signals:
     void imageChanged();
     void screenTypeChanged();
     void titleChanged();
+       void titleChanged2();
     void mediaTypeChanged();
     void mediaStatusChanged();
     void filePathChanged();
@@ -75,6 +78,9 @@ public slots:
 
     void setTitle (QString inc_title) {qs_mainTitle = inc_title; emit titleChanged();}
     QString getTitle () {return qs_mainTitle;}
+
+    void setTitle2 (QString inc_title) {qs_mainTitle2 = inc_title; emit titleChanged2();}
+    QString getTitle2 () {return qs_mainTitle2;}
 
     void setSubTitle (QString inc_subTitle) {qs_subTitle = inc_subTitle; emit titleChanged();}
     QString getSubTitle () {return qs_subTitle;}

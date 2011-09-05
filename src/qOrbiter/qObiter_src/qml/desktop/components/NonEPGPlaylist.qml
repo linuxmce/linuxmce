@@ -35,6 +35,7 @@ onPlayListPositionChanged:nonepgplaylistview.positionViewAtIndex(dcenowplaying.m
             Text {
                 id: position
                 text: name
+                font.family: "DroidSans"
                 opacity: .5
                 color: "black"
                 anchors.centerIn: parent

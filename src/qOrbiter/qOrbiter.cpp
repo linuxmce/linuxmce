@@ -1024,7 +1024,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
 
         qmlUI->nowPlayingButton->setPlaylistPostion(iValue);
 
-        // BindMediaRemote(true);
+
     }
     else if (iPK_MediaType == 0)
     {
@@ -1039,9 +1039,26 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     QString scrn = sPK_DesignObj.c_str();
     int pos1 = scrn.indexOf(",");
     scrn.remove(pos1, scrn.length());
-    qDebug() << scrn;
+
+    QString md1 = QString::fromStdString(sValue_To_Assign);
+    QStringList mdlist;
+mdlist= md1.split(QRegExp("\\n"), QString::SkipEmptyParts);
+qDebug() << "Metadatalist" << mdlist.count();
+
+    if (mdlist.count() == 2)
+    {
+    qmlUI->nowPlayingButton->setTitle(mdlist.at(0));
+     qmlUI->nowPlayingButton->setTitle2(mdlist.at(1));
+    }
+    else
+    {
+        qmlUI->nowPlayingButton->setTitle(QString::fromStdString(sValue_To_Assign));
+        qmlUI->nowPlayingButton->setTitle2("");
+    }
+
+
     qmlUI->nowPlayingButton->setScreen("Screen_"+scrn+".qml");
-    qmlUI->nowPlayingButton->setTitle(QString::fromStdString(sValue_To_Assign));
+
     qmlUI->nowPlayingButton->setSubTitle(QString::fromStdString(sText));
     qmlUI->nowPlayingButton->i_streamID = iStreamID;
     qmlUI->nowPlayingButton->i_mediaType = iPK_MediaType;
@@ -1745,6 +1762,8 @@ void qOrbiter::CMD_Display_Alert(string sText,string sTokens,string sTimeout,int
     cout << "Parm #70 - Tokens=" << sTokens << endl;
     cout << "Parm #182 - Timeout=" << sTimeout << endl;
     cout << "Parm #251 - Interruption=" << iInterruption << endl;
+
+
 }
 
 //<-dceag-c810-b->
@@ -2328,9 +2347,10 @@ void DCE::qOrbiter::BindMediaRemote(bool onoff)
     {
         status = "0";
     }
-
-    CMD_Bind_to_Media_Remote bind_remote(qmlUI->iPK_Device, qmlUI->iMediaPluginID, 0,string(""), string(status), string(""),QString::number(qmlUI->iea_area).toStdString(), 0, 0);
+    string designobj = "2355";
+    CMD_Bind_to_Media_Remote bind_remote(qmlUI->iPK_Device, qmlUI->iMediaPluginID, 2355 ,string(""), string(""), string(""),QString::number(qmlUI->iea_area).toStdString(), 0, 0);
     SendCommand(bind_remote);
+
 }
 
 void DCE::qOrbiter::JumpToPlaylistPosition(int pos)
