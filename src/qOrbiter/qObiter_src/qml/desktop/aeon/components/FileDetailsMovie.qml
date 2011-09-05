@@ -31,6 +31,7 @@ Rectangle{
             anchors.fill: parent
             fillMode: Image.PreserveAspectFit;
             source: "image://filedetailsprovider/"+filedetailsclass.screenshot
+            smooth: true
         }
     }
     Image{

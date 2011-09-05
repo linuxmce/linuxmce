@@ -8,10 +8,24 @@ Item{
     {
         target: filedetailsclass
         onShowDetailsChanged: {
-            //details.visible = true
-            stage.visible = false
-            //synopsisflick.contentHeight=synopsistext.height+104
-            JsLib.createFileDetails(mediaParent,'FileDetailsMovie.qml')
+            var detailsFile = ''
+            switch (gmediaType) {
+            case '4': // audio
+                console.log("Loading audio details")
+                break
+            case '5': // video
+                detailsFile = 'FileDetailsMovie.qml'
+                console.log("Loading video details")
+                break
+            }
+            console.log("file",detailsFile,gmediaType)
+            if (detailsFile.length) {
+                stage.visible = false
+                JsLib.createFileDetails(mediaParent,detailsFile)
+            } else {
+                console.log("No details file for media type",gmediaType)
+                JsLib.createFileDetails(mediaParent,'FileDetailsError.qml')
+            }
         }
     }
 
@@ -534,6 +548,11 @@ Item{
                 }
             }
         }
-        Component.onCompleted: txtName.text = dataModel.get(0,"name")
+        Timer{
+            interval: 500; running: true; repeat: false
+            onTriggered: {
+                txtName.text = dataModel.get(0,"name")
+            }
+        }
     }
 }
