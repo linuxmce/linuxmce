@@ -781,8 +781,11 @@ void qOrbiter::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *p
     cout << "Parm #19 - Data  (data value)" << endl;
     cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
 
-    qmlUI->updatedObjectImage->setRawData(pData, iData_Size);
+    QImage tempImage;
+    tempImage.loadFromData(QByteArray(pData, iData_Size));
+    qmlUI->updateImageChanged(tempImage);
     qDebug() << "image set!";
+
 
 }
 
