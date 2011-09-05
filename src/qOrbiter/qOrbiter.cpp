@@ -780,6 +780,20 @@ void qOrbiter::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *p
     cout << "Parm #14 - Type=" << sType << endl;
     cout << "Parm #19 - Data  (data value)" << endl;
     cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
+
+    QByteArray pictureData;              //config file put into qbytearray for processing
+    pictureData.setRawData(pData, iData_Size);
+    QImage updatedImage;
+
+    if (!updatedImage.loadFromData(pictureData, "JPEG"))
+    {
+        qDebug() << "Couldnt get image, defaulting";
+        updatedImage.load(":/img/lmcesplash.jpg");
+    }
+
+    qmlUI->updatedObjectImage = updatedImage;
+    qDebug() << "image set!";
+
 }
 
 //<-dceag-c58-b->
@@ -1020,19 +1034,17 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     {
 
         qmlUI->nowPlayingButton->setStatus(true);
-        requestMediaPlaylist();
-
+        //requestMediaPlaylist();
         qmlUI->nowPlayingButton->setPlaylistPostion(iValue);
 
-
     }
+
     else if (iPK_MediaType == 0)
     {
         qDebug () << "Closing Now Playing";
         qmlUI->nowPlayingButton->setStatus(false);
-        qmlUI->gotoQScreen("Screen_1.qml");
+       // qmlUI->gotoQScreen("Screen_1.qml");
         BindMediaRemote(false);
-
     }
 
 
@@ -2348,7 +2360,7 @@ void DCE::qOrbiter::BindMediaRemote(bool onoff)
         status = "0";
     }
     string designobj = "2355";
-    CMD_Bind_to_Media_Remote bind_remote(qmlUI->iPK_Device, qmlUI->iMediaPluginID, 2355 ,string(""), string(""), string(""),QString::number(qmlUI->iea_area).toStdString(), 0, 0);
+    CMD_Bind_to_Media_Remote bind_remote(qmlUI->iPK_Device, qmlUI->iMediaPluginID, 0,string("4962") ,status, string(""), QString::number(qmlUI->iea_area).toStdString(), 0, 0);
     SendCommand(bind_remote);
 
 }

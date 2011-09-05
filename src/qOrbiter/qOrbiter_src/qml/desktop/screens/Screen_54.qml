@@ -12,7 +12,7 @@ Rectangle {
     radius: 0
     opacity: 1
     color: "transparent"
-
+    Component.onCompleted:setNowPlayingData()
     //main 'now playing rect containing all the other items
     Remote_lighting_controls{ id: remote_lighting_controls1; x: 1187; y: 501; width: 93; height: 219 }
     Remote_Audio_controls{ id: remote1; x: 1127; y: 511; anchors.rightMargin: 0; z: 45; anchors.right: remote_lighting_controls1.left}
@@ -81,7 +81,7 @@ Rectangle {
            fillMode: Image.PreserveAspectFit
            anchors.fill: parent
 
-           source: "../../../img/lmcesplash.png"
+           source: "image://updateobject/"+dcenowplaying.m_iplaylistPosition
        }
 
        Rectangle {

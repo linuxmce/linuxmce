@@ -2,38 +2,29 @@
 #define NOWPLAYINGIMAGEPROVIDER_H
 
 #include <QDeclarativeImageProvider>
-#include <contextobjects/nowplayingclass.h>
+#include <qorbitermanager.h>
+#include <QVariant>
 
 
 
-class NowPlayingImageProvider: public QDeclarativeImageProvider
+class UpdateObjectImageProvider: public QObject , public QDeclarativeImageProvider
 {
 public:
-    NowPlayingImageProvider(NowPlayingClass* nowplaying, QObject* parent):QDeclarativeImageProvider(QDeclarativeImageProvider::Image)
-    {
-    }
+    UpdateObjectImageProvider(qorbiterManager * manager);
+
+
 
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize)
     {
 
+        QImage key = managerreference->updatedObjectImage;
+        if(key.isNull())
+        {
+             key.load(":/img/lmcesplash.jpg");
 
-/*
-        ref->pqOrbiter->getfileForDG("mediapics");
-        const char* pData;
-        int pSize;
-        pData= id.toStdString().data();
-        pSize = id.toStdString().size();
-        qDebug() << pData << "- " << pSize;
-        QByteArray t;
-        t.setRawData(pData, pSize);
-
-
-        key.loadFromData(t, "GIF");
-        //key.scaled(&requestedSize);
-
-        qDebug() << key.isNull();
-        */
-        QImage key;
+        }
+        else
+        {
         QImage result;
 
          if (requestedSize.isValid()) {
@@ -44,7 +35,14 @@ public:
             *size = result.size();
 
             return result;
+        }
     }
+signals:
+
+public slots:
+
+private:
+    qorbiterManager * managerreference;
 };
 
 #endif // NOWPLAYINGIMAGEPROVIDER_H

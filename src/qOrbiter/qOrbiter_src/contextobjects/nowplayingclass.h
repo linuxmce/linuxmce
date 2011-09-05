@@ -44,6 +44,7 @@ public:
     QString qs_playbackSpeed;
     QUrl nowPlayingImage;
     int m_iplaylistPosition;
+    QImage fileImage;
 
 signals:
     void playlistChanged();

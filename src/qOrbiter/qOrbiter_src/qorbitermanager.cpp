@@ -7,6 +7,9 @@
 #include <QDeclarativeEngine>
 #include <QApplication>
 #include <imageProviders/filedetailsimageprovider.h>
+#include <imageProviders/nowplayingimageprovider.h>
+
+
 //#include "OrbiterData.h"
 //#include "DCERouter.h"
 
@@ -218,8 +221,15 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
 
         nowPlayingButton = new NowPlayingClass();
         qorbiterUIwin->rootContext()->setContextProperty("dcenowplaying" , nowPlayingButton);
-        nowPlayingProvider = new NowPlayingImageProvider(nowPlayingButton, this);
-        qorbiterUIwin->engine()->addImageProvider("nowplayingprovider", nowPlayingProvider );
+        nowPlayingProvider = new UpdateObjectImageProvider(this);
+        qorbiterUIwin->engine()->addImageProvider("updateobject", nowPlayingProvider );
+
+        updatedObjectImage.load(":/icons/videos.png");
+                if(updatedObjectImage.isNull());
+                {
+                    qDebug() << "Cant Find Default!";
+
+                }
 
         ScreenParameters = new ScreenParamsClass;
         qorbiterUIwin->rootContext()->setContextProperty("screenparams", ScreenParameters);
@@ -1406,6 +1416,19 @@ void qorbiterManager::bindMediaRemote(bool state)
 void qorbiterManager::changedPlaylistPosition(int position)
 {
     pqOrbiter->JumpToPlaylistPosition(position);
+}
+
+void qorbiterManager::setNowPlayingData()
+{
+
+    pqOrbiter->BindMediaRemote(true);
+    pqOrbiter->requestMediaPlaylist();
+    qDebug() << "Initiating media bind and playlist request";
+}
+
+void qorbiterManager::getMediaPlaylist()
+{
+
 }
 
 

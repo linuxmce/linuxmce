@@ -24,7 +24,7 @@
 #include <contextobjects/nowplayingclass.h>
 #include <contextobjects/screenparamsclass.h>
 #include <contextobjects/playlistclass.h>
-#include <imageProviders/nowplayingimageprovider.h>
+
 
 #include <QFile>
 #include <QDir>
@@ -47,6 +47,7 @@
 
 class basicImageProvider;
 class FileDetailsImageProvider;
+class UpdateObjectImageProvider;
 
 
 namespace DCE
@@ -90,7 +91,7 @@ public:
     basicImageProvider *basicProvider;
     GridIndexProvider *advancedProvider;
     FileDetailsImageProvider *contextImageProvider;
-    NowPlayingImageProvider *nowPlayingProvider;
+    UpdateObjectImageProvider *nowPlayingProvider;
     QString *gridReqType;
 
     /*
@@ -148,6 +149,7 @@ Param 10 - pk_attribute
     //---------IMPORTANT-1-OFF-VARIABLES!!!!!---------------------------------------------//
     int i_current_command_grp;
     //int i_stream_id;
+    QImage updatedObjectImage;
 
     //ui functions
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}
@@ -242,6 +244,8 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
 
 
     //media related
+    Q_INVOKABLE void getMediaPlaylist();
+    Q_INVOKABLE void setNowPlayingData();
     Q_INVOKABLE void playMedia(QString FK_Media);
     Q_INVOKABLE void stopMedia();
     Q_INVOKABLE void ff_media(int speed);
