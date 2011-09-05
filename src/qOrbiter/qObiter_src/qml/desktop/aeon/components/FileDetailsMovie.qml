@@ -181,6 +181,7 @@ Rectangle{
             width: scaleX(39.06) // 500
             height: scaleY(15.28) // 110
             color: "transparent"
+            clip: true
             ListView {
                 id: castList
                 anchors.fill: parent
@@ -265,11 +266,21 @@ Rectangle{
             }
         }
         // Synopsis
+        Image{
+            source: '../img/common/more_top.png'
+            anchors.horizontalCenter: synopsisrect.horizontalCenter
+            anchors.bottom: synopsisrect.top
+            width: scaleX(4) // 27
+            height: scaleY(1.94)
+            smooth: true
+            visible: !synopsisflick.atYBeginning
+        }
         Rectangle {
+            id: synopsisrect
             x: scaleX(.23) // 3
             y: scaleY(49.44) // 356
             width: scaleX(49.22) // 630
-            height: scaleY(29.44) // 212
+            height: scaleY(29)
             color: "transparent"
             clip: true
             Flickable{
@@ -291,6 +302,16 @@ Rectangle{
                 }
             }
         }
+        Image{
+            source: '../img/common/more_bottom.png'
+            anchors.horizontalCenter: synopsisrect.horizontalCenter
+            anchors.top: synopsisrect.bottom
+            width: scaleX(4)
+            height: scaleY(1.94)
+            smooth: true
+            visible: !synopsisflick.atYEnd
+        }
+
         // IMDB rating
         Rectangle {
             x: scaleX(.23) // 3
