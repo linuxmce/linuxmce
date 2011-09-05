@@ -156,7 +156,7 @@ Param 10 - pk_attribute
     data
     */
 
-    QByteArray updatedObjectImage;
+    QImage updatedObjectImage;
 
     //ui functions
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}
@@ -239,6 +239,7 @@ signals:
     void locationChanged(int cRoom, int cEA);
     void modelChanged();
     void gridTypeChanged();
+    void objectUpdated();
 
 
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
@@ -259,6 +260,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     Q_INVOKABLE void rw_media(int speed);
     Q_INVOKABLE void pauseMedia();
     Q_INVOKABLE void bindMediaRemote(bool state);
+    void updateImageChanged(QImage img);
 
     Q_INVOKABLE  void getcurrentSkins(QStringList skinPaths);
     void qmlSetupLmce(int incdeviceid, QString incrouterip);

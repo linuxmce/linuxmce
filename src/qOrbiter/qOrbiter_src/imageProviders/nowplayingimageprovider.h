@@ -18,36 +18,16 @@ public:
     {
         qDebug() << "NOWPLAYINGPROVIDER STARTING";
         QImage result;
-        QImage key;
-        qDebug() << "CREATED KEY";
-        if (managerreference->updatedObjectImage.isEmpty())
-        {
-            qDebug() << "EMPTY UPDATE IMAGE BUFFER, SCHEDULE RELOAD";
-            key.load("qrc:/icons/videos.png");
-            return key;
-        }
-        else
-        {
-            QByteArray localbytes = managerreference->updatedObjectImage;
-            qDebug() << "LOADING DATA FROM QBYTE ARRAY:" << managerreference->updatedObjectImage.size();
-            key.loadFromData(localbytes);
-        }
+        QImage key = managerreference->updatedObjectImage;
 
-        qDebug() << "KEY IMAGE STATE::" << key.isNull();
 
-        if (requestedSize.isValid())
-        {
+        if (requestedSize.isValid()) {
             result = key.scaled(requestedSize);
-            qDebug() << "SCALED to SIZE";
-        }
-        else
-        {
-            qDebug() << "COULD NOT SCALE!!";
+        } else {
             result = key;
         }
+        return result;
 
-        qDebug() << "RETURNING IMAGE FROM PROVIDER AND FINISHING";
-        return key;
     }
 
 

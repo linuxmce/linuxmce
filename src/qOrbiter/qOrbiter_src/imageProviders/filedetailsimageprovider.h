@@ -17,8 +17,6 @@ public:
         QImage result;
         QImage key= f->pqOrbiter->getfileForDG(id.toStdString());
 
-
-
         if (requestedSize.isValid()) {
             result = key.scaled(requestedSize);
         } else {

@@ -170,7 +170,7 @@ Rectangle {
 
     }
 
-    ListView {
+   /* ListView {
         id: list_view1
         x: 380
         y: 16
@@ -187,7 +187,7 @@ Rectangle {
             }
         }
 
-    }
+    } */
 
 
 

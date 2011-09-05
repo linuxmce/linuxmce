@@ -380,7 +380,8 @@ bool qorbiterManager::getConf(int pPK_Device)
         // setNowPlayingIcon(false);
     }
 
-    //updatedObjectImage = new QByteArray();
+    updatedObjectImage.load("qrc:/icons/videos.png");
+    QObject::connect(this,SIGNAL(objectUpdated()), nowPlayingButton, SIGNAL(imageChanged()) );
 
 
    // qDebug() << "Reading Config" ;
@@ -1427,6 +1428,12 @@ void qorbiterManager::setNowPlayingData()
 void qorbiterManager::getMediaPlaylist()
 {
 
+}
+
+void qorbiterManager::updateImageChanged(QImage img)
+{
+    updatedObjectImage = img;
+     emit objectUpdated();
 }
 
 

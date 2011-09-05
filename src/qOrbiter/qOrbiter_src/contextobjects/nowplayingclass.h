@@ -46,6 +46,7 @@ public:
     int m_iplaylistPosition;
     QImage fileImage;
 
+
 signals:
     void playlistChanged();
     void mediaChanged();

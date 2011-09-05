@@ -134,45 +134,7 @@ Rectangle {
 
     MultiStateFileDisplay{id:grid_view1}
 
-    Component {
-             id: appDelegate
-             Item {
-                 id: wrapper
-                 width: scaleX(75); height: scaleY(75)
-                 scale:1
-                // opacity: path_view1.iconAngle.iconOpacity
 
-                 Image {
-                     id: myIcon
-                     y: 20; anchors.horizontalCenter: parent.horizontalCenter
-                     smooth: true
-                     source:"image://datagridimg/"+id ;
-                     height: scaleX(25);
-                     width: scaleY(25);
-                     fillMode: Image.PreserveAspectFit;
-                     asynchronous: true
-                     transform: Rotation {
-                         origin.x: wrapper.width/2; origin.y: wrapper.height/2
-                         axis.x: 0; axis.y: 1; axis.z: 0     // rotate around y-axis
-                      //   angle: path_view1.iconAngle
-                     }
-
-                 }
-
-                 Text {
-                     anchors { top: myIcon.bottom; horizontalCenter: parent.horizontalCenter }
-                     text: name
-                     smooth: true
-                     font.pointSize: 12
-                     //visible: wrapper.PathView.isCurrentItem
-                 }
-
-                 MouseArea {
-                     anchors.fill: parent
-                     onClicked: setStringParam(4, id)
-                 }
-             }
-         }
 
          Component {
              id: appHighlight
