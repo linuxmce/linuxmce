@@ -1,9 +1,0 @@
-# noad recording hook script
-#
-# If you enabled while installation noad automatically process each recording
-# after it is finished. Run "dpkg-reconfigure vdr-addon-noad" to enable or
-# disable after installation.
-#
-# Here you can change the options passed to noad. See noad --help for details.
-
-/usr/bin/noad --online=1 --comments --jumplogo --ac3 --overlap "$@"

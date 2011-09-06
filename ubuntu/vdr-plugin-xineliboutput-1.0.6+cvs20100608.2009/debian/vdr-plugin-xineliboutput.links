@@ -1,2 +1,0 @@
-etc/vdr/plugins/xineliboutput/allowed_hosts.conf         var/lib/vdr/plugins/xineliboutput/allowed_hosts.conf
-var/lib/vdr/plugins/xineliboutput/config                 etc/vdr/plugins/xineliboutput/config

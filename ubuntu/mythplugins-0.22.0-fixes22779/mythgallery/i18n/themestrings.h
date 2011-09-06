@@ -1,2 +1,0 @@
-void strings_null() {
-}

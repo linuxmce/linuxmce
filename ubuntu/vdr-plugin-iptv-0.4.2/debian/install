@@ -1,4 +1,0 @@
-libvdr-iptv.so.*    usr/lib/vdr/plugins/
-iptv/vlc2iptv       usr/share/vdr-plugin-iptv/
-
-debian/tmp/usr/share/locale

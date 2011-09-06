@@ -1,3 +1,0 @@
-libvdr-streamdev-server.so.*            usr/lib/vdr/plugins/
-streamdev/streamdevhosts.conf           etc/vdr/plugins/
-debian/tmp/usr/share/locale

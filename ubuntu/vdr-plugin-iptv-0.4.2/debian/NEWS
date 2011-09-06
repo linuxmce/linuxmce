@@ -1,6 +1,0 @@
-vdr-plugin-iptv (0.4.0-1) experimental; urgency=low
-
-  The format of the parameters in channels.conf has been changed - see
-  the configuration section in the README for details.
-
- -- Thomas Günther <tom@toms-cafe.de>  Sun, 07 Mar 2010 15:32:58 +0100

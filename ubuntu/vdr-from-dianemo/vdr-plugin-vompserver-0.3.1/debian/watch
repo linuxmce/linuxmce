@@ -1,3 +1,0 @@
-version=3
-opts=filenamemangle=s/.*=(.*)/$1/ \
-  http://www.loggytronic.com/vomp.php .*vdr-vompserver-(.*)\.tgz
