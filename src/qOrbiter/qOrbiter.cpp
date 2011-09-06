@@ -1690,6 +1690,7 @@ void qOrbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool 
         long dparam = it->first;
         string dparam2 = it->second;
         qDebug() << "Map  Param: " << dparam << " Value: " << dparam2.c_str();
+        qmlUI->ScreenParameters->addParam( QString::fromStdString(dparam2), dparam );
     }
 
     qDebug() << "Data params count" << pMessage->m_mapData_Parameters.size();
@@ -2367,5 +2368,26 @@ void DCE::qOrbiter::JumpToPlaylistPosition(int pos)
 void DCE::qOrbiter::SetNowPlayingDetails(QString file)
 {
 
+}
+
+void DCE::qOrbiter::SetSecurityStatus(string pin, string mode, int user, string special)
+{
+    CMD_Set_House_Mode set_security_mode(qmlUI->iPK_Device, qmlUI->iPK_Device_SecurityPlugin, mode, user, pin,0, special);
+    SendCommand(set_security_mode);
+}
+
+void DCE::qOrbiter::GetSingleSecurityCam(int cam_device, int iHeight, int iWidth)
+{
+    char *sData;
+    int sData_size= 0;
+    string imgtype;
+
+    CMD_Get_Video_Frame singleVideoFrame(qmlUI->iPK_Device,long(cam_device), string("1"), 0, iWidth, iHeight, &sData, &sData_size, &imgtype);
+    SendCommand(singleVideoFrame);
+
+}
+
+void DCE::qOrbiter::GetMultipleSecurityCams(QStringList cams)
+{
 }
 

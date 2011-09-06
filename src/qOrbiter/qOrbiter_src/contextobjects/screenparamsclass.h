@@ -27,12 +27,15 @@ public:
 
     int deviceFrom;
     void setSender(long sender) { sender = deviceFrom; emit senderChanged();}
+    void addParam(QString val, int key) {paramDevices.insert(key, val);}
+    Q_INVOKABLE  QString getParam(int key) {return paramDevices.value(key);}
+
     int getSender() {return deviceFrom;}
 
     int deviceTemplate;
     int deviceCategory;
     int currentScreen;
-    QMap <int, int> paramDevices;
+    QMap <int, QString> paramDevices;
 
     int Param1;
     int Param2;

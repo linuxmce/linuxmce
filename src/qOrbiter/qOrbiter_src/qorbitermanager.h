@@ -228,6 +228,7 @@ Param 10 - pk_attribute
     long iPK_Device_DatagridPlugIn;
     long iPK_Device_OrbiterPlugin;
     long iPK_Device_GeneralInfoPlugin;
+    long iPK_Device_SecurityPlugin;
     long iMediaPluginID;
     int m_pDevice_ScreenSaver;
     int m_dwIDataGridRequestCounter;
@@ -248,7 +249,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     bool readLocalConfig();
 
     //security related
-    Q_INVOKABLE void requestSecurityPic(int i_pk_camera_device);
+    Q_INVOKABLE void requestSecurityPic(int i_pk_camera_device, int h, int w);
 
 
     //media related

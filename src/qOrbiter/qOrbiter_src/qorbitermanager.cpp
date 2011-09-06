@@ -194,6 +194,8 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         //device variables
         iPK_Device_DatagridPlugIn =  long(6);
         iPK_Device_OrbiterPlugin = long(9);
+        iPK_Device_GeneralInfoPlugin = long(4);
+        iPK_Device_SecurityPlugin = long(13);
         m_dwIDataGridRequestCounter = 0;
 
         //initial signal and slot connections
@@ -1369,9 +1371,9 @@ void qorbiterManager::showFileInfo(QString fk_file)
     pqOrbiter->GetMediaAttributeGrid(fk_file);
 }
 
-void qorbiterManager::requestSecurityPic(int i_pk_camera_device)
+void qorbiterManager::requestSecurityPic(int i_pk_camera_device, int h, int w)
 {
-
+    pqOrbiter->GetSingleSecurityCam( i_pk_camera_device,  h,  w);
 }
 
 void qorbiterManager::playMedia(QString FK_Media)
