@@ -105,7 +105,7 @@ FdStopWatching()
 ParmEncode()
 {
 	local Parm="$1"
-	php -r "echo urlencode('$Parm');"
+	php -r "echo rawurlencode('$Parm');"
 }
 
 ParmDecode()
@@ -117,11 +117,15 @@ ParmDecode()
 BuildCommand()
 {
 	local Parm
-	local Cmd
+
+	local -a EncParm=()
 
 	for Parm in "$@"; do
 		Parm=$(ParmEncode "$Parm")
+		EncParm=("${EncParm[@]}" "$Parm")
 	done
+
+	builtin echo "${EncParm[@]}"
 }
 
 ## Utility functions

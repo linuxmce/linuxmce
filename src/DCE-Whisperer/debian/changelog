@@ -1,3 +1,10 @@
+dce-whisperer (3.0.12) unstable; urgency=low
+
+  * Implement the BuildCommand function.
+  * Use rawurlencode in ParmEncode.
+
+ -- Radu C <radu.cx@gmail.com>  Tue, 06 Sep 2011 19:41:54 +0100
+
 dce-whisperer (3.0.11) unstable; urgency=low
 
   * Fix file descriptor leaks.
