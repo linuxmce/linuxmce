@@ -81,6 +81,7 @@ public:
     void SetSecurityStatus(string pin, string mode, int user, string special);
     Q_INVOKABLE  void GetSingleSecurityCam(int cam_device, int iHeight, int iWidth);
     void GetMultipleSecurityCams(QStringList cams);
+    void GetNowPlayingAttributes();
 
     //<-dceag-const-e->
 

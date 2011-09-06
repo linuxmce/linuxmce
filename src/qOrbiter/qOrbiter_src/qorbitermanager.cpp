@@ -1429,7 +1429,9 @@ void qorbiterManager::setNowPlayingData()
 
     pqOrbiter->BindMediaRemote(true);
     pqOrbiter->requestMediaPlaylist();
+
     qDebug() << "Initiating media bind and playlist request";
+     pqOrbiter->GetNowPlayingAttributes();
 }
 
 void qorbiterManager::getMediaPlaylist()

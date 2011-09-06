@@ -37,6 +37,7 @@
         <file alias="video-blank.png">img/icons/scifi.png</file>
         <file>img/icons/sms_protocol.png</file>
         <file alias="living-room.png">img/icons/mediatime.png</file>
+        <file>img/icons/power.png</file>
     </qresource>
     <qresource prefix="/qml">
         <file alias="Style.qml">qml/desktop/droid/Style.qml</file>

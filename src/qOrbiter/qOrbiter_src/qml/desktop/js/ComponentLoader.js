@@ -68,3 +68,17 @@ function createRoomSelector() {
            console.log("Error File Detail object")
 }
 }
+
+var powercomponent
+var powersprite
+
+function createPowerButton() {
+
+    powercomponent = Qt.createComponent("../components/Power.qml");
+       powersprite = powercomponent.createObject(stage, {"x":200, "y": 500});
+
+       if (powersprite == null) {
+           // Error Handling
+           console.log("Error File Detail object")
+}
+}

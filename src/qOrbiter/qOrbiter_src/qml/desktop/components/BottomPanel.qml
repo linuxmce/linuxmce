@@ -45,20 +45,24 @@ Rectangle {
             buttontext: "Power"
 
             radius: 5
+            MouseArea{
+                anchors.fill: parent
+                onClicked:MyJs.createPowerButton()
+            }
         }
 
-        ButtonSq {
-            id: buttonsq3
-            x: 125
-            y: 1
-            width: scaleX(16)
-            height: scaleY(9)
-            color: style.homescreenfloorplanbuttoncolor
-            border.width: 2
-            buttontext: "Sleeping Menu"
-            radius: 5
-        }
 
+    ButtonSq {
+        id: buttonsq3
+        x: 125
+        y: 1
+        width: scaleX(16)
+        height: scaleY(9)
+        color: style.homescreenfloorplanbuttoncolor
+        border.width: 2
+        buttontext: "Sleeping Menu"
+        radius: 5
+    }
 
 
 
@@ -71,8 +75,9 @@ Rectangle {
         MouseArea{
             anchors.fill: parent
             onClicked:MyJs.createRoomSelector()
-                }
-             }
+        }
+    }
+
     UserListComponent {id:user}
 
     ButtonSq{
@@ -82,11 +87,11 @@ Rectangle {
         height: scaleY(9)
         color: style.homescreenfloorplanbuttoncolor
         MouseArea{
-
             anchors.fill: exit
             onClicked: closeOrbiter()
-                }
-             }
-
+        }
     }
+
 }
+}
+

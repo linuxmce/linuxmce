@@ -45,6 +45,7 @@ public:
     QUrl nowPlayingImage;
     int m_iplaylistPosition;
     QImage fileImage;
+    QString synopsis;
 
 
 signals:

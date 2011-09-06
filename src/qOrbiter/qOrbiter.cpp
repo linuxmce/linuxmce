@@ -1036,7 +1036,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     {
         qDebug () << "Closing Now Playing";
         qmlUI->nowPlayingButton->setStatus(false);
-       // qmlUI->gotoQScreen("Screen_1.qml");
+        // qmlUI->gotoQScreen("Screen_1.qml");
         BindMediaRemote(false);
     }
 
@@ -1047,13 +1047,13 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
 
     QString md1 = QString::fromStdString(sValue_To_Assign);
     QStringList mdlist;
-mdlist= md1.split(QRegExp("\\n"), QString::SkipEmptyParts);
-qDebug() << "Metadatalist" << mdlist.count();
+    mdlist= md1.split(QRegExp("\\n"), QString::SkipEmptyParts);
+    qDebug() << "Metadatalist" << mdlist.count();
 
     if (mdlist.count() == 2)
     {
-    qmlUI->nowPlayingButton->setTitle(mdlist.at(0));
-     qmlUI->nowPlayingButton->setTitle2(mdlist.at(1));
+        qmlUI->nowPlayingButton->setTitle(mdlist.at(0));
+        qmlUI->nowPlayingButton->setTitle2(mdlist.at(1));
     }
     else
     {
@@ -2304,7 +2304,7 @@ void DCE::qOrbiter::requestMediaPlaylist()
                     cellImg.load(":/icons/videos.png");
                 }
 
-              /*  if(qmlUI->currentPlaylist->checkDupe(cellTitle, cellAttribute) == true)
+                /*  if(qmlUI->currentPlaylist->checkDupe(cellTitle, cellAttribute) == true)
                 {
                     qDebug() << cellTitle << " already in playlist";
                 }
@@ -2314,7 +2314,7 @@ void DCE::qOrbiter::requestMediaPlaylist()
 
                 }
                 */
-                 qmlUI->currentPlaylist->appendRow(new PlaylistItemClass(cellTitle, cellAttribute, fk_file ,index, qmlUI->currentPlaylist));
+                qmlUI->currentPlaylist->appendRow(new PlaylistItemClass(cellTitle, cellAttribute, fk_file ,index, qmlUI->currentPlaylist));
             }
 
         }
@@ -2393,5 +2393,119 @@ void DCE::qOrbiter::GetSingleSecurityCam(int cam_device, int iHeight, int iWidth
 
 void DCE::qOrbiter::GetMultipleSecurityCams(QStringList cams)
 {
+}
+
+void DCE::qOrbiter::GetNowPlayingAttributes()
+{
+    /*
+      this functions purpose is to return the attributes for the currently playing media this in this
+      orbiter's EA it is a candidate for being extended along with the file details metadata function
+      to expand our ui capabilities. it is essentially a clone of the many datagrid requests
+      that the orbiter makes.
+      */
+
+    int gHeight = 10;
+    int gWidth = 10;
+    int pkVar = 0;
+    string valassign ="";
+    bool isSuccessfull;// = "false";
+
+    string m_sGridID ="mac_"+StringUtils::itos(qmlUI->iPK_Device); // the string identifier on the type of grid
+
+    int iRow_count=5;
+    int iColumn_count = 5;
+    bool m_bKeep_Row_Header = false;
+    bool m_bKeepColHeader = false;
+    bool m_bAdd_UpDown_Arrows = true;
+
+    string m_sSeek;
+    string m_sDataGrid_ID = "1";
+    int iOffset;
+
+    int iColumn = 1;
+    int iRowCount= 5;
+    int iRowColums = 5;
+    int m_iSeekColumn = 0;
+    int iData_Size=0;
+    int GridCurRow = 0;
+    int GridCurCol= 0;
+
+    char *pData;
+    pData = "NULL";
+    int iRow;
+
+    QString temp;
+    qmlUI->m_dwIDataGridRequestCounter++;
+
+    CMD_Populate_Datagrid cmd_populate_attribute_grid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 31, QString::number(qmlUI->iea_area).toStdString(), 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
+
+    if (SendCommand(cmd_populate_attribute_grid))
+    {
+        /*
+              initial request to populate the text only grid as denoted by the lack of a leading "_" as in _MediaFile_43
+              this way, we can safely check empty grids and error gracefully in the case of no matching media
+              */
+
+        string imgDG = m_sGridID; //standard text grid with no images. this will not crash the router if requested and its empty, picture grids will
+
+        //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
+        DCE::CMD_Request_Datagrid_Contents req_data_grid( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+        if(SendCommand(req_data_grid))
+        {
+
+            bool barrows = false; //not sure what its for
+            //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
+            DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
+            int cellsToRender= pDataGridTable->GetRows();
+            // qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
+            //  qDebug() << "Response: " << cellsToRender << " cells to render";
+
+            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
+            QString cellTitle;
+            QString cellAttribute;
+            QString fk_file;
+            QString filePath;
+            int index;
+            QImage cellImg;
+            QString cellfk;
+            DataGridCell *pCell;
+            for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
+            {
+
+                pCell = it->second;
+
+                string emptyEA;
+
+                // fk.remove("!F");
+                const char *pPath = pCell->GetImagePath();
+                index = pDataGridTable->CovertColRowType(it->first).first;
+                cellTitle = pCell->GetText();
+                cellAttribute = pCell->GetValue();
+                //qDebug() << pCell->GetImagePath();
+                cellfk = pCell->GetValue();
+
+                qDebug() << "Now Playing Attribute::" << cellTitle << "-" << cellAttribute;
+                qDebug() << "Attribute image?" << pCell->GetImagePath();
+                if (pPath )
+                {
+                    cellImg = getfileForDG(pCell->GetImagePath());
+                    size_t s=0;
+                    pCell->m_GraphicLength = (unsigned long) s;
+                    pCell->m_GraphicFormat = GR_JPG;
+                }
+                else if (!pPath) //making sure we dont provide a null image
+                {
+                    //         qDebug() << "No Image";
+                    cellImg.load(":/icons/videos.png");
+                }
+                else if (cellImg.isNull())
+                {
+                    cellImg.load(":/icons/videos.png");
+                }
+
+                //qmlUI->m_selected_grid_item->appendRow(new FileDetailsItem(cellTitle, cellAttribute, cellImg, false,  qmlUI->model));
+            }
+        }
+    }
 }
 
