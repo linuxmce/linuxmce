@@ -16,6 +16,11 @@ Rectangle {
         onTriggered: image1.source = "image://updateobject/"+securityvideo.timestamp
     }
 
+    Connections{
+        target:dcenowplaying
+        onPlayListPositionChanged: image1.source = "image://updateobject/"+securityvideo.timestamp
+    }
+
     height: 720
     width: 1280
     radius: 0

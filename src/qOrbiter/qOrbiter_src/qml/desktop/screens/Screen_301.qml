@@ -4,7 +4,7 @@ import "../components"
 Rectangle {
 
     // property alias synText:
-    id: pvrRemote
+    id: tiveoseries2remote
     anchors.centerIn: parent
 
     Timer{
