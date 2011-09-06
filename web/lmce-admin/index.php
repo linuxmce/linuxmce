@@ -475,6 +475,12 @@ switch ($section) {
 	    include_once('operations/users_settings/userChangePIN.php');
 	    userChangePIN($output,$dbADO);	    
 	break;
+        case 'userChangeVPNPassword':
+        $output = new Template($dbADO);
+        $output->setTemplateFileType('small');
+        include_once('operations/users_settings/userChangeVPNPassword.php');
+        userChangeVPNPassword($output,$dbADO);
+        break;
 	
 	//orbiters
 	case 'orbiters':

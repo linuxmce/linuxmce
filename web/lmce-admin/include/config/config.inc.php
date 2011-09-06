@@ -1,7 +1,10 @@
 <?PHP
   	
   	// todo: set lang when translation is finished
-  	$GLOBALS['lang']='en';
+  	
+  	$GLOBALS['fallbacklang']='en';
+  	$GLOBALS['lang']='fr';
+  	
   	$_SESSION['skin']=0;
   	
   	error_reporting(E_ALL ^ E_NOTICE);
@@ -21,6 +24,7 @@
   	// display loading time at the bottom of the page
   	$GLOBALS['display_loading_time']=0;
 
+	$GLOBALS['GROMMEL2']='TOTO';
   	// set it to path with write permission to enable loading time logging orr leave blank to disable
   	$GLOBALS['save_loading_time']='/var/www/lmce-admin/cached/';
 
@@ -42,7 +46,7 @@
   	
   	$GLOBALS['sendErrorsTo']='INSERT_VALID_EMAIL_HERE';
 	
-	$directory="/lmce-admin/";
+	$directory="lmce-admin";
 	$domain="http://localhost";
 	
 	// path where the media pics and orbiter backgrounds are uploaded
@@ -60,12 +64,9 @@
 	define("APPDIRECTORY",$directory);
 	define("UPLOADDIR",'upload');
 	
+	//define("LANG","ro-RO");
 	
-	
-	define("LANG","ro-RO");
-	
-	
-	setlocale(LC_ALL, LANG);
+	setlocale(LC_ALL, NULL);
 
 	//database
 	require_once("database.inc.php");
