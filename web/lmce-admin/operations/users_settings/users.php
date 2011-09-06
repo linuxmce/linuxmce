@@ -1,9 +1,44 @@
 <?
-function users($output,$dbADO) {
-	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/users.lang.php');
 
+function checkVPNaccess($username) {
+	return (exec("awk '$1==\"$username\" {print $1}' /etc/ppp/chap-secrets") == $username);
+}
+
+function setVPNaccess($username, $access) {
+	$pass="!VPNpass1";
+	if($access) // enable user's VPN access
+	{
+		if(!checkVPNaccess($username)) // does user not already have access ?
+		{
+			if(exec("awk '$1==\"#$username\" {print $1}' /etc/ppp/chap-secrets") == '#'.$username) // is user commented out ?
+			{
+				shell_exec("sed -i 's/^#$username/$username/' /etc/ppp/chap-secrets"); # if yes then uncomment
+			}
+			else
+			{
+				exec("echo '$username	l2tpd	$pass	*'> /etc/ppp/chap-secrets");
+			}
+		}
+	}
+	else // disable user's VPN access
+	{
+		if(checkVPNaccess($username)) // does user have access ?
+		{
+			shell_exec("sed -i 's/^$username/#$username/' /etc/ppp/chap-secrets"); # if yes then comment it out
+		}
+	}
+}
+
+function users($output,$dbADO) {
+	
+	includeLangFile('common.lang.php');
+	includeLangFile('users.lang.php');
+	
+	echo "TEST2: ".$GROMMEL."-".$TEXT_USERS_NOTE_CONST."<br />";
+	print_r(get_defined_vars());
+
+	//ini_set('display_errors', 1); 
+	//error_reporting(E_ALL);
 	/* @var $dbADO ADOConnection */
 	/* @var $rs ADORecordSet */
 	/* @var $resUserTypes ADORecordSet */
@@ -21,7 +56,6 @@ function users($output,$dbADO) {
 	$installationID = cleanInteger($_SESSION['installationID']);
 
 	$out.='<p>'.$TEXT_USERS_NOTE_CONST.'</p>';
-
 
 	if ($action=='form') {
 		$queryUsers = 'SELECT Users.*,Installation_Users.userCanModifyInstallation as canModifyInstallation,userCanChangeHouseMode
@@ -70,7 +104,7 @@ function users($output,$dbADO) {
 						$languagesTxt.='<option value="'.$rowLanguages['PK_Language'].'" '.($rowUser['FK_Language']==$rowLanguages['PK_Language']?"selected = 'selected'":"").'>'.$rowLanguages['Description'].'</option>';
 					}
 				}
-
+				$out.='<input type="hidden" name="userName_'.$rowUser['PK_Users'].'" value="'.$rowUser['UserName'].'">';
 				$filePath=$GLOBALS['usersPicsPath'].$rowUser['PK_Users'].'.png';
 				if(file_exists($filePath)){
 					$randNumber=rand(0,99999);
@@ -81,6 +115,7 @@ function users($output,$dbADO) {
 
 				$displayedUsers[]=$rowUser['PK_Users'];
 				$color=($i%2==1?"F0F3F8":"EEEEEE");
+				$hasVPNaccess=checkVPNaccess($rowUser['UserName']);
 				$out.='<tr valign="top" bgcolor="#'.$color.'">
 						<td>
 							<table width="100%">
@@ -91,6 +126,7 @@ function users($output,$dbADO) {
 									<td align="center">
 										<a href="javascript:void(0);" onClick="windowOpen(\'index.php?section=userChangePassword&from=users&userID='.$rowUser['PK_Users'].'\',\'width=400,height=400,toolbar=1,resizable=1\');">'.$TEXT_USER_CHANGE_PASSWORD_CONST.'</a><br>
 										<a href="javascript:void(0);" onClick="windowOpen(\'index.php?section=userChangePIN&from=users&userID='.$rowUser['PK_Users'].'\',\'width=400,height=200,toolbar=1,resizable=1\');">'.$TEXT_USER_CHANGE_PIN_CONST.'</a><br>
+										<a href="javascript:void(0);" onClick="windowOpen(\'index.php?section=userChangeVPNPassword&from=users&userID='.$rowUser['PK_Users'].'\',\'width=400,height=200,toolbar=1,resizable=1\');">'.$TEXT_USER_CHANGE_VPN_PASSWORD_CONST.'</a><br>
 										<a href="javascript:void(0);" onClick="windowOpen(\'index.php?section=userPic&from=users&userID='.$rowUser['PK_Users'].'\',\'width=600,height=400,toolbar=1,resizable=1,scrollbars=1\');">'.$TEXT_UPLOAD_PICTURE_CONST.'</a><br>
 										<a href="javascript:if(confirm(\''.$TEXT_DELETE_USER_CONFIRMATION_CONST.'\'))self.location=\'index.php?section=users&action=delete&did='.$rowUser['PK_Users'].'\'">'.$TEXT_DELETE_USER_CONST.'</a>
 									</td>
@@ -182,7 +218,13 @@ function users($output,$dbADO) {
 								</tr>
 								<tr>
 									<td align="center"><input type="checkbox" name="userCanChangeHouseMode_'.$rowUser['PK_Users'].'" value="1" '.($rowUser['userCanChangeHouseMode']?" checked='checked' ":'').'></td>
-								</tr>			
+								</tr>
+								<tr bgcolor="#DFDFDF">
+									<td align="center"><B>'.$TEXT_CAN_CONNECT_TO_VPN_CONST.'</B></td>
+								</tr>
+								<tr>
+									<td align="center"><input type="checkbox" name="userCanConnectToVPN_'.$rowUser['PK_Users'].'" value="1" '.($hasVPNaccess ? " checked='checked' ":'').'></td>
+								</tr>		
 							</table>
 						</td>
 						<td align="center">
@@ -265,6 +307,7 @@ function users($output,$dbADO) {
 				$hasMailbox =   cleanInteger(@$_POST['userHasMailbox_'.$user]);
 				$userAccessGeneralMailbox = cleanInteger(@$_POST['userAccessGeneralMailbox_'.$user]);
 
+				$userName = cleanString($_POST['userName_'.$user]);
 				$userFirstName = cleanString($_POST['userFirstName_'.$user]);
 				$userLastName = cleanString($_POST['userLastName_'.$user]);
 				$userNickname = cleanString($_POST['userNickname_'.$user]);
@@ -274,6 +317,7 @@ function users($output,$dbADO) {
 
 				$userCanModifyInstallation = cleanInteger(@$_POST['userCanModifyInstallation_'.$user]);
 				$userCanChangeHouseMode= cleanInteger(@$_POST['userCanChangeHouseMode_'.$user]);
+				$userCanConnectToVPN= cleanInteger(@$_POST['userCanConnectToVPN_'.$user]);
 
 				$userLanguage = cleanInteger(@$_POST['userLanguage_'.$user]);
 				$HideFromOrbiter = cleanInteger(@$_POST['HideFromOrbiter_'.$user]);
@@ -293,6 +337,9 @@ function users($output,$dbADO) {
 				$resUpdUser = $dbADO->Execute($query,array($hasMailbox,$userAccessGeneralMailbox,
 				$userExtension,$userEmailAddress,$userFirstName,$userLastName,$userNickname,
 				$userLanguage,$HideFromOrbiter,$user));
+
+				// modify user's VPN access if needed
+				setVPNaccess($userName, $userCanConnectToVPN);
 
 				// if the user is current user, update session variables
 				if($user==$_SESSION['userID']){
@@ -314,6 +361,8 @@ function users($output,$dbADO) {
 
 
 			}
+
+			exit();
 			$commandToSend='sudo -u root /usr/pluto/bin/SetupUsers.sh';
 			exec_batch_command($commandToSend);
 
