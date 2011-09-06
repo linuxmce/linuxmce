@@ -7,6 +7,16 @@ Rectangle {
     id: pvrRemote
     anchors.centerIn: parent
 
+    Timer{
+        id:singleshot
+        repeat: false
+        interval: 2000
+        triggeredOnStart: false
+        running: true
+
+        onTriggered: image1.source = "image://updateobject/"+securityvideo.timestamp
+    }
+
     height: 720
     width: 1280
     radius: 0

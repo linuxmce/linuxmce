@@ -382,9 +382,14 @@ bool qorbiterManager::getConf(int pPK_Device)
         // setNowPlayingIcon(false);
     }
 
-    updatedObjectImage.load("qrc:/icons/videos.png");
+    updatedObjectImage.load(":/icons/videos.png");
     QObject::connect(this,SIGNAL(objectUpdated()), nowPlayingButton, SIGNAL(imageChanged()) );
 
+    //----------------Security Video setup
+    SecurityVideo = new SecurityVideoClass();
+    qorbiterUIwin->rootContext()->setContextProperty("securityvideo", SecurityVideo);
+    securityimage = new SecurityVideoImage(SecurityVideo);
+    qorbiterUIwin->engine()->addImageProvider("securityimage", securityimage);
 
    // qDebug() << "Reading Config" ;
     iPK_Device = long(pPK_Device);

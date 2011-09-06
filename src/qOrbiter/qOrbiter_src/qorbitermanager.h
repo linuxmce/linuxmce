@@ -24,6 +24,8 @@
 #include <contextobjects/nowplayingclass.h>
 #include <contextobjects/screenparamsclass.h>
 #include <contextobjects/playlistclass.h>
+#include <contextobjects/securityvideoclass.h>
+#include <imageProviders/securityvideoimage.h>
 
 
 #include <QFile>
@@ -79,6 +81,8 @@ public:
     ScreenParamsClass *ScreenParameters;
     PlaylistClass *currentPlaylist;
     ScreenSaverModule *ScreenSaver;
+    SecurityVideoClass *SecurityVideo;
+    SecurityVideoImage *securityimage;
 
     //ui variables
     QString currentSkin;

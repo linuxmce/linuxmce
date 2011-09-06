@@ -10,7 +10,7 @@
         <file alias="telecom.png">img/icons/linphone.png</file>
         <file>img/icons/audio&amp;video.png</file>
         <file>img/icons/fortress.png</file>
-        <file>img/icons/gpgsm.png</file>
+        <file alias="security.png">img/icons/gpgsm.png</file>
         <file>img/icons/harddrive2.png</file>
         <file alias="light-off.png">img/icons/jabber_protocol.png</file>
         <file alias="home.png">img/icons/kfm_home.png</file>

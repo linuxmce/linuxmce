@@ -6,15 +6,30 @@ screen params for this screen are
 159 - the Screen
 */
 Item{
-    id:climate
+    id:singlecameraview
+    Timer{
+        id:securitytimer
+        repeat: true
+        interval: 5000
+        triggeredOnStart: true
+        running: true
+        onTriggered:{
+            securityimage.source = "image://securityimage/"+securityvideo.timestamp
+            requestSecurityPic(screenparams.getParam(2), 640, 480)
+
+        }
+
+    }
+
+
 
     Rectangle{
         height: style.orbiterH
         width: style.orbiterW
         color: "transparent"
-        Component.onCompleted: requestSecurityPic(screenparams.getParam(2), 640, 480)
+        Component.onCompleted: requestSecurityPic(screenparams.getParam(2), 800, 600)
         Text {
-            id: climatelabel
+            id: singlecamlabel
             x: 74
             y: 101
             text: "Single Camera view"
@@ -34,8 +49,12 @@ Item{
             Image {
                 id: securityimage
                 fillMode: Image.PreserveAspectFit
-                source: "image://securityvideo/"+screenparams.getParam(2)
+                source: "image://securityimage/"+securityvideo.timestamp
                 anchors.centerIn: parent
+                height: 800
+                width: 600
+                onSourceChanged: console.log(securityimage.source)
+
             }
 
             Rectangle{

@@ -2385,6 +2385,10 @@ void DCE::qOrbiter::GetSingleSecurityCam(int cam_device, int iHeight, int iWidth
     CMD_Get_Video_Frame singleVideoFrame(qmlUI->iPK_Device,long(cam_device), string("1"), 0, iWidth, iHeight, &sData, &sData_size, &imgtype);
     SendCommand(singleVideoFrame);
 
+    QImage returnedFrame;
+    returnedFrame.loadFromData(QByteArray(sData, sData_size));
+    qmlUI->SecurityVideo->currentFrame = returnedFrame;
+
 }
 
 void DCE::qOrbiter::GetMultipleSecurityCams(QStringList cams)
