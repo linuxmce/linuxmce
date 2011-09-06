@@ -5,11 +5,35 @@
 
 DEVICEDATA_Network_Interfaces=32
 DEVICEDATA_Network_Interfaces_IPv6=292
+DEVICEDATA_Network_VPN=295
 
 
 CommaField()
 {
 	echo "$2" | cut -d, -f "$1"
+}
+
+CalculateNetworkAddress()
+{
+	typeset -i mask=255
+
+	SaveIFS=$IFS
+	IFS=.
+	typeset -a IParr=($IntIP)
+	typeset -a NMarr=($IntNetmask)
+	IFS=$SaveIFS
+
+	typeset -i ipbin1=${IParr[0]}
+	typeset -i ipbin2=${IParr[1]}
+	typeset -i ipbin3=${IParr[2]}
+	typeset -i ipbin4=${IParr[3]}
+
+	typeset -i nmbin1=${NMarr[0]}
+	typeset -i nmbin2=${NMarr[1]}
+	typeset -i nmbin3=${NMarr[2]}
+	typeset -i nmbin4=${NMarr[3]}
+
+	IntNetworkAddress=$"$((ipbin1 & nmbin1)).$((ipbin2 & nmbin2)).$((ipbin3 & nmbin3)).$((ipbin4 & nmbin4))"
 }
 
 ExtractData()
@@ -39,29 +63,44 @@ ExtractData()
 			fi
 		fi
 		NetIfConf=1
+		CalculateNetworkAddress
 	fi
 }
 
 ExtractIPv6Data()
 {
-	local R IntPart ExtPart
+	local R
 	R="$*"
 	if [ -n "$R" ]; then
 		# format:
-		# <Tunnelbroker>,<TunnelID>,<Endpoint>,<IPv6>,<IPv6 netmask>,<LAN prefix>,<LAN netmask>,<UserID>,<Password>,<Activate>,<Dynamic IPv4>
+		# 1-<Tunnelbroker>,2-<TunnelID>,3-<Endpoint>,4-<IPv6>,5-<IPv6 netmask>,6-<LAN prefix>,7-<LAN netmask>,8-<UserID>,9-<Password>,10-<Activate>,11-<Dynamic IPv4>,12-<RA enabled>
 		
-		IPv6TunnelBroker=$(CommaField 5 "$R")
-		IPv6TunnelID=$(CommaField 5 "$R")
-		IPv6Endpoint=$(CommaField 5 "$R")
+		IPv6TunnelBroker=$(CommaField 1 "$R")
+		IPv6TunnelID=$(CommaField 2 "$R")
+		IPv6Endpoint=$(CommaField 3 "$R")
 		IPv6=$(CommaField 4 "$R")
 		IPv6Netmask=$(CommaField 5 "$R")
 		IPv6Net=$(CommaField 6 "$R")
 		IPv6NetNetmask=$(CommaField 7 "$R")
 		IPv6UserID=$(CommaField 8 "$R")
-		IPv6Password=$(CommaField 8 "$R")
+		IPv6Password=$(CommaField 9 "$R")
 		IPv6Active=$(CommaField 10 "$R")
 		IPv6DynamicIPv4=$(CommaField 11 "$R")
 		IPv6RAenabled=$(CommaField 12 "$R")
+	fi
+}
+
+ExtractVPNData()
+{
+	local R
+	R="$*"
+	if [ -n "$R" ]; then
+		# format:
+		# <enabled>,<IPrange>
+		
+		VPNenabled=$(CommaField 1 "$R")
+		VPNrange=$(CommaField 2 "$R")
+		VPNPSK=$(CommaField 3 "$R")
 	fi
 }
 
@@ -81,6 +120,7 @@ if ! BlacklistConfFiles '/etc/network/interfaces' ;then
 	File="/etc/network/interfaces"
 
 	Script='
+	
 function Display(ParsingInterface, interface, address, netmask, gateway, dns)
 {
 	if (ParsingInterface == 0)
@@ -92,7 +132,6 @@ function Display(ParsingInterface, interface, address, netmask, gateway, dns)
 	else
 		print (interface, address, netmask, gateway, dns);
 }
-
 BEGIN { ParsingInterface = 0; OFS = ","; }
 /#/ {
 	$0 = substr($0, 1, match($0, /#/) - 1);
@@ -162,6 +201,9 @@ IPv6Active=0
 IPv6DynamicIPv4=0
 IPv6RAenabled=0
 
+VPNenabled=off
+VPNrange=
+
 NCards=$(ip addr | grep "^[0-9]*:" | grep -v "^[0-9]*: lo" | grep -v "^[0-9]*: pan" | grep -c ".")
 
 Q="SELECT IK_DeviceData
@@ -177,6 +219,13 @@ WHERE FK_DeviceData=$DEVICEDATA_Network_Interfaces_IPv6"
 R=$(RunSQL "$Q")
 
 ExtractIPv6Data "$R"
+
+Q="SELECT IK_DeviceData
+FROM Device_DeviceData
+WHERE FK_DeviceData=$DEVICEDATA_Network_VPN"
+R=$(RunSQL "$Q")
+
+ExtractVPNData "$R"
 
 Q="SELECT IK_DeviceData
 FROM Device_DeviceData

@@ -79,12 +79,12 @@ if [[ "$IPv6Active" == "on" ]]; then
 	IPv6Password=`echo $IPv6TunnelSettings | cut -d"," -f 9`
 fi
 
-
 Q="GRANT ALL PRIVILEGES ON *.* TO '$MySqlUser'@$IntIP"
 RunSQL "$Q"
 echo "Writing network configuration with one in database"
 
-
+service xl2tpd stop
+service ipsec stop
 service radvd stop
 service networking stop
 service dhcp3-server stop
@@ -135,7 +135,7 @@ echo "$IfConf" >>"$File"
 
 echo "">"/etc/radvd.conf"
 
-if [[ "$IPv6RAenabled" == "on" ]]; then
+if [[ "$IPv6Active" == "on" ]]; then
 	# Config IPv6 tunnel if enabled in advanced network setup
 	echo "IPv6 tunnel activated ($IPv6TunnelBroker), configuring interface"
 	IfConf="auto $IPv6If
@@ -148,7 +148,11 @@ if [[ "$IPv6RAenabled" == "on" ]]; then
 	down ip -6 route flush dev $IPv6If
 	mtu 1480"
 	echo "$IfConf" >>"$File"
+fi
+
+if [[ "$IPv6RAenabled" == "on" ]]; then
 	# Configure RA daemon
+	echo "IPv6 RA daemon enabled, creating config files"	
 	RAConf="interface $IntIf {
 	AdvSendAdvert on;
 	MinRtrAdvInterval 3;
@@ -163,6 +167,40 @@ if [[ "$IPv6RAenabled" == "on" ]]; then
 	if [[ ! $(grep "net.ipv6.conf.default.forwarding=1" /etc/sysctl.conf) ]]; then
 		echo "net.ipv6.conf.default.forwarding=1">>"/etc/sysctl.conf"
 	fi
+fi
+
+if [ -e /etc/ipsec.conf ] ;then
+	rm /etc/ipsec.conf
+fi
+
+if [ -e /etc/ipsec.secrets ] ;then
+	rm /etc/ipsec.secrets
+fi
+
+if [[ "$VPNenabled" == "on" ]]; then
+        # Config L2TP/IPSEC VPN server
+        echo "L2TP/IPSEC VPN server enabled, setting up"
+        
+        # OpenSWAN IPSEC config files
+        sed -r "s,%VPNPSK%,$VPNPSK,g" /usr/pluto/templates/ipsec.secrets.tmpl >/etc/ipsec.secrets
+		sed -r "s,%CORE_NET%,$IntNetworkAddress,g;s,%CORE_MASK%,$(ip addr show $IntIf|awk '/inet / {print $2}'|awk -F \/ '{print $2}'),g" \
+			/usr/pluto/templates/ipsec.conf.tmpl >/etc/ipsec.conf       
+        
+        # XL2TP config files
+        sed -r "s,%VPN_IP_RANGE%,$VPNrange,g;s,%CORE_INT_IP%,$IntIP,g" /usr/pluto/templates/xl2tpd.conf.tmpl >/etc/xl2tpd/xl2tpd.conf
+
+        # PPP config files
+        sed -r "s,%CORE_INT_IP%,$IntIP,g" /usr/pluto/templates/options.xl2tpd.tmpl >/etc/ppp/options.xl2tpd
+        
+        # PPP users secret file
+        Q="SELECT UserName,Password FROM Users"
+		R=$(RunSQL "$Q")
+		echo "# Secrets for authentication using CHAP" > /etc/ppp/chap-secrets
+		for ROW in $R; do
+			User=$(Field 1 "$ROW")
+			Pass="!VPNpass1"
+			echo "#$User	l2tpd	$Pass	*" >> /etc/ppp/chap-secrets
+		done
 fi
 
 if ! BlacklistConfFiles '/etc/default/dhcp3-server' ;then
@@ -183,9 +221,16 @@ fi
 
 service networking start
 service dhcp3-server start
+
 if [[ "$IPv6RAenabled" == "on" ]]; then
 	echo "starting RA daemon to hand out IPv6 addresses to local network"
 	service radvd start
+fi
+
+if [[ "$VPNenabled" == "on" ]]; then
+    echo "starting L2TP / IPSEC VPN server"
+	service ipsec start
+	service xl2tpd start
 fi
 
 if ! BlacklistConfFiles '/etc/bind/named.conf.forwarders' && ! BlacklistConfFiles '/etc/bind/named.conf.options';then
