@@ -1,8 +1,9 @@
 <?
 function login($output,$dbADO) {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/login.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('login.lang.php');
+
 	global $wikiHost;
 	
 	/* @var $dbADO ADOConnection */
@@ -40,27 +41,27 @@ function login($output,$dbADO) {
 		</tr>
 		<tr>
 			<td colspan="2" align="center">
-				<B>'.((isset($_SESSION['logout_msg']))?$_SESSION['logout_msg']:$TEXT_WELCOME_MSG_CONST).'</B>
+				<B>'.((isset($_SESSION['logout_msg']))?$_SESSION['logout_msg']:translate('TEXT_WELCOME_MSG_CONST')).'</B>
 			</td>
 		</tr>';
 	if(count($users)==0){
 		$loginFormBig.='
 		<tr> 
-	      <td colspan="2" align="center"><span class="err">'.$TEXT_NO_USERS_CONST.'</span><br><a href="javascript:void(0);" onClick="windowOpen(\'index.php?section=createUser&from=login\',\'width=600,height=650,toolbar=1, resizable=1\');">'.$TEXT_CREATE_NEW_ADMIN_USER_CONST.'</a><br><br><br></td>
+	      <td colspan="2" align="center"><span class="err">'.translate('TEXT_NO_USERS_CONST').'</span><br><a href="javascript:void(0);" onClick="windowOpen(\'index.php?section=createUser&from=login\',\'width=600,height=650,toolbar=1, resizable=1\');">'.translate('TEXT_CREATE_NEW_ADMIN_USER_CONST').'</a><br><br><br></td>
 	    </tr>';
 	}else{
 		$loginFormBig.='		
 	    <tr> 
-	      <td>'.$TEXT_USERNAME_CONST.'</td>
+	      <td>'.translate('TEXT_USERNAME_CONST').'</td>
 	      <td>
 	      	<input type="text" name="username" value="'.@$_POST['username'].'" /></td>
 	    </tr>
 	    <tr> 
-	      <td>'.$TEXT_PASSWORD_CONST.'</td>
+	      <td>'.translate('TEXT_PASSWORD_CONST').'</td>
 	      <td><input type="password" name="password" value="" /></td>
 	    </tr>
 	    <tr>
-	      <td colspan="2" align="center"><input type="submit" class="button" name="submitX" value="'.$TEXT_LOGIN_CONST.'" /></td>
+	      <td colspan="2" align="center"><input type="submit" class="button" name="submitX" value="'.translate('TEXT_LOGIN_CONST').'" /></td>
 	    </tr>';
 	}
 	
@@ -69,7 +70,7 @@ function login($output,$dbADO) {
 	    &nbsp;&nbsp;
 	    </tr>
 	    <tr>
-	      <td colspan="2" align="center"><a href="'.$wikiHost.'/index.php/LinuxMCE_Admin_Website" target="_top">'.$TEXT_HELP_WITH_ADMIN_SITE_CONST.'</a></td>
+	      <td colspan="2" align="center"><a href="'.$wikiHost.'/index.php/LinuxMCE_Admin_Website" target="_top">'.translate('TEXT_HELP_WITH_ADMIN_SITE_CONST').'</a></td>
 	    </tr>
 	    <tr>
 	      <td>&nbsp;</td>
@@ -77,15 +78,15 @@ function login($output,$dbADO) {
 	if($weborbiterInstalled) {
 		$loginFormBig.='
 		<tr>
-		  <td colspan="2" align="left">'.$TEXT_WEBORBITER_LOGIN.' <a href="weborbiter.php" target="_top">'.$TEXT_WEBORBITER.'</a></td>
+		  <td colspan="2" align="left">'.translate('TEXT_WEBORBITER_LOGIN').' <a href="weborbiter.php" target="_top">'.translate('TEXT_WEBORBITER').'</a></td>
 		</tr>';
 	}
 	$loginFormBig.='
 	    <tr>
-	      <td colspan="2" align="left">Learn about LinuxMCE at <a href="http://www.linuxmce.org" target="_top">www.linuxmce.org</a><br><br>'.$TEXT_DOWNLOAD_CONST.' <a href="index.php?section=orbitersWin">'.$TEXT_ORBITER_WIN_INSTALLER_CONST.'</a></td>
+	      <td colspan="2" align="left">Learn about LinuxMCE at <a href="http://www.linuxmce.org" target="_top">www.linuxmce.org</a><br><br>'.translate('TEXT_DOWNLOAD_CONST').' <a href="index.php?section=orbitersWin">'.translate('TEXT_ORBITER_WIN_INSTALLER_CONST').'</a></td>
 	    </tr>
 	    <tr>
-	      <td colspan="2" align="left">'.$TEXT_VERSION_CONST.': 2.0.0.44.09112522510</td>
+	      <td colspan="2" align="left">'.translate('TEXT_VERSION_CONST').': 2.0.0.44.09112522510</td>
 	    </tr>
 	  </table>
 	</form>
@@ -102,13 +103,13 @@ function login($output,$dbADO) {
 		$messages = '';
 
 		if ($usernameForm=='')  {
-			$messages.=$TEXT_LOGIN_USERNAME_REQUIRED_CONST;
+			$messages.=translate('TEXT_LOGIN_USERNAME_REQUIRED_CONST');
 		}
 
 		if (isset($_POST['submitX']))
 		{
 			if ($passwordForm == '') {
-				header("Location: index.php?section=login&error=$TEXT_LOGIN_PASSWORD_REQUIRED_CONST");
+				header("Location: index.php?section=login&error=".translate('TEXT_LOGIN_PASSWORD_REQUIRED_CONST'));
 				exit();
 			} else {
 				$_SESSION['password']=$passwordForm;
@@ -140,7 +141,7 @@ function login($output,$dbADO) {
 									$query_installation = "SELECT * FROM Installation_Users WHERE FK_Users = ? ORDER BY FK_Installation ASC";
 									$res_installations = $dbADO->Execute($query_installation,array((int)$rowRemote['PK_Users']));
 									if($res_installations->RecordCount()==0){
-										header('Location: index.php?section=login&error='.$TEXT_ERROR_NO_INSTALLATION_CONST);
+										header('Location: index.php?section=login&error='.translate('TEXT_ERROR_NO_INSTALLATION_CONST'));
 										exit();
 									}
 
@@ -158,7 +159,7 @@ function login($output,$dbADO) {
 									}
 									if ($installations===array()) {
 										//the user has no installation!!!
-										$messages=$TEXT_ERROR_NO_INSTALLATION_CONST;
+										$messages=translate('TEXT_ERROR_NO_INSTALLATION_CONST');
 										header("Location: index.php?section=login&error=urlencode($messages)");
 										exit();
 									} else {
@@ -171,14 +172,14 @@ function login($output,$dbADO) {
 								}else{
 									$_SESSION['password'] = null;
 									$_SESSION['userLoggedIn'] = false;
-									header("Location: index.php?section=login&error=".$TEXT_ERROR_REMOTE_ACCES_FAILED_CONST);
+									header("Location: index.php?section=login&error=".translate('TEXT_ERROR_REMOTE_ACCES_FAILED_CONST'));
 									exit();
 								}
 							}
 						}
 
-						$messages.=$TEXT_ERROR_INVALID_USER_OR_PASSWORD_CONST;
-						header("Location: index.php?section=login&error=".$TEXT_ERROR_INVALID_USER_OR_PASSWORD_CONST);
+						$messages.=translate('TEXT_ERROR_INVALID_USER_OR_PASSWORD_CONST');
+						header("Location: index.php?section=login&error=".translate('TEXT_ERROR_INVALID_USER_OR_PASSWORD_CONST'));
 						exit(0);
 					} else {
 
@@ -187,7 +188,7 @@ function login($output,$dbADO) {
 						$query_installation = "SELECT * FROM Installation_Users WHERE FK_Users = ? ORDER BY FK_Installation ASC";
 						$res_installations = $dbADO->Execute($query_installation,array((int)$row_users['PK_Users']));
 						if($res_installations->RecordCount()==0){
-							header('Location: index.php?section=login&error='.$TEXT_ERROR_NO_INSTALLATION_CONST);
+							header('Location: index.php?section=login&error='.translate('TEXT_ERROR_NO_INSTALLATION_CONST'));
 							exit();
 						}
 
@@ -198,6 +199,11 @@ function login($output,$dbADO) {
 						$_SESSION['username'] = $usernameForm;
 						$_SESSION['MyExtension'] = (int)$row_users['Extension'];
 						$_SESSION['AccessGeneralMailbox'] = (int)$row_users['AccessGeneralMailbox'];
+						
+						// set the user's language for web admin
+						$res_language = $dbADO->Execute("select Description from Language WHERE PK_Language = ".$row_users['FK_Language']);
+						$row_language = $res_language->FetchRow();						
+						$_SESSION['UserLanguage'] = $row_language['Description'];
 
 						$installations=array();
 						while (!$res_installations->EOF) {
@@ -207,7 +213,7 @@ function login($output,$dbADO) {
 
 						if ($installations===array()) {
 							//the user has no installation!!!
-							$messages=$TEXT_ERROR_NO_INSTALLATION_CONST;
+							$messages=translate('TEXT_ERROR_NO_INSTALLATION_CONST');
 							header("Location: index.php?section=login&error=urlencode($messages)");
 						} else {
 							$_SESSION['installationIDs'] = $installations;
@@ -230,7 +236,7 @@ function login($output,$dbADO) {
 	} elseif ($actionX=='logout') {
 		$_SESSION = array();
 		session_destroy();
-		$_SESSION['logout_msg']=$TEXT_LOGOUT_MSG_CONST;
+		$_SESSION['logout_msg']=translate('TEXT_LOGOUT_MSG_CONST');
 		
 		$scriptInHead='
 		<script>
