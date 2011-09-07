@@ -1532,9 +1532,10 @@ function getMediaPluginID($installationID,$dbADO)
 	return @$row['PK_Device'];
 }
 
-function pulldownFromArray($valuesArray,$name,$selectedValue,$extra='',$valueKey='key',$zeroValueDescription='- Please select -',$highlightValue=-1)
+function pulldownFromArray($valuesArray,$name,$selectedValue,$extra='',$valueKey='key',$zeroValueDescription,$highlightValue=-1)
 {
 	$out='<select name="'.$name.'" '.$extra.'>';
+	if($zeroValueDescription=='') $zeroValueDescription = '- '.translate('TEXT_PLEASE_SELECT_CONST').' -';
 	if($zeroValueDescription!='')
 		$out.='<option value="0">'.$zeroValueDescription.'</option>';
 	foreach ($valuesArray AS $key=>$value){
@@ -1544,19 +1545,19 @@ function pulldownFromArray($valuesArray,$name,$selectedValue,$extra='',$valueKey
 	}
 	$out.='</select>';
 	
-include(APPROOT.'/languages/'.$GLOBALS['lang'].'/editMediaFile.lang.php');
+	includeLangFile('editMediaFile.lang.php');
 	
 		//print_r($selectedValue);
 	if ($name == 'subtype' || 'fileFormat')
 			{
 				if ($name =='subtype')
 				{
-					$out.='</select> '.$TEXT_SET_MEDIA_TYPE_CONST;
+					$out.='</select> '.translate('TEXT_SET_MEDIA_TYPE_CONST');
 					
 				}
 				else if ($name=='fileFormat')
 				{
-					$out.='</select> '.$TEXT_SET_FILE_FORMAT_CONST;
+					$out.='</select> '.translate('TEXT_SET_FILE_FORMAT_CONST');
 					
 				}			
 			}	
