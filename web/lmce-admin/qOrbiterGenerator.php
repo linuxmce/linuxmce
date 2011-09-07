@@ -261,7 +261,7 @@ function getRooms($conn, $doc, $orbiterData)
 {	
 echo ("Looking up Rooms now.. ");	
 
-	$sql = "SELECT * FROM `Room` ";
+	$sql = "SELECT Room.*,Icon.* FROM `Room` Left Join Icon On FK_Icon = PK_Icon ";
 	
 	$result = mysql_query($sql,$conn) or die(mysql_error($conn));
 	
@@ -280,10 +280,21 @@ echo ("Looking up Rooms now.. ");
 		$attrib2= $r->setAttribute("HideFromOrbiter", $row['HideFromOrbiter']);
 		$attrib2= $r->setAttribute("PK_EntertainArea", $row['PK_EntertainArea']);
 		$attrib2= $r->setAttribute("FK_FloorplanObjectType", $row['FK_FloorplanObjectType']);
-		$attrib2= $r->setAttribute("FloorplanInfo", $row['FloorplanInfo']);		
+		$attrib2= $r->setAttribute("FloorplanInfo", $row['FloorplanInfo']);
+
+		getIcons($r,$row);
+
 		$rElement->appendChild($r);		
 	}	
 				return true;
+}
+
+// regular get icons function returning all names of the associated icons
+function getIcons($r,$row) {
+        $att1= $r->setAttribute("MainFileName",$row['MainFileName']);				
+        $att1= $r->setAttribute("SelectedFileName",$row['SelectedFileName']);				
+        $att1= $r->setAttribute("AltFileNames",$row['AltFileNames']);				
+        $att1= $r->setAttribute("BackgroundFileName",$row['BackgroundFileName']);				
 }
 
 //get lighting scenarios===========================================-=------------------------------------
@@ -315,6 +326,7 @@ function getLightingScenarios($conn, $doc, $orbiterData)
      CommandGroup on CommandGroup_Room.FK_CommandGroup = CommandGroup.PK_CommandGroup
      LEFT Join 
      Room on CommandGroup_Room.FK_Room = Room.PK_Room 
+     LEFT Join Icon On CommandGroup.FK_Icon = PK_Icon
      where CommandGroup.FK_Array = 1 and Room.PK_Room=".$row['PK_Room']." and CommandGroup.Disabled = 0 
      Order By CommandGroup_Room.Sort";
 	
@@ -331,6 +343,7 @@ function getLightingScenarios($conn, $doc, $orbiterData)
 		$attrib2= $r->setAttribute("eaDescription", $row['RoomDesc']);
 		
 		$attrib2= $r->setAttribute("FloorplanInfo", $row['FloorplanInfo']);		
+		getIcons($r,$row);
 		$lightlocationitem->appendChild($r);		
 		}
 			
