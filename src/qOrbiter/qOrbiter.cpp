@@ -2555,10 +2555,10 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
     QString temp;
     qmlUI->m_dwIDataGridRequestCounter++;
 
-  //  CMD_Populate_Datagrid cmd_populate_livetv_grid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 101, QString::number(qmlUI->iea_area).toStdString(), 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
+   CMD_Populate_Datagrid cmd_populate_livetv_grid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 101, QString::number(qmlUI->iea_area).toStdString(), 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
-   // if (SendCommand(cmd_populate_livetv_grid))
- //   {
+    if (SendCommand(cmd_populate_livetv_grid))
+    {
         /*
               initial request to populate the text only grid as denoted by the lack of a leading "_" as in _MediaFile_43
               this way, we can safely check empty grids and error gracefully in the case of no matching media
@@ -2626,6 +2626,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
             }
         }
         //}
+}
 }
 
 void DCE::qOrbiter::TuneToChannel(int channel)
