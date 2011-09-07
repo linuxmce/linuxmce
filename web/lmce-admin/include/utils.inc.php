@@ -44,6 +44,39 @@ function array_concat($arr1,$arr2){
 }
 
 //---------------------------------------------------------------------------------------
+// i18n functions 
+//---------------------------------------------------------------------------------------
+function includeLangFile($langFile)
+{
+	// get existing variables
+    $before_eval_vars = get_defined_vars();
+
+	// include fallback language file
+    $file = APPROOT.'languages/'.$GLOBALS['fallbacklang'].'/'.$langFile;
+    $evalt = "require_once '$file';";
+    eval($evalt);
+
+	// include user language file to overwrite existing variables from fallback language
+    $file = APPROOT.'languages/'.$GLOBALS['userlang'].'/'.$langFile;
+    if( file_exists($file))
+    {
+    	$evalt = "require_once '$file';";
+    	eval($evalt);
+    }
+
+    // Create array entry in $GLOBALS for not yet existing variables
+    $function_variable_names = array("function_variable_names" => 0, "before_eval_vars" => 0, "created" => 0);
+    $created = array_diff_key(get_defined_vars(), $GLOBALS, $function_variable_names, $before_eval_vars);
+    foreach ($created as $created_name => $created_value)
+    	$GLOBALS[$created_name]=$created_value;
+}
+
+function translate($CONST)
+{
+	return $GLOBALS[$CONST];
+}
+
+//---------------------------------------------------------------------------------------
 //customized data format
 //---------------------------------------------------------------------------------------
 function formatDate($strData)

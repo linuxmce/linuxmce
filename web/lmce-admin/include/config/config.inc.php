@@ -1,7 +1,17 @@
 <?PHP
   	
-  	// todo: set lang when translation is finished
-  	$GLOBALS['lang']='en';
+  	// language to fall back if a CONST does not exist in users language, or if the whole language file is missing
+  	$GLOBALS['fallbacklang']='en';
+  	
+  	// temp to not break old php files not yet translated
+  	$GLOBALS['lang']=$GLOBALS['fallbacklang'];
+  	
+  	// set language to user language if logged in, else set it to fallback language
+  	if($_SESSION['userLoggedIn'])
+  		$GLOBALS['userlang']=$_SESSION['UserLanguage'];  		
+  	else
+  		$GLOBALS['userlang']=$GLOBALS['fallbacklang'];
+  	
   	$_SESSION['skin']=0;
   	
   	error_reporting(E_ALL ^ E_NOTICE);
@@ -42,7 +52,7 @@
   	
   	$GLOBALS['sendErrorsTo']='INSERT_VALID_EMAIL_HERE';
 	
-	$directory="/lmce-admin/";
+	$directory="lmce-admin";
 	$domain="http://localhost";
 	
 	// path where the media pics and orbiter backgrounds are uploaded
@@ -60,12 +70,9 @@
 	define("APPDIRECTORY",$directory);
 	define("UPLOADDIR",'upload');
 	
+	//define("LANG","ro-RO"); // wtf ? :-)
 	
-	
-	define("LANG","ro-RO");
-	
-	
-	setlocale(LC_ALL, LANG);
+	setlocale(LC_ALL, NULL); // NULL should use system (kunbuntu) settings ...
 
 	//database
 	require_once("database.inc.php");
