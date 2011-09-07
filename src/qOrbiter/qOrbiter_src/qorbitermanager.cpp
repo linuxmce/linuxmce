@@ -213,7 +213,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         filedetailsclass = new FileDetailsClass();
         //file details object
         qorbiterUIwin->rootContext()->setContextProperty("filedetailsclass" ,filedetailsclass);
-        contextImageProvider = new FileDetailsImageProvider(this);
+        contextImageProvider = new FileDetailsImageProvider(filedetailsclass);
         qorbiterUIwin->engine()->addImageProvider("filedetailsprovider", contextImageProvider);
         // connect(filedetailsclass, SIGNAL(FileChanged(QString)), this, SLOT(showFileInfo(QString)));
 

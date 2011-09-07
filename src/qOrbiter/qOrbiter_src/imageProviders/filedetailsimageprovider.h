@@ -5,17 +5,23 @@
 #include <QDeclarativeImageProvider>
 #include <QDebug>
 #include <QVariant>
-#include <qOrbiter/qOrbiter_src/qorbitermanager.h>
+#include <contextobjects/filedetailsclass.h>
 
 class FileDetailsImageProvider: public QObject , public QDeclarativeImageProvider
 {
 public:
-    FileDetailsImageProvider(qorbiterManager *manager);
+    FileDetailsImageProvider(FileDetailsClass *manager);
 
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize)
     {
         QImage result;
-        QImage key= f->pqOrbiter->getfileForDG(id.toStdString());
+        QImage key= f->getScreenshotimage();
+
+        if (key.isNull())
+        {
+             key.load(":/icons/playlist.png");
+
+        }
 
         if (requestedSize.isValid()) {
             result = key.scaled(requestedSize);
@@ -31,7 +37,7 @@ signals:
 public slots:
 
 private:
-    qorbiterManager * f;
+    FileDetailsClass * f;
 
 
 };

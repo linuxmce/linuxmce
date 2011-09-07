@@ -78,6 +78,14 @@ public:
     inline QString getPath() {return path;}
     inline void setPath (QString f) {path = f; emit object_changed();}
 
+    QImage qi_screenshot;
+    inline void setScreenshotimage(QImage img) {qi_screenshot= img; qDebug() << "File Detail Image Set!";}
+    inline QImage getScreenshotimage() {return qi_screenshot;}
+
+    QImage qi_bgimage;
+    void setBGimage(QImage img) {qi_bgimage= img;}
+    QImage getBGimage() {return qi_bgimage;}
+
 signals:
     void object_changed();
     void FileChanged(QString f);

@@ -1,6 +1,6 @@
 #include "filedetailsimageprovider.h"
 
-FileDetailsImageProvider::FileDetailsImageProvider(qorbiterManager *manager):QDeclarativeImageProvider(QDeclarativeImageProvider::Image), f(manager)
+FileDetailsImageProvider::FileDetailsImageProvider(FileDetailsClass *manager):QDeclarativeImageProvider(QDeclarativeImageProvider::Image), f(manager)
 {
 
 

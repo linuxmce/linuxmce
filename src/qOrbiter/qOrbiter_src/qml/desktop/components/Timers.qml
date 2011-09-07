@@ -1,4 +1,9 @@
 import QtQuick 1.0
+Item{
+
+
+
+Component{
 
         Timer{
             id:singleshot
@@ -6,9 +11,9 @@ import QtQuick 1.0
             interval: 1000
             triggeredOnStart: false
         }
+}
 
-
-
+Component{
 
         Timer{
             id:securitytimer
@@ -18,5 +23,6 @@ import QtQuick 1.0
 
         }
 
+}
 
-
+}

@@ -1427,7 +1427,9 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                         index = pDataGridTable->CovertColRowType(it->first).first;
                         if (pPath )
                         {
-                            cellImg = getfileForDG(pCell->GetImagePath());
+                            QString fullsize = pPath;
+                            fullsize.replace(".tnj", "");
+                            cellImg = getfileForDG(fullsize.toStdString());
                             size_t s=0;
                             pCell->m_GraphicLength = (unsigned long) s;
                             pCell->m_GraphicFormat = GR_JPG;
@@ -2056,6 +2058,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     if(placeholder = details.indexOf("PICTURE"))
     {
         qmlUI->filedetailsclass->setScreenshot(details.at(placeholder+1));
+        qmlUI->filedetailsclass->setScreenshotimage(getfileForDG(details.at(placeholder+1).toStdString()));
         qmlUI->filedetailsclass->title =  getfileForDG(details.at(placeholder+1).toStdString());
     }
 
@@ -2134,9 +2137,9 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 }
                 */
 
-                qDebug() << "Video Attribute::" << cellTitle << "-" << cellAttribute;
-                qDebug() << "Attribute image?" << pCell->GetImagePath();
-                if (pPath )
+              //  qDebug() << "Video Attribute::" << cellTitle << "-" << cellAttribute;
+               // qDebug() << "Attribute image?" << pCell->GetImagePath();
+            /*    if (pPath )
                 {
                     cellImg = getfileForDG(pCell->GetImagePath());
                     size_t s=0;
@@ -2152,7 +2155,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 {
                     cellImg.load(":/icons/videos.png");
                 }
-
+        */
 
                 //qmlUI->m_selected_grid_item->appendRow(new FileDetailsItem(cellTitle, cellAttribute, cellImg, false,  qmlUI->model));
             }
@@ -2488,7 +2491,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                 qDebug() << "Attribute image?" << pCell->GetImagePath();
                 if (pPath )
                 {
-                    cellImg = getfileForDG(pCell->GetImagePath());
+                   cellImg = getfileForDG(pCell->GetImagePath());
                     size_t s=0;
                     pCell->m_GraphicLength = (unsigned long) s;
                     pCell->m_GraphicFormat = GR_JPG;

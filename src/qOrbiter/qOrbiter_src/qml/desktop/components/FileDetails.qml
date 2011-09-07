@@ -7,30 +7,31 @@ Rectangle {
     height: 550
     anchors.centerIn: parent
     color: "slategrey"
-    Image {
-        id: bg
-        anchors.centerIn: parent
-        anchors.fill: parent
-        fillMode: Image.PreserveAspectFit
-        source: "image://filedetailsprovider/"+filedetailsclass.program
-        asynchronous: true
 
+    Timer{
+        id:singleshot
+        repeat: false
+        interval: 250
+        triggeredOnStart: false
+        onTriggered: image1.source = "image://filedetailsprovider/"+securityvideo.timestamp
+        running: true
     }
+
     clip: true
     focus: true
     Text {
         id: text2
-        x: 231
-        y: 16
+        x: 225
+        y: 5
         text: filedetailsclass.objecttitle
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
     }
 
     Image {
         id: image1
-        x: -15
-        y: -28
-        width: 268
+        x: 65
+        y: -24
+        width: 521
         height: 351
         fillMode: Image.PreserveAspectFit
         scale: .75
