@@ -162,16 +162,16 @@ function installationSettings($output,$dbADO) {
 					<td><input type="text" size="30" name="Zip" value="'.$rowInstallation['Zip'].'"></td>
 				</tr>
 				<tr>
-					<td colspan="2" align="center" class="tablehead"><B>Current timezone</B></td>
+					<td colspan="2" align="center" class="tablehead"><B>'.translate('TEXT_CURRENT_TIMEZONE_CONST').'</B></td>
 				</tr>
 				<tr>
 					<td colspan="2" align="center" class="normal_row"><B>'.$currentTimeZone.'</B> <input type="button" class="button" name="setTimezone" value="'.translate('TEXT_SET_TIMEZONE_CONST').'" onclick="windowOpen(\'index.php?section=setTimezone\',\'width=640,height=480,toolbar=1,scrollbars=1,resizable=1\');"></td>
 				</tr>
 				<tr>
-					<td colspan="2" align="center" class="tablehead"><B>Logging levels</B></td>
+					<td colspan="2" align="center" class="tablehead"><B>'.translate('TEXT_LOGLEVELS_CONST').'</B></td>
 				</tr>
 				<tr>
-					<td colspan="2" align="center" class="normal_Row"><B><input type="button" class="button" name="setTimezone" value="Set Loglevels" onclick="windowOpen(\'index.php?section=setLoglevels\',\'width=640,height=,toolbar=1,scrollbars=1,resizable=1\');"></td>
+					<td colspan="2" align="center" class="normal_Row"><B><input type="button" class="button" name="setTimezone" value="'.translate('TEXT_SET_LOGLEVELS_CONST').'" onclick="windowOpen(\'index.php?section=setLoglevels\',\'width=640,height=,toolbar=1,scrollbars=1,resizable=1\');"></td>
 				';
 			
 		$pulldownValue=(strpos($selectedRipFormat,';')!==false)?substr($selectedRipFormat,0,strpos($selectedRipFormat,';')):$selectedRipFormat;
