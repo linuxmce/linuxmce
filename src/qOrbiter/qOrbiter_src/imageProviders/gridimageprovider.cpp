@@ -31,11 +31,11 @@ QImage GridIndexProvider::requestImage(const QString &id, QSize *size, const QSi
         QString key = QString("image://datagridimg/%1").arg(id);
         QModelIndex index = mPixmapIndex.value(id);
       //  QImage image = mModel.data(index, mPixmapRole).value<QImage>();
-        QString t = mModel.data(index, 3).value<QString>();
-        QImage image = thismanager->pqOrbiter->getfileForDG(t.toStdString());
+        QImage image = mModel.data(index, 4).value<QImage>();
+       // QImage image = thismanager->pqOrbiter->getfileForDG(t.toStdString());
         if (image.isNull())
         {
-              image.load(":/icons/videos.png");
+             image.load(":/icons/playlist.png");
 
         }
 

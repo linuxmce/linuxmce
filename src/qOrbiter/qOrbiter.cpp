@@ -1436,6 +1436,10 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                             pCell->m_GraphicLength = (unsigned long) s;
                             pCell->m_GraphicFormat = GR_JPG;
                         }
+                        else
+                        {
+                           cellImg.load(":/icons/videos.png");
+                        }
 
 
                         qmlUI->model->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg,  qmlUI->model));
