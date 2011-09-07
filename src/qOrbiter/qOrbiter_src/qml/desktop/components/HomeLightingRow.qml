@@ -1,21 +1,32 @@
 import QtQuick 1.0
 Item {
-
-    height: scaleY(16)
+    id:lightingrow
+    height: scaleY(17)
     width: scaleX(parent.width)
 
+    Rectangle{
+        height: scaleY(17)
+        width: scaleX(100)
+        clip:true
+        color:"midnightblue"
+        radius: 20
+       // anchors.centerIn: lightingrow
     HomeButtonDelegate{id:lightingdelegate}
+
     Flickable{
-        height: parent.height
-        width: parent.width
+        height: scaleY(16)
+        width: scaleX(100)
+        anchors.centerIn: parent
         contentHeight: style.buttonH
         contentWidth: ((style.buttonW + 5) * (lightingScenarios.count + 1)) - 5
         clip: true
         flickableDirection: "HorizontalFlick"
+
         Row {
             id: guide
             //anchors.left: lightingfloorplan.right
             spacing:5
+
 
             ButtonSq {
                 id: lightingfloorplan
@@ -52,8 +63,10 @@ Item {
                 orientation:ListView.Horizontal
                 delegate:  lightingdelegate
                 interactive: false
+
             }
         }
     }
+}
 }
 

@@ -1,19 +1,20 @@
 import QtQuick 1.0
 import "../js/ComponentLoader.js" as MyJs
+
+
 Rectangle {
-
-
-    width: style.orbiterW
-    height: scaleY(9)
-    color: "#9e9d9d"
     id:advanced_panel
+    width: style.orbiterW
+    height: scaleY(10)
+    color: "aliceblue"
+
 
     Row{
         id:advancedrow
         height:scaleY(9)
         width: childrenRect.width
         anchors.centerIn: parent
-        anchors.horizontalCenter: parent.horizontalCenter
+
         spacing:10
         clip: false
 

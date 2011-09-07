@@ -2,15 +2,23 @@ import QtQuick 1.0
 
 Item {
     property alias rowlabel: rowheader.buttontext
-    height: scaleY(16)
+    height: scaleY(17)
     width: scaleX(parent.width)
+
+    Rectangle{
+        height: scaleY(17)
+        width: scaleX(100)
+        clip:true
+        color:"midnightblue"
+        radius: 20
 
    HomeButtonDelegate{id:climateDelegate}
     Flickable{
 
         id:climateRow
-        height: parent.height
-        width: parent.width
+        height: scaleY(16)
+        width: scaleX(100)
+        anchors.centerIn: parent
         contentHeight: style.buttonH
         contentWidth: ((style.buttonW + 5) * (climateScenarios.count + 1)) - 5
         clip: true
@@ -50,5 +58,6 @@ Item {
                  }
 
     }
+}
 }
 }

@@ -49,3 +49,17 @@ In an effor to keep the history of changes broken up
 #1181 - Scenario buttons attemping to pull wrong image names.
 
 If something you are working on is not described here, please open a ticket for it so we can track that specific issue.
+
+/golgoj4 pet project area
+//color schemes
+defualt -
+bg - midnightblue
+highlight1 - lightsteelblue
+highlight2 - slategrey
+highlight3 - aliceblue
+
+noir-
+bg -black
+highlight1 - darkseagreen
+highlight2 - darkolivegreen
+highlight3 - oldlace

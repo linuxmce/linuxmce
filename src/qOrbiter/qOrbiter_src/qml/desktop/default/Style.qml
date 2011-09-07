@@ -22,8 +22,10 @@ import QtQuick 1.0
         property string skindescription: "Pluto Classic Skin"
         property string skinversion: "1.0"
         property string skinvariation: "Desktop 800x600"
-        property string maincolor: "aliceblue"
+        property string maincolor: "midnightblue"
         property string accentcolor: "lightsteelblue"
+        property string highlight1: "aliceblue"
+        property string highlight2: "slategrey"
     //main stage styles
     property int orbiterH: 720
     property int orbiterW: 1280
@@ -48,15 +50,15 @@ import QtQuick 1.0
     property color tile_color: "whitesmoke"
 
     property int t_but_size: 16
-    property color t_but_color: "darkgrey"
+    property color t_but_color: highlight2
 
     //title and other misc windo accents
  property color titletextcolor: "black"
     //button styling
     property int buttonH:9
     property int buttonW: 9
-    property color button_system_color: "lightsteelblue"
-    property color button_system_color_hover: "lightblue"
+    property color button_system_color: highlight1
+    property color button_system_color_hover: highlight2
 
     property color button_action_color: "lightsteelblue"
     property color button_action_color_hover: "lightblue"
@@ -66,30 +68,30 @@ import QtQuick 1.0
     property int but_smooth: 10
 
     //navigations
-    property color arrow_color_nav: "lightsteelblue"
+    property color arrow_color_nav: accentcolor
     property color arrow_text_nav: "black"
 
 
     //row container styling
     property int rowWidth: orbiterW - 5
     property int rowH: buttonH + 10
-    property color rowbgColor: "transparent"
+    property color rowbgColor: maincolor
 
     //Notifications bar
     property int width: orbiterW - 5
-    property color not_color: "aliceblue"
-    property string not_pos: "anchors: parent.top"
+    property color not_color: accentcolor
+    property string not_pos: highlight2
 
     //special
     property color alert_bg: "lightsteelblue"
     property color alert_bg_text: "white"
 
     //advanced panel
-    property color advanced_bg: "cornflowerblue"
-    property color advanced_bg_text: "white"
+    property color advanced_bg: highlight1
+        property color advanced_bg_text: "black"
 
     //stage
-    property color stage_bg: "lightSteelblue"
-    property color bgcolor: "lightsteelblue"
+    property color stage_bg: maincolor
+    property color bgcolor: maincolor
 
 }

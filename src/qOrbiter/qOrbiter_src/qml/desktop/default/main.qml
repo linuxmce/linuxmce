@@ -15,7 +15,7 @@ import "../js/ComponentLoader.js" as MyJs
     width: style.orbiterW;
     height: style.orbiterH;
 
-    ScreenSaver{}
+
     function scaleX(x){
         return x/100*style.orbiterW
     }

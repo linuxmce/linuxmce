@@ -10,7 +10,7 @@ Item
         signal swapStyle()
         height: style.orbiterH
         width: style.orbiterW
-        color: "transparent"
+        color: "black"
 
         Rectangle{
             id:bgrect
@@ -19,11 +19,22 @@ Item
             color: "transparent"
 
         }
+        Rectangle{
+            id:status
+            height: 25
+            width: parent.width
+            color:"aliceblue"
+
+        }
 
         Column{
             id:maindisplay
-            anchors.fill: parent
-            spacing: 5
+
+            spacing: 3
+            anchors.top:status.bottom
+            anchors.topMargin: 2
+            height: scaleY(75)
+            width: scaleX(100)
             HomeLightingRow{id:lightRow }
             HomeMediaRow{id: mediaRow}
             HomeClimateRow{id: climateRow}
@@ -31,7 +42,7 @@ Item
             HomeSecurityRow{id: securityRom}
 
         }
-        BottomPanel{id: advanced; color:style.rowbgColor; anchors.bottom: stage.bottom}
+        BottomPanel{id: advanced; anchors.bottom: stage.bottom}
     }
 }
 
