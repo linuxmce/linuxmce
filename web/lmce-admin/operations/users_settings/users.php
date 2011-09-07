@@ -34,9 +34,6 @@ function users($output,$dbADO) {
 	includeLangFile('common.lang.php');
 	includeLangFile('users.lang.php');
 	
-	echo "TEST2: ".$GROMMEL."-".$TEXT_USERS_NOTE_CONST."<br />";
-	print_r(get_defined_vars());
-
 	//ini_set('display_errors', 1); 
 	//error_reporting(E_ALL);
 	/* @var $dbADO ADOConnection */
@@ -55,7 +52,7 @@ function users($output,$dbADO) {
 
 	$installationID = cleanInteger($_SESSION['installationID']);
 
-	$out.='<p>'.$TEXT_USERS_NOTE_CONST.'</p>';
+	$out.='<p>'.translate('TEXT_USERS_NOTE_CONST').'</p>';
 
 	if ($action=='form') {
 		$queryUsers = 'SELECT Users.*,Installation_Users.userCanModifyInstallation as canModifyInstallation,userCanChangeHouseMode
@@ -85,8 +82,8 @@ function users($output,$dbADO) {
 
 			$usersFormValidation='';
 			$out.='<tr bgcolor="#DFDFDF">
-				<td align="center"><B>'.$TEXT_USERNAME_CONST.'</B></td>
-				<td align="center" colspan="5"><B>'.$TEXT_DETAILS_CONST.'</b></td>
+				<td align="center"><B>'.translate('TEXT_USERNAME_CONST').'</B></td>
+				<td align="center" colspan="5"><B>'.translate('TEXT_DETAILS_CONST').'</b></td>
 				</tr>';
 			$displayedUsers=array();
 			$i=0;
@@ -124,11 +121,11 @@ function users($output,$dbADO) {
 								</tr>
 								<tr>
 									<td align="center">
-										<a href="javascript:void(0);" onClick="windowOpen(\'index.php?section=userChangePassword&from=users&userID='.$rowUser['PK_Users'].'\',\'width=400,height=400,toolbar=1,resizable=1\');">'.$TEXT_USER_CHANGE_PASSWORD_CONST.'</a><br>
-										<a href="javascript:void(0);" onClick="windowOpen(\'index.php?section=userChangePIN&from=users&userID='.$rowUser['PK_Users'].'\',\'width=400,height=200,toolbar=1,resizable=1\');">'.$TEXT_USER_CHANGE_PIN_CONST.'</a><br>
-										<a href="javascript:void(0);" onClick="windowOpen(\'index.php?section=userChangeVPNPassword&from=users&userID='.$rowUser['PK_Users'].'\',\'width=400,height=200,toolbar=1,resizable=1\');">'.$TEXT_USER_CHANGE_VPN_PASSWORD_CONST.'</a><br>
-										<a href="javascript:void(0);" onClick="windowOpen(\'index.php?section=userPic&from=users&userID='.$rowUser['PK_Users'].'\',\'width=600,height=400,toolbar=1,resizable=1,scrollbars=1\');">'.$TEXT_UPLOAD_PICTURE_CONST.'</a><br>
-										<a href="javascript:if(confirm(\''.$TEXT_DELETE_USER_CONFIRMATION_CONST.'\'))self.location=\'index.php?section=users&action=delete&did='.$rowUser['PK_Users'].'\'">'.$TEXT_DELETE_USER_CONST.'</a>
+										<a href="javascript:void(0);" onClick="windowOpen(\'index.php?section=userChangePassword&from=users&userID='.$rowUser['PK_Users'].'\',\'width=400,height=400,toolbar=1,resizable=1\');">'.translate('TEXT_USER_CHANGE_PASSWORD_CONST').'</a><br>
+										<a href="javascript:void(0);" onClick="windowOpen(\'index.php?section=userChangePIN&from=users&userID='.$rowUser['PK_Users'].'\',\'width=400,height=200,toolbar=1,resizable=1\');">'.translate('TEXT_USER_CHANGE_PIN_CONST').'</a><br>
+										<a href="javascript:void(0);" onClick="windowOpen(\'index.php?section=userChangeVPNPassword&from=users&userID='.$rowUser['PK_Users'].'\',\'width=400,height=200,toolbar=1,resizable=1\');">'.translate('TEXT_USER_CHANGE_VPN_PASSWORD_CONST').'</a><br>
+										<a href="javascript:void(0);" onClick="windowOpen(\'index.php?section=userPic&from=users&userID='.$rowUser['PK_Users'].'\',\'width=600,height=400,toolbar=1,resizable=1,scrollbars=1\');">'.translate('TEXT_UPLOAD_PICTURE_CONST').'</a><br>
+										<a href="javascript:if(confirm(\''.translate('TEXT_DELETE_USER_CONFIRMATION_CONST').'\'))self.location=\'index.php?section=users&action=delete&did='.$rowUser['PK_Users'].'\'">'.translate('TEXT_DELETE_USER_CONST').'</a>
 									</td>
 								</tr>			
 							</table>			
@@ -136,25 +133,25 @@ function users($output,$dbADO) {
 						<td align="center">
 							<table width="100%">
 								<tr bgcolor="#DFDFDF">
-									<td align="center"><B>'.$TEXT_VOICEMAIL_CONST.' + '.$TEXT_EMAIL_CONST.'</B></td>
+									<td align="center"><B>'.translate('TEXT_VOICEMAIL_CONST').' + '.translate('TEXT_EMAIL_CONST').'</B></td>
 								</tr>
 								<tr>
 									<td align="center"><input type="checkbox" name="userHasMailbox_'.$rowUser['PK_Users'].'" value="1" '.($rowUser['HasMailbox']?" checked='checked' ":'').'></td>
 								</tr>			
 								<tr bgcolor="#DFDFDF">
-									<td align="center"><B>'.$TEXT_ACCESS_GENERAL_MAILBOX_CONST.'</B></td>
+									<td align="center"><B>'.translate('TEXT_ACCESS_GENERAL_MAILBOX_CONST').'</B></td>
 								</tr>
 								<tr>
 									<td align="center"><input type="checkbox" name="userAccessGeneralMailbox_'.$rowUser['PK_Users'].'" value="1" '.($rowUser['AccessGeneralMailbox']?" checked='checked' ":'').'></td>
 								</tr>	
 								<tr bgcolor="#DFDFDF">
-									<td align="center"><B>'.$TEXT_EXTENSION_FOR_INTERCOM_CONST.'</B></td>
+									<td align="center"><B>'.translate('TEXT_EXTENSION_FOR_INTERCOM_CONST').'</B></td>
 								</tr>
 								<tr>
 									<td align="center"><input type="text" name="userExtension_'.$rowUser['PK_Users'].'" value="'.$rowUser['Extension'].'"></td>
 								</tr>
                                                                 <tr bgcolor="#DFDFDF">
-                                                                        <td align="center"><B>'.$TEXT_EMAIL_ADDRESS_CONST.'</B></td>
+                                                                        <td align="center"><B>'.translate('TEXT_EMAIL_ADDRESS_CONST').'</B></td>
                                                                 </tr>
                                                                 <tr>
 				                                        <td align="center"><input type="text" name="userEmailAddress_'.$rowUser['PK_Users'].'" value="'.$rowUser['ForwardEmail'].'"></td>
@@ -165,19 +162,19 @@ function users($output,$dbADO) {
 						<td>
 							<table width="100%">
 								<tr bgcolor="#DFDFDF">
-									<td align="center"><B>'.$TEXT_FIRSTNAME_CONST.'</B></td>
+									<td align="center"><B>'.translate('TEXT_FIRSTNAME_CONST').'</B></td>
 								</tr>
 								<tr>
 									<td align="center"><input type="text" name="userFirstName_'.$rowUser['PK_Users'].'" value="'.$rowUser['FirstName'].'"></td>
 								</tr>			
 								<tr bgcolor="#DFDFDF">
-									<td align="center"><B>'.$TEXT_LASTNAME_CONST.'</B></td>
+									<td align="center"><B>'.translate('TEXT_LASTNAME_CONST').'</B></td>
 								</tr>
 								<tr>
 									<td align="center"><input type="text" name="userLastName_'.$rowUser['PK_Users'].'" value="'.$rowUser['LastName'].'"></td>
 								</tr>	
 								<tr bgcolor="#DFDFDF">
-									<td align="center"><B>'.$TEXT_NICKNAME_CONST.'</B></td>
+									<td align="center"><B>'.translate('TEXT_NICKNAME_CONST').'</B></td>
 								</tr>
 								<tr>
 									<td align="center"><input type="text" name="userNickname_'.$rowUser['PK_Users'].'" value="'.$rowUser['Nickname'].'"></td>
@@ -189,7 +186,7 @@ function users($output,$dbADO) {
 						<td>
 							<table width="100%">
 								<tr bgcolor="#DFDFDF">
-									<td align="center"><B>'.$TEXT_LANGUAGE_CONST.'</B></td>
+									<td align="center"><B>'.translate('TEXT_LANGUAGE_CONST').'</B></td>
 								</tr>
 								<tr>
 									<td align="center"><select name="userLanguage_'.$rowUser['PK_Users'].'">
@@ -198,7 +195,7 @@ function users($output,$dbADO) {
 									</td>
 								</tr>	
 								<tr bgcolor="#DFDFDF">
-									<td align="center"><B>'.$TEXT_HIDE_FROM_ORBITER_CONST.'</B></td>
+									<td align="center"><B>'.translate('TEXT_HIDE_FROM_ORBITER_CONST').'</B></td>
 								</tr>
 								<tr>
 									<td align="center"><input type="checkbox" name="HideFromOrbiter_'.$rowUser['PK_Users'].'" value="1" '.(($rowUser['HideFromOrbiter']==1)?" checked='checked' ":'').'></td>
@@ -208,19 +205,19 @@ function users($output,$dbADO) {
 						<td align="center">
 							<table width="100%">
 								<tr bgcolor="#DFDFDF">
-									<td align="center"><B>'.$TEXT_CAN_MODIFY_CONFIGURATION_CONST.'</B></td>
+									<td align="center"><B>'.translate('TEXT_CAN_MODIFY_CONFIGURATION_CONST').'</B></td>
 								</tr>
 								<tr>
 									<td align="center"><input type="checkbox" name="userCanModifyInstallation_'.$rowUser['PK_Users'].'" value="1" '.($rowUser['canModifyInstallation']?" checked='checked' ":'').'></td>
 								</tr>			
 								<tr bgcolor="#DFDFDF">
-									<td align="center"><B>'.$TEXT_CAN_SET_HOUSE_SECURITY_MODE_CONST.'</B></td>
+									<td align="center"><B>'.translate('TEXT_CAN_SET_HOUSE_SECURITY_MODE_CONST').'</B></td>
 								</tr>
 								<tr>
 									<td align="center"><input type="checkbox" name="userCanChangeHouseMode_'.$rowUser['PK_Users'].'" value="1" '.($rowUser['userCanChangeHouseMode']?" checked='checked' ":'').'></td>
 								</tr>
 								<tr bgcolor="#DFDFDF">
-									<td align="center"><B>'.$TEXT_CAN_CONNECT_TO_VPN_CONST.'</B></td>
+									<td align="center"><B>'.translate('TEXT_CAN_CONNECT_TO_VPN_CONST').'</B></td>
 								</tr>
 								<tr>
 									<td align="center"><input type="checkbox" name="userCanConnectToVPN_'.$rowUser['PK_Users'].'" value="1" '.($hasVPNaccess ? " checked='checked' ":'').'></td>
@@ -230,7 +227,7 @@ function users($output,$dbADO) {
 						<td align="center">
 							<table width="100%">
 								<tr bgcolor="#DFDFDF">
-									<td align="center"><B>'.$TEXT_PICTURE_CONST.'</B></td>
+									<td align="center"><B>'.translate('TEXT_PICTURE_CONST').'</B></td>
 								</tr>
 								<tr>
 									<td align="center">'.@$userImage.'</td>
@@ -249,10 +246,10 @@ function users($output,$dbADO) {
 				<td colspan="9"><span class="err">'.stripslashes(@$_REQUEST['error']).'</span></td>
 			</tr>
 			<tr>
-				<td colspan="9"><p><a href="javascript:void(0);" onClick="windowOpen(\'index.php?section=createUser&from=users\',\'width=600,height=650,toolbar=1, resizable=1\');">'.$TEXT_CREATE_NEW_USER_CONST.'</a><p>
+				<td colspan="9"><p><a href="javascript:void(0);" onClick="windowOpen(\'index.php?section=createUser&from=users\',\'width=600,height=650,toolbar=1, resizable=1\');">'.translate('TEXT_CREATE_NEW_USER_CONST').'</a><p>
 				</td>
 			</tr>
-			<tr><td colspan="2"><input type="submit" class="button" name="submitX" value="'.$TEXT_SAVE_CONST.'"  > <input type="reset" class="button" name="cancelBtn" value="'.$TEXT_CANCEL_CONST.'"></td></tr>
+			<tr><td colspan="2"><input type="submit" class="button" name="submitX" value="'.translate('TEXT_SAVE_CONST').'"  > <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'"></td></tr>
 				<input type="hidden" name="displayedUsers" value="'.join(",",$displayedUsers).'">
 			</form>
 
@@ -277,7 +274,7 @@ function users($output,$dbADO) {
 				
 				// check if you try to delete your own user
 				if($toDel==$_SESSION['userID']){
-					header('Location: index.php?section=users&error='.$TEXT_ERROR_DELETE_YOUR_USER_CONST);
+					header('Location: index.php?section=users&error='.translate('TEXT_ERROR_DELETE_YOUR_USER_CONST'));
 					exit();
 				}
 				
@@ -290,7 +287,7 @@ function users($output,$dbADO) {
 				$commandToSend='sudo -u root /usr/pluto/bin/SetupUsers.sh';
 				exec_batch_command($commandToSend);
 
-				header("Location: index.php?section=users&msg=$TEXT_USER_DELETED_CONST");
+				header("Location: index.php?section=users&msg=".translate('TEXT_USER_DELETED_CONST'));
 				exit();
 			}
 			
@@ -367,12 +364,12 @@ function users($output,$dbADO) {
 			exec_batch_command($commandToSend);
 
 			if (strstr($locationGoTo,"#")) {
-				header("Location: index.php?section=users&msg=$TEXT_USERS_PAGE_SAVED_CONST".$locationGoTo);
+				header("Location: index.php?section=users&msg=".translate('TEXT_USERS_PAGE_SAVED_CONST').$locationGoTo);
 			} else {
-				header("Location: index.php?section=users&msg=$TEXT_USERS_PAGE_SAVED_CONST&lastAction=".$locationGoTo);
+				header("Location: index.php?section=users&msg=".translate('TEXT_USERS_PAGE_SAVED_CONST')."&lastAction=".$locationGoTo);
 			}
 		} else {
-			header("Location: index.php?section=users&error=$TEXT_NOT_ALLOWED_CONST&lastAction=".$locationGoTo);
+			header("Location: index.php?section=users&error=".translate('TEXT_NOT_ALLOWED_CONST')."&lastAction=".$locationGoTo);
 		}
 
 	}
@@ -383,12 +380,12 @@ function users($output,$dbADO) {
 		$output->setScriptInBody("onLoad=\"javascript:eval('$onLoad');\"");
 	}
 
-	$output->setMenuTitle($TEXT_WIZARD_CONST.' |');
-	$output->setPageTitle($TEXT_USERS_CONST);
-	$output->setNavigationMenu(array($TEXT_SETTINGS_CONST=>'index.php?section=installationSettings',$TEXT_USERS_CONST=>'index.php?section=users'));
+	$output->setMenuTitle(translate('TEXT_WIZARD_CONST').' |');
+	$output->setPageTitle(translate('TEXT_USERS_CONST'));
+	$output->setNavigationMenu(array(translate('TEXT_SETTINGS_CONST')=>'index.php?section=installationSettings',translate('TEXT_USERS_CONST')=>'index.php?section=users'));
 
 	$output->setBody($out);
-	$output->setTitle(APPLICATION_NAME.' :: '.$TEXT_USERS_CONST);
+	$output->setTitle(APPLICATION_NAME.' :: '.translate('TEXT_USERS_CONST'));
 	$output->output();
 }
 ?>
