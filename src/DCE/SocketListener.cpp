@@ -26,6 +26,11 @@ See the GNU Lesser General Public License for more details.
 #include "SocketListener.h"
 
 #include <algorithm>
+
+#ifdef __APPLE_CC__
+	#define PTHREAD_MUTEX_RECURSIVE_NP PTHREAD_MUTEX_RECURSIVE
+#endif
+
 using namespace std;
 
 using namespace DCE;

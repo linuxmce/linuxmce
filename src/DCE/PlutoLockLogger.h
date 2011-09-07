@@ -21,7 +21,7 @@
 #ifndef PlutoLockLogger_h
 #define PlutoLockLogger_h
 
-extern char *LoggerFileName;
+extern const char *LoggerFileName;
 using namespace ::std;
 
 #ifndef WIN32

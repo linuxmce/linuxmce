@@ -31,7 +31,7 @@
 
 // some environment specific stuff
 #ifndef WIN32
-    char *LoggerFileName="/var/log/pluto/PlutoServer.Logger.log";
+    const char *LoggerFileName="/var/log/pluto/PlutoServer.Logger.log";
 #else
     #ifdef UNDER_CE
         char *LoggerFileName="\\Storage Card\\PlutoServer.Logger.txt";
@@ -56,6 +56,10 @@ string LoggerWrapper::m_sFilename;
 	bool g_bFlushLog = getenv("ImmediatelyFlushLog") && atoi(getenv("ImmediatelyFlushLog"))==1;
 #else
 	bool g_bFlushLog = false;
+#endif
+
+#ifdef __APPLE_CC__
+	#define PTHREAD_MUTEX_RECURSIVE_NP PTHREAD_MUTEX_RECURSIVE
 #endif
 
 string DCE::g_sBinary,DCE::g_sBinaryPath;

@@ -34,6 +34,10 @@
 
 #include <list>
 
+#ifdef __APPLE_CC__
+	#define PTHREAD_MUTEX_RECURSIVE_NP PTHREAD_MUTEX_RECURSIVE
+#endif
+
 #ifdef PLUTOSERVER
 	const char *Module="PlutoServer";
 #else

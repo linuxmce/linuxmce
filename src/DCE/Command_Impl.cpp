@@ -618,12 +618,16 @@ void Command_Impl::CannotReloadRouter()
 #ifndef WINCE
 	cout << "The router cannot reload now.  Please try later." << endl
 		<< "Press any key to continue...";
-#ifndef WIN32
-	getch_timeout(30);
-#else
-	getch();
-#endif
-	cout << endl;
+	#ifdef __APPLE_CC__
+		std::cin.get();
+	#else
+		#ifndef WIN32
+			getch_timeout(30);
+		#else
+			getch();
+		#endif
+	#endif
+  	cout << endl;
 #endif
 }
 
@@ -1270,7 +1274,7 @@ bool Command_Impl::GetChildDeviceData( int PK_Device, int PK_DeviceData, string 
 
 void Command_Impl::RunLocalMode()
 {
-#ifndef WINCE
+#if !defined(WINCE) && !defined(__APPLE_CC__)
 	while(true)
 	{
 		cout << "Enter incoming message or QUIT: ";
