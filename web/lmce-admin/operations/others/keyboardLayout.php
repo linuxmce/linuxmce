@@ -1,8 +1,8 @@
 <?
 function keyboardLayout($output,$dbADO) {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/keyboardLayout.lang.php');
+ 	includeLangFile('common.lang.php');
+	includeLangFile('keyboardLayout.lang.php');
 	
 	/* @var $dbADO ADOConnection */
 	/* @var $rs ADORecordSet */
@@ -34,14 +34,14 @@ function keyboardLayout($output,$dbADO) {
 			<div align="center" class="err">'.@$_REQUEST['error'].'</div>
 			<div align="center" class="confirm"><B>'.@$_REQUEST['msg'].'</B></div>
 		
-			<h3 align="left">'.$TEXT_KEYBOARD_LAYOUT_CONST.'</h3>
+			<h3 align="left">'.translate('TEXT_KEYBOARD_LAYOUT_CONST').'</h3>
 			<form action="index.php" method="POST" name="keyboardLayout">
 			<input type="hidden" name="section" value="keyboardLayout">
 			<input type="hidden" name="action" value="add">
 		
 		<table cellpadding="2" cellspacing="0">
 			<tr class="tablehead">
-				<td colspan="2 align="center""><B>'.$TEXT_MEDIA_DIRECTORS_CONST.'</B></td>
+				<td colspan="2 align="center""><B>'.translate('TEXT_MEDIA_DIRECTORS_CONST').'</B></td>
 			</tr>';
 		foreach ($mediaDirectors AS $mdID=>$mdName){
 			$mdKL=exec('/usr/pluto/bin/XKbLayout.sh get '.((isset($mediaDirectorsIPs[$mdID]) && $mediaDirectorsIPs[$mdID]!='')?$mediaDirectorsIPs[$mdID]:'127.0.0.1'));
@@ -53,7 +53,7 @@ function keyboardLayout($output,$dbADO) {
 		}
 		$out.='
 			<tr>
-				<td colspan="2" align="center"><input type="submit" class="button" name="update" value="'.$TEXT_UPDATE_CONST.'"> <input type="reset" class="button" name="cancelBtn" value="'.$TEXT_CANCEL_CONST.'"></td>
+				<td colspan="2" align="center"><input type="submit" class="button" name="update" value="'.translate('TEXT_UPDATE_CONST').'"> <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'"></td>
 			</tr>
 		</table>
 		
@@ -63,7 +63,7 @@ function keyboardLayout($output,$dbADO) {
 		// check if the user has the right to modify installation
 		$canModifyInstallation = getUserCanModifyInstallation($_SESSION['userID'],$_SESSION['installationID'],$dbADO);
 		if (!$canModifyInstallation){
-			header("Location: index.php?section=keyboardLayout&error=$TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST");
+			header("Location: index.php?section=keyboardLayout&error=".translate('TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST'));
 			exit();
 		}	
 
@@ -75,16 +75,16 @@ function keyboardLayout($output,$dbADO) {
 			exec($cmd);
 		}
 		
-		header('Location: index.php?section=keyboardLayout&msg='.$TEXT_KEYBOARD_LAYOUTS_UPDATED_CONST);
+		header('Location: index.php?section=keyboardLayout&msg='.translate('TEXT_KEYBOARD_LAYOUTS_UPDATED_CONST'));
 	}
 
-	$output->setMenuTitle($TEXT_WIZARD_CONST.' |');
-	$output->setPageTitle($TEXT_KEYBOARD_LAYOUT_CONST);
+	$output->setMenuTitle(translate('TEXT_WIZARD_CONST').' |');
+	$output->setPageTitle(translate('TEXT_KEYBOARD_LAYOUT_CONST'));
 	
-	$output->setNavigationMenu(array($TEXT_KEYBOARD_LAYOUT_CONST=>'index.php?section=keyboardLayout'));
+	$output->setNavigationMenu(array(translate('TEXT_KEYBOARD_LAYOUT_CONST')=>'index.php?section=keyboardLayout'));
 	$output->setScriptCalendar('null');
 	$output->setBody($out);
-	$output->setTitle(APPLICATION_NAME.' :: '.$TEXT_KEYBOARD_LAYOUT_CONST);
+	$output->setTitle(APPLICATION_NAME.' :: '.translate('TEXT_KEYBOARD_LAYOUT_CONST'));
 	$output->output();
 }
 

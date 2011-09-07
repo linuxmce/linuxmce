@@ -1,8 +1,8 @@
 <?php
 function emailSetup($output,$dbADO) {
         // include language files
-        include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-        include(APPROOT.'/languages/'.$GLOBALS['lang'].'/emailSetup.lang.php');
+ 		includeLangFile('common.lang.php');
+		includeLangFile('emailSetup.lang.php');
 
 	// If the settings have been selected go ahead and process them
 	if(!empty($_POST["emailName"]) && ($_POST["emailAddress"]) && ($_POST["emailPassword"]) && ($_POST[emailservice])) {
@@ -129,7 +129,7 @@ function emailSetup($output,$dbADO) {
 	// Display any status messages we have for the user
 	if(!empty($_POST["emailName"]) && ($_POST["emailAddress"]) && ($_POST["emailPassword"]) && ($_POST[emailservice])) {
 	$out='
-	<div class="confirm" align="center"><B>'.$TEXT_SAVED_CONST.'</B></div>.';
+	<div class="confirm" align="center"><B>'.translate('TEXT_SAVED_CONST').'</B></div>.';
 	}
 
 	// Display any error messages we have for the user - not in use currently
@@ -140,38 +140,38 @@ function emailSetup($output,$dbADO) {
 	$out.='
 	<form action="index.php?section=emailSetup" method="post" name="emailSetup">
 	<table>
-	<tr><td><B>'.$TEXT_EMAILSERVICE_CONST.'</B></td><td><select name="emailservice" onChange="form.submit()";>
-		<option value = "gmail" '.$gmail.'>'.$TEXT_GMAIL_CONST.'</option>
-		<option value = "hotmail" '.$hotmail.'>'.$TEXT_HOTMAILMSN_CONST.'</option>
-		<option value = "yahoo" '.$yahoo.'>'.$TEXT_YAHOO_CONST.'</option>
-		<option value = "other" '.$other.'>'.$TEXT_OTHER_CONST.'</option>
+	<tr><td><B>'.translate('TEXT_EMAILSERVICE_CONST').'</B></td><td><select name="emailservice" onChange="form.submit()";>
+		<option value = "gmail" '.$gmail.'>'.translate('TEXT_GMAIL_CONST').'</option>
+		<option value = "hotmail" '.$hotmail.'>'.translate('TEXT_HOTMAILMSN_CONST').'</option>
+		<option value = "yahoo" '.$yahoo.'>'.translate('TEXT_YAHOO_CONST').'</option>
+		<option value = "other" '.$other.'>'.translate('TEXT_OTHER_CONST').'</option>
 		</td></tr>
-	<tr><td><B>'.$TEXT_NAMEFIRSTLAST_CONST.'</B></td><td><input type="text" name="emailName" value="'.$_POST["emailName"].'" /></td></tr>
-	<tr><td><B>'.$TEXT_EMAILADDRESS_CONST.'</B></td><td><input type="text" name="emailAddress" value="'.$_POST["emailAddress"].'" /></td></tr>
-	<tr><td><B>'.$TEXT_EMAILPASSWORD_CONST.'</B></td><td><input type="password" name="emailPassword" /></td></tr>.';
+	<tr><td><B>'.translate('TEXT_NAMEFIRSTLAST_CONST').'</B></td><td><input type="text" name="emailName" value="'.$_POST["emailName"].'" /></td></tr>
+	<tr><td><B>'.translate('TEXT_EMAILADDRESS_CONST').'</B></td><td><input type="text" name="emailAddress" value="'.$_POST["emailAddress"].'" /></td></tr>
+	<tr><td><B>'.translate('TEXT_EMAILPASSWORD_CONST').'</B></td><td><input type="password" name="emailPassword" /></td></tr>.';
 
 	// Check if other is selected and if so, display some other options
 	if($serviceselected=="other") {
 	$out.='
-        <tr><td><B>'.$TEXT_PORT_CONST.'</B></td><td><input type="text" name="port" value="'.$_POST["port"].'" /></td></tr>
-        <tr><td><B>'.$TEXT_MTA_CONST.'</B></td><td><input type="text" name="mta" value="'.$_POST["mta"].'" /></td></tr>
-        <tr><td><B>'.$TEXT_TLS_CONST.'</B></td><td><select name="tls">
-                <option value = "yes" '.$tlsyes.'>'.$TEXT_YES_CONST.'</option>
-                <option value = "no" '.$tlsno.'>'.$TEXT_NO_CONST.'</option>
+        <tr><td><B>'.translate('TEXT_PORT_CONST').'</B></td><td><input type="text" name="port" value="'.$_POST["port"].'" /></td></tr>
+        <tr><td><B>'.translate('TEXT_MTA_CONST').'</B></td><td><input type="text" name="mta" value="'.$_POST["mta"].'" /></td></tr>
+        <tr><td><B>'.translate('TEXT_TLS_CONST').'</B></td><td><select name="tls">
+                <option value = "yes" '.$tlsyes.'>'.translate('TEXT_YES_CONST').'</option>
+                <option value = "no" '.$tlsno.'>'.translate('TEXT_NO_CONST').'</option>
                 </td></tr>.';
 	}
 	
 	$out.='
-	<tr><td colspan="2" align="right"><input type="submit" value="'.$TEXT_UPDATE_CONST.'" class="button"/></td></tr>
+	<tr><td colspan="2" align="right"><input type="submit" value="'.translate('TEXT_UPDATE_CONST').'" class="button"/></td></tr>
 	</table>
 	</form>';
 
 	// Setup our page environment
-	$output->setMenuTitle($TEXT_WIZARD_CONST.' |');
-        $output->setPageTitle($TEXT_EMAILSETUP_CONST);
-        $output->setNavigationMenu(array($TEXT_EMAILSETUP_CONST=>"index.php?section=emailSetup"));
+	$output->setMenuTitle(translate('TEXT_WIZARD_CONST').' |');
+        $output->setPageTitle(translate('TEXT_EMAILSETUP_CONST'));
+        $output->setNavigationMenu(array(translate('TEXT_EMAILSETUP_CONST')=>"index.php?section=emailSetup"));
         $output->setBody($out);
-        $output->setTitle(APPLICATION_NAME.' :: '.$TEXT_EMAILSETUP_CONST);
+        $output->setTitle(APPLICATION_NAME.' :: '.translate('TEXT_EMAILSETUP_CONST'));
         $output->output();
 }
 ?>
