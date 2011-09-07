@@ -2,7 +2,9 @@ import QtQuick 1.0
 
 Rectangle {
     width: 300
-    height: 600
+    height: 420
+    color:"transparent"
+    id:remotenumberpad
 
     Rectangle {
         id: rectangle1
@@ -12,6 +14,7 @@ Rectangle {
         height: 411
         color: "#789199"
         radius: 22
+        anchors.centerIn: parent
 
         Rectangle {
             id: rectangle2
@@ -27,7 +30,7 @@ Rectangle {
                 x: 0
                 y: 0
                 text: ""
-                echoMode: TextInput.Password
+
                 font.family: "Droid Sans Mono"
                 cursorVisible: true
                 readOnly: false
@@ -59,7 +62,7 @@ Rectangle {
                 anchors.centerIn: parent
                 spacing: 5
                 Repeater{
-                    model: 11;
+                    model: 10;
 
                     Rectangle{
                         height: 75
@@ -78,10 +81,56 @@ Rectangle {
                             anchors.fill: parent
                             onClicked: text_input1.text = text_input1.text+index
                         }
+
+                    }
+
+                }
+            }
+            ButtonSq{
+                id:backbutton
+                x: 197
+                y: 263
+                height:75
+                width: 75
+                anchors.rightMargin: 10
+                anchors.bottomMargin: -68
+                buttontext: "Back"
+                buttontextbold: true
+                buttontextfontsize: 12
+                anchors.bottom: flow1.bottom
+                anchors.right: flow1.right
+
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: {
+                        text_input1.text.trim(1)
                     }
                 }
             }
+            ButtonSq{
+                x: 197
+                y: 263
+                height: 75
+                width: 75
+                anchors.rightMargin: 5
+                anchors.bottomMargin: -68
+                buttontext: "go"
+                buttontextbold: true
+                buttontextfontsize: 12
+                anchors.bottom: flow1.bottom
+                anchors.right: backbutton.left
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked:{
+                        changeChannels(text_input1.text)
+                        text_input1.text.trim(text_input1.text.length)
+                    }
+                }
+
+            }
         }
     }
+
 }
+
 

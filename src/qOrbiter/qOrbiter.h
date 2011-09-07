@@ -73,6 +73,7 @@ public:
     void FfMedia();
     void PauseMedia();
     void requestMediaPlaylist();
+    void requestLiveTvPlaylist();
     void ShowFloorPlan(int floorplantype);
     void GetScreenSaverImages();
     void BindMediaRemote(bool onoff);
@@ -82,6 +83,7 @@ public:
     Q_INVOKABLE  void GetSingleSecurityCam(int cam_device, int iHeight, int iWidth);
     void GetMultipleSecurityCams(QStringList cams);
     void GetNowPlayingAttributes();
+    void TuneToChannel(int channel);
 
     //<-dceag-const-e->
 

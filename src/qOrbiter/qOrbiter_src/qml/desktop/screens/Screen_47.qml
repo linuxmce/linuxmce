@@ -40,6 +40,7 @@ Rectangle {
                 width: scaleX(19);
                 height: scaleY(19)
                 anchors.centerIn: mainItem
+                clip:true
 
 
                 color: "floralwhite"
@@ -56,10 +57,10 @@ Rectangle {
                 {
                     id: imagerect;
                     source:"image://datagridimg/"+id ;
-                    height: 100;
-                    width: 156;
+                    height: scaleY(36);
+                    width: scaleX(18);
                     anchors.centerIn: parent;
-                    fillMode: Image.PreserveAspectFit;
+                    fillMode: Image.PreserveAspectCrop
                     opacity: .5
                     asynchronous: true
                 }

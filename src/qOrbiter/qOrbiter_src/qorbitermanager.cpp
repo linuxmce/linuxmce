@@ -1442,7 +1442,21 @@ void qorbiterManager::getMediaPlaylist()
 void qorbiterManager::updateImageChanged(QImage img)
 {
     updatedObjectImage = img;
-     emit objectUpdated();
+    emit objectUpdated();
+}
+
+void qorbiterManager::setNowPlayingTv()
+{
+    pqOrbiter->BindMediaRemote(true);
+    //pqOrbiter->requestMediaPlaylist();
+
+    qDebug() << "Initiating media bind and livetv playlist request";
+    pqOrbiter->requestLiveTvPlaylist();
+}
+
+void qorbiterManager::changeChannels(QString chan)
+{
+    pqOrbiter->TuneToChannel(chan.toInt());
 }
 
 

@@ -255,10 +255,13 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     //security related
     Q_INVOKABLE void requestSecurityPic(int i_pk_camera_device, int h, int w);
 
+    //livetv related
+    Q_INVOKABLE void changeChannels(QString chan);
 
     //media related
     Q_INVOKABLE void getMediaPlaylist();
     Q_INVOKABLE void setNowPlayingData();
+    Q_INVOKABLE void setNowPlayingTv();
     Q_INVOKABLE void playMedia(QString FK_Media);
     Q_INVOKABLE void stopMedia();
     Q_INVOKABLE void ff_media(int speed);
