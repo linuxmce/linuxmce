@@ -11,37 +11,52 @@ Item {
         clip:true
         color:"midnightblue"
         radius: 20
+        Image {
+            id: rowbgimg
 
+            source: "../../../img/icons/rowbg.png"
+            width: parent.width
+            height: parent.height
+
+        }
         HomeButtonDelegate{id:telecomDelegate}
 
-        Flickable{
-            id:securityflick
-            height: scaleY(16)
-            width: scaleX(100)
-            anchors.centerIn: parent
-            contentHeight: style.buttonH
-            contentWidth: ((style.buttonW) * (telecomScenarios.count + 1)) - 5
-            clip: true
-            flickableDirection: "HorizontalFlick"
-            Row {
-                id: telecomRow
-                spacing:5
 
-                ButtonSq {
-                    id: rowheader
 
-                    height: scaleY(16)
-                    width: scaleX(9)
-                    color: style.homescreenfloorplanbuttoncolor
-                    radius: style.but_smooth
-                    buttontext: "Telecom"
-                    MouseArea{
-                        id: mousearea1
-                        anchors.fill: parent
-                        onClicked: gotoQScreen("Screen_6.qml")
-                    }
+        Row {
+            id: telecomRow
+            spacing:5
+            anchors.left: parent.left
+            anchors.leftMargin: scaleX(2)
 
+            ButtonSq {
+                id: rowheader
+                anchors.top: parent.top
+                anchors.topMargin: scaleY(2)
+                height: scaleY(13)
+                width: scaleX(8)
+                color: style.homescreenfloorplanbuttoncolor
+                radius: style.but_smooth
+                buttontext: "Telecom"
+                MouseArea{
+                    id: mousearea1
+                    anchors.fill: parent
+                    onClicked: gotoQScreen("Screen_6.qml")
                 }
+
+            }
+
+            Flickable{
+                id:securityflick
+                height: scaleY(16)
+                width: scaleX(100)
+                anchors.left: rowheader.right
+                anchors.leftMargin: 4
+                contentHeight: style.buttonH
+                contentWidth: ((style.buttonW) * (telecomScenarios.count + 1)) - 5
+                clip: true
+                flickableDirection: "HorizontalFlick"
+
                 ListView{
                     id: telecomScenarios
                     height: scaleY(style.buttonH)
@@ -54,6 +69,6 @@ Item {
                 }
 
             }
-        }
+}
     }
 }

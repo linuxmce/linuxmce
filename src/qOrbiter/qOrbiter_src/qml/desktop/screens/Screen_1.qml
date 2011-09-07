@@ -30,7 +30,7 @@ Item
         Column{
             id:maindisplay
 
-            spacing: 3
+            spacing: 0
             anchors.top:status.bottom
             anchors.topMargin: 2
             height: scaleY(75)

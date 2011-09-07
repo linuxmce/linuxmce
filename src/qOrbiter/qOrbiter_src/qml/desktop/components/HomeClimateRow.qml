@@ -11,53 +11,63 @@ Item {
         clip:true
         color:"midnightblue"
         radius: 20
+        Image {
+            id: rowbgimg
 
-   HomeButtonDelegate{id:climateDelegate}
-    Flickable{
+            source: "../../../img/icons/rowbg.png"
+            width: parent.width
+            height: parent.height
 
-        id:climateRow
-        height: scaleY(16)
-        width: scaleX(100)
-        anchors.centerIn: parent
-        contentHeight: style.buttonH
-        contentWidth: ((style.buttonW + 5) * (climateScenarios.count + 1)) - 5
-        clip: true
-        flickableDirection: "HorizontalFlick"
+        }
+        HomeButtonDelegate{id:climateDelegate}
+        Flickable{
 
-
-
-    Row {
-        id: guide
-        spacing:5
-
-        ButtonSq {
-            id: rowheader
+            id:climateRow
             height: scaleY(16)
-            width: scaleX(9)
-            color: style.homescreenfloorplanbuttoncolor
-            radius: style.but_smooth
-            buttontext: "Climate"
+            width: scaleX(100)
+            anchors.centerIn: parent
+            contentHeight: style.buttonH
+            contentWidth: ((style.buttonW + 5) * (climateScenarios.count + 1)) - 5
+            clip: true
+            flickableDirection: "HorizontalFlick"
 
-            MouseArea{
-                id: mousearea1
-                anchors.fill: parent
-                onClicked:gotoQScreen("Screen_4.qml")
-             z:5 }
+
+
+            Row {
+                id: guide
+                spacing:5
+                anchors.left: parent.left
+                anchors.leftMargin: scaleX(2)
+                ButtonSq {
+                    id: rowheader
+                    anchors.top: parent.top
+                    anchors.topMargin: scaleY(2)
+                    height: scaleY(13)
+                    width: scaleX(8)
+                    color: style.homescreenfloorplanbuttoncolor
+                    radius: style.but_smooth
+                    buttontext: "Climate"
+
+                    MouseArea{
+                        id: mousearea1
+                        anchors.fill: parent
+                        onClicked:gotoQScreen("Screen_4.qml")
+                        z:5 }
+                }
+
+
+                ListView{
+                    id: climateScenarios
+                    height: scaleY(style.buttonH)
+                    width: stage.width
+                    model: currentRoomClimate
+                    spacing: 5
+                    orientation:ListView.Horizontal
+                    interactive:false
+                    delegate: climateDelegate
+                }
+
             }
-
-
-        ListView{
-            id: climateScenarios
-            height: scaleY(style.buttonH)
-            width: stage.width
-            model: currentRoomClimate
-            spacing: 5
-            orientation:ListView.Horizontal
-            interactive:false
-            delegate: climateDelegate
-                 }
-
+        }
     }
-}
-}
 }

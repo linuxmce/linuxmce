@@ -10,29 +10,30 @@ Item {
         clip:true
         color:"midnightblue"
         radius: 20
-       // anchors.centerIn: lightingrow
-    HomeButtonDelegate{id:lightingdelegate}
+        Image {
+            id: rowbgimg
 
-    Flickable{
-        height: scaleY(16)
-        width: scaleX(100)
-        anchors.centerIn: parent
-        contentHeight: style.buttonH
-        contentWidth: ((style.buttonW + 5) * (lightingScenarios.count + 1)) - 5
-        clip: true
-        flickableDirection: "HorizontalFlick"
+            source: "../../../img/icons/rowbg.png"
+            width: parent.width
+            height: parent.height
+
+        }
+        // anchors.centerIn: lightingrow
+        HomeButtonDelegate{id:lightingdelegate}
 
         Row {
             id: guide
             //anchors.left: lightingfloorplan.right
-            spacing:5
-
+            spacing:2
+            anchors.left: parent.left
+            anchors.leftMargin: scaleX(2)
 
             ButtonSq {
                 id: lightingfloorplan
-                height: scaleY(16)
-                width: scaleX(9)
-
+                height: scaleY(13)
+                width: scaleX(8)
+                anchors.top: parent.top
+                anchors.topMargin: scaleY(2)
                 color: style.homescreenfloorplanbuttoncolor
                 radius: style.but_smooth
                 buttontext: ""
@@ -40,8 +41,8 @@ Item {
                 Image {
                     id: onimg
                     source: "../../../img/icons/jabber_protocol.png"
-                    height: scaleY(16)
-                    width: scaleX(9)
+                    height: parent.height
+                    width: parent.width
                     anchors.centerIn: parent
 
                 }
@@ -53,20 +54,32 @@ Item {
                 }
 
             }
+        Flickable{
+            height: scaleY(15)
+            width: scaleX(100)
+            anchors.left: lightingfloorplan.right
+            anchors.leftMargin: 4
+            contentHeight: style.buttonH
+            contentWidth: ((style.buttonW + 5) * (lightingScenarios.count + 1)) - 5
+            clip: true
+            flickableDirection: "HorizontalFlick"
 
-            ListView{
-                id: lightingScenarios
-                width: stage.width
-                height: scaleY(style.buttonH)
-                model: currentRoomLights
-                spacing: 5
-                orientation:ListView.Horizontal
-                delegate:  lightingdelegate
-                interactive: false
 
+
+                ListView{
+                    id: lightingScenarios
+
+                    width: stage.width
+                    height: scaleY(style.buttonH)
+                    model: currentRoomLights
+                    spacing: 5
+                    orientation:ListView.Horizontal
+                    delegate:  lightingdelegate
+                    interactive: false
+
+                }
             }
         }
     }
-}
 }
 

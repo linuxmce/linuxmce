@@ -10,24 +10,28 @@ Item {
         clip:true
         color:"midnightblue"
         radius: 20
+        Image {
+            id: rowbgimg
+
+            source: "../../../img/icons/rowbg.png"
+            width: parent.width
+            height: parent.height
+
+        }
         HomeButtonDelegate{id:securityDelegate}
 
-        Flickable
-        {
-            id:securityflick
-            height: scaleY(16)
-            width: scaleX(100)
-            anchors.centerIn: parent
-            flickableDirection: "HorizontalFlick"
-           contentHeight: childrenRect.height
-            contentWidth: ((style.buttonW + 5) * (securityScenarios.count + 1)) - 5
-            clip: true
-
+        Row {
+            id: guide
+            //anchors.left: lightingfloorplan.right
+            spacing:2
+            anchors.left: parent.left
+            anchors.leftMargin: scaleX(2)
             ButtonSq {
                 id: rowheader
-
-                height: scaleY(16)
-                width: scaleX(9)
+                height: scaleY(13)
+                width: scaleX(8)
+                anchors.top: parent.top
+                anchors.topMargin: scaleY(2)
                 color: style.homescreenfloorplanbuttoncolor
                 radius: style.but_smooth
                 buttontext: "Security Floorplan"
@@ -38,6 +42,18 @@ Item {
                 }
             }
 
+        Flickable
+        {
+            id:securityflick
+            height: scaleY(16)
+            width: scaleX(100)
+            anchors.left: rowheader.right
+            anchors.leftMargin: 4
+            flickableDirection: "HorizontalFlick"
+            contentHeight: childrenRect.height
+            contentWidth: ((style.buttonW + 5) * (securityScenarios.count + 1)) - 5
+            clip: true
+
             ListView{
                 id: securityScenarios
                 height: scaleY(style.buttonH)
@@ -45,12 +61,11 @@ Item {
                 model: currentRoomSecurity
                 orientation:ListView.Horizontal
                 spacing: 5
-                anchors.left: rowheader.right
-                anchors.margins: 5
+
                 delegate: securityDelegate
                 interactive: false
             }
         }
     }
-
+}
 }
