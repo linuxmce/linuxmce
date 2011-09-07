@@ -1,10 +1,10 @@
 #ifndef __DB_WRAPPER_MYSQL_H__
 #define __DB_WRAPPER_MYSQL_H__
 
-#ifdef WIN32
-#include <mysql.h>
+#if defined(WIN32) || defined(__APPLE_CC__)
+	#include <mysql.h>
 #else
-#include <mysql/mysql.h>
+	#include <mysql/mysql.h>
 #endif
 
 // data structures
