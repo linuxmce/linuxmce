@@ -23,14 +23,19 @@
 	#include <unistd.h>
 	#include <fcntl.h>
 	#include <fnmatch.h>
-	#include <sys/vfs.h>
+    #ifndef __APPLE_CC__
+	  #include <sys/vfs.h>
+	#else
+	  #include <sys/param.h>
+	  #include <sys/mount.h>	
+	#endif
 	#include <libgen.h>
-#ifdef USE_HTTP_FETCHER
-	extern "C"
-	{
-	#include <http_fetcher.h>
-	}
-#endif
+	#ifdef USE_HTTP_FETCHER
+		extern "C"
+		{
+		#include <http_fetcher.h>
+		}
+	#endif
 #else
 //	#include <shellapi.h>
 #endif

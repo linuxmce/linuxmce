@@ -886,7 +886,7 @@ string StringUtils::GetStringFromConsole()
     string sOutput;
     while(true)
     {
-#ifndef WINCE
+#if !defined(WINCE) && !defined(__APPLE_CC__)
         char c = static_cast<char>(getch());
 #else
         char c = getchar();

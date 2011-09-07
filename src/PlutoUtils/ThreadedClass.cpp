@@ -22,6 +22,10 @@
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
 
+#ifdef __APPLE_CC__
+#define PTHREAD_MUTEX_RECURSIVE_NP PTHREAD_MUTEX_RECURSIVE
+#endif
+
 using namespace nsThreadedClass;
 using namespace DCE;
 
