@@ -1,8 +1,8 @@
 <?php
 function installationSettings($output,$dbADO) {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/installationSettings.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('installationSettings.lang.php');
 	
 	//$dbADO->debug=true;
 	$out='';
@@ -87,36 +87,36 @@ function installationSettings($output,$dbADO) {
 		<div align="center" class="confirm"><B>'.@$_REQUEST['msg'].'</B></div>
 			<table width="300">			
 				<tr>
-					<td colspan="2" align="center" class="tablehead"><B>'.$TEXT_LOCATION_CONST.'</B>:</td>
+					<td colspan="2" align="center" class="tablehead"><B>'.translate('TEXT_LOCATION_CONST').'</B>:</td>
 				</tr>		
 				<tr>
-					<td width="100"><B>'.$TEXT_DESCRIPTION_CONST.'&nbsp;*</B></td>
+					<td width="100"><B>'.translate('TEXT_DESCRIPTION_CONST').'&nbsp;*</B></td>
 					<td><input type="text" size="30" name="Description" value="'.((isset($_REQUEST['Description']))?$_REQUEST['Description']:$rowInstallation['Description']).'"></td>
 				</tr>
 				<tr>
-					<td><B>'.$TEXT_NAME_CONST.'</B></td>
+					<td><B>'.translate('TEXT_NAME_CONST').'</B></td>
 					<td><input type="text" size="30" name="Name" value="'.((isset($_REQUEST['Name']))?$_REQUEST['Name']:$rowInstallation['Name']).'"></td>
 				</tr>
 				<tr>
-					<td><B>'.$TEXT_ADDRESS_CONST.'</B></td>
+					<td><B>'.translate('TEXT_ADDRESS_CONST').'</B></td>
 					<td><input type="text" size="30" name="Address" value="'.((isset($_REQUEST['Address']))?$_REQUEST['Address']:$rowInstallation['Address']).'"></td>
 				</tr>
 				<tr>
-					<td colspan="2">'.$TEXT_ADDRESS_INFO_CONST.'</td>
+					<td colspan="2">'.translate('TEXT_ADDRESS_INFO_CONST').'</td>
 				</tr>
 				<tr>
-					<td><B>'.$TEXT_CITY_CONST.'</B></td>
+					<td><B>'.translate('TEXT_CITY_CONST').'</B></td>
 					<td><input type="text" size="30" name="City" value="'.((isset($_REQUEST['City']))?$_REQUEST['City']:$rowInstallation['City']).'"></td>
 				</tr>
 				<tr>
-					<td><B>'.$TEXT_STATE_CONST.'</B></td>
+					<td><B>'.translate('TEXT_STATE_CONST').'</B></td>
 					<td><input type="text" size="30" name="State" value="'.((isset($_REQUEST['State']))?$_REQUEST['State']:$rowInstallation['State']).'"></td>
 				</tr>
 				<tr>
-					<td colspan="2" class="tablehead" align="center"><B>'.$TEXT_LONGITUDE_CONST.'/'.$TEXT_LATITUDE_CONST.'</B></td>
+					<td colspan="2" class="tablehead" align="center"><B>'.translate('TEXT_LONGITUDE_CONST').'/'.translate('TEXT_LATITUDE_CONST').'</B></td>
 				</tr>
 				<tr>
-					<td><B>'.$TEXT_COUNTRY_CONST.'</B></td>
+					<td><B>'.translate('TEXT_COUNTRY_CONST').'</B></td>
 					<td>'.generatePullDown('countryID','Country','PK_Country','Description',$selectedCountry,$dbADO,'','onChange="document.installationSettings.action.value=\'form\';document.installationSettings.submit();" style="width:230px;"').'</td>
 				</tr>';
 				if($selectedCountry>0){
@@ -125,7 +125,7 @@ function installationSettings($output,$dbADO) {
 
 					$out.='
 					<tr>
-						<td><B>'.$TEXT_REGION_CONST.'</B></td>
+						<td><B>'.translate('TEXT_REGION_CONST').'</B></td>
 						<td>'.pulldownFromArray($regionsArray,'region',@$selectedRegion,'onChange="document.installationSettings.action.value=\'form\';document.installationSettings.submit();" style="width:230px;"').'</td>
 					</tr>';
 
@@ -134,7 +134,7 @@ function installationSettings($output,$dbADO) {
 						$output->setScriptInHead(getCitiesCoordsArray($dbADO,' WHERE FK_Region='.$selectedRegion));
 					$out.='
 					<tr>
-						<td><B>'.$TEXT_CITY_CONST.'</B></td>
+						<td><B>'.translate('TEXT_CITY_CONST').'</B></td>
 						<td>'.pulldownFromArray($citiesArray,'city_coords',@$selectedCity,'onChange="setCoordinates()" style="width:230px;"').'</td>
 					</tr>';
 					
@@ -143,7 +143,7 @@ function installationSettings($output,$dbADO) {
 				$out.='		
 				<tr>
 					<td>
-						<B>'.$TEXT_LONGITUDE_CONST.'</B> 
+						<B>'.translate('TEXT_LONGITUDE_CONST').'</B> 
 					</td>
 					<td>
 						<input type="text" size="30" name="Longitude" value="'.@$Longitude.'">
@@ -151,21 +151,21 @@ function installationSettings($output,$dbADO) {
 				</tr>
 				<tr>
 					<td>
-						<B>'.$TEXT_LATITUDE_CONST.'</B>
+						<B>'.translate('TEXT_LATITUDE_CONST').'</B>
 					</td>
 					<td>
 						 <input type="text" size="30" name="Latitude" value="'.@$Latitude.'">
 					</td>
 				</tr>
 				<tr>
-					<td><B>'.$TEXT_ZIP_CODE_CONST.'</B></td>
+					<td><B>'.translate('TEXT_ZIP_CODE_CONST').'</B></td>
 					<td><input type="text" size="30" name="Zip" value="'.$rowInstallation['Zip'].'"></td>
 				</tr>
 				<tr>
 					<td colspan="2" align="center" class="tablehead"><B>Current timezone</B></td>
 				</tr>
 				<tr>
-					<td colspan="2" align="center" class="normal_row"><B>'.$currentTimeZone.'</B> <input type="button" class="button" name="setTimezone" value="'.$TEXT_SET_TIMEZONE_CONST.'" onclick="windowOpen(\'index.php?section=setTimezone\',\'width=640,height=480,toolbar=1,scrollbars=1,resizable=1\');"></td>
+					<td colspan="2" align="center" class="normal_row"><B>'.$currentTimeZone.'</B> <input type="button" class="button" name="setTimezone" value="'.translate('TEXT_SET_TIMEZONE_CONST').'" onclick="windowOpen(\'index.php?section=setTimezone\',\'width=640,height=480,toolbar=1,scrollbars=1,resizable=1\');"></td>
 				</tr>
 				<tr>
 					<td colspan="2" align="center" class="tablehead"><B>Logging levels</B></td>
@@ -177,32 +177,32 @@ function installationSettings($output,$dbADO) {
 		$pulldownValue=(strpos($selectedRipFormat,';')!==false)?substr($selectedRipFormat,0,strpos($selectedRipFormat,';')):$selectedRipFormat;
 		$out.='
 				<tr>
-					<td colspan="2" align="center" class="tablehead"><B>'.$TEXT_MISCELANEOUS_CONST.'</B>:</td>
+					<td colspan="2" align="center" class="tablehead"><B>'.translate('TEXT_MISCELANEOUS_CONST').'</B>:</td>
 				</tr>
 				<tr>
-					<td align="left""><B>'.$TEXT_RIPPING_FORMAT_CONST.': </B></td>
+					<td align="left""><B>'.translate('TEXT_RIPPING_FORMAT_CONST').': </B></td>
 					<td align="right">'.pulldownFromArray($ripFormats,'rip',$pulldownValue,'onChange="setOptions();" style="width:180px;"').'</td>
 				</tr>				
 				<tr>
 				'.rippingSettings($selectedRipFormat).'
 				</tr>		
 				<tr>
-					<td colspan="2" align="center"><input type="submit" class="button" name="submitX" value="'.$TEXT_SAVE_CONST.'"  > <input type="reset" class="button" name="cancelBtn" value="'.$TEXT_CANCEL_CONST.'"></td>
+					<td colspan="2" align="center"><input type="submit" class="button" name="submitX" value="'.translate('TEXT_SAVE_CONST').'"  > <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'"></td>
 				</tr>
 			</table>
-			<em>* '.$TEXT_REQUIRED_FIELDS_CONST.'</em>
+			<em>* '.translate('TEXT_REQUIRED_FIELDS_CONST').'</em>
 		</form>
 		
 		<script>
 		 	var frmvalidator = new formValidator("installationSettings");
- 			frmvalidator.addValidation("Description","req","'.$TEXT_INSTALLATION_DESCRIPTION_REQUIRED_CONST.'");
+ 			frmvalidator.addValidation("Description","req","'.translate('TEXT_INSTALLATION_DESCRIPTION_REQUIRED_CONST').'");
 		</script>
 		';
 	} else {
 		// check if the user has the right to modify installation
 		$canModifyInstallation = getUserCanModifyInstallation($_SESSION['userID'],$_SESSION['installationID'],$dbADO);
 		if (!$canModifyInstallation){
-			header("Location: index.php?section=installationSettings&error=$TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST");
+			header("Location: index.php?section=installationSettings&error=".translate('TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST'));
 			exit(0);
 		}
 		
@@ -224,13 +224,13 @@ function installationSettings($output,$dbADO) {
 		if($dceRouterID!==null){
 			$dbADO->Execute($updateDD,array($city_coords,$dceRouterID,$GLOBALS['PK_City']));
 		}else{
-			$err.=$TEXT_ERROR_UNABLE_TO_FIND_DCE_ROUTER_CONST.'<br>';
+			$err.=translate('TEXT_ERROR_UNABLE_TO_FIND_DCE_ROUTER_CONST').'<br>';
 		}	
 		if($eventPluginID!==null){
 			$dbADO->Execute($updateDD,array($Longitude,$eventPluginID,$GLOBALS['Longitude']));
 			$dbADO->Execute($updateDD,array($Latitude,$eventPluginID,$GLOBALS['Latitude']));
 		}else{
-			$err.=$TEXT_ERROR_UNABLE_TO_FIND_EVENT_PLUGIN_CONST.'<br>';
+			$err.=translate('TEXT_ERROR_UNABLE_TO_FIND_EVENT_PLUGIN_CONST').'<br>';
 		}
 
 		$rip=$_POST['rip'];
@@ -248,7 +248,7 @@ function installationSettings($output,$dbADO) {
 		if($mediaPluginID!==null){
 			$dbADO->Execute($updateDD,array($rip,$mediaPluginID,$GLOBALS['RipFormat']));
 		}else{
-			$err.=$TEXT_ERROR_UNABLE_TO_FIND_MEDIA_PLUGIN_CONST.'<br>';
+			$err.=translate('TEXT_ERROR_UNABLE_TO_FIND_MEDIA_PLUGIN_CONST').'<br>';
 		}
 
 		
@@ -272,21 +272,21 @@ function installationSettings($output,$dbADO) {
 			}
 			
 			$suffix=(isset($err))?'&error='.$err:'';
-			header("Location: index.php?section=installationSettings&from=$from&msg=$TEXT_INSTALLATION_UPDATED_CONST$suffix");
+			header("Location: index.php?section=installationSettings&from=$from&msg=".translate('TEXT_INSTALLATION_UPDATED_CONST').$suffix);
 			exit();
 		} else {
-			header("Location: index.php?section=installationSettings&error=$TEXT_ERROR_INVALID_ID_OR_EMPTY_NAME_CONST");
+			header("Location: index.php?section=installationSettings&error=".translate('TEXT_ERROR_INVALID_ID_OR_EMPTY_NAME_CONST'));
 		}
 				
 	}
 	
-	$output->setMenuTitle($TEXT_WIZARD_CONST.' |');
-	$output->setPageTitle($TEXT_INSTALLATION_SETTINGS_CONST);
+	$output->setMenuTitle(translate('TEXT_WIZARD_CONST').' |');
+	$output->setPageTitle(translate('TEXT_INSTALLATION_SETTINGS_CONST'));
 	
-	$output->setNavigationMenu(array($TEXT_INSTALLATION_SETTINGS_CONST=>"index.php?section=installationSettings"));
+	$output->setNavigationMenu(array(translate('TEXT_INSTALLATION_SETTINGS_CONST')=>"index.php?section=installationSettings"));
 	
 	$output->setBody($out);
-	$output->setTitle(APPLICATION_NAME.' :: '.$TEXT_INSTALLATION_SETTINGS_CONST);			
+	$output->setTitle(APPLICATION_NAME.' :: '.translate('TEXT_INSTALLATION_SETTINGS_CONST'));			
 	$output->output();
 }
 
@@ -327,8 +327,8 @@ function getCitiesCoordsArray($dbADO,$filter='')
 // display options for each rip format
 function rippingSettings($selectedRipFormat){
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/installationSettings.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('installationSettings.lang.php');
 	
 	$bitRateArray=array(96=>96,128=>128,192=>192,256=>256,320=>320);
 	$optarray=array();
@@ -352,19 +352,19 @@ function rippingSettings($selectedRipFormat){
 	
 	$out='
 
-			<td><B>'.$TEXT_SETTINGS_CONST.'</B></td>
+			<td><B>'.translate('TEXT_SETTINGS_CONST').'</B></td>
 			<td><div id="mp3_opt" style="display:'.(($ripFormat=='mp3')?'':'none').';">
-				'.$TEXT_BIT_RATE_CONST.': '.pulldownFromArray($bitRateArray,'bit_rate_predefined',@$bit_rate,'onchange="document.installationSettings.bit_rate_user.value=document.installationSettings.bit_rate_predefined.value;" style="width:180px;"','key','').' or type <input type="text" name="bit_rate_user" value="'.@$bit_rate.'"><br>
+				'.translate('TEXT_BIT_RATE_CONST').': '.pulldownFromArray($bitRateArray,'bit_rate_predefined',@$bit_rate,'onchange="document.installationSettings.bit_rate_user.value=document.installationSettings.bit_rate_predefined.value;" style="width:180px;"','key','').' or type <input type="text" name="bit_rate_user" value="'.@$bit_rate.'"><br>
 				<input type="radio" name="cbr_vbr" value="cbr" '.((!isset($cbr_vbr) || @$cbr_vbr=='cbr')?'checked':'').'>CBR <input type="radio" name="cbr_vbr" value="vbr" '.((@$cbr_vbr=='vbr')?'checked':'').'> VBR
 			</div>
 			<div id="ogg_opt" style="display:'.(($ripFormat=='ogg')?'':'none').';">
-				'.$TEXT_QUALITY_CONST.': '.pulldownFromArray($optarray,'ogg_ql',@$ql,'style="width:180px;"','key','').'
+				'.translate('TEXT_QUALITY_CONST').': '.pulldownFromArray($optarray,'ogg_ql',@$ql,'style="width:180px;"','key','').'
 			</div>	
 			<div id="flac_opt" style="display:'.(($ripFormat=='flac')?'':'none').';">
-				'.$TEXT_NO_OPTIONS_AVAILABLE_CONST.'
+				'.translate('TEXT_NO_OPTIONS_AVAILABLE_CONST').'
 			</div>	
 			<div id="wav_opt" style="display:'.(($ripFormat=='wav')?'':'none').';">
-				'.$TEXT_NO_OPTIONS_AVAILABLE_CONST.'
+				'.translate('TEXT_NO_OPTIONS_AVAILABLE_CONST').'
 			</div>	
 			</td>
 ';
@@ -374,7 +374,7 @@ function rippingSettings($selectedRipFormat){
 
 // get an assoc array from database for cities or retrieve them from Internet if no one is found
 function getCities($selectedRegion,$dbADO){
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/installationSettings.lang.php');
+	includeLangFile('installationSettings.lang.php');
 	
 	// TODO: remove comment to use global variable instead of hard-coded devel one
 	global $LinuxMCEHost;
@@ -394,7 +394,7 @@ function getCities($selectedRegion,$dbADO){
 			$isImported=import_remote_sql($LinuxMCEHost.'/GetCity.php?PK_Region='.$selectedRegion,$dbADO);
 			return getAssocArray('City','PK_City','City',$dbADO,'WHERE FK_Region='.$selectedRegion);
 		}else{
-			error_redirect($TEXT_ERROR_IMPORT_FAILED_CONST,'index.php?section=installationSettings');
+			error_redirect(translate('TEXT_ERROR_IMPORT_FAILED_CONST'),'index.php?section=installationSettings');
 		}
 		
 	}

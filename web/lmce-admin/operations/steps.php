@@ -1,8 +1,8 @@
 <?
 function steps($output,$dbADO) {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/steps.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('steps.lang.php');
 	
 	/* @var $dbADO ADOConnection */
 
@@ -66,7 +66,7 @@ $start_time=getmicrotime();
 	if (isset($_SESSION['userLoggedIn']) && $_SESSION['userLoggedIn']==true) {
 		$out.='
 				<tr>
-					<td valign="center" colspan="3" class="left_menu" height="30">'.((@$_SESSION['userLoggedIn']==true)?'<a href="index.php?section=login&action=logout" target="basefrm" >'.$TEXT_LOGOUT_CONST.', '.$_SESSION['username'].'</a>':'').'</td>					
+					<td valign="center" colspan="3" class="left_menu" height="30">'.((@$_SESSION['userLoggedIn']==true)?'<a href="index.php?section=login&action=logout" target="basefrm" >'.translate('TEXT_LOGOUT_CONST').', '.$_SESSION['username'].'</a>':'').'</td>					
 				</tr>
 		';
 	}
@@ -76,7 +76,7 @@ $start_time=getmicrotime();
 		$out.='
 			<tr>
 				<td colspan="3" align="left" class="left_menu">
-					<span class="menu_title">'.$TEXT_WIZARD_CONST.'</span>
+					<span class="menu_title">'.translate('TEXT_WIZARD_CONST').'</span>
 				</td>
 			</tr>
 			<tr>
@@ -87,7 +87,7 @@ $start_time=getmicrotime();
 				<td colspan="3" align="center" class="left_menu">&nbsp;</td>
 			</tr>
 			<tr>
-				<td colspan="3" align="center" class="left_menu"><a href="index.php?section=leftMenu"><B>'.$TEXT_SHOW_DEVICES_TREE_CONST.'</B></a></td>
+				<td colspan="3" align="center" class="left_menu"><a href="index.php?section=leftMenu"><B>'.translate('TEXT_SHOW_DEVICES_TREE_CONST').'</B></a></td>
 			</tr>';
 	}
 		$out.='
@@ -155,8 +155,8 @@ function geSection($pageSetupID,$dbADO){
 
 function getLeftWizardMenu($dbADO){
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/steps.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('steps.lang.php');
 	
 	$GLOBALS['pagesArray']=array();
 	$GLOBALS['descriptionArray']=array();
@@ -217,7 +217,7 @@ function getLeftWizardMenu($dbADO){
 		$leftWizardMenu.='
 			<tr id="'.@$GLOBALS['pagesArray'][$pos].'">
 				<td>'.indent($GLOBALS['levelArray'][$pos]).' '.$pic.'&nbsp;&nbsp;'.$wizardLink.'</td>
-				<td align="right"><span id="next_'.@$GLOBALS['pagesArray'][$pos].'" style="display:none;"><a href="#" onClick="setMenuItem(\''.@$GLOBALS['linksArray'][$toPos].'\',\''.$toPage.'\',\''.$fromPage.'\',\''.$GLOBALS['pagesArray'][$pos].'\')">'.$TEXT_NEXT_CONST.'</a></span></td>
+				<td align="right"><span id="next_'.@$GLOBALS['pagesArray'][$pos].'" style="display:none;"><a href="#" onClick="setMenuItem(\''.@$GLOBALS['linksArray'][$toPos].'\',\''.$toPage.'\',\''.$fromPage.'\',\''.$GLOBALS['pagesArray'][$pos].'\')">'.translate('TEXT_NEXT_CONST').'</a></span></td>
 			</tr>
 			';	
 
@@ -227,7 +227,7 @@ function getLeftWizardMenu($dbADO){
 			<tr id="'.@$GLOBALS['pagesArray'][$pos].'">
 				<td>'.indent($GLOBALS['levelArray'][$pos]).'</td>
 				<td colspan="2">'.$wizardLink.'</td>
-				<td align="right"><span id="next_'.@$GLOBALS['pagesArray'][$pos].'" style="display:none;"><a href="#" onClick="setMenuItem(\''.@$GLOBALS['linksArray'][$toPos].'\',\''.$toPage.'\',\''.$fromPage.'\',\''.$GLOBALS['pagesArray'][$pos].'\')">'.$TEXT_NEXT_CONST.'</a></span></td>
+				<td align="right"><span id="next_'.@$GLOBALS['pagesArray'][$pos].'" style="display:none;"><a href="#" onClick="setMenuItem(\''.@$GLOBALS['linksArray'][$toPos].'\',\''.$toPage.'\',\''.$fromPage.'\',\''.$GLOBALS['pagesArray'][$pos].'\')">'.translate('TEXT_NEXT_CONST').'</a></span></td>
 			</tr>
 			';	
 		}else{
@@ -236,7 +236,7 @@ function getLeftWizardMenu($dbADO){
 				<td>'.indent($GLOBALS['levelArray'][$pos]).'</td>
 				<td>'.$pic.'</td>
 				<td>'.$wizardLink.'</td>
-				<td align="right"><span id="next_'.@$GLOBALS['pagesArray'][$pos].'" style="display:none;"><a href="#" onClick="setMenuItem(\''.@$GLOBALS['linksArray'][$toPos].'\',\''.$toPage.'\',\''.$fromPage.'\',\''.$GLOBALS['pagesArray'][$pos].'\')">'.$TEXT_NEXT_CONST.'</a></span></td>
+				<td align="right"><span id="next_'.@$GLOBALS['pagesArray'][$pos].'" style="display:none;"><a href="#" onClick="setMenuItem(\''.@$GLOBALS['linksArray'][$toPos].'\',\''.$toPage.'\',\''.$fromPage.'\',\''.$GLOBALS['pagesArray'][$pos].'\')">'.translate('TEXT_NEXT_CONST').'</a></span></td>
 			</tr>
 			';	
 		}

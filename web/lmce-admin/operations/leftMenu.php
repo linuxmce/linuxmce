@@ -1,9 +1,9 @@
 <?
 function leftMenu($output,$dbADO) {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/leftMenu.lang.php');
-	
+	includeLangFile('common.lang.php');
+	includeLangFile('leftMenu.lang.php');
+
 	$currentSection = @cleanString($_REQUEST['rightSection']);
 	$installationID = (int)@$_SESSION['installationID'];
 	global $devicesArray;
@@ -25,7 +25,7 @@ function leftMenu($output,$dbADO) {
 	if (isset($_SESSION['userLoggedIn']) && $_SESSION['userLoggedIn']==true) {
 		$out.='
 				<tr>
-					<td valign="top">'.($currentSection=='login'?'&raquo;':'').'<a href="index.php?section=login&action=logout" target="basefrm" >'.$TEXT_LOGOUT_CONST.', '.$_SESSION['username'].'</a></td>					
+					<td valign="top">'.($currentSection=='login'?'&raquo;':'').'<a href="index.php?section=login&action=logout" target="basefrm" >'.translate('TEXT_LOGOUT_CONST').', '.$_SESSION['username'].'</a></td>					
 				</tr>
 		';
 	} 	
@@ -124,7 +124,7 @@ function leftMenu($output,$dbADO) {
 			
 				$installationTxt.='
 					
-					'.$TEXT_CHANGE_INSTALLATION_CONST.':
+					'.translate('TEXT_CHANGE_INSTALLATION_CONST').':
 					<input type="hidden" name="section" value="leftMenu">
 					<input type="hidden" name="rightSection" value="'.$currentSection.'">
 					<select name="installationNo" onChange="parent.frames[1].location.href=\'index.php?section=userHome&reloadTree=false\';this.form.submit();">';
@@ -133,7 +133,7 @@ function leftMenu($output,$dbADO) {
 						$installationTxt.="<option ".($selectedInstallation==$elem?" selected ":'')." value='".$elem."'>$elem</option>";
 					}
 
-					$installationTxt.='</select> <input type="submit" class="button" name="submitX" value="'.$TEXT_GO_CONST.'">
+					$installationTxt.='</select> <input type="submit" class="button" name="submitX" value="'.translate('TEXT_GO_CONST').'">
 				
 				';
 			ksort($devicesArray,SORT_NUMERIC);
@@ -150,11 +150,11 @@ function leftMenu($output,$dbADO) {
 			if ($treeType!='scenarios'){
 				$out.='
 			<tr>
-				<td align="right">&nbsp;<fieldset><legend>'.$TEXT_GO_TO_DEVICE_CONST.'</legend>
+				<td align="right">&nbsp;<fieldset><legend>'.translate('TEXT_GO_TO_DEVICE_CONST').'</legend>
 					<table>
 						<tr>
 							<td>'.$quickJumpPulldown.'</td>
-							<td><input type="button" class="button" value="'.$TEXT_QUICK_JUMP_CONST.'" onClick="showDevice();"></td>
+							<td><input type="button" class="button" value="'.translate('TEXT_QUICK_JUMP_CONST').'" onClick="showDevice();"></td>
 						</tr>
 					</table>
 				</fieldset>
@@ -196,7 +196,7 @@ function leftMenu($output,$dbADO) {
 			$jsTree
 			
 			".($treeType=='devices'?"
-								auxS = insFld(foldersTree, gFld(\"$TEXT_ADD_TOP_LEVEL_DEVICE_CONST\", \"index.php?section=addMyDevice&parentID=0\"));
+								auxS = insFld(foldersTree, gFld(\"".translate('TEXT_ADD_TOP_LEVEL_DEVICE_CONST')."\", \"index.php?section=addMyDevice&parentID=0\"));
 								auxS.xID = 0;
 								auxS.iconSrc = ICONPATH + \"diffFolder.gif\"
 			  					auxS.iconSrcClosed = ICONPATH + \"diffFolder.gif\" 
@@ -286,7 +286,7 @@ function leftMenu($output,$dbADO) {
 				</tr>
 			<tr>
 				<td>
-					<br /><a href="index.php?section=leftMenu&treeType='.($treeType=='scenarios'?'devices':'scenarios').'">'.($treeType=='scenarios'?$TEXT_MY_DEVICES_CONST:$TEXT_MY_SCENARIOS_CONST).'</a>
+					<br /><a href="index.php?section=leftMenu&treeType='.($treeType=='scenarios'?'devices':'scenarios').'">'.($treeType=='scenarios'?translate('TEXT_MY_DEVICES_CONST'):translate('TEXT_MY_SCENARIOS_CONST')).'</a>
 				</td>
 			</tr>
 			';
