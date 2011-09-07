@@ -1417,17 +1417,13 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                     QString filePath;
                     int index;
                     QImage cellImg;
-
-
                     for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
                     {
                         DataGridCell *pCell = it->second;
                         const char *pPath = pCell->GetImagePath();
                         filePath = QString::fromUtf8(pPath);
                         fk_file = pCell->GetValue();
-
                         cellTitle = QString::fromUtf8(pCell->m_Text);
-                        //qDebug() << cellTitle.toAscii();
                         index = pDataGridTable->CovertColRowType(it->first).first;
                         if (pPath )
                         {

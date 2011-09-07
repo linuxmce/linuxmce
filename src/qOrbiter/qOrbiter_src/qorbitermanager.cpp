@@ -1353,7 +1353,7 @@ void qorbiterManager::initializeGridModel()
     //datagrid model setup with image provider for grid
     model = new ListModel(new gridItem, this);
     basicProvider = new basicImageProvider();
-    advancedProvider = new GridIndexProvider(model , 6, 4, this);
+    advancedProvider = new GridIndexProvider(model , 6, 4);
     QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex, int )), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex, int)), Qt::QueuedConnection);
 
     //adding important data and objects to qml now that they have been setup

@@ -2,9 +2,9 @@
 #include "qorbitermanager.h"
 #include <QDebug>
 
-GridIndexProvider::GridIndexProvider(ListModel *model  , int pathRole, int pixmapRole, qorbiterManager *manager) :
+GridIndexProvider::GridIndexProvider(ListModel *model  , int pathRole, int pixmapRole) :
     QDeclarativeImageProvider(QDeclarativeImageProvider::Image), mModel(*model),  mPathRole(pathRole),
-    mPixmapRole(pixmapRole), thismanager(manager)
+    mPixmapRole(pixmapRole)
 {
     // For each pixmap already in the model, get a mapping between the name and the index
  qRegisterMetaType<QModelIndex>("QModelIndex");
@@ -32,7 +32,7 @@ QImage GridIndexProvider::requestImage(const QString &id, QSize *size, const QSi
         QModelIndex index = mPixmapIndex.value(id);
       //  QImage image = mModel.data(index, mPixmapRole).value<QImage>();
         QImage image = mModel.data(index, 4).value<QImage>();
-       // QImage image = thismanager->pqOrbiter->getfileForDG(t.toStdString());
+
         if (image.isNull())
         {
              image.load(":/icons/playlist.png");

@@ -14,7 +14,7 @@ class GridIndexProvider :public QObject , public QDeclarativeImageProvider
 {
     Q_OBJECT
 public:
-    GridIndexProvider( ListModel* model, int pathRole, int pixmapRole, qorbiterManager *manager);
+    GridIndexProvider( ListModel* model, int pathRole, int pixmapRole);
    virtual ~GridIndexProvider();
     QImage requestImage(const QString& id, QSize* size, const QSize& requestedSize);
 
@@ -24,7 +24,7 @@ public slots:
     void dataReset();
 
 private:
-    qorbiterManager *thismanager;
+
     ListModel& mModel;
     int mPathRole;
     int mPixmapRole;
