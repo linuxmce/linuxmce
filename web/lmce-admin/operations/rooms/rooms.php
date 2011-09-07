@@ -1,9 +1,9 @@
 <?
 function rooms($output,$dbADO) {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/rooms.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/deleteRoomFromInstallation.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('rooms.lang.php');
+	includeLangFile('deleteRoomFromInstallation.lang.php');
 
 	/* @var $dbADO ADOConnection */
 	/* @var $rs ADORecordSet */
@@ -39,7 +39,7 @@ function rooms($output,$dbADO) {
 			if(isset($_GET['eaid'])){
 				$canModifyInstallation = getUserCanModifyInstallation($_SESSION['userID'],$_SESSION['installationID'],$dbADO);
 				if (!$canModifyInstallation){
-					header("Location: index.php?section=rooms&error=$TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST");
+					header("Location: index.php?section=rooms&error=".translate('TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST'));
 					exit(0);
 				}
 
@@ -56,7 +56,7 @@ function rooms($output,$dbADO) {
 			function confirmCheck(room,label){
 				eval('isChecked=document.rooms.manually_'+room+'.checked');
 				if(isChecked===true){
-					if(confirm('$TEXT_MANUALY_CONFIGURE_EA_CONFIRMATION_CONST '+label+'?')){
+					if(confirm(".translate('TEXT_MANUALY_CONFIGURE_EA_CONFIRMATION_CONST')." '+label+'?')){
 						setMan=1;
 					}else{
 						setMan=-1;
@@ -80,12 +80,12 @@ function rooms($output,$dbADO) {
 			<input type="hidden" name="action" value="add">
 			<input type="hidden" name="lastAction" value="">
 		<tr class="tablehead">
-			<td align="center"><B>'.$TEXT_ROOM_DESCRIPTION_CONST.' *</B></td>
-			<td align="center"><B>'.$TEXT_ROOM_TYPE_CONST.'</B></td>
-			<td align="center"><B>'.$TEXT_FLOORPLAN_OBJECT_TYPE_CONST.'</B></td>
-			<td align="center"><B>'.$TEXT_PICTURE_CONST.' **</B></td>
-			<td align="center"><B>'.$TEXT_DONT_SHOW_ROOM_ON_ORBITERS_CONST.'</B></td>
-			<td align="center"><B>'.$TEXT_ENTERTAIN_AREAS_CONST.'</B></td>
+			<td align="center"><B>'.translate('TEXT_ROOM_DESCRIPTION_CONST').' *</B></td>
+			<td align="center"><B>'.translate('TEXT_ROOM_TYPE_CONST').'</B></td>
+			<td align="center"><B>'.translate('TEXT_FLOORPLAN_OBJECT_TYPE_CONST').'</B></td>
+			<td align="center"><B>'.translate('TEXT_PICTURE_CONST').' **</B></td>
+			<td align="center"><B>'.translate('TEXT_DONT_SHOW_ROOM_ON_ORBITERS_CONST').'</B></td>
+			<td align="center"><B>'.translate('TEXT_ENTERTAIN_AREAS_CONST').'</B></td>
 		</tr>
 		';
 
@@ -106,7 +106,7 @@ function rooms($output,$dbADO) {
 			<tr class="'.$class.'">
 				<td align="center" valign="top">
 					<input type="text" name="roomDesc_'.$rowRoom['PK_Room'].'" value="'.$rowRoom['Description'].'"><br>
-					<a href="javascript:if(confirm(\''.$TEXT_DELETE_ROOM_CONFIRMATION_CONST.' '.$rowRoom['NoDevices'].'\')){self.location=\'index.php?section=rooms&action=delete&delRoom='.$rowRoom['PK_Room'].'\';}">'.$TEXT_DELETE_ROOM_CONST.' #'.$rowRoom['PK_Room'].'</a>
+					<a href="javascript:if(confirm(\''.translate('TEXT_DELETE_ROOM_CONFIRMATION_CONST').' '.$rowRoom['NoDevices'].'\')){self.location=\'index.php?section=rooms&action=delete&delRoom='.$rowRoom['PK_Room'].'\';}">'.translate('TEXT_DELETE_ROOM_CONST').' #'.$rowRoom['PK_Room'].'</a>
 				</td>
 				<td align="center" valign="top">'.pulldownFromArray($roomTypes,'roomType_'.$rowRoom['PK_Room'],$rowRoom['FK_RoomType'],'style="width:200px;"').'</td>
 				<td align="center" valign="top">'.pulldownFromArray($fotRoomArray,'fotRoom_'.$rowRoom['PK_Room'],$rowRoom['FK_FloorplanObjectType'],'style="width:150px;"').'</td>
@@ -115,7 +115,7 @@ function rooms($output,$dbADO) {
 				';
 				$displayedRooms[]=$rowRoom['PK_Room'];
 				$out.='<td bgcolor="#DADDE4">';
-				$out.='<input type="checkbox" name="manually_'.$rowRoom['PK_Room'].'" value="1" '.(($rowRoom['ManuallyConfigureEA']==1)?'checked':'').' onclick="confirmCheck('.$rowRoom['PK_Room'].',\''.addslashes($rowRoom['Description']).'\');//self.location=\'index.php?section=rooms&action=edit&manID='.$rowRoom['PK_Room'].'&val='.(($rowRoom['ManuallyConfigureEA']==1)?'0':'1').'\'"> '.$TEXT_MANUALLY_CONFIGURE_CONST.'<br>';
+				$out.='<input type="checkbox" name="manually_'.$rowRoom['PK_Room'].'" value="1" '.(($rowRoom['ManuallyConfigureEA']==1)?'checked':'').' onclick="confirmCheck('.$rowRoom['PK_Room'].',\''.addslashes($rowRoom['Description']).'\');//self.location=\'index.php?section=rooms&action=edit&manID='.$rowRoom['PK_Room'].'&val='.(($rowRoom['ManuallyConfigureEA']==1)?'0':'1').'\'"> '.translate('TEXT_MANUALLY_CONFIGURE_CONST').'<br>';
 				if($rowRoom['ManuallyConfigureEA']==1){
 					$queryEntertain='SELECT * FROM EntertainArea WHERE FK_Room=?';
 					$resEntertain=$dbADO->Execute($queryEntertain,$rowRoom['PK_Room']);
@@ -131,14 +131,14 @@ function rooms($output,$dbADO) {
 							$out.='<option value="'.$fotID.'" '.(($fotID==$rowEntertain['FK_FloorplanObjectType'])?'selected':'').'>'.$fotDescription.'</option>';
 						}
 						$out.='</select>
-					<input type="checkbox" name="private_'.$rowEntertain['PK_EntertainArea'].'" '.(($rowEntertain['Private']==1)?'checked':'').' value="1"> '.$TEXT_PRIVATE_CONST.' <a href="index.php?section=rooms&eaid='.$rowEntertain['PK_EntertainArea'].'">'.$TEXT_DELETE_AREA_CONST.'</a> <br>';
+					<input type="checkbox" name="private_'.$rowEntertain['PK_EntertainArea'].'" '.(($rowEntertain['Private']==1)?'checked':'').' value="1"> '.translate('TEXT_PRIVATE_CONST').' <a href="index.php?section=rooms&eaid='.$rowEntertain['PK_EntertainArea'].'">'.translate('TEXT_DELETE_AREA_CONST').'</a> <br>';
 					}
-					$out.='  <input type="submit" class="button" name="addEA_'.$rowRoom['PK_Room'].'" value="'.$TEXT_ADD_EA_CONST.'">';
+					$out.='  <input type="submit" class="button" name="addEA_'.$rowRoom['PK_Room'].'" value="'.translate('TEXT_ADD_EA_CONST').'">';
 				}
 				$out.='</td>
 			</tr>';
 				$roomsFormValidation.='
-				frmvalidator.addValidation("roomDesc_'.$rowRoom['PK_Room'].'","req","'.$TEXT_ROOM_DESCRIPTION_REQUIRED_CONST.'");
+				frmvalidator.addValidation("roomDesc_'.$rowRoom['PK_Room'].'","req","'.translate('TEXT_ROOM_DESCRIPTION_REQUIRED_CONST').'");
 			';
 			}
 
@@ -147,10 +147,10 @@ function rooms($output,$dbADO) {
 				<td colspan="4" align="center"> &nbsp;</td>
 			</tr>
 			<tr>
-				<td colspan="4" align="center"> '.pulldownFromArray($roomTypes,'roomType',0,'style="width:200px;"').' <input type="submit" class="button" name="add" value="'.$TEXT_ADD_ROOM_CONST.'"> <input type="submit" class="button" name="save" value="'.$TEXT_SAVE_CONST.'"> <input type="reset" class="button" name="cancelBtn" value="'.$TEXT_CANCEL_CONST.'"></td>
+				<td colspan="4" align="center"> '.pulldownFromArray($roomTypes,'roomType',0,'style="width:200px;"').' <input type="submit" class="button" name="add" value="'.translate('TEXT_ADD_ROOM_CONST').'"> <input type="submit" class="button" name="save" value="'.translate('TEXT_SAVE_CONST').'"> <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'"></td>
 			</tr>
 			<tr>
-				<td colspan="4" align="left"><em>* '.$TEXT_REQUIRED_FIELDS_CONST.'<br>** '.$TEXT_PICTURES_RESTRICTION_WARNING_CONST.'</em></td>
+				<td colspan="4" align="left"><em>* '.translate('TEXT_REQUIRED_FIELDS_CONST').'<br>** '.translate('TEXT_PICTURES_RESTRICTION_WARNING_CONST').'</em></td>
 			</tr>
 		
 			<input type="hidden" name="displayedEntertainArea" value="'.join(",",$displayedEntertainArea).'">
@@ -168,7 +168,7 @@ function rooms($output,$dbADO) {
 		// check if the user has the right to modify installation
 		$canModifyInstallation = getUserCanModifyInstallation($_SESSION['userID'],$_SESSION['installationID'],$dbADO);
 		if (!$canModifyInstallation){
-			header("Location: index.php?section=rooms&error=$TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST");
+			header("Location: index.php?section=rooms&error=".translate('TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST'));
 			exit(0);
 		}
 
@@ -178,7 +178,7 @@ function rooms($output,$dbADO) {
 			$newVal=(int)$_REQUEST['val'];
 
 			$dbADO->Execute('UPDATE Room SET ManuallyConfigureEA=? WHERE PK_Room=?',array($newVal,$roomID));
-			header("Location: index.php?section=rooms&msg=$TEXT_SAVED_CONST");
+			header("Location: index.php?section=rooms&msg=".translate('TEXT_SAVED_CONST'));
 			exit();
 		}
 
@@ -189,7 +189,7 @@ function rooms($output,$dbADO) {
 				$commandToSend='/usr/pluto/bin/UpdateEntArea -h localhost';
 				exec_batch_command($commandToSend);
 
-				header("Location: index.php?section=rooms&msg=$TEXT_ROOM_DELETED_CONST");
+				header("Location: index.php?section=rooms&msg=".translate('TEXT_ROOM_DELETED_CONST'));
 				exit();
 			}
 		}
@@ -289,10 +289,10 @@ function rooms($output,$dbADO) {
 		exec($commandToSend);
 
 		if (strstr($locationGoTo,"#")) {
-			header("Location: index.php?section=rooms&msg=$TEXT_SAVED_CONST".$locationGoTo.'&error='.$errNotice);
+			header("Location: index.php?section=rooms&msg=".translate('TEXT_SAVED_CONST').$locationGoTo.'&error='.$errNotice);
 			exit();
 		} else {
-			header("Location: index.php?section=rooms&msg=$TEXT_SAVED_CONST&lastAction=".$locationGoTo.'&error='.$errNotice);
+			header("Location: index.php?section=rooms&msg=".translate('TEXT_SAVED_CONST')."&lastAction=".$locationGoTo.'&error='.$errNotice);
 			exit();
 		}
 
@@ -304,12 +304,12 @@ function rooms($output,$dbADO) {
 		$output->setScriptInBody("onLoad=\"javascript:eval('$onLoad');\"");
 	}
 
-	$output->setMenuTitle($TEXT_WIZARD_CONST.' |');
-	$output->setPageTitle($TEXT_ROOMS_CONST);
+	$output->setMenuTitle(translate('TEXT_WIZARD_CONST').' |');
+	$output->setPageTitle(translate('TEXT_ROOMS_CONST'));
 
-	$output->setNavigationMenu(array($TEXT_ROOMS_CONST=>'index.php?section=rooms'));
+	$output->setNavigationMenu(array(translate('TEXT_ROOMS_CONST')=>'index.php?section=rooms'));
 	$output->setBody($out);
-	$output->setTitle(APPLICATION_NAME.' :: '.$TEXT_ROOMS_CONST);
+	$output->setTitle(APPLICATION_NAME.' :: '.translate('TEXT_ROOMS_CONST'));
 	$output->output();
 }
 ?>
