@@ -39,6 +39,14 @@ function outsideAccess($output,$dbADO) {
 	$allowAccessOnPort=($resAllowPort->RecordCount()>0)?1:0;
 	$rowAccessOnPort=$resAllowPort->FetchRow();
 	$port=$rowAccessOnPort['SourcePort'];
+
+	$resAllowSSL443=$dbADO->Execute('SELECT * FROM Firewall WHERE RuleType=? AND SourcePort=443','core_input');
+	$allowSSLAccessOn443=($resAllowSSL443->RecordCount()>0)?1:0;
+
+	$resAllowSSLPort=$dbADO->Execute('SELECT * FROM Firewall WHERE RuleType=? AND DestinationPort=443 AND DestinationIP=?',array('port_forward','127.0.0.1'));
+	$allowSSLAccessOnPort=($resAllowSSLPort->RecordCount()>0)?1:0;
+	$rowSSLAccessOnPort=$resAllowSSLPort->FetchRow();
+	$sslport=$rowSSLAccessOnPort['SourcePort'];
 	
 	if ($action=='form') {
 		
@@ -55,6 +63,12 @@ function outsideAccess($output,$dbADO) {
 		if(document.outsideAccess.allowOnPort.checked && (isNaN(portValue) || portValue==80 || portValue<=0)){
 			alert("Please type the port, other value than 80.");
 			document.outsideAccess.port.focus();
+			return false;
+		}
+		portValue=parseInt(document.outsideAccess.sslport.value);
+		if(document.outsideAccess.allowSSLOnPort.checked && (isNaN(portValue) || portValue==443 || portValue<=0)){
+			alert("Please type the port, other value than 443.");
+			document.outsideAccess.sslport.focus();
 			return false;
 		}
 		
@@ -92,6 +106,16 @@ function outsideAccess($output,$dbADO) {
 			<td><input type="text" name="port" value="'.@$port.'"></td>
 		</tr>
 		<tr>
+			<td><input type="checkbox" name="allow443" value="1" '.(($allowSSLAccessOn443==1)?'checked':'').'></td>
+			<td>'.$TEXT_ALLOW_OUTSIDE_ACCESS_SSL443_CONST.'</td>
+			<td>&nbsp;</td>
+		</tr>
+		<tr>
+			<td><input type="checkbox" name="allowSSLOnPort" value="1" '.(($allowSSLAccessOnPort==1)?'checked':'').'></td>
+			<td>'.$TEXT_ALLOW_OUTSIDE_ACCESS_SSLOTHER_CONST.'</td>
+			<td><input type="text" name="sslport" value="'.@$sslport.'"></td>
+		</tr>
+		<tr>
 			<td><input type="checkbox" name="RAport" value="1" '.(((int)@$RAport==22)?'checked':'').'></td>
 			<td>'.$TEXT_USE_PORT_22_FOR_REMOTE_ASSISTANCE_CONST.'</td>
 			<td>&nbsp;</td>
@@ -117,6 +141,9 @@ function outsideAccess($output,$dbADO) {
 		<input type="hidden" name="oldAllow80" value="'.$allowAccessOn80.'">
 		<input type="hidden" name="oldAllowOnPort" value="'.$allowAccessOnPort.'">
 		<input type="hidden" name="oldPort" value="'.@$port.'">
+		<input type="hidden" name="oldAllow443" value="'.$allowSSLAccessOn443.'">
+		<input type="hidden" name="oldAllowSSLOnPort" value="'.$allowSSLAccessOnPort.'">
+		<input type="hidden" name="oldSSLPort" value="'.@$sslport.'">
 	</form>
 		';
 	} else {
@@ -161,11 +188,17 @@ function outsideAccess($output,$dbADO) {
 
 			$allow80=(int)@$_POST['allow80'];
 			$oldAllow80=(int)@$_POST['oldAllow80'];
+			$allow443=(int)@$_POST['allow443'];
+			$oldAllow443=(int)@$_POST['oldAllow443'];
 
 			$oldAllowOnPort=@(int)$_POST['oldAllowOnPort'];
 			$allowOnPort=@(int)$_POST['allowOnPort'];
 			$oldPort=(int)@$_POST['oldPort'];
 			$port=(int)@$_POST['port'];
+			$oldAllowSSLOnPort=@(int)$_POST['oldAllowSSLOnPort'];
+			$allowSSLOnPort=@(int)$_POST['allowSSLOnPort'];
+			$oldSSLPort=(int)@$_POST['oldSSLPort'];
+			$sslport=(int)@$_POST['sslport'];
 
 			if($oldAllow80==0){
 				if($allow80==1){
@@ -185,6 +218,26 @@ function outsideAccess($output,$dbADO) {
 					$dbADO->Execute('DELETE FROM Firewall WHERE RuleType=? AND SourcePort=? AND DestinationPort=? AND DestinationIP=?',array('port_forward',$oldPort,'80','127.0.0.1'));
 				}elseif($port!=$oldPort){
 					$dbADO->Execute('UPDATE Firewall SET SourcePort=? WHERE RuleType=? AND SourcePort=? AND DestinationIP=?',array($port,'port_forward','80','127.0.0.1'));
+				}
+			}
+			if($oldAllow443==0){
+				if($allow443==1){
+					$dbADO->Execute('INSERT INTO Firewall (Protocol,SourcePort,RuleType) VALUES (?,?,?)',array('tcp','443','core_input'));
+				}
+			}else{
+				if($allow443==0){
+					$dbADO->Execute('DELETE FROM Firewall WHERE RuleType=? AND SourcePort=?',array('core_input','443'));
+				}
+			}
+			if($oldAllowSSLOnPort==0){
+				if($allowSSLOnPort==1){
+					$dbADO->Execute('INSERT INTO Firewall (Protocol,DestinationPort,RuleType,SourcePort,DestinationIP) VALUES (?,?,?,?,?)',array('tcp','443','port_forward',$sslport,'127.0.0.1'));
+				}
+			}else{
+				if($allowSSLOnPort==0){
+					$dbADO->Execute('DELETE FROM Firewall WHERE RuleType=? AND SourcePort=? AND DestinationPort=? AND DestinationIP=?',array('port_forward',$oldSSLPort,'443','127.0.0.1'));
+				}elseif($sslport!=$oldSSLPort){
+					$dbADO->Execute('UPDATE Firewall SET SourcePort=? WHERE RuleType=? AND SourcePort=? AND DestinationIP=?',array($sslport,'port_forward','443','127.0.0.1'));
 				}
 			}
 			exec('sudo -u root /usr/pluto/bin/Network_Firewall.sh');
