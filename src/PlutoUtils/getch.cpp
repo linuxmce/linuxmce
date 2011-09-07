@@ -49,7 +49,7 @@ int THE_getch(bool echo, struct timeval * timeout) // :P
 	if (! echo)
 		new_ts.c_lflag &= !ECHO;
 	// ioctl(0, TCSETS, &new_ts); //deprecated and replaced by below code
-	tcsetattr(0, &new_ts);
+	tcsetattr(0, 0, &new_ts);
 
 	c = 0;
 	do
