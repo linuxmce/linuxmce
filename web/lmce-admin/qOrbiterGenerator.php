@@ -245,7 +245,7 @@ $result = mysql_query($defaultLocationSql,$conn) or die(mysql_error($conn));
 		$subResult = mysql_query("SELECT * from EntertainArea where FK_Room = '".$row['FK_Room']."'", $conn);
 		$row2 = mysql_fetch_array($subResult);
 		
-		$attrib2= $dElement->setAttribute("DefaultLocation", $row['FK_Room']);
+		$attrib2= $dElement->setAttribute("DefaultLocation", $row2['Description']);
 		$attrib2= $dElement->setAttribute("DefaultEA", $row2['PK_EntertainArea']);
 		$attrib2= $dElement->setAttribute("DefaultRoom", $row['FK_Room']);
 		
