@@ -1,8 +1,6 @@
 <?php
 
 function changeVPNPassword($username,$oldVPNPassword,$VPNPassword) {
-	ini_set('display_errors', 1); 
-	error_reporting(E_ALL);
 	// change the user's VPN password in /etc/ppp/chap-secrets
 	exec("{ rm /etc/ppp/chap-secrets; awk '{if ($1 == \"$username\" && $3 == \"$oldVPNPassword\") sub(/$oldVPNPassword/,\"$VPNPassword\"); print $0}' >/etc/ppp/chap-secrets; } < /etc/ppp/chap-secrets");
 }
