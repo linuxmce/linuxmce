@@ -372,8 +372,6 @@ function networkSettings($output,$dbADO) {
 			<td colspan="3" align="center" bgcolor="#EEEEEE"><input type="button" class="button" name="update" value="'.translate('TEXT_UPDATE_CONST').'" onClick="validateForm()"> <input type="reset" class="button" name="reset" value="'.translate('TEXT_RESET_CONST').'"></td>
 		</tr>		
 	<tr><td colspan="3">'.translate('TEXT_OPEN_FIREWALL_CONST').'</td></tr>	'
-	//<tr><td colspan="3" class="tablehead">Current settings:</td></tr>
-	//<tr><td colspan="3" class="alternate_back">'.get_network_settings().'</td></tr>
 	.'</table>
 	</form>
 		<script>
@@ -560,38 +558,4 @@ function getIPv6FromParts($partName,$startIndex=1)
 	return $tmp;
 }
 
-function get_network_settings(){
-	$command='sudo -u root /usr/pluto/bin/Network_DisplaySettings.sh --all';
-	$ret=exec_batch_command($command,1);
-	
-	$lines=explode("\n",$ret);
-
-	if(count($lines)==0){
-		return '';
-	}
-	$out='<table>';
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_URL, 'http://automation.whatismyip.com/n09230945.asp');
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	$internetip = curl_exec($ch);
-	if($internetip) {	
-		$internetname=gethostbyaddr($internetip);
-		$out.='<tr><td><b>CORE SEEN FROM OUTSIDE</b></td><td>'.$internetip.' ('.$internetname.')</td></tr>';
-		$out.='<td colspan=2><hr></td>';
-	}
-	foreach ($lines AS $line){
-		$parts=explode('=',$line);
-		if($parts[0]=='INTERNAL_IFACE' || $parts[0]=='GATEWAY') $out.='<td colspan=2><hr></td>';
-		if(count($parts)==2){
-			$out.='
-			<tr>
-				<td><b>'.trim($parts[0]).'</b></td>
-				<td>'.trim($parts[1]).'</td>
-			</tr>';
-		}
-	}
-	$out.='</table>';
-	
-	return $out;
-}
 ?>

@@ -1,8 +1,16 @@
 <?php
+
+function changeVPNPassword($username,$oldVPNPassword,$VPNPassword) {
+	ini_set('display_errors', 1); 
+	error_reporting(E_ALL);
+	// change the user's VPN password in /etc/ppp/chap-secrets
+	exec("{ rm /etc/ppp/chap-secrets; awk '{if ($1 == \"$username\" && $3 == \"$oldVPNPassword\") sub(/$oldVPNPassword/,\"$VPNPassword\"); print $0}' >/etc/ppp/chap-secrets; } < /etc/ppp/chap-secrets");
+}
+
 function userChangeVPNPassword($output,$dbADO) {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/userChangePassword.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('userChangePassword.lang.php');
 	
 	$out='';
 	$action = isset($_POST['action'])?cleanString($_POST['action']):'form';
@@ -26,28 +34,28 @@ function userChangeVPNPassword($output,$dbADO) {
 		<input type="hidden" name="from" value="'.$from.'">
 		<input type="hidden" name="userID" value="'.$userID.'">
 		
-		<h3>'.$TEXT_CHANGE_VPN_PASSWORD_CONST.'</h3>
+		<h3>'.translate('TEXT_CHANGE_VPN_PASSWORD_CONST').'</h3>
 			<table>	
 					<tr valign="top">
-						<td>'.$TEXT_YOUR_PASSWORD_CONST.'</td>
+						<td>'.translate('TEXT_YOUR_PASSWORD_CONST').'</td>
 						<td>
 							<input type="password" name="oldVPNPassword" value="">
 						</td>
 					</tr>
 					<tr valign="top">
-						<td>'.$TEXT_PASSWORD_CONST.'</td>
+						<td>'.translate('TEXT_PASSWORD_CONST').'</td>
 						<td>
 							<input type="password" name="VPNPassword" value="">
 						</td>
 					</tr>
 					<tr valign="top">
-						<td>'.$TEXT_USER_CONFIRM_PASSWORD_CONST.'</td>
+						<td>'.translate('TEXT_USER_CONFIRM_PASSWORD_CONST').'</td>
 						<td>
 							<input type="password" name="VPNPassword2" value="">
 						</td>
 					</tr>					
 					<tr>
-						<td colspan="2" align="center"><input type="submit" class="button" name="submitX" value="'.$TEXT_SAVE_CONST.'"  > <input type="button" class="button" name="update" value="'.$TEXT_CLOSE_CONST.'" onClick="self.close();"></td>
+						<td colspan="2" align="center"><input type="submit" class="button" name="submitX" value="'.translate('TEXT_SAVE_CONST').'"  > <input type="button" class="button" name="update" value="'.translate('TEXT_CLOSE_CONST').'" onClick="self.close();"></td>
 					</tr>
 			</table>
 			</form>
@@ -56,8 +64,8 @@ function userChangeVPNPassword($output,$dbADO) {
 			$out.='
 				<script>
 		 			var frmvalidator = new formValidator("userChangeVPNPassword"); 		
-					frmvalidator.addValidation("VPNPassword","req","'.$TEXT_PASSWORD_REQUIRED_CONST.'");
-					frmvalidator.addValidation("VPNPassword2","req","'.$TEXT_CONFIRMED_PASSWORD_REQUIRED_CONST.'");';
+					frmvalidator.addValidation("VPNPassword","req","'.translate('TEXT_PASSWORD_REQUIRED_CONST').'");
+					frmvalidator.addValidation("VPNPassword2","req","'.translate('TEXT_CONFIRMED_PASSWORD_REQUIRED_CONST').'");';
 			$out.='
 				</script>
 			';
@@ -78,13 +86,13 @@ function userChangeVPNPassword($output,$dbADO) {
 			$username = $rowUser['UserName'];
 			
 			if(exec("awk '$1==\"$username\" {print $3}' /etc/ppp/chap-secrets") != $oldVPNPassword){	
-				header('Location: index.php?section=userChangeVPNPassword&from=users&userID='.$userID.'&error='.$TEXT_ERROR_OLD_PASSWORD_DO_NOT_MATCH_CONST);
+				header('Location: index.php?section=userChangeVPNPassword&from=users&userID='.$userID.'&error='.translate('TEXT_ERROR_OLD_PASSWORD_DO_NOT_MATCH_CONST'));
 				exit();
 			}
 			
 
 			if ($VPNPassword!=$VPNPassword2) {
-				header("Location: index.php?section=userChangeVPNPassword&error=$TEXT_ERROR_PASSWORD_DO_NOT_MATCH_CONST&userID=$userID&from=$from");
+				header("Location: index.php?section=userChangeVPNPassword&error=".translate('TEXT_ERROR_PASSWORD_DO_NOT_MATCH_CONST')."&userID=$userID&from=$from");
 				exit();
 			}	
 
@@ -92,16 +100,12 @@ function userChangeVPNPassword($output,$dbADO) {
 
 			
 			if ($VPNPassword!='' && ($queryUserInst && $queryUserInst->RecordCount()==1)) {
-
-								
-				// reload daemon
-				//$commandToSend='sudo -u root /usr/pluto/bin/SetupUsers.sh';
-				//exec($commandToSend);
-
+				
+				changeVPNPassword($username, $oldVPNPassword, $VPNPassword);
 				
 				$out.="
 				<script>
-					alert('$TEXT_PASSWORD_CHANGED_CONST');
+					alert('".translate('TEXT_PASSWORD_CHANGED_CONST')."');
 				    opener.document.forms.{$from}.action.value='form';
 					opener.document.forms.{$from}.submit();
 					self.close();
@@ -112,13 +116,13 @@ function userChangeVPNPassword($output,$dbADO) {
 				exit();
 			}		
 		} else {
-			header("Location: index.php?section=userChangeVPNPassword&userID=$userID&from=$from&error=$TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST");
+			header("Location: index.php?section=userChangeVPNPassword&userID=$userID&from=$from&error=".translate('TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST'));
 			exit();
 		}
 	}
 	
 	$output->setBody($out);
-	$output->setTitle(APPLICATION_NAME.' :: '.$TEXT_CHANGE_VPN_PASSWORD_CONST);			
+	$output->setTitle(APPLICATION_NAME.' :: '.translate('TEXT_CHANGE_VPN_PASSWORD_CONST'));			
 	$output->output();
 }
 ?>
