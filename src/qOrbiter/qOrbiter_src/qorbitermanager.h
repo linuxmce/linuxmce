@@ -136,6 +136,7 @@ Param 10 - pk_attribute
     ListModel *model;
     UserModel *userList;
     SkinDataModel *skinModel;
+    ListModel *playlistModel;
 
     MediaSubTypeModel *mediaTypeFilter;
     FilterModel *uiFileFilter;
@@ -257,6 +258,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
 
     //livetv related
     Q_INVOKABLE void changeChannels(QString chan);
+    Q_INVOKABLE void gridChangeChannel(QString chan);
 
     //media related
     Q_INVOKABLE void getMediaPlaylist();

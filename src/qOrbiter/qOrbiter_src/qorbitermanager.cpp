@@ -1347,6 +1347,10 @@ void qorbiterManager::initializeContexts()
 
 void qorbiterManager::initializeGridModel()
 {
+
+    playlistModel = new ListModel(new gridItem, this);
+    qorbiterUIwin->rootContext()->setContextProperty("playlistmodel", playlistModel);
+
     //datagrid model setup with image provider for grid
     model = new ListModel(new gridItem, this);
     basicProvider = new basicImageProvider();
@@ -1459,6 +1463,11 @@ void qorbiterManager::changeChannels(QString chan)
 void qorbiterManager::getLiveTVPlaylist()
 {
     pqOrbiter->requestLiveTvPlaylist();
+}
+
+void qorbiterManager::gridChangeChannel(QString chan)
+{
+    qDebug() << chan;
 }
 
 

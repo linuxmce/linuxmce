@@ -34,7 +34,7 @@ onPlayListPositionChanged:nonepgplaylistview.positionViewAtIndex(dcenowplaying.m
         clip: true
         interactive: true
         flickableDirection: "VerticalFlick"
-        model: mediaplaylist
+        model: playlistmodel
 
         delegate:
 
@@ -62,7 +62,7 @@ onPlayListPositionChanged:nonepgplaylistview.positionViewAtIndex(dcenowplaying.m
 
             MouseArea{
                 anchors.fill: parent
-                onClicked: changedPlaylistPosition(name)
+                onClicked: gridChangeChannel(name)
             }
         }
     }

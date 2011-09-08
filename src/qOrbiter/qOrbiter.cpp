@@ -2604,8 +2604,8 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
                 //qDebug() << pCell->GetImagePath();
                 cellfk = pCell->GetValue();
 
-                qDebug() << "Now Playing Attribute::" << cellTitle << "-" << cellAttribute;
-                qDebug() << "Attribute image?" << pCell->GetImagePath();
+              //  qDebug() << "Now Playing Attribute::" << cellTitle << "-" << cellAttribute;
+              //  qDebug() << "Attribute image?" << pCell->GetImagePath();
                 if (pPath )
                 {
                     cellImg = getfileForDG(pCell->GetImagePath());
@@ -2622,7 +2622,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
                 {
                     cellImg.load(":/icons/videos.png");
                 }
-                qmlUI->currentPlaylist->appendRow(new PlaylistItemClass(cellTitle, cellAttribute, fk_file ,index, qmlUI->currentPlaylist));
+                qmlUI->playlistModel->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg,  qmlUI->playlistModel));
             }
         }
         //}
