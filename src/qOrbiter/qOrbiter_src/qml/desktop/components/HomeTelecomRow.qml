@@ -49,7 +49,7 @@ Item {
             Flickable{
                 id:securityflick
                 height: scaleY(16)
-                width: scaleX(100)
+                width: scaleX(87)
                 anchors.left: rowheader.right
                 anchors.leftMargin: 4
                 contentHeight: style.buttonH

@@ -73,7 +73,7 @@ Item {
         Flickable{
             id:mediaflick
             height: scaleY(16)
-            width: scaleX(100)
+            width: scaleX(79)
             anchors.left: now_playing.right
             anchors.leftMargin: 4
             contentHeight: style.buttonH

@@ -6,24 +6,20 @@ Rectangle {
     id:advanced_panel
     width: style.orbiterW
     height: scaleY(10)
-    color: "aliceblue"
-
+    color: style.darkhighlight
 
     Row{
         id:advancedrow
         height:scaleY(9)
         width: childrenRect.width
         anchors.centerIn: parent
-
         spacing:10
         clip: false
 
         ButtonSq {
+            width: style.widebuttonw
+            height: style.widebuttonh
             id: buttonsq1
-
-            width: scaleX(16)
-            height: scaleY(9)
-            color: style.homescreenfloorplanbuttoncolor
             buttontextfontsize: 9
             border.width: 2
             buttontext: "Advanced"
@@ -39,12 +35,10 @@ Rectangle {
             id: buttonsq2
             x: 63
             y: 1
-            width: scaleX(16)
-            height: scaleY(9)
-            color: style.homescreenfloorplanbuttoncolor
+            width: style.widebuttonw
+            height: style.widebuttonh
             border.width: 2
             buttontext: "Power"
-
             radius: 5
             MouseArea{
                 anchors.fill: parent
@@ -53,46 +47,41 @@ Rectangle {
         }
 
 
-    ButtonSq {
-        id: buttonsq3
-        x: 125
-        y: 1
-        width: scaleX(16)
-        height: scaleY(9)
-        color: style.homescreenfloorplanbuttoncolor
-        border.width: 2
-        buttontext: "Sleeping Menu"
-        radius: 5
-    }
-
-
-
-    ButtonSq{
-        id:roombutton
-        buttontext: currentroom
-        width: scaleX(16)
-        height: scaleY(9)
-        color: style.homescreenfloorplanbuttoncolor
-        MouseArea{
-            anchors.fill: parent
-            onClicked:MyJs.createRoomSelector()
+        ButtonSq {
+            id: buttonsq3
+            x: 125
+            y: 1
+            width: style.widebuttonw
+            height: style.widebuttonh
+            border.width: 2
+            buttontext: "Sleeping Menu"
+            radius: 5
         }
-    }
 
-    UserListComponent {id:user}
 
-    ButtonSq{
-        id:exit
-        buttontext: "Exit Orbiter"
-        width: scaleX(16)
-        height: scaleY(9)
-        color: style.homescreenfloorplanbuttoncolor
-        MouseArea{
-            anchors.fill: exit
-            onClicked: closeOrbiter()
+
+        ButtonSq{
+            id:roombutton
+            buttontext: currentroom
+            MouseArea{
+                anchors.fill: parent
+                onClicked:MyJs.createRoomSelector()
+            }
         }
-    }
 
-}
+        UserListComponent {id:user}
+
+        ButtonSq{
+            id:exit
+            width: style.widebuttonw
+            height: style.widebuttonh
+            buttontext: "Exit Orbiter"
+            MouseArea{
+                anchors.fill: exit
+                onClicked: closeOrbiter()
+            }
+        }
+
+    }
 }
 

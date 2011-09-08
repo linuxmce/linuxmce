@@ -20,18 +20,6 @@ Item {
 
         }
         HomeButtonDelegate{id:climateDelegate}
-        Flickable{
-
-            id:climateRow
-            height: scaleY(16)
-            width: scaleX(100)
-            anchors.centerIn: parent
-            contentHeight: style.buttonH
-            contentWidth: ((style.buttonW + 5) * (climateScenarios.count + 1)) - 5
-            clip: true
-            flickableDirection: "HorizontalFlick"
-
-
 
             Row {
                 id: guide
@@ -55,6 +43,16 @@ Item {
                         z:5 }
                 }
 
+                Flickable{
+
+                    id:climateRow
+                    height: scaleY(16)
+                    width: scaleX(85)
+                    anchors.centerIn: parent
+                    contentHeight: style.buttonH
+                    contentWidth: ((style.buttonW + 5) * (climateScenarios.count + 1)) - 5
+                    clip: true
+                    flickableDirection: "HorizontalFlick"
 
                 ListView{
                     id: climateScenarios

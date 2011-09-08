@@ -1,44 +1,43 @@
 import QtQuick 1.0
 import "../components"
-
-Rectangle {
-
-    width: parent.width
-    height: parent.height
-    color: "lightsteelblue"
-    Text {
-        id: orbiter_status
-        text: "Orbiter Needs to regen - Click 'Later' because regen isnt implemented. Kthxbai"
-    }
+Item{
+    id:reloadrouter
 
     Rectangle{
-        height: 200
-        width: 200
+        height: style.orbiterH
+        width: style.orbiterW
+        color: style.maincolor
+        Rectangle{
+            id:reloadroutercontainer
+            height: scaleY(50)
+            width:scaleY(25)
+            anchors.centerIn: parent
 
-        color: "navajowhite"
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
+            Column{
+                id:buttoncolumn
+                anchors.fill: parent
 
-        ButtonSq{
-            radius: 2
-            buttontext: "Regen Now"
-            anchors.left: parent.left
-            MouseArea{
+               ButtonSq{
+                   id:confirm
+                   height: style.stdbuttonh
+                   width:style.stdbuttonw
+                   buttontext: "Reload Router Now"
 
+               }
+
+               ButtonSq{
+                   id:deny
+                   height: style.stdbuttonh
+                   width:style.stdbuttonw
+                   buttontext: "Reload Later"
+
+               }
             }
+
         }
 
-        ButtonSq{
-            x: 41
-            y: 80
-            radius: 2
-            buttontext: "Later"
-            anchors.right: parent.right
-            MouseArea{
-                 anchors.fill: parent
-                onClicked:gotoQScreen("Screen_1.qml")
-            }
-        }
+
+        HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
     }
 
 }

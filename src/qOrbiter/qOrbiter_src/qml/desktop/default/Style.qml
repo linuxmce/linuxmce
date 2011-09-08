@@ -12,20 +12,33 @@ import QtQuick 1.0
   */
 
 
-    QtObject{
-        id:classicstyle
-        objectName: "orbiter_style"
-        //skin description
-        property string skincreator: "Langston Ball (aka golgoj4)"
-        property string skinname: "Pluto Classic"
-        property string skindir: "default"
-        property string skindescription: "Pluto Classic Skin"
-        property string skinversion: "1.0"
-        property string skinvariation: "Desktop 800x600"
-        property string maincolor: "midnightblue"
-        property string accentcolor: "lightsteelblue"
-        property string highlight1: "aliceblue"
-        property string highlight2: "slategrey"
+
+QtObject{
+    id:classicstyle
+    objectName: "orbiter_style"
+
+    function scaleX(x){
+        return x/100*orbiterW
+    }
+    function scaleY(y){
+        return y/100*orbiterH
+    }
+    //skin description
+    property string skincreator: "Langston Ball (aka golgoj4)"
+    property string skinname: "Pluto Classic"
+    property string skindir: "default"
+    property string skindescription: "Pluto Classic Skin"
+    property string skinversion: "1.0"
+    property string skinvariation: "Desktop 800x600"
+    property string maincolor: "midnightblue"
+    property string accentcolor: "lightsteelblue"
+    property string highlight1: "aliceblue"
+    property string highlight2: "slategrey"
+    property string alertcolor: "red"
+    property string warncolor:"yellow"
+
+    property string darkhighlight: highlight2
+    property string lighthighlight: highlight1
     //main stage styles
     property int orbiterH: 720
     property int orbiterW: 1280
@@ -41,19 +54,24 @@ import QtQuick 1.0
     //icon sizes
     property int iconHeight: 9
     property int iconWidth: 9
-        property int  stdbuttonh: 9
-        property int  stdbuttonw: 9
+    property int  stdbuttonh: scaleY(13)
+    property int  stdbuttonw: scaleX(8)
+    property int widebuttonw: scaleX(13)
+    property int widebuttonh: scaleY(13)
+
 
     //textStyles
-     property string stylebuttonimage: ""
+    property string stylebuttonimage: ""
     property int title_size: 18
     property color tile_color: "whitesmoke"
+    property double stdbuttontext: 12
+
 
     property int t_but_size: 16
     property color t_but_color: highlight2
 
     //title and other misc windo accents
- property color titletextcolor: "black"
+    property color titletextcolor: "black"
     //button styling
     property int buttonH:9
     property int buttonW: 9
@@ -88,7 +106,7 @@ import QtQuick 1.0
 
     //advanced panel
     property color advanced_bg: highlight1
-        property color advanced_bg_text: "black"
+    property color advanced_bg_text: "black"
 
     //stage
     property color stage_bg: maincolor

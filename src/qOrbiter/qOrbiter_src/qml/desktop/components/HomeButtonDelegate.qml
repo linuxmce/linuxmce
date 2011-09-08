@@ -11,14 +11,12 @@ Component{
         {       id:delegateButton
             anchors.top: parent.top
             anchors.topMargin: scaleY(2)
-            height: scaleY(13)
-            width: scaleX(8)
-            color: style.homescreenscenariobuttoncolor
+            height: style.stdbuttonh
+            width: style.stdbuttonw
+
             radius: style.but_smooth
-            buttontext: ""
-            buttontextfontsize: 10
-            buttontextzindex: 4
-            opacity: .5
+            buttontext: label
+
             MouseArea{
                 anchors.fill: parent
                 onClicked: execGrp(params);
@@ -29,23 +27,22 @@ Component{
                 height:parent.height
                width: parent.width
                 source: "../../../img/icons/buttonoverlay.png"
+                opacity: .5
             }
 
 
             Image {
                 id:buttonimage
-                source: "../../../img/icons/"+label+".png"
+                source: ""
                 height: parent.height
                 width: parent.width
                 anchors.centerIn: delegateButton
             }
-
         }
-
+/*
         Text {
             id: daslabel
             text: label
-            font.pointSize: 12
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             anchors.centerIn: delegateButton
             anchors.fill: delegateButton
@@ -54,6 +51,7 @@ Component{
             verticalAlignment: Text.AlignVCenter
             font.family: "Droid Sans"
         }
+        */
     }
 }
 

@@ -13,7 +13,7 @@ Item {
         width:  scaleX(style.buttonW)
         Image {
             id: homeimage
-            source: "img/icons/kfm_home.png"
+            source: "../../../img/icons/kfm_home.png"
             anchors.centerIn: parent
             height: scaleY(style.buttonH)
             width:  scaleX(style.buttonW)

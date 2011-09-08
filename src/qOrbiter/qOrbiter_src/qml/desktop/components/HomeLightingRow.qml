@@ -8,11 +8,10 @@ Item {
         height: scaleY(17)
         width: scaleX(100)
         clip:true
-        color:"midnightblue"
+        color:style.maincolor
         radius: 20
         Image {
             id: rowbgimg
-
             source: "../../../img/icons/rowbg.png"
             width: parent.width
             height: parent.height
@@ -30,11 +29,11 @@ Item {
 
             ButtonSq {
                 id: lightingfloorplan
-                height: scaleY(13)
-                width: scaleX(8)
+                height: style.stdbuttonh
+                width: style.stdbuttonw
                 anchors.top: parent.top
                 anchors.topMargin: scaleY(2)
-                color: style.homescreenfloorplanbuttoncolor
+                color: style.lightaccent
                 radius: style.but_smooth
                 buttontext: ""
 
@@ -56,11 +55,11 @@ Item {
             }
         Flickable{
             height: scaleY(15)
-            width: scaleX(100)
+            width: scaleX(79)
             anchors.left: lightingfloorplan.right
             anchors.leftMargin: 4
-            contentHeight: style.buttonH
-            contentWidth: ((style.buttonW + 5) * (lightingScenarios.count + 1)) - 5
+            contentHeight: style.stdbuttonh
+            contentWidth: ((style.stdbuttonw + 5) * (lightingScenarios.count + 1)) - 5
             clip: true
             flickableDirection: "HorizontalFlick"
 
@@ -70,7 +69,7 @@ Item {
                     id: lightingScenarios
 
                     width: stage.width
-                    height: scaleY(style.buttonH)
+                    height: scaleY(style.stdbuttonh)
                     model: currentRoomLights
                     spacing: 5
                     orientation:ListView.Horizontal
