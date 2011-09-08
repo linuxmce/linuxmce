@@ -359,7 +359,6 @@ function users($output,$dbADO) {
 
 			}
 
-			exit();
 			$commandToSend='sudo -u root /usr/pluto/bin/SetupUsers.sh';
 			exec_batch_command($commandToSend);
 
