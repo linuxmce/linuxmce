@@ -14,7 +14,7 @@ $TEXT_IPV4_DHCP_ENABLED_CONST='Serveur DHCP IPv4 activé';
 $TEXT_IPV4_DHCP_LMCE_RANGE_CONST='Etendue pour les dispositifs LinuxMCE';
 $TEXT_IPV4_DHCP_NONLMCE_ENABLED_CONST='Fournir adresses IP pour dispositifs anonymes ne figurant pas dans la base de données LinuxMCE';
 $TEXT_IPV4_DHCP_NONLMCE_RANGE_CONST='Etendue pour les dispositifs NON LinuxMCE';
-$TEXT_IPV6_RA_ENABLED_CONST='Serveur d\'advertissement routeur IPv6 Router Advertisement activé (radvd)';
+$TEXT_IPV6_RA_ENABLED_CONST='Service d\'advertissement routeur IPv6 Router Advertisement activé (radvd)';
 $TEXT_IPV6_PUBLIC_PREFIX_CONST='IPv6 public prefix';
 $TEXT_VPN_ENABLED_CONST='Serveur VPN L2TP/IPSEC VPN activé';
 $TEXT_VPN_PSK_CONST='Clé pré-partagé (PSK)';
@@ -28,5 +28,5 @@ $TEXT_GATEWAY_CONST='Passerelle';
 $TEXT_NAMESERVER_CONST='Serveur de noms';
 $TEXT_INTERNAL_NIC_CONST='Carte réseau interne';
 $TEXT_SWAP_INTERFACES_CONST='Echanger interfaces';
-$TEXT_OPEN_FIREWALL_CONST='Vous devez peut-être ouvrir des ports sur votre pare-feu pour différents logiciels tournant sur votre réseau interne, tel que la vidéo conférence,  partage de fichiers, etc. Pour faire cela veuillez visiter la page avancée  <a href="index.php?section=firewall">Pare-feu</a>.'
+$TEXT_OPEN_FIREWALL_CONST='Vous devez peut-être ouvrir des ports sur votre pare-feu pour différents logiciels tournant sur votre réseau interne, tel que la vidéo conférence,  partage de fichiers, etc. <br />Pour faire cela veuillez visiter la page avancée  <a href="index.php?section=firewall">Pare-feu</a>.'
 ?>

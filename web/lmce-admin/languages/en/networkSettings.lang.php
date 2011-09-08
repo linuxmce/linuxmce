@@ -28,5 +28,5 @@ $TEXT_GATEWAY_CONST='Gateway';
 $TEXT_NAMESERVER_CONST='Nameserver';
 $TEXT_INTERNAL_NIC_CONST='Internal network card';
 $TEXT_SWAP_INTERFACES_CONST='Swap Interfaces';
-$TEXT_OPEN_FIREWALL_CONST='You may need to open up ports in the firewall for some programs that run on your internal computers, like video conferencing, file sharing, etc.  To do this, visit the Advanced, <a href="index.php?section=firewall">Firewall</a> page.'
+$TEXT_OPEN_FIREWALL_CONST='You may need to open up ports in the firewall for some programs that run on your internal computers, like video conferencing, file sharing, etc.  <br />To do this, visit the Advanced, <a href="index.php?section=firewall">Firewall</a> page.'
 ?>

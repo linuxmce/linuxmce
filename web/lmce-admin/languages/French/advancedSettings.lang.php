@@ -8,6 +8,6 @@ $TEXT_IPV6TUNNEL_PROVIDER_CONST='Fournisseur du tunnel';
 $TEXT_IPV6TUNNEL_USERID_CONST='User ID (PAS username)';
 $TEXT_IPV6TUNNEL_ACTIVATE_CONST='Activer tunnel';
 $TEXT_IPV6TUNNEL_ID_CONST='ID Tunnel';
-$TEXT_IPV6TUNNEL_DYNAMICIPV4_CONST='Adresse IPv6 externe est dynamique';
-$TEXT_IPV6TUNNEL_EXPLAINDYNAMIC_CONST='Nous envoyons régulièrement notre adresse IPv6 vers le fournisseur du tunnel';
+$TEXT_IPV6TUNNEL_DYNAMICIPV4_CONST='Adresse IPv4 externe est dynamique';
+$TEXT_IPV6TUNNEL_EXPLAINDYNAMIC_CONST='Nous envoyons régulièrement notre adresse externe IPv4 vers le fournisseur du tunnel';
 ?>
