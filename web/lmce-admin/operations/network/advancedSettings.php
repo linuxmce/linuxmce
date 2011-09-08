@@ -1,5 +1,4 @@
 <?php
-
 function ipv6_save() {
   	// tokenize values to put in CORE device data
   	$token=$_REQUEST['ipv6_tunnelbroker'].",".$_REQUEST['ipv6_tunnelID'].",".$_REQUEST['ipv6_endpoint']
@@ -23,8 +22,8 @@ function ipv6_save() {
 
 function advancedSettings($output, $dbADO) {
 	// Include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/advancedSettings.lang.php');
+ 	includeLangFile('common.lang.php');
+	includeLangFile('advancedSettings.lang.php');
 
 	// DB connection
 	$mysqlhost="localhost";
@@ -33,15 +32,17 @@ function advancedSettings($output, $dbADO) {
 	$mysqllmcedb="pluto_main";
 
 	// Init var's
-  $action = @$_REQUEST['action'];
+  	$action = @$_REQUEST['action'];
 	
 	// Connect to database and switch to main db
 	$connection=mysql_connect($mysqlhost, $mysqluser, $mysqlpwd) or die ("ERROR: could not connect to database server!");
 	mysql_select_db($mysqllmcedb, $connection) or die("ERROR: could not select LinuxMCE main database!");
 
-  if($action == 'ipv6_save') {
-    ipv6_save();
+  	if($action == 'ipv6_save') {
+    	ipv6_save();
     }
+	
+	// TODO: Update ipv6 endpoint: https://ipv4.tunnelbroker.net/ipv4_end.php?ipv4b=AUTO&pass=md5($pass)&user_id=$userID9&tunnel_id=$tunnelID
 	
 	// Query current IPv6 tunnel settings
 	$ipv6_query = mysql_query("SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=1 AND FK_DeviceData=292") 
@@ -63,7 +64,7 @@ function advancedSettings($output, $dbADO) {
 	$ipv6_RAenabled = $ipv6_data[11];
 
 	$IPv6TunnelProviders=array(
-        "- None -"                => "",
+        "- ".translate('TEXT_NONE_CONST')." -"                => "",
         "HE IPv6 Tunnel Broker"   => "he"
   );
 
@@ -81,52 +82,51 @@ function advancedSettings($output, $dbADO) {
 			<input type="hidden" name="ipv6_RAenabled" value="'.$ipv6_RAenabled.'">
 			<div class="confirm"><B>'.(isset($_REQUEST['msg'])?strip_tags($_REQUEST['msg']):'').'</B></div>
 			<table border="0">
-				<tr><td colspan="2" class="tablehead"><b>'.$TEXT_IPV6TUNNEL_SETTINGS_CONST.'</b></td></tr>
+				<tr><td colspan="2" class="tablehead"><b>'.translate('TEXT_IPV6TUNNEL_SETTINGS_CONST').'</b></td></tr>
 				
-				<tr><td width="150"><b>'.$TEXT_IPV6TUNNEL_PROVIDER_CONST.'</b></td><td>
+				<tr><td width="150"><b>'.translate('TEXT_IPV6TUNNEL_PROVIDER_CONST').'</b></td><td>
 					<select name="ipv6_tunnelbroker" STYLE="width:250px">'.$IPv6Provider_options.'</select></td></tr>
 				
-				<tr><td><b>'.$TEXT_IPv6TUNNEL_ENDPOINT_CONST.'</b></td>
+				<tr><td><b>'.translate('TEXT_IPv6TUNNEL_ENDPOINT_CONST').'</b></td>
 					<td><input type="text" name="ipv6_endpoint" value="'.$ipv6_endpoint.'" STYLE="width:250px"></td></tr>
 				
-				<tr><td><b>'.$TEXT_IPV6TUNNEL_LOCAL_IPV6_IP_CONST.'</b></td>
+				<tr><td><b>'.translate('TEXT_IPV6TUNNEL_LOCAL_IPV6_IP_CONST').'</b></td>
 					<td><input type="text" name="ipv6_localaddr" value="'.$ipv6_localaddr.'" STYLE="width:215px">
 					/ <input type="text" name="ipv6_localaddrNetmask" value="'.$ipv6_localaddrNetmask.'" STYLE="width:25px"></td></tr>
 				
-				<tr><td><b>'.$TEXT_IPV6TUNNEL_LOCAL_IPV6_NET_CONST.'</b></td>
+				<tr><td><b>'.translate('TEXT_IPV6TUNNEL_LOCAL_IPV6_NET_CONST').'</b></td>
 					<td><input type="text" name="ipv6_localnet" value="'.$ipv6_localnet.'" STYLE="width:215px">
 					 / <input type="text" name="ipv6_localnetNetmask" value="'.$ipv6_localnetNetmask.'" STYLE="width:25px"></td></tr>
 				
-				<tr><td><b>'.$TEXT_IPV6TUNNEL_USERID_CONST.'</b></td>
+				<tr><td><b>'.translate('TEXT_IPV6TUNNEL_USERID_CONST').'</b></td>
 					<td><input type="text" name="ipv6_userid" value="'.$ipv6_userID.'" STYLE="width:250px"></td></tr>
 				
-				<tr><td><b>'.$TEXT_PASSWORD_CONST.'</b></td>
+				<tr><td><b>'.translate('TEXT_PASSWORD_CONST').'</b></td>
 					<td><input type="password" name="ipv6_password" value="'.$ipv6_password.'"STYLE="width:250px"></td></tr>
 					
-				<tr><td><b>'.$TEXT_IPV6TUNNEL_ID_CONST.'</b></td>
+				<tr><td><b>'.translate('TEXT_IPV6TUNNEL_ID_CONST').'</b></td>
 					<td><input type="text" name="ipv6_tunnelID" value="'.$ipv6_tunnelID.'" STYLE="width:250px"></td></tr>
 				
 				<tr><td><b>&nbsp;</b></td>
-            	<td><input type="checkbox" name="ipv6_active" '.($ipv6_active=="on"?'checked':'').'> 
-						<font color="FF0000"><b>*</b></font>'.$TEXT_IPV6TUNNEL_ACTIVATE_CONST.'
+            	<td><input type="checkbox" name="ipv6_active" '.($ipv6_active=="on"?'checked':'').'>' 
+						.translate('TEXT_IPV6TUNNEL_ACTIVATE_CONST').'
 						<input type="checkbox" name="ipv6_dynamicIPv4" '.($ipv6_dynamicIPv4=="on"?'checked':'').'> 
-						<font color="FF0000"><b>**</b></font>'.$TEXT_IPV6TUNNEL_DYNAMICIPV4_CONST.'</td></tr>
+						<font color="FF0000"><b>*</b></font>'.translate('TEXT_IPV6TUNNEL_DYNAMICIPV4_CONST').'</td></tr>
 				
-				<tr><td>&nbsp;</td><td><input type="submit" class="button" name="Save" value="Save"></td></tr>
+				<tr><td>&nbsp;</td><td><input type="submit" class="button" name="Save" value="'.translate('TEXT_SAVE_CONST').'"></td></tr>
 				<tr><td colspan="2">&nbsp;</td></tr>
-				<tr><td colspan="2"> * IPv6 IS TO BE CONSIDERED AS EARLY BETA !!!</td></tr>
-				<tr><td colspan="2">** We regularly send our local tunnel endpoint IP to provider</td></tr>
+				<tr><td colspan="2">* '.translate('TEXT_IPV6TUNNEL_EXPLAINDYNAMIC_CONST').'</td></tr>
 			</table>
 		</form>
 		';
 
 
-	$output->setMenuTitle($TEXT_ADVANCED_CONST.' |');
-	$output->setPageTitle($TEXT_ADVANCED_SETTINGS_CONST);
+	$output->setMenuTitle(translate('TEXT_ADVANCED_CONST').' |');
+	$output->setPageTitle(translate('TEXT_ADVANCED_SETTINGS_CONST'));
 	$output->setScriptCalendar('null');
-	$output->setNavigationMenu(array($TEXT_ADVANCED_SETTINGS_CONST=>'index.php?section=advancedSettings'));
+	$output->setNavigationMenu(array(translate('TEXT_ADVANCED_SETTINGS_CONST')=>'index.php?section=advancedSettings'));
 	$output->setBody($out);
-	$output->setTitle(APPLICATION_NAME.' :: '.$TEXT_ADVANCED_SETTINGS_CONST);
+	$output->setTitle(APPLICATION_NAME.' :: '.translate('TEXT_ADVANCED_SETTINGS_CONST'));
 	$output->output();
 								
 }	

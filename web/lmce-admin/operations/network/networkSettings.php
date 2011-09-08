@@ -36,11 +36,11 @@ function getDNS() {
     $dns = implode(", ",explode("\n", trim($dns)));
     return $dns;
 }
- 
+
 function networkSettings($output,$dbADO) {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/networkSettings.lang.php');
+ 	includeLangFile('common.lang.php');
+	includeLangFile('networkSettings.lang.php');
 	
 	/* @var $dbADO ADOConnection */
 	/* @var $rs ADORecordSet */
@@ -137,7 +137,7 @@ function networkSettings($output,$dbADO) {
   if (!empty($externalInterfaceArray[0]) && !empty($internalInterfaceArray[0]))
 
 	{
-		$swaphtml = '<br><input type="submit" class="button" name="swap" value="Swap Interfaces"><br>';
+		$swaphtml = '<br><input type="submit" class="button" name="swap" value="'.translate('TEXT_SWAP_INTERFACES_CONST').'"><br>';
 	}
 	if ($action == 'form') {
 		if(!isset($fatalError)){
@@ -248,116 +248,116 @@ function networkSettings($output,$dbADO) {
 	<div align="center" class="confirm"><B>'.(isset($_GET['msg'])?strip_tags($_GET['msg']):'').'</B></div>
 	<table border="0">
 		<tr>
-			<td colspan="3" class="tablehead"><B>Core identification on local network:</B></td>
+			<td colspan="3" class="tablehead"><B>'.translate('TEXT_CORE_IDENTIFICATION_CONST').':</B></td>
 		</tr>
 		<tr>
-			<td colspan="4"><B>Computer name</B> &nbsp; <input type="text" name="cname" value="'.$cname.'"> &nbsp; <B>Domain</B> &nbsp; <input type="text" name="domain" value="'.$domain.'"></td>
+			<td colspan="4"><B>'.translate('TEXT_COMPUTER_NAME_CONST').'</B> &nbsp; <input type="text" name="cname" value="'.$cname.'"> &nbsp; <B>'.translate('TEXT_DOMAIN_CONST').'</B> &nbsp; <input type="text" name="domain" value="'.$domain.'"></td>
 		</tr>
 		<tr><td>&nbsp;</td></tr>
         	<tr>
-                        <td colspan="3" class="tablehead"><B>Your core as seen from the Internet:</B></td>
+                        <td colspan="3" class="tablehead"><B>'.translate('TEXT_CORE_SEEN_FROM_INTERNET_CONST').':</B></td>
                 </tr>
-		<tr><td colspan="3"><b>Outside IP</b>&nbsp<input type="text" name="outsideip" disabled value="'.$outsideIP.'">&nbsp;&nbsp;<b>Outside hostname</b>&nbsp;<input type="text" name="outsideip" disabled size=50 value="'.gethostbyaddr($outsideIP).'"></td></tr>
+		<tr><td colspan="3"><b>'.translate('TEXT_OUTSIDE_IP_CONST').'</b>&nbsp<input type="text" name="outsideip" disabled value="'.$outsideIP.'">&nbsp;&nbsp;<b>'.translate('TEXT_OUTSIDE_HOSTNAME_CONST').'</b>&nbsp;<input type="text" name="outsideip" disabled size=50 value="'.gethostbyaddr($outsideIP).'"></td></tr>
 		<tr><td>&nbsp;</td></tr>
 		<tr>
-			<td colspan="3" class="tablehead"><B>DHCP and RA servers on local network:</B></td>
+			<td colspan="3" class="tablehead"><B>'.translate('TEXT_DHCP_SERVERS_CONST').':</B></td>
 		</tr>
 		<tr>
 			<td colspan="3"><input type="checkbox" name="enableDHCP" value="1" '
-				.(($enableDHCP==1)?'checked':'').' onclick="setIPRange();"> IPv4 DHCP server enabled</td>
+				.(($enableDHCP==1)?'checked':'').' onclick="setIPRange();"> '.translate('TEXT_IPV4_DHCP_ENABLED_CONST').'</td>
 		</tr>
 		<tr>
 			<td>&nbsp;</td>
-			<td colspan="2"><span id="range" style="color:'.(($enableDHCP!=1)?'#CCCCCC':'').'">Range for LinuxMCE devices: <input type="text" maxlength="3" name="coreDHCP_1" size="3" value="'.@$coreDHCPArray[0].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_2" size="3" value="'.@$coreDHCPArray[1].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_3" size="3" value="'.@$coreDHCPArray[2].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_4" size="3" value="'.@$coreDHCPArray[3].'" '.(($enableDHCP!=1)?'disabled':'').'> - <input type="text" maxlength="3" name="coreDHCP_5" size="3" value="'.@$coreDHCPArray[4].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_6" size="3" value="'.@$coreDHCPArray[5].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_7" size="3" value="'.@$coreDHCPArray[6].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_8" size="3" value="'.@$coreDHCPArray[7].'" '.(($enableDHCP!=1)?'disabled':'').'></td>
+			<td colspan="2"><span id="range" style="color:'.(($enableDHCP!=1)?'#CCCCCC':'').'">'.translate('TEXT_IPV4_DHCP_LMCE_RANGE_CONST').': <input type="text" maxlength="3" name="coreDHCP_1" size="3" value="'.@$coreDHCPArray[0].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_2" size="3" value="'.@$coreDHCPArray[1].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_3" size="3" value="'.@$coreDHCPArray[2].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_4" size="3" value="'.@$coreDHCPArray[3].'" '.(($enableDHCP!=1)?'disabled':'').'> - <input type="text" maxlength="3" name="coreDHCP_5" size="3" value="'.@$coreDHCPArray[4].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_6" size="3" value="'.@$coreDHCPArray[5].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_7" size="3" value="'.@$coreDHCPArray[6].'" '.(($enableDHCP!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDHCP_8" size="3" value="'.@$coreDHCPArray[7].'" '.(($enableDHCP!=1)?'disabled':'').'></td>
 		</tr>
 		<tr>
 			<td>&nbsp;</td>
-			<td colspan="2"><input type="checkbox" name="ipForAnonymousDevices" value="1" '.((@$nonPlutoIP==1)?'checked':'').' onClick="ipFromDHCP()" '.(($enableDHCP==1)?'':'disabled').'><span id="provide" style="color:'.(($enableDHCP!=1)?'#CCCCCC':'').'"> Provide IP addresses for anonymous devices not in LinuxMCE\'s database.</span></td>
+			<td colspan="2"><input type="checkbox" name="ipForAnonymousDevices" value="1" '.((@$nonPlutoIP==1)?'checked':'').' onClick="ipFromDHCP()" '.(($enableDHCP==1)?'':'disabled').'><span id="provide" style="color:'.(($enableDHCP!=1)?'#CCCCCC':'').'"> '.translate('TEXT_IPV4_DHCP_NONLMCE_ENABLED_CONST').'</span></td>
 		</tr>
 		<tr><td>&nbsp;</td><td colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="nonPluto" style="color:'
-			.(($enableDHCP!=1)?'#CCCCCC':'').'">Range for non-LinuxMCE devices: </span>
+			.(($enableDHCP!=1)?'#CCCCCC':'').'">'.translate('TEXT_IPV4_DHCP_NONLMCE_RANGE_CONST').': </span>
 			<input type="text" maxlength="3" name="nonPlutoIP_1" size="3" value="'.@$nonPlutoIPArray[0].'" '.(($enableDHCP==1)?'':'disabled').'>			.<input type="text" maxlength="3" name="nonPlutoIP_2" size="3" value="'.@$nonPlutoIPArray[1].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_3" size="3" value="'.@$nonPlutoIPArray[2].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_4" size="3" value="'.@$nonPlutoIPArray[3].'" '.(($enableDHCP==1)?'':'disabled').'> - <input type="text" maxlength="3" name="nonPlutoIP_5" size="3" value="'.@$nonPlutoIPArray[4].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_6" size="3" value="'.@$nonPlutoIPArray[5].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_7" size="3" value="'.@$nonPlutoIPArray[6].'" '.(($enableDHCP==1)?'':'disabled').'>.<input type="text" maxlength="3" name="nonPlutoIP_8" size="3" value="'.@$nonPlutoIPArray[7].'" '.(($enableDHCP==1)?'':'disabled').'>
 		</td></tr>
 		<tr>
 		<td colspan="3"><input type="checkbox" name="enableRA" '
-			.(($enableRA==1)?'checked':'').' onclick="setIPv6Range();"> IPv6 Router Advertisement daemon enabled (radvd)</td>
+			.(($enableRA==1)?'checked':'').' onclick="setIPv6Range();"> '.translate('TEXT_IPV6_RA_ENABLED_CONST').'</td>
 		</tr>
 		<tr><td>&nbsp;</td><td colspan="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="IPv6Prefix" style="color:'
-			.(($enableRA!=1)?'#CCCCCC':'').'">IPv6 public prefix: </span>
+			.(($enableRA!=1)?'#CCCCCC':'').'">'.translate('TEXT_IPV6_PUBLIC_PREFIX_CONST').': </span>
 			<input type="text" maxlength="3" name="IPv6Prefix_1" size="3" value="'.@$IPv6PrefixArray[0].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="3" name="IPv6Prefix_2" size="3" value="'.@$IPv6PrefixArray[1].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="3" name="IPv6Prefix_3" size="3" value="'.@$IPv6PrefixArray[2].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="3" name="IPv6Prefix_4" size="3" value="'.@$IPv6PrefixArray[3].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="3" name="IPv6Prefix_5" size="3" value="'.@$IPv6PrefixArray[4].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="3" name="IPv6Prefix_6" size="3" value="'.@$IPv6PrefixArray[5].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="3" name="IPv6Prefix_7" size="3" value="'.@$IPv6PrefixArray[6].'" '.(($enableRA==1)?'':'disabled').'>:<input type="text" maxlength="3" name="IPv6Prefix_8" size="3" value="'.@$IPv6PrefixArray[7].'" '.(($enableRA==1)?'':'disabled').'> / <input type="text" maxlength="3" name="IPv6Netmask" size="3" value="'.@$IPv6Netmask.'" '.(($enableRA==1)?'':'disabled').'>
 		</td></tr>
 		
 		<tr>
-			<td colspan="3"><input type="checkbox" name="enableVPN" '.(($enableVPN==1)?'checked':'').' onclick="setVPNRange();">L2TP/IPSEC VPN server enabled</td>
+			<td colspan="3"><input type="checkbox" name="enableVPN" '.(($enableVPN==1)?'checked':'').' onclick="setVPNRange();">'.translate('TEXT_VPN_ENABLED_CONST').'</td>
 		</tr>
 		<tr>
 			<td>&nbsp;</td>
-			<td colspan="2"><span id="VPNPSKlabel" style="color:'.(($enableVPN!=1)?'#CCCCCC':'').'">Pre Shared Key (PSK): <input type="text" maxlength="15" name="VPNPSK" size="20" value="'.@$VPNPSK.'" '.(($enableVPN!=1)?'disabled':'').'></td>		
+			<td colspan="2"><span id="VPNPSKlabel" style="color:'.(($enableVPN!=1)?'#CCCCCC':'').'">'.translate('TEXT_VPN_PSK_CONST').': <input type="text" maxlength="15" name="VPNPSK" size="20" value="'.@$VPNPSK.'" '.(($enableVPN!=1)?'disabled':'').'></td>		
 		</tr>
 		<tr>
 			<td>&nbsp;</td>
-			<td colspan="2"><span id="VPNrange" style="color:'.(($enableVPN!=1)?'#CCCCCC':'').'">Range for VPN clients: <input type="text" maxlength="3" name="VPNRange_1" size="3" value="'.@$VPNRange[0].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_2" size="3" value="'.@$VPNRange[1].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_3" size="3" value="'.@$VPNRange[2].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_4" size="3" value="'.@$VPNRange[3].'" '.(($enableVPN!=1)?'disabled':'').'> - <input type="text" maxlength="3" name="VPNRange_5" size="3" value="'.@$VPNRange[4].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_6" size="3" value="'.@$VPNRange[5].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_7" size="3" value="'.@$VPNRange[6].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_8" size="3" value="'.@$VPNRange[7].'" '.(($enableVPN!=1)?'disabled':'').'></td>
+			<td colspan="2"><span id="VPNrange" style="color:'.(($enableVPN!=1)?'#CCCCCC':'').'">'.translate('TEXT_VPN_CLIENT_RANGE_CONST').': <input type="text" maxlength="3" name="VPNRange_1" size="3" value="'.@$VPNRange[0].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_2" size="3" value="'.@$VPNRange[1].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_3" size="3" value="'.@$VPNRange[2].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_4" size="3" value="'.@$VPNRange[3].'" '.(($enableVPN!=1)?'disabled':'').'> - <input type="text" maxlength="3" name="VPNRange_5" size="3" value="'.@$VPNRange[4].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_6" size="3" value="'.@$VPNRange[5].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_7" size="3" value="'.@$VPNRange[6].'" '.(($enableVPN!=1)?'disabled':'').'>.<input type="text" maxlength="3" name="VPNRange_8" size="3" value="'.@$VPNRange[7].'" '.(($enableVPN!=1)?'disabled':'').'></td>
 		</tr>
 		
 		<tr><td>&nbsp;</td></tr>
 		<tr>
-			<td colspan="3" class="tablehead"><B>Your core has '.$number_of_cards.' network adapter(s):</B></td>
+			<td colspan="3" class="tablehead"><B>'.translate('TEXT_NUMBER_OF_NIC_CONST').': '.$number_of_cards.'</B></td>
 		</tr>
 		<tr>
-			<td colspan="3"><B>1. External network card '.@$externalInterfaceArray[0].'</B> (MAC: '
+			<td colspan="3"><B>1. '.translate('TEXT_EXTERNAL_NIC_CONST').' '.@$externalInterfaceArray[0].'</B> (MAC: '
 			.@$externalMAC.')</td>
 		</tr>
 		<tr>
 			<td colspan="3"><input type="radio" name="ipFrom" value="DHCP" onclick="setStaticIP(true);"'.(($ipFromDHCP==1)?'checked':'')
-				.'> Obtain an IP address from DHCP'
+				.'> '.translate('TEXT_GET_IP_FROM_DHCP_CONST').''
 				.'<br><input type="radio" name="ipFrom" value="static" onclick="setStaticIP(false);" '
-				.(($ipFromDHCP==0)?'checked':'').'> Use a static IP address</td>
+				.(($ipFromDHCP==0)?'checked':'').'> '.translate('TEXT_USE_STATIC_IP_CONST').'</td>
 		</tr>
 		<tr>
 			<td>&nbsp;</td>
-			<td width="150"><span id="coreIPtext" style="color:'.(($ipFromDHCP==1)?'#CCCCCC':'').'">Core\'s IP address:</span></td>
+			<td width="150"><span id="coreIPtext" style="color:'.(($ipFromDHCP==1)?'#CCCCCC':'').'">'.translate('TEXT_IP_ADDRESS_CONST').':</span></td>
 			<td><input type="text" maxlength="3" name="coreIP_1" size="3" value="'.@$coreIPArray[0].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreIP_2" size="3" value="'.@$coreIPArray[1].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreIP_3" size="3" value="'.@$coreIPArray[2].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreIP_4" size="3" value="'.@$coreIPArray[3].'" '.(($ipFromDHCP==1)?'disabled':'').'>'
 		.(($ipFromDHCP==1)?'&nbsp&nbspDHCP IP  : '.@$externalIP:'')
 		.'</td>	
 		</tr>						
 		<tr>
 			<td>&nbsp;</td>
-			<td><span id="coreNMtext" style="color:'.(($ipFromDHCP==1)?'#CCCCCC':'').'">Subnet mask:</span></td>
+			<td><span id="coreNMtext" style="color:'.(($ipFromDHCP==1)?'#CCCCCC':'').'">'.translate('TEXT_NETMASK_CONST').':</span></td>
 			<td><input type="text" maxlength="3" name="coreNetMask_1" size="3" value="'.@$coreNetMaskArray[0].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreNetMask_2" size="3" value="'.@$coreNetMaskArray[1].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreNetMask_3" size="3" value="'.@$coreNetMaskArray[2].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreNetMask_4" size="3" value="'.@$coreNetMaskArray[3].'" '.(($ipFromDHCP==1)?'disabled':'').'>'
 		.(($ipFromDHCP==1)?'&nbsp&nbspDHCP MASK: '.@$externalMASK:'')
 		.'</td>
 		</tr>
 		<tr>
 			<td>&nbsp;</td>
-			<td><span id="coreGWtext" style="color:'.(($ipFromDHCP==1)?'#CCCCCC':'').'">Gateway:</span></td>
+			<td><span id="coreGWtext" style="color:'.(($ipFromDHCP==1)?'#CCCCCC':'').'">'.translate('TEXT_GATEWAY_CONST').':</span></td>
 			<td><input type="text" maxlength="3" name="coreGW_1" size="3" value="'.@$coreGWArray[0].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreGW_2" size="3" value="'.@$coreGWArray[1].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreGW_3" size="3" value="'.@$coreGWArray[2].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreGW_4" size="3" value="'.@$coreGWArray[3].'" '.(($ipFromDHCP==1)?'disabled':'').'>'
 		 .(($ipFromDHCP==1)?'&nbsp&nbspDHCP GW  : '.@$defaultGW:'')
 		.'</td>
 		</tr>		
 		<tr>
 			<td>&nbsp;</td>
-			<td><span id="coreDNS1text" style="color:'.(($ipFromDHCP==1)?'#CCCCCC':'').'">Nameserver (DNS) #1:</span></td>
+			<td><span id="coreDNS1text" style="color:'.(($ipFromDHCP==1)?'#CCCCCC':'').'">'.translate('TEXT_NAMESERVER_CONST').' (DNS) #1:</span></td>
 			<td><input type="text" maxlength="3" name="coreDNS1_1" size="3" value="'.@$coreDNS1Array[0].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDNS1_2" size="3" value="'.@$coreDNS1Array[1].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDNS1_3" size="3" value="'.@$coreDNS1Array[2].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDNS1_4" size="3" value="'.@$coreDNS1Array[3].'" '.(($ipFromDHCP==1)?'disabled':'').'>'
 			.(($ipFromDHCP==1)?'&nbsp&nbspDHCP DNS : '.@$DNS:'')
 			.'</td>
 		</tr>		
 		<tr>
 			<td>&nbsp;</td>
-			<td><span id="coreDNS2text" style="color:'.(($ipFromDHCP==1)?'#CCCCCC':'').'">Nameserver (DNS) #2:</span></td>
+			<td><span id="coreDNS2text" style="color:'.(($ipFromDHCP==1)?'#CCCCCC':'').'">'.translate('TEXT_NAMESERVER_CONST').' (DNS) #2:</span></td>
 			<td><input type="text" maxlength="3" name="coreDNS2_1" size="3" value="'.@$coreDNS2Array[0].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDNS2_2" size="3" value="'.@$coreDNS2Array[1].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDNS2_3" size="3" value="'.@$coreDNS2Array[2].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDNS2_4" size="3" value="'.@$coreDNS2Array[3].'" '.(($ipFromDHCP==1)?'disabled':'').'></td>
 		</tr>		
 		<tr><td colspan="3"><hr></td></tr>
 		<tr>
-			<td colspan="3"><B>2. Internal network card '.@$internalInterfaceArray[0].'</B> (MAC: '.@$internalMAC.')</td>
+			<td colspan="3"><B>2. '.translate('TEXT_INTERNAL_NIC_CONST').' '.@$internalInterfaceArray[0].'</B> (MAC: '.@$internalMAC.')</td>
 		<tr>
 		<tr>
 			<td>&nbsp;</td>
-			<td width="150">IP address:</td>
+			<td width="150">'.translate('TEXT_IP_ADDRESS_CONST').':</td>
 			<td><input type="text" maxlength="3" name="internalCoreIP_1" size="3" value="'.@$internalCoreIPArray[0].'">.<input type="text" maxlength="3" name="internalCoreIP_2" size="3" value="'.@$internalCoreIPArray[1].'">.<input type="text" maxlength="3" name="internalCoreIP_3" size="3" value="'.@$internalCoreIPArray[2].'">.<input type="text" maxlength="3" name="internalCoreIP_4" size="3" value="'.@$internalCoreIPArray[3].'"></td>
 		</tr>						
 		<tr>
 			<td>&nbsp;</td>
-			<td>Subnet mask:</td>
+			<td>'.translate('TEXT_NETMASK_CONST').':</td>
 			<td><input type="text" maxlength="3" name="internalCoreNetMask_1" size="3" value="'.@$internalCoreNetMaskArray[0].'">.<input type="text" maxlength="3" name="internalCoreNetMask_2" size="3" value="'.@$internalCoreNetMaskArray[1].'">.<input type="text" maxlength="3" name="internalCoreNetMask_3" size="3" value="'.@$internalCoreNetMaskArray[2].'">.<input type="text" maxlength="3" name="internalCoreNetMask_4" size="3" value="'.@$internalCoreNetMaskArray[3].'"></td>
 		</tr>
 		<tr><td colspan="3"><hr></td></tr>
@@ -366,12 +366,12 @@ function networkSettings($output,$dbADO) {
 		</tr>
 		<tr>
 			<td><input type="checkbox" name="OfflineMode" value="1" '.(($OfflineMode=='true')?'checked':'').'></td>
-			<td colspan="2"><B>'.$TEXT_OFFLINEMODE_CONST.'</B></td>
+			<td colspan="2"><B>'.translate('TEXT_OFFLINEMODE_CONST').'</B></td>
 		</tr>			
 		<tr>
-			<td colspan="3" align="center" bgcolor="#EEEEEE"><input type="button" class="button" name="update" value="Update" onClick="validateForm()"> <input type="reset" class="button" name="reset" value="Reset"></td>
+			<td colspan="3" align="center" bgcolor="#EEEEEE"><input type="button" class="button" name="update" value="'.translate('TEXT_UPDATE_CONST').'" onClick="validateForm()"> <input type="reset" class="button" name="reset" value="'.translate('TEXT_RESET_CONST').'"></td>
 		</tr>		
-	<tr><td colspan="3">You may need to open up ports in the firewall for some programs that run on your internal computers, like video conferencing, file sharing, etc.  To do this, visit the Advanced, <a href="index.php?section=firewall">Firewall</a> page.</td></tr>	'
+	<tr><td colspan="3">'.translate('TEXT_OPEN_FIREWALL_CONST').'</td></tr>	'
 	//<tr><td colspan="3" class="tablehead">Current settings:</td></tr>
 	//<tr><td colspan="3" class="alternate_back">'.get_network_settings().'</td></tr>
 	.'</table>
@@ -395,7 +395,7 @@ function networkSettings($output,$dbADO) {
 		// check if the user has the right to modify installation
 		$canModifyInstallation = getUserCanModifyInstallation($_SESSION['userID'],$_SESSION['installationID'],$dbADO);
 		if (!$canModifyInstallation){
-			header("Location: index.php?section=networkSettings&error=$TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST");
+			header("Location: index.php?section=networkSettings&error=".translate('TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST'));
 			exit(0);
 		}
 		$newEnableDHCP=(isset($_POST['enableDHCP']))?1:0;
@@ -525,10 +525,10 @@ function networkSettings($output,$dbADO) {
 			exec_batch_command("sudo -u root /sbin/reboot");
 	}
 
-	$output->setMenuTitle($TEXT_ADVANCED_CONST.' |');
-	$output->setPageTitle($TEXT_NETWORK_SETTINGS_CONST);
+	$output->setMenuTitle(translate('TEXT_ADVANCED_CONST').' |');
+	$output->setPageTitle(translate('TEXT_NETWORK_SETTINGS_CONST'));
 	$output->setScriptCalendar('null');
-	$output->setNavigationMenu(array($TEXT_NETWORK_SETTINGS_CONST=>'index.php?section=networkSettings'));	
+	$output->setNavigationMenu(array(translate('TEXT_NETWORK_SETTINGS_CONST')=>'index.php?section=networkSettings'));	
 	$output->setBody($out);
 	$output->setTitle(APPLICATION_NAME.' :: Network Settings');
 	$output->output();
