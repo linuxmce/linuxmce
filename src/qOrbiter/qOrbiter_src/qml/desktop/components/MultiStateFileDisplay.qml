@@ -4,38 +4,37 @@ import QtQuick 1.0
 Rectangle {
     id:gridholder
     width: scaleX(90)
-    height: scaleY(75)
+    height: scaleY(90)
+    clip: true
+
     anchors.top: parent.top
     anchors.horizontalCenter: parent.horizontalCenter
-    color: "transparent"
+    color: style.lighthighlight
     Image {
         id: name
         source: ""
     }
 
-
     GridView {
         id: gridView
-        anchors.fill: parent
 
         //z: 2
-        width: scaleX(90)
+        width: scaleX(85)
         height: scaleY(75)
-anchors.topMargin: scaleX(5)
-        anchors.horizontalCenter: fileviewscreen.horizontalCenter
+       anchors.centerIn: gridholder
         model:dataModel
         delegate: contactDelegate
         highlight: Rectangle { color: "lightblue"; radius: 5 }
         highlightFollowsCurrentItem: true
         focus: true
-        clip: true
-        contentItem.clip: true
+       //clip: true
+        //contentItem.clip: true
         cellWidth: scaleX(20)
         cellHeight: scaleY(20)
         keyNavigationWraps: true
         Keys.enabled: true
         Keys.onPressed: console.log(Qt.Key_Right)
-       KeyNavigation.right: gridView.moveCurrentIndexRight
+        KeyNavigation.right: gridView.moveCurrentIndexRight
 
     }
 
@@ -52,14 +51,12 @@ anchors.topMargin: scaleX(5)
         model:dataModel
         focus: true
         clip: true
-
         interactive: true
         Keys.enabled: true
         anchors.fill: parent
         offset: 5
         pathItemCount: 13;
         highlight: appHighlight
-
         preferredHighlightBegin: 0.35
         preferredHighlightEnd: 0.65
         highlightRangeMode: PathView.StrictlyEnforceRange
@@ -101,44 +98,44 @@ anchors.topMargin: scaleX(5)
     }
 
     Component {
-             id: appDelegate
-             Item {
-                 id: wrapper
-                 width: scaleX(75); height: scaleY(75)
-                 scale:1
-                // opacity: path_view1.iconAngle.iconOpacity
+        id: appDelegate
+        Item {
+            id: wrapper
+            width: scaleX(75); height: scaleY(75)
+            scale:1
+            // opacity: path_view1.iconAngle.iconOpacity
 
-                 Image {
-                     id: myIcon
-                     y: 20; anchors.horizontalCenter: parent.horizontalCenter
-                     smooth: true
-                     source:"image://datagridimg/"+id ;
-                     height: scaleX(25);
-                     width: scaleY(25);
-                     fillMode: Image.PreserveAspectFit;
-                     asynchronous: true
-                     transform: Rotation {
-                         origin.x: wrapper.width/2; origin.y: wrapper.height/2
-                         axis.x: 0; axis.y: 1; axis.z: 0     // rotate around y-axis
-                      //   angle: path_view1.iconAngle
-                     }
+            Image {
+                id: myIcon
+                y: 20; anchors.horizontalCenter: parent.horizontalCenter
+                smooth: true
+                source:"image://datagridimg/"+id ;
+                height: scaleX(25);
+                width: scaleY(25);
+                fillMode: Image.PreserveAspectFit;
+                asynchronous: true
+                transform: Rotation {
+                    origin.x: wrapper.width/2; origin.y: wrapper.height/2
+                    axis.x: 0; axis.y: 1; axis.z: 0     // rotate around y-axis
+                    //   angle: path_view1.iconAngle
+                }
 
-                 }
+            }
 
-                 Text {
-                     anchors { top: myIcon.bottom; horizontalCenter: parent.horizontalCenter }
-                     text: name
-                     smooth: true
-                     font.pointSize: 12
-                     //visible: wrapper.PathView.isCurrentItem
-                 }
+            Text {
+                anchors { top: myIcon.bottom; horizontalCenter: parent.horizontalCenter }
+                text: name
+                smooth: true
+                font.pointSize: 12
+                //visible: wrapper.PathView.isCurrentItem
+            }
 
-                 MouseArea {
-                     anchors.fill: parent
-                     onClicked: setStringParam(4, id)
-                 }
-             }
-         }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: setStringParam(4, id)
+            }
+        }
+    }
 
     ListView {
         id: list_view1
@@ -156,63 +153,54 @@ anchors.topMargin: scaleX(5)
         focus: true
         clip: true
 
-    }    
+    }
 
-    ButtonSq {
-        id: buttonsq1
-        x: 389
-        y: 1
-        width: 41
-        height: 37
-        buttontextitalic: true
-        buttontext: "Grid"
-        buttontextbold: true
-        MouseArea{
-            anchors.fill: parent
-            onClicked:{
-
-                gridholder.state =""
-                console.log(gridholder.state)
-                console.log("default clicked")
+    Row{
+        id:gridselectorrow
+        height: scaleY(5)
+        width: scaleX(50)
+        ButtonSq {
+            id: buttonsq1
+            width: scaleX(5)
+            height: scaleY(4)
+            buttontextitalic: true
+            buttontext: "Grid"
+            buttontextbold: true
+            MouseArea{
+                anchors.fill: parent
+                onClicked:{
+                    gridholder.state =""
+                    console.log(gridholder.state)
+                    console.log("default clicked")
+                }
             }
         }
-    }
 
-    ButtonSq {
-        id: buttonsq2
-        x: 442
-        y: 1
-        width: 41
-        height: 37
-        buttontextitalic: true
-        buttontextbold: true
-        buttontext: "Cover"
-        MouseArea{
-            width: 41
-            height: 38
-            anchors.bottomMargin: 0
-            anchors.fill: parent
-            onClicked: gridholder.state ="PATHVIEW"
+        ButtonSq {
+            id: buttonsq2
+            width: scaleX(5)
+            height: scaleY(4)
+            buttontextitalic: true
+            buttontextbold: true
+            buttontext: "Cover"
+            MouseArea{
+                anchors.fill: parent
+                anchors.bottomMargin: 0
+                onClicked: gridholder.state ="PATHVIEW"
+            }
         }
-    }
 
-    ButtonSq {
-        id: buttonsq3
-        x: 495
-        y: 1
-        width: 41
-        height: 37
-        buttontextbold: true
-        buttontextitalic: true
-        buttontext: "List"
-        MouseArea{
-            width: 42
-            height: 41
-            anchors.rightMargin: 0
-            anchors.bottomMargin: 0
-            anchors.fill: parent
-            onClicked: gridholder.state = "LISTVIEW"
-
+        ButtonSq {
+            id: buttonsq3
+            width: scaleX(5)
+            height: scaleY(4)
+            buttontextbold: true
+            buttontextitalic: true
+            buttontext: "List"
+            MouseArea{
+                anchors.fill: parent
+                onClicked: gridholder.state = "LISTVIEW"
+            }
         }
     }
     states: [

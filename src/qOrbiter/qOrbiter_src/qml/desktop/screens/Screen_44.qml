@@ -32,6 +32,14 @@ Rectangle {
         }
 
         ButtonSq{
+            id:regenorbiters
+            height: scaleY(style.buttonH)
+            width: scaleX(style.buttonW)
+            buttontext: "Regen All Orbiters"
+            radius: 5
+        }
+
+        ButtonSq{
             id:pending
             height: scaleY(style.buttonH)
             width: scaleX(style.buttonW)
@@ -55,13 +63,7 @@ Rectangle {
             radius: 5
         }
 
-        ButtonSq{
-            id:regenorbiters
-            height: scaleY(style.buttonH)
-            width: scaleX(style.buttonW)
-            buttontext: "Regen All Orbiters"
-            radius: 5
-        }
+
 
         ButtonSq{
             id:quickreload
@@ -74,6 +76,27 @@ Rectangle {
                 z:10
                 onClicked: quickReload()
             }
+        }
+
+        ButtonSq{
+            id:remoteassistance
+            height: scaleY(style.buttonH)
+            width: scaleX(style.buttonW)
+            buttontext: "Remote Assistance"
+            radius: 5
+            MouseArea{
+                anchors.fill: parent
+                z:10
+                onClicked: quickReload()
+            }
+        }
+
+        ButtonSq{
+            id:addsoftware
+            height: scaleY(style.buttonH)
+            width: scaleX(style.buttonW)
+            buttontext: "Add Software"
+            radius: 5
         }
 
         ButtonSq{

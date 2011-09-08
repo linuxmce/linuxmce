@@ -8,7 +8,7 @@ Rectangle {
 
     width: style.orbiterW
     height: style.orbiterH
-    color: "transparent"
+    color: style.darkhighlight
     clip: true
 
 
@@ -29,9 +29,25 @@ Rectangle {
             id:mainItem
             width: scaleX(20);
             height: scaleY(20)
-            color: "transparent"
+            color: style.lighthighlight
             border.color: "black"
             border.width: 1
+
+            MouseArea{
+                anchors.fill: mainItem
+                hoverEnabled: true
+                onEntered: {
+                    mainItem.color = style.darkhighlight
+                    mainItem.scale = 1.25
+                    mainItem.z = 5
+
+                }
+                onExited: {
+                    mainItem.color = style.lighthighlight
+                    mainItem.scale = 1
+                    mainItem.z = 1
+                }
+            }
 
             Rectangle
             {
@@ -57,8 +73,8 @@ Rectangle {
                 {
                     id: imagerect;
                     source:"image://datagridimg/"+id ;
-                    height: scaleY(36);
-                    width: scaleX(18);
+                    height: scaleY(19);
+                    width: scaleX(19);
                     anchors.centerIn: parent;
                     fillMode: Image.PreserveAspectCrop
                     opacity: .5
@@ -137,10 +153,7 @@ Rectangle {
 
 
 
-         Component {
-             id: appHighlight
-             Rectangle { width: myIcon.width; height: myIcon.height; color: "lightsteelblue" }
-         }
+
 
     Row
     {

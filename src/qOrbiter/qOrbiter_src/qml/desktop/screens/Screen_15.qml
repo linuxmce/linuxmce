@@ -36,7 +36,7 @@ Item{
             font.family: "Droid Sans"
             font.bold: false
             font.pointSize: 15
-            color: style.titletextcolor
+
         }
         Rectangle{
             id:securitycamrect

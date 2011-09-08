@@ -6,7 +6,8 @@ Rectangle {
     width: 650
     height: 550
     anchors.centerIn: parent
-    color: "slategrey"
+    color: style.darkhighlight
+    radius: 20
 
     Timer{
         id:singleshot
@@ -19,33 +20,38 @@ Rectangle {
 
     clip: true
     focus: true
-    Text {
-        id: text2
-        x: 225
-        y: 5
-        text: filedetailsclass.objecttitle
-        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+    Rectangle{
+        id:titlerect
+        height: childrenRect.height + 5
+        width: parent.width
+        color:style.lighthighlight
+
+        Text {
+            id: text2
+            x: 225
+            y: 5
+            text: filedetailsclass.objecttitle
+            font.pixelSize: 14
+            font.bold: true
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+        }
     }
 
     Image {
         id: image1
-        x: 65
-        y: -24
+      anchors.top: titlerect.bottom
+      anchors.horizontalCenter: parent.horizontalCenter
         width: 521
         height: 351
         fillMode: Image.PreserveAspectFit
-        scale: .75
+
         source: "image://filedetailsprovider/"+filedetailsclass.screenshot
         asynchronous: true
     }
     MouseArea{
-        x: 0
-        y: 0
-        anchors.rightMargin: 0
-        anchors.bottomMargin: 0
-        anchors.leftMargin: 0
-        anchors.topMargin: 0
+
         anchors.fill: parent
+    }
 
         Rectangle {
             id: rectangle1
@@ -86,14 +92,6 @@ Rectangle {
                     width: 500
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     text: filedetailsclass.synop
-                    font.pixelSize: 12
-                }
-
-                Text {
-                    id: locationtext
-                    x: 104
-                    y: 35
-                    text: "text"
                     font.pixelSize: 12
                 }
 
@@ -171,7 +169,7 @@ Rectangle {
 
     }
 
-   /* ListView {
+    /* ListView {
         id: list_view1
         x: 380
         y: 16
