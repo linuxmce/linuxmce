@@ -135,6 +135,10 @@ echo "$IfConf" >>"$File"
 
 echo "">"/etc/radvd.conf"
 
+if [ -e /etc/cron.d/UpdateIPv6TunnelEndPoint ] ;then
+	rm /etc/cron.d/UpdateIPv6TunnelEndPoint
+fi
+
 if [[ "$IPv6Active" == "on" ]]; then
 	# Config IPv6 tunnel if enabled in advanced network setup
 	echo "IPv6 tunnel activated ($IPv6TunnelBroker), configuring interface"
@@ -148,6 +152,11 @@ if [[ "$IPv6Active" == "on" ]]; then
 	down ip -6 route flush dev $IPv6If
 	mtu 1480"
 	echo "$IfConf" >>"$File"
+	if [[ "$IPv6DynamicIPv4" == "on" ]]; then
+		echo "Dynamic IPv4 activated, creating scripts to update tunnel endpoint"
+		md5pass=`echo -n $IPv6Password | md5sum | sed -e 's/  -//g'`
+		echo "*/5 * * * * root bash -c 'wget -q --no-check-certificate \"https://ipv4.tunnelbroker.net/ipv4_end.php?ipv4b=AUTO&pass=$md5pass&user_id=$IPv6UserID&tunnel_id=$IPv6TunnelID\" -O /dev/null'" >> /etc/cron.d/UpdateIPv6TunnelEndPoint
+	fi
 fi
 
 if [[ "$IPv6RAenabled" == "on" ]]; then
@@ -221,6 +230,7 @@ fi
 
 service networking start
 service dhcp3-server start
+service cron reload
 
 if [[ "$IPv6RAenabled" == "on" ]]; then
 	echo "starting RA daemon to hand out IPv6 addresses to local network"
