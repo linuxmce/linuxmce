@@ -447,9 +447,6 @@ bool qorbiterManager::getConf(int pPK_Device)
 
     QMap <QString, int> RroomMapping;                       //map for later reference
     QDomNodeList roomListXml = roomXml.childNodes();
-
-
-
     for(int index = 0; index < roomListXml.count(); index++)
     {
 
@@ -1451,12 +1448,17 @@ void qorbiterManager::setNowPlayingTv()
     //pqOrbiter->requestMediaPlaylist();
 
     qDebug() << "Initiating media bind and livetv playlist request";
-    pqOrbiter->requestLiveTvPlaylist();
+   //
 }
 
 void qorbiterManager::changeChannels(QString chan)
 {
     pqOrbiter->TuneToChannel(chan.toInt());
+}
+
+void qorbiterManager::getLiveTVPlaylist()
+{
+    pqOrbiter->requestLiveTvPlaylist();
 }
 
 

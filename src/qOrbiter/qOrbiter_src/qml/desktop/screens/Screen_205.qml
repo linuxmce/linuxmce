@@ -16,9 +16,11 @@ Item{
             Column{
                 id:buttoncolumn
                 anchors.fill: parent
+                spacing: 10
 
                ButtonSq{
                    id:confirm
+                   anchors.centerIn: parent
                    height: style.stdbuttonh
                    width:style.stdbuttonw
                    buttontext: "Reload Router Now"
@@ -27,6 +29,7 @@ Item{
 
                ButtonSq{
                    id:deny
+                   anchors.top: confirm.bottom
                    height: style.stdbuttonh
                    width:style.stdbuttonw
                    buttontext: "Reload Later"

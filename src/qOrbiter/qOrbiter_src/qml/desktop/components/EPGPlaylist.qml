@@ -5,6 +5,17 @@ Rectangle {
     height: 500
     color: "transparent"
 
+    Timer{
+        id:singleshot
+        repeat: false
+        interval: 2000
+        triggeredOnStart: false
+        running: true
+
+        onTriggered:getLiveTVPlaylist()
+    }
+
+
     Component.onCompleted: nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
 
 Connections{

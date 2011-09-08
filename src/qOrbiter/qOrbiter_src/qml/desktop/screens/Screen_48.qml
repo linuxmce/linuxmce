@@ -2,101 +2,139 @@ import QtQuick 1.0
 import "../components"
 
 Rectangle {
-    property alias videoTitle: video_title.text
-   // property alias synText:
-    id: pvrRemote
 
+    // property alias synText:
+    id: mythtvremote
+    anchors.centerIn: parent
 
-    width: 800
-    height: 600
+    Timer{
+        id:singleshot
+        repeat: false
+        interval: 2000
+        triggeredOnStart: false
+        running: true
+
+        onTriggered: image1.source = "image://updateobject/"+securityvideo.timestamp
+    }
+
+    Connections{
+        target:dcenowplaying
+        onPlayListPositionChanged: image1.source = "image://updateobject/"+securityvideo.timestamp
+    }
+
+    height: 720
+    width: 1280
     radius: 0
     opacity: 1
-    color: style.advanced_bg
+    color: "transparent"
+    Component.onCompleted:setNowPlayingTv()
 
     //main 'now playing rect containing all the other items
-    Rectangle{
-        id:video_now_playing
-        x: 200
-        y: 2
-        height: 179
-        width: 224
-        anchors.left: pvrRemote.right
-        anchors.leftMargin: -600
+    Remote_lighting_controls{ id: remote_lighting_controls1; x: 449; y: 350; width: remote1.width; height: remote1.height }
+    Remote_Audio_controls{ id: remote1; x: 384; y: 350; anchors.rightMargin: 13; z: 45; }
 
-        color: style.button_system_color
-        Text {
-            id: video_title
-            text: "text"
-        }
-        Rectangle{
-            id: title_box
-            width: video_now_playing.width
-            height: 15
-            color: style.rowbgColor
-            opacity: 5
-            anchors.top: parent.top
-            Text {
-                id: now_playing_label
-                x: 0
-                y: 0
-                text: "Now Playing"
-                anchors.topMargin: 0
-                wrapMode: Text.WordWrap
-                anchors.top: parent.top
-            }
-
-            Text {
-                id: text2
-                x: 139
-                y: 139
-                text: "whats playing"
-                clip: true
-                horizontalAlignment: Text.AlignLeft
-                wrapMode: Text.WordWrap
-                font.pixelSize: 12
-            }
-        }
-    }
-    Remote_lighting_controls{ id: remote_lighting_controls1; x: 331; y: 181; width: 65; height: 219; anchors.topMargin: 179;anchors.top: video_now_playing.baseline}
-    Remote_Audio_controls{ id: remote1; x: 277; y: 181; width: 60; height: 219; anchors.rightMargin: -6; z: 45; anchors.right: remote_lighting_controls1.left}
-
-    HomeButton{anchors.right: parent.right}
-
+    HomeButton{anchors.right: parent.right; anchors.top:parent.top}
 
     VideoControls {
         id: videocontrols1
-        x: 537
-        y: 231
-        width: 263
-        height: 249
-        color: "#e1e9f1"
+        x: 390
+        y: 620
+
     }
 
-    Column {
-        id: channelgrid
+    EPGPlaylist{ x: 182;y: 4 ;width: 200 ;height: 346}
 
-        width: 200
-        height: 500
-        clip: true
 
-        Flickable{
-            height: parent.height
-            width: parent.width
-            contentHeight: childrenRect.height
-            contentWidth: childrenRect.width
-            clip: true
+    Rectangle {
+        x: 384
+        y: 0
+        width: 350
+        height: 350
+        color: style.advanced_bg
+        anchors.verticalCenterOffset: -185
+        anchors.horizontalCenterOffset: -81
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
 
-            Repeater { model: 50               
+        Rectangle {
+            id: rectangle1
+            x: 0
+            y: 0
+            width: 350
+            height: 38
+            gradient: Gradient {
+                GradientStop {
+                    position: 0
+                    color: "#ffffff"
+                }
 
-                Rectangle {
-                    width:200
-                    height: 50
-                    color: "whitesmoke"
-                    Text {
-                        text: "I am DG item ,Sroll me!"
-                    }
+                GradientStop {
+                    position: 1
+                    color: "#3878a0"
                 }
             }
-}
+
+
+
+            Text {
+                id: text1
+                x: 0
+                y: 12
+                text:"Speed: " + dcenowplaying.qs_playbackSpeed
+                font.family: "Droid Sans"
+                font.pixelSize: 12
+            }
+        }
+
+        Image {
+            id: image1
+            x: 0
+            y: 38
+            width: 350
+            height: 224
+            anchors.topMargin: 38
+            anchors.bottomMargin: 88
+            fillMode: Image.PreserveAspectFit
+            anchors.fill: parent
+
+            source: "image://updateobject/"+dcenowplaying.m_iplaylistPosition
+        }
+
+        Rectangle {
+            id: rectangle2
+            x: 0
+            y: 262
+            width: 350
+            height: 88
+            color: "#ffffff"
+            Column
+            {
+                width: 350
+                spacing: 5
+                height: rectangle2.height
+
+                Text {
+                    id: titlebox
+                    x: 0
+                    y: 61
+                    text: "Channel: " + dcenowplaying.qs_mainTitle
+
+                    anchors.bottom: parent.bottom
+                    wrapMode: "NoWrap"
+                    font.family: "Droid Sans"
+                    anchors.bottomMargin: 12
+                    font.bold: true
+                    smooth: true
+                    horizontalAlignment: Text.AlignHCenter
+                    font.pixelSize: 12
+                }
+            }
+        }
+    }
+
+    RemoteNumberPad {
+        id: remotenumberpad1
+        x: 734
+        y: 0
     }
 }

@@ -262,6 +262,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     Q_INVOKABLE void getMediaPlaylist();
     Q_INVOKABLE void setNowPlayingData();
     Q_INVOKABLE void setNowPlayingTv();
+    Q_INVOKABLE void getLiveTVPlaylist();
     Q_INVOKABLE void playMedia(QString FK_Media);
     Q_INVOKABLE void stopMedia();
     Q_INVOKABLE void ff_media(int speed);

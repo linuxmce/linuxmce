@@ -1436,7 +1436,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                         }
                         else
                         {
-                           cellImg.load(":/icons/videos.png");
+                            cellImg.load(":/icons/videos.png");
                         }
 
 
@@ -2137,9 +2137,9 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 }
                 */
 
-              //  qDebug() << "Video Attribute::" << cellTitle << "-" << cellAttribute;
-               // qDebug() << "Attribute image?" << pCell->GetImagePath();
-            /*    if (pPath )
+                //  qDebug() << "Video Attribute::" << cellTitle << "-" << cellAttribute;
+                // qDebug() << "Attribute image?" << pCell->GetImagePath();
+                /*    if (pPath )
                 {
                     cellImg = getfileForDG(pCell->GetImagePath());
                     size_t s=0;
@@ -2360,6 +2360,7 @@ void DCE::qOrbiter::BindMediaRemote(bool onoff)
     CMD_Bind_to_Media_Remote bind_remote(qmlUI->iPK_Device, qmlUI->iMediaPluginID, 0,string("4962") ,status, string(""), QString::number(qmlUI->iea_area).toStdString(), 0, 0);
     SendCommand(bind_remote);
 
+
 }
 
 void DCE::qOrbiter::JumpToPlaylistPosition(int pos)
@@ -2491,7 +2492,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                 qDebug() << "Attribute image?" << pCell->GetImagePath();
                 if (pPath )
                 {
-                   cellImg = getfileForDG(pCell->GetImagePath());
+                    cellImg = getfileForDG(pCell->GetImagePath());
                     size_t s=0;
                     pCell->m_GraphicLength = (unsigned long) s;
                     pCell->m_GraphicFormat = GR_JPG;
@@ -2528,7 +2529,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
     string valassign ="";
     bool isSuccessfull;// = "false";
 
-    string m_sGridID ="TVTUNERS_"+StringUtils::itos(qmlUI->iPK_Device); // the string identifier on the type of grid
+    string m_sGridID ="tvchan_"+StringUtils::itos(qmlUI->iPK_Device); // the string identifier on the type of grid
 
     int iRow_count=5;
     int iColumn_count = 5;
@@ -2555,7 +2556,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
     QString temp;
     qmlUI->m_dwIDataGridRequestCounter++;
 
-   CMD_Populate_Datagrid cmd_populate_livetv_grid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 101, QString::number(qmlUI->iea_area).toStdString(), 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
+    CMD_Populate_Datagrid cmd_populate_livetv_grid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 11, string("1,1"), 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
     if (SendCommand(cmd_populate_livetv_grid))
     {
@@ -2577,7 +2578,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
             int cellsToRender= pDataGridTable->GetRows();
             qDebug() << pDataGridTable->m_CellCount;
             qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
-              qDebug() << "Response: " << cellsToRender << " cells to render";
+            qDebug() << "Response: " << cellsToRender << " cells to render";
 
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
             QString cellTitle;
@@ -2621,12 +2622,11 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
                 {
                     cellImg.load(":/icons/videos.png");
                 }
-
-                //qmlUI->m_selected_grid_item->appendRow(new FileDetailsItem(cellTitle, cellAttribute, cellImg, false,  qmlUI->model));
+                qmlUI->currentPlaylist->appendRow(new PlaylistItemClass(cellTitle, cellAttribute, fk_file ,index, qmlUI->currentPlaylist));
             }
         }
         //}
-}
+    }
 }
 
 void DCE::qOrbiter::TuneToChannel(int channel)
