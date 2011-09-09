@@ -1,27 +1,27 @@
 <?
 function editDeviceParams($output,$dbADO) {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/editDeviceParams.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('editDeviceParams.lang.php');
 	
 	global $wikiHost;
 /* @var $dbADO ADOConnection */
 /* @var $rs ADORecordSet */
 
-$out='';
-$deviceID = (int)$_REQUEST['deviceID'];
-$installationID = (int)@$_SESSION['installationID'];
-$registeredArray=array(
-	1=>$TEXT_YES_CONST,
-	0=>$TEXT_NO_CONST,
-	-1=>$TEXT_REGISTERED_RELOAD_NEEDED_CONST
-);
+	$out='';
+	$deviceID = (int)$_REQUEST['deviceID'];
+	$installationID = (int)@$_SESSION['installationID'];
+	$registeredArray=array(
+		1=>translate('TEXT_YES_CONST'),
+		0=>translate('TEXT_NO_CONST'),
+		-1=>translate('TEXT_REGISTERED_RELOAD_NEEDED_CONST')
+	);
 
-$manualyConfigureArray=array(
-	0=>'Auto Configure',
-	1=>'Manually Configure',
-	-1=>'Force into every room'
-);
+	$manualyConfigureArray=array(
+		0=>'Auto Configure',
+		1=>'Manually Configure',
+		-1=>'Force into every room'
+	);
 
 	if (!isset($_SESSION['userLoggedIn']) || $_SESSION['userLoggedIn']!=true) {
 		header("Location: index.php?section=login&last=editDeviceParams&deviceID=$deviceID");
@@ -120,17 +120,17 @@ $manualyConfigureArray=array(
 	$childsNo = getChildsNo($deviceID,$dbADO);
 	
 	if(isCritical($DeviceTemplate)){
-		$deleteLink='<a href="javascript: if (confirm(\''.$TEXT_DELETE_CRITICAL_DEVICE_CONFIRMATION_CONST.'\')) {document.location.href=\'index.php?section=deleteCriticalDevice&deviceID='.$deviceID.'&from=editDeviceParams\';}">'.$TEXT_DELETE_DEVICE_CONST.'</a> '.$TEXT_NOT_RECOMENDED_CONST;
+		$deleteLink='<a href="javascript: if (confirm(\''.translate('TEXT_DELETE_CRITICAL_DEVICE_CONFIRMATION_CONST').'\')) {document.location.href=\'index.php?section=deleteCriticalDevice&deviceID='.$deviceID.'&from=editDeviceParams\';}">'.translate('TEXT_DELETE_DEVICE_CONST').'</a> '.translate('TEXT_NOT_RECOMENDED_CONST');
 	}else{
-		$deleteLink='<a href="javascript: if (confirm(\''.$TEXT_DELETE_DEVICE_CONFIRMATION_CONST.'\')) {document.location.href=\'index.php?section=deleteMyDevice&deviceID='.$deviceID.'&from=editDeviceParams\';}">'.$TEXT_DELETE_THIS_DEVICE_CONST.'</a>';
+		$deleteLink='<a href="javascript: if (confirm(\''.translate('TEXT_DELETE_DEVICE_CONFIRMATION_CONST').'\')) {document.location.href=\'index.php?section=deleteMyDevice&deviceID='.$deviceID.'&from=editDeviceParams\';}">'.translate('TEXT_DELETE_THIS_DEVICE_CONST').'</a>';
 	}
 	
-	$manufHomeLink=($ManufacturerURL!='')?'<a href="'.$ManufacturerURL.'" target="_blank" title="'.$TEXT_MANUFACTURER_URL_CONST.'"><img src="include/images/home.png" border="0" align="middle"></a>':'';
-	$internalLink=($ManufacturerURL!='' && $InternalURLSuffix!='')?'<a href="'.$ManufacturerURL.$InternalURLSuffix.'" title="'.$TEXT_DEVICE_URL_MANUFACTURER_SITE_CONST.'" target="_blank"><img src="include/images/file.png" border="0" align="middle"></a>':'';
-	$resetDeviceLink=($ImplementsDCE==1)?'<a href="index.php?section=editDeviceParams&deviceID='.$deviceID.'&action=reset">'.$TEXT_RESET_DEVICE_CONST.'</a>':'';
+	$manufHomeLink=($ManufacturerURL!='')?'<a href="'.$ManufacturerURL.'" target="_blank" title="'.translate('TEXT_MANUFACTURER_URL_CONST').'"><img src="include/images/home.png" border="0" align="middle"></a>':'';
+	$internalLink=($ManufacturerURL!='' && $InternalURLSuffix!='')?'<a href="'.$ManufacturerURL.$InternalURLSuffix.'" title="'.translate('TEXT_DEVICE_URL_MANUFACTURER_SITE_CONST').'" target="_blank"><img src="include/images/file.png" border="0" align="middle"></a>':'';
+	$resetDeviceLink=($ImplementsDCE==1)?'<a href="index.php?section=editDeviceParams&deviceID='.$deviceID.'&action=reset">'.translate('TEXT_RESET_DEVICE_CONST').'</a>':'';
 	
 	if(isset($_REQUEST['showNote'])){
-		$Alert='alert("'.$TEXT_ADVANCED_PREPARATION_NOTE_CONST.'");
+		$Alert='alert("'.translate('TEXT_ADVANCED_PREPARATION_NOTE_CONST').'");
 		';
 	}
 
@@ -154,18 +154,18 @@ $manualyConfigureArray=array(
 	
 	<table width="100%">
 		<tr>
-			<td><a href="index.php?section=addMyDevice&parentID='.$deviceID.'">'.($deviceID==0?$TEXT_CREATE_TOP_LEVEL_DEVICE_CONST:$TEXT_CREATE_CHILD_DEVICE_CONST).'</a> &nbsp; &nbsp; &nbsp;
+			<td><a href="index.php?section=addMyDevice&parentID='.$deviceID.'">'.($deviceID==0?translate('TEXT_CREATE_TOP_LEVEL_DEVICE_CONST'):translate('TEXT_CREATE_CHILD_DEVICE_CONST')).'</a> &nbsp; &nbsp; &nbsp;
 			'.$deleteLink.' &nbsp;&nbsp; 
-			<a href="javascript:windowOpen(\'index.php?section=sendCommand&deviceID='.$deviceID.'\',\'width=800,height=600,scrollbars=1,resizable=1\');">'.$TEXT_SEND_COMMAND_TO_DEVICE_CONST.'</a> &nbsp; &nbsp; &nbsp; '.$resetDeviceLink.'
+			<a href="javascript:windowOpen(\'index.php?section=sendCommand&deviceID='.$deviceID.'\',\'width=800,height=600,scrollbars=1,resizable=1\');">'.translate('TEXT_SEND_COMMAND_TO_DEVICE_CONST').'</a> &nbsp; &nbsp; &nbsp; '.$resetDeviceLink.'
 			&nbsp;&nbsp;
-			<a href="backupChildDevices.php?deviceID='.$deviceID.'" target="_blank">'.$TEXT_BACKUP_CHILD_DEVICES_CONST.'</a>
+			<a href="backupChildDevices.php?deviceID='.$deviceID.'" target="_blank">'.translate('TEXT_BACKUP_CHILD_DEVICES_CONST').'</a>
 			&nbsp;&nbsp;
-			<a href="index.php?section=restoreChildDevices&deviceID='.$deviceID.'">'.$TEXT_RESTORE_CHILD_DEVICES_CONST.'</a>
+			<a href="index.php?section=restoreChildDevices&deviceID='.$deviceID.'">'.translate('TEXT_RESTORE_CHILD_DEVICES_CONST').'</a>
 	
 			</td>
-			<td align="right"><a href="javascript:windowOpen(\'index.php?section=errorLog&deviceID='.$deviceID.$dceRouterSuffix.@$orbiterSuffix.'\',\'width=1024,height=768,scrollbars=1,resizable=1,fullscreen=1\');">'.$TEXT_VIEW_ERRORS_IN_LOG_CONST.'</a>&nbsp;&nbsp;&nbsp;
-				<a href="javascript:windowOpen(\'index.php?section=fullLog&deviceID='.$deviceID.$dceRouterSuffix.@$orbiterSuffix.'\',\'width=1024,height=768,scrollbars=1,resizable=1,fullscreen=1\');">'.$TEXT_VIEW_WHOLE_LOG_CONST.'</a>&nbsp;&nbsp;&nbsp;
-				<a href="javascript:windowOpen(\'index.php?section=followLog&deviceID='.$deviceID.$dceRouterSuffix.@$orbiterSuffix.'\',\'width=1024,height=768,scrollbars=1,resizable=1,fullscreen=1\');">'.$TEXT_FOLLOW_LOG_CONST.'</a>
+			<td align="right"><a href="javascript:windowOpen(\'index.php?section=errorLog&deviceID='.$deviceID.$dceRouterSuffix.@$orbiterSuffix.'\',\'width=1024,height=768,scrollbars=1,resizable=1,fullscreen=1\');">'.translate('TEXT_VIEW_ERRORS_IN_LOG_CONST').'</a>&nbsp;&nbsp;&nbsp;
+				<a href="javascript:windowOpen(\'index.php?section=fullLog&deviceID='.$deviceID.$dceRouterSuffix.@$orbiterSuffix.'\',\'width=1024,height=768,scrollbars=1,resizable=1,fullscreen=1\');">'.translate('TEXT_VIEW_WHOLE_LOG_CONST').'</a>&nbsp;&nbsp;&nbsp;
+				<a href="javascript:windowOpen(\'index.php?section=followLog&deviceID='.$deviceID.$dceRouterSuffix.@$orbiterSuffix.'\',\'width=1024,height=768,scrollbars=1,resizable=1,fullscreen=1\');">'.translate('TEXT_FOLLOW_LOG_CONST').'</a>
 				'.$coreSystemLog.'
 			</td>
 		</tr>
@@ -176,36 +176,36 @@ $manualyConfigureArray=array(
 	</script>
 		
 	<fieldset>
-	<legend>'.$TEXT_DEVICE_INFO_CONST.' #'.$deviceID.'</legend>
+	<legend>'.translate('TEXT_DEVICE_INFO_CONST').' #'.$deviceID.'</legend>
 	<table border="0">
 		<tr>
-			<td>'.$TEXT_DESCRIPTION_CONST.' *</td>
+			<td>'.translate('TEXT_DESCRIPTION_CONST').' *</td>
 			<td colspan="2"><input type="text" name="DeviceDescription" value="'.$description.'" class="input_big"></td>
 		</tr>
 	<tr>
-		<td>'.$TEXT_DEVICE_TEMPLATE_CONST.'</td>
+		<td>'.translate('TEXT_DEVICE_TEMPLATE_CONST').'</td>
 		<td width="230" bgcolor="#B9B9B9"><B>'.$mdlDescription.' #'.$DeviceTemplate.'</B></td>
-		<td><input value="'.$TEXT_VIEW_CONST.'" type="button" class="button" name="controlGoToMDL" onClick="windowOpen(\'index.php?section=editMasterDevice&model='.$DeviceTemplate.'&from=editDeviceParams&fromDeviceID='.$deviceID.'\',\'width=1024,height=768,toolbar=1,scrollbars=1,resizable=1\');"> <input value="'.$TEXT_HELP_CONST.'" type="button" class="button" name="help" onClick="window.open(\''.$wikiHost.'/index.php/'.$wikiLink.'\');">'.$manufHomeLink.' '.$internalLink.'</td>
+		<td><input value="'.translate('TEXT_VIEW_CONST').'" type="button" class="button" name="controlGoToMDL" onClick="windowOpen(\'index.php?section=editMasterDevice&model='.$DeviceTemplate.'&from=editDeviceParams&fromDeviceID='.$deviceID.'\',\'width=1024,height=768,toolbar=1,scrollbars=1,resizable=1\');"> <input value="'.translate('TEXT_HELP_CONST').'" type="button" class="button" name="help" onClick="window.open(\''.$wikiHost.'/index.php/'.$wikiLink.'\');">'.$manufHomeLink.' '.$internalLink.'</td>
 	</tr>
 	<tr>
-		<td>'.$TEXT_DEVICE_TEMPLATE_COMMENTS_CONST.'</td>
+		<td>'.translate('TEXT_DEVICE_TEMPLATE_COMMENTS_CONST').'</td>
 		<td colspan="2">'.$dtComments.'</td>
 	</tr>
 	<tr>
-		<td valign="top">This device is controlled via</td>
+		<td valign="top">'.translate('TEXT_CONTROLLED_BY_CONST').'</td>
 		<td colspan="2">
 		';
 	
 		$GLOBALS['DT_&_Room']=1;
-		$out.=controlledViaPullDown('controlledVia',$deviceID,$DeviceTemplate,$DeviceCategory,$controlledVia,$dbADO,'0,- '.$TEXT_PLEASE_SELECT_CONST.' -','class="input_big" onchange="document.editDeviceParams.submit();"');
+		$out.=controlledViaPullDown('controlledVia',$deviceID,$DeviceTemplate,$DeviceCategory,$controlledVia,$dbADO,'0,- '.translate('TEXT_PLEASE_SELECT_CONST').' -','class="input_big" onchange="document.editDeviceParams.submit();"');
 					
 		$out.='		
 		</td>
 	</tr>
 	<tr>
-		<td>'.$TEXT_ROOM_CONST.'</td>
+		<td>'.translate('TEXT_ROOM_CONST').'</td>
 		<td colspan="2"><select name="Room" class="input_big">
-			<option value="0">- '.$TEXT_PLEASE_SELECT_CONST.' -</option>';
+			<option value="0">- '.translate('TEXT_PLEASE_SELECT_CONST').' -</option>';
 					if(isMediaDirector($deviceID,$dbADO)){
 						$mdArray=getDeviceTemplatesFromCategory($GLOBALS['rootMediaDirectors'],$dbADO);
 					
@@ -230,7 +230,7 @@ $manualyConfigureArray=array(
 				</select></td>
 		</tr>
 		<tr>
-			<td>'.$TEXT_ENTERTAIN_AREAS_CONST.'</td>
+			<td>'.translate('TEXT_ENTERTAIN_AREAS_CONST').'</td>
 			<td bgcolor="#B9B9B9">';
 					$selectCheckedEA='SELECT * FROM Device_EntertainArea WHERE FK_Device=?';
 					$resCheckedEA=$dbADO->Execute($selectCheckedEA,$deviceID);
@@ -259,58 +259,58 @@ $manualyConfigureArray=array(
 				</td>
 			</tr>					
 			<tr>
-				<td>Manually Configure EA</td>
+				<td>'.translate('TEXT_MANUALLY_CONFIGURE_EA_CONST').'</td>
 				<td>'.pulldownFromArray($manualyConfigureArray,'ManuallyConfigureEA',$ManuallyConfigureEA,'','key','- Please select -',-100).'</td>
 			</tr>			
 			<tr>
-				<td>IP Address</td>
+				<td>'.translate('TEXT_IP_ADDRESS_CONST').'</td>
 				<td><input name="ipAddress" value="'.$ipAddress.'" class="input_big"></td>
 			</tr>
 			<tr>
-				<td>MAC Address</td>
+				<td>'.translate('TEXT_MAC_ADDRESS_CONST').'</td>
 				<td><input name="macAddress" value="'.$macAddress.'" class="input_big"></td>
 			</tr>
 			<tr>
-				<td>Ignore On/Off</td>
-				<td>On<input type="radio" value="1" name="IgnoreOnOff" '.($ignoreOnOff==1?' checked="checked" ':'').'> &nbsp; 
-					Off:<input type="radio" value="0" name="IgnoreOnOff" '.($ignoreOnOff==0?' checked="checked" ':'').'></td>
+				<td>'.translate('TEXT_IGNORE_ON_OFF_CONST').'</td>
+				<td>'.translate('TEXT_ENABLED_CONST').'<input type="radio" value="1" name="IgnoreOnOff" '.($ignoreOnOff==1?' checked="checked" ':'').'> &nbsp; 
+					'.translate('TEXT_DISABLED_CONST').':<input type="radio" value="0" name="IgnoreOnOff" '.($ignoreOnOff==0?' checked="checked" ':'').'></td>
 			</tr>
 			<tr>
-				<td colspan="3"><input type="checkbox" name="needConfigure" value="1" '.(($deviceNeedConfigure==1)?'checked':'').' onClick="javascript:document.editDeviceParams.submit();"> '.$TEXT_RECONFIGURE_DEVICE_CONST.'</td>
+				<td colspan="3"><input type="checkbox" name="needConfigure" value="1" '.(($deviceNeedConfigure==1)?'checked':'').' onClick="javascript:document.editDeviceParams.submit();"> '.translate('TEXT_RECONFIGURE_DEVICE_CONST').'</td>
 			</tr>
 			<tr>
-				<td colspan="3"><input type="checkbox" name="PingTest" value="1" '.(($PingTest==1)?'checked':'').' onClick="javascript:document.editDeviceParams.submit();"> '.$TEXT_CONNECTION_KEEP_ALIVE_CONST.'</td>
+				<td colspan="3"><input type="checkbox" name="PingTest" value="1" '.(($PingTest==1)?'checked':'').' onClick="javascript:document.editDeviceParams.submit();"> '.translate('TEXT_CONNECTION_KEEP_ALIVE_CONST').'</td>
 			</tr>
 			<tr>
-				<td>'.$TEXT_STATE_CONST.'</td>
+				<td>'.translate('TEXT_DEVICE_STATE_CONST').'</td>
 				<td>'.getStateFormElement($deviceID,'State',$State,$dbADO).'</td>
 			</tr>
 			<tr>
-				<td>'.$TEXT_STATUS_CONST.'</td>
+				<td>'.translate('TEXT_STATUS_CONST').'</td>
 				<td><input type="text" name="Status" value="'.$Status.'" class="input_big"></td>
 			</tr>
 			<tr>
-				<td colspan="3"><input type="checkbox" name="deviceDisabled" value="1" '.(($deviceDisabled==1)?'checked':'').' onClick="javascript:document.editDeviceParams.submit();"> '.$TEXT_DISABLED_CONST.'</td>
+				<td colspan="3"><input type="checkbox" name="deviceDisabled" value="1" '.(($deviceDisabled==1)?'checked':'').' onClick="javascript:document.editDeviceParams.submit();"> '.translate('TEXT_DISABLED_CONST').'</td>
 			</tr>					
 			<tr>
-				<td colspan="3">'.$TEXT_REGISTERED_CONST.': <B>'.$registeredArray[$registered].'</B></td>
+				<td colspan="3">'.translate('TEXT_REGISTERED_CONST').': <B>'.$registeredArray[$registered].'</B></td>
 			</tr>					
 			<tr>
-				<td colspan="3" align="left"><input type="reset" class="button" name="cancelBtn" value="'.$TEXT_CANCEL_CONST.'"> <input type="submit" class="button" name="submitX" value="'.$TEXT_SAVE_CONST.'"></td>
+				<td colspan="3" align="left"><input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'"> <input type="submit" class="button" name="submitX" value="'.translate('TEXT_SAVE_CONST').'"></td>
 			</tr>
 	</table>
 	</fieldset>
 	<br />
 	<script>
 		frmvalidator.addValidation("DeviceDescription","req","Please enter a description");
-		frmvalidator.addValidation("macAddress","mac","'.$TEXT_INVALID_MAC_ADDRESS_CONST.'");
-		frmvalidator.addValidation("ipAddress","ip","'.$TEXT_INVALID_IP_ADDRESS_CONST.'");
+		frmvalidator.addValidation("macAddress","mac","'.translate('TEXT_INVALID_MAC_ADDRESS_CONST').'");
+		frmvalidator.addValidation("ipAddress","ip","'.translate('TEXT_INVALID_IP_ADDRESS_CONST').'");
 	</script>
 	<table width="100%">
 		<tr>
 			<td valign="top" width="50%">
 	<fieldset style="height:80%">				
-	<legend>'.$TEXT_DEVICE_PIPES_USED_CONST.'</legend>
+	<legend>'.translate('TEXT_DEVICE_PIPES_USED_CONST').'</legend>
 	<table>
 		<tr>
 			<td>
@@ -351,14 +351,14 @@ $manualyConfigureArray=array(
 				$selectInputsTxt.= '<option '.($rowSelInputs['PK_Command']==$rowSelectedPipesUsed['FK_Command_Input']?" selected='selected' ":"").' value="'.$rowSelInputs['PK_Command'].'">'.$rowSelInputs['Description'].'</option>';
 			}
 			
-			$out.='<td> Input on '.$rowSelectedPipesUsed['Desc_To'].' <select name="input_'.$rowSelectedPipesUsed['FK_Device_To'].'_'.$rowSelectedPipesUsed['FK_Pipe'].'"><option value="0">-please select-</option>'.$selectInputsTxt.'</select></td>';
+			$out.='<td> Input on '.$rowSelectedPipesUsed['Desc_To'].' <select name="input_'.$rowSelectedPipesUsed['FK_Device_To'].'_'.$rowSelectedPipesUsed['FK_Pipe'].'"><option value="0">-'.translate('TEXT_PLEASE_SELECT_CONST').'-</option>'.$selectInputsTxt.'</select></td>';
 			
 			$selectOutputsTxt='';
 			while ($rowSelOutputs = $resSelectOutputs->FetchRow()) {
 				$selectOutputsTxt.= '<option '.($rowSelOutputs['PK_Command']==$rowSelectedPipesUsed['FK_Command_Output']?" selected='selected' ":"").' value="'.$rowSelOutputs['PK_Command'].'">'.$rowSelOutputs['Description'].'</option>';
 			}
 			
-			$out.='<td> Output on '.$rowSelectedPipesUsed['Desc_From'].' <select name="output_'.$rowSelectedPipesUsed['FK_Device_To'].'_'.$rowSelectedPipesUsed['FK_Pipe'].'"><option value="0">-please select-</option>'.$selectOutputsTxt.'</select></td>';
+			$out.='<td> Output on '.$rowSelectedPipesUsed['Desc_From'].' <select name="output_'.$rowSelectedPipesUsed['FK_Device_To'].'_'.$rowSelectedPipesUsed['FK_Pipe'].'"><option value="0">-'.translate('TEXT_PLEASE_SELECT_CONST').'-</option>'.$selectOutputsTxt.'</select></td>';
 			
 
 			$resSelectPipes->MoveFirst();			
@@ -368,7 +368,7 @@ $manualyConfigureArray=array(
 			}
 			
 			$out.='<td> Pipe '.$selectPipesTxt.'</td>';
-			$out.='<td><input value="'.$TEXT_DELETE_CONST.'" type="button" class="button" onClick="if (confirm(\''.$TEXT_CONFIRM_DELETE_PIPE_CONST.'\')) {windowOpen(\'index.php?section=deleteDevicePipeFromDevice&deviceFromID='.$rowSelectedPipesUsed['FK_Device_From'].'&deviceToID='.$rowSelectedPipesUsed['FK_Device_To'].'&pipe='.$rowSelectedPipesUsed['FK_Pipe'].'&from=editDeviceParams\',\'width=100,height=100,toolbar=1,scrollbars=1,resizable=1\');}"></td>';
+			$out.='<td><input value="'.translate('TEXT_DELETE_CONST').'" type="button" class="button" onClick="if (confirm(\''.translate('TEXT_CONFIRM_DELETE_PIPE_CONST').'\')) {windowOpen(\'index.php?section=deleteDevicePipeFromDevice&deviceFromID='.$rowSelectedPipesUsed['FK_Device_From'].'&deviceToID='.$rowSelectedPipesUsed['FK_Device_To'].'&pipe='.$rowSelectedPipesUsed['FK_Pipe'].'&from=editDeviceParams\',\'width=100,height=100,toolbar=1,scrollbars=1,resizable=1\');}"></td>';
 			
 			$out.='</tr>';
 		}
@@ -381,7 +381,7 @@ $manualyConfigureArray=array(
 		<tr>
 			<td>
 				<select name="addDeviceForPiping">
-					<option value="0">- '.$TEXT_PLEASE_SELECT_CONST.' -</option>
+					<option value="0">- '.translate('TEXT_PLEASE_SELECT_CONST').' -</option>
 					';
 			
 				$querySelectDevice = "SELECT Description,PK_Device FROM Device Where FK_Installation = ? Order By Description ASC";
@@ -400,17 +400,17 @@ $manualyConfigureArray=array(
 			$out.='
 				</select>
 				<select name="addPipe">
-					<option value="0">-please select-</option>'.$selectPipesTxt.'</select>
-			<input type="submit" class="button" name="submitX" value="Add"  >
+					<option value="0">-'.translate('TEXT_PLEASE_SELECT_CONST').'-</option>'.$selectPipesTxt.'</select>
+			<input type="submit" class="button" name="submitX" value="'.translate('TEXT_ADD_CONST').'"  >
 			</td>
 		</tr>
-	    <tr><td><input type="submit" class="button" name="submitX" value="'.$TEXT_SAVE_CONST.'"  ></td></tr>
+	    <tr><td><input type="submit" class="button" name="submitX" value="'.translate('TEXT_SAVE_CONST').'"  ></td></tr>
 	</table>
 	</fieldset>
 		</td>
 		<td>
 	<fieldset style="height:80%">				
-	<legend>'.$TEXT_MEMBER_OF_GROUP_CONST.'</legend>
+	<legend>'.translate('TEXT_MEMBER_OF_GROUP_CONST').'</legend>
 	
 	<table>				';
 
@@ -427,14 +427,14 @@ $manualyConfigureArray=array(
 	$deviceGroups[]=0;
 	if ($resDevicesGroups) {	
 		if ($resDevicesGroups->RecordCount()==0){
-			$out.='<tr><td colspan="2">No groups for device</a></td></tr>';
+			$out.='<tr><td colspan="2">'.translate('TEXT_NO_GROUPS_FOR_DEVICE_CONST').'</a></td></tr>';
 		} 
 			
 		while ($rowDevicesGroup = $resDevicesGroups->FetchRow()) {
 			$out.="<tr>
 					<td>".$rowDevicesGroup['Description']."</td>					
 					<td>
-						<input value='Delete' type='button' onClick=\"if (confirm('$TEXT_CONFIRM_DELETE_DEVICE_FROM_GROUP_CONST')) {windowOpen('index.php?section=deleteDeviceFromDeviceGroup&deviceID=$deviceID&deviceGroupID=".$rowDevicesGroup['PK_DeviceGroup']."&from=editDeviceParams','width=200,height=200,toolbar=1,scrollbars=1,resizable=1');}\">
+						<input value='Delete' type='button' onClick=\"if (confirm('".translate('TEXT_CONFIRM_DELETE_DEVICE_FROM_GROUP_CONST')."')) {windowOpen('index.php?section=deleteDeviceFromDeviceGroup&deviceID=$deviceID&deviceGroupID=".$rowDevicesGroup['PK_DeviceGroup']."&from=editDeviceParams','width=200,height=200,toolbar=1,scrollbars=1,resizable=1');}\">
 					</td>
 				  </tr>";
 			$deviceGroups[]=$rowDevicesGroup['PK_DeviceGroup'];
@@ -444,7 +444,7 @@ $manualyConfigureArray=array(
 	$selectRemainingGroups = "SELECT Description,PK_DeviceGroup from DeviceGroup where FK_Installation = ? and PK_DeviceGroup not in (".join(",",$deviceGroups).") order by Description ASC";
 	$resRemainingGroups = $dbADO->Execute($selectRemainingGroups,array($installationID));
 	
-	$remainingGroups = '<option value="0">- '.$TEXT_PLEASE_SELECT_CONST.' -</option>';
+	$remainingGroups = '<option value="0">- '.translate('TEXT_PLEASE_SELECT_CONST').' -</option>';
 	if ($resRemainingGroups) {
 		while ($rowRemainingGroups = $resRemainingGroups->FetchRow()) {
 			$remainingGroups.='<option value="'.$rowRemainingGroups['PK_DeviceGroup'].'">'.$rowRemainingGroups['Description'].'</option>';
@@ -452,10 +452,10 @@ $manualyConfigureArray=array(
 	}
 	$out.='
 	
-	<tr><td><select name="addNewGroup">'.$remainingGroups.'</select></td><td><input type="submit" class="button"   name="submitX" value="Add"></td></tr>		
+	<tr><td><select name="addNewGroup">'.$remainingGroups.'</select></td><td><input type="submit" class="button"   name="submitX" value="'.translate('TEXT_ADD_CONST').'"></td></tr>		
 	<tr><td><a href="javascript:void(0);" onClick="windowOpen(\'index.php?section=createDeviceGroup&deviceID='.$deviceID.'&from=editDeviceParams\',\'width=400,height=400,toolbar=1,scrollbars=1,resizable=1\');">Create new device group</a></td></tr>
 	
-		<tr><td colspan="2"><input type="submit" class="button" name="submitX" value="'.$TEXT_SAVE_CONST.'"  ></td></tr>
+		<tr><td colspan="2"><input type="submit" class="button" name="submitX" value="'.translate('TEXT_SAVE_CONST').'"  ></td></tr>
 	</table>
 	</fieldset>
 			</td>
@@ -463,7 +463,7 @@ $manualyConfigureArray=array(
 	</table>
 	
 	<fieldset>
-	<legend>'.$TEXT_RELATED_DEVICES_CONST.'</legend>
+	<legend>'.translate('TEXT_RELATED_DEVICES_CONST').'</legend>
 					
 	<table>
 	';
@@ -481,7 +481,7 @@ $manualyConfigureArray=array(
 	if ($resRelatedDevices) {	
 		$relatedDevicesCount=$resRelatedDevices->RecordCount();
 		if ($relatedDevicesCount==0){
-			$out.='<tr><td colspan="2">No related devices</a></td></tr>';
+			$out.='<tr><td colspan="2">'.translate('TEXT_NO_RELATED_DEVICES_CONST').'</a></td></tr>';
 		} 
 			
 		while ($rowRelatedDevice = $resRelatedDevices->FetchRow()) {
@@ -490,7 +490,7 @@ $manualyConfigureArray=array(
 						<input type=\"text\" name=\"relatedDeviceValue_".$rowRelatedDevice['FK_Device_Related']."\" value=\"".stripslashes($rowRelatedDevice['Value'])."\">
 					</td>
 					<td>
-						<input value='Delete' class='button' type='button' onClick=\"if (confirm('$TEXT_CONFIRM_DELETE_DEVICE_CONST')) {windowOpen('index.php?section=deleteDeviceRelatedFromDeviceParams&deviceID=$deviceID&relatedID=".$rowRelatedDevice['FK_Device_Related']."&from=editDeviceParams','width=200,height=200,toolbar=1,scrollbars=1,resizable=1');}\">
+						<input value='Delete' class='button' type='button' onClick=\"if (confirm('".translate('TEXT_CONFIRM_DELETE_DEVICE_CONST')."')) {windowOpen('index.php?section=deleteDeviceRelatedFromDeviceParams&deviceID=$deviceID&relatedID=".$rowRelatedDevice['FK_Device_Related']."&from=editDeviceParams','width=200,height=200,toolbar=1,scrollbars=1,resizable=1');}\">
 					</td>
 				  </tr>";
 			$deviceRelatedData[]=$rowRelatedDevice['FK_Device_Related'];
@@ -505,7 +505,7 @@ $manualyConfigureArray=array(
 		ORDER BY Description ASC";
 	
 	$resAddNewRelatedDevices = $dbADO->Execute($selectAddNewRelatedDevices,array($installationID,$deviceID,$DeviceTemplate));
-	$newDeviceRelated='<option value="0">-please select-</option>';
+	$newDeviceRelated='<option value="0">-'.translate('TEXT_PLEASE_SELECT_CONST').'-</option>';
 	if ($resAddNewRelatedDevices) {
 		while ($rowAddNewRelatedDevices = $resAddNewRelatedDevices->FetchRow()) {
 			$newDeviceRelated.='<option value="'.$rowAddNewRelatedDevices['PK_Device'].'">'.$rowAddNewRelatedDevices['Description'].'('.$rowAddNewRelatedDevices['DT_Desc'].')</option>';
@@ -514,18 +514,18 @@ $manualyConfigureArray=array(
 	$out.='
 		
 		<tr>
-			<td>'.(($relatedDevicesCount!=0)?'&nbsp;':'<select name="addNewDeviceRelated">'.$newDeviceRelated.'</select>').' <input type="submit" class="button" name="submitX" value="Add"  ></td>
+			<td>'.(($relatedDevicesCount!=0)?'&nbsp;':'<select name="addNewDeviceRelated">'.$newDeviceRelated.'</select>').' <input type="submit" class="button" name="submitX" value="'.translate('TEXT_ADD_CONST').'"  ></td>
 			<td>&nbsp;</td>
 		</tr>
 	
 		<input type="hidden" name="selectedRelatedDevice" value="'.(join(",",$deviceRelatedData)).'">
-		<tr><td colspan="2"><input type="submit" class="button" name="submitX" value="'.$TEXT_SAVE_CONST.'"  ></td></tr>
+		<tr><td colspan="2"><input type="submit" class="button" name="submitX" value="'.translate('TEXT_SAVE_CONST').'"  ></td></tr>
 	</table>	
 	</fieldset>
 	
 	<br />
 	<fieldset>
-		<legend>'.$TEXT_DEVICE_DATA_CONST.'</legend>
+		<legend>'.translate('TEXT_DEVICE_DATA_CONST').'</legend>
 	
 		
 			<input type="hidden" value="editDeviceParams" name="section">
@@ -618,11 +618,11 @@ $manualyConfigureArray=array(
 
 	$out.=((count($deviceDataArray)>0)?formatDeviceData($deviceID,$deviceDataArray[$deviceID],$dbADO,$IsIPBased,getSpecificFloorplanType($dcID,$dbADO),1,'textarea','input_big').'
 		<input type="hidden" name="DeviceDataToDisplay" value="'.join(',',$GLOBALS['DeviceDataToDisplay']).'">
-		<input type="submit" class="button" name="submitX" value="'.$TEXT_SAVE_CONST.'"  >
+		<input type="submit" class="button" name="submitX" value="'.translate('TEXT_SAVE_CONST').'"  >
 	':'').'	
 	</fieldset>
 	</form>
-	<em>* '.$TEXT_REQUIRED_FIELDS_CONST.'</em>
+	<em>* '.translate('TEXT_REQUIRED_FIELDS_CONST').'</em>
 
 	
 	<br />';
@@ -637,7 +637,7 @@ $manualyConfigureArray=array(
 		if($action=='reset'){
 			$command="/usr/pluto/bin/MessageSend localhost 0 $deviceID 7 1";
 			exec($command);
-			Header('Location: index.php?section=editDeviceParams&deviceID='.$deviceID.'&msg='.$TEXT_DEVICE_RESETED_CONST);
+			Header('Location: index.php?section=editDeviceParams&deviceID='.$deviceID.'&msg='.translate('TEXT_DEVICE_RESETED_CONST'));
 			exit();			
 		}
 		$oldIpAddress = $ipAddress;
@@ -664,7 +664,7 @@ $manualyConfigureArray=array(
 	
 		
 		if(isMediaDirector($deviceID,$dbADO,1) && $usedBy=roomIsUsed($room,$deviceID,$dbADO)){
-			Header('Location: index.php?section=editDeviceParams&deviceID='.$deviceID.'&error='.$TEXT_ROOM_USED_BY_ANOTHER_MD_CONST.urlencode(': '.$usedBy));
+			Header('Location: index.php?section=editDeviceParams&deviceID='.$deviceID.'&error='.translate('TEXT_ROOM_USED_BY_ANOTHER_MD_CONST').urlencode(': '.$usedBy));
 			exit();			
 		}
 
@@ -799,7 +799,7 @@ $manualyConfigureArray=array(
 				$msg='Device Pipe added.';
 			}
 			else
-				$error=$TEXT_ERROR_DEVICE_PIPE_EXISTS_CONST;
+				$error=translate('TEXT_ERROR_DEVICE_PIPE_EXISTS_CONST');
 		}
 		
 		$selectPipesUsed = 'SELECT Device_Device_Pipe.*,D1.Description as Desc_From,D2.Description as Desc_To
@@ -837,7 +837,7 @@ $manualyConfigureArray=array(
 			//top.frames[\'treeframe\'].location=\'index.php?section=leftMenu\';
 		</script>';
 	} else {
-		Header('Location: index.php?section=editDeviceParams&deviceID='.$deviceID.'&error='.$TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST);
+		Header('Location: index.php?section=editDeviceParams&deviceID='.$deviceID.'&error='.translate('TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST'));
 		exit();
 	}
 }
@@ -860,8 +860,8 @@ foreach ($parentsForMenuArray as $parent) {
 
 eval("\$c=array(\$navMenuString);");
 
-	$output->setMenuTitle($TEXT_ADVANCED_CONST.' |');
-	$output->setPageTitle($TEXT_DEVICE_CONST.' #'.$deviceID.': '.$description);
+	$output->setMenuTitle(translate('TEXT_ADVANCED_CONST').' |');
+	$output->setPageTitle(translate('TEXT_DEVICE_CONST').' #'.$deviceID.': '.$description);
 
 	$output->setNavigationMenu($c);
 	$output->setBody($out);

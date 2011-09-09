@@ -3329,6 +3329,7 @@ function isCritical($deviceID)
 function formatDeviceData($deviceID,$DeviceDataArray,$dbADO,$isIPBased=0,$specificFloorplanType=0,$boolJsValidation=0,$default='input',$cssStyle='')
 {
 	includeLangFile('common.lang.php');
+	includeLangFile('utils.lang.php');
 		
 	$jsValidation='';
 	$deviceDataBox='<script type="text/javascript" src="javascript/wz_tooltip/wz_tooltip.js"></script>';
@@ -3428,7 +3429,7 @@ function formatDeviceData($deviceID,$DeviceDataArray,$dbADO,$isIPBased=0,$specif
 							<input type="hidden" name="oldDeviceData_'.$deviceID.'_'.$rowDDforDevice['FK_DeviceData'].'" value="'.$ddValue.'">';					
 			unset($ddValue);	
 			if($rowDDforDevice['Tooltip']=="") {
-				$tooltip = "Sorry, no tip available for this device data.";
+				$tooltip = translate('TEXT_NO_TOOLTIP_FOR_DEVICE_DATA_CONST');
 			} else {
 				$tooltip = $rowDDforDevice['Tooltip'];
 			}

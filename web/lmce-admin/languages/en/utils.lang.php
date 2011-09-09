@@ -45,4 +45,5 @@ $TEXT_ADVANCED_WIZARD_CONST='Advanced wizard';
 $TEXT_ERROR_NO_DEVICE_TEMPLATE_FOR_IRIGATION_DEVICES_CONST='ERROR: No device template for irigation devices.';
 $TEXT_NO_IRRIGATION_DEVICES_CONST='No irrigation devices. Add some devices first';
 $TEXT_DELAY_CONST='Delay';
+$TEXT_NO_TOOLTIP_FOR_DEVICE_DATA_CONST='Sorry, no tip available for this device data.';
 ?>

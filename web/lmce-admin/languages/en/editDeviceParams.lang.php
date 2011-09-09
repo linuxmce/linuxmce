@@ -33,4 +33,9 @@ $TEXT_BACKUP_CHILD_DEVICES_CONST='Backup child devices';
 $TEXT_RESTORE_CHILD_DEVICES_CONST='Restore child devices';
 $TEXT_REGISTERED_CONST='Registered';
 $TEXT_REGISTERED_RELOAD_NEEDED_CONST='Yes, but a reload is needed';
+$TEXT_IGNORE_ON_OFF_CONST='Ignore On/Off';
+$TEXT_MANUALLY_CONFIGURE_EA_CONST='Manually Configure EA';
+$TEXT_DEVICE_STATE_CONST='State';
+$TEXT_NO_RELATED_DEVICES_CONST='No related devices';
+$TEXT_NO_GROUPS_FOR_DEVICE_CONST='No groups for device';
 ?>

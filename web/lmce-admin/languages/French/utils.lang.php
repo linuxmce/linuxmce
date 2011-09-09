@@ -45,4 +45,5 @@ $TEXT_ADVANCED_WIZARD_CONST='Assistant avancé';
 $TEXT_ERROR_NO_DEVICE_TEMPLATE_FOR_IRIGATION_DEVICES_CONST='ERREUR: Pas de modèles pour des dispositifs d\'ireigation.';
 $TEXT_NO_IRRIGATION_DEVICES_CONST='Pas de dispositifs d\'irrigation. Veuillez-en ajouter d\'abord';
 $TEXT_DELAY_CONST='Délai';
+$TEXT_NO_TOOLTIP_FOR_DEVICE_DATA_CONST='Désolé, pas d\'aide disponible pour ce paramètre de dispositif.';
 ?>
