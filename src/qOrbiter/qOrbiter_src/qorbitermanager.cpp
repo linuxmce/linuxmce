@@ -116,7 +116,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
 #elif defined (Q_OS_MACX)
     buildType="/qml/desktop/";
 #elif defined (ANDROID)
-    buildType = "qml/android/";
+    buildType = "/qml/android/";
 #endif
 
     qorbiterUIwin = new QDeclarativeView; //initialize the declarative view to act upon its context
