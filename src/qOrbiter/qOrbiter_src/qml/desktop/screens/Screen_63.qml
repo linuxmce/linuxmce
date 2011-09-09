@@ -29,8 +29,8 @@ Rectangle {
     color: "transparent"
     Component.onCompleted:setNowPlayingTv()
     //main 'now playing rect containing all the other items
-    Remote_lighting_controls{ id: remote_lighting_controls1; x: 449; y: 350; width: remote1.width; height: remote1.height }
-    Remote_Audio_controls{ id: remote1; x: 384; y: 350; anchors.rightMargin: 13; z: 45; }
+    Remote_lighting_controls{ id: remote_lighting_controls1; x: 866; y: 29; width: remote1.width; height: remote1.height }
+    Remote_Audio_controls{ id: remote1; x: 866; y: 256; anchors.rightMargin: 13; z: 45; }
 
     HomeButton{anchors.right: parent.right; anchors.top:parent.top}
 
@@ -41,19 +41,19 @@ Rectangle {
 
     }
 
-    EPGPlaylist{ x: 182;y: 4 ;width: 200 ;height: 346}
+    EPGPlaylist{ x: 16;y: 28;width: 200 ;height: 346}
 
 
 
 
     Rectangle {
-        x: 384
-        y: 0
+        x: 516
+        y: 29
         width: 350
-        height: 350
+        height: 428
         color: style.advanced_bg
-        anchors.verticalCenterOffset: -185
-        anchors.horizontalCenterOffset: -81
+        anchors.verticalCenterOffset: -118
+        anchors.horizontalCenterOffset: 51
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
 
@@ -135,7 +135,9 @@ Rectangle {
 
     RemoteNumberPad {
         id: remotenumberpad1
-        x: 734
-        y: 0
+        height: scaleY(20)
+        width: scaleX(20)
+        x: 216
+        y: 28
     }
 }

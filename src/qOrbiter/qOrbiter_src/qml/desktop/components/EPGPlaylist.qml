@@ -26,8 +26,8 @@ onPlayListPositionChanged:nonepgplaylistview.positionViewAtIndex(dcenowplaying.m
 
     ListView{
         id:nonepgplaylistview
-        height:500
-        width: 200
+        height:scaleY(25)
+        width: scaleX(15)
 
         highlightFollowsCurrentItem: true
         highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
