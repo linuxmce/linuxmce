@@ -290,9 +290,8 @@ void Proxy_Orbiter::StopProcessingRequest(void *p)
 		{
 			if(nCount > XML_MAX_TOUCH_ZONES)
 			{
-				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "More than " TOSTRING(XML_MAX_TOUCH_ZONES) " objects needed! Screen: %s", 
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "More than " TOSTRING(XML_MAX_TOUCH_ZONES) " objects needed! Cisco 7970 will not work. Screen: %s", 
 					m_pScreenHistory_Current->GetObj()->m_ObjectID.c_str());
-				break;
 			}
 
 			sXMLItems += *it;
@@ -303,9 +302,8 @@ void Proxy_Orbiter::StopProcessingRequest(void *p)
 		{
 			if(nCount > XML_MAX_TOUCH_ZONES)
 			{
-				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "More than " TOSTRING(XML_MAX_TOUCH_ZONES) " objects needed! Screen: %s", 
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "More than " TOSTRING(XML_MAX_TOUCH_ZONES) " objects needed! Cisco 7970 will not work. Screen: %s", 
 					m_pScreenHistory_Current->GetObj()->m_ObjectID.c_str());
-				break;
 			}
 
 			sXMLItems += *it;
