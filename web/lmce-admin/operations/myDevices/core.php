@@ -1,8 +1,8 @@
 <?
 function core($output,$dbADO) {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/core.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('core.lang.php');
 	
 /* @var $dbADO ADOConnection */
 /* @var $rs ADORecordSet */
@@ -61,13 +61,13 @@ function core($output,$dbADO) {
 	<input type="hidden" name="action" value="update">
 <table>
 	<tr>
-		<td><B>Room:</B> '.pulldownFromArray($roomsArray,'room',$coreRoom).'</td>
+		<td><B>'.translate('TEXT_ROOM_CONST').':</B> '.pulldownFromArray($roomsArray,'room',$coreRoom).'</td>
 	</tr>	
 	<tr>
 		<td>'.getInstallWizardDeviceTemplates(5,$dbADO,$coreDCERouterID,$coreDistro,$CoreOS).'</td>
 	</tr>	
 	<tr>
-		<td align="center"><input type="submit" class="button" name="update" value="'.$TEXT_UPDATE_CONST.'"> <input type="reset" class="button" name="cancelBtn" value="'.$TEXT_CANCEL_CONST.'"></td>
+		<td align="center"><input type="submit" class="button" name="update" value="'.translate('TEXT_UPDATE_CONST').'"> <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'"></td>
 	</tr>	
 </table>
 </form>';
@@ -78,7 +78,7 @@ function core($output,$dbADO) {
 		$canModifyInstallation = getUserCanModifyInstallation($_SESSION['userID'],$installationID,$dbADO);
 		
 		if (!$canModifyInstallation) {
-			Header('Location: index.php?section=core&error='.$TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST);
+			Header('Location: index.php?section=core&error='.translate('TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST'));
 			exit();
 		}
 		
@@ -106,15 +106,15 @@ function core($output,$dbADO) {
 		$dbADO->Execute('UPDATE Device SET FK_Room=? WHERE PK_Device=?',array($room,$coreID));
 		$dbADO->Execute('UPDATE Device JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate SET FK_Room=? WHERE FK_Device_ControlledVia=? AND FK_DeviceCategory=?',array($room,$coreID,$GLOBALS['rootMediaDirectors']));
 		
-		Header('Location: index.php?section=core&msg='.$TEXT_CORE_OPTIONAL_DEVICES_UPDATED_CONST);
+		Header('Location: index.php?section=core&msg='.translate('TEXT_CORE_OPTIONAL_DEVICES_UPDATED_CONST'));
 	}
 
-	$output->setMenuTitle($TEXT_WIZARD_CONST.' |');
-	$output->setPageTitle($TEXT_CORE_GENERAL_INFO_CONST);
+	$output->setMenuTitle(translate('TEXT_WIZARD_CONST').' |');
+	$output->setPageTitle(translate('TEXT_CORE_GENERAL_INFO_CONST'));
 	
 	$output->setNavigationMenu(array("My Devices"=>'index.php?section=myDevices',"Core"=>"index.php?section=core"));
 	$output->setBody($out);
-	$output->setTitle(APPLICATION_NAME.' :: '.$TEXT_CORE_GENERAL_INFO_CONST);
+	$output->setTitle(APPLICATION_NAME.' :: '.translate('TEXT_CORE_GENERAL_INFO_CONST'));
 	$output->output();  		
 }
 ?>

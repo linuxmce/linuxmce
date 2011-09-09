@@ -1,8 +1,8 @@
 <?
 function devices($output,$dbADO) {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/devices.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('devices.lang.php');
 
 	global $dbPlutoMainDatabase,$wikiHost;
 	/* @var $dbADO ADOConnection */
@@ -23,7 +23,7 @@ function devices($output,$dbADO) {
 		break;
 		case 'avEquipment':
 			$deviceCategory=$GLOBALS['rootAVEquipment'];
-			$title=$TEXT_TITLE_AV_EQUIPMENT_CONST;
+			$title=translate('TEXT_TITLE_AV_EQUIPMENT_CONST');
 		break;
 		case 'lights':
 			$deviceCategory=$GLOBALS['rootLights'];
@@ -107,7 +107,7 @@ function devices($output,$dbADO) {
 		<div id="preloader" style="display:;">
 			<table width="100%">
 				<tr>
-					<td align="center">'.$TEXT_LOADING_NOTICE_CONST.'</td>
+					<td align="center">'.translate('TEXT_LOADING_NOTICE_CONST').'</td>
 				</tr>
 			</table>
 		</div>
@@ -175,7 +175,7 @@ function devices($output,$dbADO) {
 			if($resDevice->RecordCount()==0){
 				$out.='
 				<tr>
-					<td colspan="3" align="center">'.$TEXT_NO_RECORDS_CONST.'</td>
+					<td colspan="3" align="center">'.translate('TEXT_NO_RECORDS_CONST').'</td>
 				</tr>';
 			}		
 			$resDevice->MoveFirst();
@@ -186,46 +186,46 @@ function devices($output,$dbADO) {
 					$out.='
 					<input type="hidden" name="parent_'.$rowD['PK_Device'].'" value="'.$rowD['FK_Device_ControlledVia'].'">
 					<tr class="tablehead">
-					<td align="center" width="200"><B>'.$TEXT_DESCRIPTION_CONST.' / '.$TEXT_ROOM_CONST.'</B></td>
-					<td align="center" width="400"><B>'.$TEXT_DEVICE_DATA_CONST.'</B></td>
-					<td align="center" width="135"><B>'.$TEXT_ACTION_CONST.'</B></td>
+					<td align="center" width="200"><B>'.translate('TEXT_DESCRIPTION_CONST').' / '.translate('TEXT_ROOM_CONST').'</B></td>
+					<td align="center" width="400"><B>'.translate('TEXT_DEVICE_DATA_CONST').'</B></td>
+					<td align="center" width="135"><B>'.translate('TEXT_ACTION_CONST').'</B></td>
 					</tr>
 					<tr class="regular">
-						<td class="alternate_back" align="left" valign="top" title="'.$TEXT_DEVICE_TEMPLATE_CONST.': '.$rowD['TemplateName'].', '.$TEXT_DEVICE_CATEGORY_CONST.': '.$rowD['CategoryName'].', '.strtolower($TEXT_MANUFACTURER_CONST).': '.$rowD['ManufacturerName'].'">
-							'.$TEXT_DEVICE_NUM_CONST.': '.$rowD['PK_Device'].'<br>
-							'.$TEXT_DEVICE_TEMPLATE_NUM_CONST.': '.$rowD['FK_DeviceTemplate'].'<br>
-							'.$TEXT_CONTROLLED_BY_CONST.': <a href="javascript:windowOpen(\'index.php?section=editDeviceControlledVia&deviceID='.$rowD['PK_Device'].'&from='.urlencode('devices&type='.$type).'\',\'width=600,height=300,toolbar=1,scrollbars=1,resizable=1\');" title="'.$TEXT_CLICK_TO_CHANGE_CONST.'">'.((is_null($rowD['FK_Device_ControlledVia']))?$TEXT_EDIT_CONST:$rowD['PDescription']).'</a><br><br>
+						<td class="alternate_back" align="left" valign="top" title="'.translate('TEXT_DEVICE_TEMPLATE_CONST').': '.$rowD['TemplateName'].', '.translate('TEXT_DEVICE_CATEGORY_CONST').': '.$rowD['CategoryName'].', '.strtolower(translate('TEXT_MANUFACTURER_CONST')).': '.$rowD['ManufacturerName'].'">
+							'.translate('TEXT_DEVICE_NUM_CONST').': '.$rowD['PK_Device'].'<br>
+							'.translate('TEXT_DEVICE_TEMPLATE_NUM_CONST').': '.$rowD['FK_DeviceTemplate'].'<br>
+							'.translate('TEXT_CONTROLLED_BY_CONST').': <a href="javascript:windowOpen(\'index.php?section=editDeviceControlledVia&deviceID='.$rowD['PK_Device'].'&from='.urlencode('devices&type='.$type).'\',\'width=600,height=300,toolbar=1,scrollbars=1,resizable=1\');" title="'.translate('TEXT_CLICK_TO_CHANGE_CONST').'">'.((is_null($rowD['FK_Device_ControlledVia']))?translate('TEXT_EDIT_CONST'):$rowD['PDescription']).'</a><br><br>
 							<input type="text" name="description_'.$rowD['PK_Device'].'" value="'.$rowD['Description'].'" style="width:200px;"><br><br>'.pulldownFromArray($roomsArray,'room_'.$rowD['PK_Device'],$rowD['FK_Room'],'style="width:200px;"').'
 							<br><br>							
 							'.device_test_buttons($type,$rowD['PK_Device'],$dbADO).'						
 						</td>
 						<td align="right" valign="top">'.formatDeviceData($rowD['PK_Device'],$deviceDataArray[$rowD['PK_Device']],$dbADO,$rowD['IsIPBased'],@$specificFloorplanType,1,'textarea').'</td>
 						<td align="center" valign="top" class="alternate_back">
-							<input value="'.$TEXT_HELP_CONST.'" type="button" class="button_fixed" name="help" onClick="self.location=\''.$wikiHost.'/index.php/'.wikiLink($rowD['TemplateName']).'\'"><br>
-							<input type="button" class="button_fixed" name="edit_'.$rowD['PK_Device'].'" value="'.$TEXT_ADVANCED_CONST.'"  onClick="self.location=\'index.php?section=editDeviceParams&deviceID='.$rowD['PK_Device'].'\';"><br>
-							<input type="submit" class="button_fixed" name="delete_'.$rowD['PK_Device'].'" value="'.$TEXT_DELETE_CONST.'"  onClick="if(!confirm(\'Are you sure you want to delete this device?\'))return false;">
+							<input value="'.translate('TEXT_HELP_CONST').'" type="button" class="button_fixed" name="help" onClick="self.location=\''.$wikiHost.'/index.php/'.wikiLink($rowD['TemplateName']).'\'"><br>
+							<input type="button" class="button_fixed" name="edit_'.$rowD['PK_Device'].'" value="'.translate('TEXT_ADVANCED_CONST').'"  onClick="self.location=\'index.php?section=editDeviceParams&deviceID='.$rowD['PK_Device'].'\';"><br>
+							<input type="submit" class="button_fixed" name="delete_'.$rowD['PK_Device'].'" value="'.translate('TEXT_DELETE_CONST').'"  onClick="if(!confirm(\'Are you sure you want to delete this device?\'))return false;">
 						</td>
 					</tr>';
 					if($type=='surveillance_cameras'){
-						$associatedLightText=(count(@$lightsRelated[$rowD['PK_Device']])>0)?join('<br>',array_values($lightsRelated[$rowD['PK_Device']])):'- '.$TEXT_NO_DEVICES_ASSOCIATED_CONST.' -';
-						$associatedSensorsText=(count(@$sensorsRelated[$rowD['PK_Device']])>0)?join('<br>',array_values($sensorsRelated[$rowD['PK_Device']])):'- '.$TEXT_NO_DEVICES_ASSOCIATED_CONST.' -';
+						$associatedLightText=(count(@$lightsRelated[$rowD['PK_Device']])>0)?join('<br>',array_values($lightsRelated[$rowD['PK_Device']])):'- '.translate('TEXT_NO_DEVICES_ASSOCIATED_CONST').' -';
+						$associatedSensorsText=(count(@$sensorsRelated[$rowD['PK_Device']])>0)?join('<br>',array_values($sensorsRelated[$rowD['PK_Device']])):'- '.translate('TEXT_NO_DEVICES_ASSOCIATED_CONST').' -';
 						
 						$out.='
 						<tr>
 							<td colspan="3" height="1" bgcolor="black"><img src="include/images/spacer.gif" border="0" height="1" width="1"></td>
 						</tr>
 						<tr>
-							<td style="padding-left:10px;"class="alternate_back"><B>'.$TEXT_LIGHTS_CONST.':</B> </td>
+							<td style="padding-left:10px;"class="alternate_back"><B>'.translate('TEXT_LIGHTS_CONST').':</B> </td>
 							<td align="left">'.$associatedLightText.'</td>
-							<td align="center" class="alternate_back"><input type="button" class="button_fixed" name="edit1" value='.$TEXT_EDIT_CONST.' onClick="windowOpen(\'index.php?section=editCameraRelated&deviceID='.$rowD['PK_Device'].'&from='.urlencode('devices&type='.$type).'&type=lights\',\'width=600,height=300,toolbar=1,scrollbars=1,resizable=1\');"></td>
+							<td align="center" class="alternate_back"><input type="button" class="button_fixed" name="edit1" value='.translate('TEXT_EDIT_CONST').' onClick="windowOpen(\'index.php?section=editCameraRelated&deviceID='.$rowD['PK_Device'].'&from='.urlencode('devices&type='.$type).'&type=lights\',\'width=600,height=300,toolbar=1,scrollbars=1,resizable=1\');"></td>
 						</tr>
 						<tr>
 							<td colspan="3" height="1" bgcolor="black"><img src="include/images/spacer.gif" border="0" height="1" width="1"></td>
 						</tr>
 						<tr>
-							<td style="padding-left:10px;" class="alternate_back"><B>'.$TEXT_SENSORS_CONST.':</B> </td>
+							<td style="padding-left:10px;" class="alternate_back"><B>'.translate('TEXT_SENSORS_CONST').':</B> </td>
 							<td align="left">'.$associatedSensorsText.'</td>
-							<td align="center" class="alternate_back"><input type="button" class="button_fixed" name="edit2" value='.$TEXT_EDIT_CONST.' onClick="windowOpen(\'index.php?section=editCameraRelated&deviceID='.$rowD['PK_Device'].'&from='.urlencode('devices&type='.$type).'&type=sensors\',\'width=600,height=300,toolbar=1,scrollbars=1,resizable=1\');"></td>
+							<td align="center" class="alternate_back"><input type="button" class="button_fixed" name="edit2" value='.translate('TEXT_EDIT_CONST').' onClick="windowOpen(\'index.php?section=editCameraRelated&deviceID='.$rowD['PK_Device'].'&from='.urlencode('devices&type='.$type).'&type=sensors\',\'width=600,height=300,toolbar=1,scrollbars=1,resizable=1\');"></td>
 						</tr>';
 					}
 					$out.='
@@ -241,16 +241,16 @@ function devices($output,$dbADO) {
 				<input type="hidden" name="displayedDevices" value="'.join(',',$displayedDevices).'">';
 			if($resDevice->RecordCount()!=0){
 				$zoneBtn=($type=='security')?' <input type="button" class="button" name="gotoZones" value="Security Zones" onClick="self.location=\'index.php?section=zones&type=security\'">':'';
-				$updateCancelBtns='<input type="submit" class="button" name="update" value="Update"> <input type="reset" class="button" name="cancelBtn" value="'.$TEXT_CANCEL_CONST.'">';
+				$updateCancelBtns='<input type="submit" class="button" name="update" value="'.translate('TEXT_UPDATE_CONST').'"> <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'">';
 			}
-			$addGC100Btn=($type=='interfaces')?'<input type="submit" class="button" name="addGC100" value="Add gc100"> ':'';
+			$addGC100Btn=($type=='interfaces')?'<input type="submit" class="button" name="addGC100" value="'.translate('TEXT_ADD_CONST').' gc100"> ':'';
 			
 			$out.='
 				<tr>
 					<td colspan="7">&nbsp;</td>
 				</tr>
 				<tr>
-					<td colspan="7" align="center">'.@$updateCancelBtns.' '.@$zoneBtn.' '.$addGC100Btn.'<input type="button" class="button" name="button" value="Add device" onClick="document.devices.action.value=\'externalSubmit\';document.devices.submit();windowOpen(\'index.php?section=deviceTemplatePicker&from='.urlencode('devices&type='.$type).'&categoryID='.$deviceCategory.'&allowAdd=1&parentID=0\',\'width=800,height=600,toolbar=1,scrollbars=1,resizable=1\');"></td>
+					<td colspan="7" align="center">'.@$updateCancelBtns.' '.@$zoneBtn.' '.$addGC100Btn.'<input type="button" class="button" name="button" value="'.translate('TEXT_ADD_DEVICE').'" onClick="document.devices.action.value=\'externalSubmit\';document.devices.submit();windowOpen(\'index.php?section=deviceTemplatePicker&from='.urlencode('devices&type='.$type).'&categoryID='.$deviceCategory.'&allowAdd=1&parentID=0\',\'width=800,height=600,toolbar=1,scrollbars=1,resizable=1\');"></td>
 				</tr>
 			</table>
 			</div>
@@ -261,7 +261,7 @@ function devices($output,$dbADO) {
 		// check if the user has the right to modify installation
 		$canModifyInstallation = getUserCanModifyInstallation($_SESSION['userID'],$_SESSION['installationID'],$dbADO);
 		if (!$canModifyInstallation){
-			header("Location: index.php?section=devices&type=$type&error=$TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST");
+			header("Location: index.php?section=devices&type=$type&error=".translate('TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST'));
 			exit(0);
 		}
 		$displayedDevicesArray=explode(',',@$_POST['displayedDevices']);
@@ -364,7 +364,7 @@ function devices($output,$dbADO) {
 		header("Location: index.php?section=devices&type=$type&msg=".urlencode($msg));
 	}
 
-	$output->setMenuTitle($TEXT_WIZARD_CONST.' |');
+	$output->setMenuTitle(translate('TEXT_WIZARD_CONST').' |');
 	$output->setPageTitle($title);
 
 	$output->setScriptCalendar('null');
@@ -406,11 +406,11 @@ function device_test_buttons($type,$deviceID,$dbADO){
 	$row=$res->FetchRow();
 	$deviceTemplate=$row['FK_DeviceTemplate'];
 
-	$out='<center><B>Test Commands:</B></center>';
+	$out='<center><B>'.translate('TEXT_TEST_COMMANDS_CONST').':</B></center>';
 	if($type=='irrigation'){
 		if($deviceTemplate==STANDARD_IRRIGATION_SPRINKLER){
-		$out.='<input type="submit" class="button" name="on_'.$deviceID.'" value="ON"> 
-		       <input type="submit" class="button" name="off_'.$deviceID.'" value="OFF">
+		$out.='<input type="submit" class="button" name="on_'.$deviceID.'" value="'.translate('TEXT_ON_CONST').'"> 
+		       <input type="submit" class="button" name="off_'.$deviceID.'" value="'.translate('TEXT_OFF_CONST').'">
 			<input type="submit" class="button" name="delay_'.$deviceID.'" value="Delay 5 min.">
 		';
 		}
@@ -421,19 +421,19 @@ function device_test_buttons($type,$deviceID,$dbADO){
 		<input type="hidden" name="device_test" value="1">';
 		
 		if($deviceTemplate==LIGHT_SWITCH) {
-			$out.='<input type="submit" class="button" name="on_'.$deviceID.'" value="ON"> 
-			<input type="submit" class="button" name="off_'.$deviceID.'" value="OFF">';
+			$out.='<input type="submit" class="button" name="on_'.$deviceID.'" value="'.translate('TEXT_ON_CONST').'"> 
+			<input type="submit" class="button" name="off_'.$deviceID.'" value="'.translate('TEXT_OFF_CONST').'">';
 		}
 
 		else if($deviceTemplate==LIGHT_SWITCH_DIMMABLE) {
-			$out.='<input type="submit" class="button" name="on_'.$deviceID.'" value="ON"> 
-			<input type="submit" class="button" name="off_'.$deviceID.'" value="OFF">
+			$out.='<input type="submit" class="button" name="on_'.$deviceID.'" value="'.translate('TEXT_ON_CONST').'"> 
+			<input type="submit" class="button" name="off_'.$deviceID.'" value="'.translate('TEXT_OFF_CONST').'">
 			<input type="submit" class="button" name="50_'.$deviceID.'" value="50%"><br>';
 
 		}
 		else if($deviceTemplate==LIGHT_DRAPES_SWITCH) {
-			$out.='<input type="submit" class="button" name="on_'.$deviceID.'" value="CLOSE"> 
-			<input type="submit" class="button" name="off_'.$deviceID.'" value="OPEN">
+			$out.='<input type="submit" class="button" name="on_'.$deviceID.'" value="'.translate('TEXT_CLOSE_CONST').'"> 
+			<input type="submit" class="button" name="off_'.$deviceID.'" value="'.translate('TEXT_OPEN_CONST').'">
 			<input type="submit" class="button" name="50_'.$deviceID.'" value="50%"><br>';
 		} else {
 			$out.='No test commands supported for this lighting device';
@@ -446,37 +446,37 @@ function device_test_buttons($type,$deviceID,$dbADO){
 		<input type="hidden" name="device_test" value="1">';
 		
 		if($deviceTemplate==WALL_OUTLET) { 
-			$out.='<input type="submit" class="button" name="on_'.$deviceID.'" value="ON"> 
-			<input type="submit" class="button" name="off_'.$deviceID.'" value="OFF">';
+			$out.='<input type="submit" class="button" name="on_'.$deviceID.'" value="'.translate('TEXT_ON_CONST').'"> 
+			<input type="submit" class="button" name="off_'.$deviceID.'" value="'.translate('TEXT_OFF_CONST').'">';
 		}
 		else if($deviceTemplate==STANDARD_SPRINKLER) { 
-			$out.='<input type="submit" class="button" name="on_'.$deviceID.'" value="ON"> 
-			<input type="submit" class="button" name="off_'.$deviceID.'" value="OFF">';
+			$out.='<input type="submit" class="button" name="on_'.$deviceID.'" value="'.translate('TEXT_ON_CONST').'"> 
+			<input type="submit" class="button" name="off_'.$deviceID.'" value="'.translate('TEXT_OFF_CONST').'">';
 		}
 		else if($deviceTemplate==STANDARD_THERMOSTAT) {
 			$out.='<table border="0">
 			<tr>
-				<td>Power: </td>
-				<td><input type="submit" class="button" name="on_'.$deviceID.'" value="ON"> 
-				<input type="submit" class="button" name="off_'.$deviceID.'" value="OFF">
+				<td>'.translate('TEXT_POWER_CONST').' </td>
+				<td><input type="submit" class="button" name="on_'.$deviceID.'" value="'.translate('TEXT_ON_CONST').'"> 
+				<input type="submit" class="button" name="off_'.$deviceID.'" value="'.translate('TEXT_OFF_CONST').'">
 				<input type="submit" class="button" name="50_'.$deviceID.'" value="50%"
 				</td>
 			</tr>
 			<tr>
-				<td>Fan: </td>
+				<td>'.translate('TEXT_FAN_CONST').': </td>
 				<td><input type="submit" class="button" name="fan_on_'.$deviceID.'" value="Fan On">
 					<input type="submit" class="button" name="fan_auto_'.$deviceID.'" value="Fan Auto"><br> 
 				</td>
 			</tr>
 			<tr>
-				<td>Mode: </td>
-				<td><input type="submit" class="button" name="mode_heat_'.$deviceID.'" value="Heat">
-					<input type="submit" class="button" name="mode_cool_'.$deviceID.'" value="Cool">
-					<input type="submit" class="button" name="mode_auto_'.$deviceID.'" value="Auto">
+				<td>'.translate('TEXT_MODE_CONST').': </td>
+				<td><input type="submit" class="button" name="mode_heat_'.$deviceID.'" value="'.translate('TEXT_HEAT_CONST').'">
+					<input type="submit" class="button" name="mode_cool_'.$deviceID.'" value="'.translate('TEXT_COOL_CONST').'">
+					<input type="submit" class="button" name="mode_auto_'.$deviceID.'" value="'.translate('TEXT_AUTO_CONST').'">
 				</td>
 			</tr>
 			<tr>
-				<td>Temp: </td>
+				<td>'.translate('TEXT_TEMP_CONST').': </td>
 				<td><input type="submit" class="button" name="set_temp72_'.$deviceID.'" value="72 deg.">
 				<input type="submit" class="button" name="set_temp68_'.$deviceID.'" value="68 deg.">
 				</td>
@@ -484,7 +484,7 @@ function device_test_buttons($type,$deviceID,$dbADO){
 			</table>	
 			';
 		} else {
-			$out.='No test commands supported for this climate device';
+			$out.=translate('TEXT_NO_TEST_CLIMATE_CONST');
 		}
 		return $out;
 	}

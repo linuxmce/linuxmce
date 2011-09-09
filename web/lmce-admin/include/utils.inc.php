@@ -985,8 +985,8 @@ function resizeImage_old($source, $destination, $new_width, $new_height,$forcedP
 function multi_page($query, $params,$url, $page_no, $art_pagina,$dbADO)
 {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/utils.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('utils.lang.php');
 	
 	$res=$dbADO->Execute($query,$params);
 	$total=$res->RecordCount();
@@ -1004,12 +1004,12 @@ function multi_page($query, $params,$url, $page_no, $art_pagina,$dbADO)
 		$output.='</div>';
 	}
 	if($total==0){
-		$output=$TEXT_NO_RECORDS_CONST;
+		$output=translate('TEXT_NO_RECORDS_CONST');
 	}
 	else{
 		$output.='<table>
 					<tr class="tablehead">
-						<td align="center"><B>'.$TEXT_FILES_CONST.'</B></td>
+						<td align="center"><B>'.translate('TEXT_FILES_CONST').'</B></td>
 						<td align="center">&nbsp;</td>
 					</tr>';
 		$art_index=0;
@@ -1022,16 +1022,16 @@ function multi_page($query, $params,$url, $page_no, $art_pagina,$dbADO)
 			$output.=multi_page_format($row, $art_index+$start,$dbADO);
 		}
 	}
-	$output.=$TEXT_FOUND_CONST.': '.$total.'. ';
+	$output.=translate('TEXT_FOUND_CONST').': '.$total.'. ';
 	if($total!=0)
-		$output.= $TEXT_PAGE_CONST.' '.($page_no+1).'l '.$TEXT_TOTAL_PAGES_CONST.': '.$max_pages.'.<br>';
+		$output.= translate('TEXT_PAGE_CONST').' '.($page_no+1).'l '.translate('TEXT_TOTAL_PAGES_CONST').': '.$max_pages.'.<br>';
 	return $output;
 }
 function multi_page_format($row, $art_index,$mediadbADO)
 {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/utils.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('utils.lang.php');
 	
 	$queryOtherAttributes='
 		SELECT PK_Attribute, AttributeType.Description AS AttributeName,Name
@@ -1049,8 +1049,8 @@ function multi_page_format($row, $art_index,$mediadbADO)
 
 	$out='
 		<tr style="background-color:'.(($art_index%2==0)?'#EEEEEE':'#EBEFF9').';">
-			<td title="'.$row['Path'].'" align="left">'.(($row['Missing']!=0)?'<img src="include/images/missing.gif" align="top"> ':'').'<b>'.$TEXT_FILENAME_CONST.':</b> <a href="index.php?section=editMediaFile&fileID='.$row['PK_File'].'">'.$row['Filename'].'</a><br><B>'.$TEXT_PATH_CONST.':</B> <a href="index.php?section=mainMediaFilesSync&path='.urlencode($row['Path']).'&filename='.urlencode($row['Filename']).'">'.$row['Path'].'</a></td>
-			<td rowspan="2"><a href="#" onClick="if(confirm(\''.$TEXT_DELETE_MEDIA_FILES_CONFIRMATION_CONST.'\'))self.location=\'index.php?section=mainMediaBrowser&attributeID='.$GLOBALS['attributeID'].'&action=properties&fileID='.$row['PK_File'].'\';">'.$TEXT_DELETE_CONST.'</a></td>
+			<td title="'.$row['Path'].'" align="left">'.(($row['Missing']!=0)?'<img src="include/images/missing.gif" align="top"> ':'').'<b>'.translate('TEXT_FILENAME_CONST').':</b> <a href="index.php?section=editMediaFile&fileID='.$row['PK_File'].'">'.$row['Filename'].'</a><br><B>'.translate('TEXT_PATH_CONST').':</B> <a href="index.php?section=mainMediaFilesSync&path='.urlencode($row['Path']).'&filename='.urlencode($row['Filename']).'">'.$row['Path'].'</a></td>
+			<td rowspan="2"><a href="#" onClick="if(confirm(\''.translate('TEXT_DELETE_MEDIA_FILES_CONFIRMATION_CONST').'\'))self.location=\'index.php?section=mainMediaBrowser&attributeID='.$GLOBALS['attributeID'].'&action=properties&fileID='.$row['PK_File'].'\';">'.translate('TEXT_DELETE_CONST').'</a></td>
 		</tr>
 		<tr style="background-color:'.(($art_index%2==0)?'#EEEEEE':'#EBEFF9').';">
 			<td align="left">'.$otherAttributes.'</td>
@@ -1290,8 +1290,8 @@ function formatMySQLDate($mySQLformat,$customFormat)
 function displayCriteria($FK_CriteriaParmNesting,$eventHandlerID,$installationID,$dbADO)
 {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/utils.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('utils.lang.php');
 	
 	$out='';
 	$cplArray=array();
@@ -1306,8 +1306,8 @@ function displayCriteria($FK_CriteriaParmNesting,$eventHandlerID,$installationID
 		<table border="0" width="100%">
 			<tr bgcolor="#E7E7E7">
 				<td><B>(</B></td>
-				<td colspan="2"><input type="checkbox" name="nestingNot_'.$FK_CriteriaParmNesting.'" value="1" '.(($rowCPN['IsNot']==1)?'checked':'').' onClick="self.location=\'index.php?section=editCriteria&action=update&ehID='.$eventHandlerID.'&chCPN='.$FK_CriteriaParmNesting.'&setNot='.(($rowCPN['IsNot']==1)?'0':'1').'\'"> '.$TEXT_NOT_CONST.' <input type="checkbox" name="nestingAnd_'.$FK_CriteriaParmNesting.'" value="1" '.(($rowCPN['IsAnd']==1)?'checked':'').' onClick="self.location=\'index.php?section=editCriteria&action=update&ehID='.$eventHandlerID.'&chCPN='.$FK_CriteriaParmNesting.'&setAnd='.(($rowCPN['IsAnd']==1)?'0':'1').'\'"> '.$TEXT_AND_CONST.' </td>
-				<td colspan="3" align="right"><a href="index.php?section=editCriteria&ehID='.$eventHandlerID.'&fkCPN='.$FK_CriteriaParmNesting.'&action=addSegment">'.$TEXT_ADD_SEGMENT_CONST.'</a> &nbsp;&nbsp;&nbsp;<a href="index.php?section=editCriteria&ehID='.$eventHandlerID.'&parentCPN='.$FK_CriteriaParmNesting.'&action=addNesting">'.$TEXT_ADD_NESTING_CONST.'</a> &nbsp;&nbsp;<a href="#" onClick="if(confirm(\''.$TEXT_DELETE_NESTING_CONFIRMATION_CONST.'\'))self.location=\'index.php?section=editCriteria&ehID='.$eventHandlerID.'&delCPN='.$FK_CriteriaParmNesting.'&action=delNesting\'">'.$TEXT_DELETE_CONST.'</a></td>
+				<td colspan="2"><input type="checkbox" name="nestingNot_'.$FK_CriteriaParmNesting.'" value="1" '.(($rowCPN['IsNot']==1)?'checked':'').' onClick="self.location=\'index.php?section=editCriteria&action=update&ehID='.$eventHandlerID.'&chCPN='.$FK_CriteriaParmNesting.'&setNot='.(($rowCPN['IsNot']==1)?'0':'1').'\'"> '.translate('TEXT_NOT_CONST').' <input type="checkbox" name="nestingAnd_'.$FK_CriteriaParmNesting.'" value="1" '.(($rowCPN['IsAnd']==1)?'checked':'').' onClick="self.location=\'index.php?section=editCriteria&action=update&ehID='.$eventHandlerID.'&chCPN='.$FK_CriteriaParmNesting.'&setAnd='.(($rowCPN['IsAnd']==1)?'0':'1').'\'"> '.translate('TEXT_AND_CONST').' </td>
+				<td colspan="3" align="right"><a href="index.php?section=editCriteria&ehID='.$eventHandlerID.'&fkCPN='.$FK_CriteriaParmNesting.'&action=addSegment">'.translate('TEXT_ADD_SEGMENT_CONST').'</a> &nbsp;&nbsp;&nbsp;<a href="index.php?section=editCriteria&ehID='.$eventHandlerID.'&parentCPN='.$FK_CriteriaParmNesting.'&action=addNesting">'.translate('TEXT_ADD_NESTING_CONST').'</a> &nbsp;&nbsp;<a href="#" onClick="if(confirm(\''.translate('TEXT_DELETE_NESTING_CONFIRMATION_CONST').'\'))self.location=\'index.php?section=editCriteria&ehID='.$eventHandlerID.'&delCPN='.$FK_CriteriaParmNesting.'&action=delNesting\'">'.translate('TEXT_DELETE_CONST').'</a></td>
 			</tr>';
 	$queryCP='
 			SELECT CriteriaParm.*, CriteriaParmList.Description AS CPL_Description
@@ -1378,7 +1378,7 @@ function displayCriteria($FK_CriteriaParmNesting,$eventHandlerID,$installationID
 						}
 						$out.='</select>';
 					}elseif($rowCP['CPL_Description']=='State'){
-						$stateArray=array(5=>$TEXT_AFTERNOON_CONST,1=>$TEXT_DAYLIGHT_CONST,6=>$TEXT_EVENING_CONST,3=>$TEXT_MORNING_CONST,7=>$TEXT_NIGHT_CONST,2=>$TEXT_NOT_DAYLIGHT_CONST,9=>$TEXT_WEEKDAY_CONST,8=>$TEXT_WEEKEND_CONST);
+						$stateArray=array(5=>translate('TEXT_AFTERNOON_CONST'),1=>translate('TEXT_DAYLIGHT_CONST'),6=>translate('TEXT_EVENING_CONST'),3=>translate('TEXT_MORNING_CONST'),7=>translate('TEXT_NIGHT_CONST'),2=>translate('TEXT_NOT_DAYLIGHT_CONST'),9=>translate('TEXT_WEEKDAY_CONST'),8=>translate('TEXT_WEEKEND_CONST'));
 						$out.='<select name="CriteriaParmValue_'.$rowCP['PK_CriteriaParm'].'">
 										<option value=""></option>';
 						foreach($stateArray AS $key => $value){
@@ -1394,7 +1394,7 @@ function displayCriteria($FK_CriteriaParmNesting,$eventHandlerID,$installationID
 				$out.='
 				</td>
 				<td align="center">'.(($rowCPN['IsAnd']==1)?'And':'Or').'</td>
-				<td align="center"><a href="#" onClick="if(confirm(\''.$TEXT_DELETE_CRITERIA_CONFIRMATION_CONST.'\'))self.location=\'index.php?section=editCriteria&action=delete&ehID='.$eventHandlerID.'&dcpID='.$rowCP['PK_CriteriaParm'].'\'">'.$TEXT_DELETE_CONST.'</a></td>			
+				<td align="center"><a href="#" onClick="if(confirm(\''.translate('TEXT_DELETE_CRITERIA_CONFIRMATION_CONST').'\'))self.location=\'index.php?section=editCriteria&action=delete&ehID='.$eventHandlerID.'&dcpID='.$rowCP['PK_CriteriaParm'].'\'">'.translate('TEXT_DELETE_CONST').'</a></td>			
 			</tr>';
 	}
 	$resNestingChilds=$dbADO->Execute('SELECT * FROM CriteriaParmNesting WHERE FK_CriteriaParmNesting_Parent=?',array($FK_CriteriaParmNesting));
@@ -1599,13 +1599,13 @@ function getChildsOfWizard($page,$dbADO)
 function deviceForScenariosSelector_old($name,$selectedValue,$dbADO,$allowNoValue=1,$extra='')
 {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/utils.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('utils.lang.php');
 
 	$out='
 		<select name="'.$name.'" '.$extra.'>';
 	if($allowNoValue==1){
-		$out.='<option value="0">-'.$TEXT_PLEASE_SELECT_CONST.'-</option>';
+		$out.='<option value="0">-'.translate('TEXT_PLEASE_SELECT_CONST').'-</option>';
 	}
 	$out.='
 			<option value="-300" '.(($selectedValue=='-300')?'selected':'').'>[Local Orbiter]</option>';
@@ -1679,8 +1679,8 @@ function pulldownChildsDevice($parentDevice,$selectedValue,$dbADO,$depth,$filter
 function getInstallWizardDeviceTemplates($step,$dbADO,$device='',$distro=0,$operatingSystem=0)
 {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/utils.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('utils.lang.php');
 	
 	if($distro!=0){
 		$queryDistro='SELECT * FROM Distro WHERE PK_Distro=?';
@@ -1721,7 +1721,7 @@ function getInstallWizardDeviceTemplates($step,$dbADO,$device='',$distro=0,$oper
 	}else{
 		$out.='
 			<tr class="normaltext">
-				<td colspan="5">'.$TEXT_OPTIONAL_DEVICES_INFO_CONST.'</td>
+				<td colspan="5">'.translate('TEXT_OPTIONAL_DEVICES_INFO_CONST').'</td>
 			</tr>';
 	}
 	$oldCategory='';
@@ -1815,8 +1815,8 @@ function getDevicesFromCategories($categoriesArray,$dbADO)
 function commandPulldownForDevice($deviceID,$dbADO)
 {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/utils.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('utils.lang.php');
 
 	$out='';
 	if ($deviceID!=0) {
@@ -1841,12 +1841,12 @@ function commandPulldownForDevice($deviceID,$dbADO)
 		}
 		if ($resNewCommand) {
 			$out.='<select name="addNewDeviceCommand">
-					<option value="0">- '.$TEXT_PLEASE_SELECT_CONST.' -</option>';
+					<option value="0">- '.translate('TEXT_PLEASE_SELECT_CONST').' -</option>';
 			while ($rowNewCommand = $resNewCommand->FetchRow()) {
 				$out.='<option value="'.$rowNewCommand['PK_Command'].'" title="'.$rowNewCommand['Description'].'">'.$rowNewCommand['Description'].'</option>';
 			}
 			if ($resNewCommand->RecordCount()==0) {
-				$out.='<option value="0">-'.$TEXT_NO_COMMAND_CONST.'-</option>';
+				$out.='<option value="0">-'.translate('TEXT_NO_COMMAND_CONST').'-</option>';
 			}
 			$resNewCommand->Close();
 			$out.='</select>';
@@ -1860,18 +1860,18 @@ function commandPulldownForDevice($deviceID,$dbADO)
 function lightingDevicesTable($cgID,$dbADO)
 {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/utils.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('utils.lang.php');
 	
 	$out='
 		<table cellpadding="2">
 			<tr bgcolor="#DDDDDD">
-				<td align="center"><B>'.$TEXT_DEVICE_CONST.' / '.$TEXT_ROOM_CONST.'</B></td>
-				<td align="center"><B>'.$TEXT_TYPE_CONST.'</B></td>
-				<td align="center"><B>'.$TEXT_UNCHANGED_CONST.'</B></td>
-				<td align="center"><B>'.$TEXT_ON_CONST.'</B></td>
-				<td align="center"><B>'.$TEXT_OFF_CONST.'</B></td>
-				<td align="center" colspan="2"><B>'.$TEXT_SET_LEVEL_CONST.'</B></td>
+				<td align="center"><B>'.translate('TEXT_DEVICE_CONST').' / '.translate('TEXT_ROOM_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_TYPE_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_UNCHANGED_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_ON_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_OFF_CONST').'</B></td>
+				<td align="center" colspan="2"><B>'.translate('TEXT_SET_LEVEL_CONST').'</B></td>
 			</tr>';
 
 	$lightingDevicesArray=getValidLightingObjectsArray($_SESSION['installationID'],$dbADO);
@@ -1889,7 +1889,7 @@ function lightingDevicesTable($cgID,$dbADO)
 	if($resGetRoomsDevice->RecordCount()==0){
 		$out.='
 			<tr>
-				<td colspan="6">'.$TEXT_NO_LIGHTING_DEVICES_CONST.'</td>
+				<td colspan="6">'.translate('TEXT_NO_LIGHTING_DEVICES_CONST').'</td>
 			</tr>';
 	}
 	$displayedDevices=array();
@@ -1942,7 +1942,7 @@ function lightingDevicesTable($cgID,$dbADO)
 	if(count($displayedDevices)>0){
 		$out.='
 			<tr>
-				<td colspan="6" align="center"><input type="submit" class="button" name="updateDevices" value="'.$TEXT_UPDATE_CONST.'"  > <input type="reset" class="button" name="cancelBtn" value="'.$TEXT_CANCEL_CONST.'"></td>
+				<td colspan="6" align="center"><input type="submit" class="button" name="updateDevices" value="'.translate('TEXT_UPDATE_CONST').'"  > <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'"></td>
 			</tr>
 		';
 	}
@@ -1964,7 +1964,7 @@ function lightingDevicesTable($cgID,$dbADO)
 				if(isDim==true){
 					eval("dimVal=parseInt(document.scenarioWizard.dimValue_"+devicesArray[i]+".value)");
 					if(dimVal<-100 || dimVal>100 || isNaN(dimVal)){
-						alert("'.$TEXT_NUMBER_RANGE_REQUIRED_CONST.'");
+						alert("'.translate('TEXT_NUMBER_RANGE_REQUIRED_CONST').'");
 						eval("document.scenarioWizard.dimValue_"+devicesArray[i]+".focus()");
 						return false;
 					}
@@ -1980,24 +1980,24 @@ function lightingDevicesTable($cgID,$dbADO)
 function climateDevicesTable($cgID,$dbADO)
 {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/utils.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/scenarioWizard.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('utils.lang.php');
+	includeLangFile('scenarioWizard.lang.php');
 	
 	$out='
 		<table>
 			<tr bgcolor="#000000" class="sectionhead">
-				<td colspan="8" align="center"><B>'.$TEXT_CLIMATE_SECTION_THERMOSTAT_DEVICES_CONST.'</B></td>
+				<td colspan="8" align="center"><B>'.translate('TEXT_CLIMATE_SECTION_THERMOSTAT_DEVICES_CONST').'</B></td>
 			</tr>
 			<tr bgcolor="#DDDDDD">
-				<td align="center"><B>'.$TEXT_DEVICE_CONST.' / '.$TEXT_ROOM_CONST.'</B></td>
-				<td align="center"><B>'.$TEXT_TYPE_CONST.'</B></td>
-				<td align="center"><B>'.$TEXT_UNCHANGED_CONST.'</B></td>
-				<td align="center"><B>'.$TEXT_AUTO_CONST.'</B></td>
-				<td align="center"><B>'.$TEXT_HEAT_CONST.'</B></td>
-				<td align="center"><B>'.$TEXT_COOL_CONST.'</B></td>
-				<td align="center"><B>'.$TEXT_OFF_CONST.'</B></td>
-				<td align="center"><B>'.$TEXT_SET_TEMPERATURE_CONST.'</B></td>
+				<td align="center"><B>'.translate('TEXT_DEVICE_CONST').' / '.translate('TEXT_ROOM_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_TYPE_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_UNCHANGED_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_AUTO_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_HEAT_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_COOL_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_OFF_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_SET_TEMPERATURE_CONST').'</B></td>
 			</tr>';
 
 	$climateDevicesArray=getValidClimateObjectsArray($_SESSION['installationID'],$dbADO);
@@ -2017,7 +2017,7 @@ function climateDevicesTable($cgID,$dbADO)
 	if($resGetRoomsDevice->RecordCount()==0){
 		$out.='
 			<tr>
-				<td colspan="9">'.$TEXT_CLIMATE_NO_DEVICES_AVAILABLE_CONST.'</td>
+				<td colspan="9">'.translate('TEXT_CLIMATE_NO_DEVICES_AVAILABLE_CONST').'</td>
 			</tr>';
 	}
 	$displayedDevices=array();
@@ -2085,14 +2085,14 @@ function climateDevicesTable($cgID,$dbADO)
 
 	$out.='		<tr><td colspan="8">&nbsp;</td></tr>
 			<tr class="sectionhead">
-				<td colspan="8" align="center"><B>'.$TEXT_CLIMATE_SECTION_ONOFF_DEVICES_CONST.'</B></td>
+				<td colspan="8" align="center"><B>'.translate('TEXT_CLIMATE_SECTION_ONOFF_DEVICES_CONST').'</B></td>
 			</tr>
 			<tr bgcolor="#DDDDDD">
-				<td align="center"><B>'.$TEXT_DEVICE_CONST.' / '.$TEXT_ROOM_CONST.'</B></td>
-				<td align="center"><B>'.$TEXT_TYPE_CONST.'</B></td>
-				<td align="center"><B>'.$TEXT_UNCHANGED_CONST.'</B></td>
-				<td align="center"><B>'.$TEXT_ON_CONST.'</B></td>
-				<td align="center"><B>'.$TEXT_OFF_CONST.'</B></td>
+				<td align="center"><B>'.translate('TEXT_DEVICE_CONST').' / '.translate('TEXT_ROOM_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_TYPE_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_UNCHANGED_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_ON_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_OFF_CONST').'</B></td>
 				<td align="center" colspan="3">&nbsp;</td>	
 			</tr>';
 	$queryGetRoomsDevice = '
@@ -2108,7 +2108,7 @@ function climateDevicesTable($cgID,$dbADO)
 	if($resGetRoomsDevice->RecordCount()==0){
 		$out.='
 			<tr>
-				<td colspan="9">'.$TEXT_CLIMATE_NO_DEVICES_AVAILABLE_CONST.'</td>
+				<td colspan="9">'.translate('TEXT_CLIMATE_NO_DEVICES_AVAILABLE_CONST').'</td>
 			</tr>';
 	}
 	$displayedDevices=array();
@@ -2162,7 +2162,7 @@ function climateDevicesTable($cgID,$dbADO)
 	if(count($displayedDevices)>0){
 		$out.='
 				<tr>
-					<td colspan="9" align="center"><input type="submit" class="button" name="updateDevices" value="'.$TEXT_UPDATE_CONST.'"  > <input type="reset" class="button" name="cancelBtn" value="'.$TEXT_CANCEL_CONST.'"></td>
+					<td colspan="9" align="center"><input type="submit" class="button" name="updateDevices" value="'.translate('TEXT_UPDATE_CONST').'"  > <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'"></td>
 				</tr>';
 	}
 	$out.='</table>
@@ -2173,8 +2173,8 @@ function climateDevicesTable($cgID,$dbADO)
 function advancedCommandGroupCommandsTable($cgID,$section,$dbADO)
 {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/utils.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('utils.lang.php');
 	
 	$selectCommandsAssigned = "
 		SELECT CommandGroup_Command.*
@@ -2331,8 +2331,8 @@ function processClimateScenario($cgID,$dbADO)
 function processAdvancedScenarios($cgID,$section,$dbADO)
 {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/utils.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('utils.lang.php');
 	
 	$wizard=isset($_REQUEST['wizard'])?(int)$_REQUEST['wizard']:0;
 	$from=@$_REQUEST['from'];
@@ -2349,17 +2349,17 @@ function processAdvancedScenarios($cgID,$section,$dbADO)
 		$query = $dbADO->Execute($deleteObjFromDevice,array($toDel));
 		//delete saved values
 		if ($dbADO->Affected_Rows()>0) {
-			$commandsDeleted = $TEXT_COMMAND_REMOVED_FROM_COMMAND_GROUP_CONST;
+			$commandsDeleted = translate('TEXT_COMMAND_REMOVED_FROM_COMMAND_GROUP_CONST');
 			$deleteParamValues = 'DELETE FROM CommandGroup_Command_CommandParameter WHERE FK_CommandGroup_Command = ?';
 			$query = $dbADO->Execute($deleteParamValues,array($toDel));
 			if ($dbADO->Affected_Rows()>0) {
-				$parametersDeleted = $TEXT_PARAMETER_VALUES_ALSO_DELETED_CONST;
+				$parametersDeleted = translate('TEXT_PARAMETER_VALUES_ALSO_DELETED_CONST');
 			} else {
-				$parametersDeleted = $TEXT_NO_PARAMETER_VALUES_DELETED_CONST;
+				$parametersDeleted = translate('TEXT_NO_PARAMETER_VALUES_DELETED_CONST');
 			}
 
 		} else {
-			$commandsDeleted = $TEXT_ERROR_COMMAND_NOT_REMOVED_FROM_COMMAND_GROUP_CONST;
+			$commandsDeleted = translate('TEXT_ERROR_COMMAND_NOT_REMOVED_FROM_COMMAND_GROUP_CONST');
 		}
 		if($section=='scenarioWizard'){
 			header("Location: index.php?section=scenarioWizard&roomID=$roomID&cgID=$cgID&from=$from&wizard=$wizard&msg=$commandsDeleted $parametersDeleted");
@@ -2739,18 +2739,18 @@ function SerialPortInfo($parent,$name,$dbADO)
 function serialPortsPulldown($name,$selectedPort,$allowedToModify,$topParent,$dbADO,$deviceID,$cssStyle="")
 {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/utils.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('utils.lang.php');
 
 	$installationID=(int)$_SESSION['installationID'];
 
 	if($topParent==0){
-		return $TEXT_ERROR_TOP_PARENT_DEVICE_NOT_FOUND_CONST;
+		return translate('TEXT_ERROR_TOP_PARENT_DEVICE_NOT_FOUND_CONST');
 	}
 	
 	$portDeviceData=getDeviceData($topParent,$GLOBALS['AvailableSerialPorts'],$dbADO);
 	if($portDeviceData==''){
-		return $TEXT_ERROR_NO_SERIAL_PORTS_FOUND_CONST;
+		return translate('TEXT_ERROR_NO_SERIAL_PORTS_FOUND_CONST');
 	}
 
 	$serial_ports=explode(',',$portDeviceData);
@@ -2783,18 +2783,18 @@ function serialPortsPulldown($name,$selectedPort,$allowedToModify,$topParent,$db
 function soundCardPulldown($name,$selectedCard,$allowedToModify,$topParent,$dbADO,$deviceID,$cssStyle="")
 {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/utils.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('utils.lang.php');
 
 	$installationID=(int)$_SESSION['installationID'];
 
 	if($topParent==0){
-		return $TEXT_ERROR_TOP_PARENT_DEVICE_NOT_FOUND_CONST;
+		return translate('TEXT_ERROR_TOP_PARENT_DEVICE_NOT_FOUND_CONST');
 	}
 	
 	$cardDeviceData=getDeviceData($topParent,$GLOBALS['AvailableSoundCards'],$dbADO);
 	if($cardDeviceData==''){
-		return $TEXT_ERROR_NO_SOUND_CARDS_FOUND_CONST;
+		return translate('TEXT_ERROR_NO_SOUND_CARDS_FOUND_CONST');
 	}
 
 	$sound_cards=explode(',',$cardDeviceData);
@@ -3061,8 +3061,8 @@ function getProperties($primaryKey,$table,$properties,$field,$dbADO)
 function displayRemotes($mdID,$dbADO,$section)
 {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/utils.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('utils.lang.php');
 	
 	$out='';
 	$remotes=array();
@@ -3081,11 +3081,11 @@ function displayRemotes($mdID,$dbADO,$section)
 		$delLinks.='
 		<tr>
 			<td><a href="index.php?section=editDeviceParams&deviceID='.$rid.'">'.$description.'</a></td>
-			<td><a href="javascript:if(confirm(\''.$TEXT_DELETE_REMOTE_CONFIRMATION_CONST.'\'))self.location=\'index.php?section='.$section.'&type=media_directors&action=del&delRemote='.$rid.'\';">'.$TEXT_DELETE_CONST.'</a></td>
+			<td><a href="javascript:if(confirm(\''.translate('TEXT_DELETE_REMOTE_CONFIRMATION_CONST').'\'))self.location=\'index.php?section='.$section.'&type=media_directors&action=del&delRemote='.$rid.'\';">'.translate('TEXT_DELETE_CONST').'</a></td>
 		</tr>';
 	}
 	$delLinks.=(count($remotes)>0)?'</table>':'';
-	$out.=$delLinks.'<input type="button" class="button_fixed" name="button" value="'.$TEXT_ADD_REMOTE_CONST.'" onClick="document.mediaDirectors.action.value=\'externalSubmit\';document.mediaDirectors.submit();windowOpen(\'index.php?section=deviceTemplatePicker&allowAdd=1&from=mediaDirectors&categoryID='.$GLOBALS['RemoteControlls'].'&parmToKeep='.urlencode('mdID='.$mdID).'\',\'width=800,height=600,toolbar=1,scrollbars=1,resizable=1\');"> ';
+	$out.=$delLinks.'<input type="button" class="button_fixed" name="button" value="'.translate('TEXT_ADD_REMOTE_CONST').'" onClick="document.mediaDirectors.action.value=\'externalSubmit\';document.mediaDirectors.submit();windowOpen(\'index.php?section=deviceTemplatePicker&allowAdd=1&from=mediaDirectors&categoryID='.$GLOBALS['RemoteControlls'].'&parmToKeep='.urlencode('mdID='.$mdID).'\',\'width=800,height=600,toolbar=1,scrollbars=1,resizable=1\');"> ';
 	
 	return $out;
 }
@@ -3166,8 +3166,8 @@ function getFields($tableName,$fields,$dbADO,$filter='',$orderBy='')
 function displayReceivers($mdID,$categArray,$dbADO)
 {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/utils.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('utils.lang.php');
 
 	$out='';
 
@@ -3328,7 +3328,7 @@ function isCritical($deviceID)
 
 function formatDeviceData($deviceID,$DeviceDataArray,$dbADO,$isIPBased=0,$specificFloorplanType=0,$boolJsValidation=0,$default='input',$cssStyle='')
 {
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
+	includeLangFile('common.lang.php');
 		
 	$jsValidation='';
 	$deviceDataBox='<script type="text/javascript" src="javascript/wz_tooltip/wz_tooltip.js"></script>';
@@ -3391,7 +3391,7 @@ function formatDeviceData($deviceID,$DeviceDataArray,$dbADO,$isIPBased=0,$specif
 				else{
 					$deviceDataBox.=$defaultFormElement;
 				}
-				$jsValidation.=($boolJsValidation==1 && @$tableName!='Users')?"frmvalidator.addValidation(\"$formElementName\",\"numeric\",\"$TEXT_WARNING_NUMERICAL_ONLY_CONST\");\n":'';
+				$jsValidation.=($boolJsValidation==1 && @$tableName!='Users')?"frmvalidator.addValidation(\"$formElementName\",\"numeric\",\"".translate('TEXT_WARNING_NUMERICAL_ONLY_CONST')."\");\n":'';
 				break;
 				case 'bool':
 					$deviceDataBox.='<input type="checkbox" name="deviceData_'.$deviceID.'_'.$rowDDforDevice['FK_DeviceData'].'" value="1" '.((@$ddValue!=0)?'checked':'').' '.$itemDisabled.'>';
@@ -3452,8 +3452,8 @@ function formatDeviceData($deviceID,$DeviceDataArray,$dbADO,$isIPBased=0,$specif
 				<td align="right"><input type="text" name="mac_'.$deviceID.'" value="'.@$rowDDforDevice['MACaddress'].'" style="width:200px;"></td>
 			</tr>';
 		if($boolJsValidation==1){
-			$jsValidation.=' frmvalidator.addValidation("mac_'.$deviceID.'","mac","'.$TEXT_INVALID_MAC_ADDRESS_CONST.'");';
-			$jsValidation.=' frmvalidator.addValidation("ip_'.$deviceID.'","ip","'.$TEXT_INVALID_IP_ADDRESS_CONST.'");';
+			$jsValidation.=' frmvalidator.addValidation("mac_'.$deviceID.'","mac","'.translate('TEXT_INVALID_MAC_ADDRESS_CONST').'");';
+			$jsValidation.=' frmvalidator.addValidation("ip_'.$deviceID.'","ip","'.translate('TEXT_INVALID_IP_ADDRESS_CONST').'");';
 		}
 	}
 	$deviceDataBox.='</table>';
@@ -3800,8 +3800,8 @@ function reorderMultiPulldownJs()
 function getIrGroup_CommandsMatrix($dtID,$InfraredGroupsArray,$userID,$comMethod,$publicADO,$deviceID)
 {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/utils.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('utils.lang.php');
 	
 	$restrictedCommandsArray=array(194=>'Toggle power',192=>'On',193=>'Off',205=>'1',89=>'Vol Up',90=>'Vol down',63=>'Skip Fwd',64=>'Skip Back');
 	$out='';
@@ -3827,7 +3827,7 @@ function getIrGroup_CommandsMatrix($dtID,$InfraredGroupsArray,$userID,$comMethod
 		$GLOBALS['DT_&_Room']=1;
 		$controlledByRows='
 		<tr>
-			<td colspan="10" align="right">'.$TEXT_SEND_CODES_TO_DEVICE_CONST.': '.controlledViaPullDown('controlledVia',$deviceID,$dtID,@$deviceInfo['FK_DeviceCategory'][0],@$deviceInfo['FK_Device_ControlledVia'][0],$publicADO,'0,- Please select -','onChange="document.addModel.action.value=\'changeParent\';document.addModel.submit();"').'</td>
+			<td colspan="10" align="right">'.translate('TEXT_SEND_CODES_TO_DEVICE_CONST').': '.controlledViaPullDown('controlledVia',$deviceID,$dtID,@$deviceInfo['FK_DeviceCategory'][0],@$deviceInfo['FK_Device_ControlledVia'][0],$publicADO,'0,- Please select -','onChange="document.addModel.action.value=\'changeParent\';document.addModel.submit();"').'</td>
 		</tr>';
 		$GLOBALS['DT_&_Room']=0;
 	}
@@ -3843,7 +3843,7 @@ function getIrGroup_CommandsMatrix($dtID,$InfraredGroupsArray,$userID,$comMethod
 			<td align="center"><B>'.$cmdName.'</B></td>';
 	}
 	$out.='
-			<td><B>'.$TEXT_ACTION_CONST.'</B></td>
+			<td><B>'.translate('TEXT_ACTION_CONST').'</B></td>
 		</tr>';
 
 	// display codes/commands
@@ -3860,7 +3860,7 @@ function getIrGroup_CommandsMatrix($dtID,$InfraredGroupsArray,$userID,$comMethod
 			$out.='<td align="center">'.((isset($commandGrouped[$keysArray[$i]][$cmdID]))?'<input type="button" class="button" name="copyCB" value="V" onClick="window.open(\'index.php?section=displayCode&irgcID='.$pk_irgc.'\',\'_blank\',\'\');">'.$testCodeBtn:'N/A').'</td>';
 		}
 		$out.='
-			<td><input type="button" class="button" name="btn" onClick="self.location=\'index.php?section=irCodes&action=update&dtID='.$dtID.'&irGroup='.$keysArray[$i].'&deviceID='.@$_REQUEST['deviceID'].'&resync=true\';" value="'.$TEXT_THIS_WORKS_CONST.'"></td>
+			<td><input type="button" class="button" name="btn" onClick="self.location=\'index.php?section=irCodes&action=update&dtID='.$dtID.'&irGroup='.$keysArray[$i].'&deviceID='.@$_REQUEST['deviceID'].'&resync=true\';" value="'.translate('TEXT_THIS_WORKS_CONST').'"></td>
 		</tr>';
 	}
 	
@@ -3875,8 +3875,8 @@ function getIrGroup_CommandsMatrix($dtID,$InfraredGroupsArray,$userID,$comMethod
 function pickDeviceTemplate_old($categoryID, $boolManufacturer,$boolCategory,$boolDeviceTemplate,$returnValue,$defaultAll,$section,$firstColText,$dbADO,$useframes=0,$genericSerialDevicesOnly=0)
 {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/utils.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('utils.lang.php');
 	
 	$redirectUrl='index.php?section='.$section;
 	$from=@$_REQUEST['from'];
@@ -4128,21 +4128,21 @@ function pickDeviceTemplate_old($categoryID, $boolManufacturer,$boolCategory,$bo
 				if($returnValue!=0){
 					$out.='
 					<tr>
-						<td colspan="3">'.$TEXT_ADD_DEVICE_INFO_CONST.'</td>
+						<td colspan="3">'.translate('TEXT_ADD_DEVICE_INFO_CONST').'</td>
 					</tr>';
 				}
 				if($boolDeviceTemplate==1 && $disabledAdd!=''){
 					$out.='
 					<tr>
-						<td colspan="3" class="normaltext">'.$TEXT_ADD_DEVICE_TEMPLATE_INFO_CONST.' <input type="button" class="button" name="addDeviceTemplate" value="Add"'. $disabledAdd .'  onClick="javascript:addModel();"/></td>
+						<td colspan="3" class="normaltext">'.translate('TEXT_ADD_DEVICE_TEMPLATE_INFO_CONST').' <input type="button" class="button" name="addDeviceTemplate" value="Add"'. $disabledAdd .'  onClick="javascript:addModel();"/></td>
 					</tr>';
 				}
 				$out.='		
 					<tr>
-						<th width="25%">'.$TEXT_MANUFACTURERS_CONST.'</th>
-						<th width="25%">'.$TEXT_DEVICE_CATEGORY_CONST.'</th>
+						<th width="25%">'.translate('TEXT_MANUFACTURERS_CONST').'</th>
+						<th width="25%">'.translate('TEXT_DEVICE_CATEGORY_CONST').'</th>
 						<th width="25%">
-						'.$TEXT_MODELS_CONST.'
+						'.translate('TEXT_MODELS_CONST').'
 						
 						</th>				
 					</tr>
@@ -4153,7 +4153,7 @@ function pickDeviceTemplate_old($categoryID, $boolManufacturer,$boolCategory,$bo
 					if($boolManufacturer==1 && isset($_SESSION['userID'])){
 						$out.='
 							<input type="text" name="Manufacturer_Description" size="15" />
-							<input type="submit" class="button" name="addManufacturer" value="'.$TEXT_ADD_CONST.'"  />';
+							<input type="submit" class="button" name="addManufacturer" value="'.translate('TEXT_ADD_CONST').'"  />';
 					}
 					$out.=$firstColText.'
 						</td>
@@ -4222,8 +4222,8 @@ function pickDeviceTemplate_old($categoryID, $boolManufacturer,$boolCategory,$bo
 							}
 							$out.='
 							<hr />
-							<em>* '.$TEXT_MODELS_COLOR_INFO_CONST.'</em><br>
-						<b><span id="modelManuf"></span><span id="modelDeviceDescription"></span></b><br /><input type="button" class="button" name="close" value="'.$TEXT_CLOSE_CONST.'" onClick="self.close();">
+							<em>* '.translate('TEXT_MODELS_COLOR_INFO_CONST').'</em><br>
+						<b><span id="modelManuf"></span><span id="modelDeviceDescription"></span></b><br /><input type="button" class="button" name="close" value="'.translate('TEXT_CLOSE_CONST').'" onClick="self.close();">
 							
 							';
 							
@@ -4976,14 +4976,15 @@ function error_redirect($message,$url){
 }
 
 function getPowerFile($dbADO,$installationID){
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/powerFile.lang.php');
+	
+	includeLangFile('powerFile.lang.php');
 	if($installationID==0){
-		error_redirect($TEXT_ERROR_INVALID_INSTALLATION_NUMBER_CONST,'index.php?section=powerFile');		
+		error_redirect(translate('TEXT_ERROR_INVALID_INSTALLATION_NUMBER_CONST'),'index.php?section=powerFile');		
 	}
 	
 	$deviceArr=getAssocArray('Device','0','PK_Device',$dbADO,'WHERE FK_Installation='.$installationID.' AND FK_DeviceTemplate='.$GLOBALS['PowerfileC200']);
 	if(count($deviceArr)==0){
-		error_redirect($TEXT_ERROR_POWERFILE_NOT_FOUND_CONST,'index.php?section=powerFile');
+		error_redirect(translate('TEXT_ERROR_POWERFILE_NOT_FOUND_CONST'),'index.php?section=powerFile');
 	}
 
 	return $deviceArr[0];
@@ -5059,17 +5060,17 @@ function getDD($deviceID,$deviceDataValues,$dbADO)
 
 function editCommandsByWizard($wizard,$section,$commandGroupID,$dbADO){
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/utils.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('utils.lang.php');
 	
 	$out='
 		<table align="center">
 			<tr bgcolor="#D1D9EA">
 				<td><B>Add commands using Wizard:</B> <select name="wizard" onChange="document.editTimedEvent.submit();">
-					<option value="0" '.(($wizard==0)?'selected':'').'>'.$TEXT_LIGHTING_WIZARD_CONST.'</option>
-					<option value="1" '.(($wizard==1)?'selected':'').'>'.$TEXT_CLIMATE_WIZARD_CONST.'</option>
-					<option value="2" '.(($wizard==2)?'selected':'').'>'.$TEXT_IRRIGATION_WIZARD_CONST.'</option>	
-					<option value="3" '.(($wizard==3)?'selected':'').'>'.$TEXT_ADVANCED_WIZARD_CONST.'</option>
+					<option value="0" '.(($wizard==0)?'selected':'').'>'.translate('TEXT_LIGHTING_WIZARD_CONST').'</option>
+					<option value="1" '.(($wizard==1)?'selected':'').'>'.translate('TEXT_CLIMATE_WIZARD_CONST').'</option>
+					<option value="2" '.(($wizard==2)?'selected':'').'>'.translate('TEXT_IRRIGATION_WIZARD_CONST').'</option>	
+					<option value="3" '.(($wizard==3)?'selected':'').'>'.translate('TEXT_ADVANCED_WIZARD_CONST').'</option>
 				</select>
 				</td>
 			</tr>
@@ -5097,15 +5098,15 @@ function editCommandsByWizard($wizard,$section,$commandGroupID,$dbADO){
 
 function irrigationCommandGroupCommandsTable($cgID,$section,$dbADO){
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/utils.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('utils.lang.php');
 	
 	$devicesArray=array();
 
 	$pos=0;	
 	$irigationDT=getDeviceTemplatesFromCategory($GLOBALS['IrrigationDevices'],$dbADO);
 	if(count($irigationDT)==0){
-		return $TEXT_ERROR_NO_DEVICE_TEMPLATE_FOR_IRIGATION_DEVICES_CONST;
+		return translate('TEXT_ERROR_NO_DEVICE_TEMPLATE_FOR_IRIGATION_DEVICES_CONST');
 	}
 	$res=$dbADO->Execute('
 		SELECT Device.Description,PK_Device,DeviceTemplate.Description AS Template,Room.Description AS Room
@@ -5158,23 +5159,23 @@ function irrigationCommandGroupCommandsTable($cgID,$section,$dbADO){
 
 function irrigationHTML($devicesArray){
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/utils.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('utils.lang.php');
 
 	
 	if(count($devicesArray)==0){
-		return $TEXT_NO_IRRIGATION_DEVICES_CONST;
+		return translate('TEXT_NO_IRRIGATION_DEVICES_CONST');
 	}
 	$out='
 	<table cellpadding="3" cellspacing="0">
 		<tr class="tablehead">
-			<td align="center"><B>'.$TEXT_DEVICE_CONST.' / '.$TEXT_ROOM_CONST.'</B></td>
-			<td align="center"><B>'.$TEXT_TYPE_CONST.'</B></td>
-			<td align="center"><B>'.$TEXT_UNCHANGED_CONST.'</B></td>
-			<td align="center"><B>'.$TEXT_ON_CONST.'</B></td>
-			<td align="center"><B>'.$TEXT_OFF_CONST.'</B></td>
-			<td align="center" colspan="2"><B>'.$TEXT_DELAY_CONST.'</B></td>
-			<td align="center"><B>'.$TEXT_ACTION_CONST.'</B></td>
+			<td align="center"><B>'.translate('TEXT_DEVICE_CONST').' / '.translate('TEXT_ROOM_CONST').'</B></td>
+			<td align="center"><B>'.translate('TEXT_TYPE_CONST').'</B></td>
+			<td align="center"><B>'.translate('TEXT_UNCHANGED_CONST').'</B></td>
+			<td align="center"><B>'.translate('TEXT_ON_CONST').'</B></td>
+			<td align="center"><B>'.translate('TEXT_OFF_CONST').'</B></td>
+			<td align="center" colspan="2"><B>'.translate('TEXT_DELAY_CONST').'</B></td>
+			<td align="center"><B>'.translate('TEXT_ACTION_CONST').'</B></td>
 		</tr>';
 	$pos=0;
 
@@ -5200,7 +5201,7 @@ function irrigationHTML($devicesArray){
 	}
 	$out.='
 		<tr bgcolor="#E7E7E7">
-			<td align="center" colspan="8"><input type="submit" class="button" name="update_irrigation" value="'.$TEXT_UPDATE_CONST.'"> <input type="reset" class="button" name="cancelBtn" value="'.$TEXT_CANCEL_CONST.'"></td>
+			<td align="center" colspan="8"><input type="submit" class="button" name="update_irrigation" value="'.translate('TEXT_UPDATE_CONST').'"> <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'"></td>
 		</tr>	
 	</table>
 	<input type="hidden" name="irrigationDevices" value="'.join(',',array_keys($devicesArray)).'">';
@@ -5355,13 +5356,13 @@ function parentHasChoices($deviceID,$dbADO){
 function deviceForScenariosSelector($name,$selectedValue,$dbADO,$allowNoValue=1,$extra='')
 {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/utils.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('utils.lang.php');
 
 	$out='
 		<select name="'.$name.'" '.$extra.'>';
 	if($allowNoValue==1){
-		$out.='<option value="0">-'.$TEXT_PLEASE_SELECT_CONST.'-</option>';
+		$out.='<option value="0">-'.translate('TEXT_PLEASE_SELECT_CONST').'-</option>';
 	}
 	$out.='
 			<option value="-300" '.(($selectedValue=='-300')?'selected':'').'>[Local Orbiter]</option>';
@@ -5463,8 +5464,8 @@ function getSpecificFloorplanType($dcID,$dbADO){
 
 function pickDeviceTemplate($categoryID, $manufacturerID,$returnValue,$defaultAll,$section,$dbADO,$genericSerialDevicesOnly=0){
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/deviceTemplatePicker.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('deviceTemplatePicker.lang.php');
 
 	$from=@$_REQUEST['from'];
 	parse_str($from);
@@ -5502,11 +5503,11 @@ function pickDeviceTemplate($categoryID, $manufacturerID,$returnValue,$defaultAl
 		$deviceTemplatesArray=getAssocArray('DeviceTemplate','PK_DeviceTemplate','Description',$dbADO,$filter,'ORDER BY Description ASC');
 		$deviceTemplatesPulldown=pulldownFromArray($deviceTemplatesArray,'template',$dtID,'style="width:400px;" class="input_big" onchange="setDeviceTemplate();"');
 	}
-	$parentDeviceText=$TEXT_NONE_CONST;
+	$parentDeviceText=translate('TEXT_NONE_CONST');
 	if((int)@$_SESSION['parentID']>0){
 		$parentDeviceText='# '.(int)@$_SESSION['parentID'];
 		$dtstar=' ***';
-		$dtNote='<br>'.$dtstar.' '.$TEXT_DEVICE_TEMPLATE_CONTROLLED_VIA_NOTE_CONST;
+		$dtNote='<br>'.$dtstar.' '.translate('TEXT_DEVICE_TEMPLATE_CONTROLLED_VIA_NOTE_CONST');
 	}
 	
 	$out=jsManufCategories(array_keys($deviceTemplatesArray),$dbADO);
@@ -5523,59 +5524,59 @@ function pickDeviceTemplate($categoryID, $manufacturerID,$returnValue,$defaultAl
 	if($returnValue==1){
 		$out.='
 		<tr>
-			<td><B>'.$TEXT_PARENT_DEVICE_CONST.'</B></td>
+			<td><B>'.translate('TEXT_PARENT_DEVICE_CONST').'</B></td>
 			<td colspan="2">'.$parentDeviceText.'</td>
 			<td>&nbsp;</td>
 		</tr>';
 	}
 	$out.='
 		<tr class="alternate_back">
-			<td><B>'.$TEXT_MANUFACTURER_CONST.'</B></td>
+			<td><B>'.translate('TEXT_MANUFACTURER_CONST').'</B></td>
 			<td>'.pulldownFromArray($manufacturersArray,'manufacturerID',$manufacturerID,'style="width:400px;" class="input_big" onchange="setManufacturer();"').'</td>
 			<td width="35"><b><span id="manufacturerSelected" class="confirm"></span></b></td>
-			<td><input type="button" class="button_fixed" value="'.$TEXT_ADD_MANUFACTURER_CONST.'" onclick="add_manufacturer_popup();"></td>
+			<td><input type="button" class="button_fixed" value="'.translate('TEXT_ADD_MANUFACTURER_CONST').'" onclick="add_manufacturer_popup();"></td>
 		</tr>
 		<tr class="alternate_back">
-			<td valign="top"><B>'.$TEXT_DEVICE_CATEGORY_CONST.'</B></td>
+			<td valign="top"><B>'.translate('TEXT_DEVICE_CATEGORY_CONST').'</B></td>
 			<td valign="top">'.$deviceCategoryFormElement.'</td>
 			<td><b><span id="categorySelected" class="confirm"></span></b></td>
-			<td valign="top"><input type="button" class="button_fixed" value="'.$TEXT_ADD_DEVICE_CATEGORY_CONST.'" onclick="add_category_popup();"></td>
+			<td valign="top"><input type="button" class="button_fixed" value="'.translate('TEXT_ADD_DEVICE_CATEGORY_CONST').'" onclick="add_category_popup();"></td>
 		</tr>	
 		<tr class="alternate_back">
 			<td>&nbsp;</td>
 			<td colspan="2">
-				<input type="radio" name="deviceCategoryPicker" value="0" '.(($deviceCategoryPicker==0)?'checked':'').' onclick="changeCategoryPicker();"> '.$TEXT_DEVICE_CATEGORY_PULLDOWN_ALPHA_CONST.'<br>
-				<input type="radio" name="deviceCategoryPicker" value="1" '.(($deviceCategoryPicker==1)?'checked':'').' onclick="changeCategoryPicker();"> '.$TEXT_DEVICE_CATEGORY_PULLDOWN_HIERARCHICAL_CONST.'<br>
-				<input type="radio" name="deviceCategoryPicker" value="2" '.(($deviceCategoryPicker==2)?'checked':'').' onclick="changeCategoryPicker();"> '.$TEXT_DEVICE_CATEGORY_TREEVIEW_CONST.'<br>
+				<input type="radio" name="deviceCategoryPicker" value="0" '.(($deviceCategoryPicker==0)?'checked':'').' onclick="changeCategoryPicker();"> '.translate('TEXT_DEVICE_CATEGORY_PULLDOWN_ALPHA_CONST').'<br>
+				<input type="radio" name="deviceCategoryPicker" value="1" '.(($deviceCategoryPicker==1)?'checked':'').' onclick="changeCategoryPicker();"> '.translate('TEXT_DEVICE_CATEGORY_PULLDOWN_HIERARCHICAL_CONST').'<br>
+				<input type="radio" name="deviceCategoryPicker" value="2" '.(($deviceCategoryPicker==2)?'checked':'').' onclick="changeCategoryPicker();"> '.translate('TEXT_DEVICE_CATEGORY_TREEVIEW_CONST').'<br>
 			</td>
 			<td>&nbsp;</td>
 		</tr>	
 		<tr class="alternate_back">
 			<td colspan="4" align="center">
-				<input type="checkbox" name="autofilter" value="1" '.(((int)@$_REQUEST['autofilter']==1)?'checked':'').' onClick="document.deviceTemplatePicker.submit();">'.$TEXT_AUTOFILTER_CONST.' *
+				<input type="checkbox" name="autofilter" value="1" '.(((int)@$_REQUEST['autofilter']==1)?'checked':'').' onClick="document.deviceTemplatePicker.submit();">'.translate('TEXT_AUTOFILTER_CONST').' *
 			</td>
 		</tr>	
 		<tr class="alternate_back">
 			<td colspan="4" align="center">
-				<input type="submit" name="do_filter" class="button_fixed" value="'.$TEXT_APPLY_FILTER_CONST.'">
+				<input type="submit" name="do_filter" class="button_fixed" value="'.translate('TEXT_APPLY_FILTER_CONST').'">
 			</td>
 		</tr>	
 		<tr>
 			<td colspan="4" align="center">&nbsp;</td>
 		</tr>		
 		<tr class="alternate_back">
-			<td><B>'.$TEXT_DEVICE_TEMPLATE_CONST.@$dtstar.'</B></td>
+			<td><B>'.translate('TEXT_DEVICE_TEMPLATE_CONST').@$dtstar.'</B></td>
 			<td>'.$deviceTemplatesPulldown.'</td>
 			<td><b><span id="templateSelected" class="confirm"></span></b></td>
-			<td><input type="button" class="button_fixed" value="'.$TEXT_PICK_MODEL_CONST.'" onclick="pickDeviceTemplate();"></td>
+			<td><input type="button" class="button_fixed" value="'.translate('TEXT_PICK_MODEL_CONST').'" onclick="pickDeviceTemplate();"></td>
 		</tr>
 		<tr>
 			<td colspan="4" align="center">&nbsp;</td>
 		</tr>		
 		<tr class="alternate_back">
 			<td colspan="4" align="center">
-				'.$TEXT_NEW_DEVICE_TEMPLATE_NOTICE_CONST.' **<br>
-				<input type="button" class="button_fixed" value="'.$TEXT_ADD_DEVICE_TEMPLATE_CONST.'" onclick="add_device_template_popup();">
+				'.translate('TEXT_NEW_DEVICE_TEMPLATE_NOTICE_CONST').' **<br>
+				<input type="button" class="button_fixed" value="'.translate('TEXT_ADD_DEVICE_TEMPLATE_CONST').'" onclick="add_device_template_popup();">
 			</td>
 		</tr>		
 		<tr>
@@ -5587,18 +5588,18 @@ function pickDeviceTemplate($categoryID, $manufacturerID,$returnValue,$defaultAl
 			<td colspan="4">
 			<table width="100%">
 				<tr class="alternate_back">
-					<td align="center"><B>'.$TEXT_TEMPLATE_SEARCH_INFO_CONST.'</B></td>
+					<td align="center"><B>'.translate('TEXT_TEMPLATE_SEARCH_INFO_CONST').'</B></td>
 				</tr>
 				<tr class="alternate_back">
-					<td align="center"><input type="text" name="dtID" value="'.$dtID.'" onChange="setDeviceTemplatePulldown();" onKeyPress="return processEnter(this,event);"> <input type="button" class="button" name="searchBtn" value="'.$TEXT_SEARCH_TEMPLATES_CONST.'"></td>
+					<td align="center"><input type="text" name="dtID" value="'.$dtID.'" onChange="setDeviceTemplatePulldown();" onKeyPress="return processEnter(this,event);"> <input type="button" class="button" name="searchBtn" value="'.translate('TEXT_SEARCH_TEMPLATES_CONST').'"></td>
 				</tr>
 			</table>
 			</td>
 		</tr>	
 		<tr>
 			<td colspan="4" align="left">
-				<em>* '.$TEXT_AUTOFILTER_INFO_CONST.'<br>
-					** '.$TEXT_DC_MANUFACTURER_NEEDED_CONST.'
+				<em>* '.translate('TEXT_AUTOFILTER_INFO_CONST').'<br>
+					** '.translate('TEXT_DC_MANUFACTURER_NEEDED_CONST').'
 					'.@$dtNote.'
 				</em>
 			</td>
@@ -5607,11 +5608,11 @@ function pickDeviceTemplate($categoryID, $manufacturerID,$returnValue,$defaultAl
 			<td colspan="4">&nbsp;</td>
 		</tr>	
 		<tr>
-			<td colspan="4"><B>'.$TEXT_NOTES_CONST.'</B><br>'.$TEXT_PICKER_INFO_CONST.'</td>
+			<td colspan="4"><B>'.translate('TEXT_NOTES_CONST').'</B><br>'.translate('TEXT_PICKER_INFO_CONST').'</td>
 		</tr>	
 		<tr>
 			<td colspan="4" align="center">
-				<input type="reset" class="button_fixed" name="closeBtn" value="'.$TEXT_CLOSE_CONST.'" onClick="self.close();">
+				<input type="reset" class="button_fixed" name="closeBtn" value="'.translate('TEXT_CLOSE_CONST').'" onClick="self.close();">
 			</td>
 		</tr>		
 	</table>
@@ -5708,7 +5709,7 @@ function getHierachicalChilds($categoriesHierarchical,$pid,$categoriesArray,$cat
 // build a treeview with categories
 function getdTree($categoryID,$dbADO,$restrictToCategory=0){
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
+	includeLangFile('common.lang.php');
 
 	$restrictedCategories=array();
 	if($restrictToCategory!=0){
@@ -5741,7 +5742,7 @@ function getdTree($categoryID,$dbADO,$restrictToCategory=0){
 
 		d = new dTree(\'d\');
 
-		d.add(0,-1,\''.$TEXT_DEVICE_CATEGORY_CONST.'\');
+		d.add(0,-1,\''.translate('TEXT_DEVICE_CATEGORY_CONST').'\');
 		'.$jsNodes.'		
 	
 		d.config.useLines=true;
@@ -5774,7 +5775,7 @@ function getsTreeChilds($jsNodes,$pid,$categoriesArray,$categoriesParents,$restr
 
 function dtPickerJS($returnValue){
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/deviceTemplatePicker.lang.php');
+	includeLangFile('deviceTemplatePicker.lang.php');
 
 	$out='
 	<script>
@@ -5841,7 +5842,7 @@ function dtPickerJS($returnValue){
 			}
 		}else{
 			// error case, display error message
-			setErrorMessage("'.$TEXT_ERROR_DEVICE_TEMPLATE_NOT_SELECTED_CONST.'");
+			setErrorMessage("'.translate('TEXT_ERROR_DEVICE_TEMPLATE_NOT_SELECTED_CONST').'");
 		}
 	}
 	
@@ -5923,7 +5924,7 @@ function dtPickerJS($returnValue){
 			}else{
 				document.deviceTemplatePicker.template[0].selected=true;
 				document.getElementById("templateSelected").innerHTML="";
-				setErrorMessage("'.$TEXT_DEVICE_TEMPLATE_DOES_NOT_EXIST_OR_INVALID_CONTROLED_VIA_CONST.'");
+				setErrorMessage("'.translate('TEXT_DEVICE_TEMPLATE_DOES_NOT_EXIST_OR_INVALID_CONTROLED_VIA_CONST').'");
 				setManufacturerPulldown(0);
 				setCategoryPulldown(0);
 			}
@@ -5950,7 +5951,7 @@ function dtPickerJS($returnValue){
 				self.location=url;
 			}
 		}else{
-			setErrorMessage("'.$TEXT_ERROR_PICK_MANUF_AND_DC_CONST.'");
+			setErrorMessage("'.translate('TEXT_ERROR_PICK_MANUF_AND_DC_CONST').'");
 		}
 	}
 	
@@ -6288,8 +6289,8 @@ function set_device_data($deviceID,$deviceData,$value,$dbADO){
 function displayScreenSavers($orbiterID,$dbADO)
 {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/utils.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('utils.lang.php');
 
 	$out='';
 
@@ -6503,7 +6504,7 @@ function getOrbitersInTheSameRoom($commandGroupID,$dbADO){
 }
 
 function editCommandGroupCommands($commandGroupID,$dbADO){
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
+	includeLangFile('common.lang.php');
 	$selectCommandsAssigned = "
 		SELECT CommandGroup_Command.*
 		FROM CommandGroup_Command		
@@ -6518,7 +6519,7 @@ function editCommandGroupCommands($commandGroupID,$dbADO){
 	<input type="hidden" name="cgcID" id="cgcID" value="">';
 	if ($resCommandAssigned->RecordCount()>0) {
 		$out.='	<fieldset>
-					<legend>'.$TEXT_COMMANDS_CONST.'</legend>
+					<legend>'.translate('TEXT_COMMANDS_CONST').'</legend>
 						<table cellpadding="0" cellspacing="0">
 									';
 		$pos=0;
@@ -6589,7 +6590,7 @@ function editCommandGroupCommands($commandGroupID,$dbADO){
 				}				
 						
 				if ($resNewCommand->RecordCount()==0) {
-					$out.='<option value="0">-'.$TEXT_SCENARIO_NO_COMMAND_CONST.'-</option>';
+					$out.='<option value="0">-'.translate('TEXT_SCENARIO_NO_COMMAND_CONST').'-</option>';
 				}
 				$out.='</select>';
 			}
@@ -6680,14 +6681,14 @@ if($rowSelectParameters['C_CP_Description']=="") {
 					
 							</td>
 						<td valign="top">
-						<input type="submit" class="button_fixed" name="up_'.$rowCommandAssigned['PK_CommandGroup_Command'].'" value="'.$TEXT_UP_CONST.'"><br>
-						<input type="submit" class="button_fixed" name="down_'.$rowCommandAssigned['PK_CommandGroup_Command'].'" value="'.$TEXT_DOWN_CONST.'"><br>
-						<input type="button" class="button_fixed" name="editA" value="'.$TEXT_REMOVE_CONST.'" onClick="if(confirm(\''.$TEXT_CONFIRM_DELETE_COMMAND_FROM_CG_CONST.'\'))windowOpen(\'index.php?section=deleteCommandFromCommandGroup_Command&from=editCommandGroup&cgID='.$rowCommandAssigned['PK_CommandGroup_Command'].'\',\'width=100,height=100,toolbar=1,resizable=1,scrollbars=1\');"">
+						<input type="submit" class="button_fixed" name="up_'.$rowCommandAssigned['PK_CommandGroup_Command'].'" value="'.translate('TEXT_UP_CONST').'"><br>
+						<input type="submit" class="button_fixed" name="down_'.$rowCommandAssigned['PK_CommandGroup_Command'].'" value="'.translate('TEXT_DOWN_CONST').'"><br>
+						<input type="button" class="button_fixed" name="editA" value="'.translate('TEXT_REMOVE_CONST').'" onClick="if(confirm(\''.translate('TEXT_CONFIRM_DELETE_COMMAND_FROM_CG_CONST').'\'))windowOpen(\'index.php?section=deleteCommandFromCommandGroup_Command&from=editCommandGroup&cgID='.$rowCommandAssigned['PK_CommandGroup_Command'].'\',\'width=100,height=100,toolbar=1,resizable=1,scrollbars=1\');"">
 						</td>						
 					</tr>
 					<tr class="'.$class_color.'">
 						<td align="center" colspan="3">
-							<input type="button" class="button" name="testCommand" value="'.$TEXT_TEST_COMMAND_CONST.'" onClick="frames[\'commandTester\'].location=\'testCommand.php?\'+'.$cmd_to_test.';">
+							<input type="button" class="button" name="testCommand" value="'.translate('TEXT_TEST_COMMAND_CONST').'" onClick="frames[\'commandTester\'].location=\'testCommand.php?\'+'.$cmd_to_test.';">
 						</td>
 					</tr>
 					';
@@ -6698,7 +6699,7 @@ if($rowSelectParameters['C_CP_Description']=="") {
 									<tr>
 										<td colspan="3" align="center">
 											<a name="hook_0"></a>
-											<input type="submit" class="button" name="addNewDeviceButton" value="'.$TEXT_SAVE_CONST.'"  >
+											<input type="submit" class="button" name="addNewDeviceButton" value="'.translate('TEXT_SAVE_CONST').'"  >
 										</td>
 									</tr>
 								</table>
@@ -6712,7 +6713,7 @@ if($rowSelectParameters['C_CP_Description']=="") {
 }
 
 function addCommandToCommandGroup($cgID,$dbADO){
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
+	includeLangFile('common.lang.php');
 	
 	$out='<a name="addDevice"></a>
 					 Device:'.
@@ -6764,15 +6765,16 @@ function addCommandToCommandGroup($cgID,$dbADO){
 		$out.='</select>';
 	}
 	$out.='
-			<input type="submit" class="button" name="addNewDeviceButton" value="'.$TEXT_ADD_CONST.'"  >
+			<input type="submit" class="button" name="addNewDeviceButton" value="'.translate('TEXT_ADD_CONST').'"  >
 			';
 	return $out;
 	
 }
 
 function processEditScenarioCommands($commandGroupID,$dbADO){
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/editCommandGroup.lang.php');
 	
+	includeLangFile('editCommandGroup.lang.php');
+
 	$isModified=0;
 	$parametersUpdatedAlert='';
 	$returnHook='';
@@ -6807,7 +6809,7 @@ function processEditScenarioCommands($commandGroupID,$dbADO){
 
 	$resCommandAssigned = $dbADO->Execute($selectCommandsAssigned,array($installationID,$commandGroupID));
 
-	$parametersUpdatedAlert = $TEXT_PARAMETERS_NOT_UPDATED_CONST;
+	$parametersUpdatedAlert = translate('TEXT_PARAMETERS_NOT_UPDATED_CONST');
 
 	if ($resCommandAssigned) {
 		while ($rowCommandAssigned = $resCommandAssigned->FetchRow()) {
@@ -6878,7 +6880,7 @@ function processEditScenarioCommands($commandGroupID,$dbADO){
 						$dbADO->Execute($insert,array($value,$rowCommandAssigned['PK_CommandGroup_Command'],$rowSelectParameters['FK_CommandParameter']));
 					}
 					if ($dbADO->Affected_Rows()==1) {
-						$parametersUpdatedAlert=$TEXT_PARAMETERS_UPDATED_CONST;
+						$parametersUpdatedAlert=translate('TEXT_PARAMETERS_UPDATED_CONST');
 					}
 
 					if($rowCommandAssigned['FK_Command']==$GLOBALS['GoToScreen'] && (int)$rowSelectParameters['IK_CommandParameter']!=0 && $rowSelectParameters['FK_CommandParameter']==159){
@@ -6905,7 +6907,7 @@ function processEditScenarioCommands($commandGroupID,$dbADO){
 								$dbADO->Execute($insert,array($value,$rowCommandAssigned['PK_CommandGroup_Command'],$row['PK_CommandParameter']));
 							}
 							if ($dbADO->Affected_Rows()==1) {
-								$parametersUpdatedAlert=$TEXT_PARAMETERS_UPDATED_CONST;
+								$parametersUpdatedAlert=translate('TEXT_PARAMETERS_UPDATED_CONST');
 							}
 
 						}
