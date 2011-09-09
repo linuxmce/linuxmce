@@ -183,4 +183,7 @@ $TEXT_UP_CONST='Up';
 $TEXT_DOWN_CONST='Down';
 $TEXT_SORT_SCENARIOS_CONST='Sort scenarios';
 $DEFAULT_SORT ='Set Default Sort';
+$TEXT_DEFAULT_SORT_CONST ='Set Default Sort';
+$TEXT_AUDIO_CONST='Audio';
+$TEXT_VIDEO_CONST='Vide©o';
 ?>

@@ -38,4 +38,8 @@ $TEXT_MANUALLY_CONFIGURE_EA_CONST='Manually Configure EA';
 $TEXT_DEVICE_STATE_CONST='State';
 $TEXT_NO_RELATED_DEVICES_CONST='No related devices';
 $TEXT_NO_GROUPS_FOR_DEVICE_CONST='No groups for device';
+$TEXT_CREATE_NEW_DEVICE_GROUP_CONST='Create new device group';
+$TEXT_AUTO_CONFIGURE_CONST='Auto Configure';
+$TEXT_MANUAL_CONFIGURE_CONST='Manually Configure';
+$TEXT_FORCE_INTO_EVERY_ROOM_CONST='Force into every room';
 ?>

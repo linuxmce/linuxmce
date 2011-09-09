@@ -184,4 +184,7 @@ $TEXT_UP_CONST='Haut';
 $TEXT_DOWN_CONST='Bas';
 $TEXT_SORT_SCENARIOS_CONST='Trier scénarios';
 $DEFAULT_SORT ='Fixer tri par défaut';
+$TEXT_DEFAULT_SORT_CONST ='Fixer tri par défaut';
+$TEXT_AUDIO_CONST='Audio';
+$TEXT_VIDEO_CONST='Vidéo';
 ?>

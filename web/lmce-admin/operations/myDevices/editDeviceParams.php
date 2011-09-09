@@ -18,9 +18,9 @@ function editDeviceParams($output,$dbADO) {
 	);
 
 	$manualyConfigureArray=array(
-		0=>'Auto Configure',
-		1=>'Manually Configure',
-		-1=>'Force into every room'
+		0=>translate('TEXT_AUTO_CONFIGURE_CONST'),
+		1=>translate('TEXT_MANUAL_CONFIGURE_CONST'),
+		-1=>translate('TEXT_FORCE_INTO_EVERY_ROOM_CONST')
 	);
 
 	if (!isset($_SESSION['userLoggedIn']) || $_SESSION['userLoggedIn']!=true) {
@@ -260,7 +260,7 @@ function editDeviceParams($output,$dbADO) {
 			</tr>					
 			<tr>
 				<td>'.translate('TEXT_MANUALLY_CONFIGURE_EA_CONST').'</td>
-				<td>'.pulldownFromArray($manualyConfigureArray,'ManuallyConfigureEA',$ManuallyConfigureEA,'','key','- Please select -',-100).'</td>
+				<td>'.pulldownFromArray($manualyConfigureArray,'ManuallyConfigureEA',$ManuallyConfigureEA,'','key','- '.translate('TEXT_PLEASE_SELECT_CONST').' -',-100).'</td>
 			</tr>			
 			<tr>
 				<td>'.translate('TEXT_IP_ADDRESS_CONST').'</td>
@@ -351,14 +351,14 @@ function editDeviceParams($output,$dbADO) {
 				$selectInputsTxt.= '<option '.($rowSelInputs['PK_Command']==$rowSelectedPipesUsed['FK_Command_Input']?" selected='selected' ":"").' value="'.$rowSelInputs['PK_Command'].'">'.$rowSelInputs['Description'].'</option>';
 			}
 			
-			$out.='<td> Input on '.$rowSelectedPipesUsed['Desc_To'].' <select name="input_'.$rowSelectedPipesUsed['FK_Device_To'].'_'.$rowSelectedPipesUsed['FK_Pipe'].'"><option value="0">-'.translate('TEXT_PLEASE_SELECT_CONST').'-</option>'.$selectInputsTxt.'</select></td>';
+			$out.='<td> Input on '.$rowSelectedPipesUsed['Desc_To'].' <select name="input_'.$rowSelectedPipesUsed['FK_Device_To'].'_'.$rowSelectedPipesUsed['FK_Pipe'].'"><option value="0">- '.translate('TEXT_PLEASE_SELECT_CONST').' -</option>'.$selectInputsTxt.'</select></td>';
 			
 			$selectOutputsTxt='';
 			while ($rowSelOutputs = $resSelectOutputs->FetchRow()) {
 				$selectOutputsTxt.= '<option '.($rowSelOutputs['PK_Command']==$rowSelectedPipesUsed['FK_Command_Output']?" selected='selected' ":"").' value="'.$rowSelOutputs['PK_Command'].'">'.$rowSelOutputs['Description'].'</option>';
 			}
 			
-			$out.='<td> Output on '.$rowSelectedPipesUsed['Desc_From'].' <select name="output_'.$rowSelectedPipesUsed['FK_Device_To'].'_'.$rowSelectedPipesUsed['FK_Pipe'].'"><option value="0">-'.translate('TEXT_PLEASE_SELECT_CONST').'-</option>'.$selectOutputsTxt.'</select></td>';
+			$out.='<td> Output on '.$rowSelectedPipesUsed['Desc_From'].' <select name="output_'.$rowSelectedPipesUsed['FK_Device_To'].'_'.$rowSelectedPipesUsed['FK_Pipe'].'"><option value="0">- '.translate('TEXT_PLEASE_SELECT_CONST').' -</option>'.$selectOutputsTxt.'</select></td>';
 			
 
 			$resSelectPipes->MoveFirst();			
@@ -400,7 +400,7 @@ function editDeviceParams($output,$dbADO) {
 			$out.='
 				</select>
 				<select name="addPipe">
-					<option value="0">-'.translate('TEXT_PLEASE_SELECT_CONST').'-</option>'.$selectPipesTxt.'</select>
+					<option value="0">- '.translate('TEXT_PLEASE_SELECT_CONST').' -</option>'.$selectPipesTxt.'</select>
 			<input type="submit" class="button" name="submitX" value="'.translate('TEXT_ADD_CONST').'"  >
 			</td>
 		</tr>
@@ -453,7 +453,7 @@ function editDeviceParams($output,$dbADO) {
 	$out.='
 	
 	<tr><td><select name="addNewGroup">'.$remainingGroups.'</select></td><td><input type="submit" class="button"   name="submitX" value="'.translate('TEXT_ADD_CONST').'"></td></tr>		
-	<tr><td><a href="javascript:void(0);" onClick="windowOpen(\'index.php?section=createDeviceGroup&deviceID='.$deviceID.'&from=editDeviceParams\',\'width=400,height=400,toolbar=1,scrollbars=1,resizable=1\');">Create new device group</a></td></tr>
+	<tr><td><a href="javascript:void(0);" onClick="windowOpen(\'index.php?section=createDeviceGroup&deviceID='.$deviceID.'&from=editDeviceParams\',\'width=400,height=400,toolbar=1,scrollbars=1,resizable=1\');">'.translate('TEXT_CREATE_NEW_DEVICE_GROUP_CONST').'</a></td></tr>
 	
 		<tr><td colspan="2"><input type="submit" class="button" name="submitX" value="'.translate('TEXT_SAVE_CONST').'"  ></td></tr>
 	</table>
@@ -505,7 +505,7 @@ function editDeviceParams($output,$dbADO) {
 		ORDER BY Description ASC";
 	
 	$resAddNewRelatedDevices = $dbADO->Execute($selectAddNewRelatedDevices,array($installationID,$deviceID,$DeviceTemplate));
-	$newDeviceRelated='<option value="0">-'.translate('TEXT_PLEASE_SELECT_CONST').'-</option>';
+	$newDeviceRelated='<option value="0">- '.translate('TEXT_PLEASE_SELECT_CONST').' -</option>';
 	if ($resAddNewRelatedDevices) {
 		while ($rowAddNewRelatedDevices = $resAddNewRelatedDevices->FetchRow()) {
 			$newDeviceRelated.='<option value="'.$rowAddNewRelatedDevices['PK_Device'].'">'.$rowAddNewRelatedDevices['Description'].'('.$rowAddNewRelatedDevices['DT_Desc'].')</option>';

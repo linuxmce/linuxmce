@@ -20,7 +20,7 @@ $TEXT_VIEW_CONST='Voir';
 $TEXT_DEVICE_RESETED_CONST='Le dispositif à été réinitialisé.';
 $TEXT_ROOM_USED_BY_ANOTHER_MD_CONST='The room is used by another media director';
 $TEXT_ERROR_DEVICE_PIPE_EXISTS_CONST='Device pipe already exist.';
-$TEXT_CONNECTION_KEEP_ALIVE_CONST='Use 5 second pings to ensure connection stays alive.';
+$TEXT_CONNECTION_KEEP_ALIVE_CONST='Utiliser un ping tout les 5 secondes pour assurer que la connection reste établie.';
 $TEXT_RECONFIGURE_DEVICE_CONST='Reconfigurer dispositif';
 $TEXT_DEVICE_PIPES_USED_CONST='Conduites du dispositif utilisées';
 $TEXT_MEMBER_OF_GROUP_CONST='Membre du groupe';
@@ -37,4 +37,8 @@ $TEXT_MANUALLY_CONFIGURE_EA_CONST='Configurer ZD manuellement';
 $TEXT_DEVICE_STATE_CONST='Etat';
 $TEXT_NO_RELATED_DEVICES_CONST='Aucun dispositif lié';
 $TEXT_NO_GROUPS_FOR_DEVICE_CONST='Pas de groupes pour le dispositif';
+$TEXT_CREATE_NEW_DEVICE_GROUP_CONST='Créer noveau groupe de dispositifs';
+$TEXT_AUTO_CONFIGURE_CONST='Auto Configure';
+$TEXT_MANUAL_CONFIGURE_CONST='Manually Configure';
+$TEXT_FORCE_INTO_EVERY_ROOM_CONST='Force into every room';
 ?>

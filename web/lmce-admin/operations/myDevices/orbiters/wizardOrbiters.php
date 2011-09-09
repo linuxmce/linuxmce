@@ -1,8 +1,9 @@
 <?
 function wizardOrbiters($output,$dbADO) {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/wizardOrbiters.lang.php');
+ 	includeLangFile('common.lang.php');
+	includeLangFile('wizardOrbiters.lang.php');
+	includeLangFile('editDeviceParams.lang.php');
 
 	// multipage display variables
 	$orbitersPerPage=5;
@@ -23,8 +24,7 @@ function wizardOrbiters($output,$dbADO) {
 	$roomsArray=getAssocArray('Room','PK_Room','Description',$dbADO,'WHERE FK_Installation='.$installationID, 'ORDER BY Description ASC');
 
 	if(isset($_REQUEST['lastAdded']) && !isset($_REQUEST['page'])){
-		$newOrbiterAlert='alert("This device requires some advance preparation, which can take several minutes. Your Core is doing this now and you will see a message on all orbiters and media directors notifying you when it\'s done. Please wait to use the device until then.");
-		';
+		$newOrbiterAlert='alert("'.translate('TEXT_ADVANCED_PREPARATION_NOTE_CONST').'");';
 	}
 	if ($action == 'form') {
 		$out.=setLeftMenu($dbADO).'
@@ -47,12 +47,12 @@ function wizardOrbiters($output,$dbADO) {
 	<input type="hidden" name="action" value="add">
 	<input type="hidden" name="page" value="'.$page.'">
 
-	'.$TEXT_DOWNLOAD_CONST.' <a href="index.php?section=orbitersWin">'.$TEXT_ORBITER_WIN_INSTALLER_CONST.'</a><br>
-	'.$TEXT_PRIVACY_SETTINGS_CONST.': <a href="index.php?section=usersOrbiters">'.$TEXT_RESTRICT_ACCES_TO_USERS_CONST.'</a>
+	'.translate('TEXT_DOWNLOAD_CONST').' <a href="index.php?section=orbitersWin">'.translate('TEXT_ORBITER_WIN_INSTALLER_CONST').'</a><br>
+	'.translate('TEXT_PRIVACY_SETTINGS_CONST').': <a href="index.php?section=usersOrbiters">'.translate('TEXT_RESTRICT_ACCES_TO_USERS_CONST').'</a>
 		<div id="preloader" style="display:;">
 			<table width="100%" border="0">
 				<tr>
-					<td align="center">'.$TEXT_ORBITERS_PAGE_LOADING_CONST.'</td>
+					<td align="center">'.translate('TEXT_ORBITERS_PAGE_LOADING_CONST').'</td>
 				</tr>
 			</table>
 		</div>
@@ -61,9 +61,9 @@ function wizardOrbiters($output,$dbADO) {
 		<table border="0" align="center">
 			<tr>
 				<td colspan="2" align="center">
-					<input type="submit" class="button" name="QuickRegenAll" value="'.$TEXT_QUICK_REGEN_ALL_CONST.'">
-					<input type="submit" class="button" name="FullRegenAll" value="'.$TEXT_FULL_REGEN_ALL_CONST.'">
-					<input type="checkbox" name="reset_all" value="1"> '.$TEXT_RESET_ROUTER_WHEN_DONE_REGENERATING_CONST.'</td>
+					<input type="submit" class="button" name="QuickRegenAll" value="'.translate('TEXT_QUICK_REGEN_ALL_CONST').'">
+					<input type="submit" class="button" name="FullRegenAll" value="'.translate('TEXT_FULL_REGEN_ALL_CONST').'">
+					<input type="checkbox" name="reset_all" value="1"> '.translate('TEXT_RESET_ROUTER_WHEN_DONE_REGENERATING_CONST').'</td>
 			</tr>';
 
 
@@ -77,7 +77,7 @@ function wizardOrbiters($output,$dbADO) {
 		}
 		$out.='
 		<tr colspan="2">
-		<td  align="left"><legend><b>Video</b></legend>
+		<td  align="left"><legend><b>'.translate('TEXT_VIDEO_CONST').'</b></legend>
 		<select name ="VideosortOption">';
 		foreach ($vArray as $Option => $val )
 		{
@@ -90,7 +90,7 @@ function wizardOrbiters($output,$dbADO) {
 		};
 
 		$out.='
-		<input type="submit" class="button" name="setDefaultSortVideo" value="'.$DEFAULT_SORT.'">
+		<input type="submit" class="button" name="setDefaultSortVideo" value="'.translate('TEXT_DEFAULT_SORT_CONST').'">
 		</td>';
 
 		$asortArray = array("Recently Used" => -1, "Filename" => "0", "Title" => 13, "Performer"=>2, "Genre"=>8, "Album"=> 3);
@@ -100,7 +100,7 @@ function wizardOrbiters($output,$dbADO) {
                         $curOption=$sortRow['EK_AttributeType_DefaultSort'];
                 }
 		$out.='
-		<td  align="right"><legend><b>Audio</b></legend>
+		<td  align="right"><legend><b>'.translate('TEXT_AUDIO_CONST').'</b></legend>
 		<select name ="AudiosortOption">';
 
 		foreach ($asortArray as $aOption => $aval )
@@ -114,7 +114,7 @@ function wizardOrbiters($output,$dbADO) {
 		};
 
 		$out.='
-		<input type="submit" class="button" name="setDefaultSortAudio" value="'.$DEFAULT_SORT.'">
+		<input type="submit" class="button" name="setDefaultSortAudio" value="'.translate('TEXT_DEFAULT_SORT_CONST').'">
 		</td>
 		</tr>';
 
@@ -241,8 +241,8 @@ function wizardOrbiters($output,$dbADO) {
 					if(!in_array('dt',$excludedData[$orbiterGroupDisplayed])){
 						$content[$orbiterGroupDisplayed][$rowD['PK_Device']]['dt']='
 								<tr>
-									<td align="right" width="200"><B>'.$TEXT_DEVICE_TEMPLATE_CONST.'</B></td>
-									<td align="left" width="400" title="'.$TEXT_DEVICE_CATEGORY_CONST.': '.$rowD['CategoryName'].', '.strtolower($TEXT_MANUFACTURER_CONST).': '.$rowD['ManufacturerName'].'">'.$rowD['TemplateName'].'</td>
+									<td align="right" width="200"><B>'.translate('TEXT_DEVICE_TEMPLATE_CONST').'</B></td>
+									<td align="left" width="400" title="'.translate('TEXT_DEVICE_CATEGORY_CONST').': '.$rowD['CategoryName'].', '.strtolower(translate('TEXT_MANUFACTURER_CONST')).': '.$rowD['ManufacturerName'].'">'.$rowD['TemplateName'].'</td>
 								</tr>
 								';
 					}
@@ -250,7 +250,7 @@ function wizardOrbiters($output,$dbADO) {
 					if(!in_array('state',$excludedData[$orbiterGroupDisplayed])){
 						$content[$orbiterGroupDisplayed][$rowD['PK_Device']]['state']='
 								<tr>
-									<td align="right"><B>'.$TEXT_STATE_CONST.'</B></td>
+									<td align="right"><B>'.translate('TEXT_STATE_CONST').'</B></td>
 									<td>'.getStateFormElement($rowD['PK_Device'],'State_'.$rowD['PK_Device'],$rowD['State'],$dbADO).'</td>
 								</tr>
 								';
@@ -259,7 +259,7 @@ function wizardOrbiters($output,$dbADO) {
 					if(!in_array('description',$excludedData[$orbiterGroupDisplayed])){
 						$content[$orbiterGroupDisplayed][$rowD['PK_Device']]['description']='
 								<tr>
-									<td align="right"><B>'.$TEXT_DESCRIPTION_CONST.'</B></td>
+									<td align="right"><B>'.translate('TEXT_DESCRIPTION_CONST').'</B></td>
 									<td align="left"><input type="text" name="description_'.$rowD['PK_Device'].'" value="'.stripslashes($rowD['Description']).'" style="width:200px;"> # '.$rowD['PK_Device'].'</td>
 								</tr>';
 					}
@@ -267,11 +267,11 @@ function wizardOrbiters($output,$dbADO) {
 					if($rowD['IsIPBased']==1 && !in_array('ip_mac',$excludedData[$orbiterGroupDisplayed])){
 						$content[$orbiterGroupDisplayed][$rowD['PK_Device']]['ip_mac']='
 									<tr>
-										<td align="right"><B>'.$TEXT_IP_ADDRESS_CONST.'</B></td>
+										<td align="right"><B>'.translate('TEXT_IP_ADDRESS_CONST').'</B></td>
 										<td><input type="text" name="ip_'.$rowD['PK_Device'].'" value="'.$rowD['IPaddress'].'" style="width:200px;"></td>
 									</tr>
 									<tr>
-										<td align="right"><B>'.$TEXT_MAC_ADDRESS_CONST.'</B></td>
+										<td align="right"><B>'.translate('TEXT_MAC_ADDRESS_CONST').'</B></td>
 										<td><input type="text" name="mac_'.$rowD['PK_Device'].'" value="'.$rowD['MACaddress'].'" style="width:200px;"></td>
 									</tr>';
 					}
@@ -279,7 +279,7 @@ function wizardOrbiters($output,$dbADO) {
 					if(!in_array('room',$excludedData[$orbiterGroupDisplayed])){
 						$content[$orbiterGroupDisplayed][$rowD['PK_Device']]['room']='
 								<tr>
-									<td align="right"><B>'.$TEXT_ROOM_CONST.'</B></td>
+									<td align="right"><B>'.translate('TEXT_ROOM_CONST').'</B></td>
 									<td>'.pulldownFromArray($roomsArray,'room_'.$rowD['PK_Device'],$rowD['FK_Room'],'style="width:200px;"').'</td>
 								</tr>
 								';
@@ -305,19 +305,19 @@ function wizardOrbiters($output,$dbADO) {
 					<td colspan="2" align="right">'.$linksBar.'</td>
 				</tr>
 				<tr>
-					<td class="tablehead" colspan="2" align="center"><B>'.$TEXT_MOBILE_PHONE_ORBITERS_CONST.'</B></td>
+					<td class="tablehead" colspan="2" align="center"><B>'.translate('TEXT_MOBILE_PHONE_ORBITERS_CONST').'</B></td>
 				</tr>
 				<tr>
 					<td colspan="2" align="center">'.orbiterTable($content['mobile_orbiters'],'mobile_orbiters',$properties).'</td>
 				</tr>
 				<tr>
-					<td class="tablehead" colspan="2" align="center"><B>'.$TEXT_ON_SCREEN_DISPLAYS_FOR_MEDIA_DIRECTORS_CONST.'</B></td>
+					<td class="tablehead" colspan="2" align="center"><B>'.translate('TEXT_ON_SCREEN_DISPLAYS_FOR_MEDIA_DIRECTORS_CONST').'</B></td>
 				</tr>
 				<tr>
 					<td colspan="2" align="center">'.orbiterTable($content['on_screen_orbiters'],'on_screen_orbiters',$properties).'</td>
 				</tr>
 				<tr>
-					<td class="tablehead" colspan="2" align="center"><B>'.$TEXT_STANDARD_ROAMING_ORBITERS_CONST.'</B></td>
+					<td class="tablehead" colspan="2" align="center"><B>'.translate('TEXT_STANDARD_ROAMING_ORBITERS_CONST').'</B></td>
 				</tr>
 				<tr>
 					<td colspan="2" align="center">'.orbiterTable($content['standard_roaming_orbiters'],'standard_roaming_orbiters',$properties).'</td>
@@ -340,7 +340,7 @@ function wizardOrbiters($output,$dbADO) {
 				</tr>
 				<tr>
 					<td colspan="2" align="center">'.pulldownFromArray($orbitersDTArray,'deviceTemplate',0).'
-					<input type="submit" class="button" name="add" value="'.$TEXT_ADD_ORBITER_CONST.'"  ></td>
+					<input type="submit" class="button" name="add" value="'.translate('TEXT_ADD_ORBITER_CONST').'"  ></td>
 				</tr>
 			</table>
 			</div>
@@ -351,7 +351,7 @@ function wizardOrbiters($output,$dbADO) {
 		// check if the user has the right to modify installation
 		$canModifyInstallation = getUserCanModifyInstallation($_SESSION['userID'],$_SESSION['installationID'],$dbADO);
 		if (!$canModifyInstallation){
-			header("Location: index.php?section=wizardOrbiters&error=$TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST");
+			header("Location: index.php?section=wizardOrbiters&error=translate('TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST')");
 			exit(0);
 		}
 
@@ -533,17 +533,17 @@ function wizardOrbiters($output,$dbADO) {
 			}
 		}
 
-		$commandMessage=(isset($commandToSend))?'<br>'.$TEXT_ORBITER_COMMAND_SENT_CONST.': '.$commandToSend:'';
-		header("Location: index.php?section=wizardOrbiters&page=".$_REQUEST['page']."&msg=".urlencode($TEXT_ORBITERS_UPDATED_CONST.$commandMessage)."&regen=".@$regen.@$suffix);
+		$commandMessage=(isset($commandToSend))?'<br>'.translate('TEXT_ORBITER_COMMAND_SENT_CONST').': '.$commandToSend:'';
+		header("Location: index.php?section=wizardOrbiters&page=".$_REQUEST['page']."&msg=".urlencode(translate('TEXT_ORBITERS_UPDATED_CONST').$commandMessage)."&regen=".@$regen.@$suffix);
 	}
 
-	$output->setMenuTitle($TEXT_WIZARD_CONST.' |');
-	$output->setPageTitle($TEXT_ORBITES_CONST);
+	$output->setMenuTitle(translate('TEXT_WIZARD_CONST').' |');
+	$output->setPageTitle(translate('TEXT_ORBITES_CONST'));
 
 	$output->setScriptCalendar('null');
-	$output->setNavigationMenu(array($TEXT_ORBITES_CONST=>'index.php?section=wizardOrbiters'));
+	$output->setNavigationMenu(array(translate('TEXT_ORBITES_CONST')=>'index.php?section=wizardOrbiters'));
 	$output->setBody($out);
-	$output->setTitle(APPLICATION_NAME.' :: '.$TEXT_ORBITES_CONST);
+	$output->setTitle(APPLICATION_NAME.' :: '.translate('TEXT_ORBITES_CONST'));
 	$output->output();
 }
 
@@ -552,8 +552,8 @@ function wizardOrbiters($output,$dbADO) {
 function formatDDRows($rowD,$dbADO)
 {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/wizardOrbiters.lang.php');
+ 	includeLangFile('common.lang.php');
+	includeLangFile('wizardOrbiters.lang.php');
 
 	$ddHTML='';
 	$selectedMenu=0;
@@ -582,7 +582,7 @@ function formatDDRows($rowD,$dbADO)
 				}
 				else
 					$ddHTML.='<input type="text" name="deviceData_'.$rowD['PK_Device'].'_'.$rowD['FK_DeviceData'].'" value="'.@$ddValue.'" '.((isset($rowD['AllowedToModify']) && $rowD['AllowedToModify']==0)?'disabled':'').' style="width:200px;">';
-				$jsValidation.="frmvalidator.addValidation(\"$formElementName\",\"numeric\",\"$TEXT_WARNING_NUMERICAL_ONLY_CONST\");\n";
+				$jsValidation.="frmvalidator.addValidation(\"$formElementName\",\"numeric\",\"".translate('TEXT_WARNING_NUMERICAL_ONLY_CONST')."\");\n";
 				break;
 				case 'bool':
 					$ddHTML.='<input type="checkbox" name="deviceData_'.$rowD['PK_Device'].'_'.$rowD['FK_DeviceData'].'" value="1" '.((@$ddValue!=0)?'checked':'').' '.((isset($rowD['AllowedToModify']) && $rowD['AllowedToModify']==0)?'disabled':'').' style="width:200px;">';
@@ -600,11 +600,11 @@ function formatDDRows($rowD,$dbADO)
 			$parts=explode(',',$ddValue);
 			$ddHTML.='
 					<tr>
-						<td align="right"><B>'.$TEXT_SECONDS_BEFORE_SCREEN_SAVER_CONST.'</B></td>
+						<td align="right"><B>'.translate('TEXT_SECONDS_BEFORE_SCREEN_SAVER_CONST').'</B></td>
 						<td><input type="text" name="timeoutSS_'.$rowD['PK_Device'].'" value="'.@$parts[0].'" style="width:200px;"></td>
 					</tr>
 						<tr>
-						<td align="right"><B>'.$TEXT_SECONDS_BEFORE_POWER_OFF_CONST.'</B></td>
+						<td align="right"><B>'.translate('TEXT_SECONDS_BEFORE_POWER_OFF_CONST').'</B></td>
 						<td><input type="text" name="timeoutPO_'.$rowD['PK_Device'].'" value="'.@$parts[1].'" style="width:200px;"></td>
 					</tr>							';
 		}
@@ -619,15 +619,15 @@ function formatDDRows($rowD,$dbADO)
 
 function displayButtons($orbiter,$RegenInProgress){
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/wizardOrbiters.lang.php');
+ 	includeLangFile('common.lang.php');
+	includeLangFile('wizardOrbiters.lang.php');
 
 	$out='';
 
 	$out.='
 		<tr>
 			<td align="right"><input type="checkbox" name="reset_'.$orbiter.'" value="1"></td>
-			<td>'.$TEXT_RESET_ROUTER_WHEN_DONE_REGENERATING_CONST.'</td>
+			<td>'.translate('TEXT_RESET_ROUTER_WHEN_DONE_REGENERATING_CONST').'</td>
 		</tr>';
 	if(@$RegenInProgress==1){
 		$out.='
@@ -640,13 +640,13 @@ function displayButtons($orbiter,$RegenInProgress){
 	$out.='
 			<tr>
 				<td align="center" colspan="2">
-					<input type="submit" class="button" name="quickRegen_'.$orbiter.'" value="'.$TEXT_QUICK_REGEN_CONST.'"  >&nbsp;&nbsp;
-					<input type="submit" class="button" name="fullRegen_'.$orbiter.'" value="'.$TEXT_FULL_REGEN_CONST.'"  >&nbsp;&nbsp;
-					<input type="button" class="button" name="customBg" value="'.$TEXT_CUSTOM_BACKGROUND_CONST.'"  onclick="windowOpen(\'index.php?section=customBackground&oID='.$orbiter.'\',\'width=600,height=400,scrollbars=1,resizable=1\');">&nbsp;&nbsp;
-					<input type="submit" class="button" name="update" value="'.$TEXT_UPDATE_CONST.'"  >&nbsp;&nbsp;
-					<input type="reset" class="button" name="cancelBtn" value="'.$TEXT_CANCEL_CONST.'">&nbsp;&nbsp;
-					<input type="button" class="button" name="edit_'.$orbiter.'" value="'.$TEXT_ADVANCED_CONST.'"  onClick="self.location=\'index.php?section=editDeviceParams&deviceID='.$orbiter.'\';">&nbsp;&nbsp;
-					<input type="submit" class="button" name="delete_'.$orbiter.'" value="'.$TEXT_DELETE_CONST.'"  onclick="if(!confirm(\''.$TEXT_CONFIRM_DELETE_ORBITER_CONST.'\'))return false;">
+					<input type="submit" class="button" name="quickRegen_'.$orbiter.'" value="'.translate('TEXT_QUICK_REGEN_CONST').'"  >&nbsp;&nbsp;
+					<input type="submit" class="button" name="fullRegen_'.$orbiter.'" value="'.translate('TEXT_FULL_REGEN_CONST').'"  >&nbsp;&nbsp;
+					<input type="button" class="button" name="customBg" value="'.translate('TEXT_CUSTOM_BACKGROUND_CONST').'"  onclick="windowOpen(\'index.php?section=customBackground&oID='.$orbiter.'\',\'width=600,height=400,scrollbars=1,resizable=1\');">&nbsp;&nbsp;
+					<input type="submit" class="button" name="update" value="'.translate('TEXT_UPDATE_CONST').'"  >&nbsp;&nbsp;
+					<input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'">&nbsp;&nbsp;
+					<input type="button" class="button" name="edit_'.$orbiter.'" value="'.translate('TEXT_ADVANCED_CONST').'"  onClick="self.location=\'index.php?section=editDeviceParams&deviceID='.$orbiter.'\';">&nbsp;&nbsp;
+					<input type="submit" class="button" name="delete_'.$orbiter.'" value="'.translate('TEXT_DELETE_CONST').'"  onclick="if(!confirm(\''.translate('TEXT_CONFIRM_DELETE_ORBITER_CONST').'\'))return false;">
 				</td>
 			</tr>
 	';
@@ -655,15 +655,15 @@ function displayButtons($orbiter,$RegenInProgress){
 
 function displayWiFiRow($orbiter,$isOSD,$PingTest){
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/wizardOrbiters.lang.php');
+ 	includeLangFile('common.lang.php');
+	includeLangFile('wizardOrbiters.lang.php');
 
 	$out='';
 
 	if($isOSD==0){
 		$out.='
 		<tr>
-			<td align="right"><B>'.$TEXT_WIFI_CONNECTION_CONST.'</B></td>
+			<td align="right"><B>'.translate('TEXT_WIFI_CONNECTION_CONST').'</B></td>
 			<td><input type="checkbox" name="PingTest_'.$orbiter.'" value="1" '.(($PingTest==1)?'checked':'').'></td>
 		</tr>';
 	}
