@@ -1044,7 +1044,11 @@ void qorbiterManager::qmlSetupLmce(int incdeviceid, QString incrouterip)
 bool qorbiterManager::readLocalConfig()
 {
     QDomDocument localConfig;
+#ifdef Q_OS_MAC
+    QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
+#else
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
+#endif
     QFile localConfigFile;
 
     localConfigFile.setFileName(xmlPath);
@@ -1098,7 +1102,11 @@ bool qorbiterManager::readLocalConfig()
 void qorbiterManager::writeConfig()
 {
     QDomDocument localConfig;
+#ifdef Q_OS_MAC
+    QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
+#else
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
+#endif
     QFile localConfigFile;
     qDebug() << "Writing Config";
     qDebug() << xmlPath;
