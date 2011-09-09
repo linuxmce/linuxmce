@@ -7,11 +7,14 @@
   	$GLOBALS['lang']=$GLOBALS['fallbacklang'];
   	
   	// set language to user language if logged in, else set it to fallback language
-  	if($_SESSION['userLoggedIn'])
-  		$GLOBALS['userlang']=$_SESSION['UserLanguage'];  		
-  	else
+  	if((isset($_SESSION['userLoggedIn'])) && ($_SESSION['userLoggedIn']== true)) {
+  		if(isset($_SESSION['UserLanguage']))
+  			$GLOBALS['userlang']=$_SESSION['UserLanguage'];  	
+  		else
+  			$GLOBALS['userlang']=$GLOBALS['fallbacklang'];	
+  	} else {
   		$GLOBALS['userlang']=$GLOBALS['fallbacklang'];
-  	
+  	}
   	$_SESSION['skin']=0;
   	
   	error_reporting(E_ALL ^ E_NOTICE);
