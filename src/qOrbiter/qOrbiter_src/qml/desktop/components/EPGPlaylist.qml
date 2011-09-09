@@ -1,8 +1,8 @@
 import QtQuick 1.0
 
 Rectangle {
-    width: 200
-    height: 500
+    width: scaleX(20)
+    height: scaleY(40)
     color: "transparent"
 
     Timer{
@@ -26,8 +26,8 @@ onPlayListPositionChanged:nonepgplaylistview.positionViewAtIndex(dcenowplaying.m
 
     ListView{
         id:nonepgplaylistview
-        height:scaleY(25)
-        width: scaleX(15)
+        height:scaleY(40)
+        width: scaleX(21)
 
         highlightFollowsCurrentItem: true
         highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
@@ -39,14 +39,15 @@ onPlayListPositionChanged:nonepgplaylistview.positionViewAtIndex(dcenowplaying.m
         delegate:
 
             Rectangle {
+            id:delrect
             border.color: "black"
             border.width: 1
-            width:200
-            height: 50
-            color: status ? "whitesmoke" : "green"
+            width:scaleX(20)
+            height: scaleY(5)
+            color: style.lighthighlight
             Text {
                 id: position
-                text: name
+                text: channelnumber
                 font.family: "DroidSans"
                 opacity: .5
                 color: "black"
@@ -55,14 +56,20 @@ onPlayListPositionChanged:nonepgplaylistview.positionViewAtIndex(dcenowplaying.m
             }
 
             Text {
-                text: channelnumber
+                text: program
                 anchors.fill: parent
                 wrapMode: "WrapAnywhere"
+                font.pixelSize: 12
+                anchors.centerIn: parent
+
             }
 
             MouseArea{
                 anchors.fill: parent
                 onClicked: gridChangeChannel(channelnumber, channelid)
+                hoverEnabled: true
+                onEntered: delrect.color = style.accentcolor
+                onExited: delrect.color = style.lighthighlight
             }
         }
     }

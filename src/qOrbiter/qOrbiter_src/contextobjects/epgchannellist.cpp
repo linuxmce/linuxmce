@@ -39,7 +39,7 @@ void EPGChannelList::appendRows(const QList<EPGItemClass *> &items)
     beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
     foreach(EPGItemClass *item, items) {
 
-     QObject::connect(item, SIGNAL(dataChanged()), this , SLOT(handleItemChange()));
+     //QObject::connect(item, SIGNAL(dataChanged()), this , SLOT(handleItemChange()));
         m_list.append(item);
     }
 

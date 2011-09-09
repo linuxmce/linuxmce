@@ -123,7 +123,7 @@ Rectangle {
                     anchors.fill: parent
                     onClicked:{
                         changeChannels(text_input1.text)
-                        text_input1.text.trim(text_input1.text.length)
+                        text_input1.text=""
                     }
                 }
 

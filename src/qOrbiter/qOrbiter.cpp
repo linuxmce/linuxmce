@@ -2556,7 +2556,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
     QString temp;
     qmlUI->m_dwIDataGridRequestCounter++;
 
-    CMD_Populate_Datagrid cmd_populate_livetv_grid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 11, string("1,1"), 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
+    CMD_Populate_Datagrid cmd_populate_livetv_grid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 11, string("0,1"), 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
     if (SendCommand(cmd_populate_livetv_grid))
     {
@@ -2595,15 +2595,18 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
                 pCell = it->second;
                 const char *pPath = pCell->GetImagePath();
              // index = pDataGridTable->CovertColRowType(pCell->m_Value);
-                QStringList breaker = QString::fromStdString(pCell->GetText()).split(" ");
+                QStringList breaker = QString::fromStdString(pCell->m_mapAttributes_Find("Name").c_str()).split(" ");
 
                 channelName = breaker.at(1);
                 channelNumber = breaker.at(0).toInt();
                 channelIndex = pCell->GetValue();
 
-            program = pCell->m_mapAttributes_Find("Program").c_str();
-              //  qDebug() << "Channel::" << channelName <<  "-Channel Number:" << channelNumber << "- Channel Index" << channelIndex;
-                //qDebug() <<  "Model Index:" << index << " - Attribute size: " << pCell->m_NumAttributes;
+                program = QString::fromStdString(pCell->GetText());
+                program.remove(channelName);
+                program.remove(breaker.at(0));
+                qDebug () << program;
+               //qDebug() << "Channel::" << channelName <<  "-Channel Number:" << channelNumber << "- Channel Index" << channelIndex;
+               //qDebug() <<  "Model Index:" << index << " - Attribute size: " << pCell->m_NumAttributes;
 
                 if (pPath )
                 {

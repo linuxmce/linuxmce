@@ -38,6 +38,8 @@ QVariant EPGItemClass::data(int role) const
     return programImage();
   case ChannelIdRole:
     return mythid();
+  case ProgramRole:
+  return program();
   default:
     return QVariant();
   }
