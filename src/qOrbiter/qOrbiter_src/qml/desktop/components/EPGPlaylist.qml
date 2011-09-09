@@ -34,7 +34,7 @@ onPlayListPositionChanged:nonepgplaylistview.positionViewAtIndex(dcenowplaying.m
         clip: true
         interactive: true
         flickableDirection: "VerticalFlick"
-        model: playlistmodel
+        model: simpleepg
 
         delegate:
 
@@ -55,14 +55,14 @@ onPlayListPositionChanged:nonepgplaylistview.positionViewAtIndex(dcenowplaying.m
             }
 
             Text {
-                text: id
+                text: channelnumber
                 anchors.fill: parent
                 wrapMode: "WrapAnywhere"
             }
 
             MouseArea{
                 anchors.fill: parent
-                onClicked: gridChangeChannel(name)
+                onClicked: gridChangeChannel(channelnumber, channelid)
             }
         }
     }

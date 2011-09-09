@@ -51,7 +51,7 @@ void ListModel::appendRows(const QList<gridItem *> &items)
   QModelIndex index = indexFromItem(m_list.last());
   QModelIndex index2 = indexFromItem(m_list.first());
   int currentRows= m_list.count() - 1;
-  emit dataChanged(index2, index, currentRows);
+  emit dataChanged(index2, index, 0);
 
 }
 

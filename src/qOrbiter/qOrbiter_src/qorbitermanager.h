@@ -35,6 +35,7 @@
 /*----custom classes-------*/
 //own version of OrbiterData.h
 #include <datamodels/listModel.h>                             //custom item model
+#include <contextobjects/epgchannellist.h>
 #include <datamodels/gridItem.h>
 #include <uiclasses/uicontroller.h>                           //experimental
 
@@ -75,14 +76,22 @@ public:
     QDir skinsDir;
     QString m_SkinsDirectoryPath;
 
+    //------------------------------------------------------playlist classes
+    PlaylistClass *storedVideoPlaylist;
+    EPGChannelList *simpleEPGmodel;
+
+    ListModel *playlistModel;
+
     //------CUSTOM QML TYPES------------------------------------------------------------------------------------
-    FileDetailsClass *filedetailsclass;
-    NowPlayingClass *nowPlayingButton;
     ScreenParamsClass *ScreenParameters;
-    PlaylistClass *currentPlaylist;
     ScreenSaverModule *ScreenSaver;
     SecurityVideoClass *SecurityVideo;
     SecurityVideoImage *securityimage;
+
+    //------------media vars-----------------------------------
+    FileDetailsClass *filedetailsclass;
+    NowPlayingClass *nowPlayingButton;
+
 
     //ui variables
     QString currentSkin;
@@ -136,7 +145,7 @@ Param 10 - pk_attribute
     ListModel *model;
     UserModel *userList;
     SkinDataModel *skinModel;
-    ListModel *playlistModel;
+
 
     MediaSubTypeModel *mediaTypeFilter;
     FilterModel *uiFileFilter;
@@ -258,7 +267,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
 
     //livetv related
     Q_INVOKABLE void changeChannels(QString chan);
-    Q_INVOKABLE void gridChangeChannel(QString chan);
+    Q_INVOKABLE void gridChangeChannel(QString chan, QString chanid);
 
     //media related
     Q_INVOKABLE void getMediaPlaylist();

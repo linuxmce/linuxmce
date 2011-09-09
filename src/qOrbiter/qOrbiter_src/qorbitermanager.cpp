@@ -226,13 +226,14 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         nowPlayingProvider = new UpdateObjectImageProvider(this);
         qorbiterUIwin->engine()->addImageProvider("updateobject", nowPlayingProvider );
 
-
+        simpleEPGmodel = new EPGChannelList(new EPGItemClass, this);
+        qorbiterUIwin->rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
 
         ScreenParameters = new ScreenParamsClass;
         qorbiterUIwin->rootContext()->setContextProperty("screenparams", ScreenParameters);
 
-        currentPlaylist = new PlaylistClass (new PlaylistItemClass, this);
-        qorbiterUIwin->rootContext()->setContextProperty("mediaplaylist", currentPlaylist);
+        storedVideoPlaylist = new PlaylistClass (new PlaylistItemClass, this);
+        qorbiterUIwin->rootContext()->setContextProperty("mediaplaylist", storedVideoPlaylist);
 
         //showing the qml screen depending on device / platform / etc
 #ifdef Q_OS_SYMBIAN
@@ -1457,17 +1458,24 @@ void qorbiterManager::setNowPlayingTv()
 
 void qorbiterManager::changeChannels(QString chan)
 {
-    pqOrbiter->TuneToChannel(chan.toInt());
+    pqOrbiter->TuneToChannel(chan.toInt(), chan );
 }
 
 void qorbiterManager::getLiveTVPlaylist()
 {
-    pqOrbiter->requestLiveTvPlaylist();
+    if(simpleEPGmodel->isActive == false)
+    {
+        pqOrbiter->requestLiveTvPlaylist();
+    }
+
 }
 
-void qorbiterManager::gridChangeChannel(QString chan)
+void qorbiterManager::gridChangeChannel(QString chan, QString chanid)
 {
-    qDebug() << chan;
+
+   pqOrbiter->TuneToChannel(chan.toInt(), chanid);
+
+
 }
 
 

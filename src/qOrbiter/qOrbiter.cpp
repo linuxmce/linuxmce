@@ -2190,7 +2190,7 @@ void DCE::qOrbiter::StopMedia()
 {
 
     CMD_MH_Stop_Media endMedia(qmlUI->iPK_Device, qmlUI->iMediaPluginID,0,qmlUI->nowPlayingButton->i_mediaType,0,QString::number(qmlUI->iea_area).toStdString(),false);
-    qmlUI->currentPlaylist->clear();
+    qmlUI->storedVideoPlaylist->clear();
     SendCommand(endMedia);
     qDebug() << "End command sent";
 }
@@ -2216,7 +2216,7 @@ void DCE::qOrbiter::PauseMedia()
 
 void DCE::qOrbiter::requestMediaPlaylist()
 {
-    qmlUI->currentPlaylist->clear();
+    qmlUI->storedVideoPlaylist->clear();
     int gHeight = 10;
     int gWidth = 10;
     int pkVar = 0;
@@ -2317,7 +2317,7 @@ void DCE::qOrbiter::requestMediaPlaylist()
 
                 }
                 */
-                qmlUI->currentPlaylist->appendRow(new PlaylistItemClass(cellTitle, cellAttribute, fk_file ,index, qmlUI->currentPlaylist));
+                qmlUI->storedVideoPlaylist->appendRow(new PlaylistItemClass(cellTitle, cellAttribute, fk_file ,index, qmlUI->storedVideoPlaylist));
             }
 
         }
@@ -2581,34 +2581,33 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
             qDebug() << "Response: " << cellsToRender << " cells to render";
 
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
-            QString cellTitle;
-            QString cellAttribute;
-            QString fk_file;
-            QString filePath;
-            int index;
-            QImage cellImg;
-            QString cellfk;
+            QString channelName;
+            QString channelIndex;
+            QString program;
+            int dceIndex;
+            int index = 0;
+            int channelNumber;
+            QImage channelimage;
             DataGridCell *pCell;
+
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
-
                 pCell = it->second;
-
-                string emptyEA;
-
-                // fk.remove("!F");
                 const char *pPath = pCell->GetImagePath();
-                index = pDataGridTable->CovertColRowType(it->first).first;
-                cellTitle = pCell->GetText();
-                cellAttribute = pCell->GetValue();
-                //qDebug() << pCell->GetImagePath();
-                cellfk = pCell->GetValue();
+             // index = pDataGridTable->CovertColRowType(pCell->m_Value);
+                QStringList breaker = QString::fromStdString(pCell->GetText()).split(" ");
 
-              //  qDebug() << "Now Playing Attribute::" << cellTitle << "-" << cellAttribute;
-              //  qDebug() << "Attribute image?" << pCell->GetImagePath();
+                channelName = breaker.at(1);
+                channelNumber = breaker.at(0).toInt();
+                channelIndex = pCell->GetValue();
+
+            program = pCell->m_mapAttributes_Find("Program").c_str();
+              //  qDebug() << "Channel::" << channelName <<  "-Channel Number:" << channelNumber << "- Channel Index" << channelIndex;
+                //qDebug() <<  "Model Index:" << index << " - Attribute size: " << pCell->m_NumAttributes;
+
                 if (pPath )
                 {
-                    cellImg = getfileForDG(pCell->GetImagePath());
+                    channelimage = getfileForDG(pCell->GetImagePath());
                     size_t s=0;
                     pCell->m_GraphicLength = (unsigned long) s;
                     pCell->m_GraphicFormat = GR_JPG;
@@ -2616,22 +2615,31 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
                 else if (!pPath) //making sure we dont provide a null image
                 {
                     //         qDebug() << "No Image";
-                    cellImg.load(":/icons/videos.png");
+                    channelimage.load(":/icons/videos.png");
                 }
-                else if (cellImg.isNull())
+                else if (channelimage.isNull())
                 {
-                    cellImg.load(":/icons/videos.png");
+                    channelimage.load(":/icons/videos.png");
                 }
-                qmlUI->playlistModel->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg,  qmlUI->playlistModel));
+                qmlUI->simpleEPGmodel->appendRow(new EPGItemClass(channelName, channelNumber, channelIndex, program, index, channelimage, channelimage, qmlUI->simpleEPGmodel));
+                index++;
             }
         }
         //}
     }
 }
 
-void DCE::qOrbiter::TuneToChannel(int channel)
+void DCE::qOrbiter::TuneToChannel(int channel, QString chanid)
 {
-    CMD_Tune_to_channel changeChannel(qmlUI->iPK_Device, qmlUI->iMediaPluginID, StringUtils::itos(channel), StringUtils::itos(channel));
-    SendCommand(changeChannel);
+    if(qmlUI->i_current_mediaType = 11)
+    {
+    CMD_Tune_to_channel changeChannel(qmlUI->iPK_Device, qmlUI->iMediaPluginID, StringUtils::itos(channel), chanid.toStdString());
+     SendCommand(changeChannel);
+    }
+    else
+    {
+
+    }
+
 }
 

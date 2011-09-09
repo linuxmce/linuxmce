@@ -83,7 +83,7 @@ public:
     Q_INVOKABLE  void GetSingleSecurityCam(int cam_device, int iHeight, int iWidth);
     void GetMultipleSecurityCams(QStringList cams);
     void GetNowPlayingAttributes();
-    void TuneToChannel(int channel);
+    void TuneToChannel(int channel, QString chanid);
 
     //<-dceag-const-e->
 

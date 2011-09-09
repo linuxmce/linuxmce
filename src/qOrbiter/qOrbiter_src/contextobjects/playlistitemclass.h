@@ -5,7 +5,7 @@
   and to eventually allow the user to change the order of the playlist on the fly. role names subject to change
   */
 
-#include <QAbstractListModel>
+
 #include <QVariant>
 #include <QImage>
 #include <QMap>
