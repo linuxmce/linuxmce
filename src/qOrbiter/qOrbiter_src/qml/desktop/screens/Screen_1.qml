@@ -21,19 +21,26 @@ Item
         }
         Rectangle{
             id:status
-            height: 25
+            height: scaleY(2)
             width: parent.width
             color:"aliceblue"
+
+            Text{
+                id:connectstatus
+                text: "Orbiter"+ iPK_Device +" Is Connected"
+               height: status.height; anchors.left: parent.left; anchors.leftMargin: scaleX(5)
+            }
+
+            Clock{id:screen1time; height: status.height; anchors.right: parent.right; anchors.rightMargin: scaleX(15) }
 
         }
 
         Column{
             id:maindisplay
-
             spacing: 0
             anchors.top:status.bottom
             anchors.topMargin: 2
-            height: scaleY(75)
+            height: childrenRect.height
             width: scaleX(100)
             HomeLightingRow{id:lightRow }
             HomeMediaRow{id: mediaRow}
@@ -42,7 +49,7 @@ Item
             HomeSecurityRow{id: securityRom}
 
         }
-        BottomPanel{id: advanced; anchors.bottom: stage.bottom}
+        BottomPanel{id: advanced; anchors.top: maindisplay.bottom}
     }
 }
 

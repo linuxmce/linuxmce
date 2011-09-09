@@ -409,7 +409,7 @@ bool qorbiterManager::getConf(int pPK_Device)
     {
         qDebug() << "Invalid config for device: " << iPK_Device;
         qDebug() << "Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device) ;
-        exit(20);
+        gotoQScreen("Splash.qml");
     }
 
     QDomElement root = configData.documentElement();        //represent configuration in memeory

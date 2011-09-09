@@ -5,14 +5,14 @@ import "../js/ComponentLoader.js" as MyJs
 Rectangle {
     id:advanced_panel
     width: style.orbiterW
-    height: scaleY(10)
+    height: style.widebuttonh + 10
     color: style.darkhighlight
 
     Row{
         id:advancedrow
-        height:scaleY(9)
+        height:childrenRect.height +5
         width: childrenRect.width
-        anchors.centerIn: parent
+        anchors.centerIn: advanced_panel
         spacing:10
         clip: false
 
@@ -62,6 +62,8 @@ Rectangle {
 
         ButtonSq{
             id:roombutton
+            width: style.widebuttonw
+            height: style.widebuttonh
             buttontext: currentroom
             MouseArea{
                 anchors.fill: parent
