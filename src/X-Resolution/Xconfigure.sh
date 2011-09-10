@@ -269,12 +269,17 @@ EnsureResolutionVariables()
 
 wmtweaks_default()
 {
-	echo '<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mcs-option SYSTEM "mcs-option.dtd">
+ echo '<?xml version="1.0" encoding="UTF-8"?>
 
-<mcs-option>
-	<option name="Xfwm/UseCompositing" type="int" value="1"/>
-</mcs-option>'
+<channel name="xfwm4" version="1.0">
+
+    <property name="general" type="empty">
+
+        <property name="use_compositing" type="bool" value="true"/>
+
+    </property>
+
+</channel>'
 }
 
 SetWMCompositor()
@@ -287,7 +292,7 @@ SetWMCompositor()
 		if [[ ! -d "$user" ]]; then
 			continue
 		fi
-		WMTweaksFile="$user/.config/xfce4/mcs_settings/wmtweaks.xml"
+		WMTweaksFile="$user/.config/xfce4/xconf/xfce-perchannel-xml/xfwm4.xml"
 		mkdir -p "$(dirname "$WMTweaksFile")"
 		wmtweaks_default >"$WMTweaksFile"
 		sed -i '/Xfwm\/UseCompositing/ s/value="."/value="'"$UseCompositing"'"/g' "$WMTweaksFile"
