@@ -5,7 +5,7 @@ Rectangle {
 
     // property alias synText:
     id: storedaudioremote
-    anchors.centerIn: parent
+
     Timer{
         id:singleshot
         repeat: false
@@ -21,8 +21,8 @@ Rectangle {
         onPlayListPositionChanged: nowplayingimage.source = "image://updateobject/"+securityvideo.timestamp
     }
 
-    height: 720
-    width: 1280
+    height: style.orbiterH
+    width: style.orbiterW
     radius: 0
     opacity: 1
     color: style.darkhighlight
@@ -143,17 +143,13 @@ Rectangle {
 
     }
 
-        HomeButton{anchors.right: parent.right; anchors.top:parent.top}
+    HomeButton{anchors.right: parent.right; anchors.top:parent.top}
 
-        VideoControls {
-            id: videocontrols1
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: parent.bottom
-
-        }
-
-
-
+    VideoControls {
+        id: videocontrols1
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
 
     }
+}
 

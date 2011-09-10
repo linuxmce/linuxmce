@@ -40,8 +40,8 @@ QtObject{
     property string darkhighlight: highlight2
     property string lighthighlight: highlight1
     //main stage styles
-    property int orbiterH: 720
-    property int orbiterW: 1280
+    property int orbiterH: 400
+    property int orbiterW: 854
     property color stageBG: "slategray"
     property int homescreenrowheight:100
     property int homescreenbuttonheight: 9

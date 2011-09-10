@@ -1,8 +1,8 @@
 import QtQuick 1.0
 
 Rectangle {
-    width: 200
-    height: 500
+    width: scaleX(20)
+    height: scaleY(80)
     color: "transparent"
 
     Component.onCompleted: nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
@@ -20,8 +20,8 @@ id:playlistpopulator
 
     ListView{
         id:nonepgplaylistview
-        height:500
-        width: 200
+        width: scaleX(20)
+        height: scaleY(80)
 
         highlightFollowsCurrentItem: true
         highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
@@ -35,8 +35,8 @@ id:playlistpopulator
             Rectangle {
             border.color: "black"
             border.width: 1
-            width:200
-            height: 50
+            width:scaleX(20)
+            height: scaleY(10)
             color: status ? "whitesmoke" : "green"
             Text {
                 id: position
@@ -45,13 +45,14 @@ id:playlistpopulator
                 opacity: .5
                 color: "black"
                 anchors.centerIn: parent
-                font.pointSize: 14
+                font.pixelSize: 14
             }
 
             Text {
                 text: id
                 anchors.fill: parent
                 wrapMode: "WrapAnywhere"
+                font.pixelSize: 12
             }
 
             MouseArea{

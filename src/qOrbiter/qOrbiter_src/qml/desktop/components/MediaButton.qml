@@ -4,8 +4,8 @@ Rectangle {
     property alias media_but_img: media_button_image.source
     property alias media_but_txt: media_button_text.text
     id: rectangle1
-    width: 75
-    height: 75
+    width: style.stdbuttonh
+    height: style.stdbuttonw
     radius: 25
     Text {
         id: media_button_text

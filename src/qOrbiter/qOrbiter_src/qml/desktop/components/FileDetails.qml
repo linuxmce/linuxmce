@@ -3,8 +3,8 @@ import QtQuick 1.0
 
 Rectangle {
     id: filedetailrect
-    width: 650
-    height: 550
+    width: scaleX(50)
+    height: scaleY(80)
     anchors.centerIn: parent
     color: style.darkhighlight
     radius: 20
@@ -41,24 +41,18 @@ Rectangle {
         id: image1
         anchors.top: titlerect.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        width: 521
-        height: 351
+        width: scaleX(60)
+        height: scaleY(30)
         fillMode: Image.PreserveAspectFit
-
         source: "image://filedetailsprovider/"+filedetailsclass.screenshot
         asynchronous: true
-    }
-    MouseArea{
-
-        anchors.fill: parent
     }
 
     Rectangle {
         id: rectangle1
-        x: 17
-        y: 291
-        width: 622
-        height: 173
+       anchors.top: image1.bottom
+        width: scaleX(60)
+        height: scaleY(20)
         radius: 4
         clip:  true
         color: style.not_color
@@ -69,70 +63,36 @@ Rectangle {
             contentWidth: parent.width
             contentHeight: childrenRect.height
             id: contentFlick
+            Column
+            {
+                spacing:5
+
+
             Text {
-                id: fnametext
-                x: 104
-                y: 55
-                text: filedetailsclass.filename
+                id: fnametext               
+                text: "Filename: " + filedetailsclass.filename
                 font.pixelSize: 12
             }
 
             Text {
-                id: fnamelabel
-                x: 31
-                y: 55
-                text: "Filename"
+                id:  titletext
+                text:"Title:" + filedetailsclass.objecttitle
                 font.pixelSize: 12
             }
 
             Text {
                 id: synopsistext
-                x: 104
-                y: 83
-                width: 500
+
+                width: scaleX(50)
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                 text: filedetailsclass.synop
-                font.pixelSize: 12
-            }
-
-            Text {
-                id: titletext
-                x: 104
-                y: 15
-                text: filedetailsclass.objecttitle
-                font.pixelSize: 12
-            }
-
-            Text {
-                id: synopsislabel
-                x: 31
-                y: 83
-                text: "Synopsis"
-                font.pixelSize: 12
-            }
-
-            Text {
-                id: locationlabel
-                x: 31
-                y: 35
-                text: "Location"
-                font.pixelSize: 12
-            }
-
-            Text {
-                id: titlelabel
-                x: 30
-                y: 15
-                text: "Title"
                 font.pixelSize: 12
             }
         }
     }
 
     Text {
-        id: txtmoredn
-        x: 599
-        y: 449
+        id: txtmoredn        
         text: "More..."
         anchors.horizontalCenterOffset: 294
         anchors.horizontalCenter: parent.horizontalCenter
@@ -142,15 +102,15 @@ Rectangle {
 
     Text {
         id: txtmoreup
-        x: 599
-        y: 291
+        x: scaleX(60)
+        y: scaleY(20)
         text: "More..."
         anchors.horizontalCenterOffset: 294
         anchors.horizontalCenter: parent.horizontalCenter
         font.pixelSize: 12
         visible: !contentFlick.atYBeginning
     }
-
+}
 
 Component{
     id:performersheader
@@ -188,15 +148,15 @@ Component{
 
     } */
 
-
-
+Row{
+anchors.top: rectangle1.bottom
 ButtonSq {
     id: buttonsq1
-    y: 485
-    width: 140
-    height: 52
+
+    width: style.stdbuttonw
+    height: style.stdbuttonh
     radius: 10
-    x: (parent.width/3)-140
+
     //anchors.leftMargin: 18
     buttontext: "Play"
     MouseArea
@@ -208,21 +168,19 @@ ButtonSq {
 
 ButtonSq {
     id: buttonsq2
-    //x: 227
-    y: 485
-    width: 140
-    height: 52
+
+    width: style.stdbuttonw
+    height: style.stdbuttonh
     radius: 10
-    anchors.horizontalCenter: parent.horizontalCenter
+
     buttontext: "Move"
 }
 
 ButtonSq {
     id: buttonsq3
-    //x: 421
-    y: 485
-    width: 140
-    height: 52
+
+    width: style.stdbuttonw
+    height: style.stdbuttonh
     radius: 10
     buttontext: "Close"
     x: ((parent.width/3)*2)
@@ -230,6 +188,7 @@ ButtonSq {
         anchors.fill:  parent
         onClicked: filedetailrect.destroy()
     }
+}
 }
 Component.onCompleted: contentFlick.contentHeight=synopsistext.height+104
 

@@ -1,8 +1,8 @@
 import QtQuick 1.0
 
 Rectangle {
-    width: 300
-    height: 420
+    width: scaleX(30)
+    height: scaleY(40)
     color:"transparent"
     id:remotenumberpad
 

@@ -22,8 +22,8 @@ Rectangle {
         onPlayListPositionChanged: image1.source = "image://updateobject/"+securityvideo.timestamp
     }
 
-    height: 720
-    width: 1280
+    height: style.orbiterH
+    width: style.orbiterW
     color: "transparent"
     Component.onCompleted:setNowPlayingTv()
     //main 'now playing rect containing all the other items

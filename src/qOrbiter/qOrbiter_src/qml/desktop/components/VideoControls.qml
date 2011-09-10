@@ -1,23 +1,24 @@
 import QtQuick 1.0
 
 Rectangle {
-    width: 500
-    height: 100
+    width: childrenRect.width
+    height: childrenRect.height
     color: "transparent"
+
     Row{
-        anchors.centerIn: parent
+        spacing: 5
 
-        MediaButton {id:back ;
 
+        MediaButton {
+            id:back
             media_but_txt: "back"
             Image {
                 id: backicon
-               source: "../../../img/icons/player_end.png"
-              rotation: 180
+                source: "../../../img/icons/player_end.png"
+                rotation: 180
                 height: parent.height
                 width: parent.width
             }
-
         }
 
         MediaButton {id:rw ;
