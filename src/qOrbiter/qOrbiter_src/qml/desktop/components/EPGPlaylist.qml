@@ -1,8 +1,8 @@
 import QtQuick 1.0
 
 Rectangle {
-    width: scaleX(20)
-    height: scaleY(40)
+    width: scaleX(25)
+    height: scaleY(50)
     color: "transparent"
 
     Timer{
@@ -10,7 +10,7 @@ Rectangle {
         repeat: false
         interval: 2000
         triggeredOnStart: false
-        running: true
+        running: false
 
         onTriggered:getLiveTVPlaylist()
     }
@@ -18,15 +18,21 @@ Rectangle {
 
     Component.onCompleted: nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
 
-Connections{
-target: dcenowplaying
-onPlayListPositionChanged:nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
+    Connections{
+        target: dcenowplaying
+        onPlayListPositionChanged:nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
 
-}
+    }
+
+    WorkerScript{
+        id:playlistpopulator
+        source: getLiveTVPlaylist()
+
+    }
 
     ListView{
         id:nonepgplaylistview
-        height:scaleY(40)
+        height:scaleY(50)
         width: scaleX(21)
 
         highlightFollowsCurrentItem: true
@@ -66,7 +72,10 @@ onPlayListPositionChanged:nonepgplaylistview.positionViewAtIndex(dcenowplaying.m
 
             MouseArea{
                 anchors.fill: parent
-                onClicked: gridChangeChannel(channelnumber, channelid)
+                onClicked:{
+                    gridChangeChannel(channelnumber, channelid)
+                    nonepgplaylistview.positionViewAtIndex(index, ListView.Beginning)
+                }
                 hoverEnabled: true
                 onEntered: delrect.color = style.accentcolor
                 onExited: delrect.color = style.lighthighlight

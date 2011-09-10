@@ -1,6 +1,7 @@
 #ifndef EPGITEMCLASS_H
 #define EPGITEMCLASS_H
 
+#include <QAbstractListModel>
 #include <QObject>
 #include <QVariant>
 #include <QMap>
@@ -40,11 +41,6 @@ public:
 
 
     inline QMap <QString*, int> attributes() const {return m_mapAttrib;}
-
-    inline void setActive(bool b) { isActive = b;}
-    Q_INVOKABLE inline bool getActive () {return isActive;}
-    bool isActive;
-
 private:
     QString m_channame;
     int m_chanindex;

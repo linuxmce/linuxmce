@@ -2,8 +2,8 @@
 #include <QDebug>
 
 
-EPGChannelList::EPGChannelList(EPGItemClass* prototype, QObject *parent) :
-    QAbstractListModel(parent), m_prototype(prototype)
+EPGChannelList::EPGChannelList(EPGItemClass* prototype) :
+     m_prototype(prototype)
 {
     setRoleNames(m_prototype->roleNames());
     qRegisterMetaType<QModelIndex>("QModelIndex");
@@ -39,7 +39,7 @@ void EPGChannelList::appendRows(const QList<EPGItemClass *> &items)
     beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
     foreach(EPGItemClass *item, items) {
 
-     //QObject::connect(item, SIGNAL(dataChanged()), this , SLOT(handleItemChange()));
+    connect(item, SIGNAL(dataChanged()), this , SLOT(handleItemChange()));
         m_list.append(item);
     }
 
@@ -47,7 +47,7 @@ void EPGChannelList::appendRows(const QList<EPGItemClass *> &items)
     QModelIndex index = indexFromItem(m_list.last());
     QModelIndex index2 = indexFromItem(m_list.first());
     int currentRows= m_list.count() - 1;
-   // emit this->dataChanged(index2, index, 0);
+   emit dataChanged(index2, index, currentRows);
     isActive = true;
 }
 
@@ -67,7 +67,7 @@ void EPGChannelList::handleItemChange()
     qDebug() << "Handling item change for:" << index;
     if(index.isValid())
     {
-      //  emit dataChanged(index, index, 0);
+       emit dataChanged(index, index, 0);
     }
 }
 
@@ -144,7 +144,7 @@ EPGItemClass * EPGChannelList::currentRow()
 void EPGChannelList::setItemStatus(int pos)
 {
     EPGItemClass * item = find(QString::number(pos));
-    item->setActive(true);
+
 }
 
 bool EPGChannelList::checkDupe(QString name, QString position)

@@ -43,7 +43,7 @@ void ListModel::appendRows(const QList<gridItem *> &items)
   beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
   foreach(gridItem *item, items) {
 
-   QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
+   connect(item, SIGNAL(dataChanged()), this , SLOT(handleItemChange()));
     m_list.append(item);
   }
 

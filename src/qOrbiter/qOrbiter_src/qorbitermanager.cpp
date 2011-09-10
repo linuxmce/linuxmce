@@ -226,7 +226,8 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         nowPlayingProvider = new UpdateObjectImageProvider(this);
         qorbiterUIwin->engine()->addImageProvider("updateobject", nowPlayingProvider );
 
-        simpleEPGmodel = new EPGChannelList(new EPGItemClass, this);
+        simpleEPGmodel = new EPGChannelList(new EPGItemClass);
+
         qorbiterUIwin->rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
 
         ScreenParameters = new ScreenParamsClass;

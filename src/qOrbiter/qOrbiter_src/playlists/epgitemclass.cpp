@@ -3,7 +3,7 @@
 EPGItemClass::EPGItemClass( QString &chanName, int &chanIndex,  QString &channel, QString &program, int &dceIndex, QImage &chanImage, QImage &progImag, QObject *parent ) :
     m_channame(chanName), m_dceIndex(dceIndex), m_channel(channel), m_program(program), channel_image(chanImage), program_image(progImag), channel_number(chanIndex)
 {
-isActive = false;
+
 }
 
 QHash<int, QByteArray> EPGItemClass::roleNames() const

@@ -77,6 +77,7 @@ public:
     QString m_SkinsDirectoryPath;
 
     //------------------------------------------------------playlist classes
+
     PlaylistClass *storedVideoPlaylist;
     EPGChannelList *simpleEPGmodel;
 
