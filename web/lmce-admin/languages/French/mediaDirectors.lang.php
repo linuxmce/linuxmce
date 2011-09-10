@@ -1,0 +1,37 @@
+<?
+$TEXT_MEDIA_DIRECTORS_CONST='Directeurs de média';
+$TEXT_ADVANCED_PREPARATION_NOTE_CONST='Ce dispositif à besoin de préparations antérieures qui peuvent durer quelques minutes. Votre noyeau est en train de les faire. Vous allez voir un message sur tout les orbiters et directeurs de média dès que terminé. Veuillez attendre aver l\'utilisation du dispositif jusque\'à ce moment.';
+$TEXT_CONNECTED_TO_CONST='Connecté à';
+$TEXT_PVR_CAPTURE_CARD_CONST='Carte de capture PVR';
+$TEXT_SOUND_CARD_CONST='Carte son';
+$TEXT_AUDIO_SETTINGS_CONST='Audio settings';
+$TEXT_AC3_PASSTHROUGH_CONST='Use AC3/DTS pass-through';
+$TEXT_VIDEO_CARD_CONST='Carte vidéo';
+$TEXT_SET_RESOLUTION_REFRESH_CONST='Résolution & rafraichissement';
+$TEXT_SETUP_DISKLESS_MD_CONST='Setup Diskless MD';
+$TEXT_DISKLESS_MD_NOTICE_CONST='When you add a new diskless M/D, you must first click this button, wait for the setup process to complete, then do a "quick reload router", and then you can bootup your new diskless media director.';
+$TEXT_ADD_MD_CONST='Add device';
+$TEXT_MD_UPDATED_CONST='Les dispositifs ont été mis à jour';
+$TEXT_ERROR_DUPLICATE_ROOMS_CONST='Directeur de média dans plusieurs salles.';
+$TEXT_NO_PVR_CARDS_CONST='Pas de carte PVR.';
+$TEXT_CONFIRM_DELETE_PVR_CARD_CONST='Êtes-vous sûr de vouloir supprimer cette carte?';
+$TEXT_PVR_CARD_DELETED_CONST='PVR card deleted.';
+$TEXT_REBUILD_DISKLESS_IMAGE_CONST='Reconstruire l\'image';
+$TEXT_CONFIRM_DELETE_MEDIA_DIRECTOR_CONST='Are you sure you want to delete this device?';
+$TEXT_FORCE_48K_CONST='Force 48 KHz output sample rate';
+$TEXT_CHANGE_VIDEO_CARD_CONFIRMATION_CONST='Are you sure you want to change the video card?';
+$TEXT_INFRARED_REMOTES_YOU_WILL_USE_CONST='Télécommandes infrarouge à utiliser';
+$TEXT_INFRARED_RECEIVERS_CONST='Récepteur infrarouge';
+$TEXT_COMPUTING_APPLICATIONS_CONST='Application informatique';
+$TEXT_HARDWARE_ACCELERATION_CONST='Accélération matériel';
+$TEXT_USE_ALPHA_BLENDED_UI_CONST='Utiliser IU alpa';
+$TEXT_DEINTERLACE_QUALITY_CONST='Qualité désinterlac.';
+$TEXT_SCREEN_SAVER_CONST='Ecran de veille';
+$TEXT_SOFTWARE_MODULES_CONST='Modules logiciels';
+$TEXT_UI_CONST='UI';
+$TEXT_OS_ON_HARD_DRIVE_CONST='SE sur disque dûr';
+$TEXT_VIDEO_SETTINGS_CONST='Réglages vidéo';
+$TEXT_EDIT_PIPES_CONST='Modifier conduites Audio/Video';
+$TXT_AUDIO_PIPE_CONST='CONDUITE AUDIO';
+$TXT_VIDEO_PIPE_CONST='CONDUITE VIDEO';
+?>
