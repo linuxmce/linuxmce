@@ -6,11 +6,13 @@ if ! grep -q '^Name: shared/accepted-sun-dlj-v1-1' /var/cache/debconf/config.dat
 	echo 'Template: shared/accepted-sun-dlj-v1-1' >> /var/cache/debconf/config.dat
 	echo 'Owners: sun-java6-bin, sun-java6-jre' >>  /var/cache/debconf/config.dat
 fi
-if ! grep -q '^Name: mythweb/only' /var/cache/debconf/config.dat ;then
-        echo "Name: mythweb/only" >> /var/cache/debconf/config.dat
-        echo "Template: mythweb/only" >> /var/cache/debconf/config.dat
-        echo "Owners: mythweb" >> /var/cache/debconf/config.dat
-fi
+#Seeding mythweb preferences to not override the LMCE site on install
+touch /etc/default/mythweb
+echo "[cfg]" >> /etc/default/mythweb
+echo "enable = false" >> /etc/default/mythweb
+echo "only = false" >> /etc/default/mythweb
+echo "username = " >> /etc/default/mythweb
+echo "password = " >> /etc/default/mythweb 
 
 . /usr/share/debconf/confmodule
 
