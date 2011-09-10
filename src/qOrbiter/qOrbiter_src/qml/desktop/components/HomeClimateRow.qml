@@ -48,7 +48,7 @@ Item {
                     id:climateRow
                     height: scaleY(16)
                     width: scaleX(85)
-                    anchors.centerIn: parent
+                    anchors.left: rowheader.right
                     contentHeight: style.buttonH
                     contentWidth: ((style.buttonW + 5) * (climateScenarios.count + 1)) - 5
                     clip: true

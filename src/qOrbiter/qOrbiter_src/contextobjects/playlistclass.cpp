@@ -37,7 +37,7 @@ void PlaylistClass::appendRows(const QList<PlaylistItemClass *> &items)
     beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
     foreach(PlaylistItemClass *item, items) {
 
-        QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
+        //QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
         m_list.append(item);
     }
 

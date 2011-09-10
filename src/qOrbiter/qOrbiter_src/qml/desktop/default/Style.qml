@@ -30,12 +30,12 @@ QtObject{
     property string skindescription: "Pluto Classic Skin"
     property string skinversion: "1.0"
     property string skinvariation: "Desktop 800x600"
-    property string maincolor: "midnightblue"
-    property string accentcolor: "lightsteelblue"
-    property string highlight1: "aliceblue"
-    property string highlight2: "slategrey"
-    property string alertcolor: "red"
-    property string warncolor:"yellow"
+    property color maincolor: "midnightblue"
+    property color accentcolor: "lightsteelblue"
+    property color highlight1: "aliceblue"
+    property color highlight2: "slategrey"
+    property color alertcolor: "red"
+    property color warncolor:"yellow"
 
     property string darkhighlight: highlight2
     property string lighthighlight: highlight1
@@ -56,8 +56,8 @@ QtObject{
     property int iconWidth: 9
     property int  stdbuttonh: scaleY(13)
     property int  stdbuttonw: scaleX(8)
-    property int widebuttonw: scaleX(13)
-    property int widebuttonh: scaleY(13)
+    property int widebuttonw: scaleX(10)
+    property int widebuttonh: scaleY(10)
 
 
     //textStyles

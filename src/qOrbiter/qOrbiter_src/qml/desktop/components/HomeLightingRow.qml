@@ -33,7 +33,7 @@ Item {
                 width: style.stdbuttonw
                 anchors.top: parent.top
                 anchors.topMargin: scaleY(2)
-                color: style.lightaccent
+                color: style.accentcolor
                 radius: style.but_smooth
                 buttontext: ""
 

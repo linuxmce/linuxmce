@@ -105,7 +105,10 @@ extern "C" {
 qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent) :
     QWidget(parent), iPK_Device(deviceno), qs_routerip(routerip)
 {
-
+    /*
+    this block is for the purposes of exposing the proper qml skins for particular target class
+    its current reflective more of devices as target classes but this may change
+            */
     QString buildType;
 #ifdef for_desktop
     buildType = "/qml/desktop/";
@@ -127,9 +130,10 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
     }
 
     //  currentSkin = "default";
-    currentSkinURL="/qml/qOrbiter_src/";
+
     s_RouterIP="DCERouter";
 
+    //adjusting runtime paths also based on platform and build type
     QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
     const QString test = buildType;
 
@@ -137,9 +141,12 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
     QString skinPath= finalPath+"/Style.qml";
     QString skinsPath = qmlPath+test;
 
+    /*
+      this represent the beginning of the processing area for the skins availible for the device
+      we read the directory, and in turn read the file information to present it in the user interface
+      */
     //qDebug () << "QML import path for build: " << qmlPath;
     m_SkinsDirectoryPath = qmlPath+buildType.toLatin1().constData();
-
     QDir directoryMap(skinsPath);
     directoryMap.setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
     QStringList skinList = directoryMap.entryList();
@@ -163,7 +170,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
             qDebug() << skinData.errors();
             exit(0);
         }
-       // qDebug() << " loading";
+        // qDebug() << " loading";
     }
 
     if(skinData.isReady())
@@ -174,11 +181,11 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
 
 
-        initializeGridModel();
-        initializeSortString();
+        initializeGridModel();  //begins setup of media grid listmodel and its properties
+        initializeSortString(); //associated logic for navigating media grids
 
+        qorbiterUIwin->rootContext()->setContextObject(this); //providing a direct object for qml to call c++ functions of this class
 
-        qorbiterUIwin->rootContext()->setContextObject(this);
 
         //setting engine import path
         qorbiterUIwin->engine()->setBaseUrl(qmlPath+buildType);
@@ -200,18 +207,17 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
 
         //initial signal and slot connections
         QObject::connect(item, SIGNAL(close()), this, SLOT(closeOrbiter()));
-        // QObject::connect(this,SIGNAL(destroyed()), this, SLOT(closeOrbiter()));
+
 
         //managing where were are variables
         int i_current_command_grp;
         i_current_command_grp = 0;
         QStringList goBack;
         goBack << ("|||1,2|0|13|0|2|");
-
         backwards = false;
 
+        //file details object and imageprovider setup
         filedetailsclass = new FileDetailsClass();
-        //file details object
         qorbiterUIwin->rootContext()->setContextProperty("filedetailsclass" ,filedetailsclass);
         contextImageProvider = new FileDetailsImageProvider(filedetailsclass);
         qorbiterUIwin->engine()->addImageProvider("filedetailsprovider", contextImageProvider);
@@ -221,17 +227,23 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         ScreenSaver = new ScreenSaverModule;
         qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", ScreenSaver);
 
+        /* now playing button todo - make it appear and dissapear if in a room with no media / media director
+            embed in room model or other location based marker
+*/
         nowPlayingButton = new NowPlayingClass();
         qorbiterUIwin->rootContext()->setContextProperty("dcenowplaying" , nowPlayingButton);
         nowPlayingProvider = new UpdateObjectImageProvider(this);
         qorbiterUIwin->engine()->addImageProvider("updateobject", nowPlayingProvider );
 
+        //epg listmodel, no imageprovider as of yet
         simpleEPGmodel = new EPGChannelList(new EPGItemClass);
-
         qorbiterUIwin->rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
 
+        //screen parameters class that could be extended as needed to fetch other data
         ScreenParameters = new ScreenParamsClass;
         qorbiterUIwin->rootContext()->setContextProperty("screenparams", ScreenParameters);
+
+        //stored video playlist for managing any media that isnt live broacast essentially
 
         storedVideoPlaylist = new PlaylistClass (new PlaylistItemClass, this);
         qorbiterUIwin->rootContext()->setContextProperty("mediaplaylist", storedVideoPlaylist);
@@ -252,7 +264,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
 
         // qorbiterUIwin->showFullScreen();
         gotoQScreen("Splash.qml");
-   //     qDebug() << "Showing Splash";
+        //     qDebug() << "Showing Splash";
         QObject::connect(item,SIGNAL(setupStart(int, QString)), this,SLOT(qmlSetupLmce(int,QString)));
 
     }
@@ -285,7 +297,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
     pqOrbiter->qmlUI = this;
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
     {
-     //   qDebug() << "Device: " << PK_Device <<" Connect";
+        //   qDebug() << "Device: " << PK_Device <<" Connect";
         //g_pCommand_Impl=pqOrbiter;
         //g_pDeadlockHandler=DeadlockHandler;
         // g_pSocketCrashHandler=SocketCrashHandler;
@@ -305,14 +317,12 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
 
 
-        if (getConf(PK_Device) )
+        if (getConf(PK_Device) )        //getting configuration from qOrbiterGen xml file
         {
 
-            if (pqOrbiter->initialize())
+            if (pqOrbiter->initialize()) //the dcethread initialization
             {
-
-
-        //        qDebug () << "Orbiter Registered, starting";
+                //        qDebug () << "Orbiter Registered, starting";
                 gotoQScreen("Screen_1.qml");
                 return true;
             }
@@ -323,7 +333,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
                 return false;
             }
 
-            /*  i dont know what this does, but since orbter should not be local, it is commented out but not removed.
+            //i dont know what this does, but since orbter should not be local, it is commented out but not removed.
             if( bLocalMode )
                     pqOrbiter->RunLocalMode();
             else
@@ -332,8 +342,8 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
                             pthread_join(pqOrbiter->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
 
             }
-            g_pDeadlockHandler=NULL;
-            g_pSocketCrashHandler=NULL; */
+            //g_pDeadlockHandler=NULL;
+            //g_pSocketCrashHandler=NULL;
         }
     }
     else
@@ -350,7 +360,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
         else
         {
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
-            qDebug() << "Connect Failed";            
+            qDebug() << "Connect Failed";
             gotoQScreen("Splash.qml");
 
             /*
@@ -371,7 +381,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 bool qorbiterManager::refreshUI()
 {
 
-  //  qDebug() << "Launching UI";
+    //  qDebug() << "Launching UI";
     return true;
 }
 
@@ -393,14 +403,14 @@ bool qorbiterManager::getConf(int pPK_Device)
     securityimage = new SecurityVideoImage(SecurityVideo);
     qorbiterUIwin->engine()->addImageProvider("securityimage", securityimage);
 
-   // qDebug() << "Reading Config" ;
+    // qDebug() << "Reading Config" ;
     iPK_Device = long(pPK_Device);
     iOrbiterPluginID = 9;
     iMediaPluginID = 10;
     iSize = 0;
     m_pOrbiterCat = 5;
     s_onOFF = "1";
-   // qDebug() << "PK_Device No:" << iPK_Device;
+    // qDebug() << "PK_Device No:" << iPK_Device;
 
     QDomDocument configData;
 
@@ -1179,7 +1189,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
         execGrp(i_current_command_grp);
 
         break;
-    case 2:        
+    case 2:
         q_fileFormat = param;
 
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
@@ -1370,7 +1380,6 @@ void qorbiterManager::initializeGridModel()
     //adding important data and objects to qml now that they have been setup
     qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
     qorbiterUIwin->engine()->addImageProvider("datagridimg", advancedProvider);
-    qorbiterUIwin->rootContext()->setContextProperty("currentSkinUrl" , currentSkinURL);
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
 }
 
@@ -1442,7 +1451,7 @@ void qorbiterManager::setNowPlayingData()
     pqOrbiter->requestMediaPlaylist();
 
     qDebug() << "Initiating media bind and playlist request";
-     pqOrbiter->GetNowPlayingAttributes();
+    pqOrbiter->GetNowPlayingAttributes();
 }
 
 void qorbiterManager::getMediaPlaylist()
@@ -1462,7 +1471,7 @@ void qorbiterManager::setNowPlayingTv()
     //pqOrbiter->requestMediaPlaylist();
 
     qDebug() << "Initiating media bind and livetv playlist request";
-   //
+    //
 }
 
 void qorbiterManager::changeChannels(QString chan)
@@ -1482,7 +1491,7 @@ void qorbiterManager::getLiveTVPlaylist()
 void qorbiterManager::gridChangeChannel(QString chan, QString chanid)
 {
 
-   pqOrbiter->TuneToChannel(chan.toInt(), chanid);
+    pqOrbiter->TuneToChannel(chan.toInt(), chanid);
 
 
 }
