@@ -245,6 +245,7 @@
 #define DEVICEDATA_IPv6TunnelSettings_CONST 292
 #define DEVICEDATA_Battery_state_CONST 293
 #define DEVICEDATA_FK_Device_Capture_Card_Audio_P_CONST 294
+#define DEVICEDATA_VPNSettings_CONST 295
 
 #define DEVICEDATA_TABLE "DeviceData"
 #define DEVICEDATA_PK_DEVICEDATA_FIELD "PK_DeviceData"

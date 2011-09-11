@@ -1,0 +1,9 @@
+<-dceag-p-b->
+Package = DCE_Destination_Package
+Dir = 
+desc = DCE Implemenation for #2189 USB Game Pad
+Maintainer = thomasName
+Email = thom.cherryhomes@gmail.com
+Depend = DCE_Dependencies
+<-dceag-p-e->
+
