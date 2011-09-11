@@ -2540,6 +2540,8 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
 
     string m_sSeek;
     string m_sDataGrid_ID = "1";
+    string m_EA = QString::number(qmlUI->iea_area).toStdString();
+    string m_UserID = QString::number(qmlUI->iPK_User).toStdString();
     int iOffset;
 
     int iColumn = 1;
@@ -2557,7 +2559,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
     QString temp;
     qmlUI->m_dwIDataGridRequestCounter++;
 
-    CMD_Populate_Datagrid cmd_populate_livetv_grid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 11, string("1,1"), 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
+    CMD_Populate_Datagrid cmd_populate_livetv_grid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 11, m_UserID + "," + m_EA, 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
     if (SendCommand(cmd_populate_livetv_grid))
     {
