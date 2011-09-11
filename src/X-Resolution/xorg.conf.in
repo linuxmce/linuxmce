@@ -65,7 +65,6 @@ Section "Device"
         Option "AddARGBGLXVisuals" "true"
 	Option "MonitorLayout"	"Monitor0,Monitor1"
 	Option "FlipPrimary" "True"
-	Option "TVStandard"	"NTSC"
 	Option "ConnectedMonitor"	"Monitor0"
 	Option "Clone" "True"
 EndSection
