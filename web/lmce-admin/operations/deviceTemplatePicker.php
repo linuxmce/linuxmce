@@ -1,7 +1,7 @@
 <?
 function deviceTemplatePicker($output,$dbADO) {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/deviceTemplatePicker.lang.php');
+ 	includeLangFile('deviceTemplatePicker.lang.php');
 	
 	/* @var $dbADO ADOConnection */
 	/* @var $rs ADORecordSet */
@@ -22,7 +22,7 @@ function deviceTemplatePicker($output,$dbADO) {
 	$genericSerialDevices=(isset($_REQUEST['from']) && $_REQUEST['from']=='genericSerialDevices')?1:0;
 	
 	$out='<br>
-		<h3>'.$TEXT_PICK_DEVICE_TEMPLATE_CONST.'</h3>
+		<h3>'.translate('TEXT_PICK_DEVICE_TEMPLATE_CONST').'</h3>
 		<table width="100%">
 			<tr>
 				<td bgcolor="black"><img src="include/images/spacer.gif" border="0" height="1" width="1"></td>
@@ -35,7 +35,7 @@ function deviceTemplatePicker($output,$dbADO) {
 	
 	
 	$output->setBody($out);
-	$output->setTitle(APPLICATION_NAME.' :: '.$TEXT_PICK_DEVICE_TEMPLATE_CONST);			
+	$output->setTitle(APPLICATION_NAME.' :: '.translate('TEXT_PICK_DEVICE_TEMPLATE_CONST'));			
 	$output->output();  		
 }
 ?>
