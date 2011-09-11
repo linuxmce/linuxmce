@@ -26,7 +26,7 @@ Rectangle {
                 font.family: "Droid Sans Mono"
                 cursorVisible: true
                 readOnly: false
-                anchors.centerIn: numberdisplaybox
+                anchors.centerIn: numberdisplay
                 horizontalAlignment: TextInput.AlignHCenter
                 anchors.fill: parent
                 font.pixelSize: 23

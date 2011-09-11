@@ -2489,7 +2489,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                 cellfk = pCell->GetValue();
 
                 qDebug() << "Now Playing Attribute::" << cellTitle << "-" << cellAttribute;
-               // qDebug() << "Attribute image?" << pCell->GetImagePath();
+                // qDebug() << "Attribute image?" << pCell->GetImagePath();
                 if (pPath )
                 {
                     cellImg = getfileForDG(pCell->GetImagePath());
@@ -2577,8 +2577,8 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
             //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             int cellsToRender= pDataGridTable->GetRows();
-           // qDebug() << pDataGridTable->m_CellCount;
-           // qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
+            // qDebug() << pDataGridTable->m_CellCount;
+            // qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
             //qDebug() << "Response: " << cellsToRender << " cells to render";
 
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
@@ -2595,7 +2595,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
             {
                 pCell = it->second;
                 const char *pPath = pCell->GetImagePath();
-             // index = pDataGridTable->CovertColRowType(pCell->m_Value);
+                // index = pDataGridTable->CovertColRowType(pCell->m_Value);
                 QStringList breaker = QString::fromStdString(pCell->m_mapAttributes_Find("Name").c_str()).split(" ");
 
                 channelName = breaker.at(1);
@@ -2605,28 +2605,17 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
                 program = QString::fromStdString(pCell->GetText());
                 program.remove(channelName);
                 program.remove(breaker.at(0));
-                qDebug () << program;
-               //qDebug() << "Channel::" << channelName <<  "-Channel Number:" << channelNumber << "- Channel Index" << channelIndex;
-               //qDebug() <<  "Model Index:" << index << " - Attribute size: " << pCell->m_NumAttributes;
+                //qDebug () << program;
+                //qDebug() << "Channel::" << channelName <<  "-Channel Number:" << channelNumber << "- Channel Index" << channelIndex;
+                //qDebug() <<  "Model Index:" << index << " - Attribute size: " << pCell->m_NumAttributes;
 
-                if (pPath )
-                {
-                    channelimage = getfileForDG(pCell->GetImagePath());
-                    size_t s=0;
-                    pCell->m_GraphicLength = (unsigned long) s;
-                    pCell->m_GraphicFormat = GR_JPG;
-                }
-                else if (!pPath) //making sure we dont provide a null image
-                {
-                    //         qDebug() << "No Image";
-                    channelimage.load(":/icons/videos.png");
-                }
-                else if (channelimage.isNull())
-                {
-                    channelimage.load(":/icons/videos.png");
-                }
+                char * chanPData;
+                int chanIData_size = 0;
+                string *response;
 
-                qmlUI->simpleEPGmodel->appendRow(new EPGItemClass(channelName, channelNumber, channelIndex, program, index, channelimage, channelimage, qmlUI->simpleEPGmodel));
+                        channelimage.load(":/icons/videos.png");
+
+                    qmlUI->simpleEPGmodel->appendRow(new EPGItemClass(channelName, channelNumber, channelIndex, program, index, channelimage, channelimage, qmlUI->simpleEPGmodel));
                 index++;
             }
         }
@@ -2638,8 +2627,8 @@ void DCE::qOrbiter::TuneToChannel(int channel, QString chanid)
 {
     if(qmlUI->i_current_mediaType = 11)
     {
-    CMD_Tune_to_channel changeChannel(qmlUI->iPK_Device, qmlUI->iMediaPluginID, StringUtils::itos(channel), chanid.toStdString());
-     SendCommand(changeChannel);
+        CMD_Tune_to_channel changeChannel(qmlUI->iPK_Device, qmlUI->iMediaPluginID, StringUtils::itos(channel), chanid.toStdString());
+        SendCommand(changeChannel);
     }
     else
     {

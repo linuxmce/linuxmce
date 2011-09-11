@@ -1,9 +1,9 @@
 import QtQuick 1.0
 
 Rectangle {
-    width: scaleX(25)
-    height: scaleY(60)
-    color: "transparent"
+    width: scaleX(26)
+    height: scaleY(61)
+    color: style.lighthighlight
 
     Timer{
         id:singleshot
@@ -29,10 +29,8 @@ Rectangle {
     ListView{
         id:nonepgplaylistview
         height:scaleY(60)
-        width: scaleX(25)
-
-        highlightFollowsCurrentItem: true
-        highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
+        width: scaleX(25)     
+        anchors.centerIn: parent
         clip: true
         interactive: true
         flickableDirection: "VerticalFlick"
@@ -43,31 +41,56 @@ Rectangle {
             Rectangle {
             id:delrect
             border.color: "black"
-            border.width: 1
+            border.width: 2
             width:scaleX(24)
             height: scaleY(10)
             color: style.lighthighlight
-            Text {
-                id: position
-                text: channelnumber
-                font.bold: true
-                font.family: "DroidSans"
-                opacity: .5
-                color: "black"
-                anchors.centerIn: parent
-                font.pointSize: 14
-            }
-            Image {
-                id: chanimg
-                source: ""
+
+            Rectangle{
+                height: parent.height - 1
+                width: scaleX(3)
+                color: style.darkhighlight
+                anchors.right: parent.right
+                border.color: style.accentcolor
+                border.width: 1
+                Text {
+                    id: position
+                    text: channelnumber
+                    font.bold: true
+                    font.family: "DroidSans"
+
+                    opacity: .5
+                    color: "black"
+                    anchors.centerIn: parent
+                    font.pixelSize: 18
+
+                }
             }
 
+
             Text {
-                text: name + ":" +program
+                id:channelID
+                text: name
+                font.capitalization: Font.SmallCaps
                 anchors.fill: parent
                 wrapMode: "WrapAnywhere"
                 font.pixelSize: 12
-                anchors.centerIn: parent
+                anchors.top: parent.top
+
+                font.bold: true
+
+            }
+
+            Text {
+                text:program
+                anchors.bottom: delrect.bottom
+                anchors.bottomMargin: 5
+                font.capitalization: Font.SmallCaps
+
+                wrapMode: "WrapAnywhere"
+                font.pixelSize: 16
+                font.bold: true
+
 
             }
 
@@ -76,6 +99,7 @@ Rectangle {
                 onClicked:{
                     gridChangeChannel(channelnumber, channelid)
                     nonepgplaylistview.positionViewAtIndex(index, ListView.Beginning)
+                    dcenowplaying.setProgram(program)
                 }
                 hoverEnabled: true
                 onEntered: delrect.color = style.accentcolor

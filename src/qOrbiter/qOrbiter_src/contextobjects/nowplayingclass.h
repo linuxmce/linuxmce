@@ -26,7 +26,7 @@ class NowPlayingClass : public QDeclarativeItem
     Q_PROPERTY (QString qs_playbackSpeed READ getMediaSpeed WRITE setStringSpeed NOTIFY mediaSpeedChanged)
     Q_PROPERTY (QUrl nowPlayingImage READ getImage WRITE setImage NOTIFY imageChanged)
     Q_PROPERTY (int m_iplaylistPosition READ getPlaylistPosition WRITE setPlaylistPostion NOTIFY playListPositionChanged)
-
+    Q_PROPERTY (QString program READ getProgram WRITE setProgram NOTIFY programChanged)
 
 public:
     explicit NowPlayingClass(QDeclarativeItem *parent = 0);
@@ -46,6 +46,8 @@ public:
     int m_iplaylistPosition;
     QImage fileImage;
     QString synopsis;
+    QString program;
+    QString channel;
 
 
 signals:
@@ -56,12 +58,14 @@ signals:
     void imageChanged();
     void screenTypeChanged();
     void titleChanged();
-       void titleChanged2();
+    void titleChanged2();
     void mediaTypeChanged();
     void mediaStatusChanged();
     void filePathChanged();
     void mediaSpeedChanged();
     void playListPositionChanged();
+    void programChanged();
+    void channelChanged();
 
 
 
@@ -69,6 +73,9 @@ public slots:
 
     void setPlaylistPostion(int i_pls) {m_iplaylistPosition = i_pls ; qDebug() << "Playlist Position now" << m_iplaylistPosition ; emit playListPositionChanged();}
     int getPlaylistPosition() {return m_iplaylistPosition;}
+
+    void setProgram(QString newProgram) {program = newProgram; emit programChanged();}
+    QString getProgram () {return program;}
 
     void setImage(QUrl incImage) {nowPlayingImage = incImage; emit imageChanged();}
     QUrl getImage () { return nowPlayingImage;}

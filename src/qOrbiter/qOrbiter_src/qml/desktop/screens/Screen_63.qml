@@ -14,12 +14,12 @@ Rectangle {
         triggeredOnStart: false
         running: true
 
-        onTriggered: image1.source = "image://updateobject/"+securityvideo.timestamp
+        onTriggered: nowplayingimage.source = "image://updateobject/"+securityvideo.timestamp
     }
 
     Connections{
         target:dcenowplaying
-        onPlayListPositionChanged: image1.source = "image://updateobject/"+securityvideo.timestamp
+        onPlayListPositionChanged: nowplayingimage.source = "image://updateobject/"+securityvideo.timestamp
     }
 
     height: style.orbiterH
@@ -108,7 +108,7 @@ Rectangle {
                     Text {
                         id: artist
                         width: parent.width
-                        text: "Artist :" + dcenowplaying.qs_mainTitle
+                        text: qsTr("Device: ")  + dcenowplaying.qs_mainTitle
                         font.family: "Droid Sans"
                         wrapMode: "NoWrap"
                         font.bold: true
@@ -120,7 +120,7 @@ Rectangle {
                     Text {
                         id: album
                         wrapMode: "NoWrap"
-                        text: "Album: " + dcenowplaying.qs_mainTitle2
+                        text: qsTr("Channel: ") + dcenowplaying.qs_mainTitle2
                         font.family: "Droid Sans"
                         font.bold: true
                         smooth: true
@@ -131,7 +131,7 @@ Rectangle {
                     Text {
                         id: title
                         wrapMode: "NoWrap"
-                        text: "Title: " + dcenowplaying.qs_subTitle
+                        text: qsTr("Program:") + dcenowplaying.program
                         font.family: "Droid Sans"
                         font.bold: true
                         smooth: true
