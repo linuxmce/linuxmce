@@ -2623,6 +2623,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
     }
 }
 
+
 void DCE::qOrbiter::TuneToChannel(int channel, QString chanid)
 {
     if(qmlUI->i_current_mediaType = 11)
@@ -2635,5 +2636,29 @@ void DCE::qOrbiter::TuneToChannel(int channel, QString chanid)
 
     }
 
+}
+
+void DCE::qOrbiter::SetLightingLevel(int i)
+{
+    CMD_Set_Level adjust_lighting_level(qmlUI->iPK_Device, qmlUI->iPK_Device_LightingPlugin, StringUtils::itos(i));
+    SendCommand(adjust_lighting_level);
+}
+
+void DCE::qOrbiter::VolumeUp()
+{
+    CMD_Vol_Up raiseVol(qmlUI->iPK_Device, qmlUI->iMediaPluginID, 1);
+    SendCommand(raiseVol);
+}
+
+void DCE::qOrbiter::VolumeDown()
+{
+    CMD_Vol_Down lowerVolume(qmlUI->iPK_Device, qmlUI->iMediaPluginID, 1);
+    SendCommand(lowerVolume);
+}
+
+void DCE::qOrbiter::mute()
+{
+    CMD_Mute muteAudio(qmlUI->iPK_Device, qmlUI->iMediaPluginID);
+    SendCommand(muteAudio);
 }
 

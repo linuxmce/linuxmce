@@ -84,6 +84,10 @@ public:
     void GetMultipleSecurityCams(QStringList cams);
     void GetNowPlayingAttributes();
     void TuneToChannel(int channel, QString chanid);
+    void SetLightingLevel(int i);
+    void VolumeUp();
+    void VolumeDown();
+    void mute();
 
     //<-dceag-const-e->
 

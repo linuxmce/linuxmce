@@ -33,6 +33,10 @@ Rectangle {
         rotation: -90
         smooth: true
         source: "../../../img/icons/player_fwd.png"
+        MouseArea{
+            anchors.fill: parent
+            onClicked: adjustLighting(10)
+        }
     }
 
     Image {
@@ -44,6 +48,10 @@ Rectangle {
         rotation: 90
         smooth: true
         source: "../../../img/icons/player_fwd.png"
+        MouseArea{
+            anchors.fill: parent
+            onClicked: adjustLighting(-10)
+        }
     }
 
 

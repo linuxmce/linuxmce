@@ -14,8 +14,6 @@ Rectangle {
         buttontextcolor: "red"
         buttontextbold: true
         buttontextfontsize: 12
-
-
         Image {
             id: muteimg
            anchors.centerIn: parent
@@ -23,6 +21,10 @@ Rectangle {
             height: 50
 
             source: "../../../img/icons/kmix.png"
+        }
+        MouseArea{
+            anchors.fill: parent
+            onClicked: mute()
         }
     }
 
@@ -36,6 +38,11 @@ Rectangle {
         rotation: -90
         smooth: true
         source: "../../../img/icons/player_fwd.png"
+        MouseArea{
+            anchors.fill: parent
+            onClicked: adjustVolume(10)
+        }
+
     }
 
     Image {
@@ -47,6 +54,10 @@ Rectangle {
         rotation: 90
         smooth: true
         source: "../../../img/icons/player_fwd.png"
+        MouseArea{
+            anchors.fill: parent
+            onClicked: adjustVolume(-10)
+        }
     }
 
 

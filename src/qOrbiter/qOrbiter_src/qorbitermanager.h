@@ -246,6 +246,7 @@ Param 10 - pk_attribute
     long iPK_Device_OrbiterPlugin;
     long iPK_Device_GeneralInfoPlugin;
     long iPK_Device_SecurityPlugin;
+    long iPK_Device_LightingPlugin;
     long iMediaPluginID;
     int m_pDevice_ScreenSaver;
     int m_dwIDataGridRequestCounter;
@@ -290,6 +291,11 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     Q_INVOKABLE  void getcurrentSkins(QStringList skinPaths);
     void qmlSetupLmce(int incdeviceid, QString incrouterip);
     void changedPlaylistPosition(int position);
+
+    //automation related
+    void adjustVolume(int vol);
+    void adjustLighting(int l);
+    void mute();
 
     //datagrid related
     void setSorting(int i);

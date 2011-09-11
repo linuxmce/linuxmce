@@ -204,6 +204,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         iPK_Device_OrbiterPlugin = long(9);
         iPK_Device_GeneralInfoPlugin = long(4);
         iPK_Device_SecurityPlugin = long(13);
+        iPK_Device_LightingPlugin = long(8);
         m_dwIDataGridRequestCounter = 0;
 
         //initial signal and slot connections
@@ -1499,6 +1500,30 @@ void qorbiterManager::gridChangeChannel(QString chan, QString chanid)
     pqOrbiter->TuneToChannel(chan.toInt(), chanid);
 
 
+}
+
+void qorbiterManager::adjustLighting(int l)
+{
+
+        pqOrbiter->SetLightingLevel(l);
+
+}
+
+void qorbiterManager::adjustVolume(int vol)
+{
+    if (vol < 0)
+    {
+        pqOrbiter->VolumeUp();
+    }
+    else
+    {
+        pqOrbiter->VolumeDown();
+    }
+}
+
+void qorbiterManager::mute()
+{
+    pqOrbiter->mute();
 }
 
 
