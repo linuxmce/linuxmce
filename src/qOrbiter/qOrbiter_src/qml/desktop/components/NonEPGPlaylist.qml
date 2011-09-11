@@ -7,15 +7,14 @@ Rectangle {
 
     Component.onCompleted: nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
 
-Connections{
-target: dcenowplaying
-onPlayListPositionChanged:nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
+    Connections{
+        target: dcenowplaying
+        onPlayListPositionChanged:{
+            nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
 
-}
-WorkerScript{
-id:playlistpopulator
+        }
 
-}
+    }
 
 
     ListView{
@@ -31,13 +30,20 @@ id:playlistpopulator
         model: mediaplaylist
 
         delegate:
-
             Rectangle {
             border.color: "black"
             border.width: 1
             width:scaleX(20)
             height: scaleY(10)
-            color: status ? "whitesmoke" : "green"
+            color: style.accentcolor
+            clip: true
+            Image {
+                id: playlistimage
+                fillMode: Image.PreserveAspectCrop
+                source:  index == dcenowplaying.m_iplaylistPosition ? playlistimage.source = "image://updateobject/"+securityvideo.timestamp: ""
+                anchors.fill: parent
+                opacity: .4
+            }
             Text {
                 id: position
                 text: name
@@ -45,14 +51,20 @@ id:playlistpopulator
                 opacity: .5
                 color: "black"
                 anchors.centerIn: parent
-                font.pixelSize: 14
+                font.pixelSize: 18
+                font.bold: true
+                font.capitalization: Font.SmallCaps
             }
 
             Text {
                 text: id
-                anchors.fill: parent
-                wrapMode: "WrapAnywhere"
-                font.pixelSize: 12
+                font.family: "DroidSans"
+                color: "black"
+                width: parent.width
+                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                font.pixelSize: 18
+                font.bold: true
+                font.capitalization: Font.SmallCaps
             }
 
             MouseArea{

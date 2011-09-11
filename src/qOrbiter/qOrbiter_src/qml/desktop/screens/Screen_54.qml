@@ -33,21 +33,25 @@ Rectangle {
         id:mainrow
         height: childrenRect.height
         width: childrenRect.width
-        spacing: 5
+        spacing: 1
         anchors.top:parent.top
-        anchors.topMargin: scaleY(10)
+        anchors.topMargin: scaleY(5)
         anchors.horizontalCenter: parent.horizontalCenter
 
         NonEPGPlaylist{ id:playlist}
-        Rectangle {
 
-            width: scaleX(30)
+        Row {
+            width: childrenRect.width
             height: childrenRect.height
-            color: style.accentcolor
+            spacing: 1
 
-            Rectangle {
+            Column
+            {
+                height: childrenRect.height
+                width: childrenRect.width
+
+                Rectangle {
                 id: gradientheader
-
                 width: parent.width
                 height: childrenRect.height
                 gradient: Gradient {
@@ -66,48 +70,14 @@ Rectangle {
                     text:"Speed: " + dcenowplaying.qs_playbackSpeed
                     font.family: "Droid Sans"
                     font.pixelSize: 12
+
                 }
             }
-
-            Image {
-                id: nowplayingimage
-                width: scaleX(30)
-                height: scaleY(30)
-                anchors.top: gradientheader.bottom
-                fillMode: Image.PreserveAspectFit
-                source: "image://updateobject/"+dcenowplaying.m_iplaylistPosition
-            }
-
-            Rectangle {
-                id: metadatavideo
-                width: scaleX(30)
-                height: childrenRect.height
-
-                gradient: Gradient {
-                    GradientStop {
-                        position: 0
-                        color: style.accentcolor
-                    }
-
-                    GradientStop {
-                        position: 1
-                        color: style.darkhighlight
-                    }
-                }
-                color: style.darkhiglight
-                anchors.top:nowplayingimage.bottom
-                Column
-                {
-                    width: scaleX(30)
-                    spacing: 5
-                    height: childrenRect.height
-
                     Text {
                         id: artist
-                        width: parent.width
                         text: "Artist :" + dcenowplaying.qs_mainTitle
                         font.family: "Droid Sans"
-                        wrapMode: "NoWrap"
+                        wrapMode: "WrapAtWordBoundaryOrAnywhere"
                         font.bold: true
                         smooth: true
                         font.pixelSize: 12
@@ -116,31 +86,38 @@ Rectangle {
 
                     Text {
                         id: album
-                        wrapMode: "NoWrap"
+                         wrapMode: "WrapAtWordBoundaryOrAnywhere"
                         text: "Album: " + dcenowplaying.qs_mainTitle2
                         font.family: "Droid Sans"
                         font.bold: true
-                        smooth: true
-                        horizontalAlignment: Text.AlignHCenter
+                        smooth: true                      
                         font.pixelSize: 12
+
                     }
 
                     Text {
                         id: title
-                        wrapMode: "NoWrap"
+                         wrapMode: "WrapAtWordBoundaryOrAnywhere"
                         text: "Title: " + dcenowplaying.qs_subTitle
                         font.family: "Droid Sans"
                         font.bold: true
-                        smooth: true
-                        horizontalAlignment: Text.AlignHCenter
-                        font.pixelSize: 12
+                        smooth: true                      
+                        font.pixelSize: 12                      
+                    }
+                    Image {
+                        id: nowplayingimage
+                        width: scaleX(50)
+                        height: scaleY(50)
+                        fillMode: Image.PreserveAspectFit
+                        source: "image://updateobject/"+dcenowplaying.m_iplaylistPosition
                     }
                 }
-            }
-        }
-        Remote_lighting_controls{ id: remote_lighting_controls1; }
-        Remote_Audio_controls{ id: remote1; }
 
+
+
+            Remote_lighting_controls{ id: remote_lighting_controls1; }
+            Remote_Audio_controls{ id: remote1; }
+        }
     }
 
     HomeButton{anchors.right: parent.right; anchors.top:parent.top}

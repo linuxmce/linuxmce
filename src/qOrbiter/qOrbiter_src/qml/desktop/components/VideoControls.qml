@@ -19,6 +19,10 @@ Rectangle {
                 height: parent.height
                 width: parent.width
             }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: changedTrack("-1")
+            }
         }
 
         MediaButton {id:rw ;
@@ -77,7 +81,10 @@ Rectangle {
                 height: parent.height
                 width: parent.width
             }
-
+            MouseArea{
+                anchors.fill: parent
+                onClicked: changedTrack("+1")
+            }
         }
 
 

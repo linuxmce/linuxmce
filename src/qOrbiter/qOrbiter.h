@@ -88,6 +88,9 @@ public:
     void VolumeUp();
     void VolumeDown();
     void mute();
+    void ChangedTrack(QString direction);
+    void TrackUp();
+    void TrackDown();
 
     //<-dceag-const-e->
 

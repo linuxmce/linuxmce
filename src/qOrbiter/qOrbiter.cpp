@@ -2662,3 +2662,15 @@ void DCE::qOrbiter::mute()
     SendCommand(muteAudio);
 }
 
+void DCE::qOrbiter::TrackUp()
+{
+
+}
+
+void DCE::qOrbiter::ChangedTrack(QString direction)
+{
+      CMD_Jump_Position_In_Playlist jump_playlist(qmlUI->iPK_Device, qmlUI->iMediaPluginID, direction.toStdString(), qmlUI->nowPlayingButton->i_streamID);
+        SendCommand(jump_playlist);
+
+}
+

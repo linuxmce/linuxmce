@@ -1526,4 +1526,9 @@ void qorbiterManager::mute()
     pqOrbiter->mute();
 }
 
+void qorbiterManager::changedTrack(QString increment)
+{
+pqOrbiter->ChangedTrack(increment);
+}
+
 
