@@ -45,42 +45,50 @@ Section "InputDevice"
 	Option		"ZAxisMapping"	"4 5"
 EndSection
 
-Section "Monitor"
-	Identifier	"Monitor0"
-	VendorName	"Unknown Monitor Vendor"
-	ModelName	"Unknown Monitor Model"
-	HorizSync	28-500
-	VertRefresh	60
+Section "Device"
+        Identifier      "Card0"
+        Driver          "nvidia"
+        VendorName      "Unknown Vendor Name"
+        BoardName       "Unknown Board Name"
+        Option          "LinearAlloc"           "16384"
+        Option "XvmcUsesTextures" "true"
+        Option "renderAccel" "true"
+        Option "NoDDCValue"
+        Option "UseEDID" "true"
+        Option "ExactModeTimingsDVI" "true"
+        Option "NoLogo" "true"
+        Option "NoBandWidthTest" "true"
+        Option "ModeValidation" "NoDFPNativeResolutionCheck, NoEdidMaxPClkCheck, NoMaxPClkCheck, AllowInterlacedModes, AllowNon60HzDFPModes, NoEdidModes"
+        Option "DynamicTwinView" "false"
+        Option "UseEvents" "true"
+        Option "AllowGLXWithComposite" "true"
+        Option "AddARGBGLXVisuals" "true"
+	Option "MonitorLayout"	"Monitor0,Monitor1"
+	Option "FlipPrimary" "True"
+	Option "TVStandard"	"NTSC"
+	Option "ConnectedMonitor"	"Monitor0"
+	Option "Clone" "True"
 EndSection
 
-Section "Device"
-	### Available Driver options are:-
-	### Values: <i>: integer, <f>: float, <bool>: "True"/"False",
-	### <string>: "String", <freq>: "<f> Hz/kHz/MHz"
-	### [arg]: arg optional
-	#Option		"NoAccel"				# [<bool>]
-	#Option		"SWcursor"				# [<bool>]
-	#Option		"ColorKey"				# <i>
-	#Option		"CacheLines"			# <i>
-	#Option		"Dac6Bit"				# [<bool>]
-	#Option		"DRI"					# [<bool>]
-	#Option		"NoDDC"					# [<bool>]
-	#Option		"ShowCache"				# [<bool>]
-	#Option		"XvMCSurfaces"			# <i>
-	Identifier	"Card0"
-	Driver		"vesa"
-	VendorName	"Unknown Vendor Name"
-	BoardName	"Unknown Board Name"
-	Option		"LinearAlloc"		"16384"
-	#BusID		"PCI:0:2:0"
-#	Option		"NoDDC"				"true"
-	Option		"UseEDID"			"false"
-	Option		"ExactModeTimingsDVI"	"true"
-	Option		"NoLogo"			"true"
-	Option		"NoBandWidthTest"	"true"
-	Option		"ModeValidation"	"NoDFPNativeResolutionCheck, NoEdidMaxPClkCheck, NoMaxPClkCheck"
-	Option		"DynamicTwinView"	"false"
-	Option		"UseEvents"			"true"
+
+
+Section "Monitor"
+    Identifier     "Monitor0"
+    VendorName     "Unknown"
+    ModelName      "Unknown"
+    Option         "DPMS"
+        Modeline        "1024x768" 60.80 1024 1056 1128 1272 768 768 770 796
+        HorizSync       20-500
+        VertRefresh     59-61
+EndSection
+
+Section "Monitor"
+        Identifier      "Monitor1"
+        VendorName      "Unknown Monitor Vendor"
+        ModelName       "Unknown Monitor Model"
+        Modeline        "1280x720" 74.250 1280 1390 1430 1650 720 725 730 750 +hsync +vsync
+        HorizSync       20-500
+        VertRefresh     59-61
 EndSection
 
 Section "Screen"
@@ -88,10 +96,24 @@ Section "Screen"
 	Device		"Card0"
 	Monitor		"Monitor0"
 	DefaultDepth	24
+
 	SubSection "Display"
-		Depth		24
-		Modes		"640x480"
+		Depth	24
+		Modes	"640x480" "1280x720"
 	EndSubSection
+        Option "XvmcUsesTextures" "true"
+	Option  "TVStandard"    "640x480"
+        Option "renderAccel" "true"
+        Option "NoDDCValue"
+        Option "UseEDID" "true"
+        Option "ExactModeTimingsDVI" "true"
+        Option "NoLogo" "true"
+        Option "NoBandWidthTest" "true"
+        Option "ModeValidation" "NoDFPNativeResolutionCheck, NoEdidMaxPClkCheck, NoMaxPClkCheck, AllowInterlacedModes, AllowNon60HzDFPModes, NoEdidModes"
+        Option "DynamicTwinView" "false"
+        Option "UseEvents" "true"
+        Option "AllowGLXWithComposite" "true"
+        Option "AddARGBGLXVisuals" "true"
 EndSection
 
 Section "ServerFlags"
