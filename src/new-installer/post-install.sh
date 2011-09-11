@@ -69,8 +69,6 @@ YPXFRDARGS=
 
 #
 
-#Post install - TODO: create function for this and insert appropriately
-/usr/bin/pear install Image_Canvas-0.3.3 Image_Graph-0.8.0 Image_Color 
 
 echo >> /etc/apt/sources.list
 echo 
