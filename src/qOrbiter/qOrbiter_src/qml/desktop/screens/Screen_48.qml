@@ -14,33 +14,24 @@ Rectangle {
         triggeredOnStart: false
         running: true
 
-        onTriggered: image1.source = "image://updateobject/"+securityvideo.timestamp
+        onTriggered: nowplayingimage.source = "image://updateobject/"+securityvideo.timestamp
     }
 
     Connections{
         target:dcenowplaying
-        onPlayListPositionChanged: image1.source = "image://updateobject/"+securityvideo.timestamp
+        onPlayListPositionChanged: nowplayingimage.source = "image://updateobject/"+securityvideo.timestamp
     }
 
-    height: 720
-    width: 1280
+    height: style.orbiterH
+    width: style.orbiterW
     radius: 0
     opacity: 1
-    color: "transparent"
+    color: style.darkhighlight
     Component.onCompleted:setNowPlayingTv()
 
     //main 'now playing rect containing all the other items
-
     HomeButton{anchors.right: parent.right; anchors.top:parent.top}
-
-    VideoControls {
-        id: videocontrols1
-       anchors.bottom: parent.bottom
-
-    }
-
-
-
+    VideoControls {id: videocontrols1; anchors.bottom: parent.bottom; anchors.horizontalCenter: parent.horizontalCenter}
 
     Row{
         id:mainrow
@@ -50,10 +41,8 @@ Rectangle {
         anchors.top:parent.top
         anchors.topMargin: scaleY(10)
         anchors.horizontalCenter: parent.horizontalCenter
-        EPGPlaylist{ x: 182;y: 4 ;width: 200 ;height: 346}
-        RemoteNumberPad {
-            id: remotenumberpad1
-        }
+        EPGPlaylist{ }
+        RemoteNumberPad {id: remotenumberpad1;}
         Rectangle {
             width: scaleX(30)
             height: childrenRect.height
@@ -119,7 +108,7 @@ Rectangle {
                     Text {
                         id: artist
                         width: parent.width
-                        text: "Artist :" + dcenowplaying.qs_mainTitle
+                        text: qsTr("Device: ")  + dcenowplaying.qs_mainTitle
                         font.family: "Droid Sans"
                         wrapMode: "NoWrap"
                         font.bold: true
@@ -131,7 +120,7 @@ Rectangle {
                     Text {
                         id: album
                         wrapMode: "NoWrap"
-                        text: "Album: " + dcenowplaying.qs_mainTitle2
+                        text: qsTr("Channel: ") + dcenowplaying.qs_mainTitle2
                         font.family: "Droid Sans"
                         font.bold: true
                         smooth: true
@@ -142,7 +131,7 @@ Rectangle {
                     Text {
                         id: title
                         wrapMode: "NoWrap"
-                        text: "Title: " + dcenowplaying.qs_subTitle
+                        text: qsTr("Program:") + dcenowplaying.program
                         font.family: "Droid Sans"
                         font.bold: true
                         smooth: true

@@ -20,6 +20,11 @@ public:
         QImage result;
         QImage key = managerreference->updatedObjectImage;
 
+        if (key.isNull())
+        {
+             key.load(":/icons/playlist.png");
+
+        }
 
         if (requestedSize.isValid()) {
             result = key.scaled(requestedSize);
