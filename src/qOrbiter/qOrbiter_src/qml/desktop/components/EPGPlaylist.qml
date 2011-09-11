@@ -2,7 +2,7 @@ import QtQuick 1.0
 
 Rectangle {
     width: scaleX(25)
-    height: scaleY(50)
+    height: scaleY(60)
     color: "transparent"
 
     Timer{
@@ -28,8 +28,8 @@ Rectangle {
 
     ListView{
         id:nonepgplaylistview
-        height:scaleY(50)
-        width: scaleX(21)
+        height:scaleY(60)
+        width: scaleX(25)
 
         highlightFollowsCurrentItem: true
         highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
@@ -44,7 +44,7 @@ Rectangle {
             id:delrect
             border.color: "black"
             border.width: 1
-            width:scaleX(20)
+            width:scaleX(24)
             height: scaleY(10)
             color: style.lighthighlight
             Text {

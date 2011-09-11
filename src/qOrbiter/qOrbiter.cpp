@@ -2489,7 +2489,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                 cellfk = pCell->GetValue();
 
                 qDebug() << "Now Playing Attribute::" << cellTitle << "-" << cellAttribute;
-                qDebug() << "Attribute image?" << pCell->GetImagePath();
+               // qDebug() << "Attribute image?" << pCell->GetImagePath();
                 if (pPath )
                 {
                     cellImg = getfileForDG(pCell->GetImagePath());
@@ -2523,7 +2523,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
       that the orbiter makes.
       */
 
-
+    qmlUI->simpleEPGmodel->clear();
     int gHeight = 10;
     int gWidth = 10;
     int pkVar = 0;

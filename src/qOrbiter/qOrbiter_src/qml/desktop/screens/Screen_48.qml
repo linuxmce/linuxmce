@@ -30,111 +30,133 @@ Rectangle {
     Component.onCompleted:setNowPlayingTv()
 
     //main 'now playing rect containing all the other items
-    Remote_lighting_controls{ id: remote_lighting_controls1; x: 449; y: 350; width: remote1.width; height: remote1.height }
-    Remote_Audio_controls{ id: remote1; x: 384; y: 350; anchors.rightMargin: 13; z: 45; }
 
     HomeButton{anchors.right: parent.right; anchors.top:parent.top}
 
     VideoControls {
         id: videocontrols1
-        x: 390
-        y: 620
+       anchors.bottom: parent.bottom
 
     }
 
-    EPGPlaylist{ x: 182;y: 4 ;width: 200 ;height: 346}
 
 
-    Rectangle {
-        x: 384
-        y: 0
-        width: 350
-        height: 350
-        color: style.advanced_bg
-        anchors.verticalCenterOffset: -185
-        anchors.horizontalCenterOffset: -81
+
+    Row{
+        id:mainrow
+        height: childrenRect.height
+        width: childrenRect.width
+        spacing: 5
+        anchors.top:parent.top
+        anchors.topMargin: scaleY(10)
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
-
-        Rectangle {
-            id: rectangle1
-            x: 0
-            y: 0
-            width: 350
-            height: 38
-            gradient: Gradient {
-                GradientStop {
-                    position: 0
-                    color: "#ffffff"
-                }
-
-                GradientStop {
-                    position: 1
-                    color: "#3878a0"
-                }
-            }
-
-
-
-            Text {
-                id: text1
-                x: 0
-                y: 12
-                text:"Speed: " + dcenowplaying.qs_playbackSpeed
-                font.family: "Droid Sans"
-                font.pixelSize: 12
-            }
+        EPGPlaylist{ x: 182;y: 4 ;width: 200 ;height: 346}
+        RemoteNumberPad {
+            id: remotenumberpad1
         }
-
-        Image {
-            id: image1
-            x: 0
-            y: 38
-            width: 350
-            height: 224
-            anchors.topMargin: 38
-            anchors.bottomMargin: 88
-            fillMode: Image.PreserveAspectFit
-            anchors.fill: parent
-
-            source: "image://updateobject/"+dcenowplaying.m_iplaylistPosition
-        }
-
         Rectangle {
-            id: rectangle2
-            x: 0
-            y: 262
-            width: 350
-            height: 88
-            color: "#ffffff"
-            Column
-            {
-                width: 350
-                spacing: 5
-                height: rectangle2.height
+            width: scaleX(30)
+            height: childrenRect.height
+            color: style.accentcolor
 
+            Rectangle {
+                id: gradientheader
+
+                width: parent.width
+                height: childrenRect.height
+                gradient: Gradient {
+                    GradientStop {
+                        position: 0
+                        color: "#ffffff"
+                    }
+
+                    GradientStop {
+                        position: 1
+                        color: "#3878a0"
+                    }
+                }
                 Text {
-                    id: titlebox
-                    x: 0
-                    y: 61
-                    text: "Channel: " + dcenowplaying.qs_mainTitle
-
-                    anchors.bottom: parent.bottom
-                    wrapMode: "NoWrap"
+                    id: headertext
+                    text:"Speed: " + dcenowplaying.qs_playbackSpeed
                     font.family: "Droid Sans"
-                    anchors.bottomMargin: 12
-                    font.bold: true
-                    smooth: true
-                    horizontalAlignment: Text.AlignHCenter
                     font.pixelSize: 12
                 }
             }
+
+            Image {
+                id: nowplayingimage
+                width: scaleX(30)
+                height: scaleY(30)
+                anchors.top: gradientheader.bottom
+                fillMode: Image.PreserveAspectFit
+                source: "image://updateobject/"+dcenowplaying.m_iplaylistPosition
+            }
+
+            Rectangle {
+                id: metadatavideo
+                width: scaleX(30)
+                height: childrenRect.height
+
+                gradient: Gradient {
+                    GradientStop {
+                        position: 0
+                        color: style.accentcolor
+                    }
+
+                    GradientStop {
+                        position: 1
+                        color: style.darkhighlight
+                    }
+                }
+                color: style.darkhiglight
+                anchors.top:nowplayingimage.bottom
+                Column
+                {
+                    width: scaleX(30)
+                    spacing: 5
+                    height: childrenRect.height
+
+                    Text {
+                        id: artist
+                        width: parent.width
+                        text: "Artist :" + dcenowplaying.qs_mainTitle
+                        font.family: "Droid Sans"
+                        wrapMode: "NoWrap"
+                        font.bold: true
+                        smooth: true
+                        font.pixelSize: 12
+                    }
+
+
+                    Text {
+                        id: album
+                        wrapMode: "NoWrap"
+                        text: "Album: " + dcenowplaying.qs_mainTitle2
+                        font.family: "Droid Sans"
+                        font.bold: true
+                        smooth: true
+                        horizontalAlignment: Text.AlignHCenter
+                        font.pixelSize: 12
+                    }
+
+                    Text {
+                        id: title
+                        wrapMode: "NoWrap"
+                        text: "Title: " + dcenowplaying.qs_subTitle
+                        font.family: "Droid Sans"
+                        font.bold: true
+                        smooth: true
+                        horizontalAlignment: Text.AlignHCenter
+                        font.pixelSize: 12
+                    }
+                }
+            }
         }
+
+
+        Remote_lighting_controls{ id: remote_lighting_controls1; }
+        Remote_Audio_controls{ id: remote1; }
+
     }
 
-    RemoteNumberPad {
-        id: remotenumberpad1
-        x: 734
-        y: 0
-    }
 }

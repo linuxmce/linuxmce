@@ -25,7 +25,7 @@ Rectangle {
     width: style.orbiterW
     radius: 0
     opacity: 1
-    color: "transparent"
+     color: style.darkhighlight
     Component.onCompleted:setNowPlayingData()
     //main 'now playing rect containing all the other items
 
@@ -87,7 +87,7 @@ Rectangle {
                 {
                     width: scaleX(30)
                     spacing: 5
-                    height: rectangle2.height
+                    height: metadatavideo.height
 
                     Text {
                         id: maintitle

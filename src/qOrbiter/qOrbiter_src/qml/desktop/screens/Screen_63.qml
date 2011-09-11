@@ -4,7 +4,7 @@ import "../components"
 Rectangle {
 
     // property alias synText:
-    id: cablesatboxremote
+    id: satcableboxremote
     anchors.centerIn: parent
 
     Timer{
@@ -24,40 +24,35 @@ Rectangle {
 
     height: style.orbiterH
     width: style.orbiterW
-    color: "transparent"
+    radius: 0
+    opacity: 1
+    color: style.darkhighlight
     Component.onCompleted:setNowPlayingTv()
+
     //main 'now playing rect containing all the other items
-
-
     HomeButton{anchors.right: parent.right; anchors.top:parent.top}
+    VideoControls {id: videocontrols1; anchors.bottom: parent.bottom; anchors.horizontalCenter: parent.horizontalCenter}
 
-    VideoControls {
-        id: videocontrols1
-        anchors.bottom: parent.bottom
+    Row{
+        id:mainrow
+        height: childrenRect.height
+        width: childrenRect.width
+        spacing: 5
+        anchors.top:parent.top
+        anchors.topMargin: scaleY(10)
         anchors.horizontalCenter: parent.horizontalCenter
-    }
-
-    Row
-    {
-        height: scaleY(50)
-        width:scaleX(90)
-
         EPGPlaylist{ }
-        RemoteNumberPad {
-            id: remotenumberpad1
-
-        }
+        RemoteNumberPad {id: remotenumberpad1;}
         Rectangle {
-            id:nowplayingbox
             width: scaleX(30)
-            height: scaleY(40)
-            color: style.advanced_bg
+            height: childrenRect.height
+            color: style.accentcolor
 
             Rectangle {
-                id: headergradient
-                anchors.top: nowplayingbox.top
-                width: scaleX(30)
-                height: scaleY(5)
+                id: gradientheader
+
+                width: parent.width
+                height: childrenRect.height
                 gradient: Gradient {
                     GradientStop {
                         position: 0
@@ -69,10 +64,8 @@ Rectangle {
                         color: "#3878a0"
                     }
                 }
-
                 Text {
-                    id: text1
-                    anchors.centerIn: parent
+                    id: headertext
                     text:"Speed: " + dcenowplaying.qs_playbackSpeed
                     font.family: "Droid Sans"
                     font.pixelSize: 12
@@ -80,43 +73,66 @@ Rectangle {
             }
 
             Image {
-                id: image1
-                anchors.top: headergradient.bottom
-                width: scaleX(40)
-                height: scaleY(40)
+                id: nowplayingimage
+                width: scaleX(30)
+                height: scaleY(30)
+                anchors.top: gradientheader.bottom
                 fillMode: Image.PreserveAspectFit
                 source: "image://updateobject/"+dcenowplaying.m_iplaylistPosition
             }
 
             Rectangle {
-                id: metadatarect
-                width: parent.width
-                height: scaleY(9)
-                color: style.lighthighlight
-                anchors.bottom: image1.bottom
+                id: metadatavideo
+                width: scaleX(30)
+                height: childrenRect.height
+
+                gradient: Gradient {
+                    GradientStop {
+                        position: 0
+                        color: style.accentcolor
+                    }
+
+                    GradientStop {
+                        position: 1
+                        color: style.darkhighlight
+                    }
+                }
+                color: style.darkhiglight
+                anchors.top:nowplayingimage.bottom
                 Column
                 {
                     width: scaleX(30)
                     spacing: 5
-                    height: metadatarect.height
+                    height: childrenRect.height
 
                     Text {
-                        id: titlebox
-                        text: "Device: " + dcenowplaying.qs_mainTitle
-                        wrapMode: "NoWrap"
+                        id: artist
+                        width: parent.width
+                        text: "Artist :" + dcenowplaying.qs_mainTitle
                         font.family: "Droid Sans"
+                        wrapMode: "NoWrap"
+                        font.bold: true
+                        smooth: true
+                        font.pixelSize: 12
+                    }
 
+
+                    Text {
+                        id: album
+                        wrapMode: "NoWrap"
+                        text: "Album: " + dcenowplaying.qs_mainTitle2
+                        font.family: "Droid Sans"
                         font.bold: true
                         smooth: true
                         horizontalAlignment: Text.AlignHCenter
                         font.pixelSize: 12
                     }
+
                     Text {
-                        id: progbox
-                        text: "Program: "
+                        id: title
                         wrapMode: "NoWrap"
+                        text: "Title: " + dcenowplaying.qs_subTitle
                         font.family: "Droid Sans"
-                        anchors.bottomMargin: 12
                         font.bold: true
                         smooth: true
                         horizontalAlignment: Text.AlignHCenter
@@ -125,7 +141,11 @@ Rectangle {
                 }
             }
         }
-     Remote_lighting_controls{ id: remote_lighting_controls1; width: remote1.width; height: remote1.height }
-        Remote_Audio_controls{ id: remote1; anchors.rightMargin: 13; z: 45; }
+
+
+        Remote_lighting_controls{ id: remote_lighting_controls1; }
+        Remote_Audio_controls{ id: remote1; }
+
     }
+
 }
