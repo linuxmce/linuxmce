@@ -23,5 +23,4 @@ $TEXT_IRRIGATION_TYPE_CONST='Irrigation';
 $TEXT_SECURITY_TYPE_CONST='Sécurité';
 $TEXT_SURVEILLANCE_CAMERAS_TYPE_CONST='Caméras de surveillance';
 $TEXT_PHONES_TYPE_CONST='Téléphones';
-
 ?>

@@ -1,8 +1,8 @@
 <?php
 function editRespondToEvent($output,$dbADO) {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/editRespondToEvent.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('editRespondToEvent.lang.php');
 	include('eventUtils.inc.php');
 	
 	/* @var $dbADO ADOConnection */
@@ -56,19 +56,19 @@ function editRespondToEvent($output,$dbADO) {
 		<input type="hidden" name="ehID" value="'.$eventHandlerID.'">
 		<input type="hidden" name="oldWizard" value="'.$wizard.'">
 		
-		<div align="center"><h3>'.$TEXT_EDIT_RESPOND_TO_EVENT_CONST.'</h3></div>
+		<div align="center"><h3>'.translate('TEXT_EDIT_RESPOND_TO_EVENT_CONST').'</h3></div>
 		<table border="0" align="center" width="800">
 		';
 		$out.='
 			<tr class="alternate_back">
-				<td><B>'.$TEXT_DESCRIPTION_CONST.'</B></td>
+				<td><B>'.translate('TEXT_DESCRIPTION_CONST').'</B></td>
 				<td><input type="text" name="description" value="'.$rowEH['Description'].'"></td>
 			</tr>';
 		$queryCannedEvents='SELECT * FROM CannedEvents ORDER By Description ASC';
 		$resCannedEvents=$dbADO->Execute($queryCannedEvents);
 		$out.='
 			<tr>
-				<td>'.$TEXT_EVENT_CONST.':</td>
+				<td>'.translate('TEXT_EVENT_CONST').':</td>
 				<td colspan="2"><select name="cannedEvent" onChange="document.editRespondToEvent.action.value=\'form\'; document.editRespondToEvent.submit();">';
 
 		while($rowCE=$resCannedEvents->FetchRow()){
@@ -176,7 +176,7 @@ function editRespondToEvent($output,$dbADO) {
 						$out.='<input type="text" name="CriteriaParmValue_'.$rowCriteria['PK_CannedEvents_CriteriaParmList'].'" value="'.$oldValue.'">';
 					}
 				}
-				$out.=($rowCriteria['ExtraInfo']!='')?' '.$TEXT_EXTRA_INFO_CONST.': '.$rowCriteria['ExtraInfo']:'';
+				$out.=($rowCriteria['ExtraInfo']!='')?' '.translate('TEXT_EXTRA_INFO_CONST').': '.$rowCriteria['ExtraInfo']:'';
 				$out.='
 					</td>
 				</tr>				
@@ -185,10 +185,10 @@ function editRespondToEvent($output,$dbADO) {
 			$out.='
 			<input type="hidden" name="displayedCE_CP" value="'.join(',',$displayedCE_CP).'">
 			<tr>
-				<td colspan="3" align="center"><input type="submit" class="button" name="continue" value="'.$TEXT_UPDATE_CONST.'"> <input type="reset" class="button" name="cancelBtn" value="'.$TEXT_CANCEL_CONST.'"></td>
+				<td colspan="3" align="center"><input type="submit" class="button" name="continue" value="'.translate('TEXT_UPDATE_CONST').'"> <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'"></td>
 			</tr>
 			<tr>
-				<td colspan="3" align="center">'.$TEXT_RESPOND_TO_EVENT_NOTES_CONST.'</td>
+				<td colspan="3" align="center">'.translate('TEXT_RESPOND_TO_EVENT_NOTES_CONST').'</td>
 			</tr>
 			';
 		$out.='
@@ -197,10 +197,10 @@ function editRespondToEvent($output,$dbADO) {
 		$out.='
 			<table align="center">
 			<tr bgcolor="#D1D9EA">
-				<td><B>'.$TEXT_ADD_COMMANDS_USING_WIZARD_CONST.':</B> <select name="wizard" onChange="document.editRespondToEvent.submit();">
-					<option value="0" '.(($wizard==0)?'selected':'').'>'.$TEXT_LIGHTING_WIZARD_CONST.'</option>
-					<option value="1" '.(($wizard==1)?'selected':'').'>'.$TEXT_CLIMATE_WIZARD_CONST.'</option>
-					<option value="2" '.(($wizard==2)?'selected':'').'>'.$TEXT_ADVANCED_WIZARD_CONST.'</option>
+				<td><B>'.translate('TEXT_ADD_COMMANDS_USING_WIZARD_CONST').':</B> <select name="wizard" onChange="document.editRespondToEvent.submit();">
+					<option value="0" '.(($wizard==0)?'selected':'').'>'.translate('TEXT_LIGHTING_WIZARD_CONST').'</option>
+					<option value="1" '.(($wizard==1)?'selected':'').'>'.translate('TEXT_CLIMATE_WIZARD_CONST').'</option>
+					<option value="2" '.(($wizard==2)?'selected':'').'>'.translate('TEXT_ADVANCED_WIZARD_CONST').'</option>
 				</select>
 				</td>
 			</tr>
@@ -229,7 +229,7 @@ function editRespondToEvent($output,$dbADO) {
 		// processing area
 		$canModifyInstallation = getUserCanModifyInstallation($_SESSION['userID'],$installationID,$dbADO);
 		if(!$canModifyInstallation){
-			header("Location: index.php?section=editRespondToEvent&ehID=".$eventHandlerID."&error=$TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST");
+			header("Location: index.php?section=editRespondToEvent&ehID=".$eventHandlerID."&error=".translate('TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST'));
 			exit();
 		}
 		$description=cleanString($_POST['description']);
@@ -282,15 +282,15 @@ function editRespondToEvent($output,$dbADO) {
 		switch($oldWizard){
 			case 0:
 				processLightingScenario($commandGroupID,$dbADO);
-				$msg=$TEXT_THE_EVENT_HANDLER_WAS_UPDATED_CONST;
+				$msg=translate('TEXT_THE_EVENT_HANDLER_WAS_UPDATED_CONST');
 			break;
 			case 1:
 				processClimateScenario($commandGroupID,$dbADO);
-				$msg=$TEXT_THE_EVENT_HANDLER_WAS_UPDATED_CONST;
+				$msg=translate('TEXT_THE_EVENT_HANDLER_WAS_UPDATED_CONST');
 			break;
 			case 2:
 				list ($isModified,$parametersUpdatedAlert,$returnHook)=processAdvancedScenarios($commandGroupID,$section,$dbADO);
-				$msg=($isModified?$TEXT_COMMAND_GROUP_UPDATED_CONST:$TEXT_COMMAND_GROUP_NOT_UPDATED_CONST)." $parametersUpdatedAlert";
+				$msg=($isModified?translate('TEXT_COMMAND_GROUP_UPDATED_CONST'):translate('TEXT_COMMAND_GROUP_NOT_UPDATED_CONST'))." $parametersUpdatedAlert";
 			break;	
 		}
 	
@@ -303,9 +303,9 @@ function editRespondToEvent($output,$dbADO) {
 		exit();
 	}
 
-	$output->setMenuTitle($TEXT_WIZARD_CONST.' |');
-	$output->setPageTitle($TEXT_EDIT_RESPOND_TO_EVENT_CONST);
-	$output->setNavigationMenu(array($TEXT_RESPOND_TO_EVENTS_CONST=>'index.php?section=respondToEvents'));
+	$output->setMenuTitle(translate('TEXT_WIZARD_CONST').' |');
+	$output->setPageTitle(translate('TEXT_EDIT_RESPOND_TO_EVENT_CONST'));
+	$output->setNavigationMenu(array(translate('TEXT_RESPOND_TO_EVENTS_CONST')=>'index.php?section=respondToEvents'));
 	$output->setBody($out);
 	$output->setTitle(APPLICATION_NAME);			
 	$output->output();
