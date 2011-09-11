@@ -118,7 +118,7 @@ void Event_Plugin::Initialize()
 
 		if( pRow_EventHandler->TimedEvent_get() )
 		{
-			TimedEvent *pTimedEvent = new TimedEvent(pRow_EventHandler);
+			TimedEvent *pTimedEvent = new TimedEvent(pRow_EventHandler, m_mapCriteria_Find(pRow_EventHandler->FK_Criteria_get()));
 #ifdef DEBUG
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Adding timed event %d",pRow_EventHandler->PK_EventHandler_get());
 #endif
@@ -446,8 +446,37 @@ void Event_Plugin::AlarmCallback(int id, void* param)
 	{
 		TimedEvent *pTimedEvent = (TimedEvent *) param;
 
-		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Timer: %s firing command group %d",
-			pTimedEvent->m_pRow_EventHandler->Description_get().c_str(),pTimedEvent->m_pCommandGroup->m_PK_CommandGroup);
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Timer: %s timed out",
+						    pTimedEvent->m_pRow_EventHandler->Description_get().c_str());
+ 
+		bool bResult = true;
+		if( pTimedEvent->m_pCriteria!=NULL )
+		{
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Timer: %s - checking criteria.");
+			// Create some fake message and and use the event plugin as from device to avoid passing NULLs
+			Message* pMessage = new Message();
+			GetHouseModes(pMessage); // Update house modes
+			EventInfo *pEventInfo = new EventInfo(m_dwPK_Device, pMessage , (DeviceData_Router *)this, m_mapPK_HouseMode[0]);
+			pEventInfo->m_bTimedEvent = true;
+			try
+			{
+				if( !pTimedEvent->m_pCriteria->Evaluate(pEventInfo,(void *) m_pRouter) )
+					bResult=false;
+			}
+			catch(exception e)
+			{
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Problem with criteria for timed event : %s - result: %s",pTimedEvent->m_pRow_EventHandler->Description_get().c_str(),"??");
+				bResult=false;
+			}
+		}
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Timer: criteria evaluated as : %d", bResult);
+		
+		if (bResult)
+		{
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Timer: %s firing command group %d",
+							    pTimedEvent->m_pRow_EventHandler->Description_get().c_str(),pTimedEvent->m_pCommandGroup->m_PK_CommandGroup);
+			ExecCommandGroup(pTimedEvent->m_pCommandGroup->m_PK_CommandGroup);
+		}
 
 		ExecCommandGroup(pTimedEvent->m_pCommandGroup->m_PK_CommandGroup);
 		pTimedEvent->CalcNextTime();

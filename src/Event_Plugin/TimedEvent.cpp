@@ -30,11 +30,12 @@
 #include "pluto_main/Table_CriteriaParmList.h"
 #include "pluto_main/Table_EventHandler.h"
 
-TimedEvent::TimedEvent(Row_EventHandler *pRow_EventHandler)
+TimedEvent::TimedEvent(Row_EventHandler *pRow_EventHandler, class Criteria *pCriteria)
 {
 	m_tTime=0;
 	m_pRow_EventHandler=pRow_EventHandler;
 	m_iTimedEventType=m_pRow_EventHandler->TimedEvent_get();
+	m_pCriteria = pCriteria;
 	m_pCommandGroup=NULL;
 	vector<Row_CriteriaParm *> vectRow_CriteriaParm;
 	pRow_EventHandler->FK_Criteria_getrow()->FK_CriteriaParmNesting_getrow()->CriteriaParm_FK_CriteriaParmNesting_getrows(&vectRow_CriteriaParm);
