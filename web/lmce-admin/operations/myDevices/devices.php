@@ -15,7 +15,7 @@ function devices($output,$dbADO) {
 	$installationID = (int)@$_SESSION['installationID'];
 
 	$extraCategoryArray=array();
-	$title=strtoupper(str_replace('_',' ',$type));
+	$title=translate('TEXT_'.strtoupper($type).'_TYPE_CONST');
 	switch($type){
 		case 'interfaces':
 			$deviceCategory=$GLOBALS['rootInterfaces'];
@@ -243,14 +243,14 @@ function devices($output,$dbADO) {
 				$zoneBtn=($type=='security')?' <input type="button" class="button" name="gotoZones" value="Security Zones" onClick="self.location=\'index.php?section=zones&type=security\'">':'';
 				$updateCancelBtns='<input type="submit" class="button" name="update" value="'.translate('TEXT_UPDATE_CONST').'"> <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'">';
 			}
-			$addGC100Btn=($type=='interfaces')?'<input type="submit" class="button" name="addGC100" value="'.translate('TEXT_ADD_CONST').' gc100"> ':'';
+			$addGC100Btn=($type=='interfaces')?'<input type="submit" class="button" name="addGC100" value="'.translate('TEXT_ADD_GC100_CONST').'"> ':'';
 			
 			$out.='
 				<tr>
 					<td colspan="7">&nbsp;</td>
 				</tr>
 				<tr>
-					<td colspan="7" align="center">'.@$updateCancelBtns.' '.@$zoneBtn.' '.$addGC100Btn.'<input type="button" class="button" name="button" value="'.translate('TEXT_ADD_DEVICE').'" onClick="document.devices.action.value=\'externalSubmit\';document.devices.submit();windowOpen(\'index.php?section=deviceTemplatePicker&from='.urlencode('devices&type='.$type).'&categoryID='.$deviceCategory.'&allowAdd=1&parentID=0\',\'width=800,height=600,toolbar=1,scrollbars=1,resizable=1\');"></td>
+					<td colspan="7" align="center">'.@$updateCancelBtns.' '.@$zoneBtn.' '.$addGC100Btn.'<input type="button" class="button" name="button" value="'.translate('TEXT_ADD_DEVICE_CONST').'" onClick="document.devices.action.value=\'externalSubmit\';document.devices.submit();windowOpen(\'index.php?section=deviceTemplatePicker&from='.urlencode('devices&type='.$type).'&categoryID='.$deviceCategory.'&allowAdd=1&parentID=0\',\'width=800,height=600,toolbar=1,scrollbars=1,resizable=1\');"></td>
 				</tr>
 			</table>
 			</div>
@@ -368,7 +368,7 @@ function devices($output,$dbADO) {
 	$output->setPageTitle($title);
 
 	$output->setScriptCalendar('null');
-	$output->setNavigationMenu(array(((isset($title))?$title:strtoupper(str_replace('_',' ',$type)))=>'index.php?section=devices&type='.$type));
+	$output->setNavigationMenu(array(((isset($title))?$title:translate('TEXT_'.strtoupper($type).'_TYPE_CONST'))=>'index.php?section=devices&type='.$type));
 	$output->setBody($out);
 	$output->setTitle(APPLICATION_NAME);
 	$output->output();
