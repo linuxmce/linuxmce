@@ -53,14 +53,14 @@ Rectangle {
                         border.width: 2
                         Text {
                             id: buttonumber
-                            text: index
+                            text: (index+1 > 9) ? 0 : index+1
                             font.pointSize: 36
                             font.bold: true
                             anchors.centerIn: parent
                         }
                         MouseArea{
                             anchors.fill: parent
-                            onClicked: text_input1.text = text_input1.text+index
+                            onClicked: text_input1.text = text_input1.text+ ((index+1 > 9) ? 0 : index+1)
                         }
                     }
                 }
