@@ -10,7 +10,7 @@ Rectangle {
         repeat: false
         interval: 2000
         triggeredOnStart: false
-        running: false
+        running: true
 
         onTriggered:getLiveTVPlaylist()
     }
@@ -24,11 +24,7 @@ Rectangle {
 
     }
 
-    WorkerScript{
-        id:playlistpopulator
-        source: getLiveTVPlaylist()
 
-    }
 
     ListView{
         id:nonepgplaylistview
@@ -49,20 +45,25 @@ Rectangle {
             border.color: "black"
             border.width: 1
             width:scaleX(20)
-            height: scaleY(5)
+            height: scaleY(10)
             color: style.lighthighlight
             Text {
                 id: position
                 text: channelnumber
+                font.bold: true
                 font.family: "DroidSans"
                 opacity: .5
                 color: "black"
                 anchors.centerIn: parent
                 font.pointSize: 14
             }
+            Image {
+                id: chanimg
+                source: ""
+            }
 
             Text {
-                text: program
+                text: name + ":" +program
                 anchors.fill: parent
                 wrapMode: "WrapAnywhere"
                 font.pixelSize: 12

@@ -8,6 +8,7 @@
 #include <QApplication>
 #include <imageProviders/filedetailsimageprovider.h>
 #include <imageProviders/nowplayingimageprovider.h>
+#include <contextobjects/epgchannellist.h>
 
 
 //#include "OrbiterData.h"
@@ -235,9 +236,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         nowPlayingProvider = new UpdateObjectImageProvider(this);
         qorbiterUIwin->engine()->addImageProvider("updateobject", nowPlayingProvider );
 
-        //epg listmodel, no imageprovider as of yet
-        simpleEPGmodel = new EPGChannelList(new EPGItemClass);
-        qorbiterUIwin->rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
+
 
         //screen parameters class that could be extended as needed to fetch other data
         ScreenParameters = new ScreenParamsClass;
@@ -322,6 +321,13 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
             if (pqOrbiter->initialize()) //the dcethread initialization
             {
+                //epg listmodel, no imageprovider as of yet
+                simpleEPGmodel = new EPGChannelList(new EPGItemClass, this );
+                qorbiterUIwin->rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
+                processingThread = new QThread(this);
+                simpleEPGmodel->moveToThread(processingThread);
+                processingThread->start(QThread::LowPriority);
+                QObject::connect(this,SIGNAL(liveTVrequest()), simpleEPGmodel,SLOT(populate()), Qt::QueuedConnection);
                 //        qDebug () << "Orbiter Registered, starting";
                 gotoQScreen("Screen_1.qml");
                 return true;
@@ -402,6 +408,8 @@ bool qorbiterManager::getConf(int pPK_Device)
     qorbiterUIwin->rootContext()->setContextProperty("securityvideo", SecurityVideo);
     securityimage = new SecurityVideoImage(SecurityVideo);
     qorbiterUIwin->engine()->addImageProvider("securityimage", securityimage);
+
+
 
     // qDebug() << "Reading Config" ;
     iPK_Device = long(pPK_Device);
@@ -1481,16 +1489,13 @@ void qorbiterManager::changeChannels(QString chan)
 
 void qorbiterManager::getLiveTVPlaylist()
 {
-    if(simpleEPGmodel->isActive == false)
-    {
-        pqOrbiter->requestLiveTvPlaylist();
-    }
+    qDebug() << "Orbiter Manager slot called";
+        emit liveTVrequest();
 
 }
 
 void qorbiterManager::gridChangeChannel(QString chan, QString chanid)
 {
-
     pqOrbiter->TuneToChannel(chan.toInt(), chanid);
 
 

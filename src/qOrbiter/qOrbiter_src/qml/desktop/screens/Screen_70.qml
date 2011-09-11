@@ -13,12 +13,12 @@ Rectangle {
         triggeredOnStart: false
         running: true
 
-        onTriggered: image1.source = "image://updateobject/"+securityvideo.timestamp
+        onTriggered: nowplayingimage.source = "image://updateobject/"+securityvideo.timestamp
     }
 
     Connections{
         target:dcenowplaying
-        onPlayListPositionChanged: image1.source = "image://updateobject/"+securityvideo.timestamp
+        onPlayListPositionChanged: nowplayingimage.source = "image://updateobject/"+securityvideo.timestamp
     }
 
     height: style.orbiterH

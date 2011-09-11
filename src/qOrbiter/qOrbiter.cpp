@@ -2557,7 +2557,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
     QString temp;
     qmlUI->m_dwIDataGridRequestCounter++;
 
-    CMD_Populate_Datagrid cmd_populate_livetv_grid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 11, string("0,1"), 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
+    CMD_Populate_Datagrid cmd_populate_livetv_grid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 11, string("1,1"), 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
     if (SendCommand(cmd_populate_livetv_grid))
     {
@@ -2577,9 +2577,9 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
             //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             int cellsToRender= pDataGridTable->GetRows();
-            qDebug() << pDataGridTable->m_CellCount;
-            qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
-            qDebug() << "Response: " << cellsToRender << " cells to render";
+           // qDebug() << pDataGridTable->m_CellCount;
+           // qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
+            //qDebug() << "Response: " << cellsToRender << " cells to render";
 
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
             QString channelName;
@@ -2625,6 +2625,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
                 {
                     channelimage.load(":/icons/videos.png");
                 }
+
                 qmlUI->simpleEPGmodel->appendRow(new EPGItemClass(channelName, channelNumber, channelIndex, program, index, channelimage, channelimage, qmlUI->simpleEPGmodel));
                 index++;
             }

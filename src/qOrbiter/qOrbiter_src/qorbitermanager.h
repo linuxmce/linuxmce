@@ -26,6 +26,7 @@
 #include <contextobjects/playlistclass.h>
 #include <contextobjects/securityvideoclass.h>
 #include <imageProviders/securityvideoimage.h>
+#include <QThread>
 
 
 #include <QFile>
@@ -35,10 +36,10 @@
 /*----custom classes-------*/
 //own version of OrbiterData.h
 #include <datamodels/listModel.h>                             //custom item model
-#include <contextobjects/epgchannellist.h>
+//#include <contextobjects/epgchannellist.h>
 #include <datamodels/gridItem.h>
 #include <uiclasses/uicontroller.h>                           //experimental
-
+#include <contextobjects/epgchannellist.h>
 #include <imageProviders/basicImageProvider.h>                 //qml image provider
 #include <imageProviders/gridimageprovider.h>                  //qml image provider for grids !not implemented!
 
@@ -47,7 +48,7 @@
 /*-------Dce Includes----*/
 
 #include <qOrbiter/qOrbiter.h>
-
+class EPGChannelList;
 class basicImageProvider;
 class FileDetailsImageProvider;
 class UpdateObjectImageProvider;
@@ -67,6 +68,7 @@ class qorbiterManager : public QWidget
 public:
     qorbiterManager(int deviceno, QString routerip, QWidget *parent = 0);  //constructor
 
+    QThread *processingThread; //threaded class
     QString *sPK_User;
     QString *buildType;
     //QByteArray *skin;
@@ -256,6 +258,8 @@ signals:
     void modelChanged();
     void gridTypeChanged();
     void objectUpdated();
+    void liveTVrequest();
+
 
 
 public slots: //note: Q_INVOKABLE means it can be called directly from qml

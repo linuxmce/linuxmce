@@ -2,8 +2,8 @@
 #include <QDebug>
 
 
-EPGChannelList::EPGChannelList(EPGItemClass* prototype) :
-     m_prototype(prototype)
+EPGChannelList::EPGChannelList(EPGItemClass* prototype,qorbiterManager *reference) :
+    m_prototype(prototype), ref(reference)
 {
     setRoleNames(m_prototype->roleNames());
     qRegisterMetaType<QModelIndex>("QModelIndex");
@@ -173,4 +173,9 @@ bool EPGChannelList::checkDupe(QString name, QString position)
         return false;
     }
 
+}
+
+void EPGChannelList::populate()
+{
+    ref->pqOrbiter->requestLiveTvPlaylist();
 }
