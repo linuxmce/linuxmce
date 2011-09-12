@@ -11,6 +11,10 @@ DATABASEFOLDER="database"
 FILESYSTEMFOLDER="filesystem"
 VERSION=$(awk -F= '$1=="DISTRIB_RELEASE"{ sub(/\./,""); printf "%04d\n", $2 }' /etc/lsb-release)
 
+#Ensure the backup and upload directory exists
+if [ ! -d /home/backup/uplaod ]; then
+	mkdir -p /home/backup/upload
+fi
 
 Usage () {
 	echo "$0 [command]"
