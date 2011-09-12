@@ -1,8 +1,10 @@
 <?
-function outsideAccess($output,$dbADO) {
+
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/outsideAccess.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('outsideAccess.lang.php');
+
+function outsideAccess($output,$dbADO) {
 	
 	/* @var $dbADO ADOConnection */
 	/* @var $res ADORecordSet */
@@ -52,7 +54,7 @@ function outsideAccess($output,$dbADO) {
 		
 
 		if(count($retArray)==0){
-			$out.='<div class="err">'.$TEXT_ERROR_OPENING_PLUTO_CONF_CONST.'</div>';
+			$out.='<div class="err">'.translate('TEXT_ERROR_OPENING_PLUTO_CONF_CONST').'</div>';
 		}
 		$out.=setLeftMenu($dbADO).'<div class="err">'.(isset($_GET['error'])?strip_tags($_GET['error']):'').'</div>';
 		$out.='
@@ -90,52 +92,52 @@ function outsideAccess($output,$dbADO) {
 	<form action="index.php" method="post" name="outsideAccess" onSubmit="return validateInput();">
 	<input type="hidden" name="section" value="outsideAccess">
 	<input type="hidden" name="action" value="add">
-	<span class="err"><B>'.(isset($remote)?$TEXT_PROVIDE_PASSWORD_AND_INSTALLATION_CONST.' '.$installationID.'-'.$remote:'').'</B></span>
+	<span class="err"><B>'.(isset($remote)?translate('TEXT_PROVIDE_PASSWORD_AND_INSTALLATION_CONST').' '.$installationID.'-'.$remote:'').'</B></span>
 	<table width="600">
 		<tr>
-			<td colspan="3">'.$TEXT_REMOTE_ASSISTANCE_CONST.': <B>'.(isset($remote)?$TEXT_ENABLED_CONST:$TEXT_DISABLED_CONST).'</B> <input type="submit" name="'.(isset($remote)?'deactivate':'activate').'" class="button" value="'.(isset($remote)?$TEXT_DISABLE_CONST:$TEXT_ENABLE_CONST).'"></td>
+			<td colspan="3">'.translate('TEXT_REMOTE_ASSISTANCE_CONST').': <B>'.(isset($remote)?translate('TEXT_ENABLED_CONST'):translate('TEXT_DISABLED_CONST')).'</B> <input type="submit" name="'.(isset($remote)?'deactivate':'activate').'" class="button" value="'.(isset($remote)?translate('TEXT_DISABLE_CONST'):translate('TEXT_ENABLE_CONST')).'"></td>
 		</tr>	
 		<tr>
 			<td><input type="checkbox" name="allow80" value="1" '.(($allowAccessOn80==1)?'checked':'').'></td>
-			<td>'.$TEXT_ALLOW_OUTSIDE_ACCESS_80_CONST.'</td>
+			<td>'.translate('TEXT_ALLOW_OUTSIDE_ACCESS_80_CONST').'</td>
 			<td>&nbsp;</td>
 		</tr>		
 		<tr>
 			<td><input type="checkbox" name="allowOnPort" value="1" '.(($allowAccessOnPort==1)?'checked':'').'></td>
-			<td>'.$TEXT_ALLOW_OUTSIDE_ACCESS_OTHER_CONST.'</td>
+			<td>'.translate('TEXT_ALLOW_OUTSIDE_ACCESS_OTHER_CONST').'</td>
 			<td><input type="text" name="port" value="'.@$port.'"></td>
 		</tr>
 		<tr>
 			<td><input type="checkbox" name="allow443" value="1" '.(($allowSSLAccessOn443==1)?'checked':'').'></td>
-			<td>'.$TEXT_ALLOW_OUTSIDE_ACCESS_SSL443_CONST.'</td>
+			<td>'.translate('TEXT_ALLOW_OUTSIDE_ACCESS_SSL443_CONST').'</td>
 			<td>&nbsp;</td>
 		</tr>
 		<tr>
 			<td><input type="checkbox" name="allowSSLOnPort" value="1" '.(($allowSSLAccessOnPort==1)?'checked':'').'></td>
-			<td>'.$TEXT_ALLOW_OUTSIDE_ACCESS_SSLOTHER_CONST.'</td>
+			<td>'.translate('TEXT_ALLOW_OUTSIDE_ACCESS_SSLOTHER_CONST').'</td>
 			<td><input type="text" name="sslport" value="'.@$sslport.'"></td>
 		</tr>
 		<tr>
 			<td><input type="checkbox" name="RAport" value="1" '.(((int)@$RAport==22)?'checked':'').'></td>
-			<td>'.$TEXT_USE_PORT_22_FOR_REMOTE_ASSISTANCE_CONST.'</td>
+			<td>'.translate('TEXT_USE_PORT_22_FOR_REMOTE_ASSISTANCE_CONST').'</td>
 			<td>&nbsp;</td>
 		</tr>		
 		<tr>
 			<td><input type="checkbox" name="RA_CheckRemotePort" value="1" '.(((int)@$RA_CheckRemotePort==1)?'checked':'').'></td>
-			<td>'.$TEXT_ENABLE_ANTI_HANGING_MEASURE_CONST.'</td>
+			<td>'.translate('TEXT_ENABLE_ANTI_HANGING_MEASURE_CONST').'</td>
 			<td>&nbsp;</td>
 		</tr>		
 		<tr>
 			<td><input type="checkbox" name="sendErrorsToPluto" value="1" '.((@$sendErrorsToPluto==1)?'checked':'').'></td>
-			<td>'.$TEXT_SEND_ERRORS_TO_PLUTO_CONST.'</td>
+			<td>'.translate('TEXT_SEND_ERRORS_TO_PLUTO_CONST').'</td>
 			<td>&nbsp;</td>
 		</tr>		
 		<tr>
 			<td>&nbsp;</td>
-			<td colspan="2">'.$TEXT_OUTSIDE_ACCESS_NOTES_CONST.'</td>
+			<td colspan="2">'.translate('TEXT_OUTSIDE_ACCESS_NOTES_CONST').'</td>
 		</tr>		
 		<tr>
-			<td colspan="3" align="center"><input type="submit" class="button" name="save" value="'.$TEXT_UPDATE_CONST.'"> <input type="reset" class="button" name="cancelBtn" value="'.$TEXT_CANCEL_CONST.'"></td>
+			<td colspan="3" align="center"><input type="submit" class="button" name="save" value="'.translate('TEXT_UPDATE_CONST').'"> <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'"></td>
 		</tr>
 	</table>
 		<input type="hidden" name="oldAllow80" value="'.$allowAccessOn80.'">
@@ -149,7 +151,7 @@ function outsideAccess($output,$dbADO) {
 	} else {
 		$canModifyInstallation = getUserCanModifyInstallation($_SESSION['userID'],$_SESSION['installationID'],$dbADO);
 		if (!$canModifyInstallation){
-			header("Location: index.php?section=outsideAcces&error=$TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST");
+			header("Location: index.php?section=outsideAcces&error=".translate('TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST'));
 			exit();
 		}
 		
@@ -266,30 +268,26 @@ function outsideAccess($output,$dbADO) {
 			$cmd='sudo -u root /usr/pluto/bin/SetupRemoteAccess.sh'.@$suffix;
 			exec($cmd);
 			
-			header("Location: index.php?section=outsideAccess&msg=$TEXT_REMOTE_ACCESS_UPDATED_CONST");
+			header("Location: index.php?section=outsideAccess&msg=".translate('TEXT_REMOTE_ACCESS_UPDATED_CONST'));
 			exit();
 		}
 
 		header("Location: index.php?section=outsideAccess");
 	}
 
-	$output->setMenuTitle($TEXT_WIZARD_CONST.' |');
-	$output->setPageTitle($TEXT_OUTSIDE_ACCESS_CONST);
-	$output->setNavigationMenu(array($TEXT_OUTSIDE_ACCESS_CONST=>'index.php?section=outsideAccess'));	
+	$output->setMenuTitle(translate('TEXT_WIZARD_CONST').' |');
+	$output->setPageTitle(translate('TEXT_OUTSIDE_ACCESS_CONST'));
+	$output->setNavigationMenu(array(translate('TEXT_OUTSIDE_ACCESS_CONST')=>'index.php?section=outsideAccess'));	
 	$output->setBody($out);
-	$output->setTitle(APPLICATION_NAME.' :: '.$TEXT_OUTSIDE_ACCESS_CONST);			
+	$output->setTitle(APPLICATION_NAME.' :: '.translate('TEXT_OUTSIDE_ACCESS_CONST'));			
 	$output->output();  		
 }
 
 function writeToFile($accessFile, $variable,$oldValue,$newValue)
-{
-	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/outsideAccess.lang.php');
-	
+{	
 	$oldFileArray=@file($accessFile);	
 	if(!$oldFileArray){
-		header("Location: index.php?section=outsideAccess&error=$TEXT_ERROR_CANNOT_OPEN_FILE_FOR_READING_CONST ".$accessFile." ");
+		header("Location: index.php?section=outsideAccess&error=".translate('TEXT_ERROR_CANNOT_OPEN_FILE_FOR_READING_CONST')." ".$accessFile." ");
 		exit();
 	}
 	$oldFile=implode('',$oldFileArray);
@@ -300,13 +298,13 @@ function writeToFile($accessFile, $variable,$oldValue,$newValue)
 	else
 		$newFile=$oldFile.$variable.'='.$newValue."\n";
 	if(!is_writable($accessFile)){
-		header("Location: index.php?section=outsideAccess&error=$TEXT_ERROR_CANNOT_WRITE_TO_FILE_CONST ".$accessFile);
+		header("Location: index.php?section=outsideAccess&error=".translate('TEXT_ERROR_CANNOT_WRITE_TO_FILE_CONST')." ".$accessFile);
 		exit();
 	}
 	$handle = fopen($accessFile, 'w');
 
 	if (!fwrite($handle, $newFile)) {
-		header("Location: index.php?section=outsideAccess&error=$TEXT_ERROR_CANNOT_WRITE_TO_FILE_CONST ".$accessFile);
+		header("Location: index.php?section=outsideAccess&error=".translate('TEXT_ERROR_CANNOT_WRITE_TO_FILE_CONST')." ".$accessFile);
 		exit();
 	}
 	fclose($handle);
@@ -314,13 +312,9 @@ function writeToFile($accessFile, $variable,$oldValue,$newValue)
 
 function removeFromFile($variable,$accessFile)
 {
-	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/outsideAccess.lang.php');
-	
 	$oldFileArray=@file($accessFile);	
 	if(!$oldFileArray){
-		header("Location: index.php?section=outsideAccess&error=$TEXT_ERROR_CANNOT_OPEN_FILE_FOR_READING_CONST ".$accessFile);
+		header("Location: index.php?section=outsideAccess&error=".translate('TEXT_ERROR_CANNOT_OPEN_FILE_FOR_READING_CONST')." ".$accessFile);
 		exit();
 	}
 	$oldFile='';
@@ -328,13 +322,13 @@ function removeFromFile($variable,$accessFile)
 		if(!ereg($variable,$line))
 			$oldFile.=$line;
 	if(!is_writable($accessFile)){
-		header("Location: index.php?section=outsideAccess&error=$TEXT_ERROR_CANNOT_WRITE_TO_FILE_CONST ".$accessFile);
+		header("Location: index.php?section=outsideAccess&error=".translate('TEXT_ERROR_CANNOT_WRITE_TO_FILE_CONST')." ".$accessFile);
 		exit();
 	}
 	$handle = fopen($accessFile, 'w');
 
 	if (!fwrite($handle, $oldFile)) {
-		header("Location: index.php?section=outsideAccess&error=$TEXT_ERROR_CANNOT_WRITE_TO_FILE_CONST ".$accessFile);
+		header("Location: index.php?section=outsideAccess&error=".translate('TEXT_ERROR_CANNOT_WRITE_TO_FILE_CONST')." ".$accessFile);
 		exit();
 	}
 	fclose($handle);

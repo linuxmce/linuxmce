@@ -1,8 +1,8 @@
 <?php
 function scenarioWizard($output,$dbADO) {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/scenarioWizard.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('scenarioWizard.lang.php');
 	
 /* @var $dbADO ADOConnection */
 /* @var $rs ADORecordSet */
@@ -47,14 +47,14 @@ if($action=='form') {
 			<input type="hidden" name="oldWizard" value="'.$wizard.'">
 			<input type="hidden" name="testCmd" value="">
 	
-		<a href="index.php?section='.$from.'">'.$TEXT_BACK_CONST.'</a>
+		<a href="index.php?section='.$from.'">'.translate('TEXT_BACK_CONST').'</a>
 			<table width="300" align="center">
 			<tr class="alternate_back">
-				<td><B>'.$TEXT_SCENARIO_NAME_CONST.'</B></td>
+				<td><B>'.translate('TEXT_SCENARIO_NAME_CONST').'</B></td>
 				<td><textarea name="description" style="width:100%">'.$rowCG['Description'].'</textarea></td>
 			</tr>	
 			<tr>
-				<td><B>'.$TEXT_HINT_CONST.'</B> </td>
+				<td><B>'.translate('TEXT_HINT_CONST').'</B> </td>
 				<td><input type="text" name="hint" value="'.$rowCG['Hint'].'" style="width:100%"></td>
 			</tr>
 			<tr class="alternate_back">
@@ -62,18 +62,18 @@ if($action=='form') {
 				<td>'.$scenarioImg.'</td>
 			</tr>		
 			<tr>
-				<td><B>'.$TEXT_PICTURE_CONST.'</B> </td>
+				<td><B>'.translate('TEXT_PICTURE_CONST').'</B> </td>
 				<td><input type="file" name="pic" value=""></td>
 			</tr>	
 			<tr>
-				<td colspan="2" align="center"><input type="submit" class="button_fixed" name="update" value="'.$TEXT_UPDATE_CONST.'"></td>
+				<td colspan="2" align="center"><input type="submit" class="button_fixed" name="update" value="'.translate('TEXT_UPDATE_CONST').'"></td>
 			</tr>	
 			<tr class="alternate_back">
-				<td colspan="2"><B>'.$TEXT_EDIT_SCENARIO_USING_WIZARD_CONST.'</B> <select name="wizard" onChange="document.scenarioWizard.submit();">
-					<option value="0" '.(($wizard==0)?'selected':'').'>'.$TEXT_LIGHTING_WIZARD_CONST.'</option>
-					<option value="1" '.(($wizard==1)?'selected':'').'>'.$TEXT_CLIMATE_WIZARD_CONST.'</option>
-					<option value="2" '.(($wizard==2)?'selected':'').'>'.$TEXT_IRRIGATION_WIZARD_CONST.'</option>
-					<option value="3" '.(($wizard==3)?'selected':'').'>'.$TEXT_ADVANCED_WIZARD_CONST.'</option>
+				<td colspan="2"><B>'.translate('TEXT_EDIT_SCENARIO_USING_WIZARD_CONST').'</B> <select name="wizard" onChange="document.scenarioWizard.submit();">
+					<option value="0" '.(($wizard==0)?'selected':'').'>'.translate('TEXT_LIGHTING_WIZARD_CONST').'</option>
+					<option value="1" '.(($wizard==1)?'selected':'').'>'.translate('TEXT_CLIMATE_WIZARD_CONST').'</option>
+					<option value="2" '.(($wizard==2)?'selected':'').'>'.translate('TEXT_IRRIGATION_WIZARD_CONST').'</option>
+					<option value="3" '.(($wizard==3)?'selected':'').'>'.translate('TEXT_ADVANCED_WIZARD_CONST').'</option>
 				</select>
 				</td>
 			</tr>
@@ -104,7 +104,7 @@ if($action=='form') {
 	// action='add'
 	$canModifyInstallation = getUserCanModifyInstallation($_SESSION['userID'],$installationID,$dbADO);
 	if(!$canModifyInstallation){
-		Header('Location: index.php?section=scenarioWizard&error='.$TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST);
+		Header('Location: index.php?section=scenarioWizard&error='.translate('TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST'));
 		exit();
 	}
 	$oldWizard=(int)$_POST['oldWizard'];
@@ -118,15 +118,15 @@ if($action=='form') {
 	switch($oldWizard){
 		case 0:
 			processLightingScenario($cgID,$dbADO);
-			$msg=$TEXT_SCENARIO_UPDATED_CONST;
+			$msg=translate('TEXT_SCENARIO_UPDATED_CONST');
 		break;
 		case 1:
 			processClimateScenario($cgID,$dbADO);
-			$msg=$TEXT_SCENARIO_UPDATED_CONST;
+			$msg=translate('TEXT_SCENARIO_UPDATED_CONST');
 		break;
 		case 2:
 			processIrrigationScenario($cgID,$section,$dbADO);
-			$msg=$TEXT_SCENARIO_UPDATED_CONST;
+			$msg=translate('TEXT_SCENARIO_UPDATED_CONST');
 		break;			
 		case -1:
 		case 3:
@@ -176,7 +176,7 @@ if($action=='form') {
 		header("Location: index.php?section=scenarioWizard&roomID=$roomID&cgID=$cgID&from=$from&wizard=$wizard".@$sufix.$errToLink.'#hook_0');
 		exit();
 	}else{
-		header("Location: index.php?section=scenarioWizard&roomID=$roomID&cgID=$cgID&from=$from&wizard=$wizard&msg=$TEXT_SCENARIO_UPDATED_CONST"."$errToLink#hook_".@$returnHook);
+		header("Location: index.php?section=scenarioWizard&roomID=$roomID&cgID=$cgID&from=$from&wizard=$wizard&msg=".translate('TEXT_SCENARIO_UPDATED_CONST')."$errToLink#hook_".@$returnHook);
 		exit();
 	}
 	
@@ -184,26 +184,26 @@ if($action=='form') {
 }
 	switch($from){
 		case 'lightingScenarios':
-			$backLabel=$TEXT_WIZARD_LIGHTING_SCENARIOS_CONST;
+			$backLabel=translate('TEXT_WIZARD_LIGHTING_SCENARIOS_CONST');
 		break;
 		case 'climateScenarios':
-			$backLabel=$TEXT_WIZARD_CLIMATE_SCENARIOS_CONST;
+			$backLabel=translate('TEXT_WIZARD_CLIMATE_SCENARIOS_CONST');
 		break;
 		case 'mobileScenarios':
-			$backLabel=$TEXT_WIZARD_MOBILE_ORBITER_SCENARIOS_CONST;
+			$backLabel=translate('TEXT_WIZARD_MOBILE_ORBITER_SCENARIOS_CONST');
 		break;
 		case 'sleepingScenarios':
-			$backLabel=$TEXT_WIZARD_Sleeping_Scenarios_SCENARIOS_CONST;
+			$backLabel=translate('TEXT_WIZARD_Sleeping_Scenarios_SCENARIOS_CONST');
 		break;
 		default:
-			$backLabel=$TEXT_BACK_CONST;
+			$backLabel=translate('TEXT_BACK_CONST');
 		break;
 	}
 
-	$output->setMenuTitle($TEXT_ADVANCED_CONST.' |');
-	$output->setPageTitle($TEXT_EDIT_SCENARIO_CONST.' #'.$cgID);
+	$output->setMenuTitle(translate('TEXT_ADVANCED_CONST').' |');
+	$output->setPageTitle(translate('TEXT_EDIT_SCENARIO_CONST').' #'.$cgID);
 	$output->setScriptInBody("onLoad=\"javascript:top.treeframe.location.reload();\"");
-	$output->setNavigationMenu(array($TEXT_MY_SCENARIOS_CONST=>'index.php?section=myScenarios',$backLabel=>'index.php?section='.$from));
+	$output->setNavigationMenu(array(translate('TEXT_MY_SCENARIOS_CONST')=>'index.php?section=myScenarios',$backLabel=>'index.php?section='.$from));
 	$output->setScriptCalendar('null');
 	$output->setBody($out);
 	$output->setTitle(APPLICATION_NAME);

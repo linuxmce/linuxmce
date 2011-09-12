@@ -2,7 +2,9 @@
 $TEXT_OUTSIDE_ACCESS_CONST='Outside Access';
 $TEXT_ERROR_OPENING_PLUTO_CONF_CONST='Insuffient rights: pluto.conf file cannot be opened.';
 $TEXT_ALLOW_OUTSIDE_ACCESS_80_CONST='Allow outside access to the website on port 80';
-$TEXT_ALLOW_OUTSIDE_ACCESS_OTHER_CONST='Allow outside access to the website on port';
+$TEXT_ALLOW_OUTSIDE_ACCESS_OTHER_CONST='Allow outside access to the website on port ->';
+$TEXT_ALLOW_OUTSIDE_ACCESS_SSL443_CONST='Allow SSL outside access to the website on port 443';
+$TEXT_ALLOW_OUTSIDE_ACCESS_SSLOTHER_CONST='Allow SSL outside access to the website on port ->';
 $TEXT_ALLOW_PLUTO_ACCESS_CONST='Allow a LinuxMCE developer to have temporary access using this password';
 $TEXT_CONFIRM_PASSWORD_CONST='Confirm password';
 $TEXT_USE_PORT_22_FOR_REMOTE_ASSISTANCE_CONST='Use port 22 for remote assistance';
