@@ -235,7 +235,7 @@ function users($output,$dbADO) {
 							</table>
 						</td>			
 			</tr>
-			';
+			<tr><td colspan="6"><hr /></td></tr>';
 				$i++;
 			}
 

@@ -201,9 +201,13 @@ function login($output,$dbADO) {
 						$_SESSION['AccessGeneralMailbox'] = (int)$row_users['AccessGeneralMailbox'];
 						
 						// set the user's language for web admin
-						$res_language = $dbADO->Execute("select Description from Language WHERE PK_Language = ".$row_users['FK_Language']);
-						$row_language = $res_language->FetchRow();						
-						$_SESSION['UserLanguage'] = $row_language['Description'];
+						if ($row_users['FK_Language'] != NULL) {
+							$res_language = $dbADO->Execute("select Description from Language WHERE PK_Language = ".$row_users['FK_Language']);
+							$row_language = $res_language->FetchRow();						
+							$_SESSION['UserLanguage'] = $row_language['Description'];
+						} else {
+							$_SESSION['UserLanguage'] = $GLOBALS['fallbacklang'];
+						}
 
 						$installations=array();
 						while (!$res_installations->EOF) {
