@@ -127,6 +127,7 @@
 #define DEVICECATEGORY_Mobile_Internet_Devices_CONST 180
 #define DEVICECATEGORY_HDMICEC_Interface_CONST 181
 #define DEVICECATEGORY_Capture_Card_Audio_Ports_CONST 182
+#define DEVICECATEGORY_USB_Game_Pad_Remote_Controls_CONST 183
 
 #define DEVICECATEGORY_TABLE "DeviceCategory"
 #define DEVICECATEGORY_PK_DEVICECATEGORY_FIELD "PK_DeviceCategory"
