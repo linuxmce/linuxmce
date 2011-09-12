@@ -64,7 +64,7 @@ namespace DCE
 		// Private methods
 		void GetHouseModes(Message* pMessage);
 		void DeleteMembers();
-		void Initialize();
+		void Initialize(bool reload);
 public:
 		// Public member variables
 
@@ -81,7 +81,7 @@ public:
 
 		virtual void PrepareToDelete();
 		bool ProcessEvent(class Socket *pSocket,class Message *pMessage,class DeviceData_Base *pDeviceFrom,class DeviceData_Base *pDeviceTo);
-		CriteriaParmNesting *LoadCriteriaParmNesting(CriteriaParmNesting *pCriteriaParmNesting_Parent,Row_CriteriaParmNesting *pRow_CriteriaParmNesting);
+		CriteriaParmNesting *LoadCriteriaParmNesting(CriteriaParmNesting *pCriteriaParmNesting_Parent,Row_CriteriaParmNesting *pRow_CriteriaParmNesting, bool bReload);
 		void ExecuteEvent(EventInstance *pEventInstance);
         void AlarmCallback(int id, void* param);
 		void SetNextTimedEventCallback();

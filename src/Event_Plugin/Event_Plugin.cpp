@@ -88,13 +88,15 @@ bool Event_Plugin::GetConfig()
     m_pAlarmManager = new AlarmManager();
     m_pAlarmManager->Start(2);      //4 = number of worker threads
 
-    Initialize();
+    Initialize(false);
 	return true;
 }
 
-void Event_Plugin::Initialize()
+void Event_Plugin::Initialize(bool bReload)
 {
 	Row_Installation *pRow_Installation = m_pDatabase_pluto_main->Installation_get()->GetRow( m_pRouter->iPK_Installation_get() );
+	if (bReload)
+		pRow_Installation->Reload();
 
 	vector<Row_Criteria *> vectRow_Criteria;
 	if(pRow_Installation)
@@ -102,7 +104,11 @@ void Event_Plugin::Initialize()
 	for(size_t s=0;s<vectRow_Criteria.size();++s)
 	{
 		Row_Criteria *pRow_Criteria = vectRow_Criteria[s];
-		CriteriaParmNesting *pCriteriaParmNesting = LoadCriteriaParmNesting(NULL,pRow_Criteria->FK_CriteriaParmNesting_getrow());
+		if (bReload) {
+			pRow_Criteria->Reload();
+		}
+		
+		CriteriaParmNesting *pCriteriaParmNesting = LoadCriteriaParmNesting(NULL,pRow_Criteria->FK_CriteriaParmNesting_getrow(), bReload);
 		Criteria *pCriteria = new Criteria(pRow_Criteria->PK_Criteria_get(),pCriteriaParmNesting);
 		m_mapCriteria[pRow_Criteria->PK_Criteria_get()] = pCriteria;
 	}
@@ -113,6 +119,9 @@ void Event_Plugin::Initialize()
 	for(size_t s=0;s<vectRow_EventHandler.size();++s)
 	{
 		Row_EventHandler *pRow_EventHandler = vectRow_EventHandler[s];
+		if (bReload)
+			pRow_EventHandler->Reload();
+
 		if( pRow_EventHandler->Disabled_get() )
 			continue;
 
@@ -171,8 +180,11 @@ void Event_Plugin::Initialize()
 
 //<-dceag-const2-b->!
 
-CriteriaParmNesting *Event_Plugin::LoadCriteriaParmNesting(CriteriaParmNesting *pCriteriaParmNesting_Parent,Row_CriteriaParmNesting *pRow_CriteriaParmNesting)
+CriteriaParmNesting *Event_Plugin::LoadCriteriaParmNesting(CriteriaParmNesting *pCriteriaParmNesting_Parent,Row_CriteriaParmNesting *pRow_CriteriaParmNesting, bool bReload)
 {
+	if (bReload)
+		pRow_CriteriaParmNesting->Reload();
+
 	CriteriaParmNesting *pCriteriaParmNesting = new CriteriaParmNesting(pRow_CriteriaParmNesting->IsNot_get()==1,pRow_CriteriaParmNesting->IsAnd_get()==1);
 	if( pCriteriaParmNesting_Parent )
 		pCriteriaParmNesting_Parent->m_vectCriteriaParmNesting.push_back(pCriteriaParmNesting);
@@ -181,16 +193,23 @@ CriteriaParmNesting *Event_Plugin::LoadCriteriaParmNesting(CriteriaParmNesting *
 	for(size_t s=0;s<vectRow_CriteriaParmNesting.size();++s)
 	{
 		Row_CriteriaParmNesting *pRow_CriteriaParmNesting = vectRow_CriteriaParmNesting[s];
-		LoadCriteriaParmNesting(pCriteriaParmNesting,pRow_CriteriaParmNesting);
+		if (bReload)
+			pRow_CriteriaParmNesting->Reload();
+		LoadCriteriaParmNesting(pCriteriaParmNesting,pRow_CriteriaParmNesting, bReload);
 	}
 	vector<Row_CriteriaParm *> vectRow_CriteriaParm;
 	pRow_CriteriaParmNesting->CriteriaParm_FK_CriteriaParmNesting_getrows(&vectRow_CriteriaParm);
 	for(size_t s=0;s<vectRow_CriteriaParm.size();++s)
 	{
 		Row_CriteriaParm *pRow_CriteriaParm = vectRow_CriteriaParm[s];
+		if (bReload)
+			pRow_CriteriaParm->Reload();
 
 		if(NULL != pRow_CriteriaParm->FK_CriteriaParmList_getrow())
 		{
+			if (bReload)
+				pRow_CriteriaParm->FK_CriteriaParmList_getrow()->Reload();
+
 			pCriteriaParmNesting->m_vectCriteriaParm.push_back( new CriteriaParm(
 				pRow_CriteriaParm->PK_CriteriaParm_get(),pRow_CriteriaParm->FK_CriteriaParmList_get(),
 				pRow_CriteriaParm->FK_CriteriaParmList_getrow()->FK_ParameterType_get(),pRow_CriteriaParm->Operator_get(),
@@ -690,6 +709,6 @@ void Event_Plugin::CMD_Download_Configuration(string sText,string &sCMD_Result,M
 {
 	PLUTO_SAFETY_LOCK(em,m_EventMutex);
 	DeleteMembers();
-	Initialize();
+	Initialize(true);
 	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Event_Plugin::CMD_Download_Configuration() : Done");
 }
