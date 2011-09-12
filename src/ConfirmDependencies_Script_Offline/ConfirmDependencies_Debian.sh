@@ -96,7 +96,7 @@ case "$URL_TYPE" in
 		SingleEndSlash='s!//*!/!g; s!/*$!/!g; s!^http:/!http://!g; s!^ftp:/!ftp://!g'
 		EndSlashRepos=$(echo "$REPOS_SRC" | sed "$SingleEndSlash")
 		AptSrc_ParseSourcesList
-		if [ $REPOS = `lsb_release -c | awk '{print $2}'`]; then
+		if [ $REPOS = `lsb_release -c -s`]; then
                 	if AptSrc_AddSource "deb $EndSlashRepos $REPOS $SECTIONS"; then
                         	if ! BlacklistConfFiles '/etc/apt/sources.list' ;then
                                 	AptSrc_WriteSourcesList >/etc/apt/sources.list
