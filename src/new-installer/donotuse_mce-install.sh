@@ -791,6 +791,8 @@ StatsMessage "Preparing initial reboot"
 echo "/bin/false" >/etc/X11/default-display-manager
 wget http://svn.linuxmce.org/svn/branches/LinuxMCE-1004/src/new-installer/firstboot
 cp firstboot /etc/rc5.d/S90firstboot
+chmod 755 /etc/rc5.d/S90firstboot
+rm -f ./firstboot
 echo >> /etc/apt/sources.list
 /usr/share/update-notifier/notify-reboot-required
 }
