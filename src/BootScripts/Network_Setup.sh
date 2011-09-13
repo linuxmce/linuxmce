@@ -189,6 +189,13 @@ fi
 if [[ "$VPNenabled" == "on" ]]; then
         # Config L2TP/IPSEC VPN server
         echo "L2TP/IPSEC VPN server enabled, setting up"
+
+	# Disabled redirects to prevent Netkey from sending bogus icmp packets
+	for each in /proc/sys/net/ipv4/conf/*
+	do
+    		echo 0 > $each/accept_redirects
+    		echo 0 > $each/send_redirects
+	done
         
         # OpenSWAN IPSEC config files
         sed -r "s,%VPNPSK%,$VPNPSK,g" /usr/pluto/templates/ipsec.secrets.tmpl >/etc/ipsec.secrets
