@@ -318,8 +318,8 @@ debconf debconf/priority        select  critical
 debconf-set-selections /tmp/preseed.cfg
 VerifyExitCode "debconf-set-selections - preseed data"
 
-#For some odd reason, set-selections adds a space for Noninteractive that needs to be removed
-sed -i 's/Value:  Noninteractive/Value: Noninteractive/g' /var/cache/debconf/config.dat
+#For some odd reason, set-selections adds a space for Noninteractive and Critical that needs to be removed - debconf doesn't handle extra white space well
+sed -i 's/Value:  /Value: /g' /var/cache/debconf/config.dat
 
 #remove preseed file, no need to clutter things up
 rm /tmp/preseed.cfg
