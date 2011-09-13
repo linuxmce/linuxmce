@@ -633,7 +633,7 @@ void Media_Plugin::PopulateFileBrowserInfoForFile(MediaListGrid *pMediaListGrid,
 					// I have to fix the case where lack of title attribute no longer returns null.
 
 					LoggerWrapper::GetInstance()->Write(LV_STATUS,"row[2] = %s",row[2]);
-					if (string(row[2]).empty()) {
+					if (row[2] != NULL && string(row[2]).empty()) {
 						row[2] = NULL;					
 					}
 
