@@ -1,7 +1,6 @@
 #!/bin/bash
 
 PlutoHome="www.linuxmce.org"
-#PlutoHome="10.0.0.175/plutohome-com"
 
 . /usr/pluto/bin/SQL_Ops.sh
 . /usr/pluto/bin/Config_Ops.sh

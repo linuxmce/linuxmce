@@ -17,7 +17,7 @@ Host="$4"
 RAhost="$5"
 
 if [[ -z "$RAhost" ]]; then
-	RAhost="rassh.linuxmce.org"
+	RAhost="ra.linuxmce.org"
 fi
 
 if [[ -n "$6" ]]; then

@@ -4,14 +4,15 @@
 . /usr/pluto/bin/pluto.func
 . /usr/pluto/bin/SQL_Ops.sh
 
-keepAliveCmd="usr/pluto/bin/RA_KeepPortsAlive.sh"
+keepAliveCmd="/usr/pluto/bin/RA_KeepPortsAlive.sh"
 cronCmd="/usr/pluto/bin/SetupRemoteAccess.sh"
 cronCmd_Special="/usr/pluto/bin/SetupRA-Special.sh"
 cronEntry="*/1 * * * * root bash -c '$cronCmd &>/dev/null'"
 cronEntry_Special="*/10 * * * * root bash -c '$cronCmd_Special &>/dev/null'"
 screenName="RemoteAssistance"
 
-raServer=www.linuxmce.org
+RAServer=www.localeconcept.com
+RAKey="/usr/pluto/keys/id_dsa_remoteassistance"
 
 DEVICEDATA_Remote_Assistance_Ports=212
 
@@ -60,7 +61,6 @@ if [[ ! -L "$cronCmd_Special" ]]; then
 	ln -s "$cronCmd" "$cronCmd_Special"
 fi
 
-RAKey="/usr/pluto/keys/id_dsa_remoteassistance"
 [[ -f "$RAKey" ]] && chmod 700 "$RAKey" || exit
 
 shopt -s nullglob
@@ -125,7 +125,7 @@ CreateTunnel()
 	LocalPort="$2"
 	RemotePort="$3"
 	Host="$4"
-	RAhost="${5:-rassh.linuxmce.org}"
+	RAhost="${5:-ra.linuxmce.org}"
 	RAport="$6"
 	Monitored="${7:-yes}"
 
@@ -190,7 +190,7 @@ CreateTunnels()
 		PortDest="${PortNameDest##*_}"
 		PortTunnel="${!Var}"
 		CreateTunnel "${PortName}_pf" "$PortDest" "$PortTunnel"
-		CreateTunnel "${PortName}_ph" "$PortDest" "$PortTunnel" "" $raServer 22
+		CreateTunnel "${PortName}_ph" "$PortDest" "$PortTunnel" "" $RAServer 22
 	done
 
 	CreateTunnels_Special
@@ -206,7 +206,7 @@ CreateTunnels_Special()
 		PortDest="${PortNameDest##*_}"
 		PortTunnel="${!Var}"
 		CreateTunnel "${PortName}_NoMon_pf" "$PortDest" "$PortTunnel" "" "" 22 no
-		CreateTunnel "${PortName}_NoMon_ph" "$PortDest" "$PortTunnel" "" $raServer 22 no
+		CreateTunnel "${PortName}_NoMon_ph" "$PortDest" "$PortTunnel" "" $RAServer 22 no
 	done
 }
 
@@ -240,20 +240,16 @@ RemoveTunnels_Special()
 
 DeleteHostKey()
 {
-	sed -ri '/rassh2?\.linuxmce\.org/d' /root/.ssh/known_hosts
+	sed -ri '/ra?\.linuxmce\.org/d' /root/.ssh/known_hosts
 }
 
 Me="$(basename "$0")"
 if [[ "$Me" == "$(basename "$cronCmd")" ]]; then
-	echo "DeleteHostKey"
 	DeleteHostKey
 	if [[ -n "$remote" ]]; then
-		echo "RA_KeepPortsAlive.sh"
 		$keepAliveCmd
-		echo "AddCronEntry"
 		AddCronEntry
 		[[ "$1" == "restart" ]] && RemoveTunnels
-		echo "CreateTunnels"
 		CreateTunnels
 	elif grep -q '^remote=' /etc/pluto.conf; then
 		Logging "$TYPE" "$SEVERITY_CRITICAL" "$0" "Remote assistance is enabled in pluto.conf, yet remote password is empty. Avoiding closing the tunnels."

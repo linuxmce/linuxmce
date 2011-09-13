@@ -51,7 +51,7 @@ fi
 
 echo
 echo '-------------------------------------------'
-echo "Pluto staff will ask you for these details:"
+echo "LinuxMCE developpers will ask you for:"
 echo "Installation number: $PK_Installation"
 echo "Remote assistance password: $password"
 echo '-------------------------------------------'
