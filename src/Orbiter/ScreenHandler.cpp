@@ -1048,6 +1048,11 @@ void ScreenHandler::SelectedAttributeCell(DataGridCell *pCell)
 	if( (mediaFileBrowserOptions.m_PK_MediaType==MEDIATYPE_pluto_CD_CONST || mediaFileBrowserOptions.m_PK_MediaType==MEDIATYPE_pluto_StoredAudio_CONST)
 		&& mediaFileBrowserOptions.m_PK_AttributeType_Sort==ATTRIBUTETYPE_Performer_CONST )
 			mediaFileBrowserOptions.m_PK_AttributeType_Sort = ATTRIBUTETYPE_Album_CONST;
+        else if (mediaFileBrowserOptions.m_PK_MediaType==MEDIATYPE_lmce_StreamedAudio_CONST &&
+                 mediaFileBrowserOptions.m_PK_AttributeType_Sort==ATTRIBUTETYPE_Genre_CONST)
+	{
+		mediaFileBrowserOptions.m_PK_AttributeType_Sort = ATTRIBUTETYPE_Channel_CONST;
+	}
 	else
 	{
 		switch( mediaFileBrowserOptions.m_PK_AttributeType_Sort )
