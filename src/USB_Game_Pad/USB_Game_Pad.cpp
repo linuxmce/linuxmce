@@ -482,115 +482,117 @@ void USB_Game_Pad::FindGamePads()
 
 void USB_Game_Pad::ProcessGamePad(int fd)
 {
-  unsigned char axes = 2;
-  unsigned char buttons = 2;
-  uint16_t btnmap[KEY_MAX - BTN_MISC + 1];
-  uint8_t axmap[ABS_MAX + 1];
-  struct ::js_event js; // one event packet.
-
-  timespec ts_now;
-  //  timespec ts_diff;
-
-  ioctl(fd, JSIOCGAXES, &axes);
-  ioctl(fd, JSIOCGBUTTONS, &buttons);
-  ioctl(fd, JSIOCGAXMAP, axmap);
-  ioctl(fd, JSIOCGBTNMAP, btnmap);
-
-  while (read(fd, &js, sizeof(struct ::js_event)) == sizeof(struct ::js_event))
+  if (m_cCurrentScreen != 'G')         // If the current screen is a Game FS, simply ignore.
     {
-      // Parse the joystick event.
-      gettimeofday(&ts_now,NULL);
-
-      switch (js.type)
+      unsigned char axes = 2;
+      unsigned char buttons = 2;
+      uint16_t btnmap[KEY_MAX - BTN_MISC + 1];
+      uint8_t axmap[ABS_MAX + 1];
+      struct ::js_event js; // one event packet.
+      
+      timespec ts_now;
+      //  timespec ts_diff;
+      
+      ioctl(fd, JSIOCGAXES, &axes);
+      ioctl(fd, JSIOCGBUTTONS, &buttons);
+      ioctl(fd, JSIOCGAXMAP, axmap);
+      ioctl(fd, JSIOCGBTNMAP, btnmap);
+      
+      while (read(fd, &js, sizeof(struct ::js_event)) == sizeof(struct ::js_event))
 	{
-	case 1:  // buttons
-	  if (js.value == 0)
+	  // Parse the joystick event.
+	  gettimeofday(&ts_now,NULL);
+	  
+	  switch (js.type)
 	    {
-	      // button up
-	      string sButtonNum = StringUtils::itos(js.number+1);
-	      string sRet = "USB-GAMEPAD-B"+sButtonNum;
-	      map <string,pair<string,int> >::iterator it=m_mapCodesToButtons.find(sRet);
-	      if ( it==m_mapCodesToButtons.end() )
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Can't find a mapping for button %s",sRet.c_str());
-	      else
+	    case 1:  // buttons
+	      if (js.value == 0)
 		{
-		  // Send it off to IRRecieverBase
-		  ReceivedCode(it->second.second,it->second.first.c_str());
+		  // button up
+		  string sButtonNum = StringUtils::itos(js.number+1);
+		  string sRet = "USB-GAMEPAD-B"+sButtonNum;
+		  map <string,pair<string,int> >::iterator it=m_mapCodesToButtons.find(sRet);
+		  if ( it==m_mapCodesToButtons.end() )
+		    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Can't find a mapping for button %s",sRet.c_str());
+		  else
+		    {
+		      // Send it off to IRRecieverBase
+		      ReceivedCode(it->second.second,it->second.first.c_str());
+		    }
 		}
+	      break;
+	    case 2:  // axes
+	      if (js.number % 2 == 0)
+		{
+		  // Horizontal axes.
+		  if (js.value < -16384)
+		    {
+		      // left
+		      string sRet = "USB-GAMEPAD-LEFT";
+		      map <string,pair<string,int> >::iterator it=m_mapCodesToButtons.find(sRet);
+		      if ( it==m_mapCodesToButtons.end() )
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Can't find a mapping for button %s",sRet.c_str());
+		      else
+			{
+			  // Send it off to IRRecieverBase
+			  ReceivedCode(it->second.second,it->second.first.c_str());
+			}
+		    }
+		  if (js.value > 16384)
+		    {
+		      // right
+		      string sRet = "USB-GAMEPAD-RIGHT";
+		      map <string,pair<string,int> >::iterator it=m_mapCodesToButtons.find(sRet);
+		      if ( it==m_mapCodesToButtons.end() )
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Can't find a mapping for button %s",sRet.c_str());
+		      else
+			{
+			  // Send it off to IRRecieverBase
+			  ReceivedCode(it->second.second,it->second.first.c_str());
+			}
+		    }
+		}
+	      else 
+		{
+		  // Vertical axes.
+		  if (js.value < -16384)
+		    {
+		      // up
+		      string sRet = "USB-GAMEPAD-UP";
+		      map <string,pair<string,int> >::iterator it=m_mapCodesToButtons.find(sRet);
+		      if ( it==m_mapCodesToButtons.end() )
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Can't find a mapping for button %s",sRet.c_str());
+		      else
+			{
+			  // Send it off to IRRecieverBase
+			  ReceivedCode(it->second.second,it->second.first.c_str());
+			}
+		    }
+		  if (js.value > 16384)
+		    {
+		      // down
+		      string sRet = "USB-GAMEPAD-DOWN";
+		      map <string,pair<string,int> >::iterator it=m_mapCodesToButtons.find(sRet);
+		      if ( it==m_mapCodesToButtons.end() )
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Can't find a mapping for button %s",sRet.c_str());
+		      else
+			{
+			  // Send it off to IRRecieverBase
+			  ReceivedCode(it->second.second,it->second.first.c_str());
+			}
+		    }
+		}
+	      break;
 	    }
-	  break;
-	case 2:  // axes
-	  if (js.number % 2 == 0)
-	    {
-	      // Horizontal axes.
-	      if (js.value < -16384)
-		{
-		  // left
-		  string sRet = "USB-GAMEPAD-LEFT";
-		  map <string,pair<string,int> >::iterator it=m_mapCodesToButtons.find(sRet);
-		  if ( it==m_mapCodesToButtons.end() )
-		    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Can't find a mapping for button %s",sRet.c_str());
-		  else
-		    {
-		      // Send it off to IRRecieverBase
-		      ReceivedCode(it->second.second,it->second.first.c_str());
-		    }
-		}
-	      if (js.value > 16384)
-		{
-		  // right
-		  string sRet = "USB-GAMEPAD-RIGHT";
-		  map <string,pair<string,int> >::iterator it=m_mapCodesToButtons.find(sRet);
-		  if ( it==m_mapCodesToButtons.end() )
-		    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Can't find a mapping for button %s",sRet.c_str());
-		  else
-		    {
-		      // Send it off to IRRecieverBase
-		      ReceivedCode(it->second.second,it->second.first.c_str());
-		    }
-		}
-	    }
-	  else 
-	    {
-	      // Vertical axes.
-	      if (js.value < -16384)
-		{
-		  // up
-		  string sRet = "USB-GAMEPAD-UP";
-		  map <string,pair<string,int> >::iterator it=m_mapCodesToButtons.find(sRet);
-		  if ( it==m_mapCodesToButtons.end() )
-		    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Can't find a mapping for button %s",sRet.c_str());
-		  else
-		    {
-		      // Send it off to IRRecieverBase
-		      ReceivedCode(it->second.second,it->second.first.c_str());
-		    }
-		}
-	      if (js.value > 16384)
-		{
-		  // down
-		  string sRet = "USB-GAMEPAD-DOWN";
-		  map <string,pair<string,int> >::iterator it=m_mapCodesToButtons.find(sRet);
-		  if ( it==m_mapCodesToButtons.end() )
-		    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Can't find a mapping for button %s",sRet.c_str());
-		  else
-		    {
-		      // Send it off to IRRecieverBase
-		      ReceivedCode(it->second.second,it->second.first.c_str());
-		    }
-		}
-	    }
-	  break;
+	  
 	}
-
+      
+      if (errno != EAGAIN)
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ProcessGamePad(%d) Error reading event packet.",fd);
+	  return;
+	} 
     }
-  
-  if (errno != EAGAIN)
-    {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ProcessGamePad(%d) Error reading event packet.",fd);
-      return;
-    }
-
 }
 
 int USB_Game_Pad::Gamepad_Capture(int deviceID)
