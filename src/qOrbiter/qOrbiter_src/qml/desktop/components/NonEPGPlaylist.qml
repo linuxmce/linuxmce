@@ -11,9 +11,7 @@ Rectangle {
         target: dcenowplaying
         onPlayListPositionChanged:{
             nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
-
         }
-
     }
 
 

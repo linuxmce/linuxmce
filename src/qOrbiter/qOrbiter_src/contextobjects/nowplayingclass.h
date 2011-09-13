@@ -21,53 +21,88 @@ class NowPlayingClass : public QDeclarativeItem
     Q_OBJECT
 
     Q_PROPERTY (bool b_mediaPlaying READ getStatus WRITE setStatus NOTIFY mediaStatusChanged) //property to know if media is playing
-   //set now playing - text to assign
+
+    //set now playing - text to assign
     Q_PROPERTY (QString qs_mainTitle READ getTitle WRITE setTitle NOTIFY titleChanged) //the text set sent by now playing command
-     Q_PROPERTY (QString qs_mainTitle2 READ getTitle2 WRITE setTitle2 NOTIFY titleChanged2) // in the case of audio, multiple metada value are sent  thus title 2
+    Q_PROPERTY (QString qs_mainTitle2 READ getTitle2 WRITE setTitle2 NOTIFY titleChanged2) // in the case of audio, multiple metada value are sent  thus title 2
+
     //set now playing - value
     Q_PROPERTY (QString qs_subTitle READ getSubTitle WRITE setSubTitle NOTIFY titleChanged )//the secondary text sent in a seperate variable from now playing
+
     //internal reference to know what the current media screen is
     Q_PROPERTY (QString qs_screen READ getScreen WRITE setScreen NOTIFY screenTypeChanged)
+
     //file path of the file in question
     Q_PROPERTY (QString filepath READ getFilePath WRITE setFilePath NOTIFY filePathChanged)
+
     //current playback speed
     Q_PROPERTY (QString qs_playbackSpeed READ getMediaSpeed WRITE setStringSpeed NOTIFY mediaSpeedChanged)
+
     //metadata related image url
     Q_PROPERTY (QUrl nowPlayingImage READ getImage WRITE setImage NOTIFY imageChanged)
+
     //internal playlist position tracker
     Q_PROPERTY (int m_iplaylistPosition READ getPlaylistPosition WRITE setPlaylistPostion NOTIFY playListPositionChanged)
+
+    //media title variable that can be independant of what is passed initially by now playing
+    Q_PROPERTY (QString mediaTitle READ getMediaTitle WRITE setMediaTitle NOTIFY mediaTitleChanged)
+
     //television related variables
     Q_PROPERTY (QString program READ getProgram WRITE setProgram NOTIFY programChanged)
     Q_PROPERTY (QString channel READ getChannel WRITE setChannel NOTIFY channelChanged)
     Q_PROPERTY (QString channelID READ getChannelID WRITE setChannelID NOTIFY channelChanged)
     Q_PROPERTY (QString episode READ getEpisode WRITE setEpisode NOTIFY episodeChanged)
 
+    //audio related
+    Q_PROPERTY (QString album READ getAlbum WRITE setAlbum NOTIFY albumChanged)
+    Q_PROPERTY (QString track READ getTrack WRITE setTrack NOTIFY trackChanged)
+    Q_PROPERTY (QString performerlist READ getPerformers WRITE setPerformers NOTIFY performersChanged)
+
 public:
     explicit NowPlayingClass(QDeclarativeItem *parent = 0);
+
+    //general variables - set by now playing slot from dce router when media is started or paused
     QString filepath;
     QString qs_screen;
     QString qs_imagePath;
     QString qs_mainTitle;
     QString qs_mainTitle2;
     QString qs_subTitle;
-    bool b_mediaPlaying;
     int i_mediaType;
     int i_streamID;
-    int i_playbackSpeed;
-    QTime *timecode;
-    QString qs_playbackSpeed;
+
+    //dont laugh, not sure where these come from but are relevant for other functions
+    bool b_mediaPlaying;
+
     QUrl nowPlayingImage;
     int m_iplaylistPosition;
     QImage fileImage;
+
+    //media  related--------------------------
+    QString mediaTitle; //special if the media itself for some reason has a title different than the now playing
+    QTime *timecode;
     QString synopsis;
+    int i_playbackSpeed;
+    QString qs_playbackSpeed;
+
     //television related
     QString program;
     QString channel;
     QString channelID;
     QString episode;
+    //audio related
+    QStringList performers;
+    QString performerlist;
+    QString album;
+    QString track;
+    QStringList genre;
+    QStringList composer;
+    QString releasedate;
 
 
 signals:
+    //general signals
+    void mediaTitleChanged();
     void playlistChanged();
     void mediaChanged();
     void mediaEnded();
@@ -81,16 +116,28 @@ signals:
     void filePathChanged();
     void mediaSpeedChanged();
     void playListPositionChanged();
+
+    //audio signals
+    void albumChanged();
+    void trackChanged();
+    void performersChanged();
+    void composerChanged();
+
+
+    //video signals
+
+    //games signals
+
+    //dvd signals
+
+    //mythtv, vdr and live tv signals
     void programChanged();
     void channelChanged();
     void episodeChanged();
 
 
-
 public slots:
 
-    void setPlaylistPostion(int i_pls) {m_iplaylistPosition = i_pls ; qDebug() << "Playlist Position now" << m_iplaylistPosition ; emit playListPositionChanged();}
-    int getPlaylistPosition() {return m_iplaylistPosition;}
 
     void setProgram(QString newProgram) {program = newProgram; emit programChanged();}
     QString getProgram () {return program;}
@@ -122,9 +169,19 @@ public slots:
     void setFilePath (QString inc_fp) {filepath = inc_fp; qDebug() <<"FilePath:" << filepath; emit filePathChanged();}
     QString getFilePath () {return filepath;}
 
+    //general media getters and setters ----//
+
+    void setMediaTitle (QString inc_mediaTitle) {mediaTitle = inc_mediaTitle;  emit episodeChanged();}
+    QString getMediaTitle () {return mediaTitle;}
+
+    void setPlaylistPostion(int i_pls) {m_iplaylistPosition = i_pls; qDebug() << "Playlist set to: "<< m_iplaylistPosition;  emit playListPositionChanged();}
+    int getPlaylistPosition() {return m_iplaylistPosition;}
+
     void setMediaSpeed(int speed);
     void setStringSpeed(QString s) {qs_playbackSpeed = s; qDebug() << qs_playbackSpeed; emit mediaSpeedChanged();}
     QString getMediaSpeed() {return qs_playbackSpeed;}
+
+    //--tv getters and setters-------------//
 
     void setChannel (QString inc_channel) {channel = inc_channel;  emit channelChanged();}
     QString getChannel () {return channel;}
@@ -135,6 +192,17 @@ public slots:
     void setEpisode (QString inc_episode) {episode = inc_episode;  emit episodeChanged();}
     QString getEpisode () {return episode;}
 
-    };
+    //-----audio getters and setter--------//
+    void setAlbum (QString inc_album) {album = inc_album;  emit albumChanged();}
+    QString getAlbum () {return album;}
 
-    #endif // NOWPLAYINGCLASS_H
+    void setTrack (QString inc_track) {track = inc_track;  emit trackChanged();}
+    QString getTrack() {return track;}
+
+    void setPerformers (QString inc_performer) {performers << inc_performer;  emit performersChanged();}
+    QString getPerformers() {performerlist = performers.join(","); return performerlist;}
+
+
+};
+
+#endif // NOWPLAYINGCLASS_H

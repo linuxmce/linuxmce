@@ -1040,7 +1040,6 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         BindMediaRemote(false);
     }
 
-
     QString scrn = sPK_DesignObj.c_str();
     int pos1 = scrn.indexOf(",");
     scrn.remove(pos1, scrn.length());
@@ -1048,8 +1047,6 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     QString md1 = QString::fromStdString(sValue_To_Assign);
     QStringList mdlist;
     mdlist= md1.split(QRegExp("\\n"), QString::SkipEmptyParts);
-    qDebug() << "Metadatalist" << mdlist.count();
-
     if (mdlist.count() == 2)
     {
         qmlUI->nowPlayingButton->setTitle(mdlist.at(0));
@@ -2327,11 +2324,8 @@ void DCE::qOrbiter::requestMediaPlaylist()
                 */
                 qmlUI->storedVideoPlaylist->appendRow(new PlaylistItemClass(cellTitle, cellAttribute, fk_file ,index, qmlUI->storedVideoPlaylist));
             }
-
         }
-
     }
-
 }
 
 void DCE::qOrbiter::ShowFloorPlan(int floorplantype)
@@ -2367,8 +2361,6 @@ void DCE::qOrbiter::BindMediaRemote(bool onoff)
     string designobj = "2355";
     CMD_Bind_to_Media_Remote bind_remote(qmlUI->iPK_Device, qmlUI->iMediaPluginID, 0,string("4962") ,status, string(""), QString::number(qmlUI->iea_area).toStdString(), 0, 0);
     SendCommand(bind_remote);
-
-
 }
 
 void DCE::qOrbiter::JumpToPlaylistPosition(int pos)
@@ -2518,30 +2510,6 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                     qDebug() << attribute;
                 }
 
-                // qDebug() << "Now Playing Attribute::" << cellTitle << "-" << cellAttribute;
-
-
-
-
-                /*
-                // qDebug() << "Attribute image?" << pCell->GetImagePath();
-                if (pPath )
-                {
-                    cellImg = getfileForDG(pCell->GetImagePath());
-                    size_t s=0;
-                    pCell->m_GraphicLength = (unsigned long) s;
-                    pCell->m_GraphicFormat = GR_JPG;
-                }
-                else if (!pPath) //making sure we dont provide a null image
-                {
-                    //         qDebug() << "No Image";
-                    cellImg.load(":/icons/videos.png");
-                }
-                else if (cellImg.isNull())
-                {
-                    cellImg.load(":/icons/videos.png");
-                }
-            */
                 //qmlUI->m_selected_grid_item->appendRow(new FileDetailsItem(cellTitle, cellAttribute, cellImg, false,  qmlUI->model));
             }
         }
@@ -2655,8 +2623,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
                 qmlUI->simpleEPGmodel->appendRow(new EPGItemClass(channelName, channelNumber, channelIndex, program, index, channelimage, channelimage, qmlUI->simpleEPGmodel));
                 index++;
             }
-        }
-        //}
+        }        
     }
 }
 
@@ -2779,16 +2746,12 @@ void DCE::qOrbiter::populateAdditionalMedia()
                     {
                         cellImg.load(":/icons/videos.png");
                     }
-
                     qmlUI->model->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg,  qmlUI->model));
-
                 }
             }
         }
         sleep(1);
-
     }
-
 }
 
 
