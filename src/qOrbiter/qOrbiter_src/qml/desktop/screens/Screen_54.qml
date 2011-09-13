@@ -67,7 +67,7 @@ Rectangle {
                 }
                 Text {
                     id: headertext
-                    text:"Speed: " + dcenowplaying.qs_playbackSpeed
+                    text:qsTr("Speed: ") + dcenowplaying.qs_playbackSpeed
                     font.family: "Droid Sans"
                     font.pixelSize: 12
 
@@ -75,7 +75,7 @@ Rectangle {
             }
                     Text {
                         id: artist
-                        text: "Artist :" + dcenowplaying.qs_mainTitle
+                        text: qsTr("Artist :") + dcenowplaying.qs_mainTitle
                         font.family: "Droid Sans"
                         wrapMode: "WrapAtWordBoundaryOrAnywhere"
                         font.bold: true
@@ -87,7 +87,7 @@ Rectangle {
                     Text {
                         id: album
                          wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                        text: "Album: " + dcenowplaying.qs_mainTitle2
+                         text: qsTr("Album: ") + dcenowplaying.qs_mainTitle2
                         font.family: "Droid Sans"
                         font.bold: true
                         smooth: true                      
@@ -98,7 +98,7 @@ Rectangle {
                     Text {
                         id: title
                          wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                        text: "Title: " + dcenowplaying.qs_subTitle
+                         text: qsTr("Title: ") + dcenowplaying.qs_subTitle
                         font.family: "Droid Sans"
                         font.bold: true
                         smooth: true                      
