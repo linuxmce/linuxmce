@@ -13,7 +13,7 @@ Component{
             anchors.topMargin: scaleY(2)
             height: style.stdbuttonh
             width: style.stdbuttonw
-
+            buttontextcolor: style.accentcolor
             radius: style.but_smooth
             buttontext: label
 
@@ -26,8 +26,8 @@ Component{
                 id: buttonsqimg
                 height:parent.height
                width: parent.width
-                source: "../../../img/icons/buttonoverlay.png"
-                opacity: .5
+                source: "../../../img/icons/buttonoverlay2.png"
+                opacity: .75
             }
 
 
