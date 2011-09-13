@@ -2722,25 +2722,27 @@ void DCE::qOrbiter::populateAdditionalMedia()
     while(qmlUI->model->totalcells > qmlUI->model->rowCount(QModelIndex()) && qmlUI->currentScreen == "Screen_47.qml")
     {
         qDebug() << "Cells Left to render: "<< (qmlUI->model->totalcells -qmlUI->model->rowCount(QModelIndex()) );
+
         int cellsToRender= 0;
         if(qmlUI->currentScreen == "Screen_47.qml")
 
         {
             int currentrow = qmlUI->model->rowCount(QModelIndex()) -1;
+            qDebug() << currentrow;
             int gHeight = 10;
             int gWidth = 10;
-            string imgDG ="MediaFile_"+StringUtils::itos(qmlUI->iPK_Device);
+            string imgDG ="_MediaFile_"+StringUtils::itos(qmlUI->iPK_Device);
             int iData_Size=0;
-            int GridCurRow = currentrow;
+            int GridCurRow = 0;
             int GridCurCol= 0;
             char *pData;
             pData = "NULL";
-            string m_sSeek = "";
-            int offset = currentrow;
+            string m_sSeek = StringUtils::itos(currentrow);
+            int offset = 0;
             qDebug() << "Seeking to row: " << m_sSeek.c_str() ;
 
             //CMD_Request_Datagrid_Contents(                              long DeviceIDFrom,                long DeviceIDTo,                   string sID,                                string sDataGrid_ID, int iRow_count,int iColumn_count,        bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,       int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
-            DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(imgDG),    50,    int(gHeight),                      false,                 false,                                 true, string(m_sSeek), offset   ,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+            DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(imgDG),    gWidth,    int(gHeight),                      false,                 false,                                 true, string(m_sSeek), 0   ,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
 
             if(SendCommand(req_data_grid_pics))
             {
