@@ -4,11 +4,14 @@
 . /usr/pluto/bin/pluto.func
 . /usr/pluto/bin/SQL_Ops.sh
 
+keepAliveCmd="usr/pluto/bin/RA_KeepPortsAlive.sh"
 cronCmd="/usr/pluto/bin/SetupRemoteAccess.sh"
 cronCmd_Special="/usr/pluto/bin/SetupRA-Special.sh"
 cronEntry="*/1 * * * * root bash -c '$cronCmd &>/dev/null'"
 cronEntry_Special="*/10 * * * * root bash -c '$cronCmd_Special &>/dev/null'"
 screenName="RemoteAssistance"
+
+raServer=www.linuxmce.org
 
 DEVICEDATA_Remote_Assistance_Ports=212
 
@@ -66,56 +69,34 @@ shopt -s nullglob
 
 AddCronEntry()
 {
-	# if this script is not in a cron job
-	#if ! grep -qF "$cronCmd" /etc/crontab; then
-		# add it to crontab
-	#	echo "$cronEntry" >>/etc/crontab
-	#	invoke-rc.d cron reload
-	#	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Added crontab entry"
-	#else
-	#	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Crontab entry already present. Not adding."
-	#fi
+	local CronReload
 
 	if [[ ! -e /etc/cron.d/SetupRemoteAccess ]] ;then
 		echo "$cronEntry" >>/etc/cron.d/SetupRemoteAccess
-		invoke-rc.d cron reload
+		CronReload="1"
 		Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Added crontab entry"				
 	else
 		Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Crontab entry already present. Not adding."
 	fi
 	
-	#if ! grep -qF "$cronCmd_Special" /etc/crontab; then
-	#	# add it to crontab
-	#	echo "$cronEntry_Special" >>/etc/crontab
-	#	invoke-rc.d cron reload
-	#	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Added crontab entry (special)"
-	#else
-	#	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Crontab entry (special) already present. Not adding."
-	#fi
-
 	if [[ ! -e /etc/cron.d/SetupRA-Special ]] ;then
 		echo "$cronEntry_Special" >>/etc/cron.d/SetupRA-Special
-	    invoke-rc.d cron reload
+		CronReload="1"
 	    Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Added crontab entry (special)"
 	else
 		Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Crontab entry (special) already present. Not adding."
 	fi
+
+	if [[ -n "$CronReload" ]]; then
+		service cron reload
+	fi
+	
 }
 
 DelCronEntry()
 {
 	local CronReload
 
-	# remove script from crontab
-	#if grep -qF "$cronCmd" /etc/crontab; then
-	#	grep -vF "$cronCmd" /etc/crontab >/etc/crontab.$$
-	#	mv /etc/crontab.$$ /etc/crontab
-	#	CronReload="1"
-	#	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Crontab entry found. Removed."
-	#else
-	#	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Crontab entry not found. Not removing."
-	#fi
-	
 	if [[ -e /etc/cron.d/SetupRemoteAccess ]] ;then
 		rm -f /etc/cron.d/SetupRemoteAccess
 		CronReload="1"
@@ -124,15 +105,6 @@ DelCronEntry()
 		Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Crontab entry not found. Not removing."
 	fi
 	
-	#if grep -qF "$cronCmd_Special" /etc/crontab; then
-	#	grep -vF "$cronCmd_Special" /etc/crontab >/etc/crontab.$$
-	#	mv /etc/crontab.$$ /etc/crontab
-	#	CronReload="1"
-	#	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Crontab entry (special) found. Removed."
-	#else
-	#	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Crontab entry (special) not found. Not removing."
-	#fi
-
 	if [[ -e /etc/cron.d/SetupRA-Special ]] ;then
 	    rm -f /etc/cron.d/SetupRA-Special
 	    CronReload="1"
@@ -143,7 +115,7 @@ DelCronEntry()
 													
 
 	if [[ -n "$CronReload" ]]; then
-		invoke-rc.d cron reload
+		service cron reload
 	fi
 }
 
@@ -218,7 +190,7 @@ CreateTunnels()
 		PortDest="${PortNameDest##*_}"
 		PortTunnel="${!Var}"
 		CreateTunnel "${PortName}_pf" "$PortDest" "$PortTunnel"
-		CreateTunnel "${PortName}_ph" "$PortDest" "$PortTunnel" "" rassh2.linuxmce.org 22
+		CreateTunnel "${PortName}_ph" "$PortDest" "$PortTunnel" "" $raServer 22
 	done
 
 	CreateTunnels_Special
@@ -234,7 +206,7 @@ CreateTunnels_Special()
 		PortDest="${PortNameDest##*_}"
 		PortTunnel="${!Var}"
 		CreateTunnel "${PortName}_NoMon_pf" "$PortDest" "$PortTunnel" "" "" 22 no
-		CreateTunnel "${PortName}_NoMon_ph" "$PortDest" "$PortTunnel" "" rassh2.linuxmce.org 22 no
+		CreateTunnel "${PortName}_NoMon_ph" "$PortDest" "$PortTunnel" "" $raServer 22 no
 	done
 }
 
@@ -272,13 +244,16 @@ DeleteHostKey()
 }
 
 Me="$(basename "$0")"
-
 if [[ "$Me" == "$(basename "$cronCmd")" ]]; then
+	echo "DeleteHostKey"
 	DeleteHostKey
 	if [[ -n "$remote" ]]; then
-		/usr/pluto/bin/RA_KeepPortsAlive.sh
+		echo "RA_KeepPortsAlive.sh"
+		$keepAliveCmd
+		echo "AddCronEntry"
 		AddCronEntry
 		[[ "$1" == "restart" ]] && RemoveTunnels
+		echo "CreateTunnels"
 		CreateTunnels
 	elif grep -q '^remote=' /etc/pluto.conf; then
 		Logging "$TYPE" "$SEVERITY_CRITICAL" "$0" "Remote assistance is enabled in pluto.conf, yet remote password is empty. Avoiding closing the tunnels."

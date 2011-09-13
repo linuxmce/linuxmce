@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PlutoHome="rassh.linuxmce.org"
+PlutoHome="www.linuxmce.org"
 #PlutoHome="10.0.0.175/plutohome-com"
 
 . /usr/pluto/bin/SQL_Ops.sh
@@ -90,6 +90,7 @@ EnableRA()
 	fi
 
 	/usr/pluto/bin/SetupRemoteAccess.sh
+	echo "RA enabled"
 }
 
 DisableRA()
