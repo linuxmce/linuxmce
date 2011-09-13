@@ -92,6 +92,7 @@ public:
     void TrackUp();
     void TrackDown();
     void populateAdditionalMedia();
+    void SetSecurityMode(int pin, int mode);
 
     //<-dceag-const-e->
 

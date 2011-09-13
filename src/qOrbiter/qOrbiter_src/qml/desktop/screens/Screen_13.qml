@@ -34,7 +34,7 @@ Item{
         ListElement{
             name: "Sleeping"
             image: "security/Sleeping.png"
-            }
+        }
 
         ListElement{
             name: "Extended Away"
@@ -46,143 +46,151 @@ Item{
     //delegate
     Component {
         id: securityDelegate
-    Item{
-        height: childrenRect.height
-        width: childrenRect.width
-        clip: true
+        Item{
+            height: childrenRect.height
+            width: childrenRect.width
+            clip: true
 
-        Rectangle{
-            id:secrect
-              height:75
-              width: securitylist.width
-              color: "whitesmoke"
-              opacity: .5
+            Rectangle{
+                id:secrect
+                height:75
+                width: securitylist.width
+                color: "whitesmoke"
+                opacity: .5
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: {
+                        setHouseMode(index+1, text_input1.text)
+                    }
+                }
 
-              }
+            }
 
-              Text {
-                  id: delegatetext
-                  text: name
-                  anchors.centerIn: secrect
-                  font.pointSize: 12
-                  wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                  }
-          }
+            Text {
+                id: delegatetext
+                text: name
+                anchors.centerIn: secrect
+                font.pointSize: 12
+                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+            }
+        }
     }
 
     Rectangle{
-        height: 430
-        width: 800
-        color: "transparent"
+        id:container
+        height: style.orbiterH
+        width: style.orbiterW
+        color: style.darkhighlight
+
         Text {
             id: securitypanellabel
-            x: 268
-            y: 0
+            anchors.top: stage.top
             text: "Security Panel"
             font.family: "Droid Sans"
             font.bold: false
             font.pointSize: 15
         }
 
+        Rectangle{
+            height:childrenRect.height
+            width: childrenRect.width
+            border.color: style.accentcolor
+            border.width: 2
+            anchors.centerIn: parent
+            color: style.lighthighlight
 
-        HomeButton{ x: 321; y: 344; width: 75; height: 75; smooth: true}
+            Row{
+                height: childrenRect.height
+                width: childrenRect.width
+                spacing: scaleX(5)
+                anchors.centerIn: parent
+                HomeButton{height: 75; smooth: true}
 
-        Rectangle {
-            id: rectangle1
-            x: 21
-            y: 17
-            width: 250
-            height: 400
-            color: "#789199"
-            radius: 22
+                Column{
+                    id:padcolumn
+                    spacing:5
+                    width:(style.stdbuttonh *3) +15
+                    height: childrenRect.height+10
 
-            Rectangle {
-                id: rectangle2
-                x: 10
-                y: 13
-                width: 231
-                height: 43
-                color: "#ffffff"
-                radius: 19
 
-                TextInput {
-                    id: text_input1
-                    x: 0
-                    y: 0
-                    text: ""
-                    echoMode: TextInput.Password
-                    font.family: "Droid Sans Mono"
-                    cursorVisible: true
-                    readOnly: false
-                    anchors.rightMargin: 0
-                    anchors.bottomMargin: 0
-                    anchors.leftMargin: 0
-                    anchors.topMargin: 0
-                    horizontalAlignment: TextInput.AlignHCenter
-                    anchors.fill: parent
-                    font.pixelSize: 23
-                }
-            }
+                    Rectangle {
+                        id: numberdisplay
+                        width: parent.width
+                        height: scaleY(8)
+                        color: "#ffffff"
+                        radius: 19
 
-            Rectangle {
-                id: rectangle3
-                x: 10
-                y: 103
-                width: 231
-                height: 245
-                color: "#ffffff"
-                radius: 28
+                        TextInput {
+                            id: text_input1
+                            text: ""
+                            font.family: "Droid Sans Mono"
+                            cursorVisible: true
+                            readOnly: false
+                            anchors.centerIn: numberdisplay
+                            horizontalAlignment: TextInput.AlignHCenter
+                            anchors.fill: parent
+                            font.pixelSize: 23
+                            echoMode: TextInput.passwordCharacter
+                        }
+                    }
+                    Rectangle{
+                        id:flowrect
+                        height: scaleY(57)
+                        width: parent.width
+                        color: style.darkhighlight
 
-                Flow {
-                    id: flow1
-                    anchors.fill: parent
-                    spacing: 5
-                    Repeater{
-                        model: 10;
-
-                        Rectangle{
-                            height: 25
-                            width: 25
-                            anchors.margins: 10
-                            Text {
-                                id: buttonumber
-                                text: index
-                                font.pointSize: 24
-                                font.bold: true
+                        Flow {
+                            id: flow1
+                            width:parent.width
+                            height: flowrect.height
+                            anchors.centerIn: flowrect
+                            spacing: 5
+                            Repeater{
+                                model: 10;
+                                Rectangle{
+                                    height: scaleY(7)
+                                    width: scaleX(7)
+                                    border.color: "black"
+                                    border.width: 2
+                                    Text {
+                                        id: buttonumber
+                                        text: (index+1 > 9) ? 0 : index+1
+                                        font.pointSize: 25
+                                        font.bold: true
+                                        anchors.centerIn: parent
+                                    }
+                                    MouseArea{
+                                        anchors.fill: parent
+                                        onClicked: text_input1.text = text_input1.text+ ((index+1 > 9) ? 0 : index+1)
+                                    }
                                 }
-                            MouseArea{
-                                anchors.fill: parent
-                                onClicked: text_input1.text = text_input1.text+index
                             }
-                           }
+                        }
+                    }
+                }
+
+                Rectangle {
+                    id: rectangle4
+                    width: 200
+                    height: 402
+                    color: "#a7b8c4"
+                    radius: 16
+                    clip: true
+
+                    ListView
+                    {
+                        id:securitylist
+                        height: parent.height
+                        width: parent.width
+                        clip: true
+                        model: securityModes
+                        orientation: ListView.Vertical
+                        delegate: securityDelegate
+
                     }
                 }
             }
         }
-
-        Rectangle {
-            id: rectangle4
-            x: 584
-            y: 17
-            width: 200
-            height: 402
-            color: "#a7b8c4"
-            radius: 16
-            clip: true
-
-            ListView
-            {
-                id:securitylist
-                height: parent.height
-                width: parent.width
-                clip: true
-                model: securityModes
-                orientation: ListView.Vertical
-                delegate: securityDelegate
-
-             }
-            }
-        }
     }
-
+}
 

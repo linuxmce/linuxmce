@@ -1529,7 +1529,12 @@ void qorbiterManager::mute()
 
 void qorbiterManager::changedTrack(QString increment)
 {
-pqOrbiter->ChangedTrack(increment);
+    pqOrbiter->ChangedTrack(increment);
+}
+
+void qorbiterManager::setHouseMode(int mode, int pass)
+{
+    pqOrbiter->SetSecurityMode(pass, mode);
 }
 
 

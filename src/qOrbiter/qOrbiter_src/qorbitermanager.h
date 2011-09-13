@@ -91,7 +91,6 @@ public:
 
     PlaylistClass *storedVideoPlaylist;
     EPGChannelList *simpleEPGmodel;
-
     ListModel *playlistModel;
 
     //------CUSTOM QML TYPES------------------------------------------------------------------------------------
@@ -340,6 +339,9 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     Q_INVOKABLE void showfloorplan(int fptype);
     //random c++ related slots
     bool requestDataGrid();
+
+    //security
+    void setHouseMode(int mode, int pass);
     \
 };
 

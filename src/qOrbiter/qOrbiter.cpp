@@ -1338,8 +1338,6 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 
     if(qmlUI->backwards)
     {
-
-
         if(qmlUI->goBack.size() > 0)
         {
             qmlUI->goBack.removeLast();
@@ -1361,9 +1359,6 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
         qmlUI->i_current_mediaType = iPK_MediaType;
         qmlUI-> goBack << s;
     }
-
-
-    qDebug() << s;
 
     qmlUI->backwards = false;
     CMD_Populate_Datagrid populateDataGrid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 63, s.toStdString(), DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
@@ -2753,6 +2748,13 @@ void DCE::qOrbiter::populateAdditionalMedia()
         sleep(1);
     }
 }
+
+void DCE::qOrbiter::SetSecurityMode(int pin, int mode)
+{
+    CMD_Set_House_Mode change_house_modes(qmlUI->iPK_Device, qmlUI->iPK_Device_SecurityPlugin, StringUtils::itos(mode),qmlUI->iPK_User, StringUtils::itos(pin), 0, "");
+    SendCommand(change_house_modes);
+}
+
 
 
 
