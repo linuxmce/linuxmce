@@ -96,8 +96,7 @@ ExtractVPNData()
 	R="$*"
 	if [ -n "$R" ]; then
 		# format:
-		# <enabled>,<IPrange>
-		
+		# <enabled>,<IPrange>,<PSK>
 		VPNenabled=$(CommaField 1 "$R")
 		VPNrange=$(CommaField 2 "$R")
 		VPNPSK=$(CommaField 3 "$R")
@@ -203,6 +202,7 @@ IPv6RAenabled=0
 
 VPNenabled=off
 VPNrange=
+VPNPSK=
 
 NCards=$(ip addr | grep "^[0-9]*:" | grep -v "^[0-9]*: lo" | grep -v "^[0-9]*: pan" | grep -c ".")
 
