@@ -69,8 +69,8 @@ Rectangle {
             onClicked:
             {
                 rectangle1.state = "Default"
-                console.log(index)
-                nameLabel.text = username
+                setCurrentUser(index+1)
+
             }
         }
     }

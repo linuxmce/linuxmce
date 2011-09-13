@@ -48,6 +48,7 @@ Rectangle {
                     width: parent.width
                     text: title + ": In EA: " + entertain_area
                     wrapMode: "WrapAnywhere"
+                    font.bold: true
                 }
             }
 

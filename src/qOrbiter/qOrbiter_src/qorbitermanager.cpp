@@ -286,7 +286,6 @@ void qorbiterManager::gotoQScreen(QString s)
     QObject *item = qorbiterUIwin->rootObject();
     QMetaObject::invokeMethod(item, "screenchange",  Q_ARG(QVariant, screenname));
     currentScreen = s;
-
 }
 
 //this block sets up the connection to linuxmce
@@ -823,9 +822,6 @@ void qorbiterManager::setActiveRoom(int room,int ea)
     setLocation(room, ea);
 }
 
-void qorbiterManager::setCurrentUser()
-{
-}
 
 void qorbiterManager::execGrp(int grp)
 {
@@ -862,8 +858,10 @@ void qorbiterManager:: setLocation(const int &room, const int &ea)
 {
     iFK_Room = room;
     iea_area = ea;
+    qDebug() << "Moving to Location:" << room << "with ea: " << ea;
     emit locationChanged(room, ea);
-    //pqOrbiter->changeLocation(room, ea);
+    pqOrbiter->setLocation(room, ea);
+
 }
 
 int qorbiterManager::getlocation() const
@@ -1535,6 +1533,15 @@ void qorbiterManager::changedTrack(QString increment)
 void qorbiterManager::setHouseMode(int mode, int pass)
 {
     pqOrbiter->SetSecurityMode(pass, mode);
+}
+
+void qorbiterManager::setCurrentUser(QString inc_user)
+{
+     sPK_User = userList->find(sPK_User)->data(1).toString();
+     int user = inc_user.toInt();
+     qDebug() << "User name" << sPK_User << "::" << user;
+     pqOrbiter->setUser(user);
+     emit userChanged();
 }
 
 

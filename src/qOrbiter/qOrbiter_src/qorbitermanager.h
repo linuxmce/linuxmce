@@ -71,14 +71,14 @@ class qOrbiter;
 class qorbiterManager : public QWidget
 {
     Q_OBJECT
-    Q_PROPERTY (int getLocation READ getlocation NOTIFY locationChanged )
-    Q_PROPERTY (bool addMediaItem NOTIFY modelChanged)
+
     Q_PROPERTY (QString q_mediaType READ getSorting NOTIFY gridTypeChanged)
+    Q_PROPERTY (QString sPK_User READ getCurrentUser WRITE setCurrentUser NOTIFY userChanged)
 public:
     qorbiterManager(int deviceno, QString routerip, QWidget *parent = 0);  //constructor
 
     QThread *processingThread; //threaded class
-    QString *sPK_User;
+    QString sPK_User;
     QString *buildType;
     //QByteArray *skin;
     QMap <QString*, QString*> availibleSkins;
@@ -186,7 +186,8 @@ Param 10 - pk_attribute
     //ui functions
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}
     Q_INVOKABLE void setActiveRoom(int room,int ea);
-    Q_INVOKABLE void setCurrentUser();
+     Q_INVOKABLE void setCurrentUser(QString inc_user );
+    Q_INVOKABLE  QString getCurrentUser() {return sPK_User;}
 
     //class objects
     DCE::qOrbiter * pqOrbiter;                  //reference to forward declared dce object
@@ -268,6 +269,7 @@ signals:
     void gridTypeChanged();
     void objectUpdated();
     void liveTVrequest();
+    void userChanged();
 
 
 

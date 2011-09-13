@@ -2674,7 +2674,6 @@ void DCE::qOrbiter::ChangedTrack(QString direction)
 {
     CMD_Jump_Position_In_Playlist jump_playlist(qmlUI->iPK_Device, qmlUI->iMediaPluginID, direction.toStdString(), qmlUI->nowPlayingButton->i_streamID);
     SendCommand(jump_playlist);
-
 }
 
 void DCE::qOrbiter::populateAdditionalMedia()
@@ -2753,6 +2752,21 @@ void DCE::qOrbiter::SetSecurityMode(int pin, int mode)
 {
     CMD_Set_House_Mode change_house_modes(qmlUI->iPK_Device, qmlUI->iPK_Device_SecurityPlugin, StringUtils::itos(mode),qmlUI->iPK_User, StringUtils::itos(pin), 0, "");
     SendCommand(change_house_modes);
+}
+
+void DCE::qOrbiter::setLocation(int location, int ea)
+{
+    CMD_Set_Current_Room_DL set_current_room(qmlUI->iPK_Device, StringUtils::itos(qmlUI->iPK_Device_GeneralInfoPlugin), location);
+    SendCommand(set_current_room);
+
+    CMD_Set_Entertainment_Area_DL set_entertain_area(qmlUI->iPK_Device, StringUtils::itos(qmlUI->iPK_Device_GeneralInfoPlugin), StringUtils::itos(ea));
+    SendCommand(set_entertain_area);
+}
+
+void DCE::qOrbiter::setUser(int user)
+{
+    CMD_Set_Current_User_DL set_user(qmlUI->iPK_Device, StringUtils::itos(qmlUI->iPK_Device_GeneralInfoPlugin), user);
+    SendCommand(set_user);
 }
 
 

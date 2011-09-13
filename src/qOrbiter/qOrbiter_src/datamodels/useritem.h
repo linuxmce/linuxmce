@@ -19,7 +19,7 @@ public:
     FirstNameRole,
     LastNamRole,
     NickNameRole,
-    PKUserRole,
+    PKUserRole= Qt::UserRole+4,
     UserModeRole,
     RequirePinRole,
     PhoneExtensionRole,

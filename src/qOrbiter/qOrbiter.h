@@ -93,6 +93,8 @@ public:
     void TrackDown();
     void populateAdditionalMedia();
     void SetSecurityMode(int pin, int mode);
+    void setLocation(int location, int ea);
+    void setUser(int user);
 
     //<-dceag-const-e->
 
