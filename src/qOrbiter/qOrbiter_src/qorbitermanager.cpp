@@ -285,6 +285,7 @@ void qorbiterManager::gotoQScreen(QString s)
     QVariant returnedValue;
     QObject *item = qorbiterUIwin->rootObject();
     QMetaObject::invokeMethod(item, "screenchange",  Q_ARG(QVariant, screenname));
+    currentScreen = s;
 
 }
 

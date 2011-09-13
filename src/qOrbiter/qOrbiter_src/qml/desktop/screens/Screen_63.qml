@@ -41,7 +41,7 @@ Rectangle {
         anchors.top:parent.top
         anchors.topMargin: scaleY(10)
         anchors.horizontalCenter: parent.horizontalCenter
-        EPGPlaylist{ }
+        EPGPlaylist{id:tvchannellist }
         RemoteNumberPad {id: remotenumberpad1;}
         Rectangle {
             width: scaleX(30)
@@ -120,7 +120,7 @@ Rectangle {
                     Text {
                         id: album
                         wrapMode: "NoWrap"
-                        text: qsTr("Channel: ") + dcenowplaying.qs_mainTitle2
+                        text: qsTr("Channel: ") + dcenowplaying.channel
                         font.family: "Droid Sans"
                         font.bold: true
                         smooth: true

@@ -37,9 +37,9 @@ void EPGChannelList::appendRow(EPGItemClass *item)
 void EPGChannelList::appendRows(const QList<EPGItemClass *> &items)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
-    foreach(EPGItemClass *item, items) {
-
-    connect(item, SIGNAL(dataChanged()), this , SLOT(handleItemChange()));
+    foreach(EPGItemClass *item, items)
+    {
+        connect(item, SIGNAL(dataChanged()), this , SLOT(handleItemChange()));
         m_list.append(item);
     }
 
@@ -47,7 +47,7 @@ void EPGChannelList::appendRows(const QList<EPGItemClass *> &items)
     QModelIndex index = indexFromItem(m_list.last());
     QModelIndex index2 = indexFromItem(m_list.first());
     int currentRows= m_list.count() - 1;
-   emit dataChanged(index2, index, currentRows);
+    emit dataChanged(index2, index, currentRows);
     isActive = true;
 }
 
@@ -67,20 +67,20 @@ void EPGChannelList::handleItemChange()
     qDebug() << "Handling item change for:" << index;
     if(index.isValid())
     {
-       emit dataChanged(index, index, 0);
+        emit dataChanged(index, index, 0);
     }
 }
 
 EPGItemClass * EPGChannelList::find(const QString &id) const
 {
-    foreach(EPGItemClass* item, m_list) {
+    foreach(EPGItemClass* item, m_list)
+    {
         if(item->id() == id.toInt() )
         {
 
             return item;
         }
     }
-
     return 0;
 }
 
@@ -173,6 +173,34 @@ bool EPGChannelList::checkDupe(QString name, QString position)
         return false;
     }
 
+}
+
+QModelIndex EPGChannelList::getChannelIndex(const QString &name) const
+{
+    if (m_list.size() > 0)
+    {
+        int l=0;
+      //  qDebug() << "Checkin list";
+      //  qDebug() << m_list.size() << " Channels";
+        while (m_list.size() > l)
+        {
+            if (m_list.at(l)->data(3).toInt() == name.toInt())
+            {
+                qDebug() << m_list.at(l)->data(4) << "::" << name ;
+                QModelIndex index = indexFromItem(m_list.at(l));
+                qDebug() << index;
+                return index;
+            }
+            else
+            {
+                l++;
+            }
+        }
+    }
+    else
+    {
+        return QModelIndex();
+    }
 }
 
 void EPGChannelList::populate()

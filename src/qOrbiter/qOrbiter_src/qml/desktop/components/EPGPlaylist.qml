@@ -16,18 +16,18 @@ Rectangle {
     }
 
 
-    Component.onCompleted: nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
+    Component.onCompleted: epgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
 
     Connections{
         target: dcenowplaying
-        onPlayListPositionChanged:nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
+        onPlayListPositionChanged:epgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
 
     }
 
 
 
     ListView{
-        id:nonepgplaylistview
+        id:epgplaylistview
         height:scaleY(60)
         width: scaleX(25)     
         anchors.centerIn: parent
@@ -98,7 +98,7 @@ Rectangle {
                 anchors.fill: parent
                 onClicked:{
                     gridChangeChannel(channelnumber, channelid)
-                    nonepgplaylistview.positionViewAtIndex(index, ListView.Beginning)
+                    epgplaylistview.positionViewAtIndex(index, ListView.Beginning)
                     dcenowplaying.setProgram(program)
                 }
                 hoverEnabled: true

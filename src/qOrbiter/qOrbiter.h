@@ -91,6 +91,7 @@ public:
     void ChangedTrack(QString direction);
     void TrackUp();
     void TrackDown();
+    void populateAdditionalMedia();
 
     //<-dceag-const-e->
 

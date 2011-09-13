@@ -12,14 +12,17 @@
 #include <QList>
 #include <QVariant>
 #include <datamodels/gridItem.h>
+#include <qorbitermanager.h>
 
+
+class qorbiterManager;
 
 class ListModel : public QAbstractListModel
 {
   Q_OBJECT
 
 public:
-  explicit ListModel(gridItem* prototype, QObject* parent = 0);
+    explicit ListModel(gridItem* prototype, qorbiterManager *ref);
   ~ListModel();
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
@@ -34,6 +37,9 @@ public:
   QModelIndex indexFromItem( const gridItem* item) const;
   gridItem* currentRow();
   void clear();
+  int totalcells;
+  Q_INVOKABLE void checkForMore();
+
 
 signals:
   void ItemAdded();
@@ -45,6 +51,7 @@ private slots:
 private:
   gridItem* m_prototype;
   QList<gridItem*> m_list;
+  qorbiterManager *manager_ref;
 };
 
 #endif // LISTMODEL_H

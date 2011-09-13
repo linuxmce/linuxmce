@@ -43,6 +43,7 @@ public slots:
   EPGItemClass* currentRow();
 
   void populate();
+  QModelIndex getChannelIndex(const QString &name) const;
 
 signals:
   void ItemAdded();

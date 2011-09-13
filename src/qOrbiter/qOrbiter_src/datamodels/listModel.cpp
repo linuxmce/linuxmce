@@ -8,16 +8,17 @@
 #include "datamodels/listModel.h"
 #include <QDebug>
 
-ListModel::ListModel(gridItem* prototype, QObject *parent) :
-    QAbstractListModel(parent), m_prototype(prototype)
+ListModel::ListModel(gridItem* prototype, qorbiterManager *ref) :
+    m_prototype(prototype), manager_ref(ref)
 {
   setRoleNames(m_prototype->roleNames());
    qRegisterMetaType<QModelIndex>("QModelIndex");
+   totalcells = 0;
 }
 
 int ListModel::rowCount(const QModelIndex &parent) const
 {
-  Q_UNUSED(parent);
+  //Q_UNUSED(parent);
   return m_list.size();
 }
 
@@ -87,9 +88,11 @@ QVariant ListModel::get(int index, const QString &name) const
 {
   if (index>=0 && index<m_list.size()) {
     gridItem* myItem = m_list.at(index);
+
     QHash<int, QByteArray> myHash = myItem->roleNames();
     QHash<int, QByteArray>::const_iterator i = myHash.constBegin();
-     while (i != myHash.constEnd()) {
+
+    while (i != myHash.constEnd()) {
          if (i.value() == name) {
          return myItem->data(i.key());
          }
@@ -155,4 +158,12 @@ gridItem * ListModel::currentRow()
 {
     gridItem* item = m_list.at(0);
     return item;
+}
+
+void ListModel::checkForMore()
+{
+    if (totalcells < m_list.count())
+    {
+        manager_ref->pqOrbiter->populateAdditionalMedia();
+    }
 }

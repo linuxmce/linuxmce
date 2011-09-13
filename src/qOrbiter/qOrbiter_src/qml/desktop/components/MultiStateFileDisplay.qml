@@ -10,6 +10,7 @@ Rectangle {
     anchors.top: parent.top
     anchors.horizontalCenter: parent.horizontalCenter
     color: style.lighthighlight
+
     Image {
         id: name
         source: ""
@@ -124,7 +125,7 @@ Rectangle {
 
             Text {
                 anchors { top: myIcon.bottom; horizontalCenter: parent.horizontalCenter }
-                text: name
+                text:""
                 smooth: true
                 font.pointSize: 12
                 //visible: wrapper.PathView.isCurrentItem

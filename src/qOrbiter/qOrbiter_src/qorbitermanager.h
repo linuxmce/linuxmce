@@ -52,6 +52,15 @@ class EPGChannelList;
 class basicImageProvider;
 class FileDetailsImageProvider;
 class UpdateObjectImageProvider;
+class ListModel;
+class GridIndexProvider;
+class LightingScenarioModel;
+
+class MediaScenarioModel;
+class ClimateScenarioModel;
+class TelecomScenarioModel;
+class SecurityScenarioModel;
+
 
 
 namespace DCE
@@ -238,7 +247,7 @@ Param 10 - pk_attribute
     QStringList *sUserList;          //linked list of users in house
     QStringList *sCurr_Room_Devices; //linked list of current devices (experimental)
 
-    int CurrentScreen();
+    QString currentScreen;
 
     //plugin variables
     long iOrbiterPluginID;           //the orbiter plugin id for future use

@@ -9,6 +9,7 @@
 #include <QImage>
 
 class qorbiterManager;
+class ListModel;
 
 class GridIndexProvider :public QObject , public QDeclarativeImageProvider
 {

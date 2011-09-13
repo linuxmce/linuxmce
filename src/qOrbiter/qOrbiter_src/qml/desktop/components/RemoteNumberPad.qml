@@ -82,7 +82,7 @@ Rectangle {
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {
-                        text_input1.text.trim(1)
+                        text_input1.text = ""
                     }
                 }
             }
@@ -97,7 +97,7 @@ Rectangle {
                     onClicked:{
                         changeChannels(text_input1.text)
                         text_input1.text=""
-                    }
+                            }
                 }
             }
         }

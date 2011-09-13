@@ -14,10 +14,10 @@ class EPGItemClass : public QObject
 
 public:
     enum Roles {
-        NameRole = Qt::UserRole+1,
-        IndexRole =Qt::UserRole+2,
+        NameRole = Qt::DisplayRole+1,
+        IndexRole =Qt::DisplayRole+2,
         ChannelRole= Qt::DisplayRole+3,
-        ProgramRole = Qt::UserRole+5,
+        ProgramRole = Qt::DisplayRole+5,
         IdRole = Qt::DisplayRole+6,
         ChanImageRole = Qt::DisplayRole+7,
         ProgImageRole = Qt::DisplayRole+8,

@@ -5,7 +5,10 @@
   This class is a c++ representation of the 'now playing' button for LinuxMCE It purpose is to provide simple, api like
   access to the now playing button properties as well as automatically indicate the state of media that playing and any
   other relevant data related to the now playing button. For example, it holds the screen associated with the currently
-  playing media type so that when clicked, the proper remote is shown
+  playing media type so that when clicked, the proper remote is shown.
+
+  Currently, this clas will hold vars for ALL mediatypes and its up to the designer to add the proper ones
+  I will try to note what is what, but i cant guarantee 100% accuracy at this time
   */
 
 #include <QDeclarativeItem>
@@ -16,17 +19,28 @@
 class NowPlayingClass : public QDeclarativeItem
 {
     Q_OBJECT
-    Q_PROPERTY (bool b_mediaPlaying READ getStatus WRITE setStatus NOTIFY mediaStatusChanged)
-    Q_PROPERTY (QString qs_mainTitle READ getTitle WRITE setTitle NOTIFY titleChanged)
-     Q_PROPERTY (QString qs_mainTitle2 READ getTitle2 WRITE setTitle2 NOTIFY titleChanged2)
-    Q_PROPERTY (QString qs_subTitle READ getSubTitle WRITE setSubTitle NOTIFY titleChanged )
-    Q_PROPERTY (QString qs_screen READ getScreen WRITE setScreen NOTIFY screenTypeChanged)
 
+    Q_PROPERTY (bool b_mediaPlaying READ getStatus WRITE setStatus NOTIFY mediaStatusChanged) //property to know if media is playing
+   //set now playing - text to assign
+    Q_PROPERTY (QString qs_mainTitle READ getTitle WRITE setTitle NOTIFY titleChanged) //the text set sent by now playing command
+     Q_PROPERTY (QString qs_mainTitle2 READ getTitle2 WRITE setTitle2 NOTIFY titleChanged2) // in the case of audio, multiple metada value are sent  thus title 2
+    //set now playing - value
+    Q_PROPERTY (QString qs_subTitle READ getSubTitle WRITE setSubTitle NOTIFY titleChanged )//the secondary text sent in a seperate variable from now playing
+    //internal reference to know what the current media screen is
+    Q_PROPERTY (QString qs_screen READ getScreen WRITE setScreen NOTIFY screenTypeChanged)
+    //file path of the file in question
     Q_PROPERTY (QString filepath READ getFilePath WRITE setFilePath NOTIFY filePathChanged)
+    //current playback speed
     Q_PROPERTY (QString qs_playbackSpeed READ getMediaSpeed WRITE setStringSpeed NOTIFY mediaSpeedChanged)
+    //metadata related image url
     Q_PROPERTY (QUrl nowPlayingImage READ getImage WRITE setImage NOTIFY imageChanged)
+    //internal playlist position tracker
     Q_PROPERTY (int m_iplaylistPosition READ getPlaylistPosition WRITE setPlaylistPostion NOTIFY playListPositionChanged)
+    //television related variables
     Q_PROPERTY (QString program READ getProgram WRITE setProgram NOTIFY programChanged)
+    Q_PROPERTY (QString channel READ getChannel WRITE setChannel NOTIFY channelChanged)
+    Q_PROPERTY (QString channelID READ getChannelID WRITE setChannelID NOTIFY channelChanged)
+    Q_PROPERTY (QString episode READ getEpisode WRITE setEpisode NOTIFY episodeChanged)
 
 public:
     explicit NowPlayingClass(QDeclarativeItem *parent = 0);
@@ -46,8 +60,11 @@ public:
     int m_iplaylistPosition;
     QImage fileImage;
     QString synopsis;
+    //television related
     QString program;
     QString channel;
+    QString channelID;
+    QString episode;
 
 
 signals:
@@ -66,6 +83,7 @@ signals:
     void playListPositionChanged();
     void programChanged();
     void channelChanged();
+    void episodeChanged();
 
 
 
@@ -107,6 +125,15 @@ public slots:
     void setMediaSpeed(int speed);
     void setStringSpeed(QString s) {qs_playbackSpeed = s; qDebug() << qs_playbackSpeed; emit mediaSpeedChanged();}
     QString getMediaSpeed() {return qs_playbackSpeed;}
+
+    void setChannel (QString inc_channel) {channel = inc_channel;  emit channelChanged();}
+    QString getChannel () {return channel;}
+
+    void setChannelID (QString inc_channelID) {channelID = inc_channelID;  emit channelChanged();}
+    QString getChannelID () {return channelID;}
+
+    void setEpisode (QString inc_episode) {episode = inc_episode;  emit episodeChanged();}
+    QString getEpisode () {return episode;}
 
     };
 

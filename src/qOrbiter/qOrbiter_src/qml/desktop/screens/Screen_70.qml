@@ -62,7 +62,7 @@ Rectangle {
                 }
                 Text {
                     id: headertext
-                    text:"Speed: " + dcenowplaying.qs_playbackSpeed
+                    text:qsTr("Speed: ") + dcenowplaying.qs_playbackSpeed
                     font.family: "Droid Sans"
                     font.pixelSize: 12
                 }
@@ -92,7 +92,7 @@ Rectangle {
                     Text {
                         id: maintitle
                         width: parent.width
-                        text: "Title" + dcenowplaying.qs_mainTitle
+                        text: qsTr("Title: ") + dcenowplaying.qs_mainTitle
                         font.family: "Droid Sans"
                         wrapMode: "NoWrap"
                         font.bold: true
@@ -104,7 +104,18 @@ Rectangle {
                     Text {
                         id: subtitle
                         wrapMode: "NoWrap"
-                        text: "Episode: " + dcenowplaying.qs_subTitle
+                        text: qsTr("Episode: ") + dcenowplaying.episode
+                        font.family: "Droid Sans"
+                        font.bold: true
+                        smooth: true
+                        horizontalAlignment: Text.AlignHCenter
+                        font.pixelSize: 12
+                    }
+
+                    Text {
+                        id: channel
+                        wrapMode: "NoWrap"
+                        text: qsTr("Channel: ") + dcenowplaying.channelID
                         font.family: "Droid Sans"
                         font.bold: true
                         smooth: true
