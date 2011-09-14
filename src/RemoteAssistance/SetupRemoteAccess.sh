@@ -11,7 +11,7 @@ cronEntry="*/1 * * * * root bash -c '$cronCmd &>/dev/null'"
 cronEntry_Special="*/10 * * * * root bash -c '$cronCmd_Special &>/dev/null'"
 screenName="RemoteAssistance"
 
-RAServer=www.localeconcept.com
+RAServer=ra.linuxmce.org
 RAKey="/usr/pluto/keys/id_dsa_remoteassistance"
 
 DEVICEDATA_Remote_Assistance_Ports=212
