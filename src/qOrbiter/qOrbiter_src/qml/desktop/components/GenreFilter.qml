@@ -2,8 +2,8 @@ import QtQuick 1.0
 
 Rectangle {
            id:rect
-           width: 200
-           height: 200
+           width: scaleX(20)
+           height: scaleY(30)
            color: "transparent"
            anchors.centerIn: parent
            border.color: style.button_system_color

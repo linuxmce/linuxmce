@@ -1248,15 +1248,9 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             else
             {
                 q_pk_attribute = param.remove("!A");
-                if (q_mediaType == "4")
-                {
-                    qDebug() << "Music";
+
                     q_attributetype_sort = "13";
-                }
-                else if (q_mediaType == "5")
-                {
-                    q_attributetype_sort = "13";
-                }
+
 
 
                 longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;

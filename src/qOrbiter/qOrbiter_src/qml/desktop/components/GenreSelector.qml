@@ -15,13 +15,13 @@ Rectangle {
         id:genredelegate
         Item {
             id: fileformatitem
-            height: 150
-            width: 150
+            height: scaleY(8)
+            width: scaleX(15)
 
             Rectangle{
                 id: formatrect
-                height: 130
-                width: 130
+                height: scaleY(8)
+                width: scaleX(15)
                 border.color: "black"
                 border.width: 1
                 color: status ? style.stageBG : "green"
@@ -39,11 +39,10 @@ Rectangle {
                 Row{
                     height: childrenRect.height
                     width: childrenRect.width
-                    spacing: 10
 
                     Text {
 
-                        width: 75
+                        width: scaleX(10)
                         height: parent.height
                         id: fileformatcell
                         text: status ? name +" Is selected": name
@@ -58,6 +57,7 @@ Rectangle {
                         border.color: "black"
                         border.width: 1
                         color: status ? "red" : style.stageBG
+                        anchors.right: parent.right
                         z:10
                         MouseArea{
                             anchors.fill: parent
@@ -73,13 +73,11 @@ Rectangle {
     }
 
 
-    GridView{
+    ListView{
         id:genrelist
-        height: 400
-        width: 450
-        model: genrefilter
-        cellHeight: 150
-        cellWidth: 150
+        height: scaleY(80)
+        width: scaleX(15)
+        model: genrefilter        
         delegate: genredelegate
     }
 }

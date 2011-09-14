@@ -16,18 +16,23 @@ Component{
             buttontextcolor: style.accentcolor
             radius: style.but_smooth
             buttontext: label
+            buttontextbold: true
+            buttontextitalic: true
 
             MouseArea{
                 anchors.fill: parent
                 onClicked: execGrp(params);
+                onEntered: delegateButton.buttontextcolor = style.accentcolor
                 z:5    }
 
             Image {
                 id: buttonsqimg
                 height:parent.height
-               width: parent.width
+                fillMode: Image.PreserveAspectCrop
+                width: parent.width
                 source: "../../../img/icons/buttonoverlay2.png"
-                opacity: .75
+                opacity: .85
+
             }
 
 

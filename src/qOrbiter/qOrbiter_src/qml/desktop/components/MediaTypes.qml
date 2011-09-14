@@ -4,7 +4,7 @@ Rectangle {
            id:rect
            width: 200
            height: 200
-           color: "transparent"
+           color: style.lightaccent
            anchors.centerIn: parent
            border.color: style.button_system_color
            border.width: 1
@@ -15,16 +15,16 @@ Rectangle {
                  id:mediatypedelegate
                  Item {
                      id: fileformatitem
-                     height: 50
+                     height: scaleY(8)
                      width: parent.width
 
                      Rectangle{
                          id: formatrect
-                         height: 50
+                         height: scaleY(8)
                          width: parent.width
                          border.color: "black"
                          border.width: 1
-                         color: "transparent"
+                         color: style.darkhightlight
 
                          MouseArea{
                                    anchors.fill: parent
@@ -39,11 +39,9 @@ Rectangle {
                          Row{
                              height: childrenRect.height
                              width: childrenRect.width
-                             spacing: 85
-
 
                              Text {
-                                 width: 75
+                                 width: scaleX(10)
                                  height: parent.height
                                  id: fileformatcell
                                  text: name

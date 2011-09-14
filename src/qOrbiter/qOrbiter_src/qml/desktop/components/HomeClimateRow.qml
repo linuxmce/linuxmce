@@ -21,38 +21,46 @@ Item {
         }
         HomeButtonDelegate{id:climateDelegate}
 
-            Row {
-                id: guide
-                spacing:5
-                anchors.left: parent.left
-                anchors.leftMargin: scaleX(2)
-                ButtonSq {
-                    id: rowheader
-                    anchors.top: parent.top
-                    anchors.topMargin: scaleY(2)
-                    height: scaleY(13)
-                    width: scaleX(8)
-                    color: style.homescreenfloorplanbuttoncolor
-                    radius: style.but_smooth
-                    buttontext: "Climate"
+        Row {
+            id: guide
+            spacing:5
+            anchors.left: parent.left
+            anchors.leftMargin: scaleX(2)
+            ButtonSq {
+                id: rowheader
+                anchors.top: parent.top
+                anchors.topMargin: scaleY(2)
+                height: scaleY(13)
+                width: scaleX(8)
+                radius: style.but_smooth
+                buttontext: qsTr("Climate")
 
-                    MouseArea{
-                        id: mousearea1
-                        anchors.fill: parent
-                        onClicked:gotoQScreen("Screen_4.qml")
-                        z:5 }
+                MouseArea{
+                    id: mousearea1
+                    anchors.fill: parent
+                    onClicked:gotoQScreen("Screen_4.qml")
+                    z:5 }
+
+                Image {
+                    id: buttonbg
+                    source: "../../../img/icons/buttonoverlay.png"
+                    anchors.fill: rowheader
+                    height: parent.height
+
+                    width: parent.width
                 }
+            }
 
-                Flickable{
+            Flickable{
 
-                    id:climateRow
-                    height: scaleY(16)
-                    width: scaleX(85)
-                    anchors.left: rowheader.right
-                    contentHeight: style.buttonH
-                    contentWidth: ((style.buttonW + 5) * (climateScenarios.count + 1)) - 5
-                    clip: true
-                    flickableDirection: "HorizontalFlick"
+                id:climateRow
+                height: scaleY(16)
+                width: scaleX(85)
+                anchors.left: rowheader.right
+                contentHeight: style.buttonH
+                contentWidth: ((style.buttonW + 5) * (climateScenarios.count + 1)) - 5
+                clip: true
+                flickableDirection: "HorizontalFlick"
 
                 ListView{
                     id: climateScenarios

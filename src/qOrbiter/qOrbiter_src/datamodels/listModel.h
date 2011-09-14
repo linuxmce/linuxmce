@@ -38,12 +38,15 @@ public:
   gridItem* currentRow();
   void clear();
   int totalcells;
-  void checkForMore();
+
 
 
 signals:
   void ItemAdded();
   void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const int &sRow);
+
+public slots:
+  void checkForMore();
 
 private slots:
   void handleItemChange();
