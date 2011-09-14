@@ -19,7 +19,12 @@ mkdir -p $buildoutput
 
 echo "Starting the QMake process"
 pushd $buildenv
-$buildenv/qmake $projectdir/qOrbiter_src.pro -r -spec $spec $config
+$buildenv/qmake -makefile -nocache $projectdir/qOrbiter_src.pro -o $buildoutput/Makefile -r -spec $spec $config
+if  ! [ -f $buildoutput/Makefile ] ; then
+	echo "$buildoutput/Makefile does not exist - Aborting!"
+	exit 1
+fi
+
 cd $buildoutput
 echo "Starting the actual build process"
 make clean
