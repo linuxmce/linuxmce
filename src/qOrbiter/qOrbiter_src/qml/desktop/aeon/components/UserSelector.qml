@@ -60,7 +60,7 @@ Rectangle {
                             width: roomsource.width/4
                             color: style.not_color
                             Image {
-                                source: room_image
+                                source: "../../../../img/icons/personal.png"
                                 anchors.fill: parent
                                 fillMode: Image.PreserveAspectFit
                             }
