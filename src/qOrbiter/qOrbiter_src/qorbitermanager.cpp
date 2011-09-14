@@ -1190,7 +1190,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
     */
     QStringList longassstring;
     QString datagridVariableString;
-    ;
+    requestMore = false;
     switch (paramType)
     {
     case 1:
@@ -1222,6 +1222,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
         break;
     case 4:
+        qDebug() << "Filter Parameter: " << param;
         if (q_mediaSources != param.remove("!D"))
         {
             if(param.contains("!F"))
@@ -1249,9 +1250,10 @@ void qorbiterManager::setStringParam(int paramType, QString param)
                 q_pk_attribute = param.remove("!A");
                 if (q_mediaType == "4")
                 {
-                    q_attributetype_sort = "3";
+                    qDebug() << "Music";
+                    q_attributetype_sort = "13";
                 }
-                else
+                else if (q_mediaType == "5")
                 {
                     q_attributetype_sort = "13";
                 }

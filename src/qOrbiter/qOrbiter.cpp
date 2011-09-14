@@ -2679,7 +2679,7 @@ void DCE::qOrbiter::ChangedTrack(QString direction)
 void DCE::qOrbiter::populateAdditionalMedia()
 {
     qDebug() << "requesting additional media";
-
+    qmlUI->requestMore = true;
     while(qmlUI->model->totalcells > qmlUI->model->rowCount(QModelIndex()) && qmlUI->currentScreen == "Screen_47.qml" && qmlUI->requestMore == true)
     {
     //    qDebug() << "Cells Left to render: "<< (qmlUI->model->totalcells -qmlUI->model->rowCount(QModelIndex()) );
