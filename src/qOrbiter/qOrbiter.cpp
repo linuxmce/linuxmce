@@ -2325,10 +2325,10 @@ void DCE::qOrbiter::requestMediaPlaylist()
 
 void DCE::qOrbiter::ShowFloorPlan(int floorplantype)
 {
-    qDebug () << "dce";
-    string *sval;
-    std::string id = "1";
-    CMD_Get_Floorplan_Layout getFloorPlan(qmlUI->iPK_Device, qmlUI->iOrbiterPluginID,sval);
+
+    string sval = "";
+    string id = "1";
+    CMD_Get_Current_Floorplan getFloorPlan(qmlUI->iPK_Device, qmlUI->iOrbiterPluginID, id, floorplantype , &sval);
     SendCommand(getFloorPlan);
 
 }
@@ -2686,7 +2686,7 @@ void DCE::qOrbiter::populateAdditionalMedia()
 
         int cellsToRender= 0;
         int currentrow = qmlUI->model->rowCount(QModelIndex()) ;
-        qDebug() << "Current items in model" << currentrow;
+       // qDebug() << "Current items in model" << currentrow;
         int gHeight = 1;
         int gWidth = 8;
         string imgDG ="_MediaFile_"+StringUtils::itos(qmlUI->iPK_Device);
@@ -2697,7 +2697,7 @@ void DCE::qOrbiter::populateAdditionalMedia()
         pData = "NULL";
         string m_sSeek = "";// StringUtils::itos(currentrow);
         int offset = 0;
-       qDebug() << "Seeking to row: " << m_sSeek.c_str() ;
+     //  qDebug() << "Seeking to row: " << m_sSeek.c_str() ;
 
 
             //CMD_Request_Datagrid_Contents(                              long DeviceIDFrom,                long DeviceIDTo,                   string sID,                                string sDataGrid_ID, int iRow_count,int iColumn_count,        bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,       int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
@@ -2755,11 +2755,12 @@ void DCE::qOrbiter::SetSecurityMode(int pin, int mode)
 
 void DCE::qOrbiter::setLocation(int location, int ea)
 {
-    CMD_Set_Current_Room_DL set_current_room(qmlUI->iPK_Device, StringUtils::itos(qmlUI->iPK_Device_GeneralInfoPlugin), location);
+    CMD_Set_Entertainment_Area_DL set_entertain_area(qmlUI->iPK_Device, StringUtils::itos(qmlUI->iOrbiterPluginID), StringUtils::itos(ea));
+    SendCommand(set_entertain_area);
+
+    CMD_Set_Current_Room_DL set_current_room(qmlUI->iPK_Device, StringUtils::itos(qmlUI->iOrbiterPluginID), location);
     SendCommand(set_current_room);
 
-    CMD_Set_Entertainment_Area_DL set_entertain_area(qmlUI->iPK_Device, StringUtils::itos(qmlUI->iPK_Device_GeneralInfoPlugin), StringUtils::itos(ea));
-    SendCommand(set_entertain_area);
 }
 
 void DCE::qOrbiter::setUser(int user)
