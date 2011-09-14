@@ -81,7 +81,7 @@ Rectangle {
                 id: metadatavideo
                 width: scaleX(30)
                 height: childrenRect.height
-                color: style.darkhiglight
+                color: style.darkhighlight
                 anchors.top:nowplayingimage.bottom
                 Column
                 {
