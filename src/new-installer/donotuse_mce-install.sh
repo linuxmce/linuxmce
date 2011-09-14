@@ -4,12 +4,12 @@
 ###########################################################
 ### Setup global variables
 ###########################################################
-error_log=/var/log/initial_mce_setup_errors.log
+log_file=/var/log/LinuxMCE_Setup.log
 DISTRO="$(lsb_release -c -s)"
 COMPOS="beta2"
+DT_MEDIA_DIRECTOR=3
 LOCAL_REPO_BASE=/usr/pluto/deb-cache
 LOCAL_REPO_DIR=./
-DT_MEDIA_DIRECTOR=3
 DT_CORE=1
 DT_HYBRID=2
 mce_wizard_data_shell=/tmp/mce_wizard_data.sh
@@ -21,19 +21,19 @@ export PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ### Setup Functions - Error checking and logging
 ###########################################################
 
-Setup_Error_Logging () {
-if [ -f ${error_log} ]; then
-	touch ${error_log}
+Setup_Logfile () {
+if [ -f ${log_file} ]; then
+	touch ${log_file}
 	if [ $? = 1 ]; then
-		echo "`date` - Unable to write to ${error_log} - re-run script as root"
+		echo "`date` - Unable to write to ${log_file} - re-run script as root"
 		exit 1
 	else
-		echo "`date` - Logging for issues initiatilized to ${error_log}"
+		echo "`date` - Logging initiatilized to ${log_file}"
 	fi
 else
 	#0 out an existing file
-	echo > ${error_log}
-	echo "`date` - Setup has run before, clearing old log file at ${error_log}"
+	echo > ${log_file}
+	echo "`date` - Setup has run before, clearing old log file at ${log_file}"
 fi
 }
 
@@ -47,7 +47,95 @@ VerifyExitCode () {
 }
 
 StatsMessage () {
-	echo "`date` - $*"
+	printf "`date` - $* \n"
+}
+
+TeeMyOutput () {
+
+# Usage:
+# source TeeMyOutput.sh --outfile <file> [--infile <file>] [--stdout|--stderr|--stdboth] [--append] [--exclude <egrep pattern>] -- "$@"
+#   --outfile <file>         the file to tee our output to
+#   --infile <file>          the file to feed ourselves with on stdin
+#   --stdout                 redirect stdout (default)
+#   --stderr                 redirect stderr
+#   --stdboth                redirect both stdout and stderr
+#   --append                 run tee in append mode
+#   --exclude <pattern>      strip matching lines from output; pattern is used with egrep
+#
+# Environment:
+#   SHELLCMD="<shell command>" (ex: bash -x)
+
+if [[ -n "$TeeMyOutput" ]]; then
+        return 0
+fi
+Me="TeeMyOutput"
+
+# parse parameters
+for ((i = 1; i <= "$#"; i++)); do
+        Parm="${!i}"
+        case "$Parm" in
+                --outfile) ((i++)); OutFile="${!i}" ;;
+                --infile) ((i++)); InFile="${!i}" ;;
+                --stdout|--stderr|--stdboth) Mode="${!i#--std}" ;;
+                --append) Append=yes ;;
+                --exclude) ((i++)); Exclude="${!i}" ;;
+                --) LastParm="$i"; break ;;
+                *) echo "$Me: Unknown parameter '$Parm'"; exit 1
+        esac
+done
+
+if [[ -z "$OutFile" ]]; then
+        echo "$Me: No outfile"
+        exit 1
+fi
+
+if [[ -z "$LastParm" ]]; then
+        LastParm="$#"
+fi
+
+# original parameters
+for ((i = "$LastParm" + 1; i <= "$#"; i++)); do
+        OrigParms=("${OrigParms[@]}" "${!i}")
+done
+
+# construct command components
+case "$Mode" in
+        out) OurRedirect=() ;;
+        err) OurRedirect=("2>&1" "1>/dev/null") ;;
+        both) OurRedirect=("2>&1") ;;
+esac
+
+if [[ "$Append" == yes ]]; then
+        TeeParm=(-a)
+fi
+
+if [[ -n "$InFile" ]]; then
+        OurRedirect=("${OurRedirect[@]}" "<$InFile")
+fi
+
+# do our stuff
+export TeeMyOutput=yes
+ExitCodeFile="/tmp/TeeMyOutputExitCode_$$"
+trap "rm -rf '$ExitCodeFile'" EXIT
+
+Run()
+{
+        eval exec "${OurRedirect[@]}"
+        $SHELLCMD "$0" "${OrigParms[@]}"
+        echo $? >"$ExitCodeFile"
+}
+
+if [[ -z "$Exclude" ]]; then
+        Run | tee "${TeeParm[@]}" "$OutFile"
+else
+        Run | grep --line-buffered -v "$Exclude" | tee "${TeeParm[@]}" "$OutFile"
+fi
+
+ExitCode=$(<"$ExitCodeFile")
+exit "$ExitCode"
+exit 1 # just in case
+
+
 }
 
 ###########################################################
@@ -123,6 +211,46 @@ asteriskNoloadModule () {
 
 }
 
+AddGpgKeyToKeyring () {
+local gpg_key="$1"
+
+wget -q "$gpg_key" -O- | apt-key add -
+
+}
+
+AddRepoToSources () {
+local repository="$1"
+local changed
+
+
+if ! grep -q "^[^#]*${repository}" /etc/apt/sources.list
+then
+	echo "deb ${repository}" >>/etc/apt/sources.list
+	changed=0
+else
+	echo "Repository ${repository} seems already active"
+	changed=1
+fi
+
+return $changed
+}
+
+AddRepoToSourcesTop () {
+local repository="$1"
+local changed
+
+
+if ! grep -q "^[^#]*${repository}" /etc/apt/sources.list
+then
+		sed -e "1ideb ${repository}" -i /etc/apt/sources.list
+		changed=0
+else
+		sed -e "/${repository}/d" -i /etc/apt/sources.list
+		sed -e "1ideb ${repository}" -i /etc/apt/sources.list
+		echo "`date` - Repository ${repository} already active, moved to top"
+		changed=1
+fi
+}
 
 ###########################################################
 ### Setup Functions - General functions
@@ -132,6 +260,7 @@ UpdateUpgrade () {
 #perform an update and a dist-upgrade
 StatsMessage "Performing an update and an upgrade to all components"
 apt-get -qq update 
+VerifyExitCode "apt-get update"
 apt-get -y -q -f --force-yes dist-upgrade
 VerifyExitCode "dist-upgrade"
 }
@@ -143,43 +272,39 @@ ntpdate ntp.ubuntu.com
 }
 
 CreateBackupSources () {
-if [ ! -e /etc/apt/sources.list.pbackup ]
-then
+if [ ! -e /etc/apt/sources.list.pbackup ]; then
 	StatsMessage "Backing up sources.list file"
 	cp -a /etc/apt/sources.list /etc/apt/sources.list.pbackup
 fi
 }
 
 AddAptRetries () {
-        local changed
-        if [ -f /etc/apt/apt.conf ]; then
-			if ! grep -q "^[^#]*APT::Acquire { Retries" /etc/apt/apt.conf; then
-				echo 'APT::Acquire { Retries  "20" }'>>/etc/apt/apt.conf
-				changed=0
-			else
-				StatsMessage "APT preference on number of retries already set "
-				changed=1
-			fi
-		else
-			echo 'APT::Acquire { Retries  "20" }'>>/etc/apt/apt.conf
-		fi
-		StatsMessage "APT preference on number of retries set"
-        return $changed
+local changed
+if [ -f /etc/apt/apt.conf ]; then
+	if ! grep -q "^[^#]*APT::Acquire { Retries" /etc/apt/apt.conf; then
+		echo 'APT::Acquire { Retries  "20" }'>>/etc/apt/apt.conf
+		changed=0
+	else
+		StatsMessage "APT preference on number of retries already set "
+		changed=1
+	fi
+else
+	echo 'APT::Acquire { Retries  "20" }'>>/etc/apt/apt.conf
+fi
+StatsMessage "APT preference on number of retries set"
+return $changed
 }
 
 Pre-InstallNeededPackages () {
-	StatsMessage "Updating apt cache and installing necessary packages"
-	apt-get -qq update 
-	VerifyExitCode "apt-get update"
-	apt-get -y -q install dpkg-dev debconf-utils
-	VerifyExitCode "dpkg-dev and debconf-utils"
-	mkdir -p "${LOCAL_REPO_BASE}/${LOCAL_REPO_DIR}"
+StatsMessage "Installing necessary prep packages"
 
-#Check that kubuntu-desktop is installed - which it should be
-dpkg -s kubuntu-desktop 1>/dev/null
-if [ $? == 1 ]; then
-	apt-get install -y -q --force-yes kubuntu-desktop
-fi
+#Create local deb-cache dir
+mkdir -p "${LOCAL_REPO_BASE}/${LOCAL_REPO_DIR}"
+
+#Install dpkg-dev and debconf-utils for pre-seed information
+#Install makedev due to mdadm issue later in the install process - logged bug https://bugs.launchpad.net/ubuntu/+source/mdadm/+bug/850213 with ubuntu
+apt-get -y -q install dpkg-dev debconf-utils makedev
+VerifyExitCode "dpkg-dev and debconf-utils"
 
 # Disable compcache
 if [ -f /usr/share/initramfs-tools/conf.d/compcache ]; then
@@ -188,52 +313,11 @@ fi
 }
 
 CreatePackagesFiles () {
-	StatsMessage "Creating necessary package files"
-	( cd "${LOCAL_REPO_BASE}"; \
-		dpkg-scanpackages -m "${LOCAL_REPO_DIR}" /dev/null | \
-		tee "${LOCAL_REPO_DIR}/Packages" | \
-		gzip -9c >"${LOCAL_REPO_DIR}/Packages.gz" )
-}
-
-AddRepoToSourcesTop () {
-        local repository="$1"
-        local changed
-
-
-        if ! grep -q "^[^#]*${repository}" /etc/apt/sources.list
-        then
-                sed -e "1ideb ${repository}" -i /etc/apt/sources.list
-                changed=0
-        else
-                sed -e "/${repository}/d" -i /etc/apt/sources.list
-                sed -e "1ideb ${repository}" -i /etc/apt/sources.list
-                echo "`date` - Repository ${repository} already active, moved to top"
-                changed=1
-        fi
-}
-
-AddRepoToSources () {
-	local repository="$1"
-	local changed
-
-
-	if ! grep -q "^[^#]*${repository}" /etc/apt/sources.list
-	then
-		echo "deb ${repository}" >>/etc/apt/sources.list
-		changed=0
-	else
-		echo "Repository ${repository} seems already active"
-		changed=1
-	fi
-
-	return $changed
-}
-
-AddGpgKeyToKeyring () {
-	local gpg_key="$1"
-
-	wget -q "$gpg_key" -O- | apt-key add -
-
+StatsMessage "Creating necessary package files"
+( cd "${LOCAL_REPO_BASE}"; \
+	dpkg-scanpackages -m "${LOCAL_REPO_DIR}" /dev/null | \
+	tee "${LOCAL_REPO_DIR}/Packages" | \
+	gzip -9c >"${LOCAL_REPO_DIR}/Packages.gz" )
 }
 
 ConfigSources () {
@@ -250,6 +334,7 @@ DISTRO_HOST=
 #Silently gather and assign appropriate repo based on the distribution
 wget -q http://archive.ubuntu.com/ubuntu/dists/${DISTRO}/main/binary-i386/Packages.gz && DISTRO_HOST=archive
 wget -q http://old-releases.ubuntu.com/ubuntu/dists/${DISTRO}/main/binary-i386/Packages.gz && DISTRO_HOST=old-releases
+
 AddRepoToSources "http://${DISTRO_HOST}.ubuntu.com/ubuntu ${DISTRO} main restricted universe multiverse"
 AddRepoToSources "http://${DISTRO_HOST}.ubuntu.com/ubuntu ${DISTRO}-security main restricted universe multiverse"
 AddRepoToSources "http://archive.canonical.com/ubuntu ${DISTRO} partner"
@@ -257,14 +342,6 @@ AddRepoToSources "http://archive.canonical.com/ubuntu ${DISTRO} partner"
 if AddRepoToSources "http://packages.medibuntu.org/ ${DISTRO}  free non-free"; then
 	AddGpgKeyToKeyring http://packages.medibuntu.org/medibuntu-key.gpg
 fi
-
-## Setup apt sources.list
-#
-######I'm unclear as to what the purpose of this is - commenting out for now
-#local Sources="# Pluto sources - start
-#deb http://linuxmce.com/ubuntu ./
-# Pluto sources - end"
-#echo "$Sources" >/etc/apt/sources.list.d/pluto.list
 
 # Setup pluto's apt.conf
 cat >/etc/apt/apt.conf.d/30pluto <<EOF
@@ -277,11 +354,11 @@ APT::Get::AllowUnauthenticated "true";
 //APT::Get::force-yes "yes";
 EOF
 
-#HACK: ensure the local repo is the first in sources.list
+
+#ensure the local repo is the first in sources.list
 #Because Ubiquity doesn't seem to allow us to control the order in sources.list
 sed -e "/deb-cache/d" -i /etc/apt/sources.list
 sed -e "1ideb file:/usr/pluto/deb-cache ./" -i /etc/apt/sources.list
-
 
 apt-get -qq update
 VerifyExitCode "apt-get update"
@@ -324,7 +401,7 @@ sed -i 's/Value:  /Value: /g' /var/cache/debconf/config.dat
 #remove preseed file, no need to clutter things up
 rm /tmp/preseed.cfg
 
-#Seeding mythweb preferences to not override the LMCE site on install
+#Seeding mythweb preferences to not override the LMCE site on install - for some odd reason, mythweb packages don't accept the set-selections
 touch /etc/default/mythweb
 echo "[cfg]" >> /etc/default/mythweb
 echo "enable = false" >> /etc/default/mythweb
@@ -416,84 +493,60 @@ else
 	sed --in-place -e "s,\({runDhcp}\),$RunDHCP,g" ${mce_wizard_data_shell}
 fi
 
-echo "--- start mce wizard data ---" 
-cat /tmp/mce_wizard_data.sh 
-echo "--- end mce wizard data ---"
-
-if [[ ! -r /tmp/mce_wizard_data.sh ]] ;then
+if [[ ! -r ${mce_wizard_data_shell} ]]; then
         echo "`date` - Wizard Information is corrupted or missing."
 		exit 1
 fi
-. /tmp/mce_wizard_data.sh
+. ${mce_wizard_data_shell}
+VerifyExitCode "MCE Wizard Data"
 
 Core_PK_Device="0"
 
+#Setup the network interfaces
+echo > /etc/network/interfaces
+echo "auto lo" >> /etc/network/interfaces
+echo "iface lo inet loopback" >> /etc/network/interfaces
+echo >> /etc/network/interfaces
+echo "auto $c_netExtName" >> /etc/network/interfaces
+if [[ $c_netExtUseDhcp  == "1" ]] ;then
+	echo "    iface $c_netExtName inet dhcp" >> /etc/network/interfaces
+else
+	if [[ "$c_netExtIP" != "" ]] && [[ "$c_netExtName" != "" ]] &&
+	   [[ "$c_netExtMask" != "" ]] && [[ "$c_netExtGateway" != "" ]] ;then
+		echo "" >> /etc/network/interfaces
+		echo "    iface $c_netExtName inet static" >> /etc/network/interfaces
+		echo "    address $c_netExtIP" >> /etc/network/interfaces
+		echo "    netmask $c_netExtMask" >> /etc/network/interfaces
+		echo "    gateway $c_netExtGateway" >> /etc/network/interfaces
+	fi
+fi
+echo "" >> /etc/network/interfaces
+echo "auto $c_netIntName" >> /etc/network/interfaces
+echo "    iface $c_netIntName inet static" >> /etc/network/interfaces
+echo "    address $c_netIntIPN" >> /etc/network/interfaces
+echo "    netmask 255.255.255.0" >> /etc/network/interfaces
 
-}
-
-Setup_Network_Intefaces () {
-StatsMessage "Seting Up Networking interfaces"
-
-  echo > /etc/network/interfaces
-	echo "auto lo" >> /etc/network/interfaces
-	echo "iface lo inet loopback" >> /etc/network/interfaces
-	echo >> /etc/network/interfaces
-	echo "auto $c_netExtName" >> /etc/network/interfaces
-	if [[ $c_netExtUseDhcp  == "1" ]] ;then
-		echo "    iface $c_netExtName inet dhcp" >> /etc/network/interfaces
-	else
-		if [[ "$c_netExtIP" != "" ]] && [[ "$c_netExtName" != "" ]] &&
-		   [[ "$c_netExtMask" != "" ]] && [[ "$c_netExtGateway" != "" ]] ;then
-			echo "" >> /etc/network/interfaces
-			echo "    iface $c_netExtName inet static" >> /etc/network/interfaces
-			echo "    address $c_netExtIP" >> /etc/network/interfaces
-			echo "    netmask $c_netExtMask" >> /etc/network/interfaces
-			echo "    gateway $c_netExtGateway" >> /etc/network/interfaces
-		fi
-  fi
-  echo "" >> /etc/network/interfaces
-	echo "auto $c_netIntName" >> /etc/network/interfaces
-	echo "    iface $c_netIntName inet static" >> /etc/network/interfaces
-	echo "    address $c_netIntIPN" >> /etc/network/interfaces
-	echo "    netmask 255.255.255.0" >> /etc/network/interfaces
-}
-
-Setup_NIS () {
-# Put a temporary nis config file that will prevent ypbind to start
-# Temporary NIS setup, disabling NIS server and client.
-StatsMessage "Temporarily modifying the NIS configuration file disabling the NIS server and client"
-echo "
-NISSERVER=false
-NISCLIENT=false
-YPPWDDIR=/etc
-YPCHANGEOK=chsh
-NISMASTER=
-YPSERVARGS=
-YPBINDARGS=
-YPPASSWDDARGS=
-YPXFRDARGS=
-" > /etc/default/nis
 }
 
 Setup_Pluto_Conf () {
 StatsMessage "Seting Up MCE Configuration file"
-	AutostartCore=1
-	AutostartMedia=1
+AutostartCore=1
+AutostartMedia=1
 
-	case "$DISTRO" in
-	"intrepid")
-		# select UI1
-		PK_DISTRO=17
-		;;
-	"lucid")
-		# select UI2 without alpha blending
-		PK_DISTRO=18
-		;;
-	esac
+case "$DISTRO" in
+"intrepid")
+	# select UI1
+	PK_DISTRO=17
+	;;
+"lucid")
+	# select UI2 without alpha blending
+	PK_DISTRO=18
+	;;
+esac
 
-	
-	StatsMessage "Generating Default Config File"
-	PlutoConf="# Pluto config file
+
+StatsMessage "Generating Default Config File"
+PlutoConf="# Pluto config file
 MySqlHost = localhost
 MySqlUser = root
 MySqlPassword =
@@ -517,199 +570,163 @@ LogLevels = 1,5,7,8
 AutostartCore=$AutostartCore
 AutostartMedia=$AutostartMedia
 "
-	echo "$PlutoConf" > /etc/pluto.conf
-	# on lucid we don't want to run the AV Wizard
-#	if [[ "$DISTRO" = "lucid" ]]; then
-#		echo "AVWizardOverride = 0" >> /etc/pluto.conf
-#		echo "AVWizardDone = 1" >> /etc/pluto.conf
-#	fi
-	chmod 777 /etc/pluto.conf &>/dev/null
+echo "$PlutoConf" > /etc/pluto.conf
+
+chmod 777 /etc/pluto.conf &>/dev/null
 }
 
 Install_DCERouter () {
-	StatsMessage "Installing MySQL Server"
-	apt-get -y -q --force-yes -f install mysql-server
-	VerifyExitCode "MySQL Server Installation"
-	service mysql start
-	# invoke-rc.d mysql start # Because of this : https://bugs.launchpad.net/bugs/107224
-	# Fix for http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=512309
-	# to address http://svn.linuxmce.org/trac.cgi/ticket/397
-	# This will not be necessary for 9.10+
-	echo "UPDATE user SET Create_view_priv = 'Y', Show_view_priv = 'Y', \
- Create_routine_priv = 'Y', Alter_routine_priv = 'Y', \
- Create_user_priv = 'Y' WHERE User = 'debian-sys-maint'; \
+#Install mysql server
+StatsMessage "Installing MySQL Server"
+apt-get -y -q --force-yes -f install mysql-server
+VerifyExitCode "MySQL Server Installation"
+#Start mysql server
+service mysql start
+#Run mysql statement
+echo "UPDATE user SET Create_view_priv = 'Y', Show_view_priv = 'Y', \
+Create_routine_priv = 'Y', Alter_routine_priv = 'Y', \
+Create_user_priv = 'Y' WHERE User = 'debian-sys-maint'; \
 FLUSH PRIVILEGES; \
 " | mysql --defaults-extra-file=/etc/mysql/debian.cnf mysql
 
-	StatsMessage "Installing Pluto Sample Media"
-	apt-get -y -q --force-yes -f install pluto-sample-media
-	VerifyExitCode "pluto-sample-media"
-	StatsMessage "Installing the Video Wizard videos"
-	apt-get -y -q --force-yes -f install video-wizard-videos
-	VerifyExitCode "video-wizard-videos"
-
-	StatsMessage "Installing LinuxMCE Base DCE Router Software"
-	apt-get -y -q --force-yes -f install pluto-dcerouter
-	VerifyExitCode "pluto-dcerouter"
+#Install the router and media
+StatsMessage "Installing LinuxMCE Base DCE Router Software"
+apt-get -y -q --force-yes -f install pluto-dcerouter video-wizard-videos pluto-sample-media
+VerifyExitCode "Initial media and dcerouter install"
 }
 
 Create_And_Config_Devices () {
 StatsMessage "Cycling MySQL server"
 # Create the initial core device using CreateDevice, and the MD for the core in case we create a Hybrid (the default).
 
-	#/etc/init.d/mysql stop
-	service mysql stop
-	killall -9 mysqld_safe
-	#/etc/init.d/mysql start
-	service mysql start
-	sleep 30
+#Cycle the mysql server
+service mysql stop
+killall -9 mysqld_safe
+service mysql start
 
-	. /usr/pluto/bin/SQL_Ops.sh
+#sleep to ensure the mysql server is fully started
+sleep 5
 
-	DEVICE_TEMPLATE_Core=7
-	DEVICE_TEMPLATE_MediaDirector=28
+#Source the SQL_OPS file
+. /usr/pluto/bin/SQL_Ops.sh
 
-	## Update the 'LastUpdate' Device Data on the templates
-#	RunSQL "UPDATE DeviceTemplate_DeviceData SET IK_DeviceData=1 WHERE FK_DeviceTemplate = 7 AND FK_DeviceData=234"
-#	RunSQL "UPDATE DeviceTemplate_DeviceData SET IK_DeviceData=2 WHERE FK_DeviceTemplate = 28 AND FK_DeviceData=234"
-#	RunSQL "UPDATE DeviceTemplate_DeviceData SET IK_DeviceData=3 WHERE FK_DeviceTemplate = 1893 AND FK_DeviceData=234"
-
-	## Update some info in the database
-	Q="INSERT INTO Installation(Description, ActivationCode) VALUES('Pluto', '1111')"
-	RunSQL "$Q"
-
-	## Create the Core device and set it's description
-	StatsMessage "Setting up your computer to act as a 'Core'"
-	Core_PK_Device=$(/usr/pluto/bin/CreateDevice -d $DEVICE_TEMPLATE_Core | tee /dev/stderr | tail -1)
-	Q="UPDATE Device SET Description='CORE' WHERE PK_Device='$Core_PK_Device'"
-	RunSQL "$Q"
-
-	## Create a hybrid if needed
-#	if [[ "$c_deviceType" == "2" ]] ;then
-		StatsMessage "Setting up your computer to act as a 'Media Director'"
-		/usr/pluto/bin/CreateDevice -d $DEVICE_TEMPLATE_MediaDirector -C "$Core_PK_Device"
-		Hybrid_DT=$(RunSQL "SELECT PK_Device FROM Device WHERE FK_DeviceTemplate='$DEVICE_TEMPLATE_MediaDirector' LIMIT 1")
-
-		Q="UPDATE Device SET Description='The core/hybrid' WHERE PK_Device='$Hybrid_DT'"
-		RunSQL "$Q"
- 
-		## Set UI interface
-		Q="SELECT PK_Device FROM Device WHERE FK_Device_ControlledVia='$Hybrid_DT' AND FK_DeviceTemplate=62"
-		OrbiterDevice=$(RunSQL "$Q")
-
-#		case "$c_installUI" in
-#			"0")
-#				# select UI1
-#				UI_SetOptions "$OrbiterDevice" 0 0 1
-#			;;
-#			"1")
-#				# select UI2 without alpha blending
-#				UI_SetOptions "$OrbiterDevice" 1 0 4
-#			;;
-#			"2")
-#				# select UI2 with alpha blending
-#				UI_SetOptions "$OrbiterDevice" 1 1 4
-#			;;
-#			*)
-#				echo "Unknown UI version: $c_installUI"
-#			;;
-#		esac
-#	fi
-
-	StatsMessage "Configuring the LinuxMCE devices"
-        # "DCERouter postinstall"
-        # TODO: I really wonder, what the original author wants to do here, as it never worked before
-        #       It now worked (thanks to tail -2 instead of tail +2), and returns the last two device IDs.
-        devices=$(echo "SELECT PK_Device FROM Device;" | /usr/bin/mysql pluto_main | tail -2 | tr '\n' ' ')
+DEVICE_TEMPLATE_Core=7
+DEVICE_TEMPLATE_MediaDirector=28
 
 
-	/usr/pluto/bin/Update_StartupScrips.sh
+## Update some info in the database
+Q="INSERT INTO Installation(Description, ActivationCode) VALUES('Pluto', '1111')"
+RunSQL "$Q"
+
+## Create the Core device and set it's description
+StatsMessage "Setting up your computer to act as a 'Core'"
+Core_PK_Device=$(/usr/pluto/bin/CreateDevice -d $DEVICE_TEMPLATE_Core | tee /dev/stderr | tail -1)
+Q="UPDATE Device SET Description='CORE' WHERE PK_Device='$Core_PK_Device'"
+RunSQL "$Q"
+
+#Setup media director with core
+StatsMessage "Setting up your computer to act as a 'Media Director'"
+/usr/pluto/bin/CreateDevice -d $DEVICE_TEMPLATE_MediaDirector -C "$Core_PK_Device"
+Hybrid_DT=$(RunSQL "SELECT PK_Device FROM Device WHERE FK_DeviceTemplate='$DEVICE_TEMPLATE_MediaDirector' LIMIT 1")
+Q="UPDATE Device SET Description='The core/hybrid' WHERE PK_Device='$Hybrid_DT'"
+RunSQL "$Q"
+
+## Set UI interface
+Q="SELECT PK_Device FROM Device WHERE FK_Device_ControlledVia='$Hybrid_DT' AND FK_DeviceTemplate=62"
+OrbiterDevice=$(RunSQL "$Q")
+
+
+StatsMessage "Updating Startup Scripts"
+# "DCERouter postinstall"
+/usr/pluto/bin/Update_StartupScrips.sh
+
 }
 
 Configure_Network_Options () {
 # Updating hosts file and the Device_Data for the core with the internal and external network
 # addresses - uses Initial_DHCP_Config.sh from the pluto-install-scripts package.
-	StatsMessage "Configuring your internal network"
-	. /usr/pluto/bin/SQL_Ops.sh
+StatsMessage "Configuring your internal network"
+#Source the SQL Ops file
+. /usr/pluto/bin/SQL_Ops.sh
 
-	## Setup /etc/hosts
-	echo > /etc/hosts
-	echo "127.0.0.1 localhost.localdomain localhost" >> /etc/hosts
-	echo "$c_netExtIP dcerouter $(/bin/hostname)"    >> /etc/hosts
+## Setup /etc/hosts
+echo > /etc/hosts
+echo "127.0.0.1 localhost.localdomain localhost" >> /etc/hosts
+echo "$c_netExtIP dcerouter $(/bin/hostname)"    >> /etc/hosts
 
-	error=false
-	Network=""
-	Digits_Count=0
+error=false
+Network=""
+Digits_Count=0
 
-	for Digits in $(echo "$c_netIntIPN" | tr '.' ' ') ;do
-		[[ "$Digits" == *[^0-9]* ]]            && error=true
-		[[ $Digits -lt 0 || $Digits -gt 255 ]] && error=true
+for Digits in $(echo "$c_netIntIPN" | tr '.' ' ') ;do
+	[[ "$Digits" == *[^0-9]* ]]            && error=true
+	[[ $Digits -lt 0 || $Digits -gt 255 ]] && error=true
 
-		if [[ "$Network" == "" ]] ;then
-			Network="$Digits"
-		else
-			Network="${Network}.${Digits}"
-		fi
-
-		Digits_Count=$(( $Digits_Count + 1 ))
-	done
-	[[ $Digits_Count -lt 1 || $Digits_Count -gt 3 ]] && error=true
-
-	if [[ "$error" == "true" ]] ;then
-		Network="192.168.80"
-		Digits_Count="3"
-	fi
-
-	IntIP="$Network"
-	IntNetmask=""
-	for i in `seq 1 $Digits_Count` ;do
-		if [[ "$IntNetmask" == "" ]] ;then
-			IntNetmask="255"
-		else
-			IntNetmask="${IntNetmask}.255"
-		fi
-	done
-	for i in `seq $Digits_Count 3` ;do
-		if [[ $i == "3" ]] ;then
-			IntIP="${IntIP}.1"
-		else
-			IntIP="${IntIP}.0"
-		fi
-
-		IntNetmask="${IntNetmask}.0"
-	done
-
-	if [[ "$c_netIntName" == "" ]] ;then
-		IntIf="$c_netExtName:0"
+	if [[ "$Network" == "" ]] ;then
+		Network="$Digits"
 	else
-		IntIf="$c_netIntName"
+		Network="${Network}.${Digits}"
 	fi
 
-	if [[ "$c_singleNIC" == "1" ]] ;then
-                #Disable firewalls on single NIC operation, refs #396
-                echo "We are in single NIC mode -> internal firewalls disabled"
-                echo "DisableFirewall=1" >>/etc/pluto.conf
-                echo "DisableIPv6Firewall=1" >>/etc/pluto.conf
-	fi
+	Digits_Count=$(( $Digits_Count + 1 ))
+done
+[[ $Digits_Count -lt 1 || $Digits_Count -gt 3 ]] && error=true
 
-	if [[ "$c_netExtUseDhcp" == "0" ]] ;then
-		NETsetting="$c_netExtName,$c_netExtIP,$c_netExtMask,$c_netExtGateway,$c_netExtDNS1|$IntIf,$IntIP,$IntNetmask"
+if [[ "$error" == "true" ]] ;then
+	Network="192.168.80"
+	Digits_Count="3"
+fi
+
+IntIP="$Network"
+IntNetmask=""
+for i in `seq 1 $Digits_Count` ;do
+	if [[ "$IntNetmask" == "" ]] ;then
+		IntNetmask="255"
 	else
-		NETsetting="$c_netExtName,dhcp|$IntIf,$IntIP,$IntNetmask"
+		IntNetmask="${IntNetmask}.255"
 	fi
-	
-	DHCPsetting=$(/usr/pluto/install/Initial_DHCP_Config.sh "$Network" "$Digits_Count")
+done
+for i in `seq $Digits_Count 3` ;do
+	if [[ $i == "3" ]] ;then
+		IntIP="${IntIP}.1"
+	else
+		IntIP="${IntIP}.0"
+	fi
 
-	Q="REPLACE INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData) VALUES('$Core_PK_Device',32,'$NETsetting')"
+	IntNetmask="${IntNetmask}.0"
+done
+
+if [[ "$c_netIntName" == "" ]] ;then
+	IntIf="$c_netExtName:0"
+else
+	IntIf="$c_netIntName"
+fi
+
+if [[ "$c_singleNIC" == "1" ]] ;then
+			#Disable firewalls on single NIC operation, refs #396
+			echo "We are in single NIC mode -> internal firewalls disabled"
+			echo "DisableFirewall=1" >>/etc/pluto.conf
+			echo "DisableIPv6Firewall=1" >>/etc/pluto.conf
+fi
+
+if [[ "$c_netExtUseDhcp" == "0" ]] ;then
+	NETsetting="$c_netExtName,$c_netExtIP,$c_netExtMask,$c_netExtGateway,$c_netExtDNS1|$IntIf,$IntIP,$IntNetmask"
+else
+	NETsetting="$c_netExtName,dhcp|$IntIf,$IntIP,$IntNetmask"
+fi
+
+DHCPsetting=$(/usr/pluto/install/Initial_DHCP_Config.sh "$Network" "$Digits_Count")
+
+Q="REPLACE INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData) VALUES('$Core_PK_Device',32,'$NETsetting')"
+RunSQL "$Q"
+if [[ "$c_runDhcpServer" == "1" ]]; then
+	Q="REPLACE INTO Device_DeviceData(FK_Device, FK_DeviceData, IK_DeviceData)
+		VALUES($Core_PK_Device, 28, '$DHCPsetting')"
 	RunSQL "$Q"
-	if [[ "$c_runDhcpServer" == "1" ]]; then
-		Q="REPLACE INTO Device_DeviceData(FK_Device, FK_DeviceData, IK_DeviceData)
-			VALUES($Core_PK_Device, 28, '$DHCPsetting')"
-		RunSQL "$Q"
-	fi
-	# create empty IPv6 tunnel settings field
-        Q="REPLACE INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData) VALUES('$Core_PK_Device',292,'')"
-        RunSQL "$Q"
+fi
+# create empty IPv6 tunnel settings field
+	Q="REPLACE INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData) VALUES('$Core_PK_Device',292,'')"
+	RunSQL "$Q"
 
 }
 
@@ -721,45 +738,8 @@ source /usr/pluto/bin/nvidia-install.sh
 installCorrectNvidiaDriver
 }
 
-setupRunlevel3 () {
-
-	rm -rfv /etc/rc3.d/*
-	cp -av /etc/rc2.d/* /etc/rc3.d/
-	ln -sfv /etc/init.d/linuxmce /etc/rc5.d/S99linuxmce
-	rm -fv /etc/rc3.d/S99kdm /etc/rc3.d/S990start_avwizard
-	
-}
-
-setupRunlevel4 () {
-
-	rm -rfv /etc/rc4.d/*
-	cp -av /etc/rc2.d/* /etc/rc4.d/
-	ln -sfv /etc/init.d/linuxmce /etc/rc5.d/S99linuxmce
-
-}
-
-setupRunlevel5 () {
-
-	rm -rfv /etc/rc5.d/*
-	cp -av /etc/rc2.d/* /etc/rc5.d/
-	ln -sfv /etc/init.d/linuxmce /etc/rc5.d/S99linuxmce
-
-}
-
-createIninttabConfig () {
-
-cat >/etc/inittab <<"EOF"
-# WARNING: Do NOT set the default runlevel to 0 (shutdown) or 6 (reboot).
-#id:2:initdefault: # KDE
-#id:3:initdefault: # Core
-#id:4:initdefault: # Core + KDE
-id:5:initdefault: # Launch Manager
-EOF
-
-}
-
 FixAsteriskConfig () {
-
+#ensure asterisk is installed before applying fix
 dpkg -s asterisk 1>/dev/null
 
 if [ $? == 0 ]; then
@@ -771,25 +751,52 @@ fi
 }
 
 addAdditionalTTYStart () {
-	if [[ "$DISTRO" = "lucid" ]] ; then
-		sed -i 's/23/235/' /etc/init/tty2.conf
-		sed -i 's/23/235/' /etc/init/tty3.conf
-		sed -i 's/23/235/' /etc/init/tty4.conf
-		# disable plymouth splash for now. Could be replaced by own LMCE splash later
-		sed -i 's/ splash//' /etc/default/grub
-                /usr/sbin/update-grub
-	else
-        	echo "start on runlevel 5">>/etc/event.d/tty2
-        	echo "start on runlevel 5">>/etc/event.d/tty3
-        	echo "start on runlevel 5">>/etc/event.d/tty4
-	fi
+if [[ "$DISTRO" = "lucid" ]] ; then
+	sed -i 's/23/235/' /etc/init/tty2.conf
+	sed -i 's/23/235/' /etc/init/tty3.conf
+	sed -i 's/23/235/' /etc/init/tty4.conf
+	# disable plymouth splash for now. Could be replaced by own LMCE splash later
+	sed -i 's/ splash//' /etc/default/grub
+	/usr/sbin/update-grub
+else
+	echo "start on runlevel 5">>/etc/event.d/tty2
+	echo "start on runlevel 5">>/etc/event.d/tty3
+	echo "start on runlevel 5">>/etc/event.d/tty4
+fi
 }
 
 InitialBootPrep () {
 StatsMessage "Preparing initial reboot"
+
+#Setup Runlevel 3
+rm -rf /etc/rc3.d/*
+cp -a /etc/rc2.d/* /etc/rc3.d/
+ln -sf /etc/init.d/linuxmce /etc/rc5.d/S99linuxmce
+rm -f /etc/rc3.d/S99kdm /etc/rc3.d/S990start_avwizard
+
+#Setup Runlevel 4
+rm -rf /etc/rc4.d/*
+cp -a /etc/rc2.d/* /etc/rc4.d/
+ln -sf /etc/init.d/linuxmce /etc/rc5.d/S99linuxmce
+
+#Setup Runlevel 5
+rm -rf /etc/rc5.d/*
+cp -a /etc/rc2.d/* /etc/rc5.d/
+ln -sf /etc/init.d/linuxmce /etc/rc5.d/S99linuxmce
+
+#Create inittab config
+cat >/etc/inittab <<"EOF"
+# WARNING: Do NOT set the default runlevel to 0 (shutdown) or 6 (reboot).
+#id:2:initdefault: # KDE
+#id:3:initdefault: # Core
+#id:4:initdefault: # Core + KDE
+id:5:initdefault: # Launch Manager
+EOF
+
 # Remove KDM startup
 echo "/bin/false" >/etc/X11/default-display-manager
-wget http://svn.linuxmce.org/svn/branches/LinuxMCE-1004/src/new-installer/firstboot
+wget -q http://svn.linuxmce.org/svn/branches/LinuxMCE-1004/src/new-installer/firstboot
+VerifyExitCode "wget for firstboot"
 cp firstboot /etc/rc5.d/S90firstboot
 chmod 755 /etc/rc5.d/S90firstboot
 rm -f ./firstboot
@@ -797,12 +804,30 @@ echo >> /etc/apt/sources.list
 /usr/share/update-notifier/notify-reboot-required
 }
 
-#Send Errors to a log file
-exec 2>${error_log}
+Setup_NIS () {
+# Put a temporary nis config file that will prevent ypbind to start
+# Temporary NIS setup, disabling NIS server and client.
+StatsMessage "Temporarily modifying the NIS configuration file disabling the NIS server and client"
+echo "
+NISSERVER=false
+NISCLIENT=false
+YPPWDDIR=/etc
+YPCHANGEOK=chsh
+NISMASTER=
+YPSERVARGS=
+YPBINDARGS=
+YPPASSWDDARGS=
+YPXFRDARGS=
+" > /etc/default/nis
+}
+
+
+#Set up logging
+Setup_Logfile
+TeeMyOutput --outfile ${log_file} --stdboth --append -- "$@"
 
 #Execute Functions
 UpdateUpgrade
-Setup_Error_Logging
 TimeUpdate
 CreateBackupSources
 AddAptRetries
@@ -812,17 +837,11 @@ ConfigSources
 PreSeed_Prefs
 Fix_Initrd_Vmlinux
 Nic_Config
-Setup_Network_Intefaces
-Setup_NIS
 Setup_Pluto_Conf
 Install_DCERouter
 Create_And_Config_Devices
 Configure_Network_Options
 UpdateUpgrade
-setupRunlevel3
-setupRunlevel4
-setupRunlevel5
-createIninttabConfig
 FixAsteriskConfig
 addAdditionalTTYStart
 InitialBootPrep
@@ -833,7 +852,9 @@ Setup_NIS
 # /usr/pluto/bin/Diskless_CreateTBZ.sh
 
 StatsMessage "MCE Install Script completed without a detected error"
+StatsMessage "The log file for the install process is located at ${log_file}"
 StatsMessage "Reboot the system to start the final process"
+
 exit 0
 
 
