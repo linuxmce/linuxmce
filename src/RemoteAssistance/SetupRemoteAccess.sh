@@ -79,13 +79,13 @@ AddCronEntry()
 		Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Crontab entry already present. Not adding."
 	fi
 	
-	if [[ ! -e /etc/cron.d/SetupRA-Special ]] ;then
-		echo "$cronEntry_Special" >>/etc/cron.d/SetupRA-Special
-		CronReload="1"
-	    Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Added crontab entry (special)"
-	else
-		Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Crontab entry (special) already present. Not adding."
-	fi
+	#if [[ ! -e /etc/cron.d/SetupRA-Special ]] ;then
+	#	echo "$cronEntry_Special" >>/etc/cron.d/SetupRA-Special
+	#	CronReload="1"
+	#    Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Added crontab entry (special)"
+	#else
+	#	Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Crontab entry (special) already present. Not adding."
+	#fi
 
 	if [[ -n "$CronReload" ]]; then
 		service cron reload
@@ -152,6 +152,7 @@ CreateTunnel()
 		fi
 		if [[ "$FalseAlarm" -eq 0 ]]; then
 			[[ -n "$Tunnel" ]] && RemoveTunnel "$Suffix"
+			#echo "screen -d -m -S \"${screenName}_${Suffix}\" /usr/pluto/bin/RemoteAccess_Tunnel.sh \"$RemotePort\" \"$LocalPort\" \"$RAKey\" \"$Host\" \"$RAhost\" \"$RAport\""
 			screen -d -m -S "${screenName}_${Suffix}" /usr/pluto/bin/RemoteAccess_Tunnel.sh "$RemotePort" "$LocalPort" "$RAKey" "$Host" "$RAhost" "$RAport"
 			Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "$Suffix tunnel enabled."
 		else
@@ -189,11 +190,13 @@ CreateTunnels()
 		PortName="${PortNameDest%_*}"
 		PortDest="${PortNameDest##*_}"
 		PortTunnel="${!Var}"
-		CreateTunnel "${PortName}_pf" "$PortDest" "$PortTunnel"
-		CreateTunnel "${PortName}_ph" "$PortDest" "$PortTunnel" "" $RAServer 22
+		#echo "CreateTunnel \"${PortName}_pf\" \"$PortDest\" \"$PortTunnel\""
+		#CreateTunnel "${PortName}_pf" "$PortDest" "$PortTunnel"
+		#echo "CreateTunnel \"${PortName}\" \"$PortDest\" \"$PortTunnel\" \"\" $RAServer 22"
+		CreateTunnel "${PortName}" "$PortDest" "$PortTunnel" "" $RAServer 22
 	done
 
-	CreateTunnels_Special
+	#CreateTunnels_Special
 }
 
 CreateTunnels_Special()
@@ -205,8 +208,8 @@ CreateTunnels_Special()
 		PortName="${PortNameDest%_*}"
 		PortDest="${PortNameDest##*_}"
 		PortTunnel="${!Var}"
-		CreateTunnel "${PortName}_NoMon_pf" "$PortDest" "$PortTunnel" "" "" 22 no
-		CreateTunnel "${PortName}_NoMon_ph" "$PortDest" "$PortTunnel" "" $RAServer 22 no
+		#CreateTunnel "${PortName}_NoMon_pf" "$PortDest" "$PortTunnel" "" "" 22 no
+		CreateTunnel "${PortName}_NoMon" "$PortDest" "$PortTunnel" "" $RAServer 22 no
 	done
 }
 
@@ -217,11 +220,11 @@ RemoveTunnels()
 	for Var in ${!Port_*}; do
 		PortNameDest="${Var#Port_}"
 		PortName="${PortNameDest%_*}"
-		RemoveTunnel "${PortName}_pf"
-		RemoveTunnel "${PortName}_ph"
+		#RemoveTunnel "${PortName}_pf"
+		RemoveTunnel "${PortName}"
 	done
 
-	RemoveTunnels_Special
+	#RemoveTunnels_Special
 	
 	/usr/pluto/bin/RA_ChangePassword.sh
 }
@@ -233,8 +236,8 @@ RemoveTunnels_Special()
 	for Var in ${!PortNoMon_*}; do
 		PortNameDest="${Var#PortNoMon_}"
 		PortName="${PortNameDest%_*}"
-		RemoveTunnel "${PortName}_NoMon_pf"
-		RemoveTunnel "${PortName}_NoMon_ph"
+		#RemoveTunnel "${PortName}_NoMon_pf"
+		RemoveTunnel "${PortName}_NoMon"
 	done
 }
 
@@ -245,6 +248,7 @@ DeleteHostKey()
 
 Me="$(basename "$0")"
 if [[ "$Me" == "$(basename "$cronCmd")" ]]; then
+	echo "Creating standard tunnels"
 	DeleteHostKey
 	if [[ -n "$remote" ]]; then
 		$keepAliveCmd
@@ -258,6 +262,7 @@ if [[ "$Me" == "$(basename "$cronCmd")" ]]; then
 		RemoveTunnels
 	fi
 elif [[ "$Me" == "$(basename "$cronCmd_Special")" ]]; then
+	echo "Creating special tunnels"
 	RemoveTunnels_Special
 	CreateTunnels_Special
 fi
