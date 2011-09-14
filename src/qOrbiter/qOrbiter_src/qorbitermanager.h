@@ -150,6 +150,10 @@ Param 10 - pk_attribute
     QStringList goBack;
     bool backwards;
 
+    bool requestMore;
+   Q_INVOKABLE void setRequestMore(bool state);
+    bool getRequestMore();
+
     //listmodels
     QByteArray binaryConfig;
     LocationModel *m_lRooms;
@@ -270,6 +274,7 @@ signals:
     void objectUpdated();
     void liveTVrequest();
     void userChanged();
+    void requestMoreGridData();
 
 
 

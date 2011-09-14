@@ -20,6 +20,8 @@ function createFilterObjects(toBeCreated) {
     console.log(toBeCreated)
     component = Qt.createComponent(toBeCreated);
        sprite = component.createObject(fileviewscreen , {"x": 0, "y": 0});
+   setRequestMore(false)
+
     console.log("showing!")
        if (sprite == null) {
            // Error Handling

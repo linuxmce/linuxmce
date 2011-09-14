@@ -10,7 +10,6 @@ Rectangle {
            border.width: 1
            clip: true
 
-
            Component{
                  id:attributedelegate
                  Item {

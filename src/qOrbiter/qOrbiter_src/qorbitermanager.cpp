@@ -1384,7 +1384,7 @@ void qorbiterManager::initializeGridModel()
     basicProvider = new basicImageProvider();
     advancedProvider = new GridIndexProvider(model , 6, 4);
     QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex, int )), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex, int)), Qt::QueuedConnection);
-
+    QObject::connect(this,SIGNAL(requestMoreGridData()), model,SLOT(checkForMore()));
     //adding important data and objects to qml now that they have been setup
     qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
     qorbiterUIwin->engine()->addImageProvider("datagridimg", advancedProvider);
@@ -1542,6 +1542,17 @@ void qorbiterManager::setCurrentUser(QString inc_user)
      qDebug() << "User name" << sPK_User << "::" << user;
      pqOrbiter->setUser(user);
      emit userChanged();
+}
+
+void qorbiterManager::setRequestMore(bool state)
+{
+    requestMore = state;
+    emit requestMoreGridData();
+}
+
+bool qorbiterManager::getRequestMore()
+{
+    return requestMore;
 }
 
 

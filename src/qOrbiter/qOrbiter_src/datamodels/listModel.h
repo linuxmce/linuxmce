@@ -38,7 +38,7 @@ public:
   gridItem* currentRow();
   void clear();
   int totalcells;
-  Q_INVOKABLE void checkForMore();
+  void checkForMore();
 
 
 signals:

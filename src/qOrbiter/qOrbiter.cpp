@@ -2680,7 +2680,7 @@ void DCE::qOrbiter::populateAdditionalMedia()
 {
     qDebug() << "requesting additional media";
 
-    while(qmlUI->model->totalcells > qmlUI->model->rowCount(QModelIndex()) && qmlUI->currentScreen == "Screen_47.qml")
+    while(qmlUI->model->totalcells > qmlUI->model->rowCount(QModelIndex()) && qmlUI->currentScreen == "Screen_47.qml" && qmlUI->requestMore == true)
     {
     //    qDebug() << "Cells Left to render: "<< (qmlUI->model->totalcells -qmlUI->model->rowCount(QModelIndex()) );
 
@@ -2698,9 +2698,6 @@ void DCE::qOrbiter::populateAdditionalMedia()
         string m_sSeek = "";// StringUtils::itos(currentrow);
         int offset = 0;
        qDebug() << "Seeking to row: " << m_sSeek.c_str() ;
-        if(qmlUI->currentScreen == "Screen_47.qml")
-
-        {
 
 
             //CMD_Request_Datagrid_Contents(                              long DeviceIDFrom,                long DeviceIDTo,                   string sID,                                string sDataGrid_ID, int iRow_count,int iColumn_count,        bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,       int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
@@ -2746,9 +2743,9 @@ void DCE::qOrbiter::populateAdditionalMedia()
                 }
             }
         }
-        sleep(1);
+        sleep(.5);
     }
-}
+
 
 void DCE::qOrbiter::SetSecurityMode(int pin, int mode)
 {
