@@ -991,6 +991,7 @@ void qorbiterManager::getcurrentSkins(QStringList skinPaths)
 
         }
 
+        skins.append("/");
         QStringList::const_iterator constIterator;
         for (constIterator = skinPaths.constBegin(); constIterator != skinPaths.constEnd(); ++constIterator)
         {
@@ -1000,8 +1001,12 @@ void qorbiterManager::getcurrentSkins(QStringList skinPaths)
                 // qDebug() << "System Path" << (*constIterator);
             }
             else
-            {    skins.append("/");
+            {
                 QDeclarativeComponent skinData(qorbiterUIwin->engine(),QUrl::fromLocalFile(skins+(*constIterator)+"/Style.qml"));
+                if (skinData.isError()) {
+                    // this dir does not contain a Style.qml; ignore it
+                    break;
+                }
                 //turning it into a qObject - this part actually loads it - the error should connect to a slot and not an exit
                 QObject *styleObject = skinData.create(qorbiterUIwin->rootContext());
                 //wait for it to load up
