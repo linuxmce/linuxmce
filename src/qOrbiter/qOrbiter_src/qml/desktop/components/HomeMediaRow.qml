@@ -49,7 +49,7 @@ Item {
                 MouseArea{
                     id: mousearea1
                     anchors.fill: parent
-                    onClicked:gotoQScreen("Screen_3.qml")
+                    onClicked:showfloorplan(3)
                 }
             }
 

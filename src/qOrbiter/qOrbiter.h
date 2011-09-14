@@ -95,6 +95,7 @@ public:
     void SetSecurityMode(int pin, int mode);
     void setLocation(int location, int ea);
     void setUser(int user);
+    void QuickReload();
 
     //<-dceag-const-e->
 

@@ -5,7 +5,7 @@ import "../js/ComponentLoader.js" as MyJs
 Rectangle {
     height: style.orbiterH
     width: style.orbiterW
-    color: "transparent"
+    color: style.darkhighlight
     id: advancedscreen
 
     HomeButton{}
@@ -13,17 +13,16 @@ Rectangle {
     Flow {
         id: flow1
         anchors.centerIn: parent
-        height: 400
-        width: 400
+        height: scaleY(50)
+        width: scaleX(60)
         spacing: 10
 
         ButtonSq{
             id:regenorbiter
             height: scaleY(style.buttonH)
             width: scaleX(style.buttonW)
-            buttontext: "Regen Orbiter"
+            buttontext: qsTr("Regen This Orbiter")
             radius: 5
-
             MouseArea{
                 anchors.fill:parent
                 z:5
@@ -35,23 +34,36 @@ Rectangle {
             id:regenorbiters
             height: scaleY(style.buttonH)
             width: scaleX(style.buttonW)
-            buttontext: "Regen All Orbiters"
+            buttontext: qsTr("Regen All Orbiters")
             radius: 5
         }
 
         ButtonSq{
-            id:pending
+            id:reloadandregen
             height: scaleY(style.buttonH)
             width: scaleX(style.buttonW)
-            buttontext: "Pending Tasks"
+            buttontext: qsTr("Reload and Regen")
             radius: 5
+        }
+
+        ButtonSq{
+            id:quickreload
+            height: scaleY(style.buttonH)
+            width: scaleX(style.buttonW)
+            buttontext: qsTr("Quick Reload")
+            radius: 5
+            MouseArea{
+                anchors.fill: parent
+                z:10
+                onClicked: quickReload()
+            }
         }
 
         ButtonSq{
             id:networksettings
             height: scaleY(style.buttonH)
             width: scaleX(style.buttonW)
-            buttontext: "Network Settings"
+            buttontext: qsTr("Network Settings")
             radius: 5
         }
 
@@ -59,35 +71,27 @@ Rectangle {
             id:avwizard
             height: scaleY(style.buttonH)
             width: scaleX(style.buttonW)
-            buttontext: "Av wizard"
+            buttontext: qsTr("Av wizard")
             radius: 5
         }
 
-
-
         ButtonSq{
-            id:quickreload
+            id:pendingtasks
             height: scaleY(style.buttonH)
             width: scaleX(style.buttonW)
-            buttontext: "Quick Reload"
+            buttontext: qsTr("Pending Tasks")
             radius: 5
-            MouseArea{
-                anchors.fill: parent
-                z:10
-                onClicked: quickReload()
-            }
         }
 
         ButtonSq{
             id:remoteassistance
             height: scaleY(style.buttonH)
             width: scaleX(style.buttonW)
-            buttontext: "Remote Assistance"
+            buttontext: qsTr("Remote Assistance")
             radius: 5
             MouseArea{
                 anchors.fill: parent
                 z:10
-                onClicked: quickReload()
             }
         }
 
@@ -95,7 +99,7 @@ Rectangle {
             id:addsoftware
             height: scaleY(style.buttonH)
             width: scaleX(style.buttonW)
-            buttontext: "Add Software"
+            buttontext: qsTr("Add Software")
             radius: 5
         }
 
@@ -103,17 +107,37 @@ Rectangle {
             id:changeStyle
             height: scaleY(style.buttonH)
             width: scaleX(style.buttonW)
-            buttontext: "Change Styles"
+            buttontext: qsTr("Change Styles")
             radius: 5
-
             MouseArea{
                 anchors.fill: parent
                 onClicked: MyJs.createComponentObjects("SkinSelector.qml")
             }
         }
 
+            ButtonSq{
+                id:gc100
+                height: scaleY(style.buttonH)
+                width: scaleX(style.buttonW)
+                buttontext: qsTr("Add GC100")
+                radius: 5
+            }
 
+            ButtonSq{
+                id:pingtest
+                height: scaleY(style.buttonH)
+                width: scaleX(style.buttonW)
+                buttontext: qsTr("Ping Test")
+                radius: 5
+            }
 
+            ButtonSq{
+                id:ircodes
+                height: scaleY(style.buttonH)
+                width: scaleX(style.buttonW)
+                buttontext: qsTr("IR Codes")
+                radius: 5
+            }
+        }
     }
 
-}

@@ -1338,12 +1338,12 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 
     if(qmlUI->backwards)
     {
-        if(qmlUI->goBack.size() > 0)
+        if(qmlUI->goBack.count() > 1)
         {
             qmlUI->goBack.removeLast();
 
         }
-        else if (qmlUI->goBack.isEmpty())
+        else if (qmlUI->goBack.count() == 1)
         {
             qmlUI->initializeSortString();
 
@@ -2330,6 +2330,10 @@ void DCE::qOrbiter::ShowFloorPlan(int floorplantype)
     string id = "1";
     CMD_Get_Current_Floorplan getFloorPlan(qmlUI->iPK_Device, qmlUI->iOrbiterPluginID, id, floorplantype , &sval);
     SendCommand(getFloorPlan);
+    QString Screen = QString("Screen_").append(StringUtils::itos(floorplantype).c_str()).append(".qml");
+    qmlUI->gotoQScreen(Screen);
+
+    //CMD_Populate_Datagrid getfloorplandevices;
 
 }
 
@@ -2480,20 +2484,29 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                 index = pDataGridTable->CovertColRowType(it->first).first;
                 cellTitle = pCell->GetText();
                 cellAttribute = pCell->GetValue();
+               // qDebug() << cellTitle;
+               // qDebug() << cellAttribute;
                 //qDebug() << pCell->GetImagePath();
                 cellfk = pCell->GetValue();
 
-                QStringList parser = cellTitle.split("\n", QString::KeepEmptyParts);
+                QStringList parser = cellTitle.split(QRegExp("(\\n|:\\s)"), QString::KeepEmptyParts);
                 qDebug() << "Processing" << parser.at(0);
                 QString attributeType = parser.at(0);
-                QString attribute = parser.at(1);
+                QString attribute;
+                if(parser.length() < 2)
+                {
+                    attribute = "";
+                }
+                attribute = parser.at(1);
                 if(attributeType == "Program")
                 {
                     qmlUI->nowPlayingButton->setProgram(attributeType);
+                     qDebug() << attribute;
                 }
                 else if(attributeType == "Title")
                 {
-                    qmlUI->nowPlayingButton->setTitle(attribute);
+                    qmlUI->nowPlayingButton->setMediaTitle(attribute);
+                     qDebug() << attribute;
                 }
                 else if(attributeType == "Channel")
                 {
@@ -2504,6 +2517,22 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                     qmlUI->nowPlayingButton->setEpisode(attribute);
                     qDebug() << attribute;
                 }
+                else if(attributeType == "Performer")
+                {
+                    qmlUI->nowPlayingButton->setPerformers(attribute);
+                    qDebug() << attribute;
+                }
+                else if(attributeType == "Director")
+                {
+                    qmlUI->nowPlayingButton->setDirector(attribute);
+                    qDebug() << attribute;
+                }
+                else if(attributeType == "Genre")
+                {
+                    qmlUI->nowPlayingButton->setGenre(attribute);
+                    qDebug() << attribute;
+                }
+
 
                 //qmlUI->m_selected_grid_item->appendRow(new FileDetailsItem(cellTitle, cellAttribute, cellImg, false,  qmlUI->model));
             }
@@ -2708,8 +2737,8 @@ void DCE::qOrbiter::populateAdditionalMedia()
                 DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
                 cellsToRender= pDataGridTable->GetRows();
 
-                 qDebug() << "Picture Datagrid Height:" << gHeight << " , width: " << gWidth;
-                qDebug() << "Response: " << cellsToRender << " picture cells to render";
+                // qDebug() << "Picture Datagrid Height:" << gHeight << " , width: " << gWidth;
+                //qDebug() << "Response: " << cellsToRender << " picture cells to render";
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
                 QString cellTitle;
                 QString fk_file;
@@ -2739,11 +2768,10 @@ void DCE::qOrbiter::populateAdditionalMedia()
                         cellImg.load(":/icons/videos.png");
                     }
                     qmlUI->model->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg,  qmlUI->model));
-
                 }
             }
         }
-        sleep(.5);
+
     }
 
 
@@ -2767,6 +2795,11 @@ void DCE::qOrbiter::setUser(int user)
 {
     CMD_Set_Current_User_DL set_user(qmlUI->iPK_Device, StringUtils::itos(qmlUI->iPK_Device_GeneralInfoPlugin), user);
     SendCommand(set_user);
+}
+
+void DCE::qOrbiter::QuickReload()
+{
+    //SendCommand( CMD_Reload(qmlUI->iPK_Device, qmlUI->iOrbiterPluginID) );
 }
 
 

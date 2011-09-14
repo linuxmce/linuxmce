@@ -31,7 +31,7 @@ Item
                height: status.height; anchors.left: parent.left; anchors.leftMargin: scaleX(5)
             }
 
-            Clock{id:screen1time; height: status.height; anchors.right: parent.right; anchors.rightMargin: scaleX(15) }
+            Clock{id:screen1time; height: status.height; anchors.right: parent.right; anchors.rightMargin: scaleX(25) }
 
         }
 

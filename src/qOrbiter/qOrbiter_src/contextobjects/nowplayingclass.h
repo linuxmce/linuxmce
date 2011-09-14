@@ -45,14 +45,14 @@ class NowPlayingClass : public QDeclarativeItem
     Q_PROPERTY (int m_iplaylistPosition READ getPlaylistPosition WRITE setPlaylistPostion NOTIFY playListPositionChanged)
 
     //media title variable that can be independant of what is passed initially by now playing
-    Q_PROPERTY (QString mediaTitle READ getMediaTitle WRITE setMediaTitle NOTIFY mediaTitleChanged)
-
+    Q_PROPERTY (QString mediatitle READ getMediaTitle WRITE setMediaTitle NOTIFY mediaTitleChanged)
+    Q_PROPERTY (QString genre READ getGenre WRITE setGenre NOTIFY genreChanged)
     //television related variables
     Q_PROPERTY (QString program READ getProgram WRITE setProgram NOTIFY programChanged)
     Q_PROPERTY (QString channel READ getChannel WRITE setChannel NOTIFY channelChanged)
     Q_PROPERTY (QString channelID READ getChannelID WRITE setChannelID NOTIFY channelChanged)
     Q_PROPERTY (QString episode READ getEpisode WRITE setEpisode NOTIFY episodeChanged)
-
+     Q_PROPERTY (QString director READ getDirector WRITE setDirector NOTIFY directorChanged)
     //audio related
     Q_PROPERTY (QString album READ getAlbum WRITE setAlbum NOTIFY albumChanged)
     Q_PROPERTY (QString track READ getTrack WRITE setTrack NOTIFY trackChanged)
@@ -79,7 +79,7 @@ public:
     QImage fileImage;
 
     //media  related--------------------------
-    QString mediaTitle; //special if the media itself for some reason has a title different than the now playing
+    QString mediatitle; //special if the media itself for some reason has a title different than the now playing
     QTime *timecode;
     QString synopsis;
     int i_playbackSpeed;
@@ -90,12 +90,14 @@ public:
     QString channel;
     QString channelID;
     QString episode;
+    QString director;
+    QStringList directors;
     //audio related
     QStringList performers;
     QString performerlist;
     QString album;
     QString track;
-    QStringList genre;
+    QString genre;
     QStringList composer;
     QString releasedate;
 
@@ -116,6 +118,7 @@ signals:
     void filePathChanged();
     void mediaSpeedChanged();
     void playListPositionChanged();
+    void genreChanged();
 
     //audio signals
     void albumChanged();
@@ -125,6 +128,7 @@ signals:
 
 
     //video signals
+    void directorChanged();
 
     //games signals
 
@@ -171,8 +175,8 @@ public slots:
 
     //general media getters and setters ----//
 
-    void setMediaTitle (QString inc_mediaTitle) {mediaTitle = inc_mediaTitle;  emit episodeChanged();}
-    QString getMediaTitle () {return mediaTitle;}
+    void setMediaTitle (QString inc_mediaTitle) {mediatitle = inc_mediaTitle;  emit mediaTitleChanged();}
+    QString getMediaTitle () {return mediatitle;}
 
     void setPlaylistPostion(int i_pls) {m_iplaylistPosition = i_pls; qDebug() << "Playlist set to: "<< m_iplaylistPosition;  emit playListPositionChanged();}
     int getPlaylistPosition() {return m_iplaylistPosition;}
@@ -200,8 +204,13 @@ public slots:
     QString getTrack() {return track;}
 
     void setPerformers (QString inc_performer) {performers << inc_performer;  emit performersChanged();}
-    QString getPerformers() {performerlist = performers.join(","); return performerlist;}
+    QString getPerformers() {performerlist = performers.join(" | "); return performerlist;}
 
+    void setDirector (QString inc_director) {directors << inc_director;  emit directorChanged();}
+    QString getDirector() {director = directors.join(" | "); return director;}
+
+    void setGenre (QString inc_genre) {genre.append(inc_genre+" | ");  emit genreChanged();}
+    QString getGenre() { return genre;}
 
 };
 

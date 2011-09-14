@@ -4,7 +4,7 @@ import "../components"
 Rectangle {
 
     // property alias synText:
-    id: storedmediaremote
+    id: dvduntaggedremote
     anchors.centerIn: parent
     Timer{
         id:singleshot

@@ -33,6 +33,7 @@ Component{
                 source: "../../../img/icons/buttonoverlay2.png"
                 opacity: .85
 
+
             }
 
 

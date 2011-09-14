@@ -379,8 +379,9 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
     if( pqOrbiter->m_bReload )
         bReload=true;
+    pqOrbiter->QuickReload();
     gotoQScreen("Splash.qml");
-    sleep(10);
+    sleep(5);
     setupLmce(iPK_Device, sRouterIP, false, false);
 
 }
@@ -1364,7 +1365,9 @@ void qorbiterManager::initializeSortString()
     q_pk_attribute="";        //10
 
 
-    datagridVariableString = "";
+    datagridVariableString.append(q_mediaType).append("|").append(q_subType).append("|").append(q_fileFormat).append("|").append(q_attribute_genres).append("|").append(q_mediaSources).append("|").append(q_usersPrivate).append("|").append(q_attributetype_sort).append("|").append(q_pk_users).append("|").append(q_last_viewed).append("|").append(q_pk_attribute);
+    goBack.clear();
+    goBack.append(datagridVariableString);
     qDebug() << "Dg Variables Reset";
 
 }

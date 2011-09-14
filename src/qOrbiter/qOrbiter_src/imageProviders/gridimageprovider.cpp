@@ -59,7 +59,7 @@ void GridIndexProvider::dataUpdated(const QModelIndex& topLeft, const QModelInde
     // For each pixmap already in the model, get a mapping between the name and the index
     for(int row = 0; row < mModel.rowCount(); row++) {     
         QModelIndex index = mModel.index(row, 0);
-        QString path = mModel.data(index, mPathRole).value<QString>();
+        QString path = QVariant(mModel.data(index, mPathRole)).toString();
         mPixmapIndex[path] = index;
     }
 
