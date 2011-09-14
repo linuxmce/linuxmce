@@ -11,6 +11,7 @@ Item{
             var detailsFile = ''
             switch (gmediaType) {
             case '4': // audio
+                detailsFile = 'FileDetailsAudio.qml'
                 console.log("Loading audio details")
                 break
             case '5': // video

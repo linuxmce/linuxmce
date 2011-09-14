@@ -26,7 +26,20 @@ Item
             break
         }
     }
+    Timer{
+        id:singleshot
+        repeat: false
+        interval: 2000
+        triggeredOnStart: false
+        running: true
 
+        onTriggered: nowPlayingArt.source = "image://updateobject/"+securityvideo.timestamp
+    }
+
+    Connections{
+        target:dcenowplaying
+        onPlayListPositionChanged: nowPlayingArt.source = "image://updateobject/"+securityvideo.timestamp
+    }
 
     Rectangle {
         id:stage
@@ -226,14 +239,14 @@ Item
                     height: parent.height*.91
                     radius: 6
                     //color: "white"
-                                        color: "transparent"
-                    //                    Image{ // Album art here
-                    // id: nowPlayingArt
-                    //                        anchors.fill: parent
-                    //                        source: ""
-                    //                    fillMode:  Image.PreserveAspectFit
-                    //                    smooth:  true
-                    //                    }
+                    color: "transparent"
+                    Image{ // Album art here
+                        id: nowPlayingArt
+                        anchors.fill: parent
+                        source: "image://updateobject/"+securityvideo.timestamp
+                        fillMode:  Image.PreserveAspectFit
+                        smooth:  true
+                    }
                     MouseArea {
                         anchors.fill: parent
                         onClicked:gotoQScreen(dcenowplaying.qs_screen)
@@ -263,7 +276,7 @@ Item
             }
             Text{
                 id: nowPlayingAlbum
-                text: "Album"
+                text: dcenowplaying.qs_mainTitle2
                 x: scaleY(41.11)
                 y: scaleY(37.22) // 510 268
                 font.family: aeonNowPlaying.name
@@ -392,6 +405,7 @@ Item
 
     }
     Component.onCompleted: {
+        setNowPlayingData()
         mainmenu.forceActiveFocus()
         mainItemSelected(mainMenuIndex)
     }
