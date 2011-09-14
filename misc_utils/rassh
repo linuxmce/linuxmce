@@ -1,14 +1,13 @@
 #!/bin/bash
 
-#LmceHome="rassh.linuxmce.org"
 LmceHome="www.linuxmce.org"
 
-#RA_Servers=(rassh2.linuxmce.org rassh.linuxmce.org)
+#RA_Servers=(ra.linuxmce.org)
 RA_Servers=(localhost)
 
 # explicitly delete the RA server host keys if present
 # especially useful for root, because fakeroot is useless there
-sed -ri '/www?\.linmuxmce\.org/d' ~/.ssh/known_hosts
+sed -ri '/ra\.linmuxmce\.org/d' ~/.ssh/known_hosts
 
 Usage()
 {
@@ -55,25 +54,25 @@ while read line; do
 	ServicePortRA="${line#*=}"
 	ServicePortUser="${Service##*_}"
 	ServiceName="${Service%_*}"
-		if [[ "$ServiceName" == nomon_* ]]; then
+	if [[ "$ServiceName" == nomon_* ]]; then
 		ServiceName="${ServiceName#nomon_}"
 		ServiceSpecial="nomon"
 	fi
-		echo "Service: $ServiceName; RA Port: $ServicePortRA; User Port: $ServicePortUser; Special: $ServiceSpecial"
+	echo "Service: $ServiceName; RA Port: $ServicePortRA; User Port: $ServicePortUser; Special: $ServiceSpecial"
 	if [[ "$ServiceName" == SSH ]]; then
 		eval "SSH_Port_${Index}=$ServicePortRA"
 		((Index++))
 	fi
 done < "$PortFile"
 echo "----------------------------------"
-	if [[ "$DisplayOnly" == DisplayOnly ]]; then
+if [[ "$DisplayOnly" == DisplayOnly ]]; then
 	exit 0
 fi
-	for Server in "${RA_Servers[@]}"; do
+for Server in "${RA_Servers[@]}"; do
 	for Var in ${!SSH_Port_*}; do
 		Port="${!Var}"
 		echo "Trying: server=$Server port=${Port}"
-		echo fakeroot ssh -p $Port "$User@$Server" $Forward
+		#echo fakeroot ssh -p $Port "$User@$Server" $Forward
 		if fakeroot ssh -p $Port "$User@$Server" $Forward 2>/dev/null; then
 			break 2
 		else

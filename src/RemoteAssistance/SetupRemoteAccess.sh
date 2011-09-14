@@ -248,7 +248,6 @@ DeleteHostKey()
 
 Me="$(basename "$0")"
 if [[ "$Me" == "$(basename "$cronCmd")" ]]; then
-	echo "Creating standard tunnels"
 	DeleteHostKey
 	if [[ -n "$remote" ]]; then
 		$keepAliveCmd
@@ -262,7 +261,6 @@ if [[ "$Me" == "$(basename "$cronCmd")" ]]; then
 		RemoveTunnels
 	fi
 elif [[ "$Me" == "$(basename "$cronCmd_Special")" ]]; then
-	echo "Creating special tunnels"
 	RemoveTunnels_Special
 	CreateTunnels_Special
 fi
