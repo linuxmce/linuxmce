@@ -23,6 +23,10 @@ export PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 Setup_Logfile () {
 if [ -f ${log_file} ]; then
+	#zero out an existing file
+	echo > ${log_file}
+	echo "`date` - Setup has run before, clearing old log file at ${log_file}"
+else
 	touch ${log_file}
 	if [ $? = 1 ]; then
 		echo "`date` - Unable to write to ${log_file} - re-run script as root"
@@ -30,10 +34,6 @@ if [ -f ${log_file} ]; then
 	else
 		echo "`date` - Logging initiatilized to ${log_file}"
 	fi
-else
-	#0 out an existing file
-	echo > ${log_file}
-	echo "`date` - Setup has run before, clearing old log file at ${log_file}"
 fi
 }
 
@@ -736,11 +736,22 @@ StatsMessage "Starting nVidia driver setup"
 source /usr/pluto/bin/nvidia-install.sh
 # install the correct nvidia driver
 installCorrectNvidiaDriver
+
+## Unsure if this is still needed:
+if lshwd | grep -qi 'VGA .* (nv)'; then
+        apt-get -y -f install pluto-nvidia-video-drivers
+elif lshwd | grep -qi 'VGA .* (radeon)'; then
+        # Check to see if old Radeon card, if so, do not install new driver
+        if ! lshwd | grep -Pqi 'VGA .*Radeon ((9|X|ES)(1|2?)([0-9])(5|0)0|Xpress) (.*) \(radeon\)'; then
+               apt-get -y -f install xorg-driver-fglrx
+        fi
+fi
+
 }
 
 FixAsteriskConfig () {
 #ensure asterisk is installed before applying fix
-dpkg -s asterisk 1>/dev/null
+dpkg -s asterisk 1>/dev/null 2>&1
 
 if [ $? == 0 ]; then
 	asteriskNoloadModule app_directory_odbc.so
@@ -795,9 +806,9 @@ EOF
 
 # Remove KDM startup
 echo "/bin/false" >/etc/X11/default-display-manager
-wget -q http://svn.linuxmce.org/svn/branches/LinuxMCE-1004/src/new-installer/firstboot
+wget -q http://svn.linuxmce.org/svn/branches/LinuxMCE-1004/src/new-installer/firstboot.new
 VerifyExitCode "wget for firstboot"
-cp firstboot /etc/rc5.d/S90firstboot
+cp firstboot.new /etc/rc5.d/S90firstboot
 chmod 755 /etc/rc5.d/S90firstboot
 rm -f ./firstboot
 echo >> /etc/apt/sources.list
@@ -821,6 +832,10 @@ YPXFRDARGS=
 " > /etc/default/nis
 }
 
+
+###########################################################
+### Main execution area
+###########################################################
 
 #Set up logging
 Setup_Logfile
@@ -847,9 +862,6 @@ addAdditionalTTYStart
 InitialBootPrep
 Setup_NIS
 
-#StatsMessage "Building a disk image for your Diskless Media Directors"
-# TODO - find an area in the process to kick this off post reboot
-# /usr/pluto/bin/Diskless_CreateTBZ.sh
 
 StatsMessage "MCE Install Script completed without a detected error"
 StatsMessage "The log file for the install process is located at ${log_file}"
