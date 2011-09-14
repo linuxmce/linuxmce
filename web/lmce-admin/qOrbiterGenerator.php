@@ -261,7 +261,9 @@ function getRooms($conn, $doc, $orbiterData)
 {	
 echo ("Looking up Rooms now.. ");	
 
-	$sql = "SELECT Room.*,Icon.MainFileName, Icon.SelectedFileName, Icon.AltFileNames, Icon.BackgroundFileName FROM `Room` Left Join Icon On FK_Icon = PK_Icon ";
+	$sql = "SELECT Room.*,EntertainArea.PK_EntertainArea, Icon.MainFileName, Icon.SelectedFileName, Icon.AltFileNames, Icon.BackgroundFileName FROM `Room`
+	        Left Join EntertainArea On Room.PK_Room = EntertainArea.FK_Room
+                Left Join Icon On FK_Icon = PK_Icon ";
 	
 	$result = mysql_query($sql,$conn) or die(mysql_error($conn));
 	
