@@ -1,6 +1,7 @@
 import QtQuick 1.0
 
 import "../components"
+import "../js/ComponentLoader.js" as JsLib
 
 Item
 {
@@ -298,6 +299,7 @@ Item
         }
         // Bottom options menu
         Image {
+            id: mnuBottomRight
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             source:  "../img/common/timepanel_mid.png"
@@ -342,7 +344,7 @@ Item
             }
             Text{
                 id:txtRoom
-                text:currentroom
+                text:currentroom.length ? currentroom : "--"
                 font.family: scout.name;
                 font.pixelSize: parent.height*.7;
                 color: "#e5e5e5";
@@ -350,6 +352,12 @@ Item
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.right: lblUser.left
                 anchors.rightMargin: scaleX(.78)
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        JsLib.loadComponent(stage,"RoomSelector.qml")
+                    }
+                }
             }
             Text{
                 id:lblUser
@@ -362,9 +370,9 @@ Item
                 anchors.right: txtUser.left
                 anchors.rightMargin: scaleX(.78)
             }
-            Text{
+            Text {
                 id:txtUser
-                text:currentuser
+                text:currentuser.length ? currentuser : "--"
                 font.family: scout.name;
                 font.pixelSize: parent.height*.7;
                 color: "#e5e5e5";
@@ -372,6 +380,12 @@ Item
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.right: parent.right
                 anchors.rightMargin: scaleX(.78)
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        JsLib.loadComponent(stage,"UserSelector.qml")
+                    }
+                }
             }
 
         }

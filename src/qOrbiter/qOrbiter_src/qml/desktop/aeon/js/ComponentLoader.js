@@ -44,7 +44,7 @@ function deleteFilterObjects(toBeDeleted) {
 var detailcomponent
 var detailsprite
 
-function createFileDetails(parent,file) {
+function loadComponent(parent,file) {
 
     detailcomponent = Qt.createComponent("../components/"+file);
     if (detailcomponent.status == Component.Ready) {

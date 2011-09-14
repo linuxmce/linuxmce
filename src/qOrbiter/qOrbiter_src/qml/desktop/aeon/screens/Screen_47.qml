@@ -21,10 +21,10 @@ Item{
             console.log("file",detailsFile,gmediaType)
             if (detailsFile.length) {
                 stage.visible = false
-                JsLib.createFileDetails(mediaParent,detailsFile)
+                JsLib.loadComponent(mediaParent,detailsFile)
             } else {
                 console.log("No details file for media type",gmediaType)
-                JsLib.createFileDetails(mediaParent,'FileDetailsError.qml')
+                JsLib.loadComponent(mediaParent,'FileDetailsError.qml')
             }
         }
     }
@@ -51,9 +51,10 @@ Item{
                     text: "Home"
                     action: 'gotoQScreen("Screen_1.qml")'
                 }
-                //            ListElement {
-                //                text: "Test"
-                //            }
+                ListElement {
+                    text: "Back"
+                    action: 'goBackGrid()'
+                }
             }
         }
 
@@ -257,6 +258,7 @@ Item{
                     onClicked: {
                         mnuGenre.height=0;
                         mnuFile.height=0;
+                        mnuMType.height=0;
                         if (mnuAttr.height) {
                             mnuAttr.height = 0;
                         } else {
@@ -365,6 +367,7 @@ Item{
                     onClicked: {
                         mnuAttr.height=0;
                         mnuFile.height=0;
+                        mnuMType.height=0;
                         if (mnuGenre.height) {
                             mnuGenre.height = 0;
                         } else {
@@ -473,6 +476,7 @@ Item{
                     onClicked: {
                         mnuAttr.height=0;
                         mnuGenre.height=0;
+                        mnuMType.height=0;
                         if (mnuFile.height) {
                             mnuFile.height = 0;
                         } else {
@@ -541,6 +545,115 @@ Item{
                                 onClicked: {
                                     var newStatus = fileformatmodel.setSelectionStatus(name)
                                     recCheckFile.color = newStatus?"white":"transparent"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Media types
+
+        Rectangle{
+            anchors.left: recFile.right
+            anchors.bottom: parent.bottom
+            //width: scaleX(35.23) // 451
+            width: recMType.width
+            height:  scaleY(3.75) // 27
+            color: "black"
+            opacity: .7
+        }
+
+        Rectangle{
+            id: recMType
+            anchors.left: recFile.right
+            anchors.bottom: parent.bottom
+            //width: scaleX(35.23) // 451
+            width: txtMType.width+scaleX(1.5)
+            height:  scaleY(3.75) // 27
+            color: "transparent"
+            Text{
+                id: txtMType
+                text: "Media Types"
+                color: "white"
+                font.family: aeonRss.name;
+                font.pixelSize: parent.height*.6;
+                anchors.centerIn: parent
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: {
+                        mnuAttr.height=0;
+                        mnuGenre.height=0;
+                        mnuFile.height=0;
+                        if (mnuMType.height) {
+                            mnuMType.height = 0;
+                        } else {
+                            if ((fileformatmodel.rowCount()*recMType.height)<scaleY(50)) {
+                                mnuMType.height = genrefilter.rowCount()*scaleY(3.75);
+                            } else {
+                                mnuMType.height = scaleY(50);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Rectangle{
+            id: mnuMType
+            height: 0
+            width: recFile.width*2
+            color: "transparent"
+            //opacity: .7
+            anchors.bottom: recMType.top
+            anchors.left: recMType.left
+            //visible: false
+            Behavior on height {
+                NumberAnimation {
+                    duration: 100
+                    easing.type: Easing.InOutQuad
+                }
+            }
+
+            ListView{
+                anchors.fill: parent
+                clip: true
+                height: scaleY(50)
+                model: mediatypefilter
+                delegate: Rectangle{
+                    height:  recMType.height
+                    width: mnuMType.width
+                    color: "transparent"
+                    Rectangle{
+                        anchors.fill: parent
+                        color: "black"
+                        opacity: .7
+                    }
+                    Row{
+                        anchors.fill: parent
+                        spacing: scaleX(.78)
+                        anchors.leftMargin: scaleX(.78)
+                        Rectangle {
+                            id: recCheckMType
+                            anchors.leftMargin: scaleX(.78)
+                            width: parent.height*.5
+                            height: parent.height*.5
+                            anchors.verticalCenter: parent.verticalCenter
+                            color: status?"white":"transparent"
+                            border.color: "white"
+                        }
+                        Text{
+                            text: name
+                            color: "white"
+                            font.family: aeonRss.name;
+                            font.pixelSize: parent.height*.6;
+                            anchors.verticalCenter: parent.verticalCenter
+                            MouseArea{
+                                anchors.fill: parent
+                                onClicked: {
+                                    var newStatus = mediatypefilter.setSelectionStatus(name)
+                                    recCheckMType.color = newStatus?"white":"transparent"
                                 }
                             }
                         }
