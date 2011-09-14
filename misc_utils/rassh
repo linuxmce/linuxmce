@@ -2,8 +2,8 @@
 
 LmceHome="www.linuxmce.org"
 
-#RA_Servers=(ra.linuxmce.org)
-RA_Servers=(localhost)
+RA_Servers=(ra.linuxmce.org)
+#RA_Servers=(localhost)
 
 # explicitly delete the RA server host keys if present
 # especially useful for root, because fakeroot is useless there
