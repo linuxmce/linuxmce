@@ -39,6 +39,9 @@ function leftMediaBrowser($output,$dbADO) {
 			<td><input type="submit" class="button" name="go" value="'.$TEXT_GO_CONST.'"></td>
 		</tr>
 		<tr class="left_menu">
+			<td colspan="2"><a href="index.php?section=editMediaFile" target="basefrm">Add new file</a></td>
+		</tr>
+		<tr class="left_menu">
 			<td colspan="2"><hr><B>'.$TEXT_JUMP_CONST.'</B></td>
 		</tr>
 		<tr class="left_menu">
