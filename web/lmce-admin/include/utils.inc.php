@@ -1,6 +1,10 @@
 <?php 
 /* @var $dbADO ADOConnection */
 
+// include language files
+includeLangFile('common.lang.php');
+includeLangFile('utils.lang.php');
+
 function eval_buffer($string) {
    ob_start();
    eval("$string[2];");
@@ -984,10 +988,6 @@ function resizeImage_old($source, $destination, $new_width, $new_height,$forcedP
 
 function multi_page($query, $params,$url, $page_no, $art_pagina,$dbADO)
 {
-	// include language files
-	includeLangFile('common.lang.php');
-	includeLangFile('utils.lang.php');
-	
 	$res=$dbADO->Execute($query,$params);
 	$total=$res->RecordCount();
 	$max_pages = $total/$art_pagina;
@@ -1029,10 +1029,6 @@ function multi_page($query, $params,$url, $page_no, $art_pagina,$dbADO)
 }
 function multi_page_format($row, $art_index,$mediadbADO)
 {
-	// include language files
-	includeLangFile('common.lang.php');
-	includeLangFile('utils.lang.php');
-	
 	$queryOtherAttributes='
 		SELECT PK_Attribute, AttributeType.Description AS AttributeName,Name
 		FROM File_Attribute
@@ -1289,10 +1285,6 @@ function formatMySQLDate($mySQLformat,$customFormat)
 
 function displayCriteria($FK_CriteriaParmNesting,$eventHandlerID,$installationID,$dbADO)
 {
-	// include language files
-	includeLangFile('common.lang.php');
-	includeLangFile('utils.lang.php');
-	
 	$out='';
 	$cplArray=array();
 	$resCPL=$dbADO->Execute('SELECT * FROM CriteriaParmList ORDER BY Description ASC');
@@ -1598,10 +1590,6 @@ function getChildsOfWizard($page,$dbADO)
 
 function deviceForScenariosSelector_old($name,$selectedValue,$dbADO,$allowNoValue=1,$extra='')
 {
-	// include language files
-	includeLangFile('common.lang.php');
-	includeLangFile('utils.lang.php');
-
 	$out='
 		<select name="'.$name.'" '.$extra.'>';
 	if($allowNoValue==1){
@@ -1678,10 +1666,6 @@ function pulldownChildsDevice($parentDevice,$selectedValue,$dbADO,$depth,$filter
 
 function getInstallWizardDeviceTemplates($step,$dbADO,$device='',$distro=0,$operatingSystem=0)
 {
-	// include language files
-	includeLangFile('common.lang.php');
-	includeLangFile('utils.lang.php');
-	
 	if($distro!=0){
 		$queryDistro='SELECT * FROM Distro WHERE PK_Distro=?';
 		$resDistro=$dbADO->Execute($queryDistro,array($distro));
@@ -1814,10 +1798,6 @@ function getDevicesFromCategories($categoriesArray,$dbADO)
 
 function commandPulldownForDevice($deviceID,$dbADO)
 {
-	// include language files
-	includeLangFile('common.lang.php');
-	includeLangFile('utils.lang.php');
-
 	$out='';
 	if ($deviceID!=0) {
 		if(cleanInteger(@$_REQUEST['newDevice']!='-300')){
@@ -1859,13 +1839,9 @@ function commandPulldownForDevice($deviceID,$dbADO)
 
 function lightingDevicesTable($cgID,$dbADO)
 {
-	// include language files
-	includeLangFile('common.lang.php');
-	includeLangFile('utils.lang.php');
-	
 	$out='
 		<table cellpadding="2">
-			<tr bgcolor="#DDDDDD">
+			<tr class="tablehead">
 				<td align="center"><B>'.translate('TEXT_DEVICE_CONST').' / '.translate('TEXT_ROOM_CONST').'</B></td>
 				<td align="center"><B>'.translate('TEXT_TYPE_CONST').'</B></td>
 				<td align="center"><B>'.translate('TEXT_UNCHANGED_CONST').'</B></td>
@@ -1980,16 +1956,13 @@ function lightingDevicesTable($cgID,$dbADO)
 function climateDevicesTable($cgID,$dbADO)
 {
 	// include language files
-	includeLangFile('common.lang.php');
-	includeLangFile('utils.lang.php');
 	includeLangFile('scenarioWizard.lang.php');
 	
 	$out='
-		<table>
-			<tr bgcolor="#000000" class="sectionhead">
-				<td colspan="8" align="center"><B>'.translate('TEXT_CLIMATE_SECTION_THERMOSTAT_DEVICES_CONST').'</B></td>
-			</tr>
-			<tr bgcolor="#DDDDDD">
+		<fieldset>
+			<legend>'.translate('TEXT_CLIMATE_SECTION_THERMOSTAT_DEVICES_CONST').'</legend>
+			<table>
+			<tr class="tablehead">
 				<td align="center"><B>'.translate('TEXT_DEVICE_CONST').' / '.translate('TEXT_ROOM_CONST').'</B></td>
 				<td align="center"><B>'.translate('TEXT_TYPE_CONST').'</B></td>
 				<td align="center"><B>'.translate('TEXT_UNCHANGED_CONST').'</B></td>
@@ -1999,7 +1972,7 @@ function climateDevicesTable($cgID,$dbADO)
 				<td align="center"><B>'.translate('TEXT_OFF_CONST').'</B></td>
 				<td align="center"><B>'.translate('TEXT_SET_TEMPERATURE_CONST').'</B></td>
 			</tr>';
-
+			
 	$climateDevicesArray=getValidClimateObjectsArray($_SESSION['installationID'],$dbADO);
 	if(count($climateDevicesArray)==0)
 	$climateDevicesArray[]=0;
@@ -2077,17 +2050,12 @@ function climateDevicesTable($cgID,$dbADO)
 			</tr>';
 	}
 
-
-
-
-
-
-
-	$out.='		<tr><td colspan="8">&nbsp;</td></tr>
-			<tr class="sectionhead">
-				<td colspan="8" align="center"><B>'.translate('TEXT_CLIMATE_SECTION_ONOFF_DEVICES_CONST').'</B></td>
-			</tr>
-			<tr bgcolor="#DDDDDD">
+	$out.='</table></fieldset><br />
+	<fieldset>
+		<legend>'.translate('TEXT_CLIMATE_SECTION_ONOFF_DEVICES_CONST').'</legend>
+		<table>
+			<tr><td colspan="8">&nbsp;</td></tr>
+			<tr class="tablehead">
 				<td align="center"><B>'.translate('TEXT_DEVICE_CONST').' / '.translate('TEXT_ROOM_CONST').'</B></td>
 				<td align="center"><B>'.translate('TEXT_TYPE_CONST').'</B></td>
 				<td align="center"><B>'.translate('TEXT_UNCHANGED_CONST').'</B></td>
@@ -2160,22 +2128,18 @@ function climateDevicesTable($cgID,$dbADO)
 
 
 	if(count($displayedDevices)>0){
-		$out.='
+		$out.='</table></fieldset>
 				<tr>
 					<td colspan="9" align="center"><input type="submit" class="button" name="updateDevices" value="'.translate('TEXT_UPDATE_CONST').'"  > <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'"></td>
 				</tr>';
 	}
-	$out.='</table>
+	$out.='
 			<input type="hidden" name="displayedDevices" value="'.join(',',$displayedDevices).'">';
 	return $out;
 }
 
 function advancedCommandGroupCommandsTable($cgID,$section,$dbADO)
 {
-	// include language files
-	includeLangFile('common.lang.php');
-	includeLangFile('utils.lang.php');
-	
 	$selectCommandsAssigned = "
 		SELECT CommandGroup_Command.*
 		FROM CommandGroup_Command				
@@ -2330,10 +2294,6 @@ function processClimateScenario($cgID,$dbADO)
 
 function processAdvancedScenarios($cgID,$section,$dbADO)
 {
-	// include language files
-	includeLangFile('common.lang.php');
-	includeLangFile('utils.lang.php');
-	
 	$wizard=isset($_REQUEST['wizard'])?(int)$_REQUEST['wizard']:0;
 	$from=@$_REQUEST['from'];
 	$roomID=(int)@$_REQUEST['roomID'];
@@ -2738,10 +2698,6 @@ function SerialPortInfo($parent,$name,$dbADO)
 }
 function serialPortsPulldown($name,$selectedPort,$allowedToModify,$topParent,$dbADO,$deviceID,$cssStyle="")
 {
-	// include language files
-	includeLangFile('common.lang.php');
-	includeLangFile('utils.lang.php');
-
 	$installationID=(int)$_SESSION['installationID'];
 
 	if($topParent==0){
@@ -2782,10 +2738,6 @@ function serialPortsPulldown($name,$selectedPort,$allowedToModify,$topParent,$db
 
 function soundCardPulldown($name,$selectedCard,$allowedToModify,$topParent,$dbADO,$deviceID,$cssStyle="")
 {
-	// include language files
-	includeLangFile('common.lang.php');
-	includeLangFile('utils.lang.php');
-
 	$installationID=(int)$_SESSION['installationID'];
 
 	if($topParent==0){
@@ -3060,10 +3012,6 @@ function getProperties($primaryKey,$table,$properties,$field,$dbADO)
 
 function displayRemotes($mdID,$dbADO,$section)
 {
-	// include language files
-	includeLangFile('common.lang.php');
-	includeLangFile('utils.lang.php');
-	
 	$out='';
 	$remotes=array();
 	
@@ -3165,10 +3113,6 @@ function getFields($tableName,$fields,$dbADO,$filter='',$orderBy='')
 
 function displayReceivers($mdID,$categArray,$dbADO)
 {
-	// include language files
-	includeLangFile('common.lang.php');
-	includeLangFile('utils.lang.php');
-
 	$out='';
 
 	$templateArray=getArrayFromTable('DeviceTemplate','PK_DeviceTemplate','Description',$dbADO,'WHERE FK_DeviceCategory IN ('.join(',',$categArray).')','ORDER BY Description ASC');
@@ -3328,9 +3272,6 @@ function isCritical($deviceID)
 
 function formatDeviceData($deviceID,$DeviceDataArray,$dbADO,$isIPBased=0,$specificFloorplanType=0,$boolJsValidation=0,$default='input',$cssStyle='')
 {
-	includeLangFile('common.lang.php');
-	includeLangFile('utils.lang.php');
-		
 	$jsValidation='';
 	$deviceDataBox='<script type="text/javascript" src="javascript/wz_tooltip/wz_tooltip.js"></script>';
 	$deviceDataBox.='<table cellpadding="2" cellspacing="0" border="0" width="100%">';
@@ -3800,10 +3741,6 @@ function reorderMultiPulldownJs()
 // retrieve a matrix table with all commands and infrared groups
 function getIrGroup_CommandsMatrix($dtID,$InfraredGroupsArray,$userID,$comMethod,$publicADO,$deviceID)
 {
-	// include language files
-	includeLangFile('common.lang.php');
-	includeLangFile('utils.lang.php');
-	
 	$restrictedCommandsArray=array(194=>'Toggle power',192=>'On',193=>'Off',205=>'1',89=>'Vol Up',90=>'Vol down',63=>'Skip Fwd',64=>'Skip Back');
 	$out='';
 	if(count($InfraredGroupsArray)==0){
@@ -3875,10 +3812,6 @@ function getIrGroup_CommandsMatrix($dtID,$InfraredGroupsArray,$userID,$comMethod
 
 function pickDeviceTemplate_old($categoryID, $boolManufacturer,$boolCategory,$boolDeviceTemplate,$returnValue,$defaultAll,$section,$firstColText,$dbADO,$useframes=0,$genericSerialDevicesOnly=0)
 {
-	// include language files
-	includeLangFile('common.lang.php');
-	includeLangFile('utils.lang.php');
-	
 	$redirectUrl='index.php?section='.$section;
 	$from=@$_REQUEST['from'];
 	
@@ -5060,9 +4993,6 @@ function getDD($deviceID,$deviceDataValues,$dbADO)
 }
 
 function editCommandsByWizard($wizard,$section,$commandGroupID,$dbADO){
-	// include language files
-	includeLangFile('common.lang.php');
-	includeLangFile('utils.lang.php');
 	
 	$out='
 		<table align="center">
@@ -5098,10 +5028,6 @@ function editCommandsByWizard($wizard,$section,$commandGroupID,$dbADO){
 }
 
 function irrigationCommandGroupCommandsTable($cgID,$section,$dbADO){
-	// include language files
-	includeLangFile('common.lang.php');
-	includeLangFile('utils.lang.php');
-	
 	$devicesArray=array();
 
 	$pos=0;	
@@ -5159,11 +5085,6 @@ function irrigationCommandGroupCommandsTable($cgID,$section,$dbADO){
 }
 
 function irrigationHTML($devicesArray){
-	// include language files
-	includeLangFile('common.lang.php');
-	includeLangFile('utils.lang.php');
-
-	
 	if(count($devicesArray)==0){
 		return translate('TEXT_NO_IRRIGATION_DEVICES_CONST');
 	}
@@ -5356,10 +5277,6 @@ function parentHasChoices($deviceID,$dbADO){
 
 function deviceForScenariosSelector($name,$selectedValue,$dbADO,$allowNoValue=1,$extra='')
 {
-	// include language files
-	includeLangFile('common.lang.php');
-	includeLangFile('utils.lang.php');
-
 	$out='
 		<select name="'.$name.'" '.$extra.'>';
 	if($allowNoValue==1){
@@ -5465,7 +5382,6 @@ function getSpecificFloorplanType($dcID,$dbADO){
 
 function pickDeviceTemplate($categoryID, $manufacturerID,$returnValue,$defaultAll,$section,$dbADO,$genericSerialDevicesOnly=0){
 	// include language files
-	includeLangFile('common.lang.php');
 	includeLangFile('deviceTemplatePicker.lang.php');
 
 	$from=@$_REQUEST['from'];
@@ -5709,9 +5625,6 @@ function getHierachicalChilds($categoriesHierarchical,$pid,$categoriesArray,$cat
 
 // build a treeview with categories
 function getdTree($categoryID,$dbADO,$restrictToCategory=0){
-	// include language files
-	includeLangFile('common.lang.php');
-
 	$restrictedCategories=array();
 	if($restrictToCategory!=0){
 		$restrictedCategories=getDescendantsForCategory($restrictToCategory,$dbADO);
@@ -6289,10 +6202,6 @@ function set_device_data($deviceID,$deviceData,$value,$dbADO){
 
 function displayScreenSavers($orbiterID,$dbADO)
 {
-	// include language files
-	includeLangFile('common.lang.php');
-	includeLangFile('utils.lang.php');
-
 	$out='';
 
 	$categArray=getDescendantsForCategory($GLOBALS['ScreenSavers'],$dbADO);
@@ -6505,7 +6414,6 @@ function getOrbitersInTheSameRoom($commandGroupID,$dbADO){
 }
 
 function editCommandGroupCommands($commandGroupID,$dbADO){
-	includeLangFile('common.lang.php');
 	$selectCommandsAssigned = "
 		SELECT CommandGroup_Command.*
 		FROM CommandGroup_Command		
@@ -6541,6 +6449,7 @@ function editCommandGroupCommands($commandGroupID,$dbADO){
 				}
 			}
 			$class_color=(($pos%2==0)?'alternate_back':'');
+			if($pos > 0) $out.='<tr><td colspan="3"><hr/></td></tr>';
 			$out.='
 						<tr class="'.$class_color.'">
 							<td valign="top">
@@ -6714,8 +6623,6 @@ if($rowSelectParameters['C_CP_Description']=="") {
 }
 
 function addCommandToCommandGroup($cgID,$dbADO){
-	includeLangFile('common.lang.php');
-	
 	$out='<a name="addDevice"></a>
 					 Device:'.
 	deviceForScenariosSelector('newDevice',cleanInteger(@$_REQUEST['newDevice']),$dbADO,1,'onChange="this.form.action.value=\'form\';this.form.submit();"');

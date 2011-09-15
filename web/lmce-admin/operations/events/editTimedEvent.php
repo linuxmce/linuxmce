@@ -1,8 +1,8 @@
 <?php
 function editTimedEvent($output,$dbADO) {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/timedEvents.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('timedEvents.lang.php');
 	include('eventUtils.inc.php');
 		
 	/* @var $dbADO ADOConnection */
@@ -11,8 +11,8 @@ function editTimedEvent($output,$dbADO) {
 	$action = isset($_REQUEST['action'])?cleanString($_REQUEST['action']):'form';
 	$lastAction = isset($_REQUEST['lastAction'])?cleanString($_REQUEST['lastAction']):'';
 	$eventHandlerID=$_REQUEST['ehID'];
-	$dayNamesArray= array(1=>$TEXT_MONDAY_CONST, 2=>$TEXT_TUESDAY_CONST, 3=>$TEXT_WENSDAY_CONST, 4=>$TEXT_THURSDAY_CONST, 5=>$TEXT_FRIDAY_CONST, 6=>$TEXT_SATURDAY_CONST, 7=>$TEXT_SUNDAY_CONST);
-	$monthNamesArray = array(1=>$TEXT_JANUARY_CONST, 2=>$TEXT_FEBRUARY_CONST, 3=>$TEXT_MARCH_CONST, 4=>$TEXT_APRIL_CONST, 5=>$TEXT_MAY_CONST, 6=>$TEXT_JUNE_CONST, 7=>$TEXT_JULY_CONST, 8=>$TEXT_AUGUST_CONST, 9=>$TEXT_SEPTEMBER_CONST, 10=>$TEXT_OCTOBER_CONST, 11=>$TEXT_NOVEMBER_CONST, 12=>$TEXT_DECEMBER_CONST); 	
+	$dayNamesArray= array(1=>translate('TEXT_MONDAY_CONST'), 2=>translate('TEXT_TUESDAY_CONST'), 3=>translate('TEXT_WENSDAY_CONST'), 4=>translate('TEXT_THURSDAY_CONST'), 5=>translate('TEXT_FRIDAY_CONST'), 6=>translate('TEXT_SATURDAY_CONST'), 7=>translate('TEXT_SUNDAY_CONST'));
+	$monthNamesArray = array(1=>translate('TEXT_JANUARY_CONST'), 2=>translate('TEXT_FEBRUARY_CONST'), 3=>translate('TEXT_MARCH_CONST'), 4=>translate('TEXT_APRIL_CONST'), 5=>translate('TEXT_MAY_CONST'), 6=>translate('TEXT_JUNE_CONST'), 7=>translate('TEXT_JULY_CONST'), 8=>translate('TEXT_AUGUST_CONST'), 9=>translate('TEXT_SEPTEMBER_CONST'), 10=>translate('TEXT_OCTOBER_CONST'), 11=>translate('TEXT_NOVEMBER_CONST'), 12=>translate('TEXT_DECEMBER_CONST')); 	
 	$wizard=isset($_REQUEST['wizard'])?(int)$_REQUEST['wizard']:3;
 	$section=$_REQUEST['section'];
 	
@@ -32,7 +32,7 @@ function editTimedEvent($output,$dbADO) {
 		$objID=$_REQUEST['cgcID'];
 		$canModifyInstallation = getUserCanModifyInstallation($_SESSION['userID'],$installationID,$dbADO);
 		if(!$canModifyInstallation){
-			header("Location: index.php?section=editTimedEvent&error=$TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST");
+			header("Location: index.php?section=editTimedEvent&error=".translate('TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST'));
 			exit();
 		}
 		$deleteObjFromDevice = 'DELETE FROM CommandGroup_Command WHERE PK_CommandGroup_Command = ?';
@@ -43,9 +43,9 @@ function editTimedEvent($output,$dbADO) {
 		
 		reloadEventPlugin($installationID, $dbADO);
 
-		$_REQUEST['msg']=$TEXT_COMMAND_DELETED_NOTIFICATION_CONST;
+		$_REQUEST['msg']=translate('TEXT_COMMAND_DELETED_NOTIFICATION_CONST');
 	}
-	
+
 	if ($action=='form') {
 		
 		$out.='
@@ -70,7 +70,7 @@ function editTimedEvent($output,$dbADO) {
 				case 0:
 					intervalNr=parseInt(document.editTimedEvent.intervalNumber.value);
 					if(isNaN(intervalNr) || intervalNr<0){
-						alert("'.$TEXT_ERROR_INVALID_INTERVAL_NUMBER_CONST.'");
+						alert("'.translate('TEXT_ERROR_INVALID_INTERVAL_NUMBER_CONST').'");
 						document.editTimedEvent.intervalNumber.focus();
 						return false;
 					}
@@ -81,7 +81,7 @@ function editTimedEvent($output,$dbADO) {
 		
 					for(i=0;i<timeValues.length;i++){
 						if(!timeValues[i].checkTimeFormat()){
-							alert("'.$TEXT_ERROR_INVALID_TIME_FORMAT_CONST.'");
+							alert("'.translate('TEXT_ERROR_INVALID_TIME_FORMAT_CONST').'");
 							document.editTimedEvent.dayOfWeekTime.focus();
 							return false;
 						}
@@ -93,7 +93,7 @@ function editTimedEvent($output,$dbADO) {
 
 					for(i=0;i<daysValues.length;i++){
 						if(isNaN(parseInt(daysValues[i])) || parseInt(daysValues[i])<0 || parseInt(daysValues[i]>30)){
-							alert("'.$TEXT_ERROR_INVALID_DAY_NUMBER_CONST.'");
+							alert("'.translate('TEXT_ERROR_INVALID_DAY_NUMBER_CONST').'");
 		
 							document.editTimedEvent.dayOfMonths.focus();
 							return false;
@@ -105,7 +105,7 @@ function editTimedEvent($output,$dbADO) {
 
 					for(i=0;i<timeValues.length;i++){
 						if(!timeValues[i].checkTimeFormat()){
-							alert("'.$TEXT_ERROR_INVALID_TIME_FORMAT_CONST.'");
+							alert("'.translate('TEXT_ERROR_INVALID_TIME_FORMAT_CONST').'");
 							document.editTimedEvent.dayOfMonthTime.focus();
 							return false;
 						}
@@ -113,7 +113,7 @@ function editTimedEvent($output,$dbADO) {
 				break;
 				case 3:
 					if(document.editTimedEvent.absoluteDate.value.checkDateFormat()!=0){
-						alert("'.$TEXT_ERROR_INVALID_DATE_FORMAT_CONST.'");
+						alert("'.translate('TEXT_ERROR_INVALID_DATE_FORMAT_CONST').'");
 						document.editTimedEvent.absoluteDate.focus();
 						return false;
 					}
@@ -122,7 +122,7 @@ function editTimedEvent($output,$dbADO) {
 
 					for(i=0;i<timeValues.length;i++){
 						if(!timeValues[i].checkTimeFormat()){
-							alert("'.$TEXT_ERROR_INVALID_TIME_FORMAT_CONST.'");
+							alert("'.translate('TEXT_ERROR_INVALID_TIME_FORMAT_CONST').'");
 							document.editTimedEvent.absoluteTime.focus();
 							return false;
 						}
@@ -145,13 +145,13 @@ function editTimedEvent($output,$dbADO) {
 		<input type="hidden" name="ehID" value="'.$eventHandlerID.'">
 		<input type="hidden" name="oldWizard" value="'.$wizard.'">
 		
-		<a href="index.php?section=timedEvents">'.$TEXT_BACK_CONST.'</a>
+		<a href="index.php?section=timedEvents">'.translate('TEXT_BACK_CONST').'</a>
 		<table border="0" align="center" width="700">
 		';
 		$out.='
 			<tr>
-				<td width="200"><input type="radio" name="timedEventType" value="1" '.(($timedEventType==1)?'checked':'').' onClick="showOptions(1);"> <B>'.$TEXT_INTERVAL_BASED_CONST.':</B></td>
-				<td>'.$TEXT_INTERVAL_BASED_TEXT_CONST.'</td>
+				<td width="200"><input type="radio" name="timedEventType" value="1" '.(($timedEventType==1)?'checked':'').' onClick="showOptions(1);"> <B>'.translate('TEXT_INTERVAL_BASED_CONST').':</B></td>
+				<td>'.translate('TEXT_INTERVAL_BASED_TEXT_CONST').'</td>
 			</tr>	
 			<tr>
 				<td><input type="radio" name="timedEventType" value="2" '.(($timedEventType==2)?'checked':'').' onClick="showOptions(2);"> <B>Day of week based:</B></td>
@@ -259,7 +259,7 @@ function editTimedEvent($output,$dbADO) {
 				<td>If you would like to use this event as an alarm clock, choose what rooms this event should act as an alarm clock in. It will appear on the Orbiters\' sleeping menu and you can change the time on the Orbiter.</td>
 			</tr>
 			<tr bgcolor="#E7E7E7">
-				<td colspan="2" align="center"><input type="submit" class="button" name="continue" value="Update"> <input type="reset" class="button" name="cancelBtn" value="'.$TEXT_CANCEL_CONST.'"></td>
+				<td colspan="2" align="center"><input type="submit" class="button" name="continue" value="Update"> <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'"></td>
 			</tr>
 			<tr>
 				<td colspan="2" align="center">Specify above when you want Pluto to do something, and below what you want Pluto to do by choosing a device, and then a command to send to that device.</td>
@@ -421,8 +421,8 @@ function editTimedEvent($output,$dbADO) {
 		header('Location: index.php?section=editTimedEvent&ehID='.$eventHandlerID.'&msg=The event handler was updated');
 	}
 
-	$output->setMenuTitle($TEXT_TIMED_EVENTS_CONST.' |');
-	$output->setPageTitle($TEXT_EDIT_TIMED_EVENT_CONST.' #'.$eventHandlerID);
+	$output->setMenuTitle(translate('TEXT_TIMED_EVENTS_CONST').' |');
+	$output->setPageTitle(translate('TEXT_EDIT_TIMED_EVENT_CONST').' #'.$eventHandlerID);
 	$output->setNavigationMenu(array("Timed Events"=>'index.php?section=timedEvents'));
 	$output->setBody($out);
 	$output->setTitle(APPLICATION_NAME);			

@@ -1,8 +1,8 @@
 <?php
 function advancedEvents($output,$dbADO) {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/advancedEvents.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('advancedEvents.lang.php');
 	include('eventUtils.inc.php');
 		
 	/* @var $dbADO ADOConnection */
@@ -52,7 +52,8 @@ function advancedEvents($output,$dbADO) {
 
 			reloadEventPlugin($installationID, $dbADO);
 			
-			$_REQUEST['msg']=$TEXT_THE_EVENT_WAS_DELETED_CONST;
+			$_REQUEST['msg']=translate('TEXT_THE_EVENT_WAS_DELETED_CONST');
+			$_REQUEST['msg']=translate('TEXT_THE_EVENT_WAS_DELETED_CONST');
 		}
 	}
 	if ($action=='form') {
@@ -66,14 +67,14 @@ function advancedEvents($output,$dbADO) {
 		
 		<table border="0" align="center" cellpading="3">
 			<tr class="tablehead">
-				<td align="center"><B>'.$TEXT_EVENT_CONST.'</B></td>
-				<td align="center"><B>'.$TEXT_DESCRIPTION_CONST.'</B></td>
-				<td align="center"><B>'.$TEXT_FK_EVENT_CONST.'</B></td>
-				<td align="center"><B>'.$TEXT_TIMED_EVENT_CONST.'</B></td>
-				<td align="center"><B>'.$TEXT_TEMPLATE_CONST.'</B></td>
-				<td align="center"><B>'.$TEXT_CRITERIA_CONST.'</B></td>
-				<td align="center"><B>'.$TEXT_COMMANDS_CONST.'</B></td>
-				<td align="center"><B>'.$TEXT_ACTION_CONST.'</B></td>
+				<td align="center"><B>'.translate('TEXT_EVENT_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_DESCRIPTION_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_FK_EVENT_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_TIMED_EVENT_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_TEMPLATE_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_CRITERIA_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_COMMANDS_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_ACTION_CONST').'</B></td>
 			</tr>
 		';
 		$queryEvents='
@@ -104,16 +105,16 @@ function advancedEvents($output,$dbADO) {
 					<td>'.$rowEvents['EventDescription'].'</td>
 					<td>'.@$timedEventArray[$rowEvents['TimedEvent']].'</td>
 					<td>'.$rowEvents['TemplateDescription'].'</td>
-					<td align="center"><a href="index.php?section=editCriteria&ehID='.$rowEvents['PK_EventHandler'].'">'.$TEXT_EDIT_CONST.'</a></td>
-					<td align="center"><a href="index.php?section=editEventCommands&ehID='.$rowEvents['PK_EventHandler'].'">'.$TEXT_EDIT_CONST.'</a></td>
-					<td align="center"><a href="#" onClick="if(confirm(\'Are you sure you want to delete the event?\'))self.location=\'index.php?section=advancedEvents&dID='.$rowEvents['PK_EventHandler'].'\'">'.$TEXT_DELETE_CONST.'</a></td>
+					<td align="center"><a href="index.php?section=editCriteria&ehID='.$rowEvents['PK_EventHandler'].'">'.translate('TEXT_EDIT_CONST').'</a></td>
+					<td align="center"><a href="index.php?section=editEventCommands&ehID='.$rowEvents['PK_EventHandler'].'">'.translate('TEXT_EDIT_CONST').'</a></td>
+					<td align="center"><a href="#" onClick="if(confirm(\'Are you sure you want to delete the event?\'))self.location=\'index.php?section=advancedEvents&dID='.$rowEvents['PK_EventHandler'].'\'">'.translate('TEXT_DELETE_CONST').'</a></td>
 				</tr>';
 		}
-		$saveBtns=(count($displayedEH)!=0)?'<input type="submit" class="button" name="update" value="'.$TEXT_SAVE_CONST.'"> <input type="reset" class="button" name="cancelBtn" value="'.$TEXT_CANCEL_CONST.'">':'';
+		$saveBtns=(count($displayedEH)!=0)?'<input type="submit" class="button" name="update" value="'.translate('TEXT_SAVE_CONST').'"> <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'">':'';
 		
 		$out.='
 			<tr bgcolor="#E7E7E7">
-				<td colspan="8" align="center"><input type="button" class="button" name="addAdvancedEvent" value="'.$TEXT_CREATE_ADVANCED_EVENT_CONST.'" onClick="self.location=\'index.php?section=createAdvancedEvent\'"> '.$saveBtns.'</td>
+				<td colspan="8" align="center"><input type="button" class="button" name="addAdvancedEvent" value="'.translate('TEXT_CREATE_ADVANCED_EVENT_CONST').'" onClick="self.location=\'index.php?section=createAdvancedEvent\'"> '.$saveBtns.'</td>
 			</tr>
 			<tr>
 				<td colspan="8">&nbsp;</td>
@@ -127,7 +128,7 @@ function advancedEvents($output,$dbADO) {
 	} else {
 		// processing area
 		if(!$canModifyInstallation){
-			header("Location: index.php?section=advancedEvents&error=$TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST");
+			header("Location: index.php?section=advancedEvents&error=".translate('TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST'));
 			exit();
 		}
 		$displayedEHArray=explode(',',$_POST['displayedEH']);
@@ -138,14 +139,14 @@ function advancedEvents($output,$dbADO) {
 		
 		reloadEventPlugin($installationID, $dbADO);
 
-		header("Location: index.php?section=advancedEvents&msg=$TEXT_THE_EVENT_DESCRIPTION_WAS_UPDATED_CONST");
+		header("Location: index.php?section=advancedEvents&msg=".translate('TEXT_THE_EVENT_DESCRIPTION_WAS_UPDATED_CONST'));
 	}
 
-	$output->setMenuTitle($TEXT_ADVANCED_CONST.' |');
-	$output->setPageTitle($TEXT_ADVANCED_EVENTS_CONST);
-	$output->setNavigationMenu(array($TEXT_ADVANCED_EVENTS_CONST=>'index.php?section=advancedEvents'));	
+	$output->setMenuTitle(translate('TEXT_ADVANCED_CONST').' |');
+	$output->setPageTitle(translate('TEXT_ADVANCED_EVENTS_CONST'));
+	$output->setNavigationMenu(array(translate('TEXT_ADVANCED_EVENTS_CONST')=>'index.php?section=advancedEvents'));	
 	$output->setBody($out);
-	$output->setTitle(APPLICATION_NAME.' :: '.$TEXT_ADVANCED_EVENTS_CONST);			
+	$output->setTitle(APPLICATION_NAME.' :: '.translate('TEXT_ADVANCED_EVENTS_CONST'));			
 	$output->output();
 }
 ?>

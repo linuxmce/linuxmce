@@ -1,8 +1,8 @@
 <?php
 function timedEvents($output,$dbADO) {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/timedEvents.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('timedEvents.lang.php');
 	include('eventUtils.inc.php');
 	
 	/* @var $dbADO ADOConnection */
@@ -45,7 +45,7 @@ function timedEvents($output,$dbADO) {
 			$deleteEventHandler='DELETE FROM EventHandler WHERE PK_EventHandler=?';
 			$dbADO->Execute($deleteEventHandler,$eventHandlerID);
 			
-			$_REQUEST['msg']=$TEXT_DELETE_EVENT_NOTIFICATION_CONST;
+			$_REQUEST['msg']=translate('TEXT_DELETE_EVENT_NOTIFICATION_CONST');
 			reloadEventPlugin($installationID, $dbADO);
 		}
 	}
@@ -60,7 +60,7 @@ function timedEvents($output,$dbADO) {
 		
 		<table border="0" align="center" cellpading="3">
 			<tr class="tablehead">
-				<td align="center"><B>'.$TEXT_DESCRIPTION_CONST.'</B></td>
+				<td align="center"><B>'.translate('TEXT_DESCRIPTION_CONST').'</B></td>
 				<td align="center">&nbsp;</td>
 			</tr>
 		';
@@ -72,7 +72,7 @@ function timedEvents($output,$dbADO) {
 		if($resEvents->RecordCount()==0){
 			$out.='
 				<tr>
-					<td colspan="3">'.$TEXT_NO_RECORDS_CONST.'</td>
+					<td colspan="3">'.translate('TEXT_NO_RECORDS_CONST').'</td>
 				</tr>';
 		}
 		$lineCount=0;
@@ -82,9 +82,9 @@ function timedEvents($output,$dbADO) {
 				<tr bgcolor="'.(($lineCount%2==0)?'#E7E7E7':'#FFFFFF').'">
 					<td align="center">'.$rowEvents['Description'].'</td>
 					<td align="center">
-						<a href="index.php?section=advancedEvents&highligh='.$rowEvents['PK_EventHandler'].'">'.$TEXT_ADVANCED_CONST.'</a>
-						<a href="index.php?section=editTimedEvent&ehID='.$rowEvents['PK_EventHandler'].'">'.$TEXT_EDIT_CONST.'</a>
-						<a href="#" onClick="if(confirm(\'Are you sure you want to delete the event?\'))self.location=\'index.php?section=timedEvents&dID='.$rowEvents['PK_EventHandler'].'\'">'.$TEXT_DELETE_CONST.'</a></td>
+						<a href="index.php?section=advancedEvents&highligh='.$rowEvents['PK_EventHandler'].'">'.translate('TEXT_ADVANCED_CONST').'</a>
+						<a href="index.php?section=editTimedEvent&ehID='.$rowEvents['PK_EventHandler'].'">'.translate('TEXT_EDIT_CONST').'</a>
+						<a href="#" onClick="if(confirm(\'Are you sure you want to delete the event?\'))self.location=\'index.php?section=timedEvents&dID='.$rowEvents['PK_EventHandler'].'\'">'.translate('TEXT_DELETE_CONST').'</a></td>
 				</tr>';
 		}
 		$out.='
@@ -92,41 +92,41 @@ function timedEvents($output,$dbADO) {
 				<td colspan="3">&nbsp;</td>
 			</tr>
 			<tr>
-				<td><B>'.$TEXT_NEW_TIMED_EVENT_DESCRIPTION_CONST.'</B>:</td>
+				<td><B>'.translate('TEXT_NEW_TIMED_EVENT_DESCRIPTION_CONST').'</B>:</td>
 				<td colspan="2"><input type="text" name="Description" value=""></td>
 			</tr>	
 			<tr>
-				<td><input type="radio" name="timedEventType" value="1" checked> <B>'.$TEXT_INTERVAL_BASED_CONST.':</B></td>
-				<td colspan="2">'.$TEXT_INTERVAL_BASED_TEXT_CONST.'</td>
+				<td><input type="radio" name="timedEventType" value="1" checked> <B>'.translate('TEXT_INTERVAL_BASED_CONST').':</B></td>
+				<td colspan="2">'.translate('TEXT_INTERVAL_BASED_TEXT_CONST').'</td>
 			</tr>	
 			<tr>
-				<td><input type="radio" name="timedEventType" value="2"> <B>'.$TEXT_DAY_OF_WEEK_BASED_CONST.':</B></td>
-				<td colspan="2">'.$TEXT_DAY_OF_WEEK_BASED_TEXT_CONST.'</td>
+				<td><input type="radio" name="timedEventType" value="2"> <B>'.translate('TEXT_DAY_OF_WEEK_BASED_CONST').':</B></td>
+				<td colspan="2">'.translate('TEXT_DAY_OF_WEEK_BASED_TEXT_CONST').'</td>
 			</tr>		
 			<tr>
-				<td><input type="radio" name="timedEventType" value="3"> <B>'.$TEXT_DAY_OF_MONTH_BASED_CONST.':</B></td>
-				<td colspan="2">'.$TEXT_DAY_OF_MONTH_BASED_TEXT_CONST.'</td>
+				<td><input type="radio" name="timedEventType" value="3"> <B>'.translate('TEXT_DAY_OF_MONTH_BASED_CONST').':</B></td>
+				<td colspan="2">'.translate('TEXT_DAY_OF_MONTH_BASED_TEXT_CONST').'</td>
 			</tr>		
 			<tr>
-				<td><input type="radio" name="timedEventType" value="4"> <B>'.$TEXT_ABSOLUTE_CONST.':</B></td>
-				<td colspan="2">'.$TEXT_ABSOLUTE_TEXT_CONST.'</td>
+				<td><input type="radio" name="timedEventType" value="4"> <B>'.translate('TEXT_ABSOLUTE_CONST').':</B></td>
+				<td colspan="2">'.translate('TEXT_ABSOLUTE_TEXT_CONST').'</td>
 			</tr>
 			<tr>
-				<td colspan="3" align="center"><input type="submit" class="button" name="continue" value="Add"> <input type="reset" class="button" name="cancelBtn" value="'.$TEXT_CANCEL_CONST.'"></td>
+				<td colspan="3" align="center"><input type="submit" class="button" name="continue" value="'.translate('TEXT_ADD_CONST').'"> <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'"></td>
 			</tr>';
 		$out.='
 		</table>
 		</form>
 		<script>
 		 	var frmvalidator = new formValidator("timedEvents");			
- 			frmvalidator.addValidation("Description","req","'.$TEXT_VALIDATION_DESCRIPTION_CONST.'");
+ 			frmvalidator.addValidation("Description","req","'.translate('TEXT_VALIDATION_DESCRIPTION_CONST').'");
 		</script>		
 		';
 		
 	} else {
 		// processing area
 		if(!$canModifyInstallation){
-			header("Location: index.php?section=eventHandler&error=$TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST");
+			header("Location: index.php?section=eventHandler&error=".translate('TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST'));
 			exit();
 		}
 
@@ -159,11 +159,11 @@ function timedEvents($output,$dbADO) {
 		header("Location: index.php?section=editTimedEvent&ehID=".$ehID);
 	}
 
-	$output->setMenuTitle($TEXT_WIZARD_CONST.' |');
-	$output->setPageTitle($TEXT_TIMED_EVENTS_CONST);
-	$output->setNavigationMenu(array($TEXT_TIMED_EVENTS_CONST=>'index.php?section=timedEvents'));
+	$output->setMenuTitle(translate('TEXT_WIZARD_CONST').' |');
+	$output->setPageTitle(translate('TEXT_TIMED_EVENTS_CONST'));
+	$output->setNavigationMenu(array(translate('TEXT_TIMED_EVENTS_CONST')=>'index.php?section=timedEvents'));
 	$output->setBody($out);
-	$output->setTitle(APPLICATION_NAME.' :: '.$TEXT_TIMED_EVENTS_CONST);			
+	$output->setTitle(APPLICATION_NAME.' :: '.translate('TEXT_TIMED_EVENTS_CONST'));			
 	$output->output();
 }
 ?>
