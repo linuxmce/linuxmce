@@ -22,11 +22,7 @@ export PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ###########################################################
 
 Setup_Logfile () {
-if [ -f ${log_file} ]; then
-	#zero out an existing file
-	echo > ${log_file}
-	echo "`date` - Setup has run before, clearing old log file at ${log_file}"
-else
+if [ ! -f ${log_file} ]; then
 	touch ${log_file}
 	if [ $? = 1 ]; then
 		echo "`date` - Unable to write to ${log_file} - re-run script as root"
@@ -34,7 +30,10 @@ else
 	else
 		echo "`date` - Logging initiatilized to ${log_file}"
 	fi
-	break
+else
+	#zero out an existing file
+	echo > ${log_file}
+	echo "`date` - Setup has run before, clearing old log file at ${log_file}"
 fi
 }
 
