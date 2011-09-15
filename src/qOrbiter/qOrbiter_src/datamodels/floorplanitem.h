@@ -13,11 +13,11 @@ class FloorPlanItem : public QObject
     enum Roles {
         InstallationRole = Qt::UserRole+1,
         DescriptionRole =Qt::UserRole+2,
-        PageRole= Qt::DisplayRole+3,
-        IconRole = Qt::DisplayRole+4,
+        PageRole= Qt::UserRole+3,
+        IconRole = Qt::UserRole+4,
         FloorPlanImageRole = Qt::UserRole+5,
-        IconImageRole = Qt::DisplayRole+6,
-        IdRole = Qt::DisplayRole+7
+        IconImageRole = Qt::UserRole+6,
+        IdRole = Qt::UserRole+7
     };
 
 public:

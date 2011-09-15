@@ -1,8 +1,10 @@
 #include "floorplanitem.h"
+#include <QDebug>
 FloorPlanItem::FloorPlanItem(QString &installation, QString &description,  int &page,  QString &icon, QImage fpImage,  QImage &icoimg, QObject *parent) :
     m_installation(installation), m_description(description), m_page(page), m_iconPath(icon), m_floorplanImage(fpImage), m_iconImage(icoimg)
 {
-    m_ident = installation + "-" + page ;
+    m_ident = installation + "-" + QString::number(page) ;
+
 }
 
 QHash<int, QByteArray> FloorPlanItem::roleNames() const
@@ -21,6 +23,7 @@ QHash<int, QByteArray> FloorPlanItem::roleNames() const
 
 QVariant FloorPlanItem::data(int role) const
 {
+    qDebug() << "Finding role";
   switch(role) {
   case InstallationRole:
     return installation();

@@ -1,6 +1,7 @@
 #include "floorplanmodel.h"
+#include <QDebug>
 FloorPlanModel::FloorPlanModel(FloorPlanItem* prototype, QObject *parent) :
-    QAbstractItemModel(parent), m_prototype(prototype)
+    QAbstractListModel(parent), m_prototype(prototype)
 {
     setRoleNames(m_prototype->roleNames());
      qRegisterMetaType<QModelIndex>("QModelIndex");
@@ -14,6 +15,7 @@ int FloorPlanModel::rowCount(const QModelIndex &parent) const
 
 QVariant FloorPlanModel::data(const QModelIndex &index, int role) const
 {
+
   if(index.row() < 0 || index.row() >= m_list.size())
     return QVariant();
   return m_list.at(index.row())->data(role);
@@ -133,6 +135,7 @@ FloorPlanItem * FloorPlanModel::currentRow()
     return item;
 }
 
+/*
 QModelIndex FloorPlanModel::index(int row, int column, const QModelIndex &parent) const
 {
 }
@@ -145,3 +148,4 @@ int FloorPlanModel::columnCount(const QModelIndex &parent) const
 {
 
 }
+*/

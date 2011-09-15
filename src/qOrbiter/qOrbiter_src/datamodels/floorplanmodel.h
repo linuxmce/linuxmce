@@ -1,11 +1,11 @@
 #ifndef FLOORPLANMODEL_H
 #define FLOORPLANMODEL_H
 
-#include <QAbstractItemModel>
+#include <QAbstractListModel>
 #include <datamodels/floorplanitem.h>
 #include <QModelIndex>
 
-class FloorPlanModel : public QAbstractItemModel
+class FloorPlanModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
@@ -21,17 +21,17 @@ public:
     FloorPlanItem* find(const QString &id) const;
     QModelIndex indexFromItem( const FloorPlanItem* item) const;
     FloorPlanItem* currentRow();
-    void handleItemChange();
+
     void clear();
 
-    QModelIndex index(int row, int column, const QModelIndex &parent) const ;
-    QModelIndex parent(const QModelIndex &child) const;
-    int columnCount(const QModelIndex &parent) const;
+   // QModelIndex index(int row, int column, const QModelIndex &parent) const ;
+  //  QModelIndex parent(const QModelIndex &child) const;
+  //  int columnCount(const QModelIndex &parent) const;
 
 signals:
 
 public slots:
-
+ void handleItemChange();
 private:
     FloorPlanItem* m_prototype;
     QList<FloorPlanItem*> m_list;

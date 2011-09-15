@@ -663,7 +663,7 @@ bool qorbiterManager::getConf(int pPK_Device)
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomClimate", roomClimate);               //curent room climate model
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);               //curret room telecom model
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);             //current room security model
-    qorbiterUIwin->rootContext()->setContextProperty("floorplans", floorplans);
+    qorbiterUIwin->rootContext()->setContextProperty("floorplan", floorplans);
     qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
     qorbiterUIwin->rootContext()->setContextProperty("iPK_Device", QVariant::fromValue(iPK_Device));  //orbiter device number
     qorbiterUIwin->rootContext()->setContextProperty("currentroom", m_lRooms->sdefault_Ea);           //custom room list item provided
