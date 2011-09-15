@@ -138,29 +138,35 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 			$MediaType = $rowFile['EK_MediaType'];
 			$FK_MediaSubType = $rowFile['FK_MediaSubType'];
 			$FK_FileFormat = $rowFile['FK_FileFormat'];
-		}
-		$out.='
+			$out.='
 			<tr bgColor="#EEEEEE">
 				<td><B>'.$TEXT_DATE_ADDED_CONST.':</B></td>
 				<td>'.$rowFile['DateAdded'].'</td>
-			</tr>		
+			</tr>	        ';
+		}
+		$out.='
 			<tr bgColor="#EEEEEE">
 				<td><B>'.$TEXT_FILE_CONST.':</B></td>
 				<td><input type="text" name="filename" value="'.htmlentities($Filename,ENT_COMPAT,'UTF-8').'" size="55"></td>
-			</tr>
+			</tr>';
+		if (!empty($fileID)) {
+			$out.='
 			<tr>
 				<td>&nbsp;</td>
-				<td align="right"><input type="button" class="button" name="delete" value="'.$TEXT_DELETE_FILE_CONST.'" onClick="if(confirm(\''.$TEXT_DELETE_FILE_CONFIRMATION_CONST.'\')){document.editMediaFile.action.value=\'del\';document.editMediaFile.submit();}">';
-		if (!empty($fileID) && $rowFile['EK_MediaType'] != 43) { // 43 = streaming audio, not possible to move
-			$out.=' <input type="button" class="button" name="moveFile" value="Move file to other directory" onClick="windowOpen(\'index.php?section=moveFile&fileID='.$fileID.'&filePath='.urlencode(stripslashes($Path).'/'.$Filename).'\',\'width=500,height=400,toolbar=1,scrollbars=1,resizable=1\');">';
-		}			
-		$out.='</td>
+				<td align="right">
+                                        <input type="button" class="button" name="delete" value="'.$TEXT_DELETE_FILE_CONST.'" onClick="if(confirm(\''.$TEXT_DELETE_FILE_CONFIRMATION_CONST.'\')){document.editMediaFile.action.value=\'del\';document.editMediaFile.submit();}">';
+			if ($rowFile['EK_MediaType'] != 43) { // 43 = streaming audio, not possible to move
+				$out.=' <input type="button" class="button" name="moveFile" value="Move file to other directory" onClick="windowOpen(\'index.php?section=moveFile&fileID='.$fileID.'&filePath='.urlencode(stripslashes($Path).'/'.$Filename).'\',\'width=500,height=400,toolbar=1,scrollbars=1,resizable=1\');">';
+			}
+			$out.='</td>
 			</tr>';
-		if (!empty($fileID) && $rowFile['EK_MediaType'] != 43) { // 43 = streaming audio, uses only filename
+		}
+
+		if ($rowFile['EK_MediaType'] != 43) { // 43 = streaming audio, uses only filename
 			$out.='
 			<tr bgcolor="#EBEFF9">
 				<td><B>'.$TEXT_LOCATION_CONST.':</B></td>
-				<td><input type="text" name="Path" value="'.htmlentities(stripslashes($Path),ENT_COMPAT,'UTF-8').'" size="55">'.((file_exists($Path.'/'.$Filename)?'<img src=include/images/sync.gif align=middle border=0>':'<img src=include/images/db.gif align=middle border=0>')).'</td>
+				<td><input type="text" name="Path" value="'.htmlentities(stripslashes($Path),ENT_COMPAT,'UTF-8').'" size="55">'.(!empty($fileID) ? (file_exists($Path.'/'.$Filename)?'<img src=include/images/sync.gif align=middle border=0>':'<img src=include/images/db.gif align=middle border=0>') : '').'</td>
 			</tr>';
 		}
 		
@@ -370,7 +376,7 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 			$type=(int)$_POST['type'];
 			$fileName=cleanString(@$_POST['filename']);
 			$newFileID = $mediadbADO->GetOne("SELECT MAX(PK_File) AS Max_PK_File FROM File") + 1;
-			$mediadbADO->Execute("INSERT INTO File (PK_File,Filename,Path,EK_MediaType) values (?,?,'',?)",array($newFileID,$fileName,$type));
+			$mediadbADO->Execute("INSERT INTO File (PK_File,Filename,Path,EK_MediaType,DateAdded) values (?,?,'',?,CURRENT_TIMESTAMP())",array($newFileID,$fileName,$type));
 			// and let the update action below set the rest of the values
 			$action = 'update';
 			$fileID = $newFileID;
