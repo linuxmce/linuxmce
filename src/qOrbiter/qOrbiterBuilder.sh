@@ -16,11 +16,12 @@ buildoutput=$srcroot/qOrbiter/build-output
 config=CONFIG+=debug CONFIG+=for_desktop
 config="CONFIG+=debug CONFIG+=for_desktop"
 
-mkdir -p $buildoutput
+# mkdir -p $buildoutput
 #/qOrbiter_src
 
 echo "Starting the QMake process"
 pushd $buildenv
+buildoutput=$projectdir
 $buildenv/qmake -makefile -nocache $projectdir/qOrbiter_src.pro -o $buildoutput/Makefile -r -spec $spec $config
 if  ! [ -f $buildoutput/Makefile ] ; then
 	echo "$buildoutput/Makefile does not exist - Aborting!"
