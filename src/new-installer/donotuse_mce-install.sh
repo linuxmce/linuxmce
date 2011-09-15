@@ -34,6 +34,7 @@ else
 	else
 		echo "`date` - Logging initiatilized to ${log_file}"
 	fi
+	break
 fi
 }
 
@@ -575,6 +576,23 @@ echo "$PlutoConf" > /etc/pluto.conf
 chmod 777 /etc/pluto.conf &>/dev/null
 }
 
+Setup_NIS () {
+# Put a temporary nis config file that will prevent ypbind to start
+# Temporary NIS setup, disabling NIS server and client.
+StatsMessage "Temporarily modifying the NIS configuration file disabling the NIS server and client"
+echo "
+NISSERVER=false
+NISCLIENT=false
+YPPWDDIR=/etc
+YPCHANGEOK=chsh
+NISMASTER=
+YPSERVARGS=
+YPBINDARGS=
+YPPASSWDDARGS=
+YPXFRDARGS=
+" > /etc/default/nis
+}
+
 Install_DCERouter () {
 #Install mysql server
 StatsMessage "Installing MySQL Server"
@@ -588,6 +606,9 @@ Create_routine_priv = 'Y', Alter_routine_priv = 'Y', \
 Create_user_priv = 'Y' WHERE User = 'debian-sys-maint'; \
 FLUSH PRIVILEGES; \
 " | mysql --defaults-extra-file=/etc/mysql/debian.cnf mysql
+
+#Create logical link for MAKEDEV for the mdadm installation
+ln -s /sbin/MAKEDEV /dev/MAKEDEV
 
 #Install the router and media
 StatsMessage "Installing LinuxMCE Base DCE Router Software"
@@ -811,23 +832,6 @@ echo >> /etc/apt/sources.list
 /usr/share/update-notifier/notify-reboot-required
 }
 
-Setup_NIS () {
-# Put a temporary nis config file that will prevent ypbind to start
-# Temporary NIS setup, disabling NIS server and client.
-StatsMessage "Temporarily modifying the NIS configuration file disabling the NIS server and client"
-echo "
-NISSERVER=false
-NISCLIENT=false
-YPPWDDIR=/etc
-YPCHANGEOK=chsh
-NISMASTER=
-YPSERVARGS=
-YPBINDARGS=
-YPPASSWDDARGS=
-YPXFRDARGS=
-" > /etc/default/nis
-}
-
 
 ###########################################################
 ### Main execution area
@@ -849,6 +853,7 @@ PreSeed_Prefs
 Fix_Initrd_Vmlinux
 Nic_Config
 Setup_Pluto_Conf
+Setup_NIS
 Install_DCERouter
 Create_And_Config_Devices
 Configure_Network_Options
@@ -857,7 +862,6 @@ VideoDriverSetup
 FixAsteriskConfig
 addAdditionalTTYStart
 InitialBootPrep
-Setup_NIS
 
 
 StatsMessage "MCE Install Script completed without a detected error"
