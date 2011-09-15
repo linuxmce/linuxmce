@@ -54,8 +54,10 @@ function includeLangFile($langFile)
 {
 	// get existing variables
     $before_eval_vars = get_defined_vars();
-
+	
 	// include fallback language file
+    if(!isset($GLOBALS['fallbacklang'])) $GLOBALS['fallbacklang']='en';
+    if(!defined("APPROOT")) define("APPROOT",$_SERVER['DOCUMENT_ROOT']."lmce-admin/");
     $file = APPROOT.'languages/'.$GLOBALS['fallbacklang'].'/'.$langFile;
     $evalt = "require_once '$file';";
     eval($evalt);
