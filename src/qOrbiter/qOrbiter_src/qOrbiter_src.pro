@@ -7,7 +7,6 @@ folder_01.target = qml
 folder_02.source= img
 folder_02.target=     #left blank so it will appear in the root
 DEFINES += for_desktop
-
 }
 
 for_freemantle{
@@ -47,9 +46,10 @@ DEFINES +=ANDROID
 }
 
 folder_03.source = config.xml
-folfer_03.TARGET =
+folder_03.TARGET =
 DEPLOYMENTFOLDERS = folder_01 folder_02 folder_03
-
+DESTDIR=../build-output
+TARGET = qOrbiter
 # Additional import path used to resolve QML modules in Creator's code model
 QML_IMPORT_PATH =
 symbian:TARGET.UID3 = 0xE0D07D4D
