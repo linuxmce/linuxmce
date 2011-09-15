@@ -118,6 +118,19 @@ public:
     UpdateObjectImageProvider *nowPlayingProvider;
     QString *gridReqType;
 
+    //carried over variables from old OrbiterData.h
+    map<int,string> m_mapTextString;
+    vector<int> m_vectPK_Users_RequiringPIN;
+    map<int,int> m_mapDesignObj; //Used to map a screen to a DesignObj
+    map<int,int> m_mapPK_Screen_GoBackToScreen;  // For screens in this map, if there's a go back
+    map<int,int> m_mapPK_MediaType_PK_Attribute_Sort;  // The default sort for each type of media
+    map<int,int> m_mapScreen_Interrupt; // Map of which scripts can be interrupted
+    map<int,string> m_mapPK_MediaType_Description; // The description for all the media
+    map<int,string> m_mapPK_AttributeType_Description; // The description for all attribute types
+    bool m_bIsOSD,m_bNewOrbiter,m_bUseAlphaBlending,m_bUseMask;
+
+    QMap<int,QString> floorplans;
+
     /*
 datagrid variables
 these correlate to the variable string sent to the datagrid.

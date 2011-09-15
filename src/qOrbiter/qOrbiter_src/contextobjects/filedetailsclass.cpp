@@ -9,9 +9,4 @@ void FileDetailsClass::setFileMediaType()
 {
 }
 
-void FileDetailsClass::setTitle(QString t)
-{
-    objecttitle = t;
-    emit object_changed();
 
-}

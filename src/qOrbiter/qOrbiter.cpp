@@ -2120,42 +2120,49 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 // fk.remove("!F");
                 const char *pPath = pCell->GetImagePath();
                 index = pDataGridTable->CovertColRowType(it->first).first;
-                cellTitle = pCell->m_mapAttributes_Find("Title").c_str();
-                cellAttribute = pCell->m_mapAttributes_Find("Name").c_str();
+              QString attributeType = pCell->m_mapAttributes_Find("Title").c_str();
+              QString attribute  = pCell->m_mapAttributes_Find("Name").c_str();
                 cellfk = pCell->GetValue();
-                //  qDebug() << cellTitle;
-                //qDebug() << pCell->m_mapAttributes.size();
 
-                /*    if(cellTitle == "Program")
+                if(attributeType == "Program")
                 {
-                    string a_text;
-                    CMD_Get_Attribute getProgramAttributes(qmlUI->iPK_Device, qmlUI->iMediaPluginID, cellfk.remove("!A").toInt(), &a_text);
-
-                    SendCommand(getProgramAttributes);
-                    qDebug() << "Get Attrib result: " << a_text.c_str();
-                    //qDebug() << pCell->m_ImagePathLength;
+                    qmlUI->filedetailsclass->setProgram(attributeType);
+                     qDebug() << attribute;
                 }
-                */
-
-                //  qDebug() << "Video Attribute::" << cellTitle << "-" << cellAttribute;
-                // qDebug() << "Attribute image?" << pCell->GetImagePath();
-                /*    if (pPath )
+                else if(attributeType == "Title")
                 {
-                    cellImg = getfileForDG(pCell->GetImagePath());
-                    size_t s=0;
-                    pCell->m_GraphicLength = (unsigned long) s;
-                    pCell->m_GraphicFormat = GR_JPG;
+                    qmlUI->filedetailsclass->setMediaTitle(attribute);
+                     qDebug() << attribute;
                 }
-                else if (!pPath) //making sure we dont provide a null image
+                else if(attributeType == "Channel")
                 {
-                    //         qDebug() << "No Image";
-                    cellImg.load(":/icons/videos.png");
+                    qmlUI->filedetailsclass->setChannelID(attribute);
                 }
-                else if (cellImg.isNull())
+                else if(attributeType == "Episode")
                 {
-                    cellImg.load(":/icons/videos.png");
+                    qmlUI->filedetailsclass->setEpisode(attribute);
+                    qDebug() << attribute;
                 }
-        */
+                else if(attributeType == "Performer")
+                {
+                    qmlUI->filedetailsclass->setPerformers(attribute);
+                    qDebug() << attribute;
+                }
+                else if(attributeType == "Director")
+                {
+                    qmlUI->filedetailsclass->setDirector(attribute);
+                    qDebug() << attribute;
+                }
+                else if(attributeType == "Genre")
+                {
+                    qmlUI->filedetailsclass->setGenre(attribute);
+                    qDebug() << attribute;
+                }
+                else if(attributeType == "Album")
+                {
+                    qmlUI->filedetailsclass->setAlbum(attribute);
+                    qDebug() << attribute;
+                }
 
                 //qmlUI->m_selected_grid_item->appendRow(new FileDetailsItem(cellTitle, cellAttribute, cellImg, false,  qmlUI->model));
             }
@@ -2532,6 +2539,11 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                     qmlUI->nowPlayingButton->setGenre(attribute);
                     qDebug() << attribute;
                 }
+                else if(attributeType == "Album")
+                {
+                    qmlUI->filedetailsclass->setAlbum(attribute);
+                    qDebug() << attribute;
+                }
 
 
                 //qmlUI->m_selected_grid_item->appendRow(new FileDetailsItem(cellTitle, cellAttribute, cellImg, false,  qmlUI->model));
@@ -2539,6 +2551,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
         }
     }
 }
+
 
 void DCE::qOrbiter::requestLiveTvPlaylist()
 {

@@ -31,6 +31,21 @@ public:
     Q_PROPERTY(QImage title READ getTitleImage WRITE setTitleImage NOTIFY titleImageChanged)
     Q_PROPERTY(QImage program READ getProgramImage WRITE setProgramImage NOTIFY object_changed)
 
+    //media title variable that can be independant of what is passed initially by now playing
+    Q_PROPERTY (QString mediatitle READ getMediaTitle WRITE setMediaTitle NOTIFY mediaTitleChanged)
+    Q_PROPERTY (QString genre READ getGenre WRITE setGenre NOTIFY genreChanged)
+    //television related variables
+    Q_PROPERTY (QString program READ getProgram WRITE setProgram NOTIFY programChanged)
+    Q_PROPERTY (QString channel READ getChannel WRITE setChannel NOTIFY channelChanged)
+    Q_PROPERTY (QString channelID READ getChannelID WRITE setChannelID NOTIFY channelChanged)
+    Q_PROPERTY (QString episode READ getEpisode WRITE setEpisode NOTIFY episodeChanged)
+     Q_PROPERTY (QString director READ getDirector WRITE setDirector NOTIFY directorChanged)
+    //audio related
+    Q_PROPERTY (QString album READ getAlbum WRITE setAlbum NOTIFY albumChanged)
+    Q_PROPERTY (QString track READ getTrack WRITE setTrack NOTIFY trackChanged)
+    Q_PROPERTY (QString performerlist READ getPerformers WRITE setPerformers NOTIFY performersChanged)
+
+
     QString objecttitle;
 
     /*
@@ -46,12 +61,12 @@ public:
     inline void setTitleImage (QImage inc_t) {title = inc_t; emit object_changed();}
     inline QImage getTitleImage () {return title;}
 
-    QImage program;
-    inline void setProgramImage (QImage inc_p) {program = inc_p; emit object_changed();}
-    inline QImage getProgramImage () {return program;}
+    QImage programImage;
+    inline void setProgramImage (QImage inc_p) {programImage = inc_p; emit object_changed();}
+    inline QImage getProgramImage () {return programImage;}
     QUrl Season;
     QUrl imdb;
-    QUrl episode;
+
 
 
     bool showDetails;
@@ -86,17 +101,144 @@ public:
     void setBGimage(QImage img) {qi_bgimage= img;}
     QImage getBGimage() {return qi_bgimage;}
 
+    QString qs_mainTitle;
+    QString qs_mainTitle2;
+    QString qs_subTitle;
+    QString mediatitle;
+
+    //television related
+    QString program;
+    QString channel;
+    QString channelID;
+    QString episode;
+    QString director;
+    QStringList directors;
+
+    //audio related
+    QStringList performers;
+    QString performerlist;
+    QString album;
+    QString track;
+    QString genre;
+    QStringList composer;
+    QString releasedate;
+
 signals:
     void object_changed();
     void FileChanged(QString f);
     void VisibleChanged(bool vis);
     void ImageChanged(QUrl);
     void titleImageChanged();
+    //general signals
+    void mediaTitleChanged();
+    void playlistChanged();
+    void mediaChanged();
+    void mediaEnded();
+    void mediaStarted();
+    void imageChanged();
+    void screenTypeChanged();
+    void titleChanged();
+    void titleChanged2();
+    void mediaTypeChanged();
+    void mediaStatusChanged();
+    void filePathChanged();
+    void mediaSpeedChanged();
+    void playListPositionChanged();
+    void genreChanged();
+
+    //audio signals
+    void albumChanged();
+    void trackChanged();
+    void performersChanged();
+    void composerChanged();
+
+
+    //video signals
+    void directorChanged();
+
+    //games signals
+
+    //dvd signals
+
+    //mythtv, vdr and live tv signals
+    void programChanged();
+    void channelChanged();
+    void episodeChanged();
 
 public slots:
-    inline QString getTitle() {return objecttitle;}
+
+    void setProgram(QString newProgram) {program = newProgram; emit programChanged();}
+    QString getProgram () {return program;}
+
+    //void setImage(QUrl incImage) {nowPlayingImage = incImage; emit imageChanged();}
+    //QUrl getImage () { return nowPlayingImage;}
+
+    //void setScreen(QString inc_screen) {qs_screen = inc_screen; emit screenTypeChanged();}
+    //QString getScreen () {return qs_screen;}
+
+    //void setUrl (QString inc_url) {qs_imagePath = inc_url; emit imageChanged();}
+   // QString getUrl () {return qs_imagePath;}
+
+    void setTitle (QString inc_title) {qs_mainTitle = inc_title; emit titleChanged();}
+    QString getTitle () {return qs_mainTitle;}
+
+    void setTitle2 (QString inc_title) {qs_mainTitle2 = inc_title; emit titleChanged2();}
+    QString getTitle2 () {return qs_mainTitle2;}
+
+    void setSubTitle (QString inc_subTitle) {qs_subTitle = inc_subTitle; emit titleChanged();}
+    QString getSubTitle () {return qs_subTitle;}
+
+    //void setStatus (bool status) {b_mediaPlaying = status; emit mediaStatusChanged(); }
+   // bool getStatus () {return b_mediaPlaying;}
+
+  //  void setMediaType (int inc_mediaType) {i_mediaType = inc_mediaType; emit mediaTypeChanged();}
+   // int  getMediaType () {return i_mediaType;}
+
+    //void setFilePath (QString inc_fp) {filepath = inc_fp; qDebug() <<"FilePath:" << filepath; emit filePathChanged();}
+   // QString getFilePath () {return filepath;}
+
+    //general media getters and setters ----//
+
+    void setMediaTitle (QString inc_mediaTitle) {mediatitle = inc_mediaTitle;  emit mediaTitleChanged();}
+    QString getMediaTitle () {return mediatitle;}
+
+    //void setPlaylistPostion(int i_pls) {m_iplaylistPosition = i_pls; qDebug() << "Playlist set to: "<< m_iplaylistPosition;  emit playListPositionChanged();}
+  //  int getPlaylistPosition() {return m_iplaylistPosition;}
+
+  //  void setMediaSpeed(int speed);
+    //void setStringSpeed(QString s) {qs_playbackSpeed = s; qDebug() << qs_playbackSpeed; emit mediaSpeedChanged();}
+   // QString getMediaSpeed() {return qs_playbackSpeed;}
+
+    //--tv getters and setters-------------//
+
+    void setChannel (QString inc_channel) {channel = inc_channel;  emit channelChanged();}
+    QString getChannel () {return channel;}
+
+    void setChannelID (QString inc_channelID) {channelID = inc_channelID;  emit channelChanged();}
+    QString getChannelID () {return channelID;}
+
+    void setEpisode (QString inc_episode) {episode = inc_episode;  emit episodeChanged();}
+    QString getEpisode () {return episode;}
+
+    //-----audio getters and setter--------//
+    void setAlbum (QString inc_album) {album = inc_album;  emit albumChanged();}
+    QString getAlbum () {return album;}
+
+    void setTrack (QString inc_track) {track = inc_track;  emit trackChanged();}
+    QString getTrack() {return track;}
+
+    void setPerformers (QString inc_performer) {performers << inc_performer;  emit performersChanged();}
+    QString getPerformers() {performerlist = performers.join(" | "); return performerlist;}
+
+    void setDirector (QString inc_director) {directors << inc_director;  emit directorChanged();}
+    QString getDirector() {director = directors.join(" | "); return director;}
+
+    void setGenre (QString inc_genre) {genre.append(inc_genre+" | ");  emit genreChanged();}
+    QString getGenre() { return genre;}
+
+
     void setFileMediaType();
-    void setTitle(QString t);
+
 
 };
 
