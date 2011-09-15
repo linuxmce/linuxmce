@@ -16,6 +16,7 @@ mysql_select_db("pluto_main", $conn);
 
 //installation variable area
 $userArray = array();
+$floorplanArray = array();
 $roomArray = array();
 $entertainAreaArray = array();
 $lightingScenarioArray = array();
@@ -73,6 +74,10 @@ if ($attribCheck = getSortingViews($conn, $doc, $orbiterData))
 	echo "....done!<br>";
 }
 
+if (getFloorplans($conn, $doc, $orbiterData))
+{
+        echo "....done!<br>";
+}       
 if (getLightingScenarios($conn, $doc, $orbiterData))
 {
 	echo "....done!<br>";
@@ -111,6 +116,32 @@ fclose($orbiterConfPath);
 
 
 //function area-----------------------------------------------------------------------------------
+
+//get floorplan information
+function getFloorplans($conn, $doc, $orbiterData)
+{
+	$sql ="SELECT * FROM `Floorplan` ";
+	
+	echo "Setting Floorplan...";
+	
+	$result = mysql_query($sql,$conn) or die(mysql_error($conn));
+		
+	$floorplanElement = $doc->createElement("Floorplans");	
+	$orbiterData->appendChild($floorplanElement);
+	
+	while ($row = mysql_fetch_array($result))
+		{
+		$t = $doc->createElement("Floorplan");			
+
+                $attrib2= $t->setAttribute("Page", $row['Page']);
+                $attrib2= $t->setAttribute("Description", $row['Description']);
+                $attrib2= $t->setAttribute("Icon", $row['FK_Icon']);			
+
+		$floorplanElement->appendChild($t);		
+		}		
+
+        return true;
+}
 
 function getFileFormats($conn, $doc, $orbiterData)
 {
@@ -255,6 +286,7 @@ $result = mysql_query($defaultLocationSql,$conn) or die(mysql_error($conn));
 	return true;
 
 }
+
 
 //get rooms--------------------------------------------------------------------------------------
 function getRooms($conn, $doc, $orbiterData)
