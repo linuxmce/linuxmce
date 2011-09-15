@@ -1,11 +1,15 @@
-# Add more folders to ship with the application, here
+# define deployment destination and target executable name
+DESTDIR = ../build-output
+TARGET = qOrbiter
 
+
+# Add more folders to ship with the application, here
 for_desktop{
 folder_01.source = qml/desktop
-folder_01.target = ../build-output/qml
+folder_01.target = $$DESTDIR/qml
 
 folder_02.source= img
-folder_02.target= ../build-output    #left blank so it will appear in the root
+folder_02.target= $$DESTDIR    #left blank so it will appear in the root
 DEFINES += for_desktop
 }
 
@@ -28,12 +32,18 @@ DEFINES += for_harmattan
 }
 
 macx{
-folder_01.source = qml/desktop
-folder_01.target = qml
+    APP_RESOURCES_PATH=../../../$$DESTDIR/$$TARGET".app"/Contents/resources
 
-folder_02.source= img
-folder_02.target=     #left blank so it will appear in the root
+    folder_01.source = qml/desktop
+    folder_01.target = $$APP_RESOURCES_PATH/qml
 
+    folder_02.source= img
+    folder_02.target= $$APP_RESOURCES_PATH   #left blank so it will appear in the root
+
+    folder_03.source = config.xml
+    folder_03.target = $$APP_RESOURCES_PATH
+
+    ICON = osxicons.icns
 }
 
 ANDROID{
@@ -45,12 +55,12 @@ folder_02.target=     #left blank so it will appear in the root
 DEFINES +=ANDROID
 }
 
-folder_03.source = config.xml
-folder_03.target = ../build-output
+!macx{
+    folder_03.source = config.xml
+    folder_03.target = ../build-output
+}
 
 DEPLOYMENTFOLDERS = folder_01 folder_02 folder_03
-DESTDIR = ../build-output
-TARGET = qOrbiter
 # Additional import path used to resolve QML modules in Creator's code model
 QML_IMPORT_PATH =
 symbian:TARGET.UID3 = 0xE0D07D4D
@@ -59,12 +69,10 @@ INCLUDEPATH += ../../ ../../DCE/
 
 macx{
     QT += xml
-    TARGET = qOrbiter
-    ICON = osxicons.icns
 }
 
 !macx{
-LIBS += -lQtXml
+    LIBS += -lQtXml
 }
 
 CONFIG +=warn_off
