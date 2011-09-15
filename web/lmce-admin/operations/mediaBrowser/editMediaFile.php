@@ -66,38 +66,44 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 	</script>
 	';
 	if($action=='form'){
-		$resFile=$mediadbADO->Execute('SELECT * FROM File WHERE PK_File=?',$fileID);
-		$rowFile=$resFile->FetchRow();		
+		if (!empty($fileID)) {
+			$resFile=$mediadbADO->Execute('SELECT * FROM File WHERE PK_File=?',$fileID);
+			$rowFile=$resFile->FetchRow();
+		}
 		$out.='
-			<div align="center" class="err">'.stripslashes(@$_REQUEST['error']).'</div>
-			<div align="center" class="confirm"><B>'.stripslashes(@$_REQUEST['msg']).'</B></div>
-			
-		<table width="100%" >
+		<div align="center" class="err">'.stripslashes(@$_REQUEST['error']).'</div>
+		<div align="center" class="confirm"><B>'.stripslashes(@$_REQUEST['msg']).'</B></div>';
+		
+		if (!empty($fileID) && $rowFile['EK_MediaType'] != 43) { // 43 = streaming audio
+			$out.='<table width="100%" >
 			<tr>
 				<td><a href="javascript:syncPath(\''.$rowFile['Path'].'\')">Back</a></td>
 				<td align="right">'.quick_search_box().'</td>
 			<tr>
-		</table>
-					
+		</table>';
+		}
+		$out.='	
 			<form action="index.php" method="POST" name="editMediaFile" enctype="multipart/form-data">
 				<input type="hidden" name="section" value="editMediaFile">
 				<input type="hidden" name="action" value="update">
 				<input type="hidden" name="fileID" value="'.$fileID.'">
 		';
-		$queryAttrTypes='
+		$attributeTypes=array();
+		if (!empty($fileID)) {
+			$queryAttrTypes='
 			SELECT * 
 			FROM AttributeType 
 			INNER JOIN MediaType_AttributeType ON FK_AttributeType=PK_AttributeType
 			WHERE EK_MediaType=?
 			ORDER BY Description ASC';
-		$resAttrTypes=$mediadbADO->Execute($queryAttrTypes,$rowFile['EK_MediaType']);
-		$attributeTypes=array();
-		while($rowTypes=$resAttrTypes->FetchRow()){
-			$attributeTypes[$rowTypes['PK_AttributeType']]=$rowTypes['Description'];
+			$resAttrTypes=$mediadbADO->Execute($queryAttrTypes,$rowFile['EK_MediaType']);
+			while($rowTypes=$resAttrTypes->FetchRow()){
+				$attributeTypes[$rowTypes['PK_AttributeType']]=$rowTypes['Description'];
+			}
 		}
 
 		$externalAttributesBtn='';
-		if(in_array($rowFile['EK_MediaType'],array(3,4,5,28))){			
+		if(!empty($fileID) && in_array($rowFile['EK_MediaType'],array(3,4,5,28))){			
 			$externalAttributesBtn='<select name="metadata_section"><option value="checkAmazon">'.$OPTION_CHECK_AMAZON.'</option>';
 			$externalAttributesBtn.='<option value="checkIMDB">'.$OPTION_CHECK_IMDB.'</option>';
 			$externalAttributesBtn.='<option value="checkTVDB">'.$OPTION_CHECK_TVDB.'</option></selection>';
@@ -112,7 +118,7 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 		$out.='		
 		<table border="0" cellspacing="0" cellpadding="3">		
 		';
-		if($rowFile['IsDirectory']==1){
+		if(!empty($fileID) && $rowFile['IsDirectory']==1){
 			$out.='
 			<tr bgColor="#EEEEEE">
 				<td><B>'.$TEXT_THIS_IS_DIRECTORY_TREATED_AS_FILE_CONST.'</B></td>
@@ -121,7 +127,18 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 			
 			';
 		}
-	
+		$Filename = '';
+		$Path = '';
+		$MediaType = 0;
+		$FK_MediaSubType = 0;
+		$FK_FileFormat = 0;
+		if (!empty($fileID)) {
+			$Filename = $rowFile['Filename'];
+			$Path = $rowFile['Path'];
+			$MediaType = $rowFile['EK_MediaType'];
+			$FK_MediaSubType = $rowFile['FK_MediaSubType'];
+			$FK_FileFormat = $rowFile['FK_FileFormat'];
+		}
 		$out.='
 			<tr bgColor="#EEEEEE">
 				<td><B>'.$TEXT_DATE_ADDED_CONST.':</B></td>
@@ -129,22 +146,30 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 			</tr>		
 			<tr bgColor="#EEEEEE">
 				<td><B>'.$TEXT_FILE_CONST.':</B></td>
-				<td><input type="text" name="filename" value="'.htmlentities($rowFile['Filename'],ENT_COMPAT,'UTF-8').'" size="55"></td>
+				<td><input type="text" name="filename" value="'.htmlentities($Filename,ENT_COMPAT,'UTF-8').'" size="55"></td>
 			</tr>
 			<tr>
 				<td>&nbsp;</td>
-				<td align="right"><input type="button" class="button" name="delete" value="'.$TEXT_DELETE_FILE_CONST.'" onClick="if(confirm(\''.$TEXT_DELETE_FILE_CONFIRMATION_CONST.'\')){document.editMediaFile.action.value=\'del\';document.editMediaFile.submit();}"> <input type="button" class="button" name="moveFile" value="Move file to other directory" onClick="windowOpen(\'index.php?section=moveFile&fileID='.$fileID.'&filePath='.urlencode(stripslashes($rowFile['Path']).'/'.$rowFile['Filename']).'\',\'width=500,height=400,toolbar=1,scrollbars=1,resizable=1\');"></td>
-			</tr>
+				<td align="right"><input type="button" class="button" name="delete" value="'.$TEXT_DELETE_FILE_CONST.'" onClick="if(confirm(\''.$TEXT_DELETE_FILE_CONFIRMATION_CONST.'\')){document.editMediaFile.action.value=\'del\';document.editMediaFile.submit();}">';
+		if (!empty($fileID) && $rowFile['EK_MediaType'] != 43) { // 43 = streaming audio, not possible to move
+			$out.=' <input type="button" class="button" name="moveFile" value="Move file to other directory" onClick="windowOpen(\'index.php?section=moveFile&fileID='.$fileID.'&filePath='.urlencode(stripslashes($Path).'/'.$Filename).'\',\'width=500,height=400,toolbar=1,scrollbars=1,resizable=1\');">';
+		}			
+		$out.='</td>
+			</tr>';
+		if (!empty($fileID) && $rowFile['EK_MediaType'] != 43) { // 43 = streaming audio, uses only filename
+			$out.='
 			<tr bgcolor="#EBEFF9">
 				<td><B>'.$TEXT_LOCATION_CONST.':</B></td>
-				<td><input type="text" name="Path" value="'.htmlentities(stripslashes($rowFile['Path']),ENT_COMPAT,'UTF-8').'" size="55">'.((file_exists($rowFile['Path'].'/'.$rowFile['Filename'])?'<img src=include/images/sync.gif align=middle border=0>':'<img src=include/images/db.gif align=middle border=0>')).'</td>
-			</tr>
-			<tr bgcolor="#EEEEEE">
+				<td><input type="text" name="Path" value="'.htmlentities(stripslashes($Path),ENT_COMPAT,'UTF-8').'" size="55">'.((file_exists($Path.'/'.$Filename)?'<img src=include/images/sync.gif align=middle border=0>':'<img src=include/images/db.gif align=middle border=0>')).'</td>
+			</tr>';
+		}
+		
+		$out.='<tr bgcolor="#EEEEEE">
 				<td><B>'.$TEXT_TYPE_CONST.':</B></td>
-				<td><select name="type">';
+				<td><select name="type" style="width:200px;">';
 			$resType=$dbADO->Execute('SELECT * FROM MediaType ORDER BY Description ASC');
 			while($rowType=$resType->FetchRow()){
-				$out.='<option value="'.$rowType['PK_MediaType'].'" '.(($rowType['PK_MediaType']==$rowFile['EK_MediaType'])?'selected':'').'>'.$rowType['Description'].'</option>';
+				$out.='<option value="'.$rowType['PK_MediaType'].'" '.(($rowType['PK_MediaType']==$MediaType)?'selected':'').'>'.$rowType['Description'].'</option>';
 			}
 			
 			$out.='
@@ -152,35 +177,45 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 			</tr>
 			<tr bgcolor="#EEEEEE">
 				<td><B>'.$TEXT_SUB_TYPE_CONST.':</B></td>
-				<td id="subtype" >'.pulldownFromArray($mediaSubTypes,'subtype',$rowFile['FK_MediaSubType']).'</td>
+				<td id="subtype" >'.pulldownFromArray($mediaSubTypes,'subtype',$FK_MediaSubType).'</td>
 			</tr>			
 			<tr bgcolor="#EEEEEE">
 				<td><B>'.$TEXT_FILE_FORMAT_CONST.':</B></td>
-				<td "id="fileformat">'.pulldownFromArray($fileFormat,'fileFormat',$rowFile['FK_FileFormat']).'</td>
+				<td "id="fileformat">'.pulldownFromArray($fileFormat,'fileFormat',$FK_FileFormat).'</td>
 			</tr>				
-			<tr>
-				<td colspan="2"><input type="submit" class="button" name="update" value="'.$TEXT_UPDATE_CONST.'"> <input type="reset" class="button" name="cancelBtn" value="'.$TEXT_CANCEL_CONST.'">
-				<input type="hidden" name="oldPath" value="'.$rowFile['Path'].'">
-				<input type="hidden" name="oldFilename" value="'.$rowFile['Filename'].'">
+			<tr>';
+			if (empty($fileID)) {
+				$out.='
+				<td colspan="2"><input type="submit" class="button" name="addFile" value="'.$TEXT_ADD_CONST.'">';
+			} else {
+				$out.='
+				<td colspan="2"><input type="submit" class="button" name="update" value="'.$TEXT_UPDATE_CONST.'">';
+			}
+			$out.='
+                                <input type="reset" class="button" name="cancelBtn" value="'.$TEXT_CANCEL_CONST.'">
+				<input type="hidden" name="oldPath" value="'.$Path.'">
+				<input type="hidden" name="oldFilename" value="'.$Filename.'">
 				</td>
-			</tr>			
+			</tr>';
+			if (!empty($fileID)) {
+				$out.='
 			<tr bgcolor="#EBEFF9">
 				<td valign="top"><B>'.$TEXT_ATTRIBUTES_CONST.':</B>
 				</td>
 				<td>				
 				<table width="100%">';
-			$queryAttributes='
+				$queryAttributes='
 				SELECT Attribute.*, AttributeType.Description 
 				FROM Attribute
 				INNER JOIN File_Attribute ON FK_Attribute=PK_Attribute
 				INNER JOIN AttributeType ON FK_AttributeType=PK_AttributeType
 				WHERE FK_File=?
 				ORDER BY Description ASC';
-			$resAttributes=$mediadbADO->Execute($queryAttributes,$fileID);
-			$pos=0;
-			while($rowAttributes=$resAttributes->FetchRow()){
-				$pos++;
-				$out.='
+				$resAttributes=$mediadbADO->Execute($queryAttributes,$fileID);
+				$pos=0;
+				while($rowAttributes=$resAttributes->FetchRow()){
+					$pos++;
+					$out.='
 				
 						<tr bgcolor="'.(($pos%2==0)?'#EEEEEE':'#FFFFFF').'">
 							<td width="20"><input type="checkbox" value="1" name="attribute_'.$rowAttributes['PK_Attribute'].'"></td>
@@ -188,34 +223,34 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 							<td>'.$rowAttributes['Name'].'</td>
 							<td width="100" align="center"><a href="index.php?section=mainMediaBrowser&attributeID='.$rowAttributes['PK_Attribute'].'&action=properties">'.$TEXT_EDIT_CONST.'</a> <a href="#" onClick="if(confirm(\''.$TEXT_DELETE_ATTRIBUTE_FROM_FILE_CONFIRMATION_CONST.'\'))self.location=\'index.php?section=editMediaFile&fileID='.$fileID.'&action=delete&dAtr='.$rowAttributes['PK_Attribute'].'&dpath='.urlencode(stripslashes($rowFile['Path'])).'\'">'.$TEXT_REMOVE_CONST.'</a></td>
 						</tr>';
-			}
-			$out.='
+				}
+				$out.='
 				</table></td>
-			</tr>			
+			</tr>
 			<tr bgcolor="#EBEFF9">
 				<td valign="top"><B>'.$TEXT_LONG_ATTRIBUTES_CONST.':</B></td>
 				<td><table width="100%">';
-			$queryAttributes='
+				$queryAttributes='
 				SELECT LongAttribute.*, AttributeType.Description 
 				FROM LongAttribute
 				INNER JOIN AttributeType ON FK_AttributeType=PK_AttributeType
 				WHERE FK_File=?';
-			$resLongAttributes=$mediadbADO->Execute($queryAttributes,$fileID);
-			$pos=0;
-			while($rowAttributes=$resLongAttributes->FetchRow()){
-				$pos++;
-				$out.='
+				$resLongAttributes=$mediadbADO->Execute($queryAttributes,$fileID);
+				$pos=0;
+				while($rowAttributes=$resLongAttributes->FetchRow()){
+					$pos++;
+					$out.='
 						<tr bgcolor="'.(($pos%2==0)?'#EEEEEE':'#FFFFFF').'">
 							<td width="20"><input type="checkbox" value="1" name="longattribute_'.$rowAttributes['PK_LongAttribute'].'"></td>
 							<td width="100"><b>'.$rowAttributes['Description'].'</b></td>
 							<td>'.nl2br($rowAttributes['Text']).'</td>
 							<td width="100" align="center"><a href="index.php?section=editLongAttribute&laID='.$rowAttributes['PK_LongAttribute'].'&fileID='.$fileID.'">'.$TEXT_EDIT_CONST.'</a> <a href="#" onClick="if(confirm(\''.$TEXT_DELETE_ATTRIBUTE_FROM_FILE_CONFIRMATION_CONST.'\'))self.location=\'index.php?section=editMediaFile&fileID='.$fileID.'&action=delete&dLAtr='.$rowAttributes['PK_LongAttribute'].'&dpath='.urlencode(stripslashes($rowFile['Path'])).'\'">'.$TEXT_REMOVE_CONST.'</a></td>
 						</tr>';
-			}
-			$out.='
+				}
+				$out.='
 				</table></td>
-			</tr>			
-			
+			</tr>
+
 			<tr>
 				<td>&nbsp;</td>
 				<td>&nbsp;</td>
@@ -223,18 +258,18 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 			<tr>
 				<td valign="top" align="left"><B>'.$TEXT_PICTURES_CONST.'</B></td>
 				<td valign="top" align="left" colspan="6"><table width="100%" border="0">';
-			$queryPictures='
-				SELECT * FROM Picture_File
-				INNER JOIN Picture ON Picture_File.FK_Picture=PK_Picture
-				WHERE FK_File=?';
-			$resPictures=$mediadbADO->Execute($queryPictures,$fileID);
-			$picsCount=0;
-			$picsArray=array();
-			while($rowPictures=$resPictures->FetchRow()){
-				if(!in_array($rowPictures['PK_Picture'],$picsArray)){
-					$picsArray[]=$rowPictures['PK_Picture'];
-				}
-				$out .= '
+				$queryPictures='
+				        SELECT * FROM Picture_File
+				        INNER JOIN Picture ON Picture_File.FK_Picture=PK_Picture
+				        WHERE FK_File=?';
+				$resPictures=$mediadbADO->Execute($queryPictures,$fileID);
+				$picsCount=0;
+				$picsArray=array();
+				while($rowPictures=$resPictures->FetchRow()){
+					if(!in_array($rowPictures['PK_Picture'],$picsArray)){
+						$picsArray[]=$rowPictures['PK_Picture'];
+					}
+					$out .= '
 					<tr bgcolor="'.(($pos%2==0)?'#EEEEEE':'#FFFFFF').'">
 					<td width="20"><input type="checkbox" value="1" name="picture_'.$rowPictures['PK_Picture'].'"></td>
 					<td valign="center" width="100"><input type="text" name="url_'.$rowPictures['PK_Picture'].'" value="'.$rowPictures['URL'].'"></td>
@@ -242,14 +277,14 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 					<td width="100"><a href="#" onClick="if(confirm(\''.$TEXT_CONFIRM_DELETE_PICTURE_CONST.'\'))self.location=\'index.php?section=editMediaFile&fileID='.$fileID.'&action=properties&picID='.$rowPictures['PK_Picture'].'&path='.htmlentities($rowFile['Path']).'\';">'.$TEXT_DELETE_CONST.'</a></td>
 					</tr>
 					';
-			}
-			$out.='
+				}
+				$out.='
 				</table>
 				<input type="hidden" name="picsArray" value="'.join(',',$picsArray).'">
 				</td>
 			</tr>';
-			if($resAttributes->RecordCount() > 0 | $resLongAttributes->RecordCount() > 0 || $resPictures->RecordCount() > 0){
-				$out.='
+				if($resAttributes->RecordCount() > 0 | $resLongAttributes->RecordCount() > 0 || $resPictures->RecordCount() > 0){
+					$out.='
 				<tr>
 					<td></td>
 					<td><table width="100%"><tr>
@@ -257,14 +292,14 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 						<td colspan="2">
 							<a href="javascript:setAll(1);">Select/unselect all</a>
 							<input type="submit" class="button" name="delSelected" value="Delete selected" onClick="if(!confirm(\'Are you sure you want to remove those attributes?\'))return false;">';
-				if($rowFile['IsDirectory']==1){
-					$out .= '
+					if($rowFile['IsDirectory']==1){
+						$out .= '
 						<input type="submit" class="button" name="addSelectedRecursively" value="Add recursively" onClick="if(!confirm(\'Are you sure you want to add those attributes to all files under this directory?\'))return false;">
 						<input type="submit" class="button" name="replaceSelectedRecursively" value="Add/replace recursively" onClick="if(!confirm(\'Are you sure you want to add or replace those attributes to all files under this director?\nNote, all attributes of the same types will be deleted before!\'))return false;">';
+					}
+					$out .= '</td></tr></table></td></tr>';
 				}
-				$out .= '</td></tr></table></td></tr>';
-			}
-			$out .= '
+				$out .= '
 			<tr>
 				<td><B>'.$TEXT_ADD_PICTURE_CONST.'</B><br><em>'.$TEXT_JPG_ONLY_CONST.'</em></td>
 				<td colspan="6"> '.$TEXT_URL_CONST.' <input type="text" name="newUrl" value=""> '.$TEXT_FILE_CONST.' <input type="file" name="newPic" value=""> <input type="submit" class="button" name="addPic" value="'.$TEXT_ADD_PICTURE_CONST.'"></td>
@@ -277,33 +312,33 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 			<tr>
 				<td><B>'.$TEXT_ADD_ATTRIBUTE_CONST.':</B><br><select name="newAttributeType" onChange="document.editMediaFile.action.value=\'form\';document.editMediaFile.submit();">
 					<option value="0">- '.$TEXT_PLEASE_SELECT_CONST.' -</option>';
-			foreach($attributeTypes AS $attributeID=>$attributeName){
-				$out.='<option value="'.$attributeID.'" '.(($attributeID==@$_POST['newAttributeType'])?'selected':'').'>'.$attributeName.'</option>';
-			}
-			$out.='</select></td>
+				foreach($attributeTypes AS $attributeID=>$attributeName){
+					$out.='<option value="'.$attributeID.'" '.(($attributeID==@$_POST['newAttributeType'])?'selected':'').'>'.$attributeName.'</option>';
+				}
+				$out.='</select></td>
 				<td><B>'.$TEXT_ATTRIBUTE_NAME_CONST.' *</B><br><input type="text" name="newAttributeName" value="" onKeyPress="document.editMediaFile.existingAttributes.selectedIndex=-1;"></td>
 			</tr>';
-			if(isset($_POST['newAttributeType']) && $_POST['newAttributeType']!='0'){
-				$newAttributeType=(int)$_POST['newAttributeType'];
-				$resAttributesByType=$mediadbADO->Execute('SELECT * FROM Attribute WHERE FK_AttributeType=? ORDER BY Name ASC',$newAttributeType);
-				$out.='
+				if(isset($_POST['newAttributeType']) && $_POST['newAttributeType']!='0'){
+					$newAttributeType=(int)$_POST['newAttributeType'];
+					$resAttributesByType=$mediadbADO->Execute('SELECT * FROM Attribute WHERE FK_AttributeType=? ORDER BY Name ASC',$newAttributeType);
+					$out.='
 				<tr>
 					<td>&nbsp;</td>
 					<td>';
-				if($resAttributesByType->RecordCount()>0){
-					$out.='
+					if($resAttributesByType->RecordCount()>0){
+						$out.='
 				<select name="existingAttributes" size="20" onClick="setAttributeName();" onChange="setAttributeName();">';
-				while($rowAttributesByType=$resAttributesByType->FetchRow()){
-					$out.='<option value="'.$rowAttributesByType['PK_Attribute'].'">'.$rowAttributesByType['Name'].'</option>';
-				}
-				$out.='
+						while($rowAttributesByType=$resAttributesByType->FetchRow()){
+							$out.='<option value="'.$rowAttributesByType['PK_Attribute'].'">'.$rowAttributesByType['Name'].'</option>';
+						}
+						$out.='
 					</select>';
-				}
-				$out.='
+					}
+					$out.='
 				<input type="submit" class="button" name="add" value="'.$TEXT_ADD_CONST.'"></td>
 				</tr>';
-			}
-			$out.='
+				}
+				$out.='
 			<tr>
 				<td colspan="2">&nbsp;</td>
 			</tr>
@@ -316,6 +351,7 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 				<td valign="top"><textarea name="longAttributeText"></textarea> <input type="submit" class="button" name="addLA" value="'.$TEXT_ADD_CONST.'"></td>				
 			</tr>	
 		</table>';
+			}
 		$out.='
 		</form>';
 		if(isset($_POST['newAttributeType']) && $_POST['newAttributeType']!='0'){
@@ -329,6 +365,16 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 		}	
 	}else{
 	// process area
+		if (isset($_REQUEST['addFile'])) {
+			// Insert some basic data
+			$type=(int)$_POST['type'];
+			$fileName=cleanString(@$_POST['filename']);
+			$newFileID = $mediadbADO->GetOne("SELECT MAX(PK_File) AS Max_PK_File FROM File") + 1;
+			$mediadbADO->Execute("INSERT INTO File (PK_File,Filename,Path,EK_MediaType) values (?,?,'',?)",array($newFileID,$fileName,$type));
+			// and let the update action below set the rest of the values
+			$action = 'update';
+			$fileID = $newFileID;
+		}
 		if(isset($_REQUEST['picID'])){
 			$toDelete=$_REQUEST['picID'];
 			$path=stripslashes(@$_REQUEST['path']);
@@ -456,7 +502,7 @@ function editMediaFile($output,$mediadbADO,$dbADO) {
 		}
 		
 		
-		if(isset($_POST['update'])){
+		if(isset($_REQUEST['addFile']) || isset($_POST['update'])){
 			$type=(int)$_POST['type'];
 			$subtype=(int)$_POST['subtype'];
 			$subtype=($subtype==0)?NULL:$subtype;
