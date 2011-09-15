@@ -730,14 +730,10 @@ fi
 
 }
 
-NvidiaDriverSetup () {
-StatsMessage "Starting nVidia driver setup"
-#source the nvidia-install.sh file
-source /usr/pluto/bin/nvidia-install.sh
-# install the correct nvidia driver
-installCorrectNvidiaDriver
+VideoDriverSetup () {
+StatsMessage "Starting video driver setup"
 
-## Unsure if this is still needed:
+## Install driver based on the type of video card used
 if lshwd | grep -qi 'VGA .* (nv)'; then
         apt-get -y -f install pluto-nvidia-video-drivers
 elif lshwd | grep -qi 'VGA .* (radeon)'; then
@@ -857,6 +853,7 @@ Install_DCERouter
 Create_And_Config_Devices
 Configure_Network_Options
 UpdateUpgrade
+VideoDriverSetup
 FixAsteriskConfig
 addAdditionalTTYStart
 InitialBootPrep
