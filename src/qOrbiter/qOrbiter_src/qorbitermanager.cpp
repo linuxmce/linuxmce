@@ -442,6 +442,22 @@ bool qorbiterManager::getConf(int pPK_Device)
     iea_area = defaults.attribute("DefaultEA").toInt();
     iPK_User = defaults.attribute("PK_User").toInt();
 
+    //-floorplans-----------------------------------------------------------------------------------------------------
+    QDomElement floorplanXml = root.firstChildElement("Floorplans");
+    floorplans = new FloorPlanModel( new FloorPlanItem , this);
+    QDomNodeList floorplanList = floorplanXml.childNodes();
+    for(int index = 0; index < floorplanList.count(); index++)
+    {
+
+        QString m_installation= floorplanList.at(index).attributes().namedItem("Installation").nodeValue();
+        QString m_iconpath= floorplanList.at(index).attributes().namedItem("Icon").nodeValue();
+        QString m_description= floorplanList.at(index).attributes().namedItem("Description").nodeValue();
+        int m_page= floorplanList.at(index).attributes().namedItem("Page").nodeValue().toInt();
+
+        QImage m_image;
+        floorplans->appendRow(new FloorPlanItem(m_installation,m_description, m_page, m_iconpath, m_image, m_image,  userList));
+    }
+
 
 
     //-USERS-----------------------------------------------------------------------------------------------------
@@ -647,6 +663,7 @@ bool qorbiterManager::getConf(int pPK_Device)
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomClimate", roomClimate);               //curent room climate model
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);               //curret room telecom model
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);             //current room security model
+    qorbiterUIwin->rootContext()->setContextProperty("floorplans", floorplans);
     qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
     qorbiterUIwin->rootContext()->setContextProperty("iPK_Device", QVariant::fromValue(iPK_Device));  //orbiter device number
     qorbiterUIwin->rootContext()->setContextProperty("currentroom", m_lRooms->sdefault_Ea);           //custom room list item provided

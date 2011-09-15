@@ -174,7 +174,9 @@ SOURCES += main.cpp \
     contextobjects/securityvideoclass.cpp \
     imageProviders/securityvideoimage.cpp \
     contextobjects/epgchannellist.cpp \
-    playlists/epgitemclass.cpp
+    playlists/epgitemclass.cpp \
+    datamodels/floorplanmodel.cpp \
+    datamodels/floorplanitem.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -233,7 +235,9 @@ HEADERS += \
     contextobjects/securityvideoclass.h \
     imageProviders/securityvideoimage.h \
     contextobjects/epgchannellist.h \
-    playlists/epgitemclass.h
+    playlists/epgitemclass.h \
+    datamodels/floorplanmodel.h \
+    datamodels/floorplanitem.h
 
 OTHER_FILES += Readme.txt \
     config.xml \
@@ -312,6 +316,10 @@ OTHER_FILES= \
 
 RESOURCES += \
     skinData.qrc
+
+
+
+
 
 
 

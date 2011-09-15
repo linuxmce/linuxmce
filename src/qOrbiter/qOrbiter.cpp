@@ -1360,6 +1360,15 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
         qmlUI-> goBack << s;
     }
 
+    qDebug() << "Datagrid request options:";
+     qDebug() << "MediaType: " << iPK_MediaType;
+      qDebug() << "Sub Type: " << qmlUI->q_subType;
+     qDebug() << "File Format: " << qmlUI->q_fileFormat;
+     qDebug() << "Attribute/Genres: " << qmlUI->q_attribute_genres;
+     qDebug() << "Media Sources:" << qmlUI->q_mediaSources;
+     qDebug() << "Attributetype sort:" << qmlUI->q_attributetype_sort;
+     qDebug() << "File Format:" << qmlUI->q_pk_attribute;
+
     qmlUI->backwards = false;
     CMD_Populate_Datagrid populateDataGrid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 63, s.toStdString(), DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
@@ -2339,6 +2348,8 @@ void DCE::qOrbiter::ShowFloorPlan(int floorplantype)
     SendCommand(getFloorPlan);
     QString Screen = QString("Screen_").append(StringUtils::itos(floorplantype).c_str()).append(".qml");
     qmlUI->gotoQScreen(Screen);
+
+
 
     //CMD_Populate_Datagrid getfloorplandevices;
 

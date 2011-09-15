@@ -3,7 +3,7 @@ import QtQuick 1.0
 Rectangle {
     width: scaleX(30)
     height: childrenRect.height
-    color:style.accentcolor
+    color:style.lighthighlight
     id:remotenumberpad
 
     Column{
@@ -23,6 +23,7 @@ Rectangle {
             TextInput {
                 id: text_input1
                 text: ""
+                echoMode: TextInput.Password
                 font.family: "Droid Sans Mono"
                 cursorVisible: true
                 readOnly: false
@@ -35,25 +36,25 @@ Rectangle {
 
         Rectangle{
             id:numberrect
-            height: scaleY(57)
+            height: childrenRect.height + 5
             width: childrenRect.width
             anchors.top: numberdisplay.bottom
             anchors.horizontalCenter: parent.horizontalCenter
             border.color: style.darkhiglight
             color: style.lighthighlight
             Column{
-
-
+                id: numberrowcolum
+                spacing: scaleY(2)
 
                 Row{
                     id:toprow
-                     spacing: scaleX(2)
+                    spacing: scaleX(2)
                     //number one
                     Rectangle{
                         id:number1
                         height: style.stdbuttonh
                         width: style.stdbuttonw
-                        color:style.lightdarkhiglight
+                        color:style.lighthiglight
                         radius: 100
                         Text {
                             id: numberonelabel
@@ -69,14 +70,13 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-
-                                number1.scale = 1.15
-
+                                parent.color = style.darkhighlight
                             }
                             onExited:
                             {
-                                number1.scale = 1
+                              parent.color = style.lighthighlight
                             }
+
 
                             onClicked:
                             {
@@ -90,7 +90,7 @@ Rectangle {
                         id:number2
                         height: style.stdbuttonh
                         width: style.stdbuttonw
-                        color:style.lightdarkhiglight
+                        color:style.lighthiglight
                         radius: 100
                         Text {
                             id: numbero2label
@@ -106,14 +106,13 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-
-                                number2.scale = 1.15
-
+                                parent.color = style.darkhighlight
                             }
                             onExited:
                             {
-                                number2.scale = 1
+                              parent.color = style.lighthighlight
                             }
+
 
                             onClicked:
                             {
@@ -127,7 +126,7 @@ Rectangle {
                         id:number3
                         height: style.stdbuttonh
                         width: style.stdbuttonw
-                        color:style.lightdarkhiglight
+                        color:style.lighthiglight
                         radius: 100
                         Text {
                             id: number3label
@@ -143,14 +142,13 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-
-                                number3.scale = 1.15
-
+                                parent.color = style.darkhighlight
                             }
                             onExited:
                             {
-                                number3.scale = 1
+                              parent.color = style.lighthighlight
                             }
+
 
                             onClicked:
                             {
@@ -173,7 +171,7 @@ Rectangle {
                         id:number4
                         height: style.stdbuttonh
                         width: style.stdbuttonw
-                        color:style.lightdarkhiglight
+                        color:style.lighthiglight
                         radius: 100
                         Text {
                             id: numberonelabe4
@@ -189,14 +187,13 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-
-                                number4.scale = 1.15
-
+                                parent.color = style.darkhighlight
                             }
                             onExited:
                             {
-                                number4.scale = 1
+                              parent.color = style.lighthighlight
                             }
+
 
                             onClicked:
                             {
@@ -210,7 +207,7 @@ Rectangle {
                         id:number5
                         height: style.stdbuttonh
                         width: style.stdbuttonw
-                        color:style.lightdarkhiglight
+                        color:style.lighthiglight
                         radius: 100
                         Text {
                             id: numbero5label
@@ -226,14 +223,13 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-
-                                number5.scale = 1.15
-
+                                parent.color = style.darkhighlight
                             }
                             onExited:
                             {
-                                number5.scale = 1
+                              parent.color = style.lighthighlight
                             }
+
 
                             onClicked:
                             {
@@ -247,7 +243,7 @@ Rectangle {
                         id:number6
                         height: style.stdbuttonh
                         width: style.stdbuttonw
-                        color:style.lightdarkhiglight
+                        color:style.lighthiglight
                         radius: 100
                         Text {
                             id: number6label
@@ -263,14 +259,14 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-
-                                number6.scale = 1.15
-
+                                parent.color = style.darkhighlight
                             }
                             onExited:
                             {
-                                number6.scale = 1
+                              parent.color = style.lighthighlight
                             }
+
+
 
                             onClicked:
                             {
@@ -286,13 +282,13 @@ Rectangle {
                 Row
                 {
                     id:bottomrow
-                     spacing: scaleX(2)
+                    spacing: scaleX(2)
                     //number 7
                     Rectangle{
                         id:number7
                         height: style.stdbuttonh
                         width: style.stdbuttonw
-                        color:style.lightdarkhiglight
+                        color:style.lighthiglight
                         radius: 100
                         Text {
                             id: number7label
@@ -308,14 +304,13 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-
-                                number7.scale = 1.15
-
+                                parent.color = style.darkhighlight
                             }
                             onExited:
                             {
-                                number7.scale = 1
+                              parent.color = style.lighthighlight
                             }
+
 
                             onClicked:
                             {
@@ -329,7 +324,7 @@ Rectangle {
                         id:number8
                         height: style.stdbuttonh
                         width: style.stdbuttonw
-                        color:style.lightdarkhiglight
+                        color:style.lighthiglight
                         radius: 100
                         Text {
                             id: number8label
@@ -345,14 +340,13 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-
-                                number8.scale = 1.15
-
+                                parent.color = style.darkhighlight
                             }
                             onExited:
                             {
-                                number8.scale = 1
+                              parent.color = style.lighthighlight
                             }
+
 
                             onClicked:
                             {
@@ -366,7 +360,7 @@ Rectangle {
                         id:number9
                         height: style.stdbuttonh
                         width: style.stdbuttonw
-                        color:style.lightdarkhiglight
+                        color:style.lighthiglight
                         radius: 100
                         Text {
                             id: number9label
@@ -382,13 +376,11 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-
-                                number9.scale = 1.15
-
+                                parent.color = style.darkhighlight
                             }
                             onExited:
                             {
-                                number9.scale = 1
+                              parent.color = style.lighthighlight
                             }
 
                             onClicked:
@@ -404,7 +396,7 @@ Rectangle {
                     id:actionbuttons
                     height: childrenRect.height
                     width: childrenRect.width
-                     spacing: scaleX(2)
+                    spacing: scaleX(2)
                     ButtonSq{
                         id:backbutton
                         height:style.stdbuttonh
@@ -412,6 +404,7 @@ Rectangle {
                         buttontext: "Back"
                         buttontextbold: true
                         buttontextfontsize: 12
+                        buttonsqradius: 100
                         MouseArea{
                             anchors.fill: parent
                             onClicked: {
@@ -425,8 +418,10 @@ Rectangle {
                         id:number0
                         height: style.stdbuttonh
                         width: style.stdbuttonw
-                        color:style.lightdarkhiglight
+                        color:style.lighthiglight
                         radius: 100
+
+
                         Text {
                             id: number0label
                             text: qsTr("0")
@@ -441,18 +436,11 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-
-                                number0.scale = 1.15
-
+                                parent.color = style.darkhighlight
                             }
                             onExited:
                             {
-                                number0.scale = 1
-                            }
-
-                            onClicked:
-                            {
-                                text_input1.text = text_input1.text + "0"
+                              parent.color = style.lighthighlight
                             }
 
                         }
@@ -467,6 +455,7 @@ Rectangle {
                         buttontext: "go"
                         buttontextbold: true
                         buttontextfontsize: 12
+                        buttonsqradius: 100
                         MouseArea{
                             anchors.fill: parent
                             onClicked:{

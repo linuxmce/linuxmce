@@ -14,6 +14,7 @@
 #include <datamodels/climatescenariomodel.h>
 #include <datamodels/telecomscenariomodel.h>
 #include <datamodels/securityscenariomodel.h>
+#include <datamodels/floorplanmodel.h>
 #include <datamodels/skindatamodel.h>
 #include <datamodels/filtermodel.h>
 #include <datamodels/genremodel.h>
@@ -129,7 +130,9 @@ public:
     map<int,string> m_mapPK_AttributeType_Description; // The description for all attribute types
     bool m_bIsOSD,m_bNewOrbiter,m_bUseAlphaBlending,m_bUseMask;
 
-    QMap<int,QString> floorplans;
+    //floorplans
+    FloorPlanModel *floorplans;
+
 
     /*
 datagrid variables

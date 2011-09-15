@@ -1,0 +1,40 @@
+#ifndef FLOORPLANMODEL_H
+#define FLOORPLANMODEL_H
+
+#include <QAbstractItemModel>
+#include <datamodels/floorplanitem.h>
+#include <QModelIndex>
+
+class FloorPlanModel : public QAbstractItemModel
+{
+    Q_OBJECT
+public:
+    explicit FloorPlanModel(FloorPlanItem *m_prototype, QObject *parent = 0);
+    int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+    void appendRow(FloorPlanItem* item);
+    void appendRows(const QList<FloorPlanItem*> &items);
+    void insertRow(int row, FloorPlanItem* item);
+    bool removeRow(int row, const QModelIndex &parent = QModelIndex());
+    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
+    FloorPlanItem* takeRow(int row);
+    FloorPlanItem* find(const QString &id) const;
+    QModelIndex indexFromItem( const FloorPlanItem* item) const;
+    FloorPlanItem* currentRow();
+    void handleItemChange();
+    void clear();
+
+    QModelIndex index(int row, int column, const QModelIndex &parent) const ;
+    QModelIndex parent(const QModelIndex &child) const;
+    int columnCount(const QModelIndex &parent) const;
+
+signals:
+
+public slots:
+
+private:
+    FloorPlanItem* m_prototype;
+    QList<FloorPlanItem*> m_list;
+};
+
+#endif // FLOORPLANMODEL_H
