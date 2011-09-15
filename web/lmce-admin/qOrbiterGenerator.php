@@ -136,7 +136,7 @@ function getFloorplans($conn, $doc, $orbiterData)
                 $attrib2= $t->setAttribute("Page", $row['Page']);
                 $attrib2= $t->setAttribute("Description", $row['Description']);
                 $attrib2= $t->setAttribute("Icon", $row['FK_Icon']);			
-
+				$attrib2= $t->setAttribute("Installation", $row['FK_Installation']);
 		$floorplanElement->appendChild($t);		
 		}		
 
