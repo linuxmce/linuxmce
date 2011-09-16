@@ -140,6 +140,6 @@ StatsMessage "Starting firstboot script"
 CreatePackagesFiles
 SetupNetworking 
 CleanInstallSteps
-CreateDisklessImage
+#CreateDisklessImage
 StatsMessage "Firstboot Script Complete"
 exit 0
