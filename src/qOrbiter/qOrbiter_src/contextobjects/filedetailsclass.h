@@ -20,11 +20,12 @@ class FileDetailsClass : public QDeclarativeItem
     Q_OBJECT
 public:
     explicit FileDetailsClass(QDeclarativeItem *parent = 0);
+    void clear();
     Q_PROPERTY (bool showDetails READ isVisible WRITE setVisible NOTIFY VisibleChanged)
     Q_PROPERTY(QString file READ getFile WRITE setFile NOTIFY FileChanged)
     Q_PROPERTY(QString objecttitle READ getTitle WRITE setTitle NOTIFY object_changed)
-    Q_PROPERTY(QString synop READ getSynop WRITE setSynop NOTIFY object_changed)
-    Q_PROPERTY(QUrl screenshot READ getScreenShot WRITE setScreenshot NOTIFY ImageChanged)
+    Q_PROPERTY(QString synop READ getSynop WRITE setSynop NOTIFY synopChanged)
+    Q_PROPERTY(QUrl screenshot READ getScreenShot WRITE setScreenshot NOTIFY imageChanged)
     Q_PROPERTY(QString filename READ getFilename WRITE setFilename NOTIFY object_changed)
     Q_PROPERTY(QString path READ getPath WRITE setPath NOTIFY object_changed)
 
@@ -34,6 +35,7 @@ public:
     //media title variable that can be independant of what is passed initially by now playing
     Q_PROPERTY (QString mediatitle READ getMediaTitle WRITE setMediaTitle NOTIFY mediaTitleChanged)
     Q_PROPERTY (QString genre READ getGenre WRITE setGenre NOTIFY genreChanged)
+    Q_PROPERTY (QString studio READ getStudio WRITE setStudio NOTIFY studioChanged)
     //television related variables
     Q_PROPERTY (QString program READ getProgram WRITE setProgram NOTIFY programChanged)
     Q_PROPERTY (QString channel READ getChannel WRITE setChannel NOTIFY channelChanged)
@@ -44,6 +46,9 @@ public:
     Q_PROPERTY (QString album READ getAlbum WRITE setAlbum NOTIFY albumChanged)
     Q_PROPERTY (QString track READ getTrack WRITE setTrack NOTIFY trackChanged)
     Q_PROPERTY (QString performerlist READ getPerformers WRITE setPerformers NOTIFY performersChanged)
+    Q_PROPERTY (QStringList performers READ getPerformerList)
+    Q_PROPERTY (QString composerlist READ getComposers WRITE setComposers NOTIFY composersChanged)
+    Q_PROPERTY (QStringList composers READ getComposerList)
 
 
     QString objecttitle;
@@ -78,11 +83,11 @@ public:
 
     QString synop;
     inline QString getSynop() {return synop;}
-    inline void setSynop(QString s) { synop = s; emit object_changed(); }
+    inline void setSynop(QString s) { synop = s; emit synopChanged(); }
 
     QUrl screenshot;
     QUrl bgImage;
-    inline void setScreenshot(QUrl u) {screenshot = u; emit ImageChanged(screenshot);}
+    inline void setScreenshot(QUrl u) {screenshot = u;}
     inline QUrl getScreenShot() {return screenshot;}
 
     QString filename;
@@ -94,7 +99,7 @@ public:
     inline void setPath (QString f) {path = f; emit object_changed();}
 
     QImage qi_screenshot;
-    inline void setScreenshotimage(QImage img) {qi_screenshot= img; qDebug() << "File Detail Image Set!";}
+    inline void setScreenshotimage(QImage img) {qi_screenshot= img; qDebug() << "File Detail Image Set!"; emit imageChanged();}
     inline QImage getScreenshotimage() {return qi_screenshot;}
 
     QImage qi_bgimage;
@@ -105,6 +110,7 @@ public:
     QString qs_mainTitle2;
     QString qs_subTitle;
     QString mediatitle;
+    QString studio;
 
     //television related
     QString program;
@@ -120,14 +126,16 @@ public:
     QString album;
     QString track;
     QString genre;
-    QStringList composer;
+    QStringList composers;
+    QString composerlist;
     QString releasedate;
 
 signals:
     void object_changed();
+    void synopChanged();
     void FileChanged(QString f);
     void VisibleChanged(bool vis);
-    void ImageChanged(QUrl);
+    //void ImageChanged(QUrl);
     void titleImageChanged();
     //general signals
     void mediaTitleChanged();
@@ -135,6 +143,7 @@ signals:
     void mediaChanged();
     void mediaEnded();
     void mediaStarted();
+    void studioChanged();
     void imageChanged();
     void screenTypeChanged();
     void titleChanged();
@@ -150,7 +159,7 @@ signals:
     void albumChanged();
     void trackChanged();
     void performersChanged();
-    void composerChanged();
+    void composersChanged();
 
 
     //video signals
@@ -202,6 +211,9 @@ public slots:
     void setMediaTitle (QString inc_mediaTitle) {mediatitle = inc_mediaTitle;  emit mediaTitleChanged();}
     QString getMediaTitle () {return mediatitle;}
 
+    void setStudio (QString inc_studio) {channel = inc_studio;  emit studioChanged();}
+    QString getStudio () {return studio;}
+
     //void setPlaylistPostion(int i_pls) {m_iplaylistPosition = i_pls; qDebug() << "Playlist set to: "<< m_iplaylistPosition;  emit playListPositionChanged();}
   //  int getPlaylistPosition() {return m_iplaylistPosition;}
 
@@ -229,12 +241,17 @@ public slots:
 
     void setPerformers (QString inc_performer) {performers << inc_performer;  emit performersChanged();}
     QString getPerformers() {performerlist = performers.join(" | "); return performerlist;}
+    QStringList getPerformerList() {return performers;}
+
+    void setComposers (QString inc_composer) {composers << inc_composer;  emit composersChanged();}
+    QString getComposers() {composerlist = composers.join(" | "); return composerlist;}
+    QStringList getComposerList() {return composers;}
 
     void setDirector (QString inc_director) {directors << inc_director;  emit directorChanged();}
     QString getDirector() {director = directors.join(" | "); return director;}
 
     void setGenre (QString inc_genre) {genre.append(inc_genre+" | ");  emit genreChanged();}
-    QString getGenre() { return genre;}
+    QString getGenre() { return genre.left(genre.indexOf(" | "));}
 
 
     void setFileMediaType();

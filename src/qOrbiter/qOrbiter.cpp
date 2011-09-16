@@ -2050,22 +2050,26 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
 
       */
 
+    // clear out any previous data in the filedetailsclass instance
+    qmlUI->filedetailsclass->clear();
 
     QStringList details = breaker.split(QRegExp("\\t"));
     int placeholder;
 
-    if(placeholder = details.indexOf("TITLE"))
+    placeholder = details.indexOf("TITLE");
+    if(placeholder != -1)
     {
         qmlUI->filedetailsclass->setTitle(details.at(placeholder+1));
     }
 
     placeholder = details.indexOf("SYNOPSIS");
-    if(placeholder != 0)
+    if(placeholder != -1)
     {
         qmlUI->filedetailsclass->setSynop(details.at(placeholder+1));
     }
 
-    if(placeholder = details.indexOf("PICTURE"))
+    placeholder = details.indexOf("PICTURE");
+    if(placeholder != -1)
     {
         qmlUI->filedetailsclass->setScreenshot(details.at(placeholder+1));
         qmlUI->filedetailsclass->setScreenshotimage(getfileForDG(details.at(placeholder+1).toStdString()));
@@ -2073,14 +2077,14 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     }
 
     placeholder = details.indexOf("PATH");
-    if(placeholder != 0)
+    if(placeholder != -1)
     {
         qmlUI->filedetailsclass->setPath(details.at(placeholder+1));
 
     }
 
     placeholder = details.indexOf("FILENAME");
-    if(placeholder != 0)
+    if(placeholder != -1)
     {
         qmlUI->filedetailsclass->setFilename(details.at(placeholder+1));
         qDebug() << qmlUI->filedetailsclass->getFilename();
@@ -2133,16 +2137,14 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
               QString attributeType = pCell->m_mapAttributes_Find("Title").c_str();
               QString attribute  = pCell->m_mapAttributes_Find("Name").c_str();
                 cellfk = pCell->GetValue();
-
+                qDebug() << "Attribute:" << attributeType << attribute;
                 if(attributeType == "Program")
                 {
                     qmlUI->filedetailsclass->setProgram(attributeType);
-                     qDebug() << attribute;
                 }
                 else if(attributeType == "Title")
                 {
                     qmlUI->filedetailsclass->setMediaTitle(attribute);
-                     qDebug() << attribute;
                 }
                 else if(attributeType == "Channel")
                 {
@@ -2151,27 +2153,34 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 else if(attributeType == "Episode")
                 {
                     qmlUI->filedetailsclass->setEpisode(attribute);
-                    qDebug() << attribute;
                 }
                 else if(attributeType == "Performer")
                 {
                     qmlUI->filedetailsclass->setPerformers(attribute);
-                    qDebug() << attribute;
+                }
+                else if(attributeType == "Composer/Writer")
+                {
+                    qmlUI->filedetailsclass->setComposers(attribute);
                 }
                 else if(attributeType == "Director")
                 {
                     qmlUI->filedetailsclass->setDirector(attribute);
-                    qDebug() << attribute;
                 }
                 else if(attributeType == "Genre")
                 {
                     qmlUI->filedetailsclass->setGenre(attribute);
-                    qDebug() << attribute;
                 }
                 else if(attributeType == "Album")
                 {
                     qmlUI->filedetailsclass->setAlbum(attribute);
-                    qDebug() << attribute;
+                }
+                else if(attributeType == "Studio")
+                {
+                    qmlUI->filedetailsclass->setStudio(attribute);
+                }
+                else
+                {
+                    qDebug() << "Unhandled attribute: " << attributeType << attribute;
                 }
 
                 //qmlUI->m_selected_grid_item->appendRow(new FileDetailsItem(cellTitle, cellAttribute, cellImg, false,  qmlUI->model));
