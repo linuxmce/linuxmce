@@ -10,11 +10,19 @@ Rectangle{
     Behavior on opacity {
         PropertyAnimation{duration:250}
     }
-    Timer {
-        // This should not be needed, but onCompleted for this dialog is being called too soon
-        interval: 500; running: true; repeat: false
-        onTriggered: {
+    Component.onCompleted: {
+        details.opacity=1
+    }
+    Connections{
+        target: filedetailsclass
+        onImageChanged: {
+            coverArt.source = "image://filedetailsprovider/"+filedetailsclass.screenshot
+        }
+        onSynopChanged:{
             synopsisflick.contentHeight=synopsistext.height
+        }
+        onPerformersChanged:{
+            castList.model = filedetailsclass.performers
         }
     }
     color: "transparent"
@@ -28,9 +36,10 @@ Rectangle{
         height: parent.height
         color: "black"
         Image{
+            id: coverArt
             anchors.fill: parent
             fillMode: Image.PreserveAspectFit;
-            source: "image://filedetailsprovider/"+filedetailsclass.screenshot
+            //source: "image://filedetailsprovider/"+filedetailsclass.screenshot
             smooth: true
         }
     }
@@ -107,7 +116,7 @@ Rectangle{
 
         // MPAA rating flag
         Image{
-            source: "../img/flags/mpaa_restricted.png" // as well as other mpaa_* files
+            //source: "../img/flags/mpaa_restricted.png" // as well as other mpaa_* files
             smooth: true
             x: scaleX(.55) // 7
             y: scaleY(9.44) // 68
@@ -122,7 +131,7 @@ Rectangle{
             height: scaleY(7.78) // 56
             color:"transparent"
             Text{
-                text: "2006"
+                //text: "2006"
                 smooth: true
                 color: "#868686"
                 font.family: aeonEdit.name
@@ -137,7 +146,7 @@ Rectangle{
             height: scaleY(7.78) // 56
             color:"transparent"
             Text{
-                text: "Action / Drama / History / War"
+                //text: "Action / Drama / History / War"
                 smooth: true
                 color: "#868686"
                 font.family: aeonEdit.name
@@ -149,7 +158,7 @@ Rectangle{
         Text{
             x: scaleX(9.38) // 120
             y: scaleY(17.22) // 113+11
-            text: "some douchebag"
+            text: filedetailsclass.director
             smooth: true
             color: "white"
             font.family: aeonEdit.name
@@ -159,7 +168,7 @@ Rectangle{
         Text{
             x: scaleX(9.38) // 120
             y: scaleY(21.11) // 141+11
-            text: "another douchebag"
+            text: filedetailsclass.composerlist
             smooth: true
             color: "white"
             font.family: aeonEdit.name
@@ -169,7 +178,7 @@ Rectangle{
         Text{
             x: scaleX(9.38) // 120
             y: scaleY(25) // 169+11
-            text: "120 minutes"
+            //text: "120 minutes"
             smooth: true
             color: "white"
             font.family: aeonEdit.name
@@ -186,20 +195,20 @@ Rectangle{
             ListView {
                 id: castList
                 anchors.fill: parent
-                //model: filedetails.performers
-                model:ListModel {
-                    ListElement {
-                        pkattribute: "douchebag one"
-                    }
-                    ListElement{
-                        pkattribute: "douchebag two"
-                    }
-                }
+                model: filedetailsclass.performers
+//                model:ListModel {
+//                    ListElement {
+//                        pkattribute: "douchebag one"
+//                    }
+//                    ListElement{
+//                        pkattribute: "douchebag two"
+//                    }
+//                }
                 delegate: Item {
                     width: castList.width;
                     height: castList.height/5
                     Text {
-                        text:pkattribute
+                        text:modelData
                         smooth: true
                         color: "white"
                         font.family: aeonEdit.name
@@ -330,5 +339,5 @@ Rectangle{
             }
         }
     }
-    Component.onCompleted: details.opacity=1
+
 }

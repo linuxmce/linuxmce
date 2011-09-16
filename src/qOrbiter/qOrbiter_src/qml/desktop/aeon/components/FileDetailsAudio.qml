@@ -24,6 +24,7 @@ Rectangle {
             width: scaleX(45.31) // 580
             height: scaleY(88.47) // 637
             source: "../img/info/musicinfogradient.png"
+            smooth: true
         }
         Image {
             x: scaleX(4.3) // 55
@@ -31,11 +32,13 @@ Rectangle {
             width: scaleX(28.91) // 370
             height: scaleY(55.56) // 400
             source: '../img/info/musicinfoshadow.png'
+            smooth: true
             Image {
                 anchors.centerIn: parent
                 width: parent.width*.8
                 height: parent.height*.8
                 source: "image://filedetailsprovider/"+filedetailsclass.screenshot
+                smooth: true
             }
         }
 
@@ -45,7 +48,8 @@ Rectangle {
         x: scaleX(39.69) // 508
         width: scaleX(60.31) // 772
         height: parent.height
-        source: '../img/info/info_rightpaneltop.png'
+        source: "../img/info/lite/info_rightpaneltop.png"
+        smooth: true
     }
 
     Rectangle {
@@ -70,15 +74,25 @@ Rectangle {
         Text { // artist
             y: scaleY(9.72) // 70
             font.pixelSize: scaleY(4.17) // 30
-            text: "Artist"
+            text: filedetailsclass.performerlist
             smooth: true
             color: "white"
             font.family: aeonSettings.name
+            Text {
+                anchors.bottom: parent.bottom
+                anchors.left: parent.right
+                anchors.leftMargin: scaleY(5)
+                font.pixelSize: scaleY(3)
+                text: filedetailsclass.album
+                smooth: true
+                color: "white"
+                font.family: aeonSettings.name
+            }
         }
         Text { // year
             y: scaleY(16.67) // 120
             font.pixelSize: scaleY(5.14) // 37
-            text: "2006"
+            //text: "2006"
             smooth: true
             color: "white"
             font.family: aeonSettings.name
@@ -87,7 +101,7 @@ Rectangle {
             x: scaleX(8.83) // 113
             y: scaleY(16.67) // 120
             font.pixelSize: scaleY(3.33) // 24
-            text: "Genre"
+            text: filedetailsclass.genre
             smooth: true
             color: "white"
             font.family: aeonSettings.name
@@ -95,7 +109,7 @@ Rectangle {
         Text { // track
             y: scaleY(22.22) // 160
             font.pixelSize: scaleY(2.5) // 18
-            text: "Track:"
+            //text: "Track:"
             smooth: true
             color: "white"
             font.family: aeonSettings.name
@@ -103,7 +117,7 @@ Rectangle {
         Text { // duration
             y: scaleY(26.39) // 190
             font.pixelSize: scaleY(2.5) // 18
-            text: "Duration:"
+            //text: "Duration:"
             smooth: true
             color: "white"
             font.family: aeonSettings.name
