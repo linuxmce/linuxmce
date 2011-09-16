@@ -12,7 +12,7 @@
 
 
 //#include "OrbiterData.h"
-#include "DCERouter.h"
+
 
 /*
   this file is responsible for the main connection between the dce thread and the qt thread.
@@ -22,7 +22,7 @@
 
 using namespace DCE;
 
-
+/*
 // You can override this block if you don't want the app to reload in the event of a problem
 extern void (*g_pDeadlockHandler)(PlutoLock *pPlutoLock);
 extern void (*g_pSocketCrashHandler)(Socket *pSocket);
@@ -102,7 +102,7 @@ extern "C" {
 }
 
 //<-dceag-plug-e->
-
+*/
 qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent) :
     QWidget(parent), iPK_Device(deviceno), qs_routerip(routerip)
 {
