@@ -125,7 +125,8 @@ fi
 
 CreateDisklessImage () {
 StatsMessage "Building a disk image for your Diskless Media Directors"
-nohup /usr/pluto/bin/Diskless_CreateTBZ.sh >> /var/log/pluto/Diskless_Create`date`.log 2>&1 &
+local diskless_log=/var/log/pluto/Diskless_Create-`date +"%F"`.log
+nohup /usr/pluto/bin/Diskless_CreateTBZ.sh >> ${diskless_log} 2>&1 &
 }
 
 ###########################################################
@@ -141,3 +142,4 @@ SetupNetworking
 CleanInstallSteps
 CreateDisklessImage
 StatsMessage "Firstboot Script Complete"
+exit 0

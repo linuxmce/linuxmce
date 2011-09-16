@@ -35,6 +35,8 @@ else
 	echo > ${log_file}
 	echo "`date` - Setup has run before, clearing old log file at ${log_file}"
 fi
+TeeMyOutput --outfile ${log_file} --stdboth --append -- "$@"
+VerifyExitCode "Log Setup"
 }
 
 VerifyExitCode () {
@@ -838,7 +840,6 @@ echo >> /etc/apt/sources.list
 
 #Set up logging
 Setup_Logfile
-TeeMyOutput --outfile ${log_file} --stdboth --append -- "$@"
 
 #Execute Functions
 UpdateUpgrade
