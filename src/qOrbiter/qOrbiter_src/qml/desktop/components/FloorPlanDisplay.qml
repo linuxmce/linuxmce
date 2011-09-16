@@ -22,6 +22,13 @@ Rectangle {
             height: scaleY(55)
             width: scaleX(55)
             clip: true
+
+            Image {
+                id: floorplanimage
+                source: "image://listprovider/"+"floorplan"
+                asynchronous: true
+                anchors.fill: parent
+            }
         }
 
         Rectangle
@@ -82,7 +89,7 @@ Rectangle {
                 border.color: style.darkhighlight
                 Text {
                     id: devicedesc
-                    text: description
+                    text: ident
                 }
             }
         }

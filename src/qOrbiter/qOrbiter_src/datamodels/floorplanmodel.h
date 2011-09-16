@@ -7,6 +7,7 @@
 
 class FloorPlanModel : public QAbstractListModel
 {
+    Q_PROPERTY (QString currentPage READ getCurrentPage WRITE setCurrentPage NOTIFY pageChanged)
     Q_OBJECT
 public:
     explicit FloorPlanModel(FloorPlanItem *m_prototype, QObject *parent = 0);
@@ -23,13 +24,18 @@ public:
     FloorPlanItem* currentRow();
 
     void clear();
+    QImage getPageImage(QString &id);
+    void setCurrentPage(QString currentPageId);
+    QString getCurrentPage() {return currentPage;}
+    QString currentPage;
+
 
    // QModelIndex index(int row, int column, const QModelIndex &parent) const ;
   //  QModelIndex parent(const QModelIndex &child) const;
   //  int columnCount(const QModelIndex &parent) const;
 
 signals:
-
+   void pageChanged();
 public slots:
  void handleItemChange();
 private:

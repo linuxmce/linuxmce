@@ -73,7 +73,8 @@ void FloorPlanModel::handleItemChange()
 FloorPlanItem * FloorPlanModel::find(const QString &id) const
 {
   foreach(FloorPlanItem* item, m_list) {
-    if(item->id() == id) return item;
+
+    if(item->id() == id) qDebug() << item->id();return item;
   }
   return 0;
 }
@@ -82,11 +83,14 @@ QModelIndex FloorPlanModel::indexFromItem(const FloorPlanItem *item) const
 {
   Q_ASSERT(item);
   for(int row=0; row<m_list.size(); ++row) {
+ //qDebug() << "Row:" << row << "::" << m_list.at(row)->id();
+      if(m_list.at(row) == item) {
 
-      if(m_list.at(row) == item) return index(row,row,QModelIndex());
+          return index(row,row,QModelIndex());
+      }
 
   }
-
+ qDebug("fail!");
   return QModelIndex();
 }
 
@@ -133,6 +137,28 @@ FloorPlanItem * FloorPlanModel::currentRow()
 {
     FloorPlanItem* item = m_list.at(0);
     return item;
+}
+
+QImage FloorPlanModel::getPageImage(QString &id)
+{
+    qDebug() << "Seeking page id:" << id;
+    FloorPlanItem *myItem = find(id);
+    if (!myItem)
+    { QImage fail;
+        return fail;
+    }
+
+     QImage fpImage= myItem->floorplanImage();
+
+
+    return fpImage;
+}
+
+
+
+void FloorPlanModel::setCurrentPage(QString currentPageId)
+{
+ currentPage = currentPageId;
 }
 
 /*

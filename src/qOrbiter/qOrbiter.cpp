@@ -1961,7 +1961,7 @@ QImage DCE::qOrbiter::getfileForDG(string filePath)
     configData.setRawData(picData, picData_Size);
     QImage returnImage;
 
-    if (!returnImage.loadFromData(configData, "JPEG"))
+    if (!returnImage.loadFromData(configData))
     {
         qDebug() << "Couldnt get image, defaulting";
         returnImage.load(":/icons/videos.png");
@@ -2348,8 +2348,11 @@ void DCE::qOrbiter::ShowFloorPlan(int floorplantype)
     CMD_Get_Current_Floorplan getFloorPlan(qmlUI->iPK_Device, qmlUI->iOrbiterPluginID, id, floorplantype , &sval);
     SendCommand(getFloorPlan);
     QString Screen = QString("Screen_").append(StringUtils::itos(floorplantype).c_str()).append(".qml");
+
     qmlUI->gotoQScreen(Screen);
 
+
+//CMD_Request_File floorplanImgRequest
 
 
     //CMD_Populate_Datagrid getfloorplandevices;

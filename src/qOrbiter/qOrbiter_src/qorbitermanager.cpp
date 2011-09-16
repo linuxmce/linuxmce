@@ -8,6 +8,7 @@
 #include <QApplication>
 #include <imageProviders/filedetailsimageprovider.h>
 #include <imageProviders/nowplayingimageprovider.h>
+#include <imageProviders/abstractimageprovider.h>
 #include <contextobjects/epgchannellist.h>
 
 
@@ -454,10 +455,21 @@ bool qorbiterManager::getConf(int pPK_Device)
         QString m_description= floorplanList.at(index).attributes().namedItem("Description").nodeValue();
         int m_page= floorplanList.at(index).attributes().namedItem("Page").nodeValue().toInt();
 
-        QImage m_image;
-        floorplans->appendRow(new FloorPlanItem(m_installation,m_description, m_page, m_iconpath, m_image, m_image,  userList));
-    }
+       // qDebug () << "/usr/pluto/orbiter/floorplans/" << m_installation.toStdString().c_str()<<"/inst"<<StringUtils::itos(m_page).c_str()<<".png";
+        QImage m_image = pqOrbiter->getfileForDG("/usr/pluto/orbiter/floorplans/inst"+m_installation.toStdString()+"/"+StringUtils::itos(m_page)+".png");
+       QImage icon = m_image.scaledToHeight(100);
 
+       // qDebug() << m_description;
+       if (m_page == 1)
+       {
+           QString safe = m_installation;
+           floorplans->setCurrentPage(safe.append("-").append(QString::number(m_page)));
+       }
+
+        floorplans->appendRow(new FloorPlanItem(m_installation,m_description, m_page, m_iconpath, m_image, icon,  userList));
+    }
+    modelimageprovider = new AbstractImageProvider(this);
+    qorbiterUIwin->engine()->addImageProvider("listprovider", modelimageprovider);
 
 
     //-USERS-----------------------------------------------------------------------------------------------------

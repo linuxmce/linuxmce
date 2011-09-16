@@ -43,7 +43,7 @@
 #include <contextobjects/epgchannellist.h>
 #include <imageProviders/basicImageProvider.h>                 //qml image provider
 #include <imageProviders/gridimageprovider.h>                  //qml image provider for grids !not implemented!
-
+//#include <imageProviders/abstractimageprovider.h>
 #include <screensaver/screensavermodule.h>
 
 /*-------Dce Includes----*/
@@ -61,6 +61,7 @@ class MediaScenarioModel;
 class ClimateScenarioModel;
 class TelecomScenarioModel;
 class SecurityScenarioModel;
+class AbstractImageProvider;
 
 
 
@@ -117,6 +118,7 @@ public:
     GridIndexProvider *advancedProvider;
     FileDetailsImageProvider *contextImageProvider;
     UpdateObjectImageProvider *nowPlayingProvider;
+    AbstractImageProvider *modelimageprovider;
     QString *gridReqType;
 
     //carried over variables from old OrbiterData.h

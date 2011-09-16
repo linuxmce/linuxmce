@@ -23,7 +23,7 @@ QHash<int, QByteArray> FloorPlanItem::roleNames() const
 
 QVariant FloorPlanItem::data(int role) const
 {
-    qDebug() << "Finding role";
+
   switch(role) {
   case InstallationRole:
     return installation();

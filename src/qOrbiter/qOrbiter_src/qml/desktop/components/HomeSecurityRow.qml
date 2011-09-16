@@ -39,7 +39,7 @@ Item {
                 Image {
                     id: buttonbg2
                     source: "../../../img/icons/buttonoverlay3.png"
-                    anchors.fill: lightingfloorplan
+                    anchors.fill: rowheader
                     height: parent.height
                     width: parent.width
                 }

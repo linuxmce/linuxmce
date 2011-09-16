@@ -5,8 +5,6 @@
 #include <qorbitermanager.h>
 #include <QVariant>
 
-
-
 class UpdateObjectImageProvider: public QObject , public QDeclarativeImageProvider
 {
 public:
