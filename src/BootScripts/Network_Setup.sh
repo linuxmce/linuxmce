@@ -61,7 +61,7 @@ if [[ "$NetIfConf" == 0 || "$NPflagReconfNetwork" == yes ]]; then
 	RunSQL "$Q"
 fi
 
-Q="SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=1 AND FK_DeviceData=292"
+Q="SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=1 AND FK_DeviceData=$DEVICEDATA_Network_Interfaces_IPv6"
 IPv6TunnelSettings=$(RunSQL "$Q")
 IPv6Active=`echo $IPv6TunnelSettings | cut -d"," -f 10`
 # check if IPv6 tunnel settings enabled
