@@ -27,16 +27,14 @@ if [ ! -f ${log_file} ]; then
 	if [ $? = 1 ]; then
 		echo "`date` - Unable to write to ${log_file} - re-run script as root"
 		exit 1
-	else
-		echo "`date` - Logging initiatilized to ${log_file}"
 	fi
 else
 	#zero out an existing file
 	echo > ${log_file}
-	echo "`date` - Setup has run before, clearing old log file at ${log_file}"
 fi
 TeeMyOutput --outfile ${log_file} --stdboth --append -- "$@"
 VerifyExitCode "Log Setup"
+echo "`date` - Logging initiatilized to ${log_file}"
 }
 
 VerifyExitCode () {
