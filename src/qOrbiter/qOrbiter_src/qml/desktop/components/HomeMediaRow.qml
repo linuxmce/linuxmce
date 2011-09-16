@@ -38,7 +38,13 @@ Item {
                 color: style.homescreenfloorplanbuttoncolor
                 radius: style.but_smooth
                 buttontext: ""
-
+                Image {
+                    id: buttonbg
+                    source: "../../../img/icons/buttonoverlay3.png"
+                    anchors.fill: rowheader
+                    height: parent.height
+                    width: parent.width
+                }
                 Image {
                     id: mHeaderImg
                     source: "../../../img/icons/kmix.png"
@@ -46,6 +52,7 @@ Item {
                     width: parent.width
                     anchors.centerIn: parent
                 }
+
                 MouseArea{
                     id: mousearea1
                     anchors.fill: parent

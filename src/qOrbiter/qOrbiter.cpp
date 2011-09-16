@@ -76,7 +76,7 @@ bool qOrbiter::GetConfig()
         return false;
     }
 
-    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbitier Connected, requesting configuration for device %d", qmlUI->iPK_Device);
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Connected, requesting configuration for device %d", qmlUI->iPK_Device);
 
     char *oData;
     oData = NULL;
@@ -106,7 +106,7 @@ bool qOrbiter::GetConfig()
     {
         qDebug() << "Invalid config for device: " << qmlUI->iPK_Device;
         qDebug() << "Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d="<<qmlUI->iPK_Device ;
-        exit(20);
+        qmlUI->gotoQScreen("Splash.qml");
     }
     qmlUI->binaryConfig = configData;
     delete oData;
@@ -1908,6 +1908,7 @@ bool DCE::qOrbiter::initialize()
     {
         return false;
     }
+
 }
 
 bool DCE::qOrbiter::deinitialize()

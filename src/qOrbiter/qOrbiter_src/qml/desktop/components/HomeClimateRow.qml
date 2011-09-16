@@ -43,11 +43,19 @@ Item {
 
                 Image {
                     id: buttonbg
-                    source: "../../../img/icons/buttonoverlay.png"
+                    source: "../../../img/icons/buttonoverlay3.png"
                     anchors.fill: rowheader
                     height: parent.height
-
                     width: parent.width
+                }
+
+                Image {
+                    id: onimg
+                    source: "../../../img/icons/kweather.png"
+                    height: parent.height
+                    width: parent.width
+                    anchors.centerIn: parent
+
                 }
             }
 

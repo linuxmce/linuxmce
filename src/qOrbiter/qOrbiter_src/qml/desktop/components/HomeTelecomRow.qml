@@ -38,6 +38,20 @@ Item {
                 color: style.homescreenfloorplanbuttoncolor
                 radius: style.but_smooth
                 buttontext: "Telecom"
+                Image {
+                    id: buttonbg2
+                    source: "../../../img/icons/buttonoverlay3.png"
+                    anchors.fill: lightingfloorplan
+                    height: parent.height
+                    width: parent.width
+                }
+                Image {
+                    id: buttonbg
+                    source: "../../../img/icons/Speed Dial.png"
+                    anchors.fill: rowheader
+                    height: parent.height
+                    width: parent.width
+                }
                 MouseArea{
                     id: mousearea1
                     anchors.fill: parent

@@ -34,7 +34,24 @@ Item {
                 anchors.topMargin: scaleY(2)
                 color: style.homescreenfloorplanbuttoncolor
                 radius: style.but_smooth
-                buttontext: "Security Floorplan"
+                buttontext: ""
+
+                Image {
+                    id: buttonbg2
+                    source: "../../../img/icons/buttonoverlay3.png"
+                    anchors.fill: lightingfloorplan
+                    height: parent.height
+                    width: parent.width
+                }
+
+                Image {
+                    id: buttonbg
+                    source: "../../../img/icons/Security.png"
+                    anchors.fill: rowheader
+                    height: parent.height
+                    width: parent.width
+                }
+
                 MouseArea{
                     id: mousearea1
                     anchors.fill: parent

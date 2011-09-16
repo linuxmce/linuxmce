@@ -44,7 +44,7 @@ Rectangle {
             }
             onExited: {
                 buttonBase.color = style.lighthighlight
-                buttonLabel.color = "Black"
+                buttonLabel.color = style.darkhighlight
             }
 
 

@@ -18,21 +18,22 @@ Component{
             buttontext: label
             buttontextbold: true
             buttontextitalic: true
+            color:"transparent"
+
 
             MouseArea{
                 anchors.fill: parent
                 onClicked: execGrp(params);
+                hoverEnabled: true
                 onEntered: delegateButton.buttontextcolor = style.accentcolor
+                onExited: delegateButton.buttontextcolor = style.lighthighlight
                 z:5    }
 
             Image {
                 id: buttonsqimg
                 height:parent.height
-                fillMode: Image.PreserveAspectCrop
                 width: parent.width
-                source: "../../../img/icons/buttonoverlay2.png"
-                opacity: .85
-
+                source: "../../../img/icons/buttonoverlay3.png"
 
             }
 

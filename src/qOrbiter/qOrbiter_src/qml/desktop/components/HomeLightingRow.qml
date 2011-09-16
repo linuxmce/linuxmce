@@ -36,7 +36,13 @@ Item {
                 color: style.accentcolor
                 radius: style.but_smooth
                 buttontext: ""
-
+                Image {
+                    id: buttonbg
+                    source: "../../../img/icons/buttonoverlay3.png"
+                    anchors.fill: lightingfloorplan
+                    height: parent.height
+                    width: parent.width
+                }
                 Image {
                     id: onimg
                     source: "../../../img/icons/jabber_protocol.png"
@@ -45,6 +51,7 @@ Item {
                     anchors.centerIn: parent
 
                 }
+
                 MouseArea{
                     id: mousearea1
                     anchors.fill: parent

@@ -5,6 +5,7 @@ Details for qOrbiter
 
 |---Setup---|
 This assumes you have read and understood the wiki on this topic
+|-you need to install mysql headers package 'libmysqlclient15-dev' !!!!!!!
 
 You need an existing non-osd orbiter in your device tree. if you do not have one to spare, please just use the
 qOrbiter template. Add the device, reload
