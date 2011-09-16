@@ -932,10 +932,12 @@ void ScreenHandler::SelectedMediaFile(string sFile,char cActionItem)
 	pObj_Play->m_bHidden = cActionItem=='o';  // No play if it's downloadable
 
 	// If this is external content there's no delete or move, and download is only for downloadable
-	if( pObj_Delete && pObj_Move )
-                pObj_Move->m_bHidden = pObj_Delete->m_bHidden = cActionItem=='o' || cActionItem=='E' ||
+        if( pObj_Move )
+                pObj_Move->m_bHidden = cActionItem=='o' || cActionItem=='E' ||
                         mediaFileBrowserOptions.m_PK_MediaType==MEDIATYPE_lmce_StreamedAudio_CONST ||
                         mediaFileBrowserOptions.m_PK_MediaType==MEDIATYPE_lmce_StreamedVideo_CONST;
+        if( pObj_Delete )
+                pObj_Delete->m_bHidden = cActionItem=='o' || cActionItem=='E';
 	if( pObj_Download )
 		pObj_Download->m_bHidden = cActionItem!='o';
 
