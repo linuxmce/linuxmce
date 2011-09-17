@@ -122,6 +122,8 @@ int main(int argc, char* argv[])
 	string sRouter_IP="dcerouter";
 	int PK_Device=0;
 	string sLogger="stdout";
+	string sAVWHost;
+	int iAVWPort = 0;
 
 	bool bLocalMode=false,bError=false; // An error parsing the command line
 	char c;
@@ -135,23 +137,29 @@ int main(int argc, char* argv[])
 
 		c=argv[optnum][1];
 		switch (c)
-		{
-		case 'r':
-			sRouter_IP = argv[++optnum];
-			break;
-		case 'd':
-			PK_Device = atoi(argv[++optnum]);
-			break;
-        case 'L':
-            bLocalMode = true;
-            break;
-		case 'l':
-			sLogger = argv[++optnum];
-			break;
-		default:
-			bError=true;
-			break;
-		};
+		  {
+		  case 'r':
+		    sRouter_IP = argv[++optnum];
+		    break;
+		  case 'd':
+		    PK_Device = atoi(argv[++optnum]);
+		    break;
+		  case 'L':
+		    bLocalMode = true;
+		    break;
+		  case 'l':
+		    sLogger = argv[++optnum];
+		    break;
+		  case 'P':
+		    iAVWPort = atoi(argv[++optnum]);
+		    break;
+		  case 'H':
+		    sAVWHost = argv[++optnum];
+		    break;
+		  default:
+		    bError=true;
+		    break;
+		  };
 	}
 
 	if (bError)
@@ -200,6 +208,8 @@ int main(int argc, char* argv[])
 	try
 	{
 		USB_Game_Pad *pUSB_Game_Pad = new USB_Game_Pad(PK_Device, sRouter_IP,true,bLocalMode);
+		pUSB_Game_Pad->m_iAVWPort = iAVWPort;
+		pUSB_Game_Pad->m_sAVWHost = sAVWHost;
 		if ( pUSB_Game_Pad->GetConfig() && pUSB_Game_Pad->Connect(pUSB_Game_Pad->PK_DeviceTemplate_get()) ) 
 		{
 			g_pCommand_Impl=pUSB_Game_Pad;

@@ -54,6 +54,8 @@ public:
 	  int m_iJoy4fd;
 	  class AlarmManager *m_pAlarmManager;
 	  void AlarmCallback (int id, void *param);
+	  string m_sAVWHost;
+	  int m_iAVWPort;
 
 //<-dceag-const-b->
 public:
@@ -72,11 +74,7 @@ public:
 		virtual void SendIR(string Port, string IRCode, int iRepeat); // Required from IRBase
 		virtual void PrepareToDelete();
 
-//<-dceag-const2-b->
-		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
-		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
-		USB_Game_Pad(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
-//<-dceag-const2-e->
+//<-dceag-const2-b->!
 
 //<-dceag-h-b->
 	/*

@@ -63,6 +63,7 @@ USB_Game_Pad::USB_Game_Pad(int DeviceID, string ServerAddress,bool bConnectEvent
 //<-dceag-const-e->
 	, IRReceiverBase(this)
 	, m_GamePadMutex("usb_game_pad")
+	, m_iAVWPort(0)
 {
   m_GamePadMutex.Init(NULL);
   m_pAlarmManager=NULL;
@@ -72,15 +73,7 @@ USB_Game_Pad::USB_Game_Pad(int DeviceID, string ServerAddress,bool bConnectEvent
   m_iJoy1fd = m_iJoy2fd = m_iJoy3fd = m_iJoy4fd = -1;
 }
 
-//<-dceag-const2-b->
-// The constructor when the class is created as an embedded instance within another stand-alone device
-USB_Game_Pad::USB_Game_Pad(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
-	: USB_Game_Pad_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
-//<-dceag-const2-e->
-	, IRReceiverBase(this)
-	, m_GamePadMutex("usb_game_pad")
-{
-}
+//<-dceag-const2-b->!
 
 void USB_Game_Pad::PrepareToDelete()
 {
@@ -103,55 +96,71 @@ bool USB_Game_Pad::GetConfig()
 		return false;
 //<-dceag-getconfig-e->
 
-	if ( !m_Virtual_Device_Translator.GetConfig(m_pData) )
-	  return false;
-
-	// Put your code here to initialize the data in this class
-	// The configuration parameters DATA_ are now populated
+	if ( m_dwPK_Device != DEVICEID_MESSAGESEND && !m_bLocalMode )
+	  {
+	    if ( !m_Virtual_Device_Translator.GetConfig(m_pData) )
+	      return false;
+	    
+	    // Put your code here to initialize the data in this class
+	    // The configuration parameters DATA_ are now populated
+	    	    
+	    IRBase::setCommandImpl(this);
+	    IRBase::setAllDevices(&(GetData()->m_AllDevices));
+	    IRReceiverBase::GetConfig(m_pData);
+	  }
 
 	m_pAlarmManager = new AlarmManager();
 	m_pAlarmManager->Start(2);
 
-	IRBase::setCommandImpl(this);
-	IRBase::setAllDevices(&(GetData()->m_AllDevices));
-	IRReceiverBase::GetConfig(m_pData);
-
-	DeviceData_Base *pDevice = m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfCategory(DEVICECATEGORY_Infrared_Plugins_CONST);
-
-	if ( pDevice )
-	  m_dwPK_Device_IRPlugin = pDevice->m_dwPK_Device;
-	else
-	  m_dwPK_Device_IRPlugin = 0;
-
-	string sResult;
-	DCE::CMD_Get_Sibling_Remotes CMD_Get_Sibling_Remotes(m_dwPK_Device,m_dwPK_Device_IRPlugin, DEVICECATEGORY_USB_Game_Pad_Remote_Controls_CONST, &sResult);
-	SendCommand(CMD_Get_Sibling_Remotes);
-	
-	vector<string> vectRemotes;
-	StringUtils::Tokenize(sResult, "`",vectRemotes);
-	size_t i;
-	for (i=0;i<vectRemotes.size();i++)
+	if ( !m_bLocalMode )
 	  {
-	    vector<string> vectRemoteConfigs;
-	    StringUtils::Tokenize(vectRemotes[i],"~",vectRemoteConfigs);
-	    if (vectRemoteConfigs.size() == 3)
+	    DeviceData_Base *pDevice = m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfCategory(DEVICECATEGORY_Infrared_Plugins_CONST);
+	    
+	    if ( pDevice )
+	      m_dwPK_Device_IRPlugin = pDevice->m_dwPK_Device;
+	    else
+	      m_dwPK_Device_IRPlugin = 0;
+	    
+	    string sResult;
+	    DCE::CMD_Get_Sibling_Remotes CMD_Get_Sibling_Remotes(m_dwPK_Device,m_dwPK_Device_IRPlugin, DEVICECATEGORY_USB_Game_Pad_Remote_Controls_CONST, &sResult);
+	    SendCommand(CMD_Get_Sibling_Remotes);
+	    
+	    vector<string> vectRemotes;
+	    StringUtils::Tokenize(sResult, "`",vectRemotes);
+	    size_t i;
+	    for (i=0;i<vectRemotes.size();i++)
 	      {
-		vector<string> vectCodes;
-		int PK_DeviceRemote = atoi(vectRemoteConfigs[0].c_str());
-		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Adding remote ID %d, layout %s\r\n",PK_DeviceRemote,vectRemoteConfigs[1].c_str());
-		StringUtils::Tokenize(vectRemoteConfigs[2],"\r\n",vectCodes);
-		for (size_t s=0;s<vectCodes.size();++s)
+		vector<string> vectRemoteConfigs;
+		StringUtils::Tokenize(vectRemotes[i],"~",vectRemoteConfigs);
+		if (vectRemoteConfigs.size() == 3)
 		  {
-		    string::size_type pos=0;
-		    string sButton = StringUtils::Tokenize(vectCodes[s]," ",pos);
-		    while(pos<vectCodes[s].size())
+		    vector<string> vectCodes;
+		    int PK_DeviceRemote = atoi(vectRemoteConfigs[0].c_str());
+		    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Adding remote ID %d, layout %s\r\n",PK_DeviceRemote,vectRemoteConfigs[1].c_str());
+		    StringUtils::Tokenize(vectRemoteConfigs[2],"\r\n",vectCodes);
+		    for (size_t s=0;s<vectCodes.size();++s)
 		      {
-			string sCode = StringUtils::Tokenize(vectCodes[s]," ",pos);
-			m_mapCodesToButtons[sCode] = make_pair<string,int> (sButton,PK_DeviceRemote);
-			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Code: %s will fire button %s",sCode.c_str(),sButton.c_str());
+			string::size_type pos=0;
+			string sButton = StringUtils::Tokenize(vectCodes[s]," ",pos);
+			while(pos<vectCodes[s].size())
+			  {
+			    string sCode = StringUtils::Tokenize(vectCodes[s]," ",pos);
+			    m_mapCodesToButtons[sCode] = make_pair<string,int> (sButton,PK_DeviceRemote);
+			    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Code: %s will fire button %s",sCode.c_str(),sButton.c_str());
+			  }
 		      }
 		  }
 	      }
+	  }
+	else
+	  {
+	    // Local mode, hard code values to lookup.
+	    m_mapCodesToButtons["USB-GAMEPAD-UP"] = make_pair<string,int>("up",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-DOWN"] = make_pair<string,int>("down",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-LEFT"] = make_pair<string,int>("left",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-RIGHT"] = make_pair<string,int>("right",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-B1"] = make_pair<string,int>("ok",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-B2"] = make_pair<string,int>("back",0);
 	  }
 	
 	// Create the input thread.
@@ -161,8 +170,8 @@ bool USB_Game_Pad::GetConfig()
 	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Failed to create Input thread.");
 	    m_bQuit_set(true);
 	    return false;
-	    }
-
+	  }
+	
 	return true;
 }
 
@@ -177,12 +186,7 @@ bool USB_Game_Pad::Register()
 /*  Since several parents can share the same child class, and each has it's own implementation, the base class in Gen_Devices
 	cannot include the actual implementation.  Instead there's an extern function declared, and the actual new exists here.  You 
 	can safely remove this block (put a ! after the dceag-createinst-b block) if this device is not embedded within other devices. */
-//<-dceag-createinst-b->
-USB_Game_Pad_Command *Create_USB_Game_Pad(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
-{
-	return new USB_Game_Pad(pPrimaryDeviceCommand, pData, pEvent, pRouter);
-}
-//<-dceag-createinst-e->
+//<-dceag-createinst-b->!
 
 /*
 	When you receive commands that are destined to one of your children,
@@ -518,6 +522,12 @@ void USB_Game_Pad::ProcessGamePad(int fd)
 		    {
 		      // Send it off to IRRecieverBase
 		      ReceivedCode(it->second.second,it->second.first.c_str());
+		      
+		      if (m_dwPK_Device==DEVICEID_MESSAGESEND)
+			{
+			  ForceKeystroke(it->second.first, m_sAVWHost, m_iAVWPort);
+			  return;
+			}
 		    }
 		}
 	      break;
@@ -536,6 +546,11 @@ void USB_Game_Pad::ProcessGamePad(int fd)
 			{
 			  // Send it off to IRRecieverBase
 			  ReceivedCode(it->second.second,it->second.first.c_str());
+			  if (m_dwPK_Device==DEVICEID_MESSAGESEND)
+			    {
+			      ForceKeystroke(it->second.first, m_sAVWHost, m_iAVWPort);
+			      return;
+			    }
 			}
 		    }
 		  if (js.value > 16384)
@@ -549,6 +564,11 @@ void USB_Game_Pad::ProcessGamePad(int fd)
 			{
 			  // Send it off to IRRecieverBase
 			  ReceivedCode(it->second.second,it->second.first.c_str());
+			  if (m_dwPK_Device==DEVICEID_MESSAGESEND)
+			    {
+			      ForceKeystroke(it->second.first, m_sAVWHost, m_iAVWPort);
+			      return;
+			    }
 			}
 		    }
 		}
@@ -566,6 +586,11 @@ void USB_Game_Pad::ProcessGamePad(int fd)
 			{
 			  // Send it off to IRRecieverBase
 			  ReceivedCode(it->second.second,it->second.first.c_str());
+			  if (m_dwPK_Device==DEVICEID_MESSAGESEND)
+			    {
+			      ForceKeystroke(it->second.first, m_sAVWHost, m_iAVWPort);
+			      return;
+			    }
 			}
 		    }
 		  if (js.value > 16384)
@@ -579,6 +604,11 @@ void USB_Game_Pad::ProcessGamePad(int fd)
 			{
 			  // Send it off to IRRecieverBase
 			  ReceivedCode(it->second.second,it->second.first.c_str());
+			  if (m_dwPK_Device==DEVICEID_MESSAGESEND)
+			    {
+			      ForceKeystroke(it->second.first, m_sAVWHost, m_iAVWPort);
+			  return;
+			    }
 			}
 		    }
 		}
