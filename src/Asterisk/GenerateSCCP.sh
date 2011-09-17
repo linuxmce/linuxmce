@@ -42,34 +42,19 @@ for Row in $R; do
 	Device_MAC="${Device_MAC//:}"
 	Device_MAC=$(echo "$Device_MAC" | tr '[a-z]' '[A-Z]')
 
-str_DEV=";<pl_dev_$Device_ID>
-type = 7970
+str_DEV="[SEP$Device_MAC](7970)
 description = SEP$Device_MAC
 autologin = $Device_EXT
-transfer = off
-park = off
-speeddial = 
-cfwdall = off
-cfwdbusy = off
-dtmfmode = inband
-device => SEP$Device_MAC
-;</pl_dev_$Device_ID>
+button = line, $Device_EXT
 "
 
-str_LINE=";<pl_line_$Device_ID>
+str_LINE="[$Device_EXT](defaultline)
 id = $Device_EXT
 pin = 
 label = $Device_EXT
 description = $Device_EXT
-context = from-internal
-incominglimit = 2
-transfer = off
-secondary_dialtone_digits = 9
-secondary_dialtone_tone = 0x22
 cid_name = pl_$Device_ID
 cid_num = $Device_EXT
-line => $Device_EXT
-;</pl_line_$Device_ID>
 "
 
 	devices="$devices$str_DEV"
@@ -98,7 +83,6 @@ for Row in $R; do
 str_DEV=";<pl_dev_$Device_ID>
 type = 7910
 description = SEP$Device_MAC
-autologin = $Device_EXT
 transfer = off
 park = off
 speeddial = 
@@ -124,21 +108,14 @@ cid_num = $Device_EXT
 line => $Device_EXT
 ;</pl_line_$Device_ID>
 "
-
 	devices="$devices$str_DEV"
 	lines="$lines$str_LINE"
 done
 
-while read line; do
-	line="${line#+}"
-	line="${line%+}"
+cp $SCCPconfFile.template $SCCPconfFile
 
-	echo "$line"
-	if [[ "$line" == "[devices]" ]]; then
-		echo "$devices"
-	elif [[ "$line" == "[lines]" ]]; then
-		echo "$lines"
-	fi
-done < <(sed 's/^/+/; s/$/+/' "$SCCPconfFile".template) >"$SCCPconfFile"
+echo "$devices" >> $SCCPconfFile
+echo "$lines" >> $SCCPconfFile
+
 chown asterisk:asterisk /etc/asterisk/*
 

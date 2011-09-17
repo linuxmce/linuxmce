@@ -144,7 +144,7 @@ $str_SEPDefault .= "<mlppIndicationStatus>Default</mlppIndicationStatus>\r\n";
 $str_SEPDefault .= "<preemption>Default</preemption>\r\n";
 $str_SEPDefault .= "<connectionMonitorDuration>120</connectionMonitorDuration>\r\n";
 $str_SEPDefault .= "</devicePool>\r\n";
-$str_SEPDefault .= "<loadInformation>TERM70.7-0-1-0s</loadInformation>\r\n";
+$str_SEPDefault .= "<loadInformation></loadInformation>\r\n";
 $str_SEPDefault .= "<vendorConfig>\r\n";
 $str_SEPDefault .= " <disableSpeaker>false</disableSpeaker>\r\n";
 $str_SEPDefault .= " <disableSpeakerAndHeadset>false</disableSpeakerAndHeadset>\r\n";
@@ -239,5 +239,5 @@ if($DB_ROW = $DB_STATEMENT->fetchrow_hashref())
 $DB_PL_HANDLE->disconnect();
 
 #A HARD RELOAD FOR ASTERISK
-exec("invoke-rc.d asterisk restart");
+exec("service asterisk restart");
 
