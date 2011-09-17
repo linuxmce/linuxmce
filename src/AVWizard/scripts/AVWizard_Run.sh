@@ -5,6 +5,8 @@
 DriverInstalled=0
 driverConfig=none
 grep "Driver" /etc/X11/xorg.conf |grep -v "keyboard"| grep -v "#" | grep -v "vesa"|grep -v "mouse"|grep -vq "kbd" && DriverInstalled=1
+AVWizardXorgTemplate=/usr/pluto/templates/xorg.conf.in
+
 
 #
 # Check if we have nVidia or ATI cards in here, and specify proper config programs and commandline options.
@@ -84,9 +86,25 @@ CleanUp()
 SetupX()
 {
 	rm -f "$XF86Config"
-	if [[ -f "$ConfFile" ]]; then
-		cp "$ConfFile" "$XF86Config"
+        if [[ -f "$AVWizardXorgTemplate" ]]; then
+                cp "$AVWizardXorgTemplate" "$XF86Config"
+        fi
+
+
+	#logic to check drivers and replace xorg.avwizard with appropriate driver
+
+	#Get the configured display driver
+	DisplayDriver=$(GetVideoDriver)
+
+	#Get the currently configured display driver
+	CurrentDisplayDriver=$(awk -f/usr/pluto/bin/X-GetDisplayDriver.awk "$ConfigFile")
+
+	if [[ "$DisplayDriver" != "$CurrentDisplayDriver" ]]; then
+        	# change video driver, but only if needed
+        	awk -v"DisplayDriver=$DisplayDriver" -f/usr/pluto/bin/X-ChangeDisplayDriver.awk "$AVWizardXorgTemplate" >"$AVWizardXorgTemplate.$$"
+        	mv "$AVWizardXorgTemplate"{.$$,}
 	fi
+
 	rmmod nvidia &>/dev/null || :
 	# default test
 	bash -x "$BaseDir"/Xconfigure.sh --conffile "$XF86Config" --resolution '640x480@60' --output VGA --no-test | tee-pluto /var/log/pluto/Xconfigure.log
