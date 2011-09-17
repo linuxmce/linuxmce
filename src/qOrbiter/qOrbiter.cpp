@@ -1341,6 +1341,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
         if(qmlUI->goBack.count() > 1)
         {
             qmlUI->goBack.removeLast();
+            qmlUI->q_pk_attribute = "";
 
         }
         else if (qmlUI->goBack.count() == 1)
