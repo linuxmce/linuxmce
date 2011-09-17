@@ -755,11 +755,15 @@ StatsMessage "Starting video driver setup"
 
 ## Install driver based on the type of video card used
 if lshwd | grep -qi 'VGA .* (nv)'; then
+		. /usr/pluto/bin/nvidia-install.sh
+		installCorrectNvidiaDriver
         apt-get -y -f install pluto-nvidia-video-drivers
+		VerifyExitCode "Install Pluto nVidia Driver"
 elif lshwd | grep -qi 'VGA .* (radeon)'; then
         # Check to see if old Radeon card, if so, do not install new driver
         if ! lshwd | grep -Pqi 'VGA .*Radeon ((9|X|ES)(1|2?)([0-9])(5|0)0|Xpress) (.*) \(radeon\)'; then
                apt-get -y -f install xorg-driver-fglrx
+			   VerifyExitCode "Install Radeon Driver"
         fi
 fi
 
@@ -774,6 +778,16 @@ if [ $? == 0 ]; then
 	asteriskNoloadModule app_voicemail_odbc.so
 	asteriskNoloadModule app_voicemail_imap.so
 fi
+
+echo '    [admin]
+    secret = adminsecret
+    deny=0.0.0.0/0.0.0.0
+    permit=127.0.0.1/255.255.255.0
+    read = system,call,log,verbose,command,agent,user
+    write = system,call,log,verbose,command,agent,user
+'>/etc/asterisk/manager.d/admin.conf
+chmod 777 /etc/asterisk/manager.d/admin.conf
+VerifyExitCode "Set asterisk admin user used by MCE"
 
 }
 
