@@ -449,7 +449,7 @@ GetVideoDriver()
 	fi
 	case "$VideoDriver" in
 		nv) 
-			if PackageIsInstalled nvidia-glx || PackageIsInstalled nvidia-glx-new || PackageIsInstalled nvidia-glx-71 || PackageIsInstalled nvidia-glx-96 || PackageIsInstalled nvidia-glx-173 || PackageIsInstalled nvidia-glx-180 || PackageIsInstalled nvidia-glx-190 || PackageIsInstalled nvidia-glx-195 || PackageIsInstalled nvidia-glx-260 ;then
+			if PackageIsInstalled nvidia-glx || PackageIsInstalled nvidia-glx-new || PackageIsInstalled nvidia-glx-71 || PackageIsInstalled nvidia-glx-96 || PackageIsInstalled nvidia-glx-173 || PackageIsInstalled nvidia-glx-180 || PackageIsInstalled nvidia-glx-190 || PackageIsInstalled nvidia-glx-195 || PackageIsInstalled nvidia-glx-260 || PackageIsInstalled nvidia-glx-185 ;then
 			       	VideoDriver="nvidia" 
 			fi
 		;;
