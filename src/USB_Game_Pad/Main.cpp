@@ -151,9 +151,11 @@ int main(int argc, char* argv[])
 		    sLogger = argv[++optnum];
 		    break;
 		  case 'P':
+		    bLocalMode = true;
 		    iAVWPort = atoi(argv[++optnum]);
 		    break;
 		  case 'H':
+		    bLocalMode = true;
 		    sAVWHost = argv[++optnum];
 		    break;
 		  default:

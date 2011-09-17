@@ -27,6 +27,19 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
+#include <wiiuse.h>
+
+// Alarms
+#define FIND_GAMEPADS 0 
+
+void * StartInputThread(void * Arg)
+{
+  Wii_Remote_Controller *pWii_Remote_Controller = (Wii_Remote_Controller *) Arg;  // ahh the joy of pointers...
+  pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+  pWii_Remote_Controller->Wii_Capture(pWii_Remote_Controller->m_DeviceID);
+  return NULL;
+}
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 Wii_Remote_Controller::Wii_Remote_Controller(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
@@ -59,7 +72,70 @@ bool Wii_Remote_Controller::GetConfig()
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
+
+
+	if ( !m_Virtual_Device_Translator.GetConfig(m_pData) )
+	  return false;
+
+	// Put your code here to initialize the data in this class
+	// The configuration parameters DATA_ are now populated
+
+	m_pAlarmManager = new AlarmManager();
+	m_pAlarmManager->Start(2);
+
+	IRBase::setCommandImpl(this);
+	IRBase::setAllDevices(&(GetData()->m_AllDevices));
+	IRReceiverBase::GetConfig(m_pData);
+
+	DeviceData_Base *pDevice = m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfCategory(DEVICECATEGORY_Infrared_Plugins_CONST);
+
+	if ( pDevice )
+	  m_dwPK_Device_IRPlugin = pDevice->m_dwPK_Device;
+	else
+	  m_dwPK_Device_IRPlugin = 0;
+
+	string sResult;
+	DCE::CMD_Get_Sibling_Remotes CMD_Get_Sibling_Remotes(m_dwPK_Device,m_dwPK_Device_IRPlugin, DEVICECATEGORY_Wii_Remote_Controls_CONST, &sResult);
+	SendCommand(CMD_Get_Sibling_Remotes);
+	
+	vector<string> vectRemotes;
+	StringUtils::Tokenize(sResult, "`",vectRemotes);
+	size_t i;
+	for (i=0;i<vectRemotes.size();i++)
+	  {
+	    vector<string> vectRemoteConfigs;
+	    StringUtils::Tokenize(vectRemotes[i],"~",vectRemoteConfigs);
+	    if (vectRemoteConfigs.size() == 3)
+	      {
+		vector<string> vectCodes;
+		int PK_DeviceRemote = atoi(vectRemoteConfigs[0].c_str());
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Adding remote ID %d, layout %s\r\n",PK_DeviceRemote,vectRemoteConfigs[1].c_str());
+		StringUtils::Tokenize(vectRemoteConfigs[2],"\r\n",vectCodes);
+		for (size_t s=0;s<vectCodes.size();++s)
+		  {
+		    string::size_type pos=0;
+		    string sButton = StringUtils::Tokenize(vectCodes[s]," ",pos);
+		    while(pos<vectCodes[s].size())
+		      {
+			string sCode = StringUtils::Tokenize(vectCodes[s]," ",pos);
+			m_mapCodesToButtons[sCode] = make_pair<string,int> (sButton,PK_DeviceRemote);
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Code: %s will fire button %s",sCode.c_str(),sButton.c_str());
+		      }
+		  }
+	      }
+	  }
+	
+	// Create the input thread.
+	if (pthread_create(&m_inputCaptureThread, NULL, StartInputThread, (void *) this))
+	  {
+	    // failed, bail.
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Failed to create Input thread.");
+	    m_bQuit_set(true);
+	    return false;
+	    }
+
 	return true;
+
 }
 
 //<-dceag-reg-b->
@@ -195,6 +271,48 @@ void Wii_Remote_Controller::SomeFunction()
 	COMMANDS TO IMPLEMENT
 
 */
+
+void USB_Game_Pad::AlarmCallback(int id, void *param)
+{
+  switch (id)
+    {
+    case FIND_WII_REMOTES:
+      FindWiiRemotes();
+      break;
+    }
+}
+
+void USB_Game_Pad::CreateChildren()
+{
+  USB_Game_Pad_Command::CreateChildren(); // superclass
+  Start(); // Call IRBase Start.
+}
+
+int USB_Game_Pad::Wii_Capture(int deviceID)
+{
+  
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Starting Wii Remote Capture thread.");
+  // Schedule an initial device probe.
+  m_pAlarmManager->AddRelativeAlarm(1, this, FIND_WII_REMOTES, NULL);
+  Sleep(2000);
+
+  while (!m_bQuit_get())
+    {
+      if (m_bWii1Active)
+	ProcessGamePad(m_iWii1fd);
+      if (m_bWii2Active)
+	ProcessGamePad(m_iWii2fd);
+      if (m_bWii3Active)
+	ProcessGamePad(m_iWii3fd);
+      if (m_bWii4Active)
+	ProcessGamePad(m_iWii4fd);
+      
+      usleep(10000);
+
+    }
+  // for now...
+  return 0;
+}
 
 //<-dceag-c191-b->
 

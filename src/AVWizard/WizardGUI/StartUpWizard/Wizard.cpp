@@ -161,6 +161,12 @@ void Wizard::MainLoop()
 			m_WizardRemote.Start(RemoteCmd);
 #endif
 		}
+		
+		if (AVWizardOptions->GetDictionary()->Exists("GamepadCmd"))
+		  {
+		    GamepadCmd = AVWizardOptions->GetDictionary()->GetValue("GamepadCmd");
+		    m_GamepadRemote.Start(GamepadCmd);
+		  }
 	}
 
 	AVWizardOptions->GetDictionary()->Set("NoResolutions", 5);

@@ -133,6 +133,7 @@ SetDefaults()
 	WizSet DefaultFontName '/usr/share/fonts/truetype/msttcorefonts/Arial.ttf'
 	WizSet RemoteAVWizardServerPort "$AVWizard_Port"
 	WizSet RemoteCmd "$RemoteCmd"
+	WizSet GamepadCmd "$GamepadCmd"
 	WizSet ExitCode 1 # by default, we fail (i.e. on Ctrl+Alt+Bkspc)
 	echo "640x480 60 640 480 VGA" >/tmp/avwizard-resolution.txt
 }
@@ -324,6 +325,7 @@ rm -f /tmp/AVWizard_Started
 SetupViaXine
 
 RemoteCmd=$(/usr/pluto/bin/AVWizard_Remote_Detect.sh | tail -1)
+GamepadCmd=$(/usr/pluto/bin/AVWizard_Gamepad_Detect.sh | tail -1)
 
 Done=0
 while [[ "$Done" -eq 0 ]]; do
