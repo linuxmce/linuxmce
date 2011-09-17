@@ -753,6 +753,8 @@ fi
 VideoDriverSetup () {
 StatsMessage "Starting video driver setup"
 
+touch /etc/X11/xorg.conf
+
 ## Install driver based on the type of video card used
 if lshwd | grep -qi 'VGA .* (nv)'; then
 		. /usr/pluto/bin/nvidia-install.sh
