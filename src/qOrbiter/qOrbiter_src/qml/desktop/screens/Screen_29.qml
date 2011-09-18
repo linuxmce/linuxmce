@@ -8,7 +8,7 @@ Item{
         width: style.orbiterW
         color: style.darkhighlight
         HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
-        Component.onCompleted: sleepingMenu()
+        Component.onCompleted: sleepingMenu(false, 0)
         Rectangle{
             id:mainsleepingrect
             height:scaleY(65)
@@ -25,7 +25,7 @@ Item{
                 spacing: scaleY(1)
                 height: childrenRect.height
                 width: childrenRect.width
-               anchors.verticalCenter: parent.verticalCenter
+                anchors.verticalCenter: parent.verticalCenter
                 Image {
                     id: clockicon
                     source: "../../../img/icons/alarmclock.jpg"
@@ -59,42 +59,72 @@ Item{
                         }
 
                         Rectangle{
-                            height: scaleY(10)
+                            height: childrenRect.height
                             width: scaleX(15)
-                            color:style.lighthighlight
-ListView{
-    id:alarmlist
-    height: scaleY(9)
-    width: scaleX(14)
-    model:alarms
-    delegate: Rectangle{
-        height: scaleY(8)
-        width: scaleX(13)
-        Row{
-            id:delegatalayoutrow
-            anchors.centerIn: parent
-            Rectangle{
-                id:indicator
-                height: scaleY(5)
-                width: scaleX(5)
-                color: state ? red : green
-            }
-            Column{
+                            color:style.darkhighlight
+                            ListView{
+                                id:alarmlist
+                                height: scaleY(15)
+                                width: scaleX(14)
+                                model:alarms
+                                anchors.centerIn: parent
+                                anchors.margins: 10
+                                delegate:
+                                    Rectangle
+                                {
+                                    height: scaleY(8)
+                                    width: scaleX(13.5)
+                                    color:"white"
+                                    border.color: "black"
+                                    border.width: 2
+                                    anchors.margins: 10
+                                    Row{
+                                        id:delegatalayoutrow
+                                        anchors.centerIn: parent
+                                        width: parent.width
+                                        spacing: scaleY(1)
+                                        Rectangle{
+                                            id:indicator
+                                            height: parent.height
+                                            width: parent.width *.25
+                                            color: state ?  "green" : "red"
+                                            border.color: "black"
+                                            border.width: 2
 
-                Text {
-                    id: alarmtime
-                    text: alarmTime
-                }
-                Text {
-                    id: daysactive
-                    text: activedays
-                }
-            }
+                                            Text {
+                                                id: handler
+                                                text: eventHandler
+                                                anchors.centerIn: parent
+                                            }
 
+                                            MouseArea{
+                                                anchors.fill: parent
+                                                onClicked: {
+                                                    sleepingMenu(true, eventHandler)
+                                                    indicator.color = state ? "red" : "green"
 
-        }
-    }
-}
+                                                }
+
+                                            }
+                                        }
+                                        Column{
+                                            spacing: scaleY(1)
+                                            Text {
+                                                id: alarmtime
+                                                text:qsTr("Alarm Set For: ") + alarmTime
+                                            }
+                                            Text {
+                                                id: daysactive
+                                                text: qsTr("Active on: ")+ activeDays
+                                            }
+                                            Text {
+                                                id: countdown
+                                                text: qsTr("Time Left: ") +timeLeft
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }

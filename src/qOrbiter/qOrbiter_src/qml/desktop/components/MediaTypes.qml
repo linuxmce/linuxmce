@@ -24,7 +24,7 @@ Rectangle {
                          width: parent.width
                          border.color: "black"
                          border.width: 1
-                         color: style.darkhightlight
+                         color: style.darkhighlight
 
                          MouseArea{
                                    anchors.fill: parent

@@ -404,8 +404,8 @@ bool qorbiterManager::getConf(int pPK_Device)
         // setNowPlayingIcon(false);
     }
 
-    //sleeping_alarms = new QList<QObject*>;
-    //qorbiterUIwin->rootContext()->setContextProperty("alarms", QVariant::fromValue(sleeping_alarms) );
+    sleeping_alarms.clear();
+    qorbiterUIwin->rootContext()->setContextProperty("alarms", QVariant::fromValue(sleeping_alarms) );
 
     updatedObjectImage.load(":/icons/videos.png");
     QObject::connect(this,SIGNAL(objectUpdated()), nowPlayingButton, SIGNAL(imageChanged()) );
@@ -422,6 +422,7 @@ bool qorbiterManager::getConf(int pPK_Device)
     iPK_Device = long(pPK_Device);
     iOrbiterPluginID = 9;
     iMediaPluginID = 10;
+    iPK_Device_eventPlugin = 12;
     iSize = 0;
     m_pOrbiterCat = 5;
     s_onOFF = "1";
@@ -1598,9 +1599,19 @@ bool qorbiterManager::getRequestMore()
     return requestMore;
 }
 
-void qorbiterManager::sleepingMenu()
+void qorbiterManager::sleepingMenu(bool toggle, int grp)
 {
-    pqOrbiter->GetAlarms();
+    qDebug() << grp;
+    if(toggle == true)
+    {   sleeping_alarms.clear();
+        pqOrbiter->GetAlarms(toggle, grp);
+    }
+    else
+    {
+    sleeping_alarms.clear();
+    pqOrbiter->GetAlarms(false, 0);
+    }
+
 }
 
 

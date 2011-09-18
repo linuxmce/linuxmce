@@ -2,6 +2,7 @@
 #define SLEEPINGALARM_H
 
 #include <QObject>
+#include <QDebug>
 
 class SleepingAlarm : public QObject
 {
@@ -12,12 +13,9 @@ class SleepingAlarm : public QObject
     Q_PROPERTY (QString timeLeft READ getTimeLeft WRITE setTimeLeft NOTIFY countDownChanged)
     Q_PROPERTY (QString activeDays READ getDaysActive WRITE setDaysActive NOTIFY daysChanged)
 public:
-     SleepingAlarm(int i, QString f, bool u, QString c, QString k) {
-     setHandler(i);
-     setState(u);
-     setAlarmTime(f);
-     setTimeLeft(c);
-     setDaysActive(k);
+
+    SleepingAlarm(int i, QString f, bool u, QString c, QString k):eventHandler(i), alarmTime(f), state(u), timeLeft(c), activeDays(k) {
+
 
      }
 

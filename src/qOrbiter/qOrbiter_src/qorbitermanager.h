@@ -102,7 +102,7 @@ public:
     SecurityVideoImage *securityimage;
 
     //-------------sleeping menu----------------------
-    QList<QObject*> *sleeping_alarms;
+    QList<QObject*> sleeping_alarms;
 
     //------------media vars-----------------------------------
     FileDetailsClass *filedetailsclass;
@@ -252,7 +252,7 @@ Param 10 - pk_attribute
     int iPK_User;                    //current user
 
 
-    QMap <QString, int> mp_Users;
+
 
     int iFK_Room;                    //current room
     int iea_area;
@@ -281,6 +281,7 @@ Param 10 - pk_attribute
     long iPK_Device_GeneralInfoPlugin;
     long iPK_Device_SecurityPlugin;
     long iPK_Device_LightingPlugin;
+   long iPK_Device_eventPlugin;
     long iMediaPluginID;
     int m_pDevice_ScreenSaver;
     int m_dwIDataGridRequestCounter;
@@ -369,7 +370,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     bool requestDataGrid();
 
     //sleeping menu
-    Q_INVOKABLE void sleepingMenu();
+    Q_INVOKABLE void sleepingMenu(bool toggle, int grp);
 
     //security
     void setHouseMode(int mode, int pass);

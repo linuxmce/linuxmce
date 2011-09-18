@@ -100,7 +100,7 @@ public:
     void powerOff(QString deviceType);
     void getMediaTimeCode();
     void GetAdvancedMediaOptions();
-    void GetAlarms();
+    void GetAlarms(bool toggle, int grp);
 
     //<-dceag-const-e->
 
