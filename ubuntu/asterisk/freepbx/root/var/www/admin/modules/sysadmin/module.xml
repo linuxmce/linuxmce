@@ -1,0 +1,51 @@
+<module>
+	<rawname>sysadmin</rawname>
+	<name>System Admin</name>
+	<publisher>Schmoozecom.com</publisher>
+        <license>Commercial</license>
+	<repo>commercial</repo>
+	<version>2.9.0.19</version>
+	<type>tool</type>
+	<category>System Administration</category>
+	<description>System Administration - Gives you access to various system administration tools.  This module is designed to work only with the officail FreePBX Distro.</description>
+	<changelog>
+		*2.9.0.18/19* #872
+		*2.9.0.17* #891
+		*2.9.0.16* Add Sydney Australia to Timezones 
+		*2.9.0.15* #885
+		*2.9.0.12* #854
+		*2.9.0.10-12* #753
+		*2.9.0.8* Fixes storage issues with cli script
+		*2.9.0.7* Fix issue with UPS Management for Sysadmin Pro
+		*2.9.0.5/6* Fix for LoadLicense
+		*2.9.0.3* #760, #761
+		*2.9.0.2* Fixed lots of items
+		*2.9.0.1* Add more info in Desc.
+		*2.9.0.0* Fix lots of little issues and bump to 2.9.
+		*2.8.0.38* #648
+		*2.8.0.36* #634
+		*2.8.0.33-35* #634
+		*2.8.0.32* #631
+		*2.8.0.31* fixes spelling error in require
+		*2.8.0.28-30* move more functions to their own 'controller'
+		*2.8.0.27* #619
+		*2.5.0.26* Emailsetup migration
+		*2.8.0.25* Give OSS access to intrusion detection
+		*2.8.0.24* Fix for use with OSS
+		*2.8.0.23* Fix storage to work with pbxtended
+		*2.8.0.22* Add notification email hook
+		*2.8.0.20* License Changes
+		*2.8.0.13* First release 
+	</changelog>
+	<depends>
+		<module> framework ge 2.8.0.10</module>
+		<phpversion>5.1.0</phpversion>
+		<phpcomponent>Zend Optimizer</phpcomponent>
+		<file>/usr/sbin/incrond</file>
+	</depends>
+	<menuitems>
+		<sysadmin>System Admin</sysadmin>
+	</menuitems>
+	<location>release/2.8/sysadmin-2.8.0.16.tgz</location>
+	<md5sum>90cfd4bec64dbdb8ad60fa48204544a8</md5sum>
+</module>

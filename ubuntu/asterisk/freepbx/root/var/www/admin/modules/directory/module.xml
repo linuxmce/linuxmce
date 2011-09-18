@@ -1,0 +1,47 @@
+<module>
+	<rawname>directory</rawname>
+	<repo>standard</repo>
+	<name>Directory</name>
+	<version>2.9.0.11</version>
+	<publisher>Schmoozecom.com</publisher>
+	<license>GPLv2+</license>
+	<type>setup</type>
+	<category>Inbound Call Control</category>
+	<menuitems>
+		<directory>Directory</directory>
+	</menuitems>
+	<depends>
+		<version>2.8.0alpha1</version>
+		<module>recordings ge 3.3.8</module>
+	</depends>
+	<changelog>
+	*2.9.0.11* #5310
+	*2.9.0.10* #5262
+	*2.9.0.9* #5127, #5054, #5049, #5140, #5142
+	*2.9.0.7* #5088
+	*2.9.0.6* #4973, #4974
+	*2.9.0.5* #4905
+	*2.9.0.4* #4843, #4711 again
+	*2.9.0.3* #4819, #4814, #4843, #4711 
+	*2.9.0.2* #4750
+	*2.9.0.1* removed duplicate functions
+	*2.9.0.0* #4502, #4655, #4614, #4566, #4723
+	*2.8.0.1* #4614
+	*2.8.0.0* #4502
+	*2.8.0rc1.0* proper sounds files added
+	*2.8.0beta1.5* #4367, localization changes
+	*2.8.0beta1.4* #4365
+	*2.8.0beta1.3* #4360, #4361
+	*2.8.0beta1.2* #4147, #4310, #4318
+	*2.8.0beta1.1* #4298
+	*2.8.0beta1.0* #4291, various fixeS
+	*2.8.0alpha1.4* #4272, and additional AGI tweaks
+	*2.8.0alpha1.3* #4267, add announce extension, other tuning
+	*2.8.0alpha1.2* js/cosmetic changes
+	*2.8.0.0alpha1.1* fix broken vm greeting, hacky list of how many choices were found
+	*2.8.0.0alpha1.0* Schema changes requiring uninstall/reinstall, many enhancements and fixes
+	*2.8.0.0alpha0.2* Initial release
+	</changelog>
+	<location>release/2.9/directory-2.9.0.10.tgz</location>
+	<md5sum>3a971189789812235410cd329dc9df82</md5sum>
+</module>
