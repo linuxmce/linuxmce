@@ -18,6 +18,7 @@ class ScreenParamsClass : public QObject
     Q_PROPERTY (int deviceTo READ getReciever WRITE setReciever NOTIFY recieverChanged)
     Q_PROPERTY (int deviceFrom READ getSender WRITE setSender NOTIFY senderChanged)
 
+
 public:
     explicit ScreenParamsClass(QObject *parent = 0);
 

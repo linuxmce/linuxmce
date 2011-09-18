@@ -296,6 +296,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
     // iPK_Device = long(PK_Device);
 
     pqOrbiter->qmlUI = this;
+
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
     {
         //   qDebug() << "Device: " << PK_Device <<" Connect";
@@ -402,6 +403,9 @@ bool qorbiterManager::getConf(int pPK_Device)
     {
         // setNowPlayingIcon(false);
     }
+
+    //sleeping_alarms = new QList<QObject*>;
+    //qorbiterUIwin->rootContext()->setContextProperty("alarms", QVariant::fromValue(sleeping_alarms) );
 
     updatedObjectImage.load(":/icons/videos.png");
     QObject::connect(this,SIGNAL(objectUpdated()), nowPlayingButton, SIGNAL(imageChanged()) );
@@ -1592,6 +1596,11 @@ void qorbiterManager::setRequestMore(bool state)
 bool qorbiterManager::getRequestMore()
 {
     return requestMore;
+}
+
+void qorbiterManager::sleepingMenu()
+{
+    pqOrbiter->GetAlarms();
 }
 
 

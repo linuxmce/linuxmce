@@ -45,7 +45,7 @@
 #include <imageProviders/gridimageprovider.h>                  //qml image provider for grids !not implemented!
 //#include <imageProviders/abstractimageprovider.h>
 #include <screensaver/screensavermodule.h>
-
+#include <datamodels/DataModelItems/sleepingalarm.h>
 /*-------Dce Includes----*/
 
 #include <qOrbiter/qOrbiter.h>
@@ -100,6 +100,9 @@ public:
     ScreenSaverModule *ScreenSaver;
     SecurityVideoClass *SecurityVideo;
     SecurityVideoImage *securityimage;
+
+    //-------------sleeping menu----------------------
+    QList<QObject*> *sleeping_alarms;
 
     //------------media vars-----------------------------------
     FileDetailsClass *filedetailsclass;
@@ -364,6 +367,9 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     Q_INVOKABLE void showfloorplan(int fptype);
     //random c++ related slots
     bool requestDataGrid();
+
+    //sleeping menu
+    Q_INVOKABLE void sleepingMenu();
 
     //security
     void setHouseMode(int mode, int pass);

@@ -177,7 +177,8 @@ SOURCES += main.cpp \
     playlists/epgitemclass.cpp \
     datamodels/floorplanmodel.cpp \
     datamodels/floorplanitem.cpp \
-    imageProviders/abstractimageprovider.cpp
+    imageProviders/abstractimageprovider.cpp \
+    datamodels/DataModelItems/sleepingalarm.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -239,7 +240,8 @@ HEADERS += \
     playlists/epgitemclass.h \
     datamodels/floorplanmodel.h \
     datamodels/floorplanitem.h \
-    imageProviders/abstractimageprovider.h
+    imageProviders/abstractimageprovider.h \
+    datamodels/DataModelItems/sleepingalarm.h
 
 OTHER_FILES += Readme.txt \
     config.xml \
@@ -318,6 +320,8 @@ OTHER_FILES= \
 
 RESOURCES += \
     skinData.qrc
+
+
 
 
 

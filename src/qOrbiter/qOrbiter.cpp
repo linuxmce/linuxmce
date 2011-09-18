@@ -2960,6 +2960,69 @@ void DCE::qOrbiter::GetAdvancedMediaOptions()
 
 }
 
+void DCE::qOrbiter::GetAlarms()
+{
+    int cellsToRender= 0;
+    int gHeight = 4;
+    int gWidth = 3;
+    string dgName ="Sleeping_Alarms_"+StringUtils::itos(qmlUI->iPK_Device);
+    int iData_Size=0;
+    int GridCurRow = 0;
+    int GridCurCol= 0;
+    char *pData;
+    pData = "NULL";
+    string m_sSeek = "";
+    qmlUI->m_dwIDataGridRequestCounter++;
+    string option =StringUtils::itos(qmlUI->iFK_Room);
+
+    int offset = 0;
+    int pkVar  = 0;
+    int iOffset= 0;
+    string valassign = "0";
+    bool isSuccessfull;
+
+    CMD_Populate_Datagrid sleepingAlarms(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(dgName), 29, option, 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
+
+    if (SendCommand(sleepingAlarms))
+    {
+        /*
+              initial request to populate the text only grid as denoted by the lack of a leading "_" as in _MediaFile_43
+              this way, we can safely check empty grids and error gracefully in the case of no matching media
+              */
+
+
+        //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
+        DCE::CMD_Request_Datagrid_Contents sleeping_alarms( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(dgName),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+        if(SendCommand(sleeping_alarms))
+        {
+        DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
+        cellsToRender= pDataGridTable->GetRows();
+        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "sleeping menu alarms Grid Dimensions: Height %i, Width %i", gHeight, gWidth);
+        QString cellinfo;
+        QString eventgroup;
+        QString filePath;
+        int index;
+        QImage cellImg;
+        for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
+        {
+            DataGridCell *pCell = it->second;
+            const char *pPath = pCell->GetImagePath();
+            filePath = QString::fromUtf8(pPath);
+            eventgroup = pCell->GetValue();
+            cellinfo = QString::fromUtf8(pCell->m_Text);
+            //qDebug() << eventgroup;
+            qDebug() << cellinfo;
+            index = pDataGridTable->CovertColRowType(it->first).first;
+            //qmlUI->sleeping_alarms->append(new SleepingAlarm( 9, cellinfo, false, eventgroup, eventgroup));
+
+            /*
+             //   qmlUI->model->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg,  qmlUI->model));
+    */
+        }
+    }
+}
+}
+
 
 
 

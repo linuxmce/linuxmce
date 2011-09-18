@@ -8,7 +8,7 @@ Item{
         width: style.orbiterW
         color: style.darkhighlight
         HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
-
+        Component.onCompleted: sleepingMenu()
         Rectangle{
             id:mainsleepingrect
             height:scaleY(65)
@@ -62,11 +62,39 @@ Item{
                             height: scaleY(10)
                             width: scaleX(15)
                             color:style.lighthighlight
+ListView{
+    id:alarmlist
+    height: scaleY(9)
+    width: scaleX(14)
+    model:alarms
+    delegate: Rectangle{
+        height: scaleY(8)
+        width: scaleX(13)
+        Row{
+            id:delegatalayoutrow
+            anchors.centerIn: parent
+            Rectangle{
+                id:indicator
+                height: scaleY(5)
+                width: scaleX(5)
+                color: state ? red : green
+            }
+            Column{
 
-                            Text {
-                                id: name
-                                text: qsTr("listmodel goes here")
-                            }
+                Text {
+                    id: alarmtime
+                    text: alarmTime
+                }
+                Text {
+                    id: daysactive
+                    text: activedays
+                }
+            }
+
+
+        }
+    }
+}
                         }
                     }
                 }
