@@ -3020,7 +3020,7 @@ void DCE::qOrbiter::GetAlarms(bool toggle, int grp)
         for (int row = 0; row < gHeight; row++)
         {
 
-            qDebug() << "row: " << row;
+
             DataGridCell *pCell = pDataGridTable->GetData(row,0);
 
             if (row == 0)
@@ -3039,18 +3039,18 @@ void DCE::qOrbiter::GetAlarms(bool toggle, int grp)
 
             }
             else
-            {           ;
+            {
                         eventgrp = atoi(pCell->GetValue());
 
-                        days="mtf";
-                        timeleft="6:47";
-                        alarmtime="7:00";
+                        days="";
+                        timeleft="";
+                        alarmtime=pCell->GetText();
             }
             counter++;
 
             if(counter == 2)
             {
-                qDebug() << "Setting state::" << state;
+
                 qmlUI->sleeping_alarms.append(new SleepingAlarm( eventgrp, alarmtime, state, timeleft, days));
                 counter = 0;
             }

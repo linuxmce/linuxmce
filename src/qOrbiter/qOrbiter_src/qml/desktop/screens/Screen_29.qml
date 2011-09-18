@@ -72,7 +72,7 @@ Item{
                                 delegate:
                                     Rectangle
                                 {
-                                    height: scaleY(8)
+                                    height: scaleY(10)
                                     width: scaleX(13.5)
                                     color:"white"
                                     border.color: "black"
@@ -87,13 +87,13 @@ Item{
                                             id:indicator
                                             height: parent.height
                                             width: parent.width *.25
-                                            color: state ?  "green" : "red"
+                                            color: state ?  "green" : style.lighthighlight
                                             border.color: "black"
                                             border.width: 2
 
                                             Text {
                                                 id: handler
-                                                text: eventHandler
+                                                text: status
                                                 anchors.centerIn: parent
                                             }
 
@@ -108,7 +108,7 @@ Item{
                                             }
                                         }
                                         Column{
-                                            spacing: scaleY(1)
+                                            spacing: scaleY(2)
                                             Text {
                                                 id: alarmtime
                                                 text:qsTr("Alarm Set For: ") + alarmTime
