@@ -8,9 +8,9 @@ Rectangle {
 
     height: buttonLabel.height + 4;
     width: buttonLabel.width + 8
-        color: style.button_system_color
+        color: style.lighthighlight
         border.width: 1
-        border.color: style.button_action_color
+        border.color: style.darkhighlight
         radius: 1
         smooth:  true
         opacity: 1
@@ -28,8 +28,8 @@ Rectangle {
     MouseArea{
         anchors.fill: parent
         hoverEnabled: true
-        onEntered: buttonBase.color=style.button_system_color_hover
-        onExited:  buttonBase.color=style.button_system_color
+        onEntered: buttonBase.color=style.alertcolor
+        onExited:  buttonBase.color=style.lighthighlight
         onClicked: buttonBase.clicked()
     }
 

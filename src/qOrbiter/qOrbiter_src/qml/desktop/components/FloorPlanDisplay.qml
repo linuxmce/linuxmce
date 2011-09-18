@@ -59,6 +59,11 @@ Rectangle {
                     id: desc
                     text: description
                 }
+
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: floorplanimage.source = "image://listprovider/floorplan"
+                }
             }
         }
         }

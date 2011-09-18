@@ -37,8 +37,8 @@ QtObject{
     property color alertcolor: "red"
     property color warncolor:"yellow"
 
-    property string darkhighlight: highlight2
-    property color lighthighlight: highlight1
+    property string darkhighlight: "slategrey"
+    property color lighthighlight: "aliceblue"
     //main stage styles
     property int orbiterH: 720
     property int orbiterW: 1280
@@ -75,8 +75,8 @@ QtObject{
     //button styling
     property int buttonH:9
     property int buttonW: 9
-    property color button_system_color: highlight1
-    property color button_system_color_hover: highlight2
+    property color button_system_color: "lightsteelblue"
+    property color button_system_color_hover: "cornflowerblue"
 
     property color button_action_color: "lightsteelblue"
     property color button_action_color_hover: "lightblue"
@@ -93,7 +93,7 @@ QtObject{
     //row container styling
     property int rowWidth: orbiterW - 5
     property int rowH: buttonH + 10
-    property color rowbgColor: maincolor
+    property color rowbgColor: "slategrey"
 
     //Notifications bar
     property int width: orbiterW - 5

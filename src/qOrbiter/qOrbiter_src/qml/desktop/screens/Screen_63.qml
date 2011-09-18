@@ -97,7 +97,7 @@ Rectangle {
                         color: style.darkhighlight
                     }
                 }
-                color: style.darkhiglight
+                color: style.darkhighlight
                 anchors.top:nowplayingimage.bottom
                 Column
                 {

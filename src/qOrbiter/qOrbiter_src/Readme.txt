@@ -40,6 +40,7 @@ In an effor to keep the history of changes broken up
 #1167 - ui update issues, for grids, buttons, anything
 #1162 - connection screen and associated tickets like config.xml it reads
 #1168 - Documentation - if you just note things, please commit against this. and do leave comments!!!!
+#1209 - missing screens
 #1170 - Android Platform build notes
 #1173 - Qorbiter datagrid behavior
 #1174 - MacOSX - not finding qml
@@ -48,6 +49,8 @@ In an effor to keep the history of changes broken up
 #1179 - Room List showing all rooms, but not all selectable
 #1180 - Filters for media showing all instead of proper filtering types
 #1181 - Scenario buttons attemping to pull wrong image names.
+#1223 - playlist threading
+
 
 If something you are working on is not described here, please open a ticket for it so we can track that specific issue.
 

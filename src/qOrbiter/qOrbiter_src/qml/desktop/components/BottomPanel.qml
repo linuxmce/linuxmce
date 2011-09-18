@@ -56,6 +56,11 @@ Rectangle {
             border.width: 2
             buttontext: "Sleeping Menu"
             radius: 5
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked:gotoQScreen("Screen_29.qml")
+            }
         }
 
 

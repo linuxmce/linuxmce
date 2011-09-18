@@ -40,7 +40,7 @@ Rectangle {
         source: "../../../img/icons/player_fwd.png"
         MouseArea{
             anchors.fill: parent
-            onClicked: adjustVolume(10)
+            onClicked: adjustVolume(1)
         }
 
     }
@@ -56,7 +56,7 @@ Rectangle {
         source: "../../../img/icons/player_fwd.png"
         MouseArea{
             anchors.fill: parent
-            onClicked: adjustVolume(-10)
+            onClicked: adjustVolume(-1)
         }
     }
 

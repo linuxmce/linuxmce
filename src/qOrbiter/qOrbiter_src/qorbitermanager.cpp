@@ -1279,15 +1279,13 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             {
                 q_pk_attribute = param.remove("!A");
 
+               // q_attribute_genres = "19";
                     q_attributetype_sort = "13";
-
-
 
                 longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
                 datagridVariableString = longassstring.join("|");
                 //   qDebug() << datagridVariableString;
                 execGrp(i_current_command_grp);
-
             }
 
         }
@@ -1313,6 +1311,10 @@ void qorbiterManager::setStringParam(int paramType, QString param)
         else
         {
             q_attributetype_sort = param;
+            if (param.toInt() == 12)
+            {
+               ;
+            }
             longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
             datagridVariableString = longassstring.join("|");
             // qDebug() << datagridVariableString;
@@ -1358,6 +1360,10 @@ void qorbiterManager::setStringParam(int paramType, QString param)
         else
         {
             q_pk_attribute = param.remove("!A");
+            if(q_attributetype_sort.toInt() == 12)
+            {
+                q_attribute_genres = "19";
+            }
             q_attributetype_sort = "13";
 
             longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
@@ -1545,11 +1551,11 @@ void qorbiterManager::adjustVolume(int vol)
 {
     if (vol < 0)
     {
-        pqOrbiter->VolumeUp();
+        pqOrbiter->VolumeUp(vol);
     }
     else
     {
-        pqOrbiter->VolumeDown();
+        pqOrbiter->VolumeDown(vol);
     }
 }
 

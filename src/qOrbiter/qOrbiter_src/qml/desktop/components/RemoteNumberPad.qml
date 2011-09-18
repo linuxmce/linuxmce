@@ -19,6 +19,8 @@ Rectangle {
             height: scaleY(8)
             color: "#ffffff"
             radius: 19
+            border.color: style.darkhighlight
+            border.width: 2
 
             TextInput {
                 id: text_input1
@@ -39,8 +41,9 @@ Rectangle {
             height: childrenRect.height + 5
             width: childrenRect.width
             anchors.top: numberdisplay.bottom
+            anchors.topMargin: 5
             anchors.horizontalCenter: parent.horizontalCenter
-            border.color: style.darkhiglight
+            border.color: style.darkhighlight
             color: style.lighthighlight
             Column{
                 id: numberrowcolum
@@ -54,12 +57,17 @@ Rectangle {
                         id:number1
                         height: style.stdbuttonh
                         width: style.stdbuttonw
-                        color:style.lighthiglight
+                        color:style.lighthighlight
                         radius: 100
+                        Image {
+                            id: name
+                            source: "../../../img/icons/roundbuttonudn.png"
+                            anchors.fill: parent
+                        }
                         Text {
                             id: numberonelabel
                             text: qsTr("1")
-                            color: "black"
+                            color: "white"
                             font.pixelSize: parent.height * .50
                             anchors.centerIn: parent
                         }
@@ -90,7 +98,7 @@ Rectangle {
                         id:number2
                         height: style.stdbuttonh
                         width: style.stdbuttonw
-                        color:style.lighthiglight
+                        color:style.lighthighlight
                         radius: 100
                         Text {
                             id: numbero2label
@@ -126,7 +134,7 @@ Rectangle {
                         id:number3
                         height: style.stdbuttonh
                         width: style.stdbuttonw
-                        color:style.lighthiglight
+                        color:style.lighthighlight
                         radius: 100
                         Text {
                             id: number3label
@@ -171,7 +179,7 @@ Rectangle {
                         id:number4
                         height: style.stdbuttonh
                         width: style.stdbuttonw
-                        color:style.lighthiglight
+                        color:style.lighthighlight
                         radius: 100
                         Text {
                             id: numberonelabe4
@@ -207,7 +215,7 @@ Rectangle {
                         id:number5
                         height: style.stdbuttonh
                         width: style.stdbuttonw
-                        color:style.lighthiglight
+                        color:style.lighthighlight
                         radius: 100
                         Text {
                             id: numbero5label
@@ -243,7 +251,7 @@ Rectangle {
                         id:number6
                         height: style.stdbuttonh
                         width: style.stdbuttonw
-                        color:style.lighthiglight
+                        color:style.lighthighlight
                         radius: 100
                         Text {
                             id: number6label
@@ -288,7 +296,7 @@ Rectangle {
                         id:number7
                         height: style.stdbuttonh
                         width: style.stdbuttonw
-                        color:style.lighthiglight
+                        color:style.lighthighlight
                         radius: 100
                         Text {
                             id: number7label
@@ -324,7 +332,7 @@ Rectangle {
                         id:number8
                         height: style.stdbuttonh
                         width: style.stdbuttonw
-                        color:style.lighthiglight
+                        color:style.lighthighlight
                         radius: 100
                         Text {
                             id: number8label
@@ -360,7 +368,7 @@ Rectangle {
                         id:number9
                         height: style.stdbuttonh
                         width: style.stdbuttonw
-                        color:style.lighthiglight
+                        color:style.lighthighlight
                         radius: 100
                         Text {
                             id: number9label
@@ -418,7 +426,7 @@ Rectangle {
                         id:number0
                         height: style.stdbuttonh
                         width: style.stdbuttonw
-                        color:style.lighthiglight
+                        color:style.lighthighlight
                         radius: 100
 
 

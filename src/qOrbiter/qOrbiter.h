@@ -85,8 +85,8 @@ public:
     void GetNowPlayingAttributes();
     void TuneToChannel(int channel, QString chanid);
     void SetLightingLevel(int i);
-    void VolumeUp();
-    void VolumeDown();
+    void VolumeUp(int vol);
+    void VolumeDown(int vol);
     void mute();
     void ChangedTrack(QString direction);
     void TrackUp();
@@ -96,6 +96,10 @@ public:
     void setLocation(int location, int ea);
     void setUser(int user);
     void QuickReload();
+    void powerOn(QString devicetype);
+    void powerOff(QString deviceType);
+    void getMediaTimeCode();
+    void GetAdvancedMediaOptions();
 
     //<-dceag-const-e->
 
