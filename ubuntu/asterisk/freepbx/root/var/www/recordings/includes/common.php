@@ -44,7 +44,7 @@ function loadModules() {
       // build module object 
       include_once($path); 
       $path_parts = pathinfo($path);
-      list($name,$ext) = split("\.",$path_parts['basename']);
+      list($name,$ext) = explode("\.",$path_parts['basename']);
 
       // check for module and get rank
       if (class_exists($name)) {
@@ -136,7 +136,7 @@ function databaseLogon() {
   else {
 
     $include = 0;
-    $files = split(';',$AMP_FUNCTIONS_FILES);
+    $files = explode(';',$AMP_FUNCTIONS_FILES);
     foreach ($files as $file) {
       if (is_file($file)) {
         include_once($file);

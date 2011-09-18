@@ -16,11 +16,11 @@ function read_pass_from_file($username,$file){
 	foreach ($lines as $key => $line) {
 
 		unset($value);
-		list($var,$value) = split('=>',$line);
+		list($var,$value) = explode('=>',$line);
 		$var = trim($var);
 
 		if ($var==$username && $value) {
-			$buf = split(',',$value);
+			$buf = explode(',',$value);
 			return $buf[0];
 		}
 	}
