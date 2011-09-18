@@ -292,7 +292,7 @@ SetWMCompositor()
 		if [[ ! -d "$user" ]]; then
 			continue
 		fi
-		WMTweaksFile="$user/.config/xfce4/xconf/xfce-perchannel-xml/xfwm4.xml"
+		WMTweaksFile="$user/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml"
 		mkdir -p "$(dirname "$WMTweaksFile")"
 		wmtweaks_default >"$WMTweaksFile"
 		sed -i '/Xfwm\/UseCompositing/ s/value="."/value="'"$UseCompositing"'"/g' "$WMTweaksFile"
