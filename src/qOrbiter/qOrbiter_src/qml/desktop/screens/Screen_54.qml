@@ -58,17 +58,13 @@ Rectangle {
                 id: gradientheader
                 width: parent.width
                 height: childrenRect.height
-                gradient: Gradient {
-                    GradientStop {
-                        position: 0
-                        color: "#ffffff"
-                    }
-
-                    GradientStop {
-                        position: 1
-                        color: "#3878a0"
-                    }
+                Image {
+                    id: headerimage
+                    source: "../../../img/icons/header.png"
+                    height:parent.height
+                    width:parent.width
                 }
+
                 Text {
                     id: headertext
                     height:scaleY(5)
@@ -86,6 +82,24 @@ Rectangle {
                     source: "image://updateobject/"+dcenowplaying.m_iplaylistPosition
                 }
 
+                Rectangle{
+                    id:trackdata
+                    height: scaleY(15)
+                    width: metadata.width
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: title.bottom
+                    clip:true
+
+                    Image {
+                        id: trackplayingdecor
+                        source: "../../../img/icons/header.png"
+                        height: parent.height
+                        fillMode: Image.PreserveAspectCrop
+                        width: scaleX(45)
+                        anchors.centerIn: parent
+
+                    }
+                }
 
                     Text {
                         id: artist
@@ -121,17 +135,7 @@ Rectangle {
                         smooth: true                      
                         font.pixelSize: 16
                     }
-                    Rectangle{
-                        id:trackdata
-                        height: scaleY(15)
-                        width: metadata.width
-                        color: "grey"
-                        border.color: "black"
-                        border.width: 1
-                        anchors.horizontalCenter: metadata.horizontalCenter
-                        anchors.bottom: title.bottom
-                        opacity: .25
-                    }
+
 
                     VideoControls {
                         id: videocontrols1
