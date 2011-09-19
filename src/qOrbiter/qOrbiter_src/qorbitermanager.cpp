@@ -344,11 +344,11 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
             //i dont know what this does, but since orbter should not be local, it is commented out but not removed.
             if( bLocalMode )
-                    pqOrbiter->RunLocalMode();
+                pqOrbiter->RunLocalMode();
             else
             {
-                    if(pqOrbiter->m_RequestHandlerThread)
-                            pthread_join(pqOrbiter->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
+                if(pqOrbiter->m_RequestHandlerThread)
+                    pthread_join(pqOrbiter->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
 
             }
             //g_pDeadlockHandler=NULL;
@@ -460,16 +460,16 @@ bool qorbiterManager::getConf(int pPK_Device)
         QString m_description= floorplanList.at(index).attributes().namedItem("Description").nodeValue();
         int m_page= floorplanList.at(index).attributes().namedItem("Page").nodeValue().toInt();
 
-       // qDebug () << "/usr/pluto/orbiter/floorplans/" << m_installation.toStdString().c_str()<<"/inst"<<StringUtils::itos(m_page).c_str()<<".png";
+        // qDebug () << "/usr/pluto/orbiter/floorplans/" << m_installation.toStdString().c_str()<<"/inst"<<StringUtils::itos(m_page).c_str()<<".png";
         QImage m_image = pqOrbiter->getfileForDG("/usr/pluto/orbiter/floorplans/inst"+m_installation.toStdString()+"/"+StringUtils::itos(m_page)+".png");
-       QImage icon = m_image.scaledToHeight(100);
+        QImage icon = m_image.scaledToHeight(100);
 
-       // qDebug() << m_description;
-       if (m_page == 1)
-       {
-           QString safe = m_installation;
-           floorplans->setCurrentPage(safe.append("-").append(QString::number(m_page)));
-       }
+        // qDebug() << m_description;
+        if (m_page == 1)
+        {
+            QString safe = m_installation;
+            floorplans->setCurrentPage(safe.append("-").append(QString::number(m_page)));
+        }
 
         floorplans->appendRow(new FloorPlanItem(m_installation,m_description, m_page, m_iconpath, m_image, icon,  userList));
     }
@@ -1284,8 +1284,35 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             {
                 q_pk_attribute = param.remove("!A");
 
-               // q_attribute_genres = "19";
-                    q_attributetype_sort = "13";
+
+                if( q_attributetype_sort.toInt() == 2||3 && q_mediaType.toInt() == 4)
+                {
+                    if (q_attributetype_sort.toInt() == 3)
+                    {
+                        q_attributetype_sort = "";
+                    }
+                    else
+                    {
+                        q_attributetype_sort = "3";
+                    }
+
+                }
+                else if(q_mediaType.toInt() == 5)
+                {
+                    if (q_attributetype_sort.toInt() == 12 )
+                    {
+                    q_attributetype_sort="";
+                    }
+                    else if (q_attributetype_sort.toInt() == 3)
+                    {
+                        q_attributetype_sort = "12,13";
+                    }
+                    else if (q_attributetype_sort == "12,13")
+                    {
+                        q_attributetype_sort = "";
+                    }
+                }
+
 
                 longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
                 datagridVariableString = longassstring.join("|");
@@ -1318,7 +1345,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             q_attributetype_sort = param;
             if (param.toInt() == 12)
             {
-               ;
+                ;
             }
             longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
             datagridVariableString = longassstring.join("|");
@@ -1367,9 +1394,9 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             q_pk_attribute = param.remove("!A");
             if(q_attributetype_sort.toInt() == 12)
             {
-                q_attribute_genres = "19";
+
             }
-            q_attributetype_sort = "13";
+            q_attributetype_sort = "";
 
             longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
             datagridVariableString = longassstring.join("|");
@@ -1534,7 +1561,7 @@ void qorbiterManager::changeChannels(QString chan)
 void qorbiterManager::getLiveTVPlaylist()
 {
     qDebug() << "Orbiter Manager slot called";
-        emit liveTVrequest();
+    emit liveTVrequest();
 
 }
 
@@ -1548,7 +1575,7 @@ void qorbiterManager::gridChangeChannel(QString chan, QString chanid)
 void qorbiterManager::adjustLighting(int l)
 {
 
-        pqOrbiter->SetLightingLevel(l);
+    pqOrbiter->SetLightingLevel(l);
 
 }
 
@@ -1581,11 +1608,11 @@ void qorbiterManager::setHouseMode(int mode, int pass)
 
 void qorbiterManager::setCurrentUser(QString inc_user)
 {
-     sPK_User = userList->find(sPK_User)->data(1).toString();
-     int user = inc_user.toInt();
-     qDebug() << "User name" << sPK_User << "::" << user;
-     pqOrbiter->setUser(user);
-     emit userChanged();
+    sPK_User = userList->find(sPK_User)->data(1).toString();
+    int user = inc_user.toInt();
+    qDebug() << "User name" << sPK_User << "::" << user;
+    pqOrbiter->setUser(user);
+    emit userChanged();
 }
 
 void qorbiterManager::setRequestMore(bool state)
@@ -1608,8 +1635,8 @@ void qorbiterManager::sleepingMenu(bool toggle, int grp)
     }
     else
     {
-    sleeping_alarms.clear();
-    pqOrbiter->GetAlarms(false, 0);
+        sleeping_alarms.clear();
+        pqOrbiter->GetAlarms(false, 0);
     }
 
 }
