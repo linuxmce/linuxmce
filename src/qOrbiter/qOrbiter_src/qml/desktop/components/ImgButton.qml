@@ -1,5 +1,7 @@
 import QtQuick 1.0
 
+
+
 Rectangle {
     id:buttonBase
     property alias buttontext: buttonLabel.text
@@ -9,48 +11,50 @@ Rectangle {
     property alias buttontextitalic: buttonLabel.font.italic
     property alias buttontextzindex: buttonLabel.z
     property alias buttonsqradius:  buttonBase.radius
+    property alias buttonbordercolor: buttonBase.border
 
-    color:style.lighthighlight
     height: style.stdbuttonw
     width: style.stdbuttonw
-    border.width: 1
+    border.width: 3
     border.color: style.button_action_color_hover
     radius: 1
+    Image {
+        id: buttonimage
+        source: "../../../img/icons/buttonoverlay.png"
+        height: parent.height
+        width: parent.width
 
+    }
     Text {
         id: buttonLabel
-        x: 50
-        y: 50
-        width: -1
-        height: 0
+        anchors.centerIn: parent
         text:"null ipsum delorium"
         font.pixelSize: 14
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
         anchors.fill: parent
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
         anchors.margins: 5
         font.family: "Droid Sans"
-        wrapMode: "WrapAtWordBoundaryOrAnywhere"
-        elide: "ElideRight"
-
-        z:1
-}
-        MouseArea{
-            anchors.fill: buttonLabel
-            hoverEnabled: true
-            onEntered: {
-                buttonBase.color = style.highlight2
-                buttonLabel.color = style.lighthighlight
-            }
-            onExited: {
-                buttonBase.color = style.lighthighlight
-                buttonLabel.color = style.darkhighlight
-            }
+        wrapMode: Text.WordWrap
+       }
 
 
+
+    MouseArea{
+        anchors.fill: parent
+        hoverEnabled: true
+        onEntered: {
+            buttonBase.border.color = "white"
+            buttonimage.opacity = .15
+        }
+        onExited: {
+            buttonBase.border.color = style.button_action_color_hover
+            buttonimage.opacity = .75
+        }
     }
 
 
+
 }
+
+

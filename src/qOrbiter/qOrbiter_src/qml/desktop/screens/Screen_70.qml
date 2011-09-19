@@ -4,8 +4,8 @@ import "../components"
 Rectangle {
 
     // property alias synText:
-    id: dvduntaggedremote
-    anchors.centerIn: parent
+    id: storedvideoremote
+
     Timer{
         id:singleshot
         repeat: false
@@ -25,34 +25,44 @@ Rectangle {
     width: style.orbiterW
     radius: 0
     opacity: 1
-     color: style.darkhighlight
+    color: style.darkhighlight
     Component.onCompleted:setNowPlayingData()
+
+
     //main 'now playing rect containing all the other items
 
     Row{
         id:mainrow
         height: childrenRect.height
         width: childrenRect.width
-        spacing: 5
-        anchors.topMargin: 20
+        spacing: 1
+        anchors.top:parent.top
+        anchors.topMargin: scaleY(5)
         anchors.horizontalCenter: parent.horizontalCenter
 
         NonEPGPlaylist{ id:playlist}
-        Rectangle {
 
-            width: scaleX(30)
-            height: scaleY(50)
-            color: style.advanced_bg
+        Row {
+            id:metarow
+            width: childrenRect.width
+            height: childrenRect.height
+            spacing: scaleX(1)
 
-            Rectangle {
+            Column
+            {
+                id:metadata
+                height: scaleY(75)
+                width: childrenRect.width
+
+                Rectangle {
                 id: gradientheader
-
                 width: parent.width
                 height: childrenRect.height
+
                 gradient: Gradient {
                     GradientStop {
                         position: 0
-                        color: "#ffffff"
+                        color: style.lighthighlight
                     }
 
                     GradientStop {
@@ -62,85 +72,88 @@ Rectangle {
                 }
                 Text {
                     id: headertext
+                    height:scaleY(5)
                     text:qsTr("Speed: ") + dcenowplaying.qs_playbackSpeed
                     font.family: "Droid Sans"
                     font.pixelSize: 12
+
                 }
             }
-
-            Image {
-                id: nowplayingimage
-                width: scaleX(30)
-                height: scaleY(30)
-                anchors.top: gradientheader.bottom
-                fillMode: Image.PreserveAspectFit
-                source: "image://updateobject/"+dcenowplaying.m_iplaylistPosition
-            }
-
-            Rectangle {
-                id: metadatavideo
-                width: scaleX(30)
-                height: childrenRect.height
-                color: style.darkhighlight
-                anchors.top:nowplayingimage.bottom
-                Column
-                {
-                    width: scaleX(30)
-                    spacing: 5
-                    height: metadatavideo.height
-
-                    Text {
-                        id: maintitle
-                        width: parent.width
-                        text: qsTr("Title: ") + dcenowplaying.qs_mainTitle
-                        font.family: "Droid Sans"
-                        wrapMode: "NoWrap"
-                        font.bold: true
-                        smooth: true
-                        font.pixelSize: 12
-                    }
-
-
-                    Text {
-                        id: subtitle
-                        wrapMode: "NoWrap"
-                        text: qsTr("Episode: ") + dcenowplaying.episode
-                        font.family: "Droid Sans"
-                        font.bold: true
-                        smooth: true
-                        horizontalAlignment: Text.AlignHCenter
-                        font.pixelSize: 12
-                    }
-
-                    Text {
-                        id: channel
-                        wrapMode: "NoWrap"
-                        text: qsTr("Channel: ") + dcenowplaying.channelID
-                        font.family: "Droid Sans"
-                        font.bold: true
-                        smooth: true
-                        horizontalAlignment: Text.AlignHCenter
-                        font.pixelSize: 12
-                    }
+                Image {
+                    id: nowplayingimage
+                    width: scaleX(45)
+                    height: scaleY(45)
+                    fillMode: Image.PreserveAspectFit
+                    source: "image://updateobject/"+dcenowplaying.m_iplaylistPosition
                 }
-            }
-        }
-        Remote_lighting_controls{ id: remote_lighting_controls1; }
-        Remote_Audio_controls{ id: remote1; }
 
+
+                    Text {
+                        id: artist
+                        height: scaleY(5)
+                        width: scaleX(45)
+                        text: qsTr("Artist :") + dcenowplaying.qs_mainTitle
+                        font.family: "Droid Sans"
+                        wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                        font.bold: true
+                        smooth: true
+                        font.pixelSize: 16
+                    }
+
+
+                    Text {
+                        id: album
+                         height: scaleY(5)
+                         width: scaleX(45)
+                         wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                         text: qsTr("Album: ") + dcenowplaying.qs_mainTitle2
+                        font.family: "Droid Sans"
+                        font.bold: true
+                        smooth: true
+                        font.pixelSize: 16
+
+                    }
+
+                    Text {
+                        id: title
+                         height: scaleY(5)
+                         width: scaleX(45)
+                         wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                         text: qsTr("Title: ") + dcenowplaying.qs_subTitle
+                        font.family: "Droid Sans"
+                        font.bold: true
+                        smooth: true
+                        font.pixelSize: 16
+                    }
+                    Rectangle{
+                        id:trackdata
+                        height: scaleY(15)
+
+                        width: metadata.width
+                        color: "grey"
+                        border.color: "black"
+                        border.width: 1
+                        anchors.horizontalCenter: metadata.horizontalCenter
+                        anchors.bottom: title.bottom
+                        opacity: .25
+                    }
+
+                    VideoControls {
+                        id: videocontrols1
+                        anchors.top: trackdata.bottom
+                    }
+
+                }
+
+
+
+            Remote_lighting_controls{ id: remote_lighting_controls1; }
+            Remote_Audio_controls{ id: remote1; }
+        }
     }
 
-        HomeButton{anchors.right: parent.right; anchors.top:parent.top}
-
-        VideoControls {
-            id: videocontrols1
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: parent.bottom
-
-        }
+    HomeButton{anchors.right: parent.right; anchors.top:parent.top}
 
 
-
-
-    }
+}
 

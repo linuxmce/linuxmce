@@ -38,7 +38,7 @@ Item {
                 buttontext: ""
                 Image {
                     id: buttonbg
-                    source: "../../../img/icons/buttonoverlay3.png"
+                    source: "../../../img/icons/buttonoverlay.png"
                     anchors.fill: lightingfloorplan
                     height: parent.height
                     width: parent.width

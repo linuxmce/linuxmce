@@ -7,46 +7,33 @@ Component{
         height: scaleY(15)
         width: scaleX(8)
 
-        ButtonSq
+        ImgButton
         {       id:delegateButton
             anchors.top: parent.top
             anchors.topMargin: scaleY(2)
             height: style.stdbuttonh
             width: style.stdbuttonw
-            buttontextcolor: style.accentcolor
-            radius: style.but_smooth
             buttontext: label
             buttontextbold: true
             buttontextitalic: true
-            color:"transparent"
-
 
             MouseArea{
-                anchors.fill: parent
+                anchors.fill: delegateButton
                 onClicked: execGrp(params);
                 hoverEnabled: true
-                onEntered: delegateButton.buttontextcolor = style.accentcolor
-                onExited: delegateButton.buttontextcolor = style.lighthighlight
-                z:5    }
 
-            Image {
-                id: buttonsqimg
-                height:parent.height
-                width: parent.width
-                source: "../../../img/icons/buttonoverlay3.png"
+                onEntered: {
+                    delegateButton.buttonbordercolor.color = "white"
 
+                }
+                onExited: {
+                    delegateButton.buttonbordercolor.color = style.button_action_color_hover
+
+                }
             }
 
-
-            Image {
-                id:buttonimage
-                source: ""
-                height: parent.height
-                width: parent.width
-                anchors.centerIn: delegateButton
-            }
         }
-/*
+        /*
         Text {
             id: daslabel
             text: label

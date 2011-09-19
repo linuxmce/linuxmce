@@ -43,7 +43,7 @@ Item {
 
                 Image {
                     id: buttonbg
-                    source: "../../../img/icons/buttonoverlay3.png"
+                    source: "../../../img/icons/buttonoverlay.png"
                     anchors.fill: rowheader
                     height: parent.height
                     width: parent.width
