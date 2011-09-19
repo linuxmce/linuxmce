@@ -35,7 +35,7 @@ Rectangle {
         id:mainrow
         height: childrenRect.height
         width: childrenRect.width
-        spacing: 1
+        spacing: scaleX(2)
         anchors.top:parent.top
         anchors.topMargin: scaleY(5)
         anchors.horizontalCenter: parent.horizontalCenter
@@ -82,25 +82,6 @@ Rectangle {
                     source: "image://updateobject/"+dcenowplaying.m_iplaylistPosition
                 }
 
-                Rectangle{
-                    id:trackdata
-                    height: scaleY(15)
-                    width: metadata.width
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.bottom: title.bottom
-                    clip:true
-
-                    Image {
-                        id: trackplayingdecor
-                        source: "../../../img/icons/header.png"
-                        height: parent.height
-                        fillMode: Image.PreserveAspectCrop
-                        width: scaleX(45)
-                        anchors.centerIn: parent
-
-                    }
-                }
-
                     Text {
                         id: artist
                         height: scaleY(5)
@@ -136,7 +117,16 @@ Rectangle {
                         font.pixelSize: 16
                     }
 
-
+                    Rectangle{
+                        id:trackdata
+                        height: scaleY(15)
+                        width: metadata.width
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.bottom: title.bottom
+                        color:style.lighthighlight
+                        opacity: .25
+                        clip:true
+                    }
                     VideoControls {
                         id: videocontrols1
                         anchors.top: trackdata.bottom

@@ -33,7 +33,7 @@ Rectangle {
             border.width: 1
             width:scaleX(20)
             height: scaleY(10)
-            color: style.accentcolor
+            color: style.darkhighlight
             clip: true
             Image {
                 id: playlistimage
@@ -46,8 +46,8 @@ Rectangle {
                 id: position
                 text: name
                 font.family: "DroidSans"
-                opacity: .5
-                color: "black"
+
+                color: "aliceblue"
                 anchors.centerIn: parent
                 font.pixelSize: 18
                 font.bold: true
@@ -63,6 +63,14 @@ Rectangle {
                 font.pixelSize: 18
                 font.bold: true
                 font.capitalization: Font.SmallCaps
+            }
+
+            Image {
+                id: overlay
+                fillMode: Image.PreserveAspectCrop
+                source: "../../../img/icons/header.png"
+                anchors.fill: parent
+                opacity: .35
             }
 
             MouseArea{

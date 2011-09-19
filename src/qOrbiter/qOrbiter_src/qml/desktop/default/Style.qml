@@ -37,7 +37,7 @@ QtObject{
     property color alertcolor: "red"
     property color warncolor:"yellow"
 
-    property string darkhighlight: "slategrey"
+    property color darkhighlight: "slategrey"
     property color lighthighlight: "aliceblue"
     //main stage styles
     property int orbiterH: 720

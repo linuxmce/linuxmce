@@ -2651,7 +2651,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
     string valassign ="";
     bool isSuccessfull;// = "false";
 
-    string m_sGridID ="tvchan_"+StringUtils::itos(qmlUI->iPK_Device); // the string identifier on the type of grid
+    string m_sGridID ="TVCHAN_"+StringUtils::itos(qmlUI->iPK_Device); // the string identifier on the type of grid
 
     int iRow_count=5;
     int iColumn_count = 5;
