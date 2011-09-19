@@ -96,6 +96,30 @@ CREATE TABLE `freepbx_log` (
   KEY `time` (`time`,`level`)
 );
 
+
+--
+-- Table structure for table `freepbx_settings`
+--
+
+CREATE TABLE `freepbx_settings` (
+  `keyword` varchar(50) NOT NULL DEFAULT '',
+  `value` varchar(255) DEFAULT NULL,
+  `name` varchar(80) DEFAULT NULL,
+  `level` tinyint(1) DEFAULT '0',
+  `description` text,
+  `type` varchar(25) DEFAULT NULL,
+  `options` text,
+  `defaultval` varchar(255) DEFAULT NULL,
+  `readonly` tinyint(1) DEFAULT '0',
+  `hidden` tinyint(1) DEFAULT '0',
+  `category` varchar(50) DEFAULT NULL,
+  `module` varchar(25) DEFAULT NULL,
+  `emptyok` tinyint(1) DEFAULT '1',
+  `sortorder` int(11) DEFAULT '0',
+  PRIMARY KEY (`keyword`)
+);
+
+
 --
 -- Table structure for table `globals`
 --

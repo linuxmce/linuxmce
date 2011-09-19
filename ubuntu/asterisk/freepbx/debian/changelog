@@ -1,3 +1,10 @@
+freepbx (0+2.9.0-1) unstable; urgency=low
+
+  * Upgrade FreePBX to 2.9 stable
+  * Inserted new freepbx_settings table in asterisk db
+
+ -- Serge Wagener <serge@linuxmce.org>  Mon, 19 Sep 2011 14:15:00 +0200
+
 freepbx (0+2.3.1-8) unstable; urgency=low
 
   * Provide voicemail.conf, asterisk.adsi and users.conf files
