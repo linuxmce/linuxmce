@@ -759,14 +759,6 @@ touch /etc/X11/xorg.conf
 if lshwd | grep -qi 'VGA .* (nv)'; then
 		. /usr/pluto/bin/nvidia-install.sh
 		installCorrectNvidiaDriver
-        apt-get -y -f install pluto-nvidia-video-drivers
-		VerifyExitCode "Install Pluto nVidia Driver"
-elif lshwd | grep -qi 'VGA .* (radeon)'; then
-        # Check to see if old Radeon card, if so, do not install new driver
-        if ! lshwd | grep -Pqi 'VGA .*Radeon ((9|X|ES)(1|2?)([0-9])(5|0)0|Xpress) (.*) \(radeon\)'; then
-               apt-get -y -f install xorg-driver-fglrx
-			   VerifyExitCode "Install Radeon Driver"
-        fi
 fi
 
 }
