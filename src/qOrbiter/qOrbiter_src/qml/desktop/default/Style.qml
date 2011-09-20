@@ -30,15 +30,15 @@ QtObject{
     property string skindescription: "Pluto Classic Skin"
     property string skinversion: "1.0"
     property string skinvariation: "Desktop 800x600"
-    property color maincolor: "midnightblue"
-    property color accentcolor: "lightsteelblue"
-    property color highlight1: "aliceblue"
-    property color highlight2: "slategrey"
+    property color maincolor: "#0D4392"
+    property color accentcolor: "#3F76C7"
+    property color highlight1: "#EED169"
+    property color highlight2: "#EEC63B"
     property color alertcolor: "red"
     property color warncolor:"yellow"
 
-    property color darkhighlight: "slategrey"
-    property color lighthighlight: "aliceblue"
+    property color darkhighlight: "#628BC7"
+    property color lighthighlight: "#3F76C7"
     //main stage styles
     property int orbiterH: 720
     property int orbiterW: 1280
@@ -75,8 +75,8 @@ QtObject{
     //button styling
     property int buttonH:9
     property int buttonW: 9
-    property color button_system_color: "lightsteelblue"
-    property color button_system_color_hover: "cornflowerblue"
+    property color button_system_color: "#EE873B"
+    property color button_system_color_hover: "#3F76C7"
 
     property color button_action_color: "lightsteelblue"
     property color button_action_color_hover: "lightblue"
@@ -93,7 +93,7 @@ QtObject{
     //row container styling
     property int rowWidth: orbiterW - 5
     property int rowH: buttonH + 10
-    property color rowbgColor: "slategrey"
+    property color rowbgColor: "#22416F"
 
     //Notifications bar
     property int width: orbiterW - 5
@@ -109,7 +109,7 @@ QtObject{
     property color advanced_bg_text: "black"
 
     //stage
-    property color stage_bg: maincolor
-    property color bgcolor: maincolor
+    property color stage_bg: "#22416F"
+    property color bgcolor: "#0D4392"
 
 }

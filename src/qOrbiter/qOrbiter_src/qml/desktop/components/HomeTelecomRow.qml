@@ -26,7 +26,7 @@ Item {
         Row {
             id: telecomRow
             spacing:5
-            anchors.left: parent.left
+
             anchors.leftMargin: scaleX(2)
 
             ButtonSq {

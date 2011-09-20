@@ -2971,7 +2971,7 @@ void DCE::qOrbiter::GetAlarms(bool toggle, int grp)
         SendCommand(toggleAlarm, sResponse);
     }
     QString f = QString::fromStdString(sResponse->c_str());
-    qDebug() << f;
+    // qDebug() << f;
     if (sResponse)
     {
         int cellsToRender= 0;
@@ -3010,76 +3010,58 @@ void DCE::qOrbiter::GetAlarms(bool toggle, int grp)
                 DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
                 cellsToRender= pDataGridTable->GetRows();
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "sleeping menu alarms Grid Dimensions: Height %i, Width %i", gHeight, gWidth);
+                QString name;
                 QString days;
                 QString timeleft;
                 QString alarmtime;
                 int eventgrp;
-
-
                 int counter = 0;
                 int col = 0;
-                for (int row = 0; row < gHeight; row++)
+                int row = 0;
+                for (int counter = -1; counter < gHeight+1; counter++)
                 {
-
                     DataGridCell *pCell = pDataGridTable->GetData(row,col);
+                    qDebug() << "Row: " << row << ",Col:" << col;
 
                     if (row == 0)
                     {
-
                         QString test = pCell->GetText();
-
                         if (test == "ON")
                         {
                             state = true;
+
                         }
                         else
                         {
                             state= false;
                         }
 
+                        qDebug() << state;
+                        row++;
+
                     }
-                    else if (row== 1)
+
+                    else if (row == 1)
                     {
+
                         eventgrp = atoi(pCell->GetValue());
-
-                        days="";
-                        timeleft="";
-                        alarmtime=pCell->GetText();
-
-                    }
-
-
-
-                    if(counter == 1)
-                    {
+                        QString data = pCell->GetText();
+                        QStringList breakerbreaker = data.split(QRegExp("\n"), QString::KeepEmptyParts );
+                        qDebug() << breakerbreaker;
+                        name = breakerbreaker.at(0);
+                        days=breakerbreaker.at(2);
+                        days.remove("Day of Week");
+                        timeleft=breakerbreaker.at(1);
+                        alarmtime=".";
+                        qmlUI->sleeping_alarms.append(new SleepingAlarm( eventgrp, name, alarmtime, state, timeleft, days));
+                        row = -1;
                         col++;
-                        qmlUI->sleeping_alarms.append(new SleepingAlarm( eventgrp, alarmtime, state, timeleft, days));
-                        counter = 0;
-
+                        row++;
                     }
-                        counter++;
 
                 }
-
-
-                /*    for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
-        {
-            DataGridCell *pCell = it->second;
-            eventgroup = pCell->GetValue();
-
-            cellinfo = QString::fromUtf8(pCell->m_Text);
-            qDebug() << "A:" << eventgroup;
-            qDebug() << "B:" << cellinfo;
-            index = pDataGridTable->CovertColRowType(it->first).first;
-
-
-            /*
-             //   qmlUI->model->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg,  qmlUI->model));
-
-        }*/
-                qmlUI->qorbiterUIwin->rootContext()->setContextProperty("alarms" ,QVariant::fromValue(qmlUI->sleeping_alarms));
             }
-        }
+        } qmlUI->qorbiterUIwin->rootContext()->setContextProperty("alarms" ,QVariant::fromValue(qmlUI->sleeping_alarms));
     }
 }
 

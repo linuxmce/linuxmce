@@ -48,7 +48,7 @@ Item{
                         Rectangle{
                             id:alarmsheader
                             height: scaleY(4)
-                            width: scaleX(15)
+                            width: scaleX(18)
                             color: style.accentcolor
                             radius: 5
                             Text {
@@ -60,12 +60,13 @@ Item{
 
                         Rectangle{
                             height: childrenRect.height
-                            width: scaleX(15)
-                            color:style.darkhighlight
+                            width: scaleX(25.25)
+                            color:style.lighthighlight
+
                             ListView{
                                 id:alarmlist
-                                height: scaleY(15)
-                                width: scaleX(14)
+                                height: scaleY(20)
+                                width: scaleX(25)
                                 model:alarms
                                 anchors.centerIn: parent
                                 anchors.margins: 10
@@ -73,7 +74,7 @@ Item{
                                     Rectangle
                                 {
                                     height: scaleY(10)
-                                    width: scaleX(13.5)
+                                    width: scaleX(25)
                                     color:"white"
                                     border.color: "black"
                                     border.width: 2
@@ -82,10 +83,10 @@ Item{
                                         id:delegatalayoutrow
                                         anchors.centerIn: parent
                                         width: parent.width
-                                        spacing: scaleY(1)
+                                        spacing: 5
                                         Rectangle{
                                             id:indicator
-                                            height: parent.height
+                                            height: scaleY(10)
                                             width: parent.width *.25
                                             color: state ?  "green" : style.lighthighlight
                                             border.color: "black"
@@ -102,13 +103,15 @@ Item{
                                                 onClicked: {
                                                     sleepingMenu(true, eventHandler)
                                                     indicator.color = state ? "red" : "green"
-
                                                 }
-
                                             }
                                         }
                                         Column{
-                                            spacing: scaleY(2)
+                                            spacing: 5
+                                            Text {
+                                                id: alarmname
+                                                text:qsTr("Name: ") + name
+                                            }
                                             Text {
                                                 id: alarmtime
                                                 text:qsTr("Alarm Set For: ") + alarmTime

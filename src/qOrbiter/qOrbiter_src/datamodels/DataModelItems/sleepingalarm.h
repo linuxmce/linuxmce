@@ -13,11 +13,12 @@ class SleepingAlarm : public QObject
     Q_PROPERTY (QString timeLeft READ getTimeLeft WRITE setTimeLeft NOTIFY countDownChanged)
     Q_PROPERTY (QString activeDays READ getDaysActive WRITE setDaysActive NOTIFY daysChanged)
     Q_PROPERTY (QString status READ getStatus WRITE setStatus NOTIFY statusChanged)
+    Q_PROPERTY (QString name READ getName WRITE setName NOTIFY nameChanged)
 public:
 
-    SleepingAlarm(int i, QString f, bool u, QString c, QString k):eventHandler(i), alarmTime(f), state(u), timeLeft(c), activeDays(k) {
+    SleepingAlarm(int i, QString n, QString f, bool u, QString c, QString k):eventHandler(i), name(n), alarmTime(f), state(u), timeLeft(c), activeDays(k) {
 
-        qDebug() << state;
+
         if (state == false)
         {
             status = "Off";
@@ -34,6 +35,7 @@ public:
  QString timeLeft;
  QString activeDays;
  QString status;
+ QString name;
 
 
 signals:
@@ -43,7 +45,7 @@ signals:
  void countDownChanged();
  void daysChanged();
  void statusChanged();
-
+ void nameChanged();
 public slots:
  void setHandler(int iHandler) {eventHandler = iHandler; emit eventHandlerChanged();}
  int getHandler () {return eventHandler;}
@@ -62,6 +64,9 @@ public slots:
 
  void setDaysActive(QString iDaysActive) {activeDays = iDaysActive; emit daysChanged();}
  QString getDaysActive () {return activeDays;}
+
+ void setName(QString iName) {name = iName; emit nameChanged();}
+ QString getName () {return name;}
 
 
 };
