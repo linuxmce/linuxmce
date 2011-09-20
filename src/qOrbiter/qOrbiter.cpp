@@ -3009,6 +3009,7 @@ void DCE::qOrbiter::GetAlarms(bool toggle, int grp)
             {
                 DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
                 cellsToRender= pDataGridTable->GetRows();
+                qDebug() << "Rows: " << cellsToRender;
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "sleeping menu alarms Grid Dimensions: Height %i, Width %i", gHeight, gWidth);
                 QString name;
                 QString days;
@@ -3018,7 +3019,7 @@ void DCE::qOrbiter::GetAlarms(bool toggle, int grp)
                 int counter = 0;
                 int col = 0;
                 int row = 0;
-                for (int counter = -1; counter < gHeight+1; counter++)
+                for (int counter = 0; counter < cellsToRender; counter++)
                 {
                     DataGridCell *pCell = pDataGridTable->GetData(row,col);
                     qDebug() << "Row: " << row << ",Col:" << col;
