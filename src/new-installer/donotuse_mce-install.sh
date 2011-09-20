@@ -792,6 +792,8 @@ if [[ "$DISTRO" = "lucid" ]] ; then
 	sed -i 's/23/235/' /etc/init/tty4.conf
 	# disable plymouth splash for now. Could be replaced by own LMCE splash later
 	sed -i 's/ splash//' /etc/default/grub
+	#Setup vmalloc for video drivers
+	sed -i 's/GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"vmalloc=256m\"/' /etc/default/grub
 	/usr/sbin/update-grub
 else
 	echo "start on runlevel 5">>/etc/event.d/tty2
@@ -828,8 +830,6 @@ cat >/etc/inittab <<"EOF"
 id:5:initdefault: # Launch Manager
 EOF
 
-#Setup vmalloc for video drivers
-sed -i 's/GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"vmalloc=256m\"/' /etc/default/grub
 
 # Remove KDM startup
 echo "/bin/false" >/etc/X11/default-display-manager
