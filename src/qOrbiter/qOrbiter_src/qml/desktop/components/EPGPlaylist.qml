@@ -18,6 +18,7 @@ Rectangle {
         width: childrenRect.width
         anchors.centerIn: parent
         color: "aliceblue"
+        clip:true
 
         ListView{
             id:epgplaylistview
@@ -28,6 +29,7 @@ Rectangle {
             interactive: true
             flickableDirection: "VerticalFlick"
             model: simpleepg
+
 
             delegate:
 
@@ -101,11 +103,12 @@ Rectangle {
 
         Image {
             id: headeroverlay
-            source: "../../../img/icons/listoverlay.png"
+            source: "../../../img/icons/listcover.png"
             height: epgplaylistview.height
+            smooth: true
             width: epgplaylistview.width
             anchors.centerIn: epgplaylistview
-            opacity: .35
+            opacity: .15
         }
     }
 }

@@ -55,100 +55,108 @@ Rectangle {
                 width: childrenRect.width
 
                 Rectangle {
-                id: gradientheader
-                width: parent.width
-                height: childrenRect.height
-
-                gradient: Gradient {
-                    GradientStop {
-                        position: 0
-                        color: style.lighthighlight
+                    id: gradientheader
+                    width: parent.width
+                    height: childrenRect.height
+                    Image {
+                        id: headerimage
+                        source: "../../../img/icons/header.png"
+                        height:parent.height
+                        width:parent.width
                     }
+                    Text {
+                        id: headertext
+                        height:scaleY(5)
+                        text:qsTr("Speed: ") + dcenowplaying.qs_playbackSpeed
+                        font.family: "Droid Sans"
+                        font.pixelSize: scaleY(2)
+                        color: style.highlight1
 
-                    GradientStop {
-                        position: 1
-                        color: "#3878a0"
                     }
                 }
-                Text {
-                    id: headertext
-                    height:scaleY(5)
-                    text:qsTr("Speed: ") + dcenowplaying.qs_playbackSpeed
-                    font.family: "Droid Sans"
-                    font.pixelSize: 12
-
-                }
-            }
                 Image {
                     id: nowplayingimage
-                    width: scaleX(45)
-                    height: scaleY(45)
+                    width: scaleX(35)
+                    height: scaleY(35)
                     fillMode: Image.PreserveAspectFit
                     source: "image://updateobject/"+dcenowplaying.m_iplaylistPosition
                 }
 
 
-                    Text {
-                        id: artist
-                        height: scaleY(5)
-                        width: scaleX(45)
-                        text: qsTr("Artist :") + dcenowplaying.qs_mainTitle
-                        font.family: "Droid Sans"
-                        wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                        font.bold: true
-                        smooth: true
-                        font.pixelSize: 16
-                    }
-
-
-                    Text {
-                        id: album
-                         height: scaleY(5)
-                         width: scaleX(45)
-                         wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                         text: qsTr("Album: ") + dcenowplaying.qs_mainTitle2
-                        font.family: "Droid Sans"
-                        font.bold: true
-                        smooth: true
-                        font.pixelSize: 16
-
-                    }
-
-                    Text {
-                        id: title
-                         height: scaleY(5)
-                         width: scaleX(45)
-                         wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                         text: qsTr("Title: ") + dcenowplaying.qs_subTitle
-                        font.family: "Droid Sans"
-                        font.bold: true
-                        smooth: true
-                        font.pixelSize: 16
-                    }
-                    Rectangle{
-                        id:trackdata
-                        height: scaleY(15)
-
-                        width: metadata.width
-                        color: "grey"
-                        border.color: "black"
-                        border.width: 1
-                        anchors.horizontalCenter: metadata.horizontalCenter
-                        anchors.bottom: title.bottom
-                        opacity: .25
-                    }
-
-                    VideoControls {
-                        id: videocontrols1
-                        anchors.top: trackdata.bottom
-                    }
-
+                Text {
+                    id: programtext
+                    width: scaleX(35)
+                    text: qsTr("Program :") + dcenowplaying.tvProgram
+                    font.family: "Droid Sans"
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                    font.bold: true
+                    smooth: true
+                    font.pixelSize: scaleY(2)
                 }
 
 
+                Text {
+                    id: episode
+                    width: scaleX(35)
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                    text: qsTr("Episode: ") + dcenowplaying.episode
+                    font.family: "Droid Sans"
+                    font.bold: true
+                    smooth: true
+                    font.pixelSize: scaleY(2)
+                }
 
+                Text {
+                    id: genre
+                    width: scaleX(35)
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                    text: qsTr("Genre(s): ") + dcenowplaying.genre
+                    font.family: "Droid Sans"
+                    font.bold: true
+                    smooth: true
+                    font.pixelSize: scaleY(2)
+                    MouseArea{
+                        anchors.fill: genre
+                        hoverEnabled: true
+                        onEntered: { genre.elide = "ElideNone" ; }
+                        onExited: {genre.elide = "ElideRight"; }
+                    }
+                }
+
+
+                Text {
+                    id: starring
+                    width: scaleX(35)
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                    text: qsTr("Starring: ") + dcenowplaying.performerlist
+                    font.family: "Droid Sans"
+                    font.bold: true
+                    smooth: true
+                    font.pixelSize: scaleY(2)
+                    elide: "ElideRight"
+
+                    MouseArea{
+                        anchors.fill: starring
+                        hoverEnabled: true
+                        onEntered: { starring.elide = "ElideNone" ; }
+                        onExited: {starring.elide = "ElideRight"; }
+                    }
+                }
+
+            }
             Remote_lighting_controls{ id: remote_lighting_controls1; }
             Remote_Audio_controls{ id: remote1; }
+        }
+    }
+
+    Row{
+        id:controlrow
+        anchors.top: mainrow.bottom
+        height: childrenRect.height
+        width: childrenRect.width
+        anchors.horizontalCenter: storedvideoremote.horizontalCenter
+        VideoControls {
+            id: videocontrols1
         }
     }
 

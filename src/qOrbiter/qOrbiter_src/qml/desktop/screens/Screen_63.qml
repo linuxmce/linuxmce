@@ -31,7 +31,7 @@ Rectangle {
 
     //main 'now playing rect containing all the other items
     HomeButton{anchors.right: parent.right; anchors.top:parent.top}
-    VideoControls {id: videocontrols1; anchors.bottom: parent.bottom; anchors.horizontalCenter: parent.horizontalCenter}
+    VideoControls {id: videocontrols1; anchors.top: mainrow.bottom; anchors.horizontalCenter: parent.horizontalCenter}
 
     Row{
         id:mainrow
@@ -39,43 +39,41 @@ Rectangle {
         width: childrenRect.width
         spacing: 5
         anchors.top:parent.top
-        anchors.topMargin: scaleY(10)
+        anchors.topMargin: scaleY(5)
         anchors.horizontalCenter: parent.horizontalCenter
+
         EPGPlaylist{id:tvchannellist }
-        RemoteNumberPad {id: remotenumberpad1;}
+
         Rectangle {
-            width: scaleX(30)
+            id:metarect
+            width: scaleX(35)
             height: childrenRect.height
-            color: style.accentcolor
+            color: style.bgcolor
 
             Rectangle {
                 id: gradientheader
 
                 width: parent.width
                 height: childrenRect.height
-                gradient: Gradient {
-                    GradientStop {
-                        position: 0
-                        color: "#ffffff"
-                    }
-
-                    GradientStop {
-                        position: 1
-                        color: "#3878a0"
-                    }
+                Image {
+                    id: headerimage
+                    source: "../../../img/icons/header.png"
+                    height:parent.height
+                    width:parent.width
                 }
                 Text {
                     id: headertext
                     text:"Speed: " + dcenowplaying.qs_playbackSpeed
                     font.family: "Droid Sans"
                     font.pixelSize: 12
+                    color: style.highlight1
                 }
             }
 
             Image {
                 id: nowplayingimage
-                width: scaleX(30)
-                height: scaleY(30)
+                width: scaleX(35)
+                height: scaleY(35)
                 anchors.top: gradientheader.bottom
                 fillMode: Image.PreserveAspectFit
                 source: "image://updateobject/"+dcenowplaying.m_iplaylistPosition
@@ -83,21 +81,19 @@ Rectangle {
 
             Rectangle {
                 id: metadatavideo
-                width: scaleX(30)
+                width: scaleX(35)
                 height: childrenRect.height
 
-                gradient: Gradient {
-                    GradientStop {
-                        position: 0
-                        color: style.accentcolor
-                    }
+                Image {
+                    id: npgloss
+                    source: "../../../img/icons/header.png"
+                    height:parent.height
+                    width:parent.width
+                    smooth:true
 
-                    GradientStop {
-                        position: 1
-                        color: style.darkhighlight
-                    }
                 }
-                color: style.darkhighlight
+
+                color: style.bgcolor
                 anchors.top:nowplayingimage.bottom
                 Column
                 {
@@ -142,7 +138,7 @@ Rectangle {
             }
         }
 
-
+RemoteNumberPad {id: remotenumberpad1;}
         Remote_lighting_controls{ id: remote_lighting_controls1; }
         Remote_Audio_controls{ id: remote1; }
 

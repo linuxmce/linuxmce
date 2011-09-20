@@ -40,24 +40,26 @@ Rectangle {
                 fillMode: Image.PreserveAspectCrop
                 source:  index == dcenowplaying.m_iplaylistPosition ? playlistimage.source = "image://updateobject/"+securityvideo.timestamp: ""
                 anchors.fill: parent
-                opacity: .4
+                opacity: .5
             }
             Text {
                 id: position
-                text: name
+                text: qsTr("Item #") + name
                 font.family: "DroidSans"
 
                 color: "aliceblue"
-                anchors.centerIn: parent
+
                 font.pixelSize: 18
                 font.bold: true
                 font.capitalization: Font.SmallCaps
+                anchors.bottom: parent.bottom
+                opacity: .75
             }
 
             Text {
                 text: id
                 font.family: "DroidSans"
-                color: "black"
+                color: "aliceblue"
                 width: parent.width
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                 font.pixelSize: 18
@@ -70,7 +72,7 @@ Rectangle {
                 fillMode: Image.PreserveAspectCrop
                 source: "../../../img/icons/header.png"
                 anchors.fill: parent
-                opacity: .35
+                opacity: .30
             }
 
             MouseArea{

@@ -2578,7 +2578,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                 cellfk = pCell->GetValue();
 
                 QStringList parser = cellTitle.split(QRegExp("(\\n|:\\s)"), QString::KeepEmptyParts);
-                qDebug() << "Processing" << parser.at(0);
+             //   qDebug() << "Processing" << parser.at(0);
                 QString attributeType = parser.at(0);
                 QString attribute;
                 if(parser.length() < 2)
@@ -2588,13 +2588,13 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                 attribute = parser.at(1);
                 if(attributeType == "Program")
                 {
-                    qmlUI->nowPlayingButton->setProgram(attributeType);
-                    qDebug() << attribute;
+                    qmlUI->nowPlayingButton->setProgram(attribute);
+                  //  qDebug() << attribute;
                 }
                 else if(attributeType == "Title")
                 {
                     qmlUI->nowPlayingButton->setMediaTitle(attribute);
-                    qDebug() << attribute;
+                 //   qDebug() << attribute;
                 }
                 else if(attributeType == "Channel")
                 {
@@ -2603,27 +2603,27 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                 else if(attributeType == "Episode")
                 {
                     qmlUI->nowPlayingButton->setEpisode(attribute);
-                    qDebug() << attribute;
+                  //  qDebug() << attribute;
                 }
                 else if(attributeType == "Performer")
                 {
                     qmlUI->nowPlayingButton->setPerformers(attribute);
-                    qDebug() << attribute;
+                   // qDebug() << attribute;
                 }
                 else if(attributeType == "Director")
                 {
                     qmlUI->nowPlayingButton->setDirector(attribute);
-                    qDebug() << attribute;
+                   // qDebug() << attribute;
                 }
                 else if(attributeType == "Genre")
                 {
                     qmlUI->nowPlayingButton->setGenre(attribute);
-                    qDebug() << attribute;
+                   // qDebug() << attribute;
                 }
                 else if(attributeType == "Album")
                 {
                     qmlUI->filedetailsclass->setAlbum(attribute);
-                    qDebug() << attribute;
+                   // qDebug() << attribute;
                 }
 
 

@@ -5,21 +5,26 @@ Rectangle {
     height: childrenRect.height
     color:style.lighthighlight
     id:remotenumberpad
+    border.color: style.highlight1
+    border.width: 2
+    radius:5
+
 
     Column{
         id:padcolumn
         spacing:5
         width:parent.width
-        height: childrenRect.height
+        height: childrenRect.height + scaleY(1)
         anchors.centerIn: parent
 
         Rectangle {
             id: numberdisplay
-            width: numberrect.width
+            width: scaleX(15)
             height: scaleY(8)
-            color: "#ffffff"
+            color: style.highlight2
             radius: 19
-            border.color: style.darkhighlight
+            anchors.horizontalCenter: parent.horizontalCenter
+            border.color: style.accentcolor
             border.width: 2
 
             TextInput {
@@ -38,13 +43,14 @@ Rectangle {
 
         Rectangle{
             id:numberrect
-            height: childrenRect.height + 5
+            height: childrenRect.height + scaleY(1)
             width: childrenRect.width
             anchors.top: numberdisplay.bottom
             anchors.topMargin: 5
             anchors.horizontalCenter: parent.horizontalCenter
-            border.color: style.darkhighlight
-            color: style.lighthighlight
+            border.color: style.highlight1
+            color: style.darkhighlight
+            radius: 5
             Column{
                 id: numberrowcolum
                 spacing: scaleY(1)
@@ -61,13 +67,13 @@ Rectangle {
                         radius: 100
                         Image {
                             id: name
-                            source: "../../../img/icons/roundbuttonudn.png"
+                            source: "../../../img/icons/rndbuttonbase.png"
                             anchors.fill: parent
                         }
                         Text {
                             id: numberonelabel
                             text: qsTr("1")
-                            color: "white"
+
                             font.pixelSize: parent.height * .50
                             anchors.centerIn: parent
                         }
@@ -100,6 +106,11 @@ Rectangle {
                         width: scaleX(5)
                         color:style.lighthighlight
                         radius: 100
+                        Image {
+
+                            source: "../../../img/icons/rndbuttonbase.png"
+                            anchors.fill: parent
+                        }
                         Text {
                             id: numbero2label
                             text: qsTr("2")
@@ -136,6 +147,11 @@ Rectangle {
                         width: scaleX(5)
                         color:style.lighthighlight
                         radius: 100
+                        Image {
+
+                            source: "../../../img/icons/rndbuttonbase.png"
+                            anchors.fill: parent
+                        }
                         Text {
                             id: number3label
                             text: qsTr("3")
@@ -181,6 +197,11 @@ Rectangle {
                         width: scaleX(5)
                         color:style.lighthighlight
                         radius: 100
+                        Image {
+
+                            source: "../../../img/icons/rndbuttonbase.png"
+                            anchors.fill: parent
+                        }
                         Text {
                             id: numberonelabe4
                             text: qsTr("4")
@@ -217,6 +238,11 @@ Rectangle {
                         width: scaleX(5)
                         color:style.lighthighlight
                         radius: 100
+                        Image {
+
+                            source: "../../../img/icons/rndbuttonbase.png"
+                            anchors.fill: parent
+                        }
                         Text {
                             id: numbero5label
                             text: qsTr("5")
@@ -253,6 +279,11 @@ Rectangle {
                         width: scaleX(5)
                         color:style.lighthighlight
                         radius: 100
+                        Image {
+
+                            source: "../../../img/icons/rndbuttonbase.png"
+                            anchors.fill: parent
+                        }
                         Text {
                             id: number6label
                             text: qsTr("6")
@@ -298,6 +329,11 @@ Rectangle {
                         width: scaleX(5)
                         color:style.lighthighlight
                         radius: 100
+                        Image {
+
+                            source: "../../../img/icons/rndbuttonbase.png"
+                            anchors.fill: parent
+                        }
                         Text {
                             id: number7label
                             text: qsTr("7")
@@ -334,6 +370,11 @@ Rectangle {
                         width: scaleX(5)
                         color:style.lighthighlight
                         radius: 100
+                        Image {
+
+                            source: "../../../img/icons/rndbuttonbase.png"
+                            anchors.fill: parent
+                        }
                         Text {
                             id: number8label
                             text: qsTr("8")
@@ -370,6 +411,11 @@ Rectangle {
                         width: scaleX(5)
                         color:style.lighthighlight
                         radius: 100
+                        Image {
+
+                            source: "../../../img/icons/rndbuttonbase.png"
+                            anchors.fill: parent
+                        }
                         Text {
                             id: number9label
                             text: qsTr("9")
@@ -413,6 +459,11 @@ Rectangle {
                         buttontextbold: true
                         buttontextfontsize: 12
                         buttonsqradius: 100
+                        Image {
+
+                            source: "../../../img/icons/rndbuttonbase.png"
+                            anchors.fill: parent
+                        }
                         MouseArea{
                             anchors.fill: parent
                             onClicked: {
@@ -428,6 +479,11 @@ Rectangle {
                         width: scaleX(5)
                         color:style.lighthighlight
                         radius: 100
+                        Image {
+
+                            source: "../../../img/icons/rndbuttonbase.png"
+                            anchors.fill: parent
+                        }
 
 
                         Text {
@@ -459,11 +515,16 @@ Rectangle {
 
                     ButtonSq{
                          height: scaleY(9)
-                       width: scaleX(8)
+                       width: scaleX(5)
                         buttontext: "go"
                         buttontextbold: true
                         buttontextfontsize: 12
                         buttonsqradius: 100
+                        Image {
+
+                            source: "../../../img/icons/rndbuttonbase.png"
+                            anchors.fill: parent
+                        }
                         MouseArea{
                             anchors.fill: parent
                             onClicked:{

@@ -127,10 +127,7 @@ Rectangle {
                         opacity: .25
                         clip:true
                     }
-                    VideoControls {
-                        id: videocontrols1
-                        anchors.top: trackdata.bottom
-                    }
+
 
                 }
 
@@ -140,8 +137,26 @@ Rectangle {
             Remote_Audio_controls{ id: remote1; }
         }
     }
+    Row
+    {
+        id:controlrow
+        height: childrenRect.height
+        width: childrenRect.width
+        spacing: scaleX(2)
+        anchors.top:mainrow.bottom
+        anchors.topMargin: scaleY(1)
+        anchors.horizontalCenter: parent.horizontalCenter
 
-    HomeButton{anchors.right: parent.right; anchors.top:parent.top}
+        VideoControls {
+            id: videocontrols1
+        }
+
+        HomeButton{anchors.right: parent.right; anchors.top:parent.top}
+
+
+    }
+
+
 
 
 }

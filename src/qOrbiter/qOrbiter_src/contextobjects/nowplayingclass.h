@@ -48,7 +48,7 @@ class NowPlayingClass : public QDeclarativeItem
     Q_PROPERTY (QString mediatitle READ getMediaTitle WRITE setMediaTitle NOTIFY mediaTitleChanged)
     Q_PROPERTY (QString genre READ getGenre WRITE setGenre NOTIFY genreChanged)
     //television related variables
-    Q_PROPERTY (QString program READ getProgram WRITE setProgram NOTIFY programChanged)
+    Q_PROPERTY (QString tvProgram READ getProgram WRITE setProgram NOTIFY programChanged)
     Q_PROPERTY (QString channel READ getChannel WRITE setChannel NOTIFY channelChanged)
     Q_PROPERTY (QString channelID READ getChannelID WRITE setChannelID NOTIFY channelChanged)
     Q_PROPERTY (QString episode READ getEpisode WRITE setEpisode NOTIFY episodeChanged)
@@ -86,7 +86,7 @@ public:
     QString qs_playbackSpeed;
 
     //television related
-    QString program;
+    QString tvProgram;
     QString channel;
     QString channelID;
     QString episode;
@@ -143,8 +143,8 @@ signals:
 public slots:
 
 
-    void setProgram(QString newProgram) {program = newProgram; emit programChanged();}
-    QString getProgram () {return program;}
+    void setProgram(QString newProgram) {tvProgram = newProgram; emit programChanged();}
+    QString getProgram () {return tvProgram;}
 
     void setImage(QUrl incImage) {nowPlayingImage = incImage; emit imageChanged();}
     QUrl getImage () { return nowPlayingImage;}

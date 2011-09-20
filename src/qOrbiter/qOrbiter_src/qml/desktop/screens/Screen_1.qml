@@ -10,7 +10,7 @@ Item
         signal swapStyle()
         height: style.orbiterH
         width: style.orbiterW
-        color: "black"
+        color: style.bgcolor
 
         Rectangle{
             id:bgrect
@@ -23,11 +23,12 @@ Item
             id:status
             height: scaleY(2)
             width: parent.width
-            color:"aliceblue"
+            color: style.darkhighlight
+
 
             Text{
                 id:connectstatus
-                text: "Orbiter"+ iPK_Device +" Is Connected"
+                text: qsTr("Orbiter")+ iPK_Device + qsTr(" Is Connected")
                height: status.height; anchors.left: parent.left; anchors.leftMargin: scaleX(5)
             }
 

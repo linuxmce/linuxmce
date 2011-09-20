@@ -31,9 +31,9 @@ QtObject{
     property string skinversion: "1.0"
     property string skinvariation: "Desktop 800x600"
     property color maincolor: "#0D4392"
-    property color accentcolor: "#3F76C7"
-    property color highlight1: "#EED169"
-    property color highlight2: "#EEC63B"
+    property color accentcolor: "#EE873B"
+    property color highlight1: "aliceblue"
+    property color highlight2: "slategrey"
     property color alertcolor: "red"
     property color warncolor:"yellow"
 
@@ -64,7 +64,7 @@ QtObject{
     property string stylebuttonimage: ""
     property int title_size: 20* scaleX(orbiterW)
     property color title_color: "whitesmoke"
-    property double stdbuttontext: 16 * scaleX(orbiterW)
+    property int  stdbuttontext: 18 * scaleX(orbiterW)
     property color lighttext: "whitesmoke"
     property color darktext: "slategrey"
 
@@ -77,7 +77,7 @@ QtObject{
     property int buttonH:9
     property int buttonW: 9
     property color button_system_color: "#3F76C7"
-    property color button_system_color_hover: "#EE873B"
+    property color button_system_color_hover: "#22416F"
 
     property color button_action_color: "lightsteelblue"
     property color button_action_color_hover: "lightblue"
