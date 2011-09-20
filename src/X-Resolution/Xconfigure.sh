@@ -371,9 +371,12 @@ fi
 # Test detected display driver
 # Don't test if driver is vesa (assumption: always works) or current driver (assumption: already tested and works)
 # Doing this test last, to test all the changes, since the video driver (e.g. nvidia) may not work without some extra options that are set together with the resolution
-if [[ "$DisplayDriver" != "$CurrentDisplayDriver" && "$DisplayDriver" != vesa ]] && [[ -n "$Defaults" || -n "$UpdateVideoDriver" ]]; then
-	if [[ -z "$NoTest" ]] && ! TestXConfig "$Display" "$ConfigFile" && [[ -z "$ForceVESA" ]]; then
-		"$0" "${OrigParams[@]}" --force-vesa --skiplock
-		exit $?
-	fi
-fi
+#if [[ "$DisplayDriver" != "$CurrentDisplayDriver" && "$DisplayDriver" != vesa ]] && [[ -n "$Defaults" || -n "$UpdateVideoDriver" ]]; then
+#       if [[ -z "$NoTest" ]] && ! TestXConfig "$Display" "$ConfigFile" && [[ -z "$ForceVESA" ]]; then
+#               "$0" "${OrigParams[@]}" --force-vesa --skiplock
+#               exit $?
+#       fi
+#fi
+# ^^ 1004 testing - bad assumption that VESA always works due to dri module load which loads dynamically for VESA modules, dri severly kills the X session for AVWizard 
+# on nvidia cards - these lines break due to install from pluto-nvidia-video-drivers
+
