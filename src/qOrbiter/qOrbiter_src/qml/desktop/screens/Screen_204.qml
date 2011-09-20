@@ -1,47 +1,43 @@
 import QtQuick 1.0
 import "../components"
-Item{
+Rectangle{
     id:reloadrouter
+    height: style.orbiterH
+    width: style.orbiterW
+    color: style.highlight2
 
     Rectangle{
-        height: style.orbiterH
-        width: style.orbiterW
-        color: style.darkhighlight
+        id:containerrect
+        height:scaleY(50)
+        width: scaleX(60)
+        color: style.bgcolor
+        clip: true
+        border.color: style.highlight1
+        border.width: 2
+        anchors.centerIn: parent
+        radius: 10
 
-        Rectangle{
-            id:headerblock
-            height:scaleY(5)
-            width: scaleX(50)
-            color: style.warncolor
-            anchors.top: parent.top
-            anchors.topMargin: scaleY(2)
-            anchors.horizontalCenter: parent.horizontalCenter
-            radius: 10
             Text {
                 id: message
                 text: qsTr("The router has requested a reload")
                 width: parent.width
-                wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                font.pixelSize: 14
-                anchors.centerIn: parent
+                height: scaleY(5)
+                font.italic: false
+                horizontalAlignment: Text.AlignHCenter
+                font.bold: false
+                color: "aliceblue"
+                wrapMode: Text.WrapAnywhere
+                font.pixelSize: 18
+                anchors.centerIn: containerrect
             }
-        }
-
-        Rectangle{
-            id:reloadroutercontainer
-            height: childrenRect.height + 5
-            width:childrenRect.width + 5
-            anchors.centerIn: parent
-            color:style.accentcolor
-            radius: 20
-            clip:true
-
             Row{
                 id:buttonrow
                 spacing:scaleX(2)
                 width: childrenRect.width
                 height: childrenRect.height
-                anchors.centerIn: parent
+               anchors.horizontalCenter: parent.horizontalCenter
+               anchors.top: message.bottom
+               anchors.topMargin: scaleY(2)
 
                 ButtonSq{
                     id: confirm
@@ -69,4 +65,4 @@ Item{
         }
        HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
     }
-}
+

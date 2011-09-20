@@ -820,6 +820,7 @@ void qorbiterManager::closeOrbiter()
 {
     qDebug() << "Shutting Down";
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Exiting, Unregistering 1st");
+   // processingThread->quit();
     pqOrbiter->deinitialize();
     pqOrbiter->~qOrbiter();
     this->~qorbiterManager();

@@ -36,7 +36,7 @@ Rectangle {
                     onEntered: {
                         mainItem.color = style.darkhighlight
                         mainItem.scale = 1.25
-                        mainItem.z = 5
+                        mainItem.z = 10
 
                     }
                     onExited: {

@@ -80,7 +80,7 @@ Rectangle {
                             text:qsTr("Speed: ") + dcenowplaying.qs_playbackSpeed
                             font.family: "Droid Sans"
                             font.pixelSize: scaleY(2)
-                            color: style.highlight1
+                            color: "aliceblue"
                         }
                     }
                     Image {

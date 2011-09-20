@@ -76,6 +76,7 @@ class qorbiterManager : public QWidget
 
     Q_PROPERTY (QString q_mediaType READ getSorting NOTIFY gridTypeChanged)
     Q_PROPERTY (QString sPK_User READ getCurrentUser WRITE setCurrentUser NOTIFY userChanged)
+    Q_PROPERTY (QString dceResponse READ getDceResponse WRITE setDceResponse NOTIFY dceResponseChanged)
 public:
     qorbiterManager(int deviceno, QString routerip, QWidget *parent = 0);  //constructor
 
@@ -116,6 +117,8 @@ public:
     QObject *item;                                  //qObject reference to UI
     bool refreshUI();
     Q_INVOKABLE void swapSkins(QString incSkin);
+    QString dceResponse;
+
 
     basicImageProvider *basicProvider;
     GridIndexProvider *advancedProvider;
@@ -297,6 +300,7 @@ signals:
     void liveTVrequest();
     void userChanged();
     void requestMoreGridData();
+    void dceResponseChanged();
 
 
 
@@ -304,6 +308,8 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
 
     Q_INVOKABLE void writeConfig();
     bool readLocalConfig();
+    void setDceResponse(QString response) {dceResponse = response; emit dceResponseChanged();}
+    QString getDceResponse () {return dceResponse;}
 
     //security related
     Q_INVOKABLE void requestSecurityPic(int i_pk_camera_device, int h, int w);
