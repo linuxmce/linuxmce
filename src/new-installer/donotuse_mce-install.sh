@@ -828,6 +828,9 @@ cat >/etc/inittab <<"EOF"
 id:5:initdefault: # Launch Manager
 EOF
 
+#Setup vmalloc for video drivers
+sed -i 's/GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"vmalloc=256m\"/' /etc/default/grub
+
 # Remove KDM startup
 echo "/bin/false" >/etc/X11/default-display-manager
 wget -q http://svn.linuxmce.org/svn/branches/LinuxMCE-1004/src/new-installer/firstboot.new
