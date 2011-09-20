@@ -1,9 +1,10 @@
 import QtQuick 1.0
 
 Rectangle {
-    width: scaleX(20)
-    height: scaleY(80)
+    width: scaleX(17)
+    height: scaleY(55)
     color: "transparent"
+    clip:true
 
     Component.onCompleted: nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
 
@@ -17,8 +18,8 @@ Rectangle {
 
     ListView{
         id:nonepgplaylistview
-        width: scaleX(20)
-        height: scaleY(80)
+        width: scaleX(16)
+        height: scaleY(55)
 
         highlightFollowsCurrentItem: true
         highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
@@ -31,8 +32,8 @@ Rectangle {
             Rectangle {
             border.color: "black"
             border.width: 1
-            width:scaleX(20)
-            height: scaleY(10)
+            width:scaleX(16)
+            height: scaleY(9)
             color: style.darkhighlight
             clip: true
             Image {
@@ -46,9 +47,7 @@ Rectangle {
                 id: position
                 text: qsTr("Item #") + name
                 font.family: "DroidSans"
-
                 color: "aliceblue"
-
                 font.pixelSize: 18
                 font.bold: true
                 font.capitalization: Font.SmallCaps

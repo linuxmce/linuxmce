@@ -33,8 +33,7 @@ Rectangle {
         anchors.margins: 5
         font.family: "Droid Sans"
         wrapMode: "WrapAtWordBoundaryOrAnywhere"
-        elide: "ElideRight"
-
+       // elide: "ElideRight"
        color:"black"
         z:1
 }
@@ -45,18 +44,12 @@ Rectangle {
                 buttonBase.color = style.button_system_color_hover
                 buttonLabel.color = style.lighttext
                 buttonLabel.font.capitalization = Font.AllUppercase
-
             }
+
             onExited: {
                 buttonBase.color = style.button_system_color
                  buttonLabel.font.capitalization = Font.Normal
                 buttonLabel.color = "black"
-
             }
-
-
-
     }
-
-
 }

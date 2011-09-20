@@ -14,7 +14,7 @@ Rectangle {
         color: "transparent"
         Text {
             id: welcome
-            text: "Welcome To LinuxMCE!"
+            text: qsTr("Welcome To LinuxMCE!")
             font.pixelSize: 30
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
@@ -51,7 +51,7 @@ Rectangle {
     }
     Text {
         id: connectionlabel
-        text: "Set Connection Details"
+        text: qsTr("Set Connection Details")
         font.bold: true
         anchors.top: rectangle2.top
         anchors.horizontalCenter: parent.horizontalCenter
@@ -62,7 +62,7 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         spacing: 10
         Text {
-            text:  "Host:"
+            text: qsTr("Host:")
             anchors.verticalCenter: parent.verticalCenter
         }
 
@@ -72,12 +72,13 @@ Rectangle {
             text: srouterip
             font.pixelSize: 12
           //  onTextChanged: setRouterIp(routerip.text)
-            fillColor: style.button_system_color_hover
+            fillColor: style.highlight1
             anchors.verticalCenter: parent.verticalCenter
+
 
         }
         Text {
-            text:  "Device:"
+            text: qsTr("Device:")
             anchors.verticalCenter: parent.verticalCenter
         }
         TextInput {
@@ -86,7 +87,7 @@ Rectangle {
             text: deviceid
             font.pixelSize: 12
             //onTextChanged: setDeviceNo(devicenumber.text)
-            fillColor: style.button_system_color_hover
+            fillColor: style.highlight1
             anchors.verticalCenter: parent.verticalCenter
 
         }
@@ -94,7 +95,7 @@ Rectangle {
         Button {
             id: buttonsq1
             textSize: 12
-            text: "Connect"
+            text: qsTr("Connect")
             radius:  4
             onClicked: setupStart(devicenumber.text, routerip.text)
             anchors.verticalCenter: parent.verticalCenter
