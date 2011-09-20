@@ -1464,6 +1464,7 @@ void qorbiterManager::initializeGridModel()
 
 void qorbiterManager::goBackGrid()
 {
+    setRequestMore(false);
     backwards = true;
     execGrp(i_current_command_grp);
 
