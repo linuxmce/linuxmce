@@ -9,7 +9,7 @@ Item {
         height: scaleY(17)
         width: scaleX(100)
         clip:true
-        color:"midnightblue"
+        color:style.darkhighlight
         radius: 20
         Image {
             id: rowbgimg
@@ -26,7 +26,7 @@ Item {
         Row {
             id: telecomRow
             spacing:5
-
+anchors.left: parent.left
             anchors.leftMargin: scaleX(2)
 
             ButtonSq {

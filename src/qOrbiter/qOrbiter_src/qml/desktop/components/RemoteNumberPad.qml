@@ -1,7 +1,7 @@
 import QtQuick 1.0
 
 Rectangle {
-    width: scaleX(30)
+    width: scaleX(20)
     height: childrenRect.height
     color:style.lighthighlight
     id:remotenumberpad
@@ -15,7 +15,7 @@ Rectangle {
 
         Rectangle {
             id: numberdisplay
-            width: parent.width
+            width: numberrect.width
             height: scaleY(8)
             color: "#ffffff"
             radius: 19
@@ -25,7 +25,7 @@ Rectangle {
             TextInput {
                 id: text_input1
                 text: ""
-                echoMode: TextInput.Password
+
                 font.family: "Droid Sans Mono"
                 cursorVisible: true
                 readOnly: false
@@ -47,16 +47,16 @@ Rectangle {
             color: style.lighthighlight
             Column{
                 id: numberrowcolum
-                spacing: scaleY(2)
+                spacing: scaleY(1)
 
                 Row{
                     id:toprow
-                    spacing: scaleX(2)
+                    spacing: scaleX(1)
                     //number one
                     Rectangle{
                         id:number1
-                        height: style.stdbuttonh
-                        width: style.stdbuttonw
+                        height: scaleY(9)
+                        width: scaleX(5)
                         color:style.lighthighlight
                         radius: 100
                         Image {
@@ -96,8 +96,8 @@ Rectangle {
                     //number two
                     Rectangle{
                         id:number2
-                        height: style.stdbuttonh
-                        width: style.stdbuttonw
+                        height: scaleY(9)
+                        width: scaleX(5)
                         color:style.lighthighlight
                         radius: 100
                         Text {
@@ -132,8 +132,8 @@ Rectangle {
                     //number 3
                     Rectangle{
                         id:number3
-                        height: style.stdbuttonh
-                        width: style.stdbuttonw
+                        height: scaleY(9)
+                        width: scaleX(5)
                         color:style.lighthighlight
                         radius: 100
                         Text {
@@ -172,13 +172,13 @@ Rectangle {
                 Row
                 {
                     id:middlerow
-                    spacing: scaleX(2)
+                    spacing: scaleX(1)
 
                     //number 4
                     Rectangle{
                         id:number4
-                        height: style.stdbuttonh
-                        width: style.stdbuttonw
+                        height: scaleY(9)
+                        width: scaleX(5)
                         color:style.lighthighlight
                         radius: 100
                         Text {
@@ -213,8 +213,8 @@ Rectangle {
                     //number 5
                     Rectangle{
                         id:number5
-                        height: style.stdbuttonh
-                        width: style.stdbuttonw
+                        height: scaleY(9)
+                        width: scaleX(5)
                         color:style.lighthighlight
                         radius: 100
                         Text {
@@ -249,8 +249,8 @@ Rectangle {
                     //number 6
                     Rectangle{
                         id:number6
-                        height: style.stdbuttonh
-                        width: style.stdbuttonw
+                        height: scaleY(9)
+                        width: scaleX(5)
                         color:style.lighthighlight
                         radius: 100
                         Text {
@@ -290,12 +290,12 @@ Rectangle {
                 Row
                 {
                     id:bottomrow
-                    spacing: scaleX(2)
+                    spacing: scaleX(1)
                     //number 7
                     Rectangle{
                         id:number7
-                        height: style.stdbuttonh
-                        width: style.stdbuttonw
+                        height: scaleY(9)
+                        width: scaleX(5)
                         color:style.lighthighlight
                         radius: 100
                         Text {
@@ -330,8 +330,8 @@ Rectangle {
                     //number 8
                     Rectangle{
                         id:number8
-                        height: style.stdbuttonh
-                        width: style.stdbuttonw
+                        height: scaleY(9)
+                        width: scaleX(5)
                         color:style.lighthighlight
                         radius: 100
                         Text {
@@ -366,8 +366,8 @@ Rectangle {
                     //number 9
                     Rectangle{
                         id:number9
-                        height: style.stdbuttonh
-                        width: style.stdbuttonw
+                        height: scaleY(9)
+                        width: scaleX(5)
                         color:style.lighthighlight
                         radius: 100
                         Text {
@@ -404,11 +404,11 @@ Rectangle {
                     id:actionbuttons
                     height: childrenRect.height
                     width: childrenRect.width
-                    spacing: scaleX(2)
+                    spacing: scaleX(1)
                     ButtonSq{
                         id:backbutton
-                        height:style.stdbuttonh
-                        width: style.stdbuttonw
+                        height: scaleY(9)
+                        width: scaleX(5)
                         buttontext: "Back"
                         buttontextbold: true
                         buttontextfontsize: 12
@@ -424,8 +424,8 @@ Rectangle {
                     //number 9
                     Rectangle{
                         id:number0
-                        height: style.stdbuttonh
-                        width: style.stdbuttonw
+                        height: scaleY(9)
+                        width: scaleX(5)
                         color:style.lighthighlight
                         radius: 100
 
@@ -458,8 +458,8 @@ Rectangle {
 
 
                     ButtonSq{
-                        height:style.stdbuttonh
-                        width: style.stdbuttonw
+                         height: scaleY(9)
+                       width: scaleX(8)
                         buttontext: "go"
                         buttontextbold: true
                         buttontextfontsize: 12

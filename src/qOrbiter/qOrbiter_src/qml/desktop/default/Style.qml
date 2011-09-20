@@ -62,10 +62,11 @@ QtObject{
 
     //textStyles
     property string stylebuttonimage: ""
-    property int title_size: 18
-    property color tile_color: "whitesmoke"
-    property double stdbuttontext: 12
-
+    property int title_size: 20* scaleX(orbiterW)
+    property color title_color: "whitesmoke"
+    property double stdbuttontext: 16 * scaleX(orbiterW)
+    property color lighttext: "whitesmoke"
+    property color darktext: "slategrey"
 
     property int t_but_size: 16
     property color t_but_color: highlight2
@@ -75,8 +76,8 @@ QtObject{
     //button styling
     property int buttonH:9
     property int buttonW: 9
-    property color button_system_color: "#EE873B"
-    property color button_system_color_hover: "#3F76C7"
+    property color button_system_color: "#3F76C7"
+    property color button_system_color_hover: "#EE873B"
 
     property color button_action_color: "lightsteelblue"
     property color button_action_color_hover: "lightblue"

@@ -10,11 +10,11 @@ Rectangle {
     property alias buttontextzindex: buttonLabel.z
     property alias buttonsqradius:  buttonBase.radius
 
-    color:style.lighthighlight
+    color:style.button_system_color
     height: style.stdbuttonw
     width: style.stdbuttonw
-    border.width: 1
-    border.color: style.button_action_color_hover
+    border.width: 2
+    border.color: style.highlight1
     radius: 1
 
     Text {
@@ -35,19 +35,25 @@ Rectangle {
         wrapMode: "WrapAtWordBoundaryOrAnywhere"
         elide: "ElideRight"
 
+       color:"black"
         z:1
 }
         MouseArea{
             anchors.fill: buttonLabel
             hoverEnabled: true
             onEntered: {
-                buttonBase.color = style.highlight2
-                buttonLabel.color = style.lighthighlight
+                buttonBase.color = style.button_system_color_hover
+                buttonLabel.color = style.lighttext
+                buttonLabel.font.capitalization = Font.AllUppercase
+
             }
             onExited: {
-                buttonBase.color = style.lighthighlight
-                buttonLabel.color = style.darkhighlight
+                buttonBase.color = style.button_system_color
+                 buttonLabel.font.capitalization = Font.Normal
+                buttonLabel.color = "black"
+
             }
+
 
 
     }
