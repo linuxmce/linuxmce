@@ -52,7 +52,6 @@ Rectangle {
 
             Rectangle {
                 id: gradientheader
-
                 width: parent.width
                 height: childrenRect.height
                 Image {
@@ -64,9 +63,10 @@ Rectangle {
                 Text {
                     id: headertext
                     text:"Speed: " + dcenowplaying.qs_playbackSpeed
+                    height: scaleY(2.5)
                     font.family: "Droid Sans"
-                    font.pixelSize: 12
-                    color: style.highlight1
+                   font.pixelSize: 1 * scaleY(2)
+                    color: "aliceblue"
                 }
             }
 
@@ -90,7 +90,7 @@ Rectangle {
                     height:parent.height
                     width:parent.width
                     smooth:true
-
+                    opacity: .35
                 }
 
                 color: style.bgcolor
@@ -109,7 +109,8 @@ Rectangle {
                         wrapMode: "NoWrap"
                         font.bold: true
                         smooth: true
-                        font.pixelSize: 12
+                        font.pixelSize: 1 * scaleY(2)
+                        color: "aliceblue"
                     }
 
 
@@ -121,18 +122,20 @@ Rectangle {
                         font.bold: true
                         smooth: true
                         horizontalAlignment: Text.AlignHCenter
-                        font.pixelSize: 12
+                       font.pixelSize: 1 * scaleY(2)
+                        color: "aliceblue"
                     }
 
                     Text {
                         id: title
                         wrapMode: "NoWrap"
-                        text: qsTr("Program:") + dcenowplaying.program
+                        text: qsTr("Program:") + dcenowplaying.tvProgram
                         font.family: "Droid Sans"
                         font.bold: true
                         smooth: true
                         horizontalAlignment: Text.AlignHCenter
-                        font.pixelSize: 12
+                         font.pixelSize: 1 * scaleY(2)
+                        color: "aliceblue"
                     }
                 }
             }
@@ -141,7 +144,5 @@ Rectangle {
 RemoteNumberPad {id: remotenumberpad1;}
         Remote_lighting_controls{ id: remote_lighting_controls1; }
         Remote_Audio_controls{ id: remote1; }
-
     }
-
 }

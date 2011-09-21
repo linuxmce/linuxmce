@@ -21,7 +21,7 @@ public:
         QImage result;
         QImage key;
 
-        if (id == "floorplan")
+        if (id.contains("floorplan"))
         {
             key= managerreference->floorplans->getPageImage(managerreference->floorplans->currentPage);
         }

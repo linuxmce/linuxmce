@@ -101,6 +101,9 @@ public:
     void getMediaTimeCode();
     void GetAdvancedMediaOptions();
     void GetAlarms(bool toggle, int grp);
+    void SetZoom(int zoomLevel);
+    void SetAspectRatio(QString ratio);
+    void GetText(int textno);
 
     //<-dceag-const-e->
 

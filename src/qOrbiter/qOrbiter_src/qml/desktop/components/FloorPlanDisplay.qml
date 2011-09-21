@@ -1,105 +1,129 @@
 import QtQuick 1.0
 
 Rectangle {
-    width: scaleX(95)
-    height: scaleY(95)
-    color: style.darkhighlight
-    clip: true
+    width: style.orbiterW
+    height: style.orbiterH
+    color: style.highlight2
+    Connections{
+        target: floorplan
+        onPageChanged: floorplanimage.source = "image://listprovider/floorplan/"+securityvideo.timestamp
+    }
 
-    Row{
-        id:mainrow
-        height: scaleY(50)
-        width: parent.width
-        spacing: 5
-        clip: true
-        anchors.verticalCenter: parent.verticalCenter
+    Rectangle{
+        id:mainRect
+        height: scaleY(80)
+        width:scaleX(75)
+        border.color: style.highlight1
+        border.width: scaleX(1) *.25
+        radius: 10
+        anchors.centerIn: parent
+        color:style.lighthighlight
 
-        Rectangle{
-            id:imgdummy
-            color:style.lighthighlight
-            border.color: "white"
-            border.width: 2
-            height: scaleY(55)
-            width: scaleX(55)
-            clip: true
-
-            Image {
-                id: floorplanimage
-                source: "image://listprovider/"+"floorplan"
-                asynchronous: true
-                anchors.fill: parent
-            }
-        }
-
-        Rectangle
+        Column
         {
-            height: childrenRect.height + 5
-            width: childrenRect.width + 5
-            color: style.lighthighlight
-            Text{
-                id:fplabel
-                text: qsTr("Floorplans")
-                height: scaleY(5)
-            }
-
-        ListView{
-            id:floorplanlist
-            height: scaleY(10)
-            width: scaleX(18)
-            model:floorplan
-            clip:true
-            anchors.top: fplabel.bottom
-            anchors.horizontalCenter: parent.horizontalCenter
-            delegate:Rectangle{
-                height: scaleY(9)
-                width: scaleX(16)
-                color: style.accentcolor
-                border.color: style.darkhighlight
-                Text {
-                    id: desc
-                    text: description
-                }
-
-                MouseArea{
-                    anchors.fill: parent
-                    onClicked: floorplanimage.source = "image://listprovider/floorplan"
-                }
-            }
-        }
-        }
-
-        Rectangle
-        {
-            height: childrenRect.height + 5
+            id:layoutcolumn
+            height: scaleY(65)
             width: childrenRect.width
-            color: style.lighthighlight
-            Text{
-                id:devicelabel
-                text: qsTr("Devices")
-                height: scaleY(5)
+            anchors.centerIn: parent
+            spacing: scaleY(1)
+
+            Rectangle{
+                id:imgdummy
+                color:style.darkhighlight
+                border.color: "white"
+                border.width: 2
+                height: scaleY(50)
+                width: scaleX(50)
+                clip: true
+
+                Image {
+                    id: floorplanimage
+                    source: ""
+                    anchors.fill: parent
+                    height:parent.height
+                    width: parent.width
+                }
             }
 
-        ListView{
-            id:devicelist
-            height: scaleY(10)
-            width: scaleX(18)
-            model:floorplan
-             clip:true
-            anchors.top: devicelabel.bottom
-            anchors.horizontalCenter: parent.horizontalCenter
-            delegate:Rectangle{
-                height: scaleY(9)
-                width: scaleX(16)
-                color: style.accentcolor
-                border.color: style.darkhighlight
-                Text {
-                    id: devicedesc
-                    text: ident
+            Row{
+                id:mainrow
+                height: childrenRect.height
+                width: childrenRect.width
+                spacing: 5
+                clip: true
+
+                Rectangle
+                {
+                    height: childrenRect.height + 5
+                    width: childrenRect.width + 5
+                    color: style.lighthighlight
+                    Text{
+                        id:fplabel
+                        text: qsTr("Floorplans")
+                        height: scaleY(5)
+                    }
+
+                    ListView{
+                        id:floorplanlist
+                        height: scaleY(10)
+                        width: scaleX(18)
+                        model:floorplan
+                        clip:true
+                        anchors.top: fplabel.bottom
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        delegate:Rectangle{
+                            height: scaleY(9)
+                            width: scaleX(16)
+                            color: style.accentcolor
+                            border.color: style.darkhighlight
+                            Text {
+                                id: desc
+                                text: description
+                            }
+
+                            MouseArea{
+                                anchors.fill: parent
+                                onPressed:{
+                                    floorplan.setCurrentPage(ident)
+
+                                        }
+                            }
+                        }
+                    }
+                }
+
+                Rectangle
+                {
+                    height: childrenRect.height + 5
+                    width: childrenRect.width
+                    color: style.lighthighlight
+                    Text{
+                        id:devicelabel
+                        text: qsTr("Devices")
+                        height: scaleY(5)
+                    }
+
+                    ListView{
+                        id:devicelist
+                        height: scaleY(10)
+                        width: scaleX(18)
+                        model:floorplan
+                        clip:true
+                        anchors.top: devicelabel.bottom
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        delegate:Rectangle{
+                            height: scaleY(9)
+                            width: scaleX(16)
+                            color: style.accentcolor
+                            border.color: style.darkhighlight
+                            Text {
+                                id: devicedesc
+                                text: ident
+                            }
+                        }
+                    }
                 }
             }
         }
-        }
-
-
     }
 }

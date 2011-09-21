@@ -1947,7 +1947,7 @@ QImage DCE::qOrbiter::getfileForDG(string filePath)
     CMD_Request_File reqFile((long)qmlUI->iPK_Device, (long)4 , (string)filePath, &picData, &picData_Size);
     string p_sResponse;
 
-    if (!SendCommand(reqFile))
+    if (!SendCommand(reqFile, &p_sResponse))
     {
         //  qDebug() << "File request sent";
     }
@@ -2651,7 +2651,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
     string valassign ="";
     bool isSuccessfull;// = "false";
 
-    string m_sGridID ="TVCHAN_"+StringUtils::itos(qmlUI->iPK_Device); // the string identifier on the type of grid
+    string m_sGridID ="tvchan_"+StringUtils::itos(qmlUI->iPK_Device); // the string identifier on the type of grid
 
     int iRow_count=5;
     int iColumn_count = 5;
@@ -2804,6 +2804,7 @@ void DCE::qOrbiter::populateAdditionalMedia()
 {
     qDebug() << "requesting additional media";
     qmlUI->requestMore = true;
+
     while(qmlUI->model->totalcells > qmlUI->model->rowCount(QModelIndex()) && qmlUI->currentScreen == "Screen_47.qml" && qmlUI->requestMore == true)
     {
         //    qDebug() << "Cells Left to render: "<< (qmlUI->model->totalcells -qmlUI->model->rowCount(QModelIndex()) );
@@ -2866,7 +2867,6 @@ void DCE::qOrbiter::populateAdditionalMedia()
             }
         }
     }
-
 }
 
 
@@ -3059,11 +3059,48 @@ void DCE::qOrbiter::GetAlarms(bool toggle, int grp)
                         col++;
                         row++;
                     }
-
                 }
             }
         } qmlUI->qorbiterUIwin->rootContext()->setContextProperty("alarms" ,QVariant::fromValue(qmlUI->sleeping_alarms));
     }
+}
+
+void DCE::qOrbiter::SetZoom(int zoomLevel)
+{
+    string sResponse;
+    CMD_Set_Zoom setMediaZoom(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID, StringUtils::itos(zoomLevel));
+    // tues sept 20 - employing an error handling method that i hope to extend to other functions
+    if (SendCommand(setMediaZoom, &sResponse) == true)
+    {
+        qmlUI->setDceResponse(QString::fromStdString(sResponse));
+    }
+    else
+    {
+        qmlUI->setDceResponse(QString("Error sending command!"));
+    }
+
+
+
+}
+
+void DCE::qOrbiter::SetAspectRatio(QString ratio)
+{
+    string sResponse;
+    CMD_Set_Aspect_Ratio setMediaAspect(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID, ratio.toStdString());
+    // tues sept 20 - employing an error handling method that i hope to extend to other functions
+    if (SendCommand(setMediaAspect, &sResponse) == true)
+    {
+        qmlUI->setDceResponse(QString::fromStdString(sResponse));
+    }
+    else
+    {
+        qmlUI->setDceResponse(QString("Error sending command!"));
+    }
+}
+
+void DCE::qOrbiter::GetText(int textno)
+{
+
 }
 
 

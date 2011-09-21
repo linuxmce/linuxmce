@@ -25,7 +25,7 @@ public:
 
     void clear();
     QImage getPageImage(QString &id);
-    void setCurrentPage(QString currentPageId);
+    Q_INVOKABLE void setCurrentPage(QString currentPageId);
     QString getCurrentPage() {return currentPage;}
     QString currentPage;
 

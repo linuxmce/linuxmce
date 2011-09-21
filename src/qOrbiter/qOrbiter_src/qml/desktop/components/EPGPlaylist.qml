@@ -30,7 +30,6 @@ Rectangle {
             flickableDirection: "VerticalFlick"
             model: simpleepg
 
-
             delegate:
 
                 Rectangle {
@@ -42,12 +41,27 @@ Rectangle {
                 color: style.lighthighlight
 
                 Rectangle{
+                    id:channelidrect
                     height: parent.height - 1
                     width: parent.width*.25
                     color: style.maincolor
                     anchors.right: parent.right
-                    border.color: style.accentcolor
+                    border.color: style.darkhighlight
                     border.width: 2
+
+                    Text {
+                        id:channelID
+                        text: name
+                        font.capitalization: Font.SmallCaps
+                        width: parent.width
+
+                        wrapMode: "WrapAnywhere"
+                        font.pixelSize: 12
+                        anchors.top: parent.top
+                        font.bold: true
+                        color: "whitesmoke"
+                        anchors.horizontalCenter: parent.horizontalCenter
+                    }
 
                     Text {
                         id: position
@@ -60,31 +74,17 @@ Rectangle {
                         font.pixelSize: 18
                     }
                 }
-
-
                 Text {
-                    id:channelID
-                    text: name
-                    font.capitalization: Font.SmallCaps
-                    anchors.fill: parent
-                    wrapMode: "WrapAnywhere"
-                    font.pixelSize: 12
-                    anchors.top: parent.top
-                    font.bold: true
-                }
-
-                Text {
+                    id:proglabel
                     text:program
-                    anchors.bottom: delrect.bottom
-                    anchors.bottomMargin: 5
-                    font.capitalization: Font.SmallCaps
+                    anchors.top: delrect.top
+                    anchors.topMargin: 5
+                    font.capitalization: Font.MixedCase
                     width: parent.width *.75
-                    elide: "ElideRight"
-                    wrapMode: "WrapAnywhere"
-                    font.pixelSize: 16
-                    font.bold: true
 
-
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                     font.pixelSize: 1 * scaleY(2.5)
+                    color: "aliceblue"
                 }
 
                 MouseArea{
@@ -95,8 +95,9 @@ Rectangle {
                         dcenowplaying.setProgram(program)
                     }
                     hoverEnabled: true
-                    onEntered: delrect.color = style.highlight2
-                    onExited: delrect.color = style.lighthighlight
+                    onEntered:{ delrect.color = style.accentcolor ; proglabel.color = "black"}
+
+                    onExited: {delrect.color = style.lighthighlight; proglabel.color = "aliceblue"}
                 }
             }
         }

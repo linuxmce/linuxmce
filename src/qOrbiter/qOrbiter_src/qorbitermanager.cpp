@@ -454,16 +454,15 @@ bool qorbiterManager::getConf(int pPK_Device)
     QDomNodeList floorplanList = floorplanXml.childNodes();
     for(int index = 0; index < floorplanList.count(); index++)
     {
-
         QString m_installation= floorplanList.at(index).attributes().namedItem("Installation").nodeValue();
         QString m_iconpath= floorplanList.at(index).attributes().namedItem("Icon").nodeValue();
         QString m_description= floorplanList.at(index).attributes().namedItem("Description").nodeValue();
         int m_page= floorplanList.at(index).attributes().namedItem("Page").nodeValue().toInt();
 
-        // qDebug () << "/usr/pluto/orbiter/floorplans/" << m_installation.toStdString().c_str()<<"/inst"<<StringUtils::itos(m_page).c_str()<<".png";
+        qDebug () << "/usr/pluto/orbiter/floorplans/inst" << m_installation.toStdString().c_str()<<"/"<<StringUtils::itos(m_page).c_str()<<".png";
         QImage m_image = pqOrbiter->getfileForDG("/usr/pluto/orbiter/floorplans/inst"+m_installation.toStdString()+"/"+StringUtils::itos(m_page)+".png");
         QImage icon = m_image.scaledToHeight(100);
-
+        floorplans->appendRow(new FloorPlanItem(m_installation,m_description, m_page, m_iconpath, m_image, icon,  userList));
         // qDebug() << m_description;
         if (m_page == 1)
         {
@@ -471,7 +470,6 @@ bool qorbiterManager::getConf(int pPK_Device)
             floorplans->setCurrentPage(safe.append("-").append(QString::number(m_page)));
         }
 
-        floorplans->appendRow(new FloorPlanItem(m_installation,m_description, m_page, m_iconpath, m_image, icon,  userList));
     }
     modelimageprovider = new AbstractImageProvider(this);
     qorbiterUIwin->engine()->addImageProvider("listprovider", modelimageprovider);
@@ -820,7 +818,7 @@ void qorbiterManager::closeOrbiter()
 {
     qDebug() << "Shutting Down";
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Exiting, Unregistering 1st");
-   // processingThread->quit();
+    // processingThread->quit();
     pqOrbiter->deinitialize();
     pqOrbiter->~qOrbiter();
     this->~qorbiterManager();
@@ -1302,13 +1300,13 @@ void qorbiterManager::setStringParam(int paramType, QString param)
                 {
                     if (q_attributetype_sort.toInt() == 12 )
                     {
-                    q_attributetype_sort="";
+                        q_attributetype_sort="";
                     }
                     else if (q_attributetype_sort.toInt() == 3)
                     {
                         q_attributetype_sort = "12,13";
                     }
-                    else if (q_attributetype_sort == "12,13")
+                    else if (!q_attributetype_sort.isEmpty())
                     {
                         q_attributetype_sort = "";
                     }

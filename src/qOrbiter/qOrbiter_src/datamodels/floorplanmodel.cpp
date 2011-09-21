@@ -141,14 +141,16 @@ FloorPlanItem * FloorPlanModel::currentRow()
 
 QImage FloorPlanModel::getPageImage(QString &id)
 {
-   // qDebug() << "Seeking page id:" << id;
+    qDebug() << "Seeking page id:" << id;
     FloorPlanItem *myItem = find(id);
     if (!myItem)
     { QImage fail;
         return fail;
     }
+    qDebug() << "Found it!";
 
      QImage fpImage= myItem->floorplanImage();
+     qDebug () << fpImage.isNull();
     return fpImage;
 }
 
@@ -157,7 +159,8 @@ QImage FloorPlanModel::getPageImage(QString &id)
 void FloorPlanModel::setCurrentPage(QString currentPageId)
 {
  currentPage = currentPageId;
-
+ qDebug() << "image set to" << currentPageId;
+emit pageChanged();
 }
 
 /*
