@@ -3065,10 +3065,11 @@ void DCE::qOrbiter::GetAlarms(bool toggle, int grp)
     }
 }
 
-void DCE::qOrbiter::SetZoom(int zoomLevel)
+void DCE::qOrbiter::SetZoom(QString zoomLevel)
 {
     string sResponse;
-    CMD_Set_Zoom setMediaZoom(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID, StringUtils::itos(zoomLevel));
+    qDebug() << zoomLevel.toAscii();
+    CMD_Set_Zoom setMediaZoom(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID, string(zoomLevel.toAscii()));
     // tues sept 20 - employing an error handling method that i hope to extend to other functions
     if (SendCommand(setMediaZoom, &sResponse) == true)
     {

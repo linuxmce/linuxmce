@@ -1641,4 +1641,16 @@ void qorbiterManager::sleepingMenu(bool toggle, int grp)
 
 }
 
+void qorbiterManager::setZoom(QString qs_zoom)
+{
+    pqOrbiter->SetZoom(qs_zoom);
+}
+
+void qorbiterManager::setAspect(QString qs_aspect)
+{
+    pqOrbiter->SetAspectRatio(qs_aspect);
+}
+
+
+
 

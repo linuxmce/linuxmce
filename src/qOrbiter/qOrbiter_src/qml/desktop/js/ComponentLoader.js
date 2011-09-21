@@ -84,3 +84,17 @@ function createPowerButton() {
            console.log("Error File Detail object")
 }
 }
+
+var avcomponent
+var avsprite
+
+function createAvComponent(incavcomponent) {
+
+    avcomponent = Qt.createComponent(incavcomponent);
+       avsprite = avcomponent.createObject(storedvideoremote, {"x":200, "y": 500});
+
+       if (avsprite == null) {
+           // Error Handling
+           console.log("Error in av component object")
+}
+}

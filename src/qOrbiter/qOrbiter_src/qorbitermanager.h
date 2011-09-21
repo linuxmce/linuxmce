@@ -360,6 +360,8 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void setNowPlayingIcon(bool b);
     void initializeContexts();
     void initializeGridModel();
+    Q_INVOKABLE void setZoom(QString qs_zoom);
+    Q_INVOKABLE void setAspect(QString qs_aspect);
 
     //initialization related
     void regenOrbiter(int deviceNo);

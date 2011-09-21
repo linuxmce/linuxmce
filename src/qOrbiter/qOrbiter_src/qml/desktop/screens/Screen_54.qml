@@ -137,27 +137,40 @@ Rectangle {
             Remote_Audio_controls{ id: remote1; }
         }
     }
-    Row
-    {
+    Row{
         id:controlrow
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: scaleY(2)
         height: childrenRect.height
         width: childrenRect.width
-        spacing: scaleX(2)
-        anchors.top:mainrow.bottom
-        anchors.topMargin: scaleY(1)
         anchors.horizontalCenter: parent.horizontalCenter
+        Column{
+            height: childrenRect.height
+            width: childrenRect.width
 
-        VideoControls {
-            id: videocontrols1
+            VideoControls {
+                id: videocontrols1
+            }
+                Row{
+                    height: childrenRect.height
+                    width: childrenRect.width
+                    spacing: scaleX(1)
+                    ButtonSq{
+                        buttontext: qsTr("Zoom & Aspect")
+                    }
+                    ButtonSq{
+                        buttontext: qsTr("Bookmarks")
+                    }
+                    ButtonSq{
+                        buttontext: qsTr("Manage Playlist")
+                    }
+                    ButtonSq{
+                        buttontext: qsTr("Power")
+                    }
+                    HomeButton{}
+                }
+            }
         }
-
-        HomeButton{anchors.right: parent.right; anchors.top:parent.top}
-
-
-    }
-
-
-
 
 }
 

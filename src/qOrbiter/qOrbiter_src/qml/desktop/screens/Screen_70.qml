@@ -1,6 +1,6 @@
 import QtQuick 1.0
 import "../components"
-
+import "../js/ComponentLoader.js" as MyJs
 Rectangle {
 
     // property alias synText:
@@ -176,9 +176,19 @@ Rectangle {
                         spacing: scaleX(1)
                         ButtonSq{
                             buttontext: qsTr("Zoom & Aspect")
+                            MouseArea{
+                                anchors.fill: parent
+                                onClicked:  {
+                                    MyJs.createAvComponent("../components/ZoomAspect.qml")
+                                }
+                            }
                         }
                         ButtonSq{
                             buttontext: qsTr("Bookmarks")
+                        }
+                        ButtonSq{
+                            buttontext: qsTr("Resend AV Codes")
+
                         }
                         ButtonSq{
                             buttontext: qsTr("Manage Playlist")
