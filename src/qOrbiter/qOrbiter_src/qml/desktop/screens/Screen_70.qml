@@ -188,7 +188,12 @@ Rectangle {
                         }
                         ButtonSq{
                             buttontext: qsTr("Resend AV Codes")
-
+                            MouseArea{
+                                anchors.fill: parent
+                                onClicked:  {
+                                    MyJs.createAvComponent("../components/Avcodes.qml")
+                                }
+                            }
                         }
                         ButtonSq{
                             buttontext: qsTr("Manage Playlist")

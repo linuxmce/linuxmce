@@ -1,46 +1,84 @@
 import QtQuick 1.0
 import "../components"
-Item{
-    id:reloadrouter
 
     Rectangle{
+        id:requestingregen
         height: style.orbiterH
         width: style.orbiterW
-        color: style.maincolor
+        color: style.highlight2
+
         Rectangle{
-            id:reloadroutercontainer
-            height: scaleY(50)
-            width:scaleY(25)
+            id:regenrequestcontainer
+            height: scaleY(55)
+            width:scaleX(50)
             anchors.centerIn: parent
+            color: style.darkhighlight
+            border.color: style.highlight1
+            border.width: 2
+            radius: 10
+
 
             Column{
                 id:buttoncolumn
-                anchors.fill: parent
-                spacing: 10
+                height: childrenRect.height
+                width: parent.width
+                spacing: 5
+               anchors.centerIn: parent
+
+                Text {
+                    id: name
+                    text: qsTr("You have recently changed scenarios, floorplans, or other settings. I need to regenerate the graphical screens so you can see the new buttons. This will take from 2 - 20 minutes")
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                    width: parent.width * .85
+                    font.pixelSize: scaleY(2.5)
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    color: "aliceblue"
+                }
+
+                ButtonSq{
+                    id:thisorbiter
+                    height: scaleY(10)
+                    width:scaleX(10)
+                    buttontext: "Yes Regenerate this orbiter."
+                    buttonsqradius: 10
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
 
                ButtonSq{
-                   id:confirm
-                   anchors.centerIn: parent
-                   height: style.stdbuttonh
-                   width:style.stdbuttonw
-                   buttontext: "Reload Router Now"
-
+                   id:allorbiters
+                   height: scaleY(10)
+                   width:scaleX(10)
+                   buttontext: "Regenerate all orbiters in my home."
+                   buttonsqradius: 10
+                   anchors.horizontalCenter: parent.horizontalCenter
                }
 
                ButtonSq{
                    id:deny
-                   anchors.top: confirm.bottom
-                   height: style.stdbuttonh
-                   width:style.stdbuttonw
-                   buttontext: "Reload Later"
+                   height: scaleY(10)
+                   width:scaleX(10)
+                   buttontext: "No I will do it later."
+                   buttonsqradius: 10
+                   anchors.horizontalCenter: parent.horizontalCenter
+                   MouseArea{
+                       anchors.fill: parent
+                       onClicked: {gotoQScreen("Screen_1.qml")}
+                   }
+               }
 
+               ButtonSq{
+                   id:denyall
+                   height: scaleY(10)
+                   width:scaleX(10)
+                   buttontext: "No for all orbiters."
+                   buttonsqradius: 10
+                   anchors.horizontalCenter: parent.horizontalCenter
+                   MouseArea{
+                       anchors.fill: parent
+                       onClicked: {gotoQScreen("Screen_1.qml")}
+                   }
                }
             }
-
-        }
-
-
-        HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
+        }       
     }
 
-}
