@@ -49,7 +49,7 @@ var detailsprite
 function createFileDetails() {
 
     detailcomponent = Qt.createComponent("../components/FileDetails.qml");
-       detailsprite = detailcomponent.createObject(fileviewscreen , {"x": 0, "y": 0});
+    detailsprite = detailcomponent.createObject(fileviewscreen , {"x": 0, "y": 0, "z": 10});
 
        if (detailsprite == null) {
            // Error Handling
