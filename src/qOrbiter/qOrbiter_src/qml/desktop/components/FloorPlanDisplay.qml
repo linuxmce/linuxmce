@@ -6,7 +6,9 @@ Rectangle {
     color: style.highlight2
     Connections{
         target: floorplan
-        onPageChanged: floorplanimage.source = "image://listprovider/floorplan/"+securityvideo.timestamp
+        onPageChanged: {
+            floorplanimage.source = "image://listprovider/floorplan/"+floorplan.currentPage
+                   }
     }
 
     Rectangle{

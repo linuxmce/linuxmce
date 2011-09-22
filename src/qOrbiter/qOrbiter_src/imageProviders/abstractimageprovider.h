@@ -24,6 +24,7 @@ public:
         if (id.contains("floorplan"))
         {
             key= managerreference->floorplans->getPageImage(managerreference->floorplans->currentPage);
+
         }
 
         if (key.isNull())
