@@ -47,8 +47,9 @@ public:
     qorbiterManager * qmlUI;
     Virtual_Device_Translator coreDevices;
     DataGridTable pDataGridTable;
+int m_dwPK_Device_NowPlaying,m_dwPK_Device_NowPlaying_Video,m_dwPK_Device_NowPlaying_Audio,m_dwPK_Device_CaptureCard;  /** < set by the media engine, this is whatever media device is currently playing.  Capture Card is non null if we're displaying media via this card */
 
-    //<-dceag-const-b->
+//<-dceag-const-b->
 public:
     // Constructors/Destructor
     qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);

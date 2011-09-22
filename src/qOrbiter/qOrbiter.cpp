@@ -37,6 +37,8 @@ qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,
     : qOrbiter_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
     //<-dceag-const-e->
 {
+
+
 }
 
 //<-dceag-const2-b->
@@ -75,6 +77,7 @@ bool qOrbiter::GetConfig()
         RouterNeedsReload();
         return false;
     }
+
 
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Connected, requesting configuration for device %d", qmlUI->iPK_Device);
 
@@ -1022,8 +1025,13 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     cout << "Parm #50 - Name=" << sName << endl;
     cout << "Parm #103 - List_PK_Device=" << sList_PK_Device << endl;
     cout << "Parm #120 - Retransmit=" << bRetransmit << endl;
- qmlUI->nowPlayingButton->resetData();
+    string::size_type pos=0;
+    m_dwPK_Device_NowPlaying = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
+    m_dwPK_Device_NowPlaying_Video = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
+    m_dwPK_Device_NowPlaying_Audio = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
+    m_dwPK_Device_CaptureCard = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
 
+ qmlUI->nowPlayingButton->resetData();
     if (iPK_MediaType != 0)
     {
 
@@ -2568,21 +2576,16 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
             {
 
                 pCell = it->second;
-
                 string emptyEA;
-
-                // fk.remove("!F");
                 const char *pPath = pCell->GetImagePath();
                 index = pDataGridTable->CovertColRowType(it->first).first;
                 cellTitle = pCell->GetText();
                 cellAttribute = pCell->GetValue();
-                // qDebug() << cellTitle;
-                // qDebug() << cellAttribute;
-                //qDebug() << pCell->GetImagePath();
+
                 cellfk = pCell->GetValue();
 
                 QStringList parser = cellTitle.split(QRegExp("(\\n|:\\s)"), QString::KeepEmptyParts);
-                qDebug() << "Processing" << parser.at(0);
+               // qDebug() << "Processing" << parser.at(0);
                 QString attributeType = parser.at(0);
                 QString attribute;
                 if(parser.length() < 2)
@@ -2607,42 +2610,42 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                 else if(attributeType == "Episode")
                 {
                     qmlUI->nowPlayingButton->setEpisode(attribute);
-                    qDebug() << attribute;
+                  //  qDebug() << attribute;
                 }
                 else if(attributeType == "Performer")
                 {
                     qmlUI->nowPlayingButton->setPerformers(attribute);
-                    qDebug() << attribute;
+                   // qDebug() << attribute;
                 }
                 else if(attributeType == "Director")
                 {
                     qmlUI->nowPlayingButton->setDirector(attribute);
-                   qDebug() << attribute;
+                  // qDebug() << attribute;
                 }
                 else if(attributeType == "Genre")
                 {
                     qmlUI->nowPlayingButton->setGenre(attribute);
-                    qDebug() << attribute;
+                  //  qDebug() << attribute;
                 }
                 else if(attributeType == "Album")
                 {
                     qmlUI->nowPlayingButton->setAlbum(attribute);
-                    qDebug() << attribute;
+                  //  qDebug() << attribute;
                 }
                 else if(attributeType == "Track")
                 {
                     qmlUI->nowPlayingButton->setTrack(attribute);
-                    qDebug() << attribute;
+                   // qDebug() << attribute;
                 }
                 else if(attributeType == "Synopsis")
                 {
                     qmlUI->nowPlayingButton->setSynop(attribute);
-                    qDebug() << attribute;
+                  //  qDebug() << attribute;
                 }
                 else if(attributeType == "Release Date")
                 {
                     qmlUI->nowPlayingButton->setRelease(attribute);
-                    qDebug() << attribute;
+                   // qDebug() << attribute;
                 }
 
 
