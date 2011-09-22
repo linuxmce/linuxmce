@@ -413,8 +413,7 @@ bool qorbiterManager::getConf(int pPK_Device)
     //----------------Security Video setup
     SecurityVideo = new SecurityVideoClass();
     qorbiterUIwin->rootContext()->setContextProperty("securityvideo", SecurityVideo);
-    securityimage = new SecurityVideoImage(SecurityVideo);
-    qorbiterUIwin->engine()->addImageProvider("securityimage", securityimage);
+
 
 
 

@@ -26,7 +26,7 @@
 #include <contextobjects/screenparamsclass.h>
 #include <contextobjects/playlistclass.h>
 #include <contextobjects/securityvideoclass.h>
-#include <imageProviders/securityvideoimage.h>
+
 #include <QThread>
 
 
@@ -100,7 +100,7 @@ public:
     ScreenParamsClass *ScreenParameters;
     ScreenSaverModule *ScreenSaver;
     SecurityVideoClass *SecurityVideo;
-    SecurityVideoImage *securityimage;
+
 
     //-------------sleeping menu----------------------
     QList<QObject*> sleeping_alarms;

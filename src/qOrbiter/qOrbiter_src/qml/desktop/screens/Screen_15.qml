@@ -14,7 +14,7 @@ Item{
         triggeredOnStart: true
         running: true
         onTriggered:{
-            securityimage.source = "image://securityimage/"+securityvideo.timestamp
+            securityimage.source = "image://listprovider/securityimage/"+securityvideo.timestamp
             requestSecurityPic(screenparams.getParam(2), 640, 480)
 
         }
@@ -49,11 +49,11 @@ Item{
             Image {
                 id: securityimage
                 fillMode: Image.PreserveAspectFit
-                source: "image://securityimage/"+securityvideo.timestamp
+                source: "image://listprovider/securityimage/"+securityvideo.timestamp
                 anchors.centerIn: parent
-                height: 800
-                width: 600
-                onSourceChanged: console.log(securityimage.source)
+                height: scaleY(50)
+                width: scaleX(50)
+
 
             }
 

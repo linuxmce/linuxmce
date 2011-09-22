@@ -172,7 +172,6 @@ SOURCES += main.cpp \
     datamodels/DatagridClasses/datagriditem.cpp \
     imageProviders/nowplayingimageprovider.cpp \
     contextobjects/securityvideoclass.cpp \
-    imageProviders/securityvideoimage.cpp \
     contextobjects/epgchannellist.cpp \
     playlists/epgitemclass.cpp \
     datamodels/floorplanmodel.cpp \
@@ -235,7 +234,6 @@ HEADERS += \
     datamodels/DatagridClasses/datagriditem.h \
     imageProviders/nowplayingimageprovider.h \
     contextobjects/securityvideoclass.h \
-    imageProviders/securityvideoimage.h \
     contextobjects/epgchannellist.h \
     playlists/epgitemclass.h \
     datamodels/floorplanmodel.h \
@@ -320,6 +318,8 @@ OTHER_FILES= \
 
 RESOURCES += \
     skinData.qrc
+
+
 
 
 
