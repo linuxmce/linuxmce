@@ -68,9 +68,8 @@ Item {
                 height: scaleY(13)
                 width: scaleX(8)
 
-                color: dcenowplaying.b_mediaPlaying ? "green" : "red"
                 radius: style.but_smooth
-                buttontext: dcenowplaying.qs_mainTitle
+                buttontext: dcenowplaying.qs_mainTitle +"\n" + dcenowplaying.timecode
 
                 MouseArea{
                     anchors.fill: parent

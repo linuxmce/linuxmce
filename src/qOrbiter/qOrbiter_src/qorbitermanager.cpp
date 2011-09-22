@@ -252,7 +252,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         //initializing threading for timecode to prevent blocking
         timecodeThread = new QThread;
         timeCodeSocket = new QTcpSocket(timecodeThread);
-       timecodeThread->start();
+        timecodeThread->start();
 
         //showing the qml screen depending on device / platform / etc
 #ifdef Q_OS_SYMBIAN
@@ -1654,30 +1654,65 @@ void qorbiterManager::setAspect(QString qs_aspect)
 
 void qorbiterManager::updateTimecode()
 {
+    string sIPAddress;
     if(nowPlayingButton->b_mediaPlaying == true)
     {
         if(!timeCodeSocket->isOpen())
         {
-            timeCodeSocket->connectToHost("192.168.80.1", 12000, QFile::ReadOnly);
-            QObject::connect(timeCodeSocket,SIGNAL(readyRead()), this, SLOT(showTimeCode()), Qt::QueuedConnection);
+            DeviceData_Base *pDevice = pqOrbiter->m_dwPK_Device_NowPlaying ? pqOrbiter->m_pData->m_AllDevices.m_mapDeviceData_Base_Find(pqOrbiter->m_dwPK_Device_NowPlaying) : NULL;
+            if( NULL != pDevice &&
+                    (
+                        pDevice->m_dwPK_DeviceTemplate==DEVICETEMPLATE_Xine_Player_CONST ||
+                        pDevice->m_dwPK_DeviceTemplate==DEVICETEMPLATE_MPlayer_Player_CONST
+                        )
+                    )
+            {
+                sIPAddress = pDevice->m_sIPAddress;
+                qDebug() << sIPAddress.c_str();
+                if( sIPAddress.empty() )
+                {   qDebug() << "ip empty...";
+                    if( pDevice->m_pDevice_MD && !pDevice->m_pDevice_MD->m_sIPAddress.empty() )
+                        sIPAddress = pDevice->m_pDevice_MD->m_sIPAddress;
+                    else if( pDevice->m_pDevice_Core && !pDevice->m_pDevice_Core->m_sIPAddress.empty() )
+                        sIPAddress = pDevice->m_pDevice_Core->m_sIPAddress;
+                    else
+                    {
+                        LoggerWrapper::GetInstance()->Write(LV_WARNING,"Orbiter::CMD_Set_Now_Playing  Xine has no IP address");
+                        return;
+                    }
+                }
+            }
+
+
+
+                QString port = QString::fromStdString(pqOrbiter->GetCurrentDeviceData(pqOrbiter->m_dwPK_Device_NowPlaying, 171));
+                qDebug() << "IpAddress: " <<  sIPAddress.c_str();
+                timeCodeSocket->connectToHost(QString::fromStdString(sIPAddress), port.toInt(), QFile::ReadOnly);
+                QObject::connect(timeCodeSocket,SIGNAL(readyRead()), this, SLOT(showTimeCode()), Qt::QueuedConnection);
+
+            }
+        }
+        else
+        {
+            timeCodeSocket->disconnectFromHost();
 
         }
     }
-    else
+
+    void qorbiterManager::showTimeCode()
     {
-        timeCodeSocket->disconnectFromHost();
+        QByteArray socketData = timeCodeSocket->readLine();
+        QString tcData = QString::fromAscii(socketData.data(), socketData.size());
+        //qDebug() << tcData;
+        QStringList tcVars = tcData.split(",");
+        QString tcClean = tcVars.at(1);
+        tcClean.remove(QRegExp(".\\d\\d\\d"));
+        nowPlayingButton->setTimeCode(tcClean);
 
+        QString playbackSpeed = tcVars.at(0);
+        playbackSpeed.remove(QRegExp("000"));
+        nowPlayingButton->setStringSpeed(playbackSpeed+"x");
     }
-}
-
-void qorbiterManager::showTimeCode()
-{
-    QByteArray socketData = timeCodeSocket->readLine();
-    QString tcData = QString::fromAscii(socketData.data(), socketData.size());
-    //qDebug() << tcData;
-    QStringList tcVars = tcData.split(",");
-    nowPlayingButton->setTimeCode(tcVars.at(1));
-}
 
 
 

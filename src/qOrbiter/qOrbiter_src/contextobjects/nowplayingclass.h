@@ -197,7 +197,7 @@ public slots:
     int getPlaylistPosition() {return m_iplaylistPosition;}
 
     void setMediaSpeed(int speed);
-    void setStringSpeed(QString s) {qs_playbackSpeed = s; qDebug() << qs_playbackSpeed; emit mediaSpeedChanged();}
+    void setStringSpeed(QString s) {qs_playbackSpeed = s; emit mediaSpeedChanged();}
     QString getMediaSpeed() {return qs_playbackSpeed;}
 
     //--tv getters and setters-------------//
