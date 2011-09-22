@@ -7,6 +7,7 @@ Rectangle {
 
     Row{
         spacing: 5
+
         MediaButton {
             id:back
             color: "transparent"

@@ -58,6 +58,9 @@ QtObject{
     property int  stdbuttonw: scaleX(8)
     property int widebuttonw: scaleX(10)
     property int widebuttonh: scaleY(10)
+    property int mediabuttonH: scaleY(9)
+    property int mediabuttonW: scaleX(5)
+
 
 
     //textStyles

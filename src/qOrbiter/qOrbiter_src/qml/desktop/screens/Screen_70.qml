@@ -12,7 +12,6 @@ Rectangle {
         interval: 2000
         triggeredOnStart: false
         running: true
-
         onTriggered: nowplayingimage.source = "image://updateobject/"+securityvideo.timestamp
     }
 
@@ -158,8 +157,8 @@ Rectangle {
 
         Row{
             id:controlrow
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: scaleY(2)
+            anchors.top: mainrow.bottom
+            anchors.topMargin: scaleY(2)
             height: childrenRect.height
             width: childrenRect.width
             anchors.horizontalCenter: parent.horizontalCenter
@@ -179,7 +178,7 @@ Rectangle {
                             MouseArea{
                                 anchors.fill: parent
                                 onClicked:  {
-                                    MyJs.createAvComponent("../components/ZoomAspect.qml")
+                                    MyJs.createAvComponent("../components/ZoomAspect.qml", storedvideoremote)
                                 }
                             }
                         }
@@ -191,7 +190,7 @@ Rectangle {
                             MouseArea{
                                 anchors.fill: parent
                                 onClicked:  {
-                                    MyJs.createAvComponent("../components/Avcodes.qml")
+                                    MyJs.createAvComponent("../components/Avcodes.qml", storedvideoremote)
                                 }
                             }
                         }

@@ -1,12 +1,10 @@
 import QtQuick 1.0
 import "../components"
-
+import "../js/ComponentLoader.js" as MyJs
 Rectangle {
 
     // property alias synText:
     id: satcableboxremote
-    anchors.centerIn: parent
-
     Timer{
         id:singleshot
         repeat: false
@@ -24,14 +22,20 @@ Rectangle {
 
     height: style.orbiterH
     width: style.orbiterW
-    radius: 0
-    opacity: 1
-    color: style.darkhighlight
+    color: style.highlight2
     Component.onCompleted:setNowPlayingTv()
 
+    Rectangle{
+        height: scaleY(95)
+        width: scaleX(95)
+        color: style.darkhighlight
+        radius: 10
+        border.color: style.highlight1
+        border.width: 2
+        anchors.centerIn: parent
+
+
     //main 'now playing rect containing all the other items
-    HomeButton{anchors.right: parent.right; anchors.top:parent.top}
-    VideoControls {id: videocontrols1; anchors.top: mainrow.bottom; anchors.horizontalCenter: parent.horizontalCenter}
 
     Row{
         id:mainrow
@@ -39,9 +43,8 @@ Rectangle {
         width: childrenRect.width
         spacing: 5
         anchors.top:parent.top
-        anchors.topMargin: scaleY(5)
+        anchors.topMargin: scaleY(2)
         anchors.horizontalCenter: parent.horizontalCenter
-
         EPGPlaylist{id:tvchannellist }
 
         Rectangle {
@@ -144,5 +147,55 @@ Rectangle {
 RemoteNumberPad {id: remotenumberpad1;}
         Remote_lighting_controls{ id: remote_lighting_controls1; }
         Remote_Audio_controls{ id: remote1; }
+    }
+    Row{
+        id:controlrow
+        anchors.top: mainrow.bottom
+        anchors.topMargin: scaleY(2)
+        height: childrenRect.height
+        width: childrenRect.width
+        anchors.horizontalCenter: parent.horizontalCenter
+        Column{
+            height: childrenRect.height
+            width: childrenRect.width
+
+            VideoControls {
+                id: videocontrols1
+            }
+                Row{
+                    height: childrenRect.height
+                    width: childrenRect.width
+                    spacing: scaleX(1)
+                    ButtonSq{
+                        buttontext: qsTr("Zoom & Aspect")
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked:  {
+                                MyJs.createAvComponent("../components/ZoomAspect.qml",satcableboxremote )
+                            }
+                        }
+                    }
+                    ButtonSq{
+                        buttontext: qsTr("PVR Menu")
+                    }
+                    ButtonSq{
+                        buttontext: qsTr("Resend AV Codes")
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked:  {
+                                MyJs.createAvComponent("../components/Avcodes.qml",satcableboxremote )
+                            }
+                        }
+                    }
+                    ButtonSq{
+                        buttontext: qsTr("Manage Playlist")
+                    }
+                    ButtonSq{
+                        buttontext: qsTr("Power")
+                    }
+                    HomeButton{}
+                }
+            }
+        }
     }
 }

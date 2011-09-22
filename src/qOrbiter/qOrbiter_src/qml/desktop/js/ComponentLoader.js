@@ -87,11 +87,12 @@ function createPowerButton() {
 
 var avcomponent
 var avsprite
+var screen
 
-function createAvComponent(incavcomponent) {
+function createAvComponent(incavcomponent, screen) {
 
     avcomponent = Qt.createComponent(incavcomponent);
-       avsprite = avcomponent.createObject(storedvideoremote, {"x":200, "y": 500});
+       avsprite = avcomponent.createObject(screen, {"x":200, "y": 500});
 
        if (avsprite == null) {
            // Error Handling
