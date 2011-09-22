@@ -20,8 +20,12 @@ class NowPlayingClass : public QDeclarativeItem
 {
     Q_OBJECT
 
+
     Q_PROPERTY (bool b_mediaPlaying READ getStatus WRITE setStatus NOTIFY mediaStatusChanged) //property to know if media is playing
 
+    //timecode
+
+    Q_PROPERTY (QString timecode READ getTimeCode WRITE setTimeCode NOTIFY tcChanged)
     //set now playing - text to assign
     Q_PROPERTY (QString qs_mainTitle READ getTitle WRITE setTitle NOTIFY titleChanged) //the text set sent by now playing command
     Q_PROPERTY (QString qs_mainTitle2 READ getTitle2 WRITE setTitle2 NOTIFY titleChanged2) // in the case of audio, multiple metada value are sent  thus title 2
@@ -84,7 +88,7 @@ public:
 
     //media  related--------------------------
     QString mediatitle; //special if the media itself for some reason has a title different than the now playing
-    QTime *timecode;
+    QString timecode;
     QString synop;
     int i_playbackSpeed;
     QString qs_playbackSpeed;
@@ -126,6 +130,7 @@ signals:
     void genreChanged();
     void rlsChanged();
     void synopChanged();
+    void tcChanged();
 
 
     //audio signals
@@ -150,7 +155,8 @@ signals:
 
 public slots:
     void resetData();
-
+    void setTimeCode(QString uTc) {timecode = uTc; emit tcChanged();}
+    QString getTimeCode () {return timecode;}
 
     void setProgram(QString newProgram) {tvProgram = newProgram; emit programChanged();}
     QString getProgram () {return tvProgram;}

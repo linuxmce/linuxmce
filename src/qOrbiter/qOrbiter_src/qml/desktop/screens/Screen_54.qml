@@ -73,6 +73,15 @@ Rectangle {
                         font.pixelSize: 12
 
                     }
+                    Text {
+                        id: timecode
+                        height:scaleY(5)
+                        text:qsTr("Position: ") + dcenowplaying.timecode
+                        font.family: "Droid Sans"
+                        font.pixelSize: 12
+                        anchors.horizontalCenter: parent.horizontalCenter
+
+                    }
                 }
                 Image {
                     id: nowplayingimage

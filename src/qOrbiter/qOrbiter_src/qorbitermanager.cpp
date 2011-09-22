@@ -249,6 +249,11 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         storedVideoPlaylist = new PlaylistClass (new PlaylistItemClass, this);
         qorbiterUIwin->rootContext()->setContextProperty("mediaplaylist", storedVideoPlaylist);
 
+        //initializing threading for timecode to prevent blocking
+        timecodeThread = new QThread;
+        timeCodeSocket = new QTcpSocket(timecodeThread);
+       timecodeThread->start();
+
         //showing the qml screen depending on device / platform / etc
 #ifdef Q_OS_SYMBIAN
         qorbiterUIwin->showFullScreen();
@@ -413,10 +418,6 @@ bool qorbiterManager::getConf(int pPK_Device)
     //----------------Security Video setup
     SecurityVideo = new SecurityVideoClass();
     qorbiterUIwin->rootContext()->setContextProperty("securityvideo", SecurityVideo);
-
-
-
-
     // qDebug() << "Reading Config" ;
     iPK_Device = long(pPK_Device);
     iOrbiterPluginID = 9;
@@ -1529,10 +1530,8 @@ void qorbiterManager::setNowPlayingData()
 
     pqOrbiter->BindMediaRemote(true);
     pqOrbiter->requestMediaPlaylist();
-
     qDebug() << "Initiating media bind and playlist request";
-
-
+    updateTimecode();
 
 }
 
@@ -1551,7 +1550,6 @@ void qorbiterManager::setNowPlayingTv()
 {
     pqOrbiter->BindMediaRemote(true);
     //pqOrbiter->requestMediaPlaylist();
-
     qDebug() << "Initiating media bind and livetv playlist request";
     //
 }
@@ -1652,6 +1650,33 @@ void qorbiterManager::setZoom(QString qs_zoom)
 void qorbiterManager::setAspect(QString qs_aspect)
 {
     pqOrbiter->SetAspectRatio(qs_aspect);
+}
+
+void qorbiterManager::updateTimecode()
+{
+    if(nowPlayingButton->b_mediaPlaying == true)
+    {
+        if(!timeCodeSocket->isOpen())
+        {
+            timeCodeSocket->connectToHost("192.168.80.1", 12000, QFile::ReadOnly);
+            QObject::connect(timeCodeSocket,SIGNAL(readyRead()), this, SLOT(showTimeCode()), Qt::QueuedConnection);
+
+        }
+    }
+    else
+    {
+        timeCodeSocket->disconnectFromHost();
+
+    }
+}
+
+void qorbiterManager::showTimeCode()
+{
+    QByteArray socketData = timeCodeSocket->readLine();
+    QString tcData = QString::fromAscii(socketData.data(), socketData.size());
+    //qDebug() << tcData;
+    QStringList tcVars = tcData.split(",");
+    nowPlayingButton->setTimeCode(tcVars.at(1));
 }
 
 

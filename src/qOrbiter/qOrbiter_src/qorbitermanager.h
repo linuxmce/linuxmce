@@ -26,6 +26,7 @@
 #include <contextobjects/screenparamsclass.h>
 #include <contextobjects/playlistclass.h>
 #include <contextobjects/securityvideoclass.h>
+#include <QtNetwork/QTcpSocket>
 
 #include <QThread>
 
@@ -81,6 +82,8 @@ public:
     qorbiterManager(int deviceno, QString routerip, QWidget *parent = 0);  //constructor
 
     QThread *processingThread; //threaded class
+    QThread *timecodeThread; //for timecode
+    QTcpSocket *timeCodeSocket;
     QString sPK_User;
     QString *buildType;
     //QByteArray *skin;
@@ -330,6 +333,8 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     Q_INVOKABLE void pauseMedia();
     Q_INVOKABLE void bindMediaRemote(bool state);
     void updateImageChanged(QImage img);
+    void updateTimecode();
+    void showTimeCode();
 
     Q_INVOKABLE  void getcurrentSkins(QStringList skinPaths);
     void qmlSetupLmce(int incdeviceid, QString incrouterip);
