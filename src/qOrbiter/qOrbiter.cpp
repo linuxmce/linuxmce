@@ -1022,6 +1022,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     cout << "Parm #50 - Name=" << sName << endl;
     cout << "Parm #103 - List_PK_Device=" << sList_PK_Device << endl;
     cout << "Parm #120 - Retransmit=" << bRetransmit << endl;
+ qmlUI->nowPlayingButton->resetData();
 
     if (iPK_MediaType != 0)
     {
@@ -1064,6 +1065,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     qmlUI->nowPlayingButton->setSubTitle(QString::fromStdString(sText));
     qmlUI->nowPlayingButton->i_streamID = iStreamID;
     qmlUI->nowPlayingButton->i_mediaType = iPK_MediaType;
+    GetNowPlayingAttributes();
 
     // SetNowPlayingDetails();
 }
@@ -2454,6 +2456,8 @@ void DCE::qOrbiter::JumpToPlaylistPosition(int pos)
 {
     CMD_Jump_Position_In_Playlist jump_playlist(qmlUI->iPK_Device, qmlUI->iMediaPluginID, QString::number(pos).toStdString(), qmlUI->nowPlayingButton->i_streamID);
     SendCommand(jump_playlist);
+
+
 }
 
 void DCE::qOrbiter::SetNowPlayingDetails(QString file)
@@ -2578,7 +2582,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                 cellfk = pCell->GetValue();
 
                 QStringList parser = cellTitle.split(QRegExp("(\\n|:\\s)"), QString::KeepEmptyParts);
-             //   qDebug() << "Processing" << parser.at(0);
+                qDebug() << "Processing" << parser.at(0);
                 QString attributeType = parser.at(0);
                 QString attribute;
                 if(parser.length() < 2)
@@ -2603,28 +2607,44 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                 else if(attributeType == "Episode")
                 {
                     qmlUI->nowPlayingButton->setEpisode(attribute);
-                  //  qDebug() << attribute;
+                    qDebug() << attribute;
                 }
                 else if(attributeType == "Performer")
                 {
                     qmlUI->nowPlayingButton->setPerformers(attribute);
-                   // qDebug() << attribute;
+                    qDebug() << attribute;
                 }
                 else if(attributeType == "Director")
                 {
                     qmlUI->nowPlayingButton->setDirector(attribute);
-                   // qDebug() << attribute;
+                   qDebug() << attribute;
                 }
                 else if(attributeType == "Genre")
                 {
                     qmlUI->nowPlayingButton->setGenre(attribute);
-                   // qDebug() << attribute;
+                    qDebug() << attribute;
                 }
                 else if(attributeType == "Album")
                 {
-                    qmlUI->filedetailsclass->setAlbum(attribute);
-                   // qDebug() << attribute;
+                    qmlUI->nowPlayingButton->setAlbum(attribute);
+                    qDebug() << attribute;
                 }
+                else if(attributeType == "Track")
+                {
+                    qmlUI->nowPlayingButton->setTrack(attribute);
+                    qDebug() << attribute;
+                }
+                else if(attributeType == "Synopsis")
+                {
+                    qmlUI->nowPlayingButton->setSynop(attribute);
+                    qDebug() << attribute;
+                }
+                else if(attributeType == "Release Date")
+                {
+                    qmlUI->nowPlayingButton->setRelease(attribute);
+                    qDebug() << attribute;
+                }
+
 
 
                 //qmlUI->m_selected_grid_item->appendRow(new FileDetailsItem(cellTitle, cellAttribute, cellImg, false,  qmlUI->model));

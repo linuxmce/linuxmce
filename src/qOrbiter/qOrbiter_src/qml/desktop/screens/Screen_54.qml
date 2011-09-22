@@ -55,84 +55,125 @@ Rectangle {
                 width: childrenRect.width
 
                 Rectangle {
-                id: gradientheader
-                width: parent.width
-                height: childrenRect.height
-                Image {
-                    id: headerimage
-                    source: "../../../img/icons/header.png"
-                    height:parent.height
-                    width:parent.width
-                }
+                    id: gradientheader
+                    width: parent.width
+                    height: childrenRect.height
+                    Image {
+                        id: headerimage
+                        source: "../../../img/icons/header.png"
+                        height:parent.height
+                        width:parent.width
+                    }
 
-                Text {
-                    id: headertext
-                    height:scaleY(5)
-                    text:qsTr("Speed: ") + dcenowplaying.qs_playbackSpeed
-                    font.family: "Droid Sans"
-                    font.pixelSize: 12
+                    Text {
+                        id: headertext
+                        height:scaleY(5)
+                        text:qsTr("Speed: ") + dcenowplaying.qs_playbackSpeed
+                        font.family: "Droid Sans"
+                        font.pixelSize: 12
 
+                    }
                 }
-            }
                 Image {
                     id: nowplayingimage
+
                     width: scaleX(45)
                     height: scaleY(45)
                     fillMode: Image.PreserveAspectFit
                     source: "image://updateobject/"+dcenowplaying.m_iplaylistPosition
                 }
+                Rectangle{
+                    id:trackdata
+                    height: childrenRect.height
+                    width: metadata.width
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: title.bottom
+                    color:style.highlight1
+                    clip:true
 
-                    Text {
-                        id: artist
-                        height: scaleY(5)
-                        text: qsTr("Artist :") + dcenowplaying.qs_mainTitle
-                        font.family: "Droid Sans"
-                        wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                        font.bold: true
-                        smooth: true
-                        font.pixelSize: 16
+                    Column{
+                        spacing: scaleY(1)
+
+
+                        Text {
+                            id: artist
+
+                            text: qsTr("Artist :") + dcenowplaying.qs_mainTitle
+                            font.family: "Droid Sans"
+                            wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                            font.bold: true
+                            smooth: true
+                            font.pixelSize: scaleY(2.15)
+                        }
+
+
+                        Text {
+                            id: album
+
+                            wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                            text: qsTr("Album: ") + dcenowplaying.qs_mainTitle2
+                            font.family: "Droid Sans"
+                            font.bold: true
+                            smooth: true
+                            font.pixelSize: scaleY(2.15)
+
+                        }
+
+                        Text {
+                            id: title
+
+                            wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                            text: qsTr("Title: ") + dcenowplaying.qs_subTitle
+                            font.family: "Droid Sans"
+                            font.bold: true
+                            smooth: true
+                            font.pixelSize: scaleY(2.15)
+                        }
+
+                        Text {
+                            id: track
+
+                            wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                            text: qsTr("Track: ") + dcenowplaying.track
+                            font.family: "Droid Sans"
+                            font.bold: true
+                            smooth: true
+                            font.pixelSize: scaleY(2.15)
+                        }
+                        Text {
+                            id: genre
+
+                            wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                            text: qsTr("Genre(s): ") + dcenowplaying.genre
+                            font.family: "Droid Sans"
+                            font.bold: true
+                            smooth: true
+                            font.pixelSize: scaleY(2.15)
+                        }
+
+                        Text {
+                            id: synopsis
+
+                            wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                            text: qsTr("Review: ") + dcenowplaying.synop
+                            font.family: "Droid Sans"
+                            font.bold: true
+                            smooth: true
+                            font.pixelSize: scaleY(2.15)
+                        }
+                        Text {
+                            id: release
+
+                            wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                            text: qsTr("Review: ") + dcenowplaying.releasedate
+                            font.family: "Droid Sans"
+                            font.bold: true
+                            smooth: true
+                            font.pixelSize: scaleY(2.15)
+                        }
                     }
-
-
-                    Text {
-                        id: album
-                         height: scaleY(5)
-                         wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                         text: qsTr("Album: ") + dcenowplaying.qs_mainTitle2
-                        font.family: "Droid Sans"
-                        font.bold: true
-                        smooth: true                      
-                        font.pixelSize: 16
-
-                    }
-
-                    Text {
-                        id: title
-                         height: scaleY(5)
-                         wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                         text: qsTr("Title: ") + dcenowplaying.qs_subTitle
-                        font.family: "Droid Sans"
-                        font.bold: true
-                        smooth: true                      
-                        font.pixelSize: 16
-                    }
-
-                    Rectangle{
-                        id:trackdata
-                        height: scaleY(15)
-                        width: metadata.width
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.bottom: title.bottom
-                        color:style.lighthighlight
-                        opacity: .25
-                        clip:true
-                    }
-
-
                 }
-
-
-
+            }
             Remote_lighting_controls{ id: remote_lighting_controls1; }
             Remote_Audio_controls{ id: remote1; }
         }
@@ -151,26 +192,24 @@ Rectangle {
             VideoControls {
                 id: videocontrols1
             }
-                Row{
-                    height: childrenRect.height
-                    width: childrenRect.width
-                    spacing: scaleX(1)
-                    ButtonSq{
-                        buttontext: qsTr("Zoom & Aspect")
-                    }
-                    ButtonSq{
-                        buttontext: qsTr("Bookmarks")
-                    }
-                    ButtonSq{
-                        buttontext: qsTr("Manage Playlist")
-                    }
-                    ButtonSq{
-                        buttontext: qsTr("Power")
-                    }
-                    HomeButton{}
+            Row{
+                height: childrenRect.height
+                width: childrenRect.width
+                spacing: scaleX(1)
+
+                ButtonSq{
+                    buttontext: qsTr("Bookmarks")
                 }
+                ButtonSq{
+                    buttontext: qsTr("Manage Playlist")
+                }
+                ButtonSq{
+                    buttontext: qsTr("Power")
+                }
+                HomeButton{}
             }
         }
+    }
 
 }
 

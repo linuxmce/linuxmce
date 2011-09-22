@@ -22,7 +22,17 @@ Rectangle {
 
     height: style.orbiterH
     width: style.orbiterW
-    color: style.highlight2
+    gradient: Gradient {
+        GradientStop {
+            position: 0.00;
+            color: style.highlight2;
+        }
+
+        GradientStop {
+            position: 1.00;
+            color: style.maincolor;
+        }
+    }
     Component.onCompleted:setNowPlayingTv()
 
     Rectangle{
@@ -35,138 +45,139 @@ Rectangle {
         anchors.centerIn: parent
 
 
-    //main 'now playing rect containing all the other items
+        //main 'now playing rect containing all the other items
 
-    Row{
-        id:mainrow
-        height: childrenRect.height
-        width: childrenRect.width
-        spacing: 5
-        anchors.top:parent.top
-        anchors.topMargin: scaleY(2)
-        anchors.horizontalCenter: parent.horizontalCenter
-        EPGPlaylist{id:tvchannellist }
-
-        Rectangle {
-            id:metarect
-            width: scaleX(35)
+        Row{
+            id:mainrow
             height: childrenRect.height
-            color: style.bgcolor
+            width: childrenRect.width
+            spacing: 5
+            anchors.top:parent.top
+            anchors.topMargin: scaleY(2)
+            anchors.horizontalCenter: parent.horizontalCenter
+            EPGPlaylist{id:tvchannellist }
 
             Rectangle {
-                id: gradientheader
-                width: parent.width
-                height: childrenRect.height
-                Image {
-                    id: headerimage
-                    source: "../../../img/icons/header.png"
-                    height:parent.height
-                    width:parent.width
-                }
-                Text {
-                    id: headertext
-                    text:"Speed: " + dcenowplaying.qs_playbackSpeed
-                    height: scaleY(2.5)
-                    font.family: "Droid Sans"
-                   font.pixelSize: 1 * scaleY(2)
-                    color: "aliceblue"
-                }
-            }
-
-            Image {
-                id: nowplayingimage
-                width: scaleX(35)
-                height: scaleY(35)
-                anchors.top: gradientheader.bottom
-                fillMode: Image.PreserveAspectFit
-                source: "image://updateobject/"+dcenowplaying.m_iplaylistPosition
-            }
-
-            Rectangle {
-                id: metadatavideo
+                id:metarect
                 width: scaleX(35)
                 height: childrenRect.height
-
-                Image {
-                    id: npgloss
-                    source: "../../../img/icons/header.png"
-                    height:parent.height
-                    width:parent.width
-                    smooth:true
-                    opacity: .35
-                }
-
                 color: style.bgcolor
-                anchors.top:nowplayingimage.bottom
-                Column
-                {
-                    width: scaleX(30)
-                    spacing: 5
-                    height: childrenRect.height
 
+                Rectangle {
+                    id: gradientheader
+                    width: parent.width
+                    height: childrenRect.height
+                    Image {
+                        id: headerimage
+                        source: "../../../img/icons/header.png"
+                        height:parent.height
+                        width:parent.width
+                    }
                     Text {
-                        id: artist
-                        width: parent.width
-                        text: qsTr("Device: ")  + dcenowplaying.qs_mainTitle
+                        id: headertext
+                        text:"Speed: " + dcenowplaying.qs_playbackSpeed
+                        height: scaleY(2.5)
                         font.family: "Droid Sans"
-                        wrapMode: "NoWrap"
-                        font.bold: true
-                        smooth: true
                         font.pixelSize: 1 * scaleY(2)
                         color: "aliceblue"
                     }
+                }
 
+                Image {
+                    id: nowplayingimage
+                    width: scaleX(35)
+                    height: scaleY(35)
+                    anchors.top: gradientheader.bottom
+                    fillMode: Image.PreserveAspectFit
+                    source: "image://updateobject/"+dcenowplaying.m_iplaylistPosition
+                }
 
-                    Text {
-                        id: album
-                        wrapMode: "NoWrap"
-                        text: qsTr("Channel: ") + dcenowplaying.channel
-                        font.family: "Droid Sans"
-                        font.bold: true
-                        smooth: true
-                        horizontalAlignment: Text.AlignHCenter
-                       font.pixelSize: 1 * scaleY(2)
-                        color: "aliceblue"
+                Rectangle {
+                    id: metadatavideo
+                    width: scaleX(35)
+                    height: childrenRect.height
+
+                    Image {
+                        id: npgloss
+                        source: "../../../img/icons/header.png"
+                        height:parent.height
+                        width:parent.width
+                        smooth:true
+                        opacity: .35
                     }
 
-                    Text {
-                        id: title
-                        wrapMode: "NoWrap"
-                        text: qsTr("Program:") + dcenowplaying.tvProgram
-                        font.family: "Droid Sans"
-                        font.bold: true
-                        smooth: true
-                        horizontalAlignment: Text.AlignHCenter
-                         font.pixelSize: 1 * scaleY(2)
-                        color: "aliceblue"
+                    color: style.bgcolor
+                    anchors.top:nowplayingimage.bottom
+                    Column
+                    {
+                        width: scaleX(30)
+                        spacing: 5
+                        height: childrenRect.height
+
+                        Text {
+                            id: artist
+                            width: parent.width
+                            text: qsTr("Device: ")  + dcenowplaying.qs_mainTitle
+                            font.family: "Droid Sans"
+                            wrapMode: "NoWrap"
+                            font.bold: true
+                            smooth: true
+                            font.pixelSize: 1 * scaleY(2)
+                            color: "aliceblue"
+                        }
+
+
+                        Text {
+                            id: album
+                            wrapMode: "NoWrap"
+                            text: qsTr("Channel: ") + dcenowplaying.channel
+                            font.family: "Droid Sans"
+                            font.bold: true
+                            smooth: true
+                            horizontalAlignment: Text.AlignHCenter
+                            font.pixelSize: 1 * scaleY(2)
+                            color: "aliceblue"
+                        }
+
+                        Text {
+                            id: title
+                            wrapMode: "NoWrap"
+                            text: qsTr("Program:") + dcenowplaying.tvProgram
+                            font.family: "Droid Sans"
+                            font.bold: true
+                            smooth: true
+                            horizontalAlignment: Text.AlignHCenter
+                            font.pixelSize: 1 * scaleY(2)
+                            color: "aliceblue"
+                        }
                     }
                 }
             }
+
+            RemoteNumberPad {id: remotenumberpad1;}
+            Remote_lighting_controls{ id: remote_lighting_controls1; }
+            Remote_Audio_controls{ id: remote1; }
         }
+        Row{
+            id:controlrow
 
-RemoteNumberPad {id: remotenumberpad1;}
-        Remote_lighting_controls{ id: remote_lighting_controls1; }
-        Remote_Audio_controls{ id: remote1; }
-    }
-    Row{
-        id:controlrow
-        anchors.top: mainrow.bottom
-        anchors.topMargin: scaleY(2)
-        height: childrenRect.height
-        width: childrenRect.width
-        anchors.horizontalCenter: parent.horizontalCenter
-        Column{
+            anchors.top: mainrow.bottom
+            anchors.topMargin: scaleY(2)
             height: childrenRect.height
-            width: childrenRect.width
-
-            VideoControls {
-                id: videocontrols1
-            }
+            width: mainrow.width
+            anchors.horizontalCenter: parent.horizontalCenter
+            Column{
+                height: childrenRect.height
+                width: parent.width
+                anchors.centerIn: parent
+                VideoControls {
+                    id: videocontrols1
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
                 Row{
-                    height: childrenRect.height
-                    width: childrenRect.width
-                    spacing: scaleX(1)
+                    spacing:1
                     ButtonSq{
+                        id:zoom
                         buttontext: qsTr("Zoom & Aspect")
                         MouseArea{
                             anchors.fill: parent
@@ -188,7 +199,74 @@ RemoteNumberPad {id: remotenumberpad1;}
                         }
                     }
                     ButtonSq{
-                        buttontext: qsTr("Manage Playlist")
+                        buttontext: qsTr("Thumbnail")
+                    }
+                    Flickable{
+                        height: zoom.height
+                        width: scaleX(40)
+                        flickableDirection: "HorizontalFlick"
+                        clip:true
+                        contentHeight: style.stdbuttonH
+                        contentWidth: style.buttonrow * 1
+                        boundsBehavior: "DragAndOvershootBounds"
+                        focus: true
+
+
+                        Row{
+                            id:buttonrow
+                            spacing:1
+                            width: childrenRect.width
+
+                            ButtonSq{
+                                buttontext: qsTr("Live")
+                            }
+                            ButtonSq{
+                                buttontext: qsTr("Schedule")
+                            }
+                            ButtonSq{
+                                buttontext: qsTr("Recordings")
+                            }
+                            ButtonSq{
+                                buttontext: qsTr("Music")
+                            }
+                            ButtonSq{
+                                buttontext: qsTr("Guide")
+                            }
+                            ButtonSq{
+                                buttontext: qsTr("Menu")
+                            }
+                            ButtonSq{
+                                buttontext: qsTr("Info")
+                            }
+                            ButtonSq{
+                                buttontext: qsTr("Favorites")
+                            }
+                            ButtonSq{
+                                buttontext: qsTr("Record")
+                            }
+                            ButtonSq{
+                                buttontext: qsTr("Help")
+                            }
+                            ButtonSq{
+                                buttontext: qsTr("Bookmark Channel")
+                            }
+                            ButtonSq{
+                                buttontext: qsTr("Change Inputs")
+                            }
+                            ButtonSq{
+                                buttontext: qsTr("Page Up")
+                            }
+                            ButtonSq{
+                                buttontext: qsTr("Page Down")
+                            }
+                            ButtonSq{
+                                buttontext: qsTr("Next Day")
+                            }
+                            ButtonSq{
+                                buttontext: qsTr("Previous day")
+                            }
+
+                        }
                     }
                     ButtonSq{
                         buttontext: qsTr("Power")

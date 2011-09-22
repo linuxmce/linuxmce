@@ -1,10 +1,14 @@
 import QtQuick 1.0
 
 Rectangle {
-    width: scaleX(17)
+    id:nonepgplaylist
+    width: scaleX(25)
     height: scaleY(55)
-    color: "transparent"
+    color: style.highlight2
+    border.color: style.highlight1
+    border.width: 2
     clip:true
+
 
     Component.onCompleted: nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
 
@@ -18,9 +22,9 @@ Rectangle {
 
     ListView{
         id:nonepgplaylistview
-        width: scaleX(16)
+        width: scaleX(25)
         height: scaleY(55)
-
+        anchors.centerIn: parent
         highlightFollowsCurrentItem: true
         highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
         clip: true
@@ -28,12 +32,14 @@ Rectangle {
         flickableDirection: "VerticalFlick"
         model: mediaplaylist
 
+
         delegate:
             Rectangle {
             border.color: "black"
             border.width: 1
-            width:scaleX(16)
-            height: scaleY(9)
+            width:scaleX(25)
+            height: scaleY(12)
+            anchors.horizontalCenter: parent.horizontalCenter
             color: style.darkhighlight
             clip: true
             Image {
@@ -48,9 +54,8 @@ Rectangle {
                 text: qsTr("Item #") + name
                 font.family: "DroidSans"
                 color: "aliceblue"
-                font.pixelSize: 18
+                font.pixelSize: scaleY(2.25)
                 font.bold: true
-                font.capitalization: Font.SmallCaps
                 anchors.bottom: parent.bottom
                 opacity: .75
             }
@@ -61,9 +66,9 @@ Rectangle {
                 color: "aliceblue"
                 width: parent.width
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                font.pixelSize: 18
+                font.pixelSize: scaleY(2.15)
                 font.bold: true
-                font.capitalization: Font.SmallCaps
+
             }
 
             Image {

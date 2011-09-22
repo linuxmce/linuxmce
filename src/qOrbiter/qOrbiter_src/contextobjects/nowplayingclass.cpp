@@ -52,3 +52,23 @@ void NowPlayingClass::setMediaSpeed(int speed)
 
 }
 
+void NowPlayingClass::resetData()
+{
+    setTitle("");
+    setProgram("");
+    setSubTitle("");
+    setTitle2("");
+    genre.clear(); emit genreChanged();
+    performers.clear();
+    performerlist.clear();emit performersChanged();
+    setChannel("");
+    setChannelID("");
+    setEpisode("");
+    setAlbum("");
+    directors.clear(); emit directorChanged();
+    setDirector("");
+    setTrack("");
+    setMediaTitle("");
+
+}
+

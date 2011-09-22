@@ -17,7 +17,7 @@ Rectangle {
 
     Connections{
         target:dcenowplaying
-        onPlayListPositionChanged: nowplayingimage.source = "image://updateobject/"+securityvideo.timestamp
+        onPlayListPositionChanged: { nowplayingimage.source = "image://updateobject/"+securityvideo.timestamp;}
     }
 
     height: style.orbiterH
@@ -88,6 +88,16 @@ Rectangle {
                         height: scaleY(35)
                         fillMode: Image.PreserveAspectFit
                         source: "image://updateobject/"+dcenowplaying.m_iplaylistPosition
+                    }
+                    Text {
+                        id: generaltitle
+                        width: scaleX(35)
+                        text: qsTr("Ttitle :") + dcenowplaying.qs_mainTitle
+                        font.family: "Droid Sans"
+                        wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                        font.bold: true
+                        smooth: true
+                        font.pixelSize: scaleY(1.5)
                     }
 
                     Text {

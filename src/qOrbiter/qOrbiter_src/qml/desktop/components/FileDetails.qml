@@ -1,5 +1,6 @@
 import QtQuick 1.0
 
+
 Rectangle {
     id: filedetailrect
     width: scaleX(50)
@@ -10,6 +11,11 @@ Rectangle {
     color: style.highlight2
     clip: true
     radius: 5
+    border.color: style.highlight1
+    border.width: 3
+
+
+
 
     Timer{
         id:singleshot
@@ -25,6 +31,7 @@ Rectangle {
         height: childrenRect.height + 5
         width: parent.width
         color:style.highlight1
+
         radius:5
 
         Text {

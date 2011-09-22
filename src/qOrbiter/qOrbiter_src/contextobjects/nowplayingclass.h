@@ -52,12 +52,16 @@ class NowPlayingClass : public QDeclarativeItem
     Q_PROPERTY (QString channel READ getChannel WRITE setChannel NOTIFY channelChanged)
     Q_PROPERTY (QString channelID READ getChannelID WRITE setChannelID NOTIFY channelChanged)
     Q_PROPERTY (QString episode READ getEpisode WRITE setEpisode NOTIFY episodeChanged)
-     Q_PROPERTY (QString director READ getDirector WRITE setDirector NOTIFY directorChanged)
+    //movies
+
     //audio related
     Q_PROPERTY (QString album READ getAlbum WRITE setAlbum NOTIFY albumChanged)
     Q_PROPERTY (QString track READ getTrack WRITE setTrack NOTIFY trackChanged)
     Q_PROPERTY (QString performerlist READ getPerformers WRITE setPerformers NOTIFY performersChanged)
-
+    //shared
+    Q_PROPERTY(QString synop READ getSynop WRITE setSynop NOTIFY synopChanged)
+    Q_PROPERTY (QString director READ getDirector WRITE setDirector NOTIFY directorChanged)
+Q_PROPERTY(QString releasedate READ getRelease WRITE setRelease NOTIFY rlsChanged)
 public:
     explicit NowPlayingClass(QDeclarativeItem *parent = 0);
 
@@ -81,7 +85,7 @@ public:
     //media  related--------------------------
     QString mediatitle; //special if the media itself for some reason has a title different than the now playing
     QTime *timecode;
-    QString synopsis;
+    QString synop;
     int i_playbackSpeed;
     QString qs_playbackSpeed;
 
@@ -102,6 +106,7 @@ public:
     QString releasedate;
 
 
+
 signals:
     //general signals
     void mediaTitleChanged();
@@ -119,6 +124,9 @@ signals:
     void mediaSpeedChanged();
     void playListPositionChanged();
     void genreChanged();
+    void rlsChanged();
+    void synopChanged();
+
 
     //audio signals
     void albumChanged();
@@ -141,6 +149,7 @@ signals:
 
 
 public slots:
+    void resetData();
 
 
     void setProgram(QString newProgram) {tvProgram = newProgram; emit programChanged();}
@@ -212,6 +221,11 @@ public slots:
     void setGenre (QString inc_genre) {genre.append(inc_genre+" | ");  emit genreChanged();}
     QString getGenre() { return genre;}
 
+    void setRelease (QString inc_rls) {releasedate = inc_rls;  emit rlsChanged();}
+    QString getRelease() {return releasedate;}
+
+    inline QString getSynop() {return synop;}
+    inline void setSynop(QString s) { synop = s; emit synopChanged(); }
 };
 
 #endif // NOWPLAYINGCLASS_H

@@ -1521,6 +1521,8 @@ void qorbiterManager::bindMediaRemote(bool state)
 void qorbiterManager::changedPlaylistPosition(int position)
 {
     pqOrbiter->JumpToPlaylistPosition(position);
+
+
 }
 
 void qorbiterManager::setNowPlayingData()
@@ -1530,7 +1532,9 @@ void qorbiterManager::setNowPlayingData()
     pqOrbiter->requestMediaPlaylist();
 
     qDebug() << "Initiating media bind and playlist request";
-    pqOrbiter->GetNowPlayingAttributes();
+
+
+
 }
 
 void qorbiterManager::getMediaPlaylist()

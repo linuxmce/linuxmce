@@ -4,7 +4,17 @@ Rectangle{
     id:reloadrouter
     height: style.orbiterH
     width: style.orbiterW
-    color: style.highlight2
+   // color: style.highlight2
+    gradient: Gradient {
+        GradientStop {
+            position: 0.00;
+            color: style.higlight2;
+        }
+        GradientStop {
+            position: 1.00;
+            color: style.highlight1;
+        }
+    }
 
     Rectangle{
         id:containerrect

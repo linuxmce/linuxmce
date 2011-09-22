@@ -5,115 +5,134 @@ import "../js/ComponentLoader.js" as MyJs
 Rectangle {
     height: style.orbiterH
     width: style.orbiterW
-    color: style.darkhighlight
+    gradient: Gradient {
+        GradientStop {
+            position: 0.00;
+            color: style.highlight2;
+        }
+
+        GradientStop {
+            position: 1.00;
+            color: style.maincolor;
+        }
+    }
     id: advancedscreen
 
     HomeButton{}
 
-    Flow {
-        id: flow1
+    Rectangle{
+        height: scaleY(75)
+        width: scaleX(75)
+        color: style.darkhighlight
+        radius: 10
+        border.color: style.highlight1
+        border.width: 2
         anchors.centerIn: parent
-        height: scaleY(50)
-        width: scaleX(60)
-        spacing: 10
 
-        ButtonSq{
-            id:regenorbiter
-            height: scaleY(style.buttonH)
-            width: scaleX(style.buttonW)
-            buttontext: qsTr("Regen This Orbiter")
-            radius: 5
-            MouseArea{
-                anchors.fill:parent
-                z:5
-                onClicked: regenOrbiter(35)
+        Flow {
+            id: flow1
+            anchors.centerIn: parent
+            height: scaleY(50)
+            width: scaleX(60)
+            spacing: 10
+
+            ButtonSq{
+                id:regenorbiter
+                height: scaleY(style.buttonH)
+                width: scaleX(style.buttonW)
+                buttontext: qsTr("Regen This Orbiter")
+                radius: 5
+                MouseArea{
+                    anchors.fill:parent
+                    z:5
+                    onClicked: regenOrbiter(35)
+                }
             }
-        }
 
-        ButtonSq{
-            id:regenorbiters
-            height: scaleY(style.buttonH)
-            width: scaleX(style.buttonW)
-            buttontext: qsTr("Regen All Orbiters")
-            radius: 5
-        }
-
-        ButtonSq{
-            id:reloadandregen
-            height: scaleY(style.buttonH)
-            width: scaleX(style.buttonW)
-            buttontext: qsTr("Reload and Regen")
-            radius: 5
-        }
-
-        ButtonSq{
-            id:quickreload
-            height: scaleY(style.buttonH)
-            width: scaleX(style.buttonW)
-            buttontext: qsTr("Quick Reload")
-            radius: 5
-            MouseArea{
-                anchors.fill: parent
-                z:10
-                onClicked: quickReload()
+            ButtonSq{
+                id:regenorbiters
+                height: scaleY(style.buttonH)
+                width: scaleX(style.buttonW)
+                buttontext: qsTr("Regen All Orbiters")
+                radius: 5
             }
-        }
 
-        ButtonSq{
-            id:networksettings
-            height: scaleY(style.buttonH)
-            width: scaleX(style.buttonW)
-            buttontext: qsTr("Network Settings")
-            radius: 5
-        }
-
-        ButtonSq{
-            id:avwizard
-            height: scaleY(style.buttonH)
-            width: scaleX(style.buttonW)
-            buttontext: qsTr("Av wizard")
-            radius: 5
-        }
-
-        ButtonSq{
-            id:pendingtasks
-            height: scaleY(style.buttonH)
-            width: scaleX(style.buttonW)
-            buttontext: qsTr("Pending Tasks")
-            radius: 5
-        }
-
-        ButtonSq{
-            id:remoteassistance
-            height: scaleY(style.buttonH)
-            width: scaleX(style.buttonW)
-            buttontext: qsTr("Remote Assistance")
-            radius: 5
-            MouseArea{
-                anchors.fill: parent
-                z:10
+            ButtonSq{
+                id:reloadandregen
+                height: scaleY(style.buttonH)
+                width: scaleX(style.buttonW)
+                buttontext: qsTr("Reload and Regen")
+                radius: 5
             }
-        }
 
-        ButtonSq{
-            id:addsoftware
-            height: scaleY(style.buttonH)
-            width: scaleX(style.buttonW)
-            buttontext: qsTr("Add Software")
-            radius: 5
-        }
-
-        ButtonSq{
-            id:changeStyle
-            height: scaleY(style.buttonH)
-            width: scaleX(style.buttonW)
-            buttontext: qsTr("Change Styles")
-            radius: 5
-            MouseArea{
-                anchors.fill: parent
-                onClicked: MyJs.createComponentObjects("SkinSelector.qml")
+            ButtonSq{
+                id:quickreload
+                height: scaleY(style.buttonH)
+                width: scaleX(style.buttonW)
+                buttontext: qsTr("Quick Reload")
+                radius: 5
+                MouseArea{
+                    anchors.fill: parent
+                    z:10
+                    onClicked: quickReload()
+                }
             }
-        }
+
+            ButtonSq{
+                id:networksettings
+                height: scaleY(style.buttonH)
+                width: scaleX(style.buttonW)
+                buttontext: qsTr("Network Settings")
+                radius: 5
+            }
+
+            ButtonSq{
+                id:avwizard
+                height: scaleY(style.buttonH)
+                width: scaleX(style.buttonW)
+                buttontext: qsTr("Av wizard")
+                radius: 5
+            }
+
+            ButtonSq{
+                id:pendingtasks
+                height: scaleY(style.buttonH)
+                width: scaleX(style.buttonW)
+                buttontext: qsTr("Pending Tasks")
+                radius: 5
+            }
+
+            ButtonSq{
+                id:remoteassistance
+                height: scaleY(style.buttonH)
+                width: scaleX(style.buttonW)
+                buttontext: qsTr("Remote Assistance")
+                radius: 5
+                MouseArea{
+                    anchors.fill: parent
+                    z:10
+                }
+            }
+
+            ButtonSq{
+                id:addsoftware
+                height: scaleY(style.buttonH)
+                width: scaleX(style.buttonW)
+                buttontext: qsTr("Add Software")
+                radius: 5
+            }
+
+            ButtonSq{
+                id:changeStyle
+                height: scaleY(style.buttonH)
+                width: scaleX(style.buttonW)
+                buttontext: qsTr("Change Styles")
+                radius: 5
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: MyJs.createComponentObjects("SkinSelector.qml")
+                }
+            }
 
             ButtonSq{
                 id:gc100
@@ -140,4 +159,5 @@ Rectangle {
             }
         }
     }
+}
 
