@@ -74,7 +74,14 @@ FloorPlanItem * FloorPlanModel::find(const QString &id) const
 {
   foreach(FloorPlanItem* item, m_list) {
 
-    if(item->id() == id) qDebug() << item->id();return item;
+      if(item->id().contains(id))
+      {
+          qDebug() << "Found Match of: " << item->id() << "to " << id;return item;
+      }
+      else
+      {
+          qDebug() << item->id();
+      }
   }
   return 0;
 }
@@ -147,10 +154,8 @@ QImage FloorPlanModel::getPageImage(QString &id)
     { QImage fail;
         return fail;
     }
-    qDebug() << "Found it!";
-
-     QImage fpImage= myItem->floorplanImage();
-     qDebug () << fpImage.isNull();
+    qDebug() << myItem->id() << "::" << id;
+     QImage fpImage= myItem->floorplanImage();    
     return fpImage;
 }
 
@@ -159,8 +164,8 @@ QImage FloorPlanModel::getPageImage(QString &id)
 void FloorPlanModel::setCurrentPage(QString currentPageId)
 {
  currentPage = currentPageId;
- qDebug() << "image set to" << currentPageId;
-emit pageChanged();
+ emit pageChanged();
+
 }
 
 /*
