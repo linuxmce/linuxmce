@@ -1713,6 +1713,10 @@ void qorbiterManager::updateTimecode()
         QString playbackSpeed = tcVars.at(0);
         playbackSpeed.remove(QRegExp("000"));
         nowPlayingButton->setStringSpeed(playbackSpeed+"x");
+
+        QString duration = tcVars.at(2);
+        duration.remove(QRegExp(".\\d\\d\\d"));
+        nowPlayingButton->setDuration(duration);
     }
 
 

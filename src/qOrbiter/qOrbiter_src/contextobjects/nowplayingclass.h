@@ -26,6 +26,7 @@ class NowPlayingClass : public QDeclarativeItem
     //timecode
 
     Q_PROPERTY (QString timecode READ getTimeCode WRITE setTimeCode NOTIFY tcChanged)
+    Q_PROPERTY (QString duration READ getDuration WRITE setDuration NOTIFY durationChanged)
     //set now playing - text to assign
     Q_PROPERTY (QString qs_mainTitle READ getTitle WRITE setTitle NOTIFY titleChanged) //the text set sent by now playing command
     Q_PROPERTY (QString qs_mainTitle2 READ getTitle2 WRITE setTitle2 NOTIFY titleChanged2) // in the case of audio, multiple metada value are sent  thus title 2
@@ -92,6 +93,7 @@ public:
     QString synop;
     int i_playbackSpeed;
     QString qs_playbackSpeed;
+    QString duration;
 
     //television related
     QString tvProgram;
@@ -108,8 +110,6 @@ public:
     QString genre;
     QStringList composer;
     QString releasedate;
-
-
 
 signals:
     //general signals
@@ -131,6 +131,7 @@ signals:
     void rlsChanged();
     void synopChanged();
     void tcChanged();
+    void durationChanged();
 
 
     //audio signals
@@ -155,6 +156,10 @@ signals:
 
 public slots:
     void resetData();
+
+    void setDuration(QString nDuration) {duration = nDuration; emit durationChanged();}
+    QString getDuration () {return duration;}
+
     void setTimeCode(QString uTc) {timecode = uTc; emit tcChanged();}
     QString getTimeCode () {return timecode;}
 

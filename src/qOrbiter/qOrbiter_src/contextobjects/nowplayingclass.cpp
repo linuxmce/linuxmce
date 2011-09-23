@@ -69,6 +69,9 @@ void NowPlayingClass::resetData()
     setDirector("");
     setTrack("");
     setMediaTitle("");
+    setDuration("");
+    setTimeCode("");
+    setMediaType(NULL);
 
 }
 

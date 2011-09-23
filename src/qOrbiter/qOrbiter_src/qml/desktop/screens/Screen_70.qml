@@ -67,12 +67,18 @@ Rectangle {
                         id: gradientheader
                         width: parent.width
                         height: childrenRect.height
+                        color:"transparent"
+
+
+
                         Image {
                             id: headerimage
                             source: "../../../img/icons/header.png"
                             height:parent.height
                             width:parent.width
+                            opacity: .75
                         }
+
                         Text {
                             id: headertext
                             height:scaleY(5)
@@ -85,12 +91,16 @@ Rectangle {
                         Text {
                             id: timecode
                             height:scaleY(5)
-                            text:qsTr("Position: ") + dcenowplaying.timecode
+                            text: dcenowplaying.timecode + qsTr(" of ") + dcenowplaying.duration
                             font.family: "Droid Sans"
-                            font.pixelSize: 12
+                            font.pixelSize: scaleY(1) *2.15
+                            anchors.bottom:parent.bottom
                             anchors.horizontalCenter: parent.horizontalCenter
-
+                            font.bold: true
+                            color:"aliceblue"
                         }
+
+
                     }
                     Image {
                         id: nowplayingimage
@@ -99,6 +109,7 @@ Rectangle {
                         fillMode: Image.PreserveAspectFit
                         source: "image://updateobject/"+dcenowplaying.m_iplaylistPosition
                     }
+
                     Text {
                         id: generaltitle
                         width: scaleX(35)
@@ -189,42 +200,42 @@ Rectangle {
                 VideoControls {
                     id: videocontrols1
                 }
-                    Row{
-                        height: childrenRect.height
-                        width: childrenRect.width
-                        spacing: scaleX(1)
-                        ButtonSq{
-                            buttontext: qsTr("Zoom & Aspect")
-                            MouseArea{
-                                anchors.fill: parent
-                                onClicked:  {
-                                    MyJs.createAvComponent("../components/ZoomAspect.qml", storedvideoremote)
-                                }
+                Row{
+                    height: childrenRect.height
+                    width: childrenRect.width
+                    spacing: scaleX(1)
+                    ButtonSq{
+                        buttontext: qsTr("Zoom & Aspect")
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked:  {
+                                MyJs.createAvComponent("../components/ZoomAspect.qml", storedvideoremote)
                             }
                         }
-                        ButtonSq{
-                            buttontext: qsTr("Bookmarks")
-                        }
-                        ButtonSq{
-                            buttontext: qsTr("Resend AV Codes")
-                            MouseArea{
-                                anchors.fill: parent
-                                onClicked:  {
-                                    MyJs.createAvComponent("../components/Avcodes.qml", storedvideoremote)
-                                }
-                            }
-                        }
-                        ButtonSq{
-                            buttontext: qsTr("Manage Playlist")
-                        }
-                        ButtonSq{
-                            buttontext: qsTr("Power")
-                        }
-                        HomeButton{}
                     }
+                    ButtonSq{
+                        buttontext: qsTr("Bookmarks")
+                    }
+                    ButtonSq{
+                        buttontext: qsTr("Resend AV Codes")
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked:  {
+                                MyJs.createAvComponent("../components/Avcodes.qml", storedvideoremote)
+                            }
+                        }
+                    }
+                    ButtonSq{
+                        buttontext: qsTr("Manage Playlist")
+                    }
+                    ButtonSq{
+                        buttontext: qsTr("Power")
+                    }
+                    HomeButton{}
                 }
             }
-
         }
+
     }
+}
 
