@@ -28,16 +28,77 @@ Rectangle {
     color: style.darkhighlight
     Component.onCompleted:setNowPlayingData()
 
+Rectangle{
+
+        height:childrenRect.height + scaleY(2)
+        width: childrenRect.width + scaleX(2)
+        clip:true
+        radius: 10
+        border.color: style.highlight1
+        border.width: 5
+        color: style.lighthighlight
+        anchors.centerIn: parent
+
+
 
     //main 'now playing rect containing all the other items
+
+        Row{
+            id:headerrow
+            height:scaleY(10)
+            width: parent.width-1
+            Image {
+                id: headerimage
+                source: "../../../img/icons/header.png"
+                height:scaleY(10)
+                width:parent.width
+            }
+
+            Text {
+                id: headertext
+                height:scaleY(5)
+                text:qsTr("Speed: ") + dcenowplaying.qs_playbackSpeed
+                font.family: "Droid Sans"
+                font.pixelSize: scaleY(2)
+                color: "aliceblue"
+            }
+
+            Text {
+                id: timecode
+                height:scaleY(5)
+                text: dcenowplaying.timecode + qsTr(" of ") + dcenowplaying.duration
+                font.family: "Droid Sans"
+                font.pixelSize: scaleY(2.15)
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
+                font.bold: true
+                color:"aliceblue"
+            }
+
+            Text {
+                id: hartist
+                text: dcenowplaying.qs_mainTitle + " - " + dcenowplaying.qs_subTitle + qsTr(" | From the album: ")  + dcenowplaying.qs_mainTitle2
+                font.family: "Droid Sans"
+                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                font.bold: true
+                smooth: true
+               font.pixelSize: scaleY(2.25)
+              anchors.bottom: parent.bottom
+              anchors.bottomMargin: scaleY(1.5)
+               anchors.left: parent.left
+               anchors.leftMargin: scaleX(1)
+               color:"white"
+               opacity: .75
+            }
+        }
 
     Row{
         id:mainrow
         height: childrenRect.height
         width: childrenRect.width
         spacing: scaleX(2)
-        anchors.top:parent.top
-        anchors.topMargin: scaleY(5)
+        anchors.top:headerrow.bottom
+        anchors.topMargin: scaleY(2)
         anchors.horizontalCenter: parent.horizontalCenter
 
         NonEPGPlaylist{ id:playlist}
@@ -46,47 +107,18 @@ Rectangle {
             id:metarow
             width: childrenRect.width
             height: childrenRect.height
-            spacing: scaleX(1)
+            spacing: scaleX(.5)
 
             Column
             {
                 id:metadata
-                height: scaleY(75)
+                height: scaleY(30)
                 width: childrenRect.width
 
-                Rectangle {
-                    id: gradientheader
-                    width: parent.width
-                    height: childrenRect.height
-                    Image {
-                        id: headerimage
-                        source: "../../../img/icons/header.png"
-                        height:parent.height
-                        width:parent.width
-                    }
-
-                    Text {
-                        id: headertext
-                        height:scaleY(5)
-                        text:qsTr("Speed: ") + dcenowplaying.qs_playbackSpeed
-                        font.family: "Droid Sans"
-                        font.pixelSize: 12
-
-                    }
-                    Text {
-                        id: timecode
-                        height:scaleY(5)
-                        text:qsTr("Position: ") + dcenowplaying.timecode
-                        font.family: "Droid Sans"
-                        font.pixelSize: 12
-                        anchors.horizontalCenter: parent.horizontalCenter
-
-                    }
-                }
                 Image {
                     id: nowplayingimage
 
-                    width: scaleX(45)
+                    width: scaleX(20)
                     height: scaleY(45)
                     fillMode: Image.PreserveAspectFit
                     source: "image://updateobject/"+dcenowplaying.m_iplaylistPosition
@@ -104,7 +136,7 @@ Rectangle {
                         spacing: scaleY(1)
 
 
-                        Text {
+                  /*      Text {
                             id: artist
 
                             text: qsTr("Artist :") + dcenowplaying.qs_mainTitle
@@ -112,7 +144,7 @@ Rectangle {
                             wrapMode: "WrapAtWordBoundaryOrAnywhere"
                             font.bold: true
                             smooth: true
-                            font.pixelSize: scaleY(2.15)
+                           font.pixelSize: scaleY(2)
                         }
 
 
@@ -124,7 +156,7 @@ Rectangle {
                             font.family: "Droid Sans"
                             font.bold: true
                             smooth: true
-                            font.pixelSize: scaleY(2.15)
+                          font.pixelSize: scaleY(2)
 
                         }
 
@@ -136,7 +168,7 @@ Rectangle {
                             font.family: "Droid Sans"
                             font.bold: true
                             smooth: true
-                            font.pixelSize: scaleY(2.15)
+                           font.pixelSize: scaleY(2)
                         }
 
                         Text {
@@ -147,7 +179,7 @@ Rectangle {
                             font.family: "Droid Sans"
                             font.bold: true
                             smooth: true
-                            font.pixelSize: scaleY(2.15)
+                           font.pixelSize: scaleY(2)
                         }
                         Text {
                             id: genre
@@ -157,7 +189,7 @@ Rectangle {
                             font.family: "Droid Sans"
                             font.bold: true
                             smooth: true
-                            font.pixelSize: scaleY(2.15)
+                            font.pixelSize: scaleY(2)
                         }
 
                         Text {
@@ -168,18 +200,19 @@ Rectangle {
                             font.family: "Droid Sans"
                             font.bold: true
                             smooth: true
-                            font.pixelSize: scaleY(2.15)
+                            font.pixelSize: scaleY(2)
                         }
                         Text {
                             id: release
 
                             wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                            text: qsTr("Review: ") + dcenowplaying.releasedate
+                            text: qsTr("Released: ") + dcenowplaying.releasedate
                             font.family: "Droid Sans"
                             font.bold: true
                             smooth: true
-                            font.pixelSize: scaleY(2.15)
+                            font.pixelSize: scaleY(2)
                         }
+                        */
                     }
                 }
             }
@@ -219,6 +252,6 @@ Rectangle {
             }
         }
     }
-
+}
 }
 
