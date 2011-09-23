@@ -1712,7 +1712,7 @@ void qorbiterManager::showTimeCode()
     {
     QStringList tcVars = tcData.split(",");
     QString tcClean = tcVars.at(1);
-    tcClean.remove(QRegExp(".\\d\\d\\d"));
+    tcClean.remove(QRegExp(".\\d\\d\\d|00:0"));
     nowPlayingButton->setTimeCode(tcClean);
 
     QString playbackSpeed = tcVars.at(0);
@@ -1720,7 +1720,7 @@ void qorbiterManager::showTimeCode()
     nowPlayingButton->setStringSpeed(playbackSpeed+"x");
 
     QString duration = tcVars.at(2);
-    duration.remove(QRegExp(".\\d\\d\\d"));
+    duration.remove(QRegExp(".\\d\\d\\d|00:0"));
     nowPlayingButton->setDuration(duration);
     }
 }
