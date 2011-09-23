@@ -31,8 +31,8 @@ Rectangle {
     //main 'now playing rect containing all the other items
 
     Rectangle{
-        height:scaleY(95)
-        width: scaleX(95)
+        height:childrenRect.height + scaleY(5)
+        width: childrenRect.width + scaleX(4)
         clip:true
         radius: 10
         border.color: style.highlight1
@@ -44,7 +44,7 @@ Rectangle {
             id:mainrow
             height: childrenRect.height
             width: childrenRect.width
-            spacing: 1
+            spacing: scaleX(1)
             anchors.top:parent.top
             anchors.topMargin: scaleY(1.5)
             anchors.horizontalCenter: parent.horizontalCenter
@@ -68,8 +68,6 @@ Rectangle {
                         width: parent.width
                         height: childrenRect.height
                         color:"transparent"
-
-
 
                         Image {
                             id: headerimage
@@ -99,8 +97,6 @@ Rectangle {
                             font.bold: true
                             color:"aliceblue"
                         }
-
-
                     }
                     Image {
                         id: nowplayingimage
@@ -199,6 +195,7 @@ Rectangle {
 
                 VideoControls {
                     id: videocontrols1
+                    anchors.horizontalCenter: parent.horizontalCenter
                 }
                 Row{
                     height: childrenRect.height
@@ -227,6 +224,12 @@ Rectangle {
                     }
                     ButtonSq{
                         buttontext: qsTr("Manage Playlist")
+                    }
+                    ButtonSq{
+                        buttontext: qsTr("Thumbnail")
+                    }
+                    ButtonSq{
+                        buttontext: qsTr("Jog")
                     }
                     ButtonSq{
                         buttontext: qsTr("Power")

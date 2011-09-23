@@ -1656,10 +1656,12 @@ void qorbiterManager::setAspect(QString qs_aspect)
 void qorbiterManager::updateTimecode()
 {
     string sIPAddress;
-    if(nowPlayingButton->b_mediaPlaying == true)
+    if(nowPlayingButton->b_mediaPlaying == true && !timeCodeSocket->isValid())
     {
+        qDebug("media playing with no timecode!");
         if(!timeCodeSocket->isOpen())
-        {
+
+        {qDebug("sockey is closed, opening!");
             DeviceData_Base *pDevice = pqOrbiter->m_dwPK_Device_NowPlaying ? pqOrbiter->m_pData->m_AllDevices.m_mapDeviceData_Base_Find(pqOrbiter->m_dwPK_Device_NowPlaying) : NULL;
             if( NULL != pDevice &&
                     (
@@ -1683,41 +1685,45 @@ void qorbiterManager::updateTimecode()
                     }
                 }
             }
-
-
-
-                QString port = QString::fromStdString(pqOrbiter->GetCurrentDeviceData(pqOrbiter->m_dwPK_Device_NowPlaying, 171));
-                qDebug() << "IpAddress: " <<  sIPAddress.c_str();
-                timeCodeSocket->connectToHost(QString::fromStdString(sIPAddress), port.toInt(), QFile::ReadOnly);
+            QString port = QString::fromStdString(pqOrbiter->GetCurrentDeviceData(pqOrbiter->m_dwPK_Device_NowPlaying, 171));
+            qDebug() << "IpAddress: " <<  sIPAddress.c_str();
+            timeCodeSocket->connectToHost(QString::fromStdString(sIPAddress), port.toInt(), QFile::ReadOnly );
+            if ( timeCodeSocket->isValid() )
+            {
+                qDebug() << "Socket 12000 Connected to: " << sIPAddress.c_str();
                 QObject::connect(timeCodeSocket,SIGNAL(readyRead()), this, SLOT(showTimeCode()), Qt::QueuedConnection);
-
             }
         }
-        else
-        {
-            timeCodeSocket->disconnectFromHost();
-
-        }
     }
-
-    void qorbiterManager::showTimeCode()
+    else if (nowPlayingButton->b_mediaPlaying == false)
     {
-        QByteArray socketData = timeCodeSocket->readLine();
-        QString tcData = QString::fromAscii(socketData.data(), socketData.size());
-        //qDebug() << tcData;
-        QStringList tcVars = tcData.split(",");
-        QString tcClean = tcVars.at(1);
-        tcClean.remove(QRegExp(".\\d\\d\\d"));
-        nowPlayingButton->setTimeCode(tcClean);
-
-        QString playbackSpeed = tcVars.at(0);
-        playbackSpeed.remove(QRegExp("000"));
-        nowPlayingButton->setStringSpeed(playbackSpeed+"x");
-
-        QString duration = tcVars.at(2);
-        duration.remove(QRegExp(".\\d\\d\\d"));
-        nowPlayingButton->setDuration(duration);
+        timeCodeSocket->disconnectFromHost();
+        timeCodeSocket->close();
+        qDebug("Socket 12000 disconnect");
     }
+}
+
+void qorbiterManager::showTimeCode()
+{
+    QByteArray socketData = timeCodeSocket->readLine();
+    QString tcData = QString::fromAscii(socketData.data(), socketData.size());
+    //qDebug() << tcData;
+    if (tcData.length() > 0)
+    {
+    QStringList tcVars = tcData.split(",");
+    QString tcClean = tcVars.at(1);
+    tcClean.remove(QRegExp(".\\d\\d\\d"));
+    nowPlayingButton->setTimeCode(tcClean);
+
+    QString playbackSpeed = tcVars.at(0);
+    playbackSpeed.remove(QRegExp("000"));
+    nowPlayingButton->setStringSpeed(playbackSpeed+"x");
+
+    QString duration = tcVars.at(2);
+    duration.remove(QRegExp(".\\d\\d\\d"));
+    nowPlayingButton->setDuration(duration);
+    }
+}
 
 
 
