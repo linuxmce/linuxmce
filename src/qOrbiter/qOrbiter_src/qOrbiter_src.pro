@@ -69,6 +69,7 @@ INCLUDEPATH += ../../ ../../DCE/
 
 macx{
     QT += xml
+    QT += network
 }
 
 !macx{
