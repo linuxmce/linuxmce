@@ -29416,5 +29416,33 @@ namespace DCE
 			COMMANDPARAMETER_Task_CONST, sTask.c_str(),
 			COMMANDPARAMETER_Job_CONST, sJob.c_str()); }
 	};
+	class CMD_Connect_to_Device : public PreformedCommand {
+	public:
+		CMD_Connect_to_Device(long DeviceIDFrom, long DeviceIDTo,string sMac_address) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+			COMMAND_Connect_to_Device_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Mac_address_CONST, sMac_address.c_str()); }
+	};
+	class CMD_Connect_to_Device_DL : public PreformedCommand {
+	public:
+		CMD_Connect_to_Device_DL(long DeviceIDFrom, string DeviceIDTo,string sMac_address) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Connect_to_Device_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Mac_address_CONST, sMac_address.c_str()); }
+	};
+	class CMD_Connect_to_Device_DT : public PreformedCommand {
+	public:
+		CMD_Connect_to_Device_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sMac_address) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Connect_to_Device_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Mac_address_CONST, sMac_address.c_str()); }
+	};
+	class CMD_Connect_to_Device_Cat : public PreformedCommand {
+	public:
+		CMD_Connect_to_Device_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sMac_address) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Connect_to_Device_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Mac_address_CONST, sMac_address.c_str()); }
+	};
 }
 #endif

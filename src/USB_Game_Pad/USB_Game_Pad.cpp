@@ -629,6 +629,7 @@ void USB_Game_Pad::ProcessGamePad(int fd)
       if (errno != EAGAIN)
 	{
 	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ProcessGamePad(%d) Error reading event packet.",fd);
+	  m_iErrors++;
 	  return;
 	} 
     }
