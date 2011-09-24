@@ -22,7 +22,7 @@ sources = Main.cpp Wii_Remote_Controller.cpp $(Gen_Dev_Files)
 CXXFLAGS +=
 CPPFLAGS +=
 LDFLAGS +=
-XTRALDLIBS = -lmysqlclient_r
+XTRALDLIBS = -lmysqlclient_r -lwiiuse
 
 Gen_Dev_Files +=
 sources +=
