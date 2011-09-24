@@ -66,7 +66,9 @@ class NowPlayingClass : public QDeclarativeItem
     //shared
     Q_PROPERTY(QString synop READ getSynop WRITE setSynop NOTIFY synopChanged)
     Q_PROPERTY (QString director READ getDirector WRITE setDirector NOTIFY directorChanged)
-Q_PROPERTY(QString releasedate READ getRelease WRITE setRelease NOTIFY rlsChanged)
+    Q_PROPERTY(QString releasedate READ getRelease WRITE setRelease NOTIFY rlsChanged)
+
+    Q_PROPERTY (QString aspect READ getImageAspect WRITE setImageAspect NOTIFY imageAspectChanged )
 public:
     explicit NowPlayingClass(QDeclarativeItem *parent = 0);
 
@@ -110,6 +112,8 @@ public:
     QString genre;
     QStringList composer;
     QString releasedate;
+    QString aspect;
+
 
 signals:
     //general signals
@@ -152,10 +156,14 @@ signals:
     void programChanged();
     void channelChanged();
     void episodeChanged();
-
+    void imageAspectChanged();
 
 public slots:
     void resetData();
+
+
+    void setImageAspect(QString i_aspect) { aspect = i_aspect; emit imageAspectChanged();}
+    QString getImageAspect() {qDebug() << aspect; return aspect;}
 
     void setDuration(QString nDuration) {duration = nDuration; emit durationChanged();}
     QString getDuration () {return duration;}

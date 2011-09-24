@@ -29,16 +29,27 @@ Rectangle {
 
 
     //main 'now playing rect containing all the other items
+    Image {
+        id: panelimg
+        source: "../../../img/icons/displaypanel.png"
+        height: containerrect.height
+        width:containerrect.width
+        anchors.centerIn: containerrect
+    }
 
     Rectangle{
+        id:containerrect
         height:childrenRect.height + scaleY(5)
         width: childrenRect.width + scaleX(4)
         clip:true
         radius: 10
         border.color: style.highlight1
         border.width: 3
-        color: style.lighthighlight
+        color: "transparent"
         anchors.centerIn: parent
+
+
+
 
         Row{
             id:mainrow
@@ -65,7 +76,7 @@ Rectangle {
 
                     Rectangle {
                         id: gradientheader
-                        width: parent.width
+                        width:scaleX(35)
                         height: childrenRect.height
                         color:"transparent"
 
@@ -79,7 +90,7 @@ Rectangle {
 
                         Text {
                             id: headertext
-                            height:scaleY(5)
+                            height:scaleY(2)
                             text:qsTr("Speed: ") + dcenowplaying.qs_playbackSpeed
                             font.family: "Droid Sans"
                             font.pixelSize: scaleY(2)
@@ -88,7 +99,7 @@ Rectangle {
 
                         Text {
                             id: timecode
-                            height:scaleY(5)
+                            height:scaleY(2)
                             text: dcenowplaying.timecode + qsTr(" of ") + dcenowplaying.duration
                             font.family: "Droid Sans"
                             font.pixelSize: scaleY(1) *2.15
@@ -98,82 +109,120 @@ Rectangle {
                             color:"aliceblue"
                         }
                     }
-                    Image {
-                        id: nowplayingimage
-                        width: scaleX(35)
-                        height: scaleY(35)
-                        fillMode: Image.PreserveAspectFit
-                        source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
-                    }
 
-                    Text {
-                        id: generaltitle
-                        width: scaleX(35)
-                        text: qsTr("Ttitle :") + dcenowplaying.qs_mainTitle
-                        font.family: "Droid Sans"
-                        wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                        font.bold: true
-                        smooth: true
-                        font.pixelSize: scaleY(1.5)
-                    }
+                    Rectangle{
+                        id:imageholder
+                        height:childrenRect.height
+                        width:childrenRect.width
+                        color: "transparent"
+                        anchors.top:gradientheader.bottom
+                        BorderImage {
+                            id: borderimg
+                            horizontalTileMode: BorderImage.Repeat
+                            source: "../../../img/icons/drpshadow.png"
+                            anchors.fill: nowplayingimage
+                            anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
+                            border { left: 10; top: 10; right: 10; bottom: 10 }
+                            smooth: true
+                        }
+                        Image {
+                            id: nowplayingimage
+                            width: dcenowplaying.aspect=="wide"? scaleX(25) : scaleX(15)
+                            height:dcenowplaying.aspect=="wide"? scaleY(25) : scaleY(45)
+                            source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
 
-                    Text {
-                        id: programtext
-                        width: scaleX(35)
-                        text: qsTr("Program :") + dcenowplaying.tvProgram
-                        font.family: "Droid Sans"
-                        wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                        font.bold: true
-                        smooth: true
-                        font.pixelSize: scaleY(1.5)
-                    }
-
-                    Text {
-                        id: episode
-                        width: scaleX(35)
-                        wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                        text: qsTr("Episode: ") + dcenowplaying.episode
-                        font.family: "Droid Sans"
-                        font.bold: true
-                        smooth: true
-                        font.pixelSize: scaleY(1.5)
-                    }
-
-                    Text {
-                        id: genre
-                        width: scaleX(35)
-                        wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                        text: qsTr("Genre(s): ") + dcenowplaying.genre
-                        font.family: "Droid Sans"
-                        font.bold: true
-                        smooth: true
-                        font.pixelSize: scaleY(1.5)
-                        MouseArea{
-                            anchors.fill: genre
-                            hoverEnabled: true
-                            onEntered: { genre.elide = "ElideNone" ; }
-                            onExited: {genre.elide = "ElideRight"; }
                         }
                     }
 
+                    Rectangle{
+                        id:textrect
+                        height: childrenRect.height
+                        width: childrenRect.width
+                        color:"transparent"
+                        anchors.left: dcenowplaying.aspect == "wide"? imageholder.left : imageholder.right;
+                        anchors.verticalCenter:  dcenowplaying.aspect == "wide"? imageholder.bottom : imageholder.verticalCenter
 
-                    Text {
-                        id: starring
-                        width: scaleX(35)
-                        wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                        text: qsTr("Starring: ") + dcenowplaying.performerlist
-                        font.family: "Droid Sans"
-                        font.bold: true
-                        smooth: true
-                        font.pixelSize: scaleY(1.5)
-                        elide: "ElideRight"
+                        Column{
+                            spacing: scaleY(1.5)
 
-                        MouseArea{
-                            anchors.fill: starring
-                            hoverEnabled: true
-                            onEntered: { starring.elide = "ElideNone" ; }
-                            onExited: {starring.elide = "ElideRight"; }
+
+                            Text {
+                                id: generaltitle
+                                width: scaleX(35)
+                                text: qsTr("Ttitle :") + dcenowplaying.qs_mainTitle
+                                font.family: "Droid Sans"
+                                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                                font.bold: true
+                                smooth: true
+                                font.pixelSize: scaleY(1.5)
+                                visible:  dcenowplaying.qs_mainTitle =="" ? false: true
+                            }
+
+                            Text {
+                                id: programtext
+                                width: scaleX(35)
+                                text: qsTr("Program :") + dcenowplaying.tvProgram
+                                font.family: "Droid Sans"
+                                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                                font.bold: true
+                                smooth: true
+                                font.pixelSize: scaleY(1.5)
+                                visible:  dcenowplaying.tvProgram =="" ? false: true
+                            }
+
+                            Text {
+                                id: episode
+                                width: scaleX(35)
+                                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                                text: qsTr("Episode: ") + dcenowplaying.episode
+                                font.family: "Droid Sans"
+                                font.bold: true
+                                smooth: true
+                                font.pixelSize: scaleY(1.5)
+                                visible:  dcenowplaying.episode =="" ? false: true
+                            }
+
+                            Text {
+                                id: genre
+                                width: scaleX(35)
+                                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                                text: qsTr("Genre(s): ") + dcenowplaying.genre
+                                font.family: "Droid Sans"
+                                font.bold: true
+                                smooth: true
+                                font.pixelSize: scaleY(1.5)
+                                visible:  dcenowplaying.genre =="" ? false: true
+                                MouseArea{
+                                    anchors.fill: genre
+                                    hoverEnabled: true
+                                    onEntered: { genre.elide = "ElideNone" ; }
+                                    onExited: {genre.elide = "ElideRight"; }
+                                }
+                            }
+
+
+                            Text {
+                                id: starring
+                                width: scaleX(35)
+                                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                                text: qsTr("Starring: ") + dcenowplaying.performerlist
+                                font.family: "Droid Sans"
+                                font.bold: true
+                                smooth: true
+                                font.pixelSize: scaleY(1.5)
+                                elide: "ElideRight"
+                                visible:  dcenowplaying.performerlist =="" ? false: true
+
+                                MouseArea{
+                                    anchors.fill: starring
+                                    hoverEnabled: true
+                                    onEntered: { starring.elide = "ElideNone" ; }
+                                    onExited: {starring.elide = "ElideRight"; }
+                                }
+                            }
+
                         }
+
                     }
 
                 }

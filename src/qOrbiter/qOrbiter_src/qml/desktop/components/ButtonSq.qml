@@ -1,7 +1,10 @@
 import QtQuick 1.0
 
-Rectangle {
-    id:buttonBase
+Rectangle{
+
+    color: "transparent"
+    height: style.stdbuttonw
+    width: style.stdbuttonw
     property alias buttontext: buttonLabel.text
     property alias buttontextcolor: buttonLabel.color
     property alias buttontextfontsize: buttonLabel.font.pointSize
@@ -10,33 +13,47 @@ Rectangle {
     property alias buttontextzindex: buttonLabel.z
     property alias buttonsqradius:  buttonBase.radius
 
-    color:style.button_system_color
-    height: style.stdbuttonw
-    width: style.stdbuttonw
-    border.width: 2
-    border.color: style.highlight1
-    radius: 1
+    BorderImage {
+        id: name
+verticalTileMode: BorderImage.Round
+horizontalTileMode: BorderImage.Repeat
+        source: "../../../img/icons/drpshadow.png"
+        anchors.fill: buttonBase
+        anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
+        border { left: 10; top: 10; right: 10; bottom: 10 }
+        smooth: true
 
-    Text {
-        id: buttonLabel
-        x: 50
-        y: 50
-        width: -1
-        height: 0
-        text:"null ipsum delorium"
-        font.pixelSize: 14
-        verticalAlignment: Text.AlignVCenter
-        horizontalAlignment: Text.AlignHCenter
-        anchors.fill: parent
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.margins: 5
-        font.family: "Droid Sans"
-        wrapMode: "WrapAtWordBoundaryOrAnywhere"
-       // elide: "ElideRight"
-       color:"black"
-        z:1
-}
+    }
+
+    Rectangle {
+        id:buttonBase
+        color:style.button_system_color
+        height: parent.height
+        width: parent.width
+        border.width: 2
+        border.color: style.highlight1
+        radius: 1
+
+        Text {
+            id: buttonLabel
+            x: 50
+            y: 50
+            width: -1
+            height: 0
+            text:"null ipsum delorium"
+            font.pixelSize: 14
+            verticalAlignment: Text.AlignVCenter
+            horizontalAlignment: Text.AlignHCenter
+            anchors.fill: parent
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.margins: 5
+            font.family: "Droid Sans"
+            wrapMode: "WrapAtWordBoundaryOrAnywhere"
+            // elide: "ElideRight"
+            color:"black"
+            z:1
+        }
         MouseArea{
             anchors.fill: buttonLabel
             hoverEnabled: true
@@ -48,8 +65,9 @@ Rectangle {
 
             onExited: {
                 buttonBase.color = style.button_system_color
-                 buttonLabel.font.capitalization = Font.Normal
+                buttonLabel.font.capitalization = Font.Normal
                 buttonLabel.color = "black"
             }
+        }
     }
 }

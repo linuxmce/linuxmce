@@ -21,6 +21,20 @@ QImage AbstractImageProvider::floorplanProvider()
 
     }
 
+    //aspect checking
+    if(key.height() > key.width())
+    {
+       qDebug("image is poster aspect");
+        managerreference->nowPlayingButton->setImageAspect("poster");
+
+    }
+    else
+    {
+        qDebug("image is wide aspect");
+        managerreference->nowPlayingButton->setImageAspect("wide");
+
+    }
+
     return key;
 }
 
@@ -45,6 +59,19 @@ QImage AbstractImageProvider::updateObjectProvider()
     if (key.isNull())
     {
          key.load(":/icons/playlist.png");
+
+    }
+    //aspect checking
+    if(key.height() > key.width())
+    {
+       qDebug("image is poster aspect");
+        managerreference->nowPlayingButton->setImageAspect("poster");
+
+    }
+    else
+    {
+        qDebug("image is wide aspect");
+        managerreference->nowPlayingButton->setImageAspect("wide");
 
     }
 

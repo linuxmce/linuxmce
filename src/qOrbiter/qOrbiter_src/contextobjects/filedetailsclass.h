@@ -77,8 +77,6 @@ Q_PROPERTY (QString aspect READ getImageAspect WRITE setImageAspect NOTIFY image
     QUrl Season;
     QUrl imdb;
 
-
-
     bool showDetails;
     inline bool isVisible () { return showDetails; }
     inline void setVisible (bool state) { showDetails = state; emit VisibleChanged( showDetails);}
@@ -166,7 +164,6 @@ signals:
     void trackChanged();
     void performersChanged();
     void composersChanged();
-
 
     //video signals
     void directorChanged();
@@ -259,9 +256,7 @@ public slots:
     void setGenre (QString inc_genre) {genre.append(inc_genre+" | ");  emit genreChanged();}
     QString getGenre() { return genre.left(genre.indexOf(" | "));}
 
-
     void setFileMediaType();
-
 
 };
 

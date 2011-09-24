@@ -7,7 +7,7 @@ Rectangle {
     color: style.highlight2
     border.color: style.highlight1
     border.width: 2
-    clip:true
+    clip:false
 
 
     Component.onCompleted: nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
@@ -19,6 +19,16 @@ Rectangle {
         }
     }
 
+    BorderImage {
+        id: borderimg
+        verticalTileMode: BorderImage.Round
+        horizontalTileMode: BorderImage.Repeat
+        source: "../../../img/icons/drpshadow.png"
+        anchors.fill: nonepgplaylist
+        anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
+        border { left: 10; top: 10; right: 10; bottom: 10 }
+        smooth: true
+    }
 
     ListView{
         id:nonepgplaylistview

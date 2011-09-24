@@ -6,18 +6,19 @@ import "../components"
         height: style.orbiterH
         width: style.orbiterW
        // color: style.highlight2
-        gradient: Gradient {
-            GradientStop {
-                position: 0.00;
-                color: style.highlight2;
-            }
-
-            GradientStop {
-                position: 1.00;
-                color: style.maincolor;
-            }
+        Image {
+            id: bgimage
+            source: "../../../img/icons/orbiterbg.png"
         }
-
+        BorderImage {
+            id: name
+horizontalTileMode: BorderImage.Repeat
+source: "../../../img/icons/drpshadow.png"
+                    anchors.fill: regenrequestcontainer
+                   anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
+                   border { left: 10; top: 10; right: 10; bottom: 10 }
+                   smooth: true
+        }
 
         Rectangle{
             id:regenrequestcontainer
@@ -27,6 +28,7 @@ import "../components"
             color: style.darkhighlight
             border.color: style.highlight1
             border.width: 2
+
             radius: 10
 
 
@@ -38,7 +40,7 @@ import "../components"
                anchors.centerIn: parent
 
                 Text {
-                    id: name
+                    id: label
                     text: qsTr("You have recently changed scenarios, floorplans, or other settings. I need to regenerate the graphical screens so you can see the new buttons. This will take from 2 - 20 minutes")
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     width: parent.width * .85
