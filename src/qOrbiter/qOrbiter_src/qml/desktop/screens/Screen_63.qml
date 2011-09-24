@@ -22,16 +22,9 @@ Rectangle {
 
     height: style.orbiterH
     width: style.orbiterW
-    gradient: Gradient {
-        GradientStop {
-            position: 0.00;
-            color: style.highlight2;
-        }
-
-        GradientStop {
-            position: 1.00;
-            color: style.maincolor;
-        }
+    Image {
+        id: orbiterbg
+        source: "../../../img/icons/orbiterbg.png"
     }
     Component.onCompleted:setNowPlayingTv()
 
@@ -43,6 +36,14 @@ Rectangle {
         border.color: style.highlight1
         border.width: 2
         anchors.centerIn: parent
+        Image {
+            id: panelimage
+
+source: "../../../img/icons/displaypanel.png"
+height: parent.height
+width:parent.width
+
+        }
 
 
         //main 'now playing rect containing all the other items
