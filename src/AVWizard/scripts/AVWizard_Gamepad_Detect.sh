@@ -19,7 +19,7 @@ InstallPackage()
     fi
 }
 
-if [[ -f /dev/input/js0 ]] ;
+if [[ -c /dev/input/js0 ]] ;
 then
     # Joystick(s) detected.
     InstallPackage
