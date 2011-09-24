@@ -78,6 +78,8 @@ class qorbiterManager : public QWidget
     Q_PROPERTY (QString q_mediaType READ getSorting NOTIFY gridTypeChanged)
     Q_PROPERTY (QString sPK_User READ getCurrentUser WRITE setCurrentUser NOTIFY userChanged)
     Q_PROPERTY (QString dceResponse READ getDceResponse WRITE setDceResponse NOTIFY dceResponseChanged)
+    Q_PROPERTY (int aspect READ getImageAspect WRITE setImageAspect NOTIFY imageAspectChanged )
+
 public:
     qorbiterManager(int deviceno, QString routerip, QWidget *parent = 0);  //constructor
 
@@ -92,6 +94,7 @@ public:
     QString skinsPath;
     QDir skinsDir;
     QString m_SkinsDirectoryPath;
+    bool aspect; //-- true poster || false landscape
 
     //------------------------------------------------------playlist classes
 
@@ -304,8 +307,7 @@ signals:
     void userChanged();
     void requestMoreGridData();
     void dceResponseChanged();
-
-
+    void imageAspectChanged();
 
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
 
@@ -313,6 +315,9 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     bool readLocalConfig();
     void setDceResponse(QString response) {dceResponse = response; emit dceResponseChanged();}
     QString getDceResponse () {return dceResponse;}
+
+    void setImageAspect(bool i_aspect) { aspect = i_aspect; emit imageAspectChanged();}
+    bool getImageAspect() {return aspect;}
 
     //security related
     Q_INVOKABLE void requestSecurityPic(int i_pk_camera_device, int h, int w);

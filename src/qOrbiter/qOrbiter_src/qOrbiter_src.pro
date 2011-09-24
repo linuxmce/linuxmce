@@ -175,7 +175,8 @@ SOURCES += main.cpp \
     datamodels/floorplanmodel.cpp \
     datamodels/floorplanitem.cpp \
     imageProviders/abstractimageprovider.cpp \
-    datamodels/DataModelItems/sleepingalarm.cpp
+    datamodels/DataModelItems/sleepingalarm.cpp \
+    contextobjects/filedetailsclass.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -314,6 +315,7 @@ OTHER_FILES= \
 
 RESOURCES += \
     skinData.qrc
+
 
 
 
