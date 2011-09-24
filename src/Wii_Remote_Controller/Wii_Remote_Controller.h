@@ -1,0 +1,124 @@
+/*
+     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
+
+     www.plutohome.com
+
+     Phone: +1 (877) 758-8648
+ 
+
+     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+     of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+     See the GNU General Public License for more details.
+
+*/
+//<-dceag-d-b->
+#ifndef Wii_Remote_Controller_h
+#define Wii_Remote_Controller_h
+
+//	DCE Implemenation for #1954 Wii Remote Controller
+
+#include "Gen_Devices/Wii_Remote_ControllerBase.h"
+//<-dceag-d-e->
+
+//<-dceag-decl-b->
+namespace DCE
+{
+	class Wii_Remote_Controller : public Wii_Remote_Controller_Command
+	{
+//<-dceag-decl-e->
+		// Private member variables
+
+		// Private methods
+public:
+		// Public member variables
+
+//<-dceag-const-b->
+public:
+		// Constructors/Destructor
+		Wii_Remote_Controller(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
+		virtual ~Wii_Remote_Controller();
+		virtual bool GetConfig();
+		virtual bool Register();
+		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
+		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
+//<-dceag-const-e->
+
+//<-dceag-const2-b->
+		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
+		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
+		Wii_Remote_Controller(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
+//<-dceag-const2-e->
+
+//<-dceag-h-b->
+	/*
+				AUTO-GENERATED SECTION
+				Do not change the declarations
+	*/
+
+	/*
+			*****DATA***** accessors inherited from base class
+	bool DATA_Get_Ignore();
+	bool DATA_Get_Only_One_Per_PC();
+	bool DATA_Get_Autoassign_to_parents_room();
+	bool DATA_Get_PNP_Create_Without_Prompting();
+	bool DATA_Get_Immediate_Reload_Isnt_Necessar();
+
+			*****EVENT***** accessors inherited from base class
+	void EVENT_Device_Detected(string sMac_Address,string sText,string sIP_Address,int iPK_DeviceTemplate,string sVendorModelID,int iPK_CommMethod,int iPK_PnpProtocol,string sPNP_Serial_Number,string sDeviceData,string sCategory,string sSignature);
+	void EVENT_Device_Removed(string sMac_Address,string sText,int iPK_Device,string sIP_Address,int iPK_DeviceTemplate,string sVendorModelID,int iPK_CommMethod,int iPK_PnpProtocol,string sPNP_Serial_Number,string sDeviceData,string sCategory);
+
+			*****COMMANDS***** we need to implement
+	*/
+
+
+	/** @brief COMMAND: #191 - Send Code */
+	/** The I/R code -- usually in Pronto format */
+		/** @param #9 Text */
+			/** The I/R code -- usually in Pronto format */
+
+	virtual void CMD_Send_Code(string sText) { string sCMD_Result; CMD_Send_Code(sText.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Send_Code(string sText,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #245 - Learn IR */
+	/** The next IR code received is to be learned in Pronto format and fire a Store IR Code command to the I/R Plugin when done */
+		/** @param #2 PK_Device */
+			/** You can specify the device to learn for here, or you can send the command to the device itself and leave this blank */
+		/** @param #8 On/Off */
+			/** Turn IR Learning mode on or off
+0, 1 */
+		/** @param #25 PK_Text */
+			/** If specified, the text object  which should contain the result of the learn command */
+		/** @param #154 PK_Command */
+			/** Command ID for which the learning is done for */
+
+	virtual void CMD_Learn_IR(int iPK_Device,string sOnOff,int iPK_Text,int iPK_Command) { string sCMD_Result; CMD_Learn_IR(iPK_Device,sOnOff.c_str(),iPK_Text,iPK_Command,sCMD_Result,NULL);};
+	virtual void CMD_Learn_IR(int iPK_Device,string sOnOff,int iPK_Text,int iPK_Command,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #687 - Set Screen Type */
+	/** Sent by Orbiter when the screen changes to tells the i/r receiver what type of screen is displayed so it can adjust mappings if necessary. */
+		/** @param #48 Value */
+			/** a character: M=Main Menu, m=other menu, R=Pluto Remote, r=Non-pluto remote, N=navigable OSD on media dev, f=full screen media app, F=File Listing, c=computing list, C=Computing full screen */
+
+	virtual void CMD_Set_Screen_Type(int iValue) { string sCMD_Result; CMD_Set_Screen_Type(iValue,sCMD_Result,NULL);};
+	virtual void CMD_Set_Screen_Type(int iValue,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #1090 - Connect to Device */
+	/** Called to pair WiiUse to the device. */
+		/** @param #47 Mac address */
+			/** The MAC address of the Bluetooth Device to connect. */
+
+	virtual void CMD_Connect_to_Device(string sMac_address) { string sCMD_Result; CMD_Connect_to_Device(sMac_address.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Connect_to_Device(string sMac_address,string &sCMD_Result,Message *pMessage);
+
+//<-dceag-h-e->
+	};
+
+//<-dceag-end-b->
+}
+#endif
+//<-dceag-end-e->
