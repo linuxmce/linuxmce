@@ -22,7 +22,7 @@ Rectangle {
         repeat: false
         interval: 250
         triggeredOnStart: false
-        onTriggered: image1.source = "image://filedetailsprovider/"+securityvideo.timestamp
+        onTriggered: image1.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
         running: true
     }
 
@@ -51,7 +51,7 @@ Rectangle {
         width: scaleX(40)
         height: scaleY(40)
         fillMode: Image.PreserveAspectFit
-        source: "image://filedetailsprovider/"+filedetailsclass.screenshot
+        source: "image://listprovider/filedetailsprovider/"+filedetailsclass.screenshot
         asynchronous: true
     }
 
