@@ -130,7 +130,6 @@ Rectangle {
                             width: dcenowplaying.aspect=="wide"? scaleX(25) : scaleX(15)
                             height:dcenowplaying.aspect=="wide"? scaleY(25) : scaleY(45)
                             source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
-
                         }
                     }
 
@@ -140,11 +139,10 @@ Rectangle {
                         width: childrenRect.width
                         color:"transparent"
                         anchors.left: dcenowplaying.aspect == "wide"? imageholder.left : imageholder.right;
-                        anchors.verticalCenter:  dcenowplaying.aspect == "wide"? imageholder.bottom : imageholder.verticalCenter
-
+                        anchors.top:  dcenowplaying.aspect == "wide"? imageholder.bottom: imageholder.top
+                        anchors.bottomMargin: dcenowplaying.aspect == "wide"? 20: 20
                         Column{
                             spacing: scaleY(1.5)
-
 
                             Text {
                                 id: generaltitle
@@ -287,7 +285,6 @@ Rectangle {
                 }
             }
         }
-
     }
 }
 
