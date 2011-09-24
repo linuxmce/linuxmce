@@ -78,7 +78,7 @@ class qorbiterManager : public QWidget
     Q_PROPERTY (QString q_mediaType READ getSorting NOTIFY gridTypeChanged)
     Q_PROPERTY (QString sPK_User READ getCurrentUser WRITE setCurrentUser NOTIFY userChanged)
     Q_PROPERTY (QString dceResponse READ getDceResponse WRITE setDceResponse NOTIFY dceResponseChanged)
-    Q_PROPERTY (int aspect READ getImageAspect WRITE setImageAspect NOTIFY imageAspectChanged )
+
 
 public:
     qorbiterManager(int deviceno, QString routerip, QWidget *parent = 0);  //constructor
@@ -94,7 +94,7 @@ public:
     QString skinsPath;
     QDir skinsDir;
     QString m_SkinsDirectoryPath;
-    bool aspect; //-- true poster || false landscape
+    QString aspect; //-- true poster || false landscape
 
     //------------------------------------------------------playlist classes
 
@@ -259,10 +259,6 @@ Param 10 - pk_attribute
 
     string sEntertainArea;          //current entertain area int
     int iPK_User;                    //current user
-
-
-
-
     int iFK_Room;                    //current room
     int iea_area;
     QString sPK_Room;
@@ -272,17 +268,12 @@ Param 10 - pk_attribute
     QMap <int, ClimateScenarioModel*> roomClimateScenarios;
     QMap <int, TelecomScenarioModel*> roomTelecomScenarios;
     QMap <int, SecurityScenarioModel*> roomSecurityScenarios;
-
-
     QString s_onOFF;
-
 
     QStringList *sRoomList;          //Linked list of rooms in house
     QStringList *sUserList;          //linked list of users in house
     QStringList *sCurr_Room_Devices; //linked list of current devices (experimental)
-
     QString currentScreen;
-
     //plugin variables
     long iOrbiterPluginID;           //the orbiter plugin id for future use
     long iPK_Device_DatagridPlugIn;
@@ -316,8 +307,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void setDceResponse(QString response) {dceResponse = response; emit dceResponseChanged();}
     QString getDceResponse () {return dceResponse;}
 
-    void setImageAspect(bool i_aspect) { aspect = i_aspect; emit imageAspectChanged();}
-    bool getImageAspect() {return aspect;}
+
 
     //security related
     Q_INVOKABLE void requestSecurityPic(int i_pk_camera_device, int h, int w);

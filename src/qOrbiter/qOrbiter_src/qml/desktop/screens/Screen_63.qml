@@ -31,17 +31,17 @@ Rectangle {
     Rectangle{
         height: scaleY(95)
         width: scaleX(95)
-        color: style.darkhighlight
+        color: "transparent"
         radius: 10
         border.color: style.highlight1
         border.width: 2
         anchors.centerIn: parent
         Image {
             id: panelimage
-
-source: "../../../img/icons/displaypanel.png"
-height: parent.height
-width:parent.width
+            source: "../../../img/icons/displaypanel.png"
+            height: parent.height
+            width:parent.width
+            opacity: .75
 
         }
 

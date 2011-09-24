@@ -17,6 +17,8 @@ Rectangle {
 
 
 
+
+
     Timer{
         id:singleshot
         repeat: false
@@ -42,6 +44,16 @@ Rectangle {
             font.bold: true
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         }
+
+        Text {
+            id: aspecttext
+            anchors.bottom: parent.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: filedetailsclass.aspect
+            font.pixelSize: 14
+            font.bold: true
+            color: "red"
+        }
     }
 
     Image {
@@ -52,7 +64,7 @@ Rectangle {
         height: scaleY(40)
         fillMode: Image.PreserveAspectFit
         source: "image://listprovider/filedetailsprovider/"+filedetailsclass.screenshot
-        asynchronous: true
+        asynchronous: true        
     }
 
     Rectangle {

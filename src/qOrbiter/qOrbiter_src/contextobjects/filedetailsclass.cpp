@@ -4,6 +4,7 @@
 FileDetailsClass::FileDetailsClass(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)
 {
+     aspect = "TEST";
 }
 
 void FileDetailsClass::setFileMediaType()

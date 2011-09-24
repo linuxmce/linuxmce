@@ -47,11 +47,13 @@ QImage key;
         //aspect checking
         if(temp.height() > temp.width())
         {
-            //emit this->widescreenAspect();
+           // qDebug("image is poster aspect");
+            managerreference->filedetailsclass->setImageAspect("poster");
         }
         else
         {
-            //emit this->posterAspect();
+          //  qDebug("image is wide aspect");
+            managerreference->filedetailsclass->setImageAspect("wide");
         }
 
         if (requestedSize.isValid()) {
