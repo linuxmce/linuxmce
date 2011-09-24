@@ -13,12 +13,12 @@ Rectangle {
         triggeredOnStart: false
         running: true
 
-        onTriggered: nowplayingimage.source = "image://updateobject/"+securityvideo.timestamp
+        onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
 
     Connections{
         target:dcenowplaying
-        onPlayListPositionChanged: nowplayingimage.source = "image://updateobject/"+securityvideo.timestamp
+        onPlayListPositionChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
 
     height: style.orbiterH
@@ -121,7 +121,7 @@ Rectangle{
                     width: scaleX(20)
                     height: scaleY(45)
                     fillMode: Image.PreserveAspectFit
-                    source: "image://updateobject/"+dcenowplaying.m_iplaylistPosition
+                    source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
                 }
                 Rectangle{
                     id:trackdata
