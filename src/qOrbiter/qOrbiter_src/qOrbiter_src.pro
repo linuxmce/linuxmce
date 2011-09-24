@@ -163,15 +163,12 @@ SOURCES += main.cpp \
     datamodels/DataModelItems/mediatypeitem.cpp \
     datamodels/filedetailsmodel.cpp \
     datamodels/DataModelItems/filedetailsitem.cpp \
-    contextobjects/filedetailsclass.cpp \
-    imageProviders/filedetailsimageprovider.cpp \
     contextobjects/nowplayingclass.cpp \
     datamodels/DatagridClasses/datagriditemmodelclass.cpp \
     contextobjects/screenparamsclass.cpp \
     contextobjects/playlistclass.cpp \
     contextobjects/playlistitemclass.cpp \
     datamodels/DatagridClasses/datagriditem.cpp \
-    imageProviders/nowplayingimageprovider.cpp \
     contextobjects/securityvideoclass.cpp \
     contextobjects/epgchannellist.cpp \
     playlists/epgitemclass.cpp \
@@ -226,14 +223,12 @@ HEADERS += \
     datamodels/DataModelItems/filedetailsitem.h \
     ../../PlutoUtils/ThreadedClass.h \
     contextobjects/filedetailsclass.h \
-    imageProviders/filedetailsimageprovider.h \
     contextobjects/nowplayingclass.h \
     datamodels/DatagridClasses/datagriditemmodelclass.h \
     contextobjects/screenparamsclass.h \
     contextobjects/playlistclass.h \
     contextobjects/playlistitemclass.h \
     datamodels/DatagridClasses/datagriditem.h \
-    imageProviders/nowplayingimageprovider.h \
     contextobjects/securityvideoclass.h \
     contextobjects/epgchannellist.h \
     playlists/epgitemclass.h \
@@ -319,6 +314,11 @@ OTHER_FILES= \
 
 RESOURCES += \
     skinData.qrc
+
+
+
+
+
 
 
 

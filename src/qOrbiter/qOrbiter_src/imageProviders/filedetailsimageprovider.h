@@ -1,13 +1,12 @@
 #ifndef FILEDETAILSIMAGEPROVIDER_H
 #define FILEDETAILSIMAGEPROVIDER_H
 
-#include <QObject>
 #include <QDeclarativeImageProvider>
 #include <QDebug>
 #include <QVariant>
 #include <contextobjects/filedetailsclass.h>
 
-class FileDetailsImageProvider: public QObject , public QDeclarativeImageProvider
+class FileDetailsImageProvider: public QDeclarativeImageProvider
 {
 public:
     FileDetailsImageProvider(FileDetailsClass *manager);

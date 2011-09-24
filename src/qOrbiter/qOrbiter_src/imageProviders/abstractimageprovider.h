@@ -35,6 +35,24 @@ QImage key;
         {
             temp = securityProvider();
         }
+        else if(id.contains("updateobject"))
+        {
+            temp = updateObjectProvider();
+        }
+        else if (id.contains("filedetailsprovider"))
+        {
+            temp = fileDetails();
+        }
+
+        //aspect checking
+        if(temp.height() > temp.width())
+        {
+            //emit this->widescreenAspect();
+        }
+        else
+        {
+            //emit this->posterAspect();
+        }
 
         if (requestedSize.isValid()) {
             result = temp.scaled(requestedSize);
@@ -47,6 +65,7 @@ QImage key;
 
 signals:
 
+
 public slots:
 
 
@@ -54,6 +73,8 @@ private:
     qorbiterManager * managerreference;
     QImage floorplanProvider();
     QImage securityProvider();
+    QImage updateObjectProvider();
+    QImage fileDetails();
 
 };
 

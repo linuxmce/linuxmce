@@ -38,3 +38,29 @@ QImage AbstractImageProvider::securityProvider()
 
 }
 
+QImage AbstractImageProvider::updateObjectProvider()
+{
+   key = managerreference->updatedObjectImage;
+
+    if (key.isNull())
+    {
+         key.load(":/icons/playlist.png");
+
+    }
+
+    return key;
+}
+
+QImage AbstractImageProvider::fileDetails()
+{
+    key= managerreference->filedetailsclass->getScreenshotimage();
+
+    if (key.isNull())
+    {
+         key.load(":/icons/playlist.png");
+
+    }
+
+   return key;
+}
+

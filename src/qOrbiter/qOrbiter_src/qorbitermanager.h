@@ -52,8 +52,8 @@
 #include <qOrbiter/qOrbiter.h>
 class EPGChannelList;
 class basicImageProvider;
-class FileDetailsImageProvider;
-class UpdateObjectImageProvider;
+
+
 class ListModel;
 class GridIndexProvider;
 class LightingScenarioModel;
@@ -125,8 +125,8 @@ public:
 
     basicImageProvider *basicProvider;
     GridIndexProvider *advancedProvider;
-    FileDetailsImageProvider *contextImageProvider;
-    UpdateObjectImageProvider *nowPlayingProvider;
+
+
     AbstractImageProvider *modelimageprovider;
     QString *gridReqType;
 

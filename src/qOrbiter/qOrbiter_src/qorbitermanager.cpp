@@ -7,7 +7,7 @@
 #include <QDeclarativeEngine>
 #include <QApplication>
 #include <imageProviders/filedetailsimageprovider.h>
-#include <imageProviders/nowplayingimageprovider.h>
+
 #include <imageProviders/abstractimageprovider.h>
 #include <contextobjects/epgchannellist.h>
 
@@ -222,8 +222,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         //file details object and imageprovider setup
         filedetailsclass = new FileDetailsClass();
         qorbiterUIwin->rootContext()->setContextProperty("filedetailsclass" ,filedetailsclass);
-        contextImageProvider = new FileDetailsImageProvider(filedetailsclass);
-        qorbiterUIwin->engine()->addImageProvider("filedetailsprovider", contextImageProvider);
+
         // connect(filedetailsclass, SIGNAL(FileChanged(QString)), this, SLOT(showFileInfo(QString)));
 
         //non functioning screen saver module
@@ -235,8 +234,6 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
 */
         nowPlayingButton = new NowPlayingClass();
         qorbiterUIwin->rootContext()->setContextProperty("dcenowplaying" , nowPlayingButton);
-        nowPlayingProvider = new UpdateObjectImageProvider(this);
-        qorbiterUIwin->engine()->addImageProvider("updateobject", nowPlayingProvider );
 
 
 
