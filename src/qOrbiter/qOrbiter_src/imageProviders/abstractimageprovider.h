@@ -42,19 +42,20 @@ QImage key;
         else if (id.contains("filedetailsprovider"))
         {
             temp = fileDetails();
+            if(temp.height() > temp.width())
+            {
+
+                managerreference->filedetailsclass->setImageAspect("poster");
+            }
+            else
+            {
+
+                managerreference->filedetailsclass->setImageAspect("wide");
+            }
         }
 
         //aspect checking
-        if(temp.height() > temp.width())
-        {
-           // qDebug("image is poster aspect");
-            managerreference->filedetailsclass->setImageAspect("poster");
-        }
-        else
-        {
-          //  qDebug("image is wide aspect");
-            managerreference->filedetailsclass->setImageAspect("wide");
-        }
+
 
         if (requestedSize.isValid()) {
             result = temp.scaled(requestedSize);

@@ -60,6 +60,9 @@ QtObject{
     property int widebuttonh: scaleY(10)
     property int mediabuttonH: scaleY(9)
     property int mediabuttonW: scaleX(5)
+    property int avoptionbuttonh: scaleY(10)
+    property int avoptionbuttonw: scaleX(6)
+
 
 
 

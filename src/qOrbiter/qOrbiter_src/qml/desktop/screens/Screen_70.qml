@@ -5,6 +5,17 @@ Rectangle {
 
     // property alias synText:
     id: storedvideoremote
+    height: style.orbiterH
+    width: style.orbiterW
+    radius: 0
+    opacity: 1
+    color: style.darkhighlight
+
+    Image {
+        id: bgimage
+        source: "../../../img/icons/orbiterbg.png"
+    }
+
 
     Timer{
         id:singleshot
@@ -20,11 +31,6 @@ Rectangle {
         onPlayListPositionChanged: { nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;}
     }
 
-    height: style.orbiterH
-    width: style.orbiterW
-    radius: 0
-    opacity: 1
-    color: style.darkhighlight
     Component.onCompleted:setNowPlayingData()
 
 
@@ -47,9 +53,6 @@ Rectangle {
         border.width: 3
         color: "transparent"
         anchors.centerIn: parent
-
-
-
 
         Row{
             id:mainrow
@@ -74,9 +77,10 @@ Rectangle {
                     height: scaleY(50)
                     width: childrenRect.width
 
+
                     Rectangle {
                         id: gradientheader
-                        width:scaleX(35)
+                        width:metadata.width
                         height: childrenRect.height
                         color:"transparent"
 
@@ -116,6 +120,8 @@ Rectangle {
                         width:childrenRect.width
                         color: "transparent"
                         anchors.top:gradientheader.bottom
+                        anchors.topMargin: scaleY(.5)
+
                         BorderImage {
                             id: borderimg
                             horizontalTileMode: BorderImage.Repeat
@@ -127,38 +133,50 @@ Rectangle {
                         }
                         Image {
                             id: nowplayingimage
-                            width: dcenowplaying.aspect=="wide"? scaleX(25) : scaleX(15)
-                            height:dcenowplaying.aspect=="wide"? scaleY(25) : scaleY(45)
+                            width: dcenowplaying.aspect=="wide"? scaleX(25) : scaleX(20)
+                            height:dcenowplaying.aspect=="wide"? scaleY(25) : scaleY(50)
                             source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
                         }
+                    }
+
+
+                    BorderImage {
+                        id: metaborder
+                        horizontalTileMode: BorderImage.Repeat
+                        source: "../../../img/icons/drpshadow.png"
+                        anchors.fill: textrect
+                        anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
+                        border { left: 10; top: 10; right: 10; bottom: 10 }
+                        smooth: true
                     }
 
                     Rectangle{
                         id:textrect
                         height: childrenRect.height
-                        width: childrenRect.width
-                        color:"transparent"
+                        width: dcenowplaying.aspect=="wide"?  childrenRect.width : scaleX(20)
+                        color:style.highlight1
                         anchors.left: dcenowplaying.aspect == "wide"? imageholder.left : imageholder.right;
                         anchors.top:  dcenowplaying.aspect == "wide"? imageholder.bottom: imageholder.top
-                        anchors.bottomMargin: dcenowplaying.aspect == "wide"? 20: 20
+                        anchors.bottomMargin: dcenowplaying.aspect == "wide"? 20 : 20
                         Column{
                             spacing: scaleY(1.5)
+                            width: parent.width
 
                             Text {
                                 id: generaltitle
-                                width: scaleX(35)
-                                text: qsTr("Ttitle :") + dcenowplaying.qs_mainTitle
+                                width: parent.width
+                                text: qsTr("Title: ") + dcenowplaying.qs_mainTitle
                                 font.family: "Droid Sans"
                                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                                 font.bold: true
                                 smooth: true
-                                font.pixelSize: scaleY(1.5)
+                                font.pixelSize: scaleY(1.75)
                                 visible:  dcenowplaying.qs_mainTitle =="" ? false: true
                             }
 
                             Text {
                                 id: programtext
-                                width: scaleX(35)
+                                width: parent.width
                                 text: qsTr("Program :") + dcenowplaying.tvProgram
                                 font.family: "Droid Sans"
                                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -170,7 +188,7 @@ Rectangle {
 
                             Text {
                                 id: episode
-                                width: scaleX(35)
+                                width: parent.width
                                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                                 text: qsTr("Episode: ") + dcenowplaying.episode
                                 font.family: "Droid Sans"
@@ -182,7 +200,7 @@ Rectangle {
 
                             Text {
                                 id: genre
-                                width: scaleX(35)
+                                width: parent.width
                                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                                 text: qsTr("Genre(s): ") + dcenowplaying.genre
                                 font.family: "Droid Sans"
@@ -201,7 +219,7 @@ Rectangle {
 
                             Text {
                                 id: starring
-                                width: scaleX(35)
+                                width: parent.width
                                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                                 text: qsTr("Starring: ") + dcenowplaying.performerlist
                                 font.family: "Droid Sans"
@@ -210,6 +228,26 @@ Rectangle {
                                 font.pixelSize: scaleY(1.5)
                                 elide: "ElideRight"
                                 visible:  dcenowplaying.performerlist =="" ? false: true
+
+                                MouseArea{
+                                    anchors.fill: starring
+                                    hoverEnabled: true
+                                    onEntered: { starring.elide = "ElideNone" ; }
+                                    onExited: {starring.elide = "ElideRight"; }
+                                }
+                            }
+
+                            Text {
+                                id: synopsis
+                                width: parent.width
+                                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                                text: qsTr("Synopsis: ") + dcenowplaying.synop
+                                font.family: "Droid Sans"
+                                font.bold: true
+                                smooth: true
+                                font.pixelSize: scaleY(1.5)
+                                elide: "ElideRight"
+                                visible:  dcenowplaying.synop =="" ? false: true
 
                                 MouseArea{
                                     anchors.fill: starring
@@ -239,6 +277,7 @@ Rectangle {
             Column{
                 height: childrenRect.height
                 width: childrenRect.width
+                spacing: scaleY(1.5)
 
                 VideoControls {
                     id: videocontrols1
@@ -248,7 +287,7 @@ Rectangle {
                     height: childrenRect.height
                     width: childrenRect.width
                     spacing: scaleX(1)
-                    ButtonSq{
+                    AvOptionButton{
                         buttontext: qsTr("Zoom & Aspect")
                         MouseArea{
                             anchors.fill: parent
@@ -257,10 +296,10 @@ Rectangle {
                             }
                         }
                     }
-                    ButtonSq{
+                    AvOptionButton{
                         buttontext: qsTr("Bookmarks")
                     }
-                    ButtonSq{
+                    AvOptionButton{
                         buttontext: qsTr("Resend AV Codes")
                         MouseArea{
                             anchors.fill: parent
@@ -269,16 +308,16 @@ Rectangle {
                             }
                         }
                     }
-                    ButtonSq{
+                    AvOptionButton{
                         buttontext: qsTr("Manage Playlist")
                     }
-                    ButtonSq{
+                    AvOptionButton{
                         buttontext: qsTr("Thumbnail")
                     }
-                    ButtonSq{
+                    AvOptionButton{
                         buttontext: qsTr("Jog")
                     }
-                    ButtonSq{
+                    AvOptionButton{
                         buttontext: qsTr("Power")
                     }
                     HomeButton{}

@@ -458,12 +458,8 @@ Rectangle {
                         buttontext: "Back"
                         buttontextbold: true
                         buttontextfontsize: 12
-                        buttonsqradius: 100
-                        Image {
+                        buttonsqradius: 10
 
-                            source: "../../../img/icons/rndbuttonbase.png"
-                            anchors.fill: parent
-                        }
                         MouseArea{
                             anchors.fill: parent
                             onClicked: {
@@ -513,18 +509,11 @@ Rectangle {
 
 
 
-                    ButtonSq{
+                    AvOptionButton{
                          height: scaleY(9)
                        width: scaleX(5)
                         buttontext: "go"
-                        buttontextbold: true
-                        buttontextfontsize: 12
-                        buttonsqradius: 100
-                        Image {
 
-                            source: "../../../img/icons/rndbuttonbase.png"
-                            anchors.fill: parent
-                        }
                         MouseArea{
                             anchors.fill: parent
                             onClicked:{

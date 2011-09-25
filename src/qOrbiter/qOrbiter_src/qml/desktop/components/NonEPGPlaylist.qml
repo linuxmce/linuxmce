@@ -71,13 +71,13 @@ Rectangle {
             }
 
             Text {
-                text: id
+                text:  index == dcenowplaying.m_iplaylistPosition ? "Now Playing - " + id : id
                 font.family: "DroidSans"
                 color: "aliceblue"
                 width: parent.width
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                 font.pixelSize: scaleY(2.15)
-                font.bold: true
+                //font.bold: true
 
             }
 

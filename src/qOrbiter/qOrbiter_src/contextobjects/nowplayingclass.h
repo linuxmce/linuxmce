@@ -163,7 +163,7 @@ public slots:
 
 
     void setImageAspect(QString i_aspect) { aspect = i_aspect; emit imageAspectChanged();}
-    QString getImageAspect() {qDebug() << aspect; return aspect;}
+    QString getImageAspect() { return aspect;}
 
     void setDuration(QString nDuration) {duration = nDuration; emit durationChanged();}
     QString getDuration () {return duration;}

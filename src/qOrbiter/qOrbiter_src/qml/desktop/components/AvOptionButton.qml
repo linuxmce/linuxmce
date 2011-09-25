@@ -3,8 +3,8 @@ import QtQuick 1.0
 Rectangle{
 
     color: "transparent"
-    height: style.stdbuttonw
-    width: style.stdbuttonw
+    height: style.avoptionbuttonh
+    width: style.avoptionbuttonw
     property alias buttontext: buttonLabel.text
     property alias buttontextcolor: buttonLabel.color
     property alias buttontextfontsize: buttonLabel.font.pointSize
@@ -16,6 +16,7 @@ Rectangle{
     BorderImage {
         id: name
 verticalTileMode: BorderImage.Round
+horizontalTileMode: BorderImage.Repeat
         source: "../../../img/icons/drpshadow.png"
         anchors.fill: buttonBase
         anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
@@ -31,16 +32,14 @@ verticalTileMode: BorderImage.Round
         width: parent.width
         border.width: 2
         border.color: style.highlight1
-        radius: 5
+        radius: 2.5
 
         Text {
             id: buttonLabel
-            x: 50
-            y: 50
             width: -1
             height: 0
             text:"null ipsum delorium"
-            font.pixelSize: 14
+            font.pixelSize: scaleY(1.5)
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
             anchors.fill: parent
@@ -51,6 +50,7 @@ verticalTileMode: BorderImage.Round
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             // elide: "ElideRight"
             color:"black"
+
             z:1
         }
         MouseArea{

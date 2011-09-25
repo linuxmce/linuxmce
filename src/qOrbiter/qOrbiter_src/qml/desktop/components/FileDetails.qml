@@ -3,7 +3,7 @@ import QtQuick 1.0
 
 Rectangle {
     id: filedetailrect
-    width: scaleX(50)
+    width: scaleX(65)
     height: scaleY(80)
     anchors.top: parent.top
     anchors.topMargin: scaleY(5)
@@ -15,16 +15,12 @@ Rectangle {
     border.width: 3
 
 
-
-
-
-
     Timer{
         id:singleshot
         repeat: false
         interval: 250
         triggeredOnStart: false
-        onTriggered: image1.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
+        onTriggered: filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
         running: true
     }
 
@@ -49,27 +45,41 @@ Rectangle {
             id: aspecttext
             anchors.bottom: parent.bottom
             anchors.horizontalCenter: parent.horizontalCenter
-            text: filedetailsclass.aspect
+            text: filedetailsclass.aspect + " " + filedetailsclass.i_aspectH +":"+filedetailsclass.i_aspectW
             font.pixelSize: 14
             font.bold: true
             color: "red"
         }
     }
 
-    Image {
-        id: image1
-        anchors.top: titlerect.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: scaleX(40)
-        height: scaleY(40)
-        fillMode: Image.PreserveAspectFit
-        source: "image://listprovider/filedetailsprovider/"+filedetailsclass.screenshot
-        asynchronous: true        
+    Rectangle{
+        id:imageholder
+        height:childrenRect.height
+        width:childrenRect.width
+        color: "transparent"
+        anchors.top:titlerect.bottom
+
+        BorderImage {
+            id: borderimg
+            horizontalTileMode: BorderImage.Repeat
+            source: "../../../img/icons/drpshadow.png"
+            anchors.fill: filedetailsimage
+            anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
+            border { left: 10; top: 10; right: 10; bottom: 10 }
+            smooth: true
+        }
+        Image {
+            id: filedetailsimage
+            width: filedetailsclass.aspect=="wide"? scaleX(25) : scaleX(15)
+            height:filedetailsclass.aspect=="wide"?scaleY(25) : scaleY(45)
+            source: "image://listprovider/filedetails/"+securityvideo.timestamp
+        }
     }
+
 
     Rectangle {
         id: rectangle1
-        anchors.top: image1.bottom
+        anchors.top: imageholder.bottom
         anchors.topMargin: scaleY(1)
         width: parent.width *.95
         height: scaleY(20)

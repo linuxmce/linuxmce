@@ -50,6 +50,8 @@ public:
     Q_PROPERTY (QString composerlist READ getComposers WRITE setComposers NOTIFY composersChanged)
     Q_PROPERTY (QStringList composers READ getComposerList)
 Q_PROPERTY (QString aspect READ getImageAspect WRITE setImageAspect NOTIFY imageAspectChanged )
+    Q_PROPERTY (int i_aspectH READ getAspectH WRITE setAspectH NOTIFY aspectHChanged())
+    Q_PROPERTY (int i_aspectW READ getAspectW WRITE setAspectW NOTIFY aspectWChanged())
 
     QString objecttitle;
 
@@ -57,6 +59,16 @@ Q_PROPERTY (QString aspect READ getImageAspect WRITE setImageAspect NOTIFY image
       Function declared inline for readability as they are short simple functions. anything besides getters and setters will
       be located in the .cpp
       */
+
+    int i_aspectH; //height then width
+
+    void setAspectH(int h) {i_aspectH = h ; emit aspectHChanged();}
+    int getAspectH() { return i_aspectH;}
+
+    int i_aspectW; //height then width
+
+    void setAspectW(int w) {i_aspectW = w ; emit aspectWChanged();}
+    int getAspectW() { return i_aspectW;}
 
     QString aspect;
 
@@ -158,6 +170,8 @@ signals:
     void playListPositionChanged();
     void genreChanged();
     void imageAspectChanged();
+    void aspectHChanged();
+    void aspectWChanged();
 
     //audio signals
     void albumChanged();

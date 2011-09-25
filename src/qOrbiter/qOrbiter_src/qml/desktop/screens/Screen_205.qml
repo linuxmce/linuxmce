@@ -22,21 +22,19 @@ source: "../../../img/icons/drpshadow.png"
 
         Rectangle{
             id:regenrequestcontainer
-            height: scaleY(55)
+            height: childrenRect.height + scaleY(2)
             width:scaleX(50)
             anchors.centerIn: parent
             color: style.darkhighlight
             border.color: style.highlight1
             border.width: 2
-
-            radius: 10
-
+            radius: 2.5
 
             Column{
                 id:buttoncolumn
                 height: childrenRect.height
                 width: parent.width
-                spacing: 5
+                spacing: scaleY(2)
                anchors.centerIn: parent
 
                 Text {
@@ -54,7 +52,7 @@ source: "../../../img/icons/drpshadow.png"
                     height: scaleY(10)
                     width:scaleX(10)
                     buttontext: "Yes Regenerate this orbiter."
-                    buttonsqradius: 10
+                    buttonsqradius: 2.5
                     anchors.horizontalCenter: parent.horizontalCenter
                 }
 
@@ -63,7 +61,7 @@ source: "../../../img/icons/drpshadow.png"
                    height: scaleY(10)
                    width:scaleX(10)
                    buttontext: "Regenerate all orbiters in my home."
-                   buttonsqradius: 10
+                    buttonsqradius: 2.5
                    anchors.horizontalCenter: parent.horizontalCenter
                }
 
@@ -72,7 +70,7 @@ source: "../../../img/icons/drpshadow.png"
                    height: scaleY(10)
                    width:scaleX(10)
                    buttontext: "No I will do it later."
-                   buttonsqradius: 10
+                   buttonsqradius: 2.5
                    anchors.horizontalCenter: parent.horizontalCenter
                    MouseArea{
                        anchors.fill: parent
@@ -85,7 +83,7 @@ source: "../../../img/icons/drpshadow.png"
                    height: scaleY(10)
                    width:scaleX(10)
                    buttontext: "No for all orbiters."
-                   buttonsqradius: 10
+                buttonsqradius: 2.5
                    anchors.horizontalCenter: parent.horizontalCenter
                    MouseArea{
                        anchors.fill: parent

@@ -1,44 +1,45 @@
 import QtQuick 1.0
 import "../components"
-Item{
+Stage{
     id:securitypanel
 
     ListModel{
         id:securityModes
 
         ListElement{
-            name: "Home"
+            name: "Un-Armed - Home"
             image: "security/Home.png"
+            mode:1
         }
 
         ListElement{
-            name: "Away"
+            name: "Armed - Away"
             image: "security/Away.png"
+            mode:2
         }
 
         ListElement{
             name: "At Home Secure"
             image: "security/HomeSecure.png"
+            mode:3
         }
 
         ListElement{
-            name: "Away"
+            name: "Sleeping"
             image: "security/Away.png"
+            mode:4
         }
 
         ListElement{
             name: "Entertaining"
             image: "security/Entertaining.png"
-        }
-
-        ListElement{
-            name: "Sleeping"
-            image: "security/Sleeping.png"
+            mode:5
         }
 
         ListElement{
             name: "Extended Away"
-            image: "security/Extended.png"
+            image: "security/Sleeping.png"
+            mode:6
         }
 
     }
@@ -59,11 +60,19 @@ Item{
                 opacity: .5
                 MouseArea{
                     anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: {
+                        delegatetext.color = "white"; secrect.color = style.darkhighlight
+                    }
+                    onExited: {
+                        delegatetext.color = "black"; secrect.color = "whitesmoke"
+                    }
+
                     onClicked: {
-                        setHouseMode(index+1, text_input1.text)
+                        setHouseMode(mode, securitynumbers.pass)
+                        console.log(securitynumbers)
                     }
                 }
-
             }
 
             Text {
@@ -76,98 +85,31 @@ Item{
         }
     }
 
-    Rectangle{
-        id:container
-        height: style.orbiterH
-        width: style.orbiterW
-        color: style.darkhighlight
-
-        Text {
-            id: securitypanellabel
-            anchors.top: stage.top
-            text: "Security Panel"
-            font.family: "Droid Sans"
-            font.bold: false
-            font.pointSize: 15
-        }
-
-        Rectangle{
-            height:childrenRect.height
-            width: childrenRect.width
-            border.color: style.accentcolor
-            border.width: 2
-            anchors.centerIn: parent
-            color: style.lighthighlight
+    Text {
+        id: securitypanellabel
+        anchors.bottom: container.top
+        text: "Security Panel"
+        font.family: "Droid Sans"
+        font.bold: false
+        font.pointSize: 15
+    }
+//main layout
+    ShadowRect{
+        id:container       
+        rectcolor: style.highlight1
+        anchors.centerIn: parent
+        rectheight: childrenRect.height
+        rectwidth: contentrow.width
 
             Row{
-                height: childrenRect.height
-                width: childrenRect.width
-                spacing: scaleX(5)
-                anchors.centerIn: parent
+                id:contentrow
+                height: scaleY(45)
+                width: scaleX(55)
+                spacing: scaleX(2)
+                anchors.centerIn: container
                 HomeButton{height: 75; smooth: true}
-
-                Column{
-                    id:padcolumn
-                    spacing:5
-                    width:(style.stdbuttonh *3) +15
-                    height: childrenRect.height+10
-
-
-                    Rectangle {
-                        id: numberdisplay
-                        width: parent.width
-                        height: scaleY(8)
-                        color: "#ffffff"
-                        radius: 19
-
-                        TextInput {
-                            id: text_input1
-                            text: ""
-                            font.family: "Droid Sans Mono"
-                            cursorVisible: true
-                            readOnly: false
-                            anchors.centerIn: numberdisplay
-                            horizontalAlignment: TextInput.AlignHCenter
-                            anchors.fill: parent
-                            font.pixelSize: 23
-                            echoMode: TextInput.passwordCharacter
-                        }
-                    }
-                    Rectangle{
-                        id:flowrect
-                        height: scaleY(57)
-                        width: parent.width
-                        color: style.darkhighlight
-
-                        Flow {
-                            id: flow1
-                            width:parent.width
-                            height: flowrect.height
-                            anchors.centerIn: flowrect
-                            spacing: 5
-                            Repeater{
-                                model: 10;
-                                Rectangle{
-                                    height: scaleY(7)
-                                    width: scaleX(7)
-                                    border.color: "black"
-                                    border.width: 2
-                                    Text {
-                                        id: buttonumber
-                                        text: (index+1 > 9) ? 0 : index+1
-                                        font.pointSize: 25
-                                        font.bold: true
-                                        anchors.centerIn: parent
-                                    }
-                                    MouseArea{
-                                        anchors.fill: parent
-                                        onClicked: text_input1.text = text_input1.text+ ((index+1 > 9) ? 0 : index+1)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+//numberpad
+                SecurityPad{id:securitynumbers; width: scaleX(20)}
 
                 Rectangle {
                     id: rectangle4
@@ -190,7 +132,7 @@ Item{
                     }
                 }
             }
-        }
+
     }
 }
 

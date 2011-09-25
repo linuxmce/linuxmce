@@ -2,10 +2,6 @@ import QtQuick 1.0
 import "../components"
 
 Rectangle {
-
-    // property alias synText:
-    id: storedaudioremote
-
     Timer{
         id:singleshot
         repeat: false
@@ -15,243 +11,286 @@ Rectangle {
 
         onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
-
     Connections{
         target:dcenowplaying
         onPlayListPositionChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
 
+    id: storedaudioremote
     height: style.orbiterH
     width: style.orbiterW
     radius: 0
     opacity: 1
-    color: style.darkhighlight
+    color: "transparent"
+    Image {
+        id: background
+        source: "../../../img/icons/orbiterbg.png"
+    }
     Component.onCompleted:setNowPlayingData()
 
-Rectangle{
+    BorderImage {
+        id: remoteborder
+        horizontalTileMode: BorderImage.Repeat
+        source: "../../../img/icons/drpshadow.png"
+        anchors.fill: remotecontainer
+        anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
+        border { left: 10; top: 10; right: 10; bottom: 10 }
+        smooth: true
+    }
 
-        height:childrenRect.height + scaleY(2)
-        width: childrenRect.width + scaleX(2)
+    Rectangle{
+        id:remotecontainer
+        height:headerrow.height + mainrow.height + controlrow.height + scaleY(10)
+        width: mainrow.width + scaleX(2)
         clip:true
-        radius: 10
-        border.color: style.highlight1
-        border.width: 5
-        color: style.lighthighlight
+        radius: 5
+        // border.color: style.highlight1
+        // border.width: 5
+        // color: style.lighthighlight
         anchors.centerIn: parent
 
+        Image {
+            id: panelimg
+            source: "../../../img/icons/displaypanel.png"
+            height: parent.height
+            width: parent.width
+
+        }
 
 
-    //main 'now playing rect containing all the other items
+        //main 'now playing rect containing all the other items
 
         Row{
             id:headerrow
-            height:scaleY(10)
+            height:childrenRect.height
             width: parent.width-1
-            Image {
-                id: headerimage
-                source: "../../../img/icons/header.png"
-                height:scaleY(10)
-                width:parent.width
-            }
-
-            Text {
-                id: headertext
-                height:scaleY(5)
-                text:qsTr("Speed: ") + dcenowplaying.qs_playbackSpeed
-                font.family: "Droid Sans"
-                font.pixelSize: scaleY(2)
-                color: "aliceblue"
-            }
-
+            anchors.top: parent.top
+            anchors.topMargin: scaleY(1)
             Text {
                 id: timecode
-                height:scaleY(5)
-                text: dcenowplaying.timecode + qsTr(" of ") + dcenowplaying.duration
+                height:scaleY(2.15)
+                text: qsTr("Speed: ") + dcenowplaying.qs_playbackSpeed +" || " +dcenowplaying.timecode + qsTr(" of ") + dcenowplaying.duration
                 font.family: "Droid Sans"
                 font.pixelSize: scaleY(2.15)
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.horizontalCenter: parent.horizontalCenter
                 font.bold: true
-                color:"aliceblue"
-            }
-
-            Text {
-                id: hartist
-                text: dcenowplaying.qs_mainTitle + " - " + dcenowplaying.qs_subTitle + qsTr(" | From the album: ")  + dcenowplaying.qs_mainTitle2
-                font.family: "Droid Sans"
-                wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                font.bold: true
-                smooth: true
-               font.pixelSize: scaleY(2.25)
-              anchors.bottom: parent.bottom
-              anchors.bottomMargin: scaleY(1.5)
-               anchors.left: parent.left
-               anchors.leftMargin: scaleX(1)
-               color:"white"
-               opacity: .75
             }
         }
 
-    Row{
-        id:mainrow
-        height: childrenRect.height
-        width: childrenRect.width
-        spacing: scaleX(2)
-        anchors.top:headerrow.bottom
-        anchors.topMargin: scaleY(2)
-        anchors.horizontalCenter: parent.horizontalCenter
-
-        NonEPGPlaylist{ id:playlist}
-
-        Row {
-            id:metarow
-            width: childrenRect.width
+        Row{
+            id:mainrow
             height: childrenRect.height
-            spacing: scaleX(.5)
+            width: childrenRect.width
+            spacing: scaleX(2)
+            anchors.top:headerrow.bottom
+            anchors.topMargin: scaleY(2)
+            anchors.horizontalCenter: parent.horizontalCenter
 
-            Column
-            {
-                id:metadata
-                height: scaleY(30)
+            NonEPGPlaylist{ id:playlist; visible: false}
+
+            Row {
+                id:metarow
                 width: childrenRect.width
+                height: childrenRect.height
+                spacing: scaleX(.5)
 
-                Image {
-                    id: nowplayingimage
-
-                    width: scaleX(20)
-                    height: scaleY(45)
-                    fillMode: Image.PreserveAspectFit
-                    source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
-                }
-                Rectangle{
-                    id:trackdata
+                Column
+                {
+                    id:metadata
                     height: childrenRect.height
-                    width: metadata.width
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.bottom: title.bottom
-                    color:style.highlight1
-                    clip:true
+                    width: childrenRect.width
 
-                    Column{
-                        spacing: scaleY(1)
+                    Rectangle{
+                        id:imageholder
+                        height:childrenRect.height
+                        width:scaleX(35)
+                        color: "transparent"
+                        anchors.top:parent.top
 
-
-                  /*      Text {
-                            id: artist
-
-                            text: qsTr("Artist :") + dcenowplaying.qs_mainTitle
-                            font.family: "Droid Sans"
-                            wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                            font.bold: true
+                        BorderImage {
+                            id: borderimg
+                            horizontalTileMode: BorderImage.Repeat
+                            source: "../../../img/icons/drpshadow.png"
+                            anchors.fill: nowplayingimage
+                            anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
+                            border { left: 10; top: 10; right: 10; bottom: 10 }
                             smooth: true
-                           font.pixelSize: scaleY(2)
                         }
-
-
-                        Text {
-                            id: album
-
-                            wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                            text: qsTr("Album: ") + dcenowplaying.qs_mainTitle2
-                            font.family: "Droid Sans"
-                            font.bold: true
+                        Image {
+                            id: nowplayingimage
+                            width: dcenowplaying.aspect=="wide"? scaleX(19) : scaleX(15)
+                            height:dcenowplaying.aspect=="wide"? scaleY(30) : scaleY(40)
+                            source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
+                            anchors.horizontalCenter: parent.horizontalCenter
                             smooth: true
-                          font.pixelSize: scaleY(2)
-
                         }
+                    }
 
-                        Text {
-                            id: title
+                    BorderImage {
+                        id: texrectborder
+                        horizontalTileMode: BorderImage.Repeat
+                        source: "../../../img/icons/drpshadow.png"
+                        anchors.fill: textrect
+                        anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
+                        border { left: 10; top: 10; right: 10; bottom: 10 }
+                        smooth: true
+                        visible: textrect.visible
 
-                            wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                            text: qsTr("Title: ") + dcenowplaying.qs_subTitle
-                            font.family: "Droid Sans"
-                            font.bold: true
-                            smooth: true
-                           font.pixelSize: scaleY(2)
+
+                    }
+
+                    Rectangle{
+                        id:textrect
+                        visible: true
+                        height: childrenRect.height
+                        width: childrenRect.width
+                        color:style.highlight1
+                        anchors.left: dcenowplaying.aspect == "wide"? imageholder.left : imageholder.right;
+                        anchors.top:  dcenowplaying.aspect == "wide"? imageholder.bottom: imageholder.top
+                        anchors.bottomMargin: dcenowplaying.aspect == "wide"? 10 : 20
+                        clip:true
+                        Column{
+                            spacing: scaleY(1.5)
+                            width: childrenRect.width
+                            height: dcenowplaying.aspect == "wide"?scaleY(25): scaleY(65)
+                            Text {
+                                id: generaltitle
+                                width: scaleX(35)
+                                text: qsTr("Title: ") + dcenowplaying.mediatitle
+                                font.family: "Droid Sans"
+                                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+
+                                smooth: true
+                                font.pixelSize: scaleY(2)
+                                visible:  dcenowplaying.mediatitle =="" ? false: true
+                            }
+
+                            Text {
+                                id: programtext
+                                width: scaleX(35)
+                                text: qsTr("Album: ") + dcenowplaying.album
+                                font.family: "Droid Sans"
+                                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+
+                                smooth: true
+                                font.pixelSize: scaleY(2)
+                                visible:  dcenowplaying.album =="" ? false: true
+                            }
+
+                            Text {
+                                id: episode
+                                width: scaleX(35)
+                                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                                text: qsTr("Track: ") + dcenowplaying.track
+                                font.family: "Droid Sans"
+
+                                smooth: true
+                                font.pixelSize: scaleY(2)
+                                visible:  dcenowplaying.track =="" ? false: true
+                            }
+
+                            Text {
+                                id: genre
+                                width: scaleX(35)
+                                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                                text: qsTr("Genre(s): ") + dcenowplaying.genre
+                                font.family: "Droid Sans"
+                                //font.bold: true
+                                smooth: true
+                                font.pixelSize: scaleY(2)
+                                visible:  dcenowplaying.genre =="" ? false: true
+                                MouseArea{
+                                    anchors.fill: genre
+                                    hoverEnabled: true
+                                    onEntered: { genre.elide = "ElideNone" ; }
+                                    onExited: {genre.elide = "ElideRight"; }
+                                }
+                            }
+                            Text {
+                                id: released
+                                width: scaleX(35)
+                                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                                text: qsTr("Released: ") + dcenowplaying.releasedate
+                                font.family: "Droid Sans"
+                                // font.bold: true
+                                smooth: true
+                                font.pixelSize: scaleY(2)
+                                visible:  dcenowplaying.releasedate =="" ? false: true
+
+                            }
+
+
+                            Text {
+                                id: starring
+                                width: scaleX(35)
+                                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                                text: qsTr("Perfomers: ") + dcenowplaying.performerlist
+                                font.family: "Droid Sans"
+                                //  font.bold: true
+                                smooth: true
+                                font.pixelSize: scaleY(2)
+                                elide: "ElideRight"
+                                visible:  dcenowplaying.performerlist =="" ? false: true
+
+                                MouseArea{
+                                    anchors.fill: starring
+                                    hoverEnabled: true
+                                    onEntered: { starring.elide = "ElideNone" ; }
+                                    onExited: {starring.elide = "ElideRight"; }
+                                }
+                            }
                         }
-
-                        Text {
-                            id: track
-
-                            wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                            text: qsTr("Track: ") + dcenowplaying.track
-                            font.family: "Droid Sans"
-                            font.bold: true
-                            smooth: true
-                           font.pixelSize: scaleY(2)
-                        }
-                        Text {
-                            id: genre
-
-                            wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                            text: qsTr("Genre(s): ") + dcenowplaying.genre
-                            font.family: "Droid Sans"
-                            font.bold: true
-                            smooth: true
-                            font.pixelSize: scaleY(2)
-                        }
-
-                        Text {
-                            id: synopsis
-
-                            wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                            text: qsTr("Review: ") + dcenowplaying.synop
-                            font.family: "Droid Sans"
-                            font.bold: true
-                            smooth: true
-                            font.pixelSize: scaleY(2)
-                        }
-                        Text {
-                            id: release
-
-                            wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                            text: qsTr("Released: ") + dcenowplaying.releasedate
-                            font.family: "Droid Sans"
-                            font.bold: true
-                            smooth: true
-                            font.pixelSize: scaleY(2)
-                        }
-                        */
                     }
                 }
+                Remote_Audio_controls{}
+                Remote_lighting_controls{}
             }
-            Remote_lighting_controls{ id: remote_lighting_controls1; }
-            Remote_Audio_controls{ id: remote1; }
         }
-    }
-    Row{
-        id:controlrow
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: scaleY(2)
-        height: childrenRect.height
-        width: childrenRect.width
-        anchors.horizontalCenter: parent.horizontalCenter
-        Column{
-            height: childrenRect.height
+        Row{
+            id:controlrow
+            anchors.top: mainrow.bottom
+            anchors.topMargin: scaleY(5)
+            height: controlcol.height
             width: childrenRect.width
-
-            VideoControls {
-                id: videocontrols1
-            }
-            Row{
+            anchors.horizontalCenter: parent.horizontalCenter
+            Column{
+                id:controlcol
                 height: childrenRect.height
                 width: childrenRect.width
-                spacing: scaleX(1)
+                spacing: scaleY(1)
+                VideoControls {
+                    id: videocontrols1
+                }
+                Row{
+                    height: childrenRect.height
+                    width: childrenRect.width
+                    spacing: scaleX(1)
 
-                ButtonSq{
-                    buttontext: qsTr("Bookmarks")
+                    AvOptionButton{
+                        buttontext: qsTr("Bookmarks")
+                    }
+                    AvOptionButton{
+                        buttontext: qsTr("Manage Playlist")
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked: playlist.visible = !playlist.visible
+                        }
+                    }
+                    AvOptionButton{
+                        buttontext: qsTr("Attributes")
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked: textrect.visible = !textrect.visible
+                        }
+                    }
+                    AvOptionButton{
+                        buttontext: qsTr("Power")
+                    }
+                    HomeButton{}
                 }
-                ButtonSq{
-                    buttontext: qsTr("Manage Playlist")
-                }
-                ButtonSq{
-                    buttontext: qsTr("Power")
-                }
-                HomeButton{}
             }
         }
     }
-}
 }
 

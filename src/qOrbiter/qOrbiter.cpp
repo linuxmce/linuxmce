@@ -79,6 +79,7 @@ bool qOrbiter::GetConfig()
     }
 
 
+
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Connected, requesting configuration for device %d", qmlUI->iPK_Device);
 
     char *oData;

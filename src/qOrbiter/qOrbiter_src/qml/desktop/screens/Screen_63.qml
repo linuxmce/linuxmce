@@ -31,6 +31,7 @@ Rectangle {
     Rectangle{
         height: scaleY(95)
         width: scaleX(95)
+
         color: "transparent"
         radius: 10
         border.color: style.highlight1
@@ -171,13 +172,15 @@ Rectangle {
                 height: childrenRect.height
                 width: parent.width
                 anchors.centerIn: parent
+                spacing: scaleY(1)
                 VideoControls {
                     id: videocontrols1
                     anchors.horizontalCenter: parent.horizontalCenter
                 }
                 Row{
-                    spacing:1
-                    ButtonSq{
+                    spacing:scaleY(1)
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    AvOptionButton{
                         id:zoom
                         buttontext: qsTr("Zoom & Aspect")
                         MouseArea{
@@ -187,10 +190,10 @@ Rectangle {
                             }
                         }
                     }
-                    ButtonSq{
+                    AvOptionButton{
                         buttontext: qsTr("PVR Menu")
                     }
-                    ButtonSq{
+                    AvOptionButton{
                         buttontext: qsTr("Resend AV Codes")
                         MouseArea{
                             anchors.fill: parent
@@ -199,77 +202,70 @@ Rectangle {
                             }
                         }
                     }
-                    ButtonSq{
+                    AvOptionButton{
                         buttontext: qsTr("Thumbnail")
                     }
                     Flickable{
                         height: zoom.height
-                        width: scaleX(40)
+                        width: scaleX(35)
                         flickableDirection: "HorizontalFlick"
                         clip:true
-                        contentHeight: style.stdbuttonH
-                        contentWidth: style.buttonrow * 1
                         boundsBehavior: "DragAndOvershootBounds"
                         focus: true
+                        contentHeight: scaleY(9)
+                        contentWidth: scaleX(35)
 
-
-                        Row{
-                            id:buttonrow
-                            spacing:1
-                            width: childrenRect.width
-
-                            ButtonSq{
+                            AvOptionButton{
                                 buttontext: qsTr("Live")
                             }
-                            ButtonSq{
+                            AvOptionButton{
                                 buttontext: qsTr("Schedule")
                             }
-                            ButtonSq{
+                            AvOptionButton{
                                 buttontext: qsTr("Recordings")
                             }
-                            ButtonSq{
+                            AvOptionButton{
                                 buttontext: qsTr("Music")
                             }
-                            ButtonSq{
+                            AvOptionButton{
                                 buttontext: qsTr("Guide")
                             }
-                            ButtonSq{
+                            AvOptionButton{
                                 buttontext: qsTr("Menu")
                             }
-                            ButtonSq{
+                            AvOptionButton{
                                 buttontext: qsTr("Info")
                             }
-                            ButtonSq{
+                            AvOptionButton{
                                 buttontext: qsTr("Favorites")
                             }
-                            ButtonSq{
+                            AvOptionButton{
                                 buttontext: qsTr("Record")
                             }
-                            ButtonSq{
+                            AvOptionButton{
                                 buttontext: qsTr("Help")
                             }
-                            ButtonSq{
+                            AvOptionButton{
                                 buttontext: qsTr("Bookmark Channel")
                             }
-                            ButtonSq{
+                            AvOptionButton{
                                 buttontext: qsTr("Change Inputs")
                             }
-                            ButtonSq{
+                            AvOptionButton{
                                 buttontext: qsTr("Page Up")
                             }
-                            ButtonSq{
+                            AvOptionButton{
                                 buttontext: qsTr("Page Down")
                             }
-                            ButtonSq{
+                            AvOptionButton{
                                 buttontext: qsTr("Next Day")
                             }
-                            ButtonSq{
+                            AvOptionButton{
                                 buttontext: qsTr("Previous day")
                             }
 
-                        }
                     }
-                    ButtonSq{
+                    AvOptionButton{
                         buttontext: qsTr("Power")
                     }
                     HomeButton{}
