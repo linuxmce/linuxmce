@@ -3,6 +3,16 @@ import "../components"
 Stage{
     id:securitypanel
 
+    BorderImage {
+        id: borderimg
+        horizontalTileMode: BorderImage.Repeat
+        source: "../../../img/icons/drpshadow.png"
+        anchors.fill: container
+        anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
+        border { left: 10; top: 10; right: 10; bottom: 10 }
+        smooth: true
+    }
+
     ListModel{
         id:securityModes
 
@@ -85,38 +95,41 @@ Stage{
         }
     }
 
-    Text {
-        id: securitypanellabel
-        anchors.bottom: container.top
-        text: "Security Panel"
-        font.family: "Droid Sans"
-        font.bold: false
-        font.pointSize: 15
-    }
+
 //main layout
-    ShadowRect{
+    Rectangle{
         id:container       
-        rectcolor: style.highlight1
+        color: style.highlight1
         anchors.centerIn: parent
-        rectheight: childrenRect.height
-        rectwidth: contentrow.width
+        height: childrenRect.height + scaleY(1)
+        width: contentrow.width + scaleX(1)
+        radius: 2.5
+
+        Text {
+            id: securitypanellabel
+            anchors.bottom: container.top
+            text: "Security Panel"
+            font.family: "Droid Sans"
+            font.bold: false
+            font.pointSize: 15
+        }
 
             Row{
                 id:contentrow
-                height: scaleY(45)
+                height: securitynumbers.height
                 width: scaleX(55)
-                spacing: scaleX(2)
+                spacing: scaleX(5)
                 anchors.centerIn: container
-                HomeButton{height: 75; smooth: true}
+                HomeButton{smooth: true}
 //numberpad
-                SecurityPad{id:securitynumbers; width: scaleX(20)}
+                SecurityPad{id:securitynumbers; }
 
                 Rectangle {
                     id: rectangle4
-                    width: 200
-                    height: 402
+                    width: scaleX(15)
+                    height: scaleY(45)
                     color: "#a7b8c4"
-                    radius: 16
+                    radius: 2.5
                     clip: true
 
                     ListView
