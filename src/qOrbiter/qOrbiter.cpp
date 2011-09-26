@@ -111,6 +111,7 @@ bool qOrbiter::GetConfig()
         qDebug() << "Invalid config for device: " << qmlUI->iPK_Device;
         qDebug() << "Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d="<<qmlUI->iPK_Device ;
         qmlUI->gotoQScreen("Splash.qml");
+        return false;
     }
     qmlUI->binaryConfig = configData;
     delete oData;

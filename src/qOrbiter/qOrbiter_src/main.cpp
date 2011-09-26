@@ -181,8 +181,6 @@ int main(int argc, char* argv[])
         qorbiterManager * w = new qorbiterManager(PK_Device,QString::fromStdString(sRouter_IP.c_str()));
 
 
-
-            a.exec();
 #ifdef WIN32
     WORD    wVersion;
     WSADATA wsaData;
@@ -224,17 +222,20 @@ int main(int argc, char* argv[])
             {
               LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
               qDebug() << "Connected!";
-              w->gotoQScreen("Splash.qml");
-              return a.exec();
+              w->gotoQScreen("Screen_1.qml");
+
             }
 
             if(w->pqOrbiter->m_pEvent && w->pqOrbiter->m_pEvent->m_pClientSocket && w->pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
             {
+                w->gotoQScreen("Splash.qml");
+
                 bAppError = false;
                 bReload = false;
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "No Router.  Will abort");
                 qDebug() << "No Router, Aborting";
                 return false;
+
             }
             else
             {
@@ -249,11 +250,8 @@ int main(int argc, char* argv[])
                     else
                             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
             }
-            if( w->pqOrbiter->m_bReload )
-                    bReload=true;
-            w->gotoQScreen("Splash.qml");
-            delete w->pqOrbiter;
 
+            return a.exec();
     }
     catch(string s)
     {

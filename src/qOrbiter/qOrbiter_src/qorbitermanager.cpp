@@ -175,7 +175,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         qorbiterUIwin->show();
 #endif
 
-        // qorbiterUIwin->showFullScreen();
+         qorbiterUIwin->showFullScreen();
         //gotoQScreen("Splash.qml");
         //     qDebug() << "Showing Splash";
         QObject::connect(item,SIGNAL(setupStart(int, QString)), this,SLOT(qmlSetupLmce(int,QString)));
@@ -204,6 +204,8 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 {
     iPK_Device= PK_Device;
     pqOrbiter = new DCE::qOrbiter(PK_Device, sRouterIP, true,bLocalMode);
+
+
     pqOrbiter->qmlUI = this;
 
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
@@ -255,13 +257,16 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "No Router.  Will abort");
             qDebug() << "No Router, Aborting";
             return false;
+            gotoQScreen("Splash.qml");
         }
         else
         {
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
             qDebug() << "Connect Failed";
+            gotoQScreen("Splash.qml");
         }
     }
+    return true;
 }
 
 
@@ -961,7 +966,7 @@ void qorbiterManager::getcurrentSkins(QStringList skinPaths)
 void qorbiterManager::quickReload()
 {
 
-    gotoQScreen("Splash.qml");
+    //gotoQScreen("Splash.qml");
     bool connected = pqOrbiter->m_bRouterReloading;
 
     if(setupLmce(iPK_Device, s_RouterIP, false, false))

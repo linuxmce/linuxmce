@@ -153,14 +153,16 @@ Rectangle {
                     Rectangle{
                         id:textrect
                         height: childrenRect.height
-                        width: dcenowplaying.aspect=="wide"?  childrenRect.width : scaleX(20)
+                        width: dcenowplaying.aspect=="wide"?  textcol.width : scaleX(20)
                         color:style.highlight1
                         anchors.left: dcenowplaying.aspect == "wide"? imageholder.left : imageholder.right;
                         anchors.top:  dcenowplaying.aspect == "wide"? imageholder.bottom: imageholder.top
                         anchors.bottomMargin: dcenowplaying.aspect == "wide"? 20 : 20
                         Column{
+                            id:textcol
                             spacing: scaleY(1.5)
                             width: parent.width
+                            height: childrenRect.height
 
                             Text {
                                 id: generaltitle
