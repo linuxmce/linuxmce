@@ -51,4 +51,17 @@ if [[ "$Entries" -eq "0" ]]; then
 	RunSQL "$Q"
 fi
 
+# add some TV related media attributes. this should end up in SqlCVS some day. see trac ticket #1022
+Q="insert into pluto_media.AttributeType(PK_AttributeType,Description,Define,PicPriority) values(50,'Season Number',NULL,NULL) on duplicate key update psc_id=psc_id;"
+RunSQL "$Q"
+
+Q="insert into pluto_media.AttributeType(PK_AttributeType,Description,Define,PicPriority) values(51,'Episode Number',NULL,NULL) on duplicate key update psc_id=psc_id;"
+RunSQL "$Q"
+
+Q="insert into pluto_media.AttributeType(PK_AttributeType,Description,Define,PicPriority) values(52,'TV Season ID',NULL,NULL) on duplicate key update psc_id=psc_id;"
+RunSQL "$Q"
+
+Q="update pluto_media.MediaType_AttributeType set MediaSortOption=5, CombineAsOne=0 where EK_MediaType=5 and FK_AttributeType=12;"
+RunSQL "$Q"
+
 exit 0
