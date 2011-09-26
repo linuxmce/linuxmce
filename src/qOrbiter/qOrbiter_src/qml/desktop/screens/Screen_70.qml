@@ -219,7 +219,7 @@ Rectangle {
 
                             Text {
                                 id: starring
-                                width: parent.width
+                                width: childrenRect.width
                                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                                 text: qsTr("Starring: ") + dcenowplaying.performerlist
                                 font.family: "Droid Sans"

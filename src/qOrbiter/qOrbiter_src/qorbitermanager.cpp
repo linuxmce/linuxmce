@@ -23,87 +23,7 @@
 
 using namespace DCE;
 
-/*
-// You can override this block if you don't want the app to reload in the event of a problem
-extern void (*g_pDeadlockHandler)(PlutoLock *pPlutoLock);
-extern void (*g_pSocketCrashHandler)(Socket *pSocket);
-extern Command_Impl *g_pCommand_Impl;
-void DeadlockHandler(PlutoLock *pPlutoLock)
-{
-        // This isn't graceful, but for the moment in the event of a deadlock we'll just kill everything and force a reload
-        if( g_pCommand_Impl )
-        {
-                LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Deadlock problem.  %d  Going to reload and quit",g_pCommand_Impl->m_dwPK_Device);
-                g_pCommand_Impl->OnReload();
-        }
-}
-void SocketCrashHandler(Socket *pSocket)
-{
-        // This isn't graceful, but for the moment in the event of a socket crash we'll just kill everything and force a reload
-        if( g_pCommand_Impl )
-        {
-                LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Socket problem. %d  Going to reload and quit",g_pCommand_Impl->m_dwPK_Device);
-                g_pCommand_Impl->OnReload();
-        }
-}
-void Plugin_DeadlockHandler(PlutoLock *pPlutoLock)
-{
-        // This isn't graceful, but for the moment in the event of a deadlock we'll just kill everything and force a reload
-        if( g_pCommand_Impl && g_pCommand_Impl->m_pRouter )
-        {
-                LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Plugin Deadlock problem.  %d Going to reload",g_pCommand_Impl->m_dwPK_Device);
-                g_pCommand_Impl->m_pRouter->CrashWithinPlugin(g_pCommand_Impl->m_dwPK_Device);
-        }
-}
-void Plugin_SocketCrashHandler(Socket *pSocket)
-{
-        if( g_pCommand_Impl && g_pCommand_Impl->m_pRouter )
-        {
-                LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Plugin Socket problem.  %d",g_pCommand_Impl->m_dwPK_Device);
-                // g_pCommand_Impl->m_pRouter->CrashWithinPlugin(g_pCommand_Impl->m_dwPK_Device);  // Don't reload plugins since sockets can fail
-        }
-}
-//<-dceag-incl-e->
 
-extern "C" {
-        int IsRuntimePlugin()
-        {
-                // If you want this plug-in to be able to register and be used even if it is not in the Device table, set this to true.
-                // Then the Router will scan for all .so or .dll files, and if found they will be registered with a temporary device number
-                bool bIsRuntimePlugin=false;
-                if( bIsRuntimePlugin )
-                        return qOrbiter::PK_DeviceTemplate_get_static();
-                else
-                        return 0;
-        }
-}
-
-
-//<-dceag-plug-b->
-extern "C" {
-        class Command_Impl *RegisterAsPlugIn(class Router *pRouter,int PK_Device,Logger *pPlutoLogger)
-        {
-                LoggerWrapper::SetInstance(pPlutoLogger);
-                LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d loaded as plug-in",PK_Device);
-
-                qOrbiter *pqOrbiter = new qOrbiter(PK_Device, "localhost",true,false,pRouter);
-                if( pqOrbiter->m_bQuit_get()|| !pqOrbiter->GetConfig() )
-                {
-                        delete pqOrbiter;
-                        return NULL;
-                }
-                else
-                {
-                        g_pCommand_Impl=pqOrbiter;
-                        g_pDeadlockHandler=Plugin_DeadlockHandler;
-                        g_pSocketCrashHandler=Plugin_SocketCrashHandler;
-                }
-                return pqOrbiter;
-        }
-}
-
-//<-dceag-plug-e->
-*/
 qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent) :
     QWidget(parent), iPK_Device(deviceno), qs_routerip(routerip)
 {
@@ -181,8 +101,6 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         qorbiterUIwin->engine()->rootContext()->setContextProperty("style", styleObject);
         qorbiterUIwin->rootContext()->setContextProperty("srouterip", QString(qs_routerip) );
         qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
-
-
         initializeGridModel();  //begins setup of media grid listmodel and its properties
         initializeSortString(); //associated logic for navigating media grids
 
@@ -200,13 +118,6 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         //reference to the object for later use?
         item= qorbiterUIwin->rootObject();
 
-        //device variables
-        iPK_Device_DatagridPlugIn =  long(6);
-        iPK_Device_OrbiterPlugin = long(9);
-        iPK_Device_GeneralInfoPlugin = long(4);
-        iPK_Device_SecurityPlugin = long(13);
-        iPK_Device_LightingPlugin = long(8);
-        m_dwIDataGridRequestCounter = 0;
 
         //initial signal and slot connections
         QObject::connect(item, SIGNAL(close()), this, SLOT(closeOrbiter()));
@@ -264,18 +175,15 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         qorbiterUIwin->show();
 #endif
 
-
         // qorbiterUIwin->showFullScreen();
-        gotoQScreen("Splash.qml");
+        //gotoQScreen("Splash.qml");
         //     qDebug() << "Showing Splash";
         QObject::connect(item,SIGNAL(setupStart(int, QString)), this,SLOT(qmlSetupLmce(int,QString)));
-
     }
     else
     {
         qDebug() << "Couldnt get skin data!";
         exit(15);
-
     }
 }
 
@@ -295,16 +203,12 @@ void qorbiterManager::gotoQScreen(QString s)
 bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode)
 {
     pqOrbiter = new DCE::qOrbiter(PK_Device, sRouterIP, true,bLocalMode);
-    // iPK_Device = long(PK_Device);
-
     pqOrbiter->qmlUI = this;
 
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
     {
-        //   qDebug() << "Device: " << PK_Device <<" Connect";
-        //g_pCommand_Impl=pqOrbiter;
-        //g_pDeadlockHandler=DeadlockHandler;
-        // g_pSocketCrashHandler=SocketCrashHandler;
+
+
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
         /*
               we get various variable here that we will need later. I store them in the qt object so it
@@ -319,21 +223,12 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
               qt GUI (qml or qobject based) signals to DCE slots and vice versa!
             */
 
-
-
         if (getConf(PK_Device) )        //getting configuration from qOrbiterGen xml file
         {
 
             if (pqOrbiter->initialize()) //the dcethread initialization
             {
-                //epg listmodel, no imageprovider as of yet
-                simpleEPGmodel = new EPGChannelList(new EPGItemClass, this );
-                qorbiterUIwin->rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
-                processingThread = new QThread(this);
-                simpleEPGmodel->moveToThread(processingThread);
-                processingThread->start(QThread::LowPriority);
-                QObject::connect(this,SIGNAL(liveTVrequest()), simpleEPGmodel,SLOT(populate()), Qt::QueuedConnection);
-                //        qDebug () << "Orbiter Registered, starting";
+
                 gotoQScreen("Screen_1.qml");
                 return true;
             }
@@ -344,49 +239,12 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
                 return false;
             }
 
-            //i dont know what this does, but since orbter should not be local, it is commented out but not removed.
-            if( bLocalMode )
-                pqOrbiter->RunLocalMode();
-            else
-            {
-                if(pqOrbiter->m_RequestHandlerThread)
-                    pthread_join(pqOrbiter->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
-
-            }
-            //g_pDeadlockHandler=NULL;
-            //g_pSocketCrashHandler=NULL;
         }
     }
     else
     {
-        bAppError = true;
-        if( pqOrbiter->m_pEvent && pqOrbiter->m_pEvent->m_pClientSocket && pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
-        {
-            bAppError = false;
-            bReload = false;
-            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "No Router.  Will abort");
-            qDebug() << "No Router, Aborting";
-            return false;
-        }
-        else
-        {
-            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
-            qDebug() << "Connect Failed";
-            gotoQScreen("Splash.qml");
-
-            /*
-              code to read data from file add it as context object goes here.
-              also function to wrap back around to setup lmce
-              */
-        }
+        return false;
     }
-
-    if( pqOrbiter->m_bReload )
-        bReload=true;
-    pqOrbiter->QuickReload();
-    gotoQScreen("Splash.qml");
-    sleep(5);
-    setupLmce(iPK_Device, sRouterIP, false, false);
 
 }
 
@@ -401,10 +259,15 @@ bool qorbiterManager::refreshUI()
 // get conf method that reads config file
 bool qorbiterManager::getConf(int pPK_Device)
 {
-    if(!pqOrbiter->DATA_Get_Get_Time_Code_for_Media())
-    {
-        // setNowPlayingIcon(false);
-    }
+
+    //device variables
+    iPK_Device_DatagridPlugIn =  long(6);
+    iPK_Device_OrbiterPlugin = long(9);
+    iPK_Device_GeneralInfoPlugin = long(4);
+    iPK_Device_SecurityPlugin = long(13);
+    iPK_Device_LightingPlugin = long(8);
+    m_dwIDataGridRequestCounter = 0;
+
 
     sleeping_alarms.clear();
     qorbiterUIwin->rootContext()->setContextProperty("alarms", QVariant::fromValue(sleeping_alarms) );
@@ -683,6 +546,14 @@ bool qorbiterManager::getConf(int pPK_Device)
     qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms);                           //custom room list  provided
     qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);                       //file grids current media type
 
+    //epg listmodel, no imageprovider as of yet
+    simpleEPGmodel = new EPGChannelList(new EPGItemClass, this );
+    qorbiterUIwin->rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
+    processingThread = new QThread(this);
+    simpleEPGmodel->moveToThread(processingThread);
+    processingThread->start(QThread::LowPriority);
+    QObject::connect(this,SIGNAL(liveTVrequest()), simpleEPGmodel,SLOT(populate()), Qt::QueuedConnection);
+    //        qDebug () << "Orbiter Registered, starting";
 
     //------------not sure if neccesary since it knows where we are.
     setActiveRoom(iFK_Room, iea_area);
@@ -1708,18 +1579,18 @@ void qorbiterManager::showTimeCode()
     //qDebug() << tcData;
     if (tcData.length() > 0)
     {
-    QStringList tcVars = tcData.split(",");
-    QString tcClean = tcVars.at(1);
-    tcClean.remove(QRegExp(".\\d\\d\\d|00:0"));
-    nowPlayingButton->setTimeCode(tcClean);
+        QStringList tcVars = tcData.split(",");
+        QString tcClean = tcVars.at(1);
+        tcClean.remove(QRegExp(".\\d\\d\\d|00:0"));
+        nowPlayingButton->setTimeCode(tcClean);
 
-    QString playbackSpeed = tcVars.at(0);
-    playbackSpeed.remove(QRegExp("000"));
-    nowPlayingButton->setStringSpeed(playbackSpeed+"x");
+        QString playbackSpeed = tcVars.at(0);
+        playbackSpeed.remove(QRegExp("000"));
+        nowPlayingButton->setStringSpeed(playbackSpeed+"x");
 
-    QString duration = tcVars.at(2);
-    duration.remove(QRegExp(".\\d\\d\\d|00:0"));
-    nowPlayingButton->setDuration(duration);
+        QString duration = tcVars.at(2);
+        duration.remove(QRegExp(".\\d\\d\\d|00:0"));
+        nowPlayingButton->setDuration(duration);
     }
 }
 
