@@ -2509,6 +2509,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
       that the orbiter makes.
       */
 
+
     int gHeight = 10;
     int gWidth = 10;
     int pkVar = 0;
@@ -2642,7 +2643,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                 else if(attributeType == "Synopsis")
                 {
                     qmlUI->nowPlayingButton->setSynop(attribute);
-                  //  qDebug() << attribute;
+                    qDebug() << attribute;
                 }
                 else if(attributeType == "Release Date")
                 {
@@ -2650,7 +2651,59 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                    // qDebug() << attribute;
                 }
 
+                int p = 0;
+                string s_val;
+                CMD_Get_Attributes_For_Media attribute_detail_get(qmlUI->iPK_Device, qmlUI->iMediaPluginID, "" , StringUtils::itos(qmlUI->iea_area),&s_val );
+                SendCommand(attribute_detail_get);
+                QString breaker = s_val.c_str();
+                qDebug() << breaker;
+                /*
+                  attribute order - should be consistent
+                    0 - full file path
+                    1 - path to file dir
+                    2 - filename alone
+                    3 - Title Attribtues
+                    4 - Synopsis (for video media type)
+                    5 - picture
 
+                  */
+
+                // clear out any previous data in the filedetailsclass instance
+
+
+                QStringList details = breaker.split(QRegExp("\\t"));
+                int placeholder;
+
+                placeholder = details.indexOf("TITLE");
+                if(placeholder != -1)
+                {
+
+                }
+
+                placeholder = details.indexOf("SYNOPSIS");
+                if(placeholder != -1)
+                {
+                    qmlUI->nowPlayingButton->setSynop(details.at(placeholder+1));
+                }
+
+                placeholder = details.indexOf("PICTURE");
+                if(placeholder != -1)
+                {
+
+                }
+
+                placeholder = details.indexOf("PATH");
+                if(placeholder != -1)
+                {
+
+
+                }
+
+                placeholder = details.indexOf("FILENAME");
+                if(placeholder != -1)
+                {
+
+                }
 
                 //qmlUI->m_selected_grid_item->appendRow(new FileDetailsItem(cellTitle, cellAttribute, cellImg, false,  qmlUI->model));
             }

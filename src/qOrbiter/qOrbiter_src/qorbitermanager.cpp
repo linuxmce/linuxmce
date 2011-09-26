@@ -175,8 +175,8 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         qorbiterUIwin->show();
 #endif
 
-         qorbiterUIwin->showFullScreen();
-        //gotoQScreen("Splash.qml");
+        // qorbiterUIwin->showFullScreen();
+
         //     qDebug() << "Showing Splash";
         QObject::connect(item,SIGNAL(setupStart(int, QString)), this,SLOT(qmlSetupLmce(int,QString)));
     }
@@ -205,21 +205,20 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
     iPK_Device= PK_Device;
     pqOrbiter = new DCE::qOrbiter(PK_Device, sRouterIP, true,bLocalMode);
 
-
     pqOrbiter->qmlUI = this;
 
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
     {
 
 
-        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
+
         /*
               we get various variable here that we will need later. I store them in the qt object so it
               can pass them along without extra issues and so they can easily be passed to qml objects that
               are templated in
              */
 
-        pqOrbiter->CreateChildren();
+
         /*
               this line ties the class variable in the dceGenerated code to the qt ui code
               this is how the two threads (dce and qt) communicate with each other and make it possible to connect
@@ -230,7 +229,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
         {
 
             if (pqOrbiter->initialize()) //the dcethread initialization
-            {
+            { pqOrbiter->CreateChildren();
                 gotoQScreen("Screen_1.qml");
                 return true;
             }
@@ -255,15 +254,16 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             bAppError = false;
             bReload = false;
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "No Router.  Will abort");
-            qDebug() << "No Router, Aborting";
-            return false;
-            gotoQScreen("Splash.qml");
+            qDebug() << " orbiter -setup No Router, Aborting";
+           return false;
+
         }
         else
         {
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
             qDebug() << "Connect Failed";
             gotoQScreen("Splash.qml");
+            return false;
         }
     }
     return true;
@@ -1023,12 +1023,10 @@ bool qorbiterManager::readLocalConfig()
         {
 
             QDomElement configVariables = localConfig.documentElement().toElement();
-            qDebug() << configVariables.childNodes().length();
-
             qs_routerip = configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue();
             currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
-           // iPK_Device = configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong();
-            qDebug() << currentSkin;
+            iPK_Device = configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong();
+
 
             if(!qs_routerip.isNull())
             {

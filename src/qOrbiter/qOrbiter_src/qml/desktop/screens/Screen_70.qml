@@ -75,8 +75,8 @@ Rectangle {
                 {
                     id:metadata
                     height: scaleY(50)
-                    width: childrenRect.width
-
+                    width: dcenowplaying.aspect=="wide"? nowplayingimage.width : childrenRect.width
+                    spacing: scaleY(1)
 
                     Rectangle {
                         id: gradientheader
@@ -133,8 +133,8 @@ Rectangle {
                         }
                         Image {
                             id: nowplayingimage
-                            width: dcenowplaying.aspect=="wide"? scaleX(25) : scaleX(20)
-                            height:dcenowplaying.aspect=="wide"? scaleY(25) : scaleY(50)
+                            width: dcenowplaying.aspect=="wide"? scaleX(30) : scaleX(20)
+                            height:dcenowplaying.aspect=="wide"? scaleY(30) : scaleY(50)
                             source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
                         }
                     }
@@ -161,8 +161,9 @@ Rectangle {
                         Column{
                             id:textcol
                             spacing: scaleY(1.5)
-                            width: parent.width
-                            height: childrenRect.height
+                           width: nowplayingimage.width
+                           height: childrenRect.height
+
 
                             Text {
                                 id: generaltitle
@@ -182,7 +183,7 @@ Rectangle {
                                 text: qsTr("Program :") + dcenowplaying.tvProgram
                                 font.family: "Droid Sans"
                                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                                font.bold: true
+                              //  font.bold: true
                                 smooth: true
                                 font.pixelSize: scaleY(1.5)
                                 visible:  dcenowplaying.tvProgram =="" ? false: true
@@ -194,7 +195,7 @@ Rectangle {
                                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                                 text: qsTr("Episode: ") + dcenowplaying.episode
                                 font.family: "Droid Sans"
-                                font.bold: true
+                              //  font.bold: true
                                 smooth: true
                                 font.pixelSize: scaleY(1.5)
                                 visible:  dcenowplaying.episode =="" ? false: true
@@ -206,7 +207,7 @@ Rectangle {
                                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                                 text: qsTr("Genre(s): ") + dcenowplaying.genre
                                 font.family: "Droid Sans"
-                                font.bold: true
+                               // font.bold: true
                                 smooth: true
                                 font.pixelSize: scaleY(1.5)
                                 visible:  dcenowplaying.genre =="" ? false: true
@@ -221,13 +222,13 @@ Rectangle {
 
                             Text {
                                 id: starring
-                                width: childrenRect.width
+                                width: parent.width
                                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                                text: qsTr("Starring: ") + dcenowplaying.performerlist
+                                text: qsTr("Perfomers: ") + dcenowplaying.performerlist
                                 font.family: "Droid Sans"
-                                font.bold: true
+                                //  font.bold: true
                                 smooth: true
-                                font.pixelSize: scaleY(1.5)
+                                font.pixelSize: scaleY(2)
                                 elide: "ElideRight"
                                 visible:  dcenowplaying.performerlist =="" ? false: true
 

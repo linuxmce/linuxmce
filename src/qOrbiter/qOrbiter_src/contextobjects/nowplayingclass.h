@@ -231,8 +231,8 @@ public slots:
     void setTrack (QString inc_track) {track = inc_track;  emit trackChanged();}
     QString getTrack() {return track;}
 
-    void setPerformers (QString inc_performer) {performers << inc_performer;  emit performersChanged();}
-    QString getPerformers() {performerlist = performers.join(" | "); return performerlist;}
+    void setPerformers (QString inc_performer) {performerlist.append( inc_performer + " | "); emit performersChanged();}
+    QString getPerformers() { return performerlist;}
 
     void setDirector (QString inc_director) {directors << inc_director;  emit directorChanged();}
     QString getDirector() {director = directors.join(" | "); return director;}
@@ -244,7 +244,7 @@ public slots:
     QString getRelease() {return releasedate;}
 
     inline QString getSynop() {return synop;}
-    inline void setSynop(QString s) { synop = s; emit synopChanged(); }
+    inline void setSynop(QString s) { synop = s; qDebug()<< synop; emit synopChanged(); }
 };
 
 #endif // NOWPLAYINGCLASS_H
