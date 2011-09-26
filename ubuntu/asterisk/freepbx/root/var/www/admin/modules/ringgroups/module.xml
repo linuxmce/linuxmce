@@ -1,0 +1,34 @@
+<module>
+	<rawname>ringgroups</rawname>
+	<name>Ring Groups</name>
+	<version>2.2.15.1</version>
+	<type>setup</type>
+	<category>Inbound Call Control</category>
+	<description>
+		Creates a group of extensions that all ring together. Extensions can be rung all at once, or in various 'hunt' configurations. Additionally, external numbers are supported, and there is a call confirmation option where the callee has to confirm if they actually want to take the call before the caller is transferred.
+	</description>
+	<changelog>
+		*2.2.15.1* #2057 don't strip CID prefix if no prefix is being added
+		*2.2.15* #2024 provide alert when adding duplicate group number
+		*2.2.14* Fixed bug where nested CID prefixes ends up removing part of the valid CID info
+		*2.2.13* Add he_IL translation
+		*2.2.12* never allow group to include itself as nnn# and create infinite loop
+		*2.2.11* changed _ALERT_INFO to __ALERT_INFO ('_' -> '__') so it is infinitely inheritted into the dialplan
+		*2.2.10* Added BLKVM DB tree to fix inability to transfer a received call to another user, and make NODEST stuff work overall
+		*2.2.9* Modified NODEST stuff to improve some cases where it was still failing, and improve '#' transfer scenarios
+		*2.2.8* Allow ringall-prim as well as ringall for strategies with confirmation (#1408)
+		*2.2.7* Add tool tip for Group Description (#1459)
+		*2.2.6* Add NODEST so that destination (often vm) is not taken if called from queue or ringgroup and such is honored for childeren
+		*2.2.5* Modified flyover help - since moh works with confirmation now
+		*2.2.4* Added sound files for default confirmation messages
+		*2.2.3* Clarification on help message if you want to ring follow-me and other non-extension numbers
+		*2.2.2* Forgot to add default starting RG number as 600
+		*2.2.1* Cleanup of the UI, remove workaround of formatting bugs with previous UI
+		*2.2* First release for FreePBX 2.2 - Fixed compatibility issue with new UI</changelog>
+	<menuitems>
+		<ringgroups>Ring Groups</ringgroups>
+	</menuitems>
+	<location>release/2.2/ringgroups-2.2.15.tgz</location>
+	<info>http://aussievoip.com.au/wiki/freePBX-RingGroups</info>
+	<md5sum>aafb8edea59eb049a76f7bd6bc079b9d</md5sum>
+</module>

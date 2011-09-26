@@ -1,0 +1,23 @@
+;
+; IAXY Provisioning description
+;
+dhcp
+;ip: 216.207.244.130
+;netmask: 255.255.255.192
+;gateway: 216.207.244.129
+codec: ulaw
+;codec: adpcm
+server: 192.168.0.1
+;altserver: 192.168.0.2
+user: myuser
+pass: mypass
+register
+;heartbeat
+;debug
+;
+; Feature tuning (default is all enabled)
+;
+;disablecid
+;disablecw
+;disablecidcw
+;disable3way

@@ -1,0 +1,14 @@
+Source: freepbx
+Section: unknown
+Priority: optional
+Maintainer: LinuxMCE Developers <developers@linuxmce.org>
+Build-Depends: debhelper (>= 4.0.0)
+Standards-Version: 3.6.1
+
+Package: freepbx
+Architecture: any
+Pre-Depends: asterisk (>= 1:1.4.10~dfsg)
+Provides: asterisk-config-custom
+Depends: php-db, pluto-boot-scripts
+Description: FreePBX
+ FreePBX

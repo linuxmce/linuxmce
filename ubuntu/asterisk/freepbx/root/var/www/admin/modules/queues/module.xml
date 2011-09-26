@@ -1,0 +1,31 @@
+<module>
+	<rawname>queues</rawname>
+	<name>Queues</name>
+	<version>2.2.10.3</version>
+	<type>setup</type>
+	<category>Inbound Call Control</category>
+	<description>
+		Creates a queue where calls are placed on hold and answered on a first-in, first-out basis. Many options are available, including ring strategy for agents, caller announcements, max wait times, etc. 
+	</description>
+	<changelog>
+		*2.2.10.3* #2156 fix select box to deal with language translation properly
+		*2.2.10.2* #2057 don't strip CID prefix if no prefix is being added
+		*2.2.10* Changed chained CID prefixes to be handled the same as ringgroup and followme, also fixed #1965
+		*2.2.9* Replaced deprecated CALLERIDNAME and TIMSTAMP variables with the current and future supported versions
+		*2.2.8.1* Updated tootip to warn about agents.conf (unsupported and know issues) and warn about penalties (broken in asterisk)
+		*2.2.8* Fixed typo in 2.2.7
+		*2.2.7* Fixed eventmemberstatus #1635
+		*2.2.6* Add he_IL translation
+		*2.2.5* Added BLKVM DB tree to fix inability to transfer a received call to another user, and make NODEST stuff work overall
+		*2.2.4* Change _NODEST to __NODEST for some scenarios that require infinite inheritance
+		*2.2.3* Updated for freepbx 2.2.0rc2
+		*2.2.2* Disallow Queue 0 (#1487)
+		*2.2.1* Add NODEST to tell children NOT to go to destinations (like voicemail or other) - helps with followme in a queue
+		*2.2* First release for FreePBX 2.2 - Fixed compatibility issue with new UI</changelog>
+	<menuitems>
+		<queues>Queues</queues>
+	</menuitems>
+	<location>release/2.2/queues-2.2.10.2.tgz</location>
+	<info>http://aussievoip.com.au/wiki/freePBX-Queues</info>
+	<md5sum>7c577e3e60d3ee571edc856cd985750b</md5sum>
+</module>
