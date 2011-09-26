@@ -1,7 +1,0 @@
-#!/bin/bash
-
-. /usr/pluto/bin/Utils.sh
-
-DelBookmark "http://10.0.1.2/admin/"
-
-rm -f /etc/asterisk/version
