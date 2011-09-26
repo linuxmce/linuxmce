@@ -1,20 +1,7 @@
 import QtQuick 1.0
 import "../components"
-Rectangle{
+Stage{
     id:reloadrouter
-    height: style.orbiterH
-    width: style.orbiterW
-   // color: style.highlight2
-    gradient: Gradient {
-        GradientStop {
-            position: 0.00;
-            color: style.higlight2;
-        }
-        GradientStop {
-            position: 1.00;
-            color: style.highlight1;
-        }
-    }
 
     Rectangle{
         id:containerrect
@@ -52,7 +39,7 @@ Rectangle{
                 ButtonSq{
                     id: confirm
                     buttontext: qsTr("Reload Now")
-                    buttonsqradius: 20
+                    buttonsqradius: 2.5
                     buttontextitalic: true
 
                     MouseArea{
@@ -64,7 +51,7 @@ Rectangle{
                 ButtonSq{
                     id: deny
                     buttontext: qsTr("Reload Later")
-                    buttonsqradius: 20
+                    buttonsqradius: 2.5
                     buttontextitalic: true
                     MouseArea{
                         anchors.fill: parent
@@ -72,7 +59,6 @@ Rectangle{
                     }
                 }
             }
-        }
-       HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
+        }       
     }
 

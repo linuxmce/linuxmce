@@ -202,6 +202,7 @@ void qorbiterManager::gotoQScreen(QString s)
 //this block sets up the connection to linuxmce
 bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode)
 {
+    iPK_Device= PK_Device;
     pqOrbiter = new DCE::qOrbiter(PK_Device, sRouterIP, true,bLocalMode);
     pqOrbiter->qmlUI = this;
 
@@ -223,12 +224,11 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
               qt GUI (qml or qobject based) signals to DCE slots and vice versa!
             */
 
-        if (getConf(PK_Device) )        //getting configuration from qOrbiterGen xml file
+        if (getConf(PK_Device) == true )        //getting configuration from qOrbiterGen xml file
         {
 
             if (pqOrbiter->initialize()) //the dcethread initialization
             {
-
                 gotoQScreen("Screen_1.qml");
                 return true;
             }
@@ -238,15 +238,33 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Device Failed to get configuration!");
                 return false;
             }
-
+        }
+        else
+        {
+            qDebug() << "Config invalid";
+            return false;
         }
     }
     else
     {
-        return false;
+        bAppError = true;
+        if( pqOrbiter->m_pEvent && pqOrbiter->m_pEvent->m_pClientSocket && pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
+        {
+            bAppError = false;
+            bReload = false;
+            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "No Router.  Will abort");
+            qDebug() << "No Router, Aborting";
+            return false;
+        }
+        else
+        {
+            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
+            qDebug() << "Connect Failed";
+        }
     }
-
 }
+
+
 
 bool qorbiterManager::refreshUI()
 {
@@ -289,14 +307,14 @@ bool qorbiterManager::getConf(int pPK_Device)
     // qDebug() << "PK_Device No:" << iPK_Device;
 
     QDomDocument configData;
-
     const QByteArray tConf = binaryConfig.data();
     configData.setContent(tConf,false);
     if(configData.isDocument() == false)
     {
         qDebug() << "Invalid config for device: " << iPK_Device;
         qDebug() << "Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device) ;
-        gotoQScreen("Splash.qml");
+
+        return false;
     }
 
     QDomElement root = configData.documentElement();        //represent configuration in memeory
@@ -1004,7 +1022,7 @@ bool qorbiterManager::readLocalConfig()
 
             qs_routerip = configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue();
             currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
-            iPK_Device = configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong();
+           // iPK_Device = configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong();
             qDebug() << currentSkin;
 
             if(!qs_routerip.isNull())

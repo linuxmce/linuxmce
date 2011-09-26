@@ -174,6 +174,15 @@ int main(int argc, char* argv[])
 #endif
     }
 
+#ifndef for_harmattan
+        QApplication::setGraphicsSystem("raster");
+#endif
+        QApplication a(argc, argv);
+        qorbiterManager * w = new qorbiterManager(PK_Device,QString::fromStdString(sRouter_IP.c_str()));
+
+
+
+            a.exec();
 #ifdef WIN32
     WORD    wVersion;
     WSADATA wsaData;
@@ -209,28 +218,17 @@ int main(int argc, char* argv[])
     bool bReload=false;
     try
     {
-        //qt orbiter ui intialization
-#ifndef for_harmattan
-        QApplication::setGraphicsSystem("raster");
-#endif
-        QApplication a(argc, argv);
 
-        qorbiterManager * w = new qorbiterManager(PK_Device,QString::fromStdString(sRouter_IP.c_str()));
+            bAppError = w->setupLmce(PK_Device, sRouter_IP, true, bLocalMode);
+            if ( bAppError== false )
+            {
+              LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
+              qDebug() << "Connected!";
+              w->gotoQScreen("Splash.qml");
+              return a.exec();
+            }
 
-        //bool bLocalMode = false;
-        if (!w->setupLmce(PK_Device, sRouter_IP, true, bLocalMode)){
-            w->gotoQScreen("Splash.qml");
-           }
-
-            a.exec();
-
-
-
-        // intialziation end
-
-        /*
-            bAppError = true;
-            if( pqOrbiter->m_pEvent && pqOrbiter->m_pEvent->m_pClientSocket && pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
+            if(w->pqOrbiter->m_pEvent && w->pqOrbiter->m_pEvent->m_pClientSocket && w->pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
             {
                 bAppError = false;
                 bReload = false;
@@ -240,25 +238,21 @@ int main(int argc, char* argv[])
             }
             else
             {
-                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
-                qDebug() << "Connect Failed";
-                gotoQScreen("Splash.qml");
+                    bAppError = true;
+                    if( w->pqOrbiter->m_pEvent&& w->pqOrbiter->m_pEvent->m_pClientSocket && w->pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
+                    {
+                            bAppError = false;
+                            bReload = false;
+                            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "No Router.  Will abort");
 
-
-                  code to read data from file add it as context object goes here.
-                  also function to wrap back around to setup lmce
-
+                    }
+                    else
+                            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
             }
-        }
-
-        test block
-        if( pqOrbiter->m_bReload )
-            bReload=true;
-        pqOrbiter->QuickReload();
-        gotoQScreen("Splash.qml");
-        sleep(5);
-        setupLmce(iPK_Device, sRouterIP, false, false);
-        */
+            if( w->pqOrbiter->m_bReload )
+                    bReload=true;
+            w->gotoQScreen("Splash.qml");
+            delete w->pqOrbiter;
 
     }
     catch(string s)
