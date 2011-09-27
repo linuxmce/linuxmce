@@ -76,6 +76,7 @@ static DWORD PollThreadFunc(LPVOID lpParameter)
 		}
 		else if (Result == SOCKET_ERROR)
 		{
+			close(Socket);
 			PostMessage(Data->hWnd, Data->wMsg, 0, 2);
 			Socket = ProxyOrbiter_Connect(Data->ServerIP, Data->ServerPort);
 		}
