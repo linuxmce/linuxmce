@@ -11,8 +11,7 @@ SendToDCE()
 
 	if [[ "$Framework_DelayDCE" == DontDelayDCE ]]; then
 		Log "Sending DCE command: $Cmd"
-		/usr/pluto/bin/fdwrite --raw --fd 3 --data "$Cmd"$'\n'
-		#builtin echo "$Cmd" >&3
+		/usr/pluto/bin/fdwrite --raw --fd "$Framework_FD_DCE" --data "$Cmd"$'\n'
 	else
 		Log "Queuing DCE command: $Cmd"
 		Framework_DCEqueue=("${Framework_DCEqueue[@]}" "$Cmd")
@@ -46,9 +45,9 @@ ReadFromDevice()
 	esac
 
 	if [[ "$DeviceProtocol_Type" == line ]]; then
-		/usr/pluto/bin/fdread "--$Encoding" --line --eol "$DeviceProtocol_Separator" --fd 4
+		/usr/pluto/bin/fdread "--$Encoding" --line --eol "$DeviceProtocol_Separator" --fd "$Framework_FD_Device"
 	else # stream
-		/usr/pluto/bin/fdread "--$Encoding" --fd 4
+		/usr/pluto/bin/fdread "--$Encoding" --fd "$Framework_FD_Device"
 	fi
 }
 
@@ -69,9 +68,9 @@ SendToDevice()
 		;;
 	esac
 
-	/usr/pluto/bin/fdwrite "--$Encoding" --fd 4 --data "$1"
+	/usr/pluto/bin/fdwrite "--$Encoding" --fd "$Framework_FD_Device" --data "$1"
 	if [[ "$DeviceProtocol_AutoAppendSeparator" == yes ]]; then
-		/usr/pluto/bin/fdwrite "--$Encoding" --fd 4 --data "$DeviceProtocol_Separator"
+		/usr/pluto/bin/fdwrite "--$Encoding" --fd "$Framework_FD_Device" --data "$DeviceProtocol_Separator"
 	fi
 	if [[ -n "$DeviceProtocol_Delay" ]]; then
 		sleep "$DeviceProtocol_Delay"
@@ -83,7 +82,7 @@ FdWatch()
 	local Fd="$1" Function="$2"
 
 	WatchFD="$WatchFD $Fd"
-	eval "FdAction_$Fd=\"$Function\""
+	export -n "FdAction_$Fd=$Function"
 }
 
 FdStopWatching()
@@ -151,6 +150,9 @@ printf()
 	builtin printf "$@" >&2
 }
 
+Framework_FD_DCE=
+Framework_FD_Device=
+
 Framework_LoadParms()
 {
 	Router=dcerouter
@@ -179,7 +181,7 @@ Framework_MainLoop()
 	Log "Main Loop"
 
 	while [[ "$Quit" != Quit ]]; do
-		DataAvailable=$(/usr/pluto/bin/fdselect -1 0 $Framework_MainFDs $WatchFD)
+		DataAvailable=$(/usr/pluto/bin/fdselect -1 0 $WatchFD)
 		Log "Data available: $DataAvailable"
 		for FD in $DataAvailable; do
 			Log "Processing fd $FD"
@@ -203,9 +205,6 @@ Framework_Init()
 
 	Configure
 
-	FdAction_3=Framework_ReadFromDCE
-	FdAction_4=Framework_ReadFromDevice
-	
 	Framework_PipeDir="/usr/pluto/pipes/$DevNo"
 	rm -rf "$Framework_PipeDir"
 	mkdir -p "$Framework_PipeDir"
@@ -231,14 +230,18 @@ Framework_OnExit()
 
 Framework_OpenFD()
 {
-	local FD="$1" File="$2"
+	local VarFD="$1" File="$2"
+	local FD
 
 	while :; do
 		sleep .5
-		if eval "exec $FD<>'$File'"; then
+		if exec {FD}<>"$File"; then
+			export -n "$VarFD=$FD"
 			return 0
 		fi
 	done
+
+	export -n "$VarFD=-1"
 	return 1
 }
 
@@ -247,12 +250,10 @@ Framework_ConnectDCE()
 	local PathToWhisperer="/usr/pluto/bin/DCE-Whisperer"
 	Framework_DCE_ExitCodeFile="$Framework_PipeDir/DCE_ExitCode"
 
-	if [[ "$Framework_MainFDs" != *3* ]]; then
-		Framework_MainFDs="$Framework_MainFDs 3"
-	fi
 	socat PTY,link="$Framework_PipeDir/ttyDCE",echo=0,icanon=0,raw EXEC:"\"$PathToWhisperer\" -d \"$DevNo\" -r \"$Router\" -e \"$Framework_DCE_ExitCodeFile\"" &
 	Framework_PIDofDCEConn=$!
-	if Framework_OpenFD 3 "$Framework_PipeDir/ttyDCE"; then
+	if Framework_OpenFD Framework_FD_DCE "$Framework_PipeDir/ttyDCE"; then
+		FdWatch "$Framework_FD_DCE" Framework_ReadFromDCE
 		return 0
 	fi
 
@@ -276,12 +277,14 @@ Framework_ConnectDevice()
 			if [[ ! -e "$DeviceConnection_SerialPort" || -d "$DeviceConnection_SerialPort" ]]; then
 				Log "ConnectDevice: Invalid serial port"
 			fi
-			exec 5<>"$DeviceConnection_SerialPort"
+
+			local FD_SerialPort
+			exec {FD_SerialPort}<>"$DeviceConnection_SerialPort"
 			Log "ConnectDevice: Parameters: Baud=$DeviceConnection_BaudRate Parity=$DeviceConnection_Parity Port=$DeviceConnection_SerialPort"
-			/usr/pluto/bin/TestSerialPort -p /dev/fd/5 -b "$DeviceConnection_BaudRate" -P "$DeviceConnection_Parity"
-			socat PTY,link="$Framework_PipeDir/ttyDevice",echo=0,icanon=0,raw /dev/fd/5 &
+			/usr/pluto/bin/TestSerialPort -p "/dev/fd/$FD_SerialPort" -b "$DeviceConnection_BaudRate" -P "$DeviceConnection_Parity"
+			socat PTY,link="$Framework_PipeDir/ttyDevice",echo=0,icanon=0,raw "/dev/fd/$FD_SerialPort" &
 			Framework_PIDofDevConn=$!
-			exec 5>&-
+			exec {FD_SerialPort}>&-
 		;;
 		inet)
 			Log "ConnectDevice: Parameters: Protocol=$DeviceConnection_Protocol Endpoint: $DeviceConnection_Endpoint"
@@ -299,10 +302,9 @@ Framework_ConnectDevice()
 		;;
 	esac
 
-	if Framework_OpenFD 4 "$Framework_PipeDir/ttyDevice"; then
-		if [[ "$Framework_MainFDs" != *4* ]]; then
-			Framework_MainFDs="$Framework_MainFDs 4"
-		fi
+	if Framework_OpenFD Framework_FD_Device "$Framework_PipeDir/ttyDevice"; then
+		FdWatch "$Framework_FD_Device" Framework_ReadFromDevice
+
 		Log "ConnectDevice: Device connected successfully"
 		OnDeviceConnect
 	else
@@ -328,7 +330,7 @@ Framework_ReadFromDCE()
 	CmdReplyFile="$Framework_PipeDir/CmdReply"
 
 	Log "Framework_ReadFromDCE"
-	DCEline=$(/usr/pluto/bin/fdread --raw --line --eol $'\n' --fd 3)
+	DCEline=$(/usr/pluto/bin/fdread --raw --line --eol $'\n' --fd "$Framework_FD_DCE")
 	if [[ -z "$DCEline" ]]; then
 		Log "DCE whisperer exited. Shutting down."
 		if [[ -f "$Framework_DCE_ExitCodeFile" ]]; then
@@ -404,6 +406,12 @@ Framework_ReadFromDevice()
 
 	if [[ -z "$Data" ]]; then
 		Log "Connection to the device was lost"
+		if [[ -n "$Framework_FD_Device" ]]; then
+			FdStopWatching "$Framework_FD_Device"
+			exec {Framework_FD_Device}>&-
+			Framework_FD_Device=
+		fi
+
 		if [[ "$DeviceConnection_OnDisconnect" == reconnect ]]; then
 			Framework_ConnectDevice
 		else

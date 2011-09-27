@@ -1,3 +1,10 @@
+dce-whisperer (3.1) unstable; urgency=low
+
+  * Use dynamic filedescriptor opening to avoid clashes with already open file
+    descriptors.
+
+ -- Radu C <radu.cx@gmail.com>  Sun, 25 Sep 2011 17:12:22 +0100
+
 dce-whisperer (3.0.12) unstable; urgency=low
 
   * Implement the BuildCommand function.
