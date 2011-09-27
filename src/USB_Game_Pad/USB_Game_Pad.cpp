@@ -169,7 +169,8 @@ bool USB_Game_Pad::GetConfig()
 	    m_mapCodesToButtons["USB-GAMEPAD-B6"] = make_pair<string,int>("w",0);
 	    m_mapCodesToButtons["USB-GAMEPAD-B7"] = make_pair<string,int>("3",0);
 	    m_mapCodesToButtons["USB-GAMEPAD-B8"] = make_pair<string,int>("4",0);
-	    m_mapCodesToButtons["USB-GAMEPAD-B9"] = make_pair<string,int>("5",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-B9"] = make_pair<string,int>("-",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-B10"] = make_pair<string,int>("+",0);
 	  }
 	
 	// Create the input thread.
@@ -629,7 +630,7 @@ void USB_Game_Pad::ProcessGamePad(int fd)
       if (errno != EAGAIN)
 	{
 	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ProcessGamePad(%d) Error reading event packet.",fd);
-	  m_iErrors++;
+	  //m_iErrors++;
 	  return;
 	} 
     }
