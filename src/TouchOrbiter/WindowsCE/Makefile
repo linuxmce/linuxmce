@@ -1,4 +1,5 @@
 export PATH:=/opt/mingw32ce/bin:/opt/x86mingw32ce/bin:${PATH}
+export SHELL:=/bin/bash
 
 default:
 	@echo "Available targets:"
