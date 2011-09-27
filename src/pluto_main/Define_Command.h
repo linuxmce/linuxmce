@@ -989,7 +989,7 @@
 #define COMMAND_HDP_CONST 1087
 #define COMMAND_Specify_Capture_Card_Audio_Port_CONST 1088
 #define COMMAND_Update_Move_Status_CONST 1089
-#define COMMAND_Connect_to_Device_CONST 1090
+#define COMMAND_Get_Attribute_Image_CONST 1090
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"

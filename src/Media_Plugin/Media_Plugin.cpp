@@ -220,9 +220,9 @@ int MoveJob::PercentComplete()
   if ( pTask_Current==NULL || iTaskNum==0 )
     return 0; // hasn't started yet.
 
-  int RangeThisTask = 100 / m_listTask.size(); 
+  int RangeThisTask = 100 / m_listTask.size();
   int ScaledPercent = pTask_Current->PercentComplete()*RangeThisTask / 100;
-  
+
   return (RangeThisTask * (iTaskNum-1)) + ScaledPercent;
 
 }
@@ -247,7 +247,7 @@ string MoveJob::ToString()
     }
 
   string sTimeLeft;
-  
+
   if ( pTask_Current )
     sTimeLeft = "(" + StringUtils::SecondsAsTime(pTask_Current->SecondsRemaining()) + ")";
 
@@ -293,9 +293,9 @@ int MoveTask::Run()
     {
       return RunAlreadySpawned();
     }
-  
+
   DeviceData_Base *pDevice_App_Server = m_pMoveJob->m_pCommand_Impl->m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_App_Server_CONST, m_pMoveJob->m_pCommand_Impl);
-  
+
   if (!pDevice_App_Server)
     {
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MoveTask::Run() - Cannot move, no App Server found.");
@@ -307,14 +307,14 @@ int MoveTask::Run()
     }
 
   // Pass these parameters to the MoveWrapper.sh
-  string strParameters = 
+  string strParameters =
     StringUtils::itos(m_pMoveJob->m_pCommand_Impl->m_dwPK_Device) + "\t" +
     StringUtils::itos(m_pJob->m_iID_get()) + "\t" +
-    StringUtils::itos(m_iID_get()) + "\t" + 
-    m_sFileName + "\t" + 
+    StringUtils::itos(m_iID_get()) + "\t" +
+    m_sFileName + "\t" +
     m_sDestinationFileName;
- 
-  string sResultMessage = 
+
+  string sResultMessage =
     StringUtils::itos(m_pMoveJob->m_pCommand_Impl->m_dwPK_Device) + " " +   // From device
     StringUtils::itos(m_pMoveJob->m_pCommand_Impl->m_dwPK_Device) + " " +   // To Device
     StringUtils::itos(MESSAGETYPE_COMMAND) + " " +                          // 1 = COMMAND
@@ -328,7 +328,7 @@ int MoveTask::Run()
   // Passed to the App Server as a unique name that can be killed later.
   m_sSpawnName = "move_job_" +
     StringUtils::itos(m_pJob->m_iID_get()) +
-    "_task_" + 
+    "_task_" +
     StringUtils::itos(m_iID);
 
   DCE::CMD_Spawn_Application CMD_Spawn_Application(m_pMoveJob->m_pCommand_Impl->m_dwPK_Device,
@@ -357,7 +357,7 @@ int MoveTask::Run()
   //     // Set the database location appropriately.
   //     string sDestinationPath = FileUtils::BasePath(m_sDestinationFileName);
   //     string sDestinationBaseName = FileUtils::FilenameWithoutPath(m_sDestinationFileName);
-      
+
   //     m_pMoveJob->m_pRow_File->Path_set(sDestinationPath);
   //     m_pMoveJob->m_pRow_File->Path_set(sDestinationBaseName);
   //     m_pMoveJob->m_pDatabase_pluto_media->File_get()->Commit();
@@ -371,7 +371,7 @@ bool MoveTask::Abort()
      m_pDevice_App_Server->m_dwPK_Device,
      m_sSpawnName,
      false);
-  m_pMoveJob->m_pCommand_Impl->SendCommand(CMD_Kill_Application); 
+  m_pMoveJob->m_pCommand_Impl->SendCommand(CMD_Kill_Application);
 
   return Task::Abort(); // superclass
 
@@ -389,17 +389,17 @@ void MoveTask::UpdateProgress(string sStatus, int iPercent, int iTime, string sT
       LoggerWrapper::GetInstance()->Write(LV_STATUS, "MoveTask::UpdateProgress ignoring because we're done status %s", sStatus.c_str());
       return;
     }
-  
+
   m_sText=sText; // expose new status text to task so other parts can use it.
 
-  LoggerWrapper::GetInstance()->Write(LV_WARNING,"MoveTask::UpdateProgress id %d m_eTaskStatus get %d status %s message %s sFilename %s sDestinationFileName %s", 
-				    m_pMoveJob->m_iID_get(), 
+  LoggerWrapper::GetInstance()->Write(LV_WARNING,"MoveTask::UpdateProgress id %d m_eTaskStatus get %d status %s message %s sFilename %s sDestinationFileName %s",
+				    m_pMoveJob->m_iID_get(),
 				    m_eTaskStatus_get(),
 				    sStatus.c_str(),
 				    sText.c_str(),
 				    m_sFileName.c_str(),
 				    m_sDestinationFileName.c_str());
-  
+
   if ( sStatus=="p" )
     {
       m_iPercent=iPercent;
@@ -439,7 +439,7 @@ int MoveTask::SecondsRemaining()
 {
   if ( m_iTime )
     return m_iTime;
-  
+
   return Task::SecondsRemaining();
 
 }
@@ -475,7 +475,7 @@ int MoveDBTask::Run()
     }
   else
     m_eTaskStatus_set(TASK_FAILED_ABORT);  // If this didn't work, no point in doing other tasks.
- 
+
   return 0; // Done.
 }
 
@@ -721,7 +721,7 @@ continue;
                     pRow_Device_EntertainArea->FK_Device_getrow( )->Device_FK_Device_ControlledVia_getrows( &vectRow_Device ); // all it's children
                     for( size_t child=0;child<vectRow_Device.size( );++child )
                         AddDeviceToEntertainArea( pEntertainArea, vectRow_Device[child] );
-                }	
+                }
             }
         }
     }
@@ -799,7 +799,7 @@ continue;
 	m_pGeneric_NonPluto_Media = new Generic_NonPluto_Media(this);
     m_pGenericMediaHandlerInfo = new MediaHandlerInfo(m_pGeneric_NonPluto_Media,this,0,0,false,false);
 
-	DCEConfig dceconfig; 
+	DCEConfig dceconfig;
 	string sMediaType = dceconfig.m_mapParameters_Find("Bookmark_Media");
 	string::size_type pos=0;
 	while( pos<sMediaType.size() && pos!=string::npos )
@@ -1034,7 +1034,7 @@ bool Media_Plugin::Register()
     m_pDatagrid_Plugin->RegisterDatagridGenerator(
         new DataGridGeneratorCallBack( this, ( DCEDataGridGeneratorFn )( &Media_Plugin::Bookmarks ))
         , DATAGRID_Bookmarks_CONST,PK_DeviceTemplate_get() );
-	
+
     m_pDatagrid_Plugin->RegisterDatagridGenerator(
         new DataGridGeneratorCallBack( this, ( DCEDataGridGeneratorFn )( &Media_Plugin::BookmarksByMediaType ))
         , DATAGRID_Bookmarks_by_MediaType_CONST,PK_DeviceTemplate_get() );
@@ -1120,7 +1120,7 @@ void Media_Plugin::AddDeviceToEntertainArea( EntertainArea *pEntertainArea, Row_
 		pMediaDevice->m_pDeviceData_Router->m_pRow_Device->FK_DeviceTemplate_getrow()->DeviceTemplate_MediaType_FK_DeviceTemplate_getrows(&vectRow_DeviceTemplate_MediaType);
 
 		// See if this is an Disc Drive, if so, get the media identifier
-		if( pMediaDevice->m_pDeviceData_Router->WithinCategory(DEVICECATEGORY_Disc_Drives_CONST) )	
+		if( pMediaDevice->m_pDeviceData_Router->WithinCategory(DEVICECATEGORY_Disc_Drives_CONST) )
 		{
 			vector<DeviceData_Router *> vectDeviceData_Router;
 			pMediaDevice->m_pDeviceData_Router->FindSibblingsWithinCategory( DEVICECATEGORY_Media_Identifiers_CONST, vectDeviceData_Router);
@@ -1195,28 +1195,28 @@ bool Media_Plugin::MediaInserted( class Socket *pSocket, class Message *pMessage
 	    {
 		if (  (!pEntertainArea->m_pRoom) || (it->second->m_dwPK_Room != pEntertainArea->m_pRoom->m_dwPK_Room) )
 			continue;
-		
+
 		int iPK_Device_Orbiter = it->second->m_pDeviceData_Router->m_dwPK_Device;
 		LoggerWrapper::GetInstance()->Write( LV_STATUS, "DEBUG: asking user at Orbiter %d", iPK_Device_Orbiter);
-	
+
 		string sDescription = "HD-DVD/Bluray disk is inserted, do you want to rip it?";
 		string sRipDescription = "The default name to save this media under is shown below.  You may change it.  Then, touch 'Save Public' to make this media public, or, confirm that you are the current user and touch 'Save Private'.  Use / for subdirectories, like: dir/filename";
 		string sButton1 = "Yes";
-	
-		string sCommand1 = StringUtils::itos(m_dwPK_Device) + " " + 
+
+		string sCommand1 = StringUtils::itos(m_dwPK_Device) + " " +
 			StringUtils::itos(iPK_Device_Orbiter) + " " +
 			StringUtils::itos(MESSAGETYPE_COMMAND) + " " +
 			StringUtils::itos(COMMAND_Goto_Screen_CONST) + " " +
-			StringUtils::itos(COMMANDPARAMETER_PK_MediaType_CONST) 
+			StringUtils::itos(COMMANDPARAMETER_PK_MediaType_CONST)
 			+ " " + "0" + " " +
-			StringUtils::itos(COMMANDPARAMETER_EK_Disc_CONST) + " " 
+			StringUtils::itos(COMMANDPARAMETER_EK_Disc_CONST) + " "
 			+ "0" + " " +
-			StringUtils::itos(COMMANDPARAMETER_PK_Screen_CONST) + " " 
+			StringUtils::itos(COMMANDPARAMETER_PK_Screen_CONST) + " "
 			+ "19" + " " +
-			StringUtils::itos(COMMANDPARAMETER_Caption_CONST) + " " 
+			StringUtils::itos(COMMANDPARAMETER_Caption_CONST) + " "
 			+ "\"" + sRipDescription + "\"" + " " +
-			StringUtils::itos(COMMANDPARAMETER_Command_CONST) + " " 
-			+ 
+			StringUtils::itos(COMMANDPARAMETER_Command_CONST) + " "
+			+
 			"\""
 			+ StringUtils::itos(iPK_Device_Orbiter) + " " + StringUtils::itos(m_dwPK_Device) + " 1 337 "
 			"17 <%=EE#34%><%=EEU%><%=EE#34%> "
@@ -1226,23 +1226,23 @@ bool Media_Plugin::MediaInserted( class Socket *pSocket, class Message *pMessage
 			"131 0 "
 			"2 " + "<%=EE#34%>" + StringUtils::itos(pDeviceFrom->m_dwPK_Device) + "<%=EE#34%>"
 			"\"" + " " +
-			StringUtils::itos(COMMANDPARAMETER_Advanced_options_CONST) 
+			StringUtils::itos(COMMANDPARAMETER_Advanced_options_CONST)
 			+ " " + "1" + " " +
-			StringUtils::itos(COMMANDPARAMETER_Interruption_CONST) 
+			StringUtils::itos(COMMANDPARAMETER_Interruption_CONST)
 			+ " " + "0" + " " +
-			StringUtils::itos(COMMANDPARAMETER_Turn_On_CONST) + " " 
+			StringUtils::itos(COMMANDPARAMETER_Turn_On_CONST) + " "
 			+ "0" + " " +
-			StringUtils::itos(COMMANDPARAMETER_Queue_CONST) + " " 
+			StringUtils::itos(COMMANDPARAMETER_Queue_CONST) + " "
 			+ "0" + " ";
-	
+
 		string sButton2 = "No";
 		string sCommand2 = "";
-	
-	
-		DCE::SCREEN_PopupMessage cmd(m_dwPK_Device, iPK_Device_Orbiter, 
+
+
+		DCE::SCREEN_PopupMessage cmd(m_dwPK_Device, iPK_Device_Orbiter,
 				sDescription + "|" + sButton1 + "|" + sButton2,
-				sCommand1 + "|" + sCommand2, "hdbd-ripping", "0", "0", "1"); 
-	
+				sCommand1 + "|" + sCommand2, "hdbd-ripping", "0", "0", "1");
+
 		SendCommand(cmd);
 	    }
 
@@ -1362,12 +1362,12 @@ bool Media_Plugin::PlaybackCompleted( class Socket *pSocket,class Message *pMess
 		QueueMessageToRouter(new Message(m_dwPK_Device,DEVICEID_DCEROUTER,PRIORITY_NORMAL,
 			MESSAGETYPE_EXEC_COMMAND_GROUP,pMediaFile->m_dwPK_CommandGroup_Stop,0));
 
-	if(	
-		NULL != pMediaStream->m_pMediaDevice_Source && 
+	if(
+		NULL != pMediaStream->m_pMediaDevice_Source &&
 		pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device != pMessage->m_dwPK_Device_From
 	)
 	{
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Ignoring 'Playback completed' event because it's from a slave. Stream %d, MRL : %s", 
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Ignoring 'Playback completed' event because it's from a slave. Stream %d, MRL : %s",
 			iStreamID, sMRL.c_str());
 		return false;
 	}
@@ -1691,7 +1691,7 @@ MediaStream *Media_Plugin::StartMedia( MediaHandlerInfo *pMediaHandlerInfo, int 
 		if( !(*dequeMediaFile)[s]->m_dwPK_File )
 			AddFileToDatabase( (*dequeMediaFile)[s],pMediaHandlerInfo->m_PK_MediaType);
 	}
-	
+
 	MediaDevice *pMediaDevice=NULL;
     if( PK_Device_Source )
         pMediaDevice = m_mapMediaDevice_Find(PK_Device_Source);
@@ -1768,7 +1768,7 @@ dequeMediaFile->size() ? (*dequeMediaFile)[0]->m_sPath.c_str() : "NO",
 
         pMediaStream->m_dequeMediaFile += *dequeMediaFile;
     }
-    
+
 	if (pMediaStream->m_dequeMediaFile.size() != dequeMediaFile->size() && bQueue) {
 		// If we want to queue and there already was items in the deque, return here
 		// Load stream attributes for new files
@@ -1816,7 +1816,7 @@ dequeMediaFile->size() ? (*dequeMediaFile)[0]->m_sPath.c_str() : "NO",
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::StartMedia stream %d orbiter %d user %d remote %d",
 		pMediaStream->m_iStreamID_get(),pMediaStream->m_pOH_Orbiter_StartedMedia ? pMediaStream->m_pOH_Orbiter_StartedMedia->m_pDeviceData_Router->m_dwPK_Device : 0,
 		pMediaStream->m_iPK_Users,pMediaStream->m_dwPK_Device_Remote);
-		
+
 	if( StartMedia(pMediaStream,p_mapEntertainmentArea_OutputZone) )
 		return pMediaStream;
 	return NULL;
@@ -1856,7 +1856,7 @@ bool Media_Plugin::StartMedia(MediaStream *pMediaStream,map<int, pair<MediaDevic
 
 			// If Resume is set, then this media is just a temporary stream, like an announcement, and if something
 			// is currently playing, we will store that stream here and resume playing it when the temporary
-			// stream is done.  But don't resume another stream that also has a resume, since it too was just 
+			// stream is done.  But don't resume another stream that also has a resume, since it too was just
 			// an announcement.
 			if( pMediaStream->m_bResume && !pEntertainArea->m_pMediaStream->m_bResume )
 				pEntertainArea->m_vectMediaStream_Interrupted.push_back(pEntertainArea->m_pMediaStream);
@@ -1910,7 +1910,7 @@ bool Media_Plugin::StartMedia(MediaStream *pMediaStream,map<int, pair<MediaDevic
 			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Media_Plugin::StartMedia Cannot lock drive %d", pMediaFile->m_dwPK_Device_Disk_Drive);
 			if( pMediaStream->m_pOH_Orbiter_StartedMedia )
 			{
-				SCREEN_DialogCannotPlayMedia SCREEN_DialogCannotPlayMedia(m_dwPK_Device, 
+				SCREEN_DialogCannotPlayMedia SCREEN_DialogCannotPlayMedia(m_dwPK_Device,
 					pMediaStream->m_pOH_Orbiter_StartedMedia->m_pDeviceData_Router->m_dwPK_Device, "Drive is not available");
 				SendCommand(SCREEN_DialogCannotPlayMedia);
 			}
@@ -1946,7 +1946,7 @@ bool Media_Plugin::StartMedia(MediaStream *pMediaStream)
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Ready to call plugin's startmedia");
 	int iPK_Orbiter_PromptingToResume = 0;	string::size_type queue_pos;
-	if( pMediaStream->m_sStartPosition.size()==0 && 
+	if( pMediaStream->m_sStartPosition.size()==0 &&
 		(pMediaStream->m_iPK_MediaType==MEDIATYPE_pluto_StoredVideo_CONST || pMediaStream->m_iPK_MediaType==MEDIATYPE_pluto_DVD_CONST || pMediaStream->m_iPK_MediaType==MEDIATYPE_pluto_HDDVD_CONST || pMediaStream->m_iPK_MediaType==MEDIATYPE_pluto_BD_CONST || pMediaStream->m_iPK_MediaType==MEDIATYPE_lmce_Game_CONST) &&  // Don't bother asking for music
 			(pMediaStream->m_iDequeMediaFile_Pos<0 || pMediaStream->m_iDequeMediaFile_Pos>=pMediaStream->m_dequeMediaFile.size() ||
 			pMediaStream->GetCurrentMediaFile()->m_sStartPosition.size()==0) )
@@ -2070,7 +2070,7 @@ bool Media_Plugin::StartMedia(MediaStream *pMediaStream)
 		{
 			//m_pOrbiter_Plugin->DisplayMessageOnOrbiter(pMediaStream->m_pOH_Orbiter_StartedMedia->m_pDeviceData_Router->m_dwPK_Device,
 			//	"<%=T" + StringUtils::itos(TEXT_Cannot_play_media_CONST) + "%> " + sError );
-			SCREEN_DialogCannotPlayMedia SCREEN_DialogCannotPlayMedia(m_dwPK_Device, 
+			SCREEN_DialogCannotPlayMedia SCREEN_DialogCannotPlayMedia(m_dwPK_Device,
 				pMediaStream->m_pOH_Orbiter_StartedMedia->m_pDeviceData_Router->m_dwPK_Device, sError);
 			SendCommand(SCREEN_DialogCannotPlayMedia);
 		}
@@ -2106,22 +2106,22 @@ void Media_Plugin::FindActiveDestination(MediaStream *pMediaStream,map<int, pair
 			pEntertainArea->m_pMediaDevice_OutputZone = (*p_mapEntertainmentArea_OutputZone)[ pEntertainArea->m_iPK_EntertainArea ].second;
 			continue;
 		}
-		
+
 		if( pEntertainArea->m_pMediaDevice_ActiveDest )
 			continue;  // We already assigned this
-		
+
 		if( pMediaStream->m_pMediaHandlerInfo==m_pGenericMediaHandlerInfo )
 		{
 			// If we've got destination audio zones and we're not in there, then we need to find another one
-			if( (pMediaDevice_Audio && pMediaDevice_Audio->m_mapEntertainArea.find(pEntertainArea->m_iPK_EntertainArea)==pMediaDevice_Audio->m_mapEntertainArea.end()) 
+			if( (pMediaDevice_Audio && pMediaDevice_Audio->m_mapEntertainArea.find(pEntertainArea->m_iPK_EntertainArea)==pMediaDevice_Audio->m_mapEntertainArea.end())
 				|| (pMediaDevice_Video && pMediaDevice_Video->m_mapEntertainArea.find(pEntertainArea->m_iPK_EntertainArea)==pMediaDevice_Video->m_mapEntertainArea.end()) )
 			{
 				CheckForAlternatePipes(pMediaStream,pEntertainArea);
 				if( pEntertainArea->m_pMediaDevice_ActiveDest )  // Got one
 					continue;
 			}
-			if( (pMediaDevice_Audio && pMediaDevice_Audio!=pMediaStream->m_pMediaDevice_Source && pMediaDevice_Audio->m_mapEntertainArea.find(pEntertainArea->m_iPK_EntertainArea)!=pMediaDevice_Audio->m_mapEntertainArea.end()) 
-				|| (pMediaDevice_Video && pMediaDevice_Video!=pMediaStream->m_pMediaDevice_Source && pMediaDevice_Video->m_mapEntertainArea.find(pEntertainArea->m_iPK_EntertainArea)!=pMediaDevice_Video->m_mapEntertainArea.end()) ) 
+			if( (pMediaDevice_Audio && pMediaDevice_Audio!=pMediaStream->m_pMediaDevice_Source && pMediaDevice_Audio->m_mapEntertainArea.find(pEntertainArea->m_iPK_EntertainArea)!=pMediaDevice_Audio->m_mapEntertainArea.end())
+				|| (pMediaDevice_Video && pMediaDevice_Video!=pMediaStream->m_pMediaDevice_Source && pMediaDevice_Video->m_mapEntertainArea.find(pEntertainArea->m_iPK_EntertainArea)!=pMediaDevice_Video->m_mapEntertainArea.end()) )
 			{
 				pEntertainArea->m_pMediaDevice_ActiveDest=pMediaStream->m_pMediaDevice_Source;  // It's the same as the source
 				continue;  // We have destination audio/video zones, and they're in the ea we want
@@ -2134,7 +2134,7 @@ void Media_Plugin::FindActiveDestination(MediaStream *pMediaStream,map<int, pair
 			MediaDevice *pMediaDevice_CaptCard = m_mapMediaDevice_Find( pMediaStream->m_pMediaDevice_Source->m_pDevice_CaptureCard->m_dwPK_Device);
 			if( pMediaDevice_CaptCard )
 			{
-				// We won't need to use the capture card if it's in the same EA 
+				// We won't need to use the capture card if it's in the same EA
 				if( pMediaDevice_CaptCard->m_mapEntertainArea.find(pEntertainArea->m_iPK_EntertainArea)!=pMediaDevice_CaptCard->m_mapEntertainArea.end() )
 				{
 					pEntertainArea->m_pMediaDevice_ActiveDest=pMediaStream->m_pMediaDevice_Source;  // It's the same as the source
@@ -2169,7 +2169,7 @@ void Media_Plugin::FindActiveDestination(MediaStream *pMediaStream,map<int, pair
 				}
 			}
 		}
-		
+
 		if( !pEntertainArea->m_pMediaDevice_ActiveDest )
 			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Media_Plugin::StartMedia no ActiveDest for EA %d", pEntertainArea->m_iPK_EntertainArea);
 	}
@@ -2245,11 +2245,11 @@ void Media_Plugin::StartCaptureCard(MediaStream *pMediaStream)
 
 	if( pMediaStream->StreamingRequired() )
 	{
-		// For now we're not able to have a xine that renders to a NULL window and can do dvd's.  They require 
-		// a live window with events.  So for the moment this function will confirm that if we're playing a dvd disc remotely that we make the 
+		// For now we're not able to have a xine that renders to a NULL window and can do dvd's.  They require
+		// a live window with events.  So for the moment this function will confirm that if we're playing a dvd disc remotely that we make the
 		// source be one of the destinations, and change the mrl to reference the source disk
 
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Media_Plugin::StartCaptureCard id %d streaming to %d", 
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Media_Plugin::StartCaptureCard id %d streaming to %d",
 			pMediaStream->m_iStreamID_get(),
 			pDevice_MediaPlayer->m_dwPK_Device);
 
@@ -2284,7 +2284,7 @@ void Media_Plugin::StartCaptureCard(MediaStream *pMediaStream)
 	}
 	else
 	{
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Media_Plugin::StartCaptureCard id %d playing to %d", 
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Media_Plugin::StartCaptureCard id %d playing to %d",
 			pMediaStream->m_iStreamID_get(),
 			pDevice_MediaPlayer->m_dwPK_Device);
 		DCE::CMD_Play_Media cmd(m_dwPK_Device,
@@ -2342,7 +2342,7 @@ ReceivedMessageResult Media_Plugin::ReceivedMessage( class Message *pMessage )
 
 			if( !pOH_Orbiter || !pOH_Orbiter->m_pEntertainArea )
 			{
-				if( pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND && (pMessage->m_dwID==COMMAND_Stop_CONST || pMessage->m_dwID==COMMAND_Stop_Media_CONST) 
+				if( pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND && (pMessage->m_dwID==COMMAND_Stop_CONST || pMessage->m_dwID==COMMAND_Stop_Media_CONST)
 					&& pMessage->m_mapParameters[COMMANDPARAMETER_Eject_CONST]=="1" )
 				{
 					LoggerWrapper::GetInstance()->Write(LV_STATUS,"Got a stop with no media.  Will eject 1");
@@ -2387,7 +2387,7 @@ ReceivedMessageResult Media_Plugin::ReceivedMessage( class Message *pMessage )
 		if( !pEntertainArea->m_pMediaStream )
 		{
 			// If it's a volume command, let it go through to the m/d (which will get to the tv/stereo) anyway
-			if( pEntertainArea->m_pOH_Orbiter_OSD && pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND && 
+			if( pEntertainArea->m_pOH_Orbiter_OSD && pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND &&
 				(pMessage->m_dwID==COMMAND_Set_Volume_CONST || pMessage->m_dwID==COMMAND_Vol_Up_CONST || pMessage->m_dwID==COMMAND_Vol_Down_CONST) )
 			{
 				Message *pNewMessage = new Message( pMessage );
@@ -2395,7 +2395,7 @@ ReceivedMessageResult Media_Plugin::ReceivedMessage( class Message *pMessage )
 				QueueMessageToRouter( pNewMessage );
 				return rmr_Processed;
 			}
-			else if( pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND && (pMessage->m_dwID==COMMAND_Stop_CONST || pMessage->m_dwID==COMMAND_Stop_Media_CONST) 
+			else if( pMessage->m_dwMessage_Type==MESSAGETYPE_COMMAND && (pMessage->m_dwID==COMMAND_Stop_CONST || pMessage->m_dwID==COMMAND_Stop_Media_CONST)
 					&& pMessage->m_mapParameters[COMMANDPARAMETER_Eject_CONST]=="1" )
 			{
 				LoggerWrapper::GetInstance()->Write(LV_STATUS,"Got a stop with no media.  Will eject 4");
@@ -2464,7 +2464,7 @@ ReceivedMessageResult Media_Plugin::ReceivedMessage( class Message *pMessage )
 			{
 				// It's the second play in a row.  Change it to a pause
 				// If we need a discrete "play" command, we should create a new constant
-				// for "play/pause" combo buttons.  
+				// for "play/pause" combo buttons.
 				pMessage->m_dwID=COMMAND_Change_Playback_Speed_CONST;
 				pMessage->m_mapParameters[COMMANDPARAMETER_MediaPlaybackSpeed_CONST] = "0";
 				pMediaDevice->m_iLastPlaybackSpeed = 0;
@@ -2623,7 +2623,7 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"It's a valid command");
 					else if( ( pCommand->m_dwPK_Command==COMMAND_Vol_Up_CONST ||
 						   pCommand->m_dwPK_Command==COMMAND_Vol_Down_CONST ||
 						   pCommand->m_dwPK_Command==COMMAND_Set_Volume_CONST ||
-						   pCommand->m_dwPK_Command==COMMAND_Mute_CONST 
+						   pCommand->m_dwPK_Command==COMMAND_Mute_CONST
 						 ) && !pEntertainArea->m_bViewingLiveAVPath
                                                ) // It's a volume command and we're not on the LiveAV path
 					{
@@ -2820,7 +2820,7 @@ pMediaStream->m_iStreamID_get(),pMediaStream, (int) bDeleteStream, (int) bNoAuto
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Media_Plugin::StreamEnded() called with NULL MediaStream in it! Ignoring");
 		return;
 	}
-	
+
 	if( bDeleteStream )   // Release the drive if the stream is really over and not just being moved
 		ReleaseDriveLock(pMediaStream);
 
@@ -2944,7 +2944,7 @@ pMediaStream->m_iStreamID_get(),pMediaStream, (int) bDeleteStream, (int) bNoAuto
 		}
 	    delete pMediaStream;
 	}
-	else 
+	else
 		pMediaStream->m_bStopped=true;
 }
 
@@ -3426,7 +3426,7 @@ void Media_Plugin::CMD_MH_Play_Media(int iPK_Device,string sFilename,int iPK_Med
 		}
     }
 
-    if( vectEntertainArea.size()==1 && 
+    if( vectEntertainArea.size()==1 &&
 		( pMediaDevice_Source && pMediaDevice_Source->m_pDeviceData_Router->WithinCategory(DEVICECATEGORY_Disc_Drives_CONST) )
 		 || (dequeMediaFile.size()==0 && iPK_MediaType==0) ) // We got nothing -- find a disk drive within the entertainment area and send it a reset
     {
@@ -3501,7 +3501,7 @@ void Media_Plugin::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iSt
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "Can't jump in an empty queue");
         return;
     }
-	
+
 	pMessage->m_mapParameters[COMMANDPARAMETER_StreamID_CONST] = StringUtils::itos(pEntertainArea->m_pMediaStream->m_iStreamID_get());
 
 	if( pEntertainArea->m_pMediaStream->m_pMediaHandlerInfo->m_pCommand_Impl->m_pData->m_dwPK_Device!=m_dwPK_Device )
@@ -3719,7 +3719,7 @@ void Media_Plugin::CMD_MH_Move_Media(int iStreamID,string sPK_EntertainArea,stri
 
 	bool bNothingMoreToPlay = vectEntertainArea.size()==0;
 	LoggerWrapper::GetInstance()->Write( LV_STATUS, "Calling StopMedia parked %d vectea: %d", (int) pMediaStream->m_tTime_Parked, (int) vectEntertainArea.size());
-	
+
 	if( pMediaStream->m_tTime_Parked==0 )
 	{
 		// Don't bother stopping the media if it's already parked.  This media is not parked
@@ -3873,7 +3873,7 @@ void Media_Plugin::AddAlternativeRoute(DeviceData_Router *pDevice_From,DeviceDat
 	}
 	else
 		pMapPipe = it->second;
-	
+
 	(*pMapPipe)[ pPipe_New->m_PK_Pipe ] = pPipe_New;
 }
 
@@ -3911,7 +3911,7 @@ void Media_Plugin::HandleOnOffs(int PK_MediaType_Prior,int PK_MediaType_Current,
 	Row_MediaType *pRow_MediaType_Current = PK_MediaType_Current ? m_pDatabase_pluto_main->MediaType_get()->GetRow(PK_MediaType_Current) : NULL;
 
 	int PK_Pipe_Prior = pRow_MediaType_Prior && pRow_MediaType_Prior->FK_Pipe_isNull()==false ? pRow_MediaType_Prior->FK_Pipe_get() : 0;
-	
+
 	int PK_Pipe_Current = pRow_MediaType_Current && pRow_MediaType_Current->FK_Pipe_isNull()==false ? pRow_MediaType_Current->FK_Pipe_get() : 0;
 
 	map<int,MediaDevice *> mapMediaDevice_Current;
@@ -3934,7 +3934,7 @@ void Media_Plugin::HandleOnOffs(int PK_MediaType_Prior,int PK_MediaType_Current,
 		{
 			// We need a recursive function to propagate the off's along the pipe, but not turning off any devices
 			// that we're still going to use in the current map
-			if ( (*it).second ) 
+			if ( (*it).second )
 				TurnDeviceOff(PK_Pipe_Prior,(*it).second->m_pDeviceData_Router,&mapMediaDevice_Current,pEntertainArea);
 			else
 			{
@@ -3992,7 +3992,7 @@ void Media_Plugin::HandleOnOffs(int PK_MediaType_Prior,int PK_MediaType_Current,
 				if( !bViewingInRoom )
 					it->second->m_bDontSendOn=true;  // Additionally, if we're not viewing it in the room the device is in, don't send the live paths either
 			}
-			
+
 			for( map<int, class EntertainArea *>::iterator it=pMediaStream->m_mapEntertainArea.begin();
 				it!=pMediaStream->m_mapEntertainArea.end();++it)
 			{
@@ -4023,13 +4023,13 @@ void Media_Plugin::HandleOnOffs(int PK_MediaType_Prior,int PK_MediaType_Current,
 		// If this is on a media director and it's a child of the OSD, then turn the media director on
 		// Also turn on the media director if this is an audio only device to prevent the media director
 		// from powering on later and switching inputs on pipes away from the device.
-		else if( pMediaDevice->m_pDeviceData_Router->m_pDevice_MD && 
+		else if( pMediaDevice->m_pDeviceData_Router->m_pDevice_MD &&
 				pMediaDevice->m_pDeviceData_Router!=pMediaDevice->m_pDeviceData_Router->m_pDevice_MD &&
 				( (
-				     pMediaDevice->m_pDeviceData_Router->m_pDevice_ControlledVia && 
+				     pMediaDevice->m_pDeviceData_Router->m_pDevice_ControlledVia &&
 				     pMediaDevice->m_pDeviceData_Router->m_pDevice_ControlledVia->m_dwPK_DeviceTemplate==DEVICETEMPLATE_OnScreen_Orbiter_CONST
                                   ) || PK_Pipe_Current == PIPE_Audio_CONST
-				) 
+				)
 		       )
 		{
 #ifdef DEBUG
@@ -4062,12 +4062,12 @@ void Media_Plugin::HandleOnOffs(int PK_MediaType_Prior,int PK_MediaType_Current,
 		}
 
 		// See if it's a generic media stream, and it's using it's own pipes
-		if( pMediaStream->m_pMediaHandlerInfo==m_pGenericMediaHandlerInfo && 
+		if( pMediaStream->m_pMediaHandlerInfo==m_pGenericMediaHandlerInfo &&
 		    pMediaDevice->m_pDeviceData_Router->m_mapPipe_Available.size() &&
 		    pEntertainArea->m_pMediaDevice_MD->m_pDeviceData_Router->m_dwPK_Device != pMediaDevice->m_pDeviceData_Router->m_dwPK_Device // It isn't LiveAV if the MediaDevice is the MD
 		  )
 			pEntertainArea->m_bViewingLiveAVPath=true;
-		
+
 		DCE::CMD_On CMD_On(m_dwPK_Device,pMediaDevice->m_pDeviceData_Router->m_dwPK_Device,PK_Pipe_Current,"");
 		CheckForCustomPipe(pEntertainArea,CMD_On.m_pMessage);
 		SendCommand(CMD_On);
@@ -4090,9 +4090,9 @@ void Media_Plugin::TurnDeviceOff(int PK_Pipe,DeviceData_Router *pDeviceData_Rout
 	p_vectDevice->push_back(pDeviceData_Router->m_dwPK_Device);
 
 	// If there are no current devices, or there are but this one isn't in the list and this isn't an embedded device for one in the list
-	if( !pmapMediaDevice_Current || 
+	if( !pmapMediaDevice_Current ||
 		(pmapMediaDevice_Current->find( pDeviceData_Router->m_dwPK_Device ) == pmapMediaDevice_Current->end()
-		&& (pDeviceData_Router->m_pDevice_RouteTo==NULL || 
+		&& (pDeviceData_Router->m_pDevice_RouteTo==NULL ||
 			pmapMediaDevice_Current->find( pDeviceData_Router->m_pDevice_RouteTo->m_dwPK_Device ) == pmapMediaDevice_Current->end()) ) )
 	{
 		MediaDevice *pMediaDevice = m_mapMediaDevice_Find(pDeviceData_Router->m_dwPK_Device);
@@ -4202,7 +4202,7 @@ void Media_Plugin::CMD_Move_Playlist_entry_Down(int iValue,string &sCMD_Result,M
 
 void Media_Plugin::CMD_Remove_playlist_entry(int iValue,string &sCMD_Result,Message *pMessage)
 //<-dceag-c271-e->
-{	
+{
 	PLUTO_SAFETY_LOCK( mm, m_MediaMutex );
 
 	// Only an Orbiter will tell us to Mode media
@@ -4490,8 +4490,8 @@ void Media_Plugin::CMD_Rip_Disk(int iPK_Device,string sFilename,int iPK_Users,st
 		pRow_DiscLocation ? pRow_DiscLocation->Type_get().c_str() : "*NULL*", sTracks.c_str() );
 
 	// If it's a cd and no tracks were specified, prompt the user, otherwise fill in the file names
-	if( sTracks.size()==0 && 
-		((pRow_Disc && pRow_Disc->EK_MediaType_get()==MEDIATYPE_pluto_CD_CONST) || (pRow_DiscLocation && pRow_DiscLocation->Type_get()=="C") || 
+	if( sTracks.size()==0 &&
+		((pRow_Disc && pRow_Disc->EK_MediaType_get()==MEDIATYPE_pluto_CD_CONST) || (pRow_DiscLocation && pRow_DiscLocation->Type_get()=="C") ||
 		(pMediaStream && pMediaStream->m_iPK_MediaType==MEDIATYPE_pluto_CD_CONST) || (pMediaFile && pMediaFile->m_dwPK_MediaType==MEDIATYPE_pluto_CD_CONST)) )
 	{
 		SCREEN_CDTrackCopy SCREEN_CDTrackCopy(m_dwPK_Device,pMessage->m_dwPK_Device_From, iPK_Users,sFormat,sFilename,iEK_Disc,iSlot_Number,iDriveID);
@@ -4528,7 +4528,7 @@ void Media_Plugin::CMD_Rip_Disk(int iPK_Device,string sFilename,int iPK_Users,st
 	if( sFormat.size()==0 )
 		sFormat = "flac";
 	string sResponse;
-	DCE::CMD_Rip_Disk cmdRipDisk(pMessage->m_dwPK_Device_From, pDevice_Disk->m_dwPK_Device, pDevice_Disk->m_dwPK_Device, sFilename, iPK_Users, 
+	DCE::CMD_Rip_Disk cmdRipDisk(pMessage->m_dwPK_Device_From, pDevice_Disk->m_dwPK_Device, pDevice_Disk->m_dwPK_Device, sFilename, iPK_Users,
 		sFormat, sTracks, pRow_Disc ? pRow_Disc->PK_Disc_get() : 0, iSlot_Number, iDriveID, sDirectory);  // Send it from the Orbiter so disk drive knows who requested it
 	if( !SendCommand(cmdRipDisk,&sResponse) || sResponse!="OK" )
 	{
@@ -4542,7 +4542,7 @@ void Media_Plugin::CMD_Rip_Disk(int iPK_Device,string sFilename,int iPK_Users,st
 	SCREEN_DialogRippingInstructions SCREEN_DialogRippingInstructions(m_dwPK_Device, pMessage->m_dwPK_Device_From);
 	SendCommand(SCREEN_DialogRippingInstructions);
 
-//	m_mapRippingJobs[pDiskDriveMediaDevice->m_pDeviceData_Router->m_dwPK_Device] = new RippingJob(pDiskDriveMediaDevice, 
+//	m_mapRippingJobs[pDiskDriveMediaDevice->m_pDeviceData_Router->m_dwPK_Device] = new RippingJob(pDiskDriveMediaDevice,
 //		pMessage->m_dwPK_Device_From, PK_Disc, PK_MediaType, iPK_Users, sName, sTracks);
 	return;
 }
@@ -4808,7 +4808,7 @@ void Media_Plugin::AddOtherDevicesInPipes_Loop(int PK_Pipe, DeviceData_Router *p
 		if( (*p_vectDevice)[s]==pDevice->m_dwPK_Device )
 			return;
 	p_vectDevice->push_back(pDevice->m_dwPK_Device);
-	
+
 
 	MapPipe *pMapPipe = NULL;
 	if( pEntertainArea && pEntertainArea->m_pMediaDevice_OutputZone )
@@ -4838,7 +4838,7 @@ void Media_Plugin::AddOtherDevicesInPipes_Loop(int PK_Pipe, DeviceData_Router *p
 	}
 
 	if( pDevice->m_pDevice_MD && pDevice!=pDevice->m_pDevice_MD &&
-		pDevice->m_pDevice_ControlledVia && 
+		pDevice->m_pDevice_ControlledVia &&
 		pDevice->m_pDevice_ControlledVia->m_dwPK_DeviceTemplate==DEVICETEMPLATE_OnScreen_Orbiter_CONST )
 	{
 		MediaDevice *pMediaDevice = m_mapMediaDevice_Find(pDevice->m_pDevice_MD->m_dwPK_Device);
@@ -4912,7 +4912,7 @@ void Media_Plugin::GetMediaHandlersForEA(int iPK_MediaType,int iPK_MediaProvider
 
 	// If we didn't find any handlers, see if there any devices in other entertainment areas
 	// with output zones feeding the one(s) we want to be in.  This is complicated.  If the source device was a generic media device
-	// it would have matched above already.  
+	// it would have matched above already.
 	for(map<int,EntertainArea *>::iterator it=mapEntertainArea_NoHandlers.begin();it!=mapEntertainArea_NoHandlers.end();++it)
 	{
 		EntertainArea *pEntertainArea = it->second;
@@ -5310,19 +5310,19 @@ int Media_Plugin::GetStorageDeviceWithMostFreeSpace(string& sFullDescription, st
 {
 	PlutoSqlResult result;
 	DB_ROW row;
-	string sSQL = 
+	string sSQL =
 		"SELECT PK_Device, Device.Description, Device_DeviceData.IK_DeviceData, FK_DeviceCategory "
 		"FROM Device "
 		"JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate "
 		"JOIN Device_DeviceData ON FK_Device = PK_Device "
-		"WHERE FK_DeviceCategory IN (" + 
-		StringUtils::ltos(DEVICECATEGORY_Core_CONST) + ", " + 
-		StringUtils::ltos(DEVICECATEGORY_Hard_Drives_CONST) + ", " + 
-		StringUtils::ltos(DEVICECATEGORY_Storage_Devices_CONST) + ", " + 
-		StringUtils::ltos(DEVICECATEGORY_Network_Storage_CONST) + ", " + 
-		StringUtils::ltos(DEVICECATEGORY_Raid_Devices_CONST) + ", " + 
+		"WHERE FK_DeviceCategory IN (" +
+		StringUtils::ltos(DEVICECATEGORY_Core_CONST) + ", " +
+		StringUtils::ltos(DEVICECATEGORY_Hard_Drives_CONST) + ", " +
+		StringUtils::ltos(DEVICECATEGORY_Storage_Devices_CONST) + ", " +
+		StringUtils::ltos(DEVICECATEGORY_Network_Storage_CONST) + ", " +
+		StringUtils::ltos(DEVICECATEGORY_Raid_Devices_CONST) + ", " +
 		StringUtils::ltos(DEVICECATEGORY_Raid_Generic_CONST) +
-		+ ") AND FK_DeviceData = " + 
+		+ ") AND FK_DeviceData = " +
 		StringUtils::ltos(DEVICEDATA_Free_Disk_Space_in_MBytes_CONST) + " " +
 		"ORDER BY CAST(Device_DeviceData.IK_DeviceData AS UNSIGNED) DESC ";
 
@@ -5419,10 +5419,10 @@ void Media_Plugin::PopulateRemoteControlMaps()
 		Row_DeviceTemplate_MediaType_DesignObj *pRow_DeviceTemplate_MediaType_DesignObj = vectRow_DeviceTemplate_MediaType_DesignObj[s];
 		if( !pRow_DeviceTemplate_MediaType_DesignObj->FK_Skin_isNull() )
 			continue;  // This applies to a particular skin.  Come back and check these against the orbiters below
-		m_mapDeviceTemplate_MediaType_RemoteControl[pRow_DeviceTemplate_MediaType_DesignObj->UIVersion_get()-1][ 
+		m_mapDeviceTemplate_MediaType_RemoteControl[pRow_DeviceTemplate_MediaType_DesignObj->UIVersion_get()-1][
 			make_pair<int,int> ( pRow_DeviceTemplate_MediaType_DesignObj->FK_DeviceTemplate_MediaType_getrow()->FK_DeviceTemplate_get(),
 				pRow_DeviceTemplate_MediaType_DesignObj->FK_DeviceTemplate_MediaType_getrow()->FK_MediaType_get() )
-			] 
+			]
 			= new RemoteControlSet(pRow_DeviceTemplate_MediaType_DesignObj);
 	}
 
@@ -5455,12 +5455,12 @@ void Media_Plugin::PopulateRemoteControlMaps()
 			if( pRow_DeviceTemplate_MediaType_DesignObj->FK_Skin_isNull() || pRow_DeviceTemplate_MediaType_DesignObj->FK_Skin_get()!=pOH_Orbiter->m_dwPK_Skin )
 				continue;  // No skin to overwrite for this orbiter
 
-			m_mapOrbiter_DeviceTemplate_MediaType_RemoteControl[pRow_DeviceTemplate_MediaType_DesignObj->UIVersion_get()-1][ 
+			m_mapOrbiter_DeviceTemplate_MediaType_RemoteControl[pRow_DeviceTemplate_MediaType_DesignObj->UIVersion_get()-1][
 				make_pair< int, pair<int,int> > ( pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device,
 					make_pair< int, int > (
 						pRow_DeviceTemplate_MediaType_DesignObj->FK_DeviceTemplate_MediaType_getrow()->FK_DeviceTemplate_get(),
 						pRow_DeviceTemplate_MediaType_DesignObj->FK_DeviceTemplate_MediaType_getrow()->FK_MediaType_get() ) )
-				] 
+				]
 				= new RemoteControlSet(pRow_DeviceTemplate_MediaType_DesignObj);
 		}
 
@@ -5494,10 +5494,10 @@ int k=2;
 						= new RemoteControlSet(pRow_RemoteControl->FK_MediaType_DesignObj_getrow());
 			}
 			else
-				m_mapDeviceTemplate_MediaType_RemoteControl[UIVersion-1][ 
+				m_mapDeviceTemplate_MediaType_RemoteControl[UIVersion-1][
 					make_pair<int,int> ( pRow_RemoteControl->FK_DeviceTemplate_MediaType_DesignObj_getrow()->FK_DeviceTemplate_MediaType_getrow()->FK_DeviceTemplate_get(),
 						pRow_RemoteControl->FK_DeviceTemplate_MediaType_DesignObj_getrow()->FK_DeviceTemplate_MediaType_getrow()->FK_MediaType_get() )
-					] 
+					]
 					= new RemoteControlSet(pRow_RemoteControl->FK_DeviceTemplate_MediaType_DesignObj_getrow());
 		}
 		else
@@ -5515,12 +5515,12 @@ int k=2;
 						= new RemoteControlSet(pRow_RemoteControl->FK_MediaType_DesignObj_getrow());
 			}
 			else
-				m_mapOrbiter_DeviceTemplate_MediaType_RemoteControl[UIVersion-1][ 
+				m_mapOrbiter_DeviceTemplate_MediaType_RemoteControl[UIVersion-1][
 					make_pair< int, pair<int,int> > ( pRow_RemoteControl->FK_Orbiter_get(),
 						make_pair< int, int > (
 							pRow_RemoteControl->FK_DeviceTemplate_MediaType_DesignObj_getrow()->FK_DeviceTemplate_MediaType_getrow()->FK_DeviceTemplate_get(),
 							pRow_RemoteControl->FK_DeviceTemplate_MediaType_DesignObj_getrow()->FK_DeviceTemplate_MediaType_getrow()->FK_MediaType_get() ) )
-					] 
+					]
 					= new RemoteControlSet(pRow_RemoteControl->FK_DeviceTemplate_MediaType_DesignObj_getrow());
 		}
 	}
@@ -5716,10 +5716,10 @@ void Media_Plugin::CMD_Save_Bookmark(int iPK_Users,char *pData,int iData_Size,in
 		int PK_Screen = pMediaStream->GetRemoteControlScreen(pMessage->m_dwPK_Device_From);
 		if( bDescriptionWasEmpty && !bAlways )
 		{
-			string sCmdToRenameBookmark= "<%=!%> -300 1 741 159 " + StringUtils::itos(PK_Screen) + 
+			string sCmdToRenameBookmark= "<%=!%> -300 1 741 159 " + StringUtils::itos(PK_Screen) +
 				"\n<%=!%> <%=V-106%> 1 411 5 \"<%=17%>\" 129 " + StringUtils::itos(pRow_Bookmark->PK_Bookmark_get());
 
-			DCE::SCREEN_FileSave SCREEN_FileSave(m_dwPK_Device,pMessage->m_dwPK_Device_From, 
+			DCE::SCREEN_FileSave SCREEN_FileSave(m_dwPK_Device,pMessage->m_dwPK_Device_From,
 				pMediaStream->m_iPK_MediaType,0, "<%=T" + StringUtils::itos(TEXT_Name_Bookmark_CONST) + "%>", sCmdToRenameBookmark, false);
 			SendCommand(SCREEN_FileSave);
 		}
@@ -5777,7 +5777,7 @@ void Media_Plugin::CMD_Rename_Bookmark(string sValue_To_Assign,int iPK_Users,int
 
 void Media_Plugin::AddFileToDatabase(MediaFile *pMediaFile,int PK_MediaType)
 {
-	if( StringUtils::StartsWith(pMediaFile->m_sFilename,"/dev/",true) || 
+	if( StringUtils::StartsWith(pMediaFile->m_sFilename,"/dev/",true) ||
 		StringUtils::StartsWith(pMediaFile->m_sFilename,"cdda:/",true) ||
 		StringUtils::StartsWith(pMediaFile->m_sFilename,"http://",true) ||
 		pMediaFile->m_sFilename.empty() )
@@ -5786,8 +5786,8 @@ void Media_Plugin::AddFileToDatabase(MediaFile *pMediaFile,int PK_MediaType)
 	LoggerWrapper::GetInstance()->Write( LV_STATUS, "Media_Plugin::AddFileToDatabase %s",pMediaFile->m_sFilename.c_str());
 
 	vector<Row_File *> vectRow_File;
-	m_pDatabase_pluto_media->File_get()->GetRows("Path='" + 
-		StringUtils::SQLEscape(FileUtils::ExcludeTrailingSlash(pMediaFile->m_sPath)) + 
+	m_pDatabase_pluto_media->File_get()->GetRows("Path='" +
+		StringUtils::SQLEscape(FileUtils::ExcludeTrailingSlash(pMediaFile->m_sPath)) +
 		"' AND Filename='" + StringUtils::SQLEscape(pMediaFile->m_sFilename) + "'",
 		&vectRow_File);
 
@@ -5996,7 +5996,7 @@ int Media_Plugin::CheckForAutoResume(MediaStream *pMediaStream)
 	if( pMediaStream->m_dwPK_Disc )
 	{
 		m_pDatabase_pluto_media->Bookmark_get()->GetRows(
-			"EK_Users=" + StringUtils::itos(pMediaStream->m_iPK_Users) + 
+			"EK_Users=" + StringUtils::itos(pMediaStream->m_iPK_Users) +
 			" AND FK_Disc=" + StringUtils::itos(pMediaStream->m_dwPK_Disc) + " AND IsAutoResume=1 AND Description<>'START'",
 			&vectRow_Bookmark);
 
@@ -6006,12 +6006,12 @@ int Media_Plugin::CheckForAutoResume(MediaStream *pMediaStream)
 			vectRow_Bookmark.clear();
 		}
 	}
-		
+
 	// Or a playlist
 	if( pMediaStream->m_iPK_Playlist )
 	{
 		m_pDatabase_pluto_media->Bookmark_get()->GetRows(
-			"EK_Users=" + StringUtils::itos(pMediaStream->m_iPK_Users) + 
+			"EK_Users=" + StringUtils::itos(pMediaStream->m_iPK_Users) +
 			" AND FK_Playlist=" + StringUtils::itos(pMediaStream->m_iPK_Playlist) + " AND IsAutoResume=1 AND Description<>'START'",
 			&vectRow_Bookmark);
 
@@ -6040,7 +6040,7 @@ int Media_Plugin::CheckForAutoResume(MediaStream *pMediaStream)
 		if( pMediaFile->m_dwPK_File )
 		{
 			m_pDatabase_pluto_media->Bookmark_get()->GetRows(
-				"EK_Users=" + StringUtils::itos(pMediaStream->m_iPK_Users) + 
+				"EK_Users=" + StringUtils::itos(pMediaStream->m_iPK_Users) +
 				" AND FK_File=" + StringUtils::itos(pMediaFile->m_dwPK_File) + " AND IsAutoResume=1 AND Description<>'START'",
 				&vectRow_Bookmark);
 
@@ -6069,16 +6069,16 @@ int Media_Plugin::CheckForAutoResume(MediaStream *pMediaStream)
 
 	/*
 	string sMessageToResume = StringUtils::itos(m_dwPK_Device) + " " + StringUtils::itos(pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device)
-		+ " 1 " + StringUtils::itos(COMMAND_Set_Media_Position_CONST) + " " 
+		+ " 1 " + StringUtils::itos(COMMAND_Set_Media_Position_CONST) + " "
 		+ StringUtils::itos(COMMANDPARAMETER_StreamID_CONST) + " " + StringUtils::itos(pMediaStream->m_iStreamID_get()) + " "
 		+ StringUtils::itos(COMMANDPARAMETER_MediaPosition_CONST) + " \"" + sPosition + "\"";
 
 	string sMessageToGoToRemote = StringUtils::itos(m_dwPK_Device) + " " + StringUtils::itos(iPK_Device_Orbiter)
-		+ " 1 " + StringUtils::itos(COMMAND_Goto_Screen_CONST) + " " 
+		+ " 1 " + StringUtils::itos(COMMAND_Goto_Screen_CONST) + " "
 		+ StringUtils::itos(COMMANDPARAMETER_PK_DesignObj_CONST) + " <%=NP_R%>";
 
 	string sMessageToSetPreference = StringUtils::itos(iPK_Device_Orbiter) + " " + StringUtils::itos(m_dwPK_Device)
-		+ " 1 " + StringUtils::itos(COMMAND_Set_Auto_Resume_Options_CONST) + " " 
+		+ " 1 " + StringUtils::itos(COMMAND_Set_Auto_Resume_Options_CONST) + " "
 		+ StringUtils::itos(COMMANDPARAMETER_PK_Users_CONST) + " " + StringUtils::itos(pMediaStream->m_iPK_Users) + " "
 		+ StringUtils::itos(COMMANDPARAMETER_PK_MediaType_CONST) + " " + StringUtils::itos(pMediaStream->m_iPK_MediaType) + " "
 		+ StringUtils::itos(COMMANDPARAMETER_Value_To_Assign_CONST);
@@ -6109,7 +6109,7 @@ int Media_Plugin::CheckForAutoResume(MediaStream *pMediaStream)
 	string mediaURL = pMediaStream->GetFilenameToPlay("Empty file name");
 	bool bRedirectToMPlayer = ( pMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_HDDVD_CONST ) ||
 		( pMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_BD_CONST ) ||
-		( (pMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_StoredVideo_CONST) && 
+		( (pMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_StoredVideo_CONST) &&
 		  ( StringUtils::EndsWith(mediaURL, ".EVO", true) || StringUtils::EndsWith(mediaURL, ".M2TS", true) ) );
 
 	MediaDevice *pMediaDevice_MPlayer = NULL;
@@ -6120,18 +6120,18 @@ int Media_Plugin::CheckForAutoResume(MediaStream *pMediaStream)
 		pMediaDevice_MPlayer = m_mapMediaDevice_Find(m_pRouter->FindClosestRelative(DEVICETEMPLATE_MPlayer_Player_CONST, pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device));
 		if (!pMediaDevice_MPlayer)
 		{
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Failed to find MPlayer for redirect, cancelling redirect :("); 
-			bRedirectToMPlayer = false;	
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Failed to find MPlayer for redirect, cancelling redirect :(");
+			bRedirectToMPlayer = false;
 		}
 		else
 		{
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Found MPlayer for redirect, device #%i", pMediaDevice_MPlayer->m_pDeviceData_Router->m_dwPK_Device); 
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Found MPlayer for redirect, device #%i", pMediaDevice_MPlayer->m_pDeviceData_Router->m_dwPK_Device);
 		}
 	}
 
 
 	SCREEN_DialogAskToResume SCREEN_DialogAskToResume(m_dwPK_Device, iPK_Device_Orbiter,
-		StringUtils::ltos(m_dwPK_Device), 
+		StringUtils::ltos(m_dwPK_Device),
 		StringUtils::ltos( bRedirectToMPlayer?(pMediaDevice_MPlayer->m_pDeviceData_Router->m_dwPK_Device):(pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device) ),
 		StringUtils::itos(pMediaStream->m_iStreamID_get()),
 		sPosition,
@@ -6299,8 +6299,8 @@ void Media_Plugin::CMD_Media_Identified(int iPK_Device,string sValue_To_Assign,s
 	}
 
 	m_pMediaAttributes->m_pMediaAttributes_LowLevel->PurgeListMediaAttribute(listMediaAttribute_);
-	if( pMediaStream->m_mapPK_Attribute.find(ATTRIBUTETYPE_Performer_CONST)!=pMediaStream->m_mapPK_Attribute.end() || 
-		pMediaStream->m_mapPK_Attribute.find(ATTRIBUTETYPE_Album_CONST)!=pMediaStream->m_mapPK_Attribute.end() || 
+	if( pMediaStream->m_mapPK_Attribute.find(ATTRIBUTETYPE_Performer_CONST)!=pMediaStream->m_mapPK_Attribute.end() ||
+		pMediaStream->m_mapPK_Attribute.find(ATTRIBUTETYPE_Album_CONST)!=pMediaStream->m_mapPK_Attribute.end() ||
 		pMediaStream->m_mapPK_Attribute.find(ATTRIBUTETYPE_Title_CONST)!=pMediaStream->m_mapPK_Attribute.end() )
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::CMD_Media_Identified stream is now identified disc");
@@ -6462,14 +6462,14 @@ void Media_Plugin::CMD_Get_Attributes_For_Media(string sFilename,string sPK_Ente
 		Row_Playlist *pRow_Playlist = m_pDatabase_pluto_media->Playlist_get()->GetRow(atoi(sFilename.substr(2).c_str()));
 		if( pRow_Playlist )
 		{
-			*sValue_To_Assign = "FILE\t" + sFilename + 
+			*sValue_To_Assign = "FILE\t" + sFilename +
 			"\tTITLE\t" + pRow_Playlist->Name_get() +
-			"\t";	
+			"\t";
 			if( pRow_Playlist->FK_Picture_get() )
 				*sValue_To_Assign += "PICTURE\t/home/mediapics/" + StringUtils::itos(pRow_Playlist->FK_Picture_get()) + ".jpg\t";
 		}
 		else
-			*sValue_To_Assign = "FILE\t" + sFilename + "\tTITLE\t" + sFilename + "\t";	
+			*sValue_To_Assign = "FILE\t" + sFilename + "\tTITLE\t" + sFilename + "\t";
 		return;
 	}
 	else if( StringUtils::StartsWith(sFilename,"!E") || StringUtils::StartsWith(sFilename,"!o") )  // external media
@@ -6489,7 +6489,7 @@ void Media_Plugin::CMD_Get_Attributes_For_Media(string sFilename,string sPK_Ente
 	TransformFilenameToDeque(sFilename, dequeMediaFile);  // This will convert any !A, !F, !B etc.
 	if( dequeMediaFile.size() )
 		pMediaFile = dequeMediaFile[0];
-	
+
 	if( !pMediaFile )
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Media_Plugin::CMD_Get_Attributes_For_Media no valid file found %s",sFilename.c_str());
@@ -6502,13 +6502,13 @@ void Media_Plugin::CMD_Get_Attributes_For_Media(string sFilename,string sPK_Ente
 	{
 		*sValue_To_Assign = "FILE\tDisc #" + StringUtils::itos(pMediaFile->m_dwPK_Disk) +
 			"\tTITLE\t" + m_pMediaAttributes->m_pMediaAttributes_LowLevel->GetDefaultDescriptionForMediaFile(pMediaFile) +
-			"\t";	
+			"\t";
 		sExtension = m_pMediaAttributes->m_pMediaAttributes_LowLevel->GetPictureFromDiscID(pMediaFile->m_dwPK_Disk, &PK_Picture);
 	}
 	else
 	{
 		*sValue_To_Assign = "FILE\t" + pMediaFile->HumanReadableFullyQualifiedFile() +
-		  "\tPATH\t" + pMediaFile->m_sPath + 
+		  "\tPATH\t" + pMediaFile->m_sPath +
 		  "\tFILENAME\t" + pMediaFile->m_sFilename +
 			"\tTITLE\t" + m_pMediaAttributes->m_pMediaAttributes_LowLevel->GetDefaultDescriptionForMediaFile(pMediaFile) +
 			"\t";
@@ -6535,7 +6535,7 @@ void Media_Plugin::CMD_Get_Attributes_For_Media(string sFilename,string sPK_Ente
 	// cleanup
 	for (deque<MediaFile *>::iterator it = dequeMediaFile.begin(); it != dequeMediaFile.end(); ++it)
 		delete *it;
-	
+
 }
 //<-dceag-c817-b->
 
@@ -6562,7 +6562,7 @@ void Media_Plugin::CMD_Get_Default_Ripping_Info(int iEK_Disc,string *sFilename,b
 	*sFilename = "Unknown disk";
 
 	PLUTO_SAFETY_LOCK( mm, m_MediaMutex );
-	
+
 	if( iEK_Disc && iEK_Disc!=-999 )
 	{
 		Row_Disc *pRow_Disc = m_pDatabase_pluto_media->Disc_get()->GetRow(iEK_Disc);
@@ -6778,13 +6778,13 @@ void Media_Plugin::CMD_Refresh_List_of_Online_Devices(string &sCMD_Result,Messag
 	string sSQL = "SELECT PK_Device,FK_DeviceCategory,FK_DeviceTemplate,FK_Device_ControlledVia FROM Device "
 		"JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate "
 		"LEFT JOIN Device_DeviceData ON FK_Device=PK_Device AND FK_DeviceData=" TOSTRING(DEVICEDATA_Online_CONST) " "
-		"WHERE FK_DeviceCategory IN (" 
-			TOSTRING(DEVICECATEGORY_Hard_Drives_CONST) "," 
-			TOSTRING(DEVICECATEGORY_Network_Storage_CONST) "," 
-			TOSTRING(DEVICECATEGORY_Disc_Drives_CONST) "," 
+		"WHERE FK_DeviceCategory IN ("
+			TOSTRING(DEVICECATEGORY_Hard_Drives_CONST) ","
+			TOSTRING(DEVICECATEGORY_Network_Storage_CONST) ","
+			TOSTRING(DEVICECATEGORY_Disc_Drives_CONST) ","
 			TOSTRING(DEVICECATEGORY_CDDVD_Jukeboxes_CONST) ","
-			TOSTRING(DEVICECATEGORY_Raid_Devices_CONST) "," 
-			TOSTRING(DEVICECATEGORY_Raid_Generic_CONST) 
+			TOSTRING(DEVICECATEGORY_Raid_Devices_CONST) ","
+			TOSTRING(DEVICECATEGORY_Raid_Generic_CONST)
 			") "
 		"AND (IK_DeviceData IS NULL OR IK_DeviceData<>0)";
 
@@ -6875,7 +6875,7 @@ void Media_Plugin::CMD_Check_For_New_Files(string &sCMD_Result,Message *pMessage
 		Row_File *pRow_File = *it;
 		sFileList += pRow_File->Path_get() + "/" + pRow_File->Filename_get() + "\n";
 	}
-	
+
 	DCE::CMD_Identify_Media CMD_Identify_Media(m_dwPK_Device,m_dwPK_Device_MediaIdentification,
 		0,"",sFileList,m_dwPK_Device);
 	if( !SendCommand(CMD_Identify_Media) )
@@ -7035,7 +7035,7 @@ void Media_Plugin::CMD_Live_AV_Path(string sPK_EntertainArea,bool bTurn_On,strin
 		if( bTurn_On )
 			PK_Device = pMediaDevice->m_pDeviceData_Router->m_dwPK_Device;
 		else if( pEntertainArea->m_pOH_Orbiter_OSD && pEntertainArea->m_pOH_Orbiter_OSD->m_pDeviceData_Router->m_pDevice_ControlledVia )
-			// The MD 
+			// The MD
 			PK_Device = pEntertainArea->m_pOH_Orbiter_OSD->m_pDeviceData_Router->m_pDevice_ControlledVia->m_dwPK_Device;
 		else
 		{
@@ -7096,9 +7096,9 @@ void Media_Plugin::CMD_Delete_File(string sFilename,string &sCMD_Result,Message 
 		bool bIsOld = ( sOld[0] == 'O' );
 
 		string sFileToDelete = "/var/spool/asterisk/voicemail/default/" + sExtension + "/INBOX/" + ( bIsOld ? "Old/"  : "" ) + "msg" + sMsg;
-	
+
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Deleting Voicemail %s",sFileToDelete.c_str());
-	
+
 		// Delete the files.
 		if ( FileUtils::DelFile(sFileToDelete + ".txt") )
 		{
@@ -7188,7 +7188,7 @@ void Media_Plugin::CMD_Retransmit_AV_Commands(string sText,string sPK_EntertainA
 
 		HandleRetransmitOnOff(sText[0],sText[1],pMediaDevice,pMessage->m_dwPK_Device_From,pEntertainArea);
 	}
-	
+
 	if( bFoundMatching==false )
 	{
 		DeviceData_Router *pDevice = m_pRouter->m_mapDeviceData_Router_Find(pMessage->m_dwPK_Device_From);
@@ -7396,7 +7396,7 @@ bool Media_Plugin::AssignDriveForDisc(MediaStream *pMediaStream,MediaFile *pMedi
 			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Media_Plugin::AssignDriveForDisc Cannot lock drive %d", pMediaFile->m_dwPK_Device_Disk_Drive);
 			if( pMediaStream->m_pOH_Orbiter_StartedMedia )
 			{
-				SCREEN_DialogCannotPlayMedia SCREEN_DialogCannotPlayMedia(m_dwPK_Device, 
+				SCREEN_DialogCannotPlayMedia SCREEN_DialogCannotPlayMedia(m_dwPK_Device,
 					pMediaStream->m_pOH_Orbiter_StartedMedia->m_pDeviceData_Router->m_dwPK_Device, "Drive is not available");
 				SendCommand(SCREEN_DialogCannotPlayMedia);
 			}
@@ -7460,7 +7460,7 @@ void Media_Plugin::WaitingForJukebox( MediaStream *pMediaStream )
 				LoggerWrapper::GetInstance()->Write(LV_WARNING,"Media_Plugin::WaitingForJukebox Cannot lock drive %d", pMediaFile->m_dwPK_Device_Disk_Drive);
 				if( pMediaStream->m_pOH_Orbiter_StartedMedia )
 				{
-					SCREEN_DialogCannotPlayMedia SCREEN_DialogCannotPlayMedia(m_dwPK_Device, 
+					SCREEN_DialogCannotPlayMedia SCREEN_DialogCannotPlayMedia(m_dwPK_Device,
 						pMediaStream->m_pOH_Orbiter_StartedMedia->m_pDeviceData_Router->m_dwPK_Device, "Jukebox Drive is not available");
 					SendCommand(SCREEN_DialogCannotPlayMedia);
 				}
@@ -7480,7 +7480,7 @@ void Media_Plugin::WaitingForJukebox( MediaStream *pMediaStream )
 			pMediaStream->m_iStreamID_get());
 		if( pMediaStream->m_pOH_Orbiter_StartedMedia )
 		{
-			SCREEN_DialogCannotPlayMedia SCREEN_DialogCannotPlayMedia(m_dwPK_Device, 
+			SCREEN_DialogCannotPlayMedia SCREEN_DialogCannotPlayMedia(m_dwPK_Device,
 				pMediaStream->m_pOH_Orbiter_StartedMedia->m_pDeviceData_Router->m_dwPK_Device, "Jukebox is not available");
 			SendCommand(SCREEN_DialogCannotPlayMedia);
 		}
@@ -7541,7 +7541,7 @@ void Media_Plugin::TransformFilenameToDeque(string sFilename,deque<MediaFile *> 
 				pMediaFile->m_sStartPosition = pRow_Bookmark->Position_get();
 				dequeFilenames.push_back(pMediaFile);
 			}
-		}	
+		}
 	}
 	else if( sFilename[1] == 'r' || sFilename[1] == 'R' )  // Removable media (ie a disc) as !r[PK_Disc][.track]:[PK_Device_Disk]:[Slot]  This can be followed by a : and a disk drive to prevent ambiguity if there are multiple sources, and another : and a slot
 	{
@@ -7614,7 +7614,7 @@ void Media_Plugin::TransformFilenameToDeque(string sFilename,deque<MediaFile *> 
 		        MediaType = 4;
 		}
 		ExpandPlaylist(url, MediaType, dequeFilenames);
-	    
+
 	}
 	else
 		dequeFilenames.push_back(new MediaFile(m_pMediaAttributes->m_pMediaAttributes_LowLevel,sFilename));  // Just a normal file
@@ -7633,7 +7633,7 @@ bool Media_Plugin::ExpandPlaylist(string sFilename, int MediaType, deque<MediaFi
 			{
 				PlaylistItem item = *it;
 				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Media_Plugin::ExpandPlaylist adding playlist item %s, title %s", item.url.c_str(), item.title.c_str());
-			
+
 				MediaFile *pMediaFile = new MediaFile(item.url);
 				pMediaFile->m_dwPK_MediaType = MediaType;
 				pMediaFile->m_sTitle = item.title;
@@ -7655,7 +7655,7 @@ void Media_Plugin::UpdateSearchTokens()
 		return; // Shouldn't happen
 
 	time_t tLastAttribute = 0;
-	
+
 	if(NULL != row[0])
 		tLastAttribute = StringUtils::SQLDateTime(row[0]);
 
@@ -7671,7 +7671,7 @@ void Media_Plugin::UpdateSearchTokens()
 		Row_Attribute *pRow_Attribute = *it;
 		m_pMediaAttributes->m_pMediaAttributes_LowLevel->UpdateSearchTokens(pRow_Attribute);
 	}
-	
+
 	m_tLastSearchTokenUpdate = tLastAttribute;
 	DCEConfig dceconfig;
 	dceconfig.AddString("LastSearchTokenUpdate",StringUtils::itos(m_tLastSearchTokenUpdate));
@@ -7751,7 +7751,7 @@ void Media_Plugin::CMD_Specify_Repeat_Options(string sPK_EntertainArea,int iRepe
 void Media_Plugin::CMD_Move_File(string sFilename,string sPath,string &sCMD_Result,Message *pMessage)
 //<-dceag-c1083-e->
 {
-  
+
   if ( sFilename.size()>2 && sFilename[0]=='!' && sFilename[1]=='F' )
     {
       int PK_File = atoi(sFilename.substr(2).c_str());
@@ -7764,7 +7764,7 @@ void Media_Plugin::CMD_Move_File(string sFilename,string sPath,string &sCMD_Resu
 	  sFilename=pRow_File->Path_get()+"/"+pRow_File->Filename_get();
 	  string sDestinationFileName = sPath;
 	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXX Moving file %s to %s",sFilename.c_str(),sDestinationFileName.c_str());
-	  
+
 	  MoveJob *pMoveJob = new MoveJob(m_pDatabase_pluto_media,
 					  m_pJobHandler,
 					  pMessage->m_dwPK_Device_From,
@@ -7821,7 +7821,7 @@ void Media_Plugin::CMD_Move_File(string sFilename,string sPath,string &sCMD_Resu
   // 		{
   // 		  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::CMD_Move_File no ID3 File found.");
   // 		}
-	      
+
   // 	      // Move the .dvd.keys.tar.gz if it exists.
   // 	      string sDVDFile = sFilename + ".keys.tar.gz";
   // 	      string sDestinationDVDFile = sDestinationFileName + ".keys.tar.gz";
@@ -7842,15 +7842,15 @@ void Media_Plugin::CMD_Move_File(string sFilename,string sPath,string &sCMD_Resu
   // 		  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::CMD_Move_File no DVD Keys File found.");
   // 		}
   // 	      // Ending the snippet
-	      
+
   // 	    }
   // 	  else
   // 	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Media_Plugin::CMD_Move_File cannot move %d %s %s/%s",
   // 						pRow_File->PK_File_get(),sFilename.c_str(),pRow_File->Path_get().c_str(),pRow_File->Filename_get().c_str());
-	  	  
+
   // 	}
   //   }
-  
+
 }
 //<-dceag-c1088-b->
 
@@ -7901,3 +7901,13 @@ void Media_Plugin::CMD_Update_Move_Status(string sText,string sTime,string sStat
   pMoveTask->UpdateProgress(sStatus, iPercent, atoi(sTime.c_str()), sText);
 
 }
+//<-dceag-c1090-b->
+
+	/** @brief COMMAND: #1090 - Get Attribute Image */
+	/** Returns PK_Image file for supplied !A */
+
+void Media_Plugin::CMD_Get_Attribute_Image(string &sCMD_Result,Message *pMessage)
+{
+    cout << "need to implement command #1090 CMD_Get_Attribute_Image" << endl;
+    }
+//<-dceag-c1090-e->

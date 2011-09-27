@@ -1336,6 +1336,13 @@ VI=Video Input */
 	virtual void CMD_Update_Move_Status(string sText,string sTime,string sStatus,int iPercent,string sTask,string sJob) { string sCMD_Result; CMD_Update_Move_Status(sText.c_str(),sTime.c_str(),sStatus.c_str(),iPercent,sTask.c_str(),sJob.c_str(),sCMD_Result,NULL);};
 	virtual void CMD_Update_Move_Status(string sText,string sTime,string sStatus,int iPercent,string sTask,string sJob,string &sCMD_Result,Message *pMessage);
 
+
+	/** @brief COMMAND: #1090 - Get Attribute Image */
+	/** Returns PK_Image file for supplied !A */
+
+	virtual void CMD_Get_Attribute_Image() { string sCMD_Result; CMD_Get_Attribute_Image(sCMD_Result,NULL);};
+	virtual void CMD_Get_Attribute_Image(string &sCMD_Result,Message *pMessage);
+
 //<-dceag-h-e->
 };
 

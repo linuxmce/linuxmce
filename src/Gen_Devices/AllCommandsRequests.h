@@ -29416,33 +29416,29 @@ namespace DCE
 			COMMANDPARAMETER_Task_CONST, sTask.c_str(),
 			COMMANDPARAMETER_Job_CONST, sJob.c_str()); }
 	};
-	class CMD_Connect_to_Device : public PreformedCommand {
+	class CMD_Get_Attribute_Image : public PreformedCommand {
 	public:
-		CMD_Connect_to_Device(long DeviceIDFrom, long DeviceIDTo,string sMac_address) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
-			COMMAND_Connect_to_Device_CONST,
-			1 /* number of parameters */,
-			COMMANDPARAMETER_Mac_address_CONST, sMac_address.c_str()); }
+		CMD_Get_Attribute_Image(long DeviceIDFrom, long DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+			COMMAND_Get_Attribute_Image_CONST,
+			0 /* number of parameters */); }
 	};
-	class CMD_Connect_to_Device_DL : public PreformedCommand {
+	class CMD_Get_Attribute_Image_DL : public PreformedCommand {
 	public:
-		CMD_Connect_to_Device_DL(long DeviceIDFrom, string DeviceIDTo,string sMac_address) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
-			COMMAND_Connect_to_Device_CONST,
-			1 /* number of parameters */,
-			COMMANDPARAMETER_Mac_address_CONST, sMac_address.c_str()); }
+		CMD_Get_Attribute_Image_DL(long DeviceIDFrom, string DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Attribute_Image_CONST,
+			0 /* number of parameters */); }
 	};
-	class CMD_Connect_to_Device_DT : public PreformedCommand {
+	class CMD_Get_Attribute_Image_DT : public PreformedCommand {
 	public:
-		CMD_Connect_to_Device_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sMac_address) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
-			COMMAND_Connect_to_Device_CONST,
-			1 /* number of parameters */,
-			COMMANDPARAMETER_Mac_address_CONST, sMac_address.c_str()); }
+		CMD_Get_Attribute_Image_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Attribute_Image_CONST,
+			0 /* number of parameters */); }
 	};
-	class CMD_Connect_to_Device_Cat : public PreformedCommand {
+	class CMD_Get_Attribute_Image_Cat : public PreformedCommand {
 	public:
-		CMD_Connect_to_Device_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sMac_address) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
-			COMMAND_Connect_to_Device_CONST,
-			1 /* number of parameters */,
-			COMMANDPARAMETER_Mac_address_CONST, sMac_address.c_str()); }
+		CMD_Get_Attribute_Image_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Attribute_Image_CONST,
+			0 /* number of parameters */); }
 	};
 }
 #endif

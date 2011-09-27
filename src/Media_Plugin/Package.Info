@@ -2,8 +2,8 @@
 Package = DCE_Destination_Package
 Dir = 
 desc = DCE Implemenation for #2 Media Plug-in
-Maintainer = thomasName
-Email = thom.cherryhomes@gmail.com
+Maintainer = LangstonName
+Email = 
 Depend = DCE_Dependencies
 <-dceag-p-e->
 
