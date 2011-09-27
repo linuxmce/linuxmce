@@ -67,11 +67,12 @@ void NowPlayingClass::resetData()
     setAlbum("");
     directors.clear(); emit directorChanged();
     setDirector("");
-    setTrack("");
+    setTrack(""); emit trackChanged();
     setMediaTitle("");
     setDuration("");
     setTimeCode("");
     setMediaType(NULL);
+    setSynop(""); emit synopChanged();
 
 }
 

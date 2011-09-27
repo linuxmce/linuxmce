@@ -192,7 +192,7 @@ public slots:
     void setSubTitle (QString inc_subTitle) {qs_subTitle = inc_subTitle; emit titleChanged();}
     QString getSubTitle () {return qs_subTitle;}
 
-    void setStatus (bool status) {b_mediaPlaying = status; emit mediaStatusChanged(); }
+    void setStatus (bool status) {b_mediaPlaying = status;  emit mediaStatusChanged(); }
     bool getStatus () {return b_mediaPlaying;}
 
     void setMediaType (int inc_mediaType) {i_mediaType = inc_mediaType; emit mediaTypeChanged();}
@@ -231,20 +231,20 @@ public slots:
     void setTrack (QString inc_track) {track = inc_track;  emit trackChanged();}
     QString getTrack() {return track;}
 
-    void setPerformers (QString inc_performer) {performerlist.append( inc_performer + " | "); emit performersChanged();}
+    void setPerformers (QString inc_performer) { if(!performerlist.contains(inc_performer)) {performerlist.append( inc_performer + " | "); emit performersChanged();}}
     QString getPerformers() { return performerlist;}
 
     void setDirector (QString inc_director) {directors << inc_director;  emit directorChanged();}
     QString getDirector() {director = directors.join(" | "); return director;}
 
-    void setGenre (QString inc_genre) {genre.append(inc_genre+" | ");  emit genreChanged();}
-    QString getGenre() { return genre;}
+    void setGenre (QString inc_genre) { if(!genre.contains(inc_genre)) {genre.append(inc_genre+" | "); emit genreChanged();} }
+                QString getGenre() { return genre;}
 
-    void setRelease (QString inc_rls) {releasedate = inc_rls;  emit rlsChanged();}
-    QString getRelease() {return releasedate;}
+                void setRelease (QString inc_rls) {releasedate = inc_rls;  emit rlsChanged();}
+                QString getRelease() {return releasedate;}
 
-    inline QString getSynop() {return synop;}
-    inline void setSynop(QString s) { synop = s; qDebug()<< synop; emit synopChanged(); }
-};
+                inline QString getSynop() {return synop;}
+                inline void setSynop(QString s) { synop = s; qDebug()<< synop; emit synopChanged(); }
+    };
 
-#endif // NOWPLAYINGCLASS_H
+        #endif // NOWPLAYINGCLASS_H

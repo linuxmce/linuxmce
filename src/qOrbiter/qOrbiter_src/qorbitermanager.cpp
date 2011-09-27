@@ -568,6 +568,7 @@ bool qorbiterManager::getConf(int pPK_Device)
     qorbiterUIwin->rootContext()->setContextProperty("userList", userList);                           //custom user list provided
     qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms);                           //custom room list  provided
     qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);                       //file grids current media type
+    QObject::connect(this->nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()));
 
     //epg listmodel, no imageprovider as of yet
     simpleEPGmodel = new EPGChannelList(new EPGItemClass, this );
