@@ -1289,7 +1289,7 @@ void qorbiterManager::initializeSortString()
     q_attribute_genres="";    //4
     q_mediaSources ="1,2";         //5 need comma delineation
     q_usersPrivate = "0";        //6
-    q_attributetype_sort="13";  //7
+    q_attributetype_sort="12";  //7
     q_pk_users="0";             //8
     q_last_viewed="2";        //9
     q_pk_attribute="";        //10
