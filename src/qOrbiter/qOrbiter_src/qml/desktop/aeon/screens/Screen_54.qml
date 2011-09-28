@@ -13,7 +13,7 @@ Rectangle {
         triggeredOnStart: false
         running: true
 
-        onTriggered: nowPlayingArt.source = "image://updateobject/"+securityvideo.timestamp
+        onTriggered: nowPlayingArt.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
 
     Component.onCompleted: {
@@ -26,7 +26,7 @@ Rectangle {
         onPlayListPositionChanged:{
             nonepgplaylistview.currentIndex = dcenowplaying.m_iplaylistPosition
             nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Contain)
-            nowPlayingArt.source = "image://updateobject/"+securityvideo.timestamp
+            nowPlayingArt.source = "image://listprovider/updateobject/"+securityvideo.timestamp
         }
     }
     Clock{
@@ -83,7 +83,7 @@ Rectangle {
                 Image{ // Album art here
                     id: nowPlayingArt
                     anchors.fill: parent
-                    source: "image://updateobject/"+securityvideo.timestamp
+                    source: "image://listprovider/updateobject/"+securityvideo.timestamp
                     fillMode:  Image.PreserveAspectFit
                     smooth:  true
                 }

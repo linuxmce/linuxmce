@@ -33,12 +33,12 @@ Item
         triggeredOnStart: false
         running: true
 
-        onTriggered: nowPlayingArt.source = "image://updateobject/"+securityvideo.timestamp
+        onTriggered: nowPlayingArt.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
 
     Connections{
         target:dcenowplaying
-        onPlayListPositionChanged: nowPlayingArt.source = "image://updateobject/"+securityvideo.timestamp
+        onPlayListPositionChanged: nowPlayingArt.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
 
     Rectangle {

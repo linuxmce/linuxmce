@@ -212,8 +212,6 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
     {
 
-
-
         /*
               we get various variable here that we will need later. I store them in the qt object so it
               can pass them along without extra issues and so they can easily be passed to qml objects that
@@ -1212,10 +1210,6 @@ void qorbiterManager::setStringParam(int paramType, QString param)
         else
         {
             q_attributetype_sort = param;
-            if (param.toInt() == 12)
-            {
-
-            }
             longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
             datagridVariableString = longassstring.join("|");
             // qDebug() << datagridVariableString;
@@ -1261,11 +1255,11 @@ void qorbiterManager::setStringParam(int paramType, QString param)
         else
         {
             q_pk_attribute = param.remove("!A");
-            if(q_attributetype_sort.toInt() == 12)
+            if(q_attributetype_sort == "12")
             {
-
+                q_attributetype_sort = "";
             }
-            q_attributetype_sort = "";
+
 
             longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
             datagridVariableString = longassstring.join("|");

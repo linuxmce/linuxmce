@@ -119,8 +119,8 @@ Rectangle {
                         }
                         Image {
                             id: nowplayingimage
-                            width: dcenowplaying.aspect=="wide"? scaleX(19) : scaleX(15)
-                            height:dcenowplaying.aspect=="wide"? scaleY(30) : scaleY(40)
+                            width: dcenowplaying.aspect=="wide"? scaleX(28) : scaleX(15)
+                            height:dcenowplaying.aspect=="wide"? scaleY(35) : scaleY(40)
                             source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
                             anchors.horizontalCenter: parent.horizontalCenter
                             smooth: true

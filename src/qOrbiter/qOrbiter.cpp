@@ -1381,6 +1381,16 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
     qDebug() << "Attributetype sort:" << qmlUI->q_attributetype_sort;
     qDebug() << "Attribute Sort:" << qmlUI->q_pk_attribute;
 
+    if (qmlUI->q_attributetype_sort == "12" && qmlUI->q_pk_attribute != "")
+    {
+        qmlUI->q_attributetype_sort =  "52";
+    }
+    else if (qmlUI->q_attributetype_sort == "52")
+    {
+        qmlUI->q_attributetype_sort = "13";
+    }
+
+
     qmlUI->backwards = false;
     CMD_Populate_Datagrid populateDataGrid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 63, s.toStdString(), DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
@@ -1439,6 +1449,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                         filePath = QString::fromUtf8(pPath);
                         fk_file = pCell->GetValue();
                         cellTitle = QString::fromUtf8(pCell->m_Text);
+                        qDebug() << pCell->m_mapAttributes_Find("Name").c_str();
                         index = pDataGridTable->CovertColRowType(it->first).first;
                         if (pPath )
                         {
@@ -1456,6 +1467,10 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 
 
                         qmlUI->model->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg,  qmlUI->model));
+                        qDebug() << "Cell info:" ;
+                        qDebug() << cellTitle ;
+                        qDebug() << fk_file ;
+                        qDebug() << filePath ;
                     }
                     if (cellsToRender > qmlUI->model->rowCount(QModelIndex()))
                     {
