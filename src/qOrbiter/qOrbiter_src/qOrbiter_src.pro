@@ -99,9 +99,7 @@ message (Build Type: $$DEFINES)
 # The .cpp file which was generated for your project. Feel free to hack it.
 SOURCES += main.cpp \
         ../../Gen_Devices/qOrbiterBase.cpp \
-    ../qOrbiter.cpp \
-    uiclasses/lightingui.cpp \
-    uiclasses/uicontroller.cpp \
+    ../qOrbiter.cpp \   
     qorbitermanager.cpp \    
     datamodels/listModel.cpp \
     datamodels/gridItem.cpp \
@@ -184,9 +182,7 @@ qtcAddDeployment()
 
 HEADERS += \
     ../qOrbiter.h \
-    ../../Gen_Devices/qOrbiterBase.h \
-    uiclasses/lightingui.h \
-    uiclasses/uicontroller.h \
+    ../../Gen_Devices/qOrbiterBase.h \   
     qorbitermanager.h \
     qOrbiterData.h \
     datamodels/listModel.h \
@@ -315,6 +311,7 @@ OTHER_FILES= \
 
 RESOURCES += \
     skinData.qrc
+
 
 
 

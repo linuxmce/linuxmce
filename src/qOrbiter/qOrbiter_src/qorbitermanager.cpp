@@ -7,7 +7,6 @@
 #include <QDeclarativeEngine>
 #include <QApplication>
 #include <imageProviders/filedetailsimageprovider.h>
-
 #include <imageProviders/abstractimageprovider.h>
 #include <contextobjects/epgchannellist.h>
 

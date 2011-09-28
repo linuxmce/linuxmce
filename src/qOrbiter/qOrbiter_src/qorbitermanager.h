@@ -37,14 +37,11 @@
 
 /*----custom classes-------*/
 //own version of OrbiterData.h
-#include <datamodels/listModel.h>                             //custom item model
-//#include <contextobjects/epgchannellist.h>
+#include <datamodels/listModel.h>                            //custom item model
 #include <datamodels/gridItem.h>
-#include <uiclasses/uicontroller.h>                           //experimental
 #include <contextobjects/epgchannellist.h>
 #include <imageProviders/basicImageProvider.h>                 //qml image provider
 #include <imageProviders/gridimageprovider.h>                  //qml image provider for grids !not implemented!
-//#include <imageProviders/abstractimageprovider.h>
 #include <screensaver/screensavermodule.h>
 #include <datamodels/DataModelItems/sleepingalarm.h>
 /*-------Dce Includes----*/
@@ -52,7 +49,6 @@
 #include <qOrbiter/qOrbiter.h>
 class EPGChannelList;
 class basicImageProvider;
-
 
 class ListModel;
 class GridIndexProvider;
