@@ -1123,7 +1123,7 @@ function addTitle ($episodeData, $con ,$fileID, $mediadbADO, $dbADO, $output)
 	};
 	
 }
-//==========================================================================================episodeID and seriesID
+//==========================================================================================episodeID and season ID and seriesID
 function ids($episodeData, $fileID, $con ,$attributeType, $mediadbADO, $dbADO, $output)
 {//	print_r($episodeData);
 	$idArray = array( array('TV Season ID'=>$episodeData['seasonID']), array('TV Series ID'=>$episodeData['seriesID']), array( 'TV Program ID'=>$episodeData['epid']), array("Release Date" =>$episodeData['firstAir']), array("Episode Number" =>$episodeData['air_epNo']), array("Season Number" =>$episodeData['seasonNo']) );

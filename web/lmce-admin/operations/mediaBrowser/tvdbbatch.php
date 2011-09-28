@@ -225,10 +225,22 @@ function tvdbBatchResult ($output,$mediadbADO,$dbADO)
 	
 //begin ugly code======================================================
 
+$attributeType=Array();												//dynamic array to deal with changes to attribute types
+$query = "SELECT PK_AttributeType, Description from AttributeType";
+$result = mysql_query($query);
+
+while ($row=mysql_fetch_array($result)) {
+        $attributeType[$row['PK_AttributeType']]=$row['Description'];
+}
+
+$row=mysql_fetch_array($result);
+for ($i = 0; $i < count($row); $i++) {
+        $attributeType[$row['PK_AttributeType']]=$row['Description'];
+}
 
 $mediaSubTypeEnum = array (1 => "TV Shows",2 => "Movies",3 => "Home Videos", 4 => "Sports Events", 5 => "Music Videos", 6 => "Alternative", 7 => "Popular Music", 8 => "Classical Music");
 $fileFormatEnum = array (1 => "Low Res",2 => "DVD",3 => "Standard Def", 4 => "HD 720", 5 => "HD 1080", 6 => "Low Quality", 7 => "MP3", 8 => "CD Quality", 9 => "High-def audio");
-$attributeType = array (1=>"Director", 2=>"Performer", 8=>"Genre", 10=>"Channel", 11=>"Episode", 12=>"Program", 13=>"Title", 14=>"Disc ID", 16=>"Composer/Writer", 17=>"Studio", 18=>"Rating", 19=>"Release Date", 21=>"Chapter", 26=>"Rated", 31=>"Format", 32=>"Region", 33=>"Language", 34=>"Aspect Ratio", 36=>"IMDB", 37=>"Synopsis", 38=>"Producer", 39=>"Executive Producer", 41=>"TV Channel ID", 42=>"TV Program ID", 43=>"TV Series ID" );
+//$attributeType = array (1=>"Director", 2=>"Performer", 8=>"Genre", 10=>"Channel", 11=>"Episode", 12=>"Program", 13=>"Title", 14=>"Disc ID", 16=>"Composer/Writer", 17=>"Studio", 18=>"Rating", 19=>"Release Date", 21=>"Chapter", 26=>"Rated", 31=>"Format", 32=>"Region", 33=>"Language", 34=>"Aspect Ratio", 36=>"IMDB", 37=>"Synopsis", 38=>"Producer", 39=>"Executive Producer", 41=>"TV Channel ID", 42=>"TV Program ID", 43=>"TV Series ID" );
 $aTypeProper= array_flip($attributeType);
 $directors = explode("|", $episodeData['director']);
 $seriesActors = explode("|", $episodeData['series']['seriesactors']);
@@ -274,7 +286,7 @@ $genreArray = array_values($genreArr);
 	
 //=========================series title, mapped to Program===========================================		
 	$program=mysql_real_escape_string($episodeData['series']['series']);
-	$sql = "SELECT * FROM `Attribute` WHERE `Name` =\"$program\" AND FK_AttributeType = 13"; 
+        $sql = "SELECT * FROM `Attribute` WHERE `Name` =\"$program\" AND FK_AttributeType = 12";
 	$result = mysql_query($sql);		 
 	$row = mysql_fetch_assoc($result);	
 	$attrib = $row['PK_Attribute'];		
@@ -283,7 +295,7 @@ $genreArray = array_values($genreArr);
 //	$fileIdent = $_POST['fileID'];
 	if ($count < 1)
 	{		$out.= 'Series title not found...' ;	
-			$iQuery = "INSERT INTO Attribute VALUES (\"\" , 13 , \"$program\" , NULL, NULL, NULL, 0 ,CURTIME() ,NULL )" ;  	
+                        $iQuery = "INSERT INTO Attribute VALUES (\"\" , 12 , \"$program\" , NULL, NULL, NULL, 0 ,CURTIME() ,NULL )" ;
 			mysql_query($iQuery) or die (mysql_error());	
 			$insertRes= (int)mysql_insert_id()  or die (mysql_error());
 			//echo $insertRes;
@@ -491,8 +503,7 @@ $extension=strtolower(str_replace('.','',strrchr($import_cover_art,".")));
 	}; $out.='Genre Added <br></td></tr><tr><td>';
 	$i++;}
 //=================ids================================================================================
-	$idArray = array(array('TV Series ID'=>$episodeData['seriesID']), array( 'TV Program ID'=>$episodeData['epid']), array("Release Date" =>$episodeData['firstAir']), array("Episode" =>$episodeData['air_epNo']), array("Release Date" =>'Season '.$seasonNo) );
- 	$counter = count($idArray);
+        $idArray = array( array('TV Season ID'=>$episodeData['seasonID']), array('TV Series ID'=>$episodeData['seriesID']), array( 'TV Program ID'=>$episodeData['epid']), array("Release Date" =>$episodeData['firstAir']), array("Episode Number" =>$episodeData['air_epNo']), array("Season Number" =>$episodeData['seasonNo']) );
  //	echo $counter;
  	$i=0; 	
  	$flip = array_flip($attributeType);
