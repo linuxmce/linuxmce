@@ -502,6 +502,38 @@ $extension=strtolower(str_replace('.','',strrchr($import_cover_art,".")));
 	} 
 	}; $out.='Genre Added <br></td></tr><tr><td>';
 	$i++;}
+
+//==============================eptitle mapped to title==================================================================
+        $epTitle=mysql_real_escape_string($episodeData['title']);
+        $sql = "SELECT * FROM `Attribute` WHERE `Name` =\"$epTitle\" AND FK_AttributeType = 13"; //test to see if its in the db already
+        $result = mysql_query($sql);
+        $count = mysql_num_rows($result);
+        $row = mysql_fetch_assoc($result);
+        $attrib = $row['PK_Attribute'];
+
+        if ($count < 1)
+        {
+        $out.= 'Episode title not found...' ;
+                        $iQuery = "INSERT INTO Attribute VALUES (\"\" , 13 , \"$epTitle\" , NULL, NULL, NULL, 0 ,CURTIME() ,NULL )" ;
+                        mysql_query($iQuery) or die (mysql_error());
+                        $insertRes= (int)mysql_insert_id()  or die (mysql_error());
+                        //echo $insertRes;
+                        $idQuery="INSERT INTO File_Attribute  VALUES (\"$fileIdent\", \"$insertRes\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
+                         mysql_query($idQuery)  or die (mysql_error());
+        }
+        else
+        {$out.= 'Episode title in database, associating .....<br>' ;
+        $fileChk = "SELECT * FROM `File_Attribute` WHERE `FK_Attribute`= $attrib AND FK_File = $fileIdent";
+        $chkResult = mysql_query($fileChk) or die (mysql_error()); $chkCount = mysql_num_rows($chkResult); $chk = mysql_fetch_assoc($chkResult);
+        if ($chkCount < 1)
+        {
+                $out.='Inserting episode title: '.$epTitle.' into '.$fileID ;
+                $idQuery2="INSERT INTO File_Attribute  VALUES (\"$fileIdent\", \"$attrib\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
+        mysql_query($idQuery2)  or die (mysql_error());
+        } else
+        { $out.='Episode Title: <b>'.$epTitle.'</b> already in ep, skipping <br>';}
+        };$out.='Episode: '.$epTitle.' Complete<br></tr></td><tr><td>';
+
 //=================ids================================================================================
         $idArray = array( array('TV Season ID'=>$episodeData['seasonID']), array('TV Series ID'=>$episodeData['seriesID']), array( 'TV Program ID'=>$episodeData['epid']), array("Release Date" =>$episodeData['firstAir']), array("Episode Number" =>$episodeData['air_epNo']), array("Season Number" =>$episodeData['seasonNo']) );
  //	echo $counter;
