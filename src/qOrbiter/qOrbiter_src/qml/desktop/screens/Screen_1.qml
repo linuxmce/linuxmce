@@ -21,14 +21,20 @@ Item
         }
         Rectangle{
             id:status
-            height: scaleY(2)
+            height: scaleY(4.5)
             width: parent.width
-            color: style.darkhighlight
+            color: connectedState == true ? style.darkhighlight :red
 
 
             Text{
                 id:connectstatus
                 text: qsTr("Orbiter")+ iPK_Device + qsTr(" Is Connected")
+               height: status.height; anchors.left: parent.left; anchors.leftMargin: scaleX(5)
+            }
+
+            Text{
+                id:dcemessages
+                text:dcemessage
                height: status.height; anchors.left: parent.left; anchors.leftMargin: scaleX(5)
             }
 

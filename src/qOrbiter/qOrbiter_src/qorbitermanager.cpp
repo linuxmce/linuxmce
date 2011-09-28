@@ -178,7 +178,9 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         // qorbiterUIwin->showFullScreen();
 
         //     qDebug() << "Showing Splash";
+        gotoQScreen("Splash.qml");
         QObject::connect(item,SIGNAL(setupStart(int, QString)), this,SLOT(qmlSetupLmce(int,QString)));
+        QObject::connect(nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection );
     }
     else
     {
@@ -227,9 +229,11 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
         if (getConf(PK_Device) == true )        //getting configuration from qOrbiterGen xml file
         {
+            setConnectedState(true);
 
             if (pqOrbiter->initialize()) //the dcethread initialization
-            { pqOrbiter->CreateChildren();
+            {
+                pqOrbiter->CreateChildren();
                 gotoQScreen("Screen_1.qml");
                 return true;
             }
@@ -255,7 +259,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             bReload = false;
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "No Router.  Will abort");
             qDebug() << " orbiter -setup No Router, Aborting";
-           return false;
+            return false;
 
         }
         else
@@ -567,7 +571,8 @@ bool qorbiterManager::getConf(int pPK_Device)
     qorbiterUIwin->rootContext()->setContextProperty("currentroom", m_lRooms->sdefault_Ea);           //custom room list item provided
     qorbiterUIwin->rootContext()->setContextProperty("userList", userList);                           //custom user list provided
     qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms);                           //custom room list  provided
-    qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);                       //file grids current media type
+    qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
+    qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse); //file grids current media type
     QObject::connect(this->nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()));
 
     //epg listmodel, no imageprovider as of yet
@@ -799,11 +804,12 @@ int qorbiterManager::getlocation() const
 
 void qorbiterManager::regenOrbiter(int deviceNo)
 {
-    qorbiterUIwin->hide();
+    gotoQScreen("Splash.qml");
     qDebug() << "Regenerating..";
+
     QProcess *regen = new QProcess(this);
-    regen->start("sudo /var/www/lmce-admin/qOrbiterGen.php?d="+QString::number(iPK_Device), QIODevice::ReadOnly);
-    qDebug() <<"status code:" << regen->error();
+    regen->start("/var/www/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device), QIODevice::ReadOnly);
+    qDebug() <<"status code:" << regen->errorString();
     QObject::connect(regen,SIGNAL(finished(int)), this, SLOT(regenComplete(int)));
 
 }
@@ -812,31 +818,15 @@ void qorbiterManager::regenComplete(int i)
 {
     if (i == 0)
     {
-
-
         if (getConf(iPK_Device))
         {   qDebug() << "Regen Complete!";
             // qorbiterUIwin->setSource(QUrl::fromLocalFile("qml/qOrbiter_src/main.qml"));
             gotoQScreen("Screen_1.qml");
-#ifdef Q_OS_SYMBIAN
-            qorbiterUIwin->showFullScreen();
-#elif defined(Q_WS_MAEMO_5)
-            qorbiterUIwin->showMaximized();
-#else
-            qorbiterUIwin->show();
-#endif
         }
     }
     else
     {
         gotoQScreen("LoadError.qml");
-#ifdef Q_OS_SYMBIAN
-        qorbiterUIwin->showFullScreen();
-#elif defined(Q_WS_MAEMO_5)
-        qorbiterUIwin->showMaximized();
-#else
-        qorbiterUIwin->show();
-#endif
     }
 }
 
@@ -1146,6 +1136,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
         execGrp(i_current_command_grp);
 
+
         break;
     case 4:
         qDebug() << "Filter Parameter: " << param;
@@ -1156,7 +1147,6 @@ void qorbiterManager::setStringParam(int paramType, QString param)
                 filedetailsclass->setVisible(true);
                 filedetailsclass->setFile(param);
                 showFileInfo(param);
-
                 qDebug () << "info tripped";
                 break;
 
@@ -1190,20 +1180,8 @@ void qorbiterManager::setStringParam(int paramType, QString param)
                 }
                 else if(q_mediaType.toInt() == 5)
                 {
-                    if (q_attributetype_sort.toInt() == 12 )
-                    {
-                        q_attributetype_sort="";
-                    }
-                    else if (q_attributetype_sort.toInt() == 3)
-                    {
-                        q_attributetype_sort = "12,13";
-                    }
-                    else if (!q_attributetype_sort.isEmpty())
-                    {
-                        q_attributetype_sort = "";
-                    }
-                }
 
+                }
 
                 longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
                 datagridVariableString = longassstring.join("|");
@@ -1236,7 +1214,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             q_attributetype_sort = param;
             if (param.toInt() == 12)
             {
-                ;
+
             }
             longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
             datagridVariableString = longassstring.join("|");
@@ -1422,7 +1400,7 @@ void qorbiterManager::setNowPlayingData()
 
     pqOrbiter->BindMediaRemote(true);
     pqOrbiter->requestMediaPlaylist();
-    qDebug() << "Initiating media bind and playlist request";
+
     updateTimecode();
 
 }
@@ -1441,9 +1419,9 @@ void qorbiterManager::updateImageChanged(QImage img)
 void qorbiterManager::setNowPlayingTv()
 {
     pqOrbiter->BindMediaRemote(true);
-    //pqOrbiter->requestMediaPlaylist();
-    qDebug() << "Initiating media bind and livetv playlist request";
-    //
+    pqOrbiter->requestMediaPlaylist();
+
+
 }
 
 void qorbiterManager::changeChannels(QString chan)
@@ -1552,7 +1530,7 @@ void qorbiterManager::updateTimecode()
         qDebug("media playing with no timecode!");
         if(!timeCodeSocket->isOpen())
 
-        {qDebug("sockey is closed, opening!");
+        {qDebug("socket is closed, opening!");
             DeviceData_Base *pDevice = pqOrbiter->m_dwPK_Device_NowPlaying ? pqOrbiter->m_pData->m_AllDevices.m_mapDeviceData_Base_Find(pqOrbiter->m_dwPK_Device_NowPlaying) : NULL;
             if( NULL != pDevice &&
                     (
@@ -1577,12 +1555,19 @@ void qorbiterManager::updateTimecode()
                 }
             }
             QString port = QString::fromStdString(pqOrbiter->GetCurrentDeviceData(pqOrbiter->m_dwPK_Device_NowPlaying, 171));
-            qDebug() << "IpAddress: " <<  sIPAddress.c_str();
-            timeCodeSocket->connectToHost(QString::fromStdString(sIPAddress), port.toInt(), QFile::ReadOnly );
-            if ( timeCodeSocket->isValid() )
+            if (sIPAddress.length() == 0 && i_current_mediaType == 11)
             {
-                qDebug() << "Socket 12000 Connected to: " << sIPAddress.c_str();
-                QObject::connect(timeCodeSocket,SIGNAL(readyRead()), this, SLOT(showTimeCode()), Qt::QueuedConnection);
+                qDebug() << "IpAddress empty, error!: " <<  sIPAddress.c_str();
+                return;
+            }
+            else
+            {
+                timeCodeSocket->connectToHost(QString::fromStdString(sIPAddress), port.toInt(), QFile::ReadOnly );
+                if ( timeCodeSocket->isValid() )
+                {
+                    qDebug() << "Time Code Socket connected! " << sIPAddress.c_str();
+                    QObject::connect(timeCodeSocket,SIGNAL(readyRead()), this, SLOT(showTimeCode()), Qt::QueuedConnection);
+                }
             }
         }
     }
@@ -1613,6 +1598,24 @@ void qorbiterManager::showTimeCode()
         QString duration = tcVars.at(2);
         duration.remove(QRegExp(".\\d\\d\\d|00:0"));
         nowPlayingButton->setDuration(duration);
+    }
+}
+
+void qorbiterManager::checkConnection()
+{
+    setDceResponse("Connection Problem");
+    if(pqOrbiter->m_bQuit_get() == true)
+    {
+        setConnectedState(false);
+    }
+
+    if( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()))
+    {
+        if(!pqOrbiter->GetConfig())
+        {
+            //gotoQScreen("Splash.qml");
+        }
+
     }
 }
 

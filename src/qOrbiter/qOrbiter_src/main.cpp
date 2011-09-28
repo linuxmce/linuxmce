@@ -234,7 +234,7 @@ int main(int argc, char* argv[])
                 bReload = false;
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "main loop No Router.  Will abort");
                 qDebug() << " main loop- No Router, Aborting";
-                w->gotoQScreen("Splash.qml");
+
                 return a.exec();
 
             }
@@ -247,11 +247,10 @@ int main(int argc, char* argv[])
                             bReload = false;
                             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "bapp error true = No Router.  Will abort");
 
-
+                           LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
+                            w->gotoQScreen("Splash.qml");
                     }
-                    else
-                            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
-                    w->gotoQScreen("Splash.qml");
+
             }
 
             return a.exec();

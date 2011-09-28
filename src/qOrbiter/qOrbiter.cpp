@@ -97,7 +97,8 @@ bool qOrbiter::GetConfig()
 
     if (!SendCommand(configFileRequest, p_sResponse))
     {
-        //qDebug() << "File request sent";
+        qmlUI->setConnectedState(false);
+        return false;
     }
     else
     {
@@ -1946,7 +1947,14 @@ void DCE::qOrbiter::executeCommandGroup(int cmdGrp)
     string *pResponse;
     CMD_Execute_Command_Group execCommandGroup((long)qmlUI->iPK_Device, (long)2, cmdGrp);
 
-    SendCommandNoResponse(execCommandGroup);
+    if(SendCommand(execCommandGroup))
+    {
+            //qmlUI->setDceResponse(QString::fromStdString(pResponse));
+    }
+    else
+    {
+        qmlUI->checkConnection();
+    }
 
 }
 
@@ -2510,16 +2518,70 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
       */
 
 
-    int gHeight = 10;
-    int gWidth = 10;
+    int p = 0;
+    string s_val;
+    CMD_Get_Attributes_For_Media attribute_detail_get(qmlUI->iPK_Device, qmlUI->iMediaPluginID, "" , StringUtils::itos(qmlUI->iea_area),&s_val );
+    SendCommand(attribute_detail_get);
+    QString breaker = s_val.c_str();
+    qDebug() << breaker;
+    /*
+      attribute order - should be consistent
+        0 - full file path
+        1 - path to file dir
+        2 - filename alone
+        3 - Title Attribtues
+        4 - Synopsis (for video media type)
+        5 - picture
+
+      */
+
+    // clear out any previous data in the filedetailsclass instance
+
+
+    QStringList details = breaker.split(QRegExp("\\t"));
+    int placeholder;
+
+    placeholder = details.indexOf("TITLE");
+    if(placeholder != -1)
+    {
+
+    }
+
+    placeholder = details.indexOf("SYNOPSIS");
+    if(placeholder != -1)
+    {
+        qmlUI->nowPlayingButton->setSynop(details.at(placeholder+1));
+    }
+
+    placeholder = details.indexOf("PICTURE");
+    if(placeholder != -1)
+    {
+
+    }
+
+    placeholder = details.indexOf("PATH");
+    if(placeholder != -1)
+    {
+
+
+    }
+
+    placeholder = details.indexOf("FILENAME");
+    if(placeholder != -1)
+    {
+
+    }
+
+    int gHeight = 0;
+    int gWidth = 0;
     int pkVar = 0;
     string valassign ="";
     bool isSuccessfull;// = "false";
 
     string m_sGridID ="mac_"+StringUtils::itos(qmlUI->iPK_Device); // the string identifier on the type of grid
 
-    int iRow_count=5;
-    int iColumn_count = 5;
+    int iRow_count=0;
+    int iColumn_count = 0;
     bool m_bKeep_Row_Header = false;
     bool m_bKeepColHeader = false;
     bool m_bAdd_UpDown_Arrows = true;
@@ -2555,7 +2617,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
         string imgDG = m_sGridID; //standard text grid with no images. this will not crash the router if requested and its empty, picture grids will
 
         //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
-        DCE::CMD_Request_Datagrid_Contents req_data_grid( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+        DCE::CMD_Request_Datagrid_Contents req_data_grid( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    0,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
         if(SendCommand(req_data_grid))
         {
 
@@ -2563,8 +2625,8 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
             //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             int cellsToRender= pDataGridTable->GetRows();
-            // qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
-            //  qDebug() << "Response: " << cellsToRender << " cells to render";
+             qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
+            qDebug() << "Response: " << cellsToRender << " cells to render";
 
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
             QString cellTitle;
@@ -2582,13 +2644,14 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                 string emptyEA;
                 const char *pPath = pCell->GetImagePath();
                 index = pDataGridTable->CovertColRowType(it->first).first;
+
                 cellTitle = pCell->GetText();
                 cellAttribute = pCell->GetValue();
 
                 cellfk = pCell->GetValue();
-
+                //qDebug() << cellTitle;
                 QStringList parser = cellTitle.split(QRegExp("(\\n|:\\s)"), QString::KeepEmptyParts);
-               // qDebug() << "Processing" << parser.at(0);
+                //qDebug() << "Processing" << parser.at(0);
                 QString attributeType = parser.at(0);
                 QString attribute;
                 if(parser.length() < 2)
@@ -2643,66 +2706,12 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                 else if(attributeType == "Synopsis")
                 {
                     qmlUI->nowPlayingButton->setSynop(attribute);
-                    qDebug() << attribute;
+                   // qDebug() << attribute;
                 }
                 else if(attributeType == "Release Date")
                 {
                     qmlUI->nowPlayingButton->setRelease(attribute);
                    // qDebug() << attribute;
-                }
-
-                int p = 0;
-                string s_val;
-                CMD_Get_Attributes_For_Media attribute_detail_get(qmlUI->iPK_Device, qmlUI->iMediaPluginID, "" , StringUtils::itos(qmlUI->iea_area),&s_val );
-                SendCommand(attribute_detail_get);
-                QString breaker = s_val.c_str();
-                qDebug() << breaker;
-                /*
-                  attribute order - should be consistent
-                    0 - full file path
-                    1 - path to file dir
-                    2 - filename alone
-                    3 - Title Attribtues
-                    4 - Synopsis (for video media type)
-                    5 - picture
-
-                  */
-
-                // clear out any previous data in the filedetailsclass instance
-
-
-                QStringList details = breaker.split(QRegExp("\\t"));
-                int placeholder;
-
-                placeholder = details.indexOf("TITLE");
-                if(placeholder != -1)
-                {
-
-                }
-
-                placeholder = details.indexOf("SYNOPSIS");
-                if(placeholder != -1)
-                {
-                    qmlUI->nowPlayingButton->setSynop(details.at(placeholder+1));
-                }
-
-                placeholder = details.indexOf("PICTURE");
-                if(placeholder != -1)
-                {
-
-                }
-
-                placeholder = details.indexOf("PATH");
-                if(placeholder != -1)
-                {
-
-
-                }
-
-                placeholder = details.indexOf("FILENAME");
-                if(placeholder != -1)
-                {
-
                 }
 
                 //qmlUI->m_selected_grid_item->appendRow(new FileDetailsItem(cellTitle, cellAttribute, cellImg, false,  qmlUI->model));

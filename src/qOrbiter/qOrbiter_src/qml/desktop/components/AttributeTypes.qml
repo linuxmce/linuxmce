@@ -24,9 +24,6 @@ Rectangle {
                          border.color: "black"
                          border.width: 1
                          color: status ? style.bgcolor : "cornflowerblue"
-
-
-
                          MouseArea{
                                    anchors.fill: parent
                                    z:0
@@ -41,7 +38,6 @@ Rectangle {
                              height: childrenRect.height
                              width: childrenRect.width
                              spacing: 10
-
 
                              Text {
                                  width: 75
@@ -65,7 +61,6 @@ Rectangle {
                                       anchors.fill: parent
                                       onClicked:{
                                           formatrect.opacity = 0
-
                                           attribfilter.setSelectionStatus(name)
                                           formatrect.color = status ? "green" : "red"
                                           formatrect.opacity = 1

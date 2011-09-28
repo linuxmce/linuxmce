@@ -142,6 +142,7 @@ bool AttributeSortModel::setSelectionStatus(QString format)
     bool newStatus = item->updateSelection(false);
     qDebug() << "Setting State for:" << format;
     //return state;
+
     ReturnSelectedItems();
     return newStatus;
 }
@@ -164,7 +165,7 @@ void AttributeSortModel::ReturnSelectedItems()
     }
     QString qs_sorting_string= t_selected_items.join(",");
     qDebug() << "Attribute Sort updated sorting filter" << qs_sorting_string;
-    emit SetTypeSort(6, qs_sorting_string);
+ emit SetTypeSort(6, qs_sorting_string);
 }
 
 

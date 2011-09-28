@@ -78,6 +78,7 @@ class qorbiterManager : public QWidget
     Q_PROPERTY (QString q_mediaType READ getSorting NOTIFY gridTypeChanged)
     Q_PROPERTY (QString sPK_User READ getCurrentUser WRITE setCurrentUser NOTIFY userChanged)
     Q_PROPERTY (QString dceResponse READ getDceResponse WRITE setDceResponse NOTIFY dceResponseChanged)
+    Q_PROPERTY (bool connectedState READ getConnectedState WRITE setConnectedState NOTIFY connectedStateChanged)
 
 
 public:
@@ -124,6 +125,7 @@ public:
     bool refreshUI();
     Q_INVOKABLE void swapSkins(QString incSkin);
     QString dceResponse;
+    bool connectedState;
 
 
     basicImageProvider *basicProvider;
@@ -299,11 +301,16 @@ signals:
     void requestMoreGridData();
     void dceResponseChanged();
     void imageAspectChanged();
+    void connectedStateChanged();
 
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
 
     Q_INVOKABLE void writeConfig();
     bool readLocalConfig();
+
+    void setConnectedState(bool state) { connectedState = state;  if(state == false) {checkConnection();} emit connectedStateChanged(); }
+    bool getConnectedState () {return connectedState;}
+
     void setDceResponse(QString response) {dceResponse = response; emit dceResponseChanged();}
     QString getDceResponse () {return dceResponse;}
 
@@ -367,6 +374,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void regenOrbiter(int deviceNo);
     void regenComplete(int i);
     QString adjustPath(const QString&);
+    void checkConnection();
 
     //dce related slots
     Q_INVOKABLE void execGrp(int grp);        //for command groups
