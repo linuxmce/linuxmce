@@ -6,7 +6,7 @@ Item {
     width:  scaleX(8)
 
     ButtonSq{
-        buttonsqradius: 7
+        buttonsqradius: 2.5
         buttontext: "Home"
         buttontextfontsize: 14
         height: scaleY(13)

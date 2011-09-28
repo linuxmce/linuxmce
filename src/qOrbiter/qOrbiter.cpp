@@ -103,20 +103,21 @@ bool qOrbiter::GetConfig()
     else
     {
         //qDebug() <<"Idata recieved: " << iData_Size ; // size of xml file
-    }
 
-    QByteArray configData;              //config file put into qbytearray for processing
-    configData = oData;
-    if (configData.size() == 0)
-    {
-        qDebug() << "Invalid config for device: " << qmlUI->iPK_Device;
-        qDebug() << "Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d="<<qmlUI->iPK_Device ;
-        qmlUI->gotoQScreen("Splash.qml");
-        return false;
+
+        QByteArray configData;              //config file put into qbytearray for processing
+        configData = oData;
+        if (configData.size() == 0)
+        {
+            qDebug() << "Invalid config for device: " << qmlUI->iPK_Device;
+            qDebug() << "Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d="<<qmlUI->iPK_Device ;
+            qmlUI->gotoQScreen("Splash.qml");
+            return false;
+        }
+        qmlUI->binaryConfig = configData;
+        delete oData;
+        return true;
     }
-    qmlUI->binaryConfig = configData;
-    delete oData;
-    return true;
 }
 
 //<-dceag-reg-b->
@@ -1034,7 +1035,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     m_dwPK_Device_NowPlaying_Audio = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
     m_dwPK_Device_CaptureCard = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
 
- qmlUI->nowPlayingButton->resetData();
+    qmlUI->nowPlayingButton->resetData();
     if (iPK_MediaType != 0)
     {
 
@@ -1356,7 +1357,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
         {
             qmlUI->goBack.removeLast();
             qmlUI->q_pk_attribute = "";
-             s= qmlUI->goBack.last();
+            s= qmlUI->goBack.last();
         }
         else if (qmlUI->goBack.count() == 1)
         {
@@ -1371,7 +1372,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
         params = "|"+qmlUI->q_subType +"|"+qmlUI->q_fileFormat+"|"+qmlUI->q_attribute_genres+"|"+qmlUI->q_mediaSources+"||"+qmlUI->q_attributetype_sort+"||2|"+qmlUI->q_pk_attribute+"";
         s = QString::number(iPK_MediaType) + params;
         qmlUI->i_current_mediaType = iPK_MediaType;
-        qmlUI-> goBack << s;       
+        qmlUI-> goBack << s;
     }
 
     qDebug() << "Datagrid request options:";
@@ -1385,14 +1386,14 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
     //PROGRAM
     if (qmlUI->q_attributetype_sort == "12" && qmlUI->q_pk_attribute != "")
     {
-        qmlUI->q_attributetype_sort =  "52, 42";
+        qmlUI->q_attributetype_sort =  "52";
     }
-    else if (qmlUI->q_attributetype_sort == "52, 42")
+    else if (qmlUI->q_attributetype_sort == "52")
     {
         qmlUI->q_attributetype_sort = "13";
     }
 
-        //PERSON
+    //PERSON
     if (qmlUI->q_attributetype_sort == "2" && qmlUI->q_pk_attribute == "")
     {
         if(iPK_MediaType == 4)
@@ -1469,12 +1470,12 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                         filePath = QString::fromUtf8(pPath);
                         fk_file = pCell->GetValue();
                         cellTitle = QString::fromUtf8(pCell->m_Text);
-                        qDebug() << pCell->m_mapAttributes_Find("Name").c_str();
+                        // qDebug() << pCell->m_MessageLength;
                         index = pDataGridTable->CovertColRowType(it->first).first;
                         if (pPath )
                         {
                             QString fullsize = pPath;
-                            fullsize.replace(".tnj", "");
+                            //fullsize.replace(".tnj", "");
                             cellImg = getfileForDG(fullsize.toStdString());
                             size_t s=0;
                             pCell->m_GraphicLength = (unsigned long) s;
@@ -1487,10 +1488,10 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 
 
                         qmlUI->model->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg,  qmlUI->model));
-                        qDebug() << "Cell info:" ;
-                        qDebug() << cellTitle ;
-                        qDebug() << fk_file ;
-                        qDebug() << filePath ;
+                        // qDebug() << "Cell info:" ;
+                        // qDebug() << cellTitle ;
+                        // qDebug() << fk_file ;
+                        // qDebug() << filePath ;
                     }
                     if (cellsToRender > qmlUI->model->rowCount(QModelIndex()))
                     {
@@ -1984,7 +1985,7 @@ void DCE::qOrbiter::executeCommandGroup(int cmdGrp)
 
     if(SendCommand(execCommandGroup))
     {
-            //qmlUI->setDceResponse(QString::fromStdString(pResponse));
+        //qmlUI->setDceResponse(QString::fromStdString(pResponse));
     }
     else
     {
@@ -2660,7 +2661,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
             //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             int cellsToRender= pDataGridTable->GetRows();
-             qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
+            qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
             qDebug() << "Response: " << cellsToRender << " cells to render";
 
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
@@ -2697,12 +2698,12 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                 if(attributeType == "Program")
                 {
                     qmlUI->nowPlayingButton->setProgram(attribute);
-                  //  qDebug() << attribute;
+                    //  qDebug() << attribute;
                 }
                 else if(attributeType == "Title")
                 {
                     qmlUI->nowPlayingButton->setMediaTitle(attribute);
-                 //   qDebug() << attribute;
+                    //   qDebug() << attribute;
                 }
                 else if(attributeType == "Channel")
                 {
@@ -2711,42 +2712,42 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                 else if(attributeType == "Episode")
                 {
                     qmlUI->nowPlayingButton->setEpisode(attribute);
-                  //  qDebug() << attribute;
+                    //  qDebug() << attribute;
                 }
                 else if(attributeType == "Performer")
                 {
                     qmlUI->nowPlayingButton->setPerformers(attribute);
-                   // qDebug() << attribute;
+                    // qDebug() << attribute;
                 }
                 else if(attributeType == "Director")
                 {
                     qmlUI->nowPlayingButton->setDirector(attribute);
-                  // qDebug() << attribute;
+                    // qDebug() << attribute;
                 }
                 else if(attributeType == "Genre")
                 {
                     qmlUI->nowPlayingButton->setGenre(attribute);
-                  //  qDebug() << attribute;
+                    //  qDebug() << attribute;
                 }
                 else if(attributeType == "Album")
                 {
                     qmlUI->nowPlayingButton->setAlbum(attribute);
-                  //  qDebug() << attribute;
+                    //  qDebug() << attribute;
                 }
                 else if(attributeType == "Track")
                 {
                     qmlUI->nowPlayingButton->setTrack(attribute);
-                   // qDebug() << attribute;
+                    // qDebug() << attribute;
                 }
                 else if(attributeType == "Synopsis")
                 {
                     qmlUI->nowPlayingButton->setSynop(attribute);
-                   // qDebug() << attribute;
+                    // qDebug() << attribute;
                 }
                 else if(attributeType == "Release Date")
                 {
                     qmlUI->nowPlayingButton->setRelease(attribute);
-                   // qDebug() << attribute;
+                    // qDebug() << attribute;
                 }
 
                 //qmlUI->m_selected_grid_item->appendRow(new FileDetailsItem(cellTitle, cellAttribute, cellImg, false,  qmlUI->model));
@@ -3224,6 +3225,16 @@ void DCE::qOrbiter::SetAspectRatio(QString ratio)
 void DCE::qOrbiter::GetText(int textno)
 {
 
+}
+
+void DCE::qOrbiter::SetMediaPosition(QString position)
+{
+    CMD_Set_Media_Position setPosition(qmlUI->iPK_Device, qmlUI->ScreenParameters->getParam(186).toInt(), qmlUI->ScreenParameters->getParam(187).toInt(), position.toStdString());
+
+    if(!SendCommand(setPosition))
+    {
+        qmlUI->checkConnection();
+    }
 }
 
 

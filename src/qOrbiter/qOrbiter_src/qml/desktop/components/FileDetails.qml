@@ -3,7 +3,7 @@ import QtQuick 1.0
 
 Rectangle {
     id: filedetailrect
-    width: scaleX(65)
+    width: scaleX(80)
     height: scaleY(80)
     anchors.top: parent.top
     anchors.topMargin: scaleY(5)
@@ -29,9 +29,7 @@ Rectangle {
         height: childrenRect.height + 5
         width: parent.width
         color:style.highlight1
-
-        radius:5
-
+        radius:2.5
         Text {
             id: text2
             anchors.horizontalCenter: parent.horizontalCenter
@@ -41,15 +39,6 @@ Rectangle {
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         }
 
-        Text {
-            id: aspecttext
-            anchors.bottom: parent.bottom
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: filedetailsclass.aspect + " " + filedetailsclass.i_aspectH +":"+filedetailsclass.i_aspectW
-            font.pixelSize: 14
-            font.bold: true
-            color: "red"
-        }
     }
 
     Rectangle{
@@ -57,8 +46,11 @@ Rectangle {
         height:childrenRect.height
         width:childrenRect.width
         color: "transparent"
-        anchors.top:titlerect.bottom
 
+        anchors.top: titlerect.bottom
+        anchors.topMargin: scaleY(1)
+        anchors.left: parent.left
+        anchors.leftMargin: scaleX(5)
         BorderImage {
             id: borderimg
             horizontalTileMode: BorderImage.Repeat
@@ -70,8 +62,8 @@ Rectangle {
         }
         Image {
             id: filedetailsimage
-            width: filedetailsclass.aspect=="wide"? scaleX(25) : scaleX(15)
-            height:filedetailsclass.aspect=="wide"?scaleY(25) : scaleY(45)
+            width: filedetailsclass.aspect=="wide"? scaleX(42.5) : scaleX(23)
+            height:filedetailsclass.aspect=="wide"?scaleY(42.5) : scaleY(55)
             source: "image://listprovider/filedetails/"+securityvideo.timestamp
         }
     }
@@ -79,15 +71,16 @@ Rectangle {
 
     Rectangle {
         id: rectangle1
-        anchors.top: imageholder.bottom
+        anchors.top: filedetailsclass.aspect=="wide"? imageholder.bottom : titlerect.bottom
         anchors.topMargin: scaleY(1)
-        width: parent.width *.95
-        height: scaleY(20)
-        radius: 4
+        width: filedetailsclass.aspect=="wide"? parent.width *.95 : parent.width *.45
+        height: filedetailsclass.aspect=="wide"? scaleY(20) : imageholder.height
+        radius: 2.5
         clip:  true
         color: style.darkhighlight
         border.color: style.highlight1
-        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.left: filedetailsclass.aspect=="wide"? parent.left : imageholder.right
+        anchors.leftMargin: filedetailsclass.aspect=="wide"? scaleX(2) : scaleX(1)
 
         Flickable {
             anchors.fill: parent
@@ -191,9 +184,9 @@ Rectangle {
         id:controlrow
         anchors.top: rectangle1.bottom
         anchors.topMargin: scaleY(1)
-        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.horizontalCenter: filedetailsclass.aspect=="wide"? parent.horizontalCenter : rectangle1.horizontalCenter
         spacing: scaleY(.5)
-        ButtonSq {
+        AvOptionButton {
             id: buttonsq1
             width: style.stdbuttonw
             height: style.stdbuttonh
@@ -208,7 +201,7 @@ Rectangle {
             }
         }
 
-        ButtonSq {
+        AvOptionButton {
             id: buttonsq2
             width: style.stdbuttonw
             height: style.stdbuttonh
@@ -216,7 +209,7 @@ Rectangle {
             buttontext: "Move"
         }
 
-        ButtonSq {
+        AvOptionButton {
             id: buttonsq3
             width: style.stdbuttonw
             height: style.stdbuttonh

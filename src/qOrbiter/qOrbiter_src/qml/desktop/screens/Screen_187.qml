@@ -1,6 +1,22 @@
 import QtQuick 1.0
 import "../components"
 
+/*
+  Screen Params for this screen
+ Param:  10  Value:
+  Param:  159  Value:  187
+  Param:  184  Value:  device from
+ Param:  186  Value:   pk_device_mediasource 23
+  Param:  187  Value:  stream id 1009
+  Param:  188  Value:  Position CHAPTER:0 POS:110284 TITLE:0 SUBTITLE:-1 AUDIO:-1 TOTAL:191526 QUEUE_POS:8  CHAPTER:0 POS:110284 TITLE:0 SUBTITLE:-1 AUDIO:-1 TOTAL:191526
+  Param:  189  Value:  Users
+  Param:  190  Value:  Pk_MediaType
+  Param:  226  Value:  screen to go to after decision
+  Param:  251  Value:  0
+  Param:  252  Value:  0
+ Param:  253  Value:  0
+  */
+
    Rectangle {
     id:asktoresume
     width: style.orbiterW
@@ -44,20 +60,36 @@ import "../components"
                 ButtonSq{
                     buttontext: "Yes Resume"
                     buttonsqradius: 10
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked: {setPosition(screenparams.getParam(188)) ;gotoQScreen("Screen_"+screenparams.getParam(226)+".qml") }
+                    }
                 }
                 ButtonSq{
                     buttontext: "No thank you"
                     buttonsqradius: 10
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked: gotoQScreen("Screen_"+screenparams.getParam(226)+".qml")
+                    }
                 }
 
                 ButtonSq{
                     buttontext: "Yes Always Resume"
                     buttonsqradius: 10
+                    MouseArea{
+                        anchors.fill: parent
+                       // onClicked: gotoQScreen()
+                    }
                 }
 
                 ButtonSq{
                     buttontext: "No thank you, Never resume"
                     buttonsqradius: 10
+                    MouseArea{
+                        anchors.fill: parent
+                        //onClicked: gotoQScreen()
+                    }
                 }
 
             }

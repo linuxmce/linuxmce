@@ -257,6 +257,8 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             bReload = false;
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "No Router.  Will abort");
             qDebug() << " orbiter -setup No Router, Aborting";
+            pqOrbiter->Disconnect();
+
             return false;
 
         }
@@ -268,7 +270,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             return false;
         }
     }
-    return true;
+
 }
 
 
@@ -1162,13 +1164,11 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             else
             {
                 q_pk_attribute = param.remove("!A");
-
                longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
                 datagridVariableString = longassstring.join("|");
                 //   qDebug() << datagridVariableString;
                 execGrp(i_current_command_grp);
             }
-
         }
 
         break;
@@ -1222,7 +1222,6 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
             filedetailsclass->setVisible(true);
             filedetailsclass->setFile(param);
-
             break;
             //   pqOrbiter->GetMediaAttributeGrid(param);
 
@@ -1241,7 +1240,6 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             {
                 q_attributetype_sort = "";
             }
-
 
             longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
             datagridVariableString = longassstring.join("|");
@@ -1593,6 +1591,11 @@ void qorbiterManager::checkConnection()
         }
 
     }
+}
+
+void qorbiterManager::setPosition(QString position)
+{
+    pqOrbiter->SetMediaPosition(position);
 }
 
 

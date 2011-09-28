@@ -105,6 +105,7 @@ public:
     void SetZoom(QString zoomLevel);
     void SetAspectRatio(QString ratio);
     void GetText(int textno);
+    void SetMediaPosition(QString position);
 
     //<-dceag-const-e->
 

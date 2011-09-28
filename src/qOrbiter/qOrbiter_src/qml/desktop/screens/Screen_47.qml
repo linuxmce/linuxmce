@@ -21,14 +21,16 @@ Rectangle {
         Component
         {
             id: contactDelegate
+
+
+
+
             Rectangle
             {
                 id:mainItem
                 width: scaleX(20);
                 height: scaleY(20)
                 color: style.lighthighlight
-                border.color: "black"
-                border.width: 1
 
                 MouseArea{
                     anchors.fill: mainItem
@@ -49,16 +51,12 @@ Rectangle {
                 Rectangle
                 {
                     id:frame
-                    opacity: 1
+
                     width: scaleX(19);
                     height: scaleY(19)
                     anchors.centerIn: mainItem
                     clip:true
-
-
-                    color: "floralwhite"
-                    border.color: "black"
-                    border.width: 2
+                    color: "transparent"
 
                     MouseArea
                     {
@@ -66,29 +64,47 @@ Rectangle {
                         onClicked: setStringParam(4, id)
                     }
 
+                    BorderImage {
+                        id: borderimg
+                        horizontalTileMode: BorderImage.Repeat
+                        source: "../../../img/icons/drpshadow.png"
+                        anchors.fill: imagerect
+                        anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
+                        border { left: 10; top: 10; right: 10; bottom: 10 }
+                        //smooth: true
+                    }
                     Image
                     {
                         id: imagerect;
                         source:"image://datagridimg/"+id ;
-                        height: scaleY(19);
-                        width: scaleX(19);
+                        height: scaleY(18);
+                        width: scaleX(18);
                         anchors.centerIn: parent;
                         fillMode: Image.PreserveAspectCrop
-                        opacity: .5
+                        opacity: 1
                         asynchronous: true
+                        smooth: true
                     }
-                }
+                    Rectangle{
+                        id:textmask
+                        color: "grey"
+                       anchors.fill:celllabel
+                        opacity: .5
+                    }
 
-                Text
-                {
-                    text: name;
-                    opacity: 1;
-                    font.pointSize: 12;
-                    color: "black" ;
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    anchors.fill: frame
-                    font.bold: true
+                    Text
+                    {
+                        id:celllabel
+                        text: name;
+                        font.pointSize: 12;
+                        color: "white" ;
+                        wrapMode: "WrapAtWordBoundaryOrAnywhere"
 
+                        width: imagerect.width
+                        font.bold: true
+                        anchors.top: imagerect.top
+                        anchors.horizontalCenter: imagerect.horizontalCenter
+                    }
                 }
             }
         }
@@ -114,8 +130,6 @@ Rectangle {
                     id: topLayout
                     x: 10; y: 10; height: imagerect.height; width: parent.width
                     spacing: 10
-
-
 
                     Image
                     {

@@ -218,11 +218,12 @@ int main(int argc, char* argv[])
     {
 
             bAppError = w->setupLmce(PK_Device, sRouter_IP, true, bLocalMode);
-            if ( bAppError== false )
+            if ( bAppError== true )
             {
               LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
               qDebug() << "Connected!";
               w->gotoQScreen("Screen_1.qml");
+             a.exec();
 
             }
 
@@ -234,8 +235,7 @@ int main(int argc, char* argv[])
                 bReload = false;
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "main loop No Router.  Will abort");
                 qDebug() << " main loop- No Router, Aborting";
-
-                return a.exec();
+                a.exec();
 
             }
             else
@@ -246,11 +246,10 @@ int main(int argc, char* argv[])
                             bAppError = false;
                             bReload = false;
                             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "bapp error true = No Router.  Will abort");
-
                            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
                             w->gotoQScreen("Splash.qml");
+                            return a.exec();
                     }
-
             }
 
             return a.exec();

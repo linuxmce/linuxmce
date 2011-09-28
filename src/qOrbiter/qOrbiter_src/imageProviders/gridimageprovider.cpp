@@ -39,7 +39,16 @@ QImage GridIndexProvider::requestImage(const QString &id, QSize *size, const QSi
 
         }
 
+
         QImage result;
+        if (image.height() < image.width())
+        {
+           mModel.find(id)->setAspect("poster");
+        }
+        else
+        {
+             mModel.find(id)->setAspect("wide");
+        }
 
         if (requestedSize.isValid()) {
             result = image.scaled(requestedSize);

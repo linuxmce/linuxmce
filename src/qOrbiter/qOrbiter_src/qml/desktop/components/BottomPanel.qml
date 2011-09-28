@@ -5,7 +5,7 @@ import "../js/ComponentLoader.js" as MyJs
 Rectangle {
     id:advanced_panel
     width: style.orbiterW
-    height: style.widebuttonh + 10
+    height: style.widebuttonh + scaleY(2)
     color: style.darkhighlight
 
     Row{

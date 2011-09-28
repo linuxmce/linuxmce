@@ -1,6 +1,6 @@
 import QtQuick 1.0
 
-Rectangle {
+AvOptionButton {
     width: 60
     height: 200
     color: style.advanced_bg

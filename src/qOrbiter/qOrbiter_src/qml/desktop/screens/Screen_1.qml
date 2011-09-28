@@ -21,7 +21,7 @@ Item
         }
         Rectangle{
             id:status
-            height: scaleY(4.5)
+            height: scaleY(2.5)
             width: parent.width
             color: connectedState == true ? style.darkhighlight :red
 

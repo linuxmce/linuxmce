@@ -16,6 +16,7 @@ QHash<int, QByteArray> gridItem::roleNames() const
   names[AttributeRole] = "attributes";
   names[ImageRole] = "cellImage";
   names[FKRole]= "id";
+  names[AspectRole] = "aspect";
   return names;
 }
 
@@ -32,6 +33,8 @@ QVariant gridItem::data(int role) const
     return path();
   case FKRole:
     return id();
+  case AspectRole:
+  return imgAspect();
   default:
     return QVariant();
   }

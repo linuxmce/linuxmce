@@ -34,9 +34,7 @@ Rectangle {
         //contentItem.clip: true
         cellWidth: scaleX(20)
         cellHeight: scaleY(20)
-        keyNavigationWraps: true
-        Keys.enabled: true
-        Keys.onPressed:console.log(Keys.objectName)
+
     }
 
 
