@@ -1088,7 +1088,7 @@ function addProgTitle ($episodeData, $con ,$fileID, $mediadbADO, $dbADO, $output
 //=================title================================================================================
 function addTitle ($episodeData, $con ,$fileID, $mediadbADO, $dbADO, $output)
 {
-	$program=mysql_real_escape_string($episodeData['series']['series']);
+        $program=mysql_real_escape_string($episodeData['title']);
 	
 	$sql = "SELECT * FROM `Attribute` WHERE `Name` = \"$program\" AND FK_AttributeType = 13";
 	$result = mysql_query($sql) or die(mysql_error());
