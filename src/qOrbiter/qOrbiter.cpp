@@ -1306,6 +1306,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
     if (iPK_MediaType != qmlUI->i_current_mediaType)
     {
         qmlUI->initializeSortString();
+
     }
     qmlUI->gotoQScreen("Screen_47.qml");
     qmlUI->model->clear();
@@ -1355,13 +1356,14 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
         {
             qmlUI->goBack.removeLast();
             qmlUI->q_pk_attribute = "";
+             s= qmlUI->goBack.last();
         }
         else if (qmlUI->goBack.count() == 1)
         {
             qmlUI->initializeSortString();
         }
 
-        s= qmlUI->goBack.last();
+
     }
     else
     {
@@ -1369,7 +1371,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
         params = "|"+qmlUI->q_subType +"|"+qmlUI->q_fileFormat+"|"+qmlUI->q_attribute_genres+"|"+qmlUI->q_mediaSources+"||"+qmlUI->q_attributetype_sort+"||2|"+qmlUI->q_pk_attribute+"";
         s = QString::number(iPK_MediaType) + params;
         qmlUI->i_current_mediaType = iPK_MediaType;
-        qmlUI-> goBack << s;
+        qmlUI-> goBack << s;       
     }
 
     qDebug() << "Datagrid request options:";
@@ -1380,12 +1382,30 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
     qDebug() << "Media Sources:" << qmlUI->q_mediaSources;
     qDebug() << "Attributetype sort:" << qmlUI->q_attributetype_sort;
     qDebug() << "Attribute Sort:" << qmlUI->q_pk_attribute;
-
+    //PROGRAM
     if (qmlUI->q_attributetype_sort == "12" && qmlUI->q_pk_attribute != "")
     {
-        qmlUI->q_attributetype_sort =  "52";
+        qmlUI->q_attributetype_sort =  "52, 42";
     }
-    else if (qmlUI->q_attributetype_sort == "52")
+    else if (qmlUI->q_attributetype_sort == "52, 42")
+    {
+        qmlUI->q_attributetype_sort = "13";
+    }
+
+        //PERSON
+    if (qmlUI->q_attributetype_sort == "2" && qmlUI->q_pk_attribute == "")
+    {
+        if(iPK_MediaType == 4)
+        {
+            qmlUI->q_attributetype_sort = "3"; //sets to album from performer for music
+        }
+        else
+        {
+            qmlUI->q_attributetype_sort = "13"; //sets to title as catch all for other type for now
+        }
+
+    }
+    else if (qmlUI->q_attributetype_sort == "3")
     {
         qmlUI->q_attributetype_sort = "13";
     }

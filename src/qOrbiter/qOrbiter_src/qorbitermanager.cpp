@@ -1163,25 +1163,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             {
                 q_pk_attribute = param.remove("!A");
 
-
-                if( q_attributetype_sort.toInt() == 2||3 && q_mediaType.toInt() == 4)
-                {
-                    if (q_attributetype_sort.toInt() == 3)
-                    {
-                        q_attributetype_sort = "";
-                    }
-                    else
-                    {
-                        q_attributetype_sort = "3";
-                    }
-
-                }
-                else if(q_mediaType.toInt() == 5)
-                {
-
-                }
-
-                longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
+               longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
                 datagridVariableString = longassstring.join("|");
                 //   qDebug() << datagridVariableString;
                 execGrp(i_current_command_grp);
@@ -1289,7 +1271,7 @@ void qorbiterManager::initializeSortString()
     q_attribute_genres="";    //4
     q_mediaSources ="1,2";         //5 need comma delineation
     q_usersPrivate = "0";        //6
-    q_attributetype_sort="12";  //7
+    q_attributetype_sort="13";  //7
     q_pk_users="0";             //8
     q_last_viewed="2";        //9
     q_pk_attribute="";        //10

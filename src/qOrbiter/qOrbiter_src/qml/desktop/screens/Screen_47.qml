@@ -147,6 +147,7 @@ Rectangle {
 
 
         MultiStateFileDisplay{id:grid_view1}
+
         ListView{
             id:alphalist
             height: grid_view1.height
