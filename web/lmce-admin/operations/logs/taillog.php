@@ -1,12 +1,5 @@
 <?php
-//session_start();
-
-if ($_REQUEST['log']) {
-	$logname=$_REQUEST['log'];
-	$_SESSION['log'] = $logname;
-} else {
-	$logname = $_SESSION['log'];
-}
+$logname=$_REQUEST['log'];
 
 if(!ereg('/var/log/pluto/',$logname) || !is_readable($logname)){
         die('<pre style="background:black;color:white;">Access denied to '.$logname.'</pre>');
