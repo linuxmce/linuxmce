@@ -333,10 +333,13 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void updateImageChanged(QImage img);
     void updateTimecode();
     void showTimeCode();
+   Q_INVOKABLE  void showMenu();
+    Q_INVOKABLE void moveDirection (QString direction);
+    Q_INVOKABLE void enter();
 
     Q_INVOKABLE  void getcurrentSkins(QStringList skinPaths);
     void qmlSetupLmce(int incdeviceid, QString incrouterip);
-    void changedPlaylistPosition(int position);
+    void changedPlaylistPosition(QString position);
     void changedTrack(QString increment);
 
     //automation related

@@ -175,10 +175,10 @@ int main(int argc, char* argv[])
     }
 
 #ifndef for_harmattan
-        QApplication::setGraphicsSystem("raster");
+    QApplication::setGraphicsSystem("raster");
 #endif
-        QApplication a(argc, argv);
-        qorbiterManager * w = new qorbiterManager(PK_Device,QString::fromStdString(sRouter_IP.c_str()));
+    QApplication a(argc, argv);
+    qorbiterManager * w = new qorbiterManager(PK_Device,QString::fromStdString(sRouter_IP.c_str()));
 
 
 #ifdef WIN32
@@ -217,15 +217,17 @@ int main(int argc, char* argv[])
     try
     {
 
-            bAppError = w->setupLmce(PK_Device, sRouter_IP, true, bLocalMode);
-            if ( bAppError== true )
-            {
-              LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
-              qDebug() << "Connected!";
-              w->gotoQScreen("Screen_1.qml");
-             a.exec();
+        bAppError = w->setupLmce(PK_Device, sRouter_IP, true, bLocalMode);
+        if ( bAppError== false )
+        {
+            LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
+            qDebug() << "Connected!";
+            w->gotoQScreen("Screen_1.qml");
+            a.exec();
 
-            }
+        }
+        else
+        {
 
             if(w->pqOrbiter->m_pEvent && w->pqOrbiter->m_pEvent->m_pClientSocket && w->pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
             {
@@ -240,19 +242,20 @@ int main(int argc, char* argv[])
             }
             else
             {
-                    bAppError = true;
-                    if( w->pqOrbiter->m_pEvent&& w->pqOrbiter->m_pEvent->m_pClientSocket && w->pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
-                    {
-                            bAppError = false;
-                            bReload = false;
-                            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "bapp error true = No Router.  Will abort");
-                           LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
-                            w->gotoQScreen("Splash.qml");
-                            return a.exec();
-                    }
+                bAppError = true;
+                if( w->pqOrbiter->m_pEvent&& w->pqOrbiter->m_pEvent->m_pClientSocket && w->pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
+                {
+                    bAppError = false;
+                    bReload = false;
+                    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "bapp error true = No Router.  Will abort");
+                    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
+                    w->gotoQScreen("Splash.qml");
+                    return a.exec();
+                }
             }
+        }
 
-            return a.exec();
+        return a.exec();
     }
     catch(string s)
     {

@@ -53,7 +53,7 @@ void GenreModel::insertRow(int row, GenreItem *item)
 {
   beginInsertRows(QModelIndex(), row, row);
   connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
-  qDebug() << "Inserting at:" << row;
+  //qDebug() << "Inserting at:" << row;
   m_list.insert(row, item);
   endInsertRows();
 }
@@ -62,7 +62,7 @@ void GenreModel::handleItemChange()
 {
   GenreItem* item = static_cast<GenreItem*>(sender());
   QModelIndex index = indexFromItem(item);
-  qDebug() << "Handling item change for:" << index;
+  //qDebug() << "Handling item change for:" << index;
   if(index.isValid())
   {
     //emit dataChanged(index, index);
@@ -138,7 +138,7 @@ bool GenreModel::setSelectionStatus(QString format)
 {
     GenreItem* item = find(format);
     bool newStatus = item->updateSelection(false);
-    qDebug() << "Setting State for:" << format;
+    //qDebug() << "Setting State for:" << format;
     //return state;
     ReturnSelectedItems();
     return newStatus;
@@ -146,7 +146,7 @@ bool GenreModel::setSelectionStatus(QString format)
 
 bool GenreModel::getSelectionStatus(QString format)
 {
-    qDebug() << "Looking for status for" << format;
+    //qDebug() << "Looking for status for" << format;
     GenreItem* item = find(format);
 
     bool g = item->selectedStatus();
@@ -161,7 +161,7 @@ void GenreModel::ReturnSelectedItems()
         if(item->selectedStatus() == true) t_selected_items.append(item->fileformat());
     }
     QString qs_sorting_string= t_selected_items.join(",");
-    qDebug() << "File Format updated sorting filter" << qs_sorting_string;
+    //qDebug() << "File Format updated sorting filter" << qs_sorting_string;
     emit SetTypeSort(3, qs_sorting_string);
 }
 

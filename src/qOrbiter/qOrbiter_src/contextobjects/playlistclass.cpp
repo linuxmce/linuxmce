@@ -53,7 +53,7 @@ void PlaylistClass::insertRow(int row, PlaylistItemClass *item)
 {
     beginInsertRows(QModelIndex(), row, row);
     connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
-    qDebug() << "Inserting at:" << row;
+    //qDebug() << "Inserting at:" << row;
     m_list.insert(row, item);
     endInsertRows();
 }
@@ -62,7 +62,7 @@ void PlaylistClass::handleItemChange()
 {
     PlaylistItemClass* item = static_cast<PlaylistItemClass*>(sender());
     QModelIndex index = indexFromItem(item);
-    qDebug() << "Handling item change for:" << index;
+  //  qDebug() << "Handling item change for:" << index;
     if(index.isValid())
     {
         //emit dataChanged(index, index);
@@ -147,27 +147,27 @@ void PlaylistClass::setItemStatus(int pos)
 
 bool PlaylistClass::checkDupe(QString name, QString position)
 {
-    qDebug() << "Checking dupe for:" << name << " at " <<position;
+    //qDebug() << "Checking dupe for:" << name << " at " <<position;
 
     if (PlaylistItemClass *item = find(name))
-    {   qDebug() << "Found " << name;
+    {   //qDebug() << "Found " << name;
 
         if (item->name().compare(position))
         {
-            qDebug() << "Dupe position " << position.toInt() ;
+            //qDebug() << "Dupe position " << position.toInt() ;
             return true;
         }
         else
         {
-            qDebug() << item->index();
-            qDebug() << "Did not find item at postion " << position;
+            //qDebug() << item->index();
+            //qDebug() << "Did not find item at postion " << position;
             return false;
         }
 
     }
     else
     {
-        qDebug() << name << " at " << position << " Not in playlist";
+        //qDebug() << name << " at " << position << " Not in playlist";
         return false;
     }
 

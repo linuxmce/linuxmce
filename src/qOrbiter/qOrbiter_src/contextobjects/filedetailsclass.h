@@ -73,7 +73,7 @@ Q_PROPERTY (QString aspect READ getImageAspect WRITE setImageAspect NOTIFY image
     QString aspect;
 
     void setImageAspect(QString i_aspect) { aspect = i_aspect; emit imageAspectChanged();}
-    QString getImageAspect() {qDebug() << aspect; return aspect;}
+    QString getImageAspect() {return aspect;}
 
     QString file;
     inline QString getFile () {return file;}

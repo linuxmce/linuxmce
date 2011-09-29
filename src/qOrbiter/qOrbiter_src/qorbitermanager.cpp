@@ -186,6 +186,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         qDebug() << "Couldnt get skin data!";
         exit(15);
     }
+
 }
 
 
@@ -206,7 +207,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
     iPK_Device= PK_Device;
     pqOrbiter = new DCE::qOrbiter(PK_Device, sRouterIP, true,bLocalMode);
 
-    pqOrbiter->qmlUI = this;
+pqOrbiter->qmlUI = this;
 
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
     {
@@ -224,6 +225,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
               qt GUI (qml or qobject based) signals to DCE slots and vice versa!
             */
 
+
         if (getConf(PK_Device) == true )        //getting configuration from qOrbiterGen xml file
         {
             setConnectedState(true);
@@ -232,19 +234,19 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             {
                 pqOrbiter->CreateChildren();
                 gotoQScreen("Screen_1.qml");
-                return true;
+                return false;
             }
             else
             {
                 qDebug() << "Orbiter Conf Hiccup!";
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Device Failed to get configuration!");
-                return false;
+                return true;
             }
         }
         else
         {
             qDebug() << "Config invalid";
-            return false;
+            return true;
         }
     }
     else
@@ -258,7 +260,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             qDebug() << " orbiter -setup No Router, Aborting";
             pqOrbiter->Disconnect();
 
-            return false;
+            return true;
 
         }
         else
@@ -266,13 +268,11 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
             qDebug() << "Connect Failed";
             gotoQScreen("Splash.qml");
-            return false;
+            return true;
         }
     }
 
 }
-
-
 
 bool qorbiterManager::refreshUI()
 {
@@ -682,7 +682,7 @@ void qorbiterManager::swapSkins(QString incSkin)
             if(skinsDir.cd(platform.last()))
             {
                 incSkin.toLower() = skinsDir.path();
-                qDebug() << "Looking for skins in " + skinsDir.path() ;
+                //qDebug() << "Looking for skins in " + skinsDir.path() ;
                 QDeclarativeComponent skinData(qorbiterUIwin->engine(),QUrl::fromLocalFile(skinsDir.path()+"/"+incSkin.toLower()+"/Style.qml"));
                 qDebug() << skinsDir.path()+"/"+incSkin.toLower()+"/Style.qml" ;
                 //turning it into a qObject - this part actually loads it - the error should connect to a slot and not an exit
@@ -769,7 +769,9 @@ bool qorbiterManager::addMediaItem(QString mText, QString temp, QImage cell)
 
     //const char *tcell = reinterpret_cast<char*>(cell.bits());
     if (cell.isNull())
-    {qDebug() << mText << " is null img";}
+    {
+        //qDebug() << mText << " is null img";
+    }
     //this->model->appendRow(new gridItem(mText, temp, cell , model));
     emit modelChanged();
     // qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
@@ -790,7 +792,7 @@ void qorbiterManager:: setLocation(const int &room, const int &ea)
 {
     iFK_Room = room;
     iea_area = ea;
-    qDebug() << "Moving to Location:" << room << "with ea: " << ea;
+   // qDebug() << "Moving to Location:" << room << "with ea: " << ea;
     emit locationChanged(room, ea);
     pqOrbiter->setLocation(room, ea);
 
@@ -993,7 +995,7 @@ bool qorbiterManager::readLocalConfig()
     QFile localConfigFile;
 
     localConfigFile.setFileName(xmlPath);
-    qDebug() << xmlPath;
+   // qDebug() << xmlPath;
     if (!localConfigFile.open(QFile::ReadWrite))
     {
         return false;
@@ -1020,13 +1022,12 @@ bool qorbiterManager::readLocalConfig()
 
             if(!qs_routerip.isNull())
             {
-                qDebug()<< "Reading local config";
+                 qs_routerip = "DCEROUTER";
             }
             else
             {
                 qDebug() << "Could not read local, setting defaults.";
-                qDebug() << localConfig.toString();
-                qs_routerip = "DCEROUTER";
+                qDebug() << localConfig.toString();               
                 localConfigFile.close();
                 return false;
             }
@@ -1047,8 +1048,8 @@ void qorbiterManager::writeConfig()
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #endif
     QFile localConfigFile;
-    qDebug() << "Writing Config";
-    qDebug() << xmlPath;
+   // qDebug() << "Writing Config";
+   // qDebug() << xmlPath;
     localConfigFile.setFileName(xmlPath);
     if (!localConfigFile.open(QFile::ReadOnly))
     {
@@ -1131,14 +1132,14 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-        qDebug() << datagridVariableString;
+//        qDebug() << datagridVariableString;
 
         execGrp(i_current_command_grp);
 
 
         break;
     case 4:
-        qDebug() << "Filter Parameter: " << param;
+     //   qDebug() << "Filter Parameter: " << param;
         if (q_mediaSources != param.remove("!D"))
         {
             if(param.contains("!F"))
@@ -1169,6 +1170,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
                 execGrp(i_current_command_grp);
             }
         }
+        //goBack<<longassstring;
 
         break;
     case 5:
@@ -1193,9 +1195,11 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             q_attributetype_sort = param;
             longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
             datagridVariableString = longassstring.join("|");
-            // qDebug() << datagridVariableString;
+          //  qDebug() << datagridVariableString;
+           // goBack<<longassstring;
             execGrp(i_current_command_grp);
             break;
+
         }
     case 7:
         q_pk_users = param;
@@ -1235,10 +1239,6 @@ void qorbiterManager::setStringParam(int paramType, QString param)
         else
         {
             q_pk_attribute = param.remove("!A");
-            if(q_attributetype_sort == "12")
-            {
-                q_attributetype_sort = "";
-            }
 
             longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
             datagridVariableString = longassstring.join("|");
@@ -1246,7 +1246,6 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             execGrp(i_current_command_grp);
             break;
         }
-
 
     default:
         cout << "no type";
@@ -1276,7 +1275,7 @@ void qorbiterManager::initializeSortString()
 
     datagridVariableString.append(q_mediaType).append("|").append(q_subType).append("|").append(q_fileFormat).append("|").append(q_attribute_genres).append("|").append(q_mediaSources).append("|").append(q_usersPrivate).append("|").append(q_attributetype_sort).append("|").append(q_pk_users).append("|").append(q_last_viewed).append("|").append(q_pk_attribute);
     goBack.clear();
-    goBack.append(datagridVariableString);
+   // goBack.append(datagridVariableString);
     qDebug() << "Dg Variables Reset";
 
 }
@@ -1361,9 +1360,17 @@ void qorbiterManager::bindMediaRemote(bool state)
 
 }
 
-void qorbiterManager::changedPlaylistPosition(int position)
+void qorbiterManager::changedPlaylistPosition(QString position)
 {
-    pqOrbiter->JumpToPlaylistPosition(position);
+
+    if(position.length() > 20)
+    {
+    pqOrbiter->JumpToPlaylistPosition(position.toInt());
+    }
+    else
+    {
+        setPosition(position);
+    }
 
 
 }
@@ -1472,7 +1479,7 @@ bool qorbiterManager::getRequestMore()
 
 void qorbiterManager::sleepingMenu(bool toggle, int grp)
 {
-    qDebug() << grp;
+   // qDebug() << grp;
     if(toggle == true)
     {   sleeping_alarms.clear();
         pqOrbiter->GetAlarms(toggle, grp);
@@ -1500,10 +1507,11 @@ void qorbiterManager::updateTimecode()
     string sIPAddress;
     if(nowPlayingButton->b_mediaPlaying == true && !timeCodeSocket->isValid())
     {
-        qDebug("media playing with no timecode!");
+        //qDebug("media playing with no timecode!");
         if(!timeCodeSocket->isOpen())
 
-        {qDebug("socket is closed, opening!");
+        {
+            //qDebug("socket is closed, opening!");
             DeviceData_Base *pDevice = pqOrbiter->m_dwPK_Device_NowPlaying ? pqOrbiter->m_pData->m_AllDevices.m_mapDeviceData_Base_Find(pqOrbiter->m_dwPK_Device_NowPlaying) : NULL;
             if( NULL != pDevice &&
                     (
@@ -1515,7 +1523,8 @@ void qorbiterManager::updateTimecode()
                 sIPAddress = pDevice->m_sIPAddress;
                 qDebug() << sIPAddress.c_str();
                 if( sIPAddress.empty() )
-                {   qDebug() << "ip empty...";
+                {
+                    //qDebug() << "ip empty...";
                     if( pDevice->m_pDevice_MD && !pDevice->m_pDevice_MD->m_sIPAddress.empty() )
                         sIPAddress = pDevice->m_pDevice_MD->m_sIPAddress;
                     else if( pDevice->m_pDevice_Core && !pDevice->m_pDevice_Core->m_sIPAddress.empty() )
@@ -1530,7 +1539,7 @@ void qorbiterManager::updateTimecode()
             QString port = QString::fromStdString(pqOrbiter->GetCurrentDeviceData(pqOrbiter->m_dwPK_Device_NowPlaying, 171));
             if (sIPAddress.length() == 0 && i_current_mediaType == 11)
             {
-                qDebug() << "IpAddress empty, error!: " <<  sIPAddress.c_str();
+               qDebug() << "IpAddress empty, error!: " <<  sIPAddress.c_str();
                 return;
             }
             else
@@ -1594,7 +1603,23 @@ void qorbiterManager::checkConnection()
 
 void qorbiterManager::setPosition(QString position)
 {
-    pqOrbiter->SetMediaPosition(position);
+     qDebug() << position;
+     pqOrbiter->SetMediaPosition(position);
+}
+
+void qorbiterManager::showMenu()
+{
+    pqOrbiter->DvdMenu();
+}
+
+void qorbiterManager::moveDirection(QString direction)
+{
+    pqOrbiter->NavigateScreen(direction);
+}
+
+void qorbiterManager::enter()
+{
+
 }
 
 

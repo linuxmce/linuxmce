@@ -4,7 +4,7 @@ import QtQuick 1.0
 Rectangle {
     id: filedetailrect
     width: scaleX(80)
-    height: scaleY(80)
+    height: scaleY(85)
     anchors.top: parent.top
     anchors.topMargin: scaleY(5)
     anchors.horizontalCenter: parent.horizontalCenter
@@ -65,6 +65,7 @@ Rectangle {
             width: filedetailsclass.aspect=="wide"? scaleX(42.5) : scaleX(23)
             height:filedetailsclass.aspect=="wide"?scaleY(42.5) : scaleY(55)
             source: "image://listprovider/filedetails/"+securityvideo.timestamp
+            smooth: true
         }
     }
 
@@ -218,7 +219,7 @@ Rectangle {
             x: ((parent.width/3)*2)
             MouseArea{
                 anchors.fill:  parent
-                onClicked: filedetailrect.destroy()
+                onClicked: { dataModel.checkForMore();filedetailrect.destroy()}
             }
         }
     }

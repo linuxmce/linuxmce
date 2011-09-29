@@ -52,7 +52,7 @@ void FilterModel::insertRow(int row, FilterModelItem *item)
 {
   beginInsertRows(QModelIndex(), row, row);
   connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
-  qDebug() << "Inserting at:" << row;
+  //qDebug() << "Inserting at:" << row;
   m_list.insert(row, item);
   endInsertRows();
 }
@@ -140,7 +140,7 @@ bool FilterModel::setSelectionStatus(QString format)
 {
     FilterModelItem* item = find(format);
     bool newStatus = item->updateSelection(false);
-    qDebug() << "Setting State for:" << format;
+    //qDebug() << "Setting State for:" << format;
     //return state;
     ReturnSelectedItems();
     return newStatus;
@@ -162,7 +162,7 @@ void FilterModel::ReturnSelectedItems()
         if(item->selectedStatus() == true) t_selected_items.append(item->fileformat());
     }
     QString qs_sorting_string= t_selected_items.join(",");
-    qDebug() << "File Format updated sorting filter" << qs_sorting_string;
+    //qDebug() << "File Format updated sorting filter" << qs_sorting_string;
     emit SetTypeSort(2, qs_sorting_string);
 }
 

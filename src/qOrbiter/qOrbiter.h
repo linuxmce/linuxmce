@@ -106,6 +106,11 @@ public:
     void SetAspectRatio(QString ratio);
     void GetText(int textno);
     void SetMediaPosition(QString position);
+    void DvdMenu();
+    void CopyDisc();
+    void ShowBookMarks();
+    void Thumbnail();
+    void NavigateScreen(QString direction);
 
     //<-dceag-const-e->
 

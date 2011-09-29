@@ -78,8 +78,6 @@ bool qOrbiter::GetConfig()
         return false;
     }
 
-
-
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Connected, requesting configuration for device %d", qmlUI->iPK_Device);
 
     char *oData;
@@ -95,16 +93,15 @@ bool qOrbiter::GetConfig()
 
     CMD_Request_File configFileRequest((long)qmlUI->iPK_Device, (long)4 , (string)filePath, &oData, &iData_Size);
 
-    if (!SendCommand(configFileRequest, p_sResponse))
+    if (SendCommand(configFileRequest) == false)
     {
         qmlUI->setConnectedState(false);
+        qDebug("Cant request config!");
         return false;
     }
     else
     {
         //qDebug() <<"Idata recieved: " << iData_Size ; // size of xml file
-
-
         QByteArray configData;              //config file put into qbytearray for processing
         configData = oData;
         if (configData.size() == 0)
@@ -791,7 +788,7 @@ void qOrbiter::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *p
     QImage tempImage;
     tempImage.loadFromData(QByteArray(pData, iData_Size));
     qmlUI->updateImageChanged(tempImage);
-    qDebug() << "image set!";
+    //qDebug() << "image set!";
 
 
 }
@@ -1047,7 +1044,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
 
     else if (iPK_MediaType == 0)
     {
-        qDebug () << "Closing Now Playing";
+        //qDebug () << "Closing Now Playing";
         qmlUI->nowPlayingButton->setStatus(false);
         // qmlUI->gotoQScreen("Screen_1.qml");
         BindMediaRemote(false);
@@ -1351,29 +1348,63 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
     QString params;
     QString s;
 
-    if(qmlUI->backwards)
+    if(qmlUI->backwards == true)
     {
-        if(qmlUI->goBack.count() > 1)
+        qDebug("Going Backwards!");
+        qmlUI->q_pk_attribute = "";
+
+        if(qmlUI->goBack.count() > 0)
         {
-            qmlUI->goBack.removeLast();
-            qmlUI->q_pk_attribute = "";
+            qDebug("Greater than zero?");
             s= qmlUI->goBack.last();
+            qmlUI->goBack.removeLast();
+
         }
         else if (qmlUI->goBack.count() == 1)
         {
             qmlUI->initializeSortString();
         }
 
-
     }
     else
     {
 
+        //PROGRAM
+        if (qmlUI->q_attributetype_sort == "12" && qmlUI->q_pk_attribute != "")
+        {
+            qmlUI->q_attributetype_sort =  "52";
+        }
+        else if (qmlUI->q_attributetype_sort == "52")
+        {
+            qmlUI->q_attributetype_sort = "13";
+        }
+
+        //PERSON
+        if (qmlUI->q_attributetype_sort == "2" && qmlUI->q_pk_attribute == "")
+        {
+            if(iPK_MediaType == 4)
+            {
+                qmlUI->q_attributetype_sort = "3"; //sets to album from performer for music
+            }
+            else
+            {
+                qmlUI->q_attributetype_sort = "13"; //sets to title as catch all for other type for now
+            }
+
+        }
+        else if (qmlUI->q_attributetype_sort == "3")
+        {
+            qmlUI->q_attributetype_sort = "13";
+        }
+
         params = "|"+qmlUI->q_subType +"|"+qmlUI->q_fileFormat+"|"+qmlUI->q_attribute_genres+"|"+qmlUI->q_mediaSources+"||"+qmlUI->q_attributetype_sort+"||2|"+qmlUI->q_pk_attribute+"";
         s = QString::number(iPK_MediaType) + params;
         qmlUI->i_current_mediaType = iPK_MediaType;
-        qmlUI-> goBack << s;
+        qDebug() << s;
+        qmlUI->goBack<< s;
     }
+
+    qDebug() << qmlUI->goBack.join(":::");
 
     qDebug() << "Datagrid request options:";
     qDebug() << "MediaType: " << iPK_MediaType;
@@ -1383,34 +1414,6 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
     qDebug() << "Media Sources:" << qmlUI->q_mediaSources;
     qDebug() << "Attributetype sort:" << qmlUI->q_attributetype_sort;
     qDebug() << "Attribute Sort:" << qmlUI->q_pk_attribute;
-    //PROGRAM
-    if (qmlUI->q_attributetype_sort == "12" && qmlUI->q_pk_attribute != "")
-    {
-        qmlUI->q_attributetype_sort =  "52";
-    }
-    else if (qmlUI->q_attributetype_sort == "52")
-    {
-        qmlUI->q_attributetype_sort = "13";
-    }
-
-    //PERSON
-    if (qmlUI->q_attributetype_sort == "2" && qmlUI->q_pk_attribute == "")
-    {
-        if(iPK_MediaType == 4)
-        {
-            qmlUI->q_attributetype_sort = "3"; //sets to album from performer for music
-        }
-        else
-        {
-            qmlUI->q_attributetype_sort = "13"; //sets to title as catch all for other type for now
-        }
-
-    }
-    else if (qmlUI->q_attributetype_sort == "3")
-    {
-        qmlUI->q_attributetype_sort = "13";
-    }
-
 
     qmlUI->backwards = false;
     CMD_Populate_Datagrid populateDataGrid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 63, s.toStdString(), DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
@@ -2093,7 +2096,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     CMD_Get_Attributes_For_Media attribute_detail_get(qmlUI->iPK_Device, qmlUI->iMediaPluginID,  qs_fk_fileno.toStdString(), " ",&s_val );
     SendCommand(attribute_detail_get);
     QString breaker = s_val.c_str();
-    qDebug() << breaker;
+    //qDebug() << breaker;
     /*
       attribute order - should be consistent
         0 - full file path
@@ -2142,7 +2145,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     if(placeholder != -1)
     {
         qmlUI->filedetailsclass->setFilename(details.at(placeholder+1));
-        qDebug() << qmlUI->filedetailsclass->getFilename();
+        //qDebug() << qmlUI->filedetailsclass->getFilename();
     }
 
 
@@ -2192,7 +2195,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 QString attributeType = pCell->m_mapAttributes_Find("Title").c_str();
                 QString attribute  = pCell->m_mapAttributes_Find("Name").c_str();
                 cellfk = pCell->GetValue();
-                qDebug() << "Attribute:" << attributeType << attribute;
+                //qDebug() << "Attribute:" << attributeType << attribute;
                 if(attributeType == "Program")
                 {
                     qmlUI->filedetailsclass->setProgram(attributeType);
@@ -2235,7 +2238,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 }
                 else
                 {
-                    qDebug() << "Unhandled attribute: " << attributeType << attribute;
+                    //qDebug() << "Unhandled attribute: " << attributeType << attribute;
                 }
 
                 //qmlUI->m_selected_grid_item->appendRow(new FileDetailsItem(cellTitle, cellAttribute, cellImg, false,  qmlUI->model));
@@ -2273,7 +2276,7 @@ void DCE::qOrbiter::StopMedia()
     CMD_MH_Stop_Media endMedia(qmlUI->iPK_Device, qmlUI->iMediaPluginID,0,qmlUI->nowPlayingButton->i_mediaType,0,QString::number(qmlUI->iea_area).toStdString(),false);
     qmlUI->storedVideoPlaylist->clear();
     SendCommand(endMedia);
-    qDebug() << "End command sent";
+    //qDebug() << "End command sent";
 }
 
 void DCE::qOrbiter::RwMedia()
@@ -2343,7 +2346,7 @@ void DCE::qOrbiter::requestMediaPlaylist()
         {
             bool barrows = false; //not sure what its for
             //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
-            qDebug() << "getting playlist";
+            //qDebug() << "getting playlist";
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             int cellsToRender= pDataGridTable->GetRows();
             // qDebug() << "Playlist Datagrid Height:" << gHeight << " , width: " << gWidth;
@@ -2370,7 +2373,7 @@ void DCE::qOrbiter::requestMediaPlaylist()
                 cellAttribute = pCell->GetValue();
                 fk_file = pCell->GetValue();
 
-                qDebug() << "Item Attribute::" << cellTitle << "-" << cellAttribute;
+                //qDebug() << "Item Attribute::" << cellTitle << "-" << cellAttribute;
                 if (pPath )
                 {
                     cellImg = getfileForDG(pCell->GetImagePath());
@@ -2471,7 +2474,7 @@ void DCE::qOrbiter::ShowFloorPlan(int floorplantype)
                 filePath = QString::fromUtf8(pPath);
                 fk_file = pCell->GetValue();
                 cellTitle = QString::fromUtf8(pCell->m_Text);
-                qDebug() << cellTitle;
+                //qDebug() << cellTitle;
                 index = pDataGridTable->CovertColRowType(it->first).first;
                 /*
              //   qmlUI->model->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg,  qmlUI->model));
@@ -2487,7 +2490,7 @@ void DCE::qOrbiter::GetScreenSaverImages()
     CMD_Get_Screen_Saver_Files screen_saver_files(qmlUI->iPK_Device, qmlUI->iPK_Device_GeneralInfoPlugin,qmlUI->iPK_Device, sFilename);
     //SendCommand(screen_saver_files);
 
-    qDebug() << sFilename;
+    //qDebug() << sFilename;
 }
 
 void DCE::qOrbiter::BindMediaRemote(bool onoff)
@@ -2559,7 +2562,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
     CMD_Get_Attributes_For_Media attribute_detail_get(qmlUI->iPK_Device, qmlUI->iMediaPluginID, "" , StringUtils::itos(qmlUI->iea_area),&s_val );
     SendCommand(attribute_detail_get);
     QString breaker = s_val.c_str();
-    qDebug() << breaker;
+    //qDebug() << breaker;
     /*
       attribute order - should be consistent
         0 - full file path
@@ -3073,7 +3076,7 @@ void DCE::qOrbiter::GetAdvancedMediaOptions()
             filePath = QString::fromUtf8(pPath);
             fk_file = pCell->GetValue();
             cellTitle = QString::fromUtf8(pCell->m_Text);
-            qDebug() << cellTitle;
+            //qDebug() << cellTitle;
             index = pDataGridTable->CovertColRowType(it->first).first;
             /*
              //   qmlUI->model->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg,  qmlUI->model));
@@ -3160,7 +3163,7 @@ void DCE::qOrbiter::GetAlarms(bool toggle, int grp)
                             state= false;
                         }
 
-                        qDebug() << state;
+                        //qDebug() << state;
                         row++;
 
                     }
@@ -3171,7 +3174,7 @@ void DCE::qOrbiter::GetAlarms(bool toggle, int grp)
                         eventgrp = atoi(pCell->GetValue());
                         QString data = pCell->GetText();
                         QStringList breakerbreaker = data.split(QRegExp("\n"), QString::KeepEmptyParts );
-                        qDebug() << breakerbreaker;
+                        //qDebug() << breakerbreaker;
                         name = breakerbreaker.at(0);
                         days=breakerbreaker.at(2);
                         days.remove("Day of Week");
@@ -3191,7 +3194,7 @@ void DCE::qOrbiter::GetAlarms(bool toggle, int grp)
 void DCE::qOrbiter::SetZoom(QString zoomLevel)
 {
     string sResponse;
-    qDebug() << zoomLevel.toAscii();
+    //qDebug() << zoomLevel.toAscii();
     CMD_Set_Zoom setMediaZoom(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID, string(zoomLevel.toAscii()));
     // tues sept 20 - employing an error handling method that i hope to extend to other functions
     if (SendCommand(setMediaZoom, &sResponse) == true)
@@ -3229,11 +3232,79 @@ void DCE::qOrbiter::GetText(int textno)
 
 void DCE::qOrbiter::SetMediaPosition(QString position)
 {
-    CMD_Set_Media_Position setPosition(qmlUI->iPK_Device, qmlUI->ScreenParameters->getParam(186).toInt(), qmlUI->ScreenParameters->getParam(187).toInt(), position.toStdString());
+    if(qmlUI->nowPlayingButton->qs_screen.contains( "Screen_49.qml"))
 
-    if(!SendCommand(setPosition))
+    {
+        CMD_Set_Media_Position setPosition(qmlUI->iPK_Device, m_dwPK_Device_NowPlaying, qmlUI->nowPlayingButton->i_streamID, position.toStdString());
+        qDebug("DVD pls change") ;
+        if(!SendCommand(setPosition))
+        {
+            qmlUI->checkConnection();
+        }
+    }
+    else
+    {
+        CMD_Set_Media_Position setPosition(qmlUI->iPK_Device, qmlUI->ScreenParameters->getParam(186).toInt(), qmlUI->ScreenParameters->getParam(187).toInt(), position.toStdString());
+
+        if(!SendCommand(setPosition))
+        {
+            qmlUI->checkConnection();
+        }
+    }
+
+}
+
+void DCE::qOrbiter::DvdMenu()
+{
+    CMD_Goto_Media_Menu showDVDmenu(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID, 0 );
+    if(!SendCommand(showDVDmenu))
     {
         qmlUI->checkConnection();
+    }
+
+}
+
+void DCE::qOrbiter::NavigateScreen(QString direction)
+{
+    if(direction.contains("up"))
+    {
+        CMD_Move_Up moveUp(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID);
+        if(!SendCommand(moveUp))
+        {
+            qmlUI->checkConnection();
+        }
+    }
+    else if(direction.contains("down"))
+    {
+        CMD_Move_Down moveDown(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID);
+        if(!SendCommand(moveDown))
+        {
+            qmlUI->checkConnection();
+        }
+    }
+    else if(direction.contains("right"))
+    {
+        CMD_Move_Right move(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID);
+        if(!SendCommand(move))
+        {
+            qmlUI->checkConnection();
+        }
+    }
+     else  if(direction.contains("left"))
+    {
+        CMD_Move_Left move(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID);
+        if(!SendCommand(move))
+        {
+            qmlUI->checkConnection();
+        }
+    }
+    else if(direction.contains("enter"))
+    {
+        CMD_EnterGo enter(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID);
+        if(!SendCommand(enter))
+        {
+            qmlUI->checkConnection();
+        }
     }
 }
 
