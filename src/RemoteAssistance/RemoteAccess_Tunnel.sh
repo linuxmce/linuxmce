@@ -39,7 +39,6 @@ else
 	Logging "$TYPE" "$SEVERITY_WARNING" "$0" "Key '$RAKey' not found. Exiting"
 	exit 1
 fi
-echo "Running: ssh -p $RAport -i $RAKey -R$RemotePort:$Host:$LocalPort \"remoteassistance@$RAhost\""
 # TODO: check or remove host key every time just in case
 # TODO: check if port 80 isn't proxyed and if it is, also check port 22
 while echo 'x'; do

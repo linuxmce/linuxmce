@@ -134,7 +134,9 @@ CreateTunnel()
 	# if tunnel is not active create it
 	Dead=0
 	if [[ "$Monitored" == yes && "$RA_CheckRemotePort" == "1" ]]; then
-		if [[ -z "$Tunnel" ]] || ! nc -z -w1 "$RAhost" "$RemotePort"; then
+		# Foxi352 - 29 sep 2011 - disabled nc because on ra host we only bind to localhost
+		#if [[ -z "$Tunnel" ]] || ! nc -z -w1 "$RAhost" "$RemotePort"; then
+		if [[ -z "$Tunnel" ]]; then
 			Dead=1
 		fi
 	else
@@ -152,7 +154,6 @@ CreateTunnel()
 		fi
 		if [[ "$FalseAlarm" -eq 0 ]]; then
 			[[ -n "$Tunnel" ]] && RemoveTunnel "$Suffix"
-			#echo "screen -d -m -S \"${screenName}_${Suffix}\" /usr/pluto/bin/RemoteAccess_Tunnel.sh \"$RemotePort\" \"$LocalPort\" \"$RAKey\" \"$Host\" \"$RAhost\" \"$RAport\""
 			screen -d -m -S "${screenName}_${Suffix}" /usr/pluto/bin/RemoteAccess_Tunnel.sh "$RemotePort" "$LocalPort" "$RAKey" "$Host" "$RAhost" "$RAport"
 			Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "$Suffix tunnel enabled."
 		else
