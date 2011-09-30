@@ -742,7 +742,7 @@ function insertSynopsis($episodeData, $fileID, $mediadbADO, $dbADO, $output, $co
 	$Sresult = mysql_query($Ssql)or die (mysql_error());
 	$Scount = mysql_num_rows($Sresult);
 
-	if ($Scount < 1)
+	if ($Scount == 0)
 	{
 			$SfileIdent = $_POST['fileID'];
 			mysql_query("INSERT INTO LongAttribute VALUES (\"\" , 37 ,NULL, \"$SfileIdent\", NULL, \"$synopsis\" , NULL, NULL, NULL, 0 ,CURTIME() ,NULL )")or die (mysql_error());
@@ -794,7 +794,7 @@ $ATotal = count($actorArray);
 
 	$fileChk = "SELECT * FROM `File_Attribute` WHERE `FK_Attribute`= $attrib AND FK_File=$fileIdent" ;	//check to see if associated
 	$chkResult = mysql_query($fileChk) or die (mysql_error()); $chkCount = mysql_num_rows($chkResult); $chk = mysql_fetch_assoc($chkResult);
-	if ( $chkCount< 1)
+	if ( $chkCount == 0)
 	{
 		$idQuery2="INSERT INTO File_Attribute  VALUES (\"$fileIdent\", \"$attrib\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
 		mysql_query($idQuery2)  or die (mysql_error());
@@ -838,7 +838,7 @@ function addDirectors($directorArray, $fileID, $mediadbADO, $dbADO, $output, $co
 	$fileIdent = $fileID;
 	$fileChk = "SELECT * FROM `File_Attribute` WHERE `FK_Attribute`= $attrib AND FK_File=$fileIdent" ;
 	$chkResult = mysql_query($fileChk) or die (mysql_error()); $chkCount = mysql_num_rows($chkResult); $chk = mysql_fetch_assoc($chkResult);
-	if ( $chkCount< 1)
+	if ( $chkCount == 0)
 	{
 		$idQuery2="INSERT INTO File_Attribute  VALUES (\"$fileIdent\", \"$attrib\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
 		mysql_query($idQuery2)  or die (mysql_error());
@@ -1021,7 +1021,7 @@ function addGenre($genreArray, $con ,$fileID, $mediadbADO, $dbADO, $output)
 	$fileIdent = $fileID;
 	$fileChk = "SELECT * FROM `File_Attribute` WHERE `FK_Attribute`= $attrib AND FK_File=$fileIdent" ;
 	$chkResult = mysql_query($fileChk) or die (mysql_error()); $chkCount = mysql_num_rows($chkResult); $chk = mysql_fetch_assoc($chkResult);
-	if ( $chkCount < 1)
+	if ( $chkCount == 0)
 	{
 		$idQuery2="INSERT INTO File_Attribute  VALUES (\"$fileIdent\", \"$attrib\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
 		mysql_query($idQuery2)  or die (mysql_error());
@@ -1159,7 +1159,7 @@ while ($i < $counter)
 	$fileIdent = $fileID;
 	$fileChk = "SELECT * FROM `File_Attribute` WHERE `FK_Attribute`= $attrib AND FK_File=$fileIdent" ;
 	$chkResult = mysql_query($fileChk) or die (mysql_error()); $chkCount = mysql_num_rows($chkResult); $chk = mysql_fetch_assoc($chkResult);
-	if ( $chkCount < 0)
+	if ( $chkCount < 1)
 	{
 		$idQuery2="INSERT INTO File_Attribute  VALUES (\"$fileIdent\", \"$attrib\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
 		mysql_query($idQuery2)  or die (mysql_error());

@@ -535,46 +535,49 @@ $extension=strtolower(str_replace('.','',strrchr($import_cover_art,".")));
         };$out.='Episode: '.$epTitle.' Complete<br></tr></td><tr><td>';
 
 //=================ids================================================================================
-        $idArray = array( array('TV Season ID'=>$episodeData['seasonID']), array('TV Series ID'=>$episodeData['seriesID']), array( 'TV Program ID'=>$episodeData['epid']), array("Release Date" =>$episodeData['firstAir']), array("Episode Number" =>$episodeData['air_epNo']), array("Season Number" =>$episodeData['seasonNo']) );
- //	echo $counter;
- 	$i=0; 	
+      //	print_r($episodeData);
+	$idArray = array( array('TV Season ID'=>$episodeData['seasonID']), array('TV Series ID'=>$episodeData['seriesID']), array( 'TV Program ID'=>$episodeData['epid']), array("Release Date" =>$episodeData['firstAir']), array("Episode Number" =>$episodeData['air_epNo']), array("Season Number" =>$episodeData['seasonNo']) );
+ 	$counter = count($idArray);
+ //	echo $counter;	
+ 	$i=0;
  	$flip = array_flip($attributeType);
-	
+	$fileIdent = $fileID;
 while ($i < $counter)
 	{
 	$item = $idArray[$i];
-	$attribType = $flip[key($idArray[$i])]; 
+	$attribType = $flip[key($idArray[$i])];
 	$content1 = array_values($idArray[$i]);
 	$content = $content1[0];
+$out.="$content1";
+	$sql = "SELECT * FROM `Attribute` WHERE `Name` = \"$content\" AND FK_AttributeType = \"$attribType\" ";
 	
-	$sql = "SELECT * FROM `Attribute` WHERE `Name` = \"$content\" AND FK_AttributeType = \"$attribType\" "; 
-	$result = mysql_query($sql) or die (mysql_error());
-	$count = mysql_num_rows($result);	 
-	$row = mysql_fetch_assoc($result);	
-	$attrib = $row['PK_Attribute'];		
+	$result = mysql_query($sql) or die (mysql_error($content));
+	$count = mysql_num_rows($result);
+	$row = mysql_fetch_assoc($result);
+	$attrib = $row['PK_Attribute'];
 	if ($count < 1)
 	{
-			$iQuery = "INSERT INTO Attribute VALUES (\"\" , $attribType , \"$content\" , NULL, NULL, NULL, 0 ,CURTIME() ,NULL )" ;  	
-			mysql_query($iQuery) or die (mysql_error());	
+			$iQuery = "INSERT INTO Attribute VALUES (\"\" , $attribType , \"$content\" , NULL, NULL, NULL, 0 ,CURTIME() ,NULL )" ;
+			mysql_query($iQuery) or die (mysql_error());
 			$insertRes= (int)mysql_insert_id()  or die (mysql_error());
 			//echo $insertRes;
-			$idQuery="INSERT INTO File_Attribute  VALUES (\"$fileIdent\", \"$insertRes\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
+			$idQuery="INSERT INTO File_Attribute  VALUES (\"$fileIdent\", \"'.$insertRes.'\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
 			mysql_query($idQuery)  or die (mysql_error());
 		}
 	else
 	{
-	
+	$fileIdent = $fileID;
 	$fileChk = "SELECT * FROM `File_Attribute` WHERE `FK_Attribute`= $attrib AND FK_File=$fileIdent" ;
-	$chkResult = mysql_query($fileChk) or die (mysql_error()); $chkCount = mysql_num_rows($chkResult); $chk = mysql_fetch_assoc($chkResult); 
+	$chkResult = mysql_query($fileChk) or die (mysql_error()); $chkCount = mysql_num_rows($chkResult); $chk = mysql_fetch_assoc($chkResult);
 	if ( $chkCount < 1)
-	{	
+	{
 		$idQuery2="INSERT INTO File_Attribute  VALUES (\"$fileIdent\", \"$attrib\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
 		mysql_query($idQuery2)  or die (mysql_error());
 	} else
 	{
-	}	
-	};
-	$i++;} $out.='IDs, season number'.$seasonNo.' and episode number Complete<br></td></tr><tr><td>';
+	}
+	};$out.="$content1 - done";
+	$i++;}$out.='IDs complete <br></td></tr><tr><td>';
 //=========synopsis===================================================================================================
 	
 	$synopsis=mysql_real_escape_string($episodeData['synopsis']);
