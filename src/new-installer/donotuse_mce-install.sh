@@ -306,6 +306,7 @@ mkdir -p "${LOCAL_REPO_BASE}/${LOCAL_REPO_DIR}"
 apt-get -y -q install dpkg-dev debconf-utils makedev
 VerifyExitCode "dpkg-dev and debconf-utils"
 
+
 # Disable compcache
 if [ -f /usr/share/initramfs-tools/conf.d/compcache ]; then
 	rm -f /usr/share/initramfs-tools/conf.d/compcache && update-initramfs -u
@@ -362,6 +363,7 @@ sed -e "1ideb file:/usr/pluto/deb-cache ./" -i /etc/apt/sources.list
 
 apt-get -qq update
 VerifyExitCode "apt-get update"
+
 
 echo >> /etc/apt/sources.list
 
@@ -764,6 +766,7 @@ fi
 }
 
 FixAsteriskConfig () {
+
 #ensure asterisk is installed before applying fix
 dpkg -s asterisk 1>/dev/null 2>&1
 
@@ -773,15 +776,17 @@ if [ $? == 0 ]; then
 	asteriskNoloadModule app_voicemail_imap.so
 fi
 
-echo '    [admin]
-    secret = adminsecret
-    deny=0.0.0.0/0.0.0.0
-    permit=127.0.0.1/255.255.255.0
-    read = system,call,log,verbose,command,agent,user
-    write = system,call,log,verbose,command,agent,user
-'>/etc/asterisk/manager.d/admin.conf
-chmod 777 /etc/asterisk/manager.d/admin.conf
-VerifyExitCode "Set asterisk admin user used by MCE"
+if [ -d /etc/asterisk/manager.d ]; then
+	echo '    [admin]
+		secret = adminsecret
+		deny=0.0.0.0/0.0.0.0
+		permit=127.0.0.1/255.255.255.0
+		read = system,call,log,verbose,command,agent,user
+		write = system,call,log,verbose,command,agent,user
+	'>/etc/asterisk/manager.d/admin.conf
+	chmod 777 /etc/asterisk/manager.d/admin.conf
+	VerifyExitCode "Set asterisk admin user used by MCE"
+fi
 
 }
 
@@ -800,6 +805,26 @@ else
 	echo "start on runlevel 5">>/etc/event.d/tty3
 	echo "start on runlevel 5">>/etc/event.d/tty4
 fi
+}
+
+Core_Seamless_Compatability () {
+######################
+#Foxconn NT330i
+######################
+StatsMessage "Setting up Foxconn NT330i compatability"
+if ! grep atl1c /etc/initramfs-tools-interactor/modules >/dev/null; then
+	echo atl1c>>/etc/initramfs-tools-interactor/modules
+	VerifyExitCode "insertion of atl1c to modules file failed"
+	#White space should not be present in the modules files, you MUST remove for the MD to boot properly
+	sed -i '/^$/d' /etc/initramfs-tools-interactor/modules
+	modprobe atl1c
+	VerifyExitCode "Modprobe for atl1c failed"
+fi
+
+######################
+#End Foxconn NT330i
+######################
+
 }
 
 InitialBootPrep () {
@@ -829,6 +854,7 @@ cat >/etc/inittab <<"EOF"
 #id:4:initdefault: # Core + KDE
 id:5:initdefault: # Launch Manager
 EOF
+
 
 
 # Remove KDM startup
@@ -870,7 +896,9 @@ UpdateUpgrade
 VideoDriverSetup
 FixAsteriskConfig
 addAdditionalTTYStart
+Core_Seamless_Compatability
 InitialBootPrep
+
 
 
 StatsMessage "MCE Install Script completed without a detected error"
