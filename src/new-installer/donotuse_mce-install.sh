@@ -807,26 +807,6 @@ else
 fi
 }
 
-Core_Seamless_Compatability () {
-######################
-#Foxconn NT330i
-######################
-StatsMessage "Setting up Foxconn NT330i compatability"
-if ! grep atl1c /etc/initramfs-tools-interactor/modules >/dev/null; then
-	echo atl1c>>/etc/initramfs-tools-interactor/modules
-	VerifyExitCode "insertion of atl1c to modules file failed"
-	#White space should not be present in the modules files, you MUST remove for the MD to boot properly
-	sed -i '/^$/d' /etc/initramfs-tools-interactor/modules
-	modprobe atl1c
-	VerifyExitCode "Modprobe for atl1c failed"
-fi
-
-######################
-#End Foxconn NT330i
-######################
-
-}
-
 InitialBootPrep () {
 StatsMessage "Preparing initial reboot"
 
@@ -896,7 +876,6 @@ UpdateUpgrade
 VideoDriverSetup
 FixAsteriskConfig
 addAdditionalTTYStart
-Core_Seamless_Compatability
 InitialBootPrep
 
 
