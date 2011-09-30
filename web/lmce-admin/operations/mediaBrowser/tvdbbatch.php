@@ -343,7 +343,7 @@ $ATotal = count($actorArray);
 	
 	$fileChk = "SELECT * FROM `File_Attribute` WHERE `FK_Attribute`= $attrib AND FK_File=$fileIdent" ;
 	$chkResult = mysql_query($fileChk) or die (mysql_error()); $chkCount = mysql_num_rows($chkResult); $chk = mysql_fetch_assoc($chkResult); 
-	if ( $chkCount == 0)
+	if ( $chkCount < 1)
 	{		
 		$idQuery2="INSERT INTO File_Attribute  VALUES (\"$fileIdent\", \"$attrib\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
 		mysql_query($idQuery2)  or die (mysql_error());
@@ -409,7 +409,7 @@ $ATotal = count($actorArray);
 	
 	$fileChk = "SELECT * FROM `File_Attribute` WHERE `FK_Attribute`= $attrib AND FK_File=$fileIdent" ;
 	$chkResult = mysql_query($fileChk) or die (mysql_error()); $chkCount = mysql_num_rows($chkResult); $chk = mysql_fetch_assoc($chkResult); 
-	if ( $chkCount == 0)
+	if ( $chkCount < 1)
 	{		
 		$idQuery2="INSERT INTO File_Attribute  VALUES (\"$fileIdent\", \"$attrib\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
 		mysql_query($idQuery2)  or die (mysql_error());
@@ -495,7 +495,7 @@ $extension=strtolower(str_replace('.','',strrchr($import_cover_art,".")));
 	
 	$fileChk = "SELECT * FROM `File_Attribute` WHERE `FK_Attribute`= $attrib AND FK_File=$fileIdent" ;
 	$chkResult = mysql_query($fileChk) or die (mysql_error()); $chkCount = mysql_num_rows($chkResult); $chk = mysql_fetch_assoc($chkResult); 
-	if ( $chkCount == 0)
+	if ( $chkCount < 1)
 	{	
 		$idQuery2="INSERT INTO File_Attribute  VALUES (\"$fileIdent\", \"$attrib\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
 		mysql_query($idQuery2)  or die (mysql_error());
@@ -566,7 +566,7 @@ while ($i < $counter)
 	
 	$fileChk = "SELECT * FROM `File_Attribute` WHERE `FK_Attribute`= $attrib AND FK_File=$fileIdent" ;
 	$chkResult = mysql_query($fileChk) or die (mysql_error()); $chkCount = mysql_num_rows($chkResult); $chk = mysql_fetch_assoc($chkResult); 
-	if ( $chkCount == 0)
+	if ( $chkCount < 1)
 	{	
 		$idQuery2="INSERT INTO File_Attribute  VALUES (\"$fileIdent\", \"$attrib\", 0, 0, NULL, NULL, NULL, 0, CURTIME(), NULL  )";
 		mysql_query($idQuery2)  or die (mysql_error());
@@ -582,7 +582,7 @@ while ($i < $counter)
 	$Sresult = mysql_query($Ssql)or die (mysql_error());
 	$Scount = mysql_num_rows($Sresult);	 
 	
-	if ($Scount == 0)
+	if ($Scount < 1)
 	{		$out.= 'Show synopsis not found...' ;
 			$SfileIdent = $_POST['fileID'];
 			mysql_query("INSERT INTO LongAttribute VALUES (\"\" , 37 ,NULL, \"$fileIdent\", NULL, \"$synopsis\" , NULL, NULL, NULL, 0 ,CURTIME() ,NULL )")or die (mysql_error());		
