@@ -2692,7 +2692,10 @@ error_reporting(E_NONE);
 	*/
 	function &FetchRow()
 	{
-		if ($this->EOF) return false;
+		if ($this->EOF) {
+			$ret=false;
+			return $ret;
+		}
 		$arr = $this->fields;
 		$this->_currentRow++;
 		if (!$this->_fetch()) $this->EOF = true;
