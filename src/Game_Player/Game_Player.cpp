@@ -3574,17 +3574,20 @@ Game_Player::CMD_Set_Media_Position (int iStreamID, string sMediaPosition,
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 
-  string sPath = GetSaveGamePath ();
-  string sCopyCmd = "cp " + sMediaPosition + " " + sPath + "/9.sta";
-  system (sCopyCmd.c_str ());
-  // Send a command to load the game back.
-  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_F7,
-				m_iEventSerialNum++);
-  Sleep (100);
-  WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_9,
-				m_iEventSerialNum++);
-  Sleep (1000);
-  CMD_Pause (iStreamID);	// because the game will just start up from that point.
+  if (FileUtils::FileExists(sMediaPosition)) // A Simple sanity check.
+    {
+      string sPath = GetSaveGamePath ();
+      string sCopyCmd = "cp " + sMediaPosition + " " + sPath + "/9.sta";
+      system (sCopyCmd.c_str ());
+      // Send a command to load the game back.
+      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_F7,
+				    m_iEventSerialNum++);
+      Sleep (100);
+      WindowUtils::SendKeyToWindow (m_pDisplay, m_iMAMEWindowId, XK_9,
+				    m_iEventSerialNum++);
+      Sleep (1000);
+      CMD_Pause (iStreamID);	// because the game will just start up from that point.
+    }
 }
 
 //<-dceag-c548-b->
