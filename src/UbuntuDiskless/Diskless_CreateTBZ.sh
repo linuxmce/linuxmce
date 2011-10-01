@@ -28,7 +28,7 @@ Trap_Exit () {
 	umount -fl $TEMP_DIR/sys
 	umount -fl $TEMP_DIR/lib/modules/${KVER}/volatile
 
-	#rm -rf $TEMP_DIR
+	rm -rf $TEMP_DIR
 }
 
 Setup_Logfile () {
