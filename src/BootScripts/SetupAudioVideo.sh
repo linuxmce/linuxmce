@@ -100,6 +100,10 @@ EnableDigitalOutputs()
 	# inject necessary unmuting commands for later bootup.
 	amixer sset "IEC958" unmute
 	amixer sset "IEC958 1" unmute
+        #Outputs tested on the foxconn nt330i for 1004
+        amixer sset 'IEC958',0 unmute
+        amixer sset 'IEC958',1 unmute
+        amixer sset 'IEC958 Default PCM' unmute
 	alsactl store
 }
 
