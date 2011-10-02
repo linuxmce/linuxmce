@@ -32,6 +32,7 @@ Trap_Exit () {
 }
 
 Setup_Logfile () {
+mkdir -p /var/log/pluto
 if [ ! -f ${log_file} ]; then
 	touch ${log_file}
 	if [ $? = 1 ]; then
@@ -315,7 +316,8 @@ StatsMessage "Installing packages to MD"
 #Install headers and run depmod for the seamless integraiton function, ensure no errors exist
 LC_ALL=C chroot $TEMP_DIR apt-get -y install linux-headers-generic
 VerifyExitCode "Install linux headers package failed"
-LC_ALL=C chroot $TEMP_DIR depmod
+KVER=`ls $TEMP_DIR/lib/modules/ --sort time|head -1`
+LC_ALL=C chroot $TEMP_DIR depmod -v $KVER
 VerifyExitCode "depmod failed - ensure you run an apt-get dist-upgrade on your core before running again"
 
 
