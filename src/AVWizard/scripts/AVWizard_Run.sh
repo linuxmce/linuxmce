@@ -1,54 +1,17 @@
-#!/bin/bash
+#!/bin/bash -x
 
-# Check if any driver is installed. If not, check what hardware is in the box, and install the relevant driver using
-# the binary drivers
-DriverInstalled=0
-driverConfig=none
-grep "Driver" /etc/X11/xorg.conf |grep -v "keyboard"| grep -v "#" | grep -v "vesa"|grep -v "mouse"|grep -vq "kbd" && DriverInstalled=1
+. /usr/pluto/bin/AVWizard-Common.sh
+. /usr/pluto/bin/Config_Ops.sh
+. /usr/pluto/bin/Utils.sh
+. /usr/pluto/bin/X-Common.sh
 
-#
-# Check if we have nVidia or ATI cards in here, and specify proper config programs and commandline options.
-if [[ $DriverInstalled -eq 0 ]]; then
-	driverConfig=none
-	lspci|grep nVidia|grep "VGA compatible controller" -q && driverConfig=nvidia-xconfig
-	if [[ $driverConfig == nvidia-xconfig ]]; then
-		driverLine = ""
-	fi
-	if [[ $driverConfig == none ]]; then
-		lspci|grep ATI|grep -vi Non-VGA|grep VGA -q && driverConfig=aticonfig
-	fi
-	if [[ $driverConfig == aticonfig ]]; then
-		driverLine="--initial"
-	fi
-fi
 
-if [[ "$driverConfig" != none ]]; then
-	# Is it installed
-	driverConfigLocation=`which $driverConfig`
-	if [[ -x $driverConfigLocation ]]; then
-		$driverConfigLocation $driverLine
-	fi
-fi
-
-function XorgConfLogging() {
-        local message="$1"
-        local xorgLog="/var/log/pluto/xorg.conf.log"
-        local xorgLines=$(cat /etc/X11/xorg.conf | wc -l)
-				
-        local myPid=$$
-
-        echo "$myPid $(date -R) $message [$xorgLines]"  >> $xorgLog
-}
-
-ConfFile="/etc/X11/xorg.conf"
-XorgConfLogging "Starting $0 $*"
-trap 'XorgConfLogging "Ending"' EXIT
-
+###########################################################
+### Setup global variables
+###########################################################
 DEVICETEMPLATE_OnScreen_Orbiter=62
 DEVICETEMPLATE_OrbiterPlugin=12
-
 DEVICECATEGORY_Media_Director=8
-
 DEVICEDATA_ScreenWidth=100
 DEVICEDATA_ScreenHeight=101
 DEVICEDATA_PK_Size=25
@@ -57,57 +20,80 @@ DEVICEDATA_Connector=68
 DEVICEDATA_Spacing=150
 DEVICEDATA_Offset=167
 DEVICEDATA_TV_Standard=229
-
 COMMANDPARAMETER_PK_Device=2
 COMMANDPARAMETER_Force=21
 COMMANDPARAMETER_Reset=24
-
 UI_Normal_Horizontal=1
 UI_V2_Normal_Horizontal=4
-
-. /usr/pluto/bin/AVWizard-Common.sh
-. /usr/pluto/bin/Config_Ops.sh
-. /usr/pluto/bin/Utils.sh
-. /usr/pluto/bin/X-Common.sh
-
-. /usr/pluto/bin/TeeMyOutput.sh --outfile /var/log/pluto/AVWizard.log --infile /dev/null --stdboth -- "$@"
-
-
-
+ConfFile="/etc/X11/xorg.conf"
+#From /usr/pluto/bin/Utils.sh - Sets LD_Library_Path
 UseAlternativeLibs
+#Setup Log file variable
+log_file=/var/log/pluto/AVWizard_Run_$(date +%Y%m%d_%H%M%S).log
 
-CleanUp()
-{
-	rm -f /tmp/*.xml
+
+
+###########################################################
+### Setup Functions - Error checking and logging
+###########################################################
+
+VerifyExitCode () {
+        local EXITCODE=$?
+        if [ "$EXITCODE" != "0" ] ; then
+        	echo "An error (Exit code $EXITCODE) occured during the last action"
+        	echo "$1"
+                exit 1
+        fi
 }
 
-SetupX()
-{
+StatsMessage () {
+	printf "`date` - $* \n"
+}
+
+
+###########################################################
+### Setup Functions - Reference functions
+###########################################################
+
+SetupX () {
 	rm -f "$XF86Config"
 	if [[ -f "$ConfFile" ]]; then
 		cp "$ConfFile" "$XF86Config"
 	fi
 	rmmod nvidia &>/dev/null || :
-	# default test
-	bash -x "$BaseDir"/Xconfigure.sh --conffile "$XF86Config" --resolution '640x480@60' --output VGA --no-test | tee-pluto /var/log/pluto/Xconfigure.log
+	# default test assumes HDMI connection
+	bash -x "$BaseDir"/Xconfigure.sh --conffile "$XF86Config" --resolution '1280x720@60' --output HDMI-0 --tv-standard '720p (16:9)' --no-test
 	if ! TestXConfig "$Display" "$XF86Config"; then
-		# vesa test
-		bash -x "$BaseDir"/Xconfigure.sh --conffile "$XF86Config" --resolution '640x480@60' --output VGA --force-vesa --no-test | tee-pluto /var/log/pluto/Xconfigure.log
+		# Try a VGA connection with 640x480
+		bash -x "$BaseDir"/Xconfigure.sh --conffile "$XF86Config" --resolution '640x480@60' --output VGA --no-test
 		if ! TestXConfig "$Display" "$XF86Config"; then
-			# all tests failed
-			beep -l 350 -f 300 &
-			chvt 8
-			whiptail --msgbox "Failed to setup X" 0 0 --title "AVWizard" --clear </dev/tty8 &>/dev/tty8
+			# vesa test
+			bash -x "$BaseDir"/Xconfigure.sh --conffile "$XF86Config" --resolution '640x480@60' --output VGA --force-vesa --no-test
+			if ! TestXConfig "$Display" "$XF86Config"; then
+				# all tests failed
+				beep -l 350 -f 300 &
+				chvt 8
+				whiptail --msgbox "Failed to setup X" 0 0 --title "AVWizard" --clear </dev/tty8 &>/dev/tty8
+			else
+				"$BaseDir"/AVWizard-XineDefaultConfig.sh
+				SetDefaults
+			fi
+		else
+			"$BaseDir"/AVWizard-XineDefaultConfig.sh
+			SetDefaults
 		fi
+	else
+		"$BaseDir"/AVWizard-XineDefaultConfig.sh
+		SetDefaults_720p
 	fi
+
 	sed -ri '/Option.*"Composite"/d' "$XF86Config"
-	WMTweaksFile="/root/.config/xfce4/mcs_settings/wmtweaks.xml"
+	WMTweaksFile="/root/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml"
 	cp "$WMTweaksFile"{,.orig}
 	sed -i '/Xfwm\/UseCompositing/ s/value="."/value="1"/g' "$WMTweaksFile"
 }
 
-SetDefaults()
-{
+SetDefaults () {
 	WizSet Video_Ratio '4_3'
 	WizSet Resolution '640x480'
 	WizSet VideoResolution '640x480'
@@ -138,9 +124,40 @@ SetDefaults()
 	echo "640x480 60 640 480 VGA" >/tmp/avwizard-resolution.txt
 }
 
-# Update audio settings of this machine
-UpdateAudioSettings()
-{
+SetDefaults_720p () {
+	WizSet Video_Ratio '16_9'
+	WizSet Resolution '1280x720'
+	WizSet VideoResolution '1280x720'
+	WizSet WindowWidth 1280
+	WizSet WindowHeight 720
+	WizSet Refresh '60'
+	WizSet VideoRefresh '60'
+	WizSet VideoOutput 'HDMI'
+	WizSet ResolutionSelected 7
+	WizSet AudioConnector 'Analog Stereo'
+	GetAudioMixerSettings
+	WizSet AudioVolumeMin "$AudioVolumeMin"
+	WizSet AudioVolumeMax "$AudioVolumeMax"
+	WizSet AudioVolumeCurrent "$AudioVolumeCurrent"
+	WizSet AudioVolumeIncrement '1'
+	WizSet DolbyTest '0'
+	WizSet DTSTest '0'
+	WizSet XineConfigFile "$XineConf"
+	cp /etc/pluto/xine.conf "$XineConf"
+	WizSet SoundTestFile '/home/public/data/avwizard-sounds/avwizard_volume_test.mp3'
+	WizSet DTSTestFile '/home/public/data/avwizard-sounds/avwizard_dts_test.wav'
+	WizSet DolbyTestFile '/home/public/data/avwizard-sounds/avwizard_ac3_test.ac3'
+	WizSet DefaultFontName '/usr/share/fonts/truetype/msttcorefonts/Arial.ttf'
+	WizSet RemoteAVWizardServerPort "$AVWizard_Port"
+	WizSet RemoteCmd "$RemoteCmd"
+	WizSet GamepadCmd "$GamepadCmd"
+	WizSet ExitCode 1 # by default, we fail (i.e. on Ctrl+Alt+Bkspc)
+	echo "1280x720 60 1280 720 HDMI" >/tmp/avwizard-resolution-defaults.txt
+	echo "1280x720 60 1280 720 HDMI" >/tmp/avwizard-resolution.txt
+}
+
+UpdateAudioSettings () {
+	# Update audio settings of this machine
 	DEVICEDATA_Audio_Settings=88
 	DEVICECATEGORY_Media_Director=8
 
@@ -208,8 +225,29 @@ UpdateAudioSettings()
 	RunSQL "$Q"
 }
 
-UpdateOrbiterDimensions()
-{
+UpdateOrbiterUI () {
+	OrbiterDev=$(FindDevice_Template "$PK_Device" "$DEVICETEMPLATE_OnScreen_Orbiter")
+	UIVersion=$(WizGet 'UIVersion')
+	case "$UIVersion" in
+		UI1)
+			# disable: OpenGL effects, Alpha blending; select UI1
+			UI_SetOptions "$OrbiterDev" 0 0 "$UI_Normal_Horizontal"
+		;;
+		UI2_med)
+			# enable: OpenGL effects; disable: Alpha blending; select UI2
+			UI_SetOptions "$OrbiterDev" 1 0 "$UI_V2_Normal_Horizontal"
+		;;
+		UI2_hi)
+			# enable: OpenGL effects, Alpha blending; select UI2
+			UI_SetOptions "$OrbiterDev" 1 1 "$UI_V2_Normal_Horizontal"
+		;;
+		*)
+			echo "Unknown UIVersion value: '$UIVersion'"
+		;;
+	esac
+}
+
+UpdateOrbiterDimensions () {
 	WizResolution=$(< /tmp/avwizard-resolution.txt)
 	VideoResolution_Name=$(SpcField 1 "$WizResolution")
 	VideoRefresh=$(SpcField 2 "$WizResolution")
@@ -290,54 +328,88 @@ UpdateOrbiterDimensions()
 	RunSQL "$Q"
 }
 
-UpdateOrbiterUI()
-{
-	OrbiterDev=$(FindDevice_Template "$PK_Device" "$DEVICETEMPLATE_OnScreen_Orbiter")
-	UIVersion=$(WizGet 'UIVersion')
-	case "$UIVersion" in
-		UI1)
-			# disable: OpenGL effects, Alpha blending; select UI1
-			UI_SetOptions "$OrbiterDev" 0 0 "$UI_Normal_Horizontal"
-		;;
-		UI2_med)
-			# enable: OpenGL effects; disable: Alpha blending; select UI2
-			UI_SetOptions "$OrbiterDev" 1 0 "$UI_V2_Normal_Horizontal"
-		;;
-		UI2_hi)
-			# enable: OpenGL effects, Alpha blending; select UI2
-			UI_SetOptions "$OrbiterDev" 1 1 "$UI_V2_Normal_Horizontal"
-		;;
-		*)
-			echo "Unknown UIVersion value: '$UIVersion'"
-		;;
-	esac
+
+###########################################################
+### Setup Functions - General functions
+###########################################################
+
+Video_Driver_Detection () {
+# Check if any driver is installed. If not, check what hardware is in the box, and install the relevant driver using
+# the binary drivers
+DriverInstalled=0
+driverConfig=none
+grep "Driver" /etc/X11/xorg.conf |grep -v "keyboard"| grep -v "#" | grep -v "vesa"|grep -v "mouse"|grep -vq "kbd" && DriverInstalled=1
+
+# Check if we have nVidia or ATI cards in here, and specify proper config programs and commandline options.
+if [[ $DriverInstalled -eq 0 ]]; then
+	driverConfig=none
+	lspci|grep nVidia|grep "VGA compatible controller" -q && driverConfig=nvidia-xconfig
+	if [[ $driverConfig == nvidia-xconfig ]]; then
+		driverLine = ""
+	fi
+	if [[ $driverConfig == none ]]; then
+		lspci|grep ATI|grep -vi Non-VGA|grep VGA -q && driverConfig=aticonfig
+	fi
+	if [[ $driverConfig == aticonfig ]]; then
+		driverLine="--initial"
+	fi
+fi
+
+if [[ "$driverConfig" != none ]]; then
+	# Is it installed, if so execute it with any line params
+	driverConfigLocation=`which $driverConfig`
+	if [[ -x $driverConfigLocation ]]; then
+		$driverConfigLocation $driverLine
+		VerifyExitCode "Running $driverConfigLocation $driverLine failed!"
+	fi
+fi
 }
 
-SetupViaXine()
-{
+SetupViaXine() {
 	local Q OrbiterDev XineDev
-#
 }
 
-ConfSet AVWizardOverride 0
-rm -f /tmp/AVWizard_Started
+GamePad_Setup () {
 
-SetupViaXine
+if [[ ! -x /usr/pluto/bin/AVWizard_Remote_Detect.sh ]]; then
+	chmod +x /usr/pluto/bin/AVWizard_Remote_Detect.sh 
+fi
+
+if [[ ! -x /usr/pluto/bin/AVWizard_Gamepad_Detect.sh ]]; then
+	chmod +x /usr/pluto/bin/AVWizard_Gamepad_Detect.sh
+fi
 
 RemoteCmd=$(/usr/pluto/bin/AVWizard_Remote_Detect.sh | tail -1)
 GamepadCmd=$(/usr/pluto/bin/AVWizard_Gamepad_Detect.sh | tail -1)
 
+}
+
+Enable_Audio_Channels () {
+	# Added this to correctly unmute channels for setup wizard
+	amixer sset "IEC958" unmute
+	amixer sset "IEC958 1" unmute
+	amixer sset 'IEC958',0 unmute
+	amixer sset 'IEC958',1 unmute
+	amixer sset 'IEC958 Default PCM' unmute
+	alsactl store
+	VerifyExitCode "Storing audio channel settings failed"
+}
+
+Start_AVWizard () {
+#Modify /etc/pluto.conf for the AVWizardOverride value
+ConfSet AVWizardOverride 0
+rm -f /tmp/AVWizard_Started
+
+#Setup Main AVWizard loop
 Done=0
 while [[ "$Done" -eq 0 ]]; do
-	echo "$(date -R) $(basename "$0"): AVWizard Main loop"
-	CleanUp
+	StatsMessage "AVWizard Main loop"
+	rm -f /tmp/*.xml
 	SetupX
-	"$BaseDir"/AVWizard-XineDefaultConfig.sh
-	SetDefaults
 	"$BaseDir"/AVWizardWrapper.sh
 	Ret="$?"
 	mv "$WMTweaksFile"{.orig,}
-	echo "$(date -R) $(basename "$0"): AVWizard Main loop ret code $Ret"
+	StatsMessage "AVWizard Main loop ret code $Ret"
 	case "$Ret" in
 		0) Done=1 ;;
 		3)
@@ -347,24 +419,43 @@ while [[ "$Done" -eq 0 ]]; do
 	esac
 done
 
-echo "$(date -R) $(basename "$0"): AVWizard Main loop done"
+StatsMessage "AVWizard Main loop done"
 
-set -x
 # Finalize wizard: save settings
 ConfSet "AVWizardDone" "1"
 mv "$XF86Config" "$ConfFile"
 mv "$XineConf" /etc/pluto/xine.conf
-echo "$(date -R) $(basename "$0"): AVWizard reset conf file"
+StatsMessage "AVWizard reset conf file"
 alsactl store
-echo "$(date -R) $(basename "$0"): AVWizard Calling Audio Settings"
+StatsMessage "AVWizard Saving Audio Settings"
 UpdateAudioSettings
-echo "$(date -R) $(basename "$0"): AVWizard Calling UpdateOrbiterDimensions"
+StatsMessage "AVWizard Calling UpdateOrbiterDimensions"
 UpdateOrbiterDimensions
-echo "$(date -R) $(basename "$0"): AVWizard Calling UpdateOrbiterUI"
+StatsMessage "AVWizard Calling UpdateOrbiterUI"
 UpdateOrbiterUI
-echo "$(date -R) $(basename "$0"): AVWizard Calling SetupAudioVideo"
+StatsMessage "AVWizard Calling SetupAudioVideo"
 bash -x /usr/pluto/bin/SetupAudioVideo.sh | tee-pluto /var/log/pluto/avwizard_setup_av.log
-set +x
 
 ConfSet AVWizardOverride 0
+}
 
+
+###########################################################
+### Main execution area
+###########################################################
+
+#Create AVWizard.log
+. /usr/pluto/bin/TeeMyOutput.sh --outfile $log_file --infile /dev/null --stdboth -- "$@"
+
+#Trap
+trap 'StatsMessage "Exiting"' EXIT
+
+#Execute Functions
+Video_Driver_Detection
+SetupViaXine
+GamePad_Setup
+Enable_Audio_Channels
+Start_AVWizard
+
+StatsMessage "AVWizard completed without any detected error"
+exit 0
