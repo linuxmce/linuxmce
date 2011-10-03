@@ -5,6 +5,7 @@
 # Version 1.0 - 27. sep 2011 - Serge Wagener - first version
 
 DB_Extensions_Table='extensions'
+DB_Phonelines_Table='phonelines'
 Context_From_Lmce="from-lmce-custom"
 Context_Voice_Menu="voice-menu-lmce-custom"
 
@@ -46,27 +47,19 @@ GetPhoneExtensions()
 
 GetLineExtensions()
 {
-	UseDB $DB_telecom
-	# get SIP lines
-	S="select id, data from sip where keyword='account' and id like '9999_'"
+	UseDB asterisk
+	S="SELECT id, protocol FROM $DB_Phonelines_Table"
 	R=$(RunSQL "$S")
 	for Row in $R; do
-		LINES[$(Field 1 "$Row")]="SIP"
+		LINES[$(Field 1 "$Row")]=$(Field 2 "$Row")
 	done
 
-	# get IAX lines
-	S="select id, data from iax where keyword='account' and id like '9999_'"
-	R=$(RunSQL "$S")
-	for Row in $R; do
-		LINES[$(Field 1 "$Row")]="IAX"
-	done
-	
 	#get housemodes
-	S="select ID from Line_HouseMode"
-	R=$(RunSQL "$S")
-	for Row in $R; do
-		LINES[$(Field 1 "$Row")]="0"
-	done
+	#S="select ID from Line_HouseMode"
+	#R=$(RunSQL "$S")
+	#for Row in $R; do
+	#	LINES[$(Field 1 "$Row")]="0"
+	#done
 }
 
 CreateUserRoutings()
@@ -115,7 +108,7 @@ CreateLineRoutings()
 # fetch values from LinuxMCE
 GetUserExtensions
 GetPhoneExtensions
-#GetLineExtensions
+GetLineExtensions
 
 CreateUserRoutings
 CreateLineRoutings
