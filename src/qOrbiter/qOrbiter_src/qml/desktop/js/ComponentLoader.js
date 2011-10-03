@@ -45,16 +45,20 @@ function deleteFilterObjects(toBeDeleted) {
 
 var detailcomponent
 var detailsprite
+var mediatype
 
-function createFileDetails() {
+function createFileDetails(mediatype) {
 
-    detailcomponent = Qt.createComponent("../components/FileDetails.qml");
+
+    detailcomponent = Qt.createComponent("../components/FileDetails"+mediatype+".qml");
     detailsprite = detailcomponent.createObject(fileviewscreen , {"x": 0, "y": 0, "z": 10});
 
        if (detailsprite == null) {
            // Error Handling
            console.log("Error File Detail object")
-}
+           detailcomponent = Qt.createComponent("../components/FileDetails.qml");
+           detailsprite = detailcomponent.createObject(fileviewscreen , {"x": 0, "y": 0, "z": 10});
+    }
 }
 
 var roomcomponent

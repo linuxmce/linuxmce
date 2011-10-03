@@ -14,7 +14,7 @@ Rectangle {
         target: filedetailsclass
         onShowDetailsChanged:
         {
-            MyJs.createFileDetails()
+            MyJs.createFileDetails(gmediaType)
         }
     }
 
