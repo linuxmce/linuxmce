@@ -319,6 +319,12 @@ Rectangle {
                     }
                     AvOptionButton{
                         buttontext: qsTr("Jog")
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked:  {
+                                MyJs.createAvComponent("../components/JogPanel.qml", storedvideoremote)
+                            }
+                        }
                     }
                     AvOptionButton{
                         buttontext: qsTr("Power")

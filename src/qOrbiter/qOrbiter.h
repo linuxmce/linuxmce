@@ -111,6 +111,7 @@ public:
     void ShowBookMarks();
     void Thumbnail();
     void NavigateScreen(QString direction);
+    void JogStream(QString jump);
 
     //<-dceag-const-e->
 

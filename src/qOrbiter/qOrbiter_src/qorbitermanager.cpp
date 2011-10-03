@@ -1363,7 +1363,7 @@ void qorbiterManager::bindMediaRemote(bool state)
 void qorbiterManager::changedPlaylistPosition(QString position)
 {
 
-    if(position.length() > 20)
+    if(!position.contains(QRegExp("TITLE:")))
     {
     pqOrbiter->JumpToPlaylistPosition(position.toInt());
     }
@@ -1578,7 +1578,7 @@ void qorbiterManager::showTimeCode()
         nowPlayingButton->setStringSpeed(playbackSpeed+"x");
 
         QString duration = tcVars.at(2);
-        duration.remove(QRegExp(".\\d\\d\\d|00:0"));
+        duration.remove(QRegExp(".\\d\\d\\d|00:0|0:0"));
         nowPlayingButton->setDuration(duration);
     }
 }
@@ -1595,7 +1595,7 @@ void qorbiterManager::checkConnection()
     {
         if(!pqOrbiter->GetConfig())
         {
-            //gotoQScreen("Splash.qml");
+            gotoQScreen("Splash.qml");
         }
 
     }
@@ -1620,6 +1620,11 @@ void qorbiterManager::moveDirection(QString direction)
 void qorbiterManager::enter()
 {
 
+}
+
+void qorbiterManager::jogPosition(QString jog)
+{
+    pqOrbiter->JogStream(jog);
 }
 
 

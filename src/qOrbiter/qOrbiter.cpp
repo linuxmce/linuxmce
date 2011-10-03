@@ -2484,7 +2484,7 @@ void DCE::qOrbiter::ShowFloorPlan(int floorplantype)
     }
 }
 
-void DCE::qOrbiter::GetScreenSaverImages()
+void DCE::qOrbiter::GetScreenSaverImages() // unused at this time
 {
     string *sFilename;
     CMD_Get_Screen_Saver_Files screen_saver_files(qmlUI->iPK_Device, qmlUI->iPK_Device_GeneralInfoPlugin,qmlUI->iPK_Device, sFilename);
@@ -2528,7 +2528,7 @@ void DCE::qOrbiter::SetSecurityStatus(string pin, string mode, int user, string 
     SendCommand(set_security_mode);
 }
 
-void DCE::qOrbiter::GetSingleSecurityCam(int cam_device, int iHeight, int iWidth)
+void DCE::qOrbiter::GetSingleSecurityCam(int cam_device, int iHeight, int iWidth) //shows security camera, needs to be threaded as it blocks the ui
 {
     char *sData;
     int sData_size= 0;
@@ -2543,7 +2543,7 @@ void DCE::qOrbiter::GetSingleSecurityCam(int cam_device, int iHeight, int iWidth
 
 }
 
-void DCE::qOrbiter::GetMultipleSecurityCams(QStringList cams)
+void DCE::qOrbiter::GetMultipleSecurityCams(QStringList cams) // not implemented yet
 {
 }
 
@@ -2553,7 +2553,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
       this functions purpose is to return the attributes for the currently playing media this in this
       orbiter's EA it is a candidate for being extended along with the file details metadata function
       to expand our ui capabilities. it is essentially a clone of the many datagrid requests
-      that the orbiter makes.
+      that the orbiter makes in addition to parsing of other information passed for a given object.
       */
 
 
@@ -2872,7 +2872,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
 }
 
 
-void DCE::qOrbiter::TuneToChannel(int channel, QString chanid)
+void DCE::qOrbiter::TuneToChannel(int channel, QString chanid) //tunes to channel based on input, need some reworking for myth
 {
     if(qmlUI->i_current_mediaType = 11)
     {
@@ -2926,7 +2926,7 @@ void DCE::qOrbiter::ChangedTrack(QString direction)
     SendCommand(jump_playlist);
 }
 
-void DCE::qOrbiter::populateAdditionalMedia()
+void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that populates after the initial request to break out the threading and allow for a checkpoint across threads
 {
     qDebug() << "requesting additional media";
     qmlUI->requestMore = true;
@@ -3002,7 +3002,7 @@ void DCE::qOrbiter::SetSecurityMode(int pin, int mode)
     SendCommand(change_house_modes);
 }
 
-void DCE::qOrbiter::setLocation(int location, int ea)
+void DCE::qOrbiter::setLocation(int location, int ea) // sets the ea and room
 {
     CMD_Set_Entertainment_Area_DL set_entertain_area(qmlUI->iPK_Device, StringUtils::itos(qmlUI->iOrbiterPluginID), StringUtils::itos(ea));
     SendCommand(set_entertain_area);
@@ -3018,9 +3018,11 @@ void DCE::qOrbiter::setUser(int user)
     SendCommand(set_user);
 }
 
-void DCE::qOrbiter::QuickReload()
+void DCE::qOrbiter::QuickReload() //experimental function. checkConnection is going to be our watchdog at some point, now its just um. there to restart things.
 {
-    //SendCommand( CMD_Reload(qmlUI->iPK_Device, qmlUI->iOrbiterPluginID) );
+    CMD_Reload reload(qmlUI->iPK_Device, qmlUI->iOrbiterPluginID);
+    SendCommand( reload );
+    qmlUI->checkConnection();
 }
 
 void DCE::qOrbiter::powerOn(QString devicetype)
@@ -3038,7 +3040,7 @@ void DCE::qOrbiter::getMediaTimeCode()
 
 }
 
-void DCE::qOrbiter::GetAdvancedMediaOptions()
+void DCE::qOrbiter::GetAdvancedMediaOptions() // prepping for advanced media options
 {
     int cellsToRender= 0;
 
@@ -3086,7 +3088,7 @@ void DCE::qOrbiter::GetAdvancedMediaOptions()
 
 }
 
-void DCE::qOrbiter::GetAlarms(bool toggle, int grp)
+void DCE::qOrbiter::GetAlarms(bool toggle, int grp) //problem function that gets dg of alarms, but i cant get traversal right and end up with one!
 {
     bool state;
     string *sResponse;
@@ -3191,7 +3193,7 @@ void DCE::qOrbiter::GetAlarms(bool toggle, int grp)
     }
 }
 
-void DCE::qOrbiter::SetZoom(QString zoomLevel)
+void DCE::qOrbiter::SetZoom(QString zoomLevel) //zoom level for current media player
 {
     string sResponse;
     //qDebug() << zoomLevel.toAscii();
@@ -3210,7 +3212,7 @@ void DCE::qOrbiter::SetZoom(QString zoomLevel)
 
 }
 
-void DCE::qOrbiter::SetAspectRatio(QString ratio)
+void DCE::qOrbiter::SetAspectRatio(QString ratio) //set aspect ratio for current media player
 {
     string sResponse;
     CMD_Set_Aspect_Ratio setMediaAspect(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID, ratio.toStdString());
@@ -3230,6 +3232,7 @@ void DCE::qOrbiter::GetText(int textno)
 
 }
 
+//used for resume to pass complex things like chapters and other options
 void DCE::qOrbiter::SetMediaPosition(QString position)
 {
     if(qmlUI->nowPlayingButton->qs_screen.contains( "Screen_49.qml"))
@@ -3254,7 +3257,7 @@ void DCE::qOrbiter::SetMediaPosition(QString position)
 
 }
 
-void DCE::qOrbiter::DvdMenu()
+void DCE::qOrbiter::DvdMenu() //show the dvd menu
 {
     CMD_Goto_Media_Menu showDVDmenu(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID, 0 );
     if(!SendCommand(showDVDmenu))
@@ -3264,7 +3267,7 @@ void DCE::qOrbiter::DvdMenu()
 
 }
 
-void DCE::qOrbiter::NavigateScreen(QString direction)
+void DCE::qOrbiter::NavigateScreen(QString direction) //connects ui buttons to dce commands
 {
     if(direction.contains("up"))
     {
@@ -3305,6 +3308,15 @@ void DCE::qOrbiter::NavigateScreen(QString direction)
         {
             qmlUI->checkConnection();
         }
+    }
+}
+
+void DCE::qOrbiter::JogStream(QString jump) //jumps position in stream for jog
+{
+    CMD_Jump_to_Position_in_Stream jog(qmlUI->iPK_Device, qmlUI->iMediaPluginID, jump.toStdString(), m_dwPK_Device_NowPlaying  );
+    if(!SendCommand(jog))
+    {
+        qmlUI->checkConnection();
     }
 }
 
