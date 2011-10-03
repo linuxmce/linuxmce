@@ -1298,6 +1298,8 @@ void qOrbiter::CMD_Show_Shortcuts(string &sCMD_Result,Message *pMessage)
 void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message *pMessage)
 //<-dceag-c401-e->
 {
+    qmlUI->gotoQScreen("Screen_47.qml");
+
     cout << "Need to implement command #401 - Show File List" << endl;
     cout << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
 
@@ -1306,10 +1308,9 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
         qmlUI->initializeSortString();
 
     }
-    qmlUI->gotoQScreen("Screen_47.qml");
+
     qmlUI->model->clear();
     qmlUI->model->totalcells = 0;
-
 
     qmlUI->setSorting(iPK_MediaType);
     long l_pkDevice = qmlUI->iPK_Device;
@@ -1368,7 +1369,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
     }
     else
     {
-
+/*
         //PROGRAM
         if (qmlUI->q_attributetype_sort == "12" && qmlUI->q_pk_attribute != "")
         {
@@ -1378,24 +1379,29 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
         {
             qmlUI->q_attributetype_sort = "13";
         }
-
+*/
         //PERSON
         if (qmlUI->q_attributetype_sort == "2" && qmlUI->q_pk_attribute == "")
         {
-            if(iPK_MediaType == 4)
+            if(iPK_MediaType == 4 && qmlUI->q_pk_attribute != "" )
             {
                 qmlUI->q_attributetype_sort = "3"; //sets to album from performer for music
             }
-            else
+            else if (iPK_MediaType == 5)
             {
                 qmlUI->q_attributetype_sort = "13"; //sets to title as catch all for other type for now
             }
 
         }
-        else if (qmlUI->q_attributetype_sort == "3")
+        else if (qmlUI->q_attributetype_sort == "2" && qmlUI->q_pk_attribute != "")
+        {
+            qmlUI->q_attributetype_sort = "3";
+        }
+        else if (qmlUI->q_attributetype_sort == "3" && qmlUI->q_pk_attribute != "")
         {
             qmlUI->q_attributetype_sort = "13";
         }
+
 
         params = "|"+qmlUI->q_subType +"|"+qmlUI->q_fileFormat+"|"+qmlUI->q_attribute_genres+"|"+qmlUI->q_mediaSources+"||"+qmlUI->q_attributetype_sort+"||2|"+qmlUI->q_pk_attribute+"";
         s = QString::number(iPK_MediaType) + params;
@@ -2236,9 +2242,13 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 {
                     qmlUI->filedetailsclass->setStudio(attribute);
                 }
+                else if(attributeType == "Track")
+                {
+                    qmlUI->filedetailsclass->setStudio(attribute);
+                }
                 else
                 {
-                    //qDebug() << "Unhandled attribute: " << attributeType << attribute;
+                    qDebug() << "Unhandled attribute: " << attributeType << attribute;
                 }
 
                 //qmlUI->m_selected_grid_item->appendRow(new FileDetailsItem(cellTitle, cellAttribute, cellImg, false,  qmlUI->model));
