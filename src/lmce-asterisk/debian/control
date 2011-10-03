@@ -1,0 +1,16 @@
+Source: lmce-asterisk
+Section: unknown
+Priority: optional
+Maintainer: LinuxMCE Developers <developers@linuxmce.org>
+Build-Depends: debhelper (>= 4.0.0)
+Standards-Version: 3.6.1
+
+Package: lmce-asterisk
+Architecture: any
+Pre-Depends: asterisk (>= 1:1.6.2~dfsg)
+Depends: php-db, pluto-boot-scripts, chan-sccp-b
+Provides: asterisk-config-custom
+Conflicts: freepbx, pluto-asterisk, asterisk-pluto, asterisk-custom-config
+Replaces: asterisk-config
+Description: lmce-asterisk
+ lmce-asterisk
