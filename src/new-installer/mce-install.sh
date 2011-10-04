@@ -812,6 +812,172 @@ TempEMIFix () {
 ln -s /usr/lib/libdvdread.so.4 /usr/lib/libdvdread.so.3
 }
 
+CreateFirstBoot () {
+#Create the firstboot file
+echo '#!/bin/bash'>/tmp/firstboot
+echo '###########################################################'>>/tmp/firstboot
+echo '### Setup global variables'>>/tmp/firstboot
+echo '###########################################################'>>/tmp/firstboot
+echo 'LogFile="/var/log/pluto/firstboot.log"'>>/tmp/firstboot
+echo "trap 'rm -f /etc/rc5.d/S90firstboot' EXIT">>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo '###########################################################'>>/tmp/firstboot
+echo '### Setup Functions - Error checking and logging'>>/tmp/firstboot
+echo '###########################################################'>>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo 'Setup_Logfile () {'>>/tmp/firstboot
+echo 'if [ -f ${log_file} ]; then'>>/tmp/firstboot
+echo '        touch ${log_file}'>>/tmp/firstboot
+echo '        if [ $? = 1 ]; then'>>/tmp/firstboot
+echo '                echo "`date` - Unable to write to ${log_file} - re-run script as root"'>>/tmp/firstboot
+echo '                exit 1'>>/tmp/firstboot
+echo '        else'>>/tmp/firstboot
+echo '                echo "`date` - Logging initiatilized to ${log_file}"'>>/tmp/firstboot
+echo '        fi'>>/tmp/firstboot
+echo 'else'>>/tmp/firstboot
+echo '        #0 out an existing file'>>/tmp/firstboot
+echo '        echo > ${log_file}'>>/tmp/firstboot
+echo '        echo "`date` - Setup has run before, clearing old log file at ${log_file}"'>>/tmp/firstboot
+echo 'fi'>>/tmp/firstboot
+echo '}'>>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo 'VerifyExitCode () {'>>/tmp/firstboot
+echo '        local EXITCODE=$?'>>/tmp/firstboot
+echo '        if [ "$EXITCODE" != "0" ] ; then'>>/tmp/firstboot
+echo '                echo "An error (Exit code $EXITCODE) occured during the last action"'>>/tmp/firstboot
+echo '                echo "$1"'>>/tmp/firstboot
+echo '                exit 1'>>/tmp/firstboot
+echo '        fi'>>/tmp/firstboot
+echo '}'>>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo 'StatsMessage () {'>>/tmp/firstboot
+echo '        printf "`date` - $* \n"'>>/tmp/firstboot
+echo '}'>>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo '###########################################################'>>/tmp/firstboot
+echo '### Setup Functions - General functions'>>/tmp/firstboot
+echo '###########################################################'>>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo 'CreatePackagesFiles () {'>>/tmp/firstboot
+echo 'StatsMessage "Creating necessary package files"'>>/tmp/firstboot
+echo 'pushd /usr/pluto/deb-cache'>>/tmp/firstboot
+echo 'dpkg-scanpackages -m . /dev/null | tee Packages | gzip -c > Packages.gz'>>/tmp/firstboot
+echo 'popd'>>/tmp/firstboot
+echo '}'>>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo 'SetupNetworking () {'>>/tmp/firstboot
+echo 'rm -f /etc/X11/xorg.conf'>>/tmp/firstboot
+echo 'rm -f /etc/network/interfaces'>>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo '## Reconfigure networking'>>/tmp/firstboot
+echo '/usr/pluto/bin/Network_Setup.sh'>>/tmp/firstboot
+echo '/etc/init.d/networking restart'>>/tmp/firstboot
+echo '/usr/pluto/bin/DHCP_config.sh'>>/tmp/firstboot
+echo '/etc/init.d/networking restart'>>/tmp/firstboot
+echo '/usr/pluto/bin/Network_Firewall.sh'>>/tmp/firstboot
+echo '/usr/pluto/bin/ConfirmInstallation.sh'>>/tmp/firstboot
+echo '/usr/pluto/bin/Timezone_Detect.sh'>>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo '}'>>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo 'CleanInstallSteps () {'>>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo 'if [[ -f /etc/pluto/install_cleandb ]]; then'>>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo '        # on upgrade, the old keys are already in place, so keep them'>>/tmp/firstboot
+echo '        rm -f /etc/ssh/ssh_host_*'>>/tmp/firstboot
+echo '        dpkg-reconfigure -pcritical openssh-server'>>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo '        PostInstPkg=('>>/tmp/firstboot
+echo '        pluto-local-database pluto-media-database pluto-security-database pluto-system-database'>>/tmp/firstboot
+echo '        pluto-telecom-database freepbx'>>/tmp/firstboot
+echo '        )'>>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo '        for Pkg in "${PostInstPkg[@]}"; do'>>/tmp/firstboot
+echo '                /var/lib/dpkg/info/"$Pkg".postinst configure'>>/tmp/firstboot
+echo '        done'>>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo '        . /usr/pluto/bin/SQL_Ops.sh'>>/tmp/firstboot
+echo '        . /usr/pluto/bin/Config_Ops.sh'>>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo '        # Mark remote assistance as diabled'>>/tmp/firstboot
+echo '        ConfDel remote'>>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo "        arch=\$(apt-config dump | grep 'APT::Architecture' | sed 's/APT::Architecture.*\"\\(.*\\)\".*/\\1/g')">>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo '        Queries=('>>/tmp/firstboot
+echo '                "UPDATE Device_DeviceData'>>/tmp/firstboot
+echo '                        SET IK_DeviceData=15'>>/tmp/firstboot
+echo '                        WHERE PK_Device IN ('>>/tmp/firstboot
+echo '                                        SELECT PK_Device FROM Device WHERE FK_DeviceTemplate IN (7, 28)'>>/tmp/firstboot
+echo '                                )'>>/tmp/firstboot
+echo '                                AND FK_DeviceData=7'>>/tmp/firstboot
+echo '                "'>>/tmp/firstboot
+echo "                \"UPDATE Device_DeviceData SET IK_DeviceData='LMCE_CORE_u0804_\$arch' WHERE IK_DeviceData='LMCE_CORE_1_1'\"">>/tmp/firstboot
+echo "                \"UPDATE Device_DeviceData SET IK_DeviceData='LMCE_MD_u0804_i386'   WHERE IK_DeviceData='LMCE_MD_1_1'\"">>/tmp/firstboot
+echo "                \"UPDATE Device_DeviceData SET IK_DeviceData='0' WHERE FK_DeviceData='234'\"">>/tmp/firstboot
+echo "                \"UPDATE Device_DeviceData SET IK_DeviceData='i386' WHERE FK_DeviceData='112' AND IK_DeviceData='686'\"">>/tmp/firstboot
+echo "                \"USE asterisk; UPDATE incoming SET destination=CONCAT('custom-linuxmce', SUBSTR(destination, 18)) WHERE destination LIKE 'from-pluto-custom%'\"">>/tmp/firstboot
+echo "                \"DELETE FROM Software_Device WHERE 1\"">>/tmp/firstboot
+echo '        )'>>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo '        for Q in "${Queries[@]}"; do'>>/tmp/firstboot
+echo '                RunSQL "$Q"'>>/tmp/firstboot
+echo '        done'>>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo '        DT_DiskDrive=11'>>/tmp/firstboot
+echo "        DiskDrives=\$(RunSQL \"SELECT PK_Device FROM Device WHERE FK_DeviceTemplate='\$DT_DiskDrive'\")">>/tmp/firstboot
+echo '        for DiskDrive in $DiskDrives ;do'>>/tmp/firstboot
+echo '                DiskDrive_DeviceID=$(Field 1 "$DiskDrive")'>>/tmp/firstboot
+echo "                for table in 'CommandGroup_Command' 'Device_Command' 'Device_CommandGroup' 'Device_DeviceData' 'Device_DeviceGroup' 'Device_Device_Related' 'Device_EntertainArea' 'Device_HouseMode' 'Device_Orbiter' 'Device_StartupScript' 'Device_Users' ;do">>/tmp/firstboot
+echo "                        RunSQL \"DELETE FROM \\\`\$table\\\` WHERE FK_DeviceID = '\$DiskDrive_DeviceID' LIMIT 1\"">>/tmp/firstboot
+echo '                done'>>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo "                RunSQL \"DELETE FROM Device WHERE PK_Device = '\$DiskDrive_DeviceID' LIMIT 1\"">>/tmp/firstboot
+echo '        done'>>/tmp/firstboot
+echo 'fi'>>/tmp/firstboot
+echo '}'>>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo 'CreateDisklessImage () {'>>/tmp/firstboot
+echo 'StatsMessage "Building a disk image for your Diskless Media Directors"'>>/tmp/firstboot
+echo 'local diskless_log=/var/log/pluto/Diskless_Create-`date +"%F"`.log'>>/tmp/firstboot
+echo 'nohup /usr/pluto/bin/Diskless_CreateTBZ.sh >> ${diskless_log} 2>&1 &'>>/tmp/firstboot
+echo '}'>>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo 'VideoDriver () {'>>/tmp/firstboot
+echo '## Install driver based on the type of video card used'>>/tmp/firstboot
+echo "if lshwd | grep -qi 'VGA .* (nv)'; then">>/tmp/firstboot
+echo '        apt-get -y -f install pluto-nvidia-video-drivers'>>/tmp/firstboot
+echo '                VerifyExitCode "Install Pluto nVidia Driver"'>>/tmp/firstboot
+echo "elif lshwd | grep -qi 'VGA .* (radeon)'; then">>/tmp/firstboot
+echo '        # Check to see if old Radeon card, if so, do not install new driver'>>/tmp/firstboot
+echo "        if ! lshwd | grep -Pqi 'VGA .*Radeon ((9|X|ES)(1|2?)([0-9])(5|0)0|Xpress) (.*) \(radeon\)'; then">>/tmp/firstboot
+echo '               apt-get -y -f install xorg-driver-fglrx'>>/tmp/firstboot
+echo '                           VerifyExitCode "Install Radeon Driver"'>>/tmp/firstboot
+echo '        fi'>>/tmp/firstboot
+echo 'fi'>>/tmp/firstboot
+echo '}'>>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo '###########################################################'>>/tmp/firstboot
+echo '### Main execution area'>>/tmp/firstboot
+echo '###########################################################'>>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo '#Setup logging'>>/tmp/firstboot
+echo '. /usr/pluto/bin/TeeMyOutput.sh --outfile "$LogFile" --stdboth --append -- "$@"'>>/tmp/firstboot
+echo ''>>/tmp/firstboot
+echo 'StatsMessage "Starting firstboot script"'>>/tmp/firstboot
+echo 'CreatePackagesFiles'>>/tmp/firstboot
+echo 'SetupNetworking'>>/tmp/firstboot
+echo 'CleanInstallSteps'>>/tmp/firstboot
+echo '#CreateDisklessImage'>>/tmp/firstboot
+echo 'VideoDriver'>>/tmp/firstboot
+echo 'StatsMessage "Firstboot Script Complete"'>>/tmp/firstboot
+echo 'exit 0'>>/tmp/firstboot
+
+
+}
+
 InitialBootPrep () {
 StatsMessage "Preparing initial reboot"
 
@@ -844,11 +1010,9 @@ EOF
 
 # Remove KDM startup
 echo "/bin/false" >/etc/X11/default-display-manager
-wget -q http://svn.linuxmce.org/svn/branches/LinuxMCE-1004/src/new-installer/firstboot
-VerifyExitCode "wget for firstboot"
-cp firstboot /etc/rc5.d/S90firstboot
+cp /tmp/firstboot /etc/rc5.d/S90firstboot
 chmod 755 /etc/rc5.d/S90firstboot
-rm -f ./firstboot
+rm -f /tmp/firstboot
 echo >> /etc/apt/sources.list
 /usr/share/update-notifier/notify-reboot-required
 }
@@ -882,6 +1046,7 @@ VideoDriverSetup
 FixAsteriskConfig
 addAdditionalTTYStart
 TempEMIFix
+CreateFirstBoot
 InitialBootPrep
 
 
