@@ -1,0 +1,93 @@
+#!/bin/bash -x
+
+LogFile="/var/log/pluto/firstboot.log"
+. /usr/pluto/bin/TeeMyOutput.sh --outfile "$LogFile" --stdboth --append -- "$@"
+
+echo "Started : $(date -R)"
+
+pushd /usr/pluto/deb-cache
+	dpkg-scanpackages -m . /dev/null | tee Packages | gzip -c > Packages.gz
+popd
+
+trap 'rm -f /etc/rc5.d/S90firstboot' EXIT
+
+rm -f /etc/X11/xorg.conf
+rm -f /etc/network/interfaces
+
+## Reconfigure networking
+#export NPflagReconfNetwork=yes
+/usr/pluto/bin/Network_Setup.sh
+/etc/init.d/networking restart
+/usr/pluto/bin/DHCP_config.sh
+/etc/init.d/networking restart
+/usr/pluto/bin/Network_Firewall.sh
+/usr/pluto/bin/ConfirmInstallation.sh
+/usr/pluto/bin/Timezone_Detect.sh
+
+if [[ ! -f /etc/pluto/install_cleandb ]]; then # on upgrade, the old keys are already in place, so keep them
+	## Create new set of ssh keys
+	rm -f /etc/ssh/ssh_host_*
+	dpkg-reconfigure -pcritical openssh-server
+fi
+
+## Install nvidia-glx if needed
+if lshwd | grep -qi 'VGA .* (nv)'; then
+        apt-get -y -f install pluto-nvidia-video-drivers
+elif lshwd | grep -qi 'VGA .* (radeon)'; then
+        # Check to see if old Radeon card, if so, do not install new driver
+        if ! lshwd | grep -Pqi 'VGA .*Radeon ((9|X|ES)(1|2?)([0-9])(5|0)0|Xpress) (.*) \(radeon\)'; then
+               apt-get -y -f install xorg-driver-fglrx
+        fi
+fi
+
+PostInstPkg=(
+	pluto-local-database pluto-media-database pluto-security-database pluto-system-database
+	pluto-telecom-database freepbx
+)
+
+if [[ -f /etc/pluto/install_cleandb ]]; then
+	for Pkg in "${PostInstPkg[@]}"; do
+		/var/lib/dpkg/info/"$Pkg".postinst configure
+	done
+
+	. /usr/pluto/bin/SQL_Ops.sh
+	. /usr/pluto/bin/Config_Ops.sh
+
+	# Mark remote assistance as diabled
+	ConfDel remote
+
+	arch=$(apt-config dump | grep 'APT::Architecture' | sed 's/APT::Architecture.*"\(.*\)".*/\1/g')
+
+	Queries=(
+		"UPDATE Device_DeviceData
+			SET IK_DeviceData=15
+			WHERE PK_Device IN (
+					SELECT PK_Device FROM Device WHERE FK_DeviceTemplate IN (7, 28)
+				)
+				AND FK_DeviceData=7
+		"
+		"UPDATE Device_DeviceData SET IK_DeviceData='LMCE_CORE_u0804_$arch' WHERE IK_DeviceData='LMCE_CORE_1_1'"
+		"UPDATE Device_DeviceData SET IK_DeviceData='LMCE_MD_u0804_i386'   WHERE IK_DeviceData='LMCE_MD_1_1'"
+		"UPDATE Device_DeviceData SET IK_DeviceData='0' WHERE FK_DeviceData='234'"
+		"UPDATE Device_DeviceData SET IK_DeviceData='i386' WHERE FK_DeviceData='112' AND IK_DeviceData='686'"
+		"USE asterisk; UPDATE incoming SET destination=CONCAT('custom-linuxmce', SUBSTR(destination, 18)) WHERE destination LIKE 'from-pluto-custom%'"
+		"DELETE FROM Software_Device WHERE 1"
+	)
+
+	for Q in "${Queries[@]}"; do
+		RunSQL "$Q"
+	done
+
+	DT_DiskDrive=11
+	DiskDrives=$(RunSQL "SELECT PK_Device FROM Device WHERE FK_DeviceTemplate='$DT_DiskDrive'")
+	for DiskDrive in $DiskDrives ;do
+		DiskDrive_DeviceID=$(Field 1 "$DiskDrive")
+		for table in 'CommandGroup_Command' 'Device_Command' 'Device_CommandGroup' 'Device_DeviceData' 'Device_DeviceGroup' 'Device_Device_Related' 'Device_EntertainArea' 'Device_HouseMode' 'Device_Orbiter' 'Device_StartupScript' 'Device_Users' ;do
+			RunSQL "DELETE FROM \`$table\` WHERE FK_DeviceID = '$DiskDrive_DeviceID' LIMIT 1"
+		done
+
+		RunSQL "DELETE FROM Device WHERE PK_Device = '$DiskDrive_DeviceID' LIMIT 1"
+	done
+fi
+
+echo "Finished : $(date -R)"
