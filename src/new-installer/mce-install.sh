@@ -807,6 +807,11 @@ else
 fi
 }
 
+TempEMIFix () {
+#Until the new id-my-disc package is implemented, this will allow the external_media_identifier to launch
+ln -s /usr/lib/libdvdread.so.4 /usr/lib/libdvdread.so.3
+}
+
 InitialBootPrep () {
 StatsMessage "Preparing initial reboot"
 
@@ -876,6 +881,7 @@ UpdateUpgrade
 VideoDriverSetup
 FixAsteriskConfig
 addAdditionalTTYStart
+TempEMIFix
 InitialBootPrep
 
 
