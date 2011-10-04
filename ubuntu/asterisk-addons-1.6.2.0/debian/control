@@ -1,0 +1,70 @@
+Source: asterisk-addons
+Section: comm
+Priority: optional
+Maintainer: Debian VoIP Team <pkg-voip-maintainers@lists.alioth.debian.org>
+Uploaders: Tzafrir Cohen <tzafrir.cohen@xorcom.com>, Faidon Liambotis <paravoid@debian.org>
+Build-Depends: debhelper (>= 7), libmysqlclient-dev | libmysqlclient15-dev, asterisk-dev (>= 1:1.6.2.0~dfsg~rc1), autotools-dev, quilt, libbluetooth-dev
+Standards-Version: 3.8.3
+Homepage: http://www.asterisk.org/
+Vcs-Svn: svn://svn.debian.org/pkg-voip/asterisk-addons/trunk/
+Vcs-Browser: http://svn.debian.org/wsvn/pkg-voip/asterisk-addons/?op=log
+
+Package: asterisk-mysql
+Architecture: any
+Depends: asterisk-1.6.2, ${shlibs:Depends}, ${misc:Depends}
+Description: MySQL support for the Asterisk PBX (cdr mainly)
+ Asterisk is an Open Source PBX and telephony toolkit.
+ .
+ This package provides the following modules for basic MySQL support for the
+ Asterisk PBX:
+   * cdr_addon_mysql.so for logging call detail records (CDR) into a MySQL
+     database
+   * app_addon_sql_mysql.so for querying a MySQL database from your dialplan
+   * res_config_mysql.so for configuring Asterisk using a MySQL database
+ .
+ For more information about the Asterisk PBX, have a look at the Asterisk
+ package.
+
+Package: asterisk-mp3
+Architecture: any
+Depends: asterisk-1.6.2, ${shlibs:Depends}, ${misc:Depends}
+Description: MP3 format support (format_mp3) for the Asterisk PBX
+ Asterisk is an Open Source PBX and telephony toolkit.
+ .
+ This package provides read-only native support for MP3 files for the Asterisk
+ PBX.  This should allow you to, e.g, play MP3 files using Playback() or
+ Background() from the dialplan.
+ .
+ For more information about the Asterisk PBX, have a look at the Asterisk
+ package.
+
+Package: asterisk-ooh323c
+Architecture: any
+Depends: asterisk-1.6.2, ${shlibs:Depends}, ${misc:Depends}
+Description: H.323 protocol support for Asterisk (ooh323c stack)
+ Asterisk is an Open Source PBX and telephony toolkit.
+ .
+ This channel driver (chan_ooh323c) provides support for the H.323 protocol 
+ for Asterisk. This is an implementation by Objective Systems, Inc. and does
+ not use the OpenH323 library.
+ .
+ This is one of many H.323 channel implementations for Asterisk with others
+ being chan_h323 and chan_oh323, distributed by Debian as asterisk-h323 and
+ asterisk-oh323, respectively.
+ .
+ For more information about the Asterisk PBX, have a look at the Asterisk
+ package.
+
+Package: asterisk-mobile
+Architecture: any
+Depends: asterisk-1.6.2, ${shlibs:Depends}, ${misc:Depends}
+Description: bluetooth mobile devices support for Asterisk
+ Asterisk is an Open Source PBX and telephony toolkit.
+ .
+ This package provides support for connecting Bluetooth devices to the
+ Asterisk PBX. It allows you to:
+   * Send and receive PSTN calls and SMS messages over a Bluetooth phone.
+   * Use a Bluetooth handset as a local phone connected to your PBX.
+ .
+ For more information about the Asterisk PBX, have a look at the Asterisk
+ package.

@@ -1,0 +1,297 @@
+2009-12-18  Leif Madsen <lmadsen@digium.com>
+
+	* Release Asterisk-Addons 1.6.2.0
+
+2009-12-01  Leif Madsen <lmadsen@digium.com>
+
+	* Release Asterisk-Addons 1.6.2.0-rc2
+
+2009-11-23 21:54 +0000 [r1060]  Matthew Nicholson <mnicholson@digium.com>
+
+	* channels/chan_mobile.c: Backport of phone init code from trunk.
+	  (closes issue #15628) Reported by: ughnz (closes issue #16087)
+	  Reported by: ughnz
+
+2009-11-09 17:32 +0000 [r1046]  Tilghman Lesher <tlesher@digium.com>
+
+	* cdr/cdr_addon_mysql.c: Merged revision 228798 manually from
+	  http://svn.digium.com/svn/asterisk/trunk ............... r228798
+	  | tilghman | 2009-11-09 01:37:52 -0500 (Mon, Nov 9 2009) | ??
+	  lines Fix various problems detected with Valgrind. * cdr_mysql
+	  stored a pointer that was freed by realloc() ...............
+
+2009-10-16 14:58 +0000 [r1031]  Matthew Nicholson <mnicholson@digium.com>
+
+	* channels/chan_mobile.c: Continue processing after encountering an
+	  unknown AT message instead of terminating the connection.
+
+2009-09-08 18:05 +0000 [r1030]  Russell Bryant <russell@digium.com>
+
+	* formats/format_mp3.c: Fix audio problems with format_mp3. This
+	  problem was introduced when the AST_FRIENDLY_OFFSET patch was
+	  merged. I'm surprised that nobody noticed any trouble when
+	  testing that patch, but this fixes the code that fills in the
+	  buffer to start filling in after the offset portion of the
+	  buffer. (closes issue #15850) Reported by: 99gixxer Patches:
+	  issue15850.diff1.txt uploaded by russell (license 2) Tested by:
+	  99gixxer
+
+2009-09-01 20:42 +0000 [r1026]  Russell Bryant <russell@digium.com>
+
+	* formats/format_mp3.c: Fix memory corruption caused by format_mp3.
+	  format_mp3 claimed that it provided AST_FRIENDLY_OFFSET in frames
+	  returned by read(). However, it lied. This means that other parts
+	  of the code that attempted to make use of the offset buffer would
+	  end up corrupting the fields in the ast_filestream structure.
+	  This resulted in quite a few crashes due to unexpected values for
+	  fields in ast_filestream. This patch closes out quite a few bugs.
+	  However, some of these bugs have been open for a while and have
+	  been an area where more than one bug has been discussed. So with
+	  that said, anyone that is following one of the issues closed
+	  here, if you still have a problem, please open a new bug report
+	  for the specific problem you are still having. If you do, please
+	  ensure that the bug report is based on the newest version of
+	  Asterisk, and that this patch is applied if format_mp3 is in use.
+	  Thanks! (closes issue #15109) Reported by: jvandal Tested by:
+	  aragon, russell, zerohalo, marhbere, rgj (closes issue #14958)
+	  Reported by: aragon (closes issue #15123) Reported by:
+	  axisinternet (closes issue #15041) Reported by: maxnuv (closes
+	  issue #15396) Reported by: aragon (closes issue #15195) Reported
+	  by: amorsen Tested by: amorsen (closes issue #15781) Reported by:
+	  jensvb (closes issue #15735) Reported by: thom4fun (closes issue
+	  #15460) Reported by: marhbere
+
+2009-08-20 15:29 +0000 [r1019]  Tilghman Lesher <tlesher@digium.com>
+
+	* res/res_config_mysql.c: Select uncommented lines, not commented
+	  ones. (closes issue #15746) Reported by: makoto
+
+2009-08-18 19:47 +0000 [r1017]  Tilghman Lesher <tlesher@digium.com>
+
+	* res/res_config_mysql.c: Clarify some of the error messages, to
+	  help upgraders.
+
+2009-07-13  Leif Madsen <lmadsen@digium.com>
+
+	* Release Asterisk-Addons 1.6.2.0-rc1
+
+2009-07-09 21:36 +0000 [r989]  Matthew Nicholson <mnicholson@digium.com>
+
+	* channels/chan_mobile.c: Fix mbl_fixup() in chan_mobile to update
+	  newchan->tech_pvt instead of oldchan. (closes issue #15299)
+	  Reported by: nikkk
+
+2009-07-06 21:34 +0000 [r985]  Tilghman Lesher <tlesher@digium.com>
+
+	* res/res_config_mysql.c, /: Merged revisions 982 via svnmerge from
+	  https://origsvn.digium.com/svn/asterisk-addons/trunk
+	  ................ r982 | tilghman | 2009-07-06 16:31:41 -0500
+	  (Mon, 06 Jul 2009) | 14 lines Recorded merge of revisions 981 via
+	  svnmerge from
+	  https://origsvn.digium.com/svn/asterisk-addons/branches/1.4
+	  ........ r981 | tilghman | 2009-07-06 16:30:13 -0500 (Mon, 06 Jul
+	  2009) | 7 lines Don't reset reconnect time, unless a reconnect
+	  really occurred. (closes issue #15375) Reported by: kowalma
+	  Patches: 20090628__issue15375.diff.txt uploaded by tilghman
+	  (license 14) Tested by: kowalma, jacco ........ ................
+
+2009-06-29 23:13 +0000 [r963]  Tilghman Lesher <tlesher@digium.com>
+
+	* apps/app_addon_sql_mysql.c, /, configs/mysql.conf.sample (added):
+	  Merged revisions 960 via svnmerge from
+	  https://origsvn.digium.com/svn/asterisk-addons/trunk
+	  ................ r960 | tilghman | 2009-06-29 17:33:29 -0500
+	  (Mon, 29 Jun 2009) | 15 lines Merged revisions 959 via svnmerge
+	  from https://origsvn.digium.com/svn/asterisk-addons/branches/1.4
+	  ........ r959 | tilghman | 2009-06-29 17:21:09 -0500 (Mon, 29 Jun
+	  2009) | 8 lines Autoclear resources in app MYSQL when the channel
+	  ends. (closes issue #14757) Reported by: alecdavis Patches:
+	  20090408__bug14757.diff.txt uploaded by tilghman (license 14)
+	  20090518__issue14757__trunk.diff.txt uploaded by tilghman
+	  (license 14) Tested by: alecdavis ........ ................
+
+2009-06-05 22:13 +0000 [r948]  Matthew Nicholson <mnicholson@digium.com>
+
+	* channels/chan_mobile.c, /: Merged revisions 947 via svnmerge from
+	  https://origsvn.digium.com/svn/asterisk-addons/trunk ........
+	  r947 | mnicholson | 2009-06-05 16:38:50 -0500 (Fri, 05 Jun 2009)
+	  | 8 lines Properly set the needring flag to stop ringing on
+	  headsets. (closes issue #15258) Reported by: ablackthorn Patches:
+	  ring-fix3.diff uploaded by mnicholson (license 96) Tested by:
+	  ablackthorn ........
+
+2009-06-03 23:52 +0000 [r944]  Matthew Nicholson <mnicholson@digium.com>
+
+	* channels/chan_mobile.c, /: Merged revisions 943 via svnmerge from
+	  https://origsvn.digium.com/svn/asterisk-addons/trunk ........
+	  r943 | mnicholson | 2009-06-03 18:49:04 -0500 (Wed, 03 Jun 2009)
+	  | 8 lines Fix sms support by setting the correct mode for
+	  receiving messages. (closes issue #15236) Reported by: Artem
+	  Patches: sms.patch uploaded by Artem (license 800) Tested by:
+	  Artem ........
+
+2009-05-27 21:54 +0000 [r936]  Tilghman Lesher <tlesher@digium.com>
+
+	* /, Makefile.rules: Merged revisions 933 via svnmerge from
+	  https://origsvn.digium.com/svn/asterisk-addons/trunk
+	  ................ r933 | tilghman | 2009-05-27 16:52:25 -0500
+	  (Wed, 27 May 2009) | 9 lines Merged revisions 932 via svnmerge
+	  from https://origsvn.digium.com/svn/asterisk-addons/branches/1.4
+	  ........ r932 | tilghman | 2009-05-27 16:51:27 -0500 (Wed, 27 May
+	  2009) | 2 lines DONT_OPTIMIZE is a Makefile directive and needs
+	  to be interpreted before the compiler starts. ........
+	  ................
+
+2009-05-27 17:19 +0000 [r928]  Matthew Nicholson <mnicholson@digium.com>
+
+	* channels/chan_mobile.c, /: Merged revisions 926-927 via svnmerge
+	  from https://origsvn.digium.com/svn/asterisk-addons/trunk
+	  ........ r926 | mnicholson | 2009-05-27 12:07:00 -0500 (Wed, 27
+	  May 2009) | 9 lines Lock the pvt structure in the mbl_read() and
+	  mbl_write() functions. (issue #15075) Reported by: hmld Patches:
+	  chan_mobile_v2.diff uploaded by zvision (license 798)
+	  chan_mobile_v2a.diff uploaded by hmld (license 777) Tested by:
+	  hmld, zvision, rseste ........ r927 | mnicholson | 2009-05-27
+	  12:13:44 -0500 (Wed, 27 May 2009) | 9 lines Handle read errors
+	  from the sco_socket by closing the socket conenction and waiting
+	  for another one before reading again. This is non standard
+	  behavior to accomidate certain Nokia handsets. (closes issue
+	  #15075) Reported by: hmld Patches: chan_mobile_v2.diff uploaded
+	  by zvision (license 798) chan_mobile_v2a.diff uploaded by hmld
+	  (license 777) Tested by: hmld, zvision, rseste ........
+
+2009-05-15 21:53 +0000 [r915]  Matthew Nicholson <mnicholson@digium.com>
+
+	* channels/chan_mobile.c, /: Merged revisions 900,903,906-907 via
+	  svnmerge from
+	  https://origsvn.digium.com/svn/asterisk-addons/trunk ........
+	  r900 | mnicholson | 2009-05-04 17:08:56 -0500 (Mon, 04 May 2009)
+	  | 7 lines Interact with bluetooth audio sockets directly instead
+	  of going through an internal pipe. (closes issue #14878) Reported
+	  by: jongerenchaos Tested by: jongerenchaos ........ r903 |
+	  mnicholson | 2009-05-08 10:40:01 -0500 (Fri, 08 May 2009) | 10
+	  lines Accept SCO sockets even if there is no pvt->owner. An owner
+	  may come later. (closes issue #15037) Reported by: hmld Tested
+	  by: mnicholson, hmld, jongerenchaos (closes issue #15042)
+	  Reported by: mvas78 Tested by: mvas78 ........ r906 | mnicholson
+	  | 2009-05-14 12:07:07 -0500 (Thu, 14 May 2009) | 6 lines Check
+	  the first character of a caller id string to see if it is the end
+	  of the string. (closes issue #15110) Reported by: nikkk ........
+	  r907 | mnicholson | 2009-05-14 12:09:33 -0500 (Thu, 14 May 2009)
+	  | 2 lines Handle empty numbers in CMGR messages. ........
+
+2009-05-14 19:21 +0000 [r914]  Tilghman Lesher <tlesher@digium.com>
+
+	* res/res_config_mysql.c, /: Merged revisions 910 via svnmerge from
+	  https://origsvn.digium.com/svn/asterisk-addons/trunk ........
+	  r910 | tilghman | 2009-05-14 14:16:53 -0500 (Thu, 14 May 2009) |
+	  7 lines Change database list to be rwlist locks, to avoid a
+	  potential deadlock between 2 readers. (closes issue #15023,
+	  related to issue #15090) Reported by: cristiandimache Patches:
+	  20090514__issue15090.diff.txt uploaded by tilghman (license 14)
+	  Tested by: cristiandimache ........
+
+2009-04-27 19:55 +0000 [r890-894]  Kevin P. Fleming <kpfleming@digium.com>
+
+	* aclocal.m4, /, configure, acinclude.m4: Merged revisions 887 via
+	  svnmerge from
+	  https://origsvn.digium.com/svn/asterisk-addons/trunk
+	  ................ r887 | kpfleming | 2009-04-27 14:49:45 -0500
+	  (Mon, 27 Apr 2009) | 11 lines Merged revisions 886 via svnmerge
+	  from https://origsvn.digium.com/svn/asterisk-addons/branches/1.4
+	  ........ r886 | kpfleming | 2009-04-27 14:48:31 -0500 (Mon, 27
+	  Apr 2009) | 5 lines Incorporate autoconf 2.63 related fixes to
+	  configure script (see revision 190721 of the asterisk repository
+	  for more details) ........ ................
+
+	* /: reflect revisions that have been merged
+
+	* /: set proper svnmerge property for this branch
+
+	* /: remove incorrect svnmerge properties from this branch
+
+	* /: remove incorrect svnmerge properties from this branch
+
+2009-04-01  Leif Madsen <lmadsen@digium.com>
+
+	* Create Asterisk-Addons 1.6.2.0-beta1
+
+2009-03-31 13:23 +0000 [r828-829]  Leif Madsen <lmadsen@digium.com>
+
+	* /: svnmerge init per Kevin.
+
+	* / (added): Create asterisk-addons 1.6.2 branch from
+	  asterisk-addons trunk.
+
+2009-03-26 21:42 +0000 [r824]  Matthew Nicholson <mnicholson@digium.com>
+
+	* channels/chan_mobile.c: fix incorrect reference to
+	  ast_string_copy()
+
+2009-03-18 21:53 +0000 [r815]  Matthew Nicholson <mnicholson@digium.com>
+
+	* channels/chan_mobile.c: Merged in changes from the chan_mobile
+	  refactor branch. With these changes the code should be easier to
+	  read and maintain, mobile connections should be more stable, and
+	  audio quality should be much better.
+
+2009-02-15 21:13 +0000 [r779]  Olle Johansson <oej@edvina.net>
+
+	* LICENSE (added): Adding a license file from Asterisk trunk with
+	  small edits. Todo: Check by kpfleming and mpetrone
+
+2009-01-26 23:32 +0000 [r749]  Tilghman Lesher <tlesher@digium.com>
+
+	* cdr/cdr_addon_mysql.c: When fields are missing, the resulting SQL
+	  is wrong. (closes issue #14317) Reported by: cheesegrits Patches:
+	  cdr_mysql.diff uploaded by cheesegrits (license 672)
+
+2009-01-21 19:06 +0000 [r725-730]  Matthew Nicholson <mnicholson@digium.com>
+
+	* configs/mobile.conf.sample: Fixed a typo in
+	  configs/mobile.conf.sample, found by mmichelson
+
+	* configs/mobile.conf.sample: Added an example for the new
+	  blackberry option in mobile.conf.sample
+
+	* channels/chan_mobile.c: Add a 'blackberry' option for devices in
+	  chan_mobile to support blackberry devices' non standard HFP
+	  behavior. (closes issue #13744) Reported by: ciaranm Tested by:
+	  ciaranm, davidste, mnicholson, jongerenchaos
+
+2009-01-08 21:55 +0000 [r719]  Tilghman Lesher <tlesher@digium.com>
+
+	* cdr/cdr_addon_mysql.c: Prevent a possible race between a reload
+	  event and logging a CDR
+
+2008-12-22 17:00 +0000 [r715]  Russell Bryant <russell@digium.com>
+
+	* channels/ooh323c/src/ooCmdChannel.c, /: Merged revisions 714 via
+	  svnmerge from
+	  https://origsvn.digium.com/svn/asterisk-addons/branches/1.4
+	  ........ r714 | russell | 2008-12-22 10:59:46 -0600 (Mon, 22 Dec
+	  2008) | 7 lines Fix a bogus pthread_mutex_init() (closes issue
+	  #14116) Reported by: junky Patches: mutex_init.diff uploaded by
+	  junky (license 177) ........
+
+2008-12-15 23:54 +0000 [r711]  Tilghman Lesher <tlesher@digium.com>
+
+	* res/res_config_mysql.c, channels/chan_ooh323.c,
+	  cdr/cdr_addon_mysql.c: Convert addons to use ast_str opacity,
+	  fixing some bugs along the way.
+
+2008-12-11 21:16 +0000 [r707]  Tilghman Lesher <tlesher@digium.com>
+
+	* configs/cdr_mysql.conf.sample, cdr/cdr_addon_mysql.c: Allow
+	  setting the MySQL character set on each connect. (closes issue
+	  #13775) Reported by: sergee Patches:
+	  cdr_mysql_charset-r679-v2.diff uploaded by sergee (license 138)
+
+2008-12-04 19:50 +0000 [r704]  Tilghman Lesher <tlesher@digium.com>
+
+	* UPGRADE.txt, configs/cdr_mysql.conf.sample,
+	  cdr/cdr_addon_mysql.c: Permit static values in the MySQL backend,
+	  just like cdr_adaptive_odbc. (closes issue #14009) Reported by:
+	  markwilkinson Patches: cdr_mysql-2.patch uploaded by
+	  markwilkinson (license 532)
+
