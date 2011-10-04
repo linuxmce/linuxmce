@@ -132,7 +132,7 @@ SetDefaults_720p () {
 	WizSet WindowHeight 720
 	WizSet Refresh '60'
 	WizSet VideoRefresh '60'
-	WizSet VideoOutput 'HDMI'
+	WizSet VideoOutput 'HDMI-0'
 	WizSet ResolutionSelected 7
 	WizSet AudioConnector 'Analog Stereo'
 	GetAudioMixerSettings
@@ -152,8 +152,8 @@ SetDefaults_720p () {
 	WizSet RemoteCmd "$RemoteCmd"
 	WizSet GamepadCmd "$GamepadCmd"
 	WizSet ExitCode 1 # by default, we fail (i.e. on Ctrl+Alt+Bkspc)
-	echo "1280x720 60 1280 720 HDMI" >/tmp/avwizard-resolution-defaults.txt
-	echo "1280x720 60 1280 720 HDMI" >/tmp/avwizard-resolution.txt
+	echo "720p 60 1280 720 HDMI-0" >/tmp/avwizard-resolution-defaults.txt
+	echo "720p 60 1280 720 HDMI-0" >/tmp/avwizard-resolution.txt
 }
 
 UpdateAudioSettings () {
@@ -391,6 +391,7 @@ Enable_Audio_Channels () {
 	amixer sset 'IEC958',0 unmute
 	amixer sset 'IEC958',1 unmute
 	amixer sset 'IEC958 Default PCM' unmute
+	amixer sset 'Beep',0 unmute
 	alsactl store
 	VerifyExitCode "Storing audio channel settings failed"
 }
