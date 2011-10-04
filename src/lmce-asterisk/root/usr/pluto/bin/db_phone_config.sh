@@ -307,7 +307,7 @@ AddSIPLine()
 	# create SIP peer
 	context="from-trunk"
 	LINESSQL="$LINESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,secret,host,port,context,qualify,nat,fromuser,fromdomain,callerid,allow) \
-	VALUES ('$username','$username','$password','dynamic','5060','$context','yes','yes','$username','$host','$username','alaw;ulaw');"
+	VALUES ('$username','$username','$password','$host','5060','$context','yes','yes','$username','$host','$username','alaw;ulaw');"
 }
 
 WorkTheLines()

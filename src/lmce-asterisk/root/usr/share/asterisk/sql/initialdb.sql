@@ -69,9 +69,9 @@ INSERT INTO ast_config (cat_metric, var_metric, commented, filename, category, v
 DELETE FROM ast_config WHERE filename = 'musiconhold.conf';
 INSERT INTO ast_config (cat_metric, var_metric, commented, filename, category, var_name, var_val) VALUES
 (0, 0, 0, 'musiconhold.conf', 'default', 'mode', 'files'),
-(0, 1, 0, 'musiconhold.conf', 'default', 'directory', '/var/lib/asterisk/mohmp3/'),
+(0, 1, 0, 'musiconhold.conf', 'default', 'directory', '/var/lib/asterisk/mohmp3'),
 (1, 0, 0, 'musiconhold.conf', 'none', 'mode', 'files'),
-(1, 1, 0, 'musiconhold.conf', 'none', 'directory', '/var/lib/asterisk/mohmp3/none/');
+(1, 1, 0, 'musiconhold.conf', 'none', 'directory', '/var/lib/asterisk/mohmp3/none');
 
 --
 -- Insert static voicemail.conf in  DB

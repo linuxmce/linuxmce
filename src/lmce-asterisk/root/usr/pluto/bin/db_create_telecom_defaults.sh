@@ -20,14 +20,14 @@ DB_telecom=pluto_telecom
 GetUserExtensions()
 {
 	UseDB
-	S="select PK_Users,Extension from Users where Extension like '30_'"
+	S="SELECT PK_Users,Extension from Users where Extension like '30_'"
 	R=$(RunSQL "$S")
 	for Row in $R; do
 		USERS[$(Field 1 "$Row")]=$(Field 2 "$Row")
 	done
 	
 	UseDB $DB_telecom
-	S="select EK_Users from UserRouting"
+	S="SELECT DISTINCT EK_Users FROM UserRouting"
 	R=$(RunSQL "$S")
 	for Row in $R; do
 		USERS[$(Field 1 "$Row")]="0"
@@ -37,7 +37,7 @@ GetUserExtensions()
 GetPhoneExtensions()
 {
 	UseDB
-	S="select FK_Device from Device_DeviceData where FK_DeviceData=31"
+	S="SELECT FK_Device FROM Device_DeviceData WHERE FK_DeviceData=31"
 	R=$(RunSQL "$S")
 	for Row in $R; do
 		PHONES="${PHONES}$(Field 1 "$Row"),"
@@ -54,12 +54,12 @@ GetLineExtensions()
 		LINES[$(Field 1 "$Row")]=$(Field 2 "$Row")
 	done
 
-	#get housemodes
-	#S="select ID from Line_HouseMode"
-	#R=$(RunSQL "$S")
-	#for Row in $R; do
-	#	LINES[$(Field 1 "$Row")]="0"
-	#done
+	UseDB $DB_telecom
+	S="SELECT DISTINCT ID FROM Line_HouseMode ORDER BY ID"
+	R=$(RunSQL "$S")
+	for Row in $R; do
+		LINES[$(Field 1 "$Row")]="0"
+	done
 }
 
 CreateUserRoutings()
@@ -79,7 +79,6 @@ CreateUserRoutings()
 	done
 	
 	SQL="$SQL COMMIT;"
-
 	UseDB $DB_telecom
 	R=$(RunSQL "$SQL")
 }
