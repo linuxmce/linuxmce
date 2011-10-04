@@ -1,4 +1,4 @@
-asterisk-addons (1.6.2.0-2-lmce) unstable; urgency=low
+asterisk-addons (1.6.2.0-2) unstable; urgency=low
 
   * Remove backports/etch.
 
