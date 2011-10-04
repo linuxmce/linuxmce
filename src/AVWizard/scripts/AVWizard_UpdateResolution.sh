@@ -38,7 +38,7 @@ case "$Param" in
 		bash -x "$BaseDir"/Xconfigure.sh --conffile "$XF86Config" --resolution "$DefaultResolution_Size" --output "$DefaultConnector" --tv-standard "$DefaultTVStandard" | tee-pluto /var/log/pluto/Xconfigure.log
 
 		sed -ri '/Option.*"Composite"/d' "$XF86Config"
-		WMTweaksFile="/root/.config/xfce4/mcs_settings/wmtweaks.xml"
+		WMTweaksFile="/root/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml"
 		cp "$WMTweaksFile"{,.orig}
 		sed -i '/Xfwm\/UseCompositing/ s/value="."/value="1"/g' "$WMTweaksFile"
 		
