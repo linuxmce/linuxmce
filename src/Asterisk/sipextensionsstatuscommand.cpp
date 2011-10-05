@@ -74,7 +74,7 @@ SipExtensionStatusCommand::handleResponse(Token &token){
 
 	string sStatus;
 
-	if(vectLines.size() > 4)
+	if(vectLines.size() > 3)
 	{
 		//skip the header and the footers
 		for(size_t i = 1; i < vectLines.size() - 2; ++i)
