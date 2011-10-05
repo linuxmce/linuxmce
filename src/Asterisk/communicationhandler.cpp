@@ -83,17 +83,36 @@ int CommunicationHandler::handleToken(Token* ptoken, bool& bIsResponseToken)
 }
 
 int CommunicationHandler::handleDial(Token* ptoken)
-{
+{	
+	// ASTERISK 1.6 samples for IAX2 (Foxi352)
 	//Event: Dial
 	//Privilege: call,all
-	//Source: SIP/203-b6712e68
-	//Destination: SIP/200-08206080
-	//CallerID: 203
-	//CallerIDName: 203
-	//SrcUniqueID: 1194865540.278
-	//DestUniqueID: 1194865540.279
+	//SubEvent: Begin
+	//Channel: IAX2/306-3010
+	//Destination: SIP/20408720-00000008
+	//CallerIDNum: 306
+	//CallerIDName: pl_554
+	//UniqueID: 1317825362.74
+	//DestUniqueID: 1317825362.75
+	//Dialstring: 20408720/39872039
 
-	string sSrcChannel = ptoken->getKey(TOKEN_SOURCE);
+	//Event: Dial
+	//Privilege: call,all
+	//SubEvent: End
+	//Channel: IAX2/306-8140
+	//UniqueID: 1317826125.78
+	//DialStatus: ANSWER
+
+	//Event: Hangup
+	//Privilege: call,all
+	//Channel: IAX2/306-14139
+	//Uniqueid: 1317826682.80
+	//CallerIDNum: 306
+	//CallerIDName: pl_554
+	//Cause: 16
+	//Cause-txt: Normal Clearing
+	
+	string sSrcChannel = ptoken->getKey(TOKEN_CHANNEL);
 	string sDestChannel = ptoken->getKey(TOKEN_DESTINATION);
 
 	string sSrcCallerID = ptoken->getKey(TOKEN_CALLERID);
