@@ -349,7 +349,11 @@ done
 setup_hosts_file
 /usr/pluto/bin/Update_StartupScrips.sh
 /usr/pluto/bin/Diskless_ExportsNFS.sh
-/usr/pluto/bin/sync_pluto2amp.pl
+#Only run this script if the Asterisk database is there
+if `mysql --batch --skip-column-names -e "SHOW DATABASES LIKE 'asterisk'" | grep asterisk`; then
+	/usr/pluto/bin/sync_pluto2amp.pl
+fi
+
 
 ## Add host to the list of hosts allowed to access /home samba share
 R=$(RunSQL "SELECT IPaddress FROM Device JOIN DeviceTemplate ON FK_DeviceTemplate = PK_DeviceTemplate WHERE FK_DeviceCategory = 8")
