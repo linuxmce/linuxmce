@@ -257,7 +257,9 @@ fi
 sed -i -e "s,\(SSLCertificateFile\s*\).*$,\1/etc/ssl/certs/server.crt,g" default-ssl
 sed -i -e "s,\(SSLCertificateKeyFile\s*\).*$,\1/etc/ssl/private/server.key,g" default-ssl
 sed -i -e "s,#\(SSLOptions\),\1,g" default-ssl
-sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ {/<\/Directory>/i\
+sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ {
+                /RedirectMatch/ d
+                /<\/Directory>/i\
                 RedirectMatch ^/$ /lmce-admin/
 }' default-ssl
 sed -i -e "s,\(VirtualHost\s*\*\),VirtualHost _default_:80,g" pluto
