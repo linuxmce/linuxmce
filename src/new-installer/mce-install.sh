@@ -198,19 +198,6 @@ c_singleNIC=1
 
 }
 
-asteriskNoloadModule () {
-	local module="$1"
-
-
-	if ! grep -q "^[^;]*noload => ${module}" /etc/asterisk/modules.conf
-	then
-		sed -e "s/\[global\]/noload => ${module}\n&/" -i /etc/asterisk/modules.conf
-	else
-		echo "module $module already disabled"
-	fi
-
-}
-
 AddGpgKeyToKeyring () {
 local gpg_key="$1"
 
@@ -765,31 +752,6 @@ fi
 
 }
 
-FixAsteriskConfig () {
-
-#ensure asterisk is installed before applying fix
-dpkg -s asterisk 1>/dev/null 2>&1
-
-if [ $? == 0 ]; then
-	asteriskNoloadModule app_directory_odbc.so
-	asteriskNoloadModule app_voicemail_odbc.so
-	asteriskNoloadModule app_voicemail_imap.so
-fi
-
-if [ -d /etc/asterisk/manager.d ]; then
-	echo '    [admin]
-		secret = adminsecret
-		deny=0.0.0.0/0.0.0.0
-		permit=127.0.0.1/255.255.255.0
-		read = system,call,log,verbose,command,agent,user
-		write = system,call,log,verbose,command,agent,user
-	'>/etc/asterisk/manager.d/admin.conf
-	chmod 777 /etc/asterisk/manager.d/admin.conf
-	VerifyExitCode "Set asterisk admin user used by MCE"
-fi
-
-}
-
 addAdditionalTTYStart () {
 if [[ "$DISTRO" = "lucid" ]] ; then
 	sed -i 's/23/235/' /etc/init/tty2.conf
@@ -1046,7 +1008,6 @@ Create_And_Config_Devices
 Configure_Network_Options
 UpdateUpgrade
 VideoDriverSetup
-FixAsteriskConfig
 addAdditionalTTYStart
 TempEMIFix
 CreateFirstBoot
@@ -1059,5 +1020,6 @@ StatsMessage "The log file for the install process is located at ${log_file}"
 StatsMessage "Reboot the system to start the final process"
 
 exit 0
+
 
 
