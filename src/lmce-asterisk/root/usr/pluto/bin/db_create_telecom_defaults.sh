@@ -72,8 +72,8 @@ CreateUserRoutings()
 			SQL="$SQL INSERT INTO UserRouting (EK_Users,EK_UserMode,IsPriorityCaller,StepOrder,Routing) VALUES ('$key','1','1','1','ring,$PHONES');"
 		
 			for ((i=2; i <= 4; i++)); do
-				SQL="$SQL INSERT INTO UserRouting (EK_Users,EK_UserMode,IsPriorityCaller,StepOrder,Routing) values ('$key','$i','0','1','voicemail,${USERS[$key]}');";
-				SQL="$SQL INSERT INTO UserRouting (EK_Users,EK_UserMode,IsPriorityCaller,StepOrder,Routing) values ('$key','$i','1','1','voicemail,${USERS[$key]}');";
+				SQL="$SQL INSERT INTO UserRouting (EK_Users,EK_UserMode,IsPriorityCaller,StepOrder,Routing) values ('$key','$i','0','1','voicemail,$key');";
+				SQL="$SQL INSERT INTO UserRouting (EK_Users,EK_UserMode,IsPriorityCaller,StepOrder,Routing) values ('$key','$i','1','1','voicemail,$key');";
 			done
 		fi
 	done
