@@ -42,6 +42,8 @@ $DB_STATEMENT->finish();
 
 $list .= "/tmp/pluto-default-voicemenu4.gsm";
 
+`/bin/mkdir -p /var/lib/asterisk/sounds/pluto`;
+`/bin/chmod 770 -R /var/lib/asterisk/sounds/pluto`;
 `/usr/bin/sox $list /var/lib/asterisk/sounds/pluto/pluto-default-voicemenu.gsm`;
 `/bin/mkdir -p /var/spool/asterisk/voicemail/default/`;
 `/bin/chown -R asterisk:www-data /var/spool/asterisk/voicemail/*`;
@@ -54,7 +56,6 @@ $list = "";
 print "Generating speech for invalid IVR entries.\n";
 &generate_voice("Your selection is not valid, please try again.","/tmp/invalid-entry.gsm");
 $list .= "/tmp/invalid-entry.gsm ";
-
 `/usr/bin/sox $list /var/lib/asterisk/sounds/pluto/invalid-entry.gsm`;
 
 # Clean up
@@ -95,11 +96,16 @@ sub generate_voice_festival()
 	system('text2wave /tmp/festival.txt -o /tmp/festival.wav -eval "(' . $defaultVoice . ')"');
 
 	# Resample and create permanent file
-	`/usr/bin/sox /tmp/festival.wav -r 8000 -c 1 $FILE resample -ql`;
+	`/usr/bin/sox /tmp/festival.wav -r 8000 -c1 $FILE`;
 
 	# Clean up the temporary files
 	unlink "/tmp/festival.wav";
 	unlink "/tmp/festival.txt";
 }
 
-`/usr/pluto/bin/create_pluto_dialplan.pl`;
+# Allow slow migration to new lmce-asterisk
+if (-e '/usr/pluto/bin/db_create_dialplan.sh') {
+	`/usr/pluto/bin/db_create_dialplan.sh`;
+} else {
+	`/usr/pluto/bin/create_pluto_dialplan.pl`;
+}
