@@ -31,7 +31,11 @@ void FileDetailsClass::clear(){
     genre.clear();
     releasedate.clear();
     studio.clear();
+    rating.clear();
+    synop.clear();
 
+
+    emit synopChanged();
     emit object_changed();
     emit synopChanged();
     emit titleImageChanged();
@@ -50,4 +54,6 @@ void FileDetailsClass::clear(){
     emit channelChanged();
     emit episodeChanged();
     emit studioChanged();
+    emit ratingChanged();
+
 }

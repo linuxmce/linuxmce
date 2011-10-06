@@ -158,6 +158,7 @@ Rectangle {
                         anchors.left: dcenowplaying.aspect == "wide"? imageholder.left : imageholder.right;
                         anchors.top:  dcenowplaying.aspect == "wide"? imageholder.bottom: imageholder.top
                         anchors.bottomMargin: dcenowplaying.aspect == "wide"? 20 : 20
+                        z:10
                         Column{
                             id:textcol
                             spacing: scaleY(1.5)
@@ -168,12 +169,12 @@ Rectangle {
                             Text {
                                 id: generaltitle
                                 width: parent.width
-                                text: qsTr("Title: ") + dcenowplaying.qs_mainTitle
+                                text:  dcenowplaying.qs_mainTitle
                                 font.family: "Droid Sans"
                                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                                 font.bold: true
                                 smooth: true
-                                font.pixelSize: scaleY(1.75)
+                                font.pixelSize: scaleY(3)
                                 visible:  dcenowplaying.qs_mainTitle =="" ? false: true
                             }
 
@@ -253,10 +254,10 @@ Rectangle {
                                 visible:  dcenowplaying.synop =="" ? false: true
 
                                 MouseArea{
-                                    anchors.fill: starring
+                                    anchors.fill: synopsis
                                     hoverEnabled: true
-                                    onEntered: { starring.elide = "ElideNone" ; }
-                                    onExited: {starring.elide = "ElideRight"; }
+                                    onEntered: { synopsis.elide = "ElideNone" ; }
+                                    onExited: {synopsis.elide = "ElideRight"; }
                                 }
                             }
 
@@ -277,6 +278,7 @@ Rectangle {
             height: childrenRect.height
             width: childrenRect.width
             anchors.horizontalCenter: parent.horizontalCenter
+            z:0
             Column{
                 height: childrenRect.height
                 width: childrenRect.width

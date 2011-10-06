@@ -13,9 +13,18 @@ folder_02.target= $$DESTDIR    #left blank so it will appear in the root
 DEFINES += for_desktop
 }
 
+for_droid{
+folder_01.source = qml/android/phone
+folder_01.target = $$DESTDIR/qml
+
+folder_02.source= img
+folder_02.target=     #left blank so it will appear in the root
+DEFINES += for_droid
+}
+
 for_freemantle{
 folder_01.source = qml/freemantle
-folder_01.target = qml
+folder_01.target = $$DESTDIR/qml
 
 folder_02.source= img
 folder_02.target=     #left blank so it will appear in the root
@@ -24,7 +33,7 @@ DEFINES += for_freemantle
 
 for_harmattan{
 folder_01.source = qml/harmattan
-folder_01.target = qml
+folder_01.target = $$DESTDIR/qml
 
 folder_02.source= img
 folder_02.target=     #left blank so it will appear in the root
@@ -48,7 +57,7 @@ macx{
 
 ANDROID{
 folder_01.source = qml/desktop
-folder_01.target = qml
+folder_01.target = $$DESTDIR/qml
 
 folder_02.source= img
 folder_02.target=     #left blank so it will appear in the root
@@ -311,6 +320,7 @@ OTHER_FILES= \
 
 RESOURCES += \
     skinData.qrc
+
 
 
 

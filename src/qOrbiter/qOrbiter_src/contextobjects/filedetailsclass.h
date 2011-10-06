@@ -144,6 +144,7 @@ Q_PROPERTY (QString aspect READ getImageAspect WRITE setImageAspect NOTIFY image
     QStringList composers;
     QString composerlist;
     QString releasedate;
+    QString rating;
 
 signals:
     void object_changed();
@@ -172,6 +173,7 @@ signals:
     void imageAspectChanged();
     void aspectHChanged();
     void aspectWChanged();
+    void ratingChanged();
 
     //audio signals
     void albumChanged();

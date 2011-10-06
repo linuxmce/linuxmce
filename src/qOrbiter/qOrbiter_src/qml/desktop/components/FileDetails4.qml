@@ -13,7 +13,12 @@ Rectangle {
     radius: 5
     border.color: style.highlight1
     border.width: 3
+    Image {
+        id: fdbg
+        source: "../../../img/icons/nowplaying.png"
+        anchors.fill: filedetailrect
 
+    }
 
     Timer{
         id:singleshot
@@ -65,6 +70,14 @@ Rectangle {
             height:filedetailsclass.aspect=="wide"?scaleY(40) : scaleY(55)
             source: ""
             smooth: true
+        }
+
+        Image {
+            id: npmask
+            source: "../../../img/icons/transparencymask.png"
+            anchors.fill: filedetailsimage
+            opacity: .5
+
         }
     }
 
@@ -172,7 +185,6 @@ Rectangle {
                     }
                 }
             }
-
     }
 
 

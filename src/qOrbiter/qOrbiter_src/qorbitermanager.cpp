@@ -41,6 +41,8 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
     buildType="/qml/desktop/";
 #elif defined (ANDROID)
     buildType = "/qml/android/";
+#elif defined (for_droid)
+    buildType = "/qml/android/phone/";
 #endif
 
     qorbiterUIwin = new QDeclarativeView; //initialize the declarative view to act upon its context
@@ -74,7 +76,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
     getcurrentSkins(skinList);
 
     //loading the style from the current set skin directory
-#ifdef ANDROID
+#ifdef ANDROID | for_droid
     QDeclarativeComponent skinData(qorbiterUIwin->engine(),QUrl("qrc:/qml/Style.qml"));
 #else
     QDeclarativeComponent skinData(qorbiterUIwin->engine(),QUrl::fromLocalFile(finalPath+"/Style.qml"));

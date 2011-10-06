@@ -1352,16 +1352,17 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
     if(qmlUI->backwards == true)
     {
         qDebug("Going Backwards!");
-        qmlUI->q_pk_attribute = "";
+        //qmlUI->q_pk_attribute = "";
 
         if(qmlUI->goBack.count() > 0)
         {
             qDebug("Greater than zero?");
-            s= qmlUI->goBack.last();
+
             qmlUI->goBack.removeLast();
+            s= qmlUI->goBack.last();
 
         }
-        else if (qmlUI->goBack.count() == 1)
+        else if (qmlUI->goBack.count() == 0)
         {
             qmlUI->initializeSortString();
         }
@@ -1369,7 +1370,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
     }
     else
     {
-/*
+
         //PROGRAM
         if (qmlUI->q_attributetype_sort == "12" && qmlUI->q_pk_attribute != "")
         {
@@ -1379,7 +1380,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
         {
             qmlUI->q_attributetype_sort = "13";
         }
-*/
+
         //PERSON
         if (qmlUI->q_attributetype_sort == "2" && qmlUI->q_pk_attribute == "")
         {
@@ -1992,14 +1993,11 @@ void DCE::qOrbiter::executeCommandGroup(int cmdGrp)
     string *pResponse;
     CMD_Execute_Command_Group execCommandGroup((long)qmlUI->iPK_Device, (long)2, cmdGrp);
 
-    if(SendCommand(execCommandGroup))
-    {
-        //qmlUI->setDceResponse(QString::fromStdString(pResponse));
-    }
-    else
-    {
-        qmlUI->checkConnection();
-    }
+   SendCommand(execCommandGroup);
+
+
+
+
 
 }
 
@@ -2208,7 +2206,18 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 }
                 else if(attributeType == "Title")
                 {
-                    qmlUI->filedetailsclass->setMediaTitle(attribute);
+                    if (qmlUI->filedetailsclass->mediatitle ==attribute )
+                    {
+                        qDebug("Episode");
+                        qmlUI->filedetailsclass->setEpisode(attribute);
+                    }
+                    else
+                    {
+                        qDebug("Setting title");
+                         qmlUI->filedetailsclass->setMediaTitle(attribute);
+                    }
+
+                    qDebug() << attribute;
                 }
                 else if(attributeType == "Channel")
                 {
@@ -2217,6 +2226,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 else if(attributeType == "Episode")
                 {
                     qmlUI->filedetailsclass->setEpisode(attribute);
+
                 }
                 else if(attributeType == "Performer")
                 {
@@ -2244,7 +2254,11 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 }
                 else if(attributeType == "Track")
                 {
-                    qmlUI->filedetailsclass->setStudio(attribute);
+                    qmlUI->filedetailsclass->setTrack(attribute);
+                }
+                else if(attributeType == "Rating")
+                {
+                    //qmlUI->filedetailsclass->setRating(attribute);
                 }
                 else
                 {

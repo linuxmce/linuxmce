@@ -125,6 +125,14 @@ Rectangle {
                             anchors.horizontalCenter: parent.horizontalCenter
                             smooth: true
                         }
+
+                        Image {
+                            id: npmask
+                            source: "../../../img/icons/transparencymask.png"
+                            anchors.fill: nowplayingimage
+                            opacity: .5
+
+                        }
                     }
 
                     BorderImage {
@@ -139,6 +147,8 @@ Rectangle {
 
 
                     }
+
+
 
                     Rectangle{
                         id:textrect

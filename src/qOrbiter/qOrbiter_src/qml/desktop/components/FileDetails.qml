@@ -13,6 +13,11 @@ Rectangle {
     radius: 5
     border.color: style.highlight1
     border.width: 3
+    Image {
+        id: fdbg
+        source: "../../../img/icons/nowplaying.png"
+        anchors.fill: filedetailrect
+    }
 
 
     Timer{
@@ -33,7 +38,7 @@ Rectangle {
         Text {
             id: text2
             anchors.horizontalCenter: parent.horizontalCenter
-            text: filedetailsclass.objecttitle
+               text: "Filename: " + filedetailsclass.filename
             font.pixelSize: 14
             font.bold: true
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -46,11 +51,10 @@ Rectangle {
         height:childrenRect.height
         width:childrenRect.width
         color: "transparent"
+        anchors.verticalCenter: parent.verticalCenter
 
-        anchors.top: titlerect.bottom
-        anchors.topMargin: scaleY(1)
         anchors.left: parent.left
-        anchors.leftMargin: scaleX(5)
+        anchors.leftMargin: filedetailsclass.aspect=="wide"? scaleX(2.6) : scaleX(15)
         BorderImage {
             id: borderimg
             horizontalTileMode: BorderImage.Repeat
@@ -67,36 +71,45 @@ Rectangle {
             source: "image://listprovider/filedetails/"+securityvideo.timestamp
             smooth: true
         }
+
+        Image {
+            id: npmask
+            source: "../../../img/icons/transparencymask.png"
+            anchors.fill: filedetailsimage
+            opacity: .5
+
+        }
     }
 
 
     Rectangle {
         id: rectangle1
-        anchors.top: filedetailsclass.aspect=="wide"? imageholder.bottom : titlerect.bottom
-        anchors.topMargin: scaleY(1)
-        width: filedetailsclass.aspect=="wide"? parent.width *.95 : parent.width *.45
-        height: filedetailsclass.aspect=="wide"? scaleY(20) : imageholder.height
+        anchors.verticalCenter: imageholder.verticalCenter
+        width:  filedetailsclass.aspect=="wide"? parent.width *.40 : parent.width *.45
+        height: scaleY(45)
         radius: 2.5
         clip:  true
         color: style.darkhighlight
         border.color: style.highlight1
-        anchors.left: filedetailsclass.aspect=="wide"? parent.left : imageholder.right
-        anchors.leftMargin: filedetailsclass.aspect=="wide"? scaleX(2) : scaleX(1)
+        anchors.left: imageholder.right
+        anchors.leftMargin: scaleX(.5)
 
         Flickable {
             anchors.fill: parent
             flickableDirection: Flickable.VerticalFlick
             contentWidth: parent.width
-            contentHeight: childrenRect.height
+            contentHeight: textcol.height
             id: contentFlick
             Column
             {
+                id:textcol
                 spacing:5
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: childrenRect.width
+                anchors.margins: scaleY(1)
+                width: parent.width
+                height: childrenRect.height
                 Text {
                     id: fnametext
-                    text: "Filename: " + filedetailsclass.filename
+
                     font.pixelSize: scaleY(2)
                     color:"aliceblue"
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -105,12 +118,58 @@ Rectangle {
 
                 Text {
                     id:  titletext
-                    text:"Title:" + filedetailsclass.objecttitle
-                    font.pixelSize: scaleY(2)
+                    text:filedetailsclass.mediatitle
+                    font.pixelSize: scaleY(3)
+                    font.bold: true
                     color:"aliceblue"
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                      width: rectangle1.width *.95
                 }
+                Text {
+                    id:  episode
+                    text:filedetailsclass.episode
+                    font.pixelSize: scaleY(2)
+                    font.bold: true
+                    color:"aliceblue"
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                     width: rectangle1.width *.95
+                }
+
+                Text {
+                    id: rating
+                   width: rectangle1.width *.95
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                    text: filedetailsclass.rating
+                    font.family: "Droid Sans"
+                    //  font.bold: true
+                    smooth: true
+                    font.pixelSize: scaleY(2)
+                     color:"aliceblue"
+                    elide: "ElideRight"
+                    visible:  filedetailsclass.rating =="" ? false: true
+                }
+
+                Text {
+                    id: starring
+                   width: rectangle1.width *.95
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                    text: qsTr("Starring: ") + filedetailsclass.performerlist
+                    font.family: "Droid Sans"
+                    //  font.bold: true
+                    smooth: true
+                    font.pixelSize: scaleY(2)
+                     color:"aliceblue"
+                    elide: "ElideRight"
+                    visible:  filedetailsclass.performerlist =="" ? false: true
+
+                    MouseArea{
+                        anchors.fill: starring
+                        hoverEnabled: true
+                        onEntered: { starring.elide = "ElideNone" ; }
+                        onExited: {starring.elide = "ElideRight"; }
+                    }
+                }
+
 
                 Text {
                     id: synopsistext
@@ -183,7 +242,7 @@ Rectangle {
 
     Row{
         id:controlrow
-        anchors.top: rectangle1.bottom
+        anchors.top:filedetailsclass.aspect=="wide"? imageholder.bottom: rectangle1.bottom
         anchors.topMargin: scaleY(1)
         anchors.horizontalCenter: filedetailsclass.aspect=="wide"? parent.horizontalCenter : rectangle1.horizontalCenter
         spacing: scaleY(.5)
