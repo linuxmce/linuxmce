@@ -240,8 +240,8 @@ WorkThePhones()
 WriteVoiceMailEntries()
 {
 	# adds configuration of current voicemail entry to SQL query buffer.
-	USERSSQL="$USERSSQL INSERT INTO $DB_Voicemail_Users_Table (mailbox,fullname,context,email) \
-		VALUES ('$Extension','$FirstName','default', '$ForwardEmail');"
+	USERSSQL="$USERSSQL INSERT INTO $DB_Voicemail_Users_Table (mailbox,password,fullname,context,email) \
+		VALUES ('$Extension','$Extension','$FirstName','default', '$ForwardEmail');"
 }
 
 WorkTheUsers()
@@ -267,8 +267,8 @@ WorkTheUsers()
 		fi
 	done
 	# adds configuration of Default voicemail entry to SQL query buffer.
-	USERSSQL="$USERSSQL INSERT INTO $DB_Voicemail_Users_Table (mailbox,fullname,context,attach,envelope) \
-		VALUES ('100','Default','default','no','no');"
+	USERSSQL="$USERSSQL INSERT INTO $DB_Voicemail_Users_Table (mailbox,password,fullname,context,attach,envelope) \
+		VALUES ('100','100','Default','default','no','no');"
 		
 	USERSSQL="$USERSSQL COMMIT;"
 	echo "Committing users to DB";echo
