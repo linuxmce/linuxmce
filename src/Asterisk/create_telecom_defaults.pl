@@ -1,5 +1,17 @@
 #!/usr/bin/perl
 
+
+# by foxi352 - september 2011:
+#
+# THIS HAS BEEN REPLACED BY A NEW SHELL SCRIPT.
+# THIS FILE STILL EXISTS WAITING FOR EVERY CALL TO IT TO BE REPLACED
+#
+# TODO: REPLACE EVERY CALL TO THIS FILE BY db_create_telecom_defaults.sh AND DELETE THIS PERL SCRIPT
+if (-e '/usr/pluto/bin/db_create_telecom_defaults.sh') {
+	`/usr/pluto/bin/db_create_telecom_defaults.sh`;
+	exit 0;
+} 
+
 #use diagnostics;
 use strict;
 use DBI;

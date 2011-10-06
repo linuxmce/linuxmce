@@ -1,5 +1,16 @@
 #!/usr/bin/perl
 
+# by foxi352 - september 2011:
+#
+# THIS HAS BEEN REPLACED BY A NEW SHELL SCRIPT.
+# THIS FILE STILL EXISTS WAITING FOR EVERY CALL TO IT TO BE REPLACED
+#
+# TODO: REPLACE EVERY CALL TO THIS FILE BY db_phone_config.sh AND DELETE THIS PERL SCRIPT
+if (-e '/usr/pluto/bin/db_phone_config.sh') {
+	`/usr/pluto/bin/db_phone_config.sh`;
+	exit 0;
+} 
+
 use strict;
 #use diagnostics;
 use DBI;
