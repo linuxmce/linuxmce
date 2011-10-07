@@ -154,17 +154,21 @@ ReplaceVars()
 PackageIsInstalled()
 {
 	local Pkg="$1"
+	local RootFs="${2:-/}"
 
 	[[ -z "$Pkg" ]] && return 1
 	#dpkg -s "$Pkg" 2>/dev/null | grep -q 'Status: install ok installed'
-	PackageStatus "$Pkg" | grep -q '^Status: install ok installed'
+	PackageStatus "$Pkg" "$RootFs" | grep -q '^Status: install ok installed'
 }
 
 PackageStatus()
 {
 	local Pkg="$1"
+	local RootFs="${2:-/}"
+
 	[[ -z "$Pkg" ]] && return 1
-	dpkg -s "$Pkg"
+	dpkg --root="$RootFs" -s "$Pkg" 2>/dev/null || return 1
+	return 0
 }
 
 InstalledPackages()
