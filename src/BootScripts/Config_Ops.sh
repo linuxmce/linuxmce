@@ -66,7 +66,7 @@ ConfEval()
 	#               "while ...; do ...; done <file" works the way we need
 	while read line; do
 		line="${line// }"
-		if [[ "$line" == "#"* || "$line" == "//"* || "$line" == ";*" ]]; then
+		if [[ "$line" == "#"* || "$line" == "//"* || "$line" == ";"* ]]; then
 			continue # comment line; skip
 		fi
 		eval "export $line" &>/dev/null
