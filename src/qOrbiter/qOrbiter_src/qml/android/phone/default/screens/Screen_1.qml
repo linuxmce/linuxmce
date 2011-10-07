@@ -1,5 +1,5 @@
 import QtQuick 1.0
-import ScreenSaverModule 1.0
+
 import "../components"
 
 Item
@@ -31,7 +31,7 @@ Rectangle {
         ColorAnimation  { from: "aliceblue" ; to: style.advanced_bg; duration: 5000 }
         }
 
-        ScreenSaverModule{}
+
     }
 
 Column{

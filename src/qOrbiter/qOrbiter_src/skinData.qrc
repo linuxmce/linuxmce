@@ -39,9 +39,10 @@
         <file alias="living-room.png">img/icons/mediatime.png</file>
         <file>img/icons/power.png</file>
     </qresource>
-    <qresource prefix="/qml">
-        <file alias="Style.qml">qml/desktop/droid/Style.qml</file>
-        <file alias="main.qml">qml/desktop/droid/main.qml</file>
-        <file alias="Splash.qml">qml/desktop/droid/Splash.qml</file>
+    <qresource prefix="/main">
+        <file alias="main.qml">qml/android/phone/default/main.qml</file>
+        <file alias="Style.qml">qml/android/phone/default/Style.qml</file>
     </qresource>
+    <qresource prefix="/screens"/>
+    <qresource prefix="/components"/>
 </RCC>

@@ -76,8 +76,10 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
     getcurrentSkins(skinList);
 
     //loading the style from the current set skin directory
-#ifdef ANDROID | for_droid
-    QDeclarativeComponent skinData(qorbiterUIwin->engine(),QUrl("qrc:/qml/Style.qml"));
+#ifdef ANDROID
+    QDeclarativeComponent skinData(qorbiterUIwin->engine(),QUrl("qrc:main/Style.qml"));
+#elif for_droid
+    QDeclarativeComponent skinData(qorbiterUIwin->engine(),QUrl("qrc:main/Style.qml"));
 #else
     QDeclarativeComponent skinData(qorbiterUIwin->engine(),QUrl::fromLocalFile(finalPath+"/Style.qml"));
 #endif
@@ -111,7 +113,9 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         //setting engine import path
         qorbiterUIwin->engine()->setBaseUrl(qmlPath+buildType);
 #ifdef ANDROID
-        qorbiterUIwin->setSource(QUrl("qrc:/qml/main.qml"));
+        qorbiterUIwin->setSource(QUrl("qrc:main/main.qml"));
+#elif for_droid
+        qorbiterUIwin->setSource(QUrl("qrc:main/main.qml"));
 #else
         qorbiterUIwin->setSource(QUrl::fromLocalFile(finalPath+"/main.qml"));
 #endif
@@ -196,11 +200,15 @@ void qorbiterManager::gotoQScreen(QString s)
 {
     //send the qmlview a request to go to a screen, needs error handling
 
+#ifdef for_droid
+
+#else
     QVariant screenname= s;
     QVariant returnedValue;
     QObject *item = qorbiterUIwin->rootObject();
     QMetaObject::invokeMethod(item, "screenchange",  Q_ARG(QVariant, screenname));
     currentScreen = s;
+#endif
 }
 
 //this block sets up the connection to linuxmce
