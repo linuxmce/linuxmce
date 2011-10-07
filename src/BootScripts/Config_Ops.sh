@@ -16,10 +16,10 @@ ConfLogError()
 {
 	local Value="$1" WhatItIs="$2"
 	{
-		echo "$LogSectionDelimiter"
+		builtin echo "$LogSectionDelimiter"
 		date -R
-		echo "Value: $Value"
-		echo "Type: $WhatItIs"
+		builtin echo "Value: $Value"
+		builtin echo "Type: $WhatItIs"
 		ls -l /usr/pluto/locks/
 		ps axf
 	} >>/var/log/ConfError.log
@@ -74,8 +74,7 @@ ConfEval()
 	Unlock "pluto.conf" "Config_Ops-ConfEval" nolog
 
 	# if there was no MySqlDBName in pluto.conf, set it to pluto_main
-	if [ -z "$MySqlDBName" ]
-	then
+	if [[ -z "$MySqlDBName" ]]; then
 		ConfSet MySqlDBName pluto_main
 	fi
 
@@ -102,7 +101,7 @@ ConfSet()
 	local Line="$Variable = $Value"
 	local EscLine="${Line//\\\\/\\\\}"
 	if ! grep "^$EscVariable.*=" /etc/pluto.conf &>/dev/null; then
-		echo "$Line" >> /etc/pluto.conf
+		builtin echo "$Line" >> /etc/pluto.conf
 	else
 		sed -i "s/^$EscVariable.*=.*$/$EscLine/g" /etc/pluto.conf
 	fi
@@ -145,7 +144,7 @@ ReplaceVars()
 	for i in $Vars; do
 		eval "VarValue=\"\$$i\""
 		VarValue=${VarValue//\//\\\/}
-		VarValue=$(echo "$VarValue" | sed 's/^ *//g; s/ *$//g')
+		VarValue=$(builtin echo "$VarValue" | sed 's/^ *//g; s/ *$//g')
 		SedCmd="s/%$i%/$VarValue/g"
 		[[ -z "$Commands" ]] && Commands="$SedCmd" || Commands="$Commands; s/%$i%/$VarValue/g"
 	done
@@ -184,26 +183,26 @@ InstalledPackages()
 			InstPkg="$InstPkg $(PackageStatus $Pkg | grep '^Package: ' | sed 's/^Package: //')"
 		fi
 	done
-	echo "${InstPkg# }"
+	builtin echo "${InstPkg# }"
 }
 
 ConfEval
 
 PLUTO_DB_CRED=""
-if [ "$MySqlHost" ] ; then PLUTO_DB_CRED="$PLUTO_DB_CRED -h $MySqlHost"; fi
-if [ "$MySqlPort" ] ; then PLUTO_DB_CRED="$PLUTO_DB_CRED -P $MySqlPort"; fi
-if [ "$MySqlUser" ] ; then PLUTO_DB_CRED="$PLUTO_DB_CRED -u $MySqlUser"; fi
-if [ "$MySqlPassword" ] ; then PLUTO_DB_CRED="$PLUTO_DB_CRED -p $MySqlPassword"; fi
-PLUTO_DB_CRED=`echo $PLUTO_DB_CRED` 
+if [[ -n "$MySqlHost" ]]; then PLUTO_DB_CRED="$PLUTO_DB_CRED -h $MySqlHost"; fi
+if [[ -n "$MySqlPort" ]]; then PLUTO_DB_CRED="$PLUTO_DB_CRED -P $MySqlPort"; fi
+if [[ -n "$MySqlUser" ]]; then PLUTO_DB_CRED="$PLUTO_DB_CRED -u $MySqlUser"; fi
+if [[ -n "$MySqlPassword" ]]; then PLUTO_DB_CRED="$PLUTO_DB_CRED -p $MySqlPassword"; fi
+PLUTO_DB_CRED=$(builtin echo $PLUTO_DB_CRED)
 export PLUTO_DB_CRED
 
 MYSQL_DB_CRED=""
-if [ "$MySqlHost" ] ; then MYSQL_DB_CRED="$MYSQL_DB_CRED -h$MySqlHost"; fi
-if [ "$MySqlPort" ] ; then MYSQL_DB_CRED="$MYSQL_DB_CRED -P$MySqlPort"; fi
-if [ "$MySqlUser" ] ; then MYSQL_DB_CRED="$MYSQL_DB_CRED -u$MySqlUser"; fi
-if [ "$MySqlPassword" ] ; then MYSQL_DB_CRED="$MYSQL_DB_CRED -p$MySqlPassword"; fi
+if [[ -n "$MySqlHost" ]]; then MYSQL_DB_CRED="$MYSQL_DB_CRED -h$MySqlHost"; fi
+if [[ -n "$MySqlPort" ]]; then MYSQL_DB_CRED="$MYSQL_DB_CRED -P$MySqlPort"; fi
+if [[ -n "$MySqlUser" ]]; then MYSQL_DB_CRED="$MYSQL_DB_CRED -u$MySqlUser"; fi
+if [[ -n "$MySqlPassword" ]]; then MYSQL_DB_CRED="$MYSQL_DB_CRED -p$MySqlPassword"; fi
 # Make sure to trim excess spaces 
-MYSQL_DB_CRED=`echo $MYSQL_DB_CRED` 
+MYSQL_DB_CRED=$(builtin echo $MYSQL_DB_CRED)
 export MYSQL_DB_CRED
 
 LMCE_DIRS="pictures audio documents videos games/MAME games/a2600 games/a2600p games/a5200 games/a5200p games/a7800 games/a7800p games/coleco games/intv games/sg1000 games/sms games/smspal games/nes games/famicom games/snes games/snespal games/genesis games/megadriv games/vectrex games/tg16 games/pce games/sgx games/apple2cp pvr"
@@ -216,16 +215,16 @@ if [[ -n "$Valgrind" ]]; then
 		export GLIBCXX_FORCE_NEW=1
 		export GLIBCPP_FORCE_NEW=1
 	else
-		echo "*** WARNING *** Valgrind not installed. Running programs the normal way ***"
+		builtin echo "*** WARNING *** Valgrind not installed. Running programs the normal way ***"
 	fi
 fi
 
-[[ -f /tmp/pluto.gdb ]] || echo "run" >/tmp/pluto.gdb
+[[ -f /tmp/pluto.gdb ]] || builtin echo "run" >/tmp/pluto.gdb
 if [[ -n "$GDB" ]]; then
 	if which gdb &>/dev/null; then
 		VGcmd="gdb --command=/tmp/pluto.gdb --args "
 	elif [[ -z "$VGcmd" ]]; then
-		echo "*** WARNING *** GDB not installed. Running programs the normal way ***"
+		builtin echo "*** WARNING *** GDB not installed. Running programs the normal way ***"
 	fi
 fi
 
