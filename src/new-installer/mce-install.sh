@@ -854,7 +854,7 @@ if [[ -f /etc/pluto/install_cleandb ]]; then
 
         PostInstPkg=(
         pluto-local-database pluto-media-database pluto-security-database pluto-system-database
-        pluto-telecom-database freepbx
+        pluto-telecom-database
         )
 
         for Pkg in "\${PostInstPkg[@]}"; do
