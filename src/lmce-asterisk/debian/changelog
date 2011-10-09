@@ -1,3 +1,9 @@
+lmce-asterisk (0+0.1.0-3) unstable; urgency=low
+
+  * Some dependency changes to let it install before pluto-asterisk
+
+ -- Serge Wagener <serge@linuxmce.org>  Mon, 08 Oct 2011 19:00:00 +0200
+
 lmce-asterisk (0+0.1.0-2) unstable; urgency=low
 
   * Added extra sounds, let pluto-asterisk live (for now)

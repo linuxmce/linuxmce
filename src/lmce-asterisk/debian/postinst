@@ -13,33 +13,20 @@ if [[ "$1" == configure ]]; then
 	# populate new db with our default values
 	mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm < /usr/share/asterisk/sql/initialdb.sql
 	
-	# create/update asterisk database schema
-	if [[ -z "$(RunSQL "USE asterisk; SHOW TABLES")" ]]; then
-		echo "DEBUG: Installing new db"
-		#mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm asterisk </var/lib/freepbx/SQL/newinstall.sql
-	else
-		echo "DEBUG: Upgrading db"
-		#mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm asterisk </var/lib/freepbx/SQL/upgradedb.sql
-	fi
-	
-	if [[ -f /etc/init.d/asterisk.dpkg-new ]] ;then
-		rm /etc/init.d/asterisk
-		mv /etc/init.d/asterisk.dpkg-new /etc/init.d/asterisk
-	fi
-
 	mkdir -p /var/{log,spool}/asterisk
 
 	adduser www-data asterisk
 
-	chown -R asterisk.asterisk {/usr/share,/var/{log,lib,spool},/etc}/asterisk
 	chmod -R ug+rw /etc/asterisk
 	
 	service apache2 restart
-	service asterisk restart
 	
-	/usr/pluto/bin/db_create_dialplan.sh || :
-	/usr/pluto/bin/db_phone_config.sh || :
-	
+	if [[ -e /usr/sbin/asterisk ]]; then
+		/usr/pluto/bin/db_create_dialplan.sh || :
+		/usr/pluto/bin/db_phone_config.sh || :
+		chown -R asterisk.asterisk {/usr/share,/var/{log,lib,spool},/etc}/asterisk
+		service asterisk restart
+	fi	
 	mkdir -p /var/lib/asterisk/mohmp3
 	chown -R www-data: /var/lib/asterisk/mohmp3
 fi
