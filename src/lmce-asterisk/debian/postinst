@@ -13,20 +13,21 @@ if [[ "$1" == configure ]]; then
 	# populate new db with our default values
 	mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm < /usr/share/asterisk/sql/initialdb.sql
 	
-	mkdir -p /var/{log,spool}/asterisk
-
-	adduser www-data asterisk
-
-	chmod -R ug+rw /etc/asterisk
-	
-	service apache2 restart
 	
 	if [[ -e /usr/sbin/asterisk ]]; then
+		adduser www-data asterisk
+		
+		mkdir -p /var/lib/asterisk/mohmp3
+		mkdir -p /var/{log,spool}/asterisk
+		
+		chmod -R ug+rw /etc/asterisk
+		chown -R www-data: /var/lib/asterisk/mohmp3
+		chown -R asterisk.asterisk {/usr/share,/var/{log,lib,spool},/etc}/asterisk
+
 		/usr/pluto/bin/db_create_dialplan.sh || :
 		/usr/pluto/bin/db_phone_config.sh || :
-		chown -R asterisk.asterisk {/usr/share,/var/{log,lib,spool},/etc}/asterisk
+
+		service apache2 restart
 		service asterisk restart
 	fi	
-	mkdir -p /var/lib/asterisk/mohmp3
-	chown -R www-data: /var/lib/asterisk/mohmp3
 fi
