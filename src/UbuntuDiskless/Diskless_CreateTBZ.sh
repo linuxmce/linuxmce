@@ -240,6 +240,29 @@ MD_Seamless_Compatability () {
 #Foxconn NT330i
 ######################
 StatsMessage "Setting up Foxconn NT330i compatability"
+if ! grep atl1c /etc/modules >/dev/null; then
+	echo atl1c>>/etc/modules
+	VerifyExitCode "insertion of atl1c to modules file failed"
+	#White space should not be present in the modules files, you MUST remove for the MD to boot properly
+	sed -i '/^$/d' /etc/modules
+	modprobe atl1c
+	VerifyExitCode "Modprobe for atl1c failed"
+fi
+
+if ! grep atl1c /etc/initramfs-tools-interactor/modules >/dev/null; then
+	echo atl1c>>/etc/initramfs-tools-interactor/modules
+	VerifyExitCode "insertion of atl1c to modules file failed"
+	#White space should not be present in the modules files, you MUST remove for the MD to boot properly
+	sed -i '/^$/d' /etc/initramfs-tools-interactor/modules
+fi
+
+if ! grep atl1c /etc/initramfs-tools/modules >/dev/null; then
+	echo atl1c>>/etc/initramfs-tools/modules
+	VerifyExitCode "insertion of atl1c to modules file failed"
+	#White space should not be present in the modules files, you MUST remove for the MD to boot properly
+	sed -i '/^$/d' /etc/initramfs-tools/modules
+fi
+
 if ! grep atl1c $TEMP_DIR/etc/modules >/dev/null; then
 	#White space should not be present in the modules files, you MUST remove for the MD to boot properly
 	sed -i '/^$/d' $TEMP_DIR/etc/modules
@@ -252,14 +275,7 @@ if ! grep atl1c $TEMP_DIR/etc/initramfs-tools/modules >/dev/null; then
 	echo atl1c>>$TEMP_DIR/etc/initramfs-tools/modules
 fi
 
-if ! grep atl1c /etc/initramfs-tools-interactor/modules >/dev/null; then
-	echo atl1c>>/etc/initramfs-tools-interactor/modules
-	VerifyExitCode "insertion of atl1c to modules file failed"
-	#White space should not be present in the modules files, you MUST remove for the MD to boot properly
-	sed -i '/^$/d' /etc/initramfs-tools-interactor/modules
-	modprobe atl1c
-	VerifyExitCode "Modprobe for atl1c failed"
-fi
+
 
 ######################
 #End Foxconn NT330i
@@ -544,3 +560,4 @@ StatsMessage "Diskless media director image setup completed without a detected i
 
 #Exit successfully
 exit 0
+
