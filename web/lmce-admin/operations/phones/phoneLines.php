@@ -256,16 +256,28 @@ function emergencySettings($dbADO,$astADO) {
 	while($row=$res->FetchRow()){
 		$PhoneLinesList[$row['id']]=$row['name'].' - '.$row['phonenumber'];
 	}
-	//$res=$dbADO->Execute("SELECT id, name, phonenumber FROM phonelines ORDER BY id");
+	$res=$dbADO->Execute("SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_DeviceData=296 AND FK_Device=11;");
+	if($row=$res->FetchRow()) {
+		$EmergencyNumbers=$row['IK_DeviceData'];
+	} else {
+		$EmergencyNumbers='';
+	}
+	$res=$dbADO->Execute("SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_DeviceData=297 AND FK_Device=11;");
+	if($row=$res->FetchRow()) {
+		$EmergencyLineID=$row['IK_DeviceData'];
+	} else {
+		$EmergencyLineID='1';
+	}
+
 	$out='<h3 align="center">'.translate('TEXT_EMERGENCY_NUMBERS_CONST').'</h3>
 	<form action="index.php" method="POST" name="phoneSettings">
 	<input type="hidden" name="section" value="phoneLines">
 	<input type="hidden" name="action" value="update">
 	<table align="center" cellpadding="3" cellspacing="0" bgcolor="#F0F3F8">
-	<tr><td><B>'.translate('TEXT_EMERGENCY_NUMBERS_CONST').'</B>:&nbsp<input type="text" name="emergencynumbers" value="112,911"></td></tr>
+	<tr><td><B>'.translate('TEXT_EMERGENCY_NUMBERS_CONST').'</B>:&nbsp<input type="text" name="emergencynumbers" value="'.$EmergencyNumbers.'"></td></tr>
 	<tr><td>'.translate('TEXT_EMERGENCY_HELP_CONST').'</td></tr>
 	<tr><td><B>'.translate('TEXT_EMERGENCY_TRUNK_CONST').'</B>:&nbsp<select name="emergencyline"  style="width: auto">';
-		foreach ($PhoneLinesList as $id => $name) $out.='<option value="'.$id.'" '.(('' == $id)?'selected="selected"':'').'>'.$name.'</option>';
+		foreach ($PhoneLinesList as $id => $name) $out.='<option value="'.$id.'" '.(($EmergencyLineID == $id)?'selected="selected"':'').'>'.$name.'</option>';
 		$out .='</select></td>
 	</tr>
 	<tr>
