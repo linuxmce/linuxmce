@@ -18,6 +18,9 @@ DEVICEDATA_PhoneType=29
 DEVICEDATA_PhoneNumber=31
 DEVICEDATA_Secret=128
 DEVICEDATA_ServerIp=260
+DEVICEDATA_EmergencyNumbers=296
+DEVICEDATA_EmergencyPhoneLine=297
+DEVICE_TelecomPlugIn=11
 DEVICECATEGORY_HARDPHONE=90
 DEVICECATEGORY_SOFTPHONE=91
 
@@ -312,17 +315,37 @@ AddSIPLine()
 
 WorkTheLines()
 {
+	#DEVICEDATA_EmergencyNumbers=296
+	#DEVICEDATA_EmergencyPhoneLine=297
+
+	# get emergency numbers
+	UseDB
+	SQL="SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_DeviceData=$DEVICEDATA_EmergencyNumbers AND FK_Device=$DEVICE_TelecomPlugIn;"
+	emergencynumbers=$(RunSQL "$SQL")
+	
+	# get default outgoing phoneline for emergency numbers
+	SQL="SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_DeviceData=$DEVICEDATA_EmergencyPhoneLine AND FK_Device=$DEVICE_TelecomPlugIn;"
+	emergencyphonelineID=$(RunSQL "$SQL")
+
+	# get phonenumber for outgoing phoneline ID
 	UseDB asterisk
+	SQL="SELECT protocol,phonenumber FROM $DB_PhoneLines_Table WHERE id=$emergencyphonelineID;"
+	R=$(RunSQL "$SQL")
+	emergencyphonelineProtocol=$(Field 1 "$R")
+	emergencyphonelineNumber=$(Field 2 "$R")
+
+	# remove everything before recreating	
 	LINESSQL="SET AUTOCOMMIT=0; START TRANSACTION;"
-	# remove everything before recreating
 	LINESSQL="$LINESSQL DELETE FROM $DB_astconfig_Table WHERE filename='sip.conf' AND category='general' AND var_name='register';"
 	LINESSQL="$LINESSQL DELETE FROM $DB_Extensions_Table WHERE context='ext-did';"
 	LINESSQL="$LINESSQL DELETE FROM $DB_Extensions_Table WHERE context='outbound-allroutes';"
 
-	# TODO: find a better way to insert emergency numbers as soon as new webinterface is finished
-	LINESSQL="$LINESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES \
-	('outbound-allroutes','112','1','Macro','dialout-trunk,SIP/20403987,\${EXTEN},,'), \
-	('outbound-allroutes','112','2','Macro','outisbusy,');"
+	for number in ${emergencynumbers//,/ }; do
+		LINESSQL="$LINESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES \
+		('outbound-allroutes','$number','1','Macro','dialout-trunk,$emergencyphonelineProtocol/$emergencyphonelineNumber,\${EXTEN},,'), \
+		('outbound-allroutes','$number','2','Macro','outisbusy,');"
+		echo "Routing emergency number: $number via $emergencyphonelineProtocol/$emergencyphonelineNumber"
+	done
 
 	SQL="SELECT id,protocol,name,host,username,password,prefix,enabled,phonenumber FROM $DB_PhoneLines_Table"
 	R=$(RunSQL "$SQL")

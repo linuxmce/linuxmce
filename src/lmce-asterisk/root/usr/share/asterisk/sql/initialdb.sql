@@ -78,8 +78,8 @@ INSERT INTO ast_config (cat_metric, var_metric, commented, filename, category, v
 --	
 DELETE FROM ast_config WHERE filename = 'voicemail.conf';
 INSERT INTO ast_config (cat_metric, var_metric, commented, filename, category, var_name, var_val) VALUES
-(0, 0, 0, 'voicemail.conf', 'general', 'format', 'wav49|gsm|wav'),
-(0, 1, 0, 'voicemail.conf', 'general', 'serveremail', 'asterisk'),
+(0, 0, 0, 'voicemail.conf', 'general', 'format', 'wav|gsm'),
+(0, 1, 0, 'voicemail.conf', 'general', 'serveremail', 'LinuxMCE@dcerouter'),
 (0, 2, 0, 'voicemail.conf', 'general', 'maxlogins', '3'),
 (0, 3, 0, 'voicemail.conf', 'general', 'emaildateformat', '%A, %B %d, %Y at %r'),
 (0, 4, 0, 'voicemail.conf', 'general', 'sendvoicemail', 'yes'),
