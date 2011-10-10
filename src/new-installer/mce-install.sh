@@ -629,6 +629,7 @@ RunSQL "$Q"
 
 ## Create the Core device and set it's description
 StatsMessage "Setting up your computer to act as a 'Core'"
+apt-get install lmce-asterisk -y
 Core_PK_Device=$(/usr/pluto/bin/CreateDevice -d $DEVICE_TEMPLATE_Core | tee /dev/stderr | tail -1)
 Q="UPDATE Device SET Description='CORE' WHERE PK_Device='$Core_PK_Device'"
 RunSQL "$Q"
@@ -854,7 +855,7 @@ if [[ -f /etc/pluto/install_cleandb ]]; then
 
         PostInstPkg=(
         pluto-local-database pluto-media-database pluto-security-database pluto-system-database
-        pluto-telecom-database
+        pluto-telecom-database lmce-asterisk
         )
 
         for Pkg in "\${PostInstPkg[@]}"; do
@@ -881,9 +882,7 @@ if [[ -f /etc/pluto/install_cleandb ]]; then
                 "UPDATE Device_DeviceData SET IK_DeviceData='LMCE_MD_u0804_i386'   WHERE IK_DeviceData='LMCE_MD_1_1'"
                 "UPDATE Device_DeviceData SET IK_DeviceData='0' WHERE FK_DeviceData='234'"
                 "UPDATE Device_DeviceData SET IK_DeviceData='i386' WHERE FK_DeviceData='112' AND IK_DeviceData='686'"
-                "USE asterisk; UPDATE incoming SET destination=CONCAT('custom-linuxmce', SUBSTR(destination, 18)) WHERE destination LIKE 'from-pluto-custom%'"
-                "DELETE FROM Software_Device WHERE 1"
-        )
+         )
 
         for Q in "\${Queries[@]}"; do
                 RunSQL "\$Q"
