@@ -71,7 +71,7 @@ void Convert(const string & sWavFile)
 		unsigned char mp3_buffer[MP3_SIZE];
 
 		lame_t lame = lame_init();
-		lame_set_in_samplerate(lame, 44100);
+		lame_set_mode(lame, MONO);
 		lame_set_VBR(lame, vbr_default);
 		lame_init_params(lame);
 
