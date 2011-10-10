@@ -11,4 +11,5 @@ $TEXT_MESSAGE_COMMAND_EMAIL_CONST='Email';
 $TEXT_MESSAGE_COMMAND_DELETE_CONST='Delete';
 $TEXT_CONFIRM_DELETE_CONST='Do you really want to delete';
 $TEXT_MSG_MESSAGE_DELETED_CONST='Voicemail message deleted';
+$TEXT_NO_MESSAGES_CONST='No messages for this mailbox';
 ?>
