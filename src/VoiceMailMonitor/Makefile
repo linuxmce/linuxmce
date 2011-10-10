@@ -5,7 +5,7 @@ CC=$(CXX)
 CPPFLAGS=-W -Wall -pipe -ggdb3
 CXXFLAGS=-I. -I.. -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql -I$(ROOT)/inotify
 LDFLAGS=-L$(ROOT)/lib -L/usr/local/lib
-LDLIBS= -lDCECommon -lmysqlclient_r -lPlutoUtils
+LDLIBS= -lDCECommon -lmysqlclient_r -lPlutoUtils -lmp3lame
 
 sources = Main.cpp \
 $(ROOT)/inotify/inotify_class.cpp \
