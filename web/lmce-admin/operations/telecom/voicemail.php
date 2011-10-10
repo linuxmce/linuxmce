@@ -87,6 +87,7 @@ function voicemail($output,$dbADO) {
 							height="20" 
 							alt="'.translate('TEXT_MESSAGE_COMMAND_FORWARD_CONST').'" 
 							title="'.translate('TEXT_MESSAGE_COMMAND_FORWARD_CONST').'"
+							onmouseover="this.style.cursor=\'pointer\';"
 							onclick="javascript:self.location=\'index.php?section=voicemail&action=fwd&id='.$key.(($_SESSION['Extension']=='100')?'&general=1':'').'\'"
 						>
 						&nbsp;&nbsp;
@@ -94,6 +95,7 @@ function voicemail($output,$dbADO) {
 							height="17" 
 							alt="'.translate('TEXT_MESSAGE_COMMAND_EMAIL_CONST').'" 
 							title="'.translate('TEXT_MESSAGE_COMMAND_EMAIL_CONST').'"
+							onmouseover="this.style.cursor=\'pointer\';"
  							onclick="javascript:self.location=\'index.php?section=voicemail&action=mail&id='.$key.(($_SESSION['Extension']=='100')?'&general=1':'').'\'"
 						>
 						&nbsp;&nbsp;
@@ -101,6 +103,7 @@ function voicemail($output,$dbADO) {
 							height="20" 
 							alt="'.translate('TEXT_MESSAGE_COMMAND_DELETE_CONST').'" 
 							title="'.translate('TEXT_MESSAGE_COMMAND_DELETE_CONST').'"
+							onmouseover="this.style.cursor=\'pointer\';"
 							onclick="javascript:if(confirm(\''.translate('TEXT_CONFIRM_DELETE_CONST').' '.$key.'\'))self.location=\'index.php?section=voicemail&action=del&id='.$key.(($_SESSION['Extension']=='100')?'&general=1':'').'\'"
 						>
 					</td>

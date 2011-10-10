@@ -1,12 +1,22 @@
 <?
 $TEXT_PHONE_LINES_CONST='Phone Lines';
+$TEXT_PREFIX_CONST='Prefix';
+$TEXT_CHANNELS_CONST='Chan.';
+$TEXT_PROTOCOL_CONST='Protocol';
 $TEXT_PHONE_NUMBER_CONST='Phone number';
 $TEXT_USERNAME_REQUIRED_CONST='Please provide an username';
+$TEXT_EMERGENCY_NUMBERS_CONST='Emergency numbers';
+$TEXT_EMERGENCY_HELP_CONST='Comma separated list of emergency numbers, like \'112,911\' which you will be able to dial without needing an outside prefix';
+$TEXT_EMERGENCY_TRUNK_CONST='Outgoing phoneline for emergency numbers';
 $TEXT_PASSWORD_REQUIRED_CONST='Please provide a password';
-$TEXT_CHOOSE_PROVIDER_CONST='Choose provider';
+$TEXT_PHONENUMBER_REQUIRED_CONST='Please provide a phonenumber';
+$TEXT_HOST_REQUIRED_CONST='Please provide a host';
+$TEXT_ADD_LINE_CONST='Add new phoneline';
 $TEXT_ADD_PHONE_LINE_ERROR_CONST='An error has occured.';
 $TEXT_ADD_PHONE_LINE_CMD_SENT_CONST='The command was sent.';
 $TEXT_PHONE_LINE_DELETED_CONST='The phone line was deleted.';
+$TEXT_PHONE_ROUTING_CONST='Incoming routing';
+$TEXT_PHONE_LINE_UPDATED_CONST='The phone line was updated.';
 $TEXT_DELETE_PHONE_LINE_CONFIRMATION_CONST='Are you sure you want to delete this line?';
 $TEXT_PHONE_LINE_USERNAME_NOTE_CONST='The username to access provider\'s service (not webpage), sometimes is the phone number';
 $TEXT_PHONE_LINE_PASSWORD_NOTE_CONST='The password to access provider\'s service (not webpage)';
