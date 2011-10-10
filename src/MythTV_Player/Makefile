@@ -9,7 +9,7 @@ CXXFLAGS = -Wall -fPIC -ggdb3 -fmessage-length=0
 CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
 LDFLAGS = -L$(ROOT)/lib
 EXTERNAL_LIBS_NAMES = mysqlclient_r pthread
-INTERNAL_LIBS_NAMES = SerializeClass DCECommon PlutoUtils
+INTERNAL_LIBS_NAMES = SerializeClass DCECommon PlutoUtils WindowUtils
 
 MYNAME = MythTV_Player
 VERSION = 2.0.0

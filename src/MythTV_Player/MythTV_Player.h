@@ -43,12 +43,29 @@ typedef enum  { MYTHSTATUS_DISCONNECTED=0, MYTHSTATUS_STARTUP, MYTHSTATUS_LIVETV
 //<-dceag-decl-b->
 namespace DCE
 {
+
+   class VideoFrameGeometry
+  {
+
+  public:
+    int m_iWidth;
+    int m_iHeight;
+
+      VideoFrameGeometry (int iWidth, int iHeight);
+      virtual ~ VideoFrameGeometry ();
+  };
+
 	class MythTV_Player : public MythTV_Player_Command
 	{
 //<-dceag-decl-e->
     private:
+	  map < int, VideoFrameGeometry * >m_mapVideoFrameGeometry;
         long unsigned int            m_iMythFrontendWindowId;
 	    pluto_pthread_mutex_t m_MythMutex;
+	    int m_iNowPlayingX;
+	    int m_iNowPlayingY;
+	    int m_iNowPlayingW;
+	    int m_iNowPlayingH;
 
         /** Private member variables */
 	DeviceData_Base *m_pDevice_MythTV_Plugin;
@@ -65,6 +82,10 @@ namespace DCE
 	bool UpdateMythSetting(DBHelper *pDBHelper_Myth, string value, string data, string host, bool bOnlyIfNotExisting=false);
 	void selectWindow();
         bool checkWindowName(long unsigned int window, string windowName);
+
+	VideoFrameGeometry* m_mapVideoFrameGeometry_Find(int key) { map<int, VideoFrameGeometry *>::iterator it = m_mapVideoFrameGeometry.find( key ); return it == m_mapVideoFrameGeometry.end() ? NULL : (*it).second; }
+	bool m_mapVideoFrameGeometry_Exists(int key) { map<int, VideoFrameGeometry *>::iterator it = m_mapVideoFrameGeometry.find( key ); return it != m_mapVideoFrameGeometry.end(); }
+
 
     protected:
         bool LaunchMythFrontend(bool bSelectWindow=true);

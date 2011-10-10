@@ -45,6 +45,9 @@ using namespace DCE;
 #include "DCE/DCEConfig.h"
 #include "Gen_Devices/AllScreens.h"
 
+#include "WindowUtils/WindowUtils.h"
+#include <math.h>
+
 #include <sstream>
 // #include <qsqldatabase.h>
 //
@@ -83,6 +86,18 @@ void* monitorMythThread(void* param)
 }
 
 // MythContext *gContext;
+
+/* VideoFrameGeometry Stuff */
+VideoFrameGeometry::VideoFrameGeometry (int iWidth, int iHeight)
+{
+  m_iWidth = iWidth;
+  m_iHeight = iHeight;
+}
+
+VideoFrameGeometry::~VideoFrameGeometry ()
+{
+  // Does nothing.
+}
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -180,6 +195,15 @@ MythTV_Player::~MythTV_Player()
 
 	if (m_pDisplay)
 		XCloseDisplay(m_pDisplay);
+
+	// Delete the video frame geometry map.
+	for (map < int, VideoFrameGeometry * >::iterator it =
+	       m_mapVideoFrameGeometry.begin ();
+	     it != m_mapVideoFrameGeometry.end (); it++)
+	  {
+	    delete (*it).second;
+	  }
+
 }
 
 bool MythTV_Player::LaunchMythFrontend(bool bSelectWindow)
@@ -317,7 +341,7 @@ string MythTV_Player::parseMediaURL(string sMediaURL)
   }
   else
   {
-    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Malformed Media URL: %s",sMediaURL);
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Malformed Media URL: %s",sMediaURL.c_str());
     return "";
   }
 
@@ -537,7 +561,20 @@ void MythTV_Player::pollMythStatus()
 		PLUTO_SAFETY_LOCK(mm2,m_MythMutex);
 		
 		string sResult = sendMythCommand("query location");
-
+		
+		WindowUtils::FindWindowMatching(m_pDisplay, "MythTV Frontend",m_iMythFrontendWindowId);
+		
+		if (m_iMythFrontendWindowId != 0)
+		  {
+		    WindowUtils::GetWindowGeometry(m_pDisplay,
+						   m_iMythFrontendWindowId,
+						   m_iNowPlayingX,
+						   m_iNowPlayingY,
+						   m_iNowPlayingW,
+						   m_iNowPlayingH);
+		    
+		  }	
+		
 		if(sResult.length())
 		{
 			// We're up and running, if there's an initial channel to tune to do it now
@@ -561,10 +598,10 @@ void MythTV_Player::pollMythStatus()
 					m_CurTime = StringUtils::TimeAsSeconds(vectResults[2]);
 					m_EndTime = StringUtils::TimeAsSeconds(vectResults[4]);
 					if( m_sChannel != vectResults[6] )
-					{
-						m_sChannel = vectResults[6];
-						EVENT_Playback_Started(m_sChannel,m_iStreamID,"","","ch_" + m_sChannel);
-					}
+					  {
+					    m_sChannel = vectResults[6];
+					    EVENT_Playback_Started(m_sChannel,m_iStreamID,"","","ch_" + m_sChannel);
+					  }
 					
 					// Have a 2 second "buffer" for switching between live and nonlive modes so we don't get 
 					// flapping.    Unfortunately it takes live TV so long to start up at times that we need
@@ -805,65 +842,56 @@ void MythTV_Player::CMD_Tune_to_channel(string sOptions,string sProgramID,string
 void MythTV_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,int iWidth,int iHeight,char **pData,int *iData_Size,string *sFormat,string &sCMD_Result,Message *pMessage)
 //<-dceag-c84-e->
 {
-	PLUTO_SAFETY_LOCK(mm,m_MythMutex);
-	FileUtils::DelFile("/tmp/MythScreenshot.png");
-	FileUtils::DelFile("/tmp/MythScreenshot.jpg");
-	sendMythCommand("play save screenshot /tmp/MythScreenshot.png");
-	time_t tTimeout = time(NULL) + 6;  // wait 6 seconds for it
-	while(tTimeout>time(NULL))
+
+  PLUTO_SAFETY_LOCK(mm,m_MythMutex);
+
+  if (m_iMythFrontendWindowId != 0)
+    {
+      string sPath, screenName, sGeometry;
+      stringstream ssWidth, ssHeight;
+      
+      ssWidth << iWidth;
+      ssHeight << iHeight;
+      sGeometry = ssWidth.str () + "x" + ssHeight.str ();
+      
+      if (m_mapVideoFrameGeometry_Exists(pMessage->m_dwPK_Device_From))
 	{
-		if( FileUtils::FileExists("/tmp/MythScreenshot.png") )
-		{
-			system("convert -sample 600x600 /tmp/MythScreenshot.png /tmp/MythScreenshot.jpg");
-			size_t size;
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "MythTV_Player::CMD_Get_Video_Frame got %d",size);
-			*pData = FileUtils::ReadFileIntoBuffer("/tmp/MythScreenshot.jpg",size);
-			*iData_Size = size;
-			return;
-		}
+	  VideoFrameGeometry *vfg = m_mapVideoFrameGeometry_Find(pMessage->m_dwPK_Device_From);
+	  delete vfg;
+	  m_mapVideoFrameGeometry.erase(pMessage->m_dwPK_Device_From);
 	}
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "MythTV_Player::CMD_Get_Video_Frame never got it");
-	*pData = NULL;
-	*iData_Size = 0;
+      
+      m_mapVideoFrameGeometry[pMessage->m_dwPK_Device_From] =
+	new VideoFrameGeometry (iWidth, iHeight);
+      
+      // Use alternate code to display OSD
+      sPath = "/tmp/";
+      screenName = "OSD";
+      
+      // use ImageMagick. Awfully slow!
+      string cmd =
+	"scrot -u -t " + sGeometry + " " + sPath + screenName + ".jpg";
+      system (cmd.c_str ());
+      cmd =
+	"mv " + sPath + screenName + "-thumb.jpg " + sPath + screenName +
+	".jpg";
+      system (cmd.c_str ());
+      *sFormat = "2";		// JPEG.
 
-	//     if ( m_pMythTV == NULL || m_pMythTV->GetState() != kState_WatchingLiveTV )
-//     {
-//         LoggerWrapper::GetInstance()->Write(LV_STATUS, "Invalid state.");
-//         EVENT_Error_Occured("Not playing TV at this time. Can't take a screen shot");
-//         return;
-//     }
-//
-//     VideoFrame *grabbedFrame;
-//     VideoFrame actualFrame;
-//
-//     grabbedFrame = m_pMythTV->activenvp->GetCurrentFrame(actualFrame.width, actualFrame.height);
-//
-//     actualFrame.bpp = grabbedFrame->bpp;
-//     actualFrame.size = grabbedFrame->size;
-//     actualFrame.frameNumber = grabbedFrame->frameNumber;
-//     actualFrame.timecode = grabbedFrame->timecode;
-//     actualFrame.codec = grabbedFrame->codec;
-//     actualFrame.interlaced_frame = grabbedFrame->interlaced_frame;
-//     actualFrame.top_field_first = grabbedFrame->top_field_first;
-//
-//     actualFrame.buf = new unsigned char[actualFrame.size];
-//     memcpy(actualFrame.buf, grabbedFrame->buf, actualFrame.size);
-//
-//     m_pMythTV->activenvp->ReleaseCurrentFrame(grabbedFrame);
-//
-//     LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got frame size %dx%d (%d) %d)",
-//                 actualFrame.width, actualFrame.height,
-//                 actualFrame.size, actualFrame.codec);
-//
-//     delete actualFrame.buf;
-//     int x, y, nWidth, nHeight;
-//     m_pMythTV->activenvp->getVideoOutput()->GetDrawSize(x, y, nWidth, nHeight);
-//
-//     LoggerWrapper::GetInstance()->Write(LV_STATUS, "DrawSize: %dx%d %dx%d", x, y, nWidth, nHeight);
+      size_t size;
 
-//     sCMD_Result = m_pMythTV->GetScreenFrame(sDisable_Aspect_Lock, iWidth, iHeight, pData, iData_Size, sFormat);
+      *pData =
+	FileUtils::ReadFileIntoBuffer (sPath + screenName + ".jpg", size);
+      
+      *iData_Size = size;
+      
+      FileUtils::DelFile (sPath + screenName + ".png");
+      FileUtils::DelFile (sPath + screenName + ".jpg");
+      
+      return;
+
+    }
 }
-
 
 //<-dceag-c129-b->
 
@@ -1448,7 +1476,13 @@ void MythTV_Player::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string
 		break;	
 	case BUTTON_9_CONST:
 		sendMythCommand("key 9");
-		break;	
+		break;
+	case BUTTON_d_CONST:
+	  sendMythCommand("key d");
+	  break;
+	case BUTTON_i_CONST:
+	  sendMythCommand("key i");
+	  break;
 	case BUTTON_Back_CONST:
 		sendMythCommand("key back");
 		sendMythCommand("key backspace");
@@ -1471,6 +1505,24 @@ void MythTV_Player::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string
 void MythTV_Player::CMD_Simulate_Mouse_Click(int iPosition_X,int iPosition_Y,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c29-e->
 {
+
+  PLUTO_SAFETY_LOCK(mm,m_MythMutex);
+  
+  if (m_iMythFrontendWindowId != 0)
+    {
+      VideoFrameGeometry *vfg =
+	m_mapVideoFrameGeometry[pMessage->m_dwPK_Device_From];
+      double iScaleW = (double) m_iNowPlayingW / (double) vfg->m_iWidth;
+      double iScaleH = (double) m_iNowPlayingH / (double) vfg->m_iHeight;
+      int iScaledX = floor ((double) iPosition_X * iScaleW);
+      int iScaledY = floor ((double) iPosition_Y * iScaleH);
+      
+      cout << "iScaleW = " << iScaleW << " : iScaleH = " << iScaleH << endl;
+      cout << "iScaledX = " << iScaledX << " : iScaledY = " << iScaledY << endl;
+      
+      WindowUtils::SendClickToWindow (m_pDisplay, m_iMythFrontendWindowId, 1, iScaledX,
+				      iScaledY);
+    }
 }
 //<-dceag-c81-b->
 
