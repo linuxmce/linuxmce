@@ -350,22 +350,6 @@ CREATE TABLE IF NOT EXISTS `phonelines` (
 );
 
 --
--- Table for meetme rooms
---
-CREATE TABLE IF NOT EXISTS `meetme` (
-`confno` char(80) NOT NULL default '0',
-`starttime` datetime NOT NULL default '0000-00-00 00:00:00',
-`endtime` datetime NOT NULL default '2099-12-31 23:59:59' ,
-`pin` char(20) default NULL,
-`opts` char(100) default NULL,
-`adminpin` char(20) default NULL,
-`adminopts` char(100) default NULL,
-`members` int(11) NOT NULL default '0',
-`maxusers` int(11) NOT NULL default '0',
-PRIMARY KEY (`confno`,`starttime`)
-);
-
---
 -- Create view for LMCE phones in asterisk DB
 --
 CREATE OR REPLACE ALGORITHM = MERGE

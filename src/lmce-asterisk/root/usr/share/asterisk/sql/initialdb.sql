@@ -94,17 +94,6 @@ INSERT INTO ast_config (cat_metric, var_metric, commented, filename, category, v
 (1, 4, 0, 'voicemail.conf', 'zonemessages', 'european', 'Europe/Copenhagen|''vm-received'' a d b ''digits/at'' HM');
 
 --
--- Insert static meetme.conf in  DB
---	
-DELETE FROM ast_config WHERE filename = 'meetme.conf';
-INSERT INTO ast_config (cat_metric, var_metric, commented, filename, category, var_name, var_val) VALUES
-(0, 0, 0, 'meetme.conf', 'general', 'audiobuffers', '32');
-
-DELETE FROM meetme;
-INSERT INTO meetme (confno,pin,adminpin,members,starttime,endtime) 
-VALUES ("997","","","0","2010-01-01 00:01","2999-12-31 23:59");
-
---
 -- Insert realtime extensions in  DB
 --	
 

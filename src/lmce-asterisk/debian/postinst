@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 
 if [[ "$1" == configure ]]; then
 	. /usr/pluto/bin/SQL_Ops.sh

@@ -173,9 +173,6 @@ if [ "$AutostartCore" -eq "1" ] ; then
 	StartDaemon  "Start PNP MD Plugin" "/usr/pluto/bin/Start_NewMD_interactor.sh" "NewMDinteractor"
 	StartDaemon  "Start Voicemail Monitor" "/usr/pluto/bin/VoiceMailMonitor.sh" "VoiceMailMonitor"
          
-	# Verify zaptel-modules is installed, and install it otherwise. 
-	dpkg -l zaptel-modules-`uname -r` || apt-get install zaptel-modules-`uname -r` || echo "***ERROR*** INSTALLING ZAPTEL MODULE - TELECOM TRANSFER/MEETME/CONFERENCING NOT WORKING****">>/var/log/pluto/DCERouter.log 
-	modprobe ztdummy 
 fi
 if [ "$AutostartMedia" -eq "1" ] ; then
         # Load MD modules early in case they are needed for something to work later on
