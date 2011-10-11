@@ -10,7 +10,7 @@ rm -rf /root/.mythtv || :
 ln -s /etc/mythtv /root/.mythtv && touch /root/.mythtv/ignoregroup || :
 
 #Alter mythconverg.storagegroup - the default VARCHAR(32) is too short for some LMCE drive names to fully be displayed
-Q="ALTER TABLE storagegroup MODIFY groupname VARCHAR(64)"
+Q="ALTER TABLE storagegroup MODIFY dirname VARCHAR(203) NOT NULL, MODIFY groupname VARCHAR(64) NOT NULL"
 UseDB "mythconverg"
 RunSQL "$Q"
 
