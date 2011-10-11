@@ -1,8 +1,14 @@
+lmce-asterisk (0+0.2.0-3) unstable; urgency=low
+
+  * Adding files from obsolete asterisk-pluto package to this package
+
+ -- Serge Wagener <serge@linuxmce.org>  Tue, 11 Oct 2011 10:30:00 +0200
+
 lmce-asterisk (0+0.2.0-2) unstable; urgency=low
 
   * Only configure package if asterisk db already existed to not break mce-install
 
- -- Serge Wagener <serge@linuxmce.org>  Mon, 10 Oct 2011 21:00:00 +0200
+ -- Serge Wagener <serge@linuxmce.org>  Tue, 11 Oct 2011 08:00:00 +0200
 
 lmce-asterisk (0+0.2.0-1) unstable; urgency=low
 
