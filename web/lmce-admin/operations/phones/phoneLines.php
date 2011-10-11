@@ -17,7 +17,7 @@ function phoneLines($output,$astADO,$dbADO) {
 	
 	/* @var $astADO ADOConnection */
 	/* @var $rs ADORecordSet */
-	$out='';
+	$out=setLeftMenu($dbADO);
 	$action = (isset($_REQUEST['action']) && $_REQUEST['action']!='')?cleanString($_REQUEST['action']):'form';
 	$installationID = (int)@$_SESSION['installationID'];
 	$editedID=@$_REQUEST['eid'];
@@ -118,7 +118,7 @@ function phoneLines($output,$astADO,$dbADO) {
 		}
 		
 		// add new phoneline entry and reload form in edit mode
-		if(isset($_POST['action']) && $_POST['action'] == 'add') {
+		if(isset($action) && $action == 'add') {
 			$SQL="INSERT INTO phonelines (enabled,protocol) VALUES ('no','SIP')";
 			$res=$astADO->Execute($SQL);
 			$res=$astADO->Execute('SELECT LAST_INSERT_ID();');
@@ -129,7 +129,27 @@ function phoneLines($output,$astADO,$dbADO) {
 			exit();
 		}
 
-		if(isset($_POST['update_settings'])){
+		if(isset($action) && $action == 'update_emergency'){
+			$val_296=$_POST['value_296'];
+			$val_297=$_POST['value_297'];
+			$telecomPlugin=getTelecomPlugin($installationID,$dbADO);
+			if(is_null($telecomPlugin)){
+				header('Location: index.php?section=phoneLines&error='.translate('TEXT_ERROR_TELECOM_PLUGIN_NOT_FOUND_CONST'));
+				exit();
+			}
+			
+			$query='UPDATE Device_DeviceData SET IK_DeviceData=? WHERE FK_Device=? AND FK_DeviceData=?';
+			
+			$dbADO->Execute($query,array($val_296,$telecomPlugin,$GLOBALS['TelecomEmergencyNumbers']));
+			$dbADO->Execute($query,array($val_297,$telecomPlugin,$GLOBALS['TelecomEmergencyLine']));
+			
+			$cmd='sudo -u root /usr/pluto/bin/db_phone_config.sh lines';
+			exec_batch_command($cmd,1);
+			header('Location: index.php?section=phoneLines&msg='.translate('TEXT_EMERGENCY_SETTINGS_UPDATED_CONST'));
+			exit();
+		}
+
+		if(isset($action) && $action == 'update_settings'){
 			$val_141=(isset($_POST['ckb_141']))?$_POST['value_141']:0;
 			$val_142=(isset($_POST['ckb_141']) && isset($_POST['ckb_142']))?$_POST['value_142']:-1;
 			$val_143=$_POST['value_143'];
@@ -145,6 +165,8 @@ function phoneLines($output,$astADO,$dbADO) {
 			$dbADO->Execute($query,array($val_142,$telecomPlugin,$GLOBALS['TelecomPrependDigit']));
 			$dbADO->Execute($query,array($val_143,$telecomPlugin,$GLOBALS['TelecomLocalNumberLength']));
 			
+			$cmd='sudo -u root /usr/pluto/bin/db_phone_config.sh lines';
+			exec_batch_command($cmd,1);
 			header('Location: index.php?section=phoneLines&msg='.translate('TEXT_PHONE_SETTINGS_UPDATED_CONST'));
 			exit();
 		}
@@ -252,38 +274,35 @@ function phoneLinesLocalSettings($dbADO){
 }
 
 function emergencySettings($dbADO,$astADO) {
+	$installationID = (int)@$_SESSION['installationID'];	
+	$telecomPlugin=getTelecomPlugin($installationID,$dbADO);
+	if(is_null($telecomPlugin)){
+		return '<span class="err">'.translate('TEXT_ERROR_TELECOM_PLUGIN_NOT_FOUND_CONST').'</span>';
+	}
+	
+	$ddArray=getAssocArray('Device_DeviceData','FK_DeviceData','IK_DeviceData',$dbADO,'WHERE FK_Device='.$telecomPlugin);
+
 	$res=$astADO->Execute("SELECT id, name, phonenumber FROM phonelines ORDER BY id");
 	while($row=$res->FetchRow()){
 		$PhoneLinesList[$row['id']]=$row['name'].' - '.$row['phonenumber'];
 	}
-	$res=$dbADO->Execute("SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_DeviceData=296 AND FK_Device=11;");
-	if($row=$res->FetchRow()) {
-		$EmergencyNumbers=$row['IK_DeviceData'];
-	} else {
-		$EmergencyNumbers='';
-	}
-	$res=$dbADO->Execute("SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_DeviceData=297 AND FK_Device=11;");
-	if($row=$res->FetchRow()) {
-		$EmergencyLineID=$row['IK_DeviceData'];
-	} else {
-		$EmergencyLineID='1';
-	}
 
-	$out='<h3 align="center">'.translate('TEXT_EMERGENCY_NUMBERS_CONST').'</h3>
-	<form action="index.php" method="POST" name="phoneSettings">
+	$out='<h3 align="center">'.translate('TEXT_DIAL_EMERGENCY_NUMBERS_CONST').'</h3>
+	<form action="index.php" method="POST" name="emergencySettings">
 	<input type="hidden" name="section" value="phoneLines">
-	<input type="hidden" name="action" value="update">
+	<input type="hidden" name="action" value="update_emergency">
 	<table align="center" cellpadding="3" cellspacing="0" bgcolor="#F0F3F8">
-	<tr><td><B>'.translate('TEXT_EMERGENCY_NUMBERS_CONST').'</B>:&nbsp<input type="text" name="emergencynumbers" value="'.$EmergencyNumbers.'"></td></tr>
-	<tr><td>'.translate('TEXT_EMERGENCY_HELP_CONST').'</td></tr>
-	<tr><td><B>'.translate('TEXT_EMERGENCY_TRUNK_CONST').'</B>:&nbsp<select name="emergencyline"  style="width: auto">';
-		foreach ($PhoneLinesList as $id => $name) $out.='<option value="'.$id.'" '.(($EmergencyLineID == $id)?'selected="selected"':'').'>'.$name.'</option>';
+	<tr><td><B>'.translate('TEXT_DIAL_EMERGENCY_NUMBERS_CONST').'</B>:&nbsp<input type="text" name="value_296" value="'.@$ddArray['296'].'">
+	&nbsp;<B>'.translate('TEXT_EMERGENCY_TRUNK_CONST').'</B>:&nbsp<select name="value_297"  style="width: auto">';
+		foreach ($PhoneLinesList as $id => $name) $out.='<option value="'.$id.'" '.((@$ddArray['297'] == $id)?'selected="selected"':'').'>'.$name.'</option>';
 		$out .='</select></td>
 	</tr>
+	<tr><td>'.translate('TEXT_EMERGENCY_HELP_CONST').'</td></tr>
 	<tr>
-		<td align="center"><input type="submit" class="button" name="update_settings" value="'.translate('TEXT_UPDATE_CONST').'"> <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'"></td>
+		<td align="center"><input type="submit" class="button" name="update_emergency" value="'.translate('TEXT_UPDATE_CONST').'"> <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'"></td>
 	</tr>	
-	</table>';
+	</table>
+	</form>';
 	
 	return $out;
 }

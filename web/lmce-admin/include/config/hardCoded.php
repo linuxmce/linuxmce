@@ -206,6 +206,8 @@
 	$GLOBALS['TelecomLocalPrefix']=141;			// Telecom Local Prefix
 	$GLOBALS['TelecomPrependDigit']=142;		// Telecom Prepend Digit
 	$GLOBALS['TelecomLocalNumberLength']=143;	// Telecom Local Number Length
+	$GLOBALS['TelecomEmergencyNumbers']=296;	// Telecom emergency numbers
+	$GLOBALS['TelecomEmergencyLine']=297;		// Telecom outgoing phoneline
 	$GLOBALS['PortChannel']=12;					// Port Channel
 	$GLOBALS['PortChannelChoices']=151;			// Port Channel Choices
 	$GLOBALS['DisklessBoot']=9;					// Diskless boot
