@@ -404,8 +404,14 @@ Fix_Initrd_Vmlinux () {
 StatsMessage "Starting initrd and vmlinuz fix"
 # Fix a problem with the /initrd.img and /vmlinuz links pointing to a different kernel than the 
 # newest (and currently running) one
-ln -s -f /boot/initrd.img-`uname -r` /initrd.img
-ln -s -f /boot/vmlinuz-`uname -r` /vmlinuz
+LATEST_KERNEL=`ls /lib/modules --sort time --group-directories-first|head -1`
+KERNEL_TO_USE=`uname -r`
+
+if [ -f "/boot/initrd.img-$LATEST_KERNEL" ]; 
+	KERNEL_TO_USE=$LATEST_KERNEL
+fi
+ln -s -f /boot/initrd.img-$KERNEL_TO_USE /initrd.img
+ln -s -f /boot/vmlinuz-$KERNEL_TO_USE /vmlinuz
 
 }
 
