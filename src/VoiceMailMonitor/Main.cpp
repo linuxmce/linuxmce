@@ -72,6 +72,9 @@ void Convert(const string & sWavFile)
 
 		lame_t lame = lame_init();
 		lame_set_mode(lame, MONO);
+		lame_set_in_samplerate(lame, 4096);
+		lame_set_quality(lame,0);
+		lame_set_findReplayGain(lame,5);
 		lame_set_VBR(lame, vbr_default);
 		lame_init_params(lame);
 
