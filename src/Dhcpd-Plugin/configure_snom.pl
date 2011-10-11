@@ -92,5 +92,5 @@ system("curl -d \"update_policy=ask_for_update&setting_server=http%3A%2F%2F$shos
 system("curl -d \"auth_valid1=1&auth_realm1=asterisk&auth_user1=$ext&uth_pass1=$ext&SETTINGS=Save\" http://$ip/set_sip_auth_en.htm > /dev/null");
 system("curl http://$ip/set_base_en.htm?reboot=Reboot > /dev/null");
 
-#sync with AMP
-`/usr/pluto/bin/sync_pluto2amp.pl $Device_ID`
+#sync with Asterisk DB
+`/usr/pluto/bin/db_phone_config.sh`

@@ -39,8 +39,8 @@ if ($IntIP eq "") {
         $IntIP="192.168.80.1";
 }
 
-#sync with AMP (practically do nothing but create a new extension number)
-`/usr/pluto/bin/sync_pluto2amp.pl $Device_ID`;
+#sync with Asterisk DB (practically do nothing but create a new extension number)
+`/usr/pluto/bin/db_phone_config.sh`;
 
 open(FILE,"/tmp/phone${Device_ID}extension");
 $Device_EXT=<FILE>;
