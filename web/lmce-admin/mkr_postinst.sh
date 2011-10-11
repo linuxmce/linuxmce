@@ -123,6 +123,14 @@ NameVirtualHost *
 		Allow from all
 	</Directory>
 
+	Alias /voicemail/ /var/spool/asterisk/voicemail/
+	<Directory \"/var/spool/asterisk/voicemail\">
+		AllowOverride None
+		Options -Indexes -MultiViews
+		Order allow,deny
+		Allow from all
+	</Directory>
+
 	ErrorLog /var/log/apache2/error.log
 
 	# Possible values include: debug, info, notice, warn, error, crit,
