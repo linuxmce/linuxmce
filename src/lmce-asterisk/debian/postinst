@@ -8,13 +8,14 @@ if [[ "$1" == configure ]]; then
 		PassParm="-p$MySqlPassword"
 	fi
 
+	res=$(mysql --batch --skip-column-names -e "SHOW DATABASES LIKE 'asterisk'" | grep asterisk)
+	
 	# create asterisk database if it does not exist
 	mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm < /usr/share/asterisk/sql/createdb.sql
 	# populate new db with our default values
 	mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm < /usr/share/asterisk/sql/initialdb.sql
-	
-	
-	if [[ -e /usr/sbin/asterisk ]]; then
+
+	if [[ -e /usr/sbin/asterisk ]] && [[ "$res" == "asterisk" ]]; then
 		adduser www-data asterisk
 		
 		mkdir -p /var/lib/asterisk/mohmp3
@@ -30,4 +31,5 @@ if [[ "$1" == configure ]]; then
 		service apache2 restart
 		service asterisk restart
 	fi	
+
 fi
