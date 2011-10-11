@@ -270,7 +270,7 @@ function devices($output,$dbADO) {
 				deleteDevice($value,$dbADO);
 				
 				if($type=='phones'){
-					$cmd='sudo -u root /usr/pluto/bin/sync_pluto2amp.pl '.$value;
+					$cmd='sudo -u root /usr/pluto/bin/db_phone_config.sh';
 					exec_batch_command($cmd);
 				}
 			}
@@ -334,7 +334,7 @@ function devices($output,$dbADO) {
 				}
 			}
 			if($type=='phones'){
-				$cmd='sudo -u root /usr/pluto/bin/sync_pluto2amp.pl '.join(' ',$displayedDevicesArray);
+				$cmd='sudo -u root /usr/pluto/bin/db_phone_config.sh';
 				exec_batch_command($cmd);
 			}			
 			
@@ -355,7 +355,7 @@ function devices($output,$dbADO) {
 			}
 			
 			if($type=='phones'){
-				$cmd='sudo -u root /usr/pluto/bin/sync_pluto2amp.pl '.$insertID;
+				$cmd='sudo -u root /usr/pluto/bin/db_phone_config.sh';
 				exec_batch_command($cmd);
 			}
 			header("Location: index.php?section=devices&type=$type&lastAdded=$deviceTemplate");
