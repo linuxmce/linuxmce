@@ -458,7 +458,7 @@ else
 			then
 		   # Not dhcp defined in config file, test if dhclient got us an IP
 		   # /var/run/dhcp3 for newer than 810, /var/run in 810
-		   if [[ (-e /var/lib/dhcp3/dhclient-$extif.lease || -e /var/run/dhclient-$extif.lease) && `pgrep -c dhclient` == 1 ]]
+		   if [[ (-e /var/lib/dhcp3/dhclient.$extif.leases || -e /var/run/dhclient-$extif.lease) && `pgrep -c dhclient` == 1 ]]
 		   then
 			   ExtUsesDhcp=1
 		   fi
@@ -1019,6 +1019,3 @@ StatsMessage "The log file for the install process is located at ${log_file}"
 StatsMessage "Reboot the system to start the final process"
 
 exit 0
-
-
-
