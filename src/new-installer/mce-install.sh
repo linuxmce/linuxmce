@@ -407,7 +407,7 @@ StatsMessage "Starting initrd and vmlinuz fix"
 LATEST_KERNEL=`ls /lib/modules --sort time --group-directories-first|head -1`
 KERNEL_TO_USE=`uname -r`
 
-if [ -f "/boot/initrd.img-$LATEST_KERNEL" ]; 
+if [ -f "/boot/initrd.img-$LATEST_KERNEL" ]; then
 	KERNEL_TO_USE=$LATEST_KERNEL
 fi
 ln -s -f /boot/initrd.img-$KERNEL_TO_USE /initrd.img
