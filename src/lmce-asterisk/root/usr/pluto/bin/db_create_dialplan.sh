@@ -305,3 +305,5 @@ CreateDialplanLines
 CreateDialplanUsers
 CreateConferenceRooms
 CreateVoiceMenu
+
+asterisk -r -x "dialplan reload" >> /dev/null
