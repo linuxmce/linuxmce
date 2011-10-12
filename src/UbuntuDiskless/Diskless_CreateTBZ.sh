@@ -7,7 +7,7 @@ DISTRO="$(lsb_release -c -s)"
 DEVICEDATA_Architecture=112
 Architecture=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g')
 #Assign latest installed kernel and not running kernel
-KVER=$(dpkg -l | grep ^ii | grep linux-image- | grep -v linux-image-generic | tail -1 | awk -F '-' '{print $3 "-" $4 "-" $5}' | awk '{print $1}')
+KVER=`ls /lib/modules/ --sort time|head -1`
 DBST_SCRIPT='/usr/pluto/bin/Diskless_DebootstrapPluto.sh'
 ARH_DIR='/usr/pluto/install'
 DisklessFS="PlutoMD-${Architecture}.tar.bz2"
@@ -313,18 +313,18 @@ rm $TEMP_DIR/tmp/preseed.cfg
 MD_Install_Packages () {
 StatsMessage "Installing packages to MD"
 
+## Update the chrooted system (needed when created from archive)
+LC_ALL=C chroot $TEMP_DIR apt-get -f -y install
+LC_ALL=C chroot $TEMP_DIR apt-get -f -y dist-upgrade
+VerifyExitCode "Dist-upgrade failed"
+
+
 #Install headers and run depmod for the seamless integraiton function, ensure no errors exist
 LC_ALL=C chroot $TEMP_DIR apt-get -y install linux-headers-generic
 VerifyExitCode "Install linux headers package failed"
 KVER=`ls $TEMP_DIR/lib/modules/ --sort time|head -1`
 LC_ALL=C chroot $TEMP_DIR depmod -v $KVER
 VerifyExitCode "depmod failed - ensure you run an apt-get dist-upgrade on your core before running again"
-
-
-## Update the chrooted system (needed when created from archive)
-LC_ALL=C chroot $TEMP_DIR apt-get -f -y install
-LC_ALL=C chroot $TEMP_DIR apt-get -f -y dist-upgrade
-VerifyExitCode "Dist-upgrade failed"
 
 # generate locales
 StatsMessage "Generating locales"
@@ -457,8 +457,6 @@ mv -f "$TEMP_DIR"/sbin/start-stop-daemon{.pluto-install,}
 mv -f "$TEMP_DIR"/sbin/initctl{.pluto-install,}
 rm -f "$TEMP_DIR"/usr/sbin/policy-rc.d
 
-#Remove the xorg.conf to allow MCE to create it customized for the users hardware
-rm -f "$TEMP_DIR"/etc/X11/xorg.conf
 
 # Setup Link for the desktop to point to Activate Orbiter
 cat <<eol >"$TEMP_DIR"/etc/skel/Desktop/LinuxMCE
@@ -474,6 +472,9 @@ eol
 
 #Copy the orbiter activation command to the MD's desktop
 cp -r "$TEMP_DIR"/etc/skel/Desktop/* "$TEMP_DIR"/root/Desktop
+
+#Remove the xorg file(s) from installation, need to start with a fresh slate
+rm -f "$TEMP_DIR"/etc/X11/xorg.conf*
 
 #Clean up apt from the installs
 LC_ALL=C chroot "$TEMP_DIR" apt-get clean
@@ -544,3 +545,4 @@ StatsMessage "Diskless media director image setup completed without a detected i
 
 #Exit successfully
 exit 0
+
