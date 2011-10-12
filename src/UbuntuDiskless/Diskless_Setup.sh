@@ -24,7 +24,7 @@ function setup_tftp_boot
 	local Moon_BootConfFile="/tftpboot/pxelinux.cfg/01-$(echo ${Moon_MAC//:/-} | tr 'A-Z' 'a-z')"
 	local BootConf=""
 
-	local BootParams="quiet splash video=uvesafb:mode_option=1024x768-24,mtrr=3,scroll=ywrap"
+	local BootParams="quiet splash video=uvesafb:mode_option=1024x768-24,mtrr=3,scroll=ywrap vmalloc=256m"
 	local BootParams_Extra=$(RunSQL "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device = $Moon_DeviceID AND FK_DeviceData = $DEVICEDATA_Extra_Parameters")
 	local BootParams_Override=$(RunSQL "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device = $Moon_DeviceID AND FK_DeviceData = $DEVICEDATA_Extra_Parameters_Override")
 	if [[ "$BootParams_Override" == "1" ]] ;then
