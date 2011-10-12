@@ -18,7 +18,6 @@
 #define Game_Player_h
 
 //      DCE Implemenation for #1965 Game Player
-
 #include "Gen_Devices/Game_PlayerBase.h"
 //<-dceag-d-e->
 
@@ -50,7 +49,7 @@
 namespace DCE
 {
 
-  class VideoFrameGeometry
+   class VideoFrameGeometry
   {
 
   public:
@@ -89,6 +88,7 @@ namespace DCE
     // Private methods
     string GetSaveGamePath ();	// Get save game path for mediatype
   public:
+    bool LaunchEmulator(string sEnginePath, string sMediaFilename);
       virtual void PrepareToDelete ();
     bool Connect (int iPK_DeviceTemplate);
 
@@ -122,6 +122,7 @@ namespace DCE
     bool StopMAME ();
     void AlarmCallback (int id, void *param);
     void CheckMAME ();
+  
     Display *getDisplay ()
     {
       return m_pDisplay;

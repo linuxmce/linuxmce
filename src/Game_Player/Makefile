@@ -16,7 +16,10 @@ VERSION = 2.0.0
 MYDEVTEMPLATEID = 1965mplateID
 
 Gen_Dev_Files = $(GENDEV)/Game_PlayerBase.cpp
-sources = Main.cpp Game_Player.cpp $(Gen_Dev_Files)
+sources = Main.cpp Game_Player.cpp $(Gen_Dev_Files) \
+	EmulatorEngine.cpp \
+	MAMEEmulatorEngine.cpp \
+	EmulatorController.cpp
 #<-dceag-mh-e->
 
 CXXFLAGS += 

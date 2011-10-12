@@ -195,6 +195,14 @@ bool Game_Player::Register ()
 }
 
 /**
+ * Launch Emulator - Called from the Emulator Engine to spawn the app with the app server.
+ */
+bool Game_Player::LaunchEmulator(string sEnginePath, string sMediaFilename)
+{
+  // FIXME: come back here and implement this. Should call the app server.
+}
+
+/**
  * UpdateMESSConfig() - similar to the function just below, except.
  * tailored for Stella's configuration file.
  */
