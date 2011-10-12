@@ -787,7 +787,7 @@ void CheckPackage(Row_Package *pRow_Package,Row_Device *pRow_Device,bool bDevelo
 	{
 		Row_Package_Compat *pRow_Package_Compat = vectRow_Package_Compat[s];
 		if( pRow_Package_Compat->FK_Distro_get()==pRow_Distro->PK_Distro_get() ||
-			pRow_Package_Compat->FK_OperatingSystem_get()==pRow_Distro->FK_OperatingSystem_get() ||
+			(pRow_Package_Compat->FK_Distro_isNull() && pRow_Package_Compat->FK_OperatingSystem_get()==pRow_Distro->FK_OperatingSystem_get()) ||
 			(pRow_Package_Compat->FK_Distro_isNull() && pRow_Package_Compat->FK_OperatingSystem_isNull()) )
 		{
 			bFound=true;
