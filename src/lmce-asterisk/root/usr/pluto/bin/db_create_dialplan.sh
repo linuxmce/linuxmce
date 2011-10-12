@@ -67,7 +67,7 @@ CreateDialplanLines()
 			SQL="$SQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES
 			('$Context_From_Lmce','$Line','1','AGI','lmce-phonebook-lookup.agi'),
 			('$Context_From_Lmce','$Line','2','AGI','lmce-gethousemode.agi'),
-			('$Context_From_Lmce','$Line','3','Goto','$Line-hm\${HOUSEMODE},1'),
+			('$Context_From_Lmce','$Line','3','Goto','$Context_From_Lmce,$Line-hm\${HOUSEMODE},1'),
 			('$Context_From_Lmce','$Line','4','Hangup','');"
 		fi
 
@@ -113,12 +113,12 @@ CreateDialplanLines()
 
 		SQL="$SQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES
 			('$Context_From_Lmce','$Line-hm$HouseMode','1','$App','$AppParam'),
-			('$Context_From_Lmce','$Line-hm$HouseMode','2','Goto','$Line-hm$HouseMode-\${DIALSTATUS},1'),
+			('$Context_From_Lmce','$Line-hm$HouseMode','2','Goto','$Context_From_Lmce,$Line-hm$HouseMode-\${DIALSTATUS},1'),
 			('$Context_From_Lmce','$Line-hm$HouseMode','3','Hangup',''),
-			('$Context_From_Lmce','$Line-hm$HouseMode-BUSY','1','Goto','100,1'),
+			('$Context_From_Lmce','$Line-hm$HouseMode-BUSY','1','Goto','$Context_From_Lmce,100,1'),
 			('$Context_From_Lmce','$Line-hm$HouseMode-NOANSWER','1','Goto','voice-menu-pluto-custom,s,1'),
-			('$Context_From_Lmce','$Line-hm$HouseMode-CONGESTION','1','Goto','100,1'),
-			('$Context_From_Lmce','$Line-hm$HouseMode-CHANUNAVAIL','1','Goto','100,1');"
+			('$Context_From_Lmce','$Line-hm$HouseMode-CONGESTION','1','Goto','$Context_From_Lmce,100,1'),
+			('$Context_From_Lmce','$Line-hm$HouseMode-CHANUNAVAIL','1','Goto','$Context_From_Lmce,100,1');"
 		OldLine=$Line
 	done
 
@@ -148,7 +148,7 @@ CreateDialplanUsers()
 			if [[  $Temp != $User*  ]]; then	
 				SQL="$SQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES
 				('$Context_From_Lmce','$User','1','AGI','lmce-getusermode.agi'),
-				('$Context_From_Lmce','$User','2','Goto','$User-um\${USERMODE}-pri\${PRIORITYCALLER},1'),
+				('$Context_From_Lmce','$User','2','Goto','$Context_From_Lmce,$User-um\${USERMODE}-pri\${PRIORITYCALLER},1'),
 				('$Context_From_Lmce','$User','3','Hangup','');"
 			fi
 
@@ -201,19 +201,19 @@ CreateDialplanUsers()
 
 			if [[ $Temp -ne "$User-$Pri-$UserMode" ]]; then
 				SQL="$SQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES 
-				('$Context_From_Lmce','$User-um$UserMode-pri$Pri','1','Goto','$User-um$UserMode-pri$Pri-try$Try');"
+				('$Context_From_Lmce','$User-um$UserMode-pri$Pri','1','Goto','$Context_From_Lmce,$User-um$UserMode-pri$Pri-try$Try,1');"
 			fi
 			
 			SQL="$SQL DELETE FROM $DB_Extensions_Table WHERE context = '$Context_From_Lmce' AND exten = '$User-um$UserMode-pri$Pri-try$Try' AND priority='1';
 				DELETE FROM $DB_Extensions_Table WHERE context = '$Context_From_Lmce' AND exten = '$User-um$UserMode-pri$Pri-try$Try' AND priority='2';
 				INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES
 				('$Context_From_Lmce','$User-um$UserMode-pri$Pri-try$Try','1','$App','$AppParam'),
-				('$Context_From_Lmce','$User-um$UserMode-pri$Pri-try$Try','2','Goto','$User-um$UserMode-pri$Pri-try$Try-\${DIALSTATUS},1'),
+				('$Context_From_Lmce','$User-um$UserMode-pri$Pri-try$Try','2','Goto','$Context_From_Lmce,$User-um$UserMode-pri$Pri-try$Try-\${DIALSTATUS},1'),
 				('$Context_From_Lmce','$User-um$UserMode-pri$Pri-try$Try','3','Hangup',''),
-				('$Context_From_Lmce','$User-um$UserMode-pri$Pri-try$Try-BUSY','1','Goto','$User-um$UserMode-pri$Pri-try$((Try+1)),1'),
-				('$Context_From_Lmce','$User-um$UserMode-pri$Pri-try$Try-NOANSWER','1','Goto','$User-um$UserMode-pri$Pri-try$((Try+1)),1'),
-				('$Context_From_Lmce','$User-um$UserMode-pri$Pri-try$Try-CONGESTION','1','Goto','$User-um$UserMode-pri$Pri-try$((Try+1)),1'),
-				('$Context_From_Lmce','$User-um$UserMode-pri$Pri-try$Try-CHANUNAVAIL','1','Goto','$User-um$UserMode-pri$Pri-try$((Try+1)),1'),
+				('$Context_From_Lmce','$User-um$UserMode-pri$Pri-try$Try-BUSY','1','Goto','$Context_From_Lmce,$User-um$UserMode-pri$Pri-try$((Try+1)),1'),
+				('$Context_From_Lmce','$User-um$UserMode-pri$Pri-try$Try-NOANSWER','1','Goto','$Context_From_Lmce,$User-um$UserMode-pri$Pri-try$((Try+1)),1'),
+				('$Context_From_Lmce','$User-um$UserMode-pri$Pri-try$Try-CONGESTION','1','Goto','$Context_From_Lmce,$User-um$UserMode-pri$Pri-try$((Try+1)),1'),
+				('$Context_From_Lmce','$User-um$UserMode-pri$Pri-try$Try-CHANUNAVAIL','1','Goto','$Context_From_Lmce,$User-um$UserMode-pri$Pri-try$((Try+1)),1'),
 				('$Context_From_Lmce','$User-um$UserMode-pri$Pri-try$((Try+1))','1','Macro','vm,$User,DIRECTDIAL'),
 				('$Context_From_Lmce','$User-um$UserMode-pri$Pri-try$((Try+1))','2','Hangup','');"
 			Temp="$User-$Pri-$UserMode"
@@ -251,9 +251,9 @@ CreateVoiceMenu()
 	('$Context_Voice_Menu','s','4','Background','pluto/pluto-default-voicemenu'),
 	('$Context_Voice_Menu','s','5','Set','TIMEOUT(digit)=10'),
 	('$Context_Voice_Menu','s','6','Set','TIMEOUT(response)=20'),
-	('$Context_Voice_Menu','t','1','Goto','s,1'),
+	('$Context_Voice_Menu','t','1','Goto','$Context_Voice_Menu,s,1'),
 	('$Context_Voice_Menu','0','1','Dial','$PhonesList,$TIMEOUT'),
-	('$Context_Voice_Menu','0','2','Goto','s,1');"
+	('$Context_Voice_Menu','0','2','Goto','$Context_Voice_Menu,s,1');"
 
 	for i in "${!USERS[@]}"; do
 		SQL="$SQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES
@@ -267,7 +267,7 @@ CreateVoiceMenu()
 	('$Context_Voice_Menu','_XXX','1','Dial','Local/\${EXTEN}@trusted'),
 	('$Context_Voice_Menu','_XXX','2','Hangup',''),
 	('$Context_Voice_Menu','i','1','Background','pluto/invalid-entry'),
-	('$Context_Voice_Menu','i','2','Goto','s,1');"
+	('$Context_Voice_Menu','i','2','Goto','$Context_Voice_Menu,s,1');"
 
 	SQL="$SQL COMMIT;"
 
