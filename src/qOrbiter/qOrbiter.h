@@ -37,7 +37,7 @@ namespace DCE
 {
 class qOrbiter : public qOrbiter_Command
 {
-
+   Q_OBJECT
     //<-dceag-decl-e->
     // Private member variables
 
@@ -52,7 +52,7 @@ int m_dwPK_Device_NowPlaying,m_dwPK_Device_NowPlaying_Video,m_dwPK_Device_NowPla
 //<-dceag-const-b->
 public:
     // Constructors/Destructor
-    qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
+    qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL, QObject *parent=0 );
     virtual ~qOrbiter();
     virtual bool GetConfig();
     virtual bool Register();
@@ -118,7 +118,7 @@ public:
     //<-dceag-const2-b->
     // The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
     // You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
-    qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
+    qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter, QObject *parent =0);
     //<-dceag-const2-e->
 
     //<-dceag-h-b->

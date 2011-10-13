@@ -895,11 +895,11 @@ void qorbiterManager::getcurrentSkins(QStringList skinPaths)
 #endif
     if(skinsDir.cd("qml/"))
     {
-        //qDebug() << skinsDir.path();
+       qDebug() << skinsDir.path();
 
         QStringList platform = skinsDir.entryList();
 
-        //  qDebug() << "Switching to:" << platform.last();
+        qDebug() << "Switching to:" << platform.last();
 
 
         if(platform.isEmpty())
@@ -914,7 +914,7 @@ void qorbiterManager::getcurrentSkins(QStringList skinPaths)
             {
 
                 skins = skinsDir.path();
-                //  qDebug() << "Looking for skins in " + skins ;
+                 qDebug() << "Looking for skins in " + skins ;
 
             }
 
