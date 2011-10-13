@@ -42,6 +42,7 @@ done
 unset IFS
 				
 Exports_CommonDiskless="
+/                       $INTERNAL_SUBNET/$INTERNAL_CIDR_NOTATION(fsid=0,rw,no_root_squash,no_all_squash,sync,no_subtree_check)
 /home                   $INTERNAL_SUBNET/$INTERNAL_CIDR_NOTATION(rw,no_root_squash,no_all_squash,sync,no_subtree_check)
 /usr/pluto/orbiter      $INTERNAL_SUBNET/$INTERNAL_CIDR_NOTATION(ro,no_root_squash,no_all_squash,sync,no_subtree_check)
 /usr/pluto/keys         $INTERNAL_SUBNET/$INTERNAL_CIDR_NOTATION(ro,no_root_squash,no_all_squash,sync,no_subtree_check)
