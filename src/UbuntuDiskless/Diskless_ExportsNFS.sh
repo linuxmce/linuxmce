@@ -22,14 +22,32 @@ for i in 1 2 3 4; do
 	NetDigit=$(($IPDigit & $MaskDigit))
 	INTERNAL_SUBNET="$INTERNAL_SUBNET$Dot$NetDigit" && Dot="."
 done
+
+INTERNAL_CIDR_NOTATION=0
+IFS=.
+for dec in $INTERNAL_SUBNET_MASK ; do
+	case $dec in
+		255) let INTERNAL_CIDR_NOTATION+=8;;
+		254) let INTERNAL_CIDR_NOTATION+=7;;
+		252) let INTERNAL_CIDR_NOTATION+=6;;
+		248) let INTERNAL_CIDR_NOTATION+=5;;
+		240) let INTERNAL_CIDR_NOTATION+=4;;
+		224) let INTERNAL_CIDR_NOTATION+=3;;
+		192) let INTERNAL_CIDR_NOTATION+=2;;
+		128) let INTERNAL_CIDR_NOTATION+=1;;
+		0);;
+		*) echo "Error: $dec is not recognised"; exit 1
+	esac
+done
+unset IFS
 				
 Exports_CommonDiskless="
-/home                   $INTERNAL_SUBNET/$INTERNAL_SUBNET_MASK(rw,no_root_squash,no_all_squash,sync,no_subtree_check)
-/usr/pluto/orbiter      $INTERNAL_SUBNET/$INTERNAL_SUBNET_MASK(ro,no_root_squash,no_all_squash,sync,no_subtree_check)
-/usr/pluto/keys         $INTERNAL_SUBNET/$INTERNAL_SUBNET_MASK(ro,no_root_squash,no_all_squash,sync,no_subtree_check)
-/usr/pluto/deb-cache    $INTERNAL_SUBNET/$INTERNAL_SUBNET_MASK(ro,no_root_squash,no_all_squash,sync,no_subtree_check)
-/usr/pluto/var          $INTERNAL_SUBNET/$INTERNAL_SUBNET_MASK(rw,no_root_squash,no_all_squash,sync,no_subtree_check)
-/var/spool/asterisk     $INTERNAL_SUBNET/$INTERNAL_SUBNET_MASK(rw,no_root_squash,no_all_squash,sync,no_subtree_check)
+/home                   $INTERNAL_SUBNET/$INTERNAL_CIDR_NOTATION(rw,no_root_squash,no_all_squash,sync,no_subtree_check)
+/usr/pluto/orbiter      $INTERNAL_SUBNET/$INTERNAL_CIDR_NOTATION(ro,no_root_squash,no_all_squash,sync,no_subtree_check)
+/usr/pluto/keys         $INTERNAL_SUBNET/$INTERNAL_CIDR_NOTATION(ro,no_root_squash,no_all_squash,sync,no_subtree_check)
+/usr/pluto/deb-cache    $INTERNAL_SUBNET/$INTERNAL_CIDR_NOTATION(ro,no_root_squash,no_all_squash,sync,no_subtree_check)
+/usr/pluto/var          $INTERNAL_SUBNET/$INTERNAL_CIDR_NOTATION(rw,no_root_squash,no_all_squash,sync,no_subtree_check)
+/var/spool/asterisk     $INTERNAL_SUBNET/$INTERNAL_CIDR_NOTATION(rw,no_root_squash,no_all_squash,sync,no_subtree_check)
 "
 PopulateSection "/etc/exports" "CommonDiskless" "$Exports_CommonDiskless"
 
