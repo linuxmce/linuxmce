@@ -458,18 +458,6 @@ mv -f "$TEMP_DIR"/sbin/initctl{.pluto-install,}
 rm -f "$TEMP_DIR"/usr/sbin/policy-rc.d
 
 
-# Setup Link for the desktop to point to Activate Orbiter
-cat <<eol >"$TEMP_DIR"/etc/skel/Desktop/LinuxMCE
-[Desktop Entry]
-Encoding=UTF-8
-Version=8.10
-Type=Application
-Exec=/usr/pluto/bin/ActivateOrbiterFromKDE.sh
-Path=/usr/pluto/bin
-Name=Back To LinuxMCE Orbiter
-Icon=gnome-panel-launcher
-eol
-
 #Copy the orbiter activation command to the MD's desktop
 cp -r "$TEMP_DIR"/etc/skel/Desktop/* "$TEMP_DIR"/root/Desktop
 
