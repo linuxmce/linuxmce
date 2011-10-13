@@ -49,6 +49,64 @@ LockGrace=60000
 Saver=kblank.desktop
 Timeout=900" > "$homedir/.kde/share/config/kscreensaverrc"
 
+echo "[PlasmaViews][1]
+Offset=0
+panelVisibility=0
+
+[PlasmaViews][2]
+Offset=0
+panelVisibility=2" > "$homedir/.kde/share/config/plasma-desktoprc"
+
+echo "ShowApplicationStatus=false
+ShowCommunications=false
+ShowHardware=false
+ShowJobs=false
+ShowNotifications=false
+ShowSystemServices=false" > "$homedir/.kde/share/config/plasma-desktop-appletsrc"
+
+echo "[1]
+Description=Settings for OrbiterRenderer_SDL
+skiptaskbar=true
+skiptaskbarrule=2
+wmclass=OrbiterRenderer_SDL
+wmclasscomplete=false
+wmclassmatch=1
+
+
+[2]
+Description=Settings for Picture_Viewer
+skiptaskbar=true
+skiptaskbarrule=2
+wmclass=Picture_Viewer
+wmclasscomplete=false
+wmclassmatch=1
+
+[3]
+Description=Settings for pluto-xine-playback-window
+skiptaskbar=true
+skiptaskbarrule=2
+wmclass=pluto-xine-playback-window
+wmclasscomplete=false
+wmclassmatch=1
+
+[4]
+Description=(Default) Disable focus stealing prevention for XV
+fsplevel=0
+fsplevelrule=2
+wmclass=^xv .*
+wmclasscomplete=true
+wmclassmatch=3
+
+[Directories-default]
+prefixes[$d]
+
+[Emoticons]
+emoticonsTheme[$d]
+
+[General]
+count=4" > "$homedir/.kde/share/config/kwinrulesrc"
+
+
 
 DISTRO="$(lsb_release -c -s)"
 if [[ $DISTRO = "intrepid" ]] ; then
