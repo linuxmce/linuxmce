@@ -178,7 +178,7 @@ WorkThePhones()
 			SQL="SELECT MAX(ext)+1 AS free_ext FROM view_lmce_phones;"
 			PhoneNumber=$(RunSQL "$SQL")
 			if [[ $PhoneNumber -eq 0 ]]; then
-				PhoneNumber=1
+				PhoneNumber=200
 			fi
 			
 			# assign next free phonenumber
