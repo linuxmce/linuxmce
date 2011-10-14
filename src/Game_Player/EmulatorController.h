@@ -22,10 +22,8 @@ namespace DCE
     EmulatorModel *m_pEmulatorModel;
   public:
 
-    EmulatorController(Game_Player *pGame_Player);
+    EmulatorController(Game_Player *pGame_Player, EmulatorModel *pEmulatorModel);
     ~EmulatorController();
-
-    void setEmulatorModel(EmulatorModel *pEmulatorModel);
 
     // not so pure virtuals. :P
     virtual bool run();
@@ -44,10 +42,11 @@ namespace DCE
     virtual bool setSpeed(int iSpeed) = 0;
     virtual bool getSnap(char **pData, int iData_Size) = 0;
     virtual bool gotoMenu(int iMenu) = 0;
-    virtual bool moveUp() = 0;
-    virtual bool moveDown() = 0;
-    virtual bool moveLeft() = 0;
-    virtual bool moveRight() = 0;
+    virtual bool uiUp() = 0;
+    virtual bool uiDown() = 0;
+    virtual bool uiLeft() = 0;
+    virtual bool uiRight() = 0;
+    virtual bool uiOK() = 0;
     virtual bool press0() = 0;
     virtual bool press1() = 0;
     virtual bool press2() = 0;
@@ -58,7 +57,7 @@ namespace DCE
     virtual bool press7() = 0;
     virtual bool press8() = 0;
     virtual bool press9() = 0;
-    virtual bool pressBack() = 0;
+    virtual bool uiBack() = 0;
     virtual bool saveState() = 0;
     virtual bool loadState() = 0;
     virtual bool emulatorExited() = 0;
