@@ -7,7 +7,7 @@ Standards-Version: 3.6.1
 
 Package: lmce-asterisk
 Architecture: any
-Depends: php-db, pluto-boot-scripts, chan-sccp-b, asterisk-sounds-extra, asterisk-mysql
+Depends: pluto-boot-scripts, chan-sccp-b, asterisk-sounds-extra, asterisk-mysql
 Provides: asterisk-config-custom
 Conflicts: freepbx, asterisk-pluto, asterisk-custom-config
 Replaces: asterisk-config
