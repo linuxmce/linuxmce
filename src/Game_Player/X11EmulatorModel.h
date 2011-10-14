@@ -26,15 +26,15 @@ namespace DCE
     X11EmulatorModel();
     ~X11EmulatorModel();
   protected:
-    map<string, int> m_mapActionsToKeysyms;
-    int m_mapParameters_Find(string sAction) 
+    map<string, pair<int, int> > m_mapActionsToKeysyms;
+    pair<int, int> m_mapParameters_Find(string sAction) 
     {
-      map<string, int>::iterator it = m_mapActionsToKeysyms.find(sAction);
-      return it == m_mapActionsToKeysyms.end() ? 0 : (*it).second;
+      map<string, pair<int, int> >::iterator it = m_mapActionsToKeysyms.find(sAction);
+      return it == m_mapActionsToKeysyms.end() ? make_pair(0,0) : (*it).second;
     }
     bool m_mapParameters_Exists(string sAction)
     {
-      map<string, int>::iterator it = m_mapActionsToKeysyms.find(sAction);
+      map<string, pair<int, int> >::iterator it = m_mapActionsToKeysyms.find(sAction);
       return it != m_mapActionsToKeysyms.end();
     }
     virtual void initializeActionstoKeysyms() = 0; // subclass and set key mappings.
