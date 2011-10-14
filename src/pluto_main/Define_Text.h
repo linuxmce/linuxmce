@@ -1220,6 +1220,7 @@
 #define TEXT_Lights_Sleep_CONST 2163
 #define TEXT_Lights_Wakeup_CONST 2164
 #define TEXT_Lights_House_Sleep_CONST 2165
+#define TEXT_MediaType_StreamedAudio_CONST 2166
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"
