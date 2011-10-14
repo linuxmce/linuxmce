@@ -1,3 +1,9 @@
+lmce-asterisk (0+0.2.0-6) unstable; urgency=low
+
+  * Adds dependency for asterisk-mysql package
+
+ -- Serge Wagener <serge@linuxmce.org>  Fri, 14 Oct 2011 17:00:00 +0200
+
 lmce-asterisk (0+0.2.0-5) unstable; urgency=low
 
   * Replaced some GoTo in diaplan with new syntax, speed up parsing
