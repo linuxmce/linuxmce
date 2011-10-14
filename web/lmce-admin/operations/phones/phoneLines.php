@@ -124,7 +124,7 @@ function phoneLines($output,$astADO,$dbADO) {
 			$res=$astADO->Execute('SELECT LAST_INSERT_ID();');
 			$row=$res->FetchRow();
 			$id=$row[0];
-			$suffix='&msg='.$TEXT_ADD_PHONE_LINE_CMD_SENT_CONST;
+			$suffix='&msg='.translate('TEXT_ADD_PHONE_LINE_CMD_SENT_CONST');
 			header('Location: index.php?section=phoneLines&action=form&eid='.$id.@$suffix);
 			exit();
 		}
