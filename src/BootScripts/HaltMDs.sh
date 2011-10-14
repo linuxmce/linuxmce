@@ -4,6 +4,14 @@
 . /usr/pluto/bin/SQL_Ops.sh
 . /usr/pluto/bin/Config_Ops.sh
 
+echo "kill timeout 70
+
+start on runlevel RUNLEVEL=[016] PREVLEVEL=[2345] and (starting rc RUNLEVEL=[016] or stopping mysql or stopping portmap or stopping idmapd or stopping statd)
+
+task
+
+exec /usr/pluto/bin/HaltMDs.sh" >/etc/init/md_halt.conf
+
 P="$1"
 
 if [ "$P" == "D" ]; then
