@@ -3346,6 +3346,11 @@ void DCE::qOrbiter::JogStream(QString jump) //jumps position in stream for jog
     }
 }
 
+void DCE::qOrbiter::showAdvancedButtons()
+{
+    qDebug("Test Success");
+}
+
 
 
 

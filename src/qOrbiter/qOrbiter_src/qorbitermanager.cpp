@@ -243,7 +243,9 @@ pqOrbiter->qmlUI = this;
             if (pqOrbiter->initialize()) //the dcethread initialization
             {
                 pqOrbiter->CreateChildren();
+                qorbiterUIwin->rootContext()->setContextProperty("dcerouter", pqOrbiter );
                 gotoQScreen("Screen_1.qml");
+
                 return false;
             }
             else
@@ -1421,8 +1423,8 @@ void qorbiterManager::changeChannels(QString chan)
 
 void qorbiterManager::getLiveTVPlaylist()
 {
-    qDebug() << "Orbiter Manager slot called";
-    emit liveTVrequest();
+   // qDebug() << "Orbiter Manager slot called";
+    //emit liveTVrequest();
 
 }
 

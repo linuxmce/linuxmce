@@ -112,6 +112,7 @@ public:
     void Thumbnail();
     void NavigateScreen(QString direction);
     void JogStream(QString jump);
+  Q_INVOKABLE void showAdvancedButtons();
 
     //<-dceag-const-e->
 

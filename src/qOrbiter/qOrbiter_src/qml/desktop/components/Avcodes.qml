@@ -9,7 +9,7 @@ Rectangle {
     border.width: 2
     color: "aliceblue"
     anchors.centerIn: parent
-
+    Component.onCompleted: dcerouter.showAdvancedButtons()
 Column{
     height: childrenRect.height
     width: avcodes.width* .85
