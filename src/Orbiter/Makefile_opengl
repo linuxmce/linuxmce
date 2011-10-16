@@ -1,7 +1,7 @@
 #<-dceag-mh-b->
 GENDEV=../Gen_Devices
 
-SNR_CPPFLAGS ?= -DUSE_GTK -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
+SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
 SNR_LDFLAGS ?= 
 
 ROOT = ..
@@ -32,8 +32,8 @@ LDFLAGS += -L/usr/X11R6/lib
 XTRALDLIBS += -lDCECommon -lSDL_Helpers -lXtst -lGL -lGLU -lXrender -lXext -lSDL -lSDL_ttf -lSDL_image -lhid
 
 # wmctrl wrapper
-CPPFLAGS += `pkg-config gtk+-2.0 --cflags` -I/usr/X11R6/include -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include
-XTRALDLIBS += `pkg-config gtk+-2.0 --libs` -lX11 -lXmu -lglib-2.0
+CPPFLAGS += -I/usr/X11R6/include -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include
+XTRALDLIBS += -lX11 -lXmu -lglib-2.0
 
 Gen_Dev_Files +=
 sources += \
@@ -87,7 +87,8 @@ sources += \
 	../CreateDevice/UserUtils.cpp \
 	$(ROOT)/Splitter/TextSplitter.cpp \
 	$(ROOT)/Splitter/TextWrapper.cpp \
-	Linux/GTKProgressWnd.cpp Linux/GTKPromptUser.cpp \
+	Linux/XProgressWnd.cpp Linux/XPromptUser.cpp \
+	Linux/X3DWindow.cpp Linux/X3DButton.cpp \
 	SDL/StartOrbiterSDL.cpp \
 	OpenGL/ExtensionManager.cpp \
 	OpenGL/ObjectRenderer_OpenGL.cpp \

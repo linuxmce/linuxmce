@@ -1,7 +1,7 @@
 #<-dceag-mh-b->
 GENDEV=../Gen_Devices
 
-SNR_CPPFLAGS ?= -DUSE_GTK -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
+SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
 SNR_LDFLAGS ?= 
 
 ROOT = ..
@@ -54,6 +54,10 @@ XTRALDLIBS += -lX11 -lXmu -lglib-2.0
 
 Gen_Dev_Files +=
 sources += \
+	Linux/X3DWindow.cpp \
+	Linux/X3DButton.cpp \
+	Linux/XPromptUser.cpp \
+	Linux/XProgressWnd.cpp \
 	../utilities/linux/window_manager/WMController/WMController.cpp \
 	../utilities/linux/window_manager/wmctrl/wmctrl.cpp \
 	../utilities/linux/wrapper/wrapper_x11.cpp \
@@ -139,7 +143,7 @@ Orbiter: $(sources:.cpp=.o)
 	./post_make.sh $@
 
 clean: clean-recursive
-	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) Orbiter.bin Orbiter.so >/dev/null
+	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) Orbiter Orbiter.so >/dev/null
 
 package:
 	chmod +x make_package.sh
