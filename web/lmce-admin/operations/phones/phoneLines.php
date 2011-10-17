@@ -1,7 +1,4 @@
 <?
-	ini_set('display_errors', 1); 
-	error_reporting(E_ALL);
-
 	// include language files
 	includeLangFile('common.lang.php');
 	includeLangFile('phoneLines.lang.php');

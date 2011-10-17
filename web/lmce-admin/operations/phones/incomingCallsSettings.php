@@ -1,4 +1,7 @@
 <?
+	ini_set('display_errors', 1); 
+	error_reporting(E_ALL);
+
 function incomingCallsSettings($output,$dbADO,$telecomADO,$asteriskADO) {
 	// include language files
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
@@ -12,11 +15,9 @@ function incomingCallsSettings($output,$dbADO,$telecomADO,$asteriskADO) {
 	$action = (isset($_REQUEST['action']) && $_REQUEST['action']!='')?cleanString($_REQUEST['action']):'form';
 	$installationID = (int)@$_SESSION['installationID'];
 	$id=$_REQUEST['id'];
-	$data=$_REQUEST['data'];
-	$type=$_REQUEST['type'];
 	
 	if($action=='form'){
-		$selectedValues=getSelectedValues($id,$type,$telecomADO);
+		$selectedValues=getSelectedValues($id,$telecomADO);
 
 		$out.=setLeftMenu($dbADO).'
 		<div align="center" class="err">'.@$_REQUEST['error'].'</div>
@@ -27,11 +28,9 @@ function incomingCallsSettings($output,$dbADO,$telecomADO,$asteriskADO) {
 			<input type="hidden" name="section" value="incomingCallsSettings">
 			<input type="hidden" name="action" value="update">
 			<input type="hidden" name="id" value="'.$id.'">
-			<input type="hidden" name="data" value="'.$data.'">
-			<input type="hidden" name="type" value="'.$type.'">
 			
-			'.getPhoneLineDetails($id,$data,$type,$asteriskADO).'<br>
-			'.getPhoneLinesSettings($id,$type,$dbADO,$telecomADO,$selectedValues).'
+			'.getPhoneLineDetails($id,$asteriskADO).'<br>
+			'.getPhoneLinesSettings($id,$dbADO,$telecomADO,$selectedValues).'
 		</form>';
 	}else{
 	// process area
@@ -44,59 +43,35 @@ function incomingCallsSettings($output,$dbADO,$telecomADO,$asteriskADO) {
 		
 		processSubmit($telecomADO);
 		
-		header('Location: index.php?section=incomingCallsSettings&id='.$id.'&type='.$type.'&msg='.$TEXT_ICS_UPDATED_CONST);
+		header('Location: index.php?section=incomingCallsSettings&id='.$id.'&msg='.$TEXT_ICS_UPDATED_CONST);
 	}
 
 	$output->setMenuTitle($TEXT_PHONE_LINES_CONST.' |');
 	$output->setPageTitle($TEXT_INCOMMING_CALLS_SETTINGS_CONST);
-	$output->setNavigationMenu(array($TEXT_PHONE_LINES_CONST=>'index.php?section=phoneLines',$TEXT_INCOMMING_CALLS_SETTINGS_CONST=>'index.php?section=incomingCallsSettings&type='.$type.'&id='.$id));
+	$output->setNavigationMenu(array($TEXT_PHONE_LINES_CONST=>'index.php?section=phoneLines',$TEXT_INCOMMING_CALLS_SETTINGS_CONST=>'index.php?section=incomingCallsSettings&id='.$id));
 	$output->setBody($out);
 	$output->setTitle(APPLICATION_NAME);
 	$output->output();
 }
 
-function getPhoneLineDetails($id,$data,$type,$astADO){
+function getPhoneLineDetails($id,$astADO){
 	$count=0;
-	$res=$astADO->Execute("
-		SELECT sip.id,sip.data,sips.data AS sdata, sipp.data AS pdata 
-		FROM sip 
-		INNER JOIN sip sips ON (sips.id=sip.id) AND (sips.keyword='secret')
-		INNER JOIN sip sipp ON (sipp.id=sip.id) AND (sipp.keyword='username')
-		WHERE (sip.keyword='account') AND ((sip.id='$id') AND (sip.data='$data'))");
-#		WHERE (sip.keyword='account') AND ((sip.data='broadvoice') OR (sip.data='sipgate') OR (sip.data='inphonex')) AND sip.id='$id'");
+	$res=$astADO->Execute("SELECT * FROM phonelines WHERE id='$id'");
 	$out='
 	<table align="center" cellpadding="3" cellspacing="0">
 		<tr class="tablehead">
-			<td align="center"><B>Type</B></td>
-			<td align="center"><B>Data</B></td>
-			<td align="center"><B>Username</B></td>
+			<td align="center"><B>Name</B></td>
+			<td align="center"><B>Protocol</B></td>
+			<td align="center"><B>Phonenumber</B></td>
 		</tr>	';
 	while($row=$res->FetchRow()){
 		$count++;
 		$color=($count%2==0)?'#F0F3F8':'#FFFFFF';
 		$out.='
 		<tr bgcolor="'.$color.'">
-			<td>SIP</td>
-			<td>'.$row['data'].'</td>
-			<td>'.$row['pdata'].'</td>
-		</tr>';
-	}
-
-	$res=$astADO->Execute("
-		SELECT iax.id,iax.data,iaxs.data AS sdata, iaxp.data AS pdata 
-		FROM iax 
-		INNER JOIN iax iaxs ON (iaxs.id=iax.id) AND (iaxs.keyword='secret')
-		INNER JOIN iax iaxp ON (iaxp.id=iax.id) AND (iaxp.keyword='username')
-		WHERE (iax.keyword='account') AND ((iax.id='$id') AND (iax.data='$data'))");
-#		WHERE (iax.keyword='account') AND ((iax.data='fwd') OR (iax.data='teliax') OR (iax.data='efon')) AND iax.id='$id'");
-	while($row=$res->FetchRow()){
-		$count++;
-		$color=($count%2==0)?'#F0F3F8':'#FFFFFF';
-		$out.='
-		<tr bgcolor="'.$color.'">
-			<td>IAX</td>
-			<td>'.$row['data'].'</td>
-			<td>'.$row['pdata'].'</td>
+			<td>'.$row['name'].'</td>
+			<td>'.$row['protocol'].'</td>
+			<td>'.$row['phonenumber'].'</td>
 		</tr>';
 	}
 	
@@ -110,7 +85,7 @@ function getPhoneLineDetails($id,$data,$type,$astADO){
 
 
 // grab the settings from pluto_telecom table
-function getPhoneLinesSettings($id,$type,$dbADO,$telecomADO,$oldValues){
+function getPhoneLinesSettings($id,$dbADO,$telecomADO,$oldValues){
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
 		
 	$houseModes=getAssocArray('HouseMode','PK_HouseMode','Description',$dbADO,'','ORDER BY Description ASC');
@@ -127,7 +102,6 @@ function getPhoneLinesSettings($id,$type,$dbADO,$telecomADO,$oldValues){
 		$pos++;
 		$color=($pos%2==1)?'#EEEEEE':'#FFFFFF';
 		
-
 		$databaseHM=(strpos(@$oldValues[$mode],',')!==false)?substr(@$oldValues[$mode],0,strpos(@$oldValues[$mode],',')):@$oldValues[$mode];
 		$selectedHM=(isset($_REQUEST['routing_'.$mode]))?$_REQUEST['routing_'.$mode]:$databaseHM;
 		$selectedValue=(isset($_REQUEST['routing_'.$mode]) && $_REQUEST['routing_'.$mode]!=$databaseHM)?'':substr(@$oldValues[$mode],strpos(@$oldValues[$mode],',')+1);
@@ -196,8 +170,8 @@ function routing_options($mode,$selectedHM,$selectedValues,$dbADO){
 }
 
 // extract selected values from line_HouseMode from table pluto_telecom
-function getSelectedValues($id,$type,$telecomADO){
-	$res=$telecomADO->Execute('SELECT EK_HouseMode,Routing FROM Line_HouseMode WHERE `type`=? AND ID=?',array($type,$id));
+function getSelectedValues($id,$telecomADO){
+	$res=$telecomADO->Execute('SELECT EK_HouseMode,Routing FROM Line_HouseMode WHERE ID='.$id);
 	if($res->RecordCount()==0){
 		return array();
 	}
@@ -212,8 +186,7 @@ function getSelectedValues($id,$type,$telecomADO){
 
 function processSubmit($telecomADO){
 	$id=$_REQUEST['id'];
-	$type=$_REQUEST['type'];
-	$selectedValues=getSelectedValues($id,$type,$telecomADO);
+	$selectedValues=getSelectedValues($id,$telecomADO);
 	$houseModes=explode(',',$_REQUEST['houseModes']);
 
 	foreach ($houseModes AS $mode){
@@ -249,14 +222,14 @@ function processSubmit($telecomADO){
 
 		if(isset($selectedValues[$mode])){
 			// update
-			$telecomADO->Execute('UPDATE Line_HouseMode SET Routing=? WHERE ID=? AND `Type`=? AND EK_HouseMode=?',array($routingValue,$id,$type,$mode));
+			$telecomADO->Execute('UPDATE Line_HouseMode SET Routing=? WHERE ID=? AND EK_HouseMode=?',array($routingValue,$id,$mode));
 		}else{
 			// insert
-			$telecomADO->Execute('INSERT INTO Line_HouseMode (ID,`Type`,EK_HouseMode,Routing) VALUES (?,?,?,?)',array($id,$type,$mode,$routingValue));
+			$telecomADO->Execute('INSERT INTO Line_HouseMode (ID,EK_HouseMode,Routing) VALUES (?,?,?)',array($id,$mode,$routingValue));
 		}
 	}
 
-	$cmd='sudo -u root /usr/pluto/bin/create_pluto_dialplan.pl';
+	$cmd='sudo -u root /usr/pluto/bin/db_create_dialplan.sh';
 	exec($cmd);
 }
 ?>

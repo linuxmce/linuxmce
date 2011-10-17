@@ -1526,7 +1526,7 @@ function getMediaPluginID($installationID,$dbADO)
 	return @$row['PK_Device'];
 }
 
-function pulldownFromArray($valuesArray,$name,$selectedValue,$extra='',$valueKey='key',$zeroValueDescription,$highlightValue=-1)
+function pulldownFromArray($valuesArray,$name,$selectedValue,$extra='',$valueKey='key',$zeroValueDescription='',$highlightValue=-1)
 {
 	$out='<select name="'.$name.'" '.$extra.'>';
 	if($zeroValueDescription=='') $zeroValueDescription = '- '.translate('TEXT_PLEASE_SELECT_CONST').' -';
