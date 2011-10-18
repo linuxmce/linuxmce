@@ -148,7 +148,7 @@ sysfs      /sys      sysfs   defaults         0 0
 192.168.80.1:/home/public				/home/public			nfs intr,nolock,udp,rsize=32768,wsize=32768,retrans=10,timeo=50 1 1
 192.168.80.1:/home/user_1				/home/user_1			nfs intr,nolock,udp,rsize=32768,wsize=32768,retrans=10,timeo=50 1 1
 192.168.80.1:/home/flickr				/home/flickr			nfs intr,nolock,udp,rsize=32768,wsize=32768,retrans=10,timeo=50 1 1
-192.168.80.1:/home/camera			/home/camera		nfs intr,nolock,udp,rsize=32768,wsize=32768,retrans=10,timeo=50 1 1
+192.168.80.1:/home/cameras			/home/cameras		nfs intr,nolock,udp,rsize=32768,wsize=32768,retrans=10,timeo=50 1 1
 EOF
 
 cat > /etc/xdg/autostart/matchbox-keyboard.desktop << EOF
