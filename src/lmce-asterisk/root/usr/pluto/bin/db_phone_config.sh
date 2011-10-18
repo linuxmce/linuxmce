@@ -98,13 +98,6 @@ WriteSccpPhone()
 	VALUES ('$PhoneNumber','$PhoneNumber','$PhoneNumber','$PhoneNumber','pl_$DeviceID','$PhoneNumber','from-internal');"
 }
 
-WriteSipPhone()
-{
-	# adds configuration of current SIP phone to SQL query buffer.
-	PHONESSQL="$PHONESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,port,mailbox,secret,callerid,context)
-	VALUES ('$PhoneNumber','$PhoneNumber','$Port','$PhoneNumber@device','$Secret','device <$PhoneNumber>','from-internal');"
-}
-
 GetMacAddress()
 {
 	local SQL
@@ -142,7 +135,7 @@ RunConfigureScript()
 	if [[  "$ConfigureScript" != "" && "$IPaddress" != "" ]]; then
 		echo Executing Configuration Script $ConfigureScript
 		echo ping $IPaddress
-		ping -qnc 1 $IPaddress &>/dev/null && echo pingdone && /usr/pluto/bin/$ConfigureScript -d $FK_Device -i $IPaddress -m $MACaddress
+		ping -qnc 1 $IPaddress &>/dev/null && echo pingdone && /usr/pluto/bin/$ConfigureScript -d $DeviceID -i $IPaddress -m $MACaddress
 	fi
 }
 
@@ -309,14 +302,12 @@ AddSIPLine()
 
 	# create SIP peer
 	context="from-trunk"
-	LINESSQL="$LINESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,secret,host,port,context,qualify,nat,fromuser,fromdomain,callerid,allow) \
-	VALUES ('$username','$username','$password','$host','5060','$context','yes','yes','$username','$host','$username','alaw;ulaw');"
+	LINESSQL="$LINESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,secret,host,port,context,qualify,nat,fromuser,fromdomain,callerid,allow,insecure) \
+	VALUES ('$username','$username','$password','$host','5060','$context','no','yes','$username','$host','$username','alaw;ulaw','port,invite');"
 }
 
 WorkTheLines()
 {
-	#DEVICEDATA_EmergencyNumbers=296
-	#DEVICEDATA_EmergencyPhoneLine=297
 
 	# get emergency numbers
 	UseDB
