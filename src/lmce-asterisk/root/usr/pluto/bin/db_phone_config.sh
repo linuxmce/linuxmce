@@ -275,16 +275,22 @@ AddSIPLine()
 {
 	# add register to sip.conf
 	LINESSQL="$LINESSQL INSERT INTO $DB_astconfig_Table (var_metric,filename,category,var_name,var_val) VALUES
-		('$(( 100+$id ))', 'sip.conf', 'general', 'register', '$username:$password@$host/$username');"
+		('$(( 100+$id ))', 'sip.conf', 'general', 'register', '$username:$password@$host/$phonenumber');"
 	
 	# add outbound context in realtime extensions
 	context="outbound-allroutes"
 	LINESSQL="$LINESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES \
-	('$context','_$prefix.','1','Macro','dialout-trunk,SIP/$username,\${EXTEN:1},,'),\
+	('$context','_$prefix.','1','Macro','dialout-trunk,SIP/$phonenumber,\${EXTEN:1},,'),\
 	('$context','_$prefix.','2','Macro','outisbusy,');"
 	
+	# create incoming context and redirect to realtime
+	echo "
+[from-trunk-$phonenumber]
+switch => Realtime
+	" >> /etc/asterisk/extensions-lmce-trunks.conf
+
 	# add inbound context in realtime extensions
-	context="from-trunk-$username"
+	context="from-trunk-$phonenumber"
 	LINESSQL="$LINESSQL DELETE FROM $DB_Extensions_Table WHERE context like '$context';"
 	LINESSQL="$LINESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES \
 	('$context','_.','1','Set','GROUP()=OUT_$LineCounter'), \
@@ -303,11 +309,14 @@ AddSIPLine()
 	# create SIP peer
 	context="from-trunk"
 	LINESSQL="$LINESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,secret,host,port,context,qualify,nat,fromuser,fromdomain,callerid,allow,insecure) \
-	VALUES ('$username','$username','$password','$host','5060','$context','no','yes','$username','$host','$username','alaw;ulaw','port,invite');"
+	VALUES ('$phonenumber','$phonenumber','$password','$host','5060','$context','no','yes','$username','$host','$username','alaw;ulaw','port,invite');"
 }
 
 WorkTheLines()
 {
+	# remove incoming contexts file
+	rm -f /etc/asterisk/extensions-lmce-trunks.conf
+	touch /etc/asterisk/extensions-lmce-trunks.conf
 
 	# get emergency numbers
 	UseDB
