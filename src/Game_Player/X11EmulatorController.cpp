@@ -62,7 +62,7 @@ namespace DCE
     if (pairKeysyms.first == 0 && pairKeysyms.second == 0)
       {
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"X11EmulatorController::doAction(%s) - Could not find matching keysym.",sAction.c_str());
-	return NULL;
+	return false;
       }
 
     iKeysym          = pairKeysyms.first;
