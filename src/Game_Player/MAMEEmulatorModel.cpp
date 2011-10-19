@@ -60,8 +60,7 @@ namespace DCE
     m_mapActionsToKeysyms["UI_LOAD_STATE"] = make_pair(XK_F7,0);
     m_mapActionsToKeysyms["UI_SAVE_STATE"] = make_pair(XK_F7,XK_Shift_L);
     m_mapActionsToKeysyms["UI_PAGE_UP"] = make_pair(XK_Page_Up,0);
-    m_mapActionsToKeysyms["UI_PAGE_DOWN"] = make_pair(XK_Page_Down,0);
-  
+    m_mapActionsToKeysyms["UI_PAGE_DOWN"] = make_pair(XK_Page_Down,0);  
   }
 
 }

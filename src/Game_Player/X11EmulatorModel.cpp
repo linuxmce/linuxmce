@@ -16,10 +16,14 @@ namespace DCE
   X11EmulatorModel::X11EmulatorModel()
     : EmulatorModel()
   {
+    m_pDisplay = NULL;
+    m_iWindowId = 0;
   }
 
   X11EmulatorModel::~X11EmulatorModel()
   {
+    m_pDisplay = NULL;
+    m_iWindowId = 0;
   }
 
 }

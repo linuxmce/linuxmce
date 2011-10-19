@@ -21,6 +21,9 @@ namespace DCE
   public:
     MAMEEmulatorModel();
     ~MAMEEmulatorModel();
+
+    
+
   protected:
     virtual void initializeActionstoKeysyms(); // set key mappings for MAME.
   private:

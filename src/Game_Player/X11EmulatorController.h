@@ -10,6 +10,7 @@
 #define X11EMULATORCONTROLLER_H
 
 #include "EmulatorController.h"
+#include "X11EmulatorModel.h"
 #include <X11/Xlib.h>
 
 /* STL includes */
@@ -23,14 +24,16 @@ namespace DCE
   {
   public:
 
-    X11EmulatorController(Game_Player *pGame_Player, EmulatorModel *pEmulatorModel);  // ctor
+    X11EmulatorController(Game_Player *pGame_Player, X11EmulatorModel *pEmulatorModel);  // ctor
     ~X11EmulatorController(); // dtor
 
     virtual bool run();
     virtual bool stop();
 
+    virtual bool doAction(string sAction);
+
   protected:
-    Display *m_pDisplay;
+    X11EmulatorModel *m_pEmulatorModel;
   private:
   };
 }
