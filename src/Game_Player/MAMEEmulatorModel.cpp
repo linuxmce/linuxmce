@@ -20,6 +20,8 @@ namespace DCE
   MAMEEmulatorModel::MAMEEmulatorModel()
     : X11EmulatorModel()
   {
+    m_sConfigFile = "/root/.mame/mame.ini";
+    m_sConfigFileTemplate = "/usr/pluto/templates/mame.ini.template";
     initializeActionstoKeysyms();
   }
 
