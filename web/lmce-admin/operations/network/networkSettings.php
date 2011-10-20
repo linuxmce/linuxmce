@@ -257,7 +257,7 @@ function networkSettings($output,$dbADO) {
         	<tr>
                         <td colspan="3" class="tablehead"><B>'.translate('TEXT_CORE_SEEN_FROM_INTERNET_CONST').':</B></td>
                 </tr>
-		<tr><td colspan="3"><b>'.translate('TEXT_OUTSIDE_IP_CONST').'</b>&nbsp<input type="text" name="outsideip" disabled value="'.$outsideIP.'">&nbsp;&nbsp;<b>'.translate('TEXT_OUTSIDE_HOSTNAME_CONST').'</b>&nbsp;<input type="text" name="outsideip" disabled size=50 value="'.gethostbyaddr($outsideIP).'"></td></tr>
+		<tr><td colspan="3"><b>'.translate('TEXT_OUTSIDE_IP_CONST').'</b>&nbsp;<input type="text" name="outsideip" disabled value="'.$outsideIP.'">&nbsp;&nbsp;<b>'.translate('TEXT_OUTSIDE_HOSTNAME_CONST').'</b>&nbsp;<input type="text" name="outsideip" disabled size=50 value="'.gethostbyaddr($outsideIP).'"></td></tr>
 		<tr><td>&nbsp;</td></tr>
 		<tr>
 			<td colspan="3" class="tablehead"><B>'.translate('TEXT_DHCP_SERVERS_CONST').':</B></td>
@@ -317,28 +317,28 @@ function networkSettings($output,$dbADO) {
 			<td>&nbsp;</td>
 			<td width="150"><span id="coreIPtext" style="color:'.(($ipFromDHCP==1)?'#CCCCCC':'').'">'.translate('TEXT_IP_ADDRESS_CONST').':</span></td>
 			<td><input type="text" maxlength="3" name="coreIP_1" size="3" value="'.@$coreIPArray[0].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreIP_2" size="3" value="'.@$coreIPArray[1].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreIP_3" size="3" value="'.@$coreIPArray[2].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreIP_4" size="3" value="'.@$coreIPArray[3].'" '.(($ipFromDHCP==1)?'disabled':'').'>'
-		.(($ipFromDHCP==1)?'&nbsp&nbspDHCP IP  : '.@$externalIP:'')
+		.(($ipFromDHCP==1)?'&nbsp;&nbsp;DHCP IP  : '.@$externalIP:'')
 		.'</td>	
 		</tr>						
 		<tr>
 			<td>&nbsp;</td>
 			<td><span id="coreNMtext" style="color:'.(($ipFromDHCP==1)?'#CCCCCC':'').'">'.translate('TEXT_NETMASK_CONST').':</span></td>
 			<td><input type="text" maxlength="3" name="coreNetMask_1" size="3" value="'.@$coreNetMaskArray[0].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreNetMask_2" size="3" value="'.@$coreNetMaskArray[1].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreNetMask_3" size="3" value="'.@$coreNetMaskArray[2].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreNetMask_4" size="3" value="'.@$coreNetMaskArray[3].'" '.(($ipFromDHCP==1)?'disabled':'').'>'
-		.(($ipFromDHCP==1)?'&nbsp&nbspDHCP MASK: '.@$externalMASK:'')
+		.(($ipFromDHCP==1)?'&nbsp;&nbsp;DHCP MASK: '.@$externalMASK:'')
 		.'</td>
 		</tr>
 		<tr>
 			<td>&nbsp;</td>
 			<td><span id="coreGWtext" style="color:'.(($ipFromDHCP==1)?'#CCCCCC':'').'">'.translate('TEXT_GATEWAY_CONST').':</span></td>
 			<td><input type="text" maxlength="3" name="coreGW_1" size="3" value="'.@$coreGWArray[0].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreGW_2" size="3" value="'.@$coreGWArray[1].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreGW_3" size="3" value="'.@$coreGWArray[2].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreGW_4" size="3" value="'.@$coreGWArray[3].'" '.(($ipFromDHCP==1)?'disabled':'').'>'
-		 .(($ipFromDHCP==1)?'&nbsp&nbspDHCP GW  : '.@$defaultGW:'')
+		 .(($ipFromDHCP==1)?'&nbsp;&nbsp;DHCP GW  : '.@$defaultGW:'')
 		.'</td>
 		</tr>		
 		<tr>
 			<td>&nbsp;</td>
 			<td><span id="coreDNS1text" style="color:'.(($ipFromDHCP==1)?'#CCCCCC':'').'">'.translate('TEXT_NAMESERVER_CONST').' (DNS) #1:</span></td>
 			<td><input type="text" maxlength="3" name="coreDNS1_1" size="3" value="'.@$coreDNS1Array[0].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDNS1_2" size="3" value="'.@$coreDNS1Array[1].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDNS1_3" size="3" value="'.@$coreDNS1Array[2].'" '.(($ipFromDHCP==1)?'disabled':'').'>.<input type="text" maxlength="3" name="coreDNS1_4" size="3" value="'.@$coreDNS1Array[3].'" '.(($ipFromDHCP==1)?'disabled':'').'>'
-			.(($ipFromDHCP==1)?'&nbsp&nbspDHCP DNS : '.@$DNS:'')
+			.(($ipFromDHCP==1)?'&nbsp;&nbsp;DHCP DNS : '.@$DNS:'')
 			.'</td>
 		</tr>		
 		<tr>
