@@ -44,7 +44,16 @@ namespace DCE
     }
   protected:
     virtual void initializeActionstoKeysyms() = 0; // subclass and set key mappings.
+    virtual bool updateConfig();
+    virtual void initializeButtontoKeysyms();
   private:
+    map<int, int> m_mapButtonToKeysyms;
+    int m_mapButtonToKeysyms_Find(int iPK_Button) 
+    {
+      map<int, int>::iterator it = m_mapButtonToKeysyms.find(iPK_Button);
+      return it == m_mapButtonToKeysyms.end() ? 0 : (*it).second;
+    }
+    
   };
 
 }

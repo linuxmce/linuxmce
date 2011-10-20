@@ -10,6 +10,9 @@
 
 #include "MAMEEmulatorModel.h"
 #include <X11/keysym.h>
+#include "PlutoUtils/FileUtils.h"
+#include "PlutoUtils/StringUtils.h"
+#include "DCE/Logger.h"
 
 namespace DCE
 {
@@ -17,12 +20,29 @@ namespace DCE
   MAMEEmulatorModel::MAMEEmulatorModel()
     : X11EmulatorModel()
   {
-    
+    initializeActionstoKeysyms();
   }
 
   MAMEEmulatorModel::~MAMEEmulatorModel()
   {
   
+  }
+
+  void MAMEEmulatorModel::updateTemplateVariables()
+  {
+    m_mapConfigTemplateItems["###ROMPATH###"] = m_sRomPath;
+    m_mapConfigTemplateItems["###VIDEO###"] = m_sVideoAccelleration;
+
+    return;
+
+  }
+
+  /**
+   * Update the /root/.mame/mame.ini file as needed.
+   */
+  bool MAMEEmulatorModel::updateConfig()
+  {
+    return X11EmulatorModel::updateConfig();
   }
 
   void MAMEEmulatorModel::initializeActionstoKeysyms()

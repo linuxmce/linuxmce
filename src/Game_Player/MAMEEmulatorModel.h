@@ -14,6 +14,9 @@
 #include "X11EmulatorModel.h"
 #include "EmulatorModel.h"
 
+#define MAME_CONFIG_FILE_TEMPLATE "/usr/pluto/templates/mame.ini.template"
+#define MAME_CONFIG_FILE "/root/.mame/mame.ini"
+
 namespace DCE
 {
   class MAMEEmulatorModel : public X11EmulatorModel
@@ -22,10 +25,10 @@ namespace DCE
     MAMEEmulatorModel();
     ~MAMEEmulatorModel();
 
-    
-
   protected:
     virtual void initializeActionstoKeysyms(); // set key mappings for MAME.
+    virtual bool updateConfig();
+    virtual void updateTemplateVariables();
   private:
   };
 }

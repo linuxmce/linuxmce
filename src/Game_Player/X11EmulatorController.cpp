@@ -77,4 +77,46 @@ namespace DCE
     
   }
 
+  bool X11EmulatorController::pressButton(int iPK_Button)
+  {
+    // TODO: Come back here and implement this fucker.
+    return true;
+  }
+
+  bool X11EmulatorController::pressClick(int iPositionX, int iPositionY, int iButtons)
+  {
+    // TODO: Come back here.
+    return true;
+  }
+
+  bool X11EmulatorController::getSnap(char **pData, int iData_Size)
+  {
+    // TODO: come back here.
+    return true;
+  }
+
+  bool X11EmulatorController::setSpeed(int iSpeed)
+  {
+    // todo: come back here.
+    return true;
+  }
+
+  bool X11EmulatorController::saveState()
+  {
+    // not implemented
+    return true;
+  }
+
+  bool X11EmulatorController::loadState()
+  {
+    // not implemented
+    return true;
+  }
+  
+  bool X11EmulatorController::gotoMenu(int iMenu)
+  {
+    // not implemented
+    return true;
+  }
+
 }

@@ -31,12 +31,18 @@ namespace DCE
     virtual bool stop();
 
     virtual bool doAction(string sAction);
+    virtual bool pressButton(int iPK_Button);
+    virtual bool pressClick(int iPositionX, int iPositionY, int iButtons);
+    virtual bool getSnap(char **pData, int iData_Size);
+    virtual bool setSpeed(int iSpeed);
+    virtual bool gotoMenu(int iMenu);
+    virtual bool saveState();
+    virtual bool loadState();
 
   protected:
     X11EmulatorModel *m_pEmulatorModel;
   private:
   };
 }
-
 
 #endif

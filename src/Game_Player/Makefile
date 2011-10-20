@@ -21,7 +21,8 @@ sources = Main.cpp Game_Player.cpp $(Gen_Dev_Files) \
 	EmulatorController.cpp \
 	X11EmulatorModel.cpp \
 	X11EmulatorController.cpp \
-	MAMEEmulatorModel.cpp
+	MAMEEmulatorModel.cpp \
+	MAMEEmulatorController.cpp
 #<-dceag-mh-e->
 
 CXXFLAGS += 
