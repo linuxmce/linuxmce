@@ -127,6 +127,9 @@ void PlutoHalD::getChildId(LibHalContext * ctx, const char * udi,
 			if( halTag != NULL && halTag == tagValue )
 			{
 				childId = childs[i];
+
+				g_free(halTag);
+				halTag = NULL;
 				break;
 			}
 			g_free (halTag);
@@ -437,13 +440,16 @@ void PlutoHalD::myDeviceAdded(LibHalContext * ctx, const char * udi)
 						fstype = NULL;
 					}
 				}
+				g_free(storage);
+				storage = NULL;
 			}
+			g_free(parent);
+			parent = NULL;
 		}
 		else if( 0 == strcmp(category, "storage") && strlen(category) == strlen("storage") )
 		{
 			char ** capabilities = libhal_device_get_property_strlist (ctx, udi, "info.capabilities", NULL);
 			
-			capabilities = libhal_device_get_property_strlist (ctx, udi, "info.capabilities", NULL);
 			bool bCDROM = false;
 			if(capabilities != NULL)
 			{
@@ -880,7 +886,8 @@ void PlutoHalD::initialize(LibHalContext * ctx)
 			}
 			else if( 0 == strcmp(category, "bluetooth_hci") && strlen(category) == strlen("bluetooth_hci") )
 			{
-				gchar *parent = libhal_device_get_property_string (ctx, libhal_device_get_property_string(ctx, udi, "info.parent", NULL), "info.parent", NULL);
+				gchar *parent_info = libhal_device_get_property_string(ctx, udi, "info.parent", NULL);
+				gchar *parent = libhal_device_get_property_string (ctx, parent_info, "info.parent", NULL);
 				gchar *info_udi = libhal_device_get_property_string (ctx, parent, "info.udi", NULL);
 				
 				int usb_device_product_id = libhal_device_get_property_int(ctx, parent, "usb_device.product_id", NULL);
@@ -894,6 +901,8 @@ void PlutoHalD::initialize(LibHalContext * ctx)
 				halDevice->EVENT_Device_Detected("", "", "", 0, buffer, 4, 0, info_udi, "", category, halDevice->m_sSignature_get());
 				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Finished firing event for %s",buffer);
 				
+				g_free (parent_info);
+				parent_info = NULL;
 				g_free (parent);
 				parent = NULL;
 				g_free (info_udi);
@@ -965,13 +974,16 @@ void PlutoHalD::initialize(LibHalContext * ctx)
 							fstype = NULL;
 						}
 					}
+					g_free(storage);
+					storage = NULL;
 				}
+				g_free(parent);
+				parent = NULL;
 			}
 			else if( 0 == strcmp(category, "storage") && strlen(category) == strlen("storage") )
 			{
 				char ** capabilities = libhal_device_get_property_strlist (ctx, udi, "info.capabilities", NULL);
-			
-				capabilities = libhal_device_get_property_strlist (ctx, udi, "info.capabilities", NULL);
+				
 				bool bCDROM = false;
 				if(capabilities != NULL)
 				{
@@ -1182,6 +1194,7 @@ void PlutoHalD::initialize(LibHalContext * ctx)
 		g_free(category);
 		category = NULL;
 	}
+	libhal_free_string_array(devices);
 	
 	halDevice->EVENT_Done_Detecting_Devices( halDevice->m_sSignature_get() );
 }
