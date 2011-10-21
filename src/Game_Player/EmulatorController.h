@@ -11,6 +11,7 @@
 
 #include "EmulatorModel.h"
 #include "Game_Player.h"
+#include "Gen_Devices/AllCommandsRequests.h"
 
 namespace DCE
 {
@@ -20,6 +21,7 @@ namespace DCE
   protected:
     Game_Player *m_pGame_Player;
     EmulatorModel *m_pEmulatorModel;
+    virtual bool sanityCheck(string sFuncName);
   public:
 
     EmulatorController(Game_Player *pGame_Player, EmulatorModel *pEmulatorModel);

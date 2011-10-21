@@ -20,8 +20,9 @@ namespace DCE
   MAMEEmulatorModel::MAMEEmulatorModel()
     : X11EmulatorModel()
   {
-    m_sConfigFile = "/root/.mame/mame.ini";
-    m_sConfigFileTemplate = "/usr/pluto/templates/mame.ini.template";
+    m_sConfigFile = MAME_CONFIG_FILE;
+    m_sConfigFileTemplate = MAME_CONFIG_FILE_TEMPLATE;
+    m_sWindowName = "mame.mame";
     initializeActionstoKeysyms();
   }
 
@@ -30,11 +31,17 @@ namespace DCE
   
   }
 
+  string MAMEEmulatorModel::getVideoAccelleration()
+  {
+    // come back here later and actually flesh this out.
+    return "opengl";
+  }
+
   void MAMEEmulatorModel::updateTemplateVariables()
   {
-    m_mapConfigTemplateItems["###ROMPATH###"] = m_sRomPath;
-    m_mapConfigTemplateItems["###VIDEO###"] = m_sVideoAccelleration;
-
+    
+    m_mapConfigTemplateItems["###ROMPATH###"] = m_mapMedia_Find("ARCADE");
+    m_mapConfigTemplateItems["###VIDEO###"] = getVideoAccelleration();
     return;
 
   }

@@ -29,6 +29,7 @@ namespace DCE
     virtual void initializeActionstoKeysyms(); // set key mappings for MAME.
     virtual bool updateConfig();
     virtual void updateTemplateVariables();
+    virtual string getVideoAccelleration();
   private:
   };
 }

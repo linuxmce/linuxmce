@@ -63,6 +63,9 @@ namespace DCE
   class Game_Player:public Game_Player_Command, public AlarmEvent
   {
 //<-dceag-decl-e->
+
+    friend class EmulatorController;
+
     // Private member variables
 
     // Private methods

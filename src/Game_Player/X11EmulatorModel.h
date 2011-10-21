@@ -30,6 +30,7 @@ namespace DCE
     ~X11EmulatorModel();
     Display *m_pDisplay;
     Window m_iWindowId;
+    string m_sWindowName;
 
     map<string, pair<int, int> > m_mapActionsToKeysyms;
     pair<int, int> m_mapActionsToKeysyms_Find(string sAction) 
@@ -37,7 +38,7 @@ namespace DCE
       map<string, pair<int, int> >::iterator it = m_mapActionsToKeysyms.find(sAction);
       return it == m_mapActionsToKeysyms.end() ? make_pair(0,0) : (*it).second;
     }
-    bool m_mapParameters_Exists(string sAction)
+    bool m_mapActionsToKeysyms_Exists(string sAction)
     {
       map<string, pair<int, int> >::iterator it = m_mapActionsToKeysyms.find(sAction);
       return it != m_mapActionsToKeysyms.end();

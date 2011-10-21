@@ -25,15 +25,31 @@ namespace DCE
   protected:
     virtual bool updateConfig();
     virtual void updateTemplateVariables() = 0;
+    virtual string getVideoAccelleration() = 0;
   public:
     string m_sConfigFileTemplate;
     string m_sConfigFile;
-    string m_sRomPath;
     string m_sVideoAccelleration;
+    string m_sEmulatorBinary;
+    bool m_bChangeRequiresRestart;
     bool m_bRunning;
+    bool m_bHasArgs;
+    string m_sArgs;
     bool m_bRunning_get() { return m_bRunning; }
     void m_bRunning_set(bool bRunning) { m_bRunning = bRunning; }
     map<string, string> m_mapConfigTemplateItems;
+
+    map<string, string> m_mapMedia;
+    string m_mapMedia_Find(string sSlot) 
+    {
+      map<string, string>::iterator it = m_mapMedia.find(sSlot);
+      return it == m_mapMedia.end() ? "" : (*it).second;
+    }
+    bool m_mapMedia_Exists(string sSlot)
+    {
+      map<string, string>::iterator it = m_mapMedia.find(sSlot);
+      return it != m_mapMedia.end();
+    }
 
     EmulatorModel();
     ~EmulatorModel();

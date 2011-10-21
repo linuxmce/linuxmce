@@ -22,8 +22,12 @@ namespace DCE
   EmulatorModel::EmulatorModel()
   {
     m_bRunning_set(false);
+    m_bHasArgs=true;
+    m_sArgs="";
     m_sConfigFile="";
     m_sConfigFileTemplate="";
+    m_sVideoAccelleration="";
+    m_bChangeRequiresRestart=true;
   }
 
   EmulatorModel::~EmulatorModel()
@@ -31,6 +35,7 @@ namespace DCE
     m_bRunning_set(false);
     m_sConfigFile.clear();
     m_sConfigFileTemplate.clear();
+    m_mapMedia.clear();
   }
 
   bool EmulatorModel::updateConfig()

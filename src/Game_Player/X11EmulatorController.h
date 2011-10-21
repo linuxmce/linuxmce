@@ -30,6 +30,8 @@ namespace DCE
     virtual bool run();
     virtual bool stop();
 
+    void findWindow();
+
     virtual bool doAction(string sAction);
     virtual bool pressButton(int iPK_Button);
     virtual bool pressClick(int iPositionX, int iPositionY, int iButtons);
@@ -42,6 +44,7 @@ namespace DCE
   protected:
     X11EmulatorModel *m_pEmulatorModel;
   private:
+    pthread_t m_windowIdThread;
   };
 }
 
