@@ -2,6 +2,7 @@ ChangeLog
 LICENCE
 MANIFEST.in
 NEWS
+PKG-INFO
 README
 setup.py
 Coherence.egg-info/PKG-INFO
@@ -50,6 +51,7 @@ coherence/backends/swr3_storage.py
 coherence/backends/ted_storage.py
 coherence/backends/test_storage.py
 coherence/backends/tracker_storage.py
+coherence/backends/vdr_stream.py
 coherence/backends/yamj_storage.py
 coherence/backends/youtube_storage.py
 coherence/extern/__init__.py
@@ -69,11 +71,8 @@ coherence/extern/galleryremote/gallery.py
 coherence/extern/log/ChangeLog
 coherence/extern/log/README
 coherence/extern/log/__init__.py
-coherence/extern/log/__init__.pyc
 coherence/extern/log/log.py
-coherence/extern/log/log.pyc
 coherence/extern/log/termcolor.py
-coherence/extern/log/termcolor.pyc
 coherence/extern/log/test_log.py
 coherence/extern/telepathy/__init__.py
 coherence/extern/telepathy/client.py
@@ -84,11 +83,9 @@ coherence/extern/telepathy/stream.py
 coherence/extern/telepathy/tube.py
 coherence/extern/telepathy/tubeconn.py
 coherence/extern/uuid/__init__.py
-coherence/extern/uuid/__init__.pyc
 coherence/extern/uuid/uuid.README.txt
 coherence/extern/uuid/uuid.html
 coherence/extern/uuid/uuid.py
-coherence/extern/uuid/uuid.pyc
 coherence/extern/youtubedl/__init__.py
 coherence/extern/youtubedl/youtubedl.py
 coherence/test/__init__.py
@@ -173,6 +170,7 @@ coherence/upnp/services/servers/test/__init__.py
 coherence/upnp/services/servers/test/test_content_directory_server.py
 coherence/web/__init__.py
 coherence/web/ui.py
+dist/Coherence-0.6.6.2-py2.5.egg
 docs/coherence.conf.example
 docs/mirabeau.xml
 docs/test-store-example.xml
