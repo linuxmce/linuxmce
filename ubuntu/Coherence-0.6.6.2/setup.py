@@ -113,6 +113,7 @@ if haz_setuptools == True:
     setup_args['entry_points'] = """
         [coherence.plugins.backend.media_server]
         LinuxMCEStore = coherence.backends.lmce_storage:LinuxMCEStore
+        VDRStream = coherence.backends.vdr_stream:VDRStream
         FSStore = coherence.backends.fs_storage:FSStore
         MediaStore = coherence.backends.mediadb_storage:MediaStore
         ElisaMediaStore = coherence.backends.elisa_storage:ElisaMediaStore
