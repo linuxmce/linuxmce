@@ -15,10 +15,10 @@ Package: python-coherence
 Architecture: all
 Depends: ${misc:Depends},
          ${python:Depends},
-         python-celementtree,
+         python2.6-celementtree | python-celementtree,
          python-configobj,
          python2.5 | python-ctypes,
-         python-elementtree,
+         python2.6-elementtree | python-elementtree,
          python-gst0.10,
          python-louie,
          python-pkg-resources,
