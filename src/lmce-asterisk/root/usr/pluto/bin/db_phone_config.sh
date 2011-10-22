@@ -308,8 +308,9 @@ switch => Realtime
 
 	# create SIP peer
 	context="from-trunk"
-	LINESSQL="$LINESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,secret,host,port,context,qualify,nat,fromuser,fromdomain,callerid,allow,insecure) \
-	VALUES ('$phonenumber','$phonenumber','$password','$host','5060','$context','no','yes','$username','$host','$username','alaw;ulaw','port,invite');"
+	LINESSQL="$LINESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,secret,host,port,context,qualify,nat,type,fromuser,fromdomain,callerid,allow,insecure) VALUES \
+	('$host','$username','$password','$host','5060','$context','no','yes','friend',NULL,'$host','$username','alaw;ulaw','port,invite'), \
+	('$phonenumber','$username','$password','$host','5060','$context','no','yes','peer','$username', '$host','$username','alaw;ulaw','port,invite');"
 }
 
 WorkTheLines()

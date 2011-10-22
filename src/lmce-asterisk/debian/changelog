@@ -1,3 +1,9 @@
+lmce-asterisk (0+0.2.0-7) unstable; urgency=low
+
+  * Modifying trunk SIP entry for incoming calls to work
+
+ -- Serge Wagener <serge@linuxmce.org>  Sat, 22 Oct 2011 14:30:00 +0200
+
 lmce-asterisk (0+0.2.0-6) unstable; urgency=low
 
   * Adds dependency for asterisk-mysql package
