@@ -422,6 +422,9 @@ echo '/bin/false' >"$TEMP_DIR/etc/X11/default-display-manager"
 LC_ALL=C chroot $TEMP_DIR update-rc.d -f kdm remove
 LC_ALL=C chroot $TEMP_DIR update-rc.d -f NetworkManager remove
 
+#implement external_media_identifier fix
+LC_ALL=C chroot $TEMP_DIR ln -s /usr/lib/libdvdread.so.4 /usr/lib/libdvdread.so.3
+
 #Install ancillary programs
 LC_ALL=C chroot $TEMP_DIR apt-get -y install xserver-xorg-video-all linux-firmware
 VerifyExitCode "Ancillary programs install failed"
