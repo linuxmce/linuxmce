@@ -2,6 +2,7 @@ coherence (0.6.6-3) unstable; urgency=low
 
   * Change dependency for lucid
   * Limit LinuxMCE Backend to return only existing files (File.Missing != 1)
+  * Add vdr stream patch from http://coherence.beebits.net/ticket/296
 
  -- Peer Oliver Schmidt <developers@linuxmce.org>  Sat, 22 Oct 2011 17:20:00 +0200
 
