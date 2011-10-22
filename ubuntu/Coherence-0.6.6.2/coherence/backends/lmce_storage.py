@@ -214,6 +214,7 @@ class Artist(BackendItem):
             q = "select DISTINCT aalb.PK_Attribute, aalb.Name from File_Attribute faart, File_Attribute faalb, Attribute aalb, File f "\
                 "where faart.FK_Attribute = %s and faart.FK_File = f.PK_File and f.EK_MediaType = %s AND "\
                 "aalb.FK_AttributeType = %s AND aalb.PK_Attribute = faalb.FK_Attribute AND faalb.FK_File = f.PK_File "\
+                "AND f.Missing != 1 "\
                 "ORDER BY aalb.Name"
             rows = self._db.sql_execute(q, self.itemID, MEDIATYPE_AUDIO, ATTRIBUTE_ALBUM)
             for row in rows:
@@ -228,7 +229,8 @@ class Artist(BackendItem):
     def get_child_count(self):
         q = "select count(DISTINCT faalb.FK_Attribute) as c from File_Attribute faart, File_Attribute faalb, Attribute aalb, File f "\
             "where faart.FK_Attribute = %s and faart.FK_File = f.PK_File and faalb.FK_File = f.PK_File AND "\
-            "aalb.FK_AttributeType = %s AND aalb.PK_Attribute = faalb.FK_Attribute AND f.EK_MediaType = %s"
+            "aalb.FK_AttributeType = %s AND aalb.PK_Attribute = faalb.FK_Attribute AND f.EK_MediaType = %s "\
+            "AND f.Missing != 1 "
         return self._db.sql_execute(q, self.itemID, ATTRIBUTE_ALBUM, MEDIATYPE_AUDIO)[0].c
 
     def get_item(self):
@@ -267,7 +269,9 @@ class Album(BackendItem):
                 "FROM File f LEFT JOIN File_Attribute ftit ON f.PK_File = ftit.FK_File "\
                 "JOIN Attribute atit ON ftit.FK_Attribute = atit.PK_Attribute AND atit.FK_AttributeType = %s "\
                 "JOIN File_Attribute falb ON f.PK_File=falb.FK_File AND falb.FK_Attribute = %s "\
-                "WHERE f.EK_MediaType = %s ORDER BY Title"
+                "WHERE f.EK_MediaType = %s "\
+                "AND f.Missing != 1 "\
+                "ORDER BY Title"
             if request_count:
                 q += " limit %d" % request_count
             rows = self._db.sql_execute(q, ATTRIBUTE_TITLE, self.itemID, MEDIATYPE_AUDIO)
@@ -418,9 +422,12 @@ class MusicPlaylist(BasePlaylist):
         q += "FROM PlaylistEntry pe, File f "
         q += SQL_AUDIOTRACK_JOIN
         q += "WHERE f.EK_MediaType = %s AND "\
-            "f.PK_File = pe.FK_File AND pe.FK_Playlist = %s "
+            "f.PK_File = pe.FK_File AND pe.FK_Playlist = %s "\
+            "AND f.Missing != 1 "
         if request_count:
             q += " limit %d" % request_count
+            
+        
         return self._db.sql_execute(q, ATTRIBUTE_ARTIST, ATTRIBUTE_ALBUM, ATTRIBUTE_TITLE, ATTRIBUTE_TRACK, self.mediatype, self.db_id)
 
     def get_child_count(self):
@@ -622,6 +629,7 @@ class LinuxMCEDB(Loggable):
             q = "select DISTINCT a.PK_Attribute,a.Name from Attribute a, "\
                 "File_Attribute fa, File f "\
                 "WHERE a.PK_Attribute = fa.FK_Attribute AND fa.FK_File = f.PK_File AND a.FK_AttributeType = %s AND f.EK_MediaType = %s "\
+                "AND f.Missing != 1 "\
                 "order by a.Name"
             for row in self.db.sql_execute(q, ATTRIBUTE_ARTIST, MEDIATYPE_AUDIO):
                 artist = Artist(row, self.db)
@@ -641,6 +649,7 @@ class LinuxMCEDB(Loggable):
             q = "select DISTINCT a.PK_Attribute,a.Name from Attribute a "\
                 "JOIN File_Attribute fa ON a.PK_Attribute = fa.FK_Attribute "\
                 "JOIN File f ON fa.FK_File = f.PK_File where a.FK_AttributeType = %s AND f.EK_MediaType = %s "\
+                "AND f.Missing != 1 "\
                 "order by a.Name"
             for row in self.db.sql_execute(q, ATTRIBUTE_ALBUM, MEDIATYPE_AUDIO):
                 album = Album(row, self.db)
@@ -659,7 +668,9 @@ class LinuxMCEDB(Loggable):
 
         def query_db():
             q = "select distinct p.PK_Playlist, p.Name from Playlist p, PlaylistEntry pe, File f WHERE "\
-                "p.PK_Playlist = pe.FK_Playlist AND pe.FK_File = f.PK_File and f.EK_MediaType = %s order by Name"
+                "p.PK_Playlist = pe.FK_Playlist AND pe.FK_File = f.PK_File and f.EK_MediaType = %s "\
+                "AND f.Missing != 1 "\
+                "order by Name"
             for row in self.db.sql_execute(q, PlaylistClass.mediatype):
                 playlist = PlaylistClass(row, self)
                 playlists.append(playlist)
@@ -671,6 +682,7 @@ class LinuxMCEDB(Loggable):
 
     def get_artist_with_id(self, artist_id):
         q = "select PK_Attribute,Name from Attribute where PK_Attribute = %s AND FK_AttributeType = %s"
+        
         row = self.db.sql_execute(q, artist_id, ATTRIBUTE_ARTIST)[0]
         return Artist(row, self.db)
 
@@ -705,7 +717,9 @@ class LinuxMCEDB(Loggable):
         q = "select f.PK_File, CONCAT(f.Path, '/', f.Filename) as Uri, IFNULL(atit.Name,f.Filename) as Title "\
             "FROM File f LEFT JOIN File_Attribute ftit ON f.PK_File = ftit.FK_File "\
             "JOIN Attribute atit ON ftit.FK_Attribute = atit.PK_Attribute AND atit.FK_AttributeType = %s "\
-            "WHERE f.EK_MediaType = %s AND PK_File = %s ORDER BY Title"
+            "WHERE f.EK_MediaType = %s AND PK_File = %s "\
+            "AND f.Missing != 1 "\
+            "ORDER BY Title"
         row = self.db.sql_execute(q, ATTRIBUTE_TITLE, MEDIATYPE_AUDIO, track_id)[0]
         return Track(row, self.db)
 
@@ -728,7 +742,9 @@ class LinuxMCEDB(Loggable):
             q = "select f.PK_File, CONCAT(f.Path, '/', f.Filename) as Uri, IFNULL(atit.Name,f.Filename) as Title "\
                 "FROM File f LEFT JOIN File_Attribute ftit ON f.PK_File = ftit.FK_File "\
                 "JOIN Attribute atit ON ftit.FK_Attribute = atit.PK_Attribute AND atit.FK_AttributeType = %s "\
-                "WHERE f.EK_MediaType = %s ORDER BY Title"
+                "WHERE f.EK_MediaType = %s "\
+                "AND f.Missing != 1 "\
+                "ORDER BY Title"
             for row in self.db.sql_execute(q, ATTRIBUTE_TITLE, MEDIATYPE_AUDIO):
                 track = Track(row, self.db)
                 tracks.append(track)
@@ -742,7 +758,8 @@ class LinuxMCEDB(Loggable):
         q = "select f.PK_File, IFNULL(atit.Name,f.Filename) as Title, CONCAT(f.Path,'/', f.Filename) as Uri "\
             "from File f LEFT JOIN File_Attribute fatit ON f.PK_File = fatit.FK_File "\
             "JOIN Attribute atit ON fatit.FK_Attribute = atit.PK_Attribute "\
-            "where f.PK_File = %s "
+            "where f.PK_File = %s "\
+            "AND f.Missing != 1 "
         row = self.db.sql_execute(q, video_id)[0]
         return Video(row, self.db)
 
@@ -752,7 +769,8 @@ class LinuxMCEDB(Loggable):
         def query_db():
             q = "select f.PK_File, IFNULL(atit.Name,f.Filename) as Title, CONCAT(f.Path,'/', f.Filename) as Uri "\
                 "from File f LEFT JOIN File_Attribute fatit ON f.PK_File = fatit.FK_File "\
-                "JOIN Attribute atit ON fatit.FK_Attribute = atit.PK_Attribute WHERE f.EK_MediaType = %s"
+                "JOIN Attribute atit ON fatit.FK_Attribute = atit.PK_Attribute WHERE f.EK_MediaType = %s "\
+                "AND f.Missing != 1 "
             for row in self.db.sql_execute(q, MEDIATYPE_VIDEO):
                 video = Video(row, self.db)
                 videos.append(video)
