@@ -19,11 +19,12 @@ VDRInfoFileHandler::~VDRInfoFileHandler(void)
 bool VDRInfoFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 	list<pair<char *, size_t> >& /*listPicturesForTags*/)
 {
+#ifdef UPDATEMEDIA_STATUS
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# VDRInfoFileHandler::LoadAttributes: loading %d attributes in the attribute file %s",
 		pPlutoMediaAttributes->m_mapAttributes.size(), GetFileAttribute().c_str());
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# VDRInfoFileHandler::LoadAttributes: loading %d attributes in the attribute file %s",
 		pPlutoMediaAttributes->m_mapAttributes.size(), GetFileAttribute().c_str());
-
+#endif
 	string sData;
 	FileUtils::ReadTextFile(GetFileAttribute(), sData);
 
@@ -86,8 +87,10 @@ bool VDRInfoFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttribu
 {
 	string sBuffer;
 
+#ifdef UPDATEMEDIA_STATUS
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# VDRInfoFileHandler::SaveAttributes: saving %d attributes in the attribute file %s",
 		pPlutoMediaAttributes->m_mapAttributes.size(), GetFileAttribute().c_str());
+#endif
 
 	for(MapPlutoMediaAttributes::iterator it = pPlutoMediaAttributes->m_mapAttributes.begin();
 		it != pPlutoMediaAttributes->m_mapAttributes.end(); ++it)
@@ -148,10 +151,14 @@ string VDRInfoFileHandler::GetFileAttribute()
 	
 	if ( FileUtils::FileExists(m_sDirectory + "/info.vdr" ) )
 	{
+#ifdef UPDATEMEDIA_DEBUG
 		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "# VDRInfoFileHandler::GetFileAttribute: %s is an old recording dir", m_sDirectory.c_str());
+#endif
 		sInfofile = "/info.vdr";
 	} else {
+#ifdef UPDATEMEDIA_DEBUG
 		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "# VDRInfoFileHandler::GetFileAttribute: %s is a new recording dir", m_sDirectory.c_str());
+#endif
 	}
 	
 	return m_sDirectory + sInfofile;

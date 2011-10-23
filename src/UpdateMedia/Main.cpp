@@ -191,12 +191,15 @@ void *UpdateMediaThread(void *)
 	while(true)
 	{
 		//load info about ModificationData, AttrCount, AttrDate, attributes, timestamp for all files
+#ifdef UPDATEMEDIA_STATUS
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Loading fresh data from db...");
+#endif
 		MediaState::Instance().LoadDbInfo(g_pDatabase_pluto_media, UpdateMediaVars::sDirectory);
+#ifdef UPDATEMEDIA_STATUS
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Loaded fresh data from db");
 
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Worker thread: \"I'm wake!\"");        
-		
+#endif		
 		//UPnP changes: as UPnP mount share doesn't work with inotify (?? 
 		//at least I don't see it firing any expected events, we are manually 
 		//checking contents of 'devices' list for any changes
@@ -231,8 +234,9 @@ void *UpdateMediaThread(void *)
 
 			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Folder to process: %s", sItem.c_str());	
 			PLUTO_SAFETY_LOCK(cm, g_ConnectionMutex );
+#ifdef UPDATEMEDIA_STATUS
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Synchronizing '%s'...", sItem.c_str());	
-
+#endif
 			PlutoMediaFile::ResetNewFilesAddedStatus();
 				
 			UpdateMedia engine(g_pDatabase_pluto_media, g_pDatabase_pluto_main, sItem);
@@ -244,16 +248,19 @@ void *UpdateMediaThread(void *)
 
 			if( bUpdateThumbnails )
 				engine.UpdateThumbnails();
-
+#ifdef UPDATEMEDIA_STATUS
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Synchronized '%s'.", sItem.c_str());
-
+#endif
 			if(PlutoMediaFile::NewFilesAdded())
 			{
+#ifdef UPDATEMEDIA_STATUS
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "New files were added to db for '%s'.", sItem.c_str());
-
+#endif
 				SyncAttributes();
 
+#ifdef UPDATEMEDIA_STATUS
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sending \"Check for new files\" command to Media_Plugin...");
+#endif
 				Event_Impl *pEvent = new Event_Impl(DEVICEID_MESSAGESEND, 0, "dcerouter");
 				Message* pMessage = new Message(0, DEVICETEMPLATE_Media_Plugin_CONST, BL_SameHouse, 
 					MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
@@ -263,8 +270,9 @@ void *UpdateMediaThread(void *)
 				pEvent = NULL;
 
 				RemoveDuplicatedAttributes();
-
+#ifdef UPDATEMEDIA_STATUS
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Command \"Check for new files\" sent!");
+#endif
 			}
 
 			flm.Relock();
@@ -288,15 +296,18 @@ void OnModify(list<string> &listFiles)
 		struct stat st;
 		if(0 != stat(sItem.c_str(), &st))
 		{
+#ifdef UPDATEMEDIA_STATUS
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "stat failed for %s. We'll try to parent!", sItem.c_str());
-			
+#endif			
 			size_t nPos = sItem.rfind("/");
 			if(nPos != string::npos)
 				sItem = sItem.substr(0, nPos);
 
 			if(0 != stat(sItem.c_str(), &st))
 			{
+#ifdef UPDATEMEDIA_STATUS
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "stat failed for %s. We'll skip it!", sItem.c_str());
+#endif
 				continue;
 			}
 		}
@@ -308,8 +319,9 @@ void OnModify(list<string> &listFiles)
 			if(nPos != string::npos)
 				sItem = sItem.substr(0, nPos);
 		}
-
+#ifdef UPDATEMEDIA_STATUS
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "New folder %s to sync...", sItem.c_str());        
+#endif
 		PLUTO_SAFETY_LOCK(flm, g_FoldersListMutex);
 
 		bool bFound = false;

@@ -79,16 +79,24 @@ FileHandlerFactory::~FileHandlerFactory(void)
 	FileHandlerType type = fhtGeneric;
 
 	if(IsValidVDRFile(sDirectory, sFile)) {
+#ifdef UPDATEMEDIA_DEBUG
 	        LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Filehandler::GetFileHandlerType: The directory %s is VDR file!", sDirectory.c_str());
+#endif
 		type = fhtVdr;
  	} else if(IsValidTagFile(sDirectory, sFile)) {
+#ifdef UPDATEMEDIA_DEBUG
 	        LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Filehandler::GetFileHandlerType: File %s in %s is tag file!", sFile.c_str(),  sDirectory.c_str());
+#endif
 		type = fhtTag;
 	} else if(IsValidRomFile(sDirectory, sFile)) {
+#ifdef UPDATEMEDIA_DEBUG
 	        LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Filehandler::GetFileHandlerType: File %s in %s is ROM file!", sFile.c_str(),  sDirectory.c_str());
+#endif
 		type = fhtRom;
 	} else { 
+#ifdef UPDATEMEDIA_DEBUG
 	        LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Filehandler::GetFileHandlerType: File %s in %s is id3 file!", sFile.c_str(),  sDirectory.c_str());
+#endif
 		type = fhtId3;
         }     
 	return type;

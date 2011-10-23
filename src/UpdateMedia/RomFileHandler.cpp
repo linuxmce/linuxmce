@@ -52,16 +52,18 @@ bool RomFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 	string sFileWithAttributes = m_sFullFilename;
 	string sROMName = FileUtils::FilenameWithoutPath(sFileWithAttributes,false);
 
+#ifdef UPDATEMEDIA_STATUS
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# RomFileHandler::LoadAttributes: loading %d attributes in the attribute file %s",
 		pPlutoMediaAttributes->m_mapAttributes.size(), sFileWithAttributes.c_str());
-
+#endif
 	//get common tag attributes
 	map<int, string> mapAttributes;
 	GetRomInfo(sROMName, mapAttributes, listPicturesForTags);	
 
+#ifdef UPDATEMEDIA_STATUS
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# LoadPlutoAttributes: tag attributes loaded (from tag file - common tags) %d", 
 		mapAttributes.size());
-
+#endif
 	//merge attributes
 	for(map<int, string>::iterator it = mapAttributes.begin(), end = mapAttributes.end(); it != end; ++it)
 	{
