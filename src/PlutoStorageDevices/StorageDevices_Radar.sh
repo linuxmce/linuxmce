@@ -110,7 +110,7 @@ function Detect {
 			fi
 
 			## Mount the partition to get it's size
-			mountpoint_temp=$(mktemp -d)
+			mountpoint_temp=$(mktemp -d /tmp/StorageDevices_Radar.temp.mount.XXXXXXXXX)
 			mount -o ro "/dev/$partition" "$mountpoint_temp"
 			partition_size=$(df -h "/dev/$partition" | tail -n +2 | awk '{ print $2 }')
 			umount -lf "$mountpoint_temp" && rmdir "$mountpoint_temp"

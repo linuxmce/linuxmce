@@ -260,7 +260,7 @@ while : ;do
 			fi
 
                         ## See if the share is mountable
-                        mountDirTemp=$(mktemp -d)
+                        mountDirTemp=$(mktemp -d /tmp/StorageDevices_StatusRadar.temp.mount.XXXXXXXXX)
                         mount ${Device_IP}:${Share_Name} $mountDirTemp 1>/dev/null 2>/dev/null
                         isShareMountable=$?
 
@@ -353,7 +353,7 @@ while : ;do
 			fi
 
 			## See if the drive is mountable
-			mountDirTemp=$(mktemp -d)			
+			mountDirTemp=$(mktemp -d /tmp/StorageDevices_StatusRadar.temp.mount.XXXXXXXXX)			
 			mount ${IDrive_BlockDev} $mountDirTemp 1>/dev/null 2>/dev/null
 			isDriveMountable=$?
 			

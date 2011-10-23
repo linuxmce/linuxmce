@@ -12,7 +12,7 @@ DBST_SCRIPT='/usr/pluto/bin/Diskless_DebootstrapPluto.sh'
 ARH_DIR='/usr/pluto/install'
 DisklessFS="PlutoMD-${Architecture}.tar.bz2"
 log_file=/var/log/pluto/Diskless_MD_Creation_$(date +%Y%m%d_%H%M%S).log
-TEMP_DIR=$(mktemp -d)
+TEMP_DIR=$(mktemp -d /tmp/Diskless_CreateTBZ.XXXXXXXXX)
 MYSQL_DB_CRED=""
 SQL_DB="pluto_main"
 
