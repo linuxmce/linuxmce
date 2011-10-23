@@ -1,3 +1,9 @@
+lmce-asterisk (0+0.2.0-8) unstable; urgency=low
+
+  * Making 'hints' work using conf files. Not yet supported in realtime by asterisk.
+
+ -- Serge Wagener <serge@linuxmce.org>  cwSunSat, 23 Oct 2011 19:30:00 +0200
+
 lmce-asterisk (0+0.2.0-7) unstable; urgency=low
 
   * Modifying trunk SIP entry for incoming calls to work

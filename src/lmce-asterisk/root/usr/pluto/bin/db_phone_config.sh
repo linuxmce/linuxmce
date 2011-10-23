@@ -61,10 +61,11 @@ WriteExtLocal()
 {
 	# adds extension to dialplan SQL query buffer.
 	PHONESSQL="$PHONESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES \
-	('$Context_Ext_Local','$PhoneNumber','-1','hint','$PhoneProtocol/$PhoneNumber'), \
 	('$Context_Ext_Local','$PhoneNumber','1','Macro','exten-vm,nowm,$PhoneNumber'), \
 	('$Context_Ext_Local','$PhoneNumber','2','Hangup','');
 	"
+	echo "exten=>$PhoneNumber,hint,$PhoneProtocol/$PhoneNumber" >> /etc/asterisk/hints.conf
+	
 }
 
 WriteSipPhone()
@@ -141,6 +142,10 @@ RunConfigureScript()
 
 WorkThePhones()
 {
+	# recreate hints config files. This is a workaround until realtime hints do work
+	rm -f /etc/asterisk/hints.conf
+	touch /etc/asterisk/hints.conf
+
 	# Get All phone devices
 	UseDB asterisk;
 	SQL="SELECT * FROM view_lmce_phones;"
@@ -199,8 +204,11 @@ WorkThePhones()
 	                    # The SCCP phones need the MAC address to function
 	                    MacAddress=$(GetMacAddress)
 	                    ;;
-	            "IAX2"|"IAX")
+	            "IAX")
 	            		PhoneProtocol=IAX
+	                    ;;
+	            "IAX2")
+	            		PhoneProtocol=IAX2
 	                    ;;
 	    esac
 		# Add phone to asterisk config files
@@ -218,7 +226,7 @@ WorkThePhones()
 			"SCCP")
 				WriteSccpPhone
 				;;
-			"IAX")
+			"IAX"|"IAX2")
 				WriteIAXPhone
 				;;
 			*)
