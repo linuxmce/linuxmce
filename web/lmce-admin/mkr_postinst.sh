@@ -264,6 +264,7 @@ sed -i -e "s,<\(VirtualHost\s*_default_:443>\),NameVirtualHost _default_:443\n<\
 fi
 sed -i -e "s,\(SSLCertificateFile\s*\).*$,\1/etc/ssl/certs/server.crt,g" default-ssl
 sed -i -e "s,\(SSLCertificateKeyFile\s*\).*$,\1/etc/ssl/private/server.key,g" default-ssl
+sed -i -e "s,\DocumentRoot.*$,DocumentRoot /var/www/,g" default-ssl
 sed -i -e "s,#\(SSLOptions\),\1,g" default-ssl
 sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ {
                 /RedirectMatch/ d
