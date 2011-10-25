@@ -49,7 +49,7 @@ Context_Ext_Local="ext-local"
 
 CreateDialAllPhones()
 {
-	# create the dial statements that get included into extensions_pluto_dial.conf under from-pluto-custom
+	# create the dial statement to dial all phones
 	if [[ -n "$DIAL_ALL_PHONES" ]]; then
 		DIAL_ALL_PHONES="$DIAL_ALL_PHONES&Local/$PhoneNumber@trusted"
 	else
@@ -451,9 +451,7 @@ devices2astdb()
 		device=$user
 		type="fixed"
 		protocol=$(Field 3 "$Row")
-		if [[ protocol == SIP* ]]; then
-			protocol="SIP"
-		fi
+
 		case "$protocol" in
 			"SIP5061")
                 protocol=SIP
