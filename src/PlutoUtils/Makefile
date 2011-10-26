@@ -3,7 +3,7 @@ SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
 ROOT=..
 VIP = ../VIPShared
 GDEV = ./Gen_Devices
-CXXFLAGS = -fPIC -Wall -g -ggdb3 -D_GNU_SOURCE
+CXXFLAGS ?= -fPIC -Wall -g -ggdb3 -D_GNU_SOURCE
 
 have_httpfetcher = $(wildcard /usr/lib/libhttp_fetcher.*)
 
@@ -11,9 +11,9 @@ ifneq ($(strip $(have_httpfetcher)),)
 	CXXFLAGS += -DUSE_HTTP_FETCHER
 endif
 
-CPPFLAGS = -I./ -I../../ -I../ -I../DCE/ -I../../DCE -I../VIPShared/ -I../../VIPShared -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DUSE_LZO_DATAGRID $(SNR_CPPFLAGS)
-CXX = g++
-LDFLAGS =
+CPPFLAGS ?= -I./ -I../../ -I../ -I../DCE/ -I../../DCE -I../VIPShared/ -I../../VIPShared -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DUSE_LZO_DATAGRID $(SNR_CPPFLAGS)
+CXX ?= g++
+LDFLAGS ?=
 
 ifneq ($(strip $(have_httpfetcher)),)
 	LDLIBS += -lhttp_fetcher

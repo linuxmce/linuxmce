@@ -6,6 +6,7 @@
 # export CC=${CROSS}gcc ${CFLAGS}
 #export LD=${CROSS}ld
 # export CXX=${CROSS}g++ ${CXXFLAGS}
+export LDFLAGS=-L/usr/lib64/mysql
 
 LIBRARIES=RA SerializeClass PlutoUtils DCE pluto_main
 APPS=DCERouter MessageSend sqlCVS mysql_wrapper CreateDevice

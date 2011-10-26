@@ -1,12 +1,12 @@
 SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
 
 ROOT = ..
-CXXFLAGS = -Wall -ggdb3 -DxAUDIDEMO -fmessage-length=0
-CPPFLAGS = -I$(ROOT)/ -I$(ROOT)/DCE -D_REENTRANT -D_GNU_SOURCE $(SNR_CPPFLAGS) -DUSE_LZO_DATAGRID -I/usr/include/libxml2/
-LDFLAGS = -L$(ROOT)/lib -lxml2
+CXXFLAGS += -Wall -ggdb3 -DxAUDIDEMO -fmessage-length=0
+CPPFLAGS += -I$(ROOT)/ -I$(ROOT)/DCE -D_REENTRANT -D_GNU_SOURCE $(SNR_CPPFLAGS) -DUSE_LZO_DATAGRID -I/usr/include/libxml2/
+LDFLAGS += -L$(ROOT)/lib -lxml2
 
 #LDLIBS = -lpthread -lmysqlclient_r -lattr -lDCECommon -lSerializeClass -lPlutoUtils -lpluto_main -lFakeEPG -lqt-mt -lmyth-0.16 -lmythtv-0.16
-LDLIBS = -lpthread -lattr -lDCECommon -lSerializeClass -lPlutoUtils -lpluto_main -ldl
+LDLIBS += -lpthread -lattr -lDCECommon -lSerializeClass -lPlutoUtils -lpluto_main -ldl
 
 #<-mkr_B_use_mysql_wrapper_b->
 CPPFLAGS += -I/usr/include/mysql

@@ -1,8 +1,8 @@
 ROOT = ..
-CXXFLAGS = -Wall -ggdb3
-CPPFLAGS = -I.. -I. -I/usr/include/mysql
-LDFLAGS = -L$(ROOT)/lib
-LDLIBS = -lmysqlclient -lpthread 
+CXXFLAGS += -Wall -ggdb3
+CPPFLAGS += -I.. -I. -I/usr/include/mysql
+LDFLAGS += -L$(ROOT)/lib
+LDLIBS += -lmysqlclient -lpthread 
 
 APPNAME = mysql_wrapper
 VERSION = 2.0.0
