@@ -112,7 +112,7 @@ function advancedEvents($output,$dbADO) {
 					<td>'.@$timedEventArray[$rowEvents['TimedEvent']].'</td>
 					<td>'.$rowEvents['TemplateDescription'].'</td>
 					<td><center><a href="index.php?section=advancedEvents&enID='.$rowEvents['PK_EventHandler'].'">';
-					$out .= $rowEvents['Disabled']?'False':'True';
+					$out .= $rowEvents['Disabled']?translate('TEXT_FALSE_CONST'):translate('TEXT_TRUE_CONST');
 					$out .= '</a></center></td>';
 			if ($rowEvents['FK_Criteria']) {
 					$out .= '<td align="center"><a href="index.php?section=editCriteria&ehID='.$rowEvents['PK_EventHandler'].'">'.translate('TEXT_EDIT_CONST').'</a></td>';

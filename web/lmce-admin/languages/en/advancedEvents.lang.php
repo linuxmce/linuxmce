@@ -7,5 +7,6 @@ $TEXT_TIMED_EVENT_CONST='Timed event';
 $TEXT_CRITERIA_CONST='Criteria';
 $TEXT_THE_EVENT_DESCRIPTION_WAS_UPDATED_CONST='The event description was updated.';
 $TEXT_CREATE_ADVANCED_EVENT_CONST='Create advanced event';
-$TEXT_ENABLED_CONST='Enabled';
+$TEXT_TRUE_CONST='True';
+$TEXT_FALSE_CONST='False';
 ?>
