@@ -20,9 +20,9 @@ function respondToEvents($output,$dbADO) {
 
 		$eventHandlerID=$_REQUEST['dID'];
 		$queryEventsHandler='
-			SELECT EventHandler.*, Criteria.FK_CriteriaParmNesting 
-			FROM EventHandler 
-				LEFT JOIN Criteria ON FK_Criteria=PK_Criteria
+			SELECT EventHandler.*, Criteria.FK_CriteriaParmNesting
+			FROM EventHandler
+				INNER JOIN Criteria ON FK_Criteria=PK_Criteria
 			WHERE PK_EventHandler=? AND TimedEvent IS NULL';
 		$resEH=$dbADO->Execute($queryEventsHandler,$eventHandlerID);
 		if($resEH->RecordCount()!=0){
@@ -63,20 +63,20 @@ function respondToEvents($output,$dbADO) {
 			<tr class="tablehead">
 				<td align="center"><B>'.translate('TEXT_DESCRIPTION_CONST').'</B></td>
 				<td align="center"><B>'.translate('TEXT_EVENT_CONST').'</B></td>
-				<td align="center"><B>'.translate('TEXT_ACTION_CONST').'</B></td>
+				<td align="center" colspan=3><B>'.translate('TEXT_ACTION_CONST').'</B></td>
 			</tr>
 		';
 		$queryEvents='
 			SELECT EventHandler.*, CannedEvents.Description AS CannedEvent
 			FROM EventHandler
-				INNER JOIN CannedEvents ON FK_CannedEvents=PK_CannedEvents
-			WHERE EventHandler.FK_Installation=? AND TimedEvent IS NULL
+				LEFT JOIN CannedEvents ON FK_CannedEvents=PK_CannedEvents
+			WHERE EventHandler.FK_Installation=? AND TimedEvent IS NULL AND FK_Template IS NULL
 		';
 		$resEvents=$dbADO->Execute($queryEvents,$installationID);
 		if($resEvents->RecordCount()==0){
 			$out.='
 				<tr>
-					<td colspan="3">'.translate('TEXT_NO_RECORDS_CONST').'</td>
+					<td colspan="5">'.translate('TEXT_NO_RECORDS_CONST').'</td>
 				</tr>';
 		}
 		$lineCount=0;
@@ -86,25 +86,24 @@ function respondToEvents($output,$dbADO) {
 				<tr bgcolor="'.(($lineCount%2==0)?'#E7E7E7':'#FFFFFF').'">
 					<td>'.$rowEvents['Description'].'</td>
 					<td>'.$rowEvents['CannedEvent'].'</td>
-					<td align="center">
-						<a href="index.php?section=advancedEvents&highligh='.$rowEvents['PK_EventHandler'].'">'.translate('TEXT_ADVANCED_CONST').'</a> 
-						<a href="index.php?section=editRespondToEvent&ehID='.$rowEvents['PK_EventHandler'].'">'.translate('TEXT_EDIT_CONST').'</a> 
-						<a href="#" onClick="if(confirm(\''.translate('TEXT_CONFIRM_DELETE_EVENT_CONST').'\'))self.location=\'index.php?section=respondToEvents&dID='.$rowEvents['PK_EventHandler'].'\'">'.translate('TEXT_DELETE_CONST').'</a></td>
-				</tr>';
+					<td><a href="index.php?section=advancedEvents&highligh='.$rowEvents['PK_EventHandler'].'">'.translate('TEXT_ADVANCED_CONST').'</a></td> ';
+						$out .= '<td><a href="index.php?section=editRespondToEvent&ehID='.$rowEvents['PK_EventHandler'].'">'.translate('TEXT_EDIT_CONST').'</a></td>';
+						$out .= '<td><a href="#" onClick="if(confirm(\''.translate('TEXT_CONFIRM_DELETE_EVENT_CONST').'\'))self.location=\'index.php?section=respondToEvents&dID='.$rowEvents['PK_EventHandler'].'\'">'.translate('TEXT_DELETE_CONST').'</a></td>';
+				$out .= '</tr>';
 		}
 		$queryCannedEvents='SELECT * FROM CannedEvents ORDER By Description ASC';
 		$resCannedEvents=$dbADO->Execute($queryCannedEvents);
 		$out.='
 			<tr>
-				<td colspan="3">&nbsp;</td>
+				<td colspan="5">&nbsp;</td>
 			</tr>
 			<tr>
 				<td><B>'.translate('TEXT_DESCRIPTION_CONST').' *</B></td>
-				<td colspan="2"><input type="text" name="Description" value=""></td>
+				<td colspan="4"><input type="text" name="Description" value=""></td>
 			</tr>		
 			<tr>
 				<td><B>'.translate('TEXT_NEW_EVENT_CONST').' *</B></td>
-				<td colspan="2"><select name="cannedEvent">
+				<td colspan="4"><select name="cannedEvent">
 					<option value="0">- '.translate('TEXT_PLEASE_SELECT_AN_EVENT_CONST').' -</option>';
 
 		while($rowCE=$resCannedEvents->FetchRow()){
@@ -114,7 +113,7 @@ function respondToEvents($output,$dbADO) {
 			</select></td>
 			</tr>
 			<tr>
-				<td colspan="3" align="center"><input type="submit" class="button" name="continue" value="'.translate('TEXT_ADD_CONST').'"> <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'"></td>
+				<td colspan="5" align="center"><input type="submit" class="button" name="continue" value="'.translate('TEXT_ADD_CONST').'"> <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'"></td>
 			</tr>';
 		$out.='
 		</table>

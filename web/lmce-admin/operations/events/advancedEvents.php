@@ -15,12 +15,13 @@ function advancedEvents($output,$dbADO) {
 	
 	$highligh=@$_REQUEST['highligh'];
 	
-	if(isset($_REQUEST['dID']) && $_REQUEST['dID']!=0){
+	if((isset($_REQUEST['dID']) && $_REQUEST['dID']!=0) || (isset($_REQUEST['enID']) && $_REQUEST['enID']!=0)){
 		if(!$canModifyInstallation){
 			header("Location: index.php?section=advancedEvents&error=You are not authorised to modify installation.");
 			exit();
 		}
 
+		if ($_REQUEST['dID']) {
 		$eventHandlerID=$_REQUEST['dID'];
 		$queryEventsHandler='
 			SELECT EventHandler.*, Criteria.FK_CriteriaParmNesting 
@@ -53,7 +54,11 @@ function advancedEvents($output,$dbADO) {
 			reloadEventPlugin($installationID, $dbADO);
 			
 			$_REQUEST['msg']=translate('TEXT_THE_EVENT_WAS_DELETED_CONST');
-			$_REQUEST['msg']=translate('TEXT_THE_EVENT_WAS_DELETED_CONST');
+		}
+		} else if ($_REQUEST['enID']) {
+			$queryEventsHandler='UPDATE EventHandler SET Disabled=IF(Disabled=0,1,0)
+				WHERE PK_EventHandler=?';
+			$dbADO->Execute($queryEventsHandler,$_REQUEST['enID']);
 		}
 	}
 	if ($action=='form') {
@@ -72,6 +77,7 @@ function advancedEvents($output,$dbADO) {
 				<td align="center"><B>'.translate('TEXT_FK_EVENT_CONST').'</B></td>
 				<td align="center"><B>'.translate('TEXT_TIMED_EVENT_CONST').'</B></td>
 				<td align="center"><B>'.translate('TEXT_TEMPLATE_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_ENABLED_CONST').'</B></td>
 				<td align="center"><B>'.translate('TEXT_CRITERIA_CONST').'</B></td>
 				<td align="center"><B>'.translate('TEXT_COMMANDS_CONST').'</B></td>
 				<td align="center"><B>'.translate('TEXT_ACTION_CONST').'</B></td>
@@ -82,7 +88,7 @@ function advancedEvents($output,$dbADO) {
 			FROM EventHandler
 			LEFT JOIN Event ON EventHandler.FK_Event=PK_Event
 			LEFT JOIN CannedEvents ON FK_CannedEvents=PK_CannedEvents
-			WHERE EventHandler.FK_Installation=?
+			WHERE EventHandler.FK_Installation=? AND FK_Template IS NULL
 		';
 		$resEvents=$dbADO->Execute($queryEvents,$installationID);
 		if($resEvents->RecordCount()==0){
@@ -105,10 +111,17 @@ function advancedEvents($output,$dbADO) {
 					<td>'.$rowEvents['EventDescription'].'</td>
 					<td>'.@$timedEventArray[$rowEvents['TimedEvent']].'</td>
 					<td>'.$rowEvents['TemplateDescription'].'</td>
-					<td align="center"><a href="index.php?section=editCriteria&ehID='.$rowEvents['PK_EventHandler'].'">'.translate('TEXT_EDIT_CONST').'</a></td>
-					<td align="center"><a href="index.php?section=editEventCommands&ehID='.$rowEvents['PK_EventHandler'].'">'.translate('TEXT_EDIT_CONST').'</a></td>
-					<td align="center"><a href="#" onClick="if(confirm(\'Are you sure you want to delete the event?\'))self.location=\'index.php?section=advancedEvents&dID='.$rowEvents['PK_EventHandler'].'\'">'.translate('TEXT_DELETE_CONST').'</a></td>
-				</tr>';
+					<td><center><a href="index.php?section=advancedEvents&enID='.$rowEvents['PK_EventHandler'].'">';
+					$out .= $rowEvents['Disabled']?'False':'True';
+					$out .= '</a></center></td>';
+			if ($rowEvents['FK_Criteria']) {
+					$out .= '<td align="center"><a href="index.php?section=editCriteria&ehID='.$rowEvents['PK_EventHandler'].'">'.translate('TEXT_EDIT_CONST').'</a></td>';
+			} else {
+					$out .= '<td>&nbsp;</td>';
+			}
+					$out .= '<td align="center"><a href="index.php?section=editEventCommands&ehID='.$rowEvents['PK_EventHandler'].'">'.translate('TEXT_EDIT_CONST').'</a></td>';
+					$out .= '<td align="center"><a href="#" onClick="if(confirm(\'Are you sure you want to delete the event?\'))self.location=\'index.php?section=advancedEvents&dID='.$rowEvents['PK_EventHandler'].'\'">'.translate('TEXT_DELETE_CONST').'</a></td>';
+				$out .= '</tr>';
 		}
 		$saveBtns=(count($displayedEH)!=0)?'<input type="submit" class="button" name="update" value="'.translate('TEXT_SAVE_CONST').'"> <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'">':'';
 		

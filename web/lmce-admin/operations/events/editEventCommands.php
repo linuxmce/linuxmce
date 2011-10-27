@@ -61,11 +61,13 @@ function editEventCommands($output,$dbADO) {
 		
 		<table border="0" align="center">
 		';
+		if ($rowEH['FK_Criteria']) {
 		$out.='
 			<tr>
 				<td><B><a href="index.php?section=editCriteria&ehID='.$eventHandlerID.'">'.$TEXT_EDIT_EVENT_CCRITERIA_CONST.'</a></B></td>
-			</tr>
-			<tr>
+			</tr>';
+		}
+			$out .= '<tr>
 				<td colspan="2">'.editCommandGroupCommands($commandGroupID,$dbADO).'</td>
 			</tr>
 			<tr>
