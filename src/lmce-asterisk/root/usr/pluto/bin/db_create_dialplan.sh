@@ -108,7 +108,7 @@ CreateDialplanLines()
 
 		if [[ $Routing == "prompt" ]]; then
 			App="Goto"
-			AppParam="voice-menu-pluto-custom,s,1"
+			AppParam="voice-menu-lmce-custom,s,1"
 		fi
 
 		SQL="$SQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES
