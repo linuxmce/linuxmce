@@ -87,7 +87,11 @@ function respondToEvents($output,$dbADO) {
 					<td>'.$rowEvents['Description'].'</td>
 					<td>'.$rowEvents['CannedEvent'].'</td>
 					<td><a href="index.php?section=advancedEvents&highligh='.$rowEvents['PK_EventHandler'].'">'.translate('TEXT_ADVANCED_CONST').'</a></td> ';
+			if ($rowEvents['FK_CannedEvents']) {
 						$out .= '<td><a href="index.php?section=editRespondToEvent&ehID='.$rowEvents['PK_EventHandler'].'">'.translate('TEXT_EDIT_CONST').'</a></td>';
+			} else {
+						$out .= '<td>&nbsp;</td>';
+			}
 						$out .= '<td><a href="#" onClick="if(confirm(\''.translate('TEXT_CONFIRM_DELETE_EVENT_CONST').'\'))self.location=\'index.php?section=respondToEvents&dID='.$rowEvents['PK_EventHandler'].'\'">'.translate('TEXT_DELETE_CONST').'</a></td>';
 				$out .= '</tr>';
 		}
