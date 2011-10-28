@@ -161,20 +161,20 @@ bool MoveJob::ReadyToRun()
 void MoveJob::AddMoveTasks(TasklistPosition position)
 {
   vector <Task *> vTasks;
-  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXX AddMoveTasks");
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXX AddMoveTasks - from %s to %s",m_sFileName.c_str(),m_sDestinationFileName.c_str());
   // Move original filename.
-  if (FileUtils::FileExists(m_sFileName) && !FileUtils::FileExists(m_sDestinationFileName))
+  if (FileUtils::FileExists(m_sFileName))
     {
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXX Adding Move Task for Main File");
       vTasks.push_back(new MoveTask(this, "Move Media",m_bReportResult,m_sFileName,m_sDestinationFileName));
       vTasks.push_back(new MoveDBTask(this, "Move Media Entry in DB",m_bReportResult));
     }
-  if (FileUtils::FileExists(m_sFileName+".id3") && !FileUtils::FileExists(m_sDestinationFileName + ".id3"))
+  if (FileUtils::FileExists(m_sFileName+".id3"))
     {
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXX Adding Move Task for ID3 File");
       vTasks.push_back(new MoveTask(this, "Move ID3",m_bReportResult,m_sFileName+".id3",m_sDestinationFileName+".id3"));
     }
-  if (FileUtils::FileExists(m_sFileName+".dvd.keys.tar.gz") && !FileUtils::FileExists(m_sDestinationFileName+".dvd.keys.tar.gz"))
+  if (FileUtils::FileExists(m_sFileName+".dvd.keys.tar.gz"))
     {
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXX Adding Move Task for DVD Keys");
       vTasks.push_back(new MoveTask(this, "Move DVD Keys",m_bReportResult,m_sFileName+".dvd.keys.tar.gz",m_sDestinationFileName+".dvd.keys.tar.gz"));

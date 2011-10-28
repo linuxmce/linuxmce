@@ -542,7 +542,18 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"ScreenHandler::MediaBrowser_Objec
 	  {
 	    // Move File button selected.
 	    Reset_SaveFile_Info();
-	    string sCommand = "";
+
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXXXXXXXXX Path is %s, Filename is %s .",m_pOrbiter->m_mapVariable_Find(VARIABLE_Misc_Data_5_CONST).c_str(),m_pOrbiter->m_mapVariable_Find(VARIABLE_Seek_Value_CONST).c_str());
+
+	    string sCommand = StringUtils::itos(m_pOrbiter->m_dwPK_Device) + " " +
+	      "10" + " "
+	      " 1 " TOSTRING (COMMAND_Move_File_CONST) " " + 
+	      TOSTRING(COMMANDPARAMETER_Filename_CONST) " " +
+	      mediaFileBrowserOptions.m_sSelectedFile + " " +
+	      TOSTRING(COMMANDPARAMETER_Path_CONST) " " +
+	      "<%=" TOSTRING(VARIABLE_Misc_Data_5_CONST) "%>/" +
+	      "<%=" TOSTRING(VARIABLE_Seek_Value_CONST) "%>";
+	      
 	    string sTitle = "Choose a location to move the file. You can also change the file name here.";
 	    
 	    DCE::SCREEN_FileSave screen_FileSave(m_pOrbiter->m_dwPK_Device,m_pOrbiter->m_dwPK_Device,mediaFileBrowserOptions.m_PK_MediaType,-998,sTitle,sCommand,true); // true allows us to see the destination disk
