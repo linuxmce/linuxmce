@@ -279,16 +279,35 @@ WorkTheUsers()
 	mysql -A -N -u$DBUser -p$DBPass asterisk -e "$USERSSQL"
 }
 
-AddSIPLine()
+AddTrunk()
 {
-	# add register to sip.conf
-	LINESSQL="$LINESSQL INSERT INTO $DB_astconfig_Table (var_metric,filename,category,var_name,var_val) VALUES
-		('$(( 100+$id ))', 'sip.conf', 'general', 'register', '$username:$password@$host/$phonenumber');"
+	# we don't use old IAX protocol
+	if [[ $protocol == "IAX" ]]; then protocol="IAX2"; fi
+	
+	# register with external provider and create peer
+	case "$protocol" in
+		"IAX2")
+			# provider registry
+			LINESSQL="$LINESSQL INSERT INTO $DB_astconfig_Table (var_metric,filename,category,var_name,var_val) VALUES
+				('$(( 100+$id ))', 'iax.conf', 'general', 'register', '$username:$password@$host');"
+			# TODO: create IAX2 peer
+        ;;
+        "SIP")
+        	# provider registry
+			LINESSQL="$LINESSQL INSERT INTO $DB_astconfig_Table (var_metric,filename,category,var_name,var_val) VALUES
+				('$(( 100+$id ))', 'sip.conf', 'general', 'register', '$username:$password@$host/$phonenumber');"
+			# create SIP peer
+			context="from-trunk"
+			LINESSQL="$LINESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,secret,host,port,context,qualify,nat,type,fromuser,fromdomain,callerid,allow,insecure) VALUES \
+			('$host','$username','$password','$host','5060','$context','no','yes','friend',NULL,'$host','$username','alaw;ulaw','port,invite'), \
+			('$phonenumber','$username','$password','$host','5060','$context','no','yes','peer','$username', '$host','$username','alaw;ulaw','port,invite');"
+        ;;
+    esac
 	
 	# add outbound context in realtime extensions
 	context="outbound-allroutes"
 	LINESSQL="$LINESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES \
-	('$context','_$prefix.','1','Macro','dialout-trunk,SIP/$phonenumber,\${EXTEN:1},,'),\
+	('$context','_$prefix.','1','Macro','dialout-trunk,$protocol/$phonenumber,\${EXTEN:1},,'),\
 	('$context','_$prefix.','2','Macro','outisbusy,');"
 	
 	# create incoming context and redirect to realtime
@@ -314,12 +333,6 @@ switch => Realtime
 	('$context','$username','4','Noop','CallerID is \${CALLERID(all)}'), \
 	('$context','$username','5','Set','FAX_RX='), \
 	('$context','$username','6','Goto','custom-linuxmce,$line,1');"
-
-	# create SIP peer
-	context="from-trunk"
-	LINESSQL="$LINESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,secret,host,port,context,qualify,nat,type,fromuser,fromdomain,callerid,allow,insecure) VALUES \
-	('$host','$username','$password','$host','5060','$context','no','yes','friend',NULL,'$host','$username','alaw;ulaw','port,invite'), \
-	('$phonenumber','$username','$password','$host','5060','$context','no','yes','peer','$username', '$host','$username','alaw;ulaw','port,invite');"
 }
 
 WorkTheLines()
@@ -347,6 +360,7 @@ WorkTheLines()
 	# remove everything before recreating	
 	LINESSQL="SET AUTOCOMMIT=0; START TRANSACTION;"
 	LINESSQL="$LINESSQL DELETE FROM $DB_astconfig_Table WHERE filename='sip.conf' AND category='general' AND var_name='register';"
+	LINESSQL="$LINESSQL DELETE FROM $DB_astconfig_Table WHERE filename='iax.conf' AND category='general' AND var_name='register';"
 	LINESSQL="$LINESSQL DELETE FROM $DB_Extensions_Table WHERE context='ext-did';"
 	LINESSQL="$LINESSQL DELETE FROM $DB_Extensions_Table WHERE context='outbound-allroutes';"
 
@@ -370,9 +384,7 @@ WorkTheLines()
 		enabled=$(Field 8 "$Row")
 		phonenumber=$(Field 9 "$Row")
 		echo "Working phoneline $id-$name ($protocol/$phonenumber)"
-		# Next line not needed as we delete everything in WorkThePhones
-		# LINESSQL="$LINESSQL DELETE FROM $DB_SIP_Device_Table WHERE name = '$phonenumber';"
-		if [[ $protocol -eq SIP ]] && [[ $enabled == "yes" ]]; then AddSIPLine; fi
+		if [[ $enabled == "yes" ]]; then AddTrunk; fi
 	done
 	# TODO: check if we need that in outbound context end: exten => foo,1,Noop(bar) ?
 
