@@ -220,8 +220,8 @@ CREATE TABLE IF NOT EXISTS `sip_devices` (
   `regseconds` int(11) NOT NULL DEFAULT '0',
   `useragent` varchar(50) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`),
-  KEY `name_2` (`name`)
+  UNIQUE KEY `name` (`name`,`fromuser`)
+)
 );
 
 --
