@@ -91,7 +91,8 @@ function listvm($messages) {
 					height="20" 
 					alt="'.translate('TEXT_MESSAGE_COMMAND_DELETE_CONST').'" 
 					title="'.translate('TEXT_MESSAGE_COMMAND_DELETE_CONST').'"
-					onclick="javascript:if(confirm(\''.translate('TEXT_CONFIRM_DELETE_CONST').' '.$key.'\'))self.location=\'index.php?section=voicemail&action=del&id='.$key.(($_SESSION['Extension']==$generalvm)?'&general=1':'').'\'"
+					onclick="javascript:if(confirm(\''.translate('TEXT_CONFIRM_DELETE_CONST').' '.$key.'\'))
+						self.location=\'index.php?section=voicemail&action=del&id='.$key.'&new='.$msg['new'].(($_SESSION['Extension']==$generalvm)?'&general=1':'').'\'"
 				>
 			</td>
 		</tr>';
@@ -163,7 +164,8 @@ function voicemail($output,$dbADO) {
 			break;
 			
 		case 'del':
-			$vmpath=$vmbase.'/'.$_SESSION['Extension'].'/'.$vminbox.'/msg'.$_REQUEST['id'].'.*';
+			if($_REQUEST['new']) $vmpath=$vmbase.'/'.$_SESSION['Extension'].'/'.$vminbox.'/msg'.$_REQUEST['id'].'.*';
+			else $vmpath=$vmbase.'/'.$_SESSION['Extension'].'/'.$vminbox.'/'.$vmoldinbox.'/msg'.$_REQUEST['id'].'.*';
 			$cmd='sudo -u root rm '.$vmpath;
 			$response=exec_batch_command($cmd,1);
 			$suffix='&msg='.translate('TEXT_MSG_MESSAGE_DELETED_CONST');
