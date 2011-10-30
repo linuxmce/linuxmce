@@ -118,7 +118,8 @@ CreateDialplanLines()
 			('$Context_From_Lmce','$Line-hm$HouseMode-BUSY','1','Goto','$Context_From_Lmce,100,1'),
 			('$Context_From_Lmce','$Line-hm$HouseMode-NOANSWER','1','Goto','voice-menu-lmce-custom,s,1'),
 			('$Context_From_Lmce','$Line-hm$HouseMode-CONGESTION','1','Goto','$Context_From_Lmce,100,1'),
-			('$Context_From_Lmce','$Line-hm$HouseMode-CHANUNAVAIL','1','Goto','$Context_From_Lmce,100,1');"
+			('$Context_From_Lmce','$Line-hm$HouseMode-CHANUNAVAIL','1','Goto','$Context_From_Lmce,100,1'),
+			('$Context_From_Lmce','$Line-hm$HouseMode-INVALIDARGS','1','Goto','$Context_From_Lmce,100,1');"
 		OldLine=$Line
 	done
 
