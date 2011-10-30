@@ -20,6 +20,7 @@ DEVICEDATA_Secret=128
 DEVICEDATA_ServerIp=260
 DEVICEDATA_EmergencyNumbers=296
 DEVICEDATA_EmergencyPhoneLine=297
+DEVICEDATA_CallToken=298
 DEVICE_TelecomPlugIn=11
 DEVICECATEGORY_HARDPHONE=90
 DEVICECATEGORY_SOFTPHONE=91
@@ -77,9 +78,18 @@ WriteSipPhone()
 
 WriteIAXPhone()
 {
+	# test for need of CallToken
+	UseDB
+	SQL="SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device='$DeviceID' AND FK_DeviceData='$DEVICEDATA_CallToken'";
+	res=$(RunSQL "$SQL")
+	if [[ $(Field 1 "$res") -eq 1 ]]; then
+		callToken="yes"
+	else
+		callToken="no"
+	fi	
 	# adds configuration of current IAX phone to SQL query buffer.
-	PHONESSQL="$PHONESSQL INSERT INTO $DB_IAX_Device_Table (name,username,mailbox, secret, callerid)
-	VALUES ('$PhoneNumber','$PhoneNumber','$PhoneNumber@device','$Secret','device <$PhoneNumber>');"
+	PHONESSQL="$PHONESSQL INSERT INTO $DB_IAX_Device_Table (name,username,mailbox, secret, callerid, requirecalltoken)
+	VALUES ('$PhoneNumber','$PhoneNumber','$PhoneNumber@device','$Secret','device <$PhoneNumber>', '$callToken');"
 }
 
 WriteSccpPhone()
@@ -161,6 +171,7 @@ WorkThePhones()
 	DELETE FROM $DB_SCCP_Line_Table;
 	DELETE FROM $DB_SCCP_Buttons_Table;
 	DELETE FROM $DB_Extensions_Table WHERE context='$Context_Ext_Local';
+	ALTER TABLE $DB_Extensions_Table AUTO_INCREMENT=1;
 	"
 
 	for Row in $R; do
@@ -186,7 +197,7 @@ WorkThePhones()
 			
 			# create new device secret
 			Secret=$(echo `</dev/urandom tr -dc a-z0-9-_% | head -c16`)
-			SQL="update Device_DeviceData SET IK_DeviceData='$Secret' WHERE FK_Device='$DeviceID' AND FK_DeviceData='$DEVICEDATA_Secret'"
+			SQL="UPDATE Device_DeviceData SET IK_DeviceData='$Secret' WHERE FK_Device='$DeviceID' AND FK_DeviceData='$DEVICEDATA_Secret'"
 			res=$(RunSQL "$SQL")
 		fi
 		
