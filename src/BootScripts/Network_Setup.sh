@@ -133,7 +133,7 @@ iface $IntIf inet static
 	netmask $IntNetmask"
 echo "$IfConf" >>"$File"
 
-echo "">"/etc/radvd.conf"
+echo -n "">"/etc/radvd.conf"
 
 if [ -e /etc/cron.d/UpdateIPv6TunnelEndPoint ] ;then
 	rm /etc/cron.d/UpdateIPv6TunnelEndPoint
