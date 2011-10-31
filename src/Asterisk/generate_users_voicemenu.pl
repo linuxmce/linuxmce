@@ -17,12 +17,16 @@ $DB_PL_HANDLE = DBI->connect(&read_pluto_cred()) or die "Can't connect to databa
 #'Thank you for calling. To call everybody in the house, press 0. To call George, press 1. To call Mary, press 2. To leave a message, press #.';
 print "Generating speech for IVR Main Menu.\n";
 my $list = "";
+# PK_Text 2173
 &generate_voice("Thank you for calling.","/tmp/pluto-default-voicemenu1.gsm");
 $list .= "/tmp/pluto-default-voicemenu1.gsm ";
+# PK_Text 2168
 &generate_voice("If you know the extension of the person you wish to call, you may enter it at any time.","/tmp/pluto-default-voicemenu2.gsm");
 $list .= "/tmp/pluto-default-voicemenu2.gsm ";
+# PK_Text 2167
 &generate_voice("To call everybody in the house, dial 0.","/tmp/pluto-default-voicemenu3.gsm");
 $list .= "/tmp/pluto-default-voicemenu3.gsm ";
+# PK_Text 2169
 &generate_voice("To leave a message, please press the pound sign.","/tmp/pluto-default-voicemenu4.gsm");
 
 $DB_SQL = "select if((Nickname=\"\" OR Nickname IS NULL),UserName,Nickname) AS Name, Extension from Users where `Extension` like '30%' and HasMailbox = 1"; 
@@ -33,6 +37,7 @@ while(my $DB_ROW = $DB_STATEMENT->fetchrow_hashref())
     my $i=$1 if($DB_ROW->{'Extension'} =~ /(\d)$/);
 	my $j=$DB_ROW->{'Extension'};
     print "Generating speech for ".$DB_ROW->{'Name'}." extension: $j\n";
+    # PK_Text 2170, 2171
     &generate_voice("To call ".$DB_ROW->{'Name'}.", dial ".$i.".","/tmp/pluto-default-voicemenu3-$i.gsm");
     $list .= "/tmp/pluto-default-voicemenu3-$i.gsm ";
 	`/bin/mkdir -p /var/spool/asterisk/voicemail/default/$j/INBOX/Old`;
@@ -54,6 +59,7 @@ $list = "";
 
 # Let's generate the voice for invalid IVR entries.
 print "Generating speech for invalid IVR entries.\n";
+# PK_Text 2172
 &generate_voice("Your selection is not valid, please try again.","/tmp/invalid-entry.gsm");
 $list .= "/tmp/invalid-entry.gsm ";
 `/usr/bin/sox $list /usr/share/asterisk/sounds/pluto/invalid-entry.gsm`;
