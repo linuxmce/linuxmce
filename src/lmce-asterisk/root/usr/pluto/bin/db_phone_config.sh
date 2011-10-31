@@ -62,7 +62,7 @@ WriteExtLocal()
 {
 	# adds extension to dialplan SQL query buffer.
 	PHONESSQL="$PHONESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES \
-	('$Context_Ext_Local','$PhoneNumber','1','Macro','exten-vm,nowm,$PhoneNumber'), \
+	('$Context_Ext_Local','$PhoneNumber','1','Macro','exten-vm,novm,$PhoneNumber'), \
 	('$Context_Ext_Local','$PhoneNumber','2','Hangup','');
 	"
 	echo "exten=>$PhoneNumber,hint,$PhoneProtocol/$PhoneNumber" >> /etc/asterisk/hints.conf
