@@ -1,3 +1,9 @@
+lmce-asterisk (0+0.3.0-2) unstable; urgency=low
+
+  * Fixed a lot of small bugs
+
+ -- Serge Wagener <serge@linuxmce.org>  Tue, 1 Nov 2011 08:00:00 +0200
+
 lmce-asterisk (0+0.3.0-1) unstable; urgency=low
 
   * Making package asterisk-1.8 compatible.
