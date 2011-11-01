@@ -339,11 +339,10 @@ switch => Realtime
 	line=$((100+$id))
 	LINESSQL="$LINESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES \
 	('$context','$username','1','Set','__FROM_DID=\${EXTEN}'), \
-	('$context','$username','2','GotoIf','\$[ \"\${CALLERID(name)}\" != \"\" ] ?4'), \
-	('$context','$username','3','Set','CALLERID(name)=\${CALLERID(num)}'), \
-	('$context','$username','4','Noop','CallerID is \${CALLERID(all)}'), \
-	('$context','$username','5','Set','FAX_RX='), \
-	('$context','$username','6','Goto','custom-linuxmce,$line,1');"
+	('$context','$username','2','Set','CALLERID(num)=\${CALLERID(name)}'), \
+	('$context','$username','3','Noop','Incoming call from \${CALLERID(num)}'), \
+	('$context','$username','4','Set','FAX_RX='), \
+	('$context','$username','5','Goto','custom-linuxmce,$line,1');"
 }
 
 WorkTheLines()
