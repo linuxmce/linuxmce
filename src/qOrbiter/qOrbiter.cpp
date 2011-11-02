@@ -1996,11 +1996,6 @@ void DCE::qOrbiter::executeCommandGroup(int cmdGrp)
     CMD_Execute_Command_Group execCommandGroup((long)qmlUI->iPK_Device, (long)2, cmdGrp);
 
    SendCommand(execCommandGroup);
-
-
-
-
-
 }
 
 QImage DCE::qOrbiter::getfileForDG(string filePath)
@@ -3114,7 +3109,12 @@ void DCE::qOrbiter::GetAdvancedMediaOptions() // prepping for advanced media opt
 
 }
 
-void DCE::qOrbiter::GetAlarms(bool toggle, int grp) //problem function that gets dg of alarms, but i cant get traversal right and end up with one!
+/*
+  problem function that gets dg of alarms, but i cant get traversal right and end up with one!
+  its supposed to select the alarms and present them in a dg. Dg selection works currently, parsing does not.
+  */
+
+void DCE::qOrbiter::GetAlarms(bool toggle, int grp)
 {
     bool state;
     string *sResponse;
@@ -3155,7 +3155,6 @@ void DCE::qOrbiter::GetAlarms(bool toggle, int grp) //problem function that gets
               initial request to populate the text only grid as denoted by the lack of a leading "_" as in _MediaFile_43
               this way, we can safely check empty grids and error gracefully in the case of no matching media
               */
-
 
             //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
             DCE::CMD_Request_Datagrid_Contents sleeping_alarms( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(dgName),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
@@ -3198,7 +3197,6 @@ void DCE::qOrbiter::GetAlarms(bool toggle, int grp) //problem function that gets
 
                     else if (row == 1)
                     {
-
                         eventgrp = atoi(pCell->GetValue());
                         QString data = pCell->GetText();
                         QStringList breakerbreaker = data.split(QRegExp("\n"), QString::KeepEmptyParts );
@@ -3219,7 +3217,8 @@ void DCE::qOrbiter::GetAlarms(bool toggle, int grp) //problem function that gets
     }
 }
 
-void DCE::qOrbiter::SetZoom(QString zoomLevel) //zoom level for current media player
+//zoom level for current media player
+void DCE::qOrbiter::SetZoom(QString zoomLevel)
 {
     string sResponse;
     //qDebug() << zoomLevel.toAscii();
@@ -3233,9 +3232,6 @@ void DCE::qOrbiter::SetZoom(QString zoomLevel) //zoom level for current media pl
     {
         qmlUI->setDceResponse(QString("Error sending command!"));
     }
-
-
-
 }
 
 void DCE::qOrbiter::SetAspectRatio(QString ratio) //set aspect ratio for current media player
@@ -3258,7 +3254,7 @@ void DCE::qOrbiter::GetText(int textno)
 
 }
 
-//used for resume to pass complex things like chapters and other options
+//used for resume to pass complex things like chapters and positions in playlists.
 void DCE::qOrbiter::SetMediaPosition(QString position)
 {
     if(qmlUI->nowPlayingButton->qs_screen.contains( "Screen_49.qml"))
@@ -3346,6 +3342,11 @@ void DCE::qOrbiter::JogStream(QString jump) //jumps position in stream for jog
     }
 }
 
+
+/*
+  Show advanced buttons is for the ir or other controls used to send specific commands to a device. It comes in the form of a data grid initially that lists
+  the different devices. This can be cross - referenced with the now playing devices to show only relevant devices for the ui
+  */
 void DCE::qOrbiter::showAdvancedButtons()
 {
     int cellsToRender= 0;
@@ -3369,11 +3370,6 @@ void DCE::qOrbiter::showAdvancedButtons()
 
     if (SendCommand(cmd_populate_device_grid))
     {
-        /*
-              initial request to populate the text only grid as denoted by the lack of a leading "_" as in _MediaFile_43
-              this way, we can safely check empty grids and error gracefully in the case of no matching media
-              */
-
 
         //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
         DCE::CMD_Request_Datagrid_Contents req_device_grid( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(imgDG),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
