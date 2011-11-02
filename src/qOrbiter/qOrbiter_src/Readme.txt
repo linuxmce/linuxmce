@@ -29,10 +29,10 @@ FLoor plans - both datagrid and graphic type
 Local file that save critical runtime functions like router ip, device number
 Proper functions for reloading the router, trying to reconnect
 
-Implement floorplans
-Implement security functions
+Implement floorplans - need to add floorplan devices to qorbiter generator to move forward
+Implement security functions - mostly done
 Implement functions on file details screen
-
+Implement
 
 Tickets for reference to submit against.
 In an effor to keep the history of changes broken up
@@ -50,6 +50,8 @@ In an effor to keep the history of changes broken up
 #1180 - Filters for media showing all instead of proper filtering types
 #1181 - Scenario buttons attemping to pull wrong image names.
 #1223 - playlist threading
+#1247 - sleeping menu ticket
+#1261 - ui blocking issues
 
 
 If something you are working on is not described here, please open a ticket for it so we can track that specific issue.
