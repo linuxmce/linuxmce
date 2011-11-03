@@ -2577,7 +2577,6 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
       that the orbiter makes in addition to parsing of other information passed for a given object.
       */
 
-
     int p = 0;
     string s_val;
     CMD_Get_Attributes_For_Media attribute_detail_get(qmlUI->iPK_Device, qmlUI->iMediaPluginID, "" , StringUtils::itos(qmlUI->iea_area),&s_val );
@@ -3192,7 +3191,6 @@ void DCE::qOrbiter::GetAlarms(bool toggle, int grp)
 
                         //qDebug() << state;
                         row++;
-
                     }
 
                     else if (row == 1)
