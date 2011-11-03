@@ -11,4 +11,5 @@ if [ -x /usr/pluto/bin/Debug_LogKernelModules.sh ]; then
 fi
 
 #update-rc.d -f haltMDs start 01 0 6 . || /bin/true
-update-rc.d -f haltMDs stop 01 0 6 . || /bin/true
+#update-rc.d -f haltMDs stop 01 0 6 . || /bin/true
+update-rc.d -f haltMDs remove || /bin/true
