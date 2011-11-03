@@ -4,13 +4,19 @@
 . /usr/pluto/bin/SQL_Ops.sh
 . /usr/pluto/bin/Config_Ops.sh
 
-echo "kill timeout 70
+## If the runlevel is wrong, do nothing
+if [[ "$(runlevel)" != *[016] ]]; then
+	exit 0
+fi
 
-start on runlevel RUNLEVEL=[016] PREVLEVEL=[2345] and (starting rc RUNLEVEL=[016] or stopping mysql or stopping portmap or stopping idmapd or stopping statd)
-
-task
-
-exec /usr/pluto/bin/HaltMDs.sh" >/etc/init/md_halt.conf
+## Only the first copy will do anything
+## The rest will synchronized with the first copy
+if ! ln -sn /proc/$$ /tmp/haltMDs 2>/dev/null; then
+	while [[ -d /tmp/haltMDs ]]; do
+		sleep .1
+	done
+	exit 0
+fi
 
 P="$1"
 
@@ -42,7 +48,7 @@ for Host in $R; do
 done
 
 offline=0
-tries=30
+tries=60
 while [ "$offline" -eq 0 -a "$tries" -gt 0 ]; do
 	offline=1
 	for Host in $R; do
