@@ -6,8 +6,8 @@ The purpose of this class is to track screen parameters for certain screens. Par
 to a screen, but in the case they are, there should be proper handling. The purpose of this class is to be an independant
 reference to the current screen params and relevant getters and setters. Also, will be extended to deal with message passing
 back to the router in the case of special buttons like the 'yes and no' prompts or any of the other prompts.
-getter and setter un
-  */
+It needs to be expanded to create device numberlists for now playing and other situations where the contextual data may be relevant
+ */
 
 #include <QObject>
 #include <QMap>

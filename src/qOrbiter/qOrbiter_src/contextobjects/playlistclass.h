@@ -1,6 +1,9 @@
 #ifndef PLAYLISTCLASS_H
 #define PLAYLISTCLASS_H
-
+/*
+  This class acts as a controller for managing playlist items currently. It will be expanded to encompass the
+  existing orbiter playlist management functions like saving to public and private users, reordering, etc.
+  */
 #include <QAbstractListModel>
 #include <QList>
 #include <QVariant>

@@ -1,7 +1,7 @@
 import QtQuick 1.0
 import "../components"
 Item{
-    id:securitystatus
+    id:sleepingmenu
 
     Rectangle{
         height: style.orbiterH

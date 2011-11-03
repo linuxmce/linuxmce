@@ -1,6 +1,9 @@
 #ifndef GRIDIMAGEPROVIDER_H
 #define GRIDIMAGEPROVIDER_H
-
+/*
+  with the complexity of managing model indexes and other position data, this image provider is used for the purpose
+  of keeping a link between the two, enabling datagrid images to be correlated to the right cells.
+  */
 #include <QObject>
 #include <qdeclarative.h>
 #include <QModelIndex>

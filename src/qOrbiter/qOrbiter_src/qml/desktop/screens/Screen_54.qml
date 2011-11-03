@@ -1,7 +1,10 @@
 import QtQuick 1.0
 import "../components"
+import "../js/ComponentLoader.js" as MyJs
 
 Rectangle {
+    id: storedaudioremote
+
     Timer{
         id:singleshot
         repeat: false
@@ -16,7 +19,7 @@ Rectangle {
         onPlayListPositionChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
 
-    id: storedaudioremote
+
     height: style.orbiterH
     width: style.orbiterW
     radius: 0
@@ -285,6 +288,15 @@ Rectangle {
                         MouseArea{
                             anchors.fill: parent
                             onClicked: playlist.visible = !playlist.visible
+                        }
+                    }
+                    AvOptionButton{
+                        buttontext: qsTr("Resend AV Codes")
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked:  {
+                                MyJs.createAvComponent("../components/Avcodes.qml", storedaudioremote)
+                            }
                         }
                     }
                     AvOptionButton{

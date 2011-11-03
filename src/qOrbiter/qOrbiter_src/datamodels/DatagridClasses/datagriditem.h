@@ -1,3 +1,10 @@
+/*
+  The purpose of this class is to provide an api for interacting with the visual representations of
+  data for items of any sort laid out in a grid. It will more than likely evolve as time progresses
+  but the main intention is to include as many functions as possible internally to this class and notify
+  other objects via signals
+  */
+
 #ifndef DATAGRIDITEM_H
 #define DATAGRIDITEM_H
 

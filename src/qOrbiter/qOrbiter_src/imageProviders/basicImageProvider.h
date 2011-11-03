@@ -1,3 +1,8 @@
+/*
+  The basic image provider is here to provide images either from the qrc or locally included style related images
+  complex loading of media and network images is done in another imageprovider.
+  */
+
 #ifndef BASICIMAGEPROVIDER_H
 #define BASICIMAGEPROVIDER_H
 
