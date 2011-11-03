@@ -13,3 +13,6 @@ fi
 #update-rc.d -f haltMDs start 01 0 6 . || /bin/true
 #update-rc.d -f haltMDs stop 01 0 6 . || /bin/true
 update-rc.d -f haltMDs remove || /bin/true
+
+## delete bad file from previous installs
+rm -f /etc/init/md_halt.conf
