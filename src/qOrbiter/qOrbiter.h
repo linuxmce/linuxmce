@@ -37,7 +37,7 @@ namespace DCE
 {
 class qOrbiter : public qOrbiter_Command
 {
-   Q_OBJECT
+    Q_OBJECT
     //<-dceag-decl-e->
     // Private member variables
 
@@ -47,9 +47,9 @@ public:
     qorbiterManager * qmlUI;
     Virtual_Device_Translator coreDevices;
     DataGridTable pDataGridTable;
-int m_dwPK_Device_NowPlaying,m_dwPK_Device_NowPlaying_Video,m_dwPK_Device_NowPlaying_Audio,m_dwPK_Device_CaptureCard;  /** < set by the media engine, this is whatever media device is currently playing.  Capture Card is non null if we're displaying media via this card */
+    int m_dwPK_Device_NowPlaying,m_dwPK_Device_NowPlaying_Video,m_dwPK_Device_NowPlaying_Audio,m_dwPK_Device_CaptureCard;  /** < set by the media engine, this is whatever media device is currently playing.  Capture Card is non null if we're displaying media via this card */
 
-//<-dceag-const-b->
+    //<-dceag-const-b->
 public:
     // Constructors/Destructor
     qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL, QObject *parent=0 );
@@ -100,7 +100,7 @@ public:
     void powerOn(QString devicetype);
     void powerOff(QString deviceType);
     void getMediaTimeCode();
-    void GetAdvancedMediaOptions();
+    Q_INVOKABLE  void GetAdvancedMediaOptions();
     void GetAlarms(bool toggle, int grp);
     void SetZoom(QString zoomLevel);
     void SetAspectRatio(QString ratio);
@@ -112,7 +112,7 @@ public:
     void Thumbnail();
     void NavigateScreen(QString direction);
     void JogStream(QString jump);
-  Q_INVOKABLE void showAdvancedButtons();
+    Q_INVOKABLE void showAdvancedButtons();
 
     //<-dceag-const-e->
 
