@@ -1,5 +1,11 @@
 #!/bin/bash
 
+#
+# This file is no longer needed. Everything is done in db_phone_config.sh
+#
+exit 0
+
+
 . /usr/pluto/bin/SQL_Ops.sh
 
 UseDB asterisk

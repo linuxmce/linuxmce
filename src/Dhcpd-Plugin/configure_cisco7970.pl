@@ -203,7 +203,8 @@ close(FILE);
 
 `ln -sf /tftpboot/SEPDefault7970.cnf.xml /tftpboot/SEP$Device_MAC.cnf.xml`;
 
-`/usr/pluto/bin/GenerateSCCP.sh`;
+# no longer needed
+#`/usr/pluto/bin/GenerateSCCP.sh`;
 
 ### Update Cisco 7970 Orbiter
 my $ORB_ID;
@@ -238,6 +239,6 @@ if($DB_ROW = $DB_STATEMENT->fetchrow_hashref())
 }
 $DB_PL_HANDLE->disconnect();
 
-#A HARD RELOAD FOR ASTERISK
-exec("service asterisk restart");
+#A HARD RELOAD FOR ASTERISK (no longer needed in realtime env.)
+#exec("service asterisk restart");
 
