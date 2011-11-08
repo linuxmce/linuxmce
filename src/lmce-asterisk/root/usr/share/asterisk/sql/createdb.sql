@@ -221,7 +221,6 @@ CREATE TABLE IF NOT EXISTS `sip_devices` (
   `useragent` varchar(50) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`,`fromuser`)
-)
 );
 
 --
