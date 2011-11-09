@@ -5,7 +5,7 @@ echo
 . /usr/pluto/bin/pluto.func
 /usr/pluto/bin/Debug_LogKernelModules.sh "$0" || :
 PROCESS="upgrade"
-# Check if we have an existing install, by verifying the DeviceTemplate table exists
+# Check if we have an existing install, by verifying the File table exists
 mysql $MYSQL_DB_CRED pluto_media -e "Select * From File Limit 0,1"||PROCESS="install"
 if [ $PROCESS = "install" ]; then
 	(
@@ -51,17 +51,11 @@ if [[ "$Entries" -eq "0" ]]; then
 	RunSQL "$Q"
 fi
 
-# add some TV related media attributes. this should end up in SqlCVS some day. see trac ticket #1022
-Q="insert into pluto_media.AttributeType(PK_AttributeType,Description,Define,PicPriority) values(50,'Season Number',NULL,NULL) on duplicate key update psc_id=psc_id;"
-RunSQL "$Q"
-
-Q="insert into pluto_media.AttributeType(PK_AttributeType,Description,Define,PicPriority) values(51,'Episode Number',NULL,NULL) on duplicate key update psc_id=psc_id;"
-RunSQL "$Q"
-
-Q="insert into pluto_media.AttributeType(PK_AttributeType,Description,Define,PicPriority) values(52,'TV Season ID',NULL,NULL) on duplicate key update psc_id=psc_id;"
-RunSQL "$Q"
-
-Q="update pluto_media.MediaType_AttributeType set MediaSortOption=5, CombineAsOne=0 where EK_MediaType=5 and FK_AttributeType=12;"
-RunSQL "$Q"
-
+if [ $PROCESS = "upgrade" ]; then
+	echo
+	echo Updating media database using sqlCVS
+	echo Please be patient...
+	## FIXME - schema.linuxmce.org is hard coded
+	/usr/pluto/bin/sqlCVS -R 4999 -H schema.linuxmce.org $PLUTO_DB_CRED -n -d anonymous -U anonymous~nopass -D pluto_media -r media -A -e update || exit $?
+fi
 exit 0
