@@ -12,8 +12,8 @@
 #
 ## pass control to debhelper scripts..
 ##
-#my $temp="set -e\nset -- @ARGV\n" . << 'DEBHELPER_EOF_';
-##DEBHELPER#
-#DEBHELPER_EOF_
+my $temp="set -e\nset -- @ARGV\n" . << 'DEBHELPER_EOF_';
+#DEBHELPER#
+DEBHELPER_EOF_
 #system ($temp) / 256 == 0
 #   or die "Problem with debhelper scripts: $!";
