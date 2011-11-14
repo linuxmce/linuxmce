@@ -1,0 +1,8 @@
+#!/bin/bash
+
+#remove config files that may exist from old freePBX installation
+if [ "$1" = "install" ]; then
+	if [ -d /etc/asterisk ]; then
+    	rm -rf /etc/asterisk/*
+    fi
+fi

@@ -1,3 +1,10 @@
+lmce-asterisk (0+0.3.0-4) unstable; urgency=low
+
+  * Add dependency to asterisk-voicemail
+  * Some table structure modifications
+
+ -- Serge Wagener <serge@linuxmce.org>  Tue, 14 Nov 2011 20:00:00 +0200
+
 lmce-asterisk (0+0.3.0-3) unstable; urgency=low
 
   * Fixed a bug in db creation sql file

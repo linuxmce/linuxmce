@@ -170,7 +170,7 @@ CREATE TABLE IF NOT EXISTS `sip_devices` (
   `dtmfmode` varchar(7) DEFAULT 'auto',
   `fromuser` varchar(80) DEFAULT NULL,
   `fromdomain` varchar(80) DEFAULT NULL,
-  `insecure` varchar(4) DEFAULT NULL,
+  `insecure` varchar(20) DEFAULT NULL,
   `language` char(2) DEFAULT NULL,
   `mailbox` varchar(50) DEFAULT NULL,
   `pickupgroup` varchar(10) DEFAULT NULL,

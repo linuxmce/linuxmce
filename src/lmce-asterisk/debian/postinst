@@ -8,15 +8,27 @@ if [[ "$1" == configure ]]; then
 		PassParm="-p$MySqlPassword"
 	fi
 
+	# check if asterisk db exists
 	res=$(mysql --batch --skip-column-names -e "SHOW DATABASES LIKE 'asterisk'" | grep asterisk)
 	
-	# create asterisk database if it does not exist
+	# if asterisk db already exists delete some tables and recreate them to make sure they correspond to latest schema
+	if [[ "$res" == "asterisk" ]]; then
+		mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm -e "use asterisk; drop table sip_devices;"
+	fi
+	
+	# create asterisk database if it does not exist, and recreated tables deleted above
 	mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm < /usr/share/asterisk/sql/createdb.sql
+	
 	# populate new db with our default values
 	mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm < /usr/share/asterisk/sql/initialdb.sql
 
+	# if asterisk is already installed, and db creation succeded make sure file rights are correct
 	if [[ -e /usr/sbin/asterisk ]] && [[ "$res" == "asterisk" ]]; then
-		adduser www-data asterisk
+		#create asterisk account if it does not yet exist
+		id -u asterisk >/dev/null 2>/dev/null
+		if [[ $? -ne 0 ]]; then
+			adduser www-data asterisk
+		fi
 		
 		mkdir -p /var/lib/asterisk/mohmp3
 		mkdir -p /var/{log,spool}/asterisk
@@ -27,6 +39,7 @@ if [[ "$1" == configure ]]; then
 
 		/usr/pluto/bin/db_create_dialplan.sh || :
 		/usr/pluto/bin/db_phone_config.sh || :
+		
 
 		service apache2 restart
 		service asterisk restart
