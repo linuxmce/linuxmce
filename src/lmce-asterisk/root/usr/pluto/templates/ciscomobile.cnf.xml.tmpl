@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<device xsi:type="axl:XIPPhone" ctiid="1566023366">
+      <deviceProtocol>SIP</deviceProtocol>
+      <devicePool>
+            <callManagerGroup>
+                  <members>
+                        <member priority="0">
+                              <callManager>
+                                    <processNodeName>%CORE_INT_IP%</processNodeName>
+                                    <ports>
+ 										<ethernetPhonePort>2000</ethernetPhonePort>
+										<sipPort>5060</sipPort>
+										<securedSipPort>5061</securedSipPort>
+                                    </ports>
+                              </callManager>
+                        </member>
+                  </members>
+            </callManagerGroup>
+      </devicePool>
+      <sipProfile>
+            <preferredCodec>g711alaw</preferredCodec>
+            <startMediaPort>10000</startMediaPort>
+			<stopMediaPort>20000</stopMediaPort>
+            <sipLines>
+                  <line button="1">
+                        <featureID>9</featureID>
+                        <proxy>USECALLMANAGER</proxy>
+                        <port>5060</port>
+                        <featureLabel>%PHONE_NO%</featureLabel>
+                        <name>%PHONE_NO%</name>
+                        <contact>%PHONE_NO%</contact>
+                        <messagesNumber>%PHONE_NO%</messagesNumber>
+                        <messageWaitingLampPolicy>3</messageWaitingLampPolicy>
+                  </line>
+            </sipLines>
+            <dialTemplate>dialplan.xml</dialTemplate>
+			<voipControlPort>5060</voipControlPort>
+			<dscpForAudio>184</dscpForAudio>
+			<ringSettingBusyStationPolicy>0</ringSettingBusyStationPolicy>
+      </sipProfile>
+      <loadInformation></loadInformation>
+	  <versionStamp>1143565489-a3cbf294-7526-4c29-8791-c4fce4ce4c37</versionStamp>
+      <transportLayerProtocol>4</transportLayerProtocol>
+</device>

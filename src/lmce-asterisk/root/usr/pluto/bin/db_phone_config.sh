@@ -143,10 +143,9 @@ RunConfigureScript()
 		MACaddress=$(Field 2 "$Row")
 		IPaddress=$(Field 3 "$Row")
 	done
-	if [[  "$ConfigureScript" != "" && "$IPaddress" != "" ]]; then
+	if [[  "$ConfigureScript" != "" ]]; then
 		echo Executing Configuration Script $ConfigureScript
-		echo ping $IPaddress
-		ping -qnc 1 $IPaddress &>/dev/null && echo pingdone && /usr/pluto/bin/$ConfigureScript -d $DeviceID -i $IPaddress -m $MACaddress
+		/usr/pluto/bin/$ConfigureScript -d $DeviceID -i $IPaddress -m $MACaddress -n $PhoneNumber -c $IntIP
 	fi
 }
 
@@ -206,7 +205,7 @@ WorkThePhones()
 	                    Port=5061
 	                    PhoneProtocol=SIP
 	                    ;;
-	            "SIP5060")
+	            "SIP5060"|"SIP")
 	                    Port=5060
 	                    PhoneProtocol=SIP
 	                    ;;
