@@ -158,7 +158,7 @@ CREATE TABLE IF NOT EXISTS `sip_devices` (
   `secret` varchar(80) DEFAULT NULL,
   `md5secret` varchar(80) DEFAULT NULL,
   `remotesecret` varchar(250) DEFAULT NULL,
-  `transport` enum('tcp','udp','tcp,udp') DEFAULT NULL,
+  `transport` enum('tcp','udp','udp,tcp') DEFAULT 'udp,tcp',
   `host` varchar(31) NOT NULL DEFAULT 'dynamic',
   `nat` varchar(5) NOT NULL DEFAULT 'yes',
   `type` enum('user','peer','friend') NOT NULL DEFAULT 'friend',
