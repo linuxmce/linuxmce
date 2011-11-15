@@ -186,7 +186,7 @@ WorkThePhones()
 			UseDB asterisk
 			SQL="SELECT MAX(ext)+1 AS free_ext FROM view_lmce_phones;"
 			PhoneNumber=$(RunSQL "$SQL")
-			if [[ $PhoneNumber -eq 0 ]]; then
+			if [[ $PhoneNumber -eq 1 ]]; then
 				PhoneNumber=200
 			fi
 			
