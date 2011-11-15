@@ -14,6 +14,6 @@ for i in `seq $NetworkStringDigits 2` ;do
 	fi
 
 done
-sDHCP="${IntIP}.2-${IntIP}.128,${IntIP}.129-${IntIP}.254"
+sDHCP="${IntIP}.2-${IntIP}.128,${IntIP}.129-${IntIP}.199"
 
 echo $sDHCP
