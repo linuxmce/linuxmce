@@ -12,6 +12,7 @@
 . /usr/pluto/bin/SQL_Ops.sh
 . /usr/pluto/bin/Section_Ops.sh
 . /usr/pluto/bin/Utils.sh
+. /usr/pluto/bin/Network_Parameters.sh
 
 # LinuxMCE hardcoded ID's
 DEVICEDATA_PhoneType=29

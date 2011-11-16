@@ -3,7 +3,7 @@
 
 USAGE="Usage: `basename $0` -c <coreip> -n <phonenumber> "
 
-while getopts c:n: OPT; do
+while getopts c:d:i:m:n: OPT; do
     case "$OPT" in
          c)
             INTIP=$OPTARG
@@ -20,7 +20,7 @@ while getopts c:n: OPT; do
 done
 
 if [[ -n $INTIP ]] && [[ -n $PHONE ]]; then
-	echo "Configuring TFTP script for phone $PHONE on core $INTIP"
+	echo "Configuring TFTP script for Cisco mobile phone $PHONE on core $INTIP"
 	sed -r "s,%PHONE_NO%,$PHONE,g;s,%CORE_INT_IP%,$INTIP,g" /usr/pluto/templates/ciscomobile.cnf.xml.tmpl >/tftpboot/$PHONE.cnf.xml
 else
 	echo $USAGE >&2
