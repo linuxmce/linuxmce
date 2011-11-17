@@ -5,27 +5,14 @@ function checkVPNaccess($username) {
 }
 
 function setVPNaccess($username, $access) {
-	$pass="!VPNpass1";
+	$pass="!VPNpass1"; // this is atm default password for newly created VPN users
 	if($access) // enable user's VPN access
 	{
-		if(!checkVPNaccess($username)) // does user not already have access ?
-		{
-			if(exec("awk '$1==\"#$username\" {print $1}' /etc/ppp/chap-secrets") == '#'.$username) // is user commented out ?
-			{
-				shell_exec("sed -i 's/^#$username/$username/' /etc/ppp/chap-secrets"); # if yes then uncomment
-			}
-			else
-			{
-				exec("echo '$username	l2tpd	$pass	*'> /etc/ppp/chap-secrets");
-			}
-		}
+		exec("sudo -u root /usr/pluto/bin/Network_VPN.sh enable $username $pass");
 	}
 	else // disable user's VPN access
 	{
-		if(checkVPNaccess($username)) // does user have access ?
-		{
-			shell_exec("sed -i 's/^$username/#$username/' /etc/ppp/chap-secrets"); # if yes then comment it out
-		}
+		exec("sudo -u root /usr/pluto/bin/Network_VPN.sh disable $username");
 	}
 }
 

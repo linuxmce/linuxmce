@@ -1,10 +1,5 @@
 <?php
 
-function changeVPNPassword($username,$oldVPNPassword,$VPNPassword) {
-	// change the user's VPN password in /etc/ppp/chap-secrets
-	exec("{ rm /etc/ppp/chap-secrets; awk '{if ($1 == \"$username\" && $3 == \"$oldVPNPassword\") sub(/$oldVPNPassword/,\"$VPNPassword\"); print $0}' >/etc/ppp/chap-secrets; } < /etc/ppp/chap-secrets");
-}
-
 function userChangeVPNPassword($output,$dbADO) {
 	// include language files
 	includeLangFile('common.lang.php');
@@ -99,8 +94,7 @@ function userChangeVPNPassword($output,$dbADO) {
 			
 			if ($VPNPassword!='' && ($queryUserInst && $queryUserInst->RecordCount()==1)) {
 				
-				changeVPNPassword($username, $oldVPNPassword, $VPNPassword);
-				
+				exec("sudo -u root /usr/pluto/bin/Network_VPN.sh password $username $oldVPNPassword $VPNPassword");
 				$out.="
 				<script>
 					alert('".translate('TEXT_PASSWORD_CHANGED_CONST')."');
