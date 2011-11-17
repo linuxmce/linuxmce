@@ -42,18 +42,6 @@ using namespace DCE;
 #include <pthread.h>
 #include <math.h>
 
-/* VideoFrameGeometry Stuff */
-VideoFrameGeometry::VideoFrameGeometry (int iWidth, int iHeight)
-{
-  m_iWidth = iWidth;
-  m_iHeight = iHeight;
-}
-
-VideoFrameGeometry::~VideoFrameGeometry ()
-{
-  // Does nothing.
-}
-
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 Game_Player::Game_Player (int DeviceID, string ServerAddress,

@@ -17,6 +17,7 @@ MYDEVTEMPLATEID = 1965mplateID
 
 Gen_Dev_Files = $(GENDEV)/Game_PlayerBase.cpp
 sources = Main.cpp Game_Player.cpp $(Gen_Dev_Files) \
+	VideoFrameGeometry.cpp \
 	EmulatorFactory.cpp \
 	EmulatorModel.cpp \
 	EmulatorController.cpp \

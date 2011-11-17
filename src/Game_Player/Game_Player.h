@@ -33,6 +33,7 @@
 #define SHOW_GAME_VIEW 1
 #define SHOW_OSD 2
 
+#include "VideoFrameGeometry.h"
 #include "DCE/PlainClientSocket.h"
 #include "X11/Xlib.h"
 #include "X11/Xutil.h"
@@ -48,17 +49,6 @@
 //<-dceag-decl-b->
 namespace DCE
 {
-
-   class VideoFrameGeometry
-  {
-
-  public:
-    int m_iWidth;
-    int m_iHeight;
-
-      VideoFrameGeometry (int iWidth, int iHeight);
-      virtual ~ VideoFrameGeometry ();
-  };
 
   class Game_Player:public Game_Player_Command, public AlarmEvent
   {
