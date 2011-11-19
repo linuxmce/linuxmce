@@ -53,7 +53,7 @@ for(my $i=0;defined($data[$i]);$i+=2)
 	$TMP_BUFFER .= "exten => $j,n,Hangup\n\n";
 }
 
-`/usr/bin/sox $list /var/lib/asterisk/sounds/pluto/pluto-security-sos-options.gsm`;
+`/usr/bin/sox $list /usr/share/asterisk/sounds/pluto/pluto-security-sos-options.gsm`;
 
 # Begin writing extensions_custom.conf
 $EXT_BUFFER .= "; This file contains example extensions_custom.conf entries.\n";
@@ -109,7 +109,7 @@ while(my $DB_ROW = $statement->fetchrow_hashref())
 }
 $statement->finish();
 
-`/usr/bin/sox $list /var/lib/asterisk/sounds/pluto/userselect.gsm`;
+`/usr/bin/sox $list /usr/share/asterisk/sounds/pluto/userselect.gsm`;
 
 # Clean up
 unlink "/tmp/user.gsm";
@@ -120,7 +120,7 @@ $list = "";
 &generate_voice("Goodbye.","/tmp/linuxmce-goodbye.gsm");
 $list .= "/tmp/linuxmce-goodbye.gsm";
 
-`/usr/bin/sox $list /var/lib/asterisk/sounds/pluto/linuxmce-goodbye.gsm`;
+`/usr/bin/sox $list /usr/share/asterisk/sounds/pluto/linuxmce-goodbye.gsm`;
 
 # Clean up
 unlink "/tmp/linuxmce-goodbye.gsm";
@@ -145,7 +145,7 @@ print "Generating speech for Pin Entry\n";
 $list = "";
 &generate_voice("Please enter your pin.","/tmp/enterpin.gsm");
 $list .= "/tmp/enterpin.gsm";
-`/usr/bin/sox $list /var/lib/asterisk/sounds/pluto/enterpin.gsm`;
+`/usr/bin/sox $list /usr/share/asterisk/sounds/pluto/enterpin.gsm`;
 
 # Clean up
 unlink "/tmp/enterpin.gsm";
@@ -168,7 +168,7 @@ print "Generating speech for Invalid Pin\n";
 $list = "";
 &generate_voice("Your pin was not valid.  Goodbye.","/tmp/pin-invalid.gsm");
 $list .= "/tmp/pin-invalid.gsm ";
-`/usr/bin/sox $list /var/lib/asterisk/sounds/pluto/pin-invalid.gsm`;
+`/usr/bin/sox $list /usr/share/asterisk/sounds/pluto/pin-invalid.gsm`;
 
 # Clean up
 unlink "/tmp/pin-invalid.gsm";
@@ -209,7 +209,7 @@ $list .= "/tmp/linuxmce-security4.gsm ";
 &generate_voice("To speak to the person in your house dial 5","/tmp/linuxmce-security5.gsm");
 $list .= "/tmp/linuxmce-security5.gsm";
 
-`/usr/bin/sox $list /var/lib/asterisk/sounds/pluto/linuxmce-security-options.gsm`;
+`/usr/bin/sox $list /usr/share/asterisk/sounds/pluto/linuxmce-security-options.gsm`;
 
 # Clean up
 unlink "/tmp/linuxmce-security.gsm";
@@ -227,7 +227,7 @@ $list = "";
 &generate_voice("The alarm has been reset.","/tmp/linuxmce-security-reset.gsm");
 $list .= "/tmp/linuxmce-security-reset.gsm";
 
-`/usr/bin/sox $list /var/lib/asterisk/sounds/pluto/linuxmce-security-reset.gsm`;
+`/usr/bin/sox $list /usr/share/asterisk/sounds/pluto/linuxmce-security-reset.gsm`;
 
 # Clean up
 unlink "/tmp/linuxmce-security-reset.gsm";
@@ -242,7 +242,7 @@ $list = "";
 &generate_voice("The alarm has been ignored.","/tmp/linuxmce-security-ignore.gsm");
 $list .= "/tmp/linuxmce-security-ignore.gsm";
 
-`/usr/bin/sox $list /var/lib/asterisk/sounds/pluto/linuxmce-security-ignore.gsm`;
+`/usr/bin/sox $list /usr/share/asterisk/sounds/pluto/linuxmce-security-ignore.gsm`;
 
 # Clean up
 unlink "/tmp/linuxmce-security-ignore.gsm";
@@ -333,7 +333,7 @@ sub generate_voice_festival()
         system('text2wave /tmp/festival.txt -o /tmp/festival.wav -eval "(' . $defaultVoice . ')"');
 
         # Resample and create permanent file
-        `/usr/bin/sox /tmp/festival.wav -r 8000 -c 1 $FILE resample -ql`;
+        `/usr/bin/sox /tmp/festival.wav -r 8000 -c 1 $FILE`;
 
         # Clean up the temporary files
         unlink "/tmp/festival.wav";
