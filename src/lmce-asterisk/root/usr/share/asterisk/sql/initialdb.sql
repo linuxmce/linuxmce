@@ -36,7 +36,10 @@ INSERT INTO ast_config (cat_metric, var_metric, commented, filename, category, v
 (0, 11, 0, 'sip.conf', 'general', 'rtcachefriends', 'yes'),
 (0, 12, 0, 'sip.conf', 'general', 'rtautoclear', 'yes'),
 (0, 13, 0, 'sip.conf', 'general', 'tcpenable', 'yes'),
-(0, 14, 0, 'sip.conf', 'general', 'tcpbindaddr', '0.0.0.0');
+(0, 14, 0, 'sip.conf', 'general', 'tcpbindaddr', '0.0.0.0'),
+(0, 15, 0, 'sip.conf', 'general', 'registerattempts', '0'),
+(0, 16, 0, 'sip.conf', 'general', 'registertimeout', '15'),
+(0, 17, 0, 'sip.conf', 'general', 'language', 'en');
 
 --
 -- Insert static iax.conf in  DB

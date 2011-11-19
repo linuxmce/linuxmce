@@ -309,9 +309,10 @@ AddTrunk()
 				('$(( 100+$id ))', 'sip.conf', 'general', 'register', '$username:$password@$host/$phonenumber');"
 			# create SIP peer
 			context="from-trunk"
-			LINESSQL="$LINESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,secret,host,port,context,qualify,nat,type,fromuser,fromdomain,callerid,allow,insecure) VALUES \
-			('$host','$username','$password','$host','5060','$context','no','yes','friend',NULL,'$host','$username','alaw;ulaw','port,invite'), \
-			('$phonenumber','$username','$password','$host','5060','$context','no','yes','peer','$username', '$host','$username','alaw;ulaw','port,invite');"
+			LINESSQL="$LINESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,secret,host,port,context,qualify,nat,type,fromuser,fromdomain,callerid,allow,insecure,directmedia) VALUES \
+			('$host-$username','$username','$password','$host','5060','$context','yes','yes','peer','$username','$host','$username','alaw;ulaw','port,invite','no');"
+			#, \
+			#('$phonenumber','$username','$password','$host','5060','$context','no','yes','peer','$username', '$host','$username','alaw;ulaw','port,invite');"
         ;;
     esac
 	

@@ -1,8 +1,14 @@
 lmce-asterisk (0+0.3.1-1) unstable; urgency=low
 
   * Added support for CISCO mobile iOS app softphone (see http://wiki.linuxmce.org/index.php/Cisco_Mobile)
+  * Corrected sos sound files path
+  * Remove sox warning messags
+  * Some modification on SIP provider registering to reduce incoming
+    call problems
+  * Setting default SIP language to en, targeting multi language once
+    all works
 
- -- Serge Wagener <serge@linuxmce.org>  Tue, 16 Nov 2011 18:00:00 +0200
+ -- Serge Wagener <serge@linuxmce.org>  Sat, 19 Nov 2011 18:54:38 +0100
 
 lmce-asterisk (0+0.3.0-4) unstable; urgency=low
 

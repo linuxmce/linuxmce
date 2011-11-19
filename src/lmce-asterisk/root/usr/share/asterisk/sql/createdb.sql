@@ -186,7 +186,7 @@ CREATE TABLE IF NOT EXISTS `sip_devices` (
   `port` mediumint(5) unsigned NOT NULL DEFAULT '0',
   `defaultuser` varchar(80) NOT NULL DEFAULT '',
   `subscribecontext` varchar(80) DEFAULT NULL,
-  `directmedia` enum('yes','no') DEFAULT NULL,
+  `directmedia` enum('yes','no') DEFAULT 'no',
   `trustrpid` enum('yes','no') DEFAULT NULL,
   `sendrpid` enum('yes','no') DEFAULT NULL,
   `progressinband` enum('never','yes','no') DEFAULT NULL,
