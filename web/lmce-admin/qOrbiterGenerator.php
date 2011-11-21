@@ -1,4 +1,11 @@
+
+
 <?php
+/*
+ * Qrbitergenerator.php. Its sole function is to prepare a blob 
+ * configuration data for orbiter to consume on startup with key data to interact
+ * with the system
+ */
 
 //initialization area
 if (isset($_GET["d"])) {
@@ -102,6 +109,12 @@ if (getSecurityScenarios($conn, $doc, $orbiterData))
 {
 	echo "....done!<br>";
 }
+
+if (getFloorPlanDevices($conn, $doc, $orbiterData))
+{
+	echo "....done!<br>";
+}
+	
 	
 if (mysql_close($conn))
 {
@@ -676,5 +689,38 @@ function getSecurityScenarios($conn, $doc, $orbiterData)
 	
 	return true;
 }
+
+function getFloorPlanDevices($conn, $doc, $orbiterData)
+{
+	echo "Looking for  floorplan devices"."<br>";	
+
+	$floorplanDeviceElement = $doc->createElement("FloorplanDevices");	//setup xml elements for reading
+	$orbiterData->appendChild($floorplanDeviceElement);	
+	
+	//looks for devices with floorplan data
+	//selects all the devices with floorplan info thanks possy
+	$sql = "select PK_Device, Device.Description,ddd1.IK_DeviceData as  
+	FloorplanInfo,ddd2.IK_DeviceData as FloorplanObjectType From Device Join Device_DeviceData as 
+	ddd1 on Device.PK_Device = ddd1.FK_Device Join Device_DeviceData as 
+	ddd2 on Device.PK_Device = ddd2.FK_Device Where ddd1.FK_DeviceData = 10 and ddd2.FK_DeviceData = 11  ";
+	
+	$result = mysql_query($sql);
+		$i=0;
+		while ($row = mysql_fetch_array($result))
+		{
+		
+	$fp = $doc->createElement("FPDevice");			
+		$att1= $fp->setAttribute("Name", $row['Description']);
+		$att2= $fp->setAttribute("Device", $row['PK_Device']);	
+		$att3= $fp->setAttribute("Position", $row['FloorplanInfo']);
+		$att4= $fp->setAttribute("Type", $row['FloorplanObjectType']);							
+		$floorplanDeviceElement->appendChild($fp);		
+	 		
+		$i++;
+		}
+		
+		echo $i." Devices with floorplan data";
+		return true;
+	}
 
 ?>
