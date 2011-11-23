@@ -30,6 +30,7 @@ public:
 
 
 signals:
+    void deviceAdded();
 
 public slots:
 

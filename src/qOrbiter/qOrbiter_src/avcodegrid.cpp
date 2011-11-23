@@ -66,13 +66,14 @@ void AvCodeGrid::handleItemChange()
   if(index.isValid())
   {
     emit dataChanged(index, index);
+    emit deviceAdded();
   }
 }
 
 AvItem * AvCodeGrid::find(const QString &id) const
 {
   foreach(AvItem* item, m_list) {
-    if(item->id() == id) return item;
+    if(item->device_number() == id.toInt()) return item;            //note this line is different in that it keys on device number, which i have mapped to a field named device_number in the class avitem
   }
   return 0;
 }

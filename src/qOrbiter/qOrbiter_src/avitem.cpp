@@ -1,7 +1,7 @@
 #include "avitem.h"
 
-AvItem::AvItem( QString &ident, QString &name,  QString &path,  int &index,  QImage &img, QObject *parent) :
-    m_fk_file(ident), m_name(name), m_path(path), m_index(index), m_image(img)
+AvItem::AvItem( QString &name, int &num,  int &templateNo, QImage &img, QString &attrib, QObject *parent) :
+   m_name(name), m_deviceNo(num), m_deviceTemplate(templateNo), m_image(img), attribute(attrib)
 {
 
 }
@@ -11,11 +11,10 @@ QHash<int, QByteArray> AvItem::roleNames() const
 
   QHash<int, QByteArray> names;
   names[NameRole] = "name";
-  names[IndexRole] = "modelindex";
-  names[PathRole] = "path";
+  names[NumberRole] = "deviceno";
+  names[TemplateRole] = "devicetemplate";
   names[AttributeRole] = "attributes";
-  names[ImageRole] = "cellImage";
-  names[FKRole]= "fkfile";
+  names[ImageRole] = "icon";
   return names;
 }
 
@@ -24,15 +23,13 @@ QVariant AvItem::data(int role) const
   switch(role) {
   case NameRole:
     return name();
-  case IndexRole:
-    return index();
+  case NumberRole:
+    return device_number();
   case ImageRole:
     return cellImage();
-  case PathRole:
-    return path();
-  case FKRole:
-    return id();
-  default:
+  case TemplateRole:
+    return device_template();
+   default:
     return QVariant();
   }
 }
