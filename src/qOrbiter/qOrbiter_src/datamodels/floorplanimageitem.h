@@ -1,6 +1,11 @@
 #ifndef FLOORPLANITEM_H
 #define FLOORPLANITEM_H
 
+/*
+  this class is intended to manage the various aspects of floorplan images. it does not handle floorplan devices,
+  but just the floorplan images themselves.
+  */
+
 #include <QObject>
 #include <QVariant>
 #include <QImage>

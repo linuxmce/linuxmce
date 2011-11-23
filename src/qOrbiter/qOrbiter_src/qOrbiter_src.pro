@@ -185,7 +185,8 @@ SOURCES += main.cpp \
     datamodels/DataModelItems/sleepingalarm.cpp \
     contextobjects/filedetailsclass.cpp \
     avcodegrid.cpp \
-    avitem.cpp
+    avitem.cpp \
+    contextobjects/floorplandevice.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -241,11 +242,12 @@ HEADERS += \
     contextobjects/epgchannellist.h \
     playlists/epgitemclass.h \
     datamodels/floorplanmodel.h \
-    datamodels/floorplanitem.h \
     imageProviders/abstractimageprovider.h \
     datamodels/DataModelItems/sleepingalarm.h \
     avcodegrid.h \
-    avitem.h
+    avitem.h \
+    datamodels/floorplanimageitem.h \
+    contextobjects/floorplandevice.h
 
 OTHER_FILES += Readme.txt \
     config.xml \
@@ -324,6 +326,10 @@ OTHER_FILES= \
 
 RESOURCES += \
     skinData.qrc
+
+
+
+
 
 
 

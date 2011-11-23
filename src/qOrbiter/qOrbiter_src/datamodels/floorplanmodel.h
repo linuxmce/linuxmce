@@ -2,7 +2,7 @@
 #define FLOORPLANMODEL_H
 
 #include <QAbstractListModel>
-#include <datamodels/floorplanitem.h>
+#include <datamodels/floorplanimageitem.h>
 #include <QModelIndex>
 
 class FloorPlanModel : public QAbstractListModel
