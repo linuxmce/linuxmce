@@ -41,7 +41,7 @@ do
 	if [[ -c "/dev/input/js0" ]]; then
 	# USB Joystick detected, add USB game pad.
 	    PK_Device_MD=$(FindDevice_Template "$PK_Device" "$DEVICETEMPLATE_Generic_PC_as_MD" norecursion)
-	    /usr/pluto/bin/MessageSend "$DCERouter" $PK_Device_MD -1001 2 65 52 4 53 2 49 2189
+	    /usr/pluto/bin/MessageSend "$DCERouter" $PK_Device -1001 2 65 52 4 53 2 49 2189
 	else
 	    echo "No USB Game Pads detected."
 	# USB Joystick was not detected.
