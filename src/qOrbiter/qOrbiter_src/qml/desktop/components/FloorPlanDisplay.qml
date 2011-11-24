@@ -22,7 +22,6 @@ Rectangle {
         color:style.lighthighlight
 
 
-
             Image {
                 id: floorplanimage
                 source: ""

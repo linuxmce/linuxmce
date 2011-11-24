@@ -27,7 +27,9 @@
 #include <contextobjects/playlistclass.h>
 #include <contextobjects/securityvideoclass.h>
 #include <QtNetwork/QTcpSocket>
+#include <QProcess>
 
+#include <contextobjects/floorplandevice.h>
 #include <QThread>
 
 
@@ -374,6 +376,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     //initialization related
     void regenOrbiter(int deviceNo);
     void regenComplete(int i);
+    void regenError(QProcess::ProcessError);
     QString adjustPath(const QString&);
     void checkConnection();
 

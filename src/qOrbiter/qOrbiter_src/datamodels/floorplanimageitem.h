@@ -37,7 +37,7 @@ public:
     inline int page() const { return m_page; }
     inline QString icon() const { return m_iconPath; }
     inline QImage floorplanImage() const {  return m_floorplanImage; }
-     inline QImage iconImg() const {  return m_iconImage; }
+    inline QImage iconImg() const {  return m_iconImage; }
 
 
 
@@ -49,6 +49,7 @@ private:
     QImage m_floorplanImage;
     QString m_iconPath;
     QImage m_iconImage;
+    QMap <int , QObject> devicelist ;
 
 
 signals:

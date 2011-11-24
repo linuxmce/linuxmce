@@ -5,6 +5,7 @@ import "../components"
 Rectangle {
     width: style.orbiterW
     height: style.orbiterH
+    color: "slategrey"
 
    HomeButton{anchors.top: parent.top; anchors.left: parent.left}
 
@@ -12,9 +13,10 @@ Rectangle {
         anchors.centerIn: parent
         height: parent.height - 200
         width: parent.width - 100
-        url: "http://dcerouter/lmce-admin/qOrbiterGenerator.php?d="+iPK_Device
+        url: "http://192.168.80.1/lmce-admin/qOrbiterGenerator.php?d="+iPK_Device
 
     }
+
 }
 
 

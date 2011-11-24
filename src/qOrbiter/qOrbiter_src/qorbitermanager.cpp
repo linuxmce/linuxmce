@@ -819,11 +819,23 @@ void qorbiterManager::regenOrbiter(int deviceNo)
 {
     gotoQScreen("Splash.qml");
     qDebug() << "Regenerating..";
+    qDebug() << qs_routerip;
 
+    if(qs_routerip =="192.168.80.1")
+    {
+       gotoQScreen("LoadError.qml");
+        qDebug("remote orbiter");
+    }
+    else
+    {
+        qDebug("local orbiter");
     QProcess *regen = new QProcess(this);
-    regen->start("/var/www/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device), QIODevice::ReadOnly);
+    regen->start("/usr/bin/php /var/www/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device), QIODevice::ReadOnly);
     qDebug() <<"status code:" << regen->errorString();
     QObject::connect(regen,SIGNAL(finished(int)), this, SLOT(regenComplete(int)));
+    QObject::connect(regen,SIGNAL(error(QProcess::ProcessError)), this, SLOT(regenError(QProcess::ProcessError)));
+    }
+
 
 }
 
@@ -1027,14 +1039,18 @@ bool qorbiterManager::readLocalConfig()
         {
 
             QDomElement configVariables = localConfig.documentElement().toElement();
+
+            if(qs_routerip.isEmpty())
+            {
             qs_routerip = configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue();
+            }
             currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
             iPK_Device = configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong();
 
 
             if(!qs_routerip.isNull())
             {
-                 qs_routerip = "DCEROUTER";
+
             }
             else
             {
@@ -1637,6 +1653,12 @@ void qorbiterManager::enter()
 void qorbiterManager::jogPosition(QString jog)
 {
     pqOrbiter->JogStream(jog);
+}
+
+void qorbiterManager::regenError(QProcess::ProcessError)
+{
+    qDebug("Error!");
+
 }
 
 
