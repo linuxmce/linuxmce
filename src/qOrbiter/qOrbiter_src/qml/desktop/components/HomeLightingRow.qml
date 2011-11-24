@@ -7,6 +7,7 @@ Item {
     Rectangle{
         height: scaleY(17)
         width: scaleX(100)
+
         clip:true
         color:style.maincolor
         radius: 20
@@ -17,15 +18,13 @@ Item {
             height: parent.height
 
         }
-        // anchors.centerIn: lightingrow
         HomeButtonDelegate{id:lightingdelegate}
 
         Row {
             id: guide
-            //anchors.left: lightingfloorplan.right
             spacing:2
-            anchors.left: parent.left
-            anchors.leftMargin: scaleX(2)
+            x: scaleX(2)
+
 
             ButtonSq {
                 id: lightingfloorplan
@@ -39,7 +38,6 @@ Item {
                 Image {
                     id: buttonbg
                     source: "../../../img/icons/buttonoverlay.png"
-                    anchors.fill: lightingfloorplan
                     height: parent.height
                     width: parent.width
                 }
@@ -48,29 +46,21 @@ Item {
                     source: "../../../img/icons/jabber_protocol.png"
                     height: parent.height
                     width: parent.width
-                    anchors.centerIn: parent
-
                 }
 
                 MouseArea{
                     id: mousearea1
-                    anchors.fill: parent
                     onClicked: showfloorplan(2)
-
                 }
 
             }
         Flickable{
             height: scaleY(15)
             width: scaleX(79)
-            anchors.left: lightingfloorplan.right
-            anchors.leftMargin: 4
             contentHeight: style.stdbuttonh
             contentWidth: ((style.stdbuttonw + 5) * (lightingScenarios.count + 1)) - 5
             clip: true
             flickableDirection: "HorizontalFlick"
-
-
 
                 ListView{
                     id: lightingScenarios

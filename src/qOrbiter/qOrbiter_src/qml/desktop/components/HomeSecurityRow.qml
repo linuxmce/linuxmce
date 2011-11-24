@@ -22,10 +22,8 @@ Item {
 
         Row {
             id: guide
-            //anchors.left: lightingfloorplan.right
             spacing:2
-            anchors.left: parent.left
-            anchors.leftMargin: scaleX(2)
+            x: scaleX(2)
             ButtonSq {
                 id: rowheader
                 height: scaleY(13)
@@ -39,7 +37,6 @@ Item {
                 Image {
                     id: buttonbg2
                     source: "../../../img/icons/buttonoverlay.png"
-                    anchors.fill: rowheader
                     height: parent.height
                     width: parent.width
                 }
@@ -47,14 +44,12 @@ Item {
                 Image {
                     id: buttonbg
                     source: "../../../img/icons/Security.png"
-                    anchors.fill: rowheader
                     height: parent.height
                     width: parent.width
                 }
 
                 MouseArea{
                     id: mousearea1
-                    anchors.fill: parent
                     onClicked:showfloorplan(5)
                 }
             }
@@ -64,8 +59,6 @@ Item {
             id:securityflick
             height: scaleY(16)
             width: scaleX(95)
-            anchors.left: rowheader.right
-            anchors.leftMargin: 4
             flickableDirection: "HorizontalFlick"
             contentHeight: childrenRect.height
             contentWidth: ((style.buttonW + 5) * (securityScenarios.count + 1)) - 5

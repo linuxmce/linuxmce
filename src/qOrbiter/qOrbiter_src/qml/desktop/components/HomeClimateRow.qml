@@ -24,8 +24,7 @@ Item {
         Row {
             id: guide
             spacing:5
-            anchors.left: parent.left
-            anchors.leftMargin: scaleX(2)
+            x: scaleX(2)
             ButtonSq {
                 id: rowheader
                 anchors.top: parent.top
@@ -37,14 +36,12 @@ Item {
 
                 MouseArea{
                     id: mousearea1
-                    anchors.fill: parent
                     onClicked:showfloorplan(4)
                     z:5 }
 
                 Image {
                     id: buttonbg
                     source: "../../../img/icons/buttonoverlay.png"
-                    anchors.fill: rowheader
                     height: parent.height
                     width: parent.width
                 }
@@ -54,7 +51,6 @@ Item {
                     source: "../../../img/icons/kweather.png"
                     height: parent.height
                     width: parent.width
-                    anchors.centerIn: parent
 
                 }
             }
@@ -64,7 +60,6 @@ Item {
                 id:climateRow
                 height: scaleY(16)
                 width: scaleX(85)
-                anchors.left: rowheader.right
                 contentHeight: style.buttonH
                 contentWidth: ((style.buttonW + 5) * (climateScenarios.count + 1)) - 5
                 clip: true

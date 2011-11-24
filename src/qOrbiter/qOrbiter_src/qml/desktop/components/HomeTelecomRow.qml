@@ -26,8 +26,7 @@ Item {
         Row {
             id: telecomRow
             spacing:5
-anchors.left: parent.left
-            anchors.leftMargin: scaleX(2)
+            x: scaleX(2)
 
             ButtonSq {
                 id: rowheader
@@ -41,20 +40,17 @@ anchors.left: parent.left
                 Image {
                     id: buttonbg2
                     source: "../../../img/icons/buttonoverlay.png"
-                    anchors.fill: rowheader
                     height: parent.height
                     width: parent.width
                 }
                 Image {
                     id: buttonbg
                     source: "../../../img/icons/Speed Dial.png"
-                    anchors.fill: rowheader
                     height: parent.height
                     width: parent.width
                 }
                 MouseArea{
                     id: mousearea1
-                    anchors.fill: parent
                     onClicked: showfloorplan(6)
                 }
 
@@ -64,8 +60,6 @@ anchors.left: parent.left
                 id:securityflick
                 height: scaleY(16)
                 width: scaleX(87)
-                anchors.left: rowheader.right
-                anchors.leftMargin: 4
                 contentHeight: style.buttonH
                 contentWidth: ((style.buttonW) * (telecomScenarios.count + 1)) - 5
                 clip: true

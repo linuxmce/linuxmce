@@ -19,15 +19,13 @@ Item {
             height: parent.height
 
         }
-        // anchors.centerIn: lightingrow
 
         HomeButtonDelegate{id:mediaDelegate}
 
         Row {
             id: guide
             spacing:5
-            anchors.left: parent.left
-            anchors.leftMargin: scaleX(2)
+            x: scaleX(2)
 
             ButtonSq {
                 id: rowheader
@@ -41,7 +39,6 @@ Item {
                 Image {
                     id: buttonbg
                     source: "../../../img/icons/buttonoverlay.png"
-                    anchors.fill: rowheader
                     height: parent.height
                     width: parent.width
                 }
@@ -50,12 +47,10 @@ Item {
                     source: "../../../img/icons/kmix.png"
                     height: parent.height
                     width: parent.width
-                    anchors.centerIn: parent
                 }
 
                 MouseArea{
                     id: mousearea1
-                    anchors.fill: parent
                     onClicked:showfloorplan(3)
                 }
             }
@@ -72,7 +67,6 @@ Item {
                 buttontext: dcenowplaying.qs_mainTitle +" \n " + dcenowplaying.timecode
 
                 MouseArea{
-                    anchors.fill: parent
                     onClicked:screenchange(dcenowplaying.qs_screen)
                 }
             }
@@ -80,8 +74,6 @@ Item {
             id:mediaflick
             height: scaleY(16)
             width: scaleX(79)
-            anchors.left: now_playing.right
-            anchors.leftMargin: 4
             contentHeight: style.buttonH
             contentWidth: (style.buttonW + 5) * (mediaflick.children.width)
             clip: true
