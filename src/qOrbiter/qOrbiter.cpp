@@ -1035,11 +1035,9 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     qmlUI->nowPlayingButton->resetData();
     if (iPK_MediaType != 0)
     {
-
         qmlUI->nowPlayingButton->setStatus(true);
         //requestMediaPlaylist();
         qmlUI->nowPlayingButton->setPlaylistPostion(iValue);
-
     }
 
     else if (iPK_MediaType == 0)
@@ -3401,6 +3399,27 @@ void DCE::qOrbiter::showAdvancedButtons()
             }
         }
     }
+}
+
+void DCE::qOrbiter::movePlaylistEntry(bool pos, int num)
+{
+    if (pos==true)
+    {
+        CMD_Move_Playlist_entry_Up move_entry_up(qmlUI->iPK_Device, qmlUI->iOrbiterPluginID, num);
+        SendCommand(move_entry_up);
+    }
+    else
+    {
+        CMD_Move_Playlist_entry_Down move_entry_down(qmlUI->iPK_Device, qmlUI->iOrbiterPluginID, num);
+        SendCommand(move_entry_down);
+    }
+}
+
+void DCE::qOrbiter::addToPlaylist(bool now, std::string playlist)
+{
+    /*
+      found out this command doesnt exist and need to be created. ack.
+      */
 }
 
 

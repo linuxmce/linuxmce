@@ -113,6 +113,8 @@ public:
     void NavigateScreen(QString direction);
     void JogStream(QString jump);
     Q_INVOKABLE void showAdvancedButtons();
+    Q_INVOKABLE void movePlaylistEntry(bool pos, int num);
+    Q_INVOKABLE void addToPlaylist(bool now, string playlist);
 
     //<-dceag-const-e->
 

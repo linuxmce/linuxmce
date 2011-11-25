@@ -22,7 +22,10 @@
 
 using namespace DCE;
 
-
+/*
+  this is the constructor. it should be refactored to intantiatae the qorbiter class from the start to facilitate
+  cleaner startup with more robust error checking
+*/
 qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent) :
     QWidget(parent), iPK_Device(deviceno), qs_routerip(routerip)
 {
@@ -54,12 +57,11 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
 
     //  currentSkin = "default";
 
-    s_RouterIP="DCERouter";
+   // s_RouterIP="DCERouter";
 
     //adjusting runtime paths also based on platform and build type
     QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
     const QString test = buildType;
-
     QString finalPath = qmlPath+buildType+currentSkin;
     QString skinPath= finalPath+"/Style.qml";
     QString skinsPath = qmlPath+test;
@@ -106,7 +108,6 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
         initializeGridModel();  //begins setup of media grid listmodel and its properties
         initializeSortString(); //associated logic for navigating media grids
-
         qorbiterUIwin->rootContext()->setContextObject(this); //providing a direct object for qml to call c++ functions of this class
 
 
@@ -184,6 +185,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
 
         //     qDebug() << "Showing Splash";
         gotoQScreen("Splash.qml");
+
         QObject::connect(item,SIGNAL(setupStart(int, QString)), this,SLOT(qmlSetupLmce(int,QString)));
         QObject::connect(nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection );
     }
@@ -192,7 +194,8 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         qDebug() << "Couldnt get skin data!";
         exit(15);
     }
-
+    iPK_Device= deviceno;
+    pqOrbiter = new DCE::qOrbiter(iPK_Device, routerip.toStdString(), true,false);
 }
 
 
@@ -214,8 +217,6 @@ void qorbiterManager::gotoQScreen(QString s)
 //this block sets up the connection to linuxmce
 bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode)
 {
-    iPK_Device= PK_Device;
-    pqOrbiter = new DCE::qOrbiter(PK_Device, sRouterIP, true,bLocalMode);
 
 pqOrbiter->qmlUI = this;
 
@@ -245,7 +246,6 @@ pqOrbiter->qmlUI = this;
                 pqOrbiter->CreateChildren();
                 qorbiterUIwin->rootContext()->setContextProperty("dcerouter", pqOrbiter );
                 gotoQScreen("Screen_1.qml");
-
                 return false;
             }
             else
@@ -264,6 +264,7 @@ pqOrbiter->qmlUI = this;
     else
     {
         bAppError = true;
+
         if( pqOrbiter->m_pEvent && pqOrbiter->m_pEvent->m_pClientSocket && pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
         {
             bAppError = false;
@@ -275,11 +276,12 @@ pqOrbiter->qmlUI = this;
             return true;
 
         }
-        else
+        else if( pqOrbiter->m_pEvent && pqOrbiter->m_pEvent->m_pClientSocket && pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice )
         {
-            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
-            qDebug() << "Connect Failed";
+            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Invalid Device ID - Please run setup in webadmin");
+            qDebug() << "Invalid Device ID - Please run setup in webadmin";
             gotoQScreen("Splash.qml");
+            pqOrbiter->Disconnect();
             return true;
         }
     }
@@ -770,7 +772,6 @@ void qorbiterManager::setActiveRoom(int room,int ea)
 void qorbiterManager::execGrp(int grp)
 {
     pqOrbiter->executeCommandGroup(grp);
-
     i_current_command_grp = grp;
     qorbiterUIwin->rootContext()->setContextProperty("currentcommandgrp", i_current_command_grp);
 }

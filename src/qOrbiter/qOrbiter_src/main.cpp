@@ -212,6 +212,9 @@ int main(int argc, char* argv[])
 
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",PK_Device,sRouter_IP.c_str());
 
+    /*
+      need a routine here to find the router ip / dcerouter setting. there should be user feedback that its initializing
+      */
     bool bAppError=false;
     bool bReload=false;
     try
@@ -222,6 +225,11 @@ int main(int argc, char* argv[])
         {
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
             qDebug() << "Connected!";
+            /*
+              **TODO
+              add routine  that checks for valid device id and router ip
+              setup routine should take over if there is an error
+              */
             w->gotoQScreen("Screen_1.qml");
             a.exec();
 
@@ -243,11 +251,11 @@ int main(int argc, char* argv[])
             else
             {
                 bAppError = true;
-                if( w->pqOrbiter->m_pEvent&& w->pqOrbiter->m_pEvent->m_pClientSocket && w->pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
+                if( w->pqOrbiter->m_pEvent&& w->pqOrbiter->m_pEvent->m_pClientSocket && w->pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice)
                 {
                     bAppError = false;
                     bReload = false;
-                    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "bapp error true = No Router.  Will abort");
+                    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device  Will abort");
                     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
                     w->gotoQScreen("Splash.qml");
                     return a.exec();
