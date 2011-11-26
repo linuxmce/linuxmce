@@ -103,3 +103,19 @@ function createAvComponent(incavcomponent, screen) {
            console.log("Error in av component object")
 }
 }
+
+
+var thumbcomponent
+var thumbsprite
+var thumbscreen
+
+function createThumbComponent(incavcomponent, thumbscreen) {
+
+    thumbcomponent = Qt.createComponent(incavcomponent);
+       thumbsprite = thumbcomponent.createObject(thumbscreen, {"x":200, "y": 50});
+
+       if (thumbsprite == null) {
+           // Error Handling
+           console.log("Error in av component object")
+}
+}

@@ -318,6 +318,14 @@ Rectangle {
                     }
                     AvOptionButton{
                         buttontext: qsTr("Thumbnail")
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked:  {
+                                dcerouter.grabScreenshot()
+                                MyJs.createThumbComponent("../components/AssignScreenShot.qml", storedvideoremote)
+
+                            }
+                        }
                     }
                     AvOptionButton{
                         buttontext: qsTr("Jog")

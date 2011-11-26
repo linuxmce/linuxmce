@@ -180,8 +180,9 @@ Param 10 - pk_attribute
     QStringList goBack;
     bool backwards;
 
+    //for the media grid to allow pauses in loading and allow non locking operation
     bool requestMore;
-   Q_INVOKABLE void setRequestMore(bool state);
+    Q_INVOKABLE void setRequestMore(bool state);
     bool getRequestMore();
 
     //listmodels
@@ -215,12 +216,13 @@ Param 10 - pk_attribute
     data
     */
 
-    QImage updatedObjectImage;
+    QImage updatedObjectImage; //used for the current image for a given media item on screen
+    QImage mediaScreenShot;    //used for screen shots
 
     //ui functions
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}
     Q_INVOKABLE void setActiveRoom(int room,int ea);
-     Q_INVOKABLE void setCurrentUser(QString inc_user );
+    Q_INVOKABLE void setCurrentUser(QString inc_user );
     Q_INVOKABLE  QString getCurrentUser() {return sPK_User;}
 
     //class objects
@@ -281,7 +283,7 @@ Param 10 - pk_attribute
     long iPK_Device_GeneralInfoPlugin;
     long iPK_Device_SecurityPlugin;
     long iPK_Device_LightingPlugin;
-   long iPK_Device_eventPlugin;
+    long iPK_Device_eventPlugin;
     long iMediaPluginID;
     int m_pDevice_ScreenSaver;
     int m_dwIDataGridRequestCounter;
@@ -335,7 +337,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void updateImageChanged(QImage img);
     void updateTimecode();
     void showTimeCode();
-   Q_INVOKABLE  void showMenu();
+    Q_INVOKABLE  void showMenu();
     Q_INVOKABLE void moveDirection (QString direction);
     Q_INVOKABLE void enter();
 

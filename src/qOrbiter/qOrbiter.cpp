@@ -1347,6 +1347,11 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
     QString params;
     QString s;
 
+    /*
+      this section is intended to handle screen handlers for grid navigation
+      currently it is broken and any insight into navigating this programmatically
+      would be appreciated.
+      */
     if(qmlUI->backwards == true)
     {
         qDebug("Going Backwards!");
@@ -1358,7 +1363,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 
             qmlUI->goBack.removeLast();
             s= qmlUI->goBack.last();
-
+            qDebug() << s;
         }
         else if (qmlUI->goBack.count() == 0)
         {
@@ -1374,7 +1379,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
         {
             qmlUI->q_attributetype_sort =  "52";
         }
-        else if (qmlUI->q_attributetype_sort == "52")
+        else if (qmlUI->q_attributetype_sort == "52" && qmlUI->q_pk_attribute !="")
         {
             qmlUI->q_attributetype_sort = "13";
         }
@@ -1392,7 +1397,8 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
             }
 
         }
-        else if (qmlUI->q_attributetype_sort == "2" && qmlUI->q_pk_attribute != "")
+        //album
+       if (qmlUI->q_attributetype_sort == "2" && qmlUI->q_pk_attribute != "")
         {
             qmlUI->q_attributetype_sort = "3";
         }
@@ -1407,20 +1413,22 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
         qmlUI->i_current_mediaType = iPK_MediaType;
         qDebug() << s;
         qmlUI->goBack<< s;
+
+        qDebug() << "Datagrid request options:";
+        qDebug() << "MediaType: " << iPK_MediaType;
+        qDebug() << "Sub Type: " << qmlUI->q_subType;
+        qDebug() << "File Format: " << qmlUI->q_fileFormat;
+        qDebug() << "Attribute/Genres: " << qmlUI->q_attribute_genres;
+        qDebug() << "Media Sources:" << qmlUI->q_mediaSources;
+        qDebug() << "Attributetype sort:" << qmlUI->q_attributetype_sort;
+        qDebug() << "Attribute Sort:" << qmlUI->q_pk_attribute;
     }
+qmlUI->backwards = false;
+    //qDebug() << qmlUI->goBack.join(":::");
 
-    qDebug() << qmlUI->goBack.join(":::");
 
-    qDebug() << "Datagrid request options:";
-    qDebug() << "MediaType: " << iPK_MediaType;
-    qDebug() << "Sub Type: " << qmlUI->q_subType;
-    qDebug() << "File Format: " << qmlUI->q_fileFormat;
-    qDebug() << "Attribute/Genres: " << qmlUI->q_attribute_genres;
-    qDebug() << "Media Sources:" << qmlUI->q_mediaSources;
-    qDebug() << "Attributetype sort:" << qmlUI->q_attributetype_sort;
-    qDebug() << "Attribute Sort:" << qmlUI->q_pk_attribute;
 
-    qmlUI->backwards = false;
+
     CMD_Populate_Datagrid populateDataGrid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 63, s.toStdString(), DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
     if (SendCommand(populateDataGrid))
@@ -3422,6 +3430,38 @@ void DCE::qOrbiter::addToPlaylist(bool now, std::string playlist)
       */
 }
 
+void DCE::qOrbiter::grabScreenshot()
+{
+    qDebug("Getting Screenshot");
+    char *screenieData;         //screenshot data using the char** data structure for passing of data
+    int screenieDataSize=0;       //var for size of data
+    string s_format ="jpg";   //the format we want returned
+    int imageH;                 //image height of desired screenshot
+    int imageW;                 //width of desired screenshot
+    string sDisableAspectLock = "0";
+    string sResponse;
+    CMD_Get_Video_Frame grabMediaScreenshot(long(qmlUI->iPK_Device), long(m_dwPK_Device_NowPlaying), sDisableAspectLock,qmlUI->nowPlayingButton->i_streamID, 800,800, &screenieData, &screenieDataSize, &s_format);
 
+    SendCommand(grabMediaScreenshot);
+
+    QByteArray configData;              //config file put into qbytearray for processing
+    qDebug() << screenieDataSize;
+
+    configData.setRawData(screenieData, screenieDataSize);
+    qDebug() << configData.size();
+    QImage returnImage;
+
+    if (!returnImage.loadFromData(configData))
+    {
+        qDebug() << "Couldnt get image, defaulting";
+        returnImage.load(":/icons/videos.png");
+    }
+
+    // LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Sending back image for %s", filePath);
+    //   delete picData;
+
+   qmlUI->mediaScreenShot = returnImage;
+
+}
 
 

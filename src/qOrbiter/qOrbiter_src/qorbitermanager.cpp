@@ -308,7 +308,6 @@ bool qorbiterManager::getConf(int pPK_Device)
     iPK_Device_LightingPlugin = long(8);
     m_dwIDataGridRequestCounter = 0;
 
-
     sleeping_alarms.clear();
     qorbiterUIwin->rootContext()->setContextProperty("alarms", QVariant::fromValue(sleeping_alarms) );
 
@@ -1221,12 +1220,16 @@ void qorbiterManager::setStringParam(int paramType, QString param)
         }
         else
         {
+            if(backwards ==false)
+            {
             q_attributetype_sort = param;
+            }
             longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
             datagridVariableString = longassstring.join("|");
           //  qDebug() << datagridVariableString;
            // goBack<<longassstring;
             execGrp(i_current_command_grp);
+
             break;
 
         }
@@ -1336,6 +1339,7 @@ void qorbiterManager::goBackGrid()
 {
     setRequestMore(false);
     backwards = true;
+    qDebug() << q_attributetype_sort;
     execGrp(i_current_command_grp);
 
 }

@@ -112,9 +112,13 @@ public:
     void Thumbnail();
     void NavigateScreen(QString direction);
     void JogStream(QString jump);
+    void processScreenShot(char picData, int picDataSize, string fileFormat);
     Q_INVOKABLE void showAdvancedButtons();
     Q_INVOKABLE void movePlaylistEntry(bool pos, int num);
     Q_INVOKABLE void addToPlaylist(bool now, string playlist);
+    Q_INVOKABLE void grabScreenshot();
+
+
 
     //<-dceag-const-e->
 
@@ -1043,6 +1047,10 @@ light, climate, media, security, telecom */
     virtual void CMD_Assisted_Make_Call(int iPK_Users,string sPhoneExtension,string sPK_Device_From,int iPK_Device_To,string &sCMD_Result,Message *pMessage);
 
     //<-dceag-h-e->
+
+signals:
+    void screenShotReady();
+    void waitForScreenShot(char picData, int picDataSize, string fileFormat);
 };
 
 //<-dceag-end-b->

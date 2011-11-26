@@ -39,6 +39,10 @@ QImage key;
         {
             temp = updateObjectProvider();
         }
+        else if(id.contains("screenshot"))
+        {
+            temp = screenShot();
+        }
         else if (id.contains("filedetailsprovider"))
         {
             temp = fileDetails();
@@ -78,6 +82,7 @@ private:
     QImage securityProvider();
     QImage updateObjectProvider();
     QImage fileDetails();
+    QImage screenShot();
 
 };
 

@@ -91,6 +91,19 @@ QImage AbstractImageProvider::fileDetails()
     managerreference->filedetailsclass->setAspectW(key.width() / 100);
     qDebug()<< key.width()/key.height();
 
-   return key;
+    return key;
+}
+
+QImage AbstractImageProvider::screenShot()
+{
+    key = managerreference->mediaScreenShot;
+
+     if (key.isNull())
+     {
+          key.load(":/icons/playlist.png");
+
+     }
+
+     return key;
 }
 
