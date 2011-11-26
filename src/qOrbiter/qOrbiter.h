@@ -117,6 +117,8 @@ public:
     Q_INVOKABLE void movePlaylistEntry(bool pos, int num);
     Q_INVOKABLE void addToPlaylist(bool now, string playlist);
     Q_INVOKABLE void grabScreenshot();
+    Q_INVOKABLE void yellowButton();
+
 
 
 

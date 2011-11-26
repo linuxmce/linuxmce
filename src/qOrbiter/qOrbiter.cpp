@@ -3460,8 +3460,14 @@ void DCE::qOrbiter::grabScreenshot()
     // LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Sending back image for %s", filePath);
     //   delete picData;
 
-   qmlUI->mediaScreenShot = returnImage;
+    qmlUI->mediaScreenShot = returnImage;
 
+}
+
+void DCE::qOrbiter::yellowButton()
+{
+    CMD_Yellow pressYellow(qmlUI->iPK_Device, qmlUI->iMediaPluginID);
+    SendCommand(pressYellow);
 }
 
 
