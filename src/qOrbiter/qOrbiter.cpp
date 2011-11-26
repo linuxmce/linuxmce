@@ -3475,7 +3475,7 @@ void DCE::qOrbiter::redButton()
 
 void DCE::qOrbiter::greenButton()
 {
-    CMD_Green greenYellow(qmlUI->iPK_Device, qmlUI->iMediaPluginID);
+    CMD_Green pressGreen(qmlUI->iPK_Device, qmlUI->iMediaPluginID);
     SendCommand(pressGreen);
 }
 
