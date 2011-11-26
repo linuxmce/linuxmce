@@ -117,7 +117,11 @@ public:
     Q_INVOKABLE void movePlaylistEntry(bool pos, int num);
     Q_INVOKABLE void addToPlaylist(bool now, string playlist);
     Q_INVOKABLE void grabScreenshot();
+    // Default colored settop box and VDR buttons.
+    Q_INVOKABLE void redButton();
+    Q_INVOKABLE void greenButton();
     Q_INVOKABLE void yellowButton();
+    Q_INVOKABLE void blueButton();
 
 
 

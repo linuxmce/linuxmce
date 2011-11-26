@@ -3464,10 +3464,30 @@ void DCE::qOrbiter::grabScreenshot()
 
 }
 
+/*
+   Default color buttons for the sat settop boxes and VDR remotes.
+*/
+void DCE::qOrbiter::redButton()
+{
+    CMD_Red pressRed(qmlUI->iPK_Device, qmlUI->iMediaPluginID);
+    SendCommand(pressRed);
+}
+
+void DCE::qOrbiter::greenButton()
+{
+    CMD_Green greenYellow(qmlUI->iPK_Device, qmlUI->iMediaPluginID);
+    SendCommand(pressGreen);
+}
+
 void DCE::qOrbiter::yellowButton()
 {
     CMD_Yellow pressYellow(qmlUI->iPK_Device, qmlUI->iMediaPluginID);
     SendCommand(pressYellow);
 }
 
+void DCE::qOrbiter::blueButton()
+{
+    CMD_Blue pressBlue(qmlUI->iPK_Device, qmlUI->iMediaPluginID);
+    SendCommand(pressBlue);
+}
 

@@ -41,7 +41,68 @@ Rectangle {
         anchors.top:parent.top
         anchors.topMargin: scaleY(10)
         anchors.horizontalCenter: parent.horizontalCenter
-        EPGPlaylist{ }
+	Column {
+                id: epgandColouredButtons
+                EPGPlaylist{
+                        id:tvchannellist
+                }
+
+                Rectangle {
+                        height: scaleY(5)
+                        color: "#00000000"
+                        width: tvchannellist.width
+                        anchors.top: tvchannellist.bottom
+                        anchors.margins: scaleY(5)
+
+                        Rectangle {
+                            color: "#ff0000"
+                            x: parent.width / 40
+                            id: redbutton
+                            width: parent.width / 5
+                            height: parent.height
+                            MouseArea{
+                                anchors.fill: parent
+                                onClicked: dcerouter.redButton()
+                            }
+                        }
+                        Rectangle {
+                            anchors.left: redbutton.right
+                            anchors.leftMargin: parent.width / 20
+                            color: "#00ff00"
+                            id: greenbutton
+                            width: parent.width / 5
+                            height: parent.height
+                            MouseArea{
+                                anchors.fill: parent
+                                onClicked: dcerouter.greenButton()
+                            }
+                        }
+                        Rectangle {
+                            anchors.left: greenbutton.right
+                            anchors.leftMargin: parent.width / 20
+                            color: "#ffff00"
+                            id: yellowbutton
+                            width: parent.width / 5
+                            height: parent.height
+                            MouseArea{
+                                anchors.fill: parent
+                                onClicked: dcerouter.yellowButton()
+                            }
+                        }
+                        Rectangle {
+                            anchors.left: yellowbutton.right
+                            anchors.leftMargin: parent.width / 20
+                            color: "#0000ff"
+                            id: bluebutton
+                            width: parent.width / 5
+                            height: parent.height
+                            MouseArea{
+                                anchors.fill: parent
+                                onClicked: dcerouter.blueButton()
+                            }
+                        }
+                }
+        }
         RemoteNumberPad {id: remotenumberpad1;}
         Rectangle {
             width: scaleX(30)
