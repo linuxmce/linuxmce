@@ -15,7 +15,7 @@ Rectangle {
         spacing:5
         width:parent.width
         height: childrenRect.height + scaleY(1)
-        anchors.centerIn: parent
+        // anchors.centerIn: parent
 
         Rectangle {
             id: numberdisplay
@@ -34,9 +34,9 @@ Rectangle {
                 font.family: "Droid Sans Mono"
                 cursorVisible: true
                 readOnly: false
-                anchors.centerIn: numberdisplay
+                // anchors.centerIn: numberdisplay
                 horizontalAlignment: TextInput.AlignHCenter
-                anchors.fill: parent
+                // anchors.fill: parent
                 font.pixelSize: 23
             }
         }
@@ -45,7 +45,7 @@ Rectangle {
             id:numberrect
             height: childrenRect.height + scaleY(1)
             width: childrenRect.width
-            anchors.top: numberdisplay.bottom
+            // anchors.top: numberdisplay.bottom
             anchors.topMargin: 5
             anchors.horizontalCenter: parent.horizontalCenter
             border.color: style.highlight1
