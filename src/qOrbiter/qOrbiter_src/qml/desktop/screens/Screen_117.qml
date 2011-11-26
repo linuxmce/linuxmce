@@ -51,7 +51,6 @@ Rectangle {
                         height: scaleY(5)
                         color: "#00000000"
                         width: tvchannellist.width
-                        anchors.top: tvchannellist.bottom
                         anchors.margins: scaleY(5)
 
                         Rectangle {
@@ -61,7 +60,6 @@ Rectangle {
                             width: parent.width / 5
                             height: parent.height
                             MouseArea{
-                                anchors.fill: parent
                                 onClicked: dcerouter.redButton()
                             }
                         }
@@ -73,7 +71,6 @@ Rectangle {
                             width: parent.width / 5
                             height: parent.height
                             MouseArea{
-                                anchors.fill: parent
                                 onClicked: dcerouter.greenButton()
                             }
                         }
@@ -85,7 +82,6 @@ Rectangle {
                             width: parent.width / 5
                             height: parent.height
                             MouseArea{
-                                anchors.fill: parent
                                 onClicked: dcerouter.yellowButton()
                             }
                         }
@@ -97,7 +93,6 @@ Rectangle {
                             width: parent.width / 5
                             height: parent.height
                             MouseArea{
-                                anchors.fill: parent
                                 onClicked: dcerouter.blueButton()
                             }
                         }
@@ -158,7 +153,7 @@ Rectangle {
                         color: style.darkhighlight
                     }
                 }
-                color: style.darkhiglight
+                color: "#00000000" // just let the parent shine through.
                 anchors.top:nowplayingimage.bottom
                 Column
                 {
