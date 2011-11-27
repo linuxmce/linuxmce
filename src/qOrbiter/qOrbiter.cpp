@@ -1,18 +1,20 @@
 /*
-     Copyright (C) 2004 Pluto, Inc., a Florida Corporation
+    This file is part of QOrbiter for use with the LinuxMCE project found at http://www.linuxmce.org
+   Langston Ball  golgoj4@gmail.com
+    QOrbiter is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-     www.plutohome.com
+    QOrbiter is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
-     Phone: +1 (877) 758-8648
-
-
-     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
-     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
-     of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
-     See the GNU General Public License for more details.
-
+    You should have received a copy of the GNU General Public License
+    along with QOrbiter.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 //<-dceag-d-b->
 
 #include "qOrbiter.h"
@@ -1398,7 +1400,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 
         }
         //album
-       if (qmlUI->q_attributetype_sort == "2" && qmlUI->q_pk_attribute != "")
+        if (qmlUI->q_attributetype_sort == "2" && qmlUI->q_pk_attribute != "")
         {
             qmlUI->q_attributetype_sort = "3";
         }
@@ -1423,7 +1425,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
         qDebug() << "Attributetype sort:" << qmlUI->q_attributetype_sort;
         qDebug() << "Attribute Sort:" << qmlUI->q_pk_attribute;
     }
-qmlUI->backwards = false;
+    qmlUI->backwards = false;
     //qDebug() << qmlUI->goBack.join(":::");
 
 
@@ -2001,7 +2003,7 @@ void DCE::qOrbiter::executeCommandGroup(int cmdGrp)
     string *pResponse;
     CMD_Execute_Command_Group execCommandGroup((long)qmlUI->iPK_Device, (long)2, cmdGrp);
 
-   SendCommand(execCommandGroup);
+    SendCommand(execCommandGroup);
 }
 
 QImage DCE::qOrbiter::getfileForDG(string filePath)
@@ -2217,7 +2219,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                     else
                     {
                         qDebug("Setting title");
-                         qmlUI->filedetailsclass->setMediaTitle(attribute);
+                        qmlUI->filedetailsclass->setMediaTitle(attribute);
                     }
 
                     qDebug() << attribute;
@@ -3238,6 +3240,7 @@ void DCE::qOrbiter::SetZoom(QString zoomLevel)
     }
 }
 
+//aspect ratio
 void DCE::qOrbiter::SetAspectRatio(QString ratio) //set aspect ratio for current media player
 {
     string sResponse;
@@ -3319,7 +3322,7 @@ void DCE::qOrbiter::NavigateScreen(QString direction) //connects ui buttons to d
             qmlUI->checkConnection();
         }
     }
-     else  if(direction.contains("left"))
+    else  if(direction.contains("left"))
     {
         CMD_Move_Left move(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID);
         if(!SendCommand(move))
@@ -3462,6 +3465,86 @@ void DCE::qOrbiter::grabScreenshot()
 
     qmlUI->mediaScreenShot = returnImage;
 
+    //thumbs_deviceno
+    int gHeight = 0;
+    int gWidth = 0;
+    int pkVar = 0;
+    string valassign ="";
+    bool isSuccessfull;// = "false";
+    string m_sGridID ="thumbs_"+StringUtils::itos(qmlUI->iPK_Device); // the string identifier on the type of grid
+    int iRow_count=0;
+    int iColumn_count = 0;
+    bool m_bKeep_Row_Header = false;
+    bool m_bKeepColHeader = false;
+    bool m_bAdd_UpDown_Arrows = true;
+    string m_sSeek;
+    string m_sDataGrid_ID = "1";
+    int iOffset;
+    int iColumn = 1;
+    int iRowCount= 5;
+    int iRowColums = 5;
+    int m_iSeekColumn = 0;
+    int iData_Size=0;
+    int GridCurRow = 0;
+    int GridCurCol= 0;
+
+    char *pData;
+    pData = "NULL";
+    int iRow;
+
+    QString temp;
+    qmlUI->m_dwIDataGridRequestCounter++;
+
+    CMD_Populate_Datagrid cmd_populate_attribute_grid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 31, QString::number(qmlUI->iea_area).toStdString(), 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
+
+    if (SendCommand(cmd_populate_attribute_grid))
+    {
+        /*
+              initial request to populate the text only grid as denoted by the lack of a leading "_" as in _MediaFile_43
+              this way, we can safely check empty grids and error gracefully in the case of no matching media
+              */
+
+        string imgDG = m_sGridID; //standard text grid with no images. this will not crash the router if requested and its empty, picture grids will
+
+        //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
+        DCE::CMD_Request_Datagrid_Contents req_data_grid( long(qmlUI->iPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    0,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+        if(SendCommand(req_data_grid))
+        {
+
+            bool barrows = false; //not sure what its for
+            //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
+            DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
+            int cellsToRender= pDataGridTable->GetRows();
+            qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
+            qDebug() << "Response: " << cellsToRender << " cells to render";
+
+            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
+            QString cellTitle;
+            QString cellAttribute;
+            QString fk_file;
+            QString filePath;
+            int index;
+            QImage cellImg;
+            QString cellfk;
+            DataGridCell *pCell;
+            for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
+            {
+
+                pCell = it->second;
+                string emptyEA;
+                const char *pPath = pCell->GetImagePath();
+                index = pDataGridTable->CovertColRowType(it->first).first;
+                cellTitle = pCell->GetText();
+                cellAttribute = pCell->GetValue();
+                cellfk = pCell->GetValue();
+                QStringList parser = cellTitle.split(QRegExp("(\\n|:\\s)"), QString::KeepEmptyParts);
+                //qDebug() << "Processing" << parser.at(0);
+                qDebug() << parser.join("--");
+
+            }
+        }
+
+    }
 }
 
 /*

@@ -51,6 +51,7 @@ Item {
 
                 MouseArea{
                     id: mousearea1
+                    anchors.fill: parent
                     onClicked:showfloorplan(3)
                 }
             }
