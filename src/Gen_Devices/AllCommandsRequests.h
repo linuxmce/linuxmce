@@ -1,7 +1,7 @@
 #ifndef AllCommandsRequest_h
 #define AllCommandsRequest_h
-#include "../DCE/Message.h"
-#include "../DCE/PreformedCommand.h"
+#include "Message.h"
+#include "PreformedCommand.h"
 
 #include "../pluto_main/Define_Command.h"
 #include "../pluto_main/Define_CommandParameter.h"

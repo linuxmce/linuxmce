@@ -208,6 +208,13 @@ public:
 
 		MythTvMediaStream* ConvertToMythMediaStream(MediaStream *pMediaStream, string callerIdMessage = "");
 
+	// For the media grids
+	string GetRecordingURL(string sBaseName, string sHostName, string sStorageGroup);
+	bool GetRecordingPicture(string sPath, int &iPK_Picture);
+	bool GetPicturePath(string sBaseName, string sHostName, string sStorageGroup, string &picturePath);
+	virtual void PopulateDataGrid(string sToken,MediaListGrid *pMediaListGrid,int PK_MediaType, string sPK_Attribute, int PK_AttributeType_Sort, bool bShowFiles, string &sPK_MediaSubType, string &sPK_FileFormat, string &sPK_Attribute_Genres, string &sPK_Sources, string &sPK_Users_Private, int PK_Users, int iLastViewed, int *iPK_Variable, string *sValue_To_Assign );
+	virtual void GetExtendedAttributes(string sType, string sPK_MediaSource, string sURL, string *sValue_To_Assign);
+
 	void BuildCategoryColors();
 
         /** Datagrids */
@@ -288,6 +295,7 @@ public:
 	int DATA_Get_Priority();
 	bool DATA_Get_Only_One_Per_PC();
 	bool DATA_Get_Dont_Auto_Configure();
+	string DATA_Get_Media_Catalog();
 
 			*****EVENT***** accessors inherited from base class
 	void EVENT_Error_Occured(string sError_Message);

@@ -525,6 +525,366 @@ MythTvMediaStream* MythTV_PlugIn::ConvertToMythMediaStream(MediaStream *pMediaSt
 	return static_cast<MythTvMediaStream*>(pMediaStream);
 }
 
+/**
+ * GetPicturePath - sister function to grab picture for a given MythTV recording.
+ */
+bool MythTV_PlugIn::GetPicturePath(string sBaseName, string sHostName, string sStorageGroup, string &sPicturePath)
+{
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MythTV_Plugin::GetPicturePath(%s,%s,%s)",sBaseName.c_str(),sHostName.c_str(),sStorageGroup.c_str());
+  string sSQL = "SELECT dirname from storagegroup WHERE hostname = '"+sHostName+"' and groupname = '"+sStorageGroup+"'";
+  PlutoSqlResult result;
+  DB_ROW row;
+  if ((result.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MythTV_Plugin::GetPicturePath rows %d",result.r->row_count);
+      while((row=db_wrapper_fetch_row(result.r)))
+	{
+	  string sDirName = row[0];
+	  string sFilePath = sDirName + "/" + sBaseName + ".png";
+	  string sConvertedPath = sDirName + "/" + sBaseName + ".jpg";
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MythTV_PlugIn::GetPicturePath - Trying path %s",sFilePath.c_str());
+	  if (FileUtils::FileExists(sFilePath))
+	    {
+	      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MythTV_Plugin::GetPicturePath found picture at path %s",sFilePath.c_str());
+	      sPicturePath = sConvertedPath;
+	      // Convert the image using imagemagick to jpeg so Media PlugIn is happy, if needed.
+	      if (!FileUtils::FileExists(sConvertedPath))
+		{
+		  string sCmd = "convert "+sFilePath+" "+sConvertedPath;
+		  system(sCmd.c_str());
+		}
+	      return true;
+	    }
+	}
+    }
+  return false;
+}
+
+/** 
+ * GetRecordingPicture - find out if a recording already has a PK_Picture, and if so
+ * return it.
+ */
+bool MythTV_PlugIn::GetRecordingPicture(string sPath,int &iPK_Picture)
+{
+  vector<Row_Picture *> v_Rows;
+  iPK_Picture=0;
+  if (m_pMedia_Plugin->m_pDatabase_pluto_media->Picture_get()->GetRows("URL='"+sPath+"'",&v_Rows))
+    {
+      if (!v_Rows.empty())
+	{
+	  iPK_Picture=v_Rows[0]->PK_Picture_get();
+	  return true;
+	}
+    }
+
+  return false;
+
+}
+
+string MythTV_PlugIn::GetRecordingURL(string sBaseName, string sHostName, string sStorageGroup)
+{
+  int iPK_Picture;
+  string sRet="";
+  string sFullPath="";
+  string sFilePath="";
+  string sSQL = "SELECT dirname from storagegroup WHERE hostname = '"+sHostName+"' and groupname = '"+sStorageGroup+"'";
+  PlutoSqlResult result;
+  DB_ROW row;
+  if ((result.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MythTV_Plugin::GetPicturePath rows %d",result.r->row_count);
+      while((row=db_wrapper_fetch_row(result.r)))
+	{
+	  string sDirName = row[0];
+	  string sCurrPath = sDirName + "/" + sBaseName + ".jpg";
+	  sFilePath=sDirName+"/"+sBaseName;
+	  if (FileUtils::FileExists(sCurrPath))
+	    {
+	      sFullPath=sCurrPath;
+	      break;
+	    }
+	}
+      
+      // If path found, Grab the matching PK_Picture 
+
+      if (!sFullPath.empty())
+	{
+	  vector<Row_Picture *> v_Rows;
+	  iPK_Picture=0;
+	  if (m_pMedia_Plugin->m_pDatabase_pluto_media->Picture_get()->GetRows("URL='"+sFullPath+"'",&v_Rows))
+	    {
+	      if (!v_Rows.empty())
+		{
+		  iPK_Picture = v_Rows[0]->PK_Picture_get();
+		}
+	    }
+	}
+    }
+  sRet = sFilePath + "|" + StringUtils::itos(iPK_Picture) + ".pvrtv"; // hackorama for media plugin
+  return sRet;
+}
+
+/**
+ * PopulateDataGrid - populate the datagrid for Recorded TV Display
+ */
+void MythTV_PlugIn::PopulateDataGrid(string sToken,MediaListGrid *pMediaListGrid,int PK_MediaType, string sPK_Attribute, int PK_AttributeType_Sort, bool bShowFiles, string &sPK_MediaSubType, string &sPK_FileFormat, string &sPK_Attribute_Genres, string &sPK_Sources, string &sPK_Users_Private, int PK_Users, int iLastViewed, int *iPK_Variable, string *sValue_To_Assign )
+{
+
+  string sSQL, sDescription, sMediaURL, sDateTime, sPictureFilename;
+
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"XXX POPULATEDATAGRID XXX PK_AttributeType_Sort %d sPK_Attribute is %s",PK_AttributeType_Sort, sPK_Attribute.c_str());
+
+  if (PK_AttributeType_Sort == ATTRIBUTETYPE_Title_CONST)
+    {
+      if (!sPK_Attribute.empty())
+	{
+	  // If this is not empty, we are drilling down into a show.
+
+	  // parse the attribute which is Series ID|Program ID
+	  string::size_type tokenPos = 0;
+	  string sSeriesId = StringUtils::Tokenize(sPK_Attribute,"|",tokenPos);
+	  string sProgramId = StringUtils::Tokenize(sPK_Attribute,"|",tokenPos);
+
+	  sSQL = "SELECT title, seriesid, programid, basename, subtitle, description, lastmodified, hostname, storagegroup from recorded WHERE seriesid = '"+sSeriesId+"' OR programid = '"+sProgramId+"'";
+ 	  PlutoSqlResult result;
+	  DB_ROW row;
+	  if ((result.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL)
+	    {
+	      LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::PopulateDataGrid title rows %d",result.r->row_count);
+	      while((row=db_wrapper_fetch_row(result.r)))
+		{
+		  string sTitle = row[0];
+		  string sSeriesId = row[1];
+		  string sProgramId = row[2];
+		  string sBaseName = row[3];
+		  string sSubtitle = row[4];
+		  string sDesc = row[5];
+		  string sDateTime = row[6];
+		  string sHostName = row[7];
+		  string sStorageGroup = row[8];
+		  string sPicturePath;
+
+		  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MythTV_Plugin::PopulateDataGrid - drilldown sTitle /%s/ sSubtitle /%s/ sDesc /%s/ ",sTitle.c_str(),sSubtitle.c_str(),sDesc.c_str());
+
+
+		  // Build a visible description from title, subtitle, description.
+		  // Title is always used. If subtitle is available then it is used.
+		  // If subtitle is empty, then description is used IF it is below
+		  // characters.
+
+		  if (sSubtitle.empty())
+		    {
+		      if ((sDesc.size() > 0) && (sDesc.size() < 25))
+			{
+			  sDescription = sTitle + "\n\"" + sDesc + "\"";
+			}
+		      else
+			{
+			  sDescription = sTitle;
+			}
+		    }
+		  else
+		    {
+		      sDescription = sTitle = "\n\"" + sSubtitle + "\"";
+		    }
+
+		  sMediaURL = sBaseName;
+		  FileBrowserInfo *pFileBrowserInfo = new FileBrowserInfo(sDescription,"!E,"+sToken+","+GetRecordingURL(sMediaURL,sHostName,sStorageGroup),0,StringUtils::SQLDateTime(sDateTime));
+		  if (GetPicturePath(sBaseName,sHostName,sStorageGroup,sPicturePath))
+		    {
+		      int iPK_Picture=0;
+		      if (!GetRecordingPicture(sPicturePath,iPK_Picture))
+			{
+			  // No recording picture currently exists for this recording, try to add one.
+			  Row_Picture *pRecordingPicture = m_pMedia_Plugin->m_pMediaAttributes->m_pMediaAttributes_LowLevel->AddPicture(sPicturePath);
+			  if (pRecordingPicture)
+			    {
+			      pFileBrowserInfo->m_PK_Picture = pRecordingPicture->PK_Picture_get();
+			    }
+			  delete pRecordingPicture;
+			}
+		      else
+			{
+			  // A picture already exists, grab the existing record.
+			  pFileBrowserInfo->m_PK_Picture = iPK_Picture;
+			}
+		    }
+		  pMediaListGrid->m_listFileBrowserInfo.push_back(pFileBrowserInfo);
+		}
+	    } // end
+	}
+      else
+	{
+	  // Title, Top level, show one of each.
+	  sSQL = "SELECT title, COUNT(title) as numitems, seriesid, programid, basename, subtitle, description, lastmodified, hostname, storagegroup from recorded GROUP by title;";
+ 	  PlutoSqlResult result;
+	  DB_ROW row;
+	  if ((result.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL)
+	    {
+	      LoggerWrapper::GetInstance()->Write(LV_STATUS,"MythTV_PlugIn::PopulateDataGrid title rows %d",result.r->row_count);
+	      while((row=db_wrapper_fetch_row(result.r)))
+		{
+		  string sTitle = row[0];
+		  int iNumItems = atoi(row[1]);
+		  string sSeriesId = row[2];
+		  string sProgramId = row[3];
+		  string sBaseName = row[4];
+		  string sSubtitle = row[5];
+		  string sDesc = row[6];
+		  string sDateTime = row[7];
+		  string sHostName = row[8];
+		  string sStorageGroup = row[9];
+		  string sPicturePath;
+
+		  // Build a visible description from title, subtitle, description.
+		  // Title is always used. If subtitle is available then it is used.
+		  // If subtitle is empty, then description is used IF it is below
+		  // characters.
+
+		  if (sSubtitle.empty())
+		    {
+		      if (sDesc.size() < 25)
+			{
+			  sDescription = sTitle + "\n\"" + sDesc + "\"";
+			}
+		      else
+			{
+			  sDescription = sTitle;
+			}
+		    }
+		  else
+		    {
+		      sDescription = sTitle + "\n\"" + sSubtitle + "\"";
+		    }
+
+		  // If there are multiple items, then make a drilldown, otherwise
+		  // make a direct play link to send off to the MythTV_Player
+		  
+		  if (iNumItems>1)
+		    {
+		      sDescription = sTitle + " (" + StringUtils::itos(iNumItems) + " items)";
+		      sMediaURL = sSeriesId+"|"+sProgramId;
+		      FileBrowserInfo *pFileBrowserInfo = new FileBrowserInfo(sDescription,"!e,"+sToken+","+sMediaURL,0,StringUtils::SQLDateTime(sDateTime));
+		      if (GetPicturePath(sBaseName,sHostName,sStorageGroup,sPicturePath))
+			{
+			  int iPK_Picture;
+			  if (!GetRecordingPicture(sPicturePath,iPK_Picture))
+			    {
+			      // No recording picture currently exists for this recording, try to add one.
+			      Row_Picture *pRecordingPicture = m_pMedia_Plugin->m_pMediaAttributes->m_pMediaAttributes_LowLevel->AddPicture(sPicturePath);
+			      if (pRecordingPicture)
+				{
+				  pFileBrowserInfo->m_PK_Picture = pRecordingPicture->PK_Picture_get();
+				}
+			      delete pRecordingPicture;
+			    }
+			  else
+			    {
+			      // A picture already exists, grab the existing record.
+			      pFileBrowserInfo->m_PK_Picture = iPK_Picture;
+			    }
+			}
+		      pMediaListGrid->m_listFileBrowserInfo.push_back(pFileBrowserInfo);
+		    }
+		  else
+		    {
+		      sMediaURL = sBaseName;
+		      FileBrowserInfo *pFileBrowserInfo = new FileBrowserInfo(sDescription,"!E,"+sToken+","+GetRecordingURL(sMediaURL,sHostName,sStorageGroup),0,StringUtils::SQLDateTime(sDateTime));
+		      // COME BACK HERE
+		      if (GetPicturePath(sBaseName,sHostName,sStorageGroup,sPicturePath))
+			{
+			  int iPK_Picture;
+			  if (!GetRecordingPicture(sPicturePath,iPK_Picture))
+			    {
+			      // No recording picture currently exists for this recording, try to add one.
+			      Row_Picture *pRecordingPicture = m_pMedia_Plugin->m_pMediaAttributes->m_pMediaAttributes_LowLevel->AddPicture(sPicturePath);
+			      if (pRecordingPicture)
+				{
+				  pFileBrowserInfo->m_PK_Picture = pRecordingPicture->PK_Picture_get();
+				}
+			      delete pRecordingPicture;
+			    }
+			  else
+			    {
+			      // A picture already exists, grab the existing record.
+			      pFileBrowserInfo->m_PK_Picture = iPK_Picture;
+			    }
+			}
+		      pMediaListGrid->m_listFileBrowserInfo.push_back(pFileBrowserInfo); 
+		    }
+		}
+	    } // end	  
+	}
+    }
+  else if (PK_AttributeType_Sort == ATTRIBUTETYPE_Genre_CONST)
+    {
+    }
+  else
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MythTV_PlugIn::PopulateDataGrid() Somehow we fell through.");
+    }
+
+  return;
+}
+
+void MythTV_PlugIn::GetExtendedAttributes(string sType, string sPK_MediaSource, string sURL, string *sValue_To_Assign)
+{
+
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MythTV_Plugin::GetExtendedAttributes sType is %s",sType.c_str());
+
+  size_t pos=0;
+
+  string sFinalDescription, sSynopsis;
+
+  string sMediaURL = StringUtils::Tokenize(sURL,"|",pos);
+  string sPK_Picture = StringUtils::Tokenize(sURL,"|",pos);
+  string sFileName = FileUtils::FilenameWithoutPath(sMediaURL);
+  string sPicture = "/home/mediapics/"+sPK_Picture+".jpg";
+ 
+  // Get title and synopsis from sMediaURL
+
+  string sSQL = "SELECT title, subtitle, description FROM recorded WHERE basename = '"+FileUtils::FilenameWithoutPath(sMediaURL)+"'";
+  PlutoSqlResult result;
+  DB_ROW row;
+  if ((result.r=m_pDBHelper_Myth->db_wrapper_query_result(sSQL))!=NULL)
+    {
+      while((row=db_wrapper_fetch_row(result.r)))
+	{
+	  string sTitle = row[0];
+	  string sSubtitle = row[1];
+	  string sDesc = row[2];
+	  string sDescription;
+	
+	  sSynopsis=sDesc;
+
+	  if (sSubtitle.empty())
+	    {
+	      if (sDesc.size() < 25)
+		{
+		  sDescription = sTitle + "\n\"" + sDesc + "\"";
+		}
+	      else
+		{
+		  sDescription = sTitle;
+		}
+	    }
+	  else
+	    {
+	      sDescription = sTitle + "\n\"" + sSubtitle + "\"";
+	    }
+	}
+    }
+  
+  *sValue_To_Assign = 
+    "FILE\t" + sFileName + "\t" + 
+    "TITLE\t" + sFinalDescription + "\t" +
+    "SYNOPSIS\t" + sSynopsis + "\t" +
+    "PICTURE\t" + sPicture;
+
+  return;
+
+}
+
 // Parms = Users,PK_EntertainmentArea
 // All channels
 class DataGridTable *MythTV_PlugIn::AllShows(string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign,

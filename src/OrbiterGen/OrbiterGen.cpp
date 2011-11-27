@@ -1594,7 +1594,7 @@ loop_to_keep_looking_for_objs_to_include:
 		pRow_DesignObj_Array[0] = m_spDatabase_pluto_main->DesignObj_get()->GetRow(DESIGNOBJ_mnuFileList_SortOptions_CONST);
 	}
 
-	int iPK_MediaType_Searchable[] = {MEDIATYPE_pluto_StoredAudio_CONST,MEDIATYPE_pluto_StoredVideo_CONST,MEDIATYPE_pluto_Pictures_CONST,MEDIATYPE_np_Game_CONST,MEDIATYPE_misc_DocViewer_CONST,MEDIATYPE_misc_Playlist_CONST,MEDIATYPE_lmce_Game_CONST, MEDIATYPE_lmce_StreamedAudio_CONST};
+	int iPK_MediaType_Searchable[] = {MEDIATYPE_pluto_LiveTV_CONST,MEDIATYPE_pluto_StoredAudio_CONST,MEDIATYPE_pluto_StoredVideo_CONST,MEDIATYPE_pluto_Pictures_CONST,MEDIATYPE_np_Game_CONST,MEDIATYPE_misc_DocViewer_CONST,MEDIATYPE_misc_Playlist_CONST,MEDIATYPE_lmce_Game_CONST, MEDIATYPE_lmce_StreamedAudio_CONST};
 	for(int i=0;i<8;++i)
 	{
 		m_dwMediaType = iPK_MediaType_Searchable[i];
