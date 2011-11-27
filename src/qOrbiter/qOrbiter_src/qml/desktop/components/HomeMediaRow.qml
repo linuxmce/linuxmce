@@ -67,6 +67,7 @@ Item {
                 buttontext: dcenowplaying.qs_mainTitle +" \n " + dcenowplaying.timecode
 
                 MouseArea{
+                    anchors.fill: parent
                     onClicked:screenchange(dcenowplaying.qs_screen)
                 }
             }
