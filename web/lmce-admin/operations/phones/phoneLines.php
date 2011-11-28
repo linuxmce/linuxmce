@@ -21,7 +21,7 @@ function phoneLines($output,$astADO,$dbADO) {
 	if(isset($_REQUEST['id'])) $id=$_REQUEST['id'];
 
 	if($action=='form'){
-		$ProtocolList=array('SIP','IAX');
+		$ProtocolList=array('SIP','IAX', 'GTALK');
 		
 		$out.='
 		<div align="center" class="err">'.stripslashes(@$_REQUEST['error']).'</div>
@@ -215,7 +215,7 @@ function phoneLinesTable($astADO){
 			<td>'.$row['host'].'</td>
 			<td align="center">'.$row['protocol'].'</td>
 			<td>'.$row['username'].'</td>
-			<td>'.getLineState('SIP',$row['username']).'</td>
+			<td>'.getLineState($row['protocol'],$row['username']).'</td>
 			<td align="center">
 				<a href="index.php?section=phoneLines&eid='.$row['id'].'">'.translate('TEXT_EDIT_CONST').'</a> 
 				<a href="index.php?section=incomingCallsSettings&id='.$row['id'].'">'.translate('TEXT_PHONE_ROUTING_CONST').'</a> 
@@ -313,6 +313,11 @@ function getLineState($protocol, $username){
 
 	else if($protocol == 'IAX') {
 		$cmd='sudo -u root /usr/sbin/asterisk -rx "iax2 show registry" |  awk \'$3 == "'.$username.'" { print $6}\'';
+		$response=exec_batch_command($cmd,1);
+	}
+
+	else if($protocol == 'GTALK') {
+		$cmd='sudo -u root /usr/sbin/asterisk -rx "jabber show connections" |  awk \'/'.$username.'/ { print $4}\'';
 		$response=exec_batch_command($cmd,1);
 	}
 	
