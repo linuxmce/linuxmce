@@ -306,17 +306,39 @@ pqOrbiter->qmlUI = this;
 
 }
 
-bool qorbiterManager::refreshUI()
+void qorbiterManager::refreshUI()
 {
+    gotoQScreen("Splash.qml");
+    if(cleanupData())
+    {
+        qDebug("Reading new config");
+        if(pqOrbiter->GetConfig())
+        {
+            if(getConf( iPK_Device ) ==true )
+            {
+                gotoQScreen("Screen_1.qml");
 
-    //  qDebug() << "Launching UI";
-    return true;
+            }
+            else
+            {
+
+            }
+        }
+
+
+        //  qDebug() << "Launching UI";
+    }
+
+
 }
 
 
 // get conf method that reads config file
 bool qorbiterManager::getConf(int pPK_Device)
 {
+
+
+
 
     //device variables
     iPK_Device_DatagridPlugIn =  long(6);
@@ -676,8 +698,10 @@ bool qorbiterManager::getConf(int pPK_Device)
     connect(attribFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
 
     connect(nowPlayingButton, SIGNAL(mediaStatusChanged()), this , SLOT(updateTimecode()));
-
+binaryConfig.clear();
+//tConf.clear();
     qDebug() << "Cleanup config - tconf:" << tConf.size() << "|| binaryConfig:" << binaryConfig.size() << "|| configData:" << configData.childNodes().size();
+
     return true;
 }
 
@@ -1417,7 +1441,7 @@ void qorbiterManager::changedPlaylistPosition(QString position)
     }
     else
     {
-        setPosition(position);
+        pqOrbiter->setPosition(position);
     }
 
 
@@ -1506,15 +1530,7 @@ void qorbiterManager::sleepingMenu(bool toggle, int grp)
 
 }
 
-void qorbiterManager::setZoom(QString qs_zoom)
-{
-    pqOrbiter->SetZoom(qs_zoom);
-}
 
-void qorbiterManager::setAspect(QString qs_aspect)
-{
-    pqOrbiter->SetAspectRatio(qs_aspect);
-}
 
 void qorbiterManager::updateTimecode()
 {
@@ -1615,21 +1631,6 @@ void qorbiterManager::checkConnection()
     }
 }
 
-void qorbiterManager::setPosition(QString position)
-{
-     qDebug() << position;
-     pqOrbiter->SetMediaPosition(position);
-}
-
-void qorbiterManager::showMenu()
-{
-    pqOrbiter->DvdMenu();
-}
-
-void qorbiterManager::moveDirection(QString direction)
-{
-    pqOrbiter->NavigateScreen(direction);
-}
 
 
 
@@ -1642,6 +1643,24 @@ void qorbiterManager::regenError(QProcess::ProcessError)
 {
     qDebug("Error!");
 
+}
+
+bool qorbiterManager::cleanupData()
+{
+ roomLights= NULL;                 //current room scenarios model
+     roomMedia=NULL;                   //current room media model
+/*    qorbiterUIwin->rootContext()->setContextProperty("currentRoomClimate", roomClimate);               //curent room climate model
+    qorbiterUIwin->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);               //curret room telecom model
+    qorbiterUIwin->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);             //current room security model
+    qorbiterUIwin->rootContext()->setContextProperty("floorplan", floorplans);
+    qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
+    qorbiterUIwin->rootContext()->setContextProperty("iPK_Device", QVariant::fromValue(iPK_Device));  //orbiter device number
+    qorbiterUIwin->rootContext()->setContextProperty("currentroom", m_lRooms->sdefault_Ea);           //custom room list item provided
+    qorbiterUIwin->rootContext()->setContextProperty("userList", userList);                           //custom user list provided
+    qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms);                           //custom room list  provided
+    qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
+    qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse); //file grids current media type
+*/
 }
 
 

@@ -137,7 +137,8 @@ public:
     QString currentSkinURL;
     QDeclarativeView  *qorbiterUIwin;               //Qml declarativeview
     QObject *item;                                  //qObject reference to UI
-    bool refreshUI();
+    Q_INVOKABLE void refreshUI();
+    bool cleanupData();
     Q_INVOKABLE void swapSkins(QString incSkin);
     QString dceResponse;
     bool connectedState;
@@ -324,10 +325,8 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
 
     Q_INVOKABLE void writeConfig();
     bool readLocalConfig();
-
     void setConnectedState(bool state) { connectedState = state;  if(state == false) {checkConnection();} emit connectedStateChanged(); }
     bool getConnectedState () {return connectedState;}
-
     void setDceResponse(QString response) {dceResponse = response; emit dceResponseChanged();}
     QString getDceResponse () {return dceResponse;}
 
@@ -354,8 +353,8 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void updateImageChanged(QImage img);
     void updateTimecode();
     void showTimeCode();
-    Q_INVOKABLE  void showMenu();
-    Q_INVOKABLE void moveDirection (QString direction);
+
+
     Q_INVOKABLE  void getcurrentSkins(QStringList skinPaths);
     void qmlSetupLmce(int incdeviceid, QString incrouterip);
     void changedPlaylistPosition(QString position);
@@ -380,9 +379,8 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void setNowPlayingIcon(bool b);
     void initializeContexts();
     void initializeGridModel();
-    Q_INVOKABLE void setZoom(QString qs_zoom);
-    Q_INVOKABLE void setAspect(QString qs_aspect);
-    Q_INVOKABLE void setPosition(QString position);
+
+
     void jogPosition(QString jog);
 
     //initialization related

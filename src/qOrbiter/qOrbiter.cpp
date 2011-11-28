@@ -91,7 +91,7 @@ bool qOrbiter::GetConfig()
     //qDebug() << "Idata StartSize:" << iData_Size;
 
     string filePath = "/var/tmp/"+QString::number(qmlUI->iPK_Device).toStdString()+"conf.xml";
-    // qDebug() << filePath.c_str();
+     qDebug() << filePath.c_str();
 
     CMD_Request_File configFileRequest((long)qmlUI->iPK_Device, (long)4 , (string)filePath, &oData, &iData_Size);
 
@@ -114,6 +114,7 @@ bool qOrbiter::GetConfig()
             return false;
         }
         qmlUI->binaryConfig = configData;
+
         delete oData;
         return true;
     }
@@ -3219,7 +3220,7 @@ void DCE::qOrbiter::SetZoom(QString zoomLevel)
 }
 
 //aspect ratio
-void DCE::qOrbiter::SetAspectRatio(QString ratio) //set aspect ratio for current media player
+void DCE::qOrbiter::setAspect(QString ratio) //set aspect ratio for current media player
 {
     string sResponse;
     CMD_Set_Aspect_Ratio setMediaAspect(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID, ratio.toStdString());
@@ -3240,7 +3241,7 @@ void DCE::qOrbiter::GetText(int textno)
 }
 
 //used for resume to pass complex things like chapters and positions in playlists.
-void DCE::qOrbiter::SetMediaPosition(QString position)
+void DCE::qOrbiter::setPosition(QString position)
 {
     if(qmlUI->nowPlayingButton->qs_screen.contains( "Screen_49.qml"))
 
@@ -3264,7 +3265,7 @@ void DCE::qOrbiter::SetMediaPosition(QString position)
 
 }
 
-void DCE::qOrbiter::DvdMenu() //show the dvd menu
+void DCE::qOrbiter::showMenu() //show the dvd menu
 {
     CMD_Goto_Media_Menu showDVDmenu(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID, 0 );
     if(!SendCommand(showDVDmenu))
@@ -3274,7 +3275,7 @@ void DCE::qOrbiter::DvdMenu() //show the dvd menu
 
 }
 
-void DCE::qOrbiter::NavigateScreen(QString direction) //connects ui buttons to dce commands
+void DCE::qOrbiter::moveDirection(QString direction) //connects ui buttons to dce commands
 {
     if(direction.contains("up"))
     {

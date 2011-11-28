@@ -106,14 +106,14 @@ public:
     Q_INVOKABLE  void GetAdvancedMediaOptions();
     Q_INVOKABLE void GetAlarms(bool toggle, int grp);
     Q_INVOKABLE void SetZoom(QString zoomLevel);
-    Q_INVOKABLE void SetAspectRatio(QString ratio);
+    Q_INVOKABLE void setAspect(QString ratio);
     Q_INVOKABLE void GetText(int textno);
-    Q_INVOKABLE void SetMediaPosition(QString position);
-    Q_INVOKABLE void DvdMenu();
+    Q_INVOKABLE void setPosition(QString position);
+    Q_INVOKABLE void showMenu();
     Q_INVOKABLE void CopyDisc();
     Q_INVOKABLE void ShowBookMarks();
 
-    Q_INVOKABLE void NavigateScreen(QString direction);
+    Q_INVOKABLE void moveDirection(QString direction);
     Q_INVOKABLE void JogStream(QString jump);
     Q_INVOKABLE void processScreenShot(char picData, int picDataSize, string fileFormat);
     Q_INVOKABLE void showAdvancedButtons();
