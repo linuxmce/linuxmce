@@ -1,8 +1,9 @@
 lmce-asterisk (0+0.3.1-2) unstable; urgency=low
 
   * Fixed #1345 - bug on incoming and outgoing sip connections
+  * Refs #1332 - experimental gtalk phoneline provider support
 
- -- Serge Wagener <serge@linuxmce.org>  Mon, 28 Nov 2011 17:03:04 +0100
+ -- Serge Wagener <serge@linuxmce.org>  Mon, 28 Nov 2011 20:19:35 +0100
 
 lmce-asterisk (0+0.3.1-1) unstable; urgency=low
 

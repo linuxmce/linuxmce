@@ -311,10 +311,22 @@ AddTrunk()
 			context="from-trunk"
 			LINESSQL="$LINESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,secret,host,port,context,qualify,nat,type,fromuser,fromdomain,callerid,allow,insecure,directmedia) VALUES \
 			('$username','$username','$password','$host','5060','$context','yes','yes','peer','$username','$host','$phonenumber','alaw;ulaw','port,invite','no');"
-			#, \
-			#('$phonenumber','$username','$password','$host','5060','$context','no','yes','peer','$username', '$host','$username','alaw;ulaw','port,invite');"
         ;;
-    esac
+        "GTALK")
+        	# provider registry
+			LINESSQL="$LINESSQL INSERT INTO $DB_astconfig_Table (cat_metric,var_metric,filename,category,var_name,var_val) VALUES
+				('1', '0', 'jabber.conf', 'asterisk', 'type', 'client'),
+				('1', '1', 'jabber.conf', 'asterisk', 'serverhost', 'talk.google.com'),
+				('1', '2', 'jabber.conf', 'asterisk', 'username', '$username/Talk'),
+				('1', '3', 'jabber.conf', 'asterisk', 'secret', '$password'),
+				('1', '4', 'jabber.conf', 'asterisk', 'port', '5222'),
+				('1', '5', 'jabber.conf', 'asterisk', 'usetls', 'yes'),
+				('1', '6', 'jabber.conf', 'asterisk', 'usesasl', 'yes'),
+				('1', '7', 'jabber.conf', 'asterisk', 'status', 'available'),
+				('1', '8', 'jabber.conf', 'asterisk', 'statusmessage', 'LinuxMCE asterisk server'),
+				('1', '9', 'jabber.conf', 'asterisk', 'timeout', '100');"
+        ;;
+   esac
 	
 	# add outbound context in realtime extensions
 	context="outbound-allroutes"
@@ -372,8 +384,12 @@ WorkTheLines()
 	LINESSQL="SET AUTOCOMMIT=0; START TRANSACTION;"
 	LINESSQL="$LINESSQL DELETE FROM $DB_astconfig_Table WHERE filename='sip.conf' AND category='general' AND var_name='register';"
 	LINESSQL="$LINESSQL DELETE FROM $DB_astconfig_Table WHERE filename='iax.conf' AND category='general' AND var_name='register';"
+	LINESSQL="$LINESSQL DELETE FROM $DB_astconfig_Table WHERE filename='jabber.conf' AND cat_metric > 0;"	
+	LINESSQL="$LINESSQL ALTER TABLE $DB_astconfig_Table AUTO_INCREMENT=1;"
+
 	LINESSQL="$LINESSQL DELETE FROM $DB_Extensions_Table WHERE context='ext-did';"
 	LINESSQL="$LINESSQL DELETE FROM $DB_Extensions_Table WHERE context='outbound-allroutes';"
+	LINESSQL="$LINESSQL ALTER TABLE $DB_Extensions_Table AUTO_INCREMENT=1;"
 
 	for number in ${emergencynumbers//,/ }; do
 		LINESSQL="$LINESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES \
@@ -394,6 +410,7 @@ WorkTheLines()
 		prefix=$(Field 7 "$Row")
 		enabled=$(Field 8 "$Row")
 		phonenumber=$(Field 9 "$Row")
+		if [[ $protocol == 'GTALK' ]]; then phonenumber=$username; fi
 		echo "Working phoneline $id-$name ($protocol/$phonenumber)"
 		if [[ $enabled == "yes" ]]; then AddTrunk; fi
 	done
@@ -525,8 +542,9 @@ devices2astdb
 chown asterisk.asterisk /usr/share/asterisk/agi-bin/* /etc/asterisk/*
 
 # reload needed asterisk modules to activate config
-asterisk -r -x "sip reload"
-asterisk -r -x "iax2 reload"
+asterisk -r -x "sip reload" >> /dev/null
+asterisk -r -x "iax2 reload" >> /dev/null
 asterisk -r -x "sccp reload" >> /dev/null
+asterisk -r -x "jabber reload" >> /dev/null
 
 #popd

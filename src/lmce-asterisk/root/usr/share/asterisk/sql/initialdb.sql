@@ -99,6 +99,21 @@ INSERT INTO ast_config (cat_metric, var_metric, commented, filename, category, v
 (1, 4, 0, 'voicemail.conf', 'zonemessages', 'european', 'Europe/Copenhagen|''vm-received'' a d b ''digits/at'' HM');
 
 --
+-- Insert static jabber.conf and gtalk.conf in  DB for google's voice service
+--	
+DELETE FROM ast_config WHERE filename = 'jabber.conf';
+DELETE FROM ast_config WHERE filename = 'gtalk.conf';
+INSERT INTO ast_config (cat_metric, var_metric, commented, filename, category, var_name, var_val) VALUES
+(0, 0, 0, 'jabber.conf', 'general', 'autoregister', 'yes'),
+(0, 0, 0, 'gtalk.conf', 'general', 'context', 'from-trunk'),
+(0, 1, 0, 'gtalk.conf', 'general', 'bindaddr', '0.0.0.0'),
+(0, 2, 0, 'gtalk.conf', 'general', 'allowguest', 'yes'),
+(1, 0, 0, 'gtalk.conf', 'guest', 'disallow', 'all'),
+(1, 1, 0, 'gtalk.conf', 'guest', 'allow', 'ulaw'),
+(1, 2, 0, 'gtalk.conf', 'guest', 'context', 'from-trunk'),
+(1, 3, 0, 'gtalk.conf', 'guest', 'connection', 'asterisk');
+
+--
 -- Insert realtime extensions in  DB
 --	
 
