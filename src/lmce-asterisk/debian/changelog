@@ -1,3 +1,9 @@
+lmce-asterisk (0+0.3.1-2) unstable; urgency=low
+
+  * Fixed #1345 - bug on incoming and outgoing sip connections
+
+ -- Serge Wagener <serge@linuxmce.org>  Mon, 28 Nov 2011 17:03:04 +0100
+
 lmce-asterisk (0+0.3.1-1) unstable; urgency=low
 
   * Added support for CISCO mobile iOS app softphone (see http://wiki.linuxmce.org/index.php/Cisco_Mobile)
