@@ -1,3 +1,20 @@
+/*
+    This file is part of QOrbiter for use with the LinuxMCE project found at http://www.linuxmce.org
+   Langston Ball  golgoj4@gmail.com
+    QOrbiter is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    QOrbiter is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with QOrbiter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #ifndef QORBITERMANAGER_H
 #define QORBITERMANAGER_H
 
@@ -324,7 +341,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     Q_INVOKABLE void gridChangeChannel(QString chan, QString chanid);
 
     //media related
-    Q_INVOKABLE void getMediaPlaylist();
+
     Q_INVOKABLE void setNowPlayingData();
     Q_INVOKABLE void setNowPlayingTv();
     Q_INVOKABLE void getLiveTVPlaylist();
@@ -333,14 +350,12 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     Q_INVOKABLE void ff_media(int speed);
     Q_INVOKABLE void rw_media(int speed);
     Q_INVOKABLE void pauseMedia();
-    Q_INVOKABLE void bindMediaRemote(bool state);
+
     void updateImageChanged(QImage img);
     void updateTimecode();
     void showTimeCode();
     Q_INVOKABLE  void showMenu();
     Q_INVOKABLE void moveDirection (QString direction);
-    Q_INVOKABLE void enter();
-
     Q_INVOKABLE  void getcurrentSkins(QStringList skinPaths);
     void qmlSetupLmce(int incdeviceid, QString incrouterip);
     void changedPlaylistPosition(QString position);

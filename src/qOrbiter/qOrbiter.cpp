@@ -2284,7 +2284,7 @@ void DCE::qOrbiter::GetSecurityCam(int i_inc_pkdevice)
 
 }
 
-void DCE::qOrbiter::StartMedia(QString inc_FKFile)
+void DCE::qOrbiter::playMedia(QString inc_FKFile)
 {
 
     //changed to remove media type as that is decided on by the media plugin and passed back
@@ -2296,16 +2296,14 @@ void DCE::qOrbiter::StartMedia(QString inc_FKFile)
     // CMD_Play_Media playMedia(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->i_current_mediaType, 1001 , pos, inc_FKFile.toStdString());
     SendCommand(playMedia);
 
-
 }
 
 void DCE::qOrbiter::StopMedia()
 {
 
     CMD_MH_Stop_Media endMedia(qmlUI->iPK_Device, qmlUI->iMediaPluginID,0,qmlUI->nowPlayingButton->i_mediaType,0,QString::number(qmlUI->iea_area).toStdString(),false);
-    qmlUI->storedVideoPlaylist->clear();
     SendCommand(endMedia);
-    //qDebug() << "End command sent";
+    qmlUI->storedVideoPlaylist->clear();
 }
 
 void DCE::qOrbiter::RwMedia()

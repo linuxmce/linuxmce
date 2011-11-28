@@ -1374,7 +1374,7 @@ void qorbiterManager::requestSecurityPic(int i_pk_camera_device, int h, int w)
 
 void qorbiterManager::playMedia(QString FK_Media)
 {
-    pqOrbiter->StartMedia(FK_Media);
+    pqOrbiter->playMedia(FK_Media);
 
 }
 
@@ -1405,10 +1405,7 @@ void qorbiterManager::showfloorplan(int fptype)
     pqOrbiter->ShowFloorPlan(fptype);
 }
 
-void qorbiterManager::bindMediaRemote(bool state)
-{
 
-}
 
 void qorbiterManager::changedPlaylistPosition(QString position)
 {
@@ -1430,15 +1427,11 @@ void qorbiterManager::setNowPlayingData()
 
     pqOrbiter->BindMediaRemote(true);
     pqOrbiter->requestMediaPlaylist();
-
     updateTimecode();
 
 }
 
-void qorbiterManager::getMediaPlaylist()
-{
 
-}
 
 void qorbiterManager::updateImageChanged(QImage img)
 {
@@ -1637,10 +1630,7 @@ void qorbiterManager::moveDirection(QString direction)
     pqOrbiter->NavigateScreen(direction);
 }
 
-void qorbiterManager::enter()
-{
 
-}
 
 void qorbiterManager::jogPosition(QString jog)
 {

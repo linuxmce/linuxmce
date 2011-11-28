@@ -71,7 +71,7 @@ public:
     Q_INVOKABLE void GetFileInfoForQml(QString qs_file_reference);
     Q_INVOKABLE void GetMediaAttributeGrid(QString qs_fk_fileno);
     Q_INVOKABLE void GetSecurityCam(int i_inc_pkdevice);
-    Q_INVOKABLE void StartMedia(QString inc_FKFile);
+    Q_INVOKABLE void playMedia(QString inc_FKFile);
     Q_INVOKABLE void StopMedia();
     Q_INVOKABLE void RwMedia();
     Q_INVOKABLE void FfMedia();
