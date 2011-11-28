@@ -2640,6 +2640,9 @@ public:
 		}
 		return iHandled!=0 ? rmr_Processed : rmr_NotProcessed;
 	}
+
+      signals:
+        void routerDisconnect();
 }; // end class
 
 

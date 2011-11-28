@@ -3582,3 +3582,13 @@ void DCE::qOrbiter::adjustVolume(int vol)
     }
 }
 
+void DCE::qOrbiter::OnDisconnect()
+{
+    qmlUI->closeOrbiter();
+}
+
+void DCE::qOrbiter::OnReload()
+{
+    qmlUI->regenOrbiter(qmlUI->iPK_Device);
+}
+

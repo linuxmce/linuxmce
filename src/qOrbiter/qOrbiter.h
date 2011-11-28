@@ -61,6 +61,9 @@ public:
     virtual bool Register();
     virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
     virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
+    virtual void OnDisconnect();
+    virtual void OnReload();
+
     bool initialize();
 
     bool deinitialize();
