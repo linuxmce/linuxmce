@@ -344,12 +344,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     Q_INVOKABLE  void getcurrentSkins(QStringList skinPaths);
     void qmlSetupLmce(int incdeviceid, QString incrouterip);
     void changedPlaylistPosition(QString position);
-    void changedTrack(QString increment);
 
-    //automation related
-    void adjustVolume(int vol);
-    void adjustLighting(int l);
-    void mute();
 
     //datagrid related
     void setSorting(int i);

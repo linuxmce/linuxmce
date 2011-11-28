@@ -80,7 +80,7 @@ bool qOrbiter::GetConfig()
         return false;
     }
 
-    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Connected, requesting configuration for device %d", qmlUI->iPK_Device);
+    DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Connected, requesting configuration for device %d", qmlUI->iPK_Device);
 
     char *oData;
     oData = NULL;
@@ -1258,6 +1258,7 @@ void qOrbiter::CMD_Show_Popup(string sPK_DesignObj,int iPosition_X,int iPosition
     cout << "Parm #50 - Name=" << sName << endl;
     cout << "Parm #126 - Exclusive=" << bExclusive << endl;
     cout << "Parm #127 - Dont_Auto_Hide=" << bDont_Auto_Hide << endl;
+
 }
 
 //<-dceag-c398-b->
@@ -1974,7 +1975,6 @@ bool DCE::qOrbiter::initialize()
     {
         return false;
     }
-
 
 
 }
@@ -2918,24 +2918,6 @@ void DCE::qOrbiter::TuneToChannel(int channel, QString chanid) //tunes to channe
 
 }
 
-void DCE::qOrbiter::SetLightingLevel(int i)
-{
-    CMD_Set_Level adjust_lighting_level(qmlUI->iPK_Device, qmlUI->iPK_Device_LightingPlugin, StringUtils::itos(i));
-    SendCommand(adjust_lighting_level);
-}
-
-void DCE::qOrbiter::VolumeUp(int vol)
-{
-    CMD_Vol_Up raiseVol(qmlUI->iPK_Device, qmlUI->iMediaPluginID, vol);
-    SendCommand(raiseVol);
-
-}
-
-void DCE::qOrbiter::VolumeDown(int vol)
-{
-    CMD_Vol_Down lowerVolume(qmlUI->iPK_Device, qmlUI->iMediaPluginID, vol);
-    SendCommand(lowerVolume);
-}
 
 void DCE::qOrbiter::mute()
 {
@@ -2943,13 +2925,11 @@ void DCE::qOrbiter::mute()
     SendCommand(muteAudio);
 }
 
-void DCE::qOrbiter::TrackUp()
-{
-
-}
 
 void DCE::qOrbiter::ChangedTrack(QString direction)
 {
+
+
     CMD_Jump_Position_In_Playlist jump_playlist(qmlUI->iPK_Device, qmlUI->iMediaPluginID, direction.toStdString(), qmlUI->nowPlayingButton->i_streamID);
     SendCommand(jump_playlist);
 }
@@ -3464,7 +3444,7 @@ void DCE::qOrbiter::grabScreenshot()
     //   delete picData;
 
     qmlUI->mediaScreenShot = returnImage;
-
+    emit screenShotReady();
     //thumbs_deviceno
     int gHeight = 0;
     int gWidth = 0;
@@ -3572,5 +3552,35 @@ void DCE::qOrbiter::blueButton()
 {
     CMD_Blue pressBlue(qmlUI->iPK_Device, qmlUI->iMediaPluginID);
     SendCommand(pressBlue);
+}
+
+void DCE::qOrbiter::powerOff(QString deviceType)
+{
+}
+
+void DCE::qOrbiter::CopyDisc()
+{
+}
+
+void DCE::qOrbiter::ShowBookMarks()
+{
+}
+
+void DCE::qOrbiter::processScreenShot(char picData, int picDataSize, std::string fileFormat)
+{
+}
+
+void DCE::qOrbiter::adjustVolume(int vol)
+{
+    if (vol < 0)
+    {
+        CMD_Vol_Up raiseVol(qmlUI->iPK_Device, qmlUI->iMediaPluginID, vol);
+        SendCommand(raiseVol);
+    }
+    else
+    {
+        CMD_Vol_Down lowerVolume(qmlUI->iPK_Device, qmlUI->iMediaPluginID, vol);
+        SendCommand(lowerVolume);
+    }
 }
 

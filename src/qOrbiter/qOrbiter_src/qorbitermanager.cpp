@@ -1469,38 +1469,8 @@ void qorbiterManager::getLiveTVPlaylist()
 void qorbiterManager::gridChangeChannel(QString chan, QString chanid)
 {
     pqOrbiter->TuneToChannel(chan.toInt(), chanid);
-
-
 }
 
-void qorbiterManager::adjustLighting(int l)
-{
-
-    pqOrbiter->SetLightingLevel(l);
-
-}
-
-void qorbiterManager::adjustVolume(int vol)
-{
-    if (vol < 0)
-    {
-        pqOrbiter->VolumeUp(vol);
-    }
-    else
-    {
-        pqOrbiter->VolumeDown(vol);
-    }
-}
-
-void qorbiterManager::mute()
-{
-    pqOrbiter->mute();
-}
-
-void qorbiterManager::changedTrack(QString increment)
-{
-    pqOrbiter->ChangedTrack(increment);
-}
 
 void qorbiterManager::setHouseMode(int mode, int pass)
 {
