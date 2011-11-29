@@ -2,7 +2,8 @@
 #
 # Create LinuxMCE dialplan for all house- and usermodes
 #
-# Version 1.0 - 27. sep 2011 - Serge Wagener - first version
+# Version 1.0 - 27. sep 2011 - Serge Wagener (foxi352) - first version
+# Version 1.1 - 29. nov 2011 - Serge Wagener (foxi352) - added fax support
 
 DB_Extensions_Table='extensions'
 Context_From_Lmce="from-lmce-custom"
@@ -110,16 +111,30 @@ CreateDialplanLines()
 			App="Goto"
 			AppParam="voice-menu-lmce-custom,s,1"
 		fi
-
-		SQL="$SQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES
-			('$Context_From_Lmce','$Line-hm$HouseMode','1','$App','$AppParam'),
-			('$Context_From_Lmce','$Line-hm$HouseMode','2','Goto','$Context_From_Lmce,$Line-hm$HouseMode-\${DIALSTATUS},1'),
-			('$Context_From_Lmce','$Line-hm$HouseMode','3','Hangup',''),
-			('$Context_From_Lmce','$Line-hm$HouseMode-BUSY','1','Goto','$Context_From_Lmce,100,1'),
-			('$Context_From_Lmce','$Line-hm$HouseMode-NOANSWER','1','Goto','voice-menu-lmce-custom,s,1'),
-			('$Context_From_Lmce','$Line-hm$HouseMode-CONGESTION','1','Goto','$Context_From_Lmce,100,1'),
-			('$Context_From_Lmce','$Line-hm$HouseMode-CHANUNAVAIL','1','Goto','$Context_From_Lmce,100,1'),
-			('$Context_From_Lmce','$Line-hm$HouseMode-INVALIDARGS','1','Goto','$Context_From_Lmce,100,1');"
+		
+		if [[ $Routing == fax ]]; then
+			App="Goto"
+			AppParam="applications,*70,1"
+			SQL="$SQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES
+				('$Context_From_Lmce','$Line-hm$HouseMode','1','$App','$AppParam'),
+				('$Context_From_Lmce','$Line-hm$HouseMode','2','Goto','$Context_From_Lmce,$Line-hm$HouseMode-\${DIALSTATUS},1'),
+				('$Context_From_Lmce','$Line-hm$HouseMode','3','Hangup',''),
+				('$Context_From_Lmce','$Line-hm$HouseMode-BUSY','1','Hangup',''),
+				('$Context_From_Lmce','$Line-hm$HouseMode-NOANSWER','1','Hangup',''),
+				('$Context_From_Lmce','$Line-hm$HouseMode-CONGESTION','1','Hangup',''),
+				('$Context_From_Lmce','$Line-hm$HouseMode-CHANUNAVAIL','1','Hangup',''),
+				('$Context_From_Lmce','$Line-hm$HouseMode-INVALIDARGS','1','Hangup','');"
+		else
+			SQL="$SQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES
+				('$Context_From_Lmce','$Line-hm$HouseMode','1','$App','$AppParam'),
+				('$Context_From_Lmce','$Line-hm$HouseMode','2','Goto','$Context_From_Lmce,$Line-hm$HouseMode-\${DIALSTATUS},1'),
+				('$Context_From_Lmce','$Line-hm$HouseMode','3','Hangup',''),
+				('$Context_From_Lmce','$Line-hm$HouseMode-BUSY','1','Goto','$Context_From_Lmce,100,1'),
+				('$Context_From_Lmce','$Line-hm$HouseMode-NOANSWER','1','Goto','voice-menu-lmce-custom,s,1'),
+				('$Context_From_Lmce','$Line-hm$HouseMode-CONGESTION','1','Goto','$Context_From_Lmce,100,1'),
+				('$Context_From_Lmce','$Line-hm$HouseMode-CHANUNAVAIL','1','Goto','$Context_From_Lmce,100,1'),
+				('$Context_From_Lmce','$Line-hm$HouseMode-INVALIDARGS','1','Goto','$Context_From_Lmce,100,1');"
+		fi
 		OldLine=$Line
 	done
 

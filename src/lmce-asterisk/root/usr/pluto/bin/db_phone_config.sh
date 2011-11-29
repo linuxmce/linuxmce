@@ -5,7 +5,9 @@
 # * IAX phones (iax_additional_phones.conf)
 # * Users (voicemail.conf extensions.conf)
 #
-# Version 0.01
+# Version 1.0 - 27. sep 2011 - Serge Wagener (foxi352) - first version
+# Version 1.1 - 29. nov 2011 - Serge Wagener (foxi352) - added fax support
+
 #pushd /etc/asterisk
 . /usr/pluto/bin/pluto.func
 . /usr/pluto/bin/Config_Ops.sh
@@ -398,7 +400,7 @@ WorkTheLines()
 		echo "Routing emergency number: $number via $emergencyphonelineProtocol/$emergencyphonelineNumber"
 	done
 
-	SQL="SELECT id,protocol,name,host,username,password,prefix,enabled,phonenumber FROM $DB_PhoneLines_Table"
+	SQL="SELECT id,protocol,name,host,username,password,prefix,enabled,phonenumber,isfax,faxmail FROM $DB_PhoneLines_Table"
 	R=$(RunSQL "$SQL")
 	for Row in $R; do
 		id=$(Field 1 "$Row")
@@ -410,6 +412,8 @@ WorkTheLines()
 		prefix=$(Field 7 "$Row")
 		enabled=$(Field 8 "$Row")
 		phonenumber=$(Field 9 "$Row")
+		isfax=$(Field 10 "$Row")
+		faxmail=$(Field 11 "$Row")
 		if [[ $protocol == 'GTALK' ]]; then phonenumber=$username; fi
 		echo "Working phoneline $id-$name ($protocol/$phonenumber)"
 		if [[ $enabled == "yes" ]]; then AddTrunk; fi

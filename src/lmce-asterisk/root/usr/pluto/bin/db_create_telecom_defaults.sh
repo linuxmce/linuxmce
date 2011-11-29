@@ -2,7 +2,8 @@
 #
 # Create LinuxMCE telecom routing defaults for all users and lines
 #
-# Version 1.0 - 27. sep 2011 - Serge Wagener - first version
+# Version 1.0 - 27. sep 2011 - Serge Wagener (foxi352) - first version
+# Version 1.1 - 29. nov 2011 - Serge Wagener (foxi352) - added fax support
 
 DB_Extensions_Table='extensions'
 DB_Phonelines_Table='phonelines'
@@ -48,17 +49,23 @@ GetPhoneExtensions()
 GetLineExtensions()
 {
 	UseDB asterisk
-	S="SELECT id, protocol FROM $DB_Phonelines_Table"
+	S="SELECT id, protocol, isfax FROM $DB_Phonelines_Table"
 	R=$(RunSQL "$S")
 	for Row in $R; do
-		LINES[$(Field 1 "$Row")]=$(Field 2 "$Row")
+		if [[ $(Field 3 "$Row") == 'yes' ]]; then
+			LINES[$(Field 1 "$Row")]='FAX'
+		else
+			LINES[$(Field 1 "$Row")]=$(Field 2 "$Row")
+		fi
 	done
 
 	UseDB $DB_telecom
 	S="SELECT DISTINCT ID FROM Line_HouseMode ORDER BY ID"
 	R=$(RunSQL "$S")
 	for Row in $R; do
-		LINES[$(Field 1 "$Row")]="0"
+		if [[ ${LINES[$(Field 1 "$Row")]} != 'FAX' ]]; then
+			LINES[$(Field 1 "$Row")]="0"
+		fi
 	done
 }
 
@@ -88,13 +95,24 @@ CreateLineRoutings()
 	SQL="SET AUTOCOMMIT=0; START TRANSACTION;"
 	for key in "${!LINES[@]}"; do
 		if [[ ${LINES[$key]} != "0" ]]; then
-			echo "Add defaults for line $key"
-			SQL="$SQL INSERT INTO Line_HouseMode (ID,Type,EK_HouseMode,Routing) values ('$key','${LINES[$key]}','1','ring,$PHONES');"
-			SQL="$SQL INSERT INTO Line_HouseMode (ID,Type,EK_HouseMode,Routing) values ('$key','${LINES[$key]}','2','prompt');"
-			SQL="$SQL INSERT INTO Line_HouseMode (ID,Type,EK_HouseMode,Routing) values ('$key','${LINES[$key]}','3','ring,$PHONES');"
-			SQL="$SQL INSERT INTO Line_HouseMode (ID,Type,EK_HouseMode,Routing) values ('$key','${LINES[$key]}','4','prompt');"
-			SQL="$SQL INSERT INTO Line_HouseMode (ID,Type,EK_HouseMode,Routing) values ('$key','${LINES[$key]}','5','ring,$PHONES');"
-			SQL="$SQL INSERT INTO Line_HouseMode (ID,Type,EK_HouseMode,Routing) values ('$key','${LINES[$key]}','6','prompt');"
+			if [[ ${LINES[$key]} == "FAX" ]]; then
+				echo "Add defaults for FAX line $key"
+				SQL="$SQL DELETE FROM Line_HouseMode WHERE ID='$key'; ALTER TABLE Line_HouseMode AUTO_INCREMENT=1;"
+				SQL="$SQL INSERT INTO Line_HouseMode (ID,Type,EK_HouseMode,Routing) values ('$key','${LINES[$key]}','1','fax');"
+				SQL="$SQL INSERT INTO Line_HouseMode (ID,Type,EK_HouseMode,Routing) values ('$key','${LINES[$key]}','2','fax');"
+				SQL="$SQL INSERT INTO Line_HouseMode (ID,Type,EK_HouseMode,Routing) values ('$key','${LINES[$key]}','3','fax');"
+				SQL="$SQL INSERT INTO Line_HouseMode (ID,Type,EK_HouseMode,Routing) values ('$key','${LINES[$key]}','4','fax');"
+				SQL="$SQL INSERT INTO Line_HouseMode (ID,Type,EK_HouseMode,Routing) values ('$key','${LINES[$key]}','5','fax');"
+				SQL="$SQL INSERT INTO Line_HouseMode (ID,Type,EK_HouseMode,Routing) values ('$key','${LINES[$key]}','6','fax');"
+			else
+				echo "Add defaults for line $key"
+				SQL="$SQL INSERT INTO Line_HouseMode (ID,Type,EK_HouseMode,Routing) values ('$key','${LINES[$key]}','1','ring,$PHONES');"
+				SQL="$SQL INSERT INTO Line_HouseMode (ID,Type,EK_HouseMode,Routing) values ('$key','${LINES[$key]}','2','prompt');"
+				SQL="$SQL INSERT INTO Line_HouseMode (ID,Type,EK_HouseMode,Routing) values ('$key','${LINES[$key]}','3','ring,$PHONES');"
+				SQL="$SQL INSERT INTO Line_HouseMode (ID,Type,EK_HouseMode,Routing) values ('$key','${LINES[$key]}','4','prompt');"
+				SQL="$SQL INSERT INTO Line_HouseMode (ID,Type,EK_HouseMode,Routing) values ('$key','${LINES[$key]}','5','ring,$PHONES');"
+				SQL="$SQL INSERT INTO Line_HouseMode (ID,Type,EK_HouseMode,Routing) values ('$key','${LINES[$key]}','6','prompt');"
+			fi
 		fi
 	done
 	
