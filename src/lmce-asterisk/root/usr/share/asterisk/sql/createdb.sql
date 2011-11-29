@@ -57,6 +57,7 @@ KEY `filename_comment` (`filename`,`commented`)
 --
 -- Table with line-configuration for SCCP devices
 --
+DROP TABLE IF EXISTS `sccpdevice`;
 CREATE TABLE IF NOT EXISTS `sccpdevice` (
   `type` varchar(45) default NULL,
   `addon` varchar(45) default NULL,
@@ -91,6 +92,7 @@ CREATE TABLE IF NOT EXISTS `sccpdevice` (
 --
 -- Table with device-configuration for SCCP devices
 --
+DROP TABLE IF EXISTS `sccpline`;
 CREATE TABLE IF NOT EXISTS `sccpline` (
   `id` varchar(45) default NULL,
   `pin` varchar(45) default NULL,
@@ -123,6 +125,7 @@ CREATE TABLE IF NOT EXISTS `sccpline` (
 --
 -- Table with button-configuration for SCCP devices
 --
+DROP TABLE IF EXISTS `buttonconfig`;
 CREATE TABLE IF NOT EXISTS `buttonconfig` (
   `device` varchar(15) NOT NULL default '',
   `instance` tinyint(4) NOT NULL default '0',
@@ -148,6 +151,7 @@ GROUP BY sccpdevice.name;
 --
 -- Table with device-configuration for SIP devices
 --
+DROP TABLE IF EXISTS `sip_devices`;
 CREATE TABLE IF NOT EXISTS `sip_devices` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(80) NOT NULL DEFAULT '',
@@ -226,6 +230,7 @@ CREATE TABLE IF NOT EXISTS `sip_devices` (
 --
 -- Table with device-configuration for IAX devices
 --
+DROP TABLE IF EXISTS `iax_devices`;
 CREATE TABLE IF NOT EXISTS iax_devices (
 	id int(11) NOT NULL AUTO_INCREMENT,
 	name varchar(30) NOT NULL,
@@ -333,6 +338,8 @@ CREATE TABLE IF NOT EXISTS `voicemail_users` (
 CREATE TABLE IF NOT EXISTS `phonelines` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `enabled` enum('yes','no') NOT NULL DEFAULT 'yes',
+  `isfax` enum('yes','no') NOT NULL DEFAULT 'no',
+  `prefix` varchar(5) NOT NULL,
   `protocol` varchar(5) NOT NULL DEFAULT 'SIP',
   `name` varchar(50) NOT NULL DEFAULT '',
   `host` varchar(50) NOT NULL DEFAULT 'default',
@@ -340,7 +347,7 @@ CREATE TABLE IF NOT EXISTS `phonelines` (
   `phonenumber` varchar(50) NOT NULL,
   `username` varchar(50) NOT NULL DEFAULT '',
   `password` varchar(50) NOT NULL DEFAULT '',
-  `prefix` varchar(5) NOT NULL,
+  `faxmail` varchar(50) DEFAULT DEFAULT '',
   `channels` int(11) NOT NULL DEFAULT '5',
   PRIMARY KEY (`id`)
 );

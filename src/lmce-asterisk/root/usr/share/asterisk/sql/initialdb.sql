@@ -117,54 +117,63 @@ INSERT INTO ast_config (cat_metric, var_metric, commented, filename, category, v
 --	
 
 -- Delete applications and recreate latest versions of them
-DELETE FROM extensions WHERE context='app-echo-test';
-DELETE FROM extensions WHERE context='app-speakingclock';
-DELETE FROM extensions WHERE context='app-speakextennum';
+DELETE FROM extensions WHERE exten='*43';
+DELETE FROM extensions WHERE exten='*60';
+DELETE FROM extensions WHERE exten='*65';
+DELETE FROM extensions WHERE exten='*96';
+
 ALTER TABLE extensions AUTO_INCREMENT=1;
 
 -- *43: echo test
 INSERT INTO extensions (context, exten, priority, app, appdata) VALUES
-('app-echo-test', '*43', 1, 'Answer', ''),
-('app-echo-test', '*43', 2, 'Wait', '1'),
-('app-echo-test', '*43', 3, 'Playback', 'demo-echotest'),
-('app-echo-test', '*43', 4, 'Echo', ''),
-('app-echo-test', '*43', 5, 'Playback', 'demo-echodone'),
-('app-echo-test', '*43', 6, 'Hangup', '');
+('applications', '*43', 1, 'Answer', ''),
+('applications', '*43', 2, 'Wait', '1'),
+('applications', '*43', 3, 'Playback', 'demo-echotest'),
+('applications', '*43', 4, 'Echo', ''),
+('applications', '*43', 5, 'Playback', 'demo-echodone'),
+('applications', '*43', 6, 'Hangup', '');
 
 -- *60: speaking clock
 INSERT INTO extensions (context, exten, priority, app, appdata) VALUES
-('app-speakingclock', '*60', 1, 'Answer', ''),
-('app-speakingclock', '*60', 2, 'Wait', '1'),
-('app-speakingclock', '*60', 3, 'Set', 'NumLoops=0'),
-('app-speakingclock', '*60', 4, 'Set', 'FutureTime=$[${EPOCH} + 11]'),
-('app-speakingclock', '*60', 5, 'Playback', 'at-tone-time-exactly'),
-('app-speakingclock', '*60', 6, 'GotoIf', '$["${TIMEFORMAT}" = "kM"]?9'),
-('app-speakingclock', '*60', 7, 'SayUnixTime', '${FutureTime},,IM \'and\' S \'seconds\' p'),
-('app-speakingclock', '*60', 8, 'Goto', '10'),
-('app-speakingclock', '*60', 9, 'SayUnixTime', '${FutureTime},,kM \'and\' S \'seconds\''),
-('app-speakingclock', '*60', 10, 'Set', 'TimeLeft=$[${FutureTime} - ${EPOCH}]'),
-('app-speakingclock', '*60', 11, 'GotoIf', '$[${TimeLeft} < 1]?14'),
-('app-speakingclock', '*60', 12, 'Wait', '1'),
-('app-speakingclock', '*60', 13, 'Goto', '10'),
-('app-speakingclock', '*60', 14, 'Playback', 'beep'),
-('app-speakingclock', '*60', 15, 'Wait', '5'),
-('app-speakingclock', '*60', 16, 'Set', 'NumLoops=$[${NumLoops} + 1]'),
-('app-speakingclock', '*60', 17, 'GotoIf', '$[${NumLoops} < 5]?4'),
-('app-speakingclock', '*60', 18, 'Playback', 'goodbye'),
-('app-speakingclock', '*60', 19, 'Hangup', '');
+('applications', '*60', 1, 'Answer', ''),
+('applications', '*60', 2, 'Wait', '1'),
+('applications', '*60', 3, 'Set', 'NumLoops=0'),
+('applications', '*60', 4, 'Set', 'FutureTime=$[${EPOCH} + 11]'),
+('applications', '*60', 5, 'Playback', 'at-tone-time-exactly'),
+('applications', '*60', 6, 'GotoIf', '$["${TIMEFORMAT}" = "kM"]?9'),
+('applications', '*60', 7, 'SayUnixTime', '${FutureTime},,IM \'and\' S \'seconds\' p'),
+('applications', '*60', 8, 'Goto', '10'),
+('applications', '*60', 9, 'SayUnixTime', '${FutureTime},,kM \'and\' S \'seconds\''),
+('applications', '*60', 10, 'Set', 'TimeLeft=$[${FutureTime} - ${EPOCH}]'),
+('applications', '*60', 11, 'GotoIf', '$[${TimeLeft} < 1]?14'),
+('applications', '*60', 12, 'Wait', '1'),
+('applications', '*60', 13, 'Goto', '10'),
+('applications', '*60', 14, 'Playback', 'beep'),
+('applications', '*60', 15, 'Wait', '5'),
+('applications', '*60', 16, 'Set', 'NumLoops=$[${NumLoops} + 1]'),
+('applications', '*60', 17, 'GotoIf', '$[${NumLoops} < 5]?4'),
+('applications', '*60', 18, 'Playback', 'goodbye'),
+('applications', '*60', 19, 'Hangup', '');
 
 -- *65: say your extension number
 INSERT INTO extensions (context, exten, priority, app, appdata) VALUES
-('app-speakextennum', '*65', 1, 'Answer', ''),
-('app-speakextennum', '*65', 2, 'Wait', '1'),
-('app-speakextennum', '*65', 3, 'Macro', 'user-callerid'),
-('app-speakextennum', '*65', 4, 'Playback', 'your'),
-('app-speakextennum', '*65', 5, 'Playback', 'extension'),
-('app-speakextennum', '*65', 6, 'Playback', 'number'),
-('app-speakextennum', '*65', 7, 'Playback', 'is'),
-('app-speakextennum', '*65', 8, 'SayDigits', '${AMPUSER}'),
-('app-speakextennum', '*65', 9, 'Wait', '2'),
-('app-speakextennum', '*65',10, 'Hangup', '');
+('applications', '*65', 1, 'Answer', ''),
+('applications', '*65', 2, 'Wait', '1'),
+('applications', '*65', 3, 'Macro', 'user-callerid'),
+('applications', '*65', 4, 'Playback', 'your'),
+('applications', '*65', 5, 'Playback', 'extension'),
+('applications', '*65', 6, 'Playback', 'number'),
+('applications', '*65', 7, 'Playback', 'is'),
+('applications', '*65', 8, 'SayDigits', '${AMPUSER}'),
+('applications', '*65', 9, 'Wait', '2'),
+('applications', '*65',10, 'Hangup', '');
+
+-- *95: test Music On Hold (MOH)
+INSERT INTO extensions (context, exten, priority, app, appdata) VALUES
+('applications', '*96', 1, 'Answer', ''),
+('applications', '*96', 2, 'Wait', '1'),
+('applications', '*96', 3, 'MusicOnHold', ''),
+('applications', '*96', 4, 'Hangup', '');
 
 --
 -- Everything went fine until here, so let's commit to db

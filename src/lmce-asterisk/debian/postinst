@@ -13,10 +13,11 @@ if [[ "$1" == configure ]]; then
 	
 	# if asterisk db already exists delete some tables and recreate them to make sure they correspond to latest schema
 	if [[ "$res" == "asterisk" ]]; then
-		mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm -e "use asterisk; drop table sip_devices;"
+		mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm -e "use asterisk; ALTER TABLE phonelines ADD isfax ENUM('yes','no') NOT NULL DEFAULT 'no' AFTER enabled;" 2>>/dev/null
+		mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm -e "use asterisk; ALTER TABLE phonelines ADD faxmail VARCHAR(50) AFTER password;" 2>>/dev/null
 	fi
 	
-	# create asterisk database if it does not exist, and recreated tables deleted above
+	# recreate asterisk database (except tables which contains user data)
 	mysql -f -h "$MySqlHost" -u "$MySqlUser" $PassParm < /usr/share/asterisk/sql/createdb.sql
 	
 	# populate new db with our default values
