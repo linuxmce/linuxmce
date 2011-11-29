@@ -194,6 +194,7 @@ Rectangle {
                         test.color = "black"
                         alphabetrect.scale = 1
                     }
+                    onClicked: setSeekLetter(name)
                 }
             }
         }

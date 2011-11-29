@@ -1345,7 +1345,7 @@ void qorbiterManager::initializeSortString()
     q_pk_users="0";             //8
     q_last_viewed="2";        //9
     q_pk_attribute="";        //10
-
+    qs_seek ="";
 
     datagridVariableString.append(q_mediaType).append("|").append(q_subType).append("|").append(q_fileFormat).append("|").append(q_attribute_genres).append("|").append(q_mediaSources).append("|").append(q_usersPrivate).append("|").append(q_attributetype_sort).append("|").append(q_pk_users).append("|").append(q_last_viewed).append("|").append(q_pk_attribute);
     goBack.clear();
@@ -1661,6 +1661,15 @@ bool qorbiterManager::cleanupData()
     qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
     qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse); //file grids current media type
 */
+}
+
+void qorbiterManager::setSeekLetter(QString letter)
+{
+    qs_seek = letter;
+}
+
+void qorbiterManager::showMessage(QString message, int duration, bool critical)
+{
 }
 
 

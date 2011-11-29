@@ -94,7 +94,7 @@ public:
 
     Q_INVOKABLE void adjustVolume( int vol);
     Q_INVOKABLE void mute();
-    Q_INVOKABLE void ChangedTrack(QString direction);
+    Q_INVOKABLE void changedTrack(QString direction);
    Q_INVOKABLE  void populateAdditionalMedia();
     Q_INVOKABLE void SetSecurityMode(int pin, int mode);
     Q_INVOKABLE void setLocation(int location, int ea);
@@ -125,6 +125,9 @@ public:
     Q_INVOKABLE void greenButton();
     Q_INVOKABLE void yellowButton();
     Q_INVOKABLE void blueButton();
+    //buttons from the more screen
+    Q_INVOKABLE void extraButtons(QString button);
+
 
 
 

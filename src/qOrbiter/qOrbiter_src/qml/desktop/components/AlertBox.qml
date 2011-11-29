@@ -14,6 +14,6 @@ Rectangle {
 
     MouseArea {
         anchors.fill: parent
-        onClicked: alert_rect.visible = false
+        onClicked: alert_rect.destroy()
               }
 }

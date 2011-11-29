@@ -196,12 +196,14 @@ Param 10 - pk_attribute
     QString q_pk_attribute;        //10
     QString *datagridVariableString;
     QStringList goBack;
+    QString qs_seek;
     bool backwards;
 
     //for the media grid to allow pauses in loading and allow non locking operation
     bool requestMore;
     Q_INVOKABLE void setRequestMore(bool state);
     bool getRequestMore();
+    Q_INVOKABLE void setSeekLetter(QString letter);
 
     //listmodels
     QByteArray binaryConfig;
@@ -379,6 +381,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void setNowPlayingIcon(bool b);
     void initializeContexts();
     void initializeGridModel();
+    void showMessage(QString message, int duration, bool critical);
 
 
     void jogPosition(QString jog);
