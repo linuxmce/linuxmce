@@ -47,6 +47,7 @@
 #include <QProcess>
 
 #include <contextobjects/floorplandevice.h>
+#include <contextobjects/screenshotattributes.h>
 #include <QThread>
 
 
@@ -122,7 +123,7 @@ public:
     ScreenParamsClass *ScreenParameters;
     ScreenSaverModule *ScreenSaver;
     SecurityVideoClass *SecurityVideo;
-
+    QList<QObject*> screenshotVars;
 
     //-------------sleeping menu----------------------
     QList<QObject*> sleeping_alarms;

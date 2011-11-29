@@ -3581,10 +3581,12 @@ void DCE::qOrbiter::grabScreenshot()
                 //qDebug() << "Processing" << parser.at(0);
                 qDebug() << parser.join("--");
 
+                qmlUI->screenshotVars.append(new screenshotAttributes( cellfk, cellTitle, cellAttribute ));
             }
         }
-
+qmlUI->qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(qmlUI->screenshotVars));
     }
+
 }
 
 /*
@@ -3719,6 +3721,11 @@ void DCE::qOrbiter::extraButtons(QString button)
     {
 
     }
+
+}
+
+void DCE::qOrbiter::saveScreenAttribute()
+{
 
 }
 

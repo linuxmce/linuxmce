@@ -127,6 +127,7 @@ public:
     Q_INVOKABLE void blueButton();
     //buttons from the more screen
     Q_INVOKABLE void extraButtons(QString button);
+    Q_INVOKABLE void saveScreenAttribute();
 
 
 

@@ -625,6 +625,8 @@ bool qorbiterManager::getConf(int pPK_Device)
     qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms);                           //custom room list  provided
     qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
     qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse); //file grids current media type
+
+    qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(screenshotVars));
     QObject::connect(this->nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()));
 
     //epg listmodel, no imageprovider as of yet

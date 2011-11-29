@@ -204,7 +204,8 @@ SOURCES += main.cpp \
     contextobjects/filedetailsclass.cpp \
     avcodegrid.cpp \
     avitem.cpp \
-    contextobjects/floorplandevice.cpp
+    contextobjects/floorplandevice.cpp \
+    contextobjects/screenshotattributes.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -265,7 +266,8 @@ HEADERS += \
     avcodegrid.h \
     avitem.h \
     datamodels/floorplanimageitem.h \
-    contextobjects/floorplandevice.h
+    contextobjects/floorplandevice.h \
+    contextobjects/screenshotattributes.h
 
 OTHER_FILES += Readme.txt \
     config.xml \
@@ -344,6 +346,8 @@ OTHER_FILES= \
 
 RESOURCES += \
     skinData.qrc
+
+
 
 
 

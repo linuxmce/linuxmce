@@ -6,15 +6,7 @@ Rectangle {
     width: scaleX(65)
     height: scaleY(75)
     radius: 5
-    color: "slategrey"
-      property ListModel thumbmodel: ListModel{}
-    Component.onCompleted: worker.sendMessage({msg: "init", arg: top.list});
-
-    //note the import of the js as a worker script and not using the 'import' command used with qtquick
-    WorkerScript {
-        id: worker
-        source: "../js/ThreadedAttributes.js"
-    }
+    color: "slategrey"      
 
     Text {
         id: labelscreenshot
@@ -30,14 +22,15 @@ Rectangle {
 
         height: 50
         width: parent.width-1
+        color: style.accentcolor
         Text {
             id: propertystring
-            text: qsTr("type of object")
+            text: attributeType
         }
-        Text {
+       /* Text {
             id: propertystring2
-            text: qsTr("object value")
-        }
+            text: attributeNo
+        } */
      }
     }
 
@@ -49,12 +42,20 @@ Rectangle {
         width: parent.width *.25
         color: style.lighthighlight
         radius:10
-
+        clip:true
+        Text {
+            id: label2
+            text: qsTr("choose attribute")
+        }
         ListView{
             id:propertydisplay
-            model:assignscreenshot.thumbmodel
+            model:screenshotAttributes
             delegate: thumbdelegate
             anchors.fill: attributes
+            height: parent.height
+            width: parent.width
+            visible: true
+
         }
     }
 
