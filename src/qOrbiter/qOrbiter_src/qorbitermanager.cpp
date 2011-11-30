@@ -201,10 +201,10 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         // qorbiterUIwin->showFullScreen();
 
         //     qDebug() << "Showing Splash";
-        gotoQScreen("Splash.qml");
 
         QObject::connect(item,SIGNAL(setupStart(int, QString)), this,SLOT(qmlSetupLmce(int,QString)));
         QObject::connect(nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection );
+         gotoQScreen("Splash.qml");
     }
     else
     {
@@ -213,6 +213,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
     }
     iPK_Device= deviceno;
     pqOrbiter = new DCE::qOrbiter(iPK_Device, routerip.toStdString(), true,false);
+    //setupLmce(iPK_Device, routerip.toStdString(), true, false);
 }
 
 

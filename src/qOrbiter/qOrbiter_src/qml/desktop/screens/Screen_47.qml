@@ -7,8 +7,13 @@ Rectangle {
     id:fileviewscreen
     width: style.orbiterW
     height: style.orbiterH
-    color: style.darkhighlight
+    color: "transparent"
     clip: true
+
+    Image {
+        id: gb
+        source: "../../../img/icons/mediatime.png"
+    }
     Connections
     {
         target: filedetailsclass
@@ -27,7 +32,7 @@ Rectangle {
                 id:mainItem
                 width: scaleX(20);
                 height: scaleY(20)
-                color: style.lighthighlight
+                color: "transparent"
 
                 MouseArea{
                     anchors.fill: mainItem
@@ -173,7 +178,7 @@ Rectangle {
                 id:alphabetrect
                 height: scaleY(5)
                 width: scaleX(4)
-                color: style.accentcolor
+                color: "transparent"
                 clip:false
                 Text {
                     id: test
@@ -184,14 +189,11 @@ Rectangle {
                 MouseArea{
                     anchors.fill: parent
                     hoverEnabled: true
-                    onEntered: {
-                        alphabetrect.color = style.darkhighlight
-                        test.color = style.lighthighlight
+                    onEntered: {                       
                         alphabetrect.scale = 1.5
                     }
                     onExited: {
-                        alphabetrect.color = style.accentcolor
-                        test.color = "black"
+
                         alphabetrect.scale = 1
                     }
                     onClicked: setSeekLetter(name)

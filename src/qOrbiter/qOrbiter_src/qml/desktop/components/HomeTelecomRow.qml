@@ -9,19 +9,10 @@ Item {
         height: scaleY(17)
         width: scaleX(100)
         clip:true
-        color:style.darkhighlight
+        color:"transparent"
         radius: 20
-        Image {
-            id: rowbgimg
 
-            source: "../../../img/icons/rowbg.png"
-            width: parent.width
-            height: parent.height
-
-        }
         HomeButtonDelegate{id:telecomDelegate}
-
-
 
         Row {
             id: telecomRow

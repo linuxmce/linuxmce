@@ -179,7 +179,7 @@ int main(int argc, char* argv[])
 #endif
     QApplication a(argc, argv);
     qorbiterManager * w = new qorbiterManager(PK_Device,QString::fromStdString(sRouter_IP.c_str()));
-
+ return a.exec();
 
 #ifdef WIN32
     WORD    wVersion;
@@ -231,7 +231,7 @@ int main(int argc, char* argv[])
               setup routine should take over if there is an error
               */
             w->gotoQScreen("Screen_1.qml");
-            a.exec();
+
 
         }
         else
@@ -245,7 +245,7 @@ int main(int argc, char* argv[])
                 bReload = false;
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "main loop No Router.  Will abort");
                 qDebug() << " main loop- No Router, Aborting";
-                a.exec();
+
 
             }
             else
@@ -258,12 +258,12 @@ int main(int argc, char* argv[])
                     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device  Will abort");
                     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
                     w->gotoQScreen("Splash.qml");
-                    return a.exec();
+
                 }
             }
         }
 
-        return a.exec();
+
     }
     catch(string s)
     {

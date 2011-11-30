@@ -9,15 +9,9 @@ Item {
         width: scaleX(100)
 
         clip:true
-        color:style.maincolor
+color:"transparent"
         radius: 20
-        Image {
-            id: rowbgimg
-            source: "../../../img/icons/rowbg.png"
-            width: parent.width
-            height: parent.height
 
-        }
         HomeButtonDelegate{id:lightingdelegate}
 
         Row {

@@ -12,12 +12,9 @@ Item
         width: style.orbiterW
         color: style.bgcolor
 
-        Rectangle{
-            id:bgrect
-            anchors.fill: parent
-            z:0
-            color: "transparent"
-
+        Image {
+            id: bg
+            source: "../../../img/icons/orbiterbg.png"
         }
         Rectangle{
             id:status

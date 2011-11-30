@@ -6,7 +6,9 @@ Rectangle {
     width: style.orbiterW
     height: style.orbiterH
     color: "transparent"
-    // signal setupStart(int x, string y)
+    //signal setupStart(int x, string y)
+    Component.onCompleted: setupStart(devicenumber.text, routerip.text)
+
     Rectangle {
         width: style.orbiterW
         height: 75
@@ -99,6 +101,7 @@ Rectangle {
             radius:  4
             onClicked: setupStart(devicenumber.text, routerip.text)
             anchors.verticalCenter: parent.verticalCenter
+
         }
     }
 }

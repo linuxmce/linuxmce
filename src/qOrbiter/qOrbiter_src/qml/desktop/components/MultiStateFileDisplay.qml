@@ -9,9 +9,8 @@ Rectangle {
     anchors.top: parent.top
     anchors.topMargin: scaleY(5)
     anchors.horizontalCenter: parent.horizontalCenter
-    color: style.lighthighlight
-    border.color: "aliceblue"
-    border.width: 2
+    color: "transparent"
+
 
 
     Image {
@@ -27,8 +26,7 @@ Rectangle {
         anchors.centerIn: gridholder
         model:dataModel
         delegate: contactDelegate
-        highlight: Rectangle { color: "lightblue"; radius: 5 }
-        highlightFollowsCurrentItem: true
+
         focus: true
        //clip: true
         //contentItem.clip: true
