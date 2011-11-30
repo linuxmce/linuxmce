@@ -120,6 +120,7 @@ INSERT INTO ast_config (cat_metric, var_metric, commented, filename, category, v
 DELETE FROM extensions WHERE exten='*43';
 DELETE FROM extensions WHERE exten='*60';
 DELETE FROM extensions WHERE exten='*65';
+DELETE FROM extensions WHERE exten='*70';
 DELETE FROM extensions WHERE exten='*96';
 
 ALTER TABLE extensions AUTO_INCREMENT=1;
@@ -167,6 +168,18 @@ INSERT INTO extensions (context, exten, priority, app, appdata) VALUES
 ('applications', '*65', 8, 'SayDigits', '${AMPUSER}'),
 ('applications', '*65', 9, 'Wait', '2'),
 ('applications', '*65',10, 'Hangup', '');
+
+-- *70: Incoming Fax
+INSERT INTO extensions (context, exten, priority, app, appdata) VALUES
+('applications', '*70', 1, 'Answer', ''),
+('applications', '*70', 2, 'Wait', '6'),
+('applications', '*70', 3, 'Set', 'FAXFILE=/var/spool/asterisk/fax/${CALLERID(num)}.tif'),
+('applications', '*70', 4, 'Set', 'FAXFILENOEXT=/var/spool/asterisk/fax/${CALLERID(num)}'),
+('applications', '*70', 5, 'Receivefax', '${FAXFILE}'),
+('applications', '*70', 6, 'Hangup', '');
+
+-- exten => fax,n,System('/usr/bin/fax2mail ${CALLERIDNUM} "${CALLERIDNAME}" FaxNum RecipName email@address.com ${FAXFILENOEXT} p')
+
 
 -- *95: test Music On Hold (MOH)
 INSERT INTO extensions (context, exten, priority, app, appdata) VALUES
