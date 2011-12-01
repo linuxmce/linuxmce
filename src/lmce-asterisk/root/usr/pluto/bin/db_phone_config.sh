@@ -303,8 +303,11 @@ AddTrunk()
 			# provider registry
 			LINESSQL="$LINESSQL INSERT INTO $DB_astconfig_Table (var_metric,filename,category,var_name,var_val) VALUES
 				('$(( 100+$id ))', 'iax.conf', 'general', 'register', '$username:$password@$host');"
-			# TODO: create IAX2 peer
-        ;;
+			# create IAX peer
+  			context="from-trunk"
+   			LINESSQL="$LINESSQL INSERT INTO $DB_IAX_Device_Table (name,username,secret,host,port,context,type,callerid,disallow,allow)
+			VALUES ('$username','$username','$password','$host','4569','$context','peer','$phonenumber','all','alaw;ulaw');"
+   ;;
         "SIP")
         	# provider registry
 			LINESSQL="$LINESSQL INSERT INTO $DB_astconfig_Table (var_metric,filename,category,var_name,var_val) VALUES

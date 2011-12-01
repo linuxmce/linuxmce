@@ -4,8 +4,9 @@ lmce-asterisk (0+0.3.1-2) unstable; urgency=low
   * Refs #1332 - experimental gtalk phoneline provider support
   * Refs #1328 - Don't clear peers from realtime cache, makes incoming
     calls not work after some minutes
+  * Fixed bug preventing IAX2 provider registration
 
- -- Serge Wagener <serge@linuxmce.org>  Mon, 28 Nov 2011 21:13:29 +0100
+ -- Serge Wagener <serge@linuxmce.org>  Thu, 01 Dec 2011 17:39:04 +0100
 
 lmce-asterisk (0+0.3.1-1) unstable; urgency=low
 

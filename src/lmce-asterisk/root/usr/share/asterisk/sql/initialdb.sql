@@ -55,7 +55,6 @@ INSERT INTO ast_config (cat_metric, var_metric, commented, filename, category, v
 (0, 7, 0, 'iax.conf', 'general', 'mailboxdetail', 'yes'),
 (0, 8, 0, 'iax.conf', 'general', 'dtmfmode', 'auto'),
 (0, 9, 0, 'iax.conf', 'general', 'rtcachefriends', 'yes'),
-(0, 10, 0, 'iax.conf', 'general', 'rtautoclear', 'yes'),
 (0, 11, 0, 'iax.conf', 'general', 'tos', '0x18'),
 (0, 12, 0, 'iax.conf', 'general', 'jitterbuffer', 'yes');
 
