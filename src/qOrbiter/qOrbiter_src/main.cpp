@@ -212,26 +212,27 @@ int main(int argc, char* argv[])
       */
     bool bAppError=false;
     bool bReload=false;
-#ifndef for_harmattan
-                QApplication::setGraphicsSystem("raster");
-            #endif
-                QApplication a(argc, argv);
-                qorbiterManager * w = new qorbiterManager(PK_Device,QString::fromStdString(sRouter_IP.c_str()));
+
     try
     {
-
+#ifndef for_harmattan
+        QApplication::setGraphicsSystem("raster");
+#endif
+        QApplication a(argc, argv);
+        qorbiterManager * w = new qorbiterManager(PK_Device,QString::fromStdString(sRouter_IP.c_str()));
         bAppError = w->setupLmce(PK_Device, sRouter_IP, true, bLocalMode);
+        return a.exec();
         if ( bAppError== false )
         {
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
             qDebug() << "Connected!";
-            return a.exec();
+
             /*
               **TODO
               add routine  that checks for valid device id and router ip
               setup routine should take over if there is an error
               */
-          //  w->gotoQScreen("Screen_1.qml");
+            //  w->gotoQScreen("Screen_1.qml");
 
 
         }
@@ -240,13 +241,14 @@ int main(int argc, char* argv[])
 
             if(w->pqOrbiter->m_pEvent && w->pqOrbiter->m_pEvent->m_pClientSocket && w->pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
             {
+                return a.exec();
                 w->gotoQScreen("Splash.qml");
 
                 bAppError = false;
                 bReload = false;
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "main loop No Router.  Will abort");
                 qDebug() << " main loop- No Router, Aborting";
-                return a.exec();
+
 
 
             }
