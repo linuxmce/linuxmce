@@ -148,6 +148,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         QObject::connect(this,SIGNAL(orbiterReady()), this,SLOT(startOrbiter()));
 
 
+
         //managing where were are variables
         int i_current_command_grp;
         i_current_command_grp = 0;
@@ -238,6 +239,7 @@ void qorbiterManager::gotoQScreen(QString s)
 bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode)
 {
     pqOrbiter = new DCE::qOrbiter(iPK_Device, sRouterIP, true,false);
+
     iPK_Device_DatagridPlugIn =  long(6);
     iPK_Device_OrbiterPlugin = long(9);
     iPK_Device_GeneralInfoPlugin = long(4);
@@ -260,6 +262,8 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
         */
 
     pqOrbiter->qmlUI = this;
+    //connecting cross object slots - from dce/qt subclass(qorbiter) to pure qt (qorbitermanager)
+    QObject::connect(pqOrbiter,SIGNAL(disconnected(QString)), this, SLOT(processError(QString)));
 
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
     {
@@ -274,6 +278,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
         {
             pqOrbiter->CreateChildren();
             qorbiterUIwin->rootContext()->setContextProperty("dcerouter", pqOrbiter );
+            setConnectedState(true);
             return false;
         }
         else

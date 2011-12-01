@@ -20,7 +20,7 @@ Item
             id:status
             height: scaleY(2.5)
             width: parent.width
-            color: connectedState == true ? style.darkhighlight :red
+            color: connectedState == true ? style.darkhighlight : "red"
 
 
             Text{

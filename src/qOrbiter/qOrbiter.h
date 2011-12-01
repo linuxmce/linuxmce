@@ -64,6 +64,7 @@ public:
     virtual void OnDisconnect();
     virtual void OnReload();
 
+
     bool initialize();
 
     bool deinitialize();
@@ -1064,6 +1065,7 @@ light, climate, media, security, telecom */
 signals:
     void screenShotReady();
     void waitForScreenShot(char picData, int picDataSize, string fileFormat);
+    void disconnected(QString msg);
 };
 
 //<-dceag-end-b->
