@@ -174,12 +174,7 @@ int main(int argc, char* argv[])
 #endif
     }
 
-#ifndef for_harmattan
-    QApplication::setGraphicsSystem("raster");
-#endif
-    QApplication a(argc, argv);
-    qorbiterManager * w = new qorbiterManager(PK_Device,QString::fromStdString(sRouter_IP.c_str()));
- return a.exec();
+
 
 #ifdef WIN32
     WORD    wVersion;
@@ -217,6 +212,11 @@ int main(int argc, char* argv[])
       */
     bool bAppError=false;
     bool bReload=false;
+#ifndef for_harmattan
+                QApplication::setGraphicsSystem("raster");
+            #endif
+                QApplication a(argc, argv);
+                qorbiterManager * w = new qorbiterManager(PK_Device,QString::fromStdString(sRouter_IP.c_str()));
     try
     {
 
@@ -225,12 +225,13 @@ int main(int argc, char* argv[])
         {
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
             qDebug() << "Connected!";
+            return a.exec();
             /*
               **TODO
               add routine  that checks for valid device id and router ip
               setup routine should take over if there is an error
               */
-            w->gotoQScreen("Screen_1.qml");
+          //  w->gotoQScreen("Screen_1.qml");
 
 
         }
@@ -245,6 +246,7 @@ int main(int argc, char* argv[])
                 bReload = false;
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "main loop No Router.  Will abort");
                 qDebug() << " main loop- No Router, Aborting";
+                return a.exec();
 
 
             }
@@ -253,11 +255,13 @@ int main(int argc, char* argv[])
                 bAppError = true;
                 if( w->pqOrbiter->m_pEvent&& w->pqOrbiter->m_pEvent->m_pClientSocket && w->pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice)
                 {
+                    return a.exec();
                     bAppError = false;
                     bReload = false;
                     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device  Will abort");
                     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
                     w->gotoQScreen("Splash.qml");
+
 
                 }
             }

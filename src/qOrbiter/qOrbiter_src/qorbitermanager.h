@@ -45,6 +45,7 @@
 #include <contextobjects/securityvideoclass.h>
 #include <QtNetwork/QTcpSocket>
 #include <QProcess>
+#include <QtXml/QDomDocument>
 
 #include <contextobjects/floorplandevice.h>
 #include <contextobjects/screenshotattributes.h>
@@ -256,7 +257,8 @@ Param 10 - pk_attribute
     /*
       getConf() is the part of the equation that should read the orbiter conf. not implemented fully
       */
-    bool getConf(int pPK_Device);
+    void getConf(int pPK_Device);
+    void processError(QString msg);
     bool OrbiterGen();              //prelim orbter generation
     Q_INVOKABLE void quickReload();
 
@@ -311,8 +313,7 @@ Param 10 - pk_attribute
     long iPK_Device;                   //this orbiters device number, passed in from command line
 
 signals:
-    void orbiterReady();
-    void orbiterClosing();
+
     void locationChanged(int cRoom, int cEA);
     void modelChanged();
     void gridTypeChanged();
@@ -324,7 +325,17 @@ signals:
     void imageAspectChanged();
     void connectedStateChanged();
 
+    //setup related
+    void orbiterReady();
+    void orbiterClosing();
+    void scenariosReady();
+    void roomsReady();
+    void engineReady();
+    void error(QString msg);
+
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
+
+    void startOrbiter();
 
     Q_INVOKABLE void writeConfig();
     bool readLocalConfig();
@@ -332,8 +343,6 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     bool getConnectedState () {return connectedState;}
     void setDceResponse(QString response) {dceResponse = response; emit dceResponseChanged();}
     QString getDceResponse () {return dceResponse;}
-
-
 
     //security related
     Q_INVOKABLE void requestSecurityPic(int i_pk_camera_device, int h, int w);
@@ -352,7 +361,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     Q_INVOKABLE void ff_media(int speed);
     Q_INVOKABLE void rw_media(int speed);
     Q_INVOKABLE void pauseMedia();
-
+void jogPosition(QString jog);
     void updateImageChanged(QImage img);
     void updateTimecode();
     void showTimeCode();
@@ -361,7 +370,6 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     Q_INVOKABLE  void getcurrentSkins(QStringList skinPaths);
     void qmlSetupLmce(int incdeviceid, QString incrouterip);
     void changedPlaylistPosition(QString position);
-
 
     //datagrid related
     void setSorting(int i);
@@ -379,13 +387,9 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     int getlocation() const ;
     void setLocation(const int& , const int& ) ;
     Q_INVOKABLE void gotoQScreen(QString ) ;
-    void setNowPlayingIcon(bool b);
-    void initializeContexts();
-    void initializeGridModel();
+    void setNowPlayingIcon(bool b);   
+    void initializeGridModel();    
     void showMessage(QString message, int duration, bool critical);
-
-
-    void jogPosition(QString jog);
 
     //initialization related
     void regenOrbiter(int deviceNo);
