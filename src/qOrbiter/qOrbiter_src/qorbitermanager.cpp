@@ -67,10 +67,12 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
 
     qorbiterUIwin = new QDeclarativeView; //initialize the declarative view to act upon its context
 
-    if (readLocalConfig())
-    {
-        //qDebug () << "Local confing processing";
-    }
+
+        if (readLocalConfig())
+        {
+            //qDebug () << "Local confing processing";
+        }
+
 
     //  currentSkin = "default";
 
@@ -294,7 +296,7 @@ void qorbiterManager::refreshUI()
     gotoQScreen("Splash.qml");
     if(cleanupData() && pqOrbiter->GetConfig())
     {
-      getConf(iPK_Device);
+        getConf(iPK_Device);
     }
 
 }
@@ -314,6 +316,11 @@ void qorbiterManager::getConf(int pPK_Device)
 
         emit error("Invalid Config");
     }
+    else
+    {
+        writeConfig();
+    }
+
 
     QDomElement root = configData.documentElement();        //represent configuration in memeory
     // qDebug () << root.tagName();
@@ -1009,6 +1016,7 @@ bool qorbiterManager::readLocalConfig()
     // qDebug() << xmlPath;
     if (!localConfigFile.open(QFile::ReadWrite))
     {
+        emit error("config not found!");
         return false;
 
     }
