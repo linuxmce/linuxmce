@@ -1015,7 +1015,7 @@ class DataGridTable *Media_Plugin::CurrentMediaSections( string GridID, string P
 			string sCurrentTitle; 
 			
 			if (pMediaFile->m_sEpisode.size()) {
-			  sCurrentTitle = pMediaFile->m_sTitle + " - \"" + pMediaFile->m_sEpisode + "\"";
+			  sCurrentTitle = pMediaFile->m_sTitle + "\n    \"" + pMediaFile->m_sEpisode + "\"";
 			} else {
 			  sCurrentTitle = pMediaFile->m_sTitle;
 			}

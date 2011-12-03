@@ -123,7 +123,7 @@ public:
 	}
 
 
-	MediaFile(Row_PlaylistEntry *pRow_PlaylistEntry) {
+	MediaFile(MediaAttributes_LowLevel *pMediaAttributes_LowLevel,Row_PlaylistEntry *pRow_PlaylistEntry) {
 		m_dwPK_File=pRow_PlaylistEntry->FK_File_get();
 		m_dwPK_Disk=m_dwPK_Device_Disk_Drive=0;
 		m_Slot=0;
@@ -137,6 +137,8 @@ public:
 		m_sFilename=pRow_PlaylistEntry->Filename_get();
 		m_dwPK_CommandGroup_Start=pRow_PlaylistEntry->EK_CommandGroup_Start_get();
 		m_dwPK_CommandGroup_Stop=pRow_PlaylistEntry->EK_CommandGroup_Stop_get();
+		m_sTitle = GetAttributeValue(pMediaAttributes_LowLevel, ATTRIBUTETYPE_Title_CONST);
+		m_sEpisode = GetAttributeValue(pMediaAttributes_LowLevel, ATTRIBUTETYPE_Episode_CONST);
 		if( m_dwPK_Bookmark )
 		{
 			Row_Bookmark *pRow_Bookmark = pRow_PlaylistEntry->Table_PlaylistEntry_get()->Database_pluto_media_get()->Bookmark_get()->GetRow(m_dwPK_Bookmark);

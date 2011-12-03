@@ -182,7 +182,7 @@ int MediaAttributes::LoadPlaylist(int iPK_Playlist, deque<MediaFile *> &dequeMed
     vector<Row_PlaylistEntry *> vectRow_PlaylistEntry;
 	pRow_Playlist->PlaylistEntry_FK_Playlist_getrows(&vectRow_PlaylistEntry);
     for( size_t s=0;s<vectRow_PlaylistEntry.size();++s )
-		dequeMediaFile.push_back(new MediaFile(vectRow_PlaylistEntry[s]));
+      dequeMediaFile.push_back(new MediaFile(m_pMediaAttributes_LowLevel,vectRow_PlaylistEntry[s]));
 
     return (int) dequeMediaFile.size();
 }
