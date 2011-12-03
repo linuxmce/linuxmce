@@ -20,7 +20,9 @@ sources = Main.cpp Xine_Player.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=
-CPPFLAGS += -I/usr/lib/glib-2.0/include -I/usr/include/glib-2.0 -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
+CPPFLAGS += -I/usr/lib/glib-2.0/include -I/usr/include/glib-2.0 \
+		-I/usr/lib/i386-linux-gnu/glib-2.0/include \
+		 -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
 LDFLAGS += -L/usr/X11R6/lib  -L$(ROOT)/Xine_Player
 XTRALDLIBS = -ljpeg -lxine -lXtst -lX11 -lglib-2.0 -lXmu -lcdda_interface 
 
