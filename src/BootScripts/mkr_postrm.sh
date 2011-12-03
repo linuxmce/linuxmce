@@ -1,5 +1,4 @@
 #!/bin/bash
-. /usr/pluto/bin/Utils.sh
 
 ## Remove umount diversion
 if [ remove = "$1" ]; then 
