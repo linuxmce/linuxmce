@@ -1166,7 +1166,7 @@ void LM::updateScripts()
 void LM::syncWithLockList(bool eraseDeadLocalDevices)
 {
 	writeLog("Reading lockfile");
-	List::List LockList;
+	List LockList;
 
 	ifstream textStream (string(PLUTO_LOCKS).c_str());
 	if (!textStream.fail())
