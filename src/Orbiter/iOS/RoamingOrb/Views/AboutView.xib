@@ -40,7 +40,7 @@
 					<object class="IBUITextView" id="100361145">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">314</int>
-						<string key="NSFrame">{{13, 164}, {455, 95}}</string>
+						<string key="NSFrame">{{13, 159}, {455, 79}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="446587086"/>
@@ -57,8 +57,9 @@
 						<float key="IBUIMaximumZoomScale">0.0</float>
 						<bool key="IBUIBouncesZoom">NO</bool>
 						<bool key="IBUIEditable">NO</bool>
-						<string type="base64-UTF8" key="IBUIText">CkZ1cnRoZXIgaW5mb3JtYXRpb24gaXMgYXZhaWxhYmxlIGF0IHd3dy5saW51eG1jZS5vcmcKCkFwcCBl
-bmdpbmVlcmluZyBieTogU2VyZ2UgV2FnZW5lcgpBcnR3b3JrIGJ5OiBSYXltb25kIEJlbWVsbWFucw</string>
+						<string type="base64-UTF8" key="IBUIText">RnVydGhlciBpbmZvcm1hdGlvbiBpcyBhdmFpbGFibGUgYXQgd3d3LmxpbnV4bWNlLm9yZwoKQXBwIGVu
+Z2luZWVyaW5nIGJ5OiBTZXJnZSBXYWdlbmVyIChGb3hpMzUyKQpBcnR3b3JrIGJ5OiBSYXltb25kIEJl
+bWVsbWFucyAoUmF5QmUpA</string>
 						<object class="NSColor" key="IBUITextColor" id="219409019">
 							<int key="NSColorSpace">3</int>
 							<bytes key="NSWhite">MQA</bytes>
@@ -85,7 +86,6 @@ bmdpbmVlcmluZyBieTogU2VyZ2UgV2FnZW5lcgpBcnR3b3JrIGJ5OiBSYXltb25kIEJlbWVsbWFucw</
 						<string key="NSFrame">{{120, 124}, {240, 40}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
