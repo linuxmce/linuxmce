@@ -46,6 +46,9 @@ using namespace DCE;
 qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent) :
     QWidget(parent), iPK_Device(deviceno), qs_routerip(routerip)
 {
+
+
+
     /*
     this block is for the purposes of exposing the proper qml skins for particular target class
     its current reflective more of devices as target classes but this may change
@@ -66,17 +69,13 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
 #endif
 
     qorbiterUIwin = new QDeclarativeView; //initialize the declarative view to act upon its context
+    qorbiterUIwin->setWindowFlags(Qt::Window);
 
 
-        if (readLocalConfig())
-        {
-            //qDebug () << "Local confing processing";
-        }
-
-
-    //  currentSkin = "default";
-
-    // s_RouterIP="DCERouter";
+    if (readLocalConfig())
+    {
+        emit localConfigReady("Success");
+    }
 
     //adjusting runtime paths also based on platform and build type
     QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
@@ -146,6 +145,8 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         //initial signal and slot connections
         QObject::connect(item, SIGNAL(close()), this, SLOT(closeOrbiter()));
         QObject::connect(this,SIGNAL(orbiterReady()), this,SLOT(startOrbiter()));
+        QObject::connect(parent,SIGNAL(destroyed()), this, SLOT(close()));
+
 
 
 
@@ -1023,7 +1024,6 @@ bool qorbiterManager::readLocalConfig()
     {
         emit error("config not found!");
         return false;
-
     }
     else
     {
@@ -1044,6 +1044,7 @@ bool qorbiterManager::readLocalConfig()
             {
                 qs_routerip = configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue();
             }
+
             currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
             iPK_Device = configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong();
 
@@ -1082,7 +1083,7 @@ void qorbiterManager::writeConfig()
     if (!localConfigFile.open(QFile::ReadOnly))
     {
 
-        qDebug() << "Error! Cant Save Config!";
+        emit error("Error! Cant Save Config!");
 
     }
     else
@@ -1090,7 +1091,7 @@ void qorbiterManager::writeConfig()
 
         if (!localConfig.setContent( &localConfigFile))
         {
-            qDebug() << "Local Config XML  ERROR!";
+            emit error("Local Config XML  ERROR!");
         }
         else
         {
@@ -1105,7 +1106,7 @@ void qorbiterManager::writeConfig()
             localConfigFile.open(QFile::WriteOnly);
             if (!localConfigFile.write(output))
             {
-                qDebug() << "write failed";
+                emit error("write failed");
             }
             localConfigFile.close();
 

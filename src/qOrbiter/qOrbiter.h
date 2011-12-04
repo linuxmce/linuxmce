@@ -129,6 +129,10 @@ public:
     //buttons from the more screen
     Q_INVOKABLE void extraButtons(QString button);
     Q_INVOKABLE void saveScreenAttribute();
+    Q_INVOKABLE void newOrbiter();
+    virtual int PromptUser(string sPrompt,int iTimeoutSeconds=10,map<int,string> *p_mapPrompts = NULL);
+    virtual int PromptFor(string sToken);
+
 
 
 

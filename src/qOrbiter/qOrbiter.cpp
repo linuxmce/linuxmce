@@ -3731,3 +3731,25 @@ void DCE::qOrbiter::saveScreenAttribute()
 
 }
 
+void DCE::qOrbiter::newOrbiter()
+{
+    //CMD_New_Orbiter newOrbiterDevice(int devicefrom, int deviceto, string sType, int iPK_Users, int iPK_devicetemplate, string sMacAddress, int pk_room, int width, int height, int skin, int lang, int size, int pkdevice);
+    //SendCommand(newOrbiterDevice);
+}
+
+/*
+  re-implementing from original orbiter as part of the orbiter setup. i dont know how it all works, but i have an idea
+  PromptFor looks for the specific item it needs a list of, like users or rooms and then PromptUser will display the information
+  on-screen so the user can choose and then a map of choices is broken down and submitted with the new orbiter command.
+  line 146 in orbiter renderer.cpp for reference.
+  */
+int DCE::qOrbiter::PromptFor(std::string sToken)
+{
+
+}
+
+int DCE::qOrbiter::PromptUser(std::string sPrompt, int iTimeoutSeconds, map<int, std::string> *p_mapPrompts)
+{
+
+}
+

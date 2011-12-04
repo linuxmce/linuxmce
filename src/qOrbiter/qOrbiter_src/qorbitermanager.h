@@ -332,6 +332,7 @@ signals:
     void roomsReady();
     void engineReady();
     void error(QString msg);
+    void localConfigReady(QString msg);
 
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
 

@@ -62,7 +62,7 @@ import "../components"
                     buttonsqradius: 10
                     MouseArea{
                         anchors.fill: parent
-                        onClicked: {setPosition(screenparams.getParam(188)) ;gotoQScreen("Screen_"+screenparams.getParam(226)+".qml") }
+                        onClicked: {dcerouter.setPosition(screenparams.getParam(188)) ;gotoQScreen("Screen_"+screenparams.getParam(226)+".qml") }
                     }
                 }
                 ButtonSq{
