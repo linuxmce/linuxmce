@@ -149,6 +149,21 @@ BOOL executePoll = NO;
 	}
 }
 
+- (void)viewWillAppear:(BOOL)animated {
+    if(isTabbarVisible) {
+        NSLog(@"Orbiter shown, tabbar will hide ...");
+        [UIView beginAnimations:nil context:NULL];
+        [UIView setAnimationDuration:0.55];
+    
+        CGRect tabBarFrame = self.tabBarController.tabBar.frame;
+        [tabBar setAlpha:0.0];
+        isTabbarVisible=FALSE;
+        tabBarFrame.origin.y = tabBarFrame.origin.y + tabBarFrame.size.height;
+        self.tabBarController.tabBar.frame = tabBarFrame;
+        [UIView commitAnimations];
+    }
+}
+
 - (void)viewWillDisappear:(BOOL)animated {
 	[super viewWillDisappear:animated];
 	[self stopPolling];
