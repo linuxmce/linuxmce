@@ -1,5 +1,9 @@
+/*
+  Depreciated splash.qml, use the one in root
+  */
+
 import QtQuick 1.0
-import "../components"
+
 
 Rectangle {
     id: rectangle1
@@ -7,6 +11,7 @@ Rectangle {
     height: style.orbiterH
     color: "transparent"
     //signal setupStart(int x, string y)
+
     Component.onCompleted: setupStart(devicenumber.text, routerip.text)
 
     Rectangle {
@@ -94,7 +99,7 @@ Rectangle {
 
         }
 
-        Button {
+      Button {
             id: buttonsq1
             textSize: 12
             text: qsTr("Connect")
@@ -103,5 +108,6 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
 
         }
+
     }
 }

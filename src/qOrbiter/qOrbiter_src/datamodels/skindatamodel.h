@@ -5,9 +5,12 @@
 #include <datamodels/skindataitem.h>
 #include <QList>
 #include <QVariant>
+#include <QDeclarativeView>
+#include <QUrl>
+#include <qorbitermanager.h>
 
-
-  class SkinDataItem;
+class SkinDataItem;
+class qorbiterManager;
 
 
 class SkinDataModel : public QAbstractListModel
@@ -15,7 +18,7 @@ class SkinDataModel : public QAbstractListModel
     Q_OBJECT
 public:
 
-    explicit SkinDataModel(SkinDataItem *prototype, QObject* parent = 0);
+    explicit SkinDataModel(QUrl &baseUrl, SkinDataItem *prototype, qorbiterManager *uiRef, QObject* parent = 0);
     ~SkinDataModel();
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -29,13 +32,18 @@ public:
     SkinDataItem* find(const QString &id) const;
     QModelIndex indexFromItem( const SkinDataItem* item) const;
     void clear();
-
+    void addSkin(QString url);
     int *default_ea;
+
+public slots:
+    void setActiveSkin(QString name);
 
   private slots:
     void handleItemChange();
 
   private:
+    QUrl m_baseUrl;
+    qorbiterManager  *ui_reference;
     SkinDataItem* m_prototype;
     QList<SkinDataItem*> m_list;
 

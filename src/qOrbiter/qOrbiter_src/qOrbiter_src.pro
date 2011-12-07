@@ -308,7 +308,8 @@ OTHER_FILES += Readme.txt \
     android/src/eu/licentia/necessitas/industrius/QtActivity.java \
     android/src/eu/licentia/necessitas/ministro/IMinistroCallback.aidl \
     android/src/eu/licentia/necessitas/ministro/IMinistro.aidl \
-    android/AndroidManifest.xml
+    android/AndroidManifest.xml \
+    qml/Splash.qml
 
 ANDROID{
 OTHER_FILES=\
@@ -346,6 +347,8 @@ OTHER_FILES= \
 
 RESOURCES += \
     skinData.qrc
+
+
 
 
 

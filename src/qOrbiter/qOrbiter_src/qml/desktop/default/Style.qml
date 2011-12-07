@@ -14,7 +14,7 @@ import QtQuick 1.0
 
 
 QtObject{
-    id:classicstyle
+    id:style
     objectName: "orbiter_style"
 
     function scaleX(x){

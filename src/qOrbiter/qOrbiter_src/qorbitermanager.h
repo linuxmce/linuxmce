@@ -14,6 +14,22 @@
     You should have received a copy of the GNU General Public License
     along with QOrbiter.  If not, see <http://www.gnu.org/licenses/>.
 */
+/*
+    This file is part of QOrbiter for use with the LinuxMCE project found at http://www.linuxmce.org
+   Langston Ball  golgoj4@gmail.com
+    QOrbiter is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    QOrbiter is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with QOrbiter.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #ifndef QORBITERMANAGER_H
 #define QORBITERMANAGER_H
@@ -32,7 +48,7 @@
 #include <datamodels/telecomscenariomodel.h>
 #include <datamodels/securityscenariomodel.h>
 #include <datamodels/floorplanmodel.h>
-#include <datamodels/skindatamodel.h>
+
 #include <datamodels/filtermodel.h>
 #include <datamodels/genremodel.h>
 #include <datamodels/attributesortmodel.h>
@@ -46,7 +62,7 @@
 #include <QtNetwork/QTcpSocket>
 #include <QProcess>
 #include <QtXml/QDomDocument>
-
+#include <datamodels/skindatamodel.h>
 #include <contextobjects/floorplandevice.h>
 #include <contextobjects/screenshotattributes.h>
 #include <QThread>
@@ -80,6 +96,7 @@ class ClimateScenarioModel;
 class TelecomScenarioModel;
 class SecurityScenarioModel;
 class AbstractImageProvider;
+class SkinDataModel;
 
 
 
@@ -107,6 +124,9 @@ public:
     QString sPK_User;
     QString *buildType;
     //QByteArray *skin;
+
+    SkinDataModel* tskinModel;
+    //TODO, remove the below in favour of the data structure
     QMap <QString*, QString*> availibleSkins;
     QString qmlPath;
     QString skinsPath;
@@ -253,7 +273,7 @@ Param 10 - pk_attribute
 
     //QT Functions to initialize lmce data
     bool initialize(int dev_id);
-    Q_INVOKABLE bool setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode);     //init's dce object
+    Q_INVOKABLE void setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode);     //init's dce object
     /*
       getConf() is the part of the equation that should read the orbiter conf. not implemented fully
       */
@@ -324,6 +344,7 @@ signals:
     void dceResponseChanged();
     void imageAspectChanged();
     void connectedStateChanged();
+    void continueSetup();
 
     //setup related
     void orbiterReady();
@@ -337,7 +358,7 @@ signals:
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
 
     void startOrbiter();
-
+void showSystemSplash();
     Q_INVOKABLE void writeConfig();
     bool readLocalConfig();
     void setConnectedState(bool state) { connectedState = state;  if(state == false) {checkConnection();} emit connectedStateChanged(); }
@@ -362,14 +383,14 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     Q_INVOKABLE void ff_media(int speed);
     Q_INVOKABLE void rw_media(int speed);
     Q_INVOKABLE void pauseMedia();
-void jogPosition(QString jog);
+    void jogPosition(QString jog);
     void updateImageChanged(QImage img);
     void updateTimecode();
     void showTimeCode();
 
-
-    Q_INVOKABLE  void getcurrentSkins(QStringList skinPaths);
-    void qmlSetupLmce(int incdeviceid, QString incrouterip);
+    Q_INVOKABLE void setActiveSkin(QString name);
+    Q_INVOKABLE  void loadSkins(QUrl url);
+    void qmlSetupLmce(QString incdeviceid, QString incrouterip);
     void changedPlaylistPosition(QString position);
 
     //datagrid related
@@ -388,8 +409,8 @@ void jogPosition(QString jog);
     int getlocation() const ;
     void setLocation(const int& , const int& ) ;
     Q_INVOKABLE void gotoQScreen(QString ) ;
-    void setNowPlayingIcon(bool b);   
-    void initializeGridModel();    
+    void setNowPlayingIcon(bool b);
+    void initializeGridModel();
     void showMessage(QString message, int duration, bool critical);
 
     //initialization related
@@ -414,6 +435,10 @@ void processError(QString msg);
     //security
     void setHouseMode(int mode, int pass);
     \
+private:
+
+
 };
 
 #endif // QORBITERMANAGER_H
+

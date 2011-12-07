@@ -205,14 +205,12 @@ int main(int argc, char* argv[])
         cerr << "Unable to create logger" << endl;
     }
 
-    LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",PK_Device,sRouter_IP.c_str());
-
-    /*
+       /*
       need a routine here to find the router ip / dcerouter setting. there should be user feedback that its initializing
       */
     bool bAppError=false;
     bool bReload=false;
-
+// LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",PK_Device,sRouter_IP);
     try
     {
 #ifndef for_harmattan
@@ -221,52 +219,9 @@ int main(int argc, char* argv[])
 
 #endif
         QApplication a(argc, argv);
-        a.setQuitOnLastWindowClosed(true);
-
         qorbiterManager * w = new qorbiterManager(PK_Device,QString::fromStdString(sRouter_IP.c_str()));
-        bAppError = w->setupLmce(PK_Device, sRouter_IP, true, bLocalMode);
 
-        if ( bAppError== false )
-        {
-            LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
-            qDebug() << "Connected!";
-
-            /*
-              **TODO
-              add routine  that checks for valid device id and router ip
-              setup routine should take over if there is an error
-              */
-            //  w->gotoQScreen("Screen_1.qml");
-
-        }
-        else
-        {
-
-            if(w->pqOrbiter->m_pEvent && w->pqOrbiter->m_pEvent->m_pClientSocket && w->pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
-            {
-
-                w->gotoQScreen("Splash.qml");
-
-                bAppError = false;
-                bReload = false;
-                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "main loop No Router.  Will abort");
-                qDebug() << " main loop- No Router, Aborting";
-
-            }
-            else
-            {
-                bAppError = true;
-                if( w->pqOrbiter->m_pEvent&& w->pqOrbiter->m_pEvent->m_pClientSocket && w->pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice)
-                {
-                    bAppError = false;
-                    bReload = false;
-                    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device  Will abort");
-                    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
-                    w->gotoQScreen("Splash.qml");
-                }
-            }
-        }
- return a.exec();
+         a.exec();
 
     }
     catch(string s)

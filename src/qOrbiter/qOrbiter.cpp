@@ -91,14 +91,13 @@ bool qOrbiter::GetConfig()
     //qDebug() << "Idata StartSize:" << iData_Size;
 
     string filePath = "/var/tmp/"+QString::number(qmlUI->iPK_Device).toStdString()+"conf.xml";
-    qDebug() << filePath.c_str();
 
     CMD_Request_File configFileRequest((long)qmlUI->iPK_Device, (long)4 , (string)filePath, &oData, &iData_Size);
 
     if (SendCommand(configFileRequest) == false)
     {
         qmlUI->setConnectedState(false);
-        qDebug("Cant request config!");
+        qmlUI->processError("Cant request config!");
         return false;
     }
     else
@@ -108,8 +107,8 @@ bool qOrbiter::GetConfig()
         configData = oData;
         if (configData.size() == 0)
         {
-            qDebug() << "Invalid config for device: " << qmlUI->iPK_Device;
-            qDebug() << "Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d="<<qmlUI->iPK_Device ;
+            qmlUI->processError("Invalid config for device: " + QString::number(qmlUI->iPK_Device));
+            qmlUI->processError("Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d=" + QString::number(qmlUI->iPK_Device)) ;
             qmlUI->gotoQScreen("Splash.qml");
             return false;
         }

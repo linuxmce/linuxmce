@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/img">
         <file alias="splash.jpg">img/lmcesplash.jpg</file>
+        <file alias="Splash.png">img/lmcesplash.png</file>
     </qresource>
     <qresource prefix="/icons">
         <file alias="mythIcon.jpg">img/icons/Mythtv.png</file>
@@ -23,7 +24,6 @@
         <file>img/icons/package_editors.png</file>
         <file>img/icons/package_games_arcade.png</file>
         <file alias="media-games.png">img/icons/package_games.png</file>
-        <file>img/icons/password.png</file>
         <file alias="media-eject">img/icons/player_eject.png</file>
         <file alias="media-end.png">img/icons/player_end.png</file>
         <file>img/icons/player_end1.png</file>
@@ -45,4 +45,8 @@
     </qresource>
     <qresource prefix="/screens"/>
     <qresource prefix="/components"/>
+    <qresource prefix="/desktop">
+        <file alias="Splash.qml">qml/Splash.qml</file>
+    </qresource>
+    <qresource prefix="/new/prefix1"/>
 </RCC>

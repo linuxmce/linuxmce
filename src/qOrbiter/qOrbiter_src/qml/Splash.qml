@@ -3,15 +3,14 @@
   */
 import QtQuick 1.0
 
-
 Rectangle {
     id: rectangle1
-    width: style.orbiterW
-    height: style.orbiterH
-    color: "transparent"
-    //signal setupStart(int x, string y)
+    width: 800
+    height: 600
+    color: "slategrey"
+    signal setupStart(string x, string y)
 
-    Component.onCompleted: setupStart(devicenumber.text, routerip.text)
+
 
     Rectangle {
         width: style.orbiterW
@@ -24,13 +23,15 @@ Rectangle {
             font.pixelSize: 30
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
+
         }
+        Component.onCompleted: rectangle1.setupStart(devicenumber.text, routerip.text)
     }
     Image {
         id: splash
         anchors.centerIn: rectangle1
         fillMode: Image.PreserveAspectFit
-        source: "../../../img/lmcesplash.png"
+        source: "qrc:/img/Splash.png"
         anchors.fill: parent
     }
     Rectangle {
@@ -78,7 +79,7 @@ Rectangle {
             text: srouterip
             font.pixelSize: 12
           //  onTextChanged: setRouterIp(routerip.text)
-            fillColor: style.highlight1
+            fillColor: "aliceblue"
             anchors.verticalCenter: parent.verticalCenter
 
 
@@ -93,12 +94,12 @@ Rectangle {
             text: deviceid
             font.pixelSize: 12
             //onTextChanged: setDeviceNo(devicenumber.text)
-            fillColor: style.highlight1
+            fillColor: "aliceblue"
             anchors.verticalCenter: parent.verticalCenter
 
         }
 
-      Button {
+     /* Button {
             id: buttonsq1
             textSize: 12
             text: qsTr("Connect")
@@ -106,7 +107,7 @@ Rectangle {
             onClicked: setupStart(devicenumber.text, routerip.text)
             anchors.verticalCenter: parent.verticalCenter
 
-        }
+        } */
 
     }
 }

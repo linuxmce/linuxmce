@@ -26,7 +26,7 @@
 #include <imageProviders/filedetailsimageprovider.h>
 #include <imageProviders/abstractimageprovider.h>
 #include <contextobjects/epgchannellist.h>
-
+#include <datamodels/skindatamodel.h>
 
 //#include "OrbiterData.h"
 
@@ -46,64 +46,9 @@ using namespace DCE;
 qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent) :
     QWidget(parent), iPK_Device(deviceno), qs_routerip(routerip)
 {
-
-
-
-    /*
-    this block is for the purposes of exposing the proper qml skins for particular target class
-    its current reflective more of devices as target classes but this may change
-            */
-    QString buildType;
-#ifdef for_desktop
-    buildType = "/qml/desktop/";
-#elif defined (for_freemantle)
-    buildType = "/qml/freemantle/";
-#elif defined (for_harmattan)
-    buildType="/qml/harmattan/";
-#elif defined (Q_OS_MACX)
-    buildType="/qml/desktop/";
-#elif defined (ANDROID)
-    buildType = "/qml/android/";
-#elif defined (for_droid)
-    buildType = "/qml/android/phone/";
-#endif
-
     qorbiterUIwin = new QDeclarativeView; //initialize the declarative view to act upon its context
-    qorbiterUIwin->setWindowFlags(Qt::Window);
 
-
-    if (readLocalConfig())
-    {
-        emit localConfigReady("Success");
-    }
-
-    //adjusting runtime paths also based on platform and build type
-    QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
-    const QString test = buildType;
-    QString finalPath = qmlPath+buildType+currentSkin;
-    QString skinPath= finalPath+"/Style.qml";
-    QString skinsPath = qmlPath+test;
-
-    /*
-      this represent the beginning of the processing area for the skins availible for the device
-      we read the directory, and in turn read the file information to present it in the user interface
-      */
-    //qDebug () << "QML import path for build: " << qmlPath;
-    m_SkinsDirectoryPath = qmlPath+buildType.toLatin1().constData();
-    QDir directoryMap(skinsPath);
-    directoryMap.setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
-    QStringList skinList = directoryMap.entryList();
-    getcurrentSkins(skinList);
-
-    //loading the style from the current set skin directory
-#ifdef ANDROID
     QDeclarativeComponent skinData(qorbiterUIwin->engine(),QUrl("qrc:main/Style.qml"));
-#elif for_droid
-    QDeclarativeComponent skinData(qorbiterUIwin->engine(),QUrl("qrc:main/Style.qml"));
-#else
-    QDeclarativeComponent skinData(qorbiterUIwin->engine(),QUrl::fromLocalFile(finalPath+"/Style.qml"));
-#endif
-
     //turning it into a qObject - this part actually loads it - the error should connect to a slot and not an exit
     QObject *styleObject = skinData.create(qorbiterUIwin->rootContext());
 
@@ -113,133 +58,133 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
         if(skinData.isError())
         {
             qDebug() << skinData.errors();
-            exit(0);
+            exit(30);
         }
-        // qDebug() << " loading";
+
     }
 
-    if(skinData.isReady())
-    {
-        //set it as a context property so the qml can read it. if we need to changed it,we just reset the context property
-        qorbiterUIwin->engine()->rootContext()->setContextProperty("style", styleObject);
-        qorbiterUIwin->rootContext()->setContextProperty("srouterip", QString(qs_routerip) );
-        qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
-        initializeGridModel();  //begins setup of media grid listmodel and its properties
-        initializeSortString(); //associated logic for navigating media grids
-        qorbiterUIwin->rootContext()->setContextObject(this); //providing a direct object for qml to call c++ functions of this class
+    qorbiterUIwin->engine()->rootContext()->setContextProperty("style", styleObject);
+    qorbiterUIwin->rootContext()->setContextProperty("srouterip", QString(qs_routerip) );
+    qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
+    qorbiterUIwin->rootContext()->setContextObject(this); //providing a direct object for qml to call c++ functions of this class
+    qorbiterUIwin->setSource(QUrl("qrc:desktop/Splash.qml"));
 
+    item= qorbiterUIwin->rootObject();
+    connect(item,SIGNAL(setupStart(QString, QString)), this,SLOT(qmlSetupLmce(QString,QString)));
+    connect(this, SIGNAL(continueSetup()), this, SLOT(showSystemSplash()));
 
-        //setting engine import path
-        qorbiterUIwin->engine()->setBaseUrl(qmlPath+buildType);
-#ifdef ANDROID
-        qorbiterUIwin->setSource(QUrl("qrc:main/main.qml"));
-#elif for_droid
-        qorbiterUIwin->setSource(QUrl("qrc:main/main.qml"));
+#ifdef Q_OS_SYMBIAN
+    qorbiterUIwin->showFullScreen();
+#elif defined(Q_WS_MAEMO_5)
+    qorbiterUIwin->showMaximized();
+#elif defined(for_harmattan)
+    qorbiterUIwin->showFullScreen();
+#elif defined(for_desktop)
+    qorbiterUIwin->show();
 #else
-        qorbiterUIwin->setSource(QUrl::fromLocalFile(finalPath+"/main.qml"));
+    qorbiterUIwin->show();
 #endif
+    qDebug("Showing");
 
-        //reference to the object for later use?
-        item= qorbiterUIwin->rootObject();
+   emit continueSetup();
 
-        //initial signal and slot connections
-        QObject::connect(item, SIGNAL(close()), this, SLOT(closeOrbiter()));
-        QObject::connect(this,SIGNAL(orbiterReady()), this,SLOT(startOrbiter()));
-        QObject::connect(parent,SIGNAL(destroyed()), this, SLOT(close()));
-
-
+    //TODO, extract to a config
+    //TODO, execute this already if we have config data.
+    //setupLmce(iPK_Device, routerip.toStdString(), true, false);
+}
 
 
-        //managing where were are variables
-        int i_current_command_grp;
-        i_current_command_grp = 0;
-        QStringList goBack;
-        goBack << ("|||1,2|0|13|0|2|");
-        backwards = false;
+void qorbiterManager::showSystemSplash() {
 
-        //file details object and imageprovider setup
-        filedetailsclass = new FileDetailsClass();
-        qorbiterUIwin->rootContext()->setContextProperty("filedetailsclass" ,filedetailsclass);
 
-        // connect(filedetailsclass, SIGNAL(FileChanged(QString)), this, SLOT(showFileInfo(QString)));
+    if (readLocalConfig())
+    {
+        emit localConfigReady("Success");
 
-        //non functioning screen saver module
-        ScreenSaver = new ScreenSaverModule;
-        qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", ScreenSaver);
+    }
 
-        /* now playing button todo - make it appear and dissapear if in a room with no media / media director
+    QString localDir = QApplication::applicationDirPath();
+
+    loadSkins(QUrl(localDir+"/qml/desktop"));
+    //loadSkins(QUrl("http://192.168.80.1/lmce-admin/skins/desktop"));
+    //set it as a context property so the qml can read it. if we need to changed it,we just reset the context property
+
+    initializeGridModel();  //begins setup of media grid listmodel and its properties
+    initializeSortString(); //associated logic for navigating media grids
+
+    //reference to the object for later use?
+
+
+    //initial signal and slot connections
+    //        QObject::connect(item, SIGNAL(close()), this, SLOT(closeOrbiter()));
+    //        QObject::connect(this,SIGNAL(orbiterReady()), this,SLOT(startOrbiter()));
+    //        QObject::connect(parent,SIGNAL(destroyed()), this, SLOT(close()));
+
+
+    //managing where were are variables
+    int i_current_command_grp;
+    i_current_command_grp = 0;
+    QStringList goBack;
+    goBack << ("|||1,2|0|13|0|2|");
+    backwards = false;
+
+    //file details object and imageprovider setup
+    filedetailsclass = new FileDetailsClass();
+    qorbiterUIwin->rootContext()->setContextProperty("filedetailsclass" ,filedetailsclass);
+
+    // connect(filedetailsclass, SIGNAL(FileChanged(QString)), this, SLOT(showFileInfo(QString)));
+
+    //non functioning screen saver module
+    ScreenSaver = new ScreenSaverModule;
+    qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", ScreenSaver);
+
+    /* now playing button todo - make it appear and dissapear if in a room with no media / media director
             embed in room model or other location based marker
 */
-        nowPlayingButton = new NowPlayingClass();
-        qorbiterUIwin->rootContext()->setContextProperty("dcenowplaying" , nowPlayingButton);
+    nowPlayingButton = new NowPlayingClass();
+    qorbiterUIwin->rootContext()->setContextProperty("dcenowplaying" , nowPlayingButton);
+
+    //screen parameters class that could be extended as needed to fetch other data
+    ScreenParameters = new ScreenParamsClass;
+    qorbiterUIwin->rootContext()->setContextProperty("screenparams", ScreenParameters);
+
+    //stored video playlist for managing any media that isnt live broacast essentially
+
+    storedVideoPlaylist = new PlaylistClass (new PlaylistItemClass, this);
+    qorbiterUIwin->rootContext()->setContextProperty("mediaplaylist", storedVideoPlaylist);
+
+    //initializing threading for timecode to prevent blocking
+    timecodeThread = new QThread;
+    timeCodeSocket = new QTcpSocket(timecodeThread);
+    timecodeThread->start();
 
 
 
-        //screen parameters class that could be extended as needed to fetch other data
-        ScreenParameters = new ScreenParamsClass;
-        qorbiterUIwin->rootContext()->setContextProperty("screenparams", ScreenParameters);
 
-        //stored video playlist for managing any media that isnt live broacast essentially
+    //QObject::connect(nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection );
+    //iPK_Device= deviceno;
 
-        storedVideoPlaylist = new PlaylistClass (new PlaylistItemClass, this);
-        qorbiterUIwin->rootContext()->setContextProperty("mediaplaylist", storedVideoPlaylist);
+   setupLmce((int)iPK_Device, qs_routerip.toStdString(), false, false);
 
-        //initializing threading for timecode to prevent blocking
-        timecodeThread = new QThread;
-        timeCodeSocket = new QTcpSocket(timecodeThread);
-        timecodeThread->start();
-
-        //showing the qml screen depending on device / platform / etc
-#ifdef Q_OS_SYMBIAN
-        qorbiterUIwin->showFullScreen();
-#elif defined(Q_WS_MAEMO_5)
-        qorbiterUIwin->showMaximized();
-#elif defined(for_harmattan)
-        qorbiterUIwin->showFullScreen();
-#elif defined(for_desktop)
-        qorbiterUIwin->show();
-#else
-        qorbiterUIwin->show();
-#endif
-
-        // qorbiterUIwin->showFullScreen();
-
-        //     qDebug() << "Showing Splash";
-
-        QObject::connect(item,SIGNAL(setupStart(int, QString)), this,SLOT(qmlSetupLmce(int,QString)));
-        QObject::connect(nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection );
-        gotoQScreen("Splash.qml");
-    }
-    else
-    {
-        qDebug() << "Couldnt get skin data!";
-        exit(15);
-    }
-    iPK_Device= deviceno;
-
-    //setupLmce(iPK_Device, routerip.toStdString(), true, false);
 }
 
 
 void qorbiterManager::gotoQScreen(QString s)
 {
     //send the qmlview a request to go to a screen, needs error handling
-
-#ifdef for_droid
-
-#else
+    //This allows it to execute some transition or other if it wants to
     QVariant screenname= s;
-    QVariant returnedValue;
     QObject *item = qorbiterUIwin->rootObject();
     QMetaObject::invokeMethod(item, "screenchange",  Q_ARG(QVariant, screenname));
     currentScreen = s;
-#endif
 }
 
 //this block sets up the connection to linuxmce
-bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode)
+void qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode)
 {
     pqOrbiter = new DCE::qOrbiter(iPK_Device, sRouterIP, true,false);
+
+    qDebug() << "Made orbiter";
 
     iPK_Device_DatagridPlugIn =  long(6);
     iPK_Device_OrbiterPlugin = long(9);
@@ -264,10 +209,15 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
     pqOrbiter->qmlUI = this;
     //connecting cross object slots - from dce/qt subclass(qorbiter) to pure qt (qorbitermanager)
-    QObject::connect(pqOrbiter,SIGNAL(disconnected(QString)), this, SLOT(processError(QString)));
+    //QObject::connect(pqOrbiter,SIGNAL(disconnected(QString)), this, SLOT(processError(QString)));
+
+
+    qDebug() << "Attempting connection" << iPK_Device;
+
 
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
     {
+        qDebug() << "Orbiter connected ..";
         getConf(PK_Device);
         /*
               we get various variable here that we will need later. I store them in the qt object so it
@@ -280,19 +230,40 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             pqOrbiter->CreateChildren();
             qorbiterUIwin->rootContext()->setContextProperty("dcerouter", pqOrbiter );
             setConnectedState(true);
-            return false;
+            //return false;
         }
         else
         {
             qDebug() << "Orbiter Conf Hiccup!";
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Device Failed to get configuration!");
-            return true;
+            //return true;
         }
     }
     else
     {
-        qDebug() << "Config invalid";
-        return true;
+        bAppError = true;
+
+        if(pqOrbiter->m_pEvent && pqOrbiter->m_pEvent->m_pClientSocket && pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
+        {
+
+            bAppError = false;
+            bReload = false;
+            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "main loop No Router.  Will abort");
+            qDebug() << " main loop- No Router, Aborting";
+
+        }
+        else
+        {
+            bAppError = true;
+            if( pqOrbiter->m_pEvent&& pqOrbiter->m_pEvent->m_pClientSocket && pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice)
+            {
+                bAppError = false;
+                bReload = false;
+                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device  Will abort");
+                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
+
+            }
+        }
     }
 }
 
@@ -310,7 +281,7 @@ void qorbiterManager::refreshUI()
 
 // get conf method that reads config file
 void qorbiterManager::getConf(int pPK_Device)
-{  
+{
 
     QDomDocument configData;
     const QByteArray tConf = binaryConfig.data();
@@ -324,6 +295,7 @@ void qorbiterManager::getConf(int pPK_Device)
     }
     else
     {
+        qDebug() << "Attempting to write config";
         writeConfig();
     }
 
@@ -588,6 +560,8 @@ void qorbiterManager::getConf(int pPK_Device)
     QObject::connect(this,SIGNAL(liveTVrequest()), simpleEPGmodel,SLOT(populate()), Qt::QueuedConnection);
     //        qDebug () << "Orbiter Registered, starting";
 
+    qDebug() << "About to set room..";
+
     //------------not sure if neccesary since it knows where we are.
     setActiveRoom(iFK_Room, iea_area);
 
@@ -664,67 +638,42 @@ void qorbiterManager::getConf(int pPK_Device)
     updatedObjectImage.load(":/icons/videos.png");
     QObject::connect(this,SIGNAL(objectUpdated()), nowPlayingButton, SIGNAL(imageChanged()) );
     emit orbiterReady();
+   swapSkins(currentSkin);
 
 }
 
-//experimental skin swappping method. what should happen here is a call to qDeclarative engine to change
-//source import directory, thereby changing the effective skin. This is why the base compnents need to be
-//seperate from the screens them selves. the screen can and will refer to base standard object and if people
-//want to create their own, the can and simple change the component import directory, all without compiling.
-
 void qorbiterManager::swapSkins(QString incSkin)
 {
-#ifdef Q_OS_MAC
-    QDir skinsDir(QApplication::applicationDirPath().remove("MacOS").append("Resources"));
-#else
-    QDir skinsDir(QApplication::applicationDirPath().remove("bin"));
-#endif
+    qDebug() << "Initiating skin switch : " + incSkin;
 
-    if(skinsDir.cd("qml/"))
+    //get the skin URL from the skins model
+    SkinDataItem* skin = tskinModel->find(incSkin);
+
+    //load the skin style
+    QDeclarativeComponent tskinData(qorbiterUIwin->engine(), skin->styleUrl());
+
+    //turning it into a qObject - this part actually loads it - the error should connect to a slot and not an exit
+    QObject *styleObject = tskinData.create(qorbiterUIwin->rootContext());
+
+    //wait for it to load up
+    while (!tskinData.isReady())
     {
-        //qDebug() << skinsDir.path();
-
-        QStringList platform = skinsDir.entryList();
-
-        // qDebug() << "Switching to:" << platform.last();
-
-
-        if(platform.isEmpty())
+        if(tskinData.isError())
         {
-            //  qDebug() << "couldnt locate platform";
-        }
-        else
-        {
-
-            if(skinsDir.cd(platform.last()))
-            {
-                incSkin.toLower() = skinsDir.path();
-                //qDebug() << "Looking for skins in " + skinsDir.path() ;
-                QDeclarativeComponent skinData(qorbiterUIwin->engine(),QUrl::fromLocalFile(skinsDir.path()+"/"+incSkin.toLower()+"/Style.qml"));
-                qDebug() << skinsDir.path()+"/"+incSkin.toLower()+"/Style.qml" ;
-                //turning it into a qObject - this part actually loads it - the error should connect to a slot and not an exit
-                QObject *styleObject = skinData.create(qorbiterUIwin->rootContext());
-                //wait for it to load up
-                while (!skinData.isReady())
-                {
-                    if(skinData.isError())
-                    {
-                        qDebug() << skinData.errors();
-                        break;
-                    }
-
-                    qDebug() << skinData.status();
-                }
-
-                qorbiterUIwin->engine()->rootContext()->setContextProperty("style", styleObject);
-
-                qorbiterUIwin->setSource(skinsDir.path()+"/"+incSkin.toLower()+"/main.qml");
-                currentSkin = incSkin;
-                startOrbiter();
-                writeConfig();
-            }
-        }
+            qDebug() << "error! " <<  tskinData.errors();
+            break;
+        }       
     }
+
+
+    //load the actual skin entry point
+
+    qDebug() << "Skin switch url:" << skin->entryUrl();
+    currentSkin = incSkin;
+    qorbiterUIwin->engine()->rootContext()->setContextProperty("style", styleObject);
+    qorbiterUIwin->setSource(skin->entryUrl());
+    startOrbiter();
+    writeConfig();
 }
 
 
@@ -895,88 +844,15 @@ void qorbiterManager::setNowPlayingIcon(bool b)
     item->setProperty("nowplayingtext", "null");
 }
 
-void qorbiterManager::getcurrentSkins(QStringList skinPaths)
+void qorbiterManager::loadSkins(QUrl base)
 {
-    QImage skinPic(":/icons/Skin-Data.png");
-    SkinDataModel* tskinModel = new SkinDataModel(new SkinDataItem, this);
+
+    qDebug() << base;
+    tskinModel = new SkinDataModel(base, new SkinDataItem, this);
     qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
-    QString skins;
 
-#ifdef Q_OS_MAC
-    QDir skinsDir(QApplication::applicationDirPath().remove("MacOS").append("Resources"));
-#else
-    QDir skinsDir(QApplication::applicationDirPath().remove("bin"));
-#endif
-    if(skinsDir.cd("qml/"))
-    {
-        qDebug() << skinsDir.path();
-
-        QStringList platform = skinsDir.entryList();
-
-        qDebug() << "Switching to:" << platform.last();
-
-
-        if(platform.isEmpty())
-        {
-            qDebug() << "Could not locate skins for platform!";
-            exit(10);
-        }
-        else
-        {
-
-            if(skinsDir.cd(platform.last()))
-            {
-
-                skins = skinsDir.path();
-                qDebug() << "Looking for skins in " + skins ;
-
-            }
-
-        }
-
-        skins.append("/");
-        QStringList::const_iterator constIterator;
-        for (constIterator = skinPaths.constBegin(); constIterator != skinPaths.constEnd(); ++constIterator)
-        {
-
-            if ((*constIterator) == "js"||(*constIterator)=="components"||(*constIterator) =="screens")
-            {
-                // qDebug() << "System Path" << (*constIterator);
-            }
-            else
-            {
-                QDeclarativeComponent skinData(qorbiterUIwin->engine(),QUrl::fromLocalFile(skins+(*constIterator)+"/Style.qml"));
-                if (skinData.isError()) {
-                    // this dir does not contain a Style.qml; ignore it
-                    break;
-                }
-                //turning it into a qObject - this part actually loads it - the error should connect to a slot and not an exit
-                QObject *styleObject = skinData.create(qorbiterUIwin->rootContext());
-                //wait for it to load up
-                while (!skinData.isReady())
-                {
-                    if(skinData.isError())
-                    {
-                        qDebug() << skinData.errors();
-                        break;
-                    }
-
-                    qDebug() << " loading";
-                }
-                //Importing the document data for the skins themselves
-                QString s_title = styleObject->property("skinname").toString();
-                QString s_creator = styleObject->property("skincreator").toString();
-                QString s_description = styleObject->property("skindescription").toString();
-                QString s_version = styleObject->property("skinversion").toString();
-                QString s_target = styleObject->property("skinvariation").toString();
-                QString s_path = styleObject->property("skindir").toString();
-                QString s_mainc = styleObject->property("maincolor").toString();
-                QString s_accentc = styleObject->property("accentcolor").toString();
-                // qDebug() << "Adding skin to list" << s_title;
-                tskinModel->appendRow(new SkinDataItem(s_title, s_creator, s_description, s_version, s_target, skinPic, s_path, s_mainc, s_accentc, tskinModel ));
-            }
-        }
-    }
+    tskinModel->addSkin("default");
+    tskinModel->addSkin("aeon");
 }
 
 void qorbiterManager::quickReload()
@@ -985,26 +861,17 @@ void qorbiterManager::quickReload()
     //gotoQScreen("Splash.qml");
     bool connected = pqOrbiter->m_bRouterReloading;
 
-    if(setupLmce(iPK_Device, s_RouterIP, false, false))
-    {
-        qDebug() << "Reload complete, starting";
 
     }
-    else
-    {
-        qDebug() << "Router not up, waiting";
-        sleep(5);
-        quickReload();
-    }
-}
 
-void qorbiterManager::qmlSetupLmce(int incdeviceid, QString incrouterip)
+
+void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
 {
+    qDebug() << "Triggering connection to LMCE Device ID [" << incdeviceid << "] port Router Address [" << incrouterip << "]" ;
     qs_routerip = incrouterip;
-    iPK_Device = incdeviceid;
-    writeConfig();
-    setupLmce(incdeviceid, incrouterip.toStdString(), false, false);
-
+    iPK_Device = incdeviceid.toInt();
+    //writeConfig();
+    setupLmce(incdeviceid.toInt(), incrouterip.toStdString(), false, false);
 }
 
 
@@ -1046,6 +913,11 @@ bool qorbiterManager::readLocalConfig()
             }
 
             currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
+            if (currentSkin == "")
+            {
+                currentSkin = "default";
+            }
+
             iPK_Device = configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong();
 
 
@@ -1637,8 +1509,10 @@ void qorbiterManager::processError(QString msg)
     qDebug() << "Error:" << msg ;
 }
 
+void qorbiterManager::setActiveSkin(QString name)
+{
 
-
+}
 
 
 
