@@ -172,6 +172,70 @@ namespace nsJobHandler
 
   };
 
+  class TranscodeJob : public Job
+  {
+    friend class TranscodeTask;
+  public:
+    bool m_bDeleteSourceAfterTranscode;
+    bool m_bReportResult;
+    string m_sFileName;
+    string m_sDestinationFileName;
+    int m_iPK_Orbiter;
+    map<string, string> m_mapParametersAndValues;
+  public:
+TranscodeJob(class JobHandler *pJobHandler,
+	     int iPK_Orbiter,
+	     string sFileName,
+	     string sDestinationFileName,
+	     map<string, string> mapParametersAndValues,
+	     bool bDeleteSourceAfterTranscode,
+	     Command_Impl *pCommand_Impl);
+    virtual ~TranscodeJob();
+
+    virtual bool ReadyToRun();
+    void AddTranscodeTask();
+
+    virtual bool ReportPendingTasks(PendingTaskList *pPendingTaskList);
+    virtual int SecondsRemaining();
+    virtual string ToString();
+    virtual int PercentComplete();
+    virtual string GetType() { return "TranscodeJob"; }
+
+    int Get_PK_Orbiter();
+
+  };
+
+  class TranscodeTask : public Task
+  {
+  public:
+    class TranscodeJob *m_pTranscodeJob;
+    string m_sText;
+    int m_iTime;
+    string m_sFileName;
+    string m_sDestinationFileName;
+    bool m_bAlreadySpawned; 
+    string m_sSpawnName;
+    DeviceData_Base *m_pDevice_App_Server;
+    map<string,string> m_mapParametersAndValues;
+
+    TranscodeTask(class TranscodeJob *pTranscodeJob, 
+	     string sName, 
+	     string sFileName, 
+	     string sDestinationFileName);
+    virtual ~TranscodeTask();
+    virtual string GetType() { return "TranscodeTask"; }
+    
+    virtual int Run();
+    virtual bool Abort();
+    int RunAlreadySpawned();
+    void ReportFailure();
+    void ReportSuccess();
+    void ReportProgress();
+    void UpdateProgress(string sStatus, int iPercent, int iTime, string sText);
+    virtual int SecondsRemaining();
+    string GetParameters();
+  };
+
 }
 
 namespace DCE
@@ -1342,6 +1406,40 @@ VI=Video Input */
 
 	virtual void CMD_Get_Attribute_Image() { string sCMD_Result; CMD_Get_Attribute_Image(sCMD_Result,NULL);};
 	virtual void CMD_Get_Attribute_Image(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #1091 - Transcode File */
+	/** Transcode a file */
+		/** @param #13 Filename */
+			/** Source Filename */
+		/** @param #20 Format */
+			/** Format parameters key=value separated by | */
+		/** @param #50 Name */
+			/** Destination Filename */
+		/** @param #234 Directory */
+			/** Destination Directory */
+
+	virtual void CMD_Transcode_File(string sFilename,string sFormat,string sName,string sDirectory) { string sCMD_Result; CMD_Transcode_File(sFilename.c_str(),sFormat.c_str(),sName.c_str(),sDirectory.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Transcode_File(string sFilename,string sFormat,string sName,string sDirectory,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #1092 - Update Transcode Status */
+	/** Update the status of a transcode job. */
+		/** @param #9 Text */
+			/** STatus text to return to task */
+		/** @param #102 Time */
+			/** Time remaining */
+		/** @param #199 Status */
+			/** Status e s f */
+		/** @param #256 Percent */
+			/** Percent update for task */
+		/** @param #257 Task */
+			/** Task number */
+		/** @param #258 Job */
+			/** Job Number */
+
+	virtual void CMD_Update_Transcode_Status(string sText,string sTime,string sStatus,int iPercent,string sTask,string sJob) { string sCMD_Result; CMD_Update_Transcode_Status(sText.c_str(),sTime.c_str(),sStatus.c_str(),iPercent,sTask.c_str(),sJob.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Update_Transcode_Status(string sText,string sTime,string sStatus,int iPercent,string sTask,string sJob,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
 };

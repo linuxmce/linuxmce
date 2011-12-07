@@ -29440,5 +29440,93 @@ namespace DCE
 			COMMAND_Get_Attribute_Image_CONST,
 			0 /* number of parameters */); }
 	};
+	class CMD_Transcode_File : public PreformedCommand {
+	public:
+		CMD_Transcode_File(long DeviceIDFrom, long DeviceIDTo,string sFilename,string sFormat,string sName,string sDirectory) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+			COMMAND_Transcode_File_CONST,
+			4 /* number of parameters */,
+			COMMANDPARAMETER_Filename_CONST, sFilename.c_str(),
+			COMMANDPARAMETER_Format_CONST, sFormat.c_str(),
+			COMMANDPARAMETER_Name_CONST, sName.c_str(),
+			COMMANDPARAMETER_Directory_CONST, sDirectory.c_str()); }
+	};
+	class CMD_Transcode_File_DL : public PreformedCommand {
+	public:
+		CMD_Transcode_File_DL(long DeviceIDFrom, string DeviceIDTo,string sFilename,string sFormat,string sName,string sDirectory) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Transcode_File_CONST,
+			4 /* number of parameters */,
+			COMMANDPARAMETER_Filename_CONST, sFilename.c_str(),
+			COMMANDPARAMETER_Format_CONST, sFormat.c_str(),
+			COMMANDPARAMETER_Name_CONST, sName.c_str(),
+			COMMANDPARAMETER_Directory_CONST, sDirectory.c_str()); }
+	};
+	class CMD_Transcode_File_DT : public PreformedCommand {
+	public:
+		CMD_Transcode_File_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sFilename,string sFormat,string sName,string sDirectory) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Transcode_File_CONST,
+			4 /* number of parameters */,
+			COMMANDPARAMETER_Filename_CONST, sFilename.c_str(),
+			COMMANDPARAMETER_Format_CONST, sFormat.c_str(),
+			COMMANDPARAMETER_Name_CONST, sName.c_str(),
+			COMMANDPARAMETER_Directory_CONST, sDirectory.c_str()); }
+	};
+	class CMD_Transcode_File_Cat : public PreformedCommand {
+	public:
+		CMD_Transcode_File_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sFilename,string sFormat,string sName,string sDirectory) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Transcode_File_CONST,
+			4 /* number of parameters */,
+			COMMANDPARAMETER_Filename_CONST, sFilename.c_str(),
+			COMMANDPARAMETER_Format_CONST, sFormat.c_str(),
+			COMMANDPARAMETER_Name_CONST, sName.c_str(),
+			COMMANDPARAMETER_Directory_CONST, sDirectory.c_str()); }
+	};
+	class CMD_Update_Transcode_Status : public PreformedCommand {
+	public:
+		CMD_Update_Transcode_Status(long DeviceIDFrom, long DeviceIDTo,string sText,string sTime,string sStatus,int iPercent,string sTask,string sJob) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+			COMMAND_Update_Transcode_Status_CONST,
+			6 /* number of parameters */,
+			COMMANDPARAMETER_Text_CONST, sText.c_str(),
+			COMMANDPARAMETER_Time_CONST, sTime.c_str(),
+			COMMANDPARAMETER_Status_CONST, sStatus.c_str(),
+			COMMANDPARAMETER_Percent_CONST, StringUtils::itos(iPercent).c_str(),
+			COMMANDPARAMETER_Task_CONST, sTask.c_str(),
+			COMMANDPARAMETER_Job_CONST, sJob.c_str()); }
+	};
+	class CMD_Update_Transcode_Status_DL : public PreformedCommand {
+	public:
+		CMD_Update_Transcode_Status_DL(long DeviceIDFrom, string DeviceIDTo,string sText,string sTime,string sStatus,int iPercent,string sTask,string sJob) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Update_Transcode_Status_CONST,
+			6 /* number of parameters */,
+			COMMANDPARAMETER_Text_CONST, sText.c_str(),
+			COMMANDPARAMETER_Time_CONST, sTime.c_str(),
+			COMMANDPARAMETER_Status_CONST, sStatus.c_str(),
+			COMMANDPARAMETER_Percent_CONST, StringUtils::itos(iPercent).c_str(),
+			COMMANDPARAMETER_Task_CONST, sTask.c_str(),
+			COMMANDPARAMETER_Job_CONST, sJob.c_str()); }
+	};
+	class CMD_Update_Transcode_Status_DT : public PreformedCommand {
+	public:
+		CMD_Update_Transcode_Status_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sText,string sTime,string sStatus,int iPercent,string sTask,string sJob) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Update_Transcode_Status_CONST,
+			6 /* number of parameters */,
+			COMMANDPARAMETER_Text_CONST, sText.c_str(),
+			COMMANDPARAMETER_Time_CONST, sTime.c_str(),
+			COMMANDPARAMETER_Status_CONST, sStatus.c_str(),
+			COMMANDPARAMETER_Percent_CONST, StringUtils::itos(iPercent).c_str(),
+			COMMANDPARAMETER_Task_CONST, sTask.c_str(),
+			COMMANDPARAMETER_Job_CONST, sJob.c_str()); }
+	};
+	class CMD_Update_Transcode_Status_Cat : public PreformedCommand {
+	public:
+		CMD_Update_Transcode_Status_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sText,string sTime,string sStatus,int iPercent,string sTask,string sJob) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Update_Transcode_Status_CONST,
+			6 /* number of parameters */,
+			COMMANDPARAMETER_Text_CONST, sText.c_str(),
+			COMMANDPARAMETER_Time_CONST, sTime.c_str(),
+			COMMANDPARAMETER_Status_CONST, sStatus.c_str(),
+			COMMANDPARAMETER_Percent_CONST, StringUtils::itos(iPercent).c_str(),
+			COMMANDPARAMETER_Task_CONST, sTask.c_str(),
+			COMMANDPARAMETER_Job_CONST, sJob.c_str()); }
+	};
 }
 #endif

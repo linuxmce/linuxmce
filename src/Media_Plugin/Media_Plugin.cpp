@@ -486,6 +486,280 @@ bool MoveDBTask::Abort()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
+// Transcode job and task classes ///////////////////////////////////////////////////////////
+TranscodeJob::TranscodeJob(class JobHandler *pJobHandler,
+			   int iPK_Orbiter,
+			   string sFileName,
+			   string sDestinationFileName,
+			   map<string, string> mapParametersAndValues,
+			   bool bDeleteSourceAfterTranscode,
+			   Command_Impl *pCommand_Impl)
+  : Job(pJobHandler, "TranscodeJob", iPK_Orbiter, pCommand_Impl)
+{
+  m_sFileName=sFileName;
+  m_bDeleteSourceAfterTranscode=bDeleteSourceAfterTranscode;
+  m_sDestinationFileName=sDestinationFileName;
+  m_mapParametersAndValues=mapParametersAndValues;
+  m_iPK_Orbiter=iPK_Orbiter;
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TranscodeJob - start");
+}
+
+TranscodeJob::~TranscodeJob()
+{
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TranscodeJob - stop");
+  if (m_bDeleteSourceAfterTranscode)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Deleting %s after transcode.");
+      FileUtils::DelFile(m_sFileName);
+    }
+
+  SCREEN_PopupMessage SCREEN_PopupMessage(m_pCommand_Impl->m_dwPK_Device,
+					  m_iPK_Orbiter,
+					  "Transcode Complete!",
+					  "",
+					  "transcode_complete",
+					  "0",
+					  "10",
+					  "1");
+  m_pCommand_Impl->SendCommand(SCREEN_PopupMessage);
+}
+
+bool TranscodeJob::ReadyToRun()
+{
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TranscodeJob - ReadyToRun");
+  AddTranscodeTask();
+  return true;
+}
+
+void TranscodeJob::AddTranscodeTask()
+{
+  vector <Task *> vTasks;
+  if (FileUtils::FileExists(m_sFileName))
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Task Added!");
+      vTasks.push_back(new TranscodeTask(this,"Transcode File",m_sFileName,m_sDestinationFileName));
+      AddTasks(vTasks,position_TasklistEnd);
+    }
+  else
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Task Not Added! %s does not exist",m_sFileName.c_str());
+    }
+}
+
+bool TranscodeJob::ReportPendingTasks(PendingTaskList *pPendingTaskList)
+{
+  PLUTO_SAFETY_LOCK(jm,m_ThreadMutex);
+  if (m_eJobStatus==job_WaitingToStart || m_eJobStatus==job_InProgress)
+    {
+      if (pPendingTaskList)
+	{
+	  pPendingTaskList->m_listPendingTask.push_back(new PendingTask(m_iID,
+									m_iPK_Orbiter,
+									m_pCommand_Impl->m_dwPK_Device,
+									"transcode",ToString(),
+									(char)PercentComplete(),
+									SecondsRemaining(),
+									true));
+	}
+      return true;
+    }
+  else
+    return false;
+}
+
+int TranscodeJob::PercentComplete()
+{
+  return 1;
+}
+
+int TranscodeJob::SecondsRemaining()
+{
+  return 255;
+}
+
+string TranscodeJob::ToString()
+{
+  return "Transcoding "+m_sFileName+" to "+m_sDestinationFileName;
+}
+
+int TranscodeJob::Get_PK_Orbiter()
+{
+  return m_iPK_Orbiter;
+}
+
+TranscodeTask::TranscodeTask(class TranscodeJob *pTranscodeJob,
+			     string sName,
+			     string sFileName,
+			     string sDestinationFileName) : Task(pTranscodeJob,sName)
+{
+  m_bAlreadySpawned=false;
+  m_pTranscodeJob=pTranscodeJob;
+  m_sFileName=sFileName;
+  m_sDestinationFileName=sDestinationFileName;
+  m_mapParametersAndValues=pTranscodeJob->m_mapParametersAndValues;
+}
+
+TranscodeTask::~TranscodeTask()
+{
+  // does nothing.
+}
+
+string TranscodeTask::GetParameters()
+{
+  string sParameters="";
+  for (map<string, string>::iterator it=m_mapParametersAndValues.begin();
+       it!=m_mapParametersAndValues.end();++it)
+    {
+      sParameters += "-"+it->first+"\t"+it->second+"\t";
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXXXXXXX added parameter: -%s %s",it->first.c_str(),it->second.c_str());
+    }
+
+  return sParameters;
+
+}
+
+int TranscodeTask::Run()
+{
+  if (m_bAlreadySpawned)
+    {
+      return RunAlreadySpawned();
+    }
+
+  DeviceData_Base *pDevice_App_Server = m_pTranscodeJob->m_pCommand_Impl->m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_App_Server_CONST, m_pTranscodeJob->m_pCommand_Impl);
+
+  if (!pDevice_App_Server)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TranscodeTask::Run() - Cannot transcode. No App Server found.");
+      return 0;
+    }
+
+  m_pDevice_App_Server=pDevice_App_Server;
+  //  string sParameters = "-i\t"+m_sFileName+"\t"+GetParameters()+m_sDestinationFileName; // ffmpeg
+  string sParameters=GetParameters()+"-o\t"+m_sDestinationFileName+"\t"+m_sFileName;     // mencoder
+  string sResultMessage =
+    StringUtils::itos(m_pTranscodeJob->m_pCommand_Impl->m_dwPK_Device) + " " +   // From device
+    StringUtils::itos(m_pTranscodeJob->m_pCommand_Impl->m_dwPK_Device) + " " +   // To Device
+    StringUtils::itos(MESSAGETYPE_COMMAND) + " " +                          // 1 = COMMAND
+    StringUtils::itos(COMMAND_Update_Transcode_Status_CONST) + " " +             // CMD_Update_Transcode_Status
+    StringUtils::itos(COMMANDPARAMETER_Task_CONST) + " " +                  //
+    StringUtils::itos(m_iID) + " " +                                  // Task ID
+    StringUtils::itos(COMMANDPARAMETER_Job_CONST) + " " +                   //
+    StringUtils::itos(m_pJob->m_iID_get()) + " " +                          // Job ID
+    StringUtils::itos(COMMANDPARAMETER_Status_CONST) + " ";  // The Rest will be filled in below.
+
+  // Passed to the App Server as a unique name that can be killed later.
+  m_sSpawnName = "transcode_job_" +
+    StringUtils::itos(m_pJob->m_iID_get()) +
+    "_task_" +
+    StringUtils::itos(m_iID);
+
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXXXXXX PARAMETERS IS: %s",sParameters.c_str());
+
+  DCE::CMD_Spawn_Application CMD_Spawn_Application(m_pTranscodeJob->m_pCommand_Impl->m_dwPK_Device,
+						   pDevice_App_Server->m_dwPK_Device,
+						   "/usr/bin/mencoder",
+						   m_sSpawnName,
+						   sParameters,
+						   sResultMessage + "e",
+						   sResultMessage + "s",
+						   false, false, false, false);
+
+  string sResponse;
+
+  if (!m_pTranscodeJob->m_pCommand_Impl->SendCommand(CMD_Spawn_Application,&sResponse) || sResponse != "OK")
+    {
+      // App server failed somehow.
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TranscodeTask::Run() - Trying to move - App Server returned %s",sResponse.c_str());
+      return 0; // This is done. Do not trigger the run again.
+    }
+
+  m_bAlreadySpawned=true;
+
+  string sText = "Your game recording is being processed and stored. I will let you know when it is finished.";
+  string sOptions = "Ok|";
+
+  DCE::CMD_Display_Dialog_Box_On_Orbiter_Cat db(m_pTranscodeJob->m_pCommand_Impl->m_dwPK_Device,
+						DEVICECATEGORY_Orbiter_Plugins_CONST,
+						false, BL_SameHouse,
+						sText,
+						sOptions,
+						StringUtils::itos(m_pTranscodeJob->Get_PK_Orbiter()));
+
+  m_pTranscodeJob->m_pCommand_Impl->SendCommand(db);
+
+  return 1000;
+}
+
+bool TranscodeTask::Abort()
+{
+  DCE::CMD_Kill_Application CMD_Kill_Application(m_pTranscodeJob->m_pCommand_Impl->m_dwPK_Device,
+						 m_pDevice_App_Server->m_dwPK_Device,
+						 m_sSpawnName,
+						 false);
+  m_pTranscodeJob->m_pCommand_Impl->SendCommand(CMD_Kill_Application);
+  
+  return Task::Abort();
+
+}
+
+int TranscodeTask::RunAlreadySpawned()
+{
+  return 1000;
+}
+
+void TranscodeTask::UpdateProgress(string sStatus, int iPercent, int iTime, string sText)
+{
+  if( m_eTaskStatus_get()==TASK_COMPLETED )
+    {
+      LoggerWrapper::GetInstance()->Write(LV_STATUS, "MoveTask::UpdateProgress ignoring because we're done status %s", sStatus.c_str());
+      return;
+    }
+  
+  m_sText=sText; // expose new status text to task so other parts can use it.
+
+  if ( sStatus=="p" )
+    {
+      m_iPercent=iPercent;
+      m_iTime=iTime;
+      ReportProgress();
+    }
+  else if ( sStatus=="e" )
+    {
+	ReportFailure();
+      m_eTaskStatus_set(TASK_FAILED_ABORT); // mark it failed so the job will be aborted.
+    }
+  else if ( sStatus=="s" )
+    {
+	ReportSuccess();
+      m_eTaskStatus_set(TASK_COMPLETED);
+    }
+
+}
+
+void TranscodeTask::ReportFailure()
+{
+    // It's here in case we need to report on a task by task basis.
+}
+
+void TranscodeTask::ReportSuccess()
+{
+  // It's here in case we need to report on a task by task basis.
+}
+
+void TranscodeTask::ReportProgress()
+{
+  // It's here in case we need to do something.
+}
+
+int TranscodeTask::SecondsRemaining()
+{
+  if ( m_iTime )
+    return m_iTime;
+
+  return Task::SecondsRemaining();
+
+}
+/////////////////////////////////////////////////////////////////////////////////////////////
 static bool MediaFileComparer(MediaFile *a, MediaFile *b)
 {
 	if(a->m_sAlbum != b->m_sAlbum)
@@ -7907,7 +8181,97 @@ void Media_Plugin::CMD_Update_Move_Status(string sText,string sTime,string sStat
 	/** Returns PK_Image file for supplied !A */
 
 void Media_Plugin::CMD_Get_Attribute_Image(string &sCMD_Result,Message *pMessage)
-{
-    cout << "need to implement command #1090 CMD_Get_Attribute_Image" << endl;
-    }
 //<-dceag-c1090-e->
+//<-dceag-c1091-b->
+
+	/** @brief COMMAND: #1091 - Transcode File */
+	/** Transcode a file */
+		/** @param #13 Filename */
+			/** Source Filename */
+		/** @param #20 Format */
+			/** Format parameters key=value separated by | */
+		/** @param #50 Name */
+			/** Destination Filename */
+		/** @param #234 Directory */
+			/** Destination Directory */
+
+void Media_Plugin::CMD_Transcode_File(string sFilename,string sFormat,string sName,string sDirectory,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1091-e->
+{
+  // Parse the filenames out.
+  bool bDeleteSourceAfterTranscode=true;
+  size_t pos=0;
+  string sSourceFilename = sFilename;
+  string sDestinationFilename = sDirectory + "/" + sName;
+  
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Media_Plugin::CMD_Transcode_File() - sDirectory is %s and sName is %s",sDirectory.c_str(),sName.c_str());
+
+  // Parse the format parameters
+  vector<string> vectParameters;
+  map<string, string> mapParametersAndValues;
+  StringUtils::Tokenize(sFormat,"|",vectParameters);
+  for (vector<string>::iterator it=vectParameters.begin();it!=vectParameters.end();++it)
+    {
+      pos=0;
+      string sCurrentParameter = *it;
+      string sKey=StringUtils::Tokenize(sCurrentParameter,"=",pos);
+      string sValue=StringUtils::Tokenize(sCurrentParameter,"=",pos);
+      if (sKey=="deleteSourceAfterTranscode")
+	{
+	  bDeleteSourceAfterTranscode=true;
+	}
+      if (sKey=="xvidbitrate")
+	{
+	  mapParametersAndValues["xvidencopts"] = "bitrate="+sValue;
+	}
+      else
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Media_Plugin::CMD_Transcode_File - sFormat: sKey is %s sValue is %s",sKey.c_str(),sValue.c_str());
+	  mapParametersAndValues[sKey]=sValue;
+	}
+    }
+  
+  // Now we should have everything we need to fire a job.
+  
+  TranscodeJob *pTranscodeJob = new TranscodeJob(m_pJobHandler,
+						 pMessage->m_dwPK_Device_From,
+						 sSourceFilename,
+						 sDestinationFilename,
+						 mapParametersAndValues,
+						 bDeleteSourceAfterTranscode,
+						 this);
+
+   m_pJobHandler->AddJob(pTranscodeJob);
+}
+
+//<-dceag-c1092-b->
+
+	/** @brief COMMAND: #1092 - Update Transcode Status */
+	/** Update the status of a transcode job. */
+		/** @param #9 Text */
+			/** STatus text to return to task */
+		/** @param #102 Time */
+			/** Time remaining */
+		/** @param #199 Status */
+			/** Status e s f */
+		/** @param #256 Percent */
+			/** Percent update for task */
+		/** @param #257 Task */
+			/** Task number */
+		/** @param #258 Job */
+			/** Job Number */
+
+void Media_Plugin::CMD_Update_Transcode_Status(string sText,string sTime,string sStatus,int iPercent,string sTask,string sJob,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1092-e->
+{
+  PLUTO_SAFETY_LOCK(jm,*m_pJobHandler->m_ThreadMutex_get());
+  Task *pTask = m_pJobHandler->FindTask(atoi(sJob.c_str()),atoi(sTask.c_str()));
+  if (!pTask)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Media_Plugin::CMD_Update_Transcode_Status invalid job %s task %s",sJob.c_str(),sTask.c_str());
+      return;
+    }
+
+  TranscodeTask *pTranscodeTask = (TranscodeTask *) pTask;
+  pTranscodeTask->UpdateProgress(sStatus, iPercent, atoi(sTime.c_str()), sText);
+}
