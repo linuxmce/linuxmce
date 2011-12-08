@@ -246,6 +246,9 @@
 #define DEVICEDATA_Battery_state_CONST 293
 #define DEVICEDATA_FK_Device_Capture_Card_Audio_P_CONST 294
 #define DEVICEDATA_VPNSettings_CONST 295
+#define DEVICEDATA_Emergency_numbers_CONST 296
+#define DEVICEDATA_Emergency_phoneline_CONST 297
+#define DEVICEDATA_RequireCallToken_CONST 298
 
 #define DEVICEDATA_TABLE "DeviceData"
 #define DEVICEDATA_PK_DEVICEDATA_FIELD "PK_DeviceData"

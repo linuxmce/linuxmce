@@ -990,6 +990,8 @@
 #define COMMAND_Specify_Capture_Card_Audio_Port_CONST 1088
 #define COMMAND_Update_Move_Status_CONST 1089
 #define COMMAND_Get_Attribute_Image_CONST 1090
+#define COMMAND_Transcode_File_CONST 1091
+#define COMMAND_Update_Transcode_Status_CONST 1092
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"

@@ -2821,6 +2821,7 @@
 #define DESIGNOBJ_butLiveTV2_CONST 6215
 #define DESIGNOBJ_butDeleteRecording_CONST 6216
 #define DESIGNOBJ_butInfoRecording_CONST 6217
+#define DESIGNOBJ_butOK_CONST 6218
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"
