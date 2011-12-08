@@ -41,38 +41,27 @@ using namespace DCE;
 
 /*
   this is the constructor. it should be refactored to intantiatae the qorbiter class from the start to facilitate
-  cleaner startup with more robust error checking
+  cleaner startup with more robust error checking.
+
+  This class will evolve into a manager role, with the qml window handling being done elsewhere. we will see how this goes.
 */
-qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent) :
-    QWidget(parent), iPK_Device(deviceno), qs_routerip(routerip)
+qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeView *view, QObject *parent) :
+    QObject(parent), iPK_Device(deviceno), qs_routerip(routerip)
 {
-    qorbiterUIwin = new QDeclarativeView; //initialize the declarative view to act upon its context
+    qorbiterUIwin = view; //initialize the declarative view to act upon its context
 
-    QDeclarativeComponent skinData(qorbiterUIwin->engine(),QUrl("qrc:main/Style.qml"));
-    //turning it into a qObject - this part actually loads it - the error should connect to a slot and not an exit
-    QObject *styleObject = skinData.create(qorbiterUIwin->rootContext());
 
-    //wait for it to load up
-    while (!skinData.isReady())
-    {
-        if(skinData.isError())
-        {
-            qDebug() << skinData.errors();
-            exit(30);
-        }
 
-    }
 
-    qorbiterUIwin->engine()->rootContext()->setContextProperty("style", styleObject);
     qorbiterUIwin->rootContext()->setContextProperty("srouterip", QString(qs_routerip) );
     qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
     qorbiterUIwin->rootContext()->setContextObject(this); //providing a direct object for qml to call c++ functions of this class
-    qorbiterUIwin->setSource(QUrl("qrc:desktop/Splash.qml"));
+    //qorbiterUIwin->setSource(QUrl("qrc:desktop/Splash.qml"));
 
     item= qorbiterUIwin->rootObject();
     connect(item,SIGNAL(setupStart(QString, QString)), this,SLOT(qmlSetupLmce(QString,QString)));
     connect(this, SIGNAL(continueSetup()), this, SLOT(showSystemSplash()));
-
+/*
 #ifdef Q_OS_SYMBIAN
     qorbiterUIwin->showFullScreen();
 #elif defined(Q_WS_MAEMO_5)
@@ -85,8 +74,8 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip,QWidget *parent)
     qorbiterUIwin->show();
 #endif
     qDebug("Showing");
-
-   emit continueSetup();
+*/
+  emit continueSetup();
 
     //TODO, extract to a config
     //TODO, execute this already if we have config data.

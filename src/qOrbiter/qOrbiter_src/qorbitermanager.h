@@ -105,7 +105,7 @@ namespace DCE
 class qOrbiter;
 }
 
-class qorbiterManager : public QWidget
+class qorbiterManager : public QObject
 {
     Q_OBJECT
 
@@ -116,7 +116,7 @@ class qorbiterManager : public QWidget
 
 
 public:
-    qorbiterManager(int deviceno, QString routerip, QWidget *parent = 0);  //constructor
+    qorbiterManager(int deviceno, QString routerip, QDeclarativeView *view, QObject *parent = 0);  //constructor
 
     QThread *processingThread; //threaded class
     QThread *timecodeThread; //for timecode

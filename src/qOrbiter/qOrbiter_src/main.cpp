@@ -15,8 +15,9 @@
 */
 //<-dceag-incl-b->
 #include <QApplication>
+#include <QMainWindow>
 #include <qOrbiter/qOrbiter.h>
-
+#include <QDeclarativeView>
 #include "DCE/Logger.h"
 #include "ServerLogger.h"
 #include "PlutoUtils/FileUtils.h"
@@ -205,12 +206,12 @@ int main(int argc, char* argv[])
         cerr << "Unable to create logger" << endl;
     }
 
-       /*
+    /*
       need a routine here to find the router ip / dcerouter setting. there should be user feedback that its initializing
       */
     bool bAppError=false;
     bool bReload=false;
-// LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",PK_Device,sRouter_IP);
+    // LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",PK_Device,sRouter_IP);
     try
     {
 #ifndef for_harmattan
@@ -219,10 +220,11 @@ int main(int argc, char* argv[])
 
 #endif
         QApplication a(argc, argv);
-        qorbiterManager * w = new qorbiterManager(PK_Device,QString::fromStdString(sRouter_IP.c_str()));
-
-         a.exec();
-
+        QDeclarativeView mainView;
+        mainView.setSource(QUrl("qrc:desktop/Splash.qml"));
+        mainView.show();
+        qorbiterManager * w = new qorbiterManager(PK_Device,QString::fromStdString(sRouter_IP.c_str()), &mainView);
+        a.exec();
     }
     catch(string s)
     {
