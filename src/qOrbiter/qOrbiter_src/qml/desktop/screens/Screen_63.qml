@@ -256,6 +256,13 @@ Rectangle {
                                 }
                             }
                             AvOptionButton{
+                                buttontext: qsTr("Exit")
+                                MouseArea{
+                                    anchors.fill: parent
+                                    onClicked: dcerouter.extraButtons("exit")
+                                }
+                            }
+                            AvOptionButton{
                                 buttontext: qsTr("Favorites")
                                 MouseArea{
                                     anchors.fill: parent

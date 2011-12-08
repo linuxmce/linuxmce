@@ -65,14 +65,14 @@ void SkinDataModel::handleItemChange()
 SkinDataItem * SkinDataModel::find(const QString &id) const
 {
     foreach(SkinDataItem* item, m_list) {
-    qDebug() << id;
+        qDebug() << item->id();
         if(item->id().toLower() == id.toLower())
         {
             return item;
         }
 
     }
-   return m_list.first();
+    return m_list.first();
 }
 
 QModelIndex SkinDataModel::indexFromItem(const SkinDataItem *item) const
@@ -131,18 +131,11 @@ void SkinDataModel::addSkin(QString name) {
 
     QUrl style(m_baseUrl);
     style.setPath(m_baseUrl.toString()+ "/" + name + "/Style.qml");
-
+    QObject *styleObject = new QObject();
     QDeclarativeComponent skinData(ui_reference->qorbiterUIwin->engine(), style);
-    QObject *styleObject = skinData.create(ui_reference->qorbiterUIwin->rootContext());
-    if (skinData.isError()) {
-        // this dir does not contain a Style.qml; ignore it
-        qDebug() << skinData.errors();
-        return;
-    }
-    else
-    {
-        //turning it into a qObject - this part actually loads it - the error should connect to a slot and not an exit
 
+    if (!skinData.isError())
+    {
         //wait for it to load up
         while (!skinData.isReady())
         {
@@ -152,22 +145,31 @@ void SkinDataModel::addSkin(QString name) {
                 qDebug("Error!");
                 break;
             }
+qDebug() << skinData.status();
 
-            qDebug() << " loading";
         }
-        //Importing the document data for the skins themselves
-        QString s_title = styleObject->property("skinname").toString();
-        QString s_creator = styleObject->property("skincreator").toString();
-        QString s_description = styleObject->property("skindescription").toString();
-        QString s_version = styleObject->property("skinversion").toString();
-        QString s_target = styleObject->property("skinvariation").toString();
-        QString s_path = styleObject->property("skindir").toString();
-        QString s_mainc = styleObject->property("maincolor").toString();
-        QString s_accentc = styleObject->property("accentcolor").toString();
-        // qDebug() << "Adding skin to list" << s_title;
-        appendRow(new SkinDataItem(skinBase, s_title, s_creator, s_description, s_version, s_target, skinPic, s_path, s_mainc, s_accentc, this));
+
+        styleObject = skinData.create(ui_reference->qorbiterUIwin->rootContext());
     }
+    else
+    {            // this dir does not contain a Style.qml; ignore it
+        qDebug() << skinData.errors();
+        return;
+    }
+
+    //Importing the document data for the skins themselves
+    QString s_title = styleObject->property("skinname").toString();
+    QString s_creator = styleObject->property("skincreator").toString();
+    QString s_description = styleObject->property("skindescription").toString();
+    QString s_version = styleObject->property("skinversion").toString();
+    QString s_target = styleObject->property("skinvariation").toString();
+    QString s_path = styleObject->property("skindir").toString();
+    QString s_mainc = styleObject->property("maincolor").toString();
+    QString s_accentc = styleObject->property("accentcolor").toString();
+    // qDebug() << "Adding skin to list" << s_title;
+    appendRow(new SkinDataItem(skinBase, s_title, s_creator, s_description, s_version, s_target, skinPic, s_path, s_mainc, s_accentc, this));
 }
+
 
 void SkinDataModel::setActiveSkin(QString name)
 {

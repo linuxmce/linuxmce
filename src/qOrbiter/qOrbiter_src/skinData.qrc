@@ -43,7 +43,6 @@
         <file alias="main.qml">qml/android/phone/default/main.qml</file>
         <file alias="Style.qml">qml/android/phone/default/Style.qml</file>
     </qresource>
-    <qresource prefix="/components"/>
     <qresource prefix="/desktop">
         <file alias="Splash.qml">qml/Splash.qml</file>
     </qresource>

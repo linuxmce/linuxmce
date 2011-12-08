@@ -3723,6 +3723,12 @@ void DCE::qOrbiter::extraButtons(QString button)
 
     }
 
+    if(button.toLower() == "exit")
+    {
+        CMD_Exit exitAVscreen(qmlUI->iPK_Device, m_dwPK_Device_NowPlaying);
+        SendCommand(exitAVscreen);
+    }
+
 }
 
 void DCE::qOrbiter::saveScreenAttribute()

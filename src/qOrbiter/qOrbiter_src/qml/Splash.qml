@@ -13,7 +13,7 @@ Rectangle {
 
 
     Rectangle {
-        width: style.orbiterW
+        width: parent.width
         height: 75
         opacity: 1
         color: "transparent"

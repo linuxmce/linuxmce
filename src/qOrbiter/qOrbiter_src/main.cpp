@@ -222,7 +222,7 @@ int main(int argc, char* argv[])
         QApplication a(argc, argv);
         QDeclarativeView mainView;
         mainView.setSource(QUrl("qrc:desktop/Splash.qml"));
-        mainView.show();
+        mainView.showMaximized();
         qorbiterManager * w = new qorbiterManager(PK_Device,QString::fromStdString(sRouter_IP.c_str()), &mainView);
         a.exec();
     }

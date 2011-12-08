@@ -49,10 +49,6 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     QObject(parent), iPK_Device(deviceno), qs_routerip(routerip)
 {
     qorbiterUIwin = view; //initialize the declarative view to act upon its context
-
-
-
-
     qorbiterUIwin->rootContext()->setContextProperty("srouterip", QString(qs_routerip) );
     qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
     qorbiterUIwin->rootContext()->setContextObject(this); //providing a direct object for qml to call c++ functions of this class
@@ -94,7 +90,7 @@ void qorbiterManager::showSystemSplash() {
 
     QString localDir = QApplication::applicationDirPath();
 
-    loadSkins(QUrl(localDir+"/qml/desktop"));
+   loadSkins(QUrl(localDir+"/qml/desktop"));
     //loadSkins(QUrl("http://192.168.80.1/lmce-admin/skins/desktop"));
     //set it as a context property so the qml can read it. if we need to changed it,we just reset the context property
 
@@ -641,8 +637,6 @@ void qorbiterManager::swapSkins(QString incSkin)
     //load the skin style
     QDeclarativeComponent tskinData(qorbiterUIwin->engine(), skin->styleUrl());
 
-    //turning it into a qObject - this part actually loads it - the error should connect to a slot and not an exit
-    QObject *styleObject = tskinData.create(qorbiterUIwin->rootContext());
 
     //wait for it to load up
     while (!tskinData.isReady())
@@ -653,6 +647,8 @@ void qorbiterManager::swapSkins(QString incSkin)
             break;
         }       
     }
+    //turning it into a qObject - this part actually loads it - the error should connect to a slot and not an exit
+    QObject *styleObject = tskinData.create(qorbiterUIwin->rootContext());
 
 
     //load the actual skin entry point
