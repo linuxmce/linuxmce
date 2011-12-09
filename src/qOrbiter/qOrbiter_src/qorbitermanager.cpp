@@ -541,7 +541,7 @@ void qorbiterManager::getConf(int pPK_Device)
     QObject::connect(this,SIGNAL(liveTVrequest()), simpleEPGmodel,SLOT(populate()), Qt::QueuedConnection);
     //        qDebug () << "Orbiter Registered, starting";
 
-    qDebug() << "About to set room..";
+    //qDebug() << "About to set room..";
 
     //------------not sure if neccesary since it knows where we are.
     setActiveRoom(iFK_Room, iea_area);
@@ -649,7 +649,7 @@ void qorbiterManager::swapSkins(QString incSkin)
 
     //load the actual skin entry point
 
-    qDebug() << "Skin switch url:" << skin->entryUrl();
+    //qDebug() << "Skin switch url:" << skin->entryUrl();
     currentSkin = incSkin;
     qorbiterUIwin->engine()->rootContext()->setContextProperty("style", styleObject);
     qorbiterUIwin->setSource(skin->entryUrl());
@@ -828,7 +828,7 @@ void qorbiterManager::setNowPlayingIcon(bool b)
 void qorbiterManager::loadSkins(QUrl base)
 {
 
-    qDebug() << base;
+    //qDebug() << base;
     tskinModel = new SkinDataModel(base, new SkinDataItem, this);
     qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
 
@@ -848,7 +848,7 @@ void qorbiterManager::quickReload()
 
 void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
 {
-    qDebug() << "Triggering connection to LMCE Device ID [" << incdeviceid << "] port Router Address [" << incrouterip << "]" ;
+    //qDebug() << "Triggering connection to LMCE Device ID [" << incdeviceid << "] port Router Address [" << incrouterip << "]" ;
     qs_routerip = incrouterip;
     iPK_Device = incdeviceid.toInt();
     //writeConfig();
@@ -909,7 +909,7 @@ bool qorbiterManager::readLocalConfig()
             else
             {
                 qDebug() << "Could not read local, setting defaults.";
-                qDebug() << localConfig.toString();
+               // qDebug() << localConfig.toString();
                 localConfigFile.close();
                 return false;
             }
@@ -1188,7 +1188,7 @@ void qorbiterManager::goBackGrid()
 {
     setRequestMore(false);
     backwards = true;
-    qDebug() << q_attributetype_sort;
+    //qDebug() << q_attributetype_sort;
     execGrp(i_current_command_grp);
 
 }
@@ -1299,7 +1299,7 @@ void qorbiterManager::setCurrentUser(QString inc_user)
 {
     sPK_User = userList->find(sPK_User)->data(1).toString();
     int user = inc_user.toInt();
-    qDebug() << "User name" << sPK_User << "::" << user;
+    //qDebug() << "User name" << sPK_User << "::" << user;
     pqOrbiter->setUser(user);
     emit userChanged();
 }
@@ -1351,7 +1351,7 @@ void qorbiterManager::updateTimecode()
                     )
             {
                 sIPAddress = pDevice->m_sIPAddress;
-                qDebug() << sIPAddress.c_str();
+                //qDebug() << sIPAddress.c_str();
                 if( sIPAddress.empty() )
                 {
                     //qDebug() << "ip empty...";
@@ -1377,7 +1377,7 @@ void qorbiterManager::updateTimecode()
                 timeCodeSocket->connectToHost(QString::fromStdString(sIPAddress), port.toInt(), QFile::ReadOnly );
                 if ( timeCodeSocket->isValid() )
                 {
-                    qDebug() << "Time Code Socket connected! " << sIPAddress.c_str();
+                    //qDebug() << "Time Code Socket connected! " << sIPAddress.c_str();
                     QObject::connect(timeCodeSocket,SIGNAL(readyRead()), this, SLOT(showTimeCode()), Qt::QueuedConnection);
                 }
             }
@@ -1387,7 +1387,7 @@ void qorbiterManager::updateTimecode()
     {
         timeCodeSocket->disconnectFromHost();
         timeCodeSocket->close();
-        qDebug("Socket 12000 disconnect");
+        //qDebug("Socket 12000 disconnect");
     }
 }
 
@@ -1489,7 +1489,7 @@ void qorbiterManager::cleanupScreenie()
 {
     mediaScreenShot = QImage();
     screenshotVars.clear();
-    qDebug("Cleaned up Screenshot model");
+    //qDebug("Cleaned up Screenshot model");
 }
 
 void qorbiterManager::initializeConnections()

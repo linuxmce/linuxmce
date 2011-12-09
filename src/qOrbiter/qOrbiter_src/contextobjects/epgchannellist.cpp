@@ -55,7 +55,7 @@ void EPGChannelList::insertRow(int row, EPGItemClass *item)
 {
     beginInsertRows(QModelIndex(), row, row);
     connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
-    qDebug() << "Inserting at:" << row;
+    //qDebug() << "Inserting at:" << row;
     m_list.insert(row, item);
     endInsertRows();
 }
@@ -64,7 +64,7 @@ void EPGChannelList::handleItemChange()
 {
     EPGItemClass* item = static_cast<EPGItemClass*>(sender());
     QModelIndex index = indexFromItem(item);
-    qDebug() << "Handling item change for:" << index;
+    //qDebug() << "Handling item change for:" << index;
     if(index.isValid())
     {
         emit dataChanged(index, index, 0);
@@ -149,27 +149,27 @@ void EPGChannelList::setItemStatus(int pos)
 
 bool EPGChannelList::checkDupe(QString name, QString position)
 {
-    qDebug() << "Checking dupe for:" << name << " at " <<position;
+    //qDebug() << "Checking dupe for:" << name << " at " <<position;
 
     if (EPGItemClass *item = find(name))
-    {   qDebug() << "Found " << name;
+    {   //qDebug() << "Found " << name;
 
         if (item->name().compare(position))
         {
-            qDebug() << "Dupe position " << position.toInt() ;
+            //qDebug() << "Dupe position " << position.toInt() ;
             return true;
         }
         else
         {
-            qDebug() << item->index();
-            qDebug() << "Did not find item at postion " << position;
+            //qDebug() << item->index();
+            //qDebug() << "Did not find item at postion " << position;
             return false;
         }
 
     }
     else
     {
-        qDebug() << name << " at " << position << " Not in playlist";
+        //qDebug() << name << " at " << position << " Not in playlist";
         return false;
     }
 
@@ -186,9 +186,9 @@ QModelIndex EPGChannelList::getChannelIndex(const QString &name) const
         {
             if (m_list.at(l)->data(3).toInt() == name.toInt())
             {
-                qDebug() << m_list.at(l)->data(4) << "::" << name ;
+                //qDebug() << m_list.at(l)->data(4) << "::" << name ;
                 QModelIndex index = indexFromItem(m_list.at(l));
-                qDebug() << index;
+                //qDebug() << index;
                 return index;
             }
             else

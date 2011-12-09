@@ -681,10 +681,13 @@ void qOrbiter::CMD_Set_Text(string sPK_DesignObj,string sText,int iPK_Text,strin
 void qOrbiter::CMD_Set_Bound_Icon(string sValue_To_Assign,string sText,string sType,string &sCMD_Result,Message *pMessage)
 //<-dceag-c26-e->
 {
+    /*
     cout << "Need to implement command #26 - Set Bound Icon" << endl;
     cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
     cout << "Parm #9 - Text=" << sText << endl;
     cout << "Parm #14 - Type=" << sType << endl;
+    */
+
 }
 
 //<-dceag-c27-b->
@@ -782,12 +785,13 @@ void qOrbiter::CMD_Store_Variables(string &sCMD_Result,Message *pMessage)
 void qOrbiter::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *pData,int iData_Size,string sDisable_Aspect_Lock,string &sCMD_Result,Message *pMessage)
 //<-dceag-c32-e->
 {
+    /*
     cout << "Need to implement command #32 - Update Object Image" << endl;
     cout << "Parm #3 - PK_DesignObj=" << sPK_DesignObj << endl;
     cout << "Parm #14 - Type=" << sType << endl;
     cout << "Parm #19 - Data  (data value)" << endl;
     cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
-
+*/
     QImage tempImage;
     tempImage.loadFromData(QByteArray(pData, iData_Size));
     qmlUI->updateImageChanged(tempImage);
@@ -1019,6 +1023,7 @@ void qOrbiter::CMD_Continuous_Refresh(string sTime,string &sCMD_Result,Message *
 void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,string sText,int iPK_MediaType,int iStreamID,int iValue,string sName,string sList_PK_Device,bool bRetransmit,string &sCMD_Result,Message *pMessage)
 //<-dceag-c242-e->
 {
+    /*
     cout << "Need to implement command #242 - Set Now Playing" << endl;
     cout << "Parm #3 - PK_DesignObj=" << sPK_DesignObj << endl;
     cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
@@ -1029,6 +1034,8 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     cout << "Parm #50 - Name=" << sName << endl;
     cout << "Parm #103 - List_PK_Device=" << sList_PK_Device << endl;
     cout << "Parm #120 - Retransmit=" << bRetransmit << endl;
+    */
+
     string::size_type pos=0;
     m_dwPK_Device_NowPlaying = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
     m_dwPK_Device_NowPlaying_Video = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
@@ -1358,16 +1365,16 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
       */
     if(qmlUI->backwards == true)
     {
-        qDebug("Going Backwards!");
+        //qDebug("Going Backwards!");
         //qmlUI->q_pk_attribute = "";
 
         if(qmlUI->goBack.count() > 0)
         {
-            qDebug("Greater than zero?");
+            //qDebug("Greater than zero?");
 
             qmlUI->goBack.removeLast();
             s= qmlUI->goBack.last();
-            qDebug() << s;
+            //qDebug() << s;
         }
         else if (qmlUI->goBack.count() == 0)
         {
@@ -1415,7 +1422,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
         params = "|"+qmlUI->q_subType +"|"+qmlUI->q_fileFormat+"|"+qmlUI->q_attribute_genres+"|"+qmlUI->q_mediaSources+"||"+qmlUI->q_attributetype_sort+"||2|"+qmlUI->q_pk_attribute+"";
         s = QString::number(iPK_MediaType) + params;
         qmlUI->i_current_mediaType = iPK_MediaType;
-        qDebug() << s;
+        //qDebug() << s;
         qmlUI->goBack<< s;
 
         qDebug() << "Datagrid request options:";
@@ -1474,7 +1481,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                 {
                     DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
                     int cellsToRender= pDataGridTable->GetRows();
-                    qDebug() << pDataGridTable->GetCols();
+                    //qDebug() << pDataGridTable->GetCols();
 
                     //qDebug() << "Picture Datagrid Height:" << gHeight << " , width: " << gWidth;
                    // qDebug() << "Response: " << cellsToRender << " picture cells to render";
@@ -1516,7 +1523,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                     }
                     if (cellsToRender > qmlUI->model->rowCount(QModelIndex()))
                     {
-                        qDebug() <<"Addtional media loading";
+                        //qDebug() <<"Addtional media loading";
                         populateAdditionalMedia();
                     }
                 }
@@ -1762,24 +1769,24 @@ void qOrbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool 
     cout << "Parm #253 - Queue=" << bQueue << endl;
     cout << "scmdresult" << sCMD_Result << endl;
 
-    qDebug() << "Vect msg count" << pMessage->m_vectExtraMessages.size();
+    //qDebug() << "Vect msg count" << pMessage->m_vectExtraMessages.size();
 
     map<long, string >::const_iterator end = pMessage->m_mapParameters.end();
     for (map<long, string >::const_iterator it = pMessage->m_mapParameters.begin(); it != end; ++it)
     {
         long dparam = it->first;
         string dparam2 = it->second;
-        qDebug() << "Map  Param: " << dparam << " Value: " << dparam2.c_str();
+        //qDebug() << "Map  Param: " << dparam << " Value: " << dparam2.c_str();
         qmlUI->ScreenParameters->addParam( QString::fromStdString(dparam2), dparam );
     }
 
-    qDebug() << "Data params count" << pMessage->m_mapData_Parameters.size();
+    //qDebug() << "Data params count" << pMessage->m_mapData_Parameters.size();
     map<long, char* >::const_iterator end2 = pMessage->m_mapData_Parameters.end();
     for (map<long, char* >::const_iterator it2 = pMessage->m_mapData_Parameters.begin(); it2 != end2; ++it2)
     {
         long dparam = it2->first;
         string dparam2 = it2->second;
-        qDebug() << "Data  Param: " << dparam << " Value: " << dparam2.c_str();
+        //qDebug() << "Data  Param: " << dparam << " Value: " << dparam2.c_str();
     }
 
 
@@ -2032,7 +2039,7 @@ QImage DCE::qOrbiter::getfileForDG(string filePath)
 
     if (!returnImage.loadFromData(configData))
     {
-        qDebug() << "Couldnt get image, defaulting";
+        //qDebug() << "Couldnt get image, defaulting";
         returnImage.load(":/icons/videos.png");
     }
 
@@ -2215,12 +2222,12 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 {
                     if (qmlUI->filedetailsclass->mediatitle ==attribute )
                     {
-                        qDebug("Episode");
+                        //qDebug("Episode");
                         qmlUI->filedetailsclass->setEpisode(attribute);
                     }
                     else
                     {
-                        qDebug("Setting title");
+                       // qDebug("Setting title");
                         qmlUI->filedetailsclass->setMediaTitle(attribute);
                     }
 
@@ -2692,8 +2699,8 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
             //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             int cellsToRender= pDataGridTable->GetRows();
-            qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
-            qDebug() << "Response: " << cellsToRender << " cells to render";
+            //qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
+           // qDebug() << "Response: " << cellsToRender << " cells to render";
 
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
             QString cellTitle;
@@ -2936,7 +2943,7 @@ void DCE::qOrbiter::changedTrack(QString direction)
 
 void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that populates after the initial request to break out the threading and allow for a checkpoint across threads
 {
-    qDebug() << "requesting additional media";
+    //qDebug() << "requesting additional media";
     qmlUI->requestMore = true;
 
     while(qmlUI->model->totalcells > qmlUI->model->rowCount(QModelIndex()) && qmlUI->currentScreen == "Screen_47.qml" && qmlUI->requestMore == true)
@@ -3209,7 +3216,7 @@ void DCE::qOrbiter::GetAlarms(bool toggle, int grp)
             {
                 DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
                 cellsToRender= pDataGridTable->GetRows();
-                qDebug() << "Rows: " << cellsToRender;
+                //qDebug() << "Rows: " << cellsToRender;
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "sleeping menu alarms Grid Dimensions: Height %i, Width %i", gHeight, gWidth);
                 QString name;
                 QString days;
@@ -3222,7 +3229,7 @@ void DCE::qOrbiter::GetAlarms(bool toggle, int grp)
                 for (int counter = 0; counter < cellsToRender; counter++)
                 {
                     DataGridCell *pCell = pDataGridTable->GetData(row,col);
-                    qDebug() << "Row: " << row << ",Col:" << col;
+                    //qDebug() << "Row: " << row << ",Col:" << col;
 
                     if (row == 0)
                     {
@@ -3308,7 +3315,7 @@ void DCE::qOrbiter::setPosition(QString position)
 
     {
         CMD_Set_Media_Position setPosition(qmlUI->iPK_Device, m_dwPK_Device_NowPlaying, qmlUI->nowPlayingButton->i_streamID, position.toStdString());
-        qDebug("DVD pls change") ;
+        //qDebug("DVD pls change") ;
         if(!SendCommand(setPosition))
         {
             qmlUI->checkConnection();
@@ -3440,9 +3447,9 @@ void DCE::qOrbiter::showAdvancedButtons()
                 filePath = QString::fromUtf8(pPath);
                 fk_file = pCell->GetValue();
                 cellTitle = QString::fromUtf8(pCell->m_Text);
-                qDebug() << cellTitle;
-                qDebug() << pCell->GetValue();
-                qDebug() << pCell->m_NumAttributes;
+                //qDebug() << cellTitle;
+                //qDebug() << pCell->GetValue();
+                //qDebug() << pCell->m_NumAttributes;
                 index = pDataGridTable->CovertColRowType(it->first).first;
                 /*
              //   qmlUI->model->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg,  qmlUI->model));
@@ -3475,7 +3482,7 @@ void DCE::qOrbiter::addToPlaylist(bool now, std::string playlist)
 
 void DCE::qOrbiter::grabScreenshot()
 {
-    qDebug("Getting Screenshot");
+    //qDebug("Getting Screenshot");
     char *screenieData;         //screenshot data using the char** data structure for passing of data
     int screenieDataSize=0;       //var for size of data
     string s_format ="jpg";   //the format we want returned
@@ -3488,15 +3495,15 @@ void DCE::qOrbiter::grabScreenshot()
     SendCommand(grabMediaScreenshot);
 
     QByteArray configData;              //config file put into qbytearray for processing
-    qDebug() << screenieDataSize;
+    //qDebug() << screenieDataSize;
 
     configData.setRawData(screenieData, screenieDataSize);
-    qDebug() << configData.size();
+    //qDebug() << configData.size();
     QImage returnImage;
 
     if (!returnImage.loadFromData(configData))
     {
-        qDebug() << "Couldnt get image, defaulting";
+        //qDebug() << "Couldnt get image, defaulting";
         returnImage.load(":/icons/videos.png");
     }
 
@@ -3555,8 +3562,8 @@ void DCE::qOrbiter::grabScreenshot()
             //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             int cellsToRender= pDataGridTable->GetRows();
-            qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
-            qDebug() << "Response: " << cellsToRender << " cells to render";
+            //qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
+            //qDebug() << "Response: " << cellsToRender << " cells to render";
 
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
             QString cellTitle;
@@ -3577,10 +3584,10 @@ void DCE::qOrbiter::grabScreenshot()
                 cellTitle = pCell->GetText();
                 cellAttribute = pCell->GetValue();
                 cellfk = pCell->GetValue();
-                qDebug() << cellTitle << cellAttribute << cellfk ;
+                //qDebug() << cellTitle << cellAttribute << cellfk ;
                 QStringList parser = cellTitle.split(QRegExp("(\\n|:\\s)"), QString::KeepEmptyParts);
                 //qDebug() << "Processing" << parser.at(0);
-                qDebug() << parser.join("--");
+                //qDebug() << parser.join("--");
 
                 qmlUI->screenshotVars.append(new screenshotAttributes( cellfk, cellTitle, cellAttribute ));
             }
@@ -3735,7 +3742,7 @@ void DCE::qOrbiter::extraButtons(QString button)
 
 void DCE::qOrbiter::saveScreenAttribute(int attribute)
 {
-    qDebug() << "Save attribute routine" << attribute;
+    //qDebug() << "Save attribute routine" << attribute;
     string sFilename = "!A"+ StringUtils::itos(attribute);
     QByteArray bytes;
     QBuffer ba(&bytes);

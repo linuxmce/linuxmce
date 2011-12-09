@@ -76,11 +76,12 @@ FloorPlanItem * FloorPlanModel::find(const QString &id) const
 
       if(item->id().contains(id))
       {
-          qDebug() << "Found Match of: " << item->id() << "to " << id;return item;
+          //qDebug() << "Found Match of: " << item->id() << "to " << id;
+          return item;
       }
       else
       {
-          qDebug() << item->id();
+        //  qDebug() << item->id();
       }
   }
   return 0;
@@ -97,7 +98,7 @@ QModelIndex FloorPlanModel::indexFromItem(const FloorPlanItem *item) const
       }
 
   }
- qDebug("fail!");
+
   return QModelIndex();
 }
 
@@ -148,13 +149,13 @@ FloorPlanItem * FloorPlanModel::currentRow()
 
 QImage FloorPlanModel::getPageImage(QString &id)
 {
-    qDebug() << "Seeking page id:" << id;
+
     FloorPlanItem *myItem = find(id);
     if (!myItem)
     { QImage fail;
         return fail;
     }
-    qDebug() << myItem->id() << "::" << id;
+
      QImage fpImage= myItem->floorplanImage();    
     return fpImage;
 }

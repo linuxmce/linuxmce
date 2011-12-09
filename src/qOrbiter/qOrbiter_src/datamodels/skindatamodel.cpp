@@ -65,7 +65,7 @@ void SkinDataModel::handleItemChange()
 SkinDataItem * SkinDataModel::find(const QString &id) const
 {
     foreach(SkinDataItem* item, m_list) {
-        qDebug() << item->id();
+
         if(item->id().toLower() == id.toLower())
         {
             return item;
@@ -145,7 +145,7 @@ void SkinDataModel::addSkin(QString name) {
                 qDebug("Error!");
                 break;
             }
-qDebug() << skinData.status();
+
 
         }
 
@@ -176,7 +176,7 @@ void SkinDataModel::setActiveSkin(QString name)
     qDebug() << "Loading Skin at " + m_baseUrl.toString() + "/" + name;
 
     QString skinURL = find(name)->path();
-    qDebug() << skinURL;
+
 
     QDeclarativeComponent skinData(ui_reference->qorbiterUIwin->engine(), skinURL);
     QObject *styleObject = skinData.create(ui_reference->qorbiterUIwin->rootContext());
@@ -199,7 +199,7 @@ void SkinDataModel::setActiveSkin(QString name)
                 break;
             }
 
-            qDebug() << " loading";
+
         }
 
     }

@@ -139,7 +139,7 @@ Rectangle {
                     id: rating
                    width: rectangle1.width *.95
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    text: filedetailsclass.rating
+                    text: qsTr("Rating")
                     font.family: "Droid Sans"
                     //  font.bold: true
                     smooth: true

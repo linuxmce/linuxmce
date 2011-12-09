@@ -215,7 +215,7 @@ public slots:
     void setMediaType (int inc_mediaType) {i_mediaType = inc_mediaType; emit mediaTypeChanged();}
     int  getMediaType () {return i_mediaType;}
 
-    void setFilePath (QString inc_fp) {filepath = inc_fp; qDebug() <<"FilePath:" << filepath; emit filePathChanged();}
+    void setFilePath (QString inc_fp) {filepath = inc_fp; emit filePathChanged();}
     QString getFilePath () {return filepath;}
 
     //general media getters and setters ----//
@@ -223,7 +223,7 @@ public slots:
     void setMediaTitle (QString inc_mediaTitle) {mediatitle = inc_mediaTitle;  emit mediaTitleChanged();}
     QString getMediaTitle () {return mediatitle;}
 
-    void setPlaylistPostion(int i_pls) {m_iplaylistPosition = i_pls; qDebug() << "Playlist set to: "<< m_iplaylistPosition;  emit playListPositionChanged();}
+    void setPlaylistPostion(int i_pls) {m_iplaylistPosition = i_pls;  emit playListPositionChanged();}
     int getPlaylistPosition() {return m_iplaylistPosition;}
 
     void setMediaSpeed(int speed);
@@ -261,7 +261,7 @@ public slots:
                 QString getRelease() {return releasedate;}
 
                 inline QString getSynop() {return synop;}
-                inline void setSynop(QString s) { synop = s; qDebug()<< synop; emit synopChanged(); }
+                inline void setSynop(QString s) { synop = s;  emit synopChanged(); }
     };
 
         #endif // NOWPLAYINGCLASS_H
