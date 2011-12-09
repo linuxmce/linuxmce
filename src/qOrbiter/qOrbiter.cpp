@@ -25,6 +25,7 @@
 #include "PlutoUtils/Other.h"
 #include "datamodels/listModel.h"
 #include "QDebug"
+#include "QBuffer"
 
 #include <iostream>
 using namespace std;
@@ -3576,6 +3577,7 @@ void DCE::qOrbiter::grabScreenshot()
                 cellTitle = pCell->GetText();
                 cellAttribute = pCell->GetValue();
                 cellfk = pCell->GetValue();
+                qDebug() << cellTitle << cellAttribute << cellfk ;
                 QStringList parser = cellTitle.split(QRegExp("(\\n|:\\s)"), QString::KeepEmptyParts);
                 //qDebug() << "Processing" << parser.at(0);
                 qDebug() << parser.join("--");
@@ -3734,7 +3736,17 @@ void DCE::qOrbiter::extraButtons(QString button)
 void DCE::qOrbiter::saveScreenAttribute(int attribute)
 {
     qDebug() << "Save attribute routine" << attribute;
-
+    string sFilename = "!A"+ StringUtils::itos(attribute);
+    QByteArray bytes;
+    QBuffer ba(&bytes);
+    ba.open(QIODevice::WriteOnly);
+    qmlUI->mediaScreenShot.save(&ba, "JPG");
+    ba.close();
+    char *pData = (char*) bytes.constData();
+    int pDataSize = qmlUI->mediaScreenShot.byteCount();
+    //todo - add file F! to this list of attributes
+    CMD_Make_Thumbnail thumb(qmlUI->iPK_Device, qmlUI->iMediaPluginID, sFilename, pData, pDataSize );
+    SendCommand(thumb);
 }
 
 void DCE::qOrbiter::newOrbiter()
@@ -3770,6 +3782,7 @@ void DCE::qOrbiter::adjustLighting(int level)
     {
         CMD_Set_Level dn(qmlUI->iPK_Device, qmlUI->iPK_Device_LightingPlugin, StringUtils::itos(level));
         SendCommand(dn);
+
     }
 }
 
