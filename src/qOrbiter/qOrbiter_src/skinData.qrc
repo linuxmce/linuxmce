@@ -46,4 +46,5 @@
     <qresource prefix="/desktop">
         <file alias="Splash.qml">qml/Splash.qml</file>
     </qresource>
+    <qresource prefix="/new/prefix1"/>
 </RCC>

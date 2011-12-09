@@ -45,19 +45,18 @@ using namespace DCE;
 
   This class will evolve into a manager role, with the qml window handling being done elsewhere. we will see how this goes.
 */
-qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeView *view, QObject *parent) :
-    QObject(parent), iPK_Device(deviceno), qs_routerip(routerip)
+qorbiterManager::qorbiterManager(int deviceno, QString routerip, QObject *parent) :
+    QObject(parent),iPK_Device(deviceno), qs_routerip(routerip)
 {
-    qorbiterUIwin = view; //initialize the declarative view to act upon its context
+    qorbiterUIwin = new QDeclarativeView() ;  //initialize the declarative view to act upon its context
+
     qorbiterUIwin->rootContext()->setContextProperty("srouterip", QString(qs_routerip) );
     qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
-    qorbiterUIwin->rootContext()->setContextObject(this); //providing a direct object for qml to call c++ functions of this class
-    //qorbiterUIwin->setSource(QUrl("qrc:desktop/Splash.qml"));
+    qorbiterUIwin->rootContext()->setContextProperty("manager", this); //providing a direct object for qml to call c++ functions of this class
+    qorbiterUIwin->setSource(QUrl("qrc:desktop/Splash.qml"));
+    item=dynamic_cast<QObject*>(qorbiterUIwin->rootObject());
 
-    item= qorbiterUIwin->rootObject();
-    connect(item,SIGNAL(setupStart(QString, QString)), this,SLOT(qmlSetupLmce(QString,QString)));
-    connect(this, SIGNAL(continueSetup()), this, SLOT(showSystemSplash()));
-/*
+
 #ifdef Q_OS_SYMBIAN
     qorbiterUIwin->showFullScreen();
 #elif defined(Q_WS_MAEMO_5)
@@ -65,14 +64,14 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
 #elif defined(for_harmattan)
     qorbiterUIwin->showFullScreen();
 #elif defined(for_desktop)
-    qorbiterUIwin->show();
+    qorbiterUIwin->showMaximized();
 #else
     qorbiterUIwin->show();
 #endif
     qDebug("Showing");
-*/
-  emit continueSetup();
 
+
+initializeConnections();
     //TODO, extract to a config
     //TODO, execute this already if we have config data.
     //setupLmce(iPK_Device, routerip.toStdString(), true, false);
@@ -142,9 +141,6 @@ void qorbiterManager::showSystemSplash() {
     timecodeThread = new QThread;
     timeCodeSocket = new QTcpSocket(timecodeThread);
     timecodeThread->start();
-
-
-
 
     //QObject::connect(nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection );
     //iPK_Device= deviceno;
@@ -1260,14 +1256,10 @@ void qorbiterManager::changedPlaylistPosition(QString position)
 
 void qorbiterManager::setNowPlayingData()
 {
-
     pqOrbiter->BindMediaRemote(true);
     pqOrbiter->requestMediaPlaylist();
     updateTimecode();
-
 }
-
-
 
 void qorbiterManager::updateImageChanged(QImage img)
 {
@@ -1279,8 +1271,6 @@ void qorbiterManager::setNowPlayingTv()
 {
     pqOrbiter->BindMediaRemote(true);
     pqOrbiter->requestMediaPlaylist();
-
-
 }
 
 void qorbiterManager::changeChannels(QString chan)
@@ -1292,7 +1282,6 @@ void qorbiterManager::getLiveTVPlaylist()
 {
     // qDebug() << "Orbiter Manager slot called";
     //emit liveTVrequest();
-
 }
 
 void qorbiterManager::gridChangeChannel(QString chan, QString chanid)
@@ -1442,9 +1431,6 @@ void qorbiterManager::checkConnection()
     }
 }
 
-
-
-
 void qorbiterManager::jogPosition(QString jog)
 {
     pqOrbiter->JogStream(jog);
@@ -1497,6 +1483,22 @@ void qorbiterManager::processError(QString msg)
 void qorbiterManager::setActiveSkin(QString name)
 {
 
+}
+
+void qorbiterManager::cleanupScreenie()
+{
+    mediaScreenShot = QImage();
+    screenshotVars.clear();
+    qDebug("Cleaned up Screenshot model");
+}
+
+void qorbiterManager::initializeConnections()
+{
+    //connections to splash.qml slots
+    QObject::connect(item,SIGNAL(splashLoaded()), this,SLOT(showSystemSplash()));
+    QObject::connect(this, SIGNAL(continueSetup()), this, SLOT(showSystemSplash()));
+
+      emit continueSetup();
 }
 
 

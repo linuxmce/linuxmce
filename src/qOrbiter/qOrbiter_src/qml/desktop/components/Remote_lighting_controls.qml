@@ -35,7 +35,7 @@ AvOptionButton {
         source: "../../../img/icons/player_fwd.png"
         MouseArea{
             anchors.fill: parent
-            onClicked: adjustLighting(10)
+            onClicked: dcerouter.adjustLighting(10)
         }
     }
 
@@ -50,7 +50,7 @@ AvOptionButton {
         source: "../../../img/icons/player_fwd.png"
         MouseArea{
             anchors.fill: parent
-            onClicked: adjustLighting(-10)
+            onClicked: dcerouter.adjustLighting(-10)
         }
     }
 

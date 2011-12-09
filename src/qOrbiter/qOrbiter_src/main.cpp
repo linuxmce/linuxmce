@@ -32,6 +32,14 @@
 const char *g_szCompile_Date="<=compile_date=>";
 /*SVN_REVISION*/
 
+class processThread : public QThread
+{
+
+public:
+    void run() {
+        exec();
+    }
+};
 
 using namespace DCE;
 
@@ -220,11 +228,15 @@ int main(int argc, char* argv[])
 
 #endif
         QApplication a(argc, argv);
-        QDeclarativeView mainView;
-        mainView.setSource(QUrl("qrc:desktop/Splash.qml"));
-        mainView.showMaximized();
-        qorbiterManager * w = new qorbiterManager(PK_Device,QString::fromStdString(sRouter_IP.c_str()), &mainView);
-        a.exec();
+
+       // QDeclarativeView mainView;
+       // mainView.setSource(QUrl("qrc:desktop/Splash.qml"));
+       // mainView.showMaximized();
+
+        qorbiterManager * w = new qorbiterManager((int)PK_Device,QString::fromStdString(sRouter_IP));
+
+
+        return a.exec();
     }
     catch(string s)
     {

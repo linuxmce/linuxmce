@@ -9,6 +9,7 @@ Rectangle {
     height: 600
     color: "slategrey"
     signal setupStart(string x, string y)
+    signal splashLoaded()
 
 
 
@@ -35,5 +36,5 @@ Rectangle {
         anchors.fill: parent
     }    
 
-
+    Component.onCompleted: splashLoaded()
 }

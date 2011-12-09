@@ -3731,8 +3731,9 @@ void DCE::qOrbiter::extraButtons(QString button)
 
 }
 
-void DCE::qOrbiter::saveScreenAttribute()
+void DCE::qOrbiter::saveScreenAttribute(int attribute)
 {
+    qDebug() << "Save attribute routine" << attribute;
 
 }
 
@@ -3756,5 +3757,19 @@ int DCE::qOrbiter::PromptFor(std::string sToken)
 int DCE::qOrbiter::PromptUser(std::string sPrompt, int iTimeoutSeconds, map<int, std::string> *p_mapPrompts)
 {
 
+}
+
+void DCE::qOrbiter::adjustLighting(int level)
+{
+    if (level == 10)
+    {
+        CMD_Set_Level up(qmlUI->iPK_Device, qmlUI->iPK_Device_LightingPlugin, StringUtils::itos(level));
+        SendCommand(up);
+    }
+    else
+    {
+        CMD_Set_Level dn(qmlUI->iPK_Device, qmlUI->iPK_Device_LightingPlugin, StringUtils::itos(level));
+        SendCommand(dn);
+    }
 }
 

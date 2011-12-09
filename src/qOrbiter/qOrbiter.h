@@ -92,7 +92,7 @@ public:
     Q_INVOKABLE void GetMultipleSecurityCams(QStringList cams);
     Q_INVOKABLE void GetNowPlayingAttributes();
     Q_INVOKABLE void TuneToChannel(int channel, QString chanid);
-
+    Q_INVOKABLE void adjustLighting(int level);
     Q_INVOKABLE void adjustVolume( int vol);
     Q_INVOKABLE void mute();
     Q_INVOKABLE void changedTrack(QString direction);
@@ -128,7 +128,7 @@ public:
     Q_INVOKABLE void blueButton();
     //buttons from the more screen
     Q_INVOKABLE void extraButtons(QString button);
-    Q_INVOKABLE void saveScreenAttribute();
+    Q_INVOKABLE void saveScreenAttribute(int attribute);
     Q_INVOKABLE void newOrbiter();
     virtual int PromptUser(string sPrompt,int iTimeoutSeconds=10,map<int,string> *p_mapPrompts = NULL);
     virtual int PromptFor(string sToken);

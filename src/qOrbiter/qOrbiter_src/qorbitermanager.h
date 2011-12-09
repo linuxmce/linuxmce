@@ -116,7 +116,7 @@ class qorbiterManager : public QObject
 
 
 public:
-    qorbiterManager(int deviceno, QString routerip, QDeclarativeView *view, QObject *parent = 0);  //constructor
+    qorbiterManager(int deviceno, QString routerip,  QObject *parent =0);  //constructor
 
     QThread *processingThread; //threaded class
     QThread *timecodeThread; //for timecode
@@ -387,6 +387,7 @@ void showSystemSplash();
     void updateImageChanged(QImage img);
     void updateTimecode();
     void showTimeCode();
+    Q_INVOKABLE void cleanupScreenie();
 
     Q_INVOKABLE void setActiveSkin(QString name);
     Q_INVOKABLE  void loadSkins(QUrl url);
@@ -436,7 +437,7 @@ void processError(QString msg);
     void setHouseMode(int mode, int pass);
     \
 private:
-
+    void initializeConnections();
 
 };
 

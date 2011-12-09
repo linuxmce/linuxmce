@@ -6,7 +6,7 @@ Rectangle {
     width: scaleX(65)
     height: scaleY(75)
     radius: 5
-    color: "slategrey"      
+    color: "slategrey"
 
     Text {
         id: labelscreenshot
@@ -18,20 +18,29 @@ Rectangle {
     Component
     {
         id:thumbdelegate
-    Rectangle{
+        Rectangle{
+            id:attributedelegate
+            height: 50
+            width: parent.width-1
+            color: style.accentcolor
+            Text {
+                id: propertystring
+                text: attributeType
+            }
 
-        height: 50
-        width: parent.width-1
-        color: style.accentcolor
-        Text {
-            id: propertystring
-            text: attributeType
-        }
-       /* Text {
+            MouseArea{
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered: attributedelegate.color = "aliceblue"
+                onExited: attributedelegate.color = style.accentcolor
+                onClicked: dcerouter.saveScreenAttribute(attributeNo)
+            }
+
+            /* Text {
             id: propertystring2
             text: attributeNo
         } */
-     }
+        }
     }
 
     Rectangle{
@@ -55,7 +64,6 @@ Rectangle {
             height: parent.height
             width: parent.width
             visible: true
-
         }
     }
 
@@ -63,11 +71,10 @@ Rectangle {
         id: screenshotImage
         anchors.left: attributes.right
         anchors.leftMargin: 10
-        source: "image://listprovider/screenshot/"
+        source: "image://listprovider/screenshot/"+securityvideo.timestamp
         height: parent.height *.65
         fillMode: Image.PreserveAspectFit
         width: parent.width*.50
-
     }
 
     ButtonSq
@@ -82,7 +89,10 @@ Rectangle {
         anchors.rightMargin: scaleX(1)
         MouseArea{
             anchors.fill: parent
-            onClicked: assignscreenshot.destroy()
+            onClicked: {
+                cleanupScreenie();
+                assignscreenshot.destroy()
+            }
         }
     }
 
