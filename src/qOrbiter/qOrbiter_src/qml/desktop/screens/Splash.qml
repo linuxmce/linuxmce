@@ -3,7 +3,7 @@
   */
 
 import QtQuick 1.0
-import "../screens"
+import "../components"
 
 Rectangle {
     id: rectangle1

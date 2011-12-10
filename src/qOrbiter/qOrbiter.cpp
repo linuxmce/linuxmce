@@ -110,7 +110,7 @@ bool qOrbiter::GetConfig()
         {
             qmlUI->processError("Invalid config for device: " + QString::number(qmlUI->iPK_Device));
             qmlUI->processError("Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d=" + QString::number(qmlUI->iPK_Device)) ;
-            qmlUI->gotoQScreen("Splash.qml");
+            //qmlUI->gotoQScreen("Splash.qml");
             return false;
         }
         qmlUI->binaryConfig = configData;

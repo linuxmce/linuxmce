@@ -260,11 +260,21 @@ void qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
 void qorbiterManager::refreshUI()
 {
-    gotoQScreen("Splash.qml");
-    if(cleanupData() && pqOrbiter->GetConfig())
-    {
-        getConf(iPK_Device);
-    }
+
+splashWindow->showFullScreen();
+qorbiterUIwin->close();
+ QApplication::processEvents(QEventLoop::AllEvents);
+
+ if (pqOrbiter->GetConfig())
+ {
+     qDebug("Regen success, loading...");
+     getConf(iPK_Device);
+ }
+ else
+ {
+     qDebug("Cant Get Config!");
+ }
+
 
 }
 
@@ -662,9 +672,10 @@ void qorbiterManager::swapSkins(QString incSkin)
     currentSkin = incSkin;
     qorbiterUIwin->engine()->rootContext()->setContextProperty("style", styleObject);
     qorbiterUIwin->setSource(skin->entryUrl());
-    startOrbiter();
-    emit orbiterReady();
     writeConfig();
+    startOrbiter();
+    //emit orbiterReady();
+
 }
 
 
@@ -761,23 +772,29 @@ int qorbiterManager::getlocation() const
 
 void qorbiterManager::regenOrbiter(int deviceNo)
 {
-    gotoQScreen("Splash.qml");
+
+
     qDebug() << "Regenerating..";
     qDebug() << qs_routerip;
 
-    if(qs_routerip =="192.168.80.1")
+    if(qs_routerip =="127.0.0.1")
     {
-        gotoQScreen("LoadError.qml");
-        qDebug("remote orbiter");
-    }
-    else
-    {
-        qDebug("local orbiter");
+
+        splashWindow->showFullScreen();
+        qorbiterUIwin->close();
+        QApplication::processEvents(QEventLoop::AllEvents);
+        qDebug("Onscreen orbiter");
         QProcess *regen = new QProcess(this);
         regen->start("/usr/bin/php /var/www/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device), QIODevice::ReadOnly);
         qDebug() <<"status code:" << regen->errorString();
         QObject::connect(regen,SIGNAL(finished(int)), this, SLOT(regenComplete(int)));
         QObject::connect(regen,SIGNAL(error(QProcess::ProcessError)), this, SLOT(regenError(QProcess::ProcessError)));
+
+    }
+    else
+    {
+       qDebug("remote orbiter");
+       gotoQScreen("WebRegen.qml");
     }
 
 
@@ -1448,8 +1465,8 @@ void qorbiterManager::jogPosition(QString jog)
 
 void qorbiterManager::regenError(QProcess::ProcessError)
 {
-    qDebug("Error!");
-
+    qDebug("Error! Reloading existing config for device " + iPK_Device);
+   getConf(iPK_Device);
 }
 
 bool qorbiterManager::cleanupData()
@@ -1483,6 +1500,10 @@ void qorbiterManager::startOrbiter()
 {
     qorbiterUIwin->setWindowTitle("LinuxMCE Orbiter " + QString::number(iPK_Device));
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeViewToRootObject);
+
+emit orbiterReady();
+//QApplication::processEvents(QEventLoop::AllEvents);
+gotoQScreen("Screen_1.qml");
 #ifdef Q_OS_SYMBIAN
     qorbiterUIwin->showFullScreen();
 #elif defined(Q_WS_MAEMO_5)
@@ -1494,10 +1515,10 @@ void qorbiterManager::startOrbiter()
 #else
     qorbiterUIwin->show();
 #endif
-    emit orbiterReady();
+
+
     qDebug("Showing");
 
-    gotoQScreen("Screen_1.qml");
 }
 
 void qorbiterManager::processError(QString msg)
