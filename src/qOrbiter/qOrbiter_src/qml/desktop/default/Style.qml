@@ -88,8 +88,7 @@ QtObject{
     property color button_action_color: "lightsteelblue"
     property color button_action_color_hover: "lightblue"
 
-    property variant bgImg: "null"
-    property string b_title: "null"
+
     property int but_smooth: 10
 
     //navigations

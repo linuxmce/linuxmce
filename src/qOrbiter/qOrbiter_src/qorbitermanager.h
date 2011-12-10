@@ -372,8 +372,8 @@ void startSetup();
     bool readLocalConfig();
     void setConnectedState(bool state) { connectedState = state;  if(state == false) {checkConnection();} emit connectedStateChanged(); }
     bool getConnectedState () {return connectedState;}
-    void setDceResponse(QString response) {dceResponse = response; emit dceResponseChanged();}
-    QString getDceResponse () {return dceResponse;}
+    void setDceResponse(QString response);
+    QString getDceResponse () ;
 
     //security related
     Q_INVOKABLE void requestSecurityPic(int i_pk_camera_device, int h, int w);

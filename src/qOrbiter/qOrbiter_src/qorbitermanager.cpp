@@ -50,24 +50,35 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QObject *parent
 
     dceResponse = "";
     setDceResponse("Loading");
+    QUrl qrcPath;
 
         #ifdef for_desktop
             buildType = "/qml/desktop";
+            qrcPath = "qrc:desktop/Splash.qml";
    #elif defined (for_freemantle)
             buildType = "/qml/freemantle";
+            qrcPath = "qrc:freemantle/Splash.qml";
         #elif defined (for_harmattan)
             buildType="/qml/harmattan";
+            qrcPath = "qrc:harmattan/Splash.qml";
         #elif defined (Q_OS_MACX)
             buildType="/qml/desktop";
+            qrcPath = "qrc:ipad/Splash.qml";
         #elif defined (ANDROID)
             buildType = "/qml/android";
+            qrcPath = "qrc:android-phone/Splash.qml";
         #elif defined (for_droid)
             buildType = "/qml/android/phone";
+            qrcPath = "qrc:android-tablet/Splash.qml";
         #endif
+
+            /*
+              To setup the splash.qml for each platform, set the proper define which will then select the proper splash for your platform.
+              */
+
 
     QPalette palette;
     palette.setColor(QPalette::Base, Qt::transparent);
-
 
     splashWindow = new QMainWindow(0, Qt::FramelessWindowHint);     //window for splash
     splashWindow->setAttribute(Qt::WA_TranslucentBackground, true); //setting transparent bg?
@@ -79,7 +90,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QObject *parent
 
     splashView->setPalette(palette);
 splashView->rootContext()->setContextProperty("dcemessage", dceResponse); //sets connection to messaging variable in splash window
-    splashView->setSource((QUrl("qrc:desktop/Splash.qml")));        //using the QRC splash as a kickstart
+    splashView->setSource((qrcPath));        //using the QRC splash as a kickstart
 
 #ifdef Q_OS_SYMBIAN
     splashWindow->showFullScreen();
@@ -118,7 +129,6 @@ splashView->rootContext()->setContextProperty("dcemessage", dceResponse); //sets
   This function begins to initialize internal varaiables and objects needed at startup
   when its complete, it should emit a signal for the next step. now it calls setup lmce directly.
   */
-
 void qorbiterManager::startSetup() {
 
 
@@ -240,13 +250,11 @@ void qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
     //connecting cross object slots - from dce/qt subclass(qorbiter) to pure qt (qorbitermanager)
     //QObject::connect(pqOrbiter,SIGNAL(disconnected(QString)), this, SLOT(processError(QString)));
 
-
-    qDebug() << "Attempting connection" << iPK_Device;
-
+    setDceResponse("Attempting connection for device:" + iPK_Device);
 
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
     {
-        qDebug() << "Orbiter connected ..";
+        setDceResponse("Orbiter  connected");
         getConf(PK_Device);
         /*
               we get various variable here that we will need later. I store them in the qt object so it
@@ -263,7 +271,7 @@ void qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
         }
         else
         {
-            qDebug() << "Orbiter Conf Hiccup!";
+            setDceResponse("Orbiter Conf Hiccup! for device " + iPK_Device);
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Device Failed to get configuration!");
             //return true;
         }
@@ -277,7 +285,7 @@ void qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             bAppError = false;
             bReload = false;
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "main loop No Router.  Will abort");
-            qDebug() << " main loop- No Router, Aborting";
+            setDceResponse(" main loop- No Router, Aborting");
         }
         else
         {
@@ -357,7 +365,7 @@ void qorbiterManager::getConf(int pPK_Device)
         QString m_description= floorplanList.at(index).attributes().namedItem("Description").nodeValue();
         int m_page= floorplanList.at(index).attributes().namedItem("Page").nodeValue().toInt();
 
-        qDebug () << "/usr/pluto/orbiter/floorplans/inst" << m_installation.toStdString().c_str()<<"/"<<StringUtils::itos(m_page).c_str()<<".png";
+       // qDebug () << "/usr/pluto/orbiter/floorplans/inst" << m_installation.toStdString().c_str()<<"/"<<StringUtils::itos(m_page).c_str()<<".png";
         QImage m_image = pqOrbiter->getfileForDG("/usr/pluto/orbiter/floorplans/inst"+m_installation.toStdString()+"/"+StringUtils::itos(m_page)+".png");
         QImage icon = m_image.scaledToHeight(100);
         floorplans->appendRow(new FloorPlanItem(m_installation,m_description, m_page, m_iconpath, m_image, icon,  userList));
@@ -674,10 +682,11 @@ void qorbiterManager::getConf(int pPK_Device)
     //---update object image
     updatedObjectImage.load(":/icons/videos.png");
     QObject::connect(this,SIGNAL(objectUpdated()), nowPlayingButton, SIGNAL(imageChanged()) );
-
+setDceResponse("Config Complete");
+QApplication::processEvents(QEventLoop::AllEvents);
     swapSkins(currentSkin);
-    setDceResponse("Config Complete");
-    QApplication::processEvents(QEventLoop::AllEvents);
+
+
 
 }
 
@@ -1560,14 +1569,14 @@ gotoQScreen("Screen_1.qml");
 #endif
 
 
-    qDebug("Showing");
+    setDceResponse("Showing main orbiter window");
 
 }
 
 void qorbiterManager::processError(QString msg)
 {
     gotoQScreen("Splash.qml");
-    qDebug() << "Error:" << msg ;
+    setDceResponse("Process Error Slot:" + msg) ;
 }
 
 void qorbiterManager::setActiveSkin(QString name)
@@ -1598,13 +1607,40 @@ void qorbiterManager::reloadHandler()
 {
     QApplication::processEvents(QEventLoop::AllEvents);
     setDceResponse("Reloading Router");
-   splashWindow->show();
-    qorbiterUIwin->close();
-    QApplication::processEvents(QEventLoop::AllEvents);
     pqOrbiter->Disconnect();
-    sleep(15);
+    //sleep(15);
 
-    emit continueSetup();
+QApplication::processEvents(QEventLoop::AllEvents);
+
+if (pqOrbiter->Connect(iPK_Device) )
+{
+        emit continueSetup();
+}
+else
+{
+    sleep(15);
+            emit continueSetup();
+}
+
+}
+
+void qorbiterManager::setDceResponse(QString response)
+{
+    dceResponse = response; emit dceResponseChanged();
+    if (response.contains(".qml")||response.contains("screens"))
+    {
+
+    }
+    else
+    {
+      qDebug() << response;
+    }
+
+}
+
+QString qorbiterManager::getDceResponse()
+{
+    return dceResponse;
 }
 
 
