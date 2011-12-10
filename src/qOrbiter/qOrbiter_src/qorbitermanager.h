@@ -432,6 +432,7 @@ void processError(QString msg);
     //dce related slots
     Q_INVOKABLE void execGrp(int grp);        //for command groups
     Q_INVOKABLE void closeOrbiter();
+void reloadHandler();
 
     //floorplans
     Q_INVOKABLE void showfloorplan(int fptype);

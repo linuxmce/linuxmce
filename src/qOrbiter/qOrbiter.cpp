@@ -26,7 +26,7 @@
 #include "datamodels/listModel.h"
 #include "QDebug"
 #include "QBuffer"
-
+#include "QApplication"
 #include <iostream>
 using namespace std;
 using namespace DCE;
@@ -114,7 +114,6 @@ bool qOrbiter::GetConfig()
             return false;
         }
         qmlUI->binaryConfig = configData;
-
         delete oData;
         return true;
     }
@@ -3661,9 +3660,10 @@ void DCE::qOrbiter::OnDisconnect()
 
 void DCE::qOrbiter::OnReload()
 {
-    qmlUI->regenOrbiter(qmlUI->iPK_Device);
+
     emit disconnected("Router Reload");
-    DisconnectAndWait();
+
+
 }
 
 void DCE::qOrbiter::extraButtons(QString button)

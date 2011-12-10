@@ -172,7 +172,10 @@ void qorbiterManager::gotoQScreen(QString s)
 //this block sets up the connection to linuxmce
 void qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode)
 {
+    if(!pqOrbiter->m_bRunning)
+    {
     pqOrbiter = new DCE::qOrbiter(iPK_Device, sRouterIP, true,false);
+    }
 
     qDebug() << "Made orbiter";
 
@@ -198,6 +201,7 @@ void qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
         */
 
     pqOrbiter->qmlUI = this;
+     QObject::connect(pqOrbiter,SIGNAL(disconnected(QString)), this, SLOT(reloadHandler()));
     //connecting cross object slots - from dce/qt subclass(qorbiter) to pure qt (qorbitermanager)
     //QObject::connect(pqOrbiter,SIGNAL(disconnected(QString)), this, SLOT(processError(QString)));
 
@@ -235,12 +239,10 @@ void qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
         if(pqOrbiter->m_pEvent && pqOrbiter->m_pEvent->m_pClientSocket && pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
         {
-
             bAppError = false;
             bReload = false;
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "main loop No Router.  Will abort");
             qDebug() << " main loop- No Router, Aborting";
-
         }
         else
         {
@@ -1544,6 +1546,19 @@ void qorbiterManager::initializeConnections()
     //connections to splash.qml slots
     QObject::connect(item,SIGNAL(splashLoaded()), this,SLOT(startSetup()));
     QObject::connect(this, SIGNAL(continueSetup()), this, SLOT(startSetup()));
+
+    emit continueSetup();
+}
+
+void qorbiterManager::reloadHandler()
+{
+    QApplication::processEvents(QEventLoop::AllEvents);
+   splashWindow->show();
+    qorbiterUIwin->close();
+    QApplication::processEvents(QEventLoop::AllEvents);
+    pqOrbiter->Disconnect();
+    sleep(15);
+
     emit continueSetup();
 }
 
