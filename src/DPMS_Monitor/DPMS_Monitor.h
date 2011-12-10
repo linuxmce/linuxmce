@@ -36,11 +36,15 @@ namespace DCE
 		// Private member variables
 
 		// Private methods
+	private:
+	  pthread_t m_DPMSMonitorThread;
+	  void SendOnOffToOrbiter(bool bOnOff);
 public:
 		// Public member variables
 		Display *m_pDisplay;
 		int m_iOff; // Off time in seconds.
 		bool getOffTimeFromOrbiter(int& iOff);
+		void DPMSMonitorThread();
 
 //<-dceag-const-b->
 public:
@@ -52,6 +56,8 @@ public:
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
+
+		virtual void CreateChildren();
 
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router

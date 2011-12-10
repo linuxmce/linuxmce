@@ -27,6 +27,7 @@ using namespace DCE;
 //<-dceag-d-e->
 
 #include <sstream>
+#include <unistd.h> // for usleep()
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -128,7 +129,7 @@ bool DPMS_Monitor::GetConfig()
 	DPMSEnable(m_pDisplay);
 	DPMSSetTimeouts(m_pDisplay, 0, 0, 0); // yeah yeah, wound up not using it. 
 	XFlush(m_pDisplay);
-
+	
 	return true;
 }
 
@@ -177,88 +178,103 @@ void DPMS_Monitor::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 	sCMD_Result = "UNKNOWN COMMAND";
 }
 
-//<-dceag-sample-b->
-/*		**** SAMPLE ILLUSTRATING HOW TO USE THE BASE CLASSES ****
-
-**** IF YOU DON'T WANT DCEGENERATOR TO KEEP PUTTING THIS AUTO-GENERATED SECTION ****
-**** ADD AN ! AFTER THE BEGINNING OF THE AUTO-GENERATE TAG, LIKE //<=dceag-sample-b->! ****
-Without the !, everything between <=dceag-sometag-b-> and <=dceag-sometag-e->
-will be replaced by DCEGenerator each time it is run with the normal merge selection.
-The above blocks are actually <- not <=.  We don't want a substitution here
-
-void DPMS_Monitor::SomeFunction()
+/**
+ * Thread entry point for pthread to call DPMS_Monitor::DPMSMonitorThread()
+ */
+void * StartDPMSMonitorThread(void * Arg)
 {
-	// If this is going to be loaded into the router as a plug-in, you can implement: 	virtual bool Register();
-	// to do all your registration, such as creating message interceptors
-
-	// If you use an IDE with auto-complete, after you type DCE:: it should give you a list of all
-	// commands and requests, including the parameters.  See "AllCommandsRequests.h"
-
-	// Examples:
-	
-	// Send a specific the "CMD_Simulate_Mouse_Click" command, which takes an X and Y parameter.  We'll use 55,77 for X and Y.
-	DCE::CMD_Simulate_Mouse_Click CMD_Simulate_Mouse_Click(m_dwPK_Device,OrbiterID,55,77);
-	SendCommand(CMD_Simulate_Mouse_Click);
-
-	// Send the message to orbiters 32898 and 27283 (ie a device list, hence the _DL)
-	// And we want a response, which will be "OK" if the command was successfull
-	string sResponse;
-	DCE::CMD_Simulate_Mouse_Click_DL CMD_Simulate_Mouse_Click_DL(m_dwPK_Device,"32898,27283",55,77)
-	SendCommand(CMD_Simulate_Mouse_Click_DL,&sResponse);
-
-	// Send the message to all orbiters within the house, which is all devices with the category DEVICECATEGORY_Orbiter_CONST (see pluto_main/Define_DeviceCategory.h)
-	// Note the _Cat for category
-	DCE::CMD_Simulate_Mouse_Click_Cat CMD_Simulate_Mouse_Click_Cat(m_dwPK_Device,DEVICECATEGORY_Orbiter_CONST,true,BL_SameHouse,55,77)
-    SendCommand(CMD_Simulate_Mouse_Click_Cat);
-
-	// Send the message to all "DeviceTemplate_Orbiter_CONST" devices within the room (see pluto_main/Define_DeviceTemplate.h)
-	// Note the _DT.
-	DCE::CMD_Simulate_Mouse_Click_DT CMD_Simulate_Mouse_Click_DT(m_dwPK_Device,DeviceTemplate_Orbiter_CONST,true,BL_SameRoom,55,77);
-	SendCommand(CMD_Simulate_Mouse_Click_DT);
-
-	// This command has a normal string parameter, but also an int as an out parameter
-	int iValue;
-	DCE::CMD_Get_Signal_Strength CMD_Get_Signal_Strength(m_dwDeviceID, DestDevice, sMac_address,&iValue);
-	// This send command will wait for the destination device to respond since there is
-	// an out parameter
-	SendCommand(CMD_Get_Signal_Strength);  
-
-	// This time we don't care about the out parameter.  We just want the command to 
-	// get through, and don't want to wait for the round trip.  The out parameter, iValue,
-	// will not get set
-	SendCommandNoResponse(CMD_Get_Signal_Strength);  
-
-	// This command has an out parameter of a data block.  Any parameter that is a binary
-	// data block is a pair of int and char *
-	// We'll also want to see the response, so we'll pass a string for that too
-
-	int iFileSize;
-	char *pFileContents
-	string sResponse;
-	DCE::CMD_Request_File CMD_Request_File(m_dwDeviceID, DestDevice, "filename",&pFileContents,&iFileSize,&sResponse);
-	SendCommand(CMD_Request_File);
-
-	// If the device processed the command (in this case retrieved the file),
-	// sResponse will be "OK", and iFileSize will be the size of the file
-	// and pFileContents will be the file contents.  **NOTE**  We are responsible
-	// free deleting pFileContents.
-
-
-	// To access our data and events below, you can type this-> if your IDE supports auto complete to see all the data and events you can access
-
-	// Get our IP address from our data
-	string sIP = DATA_Get_IP_Address();
-
-	// Set our data "Filename" to "myfile"
-	DATA_Set_Filename("myfile");
-
-	// Fire the "Finished with file" event, which takes no parameters
-	EVENT_Finished_with_file();
-	// Fire the "Touch or click" which takes an X and Y parameter
-	EVENT_Touch_or_click(10,150);
+  DCE::DPMS_Monitor *pDPMSMonitor = (DCE::DPMS_Monitor *) Arg;
+  pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+  pDPMSMonitor->DPMSMonitorThread();
+  return NULL;
 }
-*/
-//<-dceag-sample-e->
+
+/**
+ * Custom CreateChildren method that spawns a polling thread checking the status of the DPMS
+ * and sending an appropriate CMD_Display_OffOn to the closest Orbiter. This makes sure that
+ * Orbiter knows the actual state of the display, and we don't get the display staying on
+ * because Orbiter THINKS it is off.
+ */
+void DPMS_Monitor::CreateChildren()
+{
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"DPMS_Monitor::CreateChildren() - spawning DPMS Monitoring Thread.");
+  if (pthread_create(&m_DPMSMonitorThread, NULL, StartDPMSMonitorThread, (void *) this))
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"DPMS_Monitor::CreateChildren() - Failed to create DPMS Monitoring Thread.");
+      return;
+    }
+  return;
+}
+
+/**
+ * Send a CMD_Display_OnOff to the closest onscreen orbiter.
+ */
+void DPMS_Monitor::SendOnOffToOrbiter(bool bOnOff)
+{
+  string sOnOff = "";
+  DeviceData_Base *pDevice_Orbiter = 
+    m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_Standard_Orbiter_CONST,this);
+
+  if (bOnOff)
+    {
+      sOnOff = "1";
+    }
+  else
+    {
+      sOnOff = "0";
+    }
+  
+  if (pDevice_Orbiter)
+    { 
+      DCE::CMD_Display_OnOff CMD_Display_OnOff(m_dwPK_Device,
+					       pDevice_Orbiter->m_dwPK_Device,
+					       sOnOff,
+					       false);
+      SendCommand(CMD_Display_OnOff);
+    }
+  else
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"DPMS_Monitor::SendOnOffToOrbiter - Could not find the onscreen orbiter. Timed out during registration.");
+}
+
+/**
+ * Sits here, in a runloop, checking DPMS status and sending CMD_Display_OnOff as needed to the
+ * closest related orbiter, until we need to quit.
+ */
+void DPMS_Monitor::DPMSMonitorThread()
+{
+
+  CARD16 currentPower, previousPower;
+  BOOL state;
+
+  while (!m_bQuit_get())
+    {
+      if (m_pDisplay)
+	{
+	  XFlush(m_pDisplay);
+	  usleep(250000); // Wait just a bit for X to sync.
+	  previousPower = currentPower;
+	  if (!DPMSInfo(m_pDisplay,&currentPower,&state))
+	    {
+	      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"DPMS_Monitor::DPMSMonitorThread() - Could not grab DPMS info from the display.");
+	      return;
+	    }
+	  if (previousPower!=currentPower)
+	    {
+	      switch(currentPower)
+		{
+		case DPMSModeOn:
+		  SendOnOffToOrbiter(true); // on
+		  break;
+		case DPMSModeOff:
+		  SendOnOffToOrbiter(false); // off
+		  break;
+		}
+	    }
+	}
+    }
+}
+
+//<-dceag-sample-b->!
 
 /*
 
