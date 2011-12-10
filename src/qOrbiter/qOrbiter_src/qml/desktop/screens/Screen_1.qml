@@ -29,11 +29,6 @@ Item
                height: status.height; anchors.left: parent.left; anchors.leftMargin: scaleX(5)
             }
 
-            Text{
-                id:dcemessages
-                text:dcemessage
-               height: status.height; anchors.left: parent.left; anchors.leftMargin: scaleX(5)
-            }
 
             Clock{id:screen1time; height: status.height; anchors.right: parent.right; anchors.rightMargin: scaleX(25) }
 

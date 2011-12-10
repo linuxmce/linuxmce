@@ -27,6 +27,12 @@ Rectangle {
 
         }
 
+        Text {
+            id: loadingStatus
+            text: dcemessage
+            anchors.top: welcome.bottom
+        }
+
     }
     Image {
         id: splash
@@ -36,5 +42,5 @@ Rectangle {
         anchors.fill: parent
     }    
 
-    Component.onCompleted: splashLoaded()
+
 }

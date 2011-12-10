@@ -125,7 +125,7 @@ public:
     QThread *timecodeThread; //for timecode
     QTcpSocket *timeCodeSocket;
     QString sPK_User;
-    QString *buildType;
+    QString buildType;
     //QByteArray *skin;
 
     SkinDataModel* tskinModel;
@@ -362,6 +362,7 @@ signals:
     void engineReady();
     void error(QString msg);
     void localConfigReady(QString msg);
+    void loadingMessage(QString msg);
 
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
 
