@@ -48,37 +48,46 @@ using namespace DCE;
 qorbiterManager::qorbiterManager(int deviceno, QString routerip, QObject *parent) :
     QObject(parent),iPK_Device(deviceno), qs_routerip(routerip)
 {
-    qorbiterUIwin = new QDeclarativeView() ;  //initialize the declarative view to act upon its context
+    QPalette palette;
+    palette.setColor(QPalette::Base, Qt::transparent);
 
+
+    splashWindow = new QMainWindow(0, Qt::FramelessWindowHint);     //window for splash
+    splashWindow->setAttribute(Qt::WA_TranslucentBackground, true); //setting transparent bg?
+
+    splashView = new QDeclarativeView; //qdeclarativeview for splash.qml
+    splashView->setAttribute(Qt::WA_TranslucentBackground, true);     //doing the same for qdeclarativeview
+
+    splashWindow->setCentralWidget(splashView);                      //adding view to window
+
+    splashView->setPalette(palette);
+    splashView->setSource((QUrl("qrc:desktop/Splash.qml")));
+
+    splashWindow->showNormal();
+
+    QObject::connect(this, SIGNAL(orbiterReady()), splashWindow,SLOT(close()));
+
+
+
+    // QObject * item=dynamic_cast<QObject*>(mainView.rootObject());
+
+    qorbiterUIwin = new QDeclarativeView() ;  //initialize the declarative view to act upon its context
     qorbiterUIwin->rootContext()->setContextProperty("srouterip", QString(qs_routerip) );
     qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
     qorbiterUIwin->rootContext()->setContextProperty("manager", this); //providing a direct object for qml to call c++ functions of this class
-    qorbiterUIwin->setSource(QUrl("qrc:desktop/Splash.qml"));
+
+
     item=dynamic_cast<QObject*>(qorbiterUIwin->rootObject());
+    QApplication::processEvents(QEventLoop::AllEvents);
+    initializeConnections();
 
-
-#ifdef Q_OS_SYMBIAN
-    qorbiterUIwin->showFullScreen();
-#elif defined(Q_WS_MAEMO_5)
-    qorbiterUIwin->showMaximized();
-#elif defined(for_harmattan)
-    qorbiterUIwin->showFullScreen();
-#elif defined(for_desktop)
-    qorbiterUIwin->showMaximized();
-#else
-    qorbiterUIwin->show();
-#endif
-    qDebug("Showing");
-
-
-initializeConnections();
     //TODO, extract to a config
     //TODO, execute this already if we have config data.
     //setupLmce(iPK_Device, routerip.toStdString(), true, false);
 }
 
 
-void qorbiterManager::showSystemSplash() {
+void qorbiterManager::startSetup() {
 
 
     if (readLocalConfig())
@@ -89,7 +98,7 @@ void qorbiterManager::showSystemSplash() {
 
     QString localDir = QApplication::applicationDirPath();
 
-   loadSkins(QUrl(localDir+"/qml/desktop"));
+    loadSkins(QUrl(localDir+"/qml/desktop"));
     //loadSkins(QUrl("http://192.168.80.1/lmce-admin/skins/desktop"));
     //set it as a context property so the qml can read it. if we need to changed it,we just reset the context property
 
@@ -145,7 +154,7 @@ void qorbiterManager::showSystemSplash() {
     //QObject::connect(nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection );
     //iPK_Device= deviceno;
 
-   setupLmce((int)iPK_Device, qs_routerip.toStdString(), false, false);
+    setupLmce((int)iPK_Device, qs_routerip.toStdString(), false, false);
 
 }
 
@@ -618,8 +627,8 @@ void qorbiterManager::getConf(int pPK_Device)
     //---update object image
     updatedObjectImage.load(":/icons/videos.png");
     QObject::connect(this,SIGNAL(objectUpdated()), nowPlayingButton, SIGNAL(imageChanged()) );
-    emit orbiterReady();
-   swapSkins(currentSkin);
+
+    swapSkins(currentSkin);
 
 }
 
@@ -641,7 +650,7 @@ void qorbiterManager::swapSkins(QString incSkin)
         {
             qDebug() << "error! " <<  tskinData.errors();
             break;
-        }       
+        }
     }
     //turning it into a qObject - this part actually loads it - the error should connect to a slot and not an exit
     QObject *styleObject = tskinData.create(qorbiterUIwin->rootContext());
@@ -654,6 +663,7 @@ void qorbiterManager::swapSkins(QString incSkin)
     qorbiterUIwin->engine()->rootContext()->setContextProperty("style", styleObject);
     qorbiterUIwin->setSource(skin->entryUrl());
     startOrbiter();
+    emit orbiterReady();
     writeConfig();
 }
 
@@ -843,7 +853,7 @@ void qorbiterManager::quickReload()
     bool connected = pqOrbiter->m_bRouterReloading;
 
 
-    }
+}
 
 
 void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
@@ -909,7 +919,7 @@ bool qorbiterManager::readLocalConfig()
             else
             {
                 qDebug() << "Could not read local, setting defaults.";
-               // qDebug() << localConfig.toString();
+                // qDebug() << localConfig.toString();
                 localConfigFile.close();
                 return false;
             }
@@ -1471,6 +1481,22 @@ void qorbiterManager::showMessage(QString message, int duration, bool critical)
 
 void qorbiterManager::startOrbiter()
 {
+    qorbiterUIwin->setWindowTitle("LinuxMCE Orbiter " + QString::number(iPK_Device));
+    qorbiterUIwin->setResizeMode(QDeclarativeView::SizeViewToRootObject);
+#ifdef Q_OS_SYMBIAN
+    qorbiterUIwin->showFullScreen();
+#elif defined(Q_WS_MAEMO_5)
+    qorbiterUIwin->showMaximized();
+#elif defined(for_harmattan)
+    qorbiterUIwin->showFullScreen();
+#elif defined(for_desktop)
+    qorbiterUIwin->showMaximized();
+#else
+    qorbiterUIwin->show();
+#endif
+    emit orbiterReady();
+    qDebug("Showing");
+
     gotoQScreen("Screen_1.qml");
 }
 
@@ -1495,10 +1521,9 @@ void qorbiterManager::cleanupScreenie()
 void qorbiterManager::initializeConnections()
 {
     //connections to splash.qml slots
-    QObject::connect(item,SIGNAL(splashLoaded()), this,SLOT(showSystemSplash()));
-    QObject::connect(this, SIGNAL(continueSetup()), this, SLOT(showSystemSplash()));
-
-      emit continueSetup();
+    QObject::connect(item,SIGNAL(splashLoaded()), this,SLOT(startSetup()));
+    QObject::connect(this, SIGNAL(continueSetup()), this, SLOT(startSetup()));
+    emit continueSetup();
 }
 
 

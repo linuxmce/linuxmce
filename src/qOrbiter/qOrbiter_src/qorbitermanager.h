@@ -40,6 +40,17 @@
 #include <qdeclarativecontext.h>
 #include <QDeclarativeItem>
 #include <QStringList>
+#include <QMainWindow>
+#include <QThread>
+#include <QFile>
+#include <QDir>
+#include <QDataStream>
+#include <QtNetwork/QTcpSocket>
+#include <QProcess>
+#include <QtXml/QDomDocument>
+
+/*-------Custom Classes -----------------*/
+
 #include <datamodels/usermodel.h>
 #include <datamodels/locationmodel.h>
 #include <datamodels/lightingscenariomodel.h>
@@ -59,20 +70,11 @@
 #include <contextobjects/screenparamsclass.h>
 #include <contextobjects/playlistclass.h>
 #include <contextobjects/securityvideoclass.h>
-#include <QtNetwork/QTcpSocket>
-#include <QProcess>
-#include <QtXml/QDomDocument>
+
 #include <datamodels/skindatamodel.h>
 #include <contextobjects/floorplandevice.h>
 #include <contextobjects/screenshotattributes.h>
-#include <QThread>
 
-
-#include <QFile>
-#include <QDir>
-#include <QDataStream>
-
-/*----custom classes-------*/
 //own version of OrbiterData.h
 #include <datamodels/listModel.h>                            //custom item model
 #include <datamodels/gridItem.h>
@@ -81,6 +83,7 @@
 #include <imageProviders/gridimageprovider.h>                  //qml image provider for grids !not implemented!
 #include <screensaver/screensavermodule.h>
 #include <datamodels/DataModelItems/sleepingalarm.h>
+
 /*-------Dce Includes----*/
 
 #include <qOrbiter/qOrbiter.h>
@@ -165,6 +168,9 @@ public:
     QString dceResponse;
     bool connectedState;
 
+    //splash related
+    QMainWindow *splashWindow;
+    QDeclarativeView *splashView;
 
     basicImageProvider *basicProvider;
     GridIndexProvider *advancedProvider;
@@ -348,6 +354,8 @@ signals:
 
     //setup related
     void orbiterReady();
+    void connectionsReady();
+    void orbiterDataReady();
     void orbiterClosing();
     void scenariosReady();
     void roomsReady();
@@ -358,7 +366,7 @@ signals:
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
 
     void startOrbiter();
-void showSystemSplash();
+void startSetup();
     Q_INVOKABLE void writeConfig();
     bool readLocalConfig();
     void setConnectedState(bool state) { connectedState = state;  if(state == false) {checkConnection();} emit connectedStateChanged(); }
@@ -438,6 +446,7 @@ void processError(QString msg);
     \
 private:
     void initializeConnections();
+    void setupQMLview();
 
 };
 

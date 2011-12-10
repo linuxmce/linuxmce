@@ -15,7 +15,7 @@
 */
 //<-dceag-incl-b->
 #include <QApplication>
-#include <QMainWindow>
+
 #include <qOrbiter/qOrbiter.h>
 #include <QDeclarativeView>
 #include "DCE/Logger.h"
@@ -36,9 +36,21 @@ class processThread : public QThread
 {
 
 public:
+    explicit  processThread(int inc_device, QString inc_routerip, QObject *parent=0): mi_device(inc_device), mqs_routerip(inc_routerip)
+    {
+    }
+
     void run() {
+        qorbiterManager * w = new qorbiterManager(mi_device,mqs_routerip);
         exec();
     }
+
+    qorbiterManager *w;
+
+private:
+    int mi_device;
+    QString mqs_routerip;
+
 };
 
 using namespace DCE;
@@ -227,16 +239,20 @@ int main(int argc, char* argv[])
 
 
 #endif
-        QApplication a(argc, argv);
+        QApplication  a(argc, argv);
+qorbiterManager  w(PK_Device,QString::fromStdString(sRouter_IP));
+  a.exec();
 
-       // QDeclarativeView mainView;
-       // mainView.setSource(QUrl("qrc:desktop/Splash.qml"));
-       // mainView.showMaximized();
+        //QObject::connect(&w,SIGNAL(orbiterReady()), &mainView,SLOT(hide()));
 
-        qorbiterManager * w = new qorbiterManager((int)PK_Device,QString::fromStdString(sRouter_IP));
+        //workerBee.start();
+       // w.moveToThread(&workerBee);
+        //QObject::connect(item, SIGNAL(splashLoaded()), w, SLOT(startOrbiter()));
+        // processThread *mainOrbiter = new processThread(PK_Device, QString::fromStdString(sRouter_IP));
+        //  mainOrbiter->start(QThread::TimeCriticalPriority);
 
 
-        return a.exec();
+
     }
     catch(string s)
     {
