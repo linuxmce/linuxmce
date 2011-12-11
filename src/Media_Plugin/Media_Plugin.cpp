@@ -8182,6 +8182,9 @@ void Media_Plugin::CMD_Update_Move_Status(string sText,string sTime,string sStat
 
 void Media_Plugin::CMD_Get_Attribute_Image(string &sCMD_Result,Message *pMessage)
 //<-dceag-c1090-e->
+{
+}
+
 //<-dceag-c1091-b->
 
 	/** @brief COMMAND: #1091 - Transcode File */
