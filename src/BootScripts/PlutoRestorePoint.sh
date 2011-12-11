@@ -260,6 +260,20 @@ if [[ "$1" == "--backup" ]]; then
 	mkdir -p $FULLPATH/$FILESYSTEMFOLDER/home/cameras
 	cp -Lr /home/cameras/ $FULLPATH/$FILESYSTEMFOLDER/home
 
+	# Backup game player data if available
+	if [[ -d /home/mamedata ]]; then
+		mkdir -p $FULLPATH/$FILESYSTEMFOLDER/home/mamedata/cfg
+		cp -Lr /home/mamedata/cfg/ $FULLPATH/$FILESYSTEMFOLDER/home/mamedata
+		mkdir -p $FULLPATH/$FILESYSTEMFOLDER/home/mamedata/inp
+		cp -Lr /home/mamedata/inp/ $FULLPATH/$FILESYSTEMFOLDER/home/mamedata
+		mkdir -p $FULLPATH/$FILESYSTEMFOLDER/home/mamedata/memcard
+		cp -Lr /home/mamedata/memcard/ $FULLPATH/$FILESYSTEMFOLDER/home/mamedata
+		mkdir -p $FULLPATH/$FILESYSTEMFOLDER/home/mamedata/nvram
+		cp -Lr /home/mamedata/nvram/ $FULLPATH/$FILESYSTEMFOLDER/home/mamedata
+		mkdir -p $FULLPATH/$FILESYSTEMFOLDER/home/mamedata/sta
+		cp -Lr /home/mamedata/sta/ $FULLPATH/$FILESYSTEMFOLDER/home/mamedata
+	fi
+
 	# ----------------
 	# Make the archive
 	# ----------------
