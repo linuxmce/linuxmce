@@ -236,8 +236,6 @@ int main(int argc, char* argv[])
     {
 #ifndef for_harmattan
         QApplication::setGraphicsSystem("raster");
-
-
 #endif
         QApplication  a(argc, argv);
 qorbiterManager  w(PK_Device,QString::fromStdString(sRouter_IP));
@@ -250,9 +248,6 @@ qorbiterManager  w(PK_Device,QString::fromStdString(sRouter_IP));
         //QObject::connect(item, SIGNAL(splashLoaded()), w, SLOT(startOrbiter()));
         // processThread *mainOrbiter = new processThread(PK_Device, QString::fromStdString(sRouter_IP));
         //  mainOrbiter->start(QThread::TimeCriticalPriority);
-
-
-
     }
     catch(string s)
     {

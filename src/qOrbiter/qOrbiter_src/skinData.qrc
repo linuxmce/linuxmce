@@ -16,4 +16,7 @@
     <qresource prefix="/iphone"/>
     <qresource prefix="/ipad"/>
     <qresource prefix="/nacl"/>
+    <qresource prefix="/osx">
+        <file>qml/Splash.qml</file>
+    </qresource>
 </RCC>
