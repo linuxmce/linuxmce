@@ -169,12 +169,10 @@ public:
     bool connectedState;
 
     //splash related
-    QMainWindow *splashWindow;
-    QDeclarativeView *splashView;
 
+    QDeclarativeView *splashView;
     basicImageProvider *basicProvider;
     GridIndexProvider *advancedProvider;
-
 
     AbstractImageProvider *modelimageprovider;
     QString *gridReqType;

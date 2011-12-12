@@ -226,12 +226,10 @@ int main(int argc, char* argv[])
         cerr << "Unable to create logger" << endl;
     }
 
-    /*
-      need a routine here to find the router ip / dcerouter setting. there should be user feedback that its initializing
-      */
+
     bool bAppError=false;
     bool bReload=false;
-    // LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",PK_Device,sRouter_IP);
+
     try
     {
 #ifndef for_harmattan

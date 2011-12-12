@@ -2,6 +2,7 @@
     <qresource prefix="/img">
         <file alias="splash.jpg">img/lmcesplash.jpg</file>
         <file alias="Splash.png">img/lmcesplash.png</file>
+        <file alias="config.xml">config.xml</file>
     </qresource>
     <qresource prefix="/icons">
         <file alias="mythIcon.jpg">img/icons/Mythtv.png</file>
