@@ -3662,7 +3662,8 @@ void DCE::qOrbiter::OnReload()
 {
 
     emit disconnected("Router Reload");
-
+   // qmlUI->splashView->show();
+     qmlUI->qorbiterUIwin->close();
 
 }
 

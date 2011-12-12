@@ -32,26 +32,6 @@
 const char *g_szCompile_Date="<=compile_date=>";
 /*SVN_REVISION*/
 
-class processThread : public QThread
-{
-
-public:
-    explicit  processThread(int inc_device, QString inc_routerip, QObject *parent=0): mi_device(inc_device), mqs_routerip(inc_routerip)
-    {
-    }
-
-    void run() {
-        qorbiterManager * w = new qorbiterManager(mi_device,mqs_routerip);
-        exec();
-    }
-
-    qorbiterManager *w;
-
-private:
-    int mi_device;
-    QString mqs_routerip;
-
-};
 
 using namespace DCE;
 
@@ -236,16 +216,20 @@ int main(int argc, char* argv[])
         QApplication::setGraphicsSystem("raster");
 #endif
         QApplication  a(argc, argv);
-qorbiterManager  w(PK_Device,QString::fromStdString(sRouter_IP));
-  a.exec();
 
-        //QObject::connect(&w,SIGNAL(orbiterReady()), &mainView,SLOT(hide()));
+       // ThreadedSplash splashView;
+        qorbiterManager  *w = new qorbiterManager(PK_Device,QString::fromStdString(sRouter_IP));
 
-        //workerBee.start();
-       // w.moveToThread(&workerBee);
-        //QObject::connect(item, SIGNAL(splashLoaded()), w, SLOT(startOrbiter()));
-        // processThread *mainOrbiter = new processThread(PK_Device, QString::fromStdString(sRouter_IP));
-        //  mainOrbiter->start(QThread::TimeCriticalPriority);
+      //  splashView.connect(w,SIGNAL(loadingMessage(QString)),SLOT(setMessage(QString)), Qt::QueuedConnection);
+      //  splashView.connect(w,SIGNAL(orbiterReady(bool)), SLOT(closeSplash(bool)), Qt::QueuedConnection);
+       // a.connect(w, SIGNAL(loadingMessage(QString)), &splashView,SLOT(setMessage(QString)));
+       // a.connect(w, SIGNAL(orbiterReady()), &splashView,SLOT(closeSplash()));
+
+      //  QThread splashThread; // = new QThread;
+     //   splashView.moveToThread(&splashThread);
+     //   splashThread.start();
+        a.exec();
+
     }
     catch(string s)
     {

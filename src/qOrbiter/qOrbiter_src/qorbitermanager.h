@@ -86,6 +86,9 @@
 
 /*-------Dce Includes----*/
 
+/*---------------Threaded classes-----------*/
+#include <threadedClasses/threadedsplash.h>
+
 #include <qOrbiter/qOrbiter.h>
 class EPGChannelList;
 class basicImageProvider;
@@ -123,6 +126,7 @@ public:
 
     QThread *processingThread; //threaded class
     QThread *timecodeThread; //for timecode
+
     QTcpSocket *timeCodeSocket;
     QString sPK_User;
     QString buildType;
@@ -170,7 +174,7 @@ public:
 
     //splash related
 
-    QDeclarativeView *splashView;
+
     basicImageProvider *basicProvider;
     GridIndexProvider *advancedProvider;
 
@@ -351,7 +355,7 @@ signals:
     void continueSetup();
 
     //setup related
-    void orbiterReady();
+    void orbiterReady(bool);
     void connectionsReady();
     void orbiterDataReady();
     void orbiterClosing();

@@ -50,6 +50,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QObject *parent
 
     dceResponse = "";
     setDceResponse("Loading");
+
     QUrl qrcPath;
 
         #ifdef for_desktop
@@ -76,32 +77,8 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QObject *parent
               To setup the splash.qml for each platform, set the proper define which will then select the proper splash for your platform.
               */
 
-
-    QPalette palette;
-    palette.setColor(QPalette::Base, Qt::transparent);
-
-    splashView = new QDeclarativeView; //qdeclarativeview for splash.qml
-    splashView->setAttribute(Qt::WA_TranslucentBackground, true);     //doing the same for qdeclarativeview
-    splashView->setPalette(palette);
-    splashView->rootContext()->setContextProperty("dcemessage", dceResponse); //sets connection to messaging variable in splash window
-    QApplication::processEvents(QEventLoop::AllEvents);
-    splashView->setSource((qrcPath));        //using the QRC splash as a kickstart
-
-#ifdef Q_OS_SYMBIAN
-    splashView->showFullScreen();
-#elif defined(Q_WS_MAEMO_5)
-    splashView->showMaximized();
-#elif defined(for_harmattan)
-    splashView->showFullScreen();
-#elif defined(for_desktop)
-    splashView->showMaximized();
-#else
-    splashView->show();
-#endif
-
-
-    QObject::connect(this, SIGNAL(loadingMessage(QString)), this, SLOT(setDceResponse(QString)), Qt::AutoConnection);
-    QObject::connect(this, SIGNAL(orbiterReady()), splashView,SLOT(close()));
+   // QObject::connect(this, SIGNAL(loadingMessage(QString)), this, SLOT(setDceResponse(QString)), Qt::AutoConnection);
+    //QObject::connect(this, SIGNAL(orbiterReady()), splashView,SLOT(close()));
 
     //QObject * item=dynamic_cast<QObject*>(mainView.rootObject());
 
@@ -112,12 +89,13 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QObject *parent
 
 
     item=dynamic_cast<QObject*>(qorbiterUIwin->rootObject());   //gets a reference to the root object which will be main.qml
-    QApplication::processEvents(QEventLoop::AllEvents);         //allows the escaping of the loop to show the splash window
+    //QApplication::processEvents(QEventLoop::AllEvents);         //allows the escaping of the loop to show the splash window
     initializeConnections();                                    //calls the next step. this is wrong and should change because connection initialization should happen after main.qml is loaded for this qml view
 
     //TODO, extract to a config
     //TODO, execute this already if we have config data.
     //setupLmce(iPK_Device, routerip.toStdString(), true, false);
+
 }
 
 /*
@@ -186,9 +164,10 @@ void qorbiterManager::startSetup() {
     qorbiterUIwin->rootContext()->setContextProperty("mediaplaylist", storedVideoPlaylist);
 
     //initializing threading for timecode to prevent blocking
-    timecodeThread = new QThread;
-    timeCodeSocket = new QTcpSocket(timecodeThread);
-    timecodeThread->start();
+   // timecodeThread = new QThread;
+    timeCodeSocket = new QTcpSocket();
+   // timeCodeSocket->moveToThread(timecodeThread);
+   // timecodeThread->start();
 
     //QObject::connect(nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection );
     //iPK_Device= deviceno;
@@ -216,7 +195,7 @@ void qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
     pqOrbiter = new DCE::qOrbiter(iPK_Device, sRouterIP, true,false);
 
-    qDebug() << "Made orbiter";
+    setDceResponse("Made orbiter");
 
     iPK_Device_DatagridPlugIn =  long(6);
     iPK_Device_OrbiterPlugin = long(9);
@@ -241,11 +220,12 @@ void qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
     pqOrbiter->qmlUI = this;
    //  LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",iPK_Device,qs_routerip.toStdString());
-     QObject::connect(pqOrbiter,SIGNAL(disconnected(QString)), this, SLOT(reloadHandler()));
+
+    QObject::connect(pqOrbiter,SIGNAL(disconnected(QString)), this, SLOT(reloadHandler()));
     //connecting cross object slots - from dce/qt subclass(qorbiter) to pure qt (qorbitermanager)
     //QObject::connect(pqOrbiter,SIGNAL(disconnected(QString)), this, SLOT(processError(QString)));
 
-    setDceResponse("Attempting connection for device:" + iPK_Device);
+   // setDceResponse("Attempting connection for device:" + iPK_Device);
 
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
     {
@@ -301,18 +281,18 @@ void qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 void qorbiterManager::refreshUI()
 {
 
-splashView->showFullScreen();
+//splashView->showFullScreen();
 qorbiterUIwin->close();
  QApplication::processEvents(QEventLoop::AllEvents);
 
  if (pqOrbiter->GetConfig())
  {
-     qDebug("Regen success, loading...");
+    setDceResponse("Regen success, loading...");
      getConf(iPK_Device);
  }
  else
  {
-     qDebug("Cant Get Config!");
+     setDceResponse("Cant Get Config!");
  }
 
 
@@ -335,8 +315,8 @@ void qorbiterManager::getConf(int pPK_Device)
     }
     else
     {
-        qDebug() << "Attempting to write config";
-        writeConfig();
+        setDceResponse("Attempting to write config");
+        //writeConfig();
     }
 
 
@@ -375,6 +355,7 @@ void qorbiterManager::getConf(int pPK_Device)
     modelimageprovider = new AbstractImageProvider(this);
     qorbiterUIwin->engine()->addImageProvider("listprovider", modelimageprovider);
 
+    emit loadingMessage("floorplans");
 
     //-USERS-----------------------------------------------------------------------------------------------------
     QDomElement userXml = root.firstChildElement("Users");
@@ -823,7 +804,7 @@ void qorbiterManager::regenOrbiter(int deviceNo)
     if(qs_routerip =="127.0.0.1")
     {
 
-        splashView->showFullScreen();
+        //splashView->showFullScreen();
         qorbiterUIwin->close();
         QApplication::processEvents(QEventLoop::AllEvents);
         qDebug("Onscreen orbiter");
@@ -1544,12 +1525,10 @@ void qorbiterManager::showMessage(QString message, int duration, bool critical)
 
 void qorbiterManager::startOrbiter()
 {
+
     qorbiterUIwin->setWindowTitle("LinuxMCE Orbiter " + QString::number(iPK_Device));
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeViewToRootObject);
-    setDceResponse("");
-
-emit orbiterReady();
-//QApplication::processEvents(QEventLoop::AllEvents);
+QApplication::processEvents(QEventLoop::AllEvents);
 gotoQScreen("Screen_1.qml");
 #ifdef Q_OS_SYMBIAN
     qorbiterUIwin->showFullScreen();
@@ -1565,7 +1544,7 @@ gotoQScreen("Screen_1.qml");
 
 
     setDceResponse("Showing main orbiter window");
-
+emit orbiterReady(true);
 }
 
 void qorbiterManager::processError(QString msg)
@@ -1592,7 +1571,6 @@ void qorbiterManager::initializeConnections()
     //connections to splash.qml slots
 
     QObject::connect(this, SIGNAL(continueSetup()), this, SLOT(startSetup()));
-
     setDceResponse("Connections Complete");
     emit continueSetup();
 
@@ -1621,15 +1599,9 @@ else
 
 void qorbiterManager::setDceResponse(QString response)
 {
-    dceResponse = response; emit dceResponseChanged();
-    if (response.contains(".qml")||response.contains("screens"))
-    {
-
-    }
-    else
-    {
-      qDebug() << response;
-    }
+    dceResponse = response;
+     emit loadingMessage(response);
+    emit dceResponseChanged();
 
 }
 
