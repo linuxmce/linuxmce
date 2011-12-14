@@ -45,19 +45,18 @@ using namespace DCE;
   then (hopefully) notify us of background progress. A splash bar or loading indicator needs to be added, but a textual
   messaging system will be the initial method of communication
 */
-qorbiterManager::qorbiterManager(int deviceno, QString routerip, QObject *parent) :
-    QObject(parent),iPK_Device(deviceno), qs_routerip(routerip)
+qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeView *view, QObject *parent) :
+    QObject(parent),iPK_Device(deviceno), qs_routerip(routerip),qorbiterUIwin(view)
 {
-    qorbiterUIwin = new QDeclarativeView() ;  //initialize the declarative view to act upon its context
 
+
+
+    emit loadingMessage("setting up LMCE");
     qorbiterUIwin->rootContext()->setContextProperty("srouterip", QString(qs_routerip) );
     qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
     qorbiterUIwin->rootContext()->setContextProperty("manager", this); //providing a direct object for qml to call c++ functions of this class
-   qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse); //file grids current media type
-
-    setDceResponse("Loading");
-
-    QObject::connect(this,SIGNAL(splashReady()), this,SLOT(startSetup()));
+    qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse); //file grids current media type
+   // QObject::connect(this,SIGNAL(splashReady()), this,SLOT(startSetup()));
 
 #ifdef for_desktop
     buildType = "/qml/desktop";
@@ -77,31 +76,72 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QObject *parent
 #elif defined (for_droid)
     buildType = "/qml/android/phone";
     qrcPath = "qrc:android-tablet/Splash.qml";
-#endif
+#endif    
 
-    /*
-     To setup the splash.qml for each platform, set the proper define which will then select the proper splash for your platform.
-     */
-
-    // QObject::connect(this, SIGNAL(loadingMessage(QString)), this, SLOT(setDceResponse(QString)), Qt::AutoConnection);
-    //QObject::connect(this, SIGNAL(orbiterReady()), splashView,SLOT(close()));
-    //QObject * item=dynamic_cast<QObject*>(mainView.rootObject());
-
-    if (loadSplash() == 1)
+    if (readLocalConfig())
     {
-        qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse); //file grids current media type
-
-
-        //  QObject *item=dynamic_cast<QObject*>(qorbiterUIwin->rootObject());   //gets a reference to the root object which will be main.qml
-        //QObject::connect(item,SIGNAL(splashLoaded()), this, SLOT(startSetup()));
-    QTimer::singleShot(1000, this, SLOT(startSetup()));
+        emit localConfigReady("Success");
 
     }
+    QApplication::processEvents(QEventLoop::AllEvents);
 
-    //allows the escaping of the loop to show the splash window
-    //TODO, extract to a config
-    //TODO, execute this already if we have config data.
-    //setupLmce(iPK_Device, routerip.toStdString(), true, false);
+    QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
+    QString localDir = qmlPath.append(buildType);
+
+    loadSkins(QUrl(localDir));
+    //loadSkins(QUrl("http://192.168.80.1/lmce-admin/skins/desktop"));
+    //set it as a context property so the qml can read it. if we need to changed it,we just reset the context property
+
+    initializeGridModel();  //begins setup of media grid listmodel and its properties
+    initializeSortString(); //associated logic for navigating media grids
+
+
+    //initial signal and slot connections
+    //        QObject::connect(item, SIGNAL(close()), this, SLOT(closeOrbiter()));
+    //        QObject::connect(this,SIGNAL(orbiterReady()), this,SLOT(startOrbiter()));
+    //        QObject::connect(parent,SIGNAL(destroyed()), this, SLOT(close()));
+
+
+    //managing where were are variables
+    int i_current_command_grp;
+    i_current_command_grp = 0;
+    QStringList goBack;
+    goBack << ("|||1,2|0|13|0|2|");
+    backwards = false;
+
+    //file details object and imageprovider setup
+    filedetailsclass = new FileDetailsClass();
+    qorbiterUIwin->rootContext()->setContextProperty("filedetailsclass" ,filedetailsclass);
+
+    // connect(filedetailsclass, SIGNAL(FileChanged(QString)), this, SLOT(showFileInfo(QString)));
+
+    //non functioning screen saver module
+    ScreenSaver = new ScreenSaverModule;
+    qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", ScreenSaver);
+
+    /* now playing button todo - make it appear and dissapear if in a room with no media / media director
+            embed in room model or other location based marker
+*/
+    nowPlayingButton = new NowPlayingClass();
+    qorbiterUIwin->rootContext()->setContextProperty("dcenowplaying" , nowPlayingButton);
+
+    //screen parameters class that could be extended as needed to fetch other data
+    ScreenParameters = new ScreenParamsClass;
+    qorbiterUIwin->rootContext()->setContextProperty("screenparams", ScreenParameters);
+
+    //stored video playlist for managing any media that isnt live broacast essentially
+
+    storedVideoPlaylist = new PlaylistClass (new PlaylistItemClass, this);
+    qorbiterUIwin->rootContext()->setContextProperty("mediaplaylist", storedVideoPlaylist);
+
+    //initializing threading for timecode to prevent blocking
+    // timecodeThread = new QThread;
+    timeCodeSocket = new QTcpSocket();
+    // timeCodeSocket->moveToThread(timecodeThread);
+    // timecodeThread->start();
+
+    //QObject::connect(nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection );
+    //iPK_Device= deviceno;
 
 }
 
@@ -117,7 +157,7 @@ void qorbiterManager::startSetup() {
         emit localConfigReady("Success");
 
     }
-QApplication::processEvents(QEventLoop::AllEvents);
+    QApplication::processEvents(QEventLoop::AllEvents);
 
     QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
     QString localDir = qmlPath.append(buildType);
@@ -194,7 +234,7 @@ void qorbiterManager::gotoQScreen(QString s)
 }
 
 //this block sets up the connection to linuxmce
-void qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode)
+bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode)
 {
 
     pqOrbiter = new DCE::qOrbiter(iPK_Device, sRouterIP, true,false);
@@ -254,32 +294,7 @@ void qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             //return true;
         }
     }
-    else
-    {
-        bAppError = true;
 
-        if(pqOrbiter->m_pEvent && pqOrbiter->m_pEvent->m_pClientSocket && pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
-        {
-            bAppError = false;
-            bReload = false;
-            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "main loop No Router.  Will abort");
-            setDceResponse(" main loop- No Router, Aborting");
-        }
-        else
-        {
-            bAppError = true;
-            if( pqOrbiter->m_pEvent&& pqOrbiter->m_pEvent->m_pClientSocket && pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice)
-            {
-                bAppError = false;
-                bReload = false;
-                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device  Will abort");
-                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
-
-            }
-        }
-
-
-    }
 }
 
 
@@ -951,12 +966,12 @@ bool qorbiterManager::readLocalConfig()
 
             if (currentSkin == "")
             {
-                 currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
+                currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
             }
 
             if(iPK_Device < 1 )
             {
-            iPK_Device = configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong();
+                iPK_Device = configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong();
             }
 
 
@@ -1598,9 +1613,9 @@ void qorbiterManager::reloadHandler()
 
 void qorbiterManager::setDceResponse(QString response)
 {
-    dceResponse = response;    
+    dceResponse = response;
     emit dceResponseChanged();
-   // qDebug() << response;
+    // qDebug() << response;
 
 }
 
@@ -1620,7 +1635,7 @@ int qorbiterManager::loadSplash()
     qorbiterUIwin->setWindowTitle("LinuxMCE Orbiter ");
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeViewToRootObject);
     QApplication::processEvents(QEventLoop::AllEvents);
-/*
+    /*
     QFile splashFile;
     splashFile.setFileName(qrcPath);
     qDebug() << splashFile.fileName();
@@ -1654,21 +1669,21 @@ int qorbiterManager::loadSplash()
                 splashData.completeCreate();
                 qDebug() << "Creation Complete";
 */
-                qorbiterUIwin->setSource(QUrl("qrc:desktop/Splash.qml"));
+    qorbiterUIwin->setSource(QUrl("qrc:desktop/Splash.qml"));
 
 #ifdef Q_OS_SYMBIAN
-                qorbiterUIwin->showFullScreen();
+    qorbiterUIwin->showFullScreen();
 #elif defined(Q_WS_MAEMO_5)
-                qorbiterUIwin->showMaximized();
+    qorbiterUIwin->showMaximized();
 #elif defined(for_harmattan)
-                qorbiterUIwin->showFullScreen();
+    qorbiterUIwin->showFullScreen();
 #elif defined(for_desktop)
-                qorbiterUIwin->showMaximized();
+    qorbiterUIwin->showMaximized();
 #else
-                qorbiterUIwin->show();
+    qorbiterUIwin->show();
 #endif
 
-                return 1;
+    return 1;
 
 }
 

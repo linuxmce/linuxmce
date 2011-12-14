@@ -3,6 +3,8 @@
   */
 import QtQuick 1.0
 
+
+
 Rectangle {
     id: rectangle1
     width: 800
@@ -11,6 +13,12 @@ Rectangle {
     signal setupStart(string x, string y)
     signal splashLoaded()
 
+    function setMessage(msg){
+        loadingStatus.text = msg
+    }
+
+
+
     Image {
         id: splash
         anchors.centerIn: rectangle1
@@ -18,7 +26,14 @@ Rectangle {
         source: "qrc:/img/Splash.png"
         anchors.fill: parent
     }
-
+    Text {
+        id: loadingStatus
+        text: "loading"
+        anchors.verticalCenter: parent.verticalCenter
+        font.pointSize: 20
+        anchors.horizontalCenter: parent.horizontalCenter
+        color: "black"
+    }
 
     Rectangle {
         width: parent.width
@@ -33,13 +48,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
         }
 
-        Text {
-            id: loadingStatus
-            text: dcemessage
-            anchors.top: welcome.bottom
-            font.pointSize: 20
-            anchors.horizontalCenter: parent.horizontalCenter
-        }       
+
 
     }
 

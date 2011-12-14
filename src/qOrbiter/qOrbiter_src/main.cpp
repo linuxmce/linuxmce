@@ -37,6 +37,11 @@ using namespace DCE;
 
 
 // You can override this block if you don't want the app to reload in the event of a problem
+void setMessage(QString msg, QDeclarativeView * view){
+    QVariant string= msg;
+    QObject *item = view->rootObject();
+    QMetaObject::invokeMethod(item, "setMessage",  Q_ARG(QVariant, msg));
+}
 extern void (*g_pDeadlockHandler)(PlutoLock *pPlutoLock);
 extern void (*g_pSocketCrashHandler)(Socket *pSocket);
 extern Command_Impl *g_pCommand_Impl;
@@ -118,6 +123,8 @@ extern "C" {
 
 
 //<-dceag-main-b->
+
+
 int main(int argc, char* argv[])
 {
 
@@ -216,11 +223,83 @@ int main(int argc, char* argv[])
         QApplication::setGraphicsSystem("raster");
 #endif
         QApplication  a(argc, argv);
+        QString buildType;
+        QString qrcPath;
+        QString message("loading");
 
-       // ThreadedSplash splashView;
-        qorbiterManager  *w = new qorbiterManager(PK_Device,QString::fromStdString(sRouter_IP));
+#ifdef for_desktop
+        buildType = "/qml/desktop";
+        qrcPath = ":desktop/Splash.qml";
+#elif defined (for_freemantle)
+        buildType = "/qml/freemantle";
+        qrcPath = "qrc:freemantle/Splash.qml";
+#elif defined (for_harmattan)
+        buildType="/qml/harmattan";
+        qrcPath = "qrc:harmattan/Splash.qml";
+#elif defined (Q_OS_MACX)
+        buildType="/qml/desktop";
+        qrcPath = "qrc:osx/Splash.qml";
+#elif defined (ANDROID)
+        buildType = "/qml/android";
+        qrcPath = "qrc:android-phone/Splash.qml";
+#elif defined (for_droid)
+        buildType = "/qml/android/phone";
+        qrcPath = "qrc:android-tablet/Splash.qml";
+#endif
+
+        QDeclarativeView mainView;
+        mainView.rootContext()->setContextProperty("dcemessage", message);
+        mainView.setSource(QUrl("qrc:desktop/Splash.qml"));
+
+#ifdef Q_OS_SYMBIAN
+        mainView.showFullScreen();
+#elif defined(Q_WS_MAEMO_5)
+        mainView.showMaximized();
+#elif defined(for_harmattan)
+        mainView.showFullScreen();
+#elif defined(for_desktop)
+        mainView.showMaximized();
+#else
+        mainView.show();
+#endif
+        setMessage(message, &mainView);
         QApplication::processEvents(QEventLoop::AllEvents);
-        a.exec();
+
+        qorbiterManager  *w = new qorbiterManager(PK_Device,QString::fromStdString(sRouter_IP), &mainView);
+
+        if(w->setupLmce(PK_Device, sRouter_IP, true, false))
+        {
+
+        }
+        else
+        {
+            bAppError = true;
+
+            if(w->pqOrbiter->m_pEvent && w->pqOrbiter->m_pEvent->m_pClientSocket && w->pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
+            {
+                bAppError = false;
+                bReload = false;
+                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "main loop No Router.  Will abort");
+                setMessage(" main loop- No Router, Aborting", &mainView);
+
+            }
+            else
+            {
+                bAppError = true;
+                if( w->pqOrbiter->m_pEvent&& w->pqOrbiter->m_pEvent->m_pClientSocket && w->pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice)
+                {
+                    bAppError = false;
+                    bReload = false;
+                    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device  Will abort");
+                    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
+                    setMessage("Bad Device, main thread", &mainView);
+                }
+            }
+
+
+        }
+
+ a.exec();
 
     }
     catch(string s)

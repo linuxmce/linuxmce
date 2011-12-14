@@ -122,7 +122,7 @@ class qorbiterManager : public QObject
 
 
 public:
-    qorbiterManager(int deviceno, QString routerip,  QObject *parent =0);  //constructor
+    qorbiterManager(int deviceno, QString routerip, QDeclarativeView * view,  QObject *parent =0);  //constructor
 
     QThread *processingThread; //threaded class
     QThread *timecodeThread; //for timecode
@@ -282,7 +282,7 @@ Param 10 - pk_attribute
 
     //QT Functions to initialize lmce data
     bool initialize(int dev_id);
-    Q_INVOKABLE void setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode);     //init's dce object
+    Q_INVOKABLE bool setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode);     //init's dce object
     /*
       getConf() is the part of the equation that should read the orbiter conf. not implemented fully
       */

@@ -63,6 +63,7 @@ public:
     virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
     virtual void OnDisconnect();
     virtual void OnReload();
+    virtual int DeviceIdInvalid();
 
 
     bool initialize();

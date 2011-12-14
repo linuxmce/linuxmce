@@ -3801,3 +3801,9 @@ void DCE::qOrbiter::adjustLighting(int level)
     }
 }
 
+int DCE::qOrbiter::DeviceIdInvalid()
+{
+    qDebug("Device ID invalid");
+    return 0;
+}
+
