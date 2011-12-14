@@ -11,6 +11,13 @@ Rectangle {
     signal setupStart(string x, string y)
     signal splashLoaded()
 
+    Image {
+        id: splash
+        anchors.centerIn: rectangle1
+        fillMode: Image.PreserveAspectFit
+        source: "qrc:/img/Splash.png"
+        anchors.fill: parent
+    }
 
 
     Rectangle {
@@ -24,23 +31,16 @@ Rectangle {
             font.pixelSize: 30
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
-
         }
 
         Text {
             id: loadingStatus
             text: dcemessage
             anchors.top: welcome.bottom
-        }
+            font.pointSize: 20
+            anchors.horizontalCenter: parent.horizontalCenter
+        }       
 
     }
-    Image {
-        id: splash
-        anchors.centerIn: rectangle1
-        fillMode: Image.PreserveAspectFit
-        source: "qrc:/img/Splash.png"
-        anchors.fill: parent
-    }    
-
 
 }

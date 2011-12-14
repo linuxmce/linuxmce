@@ -103,7 +103,11 @@ bool qOrbiter::GetConfig()
     }
     else
     {
-        //qDebug() <<"Idata recieved: " << iData_Size ; // size of xml file
+        qDebug("Get Config sent");
+    }
+
+
+        qDebug() <<"Idata recieved: " << iData_Size ; // size of xml file
         QByteArray configData;              //config file put into qbytearray for processing
         configData = oData;
         if (configData.size() == 0)
@@ -113,11 +117,14 @@ bool qOrbiter::GetConfig()
             //qmlUI->gotoQScreen("Splash.qml");
             return false;
         }
+
         qmlUI->binaryConfig = configData;
+        qDebug("Break");
         delete oData;
+
         return true;
     }
-}
+
 
 //<-dceag-reg-b->
 // This function will only be used if this device is loaded into the DCE Router's memory space as a plug-in.  Otherwise Connect() will be called from the main()

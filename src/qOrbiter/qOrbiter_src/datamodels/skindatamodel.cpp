@@ -1,6 +1,7 @@
 #include "skindatamodel.h"
 #include <QDebug>
 #include <QDeclarativeComponent>
+#include <QDeclarativeEngine>
 #include <QUrl>
 
 SkinDataModel::SkinDataModel(QUrl &baseUrl, SkinDataItem* prototype, qorbiterManager *uiRef, QObject* parent): QAbstractListModel(parent), m_prototype(prototype)
@@ -124,13 +125,13 @@ void SkinDataModel::addSkin(QString name) {
 
     QImage skinPic(":/icons/Skin-Data.png");
 
+
     qDebug() << "Loading Skin at " + m_baseUrl.toString() + "/" + name;
     QUrl skinBase(m_baseUrl.toString()  + "/" + name);
-
     //skinBase.setPath(m_baseUrl.toString());
+   QUrl style;
+   style.setUrl(m_baseUrl.toString() + "/" + name + "/Style.qml");
 
-    QUrl style(m_baseUrl);
-    style.setPath(m_baseUrl.toString()+ "/" + name + "/Style.qml");
     QObject *styleObject = new QObject();
     QDeclarativeComponent skinData(ui_reference->qorbiterUIwin->engine(), style);
 
@@ -146,7 +147,7 @@ void SkinDataModel::addSkin(QString name) {
                 break;
             }
 
-
+        qDebug() << style;
         }
 
         styleObject = skinData.create(ui_reference->qorbiterUIwin->rootContext());

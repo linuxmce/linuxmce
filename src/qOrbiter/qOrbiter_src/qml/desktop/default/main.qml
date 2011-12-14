@@ -43,7 +43,7 @@ import "../js/ComponentLoader.js" as MyJs
      Loader {
          id:pageLoader
          objectName: "loadbot"
-         source: "../screens/Splash.qml"
+
          onSourceChanged:  loadin
          onLoaded: {
 

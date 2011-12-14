@@ -219,15 +219,7 @@ int main(int argc, char* argv[])
 
        // ThreadedSplash splashView;
         qorbiterManager  *w = new qorbiterManager(PK_Device,QString::fromStdString(sRouter_IP));
-
-      //  splashView.connect(w,SIGNAL(loadingMessage(QString)),SLOT(setMessage(QString)), Qt::QueuedConnection);
-      //  splashView.connect(w,SIGNAL(orbiterReady(bool)), SLOT(closeSplash(bool)), Qt::QueuedConnection);
-       // a.connect(w, SIGNAL(loadingMessage(QString)), &splashView,SLOT(setMessage(QString)));
-       // a.connect(w, SIGNAL(orbiterReady()), &splashView,SLOT(closeSplash()));
-
-      //  QThread splashThread; // = new QThread;
-     //   splashView.moveToThread(&splashThread);
-     //   splashThread.start();
+        QApplication::processEvents(QEventLoop::AllEvents);
         a.exec();
 
     }

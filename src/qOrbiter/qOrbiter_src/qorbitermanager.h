@@ -133,6 +133,7 @@ public:
     //QByteArray *skin;
 
     SkinDataModel* tskinModel;
+    QString qrcPath;
     //TODO, remove the below in favour of the data structure
     QMap <QString*, QString*> availibleSkins;
     QString qmlPath;
@@ -290,8 +291,6 @@ Param 10 - pk_attribute
     bool OrbiterGen();              //prelim orbter generation
     Q_INVOKABLE void quickReload();
 
-
-
     /*
       DCE variables
       */
@@ -365,11 +364,13 @@ signals:
     void error(QString msg);
     void localConfigReady(QString msg);
     void loadingMessage(QString msg);
+    void splashReady();
 
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
 
+    int loadSplash();
     void startOrbiter();
-void startSetup();
+    void startSetup();
     Q_INVOKABLE void writeConfig();
     bool readLocalConfig();
     void setConnectedState(bool state) { connectedState = state;  if(state == false) {checkConnection();} emit connectedStateChanged(); }
@@ -431,11 +432,11 @@ void startSetup();
     void regenError(QProcess::ProcessError);
     QString adjustPath(const QString&);
     void checkConnection();
-void processError(QString msg);
+    void processError(QString msg);
     //dce related slots
     Q_INVOKABLE void execGrp(int grp);        //for command groups
     Q_INVOKABLE void closeOrbiter();
-void reloadHandler();
+    void reloadHandler();
 
     //floorplans
     Q_INVOKABLE void showfloorplan(int fptype);
