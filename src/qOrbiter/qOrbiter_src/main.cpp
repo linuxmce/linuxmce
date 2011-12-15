@@ -228,12 +228,11 @@ int main(int argc, char* argv[])
         processThread->start();
 
         QApplication::processEvents(QEventLoop::AllEvents);
-        qorbiterManager  *w = new qorbiterManager(PK_Device,QString::fromStdString(sRouter_IP), &orbiterWin.mainView);
-        QObject::connect(w, SIGNAL(loadingMessage(QString)), &orbiterWin,SLOT(setMessage(QString)));
+        qorbiterManager  w(PK_Device,QString::fromStdString(sRouter_IP), &orbiterWin.mainView);
+        QObject::connect(&w, SIGNAL(loadingMessage(QString)), &orbiterWin,SLOT(setMessage(QString)));
+        QObject::connect(&orbiterWin,SIGNAL(setupLmce(QString,QString)), &w, SLOT(qmlSetupLmce(QString,QString)));
 
-
-
-        if(w->setupLmce(PK_Device, sRouter_IP, true, false))
+        if(w.setupLmce(PK_Device, sRouter_IP, true, false))
         {
 
         }
@@ -241,27 +240,24 @@ int main(int argc, char* argv[])
         {
             bAppError = true;
 
-            if(w->pqOrbiter->m_pEvent && w->pqOrbiter->m_pEvent->m_pClientSocket && w->pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
+            if(w.pqOrbiter->m_pEvent && w.pqOrbiter->m_pEvent->m_pClientSocket && w.pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
             {
                 bAppError = false;
                 bReload = false;
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "main loop No Router.  Will abort");
-               w->setDceResponse(" main loop- No Router, Aborting");
-
+               w.setDceResponse(" main loop- No Router, Aborting");
             }
             else
             {
                 bAppError = true;
-                if( w->pqOrbiter->m_pEvent&& w->pqOrbiter->m_pEvent->m_pClientSocket && w->pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice)
+                if( w.pqOrbiter->m_pEvent&& w.pqOrbiter->m_pEvent->m_pClientSocket && w.pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice)
                 {
-
                     bAppError = false;
                     bReload = false;
                     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device  Will abort");
                     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
+                    //orbiterWin.mainView.setSource(QUrl("qrc:desktop/SetupNewOrbiter.qml"));
                     orbiterWin.setMessage("Connect Failed with Bad Device");
-
-
                 }
             }
 
