@@ -12,7 +12,7 @@ class MediaScenarioItem;
 class MediaScenarioModel : public QAbstractListModel
 {
   Q_OBJECT
-    Q_PROPERTY (QVariant data NOTIFY DataChanged)
+
 public:
 
   explicit MediaScenarioModel(MediaScenarioItem *prototype, QObject* parent = 0);

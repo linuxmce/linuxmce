@@ -206,7 +206,8 @@ SOURCES += main.cpp \
     avitem.cpp \
     contextobjects/floorplandevice.cpp \
     contextobjects/screenshotattributes.cpp \
-    threadedClasses/threadedsplash.cpp
+    threadedClasses/threadedsplash.cpp \
+    orbiterwindow.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -269,7 +270,8 @@ HEADERS += \
     datamodels/floorplanimageitem.h \
     contextobjects/floorplandevice.h \
     contextobjects/screenshotattributes.h \
-    threadedClasses/threadedsplash.h
+    threadedClasses/threadedsplash.h \
+    orbiterwindow.h
 
 OTHER_FILES += Readme.txt \
     config.xml \
@@ -349,6 +351,8 @@ OTHER_FILES= \
 
 RESOURCES += \
     skinData.qrc
+
+
 
 
 

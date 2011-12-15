@@ -107,7 +107,7 @@ public:
     Q_INVOKABLE void getMediaTimeCode();
     Q_INVOKABLE  void GetAdvancedMediaOptions();
     Q_INVOKABLE void GetAlarms(bool toggle, int grp);
-    Q_INVOKABLE void SetZoom(QString zoomLevel);
+    Q_INVOKABLE void setZoom(QString zoomLevel);
     Q_INVOKABLE void setAspect(QString ratio);
     Q_INVOKABLE void GetText(int textno);
     Q_INVOKABLE void setPosition(QString position);
@@ -129,7 +129,7 @@ public:
     Q_INVOKABLE void blueButton();
     //buttons from the more screen
     Q_INVOKABLE void extraButtons(QString button);
-    Q_INVOKABLE void saveScreenAttribute(int attribute);
+    Q_INVOKABLE void saveScreenAttribute(QString attribute);
     Q_INVOKABLE void newOrbiter();
     virtual int PromptUser(string sPrompt,int iTimeoutSeconds=10,map<int,string> *p_mapPrompts = NULL);
     virtual int PromptFor(string sToken);

@@ -35,7 +35,7 @@ Rectangle {
                     buttontext: "-7%"
                     MouseArea{
                         anchors.fill: parent
-                        onClicked:setZoom(-7)
+                        onClicked:dcerouter.setZoom(-7)
                     }
                 }
                 ButtonSq{
@@ -44,7 +44,7 @@ Rectangle {
                     buttontext: "-5%"
                     MouseArea{
                         anchors.fill: parent
-                        onClicked:setZoom(-5)
+                        onClicked:dcerouter.setZoom(-5)
                     }
                 }
 
@@ -54,7 +54,7 @@ Rectangle {
                     buttontext: "-4%"
                     MouseArea{
                         anchors.fill: parent
-                        onClicked:setZoom(-4)
+                        onClicked:dcerouter.setZoom(-4)
                     }
                 }
                 ButtonSq{
@@ -63,7 +63,7 @@ Rectangle {
                     buttontext: "-2%"
                     MouseArea{
                         anchors.fill: parent
-                        onClicked:setZoom(-2)
+                        onClicked:dcerouter.setZoom(-2)
                     }
                 }
                 ButtonSq{
@@ -72,7 +72,7 @@ Rectangle {
                     buttontext: "-1%"
                     MouseArea{
                         anchors.fill: parent
-                        onClicked:setZoom(-1)
+                        onClicked:dcerouter.setZoom(-1)
                     }
                 }
 
@@ -82,7 +82,7 @@ Rectangle {
                     buttontext: "+1%"
                     MouseArea{
                         anchors.fill: parent
-                        onClicked:setZoom("+1")
+                        onClicked:dcerouter.setZoom("+1")
                     }
                 }
                 ButtonSq{
@@ -91,7 +91,7 @@ Rectangle {
                     buttontext: "+2%"
                     MouseArea{
                         anchors.fill: parent
-                        onClicked:setZoom("+2")
+                        onClicked:dcerouter.setZoom("+2")
                     }
                 }
 
@@ -101,7 +101,7 @@ Rectangle {
                     buttontext: "+4%"
                     MouseArea{
                         anchors.fill: parent
-                        onClicked:setZoom("+4")
+                        onClicked:dcerouter.setZoom("+4")
                     }
                 }
                 ButtonSq{
@@ -110,7 +110,7 @@ Rectangle {
                     buttontext: "+5%"
                     MouseArea{
                         anchors.fill: parent
-                        onClicked:setZoom("+5")
+                        onClicked:dcerouter.setZoom("+5")
                     }
                 }
                 ButtonSq{
@@ -119,7 +119,7 @@ Rectangle {
                     buttontext: "+7%"
                     MouseArea{
                         anchors.fill: parent
-                        onClicked:setZoom("+7")
+                        onClicked:dcerouter.setZoom("+7")
                     }
                 }
 
@@ -134,7 +134,7 @@ Rectangle {
                     buttontext: "90%"
                     MouseArea{
                         anchors.fill: parent
-                        onClicked:setZoom("90")
+                        onClicked:dcerouter.setZoom("90")
                     }
                 }
 
@@ -144,7 +144,7 @@ Rectangle {
                     buttontext: "95%"
                     MouseArea{
                         anchors.fill: parent
-                        onClicked:setZoom("95")
+                        onClicked:dcerouter.setZoom("95")
                     }
                 }
                 ButtonSq{
@@ -153,7 +153,7 @@ Rectangle {
                     buttontext: "100%"
                     MouseArea{
                         anchors.fill: parent
-                        onClicked:setZoom("100")
+                        onClicked:dcerouter.setZoom("100")
                     }
                 }
                 ButtonSq{
@@ -162,7 +162,7 @@ Rectangle {
                     buttontext: "105%"
                     MouseArea{
                         anchors.fill: parent
-                        onClicked:setZoom("105")
+                        onClicked:dcerouter.setZoom("105")
                     }
                 }
 
@@ -172,7 +172,7 @@ Rectangle {
                     buttontext: "110%"
                     MouseArea{
                         anchors.fill: parent
-                        onClicked:setZoom("110")
+                        onClicked:dcerouter.setZoom("110")
                     }
                 }
                 ButtonSq{
@@ -181,7 +181,7 @@ Rectangle {
                     buttontext: "115%"
                     MouseArea{
                         anchors.fill: parent
-                        onClicked:setZoom("115")
+                        onClicked:dcerouter.setZoom("115")
                     }
                 }
 
@@ -191,7 +191,7 @@ Rectangle {
                     buttontext: "120%"
                     MouseArea{
                         anchors.fill: parent
-                        onClicked:setZoom("120")
+                        onClicked:dcerouter.setZoom("120")
                     }
                 }
                 ButtonSq{
@@ -200,7 +200,7 @@ Rectangle {
                     buttontext: "125%"
                     MouseArea{
                         anchors.fill: parent
-                        onClicked:setZoom("125")
+                        onClicked:dcerouter.setZoom("125")
                     }
                 }
                 ButtonSq{
@@ -209,7 +209,7 @@ Rectangle {
                     buttontext: "130%"
                     MouseArea{
                         anchors.fill: parent
-                        onClicked:setZoom("130")
+                        onClicked:dcerouter.setZoom("130")
                     }
                 }
 
@@ -223,7 +223,7 @@ Rectangle {
                     buttontext: "Auto"
                     MouseArea{
                         anchors.fill: parent
-                        onClicked:setAspect("auto")
+                        onClicked:dcerouter.setAspect("auto")
                     }
                 }
                 ButtonSq{
@@ -232,7 +232,7 @@ Rectangle {
                     buttontext: "1:1"
                     MouseArea{
                         anchors.fill: parent
-                        onClicked:setAspect("1:1")
+                        onClicked:dcerouter.setAspect("1:1")
                     }
                 }
 
@@ -242,7 +242,7 @@ Rectangle {
                     buttontext: "4:3"
                     MouseArea{
                         anchors.fill: parent
-                        onClicked:setAspect("4:3")
+                        onClicked:dcerouter.setAspect("4:3")
                     }
                 }
 
@@ -252,7 +252,7 @@ Rectangle {
                     buttontext: "16:9"
                     MouseArea{
                         anchors.fill: parent
-                        onClicked:setAspect("16:9")
+                        onClicked:dcerouter.setAspect("16:9")
                     }
                 }
                 ButtonSq{
@@ -261,7 +261,7 @@ Rectangle {
                     buttontext: "2.11:1"
                     MouseArea{
                         anchors.fill: parent
-                        onClicked:setAspect("2.11:1")
+                        onClicked:dcerouter.setAspect("2.11:1")
                     }
                 }
 

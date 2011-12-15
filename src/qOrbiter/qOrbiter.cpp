@@ -107,23 +107,23 @@ bool qOrbiter::GetConfig()
     }
 
 
-        qDebug() <<"Idata recieved: " << iData_Size ; // size of xml file
-        QByteArray configData;              //config file put into qbytearray for processing
-        configData = oData;
-        if (configData.size() == 0)
-        {
-            qmlUI->processError("Invalid config for device: " + QString::number(qmlUI->iPK_Device));
-            qmlUI->processError("Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d=" + QString::number(qmlUI->iPK_Device)) ;
-            //qmlUI->gotoQScreen("Splash.qml");
-            return false;
-        }
-
-        qmlUI->binaryConfig = configData;
-        qDebug("Break");
-        delete oData;
-
-        return true;
+    qDebug() <<"Idata recieved: " << iData_Size ; // size of xml file
+    QByteArray configData;              //config file put into qbytearray for processing
+    configData = oData;
+    if (configData.size() == 0)
+    {
+        qmlUI->processError("Invalid config for device: " + QString::number(qmlUI->iPK_Device));
+        qmlUI->processError("Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d=" + QString::number(qmlUI->iPK_Device)) ;
+        //qmlUI->gotoQScreen("Splash.qml");
+        return false;
     }
+
+    qmlUI->binaryConfig = configData;
+    qDebug("Break");
+    delete oData;
+
+    return true;
+}
 
 
 //<-dceag-reg-b->
@@ -1369,23 +1369,23 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
       currently it is broken and any insight into navigating this programmatically
       would be appreciated.
       */
-    if(qmlUI->backwards == true)
+    if(qmlUI->backwards)
     {
-        //qDebug("Going Backwards!");
-        //qmlUI->q_pk_attribute = "";
 
-        if(qmlUI->goBack.count() > 0)
+
+        if(qmlUI->goBack.size() > 0)
         {
-            //qDebug("Greater than zero?");
-
             qmlUI->goBack.removeLast();
-            s= qmlUI->goBack.last();
-            //qDebug() << s;
+
         }
-        else if (qmlUI->goBack.count() == 0)
+        else if (qmlUI->goBack.isEmpty())
         {
             qmlUI->initializeSortString();
+
         }
+
+        s= qmlUI->goBack.last();
+
 
     }
     else
@@ -1490,7 +1490,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                     //qDebug() << pDataGridTable->GetCols();
 
                     //qDebug() << "Picture Datagrid Height:" << gHeight << " , width: " << gWidth;
-                   // qDebug() << "Response: " << cellsToRender << " picture cells to render";
+                    // qDebug() << "Response: " << cellsToRender << " picture cells to render";
                     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
                     QString cellTitle;
                     QString fk_file;
@@ -2233,7 +2233,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                     }
                     else
                     {
-                       // qDebug("Setting title");
+                        // qDebug("Setting title");
                         qmlUI->filedetailsclass->setMediaTitle(attribute);
                     }
 
@@ -2620,7 +2620,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
 
     QStringList details = breaker.split(QRegExp("\\t"));
     int placeholder;
-
+    QString filepath;
     placeholder = details.indexOf("TITLE");
     if(placeholder != -1)
     {
@@ -2642,15 +2642,18 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
     placeholder = details.indexOf("PATH");
     if(placeholder != -1)
     {
-
+        filepath = details.at(placeholder+1) + "/";
+        \
 
     }
 
     placeholder = details.indexOf("FILENAME");
     if(placeholder != -1)
     {
-
+        filepath.append(details.at(placeholder+1));
     }
+
+    qmlUI->nowPlayingButton->setFilePath(filepath);
 
     int gHeight = 0;
     int gWidth = 0;
@@ -2706,7 +2709,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             int cellsToRender= pDataGridTable->GetRows();
             //qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
-           // qDebug() << "Response: " << cellsToRender << " cells to render";
+            // qDebug() << "Response: " << cellsToRender << " cells to render";
 
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
             QString cellTitle;
@@ -2793,6 +2796,8 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                     qmlUI->nowPlayingButton->setRelease(attribute);
                     // qDebug() << attribute;
                 }
+
+
 
                 //qmlUI->m_selected_grid_item->appendRow(new FileDetailsItem(cellTitle, cellAttribute, cellImg, false,  qmlUI->model));
             }
@@ -3277,15 +3282,15 @@ void DCE::qOrbiter::GetAlarms(bool toggle, int grp)
 }
 
 //zoom level for current media player
-void DCE::qOrbiter::SetZoom(QString zoomLevel)
+void DCE::qOrbiter::setZoom(QString zoomLevel)
 {
     string sResponse;
     //qDebug() << zoomLevel.toAscii();
     CMD_Set_Zoom setMediaZoom(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID, string(zoomLevel.toAscii()));
     // tues sept 20 - employing an error handling method that i hope to extend to other functions
-    if (SendCommand(setMediaZoom, &sResponse) == true)
+    if (SendCommand(setMediaZoom))
     {
-        qmlUI->setDceResponse(QString::fromStdString(sResponse));
+
     }
     else
     {
@@ -3299,9 +3304,9 @@ void DCE::qOrbiter::setAspect(QString ratio) //set aspect ratio for current medi
     string sResponse;
     CMD_Set_Aspect_Ratio setMediaAspect(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID, ratio.toStdString());
     // tues sept 20 - employing an error handling method that i hope to extend to other functions
-    if (SendCommand(setMediaAspect, &sResponse) == true)
+    if (SendCommand(setMediaAspect))
     {
-        qmlUI->setDceResponse(QString::fromStdString(sResponse));
+
     }
     else
     {
@@ -3595,12 +3600,24 @@ void DCE::qOrbiter::grabScreenshot()
                 //qDebug() << "Processing" << parser.at(0);
                 //qDebug() << parser.join("--");
 
-                qmlUI->screenshotVars.append(new screenshotAttributes( cellfk, cellTitle, cellAttribute ));
+                qmlUI->screenshotVars.append(new screenshotAttributes( cellfk, cellTitle, cellAttribute.prepend("!A") ));
             }
+
         }
-qmlUI->qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(qmlUI->screenshotVars));
+
+int iEK_File;
+        CMD_Get_ID_from_Filename getFileID(qmlUI->iPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->filepath.toStdString(), &iEK_File);
+        SendCommand(getFileID);
+        QString fk;
+        fk.append("!F"+ QString::fromStdString(StringUtils::itos(iEK_File)));
+        qmlUI->setDceResponse(fk);
+       // string *fk = StringUtils::itos(&iEK_File);
+
+        qmlUI->screenshotVars.append(new screenshotAttributes(fk, QString("Filename"),fk ));
+
     }
 
+    qmlUI->qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(qmlUI->screenshotVars));
 }
 
 /*
@@ -3662,15 +3679,15 @@ void DCE::qOrbiter::adjustVolume(int vol)
 
 void DCE::qOrbiter::OnDisconnect()
 {
-   qmlUI->closeOrbiter();
+    qmlUI->closeOrbiter();
 }
 
 void DCE::qOrbiter::OnReload()
 {
 
     emit disconnected("Router Reload");
-   // qmlUI->splashView->show();
-     qmlUI->qorbiterUIwin->close();
+    // qmlUI->splashView->show();
+    qmlUI->qorbiterUIwin->close();
 
 }
 
@@ -3748,10 +3765,11 @@ void DCE::qOrbiter::extraButtons(QString button)
 
 }
 
-void DCE::qOrbiter::saveScreenAttribute(int attribute)
+void DCE::qOrbiter::saveScreenAttribute(QString attribute)
 {
-    //qDebug() << "Save attribute routine" << attribute;
-    string sFilename = "!A"+ StringUtils::itos(attribute);
+
+    string sAttribute = attribute.toStdString();
+    qDebug() << attribute;
     QByteArray bytes;
     QBuffer ba(&bytes);
     ba.open(QIODevice::WriteOnly);
@@ -3760,7 +3778,7 @@ void DCE::qOrbiter::saveScreenAttribute(int attribute)
     char *pData = (char*) bytes.constData();
     int pDataSize = qmlUI->mediaScreenShot.byteCount();
     //todo - add file F! to this list of attributes
-    CMD_Make_Thumbnail thumb(qmlUI->iPK_Device, qmlUI->iMediaPluginID, sFilename, pData, pDataSize );
+    CMD_Make_Thumbnail thumb(qmlUI->iPK_Device, qmlUI->iMediaPluginID, sAttribute, pData, pDataSize );
     SendCommand(thumb);
 }
 

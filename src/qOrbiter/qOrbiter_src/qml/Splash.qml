@@ -28,11 +28,11 @@ Rectangle {
     }
     Text {
         id: loadingStatus
-        text: "loading"
+        text: dcemessage
         anchors.verticalCenter: parent.verticalCenter
         font.pointSize: 20
         anchors.horizontalCenter: parent.horizontalCenter
-        color: "black"
+        color: "white"
     }
 
     Rectangle {
