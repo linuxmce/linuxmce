@@ -49,7 +49,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     QObject(parent),iPK_Device(deviceno), qs_routerip(routerip),qorbiterUIwin(view)
 {
     m_bStartingUp= true;
-  //  setDceResponse("setting up LMCE");
+  setDceResponse("setting up LMCE");
     qorbiterUIwin->rootContext()->setContextProperty("srouterip", QString(qs_routerip) );
     qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
     qorbiterUIwin->rootContext()->setContextProperty("manager", this); //providing a direct object for qml to call c++ functions of this class
@@ -75,6 +75,9 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
 #elif defined (for_droid)
     buildType = "/qml/android/phone";
     qrcPath = "qrc:android-tablet/Splash.qml";
+#else
+    buildType = "/qml/desktop";
+    qrcPath = ":desktop/Splash.qml";
 #endif    
 
     if (readLocalConfig())
@@ -205,6 +208,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
     {
         setDceResponse("Orbiter  connected");
+
         getConf(PK_Device);
         /*
               we get various variable here that we will need later. I store them in the qt object so it
@@ -1535,9 +1539,9 @@ void qorbiterManager::reloadHandler()
 
 void qorbiterManager::setDceResponse(QString response)
 {
-    dceResponse = response;
-    emit dceResponseChanged();
+    dceResponse = response;   
     emit loadingMessage(response);
+     emit dceResponseChanged();
     // qDebug() << response;
 
 }

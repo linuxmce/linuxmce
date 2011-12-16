@@ -13,6 +13,10 @@ Rectangle {
     signal setupStart(string x, string y)
     signal splashLoaded()
 
+    Connections{
+        target:window
+        onMessageChanged:loadingStatus.text = window.message
+    }
 
 
     Image {
@@ -47,7 +51,7 @@ Rectangle {
     }
     Rectangle {
         id: rectangle2
-        anchors.top: loadingStatus.bottom
+      anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
         width: 457
         height: 57

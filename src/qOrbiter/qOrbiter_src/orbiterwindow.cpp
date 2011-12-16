@@ -11,7 +11,7 @@ orbiterWindow::orbiterWindow(QObject *parent) :
 
     mainView.rootContext()->setContextProperty("window", this);
 
-   message="loading...";
+
     mainView.setWindowTitle("LinuxMCE Orbiter ");
     mainView.setResizeMode(QDeclarativeView::SizeViewToRootObject);
 
@@ -34,12 +34,15 @@ orbiterWindow::orbiterWindow(QObject *parent) :
 #elif defined (for_droid)
     buildType = "/qml/android/phone";
     qrcPath = "qrc:android-tablet/Splash.qml";
+#else
+    buildType = "/qml/desktop";
+    qrcPath = "qrc:desktop/Splash.qml";
 #endif
 
 
 
     mainView.setSource(QUrl(qrcPath));
- setMessage("loading...");
+
 #ifdef Q_OS_SYMBIAN
     mainView.showFullScreen();
 #elif defined(Q_WS_MAEMO_5)
@@ -52,14 +55,14 @@ orbiterWindow::orbiterWindow(QObject *parent) :
     mainView.show();
 #endif
 
-    setMessage("loading");
+
 }
 
 void orbiterWindow::setMessage(QString imsg)
 {
    // QApplication::processEvents(QEventLoop::AllEvents);
-    message = imsg; emit messageChanged();
-   // qDebug() << "Orbiter window output:" << imsg;
+    message = imsg; emit MessageChanged();
+    qDebug() << "Orbiter window output:" << imsg;
 }
 
 void orbiterWindow::forceResponse(QString forced)
@@ -70,7 +73,6 @@ void orbiterWindow::forceResponse(QString forced)
 QString orbiterWindow::getMessage()
 {
     return message;
-    qDebug() << "Orbiter window output:" << message;
 }
 
 void orbiterWindow::qmlSetupLmce(QString device, QString ip)

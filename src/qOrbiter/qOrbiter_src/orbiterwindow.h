@@ -10,7 +10,7 @@ class orbiterWindow : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY (QString message READ getMessage WRITE setMessage NOTIFY messageChanged)
+    Q_PROPERTY (QString message READ getMessage WRITE setMessage NOTIFY MessageChanged)
 public:
     explicit orbiterWindow(QObject *parent = 0);
     //public members
@@ -24,7 +24,7 @@ public:
     Q_INVOKABLE void forceResponse (QString forced);
 
 signals:
-    void messageChanged();
+    void MessageChanged();
     void setupLmce(QString device, QString routerIp);
 
 public slots:
