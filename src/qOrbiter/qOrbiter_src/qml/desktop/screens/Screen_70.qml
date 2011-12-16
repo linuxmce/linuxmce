@@ -16,6 +16,12 @@ Rectangle {
         source: "../../../img/icons/orbiterbg.png"
     }
 
+    Column{
+        anchors.right: storedvideoremote.right
+        anchors.rightMargin: scaleX(1)
+        Remote_lighting_controls{ id: remote_lighting_controls1; }
+        Remote_Audio_controls{ id: remote1; }
+    }
 
     Timer{
         id:singleshot
@@ -112,10 +118,7 @@ Rectangle {
                     source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
                 }
             }
-            Row{
-                Remote_lighting_controls{ id: remote_lighting_controls1; }
-                Remote_Audio_controls{ id: remote1; }
-            }
+
 
 
         }
@@ -279,6 +282,14 @@ Rectangle {
                 }
                 AvOptionButton{
                     buttontext: qsTr("Bookmarks")
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked:  {
+
+                            MyJs.createThumbComponent("../components/Bookmarks.qml", storedvideoremote)
+
+                        }
+                    }
                 }
                 AvOptionButton{
                     buttontext: qsTr("Resend AV Codes")
@@ -319,6 +330,7 @@ Rectangle {
 
             }
         }
+
     }
 
 }

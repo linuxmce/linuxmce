@@ -33,7 +33,10 @@ Rectangle {
                 hoverEnabled: true
                 onEntered: attributedelegate.color = "aliceblue"
                 onExited: attributedelegate.color = style.accentcolor
-                onClicked: dcerouter.saveScreenAttribute(attributeNo)
+                onClicked: {
+                    dcerouter.saveScreenAttribute(attributeNo);
+                     assignscreenshot.destroy()
+                }
             }
 
             /* Text {
