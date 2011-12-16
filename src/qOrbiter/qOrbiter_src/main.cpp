@@ -223,13 +223,15 @@ int main(int argc, char* argv[])
         QApplication  a(argc, argv);
 
         orbiterWindow orbiterWin;
+        QApplication::processEvents(QEventLoop::AllEvents);
+
         orbiterWin.setMessage("loading");
         QApplication::processEvents(QEventLoop::AllEvents);
         qorbiterManager  w(PK_Device,QString::fromStdString(sRouter_IP), &orbiterWin.mainView);
 
         QObject::connect(&w, SIGNAL(loadingMessage(QString)), &orbiterWin,SLOT(setMessage(QString)), Qt::UniqueConnection);
         QObject::connect(&orbiterWin,SIGNAL(setupLmce(QString,QString)), &w, SLOT(qmlSetupLmce(QString,QString)));
-        QApplication::processEvents(QEventLoop::AllEvents);
+
 
         if(w.setupLmce(PK_Device, sRouter_IP, true, false))
         {

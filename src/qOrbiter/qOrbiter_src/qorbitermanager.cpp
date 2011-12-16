@@ -841,6 +841,8 @@ void qorbiterManager::loadSkins(QUrl base)
 
     tskinModel->addSkin("default");
     tskinModel->addSkin("aeon");
+    tskinModel->addSkin("crystalshades");
+
 }
 
 void qorbiterManager::quickReload()
