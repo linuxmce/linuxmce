@@ -314,7 +314,8 @@ OTHER_FILES += Readme.txt \
     android/src/eu/licentia/necessitas/ministro/IMinistro.aidl \
     android/AndroidManifest.xml \
     qml/Splash.qml \
-    qml/SetupNewOrbiter.qml
+    qml/SetupNewOrbiter.qml \
+    OrbiterVariables.txt
 
 ANDROID{
 OTHER_FILES=\
@@ -352,6 +353,7 @@ OTHER_FILES= \
 
 RESOURCES += \
     skinData.qrc
+
 
 
 
