@@ -92,9 +92,8 @@ Rectangle {
         anchors.rightMargin: scaleX(1)
         MouseArea{
             anchors.fill: parent
-            onClicked: {
-                cleanupScreenie();
-                assignscreenshot.destroy()
+            onPressed: {assignscreenshot.destroy() }
+            onClicked: { cleanupScreenie()
             }
         }
     }

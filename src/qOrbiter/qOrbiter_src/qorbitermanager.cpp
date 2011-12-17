@@ -1513,7 +1513,7 @@ void qorbiterManager::cleanupScreenie()
 {
     mediaScreenShot = QImage();
     screenshotVars.clear();
-    //qDebug("Cleaned up Screenshot model");
+    qDebug("Cleaned up Screenshot model");
 }
 
 void qorbiterManager::initializeConnections()

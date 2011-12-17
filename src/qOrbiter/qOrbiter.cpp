@@ -3776,10 +3776,11 @@ void DCE::qOrbiter::saveScreenAttribute(QString attribute)
     qmlUI->mediaScreenShot.save(&ba, "JPG");
     ba.close();
     char *pData = (char*) bytes.constData();
-    int pDataSize = qmlUI->mediaScreenShot.byteCount();
+    int pDataSize = ba.size();
     //todo - add file F! to this list of attributes
     CMD_Make_Thumbnail thumb(qmlUI->iPK_Device, qmlUI->iMediaPluginID, sAttribute, pData, pDataSize );
     SendCommand(thumb);
+    qmlUI->cleanupScreenie();
 }
 
 void DCE::qOrbiter::newOrbiter()
