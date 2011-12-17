@@ -50,11 +50,52 @@ int iPK_Device                 the orbiter device number
 QTime screen1time              clock. will display in
 QTime currentDateTime          current date and time
 ---need to outline 'role' data for member data-----
+
 DataModel currentRoomLights    list model of the current room lighting scenarios.
+-----Roles
+    Qurl image                 url or path to image
+    int gotoscreen              the screen to go to on interacting with this button
+    QString params              ??
+    QString command            the commandgroup that will be executed
+    QString label              the label of the scenario
+-------------------------------------------------------------------------------
+
 DataModel currentRoomMedia     list model of the current room media scenarios
+-----Roles
+Qurl image                 url or path to image
+int gotoscreen              the screen to go to on interacting with this button
+QString params              ??
+QString command            the commandgroup that will be executed
+QString label              the label of the scenario
+-------------------------------------------------------------------------------
+
 DataModel currentRoomClimate   list model of current room climate scenarios
+-----Roles
+Qurl image                 url or path to image
+int gotoscreen              the screen to go to on interacting with this button
+QString params              ??
+QString command            the commandgroup that will be executed
+QString label              the label of the scenario
+-------------------------------------------------------------------------------
+
 DataModel currentRoomTelecom   list model of the current room telecom scenarios
+-----Roles
+Qurl image                 url or path to image
+int gotoscreen              the screen to go to on interacting with this button
+QString params              ??
+QString command            the commandgroup that will be executed
+QString label              the label of the scenario
+-------------------------------------------------------------------------------
+
 DataModel currentRoomSecurity  list model of the current room security scenarios
+-----Roles
+Qurl image                 url or path to image
+int gotoscreen              the screen to go to on interacting with this button
+QString params              ??
+QString command            the commandgroup that will be executed
+QString label              the label of the scenario
+-------------------------------------------------------------------------------
+
 DataModel userList             list of the users in the linuxmce system
 DataModel roomList             list of the rooms in this home.
 DataModel mediaplaylist        the current playlist in list model form
