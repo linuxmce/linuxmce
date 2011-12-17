@@ -839,10 +839,20 @@ void qorbiterManager::loadSkins(QUrl base)
     tskinModel = new SkinDataModel(base, new SkinDataItem, this);
     qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
 
+    /*
+      TODO ASAP:
+      Write feeder function that preceeds this call to creat a simple string list
+      of all availible skins for the build. a simple parsing of the skins directory
+      should suffice and improper skins are dealt with later.
+      */
+
+#ifdef for_harmattan
+    tskinModel->addSkin("default");
+#else
     tskinModel->addSkin("default");
     tskinModel->addSkin("aeon");
     tskinModel->addSkin("crystalshades");
-
+#endif
 }
 
 void qorbiterManager::quickReload()

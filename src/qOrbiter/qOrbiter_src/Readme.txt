@@ -52,6 +52,7 @@ In an effor to keep the history of changes broken up
 #1223 - playlist threading
 #1247 - sleeping menu ticket
 #1261 - ui blocking issues
+#1372 - harmattan skin development
 
 
 If something you are working on is not described here, please open a ticket for it so we can track that specific issue.
