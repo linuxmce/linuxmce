@@ -48,13 +48,18 @@ using namespace DCE;
 qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeView *view, QObject *parent) :
     QObject(parent),iPK_Device(deviceno), qs_routerip(routerip),qorbiterUIwin(view)
 {
+
     m_bStartingUp= true;
-  setDceResponse("setting up LMCE");
+
+    setDceResponse("setting up LMCE");
+    QApplication::processEvents(QEventLoop::AllEvents);
+
     qorbiterUIwin->rootContext()->setContextProperty("srouterip", QString(qs_routerip) );
     qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
     qorbiterUIwin->rootContext()->setContextProperty("manager", this); //providing a direct object for qml to call c++ functions of this class
     qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse); //file grids current media type
     item = qorbiterUIwin->rootObject();
+
     // QObject::connect(this,SIGNAL(splashReady()), this,SLOT(startSetup()));
 
 #ifdef for_desktop
@@ -96,7 +101,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
 
     initializeGridModel();  //begins setup of media grid listmodel and its properties
     initializeSortString(); //associated logic for navigating media grids
-
+    QApplication::processEvents(QEventLoop::AllEvents);
 
     //initial signal and slot connections
     //        QObject::connect(item, SIGNAL(close()), this, SLOT(closeOrbiter()));
@@ -107,7 +112,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     //managing where were are variables
     int i_current_command_grp;
     i_current_command_grp = 0;
-
+    QApplication::processEvents(QEventLoop::AllEvents);
     goBack << ("|||1,2|0|13|0|2|");
     backwards = false;
 
@@ -144,7 +149,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
 
     //QObject::connect(nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection );
     //iPK_Device= deviceno;
-
+    QApplication::processEvents(QEventLoop::AllEvents);
 }
 
 /*
@@ -174,6 +179,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
     pqOrbiter = new DCE::qOrbiter(iPK_Device, sRouterIP, true,false);
     setDceResponse("Made orbiter");
+    QApplication::processEvents(QEventLoop::AllEvents);
 
     iPK_Device_DatagridPlugIn =  long(6);
     iPK_Device_OrbiterPlugin = long(9);
@@ -207,8 +213,9 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
     {
-        setDceResponse("Orbiter  connected");
 
+        emit loadingMessage("Orbiter  connected");
+        QApplication::processEvents(QEventLoop::AllEvents);
         getConf(PK_Device);
         /*
               we get various variable here that we will need later. I store them in the qt object so it
@@ -230,7 +237,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             //return true;
         }
     }
-
+    QApplication::processEvents(QEventLoop::AllEvents);
 }
 
 
@@ -244,11 +251,13 @@ void qorbiterManager::refreshUI()
     if (pqOrbiter->GetConfig())
     {
         setDceResponse("Regen success, loading...");
+        QApplication::processEvents(QEventLoop::AllEvents);
         getConf(iPK_Device);
     }
     else
     {
-        setDceResponse("Cant Get Config!");
+        emit loadingMessage("Cant Get Config!");
+        QApplication::processEvents(QEventLoop::AllEvents);
     }
 
 
@@ -272,6 +281,7 @@ void qorbiterManager::getConf(int pPK_Device)
     else
     {
         setDceResponse("Attempting to write config");
+        QApplication::processEvents(QEventLoop::AllEvents);
         //writeConfig();
     }
 
@@ -284,6 +294,7 @@ void qorbiterManager::getConf(int pPK_Device)
     iFK_Room = defaults.attribute("DefaultRoom").toInt();
     iea_area = defaults.attribute("DefaultEA").toInt();
     iPK_User = defaults.attribute("PK_User").toInt();
+    QApplication::processEvents(QEventLoop::AllEvents);
 
     //-floorplans-----------------------------------------------------------------------------------------------------
     QDomElement floorplanXml = root.firstChildElement("Floorplans");
@@ -312,6 +323,7 @@ void qorbiterManager::getConf(int pPK_Device)
     qorbiterUIwin->engine()->addImageProvider("listprovider", modelimageprovider);
 
     emit loadingMessage("floorplans");
+    QApplication::processEvents(QEventLoop::AllEvents);
 
     //-USERS-----------------------------------------------------------------------------------------------------
     QDomElement userXml = root.firstChildElement("Users");
@@ -507,7 +519,7 @@ void qorbiterManager::getConf(int pPK_Device)
         roomSecurityScenarios.insert(secroomMapNo, securityModelHolder);
         roomSecurity = roomSecurityScenarios.value(m_lRooms->idefault_Ea);
     }
-
+    QApplication::processEvents(QEventLoop::AllEvents);
     //------------------------------------------context objects----------------------------------------------------
     qorbiterUIwin->rootContext()->setContextObject(this);
     // setActiveRoom(RroomMapping.value(QString::fromStdString(pqOrbiter->DATA_Get_FK_EntertainArea())), 0);
@@ -534,6 +546,7 @@ void qorbiterManager::getConf(int pPK_Device)
     processingThread = new QThread(this);
     simpleEPGmodel->moveToThread(processingThread);
     processingThread->start(QThread::LowPriority);
+    QApplication::processEvents(QEventLoop::AllEvents);
     QObject::connect(this,SIGNAL(liveTVrequest()), simpleEPGmodel,SLOT(populate()), Qt::QueuedConnection);
     //        qDebug () << "Orbiter Registered, starting";
 
@@ -615,14 +628,16 @@ void qorbiterManager::getConf(int pPK_Device)
     updatedObjectImage.load(":/icons/videos.png");
     QObject::connect(this,SIGNAL(objectUpdated()), nowPlayingButton, SIGNAL(imageChanged()) );
 
-    setDceResponse("Config Complete");
     QApplication::processEvents(QEventLoop::AllEvents);
+    setDceResponse("Config Complete");
+
     swapSkins(currentSkin);
 
 }
 
 void qorbiterManager::swapSkins(QString incSkin)
 {
+    QApplication::processEvents(QEventLoop::AllEvents);
     // qDebug() << "Initiating skin switch : " + incSkin;
     setDceResponse("Setting Skin to:" + incSkin);
     //get the skin URL from the skins model
@@ -663,6 +678,7 @@ void qorbiterManager::swapSkins(QString incSkin)
 void qorbiterManager::closeOrbiter()
 {
     qDebug() << "Shutting Down";
+    QApplication::processEvents(QEventLoop::AllEvents);
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Exiting, Unregistering 1st");
     // processingThread->quit();
     pqOrbiter->deinitialize();
@@ -686,6 +702,7 @@ bool qorbiterManager::requestDataGrid()
 
 void qorbiterManager::setActiveRoom(int room,int ea)
 {
+    QApplication::processEvents(QEventLoop::AllEvents);
     roomLights = roomLightingScenarios.value(room);
     roomMedia = roomMediaScenarios.value(room);
     roomClimate = roomClimateScenarios.value(room);
@@ -700,6 +717,7 @@ void qorbiterManager::setActiveRoom(int room,int ea)
     /* */
     //qDebug() << "CHanged to room" << room;
     setLocation(room, ea);
+    QApplication::processEvents(QEventLoop::AllEvents);
 }
 
 
@@ -708,6 +726,7 @@ void qorbiterManager::execGrp(int grp)
     pqOrbiter->executeCommandGroup(grp);
     i_current_command_grp = grp;
     qorbiterUIwin->rootContext()->setContextProperty("currentcommandgrp", i_current_command_grp);
+    QApplication::processEvents(QEventLoop::AllEvents);
 }
 
 
@@ -742,6 +761,7 @@ void qorbiterManager:: setLocation(const int &room, const int &ea)
     // qDebug() << "Moving to Location:" << room << "with ea: " << ea;
     emit locationChanged(room, ea);
     pqOrbiter->setLocation(room, ea);
+    QApplication::processEvents(QEventLoop::AllEvents);
 
 }
 
@@ -838,7 +858,7 @@ void qorbiterManager::loadSkins(QUrl base)
     //qDebug() << base;
     tskinModel = new SkinDataModel(base, new SkinDataItem, this);
     qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
-
+    QApplication::processEvents(QEventLoop::AllEvents);
     /*
       TODO ASAP:
       Write feeder function that preceeds this call to creat a simple string list
@@ -1487,7 +1507,7 @@ void qorbiterManager::showMessage(QString message, int duration, bool critical)
 
 void qorbiterManager::startOrbiter()
 {
-m_bStartingUp = false;
+    m_bStartingUp = false;
     qorbiterUIwin->setWindowTitle("LinuxMCE Orbiter " + QString::number(iPK_Device));
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeViewToRootObject);
     QApplication::processEvents(QEventLoop::AllEvents);
@@ -1513,7 +1533,8 @@ void qorbiterManager::cleanupScreenie()
 {
     mediaScreenShot = QImage();
     screenshotVars.clear();
-    qDebug("Cleaned up Screenshot model");
+    setDceResponse("Cleaned up Screenshot model");
+    QApplication::processEvents(QEventLoop::AllEvents);
 }
 
 void qorbiterManager::initializeConnections()
@@ -1530,12 +1551,11 @@ void qorbiterManager::initializeConnections()
 void qorbiterManager::reloadHandler()
 {
     pqOrbiter->Disconnect();
-    QApplication::processEvents(QEventLoop::AllEvents);
+
     setDceResponse("Reloading Router");
+    QApplication::processEvents(QEventLoop::AllEvents);
     loadSplash();
     //sleep(15);
-
-    QApplication::processEvents(QEventLoop::AllEvents);
 
     if (pqOrbiter->Connect(iPK_Device) )
     {
@@ -1551,9 +1571,10 @@ void qorbiterManager::reloadHandler()
 
 void qorbiterManager::setDceResponse(QString response)
 {
-    dceResponse = response;   
+    dceResponse = response;
     emit loadingMessage(response);
-     emit dceResponseChanged();
+    QApplication::processEvents(QEventLoop::AllEvents);
+    emit dceResponseChanged();
     // qDebug() << response;
 
 }

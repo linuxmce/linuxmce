@@ -225,7 +225,7 @@ int main(int argc, char* argv[])
         orbiterWindow orbiterWin;
         QApplication::processEvents(QEventLoop::AllEvents);
 
-        orbiterWin.setMessage("loading");
+        orbiterWin.setMessage("Setting up Lmce");
         QApplication::processEvents(QEventLoop::AllEvents);
         qorbiterManager  w(PK_Device,QString::fromStdString(sRouter_IP), &orbiterWin.mainView);
 

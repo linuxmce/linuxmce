@@ -17,12 +17,15 @@
 
 
 # define deployment destination and target executable name
-DESTDIR = ../build-output
+
+
+
 TARGET = qOrbiter
 
 
 # Add more folders to ship with the application, here
 for_desktop{
+DESTDIR = ../build-output
 folder_01.source = qml/desktop
 folder_01.target = $$DESTDIR/qml
 
@@ -41,6 +44,7 @@ DEFINES += for_droid
 }
 
 for_freemantle{
+DESTDIR = ../build-output
 folder_01.source = qml/freemantle
 folder_01.target = $$DESTDIR/qml
 
@@ -59,6 +63,7 @@ DEFINES += for_harmattan
 }
 
 macx{
+DESTDIR = ../build-output
     APP_RESOURCES_PATH=../../../$$DESTDIR/$$TARGET".app"/Contents/resources
 
     folder_01.source = qml/desktop
