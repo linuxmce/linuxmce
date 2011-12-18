@@ -319,7 +319,8 @@ OTHER_FILES += Readme.txt \
     android/AndroidManifest.xml \
     qml/Splash.qml \
     qml/SetupNewOrbiter.qml \
-    OrbiterVariables.txt
+    OrbiterVariables.txt \
+    qml/harmattan/js/nowPlayingWorker.js
 
 ANDROID{
 OTHER_FILES=\

@@ -1,57 +1,61 @@
-import QtQuick 1.0
-import "../components"
-import "../js" as MyJs
+import QtQuick 1.1
+import com.nokia.meego 1.0
 
- Item {
-     id: item
-     signal close()
-     signal changeScreen(string s)
-     property string locationinfo: "standby"
+PageStackWindow {
+    id: appWindow
+    initialPage: Splash { }
 
-    // Style {id:style}
-    width: style.orbiterW;
-    height: style.orbiterH;
+    platformStyle: defaultStyle;
+    property bool enableSwipe: true;
 
-     function screenchange(screenname )
-     {
-         if(pageLoader.source = "../screens/"+screenname)
-         {
-             console.log("Command to change to:" + screenname+ " was successfull")
-         }
-         else
-         {
-             console.log("Command to change to:" + screename + " failed!")
-         }
-     }
+    PageStackWindowStyle { id: defaultStyle; }
+    PageStackWindowStyle {
+        id: customStyle;
+        background: "image://theme/meegotouch-wallpaper-portrait";
+        backgroundFillMode: Image.PreserveAspectCrop
+    }
 
-     Loader {
-         id:pageLoader
-         objectName: "loadbot"
-         source: "Splash.qml"
-         onSourceChanged:  loadin
-         onLoaded: {
-
-             console.log("Screen Changed:" + pageLoader.source)
-
-            }
-         }
-
-     SequentialAnimation{
-         id:loadin
-
-         PropertyAnimation{
-             id:fadeout
-             target:pageLoader
-             properties: "opacity"; to: "0"; duration: 5000
-
-         }
-         PropertyAnimation{
-             id: fadein
-             target:pageLoader
-             properties: "opacity"; to: "1"; duration: 5000
-         }
-
-     }
+    function screenchange(screenname)
+    {
+        var component = Qt.createComponent("../screens/"+screenname);
+        if (component.status == Component.Ready)
+            pageStack.push(component)
+        else
+            console.log("Unable to load screen: "+component.errorString());
+    }
+}
 
 
- }
+//Item {
+//     id: item
+//     signal close()
+//     signal changeScreen(string s)
+//     property string locationinfo: "standby"
+
+//    // Style {id:style}
+//    width: style.orbiterW;
+//    height: style.orbiterH;
+
+//     function screenchange(screenname )
+//     {
+//         if(pageLoader.source = "../screens/"+screenname)
+//         {
+//             console.log("Command to change to:" + screenname+ " was successfull")
+//         }
+//         else
+//         {
+//             console.log("Command to change to:" + screename + " failed!")
+//         }
+//     }
+
+//     Loader {
+//         id:pageLoader
+//         objectName: "loadbot"
+//         source: "Splash.qml"
+//         onLoaded: {
+
+//             console.log("Screen Changed:" + pageLoader.source)
+
+//            }
+//         }
+// }

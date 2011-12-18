@@ -1,4 +1,14 @@
-qorbiter-src (0.0.1) unstable; urgency=low
+qorbiter (1.0.0) unstable; urgency=low
+  * <Add change description here>
+
+ -- root <root@unknown>  Sat, 17 Dec 2011 17:11:20 -0500
+
+qorbiter (1.0.1) unstable; urgency=low
+  * <Add change description here>
+
+ -- root <root@unknown>  Sat, 17 Dec 2011 17:11:18 -0500
+
+qorbiter (0.0.1) unstable; urgency=low
 
   * Initial Release.
 

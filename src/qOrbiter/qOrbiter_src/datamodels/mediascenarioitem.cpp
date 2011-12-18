@@ -1,7 +1,7 @@
 #include "mediascenarioitem.h"
 
-MediaScenarioItem:: MediaScenarioItem( const QString &name, const QString &label, const QString &parameter, const QString &scommand,  const QString &gotoScreen , QImage img, QObject *parent):
-  m_name(name), m_label(label), m_param(parameter), m_command(scommand), m_goto(gotoScreen), m_image(img)
+MediaScenarioItem:: MediaScenarioItem( const QString &name, const QString &title, const QString &parameter, const QString &scommand,  const QString &gotoScreen , QImage img, QObject *parent):
+  m_name(name), m_title(title), m_param(parameter), m_command(scommand), m_goto(gotoScreen), m_image(img)
 {
 
 }
@@ -10,7 +10,7 @@ QHash<int, QByteArray> MediaScenarioItem::roleNames() const
 {
   QHash<int, QByteArray> names;
   names[NameRole] = "username";
-  names[LabelRole] = "label";
+  names[LabelRole] = "title";
   names[ParamRole] = "params";
   names[CommandRole] = "command";
   names[GotoRole] = "gotoscreen";
@@ -26,7 +26,7 @@ QVariant MediaScenarioItem::data(int role) const
   case NameRole:
     return id();
   case LabelRole:
-    return label();
+    return title();
   case ParamRole:
     return params();
   case CommandRole:
