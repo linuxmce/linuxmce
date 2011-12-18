@@ -1069,6 +1069,7 @@ signals:
     void screenShotReady();
     void waitForScreenShot(char picData, int picDataSize, string fileFormat);
     void disconnected(QString msg);
+    void screenSaverImages(QStringList images);
 };
 
 //<-dceag-end-b->
