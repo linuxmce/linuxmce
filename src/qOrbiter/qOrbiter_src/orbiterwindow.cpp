@@ -5,6 +5,10 @@
 #include <QDebug>
 #include <QApplication>
 
+#ifdef IOS
+    #include "../iOS/qOrbiter/ioshelpers.h"
+#endif
+
 orbiterWindow::orbiterWindow(QObject *parent) :
     QObject(parent)
 {
@@ -15,7 +19,6 @@ orbiterWindow::orbiterWindow(QObject *parent) :
     mainView.setWindowTitle("LinuxMCE Orbiter ");
     mainView.setResizeMode(QDeclarativeView::SizeViewToRootObject);
 
-
 #ifdef for_desktop
     buildType = "/qml/desktop";
     qrcPath = "qrc:desktop/Splash.qml";
@@ -25,6 +28,10 @@ orbiterWindow::orbiterWindow(QObject *parent) :
 #elif defined (for_harmattan)
     buildType="/qml/harmattan";
     qrcPath = "qrc:harmattan/Splash.qml";
+#elif defined (IOS)
+    buildType="/qml/desktop";
+    NSString *resourcePath = [[NSBundle mainBundle] resourcePath];
+    qrcPath = qStringFromNSString([resourcePath stringByAppendingPathComponent:@"qml/Splash.qml"]);
 #elif defined (Q_OS_MACX)
     buildType="/qml/desktop";
     qrcPath = "qrc:osx/Splash.qml";
@@ -38,8 +45,6 @@ orbiterWindow::orbiterWindow(QObject *parent) :
     buildType = "/qml/desktop";
     qrcPath = "qrc:desktop/Splash.qml";
 #endif
-
-
 
     mainView.setSource(QUrl(qrcPath));
 
