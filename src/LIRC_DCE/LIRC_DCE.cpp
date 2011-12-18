@@ -76,6 +76,8 @@ bool LIRC_DCE::GetConfig()
 
 	system("killall -9 lircd");
 
+	system("mkdir -p /var/run/lirc");
+
 	// Always do this
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Running modprobe lirc_dev");
 	system("modprobe lirc_dev");
@@ -86,8 +88,8 @@ bool LIRC_DCE::GetConfig()
 	{
 		string sModProbe = StringUtils::Tokenize(sSystemDevice,",",pos);
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Running modprobe %s",sModProbe.c_str());
-		if (sModProbe == "lirc_mceusb2" || sModProbe == "lirc_mceusb")
-			sModProbe = "mceusb";
+//		if (sModProbe == "lirc_mceusb2" || sModProbe == "lirc_mceusb")
+//			sModProbe = "mceusb";
 		system(("modprobe " + sModProbe).c_str());
 	}
 
