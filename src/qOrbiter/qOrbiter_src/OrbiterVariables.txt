@@ -111,12 +111,47 @@ int gmediaType                 int correlating to the mediatype the grid is navi
 int currentroom                int representing the current EA of the orbiter
 QString currentuser            string of the current user
 
+-QObject filedetailsclass       QObject containing details of a file for a pop up menu.
+Data accessible by roles: i.e filedetailsclass.program will display the program attribute for a file
+bool showDetails               boolean that can be used to govern popup modality
+qstring file                   file id number in string format
+qstring objecttitle            title of media, if any
+qstring synop                  synopsis
+qurl screenshot                the qurl for the image provider to locate and return the image
+qstring filename               full file and path
+qstring title                  attribute 13 - title
+qstring program                attribute 12 - program
+qstring mediatitle             title as provided by media plugin
+qstring genre                  attribute #? genre
+qstring studio                 attribute #? studio
+qstring channel                the channel callsign for tv
+qstring channelid              channel id for mythtv
+qstring episode                episode title?
+qsrting director               director
+qstring album                  album
+qstring track                  track number
+qstringlist performers         list of performers, seperated by '|'
+qstringlist composerlist       composers split by '|'
+QString aspect                 apect ratio
+int i_aspectH                  image height
+int i_aspectW                  image width
+
+
+
 Functions - This will be broken down by section with certain parts relating directly to the screens where they are used
 ======================================================================================================================
+
+Images
+=================================================
+
 
 HomeScreen
     Special Screen that doesnt have to be implemented, but since it can be considered the start page, certain
     data is provided to make life easier for everyone
 
+Media Functions
+=========================
+GetMediaAttributeGrid(QString qs_fk_fileno)
+This function populates the media attribute grid. This data is accessible via the filedetailsclass object
 
 
