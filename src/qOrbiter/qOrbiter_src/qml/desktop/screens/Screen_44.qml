@@ -5,17 +5,7 @@ import "../js/ComponentLoader.js" as MyJs
 Rectangle {
     height: style.orbiterH
     width: style.orbiterW
-    gradient: Gradient {
-        GradientStop {
-            position: 0.00;
-            color: style.highlight2;
-        }
-
-        GradientStop {
-            position: 1.00;
-            color: style.maincolor;
-        }
-    }
+    color: "transparent"
     id: advancedscreen
 
     HomeButton{}

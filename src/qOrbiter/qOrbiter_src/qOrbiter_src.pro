@@ -18,10 +18,7 @@
 
 # define deployment destination and target executable name
 
-
-
-TARGET = qOrbiter
-
+TARGET = qorbiter
 
 # Add more folders to ship with the application, here
 for_desktop{
@@ -55,7 +52,7 @@ DEFINES += for_freemantle
 
 for_harmattan{
 folder_01.source = qml/harmattan
-folder_01.target = $$DESTDIR/qml
+folder_01.target =
 
 folder_02.source= img
 folder_02.target=     #left blank so it will appear in the root
@@ -89,7 +86,7 @@ DEFINES +=ANDROID
 
 !macx{
     folder_03.source = config.xml
-    folder_03.target = ../build-output
+    folder_03.target = $$DESTDIR
 }
 
 DEPLOYMENTFOLDERS = folder_01 folder_02 folder_03
@@ -212,7 +209,8 @@ SOURCES += main.cpp \
     contextobjects/floorplandevice.cpp \
     contextobjects/screenshotattributes.cpp \
     threadedClasses/threadedsplash.cpp \
-    orbiterwindow.cpp
+    orbiterwindow.cpp \
+    contextobjects/screensaverclass.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -276,7 +274,8 @@ HEADERS += \
     contextobjects/floorplandevice.h \
     contextobjects/screenshotattributes.h \
     threadedClasses/threadedsplash.h \
-    orbiterwindow.h
+    orbiterwindow.h \
+    contextobjects/screensaverclass.h
 
 OTHER_FILES += Readme.txt \
     config.xml \
@@ -361,54 +360,10 @@ RESOURCES += \
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+contains(MEEGO_EDITION,harmattan) {
+    desktopfile.files = $${TARGET}.desktop
+    desktopfile.path = /usr/share/applications
+    INSTALLS += desktopfile
+}
 
 

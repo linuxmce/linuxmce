@@ -16,6 +16,12 @@ import "../js/ComponentLoader.js" as MyJs
     height: style.orbiterH;
 
 
+    ScreenSaver{
+        anchors.centerIn: parent
+        height: style.orbiterH
+        width: style.orbiterW
+    }
+
     function scaleX(x){
         return x/100*style.orbiterW
     }

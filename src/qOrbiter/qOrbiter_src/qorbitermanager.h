@@ -60,6 +60,8 @@
 #include <datamodels/securityscenariomodel.h>
 #include <datamodels/floorplanmodel.h>
 
+#include <contextobjects/screensaverclass.h>
+
 #include <datamodels/filtermodel.h>
 #include <datamodels/genremodel.h>
 #include <datamodels/attributesortmodel.h>
@@ -142,6 +144,8 @@ public:
     QString m_SkinsDirectoryPath;
     QString aspect; //-- true poster || false landscape
 
+    ScreenSaverClass ScreenSaver;
+
     //------------------------------------------------------playlist classes
 
     PlaylistClass *storedVideoPlaylist;
@@ -150,7 +154,7 @@ public:
 
     //------CUSTOM QML TYPES------------------------------------------------------------------------------------
     ScreenParamsClass *ScreenParameters;
-    ScreenSaverModule *ScreenSaver;
+
     SecurityVideoClass *SecurityVideo;
     QList<QObject*> screenshotVars;
 

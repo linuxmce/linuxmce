@@ -10,12 +10,9 @@ Item
         signal swapStyle()
         height: style.orbiterH
         width: style.orbiterW
-        color: style.bgcolor
+        color: "transparent"
 
-        Image {
-            id: bg
-            source: "../../../img/icons/orbiterbg.png"
-        }
+
         Rectangle{
             id:status
             height: scaleY(2.5)

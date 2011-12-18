@@ -5,31 +5,46 @@ Rectangle {
     height: style.orbiterW
     color: "transparent"
 
+    function changeStuff()
+    {
+        flash.running = true
+        if (flash.complete)
+        {
+        ssimg.source = "image://listprovider/screensaver/"+securityvideo.timestamp
+        }
+    }
+
     Image {
         id: ssimg
-        fillMode: Image.PreserveAspectCrop
-        source: screensaver.current_image
+        height: style.height
+        width: style.width
+        source: "image://listprovider/screensaver"+screensaver.timestamp
+        anchors.centerIn: parent
+        smooth: true
+
 
     }
 
     Connections{
         target: screensaver
-        onImageChanged:flash.complete
+        onImageChanged:changeStuff()
+
     }
 
     Rectangle{
         id:flashbox
         height: style.orbiterH
         width: style.orbiterW
-        color: "transparent"
+        color: "black"
 
         SequentialAnimation on color {
 
             id:flash
-         //   running: true
-            //loops: Animation.Infinite
-          // PauseAnimation { duration: 900 }
-            PropertyAnimation{ target:flashbox; property: "color"; to: "black"; duration: 2000}
+            running: true
+            loops: Animation.complete
+            // PauseAnimation { duration: 900 }
+
+            PropertyAnimation{ target:flashbox; property: "color"; to: "black"; duration: 1000}
             PropertyAnimation{ target:flashbox; property: "color"; to: "transparent"; duration: 2000}
         }
     }

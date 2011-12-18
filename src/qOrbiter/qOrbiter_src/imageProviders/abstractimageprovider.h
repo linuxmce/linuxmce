@@ -57,6 +57,10 @@ QImage key;
                 managerreference->filedetailsclass->setImageAspect("wide");
             }
         }
+        else if(id.contains("screensaver"))
+        {
+            temp = ScreenSaver();
+        }
 
         //aspect checking
 
@@ -83,6 +87,7 @@ private:
     QImage updateObjectProvider();
     QImage fileDetails();
     QImage screenShot();
+    QImage ScreenSaver();
 
 };
 

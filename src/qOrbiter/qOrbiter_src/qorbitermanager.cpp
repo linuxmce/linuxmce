@@ -122,9 +122,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
 
     // connect(filedetailsclass, SIGNAL(FileChanged(QString)), this, SLOT(showFileInfo(QString)));
 
-    //non functioning screen saver module
-    ScreenSaver = new ScreenSaverModule;
-    qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", ScreenSaver);
+
 
     /* now playing button todo - make it appear and dissapear if in a room with no media / media director
             embed in room model or other location based marker
@@ -146,6 +144,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     timeCodeSocket = new QTcpSocket();
     // timeCodeSocket->moveToThread(timecodeThread);
     // timecodeThread->start();
+
 
     //QObject::connect(nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection );
     //iPK_Device= deviceno;
@@ -227,6 +226,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
         {
             pqOrbiter->CreateChildren();
             qorbiterUIwin->rootContext()->setContextProperty("dcerouter", pqOrbiter );
+
             setConnectedState(true);
             //return false;
         }
@@ -267,6 +267,10 @@ void qorbiterManager::refreshUI()
 // get conf method that reads config file
 void qorbiterManager::getConf(int pPK_Device)
 {
+
+    QObject::connect(pqOrbiter, SIGNAL(screenSaverImages(QStringList)), &ScreenSaver,SLOT(setImageList(QStringList)));
+    pqOrbiter->GetScreenSaverImages();
+    qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", &ScreenSaver);
 
     QDomDocument configData;
     const QByteArray tConf = binaryConfig.data();
@@ -628,10 +632,11 @@ void qorbiterManager::getConf(int pPK_Device)
     updatedObjectImage.load(":/icons/videos.png");
     QObject::connect(this,SIGNAL(objectUpdated()), nowPlayingButton, SIGNAL(imageChanged()) );
 
-    QApplication::processEvents(QEventLoop::AllEvents);
     setDceResponse("Config Complete");
+    QApplication::processEvents(QEventLoop::AllEvents);
 
     swapSkins(currentSkin);
+
 
 }
 

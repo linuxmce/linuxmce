@@ -107,3 +107,15 @@ QImage AbstractImageProvider::screenShot()
      return key;
 }
 
+QImage AbstractImageProvider::ScreenSaver()
+{
+    key = managerreference->pqOrbiter->getfileForDG(managerreference->ScreenSaver.currentImage.toStdString());
+
+     if (key.isNull())
+     {
+          key.load(":/icons/playlist.png");
+     }
+
+     return key;
+}
+

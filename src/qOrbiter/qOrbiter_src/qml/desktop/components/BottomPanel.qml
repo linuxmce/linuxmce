@@ -7,6 +7,7 @@ Rectangle {
     width: style.orbiterW
     height: style.widebuttonh + scaleY(2)
     color: style.darkhighlight
+    opacity: .75
 
     Row{
         id:advancedrow

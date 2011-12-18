@@ -5,6 +5,9 @@ Rectangle {
 
     // property alias synText:
     id: satcableboxremote
+    height: style.orbiterH
+    width: style.orbiterW
+    color:"transparent"
     Timer{
         id:singleshot
         repeat: false
@@ -20,12 +23,8 @@ Rectangle {
         onPlayListPositionChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
 
-    height: style.orbiterH
-    width: style.orbiterW
-    Image {
-        id: orbiterbg
-        source: "../../../img/icons/orbiterbg.png"
-    }
+
+
     Component.onCompleted:setNowPlayingTv()
 
         //main 'now playing rect containing all the other items
