@@ -19,7 +19,17 @@ PageStackWindow {
     {
         var component = Qt.createComponent("../screens/"+screenname);
         if (component.status == Component.Ready)
-            pageStack.push(component)
+        {
+            if (screenname == "Screen_70.qml")
+            {
+                theme.inverted=true;
+            }
+            else
+            {
+                theme.inverted=false;
+            }
+            pageStack.push(component);
+        }
         else
             console.log("Unable to load screen: "+component.errorString());
     }

@@ -11,6 +11,22 @@ Page {
             iconId: "toolbar-view-menu";
         }
     }
+
+    Timer
+    {
+        interval: 1000;
+        repeat: true;
+        triggeredOnStart: true;
+        running: true;
+
+        onTriggered: {
+            var msg = {'action':'updateNowPlaying','item':pagesModel,"isPlaying":dcenowplaying.b_mediaPlaying,'mainTitle':dcenowplaying.qs_mainTitle,"subTitle":dcenowplaying.qs_subTitle,"qs_screen":dcenowplaying.qs_screen,"timecode":dcenowplaying.timecode};
+            nowPlayingWorker.sendMessage(msg);
+        }
+
+    }
+
+
     Menu {
         id: roomMenu;
         visualParent: pageStack;
@@ -30,50 +46,12 @@ Page {
 
     ListModel {
         id: pagesModel;
-        ListElement {
-            visible: false;
-            page: "";
-            title: "";
-        }
-        ListElement {
-            page: "Screen_2.qml";
-            title: "Lights";
-        }
-        ListElement {
-            page: "Screen_3.qml";
-            title: "Media";
-        }
-        ListElement {
-            page: "Screen_4.qml";
-            title: "Climate";
-        }
-        ListElement {
-            page: "Screen_5.qml";
-            title: "Security";
-        }
-        ListElement {
-            page: "Screen_6.qml";
-            title: "Telecom";
-        }
     }
 
     WorkerScript
     {
         id: nowPlayingWorker;
         source: "../js/nowPlayingWorker.js";
-    }
-
-    Timer
-    {
-        interval: 1000;
-        repeat: true;
-        triggeredOnStart: true;
-
-        onTriggered: {
-            var msg = {'action':'updateNowPlaying','item':pagesModel,'dcenowplaying':dcenowplaying};
-            nowPlayingWorker.sendMessage(msg);
-        }
-
     }
 
     Rectangle {

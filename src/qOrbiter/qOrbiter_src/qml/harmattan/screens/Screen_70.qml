@@ -1,121 +1,163 @@
-import QtQuick 1.0
+import QtQuick 1.1
+import com.nokia.meego 1.0
+import com.nokia.extras 1.0
+import Qt.labs.gestures 1.0
 import "../components"
+import "../js"
 
-Rectangle {
-    property alias videoTitle: video_title.text
-   // property alias synText:
-    id: pvrRemote
-    Style{id:style}
+Page {
+    id: screen_70;
+    width: 480
+    height: 854
 
-    width: 800
-    height: 480
-    radius: 0
-    opacity: 1
-    color: style.advanced_bg
-
-    //main 'now playing rect containing all the other items
-    Rectangle{
-        id:video_now_playing
-        x: 200
-        y: 2
-        height: 179
-        width: 224
-        anchors.left: pvrRemote.right
-        anchors.leftMargin: -600
-
-        color: style.button_system_color
-        Text {
-            id: video_title
-            text: "text"
+    tools: ToolBarLayout {
+        ToolIcon {
+            iconId: "toolbar-back"
+            onClicked: pageStack.pop();
         }
-        Rectangle{
-            id: title_box
-            width: video_now_playing.width
-            height: 15
-            color: style.rowbgColor
-            opacity: 5
-            anchors.top: parent.top
-            Text {
-                id: now_playing_label
-                x: 0
-                y: 0
-                text: "Now Playing"
-                anchors.topMargin: 0
-                wrapMode: Text.WordWrap
-                anchors.top: parent.top
-            }
-
-            Text {
-                id: text2
-                x: 139
-                y: 139
-                text: "whats playing"
-                clip: true
-                horizontalAlignment: Text.AlignLeft
-                wrapMode: Text.WordWrap
-                font.pixelSize: 12
-            }
+        ToolIcon {
+            visible: false;
         }
+        ToolIcon {
+            visible: false;
+        }
+        ToolIcon {
+            visible: false;
+        }
+        ToolIcon {
+            iconId: "toolbar-menu"
+        }
+
     }
-    Remote_lighting_controls{ id: remote_lighting_controls1; x: 331; y: 181; width: 93; height: 219; anchors.topMargin: 179;anchors.top: video_now_playing.baseline}
-    Remote_Audio_controls{ id: remote1; x: 321; y: 194; z: 45; anchors.right: remote_lighting_controls1.left}
 
-    ButtonSq {
-        id: buttonsq1
-        x: 752
-        y: 0
-        width: 50
-        height: 50
+    state: (screen.currentOrientation == Screen.Portrait ? "portrait" : "landscape")
+    states: [
+        State {
+            name: "landscape";
+            PropertyChanges {
+                target: nowplayingimage;
+                width: 427;
+                height: 480;
+            }
 
-        buttontext: "Home"
+        },
+        State {
+            name: "portrait";
+            PropertyChanges {
+                target: nowplayingimage;
+                width: 480;
+                height: 427;
+            }
+        }
+    ]
 
+    Rectangle {
+        id: gestureTangle;
+        width: 480;
+        height: 427;
         Image {
-            id: homeimg
-            height: parent.height
-            width: parent.width
-            source: "../../img/icons/agt_home.png"
-
+            id: nowplayingimage
+            source: "image://listprovider/updateobject/"+securityvideo.timestamp;
+            anchors.fill: parent;
+            width: 480;
+            height: 427;
+            sourceSize.width: 480;
+            sourceSize.height: 427;
+            fillMode: Image.PreserveAspectCrop;
         }
-        MouseArea {
-            id: mouse_area1
-            anchors.fill: parent
-            onClicked: changeScreen("Screen_1.qml")
+
+        SwipeArea {
+            anchors.fill: parent;
+            onSwipeRight: console.log("Swipe Right");
+            onSwipeLeft: console.log("swipe LEFT!!")
         }
     }
 
-    VideoControls {
-        id: videocontrols1
-        x: 537
-        y: 231
-        width: 263
-        height: 249
+    Rectangle {
+        id: nowplayingTitle;
+        width: 480;
+        anchors.top: gestureTangle.bottom;
+        height: 24;
+        anchors.topMargin: UiConstants.DefaultMargin;
+        anchors.leftMargin: UiConstants.DefaultMargin;
+        color: "black";
+        Text {
+            text: dcenowplaying.qs_mainTitle;
+            font.weight: Font.Bold;
+            font.pointSize: 16;
+            color: "white";
+        }
     }
 
-    Column {
-        id: channelgrid
-
-        width: 200
-        height: 500
-        clip: true
-
-        Flickable{
-            height: parent.height
-            width: parent.width
-            contentHeight: childrenRect.width
-            contentWidth: childrenRect.width
-            clip: true
-
-            Repeater { model: 50
-
-                Rectangle {
-                    width:200
-                    height: 50
-                    color: "whitesmoke"
-                    Text {
-                        text: "I am DG item ,Sroll me!"
-                    }
-                }
-            }
-}
+    Rectangle {
+        id: nowplayingsubtitleBox;
+        width: 480;
+        anchors.top: nowplayingTitle.bottom;
+        color: "black";
+        height: 48;
+        Text {
+            text: dcenowplaying.qs_subTitle;
+            font.pointSize: 16;
+            color: "white";
+        }
     }
+
+    ButtonStyle {
+        id: mediaButtonsL;
+        background: "";
+        checkedBackground: "";
+        checkedDisabledBackground: "";
+        disabledBackground: "";
+        pressedBackground: "";
+        position: "horizontal-left";
+    }
+
+    ButtonStyle {
+        id: mediaButtonsM;
+        background: "";
+        checkedBackground: "";
+        checkedDisabledBackground: "";
+        disabledBackground: "";
+        pressedBackground: "";
+        position: "horizontal-center";
+    }
+
+    ButtonStyle {
+        id: mediaButtonsR;
+        background: "";
+        checkedBackground: "";
+        checkedDisabledBackground: "";
+        disabledBackground: "";
+        pressedBackground: "";
+        position: "horizontal-right"
+    }
+
+    Row {
+        anchors.top: nowplayingsubtitleBox.bottom;
+        anchors.topMargin: UiConstants.DefaultMargin;
+        width: 480;
+        height: 30
+
+        Button { width: 480/3; platformStyle: mediaButtonsL; iconSource: "image://theme/icon-m-lockscreen-mediacontrol-previous"; }
+        Button { width: 480/3; platformStyle: mediaButtonsM; iconSource: "image://theme/icon-m-lockscreen-mediacontrol-play"; }
+        Button { width: 480/3; platformStyle: mediaButtonsR; iconSource: "image://theme/icon-m-lockscreen-mediacontrol-next"; }
+    }
+
+    Timer {
+        id: singleshot;
+        repeat: false;
+        interval: 2000;
+        triggeredOnStart: false;
+        running: true;
+        onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;
+    }
+
+    Connections {
+        target: dcenowplaying;
+        onPlayListPositionChanged: { nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp; }
+    }
+
+    Component.onCompleted: setNowPlayingData()
+
+
 }
