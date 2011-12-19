@@ -14,6 +14,11 @@ NowPlayingClass::NowPlayingClass(QDeclarativeItem *parent) :
 
 void NowPlayingClass::setMediaSpeed(int speed)
 {
+    if(speed = 0)
+    {
+        i_playbackSpeed = 0;
+    }
+
     if (i_playbackSpeed  = 1)
     {
         i_playbackSpeed = speed * 1;

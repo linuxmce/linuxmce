@@ -2337,7 +2337,7 @@ void DCE::qOrbiter::PauseMedia()
 {
     CMD_Pause_Media pause_media(qmlUI->iPK_Device, qmlUI->iMediaPluginID,qmlUI->nowPlayingButton->i_streamID);
     SendCommand(pause_media);
-    qmlUI->nowPlayingButton->setMediaSpeed(1);
+    qmlUI->nowPlayingButton->setMediaSpeed(0);
 }
 
 void DCE::qOrbiter::requestMediaPlaylist()
