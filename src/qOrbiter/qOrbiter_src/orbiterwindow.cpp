@@ -6,18 +6,18 @@
 #include <QApplication>
 
 #ifdef IOS
-    #include "../iOS/qOrbiter/ioshelpers.h"
+#include "../iOS/qOrbiter/ioshelpers.h"
 #endif
 
 orbiterWindow::orbiterWindow(QObject *parent) :
     QObject(parent)
 {
+    newOrbiter = false;
 
     mainView.rootContext()->setContextProperty("window", this);
-
-
     mainView.setWindowTitle("LinuxMCE Orbiter ");
     mainView.setResizeMode(QDeclarativeView::SizeViewToRootObject);
+
 
 #ifdef for_desktop
     buildType = "/qml/desktop";
@@ -65,7 +65,7 @@ orbiterWindow::orbiterWindow(QObject *parent) :
 
 void orbiterWindow::setMessage(QString imsg)
 {
-   // QApplication::processEvents(QEventLoop::AllEvents);
+    // QApplication::processEvents(QEventLoop::AllEvents);
     message = imsg; emit MessageChanged();
     qDebug() << "Orbiter window output:" << imsg;
 }
@@ -84,6 +84,17 @@ void orbiterWindow::qmlSetupLmce(QString device, QString ip)
 {
     emit setupLmce(device, ip);
 
+}
+
+bool orbiterWindow::getOrbiterState()
+{
+    return newOrbiter;
+}
+
+void orbiterWindow::setOrbiterState(bool state)
+{
+    newOrbiter = state;
+    emit StatusChanged();
 }
 
 

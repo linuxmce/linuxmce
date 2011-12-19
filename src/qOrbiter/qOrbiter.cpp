@@ -2531,9 +2531,7 @@ void DCE::qOrbiter::GetScreenSaverImages() // unused at this time
     string sFilename;
     CMD_Get_Screen_Saver_Files screen_saver_files(qmlUI->iPK_Device, qmlUI->iPK_Device_OrbiterPlugin,qmlUI->iPK_Device, &sFilename);
     SendCommand(screen_saver_files);
-
-    QStringList tempList = QString::fromStdString(sFilename).split("\n");
-    qDebug() << tempList;
+    QStringList tempList = QString::fromStdString(sFilename).split("\n");   
     emit screenSaverImages(tempList);
 
 }
@@ -3825,7 +3823,7 @@ void DCE::qOrbiter::adjustLighting(int level)
 
 int DCE::qOrbiter::DeviceIdInvalid()
 {
-    qDebug("Device ID invalid");
+    qmlUI->setDceResponse("Device ID invalid");
     return 0;
 }
 

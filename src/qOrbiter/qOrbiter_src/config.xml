@@ -4,4 +4,8 @@
     <device id=""/>
     <routeraddress id="dcerouter"/>
     <skin id="default"/>
+    <options>
+    <enablescreensavermode id="false"/>
+    <defaultview id="flat"/>
+    </options>
 </orbiter>

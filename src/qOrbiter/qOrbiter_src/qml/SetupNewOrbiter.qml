@@ -9,22 +9,4 @@ Rectangle {
         text: qsTr("New Orbiter")
     }
 
-    Rectangle {
-          id: connectbutton
-          height: 25
-          width: 75
-
-          Text {
-              id: name
-              text: qsTr("Exit")
-          }
-
-          radius:  4
-          MouseArea{
-          ///onClicked: //qmlSetupLmce(devicenumber.text, routerip.text)
-          anchors.verticalCenter: parent.verticalCenter
-          }
-
-      }
-
 }

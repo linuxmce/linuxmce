@@ -13,7 +13,7 @@ Component{
             anchors.topMargin: scaleY(2)
             height: style.stdbuttonh
             width: style.stdbuttonw
-            buttontext: label
+            buttontext: title
             buttontextbold: true
             buttontextitalic: true
 

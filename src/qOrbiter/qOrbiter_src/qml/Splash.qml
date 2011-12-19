@@ -13,9 +13,34 @@ Rectangle {
     signal setupStart(string x, string y)
     signal splashLoaded()
 
+    function screenchange(screenname )
+    {
+       pageLoader.source = "qrc:/desktop/"+screenname
+       if (pageLoader.status == 1)
+        {
+            //manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
+        }
+        else
+        {
+           console.log("Command to change to:" + screenname + " failed!")
+
+        }
+    }
+
+
+    Loader {
+        id:pageLoader
+        objectName: "loadbot"
+
+        onLoaded: {
+            console.log("Screen Changed:" + pageLoader.source)
+           }
+        }
+
     Connections{
         target:window
         onMessageChanged:loadingStatus.text = window.message
+        onStatusChanged: screenchange("SetupNewOrbiter.qml")
     }
 
 
@@ -23,7 +48,7 @@ Rectangle {
         id: splash
         anchors.centerIn: rectangle1
         fillMode: Image.PreserveAspectFit
-        source: "qrc:/img/Splash.png"
+        source: "qrc:/img/desktop_splash.png"
         anchors.fill: parent
     }
 
@@ -121,7 +146,8 @@ Rectangle {
             color:"red"
             Text {
                 id: name
-                text: qsTr("Connect")
+                text: qsTr("Connect!")
+                font.bold: true
             }
 
             radius:  5
@@ -133,10 +159,28 @@ Rectangle {
             onClicked: window.qmlSetupLmce(devicenumber.text, routerip.text)
             anchors.verticalCenter: parent.verticalCenter
             }
-
         }
 
+      Rectangle {
+            id: exitbutton
+            height: 25
+            width: 75
 
+            Text {
+                id: exitlabel
+                text: qsTr("Exit")
+            }
+
+            radius:  4
+            MouseArea{
+            ///onClicked: //qmlSetupLmce(devicenumber.text, routerip.text)
+            anchors.verticalCenter: parent.verticalCenter
+            }
+
+        }
     }
+
+
+
 
 }

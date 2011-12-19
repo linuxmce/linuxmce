@@ -452,10 +452,12 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
 
     //security
     void setHouseMode(int mode, int pass);
-    \
+    void activateScreenSaver();
+    void killScreenSaver();
 private:
     void initializeConnections();
     void setupQMLview();
+
 
 };
 

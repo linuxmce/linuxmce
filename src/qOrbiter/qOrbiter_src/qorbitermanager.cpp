@@ -268,9 +268,7 @@ void qorbiterManager::refreshUI()
 void qorbiterManager::getConf(int pPK_Device)
 {
 
-    QObject::connect(pqOrbiter, SIGNAL(screenSaverImages(QStringList)), &ScreenSaver,SLOT(setImageList(QStringList)));
-    pqOrbiter->GetScreenSaverImages();
-    qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", &ScreenSaver);
+
 
     QDomDocument configData;
     const QByteArray tConf = binaryConfig.data();
@@ -637,6 +635,9 @@ void qorbiterManager::getConf(int pPK_Device)
 
     swapSkins(currentSkin);
 
+#ifdef for_desktop
+    activateScreenSaver();
+#endif
 
 }
 
@@ -1598,6 +1599,17 @@ int qorbiterManager::loadSplash()
 {
 
 
+}
+
+void qorbiterManager::activateScreenSaver()
+{
+    QObject::connect(pqOrbiter, SIGNAL(screenSaverImages(QStringList)), &ScreenSaver,SLOT(setImageList(QStringList)));
+    pqOrbiter->GetScreenSaverImages();
+    qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", &ScreenSaver);
+}
+
+void qorbiterManager::killScreenSaver()
+{
 }
 
 

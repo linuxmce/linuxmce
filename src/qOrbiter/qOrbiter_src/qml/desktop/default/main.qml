@@ -34,7 +34,7 @@ import "../js/ComponentLoader.js" as MyJs
         pageLoader.source = "../screens/"+screenname
         if (pageLoader.status == 1)
          {
-             manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
+             //manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
          }
          else
          {

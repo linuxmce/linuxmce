@@ -1,7 +1,7 @@
 <RCC>
     <qresource prefix="/img">
         <file alias="config.xml">config.xml</file>
-        <file>img/lmcesplash.png</file>
+        <file alias="desktop_splash.png">img/lmcesplash.png</file>
         <file alias="harmattan_splash_bkg.png">img/harmattan_splash_bkg.png</file>
         <file alias="harmattan_splash.png">img/harmattan_splash.png</file>
     </qresource>
