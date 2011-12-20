@@ -644,7 +644,7 @@ void qorbiterManager::getConf(int pPK_Device)
 void qorbiterManager::swapSkins(QString incSkin)
 {
     QApplication::processEvents(QEventLoop::AllEvents);
-    // qDebug() << "Initiating skin switch : " + incSkin;
+     qDebug() << "Initiating skin switch : " + incSkin;
     setDceResponse("Setting Skin to:" + incSkin);
     //get the skin URL from the skins model
     SkinDataItem* skin = tskinModel->find(incSkin);

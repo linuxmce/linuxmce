@@ -25,13 +25,29 @@ Rectangle {
     radius: 0
     opacity: 1
     color: "transparent"
-    Image {
-        id: background
-        source: "../../../img/icons/orbiterbg.png"
+
+    Text {
+        id: bignowplaying
+        text: dcenowplaying.qs_mainTitle
+        anchors.centerIn: parent
+        font.pixelSize: scaleY(5)
+        opacity: .5
+        style: Text.Sunken
+
     }
+
     Component.onCompleted:setNowPlayingData()
 
     //main 'now playing rect containing all the other items
+
+
+
+    Column{
+        anchors.right: storedaudioremote.right
+        anchors.rightMargin: scaleX(1)
+        Remote_lighting_controls{ id: remote_lighting_controls1; }
+        Remote_Audio_controls{ id: remote1; }
+    }
 
     Row{
         id:headerrow
@@ -39,6 +55,7 @@ Rectangle {
         width: parent.width-1
         anchors.top: parent.top
         anchors.topMargin: scaleY(1)
+
         Text {
             id: timecode
             height:scaleY(2.15)
@@ -100,13 +117,7 @@ Rectangle {
                     opacity: .5
 
                 }
-                Row{
-                    anchors.horizontalCenter: nowplayingimage.horizontalCenter
-                    anchors.top: nowplayingimage.bottom
-                    anchors.topMargin: scaleY(.5)
-                    Remote_Audio_controls{}
-                    Remote_lighting_controls{}
-                }
+
 
             }
 

@@ -15,13 +15,14 @@ Rectangle {
         id: bgimage
         source: "../../../img/icons/orbiterbg.png"
     }
-
     Column{
         anchors.right: storedvideoremote.right
         anchors.rightMargin: scaleX(1)
         Remote_lighting_controls{ id: remote_lighting_controls1; }
         Remote_Audio_controls{ id: remote1; }
     }
+
+
 
     Timer{
         id:singleshot

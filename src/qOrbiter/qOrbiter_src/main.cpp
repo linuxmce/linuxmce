@@ -247,7 +247,7 @@ int main(int argc, char* argv[])
 
         if(w.setupLmce(PK_Device, sRouter_IP, true, false))
         {
-
+a.exec();
         }
         else
         {
@@ -275,10 +275,10 @@ int main(int argc, char* argv[])
                 }
             }
 
-
+a.exec();
         }
 
-        a.exec();
+
 
     }
     catch(string s)
@@ -296,6 +296,7 @@ int main(int argc, char* argv[])
 #ifdef IOS
 //    [pool release];
 #endif
+
     if( bAppError )
         return 1;
 
@@ -303,5 +304,6 @@ int main(int argc, char* argv[])
         return 2;
     else
         return 0;
+
 }
 //<-dceag-main-e->

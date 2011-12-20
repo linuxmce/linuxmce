@@ -26,7 +26,7 @@ QtObject{
     //skin description
     property string skincreator: "Raymond Bemelmans (aka RayBe)"
     property string skinname: "CrystalShades"
-    property string skindir: "default"
+    property string skindir: "crystalshades"
     property string skindescription: "Floorplan Skin"
     property string skinversion: "1.0"
     property string skinvariation: "Desktop 800x600"

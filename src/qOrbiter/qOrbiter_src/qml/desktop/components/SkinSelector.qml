@@ -16,6 +16,7 @@ Rectangle {
         text: "Please Choose a skin"
     }
     SkinListDelegate{id:skinchooserdelegate}
+
     ListView
     {   anchors.top: labelforview.bottom
         clip: true

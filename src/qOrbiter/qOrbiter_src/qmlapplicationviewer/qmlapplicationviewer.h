@@ -39,7 +39,7 @@ public:
 
 private:
     explicit QmlApplicationViewer(QDeclarativeView *view, QWidget *parent);
-    class QmlApplicationViewerPrivate *d;
+    class QmlApplicationViewerPrivate *m_d;
 };
 
 QApplication *createApplication(int &argc, char **argv);

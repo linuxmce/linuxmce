@@ -19,7 +19,7 @@ Component{
             MouseArea{
                 anchors.fill: parent
                 onClicked:{
-                    console.log("Switching to:" + name)
+                    console.log("the path:" +path)
                     swapSkins(path)
 
 
