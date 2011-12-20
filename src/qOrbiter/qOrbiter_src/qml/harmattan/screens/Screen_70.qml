@@ -4,6 +4,7 @@ import com.nokia.extras 1.0
 import Qt.labs.gestures 1.0
 import "../components"
 import "../js"
+import "../js/timeCodeHelpers.js" as TimeCodeHelpers
 
 Page {
     id: screen_70;
@@ -12,22 +13,49 @@ Page {
 
     tools: ToolBarLayout {
         ToolIcon {
-            iconId: "toolbar-back"
+            iconId: "toolbar-back";
+            onClicked: pageStack.pop();
+        }
+        ToolIcon {
+            iconId: "toolbar-volume";
+            onClicked: pageStack.pop();
+        }
+        ToolIcon {
+            iconId: "icon-m-camera-high-brightness";
             onClicked: pageStack.pop();
         }
         ToolIcon {
             visible: false;
         }
         ToolIcon {
-            visible: false;
-        }
-        ToolIcon {
-            visible: false;
-        }
-        ToolIcon {
-            iconId: "toolbar-menu"
+            iconId: "toolbar-view-menu"
         }
 
+    }
+
+    //    Connections {
+    //        target: dcenowplaying;
+    //        onPlayListPositionChanged: playlistDialog.selectedIndex=dcenowplaying.m_iplaylistPosition;
+    //    }
+
+    //    SelectionDialog {
+    //        id: playlistDialog;
+    //        selectedIndex: dcenowplaying.m_iplaylistPosition;
+    //        model: mediaplaylist;
+    //    }
+
+    Menu {
+        id: playlistDialog;
+        visualParent: pageStack;
+        MenuLayout {
+            Repeater {
+                model: mediaplaylist;
+                MenuItem {
+                    text: id;
+                    onClicked: changedPlaylistPosition(name);
+                }
+            }
+        }
     }
 
     state: (screen.currentOrientation == Screen.Portrait ? "portrait" : "landscape")
@@ -55,6 +83,7 @@ Page {
         id: gestureTangle;
         width: 480;
         height: 427;
+        color: "black";
         Image {
             id: nowplayingimage
             source: "image://listprovider/updateobject/"+securityvideo.timestamp;
@@ -68,9 +97,15 @@ Page {
 
         SwipeArea {
             anchors.fill: parent;
-            onSwipeRight: console.log("Swipe Right");
-            onSwipeLeft: console.log("swipe LEFT!!")
+            onSwipeRight: dcerouter.changedTrack("-1");
+            onSwipeLeft: dcerouter.changedTrack("+1");
         }
+        ToolIcon {
+            anchors.right: parent.right;
+            iconId: "icon-m-content-playlist-inverse";
+            onClicked: playlistDialog.open();
+        }
+
     }
 
     Rectangle {
@@ -94,7 +129,7 @@ Page {
         width: 480;
         anchors.top: nowplayingTitle.bottom;
         color: "black";
-        height: 48;
+        height: 20
         Text {
             text: dcenowplaying.qs_subTitle;
             font.pointSize: 16;
@@ -102,45 +137,35 @@ Page {
         }
     }
 
-    ButtonStyle {
-        id: mediaButtonsL;
-        background: "";
-        checkedBackground: "";
-        checkedDisabledBackground: "";
-        disabledBackground: "";
-        pressedBackground: "";
-        position: "horizontal-left";
-    }
-
-    ButtonStyle {
-        id: mediaButtonsM;
-        background: "";
-        checkedBackground: "";
-        checkedDisabledBackground: "";
-        disabledBackground: "";
-        pressedBackground: "";
-        position: "horizontal-center";
-    }
-
-    ButtonStyle {
-        id: mediaButtonsR;
-        background: "";
-        checkedBackground: "";
-        checkedDisabledBackground: "";
-        disabledBackground: "";
-        pressedBackground: "";
-        position: "horizontal-right"
-    }
-
-    Row {
+    Rectangle
+    {
+        color: "black";
         anchors.top: nowplayingsubtitleBox.bottom;
         anchors.topMargin: UiConstants.DefaultMargin;
-        width: 480;
-        height: 30
-
-        Button { width: 480/3; platformStyle: mediaButtonsL; iconSource: "image://theme/icon-m-lockscreen-mediacontrol-previous"; }
-        Button { width: 480/3; platformStyle: mediaButtonsM; iconSource: "image://theme/icon-m-lockscreen-mediacontrol-play"; }
-        Button { width: 480/3; platformStyle: mediaButtonsR; iconSource: "image://theme/icon-m-lockscreen-mediacontrol-next"; }
+        anchors.bottomMargin: UiConstants.DefaultMargin;
+        id: transportTangle;
+        width: 480
+        height: 96;
+        Button {
+            anchors.left: transportTangle.left;
+            anchors.verticalCenter: transportTangle.verticalCenter;
+            iconSource: "image://theme/icon-m-lockscreen-mediacontrol-previous";
+            width: 48;
+        }
+        Button {
+            id: playPause;
+            anchors.horizontalCenter: transportTangle.horizontalCenter;
+            anchors.verticalCenter: transportTangle.verticalCenter;
+            iconSource: "image://theme/icon-m-lockscreen-mediacontrol-"+(dcenowplaying.qs_speed == "0" ? "play": "pause");
+            onClicked: pauseMedia();
+            width: 48;
+        }
+        Button {
+            anchors.right: transportTangle.right;
+            anchors.verticalCenter: transportTangle.verticalCenter;
+            iconSource: "image://theme/icon-m-lockscreen-mediacontrol-next";
+            width: 48;
+        }
     }
 
     Timer {
@@ -152,12 +177,97 @@ Page {
         onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp;
     }
 
+    Timer {
+        id: updatePlayPause
+        repeat: true;
+        interval: 500;
+        triggeredOnStart: true;
+        running: true;
+        onTriggered: {
+            playPause.iconSource = "image://theme/icon-m-lockscreen-mediacontrol-"+(dcenowplaying.qs_speed == "0" ? "play": "pause");
+            positionSlider.value = TimeCodeHelpers.timecodeToSeconds(dcenowplaying.timecode);
+            positionSlider.minimumValue = 0;
+            positionSlider.maximumValue = TimeCodeHelpers.timecodeToSeconds(dcenowplaying.duration);
+        }
+    }
+
+    Rectangle {
+        id: sliderRow;
+        color: "black";
+        anchors.top: transportTangle.bottom;
+        anchors.leftMargin: UiConstants.DefaultMargin;
+        anchors.rightMargin: UiConstants.DefaultMargin;
+        width: screen_70.width;
+        height: 16;
+        Text {
+            id: newTimeText;
+            color: "white";
+            anchors.bottom: positionSlider.top;
+            text: "1:23:45";
+            font.pointSize: 14;
+            visible: true;
+        }
+        ProgressBar {
+            anchors.verticalCenter: sliderRow.verticalCenter;
+            anchors.topMargin: 48;
+            id: positionSlider;
+            width: 480;
+            value: 0;
+            minimumValue: 0;
+            maximumValue: 0;
+        }
+        MouseArea {
+            anchors.fill: parent;
+            onPressed: {
+                newTimeText.visible = true;
+            }
+            onPositionChanged: {
+                var x = mouse.x;
+                newTimeText.x = x;
+                var iScaleX = parseInt(TimeCodeHelpers.timecodeToSeconds(dcenowplaying.duration)) / positionSlider.width;
+                var iNewX = Math.floor(x * iScaleX);
+                newTimeText.text = TimeCodeHelpers.secondsToTimecode(iNewX);
+            }
+            onReleased: {
+                newTimeText.visible = false;
+                var x = mouse.x;
+                var iScaleX = parseInt(TimeCodeHelpers.timecodeToSeconds(dcenowplaying.duration)) / positionSlider.width;
+                var iNewX = Math.floor(x * iScaleX);
+                jogPosition(""+iNewX);
+            }
+
+        }
+    }
+
+    Row {
+        id: timecodeRow;
+        anchors.top: sliderRow.bottom;
+        anchors.leftMargin: UiConstants.DefaultMargin;
+        anchors.rightMargin: UiConstants.DefaultMargin;
+        anchors.topMargin: UiConstants.DefaultMargin;
+        width: screen_70.width;
+        Text {
+            text: dcenowplaying.timecode;
+            color: "white";
+            font.pointSize: 16;
+            width: screen_70.width / 2;
+            horizontalAlignment: Text.AlignLeft;
+        }
+        Text {
+            text: dcenowplaying.duration;
+            font.pointSize: 16;
+            color: "white";
+            width: screen_70.width / 2;
+            horizontalAlignment: Text.AlignRight;
+        }
+    }
+
+
     Connections {
         target: dcenowplaying;
         onPlayListPositionChanged: { nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp; }
     }
 
-    Component.onCompleted: setNowPlayingData()
-
+    Component.onCompleted: setNowPlayingData();
 
 }
