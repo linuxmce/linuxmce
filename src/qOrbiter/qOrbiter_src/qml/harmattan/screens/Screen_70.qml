@@ -13,8 +13,8 @@ Page {
 
     tools: ToolBarLayout {
         ToolIcon {
-            iconId: "toolbar-back";
-            onClicked: pageStack.pop();
+            iconId: "toolbar-home";
+            onClicked: screenchange("Screen_1.qml");
         }
         ToolIcon {
             iconId: "toolbar-volume";
@@ -22,7 +22,7 @@ Page {
         }
         ToolIcon {
             iconId: "icon-m-camera-high-brightness";
-            onClicked: pageStack.pop();
+            onClicked: lightTangle.visible = true;
         }
         ToolIcon {
             visible: false;
@@ -32,17 +32,6 @@ Page {
         }
 
     }
-
-    //    Connections {
-    //        target: dcenowplaying;
-    //        onPlayListPositionChanged: playlistDialog.selectedIndex=dcenowplaying.m_iplaylistPosition;
-    //    }
-
-    //    SelectionDialog {
-    //        id: playlistDialog;
-    //        selectedIndex: dcenowplaying.m_iplaylistPosition;
-    //        model: mediaplaylist;
-    //    }
 
     Menu {
         id: playlistDialog;
@@ -93,6 +82,19 @@ Page {
             sourceSize.width: 480;
             sourceSize.height: 427;
             fillMode: Image.PreserveAspectCrop;
+        }
+        Rectangle {
+            id: lightTangle;
+            visible: false;
+            width: 480;
+            height: 427;
+            color: "black";
+            opacity: 0.7;
+            Text {
+                text: "Lights";
+                font.pointSize: 54;
+                color: "white";
+            }
         }
 
         SwipeArea {

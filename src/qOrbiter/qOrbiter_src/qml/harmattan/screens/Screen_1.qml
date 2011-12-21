@@ -12,20 +12,22 @@ Page {
         }
     }
 
-    Timer
-    {
-        interval: 1000;
-        repeat: true;
-        triggeredOnStart: true;
-        running: true;
-
-        onTriggered: {
-            var msg = {'action':'updateNowPlaying','item':pagesModel,"isPlaying":dcenowplaying.b_mediaPlaying,'mainTitle':dcenowplaying.qs_mainTitle,"subTitle":dcenowplaying.qs_subTitle,"qs_screen":dcenowplaying.qs_screen,"timecode":dcenowplaying.timecode};
-            nowPlayingWorker.sendMessage(msg);
+    Component.onCompleted: {
+        if (dcenowplaying.b_mediaPlaying == true)
+        {
+            if (pagesModel.get(pagesModel.count-1).title != "Now Playing")
+            {
+                pagesModel.append({"title":"Now Playing","subtitle":dcenowplaying.maintitle,"page":dcenowplaying.qs_screen});
+            }
         }
-
+            else
+        {
+            if (pagesModel.get(pagesModel.count-1).title == "Now Playing")
+            {
+                pagesModel.remove(pagesModel.count-1);
+            }
+        }
     }
-
 
     Menu {
         id: roomMenu;
@@ -36,7 +38,7 @@ Page {
                 MenuItem {
                     text: title;
                     onClicked: {
-                        setActiveRoom(intRoom,entertainArea);
+                        setActiveRoom(intRoom,entertain_area);
                     }
 
                 }
@@ -44,14 +46,48 @@ Page {
         }
     }
 
-    ListModel {
-        id: pagesModel;
+    Connections {
+        target: dcenowplaying;
+        onMediaStatusChanged: {
+            if (dcenowplaying.b_mediaPlaying == true)
+            {
+                if (pagesModel.get(pagesModel.count-1).title != "Now Playing")
+                {
+                    pagesModel.append({"title":"Now Playing","subtitle":dcenowplaying.maintitle,"page":dcenowplaying.qs_screen});
+                }
+            }
+                else
+            {
+                if (pagesModel.get(pagesModel.count-1).title == "Now Playing")
+                {
+                    pagesModel.remove(pagesModel.count-1);
+                }
+            }
+        }
     }
 
-    WorkerScript
-    {
-        id: nowPlayingWorker;
-        source: "../js/nowPlayingWorker.js";
+    ListModel {
+        id: pagesModel;
+        ListElement {
+            title: "Lighting";
+            page: "Screen_2.qml";
+        }
+        ListElement {
+            title: "Media";
+            page: "Screen_3.qml";
+        }
+        ListElement {
+            title: "Climate";
+            page: "Screen_4.qml";
+        }
+        ListElement {
+            title: "Telecom";
+            page: "Screen_5.qml";
+        }
+        ListElement {
+            title: "Security";
+            page: "Screen_6.qml";
+        }
     }
 
     Rectangle {
