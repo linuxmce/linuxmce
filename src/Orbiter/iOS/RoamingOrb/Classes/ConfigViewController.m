@@ -56,13 +56,12 @@
     [prefs setObject:[port text] forKey:@"port"];
     [prefs setBool:[wifi isOn] forKey:@"wifi"];
 	[prefs setBool:[loadIndicator isOn] forKey:@"loadindicator"];
-    [prefs setInteger:[connectionIntervalSlider value] forKey:@"connectionInterval"];
-    [prefs setInteger:[pollIntervalSlider value] forKey:@"pollInterval"];    
+    [prefs setInteger:(int)([connectionIntervalSlider value] + 0.5f) forKey:@"connectionInterval"];
+    [prefs setInteger:(int)([pollIntervalSlider value] + 0.5f) forKey:@"pollInterval"];    
 	[prefs synchronize];
     
     [self.tabBarController setSelectedIndex:0];
 
-	//[navigator popViewControllerAnimated:YES];
 }
 
 - (IBAction)onExit: (id)sender {

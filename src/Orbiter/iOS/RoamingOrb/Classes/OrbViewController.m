@@ -62,6 +62,7 @@ BOOL executePoll = NO, incompleteSettings = NO;
 
 - (void)viewWillAppear:(BOOL)animated {
 	// reading preferences, setting defaults if none set
+    incompleteSettings = NO;
 	NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
 	if (![prefs valueForKey:@"server"]) {
         NSLog(@"Server is not defined");
@@ -74,8 +75,8 @@ BOOL executePoll = NO, incompleteSettings = NO;
     }
 	if (![prefs integerForKey:@"connectionInterval"]) [prefs setInteger:5 forKey:@"connectionInterval"];
 	if (![prefs integerForKey:@"pollInterval"]) [prefs setInteger:3 forKey:@"pollInterval"];
-    if (![prefs boolForKey:@"wifi"]) [prefs setBool:YES forKey:@"wifi"];
-	if (![prefs boolForKey:@"loadindicator"]) [prefs setBool:YES forKey:@"loadindicator"];
+    if (![prefs valueForKey:@"wifi"]) [prefs setBool:YES forKey:@"wifi"];   
+	if (![prefs valueForKey:@"loadindicator"]) [prefs setBool:YES forKey:@"loadindicator"];
    	[prefs synchronize];
     
     [orbiter setServer:[prefs objectForKey:@"server"]];
@@ -208,13 +209,17 @@ BOOL executePoll = NO, incompleteSettings = NO;
     if(connected) {
         [self stopPolling];
 		connected = NO;
-       if(self.isIPad) [orbView setImage:[UIImage imageWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"splash-ipad" ofType:@"png"]]];
+        if(self.isIPad) [orbView setImage:[UIImage imageWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"splash-ipad" ofType:@"png"]]];
         else {
             UIImage *myImage=[UIImage imageNamed:@"splash.png"];
             [orbView setImage:myImage];
         }
+        if(HUD != nil) [HUD hide:YES];
         [self startConnecting];
 	}
+    else {
+        if(HUD != nil) [HUD hide:YES];
+    }
 
 }
 
