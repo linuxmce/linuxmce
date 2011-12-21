@@ -48,6 +48,7 @@
 		B4558CAB12269568007E880C /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4558CAA12269568007E880C /* SystemConfiguration.framework */; };
 		B4C4A800140CF3AE0006371A /* OrbViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B4C4A7FF140CF3AE0006371A /* OrbViewController.m */; };
 		B4CCC9571260DE2F007ADE52 /* iTunesArtwork in Resources */ = {isa = PBXBuildFile; fileRef = B4CCC9561260DE2F007ADE52 /* iTunesArtwork */; };
+		B4D3434C14A2090800F0B469 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = B4D3434B14A2090800F0B469 /* MBProgressHUD.m */; };
 		B4EC11EA140CE9CE0041C93D /* OrbView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B4EC11E9140CE9CE0041C93D /* OrbView.xib */; };
 /* End PBXBuildFile section */
 
@@ -55,7 +56,6 @@
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* RoamingOrbAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RoamingOrbAppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* RoamingOrbAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RoamingOrbAppDelegate.m; sourceTree = "<group>"; };
-		1D6058910D05DD3D006BFB54 /* RoamingOrb.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = RoamingOrb.app; path = "/Users/sergewagener/CocoaProjects/iPhone/RoamingOrb/build/Debug-iphoneos/RoamingOrb.app"; sourceTree = "<absolute>"; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		288765580DF743DE002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -106,6 +106,9 @@
 		B4C4A7FE140CF3AE0006371A /* OrbViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OrbViewController.h; path = Classes/OrbViewController.h; sourceTree = "<group>"; };
 		B4C4A7FF140CF3AE0006371A /* OrbViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OrbViewController.m; path = Classes/OrbViewController.m; sourceTree = "<group>"; };
 		B4CCC9561260DE2F007ADE52 /* iTunesArtwork */ = {isa = PBXFileReference; lastKnownFileType = file; name = iTunesArtwork; path = Assets/iTunesArtwork; sourceTree = "<group>"; };
+		B4D3433814A07A1200F0B469 /* RoamingOrb.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RoamingOrb.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B4D3434A14A2090800F0B469 /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MBProgressHUD.h; path = Classes/External/MBProgressHUD.h; sourceTree = "<group>"; };
+		B4D3434B14A2090800F0B469 /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MBProgressHUD.m; path = Classes/External/MBProgressHUD.m; sourceTree = "<group>"; };
 		B4EC11E9140CE9CE0041C93D /* OrbView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = OrbView.xib; path = Views/OrbView.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -143,6 +146,7 @@
 				B4558D5312282BE4007E880C /* Assets */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
+				B4D3433914A07A1200F0B469 /* Products */,
 			);
 			name = CustomTemplate;
 			sourceTree = "<group>";
@@ -154,6 +158,8 @@
 				B43D27C6140AE61400A8261B /* Reachability.m */,
 				B43D27C7140AE61400A8261B /* UIDeviceAdditions.h */,
 				B43D27C8140AE61400A8261B /* UIDeviceAdditions.m */,
+				B4D3434A14A2090800F0B469 /* MBProgressHUD.h */,
+				B4D3434B14A2090800F0B469 /* MBProgressHUD.m */,
 			);
 			name = External;
 			sourceTree = "<group>";
@@ -275,6 +281,14 @@
 			name = Assets;
 			sourceTree = "<group>";
 		};
+		B4D3433914A07A1200F0B469 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B4D3433814A07A1200F0B469 /* RoamingOrb.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -292,7 +306,7 @@
 			);
 			name = RoamingOrb;
 			productName = orbiter;
-			productReference = 1D6058910D05DD3D006BFB54 /* RoamingOrb.app */;
+			productReference = B4D3433814A07A1200F0B469 /* RoamingOrb.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -316,6 +330,7 @@
 				en,
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
+			productRefGroup = B4D3433914A07A1200F0B469 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -376,6 +391,7 @@
 				B4C4A800140CF3AE0006371A /* OrbViewController.m in Sources */,
 				9573461F1416418800B30005 /* AboutViewController.m in Sources */,
 				957346271416471E00B30005 /* PVRViewController.m in Sources */,
+				B4D3434C14A2090800F0B469 /* MBProgressHUD.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

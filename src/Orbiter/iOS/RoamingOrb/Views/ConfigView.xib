@@ -45,7 +45,7 @@
 					<bool key="EncodedWithXMLCoder">YES</bool>
 					<object class="IBUISlider" id="844165330">
 						<reference key="NSNextResponder" ref="627480529"/>
-						<int key="NSvFlags">292</int>
+						<int key="NSvFlags">295</int>
 						<string key="NSFrame">{{173, 214}, {118, 23}}</string>
 						<reference key="NSSuperview" ref="627480529"/>
 						<reference key="NSWindow"/>
@@ -60,7 +60,7 @@
 					</object>
 					<object class="IBUILabel" id="1071995279">
 						<reference key="NSNextResponder" ref="627480529"/>
-						<int key="NSvFlags">292</int>
+						<int key="NSvFlags">295</int>
 						<string key="NSFrame">{{20, 215}, {132, 21}}</string>
 						<reference key="NSSuperview" ref="627480529"/>
 						<reference key="NSWindow"/>
@@ -94,7 +94,7 @@
 					</object>
 					<object class="IBUILabel" id="243125265">
 						<reference key="NSNextResponder" ref="627480529"/>
-						<int key="NSvFlags">292</int>
+						<int key="NSvFlags">295</int>
 						<string key="NSFrame">{{311, 213}, {126, 19}}</string>
 						<reference key="NSSuperview" ref="627480529"/>
 						<reference key="NSWindow"/>
@@ -114,7 +114,7 @@
 					</object>
 					<object class="IBUILabel" id="915005658">
 						<reference key="NSNextResponder" ref="627480529"/>
-						<int key="NSvFlags">292</int>
+						<int key="NSvFlags">295</int>
 						<string key="NSFrame">{{40, 134}, {112, 21}}</string>
 						<reference key="NSSuperview" ref="627480529"/>
 						<reference key="NSWindow"/>
@@ -135,7 +135,7 @@
 					</object>
 					<object class="IBUISwitch" id="988902051">
 						<reference key="NSNextResponder" ref="627480529"/>
-						<int key="NSvFlags">292</int>
+						<int key="NSvFlags">293</int>
 						<string key="NSFrame">{{160, 131}, {94, 27}}</string>
 						<reference key="NSSuperview" ref="627480529"/>
 						<reference key="NSWindow"/>
@@ -148,11 +148,10 @@
 					</object>
 					<object class="IBUIButton" id="246663698">
 						<reference key="NSNextResponder" ref="627480529"/>
-						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{93, 291}, {278, 46}}</string>
+						<int key="NSvFlags">306</int>
+						<string key="NSFrame">{{101, 282}, {278, 46}}</string>
 						<reference key="NSSuperview" ref="627480529"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						<int key="IBUIContentHorizontalAlignment">0</int>
@@ -182,7 +181,7 @@
 					</object>
 					<object class="IBUILabel" id="280476894">
 						<reference key="NSNextResponder" ref="627480529"/>
-						<int key="NSvFlags">292</int>
+						<int key="NSvFlags">295</int>
 						<string key="NSFrame">{{44, 177}, {108, 21}}</string>
 						<reference key="NSSuperview" ref="627480529"/>
 						<reference key="NSWindow"/>
@@ -203,7 +202,7 @@
 					</object>
 					<object class="IBUISwitch" id="44299150">
 						<reference key="NSNextResponder" ref="627480529"/>
-						<int key="NSvFlags">292</int>
+						<int key="NSvFlags">293</int>
 						<string key="NSFrame">{{160, 174}, {94, 27}}</string>
 						<reference key="NSSuperview" ref="627480529"/>
 						<reference key="NSWindow"/>
@@ -216,7 +215,7 @@
 					</object>
 					<object class="IBUISlider" id="804129181">
 						<reference key="NSNextResponder" ref="627480529"/>
-						<int key="NSvFlags">292</int>
+						<int key="NSvFlags">295</int>
 						<string key="NSFrame">{{173, 245}, {118, 23}}</string>
 						<reference key="NSSuperview" ref="627480529"/>
 						<reference key="NSWindow"/>
@@ -231,7 +230,7 @@
 					</object>
 					<object class="IBUILabel" id="134418405">
 						<reference key="NSNextResponder" ref="627480529"/>
-						<int key="NSvFlags">292</int>
+						<int key="NSvFlags">295</int>
 						<string key="NSFrame">{{20, 246}, {132, 21}}</string>
 						<reference key="NSSuperview" ref="627480529"/>
 						<reference key="NSWindow"/>
@@ -252,7 +251,7 @@
 					</object>
 					<object class="IBUILabel" id="733684023">
 						<reference key="NSNextResponder" ref="627480529"/>
-						<int key="NSvFlags">292</int>
+						<int key="NSvFlags">295</int>
 						<string key="NSFrame">{{311, 244}, {126, 19}}</string>
 						<reference key="NSSuperview" ref="627480529"/>
 						<reference key="NSWindow"/>
@@ -272,7 +271,7 @@
 					</object>
 					<object class="IBUILabel" id="861453630">
 						<reference key="NSNextResponder" ref="627480529"/>
-						<int key="NSvFlags">292</int>
+						<int key="NSvFlags">295</int>
 						<string key="NSFrame">{{20, 63}, {132, 21}}</string>
 						<reference key="NSSuperview" ref="627480529"/>
 						<reference key="NSWindow"/>
@@ -293,7 +292,7 @@
 					</object>
 					<object class="IBUILabel" id="553981833">
 						<reference key="NSNextResponder" ref="627480529"/>
-						<int key="NSvFlags">292</int>
+						<int key="NSvFlags">295</int>
 						<string key="NSFrame">{{20, 97}, {132, 21}}</string>
 						<reference key="NSSuperview" ref="627480529"/>
 						<reference key="NSWindow"/>
@@ -314,7 +313,7 @@
 					</object>
 					<object class="IBUITextField" id="266194204">
 						<reference key="NSNextResponder" ref="627480529"/>
-						<int key="NSvFlags">292</int>
+						<int key="NSvFlags">295</int>
 						<string key="NSFrame">{{175, 58}, {262, 31}}</string>
 						<reference key="NSSuperview" ref="627480529"/>
 						<reference key="NSWindow"/>
@@ -350,7 +349,7 @@
 					</object>
 					<object class="IBUITextField" id="549172848">
 						<reference key="NSNextResponder" ref="627480529"/>
-						<int key="NSvFlags">292</int>
+						<int key="NSvFlags">295</int>
 						<string key="NSFrame">{{175, 92}, {79, 31}}</string>
 						<reference key="NSSuperview" ref="627480529"/>
 						<reference key="NSWindow"/>
@@ -469,12 +468,12 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
-						<string key="label">sliderChanged:</string>
+						<string key="label">pollSliderChanged:</string>
 						<reference key="source" ref="844165330"/>
 						<reference key="destination" ref="372490531"/>
 						<int key="IBEventType">13</int>
 					</object>
-					<int key="connectionID">34</int>
+					<int key="connectionID">82</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
@@ -487,12 +486,12 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
-						<string key="label">sliderChanged:</string>
+						<string key="label">connectionSliderChanged:</string>
 						<reference key="source" ref="804129181"/>
 						<reference key="destination" ref="372490531"/>
 						<int key="IBEventType">13</int>
 					</object>
-					<int key="connectionID">71</int>
+					<int key="connectionID">83</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
@@ -540,19 +539,19 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<reference ref="861453630"/>
 							<reference ref="266194204"/>
-							<reference ref="549172848"/>
-							<reference ref="553981833"/>
-							<reference ref="844165330"/>
-							<reference ref="1071995279"/>
 							<reference ref="243125265"/>
-							<reference ref="915005658"/>
-							<reference ref="988902051"/>
-							<reference ref="280476894"/>
-							<reference ref="44299150"/>
 							<reference ref="804129181"/>
-							<reference ref="134418405"/>
 							<reference ref="733684023"/>
 							<reference ref="246663698"/>
+							<reference ref="844165330"/>
+							<reference ref="1071995279"/>
+							<reference ref="915005658"/>
+							<reference ref="988902051"/>
+							<reference ref="44299150"/>
+							<reference ref="134418405"/>
+							<reference ref="553981833"/>
+							<reference ref="549172848"/>
+							<reference ref="280476894"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -694,7 +693,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">81</int>
+			<int key="maxID">83</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">

@@ -20,11 +20,15 @@
 	NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
     [server setText:[prefs objectForKey:@"server"]];
     [port setText:[prefs objectForKey:@"port"]];
-    [wifi  setOn:[prefs boolForKey:@"connection_wifi"]];
-	[loadIndicator setOn:[prefs boolForKey:@"connection_loadindicator"]];
 
-	 //[prefs integerForKey:@"delay_preference"];
+    [wifi  setOn:[prefs boolForKey:@"wifi"]];
+	[loadIndicator setOn:[prefs boolForKey:@"loadindicator"]];
 
+    [connectionIntervalSlider setValue:[prefs integerForKey:@"connectionInterval"]];
+    [pollIntervalSlider setValue:[prefs integerForKey:@"pollInterval"]];
+	pollIntervalLabel.text = [[NSString alloc] initWithFormat:@"every %d seconds",[prefs integerForKey:@"pollInterval"]];
+	connectionIntervalLabel.text = [[NSString alloc] initWithFormat:@"every %d seconds",[prefs integerForKey:@"connectionInterval"]];
+    
 	[super viewDidLoad];
 }
 
@@ -50,13 +54,15 @@
 
     [prefs setObject:[server text] forKey:@"server"];
     [prefs setObject:[port text] forKey:@"port"];
-
-    [prefs setBool:[wifi isOn] forKey:@"connection_wifi"];
-	[prefs setBool:[loadIndicator isOn] forKey:@"connection_loadindicator"];
-
+    [prefs setBool:[wifi isOn] forKey:@"wifi"];
+	[prefs setBool:[loadIndicator isOn] forKey:@"loadindicator"];
+    [prefs setInteger:[connectionIntervalSlider value] forKey:@"connectionInterval"];
+    [prefs setInteger:[pollIntervalSlider value] forKey:@"pollInterval"];    
 	[prefs synchronize];
-	
-	[navigator popViewControllerAnimated:YES];
+    
+    [self.tabBarController setSelectedIndex:0];
+
+	//[navigator popViewControllerAnimated:YES];
 }
 
 - (IBAction)onExit: (id)sender {

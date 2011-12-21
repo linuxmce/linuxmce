@@ -14,7 +14,7 @@ UIView *previousTabBarView;
 NSString *deviceType;
 
 BOOL connected = NO, isWifi = NO, needsWifi = YES, ssl = NO, imageLoadIndicator = YES, isTabbarVisible = YES;
-BOOL executePoll = NO;
+BOOL executePoll = NO, incompleteSettings = NO;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -58,44 +58,107 @@ BOOL executePoll = NO;
 	// resize UIImageView to scale full screen (iPhone, iPad, ...)
 	orbView.contentMode = UIViewContentModeScaleAspectFit;
 	orbView.frame = CGRectMake(0, 0, screenSize.height, screenSize.width);
+}
 
-	//get settings from user defaults database
+- (void)viewWillAppear:(BOOL)animated {
+	// reading preferences, setting defaults if none set
 	NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
-	[orbiter setServer:[prefs objectForKey:@"serverip_preference"]];
-	[orbiter setPort:[prefs integerForKey:@"serverport_preference"]];
-
-	//pollInterval = [prefs integerForKey:@"connection_pollinterval"];
-	connectInterval = 5;
-    pollInterval = 3;
-	needsWifi = [prefs boolForKey:@"connection_wifi"];
-	imageLoadIndicator = [prefs boolForKey:@"imageloadindicator_preference"];
-
+	if (![prefs valueForKey:@"server"]) {
+        NSLog(@"Server is not defined");
+        [prefs setObject:@"192.168.80.1" forKey:@"server"];
+        incompleteSettings = YES;
+    }
+	if (![prefs valueForKey:@"port"]) {
+        NSLog(@"Port is not defined"); 
+        incompleteSettings = YES;
+    }
+	if (![prefs integerForKey:@"connectionInterval"]) [prefs setInteger:5 forKey:@"connectionInterval"];
+	if (![prefs integerForKey:@"pollInterval"]) [prefs setInteger:3 forKey:@"pollInterval"];
+    if (![prefs boolForKey:@"wifi"]) [prefs setBool:YES forKey:@"wifi"];
+	if (![prefs boolForKey:@"loadindicator"]) [prefs setBool:YES forKey:@"loadindicator"];
+   	[prefs synchronize];
+    
+    [orbiter setServer:[prefs objectForKey:@"server"]];
+	[orbiter setPort:[prefs integerForKey:@"port"]];
+    
+    needsWifi = [prefs boolForKey:@"wifi"];
+	imageLoadIndicator = [prefs boolForKey:@"loadindicator"];
+	connectInterval = [prefs integerForKey:@"connectionInterval"];
+    pollInterval = [prefs integerForKey:@"pollInterval"];
+    
 	// fire "poll ANYNEWS" timer if network requirements are met
 	isWifi = ([[Reachability reachabilityForLocalWiFi] currentReachabilityStatus] == ReachableViaWiFi);
-
-	NSLog(@"viewDidAppear");
-    if(needsWifi && !isWifi) {
+    
+    if(incompleteSettings) {
+		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Connection error" message:@"Your settings are not completed. You will be redirected to settings screen prefilled with some default settings." delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+		[alert show];
+		[alert release];
+        [self showTabBar:YES];
+        [self.tabBarController setSelectedIndex:1];
+    }
+    else if(needsWifi && !isWifi) {
 		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Connection error" message:@"According to your preferences you must be connected to WiFi ! Please activate Wifi or change settings !" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
 		[alert show];
 		[alert release];
+        [self showTabBar:YES];
+        [self.tabBarController setSelectedIndex:1];
 	}
-	else {
+	else {        
 		// fire connection timer
-        NSLog(@"Connecting to server...");
-        [activityIndicator startAnimating];
-		connectTimer = [[NSTimer 
-                         scheduledTimerWithTimeInterval:(connectInterval)
-                         target:self
-                         selector:@selector(connectToServer:)
-                         userInfo:nil
-                         repeats:YES] retain];
-		[connectTimer fire];	
+        [self showTabBar:NO];
+        [self startConnecting];
 	}
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+	[self stopPolling];
+    [self stopConnecting];
+    
+	[super viewWillDisappear:animated];
+}
+
+- (void)showTabBar:(BOOL)visible {
+    if(isTabbarVisible && !visible) {
+        NSLog(@"Tabbar is hiding ...");
+        [UIView beginAnimations:nil context:NULL];
+        [UIView setAnimationDuration:0.55];
+        
+        CGRect tabBarFrame = self.tabBarController.tabBar.frame;
+        [tabBar setAlpha:0.0];
+        isTabbarVisible=FALSE;
+        tabBarFrame.origin.y = tabBarFrame.origin.y + tabBarFrame.size.height;
+        self.tabBarController.tabBar.frame = tabBarFrame;
+        [UIView commitAnimations];
+    }
+    else if(!isTabbarVisible && visible) {
+        NSLog(@"Tabbar is showing up ...");
+        [UIView beginAnimations:nil context:NULL];
+        [UIView setAnimationDuration:0.55];
+        
+        CGRect tabBarFrame = self.tabBarController.tabBar.frame;
+        [tabBar setAlpha:1.0];		// fade in tabbar
+        isTabbarVisible=TRUE;
+        tabBarFrame.origin.y = tabBarFrame.origin.y - tabBarFrame.size.height;
+        self.tabBarController.tabBar.frame = tabBarFrame;
+        [UIView commitAnimations];
+    }
 }
 
 - (void)connectToServer:(id)sender {
 	// open connection to server. Rest will be handled by delegates
     [orbiter connect]; 	
+}
+
+- (void)startPolling {
+	NSLog(@"Starting polling...");
+	executePoll = YES;
+    // setup a timer that polls proxy-orb every x seconds
+    pollTimer = [[NSTimer 
+                  scheduledTimerWithTimeInterval:(pollInterval)
+                  target:self
+                  selector:@selector(pollServer:)
+                  userInfo:nil
+                  repeats:YES] retain];
 }
 
 - (void)stopPolling {
@@ -105,9 +168,27 @@ BOOL executePoll = NO;
 	pollTimer = nil;
 }
 
+- (void)startConnecting {
+	NSLog(@"Starting connection tries...");
+    // Show a waiting HUD
+    HUD = [[MBProgressHUD alloc] initWithView:self.view];
+    [self.view addSubview:HUD];
+    HUD.delegate = self;
+    HUD.labelText = @"Connecting to core";
+    [HUD show:YES];
+    connected = NO;
+	executePoll = NO;
+    connectTimer = [[NSTimer 
+                     scheduledTimerWithTimeInterval:(connectInterval)
+                     target:self
+                     selector:@selector(connectToServer:)
+                     userInfo:nil
+                     repeats:YES] retain];
+    [connectTimer fire];
+}
+
 - (void)stopConnecting {
 	NSLog(@"Stopping connection tries...");
-	executePoll = NO;
 	[connectTimer invalidate];
 	connectTimer = nil;
 }
@@ -117,17 +198,9 @@ BOOL executePoll = NO;
 	if(!connected) {
 		connected = YES;
 		NSLog(@"Connected, starting polling...");
-		// setup a timer that polls proxy-orb every x seconds
-		pollTimer = [[NSTimer 
-                      scheduledTimerWithTimeInterval:(pollInterval)
-                      target:self
-                      selector:@selector(pollServer:)
-                      userInfo:nil
-                      repeats:YES] retain];
-		[activityIndicator stopAnimating];
-		//[connectingLabel setHidden:YES];
-        
+        [self startPolling];
 	}
+    if(HUD != nil) [HUD hide:YES];
 }
 
 - (void)didReceiveConnectionError:(NSString *)errorMessage {
@@ -135,52 +208,22 @@ BOOL executePoll = NO;
     if(connected) {
         [self stopPolling];
 		connected = NO;
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Connection error" message: @"Please check your connection settings" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
-        [alert show];
-        [alert release];
-        if(self.isIPad) [orbView setImage:[UIImage imageWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"splash-ipad" ofType:@"png"]]];
+       if(self.isIPad) [orbView setImage:[UIImage imageWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"splash-ipad" ofType:@"png"]]];
         else {
             UIImage *myImage=[UIImage imageNamed:@"splash.png"];
             [orbView setImage:myImage];
         }
-		[activityIndicator startAnimating];
-		//[connectingLabel setHidden:NO];
-		connectTimer = [[NSTimer 
-                         scheduledTimerWithTimeInterval:(connectInterval)
-                         target:self
-                         selector:@selector(connectToServer:)
-                         userInfo:nil
-                         repeats:YES] retain];
+        [self startConnecting];
 	}
-}
 
-- (void)viewWillAppear:(BOOL)animated {
-    if(isTabbarVisible) {
-        NSLog(@"Orbiter shown, tabbar will hide ...");
-        [UIView beginAnimations:nil context:NULL];
-        [UIView setAnimationDuration:0.55];
-    
-        CGRect tabBarFrame = self.tabBarController.tabBar.frame;
-        [tabBar setAlpha:0.0];
-        isTabbarVisible=FALSE;
-        tabBarFrame.origin.y = tabBarFrame.origin.y + tabBarFrame.size.height;
-        self.tabBarController.tabBar.frame = tabBarFrame;
-        [UIView commitAnimations];
-    }
-}
-
-- (void)viewWillDisappear:(BOOL)animated {
-	[self stopPolling];
-    [self stopConnecting];
-	[super viewWillDisappear:animated];
 }
 
 - (void)pollServer:(id)sender {
-	//if(executePoll) {
+	if(executePoll) {
 		[orbiter poll];
-	//} else {
-	//	NSLog(@"Polling semaphore locked...");
-	//}
+	} else {
+		NSLog(@"Polling semaphore locked...");
+	}
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -225,21 +268,16 @@ BOOL executePoll = NO;
 
 - (void)didReceiveNews {
 	NSLog(@"didReceiveNews fired");
+    if(imageLoadIndicator) [activityIndicator startAnimating];
 	[orbiter downloadImage];
 }
 
 - (void)didReceiveNewImage:(UIImage*)orbiterImage {
 	NSLog(@"didReceiveNewImage fired %3.0fx%3.0f", orbiterImage.size.width, orbiterImage.size.height);
+    [activityIndicator stopAnimating];
 	[orbView setImage:orbiterImage];
 	[orbiterImage release];
-	pollTimer = [[NSTimer 
-				  scheduledTimerWithTimeInterval:(pollInterval)
-				  target:self
-				  selector:@selector(pollServer:)
-				  userInfo:nil
-				  repeats:YES] retain];
-	[activityIndicator stopAnimating];
-	executePoll = YES;
+    if(HUD != nil) [HUD hide:YES];
 }
 
 - (CGFloat) mainScreenScale {
@@ -286,6 +324,15 @@ BOOL executePoll = NO;
 
 - (void)dealloc {
 	[super dealloc];
+}
+
+#pragma mark MBProgressHUDDelegate methods
+
+- (void)hudWasHidden:(MBProgressHUD *)hud {
+    // Remove HUD from screen when the HUD was hidded
+    [HUD removeFromSuperview];
+    [HUD release];
+    HUD = nil;
 }
 
 @end
