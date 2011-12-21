@@ -43,7 +43,6 @@
 		B4485E40144AD81700A0DF9E /* default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B4485E3E144AD81700A0DF9E /* default@2x.png */; };
 		B4485E46144AD88900A0DF9E /* Default-Landscape~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = B4485E45144AD88800A0DF9E /* Default-Landscape~ipad.png */; };
 		B4485E48144AD8C800A0DF9E /* Default-Portrait~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = B4485E47144AD8C800A0DF9E /* Default-Portrait~ipad.png */; };
-		B4558C82122694DB007E880C /* OrbiterView.m in Sources */ = {isa = PBXBuildFile; fileRef = B4558C81122694DB007E880C /* OrbiterView.m */; };
 		B4558CA512269546007E880C /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4558CA412269546007E880C /* AudioToolbox.framework */; };
 		B4558CAB12269568007E880C /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4558CAA12269568007E880C /* SystemConfiguration.framework */; };
 		B4C4A800140CF3AE0006371A /* OrbViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B4C4A7FF140CF3AE0006371A /* OrbViewController.m */; };
@@ -99,8 +98,6 @@
 		B4485E3E144AD81700A0DF9E /* default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "default@2x.png"; path = "Assets/Splash/default@2x.png"; sourceTree = "<group>"; };
 		B4485E45144AD88800A0DF9E /* Default-Landscape~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Landscape~ipad.png"; path = "Assets/Splash/Default-Landscape~ipad.png"; sourceTree = "<group>"; };
 		B4485E47144AD8C800A0DF9E /* Default-Portrait~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Portrait~ipad.png"; path = "Assets/Splash/Default-Portrait~ipad.png"; sourceTree = "<group>"; };
-		B4558C80122694DB007E880C /* OrbiterView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OrbiterView.h; path = Classes/OrbiterView.h; sourceTree = "<group>"; };
-		B4558C81122694DB007E880C /* OrbiterView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OrbiterView.m; path = Classes/OrbiterView.m; sourceTree = "<group>"; };
 		B4558CA412269546007E880C /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		B4558CAA12269568007E880C /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		B4C4A7FE140CF3AE0006371A /* OrbViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OrbViewController.h; path = Classes/OrbViewController.h; sourceTree = "<group>"; };
@@ -233,8 +230,6 @@
 				B4C4A7FF140CF3AE0006371A /* OrbViewController.m */,
 				B43D27D3140AE6FC00A8261B /* ConfigViewController.h */,
 				B43D27D4140AE6FC00A8261B /* ConfigViewController.m */,
-				B4558C80122694DB007E880C /* OrbiterView.h */,
-				B4558C81122694DB007E880C /* OrbiterView.m */,
 				B43D27C2140AE5FF00A8261B /* HelpViewController.h */,
 				B43D27C3140AE5FF00A8261B /* HelpViewController.m */,
 				957346251416471E00B30005 /* PVRViewController.h */,
@@ -382,7 +377,6 @@
 			files = (
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				1D3623260D0F684500981E51 /* RoamingOrbAppDelegate.m in Sources */,
-				B4558C82122694DB007E880C /* OrbiterView.m in Sources */,
 				9573782B133FDB03005F7613 /* proxy-orbiter-client.m in Sources */,
 				B43D27C4140AE5FF00A8261B /* HelpViewController.m in Sources */,
 				B43D27C9140AE61400A8261B /* Reachability.m in Sources */,

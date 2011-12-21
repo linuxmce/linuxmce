@@ -148,8 +148,8 @@
 					</object>
 					<object class="IBUIButton" id="246663698">
 						<reference key="NSNextResponder" ref="627480529"/>
-						<int key="NSvFlags">306</int>
-						<string key="NSFrame">{{101, 282}, {278, 46}}</string>
+						<int key="NSvFlags">311</int>
+						<string key="NSFrame">{{101, 290}, {278, 68}}</string>
 						<reference key="NSSuperview" ref="627480529"/>
 						<reference key="NSWindow"/>
 						<bool key="IBUIOpaque">NO</bool>
@@ -467,6 +467,14 @@
 					<int key="connectionID">79</int>
 				</object>
 				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">connectionIntervalLabel</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="733684023"/>
+					</object>
+					<int key="connectionID">84</int>
+				</object>
+				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
 						<string key="label">pollSliderChanged:</string>
 						<reference key="source" ref="844165330"/>
@@ -542,7 +550,6 @@
 							<reference ref="243125265"/>
 							<reference ref="804129181"/>
 							<reference ref="733684023"/>
-							<reference ref="246663698"/>
 							<reference ref="844165330"/>
 							<reference ref="1071995279"/>
 							<reference ref="915005658"/>
@@ -552,6 +559,7 @@
 							<reference ref="553981833"/>
 							<reference ref="549172848"/>
 							<reference ref="280476894"/>
+							<reference ref="246663698"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -693,7 +701,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">83</int>
+			<int key="maxID">84</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
