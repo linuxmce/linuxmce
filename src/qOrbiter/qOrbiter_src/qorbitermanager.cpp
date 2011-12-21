@@ -135,8 +135,11 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     qorbiterUIwin->rootContext()->setContextProperty("screenparams", ScreenParameters);
 
     //stored video playlist for managing any media that isnt live broacast essentially
-
+    QThread *storedVideoPlaylistThread = new QThread();
     storedVideoPlaylist = new PlaylistClass (new PlaylistItemClass, this);
+    storedVideoPlaylist->moveToThread(storedVideoPlaylistThread);
+    storedVideoPlaylistThread->start();
+
     qorbiterUIwin->rootContext()->setContextProperty("mediaplaylist", storedVideoPlaylist);
 
     //initializing threading for timecode to prevent blocking
