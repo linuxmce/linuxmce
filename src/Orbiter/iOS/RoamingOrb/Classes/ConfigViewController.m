@@ -4,7 +4,8 @@
 
 
 @implementation ConfigViewController
-@synthesize scrollView, pollIntervalLabel, pollIntervalSlider;
+@synthesize scrollView, pollIntervalLabel, connectionIntervalLabel;
+@synthesize server, port, pollIntervalSlider, connectionIntervalSlider;
 
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewWillAppear:(BOOL)animated {
@@ -17,8 +18,9 @@
 	scrollView.delegate = self;
 
 	NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
-
-	[wifi  setOn:[prefs boolForKey:@"connection_wifi"]];
+    [server setText:[prefs objectForKey:@"server"]];
+    [port setText:[prefs objectForKey:@"port"]];
+    [wifi  setOn:[prefs boolForKey:@"connection_wifi"]];
 	[loadIndicator setOn:[prefs boolForKey:@"connection_loadindicator"]];
 
 	 //[prefs integerForKey:@"delay_preference"];
@@ -26,16 +28,30 @@
 	[super viewDidLoad];
 }
 
--(IBAction) sliderChanged:(id) sender {
-	int progressAsInt = (int)(pollIntervalSlider.value + 0.5f);
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    [textField resignFirstResponder];
+    return NO;
+}
+
+-(IBAction) pollSliderChanged:(id) sender {
+    int progressAsInt = (int)(pollIntervalSlider.value + 0.5f);
 	self.pollIntervalLabel.text = [[NSString alloc]
+								   initWithFormat:@"every %d seconds",progressAsInt];
+}
+
+-(IBAction) connectionSliderChanged:(id) sender {
+    int progressAsInt = (int)(connectionIntervalSlider.value + 0.5f);
+	self.connectionIntervalLabel.text = [[NSString alloc]
 								   initWithFormat:@"every %d seconds",progressAsInt];
 }
 
 -(IBAction) savePreferences:(id) sender {
 	NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
 
-	[prefs setBool:[wifi isOn] forKey:@"connection_wifi"];
+    [prefs setObject:[server text] forKey:@"server"];
+    [prefs setObject:[port text] forKey:@"port"];
+
+    [prefs setBool:[wifi isOn] forKey:@"connection_wifi"];
 	[prefs setBool:[loadIndicator isOn] forKey:@"connection_loadindicator"];
 
 	[prefs synchronize];

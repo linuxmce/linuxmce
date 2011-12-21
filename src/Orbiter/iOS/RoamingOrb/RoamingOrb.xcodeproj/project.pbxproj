@@ -18,7 +18,6 @@
 		957346271416471E00B30005 /* PVRViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 957346261416471E00B30005 /* PVRViewController.m */; };
 		9573462914164DC000B30005 /* mythtv.png in Resources */ = {isa = PBXBuildFile; fileRef = 9573462814164DC000B30005 /* mythtv.png */; };
 		9573782B133FDB03005F7613 /* proxy-orbiter-client.m in Sources */ = {isa = PBXBuildFile; fileRef = 95737828133FDB03005F7613 /* proxy-orbiter-client.m */; };
-		B42F901812158B6C00FF5801 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = B42F901712158B6C00FF5801 /* Settings.bundle */; };
 		B43D27AA140AE42600A8261B /* splash-ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = B43D27A8140AE42600A8261B /* splash-ipad.png */; };
 		B43D27AB140AE42600A8261B /* splash.png in Resources */ = {isa = PBXBuildFile; fileRef = B43D27A9140AE42600A8261B /* splash.png */; };
 		B43D27B3140AE44500A8261B /* Icon-72.png in Resources */ = {isa = PBXBuildFile; fileRef = B43D27AD140AE44500A8261B /* Icon-72.png */; };
@@ -56,7 +55,7 @@
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* RoamingOrbAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RoamingOrbAppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* RoamingOrbAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RoamingOrbAppDelegate.m; sourceTree = "<group>"; };
-		1D6058910D05DD3D006BFB54 /* RoamingOrb.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RoamingOrb.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1D6058910D05DD3D006BFB54 /* RoamingOrb.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = RoamingOrb.app; path = "/Users/sergewagener/CocoaProjects/iPhone/RoamingOrb/build/Debug-iphoneos/RoamingOrb.app"; sourceTree = "<absolute>"; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		288765580DF743DE002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -71,7 +70,6 @@
 		9573462814164DC000B30005 /* mythtv.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = mythtv.png; path = Assets/TabBar/mythtv.png; sourceTree = "<group>"; };
 		95737827133FDB03005F7613 /* proxy-orbiter-client.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "proxy-orbiter-client.h"; path = "Classes/proxy-orbiter-client.h"; sourceTree = "<group>"; };
 		95737828133FDB03005F7613 /* proxy-orbiter-client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "proxy-orbiter-client.m"; path = "Classes/proxy-orbiter-client.m"; sourceTree = "<group>"; };
-		B42F901712158B6C00FF5801 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		B43D27A8140AE42600A8261B /* splash-ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "splash-ipad.png"; path = "Assets/Splash/splash-ipad.png"; sourceTree = "<group>"; };
 		B43D27A9140AE42600A8261B /* splash.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = splash.png; path = Assets/Splash/splash.png; sourceTree = "<group>"; };
 		B43D27AD140AE44500A8261B /* Icon-72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-72.png"; path = "Assets/Icons/Icon-72.png"; sourceTree = "<group>"; };
@@ -137,15 +135,6 @@
 			path = Classes;
 			sourceTree = "<group>";
 		};
-		19C28FACFE9D520D11CA2CBB /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				B42F901712158B6C00FF5801 /* Settings.bundle */,
-				1D6058910D05DD3D006BFB54 /* RoamingOrb.app */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
@@ -154,7 +143,6 @@
 				B4558D5312282BE4007E880C /* Assets */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
-				19C28FACFE9D520D11CA2CBB /* Products */,
 			);
 			name = CustomTemplate;
 			sourceTree = "<group>";
@@ -341,7 +329,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B42F901812158B6C00FF5801 /* Settings.bundle in Resources */,
 				B4CCC9571260DE2F007ADE52 /* iTunesArtwork in Resources */,
 				B43D27AA140AE42600A8261B /* splash-ipad.png in Resources */,
 				B43D27AB140AE42600A8261B /* splash.png in Resources */,
@@ -399,6 +386,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -407,6 +396,9 @@
 				INFOPLIST_FILE = "RoamingOrb-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 3.1;
 				PRODUCT_NAME = RoamingOrb;
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Debug;
 		};
@@ -415,6 +407,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = RoamingOrb_Prefix.pch;
@@ -422,6 +415,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 3.1;
 				PRODUCT_NAME = RoamingOrb;
 				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -429,15 +423,18 @@
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = (
+					"$(ARCHS_STANDARD_32_BIT)",
+					armv6,
+				);
 				CODE_SIGN_ENTITLEMENTS = "";
-				CODE_SIGN_IDENTITY = "iPhone Developer: Serge Wagener (SQ49Q52J6Y)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 3.1;
-				PROVISIONING_PROFILE = "72D8EB89-A8D0-4A4A-8F53-3247D51B4DCE";
+				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -447,15 +444,18 @@
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CODE_SIGN_IDENTITY = "iPhone Developer: Serge Wagener (SQ49Q52J6Y)";
+				ARCHS = (
+					"$(ARCHS_STANDARD_32_BIT)",
+					armv6,
+				);
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 3.1;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
-				PROVISIONING_PROFILE = "72D8EB89-A8D0-4A4A-8F53-3247D51B4DCE";
+				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
 				SEPARATE_STRIP = NO;
@@ -473,7 +473,7 @@
 				1D6058950D05DD3E006BFB54 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "RoamingOrb" */ = {
 			isa = XCConfigurationList;
@@ -482,7 +482,7 @@
 				C01FCF5008A954540054247B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};

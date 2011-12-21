@@ -105,9 +105,15 @@ BOOL executePoll = NO;
 	pollTimer = nil;
 }
 
-- (void)didConnect {
+- (void)stopConnecting {
+	NSLog(@"Stopping connection tries...");
+	executePoll = NO;
 	[connectTimer invalidate];
-	[connectTimer release];
+	connectTimer = nil;
+}
+
+- (void)didConnect {
+	[self stopConnecting];
 	if(!connected) {
 		connected = YES;
 		NSLog(@"Connected, starting polling...");
@@ -127,10 +133,9 @@ BOOL executePoll = NO;
 - (void)didReceiveConnectionError:(NSString *)errorMessage {
 	NSLog(@"didReceiveConnectionError fired: %@", errorMessage);
     if(connected) {
-		[pollTimer invalidate];
-		[pollTimer release];
+        [self stopPolling];
 		connected = NO;
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Connection error" message: errorMessage delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Connection error" message: @"Please check your connection settings" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
         [alert show];
         [alert release];
         if(self.isIPad) [orbView setImage:[UIImage imageWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"splash-ipad" ofType:@"png"]]];
@@ -165,8 +170,9 @@ BOOL executePoll = NO;
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
-	[super viewWillDisappear:animated];
 	[self stopPolling];
+    [self stopConnecting];
+	[super viewWillDisappear:animated];
 }
 
 - (void)pollServer:(id)sender {

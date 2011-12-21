@@ -17,5 +17,8 @@
 
 @property (nonatomic, retain) UIWebView *webView;
 @property (nonatomic, retain) NSString *url;
+@property (nonatomic, retain) IBOutlet UITabBar *tabBar;
+@property (nonatomic, retain) UISwipeGestureRecognizer *swipeUpRecognizer;
+@property (nonatomic, retain) UISwipeGestureRecognizer *swipeDownRecognizer;
 
 @end
