@@ -1,22 +1,12 @@
-import QtQuick 1.0
-import "../components"
-Item{
-    id:climate
+import QtQuick 1.1
+import com.nokia.meego 1.0
+import com.nokia.extras 1.0
+import "../components";
 
-    Rectangle{
-        height: style.orbiterH
-        width: style.orbiterW
-        color: style.bgcolor
-        Text {
-            id: climatelabel
-            x: 74
-            y: 101
-            text: "Climate FloorPlan"
-            font.family: "Droid Sans"
-            font.bold: false
-            font.pointSize: 15
-        }
-        HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
-    }
-
+ScenariosPage {
+    id: screen_4;
+    headerColor: "#007cc8";
+    pageTitle: "Climate"
+    model: currentRoomClimate;
+    itemsAreScreens: false;
 }

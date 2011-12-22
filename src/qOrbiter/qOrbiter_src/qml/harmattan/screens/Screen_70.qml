@@ -14,7 +14,7 @@ Page {
     tools: ToolBarLayout {
         ToolIcon {
             iconId: "toolbar-home";
-            onClicked: screenchange("Screen_1.qml");
+            onClicked: gotoQScreen("Screen_1.qml");
         }
         ToolIcon {
             iconId: "toolbar-volume";
@@ -92,8 +92,29 @@ Page {
             opacity: 0.7;
             Text {
                 text: "Lights";
-                font.pointSize: 54;
+                font.pointSize: 48;
                 color: "white";
+            }
+            MouseArea
+            {
+                id: lightsGestureArea;
+                anchors.fill: parent;
+                onPressed: {
+                    newTimeText.visible = true;
+                }
+                onPositionChanged: {
+                    var y = mouse.y;
+                    var iScaleY = 100 / lightsGestureArea.height;
+                    var iNewY = Math.floor(y * iScaleY);
+                    adjustLighting(""+iNewY);
+                }
+                onReleased: {
+                    var y = mouse.y;
+                    var iScaleY = 100 / lightsGestureArea.height;
+                    var iNewY = Math.floor(y * iScaleY);
+                    adjustLighting(""+iNewY);
+                }
+
             }
         }
 

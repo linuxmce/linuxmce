@@ -1,22 +1,12 @@
-import QtQuick 1.0
-import "../components"
-Item{
-    id:security
+import QtQuick 1.1
+import com.nokia.meego 1.0
+import com.nokia.extras 1.0
+import "../components";
 
-    Rectangle{
-        height: 430
-        width: 800
-        color: style.bgcolor
-        Text {
-            id: securitylabel
-            x: 74
-            y: 101
-            text: "Security Floorplan"
-            font.family: "Droid Sans"
-            font.bold: false
-            font.pointSize: 15
-        }
-        HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
-    }
-
+ScenariosPage {
+    id: screen_5;
+    headerColor: "#ee5400";
+    pageTitle: "Telecom"
+    model: currentRoomTelecom;
+    itemsAreScreens: false;
 }

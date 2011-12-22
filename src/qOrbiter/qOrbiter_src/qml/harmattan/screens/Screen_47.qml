@@ -1,128 +1,88 @@
-import QtQuick 1.0
-import "../components"
+import QtQuick 1.1
+import com.nokia.meego 1.0
+import com.nokia.extras 1.0
+import "../components";
 
-Rectangle {
+Page {
+    id: screen_47;
+    tools: ToolBarLayout {
+        ToolIcon {
+            iconId: "toolbar-view-home";
+            onClicked: gotoQScreen("Screen_1.qml");
+        }
+        ToolIcon {
+            visible: false;
+        }
+        ToolIcon {
+            visible: false;
+        }
+        ToolIcon {
+            visible: false;
+        }
+        ToolIcon {
+            iconId: "toolbar-view-menu";
+            onClicked: console.log("Menu clicked.");
+        }
+    }
+    Rectangle {
+        id: contentArea;
+        width: parent.width;
+        height: parent.height-72;
+        anchors.top: headerRect.bottom;
+        anchors.leftMargin: UiConstants.DefaultMargin;
+        anchors.rightMargin: UiConstants.DefaultMargin;
+        GridView {
+            id: mediaView;
+            anchors.fill: parent;
+            model: dataModel;
+            focus: true;
+            cellWidth: 160;
+            cellHeight: 160;
+            width: parent.width;
+            height: parent.height;
+            delegate: MediaTile { }
+        }
 
-    width: style.orbiterW
-    height: style.orbiterH
-    color: "slategrey"
-    clip: true
-
-    Style{id:style}
-
-    Component {
-             id: contactDelegate
-             Item {
-                id:mainItem
-                 width: 156;
-                 height: 100
-
-                 Rectangle {
-                     id:frame
-                     opacity: 1
-                     width: mainItem.width
-                     height: mainItem.height
-                     anchors.centerIn: mainItem
-
-                     color: "floralwhite"
-                     border.color: "black"
-                     border.width: 2
-
-                     MouseArea{
-                         anchors.fill: frame
-                         onClicked: console.log(index + ":"+ name+ id)
-                     }
-
-                         Image { id: imagerect; source:"image://datagridimg/"+id ; height: 100; width: 156; anchors.centerIn: parent}
-                     }
-
-                 Text {
-                     text: name;
-                     opacity: 1;
-                     font.pointSize: 12;
-                     color: "black" ;
-                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                     anchors.fill: frame
-
-                     }
-
-             }
-         }
-
-
-    GridView {
-        id: grid_view1
-        x: 6
-        y: 7
-        model:dataModel
-        delegate: contactDelegate
-        highlight: Rectangle { color: "lightblue"; radius: 5 }
-        highlightFollowsCurrentItem: true
-        focus: true
-        width: 669
-        height: 539
-        clip: true
-        contentItem.clip: true
-        cellWidth: 156
-        cellHeight: 100
-
-        onModelChanged: {console.log("Grid Item Added!")}
-
-
-     Connections{
-         target:dataModel
-
-     }
+        ScrollDecorator {
+            flickableItem: mediaView;
+        }
 
     }
 
 
-    Rectangle{
-        width: childrenRect.width
-        height: parent.height
-        color: "floralwhite"
-        anchors.top: grid_view1.bottom
-   Row{
-       id:options
-       height:80
-       width: parent.width - 5
-
-
-
-       ButtonSq{
-           height: 45
-           width:  45
-           buttontext: "opt"
-           color: "lightblue"
-                }
-
-       ButtonSq{
-           height: 45
-           width:  45
-           buttontext: "opt1"
-           color: "lightblue"
-                }
-
-       ButtonSq{
-           height: 45
-           width:  45
-           buttontext: "Home"
-           color: "lightblue"
-
-           MouseArea{
-               anchors.fill: parent
-               onClicked:gotoQScreen("Screen_1.qml")
-                     }
-             }
-
+    Rectangle {
+        id: headerRect;
+        anchors.top: parent.top;
+        anchors.left: parent.left;
+        anchors.right: parent.right;
+        width: parent.width;
+        height: 72;
+        color: "black";
+        Text {
+            id: headerText;
+            anchors.left: headerRect.left;
+            anchors.verticalCenter: headerRect.verticalCenter;
+            anchors.leftMargin: UiConstants.DefaultMargin;
+            font.pointSize: 20;
+            color: "white";
+            text: "Media List";
         }
-     }
+        Image {
+            id: headerMenu;
+            anchors.right: headerRect.right;
+            anchors.verticalCenter: headerRect.verticalCenter;
+            anchors.rightMargin: UiConstants.DefaultMargin;
+            source: "image://theme/icon-m-toolbar-search-white";
+        }
+        MouseArea {
+            anchors.fill: headerRect;
+            onClicked: roomMenu.open();
+        }
+    }
 
-     AttributeSelector {
-         id: attributeselector1
-         x: 675
-         y: 19
-         width: 125
-         height: 400
-     }
+    Connections {
+        target: filedetailsclass;
+        onShowDetailsChanged: screenchange("Screen_47_details.qml");
+    }
+
 }

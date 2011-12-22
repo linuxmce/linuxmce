@@ -24,6 +24,14 @@ PageStackWindow {
             {
                 theme.inverted=true;
             }
+            else if (screenname == "Screen_47.qml")
+            {
+                theme.inverted=true;
+            }
+            else if (screenname == "Screen_47_details.qml")
+            {
+                theme.inverted=true;
+            }
             else
             {
                 theme.inverted=false;
