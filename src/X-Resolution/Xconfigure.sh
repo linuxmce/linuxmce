@@ -286,12 +286,22 @@ SetWMCompositor()
 {
 	local UseCompositing="$1"
 	local WMTweaksFile
-	local user
 
-	for user in /home/* /root; do
-		if [[ ! -d "$user" ]]; then
-			continue
+	local -a HomeDirs=(/root)
+
+	local Ent
+	local OldIFS="$IFS"
+	IFS=":"
+	local Username Pwd Uid Gid Comment HomeDir Shell
+	while read Username Pwd Uid Gid Comment HomeDir Shell; do
+		if [[ "$Uid" -ge 1000 && -d "$HomeDir" && "$HomeDir" != / ]]; then
+			HomeDirs=("${HomeDirs[@]}" "$HomeDir")
 		fi
+	done < <(getent passwd | egrep ':/bin/bash$')
+	IFS="$OldIFS"
+
+	local user
+	for user in "${HomeDirs[@]}"; do
 		WMTweaksFile="$user/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml"
 		mkdir -p "$(dirname "$WMTweaksFile")"
 		wmtweaks_default >"$WMTweaksFile"
