@@ -34,6 +34,7 @@ INSERT INTO ast_config (cat_metric, var_metric, commented, filename, category, v
 (0, 9, 0, 'sip.conf', 'general', 'notifyhold', 'yes'),
 (0, 10, 0, 'sip.conf', 'general', 'limitonpeers', 'yes'),
 (0, 11, 0, 'sip.conf', 'general', 'rtcachefriends', 'yes'),
+(0, 12, 0, 'sip.conf', 'general', 'rtupdate', 'yes'),
 (0, 13, 0, 'sip.conf', 'general', 'tcpenable', 'yes'),
 (0, 14, 0, 'sip.conf', 'general', 'tcpbindaddr', '0.0.0.0'),
 (0, 15, 0, 'sip.conf', 'general', 'registerattempts', '0'),
@@ -55,6 +56,7 @@ INSERT INTO ast_config (cat_metric, var_metric, commented, filename, category, v
 (0, 7, 0, 'iax.conf', 'general', 'mailboxdetail', 'yes'),
 (0, 8, 0, 'iax.conf', 'general', 'dtmfmode', 'auto'),
 (0, 9, 0, 'iax.conf', 'general', 'rtcachefriends', 'yes'),
+(0, 10, 0, 'iax.conf', 'general', 'rtupdate', 'yes'),
 (0, 11, 0, 'iax.conf', 'general', 'tos', '0x18'),
 (0, 12, 0, 'iax.conf', 'general', 'jitterbuffer', 'yes');
 

@@ -91,8 +91,8 @@ WriteIAXPhone()
 		callToken="no"
 	fi	
 	# adds configuration of current IAX phone to SQL query buffer.
-	PHONESSQL="$PHONESSQL INSERT INTO $DB_IAX_Device_Table (name,username,mailbox, secret, callerid, requirecalltoken)
-	VALUES ('$PhoneNumber','$PhoneNumber','$PhoneNumber@device','$Secret','device <$PhoneNumber>', '$callToken');"
+	PHONESSQL="$PHONESSQL INSERT INTO $DB_IAX_Device_Table (name,username,mailbox, secret, callerid, requirecalltoken,permit,deny)
+	VALUES ('$PhoneNumber','$PhoneNumber','$PhoneNumber@device','$Secret','device <$PhoneNumber>', '$callToken', '$IntIP/$IntNetmask', '0.0.0.0/0');"
 }
 
 WriteSccpPhone()
