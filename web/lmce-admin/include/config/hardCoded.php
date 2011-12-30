@@ -62,6 +62,7 @@
 	$GLOBALS['LightSwitchDimmable']=38;			// Light Switch (dimmable)
 	$GLOBALS['InfraredPlugIn'] = 39; 			// Infrared Plug In
 	$GLOBALS['EIB']=49;							// EIB
+	$GLOBALS['KNX']=2195;						// KNX via eibd
 	$GLOBALS['GenericInputOuput']=43;			// Generic Input Ouput 
 	$GLOBALS['DrapesSwitch']=68;				// Drapes Switch
 	$GLOBALS['StandardThermostat']=4;			// Standard Thermostat

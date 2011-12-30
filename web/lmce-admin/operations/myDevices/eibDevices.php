@@ -1,8 +1,8 @@
 <?
 function eibDevices($output,$dbADO,$eibADO) {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/eibDevices.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('eibDevices.lang.php');
 	
 	global $dbPlutoMainDatabase;
 	/* @var $dbADO ADOConnection */
@@ -40,7 +40,7 @@ function eibDevices($output,$dbADO,$eibADO) {
 			$labels=array('SetPoint Temperature','Actual Temperature');
 		break;
 		default:
-			$out='<div class="err">'.$TEXT_EIB_INVALID_PARAMETER_CONST.'</div>';
+			$out='<div class="err">'.translate('TEXT_EIB_INVALID_PARAMETER_CONST').'</div>';
 			$output->setBody($out);
 			$output->output();
 		break;
@@ -134,8 +134,8 @@ function eibDevices($output,$dbADO,$eibADO) {
 		<tr>
 			<td colspan="3" align="center"><table align="center" border="0">
 				<tr>
-					<td><B>'.$TEXT_UPDATE_GROUP_ADDRESSES_CONST.'</B></td>
-					<td><input type="file" name="newFile"> <input type="submit" class="button" name="add" value="'.$TEXT_UPDATE_GROUP_ADDRESSES_CONST.'"></td>
+					<td><B>'.translate('TEXT_UPDATE_GROUP_ADDRESSES_CONST').'</B></td>
+					<td><input type="file" name="newFile"> <input type="submit" class="button" name="add" value="'.translate('TEXT_UPDATE_GROUP_ADDRESSES_CONST').'"></td>
 				</tr>
 				</table>
 			</td>
@@ -144,7 +144,7 @@ function eibDevices($output,$dbADO,$eibADO) {
 			<td colspan="3">&nbsp;</td>
 		</tr>';
 	
-	$resEIB=$dbADO->Execute('SELECT * FROM Device WHERE FK_DeviceTemplate=? AND FK_Installation=? ORDER BY Description ASC',array($GLOBALS['EIB'],$installationID));
+	$resEIB=$dbADO->Execute('SELECT * FROM Device WHERE (FK_DeviceTemplate=? OR FK_DeviceTemplate=?) AND FK_Installation=? ORDER BY Description ASC',array($GLOBALS['EIB'],$GLOBALS['KNX'],$installationID));
 	$eibDevices=array();
 	while($row=$resEIB->FetchRow()){
 		$eibDevices[$row['PK_Device']]=$row['Description'];
@@ -166,9 +166,9 @@ function eibDevices($output,$dbADO,$eibADO) {
 		$out.='
 		<input type="hidden" name="oldDD_'.$rowDevices['PK_Device'].'" value="'.$rowDevices['IK_DeviceData'].'">
 		<tr>
-			<td align="center">'.$TEXT_DEVICE_CONST.': <B>'.$rowDevices['Description'].' # '.$rowDevices['PK_Device'].'</B><br> '.$TEXT_DEVICE_TEMPLATE_CONST.': <B>'.$rowDevices['Template'].'</B></td>
+			<td align="center">'.translate('TEXT_DEVICE_CONST').': <B>'.$rowDevices['Description'].' # '.$rowDevices['PK_Device'].'</B><br> '.translate('TEXT_DEVICE_TEMPLATE_CONST').': <B>'.$rowDevices['Template'].'</B></td>
 			<td align="right">
-				<fieldset><legend><B>'.$TEXT_GROUP_ADDRESSES_CONST.'</B></legend>
+				<fieldset><legend><B>'.translate('TEXT_GROUP_ADDRESSES_CONST').'</B></legend>
 				<table>
 					<tr>
 						<td>'.$labels[0].'</td>
@@ -179,13 +179,13 @@ function eibDevices($output,$dbADO,$eibADO) {
 			$out.='	<tr>
 						<td>'.@$labels[1].'</td>
 						<td><input type="text" name="dimName_'.$rowDevices['PK_Device'].'" size="50" value="'.@$channelArray[$channelParts[1]].' ('.@$channelParts[1].')'.'" disabled> <input type="hidden" name="dim_'.$rowDevices['PK_Device'].'" value="'.@$channelParts[1].'"></td>
-						<td><input type="button" class="button" name="setGroup" value="'.$TEXT_EIB_PICK_CONST.'" onClick="pickGroupAddress(\'dimName_'.$rowDevices['PK_Device'].'\',\'dim_'.$rowDevices['PK_Device'].'\');"></td>
+						<td><input type="button" class="button" name="setGroup" value="'.translate('TEXT_EIB_PICK_CONST').'" onClick="pickGroupAddress(\'dimName_'.$rowDevices['PK_Device'].'\',\'dim_'.$rowDevices['PK_Device'].'\');"></td>
 					</tr>
 			';
 		}
 		$out.='</table>
 			</fieldset></td>
-			<td><input type="button" class="button" name="del" value="'.$TEXT_DELETE_CONST.'" onClick="if(confirm(\''.$TEXT_EIB_CONFIRM_DELETE_CONST.'\'))self.location=\'index.php?section=eibDevices&action=delDevice&type='.$type.'&delID='.$rowDevices['PK_Device'].'\';"></td>
+			<td><input type="button" class="button" name="del" value="'.translate('TEXT_DELETE_CONST').'" onClick="if(confirm(\''.translate('TEXT_EIB_CONFIRM_DELETE_CONST').'\'))self.location=\'index.php?section=eibDevices&action=delDevice&type='.$type.'&delID='.$rowDevices['PK_Device'].'\';"></td>
 		</tr>
 ';
 	}
@@ -195,15 +195,15 @@ function eibDevices($output,$dbADO,$eibADO) {
 			<td colspan="3">&nbsp;</td>
 		</tr>				
 		<tr>
-			<td colspan="3" align="center"><input type="submit" class="button" name="update" value="'.$TEXT_EIB_UPDATE_DEVICES_CONST.'"></td>
+			<td colspan="3" align="center"><input type="submit" class="button" name="update" value="'.translate('TEXT_EIB_UPDATE_DEVICES_CONST').'"></td>
 		</tr>
 	</table>
 	<table align="center">
 		<tr>
-			<td align="center">'.$TEXT_ADD_DEVICE_CONST.': </td>
+			<td align="center">'.translate('TEXT_ADD_DEVICE_CONST').': </td>
 			<td><input type="text" name="newDevice"></td>
 			<td align="right" rowspan="3">
-				<fieldset><legend><B>'.$TEXT_GROUP_ADDRESSES_CONST.'</B></legend>
+				<fieldset><legend><B>'.translate('TEXT_GROUP_ADDRESSES_CONST').'</B></legend>
 					<table>
 						<tr>
 							<td>'.$labels[0].'</td>
@@ -222,7 +222,7 @@ function eibDevices($output,$dbADO,$eibADO) {
 					</table>
 				</fieldset>
 			</td>
-			<td rowspan="3"><input type="submit" class="button" name="addDevice" value="'.$TEXT_ADD_DEVICE_CONST.'"></td>
+			<td rowspan="3"><input type="submit" class="button" name="addDevice" value="'.translate('TEXT_ADD_DEVICE_CONST').'"></td>
 		</tr>					
 		<tr>
 			<td>Device template:</td>
@@ -234,7 +234,7 @@ function eibDevices($output,$dbADO,$eibADO) {
 			</select></td>	
 		</tr>
 		<tr>
-			<td>'.$TEXT_CONTROLLED_BY_CONST.':</td>
+			<td>'.translate('TEXT_CONTROLLED_BY_CONST').':</td>
 			<td><select name="controlledBy">';
 		foreach ($eibDevices AS $eibID=>$description){
 			$out.='<option value="'.$eibID.'">'.$description.'</option>';
@@ -275,10 +275,10 @@ function eibDevices($output,$dbADO,$eibADO) {
 						}
 					}
 				}
-				header("Location: index.php?section=eibDevices&type=$type&msg=$TEXT_GA_UPDATED_CONST $linesAdded.");
+				header("Location: index.php?section=eibDevices&type=$type&msg=".translate('TEXT_GA_UPDATED_CONST')." $linesAdded.");
 				exit();
 			}else{
-				header("Location: index.php?section=eibDevices&type=$type&error=$TEXT_ERROR_NO_FILE_SELECTED_CONST");
+				header("Location: index.php?section=eibDevices&type=$type&error=".translate('TEXT_ERROR_NO_FILE_SELECTED_CONST'));
 				exit();
 			}
 		}
@@ -301,7 +301,7 @@ function eibDevices($output,$dbADO,$eibADO) {
 				}
 			}
 			
-			header("Location: index.php?section=eibDevices&type=$type&msg=$TEXT_EIB_DEVICES_UPDATED_CONST");
+			header("Location: index.php?section=eibDevices&type=$type&msg=".translate('TEXT_EIB_DEVICES_UPDATED_CONST'));
 			exit();
 		}
 
@@ -329,19 +329,19 @@ function eibDevices($output,$dbADO,$eibADO) {
 				if($type=='sensors'){
 					$dbADO->Execute('UPDATE Device_DeviceData SET IK_DeviceData=? WHERE FK_Device=? AND FK_DeviceData=?',array(2,$insertID,$GLOBALS['InputOrOutput']));
 				}
-				header("Location: index.php?section=eibDevices&type=$type&msg=$TEXT_EIB_DEVICE_ADDED_CONST");
+				header("Location: index.php?section=eibDevices&type=$type&msg=".translate('TEXT_EIB_DEVICE_ADDED_CONST'));
 				exit();
 			}else{
-				header("Location: index.php?section=eibDevices&type=$type&error=$TEXT_DEVICE_NAME_REQUIRED_CONST");
+				header("Location: index.php?section=eibDevices&type=$type&error=".translate('TEXT_DEVICE_NAME_REQUIRED_CONST'));
 				exit();
 			}
 		}
 	}
 
-	$output->setMenuTitle($TEXT_WIZARD_CONST.' |');
-	$output->setPageTitle('EIB '.strtoupper($type));
+	$output->setMenuTitle(translate('TEXT_WIZARD_CONST').' |');
+	$output->setPageTitle('KNX/EIB '.strtoupper($type));
 	$output->setScriptCalendar('null');
-	$output->setNavigationMenu(array('EIB '.strtoupper($type)=>'index.php?section=eibDevices&type='.$type));
+	$output->setNavigationMenu(array('KNX/EIB '.strtoupper($type)=>'index.php?section=eibDevices&type='.$type));
 	$output->setBody($out);
 	$output->setTitle(APPLICATION_NAME);
 	$output->output();
@@ -350,14 +350,14 @@ function eibDevices($output,$dbADO,$eibADO) {
 function channelPullDown($channelArray,$pulldownName,$selectedValue,$extra='')
 {
 	// include language files
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
-	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/eibDevices.lang.php');
+	includeLangFile('common.lang.php');
+	includeLangFile('eibDevices.lang.php');
 	
 	$out='<select name="'.$pulldownName.'" '.$extra.' '.(($pulldownName=='generic')?'style="background-color:lightyellow;"':'').'>';
 	if(count($channelArray)==0)
-		$out.='<option value="0">- '.$TEXT_NO_GROUP_ADDRESS_AVAILABLE_CONST.' -</option>';
+		$out.='<option value="0">- '.translate('TEXT_NO_GROUP_ADDRESS_AVAILABLE_CONST').' -</option>';
 	else{
-		$out.='<option value="">- '.$TEXT_PLEASE_SELECT_CONST.' -</option>';
+		$out.='<option value="">- '.translate('TEXT_PLEASE_SELECT_CONST').' -</option>';
 		foreach ($channelArray AS $address=>$name){
 			$out.='<option value="'.$address.'" '.(($address==$selectedValue)?'selected':'').'>'.$name.' ('.$address.')</option>';
 		}
