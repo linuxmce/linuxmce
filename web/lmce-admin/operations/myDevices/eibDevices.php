@@ -135,7 +135,7 @@ function eibDevices($output,$dbADO,$eibADO) {
 			<td colspan="3" align="center"><table align="center" border="0">
 				<tr>
 					<td><B>'.translate('TEXT_UPDATE_GROUP_ADDRESSES_CONST').'</B></td>
-					<td><input type="file" name="newFile"> <input type="submit" class="button" name="add" value="'.translate('TEXT_UPDATE_GROUP_ADDRESSES_CONST').'"></td>
+					<td><input type="file" name="newFile"> <input type="submit" class="button" name="add" value="'.translate('TEXT_UPLOAD_CONST').'"></td>
 				</tr>
 				</table>
 			</td>
@@ -262,17 +262,13 @@ function eibDevices($output,$dbADO,$eibADO) {
 				$eibADO->Execute('TRUNCATE TABLE eib.groupaddresses');
 				$linesAdded=0;
 				foreach($fileArray AS $line){
-					preg_match_all('/\".*?\"/',$line,$matches);
-					if(count($matches[0])==4){
-						$name=str_replace('"','',$matches[0][0]);
-						$adr1=str_replace('"','',trim($matches[0][1]));
-						$adr2=str_replace('"','',trim($matches[0][2]));
-						$adr3=str_replace('"','',trim($matches[0][3]));
-						$address=$adr1.'/'.$adr2.'/'.$adr3;
-						if(is_numeric($adr1) && is_numeric($adr2) && is_numeric($adr3)){
-							$eibADO->Execute('INSERT INTO groupaddresses (name,address) VALUES (?,?)',array($name,trim($address)));
-							$linesAdded++;
-						}
+					$fields=explode("\t",$line);
+					if(count($fields) > 1){
+						$description=utf8_encode($fields[1]);
+						$fields=explode(".",$fields[0]);
+						$GA=$fields[count($fields)-1];
+						$eibADO->Execute('INSERT INTO groupaddresses (name,address) VALUES (?,?)',array($description,$GA));
+						$linesAdded++;
 					}
 				}
 				header("Location: index.php?section=eibDevices&type=$type&msg=".translate('TEXT_GA_UPDATED_CONST')." $linesAdded.");

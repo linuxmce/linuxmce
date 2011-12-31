@@ -1,6 +1,6 @@
 <?
 $TEXT_EIB_INVALID_PARAMETER_CONST='Invalid parameter';
-$TEXT_UPDATE_GROUP_ADDRESSES_CONST='Update group addresses';
+$TEXT_UPDATE_GROUP_ADDRESSES_CONST='Update group addresses (import .esf file from ETS)';
 $TEXT_GROUP_ADDRESSES_CONST='Group Addresses';
 $TEXT_EIB_PICK_CONST='Pick';
 $TEXT_EIB_CONFIRM_DELETE_CONST='Are you sure you want to delete this device?';
