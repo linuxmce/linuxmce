@@ -1,7 +1,7 @@
 <-dceag-p-b->
 Package = DCE_Destination_Package
 Dir = 
-desc = DCE Implemenation for #49 EIB
+desc = DCE Implemenation for #2195 KNX
 Maintainer = guigolumName
 Email = 
 Depend = DCE_Dependencies
