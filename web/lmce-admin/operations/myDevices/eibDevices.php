@@ -18,7 +18,7 @@ function eibDevices($output,$dbADO,$eibADO) {
 		case 'lights':
 			$allowedTemplates=array($GLOBALS['LightSwitchOnOff']=>'Light Switch On/Off',$GLOBALS['LightSwitchDimmable']=>'Light Switch Dimmable');
 			$targetDeviceData=$GLOBALS['Channel'];
-			$labels=array('On/Off','Dim');
+			$labels=array('On/Off','Status','Dim');
 		break;
 		case 'sensors':
 			$resDT=$dbADO->Execute('SELECT PK_DeviceTemplate,Description FROM DeviceTemplate WHERE FK_DeviceCategory=? ORDER BY Description ASC',$GLOBALS['rootSecurity']);
@@ -45,7 +45,7 @@ function eibDevices($output,$dbADO,$eibADO) {
 			$output->output();
 		break;
 	}
-	$multiGroupAddress=array($GLOBALS['LightSwitchDimmable'],$GLOBALS['DrapesSwitch'],$GLOBALS['StandardThermostat']);
+	$multiGroupAddress=array($GLOBALS['LightSwitchOnOff'],$GLOBALS['LightSwitchDimmable'],$GLOBALS['DrapesSwitch'],$GLOBALS['StandardThermostat']);
 	
 	$channelArray=array();
 	$resGroupAddresses=$eibADO->Execute('SELECT * FROM groupaddresses ORDER BY name ASC');
@@ -175,13 +175,22 @@ function eibDevices($output,$dbADO,$eibADO) {
 						<td><input type="text" name="onOffName_'.@$rowDevices['PK_Device'].'" size="50" value="'.@$channelArray[$channelParts[0]].' ('.@$channelParts[0].')'.'" disabled> <input type="hidden" name="onOff_'.$rowDevices['PK_Device'].'" value="'.@$channelParts[0].'"></td>
 						<td><input type="button" class="button" name="setGroup" value="Pick" onClick="pickGroupAddress(\'onOffName_'.$rowDevices['PK_Device'].'\',\'onOff_'.$rowDevices['PK_Device'].'\');"></td>
 					</tr>';
-		if(in_array($rowDevices['FK_DeviceTemplate'],$multiGroupAddress)){
+		if(count($labels) >= 2){
 			$out.='	<tr>
 						<td>'.@$labels[1].'</td>
-						<td><input type="text" name="dimName_'.$rowDevices['PK_Device'].'" size="50" value="'.@$channelArray[$channelParts[1]].' ('.@$channelParts[1].')'.'" disabled> <input type="hidden" name="dim_'.$rowDevices['PK_Device'].'" value="'.@$channelParts[1].'"></td>
+						<td><input type="text" name="statusName_'.$rowDevices['PK_Device'].'" size="50" value="'.@$channelArray[$channelParts[1]].' ('.@$channelParts[1].')'.'" disabled> <input type="hidden" name="status_'.$rowDevices['PK_Device'].'" value="'.@$channelParts[1].'"></td>
+						<td><input type="button" class="button" name="setGroup" value="'.translate('TEXT_EIB_PICK_CONST').'" onClick="pickGroupAddress(\'statusName_'.$rowDevices['PK_Device'].'\',\'status_'.$rowDevices['PK_Device'].'\');"></td>
+					</tr>
+			';
+		}
+		if((count($labels) >= 3) && $rowDevices['FK_DeviceTemplate'] != $GLOBALS['LightSwitchOnOff']){
+			$out.='	<tr>
+						<td>'.@$labels[2].'</td>
+						<td><input type="text" name="dimName_'.$rowDevices['PK_Device'].'" size="50" value="'.@$channelArray[$channelParts[2]].' ('.@$channelParts[2].')'.'" disabled> <input type="hidden" name="dim_'.$rowDevices['PK_Device'].'" value="'.@$channelParts[2].'"></td>
 						<td><input type="button" class="button" name="setGroup" value="'.translate('TEXT_EIB_PICK_CONST').'" onClick="pickGroupAddress(\'dimName_'.$rowDevices['PK_Device'].'\',\'dim_'.$rowDevices['PK_Device'].'\');"></td>
 					</tr>
 			';
+
 		}
 		$out.='</table>
 			</fieldset></td>
@@ -214,11 +223,18 @@ function eibDevices($output,$dbADO,$eibADO) {
 		$out.='
 						<tr>
 							<td>'.@$labels[1].'</td>
+							<td><input type="text" name="newStatusName" size="50" value="" disabled></td>
+							<td><input type="hidden" name="newStatus" value=""><input type="button" class="button" name="setNewStatus" '.((in_array($firstTemplate,$multiGroupAddress))?'':'disabled').' value="Pick" onClick="pickGroupAddress(\'newStatusName\',\'newStatus\');"></td>
+						</tr>';
+	}
+	if(isset($labels[2])){
+		$out.='
+						<tr>
+							<td>'.@$labels[2].'</td>
 							<td><input type="text" name="newDimName" size="50" value="" disabled></td>
 							<td><input type="hidden" name="newDim" value=""><input type="button" class="button" name="setNewDim" '.((in_array($firstTemplate,$multiGroupAddress))?'':'disabled').' value="Pick" onClick="pickGroupAddress(\'newDimName\',\'newDim\');"></td>
 						</tr>';
-	}
-	$out.='
+	}	$out.='
 					</table>
 				</fieldset>
 			</td>
@@ -282,11 +298,25 @@ function eibDevices($output,$dbADO,$eibADO) {
 		if(isset($_POST['update'])){
 			$devicesArray=unserialize(urldecode($_POST['devicesArray']));
 			foreach ($devicesArray as $deviceID=>$templateID){
-				if(in_array($templateID,$multiGroupAddress)){
-					$newDeviceData=$_POST['onOff_'.$deviceID].'|'.$_POST['dim_'.$deviceID];
-				}else{
-					$newDeviceData=$_POST['onOff_'.$deviceID];
+				switch($templateID) {
+				
+					case $GLOBALS['LightSwitchOnOff']:
+						$newDeviceData=$_POST['onOff_'.$deviceID].'|'.$_POST['status_'.$deviceID];
+						break;
+						
+					case $GLOBALS['LightSwitchDimmable']:
+						$newDeviceData=$_POST['onOff_'.$deviceID].'|'.$_POST['status_'.$deviceID].'|'.$_POST['dim_'.$deviceID];
+						break;
+				
+					default:
+						if(in_array($templateID,$multiGroupAddress)){
+							$newDeviceData=$_POST['onOff_'.$deviceID].'|'.$_POST['status_'.$deviceID].'|'.$_POST['dim_'.$deviceID];
+						}else{
+							$newDeviceData=$_POST['onOff_'.$deviceID];
+						}
+						break;
 				}
+				
 				$oldDeviceData=$_POST['oldDD_'.$deviceID];
 				if($oldDeviceData!=$newDeviceData){
 					if(is_null($oldDeviceData)){
@@ -314,9 +344,23 @@ function eibDevices($output,$dbADO,$eibADO) {
 			$newDevice=$_POST['newDevice'];
 			$deviceTemplate=(int)$_POST['deviceTemplate'];
 			$controlledBy=(int)$_POST['controlledBy'];
-			$deviceData=(in_array($deviceTemplate,$multiGroupAddress))?$_POST['newOnOff'].'|'.$_POST['newDim']:$_POST['newOnOff'];
+			
+			switch($deviceTemplate) {
+			
+				case $GLOBALS['LightSwitchOnOff']:
+					$deviceData=$_POST['newOnOff'].'|'.$_POST['newStatus'];
+					break;
+					
+				case $GLOBALS['LightSwitchDimmable']:
+					$deviceData=$_POST['newOnOff'].'|'.$_POST['newStatus'].'|'.$_POST['newDim'];
+					break;
+			
+				default:
+					$deviceData=(in_array($deviceTemplate,$multiGroupAddress))?$_POST['newOnOff'].'|'.$_POST['newDim']:$_POST['newOnOff'];
+					break;
+			}
+
 			if($newDevice!=''){
-				//$insertID=exec('sudo -u root /usr/pluto/bin/CreateDevice -h localhost -D '.$dbPlutoMainDatabase.' -d '.$deviceTemplate.' -i '.$installationID.' -C '.$controlledBy,$ret);
 				$insertID=createDevice($deviceTemplate,$installationID,$controlledBy,NULL,$dbADO);				
 				
 				$dbADO->Execute('UPDATE Device SET Description=? WHERE PK_Device=?',array($newDevice,$insertID));
