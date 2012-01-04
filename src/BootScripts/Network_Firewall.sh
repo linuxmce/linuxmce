@@ -175,8 +175,9 @@ if [[ -n "$IntIP" ]]; then
 	ip6tables -A INPUT -p udp --dport 67 -j ACCEPT # BOOTP/DHCP
 	iptables -A INPUT -s "$IntNet/$IntBitmask" -j ACCEPT
 
-	iptables -t mangle -A PREROUTING -j TTL --ttl-set 255
-	ip6tables -t mangle -A PREROUTING -j HL --hl-set 255
+	## Workaround for some ISPs that don't allow routers and drop packets based on TTL.
+	iptables -t mangle -A POSTROUTING -o $ExtIf -j TTL --ttl-set 255
+	ip6tables -t mangle -A POSTROUTING -o $ExtIf -j HL --hl-set 255
 	
 	if [[ "$ExtIP" != "dhcp" ]]; then
 		iptables -t nat -A POSTROUTING -s "$IntNet/$IntBitmask" -d \! "$IntNet/$IntBitmask" -o $ExtIf -j SNAT --to-source $ExtIP
