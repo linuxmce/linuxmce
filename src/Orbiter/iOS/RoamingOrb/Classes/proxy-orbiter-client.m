@@ -47,7 +47,7 @@ id _delegate;
     if (readStream && writeStream) {
         // set properties
 		
-		//Does not work in iOS 3.2 :-( Hopefully iPad will upgrade soon ...
+		//Does not work in iOS 3.2 :-(
 		//CFReadStreamSetProperty(readStream, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanTrue);
         //CFWriteStreamSetProperty(writeStream, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanTrue);
         

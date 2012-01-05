@@ -18,7 +18,7 @@ BOOL _isTabbarVisible = YES;
 - (void)viewDidLoad {
 	[super viewDidLoad];
 	screenSize = [[UIScreen mainScreen] bounds].size;
-    
+/* 
 	//register up swipe recognizer to show tabbar
 	UIGestureRecognizer *recognizer;
 	recognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeFrom:)];
@@ -37,14 +37,19 @@ BOOL _isTabbarVisible = YES;
 	//resize view to fullscreen to avoid white bar when tabbar is hidden
 	UIView *transView = [self.tabBarController.view.subviews objectAtIndex:0];
     transView.frame = CGRectMake(0, 0, screenSize.width, screenSize.height);
-
-    url = @"http://192.168.80.1/mythweb";
+*/
+    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+	if (![prefs valueForKey:@"server"]) {
+        NSLog(@"Server is not defined");
+        [prefs setObject:@"192.168.80.1" forKey:@"server"];
+    }
+    url = @"http://%@/mythweb",[prefs objectForKey:@"server"];
     NSURLRequest *req = [NSURLRequest requestWithURL:[NSURL URLWithString:url]];
 	[webView loadRequest:req];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-    if(_isTabbarVisible) {
+    /*if(_isTabbarVisible) {
         NSLog(@"Orbiter shown, tabbar will hide ...");
         [UIView beginAnimations:nil context:NULL];
         [UIView setAnimationDuration:0.55];
@@ -55,7 +60,7 @@ BOOL _isTabbarVisible = YES;
         tabBarFrame.origin.y = tabBarFrame.origin.y + tabBarFrame.size.height;
         self.tabBarController.tabBar.frame = tabBarFrame;
         [UIView commitAnimations];
-    }
+    }*/
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -72,11 +77,11 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
             navigationType:(UIWebViewNavigationType)navigationType
 {
     if (_sessionChecked) {
-        //[self log:@"session already checked."];
+        NSLog(@"session already checked.");
         return YES;
     }
     
-    //[self log:@"will check session."];
+    NSLog(@"will check session.");
     
     NSURLConnection *conn = [NSURLConnection connectionWithRequest:request delegate:self];
     if (conn == nil) {
@@ -110,9 +115,28 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
             NSLog(@"PVR backend exists, continue loading");
             NSURLRequest *req = [NSURLRequest requestWithURL:[NSURL URLWithString:url]];
             [webView loadRequest:req];
-      }
+        }
     }
 }
+
+- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
+{    
+    NSLog(@"Connection to PVR backend not possible");
+    [connection cancel];
+    
+    // We load from internal bundled file, so ignore 404 check
+    _sessionChecked = YES;
+    
+    // get localized path for file from app bundle
+    NSString *path;
+    NSBundle *thisBundle = [NSBundle mainBundle];
+    path = [thisBundle pathForResource:@"nopvr" ofType:@"html"];
+    
+    // make a file: URL out of the path
+    NSURLRequest *req = [NSURLRequest requestWithURL:[NSURL fileURLWithPath:path]];
+	[webView loadRequest:req];
+}
+
 - (void)didReceiveMemoryWarning {
 	// Releases the view if it doesn't have a superview.
 	[super didReceiveMemoryWarning];

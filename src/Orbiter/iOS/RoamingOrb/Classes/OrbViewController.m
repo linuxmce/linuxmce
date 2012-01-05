@@ -5,7 +5,7 @@
 
 @implementation OrbViewController
 
-@synthesize orbView, activityIndicator;
+@synthesize orbView;
 @synthesize swipeUpRecognizer, swipeDownRecognizer, swipeLeftRecognizer, swipeRightRecognizer, tabBar;
 
 proxy_orbiter_client *orbiter;
@@ -91,7 +91,7 @@ BOOL executePoll = NO, incompleteSettings = NO;
 	isWifi = ([[Reachability reachabilityForLocalWiFi] currentReachabilityStatus] == ReachableViaWiFi);
     
     if(incompleteSettings) {
-		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Connection error" message:@"Your settings are not completed. You will be redirected to settings screen prefilled with some default settings." delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Connection error" message:@"Your settings are not completed. You have been redirected to settings screen prefilled with some default settings." delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
 		[alert show];
 		[alert release];
         [self showTabBar:YES];
@@ -152,6 +152,14 @@ BOOL executePoll = NO, incompleteSettings = NO;
 
 - (void)startPolling {
 	NSLog(@"Starting polling...");
+    // Show a waiting HUD
+    /*if(imageLoadIndicator) {
+        HUD = [[MBProgressHUD alloc] initWithView:self.view];
+        [self.view addSubview:HUD];
+        HUD.delegate = self;
+        HUD.labelText = @"Loading from core...";
+        [HUD show:YES];
+    }*/
 	executePoll = YES;
     // setup a timer that polls proxy-orb every x seconds
     pollTimer = [[NSTimer 
@@ -160,6 +168,7 @@ BOOL executePoll = NO, incompleteSettings = NO;
                   selector:@selector(pollServer:)
                   userInfo:nil
                   repeats:YES] retain];
+    //[pollTimer fire];
 }
 
 - (void)stopPolling {
@@ -189,6 +198,7 @@ BOOL executePoll = NO, incompleteSettings = NO;
 }
 
 - (void)stopConnecting {
+    //if(HUD != nil) [HUD hide:YES];
 	NSLog(@"Stopping connection tries...");
 	[connectTimer invalidate];
 	connectTimer = nil;
@@ -199,9 +209,9 @@ BOOL executePoll = NO, incompleteSettings = NO;
 	if(!connected) {
 		connected = YES;
 		NSLog(@"Connected, starting polling...");
+        HUD.labelText = @"Loading from core...";
         [self startPolling];
 	}
-    if(HUD != nil) [HUD hide:YES];
 }
 
 - (void)didReceiveConnectionError:(NSString *)errorMessage {
@@ -232,7 +242,14 @@ BOOL executePoll = NO, incompleteSettings = NO;
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-	if(imageLoadIndicator) [activityIndicator startAnimating];
+    if(imageLoadIndicator) {
+        // Show a waiting HUD
+        HUD = [[MBProgressHUD alloc] initWithView:self.view];
+        [self.view addSubview:HUD];
+        HUD.delegate = self;
+        HUD.labelText = @"Loading from core...";
+        [HUD show:YES];
+    }
 	UITouch *touch = [touches anyObject];
 	CGPoint touchCoordinates = [touch locationInView:self.view];
 	[orbiter sendTouch:(NSInteger)touchCoordinates.x*self.mainScreenScale y:(NSInteger)touchCoordinates.y*self.mainScreenScale];
@@ -271,15 +288,23 @@ BOOL executePoll = NO, incompleteSettings = NO;
 	[UIView commitAnimations];
 }
 
+/*
 - (void)didReceiveNews {
 	NSLog(@"didReceiveNews fired");
-    if(imageLoadIndicator) [activityIndicator startAnimating];
+    if(imageLoadIndicator) {
+        [activityIndicator startAnimating];
+        // Show a waiting HUD
+        HUD = [[MBProgressHUD alloc] initWithView:self.view];
+        [self.view addSubview:HUD];
+        HUD.delegate = self;
+        HUD.labelText = @"Loading from core...";
+        [HUD show:YES];    
+    }
 	[orbiter downloadImage];
-}
+}*/
 
 - (void)didReceiveNewImage:(UIImage*)orbiterImage {
 	NSLog(@"didReceiveNewImage fired %3.0fx%3.0f", orbiterImage.size.width, orbiterImage.size.height);
-    [activityIndicator stopAnimating];
 	[orbView setImage:orbiterImage];
 	[orbiterImage release];
     if(HUD != nil) [HUD hide:YES];
