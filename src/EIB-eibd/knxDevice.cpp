@@ -253,8 +253,9 @@ namespace knx
 					{
 						return createModeChangedEventMessage(tl->getIntData());
 					}
-					if(tl->getGroupAddress()==_v_addrlist.at(4))
+					if(tl->getGroupAddress()==_v_addrlist.at(4)) // Current temperature
 					{
+						LoggerWrapper::GetInstance()->Write(LV_STATUS, "  Actual temperature is %f",tl->getFloatData());
 						return createTemperatureChangedEventMessage(tl->getFloatData());
 					}
 				}break;

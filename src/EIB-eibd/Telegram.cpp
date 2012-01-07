@@ -1,7 +1,7 @@
  
 #include "Telegram.h"
 using namespace DCE;
- 
+
 Telegram::Telegram():_length(0),_shortdata(0),_type(EIBWRITE),_addrdest(0),_addrfrom(0)
 {
 	for(int i=0;i<MAXTELEGRAMLENGTH;i++)
@@ -77,8 +77,8 @@ bool Telegram::receivefrom(EIBConnection *con)
 
 int Telegram::getUserData(unsigned char *buffer, int maxsize) const
 {
-	int leng=(maxsize<_length-2?maxsize:_length-2);
-	for(int i =0;i<leng;i++) buffer[i]=_data[i+2];
+	int leng=(maxsize<_length?maxsize:_length);
+	for(int i =0;i<leng;i++) buffer[i]=_data[i];
 	return leng;
 }
 
@@ -98,8 +98,17 @@ float Telegram::getFloatData() const
 	switch(_length)
 	{
 		case(0):
-		case(1): return 0.0;break;
-		case(2): unsigned short usd;getUserData((unsigned char*)&usd,2);return getFloatFromUShort(usd);break;
+		
+		case(1): 
+			return 0.0;
+			break;
+		
+		case(2):
+			unsigned short usd;
+			getUserData((unsigned char*)&usd,2);
+			return getFloatFromUShort(usd);
+			break;
+			
 		default: return 0;
 	}
 	

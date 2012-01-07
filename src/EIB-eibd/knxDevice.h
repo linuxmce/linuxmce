@@ -115,7 +115,7 @@ namespace knx
 		
 		inline Message *createModeChangedEventMessage(int mode){return new Message(_device_DCEID, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,EVENT_State_Changed_CONST, 1, EVENTPARAMETER_State_CONST, StringUtils::itos(mode).c_str());};
 		
-		inline Message *createTemperatureChangedEventMessage(float value){return new Message(_device_DCEID, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,EVENT_Level_Changed_CONST, 1, EVENTPARAMETER_Value_CONST, StringUtils::itos((int)value).c_str());};
+		inline Message *createTemperatureChangedEventMessage(float value){return new Message(_device_DCEID, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,EVENT_Level_Changed_CONST, 1, EVENTPARAMETER_Value_CONST, StringUtils::ftos(value).c_str());};
 
 		inline Message *createSensorTrippedEventMessage(int state){return new Message(_device_DCEID, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,EVENT_Sensor_Tripped_CONST, 1, EVENTPARAMETER_Tripped_CONST, StringUtils::itos(state).c_str());};
 	};
