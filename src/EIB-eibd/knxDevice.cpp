@@ -35,6 +35,7 @@ namespace knx
 			case DEVICETEMPLATE_Light_Switch_dimmable_CONST:return new LightSwitchdimmable(pDevData);break;
 			case DEVICETEMPLATE_Drapes_Switch_CONST:return new Drapes_Switch(pDevData);break;
 			case DEVICETEMPLATE_Blinds_Switch_CONST:return new Blinds_Switch(pDevData);break;
+			case DEVICETEMPLATE_Temperature_sensor_CONST: return new TemperatureSensor(pDevData);break;
 			case DEVICETEMPLATE_Generic_Input_Ouput_CONST:
 			case DEVICETEMPLATE_Air_Quality_Sensor_CONST:
 			case DEVICETEMPLATE_Door_Sensor_CONST:
@@ -237,7 +238,7 @@ namespace knx
 		return NULL;
 	}
 
-		Message *Standard_Thermostat::handleTelegram(const Telegram *tl)
+	Message *Standard_Thermostat::handleTelegram(const Telegram *tl)
 	{
 		try
 		{
@@ -255,7 +256,6 @@ namespace knx
 					}
 					if(tl->getGroupAddress()==_v_addrlist.at(4)) // Current temperature
 					{
-						LoggerWrapper::GetInstance()->Write(LV_STATUS, "  Actual temperature is %f",tl->getFloatData());
 						return createTemperatureChangedEventMessage(tl->getFloatData());
 					}
 				}break;
@@ -276,10 +276,32 @@ namespace knx
 		}
 		return NULL;
 	}
-
-		Message *GenericSensor::handleTelegram(const Telegram *tl)
+	
+	Message *TemperatureSensor::handleTelegram(const Telegram *tl)
 	{
-		//LoggerWrapper::GetInstance()->Write("LV_STATUS, "gnericsensor tryong to handle Telegram
+		try
+		{
+			switch(tl->getType())
+			{
+				case(EIBWRITE):
+				case(EIBRESPONSE):
+				{
+					if(tl->getGroupAddress()==_v_addrlist.at(0)) // Current temperature
+					{
+						LoggerWrapper::GetInstance()->Write(LV_STATUS, "  Actual temperature is %f",tl->getFloatData());
+						return createTemperatureChangedEventMessage(tl->getFloatData());
+					}
+				}break;
+							}
+		}catch(out_of_range e){
+			return NULL;
+		}
+		return NULL;
+	}
+
+	Message *GenericSensor::handleTelegram(const Telegram *tl)
+	{
+		//LoggerWrapper::GetInstance()->Write("LV_STATUS, "genericsensor trying to handle Telegram
 		try
 		{
 			switch(tl->getType())

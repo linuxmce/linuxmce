@@ -1,5 +1,7 @@
  
 #include "Telegram.h"
+#include "math.h"
+
 using namespace DCE;
 
 Telegram::Telegram():_length(0),_shortdata(0),_type(EIBWRITE),_addrdest(0),_addrfrom(0)
@@ -193,7 +195,7 @@ float Telegram::getFloatFromUShort(unsigned short tempr)
 	if( sign == 1 ) {
 		result = (-result);
 	}
-	
+
 	return (1.0) * result / 100;
 }
 
