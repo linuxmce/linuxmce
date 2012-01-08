@@ -315,7 +315,7 @@ AddTrunk()
 			# create SIP peer
 			context="from-trunk"
 			LINESSQL="$LINESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,secret,host,port,context,qualify,nat,type,fromuser,fromdomain,callerid,allow,insecure,directmedia) VALUES \
-			('$username','$username','$password','$host','5060','$context','yes','yes','peer','$username','$host','$phonenumber','alaw;ulaw','port,invite','no');"
+			('$phonenumber','$username','$password','$host','5060','$context','yes','yes','peer','$username','$host','$phonenumber','alaw;ulaw','port,invite','no');"
         ;;
         "GTALK")
         	# provider registry

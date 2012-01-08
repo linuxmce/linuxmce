@@ -6,8 +6,9 @@ lmce-asterisk (0+0.3.1-2) unstable; urgency=low
     calls not work after some minutes
   * Fixed bug preventing IAX2 provider registration
   * Fixed some IAX provider trunk bug's
+  * Fixed a bug if SIP provider username <> phonenumber
 
- -- Serge Wagener <serge@linuxmce.org>  Wed, 28 Dec 2011 19:24:24 +0100
+ -- Serge Wagener <serge@linuxmce.org>  Sun, 08 Jan 2012 20:56:40 +0100
 
 lmce-asterisk (0+0.3.1-1) unstable; urgency=low
 
