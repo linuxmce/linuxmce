@@ -348,6 +348,12 @@ void Climate_Plugin::PreprocessClimateMessage(DeviceData_Router *pDevice,Message
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Climate_Plugin: EVENT_Temperature_Changed_CONST !");
 			// Replace the current temp
 			string sLevel = pMessage->m_mapParameters[EVENTPARAMETER_Value_CONST];
+			
+			// Ugly hack to store only two decimals of temperature value. If a c++ pro could please replace it :-)
+			char cTemp[10];
+			sprintf(cTemp,"%.2f",atof(sLevel.c_str()));
+			sLevel = cTemp;
+			
 			SetStateValue(pDevice, sOn, sMode, sFan, sSetPoint, sLevel);
 		}
 		else if( pMessage->m_dwID == EVENT_Thermostat_Set_Point_Chan_CONST )
@@ -505,5 +511,12 @@ void Climate_Plugin::GetStateVar(DeviceData_Router *pDevice,
 void Climate_Plugin::SetStateValue(DeviceData_Router *pDevice,
 	   string sOn, string sMode, string sFan, string sSetPoint, string sTemp)
 {
-	pDevice->m_sState_set(sOn + "/" + sMode + "/" + sFan + "/" + sSetPoint + " (" + sTemp + ")");
+	switch(pDevice->m_dwPK_DeviceTemplate)
+	{
+		case DEVICETEMPLATE_Temperature_sensor_CONST:
+			pDevice->m_sState_set(sTemp);
+			break; 
+		default:
+			pDevice->m_sState_set(sOn + "/" + sMode + "/" + sFan + "/" + sSetPoint + " (" + sTemp + ")");
+	}
 }
