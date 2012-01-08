@@ -340,8 +340,7 @@ AddTrunk()
 	('$context','_$prefix.','2','Macro','outisbusy,');"
 	
 	# create incoming context and redirect to realtime
-	echo "
-[from-trunk-$phonenumber]
+	echo "[from-trunk-$phonenumber]
 switch => Realtime
 	" >> /etc/asterisk/extensions-lmce-trunks.conf
 
@@ -356,11 +355,11 @@ switch => Realtime
 	context="ext-did"
 	line=$((100+$id))
 	LINESSQL="$LINESSQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES \
-	('$context','$username','1','Set','__FROM_DID=\${EXTEN}'), \
-	('$context','$username','2','Set','CALLERID(num)=\${CALLERID(name)}'), \
-	('$context','$username','3','Noop','Incoming call from \${CALLERID(num)}'), \
-	('$context','$username','4','Set','FAX_RX='), \
-	('$context','$username','5','Goto','custom-linuxmce,$line,1');"
+	('$context','$phonenumber','1','Set','__FROM_DID=\${EXTEN}'), \
+	('$context','$phonenumber','2','Set','CALLERID(num)=\${CALLERID(name)}'), \
+	('$context','$phonenumber','3','Noop','Incoming call from \${CALLERID(num)}'), \
+	('$context','$phonenumber','4','Set','FAX_RX='), \
+	('$context','$phonenumber','5','Goto','custom-linuxmce,$line,1');"
 }
 
 WorkTheLines()
