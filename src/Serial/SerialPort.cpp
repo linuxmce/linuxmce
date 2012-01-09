@@ -265,8 +265,8 @@ void *CSerialPort::Private::receiveFunction(void * serialPrivate)
 
 CSerialPort::CSerialPort(string Port, unsigned BPS, eParityBitStop ParityBitStop, bool FlowControl)
 {
-	d = new Private(this);
-	if( d == NULL )
+	d.reset(new Private(this));
+	if( d.get() == NULL )
 	{
 		throw string("Not enough memory!");
 	}
@@ -361,9 +361,6 @@ CSerialPort::~CSerialPort()
 	
 	::tcdrain(m_fdSerial);
 	close(m_fdSerial);
-	
-	delete d;
-	d = NULL;
 }
 
 void CSerialPort::Write(char *Buf, size_t Len)
