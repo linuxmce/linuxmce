@@ -134,6 +134,8 @@ bool CSerialPort::IsRngSet()
 //#include <iostream>
 #include <deque>
 
+#include "PlutoUtils/LinuxSerialUSB.h"
+
 class CSerialPort::Private
 {
 	public:
@@ -275,6 +277,7 @@ CSerialPort::CSerialPort(string Port, unsigned BPS, eParityBitStop ParityBitStop
 	
 	if( Port.size()<6 || Port.substr(0,5)!="/dev/" )
 		Port = "/dev/" + Port;
+	Port = TranslateSerialUSB(Port);
 	if ((m_fdSerial = open(string(Port).c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK)) < 0)
 	{
 	if (Port == "ttyS5")
