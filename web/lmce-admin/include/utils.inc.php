@@ -297,10 +297,9 @@ function getDeviceChildsArray($parentID,$dbADO) {
 	if ($resGP) {
 		while ($row=$resGP->FetchRow()) {
 				$GLOBALS['childsArray'][]=$row['PK_Device'];
-				$GLOBALS['childsArray'][]=getDeviceChildsArray($row['PK_Device'],$dbADO);
+				getDeviceChildsArray($row['PK_Device'],$dbADO);
 		}
 	}
-	//return $childsArray;
 }
 
 
@@ -312,7 +311,7 @@ function getDeviceCategoryChildsNo($parentID,$dbADO) {
 	if ($resGP) {
 		while ($row=$resGP->FetchRow()) {
 				$GLOBALS['childsDeviceCategoryNo']++;
-				$GLOBALS['childsDeviceCategoryNo']+=getDeviceCategoryChildsNo($row['PK_DeviceCategory'],$dbADO);
+				getDeviceCategoryChildsNo($row['PK_DeviceCategory'],$dbADO);
 		}
 	}	
 }
@@ -326,7 +325,7 @@ function getDeviceCategoryChildsArray($parentID,$dbADO) {
 	if ($resGP) {
 		while ($row=$resGP->FetchRow()) {
 				$GLOBALS['childsDeviceCategoryArray'][]=$row['PK_DeviceCategory'];				
-				$GLOBALS['childsDeviceCategoryArray'][]=getDeviceCategoryChildsArray($row['PK_DeviceCategory'],$dbADO);
+				getDeviceCategoryChildsArray($row['PK_DeviceCategory'],$dbADO);
 		}
 	}
 }
