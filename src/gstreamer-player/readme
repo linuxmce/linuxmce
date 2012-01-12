@@ -1,0 +1,7 @@
+The following packages are the minimum.
+
+sudo apt-get install libgstreamer-plugins-base0.10-dev
+sudo apt-get install libgtk2.0-dev
+
+After that run make
+
