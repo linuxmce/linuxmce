@@ -184,7 +184,7 @@ Item
                     anchors.fill: parent;
                     color: "transparent"
                     Text{
-                        text:label;
+                        text:title
                         anchors.centerIn: parent;
                         font.family: aeonRss.name;
                         font.pixelSize: parent.height/2;
