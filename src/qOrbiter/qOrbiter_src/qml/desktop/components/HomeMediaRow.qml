@@ -1,17 +1,11 @@
 import QtQuick 1.0
 
-Item {
-    height: scaleY(17)
-    width: scaleX(100)
-    clip:true
 
     Rectangle{
-        height: scaleY(17)
+        height: scaleY(15)
         width: scaleX(100)
-        clip:true
+        clip:false
         color:"transparent"
-        radius: 20
-
 
         HomeButtonDelegate{id:mediaDelegate}
 
@@ -20,24 +14,18 @@ Item {
             spacing:5
             x: scaleX(2)
 
-            ButtonSq {
+            Rectangle {
                 id: rowheader
                 anchors.top: parent.top
                 anchors.topMargin: scaleY(2)
                 height: scaleY(13)
                 width: scaleX(8)
-                color: style.homescreenfloorplanbuttoncolor
+                color: "transparent"
                 radius: style.but_smooth
-                buttontext: ""
-                Image {
-                    id: buttonbg
-                    source: "../../../img/icons/buttonoverlay.png"
-                    height: parent.height
-                    width: parent.width
-                }
+
                 Image {
                     id: mHeaderImg
-                    source: "../../../img/icons/kmix.png"
+                    source: "../../../img/ui3/mediabig.png"
                     height: parent.height
                     width: parent.width
                 }
@@ -73,6 +61,7 @@ Item {
             contentWidth: (style.buttonW + 5) * (mediaflick.children.width)
             clip: true
             flickableDirection: "HorizontalFlick"
+            anchors.verticalCenter: parent.verticalCenter
 
                 ListView{
                     id: mediaScenarios
@@ -81,7 +70,7 @@ Item {
 
                     model: currentRoomMedia
                     orientation:ListView.Horizontal
-                    spacing: 5
+                    spacing:1
                     delegate: mediaDelegate
                     interactive: false
 
@@ -89,4 +78,4 @@ Item {
             }
         }
     }
-}
+

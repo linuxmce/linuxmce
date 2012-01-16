@@ -1526,6 +1526,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                         // qDebug() << cellTitle ;
                         // qDebug() << fk_file ;
                         // qDebug() << filePath ;
+                        QApplication::processEvents(QEventLoop::AllEvents);
                     }
                     if (cellsToRender > qmlUI->model->rowCount(QModelIndex()))
                     {
@@ -2026,6 +2027,7 @@ QImage DCE::qOrbiter::getfileForDG(string filePath)
     char *picData = NULL;
     int picData_Size;
     picData_Size = 0;
+
 
     CMD_Request_File reqFile((long)qmlUI->iPK_Device, (long)4 , (string)filePath, &picData, &picData_Size);
     string p_sResponse;
@@ -3078,7 +3080,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                 }
             }
             qmlUI->qs_seek="";
-        }
+        }QApplication::processEvents(QEventLoop::AllEvents);
     }
 }
 
@@ -3657,6 +3659,10 @@ void DCE::qOrbiter::CopyDisc()
 }
 
 void DCE::qOrbiter::ShowBookMarks()
+{
+}
+
+void qOrbiter::getImage()
 {
 }
 

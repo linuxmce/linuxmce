@@ -5,24 +5,31 @@ import "../js/ComponentLoader.js" as MyJs
 Rectangle {
     id:advanced_panel
     width: style.orbiterW
-    height: style.widebuttonh + scaleY(2)
-    color: style.darkhighlight
-    opacity: .75
+    height: style.widebuttonh + scaleY(4)
+    color:"transparent"
+
+    Image {
+        id: panelbg
+        source: "../../../img/ui3/footer.png"
+        height: parent.height
+        width: parent.width
+        opacity: .85
+    }
 
     Row{
         id:advancedrow
         height:childrenRect.height +5
         width: childrenRect.width
-        anchors.centerIn: advanced_panel
+        anchors.centerIn: panelbg
         spacing:10
         clip: false
 
-        ButtonSq {
+        AdvancedButton {
             width: style.widebuttonw
             height: style.widebuttonh
             id: buttonsq1
             buttontextfontsize: 9
-            border.width: 2
+
             buttontext: "Advanced"
             radius: 5
 
@@ -32,13 +39,13 @@ Rectangle {
             }
         }
 
-        ButtonSq {
+        AdvancedButton {
             id: buttonsq2
             x: 63
             y: 1
             width: style.widebuttonw
             height: style.widebuttonh
-            border.width: 2
+
             buttontext: "Power"
             radius: 5
             MouseArea{
@@ -48,13 +55,13 @@ Rectangle {
         }
 
 
-        ButtonSq {
+        AdvancedButton {
             id: buttonsq3
             x: 125
             y: 1
             width: style.widebuttonw
             height: style.widebuttonh
-            border.width: 2
+
             buttontext: "Sleeping Menu"
             radius: 5
 
@@ -66,7 +73,7 @@ Rectangle {
 
 
 
-        ButtonSq{
+        AdvancedButton{
             id:roombutton
             width: style.widebuttonw
             height: style.widebuttonh
@@ -79,7 +86,7 @@ Rectangle {
 
         UserListComponent {id:user}
 
-        ButtonSq{
+        AdvancedButton{
             id:exit
             width: style.widebuttonw
             height: style.widebuttonh

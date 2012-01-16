@@ -13,6 +13,10 @@ property bool verticalMirror: false
     Text{
         id: txtDate
         text: getDate()
+        color: "aliceblue"
+        font.letterSpacing: 2
         smooth: true
+        anchors.centerIn: parent
+
     }
 }

@@ -136,17 +136,17 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
 
     //stored video playlist for managing any media that isnt live broacast essentially
     QThread *storedVideoPlaylistThread = new QThread();
-    storedVideoPlaylist = new PlaylistClass (new PlaylistItemClass, this);
+    storedVideoPlaylist = new PlaylistClass (new PlaylistItemClass);
     storedVideoPlaylist->moveToThread(storedVideoPlaylistThread);
     storedVideoPlaylistThread->start();
 
     qorbiterUIwin->rootContext()->setContextProperty("mediaplaylist", storedVideoPlaylist);
 
     //initializing threading for timecode to prevent blocking
-    // timecodeThread = new QThread;
+    //timecodeThread = new QThread;
     timeCodeSocket = new QTcpSocket();
-    // timeCodeSocket->moveToThread(timecodeThread);
-    // timecodeThread->start();
+    //timeCodeSocket->moveToThread(timecodeThread);
+    //timecodeThread->start();
 
 
     //QObject::connect(nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection );
@@ -182,6 +182,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
     pqOrbiter = new DCE::qOrbiter(iPK_Device, sRouterIP, true,false);
     setDceResponse("Made orbiter");
     QApplication::processEvents(QEventLoop::AllEvents);
+
 
     iPK_Device_DatagridPlugIn =  long(6);
     iPK_Device_OrbiterPlugin = long(9);
@@ -550,8 +551,8 @@ void qorbiterManager::getConf(int pPK_Device)
     qorbiterUIwin->rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
     processingThread = new QThread(this);
     simpleEPGmodel->moveToThread(processingThread);
-    processingThread->start(QThread::LowPriority);
-    QApplication::processEvents(QEventLoop::AllEvents);
+    processingThread->start();    QApplication::processEvents(QEventLoop::AllEvents);
+
     QObject::connect(this,SIGNAL(liveTVrequest()), simpleEPGmodel,SLOT(populate()), Qt::QueuedConnection);
     //        qDebug () << "Orbiter Registered, starting";
 
@@ -1324,8 +1325,9 @@ void qorbiterManager::changeChannels(QString chan)
 
 void qorbiterManager::getLiveTVPlaylist()
 {
-    // qDebug() << "Orbiter Manager slot called";
-    //emit liveTVrequest();
+   qDebug() << "Orbiter Manager slot called";
+    emit liveTVrequest();
+
 }
 
 void qorbiterManager::gridChangeChannel(QString chan, QString chanid)
@@ -1422,7 +1424,7 @@ void qorbiterManager::updateTimecode()
                 if ( timeCodeSocket->isValid() )
                 {
                     //qDebug() << "Time Code Socket connected! " << sIPAddress.c_str();
-                    QObject::connect(timeCodeSocket,SIGNAL(readyRead()), this, SLOT(showTimeCode()), Qt::QueuedConnection);
+                    QObject::connect(timeCodeSocket,SIGNAL(readyRead()), this, SLOT(showTimeCode()));
                 }
             }
         }
@@ -1454,6 +1456,7 @@ void qorbiterManager::showTimeCode()
         QString duration = tcVars.at(2);
         duration.remove(QRegExp(".\\d\\d\\d|00:0|0:0|00:"));
         nowPlayingButton->setDuration(duration);
+        //qDebug() << tcClean;
     }
 }
 

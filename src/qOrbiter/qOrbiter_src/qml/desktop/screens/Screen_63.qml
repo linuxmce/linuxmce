@@ -140,6 +140,7 @@ Rectangle {
             Remote_lighting_controls{ id: remote_lighting_controls1; }
             Remote_Audio_controls{ id: remote1; }
         }
+
         Row{
             id:controlrow
 
@@ -148,10 +149,11 @@ Rectangle {
             height: childrenRect.height
             width: mainrow.width
             anchors.horizontalCenter: parent.horizontalCenter
+
             Column{
                 height: childrenRect.height
                 width: parent.width
-                anchors.centerIn: parent
+
                 spacing: scaleY(1)
                 VideoControls {
                     id: videocontrols1

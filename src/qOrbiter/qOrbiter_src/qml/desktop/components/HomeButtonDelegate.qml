@@ -4,18 +4,20 @@ Component{
 
     Item{
         //important!! these need to be set on an imported component otherwise its appears all wrong!
-        height: scaleY(15)
+        height: scaleY(13)
         width: scaleX(8)
 
         ImgButton
         {       id:delegateButton
             anchors.top: parent.top
             anchors.topMargin: scaleY(2)
-            height: style.stdbuttonh
-            width: style.stdbuttonw
+            color:"transparent"
+            // height: style.stdbuttonh
+            // width: style.stdbuttonw
             buttontext: title
             buttontextbold: true
             buttontextitalic: true
+            buttonopacity: .85
 
             MouseArea{
                 anchors.fill: delegateButton
@@ -23,11 +25,13 @@ Component{
                 hoverEnabled: true
 
                 onEntered: {
-                    delegateButton.buttonbordercolor.color = "white"
+                    delegateButton.buttontextcolor = "white"
+                    delegateButton.buttonopacity = 1
 
                 }
                 onExited: {
-                    delegateButton.buttonbordercolor.color = style.button_action_color_hover
+                    delegateButton.buttontextcolor = "black"
+                    delegateButton.buttonopacity = .85
 
                 }
             }

@@ -82,7 +82,7 @@ public:
     Q_INVOKABLE void FfMedia();
     Q_INVOKABLE void PauseMedia();
     Q_INVOKABLE void requestMediaPlaylist();
-    Q_INVOKABLE void requestLiveTvPlaylist();
+
     Q_INVOKABLE void ShowFloorPlan(int floorplantype);
     Q_INVOKABLE void GetScreenSaverImages();
     Q_INVOKABLE void BindMediaRemote(bool onoff);
@@ -114,6 +114,9 @@ public:
     Q_INVOKABLE void showMenu();
     Q_INVOKABLE void CopyDisc();
     Q_INVOKABLE void ShowBookMarks();
+
+    void getImage();
+
 
     Q_INVOKABLE void moveDirection(QString direction);
     Q_INVOKABLE void JogStream(QString jump);
@@ -1070,6 +1073,11 @@ signals:
     void waitForScreenShot(char picData, int picDataSize, string fileFormat);
     void disconnected(QString msg);
     void screenSaverImages(QStringList images);
+
+public slots:
+    void requestLiveTvPlaylist();
+
+
 };
 
 //<-dceag-end-b->

@@ -160,7 +160,7 @@ Rectangle {
                     // font.bold: true
                     smooth: true
                     font.pixelSize: scaleY(2)
-                    visible:  filedetailsclass.releasedate =="" ? false: true
+                    visible:  filedetailsclass.releasedate ==="" ? false: true
 
                 }
 

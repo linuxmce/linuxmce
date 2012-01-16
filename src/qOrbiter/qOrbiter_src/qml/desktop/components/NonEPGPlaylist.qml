@@ -55,7 +55,7 @@ Rectangle {
             Image {
                 id: playlistimage
                 fillMode: Image.PreserveAspectCrop
-                source:  index == dcenowplaying.m_iplaylistPosition ? playlistimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp: ""
+                source:  index === dcenowplaying.m_iplaylistPosition ? playlistimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp: ""
                 anchors.fill: parent
                 opacity: .5
             }
@@ -71,7 +71,7 @@ Rectangle {
             }
 
             Text {
-                text:  index == dcenowplaying.m_iplaylistPosition ? "Now Playing - " + id : id
+                text:  index === dcenowplaying.m_iplaylistPosition ? "Now Playing - " + id : id
                 font.family: "DroidSans"
                 color: "aliceblue"
                 width: parent.width

@@ -12,17 +12,17 @@ Rectangle {
     property alias buttontextzindex: buttonLabel.z
     property alias buttonsqradius:  buttonBase.radius
     property alias buttonbordercolor: buttonBase.border
+    property alias buttonopacity: buttonimage.opacity
 
-    height: style.stdbuttonw
+    height: style.stdbuttonh
     width: style.stdbuttonw
-    border.width: 3
-    border.color: style.button_action_color_hover
+
     radius: 1
     Image {
         id: buttonimage
-        source: "../../../img/icons/buttonoverlay.png"
-        height: parent.height
-        width: parent.width
+        source: "../../../img/ui3/linuxmcewidebutton.png"
+        height: style.stdbuttonh
+        width: style.stdbuttonw
 
     }
     Text {
@@ -38,22 +38,18 @@ Rectangle {
         wrapMode: Text.WordWrap
        }
 
-
-
     MouseArea{
         anchors.fill: parent
         hoverEnabled: true
         onEntered: {
-            buttonBase.border.color = "white"
-            buttonimage.opacity = .15
+
+            buttonimage.opacity = .5
         }
         onExited: {
-            buttonBase.border.color = style.button_action_color_hover
-            buttonimage.opacity = .75
+
+            buttonimage.opacity = 1
         }
     }
-
-
 
 }
 

@@ -146,7 +146,7 @@ Rectangle {
                     font.pixelSize: scaleY(2)
                      color:"aliceblue"
                     elide: "ElideRight"
-                    visible:  filedetailsclass.rating =="" ? false: true
+                    visible:  filedetailsclass.rating ==="" ? false: true
                 }
 
                 Text {

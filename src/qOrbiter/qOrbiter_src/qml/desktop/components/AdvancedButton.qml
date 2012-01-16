@@ -17,12 +17,17 @@ Rectangle{
 
     Rectangle {
         id:buttonBase
-        color:style.button_system_color
+        color: "transparent"
         height: parent.height
         width: parent.width
-        border.width: 2
-        border.color: style.highlight1
-        radius: 5
+
+        Image {
+            id: buttonbg
+            source: "../../../img/ui3/linuxmcewidebutton.png"
+            height: parent.height
+            width: parent.width
+            opacity: .5
+        }
 
         Text {
             id: buttonLabel
@@ -48,13 +53,13 @@ Rectangle{
             anchors.fill: buttonLabel
             hoverEnabled: true
             onEntered: {
-                buttonBase.color = style.button_system_color_hover
+               buttonbg.opacity = 1
                 buttonLabel.color = style.lighttext
                 buttonLabel.font.capitalization = Font.AllUppercase
             }
 
             onExited: {
-                buttonBase.color = style.button_system_color
+             buttonbg.opacity = .85
                 buttonLabel.font.capitalization = Font.Normal
                 buttonLabel.color = "black"
             }

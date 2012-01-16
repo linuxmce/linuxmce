@@ -64,8 +64,6 @@ QtObject{
     property int avoptionbuttonw: scaleX(6)
 
 
-
-
     //textStyles
     property string stylebuttonimage: ""
     property int title_size: 20* scaleX(orbiterW)

@@ -1,11 +1,10 @@
 import QtQuick 1.0
 
-Item {
-    height: scaleY(17)
-    width: scaleX(100)
-    clip:true
+
+
     Rectangle{
-        height: scaleY(17)
+        id:securityrow
+        height: scaleY(16)
         width: scaleX(100)
         clip:true
 color:"transparent"
@@ -17,26 +16,18 @@ color:"transparent"
             id: guide
             spacing:2
             x: scaleX(2)
-            ButtonSq {
+            Rectangle {
                 id: rowheader
                 height: scaleY(13)
                 width: scaleX(8)
                 anchors.top: parent.top
                 anchors.topMargin: scaleY(2)
-                color: style.homescreenfloorplanbuttoncolor
+                color: "transparent"
                 radius: style.but_smooth
-                buttontext: ""
-
-                Image {
-                    id: buttonbg2
-                    source: "../../../img/icons/buttonoverlay.png"
-                    height: parent.height
-                    width: parent.width
-                }
 
                 Image {
                     id: buttonbg
-                    source: "../../../img/icons/Security.png"
+                    source: "../../../img/ui3/securitybig.png"
                     height: parent.height
                     width: parent.width
                 }
@@ -71,4 +62,4 @@ color:"transparent"
         }
     }
 }
-}
+

@@ -3,15 +3,23 @@ import QtQuick 1.0
 Rectangle {
     width: style.orbiterH
     height: style.orbiterW
-    color: "transparent"
+    color: "black"
 
     function changeStuff()
     {
-        flash.running = true
-        if (flash.complete)
-        {
+        lower.running =true
+    }
+
+    function changePic()
+    {
+        ssimg.scale=1
         ssimg.source = "image://listprovider/screensaver/"+securityvideo.timestamp
-        }
+        raise.running = true
+    }
+
+    function startZoom()
+    {
+
     }
 
     Image {
@@ -23,29 +31,31 @@ Rectangle {
         smooth: true
 
 
-    }
+        ParallelAnimation {
 
-    Connections{
-        target: screensaver
-        onImageChanged:changeStuff()
-
-    }
-
-    Rectangle{
-        id:flashbox
-        height: style.orbiterH
-        width: style.orbiterW
-        color: "black"
-
-        SequentialAnimation on color {
-
-            id:flash
-            running: true
+            id:raise
+            running: false
             loops: Animation.complete
-            // PauseAnimation { duration: 900 }
+            PropertyAnimation{ target:ssimg; property: "opacity"; to: "1"; duration: 2000}
+            PropertyAnimation{ target:ssimg; property: "scale"; to:1.25; duration: 5000}
 
-            PropertyAnimation{ target:flashbox; property: "color"; to: "black"; duration: 1000}
-            PropertyAnimation{ target:flashbox; property: "color"; to: "transparent"; duration: 2000}
         }
+
+        SequentialAnimation on opacity {
+
+            id:lower
+            running:false
+            loops: Animation.complete
+            PropertyAnimation{ target:ssimg; property: "opacity"; to: "0"; duration: 2000}
+            ScriptAction {script: changePic()}
+        }
+
+        Connections{
+            target: screensaver
+            onImageChanged:changeStuff()
+
+        }
+
+
     }
 }

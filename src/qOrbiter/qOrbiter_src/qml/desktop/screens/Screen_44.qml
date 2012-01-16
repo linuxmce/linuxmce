@@ -14,10 +14,11 @@ Rectangle {
         height: scaleY(75)
         width: scaleX(75)
         color: style.darkhighlight
-        radius: 10
+        radius: 5
         border.color: style.highlight1
         border.width: 2
         anchors.centerIn: parent
+        opacity: .85
 
         Flow {
             id: flow1
@@ -26,7 +27,7 @@ Rectangle {
             width: scaleX(60)
             spacing: 10
 
-            ButtonSq{
+            AdvancedButton{
                 id:regenorbiter
                 height: scaleY(style.buttonH)
                 width: scaleX(style.buttonW)
@@ -39,7 +40,7 @@ Rectangle {
                 }
             }
 
-            ButtonSq{
+            AdvancedButton{
                 id:regenorbiters
                 height: scaleY(style.buttonH)
                 width: scaleX(style.buttonW)
@@ -47,7 +48,7 @@ Rectangle {
                 radius: 5
             }
 
-            ButtonSq{
+            AdvancedButton{
                 id:reloadandregen
                 height: scaleY(style.buttonH)
                 width: scaleX(style.buttonW)
@@ -55,7 +56,7 @@ Rectangle {
                 radius: 5
             }
 
-            ButtonSq{
+            AdvancedButton{
                 id:quickreload
                 height: scaleY(style.buttonH)
                 width: scaleX(style.buttonW)
@@ -68,7 +69,7 @@ Rectangle {
                 }
             }
 
-            ButtonSq{
+            AdvancedButton{
                 id:networksettings
                 height: scaleY(style.buttonH)
                 width: scaleX(style.buttonW)
@@ -76,7 +77,7 @@ Rectangle {
                 radius: 5
             }
 
-            ButtonSq{
+            AdvancedButton{
                 id:avwizard
                 height: scaleY(style.buttonH)
                 width: scaleX(style.buttonW)
@@ -84,7 +85,7 @@ Rectangle {
                 radius: 5
             }
 
-            ButtonSq{
+            AdvancedButton{
                 id:pendingtasks
                 height: scaleY(style.buttonH)
                 width: scaleX(style.buttonW)
@@ -92,7 +93,7 @@ Rectangle {
                 radius: 5
             }
 
-            ButtonSq{
+            AdvancedButton{
                 id:remoteassistance
                 height: scaleY(style.buttonH)
                 width: scaleX(style.buttonW)
@@ -104,7 +105,7 @@ Rectangle {
                 }
             }
 
-            ButtonSq{
+            AdvancedButton{
                 id:addsoftware
                 height: scaleY(style.buttonH)
                 width: scaleX(style.buttonW)
@@ -112,7 +113,7 @@ Rectangle {
                 radius: 5
             }
 
-            ButtonSq{
+            AdvancedButton{
                 id:changeStyle
                 height: scaleY(style.buttonH)
                 width: scaleX(style.buttonW)
@@ -124,7 +125,7 @@ Rectangle {
                 }
             }
 
-            ButtonSq{
+            AdvancedButton{
                 id:gc100
                 height: scaleY(style.buttonH)
                 width: scaleX(style.buttonW)
@@ -132,7 +133,7 @@ Rectangle {
                 radius: 5
             }
 
-            ButtonSq{
+            AdvancedButton{
                 id:pingtest
                 height: scaleY(style.buttonH)
                 width: scaleX(style.buttonW)
@@ -140,7 +141,7 @@ Rectangle {
                 radius: 5
             }
 
-            ButtonSq{
+            AdvancedButton{
                 id:ircodes
                 height: scaleY(style.buttonH)
                 width: scaleX(style.buttonW)

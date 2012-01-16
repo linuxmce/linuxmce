@@ -12,30 +12,34 @@ Item
         width: style.orbiterW
         color: "transparent"
 
+        Image {
+            id: headerbg
+            source: "../../../img/ui3/header.png"
+            anchors.top: stage.top
+            height: scaleY(7)
+            width: scaleX(99)
+        }
 
-        Rectangle{
-            id:status
-            height: scaleY(2.5)
-            width: parent.width
-            color: connectedState == true ? style.darkhighlight : "red"
+        Text{
+            id:connectstatus
+            text: qsTr("Orbiter")+ iPK_Device + qsTr(" Is Connected")
+            color: "aliceblue"
+            font.letterSpacing: 2
+            anchors.left: parent.left
+            anchors.leftMargin: scaleX(5)
+            anchors.verticalCenter: headerbg.verticalCenter
+        }
 
-
-            Text{
-                id:connectstatus
-                text: qsTr("Orbiter")+ iPK_Device + qsTr(" Is Connected")
-               height: status.height; anchors.left: parent.left; anchors.leftMargin: scaleX(5)
-            }
-
-
-            Clock{id:screen1time; height: status.height; anchors.right: parent.right; anchors.rightMargin: scaleX(25) }
-
+        Clock{
+            id:screen1time
+            anchors.right: headerbg.right
+            anchors.rightMargin: scaleX(25)
+            anchors.verticalCenter: headerbg.verticalCenter
         }
 
         Column{
             id:maindisplay
-            spacing: 0
-            anchors.top:status.bottom
-            anchors.topMargin: 2
+            anchors.top:headerbg.bottom
             height: childrenRect.height
             width: scaleX(100)
             HomeLightingRow{id:lightRow }
