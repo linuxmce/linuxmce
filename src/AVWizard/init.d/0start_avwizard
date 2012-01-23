@@ -19,8 +19,61 @@ if [ "$1" == "status" ] ; then
 	exit 0
 fi
                                                                 
+StartService() {
+        ServiceDescription=$1
+        ServiceCmd=$2
+        ServiceBkg=$3
+
+        if [[ -x $(echo $ServiceCmd | cut -d ' ' -f1) ]] ;then
+                if [ -x /bin/plymouth ]; then
+                        /bin/plymouth update --status="$ServiceDescription ... "
+                fi
+                echo -n "$ServiceDescription ... "
+                if [[ "$ServiceBkg" == "&" ]] ;then
+                        $ServiceCmd 1>/dev/null 2>/dev/null &
+                else
+                        $ServiceCmd 1>/dev/null 2>/dev/null
+                fi
+                err=$?
+
+                if [[ "$err" == "0" ]] ;then
+                        echo "ok"
+                else
+                        echo "fail"
+                fi
+        fi
+
+        return $err
+}
+VerifyExitCode () {
+        local EXITCODE=$?
+        if [ "$EXITCODE" != "0" ] ; then
+        	echo "An error (Exit code $EXITCODE) occured during the last action"
+        	echo "$1"
+                exit 1
+        fi
+}
 . /usr/pluto/bin/Config_Ops.sh
-. /usr/pluto/bin/nvidia-install.sh
+#. /usr/pluto/bin/nvidia-install.sh
+
+## Install driver based on the type of video card used
+if lshwd | grep -qi 'VGA .* (nv)'; then
+        StartService "Installing nVidia driver - this may take a few minutes" ". /usr/pluto/bin/nvidia-install.sh"
+	VerifyExitCode "Install Pluto nVidia Driver"
+elif lshwd | grep -qi 'VGA .* (radeon)'; then
+        # Check to see if old Radeon card, if so, do not install new driver
+	#Installing fglrx on a card older than the Radeon 9500 will break your 3d acceleration with the free ATI driver 
+        if ! lshwd | grep -Pqi 'VGA .*Radeon ((9|X|ES)(1|2?)([0-9])(5|0)0|Xpress) (.*) \(radeon\)'; then
+		StartService "Installing ATI driver - this may take a few minutes" "apt-get -y -f install xorg-driver-fglrx"
+		VerifyExitCode "Install Radeon Driver"
+        fi
+elif lshwd | grep -qi 'VGA .* (intel)'; then
+	StartService "Installing Intel driver - this may take a few minutes" "apt-get -y -f install xserver-xorg-video-intel"
+	VerifyExitCode "Install intel Driver"
+elif lshwd | grep -qi 'VGA .* (i810)'; then
+	StartService "Installing Intel driver - this may take a few minutes" "apt-get -y -f install xserver-xorg-video-i810"
+	VerifyExitCode "Install i810 Driver"
+fi
 
 if [[ "$AVWizardOverride" == "1" || "$AVWizardDone" != "1" ]] ;then
 	# Make sure the currect NVidia driver is installed
