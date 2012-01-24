@@ -434,27 +434,15 @@ GetVideoDriver()
 	local VideoDriver
 #
 #<-mkr_B_via_b->
-	VideoDriver=$(lshwd | grep ' VGA ' | head -1 | sed 's/^.*(\([^()]*\)).*$/\1/')
-	# If we only detect a vesa based system, lets see if we can find out what else it might be
-	if [[ "$VideoDriver" == "vesa" ]]; then
-	{
-		DisplayNote=$(lshwd|grep "Display controller"| cut -f 2 -d \|)
-		# This should work beautifully for the ASUS eee Box
-		if [[ "$DisplayNote" == "Mobile Integrated Graphics Controller (vesa)" ]]; then
-		{
-			VideoDriver="intel"
-		}
-		fi
-	}		
-	fi
+	VideoDriver=$(lspci | grep ' VGA ' | cut -d' ' -f5)
 	case "$VideoDriver" in
-		nv) 
+		nVidia) 
 			if PackageIsInstalled nvidia-glx 2>/dev/null || PackageIsInstalled nvidia-glx-new 2>/dev/null || PackageIsInstalled nvidia-glx-71 2>/dev/null || PackageIsInstalled nvidia-glx-96 2>/dev/null || PackageIsInstalled nvidia-glx-173 2>/dev/null || PackageIsInstalled nvidia-glx-180 2>/dev/null || PackageIsInstalled nvidia-glx-190 2>/dev/null || PackageIsInstalled nvidia-glx-195 2>/dev/null || PackageIsInstalled nvidia-glx-260 2>/dev/null || PackageIsInstalled nvidia-glx-185 2>/dev/null ;then
 			       	VideoDriver="nvidia" 
 			fi
 		;;
-		radeon|ati) PackageIsInstalled xorg-driver-fglrx && VideoDriver="fglrx" ;;
-		i810) VideoDriver="intel" ;;
+		Radeon|ATI) PackageIsInstalled xorg-driver-fglrx && VideoDriver="fglrx" ;;
+		Intel) VideoDriver="intel" ;;
 		"") VideoDriver="vesa" ;; # just-in-case default
 	esac
 #<-mkr_B_via_e->
