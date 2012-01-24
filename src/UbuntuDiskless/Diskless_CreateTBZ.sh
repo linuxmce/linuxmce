@@ -220,12 +220,6 @@ mount none -t proc $TEMP_DIR/proc
 ## FIXME: maybe we need to make sources.list from scratch ?
 cp {,"$TEMP_DIR"}/etc/apt/sources.list
 
-#Setup the medibuntu repo
-cp -p /usr/bin/wget $TEMP_DIR/usr/bin/wget
-sleep 1
-LC_ALL=C chroot $TEMP_DIR /usr/bin/wget -q http://packages.medibuntu.org/medibuntu-key.gpg -O- | /usr/bin/apt-key add -
-VerifyExitCode "medibuntu apt key add"
-
 [[ -f /etc/apt/apt.conf.d/30pluto ]] && cp {,"$TEMP_DIR"}/etc/apt/apt.conf.d/30pluto
 [[ -f /etc/apt/preferences ]] && cp {,"$TEMP_DIR"}/etc/apt/preferences
 [[ -f /etc/apt/apt.conf ]] && cp {,"$TEMP_DIR"}/etc/apt/apt.conf
@@ -273,6 +267,11 @@ StatsMessage "PreSeeding package installation preferences"
 
 LC_ALL=C chroot $TEMP_DIR apt-get -y -qq update
 VerifyExitCode "apt update"
+
+#Setup the medibuntu repo
+LC_ALL=C chroot $TEMP_DIR apt-get -y --force-yes install medibuntu-keyring 
+VerifyExitCode "medibuntu apt add keyring"
+
 LC_ALL=C chroot $TEMP_DIR apt-get -y --force-yes install debconf-utils
 VerifyExitCode "install of debconf-utils"
 
