@@ -129,7 +129,11 @@ Command_Impl::Command_Impl( int DeviceID, string ServerAddress, bool bLocalMode,
 	m_bGeneric = false;
 	m_dwMessageInterceptorCounter=1;
 	m_pMessageBuffer=NULL;
-	m_pthread_queue_id=0;
+#ifdef WIN32
+        m_pthread_queue_id.p=0;
+#else
+        m_pthread_queue_id=0;
+#endif
 }
 
 Command_Impl::Command_Impl( Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, class Router *pRouter )
@@ -152,9 +156,12 @@ Command_Impl::Command_Impl( Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl
 	m_listMessageQueueMutex.Init( NULL, &m_listMessageQueueCond );
 	m_bGeneric = false;
 	m_dwMessageInterceptorCounter=0;
-	m_pMessageBuffer=NULL;
-	m_pthread_queue_id=0;
-
+        m_pMessageBuffer=NULL;
+#ifdef WIN32
+        m_pthread_queue_id.p=0;
+#else
+        m_pthread_queue_id=0;
+#endif
 	// Connect the primary device's event processor
 	// to the Data class so Data class changes can be sent.
 	m_pData->m_pEvent_Impl = m_pPrimaryDeviceCommand->m_pEvent;
@@ -210,11 +217,19 @@ void Command_Impl::PrepareToDelete()
 	}
 
 	LoggerWrapper::GetInstance()->Write( LV_STATUS, "Message queue thread quit" );
-	if( m_pthread_queue_id != 0 )
-	{
-		pthread_join(m_pthread_queue_id, NULL);
-		m_pthread_queue_id = 0;
-	}
+#ifdef WIN32
+        if( m_pthread_queue_id.p != 0 )
+        {
+                pthread_join(m_pthread_queue_id, NULL);
+                m_pthread_queue_id.p = 0;
+        }
+#else
+        if( m_pthread_queue_id != 0 )
+        {
+                pthread_join(m_pthread_queue_id, NULL);
+                m_pthread_queue_id = 0;
+        }
+#endif
 	LoggerWrapper::GetInstance()->Write( LV_STATUS, "Message queue thread joined" );
 
 	if( m_bKillSpawnedDevicesOnExit )
@@ -445,12 +460,21 @@ bool Command_Impl::Connect(int iPK_DeviceTemplate, std::string)
 	if( bResult )
 	{
 		m_bMessageQueueThreadRunning = true;
-		if(m_pthread_queue_id==0 && pthread_create( &m_pthread_queue_id, NULL, MessageQueueThread_DCECI, (void*)this) )
-		{
-			m_pthread_queue_id=0;
-			m_bMessageQueueThreadRunning=false;
-			LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Cannot create message processing queue" );
-		}
+#ifdef WIN32
+                if(m_pthread_queue_id.p==0 && pthread_create( &m_pthread_queue_id, NULL, MessageQueueThread_DCECI, (void*)this) )
+                {
+                        m_pthread_queue_id.p=0;
+                        m_bMessageQueueThreadRunning=false;
+                        LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Cannot create message processing queue" );
+                }
+#else
+                if(m_pthread_queue_id==0 && pthread_create( &m_pthread_queue_id, NULL, MessageQueueThread_DCECI, (void*)this) )
+                {
+                        m_pthread_queue_id=0;
+                        m_bMessageQueueThreadRunning=false;
+                        LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "Cannot create message processing queue" );
+                }
+#endif
 #ifdef LL_DEBUG
 		SendString("COMMENT COMMAND " + StringUtils::itos(DeviceID));
 		m_pEvent->SendString("COMMENT EVENT " + StringUtils::itos(DeviceID));
@@ -1004,12 +1028,22 @@ void Command_Impl::StartWatchDog( clock_t Timeout )
 
 void Command_Impl::StopWatchDog()
 {
+#ifdef WIN32
+    if ( m_pThread.p != 0 )
+    {
+        m_bStopWatchdog = true;
+        pthread_join( m_pThread, NULL );
+        m_pThread.p = 0;
+    }
+#else
     if ( m_pThread != 0 )
     {
         m_bStopWatchdog = true;
         pthread_join( m_pThread, NULL );
         m_pThread = 0;
     }
+#endif
+
 }
 
 int Command_Impl::RegisterMsgInterceptor(MessageInterceptorFn pMessageInterceptorFn,int PK_Device_From,int PK_Device_To,int PK_DeviceTemplate,int PK_DeviceCategory,int MessageType,int MessageID)

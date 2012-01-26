@@ -41,7 +41,11 @@ void* ServerLoggerThread(void* param)
 
 ServerLogger::ServerLogger(int DeviceID, int PK_DeviceTemplate, string server) :ClientSocket(DeviceID, server, string("Logger ") + StringUtils::itos(DeviceID))
 {
-	m_Thread = (pthread_t)0;
+#ifdef WIN32
+    m_Thread.p = 0;
+#else
+    m_Thread = 0;
+#endif
 	m_bConnected = false;
 	m_Name = "*DEV* " + StringUtils::itos(DeviceID);
 	Connect(PK_DeviceTemplate, "serv log" + m_Name);
@@ -53,8 +57,12 @@ ServerLogger::ServerLogger(int DeviceID, int PK_DeviceTemplate, string server) :
 ServerLogger::~ServerLogger()
 {
 	m_bQuit_set(true);
-	if (m_Thread)
-		pthread_join(m_Thread,NULL);
+#ifdef WIN32
+        if (m_Thread.p)
+#else
+        if (m_Thread)
+#endif
+            pthread_join(m_Thread,NULL);
 }
 
 

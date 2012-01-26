@@ -204,7 +204,11 @@ Socket::Socket(string Name,string sIPAddress, string sMacAddress) :
 	m_sName = Name;
 	m_bQuit = false;
 	m_bUsePingToKeepAlive = false;
-	m_pthread_pingloop_id = 0;
+#ifdef WIN32
+        m_pthread_pingloop_id.p = 0;
+#else
+        m_pthread_pingloop_id = 0;
+#endif
 	m_pSocket_PingFailure=NULL;
 	m_eSocketType = st_Unknown;
 	m_pcInSockBuffer = new char[INSOCKBUFFER_SIZE];

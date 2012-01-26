@@ -25,7 +25,7 @@ Rectangle {
 
 
 
-    Component.onCompleted:setNowPlayingTv()
+    //Component.onCompleted:setNowPlayingTv()
 
         //main 'now playing rect containing all the other items
 
