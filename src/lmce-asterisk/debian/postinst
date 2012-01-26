@@ -25,6 +25,13 @@ if [[ "$1" == configure ]]; then
 
 	# if asterisk is already installed, and db creation succeded make sure file rights are correct
 	if [[ -e /usr/sbin/asterisk ]] && [[ "$res" == "asterisk" ]]; then
+
+		#create asterisk group if it does not yet exist 
+		egrep -i "^asterisk" /etc/group >/dev/null 
+		if [[ $? -ne 0 ]]; then 
+			addgroup asterisk 
+		fi 
+			 
 		#create asterisk account if it does not yet exist
 		id -u asterisk >/dev/null 2>/dev/null
 		if [[ $? -ne 0 ]]; then
@@ -36,7 +43,7 @@ if [[ "$1" == configure ]]; then
 		
 		chmod -R ug+rw /etc/asterisk
 		chown -R www-data: /var/lib/asterisk/mohmp3
-		chown -R asterisk.asterisk {/usr/share,/var/{log,lib,spool},/etc}/asterisk
+		chown -R asterisk:asterisk {/usr/share,/var/{log,lib,spool},/etc}/asterisk
 
 		/usr/pluto/bin/db_create_dialplan.sh || :
 		/usr/pluto/bin/db_phone_config.sh || :

@@ -8,8 +8,9 @@ lmce-asterisk (0+0.3.1-2) unstable; urgency=low
   * Fixed some IAX provider trunk bug's
   * Fixed a bug if SIP provider username <> phonenumber
   * Fixed a bug for incoming calls when username <> phonenumber
+  * Fixes #1396, adding asterisk group if it does not yet exist
 
- -- Serge Wagener <serge@linuxmce.org>  Sun, 08 Jan 2012 21:10:29 +0100
+ -- Serge Wagener <serge@linuxmce.org>  Thu, 26 Jan 2012 17:20:23 +0100
 
 lmce-asterisk (0+0.3.1-1) unstable; urgency=low
 
