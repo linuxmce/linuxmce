@@ -711,7 +711,7 @@ void VDR::ParseCurrentChannel(string sChannel)
 
 	//EPGSTUFF XXX
 	string sVDRResponse="";
-	string sCommand="PLUG STATUS STATUS";
+	string sCommand="PLUG status status";
 	string cLIVETV="LIVETV";
 	SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
 	if ( (sVDRResponse.empty() == true) || ( sVDRResponse == cLIVETV ) ) {
@@ -719,9 +719,12 @@ void VDR::ParseCurrentChannel(string sChannel)
 		string sCommand="LSTE " + StringUtils::itos(m_iChannelNumber) + " now";
 		SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
 	} else 	{
-		string sVDRResponse="";
-		string sCommand="PLUG STATUS RECORDING";
-		SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
+		string sTemp = "";
+		sTemp = sVDRResponse.substr(9);
+		sVDRResponse = sTemp;	
+		// string sVDRResponse="";
+		// string sCommand="LSTR " + sVDRRespons.substr();
+		//SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
 	}	                
 
 	
