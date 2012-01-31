@@ -2337,6 +2337,9 @@ int ZWApi::ZWApi::getDeviceTemplate(int basic, int generic, int specific, char *
 					// DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "smoke detector found");
 				break;
 			}
+		case GENERIC_TYPE_AV_CONTROL_POINT:
+			devicetemplate = DEVICETEMPLATE_Generic_Tuner_CONST;
+			break;
 	}
 	return devicetemplate;
 
@@ -2651,7 +2654,12 @@ bool ZWApi::ZWApi::zwThermostatSetpointSet(int node_id, int type, int value) {
 	mybuf[6] = 1; // 3 bit precision, 2 bit scale (0 = C,1=F), 3 bit size
 	mybuf[7] = value; // TODO: proper negative values..
         mybuf[8] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
-        sendFunction( mybuf , 9, REQUEST, 1);
+	if (zwIsSleepingNode(node_id)) {
+		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Postpone thermostat setpoint set - device is not always listening");
+		sendFunctionSleeping( node_id, mybuf , 9, REQUEST, 1);
+	} else {
+		sendFunction( mybuf , 9, REQUEST, 1);
+	}
 
 }
 void ZWApi::ZWApi::zwThermostatSetpointGet(int node_id,int type) {
@@ -2667,6 +2675,26 @@ void ZWApi::ZWApi::zwThermostatSetpointGet(int node_id,int type) {
         sendFunction( mybuf , 7, REQUEST, 1);
 
 }
+
+void ZWApi::ZWApi::zwAVControlSet(int node_id, int sequence, int command) {
+	char mybuf[1024];
+
+	mybuf[0] = FUNC_ID_ZW_SEND_DATA;
+	mybuf[1] = node_id;
+	mybuf[2] = 8; // length
+	mybuf[3] = COMMAND_CLASS_SIMPLE_AV_CONTROL;
+	mybuf[4] = SIMPLE_AV_CONTROL_SET;
+	mybuf[5] = sequence & 0xff; // needs to be increased so that the device can detect duplicates
+	mybuf[6] = 0; // 0 = key down, 1 = key up, 2 = keep alive
+	mybuf[7] = 0; // item id, not used in the simple class
+	mybuf[8] = 0; // item id lsb
+	mybuf[9] = (command & 0xff00) >> 8; // command 1 msb
+	mybuf[10] = command & 0xff; // command 1 lsb
+//	mybuf[xxx] = command n ...
+	mybuf[11] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+        sendFunction( mybuf , 12, REQUEST, 1);
+}
+
 
 void ZWApi::ZWApi::dropSendQueueJob() {
 	// pthread_mutex_lock (&mutexSendQueue);

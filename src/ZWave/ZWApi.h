@@ -292,7 +292,18 @@
 #define COMMAND_CLASS_SECURITY				0x98
 #define COMMAND_CLASS_SENSOR_CONFIGURATION		0x9E
 #define COMMAND_CLASS_SILENCE_ALARM			0x9d
+
 #define COMMAND_CLASS_SIMPLE_AV_CONTROL			0x94
+#define SIMPLE_AV_CONTROL_VERSION			0x01
+#define SIMPLE_AV_CONTROL_GET				0x02
+#define SIMPLE_AV_CONTROL_REPORT			0x3
+#define SIMPLE_AV_CONTROL_SET				0x01
+#define SIMPLE_AV_CONTROL_SUPPORTED_GET			0x04
+#define SIMPLE_AV_CONTROL_SUPPORTED_REPORT		0x05
+#define SIMPLE_AV_CONTROL_SET_PROPERTIES1_KEY_ATTRIBUTES_MASK 0x07
+#define SIMPLE_AV_CONTROL_SET_PROPERTIES1_RESERVED_MASK 0xF8
+#define SIMPLE_AV_CONTROL_SET_PROPERTIES1_RESERVED_SHIFT 0x03
+
 #define COMMAND_CLASS_SWITCH_BINARY			0x25
 #define COMMAND_CLASS_SWITCH_TOGGLE_BINARY		0x28
 #define COMMAND_CLASS_SWITCH_TOGGLE_MULTILEVEL		0x29
@@ -594,6 +605,8 @@ namespace ZWApi {
 
 	void zwMultiInstanceGet(int node_id, int command_class);
 	void zwRequestMultilevelSensorReportInstance(int node_id,int instance);
+
+	void zwAVControlSet(int node_id, int sequence, int command);
 	
 	void zwSoftReset();
 

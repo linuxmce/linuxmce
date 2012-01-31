@@ -19,6 +19,8 @@
 using namespace std;
 using namespace DCE;
 
+int sequence=1;
+
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 #include "PlutoUtils/LinuxSerialUSB.h"
@@ -160,6 +162,10 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 				}
 				break;
 				;;	
+			case COMMAND_Play_Media_CONST:
+				myZWApi->zwAVControlSet(node_id,sequence,0x13); // play
+				break;
+				;;
 			case COMMAND_Set_HeatCool_CONST:
 				heat = pMessage->m_mapParameters[COMMANDPARAMETER_OnOff_CONST];
 				char mode_tmp = 'A';
