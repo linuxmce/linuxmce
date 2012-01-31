@@ -7,6 +7,8 @@
 #include "ServerSocket.h"
 #include "SocketException.h"
 #include "TLV.h"
+#include <stdio.h>
+#include <unistd.h>
 
 #define DEBUG
 
