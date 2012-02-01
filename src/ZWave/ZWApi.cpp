@@ -3032,6 +3032,7 @@ void ZWApi::ZWApi::parseManufacturerSpecific(int nodeid, int manuf, int type, in
 						case 0x2: sProduct = "AS2-RF Thermostat Transmitter";
 							break;
 						case 0x3: sProduct = "HRT4-ZW Thermostat";
+							zwWakeupSet(nodeid,10,false);
 							zwConfigurationSet(nodeid,1,128,1); // enable temperature sensor
 							zwConfigurationSet(nodeid,2,0,1); // enable celsius readings
 							zwConfigurationSet(nodeid,3,5,1); // enable 0.5degC stepping
