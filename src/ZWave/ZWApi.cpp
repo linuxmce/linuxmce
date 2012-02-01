@@ -1139,6 +1139,10 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 						}
 						break;
 						;;
+					case COMMAND_CLASS_THERMOSTAT_SETPOINT:
+						if ((unsigned char)frame[6] == THERMOSTAT_SETPOINT_GET) {
+							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_THERMOSTAT_SETPOINT:THERMOSTAT_SETPOINT_GET received from node %d",(unsigned char)frame[3]);
+						}
 					case COMMAND_CLASS_CLOCK:
 						if ((unsigned char)frame[6] == CLOCK_GET) {
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_CLOCK:CLOCK_GET received from node %d",(unsigned char)frame[3]);
