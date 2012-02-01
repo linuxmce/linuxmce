@@ -1139,6 +1139,17 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 						}
 						break;
 						;;
+					case COMMAND_CLASS_CLOCK:
+						if ((unsigned char)frame[6] == CLOCK_GET) {
+							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_CLOCK:CLOCK_GET received from node %d",(unsigned char)frame[3]);
+							zwSetClock((unsigned char)frame[3]);
+						} else if ((unsigned char)frame[6] == CLOCK_REPORT) {
+							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_CLOCK:CLOCK_REPORT received from node %d",(unsigned char)frame[3]);
+						} else if ((unsigned char)frame[6] == CLOCK_SET) {
+							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_CLOCK:CLOCK_SET received from node %d",(unsigned char)frame[3]);
+						}
+						break;
+						;;
 					case COMMAND_CLASS_THERMOSTAT_MODE:
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_THERMOSTAT_MODE - ");
 						if (((unsigned char)frame[6] == THERMOSTAT_MODE_REPORT)||((unsigned char)frame[6] == THERMOSTAT_MODE_SET)) {
@@ -2801,6 +2812,26 @@ bool ZWApi::ZWApi::zwSetPromiscMode(bool promisc){
 	mybuf[1] = promisc;
 	sendFunction( mybuf , 2, REQUEST, 0);
 	return true;
+}
+
+void ZWApi::ZWApi::zwSetClock(int node_id) {
+	char mybuf[1024];
+	time_t timestamp;
+	struct tm *timestruct;
+
+	timestamp = time(NULL);
+	timestruct = localtime(&timestamp);
+
+        mybuf[0] = FUNC_ID_ZW_SEND_DATA;
+        mybuf[1] = node_id;
+        mybuf[2] = 5; // length of command
+	mybuf[3] = COMMAND_CLASS_CLOCK;
+//	mybuf[4] = CLOCK_SET;
+	mybuf[4]=CLOCK_REPORT;
+	mybuf[5]=((timestruct->tm_wday == 0 ? 7 : timestruct->tm_wday) << 5 ) | timestruct->tm_hour;
+	mybuf[6]=timestruct->tm_min == 60 ? 0 : timestruct->tm_min;
+        mybuf[7] = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_AUTO_ROUTE;
+        sendFunction( mybuf , 8, REQUEST, 1);
 }
 
 void ZWApi::ZWApi::zwGetRoutingInfo(int node_id){

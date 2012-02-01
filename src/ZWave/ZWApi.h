@@ -568,6 +568,8 @@ namespace ZWApi {
 	// battery functions
 	void zwGetBatteryLevel(int node_id);
 
+	// clock functions
+	void zwSetClock(int node_id);
 
 	// test functions
 	void zwReadMemory(int offset, int len);
