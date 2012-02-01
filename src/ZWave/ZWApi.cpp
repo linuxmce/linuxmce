@@ -378,6 +378,14 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 					if (((unsigned char)frame[3]) & (0x01 << 7)) {
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"optional functionality");
 					}
+					if (((unsigned char)frame[3]) & (0x01 << 6)) {
+						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"1000ms frequent listening slave");
+						newNode->sleepingDevice = false;
+					}
+					if (((unsigned char)frame[3]) & (0x01 << 5)) {
+						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"250ms frequent listening slave");
+						newNode->sleepingDevice = false;
+					}
 					switch (frame[5]) {
 						case BASIC_TYPE_CONTROLLER:
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"BASIC TYPE: Controller");

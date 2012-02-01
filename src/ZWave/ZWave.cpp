@@ -163,7 +163,7 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 				break;
 				;;	
 			case COMMAND_Play_Media_CONST:
-				myZWApi->zwAVControlSet(node_id,sequence,0x13); // play
+				myZWApi->zwAVControlSet(node_id,sequence,3); // vol up
 				break;
 				;;
 			case COMMAND_Set_HeatCool_CONST:
