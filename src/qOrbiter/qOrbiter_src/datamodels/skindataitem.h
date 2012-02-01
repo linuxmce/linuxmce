@@ -6,6 +6,7 @@
 #include <QImage>
 #include <QUrl>
 #include <QDebug>
+#include <QDeclarativeView>
 
 class SkinDataItem: public QObject
 {
@@ -28,7 +29,7 @@ public:
 public:
 
     SkinDataItem(QObject *parent = 0) {}
-    explicit SkinDataItem( const QUrl &url, const QString &name,  const QString &creator, const  QString &description, const QString &version, const  QString &variant , QImage img, QString &path, QString &mainc, QString &accentc, QObject *parent=0);
+    explicit SkinDataItem( const QUrl &url, const QString &name,  const QString &creator, const  QString &description, const QString &version, const  QString &variant , const QImage img, const QString &path, const QString &mainc, const QString &accentc, QObject *parent=0);
 
     QVariant data(int role) const;
     QHash<int, QByteArray> roleNames() const;
@@ -36,10 +37,7 @@ public:
 
     inline QUrl baseUrl() const { return m_url; }
     inline QUrl entryUrl() {
-        QUrl entry = QUrl(m_url);
-        entry.setPath(entry.toString() + "/main.qml");
-
-        return entry;
+        return QUrl(m_url.toString() + "/main.qml");
     }
     inline QUrl styleUrl() const {
         QUrl style = QUrl(m_url.toString());
@@ -56,7 +54,7 @@ public:
     inline QString path() const {return m_path;}
     inline QString maincolor() const {return m_maincolor;}
     inline QString accentcolor() const {return m_accentcolor;}
-
+    inline QObject* styleView() const {return m_styleView;}
 
 private:
     QUrl m_url;
@@ -69,6 +67,7 @@ private:
     QString m_maincolor;
     QString m_accentcolor;
     QImage m_image;
+    QObject *m_styleView;
 
 signals:
     void dataChanged();

@@ -1,4 +1,5 @@
 #include "skindatamodel.h"
+#include "qorbitermanager.h"
 #include <QDebug>
 #include <QDeclarativeComponent>
 #include <QDeclarativeEngine>
@@ -7,10 +8,12 @@
 SkinDataModel::SkinDataModel(QUrl &baseUrl, SkinDataItem* prototype, qorbiterManager *uiRef, QObject* parent): QAbstractListModel(parent), m_prototype(prototype)
 {
     m_baseUrl = baseUrl ;
-
+    qDebug() << "Setting skin source: " << m_baseUrl;
     setRoleNames(m_prototype->roleNames());
     qRegisterMetaType<QModelIndex>("QModelIndex");
     ui_reference = uiRef;
+    SkinLoader* load = new SkinLoader(m_baseUrl, ui_reference, this);
+    m_skin_loader = load;
 }
 
 
@@ -123,7 +126,9 @@ SkinDataItem * SkinDataModel::takeRow(int row)
 
 void SkinDataModel::addSkin(QString name) {
 
-    QImage skinPic(":/icons/Skin-Data.png");
+    /*QImage skinPic(":/icons/Skin-Data.png");
+
+    // Init the skin loader at this URL and then load the SkinDataItems from that SkinLoader
 
 
     qDebug() << "Loading Skin at " + m_baseUrl.toString() + "/" + name;
@@ -132,10 +137,24 @@ void SkinDataModel::addSkin(QString name) {
    QUrl style;
    style.setUrl(m_baseUrl.toString() + "/" + name + "/Style.qml");
 
-    QObject *styleObject = new QObject();
+   if (!style.isValid()) {
+       qDebug() << "Invalid URL!";
+   }*/
+    qDebug() << "Loading skin : " << name;
+    m_skin_loader->loadSkin(name);
+
+    /*QObject *styleObject = new QObject();
     QDeclarativeComponent skinData(ui_reference->qorbiterUIwin->engine(), style);
 
-    if (!skinData.isError())
+    if (skinData.isLoading()) {
+         QObject::connect(&skinData, SIGNAL(statusChanged(QDeclarativeComponent::Status)),
+                          this, SLOT(continueLoading()));
+    } else {
+        qDebug() << "WOOT";
+         //continueLoading(&skinData);
+    }*/
+
+    /*if (!skinData.isError())
     {
         //wait for it to load up
         while (!skinData.isReady())
@@ -147,7 +166,7 @@ void SkinDataModel::addSkin(QString name) {
                 break;
             }
 
-        qDebug() << style;
+            //qDebug() << skinData.errors();
         }
 
         styleObject = skinData.create(ui_reference->qorbiterUIwin->rootContext());
@@ -156,10 +175,10 @@ void SkinDataModel::addSkin(QString name) {
     {            // this dir does not contain a Style.qml; ignore it
         qDebug() << skinData.errors();
         return;
-    }
+    }*/
 
     //Importing the document data for the skins themselves
-    QString s_title = styleObject->property("skinname").toString();
+    /*QString s_title = styleObject->property("skinname").toString();
     QString s_creator = styleObject->property("skincreator").toString();
     QString s_description = styleObject->property("skindescription").toString();
     QString s_version = styleObject->property("skinversion").toString();
@@ -168,16 +187,14 @@ void SkinDataModel::addSkin(QString name) {
     QString s_mainc = styleObject->property("maincolor").toString();
     QString s_accentc = styleObject->property("accentcolor").toString();
     // qDebug() << "Adding skin to list" << s_title;
-    appendRow(new SkinDataItem(skinBase, s_title, s_creator, s_description, s_version, s_target, skinPic, s_path, s_mainc, s_accentc, this));
+    appendRow(new SkinDataItem(skinBase, s_title, s_creator, s_description, s_version, s_target, skinPic, s_path, s_mainc, s_accentc, this));*/
 }
-
 
 void SkinDataModel::setActiveSkin(QString name)
 {
     qDebug() << "Loading Skin at " + m_baseUrl.toString() + "/" + name;
 
     QString skinURL = find(name)->path();
-
 
     QDeclarativeComponent skinData(ui_reference->qorbiterUIwin->engine(), skinURL);
     QObject *styleObject = skinData.create(ui_reference->qorbiterUIwin->rootContext());

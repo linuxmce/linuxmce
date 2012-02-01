@@ -1,6 +1,7 @@
 #ifndef SKINDATAMODEL_H
 #define SKINDATAMODEL_H
 
+#include "skinloader.h"
 #include <QAbstractListModel>
 #include <datamodels/skindataitem.h>
 #include <QList>
@@ -9,6 +10,7 @@
 #include <QUrl>
 #include <qorbitermanager.h>
 
+class SkinLoader;
 class SkinDataItem;
 class qorbiterManager;
 
@@ -42,11 +44,11 @@ public slots:
     void handleItemChange();
 
   private:
+    SkinLoader *m_skin_loader;
     QUrl m_baseUrl;
     qorbiterManager  *ui_reference;
     SkinDataItem* m_prototype;
     QList<SkinDataItem*> m_list;
-
 };
 
 #endif // SKINDATAMODEL_H

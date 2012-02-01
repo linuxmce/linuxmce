@@ -1,8 +1,9 @@
 #include "skindataitem.h"
 #include <QDebug>
 
-SkinDataItem:: SkinDataItem( const QUrl &url, const QString &name,  const QString &creator, const  QString &description, const QString &version, const  QString &variant , QImage img, QString &path, QString &mainc, QString &accentc, QObject *parent):
-    m_url(url), m_name(name), m_creator(creator), m_description(description), m_version(version), m_variant(variant), m_image(img), m_path(path), m_maincolor(mainc), m_accentcolor(accentc)
+SkinDataItem:: SkinDataItem( const QUrl &url, const QString &name,  const QString &creator, const  QString &description, const QString &version, const  QString &variant , const QImage img, const QString &path, const QString &mainc, const QString &accentc, QObject *parent):
+    m_url(url), m_name(name), m_creator(creator), m_description(description), m_version(version), m_variant(variant), m_image(img), m_path(path), m_maincolor(mainc), m_accentcolor(accentc),
+    m_styleView(parent)
 {
 
 }

@@ -60,7 +60,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse); //file grids current media type
     item = qorbiterUIwin->rootObject();
 
-    // QObject::connect(this,SIGNAL(splashReady()), this,SLOT(startSetup()));
+    QObject::connect(this,SIGNAL(splashReady()), this,SLOT(startSetup()));
 
 #ifdef for_desktop
     buildType = "/qml/desktop";
@@ -95,9 +95,12 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
     QString localDir = qmlPath.append(buildType);
 
-    loadSkins(QUrl(localDir));
-    //loadSkins(QUrl("http://192.168.80.1/lmce-admin/skins/desktop"));
+    //loadSkins(QUrl(localDir));
+    loadSkins(QUrl("http://192.168.81.1/lmce-admin/skins"));
     //set it as a context property so the qml can read it. if we need to changed it,we just reset the context property
+
+    qDebug() << "Skins Loaded, starting data load";
+
 
     initializeGridModel();  //begins setup of media grid listmodel and its properties
     initializeSortString(); //associated logic for navigating media grids
@@ -169,15 +172,28 @@ void qorbiterManager::gotoQScreen(QString s)
 {
     //send the qmlview a request to go to a screen, needs error handling
     //This allows it to execute some transition or other if it wants to
+    qDebug() << "Starting screen switch";
     QVariant screenname= s;
     QObject * item = qorbiterUIwin->rootObject();
-    QMetaObject::invokeMethod(item, "screenchange",  Q_ARG(QVariant, screenname));
+
+    qDebug() << "About to call screenchange()";
+    if (QMetaObject::invokeMethod(item, "screenchange",  Q_ARG(QVariant, screenname))) {
+        qDebug() << "Done call to screenchange()";
+    } else {
+        qDebug() << "screenchange() FAILED";
+    }
     currentScreen = s;
 }
 
 //this block sets up the connection to linuxmce
 bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode)
 {
+    //temporary droid hack. add your device no here till fix is in//---------------------------------------
+#ifdef ANDROID
+    sRouterIP = "192.168.81.1";
+    iPK_Device = long(84);
+    PK_Device = int(84);
+#endif
 
     pqOrbiter = new DCE::qOrbiter(iPK_Device, sRouterIP, true,false);
     setDceResponse("Made orbiter");
@@ -556,7 +572,7 @@ void qorbiterManager::getConf(int pPK_Device)
     QObject::connect(this,SIGNAL(liveTVrequest()), simpleEPGmodel,SLOT(populate()), Qt::QueuedConnection);
     //        qDebug () << "Orbiter Registered, starting";
 
-    //qDebug() << "About to set room..";
+    qDebug() << "About to set room..";
 
     //------------not sure if neccesary since it knows where we are.
     setActiveRoom(iFK_Room, iea_area);
@@ -650,37 +666,36 @@ void qorbiterManager::swapSkins(QString incSkin)
     QApplication::processEvents(QEventLoop::AllEvents);
      qDebug() << "Initiating skin switch : " + incSkin;
     setDceResponse("Setting Skin to:" + incSkin);
+
     //get the skin URL from the skins model
     SkinDataItem* skin = tskinModel->find(incSkin);
 
-    //load the skin style
-    QDeclarativeComponent tskinData(qorbiterUIwin->engine(), skin->styleUrl());
-
-
-    //wait for it to load up
-    while (!tskinData.isReady())
-    {
-        if(tskinData.isError())
-        {
-            qDebug() << "error! " <<  tskinData.errors();
-            break;
-        }
-    }
-    //turning it into a qObject - this part actually loads it - the error should connect to a slot and not an exit
-    QObject *styleObject = tskinData.create(qorbiterUIwin->rootContext());
-
+    qDebug() << "Got it from the model : " + skin->baseUrl().toString();
 
     //load the actual skin entry point
-
     qDebug() << "Skin switch url:" << skin->entryUrl();
     currentSkin = incSkin;
-    qorbiterUIwin->engine()->rootContext()->setContextProperty("style", styleObject);
-    qorbiterUIwin->setSource(skin->entryUrl());
-    writeConfig();
-    m_bStartingUp = false;
-    startOrbiter();
-    //emit orbiterReady();
 
+    QObject::connect(qorbiterUIwin, SIGNAL(statusChanged(QDeclarativeView::Status)),
+                          this, SLOT(skinLoaded(QDeclarativeView::Status)));
+
+    qorbiterUIwin->engine()->rootContext()->setContextProperty("style", skin->styleView());
+    qorbiterUIwin->setSource(skin->entryUrl());
+}
+
+void qorbiterManager::skinLoaded(QDeclarativeView::Status status) {
+    qDebug() << "Skin appears to have finished loading ..";
+
+    if (status == QDeclarativeView::Error) {
+        qWarning() << "Skin loading has FAILED";
+        qWarning() << qorbiterUIwin->errors();
+    } else {
+        qDebug() << "Correctly loaded skin, continuing";
+        writeConfig();
+        m_bStartingUp = false;
+        startOrbiter();
+        //emit orbiterReady();
+    }
 }
 
 
@@ -880,8 +895,8 @@ void qorbiterManager::loadSkins(QUrl base)
     tskinModel->addSkin("default");
 #else
     tskinModel->addSkin("default");
-    tskinModel->addSkin("aeon");
-    tskinModel->addSkin("crystalshades");
+    //tskinModel->addSkin("aeon");
+    //tskinModel->addSkin("crystalshades");
 #endif
 }
 
@@ -895,7 +910,7 @@ void qorbiterManager::quickReload()
 
 void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
 {
-    //qDebug() << "Triggering connection to LMCE Device ID [" << incdeviceid << "] port Router Address [" << incrouterip << "]" ;
+    qDebug() << "Triggering connection to LMCE Device ID [" << incdeviceid << "] port Router Address [" << incrouterip << "]" ;
     qs_routerip = incrouterip;
     iPK_Device = incdeviceid.toInt();
     //writeConfig();
@@ -1524,14 +1539,18 @@ void qorbiterManager::startOrbiter()
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeViewToRootObject);
     QApplication::processEvents(QEventLoop::AllEvents);
 
+    qDebug() << "Going to screen 1 now";
+
     gotoQScreen("Screen_1.qml");
 
-    //setDceResponse("Showing main orbiter window");
+    setDceResponse("Showing main orbiter window");
 
 }
 
 void qorbiterManager::processError(QString msg)
 {
+    qDebug() << "An error occurred " + msg;
+
     gotoQScreen("Splash.qml");
     setDceResponse("Process Error Slot:" + msg) ;
 }
