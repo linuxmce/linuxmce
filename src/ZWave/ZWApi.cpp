@@ -1139,6 +1139,48 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 						}
 						break;
 						;;
+					case COMMAND_CLASS_THERMOSTAT_MODE:
+						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_THERMOSTAT_MODE - ");
+						if (((unsigned char)frame[6] == THERMOSTAT_MODE_REPORT)||((unsigned char)frame[6] == THERMOSTAT_MODE_SET)) {
+							switch((unsigned char)frame[7]) {
+								case 0:
+									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Thermostat node %d Mode Off",(unsigned char)frame[3]);
+									break;
+								case 1:
+									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Thermostat node %d Mode Heat",(unsigned char)frame[3]);
+									break;
+								case 2:
+									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Thermostat node %d Mode Cool",(unsigned char)frame[3]);
+									break;
+								case 3:
+									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Thermostat node %d Mode Auto",(unsigned char)frame[3]);
+									break;
+								case 4:
+									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Thermostat node %d Mode Aux/Emergency Heat",(unsigned char)frame[3]);
+									break;
+								case 5:
+									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Thermostat node %d Mode Resume",(unsigned char)frame[3]);
+									break;
+								case 6:
+									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Thermostat node %d Mode Fan Only",(unsigned char)frame[3]);
+									break;
+								case 7:
+									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Thermostat node %d Mode Furnace",(unsigned char)frame[3]);
+									break;
+								case 8:
+									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Thermostat node %d Mode Dry Air",(unsigned char)frame[3]);
+									break;
+								case 9:
+									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Thermostat node %d Mode Moist Air",(unsigned char)frame[3]);
+									break;
+								case 10:
+									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Thermostat node %d Mode Auto Changeover",(unsigned char)frame[3]);
+									break;
+
+							}
+						}
+						break;
+						;;
 					case COMMAND_CLASS_MULTI_CMD:
 						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_MULTI_CMD - ");
 						if ((unsigned char)frame[6] == MULTI_CMD_ENCAP) {
@@ -2915,6 +2957,15 @@ void ZWApi::ZWApi::parseManufacturerSpecific(int nodeid, int manuf, int type, in
 						case 0x1: sProduct = "ASR-RF Thermostat Receiver";
 							break;
 						case 0x2: sProduct = "AS2-RF Thermostat Transmitter";
+							break;
+						case 0x3: sProduct = "HRT4-ZW Thermostat";
+							zwConfigurationSet(nodeid,1,1,128); // enable temperature sensor
+							zwConfigurationSet(nodeid,2,1,0); // enable celsius readings
+							zwConfigurationSet(nodeid,3,1,5); // enable 0.5degC stepping
+							zwAssociationSet(nodeid, 1, ournodeid);  // receive thermostat mode set
+							zwAssociationSet(nodeid, 3, ournodeid);  // receive battery reports
+							zwAssociationSet(nodeid, 4, ournodeid);  // receive setpoint reports
+							zwAssociationSet(nodeid, 5, ournodeid);  // receive temperature reports
 							break;
 					}
 					break;
