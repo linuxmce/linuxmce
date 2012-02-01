@@ -1143,6 +1143,44 @@ void *ZWApi::ZWApi::decodeFrame(char *frame, size_t length) {
 						if ((unsigned char)frame[6] == THERMOSTAT_SETPOINT_GET) {
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_THERMOSTAT_SETPOINT:THERMOSTAT_SETPOINT_GET received from node %d",(unsigned char)frame[3]);
 						}
+						if ((unsigned char)frame[6] == THERMOSTAT_SETPOINT_REPORT) {
+							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_THERMOSTAT_SETPOINT:THERMOSTAT_SETPOINT_REPORT received from node %d",(unsigned char)frame[3]);
+							// 22 = 001 00 010A
+							string scale;
+							float ftemp;
+							int temp;
+							int precision = ( (unsigned char)frame[8] & THERMOSTAT_SETPOINT_REPORT_PRECISION_MASK ) >> THERMOSTAT_SETPOINT_REPORT_PRECISION_SHIFT;
+							if ((((unsigned char)frame[8]) & THERMOSTAT_SETPOINT_REPORT_SIZE_MASK) == 2) {
+								temp = ((unsigned char)frame[9] << 8) + (unsigned char)frame[10];
+							} else {	
+								temp = (unsigned char)frame[9];
+							}
+							if (precision > 0) {
+								ftemp = temp / pow(10,precision);
+							}  else {
+								ftemp = temp;
+							}
+							if (((((unsigned char)frame[8]) & THERMOSTAT_SETPOINT_REPORT_SCALE_MASK) >> THERMOSTAT_SETPOINT_REPORT_SCALE_SHIFT) == 0) {
+								// celcius
+								scale = "degC";
+							} else {
+								// fahrenheit
+								scale = "F";
+							}
+							switch (((unsigned char)frame[7]) & THERMOSTAT_SETPOINT_REPORT_SETPOINT_TYPE_MASK) {
+								case 1:
+									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"heating, %.1f%s",ftemp,scale.c_str());
+									break;
+								case 2:
+									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"cooling, %.1f%s",ftemp,scale.c_str());
+									break;
+								case 10:
+									DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"auto changeover, %.1f%c",ftemp,scale.c_str());
+									break;
+							}
+
+							
+						}
 					case COMMAND_CLASS_CLOCK:
 						if ((unsigned char)frame[6] == CLOCK_GET) {
 							DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"COMMAND_CLASS_CLOCK:CLOCK_GET received from node %d",(unsigned char)frame[3]);
