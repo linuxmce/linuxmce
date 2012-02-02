@@ -720,7 +720,7 @@ void VDR::ParseCurrentChannel(string sChannel)
 		SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
 	} else 	{
 		string sTemp = "";
-		sTemp = sVDRResponse.substr(9);
+		sTemp = sVDRResponse.substr(7);
 		sVDRResponse = sTemp;	
 		// string sVDRResponse="";
 		// string sCommand="LSTR " + sVDRRespons.substr();
