@@ -1,5 +1,5 @@
 import QtQuick 1.0
-import "http://192.168.80.1/components/"
+
 //import "js/ComponentLoader.js" as MyJs
 
  Item {

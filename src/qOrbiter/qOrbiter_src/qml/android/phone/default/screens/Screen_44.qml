@@ -1,6 +1,6 @@
 import QtQuick 1.0
 import "../components"
-import "../js/ComponentLoader.js" as MyJs
+
 
 Rectangle {
     height: style.orbiterH

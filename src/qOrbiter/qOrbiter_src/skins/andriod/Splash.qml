@@ -7,15 +7,15 @@ import QtQuick 1.0
 
 Rectangle {
     id: rectangle1
-    width: 600
-    height: 900
+    width: 240
+    height: 480
     color: "slategrey"
     signal setupStart(string x, string y)
     signal splashLoaded()
 
     function screenchange(screenname )
     {
-       pageLoader.source = "qrc:/desktop/"+screenname
+       pageLoader.source = "qrc:/android/"+screenname
        if (pageLoader.status == 1)
         {
             //manager.setDceResponse("Command to change to:" + screenname+ " was successfull")

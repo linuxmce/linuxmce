@@ -37,10 +37,10 @@ orbiterWindow::orbiterWindow(QObject *parent) :
     qrcPath = "qrc:osx/Splash.qml";
 #elif defined (ANDROID)
     buildType = "/qml/android";
-    qrcPath = "qrc:android-phone/Splash.qml";
+    qrcPath = "qrc:android/Splash.qml";
 #elif defined (for_droid)
     buildType = "/qml/android/phone";
-    qrcPath = "qrc:android-tablet/Splash.qml";
+    qrcPath = "qrc:android/Splash.qml";
 #else
     buildType = "/qml/desktop";
     qrcPath = "qrc:desktop/Splash.qml";
@@ -56,6 +56,8 @@ orbiterWindow::orbiterWindow(QObject *parent) :
     mainView.showFullScreen();
 #elif defined(for_desktop)
     mainView.showMaximized();
+#elif defined(ANDROID)
+    mainView.showFullScreen();
 #else
     mainView.show();
 #endif

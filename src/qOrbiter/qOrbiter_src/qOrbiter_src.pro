@@ -76,7 +76,7 @@ macx{
 }
 
 ANDROID{
-folder_01.source = qml/desktop
+folder_01.source = qml/android
 folder_01.target = $$DESTDIR/qml
 
 folder_02.source= img

@@ -76,10 +76,10 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     qrcPath = "qrc:osx/Splash.qml";
 #elif defined (ANDROID)
     buildType = "/qml/android";
-    qrcPath = "qrc:android-phone/Splash.qml";
+    qrcPath = "qrc:android/Splash.qml";
 #elif defined (for_droid)
     buildType = "/qml/android/phone";
-    qrcPath = "qrc:android-tablet/Splash.qml";
+    qrcPath = "qrc:android/Splash.qml";
 #else
     buildType = "/qml/desktop";
     qrcPath = ":desktop/Splash.qml";
