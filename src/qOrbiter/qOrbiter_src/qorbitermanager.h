@@ -179,6 +179,9 @@ public:
     QString dceResponse;
     bool connectedState;
 
+    //----ANDROID----///
+    QString droidPath;  //specific path for android files that relates to the package name 'com.linuxmce.qOrbiter/files
+    //-END---ANDROID----///
 
     //splash related
 

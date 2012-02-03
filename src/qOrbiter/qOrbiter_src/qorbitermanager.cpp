@@ -75,8 +75,9 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     buildType="/qml/desktop";
     qrcPath = "qrc:osx/Splash.qml";
 #elif defined (ANDROID)
-    buildType = "/qml/android";
+    buildType = "/qml/desktop";
     qrcPath = "qrc:android/Splash.qml";
+    droidPath = "/";
 #elif defined (for_droid)
     buildType = "/qml/android/phone";
     qrcPath = "qrc:android/Splash.qml";
@@ -84,6 +85,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     buildType = "/qml/desktop";
     qrcPath = ":desktop/Splash.qml";
 #endif    
+
 
     if (readLocalConfig())
     {
@@ -193,10 +195,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 {
     setDceResponse("Starting device connection...");
     //temporary droid hack. add your device no here till fix is in//---------------------------------------
-#ifdef ANDROID
-    sRouterIP = "192.168.81.1";
-    iPK_Device = long(84);
-#endif
+
 
     pqOrbiter = new DCE::qOrbiter(iPK_Device, sRouterIP, true,false);
     pqOrbiter->qmlUI = this;
@@ -210,8 +209,10 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
         QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
         QString localDir = qmlPath.append(buildType);
-       loadSkins(QUrl(localDir));
-        //loadSkins(QUrl("http://192.168.81.1/lmce-admin/skins/"));
+       //loadSkins(QUrl(localDir));
+#ifdef ANDROID
+        loadSkins(QUrl("http://192.168.80.1/lmce-admin/skins"));
+#endif
         //set it as a context property so the qml can read it. if we need to changed it,we just reset the context property
         qDebug() << "Skins Loaded, starting data load";
 
@@ -699,7 +700,7 @@ void qorbiterManager::getConf(int PK_Device)
 writeConfig();
     swapSkins(currentSkin);
 
-#ifdef for_desktop
+#ifdef for_desktop || ANDROID
     activateScreenSaver();
 #endif
 
@@ -971,6 +972,8 @@ bool qorbiterManager::readLocalConfig()
     QDomDocument localConfig;
 #ifdef Q_OS_MAC
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
+#elif ANDROID
+    QString xmlPath = "config.xml";
 #else
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #endif
@@ -994,7 +997,6 @@ bool qorbiterManager::readLocalConfig()
         }
         else
         {
-
             QDomElement configVariables = localConfig.documentElement().toElement();
                 qs_routerip = configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue();
                 currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
@@ -1012,6 +1014,8 @@ void qorbiterManager::writeConfig()
     QDomDocument localConfig;
 #ifdef Q_OS_MAC
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
+#elif ANDROID
+    QString xmlPath = "config.xml";
 #else
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #endif
