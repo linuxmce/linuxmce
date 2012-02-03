@@ -51,7 +51,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
 
     m_bStartingUp= true;
 
-    setDceResponse("setting up LMCE");
+    setDceResponse("Initializing...");
     QApplication::processEvents(QEventLoop::AllEvents);
 
     qorbiterUIwin->rootContext()->setContextProperty("srouterip", QString(qs_routerip) );
@@ -59,12 +59,12 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     qorbiterUIwin->rootContext()->setContextProperty("manager", this); //providing a direct object for qml to call c++ functions of this class
     qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse); //file grids current media type
     item = qorbiterUIwin->rootObject();
-
+    QApplication::processEvents(QEventLoop::AllEvents);
     QObject::connect(this,SIGNAL(splashReady()), this,SLOT(startSetup()));
 
 #ifdef for_desktop
-    buildType = "/qml/desktop";
-    qrcPath = ":desktop/Splash.qml";
+    buildType = "/skins/desktop";
+    qrcPath = "qrc:desktop/Splash.qml";
 #elif defined (for_freemantle)
     buildType = "/qml/freemantle";
     qrcPath = "qrc:freemantle/Splash.qml";
@@ -87,20 +87,24 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
 
     if (readLocalConfig())
     {
-        emit localConfigReady("Success");
-
+        emit localConfigReady( true);
     }
-    QApplication::processEvents(QEventLoop::AllEvents);
+    else
+    {
+        emit localConfigReady(false);
+    }
 
+
+    QApplication::processEvents(QEventLoop::AllEvents);
     QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
     QString localDir = qmlPath.append(buildType);
-
+    remoteDirectoryPath = "http://"+qs_routerip+"/lmce-admin/skins/";
+/*
     //loadSkins(QUrl(localDir));
     loadSkins(QUrl("http://192.168.81.1/lmce-admin/skins"));
     //set it as a context property so the qml can read it. if we need to changed it,we just reset the context property
-
     qDebug() << "Skins Loaded, starting data load";
-
+*/
 
     initializeGridModel();  //begins setup of media grid listmodel and its properties
     initializeSortString(); //associated logic for navigating media grids
@@ -150,11 +154,11 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     timeCodeSocket = new QTcpSocket();
     //timeCodeSocket->moveToThread(timecodeThread);
     //timecodeThread->start();
-
-
     //QObject::connect(nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection );
-    //iPK_Device= deviceno;
+    //iPK_Device= deviceno;    
+
     QApplication::processEvents(QEventLoop::AllEvents);
+     setupLmce(iPK_Device, qs_routerip.toStdString(), false, false);
 }
 
 /*
@@ -162,7 +166,6 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
   when its complete, it should emit a signal for the next step. now it calls setup lmce directly.
   */
 void qorbiterManager::startSetup() {
-
 
 
 }
@@ -188,50 +191,58 @@ void qorbiterManager::gotoQScreen(QString s)
 //this block sets up the connection to linuxmce
 bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode)
 {
+    setDceResponse("Starting device connection...");
     //temporary droid hack. add your device no here till fix is in//---------------------------------------
 #ifdef ANDROID
     sRouterIP = "192.168.81.1";
     iPK_Device = long(84);
-    PK_Device = int(84);
 #endif
 
     pqOrbiter = new DCE::qOrbiter(iPK_Device, sRouterIP, true,false);
-    setDceResponse("Made orbiter");
+    pqOrbiter->qmlUI = this;
     QApplication::processEvents(QEventLoop::AllEvents);
 
 
-    iPK_Device_DatagridPlugIn =  long(6);
-    iPK_Device_OrbiterPlugin = long(9);
-    iPK_Device_GeneralInfoPlugin = long(4);
-    iPK_Device_SecurityPlugin = long(13);
-    iPK_Device_LightingPlugin = long(8);
-    m_dwIDataGridRequestCounter = 0;
-
-    iPK_Device = long(PK_Device);
-    iOrbiterPluginID = 9;
-    iMediaPluginID = 10;
-    iPK_Device_eventPlugin = 12;
-    iSize = 0;
-    m_pOrbiterCat = 5;
-    s_onOFF = "1";
-
-    /*
-          this line ties the class variable in the dceGenerated code to the qt ui code
-          this is how the two threads (dce and qt) communicate with each other and make it possible to connect
-          qt GUI (qml or qobject based) signals to DCE slots and vice versa!
-        */
-
-    pqOrbiter->qmlUI = this;
-    //  LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",iPK_Device,qs_routerip.toStdString());
-
-    QObject::connect(pqOrbiter,SIGNAL(disconnected(QString)), this, SLOT(reloadHandler()));
-    //connecting cross object slots - from dce/qt subclass(qorbiter) to pure qt (qorbitermanager)
-    //QObject::connect(pqOrbiter,SIGNAL(disconnected(QString)), this, SLOT(processError(QString)));
-
-    // setDceResponse("Attempting connection for device:" + iPK_Device);
-
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
     {
+        emit connectionValid(true);
+        setDceResponse("Made orbiter");
+
+        QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
+        QString localDir = qmlPath.append(buildType);
+       loadSkins(QUrl(localDir));
+        //loadSkins(QUrl("http://192.168.81.1/lmce-admin/skins/"));
+        //set it as a context property so the qml can read it. if we need to changed it,we just reset the context property
+        qDebug() << "Skins Loaded, starting data load";
+
+        iPK_Device_DatagridPlugIn =  long(6);
+        iPK_Device_OrbiterPlugin = long(9);
+        iPK_Device_GeneralInfoPlugin = long(4);
+        iPK_Device_SecurityPlugin = long(13);
+        iPK_Device_LightingPlugin = long(8);
+        m_dwIDataGridRequestCounter = 0;
+
+        iOrbiterPluginID = 9;
+        iMediaPluginID = 10;
+        iPK_Device_eventPlugin = 12;
+        iSize = 0;
+        m_pOrbiterCat = 5;
+        s_onOFF = "1";
+
+        /*
+              this line ties the class variable in the dceGenerated code to the qt ui code
+              this is how the two threads (dce and qt) communicate with each other and make it possible to connect
+              qt GUI (qml or qobject based) signals to DCE slots and vice versa!
+            */
+
+
+        //  LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",iPK_Device,qs_routerip.toStdString());
+
+        QObject::connect(pqOrbiter,SIGNAL(disconnected(QString)), this, SLOT(reloadHandler()));
+        //connecting cross object slots - from dce/qt subclass(qorbiter) to pure qt (qorbitermanager)
+        //QObject::connect(pqOrbiter,SIGNAL(disconnected(QString)), this, SLOT(processError(QString)));
+
+        // setDceResponse("Attempting connection for device:" + iPK_Device);
 
         emit loadingMessage("Orbiter  connected");
         QApplication::processEvents(QEventLoop::AllEvents);
@@ -246,17 +257,52 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
         {
             pqOrbiter->CreateChildren();
             qorbiterUIwin->rootContext()->setContextProperty("dcerouter", pqOrbiter );
-
             setConnectedState(true);
-            //return false;
+            return true;
         }
         else
         {
             setDceResponse("Orbiter Conf Hiccup! for device " + iPK_Device);
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Device Failed to get configuration!");
-            //return true;
+            return false;
         }
     }
+    else
+
+        {
+            bAppError = true;
+
+
+            if(pqOrbiter->m_pEvent && pqOrbiter->m_pEvent->m_pClientSocket && pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
+            {
+                bAppError = false;
+                bReload = false;
+                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "OrbiterManager: No Router.  Will abort");
+                setDceResponse("OrbiterManager:MAIN No Router, Aborting");
+                emit connectionValid(false);
+                emit deviceValid(false);
+
+            }
+            else
+            {
+                bAppError = true;
+                if( pqOrbiter->m_pEvent&& pqOrbiter->m_pEvent->m_pClientSocket && pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice)
+                {
+                    bAppError = false;
+                    bReload = false;
+                    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device  Will abort");
+                    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
+                    //orbiterWin.mainView.setSource(QUrl("qrc:desktop/SetupNewOrbiter.qml"));
+                    setDceResponse("Connect Failed with Bad Device");
+                    emit deviceValid(false);
+                    emit connectionValid(true);
+                }
+            }
+
+
+        }
+
+
     QApplication::processEvents(QEventLoop::AllEvents);
 }
 
@@ -285,11 +331,8 @@ void qorbiterManager::refreshUI()
 
 
 // get conf method that reads config file
-void qorbiterManager::getConf(int pPK_Device)
+void qorbiterManager::getConf(int PK_Device)
 {
-
-
-
     QDomDocument configData;
     const QByteArray tConf = binaryConfig.data();
     configData.setContent(tConf,false);
@@ -653,6 +696,7 @@ void qorbiterManager::getConf(int pPK_Device)
     setDceResponse("Config Complete");
     QApplication::processEvents(QEventLoop::AllEvents);
 
+writeConfig();
     swapSkins(currentSkin);
 
 #ifdef for_desktop
@@ -664,37 +708,40 @@ void qorbiterManager::getConf(int pPK_Device)
 void qorbiterManager::swapSkins(QString incSkin)
 {
     QApplication::processEvents(QEventLoop::AllEvents);
-     qDebug() << "Initiating skin switch : " + incSkin;
+
     setDceResponse("Setting Skin to:" + incSkin);
 
     //get the skin URL from the skins model
-    SkinDataItem* skin = tskinModel->find(incSkin);
+    skin = tskinModel->find(incSkin);
 
     qDebug() << "Got it from the model : " + skin->baseUrl().toString();
 
     //load the actual skin entry point
     qDebug() << "Skin switch url:" << skin->entryUrl();
     currentSkin = incSkin;
+qorbiterUIwin->engine()->rootContext()->setContextProperty("style", skin->styleView());
 
     QObject::connect(qorbiterUIwin, SIGNAL(statusChanged(QDeclarativeView::Status)),
-                          this, SLOT(skinLoaded(QDeclarativeView::Status)));
+                     this, SLOT(skinLoaded(QDeclarativeView::Status)));
 
-    qorbiterUIwin->engine()->rootContext()->setContextProperty("style", skin->styleView());
-    qorbiterUIwin->setSource(skin->entryUrl());
+qorbiterUIwin->setSource(skin->entryUrl());
+
 }
 
 void qorbiterManager::skinLoaded(QDeclarativeView::Status status) {
-    qDebug() << "Skin appears to have finished loading ..";
+    setDceResponse("Skin appears to have finished loading ..");
 
     if (status == QDeclarativeView::Error) {
         qWarning() << "Skin loading has FAILED";
         qWarning() << qorbiterUIwin->errors();
     } else {
         qDebug() << "Correctly loaded skin, continuing";
-        writeConfig();
+
+
         m_bStartingUp = false;
         startOrbiter();
-        //emit orbiterReady();
+
+
     }
 }
 
@@ -787,7 +834,6 @@ void qorbiterManager:: setLocation(const int &room, const int &ea)
     emit locationChanged(room, ea);
     pqOrbiter->setLocation(room, ea);
     QApplication::processEvents(QEventLoop::AllEvents);
-
 }
 
 int qorbiterManager::getlocation() const
@@ -912,15 +958,16 @@ void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
 {
     qDebug() << "Triggering connection to LMCE Device ID [" << incdeviceid << "] port Router Address [" << incrouterip << "]" ;
     qs_routerip = incrouterip;
-    iPK_Device = incdeviceid.toInt();
+    iPK_Device = long(incdeviceid.toInt());
     //writeConfig();
     setDceResponse("Connecting to LinuxMCE Core");
-    setupLmce(incdeviceid.toInt(), incrouterip.toStdString(), false, false);
+    setupLmce(iPK_Device, incrouterip.toStdString(), false, false);
 }
 
 
 bool qorbiterManager::readLocalConfig()
 {
+    QApplication::processEvents(QEventLoop::AllEvents);
     QDomDocument localConfig;
 #ifdef Q_OS_MAC
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
@@ -933,16 +980,15 @@ bool qorbiterManager::readLocalConfig()
     // qDebug() << xmlPath;
     if (!localConfigFile.open(QFile::ReadWrite))
     {
-        emit error("config not found!");
+        setDceResponse("config not found!");
         return false;
     }
     else
     {
-
         if (!localConfig.setContent( &localConfigFile))
         {
-            qDebug() << "Local Config Missing!";
-            qDebug() <<"Enter information to continue, press connect when ready.";
+            setDceResponse("Local Config Missing!");
+            setDceResponse("Enter information to continue, press connect when ready.");
             localConfigFile.close();
             return false;
         }
@@ -950,25 +996,9 @@ bool qorbiterManager::readLocalConfig()
         {
 
             QDomElement configVariables = localConfig.documentElement().toElement();
-
-            if(qs_routerip.isEmpty())
-            {
                 qs_routerip = configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue();
-            }
-
-
-            if (currentSkin == "")
-            {
                 currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
-            }
-
-            if(iPK_Device < 1 )
-            {
                 iPK_Device = configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong();
-            }
-
-
-
         }
         localConfigFile.close();
         return true;
@@ -1340,7 +1370,7 @@ void qorbiterManager::changeChannels(QString chan)
 
 void qorbiterManager::getLiveTVPlaylist()
 {
-   qDebug() << "Orbiter Manager slot called";
+    qDebug() << "Orbiter Manager slot called";
     emit liveTVrequest();
 
 }
@@ -1488,7 +1518,7 @@ void qorbiterManager::checkConnection()
     {
         if(!pqOrbiter->GetConfig())
         {
-            gotoQScreen("Splash.qml");
+            emit raiseSplash();
         }
 
     }
@@ -1534,24 +1564,22 @@ void qorbiterManager::showMessage(QString message, int duration, bool critical)
 
 void qorbiterManager::startOrbiter()
 {
+
     m_bStartingUp = false;
     qorbiterUIwin->setWindowTitle("LinuxMCE Orbiter " + QString::number(iPK_Device));
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeViewToRootObject);
-    QApplication::processEvents(QEventLoop::AllEvents);
+   // QApplication::processEvents(QEventLoop::AllEvents);
 
-    qDebug() << "Going to screen 1 now";
-
+    setDceResponse("Going to screen 1 now");
     gotoQScreen("Screen_1.qml");
-
     setDceResponse("Showing main orbiter window");
 
 }
 
 void qorbiterManager::processError(QString msg)
 {
-    qDebug() << "An error occurred " + msg;
 
-    gotoQScreen("Splash.qml");
+emit raiseSplash();
     setDceResponse("Process Error Slot:" + msg) ;
 }
 
@@ -1581,11 +1609,12 @@ void qorbiterManager::initializeConnections()
 
 void qorbiterManager::reloadHandler()
 {
+    emit raiseSplash();
     pqOrbiter->Disconnect();
 
     setDceResponse("Reloading Router");
     QApplication::processEvents(QEventLoop::AllEvents);
-    loadSplash();
+
     //sleep(15);
 
     if (pqOrbiter->Connect(iPK_Device) )
@@ -1606,7 +1635,7 @@ void qorbiterManager::setDceResponse(QString response)
     emit loadingMessage(response);
     QApplication::processEvents(QEventLoop::AllEvents);
     emit dceResponseChanged();
-    // qDebug() << response;
+    qDebug() << response;
 
 }
 
@@ -1623,11 +1652,11 @@ QString qorbiterManager::getDceResponse()
 int qorbiterManager::loadSplash()
 {
 
-
 }
 
 void qorbiterManager::activateScreenSaver()
 {
+    qDebug("Starting Screensaver");
     QObject::connect(pqOrbiter, SIGNAL(screenSaverImages(QStringList)), &ScreenSaver,SLOT(setImageList(QStringList)));
     pqOrbiter->GetScreenSaverImages();
     qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", &ScreenSaver);

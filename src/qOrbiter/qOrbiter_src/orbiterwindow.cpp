@@ -9,15 +9,23 @@
 #include "../iOS/qOrbiter/ioshelpers.h"
 #endif
 
-orbiterWindow::orbiterWindow(QObject *parent) :
+orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *parent) :
     QObject(parent)
 {
     newOrbiter = false;
+    this->b_connectionPresent = true;
+    this->b_localConfigReady = true;
+    this->b_orbiterConfigReady = false;
+    this->b_skinDataReady = false;
+    this->b_skinIndexReady = false;
+    this->b_devicePresent = true;
 
     mainView.rootContext()->setContextProperty("window", this);
     mainView.setWindowTitle("LinuxMCE Orbiter ");
     mainView.setResizeMode(QDeclarativeView::SizeViewToRootObject);
 
+    mainView.rootContext()->setContextProperty("deviceid", int(deviceid));
+    mainView.rootContext()->setContextProperty("srouterip", QString::fromStdString(routerip));
 
 #ifdef for_desktop
     buildType = "/qml/desktop";
@@ -62,7 +70,6 @@ orbiterWindow::orbiterWindow(QObject *parent) :
     mainView.show();
 #endif
 
-
 }
 
 void orbiterWindow::setMessage(QString imsg)
@@ -91,6 +98,11 @@ void orbiterWindow::qmlSetupLmce(QString device, QString ip)
 bool orbiterWindow::getOrbiterState()
 {
     return newOrbiter;
+}
+
+void orbiterWindow::showSplash()
+{
+    mainView.setSource(QUrl(qrcPath));
 }
 
 void orbiterWindow::setOrbiterState(bool state)

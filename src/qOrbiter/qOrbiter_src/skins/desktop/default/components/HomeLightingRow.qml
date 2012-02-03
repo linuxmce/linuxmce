@@ -28,7 +28,7 @@ import QtQuick 1.0
 
                 Image {
                     id: onimg
-                    source: "../../img/ui3/lightingbig.png"
+                    source: "../images/lightingbig.png"
                     height: parent.height
                     width: parent.width
                 }

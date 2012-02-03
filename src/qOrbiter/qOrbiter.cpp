@@ -2464,7 +2464,7 @@ void DCE::qOrbiter::ShowFloorPlan(int floorplantype)
     //   CMD_Get_Floorplan_Layout getLayout(qmlUI->iPK_Device, qmlUI->iMediaPluginID, &sval);
     // SendCommand(getLayout);
     //qDebug() << "SVAL::" << sval.c_str();
-    qmlUI->gotoQScreen(Screen);
+    //qmlUI->gotoQScreen(Screen);
 
     int cellsToRender= 0;
 

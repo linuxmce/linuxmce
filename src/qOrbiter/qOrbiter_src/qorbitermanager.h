@@ -169,6 +169,8 @@ public:
     //ui variables
     QString currentSkin;
     QString currentSkinURL;
+    QString remoteDirectoryPath;
+    SkinDataItem* skin;
     QDeclarativeView  *qorbiterUIwin;               //Qml declarativeview
     QObject *item;                                  //qObject reference to UI
     Q_INVOKABLE void refreshUI();
@@ -176,6 +178,7 @@ public:
     Q_INVOKABLE void swapSkins(QString incSkin);
     QString dceResponse;
     bool connectedState;
+
 
     //splash related
 
@@ -366,9 +369,17 @@ signals:
     void roomsReady();
     void engineReady();
     void error(QString msg);
-    void localConfigReady(QString msg);
+
     void loadingMessage(QString msg);
     void splashReady();
+    void raiseSplash();
+
+    void localConfigReady(bool b);
+    void orbiterConfigReady(bool b);
+    void deviceValid(bool b);
+    void connectionValid(bool b);
+    void skinIndexReady(bool b);
+    void skinDataLoaded(bool b);
 
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
 

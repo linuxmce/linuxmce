@@ -15,7 +15,7 @@ Rectangle {
             media_but_txt: "Left"
             Image {
                 id: rwicon
-               source: "../../../img/icons/navarrow.png"
+               source: "../images/navarrow.png"
                 height: parent.height
                 width: parent.width
                 rotation: 180
@@ -35,7 +35,7 @@ Rectangle {
             media_but_txt: "Up"
             Image {
                 id: playicon
-               source: "../../../img/icons/navarrow.png"
+               source: "../images/navarrow.png"
                 height: parent.height
                 width: parent.width
                 rotation: 270
@@ -54,7 +54,7 @@ Rectangle {
             color: "transparent"
             Image {
                 id: fficon
-                source: "../../../img/icons/navarrow.png"
+                source: "../images/navarrow.png"
                 height: parent.height
                 width: parent.width
                 rotation: 90
@@ -75,7 +75,7 @@ Rectangle {
             media_but_txt: "right";
             Image {
                 id: nexticon
-            source: "../../../img/icons/navarrow.png"
+            source: "../images/navarrow.png"
                 height: parent.height
                 width: parent.width
             }

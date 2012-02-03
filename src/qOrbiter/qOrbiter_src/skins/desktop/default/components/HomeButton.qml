@@ -13,7 +13,7 @@ Item {
         width:  scaleX(8)
         Image {
             id: homeimage
-            source: "../../img/ui3/homebig.png"
+            source: "../images/homebig.png"
             anchors.centerIn: parent
             height: scaleY(13)
             width:  scaleX(8)

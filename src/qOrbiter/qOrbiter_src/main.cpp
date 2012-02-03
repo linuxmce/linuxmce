@@ -15,15 +15,15 @@
 */
 //<-dceag-incl-b->
 #ifdef IOS
-    #import <UIKit/UIKit.h>
-    #include "qmlapplicationviewer.h"
-    #include "ioshelpers.h"
+#import <UIKit/UIKit.h>
+#include "qmlapplicationviewer.h"
+#include "ioshelpers.h"
 
-    #include <QtGui/QApplication>
-    #include <QtCore/QtPlugin>
-    #include <QtDeclarative/QDeclarativeEngine>
+#include <QtGui/QApplication>
+#include <QtCore/QtPlugin>
+#include <QtDeclarative/QDeclarativeEngine>
 
-    Q_IMPORT_PLUGIN(UIKit)
+Q_IMPORT_PLUGIN(UIKit)
 #endif
 
 #include <QApplication>
@@ -49,7 +49,7 @@ using namespace DCE;
 
 
 // You can override this block if you don't want the app to reload in the event of a problem
-
+/*
 extern void (*g_pDeadlockHandler)(PlutoLock *pPlutoLock);
 extern void (*g_pSocketCrashHandler)(Socket *pSocket);
 extern Command_Impl *g_pCommand_Impl;
@@ -71,7 +71,7 @@ void SocketCrashHandler(Socket *pSocket)
         g_pCommand_Impl->OnReload();
     }
 }
-/*
+
 void Plugin_DeadlockHandler(PlutoLock *pPlutoLock)
 {
         // This isn't graceful, but for the moment in the event of a deadlock we'll just kill everything and force a reload
@@ -90,7 +90,7 @@ void Plugin_SocketCrashHandler(Socket *pSocket)
         }
 }
 //<-dceag-incl-e->
-*/
+
 extern "C" {
 int IsRuntimePlugin()
 {
@@ -102,7 +102,7 @@ int IsRuntimePlugin()
     else
         return 0;
 }
-}/*
+}
 
 
 //<-dceag-plug-b->
@@ -126,13 +126,13 @@ extern "C" {
                 }
                 return pqOrbiter;
         }
-}*/
+}
 //<-dceag-plug-e->
 
 
 //<-dceag-main-b->
 
-
+*/
 int main(int argc, char* argv[])
 {
 
@@ -226,60 +226,28 @@ int main(int argc, char* argv[])
     try
     {
 #ifdef IOS
-//        NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+        //        NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 #endif
         
 #ifndef for_harmattan
         QApplication::setGraphicsSystem("raster");
 #endif
         QApplication  a(argc, argv);
-
-        orbiterWindow orbiterWin;
+        orbiterWindow orbiterWin(PK_Device, sRouter_IP);
         QApplication::processEvents(QEventLoop::AllEvents);
-
         orbiterWin.setMessage("Setting up Lmce");
         QApplication::processEvents(QEventLoop::AllEvents);
-        qorbiterManager  w(PK_Device,QString::fromStdString(sRouter_IP), &orbiterWin.mainView);
+        qorbiterManager  *w= new qorbiterManager(PK_Device,QString::fromStdString(sRouter_IP), &orbiterWin.mainView);
 
-        QObject::connect(&w, SIGNAL(loadingMessage(QString)), &orbiterWin,SLOT(setMessage(QString)), Qt::UniqueConnection);
-        QObject::connect(&orbiterWin,SIGNAL(setupLmce(QString,QString)), &w, SLOT(qmlSetupLmce(QString,QString)));
+        QObject::connect(w, SIGNAL(loadingMessage(QString)), &orbiterWin,SLOT(setMessage(QString)), Qt::UniqueConnection);
+        QObject::connect(&orbiterWin,SIGNAL(setupLmce(QString,QString)), w, SLOT(qmlSetupLmce(QString,QString)));
+        QObject::connect(w, SIGNAL(raiseSplash()), &orbiterWin, SLOT(showSplash()) );
+        QObject::connect(w,SIGNAL(connectionValid(bool)), &orbiterWin, SLOT(setConnectionState(bool)));
+        QObject::connect(w,SIGNAL(deviceValid(bool)), &orbiterWin, SLOT(setDeviceState(bool)));
+        QObject::connect(w,SIGNAL(localConfigReady(bool)), &orbiterWin, SLOT(setLocalConfigState(bool)));
+        //w->setupLmce(PK_Device, sRouter_IP, false, false);
 
-
-        if(w.setupLmce(PK_Device, sRouter_IP, true, false))
-        {
-a.exec();
-        }
-        else
-        {
-            bAppError = true;
-
-            if(w.pqOrbiter->m_pEvent && w.pqOrbiter->m_pEvent->m_pClientSocket && w.pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
-            {
-                bAppError = false;
-                bReload = false;
-                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "main loop No Router.  Will abort");
-                w.setDceResponse(" main loop- No Router, Aborting");
-                orbiterWin.setMessage("No Connection to Core");
-            }
-            else
-            {
-                bAppError = true;
-                if( w.pqOrbiter->m_pEvent&& w.pqOrbiter->m_pEvent->m_pClientSocket && w.pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice)
-                {
-                    bAppError = false;
-                    bReload = false;
-                    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device  Will abort");
-                    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
-                    //orbiterWin.mainView.setSource(QUrl("qrc:desktop/SetupNewOrbiter.qml"));
-                    orbiterWin.setMessage("Connect Failed with Bad Device");
-                }
-            }
-
-a.exec();
-        }
-
-
-
+        return a.exec();
     }
     catch(string s)
     {
@@ -294,7 +262,7 @@ a.exec();
     WSACleanup();
 #endif
 #ifdef IOS
-//    [pool release];
+    //    [pool release];
 #endif
 
     if( bAppError )

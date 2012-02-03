@@ -7,11 +7,61 @@ import QtQuick 1.0
 
 Rectangle {
     id: rectangle1
-    width: 600
-    height: 900
+    width: 800
+    height: 600
     color: "slategrey"
     signal setupStart(string x, string y)
     signal splashLoaded()
+
+    Image {
+        id: splash
+        anchors.centerIn: rectangle1
+        fillMode: Image.PreserveAspectFit
+        source: "qrc:/img/desktop_splash.png"
+        anchors.fill: parent
+    }
+
+    Column{
+        height: parent.height
+        width: 150
+        spacing: 2
+
+        Text {
+            id: connection_present
+            text: qsTr("Connection")
+            color: window.b_connectionPresent ? "transparent" : "red"
+            font.pointSize: window.b_connectionPresent ? 14 : 12
+        }
+
+        Text {
+            id: device
+            text: qsTr("Device")
+            color: window.b_devicePresent ? "transparent" : "red"
+            font.pointSize: window.b_devicePresent ? 14 : 12
+        }
+
+        Text {
+            id: configuration_file
+            text: qsTr("Config")
+            color: window.b_localConfigReady ? "red" : "green"
+            font.pointSize: window.b_localConfigReady ? 14 : 12
+        }
+
+        Text {
+            id: skin_index
+            text: qsTr("Skins")
+           // opacity: 0
+        }
+
+        Text {
+            id: orbiter_config
+            text: qsTr("Orbiter Config")
+           // opacity: 0
+        }
+
+
+
+    }
 
     function screenchange(screenname )
     {
@@ -40,18 +90,8 @@ Rectangle {
     Connections{
         target:window
         onMessageChanged:loadingStatus.text = window.message
-        onStatusChanged: screenchange("SetupNewOrbiter.qml")
+        //onStatusChanged: screenchange("SetupNewOrbiter.qml")
     }
-
-
-    Image {
-        id: splash
-        anchors.centerIn: rectangle1
-        fillMode: Image.PreserveAspectFit
-        source: "qrc:/img/desktop_splash.png"
-        anchors.fill: parent
-    }
-
 
     Rectangle {
         width: parent.width
@@ -65,14 +105,7 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
         }
-        Text {
-            id: loadingStatus
-            text: "Status " + window.message
 
-            font.pointSize: 20
-
-            color: "white"
-        }
     }
     Rectangle {
         id: rectangle2
@@ -121,9 +154,8 @@ Rectangle {
           //  onTextChanged: setRouterIp(routerip.text)
             fillColor: "grey"
             anchors.verticalCenter: parent.verticalCenter
-
-
         }
+
         Text {
             text: qsTr("Device:")
             anchors.verticalCenter: parent.verticalCenter
@@ -179,8 +211,11 @@ Rectangle {
 
         }
     }
-
-
-
-
+    Text {
+        id: loadingStatus
+        text: "Status " + window.message
+        font.pointSize: 14
+        color: "white"
+        anchors.baseline: rectangle1.bottom
+    }
 }

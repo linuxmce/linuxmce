@@ -20,7 +20,7 @@ AvOptionButton {
             width: 50
             height: 50
 
-            source: "../../../img/icons/kmix.png"
+            source: "../images/kmix.png"
         }
         MouseArea{
             anchors.fill: parent
@@ -37,7 +37,7 @@ AvOptionButton {
 
         rotation: -90
         smooth: true
-        source: "../../../img/icons/player_fwd.png"
+        source: "../images/player_fwd.png"
         MouseArea{
             anchors.fill: parent
             onClicked: dcerouter.adjustVolume(-1)
@@ -53,7 +53,7 @@ AvOptionButton {
         height: 50
         rotation: 90
         smooth: true
-        source: "../../../img/icons/player_fwd.png"
+        source: "../images/player_fwd.png"
         MouseArea{
             anchors.fill: parent
             onClicked: dcerouter.adjustVolume(1)

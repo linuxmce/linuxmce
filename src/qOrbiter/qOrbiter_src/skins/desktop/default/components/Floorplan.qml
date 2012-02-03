@@ -9,7 +9,7 @@ ButtonSq {
     buttontext: ""
     Image {
         id: onimg
-        source: "../../../img/icons/jabber_protocol.png"
+        source: "../images/jabber_protocol.png"
         height: style.iconHeight
         width: style.iconWidth
         anchors.centerIn: parent

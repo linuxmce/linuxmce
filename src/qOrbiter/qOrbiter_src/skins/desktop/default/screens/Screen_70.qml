@@ -65,7 +65,7 @@ Rectangle {
 
                     Image {
                         id: headerimage
-                        source: "../../../img/icons/header.png"
+                        source: "../images/header.png"
                         height:parent.height
                         width:parent.width
                         opacity: .75
@@ -104,7 +104,7 @@ Rectangle {
                     BorderImage {
                         id: borderimg
                         horizontalTileMode: BorderImage.Repeat
-                        source: "../../../img/icons/drpshadow.png"
+                        source: "../images/drpshadow.png"
                         anchors.fill: nowplayingimage
                         anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
                         border { left: 10; top: 10; right: 10; bottom: 10 }
@@ -133,7 +133,7 @@ Rectangle {
             BorderImage {
                 id: metaborder
                 horizontalTileMode: BorderImage.Repeat
-                source: "../../../img/icons/drpshadow.png"
+                source: "../images/drpshadow.png"
                 anchors.fill: textrect
                 anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
                 border { left: 10; top: 10; right: 10; bottom: 10 }

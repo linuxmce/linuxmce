@@ -51,7 +51,7 @@ Rectangle {
                     height: childrenRect.height
                     Image {
                         id: headerimage
-                        source: "../../../img/icons/header.png"
+                        source: "../images/header.png"
                         height:parent.height
                         width:parent.width
                     }
@@ -81,7 +81,7 @@ Rectangle {
 
                     Image {
                         id: npgloss
-                        source: "../../../img/icons/header.png"
+                        source: "../images/header.png"
                         height:parent.height
                         width:parent.width
                         smooth:true

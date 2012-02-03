@@ -26,7 +26,7 @@ Rectangle {
             id: weatherimg
             x: 5
             y: -15
-            source: "../../../img/icons/kweather.png"
+            source: "../images/kweather.png"
             height:45
             anchors.topMargin: -15
             width: 45

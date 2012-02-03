@@ -23,11 +23,9 @@ TARGET = qorbiter
 # Add more folders to ship with the application, here
 for_desktop{
 
-folder_01.source = qml/desktop
-folder_01.target = $$DESTDIR/qml
+folder_01.source = skins/desktop
+folder_01.target = $$DESTDIR/skins
 
-folder_02.source= img
-folder_02.target= $$DESTDIR    #left blank so it will appear in the root
 DEFINES += for_desktop
 }
 
@@ -41,7 +39,6 @@ DEFINES += for_droid
 }
 
 for_freemantle{
-
 folder_01.source = qml/freemantle
 folder_01.target = $$DESTDIR/qml
 

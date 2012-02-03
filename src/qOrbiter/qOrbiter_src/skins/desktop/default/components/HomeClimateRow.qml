@@ -33,7 +33,7 @@ color:"transparent"
 
                 Image {
                     id: onimg
-                    source: "../../img/ui3/climatebig.png"
+                    source: "../images/climatebig.png"
                     width: parent.width
                     height: parent.height
 
