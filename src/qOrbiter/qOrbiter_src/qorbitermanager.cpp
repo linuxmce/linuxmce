@@ -84,7 +84,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
 #else
     buildType = "/qml/desktop";
     qrcPath = ":desktop/Splash.qml";
-#endif    
+#endif
 
 
     if (readLocalConfig())
@@ -100,7 +100,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     QApplication::processEvents(QEventLoop::AllEvents);
     QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
     QString localDir = qmlPath.append(buildType);
-    remoteDirectoryPath = "http://"+qs_routerip+"/lmce-admin/skins/";
+    remoteDirectoryPath = "http://"+qs_routerip+"/lmce-admin/skins";
 /*
     //loadSkins(QUrl(localDir));
     loadSkins(QUrl("http://192.168.81.1/lmce-admin/skins"));
@@ -157,7 +157,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     //timeCodeSocket->moveToThread(timecodeThread);
     //timecodeThread->start();
     //QObject::connect(nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection );
-    //iPK_Device= deviceno;    
+    //iPK_Device= deviceno;
 
     QApplication::processEvents(QEventLoop::AllEvents);
      setupLmce(iPK_Device, qs_routerip.toStdString(), false, false);
@@ -209,10 +209,16 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
         QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
         QString localDir = qmlPath.append(buildType);
+
        //loadSkins(QUrl(localDir));
 #ifdef ANDROID
-        loadSkins(QUrl("http://192.168.80.1/lmce-admin/skins"));
+        loadSkins(QUrl(remoteDirectoryPath));
+#else
+        loadSkins(QUrl(remoteDirectoryPath));
 #endif
+
+
+
         //set it as a context property so the qml can read it. if we need to changed it,we just reset the context property
         qDebug() << "Skins Loaded, starting data load";
 
