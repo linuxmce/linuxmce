@@ -25,6 +25,7 @@ Package: libowfs27
 Architecture: any
 Section: libs
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Provides: libowfs
 Description: Dallas 1-wire support: libraries
  The 1-Wire bus is a cheap low-speed bus for devices like weather
  sensors, access control, etc. It can be attached to your system via
@@ -36,6 +37,7 @@ Package: libownet27
 Architecture: any
 Section: libs
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Provides: libownet
 Description: Dallas 1-wire support: libraries
  The 1-Wire bus is a cheap low-speed bus for devices like weather
  sensors, access control, etc. It can be attached to your system via
