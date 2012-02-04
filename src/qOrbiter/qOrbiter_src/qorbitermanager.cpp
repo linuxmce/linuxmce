@@ -306,21 +306,15 @@ bool qorbiterManager::getConf(int PK_Device)
         emit orbiterConfigReady(false);
         return false;
     }
-    else
-    {
+
         setDceResponse("Attempting to write config");
         QApplication::processEvents(QEventLoop::AllEvents);
-        if (writeConfig())
-        {
-
-        }
-        else
+        if (!writeConfig())
         {
             setDceResponse("Couldnt save config!");
             return false;
         }
 
-    }
 
 
     QDomElement root = configData.documentElement();        //represent configuration in memeory
@@ -668,13 +662,14 @@ bool qorbiterManager::getConf(int PK_Device)
     setDceResponse("Config Complete");
     QApplication::processEvents(QEventLoop::AllEvents);
 
-    emit orbiterConfigReady( true);
- swapSkins(currentSkin);
+
+
 
 #ifdef for_desktop
     activateScreenSaver();
 #endif
-
+ swapSkins(currentSkin);
+    emit orbiterConfigReady( true);
     return true;
 }
 
@@ -698,7 +693,7 @@ void qorbiterManager::swapSkins(QString incSkin)
                      this, SLOT(skinLoaded(QDeclarativeView::Status)));
 
     qorbiterUIwin->setSource(skin->entryUrl());
-    startOrbiter();
+
 
 }
 
@@ -714,7 +709,7 @@ void qorbiterManager::skinLoaded(QDeclarativeView::Status status) {
 
         m_bStartingUp = false;
 
-
+ startOrbiter();
 
     }
 }
@@ -1030,9 +1025,9 @@ bool qorbiterManager::writeConfig()
             }
             setDceResponse("write succeded");
             localConfigFile.close();
-            return true;
+
         }
-    }
+    }return true;
 }
 
 void qorbiterManager::setStringParam(int paramType, QString param)
