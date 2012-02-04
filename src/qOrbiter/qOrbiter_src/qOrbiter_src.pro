@@ -76,7 +76,7 @@ ANDROID{
 deployment.files= config.xml
 deployment.path= /assets #all assets must go to "/assets" folder of your android package
 
-DEFINES +=ANDROID
+DEFINES+=ANDROID
 }
 
 !macx{

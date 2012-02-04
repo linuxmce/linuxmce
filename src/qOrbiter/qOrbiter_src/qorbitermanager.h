@@ -296,7 +296,7 @@ Param 10 - pk_attribute
     /*
       getConf() is the part of the equation that should read the orbiter conf. not implemented fully
       */
-    void getConf(int pPK_Device);
+    bool getConf(int pPK_Device);
 
     bool OrbiterGen();              //prelim orbter generation
     Q_INVOKABLE void quickReload();
@@ -389,7 +389,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     int loadSplash();
     void startOrbiter();
 
-    Q_INVOKABLE void writeConfig();
+    Q_INVOKABLE bool writeConfig();
     bool readLocalConfig();
     void setConnectedState(bool state) { connectedState = state;  if(state == false) {checkConnection();} emit connectedStateChanged(); }
     bool getConnectedState () {return connectedState;}

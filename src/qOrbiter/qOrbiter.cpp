@@ -1431,6 +1431,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
         //qDebug() << s;
         qmlUI->goBack<< s;
 
+        /*
         qDebug() << "Datagrid request options:";
         qDebug() << "MediaType: " << iPK_MediaType;
         qDebug() << "Sub Type: " << qmlUI->q_subType;
@@ -1439,12 +1440,10 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
         qDebug() << "Media Sources:" << qmlUI->q_mediaSources;
         qDebug() << "Attributetype sort:" << qmlUI->q_attributetype_sort;
         qDebug() << "Attribute Sort:" << qmlUI->q_pk_attribute;
+        */
     }
     qmlUI->backwards = false;
     //qDebug() << qmlUI->goBack.join(":::");
-
-
-
 
     CMD_Populate_Datagrid populateDataGrid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 63, s.toStdString(), DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
@@ -1467,7 +1466,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
             int cellsToRender= pDataGridTable->GetRows();
             //   qDebug() << "Datagrid Height:" << gHeight << " , width: " << gWidth;
             //  qDebug() << "Response: " << gWidth << " cells to render";
-            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
+           // LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
 
             if (cellsToRender == 0)
             {
@@ -1491,7 +1490,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 
                     //qDebug() << "Picture Datagrid Height:" << gHeight << " , width: " << gWidth;
                     // qDebug() << "Response: " << cellsToRender << " picture cells to render";
-                    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
+                  //  LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
                     QString cellTitle;
                     QString fk_file;
                     QString filePath;
@@ -2989,7 +2988,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 
                 // qDebug() << "Picture Datagrid Height:" << gHeight << " , width: " << gWidth;
                 //qDebug() << "Response: " << cellsToRender << " picture cells to render";
-                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
+               // LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
                 QString cellTitle;
                 QString fk_file;
                 QString filePath;
@@ -3048,7 +3047,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 
                 // qDebug() << "Picture Datagrid Height:" << gHeight << " , width: " << gWidth;
                 //qDebug() << "Response: " << cellsToRender << " picture cells to render";
-                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
+               // LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
                 QString cellTitle;
                 QString fk_file;
                 QString filePath;
