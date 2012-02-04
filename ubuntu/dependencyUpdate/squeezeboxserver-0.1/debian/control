@@ -8,6 +8,9 @@ Homepage: <insert the upstream URL, if relevant>
 
 Package: squeezeboxserver
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, logitechmediacenter
-Description: Intermediate package to point to renamed logitechmediacenter
- package instead of squeezeboxserver.
+Depends: ${shlibs:Depends}, ${misc:Depends}, logitechmediaserver
+Description: Intermediate package to point to renamed logitechmediaserver
+ Logitech renamed the server package for SqueezeBoxes again. This time
+ it is called logitechmediaserver. This intermediary package will help 
+ people with older pluto slim server packages, to fulfill the correct
+ dependency.
