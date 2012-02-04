@@ -1,11 +1,11 @@
 #ifndef SKINLOADER_H
 #define SKINLOADER_H
 
-#include <QObject>;
-#include <QUrl>;
-#include <QList>;
-#include <QDeclarativeComponent>;
-#include "skindataitem.h";
+#include <QObject>
+#include <QUrl>
+#include <QList>
+#include <QDeclarativeComponent>
+#include "skindataitem.h"
 
 class SkinDataModel;
 class qorbiterManager;

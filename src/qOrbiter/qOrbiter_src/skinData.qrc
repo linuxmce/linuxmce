@@ -1,46 +1,10 @@
 <RCC>
     <qresource prefix="/img">
-        <file alias="config.xml">config.xml</file>
         <file alias="desktop_splash.png">img/lmcesplash.png</file>
         <file alias="harmattan_splash_bkg.png">img/harmattan_splash_bkg.png</file>
         <file alias="harmattan_splash.png">img/harmattan_splash.png</file>
     </qresource>
-    <qresource prefix="/icons">
-        <file alias="mythIcon.jpg">img/icons/Mythtv.png</file>
-        <file alias="videos.png">img/icons/xine.png</file>
-        <file alias="playlist.png">img/icons/kedit.png</file>
-        <file alias="user.png">img/icons/personal.png</file>
-        <file alias="telecom.png">img/icons/linphone.png</file>
-        <file>img/icons/audio&amp;video.png</file>
-        <file>img/icons/fortress.png</file>
-        <file alias="security.png">img/icons/gpgsm.png</file>
-        <file>img/icons/harddrive2.png</file>
-        <file alias="light-off.png">img/icons/jabber_protocol.png</file>
-        <file alias="home.png">img/icons/kfm_home.png</file>
-        <file>img/icons/kmix.png</file>
-        <file alias="Skin-Data.png">img/icons/kservices.png</file>
-        <file alias="light-on.png">img/icons/ktip.png</file>
-        <file alias="weather.png">img/icons/kweather.png</file>
-        <file alias="photos.png">img/icons/lphoto.png</file>
-        <file alias="song-item.png">img/icons/lsongs.png</file>
-        <file>img/icons/package_editors.png</file>
-        <file>img/icons/package_games_arcade.png</file>
-        <file alias="media-games.png">img/icons/package_games.png</file>
-        <file alias="media-eject">img/icons/player_eject.png</file>
-        <file alias="media-end.png">img/icons/player_end.png</file>
-        <file>img/icons/player_end1.png</file>
-        <file alias="media-fwd.png">img/icons/player_fwd.png</file>
-        <file alias="media-pause.png">img/icons/player_pause.png</file>
-        <file alias="media-play.png">img/icons/player_play.png</file>
-        <file alias="media-rew.png">img/icons/player_rew.png</file>
-        <file alias="media-start.png">img/icons/player_start.png</file>
-        <file alias="media-stop.png">img/icons/player_stop.png</file>
-        <file alias="media-end-bar.png">img/icons/player-end.png</file>
-        <file alias="video-blank.png">img/icons/scifi.png</file>
-        <file>img/icons/sms_protocol.png</file>
-        <file alias="living-room.png">img/icons/mediatime.png</file>
-        <file>img/icons/power.png</file>
-    </qresource>
+    <qresource prefix="/icons"/>
     <qresource prefix="/main">
         <file alias="main.qml">qml/android/phone/default/main.qml</file>
         <file alias="Style.qml">qml/android/phone/default/Style.qml</file>

@@ -388,7 +388,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
 
     int loadSplash();
     void startOrbiter();
-    void startSetup();
+
     Q_INVOKABLE void writeConfig();
     bool readLocalConfig();
     void setConnectedState(bool state) { connectedState = state;  if(state == false) {checkConnection();} emit connectedStateChanged(); }

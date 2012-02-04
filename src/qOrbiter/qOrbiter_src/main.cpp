@@ -247,7 +247,7 @@ int main(int argc, char* argv[])
         QObject::connect(w,SIGNAL(localConfigReady(bool)), &orbiterWin, SLOT(setLocalConfigState(bool)));
         //w->setupLmce(PK_Device, sRouter_IP, false, false);
 
-        return a.exec();
+        a.exec();
     }
     catch(string s)
     {
