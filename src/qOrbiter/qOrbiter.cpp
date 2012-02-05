@@ -1315,9 +1315,6 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 {
     qmlUI->gotoQScreen("Screen_47.qml");
 
-    cout << "Need to implement command #401 - Show File List" << endl;
-    cout << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
-
     if (iPK_MediaType != qmlUI->i_current_mediaType)
     {
         qmlUI->initializeSortString();
@@ -1335,7 +1332,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
     string valassign ="";
     bool isSuccessfull;// = "false";
 
-    string m_sGridID ="MediaFile_"+StringUtils::itos(qmlUI->iPK_Device);
+    string m_sGridID ="MediaFile_"+QString::number(qmlUI->iPK_Device).toStdString();
     int iRow_count=1;
     int iColumn_count = 5;
     bool m_bKeep_Row_Header = false;
@@ -1385,8 +1382,6 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
         }
 
         s= qmlUI->goBack.last();
-
-
     }
     else
     {
@@ -1445,10 +1440,12 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
     qmlUI->backwards = false;
     //qDebug() << qmlUI->goBack.join(":::");
 
+
     CMD_Populate_Datagrid populateDataGrid(qmlUI->iPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 63, s.toStdString(), DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
     if (SendCommand(populateDataGrid))
     {
+
         /*
               initial request to populate the text only grid as denoted by the lack of a leading "_" as in _MediaFile_43
               this way, we can safely check empty grids and error gracefully in the case of no matching media
@@ -1472,7 +1469,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
             {
                 //performing checks
                 delete pDataGridTable;
-                exit ; //exit the loop because there is no grid? - eventually provide "no media" feedback
+               // exit ; //exit the loop because there is no grid? - eventually provide "no media" feedback
             }
             else
             {
@@ -1487,7 +1484,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                     DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
                     int cellsToRender= pDataGridTable->GetRows();
                     //qDebug() << pDataGridTable->GetCols();
-
+qDebug("sent image dg request");
                     //qDebug() << "Picture Datagrid Height:" << gHeight << " , width: " << gWidth;
                     // qDebug() << "Response: " << cellsToRender << " picture cells to render";
                   //  LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
@@ -1529,7 +1526,8 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                     }
                     if (cellsToRender > qmlUI->model->rowCount(QModelIndex()))
                     {
-                        //qDebug() <<"Addtional media loading";
+                        qDebug() <<"Addtional media loading";
+
                         populateAdditionalMedia();
                     }
                 }
@@ -2969,7 +2967,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
             // qDebug() << "Current items in model" << currentrow;
             int gHeight = 1;
             int gWidth = 8;
-            string imgDG ="_MediaFile_"+StringUtils::itos(qmlUI->iPK_Device);
+            string imgDG ="_MediaFile_"+QString::number(qmlUI->iPK_Device).toStdString();
             int iData_Size=0;
             int GridCurRow = currentrow;
             int GridCurCol= 0;
@@ -3028,7 +3026,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
             // qDebug() << "Current items in model" << currentrow;
             int gHeight = 1;
             int gWidth = 8;
-            string imgDG ="_MediaFile_"+StringUtils::itos(qmlUI->iPK_Device);
+            string imgDG ="_MediaFile_"+QString::number(qmlUI->iPK_Device).toStdString();
             int iData_Size=0;
             int GridCurRow = currentrow;
             int GridCurCol= 0;

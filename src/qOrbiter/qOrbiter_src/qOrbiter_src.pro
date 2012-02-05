@@ -73,6 +73,8 @@ macx{
 }
 
 ANDROID{
+folder_01.source = qml/android
+
 deployment.files= config.xml
 deployment.path= /assets #all assets must go to "/assets" folder of your android package
 
@@ -84,6 +86,7 @@ DEFINES+=ANDROID
     folder_03.target = $$DESTDIR
 }
 
+#uncomment this line to work on skins locally
 DEPLOYMENTFOLDERS = folder_01 folder_02 folder_03
 INSTALLS +=deployment
 
@@ -16648,6 +16651,8 @@ contains(MEEGO_EDITION,harmattan) {
     desktopfile.path = /usr/share/applications
     INSTALLS += desktopfile
 }
+
+
 
 
 

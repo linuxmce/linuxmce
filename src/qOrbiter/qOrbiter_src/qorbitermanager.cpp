@@ -661,10 +661,6 @@ bool qorbiterManager::getConf(int PK_Device)
 
     setDceResponse("Config Complete");
     QApplication::processEvents(QEventLoop::AllEvents);
-
-
-
-
 #ifdef for_desktop
     activateScreenSaver();
 #endif
@@ -1312,7 +1308,6 @@ void qorbiterManager::changedPlaylistPosition(QString position)
     {
         pqOrbiter->setPosition(position);
     }
-
 
 }
 
