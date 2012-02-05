@@ -182,7 +182,18 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
         emit connectionValid(true);
         emit loadingMessage("Orbiter  connected");
         QApplication::processEvents(QEventLoop::AllEvents);
-        remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins";
+        remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/";
+
+#ifdef ANDROID
+        remoteDirectoryPath.append("android/phone");
+#elif MACOSX
+        remoteDirectoryPath.append("MACOSX");
+#elif for_desktop
+        remoteDirectoryPath.append("desktop");
+#elif for_harmattan
+        remoteDirectoryPath.append("harmattan");
+#endif
+
         QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
         QString localDir = qmlPath.append(buildType);
 
@@ -307,13 +318,13 @@ bool qorbiterManager::getConf(int PK_Device)
         return false;
     }
 
-        setDceResponse("Attempting to write config");
-        QApplication::processEvents(QEventLoop::AllEvents);
-        if (!writeConfig())
-        {
-            setDceResponse("Couldnt save config!");
-            return false;
-        }
+    setDceResponse("Attempting to write config");
+    QApplication::processEvents(QEventLoop::AllEvents);
+    if (!writeConfig())
+    {
+        setDceResponse("Couldnt save config!");
+        return false;
+    }
 
 
 
@@ -664,7 +675,7 @@ bool qorbiterManager::getConf(int PK_Device)
 #ifdef for_desktop
     activateScreenSaver();
 #endif
- swapSkins(currentSkin);
+    swapSkins(currentSkin);
     emit orbiterConfigReady( true);
     return true;
 }
@@ -705,7 +716,7 @@ void qorbiterManager::skinLoaded(QDeclarativeView::Status status) {
 
         m_bStartingUp = false;
 
- startOrbiter();
+        startOrbiter();
 
     }
 }

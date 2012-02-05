@@ -17,16 +17,16 @@ import QtQuick 1.0
         objectName: "orbiter_style"
         //skin description
         property string skincreator: "Langston Ball (aka golgoj4)"
-        property string skinname: "Droid"
+        property string skinname: "Android-Default"
         property string skindir: "droid"
-        property string skindescription: "Droid skin WIP"
+        property string skindescription: "Android phone skin, work in progress"
         property string skinversion: "1.0"
-        property string skinvariation: "Android 800X480"
+        property string skinvariation: "Android 320X480"
         property string maincolor: "grey"
         property string accentcolor: "indianred"
     //main stage styles
-    property int orbiterH:800
-    property int orbiterW: 480
+    property int orbiterH:480
+    property int orbiterW: 320
     property color stageBG: "slategray"
     property int homescreenrowheight:100
     property int homescreenbuttonheight: 90
