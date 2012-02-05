@@ -178,20 +178,21 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
     {
-
         emit connectionValid(true);
         emit loadingMessage("Orbiter  connected");
         QApplication::processEvents(QEventLoop::AllEvents);
-        remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/";
+
 
 #ifdef ANDROID
-        remoteDirectoryPath.append("android/phone");
+        remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/phone";
 #elif MACOSX
-        remoteDirectoryPath.append("MACOSX");
+       remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/macosx";
 #elif for_desktop
-        remoteDirectoryPath.append("desktop");
+        remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/desktop";
 #elif for_harmattan
-        remoteDirectoryPath.append("harmattan");
+        remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/harmattan";
+#else
+        remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/";
 #endif
 
         QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
@@ -712,10 +713,7 @@ void qorbiterManager::skinLoaded(QDeclarativeView::Status status) {
         qWarning() << qorbiterUIwin->errors();
     } else {
         qDebug() << "Correctly loaded skin, continuing";
-
-
         m_bStartingUp = false;
-
         startOrbiter();
 
     }

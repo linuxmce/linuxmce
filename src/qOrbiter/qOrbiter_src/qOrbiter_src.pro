@@ -30,12 +30,12 @@ DEFINES += for_desktop
 }
 
 for_droid{
-folder_01.source = qml/android/phone
-folder_01.target = $$DESTDIR/qml
+#folder_01.source = qml/android
 
-folder_02.source= img
-folder_02.target=     #left blank so it will appear in the root
-DEFINES += for_droid
+deployment.files= config.xml
+deployment.path= /assets #all assets must go to "/assets" folder of your android package
+
+DEFINES+=ANDROID
 }
 
 for_freemantle{
@@ -73,7 +73,7 @@ macx{
 }
 
 ANDROID{
-folder_01.source = qml/android
+#folder_01.source = qml/android
 
 deployment.files= config.xml
 deployment.path= /assets #all assets must go to "/assets" folder of your android package
@@ -87,7 +87,9 @@ DEFINES+=ANDROID
 }
 
 #uncomment this line to work on skins locally
+!ANDROID{
 DEPLOYMENTFOLDERS = folder_01 folder_02 folder_03
+}
 INSTALLS +=deployment
 
 # Additional import path used to resolve QML modules in Creator's code model

@@ -7,8 +7,8 @@ import QtQuick 1.0
 
 Rectangle {
     id: rectangle1
-    width: 800
-    height: 600
+    width: 320
+    height: 480
     color: "slategrey"
     signal setupStart(string x, string y)
     signal splashLoaded()
