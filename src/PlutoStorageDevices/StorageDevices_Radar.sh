@@ -135,7 +135,7 @@ function Detect {
 			mount -o ro "/dev/$partition" "$mountpoint_temp"
 
 			partition_size=$(df -h "/dev/$partition" | tail -n +2 | awk '{ print $2 }')
-			umount -lf "$mountpoint_temp" && rmdir "$mountpoint_temp"
+			umount -lf "$mountpoint_temp";  rmdir "$mountpoint_temp"
 
 			## Sends data to MessageSend			
 			thisHost=$(hostname)
