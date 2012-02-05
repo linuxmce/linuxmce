@@ -4,7 +4,7 @@ use DBI;
 require "/usr/pluto/bin/config_ops.pl";
 
 # We try the regular LinuxMCE/Pluto credentials. If they fail, we try a local connection
-$db = DBI->connect(&read_pluto_cred()) or DBI->connect("DBI:mysql:") or die "Couldn't connect to database: $DBI::errstr\n";
+$db = DBI->connect(&read_pluto_cred()) or $db = DBI->connect("DBI:mysql:") or die "Couldn't connect to database: $DBI::errstr\n";
 
 @databases = ("pluto_main","pluto_media","pluto_telecom","asterisk","asteriskcdrdb","mythconverg","pluto_mediatomb","pluto_myth","pluto_security","pluto_telecom","pluto_vdr");
 
