@@ -2,7 +2,8 @@
 
 ## Put a kernel image in there
 mkdir -p /tftpboot/default
-KERNEL=`find /lib/modules/* -type d -sort |head -1`
+cd /lib/modules
+KERNEL=`find * -type d |head -1`             
 cp /boot/vmlinuz-$KERNEL /tftpboot/default/vmlinuz
 mkinitramfs -d /etc/initramfs-tools-interactor/ -o /tftpboot/default/initrd $KERNEL
 
