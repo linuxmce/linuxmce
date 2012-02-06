@@ -246,6 +246,9 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             setDceResponse("OrbiterManager:MAIN No Router, Aborting");
             emit connectionValid(false);
             emit deviceValid(false);
+            pqOrbiter->Disconnect();
+            pqOrbiter->~qOrbiter();
+            delete pqOrbiter;
 
         }
         else
@@ -261,6 +264,9 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
                 setDceResponse("Connect Failed with Bad Device");
                 emit deviceValid(false);
                 emit connectionValid(true);
+                pqOrbiter->Disconnect();
+               pqOrbiter->~qOrbiter();
+               // delete pqOrbiter;
             }
         }
 
@@ -704,7 +710,6 @@ void qorbiterManager::swapSkins(QString incSkin)
 
     qorbiterUIwin->setSource(skin->entryUrl());
 
-
 }
 
 void qorbiterManager::skinLoaded(QDeclarativeView::Status status) {
@@ -937,9 +942,8 @@ void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
     bAppError =true;
     qs_routerip = incrouterip;
     iPK_Device = long(incdeviceid.toInt());
-
     setDceResponse("Connecting to LinuxMCE Core");
-    setupLmce(iPK_Device, incrouterip.toStdString(), false, false);
+    setupLmce(iPK_Device, qs_routerip.toStdString(), false, false);
 }
 
 
@@ -976,9 +980,17 @@ bool qorbiterManager::readLocalConfig()
         else
         {
             QDomElement configVariables = localConfig.documentElement().toElement();
-            qs_routerip = configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue();
-            currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
-            iPK_Device = configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong();
+
+            if(!configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue().isEmpty())
+            {
+                qs_routerip = configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue();
+            }
+             currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
+
+          if(configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong() !=0)
+           {
+                iPK_Device = configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong();
+            }
         }
         localConfigFile.close();
         return true;

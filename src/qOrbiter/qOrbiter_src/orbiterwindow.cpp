@@ -20,12 +20,15 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     this->b_skinIndexReady = false;
     this->b_devicePresent = true;
 
+    router = routerip;
+    deviceno = deviceid;
+
     mainView.rootContext()->setContextProperty("window", this);
     mainView.setWindowTitle("LinuxMCE Orbiter ");
     mainView.setResizeMode(QDeclarativeView::SizeViewToRootObject);
 
-    mainView.rootContext()->setContextProperty("deviceid", int(deviceid));
-    mainView.rootContext()->setContextProperty("srouterip", QString::fromStdString(routerip));
+    mainView.rootContext()->setContextProperty("deviceid", int(deviceno));
+    mainView.rootContext()->setContextProperty("srouterip", QString::fromStdString(router));
 
 #ifdef for_desktop
     buildType = "/qml/desktop";
@@ -91,6 +94,12 @@ QString orbiterWindow::getMessage()
 
 void orbiterWindow::qmlSetupLmce(QString device, QString ip)
 {
+
+    router = ip.toStdString();
+    deviceno = device.toLong();
+    mainView.rootContext()->setContextProperty("deviceid", int(deviceno));
+    mainView.rootContext()->setContextProperty("srouterip", QString::fromStdString(router));
+
     emit setupLmce(device, ip);
 
 }

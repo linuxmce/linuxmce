@@ -1,10 +1,11 @@
 <?xml version="1.0"?>
 <orbiter>
     <routerip id="192.168.80.1"/>
-    <device id=""/>
+    <device id="0"/>
     <routeraddress id="dcerouter"/>
     <skin id="default"/>
     <enablescreensavermode id="false"/>
     <defaultview id="flat"/>
     <phone id="true"/>
+    <networkload id="true" />
 </orbiter>

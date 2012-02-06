@@ -27,6 +27,8 @@ public:
     QString qrcPath;
     Q_INVOKABLE void forceResponse (QString forced);
 
+    std::string router;
+    long deviceno;
 
     bool newOrbiter;
 

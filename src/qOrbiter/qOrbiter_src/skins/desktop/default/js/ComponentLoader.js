@@ -145,7 +145,7 @@ function finishCreation() {
         //item.pageLoader.source = sprite
         if (sprite == null) {
             // Error Handling
-            console.log("Error creating object");
+            console.log("Not finished!");
         }
     } else if (component.status == Component.Error) {
         // Error Handling
