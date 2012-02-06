@@ -173,10 +173,11 @@ public:
     SkinDataItem* skin;
     QDeclarativeView  *qorbiterUIwin;               //Qml declarativeview
     QObject *item;                                  //qObject reference to UI
-    Q_INVOKABLE void refreshUI();
+    Q_INVOKABLE void refreshUI(QUrl url);
     bool cleanupData();
     Q_INVOKABLE void swapSkins(QString incSkin);
     QString dceResponse;
+
     bool connectedState;
 
     //----ANDROID----///

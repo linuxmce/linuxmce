@@ -275,24 +275,10 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
 }
 
-void qorbiterManager::refreshUI()
+void qorbiterManager::refreshUI(QUrl url)
 {
 
-
-    qorbiterUIwin->close();
-    QApplication::processEvents(QEventLoop::AllEvents);
-
-    if (pqOrbiter->GetConfig())
-    {
-        setDceResponse("Regen success, loading...");
-        QApplication::processEvents(QEventLoop::AllEvents);
-        getConf(iPK_Device);
-    }
-    else
-    {
-        emit loadingMessage("Cant Get Config!");
-        QApplication::processEvents(QEventLoop::AllEvents);
-    }
+ qorbiterUIwin->setSource(skin->entryUrl());
 
 
 }
@@ -708,7 +694,8 @@ void qorbiterManager::swapSkins(QString incSkin)
     QObject::connect(qorbiterUIwin, SIGNAL(statusChanged(QDeclarativeView::Status)),
                      this, SLOT(skinLoaded(QDeclarativeView::Status)));
 
-    qorbiterUIwin->setSource(skin->entryUrl());
+    QMetaObject::invokeMethod(this, "refreshUI", Qt::QueuedConnection, Q_ARG(QUrl, skin->entryUrl()));
+
 
 }
 
@@ -721,6 +708,7 @@ void qorbiterManager::skinLoaded(QDeclarativeView::Status status) {
     } else {
         qDebug() << "Correctly loaded skin, continuing";
         m_bStartingUp = false;
+
         startOrbiter();
 
     }

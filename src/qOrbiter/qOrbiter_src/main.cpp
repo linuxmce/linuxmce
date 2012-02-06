@@ -245,8 +245,46 @@ int main(int argc, char* argv[])
         QObject::connect(w,SIGNAL(connectionValid(bool)), &orbiterWin, SLOT(setConnectionState(bool)));
         QObject::connect(w,SIGNAL(deviceValid(bool)), &orbiterWin, SLOT(setDeviceState(bool)));
         QObject::connect(w,SIGNAL(localConfigReady(bool)), &orbiterWin, SLOT(setLocalConfigState(bool)));
-        //w->setupLmce(PK_Device, sRouter_IP, false, false);
 
+
+        if (w->setupLmce(w->iPK_Device, w->qs_routerip.toStdString(), false, false) == true)
+        {
+           // w->startOrbiter();
+        }
+        else
+        {
+            bAppError = true;
+            if(w->pqOrbiter->m_pEvent && w->pqOrbiter->m_pEvent->m_pClientSocket && w->pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
+            {
+                bAppError = false;
+                bReload = false;
+                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "OrbiterManager: No Router.  Will abort");
+                w->setDceResponse("OrbiterManager:MAIN No Router, Aborting");
+                orbiterWin.setConnectionState(false);
+                orbiterWin.setDeviceState(false);
+                w->pqOrbiter->Disconnect();
+                w->pqOrbiter->~qOrbiter();
+            }
+            else
+            {
+                bAppError = true;
+                if( w->pqOrbiter->m_pEvent&& w->pqOrbiter->m_pEvent->m_pClientSocket && w->pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice)
+                {
+                    bAppError = false;
+                    bReload = false;
+                    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device  Will abort");
+                    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
+                    //orbiterWin.mainView.setSource(QUrl("qrc:desktop/SetupNewOrbiter.qml"));
+                    w->setDceResponse("Connect Failed with Bad Device");
+                    orbiterWin.setDeviceState(false);
+                    orbiterWin.setConnectionState(false);
+                    w->pqOrbiter->Disconnect();
+                    w->pqOrbiter->~qOrbiter();
+                    // delete pqOrbiter;
+                }
+            }
+            orbiterWin.showSplash();
+        }
         a.exec();
     }
     catch(string s)
