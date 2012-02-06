@@ -74,7 +74,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     QApplication::processEvents(QEventLoop::AllEvents);
 
 #ifdef for_desktop
-    buildType = "/skins/desktop";
+    buildType = "/qml/desktop";
     qrcPath = "qrc:desktop/Splash.qml";
 #elif defined (for_freemantle)
     buildType = "/qml/freemantle";
@@ -89,7 +89,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     buildType = "/qml/android";
     qrcPath = ":android/Splash.qml";
     droidPath = "/";
-#elif defined (for_droid)
+#elif defined (for_android)
     buildType = "/qml/android/phone";
     qrcPath = "qrc:android/Splash.qml";
 #else
@@ -186,13 +186,15 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 #ifdef ANDROID
         remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/phone";
 #elif MACOSX
-       remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/macosx";
+        remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/macosx";
 #elif for_desktop
         remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/desktop";
 #elif for_harmattan
         remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/harmattan";
+#elif for_android
+        remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/phone";
 #else
-        remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/";
+        remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins";
 #endif
 
         QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
@@ -955,11 +957,12 @@ bool qorbiterManager::readLocalConfig()
     QFile localConfigFile;
 
     localConfigFile.setFileName(xmlPath);
-    // qDebug() << xmlPath;
+    qDebug() << xmlPath;
     if (!localConfigFile.open(QFile::ReadOnly))
     {
         setDceResponse("config not found!");
         return false;
+
     }
     else
     {
@@ -998,7 +1001,7 @@ bool qorbiterManager::writeConfig()
     // qDebug() << "Writing Config";
     // qDebug() << xmlPath;
     localConfigFile.setFileName(xmlPath);
-    if (!localConfigFile.open(QFile::ReadWrite))
+    if (!localConfigFile.open(QFile::ReadOnly))
     {
         setDceResponse("Cant Save Local Config");
         return false;
@@ -1016,23 +1019,28 @@ bool qorbiterManager::writeConfig()
             localConfigFile.close();
 
             QDomElement configVariables = localConfig.documentElement().toElement();
+
             configVariables.namedItem("routerip").attributes().namedItem("id").setNodeValue(qs_routerip);
-            //configVariables.namedItem("skin").attributes().namedItem("id").setNodeValue(currentSkin);
+            configVariables.namedItem("skin").attributes().namedItem("id").setNodeValue(currentSkin);
             configVariables.namedItem("device").attributes().namedItem("id").setNodeValue(QString::number(iPK_Device));
 
             QByteArray output = localConfig.toByteArray();
-            localConfigFile.open(QFile::ReadWrite);
+
+            localConfigFile.open(QFile::WriteOnly);
+
             if (!localConfigFile.write(output))
             {
-                setDceResponse("write failed");
                 localConfigFile.close();
+                setDceResponse("write failed");
+
                 return false;
             }
-            setDceResponse("write succeded");
             localConfigFile.close();
+            setDceResponse("write succeded");
 
+            return true;
         }
-    }return true;
+    }
 }
 
 void qorbiterManager::setStringParam(int paramType, QString param)

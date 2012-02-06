@@ -18,8 +18,8 @@ import QtQuick 1.0
                 id: rowheader
                 anchors.top: parent.top
                 anchors.topMargin: scaleY(2)
-                height: scaleY(13)
-                width: scaleX(8)
+                height: style.stdbuttonh
+                width: style.stdbuttonw
                 color: "transparent"
                 radius: style.but_smooth
 
@@ -42,8 +42,8 @@ import QtQuick 1.0
                 anchors.top: parent.top
                 anchors.topMargin: scaleY(2)
                 visible: dcenowplaying.b_mediaPlaying ? true : false
-                height: scaleY(13)
-                width: scaleX(8)
+                height: style.stdbuttonh
+                width: style.stdbuttonw
 
                 radius: style.but_smooth
                 buttontext: dcenowplaying.qs_mainTitle +" \n " + dcenowplaying.timecode
@@ -70,7 +70,7 @@ import QtQuick 1.0
 
                     model: currentRoomMedia
                     orientation:ListView.Horizontal
-                    spacing:1
+                    spacing:scaleX(5)
                     delegate: mediaDelegate
                     interactive: false
 

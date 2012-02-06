@@ -14,7 +14,7 @@ import QtQuick 1.0
 
         Row {
             id: guide
-            spacing:2
+            spacing:scaleX(1)
             x: scaleX(2)
 
             Rectangle {
@@ -53,7 +53,7 @@ import QtQuick 1.0
                     width: stage.width
                     height: scaleY(style.stdbuttonh)
                     model: currentRoomLights
-                    spacing: 5
+                    spacing: scaleX(5)
                     orientation:ListView.Horizontal
                     delegate:  lightingdelegate
                     interactive: false

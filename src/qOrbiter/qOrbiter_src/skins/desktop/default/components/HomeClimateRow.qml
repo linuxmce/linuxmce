@@ -14,7 +14,7 @@ color:"transparent"
 
         Row {
             id: guide
-            spacing:5
+            spacing:scaleX(2)
             x: scaleX(2)
             Rectangle {
                 id: rowheader

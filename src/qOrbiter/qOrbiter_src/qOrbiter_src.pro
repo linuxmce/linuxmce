@@ -23,19 +23,24 @@ TARGET = qorbiter
 # Add more folders to ship with the application, here
 for_desktop{
 
-folder_01.source = skins/desktop
-folder_01.target = $$DESTDIR/skins
+folder_01.source = qml/desktop
+folder_01.target = $$DESTDIR/qml
+
+folder_03.source = config.xml
+folder_03.target = $$DESTDIR
+
 
 DEFINES += for_desktop
 }
 
-for_droid{
-#folder_01.source = qml/android
+for_android{
+folder_01.source = qml/android/
+folder_01.target = $$DESTDIR/qml
 
-deployment.files= config.xml
-deployment.path= /assets #all assets must go to "/assets" folder of your android package
+folder_03.source = config.xml
+folder_03.target =
 
-DEFINES+=ANDROID
+DEFINES+=for_android
 }
 
 for_freemantle{
@@ -44,6 +49,9 @@ folder_01.target = $$DESTDIR/qml
 
 folder_02.source= img
 folder_02.target=     #left blank so it will appear in the root
+
+folder_03.source = config.xml
+folder_03.target = $$DESTDIR/config
 DEFINES += for_freemantle
 }
 
@@ -87,10 +95,11 @@ DEFINES+=ANDROID
 }
 
 #uncomment this line to work on skins locally
-!ANDROID{
+
 DEPLOYMENTFOLDERS = folder_01 folder_02 folder_03
-}
+ANDROID{
 INSTALLS +=deployment
+}
 
 # Additional import path used to resolve QML modules in Creator's code model
 QML_IMPORT_PATH =

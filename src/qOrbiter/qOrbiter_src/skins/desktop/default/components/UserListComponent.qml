@@ -4,8 +4,8 @@ import QtQuick 1.0
 Rectangle {
 
     id: rectangle1
-    height: scaleY(style.buttonH)
-    width:  scaleX(style.buttonW)
+    height: 45
+    width: 45
     clip: true
 
     transitions: Transition {
@@ -31,8 +31,8 @@ Rectangle {
     Image {
         id: userImage
         source: "../images/personal.png"
-        height: 60
-        width: 60
+        height: 35
+        width: 35
         anchors.centerIn: parent
     }
 
@@ -94,19 +94,18 @@ states: [
 
                 PropertyChanges {
                     target: rectangle1
-                    width: 400
-                    height: 200
+                    width: 200
+                    height: 175
                     color: "#d9e9ee"
                     radius: 24
-
-                    y:  -150
+                    y:  -75
                 }
 
                 PropertyChanges {
                     target: listview1
 
-                    width: 400
-                    height: 2000
+                    width: 200
+                    height: 175
                     clip: true
                     smooth: true
                     visible: true

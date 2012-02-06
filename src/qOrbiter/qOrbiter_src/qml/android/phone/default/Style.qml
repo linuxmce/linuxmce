@@ -18,7 +18,7 @@ import QtQuick 1.0
         //skin description
         property string skincreator: "Langston Ball (aka golgoj4)"
         property string skinname: "Android-Default"
-        property string skindir: "droid"
+        property string skindir: "default"
         property string skindescription: "Android phone skin, work in progress"
         property string skinversion: "1.0"
         property string skinvariation: "Android 320X480"
@@ -29,18 +29,18 @@ import QtQuick 1.0
     property int orbiterW: 320
     property color stageBG: "slategray"
     property int homescreenrowheight:100
-    property int homescreenbuttonheight: 90
-    property int homesreenbuttonwidth: 90
+    property int homescreenbuttonheight: 45
+    property int homesreenbuttonwidth: 45
     property color homescreenscenariobuttoncolor: "aliceblue"
     property color homescreenfloorplanbuttoncolor: "lightsteelblue"
     property color homeScreenNowPlayingColorInActive: "indianred"
     property color homeScreenNowPlayingColorActive: "lightcyan"
 
     //icon sizes
-    property int iconHeight: 90
-    property int iconWidth: 90
-        property int  stdbuttonh: 90
-        property int  stdbuttonw: 90
+    property int iconHeight: 45
+    property int iconWidth: 45
+        property int  stdbuttonh: 45
+        property int  stdbuttonw: 45
 
     //textStyles
      property string stylebuttonimage: ""

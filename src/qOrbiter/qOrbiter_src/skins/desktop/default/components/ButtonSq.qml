@@ -49,7 +49,7 @@ Rectangle{
             hoverEnabled: true
             onEntered: {
                 buttonBase.color = style.button_system_color_hover
-                buttonLabel.color = style.lighttext
+                buttonLabel.color = style.titlecolor
                 buttonLabel.font.capitalization = Font.AllUppercase
             }
 

@@ -1,6 +1,7 @@
 import QtQuick 1.0
-
-//import "js/ComponentLoader.js" as MyJs
+import "screens"
+import "components"
+import "js/ComponentLoader.js" as MyJs
 
  Item {
      id: item
@@ -10,6 +11,7 @@ import QtQuick 1.0
 
      property string locationinfo: "standby"
      property string screenfile
+
 
     // Style {id:style}
     width: style.orbiterW;
@@ -25,6 +27,8 @@ import QtQuick 1.0
 
      function screenchange(screenname )
      {
+        MyJs.screenchange(screenname)
+        /*
         pageLoader.source = "screens/"+screenname
         if (pageLoader.status == 1)
          {
@@ -36,6 +40,8 @@ import QtQuick 1.0
             screenfile = screenname
             pageLoader.source = "../screens/Screen_x.qml"
          }
+         */
+        pageLoader.source = "screens/"+screenname
      }
 
 
@@ -43,7 +49,7 @@ import QtQuick 1.0
      Loader {
          id:pageLoader
          objectName: "loadbot"
-         source: "screens/Splash.qml"
+
          onSourceChanged:  loadin
          onLoaded: {
 

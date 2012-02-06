@@ -119,3 +119,36 @@ function createThumbComponent(incavcomponent, thumbscreen) {
            console.log("Error in av component object")
 }
 }
+
+var component;
+var sprite;
+
+function screenchange(screenname) {
+    console.log("Command to change to:" + screenname);
+    component = Qt.createComponent("screens/"+screenname);
+    if (component.status == Component.Ready)
+    {
+        console.log("loaded!");
+        finishCreation();
+    }
+    else
+    {
+        console.log("delayed load, waiting..")
+        component.statusChanged.connect(finishCreation);
+    }
+}
+
+function finishCreation() {
+
+    if (component.status == Component.Ready) {
+        //sprite = component.createObject(item, {"x": 100, "y": 0});
+        //item.pageLoader.source = sprite
+        if (sprite == null) {
+            // Error Handling
+            console.log("Error creating object");
+        }
+    } else if (component.status == Component.Error) {
+        // Error Handling
+        console.log("Error loading component:", component.errorString());
+    }
+}

@@ -38,13 +38,13 @@ Rectangle {
                     anchors.fill: mainItem
                     hoverEnabled: true
                     onEntered: {
-                        mainItem.color = style.darkhighlight
+                        mainItem.color = style.button_system_color_hover
                         mainItem.scale = 1.25
                         mainItem.z = 10
 
                     }
                     onExited: {
-                        mainItem.color = style.lighthighlight
+                        mainItem.color = style.button_system_color
                         mainItem.scale = 1
                         mainItem.z = 1
                     }
@@ -214,8 +214,8 @@ Rectangle {
 
             ButtonSq
             {
-                height: scaleY(style.iconHeight)
-                width: scaleX(style.iconWidth)
+                height: style.stdbuttonh
+                width: style.stdbuttonw
                 buttontext: "Go Back"
                 buttontextbold: true
                 MouseArea
