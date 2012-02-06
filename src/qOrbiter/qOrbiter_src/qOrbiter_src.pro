@@ -81,10 +81,7 @@ macx{
 }
 
 ANDROID{
-#folder_01.source = qml/android
-
-deployment.files= config.xml
-deployment.path= /assets #all assets must go to "/assets" folder of your android package
+folder_01.source = qml/android
 
 DEFINES+=ANDROID
 }

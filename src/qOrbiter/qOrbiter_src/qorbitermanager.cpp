@@ -942,12 +942,12 @@ bool qorbiterManager::readLocalConfig()
 #ifdef Q_OS_MAC
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
 #elif ANDROID
-    QString xmlPath = "config.xml";
+    QString xmlPath = "/data/data/org.linuxmce.qorbiter/files/config.xml";
 #else
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #endif
     QFile localConfigFile;
-
+//**todo!! - add function for 1st run on android that copies the file to the xml path, then performs checks. we cannot install directly there.
     localConfigFile.setFileName(xmlPath);
     qDebug() << xmlPath;
     if (!localConfigFile.open(QFile::ReadOnly))
@@ -993,8 +993,8 @@ bool qorbiterManager::writeConfig()
 #ifdef Q_OS_MAC
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
 #elif ANDROID
-    QString xmlPath = "config.xml";
-#else
+    QString xmlPath = "/data/data/org.linuxmce.qorbiter/files/config.xml";
+        #else
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #endif
     QFile localConfigFile;

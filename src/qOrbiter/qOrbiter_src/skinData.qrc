@@ -6,8 +6,7 @@
     </qresource>
     <qresource prefix="/icons"/>
     <qresource prefix="/main">
-        <file alias="main.qml">qml/android/phone/default/main.qml</file>
-        <file alias="Style.qml">qml/android/phone/default/Style.qml</file>
+        <file>config.xml</file>
     </qresource>
     <qresource prefix="/desktop">
         <file alias="Splash.qml">qml/Splash.qml</file>
@@ -20,7 +19,7 @@
         <file alias="Splash.qml">qml/harmattan/default/Splash.qml</file>
     </qresource>
     <qresource prefix="/android">
-        <file alias="SetupNewOrbiter.qml">skins/andriod/SetupNewOrbiter.qml</file>
-        <file alias="Splash.qml">skins/andriod/Splash.qml</file>
+        <file alias="SetupNewOrbiter.qml">qml/android/phone/SetupNewOrbiter.qml</file>
+        <file alias="Splash.qml">qml/android/phone/Splash.qml</file>
     </qresource>
 </RCC>
