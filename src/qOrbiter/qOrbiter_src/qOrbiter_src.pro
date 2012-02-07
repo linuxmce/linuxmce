@@ -37,6 +37,8 @@ for_android{
 folder_01.source = qml/android/
 folder_01.target = $$DESTDIR/qml
 
+
+
 folder_03.source = config.xml
 folder_03.target =
 

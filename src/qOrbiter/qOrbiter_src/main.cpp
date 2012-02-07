@@ -246,6 +246,10 @@ int main(int argc, char* argv[])
         QObject::connect(w,SIGNAL(deviceValid(bool)), &orbiterWin, SLOT(setDeviceState(bool)));
         QObject::connect(w,SIGNAL(localConfigReady(bool)), &orbiterWin, SLOT(setLocalConfigState(bool)));
 
+        if(PK_Device > 1000)
+        {
+            PK_Device = 0;
+        }
 
         if (w->setupLmce(w->iPK_Device, w->qs_routerip.toStdString(), false, false) == true)
         {
@@ -263,7 +267,7 @@ int main(int argc, char* argv[])
                 orbiterWin.setConnectionState(false);
                 orbiterWin.setDeviceState(false);
                 w->pqOrbiter->Disconnect();
-                w->pqOrbiter->~qOrbiter();
+
             }
             else
             {
@@ -280,7 +284,7 @@ int main(int argc, char* argv[])
                     orbiterWin.setConnectionState(false);
                     w->pqOrbiter->Disconnect();
                     w->pqOrbiter->~qOrbiter();
-                    // delete pqOrbiter;
+
                 }
             }
             orbiterWin.showSplash();

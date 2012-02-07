@@ -56,11 +56,12 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
 
     if (readLocalConfig())
     {
+
         emit localConfigReady( true);
 
     }
     else
-    {   setDceResponse("Couldnt Read Config!");
+    {
         emit localConfigReady(false);
     }
 
@@ -138,7 +139,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
 
     QApplication::processEvents(QEventLoop::AllEvents);
 
-    setupLmce(iPK_Device, qs_routerip.toStdString(), false, false);
+
 }
 
 
@@ -248,7 +249,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             emit deviceValid(false);
             pqOrbiter->Disconnect();
             pqOrbiter->~qOrbiter();
-            delete pqOrbiter;
+
 
         }
         else
@@ -265,8 +266,8 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
                 emit deviceValid(false);
                 emit connectionValid(true);
                 pqOrbiter->Disconnect();
-               pqOrbiter->~qOrbiter();
-               // delete pqOrbiter;
+                pqOrbiter->~qOrbiter();
+
             }
         }
 
@@ -278,7 +279,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 void qorbiterManager::refreshUI(QUrl url)
 {
 
- qorbiterUIwin->setSource(skin->entryUrl());
+    qorbiterUIwin->setSource(skin->entryUrl());
 
 
 }
@@ -942,15 +943,33 @@ bool qorbiterManager::readLocalConfig()
 #ifdef Q_OS_MAC
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
 #elif ANDROID
-    QString xmlPath = "/data/data/org.linuxmce.qorbiter/files/config.xml";
+    QString xmlPath = "/mnt/sdcard/LinuxMCE/config.xml";
 #else
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #endif
     QFile localConfigFile;
-//**todo!! - add function for 1st run on android that copies the file to the xml path, then performs checks. we cannot install directly there.
+    //**todo!! - add function for 1st run on android that copies the file to the xml path, then performs checks. we cannot install directly there.
+
     localConfigFile.setFileName(xmlPath);
-    qDebug() << xmlPath;
-    if (!localConfigFile.open(QFile::ReadOnly))
+
+#ifdef ANDROID
+    if (createAndroidConfig())
+    {
+
+        if (!localConfigFile.exists())
+        {
+            setDceResponse("android config absent!");
+            return false;
+        }
+
+    }
+    else
+    {
+        return false;
+    }
+#endif
+
+    if (!localConfigFile.open(QFile::ReadWrite))
     {
         setDceResponse("config not found!");
         return false;
@@ -958,29 +977,32 @@ bool qorbiterManager::readLocalConfig()
     }
     else
     {
-        if (!localConfig.setContent( &localConfigFile))
+        QByteArray tDoc = localConfigFile.readAll();
+        localConfigFile.close();
+        if (!localConfig.setContent( tDoc))
         {
-            setDceResponse("Local Config Missing!");
-            setDceResponse("Enter information to continue, press connect when ready.");
-            localConfigFile.close();
+            setDceResponse("Could not parse config!");
             return false;
         }
         else
         {
+
             QDomElement configVariables = localConfig.documentElement().toElement();
 
             if(!configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue().isEmpty())
             {
                 qs_routerip = configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue();
             }
-             currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
+            currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
 
-          if(configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong() !=0)
-           {
+
+            if(configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong() !=0)
+            {
                 iPK_Device = configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong();
             }
+
         }
-        localConfigFile.close();
+
         return true;
     }
 }
@@ -993,17 +1015,17 @@ bool qorbiterManager::writeConfig()
 #ifdef Q_OS_MAC
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
 #elif ANDROID
-    QString xmlPath = "/data/data/org.linuxmce.qorbiter/files/config.xml";
-        #else
+    QString xmlPath = "/mnt/sdcard/LinuxMCE/config.xml";
+#else
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #endif
     QFile localConfigFile;
-    // qDebug() << "Writing Config";
-    // qDebug() << xmlPath;
+
     localConfigFile.setFileName(xmlPath);
-    if (!localConfigFile.open(QFile::ReadOnly))
+    if (!localConfigFile.open(QFile::ReadWrite))
     {
-        setDceResponse("Cant Save Local Config");
+        setDceResponse(localConfigFile.errorString());
+        //setDceResponse("Local Config is missing!");
         return false;
     }
     else
@@ -1011,32 +1033,30 @@ bool qorbiterManager::writeConfig()
 
         if (!localConfig.setContent( &localConfigFile))
         {
-
             setDceResponse("Cannot set document type!");
+            return false;
         }
         else
         {
             localConfigFile.close();
+            localConfigFile.remove();
 
             QDomElement configVariables = localConfig.documentElement().toElement();
-
             configVariables.namedItem("routerip").attributes().namedItem("id").setNodeValue(qs_routerip);
             configVariables.namedItem("skin").attributes().namedItem("id").setNodeValue(currentSkin);
             configVariables.namedItem("device").attributes().namedItem("id").setNodeValue(QString::number(iPK_Device));
 
             QByteArray output = localConfig.toByteArray();
 
-            localConfigFile.open(QFile::WriteOnly);
-
+            localConfigFile.open(QFile::ReadWrite);
             if (!localConfigFile.write(output))
             {
                 localConfigFile.close();
-                setDceResponse("write failed");
-
+                setDceResponse("save failed");
                 return false;
             }
             localConfigFile.close();
-            setDceResponse("write succeded");
+            setDceResponse("save succeded");
 
             return true;
         }
@@ -1641,6 +1661,51 @@ void qorbiterManager::activateScreenSaver()
 
 void qorbiterManager::killScreenSaver()
 {
+}
+
+bool qorbiterManager::createAndroidConfig()
+{
+    QFile droidConfig("/mnt/sdcard/LinuxMCE/config.xml");
+    if (droidConfig.exists() && droidConfig.size() != 0)
+    {   setDceResponse("Data exists, exiting 1st run");
+        return true;
+    }
+    else
+    {
+        QDir filePath;
+        if(filePath.mkpath("/mnt/sdcard/Linuxmce/"))
+        {
+            setDceResponse("Made path");
+        }
+
+        QFile defaultConfig(":main/config.xml");
+
+        if(defaultConfig.copy("/mnt/sdcard/Linuxmce/config.xml"))
+        {
+            setDceResponse("file copied, verifying");
+            /*
+            droidConfig.setPermissions(QFile::WriteOther);
+            setDceResponse(droidConfig.errorString());
+            droidConfig.setPermissions(QFile::ReadOther);
+            setDceResponse(droidConfig.errorString());
+            droidConfig.setPermissions(QFile::ExeOwner);
+            setDceResponse(droidConfig.errorString());
+            */
+            if (droidConfig.exists() && droidConfig.size() !=0)
+            {
+                setDceResponse("config size: "+ QString::number(droidConfig.size()));
+                return true;
+            }
+
+        }
+        else
+        {
+            setDceResponse("Cannot install configuration!!");
+            setDceResponse(droidConfig.errorString());
+            return false;
+        }
+    }
+
 }
 
 

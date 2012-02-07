@@ -389,6 +389,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
 
     int loadSplash();
     void startOrbiter();
+    bool createAndroidConfig();
 
     Q_INVOKABLE bool writeConfig();
     bool readLocalConfig();
