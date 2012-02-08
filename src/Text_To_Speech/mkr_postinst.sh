@@ -36,6 +36,4 @@ rm -rf hts_tmp/
 
 echo "Finished installing Nitech HTS voices."
 
-
-
-
+sudo mkdir -p /var/lib/asterisk/sounds/pluto/
