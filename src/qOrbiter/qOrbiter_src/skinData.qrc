@@ -4,7 +4,6 @@
         <file alias="harmattan_splash_bkg.png">img/harmattan_splash_bkg.png</file>
         <file alias="harmattan_splash.png">img/harmattan_splash.png</file>
     </qresource>
-    <qresource prefix="/icons"/>
     <qresource prefix="/main">
         <file>config.xml</file>
     </qresource>

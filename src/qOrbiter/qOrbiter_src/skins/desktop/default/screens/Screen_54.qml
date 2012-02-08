@@ -5,6 +5,7 @@ import "../js/ComponentLoader.js" as MyJs
 Rectangle {
     id: storedaudioremote
 
+
     Timer{
         id:singleshot
         repeat: false
@@ -103,8 +104,8 @@ Rectangle {
                 }
                 Image {
                     id: nowplayingimage
-                    width: dcenowplaying.aspect=="wide"? scaleX(18) : scaleX(18)
-                    height:dcenowplaying.aspect=="wide"? scaleY(30) : scaleY(30)
+                    width: scaleX(30)
+                    height:scaley(30)
                     source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
                     anchors.horizontalCenter: parent.horizontalCenter
                     smooth: true
@@ -127,14 +128,14 @@ Rectangle {
                 height: childrenRect.height
                 width: scaleX(40)
                 color:"transparent"
-                anchors.left:  imageholder.right;
-                anchors.top:  imageholder.top
-                anchors.bottomMargin: dcenowplaying.aspect == "wide"? 10 : 20
+                anchors.left:  imageholder.left;
+                anchors.top:  imageholder.bottom
+
                 clip:true
                 Column{
                     spacing: scaleY(.5)
-                    width: childrenRect.width
-                    height: dcenowplaying.aspect == "wide"?scaleY(25): scaleY(35)
+                    width: scaleX(35)
+                    height: 25
                     Text {
                         id: starring
                         width: scaleX(40)
@@ -225,25 +226,21 @@ Rectangle {
             }
         }
     }
-    Row{
-        id:controlrow
-        anchors.top: mainrow.bottom
-        anchors.topMargin: scaleY(5)
-        height: controlcol.height
-        width: childrenRect.width
-        anchors.horizontalCenter: parent.horizontalCenter
-        Column{
-            id:controlcol
-            height: childrenRect.height
-            width: childrenRect.width
-            spacing: scaleY(1)
+
+
+
             VideoControls {
                 id: videocontrols1
+                anchors.bottom:optionrow.top
             }
+
+
             Row{
+                id:optionrow
                 height: childrenRect.height
-                width: childrenRect.width
-                spacing: scaleX(1)
+                width: style.orbiterw
+                spacing: scaleX(5)
+                anchors.bottom: storedaudioremote.bottom
 
                 AvOptionButton{
                     buttontext: qsTr("Bookmarks")
@@ -276,10 +273,6 @@ Rectangle {
                 }
                 HomeButton{}
             }
-        }
-    }
-
-
 
 }
 

@@ -207,7 +207,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 #ifdef ANDROID
         loadSkins(QUrl(remoteDirectoryPath));
 #else
-        loadSkins(QUrl(remoteDirectoryPath));
+        loadSkins(QUrl(localDir));
 #endif
 
         if (pqOrbiter->initialize()) //the dcethread initialization
@@ -1573,6 +1573,7 @@ void qorbiterManager::startOrbiter()
     setDceResponse("Showing main orbiter window");
     m_bStartingUp = false;
     qorbiterUIwin->setWindowTitle("LinuxMCE Orbiter " + QString::number(iPK_Device));
+
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeViewToRootObject);
     QApplication::processEvents(QEventLoop::AllEvents);
     gotoQScreen("Screen_1.qml");
@@ -1713,8 +1714,20 @@ bool qorbiterManager::createAndroidConfig()
 void qorbiterManager::checkOrientation(QSize)
 {
     setDceResponse("orientation changed!! ");
-
+    if(qorbiterUIwin->height() < qorbiterUIwin->width())
+    {
     b_orientation = false;
+    setDceResponse("wide");
+    appHeight = qorbiterUIwin->height();
+    appWidth = qorbiterUIwin->width();
+    }
+    else
+    {
+    b_orientation = true;
+    setDceResponse("profile");
+    appHeight = qorbiterUIwin->height();
+    appWidth = qorbiterUIwin->width();
+    }
 }
 
 

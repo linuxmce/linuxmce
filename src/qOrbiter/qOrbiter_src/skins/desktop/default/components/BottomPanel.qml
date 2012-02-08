@@ -4,8 +4,8 @@ import "../js/ComponentLoader.js" as MyJs
 
 Rectangle {
     id:advanced_panel
-    width: style.orbiterW
-    height: style.widebuttonh + scaleY(4)
+    width: 320
+    height: 50
     color:"transparent"
 
     Image {

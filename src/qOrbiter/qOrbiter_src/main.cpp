@@ -232,6 +232,7 @@ int main(int argc, char* argv[])
 #ifndef for_harmattan
         QApplication::setGraphicsSystem("raster");
 #endif
+
         QApplication  a(argc, argv);
         orbiterWindow orbiterWin(PK_Device, sRouter_IP);
         QApplication::processEvents(QEventLoop::AllEvents);

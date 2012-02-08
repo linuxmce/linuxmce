@@ -60,7 +60,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 #endif
 
     mainView.setSource(QUrl(qrcPath));
-mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
+
 
 #ifdef Q_OS_SYMBIAN
     mainView.showFullScreen();
@@ -73,7 +73,8 @@ mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #elif defined(ANDROID)
     mainView.showMaximized();
 #else
-    mainView.show();
+    mainView.showNormal();
+    mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
 
 }

@@ -144,6 +144,8 @@ public:
     QString m_SkinsDirectoryPath;
     QString aspect; //-- true poster || false landscape
     bool b_orientation;
+    int appHeight;
+    int appWidth;
 
     ScreenSaverClass ScreenSaver;
 

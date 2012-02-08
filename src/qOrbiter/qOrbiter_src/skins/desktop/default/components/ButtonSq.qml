@@ -21,7 +21,7 @@ Rectangle{
         height: parent.height
         width: parent.width
         border.width: 2
-        border.color: style.highlight1
+        border.color: "aliceblue"
         radius: 5
 
         Text {
@@ -49,7 +49,7 @@ Rectangle{
             hoverEnabled: true
             onEntered: {
                 buttonBase.color = style.button_system_color_hover
-                buttonLabel.color = style.titlecolor
+                buttonLabel.color = "black"
                 buttonLabel.font.capitalization = Font.AllUppercase
             }
 

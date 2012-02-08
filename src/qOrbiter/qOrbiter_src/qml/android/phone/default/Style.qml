@@ -12,21 +12,23 @@ import QtQuick 1.0
   */
 
 
-    QtObject{
-        id:classicstyle
-        objectName: "orbiter_style"
-        //skin description
-        property string skincreator: "Langston Ball (aka golgoj4)"
-        property string skinname: "Android-Default"
-        property string skindir: "default"
-        property string skindescription: "Android phone skin, work in progress"
-        property string skinversion: "1.0"
-        property string skinvariation: "Android 320X480"
-        property string maincolor: "grey"
-        property string accentcolor: "indianred"
+QtObject{
+    id:classicstyle
+    objectName: "orbiter_style"
+    //skin description
+    property string skincreator: "Langston Ball (aka golgoj4)"
+    property string skinname: "Android-Default"
+    property string skindir: "default"
+    property string skindescription: "Android phone skin, work in progress"
+    property string skinversion: "1.0"
+    property string skinvariation: "Android 320X480"
+    property string maincolor: "grey"
+    property string accentcolor: "indianred"
     //main stage styles
     property int orbiterH:480
     property int orbiterW: 320
+    property int orbiterWp: 480
+    property int orbiterHp: 320
     property color stageBG: "slategray"
     property int homescreenrowheight:100
     property int homescreenbuttonheight: 45
@@ -39,11 +41,11 @@ import QtQuick 1.0
     //icon sizes
     property int iconHeight: 45
     property int iconWidth: 45
-        property int  stdbuttonh: 45
-        property int  stdbuttonw: 45
+    property int  stdbuttonh: 45
+    property int  stdbuttonw: 45
 
     //textStyles
-     property string stylebuttonimage: ""
+    property string stylebuttonimage: ""
     property int title_size: 18
     property color tile_color: "whitesmoke"
 
@@ -51,10 +53,14 @@ import QtQuick 1.0
     property color t_but_color: "darkgrey"
 
     //title and other misc windo accents
- property color titletextcolor: "black"
+    property color titletextcolor: "black"
     //button styling
-    property int buttonH:95
-    property int buttonW: 95
+    property int buttonH:45
+    property int buttonW: 45
+    property int avoptionbuttonh :45
+    property int avoptionbuttonw :45
+     property int mediabuttonw :45
+     property int mediabuttonh :45
     property color button_system_color: "lightsteelblue"
     property color button_system_color_hover: "lightblue"
 

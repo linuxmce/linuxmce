@@ -4,7 +4,7 @@ Rectangle {
     id:nonepgplaylist
     width: scaleX(25)
     height: scaleY(55)
-    color: style.highlight2
+    color: "transparent"
     border.color: style.highlight1
     border.width: 2
     clip:false
@@ -50,7 +50,7 @@ Rectangle {
             width:scaleX(25)
             height: scaleY(12)
             anchors.horizontalCenter: parent.horizontalCenter
-            color: style.darkhighlight
+            color: "darkgrey"
             clip: true
             Image {
                 id: playlistimage
@@ -81,14 +81,14 @@ Rectangle {
 
             }
 
-            Image {
+         /*   Image {
                 id: overlay
                 fillMode: Image.PreserveAspectCrop
-                source: "../images/header.png"
+                source: "../img/header.png"
                 anchors.fill: parent
                 opacity: .30
             }
-
+         */
             MouseArea{
                 anchors.fill: parent
                 onClicked: changedPlaylistPosition(name)

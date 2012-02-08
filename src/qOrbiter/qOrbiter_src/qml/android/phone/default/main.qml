@@ -9,13 +9,14 @@ import "js/ComponentLoader.js" as MyJs
      signal changeScreen(string s)
      signal setupStart(int x, string y)
 
+
      property string locationinfo: "standby"
      property string screenfile
 
 
     // Style {id:style}
-    width: style.orbiterW;
-    height: style.orbiterH;
+    width:style.orbiterW
+    height:style.orbiterH
 
 
     function scaleX(x){

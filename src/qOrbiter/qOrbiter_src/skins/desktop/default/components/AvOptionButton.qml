@@ -31,7 +31,7 @@ horizontalTileMode: BorderImage.Repeat
         height: parent.height
         width: parent.width
         border.width: 2
-        border.color: style.highlight1
+        border.color: "aliceblue"
         radius: 2.5
 
         Text {
@@ -58,7 +58,7 @@ horizontalTileMode: BorderImage.Repeat
             hoverEnabled: true
             onEntered: {
                 buttonBase.color = style.button_system_color_hover
-                buttonLabel.color = style.lighttext
+                buttonLabel.color = "white"
                 buttonLabel.font.capitalization = Font.AllUppercase
             }
 
