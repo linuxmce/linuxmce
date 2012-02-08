@@ -143,6 +143,7 @@ public:
     QDir skinsDir;
     QString m_SkinsDirectoryPath;
     QString aspect; //-- true poster || false landscape
+    bool b_orientation;
 
     ScreenSaverClass ScreenSaver;
 
@@ -390,6 +391,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     int loadSplash();
     void startOrbiter();
     bool createAndroidConfig();
+    void checkOrientation(QSize);
 
     Q_INVOKABLE bool writeConfig();
     bool readLocalConfig();

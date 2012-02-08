@@ -1,5 +1,5 @@
 #include "skinloader.h"
-#include "qorbitermanager.h";
+#include "qorbitermanager.h"
 #include <QDebug>
 
 SkinLoader::SkinLoader(QUrl baseUrl, qorbiterManager *uiRef, SkinDataModel *parent): ui_reference(uiRef), m_base_url(baseUrl), m_parent(parent)

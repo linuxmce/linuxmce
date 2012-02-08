@@ -246,6 +246,7 @@ int main(int argc, char* argv[])
         QObject::connect(w,SIGNAL(deviceValid(bool)), &orbiterWin, SLOT(setDeviceState(bool)));
         QObject::connect(w,SIGNAL(localConfigReady(bool)), &orbiterWin, SLOT(setLocalConfigState(bool)));
 
+
         if(PK_Device > 1000)
         {
             PK_Device = 0;

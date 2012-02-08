@@ -12,6 +12,7 @@
 orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *parent) :
     QObject(parent)
 {
+
     newOrbiter = false;
     this->b_connectionPresent = true;
     this->b_localConfigReady = true;
@@ -26,6 +27,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     mainView.rootContext()->setContextProperty("window", this);
     mainView.setWindowTitle("LinuxMCE Orbiter ");
     mainView.setResizeMode(QDeclarativeView::SizeViewToRootObject);
+    //QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
 
     mainView.rootContext()->setContextProperty("deviceid", int(deviceno));
     mainView.rootContext()->setContextProperty("srouterip", QString::fromStdString(router));
@@ -58,6 +60,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 #endif
 
     mainView.setSource(QUrl(qrcPath));
+mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
 
 #ifdef Q_OS_SYMBIAN
     mainView.showFullScreen();
@@ -68,7 +71,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 #elif defined(for_desktop)
     mainView.showMaximized();
 #elif defined(ANDROID)
-    mainView.showFullScreen();
+    mainView.showMaximized();
 #else
     mainView.show();
 #endif

@@ -72,8 +72,10 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     qorbiterUIwin->rootContext()->setContextProperty("manager", this); //providing a direct object for qml to call c++ functions of this class
     qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse); //file grids current media type
     item = qorbiterUIwin->rootObject();
-    QApplication::processEvents(QEventLoop::AllEvents);
 
+    QObject::connect(qorbiterUIwin, SIGNAL(sceneResized(QSize)),  SLOT(checkOrientation(QSize)), Qt::DirectConnection );
+
+    QApplication::processEvents(QEventLoop::AllEvents);
 #ifdef for_desktop
     buildType = "/qml/desktop";
     qrcPath = "qrc:desktop/Splash.qml";
@@ -280,7 +282,7 @@ void qorbiterManager::refreshUI(QUrl url)
 {
 
     qorbiterUIwin->setSource(skin->entryUrl());
-
+    qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 
 }
 
@@ -1706,6 +1708,13 @@ bool qorbiterManager::createAndroidConfig()
         }
     }
 
+}
+
+void qorbiterManager::checkOrientation(QSize)
+{
+    setDceResponse("orientation changed!! ");
+
+    b_orientation = false;
 }
 
 
