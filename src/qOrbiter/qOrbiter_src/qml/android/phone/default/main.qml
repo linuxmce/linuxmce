@@ -18,6 +18,12 @@ import "js/ComponentLoader.js" as MyJs
     width:style.orbiterW
     height:style.orbiterH
 
+    Image {
+        id: bg
+        source: "img/bkg.png"
+        height: style.orbiterH
+        width: style.orbiterW
+    }
 
     function scaleX(x){
         return x/100*style.orbiterW

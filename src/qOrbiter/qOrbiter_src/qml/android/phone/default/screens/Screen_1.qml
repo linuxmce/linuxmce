@@ -1,51 +1,29 @@
 import QtQuick 1.0
-
 import "../components"
 
-Item
-{
 
-Rectangle {
-    id:stage
+    Rectangle {
+        id:stage
+anchors.centerIn: parent
+        signal swapStyle()
+        height: style.orbiterH
+        width: style.orbiterW
+        color: "transparent"
 
 
-    signal swapStyle()
-    height: style.orbiterH
-    width: style.orbiterW
-    opacity: 1
 
-    Rectangle{
-        id:bgrect
-        anchors.fill: parent
-        z:0
-        color: style.advanced_bg
+        Column{
+            id:maindisplay
+            anchors.centerIn: parent
+            height: childrenRect.height
+            width: scaleX(100)
+            NowPlayingBox{anchors.horizontalCenter: parent.horizontalCenter}
 
-        SequentialAnimation on color
-        {
-            running:true
-            loops:Animation.Infinite
+            DroidHomeSelector{anchors.horizontalCenter: parent.horizontalCenter}
 
-        ColorAnimation  { from: style.advanced_bg ; to: "steelblue"; duration: 5000 }
-        ColorAnimation  { from: "steelblue" ; to: "slategrey"; duration: 5000 }
-        ColorAnimation { from:  "slategrey"; to: "aliceblue"; duration: 5000 }
-        ColorAnimation  { from: "aliceblue" ; to: style.advanced_bg; duration: 5000 }
+
         }
 
-
     }
 
-Column{
-    id:maindisplay
-    anchors.fill: parent
-    spacing: 0
-    HomeLightingRow{id:lightRow }
-    HomeMediaRow{id: mediaRow}
-    HomeClimateRow{id: climateRow}
-    HomeTelecomRow{id: telecomRow}
-    HomeSecurityRow{id: securityRom}
-
-}
-BottomPanel{id: advanced; color:style.rowbgColor; anchors.bottom: stage.bottom}
-    }
-}
 

@@ -71,7 +71,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 #elif defined(for_desktop)
     mainView.showMaximized();
 #elif defined(ANDROID)
-    mainView.showMaximized();
+    mainView.showFullScreen();
 #else
     mainView.showNormal();
     mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
