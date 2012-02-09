@@ -207,7 +207,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 #ifdef ANDROID
         loadSkins(QUrl(remoteDirectoryPath));
 #else
-        loadSkins(QUrl(localDir));
+        loadSkins(QUrl(remoteDirectoryPath));
 #endif
 
         if (pqOrbiter->initialize()) //the dcethread initialization
@@ -1434,11 +1434,11 @@ void qorbiterManager::updateTimecode()
     string sIPAddress;
     if(nowPlayingButton->b_mediaPlaying == true && !timeCodeSocket->isValid())
     {
-        //qDebug("media playing with no timecode!");
+        qDebug("media playing with no timecode!");
         if(!timeCodeSocket->isOpen())
 
         {
-            //qDebug("socket is closed, opening!");
+            qDebug("socket is closed, opening!");
             DeviceData_Base *pDevice = pqOrbiter->m_dwPK_Device_NowPlaying ? pqOrbiter->m_pData->m_AllDevices.m_mapDeviceData_Base_Find(pqOrbiter->m_dwPK_Device_NowPlaying) : NULL;
             if( NULL != pDevice &&
                     (
@@ -1448,7 +1448,7 @@ void qorbiterManager::updateTimecode()
                     )
             {
                 sIPAddress = pDevice->m_sIPAddress;
-                //qDebug() << sIPAddress.c_str();
+                qDebug() << sIPAddress.c_str();
                 if( sIPAddress.empty() )
                 {
                     //qDebug() << "ip empty...";

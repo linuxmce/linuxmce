@@ -20,55 +20,48 @@ Rectangle {
         source: "qrc:/img/desktop_splash.png"
         anchors.fill: parent
     }
-    Text {
-        id: welcome
-        text: qsTr("Welcome To LinuxMCE!")
-        font.pixelSize: 14
-        color: "darkgrey"
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top:parent.top
-    }
 
     Column{
+        x: 9
+        y: 169
         height: parent.height
         width: 150
         spacing: 2
-        anchors.left: parent.left
 
         Text {
             id: connection_present
             text: qsTr("Connection")
             color: window.b_connectionPresent ? "transparent" : "red"
-            font.pointSize: window.b_connectionPresent ? 12 : 12
+            font.pointSize: window.b_connectionPresent ? 14 : 12
         }
 
         Text {
             id: device
             text: qsTr("Device")
             color: window.b_devicePresent ? "transparent" : "red"
-            font.pointSize: window.b_devicePresent ? 12 : 12
+            font.pointSize: window.b_devicePresent ? 14 : 12
         }
 
         Text {
             id: configuration_file
             text: qsTr("Config")
             color: window.b_localConfigReady ? "red" : "green"
-            font.pointSize: window.b_localConfigReady ? 12 : 12
+            font.pointSize: window.b_localConfigReady ? 14 : 12
         }
 
         Text {
             id: skin_index
             text: qsTr("Skins")
-            font.pointSize: window.b_localConfigReady ? 12 : 12
            // opacity: 0
         }
 
         Text {
             id: orbiter_config
             text: qsTr("Orbiter Config")
-            font.pointSize: window.b_localConfigReady ? 12 : 12
            // opacity: 0
         }
+
+
 
     }
 
@@ -107,16 +100,28 @@ Rectangle {
         height: 100
         opacity: 1
         color: "transparent"
-
+        Text {
+            id: welcome
+            text: qsTr("Welcome To LinuxMCE!")
+            font.pointSize: 18
+            font.italic: true
+            font.family: "Droid Sans"
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
+        }
 
     }
     Rectangle {
         id: rectangle2
+        x: -24
+        y: 87
       anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
-        width: rectangle1.width
-        height: 57
+        width: 314
+        height: 83
         radius: 7
+        anchors.verticalCenterOffset: -124
+        anchors.horizontalCenterOffset: 1
         anchors.centerIn: rectangle1
         border.width: 1
         border.color: "#000000"
@@ -135,8 +140,8 @@ Rectangle {
     Text {
         id: connectionlabel
         text: qsTr("Set Connection Details")
-        font.bold: true
         font.pixelSize: 12
+        font.bold: true
         anchors.top: rectangle2.top
         anchors.horizontalCenter: parent.horizontalCenter
     }
@@ -147,15 +152,17 @@ Rectangle {
         spacing: 10
         Text {
             text: qsTr("Host:")
-            font.pixelSize: 12
+            font.pixelSize: 11
+            font.family: "Droid Sans"
             anchors.verticalCenter: parent.verticalCenter
         }
 
         TextInput {
             id: routerip
-            width: 110
+            width: 80
             text: srouterip
-            font.pixelSize: 12
+            font.pointSize: 10
+            font.family: "Droid Sans"
           //  onTextChanged: setRouterIp(routerip.text)
             fillColor: "grey"
             anchors.verticalCenter: parent.verticalCenter
@@ -163,14 +170,15 @@ Rectangle {
 
         Text {
             text: qsTr("Device:")
+            font.pixelSize: 11
+            font.family: "Droid Sans"
             anchors.verticalCenter: parent.verticalCenter
-            font.pixelSize: 12
-
         }
         TextInput {
             id: devicenumber
             width: 25
             text: deviceid
+            font.family: "Droid Sans"
             font.pixelSize: 12
             //onTextChanged: setDeviceNo(devicenumber.text)
             fillColor: "grey"
@@ -181,13 +189,16 @@ Rectangle {
       Rectangle {
             id: connectbutton
             height: 25
-            width: 75
+            width: 41
             color:"red"
             Text {
                 id: name
-                text: qsTr("Connect!")
-
+                x: 10
+                y: 6
+                text: qsTr("Go!")
                 font.pixelSize: 12
+                verticalAlignment: Text.AlignTop
+                font.bold: true
             }
 
             radius:  5
@@ -204,18 +215,19 @@ Rectangle {
       Rectangle {
             id: exitbutton
             height: 25
-            width: 50
+            width: 45
 
             Text {
                 id: exitlabel
+                x: 13
+                y: 6
                 text: qsTr("Exit")
-                font.pixelSize: 16
+                font.pixelSize: 11
             }
 
             radius:  4
             MouseArea{
-                anchors.fill:parent
-            onClicked: Qt.quit
+            ///onClicked: //qmlSetupLmce(devicenumber.text, routerip.text)
             anchors.verticalCenter: parent.verticalCenter
             }
 
@@ -223,11 +235,12 @@ Rectangle {
     }
     Text {
         id: loadingStatus
+        x: 33
+        y: 423
         text: "Status " + window.message
-        font.pointSize: 14
-        color: "darkgrey"
-        font.bold: true
-        anchors.bottom: rectangle1.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
+        font.pixelSize: 14
+        font.family: "Droid Sans"
+        color: "white"
+        anchors.top: rectangle2.bottom
     }
 }

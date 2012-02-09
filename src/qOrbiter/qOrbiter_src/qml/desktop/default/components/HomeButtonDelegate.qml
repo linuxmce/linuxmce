@@ -6,18 +6,25 @@ Component{
         //important!! these need to be set on an imported component otherwise its appears all wrong!
         height: scaleY(13)
         width: scaleX(8)
-
+        Image {
+            id: overlay
+            fillMode: Image.PreserveAspectFit
+            source: "../img/ui3/linuxmcewidebutton.png"
+            height: parent.height
+            width: parent.width
+        }
         ImgButton
         {       id:delegateButton
             anchors.top: parent.top
             anchors.topMargin: scaleY(2)
             color:"transparent"
-            // height: style.stdbuttonh
-            // width: style.stdbuttonw
+            height: style.stdbuttonh
+            width: style.stdbuttonw
             buttontext: title
             buttontextbold: true
             buttontextitalic: true
             buttonopacity: .85
+
 
             MouseArea{
                 anchors.fill: delegateButton

@@ -31,7 +31,7 @@ import "js/ComponentLoader.js" as MyJs
 
      function screenchange(screenname )
      { 
-        pageLoader.source = "/screens/"+screenname
+        pageLoader.source = "screens/"+screenname
         if (pageLoader.status == 1)
          {
              //manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
@@ -40,7 +40,7 @@ import "js/ComponentLoader.js" as MyJs
          {
             console.log("Command to change to:" + screenname + " failed!")
             screenfile = screenname
-            pageLoader.source = "/screens/Screen_x.qml"
+            pageLoader.source = "screens/Screen_x.qml"
          }
      }
 

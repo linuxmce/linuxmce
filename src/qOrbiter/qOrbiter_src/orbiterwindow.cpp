@@ -51,7 +51,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 #elif defined (ANDROID)
     buildType = "/qml/android";
     qrcPath = "qrc:android/Splash.qml";
-#elif defined (for_droid)
+#elif defined (for_android)
     buildType = "/qml/android/phone";
     qrcPath = "qrc:android/Splash.qml";
 #else

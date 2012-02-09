@@ -14,7 +14,7 @@ Item
 
         Image {
             id: headerbg
-            source: "../../../img/ui3/header.png"
+            source: "../img/ui3/header.png"
             anchors.top: stage.top
             height: scaleY(7)
             width: scaleX(99)

@@ -1,80 +1,62 @@
 import QtQuick 1.0
 
 Rectangle {
-    width: 350
-    height: 350
-    color: style.advanced_bg
+    width: np_box.width
+    height: np_box.height
+    id: now_playing
 
-    Rectangle {
-        id: rectangle1
-        x: 0
-        y: 0
-        width: 350
-        height: 38
-        gradient: Gradient {
-            GradientStop {
-                position: 0
-                color: "#ffffff"
-            }
-
-            GradientStop {
-                position: 1
-                color: "#3878a0"
-            }
-        }
-
-        Text {
-            id: nowplayingboxtext2
-
-
-           anchors.bottom: parent.bottom
-            wrapMode: "NoWrap"
-            text: dcenowplaying.qs_subTitle
-            font.bold: true
-            smooth: true
-            horizontalAlignment: Text.AlignHCenter
-            font.pixelSize: 12
-        }
-
-        Text {
-            id: text1
-            x: 255
-            y: 12
-            text: dcenowplaying.qs_playbackSpeed
-            font.pixelSize: 12
-        }
-    }
+    visible: dcenowplaying.b_mediaPlaying ? true : false
+    color:"transparent"
 
     Image {
-        id: image1
-        x: 125
-        y: 101
-        width: 100
-        height: 100
-        source: "image://datagridimg/"+dcenowplaying.nowplayingimage
+        id: np_box
+        source: "../img/nowplayingbox.png"
     }
-
-    Rectangle {
-        id: rectangle2
-        x: 0
-        y: 262
-        width: 350
-        height: 88
-        color: "#ffffff"
-
-        Text {
-            id: nowplayingboxtext
-
-           anchors.fill: parent
-           anchors.top: parent.top
-            wrapMode: "NoWrap"
-            text: dcenowplaying.qs_mainTitle
-            font.bold: true
-            smooth: true
-            horizontalAlignment: Text.AlignHCenter
-            font.pixelSize: 12
-        }
-
+    Image {
+        id: nowplayingimage
+        height: style.orbiterh
+        fillMode: Image.PreserveAspectCrop
+        width: style.orbiterw
+        anchors.fill: np_box
+        source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
 
     }
+    Text {
+        id: np_label
+        text: qsTr("NowPlaying")
+        font.pixelSize: 12
+        anchors.top: np_box.top
+        anchors.topMargin: 15
+        anchors.left: np_box.left
+        anchors.leftMargin: 20
+        color: "Green"
+    }
+
+    Text{
+        text: dcenowplaying.qs_mainTitle
+        font.pixelSize: 12
+        anchors.top: np_label.bottom
+        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+        color: "white"
+        width: np_box.width - 40
+        anchors.horizontalCenter: np_box.horizontalCenter
+    }
+
+    MouseArea{
+        anchors.fill: parent
+        onClicked:screenchange(dcenowplaying.qs_screen)
+    }
+
+    Text {
+        id: np
+        text:dcenowplaying.timecode
+        font.pixelSize: 12
+        anchors.bottom: np_label.bottom
+        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+        anchors.horizontalCenter: np_box.horizontalCenter
+        color: "white"
+
+    }
+
+
 }

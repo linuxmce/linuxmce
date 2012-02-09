@@ -4,9 +4,37 @@ Component{
 
     Item{
         //important!! these need to be set on an imported component otherwise its appears all wrong!
-        height: scaleY(13)
-        width: scaleX(8)
 
+        height:  children.height
+
+
+        id:lightingdelegate
+        Rectangle{
+            id:delegatemenu
+            width: 200
+            height: 25
+            border.color: "white"
+            border.width: 1
+            color:"transparent"
+
+            Text {
+                id: item
+                text: title
+                color: "white"
+                font.pointSize: 14
+                anchors.centerIn: parent
+            }
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    execGrp(params)
+                    lightingmenu.destroy()
+                }
+            }
+        }
+    }
+    /*
         ImgButton
         {       id:delegateButton
             anchors.top: parent.top
@@ -50,6 +78,6 @@ Component{
             font.family: "Droid Sans"
         }
         */
-    }
+
 }
 

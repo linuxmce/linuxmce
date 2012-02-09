@@ -1,5 +1,5 @@
 import QtQuick 1.0
-import "screens"
+
 import "components"
 import "js/ComponentLoader.js" as MyJs
 

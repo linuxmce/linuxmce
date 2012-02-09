@@ -152,3 +152,19 @@ function finishCreation() {
         console.log("Error loading component:", component.errorString());
     }
 }
+
+
+var listcomponent
+var listscreen
+var screen
+
+function createListComponent(incavcomponent, screen) {
+
+    listcomponent = Qt.createComponent(incavcomponent);
+       listscreen = listcomponent.createObject(screen, {"x":75, "y": 10});
+
+       if (listscreen == null) {
+           // Error Handling
+           console.log("Error in av component object")
+}
+}

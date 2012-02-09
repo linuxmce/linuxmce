@@ -12,7 +12,6 @@ import QtQuick 1.0
   */
 
 
-
 QtObject{
     id:style
     objectName: "orbiter_style"
