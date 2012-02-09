@@ -8,6 +8,7 @@ Column {
     Rectangle{
         height: 45
         width: 45
+        color:"transparent"
 
         Image {
             id: up_bg
@@ -37,7 +38,7 @@ Column {
         buttontextzindex: 20
         buttontextcolor: "red"
         buttontextbold: true
-        buttontextfontsize: 10
+        buttontextfontsize: 8
 
         Image {
             id: lightimg
@@ -51,7 +52,7 @@ Column {
     Rectangle{
         height: 45
         width: 45
-
+        color:"transparent"
         Image {
             id: dn_bg
             source: "../img/buttonbg.png"

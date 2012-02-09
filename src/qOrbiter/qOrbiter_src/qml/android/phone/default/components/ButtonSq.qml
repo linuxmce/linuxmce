@@ -17,13 +17,18 @@ Rectangle{
 
     Rectangle {
         id:buttonBase
-        color:style.button_system_color
+
         height: parent.height
         width: parent.width
         border.width: 2
         border.color: "aliceblue"
         radius: 5
+        Image {
 
+            source: "../img/buttonbg.png"
+            anchors.fill: parent
+
+        }
         Text {
             id: buttonLabel
             x: 50
@@ -42,16 +47,11 @@ Rectangle{
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             // elide: "ElideRight"
             color:"black"
-            z:1
+
         }
         MouseArea{
-            anchors.fill: buttonLabel
-            hoverEnabled: true
-            onEntered: {
-                buttonBase.color = style.button_system_color_hover
-                buttonLabel.color = "black"
-                buttonLabel.font.capitalization = Font.AllUppercase
-            }
+            anchors.fill: buttonLabel           
+
 
             onExited: {
                 buttonBase.color = style.button_system_color

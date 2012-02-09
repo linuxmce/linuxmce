@@ -8,6 +8,7 @@ Column {
     Rectangle{
         width: 45
         height: 45
+        color:"transparent"
         Image {
             id: up_bg
             source: "../img/buttonbg.png"
@@ -50,6 +51,7 @@ Column {
     Rectangle{
         width: 45
         height: 45
+        color:"transparent"
         Image {
             id: dn_bg
             source: "../img/buttonbg.png"

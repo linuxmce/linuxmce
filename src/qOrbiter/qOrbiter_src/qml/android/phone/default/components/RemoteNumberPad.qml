@@ -1,28 +1,28 @@
 import QtQuick 1.0
 
 Rectangle {
-    width: scaleX(20)
-    height: childrenRect.height
+    width: padcolumn.width
+    height: numberdisplay.height + remotenumberpad.height
     color:style.lighthighlight
     id:remotenumberpad
     border.color: style.highlight1
     border.width: 2
-    radius:5
 
 
     Column{
         id:padcolumn
         spacing:5
-        width:parent.width
+        width:numberrect.width
         height: childrenRect.height + scaleY(1)
-        // anchors.centerIn: parent
+        anchors.top: remotenumberpad.top
+        anchors.horizontalCenter: remotenumberpad.horizontalCenter
 
         Rectangle {
             id: numberdisplay
-            width: scaleX(15)
-            height: scaleY(8)
+            width: remotenumberpad.width *.80
+            height: 25
             color: style.highlight2
-            radius: 19
+            radius: 2
             anchors.horizontalCenter: parent.horizontalCenter
             border.color: style.accentcolor
             border.width: 2
@@ -43,31 +43,31 @@ Rectangle {
 
         Rectangle{
             id:numberrect
-            height: childrenRect.height + scaleY(1)
+            height: childrenRect.height
             width: childrenRect.width
             // anchors.top: numberdisplay.bottom
             anchors.topMargin: 5
             anchors.horizontalCenter: parent.horizontalCenter
             border.color: style.highlight1
-            color: style.darkhighlight
+            color: "transparent"
             radius: 5
             Column{
                 id: numberrowcolum
-                spacing: scaleY(1)
+                spacing: 5
 
                 Row{
                     id:toprow
-                    spacing: scaleX(1)
+                    spacing: 8
                     //number one
                     Rectangle{
                         id:number1
-                        height: scaleY(9)
-                        width: scaleX(5)
+                        height: 55
+                        width: 55
                         color:style.lighthighlight
-                        radius: 100
+
                         Image {
                             id: name
-                            source: "../images/rndbuttonbase.png"
+                            source: "../img/buttonbg.png"
                             anchors.fill: parent
                         }
                         Text {
@@ -102,13 +102,13 @@ Rectangle {
                     //number two
                     Rectangle{
                         id:number2
-                        height: scaleY(9)
-                        width: scaleX(5)
+                        height: 55
+                        width: 55
                         color:style.lighthighlight
-                        radius: 100
+
                         Image {
 
-                            source: "../images/rndbuttonbase.png"
+                            source: "../img/buttonbg.png"
                             anchors.fill: parent
                         }
                         Text {
@@ -143,13 +143,13 @@ Rectangle {
                     //number 3
                     Rectangle{
                         id:number3
-                        height: scaleY(9)
-                        width: scaleX(5)
+                        height: 55
+                        width: 55
                         color:style.lighthighlight
                         radius: 100
                         Image {
 
-                            source: "../images/rndbuttonbase.png"
+                            source: "../img/buttonbg.png"
                             anchors.fill: parent
                         }
                         Text {
@@ -188,18 +188,18 @@ Rectangle {
                 Row
                 {
                     id:middlerow
-                    spacing: scaleX(1)
+                    spacing: 8
 
                     //number 4
                     Rectangle{
                         id:number4
-                        height: scaleY(9)
-                        width: scaleX(5)
+                        height: 55
+                        width: 55
                         color:style.lighthighlight
                         radius: 100
                         Image {
 
-                            source: "../images/rndbuttonbase.png"
+                            source: "../img/buttonbg.png"
                             anchors.fill: parent
                         }
                         Text {
@@ -234,13 +234,13 @@ Rectangle {
                     //number 5
                     Rectangle{
                         id:number5
-                        height: scaleY(9)
-                        width: scaleX(5)
+                        height: 55
+                        width: 55
                         color:style.lighthighlight
                         radius: 100
                         Image {
 
-                            source: "../images/rndbuttonbase.png"
+                            source: "../img/buttonbg.png"
                             anchors.fill: parent
                         }
                         Text {
@@ -275,13 +275,13 @@ Rectangle {
                     //number 6
                     Rectangle{
                         id:number6
-                        height: scaleY(9)
-                        width: scaleX(5)
+                        height: 55
+                        width: 55
                         color:style.lighthighlight
                         radius: 100
                         Image {
 
-                            source: "../images/rndbuttonbase.png"
+                            source: "../img/buttonbg.png"
                             anchors.fill: parent
                         }
                         Text {
@@ -321,17 +321,17 @@ Rectangle {
                 Row
                 {
                     id:bottomrow
-                    spacing: scaleX(1)
+                    spacing: 8
                     //number 7
                     Rectangle{
                         id:number7
-                        height: scaleY(9)
-                        width: scaleX(5)
+                        height: 55
+                        width: 55
                         color:style.lighthighlight
                         radius: 100
                         Image {
 
-                            source: "../images/rndbuttonbase.png"
+                            source: "../img/buttonbg.png"
                             anchors.fill: parent
                         }
                         Text {
@@ -366,13 +366,13 @@ Rectangle {
                     //number 8
                     Rectangle{
                         id:number8
-                        height: scaleY(9)
-                        width: scaleX(5)
+                        height: 55
+                        width: 55
                         color:style.lighthighlight
                         radius: 100
                         Image {
 
-                            source: "../images/rndbuttonbase.png"
+                            source: "../img/buttonbg.png"
                             anchors.fill: parent
                         }
                         Text {
@@ -407,13 +407,13 @@ Rectangle {
                     //number 9
                     Rectangle{
                         id:number9
-                        height: scaleY(9)
-                        width: scaleX(5)
+                        height: 55
+                        width: 55
                         color:style.lighthighlight
                         radius: 100
                         Image {
 
-                            source: "../images/rndbuttonbase.png"
+                            source: "../img/buttonbg.png"
                             anchors.fill: parent
                         }
                         Text {
@@ -450,14 +450,15 @@ Rectangle {
                     id:actionbuttons
                     height: childrenRect.height
                     width: childrenRect.width
-                    spacing: scaleX(1)
+                    spacing: 8
                     ButtonSq{
                         id:backbutton
-                        height: scaleY(9)
-                        width: scaleX(5)
+                        height: 55
+                        width: 55
+
                         buttontext: "Back"
-                        buttontextbold: true
-                        buttontextfontsize: 12
+
+                        buttontextfontsize: 10
                         buttonsqradius: 10
 
                         MouseArea{
@@ -471,13 +472,13 @@ Rectangle {
                     //number 9
                     Rectangle{
                         id:number0
-                        height: scaleY(9)
-                        width: scaleX(5)
+                        height: 55
+                        width: 55
                         color:style.lighthighlight
                         radius: 100
                         Image {
 
-                            source: "../images/rndbuttonbase.png"
+                            source: "../img/buttonbg.png"
                             anchors.fill: parent
                         }
 
@@ -509,16 +510,20 @@ Rectangle {
 
 
 
-                    AvOptionButton{
-                         height: scaleY(9)
-                       width: scaleX(5)
-                        buttontext: "go"
+                    ButtonSq{
+                        id:go
+                        height: 55
+                        width: 55
+
+                        buttontext: "Go"
+
+                        buttontextfontsize: 10
+                        buttonsqradius: 10
 
                         MouseArea{
                             anchors.fill: parent
-                            onClicked:{
-                                changeChannels(text_input1.text)
-                                text_input1.text=""
+                            onClicked: {changeChannels(text_input1.text)
+                                text_input1.text = ""
                             }
                         }
                     }
