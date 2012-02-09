@@ -1,9 +1,11 @@
 import QtQuick 1.0
+Component{
 
     Item{
         id:middle
         //important!! these need to be set on an imported component otherwise its appears all wrong!
-        height:  200
+        height:  25
+        width: 200
 
         Rectangle{
             id:delegatemenu
@@ -15,7 +17,7 @@ import QtQuick 1.0
 
             Text {
                 id: generic_label
-                text: "title"
+                text: title
                 color: "white"
                 font.pointSize: 14
                 anchors.centerIn: parent

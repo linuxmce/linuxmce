@@ -3,6 +3,7 @@ import QtQuick 1.0
 Column {
     width: 45
     height: childrenRect.height
+    spacing: 5
 
     Rectangle{
         width: 45
@@ -14,13 +15,13 @@ Column {
         }
         Image {
             id: image2
- anchors.centerIn: parent
+            anchors.centerIn: parent
             smooth: true
             source: "../img/plus.png"
-            MouseArea{
-                anchors.fill: parent
-                onClicked: dcerouter.adjustVolume(1)
-            }
+        }
+        MouseArea{
+            anchors.fill: parent
+            onClicked: dcerouter.adjustVolume(1)
         }
     }
 
@@ -56,13 +57,13 @@ Column {
         }
         Image {
             id: image1
- anchors.centerIn: parent
+            anchors.centerIn: parent
             smooth: true
             source: "../img/minus.png"
-            MouseArea{
-                anchors.fill: parent
-                onClicked: dcerouter.adjustVolume(-1)
-            }
+        }
+        MouseArea{
+            anchors.fill: parent
+            onClicked: dcerouter.adjustVolume(-1)
         }
     }
 

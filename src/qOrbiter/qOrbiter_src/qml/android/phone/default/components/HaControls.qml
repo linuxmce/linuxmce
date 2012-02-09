@@ -26,10 +26,10 @@ Rectangle {
         id:controlcol
         height: childrenRect.height
         width: childrenRect.width
-        spacing: scaleY(1)
-
+        spacing: 15
+Remote_lighting_controls{}
         Remote_Audio_controls{}
-        Remote_lighting_controls{}
+
     }
 }
 }

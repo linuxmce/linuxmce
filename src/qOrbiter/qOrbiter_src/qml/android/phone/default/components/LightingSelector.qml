@@ -3,7 +3,7 @@ import QtQuick 1.1
 
 Rectangle {
     id:genericlist
-    height: 150
+    height: 200
 
     HomeButtonDelegate{id:lightingdelegate}
     Image {

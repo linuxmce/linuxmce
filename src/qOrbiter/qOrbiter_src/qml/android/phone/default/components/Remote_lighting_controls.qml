@@ -3,10 +3,12 @@ import QtQuick 1.0
 Column {
     width: 45
     height: childrenRect.height
+    spacing: 5
 
     Rectangle{
         height: 45
         width: 45
+
         Image {
             id: up_bg
             source: "../img/buttonbg.png"
@@ -60,12 +62,12 @@ Column {
             anchors.centerIn: parent
             smooth: true
             source: "../img/minus.png"
-            MouseArea{
-                anchors.fill: parent
-                onClicked: dcerouter.adjustLighting(-10)
-            }
-        }
 
+        }
+        MouseArea{
+            anchors.fill: parent
+            onClicked: dcerouter.adjustLighting(-10)
+        }
 
     }
 

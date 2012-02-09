@@ -10,15 +10,18 @@ Rectangle {
     height: 480
     width: 320
 
-    NowPlayingBox{ x: 74;y: 11}
+    NowPlayingBox{id:np_box
+         x: 74
+         y: 11
+    }
     Rectangle{
                    id:textrect
                    visible: true
                    height: childrenRect.height
-                   width: scaleX(40)
+                   width: np_box.width
                    color:"transparent"
-                   anchors.left:  imageholder.right;
-                   anchors.top:  imageholder.top
+                   anchors.left:  np_box.left
+                   anchors.top:  np_box.bottom
                    anchors.bottomMargin: dcenowplaying.aspect == "wide"? 10 : 20
                    clip:true
                    Column{
