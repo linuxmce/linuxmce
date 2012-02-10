@@ -1,53 +1,58 @@
 import QtQuick 1.0
 
 Rectangle {
-    width: scaleX(26)
-    height: scaleY(61)
-    color: style.lighthighlight
+    id:droidepg_small
+    width: 225
+    height: 400
+    color: "transparent"
     Component.onCompleted: getLiveTVPlaylist()
     clip:true
 
     Connections{
         target: dcenowplaying
         onPlayListPositionChanged:epgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
+    }
 
+    Image {
+        id: bg
+        source: "../img/bkg.png"
+        anchors.fill: droidepg_small
     }
 
     Rectangle{
         height: childrenRect.height
         width: childrenRect.width
-        anchors.centerIn: parent
-        color: "aliceblue"
+        anchors.centerIn: droidepg_small
+        color: "transparent"
         clip:true
 
         ListView{
             id:epgplaylistview
-            height:scaleY(60)
-            width: scaleX(25)
+            height:400
+            width: 225
             anchors.centerIn: parent
-            clip:false
+            clip:true
             interactive: true
             flickableDirection: "VerticalFlick"
             model: simpleepg
 
             delegate:
-
                 Rectangle {
                 id:delrect
                 border.color: "aliceblue"
-                border.width: 2
-                width:scaleX(25)
-                height: scaleY(10)
-                color: style.lighthighlight
+                border.width: 1
+                width:225
+                height: 50
+                color: "transparent"
 
                 Rectangle{
                     id:channelidrect
                     height: parent.height - 1
                     width: parent.width*.25
-                    color: style.maincolor
+                    color:"transparent"
                     anchors.right: parent.right
                     border.color: style.darkhighlight
-                    border.width: 2
+                    border.width: 1
 
                     Text {
                         id:channelID
@@ -56,9 +61,8 @@ Rectangle {
                         width: parent.width
 
                         wrapMode: "WrapAnywhere"
-                        font.pixelSize: 12
+                        font.pixelSize: 8
                         anchors.top: parent.top
-                        font.bold: true
                         color: "whitesmoke"
                         anchors.horizontalCenter: parent.horizontalCenter
                     }
@@ -69,9 +73,8 @@ Rectangle {
                         color: "aliceblue"
                         font.bold: true
                         font.family: "DroidSans"
-                        opacity: .5
                         anchors.centerIn: parent
-                        font.pixelSize: 18
+                        font.pixelSize: 12
                     }
                 }
                 Text {
@@ -83,7 +86,7 @@ Rectangle {
                     width: parent.width *.75
 
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                     font.pixelSize: 1 * scaleY(2.5)
+                    font.pixelSize: 12
                     color: "aliceblue"
                 }
 
@@ -93,23 +96,21 @@ Rectangle {
                         gridChangeChannel(channelnumber, channelid)
                         epgplaylistview.positionViewAtIndex(index, ListView.Beginning)
                         dcenowplaying.setProgram(program)
+                        droidepg_small.destroy()
                     }
-                    hoverEnabled: true
-                    onEntered:{ delrect.color = style.accentcolor ; proglabel.color = "black"}
 
-                    onExited: {delrect.color = style.lighthighlight; proglabel.color = "aliceblue"}
                 }
             }
         }
 
-        Image {
+        /*  Image {
             id: headeroverlay
-            source: "../images/listcover.png"
+            source: "../img/listcover.png"
             height: epgplaylistview.height
             smooth: true
             width: epgplaylistview.width
             anchors.centerIn: epgplaylistview
             opacity: .15
-        }
+        } */
     }
 }

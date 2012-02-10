@@ -2,14 +2,14 @@ import QtQuick 1.0
 
 
 Rectangle {
-    width: 280
+    width: 310
     height: 80
     color: "transparent"
 
     Image {
         id: overlay
         source: "../img/widegreyshape.png"
-        width: 285
+        width: 310
         height: 76
         anchors.centerIn: parent
 
@@ -17,11 +17,13 @@ Rectangle {
 
     Row
     {
-        spacing: 22
+        x: 0
+        y: 0
+        spacing: 25
         width: overlay.width
         height: overlay.height
         anchors.left: overlay.left
-        anchors.leftMargin: 10
+        anchors.leftMargin: 0
 
         MediaButton {
             id:back

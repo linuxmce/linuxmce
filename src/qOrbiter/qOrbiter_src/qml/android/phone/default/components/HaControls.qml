@@ -17,7 +17,7 @@ Item{
         id:harect
         width: childrenRect.width
         height: childrenRect.height
-        color: style.darkhighlight
+        color: "transparent"
         border.color: style.highlight1
         border.width: 3
         Column{

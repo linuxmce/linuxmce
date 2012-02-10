@@ -34,7 +34,7 @@ Column {
         height:45
         width: 45
         anchors.centerIn: parent
-        buttontext: "Floorplan"
+        buttontext: ""
         buttontextzindex: 20
         buttontextcolor: "red"
         buttontextbold: true
@@ -59,6 +59,12 @@ Column {
             anchors.centerIn: parent
         }
         Image {
+            id: hoverimg
+            source: "../img/buttonhover.png"
+            visible: false
+            anchors.fill: parent
+        }
+        Image {
             id: ltdn
             anchors.centerIn: parent
             smooth: true
@@ -68,6 +74,8 @@ Column {
         MouseArea{
             anchors.fill: parent
             onClicked: dcerouter.adjustLighting(-10)
+            onPressed: hoverimg.visible = true
+            onReleased: hoverimg.visible = false
         }
 
     }
