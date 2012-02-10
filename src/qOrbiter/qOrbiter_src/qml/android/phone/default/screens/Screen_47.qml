@@ -1,14 +1,15 @@
 import QtQuick 1.0
 import "../components"
+import "../js/ComponentLoader.js" as MyJs
 
 
 
 Rectangle {
     id:fileviewscreen
 
-    width: style.orbiterW
-    height: style.orbiterH
-    color: style.bgcolor
+    width: 320
+    height: 480
+    color: "transparent"
     clip: true
 
 
@@ -23,71 +24,12 @@ Rectangle {
     }
 
 
-
-    Component
-    {
-        id: contactDelegate
-        Rectangle
-        {
-            id:mainItem
-            width: 175;
-            height: 109
-            color: "transparent"
-            border.color: "black"
-            border.width: 1
-
-            Rectangle
-            {
-                id:frame
-                opacity: 1
-                width: 156
-                height: 100
-                anchors.centerIn: mainItem
-
-
-                color: "floralwhite"
-                border.color: "black"
-                border.width: 2
-
-                MouseArea
-                {
-                    anchors.fill: frame
-                    onClicked: setStringParam(4, id)
-                }
-
-                Image
-                {
-                    id: imagerect;
-                    source:"image://datagridimg/"+id ;
-                    height: 100;
-                    width: 156;
-                    anchors.centerIn: parent;
-                    fillMode: Image.PreserveAspectFit;
-                    opacity: .5
-                    asynchronous: true
-                }
-            }
-
-            Text
-            {
-                text: name;
-                opacity: 1;
-                font.pointSize: 12;
-                color: "black" ;
-                wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                anchors.fill: frame
-                font.bold: true
-
-            }
-        }
-    }
-
     Component
     {
         id: contactDelegateList
         Item {
             width: list_view1.width;
-            height: 120
+            height: 100
             Rectangle {
                 id: background
                 x: 2; y: 2; width: parent.width - x*2; height: parent.height - y*2
@@ -137,49 +79,12 @@ Rectangle {
 
     MultiStateFileDisplay{id:grid_view1}
 
+
+
     Component {
-             id: appDelegate
-             Item {
-                 id: wrapper
-                 width: 300; height: 300
-                 scale: PathView.iconScaling
-                 //opacity: PathView.iconOpacity
-
-                 Image {
-                     id: myIcon
-                     y: 20; anchors.horizontalCenter: parent.horizontalCenter
-                     smooth: true
-                     source:"image://datagridimg/"+id ;
-                     height: 200;
-                     width: 356;
-                     fillMode: Image.PreserveAspectFit;
-                     asynchronous: true
-                     transform: Rotation {
-                         origin.x: wrapper.width/2; origin.y: wrapper.height/2
-                         axis.x: 0; axis.y: 1; axis.z: 0     // rotate around y-axis
-                         angle: PathView.iconAngle
-                     }
-
-                 }
-
-                 Text {
-                     anchors { top: myIcon.bottom; horizontalCenter: parent.horizontalCenter }
-                     text: name
-                     smooth: true
-                     //visible: wrapper.PathView.isCurrentItem
-                 }
-
-                 MouseArea {
-                     anchors.fill: parent
-                     onClicked: setStringParam(4, id)
-                 }
-             }
-         }
-
-         Component {
-             id: appHighlight
-             Rectangle { width: 80; height: 80; color: "lightsteelblue" }
-         }
+        id: appHighlight
+        Rectangle { width: 80; height: 80; color: "lightsteelblue" }
+    }
 
     Row
     {
@@ -203,6 +108,6 @@ Rectangle {
                 onClicked: goBackGrid()
             }
         }
-        AttributeSelector {}
+      //  AttributeSelector {}
     }
 }
