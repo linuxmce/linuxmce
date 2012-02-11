@@ -1,5 +1,5 @@
- #
-#This file is part of QOrbiter for use with the LinuxMCE project found at http://www.linuxmce.org
+#
+# This file is part of QOrbiter for use with the LinuxMCE project found at http://www.linuxmce.org
 #    Langston Ball  golgoj4@gmail.com
 
 #    QOrbiter is free software: you can redistribute it and/or modify
@@ -19,6 +19,29 @@
 # define deployment destination and target executable name
 
 TARGET = qorbiter
+
+symbian:TARGET.UID3 = 0xE15A481D
+
+# Smart Installer package's UID
+# This UID is from the protected range and therefore the package will
+# fail to install if self-signed. By default qmake uses the unprotected
+# range value if unprotected UID is defined for the application and
+# 0x2002CCCF value if protected UID is given to the application
+#symbian:DEPLOYMENT.installer_header = 0x2002CCCF
+
+# Allow network access on Symbian
+symbian:TARGET.CAPABILITY += NetworkServices
+
+
+
+# When we do stuff for Symbian, why not define the target in here...
+symbian {
+    DEFINES += for_symbian
+    INCLUDEPATH += $$EPOCROOT\epoc32\include\stdapis\stlport
+    INCLUDEPATH += $$EPOCROOT\epoc32\include\stdapis\stlport\stl
+    INCLUDEPATH += $$EPOCROOT\epoc32\include\libc
+    DEFINES += Q_OS_SYMBIAN
+}
 
 # Add more folders to ship with the application, here
 for_desktop{
@@ -129,7 +152,7 @@ symbian:TARGET.CAPABILITY += NetworkServices
 # CONFIG += mobility
 # MOBILITY +=
 message(Qt version: $$[QT_VERSION])
- message(Qt is installed in $$[QT_INSTALL_PREFIX])
+message(Qt is installed in $$[QT_INSTALL_PREFIX])
 message (Build Type: $$DEFINES)
 
 # The .cpp file which was generated for your project. Feel free to hack it.
@@ -224,7 +247,12 @@ SOURCES += main.cpp \
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
 qtcAddDeployment()
 
+#    ../../PlutoUtils/ThreadedClass.h \
+
 HEADERS += \
+    ../../DCE/*.h \
+    ../../PlutoUtils/*.h \
+    --/--/SerializeClass/*.h \
     ../qOrbiter.h \
     ../../Gen_Devices/qOrbiterBase.h \   
     qorbitermanager.h \
@@ -262,7 +290,6 @@ HEADERS += \
     datamodels/DataModelItems/mediatypeitem.h \
     datamodels/filedetailsmodel.h \
     datamodels/DataModelItems/filedetailsitem.h \
-    ../../PlutoUtils/ThreadedClass.h \
     contextobjects/filedetailsclass.h \
     contextobjects/nowplayingclass.h \
     datamodels/DatagridClasses/datagriditemmodelclass.h \
