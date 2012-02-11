@@ -55,7 +55,7 @@ QImage AbstractImageProvider::securityProvider()
 QImage AbstractImageProvider::updateObjectProvider()
 {
    key = managerreference->updatedObjectImage;
-
+   qDebug()<< "!!!!!!!!!!" <<key.size();
     if (key.isNull())
     {
          key.load(":/icons/playlist.png");

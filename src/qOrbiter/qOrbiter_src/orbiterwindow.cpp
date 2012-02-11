@@ -21,14 +21,25 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     this->b_skinIndexReady = false;
     this->b_devicePresent = true;
 
+    qDebug() << mainView.size();
+
+
     router = routerip;
     deviceno = deviceid;
 
     mainView.rootContext()->setContextProperty("window", this);
     mainView.setWindowTitle("LinuxMCE Orbiter ");
-    mainView.setResizeMode(QDeclarativeView::SizeViewToRootObject);
+    mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
     //QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
 
+    mainView.rootContext()->setContextProperty("deviceh", mainView.window()->height());
+#ifdef ANDROID
+    mainView.rootContext()->setContextProperty("devicew", (mainView.window()->width()/ 2));
+#elif for_android
+            mainView.rootContext()->setContextProperty("devicew", (mainView.window()->width()/ 2));
+#else
+    mainView.rootContext()->setContextProperty("devicew", (mainView.window()->width()));
+#endif
     mainView.rootContext()->setContextProperty("deviceid", int(deviceno));
     mainView.rootContext()->setContextProperty("srouterip", QString::fromStdString(router));
 

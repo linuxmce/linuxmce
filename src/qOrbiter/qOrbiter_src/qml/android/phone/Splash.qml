@@ -7,8 +7,17 @@ import QtQuick 1.0
 
 Rectangle {
     id: rectangle1
-    width: 320
-    height: 480
+    width: devicew
+    height: deviceh
+
+
+    function scaleX(x){
+        return x/devicew
+    }
+    function scaleY(y){
+        return y/100*deviceh
+    }
+
     color: "slategrey"
     signal setupStart(string x, string y)
     signal splashLoaded()
@@ -22,10 +31,9 @@ Rectangle {
     }
 
     Column{
-        x: 9
-        y: 169
-        height: parent.height
-        width: 150
+
+        height: childrenRect.height
+        width: scaleX(40)
         spacing: 2
 
         Text {
@@ -52,13 +60,13 @@ Rectangle {
         Text {
             id: skin_index
             text: qsTr("Skins")
-           // opacity: 0
+           opacity: 0
         }
 
         Text {
             id: orbiter_config
             text: qsTr("Orbiter Config")
-           // opacity: 0
+           opacity: 0
         }
 
 
@@ -97,30 +105,29 @@ Rectangle {
 
     Rectangle {
         width: parent.width
-        height: 100
+        height: scale(20)
         opacity: 1
         color: "transparent"
         Text {
             id: welcome
             text: qsTr("Welcome To LinuxMCE!")
-            font.pointSize: 18
+            font.pointSize: scaleY(2)
             font.italic: true
             font.family: "Droid Sans"
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.bottom: rectangle2.top
+            anchors.bottomMargin: scaleY(10)
         }
 
     }
     Rectangle {
         id: rectangle2
-        x: -24
-        y: 87
+
       anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
-        width: 314
-        height: 83
-        radius: 7
-        anchors.verticalCenterOffset: -124
+        anchors.verticalCenterOffset:10
+        width: scaleX(75)
+        height: scaleY(25)
+        radius: 7        
         anchors.horizontalCenterOffset: 1
         anchors.centerIn: rectangle1
         border.width: 1
@@ -140,8 +147,8 @@ Rectangle {
     Text {
         id: connectionlabel
         text: qsTr("Set Connection Details")
-        font.pixelSize: 12
-        font.bold: true
+        font.pixelSize: 11
+        font.bold: false
         anchors.top: rectangle2.top
         anchors.horizontalCenter: parent.horizontalCenter
     }
@@ -161,7 +168,7 @@ Rectangle {
             id: routerip
             width: 80
             text: srouterip
-            font.pointSize: 10
+            font.pixelSize: 10
             font.family: "Droid Sans"
           //  onTextChanged: setRouterIp(routerip.text)
             fillColor: "grey"
@@ -176,7 +183,7 @@ Rectangle {
         }
         TextInput {
             id: devicenumber
-            width: 25
+            width: scaleX(10)
             text: deviceid
             font.family: "Droid Sans"
             font.pixelSize: 12
@@ -188,13 +195,16 @@ Rectangle {
 
       Rectangle {
             id: connectbutton
-            height: 25
-            width: 41
+            height: scaleY(10)
+            width: scaleX(10)
             color:"red"
+
+            anchors.left: devicenumber.right
+            anchors.leftMargin: scaleX(10)
             Text {
                 id: name
-                x: 10
-                y: 6
+                anchors.centerIn: parent
+                anchors.fill: parent
                 text: qsTr("Go!")
                 font.pixelSize: 12
                 verticalAlignment: Text.AlignTop
@@ -214,13 +224,14 @@ Rectangle {
 
       Rectangle {
             id: exitbutton
-            height: 25
-            width: 45
-
+            height: scaleY(5)
+            width: scaleX(10)
+            anchors.left: connectbutton.right
+            anchors.leftMargin: scaleX(10)
             Text {
                 id: exitlabel
-                x: 13
-                y: 6
+               anchors.centerIn: parent
+               anchors.fill: parent
                 text: qsTr("Exit")
                 font.pixelSize: 11
             }
@@ -235,12 +246,12 @@ Rectangle {
     }
     Text {
         id: loadingStatus
-        x: 33
-        y: 423
+
         text: "Status " + window.message
+        anchors.topMargin: -17
         font.pixelSize: 14
         font.family: "Droid Sans"
         color: "white"
-        anchors.top: rectangle2.bottom
+        anchors.bottom: rectangle2.bottom
     }
 }

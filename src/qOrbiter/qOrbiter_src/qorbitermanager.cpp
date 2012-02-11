@@ -71,6 +71,10 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
     qorbiterUIwin->rootContext()->setContextProperty("manager", this); //providing a direct object for qml to call c++ functions of this class
     qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse); //file grids current media type
+
+    qorbiterUIwin->rootContext()->setContextProperty("appH", appHeight); //file grids current media type
+    qorbiterUIwin->rootContext()->setContextProperty("appW", appWidth); //file grids current media type
+
     item = qorbiterUIwin->rootObject();
 
     QObject::connect(qorbiterUIwin, SIGNAL(sceneResized(QSize)),  SLOT(checkOrientation(QSize)), Qt::DirectConnection );
@@ -138,7 +142,6 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
 
     //initializing threading for timecode to prevent blocking
     timeCodeSocket = new QTcpSocket();
-
     QApplication::processEvents(QEventLoop::AllEvents);
 
 
@@ -1713,20 +1716,21 @@ bool qorbiterManager::createAndroidConfig()
 
 void qorbiterManager::checkOrientation(QSize)
 {
-    setDceResponse("orientation changed!! ");
+
     if(qorbiterUIwin->height() < qorbiterUIwin->width())
     {
-    b_orientation = false;
-    setDceResponse("wide");
+
+    //setDceResponse("wide");
     appHeight = qorbiterUIwin->height();
     appWidth = qorbiterUIwin->width();
+    setOrientation(false);
     }
     else
     {
-    b_orientation = true;
-    setDceResponse("profile");
+
     appHeight = qorbiterUIwin->height();
     appWidth = qorbiterUIwin->width();
+    setOrientation( true);
     }
 }
 

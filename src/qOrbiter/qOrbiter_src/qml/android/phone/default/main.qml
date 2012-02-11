@@ -14,22 +14,26 @@ import "js/ComponentLoader.js" as MyJs
      property string screenfile
 
 
+ Connections{
+        target: manager
+     onOrientationChanged:console.log("c++ slot orientation changed")
+    }
     // Style {id:style}
-    width:style.orbiterW
-    height:style.orbiterH
+    width:devicew
+    height:deviceh
 
     Image {
         id: bg
         source: "img/bkg.png"
-        height: style.orbiterH
-        width: style.orbiterW
+        height: deviceh
+        width: devicew
     }
 
     function scaleX(x){
-        return x/100*style.orbiterW
+        return x/100*devicew
     }
     function scaleY(y){
-        return y/100*style.orbiterH
+        return y/100*deviceh
     }
 
      function screenchange(screenname )

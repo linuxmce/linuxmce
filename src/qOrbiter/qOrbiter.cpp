@@ -801,6 +801,7 @@ void qOrbiter::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *p
     QImage tempImage;
     tempImage.loadFromData(QByteArray(pData, iData_Size));
     qmlUI->updateImageChanged(tempImage);
+    //emit objectUpdate(tempImage);
     //qDebug() << "image set!";
 
 

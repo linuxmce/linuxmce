@@ -1073,6 +1073,7 @@ signals:
     void waitForScreenShot(char picData, int picDataSize, string fileFormat);
     void disconnected(QString msg);
     void screenSaverImages(QStringList images);
+    void objectUpdate(QImage u);
 
 public slots:
     void requestLiveTvPlaylist();

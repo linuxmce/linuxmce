@@ -7,8 +7,8 @@ import "../js/ComponentLoader.js" as MyJs
         id:stage
         anchors.centerIn: parent
         signal swapStyle()
-        height: style.orbiterH
-        width: style.orbiterW
+        height: deviceh
+        width: devicew
         color: "transparent"
 
 
@@ -29,7 +29,7 @@ import "../js/ComponentLoader.js" as MyJs
             ButtonSq{
                 height: 45
                 width: 45
-                buttontext: qsTr("Location")
+                buttontext: currentroom
                 MouseArea{
                     anchors.fill: parent
                     onClicked:  MyJs.createStageComponent("RoomSelector.qml", stage)
