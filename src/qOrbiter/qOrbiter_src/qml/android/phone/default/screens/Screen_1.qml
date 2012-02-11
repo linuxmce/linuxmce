@@ -1,10 +1,11 @@
-import QtQuick 1.0
+import QtQuick 1.1
 import "../components"
+import "../js/ComponentLoader.js" as MyJs
 
 
     Rectangle {
         id:stage
-anchors.centerIn: parent
+        anchors.centerIn: parent
         signal swapStyle()
         height: style.orbiterH
         width: style.orbiterW
@@ -31,7 +32,7 @@ anchors.centerIn: parent
                 buttontext: qsTr("Location")
                 MouseArea{
                     anchors.fill: parent
-                    onClicked:  MyJs.createListComponent("RoomSelector.qml", stage)
+                    onClicked:  MyJs.createStageComponent("RoomSelector.qml", stage)
                 }
 
             }
@@ -39,10 +40,10 @@ anchors.centerIn: parent
             ButtonSq{
                 height: 45
                 width: 45
-                buttontext: qsTr("User")
+                buttontext: currentuser
                 MouseArea{
                     anchors.fill: parent
-                    onClicked:  MyJs.createListComponent("UserSelector.qml", stage)
+                    onClicked:  MyJs.createStageComponent("UserSelector.qml", stage)
                 }
 
             }

@@ -49,15 +49,6 @@ Rectangle{
             color:"black"
 
         }
-        MouseArea{
-            anchors.fill: buttonLabel           
 
-
-            onExited: {
-                buttonBase.color = style.button_system_color
-                buttonLabel.font.capitalization = Font.Normal
-                buttonLabel.color = "black"
-            }
-        }
     }
 }

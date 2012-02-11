@@ -4,13 +4,13 @@ Component{
     Item{
         id:middle
         //important!! these need to be set on an imported component otherwise its appears all wrong!
-        height:  25
-        width: 200
+        height:  delegatemenu.height
+        width: delegatemenu.width
 
         Rectangle{
             id:delegatemenu
             width: 200
-            height: 35
+            height: 55
             border.color: "white"
             border.width: 1
             color:"transparent"
@@ -19,7 +19,7 @@ Component{
                 id: generic_label
                 text: title
                 color: "white"
-                font.pointSize: 14
+                font.pixelSize: 11
                 anchors.centerIn: parent
             }
 

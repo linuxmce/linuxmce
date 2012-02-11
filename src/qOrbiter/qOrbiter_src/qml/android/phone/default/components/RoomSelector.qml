@@ -1,40 +1,66 @@
-import QtQuick 1.0
-import "../components"
-
-//roomsList
-// text: title + ":" + intRoom + ", In EA: " + entertain_area
-// setActiveRoom(intRoom, entertain_area)
-/*
-                            setActiveRoom(intRoom, entertain_area)
-                            rooms.state = "Default"
-                            currentroom = title
-                             roombutton.buttontext = title
-  */
+// import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
+import QtQuick 1.1
 
 Rectangle {
-    id:roomselectorrect
-    height:100
-    width: roomsource.width
-    color: "transparent"
-    anchors.centerIn: parent
-    HomeButtonDelegate{id:lightingdelegate}
+    id:genericlist
+    height: 200
+    width: 200
+    border.color: "orange"
+    border.width: 1
+    clip: false
+    color:"transparent"
+
+Component{
+  id:delegatemenu
+
+  Item{
+        id:generic_item
+        //important!! these need to be set on an imported component otherwise its appears all wrong!
+        height:  delegatemenu.height
+        width: delegatemenu.width
+
+        Rectangle{
+
+            width: 200
+            height: 55
+            border.color: "white"
+            border.width: 1
+            color:"transparent"
+
+            Text {
+                id: generic_label
+                text:  title + ": In EA: " + entertain_area
+                color: "white"
+                font.pixelSize: 11
+                anchors.centerIn: parent
+            }
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                   setActiveRoom(intRoom, entertain_area)
+                    genericlist.destroy()
+                }
+            }
+        }
+    }
+}
     Image {
         id: bg
         source: "../img/bkg.png"
         anchors.fill: genericview
     }
-
     ListView{
-        id:genericview
+        id: genericview
         width: 200
-        orientation: ListView.Vertical
-        spacing: 5
-        clip: true
-        model: roomList
-        delegate: lightingdelegate
-        flickableDirection: "HorizontalFlick"
+        height: genericview.childrenRect.height +25
 
+        model: roomList
+        spacing:56
+        orientation:ListView.Vertical
+        delegate:  delegatemenu
+        interactive: true
+        clip:true
 
     }
-
 }

@@ -161,10 +161,11 @@ var screen
 function createListComponent(incavcomponent, screen) {
 
     listcomponent = Qt.createComponent(incavcomponent);
-       listscreen = listcomponent.createObject(screen, {"x":20, "y": -100});
+       listscreen = listcomponent.createObject(screen, {"x":20, "y": 0});
 
        if (listscreen == null) {
+            listscreen = listcomponent.createObject(screen, {"x":20, "y": 0});
            // Error Handling
-           console.log("Error in av component object")
+           console.log("Error in list component object")
 }
 }

@@ -3,7 +3,7 @@ import QtQuick 1.1
 
 Rectangle {
     id:genericlist
-    height: 20
+    height: 50
     width: genericview.width
     border.color: "orange"
     border.width: 1
