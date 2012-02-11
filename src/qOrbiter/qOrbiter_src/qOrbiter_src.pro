@@ -288,6 +288,10 @@ HEADERS += \
     datamodels/skinloader.h
 
 OTHER_FILES += Readme.txt \
+    qml/Splash.qml \
+    qml/SetupNewOrbiter.qml \
+    OrbiterVariables.txt \
+    qml/harmattan/js/nowPlayingWorker.js \
     config.xml
 
 ANDROID{
@@ -348,10 +352,6 @@ OTHER_FILES=\
     android/src/eu/licentia/necessitas/ministro/IMinistroCallback.aidl \
     android/src/eu/licentia/necessitas/ministro/IMinistro.aidl \
     android/AndroidManifest.xml \
-    qml/Splash.qml \
-    qml/SetupNewOrbiter.qml \
-    OrbiterVariables.txt \
-    qml/harmattan/js/nowPlayingWorker.js \
     android/src/org/kde/necessitas/origo/QtActivity.java \
     android/src/org/kde/necessitas/origo/QtApplication.java \
     android/src/org/kde/necessitas/ministro/IMinistro.aidl \
