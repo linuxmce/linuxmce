@@ -15,7 +15,6 @@ Rectangle {
         visible: true
     }
 
-
     HaControls{ x: 8; y: 56}
 
     AudioRemote {

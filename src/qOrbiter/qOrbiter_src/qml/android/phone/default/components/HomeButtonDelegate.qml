@@ -10,7 +10,7 @@ Component{
         Rectangle{
             id:delegatemenu
             width: 200
-            height: 25
+            height: 35
             border.color: "white"
             border.width: 1
             color:"transparent"

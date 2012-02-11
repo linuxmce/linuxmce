@@ -13,93 +13,25 @@ import "../components"
 
 Rectangle {
     id:roomselectorrect
-    height:110
-    width: 600
+    height:100
+    width: roomsource.width
     color: "transparent"
     anchors.centerIn: parent
-
-    Component
-    {
-        id:roomselectioncomponent
-
-
-        //delegate
-        Rectangle{
-            id:roomdelegate
-            height:90
-            width: 160
-            color: style.not_color
-            Image {
-                id: roomimage
-                source: room_image
-                height: 90
-                fillMode: Image.PreserveAspectFit
-                width:160
-            }
-            Rectangle{
-                id:delegateheader
-                height: 20
-                width: roomdelegate.width
-                color: "transparent"
-                anchors.top: parent.top
-                Text {
-                    id: celllabel
-                    height: 25
-                    width: parent.width
-                    text: title + ": In EA: " + entertain_area
-                    wrapMode: "WrapAnywhere"
-                    font.bold: true
-                }
-            }
-
-
-
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-                    setActiveRoom(intRoom, entertain_area)
-                    currentroom = title
-                    roombutton.buttontext = title
-                    roomselectorrect.destroy()
-                }
-            }
-
-        }
+    HomeButtonDelegate{id:lightingdelegate}
+    Image {
+        id: bg
+        source: "../img/bkg.png"
+        anchors.fill: genericview
     }
 
-
-    Rectangle{
-        id:roomselectorheader
-        height: 15
-        gradient: Gradient {
-            GradientStop {
-                position: 0
-                color: "#99e1f1"
-            }
-
-            GradientStop {
-                position: 1
-                color: "#bbc5db"
-            }
-        }
-        width: roomselectorrect.width
-        Text {
-            id: headertext
-            text: "Select Room Please"
-        }
-
-    }
     ListView{
-        id:roomsource
-        anchors.top: roomselectorheader.bottom
-        height: 90
-        width: 600
-        orientation: ListView.Horizontal
-
+        id:genericview
+        width: 200
+        orientation: ListView.Vertical
         spacing: 5
         clip: true
         model: roomList
-        delegate: roomselectioncomponent
+        delegate: lightingdelegate
         flickableDirection: "HorizontalFlick"
 
 

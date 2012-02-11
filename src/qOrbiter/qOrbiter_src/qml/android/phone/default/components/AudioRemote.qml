@@ -19,7 +19,7 @@ Rectangle {
     {
         x: 0
         y: 0
-        spacing: 25
+        spacing: 8
         width: overlay.width
         height: overlay.height
         anchors.left: overlay.left
@@ -29,14 +29,11 @@ Rectangle {
             id:back
             color: "transparent"
             media_but_txt: "back"
-            height: 25
-            width: 25
+            height: 45
+            width: 45
             anchors.verticalCenter: parent.verticalCenter
             MouseArea{
-                anchors.fill: parent
-                hoverEnabled: true
-                onEntered: back.scale = .75
-                onExited: back.scale = 1
+                anchors.fill: parent               
                 onClicked: dcerouter.changedTrack("-1")
             }
         }
@@ -44,14 +41,11 @@ Rectangle {
         MediaButton {id:rw ;
             color: "transparent"
             media_but_txt: "RW"
-            height: 25
-            width: 25
+            height: 45
+            width: 45
             anchors.verticalCenter: parent.verticalCenter
             MouseArea{
-                anchors.fill: parent
-                 hoverEnabled: true
-                onEntered: parent.scale = .75
-                onExited: parent.scale = 1
+                anchors.fill: parent                
                 onClicked: rw_media(-2)
             }
         }
@@ -60,14 +54,11 @@ Rectangle {
             id:play ;
             color: "transparent"
             media_but_txt: "Play"
-            height: 25
-            width: 25
+            height: 45
+            width: 45
             anchors.verticalCenter: parent.verticalCenter
             MouseArea {
-                anchors.fill: parent
-                 hoverEnabled: true
-                onEntered: parent.scale = .75
-                onExited: parent.scale = 1
+                anchors.fill: parent                
                 onClicked: pauseMedia()
             }
         }
@@ -75,14 +66,11 @@ Rectangle {
         MediaButton {id:ff ;
             color: "transparent"
             media_but_txt: "FF"
-            height: 25
-            width: 25
+            height: 45
+            width: 45
             anchors.verticalCenter: parent.verticalCenter
             MouseArea{
-                anchors.fill: parent
-                 hoverEnabled: true
-                onEntered: parent.scale = .75
-                onExited: parent.scale = 1
+                anchors.fill: parent                 
                 onClicked: ff_media(2)
             }
 
@@ -90,14 +78,11 @@ Rectangle {
         MediaButton {id:next ;
             color: "transparent"
             media_but_txt: "Next";
-            height: 25
-            width: 25
+            height: 45
+            width: 45
             anchors.verticalCenter: parent.verticalCenter
             MouseArea{
-                anchors.fill: parent
-                 hoverEnabled: true
-                onEntered: parent.scale = .75
-                onExited: parent.scale = 1
+                anchors.fill: parent                
                 onClicked: dcerouter.changedTrack("+1")
             }
         }
@@ -107,15 +92,12 @@ Rectangle {
             id: stop
             color: "transparent"
             media_but_txt: "stop"
-            height: 25
-            width: 25
+            height: 45
+            width: 45
             anchors.verticalCenter: parent.verticalCenter
             MouseArea
             {
-                anchors.fill: parent
-                 hoverEnabled: true
-                onEntered: parent.scale = .75
-                onExited: parent.scale = 1
+                anchors.fill: parent                 
                 onClicked: stopMedia()
             }
         }

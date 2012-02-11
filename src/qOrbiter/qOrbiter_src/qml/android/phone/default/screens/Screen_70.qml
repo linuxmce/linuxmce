@@ -7,12 +7,35 @@ Rectangle {
     id: storedVideoRemote
     height: 480
     width: 320
+    Timer{
+            id:singleshot
+            repeat: false
+            interval: 2000
+            triggeredOnStart: false
+            running: true
+
+            onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+        }
+
+        Connections{
+            target:dcenowplaying
+            onPlayListPositionChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+            onImageChanged:nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+        }
 
     NowPlayingBox
     {
         id:np_box
         x: 74
         y: 11
+    }
+
+
+       Image{
+    id:nowplayingimage
+    source:""
+    height: np_box.height
+    width: np_box.width
     }
 
     AudioRemote{ x: 25; y: 393; anchors.verticalCenterOffset: 193; anchors.horizontalCenterOffset: 5;anchors.centerIn: parent}

@@ -32,9 +32,8 @@ Column {
         anchors.centerIn: parent
         buttontext: "Mute"
         buttontextzindex: 20
-        buttontextcolor: "red"
-        buttontextbold: true
-        buttontextfontsize: 12
+        buttontextcolor: "red"        
+        buttontextfontsize: 8
         Image {
             id: muteimg
             anchors.centerIn: parent

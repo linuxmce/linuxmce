@@ -14,7 +14,7 @@ Rectangle {
     ListView{
         id: genericview
         width: 200
-        height: genericlist.childrenRect.height +25
+        height: genericview.childrenRect.height +25
         model: currentRoomMedia
         spacing:25
         orientation:ListView.Vertical

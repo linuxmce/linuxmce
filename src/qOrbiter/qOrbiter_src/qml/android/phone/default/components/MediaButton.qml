@@ -17,6 +17,9 @@ Rectangle {
     Text {
         id: media_button_text
         text: "text"
+        style: Text.Normal
+        font.pixelSize: 10
+        font.family: "Droid Sans"
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
     }

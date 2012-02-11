@@ -161,7 +161,7 @@ var screen
 function createListComponent(incavcomponent, screen) {
 
     listcomponent = Qt.createComponent(incavcomponent);
-       listscreen = listcomponent.createObject(screen, {"x":75, "y": 10});
+       listscreen = listcomponent.createObject(screen, {"x":20, "y": -100});
 
        if (listscreen == null) {
            // Error Handling
