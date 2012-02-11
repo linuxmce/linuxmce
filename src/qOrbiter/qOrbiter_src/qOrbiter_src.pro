@@ -252,7 +252,7 @@ qtcAddDeployment()
 HEADERS += \
     ../../DCE/*.h \
     ../../PlutoUtils/*.h \
-    --/--/SerializeClass/*.h \
+    ../../SerializeClass/*.h \
     ../qOrbiter.h \
     ../../Gen_Devices/qOrbiterBase.h \   
     qorbitermanager.h \
