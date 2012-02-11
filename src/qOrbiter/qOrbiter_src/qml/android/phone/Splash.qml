@@ -12,7 +12,7 @@ Rectangle {
 
 
     function scaleX(x){
-        return x/devicew
+        return x/100*devicew
     }
     function scaleY(y){
         return y/100*deviceh
@@ -104,14 +104,14 @@ Rectangle {
     }
 
     Rectangle {
-        width: parent.width
+        width: scaleX(15)
         height: scale(20)
         opacity: 1
         color: "transparent"
         Text {
             id: welcome
             text: qsTr("Welcome To LinuxMCE!")
-            font.pointSize: scaleY(2)
+            font.pointSize: scaleY(5)
             font.italic: true
             font.family: "Droid Sans"
             anchors.bottom: rectangle2.top
@@ -125,8 +125,8 @@ Rectangle {
       anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenterOffset:10
-        width: scaleX(75)
-        height: scaleY(25)
+        width: scaleX(99)
+        height: scaleY(20)
         radius: 7        
         anchors.horizontalCenterOffset: 1
         anchors.centerIn: rectangle1
@@ -180,6 +180,8 @@ Rectangle {
             font.pixelSize: 11
             font.family: "Droid Sans"
             anchors.verticalCenter: parent.verticalCenter
+            font.bold: true
+
         }
         TextInput {
             id: devicenumber

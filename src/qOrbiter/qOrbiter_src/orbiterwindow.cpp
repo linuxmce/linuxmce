@@ -26,10 +26,10 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 
     router = routerip;
     deviceno = deviceid;
-
+mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
     mainView.rootContext()->setContextProperty("window", this);
     mainView.setWindowTitle("LinuxMCE Orbiter ");
-    mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
+
     //QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
 
     mainView.rootContext()->setContextProperty("deviceh", mainView.window()->height());
@@ -63,7 +63,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     buildType = "/qml/android";
     qrcPath = "qrc:android/Splash.qml";
 #elif defined (for_android)
-    buildType = "/qml/android/phone";
+    buildType = "/qml/android";
     qrcPath = "qrc:android/Splash.qml";
 #else
     buildType = "/qml/desktop";

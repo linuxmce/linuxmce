@@ -7,8 +7,16 @@ import QtQuick 1.0
 
 Rectangle {
     id: rectangle1
-    width: 320
-    height: 480
+   anchors.fill: parent
+    onWidthChanged: console.log("detected size change")
+
+    function scaleX(x){
+        return x/devicew
+    }
+    function scaleY(y){
+        return y/100*deviceh
+    }
+
     color: "slategrey"
     signal setupStart(string x, string y)
     signal splashLoaded()
@@ -22,8 +30,9 @@ Rectangle {
     }
 
     Column{
-        height: parent.height
-        width: 150
+
+        height: childrenRect.height
+        width: scaleX(40)
         spacing: 2
 
         Text {
@@ -50,13 +59,13 @@ Rectangle {
         Text {
             id: skin_index
             text: qsTr("Skins")
-           // opacity: 0
+           opacity: 0
         }
 
         Text {
             id: orbiter_config
             text: qsTr("Orbiter Config")
-           // opacity: 0
+           opacity: 0
         }
 
 
@@ -95,25 +104,30 @@ Rectangle {
 
     Rectangle {
         width: parent.width
-        height: 100
+        height: scaleY(20)
         opacity: 1
         color: "transparent"
         Text {
             id: welcome
             text: qsTr("Welcome To LinuxMCE!")
-            font.pixelSize: 30
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
+            font.pointSize: scaleY(10)
+            font.italic: true
+            font.family: "Droid Sans"
+            anchors.bottom: rectangle2.top
+            anchors.bottomMargin: scaleY(10)
         }
 
     }
     Rectangle {
         id: rectangle2
+
       anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
-        width: 457
-        height: 57
+        anchors.verticalCenterOffset:10
+        width: scaleX(99)
+        height: scaleY(20)
         radius: 7
+        anchors.horizontalCenterOffset: 1
         anchors.centerIn: rectangle1
         border.width: 1
         border.color: "#000000"
@@ -132,7 +146,8 @@ Rectangle {
     Text {
         id: connectionlabel
         text: qsTr("Set Connection Details")
-        font.bold: true
+        font.pixelSize: 11
+        font.bold: false
         anchors.top: rectangle2.top
         anchors.horizontalCenter: parent.horizontalCenter
     }
@@ -143,14 +158,17 @@ Rectangle {
         spacing: 10
         Text {
             text: qsTr("Host:")
+            font.pixelSize: 11
+            font.family: "Droid Sans"
             anchors.verticalCenter: parent.verticalCenter
         }
 
         TextInput {
             id: routerip
-            width: 110
+            width: 80
             text: srouterip
-            font.pixelSize: 12
+            font.pixelSize: 10
+            font.family: "Droid Sans"
           //  onTextChanged: setRouterIp(routerip.text)
             fillColor: "grey"
             anchors.verticalCenter: parent.verticalCenter
@@ -158,12 +176,15 @@ Rectangle {
 
         Text {
             text: qsTr("Device:")
+            font.pixelSize: 11
+            font.family: "Droid Sans"
             anchors.verticalCenter: parent.verticalCenter
         }
         TextInput {
             id: devicenumber
-            width: 25
+            width: scaleX(10)
             text: deviceid
+            font.family: "Droid Sans"
             font.pixelSize: 12
             //onTextChanged: setDeviceNo(devicenumber.text)
             fillColor: "grey"
@@ -173,12 +194,19 @@ Rectangle {
 
       Rectangle {
             id: connectbutton
-            height: 25
-            width: 75
+            height: scaleY(5)
+            width: scaleX(10)
             color:"red"
+
+            anchors.left: devicenumber.right
+            anchors.leftMargin: scaleX(5)
             Text {
                 id: name
-                text: qsTr("Connect!")
+                anchors.centerIn: parent
+                anchors.fill: parent
+                text: qsTr("Go!")
+                font.pixelSize: 12
+                verticalAlignment: Text.AlignTop
                 font.bold: true
             }
 
@@ -195,12 +223,16 @@ Rectangle {
 
       Rectangle {
             id: exitbutton
-            height: 25
-            width: 75
-
+            height: scaleY(5)
+            width: scaleX(10)
+            anchors.left: connectbutton.right
+            anchors.leftMargin: scaleX(5)
             Text {
                 id: exitlabel
+               anchors.centerIn: parent
+               anchors.fill: parent
                 text: qsTr("Exit")
+                font.pixelSize: 11
             }
 
             radius:  4
@@ -213,9 +245,12 @@ Rectangle {
     }
     Text {
         id: loadingStatus
+
         text: "Status " + window.message
-        font.pointSize: 14
+        anchors.topMargin: -17
+        font.pixelSize: 14
+        font.family: "Droid Sans"
         color: "white"
-        anchors.baseline: rectangle1.bottom
+        anchors.bottom: rectangle2.bottom
     }
 }
