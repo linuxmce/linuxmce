@@ -37,9 +37,9 @@ symbian:TARGET.CAPABILITY += NetworkServices
 # When we do stuff for Symbian, why not define the target in here...
 symbian {
     DEFINES += for_symbian
-    INCLUDEPATH += $$EPOCROOT\epoc32\include\stdapis\stlport
-    INCLUDEPATH += $$EPOCROOT\epoc32\include\stdapis\stlport\stl
-    INCLUDEPATH += $$EPOCROOT\epoc32\include\libc
+    INCLUDEPATH += $$EPOCROOT/epoc32/include/stdapis/stlport
+    INCLUDEPATH += $$EPOCROOT/epoc32/include/stdapis/stlport/stl
+    INCLUDEPATH += $$EPOCROOT/epoc32/include/libc
     DEFINES += Q_OS_SYMBIAN
 }
 
@@ -247,12 +247,34 @@ SOURCES += main.cpp \
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
 qtcAddDeployment()
 
-#    ../../PlutoUtils/ThreadedClass.h \
+#    ../../DCE/*.h \
+#    ../../PlutoUtils/*.h \
+#    ../../SerializeClass/*.h \
+#    ../../pluto_main/*.h \
+#    ../../Gen_Devices/*.h \
+
 
 HEADERS += \
-    ../../DCE/*.h \
-    ../../PlutoUtils/*.h \
-    ../../SerializeClass/*.h \
+    ../../PlutoUtils/ThreadedClass.h \
+    ../../PlutoUtils/MultiThreadIncludes.h \
+    ../../PlutoUtils/StringUtils.h \
+    ../../PlutoUtils/CommonIncludes.h \
+    ../../PlutoUtils/Other.h \
+    ../../PlutoUtils/getch.h \
+    ../../PlutoUtils/MyStl.h \
+    ../../DCE/DeviceData_Base.h \
+    ../../DCE/Message.h \
+    ../../DCE/ServerLogger.h \
+    ../../DCE/Logger.h \
+    ../../DCE/Virtual_Device_Translator.h \
+    ../../DCE/PlutoLockLogger.h \
+    ../../DCE/ClientSocket.h \
+    ../../DCE/PlainClientSocket.h \
+    ../../DCE/AlarmManager.h \
+    ../../SerializeClass/SerializeClass.h \
+    ../../PlutoUtils/FileUtils.h \
+    ../../pluto_main/Define_DeviceCategory.h \
+    ../../pluto_main/Define_DeviceTemplate.h \
     ../qOrbiter.h \
     ../../Gen_Devices/qOrbiterBase.h \   
     qorbitermanager.h \
