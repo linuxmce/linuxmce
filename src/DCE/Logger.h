@@ -23,14 +23,15 @@
 #ifndef DCELogger_H
 #define DCELogger_H
 
-#ifndef SYMBIAN
+#ifndef Q_OS_SYMBIAN
 #include <stdio.h>
 #endif
 
 #include <pthread.h>
-#if !defined(WIN32) && !defined(__APPLE_CC__) 
-	#include <features.h>
+#if !defined(WIN32) && !defined(__APPLE_CC__) &&  !defined(Q_OS_SYMBIAN)
+#include <features.h>
 #endif
+
 #include <string>
 #include <set>
 #include <queue>
