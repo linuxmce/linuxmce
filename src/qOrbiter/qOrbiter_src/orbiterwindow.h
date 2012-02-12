@@ -68,6 +68,7 @@ signals:
     void skinDataLoaded();
     void deviceChanged();
     void orientationChanged(QSize);
+    void checkRes();
 
 
 public slots:

@@ -21,25 +21,31 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     this->b_skinIndexReady = false;
     this->b_devicePresent = true;
 
+#ifdef for_android
+    mainView.setBaseSize(1024,768);
+#endif
     qDebug() << mainView.size();
-
-
     router = routerip;
     deviceno = deviceid;
-mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
+    mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
     mainView.rootContext()->setContextProperty("window", this);
     mainView.setWindowTitle("LinuxMCE Orbiter ");
 
     //QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
 
-    mainView.rootContext()->setContextProperty("deviceh", mainView.window()->height());
+
 #ifdef ANDROID
     mainView.rootContext()->setContextProperty("devicew", (mainView.window()->width()/ 2));
+    mainView.rootContext()->setContextProperty("deviceh", (mainView.window()->height()/ 2));
 #elif for_android
-            mainView.rootContext()->setContextProperty("devicew", (mainView.window()->width()/ 2));
+
+            mainView.rootContext()->setContextProperty("devicew", 320);
+            mainView.rootContext()->setContextProperty("deviceh", 480);
 #else
     mainView.rootContext()->setContextProperty("devicew", (mainView.window()->width()));
+     mainView.rootContext()->setContextProperty("deviceh", mainView.window()->height())
 #endif
+
     mainView.rootContext()->setContextProperty("deviceid", int(deviceno));
     mainView.rootContext()->setContextProperty("srouterip", QString::fromStdString(router));
 
@@ -83,9 +89,11 @@ mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
     mainView.showMaximized();
 #elif defined(ANDROID)
     mainView.showFullScreen();
+#elif defined(for_android)
+    mainView.show();
 #else
     mainView.showNormal();
-    mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
+   // mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
 
 }
@@ -109,14 +117,11 @@ QString orbiterWindow::getMessage()
 
 void orbiterWindow::qmlSetupLmce(QString device, QString ip)
 {
-
     router = ip.toStdString();
     deviceno = device.toLong();
     mainView.rootContext()->setContextProperty("deviceid", int(deviceno));
     mainView.rootContext()->setContextProperty("srouterip", QString::fromStdString(router));
-
     emit setupLmce(device, ip);
-
 }
 
 bool orbiterWindow::getOrbiterState()

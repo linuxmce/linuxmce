@@ -97,7 +97,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     qrcPath = ":android/Splash.qml";
     droidPath = "/";
 #elif defined (for_android)
-    buildType = "/qml/android/phone";
+    buildType = "/qml/android";
     qrcPath = "qrc:android/Splash.qml";
 #else
     buildType = "/qml/desktop";
@@ -1721,8 +1721,7 @@ void qorbiterManager::checkOrientation(QSize)
     {
 
     //setDceResponse("wide");
-    appHeight = qorbiterUIwin->height();
-    appWidth = qorbiterUIwin->width();
+    qorbiterUIwin->setProperty("deviceh", qorbiterUIwin->height() );
     setOrientation(false);
     }
     else

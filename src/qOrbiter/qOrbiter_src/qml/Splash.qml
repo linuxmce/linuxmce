@@ -11,7 +11,7 @@ Rectangle {
     onWidthChanged: console.log("detected size change")
 
     function scaleX(x){
-        return x/devicew
+        return x/100*devicew
     }
     function scaleY(y){
         return y/100*deviceh

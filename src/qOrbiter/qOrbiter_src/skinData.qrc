@@ -18,7 +18,6 @@
         <file alias="Splash.qml">qml/harmattan/default/Splash.qml</file>
     </qresource>
     <qresource prefix="/android">
-        <file alias="SetupNewOrbiter.qml">qml/android/phone/SetupNewOrbiter.qml</file>
-        <file alias="Splash.qml">qml/android/phone/Splash.qml</file>
+        <file alias="Splash.qml">qml/android/Splash.qml</file>
     </qresource>
 </RCC>
