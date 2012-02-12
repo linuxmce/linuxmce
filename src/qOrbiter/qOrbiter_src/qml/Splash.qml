@@ -11,10 +11,10 @@ Rectangle {
     onWidthChanged: console.log("detected size change")
 
     function scaleX(x){
-        return x/100*devicew
+        return x/100*appH
     }
     function scaleY(y){
-        return y/100*deviceh
+        return y/100*appW
     }
 
     color: "slategrey"

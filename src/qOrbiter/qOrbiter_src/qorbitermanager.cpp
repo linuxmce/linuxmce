@@ -76,6 +76,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     appWidth = qorbiterUIwin->width() ;
 
     //qDebug() << qorbiterUIwin->size();
+    qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 
     qorbiterUIwin->rootContext()->setContextProperty("appH", appHeight); //file grids current media type
     qorbiterUIwin->rootContext()->setContextProperty("appW", appWidth); //file grids current media type
@@ -257,7 +258,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 #ifdef ANDROID
         loadSkins(QUrl(remoteDirectoryPath));
 #elif for_android
-        loadSkins(QUrl(remoteDirectoryPath));
+        loadSkins(QUrl(localDir));
 #else
         loadSkins(QUrl(remoteDirectoryPath));
 #endif
@@ -1632,7 +1633,7 @@ void qorbiterManager::startOrbiter()
     m_bStartingUp = false;
     qorbiterUIwin->setWindowTitle("LinuxMCE Orbiter " + QString::number(iPK_Device));
 
-    qorbiterUIwin->setResizeMode(QDeclarativeView::SizeViewToRootObject);
+    qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
     QApplication::processEvents(QEventLoop::AllEvents);
     gotoQScreen("Screen_1.qml");
 

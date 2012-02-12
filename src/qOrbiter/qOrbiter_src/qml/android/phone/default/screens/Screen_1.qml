@@ -7,8 +7,8 @@ import "../js/ComponentLoader.js" as MyJs
         id:stage
         anchors.centerIn: parent
         signal swapStyle()
-        height: deviceh
-        width: devicew
+        height: appH
+        width: appW
         color: "transparent"
 
 
