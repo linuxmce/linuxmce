@@ -10,7 +10,7 @@ Rectangle {
 
     Image {
         id: panelbg
-        source: "../../img/ui3/footer.png"
+        source: "../img/ui3/footer.png"
         height: parent.height
         width: parent.width
         opacity: .85

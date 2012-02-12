@@ -10,7 +10,7 @@ Rectangle {
     buttontext: "home"
     Image {
         id: homeimage
-        source: "../../../img/icons/kfm_home.png"
+        source: "../img/icons/kfm_home.png"
         height:50
         width: 50
     }

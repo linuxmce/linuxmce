@@ -39,11 +39,11 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 mainView.rootContext()->setContextProperty("deviceh", mainView.window()->height());
 #elif for_android
 
-            mainView.rootContext()->setContextProperty("devicew", 320);
-            mainView.rootContext()->setContextProperty("deviceh", 480);
+            mainView.rootContext()->setContextProperty("devicew", 800);
+            mainView.rootContext()->setContextProperty("deviceh", 600);
 #else
     mainView.rootContext()->setContextProperty("devicew", (mainView.window()->width()));
-     mainView.rootContext()->setContextProperty("deviceh", mainView.window()->height())
+     mainView.rootContext()->setContextProperty("deviceh", mainView.window()->height());
 #endif
 
     mainView.rootContext()->setContextProperty("deviceid", int(deviceno));
@@ -62,13 +62,13 @@ mainView.rootContext()->setContextProperty("deviceh", mainView.window()->height(
     buildType="/qml/desktop";
     NSString *resourcePath = [[NSBundle mainBundle] resourcePath];
     qrcPath = qStringFromNSString([resourcePath stringByAppendingPathComponent:@"qml/Splash.qml"]);
-#elif defined (Q_OS_MACX)
+#elif defined(Q_OS_MACX)
     buildType="/qml/desktop";
     qrcPath = "qrc:osx/Splash.qml";
-#elif defined (ANDROID)
+#elif defined ANDROID
     buildType = "/qml/android";
     qrcPath = "qrc:android/Splash.qml";
-#elif defined (for_android)
+#elif defined for_android
     buildType = "/qml/android";
     qrcPath = "qrc:android/Splash.qml";
 #else

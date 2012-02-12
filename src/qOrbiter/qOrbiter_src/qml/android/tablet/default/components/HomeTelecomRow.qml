@@ -26,7 +26,7 @@ Rectangle{
 
             Image {
                 id: buttonbg
-                source: "../../img/ui3/telephonebig.png"
+                source: "../img/ui3/telephonebig.png"
                 height: parent.height
                 width: parent.width
             }

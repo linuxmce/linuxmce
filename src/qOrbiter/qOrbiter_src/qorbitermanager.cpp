@@ -112,10 +112,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     qrcPath = ":android/Splash.qml";
     droidPath = "/";
 #elif defined (for_android)
-    buildType = "/qml/android";
-    qrcPath = "qrc:android/Splash.qml";
-
-   if (appWidth > 480 && appHeight > 800 || appHeight > 480 && appWidth > 800)
+    if (appWidth > 480 && appHeight > 800 || appHeight > 480 && appWidth > 800)
     {
        buildType = "/qml/android/tablet";
 
@@ -219,7 +216,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
 
 #ifdef ANDROID
-        if (appWidth > 480 && appHeight > 800 || appHeight > 480 && appWidth > 800)
+        if (qorbiterUIwin->width() > 480 || qorbiterUIwin-> height() > 800)
         {
            buildType = "/qml/android/tablet";
            remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/tablet";
@@ -237,7 +234,18 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 #elif for_harmattan
         remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/harmattan";
 #elif for_android
-        remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/phone";
+        if (qorbiterUIwin->width() > 480 || qorbiterUIwin-> height() > 800)
+        {
+           buildType = "/qml/android/tablet";
+           remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/tablet";
+           setDceResponse("Guessing Android Tablet, Loading Tablet Skins");
+        }
+        else
+        {
+            buildType = "/qml/android/phone";
+            remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/phone";
+            setDceResponse("Guessing Android Phone, Loading Phone Skins");
+        }
 #else
         remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins";
 #endif
@@ -248,6 +256,8 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
         //loadSkins(QUrl(localDir));
 #ifdef ANDROID
         loadSkins(QUrl(remoteDirectoryPath));
+#elif for_android
+        loadSkins(QUrl(localDir));
 #else
         loadSkins(QUrl(remoteDirectoryPath));
 #endif
@@ -444,19 +454,19 @@ bool qorbiterManager::getConf(int PK_Device)
 
         switch (m_iType){
         case 1:
-            imagePath = QUrl("../../../img/icons/backgrounds/livingroom.png");
+            imagePath = QUrl("../img/icons/backgrounds/livingroom.png");
             break;
         case 3:
-            imagePath = QUrl("../../../img/icons/backgrounds/bedroom.png");
+            imagePath = QUrl("../img/icons/backgrounds/bedroom.png");
             break;
         case 5:
-            imagePath = QUrl("../../../img/icons/backgrounds/kitchen.png");
+            imagePath = QUrl("../img/icons/backgrounds/kitchen.png");
             break;
         case 11:
-            imagePath = QUrl("../../../img/icons/backgrounds/mstrbedroom.png");
+            imagePath = QUrl("../img/icons/backgrounds/mstrbedroom.png");
             break;
         default:
-            imagePath = QUrl("../../../img/lmcesplash.png");
+            imagePath = QUrl("../img/lmcesplash.png");
             break;
         }
 
@@ -1677,7 +1687,7 @@ void qorbiterManager::setDceResponse(QString response)
     emit loadingMessage(response);
     QApplication::processEvents(QEventLoop::AllEvents);
     emit dceResponseChanged();
-    //qDebug() << response;
+qDebug() << response;
 
 }
 

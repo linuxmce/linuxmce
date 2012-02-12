@@ -104,7 +104,7 @@ Rectangle {
 
         Image {
             id: headeroverlay
-            source: "../../../img/icons/listcover.png"
+            source: "../img/icons/listcover.png"
             height: epgplaylistview.height
             smooth: true
             width: epgplaylistview.width

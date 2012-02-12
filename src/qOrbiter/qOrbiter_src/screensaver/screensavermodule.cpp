@@ -3,9 +3,9 @@
 ScreenSaverModule::ScreenSaverModule(QObject *parent) :
     QObject(parent)
 {
-    imageList.append("../../../img/lmcesplash.png");
-    imageList.append("../../../img/icons/bedroom.jpg");
-    imageList.append("../../../img/icons/mediatime.png");
+    imageList.append("../img/lmcesplash.png");
+    imageList.append("../img/icons/bedroom.jpg");
+    imageList.append("../img/icons/mediatime.png");
 
     setImage(QUrl(imageList.at(0)));
     testtext = "ack!";

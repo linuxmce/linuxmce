@@ -41,7 +41,7 @@ Item {
 
                 Image {
                     id: mHeaderImg
-                    source: "../../../img/icons/kmix.png"
+                    source: "../img/icons/kmix.png"
                     height: style.iconHeight
                     width: style.iconWidth
                     anchors.centerIn: parent

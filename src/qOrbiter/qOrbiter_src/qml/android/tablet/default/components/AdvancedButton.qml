@@ -23,7 +23,7 @@ Rectangle{
 
         Image {
             id: buttonbg
-            source: "../../img/ui3/linuxmcewidebutton.png"
+            source: "../img/ui3/linuxmcewidebutton.png"
             height: parent.height
             width: parent.width
             opacity: .5

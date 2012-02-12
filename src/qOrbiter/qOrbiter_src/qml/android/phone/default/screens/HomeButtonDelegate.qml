@@ -33,7 +33,7 @@ ButtonSq
 
           Image {
                 id:buttonimage
-                source: "../../../img/icons/"+label+".png"
+                source: "../img/icons/"+label+".png"
                 height: style.iconHeight
                 width: style.iconWidth
                  anchors.centerIn: delegateButton

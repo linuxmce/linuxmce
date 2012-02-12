@@ -28,7 +28,7 @@ Item{
                 anchors.verticalCenter: parent.verticalCenter
                 Image {
                     id: clockicon
-                    source: "../../../img/icons/alarmclock.jpg"
+                    source: "../img/icons/alarmclock.jpg"
                     height: scaleY(35)
                     fillMode: Image.PreserveAspectFit
                     width: scaleX(35)

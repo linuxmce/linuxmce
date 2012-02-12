@@ -67,7 +67,7 @@ Rectangle {
                         radius: 100
                         Image {
                             id: name
-                            source: "../../../img/icons/rndbuttonbase.png"
+                            source: "../img/icons/rndbuttonbase.png"
                             anchors.fill: parent
                         }
                         Text {
@@ -108,7 +108,7 @@ Rectangle {
                         radius: 100
                         Image {
 
-                            source: "../../../img/icons/rndbuttonbase.png"
+                            source: "../img/icons/rndbuttonbase.png"
                             anchors.fill: parent
                         }
                         Text {
@@ -149,7 +149,7 @@ Rectangle {
                         radius: 100
                         Image {
 
-                            source: "../../../img/icons/rndbuttonbase.png"
+                            source: "../img/icons/rndbuttonbase.png"
                             anchors.fill: parent
                         }
                         Text {
@@ -199,7 +199,7 @@ Rectangle {
                         radius: 100
                         Image {
 
-                            source: "../../../img/icons/rndbuttonbase.png"
+                            source: "../img/icons/rndbuttonbase.png"
                             anchors.fill: parent
                         }
                         Text {
@@ -240,7 +240,7 @@ Rectangle {
                         radius: 100
                         Image {
 
-                            source: "../../../img/icons/rndbuttonbase.png"
+                            source: "../img/icons/rndbuttonbase.png"
                             anchors.fill: parent
                         }
                         Text {
@@ -281,7 +281,7 @@ Rectangle {
                         radius: 100
                         Image {
 
-                            source: "../../../img/icons/rndbuttonbase.png"
+                            source: "../img/icons/rndbuttonbase.png"
                             anchors.fill: parent
                         }
                         Text {
@@ -331,7 +331,7 @@ Rectangle {
                         radius: 100
                         Image {
 
-                            source: "../../../img/icons/rndbuttonbase.png"
+                            source: "../img/icons/rndbuttonbase.png"
                             anchors.fill: parent
                         }
                         Text {
@@ -372,7 +372,7 @@ Rectangle {
                         radius: 100
                         Image {
 
-                            source: "../../../img/icons/rndbuttonbase.png"
+                            source: "../img/icons/rndbuttonbase.png"
                             anchors.fill: parent
                         }
                         Text {
@@ -413,7 +413,7 @@ Rectangle {
                         radius: 100
                         Image {
 
-                            source: "../../../img/icons/rndbuttonbase.png"
+                            source: "../img/icons/rndbuttonbase.png"
                             anchors.fill: parent
                         }
                         Text {
@@ -477,7 +477,7 @@ Rectangle {
                         radius: 100
                         Image {
 
-                            source: "../../../img/icons/rndbuttonbase.png"
+                            source: "../img/icons/rndbuttonbase.png"
                             anchors.fill: parent
                         }
 

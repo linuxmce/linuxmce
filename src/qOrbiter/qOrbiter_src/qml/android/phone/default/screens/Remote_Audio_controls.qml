@@ -22,7 +22,7 @@ Rectangle {
             width: 50
             height: 50
 
-            source: "../../../img/icons/kmix.png"
+            source: "../img/icons/kmix.png"
         }
     }
 
@@ -35,7 +35,7 @@ Rectangle {
 
         rotation: -90
         smooth: true
-        source: "../../../img/icons/player_fwd.png"
+        source: "../img/icons/player_fwd.png"
     }
 
     Image {
@@ -46,7 +46,7 @@ Rectangle {
         height: 50
         rotation: 90
         smooth: true
-        source: "../../../img/icons/player_fwd.png"
+        source: "../img/icons/player_fwd.png"
     }
 
 
