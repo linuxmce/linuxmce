@@ -1,0 +1,3 @@
+#qmldir android-phone-default
+Main main.qml
+Style Style.qml

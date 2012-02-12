@@ -1,0 +1,11 @@
+refs #1170 - droid phone qml
+--This line, and those below, will be ignored--
+
+M    components/MediaButton.qml
+M    components/HaControls.qml
+M    components/MultiStateFileDisplay.qml
+M    components/EPGPlaylist.qml
+M    components/qmldir
+M    components/Remote_lighting_controls.qml
+M    components/AudioRemote.qml
+M    components/NowPlayingBox.qml
