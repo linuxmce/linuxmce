@@ -1,3 +1,0 @@
-#qmldir android-tablet-default
-Main main.qml
-Style style.qml
