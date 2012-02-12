@@ -75,7 +75,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     appHeight = qorbiterUIwin->height() ;
     appWidth = qorbiterUIwin->width() ;
 
-    qDebug() << qorbiterUIwin->size();
+    //qDebug() << qorbiterUIwin->size();
 
     qorbiterUIwin->rootContext()->setContextProperty("appH", appHeight); //file grids current media type
     qorbiterUIwin->rootContext()->setContextProperty("appW", appWidth); //file grids current media type
@@ -98,12 +98,36 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     buildType="/qml/desktop";
     qrcPath = "qrc:osx/Splash.qml";
 #elif defined (ANDROID)
-    buildType = "/qml/android";
+    if (appWidth > 480 && appHeight > 800 || appHeight > 480 && appWidth > 800)
+    {
+       buildType = "/qml/android/tablet";
+
+    }
+    else
+    {
+        buildType = "/qml/android/phone";
+
+    }
+
     qrcPath = ":android/Splash.qml";
     droidPath = "/";
 #elif defined (for_android)
     buildType = "/qml/android";
     qrcPath = "qrc:android/Splash.qml";
+
+   if (appWidth > 480 && appHeight > 800 || appHeight > 480 && appWidth > 800)
+    {
+       buildType = "/qml/android/tablet";
+
+    }
+    else
+    {
+        buildType = "/qml/android/phone";
+
+    }
+
+    qrcPath = ":android/Splash.qml";
+    droidPath = "/";
 #else
     buildType = "/qml/desktop";
     qrcPath = ":desktop/Splash.qml";
@@ -195,7 +219,17 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
 
 #ifdef ANDROID
-        remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/phone";
+        if (appWidth > 480 && appHeight > 800 || appHeight > 480 && appWidth > 800)
+        {
+           buildType = "/qml/android/tablet";
+           remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/tablet";
+        }
+        else
+        {
+            buildType = "/qml/android/phone";
+            remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/phone";
+        }
+
 #elif MACOSX
         remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/macosx";
 #elif for_desktop
@@ -1643,7 +1677,7 @@ void qorbiterManager::setDceResponse(QString response)
     emit loadingMessage(response);
     QApplication::processEvents(QEventLoop::AllEvents);
     emit dceResponseChanged();
-    qDebug() << response;
+    //qDebug() << response;
 
 }
 

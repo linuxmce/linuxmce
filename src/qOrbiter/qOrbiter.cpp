@@ -2282,7 +2282,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 }
                 else
                 {
-                    qDebug() << "Unhandled attribute: " << attributeType << attribute;
+                    //qDebug() << "Unhandled attribute: " << attributeType << attribute;
                 }
 
                 //qmlUI->m_selected_grid_item->appendRow(new FileDetailsItem(cellTitle, cellAttribute, cellImg, false,  qmlUI->model));
