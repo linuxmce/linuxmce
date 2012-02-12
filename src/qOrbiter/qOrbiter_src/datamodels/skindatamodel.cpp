@@ -8,7 +8,7 @@
 SkinDataModel::SkinDataModel(QUrl &baseUrl, SkinDataItem* prototype, qorbiterManager *uiRef, QObject* parent): QAbstractListModel(parent), m_prototype(prototype)
 {
     m_baseUrl = baseUrl ;
-    qDebug() << "Setting skin source: " << m_baseUrl;
+    uiRef->setDceResponse("Setting skin source: " + m_baseUrl.toString());
     setRoleNames(m_prototype->roleNames());
     qRegisterMetaType<QModelIndex>("QModelIndex");
     ui_reference = uiRef;
@@ -140,7 +140,7 @@ void SkinDataModel::addSkin(QString name) {
    if (!style.isValid()) {
        qDebug() << "Invalid URL!";
    }*/
-    qDebug() << "Loading skin : " << name;
+   // qDebug() << "Loading skin : " << name;
     m_skin_loader->loadSkin(name);
 
     /*QObject *styleObject = new QObject();
@@ -192,7 +192,7 @@ void SkinDataModel::addSkin(QString name) {
 
 void SkinDataModel::setActiveSkin(QString name)
 {
-    qDebug() << "Loading Skin at " + m_baseUrl.toString() + "/" + name;
+    ui_reference->setDceResponse("Loading Skin at " + m_baseUrl.toString() + "/" + name);
 
     QString skinURL = find(name)->path();
 
@@ -200,7 +200,7 @@ void SkinDataModel::setActiveSkin(QString name)
     QObject *styleObject = skinData.create(ui_reference->qorbiterUIwin->rootContext());
     if (skinData.isError()) {
         // this dir does not contain a Style.qml; ignore it
-        qDebug() << skinData.errors();
+        ui_reference->setDceResponse(skinData.errors().last().toString());
         return;
     }
     else
@@ -212,8 +212,8 @@ void SkinDataModel::setActiveSkin(QString name)
         {
             if(skinData.isError())
             {
-                qDebug() << skinData.errors();
-                qDebug("Error!");
+                ui_reference->setDceResponse(skinData.errors().last().toString());
+
                 break;
             }
 

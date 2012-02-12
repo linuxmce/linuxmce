@@ -72,6 +72,11 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     qorbiterUIwin->rootContext()->setContextProperty("manager", this); //providing a direct object for qml to call c++ functions of this class
     qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse); //file grids current media type
 
+    appHeight = qorbiterUIwin->height() ;
+    appWidth = qorbiterUIwin->width() ;
+
+    qDebug() << qorbiterUIwin->size();
+
     qorbiterUIwin->rootContext()->setContextProperty("appH", appHeight); //file grids current media type
     qorbiterUIwin->rootContext()->setContextProperty("appW", appWidth); //file grids current media type
 
@@ -152,15 +157,15 @@ void qorbiterManager::gotoQScreen(QString s)
 {
     //send the qmlview a request to go to a screen, needs error handling
     //This allows it to execute some transition or other if it wants to
-    qDebug() << "Starting screen switch";
+    setDceResponse("Starting screen switch");
     QVariant screenname= s;
     QObject * item = qorbiterUIwin->rootObject();
 
-    qDebug() << "About to call screenchange()";
+    setDceResponse("About to call screenchange()");
     if (QMetaObject::invokeMethod(item, "screenchange",  Q_ARG(QVariant, screenname))) {
-        qDebug() << "Done call to screenchange()";
+        setDceResponse("Done call to screenchange()");
     } else {
-        qDebug() << "screenchange() FAILED";
+        setDceResponse("screenchange() FAILED");
     }
     currentScreen = s;
 }
@@ -312,8 +317,8 @@ bool qorbiterManager::getConf(int PK_Device)
     configData.setContent(tConf,false);
     if(configData.isDocument() == false)
     {
-        qDebug() << "Invalid config for device: " << iPK_Device;
-        qDebug() << "Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device) ;
+        setDceResponse("Invalid config for device: " + QString::number(iPK_Device));
+        setDceResponse("Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device)) ;
         setDceResponse("Invalid Config");
         emit orbiterConfigReady(false);
         return false;
@@ -690,10 +695,10 @@ void qorbiterManager::swapSkins(QString incSkin)
     //get the skin URL from the skins model
     skin = tskinModel->find(incSkin);
 
-    qDebug() << "Got it from the model : " + skin->baseUrl().toString();
+    //qDebug() << "Got it from the model : " + skin->baseUrl().toString();
 
     //load the actual skin entry point
-    qDebug() << "Skin switch url:" << skin->entryUrl();
+    //qDebug() << "Skin switch url:" << skin->entryUrl();
     currentSkin = incSkin;
     qorbiterUIwin->engine()->rootContext()->setContextProperty("style", skin->styleView());
 
@@ -712,7 +717,7 @@ void qorbiterManager::skinLoaded(QDeclarativeView::Status status) {
         qWarning() << "Skin loading has FAILED";
         qWarning() << qorbiterUIwin->errors();
     } else {
-        qDebug() << "Correctly loaded skin, continuing";
+        //qDebug() << "Correctly loaded skin, continuing";
         m_bStartingUp = false;
 
         startOrbiter();
@@ -724,7 +729,7 @@ void qorbiterManager::skinLoaded(QDeclarativeView::Status status) {
 //takes care of un-registering the orbiter from the DCERouter and then shutting down
 void qorbiterManager::closeOrbiter()
 {
-    qDebug() << "Shutting Down";
+    setDceResponse("Shutting Down");
     QApplication::processEvents(QEventLoop::AllEvents);
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Exiting, Unregistering 1st");
     // processingThread->quit();
@@ -820,8 +825,8 @@ void qorbiterManager::regenOrbiter(int deviceNo)
 {
 
 
-    qDebug() << "Regenerating..";
-    qDebug() << qs_routerip;
+    //qDebug() << "Regenerating..";
+    //qDebug() << qs_routerip;
 
     if(qs_routerip =="127.0.0.1")
     {
@@ -829,17 +834,17 @@ void qorbiterManager::regenOrbiter(int deviceNo)
         //splashView->showFullScreen();
         qorbiterUIwin->close();
         QApplication::processEvents(QEventLoop::AllEvents);
-        qDebug("Onscreen orbiter");
+        //qDebug("Onscreen orbiter");
         QProcess *regen = new QProcess(this);
         regen->start("/usr/bin/php /var/www/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device), QIODevice::ReadOnly);
-        qDebug() <<"status code:" << regen->errorString();
+        //qDebug() <<"status code:" << regen->errorString();
         QObject::connect(regen,SIGNAL(finished(int)), this, SLOT(regenComplete(int)));
         QObject::connect(regen,SIGNAL(error(QProcess::ProcessError)), this, SLOT(regenError(QProcess::ProcessError)));
 
     }
     else
     {
-        qDebug("remote orbiter");
+        //qDebug("remote orbiter");
         gotoQScreen("WebRegen.qml");
     }
 
@@ -932,7 +937,7 @@ void qorbiterManager::quickReload()
 
 void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
 {
-    qDebug() << "Triggering connection to LMCE Device ID [" << incdeviceid << "] port Router Address [" << incrouterip << "]" ;
+    setDceResponse("Triggering connection to LMCE Device ID [" + incdeviceid + "] port Router Address [" + incrouterip + "]") ;
     bAppError =true;
     qs_routerip = incrouterip;
     iPK_Device = long(incdeviceid.toInt());
@@ -1127,7 +1132,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
                 filedetailsclass->setVisible(true);
                 filedetailsclass->setFile(param);
                 showFileInfo(param);
-                qDebug () << "info tripped";
+                //qDebug () << "info tripped";
                 break;
 
                 //    pqOrbiter->GetMediaAttributeGrid(param);
@@ -1379,7 +1384,7 @@ void qorbiterManager::changeChannels(QString chan)
 
 void qorbiterManager::getLiveTVPlaylist()
 {
-    qDebug() << "Orbiter Manager slot called";
+    //qDebug() << "Orbiter Manager slot called";
     emit liveTVrequest();
 
 }
@@ -1437,11 +1442,11 @@ void qorbiterManager::updateTimecode()
     string sIPAddress;
     if(nowPlayingButton->b_mediaPlaying == true && !timeCodeSocket->isValid())
     {
-        qDebug("media playing with no timecode!");
+        //qDebug("media playing with no timecode!");
         if(!timeCodeSocket->isOpen())
 
         {
-            qDebug("socket is closed, opening!");
+            //qDebug("socket is closed, opening!");
             DeviceData_Base *pDevice = pqOrbiter->m_dwPK_Device_NowPlaying ? pqOrbiter->m_pData->m_AllDevices.m_mapDeviceData_Base_Find(pqOrbiter->m_dwPK_Device_NowPlaying) : NULL;
             if( NULL != pDevice &&
                     (
@@ -1451,7 +1456,7 @@ void qorbiterManager::updateTimecode()
                     )
             {
                 sIPAddress = pDevice->m_sIPAddress;
-                qDebug() << sIPAddress.c_str();
+                //qDebug() << sIPAddress.c_str();
                 if( sIPAddress.empty() )
                 {
                     //qDebug() << "ip empty...";
@@ -1469,7 +1474,7 @@ void qorbiterManager::updateTimecode()
             QString port = QString::fromStdString(pqOrbiter->GetCurrentDeviceData(pqOrbiter->m_dwPK_Device_NowPlaying, 171));
             if (sIPAddress.length() == 0 && i_current_mediaType == 11)
             {
-                qDebug() << "IpAddress empty, error!: " <<  sIPAddress.c_str();
+                //qDebug() << "IpAddress empty, error!: " <<  sIPAddress.c_str();
                 return;
             }
             else
@@ -1720,17 +1725,21 @@ void qorbiterManager::checkOrientation(QSize)
     if(qorbiterUIwin->height() < qorbiterUIwin->width())
     {
 
-    //setDceResponse("wide");
-    qorbiterUIwin->setProperty("deviceh", qorbiterUIwin->height() );
-    setOrientation(false);
+        //setDceResponse("wide");
+        appHeight = qorbiterUIwin->height() ;
+        appWidth = qorbiterUIwin->width() ;
+        // setOrientation(false);
+
     }
     else
     {
 
-    appHeight = qorbiterUIwin->height();
-    appWidth = qorbiterUIwin->width();
-    setOrientation( true);
+        appHeight = qorbiterUIwin->height() ;
+        appWidth = qorbiterUIwin->width() ;
+        // setOrientation( true);
     }
+    emit orientationChanged();
+    setDceResponse("orientation change");
 }
 
 

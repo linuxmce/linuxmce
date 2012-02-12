@@ -89,7 +89,7 @@
 /*-------Dce Includes----*/
 
 /*---------------Threaded classes-----------*/
-#include <threadedClasses/threadedsplash.h>
+
 
 #include <qOrbiter/qOrbiter.h>
 class EPGChannelList;
@@ -121,7 +121,7 @@ class qorbiterManager : public QObject
     Q_PROPERTY (QString sPK_User READ getCurrentUser WRITE setCurrentUser NOTIFY userChanged)
     Q_PROPERTY (QString dceResponse READ getDceResponse WRITE setDceResponse NOTIFY dceResponseChanged)
     Q_PROPERTY (bool connectedState READ getConnectedState WRITE setConnectedState NOTIFY connectedStateChanged)
-    Q_PROPERTY (bool b_orientation READ getOrientation WRITE setOrientation NOTIFY orientationChanged)
+  //  Q_PROPERTY (bool b_orientation READ getOrientation WRITE setOrientation NOTIFY orientationChanged)
 
 
 public:

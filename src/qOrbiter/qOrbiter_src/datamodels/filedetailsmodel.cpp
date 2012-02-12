@@ -51,7 +51,7 @@ void FileDetailsModel::insertRow(int row, FileDetailsItem *item)
 {
   beginInsertRows(QModelIndex(), row, row);
   connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
-  qDebug() << "Inserting at:" << row;
+  //qDebug() << "Inserting at:" << row;
   m_list.insert(row, item);
   endInsertRows();
 }
@@ -160,7 +160,7 @@ void FileDetailsModel::ReturnSelectedItems()
         if(item->selectedStatus() == true) t_selected_items.append(item->id());
     }
     QString qs_sorting_string= t_selected_items.join(",");
-    qDebug() << "File Format updated sorting filter" << qs_sorting_string;
+    //qDebug() << "File Format updated sorting filter" << qs_sorting_string;
     emit SetTypeSort(2, qs_sorting_string);
 }
 

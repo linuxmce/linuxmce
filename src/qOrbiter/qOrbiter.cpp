@@ -103,11 +103,11 @@ bool qOrbiter::GetConfig()
     }
     else
     {
-        qDebug("Get Config sent");
+        qmlUI->setDceResponse("Get Config sent");
     }
 
 
-    qDebug() <<"Idata recieved: " << iData_Size ; // size of xml file
+   qmlUI->setDceResponse("Idata recieved: " +QString::number(iData_Size)) ; // size of xml file
     QByteArray configData;              //config file put into qbytearray for processing
     configData = oData;
     if (configData.size() == 0)
@@ -119,7 +119,7 @@ bool qOrbiter::GetConfig()
     }
 
     qmlUI->binaryConfig = configData;
-    qDebug("Break");
+
     delete oData;
 
     return true;
@@ -1485,7 +1485,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
                     DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
                     int cellsToRender= pDataGridTable->GetRows();
                     //qDebug() << pDataGridTable->GetCols();
-qDebug("sent image dg request");
+qmlUI->setDceResponse("sent image dg request");
                     //qDebug() << "Picture Datagrid Height:" << gHeight << " , width: " << gWidth;
                     // qDebug() << "Response: " << cellsToRender << " picture cells to render";
                   //  LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
@@ -1527,7 +1527,7 @@ qDebug("sent image dg request");
                     }
                     if (cellsToRender > qmlUI->model->rowCount(QModelIndex()))
                     {
-                        qDebug() <<"Addtional media loading";
+                        qmlUI->setDceResponse("Addtional media loading");
 
                         populateAdditionalMedia();
                     }
@@ -2237,7 +2237,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                         qmlUI->filedetailsclass->setMediaTitle(attribute);
                     }
 
-                    qDebug() << attribute;
+                    //qDebug() << attribute;
                 }
                 else if(attributeType == "Channel")
                 {
@@ -3774,7 +3774,7 @@ void DCE::qOrbiter::saveScreenAttribute(QString attribute)
 {
 
     string sAttribute = attribute.toStdString();
-    qDebug() << attribute;
+    //qDebug() << attribute;
     QByteArray bytes;
     QBuffer ba(&bytes);
     ba.open(QIODevice::WriteOnly);

@@ -19,7 +19,7 @@ void ScreenSaverClass::setImageList(QStringList imgList)
    }
    else
    {
-       qDebug("Screensaver image list error!");
+       //("Screensaver image list error!");
    }
 }
 

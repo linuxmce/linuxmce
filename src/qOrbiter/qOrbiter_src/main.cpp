@@ -164,7 +164,7 @@ int main(int argc, char* argv[])
             break;
         case 'd':
             PK_Device = atoi(argv[++optnum]);
-            qDebug() << "From the command line input:" << PK_Device;
+            //qDebug() << "From the command line input:" << PK_Device;
             break;
         case 'L':
             bLocalMode = true;

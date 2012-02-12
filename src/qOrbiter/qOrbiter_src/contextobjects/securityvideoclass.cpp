@@ -8,6 +8,6 @@ SecurityVideoClass::SecurityVideoClass(QObject *parent) :
     currentFrame.load(":/icons/security.png");
     if (currentFrame.isNull())
     {
-        qDebug() << "default security failed to load";
+        //qDebug() << "default security failed to load";
     }
 }

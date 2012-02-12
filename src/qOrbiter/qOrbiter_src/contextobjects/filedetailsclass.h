@@ -114,7 +114,7 @@ Q_PROPERTY (QString aspect READ getImageAspect WRITE setImageAspect NOTIFY image
     inline void setPath (QString f) {path = f; emit object_changed();}
 
     QImage qi_screenshot;
-    inline void setScreenshotimage(QImage img) {qi_screenshot= img; qDebug() << "File Detail Image Set!"; emit imageChanged();}
+    inline void setScreenshotimage(QImage img) {qi_screenshot= img; emit imageChanged();}
     inline QImage getScreenshotimage() {return qi_screenshot;}
 
     QImage qi_bgimage;

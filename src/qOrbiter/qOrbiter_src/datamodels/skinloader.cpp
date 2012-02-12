@@ -16,22 +16,22 @@ void SkinLoader::loadSkin(QString name) {
     QUrl style;
     style.setUrl(m_base_url.toString() + "/" + name + "/Style.qml");
 
-    qDebug() << "Skin loader is loading Style.qml: " << name;
+ ui_reference->setDceResponse("Skin loader is loading Style.qml: " + name);
 
     current_component = new QDeclarativeComponent(ui_reference->qorbiterUIwin->engine(), style);
     if (current_component->isLoading()) {
-        qDebug() << "Hooking up slot";
+        //qDebug() << "Hooking up slot";
 //         QObject::connect(current_component, SIGNAL(statusChanged(QDeclarativeComponent::Status)),
 //                          this, SLOT(continueLoading()));
         if (QObject::connect(current_component, SIGNAL(statusChanged(QDeclarativeComponent::Status)),
                           this, SLOT(continueLoading()))) {
-            qDebug() << "Hooked!";
+            //qDebug() << "Hooked!";
         } else {
-            qDebug() << "Fooked! :-(";
+            //qDebug() << "Fooked! :-(";
         }
     }
     else {
-        qDebug() << "Loaded already?  Attempting to ->create()";
+        //qDebug() << "Loaded already?  Attempting to ->create()";
         continueLoading();
     }
 
@@ -41,14 +41,14 @@ void SkinLoader::loadSkin(QString name) {
 }
 
 void SkinLoader::continueLoading() {
-qDebug() << "Loading will continue now ..";
+ui_reference->setDceResponse("Loading will continue now ..");
 QImage skinPic(":/icons/Skin-Data.png");
 
 QUrl skinBase(m_base_url.toString()  + "/default");
     if (current_component->isError()) {
         qWarning() << current_component->errors();
     } else {
-        qDebug() << "Making style object";
+        //qDebug() << "Making style object";
         styleObject = current_component->create(ui_reference->qorbiterUIwin->rootContext());
         QString s_title = styleObject->property("skinname").toString();
         QString s_creator = styleObject->property("skincreator").toString();
@@ -58,7 +58,7 @@ QUrl skinBase(m_base_url.toString()  + "/default");
         QString s_path = styleObject->property("skindir").toString();
         QString s_mainc = styleObject->property("maincolor").toString();
         QString s_accentc = styleObject->property("accentcolor").toString();
-         qDebug() << "Adding skin to list" << s_title;
+        ui_reference->setDceResponse("Adding skin to list" + s_title);
         m_parent->appendRow(new SkinDataItem(skinBase, s_title, s_creator, s_description, s_version, s_target, skinPic, s_path, s_mainc, s_accentc, styleObject));
     }
 }

@@ -25,8 +25,8 @@ QtObject{
     property string maincolor: "grey"
     property string accentcolor: "indianred"
     //main stage styles
-    property int orbiterH:deviceh
-    property int orbiterW: devicew
+    property int orbiterH:appH
+    property int orbiterW: appW
     property int orbiterWp: 480
     property int orbiterHp: 320
     property color stageBG: "slategray"
@@ -41,8 +41,8 @@ QtObject{
     //icon sizes
     property int iconHeight: 45
     property int iconWidth: 45
-    property int  stdbuttonh: scaleX(12)
-    property int  stdbuttonw: scaleY(12)
+    property int  stdbuttonh: 45
+    property int  stdbuttonw: 45
 
     //textStyles
     property string stylebuttonimage: ""

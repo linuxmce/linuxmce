@@ -44,14 +44,14 @@ void FileDetailsItem::updateSelection(bool newbool)
     if (m_isSelected == true)
     {
         m_isSelected = false;
-        qDebug () << this->id() << "Button state is " << m_isSelected;
+        //qDebug () << this->id() << "Button state is " << m_isSelected;
         emit filterChanged();
        // return m_isSelected;
     }
     else
     {
         m_isSelected = true;
-        qDebug () << this->id() << "Button state is " << m_isSelected;
+        //qDebug () << this->id() << "Button state is " << m_isSelected;
        emit filterChanged();
        //return m_isSelected;
     }

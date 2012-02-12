@@ -52,7 +52,7 @@ void AttributeSortModel::insertRow(int row, AttributeSortItem *item)
 {
   beginInsertRows(QModelIndex(), row, row);
   connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
-  qDebug() << "Inserting at:" << row;
+  //qDebug() << "Inserting at:" << row;
   m_list.insert(row, item);
   endInsertRows();
 }
@@ -140,7 +140,7 @@ bool AttributeSortModel::setSelectionStatus(QString format)
 {
     AttributeSortItem* item = find(format);
     bool newStatus = item->updateSelection(false);
-    qDebug() << "Setting State for:" << format;
+    //qDebug() << "Setting State for:" << format;
     //return state;
 
     ReturnSelectedItems();
@@ -149,7 +149,7 @@ bool AttributeSortModel::setSelectionStatus(QString format)
 
 bool AttributeSortModel::getSelectionStatus(QString format)
 {
-    qDebug() << "Looking for status for" << format;
+    //qDebug() << "Looking for status for" << format;
     AttributeSortItem* item = find(format);
 
     bool g = item->selectedStatus();
@@ -164,7 +164,7 @@ void AttributeSortModel::ReturnSelectedItems()
         if(item->selectedStatus() == true) t_selected_items.append(item->fileformat());
     }
     QString qs_sorting_string= t_selected_items.join(",");
-    qDebug() << "Attribute Sort updated sorting filter" << qs_sorting_string;
+    //qDebug() << "Attribute Sort updated sorting filter" << qs_sorting_string;
  emit SetTypeSort(6, qs_sorting_string);
 }
 

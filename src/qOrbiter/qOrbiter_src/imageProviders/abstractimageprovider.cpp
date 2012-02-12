@@ -55,7 +55,7 @@ QImage AbstractImageProvider::securityProvider()
 QImage AbstractImageProvider::updateObjectProvider()
 {
    key = managerreference->updatedObjectImage;
-   qDebug()<< "!!!!!!!!!!" <<key.size();
+   //qDebug()<< "!!!!!!!!!!" <<key.size();
     if (key.isNull())
     {
          key.load(":/icons/playlist.png");
@@ -89,7 +89,7 @@ QImage AbstractImageProvider::fileDetails()
     }
     managerreference->filedetailsclass->setAspectH(key.height()/ 100);
     managerreference->filedetailsclass->setAspectW(key.width() / 100);
-    qDebug()<< key.width()/key.height();
+    //qDebug()<< key.width()/key.height();
 
     return key;
 }

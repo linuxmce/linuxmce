@@ -60,7 +60,7 @@ void ListModel::insertRow(int row, gridItem *item)
 {
   beginInsertRows(QModelIndex(), row, row);
   connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
-  qDebug() << "Inserting at:" << row;
+  //qDebug() << "Inserting at:" << row;
   m_list.insert(row, item);
   endInsertRows();
 }
@@ -69,7 +69,7 @@ void ListModel::handleItemChange()
 {
   gridItem* item = static_cast<gridItem*>(sender());
   QModelIndex index = indexFromItem(item);
-  qDebug() << "Handling item change for:" << index;
+  //qDebug() << "Handling item change for:" << index;
   if(index.isValid())
   {
     emit dataChanged(index, index, 0);

@@ -24,7 +24,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 #ifdef for_android
     mainView.setBaseSize(1024,768);
 #endif
-    qDebug() << mainView.size();
+    //qDebug() << mainView.size();
     router = routerip;
     deviceno = deviceid;
     mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
@@ -35,8 +35,8 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 
 
 #ifdef ANDROID
-    mainView.rootContext()->setContextProperty("devicew", (mainView.window()->width()/ 2));
-    mainView.rootContext()->setContextProperty("deviceh", (mainView.window()->height()/ 2));
+    mainView.rootContext()->setContextProperty("devicew", (mainView.window()->width()/ 2));//this is done because android reports the desktop width as 2x what it is.at least on my phone
+mainView.rootContext()->setContextProperty("deviceh", mainView.window()->height());
 #elif for_android
 
             mainView.rootContext()->setContextProperty("devicew", 320);
@@ -102,7 +102,7 @@ void orbiterWindow::setMessage(QString imsg)
 {
     // QApplication::processEvents(QEventLoop::AllEvents);
     message = imsg; emit MessageChanged();
-    qDebug() << "Orbiter window output:" << imsg;
+    //qDebug() << "Orbiter window output:" << imsg;
 }
 
 void orbiterWindow::forceResponse(QString forced)

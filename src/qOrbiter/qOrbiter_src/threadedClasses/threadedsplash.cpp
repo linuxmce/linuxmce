@@ -59,7 +59,7 @@ void ThreadedSplash::setMessage(QString s)
 {
     qs_progress = s;
      emit qsProgress();
-    qDebug() << "Cross thread message:" << qs_progress;
+    //qDebug() << "Cross thread message:" << qs_progress;
 
 }
 
@@ -81,14 +81,14 @@ int ThreadedSplash::getProgress()
 
 void ThreadedSplash::closeSplash(bool)
 {
-    qDebug("Recieved command to close!");
+    //qDebug("Recieved command to close!");
     splashView->close();
 }
 
 void ThreadedSplash::raiseSplash()
 {
 
-    qDebug("Recieved command to open!");
+    //qDebug("Recieved command to open!");
 #ifdef Q_OS_SYMBIAN
     splashView->showFullScreen();
 #elif defined(Q_WS_MAEMO_5)
