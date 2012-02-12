@@ -35,8 +35,8 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 
 
 #ifdef ANDROID
-    mainView.rootContext()->setContextProperty("devicew", (mainView.window()->width()/ 2));//this is done because android reports the desktop width as 2x what it is.at least on my phone
-mainView.rootContext()->setContextProperty("deviceh", mainView.window()->height());
+    mainView.rootContext()->setContextProperty("appW", (mainView.window()->width()/ 2));//this is done because android reports the desktop width as 2x what it is.at least on my phone
+mainView.rootContext()->setContextProperty("appH", mainView.window()->height());
 #elif for_android
 
             mainView.rootContext()->setContextProperty("devicew", 480);
@@ -66,7 +66,7 @@ mainView.rootContext()->setContextProperty("deviceh", mainView.window()->height(
     buildType="/qml/desktop";
     qrcPath = "qrc:osx/Splash.qml";
 #elif defined ANDROID
-    buildType = "/qml/android";
+
     qrcPath = "qrc:android/Splash.qml";
 #elif defined for_android
     buildType = "/qml/android";

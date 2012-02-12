@@ -99,7 +99,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     buildType="/qml/desktop";
     qrcPath = "qrc:osx/Splash.qml";
 #elif defined (ANDROID)
-    if (appWidth > 480 && appHeight > 800 || appHeight > 480 && appWidth > 800)
+    if (qorbiterUIwin->width() > 480 || qorbiterUIwin-> height() > 800)
     {
        buildType = "/qml/android/tablet";
 
@@ -212,20 +212,22 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
     {
         emit connectionValid(true);
-        emit loadingMessage("Orbiter  connected");
+        setDceResponse("Orbiter  connected");
         QApplication::processEvents(QEventLoop::AllEvents);
 
 
 #ifdef ANDROID
         if (qorbiterUIwin->width() > 480 || qorbiterUIwin-> height() > 800)
         {
-           buildType = "/qml/android/tablet";
+
            remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/tablet";
+           setDceResponse("Guessing Android Tablet, Loading Tablet Skins");
         }
         else
         {
-            buildType = "/qml/android/phone";
+
             remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/phone";
+            setDceResponse("Guessing Android Phone, Loading Phone Skins");
         }
 
 #elif MACOSX
@@ -273,6 +275,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             if (getConf(PK_Device))
             {
 
+                setDceResponse("Configuration processed");
                 //LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",iPK_Device,qs_routerip.toStdString());
 
                 QObject::connect(pqOrbiter,SIGNAL(disconnected(QString)), this, SLOT(reloadHandler()));
@@ -530,7 +533,7 @@ bool qorbiterManager::getConf(int PK_Device)
         roomMediaScenarios.insert(MroomMapNo, mediaModelHolder);
         roomMedia = roomMediaScenarios.value(m_lRooms->idefault_Ea);
     }
-
+ setDceResponse("Media Done");
 
     //CLIMATE-----------SCENARIOS---------------------------------------------------------------------------------
 
@@ -558,6 +561,7 @@ bool qorbiterManager::getConf(int PK_Device)
         roomClimateScenarios.insert(roomMapNo, climateModelHolder);
         roomClimate = roomClimateScenarios.value(m_lRooms->idefault_Ea);
     }
+    setDceResponse("Climate Done");
 
     //TELECOM------SCENARIOS-------------------------------------------------------------------------------------
     QDomElement tScenarios = root.firstChildElement("TelecomScenarios");
@@ -586,7 +590,7 @@ bool qorbiterManager::getConf(int PK_Device)
         roomTelecomScenarios.insert(troomMapNo, telecomModelHolder);
         roomTelecom = roomTelecomScenarios.value(m_lRooms->idefault_Ea);
     }
-
+ setDceResponse("Telecom Done");
     //SECURIY---SCENARIOS-----------------------------------------------------------------------------------------
     QDomElement secScenarios = root.firstChildElement("SecurityScenarios");
     QDomNodeList secScenarioList = secScenarios.childNodes();
@@ -612,6 +616,7 @@ bool qorbiterManager::getConf(int PK_Device)
         roomSecurityScenarios.insert(secroomMapNo, securityModelHolder);
         roomSecurity = roomSecurityScenarios.value(m_lRooms->idefault_Ea);
     }
+     setDceResponse("Security Done");
     QApplication::processEvents(QEventLoop::AllEvents);
     //------------------------------------------context objects----------------------------------------------------
     qorbiterUIwin->rootContext()->setContextObject(this);
@@ -628,10 +633,9 @@ bool qorbiterManager::getConf(int PK_Device)
     qorbiterUIwin->rootContext()->setContextProperty("userList", userList);                           //custom user list provided
     qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms);                           //custom room list  provided
     qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
-
-
     qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(screenshotVars));
     QObject::connect(this->nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()));
+     setDceResponse("Properties Done");
 
     //epg listmodel, no imageprovider as of yet
     simpleEPGmodel = new EPGChannelList(new EPGItemClass, this );
@@ -640,10 +644,11 @@ bool qorbiterManager::getConf(int PK_Device)
     simpleEPGmodel->moveToThread(processingThread);
     processingThread->start();    QApplication::processEvents(QEventLoop::AllEvents);
 
+     setDceResponse("Threading Initialized");
     QObject::connect(this,SIGNAL(liveTVrequest()), simpleEPGmodel,SLOT(populate()), Qt::QueuedConnection);
     //        qDebug () << "Orbiter Registered, starting";
 
-    setDceResponse("About to set room..");
+    setDceResponse("Setting location");
 
     //------------not sure if neccesary since it knows where we are.
     setActiveRoom(iFK_Room, iea_area);
@@ -708,6 +713,7 @@ bool qorbiterManager::getConf(int PK_Device)
 
     connect(nowPlayingButton, SIGNAL(mediaStatusChanged()), this , SLOT(updateTimecode()));
     binaryConfig.clear();
+
     //tConf.clear();
 
     //----------------Security Video setup
@@ -729,6 +735,7 @@ bool qorbiterManager::getConf(int PK_Device)
 
     if(buildType.contains("/qml/android/tablet"))
     {
+         setDceResponse("Activating Photo ScreenSaver");
         activateScreenSaver();
     }
 
@@ -1694,7 +1701,7 @@ void qorbiterManager::setDceResponse(QString response)
     emit loadingMessage(response);
     QApplication::processEvents(QEventLoop::AllEvents);
     emit dceResponseChanged();
-qDebug() << response;
+//qDebug() << response;
 
 }
 

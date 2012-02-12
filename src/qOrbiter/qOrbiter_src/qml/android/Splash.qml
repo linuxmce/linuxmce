@@ -5,8 +5,8 @@ import QtQuick 1.1
 
 Rectangle {
     id: rectangle1
-    height: deviceh
-    width: devicew
+    height: appH
+    width: appW
     focus: true
     onScaleChanged: console.log("scale changed")
 
@@ -17,10 +17,10 @@ Rectangle {
 
 
     function scaleX(x){
-        return x/100*devicew
+        return x/100*appW
     }
     function scaleY(y){
-        return y/100*deviceh
+        return y/100*appH
     }
 
     color: "slategrey"
@@ -35,11 +35,11 @@ Rectangle {
         anchors.fill: parent
     }
 
-    Column{
+    Row{
 
         height: childrenRect.height
-        width: scaleX(40)
-        spacing: 2
+        width: childrenRect.width
+        spacing: scaleX(5)
 
         Text {
             id: connection_present
@@ -65,13 +65,16 @@ Rectangle {
         Text {
             id: skin_index
             text: qsTr("Skins")
-            opacity: 0
+            color: window.b_localConfigReady ? "red" : "green"
+            font.pixelSize: window.b_localConfigReady ? 14 : 12
         }
 
         Text {
             id: orbiter_config
             text: qsTr("Orbiter Config")
-            opacity: 0
+            color: window.b_localConfigReady ? "red" : "green"
+            font.pixelSize: window.b_localConfigReady ? 14 : 12
+
         }
 
 
@@ -266,7 +269,7 @@ Rectangle {
 
         text: "Status " + window.message
         anchors.topMargin: -17
-        font.pixelSize: 14
+        font.pixelSize: scaleY(5)
         font.family: "Droid Sans"
         color: "white"
         anchors.bottom: rectangle2.bottom
