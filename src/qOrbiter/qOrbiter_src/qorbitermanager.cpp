@@ -257,7 +257,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 #ifdef ANDROID
         loadSkins(QUrl(remoteDirectoryPath));
 #elif for_android
-        loadSkins(QUrl(localDir));
+        loadSkins(QUrl(remoteDirectoryPath));
 #else
         loadSkins(QUrl(remoteDirectoryPath));
 #endif
@@ -725,6 +725,12 @@ bool qorbiterManager::getConf(int PK_Device)
 #ifdef for_desktop
     activateScreenSaver();
 #endif
+
+    if(buildType.contains("/qml/android/tablet"))
+    {
+        activateScreenSaver();
+    }
+
     swapSkins(currentSkin);
     emit orbiterConfigReady( true);
     return true;
