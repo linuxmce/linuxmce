@@ -1,4 +1,4 @@
-#include "GenericSetupItem.h"
+#include <genericsetupitem.h>
 
 
 GenericSetupItem::GenericSetupItem( QString &ident, QString &name,  QString &path,  int &index,  QImage &img, QObject *parent) :

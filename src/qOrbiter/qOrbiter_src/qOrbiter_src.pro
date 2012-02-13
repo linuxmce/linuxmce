@@ -243,7 +243,7 @@ SOURCES += main.cpp \
     contextobjects/screensaverclass.cpp \
     datamodels/skinloader.cpp \
     datamodels/genericsetupmodel.cpp \
-    datamodels/genericesetupitem.cpp
+    datamodels/genericsetupitem.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -338,7 +338,7 @@ HEADERS += \
     datamodels/skinloader.h \
     datamodels/skinloader.h \
     datamodels/genericsetupmodel.h \
-    datamodels/genericesetupitem.h
+    datamodels/genericsetupitem.h
 
 OTHER_FILES += Readme.txt \
     qml/Splash.qml \
@@ -16713,6 +16713,10 @@ contains(MEEGO_EDITION,harmattan) {
     desktopfile.path = /usr/share/applications
     INSTALLS += desktopfile
 }
+
+
+
+
 
 
 

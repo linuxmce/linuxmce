@@ -2,7 +2,7 @@
 #define GENERICSETUPMODEL_H
 #include <QObject>
 #include <QAbstractListModel>
-#include <genericesetupitem.h>
+#include <genericsetupitem.h>
 
 class GenericSetupModel : public QAbstractListModel
 {
