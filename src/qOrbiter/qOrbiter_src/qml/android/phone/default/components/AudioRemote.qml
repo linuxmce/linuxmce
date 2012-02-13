@@ -2,14 +2,14 @@ import QtQuick 1.0
 
 
 Rectangle {
-    width: 310
+    width: appW
     height: 80
     color: "transparent"
 
     Image {
         id: overlay
         source: "../img/widegreyshape.png"
-        width: 310
+        width: appW
         height: 76
         anchors.centerIn: parent
 

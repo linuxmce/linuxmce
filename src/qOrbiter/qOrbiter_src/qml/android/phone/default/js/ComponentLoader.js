@@ -161,7 +161,7 @@
   function createListComponent(incavcomponent, screen) {
 
       listcomponent = Qt.createComponent(incavcomponent);
-	listscreen = listcomponent.createObject(screen, {"x":20, "y": -100});
+        listscreen = listcomponent.createObject(stage, {"x":0, "y": 0});
 
 	if (listscreen == null) {
 	    // Error Handling
@@ -176,7 +176,7 @@
   function createStageComponent(incavcomponent, screen) {
 
       stagecomponent = Qt.createComponent("../components/"+incavcomponent);
-	stagescreen = stagecomponent.createObject(stage, {"x":20, "y": 100});
+        stagescreen = stagecomponent.createObject(stage, {"x":0, "y": 0});
 
 	if (stagescreen == null) {
 	    // Error Handling

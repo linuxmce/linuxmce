@@ -11,16 +11,19 @@ Rectangle {
     Image {
         id: np_box
         source: "../img/nowplayingbox.png"
+        height: scaleY(30)
+        width: scaleX(75)
     }
-    Image {
+   /* Image {
         id: nowplayingimage
         height: style.orbiterh
         fillMode: Image.PreserveAspectCrop
         width: style.orbiterw
         anchors.fill: np_box
-        source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
+     //   source: "image://listprovider/updateobject/"+dcenowplaying.m_iplaylistPosition
 
-    }
+    } */
+
     Text {
         id: np_label
         text: qsTr("NowPlaying")
@@ -56,30 +59,18 @@ Rectangle {
         anchors.horizontalCenter: np_box.horizontalCenter
         color: "white"
 
-        Rectangle{
-                       id:textrect
-                       x: -20
-                       y: 20
-                       visible: true
-                       height: childrenRect.height
-                       width: np_box.width
-                       color:"transparent"
-                       anchors.left:  np_box.left
-                       anchors.top:  np_box.bottom
-                       anchors.bottomMargin: dcenowplaying.aspect == "wide"? 10 : 20
-                       clip:true
+
 
 
                        Column{
                            id: column1
-                           x: -27
-                           y: 12
                            spacing: scaleY(.5)
-                           width: childrenRect.width
-                           height: dcenowplaying.aspect == "wide"?scaleY(25): scaleY(35)
+                           width: np_box.width
+                           anchors.centerIn: np_box
+                          height: childrenRect.height
                            Text {
                                id: starring
-                               width: scaleX(40)
+                               width: scaleX(65)
                                wrapMode: "WrapAtWordBoundaryOrAnywhere"
                                text: dcenowplaying.performerlist
                                font.family: "Droid Sans"
@@ -98,7 +89,7 @@ color: "Green"
                            }
                            Text {
                                id: generaltitle
-                               width: scaleX(35)
+                               width: scaleX(65)
                                text:  dcenowplaying.mediatitle
                                font.family: "Droid Sans"
                                wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -110,7 +101,7 @@ color: "Green"
 
                            Text {
                                id: programtext
-                               width: scaleX(35)
+                               width: scaleX(65)
                                text: qsTr("Album: ") + dcenowplaying.album
                                font.family: "Droid Sans"
                                wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -122,7 +113,7 @@ color: "Green"
 
                            Text {
                                id: episode
-                               width: scaleX(35)
+                               width: scaleX(65)
                                wrapMode: "WrapAtWordBoundaryOrAnywhere"
                                text: qsTr("Track: ") + dcenowplaying.track
                                font.family: "Droid Sans"
@@ -136,7 +127,7 @@ color: "Green"
 
                            Text {
                                id: genre
-                               width: scaleX(35)
+                               width: scaleX(65)
                                wrapMode: "WrapAtWordBoundaryOrAnywhere"
                                text: qsTr("Genre(s): ") + dcenowplaying.genre
                                font.family: "Droid Sans"
@@ -155,7 +146,7 @@ color: "Green"
                            }
                            Text {
                                id: released
-                               width: scaleX(35)
+                               width: scaleX(65)
                                wrapMode: "WrapAtWordBoundaryOrAnywhere"
                                text: qsTr("Released: ") + dcenowplaying.releasedate
                                font.family: "Droid Sans"
@@ -169,7 +160,7 @@ color: "Green"
                            }
 
                        }
-                   }
+
 
     }
     states: [

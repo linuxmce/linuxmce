@@ -18,7 +18,7 @@ Component{
             Text {
                 id: generic_label
                 text: title
-                color: "white"
+                color: "silver"
                 font.pixelSize: 11
                 anchors.centerIn: parent
             }

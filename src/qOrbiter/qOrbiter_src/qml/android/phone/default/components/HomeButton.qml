@@ -2,21 +2,21 @@ import QtQuick 1.0
 
 Item {
     id: homebutton
-    height: 45
-    width: 45
+    height: style.stdbuttonh
+    width: style.stdbuttonw
 
     ButtonSq{
         buttonsqradius: 2.5
         buttontext: "Home"
         buttontextfontsize: 14
-        height: 45
-        width:  45
+        height: style.stdbuttonh
+        width: style.stdbuttonw
         Image {
             id: homeimage
             source: "../img/homebig.png"
             anchors.centerIn: parent
-            height: 45
-            width: 45
+            height: style.stdbuttonh
+            width: style.stdbuttonw
         }
         MouseArea{
             anchors.fill: parent

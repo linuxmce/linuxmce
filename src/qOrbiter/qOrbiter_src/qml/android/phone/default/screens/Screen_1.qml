@@ -11,39 +11,64 @@ import "../js/ComponentLoader.js" as MyJs
         width: appW
         color: "transparent"
 
-
+NowPlayingBox{anchors.horizontalCenter: parent.horizontalCenter}
 
         Column{
             id:maindisplay
             anchors.centerIn: parent
             height: childrenRect.height
             width: scaleX(100)
-            NowPlayingBox{anchors.horizontalCenter: parent.horizontalCenter}
+
             DroidHomeSelector{anchors.horizontalCenter: parent.horizontalCenter}
 
         }
+        Text{
+            id:spaceholder
+            text:"LinuxMCE for Android"
+            font.pixelSize: scaleY(4)
+            font.family: "Droid Sans"
+            anchors.bottom: advancedrow.top
+        }
         Row
         {
-            anchors.top: maindisplay.bottom
-            spacing: 20
+            id:advancedrow
+            height: childrenRect.height
+            width: childrenRect.width
+            anchors.horizontalCenter: stage.horizontalCenter
+            anchors.bottom: stage.bottom
+            spacing: scaleX(5)
             ButtonSq{
-                height: 45
-                width: 45
+                id:roombutton
+                height: style.stdbuttonh
+                width: style.stdbuttonw
                 buttontext: currentroom
                 MouseArea{
                     anchors.fill: parent
                     onClicked:  MyJs.createStageComponent("RoomSelector.qml", stage)
                 }
 
+
+
             }
 
             ButtonSq{
-                height: 45
-                width: 45
+                height: style.stdbuttonh
+                width: style.stdbuttonw
                 buttontext: currentuser
                 MouseArea{
                     anchors.fill: parent
                     onClicked:  MyJs.createStageComponent("UserSelector.qml", stage)
+                }
+
+            }
+
+            ButtonSq{
+                height: style.stdbuttonh
+                width: style.stdbuttonw
+                buttontext: qsTr("Exit")
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: closeOrbiter()
                 }
 
             }

@@ -7,26 +7,25 @@ Rectangle {
     id: storedAudioRemote
 
 
-    height: 480
-    width: 320
+    height: appH
+    width: appW
 
     NowPlayingBox{id:np_box
-         x: 74
-         y: 11
+         x: 50
+         y: 0
     }
     Rectangle{
                    id:textrect
                    visible: true
                    height: childrenRect.height
                    width: np_box.width
+                   anchors.horizontalCenter: np_box.horizontalCenter
+                   anchors.bottom: np_box.bottom
                    color:"transparent"
-                   anchors.left:  np_box.left
-                   anchors.top:  np_box.bottom
-                   anchors.bottomMargin: dcenowplaying.aspect == "wide"? 10 : 20
-                   clip:true
+                   clip:false
                    Column{
                        spacing: scaleY(.5)
-                       width: childrenRect.width
+                       width: parent.width
                        height: dcenowplaying.aspect == "wide"?scaleY(25): scaleY(35)
                        Text {
                            id: starring
@@ -39,6 +38,7 @@ Rectangle {
                            font.pixelSize: scaleY(4)
                            elide: "ElideRight"
                            visible:  dcenowplaying.performerlist =="" ? false: true
+                           color:"silver"
 
                            MouseArea{
                                anchors.fill: starring
@@ -56,6 +56,7 @@ Rectangle {
                            smooth: true
                            font.pixelSize: scaleY(3.5)
                            visible:  dcenowplaying.mediatitle =="" ? false: true
+                           color:"silver"
                        }
 
                        Text {
@@ -67,6 +68,7 @@ Rectangle {
                            smooth: true
                            font.pixelSize: scaleY(2)
                            visible:  dcenowplaying.album =="" ? false: true
+                           color:"silver"
                        }
 
                        Text {
@@ -80,6 +82,7 @@ Rectangle {
                            smooth: true
                            font.pixelSize: scaleY(2)
                            visible:  dcenowplaying.track =="" ? false: true
+                           color:"silver"
                        }
 
                        Text {
@@ -93,6 +96,7 @@ Rectangle {
                            smooth: true
                            font.pixelSize: scaleY(2)
                            visible:  dcenowplaying.genre =="" ? false: true
+                           color:"silver"
                            MouseArea{
                                anchors.fill: genre
                                hoverEnabled: true
@@ -111,6 +115,7 @@ Rectangle {
                            smooth: true
                            font.pixelSize: scaleY(2)
                            visible:  dcenowplaying.releasedate =="" ? false: true
+                           color:"silver"
 
                        }
 
@@ -119,14 +124,14 @@ Rectangle {
 
 
 
-    AudioRemote{ x: 25; y: 393; anchors.verticalCenterOffset: 193; anchors.horizontalCenterOffset: 5;anchors.centerIn: parent}
+    AudioRemote{ id:controls; anchors.bottom: parent.bottom}
     color: "transparent"
 
     //main 'now playing rect containing all the other items
    // Remote_lighting_controls{ id: remote_lighting_controls1; x: 344; y: 351; width: 93; height: 219; anchors.topMargin: 179;anchors.top: nowplayingbox1.baseline}
    // Remote_Audio_controls{ id: remote1; x: 200; y: 351; anchors.rightMargin: 71; z: 45; anchors.right: remote_lighting_controls1.left}
- HaControls{ x: 0; y: 5;}
-    HomeButton{ x: 275; y: 160; anchors.leftMargin: 275; anchors.topMargin: 160;anchors.left: storedAudioRemote.left; anchors.top:parent.top}
+ HaControls{ anchors.left: parent.left ; anchors.top: parent.top}
+  HomeButton{ anchors.right: parent.right; anchors.top: parent.top}
 
 
 }

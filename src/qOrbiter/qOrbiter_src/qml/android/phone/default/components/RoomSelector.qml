@@ -3,41 +3,51 @@ import QtQuick 1.1
 
 Rectangle {
     id:genericlist
-    height: 200
-    width: 200
+    height: scaleY(50)
+    width: genericview.width
     border.color: "orange"
     border.width: 1
-    clip: false
+    clip: true
     color:"transparent"
+   anchors.centerIn: parent
+
+    Image {
+        id: bg
+        source: "../img/bkg.png"
+        anchors.fill: genericview
+    }
 
 Component{
   id:delegatemenu
-  
+
+
   Item{
         id:generic_item
         //important!! these need to be set on an imported component otherwise its appears all wrong!
-        height:  delegatemenu.height
-        width: delegatemenu.width
+        height:  container.height
+        width: container.width
 
         Rectangle{
-           
-            width: 200
-            height: 55
-            border.color: "white"
+           id:container
+            width: scaleX(35)
+            height: scaleY(8)
+            border.color: "silver"
             border.width: 1
             color:"transparent"
-
             Text {
                 id: generic_label
-                text:  title + ": In EA: " + entertain_area
+                text:  title
                 color: "white"
-                font.pixelSize: 11
-                anchors.centerIn: parent
+                font.pixelSize: scaleY(3)
+                anchors.centerIn: container
+                font.family: "Droid Sans"
             }
 
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
+                    currentroom = title
+                    roombutton.buttontext = title
                    setActiveRoom(intRoom, entertain_area)
                     genericlist.destroy()
                 }
@@ -45,22 +55,18 @@ Component{
         }
     }
 }
-    Image {
-        id: bg
-        source: "../img/bkg.png"
-        anchors.fill: genericview
-    }
+
     ListView{
         id: genericview
-        width: 200
-        height: genericview.childrenRect.height +25
-        
+        width: scaleX(35)
+        height: scaleY(50)
         model: roomList
-        spacing:56
+        spacing:1
         orientation:ListView.Vertical
         delegate:  delegatemenu
         interactive: true
         clip:true
+       // contentHeight: (roomList.count +1) * scaleY(5)
 
     }
 }

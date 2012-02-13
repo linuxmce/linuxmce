@@ -3,11 +3,12 @@ import QtQuick 1.1
 
 Rectangle {
     id:genericlist
-    height: 50
+    height: childrenRect.height
     width: genericview.width
     border.color: "orange"
     border.width: 1
-
+    anchors.centerIn: parent
+    clip:true
     HomeButtonDelegate{id:lightingdelegate}
     Image {
         id: bg
@@ -17,13 +18,14 @@ Rectangle {
     ListView{
         id: genericview
         width: 200
-        height: genericview.childrenRect.height +25
+        height: scaleY(50)
         model: currentRoomLights
         spacing:1
         orientation:ListView.Vertical
         delegate:  lightingdelegate
         interactive: true
         clip:true
+        contentHeight: childrenRect.height
 
     }
 }

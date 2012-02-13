@@ -18,6 +18,9 @@ Rectangle{
             Image {
                 id: lighting
                 source: "../img/lights.png"
+                height: style.iconH
+                width: style.iconW
+
             }
             MouseArea{
                 anchors.fill: parent
@@ -32,6 +35,8 @@ Rectangle{
             Image {
                 id: media
                 source: "../img/media.png"
+                height: style.iconH
+                width: style.iconW
             }
 
             MouseArea{
@@ -48,6 +53,8 @@ Rectangle{
             Image {
                 id: climate
                 source: "../img/climate.png"
+                height: style.iconH
+                width: style.iconW
             }
 
             MouseArea{
@@ -71,6 +78,8 @@ Rectangle{
             Image {
                 id: security
                 source: "../img/security.png"
+                height: style.iconH
+                width: style.iconW
             }
             MouseArea{
                 anchors.fill: parent
@@ -85,6 +94,8 @@ Rectangle{
             Image {
                 id: telecom
                 source: "../img/telecom.png"
+                height: style.iconH
+                width: style.iconW
             }
 
             MouseArea{
@@ -101,6 +112,8 @@ Rectangle{
             Image {
                 id: adv
                 source: "../img/advanced.png"
+                height: style.iconH
+                width: style.iconW
             }
 
             MouseArea{
