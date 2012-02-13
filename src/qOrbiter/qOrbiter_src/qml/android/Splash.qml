@@ -186,7 +186,8 @@ Rectangle {
         anchors.left: rectangle2.left
         anchors.leftMargin: scaleX(20)
         onFocusChanged: routerip.focus ? routerip.opacity = 1 : routerip.opacity = .5
-        focus: false
+
+
     }
 
     Text {

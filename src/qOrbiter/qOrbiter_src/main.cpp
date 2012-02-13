@@ -259,12 +259,13 @@ int main(int argc, char* argv[])
         }
         else
         {
-            bAppError = true;
+
+           w->bAppError = true;
             if(w->pqOrbiter->m_pEvent && w->pqOrbiter->m_pEvent->m_pClientSocket && w->pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
             {
                 bAppError = false;
                 bReload = false;
-                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "OrbiterManager: No Router.  Will abort");
+               // LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "OrbiterManager: No Router.  Will abort");
                 w->setDceResponse("OrbiterManager:MAIN No Router, Aborting");
                 orbiterWin.setConnectionState(false);
                 orbiterWin.setDeviceState(false);
@@ -273,23 +274,23 @@ int main(int argc, char* argv[])
             }
             else
             {
-                bAppError = true;
+                w->bAppError = true;
                 if( w->pqOrbiter->m_pEvent&& w->pqOrbiter->m_pEvent->m_pClientSocket && w->pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice)
                 {
                     bAppError = false;
                     bReload = false;
-                    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device  Will abort");
-                    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
+                   // LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device  Will abort");
+                  //  LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
                     //orbiterWin.mainView.setSource(QUrl("qrc:desktop/SetupNewOrbiter.qml"));
                     w->setDceResponse("Connect Failed with Bad Device");
                     orbiterWin.setDeviceState(false);
                     orbiterWin.setConnectionState(false);
                     w->pqOrbiter->Disconnect();
-                    w->pqOrbiter->~qOrbiter();
-
                 }
             }
-            orbiterWin.showSplash();
+
+            w->setDceResponse("Connect Error!");
+
         }
         a.exec();
     }

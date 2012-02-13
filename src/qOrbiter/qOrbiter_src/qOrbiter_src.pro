@@ -102,7 +102,7 @@ macx{
 }
 
 ANDROID{
-folder_01.source = qml/android/phone
+folder_01.source = qml/android/
 
 DEFINES+=ANDROID
 }
@@ -241,7 +241,8 @@ SOURCES += main.cpp \
     threadedClasses/threadedsplash.cpp \
     orbiterwindow.cpp \
     contextobjects/screensaverclass.cpp \
-    datamodels/skinloader.cpp
+    datamodels/skinloader.cpp \
+    datamodels/genericsetupmodel.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -334,7 +335,8 @@ HEADERS += \
     orbiterwindow.h \
     contextobjects/screensaverclass.h \
     datamodels/skinloader.h \
-    datamodels/skinloader.h
+    datamodels/skinloader.h \
+    datamodels/genericsetupmodel.h
 
 OTHER_FILES += Readme.txt \
     qml/Splash.qml \
@@ -16709,4 +16711,6 @@ contains(MEEGO_EDITION,harmattan) {
     desktopfile.path = /usr/share/applications
     INSTALLS += desktopfile
 }
+
+
 

@@ -195,7 +195,7 @@ void qorbiterManager::gotoQScreen(QString s)
 //this block sets up the connection to linuxmce
 bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode)
 {
-    setDceResponse("Starting device connection...");
+
     if (bAppError == true)
     {
         pqOrbiter = new DCE::qOrbiter(iPK_Device, qs_routerip.toStdString(), true,false);
@@ -204,7 +204,11 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
     {
         pqOrbiter = new DCE::qOrbiter(PK_Device, sRouterIP, true,false);
     }
-
+    if(pqOrbiter->m_bRunning == true)
+{
+        setDceResponse("Qorbiter wants to quit");
+    }
+     setDceResponse("Initiating Router Connection");
 
     pqOrbiter->qmlUI = this;
     QApplication::processEvents(QEventLoop::AllEvents);
@@ -274,12 +278,10 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
             if (getConf(PK_Device))
             {
-
                 setDceResponse("Configuration processed");
+                swapSkins(currentSkin);
                 //LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",iPK_Device,qs_routerip.toStdString());
-
                 QObject::connect(pqOrbiter,SIGNAL(disconnected(QString)), this, SLOT(reloadHandler()));
-
                 return true;
             }
 
@@ -296,7 +298,6 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
     {
         bAppError = true;
-
         if(pqOrbiter->m_pEvent && pqOrbiter->m_pEvent->m_pClientSocket && pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
         {
             bAppError = false;
@@ -306,9 +307,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             emit connectionValid(false);
             emit deviceValid(false);
             pqOrbiter->Disconnect();
-            pqOrbiter->~qOrbiter();
-
-
+          //  pqOrbiter->~qOrbiter();
         }
         else
         {
@@ -324,10 +323,11 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
                 emit deviceValid(false);
                 emit connectionValid(true);
                 pqOrbiter->Disconnect();
-                pqOrbiter->~qOrbiter();
+               // pqOrbiter->~qOrbiter();
 
             }
         }
+        return false;
 
     }
     QApplication::processEvents(QEventLoop::AllEvents);
@@ -733,13 +733,7 @@ bool qorbiterManager::getConf(int PK_Device)
     activateScreenSaver();
 #endif
 
-    if(buildType.contains("/qml/android/tablet"))
-    {
-         setDceResponse("Activating Photo ScreenSaver");
-        activateScreenSaver();
-    }
 
-    swapSkins(currentSkin);
     emit orbiterConfigReady( true);
     return true;
 }
@@ -1701,7 +1695,7 @@ void qorbiterManager::setDceResponse(QString response)
     emit loadingMessage(response);
     QApplication::processEvents(QEventLoop::AllEvents);
     emit dceResponseChanged();
-//qDebug() << response;
+qDebug() << response;
 
 }
 
