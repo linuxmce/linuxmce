@@ -12,15 +12,11 @@ import "js/ComponentLoader.js" as MyJs
      property string screenfile
 
     // Style {id:style}
-    width: style.orbiterW;
-    height: style.orbiterH;
+    width:style.orbiterW
+    height: style.orbiterH
 
 
-    ScreenSaver{
-        anchors.centerIn: parent
-        height: style.orbiterH
-        width: style.orbiterW
-    }
+
 
     function scaleX(x){
         return x/100*style.orbiterW
