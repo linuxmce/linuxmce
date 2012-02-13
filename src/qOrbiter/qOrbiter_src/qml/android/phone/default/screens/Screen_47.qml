@@ -51,7 +51,7 @@ Rectangle {
                 Image
                 {
                     id: imagerect;
-                    source:"image://datagridimg/"+id ;
+                   // source:"image://datagridimg/"+id ;
                     height: 100;
                     width: 156;
                     fillMode: Image.PreserveAspectFit;
