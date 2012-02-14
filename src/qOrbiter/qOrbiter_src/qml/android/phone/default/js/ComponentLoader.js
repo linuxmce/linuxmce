@@ -141,8 +141,8 @@
   function finishCreation() {
 
       if (component.status == Component.Ready) {
-	  //sprite = component.createObject(item, {"x": 100, "y": 0});
-	  //item.pageLoader.source = sprite
+          sprite = component.createObject(item, {"x": 0, "y": 0});
+          item.pageLoader.source = sprite
 	  if (sprite == null) {
 	      // Error Handling
 	      console.log("Not finished!");

@@ -9,7 +9,7 @@ Rectangle {
 
     width: appW
     height: appH
-    color: "transparent"
+    color: "silver"
     clip: true
 
 
@@ -29,7 +29,7 @@ Rectangle {
         id: contactDelegateList
         Item {
             width: list_view1.width;
-            height: 100
+            height: scaleY(10)
             Rectangle {
                 id: background
                 x: 2; y: 2; width: parent.width - x*2; height: parent.height - y*2
@@ -52,8 +52,8 @@ Rectangle {
                 {
                     id: imagerect;
                     source:"image://datagridimg/"+id ;
-                    height: 100;
-                    width: 156;
+                    height: scaleX(10);
+                    width: scaleY(10);
                     fillMode: Image.PreserveAspectFit;
                 }
 
@@ -64,11 +64,11 @@ Rectangle {
                     Text {
                         text: name;
                         opacity: 1;
-                        font.pointSize: 12;
+                        font.pointSize: scaleY(3);
                         color: "black" ;
                         wrapMode: "WrapAtWordBoundaryOrAnywhere"
                         //anchors.fill: parent
-                        font.bold: true
+                        font.bold: false
                     }
                 }
 
@@ -79,7 +79,7 @@ Rectangle {
 
     ListView {
         id: grid_view1
-        width: appW
+        width: scaleX(75)
         height: scaleY(75)
         model:dataModel
         delegate: contactDelegateList

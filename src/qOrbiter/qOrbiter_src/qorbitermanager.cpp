@@ -300,7 +300,9 @@ QApplication::processEvents(QEventLoop::AllEvents);
         else
         {
             setDceResponse("Orbiter Conf Hiccup! for device " + iPK_Device);
+#ifndef ANDROID
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Device Failed to get configuration!");
+#endif
             return false;
         }
 
@@ -316,8 +318,11 @@ QApplication::processEvents(QEventLoop::AllEvents);
             QApplication::processEvents(QEventLoop::AllEvents);
             bAppError = false;
             bReload = false;
+#ifndef ANDROID
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "OrbiterManager: No Router.  Will abort");
+#endif
             setDceResponse("OrbiterManager:LMCE Manager No Router, Aborting");
+
             emit connectionValid(false);
             emit deviceValid(false);
            // pqOrbiter->Disconnect();
@@ -339,8 +344,10 @@ QApplication::processEvents(QEventLoop::AllEvents);
              //   setDceResponse("Bad Device");
                 bAppError = false;
                 bReload = false;
+#ifndef ANDROID
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device  Will abort");
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
+#endif
                 //orbiterWin.mainView.setSource(QUrl("qrc:desktop/SetupNewOrbiter.qml"));
                 setDceResponse("Connect Failed with Bad Device");
                 emit deviceValid(false);
@@ -808,7 +815,9 @@ void qorbiterManager::closeOrbiter()
 {
     setDceResponse("Shutting Down");
     QApplication::processEvents(QEventLoop::AllEvents);
+#ifdef ANDROID
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Exiting, Unregistering 1st");
+#endif
     // processingThread->quit();
     pqOrbiter->deinitialize();
     pqOrbiter->~qOrbiter();
@@ -1545,7 +1554,9 @@ void qorbiterManager::updateTimecode()
                         sIPAddress = pDevice->m_pDevice_Core->m_sIPAddress;
                     else
                     {
+#ifndef ANDROID
                         LoggerWrapper::GetInstance()->Write(LV_WARNING,"Orbiter::CMD_Set_Now_Playing  Xine has no IP address");
+#endif
                         return;
                     }
                 }
@@ -1561,7 +1572,7 @@ void qorbiterManager::updateTimecode()
                 timeCodeSocket->connectToHost(QString::fromStdString(sIPAddress), port.toInt(), QFile::ReadOnly );
                 if ( timeCodeSocket->isValid() )
                 {
-                    //qDebug() << "Time Code Socket connected! " << sIPAddress.c_str();
+                    setDceResponse("Time Code Socket connected! " + QString::fromStdString(sIPAddress.c_str()));
                     QObject::connect(timeCodeSocket,SIGNAL(readyRead()), this, SLOT(showTimeCode()));
                 }
             }
@@ -1725,7 +1736,7 @@ void qorbiterManager::setDceResponse(QString response)
     emit loadingMessage(response);
     QApplication::processEvents(QEventLoop::AllEvents);
     emit dceResponseChanged();
-   // qDebug() << response;
+    qDebug() << response;
 
 }
 

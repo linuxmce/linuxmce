@@ -25,10 +25,11 @@ NowPlayingBox{anchors.horizontalCenter: parent.horizontalCenter}
         Text{
             id:spaceholder
             text:dcemessage
-            font.pixelSize: scaleY(6)
+            font.pixelSize: scaleY(3)
             font.family: "Droid Sans"
             anchors.bottom: advancedrow.top
             color: "silver"
+
         }
         Row
         {
