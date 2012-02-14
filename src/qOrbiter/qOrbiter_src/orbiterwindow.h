@@ -44,6 +44,26 @@ public:
     bool b_skinIndexReady;
     bool b_skinDataReady;
 
+signals:
+    void MessageChanged();
+    void setupLmce(QString device, QString routerIp);
+    void StatusChanged();
+    void connectionChanged();
+    void configStatus();
+    void orbiterConfigStatus();
+    void skinIndexStatus();
+    void skinDataLoaded();
+    void deviceChanged();
+    void orientationChanged(QSize);
+    void checkRes();
+
+
+public slots:
+    void qmlSetupLmce(QString device, QString ip);
+    void setMessage(QString imsg);
+    QString getMessage();
+    void showSetup();
+
     void setOrbiterState(bool state);
     bool getOrbiterState();
     void showSplash();
@@ -65,26 +85,6 @@ public:
 
     void setDeviceState (bool b) {b_devicePresent = b; emit deviceChanged(); }
     bool getdeviceState () {return b_devicePresent;}
-
-signals:
-    void MessageChanged();
-    void setupLmce(QString device, QString routerIp);
-    void StatusChanged();
-    void connectionChanged();
-    void configStatus();
-    void orbiterConfigStatus();
-    void skinIndexStatus();
-    void skinDataLoaded();
-    void deviceChanged();
-    void orientationChanged(QSize);
-    void checkRes();
-
-
-public slots:
-    void qmlSetupLmce(QString device, QString ip);
-    void setMessage(QString imsg);
-    QString getMessage();
-    void showSetup();
 
 
 };

@@ -58,7 +58,7 @@ QImage AbstractImageProvider::updateObjectProvider()
    //qDebug()<< "!!!!!!!!!!" <<key.size();
     if (key.isNull())
     {
-         key = (managerreference->pqOrbiter->getfileForDG(QString("/var/www/lmce-admin/"+managerreference->qmlPath+"/img/kmix.png").toStdString()));
+         key = (managerreference->pqOrbiter->getfileForDG(QString("/var/www/lmce-admin/"+managerreference->qmlPath+"/img/package_editors.png").toStdString()));
 
     }
     //aspect checking

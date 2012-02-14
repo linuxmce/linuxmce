@@ -7,12 +7,14 @@ import "../js/ComponentLoader.js" as MyJs
 Rectangle {
     id:fileviewscreen
 
-    width: appH
-    height: appW
-    color: "transparent"
-    clip: true
+    width: appW
+    height: appH
+    color: "slateblue"
 
+}
 
+    /*
+    Component.onCompleted: dcerouter.prepareFileList(manager.i_current_mediaType)
     Connections
     {
         target: filedetailsclass
@@ -111,3 +113,4 @@ Rectangle {
       //  AttributeSelector {}
     }
 }
+*/
