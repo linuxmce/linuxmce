@@ -6,8 +6,7 @@ Rectangle {
     width: appW
     height: scaleY(75)
     clip: true
-    anchors.top: parent.top
-    anchors.topMargin: scaleY(5)
+    anchors.top: parent.top    
     anchors.horizontalCenter: parent.horizontalCenter
     color: "transparent"
 
