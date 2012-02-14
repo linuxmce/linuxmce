@@ -1,4 +1,4 @@
-  import QtQuick 1.0
+  import QtQuick 1.1
 
   import "components"
   import "js/ComponentLoader.js" as MyJs
@@ -65,12 +65,14 @@ import "js/ScreenChange.js" as ScreenLogic
           {
               console.log("delayed load, waiting..")
               component.statusChanged.connect(finishCreation(component));
+              component.progressChanged.connect(checkStatus(component))
           }
       }
 
       function finishCreation(component) {
         var sprite;
           if (component.status == Component.Ready) {
+              manager.setDceResponse("Finishing creation")
               sprite = component.createObject(this, {"x": 0, "y": 0});
               pageLoader.sourceComponent = component
               if (sprite == null) {
@@ -81,6 +83,11 @@ import "js/ScreenChange.js" as ScreenLogic
               // Error Handling
               console.log("Error loading component:", component.errorString());
           }
+      }
+
+      function checkStatus(component)
+      {
+         console.log(component.progress)
       }
 
 
