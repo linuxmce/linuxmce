@@ -99,7 +99,7 @@ QApplication::processEvents(QEventLoop::AllEvents);
     buildType="/qml/desktop";
     qrcPath = "qrc:osx/Splash.qml";
 #elif defined (ANDROID)
-    if (qorbiterUIwin->width() > 480 || qorbiterUIwin-> height() > 854)
+    if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
     {
         buildType = "/qml/android/tablet";
 
@@ -113,7 +113,7 @@ QApplication::processEvents(QEventLoop::AllEvents);
     qrcPath = ":android/Splash.qml";
     droidPath = "/";
 #elif defined (for_android)
-    if (appWidth > 480 && appHeight > 800 || appHeight > 480 && appWidth > 854)
+     if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
     {
         buildType = "/qml/android/tablet";
 
@@ -242,7 +242,7 @@ QApplication::processEvents(QEventLoop::AllEvents);
 #elif for_harmattan
         remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/harmattan";
 #elif for_android
-        if (qorbiterUIwin->width() > 480 || qorbiterUIwin-> height() > 800)
+         if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
         {
             buildType = "/qml/android/tablet";
             remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/tablet";
@@ -268,7 +268,7 @@ QApplication::processEvents(QEventLoop::AllEvents);
             return false;
         }
 #elif for_android
-        loadSkins(QUrl(localDir));
+        loadSkins(QUrl(remoteDirectoryPath));
 #else
         if( !loadSkins(QUrl(remoteDirectoryPath)))
         {   emit skinIndexReady(false);

@@ -2,6 +2,7 @@
 
   import "components"
   import "js/ComponentLoader.js" as MyJs
+import "js/ScreenChange.js" as ScreenLogic
 
   Item {
       id: item
@@ -48,21 +49,9 @@
 
       function screenchange(screenname )
       {
-	  MyJs.screenchange(screenname)
-	  /*
-	  pageLoader.source = "screens/"+screenname
-	  if (pageLoader.status == 1)
-	  {
-	      console.log("Command to change to:" + screenname+ " was successfull")
-	  }
-	  else
-	  {
-	      console.log("Command to change to:" + screenname + " failed!")
-	      screenfile = screenname
-	      pageLoader.source = "../screens/Screen_x.qml"
-	  }
-	  */
-	  pageLoader.source = "screens/"+screenname
+          console.log("changing screens!")
+          ScreenLogic.initiateScreenChange(screenname)
+
       }
 
 

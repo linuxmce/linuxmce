@@ -26,23 +26,52 @@ public:
 
     QString message;
     QDeclarativeView  mainView;
-
     QString buildType;
     QString qrcPath;
-    Q_INVOKABLE void forceResponse (QString forced);
-
     std::string router;
+
     long deviceno;
-
     bool newOrbiter;
-
-    //---inline for my sanity
     bool b_connectionPresent;
     bool b_devicePresent;
     bool b_localConfigReady;
     bool b_orbiterConfigReady;
     bool b_skinIndexReady;
     bool b_skinDataReady;
+
+public slots:
+    Q_INVOKABLE void forceResponse (QString forced);
+
+    void qmlSetupLmce(QString device, QString ip);
+
+    void setMessage(QString imsg);    
+    QString getMessage();
+
+    void showSetup();
+
+    void setOrbiterState(bool state);
+    bool getOrbiterState();
+
+    void showSplash();
+
+    void setSkinDataState (bool b);
+    bool getSkinDataState () {return b_skinDataReady;}
+
+    void setSkinIndexState (bool b);
+    bool getSkinIndexState () {return b_skinIndexReady;}
+
+    void setOrbiterConfigState (bool b);
+    bool getOrbiterConfigState () {return b_orbiterConfigReady;}
+
+    void setLocalConfigState (bool b);
+    bool getLocalConfigState () {return b_localConfigReady;}
+
+    void setConnectionState (bool b) ;
+    bool getConnectionState () {return b_connectionPresent;}
+
+    void setDeviceState (bool b) ;
+    bool getdeviceState () {return b_devicePresent;}
+
 
 signals:
     void MessageChanged();
@@ -56,35 +85,6 @@ signals:
     void deviceChanged();
     void orientationChanged(QSize);
     void checkRes();
-
-
-public slots:
-    void qmlSetupLmce(QString device, QString ip);
-    void setMessage(QString imsg);
-    QString getMessage();
-    void showSetup();
-
-    void setOrbiterState(bool state);
-    bool getOrbiterState();
-    void showSplash();
-
-    void setSkinDataState (bool b) {b_skinDataReady = b; emit connectionChanged(); }
-    bool getSkinDataState () {return b_skinDataReady;}
-
-    void setSkinIndexState (bool b) {b_skinIndexReady = b; emit skinIndexStatus(); }
-    bool getSkinIndexState () {return b_skinIndexReady;}
-
-    void setOrbiterConfigState (bool b) {b_orbiterConfigReady = b; emit orbiterConfigStatus(); }
-    bool getOrbiterConfigState () {return b_orbiterConfigReady;}
-
-    void setLocalConfigState (bool b) {b_localConfigReady = b; emit configStatus(); }
-    bool getLocalConfigState () {return b_localConfigReady;}
-
-    void setConnectionState (bool b) {b_connectionPresent = b; emit connectionChanged(); }
-    bool getConnectionState () {return b_connectionPresent;}
-
-    void setDeviceState (bool b) {b_devicePresent = b; emit deviceChanged(); }
-    bool getdeviceState () {return b_devicePresent;}
 
 
 };

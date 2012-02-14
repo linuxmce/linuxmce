@@ -41,7 +41,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 #elif for_android
 
     mainView.rootContext()->setContextProperty("appW", 480);
-    mainView.rootContext()->setContextProperty("appH", 800);
+    mainView.rootContext()->setContextProperty("appH", 854);
 #else
     mainView.rootContext()->setContextProperty("appW", (mainView.window()->width()));
     mainView.rootContext()->setContextProperty("appH", mainView.window()->height());
@@ -134,6 +134,26 @@ void orbiterWindow::showSplash()
     mainView.setSource(QUrl(qrcPath));
 }
 
+void orbiterWindow::setSkinDataState(bool b)
+{
+     b_skinDataReady = b; emit connectionChanged();
+}
+
+void orbiterWindow::setSkinIndexState(bool b)
+{
+     b_skinIndexReady = b; emit skinIndexStatus();
+}
+
+void orbiterWindow::setOrbiterConfigState(bool b)
+{
+     b_orbiterConfigReady = b; emit orbiterConfigStatus();
+}
+
+void orbiterWindow::setLocalConfigState(bool b)
+{
+     b_localConfigReady = b; emit configStatus();
+}
+
 void orbiterWindow::setOrbiterState(bool state)
 {
     newOrbiter = state;
@@ -143,6 +163,16 @@ void orbiterWindow::setOrbiterState(bool state)
 void orbiterWindow::showSetup()
 {
     mainView.setSource(QUrl(":main/SetupNewOrbiter.qml"));
+}
+
+void orbiterWindow::setConnectionState(bool b)
+{
+    b_connectionPresent = b; emit connectionChanged();
+}
+
+void orbiterWindow::setDeviceState(bool b)
+{
+    b_devicePresent = b; emit deviceChanged();
 }
 
 
