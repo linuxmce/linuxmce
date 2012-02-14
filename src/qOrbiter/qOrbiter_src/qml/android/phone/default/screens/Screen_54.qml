@@ -7,8 +7,8 @@ Rectangle {
     id: storedAudioRemote
 
 
-    height: 800
-    width: 480
+    height: appH
+    width: appW
 
     NowPlayingBox{id:np_box
         height:scaleY(35)
