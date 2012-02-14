@@ -2,14 +2,11 @@
 #define GenericSetupItem_H
 
 #include <QAbstractItemModel>
+#include <QImage>
 
 class GenericSetupItem : public QAbstractItemModel
 {
     Q_OBJECT
-public:
-    explicit GenericSetupItem(QObject *parent = 0);
-    Q_OBJECT
-
 
    public:
      enum Roles {

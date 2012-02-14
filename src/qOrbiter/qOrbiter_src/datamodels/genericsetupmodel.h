@@ -2,34 +2,49 @@
 #define GENERICSETUPMODEL_H
 #include <QObject>
 #include <QAbstractListModel>
-#include <genericsetupitem.h>
+#include "genericsetupitem.h"
+#include <qorbitermanager.h>
+
+
+class qorbiterManager;
 
 class GenericSetupModel : public QAbstractListModel
 {
-    Q_OBJECT
-public:
-    explicit GenericSetupModel(QObject *parent = 0);
-    Q_OBJECT
-public:
+  Q_OBJECT
 
-    explicit GenericSetupModel(GenericSetupItem *prototype, QObject* parent = 0);
-    ~GenericSetupModel();
+public:
+    explicit GenericSetupModel(GenericSetupItem* prototype, qorbiterManager *ref);
+  ~GenericSetupModel();
+  int rowCount(const QModelIndex &parent = QModelIndex()) const;
+  QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+  void appendRow(GenericSetupItem* item);
+  void appendRows(const QList<GenericSetupItem*> &items);
+  void insertRow(int row, GenericSetupItem* item);
+  bool removeRow(int row, const QModelIndex &parent = QModelIndex());
+  bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
+  GenericSetupItem* takeRow(int row);
+  GenericSetupItem* find(const QString &id) const;
+  Q_INVOKABLE QVariant get(int index, const QString &name) const;
+  QModelIndex indexFromItem( const GenericSetupItem* item) const;
+  GenericSetupItem* currentRow();
+  void clear();
+  int totalcells;
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-    void appendRow(GenericSetupItem* item);
-    void appendRows(const QList<GenericSetupItem*> &items);
-    void insertRow(int row, GenericSetupItem* item);
-    bool removeRow(int row, const QModelIndex &parent = QModelIndex());
-    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
-    GenericSetupItem* takeRow(int row);
-    GenericSetupItem* find(const QString &id) const;
-    QModelIndex indexFromItem( const GenericSetupItem* item) const;
-    void clear();
+
+
 signals:
+  void ItemAdded();
+  void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const int &sRow);
 
 public slots:
+  void checkForMore();
 
+private slots:
+  void handleItemChange();
+
+private:
+  GenericSetupItem* m_prototype;
+  QList<GenericSetupItem*> m_list;
+  qorbiterManager *manager_ref;
 };
-
 #endif // GENERICSETUPMODEL_H
