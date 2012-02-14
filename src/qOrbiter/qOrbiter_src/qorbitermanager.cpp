@@ -268,9 +268,9 @@ QApplication::processEvents(QEventLoop::AllEvents);
             return false;
         }
 #elif for_android
-        loadSkins(QUrl(remoteDirectoryPath));
+        loadSkins(QUrl(localDir));
 #else
-        if( !loadSkins(QUrl(remoteDirectoryPath)))
+        if( !loadSkins(QUrl(localDir)))
         {   emit skinIndexReady(false);
             return false;
 
@@ -1439,6 +1439,7 @@ void qorbiterManager::changedPlaylistPosition(QString position)
 void qorbiterManager::setNowPlayingData()
 {
     pqOrbiter->BindMediaRemote(true);
+    setDceResponse("bound remote" );
     pqOrbiter->requestMediaPlaylist();
     updateTimecode();
 }
@@ -1720,11 +1721,11 @@ void qorbiterManager::reloadHandler()
 
 void qorbiterManager::setDceResponse(QString response)
 {
-    dceResponse = response;
+    dceResponse = response +  QDateTime::currentDateTime().toString();
     emit loadingMessage(response);
     QApplication::processEvents(QEventLoop::AllEvents);
     emit dceResponseChanged();
-   // qDebug() << response;
+    qDebug() << response;
 
 }
 

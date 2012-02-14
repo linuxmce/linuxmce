@@ -18,7 +18,7 @@ Item{
         width: childrenRect.width
         height: childrenRect.height
         color: "transparent"
-        border.color: style.highlight1
+        border.color: "orange"
         border.width: 3
         Column{
             id:controlcol

@@ -7,29 +7,34 @@ Rectangle {
     id: storedAudioRemote
 
 
-    height: appH
-    width: appW
+    height: 800
+    width: 480
 
     NowPlayingBox{id:np_box
-         x: 50
-         y: 0
+        height:scaleY(35)
+        width: scaleX(85)
+         visible: true
+         anchors.left: ha.right
     }
+
+
     Rectangle{
                    id:textrect
                    visible: true
                    height: childrenRect.height
-                   width: np_box.width
-                   anchors.horizontalCenter: np_box.horizontalCenter
-                   anchors.bottom: np_box.bottom
+                   width: np_box.width                   
+                   anchors.bottom: np_image.bottom
                    color:"transparent"
                    clip:false
                    Column{
+                       x: 56
+                       y: 147
                        spacing: scaleY(.5)
                        width: parent.width
                        height: dcenowplaying.aspect == "wide"?scaleY(25): scaleY(35)
                        Text {
                            id: starring
-                           width: scaleX(40)
+
                            wrapMode: "WrapAtWordBoundaryOrAnywhere"
                            text: dcenowplaying.performerlist
                            font.family: "Droid Sans"
@@ -124,14 +129,63 @@ Rectangle {
 
 
 
-    AudioRemote{ id:controls; anchors.bottom: parent.bottom}
+    AudioRemote{ id:controls; anchors.bottom: parent.bottom; anchors.horizontalCenter: parent.horizontalCenter}
     color: "transparent"
 
     //main 'now playing rect containing all the other items
    // Remote_lighting_controls{ id: remote_lighting_controls1; x: 344; y: 351; width: 93; height: 219; anchors.topMargin: 179;anchors.top: nowplayingbox1.baseline}
    // Remote_Audio_controls{ id: remote1; x: 200; y: 351; anchors.rightMargin: 71; z: 45; anchors.right: remote_lighting_controls1.left}
- HaControls{ anchors.left: parent.left ; anchors.top: parent.top}
-  HomeButton{ anchors.right: parent.right; anchors.top: parent.top}
+ HaControls{id:ha; anchors.left: parent.left ; anchors.top: parent.top
+
+ }
+  HomeButton{ id:home ;anchors.right: parent.right; anchors.top: parent.top}
+
+  NonEPGPlaylist {
+      id: nonepgplaylist3
+      anchors.top: parent.top
+      anchors.horizontalCenter: parent.horizontalCenter
+      visible: false
+      opacity: 0
+  }
+
+  ButtonSq {
+      id: buttonsq1
+      anchors.top: home.bottom
+      anchors.right: home.right
+      height: style.stdbuttonh
+      width: style.stdbuttonw
+      buttontext: qsTr("Playlist")
+      MouseArea{
+          anchors.fill: parent
+          onClicked: storedAudioRemote.state = "State1"
+      }
+  }
+  states: [
+      State {
+          name: "State1"
+
+          PropertyChanges {
+              target: np_image
+              visible: false
+          }
+
+          PropertyChanges {
+              target: textrect
+              visible: false
+          }
+
+          PropertyChanges {
+              target: np_box
+              visible: false
+          }
+
+          PropertyChanges {
+              target: nonepgplaylist3
+              visible: true
+              opacity: 1
+          }
+      }
+  ]
 
 
 }

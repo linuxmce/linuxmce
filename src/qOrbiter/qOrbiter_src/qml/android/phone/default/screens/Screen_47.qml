@@ -7,8 +7,8 @@ import "../js/ComponentLoader.js" as MyJs
 Rectangle {
     id:fileviewscreen
 
-    width: 320
-    height: 480
+    width: appW
+    height: appH
     color: "transparent"
     clip: true
 

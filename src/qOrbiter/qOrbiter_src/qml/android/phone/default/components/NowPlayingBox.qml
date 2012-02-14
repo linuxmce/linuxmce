@@ -1,20 +1,45 @@
 import QtQuick 1.0
 
 Rectangle {
-    width: np_box.width
-    height: np_box.height
     id: now_playing
-
+    height: scaleY(40)
+    width: scaleX(75)
     visible: dcenowplaying.b_mediaPlaying ? true : false
     color:"transparent"
+    clip:true
+    Timer{
+        id:singleshot
+        repeat: false
+        interval: 2000
+        triggeredOnStart: false
+        running: true
+
+        onTriggered: np_image.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+    }
+
+    Image {
+        id: np_image
+        source: "image://listprovider/updateobject/"+securityvideo.timestamp
+        fillMode: Image.PreserveAspectCrop
+        anchors.centerIn: np_box
+        height:scaleY(30)
+        width:scaleX(40)
+
+    }
+    Connections
+    {
+        target: dcenowplaying
+        onImageChanged: np_image.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+    }
 
     Image {
         id: np_box
         source: "../img/nowplayingbox.png"
-        height: scaleY(30)
-        width: scaleX(75)
+       height: parent.height
+       width: parent.width
+        opacity: .5
     }
-   /* Image {
+    /* Image {
         id: nowplayingimage
         height: style.orbiterh
         fillMode: Image.PreserveAspectCrop
@@ -46,6 +71,7 @@ Rectangle {
     }
 
     MouseArea{
+        id: mousearea1
         anchors.fill: parent
         onClicked:screenchange(dcenowplaying.qs_screen)
     }
@@ -58,125 +84,40 @@ Rectangle {
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         anchors.horizontalCenter: np_box.horizontalCenter
         color: "white"
-
-
-
-
-                       Column{
-                           id: column1
-                           spacing: scaleY(.5)
-                           width: np_box.width
-                           anchors.centerIn: np_box
-                          height: childrenRect.height
-                           Text {
-                               id: starring
-                               width: scaleX(65)
-                               wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                               text: dcenowplaying.performerlist
-                               font.family: "Droid Sans"
-                               font.bold: true
-                               smooth: true
-                               font.pixelSize: scaleY(4)
-                               elide: "ElideRight"
-                               visible:  dcenowplaying.performerlist =="" ? false: true
-color: "Green"
-                               MouseArea{
-                                   anchors.fill: starring
-                                   hoverEnabled: true
-                                   onEntered: { starring.elide = "ElideNone" ; }
-                                   onExited: {starring.elide = "ElideRight"; }
-                               }
-                           }
-                           Text {
-                               id: generaltitle
-                               width: scaleX(65)
-                               text:  dcenowplaying.mediatitle
-                               font.family: "Droid Sans"
-                               wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                               smooth: true
-                               color: "Green"
-                               font.pixelSize: scaleY(3.5)
-                               visible:  dcenowplaying.mediatitle =="" ? false: true
-                           }
-
-                           Text {
-                               id: programtext
-                               width: scaleX(65)
-                               text: qsTr("Album: ") + dcenowplaying.album
-                               font.family: "Droid Sans"
-                               wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                               smooth: true
-                               font.pixelSize: scaleY(2)
-                               color: "Green"
-                               visible:  dcenowplaying.album =="" ? false: true
-                           }
-
-                           Text {
-                               id: episode
-                               width: scaleX(65)
-                               wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                               text: qsTr("Track: ") + dcenowplaying.track
-                               font.family: "Droid Sans"
-                               //font.bold: true
-                               font.italic: true
-                               smooth: true
-                               font.pixelSize: scaleY(2)
-                               color: "Green"
-                               visible:  dcenowplaying.track =="" ? false: true
-                           }
-
-                           Text {
-                               id: genre
-                               width: scaleX(65)
-                               wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                               text: qsTr("Genre(s): ") + dcenowplaying.genre
-                               font.family: "Droid Sans"
-                               //font.bold: true
-                               font.italic: true
-                               smooth: true
-                               font.pixelSize: scaleY(2)
-                               color: "Green"
-                               visible:  dcenowplaying.genre =="" ? false: true
-                               MouseArea{
-                                   anchors.fill: genre
-                                   hoverEnabled: true
-                                   onEntered: { genre.elide = "ElideNone" ; }
-                                   onExited: {genre.elide = "ElideRight"; }
-                               }
-                           }
-                           Text {
-                               id: released
-                               width: scaleX(65)
-                               wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                               text: qsTr("Released: ") + dcenowplaying.releasedate
-                               font.family: "Droid Sans"
-                               // font.bold: true
-                               font.italic: true
-                               smooth: true
-                               color: "Green"
-                               font.pixelSize: scaleY(2)
-                               visible:  dcenowplaying.releasedate =="" ? false: true
-
-                           }
-
-                       }
-
-
     }
+
     states: [
         State {
             name: "livetv"
 
             PropertyChanges {
                 target: column1
-                x: 12
-                y: 0
+                x: 0
+                y: 30
+                anchors.horizontalCenterOffset: 0
+                anchors.topMargin: 0
             }
 
             PropertyChanges {
                 target: textrect
                 x: -38
                 y: 27
+            }
+
+            PropertyChanges {
+                target: mousearea1
+                x: 0
+                y: 0
+                width: 231
+                height: 133
+                anchors.topMargin: 0
+                anchors.rightMargin: 0
+            }
+
+            PropertyChanges {
+                target: np_box
+                x: 0
+                y: 0
             }
         },
         State {

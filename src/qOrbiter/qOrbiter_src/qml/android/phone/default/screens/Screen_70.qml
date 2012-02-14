@@ -5,23 +5,24 @@ Rectangle {
 
     // property alias synText:
     id: storedVideoRemote
-    height: 480
-    width: 320
+    height: appH
+    width: appW
     Timer{
-            id:singleshot
-            repeat: false
-            interval: 2000
-            triggeredOnStart: false
-            running: true
+        id:singleshot
+        repeat: false
+        interval: 2000
+        triggeredOnStart: false
+        running: true
 
-            onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-        }
+        onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+    }
 
-        Connections{
-            target:dcenowplaying
-            onPlayListPositionChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-            onImageChanged:nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-        }
+    Connections{
+        target:dcenowplaying
+        onPlayListPositionChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+        onImageChanged:nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+    }
+    Component.onCompleted:setNowPlayingData()
 
     NowPlayingBox
     {
@@ -31,21 +32,21 @@ Rectangle {
     }
 
 
-       Image{
-    id:nowplayingimage
-    source:""
-    height: np_box.height
-    width: np_box.width
+    Image{
+        id:nowplayingimage
+fillMode: Image.PreserveAspectCrop
+source:"image://listprovider/updateobject/"+securityvideo.timestamp
+        anchors.fill: np_box
     }
 
-    AudioRemote{ x: 25; y: 393; anchors.verticalCenterOffset: 193; anchors.horizontalCenterOffset: 5;anchors.centerIn: parent}
+    AudioRemote{id:controls;anchors.bottom: parent.bottom; anchors.horizontalCenter: parent.horizontalCenter}
     color: "transparent"
 
     //main 'now playing rect containing all the other items
     // Remote_lighting_controls{ id: remote_lighting_controls1; x: 344; y: 351; width: 93; height: 219; anchors.topMargin: 179;anchors.top: nowplayingbox1.baseline}
     // Remote_Audio_controls{ id: remote1; x: 200; y: 351; anchors.rightMargin: 71; z: 45; anchors.right: remote_lighting_controls1.left}
     HaControls{ x: 0; y: 5;}
-    HomeButton{ x: 275; y: 160; anchors.leftMargin: 275; anchors.topMargin: 160;anchors.left: storedAudioRemote.left; anchors.top:parent.top}
+    HomeButton{ id:home; anchors.left: storedAudioRemote.left; anchors.top:storedAudioRemote.top}
 
 
 }

@@ -44,7 +44,7 @@ QImage AbstractImageProvider::securityProvider()
 
    if (key.isNull())
    {
-       key.load(":/icons/playlist.png");
+       key.load(":/icons/icon.png");
 
    }
 
@@ -55,10 +55,10 @@ QImage AbstractImageProvider::securityProvider()
 QImage AbstractImageProvider::updateObjectProvider()
 {
    key = managerreference->updatedObjectImage;
-   //qDebug()<< "!!!!!!!!!!" <<key.size();
+   qDebug()<< "!!!!!!!!!!" <<key.size();
     if (key.isNull())
     {
-         key = (managerreference->pqOrbiter->getfileForDG(QString("/var/www/lmce-admin/"+managerreference->qmlPath+"/img/package_editors.png").toStdString()));
+         key = (managerreference->pqOrbiter->getfileForDG(QString(QString("/var/www/lmce-admin/")+managerreference->currentSkinURL+QString("/img/package_editors.png")).toStdString()));
 
     }
     //aspect checking

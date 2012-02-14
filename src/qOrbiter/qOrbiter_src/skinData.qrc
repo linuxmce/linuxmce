@@ -20,4 +20,7 @@
     <qresource prefix="/android">
         <file alias="Splash.qml">qml/android/Splash.qml</file>
     </qresource>
+    <qresource prefix="/icons">
+        <file alias="icon.png">img/harmattan_splash.png</file>
+    </qresource>
 </RCC>

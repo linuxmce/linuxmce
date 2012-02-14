@@ -52,7 +52,7 @@ folder_01.target = $$DESTDIR/qml
 folder_03.source = config.xml
 folder_03.target = $$DESTDIR
 
-LIBS+=opengl
+
 DEFINES += for_desktop
 }
 

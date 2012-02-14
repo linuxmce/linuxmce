@@ -15,7 +15,7 @@ Rectangle {
     border.width: 3
     Image {
         id: fdbg
-        source: "../images/nowplaying.png"
+        source: "../img/nowplayingbox.png"
         anchors.fill: filedetailrect
 
     }

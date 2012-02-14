@@ -2,15 +2,20 @@ import QtQuick 1.0
 
 Rectangle {
     id:nonepgplaylist
-    width: scaleX(25)
-    height: scaleY(55)
-    color: "transparent"
-    border.color: style.highlight1
+    width: scaleX(85)
+    height: scaleY(65)
+    color: "silver"
+    border.color: "orange"
     border.width: 2
     clip:false
+    anchors.centerIn: parent
+    function setupMedia()
+    {
+        manager.setNowPlayingData();
+        nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
+    }
 
-
-    Component.onCompleted: nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
+    Component.onCompleted: setupMedia()
 
     Connections{
         target: dcenowplaying
@@ -19,21 +24,22 @@ Rectangle {
         }
     }
 
-    BorderImage {
+  /*  BorderImage {
         id: borderimg
         verticalTileMode: BorderImage.Round
         horizontalTileMode: BorderImage.Repeat
-        source: "../images/drpshadow.png"
+        source: "../img/drpshadow.png"
         anchors.fill: nonepgplaylist
         anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
         border { left: 10; top: 10; right: 10; bottom: 10 }
         smooth: true
     }
+    */
 
     ListView{
         id:nonepgplaylistview
-        width: scaleX(25)
-        height: scaleY(55)
+        width: scaleX(65)
+        height: scaleY(65)
         anchors.centerIn: parent
         highlightFollowsCurrentItem: true
         highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
@@ -45,10 +51,10 @@ Rectangle {
 
         delegate:
             Rectangle {
-            border.color: "black"
+            border.color: "silver"
             border.width: 1
-            width:scaleX(25)
-            height: scaleY(12)
+            width:scaleX(65)
+            height: scaleY(25)
             anchors.horizontalCenter: parent.horizontalCenter
             color: "darkgrey"
             clip: true
@@ -57,7 +63,7 @@ Rectangle {
                 fillMode: Image.PreserveAspectCrop
                 source:  index === dcenowplaying.m_iplaylistPosition ? playlistimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp: ""
                 anchors.fill: parent
-                opacity: .5
+                opacity: 1
             }
             Text {
                 id: position

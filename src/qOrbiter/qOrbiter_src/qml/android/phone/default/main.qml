@@ -49,8 +49,8 @@ import "js/ScreenChange.js" as ScreenLogic
 
       function screenchange(screenname )
       {
-          console.log("changing screens!")
-          ScreenLogic.initiateScreenChange(screenname)
+          MyJs.screenchange("screens/"+screenname)
+          pageLoader.source = "screens/"+screenname
 
       }
 
