@@ -268,7 +268,7 @@ QApplication::processEvents(QEventLoop::AllEvents);
             return false;
         }
 #elif for_android
-        loadSkins(QUrl(remoteDirectoryPath));
+        loadSkins(QUrl(localDir));
 #else
         if( !loadSkins(QUrl(localDir)))
         {   emit skinIndexReady(false);

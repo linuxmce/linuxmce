@@ -6,13 +6,10 @@ import "../js/ComponentLoader.js" as MyJs
 
 Rectangle {
     id:fileviewscreen
-
     width: appW
     height: appH
-    color: "silver"
+    color: "transparent"
     clip: true
-
-
     Connections
     {
         target: filedetailsclass
@@ -23,13 +20,12 @@ Rectangle {
         }
     }
 
-
     Component
     {
         id: contactDelegateList
         Item {
-            width: list_view1.width;
-            height: scaleY(10)
+            width: 200
+            height: 100
             Rectangle {
                 id: background
                 x: 2; y: 2; width: parent.width - x*2; height: parent.height - y*2
@@ -46,8 +42,6 @@ Rectangle {
                 x: 10; y: 10; height: imagerect.height; width: parent.width
                 spacing: 10
 
-
-
                 Image
                 {
                     id: imagerect;
@@ -58,8 +52,8 @@ Rectangle {
                 }
 
                 Column {
-                    width: background.width - imagerect.width - 20;
-                    height: imagerect.height
+                    width:parent.width
+                    height: parent.height
                     spacing:5
                     Text {
                         text: name;
@@ -78,32 +72,22 @@ Rectangle {
 
 
     ListView {
-        id: grid_view1
-        width: scaleX(75)
-        height: scaleY(75)
+        id: list_view1
+        width: 400
+        height:500
         model:dataModel
         delegate: contactDelegateList
-        highlightFollowsCurrentItem: true
-        highlight: appHighlight
-        focus: true
         clip: true
-
     }
 
-
-
-    Component {
-        id: appHighlight
-        Rectangle { width: 80; height: 80; color: "lightsteelblue" }
-    }
 
     Row
     {
         height: childrenRect.height
         anchors.topMargin: 0
         width: childrenRect.width
-        anchors.top: grid_view1.bottom
-        anchors.left: grid_view1.left
+        anchors.top: list_view1.bottom
+        anchors.left: list_view1.left
 
         ButtonSq
         {

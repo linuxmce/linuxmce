@@ -47,13 +47,41 @@ import "js/ScreenChange.js" as ScreenLogic
 	  return y/100*appH
       }
 
-      function screenchange(screenname )
-      {
 
-          pageLoader.source = MyJs.screenchange(screenname)
 
+
+      function screenchange(screenname) {
+          var component;
+
+
+          console.log("Command to change to:" + screenname);
+          component = Qt.createComponent("screens/"+screenname);
+          if (component.status == Component.Ready)
+          {
+              console.log("loaded!");
+              finishCreation(component);
+          }
+          else
+          {
+              console.log("delayed load, waiting..")
+              component.statusChanged.connect(finishCreation(component));
+          }
       }
 
+      function finishCreation(component) {
+        var sprite;
+          if (component.status == Component.Ready) {
+              sprite = component.createObject(this, {"x": 0, "y": 0});
+              pageLoader.sourceComponent = component
+              if (sprite == null) {
+                  // Error Handling
+                  console.log("Not finished!");
+              }
+          } else if (component.status == Component.Error) {
+              // Error Handling
+              console.log("Error loading component:", component.errorString());
+          }
+      }
 
 
       Loader {
