@@ -24,10 +24,11 @@ NowPlayingBox{anchors.horizontalCenter: parent.horizontalCenter}
         }
         Text{
             id:spaceholder
-            text:"LinuxMCE for Android"
-            font.pixelSize: scaleY(4)
+            text:dceresponse
+            font.pixelSize: scaleY(6)
             font.family: "Droid Sans"
             anchors.bottom: advancedrow.top
+            color: "silver"
         }
         Row
         {
