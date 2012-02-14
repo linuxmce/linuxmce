@@ -233,6 +233,7 @@ int main(int argc, char* argv[])
         QApplication::setGraphicsSystem("raster");
 #endif
 
+
         QApplication  a(argc, argv);
         orbiterWindow orbiterWin(PK_Device, sRouter_IP);
         QApplication::processEvents(QEventLoop::AllEvents);
@@ -243,9 +244,15 @@ int main(int argc, char* argv[])
         QObject::connect(w, SIGNAL(loadingMessage(QString)), &orbiterWin,SLOT(setMessage(QString)), Qt::UniqueConnection);
         QObject::connect(&orbiterWin,SIGNAL(setupLmce(QString,QString)), w, SLOT(qmlSetupLmce(QString,QString)));
         QObject::connect(w, SIGNAL(raiseSplash()), &orbiterWin, SLOT(showSplash()) );
-        QObject::connect(w,SIGNAL(connectionValid(bool)), &orbiterWin, SLOT(setConnectionState(bool)));
-        QObject::connect(w,SIGNAL(deviceValid(bool)), &orbiterWin, SLOT(setDeviceState(bool)));
-        QObject::connect(w,SIGNAL(localConfigReady(bool)), &orbiterWin, SLOT(setLocalConfigState(bool)));
+
+        QObject::connect(w,SIGNAL(showSetup()), &orbiterWin, SLOT( showSetup()) );
+
+        QObject::connect(w,SIGNAL(connectionValid(bool)), &orbiterWin, SLOT(setConnectionState(bool b)));
+        QObject::connect(w,SIGNAL(deviceValid(bool)), &orbiterWin, SLOT(setDeviceState(bool b)));
+        QObject::connect(w,SIGNAL(localConfigReady(bool)), &orbiterWin, SLOT(setLocalConfigState(bool b)));
+        QObject::connect(w, SIGNAL(skinDataLoaded(bool)), &orbiterWin, SLOT(setSkinDataState(bool b)));
+        QObject::connect(w,SIGNAL(skinIndexReady(bool)), &orbiterWin,SLOT(setSkinIndexState(bool b)));
+        QObject::connect(w,SIGNAL(orbiterConfigReady(bool)), &orbiterWin, SLOT(setOrbiterConfigState(bool b)));
 
 
         if(PK_Device > 1000)
@@ -260,7 +267,6 @@ int main(int argc, char* argv[])
         else
         {
 
-           w->bAppError = true;
             if(w->pqOrbiter->m_pEvent && w->pqOrbiter->m_pEvent->m_pClientSocket && w->pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
             {
                 bAppError = false;
@@ -270,11 +276,12 @@ int main(int argc, char* argv[])
                 orbiterWin.setConnectionState(false);
                 orbiterWin.setDeviceState(false);
                 w->pqOrbiter->Disconnect();
+                orbiterWin.setMessage("Dead Device");
 
             }
             else
             {
-                w->bAppError = true;
+
                 if( w->pqOrbiter->m_pEvent&& w->pqOrbiter->m_pEvent->m_pClientSocket && w->pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice)
                 {
                     bAppError = false;
@@ -284,13 +291,13 @@ int main(int argc, char* argv[])
                     //orbiterWin.mainView.setSource(QUrl("qrc:desktop/SetupNewOrbiter.qml"));
                     w->setDceResponse("Connect Failed with Bad Device");
                     orbiterWin.setDeviceState(false);
-                    orbiterWin.setConnectionState(false);
+                    orbiterWin.setConnectionState(true);
                     w->pqOrbiter->Disconnect();
+                    QApplication::processEvents(QEventLoop::AllEvents);
+                    orbiterWin.setMessage("Dead Device");
+
                 }
             }
-
-            w->setDceResponse("Connect Error!");
-
         }
         a.exec();
     }

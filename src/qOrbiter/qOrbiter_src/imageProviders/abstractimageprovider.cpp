@@ -58,7 +58,7 @@ QImage AbstractImageProvider::updateObjectProvider()
    //qDebug()<< "!!!!!!!!!!" <<key.size();
     if (key.isNull())
     {
-         key.load(":/icons/playlist.png");
+         key = (managerreference->pqOrbiter->getfileForDG(QString("/var/www/lmce-admin/"+managerreference->qmlPath+"/img/kmix.png").toStdString()));
 
     }
     //aspect checking

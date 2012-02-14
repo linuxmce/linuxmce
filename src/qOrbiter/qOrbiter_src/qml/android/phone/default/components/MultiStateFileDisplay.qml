@@ -3,8 +3,8 @@ import QtQuick 1.0
 
 Rectangle {
     id:gridholder
-    width: 320
-    height: 480
+    width: appW
+    height: scaleY(75)
     clip: true
     anchors.top: parent.top
     anchors.topMargin: scaleY(5)
@@ -13,8 +13,8 @@ Rectangle {
 
     ListView {
         id: list_view1
-        width: 310
-        height: 450
+        width: appW
+        height: scaleY(75)
         model:dataModel
         delegate: contactDelegateList
         highlightFollowsCurrentItem: true

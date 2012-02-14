@@ -382,6 +382,7 @@ signals:
     void loadingMessage(QString msg);
     void splashReady();
     void raiseSplash();
+    void showSetup();
 
     void localConfigReady(bool b);
     void orbiterConfigReady(bool b);
@@ -431,7 +432,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     Q_INVOKABLE void cleanupScreenie();
 
     Q_INVOKABLE void setActiveSkin(QString name);
-    Q_INVOKABLE  void loadSkins(QUrl url);
+    Q_INVOKABLE  bool loadSkins(QUrl url);
     void qmlSetupLmce(QString incdeviceid, QString incrouterip);
     void changedPlaylistPosition(QString position);
 

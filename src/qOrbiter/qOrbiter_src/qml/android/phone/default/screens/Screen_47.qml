@@ -7,8 +7,8 @@ import "../js/ComponentLoader.js" as MyJs
 Rectangle {
     id:fileviewscreen
 
-    width: 320
-    height: 480
+    width: appH
+    height: appW
     color: "transparent"
     clip: true
 
@@ -51,7 +51,7 @@ Rectangle {
                 Image
                 {
                     id: imagerect;
-                   // source:"image://datagridimg/"+id ;
+                    source:"image://datagridimg/"+id ;
                     height: 100;
                     width: 156;
                     fillMode: Image.PreserveAspectFit;

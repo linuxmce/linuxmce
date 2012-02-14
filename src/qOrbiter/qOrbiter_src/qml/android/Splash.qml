@@ -15,6 +15,10 @@ Rectangle {
         onOrientationChanged:console.log("window size changed in qml")
     }
 
+    Connections{
+        target:window
+        onDeviceChanged: pageLoader.source ? ":/main/SetupNewOrbiter.qml": "Splash.qml"
+    }
 
     function scaleX(x){
         return x/100*appW
@@ -39,41 +43,48 @@ Rectangle {
 
         height: childrenRect.height
         width: childrenRect.width
-        spacing: scaleX(5)
+        spacing: scaleX(2)
 
         Text {
             id: connection_present
             text: qsTr("Connection")
-            color: window.b_connectionPresent ? "transparent" : "red"
-            font.pixelSize: window.b_connectionPresent ? 14 : 12
+            color: window.b_connectionPresent ? "green" : "red"
+            font.pixelSize: window.b_connectionPresent ?  scaleY(3) : scaleY(4)
         }
 
         Text {
             id: device
             text: qsTr("Device")
-            color: window.b_devicePresent ? "transparent" : "red"
-            font.pixelSize: window.b_devicePresent ? 14 : 12
+            color: window.b_devicePresent ? "green" : "red"
+            font.pixelSize: window.b_devicePresent ?  scaleY(3) : scaleY(4)
         }
 
         Text {
             id: configuration_file
-            text: qsTr("Config")
-            color: window.b_localConfigReady ? "red" : "green"
-            font.pixelSize: window.b_localConfigReady ? 14 : 12
+            text: qsTr(" Local Config")
+            color: window.b_localConfigReady ? "green" : "red"
+            font.pixelSize: window.b_localConfigReady ?  scaleY(3) : scaleY(4)
+        }
+
+        Text {
+            id: skins
+            text: qsTr("Skins Location")
+            color: window.b_localConfigReady ? "green" : "red"
+            font.pixelSize: window.b_skinDataReady ?  scaleY(3) : scaleY(4)
         }
 
         Text {
             id: skin_index
-            text: qsTr("Skins")
-            color: window.b_localConfigReady ? "red" : "green"
-            font.pixelSize: window.b_localConfigReady ? 14 : 12
+            text: qsTr("Skins Loaded")
+            color: window.b_localConfigReady ? "green" : "red"
+            font.pixelSize: window.b_skinIndexReady ?  scaleY(3) : scaleY(4)
         }
 
         Text {
             id: orbiter_config
             text: qsTr("Orbiter Config")
-            color: window.b_localConfigReady ? "red" : "green"
-            font.pixelSize: window.b_localConfigReady ? 14 : 12
+            color: window.b_localConfigReady ? "green" : "red"
+            font.pixelSize: window.b_orbiterConfigReady ?  scaleY(3) : scaleY(4)
 
         }
 

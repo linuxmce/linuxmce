@@ -14,12 +14,12 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 {
 
     newOrbiter = false;
-    this->b_connectionPresent = true;
-    this->b_localConfigReady = true;
+    this->b_connectionPresent = false;
+    this->b_localConfigReady = false;
     this->b_orbiterConfigReady = false;
     this->b_skinDataReady = false;
     this->b_skinIndexReady = false;
-    this->b_devicePresent = true;
+    this->b_devicePresent = false;
 
 #ifdef for_android
     mainView.setBaseSize(1024,768);
@@ -27,6 +27,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     //qDebug() << mainView.size();
     router = routerip;
     deviceno = deviceid;
+
     mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
     mainView.rootContext()->setContextProperty("window", this);
     mainView.setWindowTitle("LinuxMCE Orbiter ");
@@ -36,14 +37,14 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 
 #ifdef ANDROID
     mainView.rootContext()->setContextProperty("appW", (mainView.window()->width()/ 2));//this is done because android reports the desktop width as 2x what it is.at least on my phone
-mainView.rootContext()->setContextProperty("appH", mainView.window()->height());
+    mainView.rootContext()->setContextProperty("appH", mainView.window()->height());
 #elif for_android
 
-            mainView.rootContext()->setContextProperty("appW", 480);
-            mainView.rootContext()->setContextProperty("appH", 800);
+    mainView.rootContext()->setContextProperty("appW", 480);
+    mainView.rootContext()->setContextProperty("appH", 800);
 #else
     mainView.rootContext()->setContextProperty("appW", (mainView.window()->width()));
-     mainView.rootContext()->setContextProperty("appH", mainView.window()->height());
+    mainView.rootContext()->setContextProperty("appH", mainView.window()->height());
 #endif
 
     mainView.rootContext()->setContextProperty("deviceid", int(deviceno));
@@ -78,7 +79,6 @@ mainView.rootContext()->setContextProperty("appH", mainView.window()->height());
 
     mainView.setSource(QUrl(qrcPath));
 
-
 #ifdef Q_OS_SYMBIAN
     mainView.showFullScreen();
 #elif defined(Q_WS_MAEMO_5)
@@ -93,7 +93,7 @@ mainView.rootContext()->setContextProperty("appH", mainView.window()->height());
     mainView.show();
 #else
     mainView.showNormal();
-   // mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
+    // mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
 
 }
@@ -138,6 +138,11 @@ void orbiterWindow::setOrbiterState(bool state)
 {
     newOrbiter = state;
     emit StatusChanged();
+}
+
+void orbiterWindow::showSetup()
+{
+    mainView.setSource(QUrl(":main/SetupNewOrbiter.qml"));
 }
 
 
