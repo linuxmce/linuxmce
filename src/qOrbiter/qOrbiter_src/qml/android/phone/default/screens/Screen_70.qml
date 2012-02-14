@@ -14,7 +14,7 @@ Rectangle {
         triggeredOnStart: false
         running: true
 
-        onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+        onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+Qt.formatTime
     }
 
     Connections{

@@ -1,6 +1,7 @@
 import QtQuick 1.0
 
 Rectangle {
+    var time = new time()
     id: now_playing
     height: scaleY(40)
     width: scaleX(75)
@@ -14,7 +15,7 @@ Rectangle {
         triggeredOnStart: false
         running: true
 
-        onTriggered: np_image.source = "image://listprovider/updateobject/"+Qt.formatDate
+        onTriggered: np_image.source = "image://listprovider/updateobject/"+Qt.formatTime(time)
     }
 
     Image {
