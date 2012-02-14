@@ -13,7 +13,7 @@ Rectangle {
     Image {
         id: bg
         fillMode: Image.PreserveAspectCrop
-        source: "../images/power.png"
+        source: ""
         anchors.fill: parent
     }
 

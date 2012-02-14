@@ -77,7 +77,18 @@ Rectangle {
     }
 
 
-    MultiStateFileDisplay{id:grid_view1}
+    ListView {
+        id: grid_view1
+        width: appW
+        height: scaleY(75)
+        model:dataModel
+        delegate: contactDelegateList
+        highlightFollowsCurrentItem: true
+        highlight: appHighlight
+        focus: true
+        clip: true
+
+    }
 
 
 
@@ -108,6 +119,6 @@ Rectangle {
                 onClicked: goBackGrid()
             }
         }
-      //  AttributeSelector {}
+        AttributeSelector {}
     }
 }

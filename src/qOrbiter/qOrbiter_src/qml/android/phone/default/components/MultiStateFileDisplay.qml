@@ -10,18 +10,7 @@ Rectangle {
     anchors.horizontalCenter: parent.horizontalCenter
     color: "transparent"
 
-    ListView {
-        id: list_view1
-        width: appW
-        height: scaleY(75)
-        model:dataModel
-        delegate: contactDelegateList
-        highlightFollowsCurrentItem: true
-        highlight: appHighlight
-        focus: true
-        clip: true
 
-    }
 
 
 }

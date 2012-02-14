@@ -20,7 +20,7 @@ Rectangle {
 
     Image {
         id: np_image
-        source: "image://listprovider/updateobject/"+securityvideo.timestamp
+        source: ""
         fillMode: Image.PreserveAspectCrop
         anchors.centerIn: np_box
         height:scaleY(30)

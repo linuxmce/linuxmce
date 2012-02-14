@@ -8,7 +8,7 @@ Rectangle {
     color: "transparent"
     Row{
         id:attributerow
-        height: scaleY(style.buttonH )
+        height: scaleY(style.stdbuttonh )
         width: childrenRect.width
         spacing: 5
 
