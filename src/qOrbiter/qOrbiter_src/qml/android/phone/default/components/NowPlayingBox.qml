@@ -14,7 +14,7 @@ Rectangle {
         triggeredOnStart: false
         running: true
 
-        onTriggered: np_image.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+        onTriggered: np_image.source = "image://listprovider/updateobject/"+Qt.formatDate
     }
 
     Image {

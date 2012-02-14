@@ -23,7 +23,7 @@ Rectangle {
                    visible: true
                    height: childrenRect.height
                    width: np_box.width                   
-                   anchors.bottom: np_image.bottom
+                   anchors.centerIn: parent
                    color:"transparent"
                    clip:false
                    Column{
@@ -164,10 +164,7 @@ Rectangle {
       State {
           name: "State1"
 
-          PropertyChanges {
-              target: np_image
-              visible: false
-          }
+
 
           PropertyChanges {
               target: textrect
