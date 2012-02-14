@@ -24,7 +24,7 @@ NowPlayingBox{anchors.horizontalCenter: parent.horizontalCenter}
         }
         Text{
             id:spaceholder
-            text:dceresponse
+            text:dcemessage
             font.pixelSize: scaleY(6)
             font.family: "Droid Sans"
             anchors.bottom: advancedrow.top
