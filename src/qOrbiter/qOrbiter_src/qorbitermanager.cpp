@@ -58,7 +58,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     {
 
         emit localConfigReady( true);
-QApplication::processEvents(QEventLoop::AllEvents);
+        QApplication::processEvents(QEventLoop::AllEvents);
     }
     else
     {
@@ -101,19 +101,19 @@ QApplication::processEvents(QEventLoop::AllEvents);
 #elif defined (ANDROID)
     if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
     {
-        buildType = "/qml/android/tablet";
+        buildType = "tablet";
 
     }
     else
     {
-        buildType = "/qml/android/phone";
+        buildType = "phone";
 
     }
 
     qrcPath = ":android/Splash.qml";
     droidPath = "/";
 #elif defined (for_android)
-     if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
+    if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
     {
         buildType = "/qml/android/tablet";
 
@@ -207,9 +207,12 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
     }
 
     setDceResponse("Initiating Router Connection");
-QApplication::processEvents(QEventLoop::AllEvents);
+    QApplication::processEvents(QEventLoop::AllEvents);
 
+    QObject::connect(pqOrbiter,SIGNAL(gotoScreen(QString)), this, SLOT(gotoQScreen(QString)), Qt::QueuedConnection);
     pqOrbiter->qmlUI = this;
+
+
     QApplication::processEvents(QEventLoop::AllEvents);
 
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
@@ -242,7 +245,7 @@ QApplication::processEvents(QEventLoop::AllEvents);
 #elif for_harmattan
         remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/harmattan";
 #elif for_android
-         if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
+        if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
         {
             buildType = "/qml/android/tablet";
             remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/tablet";
@@ -258,8 +261,14 @@ QApplication::processEvents(QEventLoop::AllEvents);
         remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins";
 #endif
 
-        QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
+
+#ifdef ANDROID
+        QString localDir="/mnt/sdcard/Linuxmce/android/"+buildType;
+        QString qmlPath = "/mnt/sdcard/Linuxmce/android/"+buildType;
+#else
         QString localDir = qmlPath.append(buildType);
+        QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
+#endif
 
         //loadSkins(QUrl(localDir));
 #ifdef ANDROID
@@ -268,7 +277,7 @@ QApplication::processEvents(QEventLoop::AllEvents);
             return false;
         }
 #elif for_android
-        loadSkins(QUrl(localDir));
+        loadSkins(QUrl(remoteDirectoryPath));
 #else
         if( !loadSkins(QUrl(localDir)))
         {   emit skinIndexReady(false);
@@ -289,9 +298,12 @@ QApplication::processEvents(QEventLoop::AllEvents);
             if (getConf(PK_Device))
             {
                 emit localConfigReady(true);
-QApplication::processEvents(QEventLoop::AllEvents);
+                QApplication::processEvents(QEventLoop::AllEvents);
                 swapSkins(currentSkin);
-                //LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",iPK_Device,qs_routerip.toStdString());
+#ifndef ANDROID
+                LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",iPK_Device,qs_routerip.toStdString());
+#endif
+
                 QObject::connect(pqOrbiter,SIGNAL(disconnected(QString)), this, SLOT(reloadHandler()));
                 return true;
             }
@@ -325,7 +337,7 @@ QApplication::processEvents(QEventLoop::AllEvents);
 
             emit connectionValid(false);
             emit deviceValid(false);
-           // pqOrbiter->Disconnect();
+            // pqOrbiter->Disconnect();
             //  pqOrbiter->~qOrbiter();
             return false;
         }
@@ -341,7 +353,7 @@ QApplication::processEvents(QEventLoop::AllEvents);
                   }
                   */
 
-             //   setDceResponse("Bad Device");
+                //   setDceResponse("Bad Device");
                 bAppError = false;
                 bReload = false;
 #ifndef ANDROID
@@ -353,7 +365,7 @@ QApplication::processEvents(QEventLoop::AllEvents);
                 emit deviceValid(false);
                 emit connectionValid(true);
                 QApplication::processEvents(QEventLoop::AllEvents);
-               // pqOrbiter->Disconnect();
+                // pqOrbiter->Disconnect();
                 // pqOrbiter->~qOrbiter();
                 return false;
 
@@ -679,7 +691,7 @@ bool qorbiterManager::getConf(int PK_Device)
     //        qDebug () << "Orbiter Registered, starting";
 
     setDceResponse("Setting location");
-QApplication::processEvents(QEventLoop::AllEvents);
+    QApplication::processEvents(QEventLoop::AllEvents);
     //------------not sure if neccesary since it knows where we are.
     setActiveRoom(iFK_Room, iea_area);
 
@@ -864,7 +876,7 @@ void qorbiterManager::execGrp(int grp)
     pqOrbiter->executeCommandGroup(grp);
     i_current_command_grp = grp;
     qorbiterUIwin->rootContext()->setContextProperty("currentcommandgrp", i_current_command_grp);
-    QApplication::processEvents(QEventLoop::AllEvents);
+    //QApplication::processEvents(QEventLoop::AllEvents);
 }
 
 
@@ -1373,6 +1385,7 @@ void qorbiterManager::initializeGridModel()
     qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
     qorbiterUIwin->engine()->addImageProvider("datagridimg", advancedProvider);
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
+
     setDceResponse("Grid Initialized");
 }
 

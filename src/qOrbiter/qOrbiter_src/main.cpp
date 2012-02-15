@@ -136,6 +136,11 @@ extern "C" {
 int main(int argc, char* argv[])
 {
 
+#ifdef __ARMEL__
+#define _BYTE_ORDER _BIG_ENDIAN
+#else
+#define _BYTE_ORDER _LITTLE_ENDIAN
+#endif
     g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
     g_sBinaryPath = FileUtils::BasePath(argv[0]);
 

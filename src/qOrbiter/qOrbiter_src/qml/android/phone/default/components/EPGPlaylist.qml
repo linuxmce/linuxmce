@@ -51,7 +51,7 @@ Rectangle {
                     width: parent.width*.25
                     color:"transparent"
                     anchors.right: parent.right
-                    border.color: style.darkhighlight
+                    border.color: "silver"
                     border.width: 1
 
                     Text {

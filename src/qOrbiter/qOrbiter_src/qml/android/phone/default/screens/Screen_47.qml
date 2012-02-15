@@ -27,8 +27,7 @@ Rectangle {
             width: scaleX(99)
             height: scaleY(8)
             Rectangle {
-                id: background
-                x: 2; y: 2; width: parent.width - x*2; height: parent.height - y*2
+                id: background                
                 color: "floralwhite"
                 border.color: "black"
                 radius: 5
@@ -45,7 +44,7 @@ Rectangle {
                 Image
                 {
                     id: imagerect;
-                    source:""
+                    source:"../img/media.png"
                     height: scaleX(10);
                     width: scaleY(10);
                     fillMode: Image.PreserveAspectFit;
@@ -58,7 +57,7 @@ Rectangle {
                     Text {
                         text: name;
                         opacity: 1;
-                        font.pointSize: scaleY(2);
+                        font.pixelSize: scaleY(2);
                         color: "black" ;
                         wrapMode: "WrapAtWordBoundaryOrAnywhere"
                         //anchors.fill: parent
@@ -78,7 +77,7 @@ Rectangle {
         model:dataModel
         delegate: contactDelegateList
         clip: true
-        Component.onCompleted: dcerouter.prepareFileList(5)
+
     }
 
 

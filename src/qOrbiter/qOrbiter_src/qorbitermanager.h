@@ -35,7 +35,7 @@
 #define QORBITERMANAGER_H
 
 /*---qt includes----*/
-#include <QWidget>
+#include <QtGui>
 #include <QDeclarativeView>
 #include <qdeclarativecontext.h>
 #include <QDeclarativeItem>

@@ -64,7 +64,8 @@ import "js/ScreenChange.js" as ScreenLogic
           else
           {
               console.log("delayed load, waiting..")
-              component.statusChanged.connect(finishCreation(component));
+
+              component.statusChanged.connect(finishCreation(component));              
               component.progressChanged.connect(checkStatus(component))
           }
       }
@@ -72,7 +73,7 @@ import "js/ScreenChange.js" as ScreenLogic
       function finishCreation(component) {
         var sprite;
           if (component.status == Component.Ready) {
-              manager.setDceResponse("Finishing creation")
+              console.log("Finishing creation")
               sprite = component.createObject(this, {"x": 0, "y": 0});
               pageLoader.sourceComponent = component
               if (sprite == null) {
