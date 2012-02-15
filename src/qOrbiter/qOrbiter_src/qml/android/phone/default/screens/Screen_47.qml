@@ -24,8 +24,8 @@ Rectangle {
     {
         id: contactDelegateList
         Item {
-            width: 200
-            height: 100
+            width: scaleX(99)
+            height: scaleY(8)
             Rectangle {
                 id: background
                 x: 2; y: 2; width: parent.width - x*2; height: parent.height - y*2
@@ -45,7 +45,7 @@ Rectangle {
                 Image
                 {
                     id: imagerect;
-                    source:"image://datagridimg/"+id ;
+                    source:""
                     height: scaleX(10);
                     width: scaleY(10);
                     fillMode: Image.PreserveAspectFit;
@@ -58,7 +58,7 @@ Rectangle {
                     Text {
                         text: name;
                         opacity: 1;
-                        font.pointSize: scaleY(3);
+                        font.pointSize: scaleY(2);
                         color: "black" ;
                         wrapMode: "WrapAtWordBoundaryOrAnywhere"
                         //anchors.fill: parent
@@ -73,11 +73,12 @@ Rectangle {
 
     ListView {
         id: list_view1
-        width: 400
-        height:500
+        width: scaleX(100)
+        height:scaleY(75)
         model:dataModel
         delegate: contactDelegateList
         clip: true
+        Component.onCompleted: dcerouter.prepareFileList(5)
     }
 
 
@@ -88,7 +89,6 @@ Rectangle {
         width: childrenRect.width
         anchors.top: list_view1.bottom
         anchors.left: list_view1.left
-
         ButtonSq
         {
             height: style.iconHeight
