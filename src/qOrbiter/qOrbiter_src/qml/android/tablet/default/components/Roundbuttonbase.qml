@@ -11,6 +11,7 @@ Rectangle {
         id: rnd_but_text
         text: ""
         anchors.centerIn: parent
+        font.pixelSize: scaleY(2)
     }
 
 }

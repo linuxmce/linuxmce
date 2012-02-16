@@ -19,6 +19,7 @@ Rectangle {
         text: "text"
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
+        font.pixelSize: scaleY(2)
 }
 
 

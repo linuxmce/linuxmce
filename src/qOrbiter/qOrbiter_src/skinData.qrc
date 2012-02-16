@@ -22,5 +22,8 @@
     </qresource>
     <qresource prefix="/icons">
         <file alias="icon.png">img/harmattan_splash.png</file>
+        <file alias="audio.png">qml/desktop/default/img/icons/kmix.png</file>
+        <file alias="video.png">qml/desktop/default/img/icons/xine.png</file>
+        <file alias="games.png">qml/desktop/default/img/icons/Games.png</file>
     </qresource>
 </RCC>

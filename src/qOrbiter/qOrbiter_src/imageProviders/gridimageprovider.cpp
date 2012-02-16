@@ -35,7 +35,8 @@ QImage GridIndexProvider::requestImage(const QString &id, QSize *size, const QSi
 
         if (image.isNull())
         {
-             image.load(":/icons/playlist.png");
+
+             image.load(":/icons/icon.png");
 
         }
 
