@@ -6,9 +6,10 @@ Item{
     Rectangle{
         height: style.orbiterH
         width: style.orbiterW
-        color: style.darkhighlight
+        color: "transparent"
         HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
         Component.onCompleted: sleepingMenu(false, 0)
+
         Rectangle{
             id:mainsleepingrect
             height:scaleY(65)
@@ -26,14 +27,14 @@ Item{
                 height: childrenRect.height
                 width: childrenRect.width
                 anchors.verticalCenter: parent.verticalCenter
-                Image {
+                /*    Image {
                     id: clockicon
                     source: "../img/icons/alarmclock.jpg"
                     height: scaleY(35)
                     fillMode: Image.PreserveAspectFit
                     width: scaleX(35)
                 }
-
+        */
                 Rectangle{
                     id:alarmslist
                     height: childrenRect.height
@@ -49,12 +50,13 @@ Item{
                             id:alarmsheader
                             height: scaleY(4)
                             width: scaleX(18)
-                            color: style.accentcolor
+                            color: "silver"
                             radius: 5
                             Text {
                                 id: alarmtext
                                 text: qsTr("Sleeping Alarms")
                                 anchors.horizontalCenter: parent.horizontalCenter
+                                font.pixelSize: scaleY(2)
                             }
                         }
 
@@ -73,57 +75,61 @@ Item{
                                 delegate:
                                     Rectangle
                                 {
-                                    height: scaleY(10)
-                                    width: scaleX(25)
-                                    color:"white"
-                                    border.color: "black"
-                                    border.width: 2
-                                    anchors.margins: 10
-                                    Row{
-                                        id:delegatalayoutrow
-                                        anchors.centerIn: parent
-                                        width: parent.width
-                                        spacing: 5
-                                        Rectangle{
-                                            id:indicator
-                                            height: scaleY(10)
-                                            width: parent.width *.25
-                                            color: state ?  "green" : style.lighthighlight
-                                            border.color: "black"
-                                            border.width: 2
+                                height: scaleY(10)
+                                width: scaleX(25)
+                                color:"white"
+                                border.color: "black"
+                                border.width: 2
+                                anchors.margins: 10
+                                Row{
+                                    id:delegatalayoutrow
+                                    anchors.centerIn: parent
+                                    width: parent.width
+                                    spacing: 5
+                                    Rectangle{
+                                        id:indicator
+                                        height: scaleY(10)
+                                        width: parent.width *.25
+                                        color: state ?  "green" : style.lighthighlight
+                                        border.color: "black"
+                                        border.width: 2
 
-                                            Text {
-                                                id: handler
-                                                text: status
-                                                anchors.centerIn: parent
-                                            }
+                                        Text {
+                                            id: handler
+                                            text: status
+                                            anchors.centerIn: parent
+                                            font.pixelSize: scaleY(2)
+                                        }
 
-                                            MouseArea{
-                                                anchors.fill: parent
-                                                onClicked: {
-                                                    sleepingMenu(true, eventHandler)
-                                                    indicator.color = state ? "red" : "green"
-                                                }
+                                        MouseArea{
+                                            anchors.fill: parent
+                                            onClicked: {
+                                                sleepingMenu(true, eventHandler)
+                                                indicator.color = state ? "red" : "green"
                                             }
                                         }
-                                        Column{
-                                            spacing: 5
-                                            Text {
-                                                id: alarmname
-                                                text:qsTr("Name: ") + name
-                                            }
-                                            Text {
-                                                id: alarmtime
-                                                text:qsTr("Alarm Set For: ") + alarmTime
-                                            }
-                                            Text {
-                                                id: daysactive
-                                                text: qsTr("Active on: ")+ activeDays
-                                            }
-                                            Text {
-                                                id: countdown
-                                                text: qsTr("Time Left: ") +timeLeft
-                                            }
+                                    }
+                                    Column{
+                                        spacing: 5
+                                        Text {
+                                            id: alarmname
+                                            text:qsTr("Name: ") + name
+                                            font.pixelSize: scaleY(2)
+                                        }
+                                        Text {
+                                            id: alarmtime
+                                            text:qsTr("Alarm Set For: ") + alarmTime
+                                            font.pixelSize: scaleY(2)
+                                        }
+                                        Text {
+                                            id: daysactive
+                                            text: qsTr("Active on: ")+ activeDays
+                                            font.pixelSize: scaleY(2)
+                                        }
+                                        Text {
+                                            id: countdown
+                                            text: qsTr("Time Left: ") +timeLeft
+                                            font.pixelSize: scaleY(2)
                                         }
                                     }
                                 }
@@ -134,4 +140,5 @@ Item{
             }
         }
     }
+}
 }
