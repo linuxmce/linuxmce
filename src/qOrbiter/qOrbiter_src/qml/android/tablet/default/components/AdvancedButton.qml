@@ -30,13 +30,11 @@ Rectangle{
         }
 
         Text {
-            id: buttonLabel
-            x: 50
-            y: 50
+            id: buttonLabel           
             width: -1
             height: 0
             text:"null ipsum delorium"
-            font.pixelSize: 14
+            font.pixelSize: scaleY(3)
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
             anchors.fill: parent

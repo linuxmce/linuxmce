@@ -20,6 +20,7 @@ Component
                 Text {
                     id: celllabel
                     text: title + ":" + intRoom + ", In EA: " + entertain_area
+                    font.pixelSize: scaleY(2)
                 }
             }
         }

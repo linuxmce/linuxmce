@@ -49,6 +49,7 @@ Rectangle {
                     text: title + ": In EA: " + entertain_area
                     wrapMode: "WrapAnywhere"
                     font.bold: true
+                    font.pixelSize: scaleY(2)
                 }
             }
 
@@ -86,6 +87,7 @@ Rectangle {
         Text {
             id: headertext
             text: "Select Room Please"
+            font.pixelSize: scaleY(2)
         }
 
     }
