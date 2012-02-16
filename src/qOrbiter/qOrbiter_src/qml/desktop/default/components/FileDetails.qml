@@ -15,7 +15,7 @@ Rectangle {
     border.width: 3
     Image {
         id: fdbg
-        source: "../../../img/icons/nowplaying.png"
+        source: "../img/icons/nowplaying.png"
         anchors.fill: filedetailrect
     }
 
@@ -58,7 +58,7 @@ Rectangle {
         BorderImage {
             id: borderimg
             horizontalTileMode: BorderImage.Repeat
-            source: "../../../img/icons/drpshadow.png"
+            source: "../img/icons/drpshadow.png"
             anchors.fill: filedetailsimage
             anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
             border { left: 10; top: 10; right: 10; bottom: 10 }
@@ -74,7 +74,7 @@ Rectangle {
 
         Image {
             id: npmask
-            source: "../../../img/icons/transparencymask.png"
+            source: "../img/icons/transparencymask.png"
             anchors.fill: filedetailsimage
             opacity: .5
 

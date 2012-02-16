@@ -23,7 +23,7 @@ Rectangle {
         id: borderimg
         verticalTileMode: BorderImage.Round
         horizontalTileMode: BorderImage.Repeat
-        source: "../../../img/icons/drpshadow.png"
+        source: "../img/icons/drpshadow.png"
         anchors.fill: nonepgplaylist
         anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
         border { left: 10; top: 10; right: 10; bottom: 10 }
@@ -84,7 +84,7 @@ Rectangle {
             Image {
                 id: overlay
                 fillMode: Image.PreserveAspectCrop
-                source: "../../../img/icons/header.png"
+                source: "../img/icons/header.png"
                 anchors.fill: parent
                 opacity: .30
             }

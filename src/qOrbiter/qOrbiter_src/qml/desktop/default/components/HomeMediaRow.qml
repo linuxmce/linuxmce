@@ -25,7 +25,7 @@ import QtQuick 1.0
 
                 Image {
                     id: mHeaderImg
-                    source: "../../../img/ui3/mediabig.png"
+                    source: "../img/ui3/mediabig.png"
                     height: parent.height
                     width: parent.width
                 }

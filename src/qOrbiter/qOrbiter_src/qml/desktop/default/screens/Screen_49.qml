@@ -13,7 +13,7 @@ Rectangle {
 
     Image {
         id: bgimage
-        source: "../../../img/icons/orbiterbg.png"
+        source: "../img/icons/orbiterbg.png"
     }
 
     Timer{
@@ -36,7 +36,7 @@ Rectangle {
     //main 'now playing rect containing all the other items
     Image {
         id: panelimg
-        source: "../../../img/icons/displaypanel.png"
+        source: "../img/icons/displaypanel.png"
         height: containerrect.height
         width:containerrect.width
         anchors.centerIn: containerrect
@@ -85,7 +85,7 @@ Rectangle {
 
                         Image {
                             id: headerimage
-                            source: "../../../img/icons/header.png"
+                            source: "../img/icons/header.png"
                             height:parent.height
                             width:parent.width
                             opacity: .75
@@ -124,7 +124,7 @@ Rectangle {
                         BorderImage {
                             id: borderimg
                             horizontalTileMode: BorderImage.Repeat
-                            source: "../../../img/icons/drpshadow.png"
+                            source: "../img/icons/drpshadow.png"
                             anchors.fill: nowplayingimage
                             anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
                             border { left: 10; top: 10; right: 10; bottom: 10 }
@@ -142,7 +142,7 @@ Rectangle {
                     BorderImage {
                         id: metaborder
                         horizontalTileMode: BorderImage.Repeat
-                        source: "../../../img/icons/drpshadow.png"
+                        source: "../img/icons/drpshadow.png"
                         anchors.fill: textrect
                         anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
                         border { left: 10; top: 10; right: 10; bottom: 10 }

@@ -27,7 +27,7 @@ color:"transparent"
 
                 Image {
                     id: buttonbg
-                    source: "../../../img/ui3/securitybig.png"
+                    source: "../img/ui3/securitybig.png"
                     height: parent.height
                     width: parent.width
                 }
