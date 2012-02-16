@@ -238,7 +238,7 @@ Rectangle {
 
             radius:  4
             MouseArea{
-            ///onClicked: //qmlSetupLmce(devicenumber.text, routerip.text)
+            onClicked: closeOrbiter()
             anchors.verticalCenter: parent.verticalCenter
             }
 

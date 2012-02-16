@@ -90,7 +90,7 @@ Rectangle {
             id:exit
             width: style.widebuttonw
             height: style.widebuttonh
-            buttontext: "Exit Orbiter"
+            buttontext: qsTr("Exit Orbiter")
             MouseArea{
                 anchors.fill: exit
                 onClicked: closeOrbiter()

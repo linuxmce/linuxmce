@@ -14,7 +14,7 @@ Item
 
         Image {
             id: headerbg
-            source: "../../img/ui3/header.png"
+            source: "../img/ui3/header.png"
             anchors.top: stage.top
             height: scaleY(7)
             width: scaleX(99)
@@ -28,6 +28,7 @@ Item
             anchors.left: parent.left
             anchors.leftMargin: scaleX(5)
             anchors.verticalCenter: headerbg.verticalCenter
+            font.pixelSize: scaleY(3)
         }
 
         Clock{
@@ -35,6 +36,7 @@ Item
             anchors.right: headerbg.right
             anchors.rightMargin: scaleX(25)
             anchors.verticalCenter: headerbg.verticalCenter
+
         }
 
         Column{

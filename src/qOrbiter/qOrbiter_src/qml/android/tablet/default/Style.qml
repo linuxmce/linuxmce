@@ -18,10 +18,10 @@ QtObject{
     objectName: "orbiter_style"
 
     function scaleX(x){
-        return x/100*orbiterW
+        return x/100*appW
     }
     function scaleY(y){
-        return y/100*orbiterH
+        return y/100*appH
     }
     //skin description
     property string skincreator: "Langston Ball (aka golgoj4)"
