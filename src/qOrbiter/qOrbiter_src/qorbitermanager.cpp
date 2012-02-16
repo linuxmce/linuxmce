@@ -58,7 +58,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     {
 
         emit localConfigReady( true);
-        QApplication::processEvents(QEventLoop::AllEvents);
+QApplication::processEvents(QEventLoop::AllEvents);
     }
     else
     {
@@ -101,19 +101,19 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
 #elif defined (ANDROID)
     if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
     {
-        buildType = "tablet";
+        buildType = "/qml/android/tablet";
 
     }
     else
     {
-        buildType = "phone";
+        buildType = "/qml/android/phone";
 
     }
 
     qrcPath = ":android/Splash.qml";
     droidPath = "/";
 #elif defined (for_android)
-    if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
+     if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
     {
         buildType = "/qml/android/tablet";
 
@@ -207,12 +207,9 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
     }
 
     setDceResponse("Initiating Router Connection");
-    QApplication::processEvents(QEventLoop::AllEvents);
+QApplication::processEvents(QEventLoop::AllEvents);
 
-    QObject::connect(pqOrbiter,SIGNAL(gotoScreen(QString)), this, SLOT(gotoQScreen(QString)), Qt::QueuedConnection);
     pqOrbiter->qmlUI = this;
-
-
     QApplication::processEvents(QEventLoop::AllEvents);
 
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
@@ -245,7 +242,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 #elif for_harmattan
         remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/harmattan";
 #elif for_android
-        if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
+         if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
         {
             buildType = "/qml/android/tablet";
             remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/tablet";
@@ -261,14 +258,8 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
         remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins";
 #endif
 
-
-#ifdef ANDROID
-        QString localDir="/mnt/sdcard/Linuxmce/android/"+buildType;
-        QString qmlPath = "/mnt/sdcard/Linuxmce/android/"+buildType;
-#else
-        QString localDir = qmlPath.append(buildType);
         QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
-#endif
+        QString localDir = qmlPath.append(buildType);
 
         //loadSkins(QUrl(localDir));
 #ifdef ANDROID
@@ -277,7 +268,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             return false;
         }
 #elif for_android
-        loadSkins(QUrl(remoteDirectoryPath));
+        loadSkins(QUrl(localDir));
 #else
         if( !loadSkins(QUrl(localDir)))
         {   emit skinIndexReady(false);
@@ -298,12 +289,9 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
             if (getConf(PK_Device))
             {
                 emit localConfigReady(true);
-                QApplication::processEvents(QEventLoop::AllEvents);
+QApplication::processEvents(QEventLoop::AllEvents);
                 swapSkins(currentSkin);
-#ifndef ANDROID
-                LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",iPK_Device,qs_routerip.toStdString());
-#endif
-
+                //LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",iPK_Device,qs_routerip.toStdString());
                 QObject::connect(pqOrbiter,SIGNAL(disconnected(QString)), this, SLOT(reloadHandler()));
                 return true;
             }
@@ -337,7 +325,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
             emit connectionValid(false);
             emit deviceValid(false);
-            // pqOrbiter->Disconnect();
+           // pqOrbiter->Disconnect();
             //  pqOrbiter->~qOrbiter();
             return false;
         }
@@ -353,7 +341,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
                   }
                   */
 
-                //   setDceResponse("Bad Device");
+             //   setDceResponse("Bad Device");
                 bAppError = false;
                 bReload = false;
 #ifndef ANDROID
@@ -365,7 +353,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
                 emit deviceValid(false);
                 emit connectionValid(true);
                 QApplication::processEvents(QEventLoop::AllEvents);
-                // pqOrbiter->Disconnect();
+               // pqOrbiter->Disconnect();
                 // pqOrbiter->~qOrbiter();
                 return false;
 
@@ -691,7 +679,7 @@ bool qorbiterManager::getConf(int PK_Device)
     //        qDebug () << "Orbiter Registered, starting";
 
     setDceResponse("Setting location");
-    QApplication::processEvents(QEventLoop::AllEvents);
+QApplication::processEvents(QEventLoop::AllEvents);
     //------------not sure if neccesary since it knows where we are.
     setActiveRoom(iFK_Room, iea_area);
 
@@ -876,7 +864,7 @@ void qorbiterManager::execGrp(int grp)
     pqOrbiter->executeCommandGroup(grp);
     i_current_command_grp = grp;
     qorbiterUIwin->rootContext()->setContextProperty("currentcommandgrp", i_current_command_grp);
-    //QApplication::processEvents(QEventLoop::AllEvents);
+    QApplication::processEvents(QEventLoop::AllEvents);
 }
 
 
@@ -1199,7 +1187,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
         //qDebug() << datagridVariableString;
-        pqOrbiter->prepareFileList(i_current_mediaType );
+        execGrp(i_current_command_grp);
 
         break;
     case 2:
@@ -1208,7 +1196,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
         // qDebug() << datagridVariableString;
-        pqOrbiter->prepareFileList(i_current_mediaType );
+        execGrp(i_current_command_grp);
 
         break;
     case 3:
@@ -1218,7 +1206,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
         datagridVariableString = longassstring.join("|");
         //        qDebug() << datagridVariableString;
 
-         pqOrbiter->prepareFileList(i_current_mediaType );
+        execGrp(i_current_command_grp);
 
 
         break;
@@ -1251,7 +1239,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
                 longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
                 datagridVariableString = longassstring.join("|");
                 //   qDebug() << datagridVariableString;
-                pqOrbiter->prepareFileList(i_current_mediaType );
+                execGrp(i_current_command_grp);
             }
         }
         //goBack<<longassstring;
@@ -1263,7 +1251,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
         // qDebug() << datagridVariableString;
-         pqOrbiter->prepareFileList(i_current_mediaType );
+        execGrp(i_current_command_grp);
 
         break;
     case 6:
@@ -1284,7 +1272,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             datagridVariableString = longassstring.join("|");
             //  qDebug() << datagridVariableString;
             // goBack<<longassstring;
-           pqOrbiter->prepareFileList(i_current_mediaType );
+            execGrp(i_current_command_grp);
 
             break;
 
@@ -1295,7 +1283,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
         //  qDebug() << datagridVariableString;
-        pqOrbiter->prepareFileList(i_current_mediaType );
+        execGrp(i_current_command_grp);
 
         break;
     case 8:
@@ -1304,7 +1292,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
         //   qDebug() << datagridVariableString;
-        pqOrbiter->prepareFileList(i_current_mediaType );
+        execGrp(i_current_command_grp);
 
         break;
     case 9:
@@ -1331,7 +1319,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
             datagridVariableString = longassstring.join("|");
             //    qDebug() << datagridVariableString;
-             pqOrbiter->prepareFileList(i_current_mediaType );
+            execGrp(i_current_command_grp);
             break;
         }
 
@@ -1385,7 +1373,6 @@ void qorbiterManager::initializeGridModel()
     qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
     qorbiterUIwin->engine()->addImageProvider("datagridimg", advancedProvider);
     qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
-
     setDceResponse("Grid Initialized");
 }
 

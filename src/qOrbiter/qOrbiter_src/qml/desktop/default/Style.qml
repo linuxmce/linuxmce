@@ -24,7 +24,7 @@ QtObject{
     }
     //skin description
     property string skincreator: "Langston Ball (aka golgoj4)"
-    property string skinname: "Pluto Classic"
+    property string skinname: "Default"
     property string skindir: "default"
     property string skindescription: "Pluto Classic Skin"
     property string skinversion: "1.0"

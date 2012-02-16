@@ -74,6 +74,12 @@ SkinDataItem * SkinDataModel::find(const QString &id) const
         {
             return item;
         }
+        else
+        {
+            qDebug()<< item->id();
+            ui_reference->setDceResponse("SKIN ERROR");
+            return m_list.at(0);
+        }
 
     }
     return m_list.first();

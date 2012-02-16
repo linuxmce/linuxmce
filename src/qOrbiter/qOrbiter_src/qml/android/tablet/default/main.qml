@@ -15,7 +15,11 @@ import "js/ComponentLoader.js" as MyJs
     width:style.orbiterW
     height: style.orbiterH
 
-
+    Image {
+        id: bg
+        source: "img/lmcesplash.png"
+        anchors.fill:parent
+    }
 
 
     function scaleX(x){

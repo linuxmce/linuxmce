@@ -21,9 +21,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     this->b_skinIndexReady = false;
     this->b_devicePresent = false;
 
-#ifdef for_android
-    mainView.setBaseSize(1024,768);
-#endif
+
     //qDebug() << mainView.size();
     router = routerip;
     deviceno = deviceid;
@@ -40,8 +38,8 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     mainView.rootContext()->setContextProperty("appH", mainView.window()->height());
 #elif for_android
 
-    mainView.rootContext()->setContextProperty("appW", 480);
-    mainView.rootContext()->setContextProperty("appH", 854);
+    mainView.rootContext()->setContextProperty("appW", 400);
+    mainView.rootContext()->setContextProperty("appH", 800);
 #else
     mainView.rootContext()->setContextProperty("appW", (mainView.window()->width()));
     mainView.rootContext()->setContextProperty("appH", mainView.window()->height());
