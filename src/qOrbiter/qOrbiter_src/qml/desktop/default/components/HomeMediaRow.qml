@@ -70,7 +70,7 @@ import QtQuick 1.0
 
                     model: currentRoomMedia
                     orientation:ListView.Horizontal
-                    spacing:1
+                    spacing:5
                     delegate: mediaDelegate
                     interactive: false
 
