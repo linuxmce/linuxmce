@@ -58,7 +58,7 @@ Rectangle {
         BorderImage {
             id: borderimg
             horizontalTileMode: BorderImage.Repeat
-            source: "../images/drpshadow.png"
+            source: "../img/drpshadow.png"
             anchors.fill: filedetailsimage
             anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
             border { left: 10; top: 10; right: 10; bottom: 10 }
