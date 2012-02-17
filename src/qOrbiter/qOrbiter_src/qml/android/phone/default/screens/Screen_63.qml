@@ -5,8 +5,8 @@ Rectangle {
 
     // property alias synText:
     id: satcableboxremote
-    height: 480
-    width: 320
+    height: appH
+    width: appW
     state: ""
     color: "transparent"
     NowPlayingBox{id:np_box
@@ -15,13 +15,13 @@ Rectangle {
         visible: true
     }
 
-    HaControls{ x: 8; y: 56}
+    HaControls{id:automation_controls; anchors.top: home.bottom; anchors.left:home.left}
 
     AudioRemote {
         id: audioremote1
         anchors.bottom: satcableboxremote.bottom
     }
-    HomeButton{ x: 8; y: 5; anchors.leftMargin: 275; anchors.topMargin: 5;anchors.left: storedAudioRemote.left; anchors.top:parent.top}
+    HomeButton{id:home; anchors.leftMargin: 5; anchors.topMargin: 5;anchors.left: satcableboxremote.left; anchors.top:satcableboxremote.top}
 
     RemoteNumberPad {
         id: remotenumberpad1
@@ -36,7 +36,7 @@ Rectangle {
         height: 45
         anchors.right: satcableboxremote.right
         anchors.top: np_box.top
-        buttontextfontsize: 28.600
+        buttontextfontsize: 28
         buttontext: "#"
         MouseArea{
             smooth: true
@@ -47,8 +47,8 @@ Rectangle {
 
     ButtonSq {
         id: homebutton
-        x: 196
-        y: 294
+       anchors.top: parent.top
+       anchors.left: parent.left
         visible: false
         buttontext: "home"
         MouseArea{
@@ -99,16 +99,11 @@ Rectangle {
             }
 
             PropertyChanges {
-                target: homebutton
-                x: 265
-                y: 5
-                width: style.stdbuttonw
-                height: style.stdbuttonh
+                target: homebutton                
                 buttontextbold: true
                 buttontext: "Display"
                 visible:true
-                anchors.right: satcableboxremote.right
-                anchors.top:  satcableboxremote.top
+
             }
 
             PropertyChanges{

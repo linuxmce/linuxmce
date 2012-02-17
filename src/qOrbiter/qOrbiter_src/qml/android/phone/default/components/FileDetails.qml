@@ -3,8 +3,8 @@ import QtQuick 1.0
 
 Rectangle {
     id: filedetailrect
-    width: scaleX(50)
-    height: scaleY(50)
+    width: scaleX(80)
+    height: scaleY(75)
     anchors.top: parent.top
     anchors.topMargin: scaleY(5)
     anchors.horizontalCenter: parent.horizontalCenter
