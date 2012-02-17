@@ -4,6 +4,7 @@ Column {
     height: childrenRect.height
     width:50
     spacing: 5
+    signal volChange(int vol)
 
     Rectangle{
         height: 50
@@ -36,7 +37,7 @@ Column {
         }
         MouseArea{
             anchors.fill: parent
-            onClicked: dcerouter.adjustVolume(1)
+            onClicked: volChange(1)
 
             onPressed: hoverimg.visible = true
             onReleased: hoverimg.visible = false
@@ -94,7 +95,7 @@ Column {
         }
         MouseArea{
             anchors.fill: parent
-            onClicked: dcerouter.adjustVolume(-1)
+            onClicked: volChange(-1)
 
             onPressed: hoverimg2.visible = true
             onReleased: hoverimg2.visible = false

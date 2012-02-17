@@ -428,6 +428,8 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     Q_INVOKABLE void ff_media(int speed);
     Q_INVOKABLE void rw_media(int speed);
     Q_INVOKABLE void pauseMedia();
+     void adjustVolume(int vol);
+
     void jogPosition(QString jog);
     void updateImageChanged(QImage img);
     void updateTimecode();

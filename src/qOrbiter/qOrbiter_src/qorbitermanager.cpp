@@ -212,10 +212,9 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
     pqOrbiter->qmlUI = this;
     QApplication::processEvents(QEventLoop::AllEvents);
 
-#ifdef ANDROID
-    QObject::connect(pqOrbiter, SIGNAL(gotoScreen(QString)), SLOT(gotoQScreen(QString)),Qt::DirectConnection);
 
-#endif
+    QObject::connect(pqOrbiter, SIGNAL(gotoScreen(QString)), SLOT(gotoQScreen(QString)), Qt::QueuedConnection);
+
     QObject::connect(pqOrbiter, SIGNAL(clearGrid()), model, SLOT(clear()), Qt::QueuedConnection);
     QObject::connect(pqOrbiter, SIGNAL(statusMessage(QString)), this , SLOT(setDceResponse(QString)));
     QObject::connect(pqOrbiter,SIGNAL(addItem(gridItem*)), model, SLOT(appendRow(gridItem*)));
@@ -1825,8 +1824,13 @@ void qorbiterManager::checkOrientation(QSize)
 void qorbiterManager::getGrid(int i)
 {
     emit gridTypeChanged(i);
-    gotoQScreen("Screen_47.qml");
+
     emit mediaRequest(i);
+}
+
+void qorbiterManager::adjustVolume(int vol)
+{
+    pqOrbiter->adjustVolume( vol);
 }
 
 

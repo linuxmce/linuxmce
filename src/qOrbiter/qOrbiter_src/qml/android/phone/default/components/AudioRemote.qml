@@ -98,7 +98,7 @@ Rectangle {
             MouseArea
             {
                 anchors.fill: parent                 
-                onClicked: stopMedia()
+                onClicked: manager.stopMedia()
             }
         }
     }
