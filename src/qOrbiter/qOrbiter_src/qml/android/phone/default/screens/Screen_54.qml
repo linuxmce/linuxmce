@@ -27,8 +27,8 @@ Rectangle {
                    color:"transparent"
                    clip:false
                    Column{
-                       x: 56
-                       y: 147
+                       anchors.bottom: np_box.bottom
+                       anchors.horizontalCenter: parent.horizontalCenter
                        spacing: scaleY(.5)
                        width: parent.width
                        height: dcenowplaying.aspect == "wide"?scaleY(25): scaleY(35)

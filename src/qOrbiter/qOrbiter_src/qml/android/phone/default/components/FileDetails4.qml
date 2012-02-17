@@ -3,7 +3,7 @@ import QtQuick 1.0
 
 Rectangle {
     id: filedetailrect
-    width: scaleX(65)
+    width: scaleX(76)
     height: scaleY(75)
     anchors.top: parent.top
     anchors.topMargin: scaleY(5)
@@ -58,7 +58,7 @@ Rectangle {
         BorderImage {
             id: borderimg
             horizontalTileMode: BorderImage.Repeat
-            source: "../images/drpshadow.png"
+            source: "../img/drpshadow.png"
             anchors.fill: filedetailsimage
             anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
             border { left: 10; top: 10; right: 10; bottom: 10 }
@@ -66,19 +66,13 @@ Rectangle {
         }
         Image {
             id: filedetailsimage
-            width: filedetailsclass.aspect=="wide"? scaleX(30) : scaleX(23)
-            height:filedetailsclass.aspect=="wide"?scaleY(40) : scaleY(55)
+            width: scaleX(15)
+            height:scaleY(15)
             source: ""
             smooth: true
         }
 
-        Image {
-            id: npmask
-            source: "../images/transparencymask.png"
-            anchors.fill: filedetailsimage
-            opacity: .5
 
-        }
     }
 
 
