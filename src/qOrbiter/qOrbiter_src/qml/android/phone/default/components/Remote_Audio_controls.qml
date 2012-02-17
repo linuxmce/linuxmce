@@ -37,7 +37,7 @@ Column {
         MouseArea{
             anchors.fill: parent
             onClicked: dcerouter.adjustVolume(1)
-            onPressAndHold: dcerouter.adjustVolume(1)
+
             onPressed: hoverimg.visible = true
             onReleased: hoverimg.visible = false
         }
@@ -95,7 +95,7 @@ Column {
         MouseArea{
             anchors.fill: parent
             onClicked: dcerouter.adjustVolume(-1)
-            onPressAndHold: dcerouter.adjustVolume(-1)
+
             onPressed: hoverimg2.visible = true
             onReleased: hoverimg2.visible = false
         }
