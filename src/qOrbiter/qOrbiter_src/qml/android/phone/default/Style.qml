@@ -68,13 +68,14 @@ QtObject{
     property int buttonH:scaleY(10)
     property int buttonW: scaleY(10)
 
-    property int stdbuttonh:scaleY(10)
-    property int stdbuttonw: scaleY(10)
+
 
     property int avoptionbuttonh :scaleY(12)
     property int avoptionbuttonw :scaleY(12)
+
     property int mediabuttonw :scaleY(12)
     property int mediabuttonh :scaleY(12)
+
     property color button_system_color: "lightsteelblue"
     property color button_system_color_hover: "lightblue"
 
