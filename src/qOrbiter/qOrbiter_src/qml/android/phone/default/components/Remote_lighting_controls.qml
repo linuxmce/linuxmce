@@ -1,13 +1,13 @@
 import QtQuick 1.0
 
 Column {
-    width: style.iconWidth
-    height: childrenRect.height
+    width: 45
+    height: 45
     spacing: 5
 
     Rectangle{
-        height: style.iconHeight
-        width: style.iconWidth
+        width: 45
+        height: 45
         color:"transparent"
 
         Image {
@@ -54,8 +54,8 @@ Column {
     }
 
     Rectangle{
-        height: style.iconHeight
-        width: style.iconWidth
+        width: 45
+        height: 45
         color:"transparent"
         Image {
             id: dn_bg
@@ -77,7 +77,7 @@ Column {
         }
         MouseArea{
             anchors.fill: parent
-            onPressAndHold: dcerouter.adjustLighting(-10)
+
             onClicked: dcerouter.adjustLighting(-10)
             onPressed: hoverimg.visible = true
             onReleased: hoverimg.visible = false

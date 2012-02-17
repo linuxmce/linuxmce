@@ -1,8 +1,8 @@
 import QtQuick 1.0
 
 Column {
-    width: style.iconWidth
-    height: childrenRect.height
+    height: 45
+    width:45
     spacing: 5
 
     Rectangle{
@@ -56,8 +56,8 @@ Column {
     }
 
     Rectangle{
-        height: style.iconHeight
-        width: style.iconWidth
+        height: 45
+        width:45
         color:"transparent"
 
         Image {
