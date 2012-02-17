@@ -10,9 +10,16 @@ Column {
         height: 45
         color:"transparent"
         Image {
+            id: hoverimg
+            source: "../img/buttonhover.png"
+            visible: false
+            anchors.fill: parent
+        }
+        Image {
             id: up_bg
             source: "../img/buttonbg.png"
             anchors.centerIn: parent
+            anchors.fill: parent
         }
         Image {
             id: image2
@@ -23,17 +30,19 @@ Column {
         MouseArea{
             anchors.fill: parent
             onClicked: dcerouter.adjustVolume(1)
+            onPressAndHold: dcerouter.adjustVolume(1)
+            onPressed: hoverimg.visible = true
+            onReleased: hoverimg.visible = false
         }
     }
 
     ButtonSq{
-        height:45
-        width: 45
+
         anchors.centerIn: parent
         buttontext: "Mute"
         buttontextzindex: 20
         buttontextcolor: "red"        
-        buttontextfontsize: 8
+        buttontextfontsize: scaleY(2)
         Image {
             id: muteimg
             anchors.centerIn: parent
@@ -51,11 +60,19 @@ Column {
         width: 45
         height: 45
         color:"transparent"
+
         Image {
             id: dn_bg
             source: "../img/buttonbg.png"
             anchors.centerIn: parent
         }
+        Image {
+            id: hoverimg2
+            source: "../img/buttonhover.png"
+            visible: false
+            anchors.fill: parent
+        }
+
         Image {
             id: image1
             anchors.centerIn: parent
@@ -65,6 +82,9 @@ Column {
         MouseArea{
             anchors.fill: parent
             onClicked: dcerouter.adjustVolume(-1)
+            onPressAndHold: dcerouter.adjustVolume(-1)
+            onPressed: hoverimg2.visible = true
+            onReleased: hoverimg2.visible = false
         }
     }
 
