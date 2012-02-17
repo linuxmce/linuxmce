@@ -6,6 +6,11 @@ Component{
         //important!! these need to be set on an imported component otherwise its appears all wrong!
         height: scaleY(13)
         width: scaleX(8)
+
+        /*
+        //this image displays a second button-image beneath the buttons
+        //from the Climate-, Lighting-, Media-, Security- and Telecom-Rows;
+        //if it has no purpose it can be deleted
         Image {
             id: overlay
             fillMode: Image.PreserveAspectFit
@@ -13,6 +18,8 @@ Component{
             height: parent.height
             width: parent.width
         }
+        */
+
         ImgButton
         {       id:delegateButton
             anchors.top: parent.top
