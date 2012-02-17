@@ -3,7 +3,7 @@ import QtQuick 1.0
 Rectangle{
 
     color: "transparent"
-    height: style.stdbuttonw
+    height: style.stdbuttonh
     width: style.stdbuttonw
     property alias buttontext: buttonLabel.text
     property alias buttontextcolor: buttonLabel.color
@@ -18,8 +18,8 @@ Rectangle{
     Rectangle {
         id:buttonBase
 
-        height: style.buttonh
-        width: style.buttonw
+        height: style.stdbuttonh
+        width: style.stdbuttonw
         border.width: 2
         border.color: "aliceblue"
         radius: 5

@@ -3,8 +3,8 @@ import QtQuick 1.0
 Rectangle{
 
     color: "transparent"
-    height: style.avoptionbuttonh
-    width: style.avoptionbuttonw
+    height: style.stdbuttonh
+    width: style.stdbuttonw
     property alias buttontext: buttonLabel.text
     property alias buttontextcolor: buttonLabel.color
     property alias buttontextfontsize: buttonLabel.font.pointSize
@@ -28,8 +28,8 @@ horizontalTileMode: BorderImage.Repeat
     Rectangle {
         id:buttonBase
         color:style.button_system_color
-        height: parent.height
-        width: parent.width
+        height: style.stdbuttonh
+        width: style.stdbuttonw
         border.width: 2
         border.color: "aliceblue"
         radius: 2.5

@@ -3,8 +3,8 @@ import QtQuick 1.0
 
 Rectangle {
     id: filedetailrect
-    width: scaleX(80)
-    height: scaleY(85)
+    width: scaleX(50)
+    height: scaleY(50)
     anchors.top: parent.top
     anchors.topMargin: scaleY(5)
     anchors.horizontalCenter: parent.horizontalCenter
@@ -15,7 +15,7 @@ Rectangle {
     border.width: 3
     Image {
         id: fdbg
-        source: "../images/nowplaying.png"
+        source: "../img/bkg.png"
         anchors.fill: filedetailrect
     }
 
@@ -74,7 +74,7 @@ Rectangle {
 
         Image {
             id: npmask
-            source: "../images/transparencymask.png"
+            source: "../img/nowplayingbox.png"
             anchors.fill: filedetailsimage
             opacity: .5
 
@@ -271,8 +271,8 @@ Rectangle {
 
         AvOptionButton {
             id: buttonsq3
-            width: style.stdbuttonw
             height: style.stdbuttonh
+            width: style.stdbuttonw
             radius: 10
             buttontext: "Close"
             x: ((parent.width/3)*2)

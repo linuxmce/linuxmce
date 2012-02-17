@@ -14,8 +14,8 @@ Rectangle {
 
         ButtonSq {
             id: rowheader
-            height: style.buttonH
-            width: style.buttonW
+            height: style.stdbuttonh
+            width: style.stdbuttonw
             color: style.button_action_color
             radius: style.but_smooth
             buttontext: rowHD

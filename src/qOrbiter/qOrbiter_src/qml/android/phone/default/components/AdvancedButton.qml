@@ -3,7 +3,7 @@ import QtQuick 1.0
 Rectangle{
 
     color: "blue"
-    height: style.stdbuttonw
+    height: style.stdbuttonh
     width: style.stdbuttonw
     property alias buttontext: buttonLabel.text
     property alias buttontextcolor: buttonLabel.color
@@ -23,7 +23,7 @@ Rectangle{
 
         Image {
             id: buttonbg
-            source: "../images/linuxmcewidebutton.png"
+            source: "../img/buttonbg.png"
             height: parent.height
             width: parent.width
             opacity: .5
@@ -31,12 +31,10 @@ Rectangle{
 
         Text {
             id: buttonLabel
-            x: 50
-            y: 50
             width: -1
             height: 0
             text:"null ipsum delorium"
-            font.pixelSize: 14
+            font.pixelSize: scaleY(3)
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
             anchors.fill: parent
