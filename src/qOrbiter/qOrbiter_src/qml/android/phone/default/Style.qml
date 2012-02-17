@@ -24,7 +24,7 @@ QtObject{
     property string skinvariation: "Android 320X480"
     property string maincolor: "grey"
     property string accentcolor: "indianred"
-   //scale function
+    //scale function
     function scaleX(x){
         return x/100*appH
     }
@@ -65,12 +65,16 @@ QtObject{
     //title and other misc windo accents
     property color titletextcolor: "black"
     //button styling
-    property int buttonH:scaleY(12)
-    property int buttonW: scaleY(12)
+    property int buttonH:scaleY(10)
+    property int buttonW: scaleY(10)
+
+    property int stdbuttonh:scaleY(10)
+    property int stdbuttonw: scaleY(10)
+
     property int avoptionbuttonh :scaleY(12)
     property int avoptionbuttonw :scaleY(12)
-     property int mediabuttonw :scaleY(12)
-     property int mediabuttonh :scaleY(12)
+    property int mediabuttonw :scaleY(12)
+    property int mediabuttonh :scaleY(12)
     property color button_system_color: "lightsteelblue"
     property color button_system_color_hover: "lightblue"
 

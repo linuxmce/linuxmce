@@ -12,7 +12,7 @@ Rectangle {
 
     Connections{
         target: window
-        onOrientationChanged:console.log("window size changed in qml")
+        onOrientationChanged:updateRez()
     }
 
     Connections{
@@ -25,6 +25,12 @@ Rectangle {
     }
     function scaleY(y){
         return y/100*appH
+    }
+
+    function updateRez()
+    {
+        rectangle1.height = appH
+        rectangle2.width = appW
     }
 
     color: "slategrey"

@@ -7,11 +7,17 @@ import QtQuick 1.0
 
 Rectangle {
     id: rectangle1
-    width: 320
-    height: 480
+    width: appH
+    height: appW
+    onHeightChanged: updateOrientation()
     color: "slategrey"
     signal setupStart(string x, string y)
     signal splashLoaded()
+
+    function updateOrientation(){
+        rectangle1.height =appH
+        rectangle1.width = appW
+    }
 
     Image {
         id: splash

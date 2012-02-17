@@ -46,8 +46,8 @@ Column {
         Image {
             id: muteimg
             anchors.centerIn: parent
-            width: 45
-            height: 45
+            height: style.buttonh
+            width: style.buttonw
             source: "../img/kmix.png"
         }
         MouseArea{
@@ -57,8 +57,8 @@ Column {
     }
 
     Rectangle{
-        width: 45
-        height: 45
+        height: style.buttonh
+        width: style.buttonw
         color:"transparent"
 
         Image {

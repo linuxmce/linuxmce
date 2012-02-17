@@ -155,8 +155,8 @@ GenericSetupItem * GenericSetupModel::currentRow()
 
 void GenericSetupModel::checkForMore()
 {
-    if (totalcells < m_list.count())
+    if (totalcells > m_list.count())
     {
-        manager_ref->pqOrbiter->populateAdditionalMedia();
+        //manager_ref->pqOrbiter->populateAdditionalMedia();
     }
 }

@@ -1,13 +1,13 @@
 import QtQuick 1.0
 
 Column {
-    width: 45
+    width: style.buttonw
     height: childrenRect.height
     spacing: 5
 
     Rectangle{
-        height: 45
-        width: 45
+        height: style.buttonh
+        width: style.buttonw
         color:"transparent"
 
         Image {
@@ -49,15 +49,15 @@ Column {
         Image {
             id: lightimg
             anchors.centerIn: parent
-            width: 45
-            height: 45
+            height: style.buttonh
+            width: style.buttonw
             source: "../img/On.png"
         }
     }
 
     Rectangle{
-        height: 45
-        width: 45
+        height: style.buttonh
+        width: style.buttonw
         color:"transparent"
         Image {
             id: dn_bg

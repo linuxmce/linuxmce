@@ -29,7 +29,7 @@ Rectangle {
             height: scaleY(8)
             Rectangle {
                 id: background
-                color: "transparent"
+                color: mouseclick.pressed ? "orange":"transparent"
                 border.color: "silver"
                 radius: 5
                 height: scaleY(8)
@@ -58,10 +58,10 @@ Rectangle {
                 }
 
                 MouseArea {
+                    id:mouseclick
                     anchors.fill: parent
                     onClicked: setStringParam(4, id)
-                    onPressed: parent.color="orange"
-                    onReleased: parent.color="transparent"
+
                 }
             }
         }

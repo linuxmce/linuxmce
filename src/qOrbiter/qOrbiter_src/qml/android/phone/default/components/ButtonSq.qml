@@ -7,7 +7,7 @@ Rectangle{
     width: style.stdbuttonw
     property alias buttontext: buttonLabel.text
     property alias buttontextcolor: buttonLabel.color
-    property alias buttontextfontsize: buttonLabel.font.pointSize
+    property alias buttontextfontsize: buttonLabel.font.pixelSize
     property alias buttontextbold: buttonLabel.font.bold
     property alias buttontextitalic: buttonLabel.font.italic
     property alias buttontextzindex: buttonLabel.z
@@ -18,8 +18,8 @@ Rectangle{
     Rectangle {
         id:buttonBase
 
-        height: parent.height
-        width: parent.width
+        height: style.buttonh
+        width: style.buttonw
         border.width: 2
         border.color: "aliceblue"
         radius: 5
@@ -31,12 +31,9 @@ Rectangle{
         }
         Text {
             id: buttonLabel
-            x: 50
-            y: 50
-            width: -1
-            height: 0
+
             text:"null ipsum delorium"
-            font.pixelSize: 10
+            font.pixelSize: buttontextfontsize
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
             anchors.fill: parent

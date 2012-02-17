@@ -54,7 +54,7 @@ void ListModel::appendRows(const QList<gridItem *> &items)
   QModelIndex index2 = indexFromItem(m_list.first());
   int currentRows= m_list.count() - 1;
   emit dataChanged(index2, index, currentRows);
-    checkForMore();
+
 
 }
 
@@ -165,11 +165,11 @@ gridItem * ListModel::currentRow()
 
 void ListModel::checkForMore()
 {
-    if (totalcells < this->rowCount())
+    if (m_list.count() < totalcells )
     {
 
         loadingStatus = true;
-
+        emit gimmieData(gridType);
     }
     else
     {
@@ -187,8 +187,19 @@ void ListModel::populateGrid(int mediaType)
 void ListModel::setTotalCells(int cells)
 {
     totalcells = cells;
-    emit sizeChanged(totalcells);
-    //qDebug() << "Model Size Changed" << totalcells;
+
+    if ( m_list.count() < totalcells)
+    {
+
+       // loadingStatus = true;
+
+    }
+    else
+    {
+
+      //  loadingStatus = false;
+    }
+
 }
 
 int ListModel::getTotalCells()

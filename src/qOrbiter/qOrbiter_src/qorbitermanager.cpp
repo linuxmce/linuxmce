@@ -217,12 +217,13 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
     QObject::connect(pqOrbiter, SIGNAL(clearGrid()), model, SLOT(clear()), Qt::QueuedConnection);
     QObject::connect(pqOrbiter, SIGNAL(statusMessage(QString)), this , SLOT(setDceResponse(QString)));
     QObject::connect(pqOrbiter,SIGNAL(addItem(gridItem*)), model, SLOT(appendRow(gridItem*)));
-    QObject::connect(pqOrbiter,SIGNAL(gridModelSizeChange(int)), model, SLOT(setTotalCells(int)));
+    QObject::connect(pqOrbiter,SIGNAL(gridModelSizeChange(int)), model, SLOT(setTotalCells(int)),Qt::QueuedConnection);
     QObject::connect(pqOrbiter,SIGNAL(requestMediaGrid(int)), this, SLOT(getGrid(int)));
     QObject::connect(pqOrbiter,SIGNAL(checkGridStatus()), model, SLOT(checkForMore()));
+    QObject::connect(this,SIGNAL(filterChanged(int)), pqOrbiter,SLOT(prepareFileList(int)));
 
-    QObject::connect(model, SIGNAL(gimmieData(int)), pqOrbiter, SLOT(populateAdditionalMedia()));
-    QObject::connect(this, SIGNAL(mediaRequest(int)), pqOrbiter,SLOT(prepareFileList(int)));
+    QObject::connect(model, SIGNAL(gimmieData(int)), pqOrbiter, SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
+    QObject::connect(this, SIGNAL(mediaRequest(int)), pqOrbiter,SLOT(prepareFileList(int)), Qt::QueuedConnection);
 
     QObject::connect(this, SIGNAL(gridTypeChanged(int)), model, SLOT(setGridType(int)));
 
@@ -1019,7 +1020,7 @@ bool qorbiterManager::loadSkins(QUrl base)
 #ifdef for_harmattan
     tskinModel->addSkin("default");
 
-   #elif ANDROID
+#elif ANDROID
     tskinModel->addSkin("default");
 #else
     tskinModel->addSkin("default");
@@ -1202,32 +1203,21 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-        //qDebug() << datagridVariableString;
-        execGrp(i_current_command_grp);
-
+        emit filterChanged(i_current_mediaType);
         break;
     case 2:
         q_fileFormat = param;
-
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-        // qDebug() << datagridVariableString;
-        execGrp(i_current_command_grp);
-
+        emit filterChanged(i_current_mediaType);
         break;
     case 3:
         q_attribute_genres = param;
-
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-        //        qDebug() << datagridVariableString;
-
-        execGrp(i_current_command_grp);
-
-
+        emit filterChanged(i_current_mediaType);
         break;
     case 4:
-        //   qDebug() << "Filter Parameter: " << param;
         if (q_mediaSources != param.remove("!D"))
         {
             if(param.contains("!F"))
@@ -1235,11 +1225,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
                 filedetailsclass->setVisible(true);
                 filedetailsclass->setFile(param);
                 showFileInfo(param);
-                //qDebug () << "info tripped";
                 break;
-
-                //    pqOrbiter->GetMediaAttributeGrid(param);
-
             }
             else if (param.contains("!P"))
             {
@@ -1248,30 +1234,22 @@ void qorbiterManager::setStringParam(int paramType, QString param)
                 showFileInfo(param);
                 break;
             }
-
             else
             {
                 q_pk_attribute = param.remove("!A");
                 longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
                 datagridVariableString = longassstring.join("|");
-                //   qDebug() << datagridVariableString;
-                execGrp(i_current_command_grp);
+                emit filterChanged(i_current_mediaType);
             }
         }
-        //goBack<<longassstring;
-
         break;
     case 5:
         q_usersPrivate = param;
-
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-        // qDebug() << datagridVariableString;
-        execGrp(i_current_command_grp);
-
+        emit filterChanged(i_current_mediaType);
         break;
     case 6:
-
         if (param.contains("!P"))
         {
             filedetailsclass->setVisible(true);
@@ -1286,30 +1264,20 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             }
             longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
             datagridVariableString = longassstring.join("|");
-            //  qDebug() << datagridVariableString;
-            // goBack<<longassstring;
-            execGrp(i_current_command_grp);
-
+            emit filterChanged(i_current_mediaType);
             break;
-
         }
     case 7:
         q_pk_users = param;
-
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-        //  qDebug() << datagridVariableString;
-        execGrp(i_current_command_grp);
-
+        emit filterChanged(i_current_mediaType);
         break;
     case 8:
         q_last_viewed = param;
-
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-        //   qDebug() << datagridVariableString;
-        execGrp(i_current_command_grp);
-
+        emit filterChanged(i_current_mediaType);
         break;
     case 9:
         if(param.contains("!F"))
@@ -1318,8 +1286,6 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             filedetailsclass->setVisible(true);
             filedetailsclass->setFile(param);
             break;
-            //   pqOrbiter->GetMediaAttributeGrid(param);
-
         }
         else if (param.contains("!P"))
         {
@@ -1331,16 +1297,14 @@ void qorbiterManager::setStringParam(int paramType, QString param)
         else
         {
             q_pk_attribute = param.remove("!A");
-
             longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
             datagridVariableString = longassstring.join("|");
-            //    qDebug() << datagridVariableString;
-            execGrp(i_current_command_grp);
+            emit filterChanged(i_current_mediaType);
             break;
         }
 
     default:
-        cout << "no type";
+         emit filterChanged(i_current_mediaType);
 
     }
 
@@ -1382,8 +1346,8 @@ void qorbiterManager::initializeGridModel()
     //datagrid model setup with image provider for grid
     gridThread = new QThread();
     model = new ListModel(new gridItem);
- //   model->moveToThread(gridThread);
-  //  gridThread->start();
+    //   model->moveToThread(gridThread);
+    //  gridThread->start();
 
     // QObject::connect(pqOrbiter, SIGNAL(addItem(gridItem*)), this, SLOT(addMediaItem(gridItem*)), Qt::QueuedConnection);
     //    model->moveToThread(processingThread);
@@ -1757,7 +1721,7 @@ void qorbiterManager::setDceResponse(QString response)
     emit loadingMessage(dceResponse);
     QApplication::processEvents(QEventLoop::AllEvents);
     emit dceResponseChanged();
-   // qDebug() << response;
+    // qDebug() << response;
 
 }
 
@@ -1859,7 +1823,7 @@ void qorbiterManager::checkOrientation(QSize)
 void qorbiterManager::getGrid(int i)
 {
     emit gridTypeChanged(i);
-   gotoQScreen("Screen_47.qml");
+    gotoQScreen("Screen_47.qml");
     emit mediaRequest(i);
 }
 
