@@ -20,9 +20,10 @@ Rectangle{
 
         height: style.stdbuttonh
         width: style.stdbuttonw
-        border.width: 2
+        border.width: 1
         border.color: "aliceblue"
         radius: 5
+        smooth:true
         Image {
 
             source: "../img/buttonbg.png"
@@ -33,7 +34,7 @@ Rectangle{
             id: buttonLabel
 
             text:"null ipsum delorium"
-            font.pixelSize: buttontextfontsize
+            font.pixelSize: scaleY(buttontextfontsize)
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
             anchors.fill: parent
