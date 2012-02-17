@@ -1,19 +1,19 @@
 import QtQuick 1.0
 
 Column {
-    width: style.buttonw
+    width: style.iconWidth
     height: childrenRect.height
     spacing: 5
 
     Rectangle{
-        height: style.buttonh
-        width: style.buttonw
+        height: style.iconHeight
+        width: style.icongWidth
         color:"transparent"
 
         Image {
             id: up_bg
             source: "../img/buttonbg.png"
-            anchors.centerIn: parent
+            anchors.fill:parent
         }
         Image {
             id: hoverimgup
@@ -22,9 +22,9 @@ Column {
             anchors.fill: parent
         }
         Image {
-            id: image2
-            anchors.centerIn: parent
+            id: image2            
             smooth: true
+            anchors.fill: parent
             source: "../img/plus.png"            
         }
         MouseArea{
@@ -44,25 +44,25 @@ Column {
         buttontextzindex: 20
         buttontextcolor: "red"
         buttontextbold: true
-        buttontextfontsize: scaleY(2)
+        buttontextfontsize: 4
 
         Image {
             id: lightimg
             anchors.centerIn: parent
-            height: style.buttonh
-            width: style.buttonw
+            height: style.iconHeight
+            width: style.icongWidth
             source: "../img/On.png"
         }
     }
 
     Rectangle{
-        height: style.buttonh
-        width: style.buttonw
+        height: style.iconHeight
+        width: style.icongWidth
         color:"transparent"
         Image {
             id: dn_bg
             source: "../img/buttonbg.png"
-            anchors.centerIn: parent
+            anchors.fill: parent
         }
         Image {
             id: hoverimg
@@ -72,7 +72,7 @@ Column {
         }
         Image {
             id: ltdn
-            anchors.centerIn: parent
+           anchors.fill: parent
             smooth: true
             source: "../img/minus.png"
 
@@ -84,9 +84,5 @@ Column {
             onPressed: hoverimg.visible = true
             onReleased: hoverimg.visible = false
         }
-
     }
-
-
-
 }

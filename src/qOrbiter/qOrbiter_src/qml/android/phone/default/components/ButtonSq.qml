@@ -34,7 +34,7 @@ Rectangle{
             id: buttonLabel
 
             text:"null ipsum delorium"
-            font.pixelSize: scaleY(buttontextfontsize)
+            font.pixelSize: scaleY(2)
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
             anchors.fill: parent

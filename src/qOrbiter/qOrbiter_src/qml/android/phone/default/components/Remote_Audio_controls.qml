@@ -1,24 +1,25 @@
 import QtQuick 1.0
 
 Column {
-    width: 45
+    width: style.iconWidth
     height: childrenRect.height
     spacing: 5
 
     Rectangle{
-        width: 45
-        height: 45
+        height: style.iconHeight
+        width: style.icongWidth
         color:"transparent"
-        Image {
-            id: hoverimg
-            source: "../img/buttonhover.png"
-            visible: false
-            anchors.fill: parent
-        }
+
         Image {
             id: up_bg
             source: "../img/buttonbg.png"
             anchors.centerIn: parent
+            anchors.fill: parent
+        }
+        Image {
+            id: hoverimg
+            source: "../img/buttonhover.png"
+            visible: false
             anchors.fill: parent
         }
         Image {
@@ -46,8 +47,8 @@ Column {
         Image {
             id: muteimg
             anchors.centerIn: parent
-            height: style.buttonh
-            width: style.buttonw
+            height: style.iconHeight
+            width: style.icongWidth
             source: "../img/kmix.png"
         }
         MouseArea{
@@ -57,8 +58,8 @@ Column {
     }
 
     Rectangle{
-        height: style.buttonh
-        width: style.buttonw
+        height: style.iconHeight
+        width: style.icongWidth
         color:"transparent"
 
         Image {
