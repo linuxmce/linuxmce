@@ -148,8 +148,8 @@ Rectangle {
     //main 'now playing rect containing all the other items
     // Remote_lighting_controls{ id: remote_lighting_controls1; x: 344; y: 351; width: 93; height: 219; anchors.topMargin: 179;anchors.top: nowplayingbox1.baseline}
     // Remote_Audio_controls{ id: remote1; x: 200; y: 351; anchors.rightMargin: 71; z: 45; anchors.right: remote_lighting_controls1.left}
-    HaControls{ x: 0; y: 5;}
-    HomeButton{ id:home; anchors.left: storedAudioRemote.left; anchors.top:storedAudioRemote.top}
+    HaControls{ id:hacontrolbox; anchors.left: parent.left; anchors.top: home.bottom}
+    HomeButton{ id:home; anchors.left: storedVideoRemote.left; anchors.top:storedVideoRemote.top}
 
 
 }

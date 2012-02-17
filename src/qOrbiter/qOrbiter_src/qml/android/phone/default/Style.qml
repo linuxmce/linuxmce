@@ -49,8 +49,8 @@ QtObject{
 
 
     //icon sizes
-    property int iconHeight:scaleY(10)
-    property int iconWidth: scaleY(10)
+    property int iconHeight:scaleY(15)
+    property int iconWidth: scaleY(15)
     property int  stdbuttonh: scaleY(10)
     property int  stdbuttonw: scaleY(10)
 
