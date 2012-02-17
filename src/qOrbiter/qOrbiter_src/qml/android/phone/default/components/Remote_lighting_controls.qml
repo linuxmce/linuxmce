@@ -7,7 +7,7 @@ Column {
 
     Rectangle{
         height: style.iconHeight
-        width: style.icongWidth
+        width: style.iconWidth
         color:"transparent"
 
         Image {
@@ -48,16 +48,14 @@ Column {
 
         Image {
             id: lightimg
-            anchors.centerIn: parent
-            height: style.iconHeight
-            width: style.icongWidth
+            anchors.fill: parent
             source: "../img/On.png"
         }
     }
 
     Rectangle{
         height: style.iconHeight
-        width: style.icongWidth
+        width: style.iconWidth
         color:"transparent"
         Image {
             id: dn_bg

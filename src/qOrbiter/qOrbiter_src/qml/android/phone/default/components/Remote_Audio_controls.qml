@@ -7,7 +7,7 @@ Column {
 
     Rectangle{
         height: style.iconHeight
-        width: style.icongWidth
+        width: style.iconWidth
         color:"transparent"
 
         Image {
@@ -46,9 +46,7 @@ Column {
         buttontextfontsize: scaleY(2)
         Image {
             id: muteimg
-            anchors.centerIn: parent
-            height: style.iconHeight
-            width: style.icongWidth
+            anchors.fill: parent
             source: "../img/kmix.png"
         }
         MouseArea{
@@ -59,7 +57,7 @@ Column {
 
     Rectangle{
         height: style.iconHeight
-        width: style.icongWidth
+        width: style.iconWidth
         color:"transparent"
 
         Image {
