@@ -8,7 +8,7 @@ Item {
     ButtonSq{
         buttonsqradius: 2.5
         buttontext: "Home"
-        buttontextfontsize: 14
+        buttontextfontsize: scaleY(2)
         height: style.stdbuttonh
         width: style.stdbuttonw
         Image {

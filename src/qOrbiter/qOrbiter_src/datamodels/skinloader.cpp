@@ -48,7 +48,7 @@ QUrl skinBase(m_base_url.toString()+"/"+ui_reference->currentSkin);
     if (current_component->isError()) {
         qWarning() << current_component->errors();
     } else {
-        //qDebug() << "Making style object";
+       //qDebug() << "Making style object";
         styleObject = current_component->create(ui_reference->qorbiterUIwin->rootContext());
         QString s_title = styleObject->property("skinname").toString();
         QString s_creator = styleObject->property("skincreator").toString();

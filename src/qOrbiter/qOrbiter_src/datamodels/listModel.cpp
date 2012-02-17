@@ -14,6 +14,7 @@ ListModel::ListModel(gridItem* prototype, QObject* parent) :
   setRoleNames(m_prototype->roleNames());
    qRegisterMetaType<QModelIndex>("QModelIndex");
    totalcells = 0;
+   loadingStatus = false;
 }
 
 int ListModel::rowCount(const QModelIndex &parent) const
@@ -53,7 +54,7 @@ void ListModel::appendRows(const QList<gridItem *> &items)
   QModelIndex index2 = indexFromItem(m_list.first());
   int currentRows= m_list.count() - 1;
   emit dataChanged(index2, index, currentRows);
-
+    checkForMore();
 
 }
 
@@ -119,6 +120,7 @@ QModelIndex ListModel::indexFromItem(const gridItem *item) const
 void ListModel::clear()
 {
    //("Clearing List");
+    loadingStatus == false;
   qDeleteAll(m_list);
   m_list.clear();
   this->reset();
@@ -163,17 +165,15 @@ gridItem * ListModel::currentRow()
 
 void ListModel::checkForMore()
 {
-    if (totalcells > this->rowCount())
+    if (totalcells < this->rowCount())
     {
-        //qDebug("Gettin moar");
+
         loadingStatus = true;
-        emit gimmieData(gridType);
+
     }
     else
     {
-        //qDebug("No more to get?");
-        //qDebug()<< "Model" << m_list.count();
-        //qDebug() << "Grid" << totalcells;
+
         loadingStatus = false;
     }
 

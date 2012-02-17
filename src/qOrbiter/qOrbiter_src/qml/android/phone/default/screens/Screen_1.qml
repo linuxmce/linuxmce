@@ -38,7 +38,7 @@ NowPlayingBox{anchors.horizontalCenter: parent.horizontalCenter}
             width: childrenRect.width
             anchors.horizontalCenter: stage.horizontalCenter
             anchors.bottom: stage.bottom
-            spacing: scaleX(5)
+            spacing: scaleX(4)
             ButtonSq{
                 id:roombutton
                 height: style.stdbuttonh

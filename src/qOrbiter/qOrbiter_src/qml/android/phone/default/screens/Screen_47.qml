@@ -24,38 +24,35 @@ Rectangle {
     {
         id: contactDelegateList
         Item {
-            width: scaleX(99)
+            width: scaleX(75)
             height: scaleY(8)
             Rectangle {
                 id: background                
-                color: "silver"
-                border.color: "orange"
+                color: "transparent"
+                border.color: "silver"
                 radius: 5
                 height: scaleY(8)
-                width: scaleX(99)
+                width: scaleX(75)
             }
-            MouseArea {
-                anchors.fill: parent
-                onClicked: setStringParam(4, id)
-            }
+
             Row {
                 id: topLayout
                 x: 10; y: 10; height: imagerect.height; width: parent.width
-                spacing: 10
+                spacing:scaleX(2)
 
                 Image
                 {
                     id: imagerect;
                     source:"image://datagridimg/"+id ;
-                    height: scaleX(10);
-                    width: scaleY(10);
+                    height: scaleX(8);
+                    width: scaleY(8);
                     fillMode: Image.PreserveAspectFit;
                 }
 
                 Column {
                     width:parent.width
                     height: parent.height
-                    spacing:5
+                    spacing:scaleY(1)
                     Text {
                         text: name;
                         opacity: 1;
@@ -63,8 +60,15 @@ Rectangle {
                         color: "black" ;
                         wrapMode: "WrapAtWordBoundaryOrAnywhere"
                         //anchors.fill: parent
+                        width: scaleX(55)
                         font.bold: false
                     }
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: setStringParam(4, id)
+                    onPressed: parent.color="orange"
+                    onReleased: parent.color="transparent"
                 }
 
             }
@@ -74,8 +78,8 @@ Rectangle {
 
     ListView {
         id: list_view1
-        width: scaleX(100)
-        height:scaleY(75)
+        width: scaleX(75)
+        height:scaleY(65)
         model:dataModel
         delegate: contactDelegateList
         clip: true
@@ -84,9 +88,9 @@ Rectangle {
 
 
     Row
-    {
+    {id:bottomrow
         height: childrenRect.height
-        anchors.topMargin: 0
+        anchors.topMargin: scaleY(5)
         width: childrenRect.width
         anchors.top: list_view1.bottom
         anchors.left: list_view1.left
@@ -95,15 +99,24 @@ Rectangle {
             height: style.iconHeight
             width: style.iconWidth
             buttontext: "Go Back"
-
             buttontextbold: true
-
             MouseArea
             {
                 anchors.fill:parent
                 onClicked: goBackGrid()
             }
         }
-        AttributeSelector {}
+        AttributeSelector {id:selector}
+
+    }
+    Text{
+        id:spaceholder
+        text:dcemessage
+        font.pixelSize: scaleY(3)
+        font.family: "Droid Sans"
+        anchors.top: bottomrow.bottom
+        anchors.left: parent.left
+        color: "silver"
+
     }
 }
