@@ -167,13 +167,13 @@ void ListModel::checkForMore()
 {
     if (m_list.count() < totalcells )
     {
-
+qDebug() <<QString::number(m_list.count()) +" cells in model, out of " + QString::number(totalcells);
         loadingStatus = true;
         emit gimmieData(gridType);
     }
     else
     {
-
+qDebug() <<QString::number(m_list.count()) +" cells in model, out of " + QString::number(totalcells);
         loadingStatus = false;
     }
 
@@ -191,13 +191,14 @@ void ListModel::setTotalCells(int cells)
     if ( m_list.count() < totalcells)
     {
 
-       // loadingStatus = true;
+        qDebug() <<QString::number(m_list.count()) +" cells in model, out of " + QString::number(totalcells);
+       loadingStatus = true;
 
     }
     else
     {
-
-      //  loadingStatus = false;
+qDebug() <<QString::number(m_list.count()) +" cells in model, out of " + QString::number(totalcells);
+       loadingStatus = false;
     }
 
 }

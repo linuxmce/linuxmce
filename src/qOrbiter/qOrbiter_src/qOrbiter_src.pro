@@ -379,7 +379,8 @@ OTHER_FILES += Readme.txt \
     android/res/layout/splash.xml \
     android/res/values-id/strings.xml \
     android/res/drawable-ldpi/icon.png \
-    android/AndroidManifest.xml
+    android/AndroidManifest.xml \
+    android/version.xml
 
 ANDROID{
 OTHER_FILES=\
@@ -16715,6 +16716,7 @@ contains(MEEGO_EDITION,harmattan) {
     desktopfile.path = /usr/share/applications
     INSTALLS += desktopfile
 }
+
 
 
 

@@ -83,7 +83,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
 
     item = qorbiterUIwin->rootObject();
 
-    QObject::connect(qorbiterUIwin, SIGNAL(sceneResized(QSize)),  SLOT(checkOrientation(QSize)), Qt::DirectConnection );
+    QObject::connect(qorbiterUIwin, SIGNAL(sceneResized(QSize)),  SLOT(checkOrientation(QSize)),Qt::QueuedConnection );
 
     QApplication::processEvents(QEventLoop::AllEvents);
 #ifdef for_desktop
@@ -188,8 +188,6 @@ void qorbiterManager::gotoQScreen(QString s)
     } else {
         setDceResponse("screenchange() FAILED");
     }
-
-
     currentScreen = s;
 }
 
@@ -215,13 +213,13 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
 
 
 
-    QObject::connect(pqOrbiter, SIGNAL(clearGrid()), model, SLOT(clear()), Qt::QueuedConnection);
+    QObject::connect(pqOrbiter, SIGNAL(clearGrid()), model, SLOT(clear()));
     QObject::connect(pqOrbiter, SIGNAL(statusMessage(QString)), this , SLOT(setDceResponse(QString)));
-    QObject::connect(pqOrbiter,SIGNAL(addItem(gridItem*)), model, SLOT(appendRow(gridItem*)));
+    QObject::connect(pqOrbiter,SIGNAL(addItem(gridItem*)), model, SLOT(appendRow(gridItem*)),Qt::QueuedConnection);
     QObject::connect(pqOrbiter,SIGNAL(gridModelSizeChange(int)), model, SLOT(setTotalCells(int)),Qt::QueuedConnection);
-    QObject::connect(pqOrbiter,SIGNAL(requestMediaGrid(int)), this, SLOT(getGrid(int)));
-    QObject::connect(pqOrbiter,SIGNAL(checkGridStatus()), model, SLOT(checkForMore()));
-    QObject::connect(this,SIGNAL(filterChanged(int)), pqOrbiter,SLOT(prepareFileList(int)), Qt::QueuedConnection);
+    QObject::connect(pqOrbiter,SIGNAL(requestMediaGrid(int)), this, SLOT(getGrid(int)), Qt::QueuedConnection);
+    QObject::connect(pqOrbiter,SIGNAL(checkGridStatus()), model, SLOT(checkForMore()), Qt::QueuedConnection);
+    QObject::connect(this,SIGNAL(filterChanged(int)), pqOrbiter,SLOT(prepareFileList(int)),Qt::QueuedConnection);
 
     QObject::connect(model, SIGNAL(gimmieData(int)), pqOrbiter, SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
     QObject::connect(this, SIGNAL(mediaRequest(int)), pqOrbiter,SLOT(prepareFileList(int)), Qt::QueuedConnection);
