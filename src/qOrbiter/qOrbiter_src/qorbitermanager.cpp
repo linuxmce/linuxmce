@@ -181,13 +181,15 @@ void qorbiterManager::gotoQScreen(QString s)
     QApplication::processEvents(QEventLoop::AllEvents);
     QVariant screenname= s;
     QObject * item = qorbiterUIwin->rootObject();
-
+/*
     setDceResponse("About to call screenchange()");
     if (QMetaObject::invokeMethod(item, "screenchange",  Q_ARG(QVariant, screenname))) {
         setDceResponse("Done call to screenchange()");
     } else {
         setDceResponse("screenchange() FAILED");
     }
+    */
+    emit screenChange(s);
     currentScreen = s;
 }
 
@@ -220,7 +222,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
     QObject::connect(pqOrbiter,SIGNAL(gridModelSizeChange(int)), model, SLOT(setTotalCells(int)),Qt::QueuedConnection);
     QObject::connect(pqOrbiter,SIGNAL(requestMediaGrid(int)), this, SLOT(getGrid(int)));
     QObject::connect(pqOrbiter,SIGNAL(checkGridStatus()), model, SLOT(checkForMore()));
-    QObject::connect(this,SIGNAL(filterChanged(int)), pqOrbiter,SLOT(prepareFileList(int)));
+    QObject::connect(this,SIGNAL(filterChanged(int)), pqOrbiter,SLOT(prepareFileList(int)), Qt::QueuedConnection);
 
     QObject::connect(model, SIGNAL(gimmieData(int)), pqOrbiter, SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
     QObject::connect(this, SIGNAL(mediaRequest(int)), pqOrbiter,SLOT(prepareFileList(int)), Qt::QueuedConnection);

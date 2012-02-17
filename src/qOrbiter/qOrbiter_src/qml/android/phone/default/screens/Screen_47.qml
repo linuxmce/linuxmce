@@ -83,9 +83,9 @@ Rectangle {
     {id:bottomrow
         height: childrenRect.height
         anchors.topMargin: scaleY(5)
-        width: childrenRect.width
         anchors.top: list_view1.bottom
-        anchors.left: list_view1.left
+        width: childrenRect.width
+        anchors.horizontalCenter: parent.horizontalCenter
         ButtonSq
         {
             height: style.iconHeight
@@ -106,7 +106,7 @@ Rectangle {
         text:dcemessage
         font.pixelSize: scaleY(3)
         font.family: "Droid Sans"
-        anchors.top: bottomrow.bottom
+        anchors.bottom: parent.bottom
         anchors.left: parent.left
         color: "silver"
 

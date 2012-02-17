@@ -369,6 +369,7 @@ signals:
     void imageAspectChanged();
     void connectedStateChanged();
     void continueSetup();
+    void screenChange(QString s);
 
     //setup related
     void orbiterReady(bool);
