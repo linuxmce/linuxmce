@@ -1014,12 +1014,17 @@ bool qorbiterManager::loadSkins(QUrl base)
       should suffice and improper skins are dealt with later.
       */
 
+
+
 #ifdef for_harmattan
+    tskinModel->addSkin("default");
+
+   #elif ANDROID
     tskinModel->addSkin("default");
 #else
     tskinModel->addSkin("default");
-    //tskinModel->addSkin("aeon");
-    //tskinModel->addSkin("crystalshades");
+    tskinModel->addSkin("aeon");
+    tskinModel->addSkin("crystalshades");
 #endif
 
     return true;

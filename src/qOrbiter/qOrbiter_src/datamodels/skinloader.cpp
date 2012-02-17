@@ -44,7 +44,7 @@ void SkinLoader::continueLoading() {
 ui_reference->setDceResponse("Loading will continue now ..");
 QImage skinPic(":/icons/playlist.png");
 
-QUrl skinBase(m_base_url.toString()  + "/default");
+QUrl skinBase(m_base_url.toString()+"/"+ui_reference->currentSkin);
     if (current_component->isError()) {
         qWarning() << current_component->errors();
     } else {
