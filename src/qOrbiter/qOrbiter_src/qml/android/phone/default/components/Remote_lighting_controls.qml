@@ -16,29 +16,35 @@ Column {
             anchors.centerIn: parent
         }
         Image {
+            id: hoverimgup
+            source: "../img/buttonhover.png"
+            visible: false
+            anchors.fill: parent
+        }
+        Image {
             id: image2
             anchors.centerIn: parent
             smooth: true
-            source: "../img/plus.png"
-
-            MouseArea{
-                anchors.fill: parent
-                onClicked: dcerouter.adjustLighting(10)
-            }
+            source: "../img/plus.png"            
+        }
+        MouseArea{
+            anchors.fill: parent
+            onClicked: dcerouter.adjustLighting(10)
+            onPressed: hoverimgup.visible = true
+            onReleased: hoverimgup.visible = false
         }
     }
 
 
 
     ButtonSq{
-        height:45
-        width: 45
+
         anchors.centerIn: parent
         buttontext: ""
         buttontextzindex: 20
         buttontextcolor: "red"
         buttontextbold: true
-        buttontextfontsize: 8
+        buttontextfontsize: scaleY(2)
 
         Image {
             id: lightimg
@@ -73,6 +79,7 @@ Column {
         }
         MouseArea{
             anchors.fill: parent
+            onPressAndHold: dcerouter.adjustLighting(-10)
             onClicked: dcerouter.adjustLighting(-10)
             onPressed: hoverimg.visible = true
             onReleased: hoverimg.visible = false

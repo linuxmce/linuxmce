@@ -35,9 +35,7 @@ QImage GridIndexProvider::requestImage(const QString &id, QSize *size, const QSi
 
         if (image.isNull())
         {
-
-             image.load(":/icons/icon.png");
-
+             image.load(":/icons/mediacell.png");
         }
 
 

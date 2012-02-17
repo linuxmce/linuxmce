@@ -25,5 +25,7 @@
         <file alias="audio.png">qml/desktop/default/img/icons/kmix.png</file>
         <file alias="video.png">qml/desktop/default/img/icons/xine.png</file>
         <file alias="games.png">qml/desktop/default/img/icons/Games.png</file>
+        <file alias="mediacell.png">qml/desktop/default/img/ui3/linuxmcewidebutton.png</file>
+        <file alias="playlist.png">qml/desktop/default/img/icons/package_editors.png</file>
     </qresource>
 </RCC>

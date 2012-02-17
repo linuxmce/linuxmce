@@ -8,8 +8,8 @@
 #include "datamodels/listModel.h"
 #include <QDebug>
 
-ListModel::ListModel(gridItem* prototype, qorbiterManager *ref) :
-    m_prototype(prototype), manager_ref(ref)
+ListModel::ListModel(gridItem* prototype, QObject* parent) :
+  QAbstractListModel(parent),  m_prototype(prototype)
 {
   setRoleNames(m_prototype->roleNames());
    qRegisterMetaType<QModelIndex>("QModelIndex");
@@ -53,6 +53,7 @@ void ListModel::appendRows(const QList<gridItem *> &items)
   QModelIndex index2 = indexFromItem(m_list.first());
   int currentRows= m_list.count() - 1;
   emit dataChanged(index2, index, currentRows);
+
 
 }
 
@@ -117,7 +118,7 @@ QModelIndex ListModel::indexFromItem(const gridItem *item) const
 
 void ListModel::clear()
 {
-
+   //("Clearing List");
   qDeleteAll(m_list);
   m_list.clear();
   this->reset();
@@ -162,8 +163,49 @@ gridItem * ListModel::currentRow()
 
 void ListModel::checkForMore()
 {
-    if (totalcells < m_list.count())
+    if (totalcells > this->rowCount())
     {
-        manager_ref->pqOrbiter->populateAdditionalMedia();
+        //qDebug("Gettin moar");
+        loadingStatus = true;
+        emit gimmieData(gridType);
     }
+    else
+    {
+        //qDebug("No more to get?");
+        //qDebug()<< "Model" << m_list.count();
+        //qDebug() << "Grid" << totalcells;
+        loadingStatus = false;
+    }
+
 }
+
+void ListModel::populateGrid(int mediaType)
+{
+    //manager_ref->pqOrbiter->prepareFileList(mediaType);
+}
+
+void ListModel::setTotalCells(int cells)
+{
+    totalcells = cells;
+    emit sizeChanged(totalcells);
+    //qDebug() << "Model Size Changed" << totalcells;
+}
+
+int ListModel::getTotalCells()
+{
+    return totalcells;
+}
+
+void ListModel::setGridType(int type)
+{
+    gridType = type;
+    emit gridTypeChanged(gridType);
+    //qDebug("Grid Type Set");
+
+}
+
+int ListModel::getGridType()
+{
+    return gridType;
+}
+

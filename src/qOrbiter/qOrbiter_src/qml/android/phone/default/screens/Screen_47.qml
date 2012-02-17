@@ -28,8 +28,8 @@ Rectangle {
             height: scaleY(8)
             Rectangle {
                 id: background                
-                color: "floralwhite"
-                border.color: "black"
+                color: "silver"
+                border.color: "orange"
                 radius: 5
                 height: scaleY(8)
                 width: scaleX(99)

@@ -42,7 +42,7 @@ void SkinLoader::loadSkin(QString name) {
 
 void SkinLoader::continueLoading() {
 ui_reference->setDceResponse("Loading will continue now ..");
-QImage skinPic(":/icons/Skin-Data.png");
+QImage skinPic(":/icons/playlist.png");
 
 QUrl skinBase(m_base_url.toString()  + "/default");
     if (current_component->isError()) {

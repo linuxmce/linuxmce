@@ -129,6 +129,7 @@ public:
 
     QThread *processingThread; //threaded class
     QThread *timecodeThread; //for timecode
+     QThread *gridThread;
 
     QTcpSocket *timeCodeSocket;
     QString sPK_User;
@@ -358,7 +359,8 @@ signals:
 
     void locationChanged(int cRoom, int cEA);
     void modelChanged();
-    void gridTypeChanged();
+    void gridTypeChanged(int i);
+    void mediaRequest(int);
     void objectUpdated();
     void liveTVrequest();
     void userChanged();
@@ -396,7 +398,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     int loadSplash();
     void startOrbiter();
     bool createAndroidConfig();
-
+ void gotoQScreen(QString ) ;
     void checkOrientation(QSize);
     bool getOrientation (){return b_orientation;}
     void setOrientation (bool s) { b_orientation = s; setDceResponse("orientation changed!! "); emit orientationChanged();}
@@ -441,7 +443,8 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     QString getSorting() {return q_mediaType;}
     void initializeSortString();
     void clearMediaModel();
-    bool addMediaItem(QString mText, QString temp, QImage cell);
+    void getGrid(int i);
+    void addMediaItem(gridItem* g);
     void updateModel();
     Q_INVOKABLE void setStringParam(int paramType, QString param);
     Q_INVOKABLE void goBackGrid();
@@ -451,7 +454,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     //ui related
     int getlocation() const ;
     void setLocation(const int& , const int& ) ;
-    Q_INVOKABLE void gotoQScreen(QString ) ;
+
     void setNowPlayingIcon(bool b);
     void initializeGridModel();
     void showMessage(QString message, int duration, bool critical);

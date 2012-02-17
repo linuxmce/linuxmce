@@ -58,7 +58,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     {
 
         emit localConfigReady( true);
-QApplication::processEvents(QEventLoop::AllEvents);
+        QApplication::processEvents(QEventLoop::AllEvents);
     }
     else
     {
@@ -113,7 +113,7 @@ QApplication::processEvents(QEventLoop::AllEvents);
     qrcPath = ":android/Splash.qml";
     droidPath = "/";
 #elif defined (for_android)
-     if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
+    if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
     {
         buildType = "/qml/android/tablet";
 
@@ -130,8 +130,6 @@ QApplication::processEvents(QEventLoop::AllEvents);
     buildType = "/qml/desktop";
     qrcPath = ":desktop/Splash.qml";
 #endif
-
-
 
     QApplication::processEvents(QEventLoop::AllEvents);
     QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
@@ -207,10 +205,26 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
     }
 
     setDceResponse("Initiating Router Connection");
-QApplication::processEvents(QEventLoop::AllEvents);
+    QApplication::processEvents(QEventLoop::AllEvents);
 
     pqOrbiter->qmlUI = this;
     QApplication::processEvents(QEventLoop::AllEvents);
+
+#ifdef ANDROID
+    QObject::connect(pqOrbiter, SIGNAL(gotoScreen(QString)), SLOT(gotoQScreen(QString)),Qt::DirectConnection);
+
+#endif
+    QObject::connect(pqOrbiter, SIGNAL(clearGrid()), model, SLOT(clear()), Qt::QueuedConnection);
+    QObject::connect(pqOrbiter, SIGNAL(statusMessage(QString)), this , SLOT(setDceResponse(QString)));
+    QObject::connect(pqOrbiter,SIGNAL(addItem(gridItem*)), model, SLOT(appendRow(gridItem*)));
+    QObject::connect(pqOrbiter,SIGNAL(gridModelSizeChange(int)), model, SLOT(setTotalCells(int)));
+    QObject::connect(pqOrbiter,SIGNAL(requestMediaGrid(int)), this, SLOT(getGrid(int)));
+    QObject::connect(pqOrbiter,SIGNAL(checkGridStatus()), model, SLOT(checkForMore()));
+
+    QObject::connect(model, SIGNAL(gimmieData(int)), pqOrbiter, SLOT(populateAdditionalMedia()));
+    QObject::connect(this, SIGNAL(mediaRequest(int)), pqOrbiter,SLOT(prepareFileList(int)));
+
+    QObject::connect(this, SIGNAL(gridTypeChanged(int)), model, SLOT(setGridType(int)));
 
     if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
     {
@@ -242,7 +256,7 @@ QApplication::processEvents(QEventLoop::AllEvents);
 #elif for_harmattan
         remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/harmattan";
 #elif for_android
-         if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
+        if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
         {
             buildType = "/qml/android/tablet";
             remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/tablet";
@@ -289,7 +303,7 @@ QApplication::processEvents(QEventLoop::AllEvents);
             if (getConf(PK_Device))
             {
                 emit localConfigReady(true);
-QApplication::processEvents(QEventLoop::AllEvents);
+                QApplication::processEvents(QEventLoop::AllEvents);
                 swapSkins(currentSkin);
                 //LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",iPK_Device,qs_routerip.toStdString());
                 QObject::connect(pqOrbiter,SIGNAL(disconnected(QString)), this, SLOT(reloadHandler()));
@@ -325,7 +339,7 @@ QApplication::processEvents(QEventLoop::AllEvents);
 
             emit connectionValid(false);
             emit deviceValid(false);
-           // pqOrbiter->Disconnect();
+            // pqOrbiter->Disconnect();
             //  pqOrbiter->~qOrbiter();
             return false;
         }
@@ -341,7 +355,7 @@ QApplication::processEvents(QEventLoop::AllEvents);
                   }
                   */
 
-             //   setDceResponse("Bad Device");
+                //   setDceResponse("Bad Device");
                 bAppError = false;
                 bReload = false;
 #ifndef ANDROID
@@ -353,7 +367,7 @@ QApplication::processEvents(QEventLoop::AllEvents);
                 emit deviceValid(false);
                 emit connectionValid(true);
                 QApplication::processEvents(QEventLoop::AllEvents);
-               // pqOrbiter->Disconnect();
+                // pqOrbiter->Disconnect();
                 // pqOrbiter->~qOrbiter();
                 return false;
 
@@ -679,7 +693,7 @@ bool qorbiterManager::getConf(int PK_Device)
     //        qDebug () << "Orbiter Registered, starting";
 
     setDceResponse("Setting location");
-QApplication::processEvents(QEventLoop::AllEvents);
+    QApplication::processEvents(QEventLoop::AllEvents);
     //------------not sure if neccesary since it knows where we are.
     setActiveRoom(iFK_Room, iea_area);
 
@@ -868,17 +882,14 @@ void qorbiterManager::execGrp(int grp)
 }
 
 
-bool qorbiterManager::addMediaItem(QString mText, QString temp, QImage cell)
+void qorbiterManager::addMediaItem(gridItem* g)
 {
 
-    //const char *tcell = reinterpret_cast<char*>(cell.bits());
-    if (cell.isNull())
-    {
-        //qDebug() << mText << " is null img";
-    }
-    //this->model->appendRow(new gridItem(mText, temp, cell , model));
-    emit modelChanged();
-    // qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
+
+
+    this->model->appendRow(g);
+
+
 }
 
 void qorbiterManager::updateModel()
@@ -977,8 +988,8 @@ void qorbiterManager::setSorting(int i)
 {
     //qDebug() << "Setting grid mediatype to :" << i;
     q_mediaType = QString::number(i);
-    this->qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
-    emit gridTypeChanged();
+    qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
+    emit gridTypeChanged(i);
 }
 
 void qorbiterManager::setNowPlayingIcon(bool b)
@@ -1361,10 +1372,16 @@ void qorbiterManager::initializeGridModel()
 {
 
     playlistModel = new ListModel(new gridItem, this);
-    qorbiterUIwin->rootContext()->setContextProperty("playlistmodel", playlistModel);
 
+    qorbiterUIwin->rootContext()->setContextProperty("playlistmodel", playlistModel);
     //datagrid model setup with image provider for grid
-    model = new ListModel(new gridItem, this);
+    gridThread = new QThread();
+    model = new ListModel(new gridItem);
+ //   model->moveToThread(gridThread);
+  //  gridThread->start();
+
+    // QObject::connect(pqOrbiter, SIGNAL(addItem(gridItem*)), this, SLOT(addMediaItem(gridItem*)), Qt::QueuedConnection);
+    //    model->moveToThread(processingThread);
     basicProvider = new basicImageProvider();
     advancedProvider = new GridIndexProvider(model , 6, 4);
     QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex, int )), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex, int)), Qt::QueuedConnection);
@@ -1382,7 +1399,6 @@ void qorbiterManager::goBackGrid()
     backwards = true;
     //qDebug() << q_attributetype_sort;
     execGrp(i_current_command_grp);
-
 }
 
 void qorbiterManager::showFileInfo(QString fk_file)
@@ -1733,10 +1749,10 @@ void qorbiterManager::reloadHandler()
 void qorbiterManager::setDceResponse(QString response)
 {
     dceResponse = response +  QDateTime::currentDateTime().toString();
-    emit loadingMessage(response);
+    emit loadingMessage(dceResponse);
     QApplication::processEvents(QEventLoop::AllEvents);
     emit dceResponseChanged();
-    qDebug() << response;
+   // qDebug() << response;
 
 }
 
@@ -1833,6 +1849,13 @@ void qorbiterManager::checkOrientation(QSize)
     }
     emit orientationChanged();
     setDceResponse("orientation change");
+}
+
+void qorbiterManager::getGrid(int i)
+{
+    emit gridTypeChanged(i);
+   gotoQScreen("Screen_47.qml");
+    emit mediaRequest(i);
 }
 
 
