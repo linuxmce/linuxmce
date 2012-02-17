@@ -15,7 +15,7 @@ Column {
             height: 45
             width:45
             source: "../img/buttonbg.png"
-            anchors.fill:parent
+
         }
         Image {
             id: hoverimgup
@@ -23,14 +23,14 @@ Column {
             height: 45
             width:45
             visible: false
-            anchors.fill: parent
+
         }
         Image {
             id: image2
             height: 45
             width:45
             smooth: true
-            anchors.fill: parent
+
             source: "../img/plus.png"            
         }
         MouseArea{
@@ -70,7 +70,7 @@ Column {
             height: 45
             width:45
             source: "../img/buttonbg.png"
-            anchors.fill: parent
+
         }
         Image {
             id: hoverimg
@@ -78,7 +78,7 @@ Column {
             width:45
             source: "../img/buttonhover.png"
             visible: false
-            anchors.fill: parent
+
         }
         Image {
             id: ltdn

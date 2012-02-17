@@ -4,7 +4,7 @@ Column {
     height: childrenRect.height
     width:45
     spacing: 5
-    signal volChange(int vol)
+
 
     Rectangle{
         height: 45
@@ -17,7 +17,7 @@ Column {
             width:45
             source: "../img/buttonbg.png"
             anchors.centerIn: parent
-            anchors.fill: parent
+
         }
         Image {
             id: hoverimg
@@ -25,8 +25,9 @@ Column {
             width:45
             source: "../img/buttonhover.png"
             visible: false
-            anchors.fill: parent
+
         }
+
         Image {
             id: image2
             height: 45
@@ -82,7 +83,7 @@ Column {
             width:45
             source: "../img/buttonhover.png"
             visible: false
-            anchors.fill: parent
+
         }
 
         Image {
