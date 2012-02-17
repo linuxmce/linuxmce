@@ -1,28 +1,34 @@
 import QtQuick 1.0
 
 Column {
-    width: 45
-    height: 45
+    width: 50
+    height: childrenRect.height
     spacing: 5
 
     Rectangle{
-        width: 45
-        height: 45
+        height: 50
+        width:50
         color:"transparent"
 
         Image {
             id: up_bg
+            height: 50
+            width:50
             source: "../img/buttonbg.png"
             anchors.fill:parent
         }
         Image {
             id: hoverimgup
             source: "../img/buttonhover.png"
+            height: 50
+            width:50
             visible: false
             anchors.fill: parent
         }
         Image {
-            id: image2            
+            id: image2
+            height: 50
+            width:50
             smooth: true
             anchors.fill: parent
             source: "../img/plus.png"            
@@ -48,28 +54,36 @@ Column {
 
         Image {
             id: lightimg
+            height: 50
+            width:50
             anchors.fill: parent
             source: "../img/On.png"
         }
     }
 
     Rectangle{
-        width: 45
-        height: 45
+        height: 50
+        width:50
         color:"transparent"
         Image {
             id: dn_bg
+            height: 50
+            width:50
             source: "../img/buttonbg.png"
             anchors.fill: parent
         }
         Image {
             id: hoverimg
+            height: 50
+            width:50
             source: "../img/buttonhover.png"
             visible: false
             anchors.fill: parent
         }
         Image {
             id: ltdn
+            height: 50
+            width:50
            anchors.fill: parent
             smooth: true
             source: "../img/minus.png"
