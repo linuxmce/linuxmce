@@ -31,7 +31,7 @@ import "js/ScreenChange.js" as ScreenLogic
   Connections{
 	  target: manager
       onOrientationChanged: checkLayout()
-      onScreenChange: screenchange(s)
+
       }
     
 

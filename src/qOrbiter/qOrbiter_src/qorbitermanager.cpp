@@ -181,15 +181,15 @@ void qorbiterManager::gotoQScreen(QString s)
     QApplication::processEvents(QEventLoop::AllEvents);
     QVariant screenname= s;
     QObject * item = qorbiterUIwin->rootObject();
-/*
+
     setDceResponse("About to call screenchange()");
     if (QMetaObject::invokeMethod(item, "screenchange",  Q_ARG(QVariant, screenname))) {
         setDceResponse("Done call to screenchange()");
     } else {
         setDceResponse("screenchange() FAILED");
     }
-    */
-    emit screenChange(s);
+
+
     currentScreen = s;
 }
 
@@ -213,7 +213,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
     QApplication::processEvents(QEventLoop::AllEvents);
 
 
-    QObject::connect(pqOrbiter, SIGNAL(gotoScreen(QString)), SLOT(gotoQScreen(QString)), Qt::QueuedConnection);
+
 
     QObject::connect(pqOrbiter, SIGNAL(clearGrid()), model, SLOT(clear()), Qt::QueuedConnection);
     QObject::connect(pqOrbiter, SIGNAL(statusMessage(QString)), this , SLOT(setDceResponse(QString)));
