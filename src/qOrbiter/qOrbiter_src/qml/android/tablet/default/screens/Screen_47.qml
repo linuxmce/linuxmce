@@ -79,7 +79,7 @@ Rectangle {
                     Image
                     {
                         id: imagerect;
-                        //source:"image://datagridimg/"+id ;
+                        source:"image://datagridimg/"+id ;
                         height: scaleY(18);
                         width: scaleX(18);
                         anchors.centerIn: parent;
