@@ -19,7 +19,7 @@ Item{
         height: childrenRect.height
         color: "transparent"
         border.color: "orange"
-        border.width: 3
+        border.width: 1
         Column{
             id:controlcol
             height: childrenRect.height

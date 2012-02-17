@@ -26,8 +26,7 @@ Rectangle {
     NowPlayingBox
     {
         id:np_box
-        x: 74
-        y: 11
+       anchors.top: parent.top
     }
 
 
@@ -42,7 +41,7 @@ Rectangle {
         spacing: scaleY(1.5)
         width: scaleX(55)
         height: childrenRect.height
-        anchors.top: np_box.top
+        anchors.top: np_box.bottom
         anchors.horizontalCenter: parent.horizontalCenter
 
 
