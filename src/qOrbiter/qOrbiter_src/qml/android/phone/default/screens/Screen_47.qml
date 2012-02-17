@@ -10,6 +10,7 @@ Rectangle {
     height: appH
     color: "transparent"
     clip: true
+    border.color: "silver"
     Connections
     {
         target: filedetailsclass
