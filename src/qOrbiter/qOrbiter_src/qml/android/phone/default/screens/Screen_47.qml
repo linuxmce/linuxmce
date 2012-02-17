@@ -26,13 +26,13 @@ Rectangle {
         id: contactDelegateList
         Item {
             width: scaleX(75)
-            height: scaleY(8)
+            height: scaleY(10)
             Rectangle {
                 id: background
                 color: mouseclick.pressed ? "orange":"transparent"
                 border.color: "silver"
                 radius: 5
-                height: scaleY(8)
+                height: scaleY(10)
                 width: scaleX(75)
 
                 Image
@@ -48,11 +48,12 @@ Rectangle {
                 Text {
                     text: name;
                     opacity: 1;
-                    font.pixelSize: scaleY(2);
-                    color: "black" ;
+                    font.pixelSize: scaleY(4);
+                    color: "Silver" ;
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     //anchors.fill: parent
                     width: scaleX(55)
+                    height: scaleY(6)
                     font.bold: false
                     anchors.left: imagerect.right
                 }
@@ -75,6 +76,7 @@ Rectangle {
         model:dataModel
         delegate: contactDelegateList
         clip: true
+        spacing: scaleY(2)
         anchors.horizontalCenter: parent.horizontalCenter
     }
 
