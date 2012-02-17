@@ -31,6 +31,8 @@ Rectangle {
                 color: "floralwhite"
                 border.color: "black"
                 radius: 5
+                height: scaleY(8)
+                width: scaleX(99)
             }
             MouseArea {
                 anchors.fill: parent
@@ -44,7 +46,7 @@ Rectangle {
                 Image
                 {
                     id: imagerect;
-                    source:"../img/media.png"
+                    source:"image://datagridimg/"+id ;
                     height: scaleX(10);
                     width: scaleY(10);
                     fillMode: Image.PreserveAspectFit;
