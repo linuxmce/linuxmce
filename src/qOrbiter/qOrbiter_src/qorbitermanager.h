@@ -122,7 +122,7 @@ class qorbiterManager : public QObject
     Q_PROPERTY (QString dceResponse READ getDceResponse WRITE setDceResponse NOTIFY dceResponseChanged)
     Q_PROPERTY (bool connectedState READ getConnectedState WRITE setConnectedState NOTIFY connectedStateChanged)
     Q_PROPERTY (bool b_orientation READ getOrientation WRITE setOrientation NOTIFY orientationChanged)
-    Q_PROPERTY (QString currentScreen  NOTIFY screenChange)
+    Q_PROPERTY (QString currentScreen READ getCurrentScreen WRITE setCurrentScreen  NOTIFY screenChange)
 
 
 public:
@@ -405,7 +405,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     bool getOrientation (){return b_orientation;}
     void setOrientation (bool s) { b_orientation = s; setDceResponse("orientation changed!! "); emit orientationChanged();}
     QString getCurrentScreen();
-    void setCurrentScreent(QString s);
+    void setCurrentScreen(QString s);
 
     Q_INVOKABLE bool writeConfig();
     bool readLocalConfig();

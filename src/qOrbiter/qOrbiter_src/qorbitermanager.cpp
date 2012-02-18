@@ -184,7 +184,8 @@ void qorbiterManager::gotoQScreen(QString s)
     setDceResponse("Starting screen switch");
 
     QVariant screenname= s;
-    emit screenChange(s);
+    //emit screenChange(s);
+
 
     setDceResponse("About to call screenchange()");
     if (QMetaObject::invokeMethod(item, "screenchange",  Q_ARG(QVariant, screenname))) {
@@ -192,6 +193,7 @@ void qorbiterManager::gotoQScreen(QString s)
     } else {
         setDceResponse("screenchange() FAILED");
     }
+
     currentScreen = s;
 }
 
@@ -938,7 +940,7 @@ void qorbiterManager::regenOrbiter(int deviceNo)
     else
     {
         //qDebug("remote orbiter");
-        gotoQScreen("WebRegen.qml");
+        emit screenChange("WebRegen.qml");
     }
 
 
@@ -952,7 +954,7 @@ void qorbiterManager::regenComplete(int i)
     }
     else
     {
-        gotoQScreen("LoadError.qml");
+        emit screenChange("LoadError.qml");
     }
 }
 
@@ -1654,7 +1656,7 @@ void qorbiterManager::startOrbiter()
 
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
     QApplication::processEvents(QEventLoop::AllEvents);
-    gotoQScreen("Screen_1.qml");
+    emit screenChange("Screen_1.qml");
     QApplication::processEvents(QEventLoop::AllEvents);
 
 }
@@ -1833,7 +1835,7 @@ QString qorbiterManager::getCurrentScreen()
     return currentScreen;
 }
 
-void qorbiterManager::setCurrentScreent(QString s)
+void qorbiterManager::setCurrentScreen(QString s)
 {
     currentSkin = s;
             emit screenChange(s);

@@ -52,7 +52,7 @@ import "js/ScreenChange.js" as ScreenLogic
 
 
 
-      function screenchange() {
+      function screenchange(screen) {
           var component;
 
 
