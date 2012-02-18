@@ -247,7 +247,7 @@ BOOL executePoll = NO, incompleteSettings = NO;
         HUD = [[MBProgressHUD alloc] initWithView:self.view];
         [self.view addSubview:HUD];
         HUD.delegate = self;
-        HUD.labelText = @"Loading from core...";
+        //HUD.labelText = @"Loading ...";
         [HUD show:YES];
     }
 	UITouch *touch = [touches anyObject];
