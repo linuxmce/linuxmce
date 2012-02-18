@@ -26,15 +26,12 @@ import "js/ScreenChange.js" as ScreenLogic
   item.width=appW
 
   }
-
   
   Connections{
 	  target: manager
       onOrientationChanged: checkLayout()
-      onScreenChange:screenchange()
-
+      onScreenChange:screenchange(currentScreen)
       }
-
 
       Image {
 	  id: bg
@@ -50,11 +47,8 @@ import "js/ScreenChange.js" as ScreenLogic
       }
 
 
-
-
       function screenchange(screen) {
           var component;
-
 
           console.log("Command to change to:" +currentScreen);
           component = Qt.createComponent("screens/"+currentScreen);
