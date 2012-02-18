@@ -44,7 +44,7 @@ void SkinLoader::continueLoading() {
 ui_reference->setDceResponse("Loading will continue now ..");
 QImage skinPic(":/icons/playlist.png");
 
-QUrl skinBase(m_base_url.toString()+"/"+ui_reference->currentSkin);
+
     if (current_component->isError()) {
         qWarning() << current_component->errors();
     } else {
@@ -58,7 +58,11 @@ QUrl skinBase(m_base_url.toString()+"/"+ui_reference->currentSkin);
         QString s_path = styleObject->property("skindir").toString();
         QString s_mainc = styleObject->property("maincolor").toString();
         QString s_accentc = styleObject->property("accentcolor").toString();
+        QUrl skinBase(m_base_url.toString()+"/"+s_path);
         ui_reference->setDceResponse("Adding skin to list" + s_title);
+
+        qDebug()<<"Finished Adding" << s_title;
+        qDebug() << "Location" << skinBase;
         m_parent->appendRow(new SkinDataItem(skinBase, s_title, s_creator, s_description, s_version, s_target, skinPic, s_path, s_mainc, s_accentc, styleObject));
     }
 }

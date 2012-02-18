@@ -45,7 +45,7 @@ public:
 
         return style;
     }
-    inline QString id() const { return m_name; }
+    inline QString id() const { return m_path; }
     inline QString creator() const { return m_creator; }
     inline QString description() const { return m_description; }
     inline QString version() const { return m_version; }

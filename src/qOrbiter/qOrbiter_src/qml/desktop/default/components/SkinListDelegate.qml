@@ -19,8 +19,8 @@ Component{
             MouseArea{
                 anchors.fill: parent
                 onClicked:{
-                    console.log("the path:" +path)
-                    swapSkins(path)
+
+                    setActiveSkin(name)
 
 
                 }

@@ -784,17 +784,16 @@ bool qorbiterManager::getConf(int PK_Device)
 
 void qorbiterManager::swapSkins(QString incSkin)
 {
-    QApplication::processEvents(QEventLoop::AllEvents);
 
     setDceResponse("Setting Skin to:" + incSkin);
 
     //get the skin URL from the skins model
     skin = tskinModel->find(incSkin);
 
-    //qDebug() << "Got it from the model : " + skin->baseUrl().toString();
+    qDebug() << "Got it from the model : " + skin->baseUrl().toString();
 
     //load the actual skin entry point
-    //qDebug() << "Skin switch url:" << skin->entryUrl();
+    qDebug() << "Skin switch url:" << skin->entryUrl();
     currentSkin = incSkin;
     qorbiterUIwin->engine()->rootContext()->setContextProperty("style", skin->styleView());
 
@@ -884,12 +883,7 @@ void qorbiterManager::execGrp(int grp)
 
 void qorbiterManager::addMediaItem(gridItem* g)
 {
-
-
-
     this->model->appendRow(g);
-
-
 }
 
 void qorbiterManager::updateModel()
@@ -1339,21 +1333,22 @@ void qorbiterManager::initializeSortString()
 void qorbiterManager::initializeGridModel()
 {
 
-    playlistModel = new ListModel(new gridItem, this);
 
-    qorbiterUIwin->rootContext()->setContextProperty("playlistmodel", playlistModel);
+
+
     //datagrid model setup with image provider for grid
     gridThread = new QThread();
     model = new ListModel(new gridItem);
-    //   model->moveToThread(gridThread);
-    //  gridThread->start();
+      model->moveToThread(gridThread);
+     gridThread->start();
 
     // QObject::connect(pqOrbiter, SIGNAL(addItem(gridItem*)), this, SLOT(addMediaItem(gridItem*)), Qt::QueuedConnection);
     //    model->moveToThread(processingThread);
     basicProvider = new basicImageProvider();
     advancedProvider = new GridIndexProvider(model , 6, 4);
     QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex, int )), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex, int)), Qt::QueuedConnection);
-    QObject::connect(this,SIGNAL(requestMoreGridData()), model,SLOT(checkForMore()));
+    //QObject::connect(this,SIGNAL(requestMoreGridData()), model,SLOT(checkForMore()));
+
     //adding important data and objects to qml now that they have been setup
     qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
     qorbiterUIwin->engine()->addImageProvider("datagridimg", advancedProvider);
@@ -1673,7 +1668,9 @@ void qorbiterManager::processError(QString msg)
 
 void qorbiterManager::setActiveSkin(QString name)
 {
+    qDebug("Setting Skin");
 
+swapSkins(name);
 }
 
 void qorbiterManager::cleanupScreenie()
@@ -1716,11 +1713,11 @@ void qorbiterManager::reloadHandler()
 
 void qorbiterManager::setDceResponse(QString response)
 {
-    dceResponse = response +  QDateTime::currentDateTime().toString();
+    dceResponse = response;
     emit loadingMessage(dceResponse);
     QApplication::processEvents(QEventLoop::AllEvents);
     emit dceResponseChanged();
-    // qDebug() << response;
+     qDebug() << dceResponse;
 
 }
 
