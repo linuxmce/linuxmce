@@ -388,6 +388,7 @@ signals:
     void showSetup();
 
     void stillLoading(bool b);
+    void executeCMD(int);
 
     void localConfigReady(bool b);
     void orbiterConfigReady(bool b);

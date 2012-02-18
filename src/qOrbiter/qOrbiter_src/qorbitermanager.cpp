@@ -140,11 +140,13 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     QApplication::processEvents(QEventLoop::AllEvents);
 
     //managing where were are variables
-    int i_current_command_grp;
     i_current_command_grp = 0;
+    i_current_mediaType =0;
+
     QApplication::processEvents(QEventLoop::AllEvents);
     goBack << ("|||1,2|0|13|0|2|");
     backwards = false;
+
 
     //file details object and imageprovider setup
     filedetailsclass = new FileDetailsClass();
@@ -168,8 +170,6 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     //initializing threading for timecode to prevent blocking
     timeCodeSocket = new QTcpSocket();
     QApplication::processEvents(QEventLoop::AllEvents);
-
-
 }
 
 
@@ -186,7 +186,7 @@ void qorbiterManager::gotoQScreen(QString s)
     //emit screenChange(s);
     QObject *item = qorbiterUIwin->rootObject();
     setDceResponse("About to call screenchange()");
-    if (QMetaObject::invokeMethod(item, "screenchange",  Q_ARG(QVariant, screenname))) {
+    if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection,  Q_ARG(QVariant, screenname))) {
         setDceResponse("Done call to screenchange()");
     } else {
         setDceResponse("screenchange() FAILED");
@@ -221,13 +221,14 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
     QObject::connect(pqOrbiter,SIGNAL(requestMediaGrid(int)), this, SLOT(getGrid(int)), Qt::QueuedConnection);
     QObject::connect(pqOrbiter,SIGNAL(checkGridStatus()), model, SLOT(checkForMore()), Qt::QueuedConnection);
     QObject::connect(pqOrbiter, SIGNAL(gotoQml(QString)), this, SLOT(gotoQScreen(QString)), Qt::QueuedConnection);
-  //  QObject::connect(this,SIGNAL(stillLoading(bool)), model, SLOT(setLoadingStatus(bool)), Qt::QueuedConnection);
+    //  QObject::connect(this,SIGNAL(stillLoading(bool)), model, SLOT(setLoadingStatus(bool)), Qt::QueuedConnection);
 
     QObject::connect(this,SIGNAL(filterChanged(int)), pqOrbiter,SLOT(prepareFileList(int)),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(loadingStatusChanged(bool)), this, SLOT(setRequestMore(bool)),Qt::QueuedConnection);
     QObject::connect(model, SIGNAL(gimmieData(int)), pqOrbiter, SLOT(populateAdditionalMedia()),Qt::QueuedConnection);
     QObject::connect(this, SIGNAL(mediaRequest(int)), pqOrbiter,SLOT(prepareFileList(int)), Qt::QueuedConnection);
     QObject::connect(this,SIGNAL(screenChange(QString)), this, SLOT(gotoQScreen(QString)),Qt::QueuedConnection);
+    QObject::connect(this,SIGNAL(executeCMD(int)), pqOrbiter, SLOT(executeCommandGroup(int)), Qt::QueuedConnection);
 
     QObject::connect(this, SIGNAL(gridTypeChanged(int)), model, SLOT(setGridType(int)));
 
@@ -879,10 +880,11 @@ void qorbiterManager::setActiveRoom(int room,int ea)
 
 void qorbiterManager::execGrp(int grp)
 {
-    pqOrbiter->executeCommandGroup(grp);
+
     i_current_command_grp = grp;
     qorbiterUIwin->rootContext()->setContextProperty("currentcommandgrp", i_current_command_grp);
     QApplication::processEvents(QEventLoop::AllEvents);
+    emit executeCMD(grp);
 }
 
 
@@ -1839,7 +1841,7 @@ QString qorbiterManager::getCurrentScreen()
 void qorbiterManager::setCurrentScreen(QString s)
 {
     currentSkin = s;
-            emit screenChange(s);
+    emit screenChange(s);
 }
 
 

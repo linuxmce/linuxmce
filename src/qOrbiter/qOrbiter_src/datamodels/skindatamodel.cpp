@@ -68,6 +68,7 @@ void SkinDataModel::handleItemChange()
 
 SkinDataItem * SkinDataModel::find(const QString &id) const
 {
+    qDebug("Looking for skin...");
     foreach(SkinDataItem* item, m_list)
     {
         qDebug()<< "Found:" << item->id() << "of" << m_list.size();
