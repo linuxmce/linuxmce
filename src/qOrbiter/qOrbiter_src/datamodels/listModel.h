@@ -47,6 +47,7 @@ public:
 signals:
     void ItemAdded();
     void gimmieData(int type);
+    void loadingStatusChanged(bool state);
     void sizeChanged(int size);
     void gridTypeChanged(int type);
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const int &sRow);
@@ -60,6 +61,8 @@ public slots:
     void setGridType( int type);
     int getGridType();
     void clear();
+    void setLoadingStatus(bool b);
+    bool getLoadingStatus();
 
 private slots:
     void handleItemChange();

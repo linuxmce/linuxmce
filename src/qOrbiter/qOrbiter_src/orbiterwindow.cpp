@@ -84,7 +84,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
 #elif defined(for_harmattan)
     mainView.showFullScreen();
 #elif defined(for_desktop)
-    mainView.showMaximized();
+    mainView.showNormal();
 #elif defined(ANDROID)
     mainView.showFullScreen();
 #elif defined(for_android)

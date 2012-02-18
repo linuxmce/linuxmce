@@ -121,7 +121,8 @@ class qorbiterManager : public QObject
     Q_PROPERTY (QString sPK_User READ getCurrentUser WRITE setCurrentUser NOTIFY userChanged)
     Q_PROPERTY (QString dceResponse READ getDceResponse WRITE setDceResponse NOTIFY dceResponseChanged)
     Q_PROPERTY (bool connectedState READ getConnectedState WRITE setConnectedState NOTIFY connectedStateChanged)
-  //  Q_PROPERTY (bool b_orientation READ getOrientation WRITE setOrientation NOTIFY orientationChanged)
+    Q_PROPERTY (bool b_orientation READ getOrientation WRITE setOrientation NOTIFY orientationChanged)
+    Q_PROPERTY (QString currentScreen  NOTIFY screenChange)
 
 
 public:
@@ -129,7 +130,7 @@ public:
 
     QThread *processingThread; //threaded class
     QThread *timecodeThread; //for timecode
-     QThread *gridThread;
+    QThread *gridThread;
 
     QTcpSocket *timeCodeSocket;
     QString sPK_User;
@@ -248,8 +249,7 @@ Param 10 - pk_attribute
 
     //for the media grid to allow pauses in loading and allow non locking operation
     bool requestMore;
-    Q_INVOKABLE void setRequestMore(bool state);
-    bool getRequestMore();
+
     Q_INVOKABLE void setSeekLetter(QString letter);
 
     //listmodels
@@ -395,14 +395,17 @@ signals:
     void skinDataLoaded(bool b);
 
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
-
+    void setRequestMore(bool state);
+    bool getRequestMore();
     int loadSplash();
     void startOrbiter();
     bool createAndroidConfig();
- void gotoQScreen(QString ) ;
+    void gotoQScreen(QString ) ;
     void checkOrientation(QSize);
     bool getOrientation (){return b_orientation;}
     void setOrientation (bool s) { b_orientation = s; setDceResponse("orientation changed!! "); emit orientationChanged();}
+    QString getCurrentScreen();
+    void setCurrentScreent(QString s);
 
     Q_INVOKABLE bool writeConfig();
     bool readLocalConfig();
@@ -428,7 +431,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     Q_INVOKABLE void ff_media(int speed);
     Q_INVOKABLE void rw_media(int speed);
     Q_INVOKABLE void pauseMedia();
-     void adjustVolume(int vol);
+    void adjustVolume(int vol);
 
     void jogPosition(QString jog);
     void updateImageChanged(QImage img);

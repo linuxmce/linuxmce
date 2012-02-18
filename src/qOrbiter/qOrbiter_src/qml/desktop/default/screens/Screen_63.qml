@@ -5,8 +5,8 @@ Rectangle {
 
     // property alias synText:
     id: satcableboxremote
-    height: style.orbiterH
-    width: style.orbiterW
+    height: appH
+    width: appW
     color:"transparent"
     Timer{
         id:singleshot

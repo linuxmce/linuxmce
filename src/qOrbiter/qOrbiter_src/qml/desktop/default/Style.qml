@@ -17,10 +17,10 @@ QtObject{
     objectName: "orbiter_style"
 
     function scaleX(x){
-        return x/100*orbiterW
+        return x/100*appW
     }
     function scaleY(y){
-        return y/100*orbiterH
+        return y/100*appH
     }
     //skin description
     property string skincreator: "Langston Ball (aka golgoj4)"
@@ -39,8 +39,8 @@ QtObject{
     property color darkhighlight: "#628BC7"
     property color lighthighlight: "#3F76C7"
     //main stage styles
-    property int orbiterH: 720
-    property int orbiterW: 1280
+    property int orbiterH: appH
+    property int orbiterW: appW
     property color stageBG: "slategray"
     property int homescreenrowheight:100
     property int homescreenbuttonheight: 9

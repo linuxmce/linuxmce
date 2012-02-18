@@ -12,21 +12,35 @@ import "js/ComponentLoader.js" as MyJs
      property string screenfile
 
     // Style {id:style}
-    width: style.orbiterW;
-    height: style.orbiterH;
+    width: appW
+    height: appH;
+
+    Connections{
+        target:manager
+        onOrientationChanged: updateScreen()
+    }
+
+    function updateScreen()
+    {
+    item.height = appH
+        item.width = appW
+
+        console.log("updated screen")
+ }
+
 
 
     ScreenSaver{
         anchors.centerIn: parent
-        height: style.orbiterH
-        width: style.orbiterW
+        height:item.height
+        width: item.width
     }
 
     function scaleX(x){
-        return x/100*style.orbiterW
+        return x/100*appW
     }
     function scaleY(y){
-        return y/100*style.orbiterH
+        return y/100*appW
     }
 
      function screenchange(screenname )

@@ -175,12 +175,16 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
 
 void qorbiterManager::gotoQScreen(QString s)
 {
+    setRequestMore(false);
+
+
     //send the qmlview a request to go to a screen, needs error handling
     //This allows it to execute some transition or other if it wants to
+
     setDceResponse("Starting screen switch");
-    QApplication::processEvents(QEventLoop::AllEvents);
+
     QVariant screenname= s;
-    QObject * item = qorbiterUIwin->rootObject();
+    emit screenChange(s);
 
     setDceResponse("About to call screenchange()");
     if (QMetaObject::invokeMethod(item, "screenchange",  Q_ARG(QVariant, screenname))) {
@@ -210,17 +214,15 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
     pqOrbiter->qmlUI = this;
     QApplication::processEvents(QEventLoop::AllEvents);
 
-
-
-
     QObject::connect(pqOrbiter, SIGNAL(clearGrid()), model, SLOT(clear()));
     QObject::connect(pqOrbiter, SIGNAL(statusMessage(QString)), this , SLOT(setDceResponse(QString)));
     QObject::connect(pqOrbiter,SIGNAL(addItem(gridItem*)), model, SLOT(appendRow(gridItem*)),Qt::QueuedConnection);
     QObject::connect(pqOrbiter,SIGNAL(gridModelSizeChange(int)), model, SLOT(setTotalCells(int)),Qt::QueuedConnection);
     QObject::connect(pqOrbiter,SIGNAL(requestMediaGrid(int)), this, SLOT(getGrid(int)), Qt::QueuedConnection);
     QObject::connect(pqOrbiter,SIGNAL(checkGridStatus()), model, SLOT(checkForMore()), Qt::QueuedConnection);
-    QObject::connect(this,SIGNAL(filterChanged(int)), pqOrbiter,SLOT(prepareFileList(int)),Qt::QueuedConnection);
 
+    QObject::connect(this,SIGNAL(filterChanged(int)), pqOrbiter,SLOT(prepareFileList(int)),Qt::QueuedConnection);
+    QObject::connect(model,SIGNAL(loadingStatusChanged(bool)), this, SLOT(setRequestMore(bool)), Qt::QueuedConnection);
     QObject::connect(model, SIGNAL(gimmieData(int)), pqOrbiter, SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
     QObject::connect(this, SIGNAL(mediaRequest(int)), pqOrbiter,SLOT(prepareFileList(int)), Qt::QueuedConnection);
 
@@ -1297,7 +1299,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
         }
 
     default:
-         emit filterChanged(i_current_mediaType);
+        emit filterChanged(i_current_mediaType);
 
     }
 
@@ -1333,14 +1335,11 @@ void qorbiterManager::initializeSortString()
 void qorbiterManager::initializeGridModel()
 {
 
-
-
-
     //datagrid model setup with image provider for grid
     gridThread = new QThread();
     model = new ListModel(new gridItem);
-      model->moveToThread(gridThread);
-     gridThread->start();
+    model->moveToThread(gridThread);
+    gridThread->start();
 
     // QObject::connect(pqOrbiter, SIGNAL(addItem(gridItem*)), this, SLOT(addMediaItem(gridItem*)), Qt::QueuedConnection);
     //    model->moveToThread(processingThread);
@@ -1479,7 +1478,7 @@ void qorbiterManager::setCurrentUser(QString inc_user)
 void qorbiterManager::setRequestMore(bool state)
 {
     requestMore = state;
-    emit requestMoreGridData();
+
 }
 
 bool qorbiterManager::getRequestMore()
@@ -1670,7 +1669,7 @@ void qorbiterManager::setActiveSkin(QString name)
 {
     qDebug("Setting Skin");
 
-swapSkins(name);
+    swapSkins(name);
 }
 
 void qorbiterManager::cleanupScreenie()
@@ -1687,6 +1686,7 @@ void qorbiterManager::initializeConnections()
     //connections to splash.qml slots
 
     QObject::connect(this, SIGNAL(continueSetup()), this, SLOT(startSetup()));
+
     setDceResponse("Connections Complete");
     emit continueSetup();
 
@@ -1717,7 +1717,7 @@ void qorbiterManager::setDceResponse(QString response)
     emit loadingMessage(dceResponse);
     QApplication::processEvents(QEventLoop::AllEvents);
     emit dceResponseChanged();
-     qDebug() << dceResponse;
+    qDebug() << dceResponse;
 
 }
 
@@ -1802,7 +1802,7 @@ void qorbiterManager::checkOrientation(QSize)
         //setDceResponse("wide");
         appHeight = qorbiterUIwin->height() ;
         appWidth = qorbiterUIwin->width() ;
-        // setOrientation(false);
+        setOrientation(false);
 
     }
     else
@@ -1810,22 +1810,33 @@ void qorbiterManager::checkOrientation(QSize)
 
         appHeight = qorbiterUIwin->height() ;
         appWidth = qorbiterUIwin->width() ;
-        // setOrientation( true);
+        setOrientation( true);
     }
-    emit orientationChanged();
+
     setDceResponse("orientation change");
 }
 
 void qorbiterManager::getGrid(int i)
 {
+    setRequestMore(true);
     emit gridTypeChanged(i);
-
     emit mediaRequest(i);
 }
 
 void qorbiterManager::adjustVolume(int vol)
 {
     pqOrbiter->adjustVolume( vol);
+}
+
+QString qorbiterManager::getCurrentScreen()
+{
+    return currentScreen;
+}
+
+void qorbiterManager::setCurrentScreent(QString s)
+{
+    currentSkin = s;
+            emit screenChange(s);
 }
 
 
