@@ -70,7 +70,6 @@ SkinDataItem * SkinDataModel::find(const QString &id) const
 {
     foreach(SkinDataItem* item, m_list)
     {
-
         qDebug()<< "Found:" << item->id() << "of" << m_list.size();
 
         if(item->id().toLower() == id.toLower())

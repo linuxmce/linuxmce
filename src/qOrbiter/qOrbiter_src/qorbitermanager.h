@@ -387,6 +387,8 @@ signals:
     void raiseSplash();
     void showSetup();
 
+    void stillLoading(bool b);
+
     void localConfigReady(bool b);
     void orbiterConfigReady(bool b);
     void deviceValid(bool b);

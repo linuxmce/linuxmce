@@ -12,8 +12,8 @@ import "js/ComponentLoader.js" as MyJs
      property string screenfile
 
     // Style {id:style}
-    width: appW
-    height: appH;
+    width: 1280
+    height: 720;
 
     Connections{
         target:manager
@@ -22,8 +22,7 @@ import "js/ComponentLoader.js" as MyJs
 
     function updateScreen()
     {
-    item.height = appH
-        item.width = appW
+
 
         console.log("updated screen")
  }
@@ -37,10 +36,10 @@ import "js/ComponentLoader.js" as MyJs
     }
 
     function scaleX(x){
-        return x/100*appW
+        return x/100*style.orbiterW
     }
     function scaleY(y){
-        return y/100*appW
+        return y/100*style.orbiterH
     }
 
      function screenchange(screenname )

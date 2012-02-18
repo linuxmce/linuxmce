@@ -41,8 +41,8 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     mainView.rootContext()->setContextProperty("appW", 400);
     mainView.rootContext()->setContextProperty("appH", 800);
 #else
-    mainView.rootContext()->setContextProperty("appW", (mainView.window()->width()));
-    mainView.rootContext()->setContextProperty("appH", mainView.window()->height());
+    mainView.rootContext()->setContextProperty("appW", 1280);
+    mainView.rootContext()->setContextProperty("appH", 720);
 #endif
 
     mainView.rootContext()->setContextProperty("deviceid", int(deviceno));

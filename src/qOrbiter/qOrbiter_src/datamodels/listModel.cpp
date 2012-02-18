@@ -226,7 +226,7 @@ void ListModel::setLoadingStatus(bool b)
 {
     loadingStatus = b;
     qDebug() << "List Model Loading Status set to:" << b;
-    emit loadingStatus;
+    emit loadingStatusChanged(loadingStatus);
 }
 
 bool ListModel::getLoadingStatus()

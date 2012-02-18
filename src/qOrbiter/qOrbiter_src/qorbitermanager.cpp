@@ -177,7 +177,6 @@ void qorbiterManager::gotoQScreen(QString s)
 {
     setRequestMore(false);
 
-
     //send the qmlview a request to go to a screen, needs error handling
     //This allows it to execute some transition or other if it wants to
 
@@ -185,8 +184,7 @@ void qorbiterManager::gotoQScreen(QString s)
 
     QVariant screenname= s;
     //emit screenChange(s);
-
-
+    QObject *item = qorbiterUIwin->rootObject();
     setDceResponse("About to call screenchange()");
     if (QMetaObject::invokeMethod(item, "screenchange",  Q_ARG(QVariant, screenname))) {
         setDceResponse("Done call to screenchange()");
@@ -222,10 +220,12 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
     QObject::connect(pqOrbiter,SIGNAL(gridModelSizeChange(int)), model, SLOT(setTotalCells(int)),Qt::QueuedConnection);
     QObject::connect(pqOrbiter,SIGNAL(requestMediaGrid(int)), this, SLOT(getGrid(int)), Qt::QueuedConnection);
     QObject::connect(pqOrbiter,SIGNAL(checkGridStatus()), model, SLOT(checkForMore()), Qt::QueuedConnection);
+    QObject::connect(pqOrbiter, SIGNAL(gotoQml(QString)), this, SLOT(gotoQScreen(QString)), Qt::QueuedConnection);
+  //  QObject::connect(this,SIGNAL(stillLoading(bool)), model, SLOT(setLoadingStatus(bool)), Qt::QueuedConnection);
 
     QObject::connect(this,SIGNAL(filterChanged(int)), pqOrbiter,SLOT(prepareFileList(int)),Qt::QueuedConnection);
-    QObject::connect(model,SIGNAL(loadingStatusChanged(bool)), this, SLOT(setRequestMore(bool)), Qt::QueuedConnection);
-    QObject::connect(model, SIGNAL(gimmieData(int)), pqOrbiter, SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
+    QObject::connect(model,SIGNAL(loadingStatusChanged(bool)), this, SLOT(setRequestMore(bool)),Qt::QueuedConnection);
+    QObject::connect(model, SIGNAL(gimmieData(int)), pqOrbiter, SLOT(populateAdditionalMedia()),Qt::QueuedConnection);
     QObject::connect(this, SIGNAL(mediaRequest(int)), pqOrbiter,SLOT(prepareFileList(int)), Qt::QueuedConnection);
     QObject::connect(this,SIGNAL(screenChange(QString)), this, SLOT(gotoQScreen(QString)),Qt::QueuedConnection);
 
@@ -1481,7 +1481,7 @@ void qorbiterManager::setCurrentUser(QString inc_user)
 void qorbiterManager::setRequestMore(bool state)
 {
     requestMore = state;
-
+    emit stillLoading( requestMore);
 }
 
 bool qorbiterManager::getRequestMore()
@@ -1718,7 +1718,7 @@ void qorbiterManager::setDceResponse(QString response)
 {
     dceResponse = response;
     emit loadingMessage(dceResponse);
-    QApplication::processEvents(QEventLoop::AllEvents);
+
     emit dceResponseChanged();
     qDebug() << dceResponse;
 

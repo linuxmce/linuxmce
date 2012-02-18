@@ -236,9 +236,9 @@ int main(int argc, char* argv[])
 
         QApplication  a(argc, argv);
         orbiterWindow orbiterWin(PK_Device, sRouter_IP);
-        QApplication::processEvents(QEventLoop::AllEvents);
+
         orbiterWin.setMessage("Setting up Lmce");
-        QApplication::processEvents(QEventLoop::AllEvents);
+
         qorbiterManager  *w= new qorbiterManager(PK_Device,QString::fromStdString(sRouter_IP), &orbiterWin.mainView);
 
         QObject::connect(w, SIGNAL(loadingMessage(QString)), &orbiterWin,SLOT(setMessage(QString)), Qt::UniqueConnection);
@@ -293,7 +293,7 @@ int main(int argc, char* argv[])
                     orbiterWin.setDeviceState(false);
                     orbiterWin.setConnectionState(true);
                     w->pqOrbiter->Disconnect();
-                    QApplication::processEvents(QEventLoop::AllEvents);
+
                     orbiterWin.setMessage("Dead Device");
 
                 }
