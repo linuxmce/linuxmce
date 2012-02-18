@@ -227,6 +227,7 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
     QObject::connect(model,SIGNAL(loadingStatusChanged(bool)), this, SLOT(setRequestMore(bool)), Qt::QueuedConnection);
     QObject::connect(model, SIGNAL(gimmieData(int)), pqOrbiter, SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
     QObject::connect(this, SIGNAL(mediaRequest(int)), pqOrbiter,SLOT(prepareFileList(int)), Qt::QueuedConnection);
+    QObject::connect(this,SIGNAL(screenChange(QString)), this, SLOT(gotoQScreen(QString)),Qt::QueuedConnection);
 
     QObject::connect(this, SIGNAL(gridTypeChanged(int)), model, SLOT(setGridType(int)));
 
