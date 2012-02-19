@@ -3,9 +3,9 @@ import QtQuick 1.0
 Rectangle {
     width: padcolumn.width
     height: numberdisplay.height + remotenumberpad.height
-    color:style.lighthighlight
+    color:"transparent"
     id:remotenumberpad
-    border.color: style.highlight1
+    border.color: "orange"
     border.width: 2
 
 
@@ -63,7 +63,7 @@ Rectangle {
                         id:number1
                         height: 55
                         width: 55
-                        color:style.lighthighlight
+                        color:"silver"
 
                         Image {
                             id: name
@@ -84,11 +84,11 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-                                parent.color = style.darkhighlight
+                                parent.color = "silver"
                             }
                             onExited:
                             {
-                              parent.color = style.lighthighlight
+                              parent.color = "silver"
                             }
 
 
@@ -104,7 +104,7 @@ Rectangle {
                         id:number2
                         height: 55
                         width: 55
-                        color:style.lighthighlight
+                        color:"silver"
 
                         Image {
 
@@ -125,11 +125,11 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-                                parent.color = style.darkhighlight
+                                parent.color = "silver"
                             }
                             onExited:
                             {
-                              parent.color = style.lighthighlight
+                              parent.color = "silver"
                             }
 
 
@@ -145,7 +145,7 @@ Rectangle {
                         id:number3
                         height: 55
                         width: 55
-                        color:style.lighthighlight
+                        color:"silver"
                         radius: 100
                         Image {
 
@@ -166,11 +166,11 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-                                parent.color = style.darkhighlight
+                                parent.color = "silver"
                             }
                             onExited:
                             {
-                              parent.color = style.lighthighlight
+                              parent.color = "silver"
                             }
 
 
@@ -195,7 +195,7 @@ Rectangle {
                         id:number4
                         height: 55
                         width: 55
-                        color:style.lighthighlight
+                        color:"silver"
                         radius: 100
                         Image {
 
@@ -216,11 +216,11 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-                                parent.color = style.darkhighlight
+                                parent.color = "silver"
                             }
                             onExited:
                             {
-                              parent.color = style.lighthighlight
+                              parent.color = "silver"
                             }
 
 
@@ -236,7 +236,7 @@ Rectangle {
                         id:number5
                         height: 55
                         width: 55
-                        color:style.lighthighlight
+                        color:"silver"
                         radius: 100
                         Image {
 
@@ -257,11 +257,11 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-                                parent.color = style.darkhighlight
+                                parent.color = "silver"
                             }
                             onExited:
                             {
-                              parent.color = style.lighthighlight
+                              parent.color = "silver"
                             }
 
 
@@ -277,7 +277,7 @@ Rectangle {
                         id:number6
                         height: 55
                         width: 55
-                        color:style.lighthighlight
+                        color:"silver"
                         radius: 100
                         Image {
 
@@ -298,11 +298,11 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-                                parent.color = style.darkhighlight
+                                parent.color = "silver"
                             }
                             onExited:
                             {
-                              parent.color = style.lighthighlight
+                              parent.color = "silver"
                             }
 
 
@@ -327,7 +327,7 @@ Rectangle {
                         id:number7
                         height: 55
                         width: 55
-                        color:style.lighthighlight
+                        color:"silver"
                         radius: 100
                         Image {
 
@@ -348,11 +348,11 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-                                parent.color = style.darkhighlight
+                                parent.color = "silver"
                             }
                             onExited:
                             {
-                              parent.color = style.lighthighlight
+                              parent.color = "silver"
                             }
 
 
@@ -368,7 +368,7 @@ Rectangle {
                         id:number8
                         height: 55
                         width: 55
-                        color:style.lighthighlight
+                        color:"silver"
                         radius: 100
                         Image {
 
@@ -389,11 +389,11 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-                                parent.color = style.darkhighlight
+                                parent.color = "silver"
                             }
                             onExited:
                             {
-                              parent.color = style.lighthighlight
+                              parent.color = "silver"
                             }
 
 
@@ -409,7 +409,7 @@ Rectangle {
                         id:number9
                         height: 55
                         width: 55
-                        color:style.lighthighlight
+                        color:"silver"
                         radius: 100
                         Image {
 
@@ -430,11 +430,11 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-                                parent.color = style.darkhighlight
+                                parent.color = "silver"
                             }
                             onExited:
                             {
-                              parent.color = style.lighthighlight
+                              parent.color = "silver"
                             }
 
                             onClicked:
@@ -474,7 +474,7 @@ Rectangle {
                         id:number0
                         height: 55
                         width: 55
-                        color:style.lighthighlight
+                        color:"silver"
                         radius: 100
                         Image {
 
@@ -497,11 +497,11 @@ Rectangle {
                             hoverEnabled: true
                             onEntered:
                             {
-                                parent.color = style.darkhighlight
+                                parent.color = "silver"
                             }
                             onExited:
                             {
-                              parent.color = style.lighthighlight
+                              parent.color = "silver"
                             }
 
                         }
