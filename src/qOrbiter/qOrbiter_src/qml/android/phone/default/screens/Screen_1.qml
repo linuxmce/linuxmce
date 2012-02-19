@@ -31,19 +31,27 @@ NowPlayingBox{anchors.horizontalCenter: parent.horizontalCenter}
             color: "silver"
 
         }
+        Image {
+            id: bottomBg
+            source: "../img/lowerbkg.png"
+            height: scaleY(10)
+            width: scaleX(55)
+            anchors.bottom: stage.bottom
+            anchors.horizontalCenter: stage.horizontalCenter
+
+        }
         Row
         {
             id:advancedrow
-            height: childrenRect.height
-            width: childrenRect.width
-            anchors.horizontalCenter: stage.horizontalCenter
-            anchors.bottom: stage.bottom
+            height: bottomBg.height
+            width: bottomBg.width
+           anchors.centerIn: bottomBg
             spacing: scaleX(4)
             ButtonSq{
                 id:roombutton
                 height: style.stdbuttonh
                 width: style.stdbuttonw
-                buttontext: currentroom
+                buttontext: currentRoom
                 MouseArea{
                     anchors.fill: parent
                     onClicked:  MyJs.createStageComponent("RoomSelector.qml", stage)

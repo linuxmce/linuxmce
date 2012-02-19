@@ -36,7 +36,7 @@ Q_IMPORT_PLUGIN(UIKit)
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
 //#include "DCERouter.h"
-#include <QDebug>
+//#include <QDebug>
 
 // In source files stored in archives and packages, these 2 lines will have the release version (build)
 // and the svn revision as a global variable that can be inspected within a core dump

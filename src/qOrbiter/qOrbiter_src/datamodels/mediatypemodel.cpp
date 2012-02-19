@@ -1,6 +1,6 @@
 #include "mediatypemodel.h"
 
-#include <QDebug>
+//#include <QDebug>
 
 MediaSubTypeModel::MediaSubTypeModel(MediaSubTypeItem* prototype, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype)

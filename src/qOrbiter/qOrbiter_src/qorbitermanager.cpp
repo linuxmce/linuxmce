@@ -17,7 +17,7 @@
 
 #include "qorbitermanager.h"
 #include <QDeclarativeProperty>
-#include <QDebug>
+//#include <QDebug>
 #include <QFile>
 #include <QtXml/QtXml>
 #include <QProcess>
@@ -76,7 +76,6 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, DCE::qOrbiter *dceDevic
     appHeight = qorbiterUIwin->height() ;
     appWidth = qorbiterUIwin->width() ;
 
-    //qDebug() << qorbiterUIwin->size();
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 
     qorbiterUIwin->rootContext()->setContextProperty("appH", appHeight); //file grids current media type
@@ -284,22 +283,22 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 
     emit skinIndexReady(true);
 
-        if (getConf(iPK_Device))
+    if (getConf(iPK_Device))
+    {
+        if(pqOrbiter->registerDevice())
         {
-            if(pqOrbiter->registerDevice())
-            {
-                emit localConfigReady(true);
-                QApplication::processEvents(QEventLoop::AllEvents);
-                swapSkins(currentSkin);
-                //LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",iPK_Device,qs_routerip.toStdString());
-                QObject::connect(pqOrbiter,SIGNAL(disconnected(QString)), this, SLOT(reloadHandler()));
-                return true;
-            }else
-                return false;
-
-        }
-        else
+            emit localConfigReady(true);
+            QApplication::processEvents(QEventLoop::AllEvents);
+            swapSkins(currentSkin);
+            //LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",iPK_Device,qs_routerip.toStdString());
+            QObject::connect(pqOrbiter,SIGNAL(disconnected(QString)), this, SLOT(reloadHandler()));
+            return true;
+        }else
             return false;
+
+    }
+    else
+        return false;
 
 
 
@@ -373,11 +372,11 @@ bool qorbiterManager::getConf(int PK_Device)
         QString m_description= floorplanList.at(index).attributes().namedItem("Description").nodeValue();
         int m_page= floorplanList.at(index).attributes().namedItem("Page").nodeValue().toInt();
 
-        // qDebug () << "/usr/pluto/orbiter/floorplans/inst" << m_installation.toStdString().c_str()<<"/"<<StringUtils::itos(m_page).c_str()<<".png";
+
         QImage m_image = pqOrbiter->getfileForDG("/usr/pluto/orbiter/floorplans/inst"+m_installation.toStdString()+"/"+StringUtils::itos(m_page)+".png");
         QImage icon = m_image.scaledToHeight(100);
         floorplans->appendRow(new FloorPlanItem(m_installation,m_description, m_page, m_iconpath, m_image, icon,  userList));
-        // qDebug() << m_description;
+
         if (m_page == 1)
         {
             QString safe = m_installation;
@@ -710,17 +709,11 @@ bool qorbiterManager::getConf(int PK_Device)
 }
 
 void qorbiterManager::swapSkins(QString incSkin)
-{
-
+{    
     setDceResponse("Setting Skin to:" + incSkin);
-
-    //get the skin URL from the skins model
     skin = tskinModel->find(incSkin);
-
-    qDebug() << "Got it from the model : " + skin->baseUrl().toString();
-
+    setDceResponse("Got it from the model : " + skin->baseUrl().toString());
     //load the actual skin entry point
-    qDebug() << "Skin switch url:" << skin->entryUrl();
     currentSkin = incSkin;
     qorbiterUIwin->engine()->rootContext()->setContextProperty("style", skin->styleView());
 
@@ -728,7 +721,6 @@ void qorbiterManager::swapSkins(QString incSkin)
                      this, SLOT(skinLoaded(QDeclarativeView::Status)));
 
     QMetaObject::invokeMethod(this, "refreshUI", Qt::QueuedConnection, Q_ARG(QUrl, skin->entryUrl()));
-
 
 }
 
@@ -740,7 +732,7 @@ void qorbiterManager::skinLoaded(QDeclarativeView::Status status) {
         qWarning() << qorbiterUIwin->errors();
         emit skinDataLoaded(false);
     } else {
-        //qDebug() << "Correctly loaded skin, continuing";
+
         m_bStartingUp = false;
         emit skinDataLoaded(true);
         QApplication::processEvents(QEventLoop::AllEvents);
@@ -792,8 +784,7 @@ void qorbiterManager::setActiveRoom(int room,int ea)
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomClimate", roomClimate);
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);
-    /* */
-    //qDebug() << "CHanged to room" << room;
+
     setLocation(room, ea);
     QApplication::processEvents(QEventLoop::AllEvents);
 }
@@ -829,7 +820,6 @@ void qorbiterManager:: setLocation(const int &room, const int &ea)
 {
     iFK_Room = room;
     iea_area = ea;
-    // qDebug() << "Moving to Location:" << room << "with ea: " << ea;
     emit locationChanged(room, ea);
     pqOrbiter->setLocation(room, ea);
     QApplication::processEvents(QEventLoop::AllEvents);
@@ -842,10 +832,6 @@ int qorbiterManager::getlocation() const
 
 void qorbiterManager::regenOrbiter(int deviceNo)
 {
-
-
-    //qDebug() << "Regenerating..";
-    //qDebug() << qs_routerip;
 
     if(qs_routerip =="127.0.0.1")
     {
@@ -863,7 +849,6 @@ void qorbiterManager::regenOrbiter(int deviceNo)
     }
     else
     {
-        //qDebug("remote orbiter");
         emit screenChange("WebRegen.qml");
     }
 
@@ -908,7 +893,6 @@ QString qorbiterManager::adjustPath(const QString &path)
 
 void qorbiterManager::setSorting(int i)
 {
-    //qDebug() << "Setting grid mediatype to :" << i;
     q_mediaType = QString::number(i);
     qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
     emit gridTypeChanged(i);
@@ -925,7 +909,6 @@ void qorbiterManager::setNowPlayingIcon(bool b)
 bool qorbiterManager::loadSkins(QUrl base)
 {
 
-    //qDebug() << base;
     tskinModel = new SkinDataModel(base, new SkinDataItem, this);
     qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
     QApplication::processEvents(QEventLoop::AllEvents);
@@ -935,8 +918,6 @@ bool qorbiterManager::loadSkins(QUrl base)
       of all availible skins for the build. a simple parsing of the skins directory
       should suffice and improper skins are dealt with later.
       */
-
-
 
 #ifdef for_harmattan
     tskinModel->addSkin("default");
@@ -1285,7 +1266,6 @@ void qorbiterManager::goBackGrid()
 {
     setRequestMore(false);
     backwards = true;
-    //qDebug() << q_attributetype_sort;
     execGrp(i_current_command_grp);
 }
 
@@ -1375,10 +1355,8 @@ void qorbiterManager::changeChannels(QString chan)
 }
 
 void qorbiterManager::getLiveTVPlaylist()
-{
-    //qDebug() << "Orbiter Manager slot called";
+{   
     emit liveTVrequest();
-
 }
 
 void qorbiterManager::gridChangeChannel(QString chan, QString chanid)
@@ -1396,7 +1374,6 @@ void qorbiterManager::setCurrentUser(QString inc_user)
 {
     sPK_User = userList->find(sPK_User)->data(1).toString();
     int user = inc_user.toInt();
-    //qDebug() << "User name" << sPK_User << "::" << user;
     pqOrbiter->setUser(user);
     emit userChanged();
 }
@@ -1414,7 +1391,7 @@ bool qorbiterManager::getRequestMore()
 
 void qorbiterManager::sleepingMenu(bool toggle, int grp)
 {
-    // qDebug() << grp;
+
     if(toggle == true)
     {   sleeping_alarms.clear();
         pqOrbiter->GetAlarms(toggle, grp);
@@ -1424,7 +1401,6 @@ void qorbiterManager::sleepingMenu(bool toggle, int grp)
         sleeping_alarms.clear();
         pqOrbiter->GetAlarms(false, 0);
     }
-
 }
 
 
@@ -1486,7 +1462,6 @@ void qorbiterManager::updateTimecode()
     {
         timeCodeSocket->disconnectFromHost();
         timeCodeSocket->close();
-        //qDebug("Socket 12000 disconnect");
     }
 }
 
@@ -1494,7 +1469,7 @@ void qorbiterManager::showTimeCode()
 {
     QByteArray socketData = timeCodeSocket->readLine();
     QString tcData = QString::fromAscii(socketData.data(), socketData.size());
-    //qDebug() << tcData;
+
     if (tcData.length() > 0)
     {
         QStringList tcVars = tcData.split(",");
@@ -1509,7 +1484,7 @@ void qorbiterManager::showTimeCode()
         QString duration = tcVars.at(2);
         duration.remove(QRegExp(".\\d\\d\\d|00:0|0:0|00:"));
         nowPlayingButton->setDuration(duration);
-        //qDebug() << tcClean;
+
     }
 }
 
@@ -1540,18 +1515,6 @@ bool qorbiterManager::cleanupData()
 {
     roomLights= NULL;                 //current room scenarios model
     roomMedia=NULL;                   //current room media model
-    /*    qorbiterUIwin->rootContext()->setContextProperty("currentRoomClimate", roomClimate);               //curent room climate model
-    qorbiterUIwin->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);               //curret room telecom model
-    qorbiterUIwin->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);             //current room security model
-    qorbiterUIwin->rootContext()->setContextProperty("floorplan", floorplans);
-    qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
-    qorbiterUIwin->rootContext()->setContextProperty("iPK_Device", QVariant::fromValue(iPK_Device));  //orbiter device number
-    qorbiterUIwin->rootContext()->setContextProperty("currentroom", m_lRooms->sdefault_Ea);           //custom room list item provided
-    qorbiterUIwin->rootContext()->setContextProperty("userList", userList);                           //custom user list provided
-    qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms);                           //custom room list  provided
-    qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
-    qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse); //file grids current media type
-*/
 }
 
 void qorbiterManager::setSeekLetter(QString letter)
@@ -1601,14 +1564,9 @@ void qorbiterManager::cleanupScreenie()
 
 void qorbiterManager::initializeConnections()
 {
-
-    //connections to splash.qml slots
-
     QObject::connect(this, SIGNAL(continueSetup()), this, SLOT(startSetup()));
-
     setDceResponse("Connections Complete");
     emit continueSetup();
-
 }
 
 void qorbiterManager::reloadHandler()
@@ -1635,7 +1593,7 @@ void qorbiterManager::setDceResponse(QString response)
     dceResponse = response;
     emit loadingMessage(dceResponse);
     emit dceResponseChanged();
-    qDebug() << dceResponse;
+   // qDebug() << dceResponse;
 
 }
 
@@ -1644,11 +1602,7 @@ QString qorbiterManager::getDceResponse()
     return dceResponse;
 }
 
-/*
-  This function is an attempt to bypass problems with initialization of the qml window. The goal is to be able
-  show loading, feedback and other progress during times when the main orbiter is not in view, like startup and
-  router reloads.
-  */
+
 int qorbiterManager::loadSplash()
 {
 

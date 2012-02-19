@@ -1,5 +1,5 @@
 #include "floorplanimageitem.h"
-#include <QDebug>
+//#include <QDebug>
 FloorPlanItem::FloorPlanItem(QString &installation, QString &description,  int &page,  QString &icon, QImage fpImage,  QImage &icoimg, QObject *parent) :
     m_installation(installation), m_description(description), m_page(page), m_iconPath(icon), m_floorplanImage(fpImage), m_iconImage(icoimg)
 {

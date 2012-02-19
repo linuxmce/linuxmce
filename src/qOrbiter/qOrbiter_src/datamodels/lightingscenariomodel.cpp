@@ -1,5 +1,5 @@
 #include <datamodels/lightingscenariomodel.h>
-#include <QDebug>
+//#include <QDebug>
 
 
 LightingScenarioModel::LightingScenarioModel(LightingScenarioItem* prototype, QObject* parent): QAbstractListModel(parent), m_prototype(prototype)

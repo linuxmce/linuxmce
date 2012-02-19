@@ -3,8 +3,8 @@ import QtQuick 1.0
 Rectangle{
 
     color: "transparent"
-    height: 50
-    width:50
+    height: style.stdbuttonh
+    width: style.stdbuttonw
     property alias buttontext: buttonLabel.text
     property alias buttontextcolor: buttonLabel.color
     property alias buttontextfontsize: buttonLabel.font.pixelSize

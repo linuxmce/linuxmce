@@ -1,6 +1,6 @@
 #include "genremodel.h"
 
-#include <QDebug>
+//#include <QDebug>
 
 GenreModel::GenreModel(GenreItem* prototype, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype)

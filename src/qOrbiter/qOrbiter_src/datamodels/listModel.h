@@ -1,9 +1,4 @@
-/*
- * Author: Christophe Dumez <dchris@gmail.com>
- * License: Public domain (No attribution required)
- * Website: http://cdumez.blogspot.com/
- * Version: 1.0
- */
+
 
 #ifndef LISTMODEL_H
 #define LISTMODEL_H

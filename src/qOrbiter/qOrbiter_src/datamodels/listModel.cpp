@@ -6,7 +6,7 @@
  */
 
 #include "datamodels/listModel.h"
-#include <QDebug>
+
 
 ListModel::ListModel(gridItem* prototype, QObject* parent) :
     QAbstractListModel(parent),  m_prototype(prototype)
@@ -62,7 +62,7 @@ void ListModel::insertRow(int row, gridItem *item)
 {
     beginInsertRows(QModelIndex(), row, row);
     connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
-    //qDebug() << "Inserting at:" << row;
+    ////qdebug() << "Inserting at:" << row;
     m_list.insert(row, item);
     endInsertRows();
 }
@@ -71,7 +71,7 @@ void ListModel::handleItemChange()
 {
     gridItem* item = static_cast<gridItem*>(sender());
     QModelIndex index = indexFromItem(item);
-    //qDebug() << "Handling item change for:" << index;
+    ////qdebug() << "Handling item change for:" << index;
     if(index.isValid())
     {
         emit dataChanged(index, index, 0);
@@ -167,13 +167,13 @@ void ListModel::checkForMore()
 {
     if (m_list.count() < totalcells )
     {
-        qDebug() <<QString::number(m_list.count()) +" cells in model, out of " + QString::number(totalcells) << "getting more";
+        ////qdebug() <<QString::number(m_list.count()) +" cells in model, out of " + QString::number(totalcells) << "getting more";
         setLoadingStatus(true);
         emit gimmieData(gridType);
     }
     else
     {
-        qDebug() <<QString::number(m_list.count()) +" cells in model, out of " + QString::number(totalcells) <<" No Mas";
+        //qdebug() <<QString::number(m_list.count()) +" cells in model, out of " + QString::number(totalcells) <<" No Mas";
         setLoadingStatus(false);
     }
 
@@ -191,13 +191,13 @@ void ListModel::setTotalCells(int cells)
     if ( m_list.count() < totalcells)
     {
 
-        qDebug() <<QString::number(m_list.count()) +" cells in model, out of " + QString::number(totalcells);
+        //qdebug() <<QString::number(m_list.count()) +" cells in model, out of " + QString::number(totalcells);
         setLoadingStatus(true);
 
     }
     else
     {
-        qDebug() <<QString::number(m_list.count()) +" cells in model, out of " + QString::number(totalcells);
+        //qdebug() <<QString::number(m_list.count()) +" cells in model, out of " + QString::number(totalcells);
         setLoadingStatus(false);
     }
     emit sizeChanged(cells);
@@ -213,7 +213,7 @@ void ListModel::setGridType(int type)
 {
     gridType = type;
     emit gridTypeChanged(gridType);
-    //qDebug("Grid Type Set");
+    ////qdebug("Grid Type Set");
 
 }
 
@@ -225,7 +225,7 @@ int ListModel::getGridType()
 void ListModel::setLoadingStatus(bool b)
 {
     loadingStatus = b;
-    qDebug() << "List Model Loading Status set to:" << b;
+    //qdebug() << "List Model Loading Status set to:" << b;
     emit loadingStatusChanged(loadingStatus);
 }
 
