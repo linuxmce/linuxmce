@@ -121,7 +121,7 @@ void ListModel::clear()
 {
     //("Clearing List");
     loadingStatus == false;
-    qDeleteAll(m_list);
+    //qDeleteAll(m_list);
     m_list.clear();
     this->reset();
 

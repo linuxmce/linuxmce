@@ -87,6 +87,7 @@
 #include <datamodels/DataModelItems/sleepingalarm.h>
 
 /*-------Dce Includes----*/
+#include <qOrbiter/qOrbiter.h>
 
 /*---------------Threaded classes-----------*/
 
@@ -126,7 +127,7 @@ class qorbiterManager : public QObject
 
 
 public:
-    qorbiterManager(int deviceno, QString routerip, QDeclarativeView * view,  QObject *parent =0);  //constructor
+    qorbiterManager(QDeclarativeView * view, DCE::qOrbiter *dceDevice, QObject *parent =0);  //constructor
 
     QThread *processingThread; //threaded class
     QThread *timecodeThread; //for timecode
@@ -142,6 +143,7 @@ public:
     //TODO, remove the below in favour of the data structure
     QMap <QString*, QString*> availibleSkins;
     QString qmlPath;
+    QString localDir;
     QString skinsPath;
     QDir skinsDir;
     QString m_SkinsDirectoryPath;
@@ -298,7 +300,7 @@ Param 10 - pk_attribute
 
     //QT Functions to initialize lmce data
     bool initialize(int dev_id);
-    Q_INVOKABLE bool setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode);     //init's dce object
+    Q_INVOKABLE bool initializeManager(string router_address, int device_id);     //init's dce object
     /*
       getConf() is the part of the equation that should read the orbiter conf. not implemented fully
       */
@@ -398,6 +400,7 @@ signals:
     void skinDataLoaded(bool b);
 
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
+     void qmlSetupLmce(QString incdeviceid, QString incrouterip);
     void setRequestMore(bool state);
     bool getRequestMore();
     int loadSplash();
@@ -444,7 +447,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
 
     Q_INVOKABLE void setActiveSkin(QString name);
     Q_INVOKABLE  bool loadSkins(QUrl url);
-    void qmlSetupLmce(QString incdeviceid, QString incrouterip);
+
     void changedPlaylistPosition(QString position);
 
     //datagrid related

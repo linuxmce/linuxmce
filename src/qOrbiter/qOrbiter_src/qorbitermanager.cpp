@@ -45,13 +45,13 @@ using namespace DCE;
   then (hopefully) notify us of background progress. A splash bar or loading indicator needs to be added, but a textual
   messaging system will be the initial method of communication
 */
-qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeView *view, QObject *parent) :
-    QObject(parent),iPK_Device(deviceno), qs_routerip(routerip),qorbiterUIwin(view)
+qorbiterManager::qorbiterManager(QDeclarativeView *view, DCE::qOrbiter *dceDevice, QObject *parent) :
+    QObject(parent),qorbiterUIwin(view),pqOrbiter(dceDevice)
 {
 
     m_bStartingUp= true;
     bAppError = false;
-
+    pqOrbiter->qmlUI = this;
     setDceResponse("Initializing...");
 
     if (readLocalConfig())
@@ -71,6 +71,7 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
     qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
     qorbiterUIwin->rootContext()->setContextProperty("manager", this); //providing a direct object for qml to call c++ functions of this class
     qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse); //file grids current media type
+    qorbiterUIwin->rootContext()->setContextProperty("dcerouter", pqOrbiter); //dcecontext object
 
     appHeight = qorbiterUIwin->height() ;
     appWidth = qorbiterUIwin->width() ;
@@ -132,8 +133,8 @@ qorbiterManager::qorbiterManager(int deviceno, QString routerip, QDeclarativeVie
 #endif
 
     QApplication::processEvents(QEventLoop::AllEvents);
-    QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
-    QString localDir = qmlPath.append(buildType);
+    qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
+    localDir = qmlPath.append(buildType);
 
     initializeGridModel();  //begins setup of media grid listmodel and its properties
     initializeSortString(); //associated logic for navigating media grids
@@ -196,23 +197,12 @@ void qorbiterManager::gotoQScreen(QString s)
 }
 
 //this block sets up the connection to linuxmce
-bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLocalMode)
+bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 {
-
-    if (bAppError == true)
-    {
-        pqOrbiter = new DCE::qOrbiter(iPK_Device, qs_routerip.toStdString(), true,false);
-    }
-    else
-    {
-        pqOrbiter = new DCE::qOrbiter(PK_Device, sRouterIP, true,false);
-    }
 
     setDceResponse("Initiating Router Connection");
     QApplication::processEvents(QEventLoop::AllEvents);
 
-    pqOrbiter->qmlUI = this;
-    QApplication::processEvents(QEventLoop::AllEvents);
 
     QObject::connect(pqOrbiter, SIGNAL(clearGrid()), model, SLOT(clear()));
     QObject::connect(pqOrbiter, SIGNAL(statusMessage(QString)), this , SLOT(setDceResponse(QString)));
@@ -223,90 +213,80 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
     QObject::connect(pqOrbiter, SIGNAL(gotoQml(QString)), this, SLOT(gotoQScreen(QString)), Qt::QueuedConnection);
     //  QObject::connect(this,SIGNAL(stillLoading(bool)), model, SLOT(setLoadingStatus(bool)), Qt::QueuedConnection);
 
+
     QObject::connect(this,SIGNAL(filterChanged(int)), pqOrbiter,SLOT(prepareFileList(int)),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(loadingStatusChanged(bool)), this, SLOT(setRequestMore(bool)),Qt::QueuedConnection);
     QObject::connect(model, SIGNAL(gimmieData(int)), pqOrbiter, SLOT(populateAdditionalMedia()),Qt::QueuedConnection);
     QObject::connect(this, SIGNAL(mediaRequest(int)), pqOrbiter,SLOT(prepareFileList(int)), Qt::QueuedConnection);
     QObject::connect(this,SIGNAL(screenChange(QString)), this, SLOT(gotoQScreen(QString)),Qt::QueuedConnection);
     QObject::connect(this,SIGNAL(executeCMD(int)), pqOrbiter, SLOT(executeCommandGroup(int)), Qt::QueuedConnection);
-
     QObject::connect(this, SIGNAL(gridTypeChanged(int)), model, SLOT(setGridType(int)));
 
-    if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()) )
-    {
-        emit connectionValid(true);
-        setDceResponse("Orbiter  connected");
-        QApplication::processEvents(QEventLoop::AllEvents);
 
 
 #ifdef ANDROID
-        if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
-        {
+    if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
+    {
 
-            remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/tablet";
-            setDceResponse("Guessing Android Tablet, Loading Tablet Skins");
-            QApplication::processEvents(QEventLoop::AllEvents);
-        }
-        else
-        {
+        remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/tablet";
+        setDceResponse("Guessing Android Tablet, Loading Tablet Skins");
+        QApplication::processEvents(QEventLoop::AllEvents);
+    }
+    else
+    {
 
-            remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/phone";
-            setDceResponse("Guessing Android Phone, Loading Phone Skins");
-            QApplication::processEvents(QEventLoop::AllEvents);
-        }
+        remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/phone";
+        setDceResponse("Guessing Android Phone, Loading Phone Skins");
+        QApplication::processEvents(QEventLoop::AllEvents);
+    }
 
 #elif MACOSX
-        remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/macosx";
+    remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/macosx";
 #elif for_desktop
-        remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/desktop";
+    remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/desktop";
 #elif for_harmattan
-        remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/harmattan";
+    remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/harmattan";
 #elif for_android
-        if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
-        {
-            buildType = "/qml/android/tablet";
-            remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/tablet";
-            setDceResponse("Guessing Android Tablet, Loading Tablet Skins");
-        }
-        else
-        {
-            buildType = "/qml/android/phone";
-            remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/phone";
-            setDceResponse("Guessing Android Phone, Loading Phone Skins");
-        }
+    if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
+    {
+        buildType = "/qml/android/tablet";
+        remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/tablet";
+        setDceResponse("Guessing Android Tablet, Loading Tablet Skins");
+    }
+    else
+    {
+        buildType = "/qml/android/phone";
+        remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/phone";
+        setDceResponse("Guessing Android Phone, Loading Phone Skins");
+    }
 #else
-        remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins";
+    remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins";
 #endif
 
-        QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
-        QString localDir = qmlPath.append(buildType);
+    QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
+    QString localDir = qmlPath.append(buildType);
 
-        //loadSkins(QUrl(localDir));
+    //loadSkins(QUrl(localDir));
 #ifdef ANDROID
-        if( !loadSkins(QUrl(remoteDirectoryPath)))
-        {   emit skinIndexReady(true);
-            return false;
-        }
+    if( !loadSkins(QUrl(remoteDirectoryPath)))
+    {   emit skinIndexReady(true);
+        return false;
+    }
 #elif for_android
-        loadSkins(QUrl(localDir));
+    loadSkins(QUrl(localDir));
 #else
-        if( !loadSkins(QUrl(localDir)))
-        {   emit skinIndexReady(false);
-            return false;
+    if( !loadSkins(QUrl(localDir)))
+    {   emit skinIndexReady(false);
+        return false;
 
-        }
+    }
 #endif
-        emit skinIndexReady(true);
 
-        if (pqOrbiter->initialize()) //the dcethread initialization
+    emit skinIndexReady(true);
+
+        if (getConf(iPK_Device))
         {
-            pqOrbiter->CreateChildren();
-            qorbiterUIwin->rootContext()->setContextProperty("dcerouter", pqOrbiter );
-            setConnectedState(true);
-            emit deviceValid(true);
-            bAppError = false;
-            QApplication::processEvents(QEventLoop::AllEvents);
-            if (getConf(PK_Device))
+            if(pqOrbiter->registerDevice())
             {
                 emit localConfigReady(true);
                 QApplication::processEvents(QEventLoop::AllEvents);
@@ -314,72 +294,15 @@ bool qorbiterManager::setupLmce(int PK_Device, string sRouterIP, bool, bool bLoc
                 //LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",iPK_Device,qs_routerip.toStdString());
                 QObject::connect(pqOrbiter,SIGNAL(disconnected(QString)), this, SLOT(reloadHandler()));
                 return true;
-            }
-
-        }
-        else
-        {
-            setDceResponse("Orbiter Conf Hiccup! for device " + iPK_Device);
-#ifndef ANDROID
-            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Device Failed to get configuration!");
-#endif
-            return false;
-        }
-
-    }
-    else
-
-    {
-
-        bAppError = true;
-        if(pqOrbiter->m_pEvent && pqOrbiter->m_pEvent->m_pClientSocket && pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
-        {
-            setDceResponse("Inside");
-            QApplication::processEvents(QEventLoop::AllEvents);
-            bAppError = false;
-            bReload = false;
-#ifndef ANDROID
-            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "OrbiterManager: No Router.  Will abort");
-#endif
-            setDceResponse("OrbiterManager:LMCE Manager No Router, Aborting");
-
-            emit connectionValid(false);
-            emit deviceValid(false);
-            // pqOrbiter->Disconnect();
-            //  pqOrbiter->~qOrbiter();
-            return false;
-        }
-        else
-        {
-            bAppError = true;
-            if( pqOrbiter->m_pEvent&& pqOrbiter->m_pEvent->m_pClientSocket && pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice)
-            {
-                /*   if(DeviceIdInvalid() !=0)
-                 {
-                      qmlUI->setDceResponse("Bad Device");
-                  return false;
-                  }
-                  */
-
-                //   setDceResponse("Bad Device");
-                bAppError = false;
-                bReload = false;
-#ifndef ANDROID
-                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device  Will abort");
-                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
-#endif
-                //orbiterWin.mainView.setSource(QUrl("qrc:desktop/SetupNewOrbiter.qml"));
-                setDceResponse("Connect Failed with Bad Device");
-                emit deviceValid(false);
-                emit connectionValid(true);
-                QApplication::processEvents(QEventLoop::AllEvents);
-                // pqOrbiter->Disconnect();
-                // pqOrbiter->~qOrbiter();
+            }else
                 return false;
 
-            }
         }
-    }
+        else
+            return false;
+
+
+
 }
 
 void qorbiterManager::refreshUI(QUrl url)
@@ -428,8 +351,6 @@ bool qorbiterManager::getConf(int PK_Device)
         setDceResponse("Couldnt save config!");
         return false;
     }
-
-
 
     QDomElement root = configData.documentElement();        //represent configuration in memeory
     // qDebug () << root.tagName();
@@ -693,10 +614,10 @@ bool qorbiterManager::getConf(int PK_Device)
     simpleEPGmodel->moveToThread(processingThread);
     processingThread->start();    QApplication::processEvents(QEventLoop::AllEvents);
 
-    setDceResponse("Threading Initialized");
+    setDceResponse("EPG Threading Initialized");
     QObject::connect(this,SIGNAL(liveTVrequest()), simpleEPGmodel,SLOT(populate()), Qt::QueuedConnection);
     QApplication::processEvents(QEventLoop::AllEvents);
-    //        qDebug () << "Orbiter Registered, starting";
+
 
     setDceResponse("Setting location");
     QApplication::processEvents(QEventLoop::AllEvents);
@@ -1042,11 +963,11 @@ void qorbiterManager::quickReload()
 void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
 {
     setDceResponse("Triggering connection to LMCE Device ID [" + incdeviceid + "] port Router Address [" + incrouterip + "]") ;
-    bAppError =true;
+
     qs_routerip = incrouterip;
     iPK_Device = long(incdeviceid.toInt());
     setDceResponse("Connecting to LinuxMCE Core");
-    setupLmce(iPK_Device, qs_routerip.toStdString(), false, false);
+    initializeManager( qs_routerip.toStdString(), iPK_Device);
 }
 
 
@@ -1601,14 +1522,7 @@ void qorbiterManager::checkConnection()
         setDceResponse("Disconnected!");
     }
 
-    if( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()))
-    {
-        if(!pqOrbiter->GetConfig())
-        {
-            emit raiseSplash();
-        }
 
-    }
 }
 
 void qorbiterManager::jogPosition(QString jog)
@@ -1720,7 +1634,6 @@ void qorbiterManager::setDceResponse(QString response)
 {
     dceResponse = response;
     emit loadingMessage(dceResponse);
-
     emit dceResponseChanged();
     qDebug() << dceResponse;
 

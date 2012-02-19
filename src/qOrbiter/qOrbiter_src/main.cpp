@@ -18,7 +18,6 @@
 #import <UIKit/UIKit.h>
 #include "qmlapplicationviewer.h"
 #include "ioshelpers.h"
-
 #include <QtGui/QApplication>
 #include <QtCore/QtPlugin>
 #include <QtDeclarative/QDeclarativeEngine>
@@ -30,7 +29,7 @@ Q_IMPORT_PLUGIN(UIKit)
 
 #include <qOrbiter/qOrbiter.h>
 #include <orbiterwindow.h>
-
+#include <qorbitermanager.h>
 #include "DCE/Logger.h"
 #include "ServerLogger.h"
 #include "PlutoUtils/FileUtils.h"
@@ -135,6 +134,10 @@ extern "C" {
 */
 int main(int argc, char* argv[])
 {
+#ifndef for_harmattan
+    QApplication::setGraphicsSystem("raster");
+#endif
+    QApplication  a(argc, argv);
 
     g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
     g_sBinaryPath = FileUtils::BasePath(argv[0]);
@@ -225,24 +228,27 @@ int main(int argc, char* argv[])
 
     try
     {
+        /*
+          move main pqOrbiter initialization here.
+          */
 #ifdef IOS
         //        NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 #endif
-        
-#ifndef for_harmattan
-        QApplication::setGraphicsSystem("raster");
-#endif
 
 
-        QApplication  a(argc, argv);
+        QThread *dceThread = new QThread;
+        qOrbiter *pqOrbiter = new qOrbiter(PK_Device, sRouter_IP,true,bLocalMode);
+        pqOrbiter->moveToThread(dceThread);
+        dceThread->start();
+
         orbiterWindow orbiterWin(PK_Device, sRouter_IP);
-
         orbiterWin.setMessage("Setting up Lmce");
 
-        qorbiterManager  *w= new qorbiterManager(PK_Device,QString::fromStdString(sRouter_IP), &orbiterWin.mainView);
-
+        qorbiterManager  *w= new qorbiterManager(&orbiterWin.mainView, pqOrbiter);
+        QObject::connect(pqOrbiter, SIGNAL(statusMessage(QString)), &orbiterWin,SLOT(setMessage(QString)),Qt::QueuedConnection);
+        QObject::connect(pqOrbiter,SIGNAL(startManager(QString,QString)), w, SLOT(qmlSetupLmce(QString,QString)));
         QObject::connect(w, SIGNAL(loadingMessage(QString)), &orbiterWin,SLOT(setMessage(QString)), Qt::UniqueConnection);
-        QObject::connect(&orbiterWin,SIGNAL(setupLmce(QString,QString)), w, SLOT(qmlSetupLmce(QString,QString)));
+        QObject::connect(&orbiterWin,SIGNAL(setupLmce(QString,QString)), pqOrbiter, SLOT(qmlSetup(QString,QString)),Qt::DirectConnection);
         QObject::connect(w, SIGNAL(raiseSplash()), &orbiterWin, SLOT(showSplash()) );
 
         QObject::connect(w,SIGNAL(showSetup()), &orbiterWin, SLOT( showSetup()) );
@@ -254,53 +260,44 @@ int main(int argc, char* argv[])
         QObject::connect(w,SIGNAL(skinIndexReady(bool)), &orbiterWin,SLOT(setSkinIndexState(bool)));
         QObject::connect(w,SIGNAL(orbiterConfigReady(bool)), &orbiterWin, SLOT(setOrbiterConfigState(bool)));
 
+        pqOrbiter->m_dwPK_Device = w->iPK_Device;
+        pqOrbiter->m_sHostName = w->qs_routerip.toStdString();
 
-        if(PK_Device > 1000)
+        /*
+        sRouter_IP =pqOrbiter->m_sHostName;
+        PK_Device = pqOrbiter->m_dwPK_Device;
+            */
+        if ( pqOrbiter->initialize() )
         {
-            PK_Device = 0;
-        }
 
-        if (w->setupLmce(w->iPK_Device, w->qs_routerip.toStdString(), false, false) == true)
-        {
-           // w->startOrbiter();
+            LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
+
+
+            pqOrbiter->CreateChildren();
+            if( bLocalMode )
+                pqOrbiter->RunLocalMode();
+            else
+            {
+                /*
+                if(pqOrbiter->m_RequestHandlerThread)
+                    pthread_join(pqOrbiter->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
+                */
+            }
+
         }
         else
         {
+            qDebug("No Initialization!");
 
-            if(w->pqOrbiter->m_pEvent && w->pqOrbiter->m_pEvent->m_pClientSocket && w->pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
-            {
-                bAppError = false;
-                bReload = false;
-               // LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "OrbiterManager: No Router.  Will abort");
-                w->setDceResponse("OrbiterManager:MAIN No Router, Aborting");
-                orbiterWin.setConnectionState(false);
-                orbiterWin.setDeviceState(false);
-                w->pqOrbiter->Disconnect();
-                orbiterWin.setMessage("Dead Device");
-
-            }
-            else
-            {
-
-                if( w->pqOrbiter->m_pEvent&& w->pqOrbiter->m_pEvent->m_pClientSocket && w->pqOrbiter->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice)
-                {
-                    bAppError = false;
-                    bReload = false;
-                   // LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device  Will abort");
-                  //  LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
-                    //orbiterWin.mainView.setSource(QUrl("qrc:desktop/SetupNewOrbiter.qml"));
-                    w->setDceResponse("Connect Failed with Bad Device");
-                    orbiterWin.setDeviceState(false);
-                    orbiterWin.setConnectionState(true);
-                    w->pqOrbiter->Disconnect();
-
-                    orbiterWin.setMessage("Dead Device");
-
-                }
-            }
         }
+
+        if( pqOrbiter->m_bReload )
+            bReload=true;
         a.exec();
+        delete pqOrbiter;
+
     }
+
     catch(string s)
     {
         cerr << "Exception: " << s << endl;
