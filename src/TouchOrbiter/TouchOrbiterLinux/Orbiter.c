@@ -36,6 +36,9 @@ void setError(int err);
 static const char *ServerIP, *ServerPortStr;
 static unsigned int ServerPort;
 
+static const char *DisplayWidthStr, *DisplayHeightStr;
+static unsigned int DisplayWidth;
+static unsigned int DisplayHeight;
 //static int CommSocket = 0 ;
 
 static struct IniStore IniStore;
@@ -125,6 +128,10 @@ int main(void)
 	ServerPort = atoi(ServerPortStr);	
 	reconnectTimeout = GetIniData(&IniStore, "Network.ReconnectTimeOut");
 	reconnectTimer = atoi(reconnectTimeout);
+	DisplayWidthStr = GetIniData(&IniStore, "Display.Width");
+	DisplayWidth = atoi(DisplayWidthStr);
+	DisplayHeightStr = GetIniData(&IniStore, "Display.Height");
+	DisplayHeight = atoi(DisplayHeightStr);
 	
 	
 	if (ServerIP == NULL || ServerPortStr == NULL)
@@ -151,9 +158,13 @@ int main(void)
 		exit(1);
 	}
 
-	screen = SDL_SetVideoMode(800, 480, 32, SDL_DOUBLEBUF | SDL_HWSURFACE);
+	/* 
+		Setting the video mode according to the Orbiter.ini. For mini2440 it is should be 800x480
+	
+	*/ 
+	screen = SDL_SetVideoMode(DisplayWidth, DisplayHeight, 32, SDL_DOUBLEBUF | SDL_HWSURFACE);
 	if ( screen == NULL ) {
-		fprintf(stdout, "Couldn't set 800x480x8 video mode: %s\n",SDL_GetError());
+		fprintf(stdout, "Couldn't set %ux%ux8 video mode: %s\n",DisplayWidth,DisplayHeight,SDL_GetError());
 		exit(1);
 	}
 
