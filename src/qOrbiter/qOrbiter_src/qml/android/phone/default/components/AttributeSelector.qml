@@ -12,7 +12,7 @@ Rectangle {
         width: childrenRect.width
         spacing: 5
 
-        HomeButton{id:home}
+
 
         ButtonSq
         {
@@ -87,6 +87,12 @@ Rectangle {
                 anchors.fill:parent
                 onClicked: MyJs.createFilterObjects("../components/MediaTypes.qml")
             }
+        }
+
+        HomeButton{
+            id:home
+            height: style.stdbuttonh
+            width: style.stdbuttonw
         }
 
 
