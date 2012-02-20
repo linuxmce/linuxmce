@@ -1,7 +1,7 @@
 import QtQuick 1.0
 Item{
-    height: harect.height
-    width: harect.width
+ height: style.stdbuttonh
+ width: style.stdbuttonw
 
     BorderImage {
         id: haborder
@@ -24,8 +24,13 @@ Item{
             id:controlcol
             height: childrenRect.height
             width: childrenRect.width
-            spacing: 15
+            spacing: scaleY(1)
             Remote_lighting_controls{}
+            Image {
+                id: space
+                source: "../img/line_4.png"
+                width: parent.width
+            }
             Remote_Audio_controls{}
 
         }

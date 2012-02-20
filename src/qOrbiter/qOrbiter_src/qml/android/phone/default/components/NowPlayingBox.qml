@@ -4,11 +4,11 @@ Rectangle {
 
     id: now_playing
     height: scaleY(40)
-    width: scaleX(85)
+    width: scaleX(75)
     visible: dcenowplaying.b_mediaPlaying ? true : false
     color:"transparent"
-
     clip:true
+
     Timer{
         id:singleshot
         repeat: false
@@ -17,29 +17,27 @@ Rectangle {
         running: true
         onTriggered: np_image.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
-
-
-    Image {
-        id: np_image
-        source: ""
-        fillMode: Image.PreserveAspectCrop
-        anchors.centerIn: np_box
-        height:scaleY(30)
-        width:scaleX(85)
-
-    }
     Connections
     {
         target: dcenowplaying
         onImageChanged: np_image.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
 
+    Image{
+        id:np_image
+        fillMode: Image.PreserveAspectCrop
+        source:"image://listprovider/updateobject/"+securityvideo.timestamp
+        height:  scaleY(22)
+        width: scaleY(22)
+        anchors.centerIn: np_box
+
+    }
     Image {
         id: np_box
         source: "../img/nowplayingbox.png"
-       height: parent.height
-       width: parent.width
-        opacity: .5
+       height: now_playing.height
+       width: now_playing.width
+        opacity: .65
     }
     /* Image {
         id: nowplayingimage
@@ -54,7 +52,7 @@ Rectangle {
     Text {
         id: np_label
         text: qsTr("NowPlaying")
-        font.pixelSize: 12
+        font.pixelSize: scaleY(3)
         anchors.top: np_box.top
         anchors.topMargin: 15
         anchors.left: np_box.left
@@ -64,10 +62,10 @@ Rectangle {
 
     Text{
         text: dcenowplaying.qs_mainTitle
-        font.pixelSize: 12
+        font.pixelSize: scaleY(3)
         anchors.top: np_label.bottom
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-        color: "white"
+        color: "silver"
         width: np_box.width - 40
         anchors.horizontalCenter: np_box.horizontalCenter
     }

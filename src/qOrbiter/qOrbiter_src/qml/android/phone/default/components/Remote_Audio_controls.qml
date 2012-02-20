@@ -1,36 +1,36 @@
 import QtQuick 1.0
 
 Column {
-    height: childrenRect.height
-    width:45
-    spacing: 5
+    id:audio_column
+    height: (style.stdbuttonH * 3) + (audio_column.spacing *3)
+    width:style.stdbuttonw
+    spacing: scaleY(1)
 
 
     Rectangle{
-        height: 45
-        width:45
+        height: style.stdbuttonh
+        width:style.stdbuttonw
         color:"transparent"
 
         Image {
             id: up_bg
-            height: 45
-            width:45
+            height: style.stdbuttonh
+            width:style.stdbuttonw
             source: "../img/buttonbg.png"
             anchors.centerIn: parent
 
         }
         Image {
             id: hoverimg
-            height: 45
-            width:45
+            height: style.stdbuttonh
+            width:style.stdbuttonw
             source: "../img/buttonhover.png"
             visible: false
 
         }
 
         Image {
-            id: image2
-            scale:scaleX(.25)
+            id: image2            
             anchors.centerIn: parent
             smooth: true
             source: "../img/plus.png"
@@ -53,8 +53,8 @@ Column {
         buttontextfontsize: scaleY(2)
         Image {
             id: muteimg
-            height: 45
-            width:45
+            height: style.stdbuttonh
+            width:style.stdbuttonw
             anchors.fill: parent
             source: "../img/kmix.png"
         }
@@ -65,21 +65,21 @@ Column {
     }
 
     Rectangle{
-        height: 45
-        width:45
+        height: style.stdbuttonh
+        width:style.stdbuttonw
         color:"transparent"
 
         Image {
             id: dn_bg
-            height: 45
-            width:45
+            height: style.stdbuttonh
+            width:style.stdbuttonw
             source: "../img/buttonbg.png"
             anchors.centerIn: parent
         }
         Image {
             id: hoverimg2
-            height: 45
-            width:45
+            height: style.stdbuttonh
+            width:style.stdbuttonw
             source: "../img/buttonhover.png"
             visible: false
 
@@ -87,7 +87,6 @@ Column {
 
         Image {
             id: image1
-            scale:scaleX(.25)
             anchors.centerIn: parent
             smooth: true
             source: "../img/minus.png"

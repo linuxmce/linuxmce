@@ -7,42 +7,25 @@ Rectangle {
     id: storedVideoRemote
     height: appH
     width: appW
-    Timer{
-        id:singleshot
-        repeat: false
-        interval: 2000
-        triggeredOnStart: false
-        running: true
-        onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+Qt.formatTime
-    }
-
-    Connections{
-        target:dcenowplaying
-        onPlayListPositionChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-        onImageChanged:nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-    }
+    color: "transparent"
     Component.onCompleted:setNowPlayingData()
 
     NowPlayingBox
     {
         id:np_box
-       anchors.top: parent.top
+        anchors.top: parent.top
+       anchors.left: home.right
+       anchors.leftMargin: scaleX(5)
     }
 
-
-    Image{
-        id:nowplayingimage
-        fillMode: Image.PreserveAspectCrop
-        source:"image://listprovider/updateobject/"+securityvideo.timestamp
-        anchors.fill: np_box
-    }
     Column{
         id:textcol
         spacing: scaleY(1.5)
-        width: scaleX(55)
+        width: scaleX(80)
         height: childrenRect.height
         anchors.top: np_box.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.left: hacontrolbox.right
+        anchors.leftMargin: scaleX(2)
 
 
         Text {
@@ -55,6 +38,7 @@ Rectangle {
             smooth: true
             font.pixelSize: scaleY(3)
             visible:  dcenowplaying.qs_mainTitle =="" ? false: true
+            color: "orange"
         }
 
         Text {
@@ -65,8 +49,10 @@ Rectangle {
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             //  font.bold: true
             smooth: true
-            font.pixelSize: scaleY(1.5)
+            font.pixelSize: scaleY(3)
             visible:  dcenowplaying.tvProgram =="" ? false: true
+            color:"silver"
+
         }
 
         Text {
@@ -77,8 +63,9 @@ Rectangle {
             font.family: "Droid Sans"
             //  font.bold: true
             smooth: true
-            font.pixelSize: scaleY(1.5)
+            font.pixelSize: scaleY(3)
             visible:  dcenowplaying.episode =="" ? false: true
+            color:"silver"
         }
 
         Text {
@@ -89,8 +76,9 @@ Rectangle {
             font.family: "Droid Sans"
             // font.bold: true
             smooth: true
-            font.pixelSize: scaleY(1.5)
+            font.pixelSize: scaleY(3)
             visible:  dcenowplaying.genre =="" ? false: true
+            color:"silver"
             MouseArea{
                 anchors.fill: genre
                 hoverEnabled: true
@@ -108,10 +96,10 @@ Rectangle {
             font.family: "Droid Sans"
             //  font.bold: true
             smooth: true
-            font.pixelSize: scaleY(2)
+            font.pixelSize: scaleY(3)
             elide: "ElideRight"
             visible:  dcenowplaying.performerlist =="" ? false: true
-
+            color:"silver"
             MouseArea{
                 anchors.fill: starring
                 hoverEnabled: true
@@ -128,10 +116,10 @@ Rectangle {
             font.family: "Droid Sans"
             font.bold: true
             smooth: true
-            font.pixelSize: scaleY(1.5)
+            font.pixelSize: scaleY(3)
             elide: "ElideRight"
             visible:  dcenowplaying.synop =="" ? false: true
-
+            color:"silver"
             MouseArea{
                 anchors.fill: synopsis
                 hoverEnabled: true
@@ -143,13 +131,12 @@ Rectangle {
 
 
     AudioRemote{id:controls;anchors.bottom: parent.bottom; anchors.horizontalCenter: parent.horizontalCenter}
-    color: "transparent"
 
     //main 'now playing rect containing all the other items
     // Remote_lighting_controls{ id: remote_lighting_controls1; x: 344; y: 351; width: 93; height: 219; anchors.topMargin: 179;anchors.top: nowplayingbox1.baseline}
     // Remote_Audio_controls{ id: remote1; x: 200; y: 351; anchors.rightMargin: 71; z: 45; anchors.right: remote_lighting_controls1.left}
-    HaControls{ id:hacontrolbox; anchors.left: parent.left; anchors.top: home.bottom}
-    HomeButton{ id:home; anchors.left: storedVideoRemote.left; anchors.top:storedVideoRemote.top}
+    HaControls{ id:hacontrolbox; anchors.left: parent.left; anchors.top: home.bottom; anchors.topMargin: scaleY(1)}
+    HomeButton{ id:home; anchors.left: storedVideoRemote.left; anchors.top:storedVideoRemote.top; anchors.topMargin: scaleY(1)}
 
 
 }

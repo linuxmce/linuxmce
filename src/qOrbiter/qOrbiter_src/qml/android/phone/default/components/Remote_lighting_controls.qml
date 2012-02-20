@@ -1,37 +1,33 @@
 import QtQuick 1.0
 
 Column {
-    width: 45
-    height: childrenRect.height
-    spacing: 5
+    id:lightingColumn
+    width: style.stdbuttonw
+    height: (style.stdbuttonH * 3) + (lightingColumn.spacing *3)
+    spacing: scaleY(1)
 
     Rectangle{
-        height: 45
-        width:45
+        height: style.stdbuttonh
+        width:style.stdbuttonw
         color:"transparent"
 
         Image {
             id: up_bg
-            height: 45
-            width:45
+            anchors.fill: parent
             source: "../img/buttonbg.png"
-
         }
         Image {
             id: hoverimgup
             source: "../img/buttonhover.png"
-            height: 45
-            width:45
+            anchors.fill: parent
             visible: false
 
         }
         Image {
             id: image2
-            height: 45
-            width:45
             smooth: true
-
-            source: "../img/plus.png"            
+            anchors.centerIn: parent
+            source: "../img/plus.png"
         }
         MouseArea{
             anchors.fill: parent
@@ -51,40 +47,44 @@ Column {
         buttontextcolor: "red"
         buttontextbold: true
         buttontextfontsize: 4
+        Image{
+            id: center_bg
+            source:"../img/chkbxempty.png"
+            height: style.stdbuttonh
+            width:style.stdbuttonw
+        }
 
         Image {
             id: lightimg
-            height: 45
-            width:45
+           anchors.centerIn: parent
             anchors.fill: parent
             source: "../img/On.png"
         }
     }
 
     Rectangle{
-        height: 45
-        width:45
+        height: style.stdbuttonh
+        width:style.stdbuttonw
         color:"transparent"
         Image {
             id: dn_bg
-            height: 45
-            width:45
+            height: style.stdbuttonh
+            width:style.stdbuttonw
             source: "../img/buttonbg.png"
+            anchors.centerIn: parent
 
         }
         Image {
             id: hoverimg
-            height: 45
-            width:45
+            height: style.stdbuttonh
+            width:style.stdbuttonw
             source: "../img/buttonhover.png"
             visible: false
 
         }
         Image {
             id: ltdn
-            height: 45
-            width:45
-           anchors.fill: parent
+            anchors.centerIn: parent
             smooth: true
             source: "../img/minus.png"
 
