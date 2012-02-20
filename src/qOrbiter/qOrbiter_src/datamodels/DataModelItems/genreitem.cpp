@@ -1,5 +1,5 @@
 #include "genreitem.h"
-#include <QDebug>
+
 
 GenreItem::GenreItem( QString name,  QString pk_fileformat,  QImage img, bool selstat,  QObject *parent) :
     m_description(name), m_fk_fileformat(pk_fileformat), m_image(img), m_isSelected(selstat)

@@ -1,5 +1,5 @@
 #include "filedetailsitem.h"
-#include <QDebug>
+
 
 
 FileDetailsItem::FileDetailsItem( QString title,  QString data,  QImage img, bool selstat,  QObject *parent) :

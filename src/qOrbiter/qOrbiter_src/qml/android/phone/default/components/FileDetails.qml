@@ -3,16 +3,16 @@ import QtQuick 1.0
 
 Rectangle {
     id: filedetailrect
-    width: scaleX(80)
+    width: scaleX(85)
     height: scaleY(75)
     anchors.top: parent.top
     anchors.topMargin: scaleY(5)
     anchors.horizontalCenter: parent.horizontalCenter
-    color: style.highlight2
+    color: "silver"
     clip: true
     radius: 5
-    border.color: style.highlight1
-    border.width: 3
+    border.color:"orange"
+    border.width: 1
     Image {
         id: fdbg
         source: "../img/bkg.png"
@@ -29,22 +29,6 @@ Rectangle {
         running: true
     }
 
-    Rectangle{
-        id:titlerect
-        height: childrenRect.height + 5
-        width: parent.width
-        color:style.highlight1
-        radius:2.5
-        Text {
-            id: text2
-            anchors.horizontalCenter: parent.horizontalCenter
-               text: "Filename: " + filedetailsclass.filename
-            font.pixelSize: 14
-            font.bold: true
-            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-        }
-
-    }
 
     Rectangle{
         id:imageholder
@@ -66,8 +50,8 @@ Rectangle {
         }
         Image {
             id: filedetailsimage
-            width: filedetailsclass.aspect=="wide"? scaleX(42.5) : scaleX(23)
-            height:filedetailsclass.aspect=="wide"?scaleY(42.5) : scaleY(55)
+            width: scaleX(25)
+            height:scaleY(25)
             source: "image://listprovider/filedetails/"+securityvideo.timestamp
             smooth: true
         }
@@ -86,11 +70,11 @@ Rectangle {
         id: rectangle1
         anchors.verticalCenter: imageholder.verticalCenter
         width:  filedetailsclass.aspect=="wide"? parent.width *.40 : parent.width *.45
-        height: scaleY(45)
+        height: scaleY(35)
         radius: 2.5
         clip:  true
-        color: style.darkhighlight
-        border.color: style.highlight1
+        color: "black"
+        border.color: "orange"
         anchors.left: imageholder.right
         anchors.leftMargin: scaleX(.5)
 

@@ -1,6 +1,6 @@
 #include "mediatypeitem.h"
 
-#include <QDebug>
+
 
 
 MediaSubTypeItem::MediaSubTypeItem( QString name,  QString pk_fileformat,  QImage img, bool selstat,  QObject *parent) :

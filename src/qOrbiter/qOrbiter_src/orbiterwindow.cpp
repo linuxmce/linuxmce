@@ -2,7 +2,6 @@
 #include <QObject>
 #include <QDeclarativeView>
 #include <qdeclarative.h>
-#include <QDebug>
 #include <QApplication>
 
 #ifdef IOS
@@ -38,8 +37,8 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     mainView.rootContext()->setContextProperty("appH", mainView.window()->height());
 #elif for_android
 
-    mainView.rootContext()->setContextProperty("appW", 400);
-    mainView.rootContext()->setContextProperty("appH", 800);
+    mainView.rootContext()->setContextProperty("appW", 320);
+    mainView.rootContext()->setContextProperty("appH", 480);
 #else
     mainView.rootContext()->setContextProperty("appW", 1280);
     mainView.rootContext()->setContextProperty("appH", 720);

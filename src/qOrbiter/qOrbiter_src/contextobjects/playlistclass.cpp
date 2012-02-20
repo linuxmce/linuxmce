@@ -1,5 +1,5 @@
 #include "playlistclass.h"
-#include <QDebug>
+
 
 PlaylistClass::PlaylistClass(PlaylistItemClass* prototype, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype)

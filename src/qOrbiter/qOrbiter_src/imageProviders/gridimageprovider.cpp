@@ -1,6 +1,6 @@
 #include "gridimageprovider.h"
 #include "qorbitermanager.h"
-#include <QDebug>
+
 
 GridIndexProvider::GridIndexProvider(ListModel *model  , int pathRole, int pixmapRole) :
     QDeclarativeImageProvider(QDeclarativeImageProvider::Image), mModel(*model),  mPathRole(pathRole),

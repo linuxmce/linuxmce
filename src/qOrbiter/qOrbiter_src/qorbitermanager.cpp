@@ -17,7 +17,6 @@
 
 #include "qorbitermanager.h"
 #include <QDeclarativeProperty>
-//#include <QDebug>
 #include <QFile>
 #include <QtXml/QtXml>
 #include <QProcess>

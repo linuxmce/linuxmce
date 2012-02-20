@@ -66,12 +66,8 @@ public:
     virtual int DeviceIdInvalid();
 
 
-    bool initialize();
 
-    bool deinitialize();
 
-    bool getConfiguration();
-    void executeCommandGroup(int cmdGrp);
     Q_INVOKABLE QImage getfileForDG(string filename);
     Q_INVOKABLE void GetFileInfoForQml(QString qs_file_reference);
     Q_INVOKABLE void GetMediaAttributeGrid(QString qs_fk_fileno);
@@ -97,7 +93,7 @@ public:
     Q_INVOKABLE void adjustVolume( int vol);
     Q_INVOKABLE void mute();
     Q_INVOKABLE void changedTrack(QString direction);
-   Q_INVOKABLE  void populateAdditionalMedia();
+
     Q_INVOKABLE void SetSecurityMode(int pin, int mode);
     Q_INVOKABLE void setLocation(int location, int ea);
     Q_INVOKABLE void setUser(int user);
@@ -114,6 +110,7 @@ public:
     Q_INVOKABLE void showMenu();
     Q_INVOKABLE void CopyDisc();
     Q_INVOKABLE void ShowBookMarks();
+
 
     void getImage();
 
@@ -134,6 +131,7 @@ public:
     Q_INVOKABLE void extraButtons(QString button);
     Q_INVOKABLE void saveScreenAttribute(QString attribute);
     Q_INVOKABLE void newOrbiter();
+
     virtual int PromptUser(string sPrompt,int iTimeoutSeconds=10,map<int,string> *p_mapPrompts = NULL);
     virtual int PromptFor(string sToken);
 
@@ -1074,11 +1072,29 @@ signals:
     void disconnected(QString msg);
     void screenSaverImages(QStringList images);
     void objectUpdate(QImage u);
+    void gotoScreen(QString screen);
+    void addItem(gridItem*);
+    void requestMediaGrid(int);
+    void clearGrid();
+    void statusMessage(QString s);
+    void gridModelSizeChange(int size);
+    void checkGridStatus();
+    void gotoQml(QString qml);
+    void startManager(QString, QString);
 
 public slots:
     void requestLiveTvPlaylist();
+    void prepareFileList( int iPK_MediaType);
+    void cleanupGrid();
+    void populateAdditionalMedia();
+     void executeCommandGroup(int cmdGrp);
 
-
+     bool initialize();
+     bool deinitialize();
+     bool getConfiguration();
+     bool registerDevice();
+     void qmlSetup(QString device, QString address);
+     void connectionError();
 };
 
 //<-dceag-end-b->

@@ -1,5 +1,5 @@
 #include "filtermodelitem.h"
-#include <QDebug>
+
 
 
 FilterModelItem::FilterModelItem( QString name,  QString pk_fileformat,  QImage img, bool selstat,  QObject *parent) :

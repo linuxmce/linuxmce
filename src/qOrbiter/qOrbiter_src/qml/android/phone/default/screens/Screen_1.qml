@@ -11,31 +11,34 @@ Rectangle {
     width: appW
     color: "transparent"
 
-    NowPlayingBox{anchors.horizontalCenter: parent.horizontalCenter}
-
-    Column{
-        id:maindisplay
-        anchors.centerIn: parent
-        height: childrenRect.height
-        width: scaleX(100)
-
-        DroidHomeSelector{anchors.horizontalCenter: parent.horizontalCenter}
-
-    }
     Text{
         id:spaceholder
         text:dcemessage
         font.pixelSize: scaleY(3)
         font.family: "Droid Sans"
-        anchors.bottom: advancedrow.top
+        anchors.top: stage.top
+        anchors.topMargin: scaleY(1)
+        width: scaleX(75)
+        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         color: "silver"
 
     }
+    Column{
+        id:maindisplay
+        anchors.top: spaceholder.bottom
+        height: childrenRect.height
+        width: scaleX(100)
+        spacing: scaleY(1)
+        NowPlayingBox{anchors.horizontalCenter: parent.horizontalCenter}
+        DroidHomeSelector{anchors.horizontalCenter: parent.horizontalCenter}
+
+    }
+
     Image {
         id: bottomBg
         source: "../img/lowerbkg.png"
-        height: scaleY(10)
-        width: scaleX(55)
+        height: advancedrow.height + scaleY(1)
+        width: advancedrow.width + scaleX(1)
         anchors.bottom: stage.bottom
         anchors.horizontalCenter: stage.horizontalCenter
 

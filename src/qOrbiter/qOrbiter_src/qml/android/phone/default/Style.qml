@@ -51,8 +51,8 @@ QtObject{
     //icon sizes
     property int iconHeight:scaleY(15)
     property int iconWidth: scaleY(15)
-    property int  stdbuttonh: scaleY(10)
-    property int  stdbuttonw: scaleY(10)
+    property int  stdbuttonh: scaleY(15)
+    property int  stdbuttonw: scaleY(15)
 
     //textStyles
     property string stylebuttonimage: ""
@@ -65,10 +65,8 @@ QtObject{
     //title and other misc windo accents
     property color titletextcolor: "black"
     //button styling
-    property int buttonH:scaleY(10)
-    property int buttonW: scaleY(10)
-
-
+    property int buttonH:scaleY(15)
+    property int buttonW: scaleY(15)
 
     property int avoptionbuttonh :scaleY(12)
     property int avoptionbuttonw :scaleY(12)
@@ -76,11 +74,11 @@ QtObject{
     property int mediabuttonw :scaleY(12)
     property int mediabuttonh :scaleY(12)
 
-    property color button_system_color: "lightsteelblue"
-    property color button_system_color_hover: "lightblue"
+    property color button_system_color: "silver"
+    property color button_system_color_hover: "darkgrey"
 
-    property color button_action_color: "lightsteelblue"
-    property color button_action_color_hover: "lightblue"
+    property color button_action_color: "lightgrey"
+    property color button_action_color_hover: "darkgrey"
 
     property variant bgImg: "null"
     property string b_title: "null"

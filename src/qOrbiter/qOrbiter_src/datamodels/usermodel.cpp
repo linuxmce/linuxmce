@@ -1,5 +1,5 @@
 #include "usermodel.h"
-#include <QDebug>
+
 
 UserModel::UserModel(UserItem* prototype, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype)

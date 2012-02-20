@@ -30,8 +30,7 @@ Column {
 
         Image {
             id: image2
-            height: 45
-            width:45
+            scale:scaleX(.25)
             anchors.centerIn: parent
             smooth: true
             source: "../img/plus.png"
@@ -88,8 +87,7 @@ Column {
 
         Image {
             id: image1
-            height: 45
-            width:45
+            scale:scaleX(.25)
             anchors.centerIn: parent
             smooth: true
             source: "../img/minus.png"

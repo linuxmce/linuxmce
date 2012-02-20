@@ -1,5 +1,5 @@
 #include "epgchannellist.h"
-#include <QDebug>
+
 
 
 EPGChannelList::EPGChannelList(EPGItemClass* prototype,qorbiterManager *reference) :

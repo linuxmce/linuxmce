@@ -15,8 +15,8 @@ Rectangle{
 
     BorderImage {
         id: name
-verticalTileMode: BorderImage.Round
-horizontalTileMode: BorderImage.Repeat
+        verticalTileMode: BorderImage.Round
+        horizontalTileMode: BorderImage.Repeat
         source: "../img/drpshadow.png"
         anchors.fill: buttonBase
         anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
@@ -25,21 +25,24 @@ horizontalTileMode: BorderImage.Repeat
 
     }
 
+
     Rectangle {
         id:buttonBase
-        color:style.button_system_color
+        color:"transparent"
         height: style.stdbuttonh
         width: style.stdbuttonw
-        border.width: 2
-        border.color: "aliceblue"
-        radius: 2.5
+        Image {
+            id: button_bg
+            source: "../img/buttonbg.png"
+            anchors.fill: parent
+        }
 
         Text {
             id: buttonLabel
             width: -1
             height: 0
             text:"null ipsum delorium"
-            font.pixelSize: scaleY(1.5)
+            font.pixelSize: scaleY(2)
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
             anchors.fill: parent
@@ -53,20 +56,17 @@ horizontalTileMode: BorderImage.Repeat
 
             z:1
         }
+        Image {
+            id: hoverstate
+            source: "../img/buttonhover.png"
+            anchors.fill: parent
+            visible:false
+
+        }
         MouseArea{
             anchors.fill: buttonLabel
-            hoverEnabled: true
-            onEntered: {
-                buttonBase.color = style.button_system_color_hover
-                buttonLabel.color = "white"
-                buttonLabel.font.capitalization = Font.AllUppercase
-            }
-
-            onExited: {
-                buttonBase.color = style.button_system_color
-                buttonLabel.font.capitalization = Font.Normal
-                buttonLabel.color = "black"
-            }
+            onPressed: hoverstate.visible = true
+            onReleased: hoverstate.visible = false
         }
     }
 }

@@ -1,5 +1,5 @@
 #include "filedetailsmodel.h"
-//#include <QDebug>
+
 FileDetailsModel::FileDetailsModel(FileDetailsItem* prototype, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype)
 {

@@ -6,14 +6,26 @@ Rectangle {
     height: childrenRect.height
     width: childrenRect.width
     color: "transparent"
-    Row{
+    Column{
         id:attributerow
-        height: scaleY(style.stdbuttonh )
+        height: childrenRect.height
         width: childrenRect.width
         spacing: 5
 
         HomeButton{id:home}
 
+        ButtonSq
+        {
+            height: style.stdbuttonH
+            width: style.stdbuttonw
+            buttontext: "Grid Back"
+            buttontextbold: true
+            MouseArea
+            {
+                anchors.fill:parent
+                onClicked: goBackGrid()
+            }
+        }
         ButtonSq{
 
             buttontext: "Attribute Sort"

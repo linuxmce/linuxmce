@@ -1,7 +1,7 @@
 #include "threadedsplash.h"
 #include <QDeclarativeView>
 #include <QDeclarativeContext>
-#include <QDebug>
+
 
 
 

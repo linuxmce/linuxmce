@@ -1,6 +1,6 @@
 #include "skindatamodel.h"
 #include "qorbitermanager.h"
-#include <QDebug>
+
 #include <QDeclarativeComponent>
 #include <QDeclarativeEngine>
 #include <QUrl>
@@ -68,10 +68,10 @@ void SkinDataModel::handleItemChange()
 
 SkinDataItem * SkinDataModel::find(const QString &id) const
 {
-    qDebug("Looking for skin...");
+   // qDebug("Looking for skin...");
     foreach(SkinDataItem* item, m_list)
     {
-        qDebug()<< "Found:" << item->id() << "of" << m_list.size();
+       // qDebug()<< "Found:" << item->id() << "of" << m_list.size();
 
         if(item->id().toLower() == id.toLower())
         {
@@ -154,7 +154,7 @@ void SkinDataModel::setActiveSkin(QString name)
     ui_reference->setDceResponse("Loading Skin at " + m_baseUrl.toString() + "/" + name);
 
     QString skinURL = find(name)->path();
-    qDebug() << skinURL;
+   //dir -l qDebug() << skinURL;
     QDeclarativeComponent skinData(ui_reference->qorbiterUIwin->engine(), skinURL);
     QObject *styleObject = skinData.create(ui_reference->qorbiterUIwin->rootContext());
     if (skinData.isError()) {

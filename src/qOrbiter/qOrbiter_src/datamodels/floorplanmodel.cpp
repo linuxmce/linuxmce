@@ -1,5 +1,5 @@
 #include "floorplanmodel.h"
-//#include <QDebug>
+
 FloorPlanModel::FloorPlanModel(FloorPlanItem* prototype, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype)
 {

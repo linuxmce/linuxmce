@@ -4,19 +4,20 @@ Rectangle {
 
     id: now_playing
     height: scaleY(40)
-    width: scaleX(75)
+    width: scaleX(85)
     visible: dcenowplaying.b_mediaPlaying ? true : false
     color:"transparent"
+
     clip:true
     Timer{
         id:singleshot
         repeat: false
-        interval: 2000
+        interval: 5000
         triggeredOnStart: false
         running: true
-
         onTriggered: np_image.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
+
 
     Image {
         id: np_image
@@ -24,7 +25,7 @@ Rectangle {
         fillMode: Image.PreserveAspectCrop
         anchors.centerIn: np_box
         height:scaleY(30)
-        width:scaleX(40)
+        width:scaleX(85)
 
     }
     Connections

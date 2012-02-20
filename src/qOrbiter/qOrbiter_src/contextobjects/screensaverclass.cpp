@@ -1,6 +1,6 @@
 #include "screensaverclass.h"
 #include <QTimer>
-#include <QDebug>
+
 
 ScreenSaverClass::ScreenSaverClass(QObject *parent) :
     QObject(parent)

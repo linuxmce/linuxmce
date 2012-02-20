@@ -1,7 +1,7 @@
 #include "attributesortitem.h"
 
 
-#include <QDebug>
+
 
 
 AttributeSortItem::AttributeSortItem( QString name,  QString pk_fileformat,  QImage img, bool selstat,  QObject *parent) :

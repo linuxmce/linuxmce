@@ -1,5 +1,5 @@
 #include "filtermodel.h"
-//#include <QDebug>
+
 
 FilterModel::FilterModel(FilterModelItem* prototype, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype)
