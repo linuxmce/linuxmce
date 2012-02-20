@@ -15,67 +15,96 @@ import "js/ComponentLoader.js" as MyJs
     width:style.orbiterW
     height: style.orbiterH
 
-    Image {
+    Connections{
+        target: manager
+        onOrientationChanged: checkLayout()
+
+        }
+
+        Image {
         id: bg
         source: "img/lmcesplash.png"
         anchors.fill:parent
-    }
+        }
+
+        function scaleX(x){
+        return x/100*appW
+        }
+        function scaleY(y){
+        return y/100*appH
+        }
 
 
-    function scaleX(x){
-        return x/100*style.orbiterW
-    }
-    function scaleY(y){
-        return y/100*style.orbiterH
-    }
+        function screenchange(screen) {
+            var component;
+            pageLoader.source = "screens/"+screen
 
-     function screenchange(screenname )
-     { 
-       console.log("Command to change to:" + screenname + " in process...")
-        pageLoader.source = "screens/" + screenname
-        if (pageLoader.status == 1)
-         {
-             //manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
-             console.log("Command to change to:" + screenname + " did something!!")
-         }
-         else
-         {
-            console.log("Command to change to:" + screenname + " failed!")
-            //screenfile = screenname
-            //pageLoader.source = "screens/Screen_x.qml"
-         }
-     }
+            console.log("QML Command to change to:" +screen);
+            component = Qt.createComponent("screens/"+screen);
+            if (component.status == Component.Ready)
+            {
+                console.log("loaded!");
+                finishCreation(component);
+            }
+            else
+            {
+                console.log("delayed load, waiting..")
+
+                component.statusChanged.connect(finishCreation(component));
+                component.progressChanged.connect(checkStatus(component))
+            }
+        }
+
+        function finishCreation(component) {
+          var sprite;
+            if (component.status == Component.Ready) {
+                console.log("Finishing creation")
+                sprite = component.createObject(this, {"x": 0, "y": 0});
+                pageLoader.sourceComponent = component
+                if (sprite == null) {
+                    // Error Handling
+                    console.log("Not finished!");
+                }
+            } else if (component.status == Component.Error) {
+                // Error Handling
+                console.log("Error loading component:", component.errorString());
+            }
+        }
+
+        function checkStatus(component)
+        {
+           console.log(component.progress)
+        }
 
 
+        Loader {
+        id:pageLoader
+        objectName: "loadbot"
 
-     Loader {
-         id:pageLoader
-         objectName: "loadbot"
+        onSourceChanged:  loadin
+        onLoaded: {
 
-         onSourceChanged:  loadin
-         onLoaded: {
-
-             console.log("Screen Changed:" + pageLoader.source)
+            console.log("Screen Changed:" + pageLoader.source)
 
             }
-         }
+        }
 
-     SequentialAnimation{
-         id:loadin
+        SequentialAnimation{
+        id:loadin
 
-         PropertyAnimation{
-             id:fadeout
-             target:pageLoader
-             properties: "opacity"; to: "0"; duration: 5000
+        PropertyAnimation{
+            id:fadeout
+            target:pageLoader
+            properties: "opacity"; to: "0"; duration: 5000
 
-         }
-         PropertyAnimation{
-             id: fadein
-             target:pageLoader
-             properties: "opacity"; to: "1"; duration: 5000
-         }
+        }
+        PropertyAnimation{
+            id: fadein
+            target:pageLoader
+            properties: "opacity"; to: "1"; duration: 5000
+        }
 
-     }
+        }
 
 
- }
+    }
