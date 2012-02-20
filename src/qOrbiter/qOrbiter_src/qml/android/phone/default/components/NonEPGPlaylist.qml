@@ -2,13 +2,12 @@ import QtQuick 1.0
 
 Rectangle {
     id:nonepgplaylist
-    width: scaleX(85)
-    height: scaleY(65)
+    width: scaleX(80)
+    height: scaleY(75)
     color: "silver"
     border.color: "orange"
     border.width: 2
-    clip:false
-    anchors.centerIn: parent
+    clip:false    
     function setupMedia()
     {
         manager.setNowPlayingData();
@@ -38,8 +37,8 @@ Rectangle {
 
     ListView{
         id:nonepgplaylistview
-        width: scaleX(65)
-        height: scaleY(65)
+        width: scaleX(80)
+        height: scaleY(75)
         anchors.centerIn: parent
         highlightFollowsCurrentItem: true
         highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
@@ -53,10 +52,17 @@ Rectangle {
             Rectangle {
             border.color: "silver"
             border.width: 1
-            width:scaleX(65)
-            height: scaleY(25)
+            width:scaleX(80)
+            height: scaleY(20)
             anchors.horizontalCenter: parent.horizontalCenter
-            color: "darkgrey"
+
+            Image {
+                id: bg
+                source: "../img/lowerbkg.png"
+                width:scaleX(80)
+                height: scaleY(20)
+                fillMode: Image.PreserveAspectCrop
+            }
             clip: true
             Image {
                 id: playlistimage
@@ -67,11 +73,12 @@ Rectangle {
             }
             Text {
                 id: position
-                text: qsTr("Item #") + name
+                text: qsTr("#") + name
                 font.family: "DroidSans"
-                color: "aliceblue"
-                font.pixelSize: scaleY(2.25)
+                color: "silver"
+                font.pixelSize: scaleY(4)
                 font.bold: true
+
                 anchors.bottom: parent.bottom
                 opacity: .75
             }
@@ -79,25 +86,25 @@ Rectangle {
             Text {
                 text:  index === dcenowplaying.m_iplaylistPosition ? "Now Playing - " + id : id
                 font.family: "DroidSans"
-                color: "aliceblue"
+                color: "silver"
                 width: parent.width
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                font.pixelSize: scaleY(2.15)
-                //font.bold: true
-
+                font.pixelSize: scaleY(4)
             }
 
-         /*   Image {
+           Image {
                 id: overlay
                 fillMode: Image.PreserveAspectCrop
-                source: "../img/header.png"
+                source: "../img/transparencymask.png"
                 anchors.fill: parent
                 opacity: .30
             }
-         */
+
             MouseArea{
                 anchors.fill: parent
                 onClicked: changedPlaylistPosition(name)
+                onPressed: border.color = "orange"
+                onReleased: border.color="silver"
             }
         }
     }
