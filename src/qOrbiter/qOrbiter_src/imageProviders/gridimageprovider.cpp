@@ -37,27 +37,27 @@ QImage GridIndexProvider::requestImage(const QString &id, QSize *size, const QSi
     {
         image.load(":/icons/icon.png");
     }
-
-
-    QImage result;
-    if (image.height() < image.width())
-    {
-        mModel.find(id)->setAspect("poster");
-    }
     else
     {
-        mModel.find(id)->setAspect("wide");
+QImage result;
+        if (image.height() < image.width())
+        {
+            mModel.find(id)->setAspect("poster");
+        }
+        else
+        {
+            mModel.find(id)->setAspect("wide");
+        }
+
+        if (requestedSize.isValid()) {
+            result = image.scaled(requestedSize);
+        } else {
+            result = image;
+        }
     }
 
-    if (requestedSize.isValid()) {
-        result = image.scaled(requestedSize);
-    } else {
-        result = image;
-    }
 
-
-    // *size = result.size();
-    return result;
+    return image;
 
 }
 

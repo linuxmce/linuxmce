@@ -10,10 +10,6 @@ Rectangle {
     color: "transparent"
     clip: true
 
-    Image {
-        id: gb
-        source: "../img/icons/mediatime.png"
-    }
     Connections
     {
         target: filedetailsclass
@@ -22,6 +18,64 @@ Rectangle {
             MyJs.createFileDetails(gmediaType)
         }
     }
+    Rectangle{
+        id: pos_label
+        anchors.top: fileviewscreen.top
+        anchors.horizontalCenter: fileviewscreen.horizontalCenter
+        color:style.darkhighlight
+        width: scaleX(75)
+        height: scaleY(5)
+        Row{
+            id:label_row
+            width: childrenRect.width
+            height: scaleY(5)
+            anchors.centerIn: pos_label
+            spacing: scaleX(1)
+            Text {
+                id: grid_position_label
+                text: qsTr("You are browsing by:") + manager.q_mediaType
+            }
+            Text {
+                id: grid_attritbute_label
+                text: qsTr("Attribute") + manager.q_attributetype_sort
+            }
+        }
+
+    }
+    Connections
+    {
+        target: dataModel
+        onProgressChanged:progress_bar_fill.height = ((progress_bar.height) * (dataModel.progress )) /100
+    }
+
+    Rectangle
+    {
+        id:progress_bar
+        height: scaleY(65)
+        width: scaleX(2)
+        color: "transparent"
+        border.color: "white"
+        border.width: 1
+        anchors.verticalCenter: parent.verticalCenter
+
+        Rectangle{
+            id:progress_bar_fill
+            height: 0
+            width: parent.width
+            color: dataModel.loadingStatus ? "green" : "red"
+            anchors.bottom: parent.bottom
+        }
+        Text {
+            id: total_cells
+            text: dataModel.totalcells
+            color: "grey"
+            font.bold: true
+            font.pixelSize: scaleY(4)
+            anchors.top: progress_bar_fill.top
+        }
+    }
+
+
 
         Component
         {
@@ -163,7 +217,7 @@ Rectangle {
         }
 
 
-        MultiStateFileDisplay{id:grid_view1}
+        MultiStateFileDisplay{id:grid_view1; anchors.top: pos_label.bottom}
 
         ListView{
             id:alphalist

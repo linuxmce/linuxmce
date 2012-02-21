@@ -16,6 +16,10 @@ class ListModel : public QAbstractListModel
 {
     Q_OBJECT
 
+        Q_PROPERTY (double progress READ getProgress WRITE setProgress NOTIFY progressChanged)
+        Q_PROPERTY (bool loadingStatus READ getLoadingStatus WRITE setLoadingStatus NOTIFY loadingStatusChanged)
+
+
 public:
     explicit ListModel(gridItem* prototype, QObject* parent = 0);
     ~ListModel();
@@ -35,6 +39,8 @@ public:
     int totalcells;
     bool loadingStatus;
     int gridType;
+    double progress;
+    int currentCells;
 
 
 
@@ -46,6 +52,8 @@ signals:
     void sizeChanged(int size);
     void gridTypeChanged(int type);
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const int &sRow);
+    void progressChanged(double p);
+
 
 public slots:
     void checkForMore();
@@ -58,6 +66,8 @@ public slots:
     void clear();
     void setLoadingStatus(bool b);
     bool getLoadingStatus();
+    void setProgress(double n_progress);
+    double getProgress();
 
 private slots:
     void handleItemChange();

@@ -175,7 +175,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, DCE::qOrbiter *dceDevic
 void qorbiterManager::gotoQScreen(QString s)
 {
     setRequestMore(false);
-
+    model->clear();
     //send the qmlview a request to go to a screen, needs error handling
     //This allows it to execute some transition or other if it wants to
 
@@ -1094,9 +1094,11 @@ void qorbiterManager::setStringParam(int paramType, QString param)
     QString q_pk_attribute;        //10
     QString *datagridVariableString;
     */
+
     QStringList longassstring;
     QString datagridVariableString;
     requestMore = false;
+    model->clear();
     switch (paramType)
     {
     case 1:

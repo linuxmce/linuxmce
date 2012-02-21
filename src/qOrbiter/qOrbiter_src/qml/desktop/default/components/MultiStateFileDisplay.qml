@@ -6,8 +6,6 @@ Rectangle {
     width: scaleX(85)
     height: scaleY(85)
     clip: true
-    anchors.top: parent.top
-    anchors.topMargin: scaleY(5)
     anchors.horizontalCenter: parent.horizontalCenter
     color: "transparent"
 
@@ -26,7 +24,7 @@ Rectangle {
         anchors.centerIn: gridholder
         model:dataModel
         delegate: contactDelegate
-
+        cacheBuffer: 20
         focus: true
        //clip: true
         //contentItem.clip: true
