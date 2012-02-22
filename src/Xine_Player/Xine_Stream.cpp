@@ -189,12 +189,14 @@ Xine_Stream::Xine_Stream(Xine_Stream_Factory* pFactory, xine_t *pXineLibrary, in
 	m_pXineStreamEventQueue = NULL;
 
 	m_iZoomLevel = 100;
-	
+ 
 	m_isSlimClient = false;
-        
+
         m_sMediaType = "N";
         m_iMediaID = -1;
 	
+	m_iMRLPos = 0;
+
 	// VPTS stuff
 	m_iStartVPTS = 0;
 	m_iCurrentVPTS = 0;
@@ -538,6 +540,9 @@ bool Xine_Stream::CloseMedia()
 		
 		m_bIsRendering = false;
 		m_iTitle=m_iChapter=-1;
+
+		m_vectMRLs.clear();
+		m_iMRLPos = 0;
 	}
 	
 	return true;
@@ -554,6 +559,13 @@ bool Xine_Stream::OpenMedia(string fileName, string &sMediaInfo, string sMediaPo
 	// resetting info about opened stream
 	m_iCachedStreamPosition = 0;
 	m_iCachedStreamLength = 0;
+
+	// Reset internal MRL list
+	{
+		PLUTO_SAFETY_LOCK(streamLock, m_streamMutex);
+		m_vectMRLs.clear();
+		m_iMRLPos = 0;
+	}
 
 	// by default, believe that everything except MPEG files has precise timecodes
 	m_bTimecodeIsPrecise = ! ( StringUtils::EndsWith(fileName, ".mpg", true) ||
@@ -1860,13 +1872,17 @@ void Xine_Stream::XineStreamEventListener( void *streamObject, const xine_event_
 	{
 		case XINE_EVENT_UI_PLAYBACK_FINISHED:
 			LoggerWrapper::GetInstance()->Write( LV_STATUS, "Got XINE_EVENT_UI_PLAYBACK_FINISHED" );
-			//pXineStream->StopSpecialSeek();
-			pXineStream->changePlaybackSpeed( PLAYBACK_STOP );
-			pXineStream->ReportTimecode();
-			pXineStream->playbackCompleted( false );
-			{			
-				PLUTO_SAFETY_LOCK(streamLock, pXineStream->m_streamMutex);
-				pXineStream->m_bIsRendering = false;
+			// Check if we have got any extended MRLs
+			if (!pXineStream->PlayNextMRL())
+			{
+				//pXineStream->StopSpecialSeek();
+				pXineStream->changePlaybackSpeed( PLAYBACK_STOP );
+				pXineStream->ReportTimecode();
+				pXineStream->playbackCompleted( false );
+				{			
+					PLUTO_SAFETY_LOCK(streamLock, pXineStream->m_streamMutex);
+					pXineStream->m_bIsRendering = false;
+				}
 			}
 			break;
 		case XINE_EVENT_QUIT:
@@ -2220,6 +2236,14 @@ void Xine_Stream::XineStreamEventListener( void *streamObject, const xine_event_
 			
 			LoggerWrapper::GetInstance()->Write( LV_WARNING, "Message details: %s", message.c_str() );
 			
+		}
+		break;
+
+		case XINE_EVENT_MRL_REFERENCE_EXT:
+		{
+			xine_mrl_reference_data_ext_t *ref = (xine_mrl_reference_data_ext_t *) event->data;
+			LoggerWrapper::GetInstance()->Write( LV_WARNING, "XINE_EVENT_MRL_REFERENCE_EXT got mrl [%s] (alternative=%d)\n", ref->mrl, ref->alternative);
+			pXineStream->AddMRL(ref);
 		}
 		break;
 
@@ -3568,6 +3592,41 @@ void Xine_Stream::UpdateTitleChapterInfo()
     }
 #endif
 //<-mkr_B_via_e->
+}
+
+void Xine_Stream::AddMRL(xine_mrl_reference_data_ext_t *ref)
+{
+        PLUTO_SAFETY_LOCK(streamLock, m_streamMutex);
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Xine_Stream::AddMRL(): Adding MRL to m_vetMRLs: '%s' ", ref->mrl );
+	m_vectMRLs.push_back(ref->mrl);
+}
+
+bool Xine_Stream::PlayNextMRL()
+{
+	PLUTO_SAFETY_LOCK(streamLock, m_streamMutex);
+	bool bMoreMRLs = !m_vectMRLs.empty() && m_iMRLPos < m_vectMRLs.size();
+
+	if (bMoreMRLs)
+	{
+		string tmp = m_vectMRLs[m_iMRLPos];
+		m_iMRLPos++;
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Xine_Stream::PlayNextMRL(): Trying to open next MRL in list: '%s' ", tmp.c_str() );
+
+		changePlaybackSpeed( PLAYBACK_STOP );
+		bool mediaOpened = xine_open( m_pXineStream, tmp.c_str() );
+		if (!mediaOpened)
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Xine_Stream::PlayNextMRL(): Opening media FAILED");
+		else 
+		{
+			if (playStream(""))
+			{
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "Xine_Stream::PlayNextMRL(): New MRL is playing.");
+				return true;
+			}
+		}
+
+	}
+	return false;
 }
 
 } // DCE namespace end

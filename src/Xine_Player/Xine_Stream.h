@@ -129,6 +129,9 @@ namespace DCE
 
 			string m_sMediaInfo;
 
+			vector<string> m_vectMRLs;
+			int m_iMRLPos;
+			
 			int m_iPlaybackSpeed;
 
 			bool getRealStreamPosition(int &positionTime, int &totalTime);
@@ -140,6 +143,8 @@ namespace DCE
 			void FireMenuOnScreen(int iButtons);
                         void SendMessageToOrbiter(string sMessage);
 
+			void AddMRL(xine_mrl_reference_data_ext_t *ref);
+			bool PlayNextMRL();
 		private:
 
 			int m_iSeekMuteStatus;
