@@ -24,6 +24,7 @@
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
 #include "datamodels/listModel.h"
+#include <datamodels/avdevice.h>
 
 #include "QBuffer"
 #include "QApplication"
@@ -3163,13 +3164,17 @@ void DCE::qOrbiter::showAdvancedButtons()
             QImage cellImg;
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
+
                 DataGridCell *pCell = it->second;
                 const char *pPath = pCell->GetImagePath();
                 filePath = QString::fromUtf8(pPath);
                 fk_file = pCell->GetValue();
                 cellTitle = QString::fromUtf8(pCell->m_Text);
                 index = pDataGridTable->CovertColRowType(it->first).first;
+               emit statusMessage(cellTitle + "::" + fk_file);
+               qmlUI->buttonList.append(new AvDevice(fk_file.toInt(), cellTitle, "core"));
             }
+            qmlUI->qorbiterUIwin->rootContext()->setContextProperty("buttonList" ,QVariant::fromValue(qmlUI->buttonList));
         }
     }
 }

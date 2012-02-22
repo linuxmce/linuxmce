@@ -10,6 +10,11 @@ Rectangle {
     color: "aliceblue"
     anchors.centerIn: parent
     Component.onCompleted: dcerouter.showAdvancedButtons()
+    MouseArea{
+        anchors.fill:avcodes
+
+    }
+
 Column{
     height: childrenRect.height
     width: avcodes.width* .85
@@ -39,6 +44,31 @@ Column{
         Text {
             id: blah
             text: qsTr("List model grid goes here")
+        }
+        ListView
+        {
+            id:codelist
+            height: parent.height
+            width: scaleX(15)
+            anchors.top:blah.bottom
+            model: buttonList
+            delegate: Rectangle{
+                id:av_code_top
+                height: scaleY(5)
+                width: parent.width *(.25)
+                color: "grey"
+                Text{
+                    id:av_label
+                    text:qs_device
+                }
+                MouseArea{
+                    anchors.fill: av_code_top
+                    hoverEnabled: true
+                    onEntered: av_code_top.color = "white"
+                    onExited: av_code_top.color = style.lighthighlight
+
+                }
+            }
         }
     }
 }

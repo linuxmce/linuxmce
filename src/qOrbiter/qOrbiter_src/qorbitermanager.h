@@ -260,6 +260,7 @@ Param 10 - pk_attribute
     ListModel *model;
     UserModel *userList;
     SkinDataModel *skinModel;
+    QList<QObject*> buttonList;
 
 
     MediaSubTypeModel *mediaTypeFilter;

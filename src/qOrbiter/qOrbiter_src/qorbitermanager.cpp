@@ -146,6 +146,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, DCE::qOrbiter *dceDevic
     goBack << ("|||1,2|0|13|0|2|");
     backwards = false;
 
+    //avcode grid button list
+
 
     //file details object and imageprovider setup
     filedetailsclass = new FileDetailsClass();
