@@ -4,7 +4,7 @@ Rectangle {
     width: scaleX(26)
     height: scaleY(61)
     color: style.lighthighlight
-    //Component.onCompleted: getLiveTVPlaylist()
+    Component.onCompleted: getLiveTVPlaylist()
     clip:true
 
     Connections{

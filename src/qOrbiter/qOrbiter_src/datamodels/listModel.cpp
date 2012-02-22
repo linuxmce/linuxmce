@@ -123,9 +123,9 @@ void ListModel::clear()
     //("Clearing List");   
     qDeleteAll(m_list);
     m_list.clear();
-    loadingStatus == false;
-    totalcells =0;
-    qDebug() << "Total Rows:" << this->rowCount();
+    this->reset();
+    setTotalCells(0);
+    qDebug() << "Total Rows:" << m_list.count();
 
 }
 
@@ -173,7 +173,7 @@ void ListModel::checkForMore()
     {
         int l = m_list.count();
         double p = (((double)l / (double)totalcells) * 100) ;
-        qDebug()<< p;
+        //qDebug()<< p;
 
         setProgress(p);
         setLoadingStatus(true);
@@ -232,9 +232,6 @@ int ListModel::getGridType()
 void ListModel::setLoadingStatus(bool b)
 {
     loadingStatus = b;
-
-
-
     emit loadingStatusChanged(loadingStatus);
 }
 
@@ -247,7 +244,7 @@ void ListModel::setProgress(double n_progress)
 {
     progress = n_progress;
     emit progressChanged( progress );
-     qDebug() << "Loading Progress:" << progress;
+    // qDebug() << "Loading Progress:" << progress;
       // qDebug() << QString::number(m_list.count()) +" cells in model, out of " + QString::number(totalcells);
 
 }
@@ -255,5 +252,12 @@ void ListModel::setProgress(double n_progress)
 double ListModel::getProgress()
 {
     return progress;
+}
+
+void ListModel::attributeSort()
+{
+   this->clear();
+    emit gimmieData(gridType);
+
 }
 

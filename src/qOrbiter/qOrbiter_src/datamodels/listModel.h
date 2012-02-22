@@ -68,6 +68,7 @@ public slots:
     bool getLoadingStatus();
     void setProgress(double n_progress);
     double getProgress();
+    void attributeSort();
 
 private slots:
     void handleItemChange();

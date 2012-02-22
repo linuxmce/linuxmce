@@ -246,6 +246,7 @@ int main(int argc, char* argv[])
         orbiterWin.setMessage("Setting up Lmce");
 
         qorbiterManager  *w= new qorbiterManager(&orbiterWin.mainView, pqOrbiter);
+
         QObject::connect(pqOrbiter, SIGNAL(statusMessage(QString)), &orbiterWin,SLOT(setMessage(QString)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter,SIGNAL(startManager(QString,QString)), w, SLOT(qmlSetupLmce(QString,QString)));
         QObject::connect(w, SIGNAL(loadingMessage(QString)), &orbiterWin,SLOT(setMessage(QString)), Qt::UniqueConnection);
@@ -264,10 +265,6 @@ int main(int argc, char* argv[])
         pqOrbiter->m_dwPK_Device = w->iPK_Device;
         pqOrbiter->m_sHostName = w->qs_routerip.toStdString();
 
-        /*
-        sRouter_IP =pqOrbiter->m_sHostName;
-        PK_Device = pqOrbiter->m_dwPK_Device;
-            */
         if ( pqOrbiter->initialize() )
         {
 

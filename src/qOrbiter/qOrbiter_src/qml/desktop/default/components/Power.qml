@@ -43,7 +43,7 @@ Rectangle {
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
-
+                            dcerouter.displayToggle(1)
                             powerrect.destroy()
                         }
                     }
@@ -75,7 +75,7 @@ Rectangle {
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
-
+                            dcerouter.displayToggle(0)
                             powerrect.destroy()
                         }
                     }

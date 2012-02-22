@@ -358,7 +358,7 @@ Param 10 - pk_attribute
     long iPK_Device;                   //this orbiters device number, passed in from command line
 
 signals:
-    void filterChanged(int);
+    void filterChanged();
     void locationChanged(int cRoom, int cEA);
     void modelChanged();
     void gridTypeChanged(int i);

@@ -37,7 +37,7 @@ Rectangle {
             }
             Text {
                 id: grid_attritbute_label
-                text: qsTr("Attribute") + manager.q_attributetype_sort
+                text: qsTr("Attribute Type Sort") + manager.q_attributetype_sort
             }
         }
 

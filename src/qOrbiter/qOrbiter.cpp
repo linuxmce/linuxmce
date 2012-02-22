@@ -1334,9 +1334,9 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 
     qmlUI->setSorting(iPK_MediaType);
     emit requestMediaGrid(iPK_MediaType);
-    emit statusMessage("Show File List Complete, Calling request Media Grid");
-    emit gotoQml("Screen_47.qml");
 
+    emit gotoQml("Screen_47.qml");
+emit statusMessage("Show File List Complete, Calling request Media Grid");
 }
 
 //<-dceag-c402-b->
@@ -1819,7 +1819,7 @@ bool qOrbiter::registerDevice()
 void qOrbiter::qmlSetup(QString device, QString address)
 {
     m_dwPK_Device = device.toLong();
-    this->m_sHostName = address.toStdString();
+    m_sHostName = address.toStdString();
     if(initialize())
     {
 
@@ -1828,7 +1828,7 @@ void qOrbiter::qmlSetup(QString device, QString address)
     }
     else
     {
-
+connectionError();
     }
 
 }
@@ -1848,6 +1848,35 @@ void DCE::qOrbiter::executeCommandGroup(int cmdGrp)
     CMD_Execute_Command_Group execCommandGroup((long)m_dwPK_Device, (long)2, cmdGrp);
 
     SendCommand(execCommandGroup);
+}
+
+void qOrbiter::displayToggle(int i)
+{
+
+        string state;
+        string res;
+        if (i == 0)
+        {
+            state = "off";
+            DCE::CMD_Off display(m_dwPK_Device, qmlUI->iMediaPluginID, 0);
+            SendCommand(display);
+  emit statusMessage("Attempting to toggle the MD display Off");
+        }
+        else
+        {
+            state ="on";
+            DCE::CMD_On display(m_dwPK_Device, qmlUI->iMediaPluginID, 1, "");
+            SendCommand(display);
+              emit statusMessage("Attempting to toggle the MD display on");
+
+        }
+
+
+}
+
+void qOrbiter::shutdownMD()
+{
+
 }
 
 QImage DCE::qOrbiter::getfileForDG(string filePath)
@@ -2710,7 +2739,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 
     if( qmlUI->requestMore == true)
     {
-        //emit statusMessage("Still on Media Grid Screen");
+        emit statusMessage("Still on Media Grid Screen");
 
         //seeking to a specific letter then reseting the request more
         int cellsToRender= 0;
@@ -3494,10 +3523,8 @@ int DCE::qOrbiter::DeviceIdInvalid()
 
 void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
 {
-    if(qmlUI->requestMore == false)
-    {
-        qmlUI->model->clear();
-    }
+
+
     emit statusMessage("Retrieving grid for mediatype" + QString::number(iPK_MediaType));
     //emit cleanupGrid();
 
@@ -3528,21 +3555,21 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
       would be appreciated.
       */
     if(qmlUI->backwards)
-    {
-
-
-        if(qmlUI->goBack.size() > 0)
+    { qmlUI->model->clear();
+        if(!qmlUI->goBack.isEmpty())
         {
             qmlUI->goBack.removeLast();
 
         }
-        else if (qmlUI->goBack.isEmpty())
+        else
         {
             qmlUI->initializeSortString();
 
         }
 
         s= qmlUI->goBack.last();
+        emit statusMessage(s);
+        qmlUI->backwards = false;
     }
     else
     {

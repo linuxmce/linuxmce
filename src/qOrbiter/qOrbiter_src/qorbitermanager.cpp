@@ -212,7 +212,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     //  QObject::connect(this,SIGNAL(stillLoading(bool)), model, SLOT(setLoadingStatus(bool)), Qt::QueuedConnection);
 
 
-    QObject::connect(this,SIGNAL(filterChanged(int)), pqOrbiter,SLOT(prepareFileList(int)),Qt::QueuedConnection);
+    QObject::connect(this,SIGNAL(filterChanged()), model,SLOT(attributeSort()),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(loadingStatusChanged(bool)), this, SLOT(setRequestMore(bool)),Qt::QueuedConnection);
     QObject::connect(model, SIGNAL(gimmieData(int)), pqOrbiter, SLOT(populateAdditionalMedia()),Qt::QueuedConnection);
     QObject::connect(this, SIGNAL(mediaRequest(int)), pqOrbiter,SLOT(prepareFileList(int)), Qt::QueuedConnection);
@@ -1097,8 +1097,8 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
     QStringList longassstring;
     QString datagridVariableString;
-    requestMore = false;
-    model->clear();
+  model->clear();
+
     switch (paramType)
     {
     case 1:
@@ -1106,19 +1106,21 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-        emit filterChanged(i_current_mediaType);
+        emit mediaRequest(i_current_mediaType);
         break;
     case 2:
         q_fileFormat = param;
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-        emit filterChanged(i_current_mediaType);
+
+        emit mediaRequest(i_current_mediaType);
         break;
     case 3:
         q_attribute_genres = param;
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-        emit filterChanged(i_current_mediaType);
+
+        emit mediaRequest(i_current_mediaType);
         break;
     case 4:
         if (q_mediaSources != param.remove("!D"))
@@ -1142,7 +1144,8 @@ void qorbiterManager::setStringParam(int paramType, QString param)
                 q_pk_attribute = param.remove("!A");
                 longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
                 datagridVariableString = longassstring.join("|");
-                emit filterChanged(i_current_mediaType);
+
+                emit mediaRequest(i_current_mediaType);
             }
         }
         break;
@@ -1150,7 +1153,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
         q_usersPrivate = param;
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-        emit filterChanged(i_current_mediaType);
+        emit mediaRequest(i_current_mediaType);
         break;
     case 6:
         if (param.contains("!P"))
@@ -1167,20 +1170,22 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             }
             longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
             datagridVariableString = longassstring.join("|");
-            emit filterChanged(i_current_mediaType);
+            emit mediaRequest(i_current_mediaType);
             break;
         }
     case 7:
         q_pk_users = param;
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-        emit filterChanged(i_current_mediaType);
+
+        emit mediaRequest(i_current_mediaType);
         break;
     case 8:
         q_last_viewed = param;
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-        emit filterChanged(i_current_mediaType);
+
+        emit mediaRequest(i_current_mediaType);
         break;
     case 9:
         if(param.contains("!F"))
@@ -1202,12 +1207,13 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             q_pk_attribute = param.remove("!A");
             longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
             datagridVariableString = longassstring.join("|");
-            emit filterChanged(i_current_mediaType);
+
+            emit mediaRequest(i_current_mediaType);
             break;
         }
 
     default:
-        emit filterChanged(i_current_mediaType);
+        emit mediaRequest(i_current_mediaType) ;
 
     }
 
@@ -1267,7 +1273,7 @@ void qorbiterManager::goBackGrid()
 {
     setRequestMore(false);
     backwards = true;
-    execGrp(i_current_command_grp);
+    emit mediaRequest(i_current_mediaType);
 }
 
 void qorbiterManager::showFileInfo(QString fk_file)
@@ -1594,7 +1600,7 @@ void qorbiterManager::setDceResponse(QString response)
     dceResponse = response;
     emit loadingMessage(dceResponse);
     emit dceResponseChanged();
-   // qDebug() << dceResponse;
+    qDebug() << dceResponse;
 
 }
 

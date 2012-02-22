@@ -1088,6 +1088,8 @@ public slots:
     void cleanupGrid();
     void populateAdditionalMedia();
      void executeCommandGroup(int cmdGrp);
+     void displayToggle(int);
+     void shutdownMD();
 
      bool initialize();
      bool deinitialize();
@@ -1095,6 +1097,7 @@ public slots:
      bool registerDevice();
      void qmlSetup(QString device, QString address);
      void connectionError();
+
 };
 
 //<-dceag-end-b->
