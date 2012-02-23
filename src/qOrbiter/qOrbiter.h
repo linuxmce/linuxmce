@@ -1081,6 +1081,8 @@ signals:
     void checkGridStatus();
     void gotoQml(QString qml);
     void startManager(QString, QString);
+    void deviceInvalid(QList<QObject*>);
+
 
 public slots:
     void requestLiveTvPlaylist();

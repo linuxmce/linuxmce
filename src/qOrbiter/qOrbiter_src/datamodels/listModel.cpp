@@ -121,12 +121,11 @@ QModelIndex ListModel::indexFromItem(const gridItem *item) const
 void ListModel::clear()
 {
     //("Clearing List");
-    removeRows(0, m_list.count(), QModelIndex());
 
     qDeleteAll(m_list);
     m_list.clear();
-    this->reset();
-    setTotalCells(0);
+   reset();
+    totalcells = 0;
 
     qDebug() << "Total Rows:" << m_list.count();
 
@@ -210,7 +209,7 @@ void ListModel::setTotalCells(int cells)
         //qdebug() <<QString::number(m_list.count()) +" cells in model, out of " + QString::number(totalcells);
         setLoadingStatus(false);
     }
-    emit sizeChanged(cells);
+   // emit sizeChanged(cells);
 
 }
 

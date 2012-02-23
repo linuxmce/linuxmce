@@ -29,6 +29,7 @@ public:
     QString buildType;
     QString qrcPath;
     std::string router;
+    QList<QObject*> orbiterList;
 
     long deviceno;
     bool newOrbiter;
@@ -48,6 +49,7 @@ public slots:
     QString getMessage();
 
     void showSetup();
+
 
     void setOrbiterState(bool state);
     bool getOrbiterState();
@@ -72,6 +74,10 @@ public slots:
     void setDeviceState (bool b) ;
     bool getdeviceState () {return b_devicePresent;}
 
+    void prepareExistingOrbiters(QList<QObject*> ex_list);
+
+
+
 
 signals:
     void MessageChanged();
@@ -85,6 +91,7 @@ signals:
     void deviceChanged();
     void orientationChanged(QSize);
     void checkRes();
+    void showList();
 
 
 };

@@ -1,7 +1,7 @@
 /*
   Splash.qml This is the general linuxmce splash screen and should be used for all devices on startup.
   */
-import QtQuick 1.0
+import QtQuick 1.1
 
 
 
@@ -17,6 +17,13 @@ Rectangle {
     function scaleY(y){
         return y/100*appW
     }
+
+    Connections{
+        target: window
+         onShowList:existing_orbiters.visible = true
+    }
+
+
 
     color: "slategrey"
     signal setupStart(string x, string y)
@@ -254,4 +261,39 @@ Rectangle {
         color: "white"
         anchors.bottom: rectangle2.bottom
     }
+
+   ListView{
+       id:existing_orbiters
+       height: scaleY(65)
+       width: scaleX(75)
+       anchors.centerIn: parent
+       model:orbiterList
+       visible: false
+       delegate: Rectangle{
+           id:existing_orbiter_delegate
+           height: scaleY(20)
+           width: scaleX(70)
+           color: "slategrey"
+           border.color: "white"
+           border.width: 1
+           Text {
+               id: orbiter_label
+               text: label
+               font.pixelSize: scaleY(2)
+               width: parent.width
+               wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+           }
+           Text {
+               id: dev_num
+               text:qsTr("Device:")+ i_device_number
+                font.pixelSize: scaleY(2)
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+           }
+
+           MouseArea {
+               anchors.fill: parent
+               onClicked: window.qmlSetupLmce(i_device_number, routerip.text)
+           }
+       }
+   }
 }

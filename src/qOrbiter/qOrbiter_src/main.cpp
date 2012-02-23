@@ -236,11 +236,11 @@ int main(int argc, char* argv[])
 #endif
 
 
-        //QThread *dceThread = new QThread;
+        QThread *dceThread = new QThread;
         qOrbiter *pqOrbiter = new qOrbiter(PK_Device, sRouter_IP,true,bLocalMode);
 
-        //pqOrbiter->moveToThread(dceThread);
-        //dceThread->start();
+        pqOrbiter->moveToThread(dceThread);
+        dceThread->start();
 
         orbiterWindow orbiterWin(PK_Device, sRouter_IP);
         orbiterWin.setMessage("Setting up Lmce");
@@ -249,6 +249,7 @@ int main(int argc, char* argv[])
 
         QObject::connect(pqOrbiter, SIGNAL(statusMessage(QString)), &orbiterWin,SLOT(setMessage(QString)),Qt::QueuedConnection);
         QObject::connect(pqOrbiter,SIGNAL(startManager(QString,QString)), w, SLOT(qmlSetupLmce(QString,QString)));
+        QObject::connect(pqOrbiter, SIGNAL(deviceInvalid(QList<QObject*>)), &orbiterWin,SLOT(prepareExistingOrbiters(QList<QObject *>)));
         QObject::connect(w, SIGNAL(loadingMessage(QString)), &orbiterWin,SLOT(setMessage(QString)), Qt::UniqueConnection);
         QObject::connect(&orbiterWin,SIGNAL(setupLmce(QString,QString)), pqOrbiter, SLOT(qmlSetup(QString,QString)),Qt::DirectConnection);
         QObject::connect(w, SIGNAL(raiseSplash()), &orbiterWin, SLOT(showSplash()) );

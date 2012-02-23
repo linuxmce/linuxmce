@@ -2,6 +2,7 @@
 #include <QObject>
 #include <QDeclarativeView>
 #include <qdeclarative.h>
+#include <contextobjects/existingorbiter.h>
 #include <QApplication>
 
 #ifdef IOS
@@ -170,6 +171,13 @@ void orbiterWindow::setConnectionState(bool b)
 void orbiterWindow::setDeviceState(bool b)
 {
     b_devicePresent = b; emit deviceChanged();
+}
+
+void orbiterWindow::prepareExistingOrbiters(QList<QObject *> ex_list)
+{
+    orbiterList = ex_list;
+    mainView.rootContext()->setContextProperty("orbiterList", QVariant::fromValue(orbiterList));
+    emit showList();
 }
 
 

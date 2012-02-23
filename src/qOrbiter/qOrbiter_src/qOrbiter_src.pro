@@ -247,7 +247,8 @@ SOURCES += main.cpp \
     datamodels/genericsetupmodel.cpp \
     datamodels/genericsetupitem.cpp \
     dgmanager.cpp \
-    datamodels/avdevice.cpp
+    datamodels/avdevice.cpp \
+    contextobjects/existingorbiter.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -344,7 +345,8 @@ HEADERS += \
     datamodels/genericsetupmodel.h \
     datamodels/genericsetupitem.h \
     dgmanager.h \
-    datamodels/avdevice.h
+    datamodels/avdevice.h \
+    contextobjects/existingorbiter.h
 
 OTHER_FILES += Readme.txt \
     qml/Splash.qml \

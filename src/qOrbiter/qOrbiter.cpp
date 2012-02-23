@@ -25,6 +25,7 @@
 #include "PlutoUtils/Other.h"
 #include "datamodels/listModel.h"
 #include <datamodels/avdevice.h>
+#include <contextobjects/existingorbiter.h>
 
 #include "QBuffer"
 #include "QApplication"
@@ -1753,29 +1754,36 @@ bool DCE::qOrbiter::initialize()
 
         if(  m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
         {
-            QApplication::processEvents(QEventLoop::AllEvents);
+
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "No Router");
             emit statusMessage("No Connection to Router");
+            QApplication::processEvents(QEventLoop::AllEvents);
         }
         else if( m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice )
         {
-            QApplication::processEvents(QEventLoop::AllEvents);
+
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device");
             emit statusMessage("Bad Device");
+            DeviceIdInvalid();
+            QApplication::processEvents(QEventLoop::AllEvents);
         }
 
         else if(  m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_NeedReload )
         {
-            QApplication::processEvents(QEventLoop::AllEvents);
+
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Router Needs Reload");
             emit statusMessage("Needs Reload");
+            QApplication::processEvents(QEventLoop::AllEvents);
         }
         else
         {
-            QApplication::processEvents(QEventLoop::AllEvents);
+
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
             emit statusMessage("QOrbiter Connect() Failed :(");
+            QApplication::processEvents(QEventLoop::AllEvents);
+
         }
+
 
         QApplication::processEvents(QEventLoop::AllEvents);
         Disconnect();
@@ -2805,9 +2813,9 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                 }
                 else
                 { cellImg.load(":/icons/icon.png"); }
-                // qmlUI->model->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
+                qmlUI->model->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
                 // gridItem *cItem = new gridItem(fk_file, cellTitle, filePath, index, cellImg);
-                emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
+                //  emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
                 QApplication::processEvents(QEventLoop::AllEvents);
             }
             delete pDataGridTable;
@@ -3536,14 +3544,36 @@ void DCE::qOrbiter::adjustLighting(int level)
 
 int DCE::qOrbiter::DeviceIdInvalid()
 {
-    //qmlUI->setDceResponse("Device ID invalid");
+
+
+    emit statusMessage("Device ID is invalid. Finding Existing Orbiters of this type");
+     QApplication::processEvents(QEventLoop::AllEvents);
+    QList<QObject*>  temp_orbiter_list ;
+
+    map<int,string> mapDevices;
+    GetDevicesByTemplate(PK_DeviceTemplate_get(),&mapDevices);
+
+    if( mapDevices.size()==0 )
+    {
+        emit statusMessage("No orbiters of this type found. Would you like to setup a new one?");
+         QApplication::processEvents(QEventLoop::AllEvents);
+        return 0;
+    }
+
+    for(map<int,string>::iterator it=mapDevices.begin();it!=mapDevices.end();++it)
+    {
+
+        temp_orbiter_list.append(new ExistingOrbiter((int)it->first, QString::fromStdString(it->second)));
+        cout << it->first << " " << it->second << endl;
+    }
+    emit deviceInvalid(temp_orbiter_list);
     return 0;
+
+
 }
 
 void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
 {
-
-
     emit statusMessage("Retrieving grid for mediatype" + QString::number(iPK_MediaType));
     //emit cleanupGrid();
 
@@ -3568,11 +3598,6 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
     QString params;
     QString s;
 
-    /*
-      this section is intended to handle screen handlers for grid navigation
-      currently it is broken and any insight into navigating this programmatically
-      would be appreciated.
-      */
     if(qmlUI->backwards == true)
     {
         emit statusMessage("Going back a level");
@@ -3580,7 +3605,6 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
     }
     else
     {
-
         //PROGRAM
         if (qmlUI->q_attributetype_sort == "12" && qmlUI->q_pk_attribute != "")
         {
@@ -3623,13 +3647,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
         qmlUI->i_current_mediaType = iPK_MediaType;
         qmlUI->goBack<< s;
     }
-    else
-    {
-        //qmlUI->goBack.last();
-    }
 
-
-    qDebug() << qmlUI->goBack.join("++==++");
 
     CMD_Populate_Datagrid populateDataGrid(m_dwPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 63, s.toStdString(), DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
@@ -3683,7 +3701,6 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                     int index;
                     QImage cellImg;
 
-
                     for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
                     {
                         DataGridCell *pCell = it->second;
@@ -3707,10 +3724,10 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                             cellImg.load(":/icons/icon.png");
                         }
 
-                        // qmlUI->model->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
+                        qmlUI->model->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
                         // gridItem *cItem = new gridItem(fk_file, cellTitle, filePath, index, cellImg);
 
-                        emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
+                        // emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
                         QApplication::processEvents(QEventLoop::AllEvents);
                     }
                     qDebug("Checking for more from qorbiter.cpp");
@@ -3770,4 +3787,5 @@ void DCE::qOrbiter::cleanupGrid()
     emit clearGrid();
 
 }
+
 
