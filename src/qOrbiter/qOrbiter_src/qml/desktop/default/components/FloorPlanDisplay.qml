@@ -4,6 +4,7 @@ Rectangle {
     width: style.orbiterW
     height: style.orbiterH
     color: style.highlight2
+
     Connections{
         target: floorplan
         onPageChanged: {

@@ -1097,6 +1097,8 @@ public slots:
      bool registerDevice();
      void qmlSetup(QString device, QString address);
      void connectionError();
+     void getFloorplanDeviceCommand(int device);
+
 
 };
 

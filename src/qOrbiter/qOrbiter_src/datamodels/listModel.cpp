@@ -120,11 +120,14 @@ QModelIndex ListModel::indexFromItem(const gridItem *item) const
 
 void ListModel::clear()
 {
-    //("Clearing List");   
+    //("Clearing List");
+    removeRows(0, m_list.count(), QModelIndex());
+
     qDeleteAll(m_list);
     m_list.clear();
     this->reset();
     setTotalCells(0);
+
     qDebug() << "Total Rows:" << m_list.count();
 
 }

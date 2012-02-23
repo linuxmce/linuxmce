@@ -11,6 +11,7 @@ Component{
         //this image displays a second button-image beneath the buttons
         //from the Climate-, Lighting-, Media-, Security- and Telecom-Rows;
         //if it has no purpose it can be deleted
+        */
         Image {
             id: overlay
             fillMode: Image.PreserveAspectFit
@@ -18,7 +19,15 @@ Component{
             height: parent.height
             width: parent.width
         }
-        */
+        Image {
+            id: overlay_hover
+            fillMode: Image.PreserveAspectFit
+            source: "../img/ui3/linuxmcewidebuttongrn.png"
+            height: parent.height
+            width: parent.width
+            visible:false
+        }
+
 
         ImgButton
         {       id:delegateButton
@@ -36,6 +45,8 @@ Component{
             MouseArea{
                 anchors.fill: delegateButton
                 onClicked: execGrp(params);
+                onPressed: overlay_hover.visible = true
+                onReleased: overlay_hover.visible= false
                 hoverEnabled: true
 
                 onEntered: {
