@@ -293,4 +293,40 @@ Rectangle {
         anchors.bottom: rectangle2.bottom
         anchors.horizontalCenter: rectangle2.horizontalCenter
     }
+
+    ListView{
+        id:existing_orbiters
+        height: scaleY(65)
+        width: scaleX(75)
+        anchors.centerIn: parent
+        model:orbiterList
+        visible: false
+        delegate: Rectangle{
+            id:existing_orbiter_delegate
+            height: scaleY(20)
+            width: scaleX(70)
+            color: "slategrey"
+            border.color: "white"
+            border.width: 1
+            Text {
+                id: orbiter_label
+                text: label
+                font.pixelSize: scaleY(2)
+                width: parent.width
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            }
+            Text {
+                id: dev_num
+                anchors.left: orbiter_label.right
+                text:qsTr("Device:")+ i_device_number
+                 font.pixelSize: scaleY(2)
+                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: window.qmlSetupLmce(i_device_number, routerip.text)
+            }
+        }
+    }
 }

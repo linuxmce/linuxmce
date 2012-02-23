@@ -12,11 +12,9 @@ Rectangle {
         width: childrenRect.width
         spacing: 5
 
-
-
         ButtonSq
         {
-            height: style.stdbuttonH
+            height: style.stdbuttonh
             width: style.stdbuttonw
             buttontext: "Grid Back"
             buttontextbold: true

@@ -24,7 +24,7 @@ Rectangle {
     AttributeSelector {
         id:selector
         anchors.left:fileviewscreen.left
-        anchors.top: fileviewscreen.top
+        anchors.verticalCenter: fileviewscreen.verticalCenter
     }
 
     Component
@@ -53,7 +53,7 @@ Rectangle {
 
                 Text {
                     text: name;                   
-                    font.pixelSize: scaleY(3);
+                    font.pixelSize: scaleY(2);
                     color: "Silver" ;
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     //anchors.fill: parent
