@@ -8278,3 +8278,25 @@ void Media_Plugin::CMD_Update_Transcode_Status(string sText,string sTime,string 
   TranscodeTask *pTranscodeTask = (TranscodeTask *) pTask;
   pTranscodeTask->UpdateProgress(sStatus, iPercent, atoi(sTime.c_str()), sText);
 }
+//<-dceag-c1095-b->
+
+	/** @brief COMMAND: #1095 - Get Attribute Types */
+	/** Get  attribute types */
+		/** @param #9 Text */
+			/** The attribute types in the format of: id:name<newline>id:name<newline> */
+		/** @param #29 PK_MediaType */
+			/** Media type to find attribute types for. If 0, will return all. */
+
+void Media_Plugin::CMD_Get_Attribute_Types(int iPK_MediaType,string *sText,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1095-e->
+//<-dceag-c1096-b->
+
+	/** @brief COMMAND: #1096 - Get Attributes For Type */
+	/** Get the attributes for attribute type */
+		/** @param #9 Text */
+			/** The attributes for the specified attribute type in the format: id:name<newline>id:name<newline> */
+		/** @param #122 EK_AttributeType */
+			/** The attribute type to get the attributes for */
+
+void Media_Plugin::CMD_Get_Attributes_For_Type(int iEK_AttributeType,string *sText,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1096-e->

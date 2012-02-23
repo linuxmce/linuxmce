@@ -1441,6 +1441,28 @@ VI=Video Input */
 	virtual void CMD_Update_Transcode_Status(string sText,string sTime,string sStatus,int iPercent,string sTask,string sJob) { string sCMD_Result; CMD_Update_Transcode_Status(sText.c_str(),sTime.c_str(),sStatus.c_str(),iPercent,sTask.c_str(),sJob.c_str(),sCMD_Result,NULL);};
 	virtual void CMD_Update_Transcode_Status(string sText,string sTime,string sStatus,int iPercent,string sTask,string sJob,string &sCMD_Result,Message *pMessage);
 
+
+	/** @brief COMMAND: #1095 - Get Attribute Types */
+	/** Get  attribute types */
+		/** @param #9 Text */
+			/** The attribute types in the format of: id:name<newline>id:name<newline> */
+		/** @param #29 PK_MediaType */
+			/** Media type to find attribute types for. If 0, will return all. */
+
+	virtual void CMD_Get_Attribute_Types(int iPK_MediaType,string *sText) { string sCMD_Result; CMD_Get_Attribute_Types(iPK_MediaType,sText,sCMD_Result,NULL);};
+	virtual void CMD_Get_Attribute_Types(int iPK_MediaType,string *sText,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #1096 - Get Attributes For Type */
+	/** Get the attributes for attribute type */
+		/** @param #9 Text */
+			/** The attributes for the specified attribute type in the format: id:name<newline>id:name<newline> */
+		/** @param #122 EK_AttributeType */
+			/** The attribute type to get the attributes for */
+
+	virtual void CMD_Get_Attributes_For_Type(int iEK_AttributeType,string *sText) { string sCMD_Result; CMD_Get_Attributes_For_Type(iEK_AttributeType,sText,sCMD_Result,NULL);};
+	virtual void CMD_Get_Attributes_For_Type(int iEK_AttributeType,string *sText,string &sCMD_Result,Message *pMessage);
+
 //<-dceag-h-e->
 };
 
