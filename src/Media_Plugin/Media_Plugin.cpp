@@ -8289,6 +8289,9 @@ void Media_Plugin::CMD_Update_Transcode_Status(string sText,string sTime,string 
 
 void Media_Plugin::CMD_Get_Attribute_Types(int iPK_MediaType,string *sText,string &sCMD_Result,Message *pMessage)
 //<-dceag-c1095-e->
+{
+
+}
 //<-dceag-c1096-b->
 
 	/** @brief COMMAND: #1096 - Get Attributes For Type */
@@ -8300,3 +8303,5 @@ void Media_Plugin::CMD_Get_Attribute_Types(int iPK_MediaType,string *sText,strin
 
 void Media_Plugin::CMD_Get_Attributes_For_Type(int iEK_AttributeType,string *sText,string &sCMD_Result,Message *pMessage)
 //<-dceag-c1096-e->
+{
+}
