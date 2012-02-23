@@ -992,6 +992,10 @@
 #define COMMAND_Get_Attribute_Image_CONST 1090
 #define COMMAND_Transcode_File_CONST 1091
 #define COMMAND_Update_Transcode_Status_CONST 1092
+#define COMMAND_Game_1_CONST 1093
+#define COMMAND_Game_2_CONST 1094
+#define COMMAND_Get_Attribute_Types_CONST 1095
+#define COMMAND_Get_Attributes_For_Type_CONST 1096
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"
