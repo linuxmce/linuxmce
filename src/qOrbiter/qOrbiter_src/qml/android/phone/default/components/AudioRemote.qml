@@ -10,16 +10,15 @@ Rectangle {
         id: overlay
         source: "../img/widegreyshape.png"
         width: appW
-        height: 76
+        height: scaleY(5)
         anchors.centerIn: parent
 
          }
 
     Row
     {
-        x: 0
-        y: 0
-        spacing: 8
+
+        spacing: scaleX(1.5)
         width: overlay.width
         height: overlay.height
         anchors.left: overlay.left
@@ -29,8 +28,8 @@ Rectangle {
             id:back
             color: "transparent"
             media_but_txt: "back"
-            height: 45
-            width: 45
+            height: style.stdbuttonh
+            width: style.stdbuttonw
             anchors.verticalCenter: parent.verticalCenter
             MouseArea{
                 anchors.fill: parent               
@@ -41,8 +40,8 @@ Rectangle {
         MediaButton {id:rw ;
             color: "transparent"
             media_but_txt: "RW"
-            height: 45
-            width: 45
+            height: style.stdbuttonh
+            width: style.stdbuttonw
             anchors.verticalCenter: parent.verticalCenter
             MouseArea{
                 anchors.fill: parent                
@@ -54,8 +53,8 @@ Rectangle {
             id:play ;
             color: "transparent"
             media_but_txt: "Play"
-            height: 45
-            width: 45
+            height: style.stdbuttonh
+            width: style.stdbuttonw
             anchors.verticalCenter: parent.verticalCenter
             MouseArea {
                 anchors.fill: parent                
@@ -66,8 +65,8 @@ Rectangle {
         MediaButton {id:ff ;
             color: "transparent"
             media_but_txt: "FF"
-            height: 45
-            width: 45
+            height: style.stdbuttonh
+            width: style.stdbuttonw
             anchors.verticalCenter: parent.verticalCenter
             MouseArea{
                 anchors.fill: parent                 
@@ -78,8 +77,8 @@ Rectangle {
         MediaButton {id:next ;
             color: "transparent"
             media_but_txt: "Next";
-            height: 45
-            width: 45
+            height: style.stdbuttonh
+            width: style.stdbuttonw
             anchors.verticalCenter: parent.verticalCenter
             MouseArea{
                 anchors.fill: parent                
@@ -92,8 +91,8 @@ Rectangle {
             id: stop
             color: "transparent"
             media_but_txt: "stop"
-            height: 45
-            width: 45
+            height: style.stdbuttonh
+            width: style.stdbuttonw
             anchors.verticalCenter: parent.verticalCenter
             MouseArea
             {
