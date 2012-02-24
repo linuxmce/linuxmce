@@ -38,7 +38,7 @@ Rectangle {
 
                 MouseArea{
                     anchors.fill: parent
-                    onPressed: {
+                    onPressAndHold: {
                         formatrect.opacity = 0
                         genrefilter.setSelectionStatus(name)
                         formatrect.color = status ? "green" : "red"
