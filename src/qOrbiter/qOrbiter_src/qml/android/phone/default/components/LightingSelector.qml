@@ -2,27 +2,52 @@
 import QtQuick 1.1
 
 Rectangle {
-    id:genericlist
+    id:generic_list
     height: childrenRect.height
-    width: genericview.width
+    width: generic_view.width
     border.color: "orange"
     border.width: 1
     anchors.centerIn: parent
     clip:true
-    HomeButtonDelegate{id:lightingdelegate}
     Image {
         id: bg
         source: "../img/bkg.png"
-        anchors.fill: genericview
+        anchors.fill: generic_list
     }
+    Rectangle{
+        id:exit_button
+        height: scaleY(8)
+        width: scaleX(61)
+        anchors.top: generic_list.top
+        color: "transparent"
+        Image {
+            id: headerbg
+            source: "../img/widegreyshape.png"
+            anchors.fill: exit_button
+        }
+
+        Text {
+            id: exit
+            text: qsTr("Exit")
+            font.pixelSize: scaleY(3)
+            anchors.centerIn: parent
+        }
+        MouseArea{
+            anchors.fill: parent
+            onClicked: generic_list.destroy()
+        }
+    }
+    HomeButtonDelegate{id:generic_delegate}
+
     ListView{
-        id: genericview
-        width: 200
+        id: generic_view
+        anchors.top: exit_button.bottom
+        width: scaleX(61)
         height: scaleY(50)
         model: currentRoomLights
         spacing:1
         orientation:ListView.Vertical
-        delegate:  lightingdelegate
+        delegate:  generic_delegate
         interactive: true
         clip:true
         contentHeight: childrenRect.height

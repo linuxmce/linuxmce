@@ -9,15 +9,7 @@ Rectangle {
     color:"transparent"
     clip:true
 
-    Timer{
-        id:singleshot
-        repeat: false
-        interval: 5000
-        triggeredOnStart: false
-        running: true
-        onTriggered: np_image.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-    }
-    Connections
+   Connections
     {
         target: dcenowplaying
         onImageChanged: np_image.source = "image://listprovider/updateobject/"+securityvideo.timestamp
@@ -26,7 +18,7 @@ Rectangle {
     Image{
         id:np_image
         fillMode: Image.PreserveAspectCrop
-        source:"image://listprovider/updateobject/"+securityvideo.timestamp
+        source:""
         height:  scaleY(22)
         width: scaleY(22)
         anchors.centerIn: np_box

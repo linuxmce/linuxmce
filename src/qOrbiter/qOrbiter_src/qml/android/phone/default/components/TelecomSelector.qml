@@ -43,8 +43,8 @@ Rectangle {
         id: generic_view
         anchors.top: exit_button.bottom
         width: scaleX(61)
-        height: scaleY(50)
-        model: currentRoomMedia
+        height:  scaleY(50)
+        model: currentRoomSecurity
         spacing:1
         orientation:ListView.Vertical
         delegate:  generic_delegate

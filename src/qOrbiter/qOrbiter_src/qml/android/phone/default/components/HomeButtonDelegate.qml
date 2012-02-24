@@ -9,8 +9,8 @@ Component{
 
         Rectangle{
             id:delegatemenu
-            width: 200
-            height: 55
+            width: scaleX(61)
+            height: scaleY(12)
             border.color: "white"
             border.width: 1
             color:"transparent"
@@ -19,7 +19,7 @@ Component{
                 id: generic_label
                 text: title
                 color: "silver"
-                font.pixelSize: 11
+                font.pixelSize: scaleY(3)
                 anchors.centerIn: parent
             }
 
@@ -27,8 +27,10 @@ Component{
                 anchors.fill: parent
                 onClicked: {
                     execGrp(params);
-                    genericlist.destroy()
+                    generic_list.destroy()
                 }
+                onPressed:  delegatemenu.color = "orange"
+                onReleased: delegatemenu.color = "transparent"
             }
         }
     }

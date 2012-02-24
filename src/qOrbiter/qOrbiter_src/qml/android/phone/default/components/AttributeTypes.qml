@@ -14,13 +14,13 @@ Rectangle {
         id:attributedelegate
         Item {
             id: fileformatitem
-            height: 50
-            width: 150
+            height: scaleY(8)
+            width: scaleX(55)
 
             Rectangle{
                 id: formatrect
-                height: 50
-                width: 130
+                height: scaleY(8)
+                width: scaleX(55)
                 border.color: "black"
                 border.width: 1
                 color: status ? "transparent": "silver"
@@ -30,7 +30,7 @@ Rectangle {
                     height: parent.height
                     id: fileformatcell
                     text: name
-                    font.pointSize: scaleY(3)
+                    font.pointSize: scaleY(2)
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     onFocusChanged: {rect.destroy()}
 
@@ -54,8 +54,8 @@ Rectangle {
 
     ListView{
         id:genrelist
-        height: 400
-        width: 450
+        height: scaleY(45)
+        width: scaleX(55)
         model: attribfilter
 
         delegate: attributedelegate
