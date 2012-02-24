@@ -23,7 +23,7 @@ QtObject{
     property string skinversion: "1.0"
     property string skinvariation: "Android 320X480"
     property string maincolor: "grey"
-    property string accentcolor: "indianred"
+
     //scale function
     function scaleX(x){
         return x/100*appH
@@ -32,6 +32,17 @@ QtObject{
         return y/100*appW
     }
     //end scale function
+    //-color definitions
+
+    property color accentcolor: "orange"
+    property color highlight1: "silver"
+    property color highlight2: "orange"
+    property color alertcolor: "red"
+    property color warncolor:"yellow"
+
+    property color darkhighlight: "darkgrey"
+    property color lighthighlight: "green"
+    //--end color definitions
     //main stage styles
     property int orbiterH:appH
     property int orbiterW: appW
@@ -45,6 +56,7 @@ QtObject{
     property color homescreenfloorplanbuttoncolor: "lightsteelblue"
     property color homeScreenNowPlayingColorInActive: "indianred"
     property color homeScreenNowPlayingColorActive: "lightcyan"
+
 
 
 

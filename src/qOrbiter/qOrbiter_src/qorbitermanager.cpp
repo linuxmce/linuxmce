@@ -701,7 +701,7 @@ bool qorbiterManager::getConf(int PK_Device)
     //---update object image
     updatedObjectImage.load(":/icons/videos.png");
     QObject::connect(this,SIGNAL(objectUpdated()), nowPlayingButton, SIGNAL(imageChanged()) );
-    QObject::connect(pqOrbiter,SIGNAL(objectUpdate(QImage)), nowPlayingButton, SLOT(setImage(QUrl)));
+    //QObject::connect(pqOrbiter,SIGNAL(objectUpdate(QImage)), nowPlayingButton, SLOT(setImage(QUrl)));
 
     setDceResponse(" Remote Config Complete");
     QApplication::processEvents(QEventLoop::AllEvents);
