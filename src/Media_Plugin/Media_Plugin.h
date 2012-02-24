@@ -1463,6 +1463,28 @@ VI=Video Input */
 	virtual void CMD_Get_Attributes_For_Type(int iEK_AttributeType,string *sText) { string sCMD_Result; CMD_Get_Attributes_For_Type(iEK_AttributeType,sText,sCMD_Result,NULL);};
 	virtual void CMD_Get_Attributes_For_Type(int iEK_AttributeType,string *sText,string &sCMD_Result,Message *pMessage);
 
+
+	/** @brief COMMAND: #1097 - Get File Formats */
+	/** Get file formats for the specified media type. */
+		/** @param #20 Format */
+			/** Comma-delimited list of file formats. */
+		/** @param #29 PK_MediaType */
+			/** Media Type to get file formats for. If 0, get all. */
+
+	virtual void CMD_Get_File_Formats(int iPK_MediaType,string *sFormat) { string sCMD_Result; CMD_Get_File_Formats(iPK_MediaType,sFormat,sCMD_Result,NULL);};
+	virtual void CMD_Get_File_Formats(int iPK_MediaType,string *sFormat,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #1098 - Get Media Sub Type */
+	/** Get media sub types for specified media type. */
+		/** @param #29 PK_MediaType */
+			/** The Media Type to get sub types for. If 0, gets all. */
+		/** @param #50 Name */
+			/** Comma delimited list of media sub types. */
+
+	virtual void CMD_Get_Media_Sub_Type(int iPK_MediaType,string *sName) { string sCMD_Result; CMD_Get_Media_Sub_Type(iPK_MediaType,sName,sCMD_Result,NULL);};
+	virtual void CMD_Get_Media_Sub_Type(int iPK_MediaType,string *sName,string &sCMD_Result,Message *pMessage);
+
 //<-dceag-h-e->
 };
 

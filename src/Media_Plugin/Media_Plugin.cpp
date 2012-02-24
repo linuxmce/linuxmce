@@ -8290,7 +8290,28 @@ void Media_Plugin::CMD_Update_Transcode_Status(string sText,string sTime,string 
 void Media_Plugin::CMD_Get_Attribute_Types(int iPK_MediaType,string *sText,string &sCMD_Result,Message *pMessage)
 //<-dceag-c1095-e->
 {
+	string result = "";
+	if ( iPK_MediaType > 0 )
+	{
+		// Look up attribute types for specific media type
+		vector<Row_MediaType_AttributeType *> vectRow_MediaType_AttributeType;
+		m_pDatabase_pluto_media->MediaType_AttributeType_get()->GetRows("EK_MediaType="+StringUtils::itos(iPK_MediaType),
+									 &vectRow_MediaType_AttributeType);
+		for(vector<Row_MediaType_AttributeType *>::iterator it=vectRow_MediaType_AttributeType.begin();it!=vectRow_MediaType_AttributeType.end();++it)
+		{
+			result += (*it)->FK_AttributeType_get() + ":" + (*it)->FK_AttributeType_getrow()->Description_get() + "\n";
+		}
+	} else {
+		// Look up all attribute types
+		vector<Row_AttributeType *> vectRow_AttributeType;
+		m_pDatabase_pluto_media->AttributeType_get()->GetRows("1=1", &vectRow_AttributeType);
+		for(vector<Row_AttributeType *>::iterator it=vectRow_AttributeType.begin();it!=vectRow_AttributeType.end();++it)
+		{
+			result += (*it)->PK_AttributeType_get() + ":" + (*it)->Description_get() + "\n";
+		}
 
+	}
+	(*sText) = result;
 }
 //<-dceag-c1096-b->
 
@@ -8303,5 +8324,42 @@ void Media_Plugin::CMD_Get_Attribute_Types(int iPK_MediaType,string *sText,strin
 
 void Media_Plugin::CMD_Get_Attributes_For_Type(int iEK_AttributeType,string *sText,string &sCMD_Result,Message *pMessage)
 //<-dceag-c1096-e->
+{
+	string result = "";
+	// Look up attribute for specific attribute type
+	vector<Row_Attribute *> vectRow_Attribute;
+	m_pDatabase_pluto_media->Attribute_get()->GetRows("FK_AttributeType="+StringUtils::itos(iEK_AttributeType),
+									 &vectRow_Attribute);
+	for(vector<Row_Attribute *>::iterator it=vectRow_Attribute.begin();it!=vectRow_Attribute.end();++it)
+	{
+		result += (*it)->PK_Attribute_get() + ":" + (*it)->Name_get() + "\n";
+	}
+	(*sText) = result;
+}
+//<-dceag-c1097-b->
+
+	/** @brief COMMAND: #1097 - Get File Formats */
+	/** Get file formats for the specified media type. */
+		/** @param #20 Format */
+			/** Comma-delimited list of file formats. */
+		/** @param #29 PK_MediaType */
+			/** Media Type to get file formats for. If 0, get all. */
+
+void Media_Plugin::CMD_Get_File_Formats(int iPK_MediaType,string *sFormat,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1097-e->
+{
+}
+
+//<-dceag-c1098-b->
+
+	/** @brief COMMAND: #1098 - Get Media Sub Type */
+	/** Get media sub types for specified media type. */
+		/** @param #29 PK_MediaType */
+			/** The Media Type to get sub types for. If 0, gets all. */
+		/** @param #50 Name */
+			/** Comma delimited list of media sub types. */
+
+void Media_Plugin::CMD_Get_Media_Sub_Type(int iPK_MediaType,string *sName,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1098-e->
 {
 }
