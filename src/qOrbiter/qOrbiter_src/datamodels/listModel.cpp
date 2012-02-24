@@ -72,7 +72,7 @@ void ListModel::handleItemChange()
 {
     gridItem* item = static_cast<gridItem*>(sender());
     QModelIndex index = indexFromItem(item);
-    ////qdebug() << "Handling item change for:" << index;
+    qDebug() << "Handling item change for:" << index;
     if(index.isValid())
     {
         emit dataChanged(index, index, 0);
@@ -202,7 +202,7 @@ void ListModel::setTotalCells(int cells)
     {
 
         setLoadingStatus(true);
-
+qDebug() <<QString::number(m_list.count()) +" cells in model, out of " + QString::number(totalcells);
     }
     else
     {

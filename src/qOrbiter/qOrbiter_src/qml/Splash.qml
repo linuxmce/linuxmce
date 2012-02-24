@@ -7,8 +7,8 @@ import QtQuick 1.1
 
 Rectangle {
     id: rectangle1
-   height:720
-   width:1280
+    height:720
+    width:1280
     onWidthChanged: console.log("detected size change")
 
     function scaleX(x){
@@ -20,7 +20,8 @@ Rectangle {
 
     Connections{
         target: window
-         onShowList:existing_orbiters.visible = true
+        onShowList:existing_orbiters.visible = true
+        onShowExternal: ext_routerip.visible = true
     }
 
 
@@ -67,13 +68,13 @@ Rectangle {
         Text {
             id: skin_index
             text: qsTr("Skins")
-           opacity: 0
+            opacity: 0
         }
 
         Text {
             id: orbiter_config
             text: qsTr("Orbiter Config")
-           opacity: 0
+            opacity: 0
         }
 
 
@@ -82,14 +83,14 @@ Rectangle {
 
     function screenchange(screenname )
     {
-       pageLoader.source = "qrc:/desktop/"+screenname
-       if (pageLoader.status == 1)
+        pageLoader.source = "qrc:/desktop/"+screenname
+        if (pageLoader.status == 1)
         {
             //manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
         }
         else
         {
-           console.log("Command to change to:" + screenname + " failed!")
+            console.log("Command to change to:" + screenname + " failed!")
 
         }
     }
@@ -101,8 +102,8 @@ Rectangle {
 
         onLoaded: {
             console.log("Screen Changed:" + pageLoader.source)
-           }
         }
+    }
 
     Connections{
         target:window
@@ -115,21 +116,12 @@ Rectangle {
         height: scaleY(20)
         opacity: 1
         color: "transparent"
-        Text {
-            id: welcome
-            text: qsTr("Welcome To LinuxMCE!")
-            font.pointSize: scaleY(10)
-            font.italic: true
-            font.family: "Droid Sans"
-            anchors.bottom: rectangle2.top
-            anchors.bottomMargin: scaleY(10)
-        }
 
     }
     Rectangle {
         id: rectangle2
 
-      anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenterOffset:10
         width: scaleX(99)
@@ -177,9 +169,21 @@ Rectangle {
             text: srouterip
             font.pixelSize: 10
             font.family: "Droid Sans"
-          //  onTextChanged: setRouterIp(routerip.text)
+            //  onTextChanged: setRouterIp(routerip.text)
             fillColor: "grey"
             anchors.verticalCenter: parent.verticalCenter
+        }
+
+        TextInput {
+            id: ext_routerip
+            width: 80
+            text: extip
+            font.pixelSize: 10
+            font.family: "Droid Sans"
+            //  onTextChanged: setRouterIp(routerip.text)
+            fillColor: "grey"
+            anchors.verticalCenter: parent.verticalCenter
+            visible: false
         }
 
         Text {
@@ -200,7 +204,7 @@ Rectangle {
 
         }
 
-      Rectangle {
+        Rectangle {
             id: connectbutton
             height: scaleY(5)
             width: scaleX(10)
@@ -224,12 +228,12 @@ Rectangle {
                 onEntered: parent.color="green"
                 onExited: parent.color="red"
                 anchors.fill: parent
-            onClicked: window.qmlSetupLmce(devicenumber.text, routerip.text)
-            anchors.verticalCenter: parent.verticalCenter
+                onClicked: window.qmlSetupLmce(devicenumber.text, routerip.text)
+                anchors.verticalCenter: parent.verticalCenter
             }
         }
 
-      Rectangle {
+        Rectangle {
             id: exitbutton
             height: scaleY(5)
             width: scaleX(10)
@@ -237,16 +241,16 @@ Rectangle {
             anchors.leftMargin: scaleX(5)
             Text {
                 id: exitlabel
-               anchors.centerIn: parent
-               anchors.fill: parent
+                anchors.centerIn: parent
+                anchors.fill: parent
                 text: qsTr("Exit")
                 font.pixelSize: 11
             }
 
             radius:  4
             MouseArea{
-            onClicked: closeOrbiter()
-            anchors.verticalCenter: parent.verticalCenter
+                onClicked: closeOrbiter()
+                anchors.verticalCenter: parent.verticalCenter
             }
 
         }
@@ -260,40 +264,51 @@ Rectangle {
         font.family: "Droid Sans"
         color: "white"
         anchors.bottom: rectangle2.bottom
+        anchors.horizontalCenter: rectangle2.horizontalCenter
     }
 
-   ListView{
-       id:existing_orbiters
-       height: scaleY(65)
-       width: scaleX(75)
-       anchors.centerIn: parent
-       model:orbiterList
-       visible: false
-       delegate: Rectangle{
-           id:existing_orbiter_delegate
-           height: scaleY(20)
-           width: scaleX(70)
-           color: "slategrey"
-           border.color: "white"
-           border.width: 1
-           Text {
-               id: orbiter_label
-               text: label
-               font.pixelSize: scaleY(2)
-               width: parent.width
-               wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-           }
-           Text {
-               id: dev_num
-               text:qsTr("Device:")+ i_device_number
-                font.pixelSize: scaleY(2)
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-           }
+    ListView{
+        id:existing_orbiters
+        height: scaleY(16)
+        width: scaleX(55)
+        clip: true
+        anchors.centerIn: rectangle2
+        model:orbiterList
+        visible: false
+        delegate: Rectangle{
+            id:existing_orbiter_delegate
+            height: scaleY(10)
+            width: existing_orbiters.width
+            color: "slategrey"
+            border.color: "white"
+            border.width: 1
+            Column
+            {
+                height: childrenRect.height
+                width: existing_orbiters.width
 
-           MouseArea {
-               anchors.fill: parent
-               onClicked: window.qmlSetupLmce(i_device_number, routerip.text)
-           }
-       }
-   }
+                Text {
+                    id: orbiter_label
+                    text: qsTr("Orbiter:")+ label
+                    font.pixelSize: scaleY(1.75)
+                    width: existing_orbiters.width
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                }
+                Text {
+                    id: dev_num
+                    width: existing_orbiters.width
+                    text:qsTr("Device:")+ i_device_number
+                    font.pixelSize: scaleY(2)
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                }
+            }
+
+
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: window.qmlSetupLmce(i_device_number, routerip.text)
+            }
+        }
+    }
 }

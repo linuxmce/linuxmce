@@ -42,6 +42,10 @@ signals:
   void ItemAdded();
   void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const bool &state);
    void SetTypeSort(int pos, QString type);
+
+public slots:
+   void resetStates();
+
 private slots:
   void handleItemChange();
 

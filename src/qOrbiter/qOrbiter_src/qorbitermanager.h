@@ -357,9 +357,11 @@ Param 10 - pk_attribute
     int m_pDevice_ScreenSaver;
     int m_dwIDataGridRequestCounter;
     long iPK_Device;                   //this orbiters device number, passed in from command line
+    QString qs_ext_routerip;
 
 signals:
     void filterChanged();
+    void resetFilter();
     void locationChanged(int cRoom, int cEA);
     void modelChanged();
     void gridTypeChanged(int i);

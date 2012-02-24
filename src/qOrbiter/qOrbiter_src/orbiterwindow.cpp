@@ -48,6 +48,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     mainView.rootContext()->setContextProperty("deviceid", int(deviceno));
     mainView.rootContext()->setContextProperty("srouterip", QString::fromStdString(router));
 
+
 #ifdef for_desktop
     buildType = "/qml/desktop";
     qrcPath = "qrc:desktop/Splash.qml";

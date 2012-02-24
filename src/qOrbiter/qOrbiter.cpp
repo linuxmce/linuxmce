@@ -1342,6 +1342,11 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
     {
         emit gotoQml("Screen_47.qml");
     }
+    else
+    {
+        qmlUI->model->clear();
+
+    }
     emit requestMediaGrid(iPK_MediaType);
     emit statusMessage("Show File List Complete, Calling request Media Grid");
 }
@@ -1745,19 +1750,23 @@ bool DCE::qOrbiter::initialize()
     {
         qDebug("Starting Manager");
         emit startManager(QString::number(m_dwPK_Device), QString::fromStdString(m_sHostName) );
+         QApplication::processEvents(QEventLoop::AllEvents);
         return true;
     }
     else
     {
-        QApplication::processEvents(QEventLoop::AllEvents);
-        qDebug("Checking Connection Error Type:");
 
+
+        qDebug("Checking Connection Error Type:");
+QApplication::processEvents(QEventLoop::AllEvents);
         if(  m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
         {
 
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "No Router");
             emit statusMessage("No Connection to Router");
+            emit routerInvalid();
             QApplication::processEvents(QEventLoop::AllEvents);
+
         }
         else if( m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice )
         {
@@ -1766,6 +1775,7 @@ bool DCE::qOrbiter::initialize()
             emit statusMessage("Bad Device");
             DeviceIdInvalid();
             QApplication::processEvents(QEventLoop::AllEvents);
+
         }
 
         else if(  m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_NeedReload )
@@ -1774,6 +1784,7 @@ bool DCE::qOrbiter::initialize()
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Router Needs Reload");
             emit statusMessage("Needs Reload");
             QApplication::processEvents(QEventLoop::AllEvents);
+
         }
         else
         {
@@ -1782,13 +1793,14 @@ bool DCE::qOrbiter::initialize()
             emit statusMessage("QOrbiter Connect() Failed :(");
             QApplication::processEvents(QEventLoop::AllEvents);
 
+
         }
 
 
-        QApplication::processEvents(QEventLoop::AllEvents);
+
         Disconnect();
         return false;
-
+        QApplication::processEvents(QEventLoop::AllEvents);
     }
 
 
@@ -1967,14 +1979,7 @@ QImage DCE::qOrbiter::getfileForDG(string filePath)
     CMD_Request_File reqFile((long)m_dwPK_Device, (long)4 , (string)filePath, &picData, &picData_Size);
     string p_sResponse;
 
-    if (!SendCommand(reqFile, &p_sResponse))
-    {
-
-    }
-    else
-    {
-
-    }
+    SendCommand(reqFile);
 
     QByteArray configData;              //config file put into qbytearray for processing
     configData.setRawData(picData, picData_Size);
@@ -2760,9 +2765,9 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 {
     //emit statusMessage("requesting additional media");
 
-    if( qmlUI->requestMore == true)
+    if( qmlUI->requestMore == true && qmlUI->model->loadingStatus == true)
     {
-        emit statusMessage("Still on Media Grid Screen");
+       // emit statusMessage("Still on Media Grid Screen");
 
         //seeking to a specific letter then reseting the request more
         int cellsToRender= 0;
@@ -2813,15 +2818,16 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                 }
                 else
                 { cellImg.load(":/icons/icon.png"); }
-                qmlUI->model->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
+                //qmlUI->model->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
                 // gridItem *cItem = new gridItem(fk_file, cellTitle, filePath, index, cellImg);
-                //  emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
+                 emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
                 QApplication::processEvents(QEventLoop::AllEvents);
             }
             delete pDataGridTable;
         }
         //qmlUI->qs_seek="";
-    } checkGridStatus();
+    }
+    emit checkGridStatus();
 }
 
 
@@ -3724,10 +3730,10 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                             cellImg.load(":/icons/icon.png");
                         }
 
-                        qmlUI->model->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
+                        //qmlUI->model->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
                         // gridItem *cItem = new gridItem(fk_file, cellTitle, filePath, index, cellImg);
 
-                        // emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
+                        emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
                         QApplication::processEvents(QEventLoop::AllEvents);
                     }
                     qDebug("Checking for more from qorbiter.cpp");

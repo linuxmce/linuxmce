@@ -92,7 +92,7 @@ signals:
     void orientationChanged(QSize);
     void checkRes();
     void showList();
-
+    void showExternal();
 
 };
 #endif

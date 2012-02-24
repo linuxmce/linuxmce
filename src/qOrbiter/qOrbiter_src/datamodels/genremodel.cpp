@@ -153,6 +153,14 @@ bool GenreModel::getSelectionStatus(QString format)
     return g;
 
 }
+
+void GenreModel::resetStates()
+{
+    foreach(GenreItem* item, m_list) {
+        item->setStatus(false);
+    }
+
+}
 void GenreModel::ReturnSelectedItems()
 {
     QStringList t_selected_items;

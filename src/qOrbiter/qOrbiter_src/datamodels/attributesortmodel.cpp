@@ -165,7 +165,14 @@ void AttributeSortModel::ReturnSelectedItems()
     }
     QString qs_sorting_string= t_selected_items.join(",");
     qDebug() << "Attribute Sort updated sorting filter" << qs_sorting_string;
- emit SetTypeSort(6, qs_sorting_string);
+    emit SetTypeSort(6, qs_sorting_string);
+}
+
+void AttributeSortModel::resetStates()
+{
+    foreach(AttributeSortItem* item, m_list) {
+        if(item->setStatus(false));
+    }
 }
 
 
