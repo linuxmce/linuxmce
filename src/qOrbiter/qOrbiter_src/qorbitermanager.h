@@ -418,7 +418,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
 
     Q_INVOKABLE bool writeConfig();
     bool readLocalConfig();
-    void setConnectedState(bool state) { connectedState = state;  if(state == false) {checkConnection();} emit connectedStateChanged(); }
+    void setConnectedState(bool state) { connectedState = state;  if(state == false) {checkConnection("Connection Changed");} emit connectedStateChanged(); }
     bool getConnectedState () {return connectedState;}
     void setDceResponse(QString response);
     QString getDceResponse () ;
@@ -479,7 +479,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void regenComplete(int i);
     void regenError(QProcess::ProcessError);
     QString adjustPath(const QString&);
-    void checkConnection();
+    void checkConnection(QString s);
     void processError(QString msg);
     //dce related slots
     Q_INVOKABLE void execGrp(int grp);        //for command groups

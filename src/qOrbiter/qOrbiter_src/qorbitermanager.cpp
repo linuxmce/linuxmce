@@ -309,10 +309,9 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 
 void qorbiterManager::refreshUI(QUrl url)
 {
-
+    qorbiterUIwin->rootContext()->setBaseUrl(skin->entryUrl());
     qorbiterUIwin->setSource(skin->entryUrl());
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
-
 }
 
 
@@ -1558,14 +1557,15 @@ void qorbiterManager::showTimeCode()
     }
 }
 
-void qorbiterManager::checkConnection()
+void qorbiterManager::checkConnection(QString s)
 {
-    setDceResponse("Connection Problem");
+    setDceResponse(s);
     if(pqOrbiter->m_bQuit_get() == true)
     {
         setConnectedState(false);
         setDceResponse("Disconnected!");
     }
+    emit raiseSplash();
 
 
 }
@@ -1635,7 +1635,7 @@ void qorbiterManager::cleanupScreenie()
 void qorbiterManager::initializeConnections()
 {
 
-
+    //QObject::connect(pqOrbiter, SIGNAL(disconnected(QString)), this, SLOT(checkConnection(QString)));
 
     QObject::connect(this, SIGNAL(continueSetup()), this, SLOT(startSetup()));
     setDceResponse("Connections Complete");
@@ -1645,19 +1645,23 @@ void qorbiterManager::initializeConnections()
 void qorbiterManager::reloadHandler()
 {
     emit raiseSplash();
-    pqOrbiter->Disconnect();
-
+/*
     setDceResponse("Reloading Router");
     QApplication::processEvents(QEventLoop::AllEvents);
-    if (pqOrbiter->Connect(iPK_Device) )
+     sleep(15);
+    if ( pqOrbiter->GetConfig() && pqOrbiter->Connect(pqOrbiter->PK_DeviceTemplate_get()))
     {
-        emit continueSetup();
+
+        setDceResponse("Reload Complete");
+        swapSkins(currentSkin);
+         QApplication::processEvents(QEventLoop::AllEvents);
     }
     else
     {
-        sleep(15);
-        emit continueSetup();
+QApplication::processEvents(QEventLoop::AllEvents);
+
     }
+    */
 
 }
 
