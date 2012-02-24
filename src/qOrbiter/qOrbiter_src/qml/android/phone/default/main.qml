@@ -22,9 +22,6 @@ import "js/ScreenChange.js" as ScreenLogic
   function checkLayout()
   {
   console.log("c++ slot orientation changed")
-  item.height=appH
-  item.width=appW
-
   }
   
   Connections{
