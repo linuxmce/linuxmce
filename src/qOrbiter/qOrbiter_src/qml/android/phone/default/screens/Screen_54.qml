@@ -5,8 +5,8 @@ Rectangle {
 
     // property alias synText:
     id: storedAudioRemote
-    height: 480
-    width: 320
+    height: appH
+    width: appW
     color: "transparent"
 
     NowPlayingBox
