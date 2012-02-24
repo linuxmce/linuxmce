@@ -6,80 +6,63 @@ Rectangle {
     height: childrenRect.height
     color: "transparent"
     anchors.centerIn: parent
-    border.color: style.button_system_color
+    border.color: "silver"
     border.width: 1
     clip: true
 
-
     Component{
-        id:genredelegate
+        id:attributedelegate
         Item {
             id: fileformatitem
-            height: scaleY(8)
-            width: scaleX(15)
+            height: scaleY(10)
+            width: scaleX(55)
 
             Rectangle{
                 id: formatrect
-                height: scaleY(8)
-                width: scaleX(15)
+                height: scaleY(10)
+                width: scaleX(55)
                 border.color: "black"
                 border.width: 1
-                color: status ? style.stageBG : "green"
+                color: status ? "transparent": "silver"
+
+                Text {
+                    width: 75
+                    height: parent.height
+                    id: fileformatcell
+                    text: name
+                    font.pointSize: scaleY(2)
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                    onFocusChanged: {rect.destroy()}
+
+                }
 
                 MouseArea{
                     anchors.fill: parent
-                    z:0
-                    onClicked:
-                    {
+                    onPressed: {
+                        formatrect.opacity = 0
+                        genrefilter.setSelectionStatus(name)
+                        formatrect.color = status ? "green" : "red"
+                        formatrect.opacity = 1
+                        parent.color = "orange"
                         rect.destroy()
                     }
-                }
+                    onReleased: parent.color = "silver"
 
-
-                Row{
-                    height: childrenRect.height
-                    width: childrenRect.width
-
-                    Text {
-
-                        width: scaleX(10)
-                        height: parent.height
-                        id: fileformatcell
-                        text: status ? name +" Is selected": name
-                        font.pointSize: 12
-                        wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                        onFocusChanged: {rect.destroy()}
-                    }
-
-                    Rectangle{
-                        height: 25
-                        width: 25
-                        border.color: "black"
-                        border.width: 1
-                        color: status ? "red" : style.stageBG
-                        anchors.right: parent.right
-                        z:10
-                        MouseArea{
-                            anchors.fill: parent
-                            onClicked:{
-                                genrefilter.setSelectionStatus(name)
-
-                            }
-                        }
-                    }
                 }
             }
         }
     }
 
-
     ListView{
         id:genrelist
-        height: scaleY(80)
-        width: scaleX(15)
-        model: genrefilter        
-        delegate: genredelegate
+        height: scaleY(45)
+        width: scaleX(55)
+        model: genrefilter
+
+        delegate: attributedelegate
+
     }
+
 }
 
 

@@ -14,12 +14,12 @@ Rectangle {
         id:attributedelegate
         Item {
             id: fileformatitem
-            height: scaleY(8)
+            height: scaleY(10)
             width: scaleX(55)
 
             Rectangle{
                 id: formatrect
-                height: scaleY(8)
+                height: scaleY(10)
                 width: scaleX(55)
                 border.color: "black"
                 border.width: 1
@@ -44,6 +44,7 @@ Rectangle {
                         formatrect.color = status ? "green" : "red"
                         formatrect.opacity = 1
                         parent.color = "orange"
+                        rect.destroy()
                     }
                     onReleased: parent.color = "silver"
 

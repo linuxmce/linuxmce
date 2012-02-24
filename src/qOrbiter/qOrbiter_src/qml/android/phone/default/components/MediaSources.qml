@@ -1,125 +1,68 @@
 import QtQuick 1.0
 
 Rectangle {
-           id:rect
-           width: 200
-           height: 200
-           color: "transparent"
-           anchors.centerIn: parent
-           border.color: style.button_system_color
-           border.width: 1
-           clip: true
-           property string cindex
+    id:rect
+    width: childrenRect.width
+    height: childrenRect.height
+    color: "transparent"
+    anchors.centerIn: parent
+    border.color: "silver"
+    border.width: 1
+    clip: true
 
-           ListModel{
-               id:mediasourcelist
+    Component{
+        id:attributedelegate
+        Item {
+            id: fileformatitem
+            height: scaleY(10)
+            width: scaleX(55)
 
-               ListElement{
-                   name:"Hard Drives"
-                   pk:"1"
-                   isSelected: false
-               }
+            Rectangle{
+                id: formatrect
+                height: scaleY(10)
+                width: scaleX(55)
+                border.color: "black"
+                border.width: 1
+                color: status ? "transparent": "silver"
 
-               ListElement{
-                   name:"Discs & Jukeboxes"
-                   pk:"2"
-                   isSelected: false
-               }
+                Text {
+                    width: 75
+                    height: parent.height
+                    id: fileformatcell
+                    text: name
+                    font.pointSize: scaleY(2)
+                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                    onFocusChanged: {rect.destroy()}
 
-               ListElement{
-                   name:"Bookmarks"
-                   pk:"3"
-                   isSelected: false
-               }
+                }
 
-               ListElement{
-                   name:"Downloadable"
-                   pk:"4"
-                   isSelected: false
-               }
-           }
+                MouseArea{
+                    anchors.fill: parent
+                    onPressed: {
+                        formatrect.opacity = 0
+                        mediasourcelist.setSelectionStatus(name)
+                        formatrect.color = status ? "green" : "red"
+                        formatrect.opacity = 1
+                        parent.color = "orange"
+                        rect.destroy()
+                    }
+                    onReleased: parent.color = "silver"
 
-           Component{
-                 id:fileformatdelegate
-                 Item {
-                     id: fileformatitem
-                     height: 50
-                     width: parent.width
-
-                     Rectangle{
-                         id: formatrect
-                         height: 50
-                         width: parent.width
-                         border.color: "black"
-                         border.width: 1
-                         color: "transparent"
-
-                         MouseArea{
-                                   anchors.fill: parent
-                                   z:0
-                                   onClicked:
-                                   {
-                                       rect.destroy()
-                                   }
-                              }
-
-
-                         Row{
-                             height: childrenRect.height
-                             width: childrenRect.width
-                             spacing: 85
-
-
-                             Text {
-                                 width: 75
-                                 height: parent.height
-                                 id: fileformatcell
-                                 text: name
-                                 font.pointSize: 14
-                                 onFocusChanged: {rect.destroy()}
-
-                                  }
-
-                             Rectangle{
-                                 height: 25
-                                 width: 25
-                                 border.color: "black"
-                                 border.width: 1
-                                 color: isSelected ? "green" : "red"
-                                 z:10
-                                  MouseArea{
-                                      anchors.fill: parent
-                                      onClicked:{
-
-                                          mediasourcelist.setProperty(index, "isSelected", !mediasourcelist.get(index).isSelected)
-                                          fileformatcell.color = isSelected ? "green" : "red"
-
-                                                }
-                                          }
-                                      }
-
-                               }
-
-
-                         }
-                     }
-                 }
-
-
-
-        ListView{
-            id:mediasources
-            height: parent.height
-            width: parent.width
-            model: mediasourcelist
-            delegate: fileformatdelegate
-            focus:true
-
-
+                }
             }
-
         }
+    }
 
+    ListView{
+        id:genrelist
+        height: scaleY(45)
+        width: scaleX(55)
+        model: mediasourcelist
 
+        delegate: attributedelegate
+
+    }
+
+}
 
 
