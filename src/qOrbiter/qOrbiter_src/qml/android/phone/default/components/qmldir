@@ -68,4 +68,4 @@ Splash Splash.qml
 SecurityPad SecurityPad.qml
 ControlRow ControlRow.qml
 DroidHomeSelector DroidHomeSelector.qml
-
+NowPlayingButton NowPlayingButton.qml
