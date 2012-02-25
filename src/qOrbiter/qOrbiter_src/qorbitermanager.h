@@ -129,40 +129,26 @@ class qorbiterManager : public QObject
 public:
     qorbiterManager(QDeclarativeView * view, DCE::qOrbiter *dceDevice, QObject *parent =0);  //constructor
 
+    //thread objects
     QThread *processingThread; //threaded class
     QThread *timecodeThread; //for timecode
     QThread *gridThread;
-
     QTcpSocket *timeCodeSocket;
+
+    //settings
     QString sPK_User;
     QString buildType;
-    //QByteArray *skin;
-
-    SkinDataModel* tskinModel;
-    QString qrcPath;
-    //TODO, remove the below in favour of the data structure
-    QMap <QString*, QString*> availibleSkins;
-    QString qmlPath;
-    QString localDir;
-    QString skinsPath;
-    QDir skinsDir;
-    QString m_SkinsDirectoryPath;
-    QString aspect; //-- true poster || false landscape
-    bool b_orientation;
-    int appHeight;
-    int appWidth;
-
-    ScreenSaverClass ScreenSaver;
+    QByteArray binaryConfig;
+    long iPK_Device;
+    QString qs_ext_routerip;
 
     //------------------------------------------------------playlist classes
-
     PlaylistClass *storedVideoPlaylist;
     EPGChannelList *simpleEPGmodel;
     ListModel *playlistModel;
 
     //------CUSTOM QML TYPES------------------------------------------------------------------------------------
     ScreenParamsClass *ScreenParameters;
-
     SecurityVideoClass *SecurityVideo;
     QList<QObject*> screenshotVars;
 
@@ -172,34 +158,55 @@ public:
     //------------media vars-----------------------------------
     FileDetailsClass *filedetailsclass;
     NowPlayingClass *nowPlayingButton;
+    QString aspect; //-- true poster || false landscape
+    QString *gridReqType;
 
+    //skins
+    SkinDataModel* tskinModel;
+    QString qrcPath;
+    //TODO, remove the below in favour of the data structure
+    QMap <QString*, QString*> availibleSkins;
+    QString qmlPath;
+    QString localDir;
+    QString skinsPath;
+    QDir skinsDir;
+    QString m_SkinsDirectoryPath;
 
-    //ui variables
+    //ui
     QString currentSkin;
     QString currentSkinURL;
     QString remoteDirectoryPath;
     SkinDataItem* skin;
     QDeclarativeView  *qorbiterUIwin;               //Qml declarativeview
-    QObject *item;                                  //qObject reference to UI
-    Q_INVOKABLE void refreshUI(QUrl url);
-    bool cleanupData();
-    Q_INVOKABLE void swapSkins(QString incSkin);
-    QString dceResponse;
+    QObject *item;
+    ScreenSaverClass ScreenSaver;
 
+    //media
+    bool mediaPlaying;
+    QImage updatedObjectImage; //used for the current image for a given media item on screen
+    QImage mediaScreenShot;    //used for screen shots
+
+    bool b_orientation;
+    int appHeight;
+    int appWidth;
+    Q_INVOKABLE void refreshUI(QUrl url);
+    void swapSkins(QString incSkin);
+
+    //device state
+    bool cleanupData();
+    QString dceResponse;
     bool connectedState;
+    int i_current_command_grp;
+    int i_current_mediaType;
 
     //----ANDROID----///
     QString droidPath;  //specific path for android files that relates to the package name 'com.linuxmce.qOrbiter/files
     //-END---ANDROID----///
 
-    //splash related
-
-
+    //image providers
     basicImageProvider *basicProvider;
     GridIndexProvider *advancedProvider;
-
     AbstractImageProvider *modelimageprovider;
-    QString *gridReqType;
 
     //carried over variables from old OrbiterData.h
     map<int,string> m_mapTextString;
@@ -214,7 +221,6 @@ public:
 
     //floorplans
     FloorPlanModel *floorplans;
-
 
     /*
 datagrid variables
@@ -248,46 +254,30 @@ Param 10 - pk_attribute
     QStringList goBack;
     QString qs_seek;
     bool backwards;
-
-    //for the media grid to allow pauses in loading and allow non locking operation
     bool requestMore;
-
-    Q_INVOKABLE void setSeekLetter(QString letter);
+    void setSeekLetter(QString letter);
 
     //listmodels
-    QByteArray binaryConfig;
     LocationModel *m_lRooms;
-    ListModel *model;
+    ListModel *model;      //media grid model
     UserModel *userList;
     SkinDataModel *skinModel;
     QList<QObject*> buttonList;
-
-
     MediaSubTypeModel *mediaTypeFilter;
     FilterModel *uiFileFilter;
     AttributeSortModel *attribFilter;
     GenreModel *genreFilter;
-
-    int i_current_mediaType;
-
     LightingScenarioModel *roomLights;
     MediaScenarioModel *roomMedia;
     ClimateScenarioModel *roomClimate;
     TelecomScenarioModel *roomTelecom;
     SecurityScenarioModel *roomSecurity;
-
-    //---------IMPORTANT-1-OFF-VARIABLES!!!!!---------------------------------------------//
-    int i_current_command_grp;
-    //int i_stream_id;
-
-    /*
-    update object image variables. they need a place to be store because they can be sent or updated at any time
-    with this method, the current screen can get its data in an async fashion and multiple components can request the
-    data
-    */
-
-    QImage updatedObjectImage; //used for the current image for a given media item on screen
-    QImage mediaScreenShot;    //used for screen shots
+    QMap <QString, int> mp_rooms;
+    QMap <int, LightingScenarioModel*> roomLightingScenarios;
+    QMap <int, MediaScenarioModel*> roomMediaScenarios;
+    QMap <int, ClimateScenarioModel*> roomClimateScenarios;
+    QMap <int, TelecomScenarioModel*> roomTelecomScenarios;
+    QMap <int, SecurityScenarioModel*> roomSecurityScenarios;
 
     //ui functions
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}
@@ -297,22 +287,14 @@ Param 10 - pk_attribute
 
     //class objects
     DCE::qOrbiter * pqOrbiter;                  //reference to forward declared dce object
-    bool mediaPlaying;
 
     //QT Functions to initialize lmce data
     bool initialize(int dev_id);
-    Q_INVOKABLE bool initializeManager(string router_address, int device_id);     //init's dce object
-    /*
-      getConf() is the part of the equation that should read the orbiter conf. not implemented fully
-      */
-    bool getConf(int pPK_Device);
+    bool initializeManager(string router_address, int device_id);     //init's dce object
+    //getConf() is the part of the equation that should read the orbiter conf. not implemented fully
 
-    bool OrbiterGen();              //prelim orbter generation
-    Q_INVOKABLE void quickReload();
 
-    /*
-      DCE variables
-      */
+    //DCE variables
     bool m_bStartingUp;
     string m_sLocalDirectory;
     int m_pOrbiterCat;
@@ -326,25 +308,19 @@ Param 10 - pk_attribute
     QString qs_routerip;
     bool dceBool;                   //
     bool bLocalMode;                //local running flag, for running without router.
-    //LightingScenarioModel *dummy;
 
     string sEntertainArea;          //current entertain area int
     int iPK_User;                    //current user
     int iFK_Room;                    //current room
     int iea_area;
     QString sPK_Room;
-    QMap <QString, int> mp_rooms;
-    QMap <int, LightingScenarioModel*> roomLightingScenarios;
-    QMap <int, MediaScenarioModel*> roomMediaScenarios;
-    QMap <int, ClimateScenarioModel*> roomClimateScenarios;
-    QMap <int, TelecomScenarioModel*> roomTelecomScenarios;
-    QMap <int, SecurityScenarioModel*> roomSecurityScenarios;
     QString s_onOFF;
 
     QStringList *sRoomList;          //Linked list of rooms in house
     QStringList *sUserList;          //linked list of users in house
     QStringList *sCurr_Room_Devices; //linked list of current devices (experimental)
     QString currentScreen;
+
     //plugin variables
     long iOrbiterPluginID;           //the orbiter plugin id for future use
     long iPK_Device_DatagridPlugIn;
@@ -356,8 +332,7 @@ Param 10 - pk_attribute
     long iMediaPluginID;
     int m_pDevice_ScreenSaver;
     int m_dwIDataGridRequestCounter;
-    long iPK_Device;                   //this orbiters device number, passed in from command line
-    QString qs_ext_routerip;
+
 
 signals:
     void filterChanged();
@@ -403,7 +378,11 @@ signals:
     void skinDataLoaded(bool b);
 
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
-     void qmlSetupLmce(QString incdeviceid, QString incrouterip);
+    bool getConf(int pPK_Device);
+    bool OrbiterGen();              //prelim orbter generation
+    void quickReload();
+
+    void qmlSetupLmce(QString incdeviceid, QString incrouterip);
     void setRequestMore(bool state);
     bool getRequestMore();
     int loadSplash();

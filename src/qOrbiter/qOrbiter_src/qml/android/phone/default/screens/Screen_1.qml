@@ -13,7 +13,7 @@ Rectangle {
 
     Text{
         id:spaceholder
-        text:dcemessage
+        text:manager.dceResponse
         font.pixelSize: scaleY(3)
         font.family: "Droid Sans"
         anchors.top: stage.top

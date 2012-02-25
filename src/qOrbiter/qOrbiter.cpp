@@ -797,7 +797,7 @@ void qOrbiter::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *p
     cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
 */
 
-    qmlUI->setDceResponse("Incoming" + QString::fromStdString(sType)+ "::Update Object Image raw size: " +QString::number(iData_Size));
+    qmlUI->setDceResponse("Incoming" + QString::fromStdString(sType));
 
     const uchar *data = (uchar*)pData;
 #ifdef ANDROID
@@ -817,7 +817,7 @@ void qOrbiter::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *p
 #endif
 
     emit objectUpdate(tempImage);
-    qmlUI->setDceResponse("Update Image detected. Size:" + QString::number(tempImage.size().height()));
+    qmlUI->setDceResponse("Update Image detected. Size:" + tempImage.byteCount());
 }
 
 //<-dceag-c58-b->
@@ -1748,7 +1748,7 @@ bool DCE::qOrbiter::initialize()
 
     if ( GetConfig() && Connect(PK_DeviceTemplate_get()) )
     {
-        qDebug("Starting Manager");
+     //   qDebug("Starting Manager");
         emit startManager(QString::number(m_dwPK_Device), QString::fromStdString(m_sHostName) );
          QApplication::processEvents(QEventLoop::AllEvents);
         return true;
@@ -1757,7 +1757,7 @@ bool DCE::qOrbiter::initialize()
     {
 
 
-        qDebug("Checking Connection Error Type:");
+      //  qDebug("Checking Connection Error Type:");
 QApplication::processEvents(QEventLoop::AllEvents);
         if(  m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
         {
@@ -1792,11 +1792,7 @@ QApplication::processEvents(QEventLoop::AllEvents);
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
             emit statusMessage("QOrbiter Connect() Failed :(");
             QApplication::processEvents(QEventLoop::AllEvents);
-
-
         }
-
-
 
         Disconnect();
         return false;
@@ -2855,9 +2851,10 @@ void DCE::qOrbiter::setUser(int user)
 
 void DCE::qOrbiter::QuickReload() //experimental function. checkConnection is going to be our watchdog at some point, now its just um. there to restart things.
 {
-    CMD_Reload reload(m_dwPK_Device, qmlUI->iOrbiterPluginID);
-    SendCommand( reload );
-    qmlUI->checkConnection();
+    Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName);
+    event_Impl.m_pClientSocket->SendString( "RELOAD" );
+
+
 }
 
 void DCE::qOrbiter::powerOn(QString devicetype)
@@ -3067,7 +3064,7 @@ void DCE::qOrbiter::setPosition(QString position)
         //qDebug("DVD pls change") ;
         if(!SendCommand(setPosition))
         {
-            qmlUI->checkConnection();
+
         }
     }
     else
@@ -3076,7 +3073,7 @@ void DCE::qOrbiter::setPosition(QString position)
 
         if(!SendCommand(setPosition))
         {
-            qmlUI->checkConnection();
+
         }
     }
 
@@ -3087,7 +3084,7 @@ void DCE::qOrbiter::showMenu() //show the dvd menu
     CMD_Goto_Media_Menu showDVDmenu(m_dwPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID, 0 );
     if(!SendCommand(showDVDmenu))
     {
-        qmlUI->checkConnection();
+
     }
 
 }
@@ -3099,7 +3096,7 @@ void DCE::qOrbiter::moveDirection(QString direction) //connects ui buttons to dc
         CMD_Move_Up moveUp(m_dwPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID);
         if(!SendCommand(moveUp))
         {
-            qmlUI->checkConnection();
+
         }
     }
     else if(direction.contains("down"))
@@ -3107,7 +3104,7 @@ void DCE::qOrbiter::moveDirection(QString direction) //connects ui buttons to dc
         CMD_Move_Down moveDown(m_dwPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID);
         if(!SendCommand(moveDown))
         {
-            qmlUI->checkConnection();
+
         }
     }
     else if(direction.contains("right"))
@@ -3115,7 +3112,7 @@ void DCE::qOrbiter::moveDirection(QString direction) //connects ui buttons to dc
         CMD_Move_Right move(m_dwPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID);
         if(!SendCommand(move))
         {
-            qmlUI->checkConnection();
+
         }
     }
     else  if(direction.contains("left"))
@@ -3123,7 +3120,7 @@ void DCE::qOrbiter::moveDirection(QString direction) //connects ui buttons to dc
         CMD_Move_Left move(m_dwPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID);
         if(!SendCommand(move))
         {
-            qmlUI->checkConnection();
+
         }
     }
     else if(direction.contains("enter"))
@@ -3131,7 +3128,7 @@ void DCE::qOrbiter::moveDirection(QString direction) //connects ui buttons to dc
         CMD_EnterGo enter(m_dwPK_Device, qmlUI->iMediaPluginID, qmlUI->nowPlayingButton->i_streamID);
         if(!SendCommand(enter))
         {
-            qmlUI->checkConnection();
+
         }
     }
 }
@@ -3141,7 +3138,7 @@ void DCE::qOrbiter::JogStream(QString jump) //jumps position in stream for jog
     CMD_Jump_to_Position_in_Stream jog(m_dwPK_Device, qmlUI->iMediaPluginID, jump.toStdString(), m_dwPK_Device_NowPlaying  );
     if(!SendCommand(jog))
     {
-        qmlUI->checkConnection();
+
     }
 }
 
@@ -3409,15 +3406,14 @@ void DCE::qOrbiter::adjustVolume(int vol)
 
 void DCE::qOrbiter::OnDisconnect()
 {
-    qmlUI->closeOrbiter();
+    emit disconnected("Lost Connection");
 }
 
 void DCE::qOrbiter::OnReload()
 {
 
     emit disconnected("Router Reload");
-    // qmlUI->splashView->show();
-    qmlUI->qorbiterUIwin->close();
+
 
 }
 
@@ -3638,6 +3634,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
         //album
         if (qmlUI->q_attributetype_sort == "2" && qmlUI->q_pk_attribute != "")
         {
+            emit statusMessage("Album Selected");
             qmlUI->q_attributetype_sort = "3";
         }
         else if (qmlUI->q_attributetype_sort == "3" && qmlUI->q_pk_attribute != "")
@@ -3653,7 +3650,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
         qmlUI->i_current_mediaType = iPK_MediaType;
         qmlUI->goBack<< s;
     }
-
+qDebug() << s;
 
     CMD_Populate_Datagrid populateDataGrid(m_dwPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 63, s.toStdString(), DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
@@ -3706,9 +3703,11 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                     QString filePath;
                     int index;
                     QImage cellImg;
+                    int i=0;
 
                     for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
                     {
+
                         DataGridCell *pCell = it->second;
                         const char *pPath = pCell->GetImagePath();
                         filePath = QString::fromUtf8(pPath);
@@ -3735,8 +3734,9 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
 
                         emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
                         QApplication::processEvents(QEventLoop::AllEvents);
+
                     }
-                    qDebug("Checking for more from qorbiter.cpp");
+                   // qDebug("Checking for more from qorbiter.cpp");
                     delete pDataGridTable;
                     checkGridStatus();
                 }

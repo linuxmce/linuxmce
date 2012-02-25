@@ -53,6 +53,7 @@ signals:
     void gridTypeChanged(int type);
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const int &sRow);
     void progressChanged(double p);
+    void ready(int type);
 
 
 public slots:
@@ -69,6 +70,7 @@ public slots:
     void setProgress(double n_progress);
     double getProgress();
     void attributeSort();
+    bool clearAndRequest();
 
 private slots:
     void handleItemChange();

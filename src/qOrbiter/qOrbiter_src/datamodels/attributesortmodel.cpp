@@ -164,7 +164,7 @@ void AttributeSortModel::ReturnSelectedItems()
         if(item->selectedStatus() == true) t_selected_items.append(item->fileformat());
     }
     QString qs_sorting_string= t_selected_items.join(",");
-    qDebug() << "Attribute Sort updated sorting filter" << qs_sorting_string;
+    //qDebug() << "Attribute Sort updated sorting filter" << qs_sorting_string;
     emit SetTypeSort(6, qs_sorting_string);
 }
 

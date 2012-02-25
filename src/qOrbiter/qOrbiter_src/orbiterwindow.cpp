@@ -134,7 +134,7 @@ bool orbiterWindow::getOrbiterState()
 
 void orbiterWindow::showSplash()
 {
-    mainView.setSource(QUrl(qrcPath));
+    mainView.setSource(QUrl("../Splash.qml"));
 }
 
 void orbiterWindow::setSkinDataState(bool b)

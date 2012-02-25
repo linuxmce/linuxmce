@@ -20,7 +20,7 @@ ListModel::ListModel(gridItem* prototype, QObject* parent) :
 
 int ListModel::rowCount(const QModelIndex &parent) const
 {
-    //Q_UNUSED(parent);
+    Q_UNUSED(parent);
     return m_list.size();
 }
 
@@ -38,6 +38,7 @@ ListModel::~ListModel() {
 
 void ListModel::appendRow(gridItem *item)
 {
+
     appendRows(QList<gridItem*>() << item);
 }
 
@@ -53,7 +54,7 @@ void ListModel::appendRows(const QList<gridItem *> &items)
     endInsertRows();
     QModelIndex index = indexFromItem(m_list.last());
     QModelIndex index2 = indexFromItem(m_list.first());
-    int currentRows= m_list.count() - 1;
+    int currentRows= m_list.size() - 1;
     emit dataChanged(index2, index, currentRows);
 
 
@@ -124,10 +125,8 @@ void ListModel::clear()
 
     qDeleteAll(m_list);
     m_list.clear();
-   reset();
     totalcells = 0;
-
-    qDebug() << "Total Rows:" << m_list.count();
+    qDebug() << "Total Rows:" << m_list.size();
 
 }
 
@@ -144,7 +143,7 @@ bool ListModel::removeRow(int row, const QModelIndex &parent)
 bool ListModel::removeRows(int row, int count, const QModelIndex &parent)
 {
     Q_UNUSED(parent);
-    if(row < 0 || (row+count) >= m_list.size()) return false;
+    if(row < 0 || (row+count) > m_list.size()) return false;
     beginRemoveRows(QModelIndex(), row, row+count-1);
     for(int i=0; i<count; ++i) {
         delete m_list.takeAt(row);
@@ -171,14 +170,12 @@ void ListModel::checkForMore()
 {
 
 
-    if (m_list.count() < totalcells && loadingStatus == true )
+    if (m_list.size()< totalcells && loadingStatus == true )
     {
-        int l = m_list.count();
-        double p = (((double)l / (double)totalcells) * 100) ;
-        //qDebug()<< p;
+        double p = (((double)m_list.size() / (double)totalcells) * 100) ;
 
         setProgress(p);
-        setLoadingStatus(true);
+
         emit gimmieData(gridType);
     }
     else
@@ -197,19 +194,19 @@ void ListModel::populateGrid(int mediaType)
 void ListModel::setTotalCells(int cells)
 {
     totalcells = cells;
-
-    if ( m_list.count() < totalcells)
+    qDebug() << "Size Changed" << totalcells;
+    if ( m_list.size() < totalcells)
     {
 
         setLoadingStatus(true);
-qDebug() <<QString::number(m_list.count()) +" cells in model, out of " + QString::number(totalcells);
+//qDebug() <<QString::number(m_list.count()) +" cells in model, out of " + QString::number(totalcells);
     }
     else
     {
         //qdebug() <<QString::number(m_list.count()) +" cells in model, out of " + QString::number(totalcells);
         setLoadingStatus(false);
     }
-   // emit sizeChanged(cells);
+    emit sizeChanged(cells);
 
 }
 
@@ -260,6 +257,26 @@ void ListModel::attributeSort()
 {
    this->clear();
     emit gimmieData(gridType);
+
+}
+
+bool ListModel::clearAndRequest()
+{
+
+
+loadingStatus = true;
+    if(removeRows(0, m_list.size(), QModelIndex()))
+    {
+        totalcells=0;
+        m_list.clear();
+        qDebug("Requesting");
+        setLoadingStatus(true);
+        emit ready(getGridType());
+    }
+    else
+    {
+        qDebug("Couldnt delete list!");
+    }
 
 }
 
