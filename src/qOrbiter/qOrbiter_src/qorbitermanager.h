@@ -388,7 +388,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     int loadSplash();
     void startOrbiter();
     bool createAndroidConfig();
-    void gotoQScreen(QString ) ;
+    Q_INVOKABLE void gotoQScreen(QString ) ;
     void checkOrientation(QSize);
     bool getOrientation (){return b_orientation;}
     void setOrientation (bool s) { b_orientation = s; setDceResponse("orientation changed!! "); emit orientationChanged();}

@@ -208,22 +208,22 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 
     QObject::connect(pqOrbiter, SIGNAL(clearGrid()), model, SLOT(clear()));
     QObject::connect(pqOrbiter, SIGNAL(statusMessage(QString)), this , SLOT(setDceResponse(QString)));
-    QObject::connect(pqOrbiter,SIGNAL(addItem(gridItem*)), model, SLOT(appendRow(gridItem*)));
+    QObject::connect(pqOrbiter,SIGNAL(addItem(gridItem*)), model, SLOT(appendRow(gridItem*)), Qt::QueuedConnection);
     QObject::connect(pqOrbiter,SIGNAL(gridModelSizeChange(int)), model, SLOT(setTotalCells(int)));
-    QObject::connect(pqOrbiter,SIGNAL(requestMediaGrid(int)), this, SLOT(getGrid(int)));
-    QObject::connect(pqOrbiter,SIGNAL(checkGridStatus()), model, SLOT(checkForMore()));
-    QObject::connect(pqOrbiter, SIGNAL(gotoQml(QString)), this, SLOT(gotoQScreen(QString)));
+    QObject::connect(pqOrbiter,SIGNAL(requestMediaGrid(int)), this, SLOT(getGrid(int)), Qt::QueuedConnection);
+    QObject::connect(pqOrbiter,SIGNAL(checkGridStatus()), model, SLOT(checkForMore()), Qt::QueuedConnection);
+    QObject::connect(pqOrbiter, SIGNAL(gotoQml(QString)), this, SLOT(gotoQScreen(QString)), Qt::QueuedConnection);
     //  QObject::connect(this,SIGNAL(stillLoading(bool)), model, SLOT(setLoadingStatus(bool)), Qt::QueuedConnection);
 
 
-    QObject::connect(this,SIGNAL(filterChanged()), model,SLOT(attributeSort()));
-    QObject::connect(model,SIGNAL(loadingStatusChanged(bool)), this, SLOT(setRequestMore(bool)));
-    QObject::connect(model, SIGNAL(gimmieData(int)), pqOrbiter, SLOT(populateAdditionalMedia()));
-    QObject::connect(model,SIGNAL(ready(int)), pqOrbiter, SLOT(prepareFileList(int)));
-    QObject::connect(this, SIGNAL(mediaRequest(int)), pqOrbiter,SLOT(prepareFileList(int)));
-    QObject::connect(this,SIGNAL(screenChange(QString)), this, SLOT(gotoQScreen(QString)));
-    QObject::connect(this,SIGNAL(executeCMD(int)), pqOrbiter, SLOT(executeCommandGroup(int)));
-    QObject::connect(this, SIGNAL(gridTypeChanged(int)), model, SLOT(setGridType(int)));
+    //QObject::connect(this,SIGNAL(filterChanged()), model,SLOT(attributeSort()));
+    QObject::connect(model,SIGNAL(loadingStatusChanged(bool)), this, SLOT(setRequestMore(bool)), Qt::QueuedConnection);
+    QObject::connect(model, SIGNAL(gimmieData(int)), pqOrbiter, SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
+    QObject::connect(model,SIGNAL(ready(int)), pqOrbiter, SLOT(prepareFileList(int)), Qt::QueuedConnection);
+    QObject::connect(this, SIGNAL(mediaRequest(int)), pqOrbiter,SLOT(prepareFileList(int)), Qt::QueuedConnection);
+    QObject::connect(this,SIGNAL(screenChange(QString)), this, SLOT(gotoQScreen(QString)), Qt::QueuedConnection);
+    QObject::connect(this,SIGNAL(executeCMD(int)), pqOrbiter, SLOT(executeCommandGroup(int)), Qt::QueuedConnection);
+    QObject::connect(this, SIGNAL(gridTypeChanged(int)), model, SLOT(setGridType(int)), Qt::QueuedConnection);
 
 
 

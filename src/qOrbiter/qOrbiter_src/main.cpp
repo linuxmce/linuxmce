@@ -236,11 +236,11 @@ int main(int argc, char* argv[])
 #endif
 
 
-        QThread *dceThread = new QThread;
+        //QThread *dceThread = new QThread;
         qOrbiter *pqOrbiter = new qOrbiter(PK_Device, sRouter_IP,true,bLocalMode);
 
-        pqOrbiter->moveToThread(dceThread);
-        dceThread->start();
+        //pqOrbiter->moveToThread(dceThread);
+        //dceThread->start();
 
         orbiterWindow orbiterWin(PK_Device, sRouter_IP);
         orbiterWin.setMessage("Setting up Lmce");

@@ -41,10 +41,6 @@ public:
     int gridType;
     double progress;
     int currentCells;
-
-
-
-
 signals:
     void ItemAdded();
     void gimmieData(int type);

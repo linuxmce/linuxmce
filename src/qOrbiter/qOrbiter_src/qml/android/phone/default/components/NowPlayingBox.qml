@@ -18,9 +18,9 @@ Rectangle {
     Image{
         id:np_image
         fillMode: Image.PreserveAspectCrop
-        source:""
-        height:  scaleY(22)
-        width: scaleY(22)
+        source:"../img/media.png"
+        height:  appH
+        width: appW
         anchors.centerIn: np_box
 
     }
@@ -62,11 +62,6 @@ Rectangle {
         anchors.horizontalCenter: np_box.horizontalCenter
     }
 
-    MouseArea{
-        id: mousearea1
-        anchors.fill: parent
-        onClicked:screenchange(dcenowplaying.qs_screen)
-    }
 
     Text {
         id: np
@@ -90,11 +85,7 @@ Rectangle {
                 anchors.topMargin: 0
             }
 
-            PropertyChanges {
-                target: textrect
-                x: -38
-                y: 27
-            }
+
 
             PropertyChanges {
                 target: mousearea1
@@ -121,11 +112,7 @@ Rectangle {
                 y: 29
             }
 
-            PropertyChanges {
-                target: textrect
-                x: -27
-                y: 18
-            }
+
         },
         State {
             name: "storedvideo"

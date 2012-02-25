@@ -26,11 +26,12 @@ Rectangle {
     Column{
         id:maindisplay
         anchors.top: spaceholder.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
         height: childrenRect.height
-        width: scaleX(100)
+        width: childrenRect.width
         spacing: scaleY(1)
-        NowPlayingBox{anchors.horizontalCenter: parent.horizontalCenter}
-        DroidHomeSelector{anchors.horizontalCenter: parent.horizontalCenter}
+        NowPlayingButton{ width: home_selector.width}
+        DroidHomeSelector{id:home_selector}
 
     }
 

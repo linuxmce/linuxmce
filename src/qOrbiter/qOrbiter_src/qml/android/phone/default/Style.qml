@@ -57,7 +57,8 @@ QtObject{
     property color homeScreenNowPlayingColorInActive: "indianred"
     property color homeScreenNowPlayingColorActive: "lightcyan"
 
-
+    property int homeselectorh: scaleY(15)
+    property int homeselectorw: scaleY(15)
 
 
     //icon sizes
