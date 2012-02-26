@@ -35,7 +35,7 @@ Rectangle {
             height: scaleY(20)
             Rectangle {
                 id: background
-                color: mouseclick.pressed ? "orange":"transparent"
+                color: mouseclick.pressed ? "orange":"grey"
                 anchors.centerIn: parent
                 border.color: "silver"               
                 height: scaleY(20)
@@ -66,8 +66,7 @@ Rectangle {
                 MouseArea {
                     id:mouseclick
                     anchors.fill: parent
-                    onClicked: setStringParam(4, id)
-
+                    onPressed: setStringParam(4, id)
                 }
             }
         }
@@ -81,7 +80,7 @@ Rectangle {
         model:dataModel
         delegate: contactDelegateList
         clip: true
-        cacheBuffer: 10
+        cacheBuffer: 30
         anchors.left: selector.right
         anchors.top: fileviewscreen.top
 

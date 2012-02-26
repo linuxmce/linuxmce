@@ -76,7 +76,7 @@ void ListModel::handleItemChange()
 {
     gridItem* item = static_cast<gridItem*>(sender());
     QModelIndex index = indexFromItem(item);
-    qDebug() << "Handling item change for:" << index;
+   // qDebug() << "Handling item change for:" << index;
     if(index.isValid())
     {
         emit dataChanged(index, index, 0);
@@ -129,7 +129,7 @@ void ListModel::clear()
     qDeleteAll(m_list);
     m_list.clear();
     totalcells = 0;
-    qDebug() << "Total Rows:" << m_list.size();
+    //qDebug() << "Total Rows:" << m_list.size();
 
 }
 
@@ -197,7 +197,7 @@ void ListModel::populateGrid(int mediaType)
 void ListModel::setTotalCells(int cells)
 {
     totalcells = cells;
-    qDebug() << "Size Changed" << totalcells;
+   // qDebug() << "Size Changed" << totalcells;
     if ( m_list.size() < totalcells)
     {
 
@@ -272,13 +272,13 @@ clearing = true;
     {
       totalcells=0;
         m_list.clear();
-        qDebug("Requesting");
+       // qDebug("Requesting");
         setLoadingStatus(true);
         emit ready(getGridType());
     }
     else
     {
-        qDebug("Couldnt delete list!");
+      //  qDebug("Couldnt delete list!");
     }
 clearing = false;
 }
