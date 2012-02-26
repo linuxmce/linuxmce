@@ -18,8 +18,6 @@ Rectangle {
         source: "../img/bkg.png"
         anchors.fill: filedetailrect
     }
-
-
     Timer{
         id:singleshot
         repeat: false

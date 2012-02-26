@@ -26,11 +26,11 @@ Rectangle {
                 color: status ? "transparent": "silver"
 
                 Text {
-                    width: 75
+                    width: parent.width
                     height: parent.height
                     id: fileformatcell
                     text: name
-                    font.pointSize: scaleY(2)
+                    font.pixelSize: scaleY(2)
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     onFocusChanged: {rect.destroy()}
 
