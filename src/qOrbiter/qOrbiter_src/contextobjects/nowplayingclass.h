@@ -40,6 +40,7 @@ class NowPlayingClass : public QDeclarativeItem
 
     Q_PROPERTY (bool b_mediaPlaying READ getStatus WRITE setStatus NOTIFY mediaStatusChanged) //property to know if media is playing
 
+    Q_PROPERTY (QImage fileImage READ getImage WRITE setImage NOTIFY imageChanged)
     //timecode
 
     Q_PROPERTY (QString timecode READ getTimeCode WRITE setTimeCode NOTIFY tcChanged)
@@ -61,7 +62,7 @@ class NowPlayingClass : public QDeclarativeItem
     Q_PROPERTY (QString qs_playbackSpeed READ getMediaSpeed WRITE setStringSpeed NOTIFY mediaSpeedChanged)
 
     //metadata related image url
-    Q_PROPERTY (QUrl nowPlayingImage READ getImage WRITE setImage NOTIFY imageChanged)
+    Q_PROPERTY (QUrl nowPlayingImageUrl READ getImageUrl WRITE setImageUrl NOTIFY imageUrlChanged)
 
     //internal playlist position tracker
     Q_PROPERTY (int m_iplaylistPosition READ getPlaylistPosition WRITE setPlaylistPostion NOTIFY playListPositionChanged)
@@ -102,7 +103,7 @@ public:
     //dont laugh, not sure where these come from but are relevant for other functions
     bool b_mediaPlaying;
 
-    QUrl nowPlayingImage;
+    QUrl nowPlayingImageUrl;
     int m_iplaylistPosition;
     QImage fileImage;
 
@@ -139,6 +140,7 @@ signals:
     void mediaChanged();
     void mediaEnded();
     void mediaStarted();
+    void imageUrlChanged();
     void imageChanged();
     void screenTypeChanged();
     void titleChanged();
@@ -153,6 +155,7 @@ signals:
     void synopChanged();
     void tcChanged();
     void durationChanged();
+    void statusMessage(QString msg);
 
 
     //audio signals
@@ -191,13 +194,29 @@ public slots:
     void setProgram(QString newProgram) {tvProgram = newProgram; emit programChanged();}
     QString getProgram () {return tvProgram;}
 
-    void setImage(QUrl incImage) {nowPlayingImage = incImage; emit imageChanged();}
-    QUrl getImage () { return nowPlayingImage;}
+    void setImageUrl(QUrl incImage) {nowPlayingImageUrl = incImage;}
+    QUrl getImageUrl () { return nowPlayingImageUrl;}
+
+    void setImageData( const uchar *data, int iData_size) {
+
+        QImage t;
+
+        if( t.loadFromData(data, iData_size))
+        {
+            setImage(t);
+        }
+        else
+        {
+            emit statusMessage("Update Object Image Conversion Failed:");
+        }
+    }
+    void setImage(QImage img) {fileImage = img; emit imageChanged();}
+    QImage getImage() {return fileImage;}
 
     void setScreen(QString inc_screen) {qs_screen = inc_screen; emit screenTypeChanged();}
     QString getScreen () {return qs_screen;}
 
-    void setUrl (QString inc_url) {qs_imagePath = inc_url; emit imageChanged();}
+    void setUrl (QString inc_url) {qs_imagePath = inc_url; emit imageUrlChanged();}
     QString getUrl () {return qs_imagePath;}
 
     void setTitle (QString inc_title) {qs_mainTitle = inc_title; emit titleChanged();}

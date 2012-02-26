@@ -797,27 +797,11 @@ void qOrbiter::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *p
     cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
 */
 
-    qmlUI->setDceResponse("Incoming" + QString::fromStdString(sType));
-
+    emit statusMessage("Incoming" + QString::fromStdString(sType));
+    emit statusMessage("Update Image detected. Size:" + QString::number(iData_Size));
     const uchar *data = (uchar*)pData;
-#ifdef ANDROID
-    QImage tempImage= QImage::fromData(QByteArray(pData, iData_Size), "JPG");
-#else
-    QImage tempImage;
-    if( tempImage.loadFromData(data, iData_Size, "JPG"))
-    {
-        qmlUI->updateImageChanged(tempImage);
-    }
-    else
-    {
-        qmlUI->setDceResponse(QString::number(tempImage.byteCount()));
-    }
+    emit objectUpdate(data, iData_Size);
 
-
-#endif
-
-    emit objectUpdate(tempImage);
-    qmlUI->setDceResponse("Update Image detected. Size:" + tempImage.byteCount());
 }
 
 //<-dceag-c58-b->
@@ -1332,7 +1316,6 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
     if (iPK_MediaType != qmlUI->i_current_mediaType)
     {
         qmlUI->initializeSortString();
-
     }
 
     qmlUI->setSorting(iPK_MediaType);
@@ -1748,17 +1731,17 @@ bool DCE::qOrbiter::initialize()
 
     if ( GetConfig() && Connect(PK_DeviceTemplate_get()) )
     {
-     //   qDebug("Starting Manager");
+        //   qDebug("Starting Manager");
         emit startManager(QString::number(m_dwPK_Device), QString::fromStdString(m_sHostName) );
-         QApplication::processEvents(QEventLoop::AllEvents);
+        QApplication::processEvents(QEventLoop::AllEvents);
         return true;
     }
     else
     {
 
 
-      //  qDebug("Checking Connection Error Type:");
-QApplication::processEvents(QEventLoop::AllEvents);
+        //  qDebug("Checking Connection Error Type:");
+        QApplication::processEvents(QEventLoop::AllEvents);
         if(  m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
         {
 
@@ -2717,6 +2700,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
                 channelimage.load(":/icons/icon.png");
 
                 qmlUI->simpleEPGmodel->appendRow(new EPGItemClass(channelName, channelNumber, channelIndex, program, index, channelimage, channelimage, qmlUI->simpleEPGmodel));
+                QApplication::processEvents(QEventLoop::AllEvents);
                 index++;
             }
         }
@@ -2763,13 +2747,13 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 
     if( qmlUI->requestMore == true && qmlUI->model->loadingStatus == true)
     {
-       // emit statusMessage("Still on Media Grid Screen");
+        // emit statusMessage("Still on Media Grid Screen");
 
         //seeking to a specific letter then reseting the request more
         int cellsToRender= 0;
         int currentrow = qmlUI->model->rowCount(QModelIndex()) ;
         int gHeight = 1;
-        int gWidth = 8;
+        int gWidth = 1;
         string imgDG ="_MediaFile_"+QString::number(m_dwPK_Device).toStdString();
         int iData_Size=0;
         int GridCurRow = currentrow;
@@ -2780,7 +2764,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
         int offset = 0;
 
         //CMD_Request_Datagrid_Contents(                              long DeviceIDFrom,                long DeviceIDTo,                   string sID,                                string sDataGrid_ID, int iRow_count,int iColumn_count,        bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,       int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
-        DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(imgDG),    16,    int(gHeight),                      false,                 false,                                 true, string(m_sSeek), 0   ,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+        DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(qmlUI->iPK_Device_DatagridPlugIn), StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(imgDG),    1,    int(gHeight),                      false,                 false,                                 true, string(m_sSeek), 0   ,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
 
         if(SendCommand(req_data_grid_pics))
         {
@@ -2793,7 +2777,8 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
             QString filePath;
             int index;
             QImage cellImg;
-
+            if(qmlUI->requestMore == true && qmlUI->model->clearing == false)
+            {
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
                 DataGridCell *pCell = it->second;
@@ -2816,14 +2801,15 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                 { cellImg.load(":/icons/icon.png"); }
                 //qmlUI->model->appendRow(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
                 // gridItem *cItem = new gridItem(fk_file, cellTitle, filePath, index, cellImg);
-                 emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
-                QApplication::processEvents(QEventLoop::AllEvents);
+                emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
+                //QApplication::processEvents(QEventLoop::AllEvents);
             }
             delete pDataGridTable;
+}
         }
-        //qmlUI->qs_seek="";
+
     }
-    emit checkGridStatus();
+emit checkGridStatus();
 }
 
 
@@ -3549,7 +3535,7 @@ int DCE::qOrbiter::DeviceIdInvalid()
 
 
     emit statusMessage("Device ID is invalid. Finding Existing Orbiters of this type");
-     QApplication::processEvents(QEventLoop::AllEvents);
+    QApplication::processEvents(QEventLoop::AllEvents);
     QList<QObject*>  temp_orbiter_list ;
 
     map<int,string> mapDevices;
@@ -3558,7 +3544,7 @@ int DCE::qOrbiter::DeviceIdInvalid()
     if( mapDevices.size()==0 )
     {
         emit statusMessage("No orbiters of this type found. Would you like to setup a new one?");
-         QApplication::processEvents(QEventLoop::AllEvents);
+        QApplication::processEvents(QEventLoop::AllEvents);
         return 0;
     }
 
@@ -3578,7 +3564,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
 {
     emit statusMessage("Retrieving grid for mediatype" + QString::number(iPK_MediaType));
     //emit cleanupGrid();
-
+    qDebug() << iPK_MediaType;
     int gHeight = 1;
     int gWidth = 1;
     int pkVar = 0;
@@ -3607,42 +3593,68 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
     }
     else
     {
-        //PROGRAM
-        if (qmlUI->q_attributetype_sort == "12" && qmlUI->q_pk_attribute != "")
+        //video
+        if (iPK_MediaType == 5)
         {
-            emit statusMessage("Programs Selected!");
-            qmlUI->q_attributetype_sort =  "52";
-        }
-        else if (qmlUI->q_attributetype_sort == "52" && qmlUI->q_pk_attribute !="")
-        {
-            qmlUI->q_attributetype_sort = "13";
+            if (qmlUI->q_attributetype_sort == "")
+            {
+                qmlUI->q_attributetype_sort = qmlUI->videoDefaultSort;
+            }
+            else if(qmlUI->q_attributetype_sort == "12" && qmlUI->q_pk_attribute !="") //catches program
+            {
+                qmlUI->q_attributetype_sort= "52";
+            }
+            else if(qmlUI->q_attributetype_sort == "1" && qmlUI->q_pk_attribute !="") //catches director
+            {
+                qmlUI->q_attributetype_sort = "13";
+            }
+            else if (qmlUI->q_attributetype_sort =="2" )
+            {
+                qmlUI->q_attributetype_sort = "13";
+            }
+            else if (qmlUI->q_attributetype_sort =="8")
+            {
+                qmlUI->q_attributetype_sort = "13";
+            }
+            else if(qmlUI->q_attributetype_sort =="52")
+            {
+                qmlUI->q_attributetype_sort = "13";
+            }
+
         }
 
-        //PERSON
-        if (qmlUI->q_attributetype_sort == "2" && qmlUI->q_pk_attribute == "")
+        //audio
+        if (iPK_MediaType == 4)
         {
-            if(iPK_MediaType == 4 && qmlUI->q_pk_attribute != "" )
+            if (qmlUI->q_attributetype_sort == "" )
             {
-                qmlUI->q_attributetype_sort = "3"; //sets to album from performer for music
+                qmlUI->q_attributetype_sort = qmlUI->audioDefaultSort;
             }
-            else if (iPK_MediaType == 5)
+            else if(qmlUI->q_attributetype_sort == "2" && qmlUI->q_pk_attribute !="") //catches performer
             {
-                qmlUI->q_attributetype_sort = "13"; //sets to title as catch all for other type for now
+                qmlUI->q_attributetype_sort= "3";
+            }
+            else if (qmlUI->q_attributetype_sort =="8"  && qmlUI->q_pk_attribute !="")
+            {
+                qmlUI->q_attributetype_sort = "3";
+            }
+            else if(qmlUI->q_attributetype_sort =="3")
+            {
+                qmlUI->q_attributetype_sort = "13";
             }
 
         }
-        //album
-        if (qmlUI->q_attributetype_sort == "2" && qmlUI->q_pk_attribute != "")
-        {
-            emit statusMessage("Album Selected");
-            qmlUI->q_attributetype_sort = "3";
-        }
-        else if (qmlUI->q_attributetype_sort == "3" && qmlUI->q_pk_attribute != "")
-        {
-            qmlUI->q_attributetype_sort = "13";
-        }
+        //photos
+
+
+        //playlists
+
+
+        //games
 
     }
+
+
     params = "|"+qmlUI->q_subType +"|"+qmlUI->q_fileFormat+"|"+qmlUI->q_attribute_genres+"|"+qmlUI->q_mediaSources+"||"+qmlUI->q_attributetype_sort+"||2|"+qmlUI->q_pk_attribute+"";
     s = QString::number(iPK_MediaType) + params;
     if(qmlUI->backwards == false)
@@ -3650,7 +3662,6 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
         qmlUI->i_current_mediaType = iPK_MediaType;
         qmlUI->goBack<< s;
     }
-qDebug() << s;
 
     CMD_Populate_Datagrid populateDataGrid(m_dwPK_Device, qmlUI->iPK_Device_DatagridPlugIn, StringUtils::itos( qmlUI->m_dwIDataGridRequestCounter ), string(m_sGridID), 63, s.toStdString(), DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
@@ -3733,10 +3744,10 @@ qDebug() << s;
                         // gridItem *cItem = new gridItem(fk_file, cellTitle, filePath, index, cellImg);
 
                         emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
-                        QApplication::processEvents(QEventLoop::AllEvents);
+                        // QApplication::processEvents(QEventLoop::AllEvents);
 
                     }
-                   // qDebug("Checking for more from qorbiter.cpp");
+                    // qDebug("Checking for more from qorbiter.cpp");
                     delete pDataGridTable;
                     checkGridStatus();
                 }

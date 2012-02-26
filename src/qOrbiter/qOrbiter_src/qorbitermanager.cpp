@@ -83,7 +83,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, DCE::qOrbiter *dceDevic
 
     item = qorbiterUIwin->rootObject();
 
-    QObject::connect(qorbiterUIwin, SIGNAL(sceneResized(QSize)),  SLOT(checkOrientation(QSize)),Qt::QueuedConnection );
+    QObject::connect(qorbiterUIwin, SIGNAL(sceneResized(QSize)),  SLOT(checkOrientation(QSize)) );
 
     QApplication::processEvents(QEventLoop::AllEvents);
 #ifdef for_desktop
@@ -142,6 +142,11 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, DCE::qOrbiter *dceDevic
     //managing where were are variables
     i_current_command_grp = 0;
     i_current_mediaType =0;
+    videoDefaultSort = "13";
+   audioDefaultSort = "2";
+   photoDefaultSort = "13";
+   gamesDefaultSort = "49";
+
 
     QApplication::processEvents(QEventLoop::AllEvents);
     //goBack << ("|||1,2|0|13|0|2|");
@@ -179,7 +184,9 @@ void qorbiterManager::gotoQScreen(QString s)
 {
     setRequestMore(false);
     model->clear();
+    initializeSortString();
     emit resetFilter();
+
     //send the qmlview a request to go to a screen, needs error handling
     //This allows it to execute some transition or other if it wants to
 
@@ -189,7 +196,7 @@ void qorbiterManager::gotoQScreen(QString s)
     //emit screenChange(s);
     QObject *item = qorbiterUIwin->rootObject();
     setDceResponse("About to call screenchange()");
-    if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection,  Q_ARG(QVariant, screenname))) {
+    if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
         setDceResponse("Done call to screenchange()");
     } else {
         setDceResponse("screenchange() FAILED");
@@ -208,16 +215,16 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 
     QObject::connect(pqOrbiter, SIGNAL(clearGrid()), model, SLOT(clear()));
     QObject::connect(pqOrbiter, SIGNAL(statusMessage(QString)), this , SLOT(setDceResponse(QString)));
-    QObject::connect(pqOrbiter,SIGNAL(addItem(gridItem*)), model, SLOT(appendRow(gridItem*)), Qt::QueuedConnection);
+    QObject::connect(pqOrbiter,SIGNAL(addItem(gridItem*)), model, SLOT(appendRow(gridItem*)), Qt::DirectConnection);
     QObject::connect(pqOrbiter,SIGNAL(gridModelSizeChange(int)), model, SLOT(setTotalCells(int)));
     QObject::connect(pqOrbiter,SIGNAL(requestMediaGrid(int)), this, SLOT(getGrid(int)), Qt::QueuedConnection);
     QObject::connect(pqOrbiter,SIGNAL(checkGridStatus()), model, SLOT(checkForMore()), Qt::QueuedConnection);
-    QObject::connect(pqOrbiter, SIGNAL(gotoQml(QString)), this, SLOT(gotoQScreen(QString)), Qt::QueuedConnection);
+    QObject::connect(pqOrbiter, SIGNAL(gotoQml(QString)), this, SLOT(gotoQScreen(QString)));
     //  QObject::connect(this,SIGNAL(stillLoading(bool)), model, SLOT(setLoadingStatus(bool)), Qt::QueuedConnection);
 
 
     //QObject::connect(this,SIGNAL(filterChanged()), model,SLOT(attributeSort()));
-    QObject::connect(model,SIGNAL(loadingStatusChanged(bool)), this, SLOT(setRequestMore(bool)), Qt::QueuedConnection);
+    QObject::connect(model,SIGNAL(loadingStatusChanged(bool)), this, SLOT(setRequestMore(bool)), Qt::DirectConnection);
     QObject::connect(model, SIGNAL(gimmieData(int)), pqOrbiter, SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(ready(int)), pqOrbiter, SLOT(prepareFileList(int)), Qt::QueuedConnection);
     QObject::connect(this, SIGNAL(mediaRequest(int)), pqOrbiter,SLOT(prepareFileList(int)), Qt::QueuedConnection);
@@ -303,8 +310,6 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     }
     else
         return false;
-
-
 
 }
 
@@ -606,13 +611,13 @@ bool qorbiterManager::getConf(int PK_Device)
     qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms);                           //custom room list  provided
     qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
     qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(screenshotVars));
-    QObject::connect(this->nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()));
+    QObject::connect(this->nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection);
     setDceResponse("Properties Done");
 
     //epg listmodel, no imageprovider as of yet
     simpleEPGmodel = new EPGChannelList(new EPGItemClass, this );
     qorbiterUIwin->rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
-    processingThread = new QThread(this);
+    processingThread = new QThread();
     simpleEPGmodel->moveToThread(processingThread);
     processingThread->start();    QApplication::processEvents(QEventLoop::AllEvents);
 
@@ -686,7 +691,7 @@ bool qorbiterManager::getConf(int PK_Device)
     connect(attribFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
     QObject::connect(this, SIGNAL(resetFilter()), attribFilter, SLOT(resetStates()) );
 
-    connect(nowPlayingButton, SIGNAL(mediaStatusChanged()), this , SLOT(updateTimecode()));
+    //connect(nowPlayingButton, SIGNAL(mediaStatusChanged()), this , SLOT(updateTimecode()));
     binaryConfig.clear();
 
     //tConf.clear();
@@ -699,10 +704,8 @@ bool qorbiterManager::getConf(int PK_Device)
     sleeping_alarms.clear();
     qorbiterUIwin->rootContext()->setContextProperty("alarms", QVariant::fromValue(sleeping_alarms) );
     //---update object image
-    updatedObjectImage.load(":/icons/videos.png");
-    QObject::connect(this,SIGNAL(objectUpdated()), nowPlayingButton, SIGNAL(imageChanged()) );
-    //QObject::connect(pqOrbiter,SIGNAL(objectUpdate(QImage)), nowPlayingButton, SLOT(setImage(QUrl)));
 
+    QObject::connect(pqOrbiter,SIGNAL(objectUpdate(const uchar*,int)), nowPlayingButton, SLOT(setImageData(const uchar*,int)),Qt::DirectConnection);
     setDceResponse(" Remote Config Complete");
     QApplication::processEvents(QEventLoop::AllEvents);
 #ifdef for_desktop
@@ -1249,7 +1252,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
 
 
-    // initializeSortString();
+
 }
 
 void qorbiterManager::initializeSortString()
@@ -1263,7 +1266,7 @@ void qorbiterManager::initializeSortString()
     q_attribute_genres="";    //4
     q_mediaSources ="1,2";         //5 need comma delineation
     q_usersPrivate = "0";        //6
-    q_attributetype_sort="13";  //7
+    q_attributetype_sort="";  //7
     q_pk_users="0";             //8
     q_last_viewed="2";        //9
     q_pk_attribute="";        //10

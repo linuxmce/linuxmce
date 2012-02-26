@@ -54,11 +54,11 @@ QImage AbstractImageProvider::securityProvider()
 
 QImage AbstractImageProvider::updateObjectProvider()
 {
-   key = managerreference->updatedObjectImage;
+   key = managerreference->nowPlayingButton->fileImage;
    //qDebug()<< "!!!!!!!!!!" <<key.size();
     if (key.isNull())
     {
-         key = (managerreference->pqOrbiter->getfileForDG(QString(QString("/var/www/lmce-admin/")+managerreference->currentSkinURL+QString("/img/package_editors.png")).toStdString()));
+        key.load(":/icons/icon.png");
 
     }
     //aspect checking

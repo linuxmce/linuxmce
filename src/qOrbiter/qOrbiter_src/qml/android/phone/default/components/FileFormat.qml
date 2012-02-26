@@ -15,7 +15,7 @@ Rectangle {
                  id:fileformatdelegate
                  Item {
                      id: fileformatitem
-                     height: 50
+                     height: scaleY(10)
                      width: parent.width
 
                      Rectangle{
@@ -61,12 +61,14 @@ Rectangle {
                                  z:10
                                   MouseArea{
                                       anchors.fill: parent
-                                      onClicked:{
+                                      onPressAndHold: {
                                           cindex=desc
                                           fileformatmodel.setSelectionStatus(name)
                                           fileformatcell.color = status ? "green" : "red"
                                           console.log(status)
-                                                }
+                                          rect.destroy()
+                                          }
+
                                           }
                                       }
 

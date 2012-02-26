@@ -16,6 +16,7 @@ ListModel::ListModel(gridItem* prototype, QObject* parent) :
     totalcells = 0;
     loadingStatus = false;
     progress = 0;
+    clearing = false;
 }
 
 int ListModel::rowCount(const QModelIndex &parent) const
@@ -38,8 +39,10 @@ ListModel::~ListModel() {
 
 void ListModel::appendRow(gridItem *item)
 {
-
+    if (clearing != true)
+    {
     appendRows(QList<gridItem*>() << item);
+    }
 }
 
 void ListModel::appendRows(const QList<gridItem *> &items)
@@ -263,11 +266,11 @@ void ListModel::attributeSort()
 bool ListModel::clearAndRequest()
 {
 
+clearing = true;
 
-loadingStatus = true;
     if(removeRows(0, m_list.size(), QModelIndex()))
     {
-        totalcells=0;
+      totalcells=0;
         m_list.clear();
         qDebug("Requesting");
         setLoadingStatus(true);
@@ -277,6 +280,6 @@ loadingStatus = true;
     {
         qDebug("Couldnt delete list!");
     }
-
+clearing = false;
 }
 

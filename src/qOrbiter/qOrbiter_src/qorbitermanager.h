@@ -251,6 +251,11 @@ Param 10 - pk_attribute
     QString q_last_viewed;        //9
     QString q_pk_attribute;        //10
     QString *datagridVariableString;
+    QString videoDefaultSort;
+    QString audioDefaultSort;
+    QString photoDefaultSort;
+    QString gamesDefaultSort;
+
     QStringList goBack;
     QString qs_seek;
     bool backwards;
@@ -278,6 +283,7 @@ Param 10 - pk_attribute
     QMap <int, ClimateScenarioModel*> roomClimateScenarios;
     QMap <int, TelecomScenarioModel*> roomTelecomScenarios;
     QMap <int, SecurityScenarioModel*> roomSecurityScenarios;
+    QMap <int, int> *defaultSort;
 
     //ui functions
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}
@@ -388,7 +394,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     int loadSplash();
     void startOrbiter();
     bool createAndroidConfig();
-    Q_INVOKABLE void gotoQScreen(QString ) ;
+    void gotoQScreen(QString ) ;
     void checkOrientation(QSize);
     bool getOrientation (){return b_orientation;}
     void setOrientation (bool s) { b_orientation = s; setDceResponse("orientation changed!! "); emit orientationChanged();}

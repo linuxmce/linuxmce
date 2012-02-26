@@ -50,7 +50,7 @@ import QtQuick 1.0
 
                 MouseArea{
                     anchors.fill: parent
-                    onClicked:screenchange(dcenowplaying.qs_screen)
+                    onClicked:manager.gotoQScreen(dcenowplaying.qs_screen)
                 }
             }
         Flickable{

@@ -46,6 +46,7 @@ Rectangle {
     {
         target: dataModel
         onProgressChanged:progress_bar_fill.height = ((progress_bar.height) * (dataModel.progress )) /100
+        onReady:progress_bar_fill.height = 0
     }
 
     Rectangle

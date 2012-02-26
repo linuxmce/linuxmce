@@ -1071,7 +1071,7 @@ signals:
     void waitForScreenShot(char picData, int picDataSize, string fileFormat);
     void disconnected(QString msg);
     void screenSaverImages(QStringList images);
-    void objectUpdate(QImage u);
+    void objectUpdate(const uchar* ,int);
     void gotoScreen(QString screen);
     void addItem(gridItem*);
     void requestMediaGrid(int);
@@ -1083,6 +1083,7 @@ signals:
     void startManager(QString, QString);
     void deviceInvalid(QList<QObject*>);
     void routerInvalid();
+    void mediaMessage(QString msg);
 
 
 public slots:
