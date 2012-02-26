@@ -35,7 +35,7 @@ Rectangle {
             height: scaleY(20)
             Rectangle {
                 id: background
-                color: mouseclick.pressed ? "orange":"grey"
+                color: mouseclick.pressed ? "orange":"darkgrey"
                 anchors.centerIn: parent
                 border.color: "silver"               
                 height: scaleY(20)
@@ -65,8 +65,8 @@ Rectangle {
 
                 MouseArea {
                     id:mouseclick
-                    anchors.fill: parent
-                    onPressed: setStringParam(4, id)
+                    anchors.fill: parent                   
+                    onDoubleClicked: setStringParam(4, id)
                 }
             }
         }
