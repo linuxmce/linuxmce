@@ -81,6 +81,7 @@ Rectangle {
         model:dataModel
         delegate: contactDelegateList
         clip: true
+        cacheBuffer: 10
         anchors.left: selector.right
         anchors.top: fileviewscreen.top
 
