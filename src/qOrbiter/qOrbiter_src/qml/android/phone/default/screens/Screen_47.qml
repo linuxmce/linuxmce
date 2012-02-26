@@ -35,7 +35,7 @@ Rectangle {
             height: scaleY(20)
             Rectangle {
                 id: background
-                color: mouseclick.pressed ? "orange":"darkgrey"
+                color: mouseclick.pressed ? "orange":"transparent"
                 anchors.centerIn: parent
                 border.color: "silver"               
                 height: scaleY(20)
@@ -53,13 +53,14 @@ Rectangle {
 
                 Text {
                     text: name;                   
-                    font.pixelSize: scaleY(2);
+                    font.pixelSize: scaleY(3.5);
                     color: "Silver" ;
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     //anchors.fill: parent
                     width: scaleX(55)
                     height: scaleY(20)
-                    font.bold: false
+                    font.bold: true
+                    font.family: "Droid Sans"
                     anchors.left: imagerect.right
                 }
 
