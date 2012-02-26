@@ -3,7 +3,7 @@ import QtQuick 1.1
 
 Rectangle {
     id:np_box
-    width: scaleX(80)
+    width: scaleX(90)
     height: scaleY(35)
     color: "transparent"
     border.color: "silver"
@@ -16,7 +16,7 @@ Rectangle {
         spacing: scaleY(1.5)
         width: parent.width
         height: childrenRect.height
-        anchors.top: np_box.bottom
+        anchors.top: np_box.top
 
         Text {
             id: generaltitle
@@ -123,6 +123,7 @@ Rectangle {
         id: np
         text:dcenowplaying.timecode
         font.pixelSize: scaleY(4)
+        width:childrenRect.width
         anchors.bottom: np_box.bottom
         anchors.horizontalCenter: np_label.horizontalCenter
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -135,3 +136,4 @@ Rectangle {
         onClicked:manager.gotoQScreen(dcenowplaying.qs_screen)
     }
 }
+

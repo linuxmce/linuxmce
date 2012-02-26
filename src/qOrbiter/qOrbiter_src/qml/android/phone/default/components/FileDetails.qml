@@ -4,15 +4,21 @@ import QtQuick 1.0
 Rectangle {
     id: filedetailrect
     width: scaleX(85)
-    height: scaleY(75)
-    anchors.top: parent.top
-    anchors.topMargin: scaleY(5)
-    anchors.horizontalCenter: parent.horizontalCenter
+    height: scaleY(85)
+    anchors.centerIn: parent
     color: "silver"
     clip: true
     radius: 5
     border.color:"orange"
     border.width: 1
+    MouseArea{
+        id:bg_catch
+        height: appH
+        width: appW
+        onPressed: filedetailrect.destroy()
+
+    }
+
     Image {
         id: fdbg
         source: "../img/bkg.png"
@@ -239,7 +245,8 @@ Rectangle {
             MouseArea
             {
                 anchors.fill: parent
-                onClicked: playMedia(filedetailsclass.file)  //dce function
+                onClicked:{ playMedia(filedetailsclass.file) ; filedetailrect.destroy()}
+
             }
         }
 
