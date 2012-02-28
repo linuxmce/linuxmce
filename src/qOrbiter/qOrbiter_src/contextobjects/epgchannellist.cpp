@@ -205,5 +205,5 @@ QModelIndex EPGChannelList::getChannelIndex(const QString &name) const
 
 void EPGChannelList::populate()
 {
-    ref->pqOrbiter->requestLiveTvPlaylist();
+    //ref->pqOrbiter->requestLiveTvPlaylist();
 }

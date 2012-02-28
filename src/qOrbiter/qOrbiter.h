@@ -31,8 +31,8 @@
 
 //<-dceag-d-e->
 
-class qorbiterManager;
 class basicImageProvider;
+
 
 
 //<-dceag-decl-b->
@@ -47,10 +47,70 @@ class qOrbiter : public qOrbiter_Command
     // Private methods
 public:
     // Public member variables
-    qorbiterManager * qmlUI;
+
     Virtual_Device_Translator coreDevices;
     DataGridTable pDataGridTable;
     int m_dwPK_Device_NowPlaying,m_dwPK_Device_NowPlaying_Video,m_dwPK_Device_NowPlaying_Audio,m_dwPK_Device_CaptureCard;  /** < set by the media engine, this is whatever media device is currently playing.  Capture Card is non null if we're displaying media via this card */
+    bool retrieving;
+    bool finished;
+    int i_mediaModelRows;
+    int i_currentMediaModelRow;
+    bool pause;
+    int iPK_Device_DatagridPlugIn;
+    int iPK_Device_OrbiterPlugin;
+    int iPK_Device_GeneralInfoPlugin;
+    int  iPK_Device_SecurityPlugin;
+    int  iPK_Device_LightingPlugin;
+    int  m_dwIDataGridRequestCounter;
+    int iOrbiterPluginID;
+    int  iMediaPluginID;
+    int iPK_Device_eventPlugin;
+    int m_pOrbiterCat;
+    int i_ea;
+    int i_room;
+    int i_user;
+    int i_current_mediaType;
+    string *s_user;
+    QString currentScreen;
+
+
+    int internal_streamID;
+    //media grid
+    QStringList goBack;
+
+    QString qs_seek;
+
+    QString q_mediaType;           //1
+    QString q_subType;             //2
+    QString q_fileFormat;          //3
+    QString q_attribute_genres;    //4
+    QString q_mediaSources;         //5
+    QString q_usersPrivate;        //6
+    QString q_attributetype_sort;  //7
+    QString q_pk_users;             //8
+    QString q_last_viewed;        //9
+    QString q_pk_attribute;        //10
+
+    QString *datagridVariableString;
+    QString videoDefaultSort;
+    QString audioDefaultSort;
+    QString photoDefaultSort;
+    QString gamesDefaultSort;
+
+    bool backwards;
+    bool requestMore;
+    //end media grid
+
+    //carried over variables from old OrbiterData.h
+    map<int,string> m_mapTextString;
+    vector<int> m_vectPK_Users_RequiringPIN;
+    map<int,int> m_mapDesignObj; //Used to map a screen to a DesignObj
+    map<int,int> m_mapPK_Screen_GoBackToScreen;  // For screens in this map, if there's a go back
+    map<int,int> m_mapPK_MediaType_PK_Attribute_Sort;  // The default sort for each type of media
+    map<int,int> m_mapScreen_Interrupt; // Map of which scripts can be interrupted
+    map<int,string> m_mapPK_MediaType_Description; // The description for all the media
+    map<int,string> m_mapPK_AttributeType_Description; // The description for all attribute types
+    bool m_bIsOSD,m_bNewOrbiter,m_bUseAlphaBlending,m_bUseMask;
 
     //<-dceag-const-b->
 public:
@@ -64,9 +124,6 @@ public:
     virtual void OnDisconnect();
     virtual void OnReload();
     virtual int DeviceIdInvalid();
-
-
-
 
     Q_INVOKABLE QImage getfileForDG(string filename);
     Q_INVOKABLE void GetFileInfoForQml(QString qs_file_reference);
@@ -85,7 +142,7 @@ public:
     Q_INVOKABLE void JumpToPlaylistPosition(int pos);
     Q_INVOKABLE void SetNowPlayingDetails(QString file);
     Q_INVOKABLE void SetSecurityStatus(string pin, string mode, int user, string special);
-    Q_INVOKABLE  void GetSingleSecurityCam(int cam_device, int iHeight, int iWidth);
+    Q_INVOKABLE void GetSingleSecurityCam(int cam_device, int iHeight, int iWidth);
     Q_INVOKABLE void GetMultipleSecurityCams(QStringList cams);
     Q_INVOKABLE void GetNowPlayingAttributes();
     Q_INVOKABLE void TuneToChannel(int channel, QString chanid);
@@ -111,9 +168,7 @@ public:
     Q_INVOKABLE void CopyDisc();
     Q_INVOKABLE void ShowBookMarks();
 
-
     void getImage();
-
 
     Q_INVOKABLE void moveDirection(QString direction);
     Q_INVOKABLE void JogStream(QString jump);
@@ -134,9 +189,6 @@ public:
 
     virtual int PromptUser(string sPrompt,int iTimeoutSeconds=10,map<int,string> *p_mapPrompts = NULL);
     virtual int PromptFor(string sToken);
-
-
-
 
     //<-dceag-const-e->
 
@@ -1067,41 +1119,109 @@ light, climate, media, security, telecom */
     //<-dceag-h-e->
 
 signals:
-    void screenShotReady();
-    void waitForScreenShot(char picData, int picDataSize, string fileFormat);
-    void disconnected(QString msg);
-    void screenSaverImages(QStringList images);
-    void objectUpdate(const uchar* ,int);
-    void gotoScreen(QString screen);
-    void addItem(gridItem*);
-    void requestMediaGrid(int);
-    void clearGrid();
-    void statusMessage(QString s);
-    void gridModelSizeChange(int size);
-    void checkGridStatus();
+    //navigation
     void gotoQml(QString qml);
+    void gotoScreen(QString screen);
+
+    //setup
     void startManager(QString, QString);
     void deviceInvalid(QList<QObject*>);
     void routerInvalid();
+    void statusMessage(QString s);
+    void configReady(QByteArray config);
+
+    //connections
+    void disconnected(QString msg);
+
+    //media
+    void screenShotReady();
+    void waitForScreenShot(char picData, int picDataSize, string fileFormat);
+    void screenSaverImages(QStringList images);
+    void objectUpdate(const uchar* ,int);
     void mediaMessage(QString msg);
+    void gridModelSizeChange(int size);
+    void checkGridStatus();
+
+    //media datagrid
+    void initializeSorting();
+
+    void recievingStatusChanged();
+    void gridStatusChanged();
+    void addItem(gridItem*);
+    void requestMediaGrid(int);
+    void clearGrid();
+    void clearAndContinue();
+    void showFileInfo(bool state);
+    void setFocusFile(QString);
+
+    //now playing signals
+    void setNowPlaying(bool status);
+    void addScreenParam(QString, int);
+    void currentScreenChanged(QString screen);
+    void playlistPositionChanged(int position);
+    void subtitleChanged(QString subtitle);
+    void streamIdChanged(int stream_id);
+    void mediaTypeChanged(int mediaType);
+
+    //attributes. granular instead of grouped because i can. i figure the strongly interwoven orbiter got us in trouble the 1st time right? Right?!
+    void np_title1Changed(QString t1);
+    void np_title2Changed(QString t2);
+    void np_mediaTitleChanged(QString m_title);
+    void np_synopsisChanged(QString synop);
+    void np_imagePath(QString img_path);
+    void np_filename(QString filename);
+    void np_program(QString prog);
+    void np_channel(QString chan);
+    void np_channelID(QString chanID);
+    void np_episode(QString episode);
+    void np_performer(QString perf);
+    void np_director(QString director);
+    void np_genre(QString genre);
+    void np_album(QString album);
+    void np_track(QString track);
+    void np_releaseDate(QString release_date);
+
 
 
 public slots:
+    //setup
+    void executeCommandGroup(int cmdGrp);
+    void shutdownMD();
+    bool initialize();
+    bool deinitialize();
+    bool getConfiguration();
+    void registerDevice(int user, QString ea, int room);
+    void qmlSetup(QString device, QString address);
+
+    //connections
+    void connectionError();
+
+    //media grid
+    void checkLoadingStatus();
     void requestLiveTvPlaylist();
     void prepareFileList( int iPK_MediaType);
     void cleanupGrid();
     void populateAdditionalMedia();
-     void executeCommandGroup(int cmdGrp);
-     void displayToggle(int);
-     void shutdownMD();
+    void setRecievingStatus(bool b);
+    bool getRecievingStatus();
+    void setGridStatus(bool b);
+    bool getGridStatus();
+    void setCurrentRow(int row);
+    int getCurrentRow();
+    void initializeGrid();
+    void setStringParam(int paramType, QString param);
+    void goBackGrid();
 
-     bool initialize();
-     bool deinitialize();
-     bool getConfiguration();
-     bool registerDevice();
-     void qmlSetup(QString device, QString address);
-     void connectionError();
-     void getFloorplanDeviceCommand(int device);
+
+    //now playing
+
+    //media
+    void displayToggle(int);
+    void getGridView(bool direction);
+
+
+    //floorplans
+    void getFloorplanDeviceCommand(int device);
 
 
 };

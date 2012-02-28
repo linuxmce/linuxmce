@@ -42,8 +42,9 @@ public:
     double progress;
     int currentCells;
     bool clearing;
+
 signals:
-    void ItemAdded();
+    void itemAdded(int row);
     void gimmieData(int type);
     void loadingStatusChanged(bool state);
     void sizeChanged(int size);
@@ -51,6 +52,7 @@ signals:
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const int &sRow);
     void progressChanged(double p);
     void ready(int type);
+    void statusMessage(QString msg);
 
 
 public slots:
@@ -67,7 +69,7 @@ public slots:
     void setProgress(double n_progress);
     double getProgress();
     void attributeSort();
-    bool clearAndRequest();
+    void clearAndRequest();
 
 private slots:
     void handleItemChange();

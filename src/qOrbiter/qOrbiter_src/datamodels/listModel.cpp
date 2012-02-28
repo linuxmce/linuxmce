@@ -39,10 +39,9 @@ ListModel::~ListModel() {
 
 void ListModel::appendRow(gridItem *item)
 {
-    if (clearing != true)
-    {
-    appendRows(QList<gridItem*>() << item);
-    }
+    if(clearing != true)
+        appendRows(QList<gridItem*>() << item);
+
 }
 
 void ListModel::appendRows(const QList<gridItem *> &items)
@@ -52,15 +51,18 @@ void ListModel::appendRows(const QList<gridItem *> &items)
 
         QObject::connect(item, SIGNAL(dataChanged()), this , SLOT(handleItemChange()));
         m_list.append(item);
+
     }
 
     endInsertRows();
+
     QModelIndex index = indexFromItem(m_list.last());
     QModelIndex index2 = indexFromItem(m_list.first());
     int currentRows= m_list.size() - 1;
+    emit itemAdded(currentRows);
+    double p = (((double)m_list.size() / (double)totalcells) * 100) ;
+    setProgress(p);
     emit dataChanged(index2, index, currentRows);
-
-
 }
 
 void ListModel::insertRow(int row, gridItem *item)
@@ -76,7 +78,7 @@ void ListModel::handleItemChange()
 {
     gridItem* item = static_cast<gridItem*>(sender());
     QModelIndex index = indexFromItem(item);
-   // qDebug() << "Handling item change for:" << index;
+    // qDebug() << "Handling item change for:" << index;
     if(index.isValid())
     {
         emit dataChanged(index, index, 0);
@@ -124,12 +126,21 @@ QModelIndex ListModel::indexFromItem(const gridItem *item) const
 
 void ListModel::clear()
 {
-    //("Clearing List");
+    clearing =true;
+    this->reset();
+    if(removeRows(0, m_list.size(), QModelIndex()))
+    {
+        totalcells=0;
 
-    qDeleteAll(m_list);
-    m_list.clear();
-    totalcells = 0;
-    //qDebug() << "Total Rows:" << m_list.size();
+
+        // qDebug("Requesting");
+
+    }
+    else
+    {
+        //  qDebug("Couldnt delete list!");
+    }
+    clearing = false;
 
 }
 
@@ -173,20 +184,6 @@ void ListModel::checkForMore()
 {
 
 
-    if (m_list.size()< totalcells && loadingStatus == true )
-    {
-        double p = (((double)m_list.size() / (double)totalcells) * 100) ;
-
-        setProgress(p);
-
-        emit gimmieData(gridType);
-    }
-    else
-    {
-      //  qDebug() <<QString::number(m_list.count()) +" cells in model, out of " + QString::number(totalcells) <<" No Mas";
-        setLoadingStatus(false);
-    }
-
 }
 
 void ListModel::populateGrid(int mediaType)
@@ -197,17 +194,17 @@ void ListModel::populateGrid(int mediaType)
 void ListModel::setTotalCells(int cells)
 {
     totalcells = cells;
-   // qDebug() << "Size Changed" << totalcells;
+    emit statusMessage("Size Changed" + QString::number(totalcells));
     if ( m_list.size() < totalcells)
     {
 
-        setLoadingStatus(true);
-//qDebug() <<QString::number(m_list.count()) +" cells in model, out of " + QString::number(totalcells);
+
+
     }
     else
     {
-        //qdebug() <<QString::number(m_list.count()) +" cells in model, out of " + QString::number(totalcells);
-        setLoadingStatus(false);
+
+
     }
     emit sizeChanged(cells);
 
@@ -247,7 +244,7 @@ void ListModel::setProgress(double n_progress)
     progress = n_progress;
     emit progressChanged( progress );
     // qDebug() << "Loading Progress:" << progress;
-      // qDebug() << QString::number(m_list.count()) +" cells in model, out of " + QString::number(totalcells);
+    // qDebug() << QString::number(m_list.count()) +" cells in model, out of " + QString::number(totalcells);
 
 }
 
@@ -258,28 +255,29 @@ double ListModel::getProgress()
 
 void ListModel::attributeSort()
 {
-   this->clear();
+    this->clear();
     emit gimmieData(gridType);
 
 }
 
-bool ListModel::clearAndRequest()
+void ListModel::clearAndRequest()
 {
 
-clearing = true;
+    clearing = true;
 
     if(removeRows(0, m_list.size(), QModelIndex()))
     {
-      totalcells=0;
-        m_list.clear();
-       // qDebug("Requesting");
-        setLoadingStatus(true);
+        totalcells=0;
+
+         qDebug("Cleared?");
+        clearing = false;
+
         emit ready(getGridType());
     }
     else
     {
-      //  qDebug("Couldnt delete list!");
+        //  qDebug("Couldnt delete list!");
     }
-clearing = false;
+
 }
 

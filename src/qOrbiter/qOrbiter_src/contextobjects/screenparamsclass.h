@@ -27,8 +27,7 @@ public:
     int getReciever() {return deviceTo;}
 
     int deviceFrom;
-    void setSender(long sender) { sender = deviceFrom; emit senderChanged();}
-    void addParam(QString val, int key) {paramDevices.insert(key, val);}
+
     Q_INVOKABLE  QString getParam(int key) {return paramDevices.value(key);}
 
     int getSender() {return deviceFrom;}
@@ -53,7 +52,9 @@ signals:
     void senderChanged();
 
 public slots:
-
+    void setSender(long sender) { sender = deviceFrom; emit senderChanged();}
+    void addParam(QString val, int key) {paramDevices.insert(key, val);}
+    void clear();
 
 };
 

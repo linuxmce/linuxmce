@@ -127,7 +127,7 @@ class qorbiterManager : public QObject
 
 
 public:
-    qorbiterManager(QDeclarativeView * view, DCE::qOrbiter *dceDevice, QObject *parent =0);  //constructor
+    qorbiterManager(QDeclarativeView * view, QObject *parent=0);  //constructor
 
     //thread objects
     QThread *processingThread; //threaded class
@@ -208,16 +208,7 @@ public:
     GridIndexProvider *advancedProvider;
     AbstractImageProvider *modelimageprovider;
 
-    //carried over variables from old OrbiterData.h
-    map<int,string> m_mapTextString;
-    vector<int> m_vectPK_Users_RequiringPIN;
-    map<int,int> m_mapDesignObj; //Used to map a screen to a DesignObj
-    map<int,int> m_mapPK_Screen_GoBackToScreen;  // For screens in this map, if there's a go back
-    map<int,int> m_mapPK_MediaType_PK_Attribute_Sort;  // The default sort for each type of media
-    map<int,int> m_mapScreen_Interrupt; // Map of which scripts can be interrupted
-    map<int,string> m_mapPK_MediaType_Description; // The description for all the media
-    map<int,string> m_mapPK_AttributeType_Description; // The description for all attribute types
-    bool m_bIsOSD,m_bNewOrbiter,m_bUseAlphaBlending,m_bUseMask;
+
 
     //floorplans
     FloorPlanModel *floorplans;
@@ -260,6 +251,7 @@ Param 10 - pk_attribute
     QString qs_seek;
     bool backwards;
     bool requestMore;
+
     void setSeekLetter(QString letter);
 
     //listmodels
@@ -292,7 +284,7 @@ Param 10 - pk_attribute
     Q_INVOKABLE  QString getCurrentUser() {return sPK_User;}
 
     //class objects
-    DCE::qOrbiter * pqOrbiter;                  //reference to forward declared dce object
+
 
     //QT Functions to initialize lmce data
     bool initialize(int dev_id);
@@ -356,6 +348,10 @@ signals:
     void connectedStateChanged();
     void continueSetup();
     void screenChange(QString s);
+    void clearModel();
+    void clearAndContinue();
+    void registerOrbiter(int user, QString ea, int room);
+    void unregisterOrbiter(int user, QString ea, int room);
 
     //setup related
     void orbiterReady(bool);
@@ -384,7 +380,7 @@ signals:
     void skinDataLoaded(bool b);
 
 public slots: //note: Q_INVOKABLE means it can be called directly from qml
-    bool getConf(int pPK_Device);
+    void processConfig(QByteArray config);
     bool OrbiterGen();              //prelim orbter generation
     void quickReload();
 
@@ -456,6 +452,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void setLocation(const int& , const int& ) ;
 
     void setNowPlayingIcon(bool b);
+    void nowPlayingChanged(bool b);
     void initializeGridModel();
     void showMessage(QString message, int duration, bool critical);
 

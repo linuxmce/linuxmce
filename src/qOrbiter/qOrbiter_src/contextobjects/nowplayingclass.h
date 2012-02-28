@@ -181,7 +181,6 @@ signals:
 public slots:
     void resetData();
 
-
     void setImageAspect(QString i_aspect) { aspect = i_aspect; emit imageAspectChanged();}
     QString getImageAspect() { return aspect;}
 
@@ -228,7 +227,7 @@ public slots:
     void setSubTitle (QString inc_subTitle) {qs_subTitle = inc_subTitle; emit titleChanged();}
     QString getSubTitle () {return qs_subTitle;}
 
-    void setStatus (bool status) {b_mediaPlaying = status;  emit mediaStatusChanged(); }
+    void setStatus (bool status) {b_mediaPlaying = status; qDebug() << "Now Playing is: " + status;  emit mediaStatusChanged(); }
     bool getStatus () {return b_mediaPlaying;}
 
     void setMediaType (int inc_mediaType) {i_mediaType = inc_mediaType; emit mediaTypeChanged();}
@@ -281,6 +280,9 @@ public slots:
 
                 inline QString getSynop() {return synop;}
                 inline void setSynop(QString s) { synop = s;  emit synopChanged(); }
+
+                void setStreamID(int stream) {i_streamID = stream;}
+                int getStreamID() {return i_streamID;}
     };
 
         #endif // NOWPLAYINGCLASS_H

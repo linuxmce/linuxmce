@@ -109,7 +109,7 @@ QImage AbstractImageProvider::screenShot()
 
 QImage AbstractImageProvider::ScreenSaver()
 {
-    key = managerreference->pqOrbiter->getfileForDG(managerreference->ScreenSaver.currentImage.toStdString());
+    key = managerreference->updatedObjectImage;
 
      if (key.isNull())
      {

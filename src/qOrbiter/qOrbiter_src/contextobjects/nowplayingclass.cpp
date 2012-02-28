@@ -8,8 +8,6 @@ NowPlayingClass::NowPlayingClass(QDeclarativeItem *parent) :
     qs_playbackSpeed = "1x";
     i_playbackSpeed = 1;
    // m_iplaylistPosition = 0;
-
-
 }
 
 void NowPlayingClass::setMediaSpeed(int speed)
@@ -78,6 +76,7 @@ void NowPlayingClass::resetData()
     setTimeCode("");
     setMediaType(NULL);
     setSynop(""); emit synopChanged();
+    setStreamID(0);
 
 }
 

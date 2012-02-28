@@ -16,17 +16,19 @@
 //<-dceag-incl-b->
 #ifdef IOS
 #import <UIKit/UIKit.h>
-#include "qmlapplicationviewer.h"
+
 #include "ioshelpers.h"
 #include <QtGui/QApplication>
 #include <QtCore/QtPlugin>
 #include <QtDeclarative/QDeclarativeEngine>
 
+
 Q_IMPORT_PLUGIN(UIKit)
 #endif
 
 #include <QApplication>
-
+#include <datamodels/listModel.h>
+#include <datamodels/gridItem.h>
 #include <qOrbiter/qOrbiter.h>
 #include <orbiterwindow.h>
 #include <qorbitermanager.h>
@@ -35,7 +37,8 @@ Q_IMPORT_PLUGIN(UIKit)
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
-
+#include <QDeclarativeEngine>
+#include <imageProviders/abstractimageprovider.h>
 
 
 // In source files stored in archives and packages, these 2 lines will have the release version (build)
@@ -234,36 +237,93 @@ int main(int argc, char* argv[])
 #ifdef IOS
         //        NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 #endif
-
+        orbiterWindow orbiterWin(PK_Device, sRouter_IP);
+        orbiterWin.setMessage("Setting up Lmce");
+        qorbiterManager  *w= new qorbiterManager(&orbiterWin.mainView);
+        AbstractImageProvider *modelimageprovider = new AbstractImageProvider(w);
+        orbiterWin.mainView.engine()->addImageProvider("listprovider", modelimageprovider);
 
         QThread *dceThread = new QThread;
         qOrbiter *pqOrbiter = new qOrbiter(PK_Device, sRouter_IP,true,bLocalMode);
-
         pqOrbiter->moveToThread(dceThread);
-        dceThread->start();
 
-        orbiterWindow orbiterWin(PK_Device, sRouter_IP);
-        orbiterWin.setMessage("Setting up Lmce");
 
-        qorbiterManager  *w= new qorbiterManager(&orbiterWin.mainView, pqOrbiter);
+        QThread * mediaThread = new QThread();
+        ListModel *mediaModel = new ListModel(new gridItem);
+        mediaModel->moveToThread(mediaThread);
+        GridIndexProvider * advancedProvider = new GridIndexProvider(mediaModel , 6, 4);
+        QObject::connect(mediaModel,SIGNAL(dataChanged(QModelIndex,QModelIndex, int )), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex, int)), Qt::DirectConnection);
+        orbiterWin.mainView.engine()->addImageProvider("datagridimg", advancedProvider);
+        advancedProvider->moveToThread(mediaThread);
 
-        QObject::connect(pqOrbiter, SIGNAL(statusMessage(QString)), &orbiterWin,SLOT(setMessage(QString)),Qt::QueuedConnection);
+        orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", pqOrbiter); //dcecontext object
+        orbiterWin.mainView.rootContext()->setContextProperty("dataModel", mediaModel);
+
+        //setup
+        QObject::connect(w, SIGNAL(registerOrbiter(int,QString,int)), pqOrbiter,SLOT(registerDevice(int,QString,int)));
         QObject::connect(pqOrbiter,SIGNAL(startManager(QString,QString)), w, SLOT(qmlSetupLmce(QString,QString)));
         QObject::connect(pqOrbiter, SIGNAL(deviceInvalid(QList<QObject*>)), &orbiterWin,SLOT(prepareExistingOrbiters(QList<QObject *>)));
         QObject::connect(pqOrbiter,SIGNAL(routerInvalid()), &orbiterWin, SIGNAL(showExternal()));
-        QObject::connect(w, SIGNAL(loadingMessage(QString)), &orbiterWin,SLOT(setMessage(QString)), Qt::UniqueConnection);
         QObject::connect(&orbiterWin,SIGNAL(setupLmce(QString,QString)), pqOrbiter, SLOT(qmlSetup(QString,QString)),Qt::DirectConnection);
-
-        QObject::connect(w, SIGNAL(raiseSplash()), &orbiterWin, SLOT(showSplash()) );
-
-        QObject::connect(w,SIGNAL(showSetup()), &orbiterWin, SLOT( showSetup()) );
-
         QObject::connect(w,SIGNAL(connectionValid(bool)), &orbiterWin, SLOT(setConnectionState(bool)));
         QObject::connect(w,SIGNAL(deviceValid(bool)), &orbiterWin, SLOT(setDeviceState(bool)));
         QObject::connect(w,SIGNAL(localConfigReady(bool)), &orbiterWin, SLOT(setLocalConfigState(bool)));
         QObject::connect(w, SIGNAL(skinDataLoaded(bool)), &orbiterWin, SLOT(setSkinDataState(bool)));
         QObject::connect(w,SIGNAL(skinIndexReady(bool)), &orbiterWin,SLOT(setSkinIndexState(bool)));
         QObject::connect(w,SIGNAL(orbiterConfigReady(bool)), &orbiterWin, SLOT(setOrbiterConfigState(bool)));
+        QObject::connect(pqOrbiter, SIGNAL(configReady(QByteArray)), w, SLOT(processConfig(QByteArray)));
+        QObject::connect(w, SIGNAL(raiseSplash()), &orbiterWin, SLOT(showSplash()) );
+        QObject::connect(w,SIGNAL(showSetup()), &orbiterWin, SLOT( showSetup()) );
+
+        //messaging
+        QObject::connect(mediaModel, SIGNAL(statusMessage(QString)), w, SLOT(setDceResponse(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(statusMessage(QString)), w , SLOT(setDceResponse(QString)));
+        QObject::connect(w, SIGNAL(loadingMessage(QString)), &orbiterWin,SLOT(setMessage(QString)), Qt::UniqueConnection);
+
+        //operations
+        QObject::connect(pqOrbiter,SIGNAL(objectUpdate(const uchar*,int)), w->nowPlayingButton, SLOT(setImageData(const uchar*,int)),Qt::DirectConnection);
+        QObject::connect(pqOrbiter, SIGNAL(addScreenParam(QString,int)), w->ScreenParameters, SLOT(addParam(QString, int)));
+        QObject::connect(pqOrbiter, SIGNAL(currentScreenChanged(QString)), w->nowPlayingButton, SLOT(setScreen(QString)));
+
+        //navigation
+        QObject::connect(pqOrbiter,SIGNAL(gotoQml(QString)), w, SLOT(gotoQScreen(QString)));
+
+        //mediagrid
+        QObject::connect(mediaModel, SIGNAL(itemAdded(int)), pqOrbiter, SLOT(setCurrentRow(int)), Qt::DirectConnection);
+        QObject::connect(w, SIGNAL(clearModel()), mediaModel,SLOT(clear()));
+        QObject::connect(w, SIGNAL(clearAndContinue()), mediaModel, SLOT(clearAndRequest()),Qt::DirectConnection);
+        QObject::connect(pqOrbiter, SIGNAL(clearGrid()), mediaModel, SLOT(clear()));
+        QObject::connect(pqOrbiter,SIGNAL(addItem(gridItem*)), mediaModel, SLOT(appendRow(gridItem*)),Qt::QueuedConnection);
+        QObject::connect(pqOrbiter,SIGNAL(gridModelSizeChange(int)), mediaModel, SLOT(setTotalCells(int)),Qt::QueuedConnection);
+        // QObject::connect(pqOrbiter,SIGNAL(checkGridStatus()), mediaModel, SLOT(checkForMore()), Qt::QueuedConnection);
+        // QObject::connect(mediaModel,SIGNAL(loadingStatusChanged(bool)), w, SLOT(setRequestMore(bool)), Qt::DirectConnection);
+        // QObject::connect(mediaModel, SIGNAL(gimmieData(int)), pqOrbiter, SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
+        QObject::connect(mediaModel,SIGNAL(ready(int)), pqOrbiter, SLOT(prepareFileList(int)), Qt::DirectConnection);
+        QObject::connect(w, SIGNAL(gridTypeChanged(int)), mediaModel, SLOT(setGridType(int)), Qt::QueuedConnection);
+
+        //now playing signals
+        QObject::connect(pqOrbiter, SIGNAL(setNowPlaying(bool)), w->nowPlayingButton,SLOT(setStatus(bool)));
+        QObject::connect(pqOrbiter,SIGNAL(streamIdChanged(int)), w->nowPlayingButton, SLOT(setStreamID(int)));
+
+        //attributes
+        QObject::connect(pqOrbiter, SIGNAL(np_mediaTitleChanged(QString)), w->nowPlayingButton, SLOT(setMediaTitle(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(np_album(QString)), w->nowPlayingButton, SLOT(setAlbum(QString)));
+        QObject::connect(pqOrbiter,SIGNAL(np_channel(QString)), w->nowPlayingButton, SLOT(setChannel(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(np_director(QString)), w->nowPlayingButton, SLOT(setDirector(QString)));
+        QObject::connect(pqOrbiter,SIGNAL(np_episode(QString)), w->nowPlayingButton, SLOT(setEpisode(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(np_filename(QString)), w->nowPlayingButton, SLOT(setFilePath(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(np_genre(QString)), w->nowPlayingButton, SLOT(setGenre(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(np_imagePath(QString)), w->nowPlayingButton, SLOT(setImageUrl(QUrl)));
+        QObject::connect(pqOrbiter, SIGNAL(np_performer(QString)), w->nowPlayingButton, SLOT(setPerformers(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(np_program(QString)), w->nowPlayingButton, SLOT(setProgram(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(np_releaseDate(QString)), w->nowPlayingButton, SLOT(setRelease(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(np_title1Changed(QString)), w->nowPlayingButton, SLOT(setTitle(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(np_title2Changed(QString)), w->nowPlayingButton, SLOT(setTitle2(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(subtitleChanged(QString)), w->nowPlayingButton, SLOT(setSubTitle(QString)));
+        QObject::connect(pqOrbiter, SIGNAL(np_synopsisChanged(QString)), w->nowPlayingButton, SLOT(setSynop(QString)));
+
+        mediaThread->start();
+        dceThread->start();
 
         pqOrbiter->m_dwPK_Device = w->iPK_Device;
         pqOrbiter->m_sHostName = w->qs_routerip.toStdString();

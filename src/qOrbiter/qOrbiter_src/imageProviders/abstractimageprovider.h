@@ -16,10 +16,11 @@
 #include <QVariant>
 #include <qorbitermanager.h>
 
+
 class AbstractImageProvider: public QObject , public QDeclarativeImageProvider
 {
 public:
-    AbstractImageProvider(qorbiterManager * manager);
+    AbstractImageProvider(qorbiterManager * manager );
 
 QImage result;
 QImage key;

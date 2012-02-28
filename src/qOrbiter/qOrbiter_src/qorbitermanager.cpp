@@ -23,7 +23,7 @@
 #include <QDeclarativeEngine>
 #include <QApplication>
 #include <imageProviders/filedetailsimageprovider.h>
-#include <imageProviders/abstractimageprovider.h>
+
 #include <contextobjects/epgchannellist.h>
 #include <datamodels/skindatamodel.h>
 #include <QTimer>
@@ -44,13 +44,13 @@ using namespace DCE;
   then (hopefully) notify us of background progress. A splash bar or loading indicator needs to be added, but a textual
   messaging system will be the initial method of communication
 */
-qorbiterManager::qorbiterManager(QDeclarativeView *view, DCE::qOrbiter *dceDevice, QObject *parent) :
-    QObject(parent),qorbiterUIwin(view),pqOrbiter(dceDevice)
+qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
+    QObject(parent),qorbiterUIwin(view)
 {
 
     m_bStartingUp= true;
     bAppError = false;
-    pqOrbiter->qmlUI = this;
+    //pqOrbiter->qmlUI = this;
     setDceResponse("Initializing...");
 
     if (readLocalConfig())
@@ -71,7 +71,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, DCE::qOrbiter *dceDevic
     qorbiterUIwin->rootContext()->setContextProperty("extip", qs_ext_routerip );
     qorbiterUIwin->rootContext()->setContextProperty("manager", this); //providing a direct object for qml to call c++ functions of this class
     qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse); //file grids current media type
-    qorbiterUIwin->rootContext()->setContextProperty("dcerouter", pqOrbiter); //dcecontext object
+
 
     appHeight = qorbiterUIwin->height() ;
     appWidth = qorbiterUIwin->width() ;
@@ -143,12 +143,12 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, DCE::qOrbiter *dceDevic
     i_current_command_grp = 0;
     i_current_mediaType =0;
     videoDefaultSort = "13";
-   audioDefaultSort = "2";
-   photoDefaultSort = "13";
-   gamesDefaultSort = "49";
+    audioDefaultSort = "2";
+    photoDefaultSort = "13";
+    gamesDefaultSort = "49";
 
 
-    QApplication::processEvents(QEventLoop::AllEvents);
+
     //goBack << ("|||1,2|0|13|0|2|");
     backwards = false;
 
@@ -183,7 +183,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, DCE::qOrbiter *dceDevic
 void qorbiterManager::gotoQScreen(QString s)
 {
     setRequestMore(false);
-    model->clear();
+    //pqOrbiter->retrieving = false;
+    emit clearModel();
     initializeSortString();
     emit resetFilter();
 
@@ -210,28 +211,11 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 {
 
     setDceResponse("Initiating Router Connection");
-    QApplication::processEvents(QEventLoop::AllEvents);
 
+    //QObject::connect(pqOrbiter, SIGNAL(gotoQml(QString)), this, SLOT(gotoQScreen(QString)));
 
-    QObject::connect(pqOrbiter, SIGNAL(clearGrid()), model, SLOT(clear()));
-    QObject::connect(pqOrbiter, SIGNAL(statusMessage(QString)), this , SLOT(setDceResponse(QString)));
-    QObject::connect(pqOrbiter,SIGNAL(addItem(gridItem*)), model, SLOT(appendRow(gridItem*)), Qt::DirectConnection);
-    QObject::connect(pqOrbiter,SIGNAL(gridModelSizeChange(int)), model, SLOT(setTotalCells(int)));
-    QObject::connect(pqOrbiter,SIGNAL(requestMediaGrid(int)), this, SLOT(getGrid(int)), Qt::QueuedConnection);
-    QObject::connect(pqOrbiter,SIGNAL(checkGridStatus()), model, SLOT(checkForMore()), Qt::QueuedConnection);
-    QObject::connect(pqOrbiter, SIGNAL(gotoQml(QString)), this, SLOT(gotoQScreen(QString)));
-    //  QObject::connect(this,SIGNAL(stillLoading(bool)), model, SLOT(setLoadingStatus(bool)), Qt::QueuedConnection);
-
-
-    //QObject::connect(this,SIGNAL(filterChanged()), model,SLOT(attributeSort()));
-    QObject::connect(model,SIGNAL(loadingStatusChanged(bool)), this, SLOT(setRequestMore(bool)), Qt::DirectConnection);
-    QObject::connect(model, SIGNAL(gimmieData(int)), pqOrbiter, SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
-    QObject::connect(model,SIGNAL(ready(int)), pqOrbiter, SLOT(prepareFileList(int)), Qt::QueuedConnection);
-    QObject::connect(this, SIGNAL(mediaRequest(int)), pqOrbiter,SLOT(prepareFileList(int)), Qt::QueuedConnection);
     QObject::connect(this,SIGNAL(screenChange(QString)), this, SLOT(gotoQScreen(QString)), Qt::QueuedConnection);
-    QObject::connect(this,SIGNAL(executeCMD(int)), pqOrbiter, SLOT(executeCommandGroup(int)), Qt::QueuedConnection);
-    QObject::connect(this, SIGNAL(gridTypeChanged(int)), model, SLOT(setGridType(int)), Qt::QueuedConnection);
-
+    //QObject::connect(this,SIGNAL(executeCMD(int)), pqOrbiter, SLOT(executeCommandGroup(int)), Qt::QueuedConnection);
 
 
 #ifdef ANDROID
@@ -283,7 +267,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
         return false;
     }
 #elif for_android
-    loadSkins(QUrl(localDir));
+    loadSkins(QUrl(remoteDirectoryPath));
 #else
     if( !loadSkins(QUrl(localDir)))
     {   emit skinIndexReady(false);
@@ -293,16 +277,17 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 #endif
 
     emit skinIndexReady(true);
+swapSkins(currentSkin);
 
-    if (getConf(iPK_Device))
+  /*      if (getConf(iPK_Device))
     {
         if(pqOrbiter->registerDevice())
         {
             emit localConfigReady(true);
-            QApplication::processEvents(QEventLoop::AllEvents);
-            swapSkins(currentSkin);
+
+
             //LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",iPK_Device,qs_routerip.toStdString());
-            QObject::connect(pqOrbiter,SIGNAL(disconnected(QString)), this, SLOT(reloadHandler()));
+           // QObject::connect(pqOrbiter,SIGNAL(disconnected(QString)), this, SLOT(reloadHandler()));
             return true;
         }else
             return false;
@@ -310,7 +295,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     }
     else
         return false;
-
+*/
 }
 
 void qorbiterManager::refreshUI(QUrl url)
@@ -322,7 +307,7 @@ void qorbiterManager::refreshUI(QUrl url)
 
 
 // get conf method that reads config file
-bool qorbiterManager::getConf(int PK_Device)
+void qorbiterManager::processConfig(QByteArray config)
 {
 
     iPK_Device_DatagridPlugIn =  long(6);
@@ -339,7 +324,7 @@ bool qorbiterManager::getConf(int PK_Device)
     s_onOFF = "1";
 
     QDomDocument configData;
-    const QByteArray tConf = binaryConfig.data();
+    const QByteArray tConf =  config;
     configData.setContent(tConf,false);
     if(configData.isDocument() == false)
     {
@@ -348,7 +333,7 @@ bool qorbiterManager::getConf(int PK_Device)
         setDceResponse("Invalid Config");
         emit orbiterConfigReady(false);
         QApplication::processEvents(QEventLoop::AllEvents);
-        return false;
+
     }
 
     setDceResponse("Attempting to write config");
@@ -356,7 +341,7 @@ bool qorbiterManager::getConf(int PK_Device)
     if (!writeConfig())
     {
         setDceResponse("Couldnt save config!");
-        return false;
+
     }
 
     QDomElement root = configData.documentElement();        //represent configuration in memeory
@@ -368,6 +353,8 @@ bool qorbiterManager::getConf(int PK_Device)
     iea_area = defaults.attribute("DefaultEA").toInt();
     iPK_User = defaults.attribute("PK_User").toInt();
     QApplication::processEvents(QEventLoop::AllEvents);
+
+    setDceResponse("Defaults Set");
 
     //-floorplans-----------------------------------------------------------------------------------------------------
     QDomElement floorplanXml = root.firstChildElement("Floorplans");
@@ -381,7 +368,8 @@ bool qorbiterManager::getConf(int PK_Device)
         int m_page= floorplanList.at(index).attributes().namedItem("Page").nodeValue().toInt();
 
 
-        QImage m_image = pqOrbiter->getfileForDG("/usr/pluto/orbiter/floorplans/inst"+m_installation.toStdString()+"/"+StringUtils::itos(m_page)+".png");
+        QImage m_image;// pqOrbiter->getfileForDG("/usr/pluto/orbiter/floorplans/inst"+m_installation.toStdString()+"/"+StringUtils::itos(m_page)+".png");
+        m_image.load(":/icons/icon.png");
         QImage icon = m_image.scaledToHeight(100);
         floorplans->appendRow(new FloorPlanItem(m_installation,m_description, m_page, m_iconpath, m_image, icon,  userList));
 
@@ -392,8 +380,7 @@ bool qorbiterManager::getConf(int PK_Device)
         }
 
     }
-    modelimageprovider = new AbstractImageProvider(this);
-    qorbiterUIwin->engine()->addImageProvider("listprovider", modelimageprovider);
+
 
     emit loadingMessage("floorplans");
     QApplication::processEvents(QEventLoop::AllEvents);
@@ -457,7 +444,7 @@ bool qorbiterManager::getConf(int PK_Device)
     }
     m_lRooms->sdefault_Ea = defaults.attribute("DefaultLocation");
     m_lRooms->idefault_Ea = RroomMapping.value(m_lRooms->sdefault_Ea);
-
+    setDceResponse("Room Done");
 
     //--LIGHTING SCENARIOS----------------------------------------------------------------------------------
 
@@ -485,6 +472,7 @@ bool qorbiterManager::getConf(int PK_Device)
         roomLightingScenarios.insert(LroomMapNo, lightModelHolder);
         roomLights = roomLightingScenarios.value(m_lRooms->idefault_Ea);
     }
+    setDceResponse("Lighting Done");
 
     //---MEDIA--------------SCENARIOS----------------------------------------------------------------------------
     QDomElement mScenarios = root.firstChildElement("MediaScenarios");
@@ -611,7 +599,7 @@ bool qorbiterManager::getConf(int PK_Device)
     qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms);                           //custom room list  provided
     qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
     qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(screenshotVars));
-    QObject::connect(this->nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection);
+   // QObject::connect(this->nowPlayingButton, SIGNAL(mediaStatusChanged()), this, SLOT(updateTimecode()), Qt::QueuedConnection);
     setDceResponse("Properties Done");
 
     //epg listmodel, no imageprovider as of yet
@@ -630,6 +618,7 @@ bool qorbiterManager::getConf(int PK_Device)
     QApplication::processEvents(QEventLoop::AllEvents);
     //------------not sure if neccesary since it knows where we are.
     setActiveRoom(iFK_Room, iea_area);
+    emit registerOrbiter((userList->find(sPK_User)->data(4).toInt()), QString::number(iea_area), iFK_Room );
 
     //pqOrbiter->CMD_Set_Current_Room(m_lRooms->idefault_Ea);
     //pqOrbiter->CMD_Set_Entertainment_Area(m_lRooms->sdefault_Ea.toStdString());
@@ -705,7 +694,7 @@ bool qorbiterManager::getConf(int PK_Device)
     qorbiterUIwin->rootContext()->setContextProperty("alarms", QVariant::fromValue(sleeping_alarms) );
     //---update object image
 
-    QObject::connect(pqOrbiter,SIGNAL(objectUpdate(const uchar*,int)), nowPlayingButton, SLOT(setImageData(const uchar*,int)),Qt::DirectConnection);
+
     setDceResponse(" Remote Config Complete");
     QApplication::processEvents(QEventLoop::AllEvents);
 #ifdef for_desktop
@@ -713,8 +702,9 @@ bool qorbiterManager::getConf(int PK_Device)
 #endif
 
     emit orbiterConfigReady(true);
+
     QApplication::processEvents(QEventLoop::AllEvents);
-    return true;
+
 }
 
 bool qorbiterManager::OrbiterGen()
@@ -760,12 +750,10 @@ void qorbiterManager::closeOrbiter()
 {
     setDceResponse("Shutting Down");
     QApplication::processEvents(QEventLoop::AllEvents);
-#ifdef ANDROID
+#ifndef ANDROID
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Exiting, Unregistering 1st");
 #endif
-    // processingThread->quit();
-    pqOrbiter->deinitialize();
-    pqOrbiter->~qOrbiter();
+   emit unregisterOrbiter((userList->find(sPK_User)->data(4).toInt()), QString(iFK_Room), iea_area );
     this->~qorbiterManager();
     exit(0);
 }
@@ -785,7 +773,7 @@ bool qorbiterManager::requestDataGrid()
 
 void qorbiterManager::setActiveRoom(int room,int ea)
 {
-    QApplication::processEvents(QEventLoop::AllEvents);
+
     roomLights = roomLightingScenarios.value(room);
     roomMedia = roomMediaScenarios.value(room);
     roomClimate = roomClimateScenarios.value(room);
@@ -797,9 +785,6 @@ void qorbiterManager::setActiveRoom(int room,int ea)
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomClimate", roomClimate);
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);
-
-    setLocation(room, ea);
-    QApplication::processEvents(QEventLoop::AllEvents);
 }
 
 
@@ -815,7 +800,7 @@ void qorbiterManager::execGrp(int grp)
 
 void qorbiterManager::addMediaItem(gridItem* g)
 {
-    this->model->appendRow(g);
+
 }
 
 void qorbiterManager::updateModel()
@@ -833,8 +818,9 @@ void qorbiterManager:: setLocation(const int &room, const int &ea)
 {
     iFK_Room = room;
     iea_area = ea;
-    emit locationChanged(room, ea);
-    pqOrbiter->setLocation(room, ea);
+
+    //emit locationChanged(room, ea);
+   // pqOrbiter->setLocation(room, ea);
     QApplication::processEvents(QEventLoop::AllEvents);
 }
 
@@ -872,7 +858,7 @@ void qorbiterManager::regenComplete(int i)
 {
     if (i == 0)
     {
-        getConf(iPK_Device);
+        //processConfig(iPK_Device);
     }
     else
     {
@@ -919,6 +905,11 @@ void qorbiterManager::setNowPlayingIcon(bool b)
     item->setProperty("nowplayingtext", "null");
 }
 
+void qorbiterManager::nowPlayingChanged(bool b)
+{
+    nowPlayingButton->setStatus(b);
+}
+
 bool qorbiterManager::loadSkins(QUrl base)
 {
 
@@ -937,6 +928,9 @@ bool qorbiterManager::loadSkins(QUrl base)
 
 #elif ANDROID
     tskinModel->addSkin("default");
+
+#elif for_android
+    tskinModel->addSkin("default");
 #else
     tskinModel->addSkin("default");
     tskinModel->addSkin("aeon");
@@ -949,8 +943,8 @@ bool qorbiterManager::loadSkins(QUrl base)
 void qorbiterManager::quickReload()
 {
 
-    pqOrbiter->QuickReload();
-    bool connected = pqOrbiter->m_bRouterReloading;
+   // pqOrbiter->QuickReload();
+    //bool connected = pqOrbiter->m_bRouterReloading;
 }
 
 
@@ -1107,6 +1101,7 @@ bool qorbiterManager::writeConfig()
 
 void qorbiterManager::setStringParam(int paramType, QString param)
 {
+  //  pqOrbiter->retrieving = false;
     /*
     QString q_mediaType;           //1 passed in inital dg request
     QString q_subType;             //2
@@ -1126,6 +1121,8 @@ void qorbiterManager::setStringParam(int paramType, QString param)
     QString datagridVariableString;
 
     backwards = false;
+
+
     switch (paramType)
     {
     case 1:
@@ -1133,7 +1130,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-        model->clearAndRequest();
+        emit clearAndContinue();
         break;
 
     case 2:
@@ -1141,7 +1138,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-        model->clearAndRequest();
+        emit clearAndContinue();
         break;
 
     case 3:
@@ -1149,7 +1146,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-        model->clearAndRequest();
+          emit clearAndContinue();
         break;
 
     case 4:
@@ -1175,7 +1172,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
                 longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
                 datagridVariableString = longassstring.join("|");
 
-                model->clearAndRequest();
+                  emit clearAndContinue();
             }
         }
         break;
@@ -1185,7 +1182,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-        model->clearAndRequest();
+          emit clearAndContinue();
         break;
 
     case 6:
@@ -1203,7 +1200,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             }
             longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
             datagridVariableString = longassstring.join("|");
-            model->clearAndRequest();
+              emit clearAndContinue();
             break;
         }
 
@@ -1212,13 +1209,13 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-        model->clearAndRequest();
+     emit clearAndContinue();
         break;
     case 8:
         q_last_viewed = param;
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
-        model->clearAndRequest();
+          emit clearAndContinue();
 
         break;
     case 9:
@@ -1241,12 +1238,12 @@ void qorbiterManager::setStringParam(int paramType, QString param)
             q_pk_attribute = param.remove("!A");
             longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
             datagridVariableString = longassstring.join("|");
-            model->clearAndRequest();
+              emit clearAndContinue();
             break;
         }
 
     default:
-        model->clearAndRequest();
+          emit clearAndContinue();
 
     }
 
@@ -1283,22 +1280,20 @@ void qorbiterManager::initializeGridModel()
 {
 
     //datagrid model setup with image provider for grid
-    gridThread = new QThread();
+    /*  gridThread = new QThread();
     model = new ListModel(new gridItem);
     model->moveToThread(gridThread);
     gridThread->start();
-
+*/
     // QObject::connect(pqOrbiter, SIGNAL(addItem(gridItem*)), this, SLOT(addMediaItem(gridItem*)), Qt::QueuedConnection);
     //    model->moveToThread(processingThread);
     basicProvider = new basicImageProvider();
-    advancedProvider = new GridIndexProvider(model , 6, 4);
-    QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex, int )), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex, int)));
+    qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
     //QObject::connect(this,SIGNAL(requestMoreGridData()), model,SLOT(checkForMore()));
 
     //adding important data and objects to qml now that they have been setup
-    qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
-    qorbiterUIwin->engine()->addImageProvider("datagridimg", advancedProvider);
-    qorbiterUIwin->rootContext()->setContextProperty("currentDateTime", QDateTime::currentDateTime());
+    // qorbiterUIwin->rootContext()->setContextProperty("dataModel", model);
+
     setDceResponse("Grid Initialized");
 }
 
@@ -1310,7 +1305,7 @@ void qorbiterManager::goBackGrid()
     if(goBack.isEmpty())
     {
         initializeSortString();
-        model->clearAndRequest();
+        emit clearAndContinue();
     }
     else
     {
@@ -1330,7 +1325,7 @@ void qorbiterManager::goBackGrid()
         q_pk_users = reverseParams.at(7);
         q_last_viewed = reverseParams.at(8);
         q_pk_attribute = reverseParams.at(9);
-        model->clearAndRequest();
+        emit clearAndContinue();
     }
 
     //datagridVariableString.append(q_mediaType).append("|").append(q_subType).append("|").append(q_fileFormat).append("|").append(q_attribute_genres).append("|").append(q_mediaSources).append("|").append(q_usersPrivate).append("|").append(q_attributetype_sort).append("|").append(q_pk_users).append("|").append(q_last_viewed).append("|").append(q_pk_attribute);
@@ -1342,45 +1337,45 @@ void qorbiterManager::goBackGrid()
 void qorbiterManager::showFileInfo(QString fk_file)
 {
 
-    pqOrbiter->GetMediaAttributeGrid(fk_file);
+   // pqOrbiter->GetMediaAttributeGrid(fk_file);
 }
 
 void qorbiterManager::requestSecurityPic(int i_pk_camera_device, int h, int w)
 {
-    pqOrbiter->GetSingleSecurityCam( i_pk_camera_device,  h,  w);
+  //  pqOrbiter->GetSingleSecurityCam( i_pk_camera_device,  h,  w);
 }
 
 void qorbiterManager::playMedia(QString FK_Media)
 {
-    pqOrbiter->playMedia(FK_Media);
+  //  pqOrbiter->playMedia(FK_Media);
 
 }
 
 void qorbiterManager::stopMedia()
 {
-    pqOrbiter->StopMedia();
+  //  pqOrbiter->StopMedia();
 }
 
 void qorbiterManager::rw_media(int speed)
 {
-    nowPlayingButton->setMediaSpeed(speed);
-    pqOrbiter->RwMedia();
+    //nowPlayingButton->setMediaSpeed(speed);
+    //pqOrbiter->RwMedia();
 }
 
 void qorbiterManager::ff_media(int speed)
 {
-    nowPlayingButton->setMediaSpeed(speed);
-    pqOrbiter->FfMedia();
+    //nowPlayingButton->setMediaSpeed(speed);
+    //pqOrbiter->FfMedia();
 }
 
 void qorbiterManager::pauseMedia()
 {
-    pqOrbiter->PauseMedia();
+  //  pqOrbiter->PauseMedia();
 }
 
 void qorbiterManager::showfloorplan(int fptype)
 {
-    pqOrbiter->ShowFloorPlan(fptype);
+  //  pqOrbiter->ShowFloorPlan(fptype);
 }
 
 
@@ -1390,21 +1385,21 @@ void qorbiterManager::changedPlaylistPosition(QString position)
 
     if(!position.contains(QRegExp("TITLE:")))
     {
-        pqOrbiter->JumpToPlaylistPosition(position.toInt());
+  //      pqOrbiter->JumpToPlaylistPosition(position.toInt());
     }
     else
     {
-        pqOrbiter->setPosition(position);
+  //      pqOrbiter->setPosition(position);
     }
 
 }
 
 void qorbiterManager::setNowPlayingData()
 {
-    pqOrbiter->BindMediaRemote(true);
+  //  pqOrbiter->BindMediaRemote(true);
     setDceResponse("bound remote" );
-    pqOrbiter->requestMediaPlaylist();
-    updateTimecode();
+   // pqOrbiter->requestMediaPlaylist();
+   // updateTimecode();
 }
 
 void qorbiterManager::updateImageChanged(QImage img)
@@ -1415,36 +1410,36 @@ void qorbiterManager::updateImageChanged(QImage img)
 
 void qorbiterManager::setNowPlayingTv()
 {
-    pqOrbiter->BindMediaRemote(true);
-    pqOrbiter->requestMediaPlaylist();
+  //  pqOrbiter->BindMediaRemote(true);
+   // pqOrbiter->requestMediaPlaylist();
 }
 
 void qorbiterManager::changeChannels(QString chan)
 {
-    pqOrbiter->TuneToChannel(chan.toInt(), chan );
+  //  pqOrbiter->TuneToChannel(chan.toInt(), chan );
 }
 
 void qorbiterManager::getLiveTVPlaylist()
 {   
-    emit liveTVrequest();
+  //  emit liveTVrequest();
 }
 
 void qorbiterManager::gridChangeChannel(QString chan, QString chanid)
 {
-    pqOrbiter->TuneToChannel(chan.toInt(), chanid);
+////    pqOrbiter->TuneToChannel(chan.toInt(), chanid);
 }
 
 
 void qorbiterManager::setHouseMode(int mode, int pass)
 {
-    pqOrbiter->SetSecurityMode(pass, mode);
+   // pqOrbiter->SetSecurityMode(pass, mode);
 }
 
 void qorbiterManager::setCurrentUser(QString inc_user)
 {
     sPK_User = userList->find(sPK_User)->data(1).toString();
     int user = inc_user.toInt();
-    pqOrbiter->setUser(user);
+   // pqOrbiter->setUser(user);
     emit userChanged();
 }
 
@@ -1464,12 +1459,12 @@ void qorbiterManager::sleepingMenu(bool toggle, int grp)
 
     if(toggle == true)
     {   sleeping_alarms.clear();
-        pqOrbiter->GetAlarms(toggle, grp);
+      //  pqOrbiter->GetAlarms(toggle, grp);
     }
     else
     {
         sleeping_alarms.clear();
-        pqOrbiter->GetAlarms(false, 0);
+       // pqOrbiter->GetAlarms(false, 0);
     }
 }
 
@@ -1477,6 +1472,7 @@ void qorbiterManager::sleepingMenu(bool toggle, int grp)
 
 void qorbiterManager::updateTimecode()
 {
+    /*
     string sIPAddress;
     if(nowPlayingButton->b_mediaPlaying == true && !timeCodeSocket->isValid())
     {
@@ -1533,6 +1529,7 @@ void qorbiterManager::updateTimecode()
         timeCodeSocket->disconnectFromHost();
         timeCodeSocket->close();
     }
+    */
 }
 
 void qorbiterManager::showTimeCode()
@@ -1560,6 +1557,7 @@ void qorbiterManager::showTimeCode()
 
 void qorbiterManager::checkConnection(QString s)
 {
+    /*
     setDceResponse(s);
     if(pqOrbiter->m_bQuit_get() == true)
     {
@@ -1567,19 +1565,19 @@ void qorbiterManager::checkConnection(QString s)
         setDceResponse("Disconnected!");
     }
     emit raiseSplash();
-
+*/
 
 }
 
 void qorbiterManager::jogPosition(QString jog)
 {
-    pqOrbiter->JogStream(jog);
+   // pqOrbiter->JogStream(jog);
 }
 
 void qorbiterManager::regenError(QProcess::ProcessError)
 {
     setDceResponse("Error! Reloading existing config for device " + iPK_Device);
-    getConf(iPK_Device);
+    //processConfig(iPK_Device);
 }
 
 bool qorbiterManager::cleanupData()
@@ -1671,7 +1669,7 @@ void qorbiterManager::setDceResponse(QString response)
     dceResponse = response;
     emit loadingMessage(dceResponse);
     emit dceResponseChanged();
-    // qDebug() << dceResponse;
+    qDebug() << dceResponse;
 
 }
 
@@ -1689,8 +1687,8 @@ int qorbiterManager::loadSplash()
 void qorbiterManager::activateScreenSaver()
 {
     setDceResponse("Starting Screensaver");
-    QObject::connect(pqOrbiter, SIGNAL(screenSaverImages(QStringList)), &ScreenSaver,SLOT(setImageList(QStringList)));
-    pqOrbiter->GetScreenSaverImages();
+   // QObject::connect(pqOrbiter, SIGNAL(screenSaverImages(QStringList)), &ScreenSaver,SLOT(setImageList(QStringList)));
+   // pqOrbiter->GetScreenSaverImages();
     qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", &ScreenSaver);
 }
 
@@ -1775,7 +1773,7 @@ void qorbiterManager::getGrid(int i)
 
 void qorbiterManager::adjustVolume(int vol)
 {
-    pqOrbiter->adjustVolume( vol);
+  //  pqOrbiter->adjustVolume( vol);
 }
 
 QString qorbiterManager::getCurrentScreen()
