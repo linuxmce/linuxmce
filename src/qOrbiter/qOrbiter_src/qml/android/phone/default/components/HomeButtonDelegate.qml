@@ -26,7 +26,7 @@ Component{
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
-                    execGrp(params);
+                    dcerouter.executeCommandGroup(params);
                     generic_list.destroy()
                 }
                 onPressed:  delegatemenu.color = "orange"
