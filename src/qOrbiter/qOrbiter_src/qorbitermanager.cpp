@@ -84,8 +84,9 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     item = qorbiterUIwin->rootObject();
 
     QObject::connect(qorbiterUIwin, SIGNAL(sceneResized(QSize)),  SLOT(checkOrientation(QSize)) );
+    QObject::connect(this, SIGNAL(orbiterConfigReady(bool)), this, SLOT(showUI(bool)));
 
-    QApplication::processEvents(QEventLoop::AllEvents);
+
 #ifdef for_desktop
     buildType = "/qml/desktop";
     qrcPath = "qrc:desktop/Splash.qml";
@@ -147,8 +148,6 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     photoDefaultSort = "13";
     gamesDefaultSort = "49";
 
-
-
     //goBack << ("|||1,2|0|13|0|2|");
     backwards = false;
 
@@ -182,10 +181,9 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 
 void qorbiterManager::gotoQScreen(QString s)
 {
-    setRequestMore(false);
     //pqOrbiter->retrieving = false;
+    emit keepLoading(false);
     emit clearModel();
-    initializeSortString();
     emit resetFilter();
 
     //send the qmlview a request to go to a screen, needs error handling
@@ -210,7 +208,7 @@ void qorbiterManager::gotoQScreen(QString s)
 bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 {
 
-    setDceResponse("Initiating Router Connection");
+    setDceResponse("Starting Manager");
 
     //QObject::connect(pqOrbiter, SIGNAL(gotoQml(QString)), this, SLOT(gotoQScreen(QString)));
 
@@ -267,7 +265,11 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
         return false;
     }
 #elif for_android
-    loadSkins(QUrl(remoteDirectoryPath));
+    qDebug() << "Loading skins";
+    if( !loadSkins(QUrl(localDir)))
+    {   emit skinIndexReady(false);
+        return false;
+    }
 #else
     if( !loadSkins(QUrl(localDir)))
     {   emit skinIndexReady(false);
@@ -276,26 +278,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     }
 #endif
 
-    emit skinIndexReady(true);
-swapSkins(currentSkin);
 
-  /*      if (getConf(iPK_Device))
-    {
-        if(pqOrbiter->registerDevice())
-        {
-            emit localConfigReady(true);
-
-
-            //LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",iPK_Device,qs_routerip.toStdString());
-           // QObject::connect(pqOrbiter,SIGNAL(disconnected(QString)), this, SLOT(reloadHandler()));
-            return true;
-        }else
-            return false;
-
-    }
-    else
-        return false;
-*/
 }
 
 void qorbiterManager::refreshUI(QUrl url)
@@ -332,12 +315,11 @@ void qorbiterManager::processConfig(QByteArray config)
         setDceResponse("Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device)) ;
         setDceResponse("Invalid Config");
         emit orbiterConfigReady(false);
-        QApplication::processEvents(QEventLoop::AllEvents);
+
 
     }
 
-    setDceResponse("Attempting to write config");
-    QApplication::processEvents(QEventLoop::AllEvents);
+    setDceResponse("Attempting to write config");    
     if (!writeConfig())
     {
         setDceResponse("Couldnt save config!");
@@ -352,7 +334,6 @@ void qorbiterManager::processConfig(QByteArray config)
     iFK_Room = defaults.attribute("DefaultRoom").toInt();
     iea_area = defaults.attribute("DefaultEA").toInt();
     iPK_User = defaults.attribute("PK_User").toInt();
-    QApplication::processEvents(QEventLoop::AllEvents);
 
     setDceResponse("Defaults Set");
 
@@ -703,8 +684,6 @@ void qorbiterManager::processConfig(QByteArray config)
 
     emit orbiterConfigReady(true);
 
-    QApplication::processEvents(QEventLoop::AllEvents);
-
 }
 
 bool qorbiterManager::OrbiterGen()
@@ -915,7 +894,7 @@ bool qorbiterManager::loadSkins(QUrl base)
 
     tskinModel = new SkinDataModel(base, new SkinDataItem, this);
     qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
-    QApplication::processEvents(QEventLoop::AllEvents);
+
     /*
       TODO ASAP:
       Write feeder function that preceeds this call to creat a simple string list
@@ -936,7 +915,7 @@ bool qorbiterManager::loadSkins(QUrl base)
     tskinModel->addSkin("aeon");
     tskinModel->addSkin("crystalshades");
 #endif
-
+emit skinIndexReady(true);
     return true;
 }
 
@@ -945,6 +924,18 @@ void qorbiterManager::quickReload()
 
    // pqOrbiter->QuickReload();
     //bool connected = pqOrbiter->m_bRouterReloading;
+}
+
+void qorbiterManager::showUI(bool b)
+{
+    if(b == true)
+    {
+  swapSkins(currentSkin);
+    }
+    else
+    {
+        emit raiseSplash();
+    }
 }
 
 
@@ -1101,154 +1092,8 @@ bool qorbiterManager::writeConfig()
 
 void qorbiterManager::setStringParam(int paramType, QString param)
 {
-  //  pqOrbiter->retrieving = false;
-    /*
-    QString q_mediaType;           //1 passed in inital dg request
-    QString q_subType;             //2
-    QString q_fileFormat;          //3
-    QString q_attribute_genres;    //4
-    QString q_mediaSources;         //5 needs comma seperator
 
-    QString q_usersPrivate;        //6
-    QString q_attributetype_sort;  //7
-    QString q_pk_users;             //8
-    QString q_last_viewed;        //9
-    QString q_pk_attribute;        //10
-    QString *datagridVariableString;
-    */
-
-    QStringList longassstring;
-    QString datagridVariableString;
-
-    backwards = false;
-
-
-    switch (paramType)
-    {
-    case 1:
-        q_subType = param;
-
-        longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
-        datagridVariableString = longassstring.join("|");
-        emit clearAndContinue();
-        break;
-
-    case 2:
-        q_fileFormat = param;
-
-        longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
-        datagridVariableString = longassstring.join("|");
-        emit clearAndContinue();
-        break;
-
-    case 3:
-        q_attribute_genres = param;
-
-        longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
-        datagridVariableString = longassstring.join("|");
-          emit clearAndContinue();
-        break;
-
-    case 4:
-        if (q_mediaSources != param.remove("!D"))
-        {
-            if(param.contains("!F"))
-            {
-                filedetailsclass->setVisible(true);
-                filedetailsclass->setFile(param);
-                showFileInfo(param);
-                break;
-            }
-            else if (param.contains("!P"))
-            {
-                filedetailsclass->setVisible(true);
-                filedetailsclass->setFile(param);
-                showFileInfo(param);
-                break;
-            }
-            else
-            {
-                q_pk_attribute = param.remove("!A");
-                longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
-                datagridVariableString = longassstring.join("|");
-
-                  emit clearAndContinue();
-            }
-        }
-        break;
-
-    case 5:
-        q_usersPrivate = param;
-
-        longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
-        datagridVariableString = longassstring.join("|");
-          emit clearAndContinue();
-        break;
-
-    case 6:
-        if (param.contains("!P"))
-        {
-            filedetailsclass->setVisible(true);
-            filedetailsclass->setFile(param);
-            break;
-        }
-        else
-        {
-            if(backwards ==false)
-            {
-                q_attributetype_sort = param;
-            }
-            longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
-            datagridVariableString = longassstring.join("|");
-              emit clearAndContinue();
-            break;
-        }
-
-    case 7:
-        q_pk_users = param;
-
-        longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
-        datagridVariableString = longassstring.join("|");
-     emit clearAndContinue();
-        break;
-    case 8:
-        q_last_viewed = param;
-        longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
-        datagridVariableString = longassstring.join("|");
-          emit clearAndContinue();
-
-        break;
-    case 9:
-        if(param.contains("!F"))
-        {
-
-            filedetailsclass->setVisible(true);
-            filedetailsclass->setFile(param);
-            break;
-        }
-        else if (param.contains("!P"))
-        {
-            filedetailsclass->setVisible(true);
-            filedetailsclass->setFile(param);
-            break;
-        }
-
-        else
-        {
-            q_pk_attribute = param.remove("!A");
-            longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
-            datagridVariableString = longassstring.join("|");
-              emit clearAndContinue();
-            break;
-        }
-
-    default:
-          emit clearAndContinue();
-
-    }
-
-
-
+emit setDceGridParam(paramType, param);
 
 }
 
@@ -1348,7 +1193,7 @@ void qorbiterManager::requestSecurityPic(int i_pk_camera_device, int h, int w)
 void qorbiterManager::playMedia(QString FK_Media)
 {
   //  pqOrbiter->playMedia(FK_Media);
-
+    emit startPlayback(FK_Media);
 }
 
 void qorbiterManager::stopMedia()

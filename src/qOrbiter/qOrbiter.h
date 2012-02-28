@@ -145,7 +145,7 @@ public:
     Q_INVOKABLE void GetSingleSecurityCam(int cam_device, int iHeight, int iWidth);
     Q_INVOKABLE void GetMultipleSecurityCams(QStringList cams);
     Q_INVOKABLE void GetNowPlayingAttributes();
-    Q_INVOKABLE void TuneToChannel(int channel, QString chanid);
+    Q_INVOKABLE void TuneToChannel(QString chanid);
     Q_INVOKABLE void adjustLighting(int level);
     Q_INVOKABLE void adjustVolume( int vol);
     Q_INVOKABLE void mute();
@@ -1150,7 +1150,7 @@ signals:
     void addItem(gridItem*);
     void requestMediaGrid(int);
     void clearGrid();
-    void clearAndContinue();
+    void clearAndContinue(int type);
     void showFileInfo(bool state);
     void setFocusFile(QString);
 
@@ -1197,7 +1197,7 @@ public slots:
     void connectionError();
 
     //media grid
-    void checkLoadingStatus();
+    bool checkLoadingStatus();
     void requestLiveTvPlaylist();
     void prepareFileList( int iPK_MediaType);
     void cleanupGrid();

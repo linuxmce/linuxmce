@@ -11,7 +11,7 @@ SkinLoader::SkinLoader(QUrl baseUrl, qorbiterManager *uiRef, SkinDataModel *pare
 SkinLoader::~SkinLoader() {}
 
 void SkinLoader::loadSkin(QString name) {
-
+    qDebug() << "skinloader adding::" << name;
      //skinBase.setPath(m_baseUrl.toString());
     QUrl style;
     style.setUrl(m_base_url.toString() + "/" + name + "/Style.qml");

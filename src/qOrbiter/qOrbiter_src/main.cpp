@@ -252,9 +252,11 @@ int main(int argc, char* argv[])
         ListModel *mediaModel = new ListModel(new gridItem);
         mediaModel->moveToThread(mediaThread);
         GridIndexProvider * advancedProvider = new GridIndexProvider(mediaModel , 6, 4);
-        QObject::connect(mediaModel,SIGNAL(dataChanged(QModelIndex,QModelIndex, int )), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex, int)), Qt::DirectConnection);
+       //QObject::connect(mediaModel,SIGNAL(dataChanged(QModelIndex,QModelIndex, int )), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex, int)), Qt::DirectConnection);
+        //QObject::connect(mediaModel, SIGNAL(modelAboutToBeReset()), advancedProvider, SLOT(dataReset()), Qt::DirectConnection);
+
         orbiterWin.mainView.engine()->addImageProvider("datagridimg", advancedProvider);
-        advancedProvider->moveToThread(mediaThread);
+       advancedProvider->moveToThread(mediaThread);
 
         orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", pqOrbiter); //dcecontext object
         orbiterWin.mainView.rootContext()->setContextProperty("dataModel", mediaModel);
@@ -284,22 +286,26 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter,SIGNAL(objectUpdate(const uchar*,int)), w->nowPlayingButton, SLOT(setImageData(const uchar*,int)),Qt::DirectConnection);
         QObject::connect(pqOrbiter, SIGNAL(addScreenParam(QString,int)), w->ScreenParameters, SLOT(addParam(QString, int)));
         QObject::connect(pqOrbiter, SIGNAL(currentScreenChanged(QString)), w->nowPlayingButton, SLOT(setScreen(QString)));
-
+        QObject::connect(w, SIGNAL(startPlayback(QString)), pqOrbiter, SLOT(checkLoadingStatus()));
         //navigation
         QObject::connect(pqOrbiter,SIGNAL(gotoQml(QString)), w, SLOT(gotoQScreen(QString)));
 
         //mediagrid
-        QObject::connect(mediaModel, SIGNAL(itemAdded(int)), pqOrbiter, SLOT(setCurrentRow(int)), Qt::DirectConnection);
+        QObject::connect(mediaModel, SIGNAL(itemAdded(int)), pqOrbiter, SLOT(setCurrentRow(int)));
         QObject::connect(w, SIGNAL(clearModel()), mediaModel,SLOT(clear()));
-        QObject::connect(w, SIGNAL(clearAndContinue()), mediaModel, SLOT(clearAndRequest()),Qt::DirectConnection);
+        QObject::connect(pqOrbiter, SIGNAL(clearAndContinue(int)), mediaModel, SLOT(clearAndRequest(int)));
         QObject::connect(pqOrbiter, SIGNAL(clearGrid()), mediaModel, SLOT(clear()));
-        QObject::connect(pqOrbiter,SIGNAL(addItem(gridItem*)), mediaModel, SLOT(appendRow(gridItem*)),Qt::QueuedConnection);
+        QObject::connect(pqOrbiter,SIGNAL(addItem(gridItem*)), mediaModel, SLOT(appendRow(gridItem*)));
         QObject::connect(pqOrbiter,SIGNAL(gridModelSizeChange(int)), mediaModel, SLOT(setTotalCells(int)),Qt::QueuedConnection);
         // QObject::connect(pqOrbiter,SIGNAL(checkGridStatus()), mediaModel, SLOT(checkForMore()), Qt::QueuedConnection);
         // QObject::connect(mediaModel,SIGNAL(loadingStatusChanged(bool)), w, SLOT(setRequestMore(bool)), Qt::DirectConnection);
         // QObject::connect(mediaModel, SIGNAL(gimmieData(int)), pqOrbiter, SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
         QObject::connect(mediaModel,SIGNAL(ready(int)), pqOrbiter, SLOT(prepareFileList(int)), Qt::DirectConnection);
         QObject::connect(w, SIGNAL(gridTypeChanged(int)), mediaModel, SLOT(setGridType(int)), Qt::QueuedConnection);
+        QObject::connect(w, SIGNAL(setDceGridParam(int,QString)), pqOrbiter, SLOT(setStringParam(int,QString)));
+        QObject::connect(w, SIGNAL(keepLoading(bool)), pqOrbiter,SLOT(setGridStatus(bool)), Qt::DirectConnection);
+        QObject::connect(pqOrbiter, SIGNAL(showFileInfo(bool)), w->filedetailsclass, SLOT(setVisible(bool)));
+        QObject::connect(pqOrbiter, SIGNAL(setFocusFile(QString)), w->filedetailsclass, SLOT(setFile(QString)));
 
         //now playing signals
         QObject::connect(pqOrbiter, SIGNAL(setNowPlaying(bool)), w->nowPlayingButton,SLOT(setStatus(bool)));

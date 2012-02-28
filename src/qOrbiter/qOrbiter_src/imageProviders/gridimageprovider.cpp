@@ -19,9 +19,10 @@ GridIndexProvider::GridIndexProvider(ListModel *model  , int pathRole, int pixma
         mPixmapIndex[path] = index;
     }
 
-    QObject::connect(&mModel, SIGNAL(dataChanged(QModelIndex,QModelIndex, int)), this, SLOT(dataUpdated(QModelIndex,QModelIndex, int)));
-    QObject::connect(&mModel, SIGNAL(rowsRemoved(QModelIndex,int,int)), this, SLOT(dataDeleted(QModelIndex,int,int)));
-    QObject::connect(&mModel, SIGNAL(modelReset()), this, SLOT(dataReset()));
+    QObject::connect(&mModel, SIGNAL(dataChanged(QModelIndex,QModelIndex, int)), this, SLOT(dataUpdated(QModelIndex,QModelIndex, int)), Qt::QueuedConnection);
+    QObject::connect(&mModel, SIGNAL(rowsRemoved(QModelIndex,int,int)), this, SLOT(dataDeleted(QModelIndex,int,int)) );
+    QObject::connect(&mModel, SIGNAL(modelAboutToBeReset()), this, SLOT(dataReset()), Qt::QueuedConnection);
+
 }
 
 
@@ -39,7 +40,7 @@ QImage GridIndexProvider::requestImage(const QString &id, QSize *size, const QSi
     }
     else
     {
-QImage result;
+        QImage result;
         if (image.height() < image.width())
         {
             mModel.find(id)->setAspect("poster");
@@ -64,11 +65,19 @@ QImage result;
 void GridIndexProvider::dataUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight, const int &cRow)
 {
 
-    // For each pixmap already in the model, get a mapping between the name and the index
-    for(int row = 0; row < mModel.rowCount(); row++) {
-        QModelIndex index = mModel.index(row, 0);
-        QString path = QVariant(mModel.data(index, mPathRole)).toString();
-        mPixmapIndex.insert(path, index);
+    if(mModel.clearing)
+    {
+       this->dataReset();
+    }
+    else
+    {
+        // For each pixmap already in the model, get a mapping between the name and the index
+        for(int row = 0; row < mModel.rowCount(); row++) {
+            QModelIndex index = mModel.index(row, 0);
+            QString path = QVariant(mModel.data(index, mPathRole)).toString();
+            mPixmapIndex.insert(path, index);
+        }
+
     }
 
 }
@@ -88,6 +97,7 @@ void GridIndexProvider::dataDeleted(const QModelIndex&, int start, int end)
 
 void GridIndexProvider::dataReset()
 {
+    qDebug("Clearing pixmaps");
     mPixmapIndex.clear();
 }
 

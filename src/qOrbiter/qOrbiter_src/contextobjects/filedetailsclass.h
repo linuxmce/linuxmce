@@ -41,7 +41,7 @@ public:
     Q_PROPERTY (QString channel READ getChannel WRITE setChannel NOTIFY channelChanged)
     Q_PROPERTY (QString channelID READ getChannelID WRITE setChannelID NOTIFY channelChanged)
     Q_PROPERTY (QString episode READ getEpisode WRITE setEpisode NOTIFY episodeChanged)
-     Q_PROPERTY (QString director READ getDirector WRITE setDirector NOTIFY directorChanged)
+    Q_PROPERTY (QString director READ getDirector WRITE setDirector NOTIFY directorChanged)
     //audio related
     Q_PROPERTY (QString album READ getAlbum WRITE setAlbum NOTIFY albumChanged)
     Q_PROPERTY (QString track READ getTrack WRITE setTrack NOTIFY trackChanged)
@@ -49,7 +49,7 @@ public:
     Q_PROPERTY (QStringList performers READ getPerformerList)
     Q_PROPERTY (QString composerlist READ getComposers WRITE setComposers NOTIFY composersChanged)
     Q_PROPERTY (QStringList composers READ getComposerList)
-Q_PROPERTY (QString aspect READ getImageAspect WRITE setImageAspect NOTIFY imageAspectChanged )
+    Q_PROPERTY (QString aspect READ getImageAspect WRITE setImageAspect NOTIFY imageAspectChanged )
     Q_PROPERTY (int i_aspectH READ getAspectH WRITE setAspectH NOTIFY aspectHChanged())
     Q_PROPERTY (int i_aspectW READ getAspectW WRITE setAspectW NOTIFY aspectWChanged())
 
@@ -61,66 +61,16 @@ Q_PROPERTY (QString aspect READ getImageAspect WRITE setImageAspect NOTIFY image
       */
 
     int i_aspectH; //height then width
-
-    void setAspectH(int h) {i_aspectH = h ; emit aspectHChanged();}
-    int getAspectH() { return i_aspectH;}
-
     int i_aspectW; //height then width
-
-    void setAspectW(int w) {i_aspectW = w ; emit aspectWChanged();}
-    int getAspectW() { return i_aspectW;}
-
     QString aspect;
 
-    void setImageAspect(QString i_aspect) { aspect = i_aspect; emit imageAspectChanged();}
-    QString getImageAspect() {return aspect;}
 
-    QString file;
-    inline QString getFile () {return file;}
-    inline void setFile(QString incFile) { file = incFile; emit FileChanged(file);}
 
     QImage title;
-    inline void setTitleImage (QImage inc_t) {title = inc_t; emit object_changed();}
-    inline QImage getTitleImage () {return title;}
-
+    QString file;
     QImage programImage;
-    inline void setProgramImage (QImage inc_p) {programImage = inc_p; emit object_changed();}
-    inline QImage getProgramImage () {return programImage;}
     QUrl Season;
     QUrl imdb;
-
-    bool showDetails;
-    inline bool isVisible () { return showDetails; }
-    inline void setVisible (bool state) { showDetails = state; emit VisibleChanged( showDetails);}
-
-    // Q_INVOKABLE void setSelectionStatus(QString format);
-    // Q_INVOKABLE bool getSelectionStatus();
-
-    QString synop;
-    inline QString getSynop() {return synop;}
-    inline void setSynop(QString s) { synop = s; emit synopChanged(); }
-
-    QUrl screenshot;
-    QUrl bgImage;
-    inline void setScreenshot(QUrl u) {screenshot = u;}
-    inline QUrl getScreenShot() {return screenshot;}
-
-    QString filename;
-    inline QString getFilename() {return filename;}
-    inline void setFilename (QString f) {filename = f; emit object_changed();}
-
-    QString path;
-    inline QString getPath() {return path;}
-    inline void setPath (QString f) {path = f; emit object_changed();}
-
-    QImage qi_screenshot;
-    inline void setScreenshotimage(QImage img) {qi_screenshot= img; emit imageChanged();}
-    inline QImage getScreenshotimage() {return qi_screenshot;}
-
-    QImage qi_bgimage;
-    void setBGimage(QImage img) {qi_bgimage= img;}
-    QImage getBGimage() {return qi_bgimage;}
-
     QString qs_mainTitle;
     QString qs_mainTitle2;
     QString qs_subTitle;
@@ -145,6 +95,15 @@ Q_PROPERTY (QString aspect READ getImageAspect WRITE setImageAspect NOTIFY image
     QString composerlist;
     QString releasedate;
     QString rating;
+
+    QImage qi_screenshot;
+    QImage qi_bgimage;
+    bool showDetails;
+    QString synop;
+    QUrl screenshot;
+    QUrl bgImage;
+    QString filename;
+    QString path;
 
 signals:
     void object_changed();
@@ -205,7 +164,7 @@ public slots:
     //QString getScreen () {return qs_screen;}
 
     //void setUrl (QString inc_url) {qs_imagePath = inc_url; emit imageChanged();}
-   // QString getUrl () {return qs_imagePath;}
+    // QString getUrl () {return qs_imagePath;}
 
     void setTitle (QString inc_title) {qs_mainTitle = inc_title; emit titleChanged();}
     QString getTitle () {return qs_mainTitle;}
@@ -217,13 +176,13 @@ public slots:
     QString getSubTitle () {return qs_subTitle;}
 
     //void setStatus (bool status) {b_mediaPlaying = status; emit mediaStatusChanged(); }
-   // bool getStatus () {return b_mediaPlaying;}
+    // bool getStatus () {return b_mediaPlaying;}
 
-  //  void setMediaType (int inc_mediaType) {i_mediaType = inc_mediaType; emit mediaTypeChanged();}
-   // int  getMediaType () {return i_mediaType;}
+    //  void setMediaType (int inc_mediaType) {i_mediaType = inc_mediaType; emit mediaTypeChanged();}
+    // int  getMediaType () {return i_mediaType;}
 
     //void setFilePath (QString inc_fp) {filepath = inc_fp; qDebug() <<"FilePath:" << filepath; emit filePathChanged();}
-   // QString getFilePath () {return filepath;}
+    // QString getFilePath () {return filepath;}
 
     //general media getters and setters ----//
 
@@ -234,11 +193,11 @@ public slots:
     QString getStudio () {return studio;}
 
     //void setPlaylistPostion(int i_pls) {m_iplaylistPosition = i_pls; qDebug() << "Playlist set to: "<< m_iplaylistPosition;  emit playListPositionChanged();}
-  //  int getPlaylistPosition() {return m_iplaylistPosition;}
+    //  int getPlaylistPosition() {return m_iplaylistPosition;}
 
-  //  void setMediaSpeed(int speed);
+    //  void setMediaSpeed(int speed);
     //void setStringSpeed(QString s) {qs_playbackSpeed = s; qDebug() << qs_playbackSpeed; emit mediaSpeedChanged();}
-   // QString getMediaSpeed() {return qs_playbackSpeed;}
+    // QString getMediaSpeed() {return qs_playbackSpeed;}
 
     //--tv getters and setters-------------//
 
@@ -273,6 +232,64 @@ public slots:
     QString getGenre() { return genre.left(genre.indexOf(" | "));}
 
     void setFileMediaType();
+
+    void setAspectH(int h) {i_aspectH = h ; emit aspectHChanged();}
+    int getAspectH() { return i_aspectH;}
+
+    void setAspectW(int w) {i_aspectW = w ; emit aspectWChanged();}
+    int getAspectW() { return i_aspectW;}
+
+    void setImageAspect(QString i_aspect) { aspect = i_aspect; emit imageAspectChanged();}
+    QString getImageAspect() {return aspect;}
+
+    inline QString getFile () {return file;}
+    inline void setFile(QString incFile) { file = incFile; emit FileChanged(file);}
+
+
+    inline void setTitleImage (QImage inc_t) {title = inc_t; emit object_changed();}
+    inline QImage getTitleImage () {return title;}
+
+
+    inline void setProgramImage (QImage inc_p) {programImage = inc_p; emit object_changed();}
+    inline QImage getProgramImage () {return programImage;}
+
+
+    // Q_INVOKABLE void setSelectionStatus(QString format);
+    // Q_INVOKABLE bool getSelectionStatus();
+
+
+    inline QString getSynop() {return synop;}
+    inline void setSynop(QString s) { synop = s; emit synopChanged(); }
+
+    inline void setScreenshot(QUrl u) {screenshot = u;}
+    inline QUrl getScreenShot() {return screenshot;}
+
+    inline QString getFilename() {return filename;}
+    inline void setFilename (QString f) {filename = f; emit object_changed();}
+
+    inline QString getPath() {return path;}
+    inline void setPath (QString f) {path = f; emit object_changed();}
+
+
+    inline void setScreenshotimage(QImage img) {qi_screenshot= img; emit imageChanged();}
+    inline QImage getScreenshotimage() {return qi_screenshot;}
+
+
+    void setBGimage(QImage img) {qi_bgimage= img;}
+    QImage getBGimage() {return qi_bgimage;}
+
+
+    inline bool isVisible () { return showDetails; }
+    inline void setVisible (bool state) { showDetails = state; emit VisibleChanged( showDetails);}
+
+    // Q_INVOKABLE void setSelectionStatus(QString format);
+    // Q_INVOKABLE bool getSelectionStatus();
+
+
+
+
+
+
 
 };
 

@@ -29,6 +29,7 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
     mainView.rootContext()->setContextProperty("window", this);
     mainView.setWindowTitle("LinuxMCE Orbiter ");
+    mainView.rootContext()->setContextProperty("orbiterList" , "");
 
     //QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
 
@@ -38,8 +39,8 @@ orbiterWindow::orbiterWindow(long deviceid, std::string routerip, QObject *paren
     mainView.rootContext()->setContextProperty("appH", mainView.window()->height());
 #elif for_android
 
-    mainView.rootContext()->setContextProperty("appW", 480);
-    mainView.rootContext()->setContextProperty("appH", 800);
+    mainView.rootContext()->setContextProperty("appW", 320);
+    mainView.rootContext()->setContextProperty("appH", 480);
 #else
     mainView.rootContext()->setContextProperty("appW", 1280);
     mainView.rootContext()->setContextProperty("appH", 720);

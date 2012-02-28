@@ -276,7 +276,7 @@ Rectangle {
                 MouseArea
                 {
                     anchors.fill:parent
-                    onClicked: goBackGrid()
+                    onClicked: dcerouter.goBackGrid()
                 }
             }
             AttributeSelector {}

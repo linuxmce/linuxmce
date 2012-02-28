@@ -39,9 +39,7 @@ ListModel::~ListModel() {
 
 void ListModel::appendRow(gridItem *item)
 {
-    if(clearing != true)
         appendRows(QList<gridItem*>() << item);
-
 }
 
 void ListModel::appendRows(const QList<gridItem *> &items)
@@ -63,15 +61,18 @@ void ListModel::appendRows(const QList<gridItem *> &items)
     double p = (((double)m_list.size() / (double)totalcells) * 100) ;
     setProgress(p);
     emit dataChanged(index2, index, currentRows);
+
 }
 
 void ListModel::insertRow(int row, gridItem *item)
 {
+
     beginInsertRows(QModelIndex(), row, row);
     connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
     ////qdebug() << "Inserting at:" << row;
     m_list.insert(row, item);
     endInsertRows();
+
 }
 
 void ListModel::handleItemChange()
@@ -83,6 +84,38 @@ void ListModel::handleItemChange()
     {
         emit dataChanged(index, index, 0);
     }
+}
+
+void ListModel::reset()
+{
+clearing = true;
+    emit modelAboutToBeReset();
+    beginResetModel();
+    resetInternalData();
+
+    //qDeleteAll(m_list);
+    endResetModel();
+    emit modelReset();
+
+    clearing = false;
+emit ready(gridType);
+}
+
+void ListModel::beginResetModel()
+{
+}
+
+void ListModel::endResetModel()
+{
+}
+
+void ListModel::resetInternalData()
+{
+
+    m_list.clear();
+
+
+
 }
 
 gridItem * ListModel::find(const QString &id) const
@@ -126,21 +159,11 @@ QModelIndex ListModel::indexFromItem(const gridItem *item) const
 
 void ListModel::clear()
 {
+
     clearing =true;
-    this->reset();
-    if(removeRows(0, m_list.size(), QModelIndex()))
-    {
-        totalcells=0;
-
-
-        // qDebug("Requesting");
-
-    }
-    else
-    {
-        //  qDebug("Couldnt delete list!");
-    }
+    m_list.clear();
     clearing = false;
+
 
 }
 
@@ -218,7 +241,7 @@ int ListModel::getTotalCells()
 void ListModel::setGridType(int type)
 {
     gridType = type;
-    emit gridTypeChanged(gridType);
+    //emit gridTypeChanged(gridType);
     ////qdebug("Grid Type Set");
 
 }
@@ -260,24 +283,13 @@ void ListModel::attributeSort()
 
 }
 
-void ListModel::clearAndRequest()
+void ListModel::clearAndRequest(int type)
 {
-
+    this->gridType = type;
     clearing = true;
+    setTotalCells(0);
+    reset();
 
-    if(removeRows(0, m_list.size(), QModelIndex()))
-    {
-        totalcells=0;
-
-         qDebug("Cleared?");
-        clearing = false;
-
-        emit ready(getGridType());
-    }
-    else
-    {
-        //  qDebug("Couldnt delete list!");
-    }
 
 }
 

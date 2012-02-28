@@ -8,7 +8,7 @@
 #include <QVariant>
 #include <datamodels/gridItem.h>
 #include <qorbitermanager.h>
-
+#include <QMutex>
 
 class qorbiterManager;
 
@@ -16,8 +16,8 @@ class ListModel : public QAbstractListModel
 {
     Q_OBJECT
 
-        Q_PROPERTY (double progress READ getProgress WRITE setProgress NOTIFY progressChanged)
-        Q_PROPERTY (bool loadingStatus READ getLoadingStatus WRITE setLoadingStatus NOTIFY loadingStatusChanged)
+    Q_PROPERTY (double progress READ getProgress WRITE setProgress NOTIFY progressChanged)
+    Q_PROPERTY (bool loadingStatus READ getLoadingStatus WRITE setLoadingStatus NOTIFY loadingStatusChanged)
 
 
 public:
@@ -35,7 +35,7 @@ public:
     Q_INVOKABLE QVariant get(int index, const QString &name) const;
     QModelIndex indexFromItem( const gridItem* item) const;
     gridItem* currentRow();
-
+    QMutex mutextest;
     int totalcells;
     bool loadingStatus;
     int gridType;
@@ -54,6 +54,9 @@ signals:
     void ready(int type);
     void statusMessage(QString msg);
 
+    void modelAboutToBeReset();
+    void modelReset();
+
 
 public slots:
     void checkForMore();
@@ -69,12 +72,17 @@ public slots:
     void setProgress(double n_progress);
     double getProgress();
     void attributeSort();
-    void clearAndRequest();
+    void clearAndRequest( int );
 
 private slots:
     void handleItemChange();
+    void reset();
 
+
+    virtual void beginResetModel();
+    virtual void endResetModel();
 private:
+    void resetInternalData();
     gridItem* m_prototype;
     QList<gridItem*> m_list;
     // qorbiterManager *manager_ref;

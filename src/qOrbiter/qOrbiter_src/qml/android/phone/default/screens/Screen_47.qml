@@ -85,11 +85,7 @@ Rectangle {
         anchors.left: selector.right
         anchors.top: fileviewscreen.top
 
-
     }
-
-
-
 
     Text{
         id:spaceholder

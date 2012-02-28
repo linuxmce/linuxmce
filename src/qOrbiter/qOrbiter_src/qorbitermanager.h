@@ -352,6 +352,9 @@ signals:
     void clearAndContinue();
     void registerOrbiter(int user, QString ea, int room);
     void unregisterOrbiter(int user, QString ea, int room);
+    void startPlayback(QString file);
+    void setDceGridParam(int a, QString p );
+    void keepLoading(bool s);
 
     //setup related
     void orbiterReady(bool);
@@ -383,6 +386,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     void processConfig(QByteArray config);
     bool OrbiterGen();              //prelim orbter generation
     void quickReload();
+    void showUI(bool b);
 
     void qmlSetupLmce(QString incdeviceid, QString incrouterip);
     void setRequestMore(bool state);
