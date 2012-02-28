@@ -89,6 +89,10 @@ using namespace DCE;
 #include "pluto_media/Table_ProviderSource.h"
 #include "pluto_media/Table_LongAttribute.h"
 #include "pluto_media/Table_RipStatus.h"
+#include "pluto_media/Table_MediaSubType.h"
+#include "pluto_media/Table_FileFormat.h"
+#include "pluto_media/Table_MediaType_FileFormat.h"
+#include "pluto_media/Table_MediaType_MediaSubType.h"
 #include "Gen_Devices/AllScreens.h"
 #include "pluto_main/Define_Pipe.h"
 
@@ -8348,7 +8352,30 @@ void Media_Plugin::CMD_Get_Attributes_For_Type(int iEK_AttributeType,string *sTe
 void Media_Plugin::CMD_Get_File_Formats(int iPK_MediaType,string *sFormat,string &sCMD_Result,Message *pMessage)
 //<-dceag-c1097-e->
 {
+	string result = "";
+	if ( iPK_MediaType > 0 )
+	{
+		// Look up file formats for specific media type
+		vector<Row_MediaType_FileFormat *> vectRow_MediaType_FileFormat;
+		m_pDatabase_pluto_media->MediaType_FileFormat_get()->GetRows("EK_MediaType="+StringUtils::itos(iPK_MediaType),
+									 &vectRow_MediaType_FileFormat);
+		for(vector<Row_MediaType_FileFormat *>::iterator it=vectRow_MediaType_FileFormat.begin();it!=vectRow_MediaType_FileFormat.end();++it)
+		{
+			result += (*it)->FK_FileFormat_get() + ":" + (*it)->FK_FileFormat_getrow()->Description_get() + "\n";
+		}
+	} else {
+		// Look up all file format
+		vector<Row_FileFormat *> vectRow_FileFormat;
+		m_pDatabase_pluto_media->FileFormat_get()->GetRows("1=1", &vectRow_FileFormat);
+		for(vector<Row_FileFormat *>::iterator it=vectRow_FileFormat.begin();it!=vectRow_FileFormat.end();++it)
+		{
+			result += (*it)->PK_FileFormat_get() + ":" + (*it)->Description_get() + "\n";
+		}
+
+	}
+	(*sFormat) = result;
 }
+
 
 //<-dceag-c1098-b->
 
@@ -8362,4 +8389,26 @@ void Media_Plugin::CMD_Get_File_Formats(int iPK_MediaType,string *sFormat,string
 void Media_Plugin::CMD_Get_Media_Sub_Type(int iPK_MediaType,string *sName,string &sCMD_Result,Message *pMessage)
 //<-dceag-c1098-e->
 {
+	string result = "";
+	if ( iPK_MediaType > 0 )
+	{
+		// Look up media sub type for specific media type
+		vector<Row_MediaType_MediaSubType *> vectRow_MediaType_MediaSubType;
+		m_pDatabase_pluto_media->MediaType_MediaSubType_get()->GetRows("EK_MediaType="+StringUtils::itos(iPK_MediaType),
+									 &vectRow_MediaType_MediaSubType);
+		for(vector<Row_MediaType_MediaSubType *>::iterator it=vectRow_MediaType_MediaSubType.begin();it!=vectRow_MediaType_MediaSubType.end();++it)
+		{
+			result += (*it)->FK_MediaSubType_get() + ":" + (*it)->FK_MediaSubType_getrow()->Description_get() + "\n";
+		}
+	} else {
+		// Look up all media sub types
+		vector<Row_MediaSubType *> vectRow_MediaSubType;
+		m_pDatabase_pluto_media->MediaSubType_get()->GetRows("1=1", &vectRow_MediaSubType);
+		for(vector<Row_MediaSubType *>::iterator it=vectRow_MediaSubType.begin();it!=vectRow_MediaSubType.end();++it)
+		{
+			result += (*it)->PK_MediaSubType_get() + ":" + (*it)->Description_get() + "\n";
+		}
+
+	}
+	(*sName) = result;
 }
