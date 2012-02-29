@@ -21,7 +21,7 @@ Rectangle {
             MouseArea
             {
                 anchors.fill:parent
-                onClicked: dcerouter.goBackGrid()
+                onReleased: dcerouter.goBackGrid()
             }
         }
         ButtonSq{
@@ -32,7 +32,7 @@ Rectangle {
             width: style.stdbuttonw
             MouseArea{
                 anchors.fill:parent
-                onClicked: MyJs.createFilterObjects("../components/AttributeTypes.qml")
+                onReleased: MyJs.createFilterObjects("../components/AttributeTypes.qml")
             }
         }
 
@@ -44,7 +44,7 @@ Rectangle {
             width: style.stdbuttonw
             MouseArea{
                 anchors.fill:parent
-                onClicked: MyJs.createFilterObjects("../components/GenreSelector.qml")
+                onReleased: MyJs.createFilterObjects("../components/GenreSelector.qml")
             }
         }
 
@@ -57,7 +57,7 @@ Rectangle {
 
             MouseArea{
                 anchors.fill:parent
-                onClicked: MyJs.createFilterObjects("../components/MediaSources.qml")
+                onReleased: MyJs.createFilterObjects("../components/MediaSources.qml")
             }
         }
 
@@ -71,7 +71,7 @@ Rectangle {
             width: style.stdbuttonw
             MouseArea{
                 anchors.fill:parent
-                onClicked: MyJs.createFilterObjects("../components/FileFormat.qml")
+                onReleased: MyJs.createFilterObjects("../components/FileFormat.qml")
             }
         }
 
@@ -83,7 +83,7 @@ Rectangle {
             width: style.stdbuttonw
             MouseArea{
                 anchors.fill:parent
-                onClicked: MyJs.createFilterObjects("../components/MediaTypes.qml")
+                onReleased: MyJs.createFilterObjects("../components/MediaTypes.qml")
             }
         }
 

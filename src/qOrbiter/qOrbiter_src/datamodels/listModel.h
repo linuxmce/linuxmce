@@ -59,6 +59,7 @@ signals:
     void modelAboutToBeReset();
     void modelReset();
     void cellsChanged();
+    void pagingCleared();
 
 
 public slots:
@@ -78,6 +79,8 @@ public slots:
     void clearAndRequest( int );
     void setCurrentCells (int i) {currentCells = i; emit cellsChanged();}
     int getCurrentCells () {return currentCells;}
+    void clearForPaging();
+
 
 private slots:
     void handleItemChange();

@@ -2,8 +2,8 @@ import QtQuick 1.0
 
 Rectangle {
     id:rect
-    width: childrenRect.width
-    height: childrenRect.height
+    width: scaleX(55)
+    height: scaleY(55)
     color: "transparent"
     anchors.centerIn: parent
     border.color: "silver"
@@ -26,27 +26,27 @@ Rectangle {
                 color: status ? "transparent": "silver"
 
                 Text {
-                    width: parent.width
-                    height: parent.height
+
                     id: fileformatcell
                     text: name
-                    font.pixelSize: scaleY(2)
+                    font.pixelSize: scaleY(2.5)
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                    anchors.centerIn: formatrect
                     onFocusChanged: {rect.destroy()}
 
                 }
 
                 MouseArea{
                     anchors.fill: parent
-                    onPressAndHold: {
+                    onPressed: parent.color = "silver"
+                    onReleased: {
                         formatrect.opacity = 0
                         attribfilter.setSelectionStatus(name)
-                        formatrect.color = status ? "green" : "red"
+                        formatrect.color = status ? "silver" : "orange"
                         formatrect.opacity = 1
                         parent.color = "orange"
                         rect.destroy()
                     }
-                    onReleased: parent.color = "silver"
 
                 }
             }
@@ -58,7 +58,6 @@ Rectangle {
         height: scaleY(45)
         width: scaleX(55)
         model: attribfilter
-
         delegate: attributedelegate
 
     }

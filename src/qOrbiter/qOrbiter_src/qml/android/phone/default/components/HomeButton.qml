@@ -20,7 +20,7 @@ Item {
         }
         MouseArea{
             anchors.fill: parent
-            onClicked:gotoQScreen("Screen_1.qml")
+            onReleased:gotoQScreen("Screen_1.qml")
         }
     }
 }

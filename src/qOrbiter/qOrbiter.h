@@ -41,6 +41,7 @@ namespace DCE
 class qOrbiter : public qOrbiter_Command
 {
     Q_OBJECT
+
     //<-dceag-decl-e->
     // Private member variables
 
@@ -53,8 +54,14 @@ public:
     int m_dwPK_Device_NowPlaying,m_dwPK_Device_NowPlaying_Video,m_dwPK_Device_NowPlaying_Audio,m_dwPK_Device_CaptureCard;  /** < set by the media engine, this is whatever media device is currently playing.  Capture Card is non null if we're displaying media via this card */
     bool retrieving;
     bool finished;
+
     int i_mediaModelRows;
     int i_currentMediaModelRow;
+    int media_totalPages;
+    int media_currentPage;
+    int media_pos;
+    int media_pageSeperator;
+
     bool pause;
     int iPK_Device_DatagridPlugIn;
     int iPK_Device_OrbiterPlugin;
@@ -70,6 +77,7 @@ public:
     int i_room;
     int i_user;
     int i_current_mediaType;
+
     string *s_user;
     QString currentScreen;
 
@@ -1149,10 +1157,11 @@ signals:
     void gridStatusChanged();
     void addItem(gridItem*);
     void requestMediaGrid(int);
-    void clearGrid();
+    void clearPageGrid();
     void clearAndContinue(int type);
     void showFileInfo(bool state);
     void setFocusFile(QString);
+    void modelPageCount(QList<QObject*> count);
 
     //now playing signals
     void setNowPlaying(bool status);
@@ -1212,14 +1221,15 @@ public slots:
     void initializeGrid();
     void setStringParam(int paramType, QString param);
     void goBackGrid();
-
+    void requestPage(int page);
+    void prepareMobileFileList(int iPK_MediaType);
+    void jumpMobileGrid(int page);
 
     //now playing
 
     //media
     void displayToggle(int);
     void getGridView(bool direction);
-
 
     //floorplans
     void getFloorplanDeviceCommand(int device);

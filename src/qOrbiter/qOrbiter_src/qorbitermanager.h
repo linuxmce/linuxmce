@@ -388,6 +388,7 @@ public slots: //note: Q_INVOKABLE means it can be called directly from qml
     bool OrbiterGen();              //prelim orbter generation
     void quickReload();
     void showUI(bool b);
+    void displayModelPages(QList<QObject*> pages);
 
     void qmlSetupLmce(QString incdeviceid, QString incrouterip);
     void setRequestMore(bool state);

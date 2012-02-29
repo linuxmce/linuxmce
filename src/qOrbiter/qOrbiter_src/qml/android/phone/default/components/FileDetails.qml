@@ -245,7 +245,7 @@ Rectangle {
             MouseArea
             {
                 anchors.fill: parent
-                onClicked:{ playMedia(filedetailsclass.file) ; filedetailrect.destroy()}
+                onClicked:{ dcerouter.playMedia(filedetailsclass.file) ; filedetailrect.destroy()}
 
             }
         }
@@ -267,7 +267,7 @@ Rectangle {
             x: ((parent.width/3)*2)
             MouseArea{
                 anchors.fill:  parent
-                onClicked: { dataModel.checkForMore();filedetailrect.destroy()}
+                onClicked: { filedetailrect.destroy()}
             }
         }
     }

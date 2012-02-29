@@ -82,42 +82,41 @@ Rectangle {
         id: contactDelegateList
         Item {
             width: scaleX(75)
-            height: scaleY(20)
+            height: scaleY(15)
             Rectangle {
                 id: background
                 color: mouseclick.pressed ? "orange":"transparent"
                 anchors.centerIn: parent
                 border.color: "silver"               
-                height: scaleY(20)
-                width: scaleX(79)
+                height: scaleY(15)
+                width: scaleX(75)
+                Row{
+                    Image
+                    {
+                        id: imagerect;
+                        source:"image://datagridimg/"+id ;
+                        height: scaleX(15);
+                        width: scaleY(15);
+                        fillMode: Image.PreserveAspectFit;
 
-                Image
-                {
-                    id: imagerect;
-                    source:"image://datagridimg/"+id ;
-                    height: scaleX(20);
-                    width: scaleY(20);
-                    fillMode: Image.PreserveAspectFit;
-                    anchors.left: background.left
-                }
+                    }
 
-                Text {
-                    text: name;                   
-                    font.pixelSize: scaleY(3.5);
-                    color: "Silver" ;
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    //anchors.fill: parent
-                    width: scaleX(50)
-                    height: scaleY(20)
-
-                    font.family: "Droid Sans"
-                    anchors.left: imagerect.right
+                    Text {
+                        text: name;
+                        font.pixelSize: scaleY(2.5);
+                        color: "Silver" ;
+                        wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                        //anchors.fill: parent
+                        width: scaleX(55)
+                        height: scaleY(20)
+                        font.family: "Droid Sans"                        
+                    }
                 }
 
                 MouseArea {
                     id:mouseclick
                     anchors.fill: parent                   
-                    onDoubleClicked: setStringParam(4, id)
+                    onReleased: setStringParam(4, id)
                 }
             }
         }
@@ -131,9 +130,38 @@ Rectangle {
         model:dataModel
         delegate: contactDelegateList
         clip: true
-        cacheBuffer: 30
+        cacheBuffer: 15
         anchors.left: selector.right
         anchors.top: fileviewscreen.top
+
+    }
+    ListView{
+        id:model_pages
+        height: appH
+        width: scaleX(10)
+        model: pageList
+        anchors.left: list_view1.right
+        delegate: Rectangle{
+            height: scaleY(10)
+            width: scaleX(10)
+            color: "transparent"
+            Text {
+                id:page_label
+                text: label
+                font.pixelSize: scaleY(2)
+                anchors.centerIn: parent
+                color: "orange"
+                font.bold: true
+            }
+
+            MouseArea{
+                anchors.fill: parent
+                onReleased: { dcerouter.requestPage(index) ; parent.color = "transparent"}
+                onPressed: parent.color = "orange"
+
+            }
+
+        }
 
     }
 

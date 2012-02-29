@@ -58,7 +58,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             MouseArea {
                 anchors.fill: parent                
-                onClicked: pauseMedia()
+                onClicked: dcerouter.pauseMedia()
             }
         }
 
@@ -70,7 +70,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             MouseArea{
                 anchors.fill: parent                 
-                onClicked: ff_media(2)
+                onClicked: dcerouter.ff_media(2)
             }
 
         }
@@ -97,7 +97,7 @@ Rectangle {
             MouseArea
             {
                 anchors.fill: parent                 
-                onClicked: manager.stopMedia()
+                onClicked: dcerouter.StopMedia()
             }
         }
     }

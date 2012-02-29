@@ -294,3 +294,18 @@ void ListModel::clearAndRequest(int type)
 
 }
 
+void ListModel::clearForPaging()
+{
+    clearing = true;
+        emit modelAboutToBeReset();
+        beginResetModel();
+        resetInternalData();
+
+        //qDeleteAll(m_list);
+        endResetModel();
+        emit modelReset();
+
+        clearing = false;
+        emit pagingCleared();
+}
+

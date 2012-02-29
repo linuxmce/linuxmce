@@ -297,6 +297,7 @@ void qorbiterManager::refreshUI(QUrl url)
     qorbiterUIwin->rootContext()->setBaseUrl(skin->entryUrl());
     qorbiterUIwin->setSource(skin->entryUrl());
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
+
 }
 
 
@@ -688,7 +689,7 @@ void qorbiterManager::processConfig(QByteArray config)
 
 
     setDceResponse(" Remote Config Complete");
-    QApplication::processEvents(QEventLoop::AllEvents);
+
 #ifdef for_desktop
     activateScreenSaver();
 #endif
@@ -729,7 +730,9 @@ void qorbiterManager::skinLoaded(QDeclarativeView::Status status) {
         m_bStartingUp = false;
         emit skinDataLoaded(true);
         QApplication::processEvents(QEventLoop::AllEvents);
+
         startOrbiter();
+
 
     }
 }
@@ -941,12 +944,17 @@ void qorbiterManager::showUI(bool b)
 {
     if(b == true)
     {
-  swapSkins(currentSkin);
+swapSkins(currentSkin);
     }
     else
     {
         emit raiseSplash();
     }
+}
+
+void qorbiterManager::displayModelPages(QList<QObject *> pages)
+{
+    qorbiterUIwin->rootContext()->setContextProperty("pageList", QVariant::fromValue(pages));
 }
 
 
