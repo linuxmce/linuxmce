@@ -355,6 +355,7 @@ signals:
     void startPlayback(QString file);
     void setDceGridParam(int a, QString p );
     void keepLoading(bool s);
+    void updateScreen(QString screen);
 
     //setup related
     void orbiterReady(bool);

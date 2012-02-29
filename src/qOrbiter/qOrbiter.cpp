@@ -29,9 +29,9 @@
 
 #include "QBuffer"
 #include "QApplication"
-
+#ifndef ANDROID
 #include <iostream>
-
+#endif
 using namespace std;
 using namespace DCE;
 
@@ -1848,9 +1848,6 @@ void qOrbiter::registerDevice(int user, QString ea, int room)
     i_ea = ea.toInt();
     i_room = room;
 
-    qDebug() << i_user;
-    qDebug() << i_ea;
-    qDebug() << i_room;
 
     pData = "NULL";
     iSize = 0;
@@ -1860,7 +1857,7 @@ void qOrbiter::registerDevice(int user, QString ea, int room)
     if (SendCommand(CMD_Orbiter_Registered, &pResponse) && pResponse=="OK")
     {
 
-        qDebug() << pResponse.c_str();
+        emit statusMessage("DCERouter Responded to Register with " + QString::fromStdString(pResponse));
         setLocation(room, ea.toInt());
     }
     else
@@ -1887,6 +1884,11 @@ void qOrbiter::qmlSetup(QString device, QString address)
         connectionError();
     }
 
+}
+
+void qOrbiter::setCurrentScreen(QString s)
+{
+    //currentScreen = s;
 }
 
 void qOrbiter::connectionError()
@@ -1976,13 +1978,12 @@ void qOrbiter::setGridStatus(bool b)
 {
     retrieving = b;
     requestMore = b;
-    qDebug("Stopping grid");
-    checkGridStatus();
+   // checkLoadingStatus();
 }
 
 bool qOrbiter::getGridStatus()
 {
-    return retrieving;
+    return requestMore;
 }
 
 void qOrbiter::setCurrentRow(int row)
@@ -2180,9 +2181,7 @@ void qOrbiter::goBackGrid()
     else
     {
         goBack.removeLast();
-        int back = goBack.count() - 1;
-        //qDebug() << back;
-        //qDebug() << "Going back to::" << goBack.at(back);
+        int back = goBack.count() - 1;     
 
         QStringList reverseParams = goBack.at(back).split("|", QString::KeepEmptyParts);
         q_mediaType = reverseParams.first();
@@ -3050,15 +3049,8 @@ void DCE::qOrbiter::changedTrack(QString direction)
 
 void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that populates after the initial request to break out the threading and allow for a checkpoint across threads
 {
-    // emit statusMessage("requesting additional media");
+     emit statusMessage("requesting additional media");
 
-    if( requestMore == true)
-    {
-        //emit statusMessage("Still on Media Grid Screen");
-
-        //seeking to a specific letter then reseting the request more
-
-        // int currentrow = model->rowCount(QModelIndex()) ;
         int gHeight = 1;
         int gWidth = 1;
         string imgDG ="_MediaFile_"+QString::number(m_dwPK_Device).toStdString();
@@ -3113,7 +3105,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 
         }
 
-    }
+
 
 }
 
@@ -3870,15 +3862,17 @@ int DCE::qOrbiter::DeviceIdInvalid()
 void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
 {
     q_mediaType = QString::number(iPK_MediaType);
-    emit statusMessage("Retrieving grid for mediatype" + QString::fromStdString(StringUtils::itos(iPK_MediaType)));
+    requestMore = true;
+
+    emit statusMessage("Initial media request");
     //emit cleanupGrid();
-    //qDebug() << iPK_MediaType;
+
     int gHeight = 1;
     int gWidth = 0;
     int pkVar = 0;
     string valassign ="";
     bool isSuccessfull;// = "false";
-    requestMore = true;
+
     string m_sGridID ="MediaFile_"+QString::number(m_dwPK_Device).toStdString();
     string m_sSeek="";
     int iOffset = 5;
@@ -3971,7 +3965,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
         q_mediaType = QString::number(iPK_MediaType);
         goBack<< s;
     }
-    qDebug() << s;
+   qDebug() << s;
     CMD_Populate_Datagrid populateDataGrid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID), 63, s.toStdString(), DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
     if (SendCommand(populateDataGrid))
@@ -4019,7 +4013,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
 #ifndef ANDROID
                     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
 #endif
-                    qDebug() << gHeight << "::" << gWidth;
+
                     QString cellTitle;
                     QString fk_file;
                     QString filePath;
@@ -4050,12 +4044,8 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                         {
                             cellImg.load(":/icons/icon.png");
                         }
-
                         emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
-
                     }
-
-
                 }
             }
         }
@@ -4111,17 +4101,15 @@ void DCE::qOrbiter::cleanupGrid()
 
 bool qOrbiter::checkLoadingStatus()
 {
-    if(i_currentMediaModelRow < i_mediaModelRows && currentScreen =="Screen_47.qml" )
+    if(i_currentMediaModelRow < i_mediaModelRows && requestMore == true )
     {
         emit statusMessage("Count" + QString::number(i_currentMediaModelRow)+ "/" + QString::number(i_mediaModelRows));
-        if(requestMore == true)
-        {
-            populateAdditionalMedia();
-        }
+
+        populateAdditionalMedia();
     }
     else
     {
-
+        emit statusMessage("Loading Ended");
         retrieving = false;
         requestMore = false;
         return false;

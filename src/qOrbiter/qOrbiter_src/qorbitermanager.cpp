@@ -182,7 +182,18 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 void qorbiterManager::gotoQScreen(QString s)
 {
     //pqOrbiter->retrieving = false;
-    emit keepLoading(false);
+    if(s =="Screen_47.qml")
+    {
+        bool t = true;
+        emit keepLoading(t);
+
+    }
+    else
+    {
+        bool t = false;
+        emit keepLoading(t);
+    }
+
     emit clearModel();
     emit resetFilter();
 
@@ -192,7 +203,7 @@ void qorbiterManager::gotoQScreen(QString s)
     setDceResponse("Starting screen switch");
 
     QVariant screenname= s;
-    //emit screenChange(s);
+currentScreen = s;
     QObject *item = qorbiterUIwin->rootObject();
     setDceResponse("About to call screenchange()");
     if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
@@ -201,7 +212,7 @@ void qorbiterManager::gotoQScreen(QString s)
         setDceResponse("screenchange() FAILED");
     }
 
-    currentScreen = s;
+
 }
 
 //this block sets up the connection to linuxmce

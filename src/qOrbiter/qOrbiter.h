@@ -1192,6 +1192,7 @@ public slots:
     bool getConfiguration();
     void registerDevice(int user, QString ea, int room);
     void qmlSetup(QString device, QString address);
+    void setCurrentScreen(QString s);
 
     //connections
     void connectionError();
