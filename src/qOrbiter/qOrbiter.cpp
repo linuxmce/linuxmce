@@ -3049,7 +3049,7 @@ void DCE::qOrbiter::changedTrack(QString direction)
 
 void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that populates after the initial request to break out the threading and allow for a checkpoint across threads
 {
-     emit statusMessage("requesting additional media");
+     //emit statusMessage("requesting additional media");
 
         int gHeight = 1;
         int gWidth = 1;
@@ -3965,7 +3965,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
         q_mediaType = QString::number(iPK_MediaType);
         goBack<< s;
     }
-   qDebug() << s;
+   //qDebug() << s;
     CMD_Populate_Datagrid populateDataGrid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID), 63, s.toStdString(), DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 
     if (SendCommand(populateDataGrid))
@@ -4103,8 +4103,8 @@ bool qOrbiter::checkLoadingStatus()
 {
     if(i_currentMediaModelRow < i_mediaModelRows && requestMore == true )
     {
-        emit statusMessage("Count" + QString::number(i_currentMediaModelRow)+ "/" + QString::number(i_mediaModelRows));
 
+        //emit statusMessage("Count" + QString::number(i_currentMediaModelRow)+ "/" + QString::number(i_mediaModelRows));
         populateAdditionalMedia();
     }
     else

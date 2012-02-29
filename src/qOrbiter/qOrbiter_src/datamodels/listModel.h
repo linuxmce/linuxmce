@@ -18,6 +18,8 @@ class ListModel : public QAbstractListModel
 
     Q_PROPERTY (double progress READ getProgress WRITE setProgress NOTIFY progressChanged)
     Q_PROPERTY (bool loadingStatus READ getLoadingStatus WRITE setLoadingStatus NOTIFY loadingStatusChanged)
+    Q_PROPERTY (int totalcells READ getTotalCells WRITE setTotalCells NOTIFY sizeChanged)
+    Q_PROPERTY (int currentCells READ getCurrentCells WRITE setCurrentCells NOTIFY cellsChanged)
 
 
 public:
@@ -56,6 +58,7 @@ signals:
 
     void modelAboutToBeReset();
     void modelReset();
+    void cellsChanged();
 
 
 public slots:
@@ -73,6 +76,8 @@ public slots:
     double getProgress();
     void attributeSort();
     void clearAndRequest( int );
+    void setCurrentCells (int i) {currentCells = i; emit cellsChanged();}
+    int getCurrentCells () {return currentCells;}
 
 private slots:
     void handleItemChange();

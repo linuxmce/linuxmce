@@ -58,6 +58,7 @@ void ListModel::appendRows(const QList<gridItem *> &items)
 
     int currentRows= m_list.size();
     emit itemAdded(currentRows);
+    setCurrentCells(currentRows);
     double p = (((double)m_list.size() / (double)totalcells) * 100) ;
     setProgress(p);
     emit dataChanged(index2, index, currentRows);

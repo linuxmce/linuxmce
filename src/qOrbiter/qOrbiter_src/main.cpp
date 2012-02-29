@@ -292,8 +292,8 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter,SIGNAL(gotoQml(QString)), w, SLOT(gotoQScreen(QString)));
 
         //mediagrid
-        QObject::connect(mediaModel, SIGNAL(itemAdded(int)), pqOrbiter, SLOT(setCurrentRow(int)), Qt::DirectConnection);
-        QObject::connect(w, SIGNAL(clearModel()), mediaModel,SLOT(clear()));
+        QObject::connect(mediaModel, SIGNAL(itemAdded(int)), pqOrbiter, SLOT(setCurrentRow(int)),Qt::QueuedConnection);
+        QObject::connect(w, SIGNAL(clearModel()), mediaModel,SLOT(clear()),Qt::DirectConnection);
         QObject::connect(pqOrbiter, SIGNAL(clearAndContinue(int)), mediaModel, SLOT(clearAndRequest(int)));
         QObject::connect(pqOrbiter, SIGNAL(clearGrid()), mediaModel, SLOT(clear()));
         QObject::connect(pqOrbiter,SIGNAL(addItem(gridItem*)), mediaModel, SLOT(appendRow(gridItem*)));
