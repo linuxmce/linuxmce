@@ -107,9 +107,9 @@ Rectangle {
                     color: "Silver" ;
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     //anchors.fill: parent
-                    width: scaleX(55)
+                    width: scaleX(50)
                     height: scaleY(20)
-                    font.bold: true
+
                     font.family: "Droid Sans"
                     anchors.left: imagerect.right
                 }
@@ -127,7 +127,7 @@ Rectangle {
     ListView {
         id: list_view1
         width: scaleX(75)
-        height:scaleY(80)
+        height:scaleY(85)
         model:dataModel
         delegate: contactDelegateList
         clip: true

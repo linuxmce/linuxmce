@@ -97,7 +97,7 @@ void GridIndexProvider::dataDeleted(const QModelIndex&, int start, int end)
 
 void GridIndexProvider::dataReset()
 {
-    qDebug("Clearing pixmaps");
+
     mPixmapIndex.clear();
 }
 

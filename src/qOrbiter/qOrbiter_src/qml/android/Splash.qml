@@ -20,6 +20,12 @@ Rectangle {
         onDeviceChanged: pageLoader.source ? ":/main/SetupNewOrbiter.qml": "Splash.qml"
     }
 
+    Connections{
+        target: window
+        onShowList:existing_orbiters.visible = true
+        onShowExternal: ext_routerip.visible = true
+    }
+
     function scaleX(x){
         return x/100*appW
     }
