@@ -52,7 +52,7 @@ Component{
                            anchors.fill: parent
                            onClicked:{
                                cindex=desc
-                               setSelectionStatus(name)
+                               dcerouter.setSelectionStatus(name)
                                fileformatcell.color = status ? "green" : "red"
 
                                      }

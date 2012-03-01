@@ -50,7 +50,7 @@ Rectangle {
             radius: 5
             MouseArea{
                 anchors.fill: parent
-                onClicked:MyJs.createPowerButton()
+                //onClicked:MyJs.createPowerButton()
             }
         }
 

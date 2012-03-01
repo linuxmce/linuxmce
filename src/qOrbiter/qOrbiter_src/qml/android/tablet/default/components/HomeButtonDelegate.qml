@@ -21,7 +21,7 @@ Component{
 
             MouseArea{
                 anchors.fill: delegateButton
-                onClicked: execGrp(params);
+                onClicked: dcerouter.executeCommandGroup(params);
                 hoverEnabled: true
 
                 onEntered: {

@@ -273,6 +273,10 @@ Rectangle {
                 }
                 AvOptionButton{
                     buttontext: qsTr("Power")
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked: dcerouter.StopMedia()
+                    }
                 }
                 HomeButton{}
             }

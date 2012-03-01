@@ -517,7 +517,7 @@ Rectangle {
                         MouseArea{
                             anchors.fill: parent
                             onClicked:{
-                                changeChannels(text_input1.text)
+                                dcerouter.changeChannels(text_input1.text)
                                 text_input1.text=""
                             }
                         }

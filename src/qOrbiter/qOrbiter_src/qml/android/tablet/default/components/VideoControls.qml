@@ -42,7 +42,7 @@ Rectangle {
                  hoverEnabled: true
                 onEntered: parent.scale = .75
                 onExited: parent.scale = 1
-                onClicked: rw_media(-2)
+                onClicked: dcerouter.RwMedia(-2)
             }
         }
 
@@ -62,7 +62,7 @@ Rectangle {
                  hoverEnabled: true
                 onEntered: parent.scale = .75
                 onExited: parent.scale = 1
-                onClicked: pauseMedia()
+                onClicked: dcerouter.PauseMedia()
             }
         }
 
@@ -80,7 +80,7 @@ Rectangle {
                  hoverEnabled: true
                 onEntered: parent.scale = .75
                 onExited: parent.scale = 1
-                onClicked: ff_media(2)
+                onClicked: dcerouter.FfMedia(2)
             }
 
         }
@@ -119,7 +119,7 @@ Rectangle {
                  hoverEnabled: true
                 onEntered: parent.scale = .75
                 onExited: parent.scale = 1
-                onClicked: stopMedia()
+                onClicked: dcerouter.StopMedia()
             }
         }
     }
