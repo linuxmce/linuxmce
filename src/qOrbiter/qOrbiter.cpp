@@ -3103,8 +3103,8 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
         int gHeight = 1;
         int gWidth = 1;
         int offset = 0;
-        int GridCurRow =0;
-        int GridCurCol= i_currentMediaModelRow;
+        int GridCurRow =i_currentMediaModelRow;
+        int GridCurCol= 0;
         string m_sSeek = "" ;
         int iOffset=0;
 #else
