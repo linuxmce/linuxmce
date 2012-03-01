@@ -61,8 +61,8 @@ QImage skinPic(":/icons/playlist.png");
         QUrl skinBase(m_base_url.toString()+"/"+s_path);
         ui_reference->setDceResponse("Adding skin to list" + s_title);
 
-        qDebug()<<"Finished Adding" << s_title;
-        qDebug() << "Location" << skinBase;
+        //qDebug()<<"Finished Adding" << s_title;
+        //qDebug() << "Location" << skinBase;
         m_parent->appendRow(new SkinDataItem(skinBase, s_title, s_creator, s_description, s_version, s_target, skinPic, s_path, s_mainc, s_accentc, styleObject));
     }
 }

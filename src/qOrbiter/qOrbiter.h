@@ -50,7 +50,7 @@ public:
     // Public member variables
 
     Virtual_Device_Translator coreDevices;
-    DataGridTable pDataGridTable;
+    //DataGridTable pDataGridTable;
     int m_dwPK_Device_NowPlaying,m_dwPK_Device_NowPlaying_Video,m_dwPK_Device_NowPlaying_Audio,m_dwPK_Device_CaptureCard;  /** < set by the media engine, this is whatever media device is currently playing.  Capture Card is non null if we're displaying media via this card */
     bool retrieving;
     bool finished;
@@ -77,6 +77,8 @@ public:
     int i_room;
     int i_user;
     int i_current_mediaType;
+    QImage returnImage;
+    QByteArray TconfigData;
 
     string *s_user;
     QString currentScreen;
@@ -104,6 +106,7 @@ public:
     QString audioDefaultSort;
     QString photoDefaultSort;
     QString gamesDefaultSort;
+    DataGridTable pDataGridTable ;
 
     bool backwards;
     bool requestMore;

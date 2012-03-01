@@ -1335,7 +1335,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
     currentScreen= "Screen_47.qml";
     emit statusMessage("Show File List Complete, Calling request Media Grid");
 
-   setGridStatus(true);
+    setGridStatus(true);
     prepareFileList(iPK_MediaType);
 
 
@@ -1985,7 +1985,7 @@ void qOrbiter::setGridStatus(bool b)
 {
 
     requestMore = b;
-    qDebug() << "Request set to " << requestMore;
+    //qDebug() << "Request set to " << requestMore;
     //checkLoadingStatus();
 }
 
@@ -2214,8 +2214,8 @@ void qOrbiter::requestPage(int page)
     media_currentPage = page;
     setGridStatus(true);
 
-    qDebug () << "Navigating to page " << media_currentPage;
-    qDebug() << "Cell Range::" << media_pos << "to" << media_pos + media_pageSeperator;
+    //qDebug () << "Navigating to page " << media_currentPage;
+    //qDebug() << "Cell Range::" << media_pos << "to" << media_pos + media_pageSeperator;
 #ifndef for_desktop
     emit clearPageGrid();
 #endif
@@ -2283,14 +2283,15 @@ QImage DCE::qOrbiter::getfileForDG(string filePath)
     string p_sResponse="";
 
     //SendCommand(reqFile, p_sResponse);
-    QImage returnImage;
+
     if(SendCommand(reqFile, &p_sResponse) && p_sResponse =="OK")
     {
-        QByteArray configData;              //config file put into qbytearray for processing
-        configData.setRawData(picData, picData_Size);
+
+       TconfigData.setRawData(picData, picData_Size) ;              //config file put into qbytearray for processing
 
 
-        if (!returnImage.loadFromData(configData))
+
+        if (!returnImage.loadFromData(TconfigData))
         {
             emit statusMessage("Couldnt Load From Data, setting default icon image");
             returnImage.load(":/icons/icon.png");
@@ -2304,9 +2305,6 @@ QImage DCE::qOrbiter::getfileForDG(string filePath)
         returnImage.load(":/icons/icon.png");
         return returnImage;
     }
-
-
-
 
 }
 
@@ -3097,7 +3095,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 
     if(checkLoadingStatus() == true)
     {
- emit statusMessage("requesting additional media");
+        emit statusMessage("requesting additional media");
 
 #ifdef for_desktop
         int gHeight = 1;
@@ -3114,7 +3112,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
         int GridCurRow =media_currentPage ;
         int GridCurCol= 0 ;
         int iOffset=0;
-        qDebug() << "our target is row:" << GridCurCol;
+        //qDebug() << "our target is row:" << GridCurCol;
         string m_sSeek = "" ;
 #endif
 
@@ -3125,26 +3123,26 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
         pData = "NULL";
         //CMD_Request_Datagrid_Contents(                              long DeviceIDFrom,                long DeviceIDTo,                   string sID,                                string sDataGrid_ID, int iRow_count,int iColumn_count,        bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,       int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
 #ifdef for_desktop
-                DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    1, 1,                     false,                 false,                                 true, string(m_sSeek),   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+        DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    1, 1,                     false,                 false,                                 true, string(m_sSeek),   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
 #else
-                DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    1, media_pageSeperator,                     false,                 false,                                 true, string(m_sSeek),   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+        DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    1, media_pageSeperator,                     false,                 false,                                 true, string(m_sSeek),   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
 #endif
-
-        if(SendCommand(req_data_grid_pics))
+        std::string pResponse ="";
+        if(SendCommand(req_data_grid_pics, &pResponse) && pResponse == "OK")
         {
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             // cellsToRender= pDataGridTable->GetRows();
 
             // LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
-            QString cellTitle;
-            QString fk_file;
-            QString filePath;
-            int index;
-            QImage cellImg;
-
 
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
+                QString cellTitle;
+                QString fk_file;
+                QString filePath;
+                int index;
+                QImage cellImg;
+
                 DataGridCell *pCell = it->second;
                 const char *pPath = pCell->GetImagePath();
                 filePath = QString::fromUtf8(pPath);
@@ -3165,16 +3163,16 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                 {
                     cellImg.load(":/icons/icon.png");
                 }
-                qDebug() << index ;
+                //qDebug() << index ;
                 emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
             }
+            delete pDataGridTable;
+
         }
-
-
     }
     else
     {
-        qDebug("Grid set to stop, will not load more.");
+        //qDebug("Grid set to stop, will not load more.");
     }
 
 }
@@ -4088,7 +4086,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                 }
 
                 emit modelPageCount(modelPages);
-                qDebug() << cellsToRender << " Cells converted to " << modelPages.count() ;
+                //qDebug() << cellsToRender << " Cells converted to " << modelPages.count() ;
 
 
                 string imgDG = "_"+m_sGridID; //correcting the grid id string for images
@@ -4139,6 +4137,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                         }
                         emit addItem(new gridItem(fk_file, cellTitle, filePath, index, cellImg));
                     }
+                    delete pDataGridTable;
                 }
             }
         }
