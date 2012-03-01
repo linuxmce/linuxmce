@@ -255,7 +255,8 @@ int main(int argc, char* argv[])
        //QObject::connect(mediaModel,SIGNAL(dataChanged(QModelIndex,QModelIndex, int )), advancedProvider,SLOT(dataUpdated(QModelIndex,QModelIndex, int)), Qt::DirectConnection);
         //QObject::connect(mediaModel, SIGNAL(modelAboutToBeReset()), advancedProvider, SLOT(dataReset()), Qt::DirectConnection);
 
-        orbiterWin.mainView.engine()->addImageProvider("datagridimg", advancedProvider);
+
+       orbiterWin.mainView.engine()->addImageProvider("datagridimg", advancedProvider);
        advancedProvider->moveToThread(mediaThread);
 
         orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", pqOrbiter); //dcecontext object
@@ -286,27 +287,25 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter,SIGNAL(objectUpdate(const uchar*,int)), w->nowPlayingButton, SLOT(setImageData(const uchar*,int)),Qt::DirectConnection);
         QObject::connect(pqOrbiter, SIGNAL(addScreenParam(QString,int)), w->ScreenParameters, SLOT(addParam(QString, int)));
         QObject::connect(pqOrbiter, SIGNAL(currentScreenChanged(QString)), w->nowPlayingButton, SLOT(setScreen(QString)));
-        QObject::connect(w, SIGNAL(startPlayback(QString)), pqOrbiter, SLOT(checkLoadingStatus()));
+        QObject::connect(w, SIGNAL(startPlayback(QString)), pqOrbiter, SLOT(playMedia(QString)));
 
         //navigation
         QObject::connect(pqOrbiter,SIGNAL(gotoQml(QString)), w, SLOT(gotoQScreen(QString)));
 
         //mediagrid
-        QObject::connect(mediaModel, SIGNAL(pagingCleared()), pqOrbiter,SLOT(populateAdditionalMedia()));
-        QObject::connect(pqOrbiter, SIGNAL(clearPageGrid()), mediaModel, SLOT(clearForPaging()));
-        QObject::connect(mediaModel, SIGNAL(itemAdded(int)), pqOrbiter, SLOT(setCurrentRow(int)),Qt::QueuedConnection);
-        QObject::connect(w, SIGNAL(clearModel()), mediaModel,SLOT(clear()),Qt::DirectConnection);
-        QObject::connect(pqOrbiter, SIGNAL(clearAndContinue(int)), mediaModel, SLOT(clearAndRequest(int)));
-        QObject::connect(pqOrbiter, SIGNAL(clearPageGrid()), mediaModel, SLOT());
+        QObject::connect(mediaModel, SIGNAL(pagingCleared()), pqOrbiter,SLOT(populateAdditionalMedia()), Qt::DirectConnection);
+        QObject::connect(pqOrbiter, SIGNAL(clearPageGrid()), mediaModel, SLOT(clearForPaging()), Qt::DirectConnection);
+        QObject::connect(mediaModel, SIGNAL(itemAdded(int)), pqOrbiter, SLOT(setCurrentRow(int)), Qt::DirectConnection);
+        QObject::connect(w, SIGNAL(clearModel()), mediaModel,SLOT(clear()), Qt::DirectConnection);
+        QObject::connect(pqOrbiter, SIGNAL(clearAndContinue(int)), mediaModel, SLOT(clearAndRequest(int)), Qt::DirectConnection);
         QObject::connect(pqOrbiter,SIGNAL(addItem(gridItem*)), mediaModel, SLOT(appendRow(gridItem*)));
-        QObject::connect(pqOrbiter,SIGNAL(gridModelSizeChange(int)), mediaModel, SLOT(setTotalCells(int)),Qt::QueuedConnection);
-        // QObject::connect(pqOrbiter,SIGNAL(checkGridStatus()), mediaModel, SLOT(checkForMore()), Qt::QueuedConnection);
-        // QObject::connect(mediaModel,SIGNAL(loadingStatusChanged(bool)), w, SLOT(setRequestMore(bool)), Qt::DirectConnection);
-        // QObject::connect(mediaModel, SIGNAL(gimmieData(int)), pqOrbiter, SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
+        QObject::connect(pqOrbiter,SIGNAL(gridModelSizeChange(int)), mediaModel, SLOT(setTotalCells(int)), Qt::DirectConnection);
+
+
         QObject::connect(mediaModel,SIGNAL(ready(int)), pqOrbiter, SLOT(prepareFileList(int)), Qt::DirectConnection);
         QObject::connect(w, SIGNAL(gridTypeChanged(int)), mediaModel, SLOT(setGridType(int)), Qt::QueuedConnection);
         QObject::connect(w, SIGNAL(setDceGridParam(int,QString)), pqOrbiter, SLOT(setStringParam(int,QString)));
-        QObject::connect(w, SIGNAL(keepLoading(bool)), pqOrbiter,SLOT(setGridStatus(bool)), Qt::DirectConnection);
+        QObject::connect(w, SIGNAL(keepLoading(bool)), pqOrbiter,SLOT(setGridStatus(bool)));
         QObject::connect(pqOrbiter, SIGNAL(showFileInfo(bool)), w->filedetailsclass, SLOT(setVisible(bool)));
         QObject::connect(pqOrbiter, SIGNAL(setFocusFile(QString)), w->filedetailsclass, SLOT(setFile(QString)));
         QObject::connect(pqOrbiter, SIGNAL(modelPageCount(QList<QObject*>)), w, SLOT(displayModelPages(QList<QObject*>)));
@@ -323,7 +322,7 @@ int main(int argc, char* argv[])
         QObject::connect(pqOrbiter,SIGNAL(np_episode(QString)), w->nowPlayingButton, SLOT(setEpisode(QString)));
         QObject::connect(pqOrbiter, SIGNAL(np_filename(QString)), w->nowPlayingButton, SLOT(setFilePath(QString)));
         QObject::connect(pqOrbiter, SIGNAL(np_genre(QString)), w->nowPlayingButton, SLOT(setGenre(QString)));
-        QObject::connect(pqOrbiter, SIGNAL(np_imagePath(QString)), w->nowPlayingButton, SLOT(setImageUrl(QUrl)));
+
         QObject::connect(pqOrbiter, SIGNAL(np_performer(QString)), w->nowPlayingButton, SLOT(setPerformers(QString)));
         QObject::connect(pqOrbiter, SIGNAL(np_program(QString)), w->nowPlayingButton, SLOT(setProgram(QString)));
         QObject::connect(pqOrbiter, SIGNAL(np_releaseDate(QString)), w->nowPlayingButton, SLOT(setRelease(QString)));

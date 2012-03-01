@@ -181,21 +181,19 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 
 void qorbiterManager::gotoQScreen(QString s)
 {
-    //pqOrbiter->retrieving = false;
+
     if(s =="Screen_47.qml")
     {
-        bool t = true;
-        emit keepLoading(t);
 
     }
     else
-    {
+
+    {   qDebug() << "Setting load to false";
         bool t = false;
         emit keepLoading(t);
+        emit clearModel();
+        emit resetFilter();
     }
-
-    emit clearModel();
-    emit resetFilter();
 
     //send the qmlview a request to go to a screen, needs error handling
     //This allows it to execute some transition or other if it wants to
@@ -1533,7 +1531,7 @@ void qorbiterManager::setDceResponse(QString response)
     dceResponse = response;
     emit loadingMessage(dceResponse);
     emit dceResponseChanged();
-   // qDebug() << dceResponse;
+   qDebug() << dceResponse;
 
 }
 

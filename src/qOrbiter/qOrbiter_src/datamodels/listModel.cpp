@@ -39,7 +39,7 @@ ListModel::~ListModel() {
 
 void ListModel::appendRow(gridItem *item)
 {
-        appendRows(QList<gridItem*>() << item);
+    appendRows(QList<gridItem*>() << item);
 }
 
 void ListModel::appendRows(const QList<gridItem *> &items)
@@ -89,17 +89,14 @@ void ListModel::handleItemChange()
 
 void ListModel::reset()
 {
-clearing = true;
+    clearing = true;
     emit modelAboutToBeReset();
     beginResetModel();
     resetInternalData();
-
-    //qDeleteAll(m_list);
     endResetModel();
-    emit modelReset();
-
+   emit modelReset();
     clearing = false;
-emit ready(gridType);
+
 }
 
 void ListModel::beginResetModel()
@@ -112,10 +109,9 @@ void ListModel::endResetModel()
 
 void ListModel::resetInternalData()
 {
-
+    setTotalCells(0);
+    setProgress(0.0);
     m_list.clear();
-
-
 
 }
 
@@ -161,11 +157,18 @@ QModelIndex ListModel::indexFromItem(const gridItem *item) const
 void ListModel::clear()
 {
 
-    clearing =true;
-    m_list.clear();
+    clearing = true;
+    emit modelAboutToBeReset();
+    beginResetModel();
+    resetInternalData();
+    endResetModel();
+    emit modelReset();
     clearing = false;
-
-
+    while(m_list.count() > 1)
+    {
+        qDebug("Clearing");
+    }
+    qDebug ()<< "Model Clear" ;
 }
 
 bool ListModel::removeRow(int row, const QModelIndex &parent)
@@ -279,33 +282,39 @@ double ListModel::getProgress()
 
 void ListModel::attributeSort()
 {
-    this->clear();
-    emit gimmieData(gridType);
+
 
 }
 
 void ListModel::clearAndRequest(int type)
 {
-    this->gridType = type;
+    gridType = type;
     clearing = true;
+    emit modelAboutToBeReset();
+    beginResetModel();
+    resetInternalData();
     setTotalCells(0);
-    reset();
+    //qDeleteAll(m_list);
+    endResetModel();
+    emit modelReset();
+    clearing = false;
+    emit ready(gridType);
 
 
 }
 
 void ListModel::clearForPaging()
 {
+    qDebug("Clearing for next page");
     clearing = true;
-        emit modelAboutToBeReset();
-        beginResetModel();
-        resetInternalData();
-
-        //qDeleteAll(m_list);
-        endResetModel();
-        emit modelReset();
-
-        clearing = false;
-        emit pagingCleared();
+    emit modelAboutToBeReset();
+    beginResetModel();
+    resetInternalData();
+    //qDeleteAll(m_list);
+    endResetModel();
+    emit modelReset();
+    clearing = false;
+    qDebug("Page Cleared, requesting");
+    emit pagingCleared();
 }
 

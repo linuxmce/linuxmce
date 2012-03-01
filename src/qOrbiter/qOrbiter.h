@@ -133,31 +133,7 @@ public:
     virtual void OnReload();
     virtual int DeviceIdInvalid();
 
-    Q_INVOKABLE QImage getfileForDG(string filename);
-    Q_INVOKABLE void GetFileInfoForQml(QString qs_file_reference);
-    Q_INVOKABLE void GetMediaAttributeGrid(QString qs_fk_fileno);
-    Q_INVOKABLE void GetSecurityCam(int i_inc_pkdevice);
-    Q_INVOKABLE void playMedia(QString inc_FKFile);
-    Q_INVOKABLE void StopMedia();
-    Q_INVOKABLE void RwMedia();
-    Q_INVOKABLE void FfMedia();
-    Q_INVOKABLE void PauseMedia();
-    Q_INVOKABLE void requestMediaPlaylist();
 
-    Q_INVOKABLE void ShowFloorPlan(int floorplantype);
-    Q_INVOKABLE void GetScreenSaverImages();
-    Q_INVOKABLE void BindMediaRemote(bool onoff);
-    Q_INVOKABLE void JumpToPlaylistPosition(int pos);
-    Q_INVOKABLE void SetNowPlayingDetails(QString file);
-    Q_INVOKABLE void SetSecurityStatus(string pin, string mode, int user, string special);
-    Q_INVOKABLE void GetSingleSecurityCam(int cam_device, int iHeight, int iWidth);
-    Q_INVOKABLE void GetMultipleSecurityCams(QStringList cams);
-    Q_INVOKABLE void GetNowPlayingAttributes();
-    Q_INVOKABLE void TuneToChannel(QString chanid);
-    Q_INVOKABLE void adjustLighting(int level);
-    Q_INVOKABLE void adjustVolume( int vol);
-    Q_INVOKABLE void mute();
-    Q_INVOKABLE void changedTrack(QString direction);
 
     Q_INVOKABLE void SetSecurityMode(int pin, int mode);
     Q_INVOKABLE void setLocation(int location, int ea);
@@ -1222,14 +1198,39 @@ public slots:
     void setStringParam(int paramType, QString param);
     void goBackGrid();
     void requestPage(int page);
-    void prepareMobileFileList(int iPK_MediaType);
-    void jumpMobileGrid(int page);
 
+    void jumpMobileGrid(int page);
+    void getGridView(bool direction);
     //now playing
 
     //media
     void displayToggle(int);
-    void getGridView(bool direction);
+    QImage getfileForDG(string filename);
+    void GetFileInfoForQml(QString qs_file_reference);
+    void GetMediaAttributeGrid(QString qs_fk_fileno);
+    void GetSecurityCam(int i_inc_pkdevice);
+    void playMedia(QString inc_FKFile);
+    void StopMedia();
+    void RwMedia();
+    void FfMedia();
+    void PauseMedia();
+    void requestMediaPlaylist();
+
+    void ShowFloorPlan(int floorplantype);
+    void GetScreenSaverImages();
+    void BindMediaRemote(bool onoff);
+    void JumpToPlaylistPosition(int pos);
+    void SetNowPlayingDetails(QString file);
+    void SetSecurityStatus(string pin, string mode, int user, string special);
+    void GetSingleSecurityCam(int cam_device, int iHeight, int iWidth);
+    void GetMultipleSecurityCams(QStringList cams);
+    void GetNowPlayingAttributes();
+    void TuneToChannel(QString chanid);
+    void adjustLighting(int level);
+    void adjustVolume( int vol);
+    void mute();
+    void changedTrack(QString direction);
+
 
     //floorplans
     void getFloorplanDeviceCommand(int device);
