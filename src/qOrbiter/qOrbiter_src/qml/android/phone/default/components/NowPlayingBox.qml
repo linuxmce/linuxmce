@@ -18,7 +18,7 @@ Rectangle {
     Image{
         id:np_image
         fillMode: Image.PreserveAspectCrop
-        source:"../img/media.png"
+        source:"../img/transparencymask.png"
         height:  appH
         width: appW
         anchors.centerIn: np_box
